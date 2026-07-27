@@ -1,0 +1,31 @@
+"use strict";
+/* CAGE LEGACY — js/main.js
+   Point d'entrée : démarre le jeu une fois tous les autres fichiers chargés. */
+/* ==== [ANCRE: VALIDATION] — adaptée au schéma RÉEL de SKILLS. Chaque
+   compétence est {id,name,rar,fx,desc,tags,fam,key}. rar ∈ C/R/E/L/M
+   (barème du plan §18.6). N'empêche jamais le jeu de démarrer : les erreurs
+   sont seulement journalisées en console pour diagnostic. */
+const RAR_TOTAL={C:5,R:9,E:15,L:22,M:32};
+function validateSkills(){
+  const errs=[], seen=new Set();
+  for(const s of SKILLS){
+    if(seen.has(s.id)) errs.push(`${s.id} : id dupliqué`);
+    seen.add(s.id);
+    let total=0;
+    for(const k in s.fx){
+      if(!ATTR_KEYS.includes(k)) errs.push(`${s.id} : attribut inconnu "${k}"`);
+      if(k===CHIN && s.fam!=='gen') errs.push(`${s.id} : chin interdit hors famille génétique`);
+      total+=s.fx[k];
+    }
+    const attendu=RAR_TOTAL[s.rar];
+    if(attendu!=null && total!==attendu) errs.push(`${s.id} : total ${total}, barème ${s.rar}=${attendu}`);
+    if(!s.desc || s.desc.length<40) errs.push(`${s.id} : descriptif absent ou trop court`);
+    if(!s.tags || !s.tags.length) errs.push(`${s.id} : mots-clés manquants`);
+  }
+  if(errs.length){ console.warn('COMPÉTENCES — '+errs.length+' point(s) à corriger :'); errs.forEach(e=>console.warn(' •',e)); }
+  else console.log('Compétences OK ('+SKILLS.length+')');
+  return errs;
+}
+validateSkills();
+/* ==== [FIN ANCRE] ==== */
+if(document.getElementById('app')){ G={screen:'intro',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme('dark'); render(); }

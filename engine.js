@@ -1,0 +1,329 @@
+"use strict";
+/* =========================================================================
+   CAGE LEGACY — MOTEUR v2 (reconstruction)
+   30 attributs (Technique/Mental/Physique) internes /100, AFFICHÉS /20.
+   Génération profonde (origine + motivation + potentiel caché). Combat qui
+   produit de vraies statistiques de round + log lisible. Échelle d'orgs.
+   Classement/GOAT corrigés (les défaites pèsent lourd). Pas d'argent.
+   Cadre de compétences uniques. Aucune dépendance externe (Node pur).
+   ========================================================================= */
+/* Dépend de : data-skills.js (SKILLS, RAR_CHANCE), data-content.js (ORIGINS, MOTIVATIONS).
+   Doit être chargé après ces deux fichiers. */
+let SEED=(Date.now()^0x9e3779b9)>>>0;
+function setSeed(s){ SEED=(s>>>0)||1; }
+function rnd(){ SEED=(SEED*1664525+1013904223)>>>0; return SEED/4294967296; }
+const RI=(a,b)=>Math.floor(rnd()*(b-a+1))+a;
+const R=(a,b)=>a+rnd()*(b-a);
+const pick=a=>a[Math.floor(rnd()*a.length)];
+const clamp=(v,lo=1,hi=100)=>v<lo?lo:v>hi?hi:v;
+function gauss(m,sd,lo,hi){ let u=0,v=0; while(!u)u=rnd(); while(!v)v=rnd(); let g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); let x=Math.round(m+g*sd); if(lo!=null)x=Math.max(lo,x); if(hi!=null)x=Math.min(hi,x); return x; }
+const sigmoid=x=>1/(1+Math.exp(-x));
+const d20=v=>Math.max(1,Math.min(20,Math.round(v/5)));   // /100 -> /20 affiché
+
+/* --------------------------- 30 ATTRIBUTS --------------------------------- */
+const ATTR={
+  tech:[['jab','Jab'],['cross','Direct'],['hook','Crochets'],['kick','Coups de pied'],['clinchStr','Lutte debout'],
+        ['takedown','Amenées au sol'],['tdd','Défense lutte'],['topControl','Contrôle au sol'],['gnp','Sol offensif'],
+        ['submission','Soumissions'],['guardWork','Jeu de garde']],
+  ment:[['fightIQ','Intelligence'],['composure','Sang-froid'],['aggression','Agressivité'],['heart','Cœur'],
+        ['discipline','Discipline'],['adaptability','Adaptation'],['killer','Instinct de finition'],['focus','Concentration'],['confidence','Confiance']],
+  phys:[['power','Puissance'],['handSpeed','Vitesse des mains'],['footSpeed','Jeu de jambes'],['cardio','Cardio'],
+        ['strength','Force'],['chin','Menton'],['recovery','Récupération'],['explosiveness','Explosivité'],['flexibility','Souplesse'],['durability','Résistance']],
+};
+const ALL_ATTR=[].concat(ATTR.tech,ATTR.ment,ATTR.phys);
+const ATTR_KEYS=ALL_ATTR.map(a=>a[0]);
+const CHIN='chin';                                  // ne monte jamais
+const TRAINABLE=ATTR_KEYS.filter(k=>k!==CHIN);
+const attrLabel=k=>(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1];
+
+/* ------------------------- DIVISIONS & STYLES ----------------------------- */
+const DIVISIONS={
+ H:[{id:'H-fly',name:'Poids mouche',h:168,r:170},{id:'H-bantam',name:'Poids coq',h:171,r:173},
+    {id:'H-feather',name:'Poids plume',h:173,r:175},{id:'H-light',name:'Poids léger',h:175,r:178},
+    {id:'H-welter',name:'Poids mi-moyen',h:180,r:184},{id:'H-middle',name:'Poids moyen',h:184,r:189},
+    {id:'H-lheavy',name:'Poids mi-lourd',h:188,r:193},{id:'H-heavy',name:'Poids lourd',h:191,r:196}],
+ F:[{id:'F-straw',name:'Poids paille',h:163,r:164},{id:'F-fly',name:'Poids mouche',h:165,r:166},
+    {id:'F-bantam',name:'Poids coq',h:168,r:169},{id:'F-feather',name:'Poids plume',h:170,r:172}],
+};
+DIVISIONS.H.forEach(d=>d.gender='H'); DIVISIONS.F.forEach(d=>d.gender='F');
+const allDivisions=()=>DIVISIONS.H.concat(DIVISIONS.F);
+const divById=id=>allDivisions().find(d=>d.id===id);
+
+/* biais de style : quels attributs sont naturellement plus hauts au départ */
+const STYLES={
+  boxer:{label:'Boxe',b:{jab:8,cross:9,hook:8,handSpeed:8,footSpeed:5,power:4,tdd:3},grap:0.15},
+  kickboxer:{label:'Kickboxing',b:{kick:11,cross:8,clinchStr:7,footSpeed:6,power:5,tdd:4},grap:0.2},
+  muayThai:{label:'Muay-thaï',b:{kick:11,clinchStr:11,hook:6,strength:5,durability:5,power:4,tdd:4},grap:0.3},
+  karate:{label:'Karaté',b:{footSpeed:11,kick:8,jab:6,handSpeed:6,fightIQ:5,tdd:3},grap:0.15},
+  wrestler:{label:'Lutte',b:{takedown:9,tdd:9,topControl:8,strength:7,cardio:5},grap:0.77},
+  bjj:{label:'Jiu-jitsu',b:{submission:12,guardWork:10,gnp:7,flexibility:6,composure:5,tdd:4,takedown:4},grap:0.72},
+  sambo:{label:'Sambo',b:{takedown:8,submission:9,topControl:7,strength:6,heart:5,tdd:4},grap:0.66},
+  mma:{label:'MMA complet',b:{fightIQ:7,adaptability:7,cardio:7,tdd:8,cross:7,hook:5,takedown:4,kick:5},grap:0.5},
+};
+const STYLE_KEYS=Object.keys(STYLES);
+const styleLabel=s=>(STYLES[s]||{label:s}).label;
+
+/* ------------------------------ NOMS -------------------------------------- */
+const COUNTRIES={
+ FR:{name:'France',flag:'🇫🇷',last:['Moreau','Lefevre','Dubois','Girard','Faure','Roussel','Blanc','Mercier']},
+ BR:{name:'Brésil',flag:'🇧🇷',last:['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha']},
+ US:{name:'États-Unis',flag:'🇺🇸',last:['Johnson','Williams','Brown','Miller','Davis','Wilson','Carter','Reed']},
+ DAG:{name:'Daghestan',flag:'🏔️',last:['Nurmagomedov','Aliev','Magomedov','Gadzhiev','Ramazanov','Shamilov','Umarov']},
+ JP:{name:'Japon',flag:'🇯🇵',last:['Sato','Suzuki','Takahashi','Tanaka','Watanabe','Kobayashi','Nakamura']},
+ NG:{name:'Nigéria',flag:'🇳🇬',last:['Adeyemi','Okafor','Balogun','Eze','Okoye','Abubakar','Nwosu']},
+ GB:{name:'Royaume-Uni',flag:'🇬🇧',last:['Smith','Taylor','Walker','Wright','Hughes','Ward','Bennett']},
+ RU:{name:'Russie',flag:'🇷🇺',last:['Volkov','Petrov','Sokolov','Ivanov','Popov','Kozlov','Orlov']},
+ MX:{name:'Mexique',flag:'🇲🇽',last:['Hernández','García','Martínez','López','Ramírez','Torres','Flores']},
+ IE:{name:'Irlande',flag:'🇮🇪',last:['Murphy','Kelly','OBrien','Byrne','Ryan','Walsh','McCarthy']},
+ TH:{name:'Thaïlande',flag:'🇹🇭',last:['Sittichai','Petchyindee','Kiatmoo','Sor','Rungravee']},
+ KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon']},
+ CM:{name:'Cameroun',flag:'🇨🇲',last:['Ngannou','Mbappe','Etoo','Nkemdirim','Fotso','Biya']},
+ GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze']},
+};
+const COUNTRY_KEYS=Object.keys(COUNTRIES);
+const FIRST_M=['Alex','Marcus','Diego','Ivan','Kenji','Samuel','Leon','Rashid','Tariq','Bruno','Kai','Omar','Noah','Yuki','Malik','Hugo','Sean','Nikolai','Andre','Felix','Jamal','Ravi','Enzo','Kofi','Dante'];
+const FIRST_F=['Amara','Lena','Sofia','Nadia','Yuki','Maya','Zara','Ana','Ines','Kira','Fatima','Nina','Rosa','Aiko','Elena','Sara','Leïla','Tara','Bianca','Hana'];
+function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?FIRST_F:FIRST_M); const last=pick(c.last); return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
+
+/* ------------------------- CRÉATION D'UN COMBATTANT ----------------------- */
+let _id=1;
+function makePhysical(div){ const D=div||pick(allDivisions());
+  let height=gauss(D.h,4,D.h-9,D.h+11); let reach=Math.round(height+gauss(D.r-D.h,2.5)); if(reach<height-1)reach=height-1;
+  const tags=[]; if(rnd()<0.02){reach+=RI(6,12);tags.push('allonge hors-norme');} if(rnd()<0.02)tags.push('densité rare (type Ngannou)'); if(rnd()<0.02)tags.push('explosivité rare (type Cormier)');
+  return {height,reach,tags};
+}
+function baseAttrs(style,level,predis){ const o={}; const bias=(STYLES[style]||{b:{}}).b;
+  for(const k of ATTR_KEYS){ let v=gauss(level, 9, 6, 96); if(bias[k])v=clamp(v+bias[k]); o[k]=v; }
+  if(predis){ if(predis.includes('densité'))o.power=clamp(o.power+RI(8,16)); if(predis.includes('explosivité')){o.explosiveness=clamp(o.explosiveness+RI(8,14));o.takedown=clamp(o.takedown+RI(5,10));} }
+  return o;
+}
+function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
+  const div=divById(opt.div)|| (gender==='H'?pick(DIVISIONS.H):pick(DIVISIONS.F));
+  const style=opt.style||pick(STYLE_KEYS); const ck=opt.countryKey||pick(COUNTRY_KEYS);
+  const nm=makeName(gender,ck,opt.first);
+  const phys=makePhysical(div);
+  const level=opt.level!=null?opt.level:gauss(46,10,20,80);
+  const attrs=baseAttrs(style,level,phys.tags.join(' '));
+  const potential=opt.potential!=null?opt.potential:gauss(64,12,34,97);   // caché
+  const dynamic=0;                                                         // moral/forme caché ±
+  const mot=pick(MOTIVATIONS); const origin=pick(ORIGINS);
+  const f={ id:_id++, gender, div:div.id, divName:div.name, style, styleLabel:styleLabel(style),
+    first:nm.first,last:nm.last,name:nm.name,flag:nm.flag,countryKey:ck,
+    phys, attrs, potential, dynamic, morale:60, form:55,
+    stage:'amateur', org:0, orgWins:0, age:opt.age!=null?opt.age:RI(18,22),
+    W:0,L:0,D:0,ko:0,sub:0,dec:0,koLoss:0,streak:0, champion:null, titles:0, defenses:0,
+    skills:[], history:[], origin, motivation:mot.short, drive:mot.drive, amaRec:null, amaTitle:false, nick:null, epithets:[] };
+  f.overall=overall(f);
+  // ==== [ANCRE: GENETIQUE] — jet unique à la création, jamais via rollSkill ====
+  const GENETIC_CHANCE=0.10;
+  if(rnd()<GENETIC_CHANCE){
+    const genPool=SKILLS.filter(s=>s.fam==='gen');
+    if(genPool.length>0) grantSkill(f, genPool[Math.floor(rnd()*genPool.length)]);
+  }
+  // ==== [FIN ANCRE] ====
+  return f;
+}
+
+/* ------------------- canaux de combat dérivés des 30 attributs ------------ */
+function eff(f){ const a=f.attrs; const dyn=(f.morale-50)*0.10+(f.form-50)*0.10; // moral/forme -> ±
+  const ch={
+    striking: a.jab*0.24+a.cross*0.24+a.hook*0.2+a.kick*0.18+a.clinchStr*0.14 + a.fightIQ*0.06,
+    power:    a.power + a.strength*0.12,
+    handSpeed:a.handSpeed*0.85 + a.footSpeed*0.15,
+    footwork: a.footSpeed*0.8 + a.flexibility*0.2,
+    clinch:   a.clinchStr*0.8 + a.strength*0.2,
+    takedown: a.takedown*0.78 + a.strength*0.12 + a.explosiveness*0.08,
+    tdd:      a.tdd*0.88 + a.strength*0.08 + a.flexibility*0.06 + 2,
+    topControl:a.topControl*0.82 + a.strength*0.18,
+    ground:   a.gnp*0.82 + a.power*0.18,
+    submission:a.submission*0.9 + a.flexibility*0.1,
+    guard:    a.guardWork*0.85 + a.flexibility*0.15,
+    cardio:   a.cardio*0.82 + a.recovery*0.18,
+    chin:     a.chin*0.72 + a.durability*0.28,
+    fightIQ:  a.fightIQ*0.7 + a.composure*0.18 + a.adaptability*0.12,
+    killer:   a.killer, heart:a.heart, aggression:a.aggression,
+  };
+  for(const k in ch){ if(k!=='chin'&&k!=='killer'&&k!=='heart'&&k!=='aggression') ch[k]=clamp(ch[k]+dyn,1,100); }
+  // bonus de compétences débloquées
+  for(const sid of f.skills){ const S=SKILLS.find(s=>s.id===sid); if(S&&S.fx){} }
+  return ch;
+}
+function overall(f){ const a=f.attrs;
+  // récompense la spécialisation : le coeur des meilleurs attributs pèse plus
+  const vals=ATTR_KEYS.map(k=>a[k]).sort((x,y)=>y-x);
+  const top=vals.slice(0,10), topAvg=top.reduce((s,v)=>s+v,0)/top.length;
+  const allAvg=vals.reduce((s,v)=>s+v,0)/vals.length;
+  let ov=topAvg*0.68+allAvg*0.32 + (f.dynamic||0)*0.3;
+  return clamp(Math.round(ov),1,100);
+}
+function groupAvg(f){ const a=f.attrs; const g=k=>Math.round(k.reduce((s,x)=>s+a[x[0]],0)/k.length);
+  return {tech:g(ATTR.tech),ment:g(ATTR.ment),phys:g(ATTR.phys)}; }
+
+/* ------------------------------- COMBAT ----------------------------------- */
+function reachEdge(A,B){ return clamp((A.phys.reach-B.phys.reach)*0.14,-6,6); }
+function simulateFight(A,B,rounds=3){ const a=eff(A),b=eff(B);
+  const giA=STYLES[A.style].grap, giB=STYLES[B.style].grap; const rEdge=reachEdge(A,B);
+  let sa=0,sb=0,dmgA=0,dmgB=0,finish=null; const log=[];
+  const st={ // statistiques de combat
+    A:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0}, B:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0} };
+  for(let r=1;r<=rounds && !finish;r++){
+    const fatA=clamp((dmgA-a.cardio)*0.06,0,18), fatB=clamp((dmgB-b.cardio)*0.06,0,18);
+    const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
+    if(attA>0.14)st.A.tdAtt++; if(attB>0.14)st.B.tdAtt++;
+    const tdA=attA>0.14?sigmoid((a.takedown-b.tdd)/15)*attA:0;
+    const tdB=attB>0.14?sigmoid((b.takedown-a.tdd)/15)*attB:0;
+    let grounded=false,topIsA=false; const gTop=Math.max(tdA,tdB);
+    if(gTop>0.18 && rnd()<clamp(gTop*0.96,0,0.82)){ grounded=true; topIsA=tdA>=tdB; if(topIsA)st.A.td++; else st.B.td++; }
+    if(grounded){ const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
+      const control=clamp((top.topControl-bot.guard)*0.32,0,11);
+      const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45);
+      const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004);
+      const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35);
+      const topPts=6+control*0.5+gnp*0.46+subTop*0.22; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.16+3;
+      if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=1;st.A.sig+=Math.round(gnp*0.4);} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=1;st.B.sig+=Math.round(gnp*0.4);}
+      const heartR=1-(bot.heart*0.0016);
+      const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/22,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR;
+      const subChT=clamp((top.submission-bot.guard)/29,0,.84)*0.98*(1-bot.fightIQ*0.0022);
+      const subChB=clamp((bot.submission-top.guard)/42,0,.7)*0.44*(1-top.fightIQ*0.0022);
+      if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
+      else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
+      else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
+      log.push({r,phase:'sol',top:topIsA?'A':'B'});
+    } else {
+      const offA=a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14+rEdge-b.footwork*0.2-b.fightIQ*0.14-fatA;
+      const offB=b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14-rEdge-a.footwork*0.2-a.fightIQ*0.14-fatB;
+      const pA=clamp(offA*0.55,0,70)+RI(-7,7), pB=clamp(offB*0.55,0,70)+RI(-7,7);
+      sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22,0,22);dmgB+=clamp(offA*0.22,0,22);
+      st.A.sig+=clamp(Math.round(pA*0.5),0,40); st.B.sig+=clamp(Math.round(pB*0.5),0,40);
+      const koA=clamp((a.power-b.chin)/42,0,.93)*clamp((offA-offB)/34+0.46,0,1)*0.64*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016);
+      const koB=clamp((b.power-a.chin)/42,0,.93)*clamp((offB-offA)/34+0.46,0,1)*0.64*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016);
+      if(rnd()<koA){finish={by:A,loser:B,method:'KO/TKO',round:r};st.A.kd++;}
+      else if(rnd()<koB){finish={by:B,loser:A,method:'KO/TKO',round:r};st.B.kd++;}
+      log.push({r,phase:'debout'});
+    }
+    if(dmgA>45&&rnd()<.4)A.attrs.chin=clamp(A.attrs.chin-1,1);
+    if(dmgB>45&&rnd()<.4)B.attrs.chin=clamp(B.attrs.chin-1,1);
+  }
+  let res;
+  if(finish){ res={winner:finish.by===A?'A':'B',method:finish.method,round:finish.round,detail:finish.detail||''}; }
+  else { const d=sa-sb; res=(Math.abs(d)<5&&rnd()<.5)?{winner:rnd()<.5?'A':'B',method:'Décision partagée'}:{winner:d>=0?'A':'B',method:'Décision'}; }
+  res.scoreA=Math.round(sa); res.scoreB=Math.round(sb); res.log=log; res.stats=st; return res;
+}
+function applyResult(F,opp,res,side){ const win=res.winner===side; const m=res.method;
+  if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(m.startsWith('KO'))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(6,12),0,100); }
+  else { F.L++; F.streak=Math.min(-1,F.streak-1); if(m.startsWith('KO'))F.koLoss++; F.morale=clamp(F.morale-RI(8,16),0,100); }
+  F.form=clamp(F.form+(win?RI(3,8):-RI(5,12)),0,100);
+  // ==== [ANCRE: META04_06] — planchers de moral. Le jeu n'a pas de système de
+  // popularité distinct : ces deux compétences sont adaptées sur `morale`,
+  // le champ existant le plus proche (au lieu d'un f.pop qui n'existe pas). ====
+  if(F.skills&&F.skills.includes('meta06')){ if(F.morale<75) F.morale=75; }
+  else if(F.skills&&F.skills.includes('meta04')){ if(F.morale<45) F.morale=45; }
+  // ==== [FIN ANCRE] ====
+  F.history.push({res:win?'win':'loss',method:m,round:res.round||null,oppId:opp&&opp.id});
+  if(F.history.length>60)F.history=F.history.slice(-60);
+  return win;
+}
+/* estimation IMPARFAITE de la proba de victoire (pour l'UI : fourchette) */
+function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
+  const oa=A.overall+a.killer*0.05+reachEdge(A,B), ob=B.overall+b.killer*0.05;
+  let p=sigmoid((oa-ob)/12); p=clamp(p*100+RI(-8,8),3,97)/100; return p; // bruit volontaire
+}
+
+/* ------------------------- ORGS / CLASSEMENT / ÂGE ------------------------ */
+const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Ligue européenne','Élite internationale'];
+const ORG_PROMO_OVR=[0,32,42,52,60,68];   // overall requis pour évoluer vers l'org n
+function canPromote(f){ const n=f.org+1; return n<ORGS.length && (f.orgWins||0)>=3 && f.overall>=ORG_PROMO_OVR[n]; }
+function p4pScore(f){ const fights=f.W+f.L+f.D; if(fights<3)return f.overall*1.3;
+  const wr=f.W/fights;
+  const base=f.overall*1.8 + wr*120 + f.defenses*14 + (f.champion?26:0) + Math.max(0,f.streak)*2 + Math.min(f.titles,3)*10;
+  return base*clamp(0.45+wr*0.6,0.45,1.05) - f.L*5 - f.koLoss*3;
+}
+function rankPool(list){ return list.slice().sort((x,y)=>p4pScore(y)-p4pScore(x)); }
+function applyAging(f){ const A=f.age; if(A>=33){ // déclin
+    const dec=k=>f.attrs[k]=clamp(f.attrs[k]-RI(0,2),1,100);
+    dec('footSpeed');dec('handSpeed');dec('cardio');dec('explosiveness'); if(A>=36){dec('power');dec('recovery');} f.attrs.chin=clamp(f.attrs.chin-(A>=35?RI(0,2):0),1,100);
+  } else if(A>=27){ /* pic : stable */ }
+  f.age++; f.overall=overall(f);
+}
+/* progression BORNÉE : un choix applique un delta net d'attributs ( up/down),
+   plafonné par le potentiel — pas d'amélioration infinie. */
+function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
+    if(k==='morale'){ f.morale=clamp(f.morale+dv,0,100); applied.push(['Moral',dv]); continue; }
+    if(k==='form'){ f.form=clamp(f.form+dv,0,100); applied.push(['Forme',dv]); continue; }
+    const before=f.attrs[k]; let after=before+dv;
+    if(dv>0) after=Math.min(after, f.potential+4);   // borne haute = potentiel
+    f.attrs[k]=clamp(after,1,100); const real=Math.round(f.attrs[k]-before);
+    if(real!==0)applied.push([attrLabel(k),real]);
+  } f.overall=overall(f); return applied;
+}
+/* ==== [ANCRE: TIRAGE] — moteur de compétences en deux temps (plan §6/§18).
+   Corrigé par rapport à la version brute reçue : les attributs vivent dans
+   f.attrs (pas f.stats), le pays est f.countryKey (pas f.country), et le
+   générateur aléatoire doit être rnd() (seedé, reproductible) et non
+   Math.random(). Bornes /1-100 et recalcul de l'overall ajoutés, comme le
+   faisait l'ancien rollSkill(). ==== */
+const SKILL_CONSTANTS = {
+  BASE_RATE: 0.042, DROUGHT_INC: 0.005, MYTHIC_CHANCE: 0.0009,
+  MAX_CAREER_SKILLS: 5, AGE_META: 34,
+};
+function tirerRarete(){ const roll=rnd()*100;
+  if(roll<58.3) return 'C'; if(roll<87.4) return 'R'; if(roll<97.1) return 'E'; return 'L';
+}
+function poolEligible(f, isEndOfCareer, isCapped){
+  return SKILLS.filter(s=>{
+    if(f.skills && f.skills.includes(s.id)) return false;
+    if(s.fam==='gen') return false;                 // jamais tiré en carrière, seulement à la création
+    if(s.fam==='meta') return isEndOfCareer;
+    if(isCapped) return false;
+    if(s.fam==='style' && s.key===f.style) return true;
+    if(s.fam==='country' && s.key===f.countryKey) return true;
+    return false;
+  });
+}
+function getFallbackSkill(pool, baseRarity){ const hierarchy=['L','E','R','C'];
+  let startIndex=hierarchy.indexOf(baseRarity); if(startIndex===-1) startIndex=0;
+  for(let i=startIndex;i<hierarchy.length;i++){ const available=pool.filter(s=>s.rar===hierarchy[i]);
+    if(available.length>0) return available[Math.floor(rnd()*available.length)]; }
+  return null;
+}
+function grantSkill(f, skill){ if(!f.skills) f.skills=[]; f.skills.push(skill.id);
+  if(skill.fx){ for(const stat in skill.fx){ if(f.attrs && f.attrs[stat]!==undefined) f.attrs[stat]=clamp(f.attrs[stat]+skill.fx[stat],1,100); } }
+  f.overall=overall(f); return skill;
+}
+function rollSkill(f){
+  if(!f._drought) f._drought=0; if(!f.skills) f.skills=[];
+  let careerCount=0, hasMythic=false;
+  f.skills.forEach(skillId=>{ const s=SKILLS.find(x=>x.id===skillId); if(s){ if(s.fam==='style'||s.fam==='country') careerCount++; if(s.rar==='M') hasMythic=true; } });
+  const isCapped=careerCount>=SKILL_CONSTANTS.MAX_CAREER_SKILLS;
+  const isEndOfCareer=(f.age>=SKILL_CONSTANTS.AGE_META);
+  // 1) Jet Mythique — entièrement séparé, testé à CHAQUE combat, indépendant
+  //    du plafond et de la sécheresse (sinon il ne se déclenche presque jamais,
+  //    comme observé lors des tests : 0% au lieu des ~4%/carrière visés).
+  if(!hasMythic && rnd()<SKILL_CONSTANTS.MYTHIC_CHANCE){
+    const mythics=SKILLS.filter(s=>s.rar==='M' && s.fam==='style' && s.key===f.style && !(f.skills||[]).includes(s.id));
+    if(mythics.length>0) return grantSkill(f, mythics[Math.floor(rnd()*mythics.length)]);
+  }
+  // 2) Pool éligible pour le tirage normal (style/pays/méta selon contexte)
+  const pool=poolEligible(f, isEndOfCareer, isCapped);
+  if(pool.length===0) return null;
+  const unlockChance=SKILL_CONSTANTS.BASE_RATE + (f._drought*SKILL_CONSTANTS.DROUGHT_INC);
+  if(rnd()>unlockChance){ f._drought++; return null; }
+  f._drought=0;
+  if(isEndOfCareer){ const metaPool=pool.filter(s=>s.fam==='meta');
+    if(metaPool.length>0 && rnd()<0.25) return grantSkill(f, metaPool[Math.floor(rnd()*metaPool.length)]); }
+  if(isCapped) return null;
+  const rarityDrawn=tirerRarete(); const finalSkill=getFallbackSkill(pool, rarityDrawn);
+  if(finalSkill) return grantSkill(f, finalSkill);
+  return null;
+}
+/* ==== [FIN ANCRE] ==== */
+/* épithètes de fin de carrière (uniques, certains liés à la catégorie) */
+function epithets(f){ const e=[]; const fights=f.W+f.L+f.D; const wr=f.W/Math.max(1,fights);
+  if(f.ko>=12)e.push('Machine à KO'); if(f.sub>=12)e.push('Le chasseur de cou');
+  if(f.titles>=1&&f.L===0)e.push('L\u2019Invaincu'); if(f.defenses>=5)e.push('Le monarque');
+  if(f.attrs.power>=92&&/plume|paille|mouche|coq/i.test(f.divName))e.push('Le Ngannou des petits gabarits');
+  if(f.skills.includes('anaconda'))e.push('L\u2019Anaconda'); if(f.skills.includes('twister'))e.push('Le Tordeur');
+  if(f.morale>=85&&f.titles>=1)e.push('Le favori du public'); if(wr>=0.85&&fights>=15)e.push('Le prodige');
+  if(f.koLoss>=6)e.push('La guerre l\u2019a marqué'); if(!e.length)e.push('L\u2019artisan de la cage');
+  return e;
+}
