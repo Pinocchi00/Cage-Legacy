@@ -1,3 +1,4 @@
+
 "use strict";
 /* CAGE LEGACY — js/ui.js
    Logique de jeu (roster, adversaires, entraînement, combat, succès),
