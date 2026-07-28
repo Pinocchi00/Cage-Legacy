@@ -16,7 +16,7 @@ const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])
 
 /* ------------------------------ sauvegarde -------------------------------- */
 function save(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
-function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ G=migrate(JSON.parse(s)); return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
+function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ G=migrate(JSON.parse(s)); validateState(); return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
 function hasSave(){ try{ return !!localStorage.getItem(SAVE_KEY); }catch(e){ return false; } }
 function wipe(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
 /* ==== [ANCRE: PANTHEON] — hors wipe(), survit d'une carrière à l'autre ==== */
@@ -33,5 +33,30 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
 function migrate(g){ if(!g)return g; g.version=g.version||1;
   if(g.version<2){ g.version=2; }
   return g; }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: VALIDATE_STATE] — comble les champs manquants d'une ancienne
+   sauvegarde (audit "sécurité des sauvegardes"). Corrigé par rapport au
+   brouillon : G.season est un OBJET {year,fights} dans ce jeu, jamais un
+   nombre — l'écraser avec 1 casserait scr_season()/compileSeasonStats(). Il
+   n'existe pas de champ G.mode ici (l'arcade vit sous G.arcade.active) donc
+   rien à y combler. Ne touche jamais une sauvegarde valide : uniquement les
+   champs manquants (typeof===undefined / pas un tableau / pas un objet). ==== */
+function validateState(){
+  if(!G || !G.f) return;
+  const f=G.f;
+  if(typeof f.earnings==='undefined') f.earnings=0;
+  if(typeof f.rivalId==='undefined') f.rivalId=null;
+  if(typeof f.proOfferCooldown==='undefined') f.proOfferCooldown=0;
+  if(typeof f.botchedWeightCuts==='undefined') f.botchedWeightCuts=0;
+  if(typeof f.rankBoost==='undefined') f.rankBoost=0;
+  if(typeof f.orgWins==='undefined') f.orgWins=0;
+  if(!Array.isArray(f.skills)) f.skills=[];
+  if(!Array.isArray(f.history)) f.history=[];
+  if(!Array.isArray(f.amateurRivals)) f.amateurRivals=[];
+  if(!G.season || typeof G.season!=='object' || !Array.isArray(G.season.fights)) G.season={year:(G.season&&G.season.year)||1,fights:[]};
+  if(!Array.isArray(G.roster)) G.roster=makeOrgRoster(f);
+  if(!Array.isArray(G.ach)) G.ach=[];
+  if(G.arcade && typeof G.arcade.active==='undefined') G.arcade=null; // état arcade incomplet -> repli sûr, jamais 'actif' par erreur
+}
 /* ==== [FIN ANCRE] ==== */
 function setTheme(t){ G.theme=t; try{ if(document.documentElement)document.documentElement.setAttribute('data-theme',t); }catch(e){} }
