@@ -28,4 +28,4 @@ function validateSkills(){
 }
 validateSkills();
 /* ==== [FIN ANCRE] ==== */
-if(document.getElementById('app')){ G={screen:'intro',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme('dark'); render(); }
+if(document.getElementById('app')){ G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme('dark'); render(); }
