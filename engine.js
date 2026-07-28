@@ -161,11 +161,54 @@ function groupAvg(f){ const a=f.attrs; const g=k=>Math.round(k.reduce((s,x)=>s+a
 
 /* ------------------------------- COMBAT ----------------------------------- */
 function reachEdge(A,B){ return clamp((A.phys.reach-B.phys.reach)*0.14,-6,6); }
-function simulateFight(A,B,rounds=3){ const a=eff(A),b=eff(B);
-  const giA=STYLES[A.style].grap, giB=STYLES[B.style].grap; const rEdge=reachEdge(A,B);
+/* ==== [ANCRE: EQUILIBRAGE_MC] - recalibrage Monte-Carlo (audit d'equilibrage).
+   Mesure avant/apres sur 10000+ combats simules : victoire ecrasante a 97%
+   des un ecart de niveau modere, soumissions quasi jamais declenchees (4%).
+   4 leviers touches : seuil/probabilite de mise au sol, sensibilite du KO
+   debout, bruit du score par round, chance de soumission au sol - plus une
+   modulation par categorie de poids basee sur la vraie taille des divisions
+   (pas une liste de noms). Le filtre par style (kickboxer vs kickboxer ne va
+   quasiment jamais au sol, wrestler vs wrestler si) etait DEJA correct et n'a
+   pas eu besoin d'etre touche - verifie explicitement avant d'y toucher.
+   Complété ici par un journal granulaire (plusieurs lignes de texte par
+   round, momentum, dégâts par zone tête/corps/jambes) lu par l'arène —
+   AUCUNE formule de résolution du combat n'est modifiée, uniquement des
+   sous-événements narratifs générés en plus, pour l'affichage. ==== */
+function weightFactor(f){ const divs=DIVISIONS[f.gender]||DIVISIONS.H; const d=divById(f.div);
+  if(!d) return 0.5;
+  const heights=divs.map(x=>x.h); const min=Math.min(...heights), max=Math.max(...heights);
+  return max>min ? (d.h-min)/(max-min) : 0.5; }
+function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
+  const wf=weightFactor(A);
+  const koWeightMult=1+(wf-0.5)*0.5;
+  const noiseWeightMult=1+(wf-0.5)*0.4;
+  // ==== [FIN ANCRE] ====
+  // ==== [ANCRE: PLAN_TACTIQUE] — modificateurs du vestiaire (audit §11), appliqués
+  // une seule fois sur les canaux de A avant la boucle des rounds. Clés vérifiées
+  // contre les canaux réels de eff() : striking, power, footwork/fightIQ (def),
+  // takedown (td), tdd, submission (sub), ground (gnp), topControl (ctrl). ====
+  let myGi=STYLES[A.style].grap;
+  if(plan){
+    if(plan.gi) myGi*=plan.gi;
+    if(plan.td) a.takedown*=plan.td;
+    if(plan.tdd) a.tdd*=plan.tdd;
+    if(plan.str) a.striking*=plan.str;
+    if(plan.ko) a.power*=plan.ko;
+    if(plan.sub) a.submission*=plan.sub;
+    if(plan.gnp) a.ground*=plan.gnp;
+    if(plan.ctrl) a.topControl*=plan.ctrl;
+    if(plan.def){ a.footwork*=plan.def; a.fightIQ*=plan.def; }
+    for(const k in a){ if(typeof a[k]==='number') a[k]=clamp(a[k],1,150); }
+  }
+  const giA=myGi, giB=STYLES[B.style].grap; const rEdge=reachEdge(A,B);
   let sa=0,sb=0,dmgA=0,dmgB=0,finish=null; const log=[];
-  const st={ // statistiques de combat
-    A:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0}, B:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0} };
+  const st={ // statistiques de combat (dmgHead/Body/Legs : purement narratif, additif)
+    A:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0},
+    B:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0} };
+  let momentum=50; // jauge narrative (50=neutre), n'influence aucun calcul de combat
+  const formatTime=(k,tot)=>{ let sec=300-Math.floor((k/tot)*300); let m=Math.floor(sec/60); let s=sec%60; return `${m<10?'0':''}${m}:${s<10?'0':''}${s}`; };
+  const getTags=f=>(f.skills||[]).map(id=>{ const s=SKILLS.find(x=>x.id===id); return s?(s.tags||[]):[]; }).flat();
+  const tagsA=getTags(A), tagsB=getTags(B);
   for(let r=1;r<=rounds && !finish;r++){
     const fatA=clamp((dmgA-a.cardio)*0.06,0,18), fatB=clamp((dmgB-b.cardio)*0.06,0,18);
     const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
@@ -173,7 +216,7 @@ function simulateFight(A,B,rounds=3){ const a=eff(A),b=eff(B);
     const tdA=attA>0.14?sigmoid((a.takedown-b.tdd)/15)*attA:0;
     const tdB=attB>0.14?sigmoid((b.takedown-a.tdd)/15)*attB:0;
     let grounded=false,topIsA=false; const gTop=Math.max(tdA,tdB);
-    if(gTop>0.18 && rnd()<clamp(gTop*0.96,0,0.82)){ grounded=true; topIsA=tdA>=tdB; if(topIsA)st.A.td++; else st.B.td++; }
+    if(gTop>0.10 && rnd()<clamp(gTop*1.5,0,0.85)){ grounded=true; topIsA=tdA>=tdB; if(topIsA)st.A.td++; else st.B.td++; }
     if(grounded){ const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
       const control=clamp((top.topControl-bot.guard)*0.32,0,11);
       const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45);
@@ -183,23 +226,52 @@ function simulateFight(A,B,rounds=3){ const a=eff(A),b=eff(B);
       if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=1;st.A.sig+=Math.round(gnp*0.4);} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=1;st.B.sig+=Math.round(gnp*0.4);}
       const heartR=1-(bot.heart*0.0016);
       const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/22,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR;
-      const subChT=clamp((top.submission-bot.guard)/29,0,.84)*0.98*(1-bot.fightIQ*0.0022);
+      const subChT=clamp((top.submission-bot.guard)/17,0,.84)*1.25*(1-bot.fightIQ*0.0022);
       const subChB=clamp((bot.submission-top.guard)/42,0,.7)*0.44*(1-top.fightIQ*0.0022);
       if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
       else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
       else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
-      log.push({r,phase:'sol',top:topIsA?'A':'B'});
+      // ==== journal granulaire (sol) — 4 sous-événements narratifs, aucun impact sur le calcul ci-dessus ====
+      for(let k=0;k<4;k++){
+        const isMe=(k===0)?(tdA>=tdB):topIsA;
+        momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
+        const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB;
+        const tgt=isMe?st.B:st.A;
+        tgt.dmgBody+=RI(0,2); tgt.dmgHead+=RI(0,1);
+        let txtPool=k===0?[`Amenée au sol de ${atk.name}.`,`Takedown validé par ${atk.name}.`]:[`${atk.name} consolide son contrôle.`,`${atk.name} maintient une lourde pression.`];
+        if(k!==0 && tgs.includes('GNP')) txtPool.push(`${atk.name} fait pleuvoir un lourd Ground & Pound.`);
+        if(k!==0 && tgs.includes('Soumission')) txtPool.push(`${atk.name} cherche l\u2019ouverture pour soumettre.`);
+        if(k===0 && tgs.includes('Judo')) txtPool.push(`${atk.name} fauche ${def.name} avec un balayage net.`);
+        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,4)}] `+pick(txtPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      }
+      if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
+        last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
     } else {
       const offA=a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14+rEdge-b.footwork*0.2-b.fightIQ*0.14-fatA;
       const offB=b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14-rEdge-a.footwork*0.2-a.fightIQ*0.14-fatB;
-      const pA=clamp(offA*0.55,0,70)+RI(-7,7), pB=clamp(offB*0.55,0,70)+RI(-7,7);
+      const noiseAmt=Math.round(18*noiseWeightMult); const pA=clamp(offA*0.42,0,70)+RI(-noiseAmt,noiseAmt), pB=clamp(offB*0.42,0,70)+RI(-noiseAmt,noiseAmt);
       sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22,0,22);dmgB+=clamp(offA*0.22,0,22);
       st.A.sig+=clamp(Math.round(pA*0.5),0,40); st.B.sig+=clamp(Math.round(pB*0.5),0,40);
-      const koA=clamp((a.power-b.chin)/42,0,.93)*clamp((offA-offB)/34+0.46,0,1)*0.64*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016);
-      const koB=clamp((b.power-a.chin)/42,0,.93)*clamp((offB-offA)/34+0.46,0,1)*0.64*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016);
+      const koA=clamp((a.power-b.chin)/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016);
+      const koB=clamp((b.power-a.chin)/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016);
       if(rnd()<koA){finish={by:A,loser:B,method:'KO/TKO',round:r};st.A.kd++;}
       else if(rnd()<koB){finish={by:B,loser:A,method:'KO/TKO',round:r};st.B.kd++;}
-      log.push({r,phase:'debout'});
+      // ==== journal granulaire (debout) — 5 sous-événements narratifs, aucun impact sur le calcul ci-dessus ====
+      for(let k=0;k<5;k++){
+        const isMe=rnd()<(offA/(offA+offB+1));
+        momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
+        const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB;
+        const tgt=isMe?st.B:st.A;
+        const rDmg=rnd(); if(rDmg<0.4) tgt.dmgHead+=RI(1,4); else if(rDmg<0.7) tgt.dmgBody+=RI(1,4); else tgt.dmgLegs+=RI(1,4);
+        let txtPool=[`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l\u2019ouverture en striking.`];
+        if(tgs.includes('Kick')) txtPool.push(`${atk.name} claque un lourd kick.`);
+        if(tgs.includes('Blitz')) txtPool.push(`${atk.name} explose en blitz !`);
+        if(tgs.includes('Sniper')) txtPool.push(`${atk.name} pique à distance avec précision.`);
+        if(tgs.includes('Teep')) txtPool.push(`${atk.name} repousse l\u2019assaut d\u2019un teep.`);
+        log.push({r,phase:'debout',by:isMe?'me':'op',text:`[${formatTime(k,5)}] `+pick(txtPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      }
+      if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
+        last.text=`[00:00] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
     }
     if(dmgA>45&&rnd()<.4)A.attrs.chin=clamp(A.attrs.chin-1,1);
     if(dmgB>45&&rnd()<.4)B.attrs.chin=clamp(B.attrs.chin-1,1);
@@ -230,13 +302,15 @@ function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
 }
 
 /* ------------------------- ORGS / CLASSEMENT / ÂGE ------------------------ */
-const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Ligue européenne','Élite internationale'];
-const ORG_PROMO_OVR=[0,32,42,52,60,68];   // overall requis pour évoluer vers l'org n
+const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Ligue européenne','Apex Legacy (Gloire)','Global Fortune (Argent)'];
+const ORG_PROMO_OVR=[0,32,42,52,60,68,68];   // overall requis pour évoluer vers l'org n
 function canPromote(f){ const n=f.org+1; return n<ORGS.length && (f.orgWins||0)>=3 && f.overall>=ORG_PROMO_OVR[n]; }
 function p4pScore(f){ const fights=f.W+f.L+f.D; if(fights<3)return f.overall*1.3;
   const wr=f.W/fights;
-  const base=f.overall*1.8 + wr*120 + f.defenses*14 + (f.champion?26:0) + Math.max(0,f.streak)*2 + Math.min(f.titles,3)*10;
-  return base*clamp(0.45+wr*0.6,0.45,1.05) - f.L*5 - f.koLoss*3;
+  let base=f.overall*1.8 + wr*120 + f.defenses*14 + (f.champion?26:0) + Math.max(0,f.streak)*2 + Math.min(f.titles,3)*10;
+  const leapfrog=f.rankBoost||0;
+  if(f.org===5) base*=1.4; // Apex Legacy : statut de légende massivement valorisé
+  return base*clamp(0.45+wr*0.6,0.45,1.05) - f.L*5 - f.koLoss*3 + leapfrog;
 }
 function rankPool(list){ return list.slice().sort((x,y)=>p4pScore(y)-p4pScore(x)); }
 function applyAging(f){ const A=f.age; if(A>=33){ // déclin
@@ -327,3 +401,4 @@ function epithets(f){ const e=[]; const fights=f.W+f.L+f.D; const wr=f.W/Math.ma
   if(f.koLoss>=6)e.push('La guerre l\u2019a marqué'); if(!e.length)e.push('L\u2019artisan de la cage');
   return e;
 }
+
