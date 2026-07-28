@@ -401,4 +401,3 @@ function epithets(f){ const e=[]; const fights=f.W+f.L+f.D; const wr=f.W/Math.ma
   if(f.koLoss>=6)e.push('La guerre l\u2019a marqué'); if(!e.length)e.push('L\u2019artisan de la cage');
   return e;
 }
-
