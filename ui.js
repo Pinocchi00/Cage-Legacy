@@ -58,30 +58,8 @@ const TACTICS = {
   ]
 };
 /* ==== [FIN ANCRE] ==== */
-const RAR_COLORS={C:'var(--muted)',R:'var(--text)',E:'var(--gold)',L:'var(--blood)',M:'#8b5cf6'};
+const RAR_COLORS={C:'var(--muted)',R:'var(--text)',E:'var(--gold)',L:'var(--blood)',M:'var(--gold)'};
 /* --------------------------- roster / classement -------------------------- */
-/* ==== [ANCRE: AMA_CHAMPIONSHIPS] — un seul combat décisif (version légère
-   validée), aucune incidence sur f.org/ORGS, amateurs uniquement. Config-driven
-   pour ajouter facilement d'autres pays plus tard sans dupliquer de logique. ==== */
-const AMA_CHAMPIONSHIPS=[
- {id:'wma',label:'WMA',name:'Championnat du monde amateur',country:null,rankMin:1,rankMax:2},
- ...COUNTRY_KEYS.map(ck=>{ const pfx=COUNTRY_MMA_PREFIX[ck]; const label=pfx+'MMA';
-   return {id:label.toLowerCase(),label,name:`Championnat ${COUNTRIES[ck].name} amateur`,country:ck,rankMin:2,rankMax:5}; })
-];
-function amaScopedPool(f,cfg){ return G.roster.filter(o=>o.org===0 && o.style===f.style && o.div===f.div && (o.W+o.L+(o.D||0))>=5 && (!cfg.country || o.countryKey===cfg.country)); }
-function amaScopedRank(f,cfg){ const pool=amaScopedPool(f,cfg).filter(o=>o.id!==f.id).concat([f]); return rankPool(pool).findIndex(o=>o===f)+1; }
-function checkAmaChampionship(f){
-  if(f.org!==0 || (f.W+f.L+(f.D||0))<5) return null;
-  if(!f.amaTitles) f.amaTitles=[];
-  for(const cfg of AMA_CHAMPIONSHIPS){
-    if(f.amaTitles.includes(cfg.id)) continue;
-    if(cfg.country && f.countryKey!==cfg.country) continue;
-    const rnk=amaScopedRank(f,cfg);
-    if(rnk>=cfg.rankMin && rnk<=cfg.rankMax) return cfg;
-  }
-  return null;
-}
-/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: LINEAGE] — registre des ceintures (Phase 6). Array de règnes,
    pas de clé composite string (évite toute ambiguïté de parsing) ; groupé par
    org+divName seulement à l'affichage (scr_beltLineage). Année réelle prise
@@ -100,7 +78,7 @@ function recordTitleDefense(org,divName,champion){
 function orgLevel(org){ return [38,46,54,61,67,73,73][org]||40; }
 function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const pool=[];
   const isAmateur=(f.org===0);
-  const needed=isAmateur?100:30; // pro : 1 champion + 15 contenders classés + 14 non classés
+  const needed=isAmateur?100:12;
   // Array.isArray est nécessaire : oldRoster peut valoir le sentinel 'PRO_TRANSITION'
   // (une chaîne, qui a un .length mais pas de .filter) — sans cette garde, ça plante.
   if(!isAmateur && oldRoster && Array.isArray(oldRoster) && oldRoster.length>0){
@@ -108,18 +86,16 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     survivors.forEach(o=>{ o.attrs.fightIQ=clamp(o.attrs.fightIQ+RI(1,3),1,100); o.overall=overall(o); pool.push(o); });
   }
   if(!isAmateur && oldRoster==='PRO_TRANSITION' && f.amateurRivals){
-    f.amateurRivals.forEach(r=>{ r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; pool.push(r); });
+    f.amateurRivals.forEach(r=>{ r.org=1; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; pool.push(r); });
   }
   const toGenerate=needed-pool.length;
   for(let i=0;i<toGenerate;i++){ const lv=clamp(base+RI(-10,14),20,97);
     const age=isAmateur?RI(17,24):RI(22,35);
     const o=makeFighter({gender:f.gender,div:f.div,level:lv,potential:lv+RI(2,12),age});
     o.W=isAmateur?RI(0,15):RI(6,24); o.L=isAmateur?RI(0,6):RI(1,8);
-    o.ko=RI(0,o.W);
-    o.streak=(o.L===0)?o.W:RI(-2,Math.min(5,o.W));
-    pool.push(o); }
+    o.ko=RI(0,o.W); o.streak=RI(-2,6); pool.push(o); }
   const ranked=rankPool(pool);
-  if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); }
+  if(f.org>=4){ ranked[0].champion=f.org>=5?'monde':'europe'; ranked[0].defenses=RI(0,4); }
   return ranked;
 }
 function divRank(f){ return rankPool(G.roster.filter(o=>!o.champion).concat([f])).findIndex(o=>o===f)+1; }
@@ -139,62 +115,39 @@ function tacticalRead(f,o){ const a=eff(f),b=eff(o);
   if(fights<=5 && o.W>o.L) prefix='Jeune loup imprévisible. ';
   else if(o.streak<=-2 && o.age>=32) prefix='Vétéran sur le déclin. ';
   else if(o.streak>=3) prefix='Sur une grosse série de victoires. ';
-  // cohérence avec le scouting affiché (striking/grappling/danger) : si au moins
-  // 2 des 3 catégories montrées penchent nettement dans le même sens, la lecture
-  // tactique doit le refléter — pas seulement l'écart d'overall, qui peut rester
-  // sous le seuil même quand les 3 catégories visibles sont unanimes.
-  const oStr=(o.attrs.jab+o.attrs.cross+o.attrs.hook+o.attrs.kick)/4, fStr=(f.attrs.jab+f.attrs.cross+f.attrs.hook+f.attrs.kick)/4;
-  const oGrap=(o.attrs.takedown+o.attrs.submission+o.attrs.topControl)/3, fGrap=(f.attrs.takedown+f.attrs.submission+f.attrs.topControl)/3;
-  const oDan=o.attrs.power, fDan=f.attrs.power;
-  const edgeOpp=[oStr-fStr,oGrap-fGrap,oDan-fDan].filter(d=>d>=8).length;
-  const edgeMe=[oStr-fStr,oGrap-fGrap,oDan-fDan].filter(d=>d<=-8).length;
   let base='Combat équilibré — l\u2019intelligence fera la différence.';
   if(b.striking>b.ground+12 && b.striking>a.striking) base='Redoutable debout — amène-le au sol.';
   else if(b.takedown>a.tdd+10) base='Gros lutteur — garde la cage dans le dos, sprawle.';
   else if(b.submission>a.guard+12) base='Dangereux au sol — reste debout, méfie-toi du cou.';
-  else if(a.overall>o.overall+8 || edgeMe>=2) base='Sur le papier, tu domines. Ne te relâche pas.';
-  else if(o.overall>f.overall+8 || edgeOpp>=2) base='Plus fort que toi. Il te faudra un plan.';
+  else if(a.overall>o.overall+8) base='Sur le papier, tu domines. Ne te relâche pas.';
+  else if(o.overall>f.overall+8) base='Plus fort que toi. Il te faudra un plan.';
   return prefix+base;
 }
 function genOpponents(f){
   const pool=G.roster.filter(o=>o.id!==f.id);
   let chosen=[];
-  if(G.pendingAmaTitle && f.org===0){
-    const cfg=G.pendingAmaTitle;
-    const scoped=amaScopedPool(f,cfg).filter(o=>o.id!==f.id);
-    const rival=rankPool(scoped)[0]||pool[0];
-    return [{o:rival, read:`${cfg.label} — ${cfg.name}. Un seul combat, une seule ceinture.`}];
-  }
   const isDefense=!!f.champion;
-  const isTitle=(!isDefense && isTitleEligible(f));
-  if(isTitle){ const champ=pool.find(o=>o.champion)||pool[0];
-    return [{o:champ, read:`Combat de titre. Un seul adversaire possible : le champion. ${tacticalRead(f,champ)}`}]; }
+  const isTitle=(!isDefense && f.org>=4 && ((f.streak||0)>=3 || divRank(f)<=2));
   if(isDefense){ chosen.push(pool[0],pool[1],pool[2]); }
+  else if(isTitle){ chosen.push(pool.find(o=>o.champion)||pool[0]); }
   else {
     const myRank=pool.findIndex(o=>p4pScore(o)<p4pScore(f));
-    // rk clampé à un index VALIDE du pool (jamais pool.length) : sinon pool[rk] est
-    // undefined et retombe sur pool[0] via le ||pool[0] plus bas — c'est-à-dire le
-    // champion/N°1 — exactement le bug "j'affronte le N°1 à mon 1er combat".
-    const rk=Math.min(myRank===-1?pool.length-1:myRank, pool.length-1);
-    // écart proportionnel à la taille du pool (6%, minimum 2) : un pool amateur de
-    // ~100 a besoin d'une fenêtre bien plus large qu'un pool pro de ~30, sinon
-    // rk±2 retombe régulièrement sur le tout premier du classement par accident.
-    const spread=Math.max(2,Math.round(pool.length*0.06));
+    const rk=myRank===-1?pool.length:myRank;
     if(f.streak<=-2){
       // SCÉNARIO A : Le Rebond (Prospect vs Vétéran)
-      const prospect=pool.find(o=>(o.W+o.L)<=5 && o.W>o.L && p4pScore(o)<p4pScore(f)) || pool[Math.min(pool.length-1, rk+spread)];
-      const veteran=pool.find(o=>o.age>=32 && o.streak<0) || pool[Math.min(pool.length-1, rk+spread+1)];
+      const prospect=pool.find(o=>(o.W+o.L)<=5 && o.W>o.L && p4pScore(o)<p4pScore(f)) || pool[Math.min(pool.length-1, rk+2)];
+      const veteran=pool.find(o=>o.age>=32 && o.streak<0) || pool[Math.min(pool.length-1, rk+3)];
       const mid=pool[rk]||pool[0];
       chosen.push(prospect, veteran, mid);
     } else if(f.streak>=2){
       // SCÉNARIO B : L'Anti-chambre (Gatekeeper)
-      const gatekeeper=pool.find(o=>o.attrs.durability>75 || o.attrs.tdd>75) || pool[Math.max(0, rk-spread)];
-      const higher=pool[Math.max(0, rk-spread-1)];
+      const gatekeeper=pool.find(o=>o.attrs.durability>75 || o.attrs.tdd>75) || pool[Math.max(0, rk-2)];
+      const higher=pool[Math.max(0, rk-3)];
       const trap=pool[Math.min(pool.length-1, rk+1)];
       chosen.push(gatekeeper, higher, trap);
     } else {
       // SCÉNARIO C : Statu Quo
-      chosen.push(pool[Math.max(0, rk-spread)], pool[rk]||pool[0], pool[Math.min(pool.length-1, rk+spread)]);
+      chosen.push(pool[Math.max(0, rk-2)], pool[rk]||pool[0], pool[Math.min(pool.length-1, rk+2)]);
     }
     if(f.rivalId){ const rival=pool.find(o=>o.id===f.rivalId && !o.champion);
       if(rival && !chosen.includes(rival)) chosen[1]=rival; }
@@ -234,33 +187,7 @@ function chooseTraining(i){ const opt=G.train[i]; const applied=applyDeltas(G.f,
   }
   const kind=fightKind(); const opp=G.sel.o; const rounds=(kind==='title')?5:3;
   G.fight={kind,opp,rounds,malus:null};
-  // ==== [ANCRE: CUTTING_5PALIERS] — déterministe, à CHAQUE combat. Le poids de
-  // forme est un trait VARIABLE (weightCutInfo tire un % neuf à chaque appel),
-  // pas un socle figé à la création — donc le palier change réellement d'un
-  // combat à l'autre sans avoir besoin d'une variance ajoutée par-dessus.
-  const wc=weightCutInfo(G.f); const isTopDivision=(G.f.div==='H-heavy'||G.f.div==='F-feather');
-  const effPct=wc.cutPct;
-  let cutTier, cutMods=null;
-  if(effPct<=3){ cutTier='sans_effort'; cutMods={cardio:6,durability:4}; }
-  else if(effPct<=8){ cutTier='facile'; }
-  else if(effPct<=13){ cutTier='normal'; }
-  else if(effPct<=20){ cutTier='complique'; cutMods={cardio:-12,strength:-10,durability:-8}; }
-  else { cutTier='impossible'; }
-  G.fight.cutResult={tier:cutTier,effPct,kg:wc.cutKg};
-  if(cutTier==='impossible'){
-    G.f.botchedWeightCuts=(G.f.botchedWeightCuts||0)+1;
-    G.f.form=clamp(G.f.form-15,0,100); G.f.morale=clamp(G.f.morale-12,0,100);
-    if(G.f.botchedWeightCuts>=3 && !isTopDivision){
-      const divs=DIVISIONS[G.f.gender]; const curIdx=divs.findIndex(d=>d.id===G.f.div); const nextDiv=divs[curIdx+1];
-      if(nextDiv){ G.f.div=nextDiv.id; G.f.divName=nextDiv.name; G.f.botchedWeightCuts=0; G.f.champion=null;
-        G.lastMsg=`Le corps dit stop. La commission vous interdit de redescendre : monté en ${G.f.divName}.`; }
-      else G.lastMsg='Pesée ratée. Le combat est annulé.';
-    } else { G.lastMsg=`Pesée ratée (${effPct.toFixed(1)}% du poids de forme) : impossible de descendre à temps. Le combat est annulé.`; }
-    G.screen='hub'; save(); render(); return; // pesée ratée, combat annulé
-  }
-  if(cutMods) G.fight.malus=Object.assign({},G.fight.malus,cutMods);
-  // ==== [FIN ANCRE] ====
-  if(rnd()<0.08){ generateRandomEvent(); G.screen='event'; save(); render(); }
+  if(rnd()<0.15){ generateRandomEvent(); G.screen='event'; save(); render(); }
   else { proceedToFight(); }
 }
 function proceedToFight(){ G.screen='plan'; save(); render(); }
@@ -271,7 +198,8 @@ function proceedToFight(){ G.screen='plan'; save(); render(); }
    faute de catégorie supérieure où l'envoyer. ==== */
 function generateRandomEvent(){ const f=G.f;
   const isTopDivision=(f.div==='H-heavy' || f.div==='F-feather');
-  let pool=['minor_injury','minor_injury'];
+  let pool=['minor_injury','minor_injury','weight_cut'];
+  if(!isTopDivision) pool.push('weight_cut');
   if(rnd()<0.25) pool.push('major_injury');
   // ==== [ANCRE: EVENEMENTS_ARGENT] — dilemmes financiers, réservés aux pros ====
   if(f.org>0){
@@ -281,7 +209,32 @@ function generateRandomEvent(){ const f=G.f;
   // ==== [FIN ANCRE] ====
   const type=pick(pool);
   let title='', text='', btn='Continuer', actionId=type;
-  if(type==='minor_injury'){
+  if(type==='weight_cut'){
+    const wc=weightCutInfo(f);
+    if(wc.cutPct<=5){
+      title='Pesée validée'; text=`Poids de forme proche de la limite (${wc.cutKg}kg à perdre). Coupe sans difficulté, forme optimale.`;
+    } else if(wc.cutPct<=10){
+      title='Cutting modéré'; text=`Perte de ${wc.cutKg}kg (${wc.cutPct.toFixed(1)}% du poids de forme). Ça se travaille, sans plus.`;
+      G.fight.malus={cardio:-6,strength:-4};
+    } else {
+      f.botchedWeightCuts=(f.botchedWeightCuts||0)+1;
+      if(f.botchedWeightCuts>=3 && !isTopDivision){
+        const divs=DIVISIONS[f.gender]; const curIdx=divs.findIndex(d=>d.id===f.div); const nextDiv=divs[curIdx+1];
+        if(nextDiv){
+          f.div=nextDiv.id; f.divName=nextDiv.name; f.botchedWeightCuts=0; f.champion=null;
+          title='Le corps dit stop';
+          text=`Votre corps ne tolère plus la déshydratation. Pour la troisième fois, la coupe de poids (${wc.cutPct.toFixed(1)}%) est un désastre médical. La commission vous interdit de redescendre : vous êtes forcé de monter en <b>${f.divName}</b>.`;
+          actionId='move_up';
+        } else { f.botchedWeightCuts=0; title='Coupe de poids brutale';
+          text=`Perte de ${wc.cutKg}kg (${wc.cutPct.toFixed(1)}% du poids de forme) — un enfer absolu. Déficit sévère de cardio et de force ce soir.`;
+          G.fight.malus={cardio:-15,strength:-12,durability:-10}; }
+      } else {
+        title='Coupe de poids brutale';
+        text=`Perte de ${wc.cutKg}kg (${wc.cutPct.toFixed(1)}% du poids de forme) dans le sauna — un enfer absolu. Déficit sévère de cardio et de force ce soir.`;
+        G.fight.malus={cardio:-15,strength:-12,durability:-10};
+      }
+    }
+  } else if(type==='minor_injury'){
     title='Pépin physique';
     text='Mauvaise torsion du genou lors du dernier sparring. Rien qui n\u2019empêche de combattre, mais vous allez le sentir dans l\u2019octogone.';
     G.fight.malus={footSpeed:-15,explosiveness:-12};
@@ -443,12 +396,12 @@ function evaluateProOffer(f, res, oppRank){
   const upset=oppRank<=10 && res.method!=='Décision';
   let threshold=35; if(f.age<=20) threshold=55; if(f.age>=23) threshold=25;
   if(hypeScore>=threshold || upset || (rnd()<0.05 && hypeScore>15)){
-    let msg=''; const fastTrack=upset||finishes>=8;
+    let msg='';
     if(upset) msg='Ton finish retentissant sur un membre du Top 10 national a fait le tour des réseaux. Les promoteurs frappent à la porte.';
     else if(finishes>=8) msg=`Avec ton style ultra-spectaculaire (${finishes} finitions) et ta réputation de tueur, le public pro te réclame malgré tes ${f.L} défaites.`;
     else if(f.age<=20) msg=`Tu n\u2019as que ${f.age} ans, mais ta maturité dans la cage affole les recruteurs régionaux. Tu es un prospect majeur.`;
     else msg='Tes résultats réguliers et ton classement sur le circuit IMMAF t\u2019ouvrent enfin les portes du monde professionnel.';
-    return { forced:false, msg, fastTrack };
+    return { forced:false, msg };
   }
   return null;
 }
@@ -616,17 +569,19 @@ function scr_draft(){ const pool=G.arcade.pool;
    <span class="eyebrow mono" style="color:var(--blood)">DRAFT ARCADE // GAUNTLET</span></div>
    <p class="lede" style="margin-bottom:32px;font-size:15px">Survivez à 5 combats d\u2019affilée. La défaite est éliminatoire. Sélectionnez votre profil tactique.</p>`;
   pool.forEach((p,i)=>{
-    h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-      <div class="meta-strip"><div><span>Style</span><b>${p.styleLabel}</b></div></div>
-      <div class="hero-name">${p.nick} ${p.flag}</div>
-      <div class="narr" style="margin:10px 0 0;position:relative;z-index:2"><blockquote style="font-size:14px">« ${p._perk||''} »</blockquote></div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;position:relative;z-index:2" class="mono">
-        <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">STRK</span><b style="font-size:18px">${Math.round((p.attrs.jab+p.attrs.cross+p.attrs.hook)/3)}</b></div>
-        <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">GRAP</span><b style="font-size:18px">${Math.round((p.attrs.takedown+p.attrs.submission+p.attrs.topControl)/3)}</b></div>
-        <div style="background:var(--panel2);border:1px solid var(--gold-d);padding:8px 0;text-align:center"><span class="stat-lbl">PUIS</span><b style="font-size:18px" class="gold">${p.attrs.power}</b></div>
-        <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">CARDIO</span><b style="font-size:18px">${p.attrs.cardio}</b></div>
+    h+=`<div style="margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h3 class="disp" style="margin:0;font-size:28px;text-transform:uppercase">${p.nick} ${p.flag}</h3>
+        <span class="mono muted">${p.styleLabel}</span>
       </div>
-      <button class="btn" style="border-color:var(--text);position:relative;z-index:2" onclick="CL.selectDraft(${i})">SÉLECTIONNER CE PROFIL</button>
+      <div style="margin:8px 0 16px 0;font-family:'Fraunces';font-style:italic;color:var(--muted);font-size:14.5px">« ${p._perk||''} »</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0" class="mono">
+        <div style="background:var(--panel2);padding:8px 0;text-align:center"><span class="muted" style="font-size:10px;display:block">STRK</span><b style="font-size:18px">${Math.round((p.attrs.jab+p.attrs.cross+p.attrs.hook)/3)}</b></div>
+        <div style="background:var(--panel2);padding:8px 0;text-align:center"><span class="muted" style="font-size:10px;display:block">GRAP</span><b style="font-size:18px">${Math.round((p.attrs.takedown+p.attrs.submission+p.attrs.topControl)/3)}</b></div>
+        <div style="background:var(--panel2);padding:8px 0;text-align:center;border-bottom:2px solid var(--blood)"><span class="muted" style="font-size:10px;display:block">PUIS</span><b style="font-size:18px">${p.attrs.power}</b></div>
+        <div style="background:var(--panel2);padding:8px 0;text-align:center"><span class="muted" style="font-size:10px;display:block">CARDIO</span><b style="font-size:18px">${p.attrs.cardio}</b></div>
+      </div>
+      <button class="btn" style="border-color:var(--text)" onclick="CL.selectDraft(${i})">SÉLECTIONNER CE PROFIL</button>
     </div>`;
   });
   h+=`<button class="btn ghost mt" style="border:none;color:var(--muted)" onclick="CL.go('title')">← Annuler</button></div>`;
@@ -634,37 +589,32 @@ function scr_draft(){ const pool=G.arcade.pool;
 }
 function scr_gameover(){ const a=G.arcade, f=G.f; const isVictory=a.streak>=a.target;
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
-     <div class="hero-name" style="color:${isVictory?'var(--gold)':'var(--loss)'}">${isVictory?'CHAMPION ARCADE':'R.I.P.'}<em style="color:var(--muted)">${isVictory?'Survivant du Gauntlet':'Fin de la run'}</em></div>
+   <div style="background:${isVictory?'var(--text)':'var(--blood)'};color:${isVictory?'var(--bg)':'#fff'};padding:24px;text-align:center;margin:0 -16px 32px -16px;border-top:4px solid var(--line);border-bottom:4px solid var(--line)">
+     <h2 class="disp" style="margin:0;font-size:48px">${isVictory?'CHAMPION ARCADE':'R.I.P.'}</h2>
+     <div class="mono" style="margin-top:8px;letter-spacing:.1em">${isVictory?'SURVIVANT DU GAUNTLET':'FIN DE LA RUN'}</div>
    </div>
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
-     <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
-     <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
-     <div class="stat-band">
-       <div><span class="stat-big hot">${a.streak}/${a.target}</span><span class="stat-lbl">Victoires</span></div>
-     </div>
+   <div style="border-left:4px solid ${isVictory?'var(--text)':'var(--blood)'};padding-left:16px;margin-bottom:40px">
+     <h3 class="disp" style="font-size:32px;margin:0 0 8px 0">${esc(f.nick||f.name)} ${f.flag}</h3>
+     <p class="mono muted" style="font-size:14px;margin:0">PROFIL : ${(f.styleLabel||'').toUpperCase()}</p>
+     <p class="mono" style="font-size:14px;margin:16px 0 0 0">SCORE : <b style="font-size:24px;color:${isVictory?'var(--text)':'var(--blood)'}">${a.streak}/${a.target}</b> VICTOIRES</p>
    </div>
-   <div class="narr"><blockquote>${isVictory?`« Contre toute attente, il a marché sur l\u2019algorithme. 5 cadavres laissés dans la cage. Le contrat est rempli. »`:`« Le combat de trop. L\u2019ascension s\u2019arrête net sur la toile de l\u2019octogone. Les lumières s\u2019éteignent. »`}</blockquote></div>
-   <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
+   <div style="font-family:'Fraunces';font-style:italic;font-size:18px;color:var(--muted);margin-bottom:48px">
+     ${isVictory?`« Contre toute attente, il a marché sur l\u2019algorithme. 5 cadavres laissés dans la cage. Le contrat est rempli. »`:`« Le combat de trop. L\u2019ascension s\u2019arrête net sur la toile de l\u2019octogone. Les lumières s\u2019éteignent. »`}
+   </div>
+   <button class="btn" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
    <button class="btn ghost mt" onclick="CL.go('title')">${isVictory?'RETOURNER DANS L\u2019OMBRE':'ACCEPTER LA DÉFAITE'}</button>
    </div>`; }
 function scr_arcadehub(){ const f=G.f, a=G.arcade;
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
-   <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur ce run</em></div>
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:20px">
-     <div class="eyebrow mb">Prochain adversaire</div>
-     <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
-     <div class="muted small mt">${a.opponent.styleLabel} · ${a.opponent.age} ans</div></div>
+   <h2 class="disp big" style="font-size:36px">${a.streak} / ${a.target}</h2>
+   <p class="lede">${f.nick} ${f.flag} — ${recordStr(f)} sur ce run</p>
+   <div class="card" style="text-align:left"><div class="eyebrow mb">Prochain adversaire</div>
+     <div class="disp" style="font-size:22px">${esc(a.opponent.name)} ${a.opponent.flag}</div>
+     <div class="muted small mt">${a.opponent.styleLabel} · ${a.opponent.age} ans · Overall ${a.opponent.overall}</div></div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run</button></div>`; }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: TITLE_ELIGIBLE] — condition UNIQUE, partagée par genOpponents()
-   et fightKind(). Avant : les deux vérifiaient des choses différentes
-   (streak vs orgWins), ce qui permettait de battre le vrai champion sans que
-   le combat soit jamais reconnu comme un combat de titre. ==== */
-function isTitleEligible(f){ return f.org>=1 && ((f.streak||0)>=3 || divRank(f)<=2); }
-/* ==== [FIN ANCRE] ==== */
-function fightKind(){ const f=G.f; if(f.champion) return 'defense'; if(isTitleEligible(f)) return 'title'; return 'normal'; }
+function fightKind(){ const f=G.f; if(f.champion) return 'defense'; if(f.org>=4 && ((f.orgWins||0)>=3 || divRank(f)<=2)) return 'title'; return 'normal'; }
 
 function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // ==== [ANCRE: RANGS_AVANT] — capturés avant simulateFight/applyResult, car la
@@ -710,7 +660,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(win) purse+=basePurse;
   if(win && !res.method.startsWith('Déc')) purse+=50;
   if(G.f.champion) purse*=2.5;
-  if(G.f.org===6) purse*=3.0; // Ultimate Rim paie énormément
+  if(G.f.org===6) purse*=3.0; // Global Fortune paie énormément
   G.f.earnings=(G.f.earnings||0)+purse;
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: RIVALITE] — une défaite, ou une décision très serrée, crée une animosité ====
@@ -739,8 +689,8 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const finish=!res.method.startsWith('Déc');
   // titre
   if(win && kind==='title'){
-    G.f.champion=(G.f.org>=5?'monde':G.f.org===4?'europe':G.f.org===3?'national':G.f.org===2?'regional':'local'); G.f.titles++; G.roster.forEach(o=>o.champion=null);
-    milestone='🏆 CEINTURE '+orgDisplayName(G.f).toUpperCase();
+    G.f.champion=(G.f.org>=5?'monde':'europe'); G.f.titles++; G.roster.forEach(o=>o.champion=null);
+    milestone=(G.f.org>=5?'🏆 CEINTURE MONDIALE':'🥈 CEINTURE EUROPÉENNE');
     recordTitleChange(G.f.org,G.f.divName,G.f.name,opp.name);
   }
   else if(win && kind==='defense'){ G.f.defenses++; milestone='Titre défendu ('+G.f.defenses+')'; recordTitleDefense(G.f.org,G.f.divName,G.f.name); }
@@ -756,7 +706,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // vieillissement (1 an ~ 2-4 combats) — rythme RÉEL inchangé (RI(2,4), pas un cycle fixe)
   let endOfSeason=false;
   G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(2,4)){ applyAging(G.f); G.f._fy=0; endOfSeason=true;
-    // ==== [ANCRE: SANTE_GFL] — Ultimate Rim : suivi médical premium, régénère
+    // ==== [ANCRE: SANTE_GFL] — Global Fortune : suivi médical premium, régénère
     // le menton/résistance. Exception NARRATIVE délibérée à la règle "le menton
     // ne monte jamais" (habituellement réservée à la génétique) — approuvée
     // explicitement comme le privilège propre à cette ligue. ====
@@ -768,7 +718,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // ==== [ANCRE: CIRCUIT_AMATEUR] — remplace la promotion automatique org 0->1
   // par une offre de contrat pro (spectacle > ratio propre). Au-delà (org>=1),
   // la logique de promotion existante (canPromote) est inchangée, sauf à org 4
-  // (Continentale) où elle bascule vers le dilemme Pacific Championship/Ultimate Rim.
+  // (Ligue européenne) où elle bascule vers le dilemme Apex/Global Fortune.
   // Au-delà (org 5 ou 6), canPromote n'est plus jamais appelée : ligue terminale.
   let proOffer=null, topTierOffer=false;
   if(G.f.org===0){
@@ -778,26 +728,11 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       G.f.amateurRivals=G.f.amateurRivals||[];
       if(!G.f.amateurRivals.find(r=>r.id===opp.id)) G.f.amateurRivals.push(opp);
     }
-    // ==== [ANCRE: AMA_TITLE_RESOLVE] — si ce combat était le combat de
-    // championnat amateur en attente, on le résout avant tout le reste. ====
-    if(G.pendingAmaTitle){
-      const cfg=G.pendingAmaTitle; G.pendingAmaTitle=null;
-      if(win){
-        G.f.amaTitles=G.f.amaTitles||[]; G.f.amaTitles.push(cfg.id);
-        G.f.rankBoost=(G.f.rankBoost||0)+100;
-        milestone=`🏅 Ceinture ${cfg.label} remportée !`;
-        proOffer=evaluateProOffer(G.f,res,oppRankBefore);
-      } else { milestone=milestone||`Finale ${cfg.label} perdue.`; }
-    } else {
-      const newCfg=checkAmaChampionship(G.f);
-      if(newCfg){ G.pendingAmaTitle=newCfg; milestone=milestone||`${newCfg.label} : tu es repéré pour la finale !`; }
-    }
-    // ==== [FIN ANCRE] ====
-    if(win || G.f.age>=26){ proOffer=proOffer||evaluateProOffer(G.f,res,oppRankBefore); }
-  } else if(G.f.org<5 && !G.f.champion){
+    if(win || G.f.age>=26){ proOffer=evaluateProOffer(G.f,res,oppRankBefore); }
+  } else if(G.f.org<5){
     if(canPromote(G.f)){
       if(G.f.org===4){ topTierOffer=true; }
-      else { G.f.org++; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]); G.roster=makeOrgRoster(G.f,G.roster); milestone=milestone||('Promotion : '+orgDisplayName(G.f)); }
+      else { G.f.org++; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.roster=makeOrgRoster(G.f,G.roster); milestone=milestone||('Promotion : '+ORGS[G.f.org]); }
     }
   }
   // ==== [FIN ANCRE] ====
@@ -823,47 +758,23 @@ function earnNickname(f){ const a=f.attrs;
 }
 
 /* ------------------------------ succès ------------------------------------ */
-/* ==== [ANCRE: SVG_ICONS] — width/height en 1em (pas 24 fixe) : hérite du
-   font-size du conteneur. Sans ça, la légende de fin de carrière (font-size:60px)
-   afficherait une icône minuscule 24px au lieu de remplir l'espace comme le
-   faisait l'emoji. Les .ico des listes de succès (font-size:19px en CSS)
-   héritent aussi correctement de cette façon. ==== */
-const SVG = {
-  glove: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 6l-6 6M7 17l-4 4M21 3l-4 4M8 12a4 4 0 0 0-4 4c0 2 2 4 4 4s4-2 4-4a4 4 0 0 0-4-4zM16 4a4 4 0 0 0-4 4c0 2 2 4 4 4s4-2 4-4a4 4 0 0 0-4-4z"/></svg>`,
-  pro: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-  medal: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>`,
-  crown: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="2 4 5 16 12 22 19 16 22 4 17 9 12 4 7 9 2 4"/></svg>`,
-  fire: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
-  ko: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
-  sub: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>`,
-  skill: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
-  dna: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3c0 4 12 4 12 8s-12 4-12 8M18 3c0 4-12 4-12 8s12 4 12 8"/></svg>`,
-  skull: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="M12.5 17l-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg>`,
-  web: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M4.9 19.1l14.2-14.2"/></svg>`,
-  diamond: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 13L2 9Z"/></svg>`,
-  goat: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><circle cx="12" cy="11" r="3"/></svg>`,
-  veteran: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
-  star: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
-  hammer: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4l-4 4M21.5 2.5a2.12 2.12 0 0 0-3 0L3 18l3 3 15.5-15.5a2.12 2.12 0 0 0 0-3z"/></svg>`
-};
 const ACH=[
- {id:'debut',cat:'Carrière & Titres',ico:SVG.glove,h:'Baptême',d:'Gagner ton 1er combat',t:f=>f.W>=1||f.amaRec},
- {id:'pro',cat:'Carrière & Titres',ico:SVG.pro,h:'Passage pro',d:'Devenir professionnel',t:f=>f.stage==='pro'},
- {id:'euro',cat:'Carrière & Titres',ico:SVG.medal,h:'Roi d\u2019Europe',d:'Ceinture européenne',t:f=>f.titles>=1&&f._euro},
- {id:'world',cat:'Carrière & Titres',ico:SVG.crown,h:'Champion du monde',d:'Ceinture mondiale',t:f=>f._world},
- {id:'defend5',cat:'Carrière & Titres',ico:SVG.crown,h:'Dynastie',d:'5 défenses de titre',t:f=>f.defenses>=5},
- {id:'undef',cat:'Carrière & Titres',ico:SVG.diamond,h:'L\u2019Invaincu',d:'Champion sans défaite pro',t:f=>f._world&&f.L===0},
- {id:'ko1',cat:'Finitions & Séries',ico:SVG.ko,h:'Bonne nuit',d:'Gagner par KO',t:f=>f.ko>=1},
- {id:'sub1',cat:'Finitions & Séries',ico:SVG.sub,h:'Le piège',d:'Gagner par soumission',t:f=>f.sub>=1},
- {id:'streak8',cat:'Finitions & Séries',ico:SVG.fire,h:'Intouchable',d:'8 victoires d\u2019affilée',t:f=>f.streak>=8},
- {id:'koking',cat:'Finitions & Séries',ico:SVG.skull,h:'Machine à KO',d:'12 victoires par KO',t:f=>f.ko>=12},
- {id:'subking',cat:'Finitions & Séries',ico:SVG.web,h:'Le finisseur du sol',d:'12 soumissions',t:f=>f.sub>=12},
- {id:'skill3',cat:'Technique & Héritage',ico:SVG.skill,h:'Arsenal secret',d:'Débloquer 3 compétences',t:f=>f.skills.length>=3},
- {id:'skill8',cat:'Technique & Héritage',ico:SVG.dna,h:'Prodige technique',d:'Débloquer 8 compétences',t:f=>f.skills.length>=8},
- {id:'legend',cat:'Technique & Héritage',ico:SVG.goat,h:'Légende vivante',d:'Mondial + 5 défenses',t:f=>f._world&&f.defenses>=5},
- {id:'vet',cat:'Technique & Héritage',ico:SVG.veteran,h:'Vétéran',d:'30 combats pro',t:f=>f.stage==='pro'&&(f.W+f.L+f.D)>=30},
+ {id:'debut',ico:'🥊',h:'Baptême',d:'Gagner ton 1er combat',t:f=>f.W>=1||f.amaRec},
+ {id:'pro',ico:'📇',h:'Passage pro',d:'Devenir professionnel',t:f=>f.stage==='pro'},
+ {id:'ko1',ico:'💥',h:'Bonne nuit',d:'Gagner par KO',t:f=>f.ko>=1},
+ {id:'sub1',ico:'🐍',h:'Le piège',d:'Gagner par soumission',t:f=>f.sub>=1},
+ {id:'euro',ico:'🥈',h:'Roi d\u2019Europe',d:'Ceinture européenne',t:f=>f.titles>=1&&f._euro},
+ {id:'world',ico:'🏆',h:'Champion du monde',d:'Ceinture mondiale',t:f=>f._world},
+ {id:'streak8',ico:'🔥',h:'Intouchable',d:'8 victoires d\u2019affilée',t:f=>f.streak>=8},
+ {id:'defend5',ico:'👑',h:'Dynastie',d:'5 défenses de titre',t:f=>f.defenses>=5},
+ {id:'skill3',ico:'✨',h:'Arsenal secret',d:'Débloquer 3 compétences',t:f=>f.skills.length>=3},
+ {id:'skill8',ico:'🧬',h:'Prodige technique',d:'Débloquer 8 compétences',t:f=>f.skills.length>=8},
+ {id:'koking',ico:'☠️',h:'Machine à KO',d:'12 victoires par KO',t:f=>f.ko>=12},
+ {id:'subking',ico:'🕸️',h:'Le finisseur du sol',d:'12 soumissions',t:f=>f.sub>=12},
+ {id:'undef',ico:'💎',h:'L\u2019Invaincu',d:'Champion sans défaite pro',t:f=>f._world&&f.L===0},
+ {id:'legend',ico:'🐐',h:'Légende vivante',d:'Mondial + 5 défenses',t:f=>f._world&&f.defenses>=5},
+ {id:'vet',ico:'🎖️',h:'Vétéran',d:'30 combats pro',t:f=>f.stage==='pro'&&(f.W+f.L+f.D)>=30},
 ];
-/* ==== [FIN ANCRE] ==== */
 function checkAch(){ G.ach=G.ach||[]; if(G.f.champion==='monde')G.f._world=true; if(G.f.champion==='europe')G.f._euro=true;
   const got=[]; for(const a of ACH){ if(!G.ach.includes(a.id)&&a.t(G.f)){ G.ach.push(a.id); got.push(a); } } return got; }
 
@@ -915,41 +826,34 @@ function scr_create(){ const d=G.draft, divs=DIVISIONS[d.gender];
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 
 function scr_hub(){ const f=G.f; const champ=f.champion;
-  const msgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--loss);background:var(--panel2)"><div class="small" style="color:var(--loss)">${esc(G.lastMsg)}</div></div>`:'';
-  if(G.lastMsg) G.lastMsg=null;
   const injuryHtml=f.injury?`<div class="card gold-b glass" style="border-color:var(--loss);margin-bottom:16px">
      <span class="eyebrow mb" style="color:var(--loss)">⚠ SUSPENSION MÉDICALE</span>
      <div class="disp" style="font-size:18px">${esc(f.injury.name)}</div>
      <div class="muted small mt">Indisponible : encore ${f.injury.left} combat${f.injury.left>1?'s':''}</div>
      <button class="btn mt" style="width:100%;border-color:var(--loss);color:var(--loss)" onclick="CL.recoverInjury()">Se soigner et avancer</button>
    </div>`:'';
-  const declineHtml=(!f.injury && isDeclining(f))?`<div class="mono small" style="color:var(--loss);margin-top:6px">📉 Déclin athlétique en cours</div>`:'';
+  const declineHtml=(!f.injury && isDeclining(f))?`<div class="mono small" style="color:var(--loss);margin-top:2px">📉 Déclin athlétique en cours</div>`:'';
   const fightBtnHtml=f.injury
     ?`<button class="btn ghost" style="font-size:20px;padding:18px;opacity:.5;cursor:not-allowed" disabled>Inapte au combat</button>`
     :`<button class="btn primary" style="font-size:20px;padding:18px" onclick="CL.fightSelect()">Trouver un combat</button>`;
-  const rankTag=champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0||divRank(f)>15?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`);
-  const streakTag=f.streak>=3?`<span class="tag2">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
-  const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
   return `<div class="scr">
    <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
-     <span class="eyebrow mono" onclick="CL.theme()" style="cursor:pointer">ID:${(''+f.id).padStart(4,'0')} // ${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()} ${G.theme==='light'?'🌙':'☀️'}</span>
+     <span class="eyebrow mono" onclick="CL.theme()" style="cursor:pointer">ID:${(''+f.id).padStart(4,'0')} // ${ORGS[f.org].toUpperCase()} // ${f.divName.toUpperCase()} ${G.theme==='light'?'🌙':'☀️'}</span>
      <span class="eyebrow mono gold">${f.earnings?f.earnings.toFixed(0)+'K $':'0 $'}</span>
    </div>
-   ${msgHtml}
    ${injuryHtml}
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-     <div class="meta-strip">
-       <div><span>Dossier</span><b>#${(''+f.id).padStart(4,'0')}</b></div>
-       <div><span>Palier</span><b>${orgDisplayName(f)}</b></div>
-       <div><span>Division</span><b>${f.divName}</b></div>
-       <div style="margin-left:auto"><span>Gains</span><b class="gold">${f.earnings?f.earnings.toFixed(0)+'K $':'0 $'}</b></div>
+   <div class="glass mwash" style="position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--panel2);border:1px solid var(--line);padding:14px;margin-bottom:16px">
+     <div style="position:relative;z-index:2">
+       <div class="fh"><div class="nm" style="font-size:clamp(28px,8vw,40px);letter-spacing:-.02em">${esc(f.name)}</div><div class="fl" style="font-size:20px">${f.flag}</div></div>
+       ${f.nick?`<div class="nick" style="font-size:15px">« ${f.nick} »</div>`:''}
+       <div class="mono small muted" style="margin-top:6px">${f.styleLabel.toUpperCase()} · ${f.age} ANS</div>
+       <div class="mono small" style="margin-top:2px">${champ?`<b class="gold">${champ==='monde'?'CHAMP. MONDE':'CHAMP. EUROPE'}</b>`:((f.W+f.L+(f.D||0))===0?'RANG: NR':`RANG: #${divRank(f)}`)}</div>
+       ${declineHtml}
      </div>
-     <div class="hero-name">${esc(f.name)}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
-     <div class="tagrow">${rankTag}${streakTag}${amaTag}</div>
-     ${declineHtml}
-     <div class="stat-band">
-       <div><span class="stat-big">${recordStr(f)}</span><span class="stat-lbl">Palmarès${f.stage==='pro'?' pro':' amateur'}</span></div>
-       <div style="text-align:right"><span class="stat-big hot">${f.ko}</span><span class="stat-lbl">KO / ${f.sub} SUB</span></div>
+     <div style="position:relative;z-index:2;text-align:right;flex:0 0 auto">
+       <div class="rec" style="font-size:30px;margin:0">${recordStr(f)}</div>
+       <div class="muted mono small" style="margin-top:2px">${f.ko} KO / ${f.sub} SUB</div>
+       <div class="muted mono small">${f.amaRec?`AM. ${f.amaRec.W}-${f.amaRec.L}`:'DÉBUTANT'}</div>
      </div>
    </div>
    <div style="margin-bottom:20px">
@@ -957,8 +861,8 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
      ${last5(f)}
    </div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
-     <div><span class="stat-lbl" style="margin-bottom:4px">MORAL</span><div class="gauge2"><span style="width:${clamp(f.morale,0,100)}%"></span></div></div>
-     <div><span class="stat-lbl" style="margin-bottom:4px">FORME</span><div class="gauge2"><span style="width:${clamp(f.form,0,100)}%"></span></div></div>
+     <div><span class="mono small muted" style="display:block;margin-bottom:4px">MORAL</span>${gauge(f.morale)}</div>
+     <div><span class="mono small muted" style="display:block;margin-bottom:4px">FORME</span>${gauge(f.form)}</div>
    </div>
    ${fightBtnHtml}
    <div class="g2"><button class="btn" onclick="CL.go('profile')">Profil</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
@@ -970,13 +874,13 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
 function scr_select(){ const f=G.f;
   let h=`<div class="scr">
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
-     <span class="eyebrow mono">BUREAU DU MATCHMAKER // ${orgDisplayName(f).toUpperCase()}</span>
+     <span class="eyebrow mono">BUREAU DU MATCHMAKER // ${ORGS[f.org].toUpperCase()}</span>
    </div>
    <p class="lede" style="margin-bottom:32px;font-size:15px">Analysez les profils et signez le contrat. L\u2019ordre des propositions dicte le niveau de risque et la récompense au classement.</p>`;
   G.opps.forEach((e,i)=>{ const o=e.o;
     const isRival=(f.rivalId===o.id); const isAmaRival=(!isRival && o.isAmateurRival);
     const rnk=divRank(o); const fightsTot=o.W+o.L+(o.D||0);
-    const rTag=o.champion?'CHAMPION':((fightsTot===0||rnk>15)?'NON CLASSÉ':(rnk===1?'CHALLENGER #1':`RANG #${rnk}`));
+    const rTag=o.champion?'CHAMPION':(fightsTot===0?'NR':(rnk===1?'CHALLENGER #1':`RANG #${rnk}`));
     // Trio de scouting calculé à partir des vrais attributs (pas de "grappling" scalaire dans le moteur)
     const striking=Math.round((o.attrs.jab+o.attrs.cross+o.attrs.hook+o.attrs.kick)/4);
     const grappling=Math.round((o.attrs.takedown+o.attrs.submission+o.attrs.topControl)/3);
@@ -984,22 +888,24 @@ function scr_select(){ const f=G.f;
     const myStr=Math.round((f.attrs.jab+f.attrs.cross+f.attrs.hook+f.attrs.kick)/4);
     const myGrap=Math.round((f.attrs.takedown+f.attrs.submission+f.attrs.topControl)/3);
     const myDan=f.attrs.power;
-    const diffText=(opp,me)=>{ const diff=me-opp; if(diff>=12)return'Ton avantage net';if(diff>=5)return'Léger avantage';if(diff>-5&&diff<5)return'Équilibré';if(diff<=-12)return'Son avantage net';return'Léger désavantage'; };
-    h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-      <div class="meta-strip"><div><span>Record</span><b>${recordStr(o)}</b></div></div>
-      <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
-      <div class="tagrow">
-        ${isRival?'<span class="tag2" style="color:#fff;background:var(--blood);border-color:var(--blood)">RIVAL</span>':''}
-        ${isAmaRival?'<span class="tag2" style="color:var(--sage);border-color:var(--sage)">RIVAL AMATEUR</span>':''}
-        <span class="tag2 hot">${rTag}</span>
+    const diffText=(a,b)=>a>b+12?'Supérieur':(a>b+5?'Avantage':(a<b-12?'Déficit lourd':(a<b-5?'Déficit':'Jeu égal')));
+    h+=`<div style="margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h3 class="disp" style="margin:0;font-size:26px;${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}</h3>
+        <div class="mono small">
+          ${isRival?'<span style="background:var(--blood);color:#fff;padding:2px 6px;margin-right:8px">RIVAL</span>':''}
+          ${isAmaRival?'<span style="border:1px solid var(--sage);color:var(--sage);padding:2px 6px;margin-right:8px">RIVAL AMATEUR</span>':''}
+          <span class="muted">${rTag}</span>
+        </div>
       </div>
-      <div class="stat-band" style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:left">
-        <div><span class="stat-lbl">STRIKING</span><b class="mono" style="font-size:13px">${diffText(striking,myStr)}</b></div>
-        <div><span class="stat-lbl">GRAPPLING</span><b class="mono" style="font-size:13px">${diffText(grappling,myGrap)}</b></div>
-        <div><span class="stat-lbl">DANGER (KO)</span><b class="mono" style="font-size:13px">${diffText(danger,myDan)}</b></div>
+      <div class="sub mono" style="margin:6px 0 16px 0;color:var(--muted);font-size:14px">${o.age} ANS / RECORD: ${recordStr(o)} / ${o.styleLabel.toUpperCase()}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:20px 0;font-size:14px" class="mono">
+        <div style="border-left:3px solid var(--sage);padding-left:8px"><span class="muted" style="font-size:11px;display:block">STRIKING</span><b style="font-size:14px;color:var(--text)">${diffText(striking,myStr)}</b></div>
+        <div style="border-left:3px solid var(--muted);padding-left:8px"><span class="muted" style="font-size:11px;display:block">GRAPPLING</span><b style="font-size:14px;color:var(--text)">${diffText(grappling,myGrap)}</b></div>
+        <div style="border-left:3px solid var(--blood);padding-left:8px"><span class="muted" style="font-size:11px;display:block">DANGER (KO)</span><b style="font-size:14px;color:var(--text)">${diffText(danger,myDan)}</b></div>
       </div>
-      <p class="event-text" style="font-size:13.5px;opacity:.9;margin:12px 0 0;position:relative;z-index:2">${e.read}</p>
-      <button class="btn ${isRival?'primary':''}" style="margin-top:14px;font-size:15px;letter-spacing:.05em;position:relative;z-index:2" onclick="CL.opp(${i})">${isRival?'RÉGLER SES COMPTES':'ACCEPTER LE COMBAT'}</button>
+      <p class="event-text" style="font-size:13.5px;opacity:.9;margin:8px 0 16px">${e.read}</p>
+      <button class="btn ${isRival?'primary':''}" style="margin-top:4px;font-size:15px;letter-spacing:.05em" onclick="CL.opp(${i})">${isRival?'RÉGLER LE CONTENTIEUX':'SIGNER LE CONTRAT'}</button>
     </div>`;
   });
   h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Retour au vestiaire</button></div>`;
@@ -1008,8 +914,7 @@ function scr_select(){ const f=G.f;
 
 function scr_camp(){ const f=G.f;
   const deltaHtml=d=>d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
-     const vague=(k==='morale'||k==='form')?(v>0?`+${lbl}`:`-${lbl}`):(v>0?`Potentiel : ${lbl} ↑`:`Potentiel : ${lbl} ↓`);
-     return `<span class="dlt ${v>=0?'up':'dn'}">${vague}</span>`; }).join('');
+     return `<span class="dlt ${v>=0?'up':'dn'}">${v>0?'+':''}${v} ${lbl}</span>`; }).join('');
   return `<div class="scr"><div class="bar"><span class="eyebrow">Camp d\u2019entraînement</span><span class="eyebrow x" onclick="CL.go('select')">✕</span></div>
    <p class="lede small">Un seul axe avant ce combat. Chaque choix <b>monte et baisse</b> des attributs (bornés par ton potentiel).</p>
    ${G.train.map((t,i)=>`<div class="opp" onclick="CL.train(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
@@ -1018,13 +923,12 @@ function scr_camp(){ const f=G.f;
 
 /* ==== [ANCRE: PLAN_COMBAT] — vestiaire, choix tactique juste avant le combat ==== */
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
-  const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0};
-  const wcHtml={
-    sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage)"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div><div class="small muted">Poids de forme quasi identique à la limite. Repos et concentration parfaits.</div><div class="small" style="color:var(--sage);font-weight:bold">Bonus ce soir : cardio et solidité.</div></div>`,
-    facile:`<div class="card mt" style="border-left:3px solid var(--sage)"><div class="eyebrow mb" style="color:var(--sage)">Cutting facile</div><div class="small muted">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%). Aucun impact ce soir.</div></div>`,
-    normal:`<div class="card mt" style="border-left:3px solid var(--gold)"><div class="eyebrow gold mb">Cutting normal</div><div class="small muted">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%). Dans la norme du métier, aucun impact.</div></div>`,
-    complique:`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2)"><div class="eyebrow mb" style="color:var(--loss)">Cutting compliqué</div><div class="small muted mb">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%).</div><div class="small" style="color:var(--loss);font-weight:bold">Malus ce soir : cardio, force et solidité.</div></div>`,
-  }[cr.tier]||'';
+  const wc=weightCutInfo(f);
+  const wcHtml=wc.cutPct<=5
+    ?`<div class="card mt" style="border-left:3px solid var(--sage)"><div class="eyebrow mb" style="color:var(--sage)">Pesée validée</div><div class="small muted">Poids de forme proche de la limite. Forme optimale ce soir.</div></div>`
+    :wc.cutPct<=10
+    ?`<div class="card mt" style="border-left:3px solid var(--gold)"><div class="eyebrow gold mb">Cutting modéré</div><div class="small muted">${wc.cutKg}kg à perdre (${wc.cutPct.toFixed(1)}%). Léger déficit attendu.</div></div>`
+    :`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2)"><div class="eyebrow mb" style="color:var(--loss)">Cutting extrême</div><div class="small muted mb">${wc.cutKg}kg à perdre (${wc.cutPct.toFixed(1)}% du poids de forme).</div><div class="small" style="color:var(--loss);font-weight:bold">Risque de malus critique ce soir (cardio/force).</div></div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
    <div class="card raise" style="border-color:var(--gold-d)">
      <div class="disp">VS ${esc(opp.name)}</div>
@@ -1047,31 +951,19 @@ function fightLog(res){ if(!res.log||!res.log.length)return '<span class="muted 
 function scr_hof(){ const list=loadHOF();
   return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon · ${list.length} légende(s)</span><span class="eyebrow x" onclick="CL.go('intro')">✕</span></div>
    <h2 class="disp">Tes anciens combattants</h2>
-   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:var(--panel2)">
-      <div class="hero-name" style="font-size:20px">${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
-      <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
-        <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
-      </div>
-      <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div></div>`).join(''):
+   ${list.length?list.map((f,i)=>`<div class="card"><div class="fh"><div class="fh-l"><div class="nm" style="font-size:19px">${i+1}. ${esc(f.name)}</div>${f.nick?`<div class="nick">« ${f.nick} »</div>`:''}<div class="sub">${f.style} · ${f.div} · retraite ${f.age} ans</div></div><div class="fl">${f.flag}</div></div>
+      <div class="rec">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span> <span class="muted small">${f.rank}</span></div>
+      <div class="epis">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div></div>`).join(''):
       '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   let judgesHtml='';
-  if(p.method && p.method.startsWith('Déc') && p.res.judges){
-    const J=p.res.judges;
+  if(p.method && p.method.startsWith('Déc')){
     judgesHtml=`<div class="card gold-b" style="text-align:center">
-      <div class="eyebrow mb">Pointage des juges (10-point must)</div>
-      <div class="duel2" style="justify-content:center;gap:16px">
-        <span class="num ${J.j1[0]>J.j1[1]?'a':'b'}">${J.j1[0]}-${J.j1[1]}</span>
-        <span class="num ${J.j2[0]>J.j2[1]?'a':'b'}">${J.j2[0]}-${J.j2[1]}</span>
-        <span class="num ${J.j3[0]>J.j3[1]?'a':'b'}">${J.j3[0]}-${J.j3[1]}</span>
-      </div>
-      <div class="hr"></div>
-      <div class="mono small muted" style="text-align:left;font-size:10px">
-        <div style="display:flex;justify-content:space-between;color:var(--text);margin-bottom:4px"><span>RND</span><span>J1</span><span>J2</span><span>J3</span><span>SIG</span><span>TD</span><span>KD</span></div>
-        ${(p.res.roundStats||[]).map(rs=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--line)">
-          <span style="color:var(--gold)">R${rs.r}</span><span>${rs.j1[0]}-${rs.j1[1]}</span><span>${rs.j2[0]}-${rs.j2[1]}</span><span>${rs.j3[0]}-${rs.j3[1]}</span><span>${rs.sigA}-${rs.sigB}</span><span>${rs.tdA}-${rs.tdB}</span><span>${rs.kdA}-${rs.kdB}</span>
-        </div>`).join('')}
+      <div class="eyebrow mb">Pointage des juges</div>
+      <div class="disp" style="font-size:26px;letter-spacing:2px">
+        <span class="${p.res.scoreA>p.res.scoreB?'gold':'muted'}">${p.res.scoreA}</span> <span class="muted">–</span>
+        <span class="${p.res.scoreB>p.res.scoreA?'gold':'muted'}">${p.res.scoreB}</span>
       </div></div>`;
   }
   let campHtml='';
@@ -1084,15 +976,11 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
     }).filter(Boolean);
     if(rows.length) campHtml=`<div class="card"><div class="eyebrow mb">Évolution (sur 20)</div><div class="dlts">${rows.join('')}</div></div>`;
   }
-  return `<div class="scr">
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px;text-align:center">
-     <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
-     <div class="hero-name" style="color:${p.win?'var(--gold)':'var(--loss)'}">${p.win?'VICTOIRE':'DÉFAITE'}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
-     <div class="tagrow" style="justify-content:center">
-       ${(p.res.moveName && !p.method.startsWith('Déc'))?`<span class="tag2 hot">${esc(p.res.moveName)}</span>`:''}
-       ${p.planLabel?`<span class="tag2">Tactique : ${p.planLabel}</span>`:''}
-     </div>
-   </div>
+  return `<div class="scr center"><div class="eyebrow">${p.opp.flag} vs ${esc(p.opp.name)}</div>
+   <h1 class="disp big" style="color:${p.win?'var(--gold)':'var(--loss)'};margin:4px 0">${p.win?'VICTOIRE':'DÉFAITE'}</h1>
+   <div class="tag ${p.win?'gold':'blood'}">${p.method}${p.res.round?' · R'+p.res.round:''}</div>
+   ${(p.res.moveName && !p.method.startsWith('Déc'))?`<div class="mono small muted" style="margin-top:4px">Par : ${esc(p.res.moveName)}</div>`:''}
+   ${p.planLabel?`<div class="tag gold" style="margin-top:4px;border-color:var(--gold-d)">Tactique : ${p.planLabel}</div>`:''}
    ${judgesHtml}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div></div></div>`:''}
@@ -1104,34 +992,29 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    <div class="card"><div class="eyebrow mb">Déroulé</div>${fightLog(p.res)}</div>
    ${campHtml}
    ${p.newAch&&p.newAch.length?`<div class="card">${p.newAch.map(a=>`<div class="ach"><span class="ico">${a.ico}</span><b class="gold">${a.h}</b> <span class="muted small">${a.d}</span></div>`).join('')}</div>`:''}
-   ${p.narrative?`<div class="card glass narr" style="background:var(--panel2)"><blockquote>« ${p.narrative.txt(f)} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
+   ${p.narrative?`<div class="card" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="eyebrow mb">${p.narrative.src}</div><div style="font-style:italic;color:var(--text);font-size:14.5px">${p.narrative.txt(f)}</div></div>`:''}
    <button class="btn primary" onclick="CL.${p.forced?'toLegacy':'afterResult'}()">${p.forced?'Voir mon palmarès':'Continuer'}</button></div>`; }
 
 function scr_profile(){ const f=G.f; const g=groupAvg(f);
   const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
      ${ATTR[key].map(a=>`<div class="attr"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]]*5>100?100:f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="CL.go('hub')">✕</span></div>
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-     <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Gabarit</span><b>${f.phys.height}cm / ${f.phys.reach}cm</b></div></div>
-     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
-     <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
-     <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
-     ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
-     ${f.skills.length?`<div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Compétences.</b></div>${f.skills.map(id=>{const sk=SKILLS.find(s=>s.id===id); return `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0;position:relative;z-index:2"><span class="story" style="margin:0;color:${RAR_COLORS[sk.rar]||'var(--gold)'}">${sk.name}</span>${(sk.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;}).join('')}`:''}
+   <div class="card"><div class="fh"><div class="fh-l"><div class="nm">${esc(f.name)}</div>${f.nick?`<div class="nick">« ${f.nick} »</div>`:''}<div class="sub">${f.styleLabel} · ${f.divName} · ${f.age} ans · ${f.phys.height}cm/${f.phys.reach}cm</div></div><div class="fl">${f.flag}</div></div>
+     <div class="story"><b>Origine.</b> ${f.origin}.</div><div class="story"><b>Se bat pour.</b> ${f.motivation}.</div>
+     ${f.skills.length?`<div class="story"><b>Compétences.</b></div>${f.skills.map(id=>{const sk=SKILLS.find(s=>s.id===id); return `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0"><span class="story" style="margin:0;color:${RAR_COLORS[sk.rar]||'var(--gold)'}">${sk.name}</span>${(sk.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;}).join('')}`:''}
    </div>
    ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
-   <div class="rarity-guide"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>
    <button class="btn ghost" onclick="CL.go('hub')">Retour</button></div>`; }
 
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
   let h=`<div class="scr">
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
-     <span class="eyebrow mono" style="letter-spacing:.1em">BASE DE DONNÉES // ${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
+     <span class="eyebrow mono" style="letter-spacing:.1em">BASE DE DONNÉES // ${ORGS[f.org].toUpperCase()} // ${f.divName.toUpperCase()}</span>
    </div>
    <div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
      <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:70px;text-align:right">RECORD</div><div style="width:70px;text-align:right">STATUT</div>
    </div>`;
-  dr.slice(0,16).forEach((o,i)=>{ const isPlayer=(o===f); const rank=i+1;
+  dr.slice(0,13).forEach((o,i)=>{ const isPlayer=(o===f); const rank=i+1;
     let arrow='–'; let arrowColor='var(--muted)';
     if(o.lastRankDelta>0){arrow='▲';arrowColor='var(--win)';} if(o.lastRankDelta<0){arrow='▼';arrowColor='var(--loss)';}
     const fightsTot=o.W+o.L+(o.D||0);
@@ -1153,8 +1036,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
 
 function scr_event(){ const ev=G.activeEvent;
   return `<div class="scr center intro"><div class="eyebrow blood">Événement imprévu</div>
-   <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,36px)">${ev.title}</div>
-   <p class="lede">${ev.text}</p>
+   <h2 class="disp">${ev.title}</h2><p class="lede">${ev.text}</p>
    <button class="btn primary" onclick="CL.handleEvent()">${ev.btn}</button></div>`; }
 
 /* ==== [ANCRE: ECRAN_SAISON] — 'eval' renommé en 'seasonEval' : mot réservé en
@@ -1162,51 +1044,47 @@ function scr_event(){ const ev=G.activeEvent;
 function scr_season(){ const f=G.f; const sData=G.season||{year:1,fights:[]};
   const seasonEval=evaluateSeason(f,sData.fights); const s=seasonEval.stats;
   return `<div class="scr center intro"><div class="eyebrow gold">Bilan Saisonnier</div>
-   <div class="hero-name" style="text-align:center">Année ${sData.year}<em style="color:var(--muted)">${s.W} V — ${s.L} D</em></div>
-   <div class="glass card gold-b" style="margin:20px 0;background:var(--panel2)">
-     <div class="tagrow" style="justify-content:center">
-       <span class="tag2">${s.koW} KO</span><span class="tag2">${s.subW} SUB</span><span class="tag2">${s.decW} DÉC</span>
-     </div>
+   <h2 class="disp big">Année ${sData.year}</h2>
+   <div class="card gold-b" style="margin:20px 0">
+     <div class="disp" style="font-size:22px">Bilan : ${s.W} V - ${s.L} D</div>
+     <div class="muted small mt">${s.koW} KO | ${s.subW} SUB | ${s.decW} DÉC</div>
      <div class="hr"></div>
-     <div class="stat-band" style="justify-content:space-around;text-align:center">
-       <div><span class="stat-big" style="font-size:24px">${s.sigMe}</span><span class="stat-lbl">Frappes</span></div>
-       <div><span class="stat-big" style="font-size:24px">${s.tdMe}</span><span class="stat-lbl">Takedowns</span></div>
-     </div>
+     <div class="g2" style="font-family:'JetBrains Mono';font-size:12px;color:var(--muted)">
+       <div>Frappes : ${s.sigMe}</div><div>Takedowns : ${s.tdMe}</div></div>
    </div>
    <h3 class="disp" style="font-size:18px;color:var(--gold);margin-bottom:10px">Trophées de la Saison</h3>
    ${seasonEval.trophies.length>0?
-     `<div class="tagrow" style="justify-content:center">${seasonEval.trophies.map(t=>`<span class="tag2 hot">🏆 ${t.lbl}</span>`).join('')}</div>`
+     `<div class="pills" style="justify-content:center">${seasonEval.trophies.map(t=>`<span class="pill on" style="margin-bottom:8px">🏆 ${t.lbl}</span>`).join('')}</div>`
      : `<p class="muted small">Saison de transition. Aucun trophée majeur remporté cette année.</p>`}
    <button class="btn primary mt" onclick="CL.nextSeason()">Passer à l\u2019année suivante</button></div>`; }
 /* ==== [FIN ANCRE] ==== */
 
 function scr_contract(){ const f=G.f; const offer=G.pending.proOffer;
   return `<div class="scr center intro"><div class="eyebrow gold">Offre de Contrat Professionnel</div>
-   <div class="hero-name" style="text-align:center">Le Grand Bain</div>
-   <div class="glass card gold-b" style="margin:20px 0;text-align:left;background:var(--panel2)">
-     <div class="narr"><blockquote style="font-size:15px">« ${offer.msg} »</blockquote></div>
+   <h2 class="disp big" style="font-size:32px">Le Grand Bain</h2>
+   <div class="card gold-b" style="margin:20px 0;text-align:left">
+     <p class="lede" style="color:var(--text)">"${offer.msg}"</p>
      <div class="hr"></div>
      <div class="muted small">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
    </div>
-   <button class="btn primary mt" onclick="CL.acceptPro(1)">Signer en ${ORGS[1]}</button>
-   ${offer.fastTrack?`<button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.acceptPro(3)">Signer directement en ${ORGS[3]} (opposition bien plus dure)</button>`:''}
+   <button class="btn primary mt" onclick="CL.acceptPro()">Signer le contrat</button>
    ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus</button>`:''}
    </div>`; }
 
-/* ==== [ANCRE: SOMMET] — dilemme Pacific Championship (gloire) vs Ultimate Rim (argent+santé) ==== */
+/* ==== [ANCRE: SOMMET] — dilemme Apex Legacy (gloire) vs Global Fortune (argent+santé) ==== */
 function scr_toptier(){
   return `<div class="scr center intro"><div class="eyebrow gold">Le Sommet du Monde</div>
-   <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">L\u2019Heure du Choix</div>
+   <h2 class="disp big" style="font-size:30px">L\u2019Heure du Choix</h2>
    <p class="lede">Vous avez conquis l\u2019Europe. Les deux plus grandes organisations mondiales vous offrent un contrat d\u2019exclusivité. Votre décision est définitive.</p>
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--blood-d);text-align:left;padding:16px">
-     <div class="hero-name" style="font-size:22px;color:var(--blood)">PACIFIC CHAMPIONSHIP<em style="color:var(--muted)">Gloire</em></div>
-     <p class="muted small mt" style="position:relative;z-index:2">L\u2019organisation la plus prestigieuse et brutale au monde. Le niveau d\u2019opposition y est effrayant (+4 OVR pour tous les adversaires), mais la gloire y est inégalée (+40% de progression au classement). Les salaires restent standards.</p>
-     <button class="btn primary" style="position:relative;z-index:2" onclick="CL.signTopTier(5)">Signer chez Pacific Championship</button>
+   <div class="card" style="border-color:var(--blood);text-align:left">
+     <h3 class="disp" style="margin:0;color:var(--blood)">APEX LEGACY (Gloire)</h3>
+     <p class="muted small mt">L\u2019organisation la plus prestigieuse et brutale au monde. Le niveau d\u2019opposition y est effrayant (+4 OVR pour tous les adversaires), mais la gloire y est inégalée (+40% de progression au classement). Les salaires restent standards.</p>
+     <button class="btn primary" onclick="CL.signTopTier(5)">Signer chez Apex</button>
    </div>
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--sage);text-align:left;padding:16px;margin-top:15px">
-     <div class="hero-name" style="font-size:22px;color:var(--sage)">ULTIMATE RIM<em style="color:var(--muted)">Argent & Santé</em></div>
-     <p class="muted small mt" style="position:relative;z-index:2">La ligue des millionnaires. Les salaires sont multipliés par 3. Le niveau y est élite mais régulé, et le suivi médical de pointe restaure virtuellement votre intégrité physique (Menton) au fil des mois.</p>
-     <button class="btn" style="background:var(--sage);color:#fff;border:none;position:relative;z-index:2" onclick="CL.signTopTier(6)">Signer chez Ultimate Rim</button>
+   <div class="card" style="border-color:var(--sage);text-align:left;margin-top:15px">
+     <h3 class="disp" style="margin:0;color:var(--sage)">GLOBAL FORTUNE (Argent & Santé)</h3>
+     <p class="muted small mt">La ligue des millionnaires. Les salaires sont multipliés par 3. Le niveau y est élite mais régulé, et le suivi médical de pointe restaure virtuellement votre intégrité physique (Menton) au fil des mois.</p>
+     <button class="btn" style="background:var(--sage);color:#fff;border:none" onclick="CL.signTopTier(6)">Signer chez Global Fortune</button>
    </div></div>`; }
 /* ==== [FIN ANCRE] ==== */
 
@@ -1225,11 +1103,9 @@ function scr_history(){ const f=G.f; const history=(f.history||[]).slice().rever
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
      <span class="eyebrow mono">DOSSIER ATHLÈTE // ARCHIVES PERSONNELLES</span>
    </div>
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:32px">
-     <div class="stat-band" style="border-top:none;padding-top:0;margin-top:0">
-       <div><span class="stat-big" style="font-size:32px">${earningsStr}K $</span><span class="stat-lbl">Gains en carrière</span></div>
-       <div style="text-align:right"><span class="stat-big hot" style="font-size:32px">${winRate}%</span><span class="stat-lbl">Efficacité (win rate)</span></div>
-     </div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px">
+     <div style="border:1px solid var(--line);padding:16px"><div class="mono muted" style="font-size:11px;margin-bottom:8px">GAINS EN CARRIÈRE</div><div class="disp" style="font-size:32px">${earningsStr}K $</div></div>
+     <div style="border:1px solid var(--line);padding:16px"><div class="mono muted" style="font-size:11px;margin-bottom:8px">EFFICACITÉ (WIN RATE)</div><div class="disp" style="font-size:32px">${winRate}%</div></div>
    </div>
    <h3 class="disp" style="font-size:24px;margin-bottom:16px">REGISTRE DES AFFRONTEMENTS</h3>`;
   if(history.length===0){
@@ -1277,7 +1153,7 @@ function scr_beltLineage(){
   } else {
     keys.forEach(key=>{ const reigns=groups[key]; const [org,divName]=[Number(key.split('|')[0]),reigns[0].divName];
       h+=`<div class="card glass mb" style="background:var(--panel2)">
-        <div class="hero-name" style="font-size:18px">${esc(ORGS[org]||'Organisation')}<em style="font-size:13px">${esc(divName)}</em></div>`;
+        <div class="disp gold" style="font-size:16px;margin-bottom:6px">${esc(ORGS[org]||'Organisation')} — ${esc(divName)}</div>`;
       reigns.forEach((r,idx)=>{ const isCurrent=(idx===0);
         h+=`<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:6px 0;font-size:13px">
           <div><b style="color:${isCurrent?'var(--gold)':'var(--text)'}">${esc(r.champion)}</b>
@@ -1293,20 +1169,12 @@ function scr_beltLineage(){
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_ach(){ G.ach=G.ach||[];
-  let h=`<div class="scr">
+  return `<div class="scr">
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
      <span class="eyebrow mono" style="letter-spacing:.1em">DOSSIER // PALMARÈS ${G.ach.length}/${ACH.length}</span>
-   </div>`;
-  const cats=['Carrière & Titres','Finitions & Séries','Technique & Héritage'];
-  cats.forEach(c=>{
-    h+=`<h3 class="disp" style="font-size:18px;margin:24px 0 12px;color:var(--muted)">${c}</h3>`;
-    ACH.filter(a=>a.cat===c).forEach(a=>{ const got=G.ach.includes(a.id);
-      h+=`<div class="ach ${got?'':'lk'}"><span class="ico" style="display:flex;align-items:center;color:var(--gold)">${a.ico}</span><span><b class="${got?'gold':''}">${a.h}</b><div class="muted small">${a.d}</div></span></div>`;
-    });
-  });
-  h+=`<div class="rarity-guide"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>`;
-  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`;
-  return h; }
+   </div>
+   ${ACH.map(a=>{const got=G.ach.includes(a.id);return `<div class="ach ${got?'':'lk'}"><span class="ico">${a.ico}</span><span><b class="${got?'gold':''}">${a.h}</b><div class="muted small">${a.d}</div></span></div>`;}).join('')}
+   <button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`; }
 
 function scr_retire(){ return `<div class="scr center"><div class="eyebrow">Fin de carrière</div><h2 class="disp">Raccrocher les gants ?</h2>
    <p class="lede">Décision définitive. Ton palmarès sera scellé.</p>
@@ -1314,22 +1182,20 @@ function scr_retire(){ return `<div class="scr center"><div class="eyebrow">Fin 
    <button class="btn ghost" onclick="CL.exportSave()">Copier ma sauvegarde</button></div>`; }
 
 function legacyTitle(f){ const s=(f._world?300:0)+(f._euro?120:0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2;
-  if(s>=380)return[SVG.goat,'LÉGENDE ÉTERNELLE']; if(s>=250)return[SVG.crown,'GRAND CHAMPION'];
-  if(s>=140)return[SVG.star,'CHAMPION RESPECTÉ']; if(s>=60)return[SVG.glove,'COMBATTANT ACCOMPLI'];
-  if(s>=10)return[SVG.veteran,'VÉTÉRAN DU CIRCUIT']; return[SVG.hammer,'GUERRIER DE L\u2019OMBRE']; }
+  if(s>=380)return['🐐','LÉGENDE ÉTERNELLE']; if(s>=250)return['🏆','GRAND CHAMPION'];
+  if(s>=140)return['⭐','CHAMPION RESPECTÉ']; if(s>=60)return['🥊','COMBATTANT ACCOMPLI'];
+  if(s>=10)return['🎖️','VÉTÉRAN DU CIRCUIT']; return['🔨','GUERRIER DE L\u2019OMBRE']; }
 function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=epithets(f);
   return `<div class="scr center"><div class="eyebrow">Palmarès scellé</div>
-   <div style="font-size:60px">${ico}</div>
-   <div class="hero-name" style="text-align:center;color:var(--gold)">${rank}<em style="color:var(--muted)">${esc(f.name)}${f.nick?' « '+f.nick+' »':''}</em></div>
-   <div class="glass card" style="background:var(--panel2);text-align:left"><div class="epis" style="position:relative;z-index:2">${ep.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
+   <div style="font-size:60px">${ico}</div><h1 class="disp" style="color:var(--gold);font-size:30px">${rank}</h1>
+   <div class="muted mb">${esc(f.name)}${f.nick?' « '+f.nick+' »':''}</div>
+   <div class="card"><div class="epis">${ep.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
      <div class="hr"></div>
-     <div class="stat-band" style="border-top:none;padding-top:0;margin-top:0;flex-wrap:wrap;gap:16px">
-       <div><span class="stat-big" style="font-size:26px">${recordStr(f)}</span><span class="stat-lbl">Bilan pro</span></div>
-       <div><span class="stat-big hot" style="font-size:26px">${f.ko}/${f.sub}</span><span class="stat-lbl">KO/SUB</span></div>
-       <div><span class="stat-big" style="font-size:26px">${f.defenses}</span><span class="stat-lbl">Défenses</span></div>
-       <div><span class="stat-big" style="font-size:26px">${f.skills.length}</span><span class="stat-lbl">Compét.</span></div>
-     </div>
-     <div class="muted small mt" style="position:relative;z-index:2">${f.motivation}</div></div>
+     <div class="lg"><div><span class="lg-v gold">${recordStr(f)}</span><span class="lg-l">Bilan pro</span></div>
+       <div><span class="lg-v gold">${f.ko}/${f.sub}</span><span class="lg-l">KO/SUB</span></div>
+       <div><span class="lg-v gold">${f.defenses}</span><span class="lg-l">Défenses</span></div>
+       <div><span class="lg-v gold">${f.skills.length}</span><span class="lg-l">Compét.</span></div></div>
+     <div class="muted small mt">${f.motivation}</div></div>
    <button class="btn primary" onclick="CL.newCareer()">Nouvelle carrière</button></div>`; }
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
@@ -1394,7 +1260,7 @@ const CL={
     G.roster=makeOrgRoster(G.f,G.roster);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
     G.screen='hub'; save(); render(); },
-  acceptPro(orgIdx){ turnPro(); G.f.org=orgIdx||1; if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
+  acceptPro(){ turnPro(); G.f.org=1; G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   declinePro(){ G.f.proOfferCooldown=3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus','true'); }catch(e){} }
@@ -1465,57 +1331,28 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
 }
 function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,grounded,top,tap}
   ctx.save();
-  const sh=o.shake?((Math.random()-0.5)*4):0;
+  const sh=o.shake?( (Math.random()-0.5)*4 ):0;
   x+=face*(o.lunge*14)+sh;
   const bob=Math.sin(performance.now()/240 + (face>0?0:1))*2;
-  if(o.grounded){
-    if(!o.top){
-      // Sur le dos (garde) — buste allongé, tête décalée, jambes relevées
-      ctx.translate(x, groundY-5);
-      ctx.fillStyle=o.flash?'#fff':color; ctx.globalAlpha=.95;
-      ctx.beginPath(); ctx.ellipse(0,0,30,9,0,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(-face*25,-2,7,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle=color; ctx.lineWidth=5; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(0,-20); ctx.lineTo(-face*15,-15); ctx.stroke();
-    } else {
-      // Au-dessus (dominant) — buste vertical, bras qui contrôle/frappe
-      ctx.translate(x-face*8, groundY-22);
-      ctx.fillStyle=o.flash?'#fff':color; ctx.strokeStyle=o.flash?'#fff':color;
-      ctx.lineWidth=12; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(0,10); ctx.lineTo(0,-15); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0,-22,8,0,Math.PI*2); ctx.fill();
-      ctx.lineWidth=5;
-      ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(face*15,(o.lunge*15)); ctx.stroke();
-    }
-    if(o.tap){ // halo de danger de soumission, pulsant, sur le combattant en péril
-      const pulse=Math.abs(Math.sin(performance.now()/150))*5;
-      ctx.beginPath(); ctx.arc(0,-15,20+pulse,0,Math.PI*2);
-      ctx.fillStyle='rgba(199,51,42,0.3)'; ctx.fill();
-      ctx.strokeStyle='#C7332A'; ctx.lineWidth=2; ctx.stroke();
-    }
-    ctx.restore(); return;
+  if(o.grounded && !o.top){ // au sol sur le dos
+    ctx.translate(x,groundY-8); ctx.fillStyle=o.flash?'#fff':color; ctx.globalAlpha=.95;
+    ctx.beginPath(); ctx.ellipse(0,0,34,11,0,0,7); ctx.fill(); // corps allongé
+    ctx.beginPath(); ctx.arc(-face*30,-4,8,0,7); ctx.fill(); ctx.restore(); return;
   }
-  ctx.translate(x, groundY-52+bob+(o.fallen?46:0));
-  if(o.fallen) ctx.rotate(face*1.3);
+  let topLean=o.grounded&&o.top?18:0;
+  ctx.translate(x, groundY-52+bob+ (o.fallen?46:0));
+  if(o.fallen){ ctx.rotate(face*1.3); }
+  else if(topLean){ ctx.rotate(-face*0.5); ctx.translate(0,34); }
   const col=o.flash?'#fff':color;
   ctx.strokeStyle=col; ctx.lineWidth=6; ctx.lineCap='round';
   ctx.beginPath(); ctx.moveTo(-3,4); ctx.lineTo(-10,46); ctx.moveTo(4,4); ctx.lineTo(12,46); ctx.stroke();
   ctx.lineWidth=15; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(0,26); ctx.stroke();
-  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(0,-20,9,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(0,-20,9,0,7); ctx.fill();
   ctx.lineWidth=6;
   const reach=o.lunge;
-  // flou de mouvement — traînée du bras avant en pleine frappe
-  if(reach>0.1 && !o.fallen){
-    for(let i=1;i<=3;i++){
-      ctx.globalAlpha=0.25/i;
-      const offset=(reach*20)*(i*0.4);
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(face*(10+(reach*20)-offset), -8+(reach*4)); ctx.stroke();
-    }
-  }
-  ctx.globalAlpha=1;
   ctx.beginPath(); ctx.moveTo(0,2); ctx.lineTo(-face*8,-10); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(face*(10+reach*20), -8+reach*4); ctx.stroke();
-  ctx.fillStyle=o.flash?'#fff':color; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=o.flash?'#fff':color; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,7); ctx.fill();
   ctx.restore();
 }
 function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const W=A.W,H=A.H;
@@ -1538,12 +1375,8 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   // au-dessus de 50 le joueur pousse l'adversaire vers son propre mur.
   const mom=(A.currentMomentum!=null?A.currentMomentum:50);
   const shift=grounded?0:clamp((mom-50)/50,-1,1)*(W*0.07);
-  let xOp=W*0.66+shift, xMe=W*0.34+shift;
-  if(grounded){ const center=W*0.5+shift; xOp=center+(A.curTop==='op'?5:-5); xMe=center+(A.curTop==='me'?-5:5); }
-  const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
-  fighter(ctx, xOp, gY, -1, '#6E8478', {lunge:A.lungeOp*(1-frac),flash:A.flashOp>0,shake:A.shakeOp>0,fallen:A.fall===2,grounded,top:A.curTop==='op',tap:isSubDanger&&A.curTop!=='op'});
-  fighter(ctx, xMe, gY, 1, '#B23B36', {lunge:A.lungeMe*(1-frac),flash:A.flashMe>0,shake:A.shakeMe>0,fallen:A.fall===1,grounded,top:A.curTop==='me',tap:isSubDanger&&A.curTop!=='me'});
-  if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#C7332A'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
+  fighter(ctx, W*0.66+shift, gY, -1, '#6E8478', {lunge:A.lungeOp*(1-frac),flash:A.flashOp>0,shake:A.shakeOp>0,fallen:A.fall===2,grounded,top:A.curTop==='op'});
+  fighter(ctx, W*0.34+shift, gY, 1, '#B23B36', {lunge:A.lungeMe*(1-frac),flash:A.flashMe>0,shake:A.shakeMe>0,fallen:A.fall===1,grounded,top:A.curTop==='me'});
   A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
   A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);
   A.lungeMe*=0.86; A.lungeOp*=0.86;
