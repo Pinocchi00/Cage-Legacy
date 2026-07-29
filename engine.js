@@ -416,7 +416,7 @@ const GENERIC_SUB=['étranglement arrière (rear-naked choke)','guillotine','kim
 const GENERIC_KO=['crochet au menton','direct explosif','uppercut','coup de pied à la tête','genou en clinch','coude au sol','enchaînement de coups au sol'];
 function pickFinishMove(winner,type){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
-  if(owned.length){ const chosenId=pick(owned); return FINISH_MOVES[type].find(m=>m.id===chosenId).name; }
+  if(owned.length && rnd()<0.6){ const chosenId=pick(owned); return FINISH_MOVES[type].find(m=>m.id===chosenId).name; }
   return pick(type==='sub'?GENERIC_SUB:GENERIC_KO);
 }
 function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
