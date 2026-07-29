@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* CAGE LEGACY — thème sombre + clair (registre d'archives, lisible mobile) */
+/* CAGE LEGACY — registre d'archives, thème sombre unique verrouillé */
 :root{
  --bg:#0C0906; --panel:#0C0906; --panel2:#1A150F; --line:#3C3122;
  --text:#E8E1D1; --muted:#8F826D; --faint:#776B58;
@@ -13,23 +13,22 @@
  --sage:#6E8478; --win:#86A87F; --loss:#C7332A;
  --r:0px; --maxw:560px;
 }
-[data-theme="light"]{
- --bg:#EBE5D6; --panel:#F5F1E6; --panel2:#EDE7D8; --line:#D4CDBA;
- --text:#2B2520; --muted:#7A7061; --faint:#B5AC98;
- --blood:#BA342E; --blood-d:#8F241F; --gold:#94721E; --gold-d:#B58D2B;
- --sage:#5C7364; --win:#45824E; --loss:#BA342E;
-}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg)}
 body{color:var(--text);font-family:'Fraunces',Georgia,serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
  background-image:radial-gradient(rgba(0,0,0,.14) 1px,transparent 1px);background-size:4px 4px;transition:background .2s,color .2s;position:relative}
-/* Dégradé chaud et sombre (pas blanc) pour casser l'aplat sans éclaircir davantage */
-[data-theme="light"] body{background-image:radial-gradient(circle at 50% 0%,rgba(120,100,60,.10) 0%,transparent 60%),radial-gradient(rgba(120,100,60,.09) 1px,transparent 1px)}
-/* grain de pellicule — DA v3, discret, jamais plat, au-dessus de tout */
+/* texture halftone (trame + grain de pellicule), esthétique "dossier confidentiel" */
 body::before{
+ content:'';position:fixed;inset:0;pointer-events:none;z-index:998;
+ background-image:radial-gradient(var(--line) 1px,transparent 1.5px);background-size:4px 4px;opacity:.15;mix-blend-mode:multiply;
+}
+body::after{
  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.045;mix-blend-mode:overlay;
  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+/* zones de pouce mobiles : cible tactile minimale sur les éléments de liste */
+.opp,.glass{min-height:64px;margin-bottom:8px}
+.opp:hover{border-color:var(--gold-d);background:var(--line)}
 #app{max-width:var(--maxw);margin:0 auto}
 .scr{padding:16px 15px 40px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -53,7 +52,6 @@ h2.disp{font-size:24px;margin-bottom:12px}
  -webkit-backdrop-filter:blur(10px) saturate(120%);backdrop-filter:blur(10px) saturate(120%);
  box-shadow:0 1px 0 rgba(255,255,255,.05) inset;
 }
-[data-theme="light"] .glass{box-shadow:0 1px 0 rgba(255,255,255,.6) inset}
 /* motion-wash — traînée diagonale teintée --blood, jamais un aplat */
 .mwash{background-image:
  repeating-linear-gradient(115deg, transparent 0 18px, color-mix(in srgb, var(--blood) 8%, transparent) 18px 20px),
