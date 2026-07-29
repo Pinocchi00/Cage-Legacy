@@ -222,6 +222,12 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
   }
   const giA=myGi, giB=STYLES[B.style].grap; const rEdge=reachEdge(A,B);
   let sa=0,sb=0,dmgA=0,dmgB=0,finish=null; const log=[];
+  // ==== [ANCRE: CHIN_TEMPORAIRE] — un round brutal fragilise le menton pour LE
+  // RESTE DE CE COMBAT uniquement (variable locale), jamais l'attribut permanent
+  // du combattant : encaisser un round dur ne doit pas user le menton à vie,
+  // sans que le joueur en soit jamais informé. ====
+  let chinVulnA=0, chinVulnB=0;
+  // ==== [FIN ANCRE] ====
   const st={ // statistiques de combat (dmgHead/Body/Legs : purement narratif, additif)
     A:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0},
     B:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0} };
@@ -244,9 +250,10 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     // ==== [ANCRE: JUGES_10PT_SNAP] ====
     const _startSa=sa, _startSb=sb, _kdA0=st.A.kd, _kdB0=st.B.kd, _sigA0=st.A.sig, _sigB0=st.B.sig, _tdA0=st.A.td, _tdB0=st.B.td;
     // ==== [FIN ANCRE] ====
-    const fatA=clamp((dmgA-a.cardio)*0.06,0,18), fatB=clamp((dmgB-b.cardio)*0.06,0,18);
+    const outA=st.A.sig+st.A.tdAtt*0.6, outB=st.B.sig+st.B.tdAtt*0.6;
+    const fatA=clamp(((dmgA+outA*0.2)-a.cardio)*0.06,0,18), fatB=clamp(((dmgB+outB*0.2)-b.cardio)*0.06,0,18);
     const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
-    if(attA>0.14)st.A.tdAtt++; if(attB>0.14)st.B.tdAtt++;
+    if(attA>0.14)st.A.tdAtt+=Math.floor(attA*8); if(attB>0.14)st.B.tdAtt+=Math.floor(attB*8);
     const tdA=attA>0.14?sigmoid((a.takedown-b.tdd)/15)*attA:0;
     const tdB=attB>0.14?sigmoid((b.takedown-a.tdd)/15)*attB:0;
     let grounded=false,topIsA=false; const gTop=Math.max(tdA,tdB);
@@ -261,7 +268,7 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
       const heartR=1-(bot.heart*0.0016);
       const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/22,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR;
       const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022);
-      const subChB=clamp((bot.submission-top.guard)/42,0,.7)*0.44*(1-top.fightIQ*0.0022);
+      const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022);
       if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
       else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
       else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
@@ -286,15 +293,16 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
       if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
         last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
     } else {
-      const offA=a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14+rEdge-b.footwork*0.2-b.fightIQ*0.14-fatA;
-      const offB=b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14-rEdge-a.footwork*0.2-a.fightIQ*0.14-fatB;
+      const offA=a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA;
+      const offB=b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB;
       const noiseAmt=Math.round(18*noiseWeightMult); const pA=clamp(offA*0.42,0,70)+RI(-noiseAmt,noiseAmt), pB=clamp(offB*0.42,0,70)+RI(-noiseAmt,noiseAmt);
       sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22,0,22);dmgB+=clamp(offA*0.22,0,22);
       st.A.sig+=clamp(Math.round(pA*0.5),0,40); st.B.sig+=clamp(Math.round(pB*0.5),0,40);
-      const koA=clamp((a.power-b.chin)/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016);
-      const koB=clamp((b.power-a.chin)/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016);
-      if(rnd()<koA){finish={by:A,loser:B,method:'KO/TKO',round:r};st.A.kd++;}
-      else if(rnd()<koB){finish={by:B,loser:A,method:'KO/TKO',round:r};st.B.kd++;}
+      const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016);
+      const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016);
+      const isKdA=rnd()<koA*1.5, isKdB=!isKdA&&rnd()<koB*1.5;
+      if(isKdA){ st.A.kd++; if(rnd()<0.6){ finish={by:A,loser:B,method:'KO/TKO',round:r}; } }
+      else if(isKdB){ st.B.kd++; if(rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } }
       // ==== journal granulaire (debout) — 5 sous-événements narratifs, aucun impact sur le calcul ci-dessus ====
       for(let k=0;k<5;k++){
         const isMe=rnd()<(offA/(offA+offB+1));
@@ -318,8 +326,8 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
       if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
         last.text=`[00:00] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
     }
-    if(dmgA>45&&rnd()<.4)A.attrs.chin=clamp(A.attrs.chin-1,1);
-    if(dmgB>45&&rnd()<.4)B.attrs.chin=clamp(B.attrs.chin-1,1);
+    if(dmgA>45&&rnd()<.4)chinVulnA+=1;
+    if(dmgB>45&&rnd()<.4)chinVulnB+=1;
     // ==== [ANCRE: JUGES_10PT_SCORE] — 10-9 par défaut, 10-8 si domination nette, 10-7 en cas extrême ====
     const rSa=sa-_startSa, rSb=sb-_startSb, rDiff=rSa-rSb, kdDiff=(st.A.kd-_kdA0)-(st.B.kd-_kdB0);
     let sA=10,sB=10;
@@ -329,7 +337,9 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     else if(rDiff<-44||kdDiff<=-3){ sA=7;sB=10; }
     else if(rDiff<-32||kdDiff<=-2){ sA=8;sB=10; }
     else if(rDiff<-3||kdDiff===-1){ sA=9;sB=10; }
-    else { sA=10;sB=9; } // 10-10 rarissime en MMA, on tranche toujours légèrement
+    else if(rDiff>0){ sA=10;sB=9; } // bande serrée mais A garde un léger avantage réel
+    else if(rDiff<0){ sA=9;sB=10; } // bande serrée mais B garde un léger avantage réel
+    else { if(rnd()<0.5){sA=10;sB=9;} else {sA=9;sB=10;} } // égalité mathématique exacte, rarissime
     let j1=[sA,sB], j2=[sA,sB], j3=[sA,sB];
     if(Math.abs(rDiff)<=6 && kdDiff===0){
       if(rnd()<0.3) j2=[sB===10?9:10, sA===10?9:10];
@@ -337,6 +347,11 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     }
     j1A+=j1[0];j1B+=j1[1];j2A+=j2[0];j2B+=j2[1];j3A+=j3[0];j3B+=j3[1];
     roundStats.push({r,j1,j2,j3,sigA:st.A.sig-_sigA0,sigB:st.B.sig-_sigB0,tdA:st.A.td-_tdA0,tdB:st.B.td-_tdB0,kdA:st.A.kd-_kdA0,kdB:st.B.kd-_kdB0});
+    // ==== [ANCRE: RECUP_INTER_ROUND] — la minute de repos entre rounds allège
+    // une partie des dégâts accumulés, proportionnellement à la vraie stat de
+    // récupération (pas la fatigue/cardio, qui reste dérivée à chaque round). ====
+    dmgA=Math.max(0,dmgA-(A.attrs.recovery||50)*0.15);
+    dmgB=Math.max(0,dmgB-(B.attrs.recovery||50)*0.15);
     // ==== [FIN ANCRE] ====
   }
   let res;
@@ -348,26 +363,27 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     // toujours cohérentes avec le résultat annoncé. ====
     const votesA=[j1A>j1B,j2A>j2B,j3A>j3B].filter(Boolean).length;
     const votesB=[j1A<j1B,j2A<j2B,j3A<j3B].filter(Boolean).length;
-    const winnerSide=votesA>=votesB?'A':'B';
-    const unanimous=votesA===3||votesB===3;
-    res={winner:winnerSide,method:unanimous?'Décision':'Décision partagée'};
+    if(votesA===votesB){ res={winner:'D',method:'Égalité'}; }
+    else { const winnerSide=votesA>votesB?'A':'B'; const unanimous=votesA===3||votesB===3;
+      res={winner:winnerSide,method:unanimous?'Décision':'Décision partagée'}; }
     // ==== [FIN ANCRE] ====
   }
   res.scoreA=j1A+j2A+j3A; res.scoreB=j1B+j2B+j3B;
   res.judges={j1:[j1A,j1B],j2:[j2A,j2B],j3:[j3A,j3B]}; res.roundStats=roundStats;
   res.log=log; res.stats=st; return res;
 }
-function applyResult(F,opp,res,side){ const win=res.winner===side; const m=res.method;
-  if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(m.startsWith('KO'))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(6,12),0,100); }
+function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!isDraw&&res.winner===side; const m=res.method;
+  if(isDraw){ F.D=(F.D||0)+1; F.morale=clamp(F.morale+RI(-2,2),0,100); }
+  else if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(m.startsWith('KO'))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(6,12),0,100); }
   else { F.L++; F.streak=Math.min(-1,F.streak-1); if(m.startsWith('KO'))F.koLoss++; F.morale=clamp(F.morale-RI(8,16),0,100); }
-  F.form=clamp(F.form+(win?RI(3,8):-RI(5,12)),0,100);
+  F.form=clamp(F.form+(win?RI(3,8):isDraw?0:-RI(5,12)),0,100);
   // ==== [ANCRE: META04_06] — planchers de moral. Le jeu n'a pas de système de
   // popularité distinct : ces deux compétences sont adaptées sur `morale`,
   // le champ existant le plus proche (au lieu d'un f.pop qui n'existe pas). ====
   if(F.skills&&F.skills.includes('meta06')){ if(F.morale<75) F.morale=75; }
   else if(F.skills&&F.skills.includes('meta04')){ if(F.morale<45) F.morale=45; }
   // ==== [FIN ANCRE] ====
-  F.history.push({res:win?'win':'loss',method:m,round:res.round||null,oppId:opp&&opp.id});
+  F.history.push({res:isDraw?'draw':(win?'win':'loss'),method:m,round:res.round||null,oppId:opp&&opp.id});
   if(F.history.length>60)F.history=F.history.slice(-60);
   return win;
 }
