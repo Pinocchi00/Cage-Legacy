@@ -441,16 +441,27 @@ const ORG_FLAVORS=[
 function orgDisplayName(f){ if(f.org===0||f.org>=5) return ORGS[f.org]; return f.orgFlavor||ORGS[f.org]; }
 /* ==== [FIN ANCRE] ==== */
 function canPromote(f){ const n=f.org+1; return n<ORGS.length && (f.orgWins||0)>=3 && p4pScore(f)>=ORG_PROMO_SCORE[n]; }
+/* ==== [ANCRE: P4P_SCORE_80_20] — le classement pesait 100% le palmarès de
+   CARRIÈRE (jamais remis à zéro entre deux paliers pro), alors que seul
+   turnPro() (amateur->pro) réinitialise W/L. Une promotion tier 1->2 gardait
+   donc tout le poids des victoires du tier 1, faisant atterrir un combattant
+   n'ayant jamais combattu dans son nouveau palier à un rang aléatoire du
+   genre #12. Nouvelle formule : 80% palmarès DANS l'orga actuelle (orgWins,
+   défenses, titre — tous déjà remis à zéro à chaque promotion), 20% palmarès
+   de carrière global (élan/réputation qui traverse les paliers). L'amateur
+   (org 0) garde l'ancienne formule à 100% : il n'y a qu'un seul palier, pas
+   de promotion interne à corriger. ==== */
 function p4pScore(f){ const fights=f.W+f.L+f.D;
   if(fights===0) return 0; // statut "non classé" (NR)
-  let base=(f.W*45)+(f.ko*20)+(f.sub*20)-(f.L*35)-(f.koLoss*15);
-  base+=Math.max(0,f.streak)*12;
-  base+=f.defenses*30;
-  base+=(f.champion?50:0);
+  const globalBase=(f.W*45)+(f.ko*20)+(f.sub*20)-(f.L*35)-(f.koLoss*15)+Math.max(0,f.streak)*12;
   const leapfrog=f.rankBoost||0;
-  if(f.org===5) base*=1.4;
-  return Math.max(1, base+leapfrog);
+  if(f.org===0) return Math.max(1, globalBase+f.defenses*30+(f.champion?50:0)+leapfrog);
+  const orgBase=((f.orgWins||0)*40)+f.defenses*30+(f.champion?50:0);
+  let score=orgBase*0.8+globalBase*0.2+leapfrog;
+  if(f.org===5) score*=1.4;
+  return Math.max(1, score);
 }
+/* ==== [FIN ANCRE] ==== */
 function rankPool(list){ return list.slice().sort((x,y)=>p4pScore(y)-p4pScore(x)); }
 function isDeclining(f){ return f.age>=(isHeavy(f)?35:33); }
 function isHeavy(f){ return f.div==='H-heavy'||f.div==='H-lheavy'; }
@@ -488,8 +499,8 @@ function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
    Math.random(). Bornes /1-100 et recalcul de l'overall ajoutés, comme le
    faisait l'ancien rollSkill(). ==== */
 const SKILL_CONSTANTS = {
-  BASE_RATE: 0.042, DROUGHT_INC: 0.005, MYTHIC_CHANCE: 0.0009,
-  MAX_CAREER_SKILLS: 5, AGE_META: 34,
+  BASE_RATE: 0.095, DROUGHT_INC: 0.01, MYTHIC_CHANCE: 0.0009,
+  MAX_CAREER_SKILLS: 9, AGE_META: 34,
 };
 function tirerRarete(){ const roll=rnd()*100;
   if(roll<58.3) return 'C'; if(roll<87.4) return 'R'; if(roll<97.1) return 'E'; return 'L';
