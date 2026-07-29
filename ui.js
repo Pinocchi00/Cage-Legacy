@@ -343,7 +343,7 @@ function compileSeasonStats(f, fights){
     s.kdMe+=ft.st.Me.kd||0; s.kdOp+=ft.st.Op.kd||0;
     const totalSig=(ft.st.Me.sig||0)+(ft.st.Op.sig||0);
     if(totalSig>60 || ft.st.Me.kd+ft.st.Op.kd>=2) s.wars++;
-    if(ft.method.startsWith('Déc') && Math.abs((ft.scoreA||0)-(ft.scoreB||0))<=5) s.closeFights++;
+    if(isDecisionLike(ft.method) && Math.abs((ft.scoreA||0)-(ft.scoreB||0))<=5) s.closeFights++;
   });
   return s;
 }
@@ -482,10 +482,10 @@ function generateNarrativeQuote(f,p){
   tags.push(p.win?'WIN':'LOSS');
   if(p.method.startsWith('KO')) tags.push('KO');
   if(p.method.startsWith('Soum')) tags.push('SUB');
-  if(p.method.startsWith('Déc')) tags.push('DEC');
+  if(isDecisionLike(p.method)) tags.push('DEC');
   if(totalSig>120 || st.A.kd+st.B.kd>=2) tags.push('WAR');
   if(f.stage==='pro' && (f.W+f.L)>=4) tags.push('ESTABLISHED');
-  if(p.method.startsWith('Déc') && totalSig<30 && (st.A.ctrl<2 && st.B.ctrl<2)) tags.push('SNOOZEFEST');
+  if(isDecisionLike(p.method) && totalSig<30 && (st.A.ctrl<2 && st.B.ctrl<2)) tags.push('SNOOZEFEST');
   if(p.win && oppSig<=5) tags.push('FLAWLESS');
   if(p.opp && f.rivalId===p.opp.id) tags.push('RIVAL');
   if(f.age<=22) tags.push('PROSPECT');
@@ -608,7 +608,7 @@ function resolveArcadeFight(){
   { const last=G.f.history[G.f.history.length-1];
     if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank='NR'; last.season=G.arcade.streak+1; } }
   G.fight={kind:'arcade',opp,rounds:3,plan:null};
-  G.pending={res,win,method:res.method,finish:!res.method.startsWith('Déc'),opp:{name:opp.name,flag:opp.flag}};
+  G.pending={res,win,method:res.method,finish:!isDecisionLike(res.method),opp:{name:opp.name,flag:opp.flag}};
   buildTimeline(); G.screen='arena'; save(); render();
 }
 function scr_draft(){ const pool=G.arcade.pool;
@@ -708,14 +708,14 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const basePurse=[0,2,8,25,80,150,400][G.f.org]||0;
   let purse=basePurse;
   if(win) purse+=basePurse;
-  if(win && !res.method.startsWith('Déc')) purse+=50;
+  if(win && !isDecisionLike(res.method)) purse+=50;
   if(G.f.champion) purse*=2.5;
   if(G.f.org===6) purse*=3.0; // Ultimate Rim paie énormément
   G.f.earnings=(G.f.earnings||0)+purse;
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: RIVALITE] — une défaite, ou une décision très serrée, crée une animosité ====
   const scoreDiff=Math.abs((res.scoreA||0)-(res.scoreB||0));
-  if(!win || (res.method.startsWith('Déc') && scoreDiff<=8)){
+  if(!win || (isDecisionLike(res.method) && scoreDiff<=8)){
     if(!G.f._rivalries) G.f._rivalries={};
     G.f._rivalries[opp.id]=(G.f._rivalries[opp.id]||0)+1;
     if(G.f._rivalries[opp.id]>=2) G.f.rivalId=opp.id;
@@ -736,7 +736,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   // ==== [FIN ANCRE] ====
   G.f.orgWins=win?((G.f.orgWins||0)+1):Math.max(0,(G.f.orgWins||0)-1);
-  const finish=!res.method.startsWith('Déc');
+  const finish=!isDecisionLike(res.method);
   // titre
   if(win && kind==='title'){
     G.f.champion=(G.f.org>=5?'monde':G.f.org===4?'europe':G.f.org===3?'national':G.f.org===2?'regional':'local'); G.f.titles++; G.roster.forEach(o=>o.champion=null);
@@ -775,7 +775,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.f.org===0){
     if((G.f.proOfferCooldown||0)>0) G.f.proOfferCooldown--;
     const warThisFight=(res.stats.A.sig+res.stats.B.sig>60) || (res.stats.A.kd+res.stats.B.kd>=2);
-    if(oppRankBefore<=15 && (!win || res.method.startsWith('Déc') || warThisFight)){
+    if(oppRankBefore<=15 && (!win || isDecisionLike(res.method) || warThisFight)){
       G.f.amateurRivals=G.f.amateurRivals||[];
       if(!G.f.amateurRivals.find(r=>r.id===opp.id)) G.f.amateurRivals.push(opp);
     }
@@ -1037,7 +1037,7 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
 /* ==== [ANCRE: NARRATION] — log texte à partir de res.log/res.stats, déjà calculés ==== */
 function fightLog(res){ if(!res.log||!res.log.length)return '<span class="muted small">Décision aux cartes.</span>';
   const rows=res.log.map(L=>`<div class="log-row ${L.finish?'gold':''}"><span class="log-r">R${L.r}</span><span style="flex:1">${L.text||(L.phase==='sol'?'échanges au sol':'échanges debout')}</span></div>`);
-  if(res.method.startsWith('Déc')) rows.push(`<div class="log-row gold"><span class="log-r">R${res.round||3}</span><span style="flex:1">${res.method}${res.detail?' — '+res.detail:''}</span></div>`);
+  if(isDecisionLike(res.method)) rows.push(`<div class="log-row gold"><span class="log-r">R${res.round||3}</span><span style="flex:1">${res.method}${res.detail?' — '+res.detail:''}</span></div>`);
   return `<div class="fight-log" style="max-height:220px;overflow-y:auto;padding-right:5px">${rows.join('')}</div>`; }
 /* ==== [FIN ANCRE] ==== */
 function scr_hof(){ const list=loadHOF();
@@ -1053,7 +1053,7 @@ function scr_hof(){ const list=loadHOF();
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   let judgesHtml='';
-  if(p.method && p.method.startsWith('Déc') && p.res.judges){
+  if(isDecisionLike(p.method) && p.res.judges){
     const J=p.res.judges;
     judgesHtml=`<div class="card gold-b" style="text-align:center">
       <div class="eyebrow mb">Pointage des juges (10-point must)</div>
@@ -1085,7 +1085,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
      <div class="hero-name" style="color:${p.win?'var(--gold)':'var(--loss)'}">${p.win?'VICTOIRE':'DÉFAITE'}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
      <div class="tagrow" style="justify-content:center">
-       ${(p.res.moveName && !p.method.startsWith('Déc'))?`<span class="tag2 hot">${esc(p.res.moveName)}</span>`:''}
+       ${(p.res.moveName && !isDecisionLike(p.method))?`<span class="tag2 hot">${esc(p.res.moveName)}</span>`:''}
        ${p.planLabel?`<span class="tag2">Tactique : ${p.planLabel}</span>`:''}
      </div>
    </div>
@@ -1422,9 +1422,9 @@ function buildTimeline(){
   const log=(res.log&&res.log.length)?res.log:[];
   const beats=log.map(L=>({phase:L.phase,by:L.by,round:L.r,finish:L.finish,method:L.method,
     text:L.text,momentum:L.momentum,snapA:L.snapA,snapB:L.snapB}));
-  if(res.method.startsWith('Déc')) beats.push({phase:'bell',finish:true,method:res.method,round:res.round||3,text:'[00:00] Fin du combat. Décision des juges.'});
+  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:res.round||3,text:'[00:00] Fin du combat. Décision des juges.'});
   let hMeEnd=60,hOpEnd=60;
-  if(res.method.startsWith('Déc')){ const s=res.scoreA+res.scoreB||1; hMeEnd=clamp(20+70*res.scoreA/s,12,92); hOpEnd=clamp(20+70*res.scoreB/s,12,92); }
+  if(isDecisionLike(res.method)){ const s=res.scoreA+res.scoreB||1; hMeEnd=clamp(20+70*res.scoreA/s,12,92); hOpEnd=clamp(20+70*res.scoreB/s,12,92); }
   else { if(meWin){hOpEnd=res.method.startsWith('KO')?4:22; hMeEnd=clamp(45+RI(0,25));} else {hMeEnd=res.method.startsWith('KO')?4:22; hOpEnd=clamp(45+RI(0,25));} }
   ARENA={beats,idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
     hMe:100,hOp:100,stMe:100,stOp:100,hMeEnd,hOpEnd,
@@ -1550,7 +1550,7 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
   const rnd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
   let label = grounded?'SOL':'DEBOUT';
-  if(A.done){ label = A.method.startsWith('Déc')?'AUX POINTS': (A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
+  if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
   ctx.fillText(A.done?label:('ROUND '+rnd+' · '+label), W/2, 20);
   if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }
 }
