@@ -172,7 +172,12 @@ function genOpponents(f){
   const isTitle=(!isDefense && isTitleEligible(f));
   if(isTitle){ const champ=pool.find(o=>o.champion)||pool[0];
     return [{o:champ, read:`Combat de titre. Un seul adversaire possible : le champion. ${tacticalRead(f,champ)}`}]; }
-  if(isDefense){ chosen.push(pool[0],pool[1],pool[2]); }
+  if(isDefense){
+    const r1=pool[0]||pool[1];
+    const rest=pool.slice(1,8).filter(o=>o && o.id!==r1.id);
+    rest.sort(()=>0.5-rnd());
+    chosen.push(r1, rest[0]||pool[1], rest[1]||pool[2]);
+  }
   else {
     const myRank=pool.findIndex(o=>p4pScore(o)<p4pScore(f));
     // rk clampé à un index VALIDE du pool (jamais pool.length) : sinon pool[rk] est
@@ -256,6 +261,8 @@ function chooseTraining(i){ const opt=G.train[i]; const applied=applyDeltas(G.f,
     if(G.f.botchedWeightCuts>=3 && !isTopDivision){
       const divs=DIVISIONS[G.f.gender]; const curIdx=divs.findIndex(d=>d.id===G.f.div); const nextDiv=divs[curIdx+1];
       if(nextDiv){ G.f.div=nextDiv.id; G.f.divName=nextDiv.name; G.f.botchedWeightCuts=0; G.f.champion=null;
+        G.f.orgWins=0; G.f.defenses=0;
+        G.roster=makeOrgRoster(G.f);
         G.lastMsg=`Le corps dit stop. La commission vous interdit de redescendre : monté en ${G.f.divName}.`; }
       else G.lastMsg='Pesée ratée. Le combat est annulé.';
     } else { G.lastMsg=`Pesée ratée (${effPct.toFixed(1)}% du poids de forme) : impossible de descendre à temps. Le combat est annulé.`; }
@@ -678,7 +685,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
    et fightKind(). Avant : les deux vérifiaient des choses différentes
    (streak vs orgWins), ce qui permettait de battre le vrai champion sans que
    le combat soit jamais reconnu comme un combat de titre. ==== */
-function isTitleEligible(f){ return f.org>=1 && (divRank(f)<=2 || ((f.streak||0)>=6 && divRank(f)<=4)); }
+function isTitleEligible(f){ return f.org>=1 && f.streak>0 && (divRank(f)<=2 || ((f.streak||0)>=6 && divRank(f)<=4)); }
 /* ==== [FIN ANCRE] ==== */
 function fightKind(){ const f=G.f; if(f.champion) return 'defense'; if(isTitleEligible(f)) return 'title'; return 'normal'; }
 
@@ -768,7 +775,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   else if(win && kind==='defense'){ G.f.defenses++; milestone='Titre défendu ('+G.f.defenses+')'; recordTitleDefense(G.f.org,G.f.divName,G.f.name); }
   else if(kind==='defense' && res.winner==='D'){ milestone='Titre conservé (match nul)'; }
-  else if(!win && res.winner!=='D' && G.f.champion){ G.f.champion=null; milestone='Titre perdu'; }
+  else if(!win && res.winner!=='D' && G.f.champion){ G.f.champion=null; G.f.defenses=0; milestone='Titre perdu'; }
   // compétence débloquée ?
   const skill=rollSkill(G.f);
   // ==== [ANCRE: SAISON_TRACKING] — enregistrement du combat pour le bilan annuel ====
@@ -794,7 +801,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // la logique de promotion existante (canPromote) est inchangée, sauf à org 4
   // (Continentale) où elle bascule vers le dilemme Pacific Championship/Ultimate Rim.
   // Au-delà (org 5 ou 6), canPromote n'est plus jamais appelée : ligue terminale.
-  let proOffer=null, topTierOffer=false;
+  let proOffer=null, topTierOffer=false, promoOffer=false;
   if(G.f.org===0){
     if((G.f.proOfferCooldown||0)>0) G.f.proOfferCooldown--;
     const warThisFight=(res.stats.A.sig+res.stats.B.sig>60) || (res.stats.A.kd+res.stats.B.kd>=2);
@@ -810,6 +817,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
         G.f.amaTitles=G.f.amaTitles||[]; G.f.amaTitles.push(cfg.id);
         G.f.rankBoost=(G.f.rankBoost||0)+100;
         milestone=`🏅 Ceinture ${cfg.label} remportée !`;
+        recordTitleChange(0, cfg.name, G.f.name, opp.name);
         proOffer=evaluateProOffer(G.f,res,oppRankBefore);
       } else { milestone=milestone||`Finale ${cfg.label} perdue.`; }
     } else {
@@ -821,12 +829,13 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   } else if(G.f.org<5 && !G.f.champion){
     if(canPromote(G.f)){
       if(G.f.org===4){ topTierOffer=true; }
-      else { G.f.org++; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]); G.roster=makeOrgRoster(G.f,G.roster); milestone=milestone||('Promotion : '+orgDisplayName(G.f)); }
+      else if(!G.f.promoCooldown || G.f.promoCooldown<=0){ promoOffer=true; }
     }
   }
+  if(G.f.promoCooldown>0) G.f.promoCooldown--;
   // ==== [FIN ANCRE] ====
   const newAch=checkAch();
-  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,narrative,
+  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,narrative,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
@@ -951,7 +960,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   const fightBtnHtml=f.injury
     ?`<button class="btn ghost" style="font-size:20px;padding:18px;opacity:.5;cursor:not-allowed" disabled>Athlète inapte</button>`
     :`<button class="btn primary" style="font-size:20px;padding:18px" onclick="CL.fightSelect()">Évaluer les contrats (Matchmaking)</button>`;
-  const rankTag=champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0||divRank(f)>15?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`);
+  const rankTag=champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`);
   const streakTag=f.streak>=3?`<span class="tag2">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
   const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
   return `<div class="scr">
@@ -995,7 +1004,7 @@ function scr_select(){ const f=G.f;
   G.opps.forEach((e,i)=>{ const o=e.o;
     const isRival=(f.rivalId===o.id); const isAmaRival=(!isRival && o.isAmateurRival);
     const rnk=divRank(o); const fightsTot=o.W+o.L+(o.D||0);
-    const rTag=o.champion?'CHAMPION':((fightsTot===0||rnk>15)?'NON CLASSÉ':(rnk===1?'CHALLENGER #1':`RANG #${rnk}`));
+    const rTag=o.champion?'CHAMPION':(fightsTot===0?'NON CLASSÉ':(rnk===1?'CHALLENGER #1':`RANG #${rnk}`));
     // Trio de scouting calculé à partir des vrais attributs (pas de "grappling" scalaire dans le moteur)
     const striking=Math.round((o.attrs.jab+o.attrs.cross+o.attrs.hook+o.attrs.kick)/4);
     const grappling=Math.round((o.attrs.takedown+o.attrs.submission+o.attrs.topControl)/3);
@@ -1040,10 +1049,10 @@ function scr_camp(){ const f=G.f;
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0};
   const wcHtml={
-    sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage)"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div><div class="small muted">Poids de forme quasi identique à la limite. Repos et concentration parfaits.</div><div class="small" style="color:var(--sage);font-weight:bold">Bonus ce soir : cardio et solidité.</div></div>`,
-    facile:`<div class="card mt" style="border-left:3px solid var(--sage)"><div class="eyebrow mb" style="color:var(--sage)">Cutting facile</div><div class="small muted">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%). Aucun impact ce soir.</div></div>`,
-    normal:`<div class="card mt" style="border-left:3px solid var(--gold)"><div class="eyebrow gold mb">Cutting normal</div><div class="small muted">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%). Dans la norme du métier, aucun impact.</div></div>`,
-    complique:`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2)"><div class="eyebrow mb" style="color:var(--loss)">Cutting compliqué</div><div class="small muted mb">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%).</div><div class="small" style="color:var(--loss);font-weight:bold">Malus ce soir : cardio, force et solidité.</div></div>`,
+    sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div><div class="small muted" style="margin-top:6px">Poids de forme quasi identique à la limite.</div><div class="small" style="color:var(--sage);font-weight:bold;margin-top:4px">Bonus ce soir : cardio et solidité.</div></div>`,
+    facile:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Cutting facile</div><div class="small muted" style="margin-top:6px">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%).</div><div class="small muted" style="margin-top:4px">Aucun impact ce soir.</div></div>`,
+    normal:`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px"><div class="eyebrow gold mb">Cutting normal</div><div class="small muted" style="margin-top:6px">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%).</div><div class="small muted" style="margin-top:4px">Dans la norme du métier, aucun impact.</div></div>`,
+    complique:`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding-left:14px"><div class="eyebrow mb" style="color:var(--loss)">Cutting compliqué</div><div class="small muted" style="margin-top:6px">${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%).</div><div class="small" style="color:var(--loss);font-weight:bold;margin-top:4px">Malus ce soir : cardio, force et solidité.</div></div>`,
   }[cr.tier]||'';
   return `<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
    <div class="card raise" style="border-color:var(--gold-d)">
@@ -1232,6 +1241,20 @@ function scr_toptier(){
    </div></div>`; }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: ECRAN_PROMO] — la promotion devient un choix du joueur (au lieu
+   d'automatique) : rester chasser la ceinture locale, ou monter tout de suite. ==== */
+function scr_promo(){
+  const f=G.f; const nextOrgFlavor=ORG_FLAVORS[f.org+1]?pick(ORG_FLAVORS[f.org+1]):(ORGS[f.org+1]||'Ligue supérieure');
+  return `<div class="scr center intro"><div class="eyebrow gold">Promotion méritée</div>
+   <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Contrat : ${nextOrgFlavor}</div>
+   <p class="lede mt">Vos performances vous ouvrent les portes d\u2019une ligue supérieure. Monter maintenant, ou rester tenter la ceinture ici ?</p>
+   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);padding:16px;margin-top:24px">
+     <button class="btn primary" style="position:relative;z-index:2" onclick="CL.acceptPromo()">Signer avec ${nextOrgFlavor}</button>
+     <button class="btn ghost mt" style="position:relative;z-index:2" onclick="CL.declinePromo()">Rester dans l\u2019organisation actuelle</button>
+   </div></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: ECRAN_HISTORIQUE] — corrigé par rapport au brouillon : l'ordre
    de stockage réel est chronologique croissant (push, pas unshift) car
    last5() en dépend déjà (slice(-5) = les plus récents) ; on inverse
@@ -1356,7 +1379,7 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,contract:scr_contract,toptier:scr_toptier,
-  draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage};
+  draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo};
 
 /* ============================== RENDER + CL =============================== */
 function render(){ const app=document.getElementById('app'); if(!app)return;
@@ -1407,11 +1430,23 @@ const CL={
       G.arcade.opponent=genArcadeOpponent(G.arcade.streak);
       G.screen='arcadehub'; save(); render(); return;
     }
-    const p=G.pending; G.screen=(p&&p.proOffer)?'contract':(p&&p.topTierOffer)?'toptier':(p&&p.endOfSeason)?'season':'hub'; save(); render(); },
+    const p=G.pending; G.screen=(p&&p.proOffer)?'contract':(p&&p.topTierOffer)?'toptier':(p&&p.promoOffer)?'promo':(p&&p.endOfSeason)?'season':'hub'; save(); render(); },
   startArcade(){ G.arcade={active:true,streak:0,target:5,pool:buildArcadePool()}; G.screen='draft'; save(); render(); },
   selectDraft(i){ G.f=G.arcade.pool[i]; G.arcade.opponent=genArcadeOpponent(0); G.screen='arcadehub'; save(); render(); },
   retryArcade(){ CL.startArcade(); },
   fightArcade(){ resolveArcadeFight(); },
+  acceptPromo(){
+    G.f.org++; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
+    if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
+    G.roster=makeOrgRoster(G.f,G.roster);
+    if(G.pending) G.pending.promoOffer=false;
+    G.screen='hub'; save(); render();
+  },
+  declinePromo(){
+    G.f.promoCooldown=2;
+    if(G.pending) G.pending.promoOffer=false;
+    G.screen='hub'; save(); render();
+  },
   signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; if(G.pending)G.pending.topTierOffer=false;
     G.roster=makeOrgRoster(G.f,G.roster);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
@@ -1590,21 +1625,21 @@ function scr_arena(){ const A=ARENA||{};
        <div id="ar-momentum" style="height:100%;width:50%;background:var(--blood);transition:width .4s ease"></div>
        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--bg)"></div>
      </div>
-     <div class="arena-hud" style="border-bottom:1px dashed var(--line);padding-bottom:16px">
-       <div style="display:flex;flex-direction:column">
+     <div class="arena-hud" style="border-bottom:1px dashed var(--line);padding-bottom:16px;display:flex;justify-content:space-between">
+       <div style="display:flex;flex-direction:column;align-items:flex-start">
          <span class="ah-name blood mono" style="font-size:13px">${esc(A.nmeName||'Toi')}</span>
-         <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
-           <span class="mono" style="font-size:10px;color:var(--muted)">T</span><div id="dm-h" style="width:14px;height:4px;background:var(--sage);transition:background .3s"></div>
-           <span class="mono" style="font-size:10px;color:var(--muted)">C</span><div id="dm-b" style="width:14px;height:4px;background:var(--sage);transition:background .3s"></div>
-           <span class="mono" style="font-size:10px;color:var(--muted)">J</span><div id="dm-l" style="width:14px;height:4px;background:var(--sage);transition:background .3s"></div>
+         <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:10px;text-align:center">T</span><div id="dm-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:10px;text-align:center">C</span><div id="dm-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:10px;text-align:center">J</span><div id="dm-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
          </div>
        </div>
        <div style="display:flex;flex-direction:column;align-items:flex-end">
          <span class="ah-name sage mono" style="font-size:13px">${esc(A.nopName||'Adv.')}</span>
-         <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
-           <div id="do-h" style="width:14px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted)">T</span>
-           <div id="do-b" style="width:14px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted)">C</span>
-           <div id="do-l" style="width:14px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted)">J</span>
+         <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;align-items:flex-end">
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:10px;text-align:center">T</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:10px;text-align:center">C</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:10px;text-align:center">J</span></div>
          </div>
        </div>
      </div>
