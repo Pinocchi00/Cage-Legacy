@@ -108,7 +108,7 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     survivors.forEach(o=>{ o.attrs.fightIQ=clamp(o.attrs.fightIQ+RI(1,3),1,100); o.overall=overall(o); pool.push(o); });
   }
   if(!isAmateur && oldRoster==='PRO_TRANSITION' && f.amateurRivals){
-    f.amateurRivals.forEach(r=>{ r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; pool.push(r); });
+    f.amateurRivals.forEach(r=>{ r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; r.orgWins=RI(0,2); pool.push(r); });
   }
   const toGenerate=needed-pool.length;
   for(let i=0;i<toGenerate;i++){ const lv=clamp(base+RI(-10,14),20,97);
@@ -117,9 +117,12 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     o.W=isAmateur?RI(0,15):RI(6,24); o.L=isAmateur?RI(0,6):RI(1,8);
     o.ko=RI(0,o.W);
     o.streak=(o.L===0)?o.W:RI(-2,Math.min(5,o.W));
+    // le PNJ est censé être établi DANS cette orga depuis un moment — sans ça,
+    // la formule 80/20 (orgWins pèse 80%) donnerait un roster entièrement plat à 0
+    if(!isAmateur) o.orgWins=Math.max(0,Math.round((o.W-o.L)*0.7)+RI(-1,2));
     pool.push(o); }
   const ranked=rankPool(pool);
-  if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); }
+  if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgWins=Math.max(ranked[0].orgWins||0,RI(9,16)); }
   return ranked;
 }
 function divRank(f){ return rankPool(G.roster.filter(o=>!o.champion).concat([f])).findIndex(o=>o===f)+1; }
@@ -433,6 +436,16 @@ function evaluateSeason(f,fights){ const s=compileSeasonStats(f,fights);
    (res.stats={A,B} seulement) — le caractère "guerre" du combat est recalculé
    ici en ligne à partir des vraies stats A/B, sur le même principe que le
    moteur de saison. ==== */
+/* ==== [ANCRE: PHRASES_RECRUTEMENT] — formulations variées pour nommer l'orga
+   qui recrute, au lieu du nom de palier générique ("Circuit local"). ==== */
+const CONTRACT_PHRASES=[
+ o=>`${o} vous veut.`,
+ o=>`Vous avez tapé dans l\u2019œil de ${o}.`,
+ o=>`${o} a suivi votre parcours de près.`,
+ o=>`Un recruteur de ${o} s\u2019est déplacé pour vous voir combattre.`,
+ o=>`${o} vous propose un contrat, séduit par vos performances.`,
+];
+/* ==== [FIN ANCRE] ==== */
 function evaluateProOffer(f, res, oppRank){
   if(f.org!==0 || (f.proOfferCooldown||0)>0) return null;
   if(f.age>=26) return { forced:true, msg:'La limite d\u2019âge du circuit amateur (26 ans) est atteinte. Vous êtes forcé de passer professionnel aujourd\u2019hui ou de ranger les gants.' };
@@ -448,7 +461,10 @@ function evaluateProOffer(f, res, oppRank){
     else if(finishes>=8) msg=`Avec ton style ultra-spectaculaire (${finishes} finitions) et ta réputation de tueur, le public pro te réclame malgré tes ${f.L} défaites.`;
     else if(f.age<=20) msg=`Tu n\u2019as que ${f.age} ans, mais ta maturité dans la cage affole les recruteurs régionaux. Tu es un prospect majeur.`;
     else msg='Tes résultats réguliers et ton classement sur le circuit IMMAF t\u2019ouvrent enfin les portes du monde professionnel.';
-    return { forced:false, msg, fastTrack };
+    const orgFlavor1=pick(ORG_FLAVORS[1]); const phrase1=pick(CONTRACT_PHRASES)(orgFlavor1);
+    let orgFlavor3=null, phrase3=null;
+    if(fastTrack){ orgFlavor3=pick(ORG_FLAVORS[3]); phrase3=pick(CONTRACT_PHRASES)(orgFlavor3); }
+    return { forced:false, msg, fastTrack, orgFlavor1, phrase1, orgFlavor3, phrase3 };
   }
   return null;
 }
@@ -662,7 +678,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
    et fightKind(). Avant : les deux vérifiaient des choses différentes
    (streak vs orgWins), ce qui permettait de battre le vrai champion sans que
    le combat soit jamais reconnu comme un combat de titre. ==== */
-function isTitleEligible(f){ return f.org>=1 && ((f.streak||0)>=3 || divRank(f)<=2); }
+function isTitleEligible(f){ return f.org>=1 && (divRank(f)<=2 || ((f.streak||0)>=6 && divRank(f)<=4)); }
 /* ==== [FIN ANCRE] ==== */
 function fightKind(){ const f=G.f; if(f.champion) return 'defense'; if(isTitleEligible(f)) return 'title'; return 'normal'; }
 
@@ -727,7 +743,14 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const myRankNow=myRankBefore, oppRankNow=oppRankBefore;
   if(win){
     if(oppRankNow>myRankNow+4 && !opp.champion){ G.f.easyFights=(G.f.easyFights||0)+1; } else { G.f.easyFights=0; }
-    if(oppRankNow<=3 && myRankNow>5){ G.f.rankBoost=(G.f.rankBoost||0)+60; }
+    // ==== [ANCRE: LEAPFROG_PROPORTIONNEL] — battre un adversaire mieux classé
+    // referme la moitié de l'écart de SCORE vers lui (pas juste un bonus fixe
+    // réservé au top-3) : bat le 13e, tu te rapproches vraiment de sa place.
+    // Remplace l'ancienne règle étroite (+60 fixe, seulement si adversaire
+    // top-3), désormais couverte naturellement par la proportionnalité. ====
+    const oppScoreNow=p4pScore(opp), myScoreNow=p4pScore(G.f);
+    if(oppScoreNow>myScoreNow){ G.f.rankBoost=(G.f.rankBoost||0)+Math.round((oppScoreNow-myScoreNow)*0.5); }
+    // ==== [FIN ANCRE] ====
   } else { G.f.easyFights=0; }
   let milestone='';
   if((G.f.easyFights||0)>=3){
@@ -981,7 +1004,7 @@ function scr_select(){ const f=G.f;
     const myGrap=Math.round((f.attrs.takedown+f.attrs.submission+f.attrs.topControl)/3);
     const myDan=f.attrs.power;
     const diffText=(opp,me)=>{ const diff=me-opp; if(diff>=12)return'Ton avantage net';if(diff>=5)return'Léger avantage';if(diff>-5&&diff<5)return'Équilibré';if(diff<=-12)return'Son avantage net';return'Léger désavantage'; };
-    const getDiffColor=(txt)=>txt.startsWith('Son')||txt==='Léger désavantage'?'var(--loss)':'var(--text)';
+    const getDiffColor=(txt)=>txt.startsWith('Son')||txt==='Léger désavantage'?'var(--loss)':(txt.startsWith('Ton')||txt==='Léger avantage')?'var(--gold)':'var(--text)';
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
       <div class="meta-strip"><div><span>Dossier</span><b>#${(''+o.id).padStart(4,'0')}</b></div><div><span>Record</span><b>${recordStr(o)}</b></div></div>
       <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
@@ -1187,8 +1210,8 @@ function scr_contract(){ const f=G.f; const offer=G.pending.proOffer;
      <div class="hr"></div>
      <div class="muted small">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
    </div>
-   <button class="btn primary mt" onclick="CL.acceptPro(1)">Signer en ${ORGS[1]}</button>
-   ${offer.fastTrack?`<button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.acceptPro(3)">Signer directement en ${ORGS[3]} (opposition bien plus dure)</button>`:''}
+   <button class="btn primary mt" onclick="CL.acceptPro(1,'${offer.orgFlavor1}')">${offer.phrase1}</button>
+   ${offer.fastTrack?`<button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.acceptPro(3,'${offer.orgFlavor3}')">${offer.phrase3} (opposition bien plus dure)</button>`:''}
    ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus</button>`:''}
    </div>`; }
 
@@ -1393,7 +1416,7 @@ const CL={
     G.roster=makeOrgRoster(G.f,G.roster);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
     G.screen='hub'; save(); render(); },
-  acceptPro(orgIdx){ turnPro(); G.f.org=orgIdx||1; if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
+  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   declinePro(){ G.f.proOfferCooldown=3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus','true'); }catch(e){} }
