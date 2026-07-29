@@ -15,7 +15,14 @@ const SAVE_KEY='cage-legacy-v3';
 const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
 /* ------------------------------ sauvegarde -------------------------------- */
-function save(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
+/* ==== [ANCRE: SAVE_GARDE_ARCADE] — bug trouvé : arcade et carrière partageaient
+   la MÊME clé de sauvegarde. Démarrer un Gauntlet écrasait la carrière dans
+   localStorage ; "Reprendre" (toujours G.screen='hub') rechargeait alors le
+   combattant du Gauntlet dans le hub de carrière. Un run Gauntlet ne doit
+   jamais toucher au localStorage : il ne survit pas à une fermeture, exactement
+   comme un roguelite classique — la vraie carrière reste intacte pendant ce temps. ==== */
+function save(){ if(G&&((G.arcade&&G.arcade.active)||['draft','arcadehub','gameover'].includes(G.screen))) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
+/* ==== [FIN ANCRE] ==== */
 function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ G=migrate(JSON.parse(s)); validateState(); return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
 function hasSave(){ try{ return !!localStorage.getItem(SAVE_KEY); }catch(e){ return false; } }
 function wipe(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
