@@ -424,119 +424,428 @@ const SK_MMA = [
     ['mma40', 'Singularité Martiale', 'M', {fightIQ: 10, adaptability: 10, cardio: 10}, 'Le futur du sport. Il ne boxe ni ne lutte : il résout le combat. Une perfection extraterrestre.', ['Génie pur', 'GOAT']]
 ];
 
-const SK_META = [
-    ['meta01', 'Retraite retardée', 'X', {}, 'Un corps qui refuse encore de rendre les armes. Repousse l\'âge de la retraite de deux ans.', ['Longévité', 'Méta']],
-    ['meta02', 'Mentor testamentaire', 'X', {}, 'Au moment de la retraite, transmet un bonus permanent à ta prochaine carrière (Nouvelle partie +).', ['Héritage', 'Méta']],
-    ['meta03', 'Corps increvable', 'X', {durability: 4, recovery: 3}, 'A traversé assez de guerres pour que son corps ait appris à survivre à tout.', ['Vétéran', 'Méta']],
-    ['meta04', 'Contrat à vie', 'X', {}, 'Verrouille un cachet ou une popularité minimum garantie jusqu\'à la retraite.', ['Statut', 'Méta']],
-    ['meta05', 'Dernier tour de piste', 'X', {}, 'Pour le tout dernier combat avant la retraite : +6 sur tous les canaux offensifs.', ['Chant du cygne', 'Méta']],
-    ['meta06', 'Légende locale', 'X', {}, 'La popularité ne redescend jamais sous un plancher élevé. Le public a déjà décidé qui il est.', ['Aura', 'Méta']]
+// ==========================================
+// COMPÉTENCES GÉNÉTIQUES (20) - Tirées uniquement à la création
+// ==========================================
+const SK_GENETIC = [
+    // 10 Communes (+1/20)
+    ['gen01', 'Fémurs allongés', 'C', {kick: 5}, 'Allonge des jambes anormale. Frappe là où on ne l\u2019attend pas.', ['Allonge', 'Génétique']],
+    ['gen02', 'Densité osseuse', 'C', {power: 5}, 'Un squelette naturellement lourd. Os de frappe denses.', ['Densité', 'Génétique']],
+    ['gen03', 'Réflexes précoces', 'C', {handSpeed: 5}, 'Connexions nerveuses accélérées depuis la naissance.', ['Réflexes', 'Génétique']],
+    ['gen04', 'Poumons surdimensionnés', 'C', {cardio: 5}, 'Capacité pulmonaire excédant la moyenne humaine.', ['Cardio inné', 'Génétique']],
+    ['gen05', 'Fibre blanche pure', 'C', {explosiveness: 5}, 'Muscles conçus pour l\u2019explosion immédiate, pas l\u2019endurance.', ['Explosivité', 'Génétique']],
+    ['gen06', 'Hyperlaxité', 'C', {flexibility: 5}, 'Articulations capables de se tordre au-delà du point de rupture.', ['Souplesse', 'Génétique']],
+    ['gen07', 'Mâchoire de Neandertal', 'C', {chin: 5}, 'Base crânienne épaisse. Ne ressent pas les commotions.', ['Menton', 'Exception']],
+    ['gen08', 'Synapses martiales', 'C', {fightIQ: 5}, 'Comprend naturellement la biomécanique sans l\u2019étudier.', ['QI Inné', 'Génétique']],
+    ['gen09', 'Cicatrisation accélérée', 'C', {recovery: 5}, 'Métabolisme réparant les fibres musculaires en un temps record.', ['Récupération', 'Génétique']],
+    ['gen10', 'Force paysanne', 'C', {strength: 5}, 'Force fonctionnelle pure acquise hors des salles de musculation.', ['Force pure', 'Génétique']],
+    // 5 Rares (+2/20)
+    ['gen11', 'Ossature de primate', 'R', {power: 5, durability: 5}, 'Bras longs et lourds. Frappe comme un animal sauvage.', ['Brute', 'Génétique']],
+    ['gen12', 'Métabolisme d\u2019oiseau', 'R', {cardio: 5, recovery: 5}, 'Le cœur bat vite, oxygène vite, et ne s\u2019arrête jamais.', ['Inépuisable', 'Génétique']],
+    ['gen13', 'Système survolté', 'R', {footSpeed: 5, handSpeed: 5}, 'Mouvements constants et impossibles à suivre à l\u2019œil nu.', ['Vitesse', 'Génétique']],
+    ['gen14', 'Génétique de prédateur', 'R', {strength: 5, explosiveness: 5}, 'Tension musculaire d\u2019un grand félin prêt à bondir.', ['Prédateur', 'Génétique']],
+    ['gen15', 'Cerveau reptilien', 'R', {fightIQ: 5, composure: 5}, 'Détachement total de la peur. Pur calcul mathématique.', ['Sociopathe', 'Génétique']],
+    // 3 Épiques (+3/20)
+    ['gen16', 'Anomalie physique', 'E', {power: 5, chin: 5, durability: 5}, 'Une erreur de la nature qui n\u2019aurait jamais dû monter dans une cage.', ['Monstre', 'Génétique']],
+    ['gen17', 'Sang suroxygéné', 'E', {cardio: 10, recovery: 5}, 'Sang chargé en oxygène empêchant la formation d\u2019acide lactique.', ['Poumons d\u2019acier', 'Génétique']],
+    ['gen18', 'Prodige absolu', 'E', {fightIQ: 10, adaptability: 5}, 'Apprend une technique mortelle en la regardant une seule fois.', ['Génie', 'Génétique']],
+    // 1 Légendaire (+4/20)
+    ['gen19', 'Monstre de la nature', 'L', {strength: 10, explosiveness: 10}, 'Une combinaison de puissance et d\u2019explosion qui défie la biologie.', ['Titanesque', 'Génétique']],
+    // 1 Mythique (+6/20)
+    ['gen20', 'L\u2019Élu de la violence', 'M', {power: 10, chin: 10, explosiveness: 10}, 'Né avec toutes les caractéristiques pour dominer l\u2019espèce humaine.', ['Dieu de la guerre', 'Génétique']]
 ];
 
 // ==========================================
-// COMPÉTENCES DE PAYS (C=+5, 5 pays pour l'instant sur 14)
+// COMPÉTENCES MÉTA (20) - Vétérans et Fin de carrière
 // ==========================================
+const SK_META = [
+    // 5 Mécaniques (X) - Modifient les règles du jeu, pas les stats
+    ['meta01', 'Retraite retardée', 'X', {}, 'Un corps qui refuse de rendre les armes. Repousse la retraite de deux ans.', ['Longévité', 'Méta']],
+    ['meta02', 'Mentor testamentaire', 'X', {}, 'Transmet un bonus permanent à ta prochaine carrière (Nouvelle Partie +).', ['Héritage', 'Méta']],
+    ['meta03', 'Contrat à vie', 'X', {}, 'Verrouille un cachet minimum garanti jusqu\u2019à la fin de la carrière.', ['Statut', 'Méta']],
+    ['meta04', 'Légende locale', 'X', {}, 'La popularité ne redescend plus jamais. Le public a décidé qui tu es.', ['Aura', 'Méta']],
+    ['meta05', 'Chant du cygne', 'X', {}, 'Dernier combat de carrière : +6 sur tous les attributs offensifs en adrénaline pure.', ['Ultime', 'Méta']],
+    // 6 Communes (+1/20)
+    ['meta06', 'Vice de vétéran', 'C', {clinchStr: 5}, 'Sait placer son poids pour écraser l\u2019autre et se reposer en douce.', ['Vice', 'Méta']],
+    ['meta07', 'Glace dans les veines', 'C', {composure: 5}, 'A tout vu, tout vécu. Rien ne le surprend ni ne le stresse.', ['Sang-froid', 'Méta']],
+    ['meta08', 'Cuir tanné', 'C', {durability: 5}, 'La peau et les os sont devenus durs comme de la roche avec l\u2019âge.', ['Cuir', 'Méta']],
+    ['meta09', 'Économie de souffle', 'C', {fightIQ: 5}, 'Bouge peu mais bouge juste. Compense la perte de cardio par l\u2019esprit.', ['Calcul', 'Méta']],
+    ['meta10', 'Force de daron', 'C', {strength: 5}, 'Une lourdeur physique inexplicable qu\u2019on n\u2019acquiert qu\u2019avec l\u2019âge.', ['Lourdeur', 'Méta']],
+    ['meta11', 'Lactique géré', 'C', {recovery: 5}, 'Récupère mieux entre les rounds grâce à une respiration millimétrée.', ['Souffle', 'Méta']],
+    // 4 Rares (+2/20)
+    ['meta12', 'Énergie calculée', 'R', {fightIQ: 5, composure: 5}, 'Gère le chrono du round de manière mathématique pour ne pas s\u2019épuiser.', ['Gestion', 'Méta']],
+    ['meta13', 'Mur de l\u2019ancien', 'R', {strength: 5, tdd: 5}, 'Un ancrage au sol terrifiant qui empêche les jeunes loups de le lutter.', ['Ancrage', 'Méta']],
+    ['meta14', 'Survivant des arènes', 'R', {heart: 5, durability: 5}, 'Refuse viscéralement de se faire assommer par un gamin.', ['Survivant', 'Méta']],
+    ['meta15', 'Désillusion martiale', 'R', {adaptability: 5, fightIQ: 5}, 'Ne tombe plus dans les pièges de feinte. Connaît tous les manuels.', ['Désillusion', 'Méta']],
+    // 3 Épiques (+3/20)
+    ['meta16', 'Maître tacticien', 'E', {fightIQ: 10, composure: 5}, 'Conduit le combat comme une symphonie macabre qu\u2019il a déjà écrite.', ['Maestro', 'Méta']],
+    ['meta17', 'Vieux crâne', 'E', {heart: 10, durability: 5}, 'On peut le frapper avec une batte, il continuera d\u2019avancer.', ['Increvable', 'Méta']],
+    ['meta18', 'Bibliothèque martiale', 'E', {adaptability: 10, fightIQ: 5}, 'A affronté absolument tous les styles existants. A toujours une réponse.', ['Savoir', 'Méta']],
+    // 1 Légendaire (+4/20)
+    ['meta19', 'Indéracinable', 'L', {tdd: 10, strength: 10}, 'Une fois planté au sol, il faut une grue pour le mettre sur le dos.', ['Montagne', 'Méta']],
+    // 1 Mythique (+6/20)
+    ['meta20', 'Dieu de la Cage', 'M', {fightIQ: 10, composure: 10, heart: 10}, 'Le saint patron des vétérans. Ne perd jamais son sang-froid, ne recule jamais.', ['Divinité', 'Méta']]
+];
+
+// ==========================================
+// COMPÉTENCES DE PAYS (14 pays x 20 = 280)
+// Format strict : 12 Communes, 5 Rares, 2 Épiques, 1 Légendaire par pays
+// ==========================================
+
 const SK_COUNTRY = {
+    // ----------------------------------------------------
+    // DAGHESTAN (Lutte, Pression, Cardio, Discipline)
+    // ----------------------------------------------------
     DAG: [
-        ['dag01', 'Sambo de fer', 'C', {takedown: 3, tdd: 2}, 'Lutte rugueuse des montagnes.', ['Lutte', 'Daghestan']],
-        ['dag02', 'Lignée du tapis', 'C', {cardio: 3, discipline: 2}, 'Né sur les tapis de lutte, cardio inépuisable.', ['Cardio', 'Daghestan']],
-        ['dag03', 'Pression jusqu\'au bout', 'C', {heart: 3, aggression: 2}, 'Mentalité de conquête, n\'accepte pas le recul.', ['Pression', 'Daghestan']],
-        ['dag04', 'Contrôle sans relâche', 'C', {topControl: 3, strength: 2}, 'Écrase l\'adversaire avec une maîtrise totale du poids.', ['Contrôle', 'Daghestan']],
-        ['dag05', 'Prudence calculée', 'C', {composure: 3, fightIQ: 2}, 'Prend peu de risques, favorise la victoire méthodique.', ['Stratégie', 'Daghestan']]
+        ['dag01', 'Lutte des montagnes', 'C', {takedown: 5}, 'Prises aux jambes rudes et sans esthétique.', ['Lutte', 'Daghestan']],
+        ['dag02', 'Lignée du tapis', 'C', {tdd: 5}, 'Né sur le tapis, immunisé aux projections.', ['Antilutte', 'Daghestan']],
+        ['dag03', 'Pression écrasante', 'C', {topControl: 5}, 'La maîtrise absolue de la gravité corporelle.', ['Contrôle', 'Daghestan']],
+        ['dag04', 'Cardio caucasien', 'C', {cardio: 5}, 'Inépuisable même dans l\u2019air le plus rare.', ['Endurance', 'Daghestan']],
+        ['dag05', 'Force d\u2019ours', 'C', {strength: 5}, 'S\u2019entraînait littéralement avec des bêtes sauvages.', ['Force', 'Daghestan']],
+        ['dag06', 'Déni d\u2019abandon', 'C', {heart: 5}, 'La honte de la défaite est pire que la mort.', ['Cœur', 'Daghestan']],
+        ['dag07', 'Stricte doctrine', 'C', {discipline: 5}, 'Ne dévie jamais du plan de match du coach.', ['Discipline', 'Daghestan']],
+        ['dag08', 'Sambo brutal', 'C', {gnp: 5}, 'Frappe au sol avec une lourdeur effrayante.', ['GNP', 'Daghestan']],
+        ['dag09', 'Clinch sanglant', 'C', {clinchStr: 5}, 'Lutte debout épuisante, vidant l\u2019adversaire.', ['Clinch', 'Daghestan']],
+        ['dag10', 'Overhand du Tsar', 'C', {power: 5}, 'Gros bras arrière lancé sans finesse pour tuer.', ['Puissance', 'Daghestan']],
+        ['dag11', 'Patience froide', 'C', {composure: 5}, 'Prend son temps pour verrouiller la victime.', ['Sang-froid', 'Daghestan']],
+        ['dag12', 'Chaînes d\u2019acier', 'C', {submission: 5}, 'Clés de bras passées par la force, pas la souplesse.', ['Soumission', 'Daghestan']],
+        ['dag13', 'Grip caucasien', 'R', {takedown: 5, strength: 5}, 'Saisit la cible et l\u2019arrache du sol brutalement.', ['Arracheur', 'Daghestan']],
+        ['dag14', 'Étau respiratoire', 'R', {cardio: 5, topControl: 5}, 'Lutte à un rythme qui étouffe le cardio adverse.', ['Étau', 'Daghestan']],
+        ['dag15', 'Mur du Nord', 'R', {tdd: 5, discipline: 5}, 'Défense méthodique interdisant toute entrée.', ['Mur', 'Daghestan']],
+        ['dag16', 'Marteau russe', 'R', {gnp: 5, power: 5}, 'Démolit la garde depuis la position montée.', ['Marteau', 'Daghestan']],
+        ['dag17', 'Résilience froide', 'R', {heart: 5, durability: 5}, 'Encaisse les coups comme une tempête de neige.', ['Résilience', 'Daghestan']],
+        ['dag18', 'Anaconda du Caucase', 'E', {topControl: 10, takedown: 5}, 'Enroule, fait tomber et ne relâche plus jamais.', ['Cauchemar', 'Daghestan']],
+        ['dag19', 'Machine de guerre', 'E', {cardio: 10, strength: 5}, 'Un cyborg programmé pour broyer ses opposants.', ['Machine', 'Daghestan']],
+        ['dag20', 'Seigneur des Tapis', 'L', {takedown: 10, topControl: 10}, 'Une fois qu\u2019il touche tes jambes, ta vie t\u2019échappe.', ['Grappling divin', 'Daghestan']]
     ],
+    // ----------------------------------------------------
+    // BRÉSIL (BJJ, Mouvement, Agression, Souplesse)
+    // ----------------------------------------------------
     BR: [
-        ['br01', 'Jiu-jitsu de la Favela', 'C', {submission: 3, adaptability: 2}, 'Grappling créatif et mortel, forgé dans la rue.', ['BJJ', 'Brésil']],
-        ['br02', 'Ginga naturelle', 'C', {footSpeed: 3, flexibility: 2}, 'Déplacements fluides, héritage de la Capoeira.', ['Mouvement', 'Brésil']],
-        ['br03', 'Cœur du Nordeste', 'C', {heart: 3, recovery: 2}, 'Un cœur immense qui refuse la défaite.', ['Cœur', 'Brésil']],
-        ['br04', 'Style libre', 'C', {adaptability: 3, fightIQ: 2}, 'Improvisation constante et déroutante.', ['Impro', 'Brésil']],
-        ['br05', 'Instinct latin', 'C', {killer: 3, aggression: 2}, 'La passion du finish dès qu\'une odeur de sang apparaît.', ['Finition', 'Brésil']]
+        ['br01', 'Art de la Favela', 'C', {submission: 5}, 'Grappling créatif et létal forgé dans la rue.', ['Soumission', 'Brésil']],
+        ['br02', 'Garde impénétrable', 'C', {guardWork: 5}, 'Ferme le jeu depuis le dos de manière absolue.', ['Garde', 'Brésil']],
+        ['br03', 'Ginga naturelle', 'C', {flexibility: 5}, 'Mouvements hérités de la Capoeira, très fluides.', ['Souplesse', 'Brésil']],
+        ['br04', 'Vitesse féline', 'C', {footSpeed: 5}, 'Déplacements dansants, presque aériens.', ['Mouvement', 'Brésil']],
+        ['br05', 'Instinct de tueur', 'C', {killer: 5}, 'La passion du finish dès qu\u2019une goutte de sang coule.', ['Finition', 'Brésil']],
+        ['br06', 'Jiu-jitsu originel', 'C', {adaptability: 5}, 'Improvisation constante pour prendre le dos.', ['BJJ', 'Brésil']],
+        ['br07', 'Cœur du Nordeste', 'C', {heart: 5}, 'Un cœur immense refusant catégoriquement de céder.', ['Cœur', 'Brésil']],
+        ['br08', 'Chute Boxe', 'C', {aggression: 5}, 'Agressivité pure inspirée des salles de Curitiba.', ['Chute Boxe', 'Brésil']],
+        ['br09', 'Low Kick destructeur', 'C', {kick: 5}, 'Coupe les jambes comme on coupe de la canne.', ['Kick', 'Brésil']],
+        ['br10', 'Crochet sauvage', 'C', {hook: 5}, 'Lancé avec toute la force des hanches.', ['Crochet', 'Brésil']],
+        ['br11', 'Transition magique', 'C', {fightIQ: 5}, 'Anticipe le mouvement adverse pour rouler au sol.', ['Transition', 'Brésil']],
+        ['br12', 'Esquive capoeira', 'C', {composure: 5}, 'Baisse la tête sereinement sous les high kicks.', ['Esquive', 'Brésil']],
+        ['br13', 'Triangle volant', 'R', {submission: 5, flexibility: 5}, 'Ferme un étranglement géométrique en plein saut.', ['Triangle', 'Brésil']],
+        ['br14', 'Danse de l\u2019araignée', 'R', {guardWork: 5, adaptability: 5}, 'Contrôle à distance depuis le dos, rendant fou.', ['Araignée', 'Brésil']],
+        ['br15', 'Soccer kick spirit', 'R', {kick: 5, killer: 5}, 'Kicks au sol impitoyables (quand c\u2019était légal).', ['PRIDE', 'Brésil']],
+        ['br16', 'Bagarreur des rues', 'R', {aggression: 5, hook: 5}, 'Accepte la guerre totale pour le KO.', ['Bagarre', 'Brésil']],
+        ['br17', 'Sang chaud', 'R', {heart: 5, footSpeed: 5}, 'L\u2019énergie monte quand le combat devient critique.', ['Ferveur', 'Brésil']],
+        ['br18', 'Anaconda brésilien', 'E', {submission: 10, guardWork: 5}, 'Une toile dont personne ne s\u2019échappe vivant.', ['Pieuvre', 'Brésil']],
+        ['br19', 'Carnage de Curitiba', 'E', {aggression: 10, kick: 5}, 'Un ouragan de violence pur et dévastateur.', ['Violence', 'Brésil']],
+        ['br20', 'Ceinture Rouge', 'L', {submission: 10, adaptability: 10}, 'L\u2019art doux maîtrisé jusqu\u2019à sa forme la plus pure.', ['Légende BJJ', 'Brésil']]
     ],
+    // ----------------------------------------------------
+    // THAÏLANDE (Kick, Clinch, Durabilité, Muay Thaï)
+    // ----------------------------------------------------
     TH: [
-        ['th01', 'Clinch du Muay Thaï', 'C', {clinchStr: 3, strength: 2}, 'Maîtrise la nuque adverse comme personne.', ['Clinch', 'Thaïlande']],
-        ['th02', 'École du Sud', 'C', {kick: 3, cardio: 2}, 'Kicks dévastateurs et endurance à toute épreuve.', ['Kick', 'Thaïlande']],
-        ['th03', 'Genoux de fer', 'C', {clinchStr: 3, gnp: 2}, 'Des genoux qui perforent les organes.', ['Genoux', 'Thaïlande']],
-        ['th04', 'Endurance des stades', 'C', {cardio: 3, durability: 2}, 'Habitué à la chaleur étouffante des rings thaïlandais.', ['Endurance', 'Thaïlande']],
-        ['th05', 'Élégance martiale', 'C', {footSpeed: 3, composure: 2}, 'Frappe avec une beauté technique déconcertante.', ['Esthétique', 'Thaïlande']]
+        ['th01', 'Tibia d\u2019acier', 'C', {kick: 5}, 'A passé sa jeunesse à frapper des troncs d\u2019arbres.', ['Kick', 'Thaïlande']],
+        ['th02', 'Plum mortel', 'C', {clinchStr: 5}, 'Saisie de nuque détruisant la posture adverse.', ['Clinch', 'Thaïlande']],
+        ['th03', 'Sourire thaï', 'C', {durability: 5}, 'Sourit en encaissant le coup pour briser l\u2019ego.', ['Encaisseur', 'Thaïlande']],
+        ['th04', 'Genou piqué', 'C', {power: 5}, 'Coup de genou tranchant au foie.', ['Genou', 'Thaïlande']],
+        ['th05', 'Cœur de Lumpinee', 'C', {heart: 5}, 'La ferveur des stadiums de Bangkok dans le sang.', ['Cœur', 'Thaïlande']],
+        ['th06', 'Teep facial', 'C', {footSpeed: 5}, 'Repousse l\u2019adversaire avec un pied au visage.', ['Teep', 'Thaïlande']],
+        ['th07', 'Coude rasoir', 'C', {killer: 5}, 'Cherche l\u2019ouverture pour inonder les yeux de sang.', ['Coude', 'Thaïlande']],
+        ['th08', 'Calme plat', 'C', {composure: 5}, 'Ne sur-réagit jamais à une feinte de boxe.', ['Sang-froid', 'Thaïlande']],
+        ['th09', 'Rythme du pari', 'C', {cardio: 5}, 'Augmente la cadence au round 3 comme au pays.', ['Cardio', 'Thaïlande']],
+        ['th10', 'Check de marbre', 'C', {tdd: 5}, 'Bloque les jambes comme il bloque les kicks.', ['Défense', 'Thaïlande']],
+        ['th11', 'Balayage brutal', 'C', {takedown: 5}, 'Fauche la jambe d\u2019appui au moindre déséquilibre.', ['Sweep', 'Thaïlande']],
+        ['th12', 'Garde hermétique', 'C', {fightIQ: 5}, 'Lecture pure des lignes d\u2019attaque occidentales.', ['Lecture', 'Thaïlande']],
+        ['th13', 'Destruction basse', 'R', {kick: 5, power: 5}, 'Scie l\u2019arbre par la base pour annuler les appuis.', ['Low Kick', 'Thaïlande']],
+        ['th14', 'Étau de Bangkok', 'R', {clinchStr: 5, strength: 5}, 'Maintient la tête adverse en bas quoi qu\u2019il arrive.', ['Contrôle', 'Thaïlande']],
+        ['th15', 'Impassibilité', 'R', {durability: 5, composure: 5}, 'Encaisse les parpaings sans ciller.', ['Impassible', 'Thaïlande']],
+        ['th16', 'Boucherie', 'R', {killer: 5, clinchStr: 5}, 'Utilise les coudes en corps-à-corps pour finir.', ['Sang', 'Thaïlande']],
+        ['th17', 'Machine à rythme', 'R', {cardio: 5, heart: 5}, 'Ne recule jamais face à l\u2019adversité.', ['Machine', 'Thaïlande']],
+        ['th18', 'Dieu du Stadium', 'E', {kick: 10, durability: 5}, 'L\u2019art des 8 membres dans sa violence la plus pure.', ['Muay Thai', 'Thaïlande']],
+        ['th19', 'L\u2019Art du Sang', 'E', {clinchStr: 10, killer: 5}, 'Détruit la cible au contact avec une cruauté froide.', ['Coupeur', 'Thaïlande']],
+        ['th20', 'Héritage d\u2019Ayutthaya', 'L', {kick: 10, clinchStr: 10}, 'Frappes si lourdes qu\u2019elles brisent les os à travers la garde.', ['Légende', 'Thaïlande']]
     ],
+    // ----------------------------------------------------
+    // FRANCE (Savate, Mouvement, Fierté, Judo)
+    // ----------------------------------------------------
     FR: [
-        ['fr01', 'Savate de précision', 'C', {kick: 3, footSpeed: 2}, 'Des coups de pieds fluides, chirurgicaux et élégants.', ['Savate', 'France']],
-        ['fr02', 'Menton relevé', 'C', {composure: 3, fightIQ: 2}, 'Une fierté qui se traduit par un sang-froid impressionnant.', ['Fierté', 'France']],
-        ['fr03', 'Garde structurée', 'C', {durability: 3, tdd: 2}, 'Une défense hermétique issue de l\'école de boxe académique.', ['Garde', 'France']],
-        ['fr04', 'Judo de la capitale', 'C', {takedown: 3, adaptability: 2}, 'Balayages et projections à l\'amplitude parfaite.', ['Judo', 'France']],
-        ['fr05', 'Cœur d\'outsider', 'C', {heart: 3, recovery: 2}, 'Se sublime toujours face aux champions étrangers.', ['Outsider', 'France']]
+        ['fr01', 'Savate élégante', 'C', {kick: 5}, 'Fouettés précis, agiles, en chaussures virtuelles.', ['Savate', 'France']],
+        ['fr02', 'Fierté nationale', 'C', {composure: 5}, 'Sourire hautain déstabilisant l\u2019adversaire.', ['Arrogance', 'France']],
+        ['fr03', 'Garde hermétique', 'C', {tdd: 5}, 'Garde de boxe française fermant tout takedown.', ['Garde', 'France']],
+        ['fr04', 'Judo de la capitale', 'C', {takedown: 5}, 'Fauchages amples et ippons destructeurs.', ['Judo', 'France']],
+        ['fr05', 'Cœur de Gavroche', 'C', {heart: 5}, 'Prend des coups mais se relève toujours pour narguer.', ['Outsider', 'France']],
+        ['fr06', 'Jeu d\u2019escrimeur', 'C', {footSpeed: 5}, 'Déplacements linéaires sur la pointe des pieds.', ['Mobilité', 'France']],
+        ['fr07', 'Jab académique', 'C', {jab: 5}, 'Pique proprement de la main avant sans forcer.', ['Boxe', 'France']],
+        ['fr08', 'Esprit d\u2019analyse', 'C', {fightIQ: 5}, 'Analyse géométrique du combat à la française.', ['Cartésien', 'France']],
+        ['fr09', 'Grappling parisien', 'C', {submission: 5}, 'Style au sol moderne et très technique.', ['Luta Livre', 'France']],
+        ['fr10', 'Vitesse d\u2019exécution', 'C', {handSpeed: 5}, 'Frappe très vite, privilégie la touche à la force.', ['Vitesse', 'France']],
+        ['fr11', 'Cuir de banlieue', 'C', {durability: 5}, 'Conditionné dans des quartiers où il faut survivre.', ['Dur au mal', 'France']],
+        ['fr12', 'Cardio des Alpes', 'C', {cardio: 5}, 'Poumons d\u2019acier forgés en haute altitude.', ['Cardio', 'France']],
+        ['fr13', 'Fouetté foudroyant', 'R', {kick: 5, footSpeed: 5}, 'Tire sa jambe comme un fouet depuis l\u2019extérieur.', ['Savate pure', 'France']],
+        ['fr14', 'Ippon Seoi Nage', 'R', {takedown: 5, power: 5}, 'Jette la cible par-dessus l\u2019épaule violemment.', ['Projection', 'France']],
+        ['fr15', 'Génie cartésien', 'R', {fightIQ: 5, adaptability: 5}, 'S\u2019adapte mathématiquement au jeu adverse.', ['Adaptation', 'France']],
+        ['fr16', 'Direct de Marseille', 'R', {cross: 5, killer: 5}, 'Une droite sale, puissante, qui vise le KO net.', ['Bagarre', 'France']],
+        ['fr17', 'Panache', 'R', {heart: 5, composure: 5}, 'Brille sous la pression quand la foule hue.', ['Panache', 'France']],
+        ['fr18', 'L\u2019École Française', 'E', {fightIQ: 10, footSpeed: 5}, 'Boxe intouchable, pure classe et précision absolue.', ['Maestro', 'France']],
+        ['fr19', 'Teddy Bear', 'E', {takedown: 10, topControl: 5}, 'Monstre de judo impossible à bouger au sol.', ['Judo lourd', 'France']],
+        ['fr20', 'Le Cyrano de la Cage', 'L', {fightIQ: 10, kick: 10}, 'Frappe avec grâce, se moque, et gagne avec art.', ['Virtuose', 'France']]
     ],
+    // ----------------------------------------------------
+    // ÉTATS-UNIS (NCAA, Boxe, Puissance, Showman)
+    // ----------------------------------------------------
     US: [
-        ['us01', 'Lutte universitaire (D1)', 'C', {takedown: 3, topControl: 2}, 'Takedowns surpuissants forgés sur les bancs de la fac.', ['NCAA', 'USA']],
-        ['us02', 'Boxe de Philly', 'C', {handSpeed: 3, hook: 2}, 'Des crochets rapides et une défense d\'épaule caractéristique.', ['Philly Shell', 'USA']],
-        ['us03', 'Régime industriel', 'C', {strength: 3, explosiveness: 2}, 'Une musculature et une force brute impressionnantes.', ['Force', 'USA']],
-        ['us04', 'Bête de spectacle', 'C', {aggression: 3, killer: 2}, 'Cherche le KO à tout prix pour enflammer le public.', ['Showman', 'USA']],
-        ['us05', 'Cardio d\'athlète', 'C', {cardio: 3, tdd: 2}, 'Préparation physique poussée à la limite absolue.', ['Athlète', 'USA']]
+        ['us01', 'Lutte Division 1', 'C', {takedown: 5}, 'Takedown en double leg parfait de niveau fac.', ['NCAA', 'USA']],
+        ['us02', 'Philly Shell', 'C', {handSpeed: 5}, 'Boxe défensive, épaules roulées, contres rapides.', ['Boxe US', 'USA']],
+        ['us03', 'Force industrielle', 'C', {strength: 5}, 'Soulevé de fonte depuis le lycée. Bœuf.', ['Force', 'USA']],
+        ['us04', 'Bête de spectacle', 'C', {aggression: 5}, 'Fait le show pour les caméras, cherche le sang.', ['Showman', 'USA']],
+        ['us05', 'Athlétisme pur', 'C', {explosiveness: 5}, 'Un mutant d\u2019explosivité musculaire américaine.', ['Athlète', 'USA']],
+        ['us06', 'Défense de velours', 'C', {tdd: 5}, 'Hanches parfaites pour sprawl de lutte libre.', ['Antilutte', 'USA']],
+        ['us07', 'Overhand de bar', 'C', {power: 5}, 'La bonne vieille droite des bagarres de saloon.', ['Brawl', 'USA']],
+        ['us08', 'Cardio d\u2019élite', 'C', {cardio: 5}, 'Conditionnement NFL. Ne fatigue jamais.', ['Condition', 'USA']],
+        ['us09', 'Ground & Pound lourd', 'C', {gnp: 5}, 'Écrase et frappe pour finir l\u2019adversaire au sol.', ['GNP', 'USA']],
+        ['us10', 'Trash talker', 'C', {composure: 5}, 'Insulte la cible pour rester concentré.', ['Mental', 'USA']],
+        ['us11', 'Crochet de Philadelphie', 'C', {hook: 5}, 'Un crochet vicieux qui a éteint des dizaines de gars.', ['Crochet', 'USA']],
+        ['us12', 'Instinct de survie', 'C', {heart: 5}, 'L\u2019American Dream : refuser de rester au sol.', ['Rêve', 'USA']],
+        ['us13', 'Génétique modifiée', 'R', {explosiveness: 5, power: 5}, 'Vitesse et force qui défient la biologie.', ['Mutant', 'USA']],
+        ['us14', 'All-American', 'R', {takedown: 5, topControl: 5}, 'La lutte universitaire à son sommet destructeur.', ['Lutte d\u2019élite', 'USA']],
+        ['us15', 'Boxeur de l\u2019Est', 'R', {handSpeed: 5, fightIQ: 5}, 'Combinaisons rapides de boxe anglaise urbaine.', ['Boxe', 'USA']],
+        ['us16', 'Marteau pilon', 'R', {gnp: 5, killer: 5}, 'Ground and pound cherchant la commotion.', ['GNP fatal', 'USA']],
+        ['us17', 'Cœur de l\u2019Aigle', 'R', {heart: 5, cardio: 5}, 'Remonte des pires situations avec panache.', ['Comeback', 'USA']],
+        ['us18', 'L\u2019Oncle Sam', 'E', {takedown: 10, explosiveness: 5}, 'Fonce dans l\u2019adversaire comme un train de marchandises.', ['Bulldozer', 'USA']],
+        ['us19', 'Hollywood KO', 'E', {power: 10, handSpeed: 5}, 'Le sens du spectacle achevé par une droite cataclysmique.', ['Star', 'USA']],
+        ['us20', 'Le Rêve Américain', 'L', {power: 10, takedown: 10}, 'Frappe comme un camion, lutte comme un ours. L\u2019archétype parfait.', ['Machine US', 'USA']]
     ],
+    // ----------------------------------------------------
+    // JAPON (Budo, Soumission, Kamikaze, Judo)
+    // ----------------------------------------------------
     JP: [
-        ['jp01', 'L\'Esprit Budo', 'C', {fightIQ: 3, composure: 2}, 'Un respect strict des arts martiaux traditionnels qui se traduit par une discipline de fer.', ['Budo', 'Japon']],
-        ['jp02', 'Maître des clés de jambes', 'C', {submission: 3, adaptability: 2}, 'Spécialiste absolu des soumissions sur le bas du corps, plongeant sur la moindre cheville.', ['Leglocks', 'Japon']],
-        ['jp03', 'Mentalité Kamikaze', 'C', {killer: 3, heart: 2}, 'Prêt à sacrifier sa propre intégrité physique si cela lui permet de placer le coup fatal.', ['Sacrifice', 'Japon']],
-        ['jp04', 'Judo technique', 'C', {takedown: 3, adaptability: 2}, 'Des projections à la hanche d\'une pureté absolue, utilisant la force de son adversaire.', ['Judo', 'Japon']],
-        ['jp05', 'Endurance spirituelle', 'C', {recovery: 3, durability: 2}, 'Une capacité à occulter la douleur grâce à une concentration méditative inébranlable.', ['Spirituel', 'Japon']]
+        ['jp01', 'Esprit Budo', 'C', {fightIQ: 5}, 'Respect strict et analyse froide des arts martiaux.', ['Budo', 'Japon']],
+        ['jp02', 'Collectionneur de talons', 'C', {submission: 5}, 'Plonge sur les chevilles sans hésitation.', ['Leglocks', 'Japon']],
+        ['jp03', 'Kamikaze', 'C', {killer: 5}, 'Prêt à mourir s\u2019il peut emporter l\u2019adversaire avec lui.', ['Sacrifice', 'Japon']],
+        ['jp04', 'Judo traditionnel', 'C', {takedown: 5}, 'Projections pures héritées du Kodokan.', ['Judo', 'Japon']],
+        ['jp05', 'Endurance zen', 'C', {recovery: 5}, 'Médite la douleur pour qu\u2019elle disparaisse.', ['Spirituel', 'Japon']],
+        ['jp06', 'Âme de Samouraï', 'C', {heart: 5}, 'La reddition est une option inconcevable.', ['Honneur', 'Japon']],
+        ['jp07', 'Discipline de fer', 'C', {discipline: 5}, 'Répète les katas jusqu\u2019à la perfection.', ['Kata', 'Japon']],
+        ['jp08', 'Frappe Karaté', 'C', {kick: 5}, 'Kicks rapides et secs qui claquent comme un fouet.', ['Karaté', 'Japon']],
+        ['jp09', 'Sang-froid abyssal', 'C', {composure: 5}, 'Rien, absolument rien, ne le fait sourciller.', ['Glace', 'Japon']],
+        ['jp10', 'Adaptabilité ninja', 'C', {adaptability: 5}, 'Mue selon le style adverse sans prévenir.', ['Ninja', 'Japon']],
+        ['jp11', 'Vitesse de l\u2019ombre', 'C', {footSpeed: 5}, 'Glisse sur le ring avec des appuis parfaits.', ['Ombre', 'Japon']],
+        ['jp12', 'Garde Kodokan', 'C', {guardWork: 5}, 'Une fois sur le dos, un nouveau combat commence.', ['Ne-Waza', 'Japon']],
+        ['jp13', 'Bushido', 'R', {fightIQ: 5, discipline: 5}, 'L\u2019intellect martial poussé à son paroxysme.', ['Maître', 'Japon']],
+        ['jp14', 'Ippon dévastateur', 'R', {takedown: 5, power: 5}, 'Jette la cible au sol pour lui casser le souffle.', ['Ippon', 'Japon']],
+        ['jp15', 'Clés des abysses', 'R', {submission: 5, adaptability: 5}, 'Tord les bras dans des angles que l\u2019anatomie renie.', ['Torture', 'Japon']],
+        ['jp16', 'Cœur de PRIDE', 'R', {heart: 5, durability: 5}, 'Encaisse les genoux à la tête avec le sourire.', ['PRIDE', 'Japon']],
+        ['jp17', 'Frappe fantôme', 'R', {handSpeed: 5, footSpeed: 5}, 'Touche la cible et disparaît immédiatement.', ['Fantôme', 'Japon']],
+        ['jp18', 'Démon d\u2019Okinawa', 'E', {submission: 10, killer: 5}, 'Trouve la soumission fatale en une fraction de seconde.', ['Terreur', 'Japon']],
+        ['jp19', 'Impassible', 'E', {composure: 10, heart: 5}, 'Refuse de montrer la moindre douleur ou peur.', ['Mur de glace', 'Japon']],
+        ['jp20', 'Le Dernier Samouraï', 'L', {fightIQ: 10, submission: 10}, 'Une légende vivante alliant technique martiale pure et art du sol.', ['Mythe', 'Japon']]
     ],
+    // ----------------------------------------------------
+    // NIGÉRIA (Striking, Allonge, Athlétisme)
+    // ----------------------------------------------------
     NG: [
-        ['ng01', 'Héritage martial', 'C', {kick: 3, footSpeed: 2}, 'Des déplacements fluides et des coups de pied venus d\'une longue tradition martiale.', ['Style', 'Nigéria']],
-        ['ng02', 'Athlète d\'élite', 'C', {cardio: 3, explosiveness: 2}, 'Une condition physique exceptionnelle permettant d\'exploser du premier au dernier round.', ['Athlète', 'Nigéria']],
-        ['ng03', 'Allonge trompeuse', 'C', {jab: 3, fightIQ: 2}, 'Utilise parfaitement sa morphologie pour toucher l\'adversaire sans jamais se faire toucher.', ['Distance', 'Nigéria']],
-        ['ng04', 'Force fonctionnelle', 'C', {tdd: 3, strength: 2}, 'Une musculature dense qui rend les tentatives de takedown adverses particulièrement inefficaces.', ['Antilutte', 'Nigéria']],
-        ['ng05', 'Feintes hypnotiques', 'C', {fightIQ: 3, adaptability: 2}, 'Multiplie les micro-mouvements pour figer la garde et l\'esprit tactique de son adversaire.', ['Feinte', 'Nigéria']]
+        ['ng01', 'Héritage royal', 'C', {kick: 5}, 'Kicks fluides avec une allonge surnaturelle.', ['Style', 'Nigéria']],
+        ['ng02', 'Génétique d\u2019élite', 'C', {explosiveness: 5}, 'Explose sur la cible comme une panthère.', ['Athlète', 'Nigéria']],
+        ['ng03', 'Trompe-l\u2019œil', 'C', {jab: 5}, 'Gère la distance de manière illisible pour l\u2019autre.', ['Distance', 'Nigéria']],
+        ['ng04', 'Force africaine', 'C', {strength: 5}, 'Force fonctionnelle terrifiante sans soulever de fonte.', ['Force pure', 'Nigéria']],
+        ['ng05', 'Danse hypnotique', 'C', {fightIQ: 5}, 'Mouvements d\u2019épaules qui figent la garde adverse.', ['Feintes', 'Nigéria']],
+        ['ng06', 'Crochet large', 'C', {hook: 5}, 'Une main lourde balancée de très loin.', ['Crochet', 'Nigéria']],
+        ['ng07', 'Cardio de savane', 'C', {cardio: 5}, 'Infatigable même dans les guerres d\u2019usure.', ['Cardio', 'Nigéria']],
+        ['ng08', 'Esquive arrière', 'C', {footSpeed: 5}, 'Se penche en arrière pour faire rater le KO.', ['Matrix', 'Nigéria']],
+        ['ng09', 'Direct foudroyant', 'C', {cross: 5}, 'Le bras arrière est un sniper lourd.', ['Sniper', 'Nigéria']],
+        ['ng10', 'Antilutte féline', 'C', {tdd: 5}, 'Des hanches fuyantes face aux lutteurs.', ['Sprawl', 'Nigéria']],
+        ['ng11', 'Patience souveraine', 'C', {composure: 5}, 'Attend calmement que l\u2019adversaire s\u2019empale.', ['Patience', 'Nigéria']],
+        ['ng12', 'Résilience du continent', 'C', {durability: 5}, 'Corps dur comme l\u2019ébène.', ['Cuir', 'Nigéria']],
+        ['ng13', 'Frappe élastique', 'R', {jab: 5, footSpeed: 5}, 'Frappe à une distance qui défie la physique.', ['Allonge', 'Nigéria']],
+        ['ng14', 'Saut de panthère', 'R', {explosiveness: 5, kick: 5}, 'Kicks sautés qui décapitent sans appel.', ['Saut', 'Nigéria']],
+        ['ng15', 'Puissance brute', 'R', {power: 5, strength: 5}, 'La force d\u2019un poids lourd dans un poids moyen.', ['Gabarit', 'Nigéria']],
+        ['ng16', 'Tacticien royal', 'R', {fightIQ: 5, adaptability: 5}, 'S\u2019ajuste et punit l\u2019adversaire au fil des rounds.', ['QI', 'Nigéria']],
+        ['ng17', 'Roi de l\u2019esquive', 'R', {composure: 5, footSpeed: 5}, 'Danse autour des parpaings sans jamais ciller.', ['Intouchable', 'Nigéria']],
+        ['ng18', 'Le Cauchemar de Lagos', 'E', {power: 10, cross: 5}, 'Une seule frappe du bras arrière éteint la lumière.', ['Mortel', 'Nigéria']],
+        ['ng19', 'L\u2019Ombre Élastique', 'E', {footSpeed: 10, fightIQ: 5}, 'Impossible à cerner, impossible à toucher.', ['Fantôme', 'Nigéria']],
+        ['ng20', 'Le Roi Africain', 'L', {power: 10, footSpeed: 10}, 'Puissance titanesque couplée à une agilité de danseur.', ['Souverain', 'Nigéria']]
     ],
+    // ----------------------------------------------------
+    // ROYAUME-UNI (Bagarre, Grit, Boxe de rue)
+    // ----------------------------------------------------
     GB: [
-        ['gb01', 'Grit britannique', 'C', {heart: 3, durability: 2}, 'Une ténacité exceptionnelle dans l\'adversité, refusant de céder le moindre centimètre.', ['Ténacité', 'Royaume-Uni']],
-        ['gb02', 'Boxe de gouttière', 'C', {clinchStr: 3, hook: 2}, 'Excellente maîtrise du dirty boxing et des frappes courtes dans les phases de clinch.', ['Dirty Boxing', 'Royaume-Uni']],
-        ['gb03', 'Le jab académique', 'C', {jab: 3, fightIQ: 2}, 'Un jab du bras avant piquant et répétitif qui détruit la vision et le timing adverse.', ['Jab', 'Royaume-Uni']],
-        ['gb04', 'Pression constante', 'C', {aggression: 3, cardio: 2}, 'Avance continuellement en fermant les angles, forçant l\'adversaire à combattre sur le reculoir.', ['Pression', 'Royaume-Uni']],
-        ['gb05', 'Mental de hooligan', 'C', {power: 3, killer: 2}, 'Se nourrit de l\'énergie de la foule pour transformer le combat en une véritable bagarre de rue.', ['Hooligan', 'Royaume-Uni']]
+        ['gb01', 'Grit britannique', 'C', {heart: 5}, 'Refuse obstinément de perdre. Trop fier pour ça.', ['Ténacité', 'Royaume-Uni']],
+        ['gb02', 'Dirty Boxing', 'C', {clinchStr: 5}, 'Uppercuts et coudes illégaux dans le clinch.', ['Bagarre', 'Royaume-Uni']],
+        ['gb03', 'Jab de pub', 'C', {jab: 5}, 'Piquant, agaçant, répété jusqu\u2019à la folie.', ['Jab', 'Royaume-Uni']],
+        ['gb04', 'Marcheur hooligan', 'C', {aggression: 5}, 'Avance vers l\u2019ennemi en l\u2019insultant.', ['Pression', 'Royaume-Uni']],
+        ['gb05', 'Menton de brique', 'C', {durability: 5}, 'Encaisse les chopes de bière et les overhands.', ['Menton', 'Royaume-Uni']],
+        ['gb06', 'Vitesse anglaise', 'C', {handSpeed: 5}, 'Combos de boxe rapides inspirés du noble art.', ['Boxe', 'Royaume-Uni']],
+        ['gb07', 'Gaucher vicieux', 'C', {cross: 5}, 'Bras arrière sec et précis.', ['Direct', 'Royaume-Uni']],
+        ['gb08', 'Défense rustique', 'C', {tdd: 5}, 'Bourrine les hanches pour éviter d\u2019aller au sol.', ['Sprawl lourd', 'Royaume-Uni']],
+        ['gb09', 'Crochet de rue', 'C', {hook: 5}, 'Court, sale et efficace.', ['Crochet', 'Royaume-Uni']],
+        ['gb10', 'Cardio pluvieux', 'C', {cardio: 5}, 'Brave les guerres longues sans fatigue apparente.', ['Endurance', 'Royaume-Uni']],
+        ['gb11', 'Tueur au sol', 'C', {gnp: 5}, 'Au sol, il tape jusqu\u2019à ce que l\u2019arbitre le tire.', ['GNP', 'Royaume-Uni']],
+        ['gb12', 'Arrogance anglaise', 'C', {composure: 5}, 'Baisse la garde avec le sourire après un coup pris.', ['Mental', 'Royaume-Uni']],
+        ['gb13', 'Bagarre de ruelle', 'R', {clinchStr: 5, hook: 5}, 'Détruit la garde adverse au corps-à-corps.', ['Dirty', 'Royaume-Uni']],
+        ['gb14', 'Cœur de Lion', 'R', {heart: 5, durability: 5}, 'Prend un knockdown, se relève plus dangereux.', ['Grit', 'Royaume-Uni']],
+        ['gb15', 'Sniper londonien', 'R', {cross: 5, handSpeed: 5}, 'Le bras arrière ne pardonne aucune erreur.', ['Sniper', 'Royaume-Uni']],
+        ['gb16', 'Pression hooligan', 'R', {aggression: 5, cardio: 5}, 'Asphyxie la cible par une marche en avant totale.', ['Bulldozer', 'Royaume-Uni']],
+        ['gb17', 'Vice de la rue', 'R', {fightIQ: 5, killer: 5}, 'Voit la faille quand le combat devient chaotique.', ['Opportuniste', 'Royaume-Uni']],
+        ['gb18', 'Roi des Pubs', 'E', {heart: 10, hook: 5}, 'Bagarreur légendaire qui finit toujours par gagner à l\u2019usure.', ['Terreur', 'Royaume-Uni']],
+        ['gb19', 'L\u2019Aristocrate', 'E', {handSpeed: 10, fightIQ: 5}, 'Boxe anglaise parfaite, élégante et destructrice.', ['Noble Art', 'Royaume-Uni']],
+        ['gb20', 'L\u2019Empire', 'L', {heart: 10, clinchStr: 10}, 'La rudesse absolue mêlée à un courage sans limite.', ['Mythe anglais', 'Royaume-Uni']]
     ],
+    // ----------------------------------------------------
+    // RUSSIE (Sambo militaire, Froid, Castings Punches)
+    // ----------------------------------------------------
     RU: [
-        ['ru01', 'Sambo militaire', 'C', {takedown: 3, submission: 2}, 'Un style de corps-à-corps extrêmement rude axé sur les projections dévastatrices et les clés rapides.', ['Sambo', 'Russie']],
-        ['ru02', 'Casting Punch', 'C', {cross: 3, power: 2}, 'Un overhand jeté avec tout le poids du corps, masquant souvent une vicieuse entrée en lutte.', ['Overhand', 'Russie']],
-        ['ru03', 'Endurance sibérienne', 'C', {cardio: 3, recovery: 2}, 'Conditionné dans un climat hostile, ne montre aucun signe de fatigue physique ou psychologique.', ['Sibérie', 'Russie']],
-        ['ru04', 'Maître de la gravité', 'C', {tdd: 3, topControl: 2}, 'Possède un équilibre parfait qui rend presque impossible de le mettre sur le dos face contre terre.', ['Équilibre', 'Russie']],
-        ['ru05', 'Discipline de fer', 'C', {discipline: 3, composure: 2}, 'Applique scrupuleusement la stratégie établie dans le coin sans jamais céder à l\'émotion pure.', ['Discipline', 'Russie']]
+        ['ru01', 'Sambo militaire', 'C', {takedown: 5}, 'Lutte sans kimono brutale et directe.', ['Sambo', 'Russie']],
+        ['ru02', 'Casting Punch', 'C', {cross: 5}, 'Poing lourd jeté avec le poids du corps.', ['Overhand', 'Russie']],
+        ['ru03', 'Sang de glace', 'C', {composure: 5}, 'Absolument aucune émotion faciale.', ['Glace', 'Russie']],
+        ['ru04', 'Endurance sibérienne', 'C', {cardio: 5}, 'Ne ressent ni la fatigue ni le froid.', ['Sibérie', 'Russie']],
+        ['ru05', 'Force d\u2019ours', 'C', {strength: 5}, 'Prend son adversaire et le plie en deux.', ['Force', 'Russie']],
+        ['ru06', 'Clés sauvages', 'C', {submission: 5}, 'Tord les bras et jambes avec violence.', ['Soumission', 'Russie']],
+        ['ru07', 'Discipline de l\u2019Armée', 'C', {discipline: 5}, 'Applique le plan de match comme un robot.', ['Machine', 'Russie']],
+        ['ru08', 'Étau soviétique', 'C', {topControl: 5}, 'Poids mort sur la cible au sol. Irrespirable.', ['Contrôle', 'Russie']],
+        ['ru09', 'Crochet de fer', 'C', {hook: 5}, 'Une enclume jetée à bout de bras.', ['Crochet', 'Russie']],
+        ['ru10', 'Défense rocailleuse', 'C', {durability: 5}, 'Prend les coups de pied dans les côtes sans broncher.', ['Roc', 'Russie']],
+        ['ru11', 'Anti-lutte lourde', 'C', {tdd: 5}, 'Hanches de plomb, impossible à balayer.', ['Base', 'Russie']],
+        ['ru12', 'GNP marteau', 'C', {gnp: 5}, 'Écrase la tête de la victime contre le tapis.', ['Destruction', 'Russie']],
+        ['ru13', 'Garde du Tsar', 'R', {topControl: 5, strength: 5}, 'Personne ne sort de sous son contrôle.', ['Écrasement', 'Russie']],
+        ['ru14', 'Missile balistique', 'R', {cross: 5, power: 5}, 'Le Casting Punch éteint instantanément les lumières.', ['KO', 'Russie']],
+        ['ru15', 'Tueur silencieux', 'R', {killer: 5, composure: 5}, 'Achève le combat sans cligner des yeux.', ['Froid', 'Russie']],
+        ['ru16', 'Machine hivernale', 'R', {cardio: 5, discipline: 5}, 'Un automate qui avance round après round.', ['Cyborg', 'Russie']],
+        ['ru17', 'Arrachage d\u2019os', 'R', {submission: 5, strength: 5}, 'La technique importe peu face à sa force brute.', ['Broyage', 'Russie']],
+        ['ru18', 'L\u2019Ours Rouge', 'E', {strength: 10, topControl: 5}, 'Une montagne humaine inarrêtable une fois au corps-à-corps.', ['Prédateur', 'Russie']],
+        ['ru19', 'Zéro Absolu', 'E', {composure: 10, power: 5}, 'Un tueur méthodique que rien ne perturbe.', ['Glace', 'Russie']],
+        ['ru20', 'La Mère Patrie', 'L', {power: 10, takedown: 10}, 'Frappe comme une bombe, lutte comme un tank.', ['Légende russe', 'Russie']]
     ],
+    // ----------------------------------------------------
+    // MEXIQUE (Boxe, Foie, Cœur, Machismo)
+    // ----------------------------------------------------
     MX: [
-        ['mx01', 'Le crochet au foie', 'C', {hook: 3, killer: 2}, 'Vise inlassablement le foie avec des crochets gauches d\'une précision diabolique.', ['Boxe mexicaine', 'Mexique']],
-        ['mx02', 'Menton d\'Acapulco', 'C', {durability: 3, heart: 2}, 'Encaisse les coups les plus lourds sans jamais reculer ni montrer la moindre douleur.', ['Menton', 'Mexique']],
-        ['mx03', 'Volume asphyxiant', 'C', {handSpeed: 3, cardio: 2}, 'Un débit de coups qui ne s\'arrête jamais, noyant l\'adversaire sous la pression constante.', ['Volume', 'Mexique']],
-        ['mx04', 'Guerre de tranchées', 'C', {clinchStr: 3, aggression: 2}, 'Excellence absolue dans le combat de très près, où la violence atteint son paroxysme.', ['Bagarre', 'Mexique']],
-        ['mx05', 'Cœur de guerrier', 'C', {heart: 3, recovery: 2}, 'Plus le combat est sanglant et difficile, plus son esprit combatif se renforce.', ['Guerrier', 'Mexique']]
+        ['mx01', 'Chasseur de foie', 'C', {hook: 5}, 'Crochets gauches terrifiants sous les côtes.', ['Boxe mexicaine', 'Mexique']],
+        ['mx02', 'Menton d\u2019Acapulco', 'C', {durability: 5}, 'Prend un parpaing, avance et sourit.', ['Menton', 'Mexique']],
+        ['mx03', 'Cœur Aztèque', 'C', {heart: 5}, 'Le sang qui coule le rend plus dangereux.', ['Guerrier', 'Mexique']],
+        ['mx04', 'Volume asphyxiant', 'C', {handSpeed: 5}, 'Débit de coups de poings digne d\u2019une mitraillette.', ['Volume', 'Mexique']],
+        ['mx05', 'Guerre de tranchées', 'C', {aggression: 5}, 'Transforme le combat en bagarre de cabine téléphonique.', ['Bagarre', 'Mexique']],
+        ['mx06', 'Cardio des hauts-plateaux', 'C', {cardio: 5}, 'Poumons forgés dans l\u2019altitude mexicaine.', ['Cardio', 'Mexique']],
+        ['mx07', 'Uppercut destructeur', 'C', {power: 5}, 'Coup de poing remontant pour décapiter la cible.', ['Uppercut', 'Mexique']],
+        ['mx08', 'Clinch sale', 'C', {clinchStr: 5}, 'Ne lâche rien au corps-à-corps, frappe partout.', ['Dirty', 'Mexique']],
+        ['mx09', 'Tueur instinctif', 'C', {killer: 5}, 'Flot de sang = instinct de finition immédiat.', ['Finition', 'Mexique']],
+        ['mx10', 'Défense à l\u2019esquive', 'C', {footSpeed: 5}, 'Roule les épaules avec l\u2019art de la boxe.', ['Esquive', 'Mexique']],
+        ['mx11', 'Takedown de rue', 'C', {takedown: 5}, 'Amène au sol pour continuer la bagarre.', ['Lutte sale', 'Mexique']],
+        ['mx12', 'Récupération folle', 'C', {recovery: 5}, 'Est groggy au R1, revient neuf au R2.', ['Zombie', 'Mexique']],
+        ['mx13', 'Frappe hépatique', 'R', {hook: 5, power: 5}, 'Le crochet au foie qui plie l\u2019adversaire en deux.', ['Destruction', 'Mexique']],
+        ['mx14', 'Guerre absolue', 'R', {aggression: 5, heart: 5}, 'Le combat du siècle à chaque sortie.', ['Bain de sang', 'Mexique']],
+        ['mx15', 'Trombe de poings', 'R', {handSpeed: 5, cardio: 5}, 'Des combos à 12 coups qui ne s\u2019arrêtent jamais.', ['Mitraillette', 'Mexique']],
+        ['mx16', 'Tête de brique', 'R', {durability: 5, recovery: 5}, 'Indéboulonnable, encaisse l\u2019enfer en riant.', ['Roc', 'Mexique']],
+        ['mx17', 'Le Brawler', 'R', {power: 5, clinchStr: 5}, 'Massacreur en combat très très rapproché.', ['Boucher', 'Mexique']],
+        ['mx18', 'Le Dieu de la Guerre', 'E', {heart: 10, hook: 5}, 'Insubmersible, il draine l\u2019âme de l\u2019adversaire.', ['Guerrier Aztèque', 'Mexique']],
+        ['mx19', 'L\u2019Assassin au Sombrero', 'E', {handSpeed: 10, cardio: 5}, 'Submerge la cible sous un océan de coups.', ['Océan', 'Mexique']],
+        ['mx20', 'Légende de Tijuana', 'L', {heart: 10, durability: 10}, 'Une résistance à la douleur qui défie la médecine moderne.', ['Mythe mexicain', 'Mexique']]
     ],
+    // ----------------------------------------------------
+    // IRLANDE (Sniper, Trashtalk, Explosivité)
+    // ----------------------------------------------------
     IE: [
-        ['ie01', 'Le sniper celte', 'C', {cross: 3, fightIQ: 2}, 'Un bras arrière foudroyant qui trouve le menton adverse avec une précision diabolique.', ['Sniper', 'Irlande']],
-        ['ie02', 'Trash talk psychologique', 'C', {aggression: 3, killer: 2}, 'Brise mentalement son adversaire avant et pendant le combat, le forçant à commettre des erreurs.', ['Psychologie', 'Irlande']],
-        ['ie03', 'Gestion de la distance', 'C', {footSpeed: 3, tdd: 2}, 'Utilise une posture de karaté très large pour entrer et sortir de la zone de danger comme un éclair.', ['Mobilité', 'Irlande']],
-        ['ie04', 'Explosivité du premier round', 'C', {explosiveness: 3, power: 2}, 'Une capacité à générer des dégâts critiques dès les premières secondes d\'affrontement dans la cage.', ['Blitz', 'Irlande']],
-        ['ie05', 'Combinaisons fluides', 'C', {handSpeed: 3, adaptability: 2}, 'Enchaîne les poings avec un relâchement et une vitesse de bras d\'une beauté fatale.', ['Fluidité', 'Irlande']]
+        ['ie01', 'Sniper celte', 'C', {cross: 5}, 'Bras arrière millimétré qui trouve toujours la cible.', ['Sniper', 'Irlande']],
+        ['ie02', 'Trash talker', 'C', {aggression: 5}, 'Détruit la confiance adverse par la parole.', ['Psychologie', 'Irlande']],
+        ['ie03', 'Jeu de distance', 'C', {footSpeed: 5}, 'Posture large, in-and-out perpétuel.', ['Mobilité', 'Irlande']],
+        ['ie04', 'Blitz du R1', 'C', {explosiveness: 5}, 'Démarre le combat à 200km/h pour le KO rapide.', ['Blitz', 'Irlande']],
+        ['ie05', 'Combos d\u2019escrimeur', 'C', {handSpeed: 5}, 'Flot de poings rapides et relâchés.', ['Fluidité', 'Irlande']],
+        ['ie06', 'Main gauche', 'C', {power: 5}, 'Une patate de forain déguisée en technique pure.', ['Frappe', 'Irlande']],
+        ['ie07', 'Calme du pub', 'C', {composure: 5}, 'Ne cède jamais à la panique sous le feu.', ['Sang-froid', 'Irlande']],
+        ['ie08', 'Lecture de jeu', 'C', {fightIQ: 5}, 'Calcule la distance parfaite au premier coup d\u2019œil.', ['QI', 'Irlande']],
+        ['ie09', 'High Kick masqué', 'C', {kick: 5}, 'Coup de pied haut fouetté sans prévenir.', ['Kick', 'Irlande']],
+        ['ie10', 'Défense glissante', 'C', {tdd: 5}, 'Fuit les hanches du lutteur comme une anguille.', ['Esquive', 'Irlande']],
+        ['ie11', 'Finition froide', 'C', {killer: 5}, 'Voit l\u2019adversaire chanceler et l\u2019éteint sans pitié.', ['Finition', 'Irlande']],
+        ['ie12', 'Grit caché', 'C', {heart: 5}, 'Derrière l\u2019arrogance se cache une vraie dureté.', ['Cœur', 'Irlande']],
+        ['ie13', 'Main de Dieu', 'R', {cross: 5, power: 5}, 'Le bras arrière met fin au combat au premier contact.', ['One-punch', 'Irlande']],
+        ['ie14', 'Guerre psychologique', 'R', {aggression: 5, fightIQ: 5}, 'L\u2019adversaire a perdu le combat avant d\u2019entrer dans la cage.', ['Génie mental', 'Irlande']],
+        ['ie15', 'Fantôme du Ring', 'R', {footSpeed: 5, handSpeed: 5}, 'Touche et ressort avant le contre adverse.', ['In-out', 'Irlande']],
+        ['ie16', 'Explosion irlandaise', 'R', {explosiveness: 5, killer: 5}, 'Une machine à highlights dans la première minute.', ['Blitz mortel', 'Irlande']],
+        ['ie17', 'Œil de Lynx', 'R', {composure: 5, cross: 5}, 'Contre le moindre pas en avant de manière clinique.', ['Interception', 'Irlande']],
+        ['ie18', 'Le Roi de Dublin', 'E', {power: 10, explosiveness: 5}, 'Un striker terrifiant de précision et de violence.', ['Légende', 'Irlande']],
+        ['ie19', 'L\u2019Ombre Celte', 'E', {footSpeed: 10, fightIQ: 5}, 'Intouchable, insaisissable, rend les lutteurs fous.', ['Fantôme', 'Irlande']],
+        ['ie20', 'Le Mystic', 'L', {cross: 10, fightIQ: 10}, 'Prédit le round du KO, et l\u2019exécute à la seconde près.', ['Mythe', 'Irlande']]
     ],
+    // ----------------------------------------------------
+    // CORÉE (Zombie, Taekwondo, Menton de fer)
+    // ----------------------------------------------------
     KR: [
-        ['kr01', 'Esprit du Zombie', 'C', {heart: 3, durability: 2}, 'Continue d\'avancer sous les coups avec une résilience qui terrifie la plupart des adversaires.', ['Résilience', 'Corée']],
-        ['kr02', 'Frappe taekwondo', 'C', {kick: 3, explosiveness: 2}, 'Des coups de pied retournés et sautés d\'une précision et d\'une rapidité redoutables.', ['Taekwondo', 'Corée']],
-        ['kr03', 'Bagarre de Séoul', 'C', {hook: 3, killer: 2}, 'Accepte volontiers l\'échange de coups directs dans la poche pour trouver le KO instantané.', ['Brawl', 'Corée']],
-        ['kr04', 'Garde impénétrable', 'C', {composure: 3, tdd: 2}, 'Garde son calme sous une pression extrême et défend les amenées au sol avec lucidité.', ['Défense', 'Corée']],
-        ['kr05', 'Conditionnement', 'C', {cardio: 3, recovery: 2}, 'Un entraînement spartiate qui lui permet de récupérer entre les rounds de manière optimale.', ['Récupération', 'Corée']]
+        ['kr01', 'Esprit Zombie', 'C', {heart: 5}, 'Avance de manière désarticulée sous les bombes.', ['Zombie', 'Corée']],
+        ['kr02', 'Taekwondo pur', 'C', {kick: 5}, 'Kicks retournés spectaculaires et mortels.', ['Taekwondo', 'Corée']],
+        ['kr03', 'Menton en titane', 'C', {durability: 5}, 'Prend un coup de pied dans la tête et ne bronche pas.', ['Menton', 'Corée']],
+        ['kr04', 'Bagarre de Séoul', 'C', {hook: 5}, 'Cherche l\u2019échange au centre du ring pour le KO.', ['Brawl', 'Corée']],
+        ['kr05', 'Défense froide', 'C', {composure: 5}, 'Garde le visage impassible face à la tempête.', ['Sang-froid', 'Corée']],
+        ['kr06', 'Récupération martiale', 'C', {recovery: 5}, 'Le conditionnement du service militaire porte ses fruits.', ['Récupération', 'Corée']],
+        ['kr07', 'Vitesse d\u2019exécution', 'C', {footSpeed: 5}, 'Déplacements sautillants typiques du kickboxing.', ['Mobilité', 'Corée']],
+        ['kr08', 'Judo scolaire', 'C', {takedown: 5}, 'Projections pures apprises très jeune.', ['Judo', 'Corée']],
+        ['kr09', 'Antilutte féroce', 'C', {tdd: 5}, 'Sprawle et renvoie un crochet instantané.', ['Défense', 'Corée']],
+        ['kr10', 'Direct chirurgical', 'C', {cross: 5}, 'Une droite droite comme un i qui fend la garde.', ['Sniper', 'Corée']],
+        ['kr11', 'Cardio constant', 'C', {cardio: 5}, 'Ne baisse jamais les bras de fatigue.', ['Endurance', 'Corée']],
+        ['kr12', 'Finition brutale', 'C', {killer: 5}, 'N\u2019a aucune pitié pour un adversaire qui tombe.', ['Tueur', 'Corée']],
+        ['kr13', 'Mort-vivant', 'R', {heart: 5, durability: 5}, 'Plus il prend de dégâts, plus il devient menaçant.', ['Zombie', 'Corée']],
+        ['kr14', 'Tornade coréenne', 'R', {kick: 5, explosiveness: 5}, 'Kicks sautés à 360° qui arrachent la tête.', ['Coup retourné', 'Corée']],
+        ['kr15', 'Guerre de tranchées', 'R', {hook: 5, composure: 5}, 'Détruit la cible de près sans cligner des yeux.', ['Brawl', 'Corée']],
+        ['kr16', 'Conditionnement total', 'R', {recovery: 5, cardio: 5}, 'Est neuf au début de chaque nouveau round.', ['Machine', 'Corée']],
+        ['kr17', 'Contre foudroyant', 'R', {cross: 5, fightIQ: 5}, 'Punit avec l\u2019exact bras arrière au bon timing.', ['Sniper', 'Corée']],
+        ['kr18', 'L\u2019Increvable', 'E', {durability: 10, heart: 5}, 'Un mur de chair qui encaisse l\u2019apocalypse en souriant.', ['Roc', 'Corée']],
+        ['kr19', 'Maître du Taekwondo', 'E', {kick: 10, footSpeed: 5}, 'Frappe avec les jambes comme d\u2019autres avec les poings.', ['Légende pied', 'Corée']],
+        ['kr20', 'Le Zombie Coréen', 'L', {heart: 10, hook: 10}, 'Une légende de la guerre. Il ne reculera littéralement jamais.', ['Mythe Coréen', 'Corée']]
     ],
+    // ----------------------------------------------------
+    // CAMEROUN (Force destructrice, Predator, Athlète)
+    // ----------------------------------------------------
     CM: [
-        ['cm01', 'Force de la nature', 'C', {power: 3, strength: 2}, 'Une puissance de frappe terrifiante capable de déconnecter n\'importe qui sur un seul coup.', ['Destruction', 'Cameroun']],
-        ['cm02', 'Instinct du prédateur', 'C', {killer: 3, aggression: 2}, 'Dès qu\'une faiblesse est repérée, il se jette sur sa proie pour terminer le combat brutalement.', ['Finition', 'Cameroun']],
-        ['cm03', 'Menton de roc', 'C', {durability: 3, heart: 2}, 'Une constitution physique hors norme qui lui permet d\'encaisser les frappes les plus lourdes.', ['Encaisseur', 'Cameroun']],
-        ['cm04', 'Uppercut destructeur', 'C', {hook: 3, explosiveness: 2}, 'Un coup remontant depuis les hanches qui soulève l\'adversaire avant de l\'envoyer au tapis.', ['Uppercut', 'Cameroun']],
-        ['cm05', 'Sprawl explosif', 'C', {tdd: 3, power: 2}, 'Rejette violemment les lutteurs vers le sol avec des hanches d\'une lourdeur insoupçonnée.', ['Antilutte', 'Cameroun']]
+        ['cm01', 'Force de la Nature', 'C', {power: 5}, 'Une puissance brute inexplicable biologiquement.', ['Destruction', 'Cameroun']],
+        ['cm02', 'Le Prédateur', 'C', {killer: 5}, 'Odeur du sang = ruée frénétique vers le KO.', ['Finition', 'Cameroun']],
+        ['cm03', 'Bloc de granit', 'C', {durability: 5}, 'Les poings de l\u2019adversaire rebondissent sur sa tête.', ['Roc', 'Cameroun']],
+        ['cm04', 'Uppercut de l\u2019enfer', 'C', {hook: 5}, 'Soulève des hommes de 100 kilos avec un seul poing.', ['Uppercut', 'Cameroun']],
+        ['cm05', 'Hanches de sable', 'C', {tdd: 5}, 'Lourd comme du plomb, impossible à amener au sol.', ['Antilutte', 'Cameroun']],
+        ['cm06', 'Saut de lion', 'C', {explosiveness: 5}, 'Franchit 3 mètres en un battement de cil.', ['Vitesse', 'Cameroun']],
+        ['cm07', 'Musculature dense', 'C', {strength: 5}, 'Force fonctionnelle de travailleur manuel.', ['Gabarit', 'Cameroun']],
+        ['cm08', 'Jab bélier', 'C', {jab: 5}, 'Son simple jab assomme les poids légers.', ['Jab lourd', 'Cameroun']],
+        ['cm09', 'Survie extrême', 'C', {heart: 5}, 'A vécu l\u2019enfer. Une cage ne l\u2019effraie pas.', ['Mental', 'Cameroun']],
+        ['cm10', 'Cardio d\u2019explosion', 'C', {cardio: 5}, 'Un réservoir taillé pour 5 minutes de tempête.', ['Blitz', 'Cameroun']],
+        ['cm11', 'GNP marteau', 'C', {gnp: 5}, 'Chaque frappe au sol résonne comme un coup de fusil.', ['GNP', 'Cameroun']],
+        ['cm12', 'Pression muette', 'C', {aggression: 5}, 'Avance lentement, tel un monstre de film d\u2019horreur.', ['Traque', 'Cameroun']],
+        ['cm13', 'Faux du faucheur', 'R', {power: 5, hook: 5}, 'L\u2019uppercut ou le crochet finalent les carrières.', ['Destruction', 'Cameroun']],
+        ['cm14', 'Bête fauve', 'R', {explosiveness: 5, killer: 5}, 'Bondit sur la cible sonnée avec atrocité.', ['Fauve', 'Cameroun']],
+        ['cm15', 'Mur d\u2019ébène', 'R', {tdd: 5, strength: 5}, 'Les lutteurs s\u2019écrasent contre lui comme des insectes.', ['Mur', 'Cameroun']],
+        ['cm16', 'Poings de fer', 'R', {durability: 5, power: 5}, 'Frappe et encaisse sans commune mesure.', ['Acier', 'Cameroun']],
+        ['cm17', 'Résilience du désert', 'R', {heart: 5, composure: 5}, 'Rien ne le fait paniquer, il a vu pire.', ['Glace', 'Cameroun']],
+        ['cm18', 'Le Roi de la Savane', 'E', {power: 10, explosiveness: 5}, 'Un monstre physique qui décapite ses opposants.', ['Roi', 'Cameroun']],
+        ['cm19', 'L\u2019Enclume', 'E', {strength: 10, tdd: 5}, 'Une force brute impossible à déplacer d\u2019un pouce.', ['Titan', 'Cameroun']],
+        ['cm20', 'Le Prédateur Absolu', 'L', {power: 10, killer: 10}, 'Touche une fois. Le combat est fini. Point barre.', ['Mythe Africain', 'Cameroun']]
     ],
+    // ----------------------------------------------------
+    // GÉORGIE (Lutte Caucasienne, Boxe Lourdes, Cardio)
+    // ----------------------------------------------------
     GE: [
-        ['ge01', 'Lutte caucasienne', 'C', {takedown: 3, cardio: 2}, 'Enchaîne les tentatives de projection à un rythme effréné jusqu\'à ce que l\'adversaire craque.', ['Lutte', 'Géorgie']],
-        ['ge02', 'Crochet de Tbilissi', 'C', {hook: 3, power: 2}, 'Des poings de brique lancés avec une technique parfaite pour casser les gardes les plus solides.', ['Crochet lourd', 'Géorgie']],
-        ['ge03', 'Grappling féroce', 'C', {topControl: 3, aggression: 2}, 'Une fois au sol, il ne laisse aucun espace pour respirer et cherche à détruire l\'opposant.', ['Pression au sol', 'Géorgie']],
-        ['ge04', 'Mental de fer', 'C', {heart: 3, composure: 2}, 'Une détermination sans faille face à l\'adversité, n\'acceptant jamais la position de dominé.', ['Mental', 'Géorgie']],
-        ['ge05', 'Conditionnement total', 'C', {cardio: 3, durability: 2}, 'Un corps forgé dans les salles d\'entraînement les plus rudes pour ne jamais baisser de rythme.', ['Endurance', 'Géorgie']]
+        ['ge01', 'Lutte caucasienne', 'C', {takedown: 5}, 'Takedown constant, lourd et épuisant.', ['Lutte', 'Géorgie']],
+        ['ge02', 'Crochet géorgien', 'C', {hook: 5}, 'Crochet du gauche jeté avec haine.', ['Boxe lourde', 'Géorgie']],
+        ['ge03', 'Grappling féroce', 'C', {topControl: 5}, 'Broie la cible au sol pour la faire taper.', ['Contrôle', 'Géorgie']],
+        ['ge04', 'Mental d\u2019acier', 'C', {heart: 5}, 'Un esprit de guerre qui ne recule jamais.', ['Cœur', 'Géorgie']],
+        ['ge05', 'Poumons de montagne', 'C', {cardio: 5}, 'Cardio inépuisable même au 5ème round.', ['Endurance', 'Géorgie']],
+        ['ge06', 'Judo brutal', 'C', {strength: 5}, 'Projections héritées du judo soviétique.', ['Judo', 'Géorgie']],
+        ['ge07', 'Sambo de Tbilissi', 'C', {submission: 5}, 'Clés de bras vicieuses sorties de nulle part.', ['Sambo', 'Géorgie']],
+        ['ge08', 'Défense en bloc', 'C', {durability: 5}, 'Prend les frappes sur le front et sourit.', ['Roc', 'Géorgie']],
+        ['ge09', 'Pression constante', 'C', {aggression: 5}, 'Marche en avant en lançant des bombes.', ['Pression', 'Géorgie']],
+        ['ge10', 'Antilutte passive', 'C', {tdd: 5}, 'Bloque avec la hanche sans effort visible.', ['Défense', 'Géorgie']],
+        ['ge11', 'GNP hargneux', 'C', {gnp: 5}, 'Coudes et poings lâchés avec violence au sol.', ['GNP', 'Géorgie']],
+        ['ge12', 'Vitesse surprenante', 'C', {footSpeed: 5}, 'Gabarit lourd mais déplacement ultra-véloce.', ['Vélocité', 'Géorgie']],
+        ['ge13', 'Tornade de lutte', 'R', {takedown: 5, cardio: 5}, 'Une machine à takedown qui ne fatigue jamais.', ['Machine', 'Géorgie']],
+        ['ge14', 'Poing de Tbilissi', 'R', {hook: 5, power: 5}, 'Un seul crochet suffit à briser la garde.', ['Destruction', 'Géorgie']],
+        ['ge15', 'Broyeur au sol', 'R', {topControl: 5, strength: 5}, 'Contrôle écrasant interdisant toute fuite.', ['Étau', 'Géorgie']],
+        ['ge16', 'Cœur caucasien', 'R', {heart: 5, durability: 5}, 'Prend les pires KO potentiels et continue.', ['Increvable', 'Géorgie']],
+        ['ge17', 'Guerrier complet', 'R', {takedown: 5, hook: 5}, 'Frappe lourd, lutte lourd. Zéro respiration.', ['Hybride', 'Géorgie']],
+        ['ge18', 'Le Monstre du Caucase', 'E', {cardio: 10, takedown: 5}, 'Épuise littéralement la vie de tous ses adversaires.', ['Usure', 'Géorgie']],
+        ['ge19', 'L\u2019Exécuteur', 'E', {power: 10, hook: 5}, 'Frappe avec une puissance tétanisante.', ['Finition', 'Géorgie']],
+        ['ge20', 'Le Roi de Géorgie', 'L', {takedown: 10, power: 10}, 'Une légende alliant la lutte de l\u2019Est et les poings d\u2019acier.', ['Mythe Géorgien', 'Géorgie']]
     ]
 };
 
+// On enregistre les tableaux dans le dictionnaire central SKILLS
 regSkills(SK_KARATE, 'style', 'karate');
 regSkills(SK_SAMBO, 'style', 'sambo');
 regSkills(SK_KICKBOXER, 'style', 'kickboxer');
@@ -545,6 +854,7 @@ regSkills(SK_BJJ, 'style', 'bjj');
 regSkills(SK_WRESTLER, 'style', 'wrestler');
 regSkills(SK_BOXER, 'style', 'boxer');
 regSkills(SK_MMA, 'style', 'mma');
+
 regSkills(SK_GENETIC, 'gen', null);
 regSkills(SK_META, 'meta', null);
 for(const ck in SK_COUNTRY){ regSkills(SK_COUNTRY[ck], 'country', ck); }
