@@ -19,6 +19,12 @@ const clamp=(v,lo=1,hi=100)=>v<lo?lo:v>hi?hi:v;
 function gauss(m,sd,lo,hi){ let u=0,v=0; while(!u)u=rnd(); while(!v)v=rnd(); let g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); let x=Math.round(m+g*sd); if(lo!=null)x=Math.max(lo,x); if(hi!=null)x=Math.min(hi,x); return x; }
 const sigmoid=x=>1/(1+Math.exp(-x));
 const d20=v=>Math.max(1,Math.min(20,Math.round(v/5)));   // /100 -> /20 affiché
+/* ==== [ANCRE: IS_DECISION_LIKE] — un seul point de vérité pour "ce combat s'est
+   terminé aux cartes des juges" (Décision, Décision partagée, OU Égalité).
+   Avant : 13 vérifications startsWith('Déc') éparpillées dans le code, toutes
+   cassées par l'ajout du Draw ('Égalité' ne commence pas par 'Déc'). ==== */
+function isDecisionLike(m){ return !!m && (m.startsWith('Déc')||m==='Égalité'); }
+/* ==== [FIN ANCRE] ==== */
 
 /* --------------------------- 30 ATTRIBUTS --------------------------------- */
 const ATTR={
