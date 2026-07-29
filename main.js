@@ -5,7 +5,7 @@
    compétence est {id,name,rar,fx,desc,tags,fam,key}. rar ∈ C/R/E/L/M
    (barème du plan §18.6). N'empêche jamais le jeu de démarrer : les erreurs
    sont seulement journalisées en console pour diagnostic. */
-const RAR_TOTAL={C:5,R:9,E:15,L:22,M:32};
+const RAR_TOTAL={C:5,R:10,E:15,L:20,M:30};
 function validateSkills(){
   const errs=[], seen=new Set();
   for(const s of SKILLS){
