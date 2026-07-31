@@ -130,16 +130,23 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
   for(let i=0;i<toGenerate;i++){ const lv=clamp(base+RI(-10,14),20,97);
     const age=isAmateur?RI(17,24):RI(22,35);
     const o=makeFighter({gender:f.gender,div:f.div,level:lv,potential:lv+RI(2,12),age});
+    o.org=f.org; // bug confirmé et corrigé : restait à 0 par défaut, faussant le x1.4 Pacific Championship
     o.W=isAmateur?RI(0,15):RI(6,24); o.L=isAmateur?RI(0,6):RI(1,8);
     o.ko=RI(0,o.W);
     o.streak=(o.L===0)?o.W:RI(-2,Math.min(5,o.W));
     if(!isAmateur) o.amaRec={W:RI(2,12),L:RI(0,4)};
+    if(f.org>=3){ // durcissement de l'IA en ligue haute — évite les victoires faciles par spam
+      o.attrs.tdd=clamp(o.attrs.tdd+RI(8,16),1,100);
+      o.attrs.fightIQ=clamp(o.attrs.fightIQ+RI(6,12),1,100);
+      o.attrs.durability=clamp(o.attrs.durability+RI(5,10),1,100);
+      o.overall=overall(o);
+    }
     // le PNJ est censé être établi DANS cette orga depuis un moment — sans ça,
-    // la formule 80/20 (orgWins pèse 80%) donnerait un roster entièrement plat à 0
-    if(!isAmateur) o.orgWins=Math.max(0,Math.round((o.W-o.L)*0.7)+RI(-1,2));
+    // la dynamique Elo (orgElo pèse 80%) donnerait un roster entièrement plat
+    if(!isAmateur){ const bias=Math.round((o.W-o.L)*18); o.orgElo=eloBaseline(f.org,o.overall)+bias+RI(-40,40); o.careerElo=eloBaseline(f.org,o.overall)+Math.round(bias*0.6); }
     pool.push(o); }
   const ranked=rankPool(pool);
-  if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgWins=Math.max(ranked[0].orgWins||0,RI(9,16)); }
+  if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgElo=Math.max(ranked[0].orgElo||0,eloBaseline(f.org,ranked[0].overall)+RI(150,300)); }
   return ranked;
 }
 function divRank(f){ return rankPool(G.roster.filter(o=>!o.champion).concat([f])).findIndex(o=>o===f)+1; }
@@ -148,7 +155,25 @@ function advanceRoster(){
   const oldRanks={}; rankPool(allFighters).forEach((o,i)=>oldRanks[o.id]=i);
   const r=G.roster.filter(o=>!o.champion);
   const simCount=Math.min(Math.floor(r.length/1.5),20); // plafonné : roster amateur = 100, sans cap ça ferait ~66 combats simulés à chaque cycle
-  for(let n=0;n<simCount;n++){ const a=pick(r),b=pick(r); if(a===b)continue; const res=simulateFight(a,b,3); applyResult(a,b,res,'A'); applyResult(b,a,res,'B'); }
+  const fought=new Set();
+  for(let n=0;n<simCount;n++){ const a=pick(r),b=pick(r); if(a===b)continue; const res=simulateFight(a,b,3); applyResult(a,b,res,'A'); applyResult(b,a,res,'B');
+    if(a.orgElo===undefined) a.orgElo=eloBaseline(a.org,a.overall); if(a.careerElo===undefined) a.careerElo=eloBaseline(a.org,a.overall);
+    if(b.orgElo===undefined) b.orgElo=eloBaseline(b.org,b.overall); if(b.careerElo===undefined) b.careerElo=eloBaseline(b.org,b.overall);
+    const d=calculateEloDelta(a.orgElo,b.orgElo,res.winner,res.method,res.round);
+    a.orgElo=Math.max(500,a.orgElo+d.deltaA); b.orgElo=Math.max(500,b.orgElo+d.deltaB);
+    a.careerElo=Math.max(500,a.careerElo+Math.round(d.deltaA*0.5)); b.careerElo=Math.max(500,b.careerElo+Math.round(d.deltaB*0.5));
+    a.inactivityCycles=0; b.inactivityCycles=0; fought.add(a.id); fought.add(b.id);
+  }
+  // Décroissance d'inactivité (Rank Rust) : un PNJ non-combattant depuis 3+
+  // cycles perd progressivement en crédibilité Elo.
+  G.roster.forEach(o=>{ if(fought.has(o.id))return;
+    if(o.inactivityCycles===undefined) o.inactivityCycles=0;
+    o.inactivityCycles++;
+    if(o.inactivityCycles>3){
+      if(o.orgElo!==undefined) o.orgElo=Math.max(600,Math.round(o.orgElo*0.985));
+      if(o.careerElo!==undefined) o.careerElo=Math.max(600,Math.round(o.careerElo*0.985));
+    }
+  });
   G.roster=rankPool(G.roster);
   rankPool(G.roster.concat([G.f])).forEach((o,i)=>{ const oldRk=oldRanks[o.id]; o.lastRankDelta=oldRk!==undefined?(oldRk-i):0; });
 }
@@ -183,13 +208,13 @@ function genOpponents(f){
     const myMatch=G.tournament.matches.find(m=>m.a.id===f.id || m.b.id===f.id);
     if(myMatch){
       const rival=myMatch.a.id===f.id?myMatch.b:myMatch.a;
-      return [{o:rival, read:`TOURNOI ${G.tournament.cfg.label} — ${G.tournament.step}. Élimination directe.`}];
+      return [{o:rival, read:`Élimination directe.`, context:`TOURNOI ${G.tournament.cfg.label} — ${G.tournament.step}`}];
     }
   }
   const isDefense=!!f.champion;
   const isTitle=(!isDefense && isTitleEligible(f));
   if(isTitle){ const champ=pool.find(o=>o.champion)||pool[0];
-    return [{o:champ, read:`Combat de titre. Un seul adversaire possible : le champion. ${tacticalRead(f,champ)}`}]; }
+    return [{o:champ, read:tacticalRead(f,champ), context:`COMBAT DE TITRE`}]; }
   if(isDefense){
     const r1=pool[0]||pool[1];
     const rest=pool.slice(1,8).filter(o=>o && o.id!==r1.id);
@@ -197,32 +222,33 @@ function genOpponents(f){
     chosen.push(r1, rest[0]||pool[1], rest[1]||pool[2]);
   }
   else {
-    const myRank=pool.findIndex(o=>p4pScore(o)<p4pScore(f));
+    const normalPool=pool.filter(o=>!o.champion); // le champion ne doit JAMAIS apparaître hors d'un vrai combat de titre
+    const myRank=normalPool.findIndex(o=>p4pScore(o)<p4pScore(f));
     // rk clampé à un index VALIDE du pool (jamais pool.length) : sinon pool[rk] est
     // undefined et retombe sur pool[0] via le ||pool[0] plus bas — c'est-à-dire le
     // champion/N°1 — exactement le bug "j'affronte le N°1 à mon 1er combat".
-    const rk=Math.min(myRank===-1?pool.length-1:myRank, pool.length-1);
+    const rk=Math.min(myRank===-1?normalPool.length-1:myRank, normalPool.length-1);
     // écart proportionnel à la taille du pool (6%, minimum 2) : un pool amateur de
     // ~100 a besoin d'une fenêtre bien plus large qu'un pool pro de ~30, sinon
     // rk±2 retombe régulièrement sur le tout premier du classement par accident.
-    const spread=Math.max(2,Math.round(pool.length*0.06));
+    const spread=Math.max(2,Math.round(normalPool.length*0.06));
     if(f.streak<=-2){
       // SCÉNARIO A : Le Rebond (Prospect vs Vétéran)
-      const prospect=pool.find(o=>(o.W+o.L)<=5 && o.W>o.L && p4pScore(o)<p4pScore(f)) || pool[Math.min(pool.length-1, rk+spread)];
-      const veteran=pool.find(o=>o.age>=32 && o.streak<0) || pool[Math.min(pool.length-1, rk+spread+1)];
-      const mid=pool[rk]||pool[0];
+      const prospect=normalPool.find(o=>(o.W+o.L)<=5 && o.W>o.L && p4pScore(o)<p4pScore(f)) || normalPool[Math.min(normalPool.length-1, rk+spread)];
+      const veteran=normalPool.find(o=>o.age>=32 && o.streak<0) || normalPool[Math.min(normalPool.length-1, rk+spread+1)];
+      const mid=normalPool[rk]||normalPool[0];
       chosen.push(prospect, veteran, mid);
     } else if(f.streak>=2){
       // SCÉNARIO B : L'Anti-chambre (Gatekeeper)
-      const gatekeeper=pool.find(o=>o.attrs.durability>75 || o.attrs.tdd>75) || pool[Math.max(0, rk-spread)];
-      const higher=pool[Math.max(0, rk-spread-1)];
-      const trap=pool[Math.min(pool.length-1, rk+1)];
+      const gatekeeper=normalPool.find(o=>o.attrs.durability>75 || o.attrs.tdd>75) || normalPool[Math.max(0, rk-spread)];
+      const higher=normalPool[Math.max(0, rk-spread-1)];
+      const trap=normalPool[Math.min(normalPool.length-1, rk+1)];
       chosen.push(gatekeeper, higher, trap);
     } else {
       // SCÉNARIO C : Statu Quo
-      chosen.push(pool[Math.max(0, rk-spread)], pool[rk]||pool[0], pool[Math.min(pool.length-1, rk+spread)]);
+      chosen.push(normalPool[Math.max(0, rk-spread)], normalPool[rk]||normalPool[0], normalPool[Math.min(normalPool.length-1, rk+spread)]);
     }
-    if(f.rivalId){ const rival=pool.find(o=>o.id===f.rivalId && !o.champion);
+    if(f.rivalId){ const rival=normalPool.find(o=>o.id===f.rivalId && !o.champion);
       if(rival && !chosen.includes(rival)) chosen[1]=rival; }
   }
   let uniqueOpps=[...new Set(chosen)].filter(Boolean);
@@ -249,6 +275,9 @@ function trainingOptions(f){ const gen=TRAIN.filter(x=>x.t.includes('all'));
 function startFightSelect(){ if(G.f.injury) return; G.opps=genOpponents(G.f); G.screen='select'; save(); render(); }
 function chooseOpponent(i){ G.sel=G.opps[i]; G.train=trainingOptions(G.f); G.screen='camp'; save(); render(); }
 function chooseTraining(i){ const opt=G.train[i]; const applied=applyDeltas(G.f,opt.d); G.campApplied={label:opt.label,deltas:applied};
+  if(G.f._mentorMainStat && G.f.attrs[G.f._mentorMainStat]!==undefined){
+    const extra=applyDeltas(G.f,[[G.f._mentorMainStat,2]]); G.campApplied.deltas=G.campApplied.deltas.concat(extra);
+  }
   // Risque de blessure à l'entraînement — nul sur les choix non-physiques (repos/mental).
   // Réutilise le catalogue réel (rollInjury/f.injury de Phase 4), pas un tirage
   // parallèle qui doublerait le risque déjà couvert par generateRandomEvent()/major_injury.
@@ -270,7 +299,7 @@ function chooseTraining(i){ const opt=G.train[i]; const applied=applyDeltas(G.f,
   if(effPct<=3){ cutTier='sans_effort'; cutMods={cardio:6,durability:4}; }
   else if(effPct<=8){ cutTier='facile'; }
   else if(effPct<=13){ cutTier='normal'; }
-  else if(effPct<=18){ cutTier='complique'; cutMods={cardio:-12,strength:-10,durability:-8}; }
+  else if(effPct<=18){ cutTier='complique'; cutMods={cardio:-12,strength:-10,durability:-8,chin:-12}; }
   else { cutTier='impossible'; }
   G.fight.cutResult={tier:cutTier,effPct,kg:wc.cutKg,walk:wc.walk,limit:wc.limit};
   if(cutTier==='impossible'){
@@ -288,13 +317,27 @@ function chooseTraining(i){ const opt=G.train[i]; const applied=applyDeltas(G.f,
     // Négociation : l'adversaire peut accepter de maintenir le combat contre une part de la bourse
     G.activeEvent={
       title:'Pesée ratée (Catchweight)',
-      text:`Catastrophe sur la balance (${effPct.toFixed(1)}% du poids de forme). Le combat devait être annulé, mais ${esc(opp.name)} accepte de maintenir l\u2019affrontement si vous lui cédez 35% de votre bourse. Vos capacités physiques seront fortement réduites ce soir.`,
+      text:`Catastrophe sur la balance : ${wc.cutKg.toFixed(1)}kg au-dessus de la limite (${wc.limit}kg). Le combat devait être annulé, mais ${esc(opp.name)} accepte de maintenir l\u2019affrontement si vous lui cédez 35% de votre bourse. Vos capacités physiques seront fortement réduites ce soir.`,
       btn:'Accepter l\u2019amende et combattre', actionId:'botched_weight_accept',
       btn2:'Annuler le combat', actionId2:'botched_weight_decline'
     };
     G.screen='event'; save(); render(); return;
   }
   if(cutMods) G.fight.malus=Object.assign({},G.fight.malus,cutMods);
+  // ==== [ANCRE: ADVERSAIRE_SURPOIDS] — l'inverse du catchweight joueur : c'est
+  // l'adversaire qui rate sa pesée. Ici pas de tirage aléatoire côté adversaire :
+  // c'est le JOUEUR qui choisit d'accepter (l'adversaire plus lourd gagne un vrai
+  // bonus mécanique) ou de refuser (combat annulé). ====
+  if(rnd()<0.1){
+    const oppOverKg=+(RI(2,8)+rnd()).toFixed(1);
+    G.activeEvent={
+      title:'L\u2019adversaire a raté sa pesée',
+      text:`${esc(opp.name)} se présente ${oppOverKg}kg au-dessus de la limite. L\u2019organisation vous laisse décider : accepter le combat en catchweight (il combattra avec un vrai avantage de gabarit) ou le refuser (combat annulé, un remplaçant est cherché).`,
+      btn:'Accepter le catchweight', actionId:'opp_overweight_accept',
+      btn2:'Refuser le combat', actionId2:'opp_overweight_decline'
+    };
+    G.screen='event'; save(); render(); return;
+  }
   // ==== [FIN ANCRE] ====
   if(rnd()<0.08){ generateRandomEvent(); G.screen='event'; save(); render(); }
   else { proceedToFight(); }
@@ -805,15 +848,23 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   for(const k in savedAttrs){ G.f.attrs[k]=savedAttrs[k]; }
   if(Object.keys(savedAttrs).length) G.f.overall=overall(G.f);
   // ==== [FIN ANCRE] ====
-  // ==== [ANCRE: CACHET] — bourse en milliers, selon l'organisation (audit économie) ====
-  const basePurse=[0,2,8,25,80,150,400][G.f.org]||0;
-  let purse=basePurse;
-  if(win) purse+=basePurse;
-  if(win && !isDecisionLike(res.method)) purse+=50;
-  if(G.f.champion) purse*=2.5;
-  if(G.f.org===6) purse*=3.0; // Ultimate Rim paie énormément
-  if(G.fight.pursePenalty) purse=Math.floor(purse*G.fight.pursePenalty);
+  // ==== [ANCRE: CACHET] — bourse en milliers $, structure Show/Win réaliste
+  // (audit économie #9) : garantie de présence + prime de victoire séparées,
+  // multiplicateur de champion différencié par palier, prime de performance
+  // proportionnelle plutôt qu'un forfait fixe identique à tous les niveaux.
+  const ORG_PURSES=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[30,30],[250,0]];
+  const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,5.0,2.0];
+  let [showPurse,winBonus]=ORG_PURSES[G.f.org]||[0,0];
+  if(G.f.champion){ const m=CHAMP_MULT[G.f.org]||1; showPurse*=m; winBonus*=m; }
+  let purse=showPurse;
+  if(win) purse+=winBonus;
+  if(win && !isDecisionLike(res.method)){ purse+=(G.f.org===5)?50:showPurse*0.25; }
+  if(G.fight.pursePenalty) purse=Math.floor(purse*G.fight.pursePenalty*100)/100;
+  const purseGross=purse;
+  purse=Math.floor(purse*0.75*100)/100; // frais de camp fixes (manager, coach, salle) : ~25% de la bourse brute
+  const campFee=+(purseGross-purse).toFixed(2);
   G.f.earnings=(G.f.earnings||0)+purse;
+  G.fight.purseDetail={gross:purseGross,fee:campFee,net:purse};
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: RIVALITE] — une défaite, ou une décision très serrée, crée une animosité ====
   const scoreDiff=Math.abs((res.scoreA||0)-(res.scoreB||0));
@@ -821,18 +872,31 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(!G.f._rivalries) G.f._rivalries={};
     G.f._rivalries[opp.id]=(G.f._rivalries[opp.id]||0)+1;
     if(G.f._rivalries[opp.id]>=2) G.f.rivalId=opp.id;
-    // Mémorise le PLUS GRAND rival de la carrière (le plus de confrontations), en
-    // snapshot (le PNJ lui-même peut disparaître à la prochaine régénération de
-    // roster) pour pouvoir le montrer au Panthéon et à l'écran de retraite.
-    if(!G.f.biggestRival || G.f._rivalries[opp.id]>(G.f.biggestRival.count||0)){
-      G.f.biggestRival={name:opp.name,flag:opp.flag,count:G.f._rivalries[opp.id],W:opp.W,L:opp.L,style:opp.styleLabel};
-    }
+  }
+  // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
+  // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
+  // donc un adversaire battu 15 fois de façon décisive n'était presque jamais
+  // retenu comme rival marquant.
+  if(!G.f._allMeetings) G.f._allMeetings={};
+  G.f._allMeetings[opp.id]=(G.f._allMeetings[opp.id]||0)+1;
+  if(!G.f.biggestRival || G.f._allMeetings[opp.id]>(G.f.biggestRival.count||0)){
+    G.f.biggestRival={name:opp.name,flag:opp.flag,count:G.f._allMeetings[opp.id],W:opp.W,L:opp.L,style:opp.styleLabel};
   }
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: LEAPFROG_CUT] — traçage de la facilité des combats + bond de classement,
   // et sanction si le joueur enchaîne trop d'adversaires trop faciles. ====
   let forced=false;
   const myRankNow=myRankBefore, oppRankNow=oppRankBefore;
+  // ==== [ANCRE: ELO_UPDATE] — met à jour orgElo (poids 80% dans p4pScore) et
+  // careerElo (20%) du joueur ET de l'adversaire, K-factor modulé selon la
+  // méthode de finition et le round — remplace l'ancien comptage brut orgWins.
+  if(opp.orgElo===undefined) opp.orgElo=eloBaseline(opp.org,opp.overall);
+  if(opp.careerElo===undefined) opp.careerElo=eloBaseline(opp.org,opp.overall);
+  const eloRes=calculateEloDelta(G.f.orgElo,opp.orgElo,res.winner,res.method,res.round);
+  G.f.orgElo=Math.max(500,G.f.orgElo+eloRes.deltaA); opp.orgElo=Math.max(500,opp.orgElo+eloRes.deltaB);
+  G.f.careerElo=Math.max(500,G.f.careerElo+Math.round(eloRes.deltaA*0.5)); opp.careerElo=Math.max(500,opp.careerElo+Math.round(eloRes.deltaB*0.5));
+  G.f.inactivityCycles=0;
+  // ==== [FIN ANCRE] ====
   if(win){
     if(oppRankNow>myRankNow+4 && !opp.champion){ G.f.easyFights=(G.f.easyFights||0)+1; } else { G.f.easyFights=0; }
     // ==== [ANCRE: LEAPFROG_PROPORTIONNEL] — battre un adversaire mieux classé
@@ -843,6 +907,8 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     const oppScoreNow=p4pScore(opp), myScoreNow=p4pScore(G.f);
     if(oppScoreNow>myScoreNow){ G.f.rankBoost=(G.f.rankBoost||0)+Math.round((oppScoreNow-myScoreNow)*0.5); }
     // ==== [FIN ANCRE] ====
+  } else if(res.winner==='D'){
+    G.f.easyFights=0; // un match nul n'est ni un combat facile ni un vrai revers de classement
   } else {
     G.f.easyFights=0;
     // ==== [ANCRE: RANK_CRASH] — une défaite classé top-3 doit vraiment faire
@@ -862,7 +928,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   let milestone='';
   if((G.f.easyFights||0)>=3){
-    if(G.f.org>0){ G.f.org--; G.f.easyFights=0; G.f.champion=null; milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
+    if(G.f.org>0){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
     else { G.f.retired=true; forced=true; milestone='Contrat coupé par l\u2019organisation.'; }
   }
   // ==== [FIN ANCRE] ====
@@ -953,9 +1019,9 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // ==== [FIN ANCRE] ====
     if(win || G.f.age>=26){ proOffer=proOffer||evaluateProOffer(G.f,res,oppRankBefore); }
   } else if(G.f.org<5){
-    if(!G.f.champion && canPromote(G.f)){
+    if(!G.f.champion && canPromote(G.f) && (!G.f.promoCooldown || G.f.promoCooldown<=0)){
       if(G.f.org===4){ topTierOffer=true; }
-      else if(!G.f.promoCooldown || G.f.promoCooldown<=0){ promoOffer=true; }
+      else { promoOffer=true; }
     }
     // Free Agency : un champion avec au moins 2 défenses attire les ligues supérieures
     else if(G.f.champion && G.f.defenses>=2 && (!G.f.promoCooldown || G.f.promoCooldown<=0)){
@@ -966,7 +1032,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // ==== [ANCRE: RETROGRADATION_INTERNATIONAL] — les ligues internationales
     // (Pacific/Ultimate Rim) ne proposent JAMAIS de promotion (rien au-dessus),
     // mais sanctionnent une série de défaites par une vraie rétrogradation.
-    G.f.org=4; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
+    G.f.org=4; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(4,G.f.overall);
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
     G.roster=makeOrgRoster(G.f,G.roster);
     milestone=milestone||'Rétrogradé : la ligue internationale coupe ton contrat après cette série de défaites.';
@@ -975,7 +1041,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.f.promoCooldown>0) G.f.promoCooldown--;
   // ==== [FIN ANCRE] ====
   const newAch=checkAch();
-  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,narrative,
+  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,narrative,purseDetail:G.fight.purseDetail,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
@@ -1093,7 +1159,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
     ?`<button class="btn ghost" style="font-size:20px;padding:18px;opacity:.5;cursor:not-allowed" disabled>Athlète inapte</button>`
     :`<button class="btn primary" style="font-size:20px;padding:18px" onclick="CL.fightSelect()">Évaluer les contrats (Matchmaking)</button>`;
   const rankTag=champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`);
-  const streakTag=f.streak>=3?`<span class="tag2">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
+  const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
   const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
   return `<div class="scr">
    <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
@@ -1116,8 +1182,8 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
      ${last5(f)}
    </div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
-     <div><span class="stat-lbl" style="margin-bottom:4px">MORAL</span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--gold)"></span></div></div>
-     <div><span class="stat-lbl" style="margin-bottom:4px">FORME</span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--sage)"></span></div></div>
+     <div><span class="stat-lbl" style="margin-bottom:4px">MORAL</span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--win)"></span></div></div>
+     <div><span class="stat-lbl" style="margin-bottom:4px">FORME</span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:#4DA6FF"></span></div></div>
    </div>
    ${fightBtnHtml}
    <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
@@ -1149,6 +1215,7 @@ function scr_select(){ const f=G.f;
       <div class="meta-strip"><div><span>Record</span><b style="white-space:nowrap">${recordStr(o)}</b></div>${o.amaRec?`<div><span>Amateur</span><b style="white-space:nowrap">${o.amaRec.W}-${o.amaRec.L}</b></div>`:''}</div>
       <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
       <div class="tagrow">
+        ${e.context?`<span class="tag2 hot" style="background:var(--gold);color:var(--bg);border-color:var(--gold)">${e.context}</span>`:''}
         ${isRival?'<span class="tag2" style="color:var(--bg);background:var(--blood);border-color:var(--blood)">RIVALITÉ ACTIVE</span>':''}
         ${isAmaRival?'<span class="tag2" style="color:var(--sage);border-color:var(--sage)">RIVAL AMATEUR</span>':''}
         <span class="tag2 hot">${rTag}</span>
@@ -1180,14 +1247,29 @@ function scr_camp(){ const f=G.f;
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
   const wcHtml={
-    sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div><div class="small muted" style="margin-top:6px">Poids actuel : ${cr.walk.toFixed(1)}kg pour une limite à ${cr.limit}kg. Un moine bouddhiste au régime.</div><div class="small" style="color:var(--sage);font-weight:bold;margin-top:4px">Bonus ce soir : cardio et solidité.</div></div>`,
-    facile:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Cutting facile</div><div class="small muted" style="margin-top:6px">Poids actuel : ${cr.walk.toFixed(1)}kg (limite ${cr.limit}kg) — ${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%). Deux jours de sauna et un sandwich en moins, rien de dramatique.</div><div class="small muted" style="margin-top:4px">Aucun impact ce soir.</div></div>`,
-    normal:`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px"><div class="eyebrow gold mb">Cutting normal</div><div class="small muted" style="margin-top:6px">Poids actuel : ${cr.walk.toFixed(1)}kg (limite ${cr.limit}kg) — ${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%). Le sauna, le sac poubelle, la routine du métier.</div><div class="small muted" style="margin-top:4px">Dans la norme du métier, aucun impact.</div></div>`,
-    complique:`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding-left:14px"><div class="eyebrow mb" style="color:var(--loss)">Cutting compliqué</div><div class="small muted" style="margin-top:6px">Poids actuel : ${cr.walk.toFixed(1)}kg (limite ${cr.limit}kg) — ${cr.kg}kg à perdre (${cr.effPct.toFixed(1)}%). Tu vas cracher dans un gobelet pendant six heures et dormir dans un sac poubelle. Pitoyable, mais professionnel.</div><div class="small" style="color:var(--loss);font-weight:bold;margin-top:4px">Malus ce soir : cardio, force et solidité.</div></div>`,
+    sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div>
+      <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="small muted" style="margin-top:8px">Un moine bouddhiste au régime.</div>
+      <div class="small" style="color:var(--sage);font-weight:bold;margin-top:4px">Bonus ce soir : cardio et solidité.</div></div>`,
+    facile:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Cutting facile</div>
+      <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="mono small" style="margin-top:2px">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
+      <div class="small muted" style="margin-top:8px">Deux jours de sauna et un sandwich en moins, rien de dramatique.</div>
+      <div class="small muted" style="margin-top:4px">Aucun impact ce soir.</div></div>`,
+    normal:`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px"><div class="eyebrow gold mb">Cutting normal</div>
+      <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="mono small" style="margin-top:2px">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
+      <div class="small muted" style="margin-top:8px">Le sauna, le sac poubelle, la routine du métier.</div>
+      <div class="small muted" style="margin-top:4px">Dans la norme du métier, aucun impact.</div></div>`,
+    complique:`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding-left:14px"><div class="eyebrow mb" style="color:var(--loss)">Cutting compliqué</div>
+      <div class="mono small" style="margin-top:6px;position:relative;z-index:2">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="mono small" style="margin-top:2px;position:relative;z-index:2">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
+      <div class="small muted" style="margin-top:8px;position:relative;z-index:2">Tu vas cracher dans un gobelet pendant six heures et dormir dans un sac poubelle. Pitoyable, mais professionnel.</div>
+      <div class="small" style="color:var(--loss);font-weight:bold;margin-top:4px;position:relative;z-index:2">Malus ce soir : cardio, force, solidité et menton (déshydratation).</div></div>`,
   }[cr.tier]||'';
   return `<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
    <div class="card raise" style="border-color:var(--gold-d)">
-     <div class="disp">VS ${esc(opp.name)}</div>
+     <div class="disp">VS ${esc(opp.name)} <span class="muted" style="font-size:14px;font-weight:normal">(${opp.styleLabel})</span></div>
      <div class="muted small">${tacticalRead(f,opp)}</div>
    </div>
    ${wcHtml}
@@ -1254,18 +1336,27 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
      <div class="hero-name" style="color:${p.win?'var(--win)':'var(--loss)'}">${p.win?'VICTOIRE':'DÉFAITE'}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
      <div class="tagrow" style="justify-content:center">
-       ${(p.res.moveName && !isDecisionLike(p.method))?`<span class="tag2 hot">${p.res.zone?(p.method.startsWith('KO')?'KO au '+p.res.zone+' — ':'Soumission ('+p.res.zone+') — '):''}${esc(p.res.moveName)}</span>`:''}
+       ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
+         const typeStr=p.method.startsWith('KO')?'KO/TKO':'Soumission';
+         const zoneRedundant=p.res.zone && p.res.moveName.toLowerCase().includes(p.res.zone.toLowerCase());
+         const zoneDetail=(p.res.zone && !zoneRedundant)?` — ${p.res.zone}`:'';
+         return `<span class="tag2 hot">${typeStr} (${esc(p.res.moveName)})${zoneDetail}</span>`;
+       })():''}
        ${p.planLabel?`<span class="tag2">Tactique : ${p.planLabel}</span>`:''}
      </div>
    </div>
    ${judgesHtml}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
-   ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small gold mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${v} ${label}`;}).join(', ')}</div>`:''}</div></div>`:''}
+   ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const before=d20(f.attrs[k]-v); return `<div style="color:var(--win)">${before} → ${after} ${label}</div>`;}).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
      <div class="st-row"><span>${st.A.ctrl}</span><span class="st-l">Contrôle (rds)</span><span>${st.B.ctrl}</span></div>
      <div class="st-row"><span>${st.A.kd}</span><span class="st-l">Knockdowns</span><span>${st.B.kd}</span></div></div>
+   ${p.purseDetail?`<div class="card"><div class="eyebrow mb">Bourse</div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Bourse brute</span><span>${formatArgent(p.purseDetail.gross)}</span></div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Frais de camp (manager, coach, salle)</span><span style="color:var(--loss)">-${formatArgent(p.purseDetail.fee)}</span></div>
+     <div class="mono small" style="display:flex;justify-content:space-between;margin-top:4px"><b>Net perçu</b><b class="gold">${formatArgent(p.purseDetail.net)}</b></div></div>`:''}
    <div class="card"><div class="eyebrow mb">Déroulé</div>${fightLog(p.res)}</div>
    ${campHtml}
    ${p.newAch&&p.newAch.length?`<div class="card">${p.newAch.map(a=>`<div class="ach"><span class="ico">${a.ico}</span><b class="gold">${a.h}</b> <span class="muted small">${a.d}</span></div>`).join('')}</div>`:''}
@@ -1282,7 +1373,26 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f);
      <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
-     ${f.skills.length?`<div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Compétences.</b></div>${f.skills.map(id=>{const sk=SKILLS.find(s=>s.id===id); return `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0;position:relative;z-index:2"><span class="story" style="margin:0;color:${RAR_COLORS[sk.rar]||'var(--gold)'}">${sk.name}</span>${(sk.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;}).join('')}`:''}
+     ${f.skills.length?(()=>{
+       const rarOrder={C:0,R:1,E:2,L:3,M:4,X:5};
+       const sorted=f.skills.slice().sort((a,b)=>{
+         const sa=SKILLS.find(s=>s.id===a), sb=SKILLS.find(s=>s.id===b);
+         return (rarOrder[sa.rar]??9)-(rarOrder[sb.rar]??9);
+       });
+       // hash déterministe simple : même tag = même couleur, sans mapping manuel sur 640 compétences
+       const tagColor=t=>{ let h=0; for(let i=0;i<t.length;i++) h=(h*31+t.charCodeAt(i))>>>0;
+         const palette=['#4DA6FF','#6FB577','#D4AF37','#C7332A','#8b5cf6','#E08E45']; return palette[h%palette.length]; };
+       return `<div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Compétences.</b> <span class="muted small">(clique pour le détail)</span></div>`+
+         sorted.map((id,i)=>{const sk=SKILLS.find(s=>s.id===id);
+           const fxTxt=sk.fx?Object.entries(sk.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${v} ${label}`;}).join(', '):'';
+           return `<div style="margin:4px 0;position:relative;z-index:2">
+             <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;cursor:pointer" onclick="const d=document.getElementById('skdet${i}'); d.style.display=d.style.display==='none'?'block':'none';">
+               <span class="story" style="margin:0;color:${RAR_COLORS[sk.rar]||'var(--gold)'}">${sk.name}</span>
+               ${(sk.tags||[]).map(t=>`<span class="tag" style="color:${tagColor(t)};border-color:${tagColor(t)}">${t}</span>`).join('')}
+             </div>
+             <div id="skdet${i}" class="muted small" style="display:none;margin:4px 0 0 0;padding-left:8px;border-left:2px solid var(--line)">${sk.desc||''}${fxTxt?`<div class="mono" style="color:var(--win);margin-top:2px">${fxTxt}</div>`:''}</div>
+           </div>`;}).join('');
+     })():''}
    </div>
    ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
    <div class="rarity-guide"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>
@@ -1317,9 +1427,9 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
 }
 
 function scr_event(){ const ev=G.activeEvent;
-  return `<div class="scr center intro"><div class="eyebrow blood">Événement imprévu</div>
+  return `<div class="scr center" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh"><div class="eyebrow blood">Événement imprévu</div>
    <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,36px)">${ev.title}</div>
-   <p class="lede">${ev.text}</p>
+   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:16px 0"><p class="lede" style="margin:0;text-align:left;max-width:100%">${ev.text}</p></div>
    <button class="btn primary" onclick="CL.handleEvent('${ev.actionId}')">${ev.btn}</button>
    ${ev.btn2?`<button class="btn ghost mt" onclick="CL.handleEvent('${ev.actionId2}')">${ev.btn2}</button>`:''}</div>`; }
 
@@ -1373,7 +1483,9 @@ function scr_toptier(){
      <div class="hero-name" style="font-size:22px;color:var(--sage)">ULTIMATE RIM<em style="color:var(--muted)">Argent & Santé</em></div>
      <p class="muted small mt" style="position:relative;z-index:2">La ligue des millionnaires. Les salaires sont multipliés par 3. Le niveau y est élite mais régulé, et le suivi médical de pointe entretient votre conditionnement physique au fil des mois — mais aucun médecin ne rend les neurones perdus au combat.</p>
      <button class="btn" style="background:var(--sage);color:#fff;border:none;position:relative;z-index:2" onclick="CL.signTopTier(6)">Signer chez Ultimate Rim</button>
-   </div></div>`; }
+   </div>
+   <button class="btn ghost mt" onclick="CL.declineTopTier()">Ne rien signer — rester en Continentale</button>
+   </div>`; }
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: ECRAN_PROMO] — la promotion devient un choix du joueur (au lieu
@@ -1385,16 +1497,16 @@ function scr_promo(){
   // une offre "fast-track" concurrente en plus de l'offre standard, chacune
   // avec sa propre description et sa propre bourse — pas un simple "signer
   // avec X" unique. ====
-  const basePurse=[0,2,8,25,80,150,400];
+  const orgPurseTotal=[0,1.2,4,10,30,60,250];
   const nextOrg=f.org+1;
   const flavorNext=ORG_FLAVORS[nextOrg]?pick(ORG_FLAVORS[nextOrg]):(ORGS[nextOrg]||'Ligue supérieure');
-  const offers=[{org:nextOrg,flavor:flavorNext,purseTxt:formatArgent(basePurse[nextOrg]||0),
+  const offers=[{org:nextOrg,flavor:flavorNext,purseTxt:formatArgent(orgPurseTotal[nextOrg]||0),
     desc:isChamp?`En tant que champion ${f.divName} dominant, ${flavorNext} veut racheter votre contrat. Accepter signifie abandonner votre ceinture actuelle pour monter d\u2019un cran.`
       :`${flavorNext} a suivi tes performances de près. Ils pensent que tu es prêt pour une salle plus grande.`}];
   const dominant=(isChamp||f.titles>=1) && ((f.defenses||0)>=2 || (f.streak||0)>=6);
   if(dominant && nextOrg+1<5){
     const flavorSkip=ORG_FLAVORS[nextOrg+1]?pick(ORG_FLAVORS[nextOrg+1]):(ORGS[nextOrg+1]||'Ligue supérieure');
-    offers.push({org:nextOrg+1,flavor:flavorSkip,purseTxt:formatArgent(basePurse[nextOrg+1]||0),
+    offers.push({org:nextOrg+1,flavor:flavorSkip,purseTxt:formatArgent(orgPurseTotal[nextOrg+1]||0),
       desc:`Ta domination a fait le tour du milieu : ${flavorSkip} veut te griller la politesse et t\u2019offre de brûler une étape.`});
   }
   return `<div class="scr center intro"><div class="eyebrow gold">${isChamp?'Free Agency (Transfert)':'Le Marché'}</div>
@@ -1438,7 +1550,7 @@ function scr_history(){ const f=G.f; const history=(f.history||[]).slice().rever
       <div style="width:36px">RES</div><div style="flex:1">ADVERSAIRE</div><div style="width:50px;text-align:center">SAIS.</div><div style="width:90px;text-align:right">MÉTHODE</div></div>`;
     history.forEach(fight=>{
       const resLetter=fight.res==='win'?'W':(fight.res==='loss'?'L':'D');
-      const resColor=resLetter==='W'?'var(--win)':(resLetter==='L'?'var(--loss)':'var(--muted)');
+      const resColor=resLetter==='W'?'var(--gold)':(resLetter==='L'?'var(--loss)':'var(--muted)');
       const resText=resLetter==='W'?'VICTOIRE':(resLetter==='L'?'DÉFAITE':'NUL');
       const oppName=fight.oppName||'Adversaire inconnu';
       const oppRank=fight.oppRank?(fight.oppRank==='NR'?'NR':'#'+fight.oppRank):'—';
@@ -1548,16 +1660,39 @@ const CL={
   draftIn(k,v){ G.draft[k]=v; },
   create(){ const d=G.draft; const f=makeFighter({gender:d.gender,div:d.div,style:d.style,countryKey:d.country,first:(d.first||'').trim()||undefined,age:RI(15,16),potential:RI(70,94)});
     f.stage='amateur'; f.org=0; f._fy=0;
-    // ==== [ANCRE: META02] — legs du mentor, consommé une seule fois ====
-    try{ if(localStorage.getItem('cage-legacy-mentor-bonus')==='true'){
-      for(const k in f.attrs) f.attrs[k]=clamp(f.attrs[k]+2,1,100);
-      f.overall=overall(f); localStorage.removeItem('cage-legacy-mentor-bonus'); } }catch(e){}
+    // ==== [ANCRE: META02] — mentorat en 3 piliers, consommé une seule fois à la
+    // création : (1) bonus d'archétype selon le style du mentor, (2) faveur des
+    // promoteurs (cooldown d'offre pro réduit de 50%), (3) bonus de camp
+    // persistant sur la stat principale du mentor (+2 à chaque entraînement).
+    try{ const raw=localStorage.getItem('cage-legacy-mentor-bonus');
+      if(raw){
+        const mentor=JSON.parse(raw);
+        const ARCHETYPE_BONUS={
+          wrestler:{tdd:10,strength:5}, sambo:{tdd:10,strength:5},
+          boxer:{handSpeed:10,jab:5,cross:5}, kickboxer:{handSpeed:10,jab:5,cross:5},
+          muayThai:{handSpeed:10,jab:5,cross:5}, karate:{handSpeed:10,jab:5,cross:5},
+          bjj:{submission:10,guardWork:5}, mma:{fightIQ:8,adaptability:8}
+        };
+        const MAIN_STAT={boxer:'jab',kickboxer:'kick',muayThai:'kick',karate:'kick',wrestler:'takedown',bjj:'submission',sambo:'takedown',mma:'fightIQ'};
+        const bonus=ARCHETYPE_BONUS[mentor.style]||{};
+        for(const k in bonus) if(f.attrs[k]!==undefined) f.attrs[k]=clamp(f.attrs[k]+bonus[k],1,100);
+        f.overall=overall(f);
+        f._mentorMainStat=MAIN_STAT[mentor.style]||null; // pilier 3, lu par chooseTraining()
+        f.proOfferCooldown=0; f._mentorFastTrack=true; // pilier 2, lu par declinePro()
+        localStorage.removeItem('cage-legacy-mentor-bonus');
+      }
+    }catch(e){}
     // ==== [FIN ANCRE] ====
     G.f=f; G.roster=makeOrgRoster(f); G.ach=[]; G.season={year:1,fights:[]}; checkAch(); G.screen='hub'; save(); render(); },
   fightSelect(){ startFightSelect(); },
   opp(i){ chooseOpponent(i); },
   train(i){ chooseTraining(i); },
   skipArena(){ CL.toResult(); },
+  nextRound(){ if(!ARENA||!ARENA.roundPause) return;
+    ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
+    ARENA.roundPause=false;
+    if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
+  },
   handleEvent(actionId){ const ev=G.activeEvent; const id=actionId||(ev&&ev.actionId);
     if(id==='major_injury'){ const f=G.f;
       f._fy=(f._fy||0)+1; if(f._fy>=RI(2,4)){ applyAging(f); f._fy=0; }
@@ -1571,6 +1706,15 @@ const CL={
     } else if(id==='botched_weight_decline'){
       G.f.morale=clamp(G.f.morale-8,0,100);
       G.lastMsg='Combat annulé. Mauvaise impression garantie auprès de l\u2019organisation.';
+      G.screen='hub'; save(); render();
+    } else if(id==='opp_overweight_accept'){
+      const oa=G.fight.opp.attrs;
+      oa.killer=clamp((oa.killer||50)+5,1,100); oa.power=clamp((oa.power||50)+5,1,100);
+      G.fight.opp.overall=overall(G.fight.opp);
+      proceedToFight();
+    } else if(id==='opp_overweight_decline'){
+      G.f.form=clamp(G.f.form-5,0,100);
+      G.lastMsg='Combat annulé suite au surpoids adverse. Un remplaçant est recherché pour la prochaine carte.';
       G.screen='hub'; save(); render();
     } else { proceedToFight(); }
   },
@@ -1600,7 +1744,7 @@ const CL={
   retryArcade(){ CL.startArcade(); },
   fightArcade(){ resolveArcadeFight(); },
   acceptPromo(targetOrg){
-    G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
+    G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall);
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
     G.roster=makeOrgRoster(G.f,G.roster);
     if(G.pending) G.pending.promoOffer=false;
@@ -1611,14 +1755,19 @@ const CL={
     if(G.pending) G.pending.promoOffer=false;
     G.screen='hub'; save(); render();
   },
-  signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; if(G.pending)G.pending.topTierOffer=false;
+  declineTopTier(){
+    G.f.promoCooldown=2;
+    if(G.pending) G.pending.topTierOffer=false;
+    G.screen='hub'; save(); render();
+  },
+  signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); if(G.pending)G.pending.topTierOffer=false;
     G.roster=makeOrgRoster(G.f,G.roster);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
     G.screen='hub'; save(); render(); },
-  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
-  declinePro(){ G.f.proOfferCooldown=3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
+  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
+  declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; G.screen='hub'; save(); render(); },
-  toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus','true'); }catch(e){} }
+  toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     G.f.retired=true; enshrine(G.f); G.screen='legacy'; save(); render(); },
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
@@ -1654,7 +1803,7 @@ function buildTimeline(){
   ARENA={beats,idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
     hMe:100,hOp:100,stMe:100,stOp:100,hMeEnd,hOpEnd,
     flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:res.method,meWin,
-    currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},
+    currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:res.zone||null,
     nmeName:you.first,nopName:opp.first,meFlag:you.flag,opFlag:opp.flag};
 }
 function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
@@ -1662,15 +1811,29 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   if(!cv||!cv.getContext||typeof requestAnimationFrame==='undefined'){ ARENA.done=true; return; } // pas de canvas (test)
   const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=220;
   cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.t0=performance.now();
+  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.t0=performance.now(); ARENA.pauseOffset=0; ARENA.roundPause=false;
   ARENA.noise=makeNoisePattern(ctx);
   const total=ARENA.beats.length*BEAT_MS;
-  const loop=(now)=>{ const el=now-ARENA.t0; const bi=Math.min(ARENA.beats.length-1,Math.floor(el/BEAT_MS));
-    if(bi!==ARENA.lastBeat){ ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]); }
+  const loop=(now)=>{ if(ARENA.roundPause) return; const el=now-ARENA.t0-ARENA.pauseOffset; const bi=Math.min(ARENA.beats.length-1,Math.floor(el/BEAT_MS));
+    if(bi!==ARENA.lastBeat){
+      // pause au changement de round (sauf le tout premier beat) — laisse le
+      // joueur enchaîner manuellement plutôt qu'un défilement continu
+      const prevRound=ARENA.lastBeat>=0?(ARENA.beats[ARENA.lastBeat].round||1):null;
+      const newRound=ARENA.beats[bi].round||1;
+      if(prevRound!==null && newRound!==prevRound && !ARENA.beats[bi].finish){
+        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; renderArenaOverlay(); return;
+      }
+      ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]);
+    }
     drawArena((el%BEAT_MS)/BEAT_MS); paintBars();
     if(el>=total){ ARENA.done=true; drawArena(1,true); ARENA.to=setTimeout(()=>CL.toResult(),1300); return; }
     ARENA.raf=requestAnimationFrame(loop); };
+  ARENA.loopFn=loop;
   paintBars(); ARENA.raf=requestAnimationFrame(loop);
+}
+function renderArenaOverlay(){ const el=document.getElementById('ar-log'); if(!el) return;
+  const finishedRound=ARENA.beats[ARENA.lastBeat]?(ARENA.beats[ARENA.lastBeat].round||1):1;
+  el.innerHTML=`<div style="text-align:center"><b class="gold">Fin du round ${finishedRound}</b><br><button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.nextRound()">Round suivant ▸</button></div>`;
 }
 function applyBeat(b){ const A=ARENA; if(!b)return;
   if(b.phase==='bell'){ A.currentText=b.text; return; }
@@ -1679,7 +1842,9 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
   else { A.hMe=clamp(A.hMe-dmg,A.hMeEnd*0.6,100); A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }
   A.stMe=clamp(A.stMe-RI(2,5),12,100); A.stOp=clamp(A.stOp-RI(2,5),12,100);
   if(b.finish){ if(b.method&&b.method.startsWith('KO')){ if(A.meWin){A.hOp=2;A.fall=2;} else {A.hMe=2;A.fall=1;} }
-    else if(b.method&&b.method.startsWith('Soum')){ A.tap=A.meWin?2:1; } }
+    else if(b.method&&b.method.startsWith('Soum')){ A.tap=A.meWin?2:1; }
+    if(A.finishZone){ const zoneLetter=A.finishZone==='tête'?'h':A.finishZone==='corps'?'b':'l';
+      const loserPrefix=A.meWin?'do':'dm'; A.flashZoneId=`${loserPrefix}-${zoneLetter}`; } }
   A.curPhase=b.phase; A.curTop=(b.phase==='sol')?(b.by==='me'?'me':'op'):null;
   A.currentText=b.text; A.currentMomentum=b.momentum;
   if(b.snapA) A.snapA=b.snapA; if(b.snapB) A.snapB=b.snapB;
@@ -1743,6 +1908,21 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   ctx.clearRect(0,0,W,H);
   const gY=H-24;
   const topY=H*0.34, topL=W*0.2, topR=W*0.8;
+  // ==== [ANCRE: ECLAIRAGE_GRADINS] — éclairage de projecteurs (au-dessus de
+  // l'octogone) + gradins stylisés dans les coins, pour casser le noir plat
+  // qui entourait la fosse et donnait une impression de vide sans profondeur.
+  const spot=ctx.createRadialGradient(W*0.5,topY*0.4,0,W*0.5,topY*0.4,W*0.75);
+  spot.addColorStop(0,'rgba(255,235,190,.16)'); spot.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=spot; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#15110c';
+  const bleacherRows=4;
+  for(let r=0;r<bleacherRows;r++){ const ry=topY*0.08+r*(topY*0.75/bleacherRows);
+    ctx.globalAlpha=.35-r*.06;
+    ctx.fillRect(0,ry,topL*0.9,topY*0.75/bleacherRows-2);
+    ctx.fillRect(W-topL*0.9,ry,topL*0.9,topY*0.75/bleacherRows-2);
+  }
+  ctx.globalAlpha=1;
+  // ==== [FIN ANCRE] ====
   // Sol en octogone stylisé (au lieu d'un simple rectangle plein)
   ctx.beginPath();
   ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.lineTo(W,gY); ctx.lineTo(topR,topY);
@@ -1827,6 +2007,7 @@ function paintBars(){ if(!ARENA)return; const set=(id,v)=>{const e=document.getE
   const setZone=(id,v)=>{ const e=document.getElementById(id); if(e)e.style.background=zoneColor(v); };
   if(ARENA.snapA){ setZone('dm-h',ARENA.snapA.h); setZone('dm-b',ARENA.snapA.b); setZone('dm-l',ARENA.snapA.l); }
   if(ARENA.snapB){ setZone('do-h',ARENA.snapB.h); setZone('do-b',ARENA.snapB.b); setZone('do-l',ARENA.snapB.l); }
+  if(ARENA.flashZoneId){ const e=document.getElementById(ARENA.flashZoneId); if(e){ e.style.background='var(--blood)'; e.style.boxShadow='0 0 6px var(--blood)'; } }
   const logEl=document.getElementById('ar-log');
   if(logEl && ARENA.currentText && logEl.getAttribute('data-last')!==ARENA.currentText){
     logEl.innerHTML=`<div style="animation:fade .3s ease;color:var(--text)">${ARENA.currentText}</div>`;

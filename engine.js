@@ -99,9 +99,15 @@ function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=f
 let _id=1;
 function makePhysical(div){ const D=div||pick(allDivisions());
   let height=gauss(D.h,4,D.h-9,D.h+11);
+  const tags=[];
+  // Anomalie statistique rare : une taille réellement hors-norme pour la division
+  if(rnd()<0.02){ height=D.h+RI(16,24); tags.push('gabarit hors-norme pour la division'); }
   // Allonge découplée de la taille (indice de singe), plutôt que dérivée de D.h/D.r directement
-  let apeIndex=gauss(0,5,-8,12); let reach=Math.round(height+apeIndex); if(reach<height-1)reach=height-1;
-  const tags=[]; if(apeIndex>=7)tags.push('allonge hors-norme'); if(rnd()<0.02)tags.push('densité rare (type Ngannou)'); if(rnd()<0.02)tags.push('explosivité rare (type Cormier)');
+  let apeIndex=gauss(0,5,-8,12);
+  if(rnd()<0.02){ apeIndex=RI(15,22); tags.push('allonge démesurée'); } // anomalie rare, indépendante de la taille
+  let reach=Math.round(height+apeIndex); if(reach<height-1)reach=height-1;
+  if(apeIndex>=7 && !tags.includes('allonge démesurée'))tags.push('allonge hors-norme');
+  if(rnd()<0.02)tags.push('densité rare (type Ngannou)'); if(rnd()<0.02)tags.push('explosivité rare (type Cormier)');
   return {height,reach,tags};
 }
 /* ------------------ CUTTING — trait VARIABLE, retiré à chaque combat (pas un
@@ -135,6 +141,7 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
     W:0,L:0,D:0,ko:0,sub:0,dec:0,koLoss:0,streak:0, champion:null, titles:0, defenses:0,
     skills:[], history:[], origin, motivation:mot.short, drive:mot.drive, amaRec:null, amaTitle:false, nick:null, epithets:[] };
   f.overall=overall(f);
+  f.orgElo=eloBaseline(0,f.overall); f.careerElo=eloBaseline(0,f.overall); f.inactivityCycles=0;
   // ==== [ANCRE: GENETIQUE] — jet unique à la création, jamais via rollSkill ====
   const GENETIC_CHANCE=0.10;
   if(rnd()<GENETIC_CHANCE){
@@ -204,7 +211,24 @@ function weightFactor(f){ const divs=DIVISIONS[f.gender]||DIVISIONS.H; const d=d
   if(!d) return 0.5;
   const heights=divs.map(x=>x.h); const min=Math.min(...heights), max=Math.max(...heights);
   return max>min ? (d.h-min)/(max-min) : 0.5; }
+// ==== [ANCRE: STYLE_PROFILE] — différenciation mécanique des 8 styles (volume de
+// frappes, facteur KO, menace de soumission, dégâts clinch/GNP). tdVol
+// délibérément absent : STYLES[].grap couvre déjà l'initiative de lutte
+// (boxeur 0.15 vs lutteur 0.77, écart ×5) — l'ajouter aurait fait ×48, une
+// surcorrection qui aurait quasiment supprimé la lutte chez les boxeurs. ====
+const STYLE_PROFILE={
+  boxer:{sigVol:1.30,koMod:1.15,subMod:0.10,clinchDmg:0.8,gnpDmg:0.8},
+  kickboxer:{sigVol:1.20,koMod:1.20,subMod:0.20,clinchDmg:0.9,gnpDmg:0.8},
+  muayThai:{sigVol:1.10,koMod:1.25,subMod:0.30,clinchDmg:1.35,gnpDmg:1.0},
+  karate:{sigVol:0.80,koMod:1.35,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
+  wrestler:{sigVol:0.75,koMod:0.90,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
+  bjj:{sigVol:0.65,koMod:0.70,subMod:1.60,clinchDmg:0.9,gnpDmg:0.9,guardPull:0.35},
+  sambo:{sigVol:0.85,koMod:1.20,subMod:1.25,clinchDmg:1.2,gnpDmg:1.15},
+  mma:{sigVol:1.00,koMod:1.00,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
+};
+/* ==== [FIN ANCRE] ==== */
 function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
+  const profA=STYLE_PROFILE[A.style]||STYLE_PROFILE.mma, profB=STYLE_PROFILE[B.style]||STYLE_PROFILE.mma;
   const wf=weightFactor(A);
   const koWeightMult=1+(wf-0.5)*0.5;
   const noiseWeightMult=1+(wf-0.5)*0.4;
@@ -264,17 +288,20 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     const tdB=attB>0.14?sigmoid((b.takedown-a.tdd)/15)*attB:0;
     let grounded=false,topIsA=false; const gTop=Math.max(tdA,tdB);
     if(gTop>0.10 && rnd()<clamp(gTop*1.5,0,0.85)){ grounded=true; topIsA=tdA>=tdB; if(topIsA)st.A.td++; else st.B.td++; }
+    else if(profA.guardPull && b.tdd>a.takedown && rnd()<profA.guardPull){ grounded=true; topIsA=false; st.A.ctrl+=1; } // BJJ (A) tire sa propre garde
+    else if(profB.guardPull && a.tdd>b.takedown && rnd()<profB.guardPull){ grounded=true; topIsA=true; st.B.ctrl+=1; } // BJJ (B) tire sa propre garde
     if(grounded){ const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
+      const topProf=topIsA?profA:profB, botProf=topIsA?profB:profA;
       const control=clamp((top.topControl-bot.guard)*0.32,0,11);
-      const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45);
-      const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004);
-      const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35);
+      const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45)*topProf.gnpDmg;
+      const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod;
+      const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35)*botProf.subMod;
       const topPts=6+control*0.5+gnp*0.46+subTop*0.22; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.16+3;
       if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=1;st.A.sig+=Math.round(gnp*0.4);} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=1;st.B.sig+=Math.round(gnp*0.4);}
       const heartR=1-(bot.heart*0.0016);
-      const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/22,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR;
-      const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022);
-      const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022);
+      const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/22,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod;
+      const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod;
+      const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod;
       if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
       else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
       else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
@@ -299,13 +326,13 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
       if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
         last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
     } else {
-      const offA=a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA;
-      const offB=b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB;
+      const offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
+      const offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
       const noiseAmt=Math.round(18*noiseWeightMult); const pA=clamp(offA*0.42,0,70)+RI(-noiseAmt,noiseAmt), pB=clamp(offB*0.42,0,70)+RI(-noiseAmt,noiseAmt);
       sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22,0,22);dmgB+=clamp(offA*0.22,0,22);
       st.A.sig+=clamp(Math.round(pA*0.5),0,40); st.B.sig+=clamp(Math.round(pB*0.5),0,40);
-      const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016);
-      const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016);
+      const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016)*profA.koMod;
+      const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016)*profB.koMod;
       const isKdA=rnd()<koA*1.5, isKdB=!isKdA&&rnd()<koB*1.5;
       if(isKdA){ st.A.kd++; if(rnd()<0.6){ finish={by:A,loser:B,method:'KO/TKO',round:r}; } }
       else if(isKdB){ st.B.kd++; if(rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } }
@@ -381,7 +408,20 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
   }
   res.scoreA=j1A+j2A+j3A; res.scoreB=j1B+j2B+j3B;
   res.judges={j1:[j1A,j1B],j2:[j2A,j2B],j3:[j3A,j3B]}; res.roundStats=roundStats;
-  res.log=log; res.stats=st; return res;
+  res.log=log; res.stats=st;
+  // ==== [ANCRE: CHIN_PERMANENT] — dégâts neurologiques cumulatifs et
+  // irréversibles, demandés explicitement malgré la règle "jamais de
+  // dégradation silencieuse" établie plus tôt : ici le déclencheur est
+  // toujours explicite et compréhensible (KO subi, ou guerre confirmée),
+  // jamais un tirage aléatoire déconnecté d'un événement précis.
+  if(finish && finish.method==='KO/TKO'){
+    const loserAttrs=(finish.loser===A)?A.attrs:B.attrs;
+    loserAttrs.chin=clamp(loserAttrs.chin-RI(1,3),1,100);
+  }
+  if(st.A.dmgHead>=15 && rnd()<0.4) A.attrs.chin=clamp(A.attrs.chin-1,1,100);
+  if(st.B.dmgHead>=15 && rnd()<0.4) B.attrs.chin=clamp(B.attrs.chin-1,1,100);
+  // ==== [FIN ANCRE] ====
+  return res;
 }
 function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!isDraw&&res.winner===side; const m=res.method;
   if(isDraw){ F.D=(F.D||0)+1; F.morale=clamp(F.morale+RI(-2,2),0,100); }
@@ -464,13 +504,30 @@ function canPromote(f){ const n=f.org+1; return n<ORGS.length && (f.orgWins||0)>
    de carrière global (élan/réputation qui traverse les paliers). L'amateur
    (org 0) garde l'ancienne formule à 100% : il n'y a qu'un seul palier, pas
    de promotion interne à corriger. ==== */
+// ==== [ANCRE: ELO_BASELINE] — base Elo selon le palier, biaisée par l'overall.
+// Utilisée à la fois pour l'initialisation d'un combattant ET pour la remise à
+// zéro de orgElo à chaque changement d'organisation (c'est ÇA qui corrige le
+// bug "classé trop haut en rejoignant une nouvelle orga" — contrairement à la
+// proposition Elo brute qui ne réinitialisait jamais rien). ====
+function eloBaseline(org,overallVal){ const b=[800,1000,1200,1450,1700,2000,2100][org]||1000; return Math.round(b+((overallVal||50)-50)*8); }
+// Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
+// de finition (KO/Soumission pèsent plus qu'une décision) et le round.
+function calculateEloDelta(ratingA,ratingB,winnerSide,method,round){
+  const expectedA=1/(1+Math.pow(10,(ratingB-ratingA)/400)); const expectedB=1-expectedA;
+  const scoreA=winnerSide==='A'?1:(winnerSide==='D'?0.5:0), scoreB=winnerSide==='B'?1:(winnerSide==='D'?0.5:0);
+  let kFactor=32;
+  if(method&&method.startsWith('KO')) kFactor=48; else if(method&&method.startsWith('Soum')) kFactor=44; else if(method==='Décision partagée') kFactor=24;
+  if(round===1) kFactor*=1.25;
+  return {deltaA:Math.round(kFactor*(scoreA-expectedA)), deltaB:Math.round(kFactor*(scoreB-expectedB))};
+}
+/* ==== [FIN ANCRE] ==== */
 function p4pScore(f){ const fights=f.W+f.L+f.D;
   if(fights===0) return 0; // statut "non classé" (NR)
-  const globalBase=(f.W*45)+(f.ko*20)+(f.sub*20)-(f.L*35)-(f.koLoss*15)+Math.max(0,f.streak)*12;
+  if(f.careerElo===undefined) f.careerElo=eloBaseline(f.org,f.overall);
+  if(f.orgElo===undefined) f.orgElo=eloBaseline(f.org,f.overall);
   const leapfrog=f.rankBoost||0;
-  if(f.org===0) return Math.max(1, globalBase+f.defenses*30+(f.champion?50:0)+leapfrog);
-  const orgBase=((f.orgWins||0)*40)+f.defenses*30+(f.champion?50:0);
-  let score=orgBase*0.8+globalBase*0.2+leapfrog;
+  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+(f.champion?50:0)+leapfrog);
+  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+(f.champion?50:0)+leapfrog;
   if(f.org===5) score*=1.4;
   return Math.max(1, score);
 }
