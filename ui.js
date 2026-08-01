@@ -68,15 +68,11 @@ const AMA_CHAMPIONSHIPS=[
  ...COUNTRY_KEYS.map(ck=>{ const pfx=COUNTRY_MMA_PREFIX[ck]; const label=pfx+'MMA';
    return {id:label.toLowerCase(),label,name:`Championnat ${COUNTRIES[ck].name} amateur`,country:ck,rankMin:2,rankMax:5}; })
 ];
-function amaScopedPool(f,cfg){ return G.roster.filter(o=>o.org===0 && o.style===f.style && o.div===f.div && (o.W+o.L+(o.D||0))>=5 && (!cfg.country || o.countryKey===cfg.country)); }
+function amaScopedPool(f,cfg){ return G.roster.filter(o=>o.org===0 && o.div===f.div && (o.W+o.L+(o.D||0))>=5 && (!cfg.country || o.countryKey===cfg.country)); }
 function amaScopedRank(f,cfg){ const pool=amaScopedPool(f,cfg).filter(o=>o.id!==f.id).concat([f]); return rankPool(pool).findIndex(o=>o===f)+1; }
 function generateTournament(f,cfg){
   const pool=amaScopedPool(f,cfg);
   let top8=rankPool(pool).filter(o=>o.id!==f.id).slice(0,7);
-  if(top8.length<7){ // filet de sécurité : complète hors-scope plutôt que planter
-    const extra=G.roster.filter(o=>o.id!==f.id && o.org===0 && !top8.includes(o));
-    while(top8.length<7 && extra.length){ top8.push(extra.pop()); }
-  }
   top8.push(f);
   top8=rankPool(top8); // reseeding avec le joueur inclus
   const matches=[{a:top8[0],b:top8[7]},{a:top8[1],b:top8[6]},{a:top8[2],b:top8[5]},{a:top8[3],b:top8[4]}];
@@ -85,8 +81,9 @@ function generateTournament(f,cfg){
 function checkAmaChampionship(f){
   if(f.org!==0 || (f.W+f.L+(f.D||0))<5) return null;
   if(!f.amaTitles) f.amaTitles=[];
+  if(!f.amaAttempted) f.amaAttempted=[];
   for(const cfg of AMA_CHAMPIONSHIPS){
-    if(f.amaTitles.includes(cfg.id)) continue;
+    if(f.amaAttempted.includes(cfg.id)) continue;
     if(cfg.country && f.countryKey!==cfg.country) continue;
     // Le bracket a besoin de 7 AUTRES participants réels : un pool scoped trop
     // petit (style/pays rare) ne peut pas remplir 8 places sans planter sur des
@@ -142,8 +139,13 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
       o.overall=overall(o);
     }
     // le PNJ est censé être établi DANS cette orga depuis un moment — sans ça,
-    // la dynamique Elo (orgElo pèse 80%) donnerait un roster entièrement plat
-    if(!isAmateur){ const bias=Math.round((o.W-o.L)*18); o.orgElo=eloBaseline(f.org,o.overall)+bias+RI(-40,40); o.careerElo=eloBaseline(f.org,o.overall)+Math.round(bias*0.6); }
+    // la dynamique Elo (orgElo pèse 80%) donnerait un roster entièrement plat.
+    // Pour l'amateur (org 0), seul careerElo compte dans p4pScore : il DOIT être
+    // corrélé au record généré, sinon un PNJ classé peut afficher un palmarès
+    // perdant (1-4) tout en étant classé #1 — confirmé, c'était le cas.
+    const bias=Math.round((o.W-o.L)*18);
+    if(!isAmateur){ o.orgElo=eloBaseline(f.org,o.overall)+bias+RI(-40,40); o.careerElo=eloBaseline(f.org,o.overall)+Math.round(bias*0.6); }
+    else { o.careerElo=eloBaseline(0,o.overall)+bias+RI(-20,20); }
     pool.push(o); }
   const ranked=rankPool(pool);
   if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgElo=Math.max(ranked[0].orgElo||0,eloBaseline(f.org,ranked[0].overall)+RI(150,300)); }
@@ -928,7 +930,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   let milestone='';
   if((G.f.easyFights||0)>=3){
-    if(G.f.org>0){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
+    if(G.f.org>0){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
     else { G.f.retired=true; forced=true; milestone='Contrat coupé par l\u2019organisation.'; }
   }
   // ==== [FIN ANCRE] ====
@@ -1003,6 +1005,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
         } else if(t.step==='Finale'){
           t.active=false; G.tournament=null;
           G.f.amaTitles=G.f.amaTitles||[]; G.f.amaTitles.push(t.cfg.id);
+          G.f.amaAttempted=G.f.amaAttempted||[]; G.f.amaAttempted.push(t.cfg.id);
           G.f.rankBoost=(G.f.rankBoost||0)+100;
           milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.medal} Ceinture ${t.cfg.label} remportée !</span>`;
           recordTitleChange(0, t.cfg.name, G.f.name, opp.name);
@@ -1010,6 +1013,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
         }
       } else {
         milestone=`Éliminé en ${t.step} du ${t.cfg.label}.`;
+        G.f.amaAttempted=G.f.amaAttempted||[]; G.f.amaAttempted.push(t.cfg.id);
         t.active=false; G.tournament=null;
       }
     } else {
@@ -1032,7 +1036,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // ==== [ANCRE: RETROGRADATION_INTERNATIONAL] — les ligues internationales
     // (Pacific/Ultimate Rim) ne proposent JAMAIS de promotion (rien au-dessus),
     // mais sanctionnent une série de défaites par une vraie rétrogradation.
-    G.f.org=4; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(4,G.f.overall);
+    G.f.org=4; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(4,G.f.overall); G.f.rankBoost=0;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
     G.roster=makeOrgRoster(G.f,G.roster);
     milestone=milestone||'Rétrogradé : la ligue internationale coupe ton contrat après cette série de défaites.';
@@ -1375,7 +1379,7 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f);
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
      ${f.skills.length?(()=>{
        const rarOrder={C:0,R:1,E:2,L:3,M:4,X:5};
-       const sorted=f.skills.slice().sort((a,b)=>{
+       const sorted=f.skills.filter(id=>SKILLS.some(s=>s.id===id)).slice().sort((a,b)=>{
          const sa=SKILLS.find(s=>s.id===a), sb=SKILLS.find(s=>s.id===b);
          return (rarOrder[sa.rar]??9)-(rarOrder[sb.rar]??9);
        });
@@ -1706,6 +1710,8 @@ const CL={
     } else if(id==='botched_weight_decline'){
       G.f.morale=clamp(G.f.morale-8,0,100);
       G.lastMsg='Combat annulé. Mauvaise impression garantie auprès de l\u2019organisation.';
+      G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(2,4)){ applyAging(G.f); G.f._fy=0; }
+      advanceRoster();
       G.screen='hub'; save(); render();
     } else if(id==='opp_overweight_accept'){
       const oa=G.fight.opp.attrs;
@@ -1715,6 +1721,8 @@ const CL={
     } else if(id==='opp_overweight_decline'){
       G.f.form=clamp(G.f.form-5,0,100);
       G.lastMsg='Combat annulé suite au surpoids adverse. Un remplaçant est recherché pour la prochaine carte.';
+      G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(2,4)){ applyAging(G.f); G.f._fy=0; }
+      advanceRoster();
       G.screen='hub'; save(); render();
     } else { proceedToFight(); }
   },
@@ -1744,7 +1752,7 @@ const CL={
   retryArcade(){ CL.startArcade(); },
   fightArcade(){ resolveArcadeFight(); },
   acceptPromo(targetOrg){
-    G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall);
+    G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
     G.roster=makeOrgRoster(G.f,G.roster);
     if(G.pending) G.pending.promoOffer=false;
@@ -1760,11 +1768,11 @@ const CL={
     if(G.pending) G.pending.topTierOffer=false;
     G.screen='hub'; save(); render();
   },
-  signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); if(G.pending)G.pending.topTierOffer=false;
+  signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); G.f.rankBoost=0; if(G.pending)G.pending.topTierOffer=false;
     G.roster=makeOrgRoster(G.f,G.roster);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
     G.screen='hub'; save(); render(); },
-  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
+  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
@@ -1797,11 +1805,8 @@ function buildTimeline(){
   const beats=log.map(L=>({phase:L.phase,by:L.by,round:L.r,finish:L.finish,method:L.method,
     text:L.text,momentum:L.momentum,snapA:L.snapA,snapB:L.snapB}));
   if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:res.round||3,text:'[00:00] Fin du combat. Décision des juges.'});
-  let hMeEnd=60,hOpEnd=60;
-  if(isDecisionLike(res.method)){ const s=res.scoreA+res.scoreB||1; hMeEnd=clamp(20+70*res.scoreA/s,12,92); hOpEnd=clamp(20+70*res.scoreB/s,12,92); }
-  else { if(meWin){hOpEnd=res.method.startsWith('KO')?4:22; hMeEnd=clamp(45+RI(0,25));} else {hMeEnd=res.method.startsWith('KO')?4:22; hOpEnd=clamp(45+RI(0,25));} }
   ARENA={beats,idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
-    hMe:100,hOp:100,stMe:100,stOp:100,hMeEnd,hOpEnd,
+    stMe:100,stOp:100,
     flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:res.method,meWin,
     currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:res.zone||null,
     nmeName:you.first,nopName:opp.first,meFlag:you.flag,opFlag:opp.flag};
@@ -1817,11 +1822,15 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   const loop=(now)=>{ if(ARENA.roundPause) return; const el=now-ARENA.t0-ARENA.pauseOffset; const bi=Math.min(ARENA.beats.length-1,Math.floor(el/BEAT_MS));
     if(bi!==ARENA.lastBeat){
       // pause au changement de round (sauf le tout premier beat) — laisse le
-      // joueur enchaîner manuellement plutôt qu'un défilement continu
+      // joueur enchaîner manuellement plutôt qu'un défilement continu.
+      // pauseHandledFor évite de redétecter EXACTEMENT le même changement de
+      // round à la reprise (sinon nextRound() retombe sur le même bi, revoit
+      // le même changement de round, et se re-bloque instantanément : le
+      // bouton semblait "ne rien faire").
       const prevRound=ARENA.lastBeat>=0?(ARENA.beats[ARENA.lastBeat].round||1):null;
       const newRound=ARENA.beats[bi].round||1;
-      if(prevRound!==null && newRound!==prevRound && !ARENA.beats[bi].finish){
-        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; renderArenaOverlay(); return;
+      if(prevRound!==null && newRound!==prevRound && !ARENA.beats[bi].finish && bi!==ARENA.pauseHandledFor){
+        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; ARENA.pauseHandledFor=bi; renderArenaOverlay(); return;
       }
       ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]);
     }
@@ -1837,11 +1846,10 @@ function renderArenaOverlay(){ const el=document.getElementById('ar-log'); if(!e
 }
 function applyBeat(b){ const A=ARENA; if(!b)return;
   if(b.phase==='bell'){ A.currentText=b.text; return; }
-  const dmg = b.phase==='sol'? RI(4,9) : RI(6,13);
-  if(b.by==='me'){ A.hOp=clamp(A.hOp-dmg,A.hOpEnd*0.6,100); A.flashOp=1; A.shakeOp=1; A.lungeMe=1; }
-  else { A.hMe=clamp(A.hMe-dmg,A.hMeEnd*0.6,100); A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }
+  if(b.by==='me'){ A.flashOp=1; A.shakeOp=1; A.lungeMe=1; }
+  else { A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }
   A.stMe=clamp(A.stMe-RI(2,5),12,100); A.stOp=clamp(A.stOp-RI(2,5),12,100);
-  if(b.finish){ if(b.method&&b.method.startsWith('KO')){ if(A.meWin){A.hOp=2;A.fall=2;} else {A.hMe=2;A.fall=1;} }
+  if(b.finish){ if(b.method&&b.method.startsWith('KO')){ if(A.meWin){A.fall=2;} else {A.fall=1;} }
     else if(b.method&&b.method.startsWith('Soum')){ A.tap=A.meWin?2:1; }
     if(A.finishZone){ const zoneLetter=A.finishZone==='tête'?'h':A.finishZone==='corps'?'b':'l';
       const loserPrefix=A.meWin?'do':'dm'; A.flashZoneId=`${loserPrefix}-${zoneLetter}`; } }
@@ -1907,17 +1915,17 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
 function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const W=A.W,H=A.H;
   ctx.clearRect(0,0,W,H);
   const gY=H-24;
-  const topY=H*0.34, topL=W*0.2, topR=W*0.8;
+  const topY=H*0.34, topL=W*0.28, topR=W*0.72;
   // ==== [ANCRE: ECLAIRAGE_GRADINS] — éclairage de projecteurs (au-dessus de
   // l'octogone) + gradins stylisés dans les coins, pour casser le noir plat
   // qui entourait la fosse et donnait une impression de vide sans profondeur.
   const spot=ctx.createRadialGradient(W*0.5,topY*0.4,0,W*0.5,topY*0.4,W*0.75);
-  spot.addColorStop(0,'rgba(255,235,190,.16)'); spot.addColorStop(1,'rgba(0,0,0,0)');
+  spot.addColorStop(0,'rgba(255,225,170,.32)'); spot.addColorStop(0.5,'rgba(255,225,170,.10)'); spot.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=spot; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#15110c';
+  ctx.fillStyle='#3a3126';
   const bleacherRows=4;
   for(let r=0;r<bleacherRows;r++){ const ry=topY*0.08+r*(topY*0.75/bleacherRows);
-    ctx.globalAlpha=.35-r*.06;
+    ctx.globalAlpha=.6-r*.1;
     ctx.fillRect(0,ry,topL*0.9,topY*0.75/bleacherRows-2);
     ctx.fillRect(W-topL*0.9,ry,topL*0.9,topY*0.75/bleacherRows-2);
   }
