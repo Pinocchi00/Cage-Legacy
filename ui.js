@@ -289,7 +289,7 @@ function chooseTraining(i){ const opt=G.train[i]; const applied=applyDeltas(G.f,
     G.f.form=clamp(G.f.form-15,0,100); G.f.morale=clamp(G.f.morale-10,0,100);
     G.screen='hub'; save(); render(); return;
   }
-  const kind=fightKind(); const opp=G.sel.o; const rounds=(kind==='title')?5:3;
+  const kind=fightKind(); const opp=G.sel.o; const rounds=(kind==='title'||kind==='defense')?5:3;
   G.fight={kind,opp,rounds,malus:null};
   // ==== [ANCRE: CUTTING_5PALIERS] — déterministe, à CHAQUE combat. Le poids de
   // forme est un trait VARIABLE (weightCutInfo tire un % neuf à chaque appel),
@@ -1038,7 +1038,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // mais sanctionnent une série de défaites par une vraie rétrogradation.
     G.f.org=4; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(4,G.f.overall); G.f.rankBoost=0;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
-    G.roster=makeOrgRoster(G.f,G.roster);
+    G.roster=makeOrgRoster(G.f);
     milestone=milestone||'Rétrogradé : la ligue internationale coupe ton contrat après cette série de défaites.';
     // ==== [FIN ANCRE] ====
   }
@@ -1101,7 +1101,8 @@ function checkAch(){ G.ach=G.ach||[]; if(G.f.champion==='monde')G.f._world=true;
 /* ============================== ÉCRANS ==================================== */
 function last5(f){ const h=f.history.slice(-5); if(!h.length)return '<span class="muted small">Pas encore de combat</span>';
   return '<div class="l5">'+h.map(x=>{ const ko=x.method&&x.method.startsWith('KO'),sub=x.method&&x.method.startsWith('Soum');
-    return `<span class="p ${x.res==='win'?'w':'l'}" title="${x.method||''}">${x.res==='win'?'V':'D'}<i>${ko?'KO':sub?'SUB':'DÉC'}</i></span>`; }).join('')+'</div>'; }
+    const letter=x.res==='win'?'V':(x.res==='draw'?'N':'D'); const cls=x.res==='win'?'w':(x.res==='draw'?'d':'l');
+    return `<span class="p ${cls}" title="${x.method||''}">${letter}<i>${ko?'KO':sub?'SUB':'DÉC'}</i></span>`; }).join('')+'</div>'; }
 function formatArgent(kMontant){ const total=Math.round((kMontant||0)*1000);
   if(total>=1000000) return (total/1000000).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:1})+' M $';
   return total.toLocaleString('fr-FR')+' $';
@@ -1338,7 +1339,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   return `<div class="scr">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px;text-align:center">
      <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
-     <div class="hero-name" style="color:${p.win?'var(--win)':'var(--loss)'}">${p.win?'VICTOIRE':'DÉFAITE'}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
+     <div class="hero-name" style="color:${p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)')}">${p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE')}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
      <div class="tagrow" style="justify-content:center">
        ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
          const typeStr=p.method.startsWith('KO')?'KO/TKO':'Soumission';
@@ -1385,10 +1386,10 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f);
        });
        // hash déterministe simple : même tag = même couleur, sans mapping manuel sur 640 compétences
        const tagColor=t=>{ let h=0; for(let i=0;i<t.length;i++) h=(h*31+t.charCodeAt(i))>>>0;
-         const palette=['#4DA6FF','#6FB577','#D4AF37','#C7332A','#8b5cf6','#E08E45']; return palette[h%palette.length]; };
+         const palette=['var(--win)','var(--gold)','var(--loss)']; return palette[h%palette.length]; };
        return `<div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Compétences.</b> <span class="muted small">(clique pour le détail)</span></div>`+
          sorted.map((id,i)=>{const sk=SKILLS.find(s=>s.id===id);
-           const fxTxt=sk.fx?Object.entries(sk.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${v} ${label}`;}).join(', '):'';
+           const fxTxt=sk.fx?Object.entries(sk.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(v/5))} ${label}`;}).join(', '):'';
            return `<div style="margin:4px 0;position:relative;z-index:2">
              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;cursor:pointer" onclick="const d=document.getElementById('skdet${i}'); d.style.display=d.style.display==='none'?'block':'none';">
                <span class="story" style="margin:0;color:${RAR_COLORS[sk.rar]||'var(--gold)'}">${sk.name}</span>
@@ -1554,7 +1555,7 @@ function scr_history(){ const f=G.f; const history=(f.history||[]).slice().rever
       <div style="width:36px">RES</div><div style="flex:1">ADVERSAIRE</div><div style="width:50px;text-align:center">SAIS.</div><div style="width:90px;text-align:right">MÉTHODE</div></div>`;
     history.forEach(fight=>{
       const resLetter=fight.res==='win'?'W':(fight.res==='loss'?'L':'D');
-      const resColor=resLetter==='W'?'var(--gold)':(resLetter==='L'?'var(--loss)':'var(--muted)');
+      const resColor=resLetter==='W'?'var(--win)':(resLetter==='L'?'var(--loss)':'var(--gold)');
       const resText=resLetter==='W'?'VICTOIRE':(resLetter==='L'?'DÉFAITE':'NUL');
       const oppName=fight.oppName||'Adversaire inconnu';
       const oppRank=fight.oppRank?(fight.oppRank==='NR'?'NR':'#'+fight.oppRank):'—';
@@ -1754,7 +1755,7 @@ const CL={
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
-    G.roster=makeOrgRoster(G.f,G.roster);
+    G.roster=makeOrgRoster(G.f);
     if(G.pending) G.pending.promoOffer=false;
     G.screen='hub'; save(); render();
   },
@@ -1769,7 +1770,7 @@ const CL={
     G.screen='hub'; save(); render();
   },
   signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); G.f.rankBoost=0; if(G.pending)G.pending.topTierOffer=false;
-    G.roster=makeOrgRoster(G.f,G.roster);
+    G.roster=makeOrgRoster(G.f);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
     G.screen='hub'; save(); render(); },
   acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
@@ -1931,21 +1932,27 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   }
   ctx.globalAlpha=1;
   // ==== [FIN ANCRE] ====
-  // Sol en octogone stylisé (au lieu d'un simple rectangle plein)
+  // Sol en véritable octogone (8 côtés : les 4 coins sont coupés, pas
+  // seulement les 2 du haut — un simple trapèze à 6 côtés se lisait trop
+  // comme un rectangle pour être identifié comme un octogone)
+  const botL=W*0.1, botR=W*0.9, gY2=H-10;
   ctx.beginPath();
-  ctx.moveTo(0,H); ctx.lineTo(W,H); ctx.lineTo(W,gY); ctx.lineTo(topR,topY);
-  ctx.lineTo(topL,topY); ctx.lineTo(0,gY); ctx.closePath();
+  ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.lineTo(W,gY2); ctx.lineTo(W,gY);
+  ctx.lineTo(topR,topY); ctx.lineTo(topL,topY); ctx.lineTo(0,gY); ctx.lineTo(0,gY2);
+  ctx.closePath();
   const g=ctx.createLinearGradient(0,topY,0,H); g.addColorStop(0,'#1c1710'); g.addColorStop(1,'#241d14');
   ctx.fillStyle=g; ctx.fill();
   if(A.noise){ ctx.save(); ctx.clip(); ctx.fillStyle=A.noise; ctx.fillRect(0,0,W,H); ctx.restore(); }
   ctx.strokeStyle='#3a2f20'; ctx.lineWidth=1;
   for(let i=0;i<=8;i++){ const x=i*W/8; ctx.globalAlpha=.5; ctx.beginPath(); ctx.moveTo(x,gY); ctx.lineTo(x*0.6+W*0.2,topY); ctx.stroke(); }
   ctx.globalAlpha=1; ctx.strokeStyle='#4a3c1f'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(0,gY); ctx.lineTo(W,gY); ctx.stroke();       // rail bas
+  ctx.beginPath(); ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.stroke();      // rail bas
   ctx.beginPath(); ctx.moveTo(topL,topY); ctx.lineTo(topR,topY); ctx.stroke(); // rail haut
-  // poteaux d'angle — 4 coins de l'octogone stylisé
+  ctx.beginPath(); ctx.moveTo(0,gY); ctx.lineTo(0,gY2); ctx.stroke();          // rail gauche
+  ctx.beginPath(); ctx.moveTo(W,gY); ctx.lineTo(W,gY2); ctx.stroke();          // rail droit
+  // poteaux d'angle — les 8 sommets de l'octogone
   ctx.fillStyle='#5C4B2E';
-  [[0,gY],[W,gY],[topL,topY],[topR,topY]].forEach(([px,py])=>{ ctx.fillRect(px-2,py-10,4,20); });
+  [[botL,H],[botR,H],[W,gY2],[W,gY],[topL,topY],[topR,topY],[0,gY],[0,gY2]].forEach(([px,py])=>{ ctx.fillRect(px-2,py-10,4,20); });
   const grounded=A.curPhase==='sol';
   // contrôle de cage : le momentum (0-100, 50=neutre) décale le centre du duel —
   // au-dessus de 50 le joueur pousse l'adversaire vers son propre mur.
@@ -2001,9 +2008,9 @@ function scr_arena(){ const A=ARENA||{};
        </div>
      </div>
      <canvas id="arena-cv" style="width:100%;height:220px;display:block;margin-top:16px;border:1px solid var(--line);background:var(--bg)"></canvas>
-     <div class="arena-st" style="margin-top:16px"><div class="st-lbl">RÉSERVE O2</div><div class="st-lbl" style="text-align:right">RÉSERVE O2</div></div>
+     <div class="arena-st" style="margin-top:16px"><div class="st-lbl">CARDIO</div><div class="st-lbl" style="text-align:right">CARDIO</div></div>
      <div class="arena-bars sm" style="margin-top:6px"><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-me" style="background:var(--gold)"></div></div><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-op" style="background:var(--gold)"></div></div></div>
-     <div id="ar-log" class="mono muted small" style="margin-top:20px;height:48px;display:flex;flex-direction:column;justify-content:flex-end;border-left:3px solid var(--gold);padding-left:12px;line-height:1.4;padding-bottom:4px"></div>
+     <div id="ar-log" class="mono muted small" style="margin-top:20px;min-height:48px;display:flex;flex-direction:column;justify-content:flex-end;border-left:3px solid var(--gold);padding-left:12px;line-height:1.4;padding-bottom:4px"></div>
    </div>
    <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Couper la transmission vidéo ▸</button>
   </div>`; }

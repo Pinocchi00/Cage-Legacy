@@ -377,10 +377,17 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     else if(rDiff<0){ sA=9;sB=10; } // bande serrée mais B garde un léger avantage réel
     else { if(rnd()<0.5){sA=10;sB=9;} else {sA=9;sB=10;} } // égalité mathématique exacte, rarissime
     let j1=[sA,sB], j2=[sA,sB], j3=[sA,sB];
-    if(Math.abs(rDiff)<=6 && kdDiff===0){
-      if(rnd()<0.3) j2=[sB===10?9:10, sA===10?9:10];
-      if(rnd()<0.1) j3=[sB===10?9:10, sA===10?9:10];
-    }
+    // Dissidence des juges : la probabilité baisse avec l'écart du round mais
+    // n'atteint jamais 0% — même un round net (10-7/10-8) peut voir un juge
+    // s'écarter d'un point. Avant, la dissidence n'était possible QUE sur les
+    // rounds ultra-serrés (|rDiff|<=6), rendant l'unanimité totale obligatoire
+    // sur tout round net — confirmé irréaliste (3 juges identiques à chaque
+    // round d'un combat entier n'arrive jamais en vrai MMA).
+    const margin=Math.max(Math.abs(rDiff),Math.abs(kdDiff)*20);
+    const dissent2=clamp(0.35-margin*0.004,0.04,0.35);
+    const dissent3=clamp(0.15-margin*0.002,0.02,0.15);
+    if(rnd()<dissent2) j2=[sB===10?9:10, sA===10?9:10];
+    if(rnd()<dissent3) j3=[sB===10?9:10, sA===10?9:10];
     j1A+=j1[0];j1B+=j1[1];j2A+=j2[0];j2B+=j2[1];j3A+=j3[0];j3B+=j3[1];
     roundStats.push({r,j1,j2,j3,sigA:st.A.sig-_sigA0,sigB:st.B.sig-_sigB0,tdA:st.A.td-_tdA0,tdB:st.B.td-_tdB0,kdA:st.A.kd-_kdA0,kdB:st.B.kd-_kdB0});
     // ==== [ANCRE: RECUP_INTER_ROUND] — la minute de repos entre rounds allège
@@ -466,7 +473,7 @@ const FINISH_MOVES={
   {id:'mma30',name:'Ground and Pound de l\u2019enfer',zone:'tête'},{id:'mma37',name:'instinct de destruction',zone:'tête'},
  ]
 };
-const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'tête'},{name:'clé de bras (armbar)',zone:'tête'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'}];
+const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'corps'},{name:'clé de bras (armbar)',zone:'corps'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'}];
 const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'}];
 function pickFinishMove(winner,type,zone){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
@@ -496,7 +503,9 @@ const ORG_FLAVORS=[
 ];
 function orgDisplayName(f){ if(f.org===0||f.org>=5) return ORGS[f.org]; return f.orgFlavor||ORGS[f.org]; }
 /* ==== [FIN ANCRE] ==== */
-function canPromote(f){ const n=f.org+1; return n<ORGS.length && (f.orgWins||0)>=3 && p4pScore(f)>=ORG_PROMO_SCORE[n]; }
+function canPromote(f){ const n=f.org+1; const totalOrg=f.W+f.L+(f.D||0);
+  const winRate=totalOrg>0?f.W/totalOrg:0;
+  return n<ORGS.length && (f.orgWins||0)>=3 && winRate>=0.55 && p4pScore(f)>=ORG_PROMO_SCORE[n]; }
 /* ==== [ANCRE: P4P_SCORE_80_20] — le classement pesait 100% le palmarès de
    CARRIÈRE (jamais remis à zéro entre deux paliers pro), alors que seul
    turnPro() (amateur->pro) réinitialise W/L. Une promotion tier 1->2 gardait
