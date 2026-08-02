@@ -382,7 +382,17 @@ function tacticalRead(f,o){ const a=eff(f),b=eff(o);
   return prefix+base;
 }
 function genOpponents(f){
-  const pool=G.roster.filter(o=>o.id!==f.id);
+  let pool=G.roster.filter(o=>o.id!==f.id);
+  // Anti-répétition globale : mémoire des 4 derniers adversaires, appliquée
+  // AVANT tout branchement (titre/défense/normal) — l'ancien filtre à 1 seul
+  // adversaire (lastOpponentId) ne protégeait que le matchmaking normal,
+  // laissant les combats de titre et les défenses totalement exposés à la
+  // répétition, ce qui explique le cas signalé (même adversaire proposé
+  // après avoir pris ET défendu la ceinture contre lui).
+  if(f.recentOpps && f.recentOpps.length>0){
+    const filtered=pool.filter(o=>!f.recentOpps.includes(o.id));
+    if(filtered.length>=5) pool=filtered;
+  }
   let chosen=[];
   if(G.tournament && G.tournament.active && f.org===0){
     const myMatch=G.tournament.matches.find(m=>m.a.id===f.id || m.b.id===f.id);
@@ -402,14 +412,7 @@ function genOpponents(f){
     chosen.push(r1, rest[0]||pool[1], rest[1]||pool[2]);
   }
   else {
-    let normalPool=pool.filter(o=>!o.champion); // le champion ne doit JAMAIS apparaître hors d'un vrai combat de titre
-    // Anti-répétition : pas de revanche immédiate sur un combat classique (le
-    // titre a déjà son propre chemin dédié plus haut, ce filtre ne concerne
-    // que le matchmaking normal). Désactivé si le pool devient trop petit.
-    if(G.f.lastOpponentId){
-      const filtered=normalPool.filter(o=>o.id!==G.f.lastOpponentId);
-      if(filtered.length>=3) normalPool=filtered;
-    }
+    let normalPool=rankPool(pool.filter(o=>!o.champion)); // trié du meilleur au pire — myRank/rk ci-dessous en dépendent directement
     const myRank=normalPool.findIndex(o=>p4pScore(o)<p4pScore(f));
     // rk clampé à un index VALIDE du pool (jamais pool.length) : sinon pool[rk] est
     // undefined et retombe sur pool[0] via le ||pool[0] plus bas — c'est-à-dire le
@@ -419,7 +422,14 @@ function genOpponents(f){
     // ~100 a besoin d'une fenêtre bien plus large qu'un pool pro de ~30, sinon
     // rk±2 retombe régulièrement sur le tout premier du classement par accident.
     const spread=Math.max(2,Math.round(normalPool.length*0.06));
-    if(f.streak<=-2){
+    // Filet de sécurité explicite : premier combat pro (0 combat dans cette
+    // organisation), en plus de la protection déjà assurée par le clamp de rk
+    // ci-dessus — garantit que les 3 propositions viennent du tout bas du
+    // classement, sans dépendre du bon comportement de p4pScore/findIndex.
+    if(f.org>0 && (f.W+f.L+(f.D||0))===0 && normalPool.length>=5){
+      const bottom=normalPool.slice(-5);
+      chosen.push(bottom[bottom.length-1], bottom[Math.floor(bottom.length/2)], bottom[0]);
+    } else if(f.streak<=-2){
       // SCÉNARIO A : Le Rebond (Prospect vs Vétéran)
       const prospect=normalPool.find(o=>(o.W+o.L)<=5 && o.W>o.L && p4pScore(o)<p4pScore(f)) || normalPool[Math.min(normalPool.length-1, rk+spread)];
       const veteran=normalPool.find(o=>o.age>=32 && o.streak<0) || normalPool[Math.min(normalPool.length-1, rk+spread+1)];
@@ -1046,9 +1056,13 @@ function advanceWTUMMABracket(){
   return false;
 }
 function generateArcadeUpgrades(){
-  G.arcade.trainOpts=trainingOptions(G.f).slice(0,3);
+  const baseOpts=trainingOptions(G.f).slice(0,3);
+  // Bonus x4 : le format court (Bracket 64 / Ladder 100) rend les bonus
+  // habituels de carrière (sur 100) quasi invisibles sur un parcours de
+  // seulement 6-8 combats — l'affichage réel se fait ensuite sur /20 via d20().
+  G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:opt.d.map(delta=>[delta[0],delta[1]*4])}));
   G.arcade.skillOpts=[];
-  const rStep=G.arcade.tournament.roundStep;
+  const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
   let validPool=poolEligible(G.f,false,false);
   if(rStep>=4) validPool=validPool.filter(s=>s.rar!=='C');
   if(rStep===6) validPool=validPool.filter(s=>s.rar==='L'||s.rar==='M');
@@ -1092,96 +1106,104 @@ function genWTUMMAOpponent(){
    classique — ne modifie aucun écran existant. ==== */
 function scr_faith_draft(){
   const d=G.faithDraft;
-  let title='', desc='', cards='';
-  if(d.step===1){
-    title='VOTRE ORIGINE 🎲'; desc='D\u2019où venez-vous ? Cela forgera vos stats de base et votre style.';
-    const opts=[
-      {id:'traditional',name:'Académie Traditionnelle',txt:'Un parcours académique, structuré et rigoureux depuis la jeunesse.',tags:'+IQ, +Discipline'},
-      {id:'pro_child',name:'Enfant de Combattant',txt:'Un nom qui ouvre des portes, et une pression qui ne vous quitte jamais.',tags:'+Argent, -Sang-froid'},
-      {id:'street',name:'Quartier Populaire',txt:'Tout a été appris dans la rue et les parkings. À la dure.',tags:'+Menton, +Cœur'},
-      {id:'late_bloomer',name:'Talent Tardif',txt:'Personne ne croyait en vous. Votre corps et votre rage comme seuls bagages.',tags:'+Puissance, -Technique'}
-    ];
-    cards=opts.map(o=>`<div class="glass opp" style="padding:16px;text-align:left" onclick="CL.selectFaithDraft('origin','${o.id}')">
-      <div class="hero-name" style="font-size:22px;text-transform:none">${o.name}</div>
-      <div class="muted small mt">${o.txt}</div>
-      <div class="mono small mt" style="color:var(--gold)">${o.tags}</div></div>`).join('');
-  } else if(d.step===2){
-    title='VOTRE POSITION 🎲'; desc='Votre base martiale. Elle dictera vos premiers combats.';
-    const styles=['boxer','wrestler','bjj','muayThai'];
-    cards=styles.map(s=>`<div class="glass opp" style="padding:16px;text-align:left" onclick="CL.selectFaithDraft('style','${s}')">
-      <div class="hero-name" style="font-size:22px;text-transform:none">${STYLES[s].label}</div>
-      <div class="muted small mt">Les stats qui font les légendes... et les critiques quand la victoire fuit.</div></div>`).join('');
-  } else if(d.step===3){
-    title='VOS ANNÉES ADO 🎲'; desc='Le style de vie qui a forgé votre discipline... et votre réputation.';
-    const opts=[
-      {id:'pro',name:'🥗 Vie de Pro',txt:'Extinction des feux à 22h, diète stricte, zéro écart. Les coachs vous adorent.'},
-      {id:'balanced',name:'⚖️ Équilibré',txt:'Sérieux à l\u2019entraînement, détendu en dehors. Ni moine ni fêtard.'},
-      {id:'party',name:'🎉 La Belle Vie',txt:'Sorties, potes, réseaux sociaux. Le talent fera le reste... non ?'}
-    ];
-    cards=opts.map(o=>`<div class="glass opp" style="padding:16px;text-align:left" onclick="CL.selectFaithDraft('lifestyle','${o.id}')">
-      <div class="hero-name" style="font-size:22px;text-transform:none">${o.name}</div>
-      <div class="muted small mt">${o.txt}</div></div>`).join('');
-  } else if(d.step===4){
-    title='VOTRE CERCLE 🎲'; desc='Qui s\u2019occupe de vos intérêts avant même votre premier contrat ?';
-    const opts=[
-      {id:'family',name:'👨\u200d👩\u200d👦 Famille Soutien',txt:'Des parents protecteurs qui gèrent tout : contrats, équilibre.'},
-      {id:'agent',name:'🦈 Agent Ambitieux',txt:'Un jeune requin vous a repéré. Il promet les sommets — et prend sa part.'},
-      {id:'squad',name:'👉 Le Gang du Quartier',txt:'Vos amis d\u2019enfance vous suivent partout. Bruyants, loyaux, incontrôlables.'}
-    ];
-    cards=opts.map(o=>`<div class="glass opp" style="padding:16px;text-align:left" onclick="CL.selectFaithDraft('circle','${o.id}')">
-      <div class="hero-name" style="font-size:22px;text-transform:none">${o.name}</div>
-      <div class="muted small mt">${o.txt}</div></div>`).join('');
-  }
+  const opt=(key,val,icon,name,desc)=>`
+    <div class="glass opp" style="padding:12px;text-align:left;border-color:${d[key]===val?'var(--text)':'var(--line)'}" onclick="CL.selectFaithDraft('${key}','${val}')">
+      <div class="hero-name" style="font-size:18px;text-transform:none;color:${d[key]===val?'var(--text)':'var(--muted)'}">${icon} ${name}</div>
+      <div class="muted small mt">${desc}</div>
+    </div>`;
   return `<div class="scr center intro">
-    <div class="tagrow mb" style="justify-content:center">${[1,2,3,4].map(i=>`<div style="width:10px;height:10px;border-radius:50%;background:${d.step===i?'var(--gold)':'var(--line)'}"></div>`).join('')}</div>
-    <h2 class="disp big" style="font-size:32px">${title}</h2>
-    <p class="lede small">${desc}</p>
-    <div style="margin-top:24px;display:flex;flex-direction:column;gap:4px">${cards}</div>
+    <h2 class="disp big" style="font-size:32px">ORIGINES</h2>
+    <p class="lede small">Forgez l\u2019histoire et la psychologie de votre combattant.</p>
+
+    <div class="fld" style="text-align:left"><label>1. VOTRE ORIGINE</label>
+      ${opt('origin','traditional','🏛️','Académie Traditionnelle','Parcours structuré. (+IQ, +Discipline)')}
+      ${opt('origin','pro_child','🥊','Enfant de Combattant','Un nom qui ouvre des portes. (+Argent, -Sang-froid)')}
+      ${opt('origin','street','🚧','Quartier Populaire','À la dure. (+Menton, +Cœur)')}
+      ${opt('origin','late_bloomer','⏳','Talent Tardif','Le corps comme seul bagage. (+Puissance, -Technique)')}
+    </div>
+
+    <div class="fld" style="text-align:left"><label>2. DISCIPLINE DE BASE</label>
+      ${opt('style','boxer','🥊','Boxe','Mains lourdes et déplacements.')}
+      ${opt('style','wrestler','🤼','Lutte','Projections et contrôle absolu.')}
+      ${opt('style','bjj','🥋','Jiu-Jitsu','Soumissions et jeu au sol.')}
+      ${opt('style','muayThai','🇹🇭','Muay-Thaï','Clinch, genoux et coudes.')}
+    </div>
+
+    <div class="fld" style="text-align:left"><label>3. HYGIÈNE DE VIE (ADO)</label>
+      ${opt('lifestyle','pro','🥗','Vie de Pro','Diète stricte, sommeil. (+Cardio, +Forme)')}
+      ${opt('lifestyle','balanced','⚖️','Équilibré','Sérieux mais détendu. (Stats équilibrées)')}
+      ${opt('lifestyle','party','🎉','La Belle Vie','Fêtes et réseaux. (+Hype, -Forme)')}
+    </div>
+
+    <div class="fld" style="text-align:left"><label>4. LE CERCLE (MANAGEMENT)</label>
+      ${opt('circle','family','👨\u200d👩\u200d👦','Famille','Des parents qui gèrent tout. (+Moral)')}
+      ${opt('circle','agent','🦈','Agent Ambitieux','Un requin des affaires. (+Fonds de départ)')}
+      ${opt('circle','squad','🤜','Le Gang','Vos amis d\u2019enfance. (Neutre)')}
+    </div>
+
+    <div class="fld" style="text-align:left"><label>5. PERSONNALITÉ (MÉDIAS)</label>
+      ${opt('personality','villain','🦹','Villain / Trash Talker','Génère de la hype, mais draine le moral.')}
+      ${opt('personality','humble','🙏','Humble / Respecté','Mental d\u2019acier, apprécié des puristes.')}
+    </div>
+
+    <button class="btn primary mt" style="padding:16px;font-size:18px" onclick="CL.finalizeFaithDraft()">VALIDER ET COMMENCER</button>
+    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }
 
 function scr_faith_hub(){
-  const f=G.f; const pa=G.faith.pa;
+  const f=G.f; const step=G.faith.step||1;
   const topBar=`<div style="display:flex;gap:8px;margin-bottom:12px">
-    <div class="glass" style="flex:1;text-align:center;padding:8px 0;border-color:var(--gold);border-bottom:2px solid var(--gold);border-radius:6px;min-height:auto">
-      <b class="gold" style="font-size:16px;font-family:'Oswald'">⚡ ${pa} PA</b></div>
     <div class="glass" style="flex:1.2;text-align:center;padding:8px 0;border-radius:6px;min-height:auto">
       <b style="font-size:16px;font-family:'Oswald'">${formatArgent(f.earnings)}</b></div>
     <div class="glass" style="flex:1;text-align:center;padding:8px 0;border-radius:6px;min-height:auto">
-      <b class="mono" style="font-size:14px;color:var(--gold)">OVR ${f.overall}</b></div>
+      <b class="mono" style="font-size:14px;color:var(--text)">OVR ${f.overall}</b></div>
   </div>
   <div style="display:flex;gap:16px;margin-bottom:24px;padding:0 4px">
     <div style="flex:1"><span class="stat-lbl" style="margin-bottom:4px">FORME</span>
       <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden">
-        <span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:linear-gradient(90deg,#E8B923,#6FB577)"></span></div></div>
+        <span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--text)"></span></div></div>
     <div style="flex:1"><span class="stat-lbl" style="margin-bottom:4px">MORAL</span>
       <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden">
-        <span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:linear-gradient(90deg,#C7332A,#4DA6FF)"></span></div></div>
+        <span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--text)"></span></div></div>
   </div>`;
+  let actionsHtml='';
+  if(step===1){
+    actionsHtml=`<div class="eyebrow mb">PHASE 1 : PRÉPARATION</div>
+    <p class="lede small">Sélectionnez votre approche pour cette saison.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithTrain()">
+        <div class="disp" style="font-size:18px;color:var(--text)">ENTRAÎNEMENT</div>
+        <div class="mono muted small mt" style="font-size:10px">Améliorer vos stats physiques et techniques</div></div>
+      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithScout()">
+        <div class="disp" style="font-size:18px;color:var(--text)">SCOUT / MÉDIAS</div>
+        <div class="mono muted small mt" style="font-size:10px">Étude stratégique & guerre psychologique</div></div>
+    </div>`;
+  } else if(step===2){
+    actionsHtml=`<div class="eyebrow mb">PHASE 2 : AJUSTEMENT</div>
+    <p class="lede small">Gérez votre condition ou investissez avant l\u2019affrontement.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithRest()">
+        <div class="disp" style="font-size:18px;color:var(--text)">REPOS & RÉCUPÉRATION</div>
+        <div class="mono muted small mt" style="font-size:10px">+25 Forme, +10 Moral</div></div>
+      <button class="btn" style="border-color:var(--text);color:var(--text);font-size:16px;padding:16px;margin:0" onclick="CL.go('faith_shop')">Boutique d\u2019Influence & Investissements</button>
+    </div>`;
+  } else {
+    actionsHtml=`<div class="eyebrow mb">PHASE 3 : L\u2019OCTOGONE</div>
+    <p class="lede small">Tout est en place. Il est temps de valider cette saison.</p>
+    <button class="btn primary" style="padding:20px;font-size:20px;border-radius:8px;margin-top:10px" onclick="CL.faithFight()">COMBATTRE</button>`;
+  }
   return `<div class="scr">
     ${topBar}
     <div class="glass mwash card" style="padding:16px;margin-bottom:20px;border-radius:8px;background:var(--panel2)">
       <div class="meta-strip" style="margin-bottom:8px;color:var(--text)">
         <span style="background:var(--line);padding:4px 8px;border-radius:4px">SAISON ${G.faith.year}</span>
-        <span>MOIS ${G.faith.month} / 12</span></div>
+        <span>ÉTAPE ${step} / 3</span></div>
       <div class="hero-name" style="font-size:28px">${esc(f.name)} ${f.flag}</div>
       <div class="mono small muted mt">Ligue : <b style="color:var(--text)">${orgDisplayName(f)}</b></div>
     </div>
-    <div class="eyebrow mb">ACTIONS DU MOIS</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithTrain()">
-        <div class="disp gold" style="font-size:18px">ENTRAÎNEMENT</div>
-        <div class="mono muted small mt" style="font-size:10px">1 PA · Améliorer stats</div></div>
-      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithScout()">
-        <div class="disp" style="font-size:18px;color:var(--sage)">SCOUT / MÉDIAS</div>
-        <div class="mono muted small mt" style="font-size:10px">1 PA · Étude & Buzz</div></div>
-      <div class="glass opp" style="padding:12px;text-align:center;grid-column:span 2" onclick="CL.faithRest()">
-        <div class="disp" style="font-size:18px;color:#4DA6FF">REPOS & RÉCUPÉRATION</div>
-        <div class="mono muted small mt" style="font-size:10px">1 PA · +25 Forme, +10 Moral</div></div>
-    </div>
-    <button class="btn primary mt" style="padding:20px;font-size:20px;border-radius:8px;margin-top:20px" onclick="CL.faithFight()">COMBATTRE (3 PA)</button>
-    <button class="btn mt" style="border-color:var(--gold);color:var(--gold);font-size:16px;padding:16px" onclick="CL.go('faith_shop')">Boutique d\u2019Influence & Investissements</button>
-    <button class="btn ghost mt" onclick="CL.go('profile')">Voir Fiche Complète</button>
+    ${actionsHtml}
+    <button class="btn ghost mt" onclick="CL.go('profile')">Voir fiche complète</button>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */
@@ -1189,7 +1211,7 @@ function scr_faith_train(){
   const deltaHtml=d=>d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
     const vague=(k==='morale'||k==='form')?(v>0?`+${lbl}`:`-${lbl}`):(v>0?`Potentiel : ${lbl} ↑`:`Potentiel : ${lbl} ↓`);
     return `<span class="dlt ${v>=0?'up':'dn'}">${vague}</span>`; }).join('');
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Salle d\u2019entraînement (1 PA)</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Salle d\u2019entraînement</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
    <p class="lede small">L\u2019entraînement consomme du temps et de la forme, mais augmente vos attributs vers leurs plafonds uniques.</p>
    ${G.train.map((t,i)=>`<div class="opp" onclick="CL.chooseFaithTrain(${i})">
      <div class="opp-top"><span class="opp-nm">${t.label}</span></div>
@@ -1198,7 +1220,7 @@ function scr_faith_train(){
 }
 function scr_faith_scout(){
   return `<div class="scr center intro">
-   <div class="eyebrow sage">Analyse & Médias (1 PA)</div>
+   <div class="eyebrow sage">Analyse & Médias</div>
    <h2 class="disp big" style="font-size:32px">Préparation Stratégique</h2>
    <p class="lede small">Préparez le terrain pour votre prochain combat. Les bonus/malus s\u2019appliqueront directement lors de votre prochaine montée dans la cage.</p>
    <div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;text-align:left">
@@ -1356,38 +1378,43 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
      <div class="eyebrow mb">Prochain adversaire : Seed #${a.opponent.seed}</div>
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · OVR ${a.opponent.overall}</div></div>
-   <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (R${a.tournament.roundStep}/6)</button>
+   <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run</button></div>`;
 }
 /* ==== [ANCRE: ECRAN_ARCADE_UPGRADES] — camp d'entraînement roguelite entre
    chaque tour du Bracket 64 : un entraînement + une compétence à choisir. ==== */
 function scr_arcade_upgrades(){
-  const a=G.arcade;
-  let h=`<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // CAMP D\u2019ENTRAÎNEMENT</span></div>
-         <p class="lede small">L\u2019étau se resserre. Sélectionnez un ajustement physique et une nouvelle compétence pour le prochain tour.</p>`;
-  if(!a.upgradesChosen.train){
-    h+=`<div class="eyebrow mt mb" style="color:var(--gold)">1. CONDITIONNEMENT & SPARRING</div>`;
-    a.trainOpts.forEach((t,i)=>{
-      const deltas=t.d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
-        return `<span class="dlt ${v>=0?'up':'dn'}">${v>=0?'+':''}${v} ${lbl}</span>`; }).join('');
-      h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
-            <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
-    });
-  } else { h+=`<div class="card glass mt mb"><span class="gold">✓ Entraînement appliqué</span></div>`; }
+  const a=G.arcade, f=G.f, g=groupAvg(f);
+  const stepName=a.tournament?a.tournament.stepName:'Ascension';
+  const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
+     ${ATTR[key].map(att=>`<div class="attr"><span class="attr-l">${att[1]}</span>${gauge(f.attrs[att[0]])}<span class="attr-v">${d20(f.attrs[att[0]])}</span></div>`).join('')}</div>`;
+  let h=`<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // AMÉLIORATIONS</span></div>`;
   if(!a.upgradesChosen.skill){
-    h+=`<div class="eyebrow mt mb" style="color:var(--blood)">2. NOUVELLE COMPÉTENCE (${a.tournament.stepName})</div>`;
+    h+=`<p class="lede small">L\u2019étau se resserre. Sélectionnez une nouvelle compétence pour la suite du parcours.</p>
+        <div class="eyebrow mt mb" style="color:var(--gold)">1. NOUVELLE COMPÉTENCE (${stepName})</div>`;
     a.skillOpts.forEach((s,i)=>{
       const color=RAR_COLORS[s.rar]||'var(--gold)';
       h+=`<div class="opp" style="border-left:3px solid ${color}" onclick="CL.pickArcadeSkill(${i})">
             <b style="color:${color}">${s.name}</b> <span class="muted small">(${s.rar})</span>
             <div class="muted small mt">${s.desc||s.blurb||''}</div></div>`;
     });
-    if(!a.skillOpts.length) h+=`<div class="card glass mt"><span class="muted small">Aucune compétence disponible pour l\u2019instant.</span></div>`;
-  } else { h+=`<div class="card glass mt mb"><span class="blood">✓ Compétence acquise</span></div>`; }
-  if(a.upgradesChosen.train && (a.upgradesChosen.skill||!a.skillOpts.length)){
-    h+=`<button class="btn primary mt" onclick="CL.go('arcadehub')">Continuer vers le Bracket</button>`;
+    if(!a.skillOpts.length) h+=`<div class="card glass mt"><span class="muted small">Aucune compétence disponible pour l\u2019instant.</span></div>
+          <button class="btn ghost mt" onclick="CL.pickArcadeSkill(-1)">Continuer vers le camp</button>`;
+  } else if(!a.upgradesChosen.train){
+    h+=`<p class="lede small">Sélectionnez un ajustement physique.</p>
+        <div class="eyebrow mt mb" style="color:var(--gold)">2. CONDITIONNEMENT & SPARRING</div>`;
+    a.trainOpts.forEach((t,i)=>{
+      const deltas=t.d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
+        return `<span class="dlt ${v>=0?'up':'dn'}">${v>=0?'+':''}${v} ${lbl}</span>`; }).join('');
+      h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
+            <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
+    });
   }
-  return h+`</div>`;
+  h+=`<div class="hr" style="margin:24px 0"></div>
+      <div class="eyebrow mb">Attributs du combattant (temps réel)</div>
+      ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
+  </div>`;
+  return h;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
@@ -1401,6 +1428,9 @@ function fightKind(){ const f=G.f; if(f.champion) return 'defense'; if(isTitleEl
 
 function resolveFight(){ const {opp,rounds,kind}=G.fight;
   G.f.lastOpponentId=opp.id;
+  G.f.recentOpps=G.f.recentOpps||[];
+  G.f.recentOpps.unshift(opp.id);
+  if(G.f.recentOpps.length>4) G.f.recentOpps.length=4;
   // ==== [ANCRE: RANGS_AVANT] — capturés avant simulateFight/applyResult, car la
   // victoire elle-même modifie le classement : le leapfrog doit juger la
   // situation AVANT le combat ("j'étais outsider, j'ai battu un top 3"),
@@ -1438,7 +1468,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const adaptivePlanForOpp=(typeof getAdaptiveNPCTactics==='function')?getAdaptiveNPCTactics(opp,G.f):null;
   const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m); const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
   if(typeof checkIronManDeath==='function') checkIronManDeath(res,null);
-  if(typeof checkScenarioState==='function') checkScenarioState(res);
   if(typeof evaluateSponsor==='function') evaluateSponsor(res);
   // ==== [ANCRE: NARRATIF_APPEL] — calculé ici (mêmes données réelles qu'avant),
   // pour pouvoir à la fois l'afficher sur l'écran de résultat ET l'archiver
@@ -1516,7 +1545,13 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // Remplace l'ancienne règle étroite (+60 fixe, seulement si adversaire
     // top-3), désormais couverte naturellement par la proportionnalité. ====
     const oppScoreNow=p4pScore(opp), myScoreNow=p4pScore(G.f);
-    if(oppScoreNow>myScoreNow){ G.f.rankBoost=(G.f.rankBoost||0)+Math.round((oppScoreNow-myScoreNow)*0.5); }
+    if(oppScoreNow>myScoreNow){
+      const rankGap=myRankNow-oppRankNow;
+      let leapMult=0.5;
+      if(rankGap>=10) leapMult=1.0;
+      else if(rankGap>=5) leapMult=0.75;
+      G.f.rankBoost=(G.f.rankBoost||0)+Math.round((oppScoreNow-myScoreNow)*leapMult);
+    }
     // ==== [FIN ANCRE] ====
   } else if(res.winner==='D'){
     G.f.easyFights=0; // un match nul n'est ni un combat facile ni un vrai revers de classement
@@ -1682,11 +1717,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   // ==== [FIN ANCRE] ====
   const newAch=checkAch();
+  if(typeof checkScenarioState==='function'){
+    checkScenarioState(res);
+    if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
+    if(G.f.retired) forced=true;
+  }
   G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,narrative,purseDetail:G.fight.purseDetail,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
-  f.W=f.L=f.D=f.ko=f.sub=f.dec=f.koLoss=f.streak=0; f.history=[]; f.champion=null; f.titles=0; f.defenses=0; f._fy=0;
+  f.W=f.L=f.D=f.ko=f.sub=f.dec=f.koLoss=f.streak=0; f.orgWins=0; f.easyFights=0; f.history=[]; f.champion=null; f.titles=0; f.defenses=0; f._fy=0;
   f.nick=earnNickname(f); }
 function earnNickname(f){ const a=f.attrs;
   const striker=['le Sniper','le Marteau','la Foudre','le Bourreau','Mains de Pierre','le Cogneur','la Guillotine debout'];
@@ -1782,19 +1822,33 @@ function scr_title(){
      <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
      <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
    </div>
-   <button class="btn" style="font-size:20px;padding:24px;border-color:var(--text)" onclick="CL.go('intro')">CARRIÈRE COMPLÈTE
+   <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
+     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
+   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
      <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l\u2019argent, les camps et l\u2019héritage</span></button>
-   <button class="btn primary" style="font-size:20px;padding:24px;margin-top:16px" onclick="CL.startArcade()">GAUNTLET
-     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Bracket à 64 combattants, élimination directe</span></button>
+   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Tournois et défis d\u2019ascension arcade</span></button>
+   <div class="hr" style="margin:24px 0"></div>
+   <button class="btn ghost" style="font-size:16px;padding:16px;border:1px dashed var(--gold);background:var(--panel2);color:var(--gold)" onclick="CL.go('legends')">BOUTIQUE : SALLE DES LÉGENDES
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
+   </div>`;
+}
+/* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
+   (Bracket 64, Classement des 100, Boss Run), auparavant tous au même niveau
+   que les modes principaux sur l'écran titre. ==== */
+function scr_gauntlet_menu(){
+  return `<div class="scr center intro">
+   <div class="eyebrow sage">Mode Arcade</div>
+   <h2 class="disp big">GAUNTLET</h2>
+   <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
+   <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
+     <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span></button>
+   <button class="btn" style="font-size:18px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet</span></button>
    ${checkLegendUnlock('mode_boss')?`<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--gold);color:var(--gold)" onclick="CL.startBossRun()">BOSS RUN
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span></button>`:''}
-   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet, saut de rang à chaque victoire</span></button>
-   <button class="btn" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startFaith()">MMA FAITH
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Mode Carrière Longue — Gestion de vie (Destiny-like)</span></button>
-   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px" onclick="CL.go('scenarios')">SCÉNARIOS
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Défis courts et prédéfinis</span></button>
-   </div>`;
+   <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
+  </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_intro(){ const c=hasSave();
@@ -1816,13 +1870,12 @@ function scr_create(){ const d=G.draft, divs=DIVISIONS[d.gender];
    <div class="fld"><label>Division</label><div class="pills">${divs.map(x=>`<span class="pill ${d.div===x.id?'on':''}" onclick="CL.draft('div','${x.id}')">${x.name}</span>`).join('')}</div></div>
    <div class="fld"><label>Discipline de base <span class="muted">(toutes équilibrées)</span></label><div class="pills">${STYLE_KEYS.map(s=>`<span class="pill ${d.style===s?'on':''}" onclick="CL.draft('style','${s}')">${styleLabel(s)}</span>`).join('')}</div></div>
    <div class="note small">Ton <b>origine</b>, ta <b>motivation</b> et ton <b>surnom</b> (au passage pro) se révéleront en jeu.</div>
-   <div class="fld"><label>Personnalité <span class="muted">(façon d'aborder les médias)</span></label><div class="pills">
-     <span class="pill ${d.personality==='villain'?'on':''}" onclick="CL.draft('personality','villain')">Villain / Trash Talker</span>
-     <span class="pill ${d.personality==='humble'?'on':''}" onclick="CL.draft('personality','humble')">Humble / Respecté</span>
-   </div></div>
    <div class="fld"><label>Mode <span class="muted">(optionnel)</span></label><div class="pills">
-     <span class="pill ${d.ironMan?'on':''}" onclick="CL.draft('ironMan',!d.ironMan)">Iron Man — une défaite ou blessure grave = fin définitive</span>
+     <span class="pill ${d.ironMan?'on':''}" onclick="CL.draft('ironMan',${!d.ironMan})">Iron Man — une défaite ou blessure grave = fin définitive</span>
    </div></div>
+   <div class="fld"><label>Défis prédéfinis <span class="muted">(Scénarios)</span></label>
+     <button class="btn ghost" style="border:1px solid var(--line);margin:0;padding:12px" onclick="CL.go('scenarios')">Parcourir les scénarios</button>
+   </div>
    <button class="btn primary" onclick="CL.create()">Débuter la carrière</button>
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 
@@ -1864,7 +1917,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
    </div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
      <div><span class="stat-lbl" style="margin-bottom:4px">MORAL</span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--win)"></span></div></div>
-     <div><span class="stat-lbl" style="margin-bottom:4px">FORME</span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:#4DA6FF"></span></div></div>
+     <div><span class="stat-lbl" style="margin-bottom:4px">FORME</span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--sage)"></span></div></div>
    </div>
    ${fightBtnHtml}
    <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
@@ -1926,12 +1979,6 @@ function scr_select(){ const f=G.f;
         <div><span class="stat-lbl">DANGER (KO)</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(danger,myDan))}">${diffText(danger,myDan)}</b></div>
       </div>
       <p class="event-text mono" style="font-size:11.5px;opacity:.85;margin:14px 0 0;position:relative;z-index:2;border-left:2px solid var(--gold);padding-left:10px">ANALYSE : ${e.read}</p>
-      ${(()=>{ const rep=getScoutingReport(f,o); if(!rep) return '';
-        return `<div class="card glass mt" style="border-left:3px solid var(--sage);padding-left:14px;background:var(--panel2);position:relative;z-index:2">
-          <div class="eyebrow mb" style="color:var(--sage)">Rapport de scouting pro</div>
-          ${rep.chinWarning?`<div class="mono small" style="color:var(--loss);margin-bottom:6px">⚠ Menton ou résistance suspectés fragiles suite à de récentes guerres.</div>`:''}
-          <div class="mono small">Marge de progression : <b class="gold">${rep.potentialGapText}</b></div>
-        </div>`; })()}
       <button class="btn ${isRival?'primary':''}" style="margin-top:14px;font-size:15px;letter-spacing:.05em;position:relative;z-index:2" onclick="CL.opp(${i})">${isRival?'RÉGLER SES COMPTES':'ACCEPTER LE COMBAT'}</button>
     </div>`;
   });
@@ -1944,9 +1991,15 @@ function scr_camp(){ const f=G.f;
      const vague=(k==='morale'||k==='form')?(v>0?`+${lbl}`:`-${lbl}`):(v>0?`Potentiel : ${lbl} ↑`:`Potentiel : ${lbl} ↓`);
      return `<span class="dlt ${v>=0?'up':'dn'}">${vague}</span>`; }).join('');
   const curTier=G.selectedCampTier||'gratuit';
+  const activeTier=CAMP_TIERS.find(t=>t.id===curTier)||CAMP_TIERS[0];
+  let tierDesc='';
+  if(activeTier.id==='gratuit') tierDesc='Aucun coût financier. <span style="color:var(--loss)">Risque de blessure de 5%</span> (-15 Forme, -10 Moral).';
+  else if(activeTier.id==='premium') tierDesc='Coût : 15k$. <span style="color:var(--win)">Zéro risque de blessure. Bonus garanti : +5 Forme, +5 Moral.</span>';
+  else if(activeTier.id==='sparring') tierDesc='Coût : 35k$. <span style="color:var(--win)">Zéro risque. Bonus : +5 Forme.</span> L\u2019adversaire subira un lourd malus (-15 Adapt., -10 QI).';
   return `<div class="scr"><div class="bar"><span class="eyebrow">Camp d\u2019entraînement</span><span class="eyebrow x" onclick="CL.go('select')">✕</span></div>
    <p class="lede small">Un seul axe avant ce combat. Chaque choix <b>monte et baisse</b> des attributs (bornés par ton potentiel).</p>
    <div class="tagrow mb">${CAMP_TIERS.map(t=>`<span class="tag2 ${curTier===t.id?'hot':''}" style="cursor:pointer" onclick="CL.setCampTier('${t.id}')">${t.name}${t.cost?` (${t.cost}k$)`:''}</span>`).join('')}</div>
+   <div class="card glass mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><div class="mono small">${tierDesc}</div></div>
    ${G.train.map((t,i)=>`<div class="opp" onclick="CL.train(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
       <div class="opp-mid">${t.hint}</div><div class="dlts">${deltaHtml(t.d)}</div></div>`).join('')}
    </div>`; }
@@ -1954,6 +2007,7 @@ function scr_camp(){ const f=G.f;
 /* ==== [ANCRE: PLAN_COMBAT] — vestiaire, choix tactique juste avant le combat ==== */
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
+  const step=G.fight.planStep||1;
   const wcHtml={
     sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div>
       <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
@@ -1975,23 +2029,29 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
       <div class="small muted" style="margin-top:8px;position:relative;z-index:2">Tu vas cracher dans un gobelet pendant six heures et dormir dans un sac poubelle. Pitoyable, mais professionnel.</div>
       <div class="small" style="color:var(--loss);font-weight:bold;margin-top:4px;position:relative;z-index:2">Malus ce soir : cardio, force, solidité et menton (déshydratation).</div></div>`,
   }[cr.tier]||'';
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
-   ${renderFightPoster(f,opp,G.fight.kind)}
-   <div class="card" style="border-color:transparent;padding:0 0 16px 0">
+  let h=`<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
+   ${renderFightPoster(f,opp,G.fight.kind)}`;
+  if(step===1){
+    h+=wcHtml;
+    if(G.pressConf) h+=`<div class="card mt glass" style="border-left:3px solid var(--blood);padding-left:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="color:var(--blood)">${G.pressConf.title}</div>
+     <div class="small">${G.pressConf.text}</div></div>`;
+    if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
+     <div class="mono small">${G.activeSponsor.text}</div></div>`;
+    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">VALIDER LES RÉSULTATS MÉDICAUX</button>`;
+  } else {
+    h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
      <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
    </div>
-   ${wcHtml}
-   ${G.pressConf?`<div class="card mt glass" style="border-left:3px solid var(--blood);padding-left:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="color:var(--blood)">${G.pressConf.title}</div>
-     <div class="small">${G.pressConf.text}</div></div>`:''}
-   ${G.activeSponsor?`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
-     <div class="mono small">${G.activeSponsor.text}</div></div>`:''}
    <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
    ${getExclusiveTactics(f).concat(plans).map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
      <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
-   </div>`; }
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}`;
+  }
+  h+=`</div>`;
+  return h;
+}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: NARRATION] — log texte à partir de res.log/res.stats, déjà calculés ==== */
@@ -2005,10 +2065,19 @@ function scr_hof(){
   const filt=G.hofFilter||{};
   const list=(typeof filterHallOfFame==='function')?filterHallOfFame(filt):fullList;
   const styles=[...new Set(fullList.map(f=>f.style))];
+  const divisions=[...new Set(fullList.map(f=>f.divName).filter(Boolean))];
+  const modes=[...new Set(fullList.map(f=>f.gameMode||'career'))];
+  const modeLabels={career:'Carrière Complète',faith:'MMA Faith'};
+  const showFilters=!!G.showHofFilters;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon · ${list.length}/${fullList.length} légende(s)</span><span class="eyebrow x" onclick="CL.go('intro')">✕</span></div>
    <h2 class="disp">Tes anciens combattants</h2>
-   ${styles.length>1?`<div class="tagrow mb"><span class="tag2 ${!filt.style?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','')">Tous les styles</span>${styles.map(s=>`<span class="tag2 ${filt.style===s?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','${esc(s)}')">${esc(s)}</span>`).join('')}</div>
-   <div class="tagrow mb"><span class="tag2 ${!filt.minDefenses?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',0)">Toutes défenses</span><span class="tag2 ${filt.minDefenses>=2?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',2)">2+ défenses</span></div>`:''}
+   <button class="btn ghost mb" style="border:1px solid var(--line);width:auto;padding:8px 16px" onclick="CL.toggleHofFilters()">Filtres ${showFilters?'−':'+'}</button>
+   ${showFilters?`<div style="background:var(--panel2);padding:12px;border:1px solid var(--line);margin-bottom:16px">
+   ${modes.length>1?`<div class="eyebrow mb">Mode</div><div class="tagrow mb"><span class="tag2 ${!filt.gameMode?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','')">Tous</span>${modes.map(m=>`<span class="tag2 ${filt.gameMode===m?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','${m}')">${modeLabels[m]||m}</span>`).join('')}</div>`:''}
+   ${styles.length>1?`<div class="eyebrow mb mt">Styles</div><div class="tagrow mb"><span class="tag2 ${!filt.style?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','')">Tous</span>${styles.map(s=>`<span class="tag2 ${filt.style===s?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','${esc(s)}')">${esc(s)}</span>`).join('')}</div>`:''}
+   ${divisions.length>1?`<div class="eyebrow mb mt">Divisions</div><div class="tagrow mb"><span class="tag2 ${!filt.divName?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','')">Toutes</span>${divisions.map(d=>`<span class="tag2 ${filt.divName===d?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','${esc(d)}')">${esc(d)}</span>`).join('')}</div>`:''}
+   <div class="eyebrow mb mt">Défenses</div><div class="tagrow mb"><span class="tag2 ${!filt.minDefenses?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',0)">Toutes</span><span class="tag2 ${filt.minDefenses>=2?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',2)">2+ défenses</span></div>
+   </div>`:''}
    ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:var(--panel2);padding:16px">
       <div class="hero-name" style="font-size:20px">${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
@@ -2075,7 +2144,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
-     <div class="st-row"><span>${st.A.ctrl}</span><span class="st-l">Contrôle (rds)</span><span>${st.B.ctrl}</span></div>
+     <div class="st-row"><span>${(st.A.ctrl||0).toFixed(1)}</span><span class="st-l">Contrôle (rounds)</span><span>${(st.B.ctrl||0).toFixed(1)}</span></div>
      <div class="st-row"><span>${st.A.kd}</span><span class="st-l">Knockdowns</span><span>${st.B.kd}</span></div></div>
    ${p.purseDetail?`<div class="card"><div class="eyebrow mb">Bourse</div>
      <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Bourse brute</span><span>${formatArgent(p.purseDetail.gross)}</span></div>
@@ -2180,19 +2249,6 @@ function scr_season(){ const f=G.f; const sData=G.season||{year:1,fights:[]};
    <button class="btn primary mt" onclick="CL.nextSeason()">Passer à l\u2019année suivante</button></div>`; }
 /* ==== [FIN ANCRE] ==== */
 
-function scr_contract(){ const f=G.f; const offer=G.pending.proOffer;
-  return `<div class="scr center intro"><div class="eyebrow gold">Offre de Contrat Professionnel</div>
-   <div class="hero-name" style="text-align:center">Le Grand Bain</div>
-   <div class="glass card gold-b" style="margin:20px 0;text-align:left;background:var(--panel2)">
-     <div class="narr"><blockquote style="font-size:15px">« ${offer.msg} »</blockquote></div>
-     <div class="hr"></div>
-     <div class="muted small">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
-   </div>
-   <button class="btn primary mt" onclick="CL.acceptPro(1,'${offer.orgFlavor1}')">${offer.phrase1}</button>
-   ${offer.fastTrack?`<button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.acceptPro(3,'${offer.orgFlavor3}')">${offer.phrase3} (opposition bien plus dure)</button>`:''}
-   ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus</button>`:''}
-   </div>`; }
-
 /* ==== [ANCRE: SOMMET] — dilemme Pacific Championship (gloire) vs Ultimate Rim (argent+santé) ==== */
 function scr_toptier(){
   return `<div class="scr center intro"><div class="eyebrow gold">Le Sommet du Monde</div>
@@ -2216,6 +2272,26 @@ function scr_toptier(){
    d'automatique) : rester chasser la ceinture locale, ou monter tout de suite. ==== */
 function scr_promo(){
   const f=G.f; const isChamp=!!f.champion;
+  const isAmateurOffer=(f.org===0 && G.pending && G.pending.proOffer);
+  if(isAmateurOffer){
+    const offer=G.pending.proOffer;
+    return `<div class="scr center intro"><div class="eyebrow gold">Offre de Contrat Professionnel</div>
+     <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Quelqu\u2019un veut te signer</div>
+     <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure.</p>
+     <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:18px">
+       <div class="hero-name" style="font-size:20px">${offer.orgFlavor1}<em style="color:var(--muted)">Contrat standard</em></div>
+       <p class="muted small mt">${offer.msg}</p>
+       <div class="muted small mt">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
+       <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(1,'${offer.orgFlavor1}')">${offer.phrase1}</button>
+     </div>
+     ${offer.fastTrack?`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--blood-d);text-align:left;padding:16px;margin-top:15px">
+       <div class="hero-name" style="font-size:20px;color:var(--blood)">${offer.orgFlavor3}<em style="color:var(--muted)">Fast-Track (opposition bien plus dure)</em></div>
+       <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
+       <button class="btn mt" style="border-color:var(--gold);color:var(--gold);position:relative;z-index:2" onclick="CL.acceptPro(3,'${offer.orgFlavor3}')">${offer.phrase3}</button>
+     </div>`:''}
+     ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus en amateur</button>`:''}
+     </div>`;
+  }
   // ==== [ANCRE: MARCHE_OFFRES] — le "tier" des orgas qui te veulent dépend de
   // tes accomplissements (titre, défenses, série) : un palmarès dominant ouvre
   // une offre "fast-track" concurrente en plus de l'offre standard, chacune
@@ -2509,10 +2585,11 @@ function scr_faith_shop(){
 }
 /* ==== [FIN ANCRE] ==== */
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
-  result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,contract:scr_contract,toptier:scr_toptier,
+  result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,vs_friend:scr_vs_friend,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_train:scr_faith_train,faith_scout:scr_faith_scout,faith_year_end:scr_faith_year_end,faith_shop:scr_faith_shop};
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_train:scr_faith_train,faith_scout:scr_faith_scout,faith_year_end:scr_faith_year_end,faith_shop:scr_faith_shop,
+  gauntlet_menu:scr_gauntlet_menu};
 
 /* ============================== RENDER + CL =============================== */
 function render(){ const app=document.getElementById('app'); if(!app)return;
@@ -2566,6 +2643,7 @@ const CL={
      buildTimeline(); G.screen='arena'; render();
   },
   filterHof(key,val){ if(!G.hofFilter) G.hofFilter={}; if(val===''||val===0) delete G.hofFilter[key]; else G.hofFilter[key]=val; render(); },
+  toggleHofFilters(){ G.showHofFilters=!G.showHofFilters; render(); },
   tryChampChamp(targetDivId){ const r=attemptChampChamp(targetDivId); G.lastMsg=r.msg; render(); },
   champChampFight(){
     if(!G.f.champChampTarget) return;
@@ -2587,6 +2665,14 @@ const CL={
     CL.create();
     G.activeScenario=scen.id;
     scen.init(G.f);
+    // Recalcul critique : create() a fixé l'overall/Elo au niveau amateur, mais
+    // scen.init() vient de changer radicalement l'organisation et le palmarès —
+    // sans ce recalcul, le combattant restait à ~800 pts Elo pour toujours,
+    // gelant son classement quel que soit son parcours réel.
+    G.f.overall=overall(G.f);
+    const bias=Math.round(((G.f.W||0)-(G.f.L||0))*18);
+    G.f.orgElo=eloBaseline(G.f.org,G.f.overall)+bias;
+    G.f.careerElo=eloBaseline(G.f.org,G.f.overall)+Math.round(bias*0.6);
     G.roster=makeOrgRoster(G.f);
     G.screen='hub'; save(); render(); },
   cont(){ if(load()){ setTheme(G.theme||'dark'); G.screen='hub'; render(); } },
@@ -2655,6 +2741,7 @@ const CL={
     } else { chooseOpponent(i); }
   },
   train(i){ chooseTraining(i); },
+  setCampTier(tierId){ G.selectedCampTier=tierId; render(); },
   skipArena(){ CL.toResult(); },
   nextRound(){ if(!ARENA||!ARENA.roundPause) return;
     ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
@@ -2712,6 +2799,10 @@ const CL={
       if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; }
       G.vsFriendActive=false; G.screen='vs_friend'; render(); return;
     }
+    if(G.faith){
+      if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd();
+      return;
+    }
     if(G.arcade && G.arcade.active){
       const win=G.pending&&G.pending.win;
       if(G.arcade.mode==='boss_run'){
@@ -2736,8 +2827,8 @@ const CL={
           G.arcade.active=false; G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
         }
         G.f.form=Math.min(100,G.f.form+20);
-        G.arcade.opponent=genWTUMMAOpponent();
-        G.screen='arcadehub'; save(); render(); return;
+        generateArcadeUpgrades();
+        G.screen='arcade_upgrades'; save(); render(); return;
       }
       // ==== Bracket 64 (WTUMMA) ====
       if(!win){
@@ -2761,18 +2852,19 @@ const CL={
       generateArcadeUpgrades();
       G.screen='arcade_upgrades'; save(); render(); return;
     }
-    const p=G.pending; G.screen=(p&&p.proOffer)?'contract':(p&&p.topTierOffer)?'toptier':(p&&p.promoOffer)?'promo':(p&&p.endOfSeason)?'season':'hub'; save(); render(); },
+    const p=G.pending; G.screen=(p&&p.proOffer)?'promo':(p&&p.topTierOffer)?'toptier':(p&&p.promoOffer)?'promo':(p&&p.endOfSeason)?'season':'hub'; save(); render(); },
   startArcade(){ injectExtendedArchetypes(); G.arcade={active:true,streak:0,target:5,pool:buildArcadePool()}; G.screen='draft'; save(); render(); },
   startBossRun(){ startBossRun(); },
   startLadder100(){ injectExtendedArchetypes(); G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool()}; G.screen='draft'; save(); render(); },
-  startFaith(){ G.faithDraft={step:1,origin:'',style:'',lifestyle:'',circle:''}; G.screen='faith_draft'; save(); render(); },
-  selectFaithDraft(key,value){
-    G.faithDraft[key]=value; G.faithDraft.step++;
-    if(G.faithDraft.step>4){ CL.finalizeFaithDraft(); } else { render(); }
-  },
+  startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:''}; G.screen='faith_draft'; save(); render(); },
+  selectFaithDraft(key,value){ G.faithDraft[key]=value; render(); },
   finalizeFaithDraft(){
     const d=G.faithDraft;
+    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality){
+      G.lastMsg="Complète les 5 catégories avant de commencer."; render(); return;
+    }
     const f=makeFighter({gender:'H',style:d.style,countryKey:'FR',age:18});
+    f.gameMode='faith';
     if(d.origin==='traditional'){ f.attrs.fightIQ+=8; f.attrs.discipline+=8; }
     if(d.origin==='pro_child'){ f.earnings=50; f.attrs.composure-=10; f.hypeBonus=1.5; }
     if(d.origin==='street'){ f.attrs.chin+=10; f.attrs.heart+=10; f.attrs.fightIQ-=5; }
@@ -2780,7 +2872,10 @@ const CL={
     if(d.lifestyle==='pro'){ f.attrs.cardio+=10; f.form=100; }
     if(d.lifestyle==='party'){ f.form=60; f.morale=90; f.hypeBonus=(f.hypeBonus||1)+0.3; }
     if(d.circle==='family'){ f.morale=100; }
-    if(d.circle==='agent'){ f.earnings+=30; f.agentCut=0.15; }
+    if(d.circle==='agent'){ f.earnings=(f.earnings||0)+30; f.agentCut=0.15; }
+    f.personality=d.personality;
+    if(d.personality==='villain'){ f.hypeBonus=(f.hypeBonus||1)+0.3; f.morale=clamp(f.morale-10,0,100); }
+    else if(d.personality==='humble'){ f.hypeBonus=1.0; f.morale=clamp(f.morale+15,0,100); f.attrs.focus=clamp((f.attrs.focus||50)+10,1,100); }
     for(const k in f.attrs) f.attrs[k]=clamp(f.attrs[k],1,100);
     f.overall=overall(f);
     f.maxAttrs={};
@@ -2790,37 +2885,25 @@ const CL={
       f.maxAttrs[k]=clamp(f.attrs[k]+margin,1,100);
     }
     G.f=f; G.roster=makeOrgRoster(f);
-    G.faith={year:2026,month:1,pa:3,fightsThisYear:0,influence:0,startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0};
+    G.faith={year:2026,step:1,fightsThisYear:0,influence:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0};
     G.season={year:1,fights:[]};
     G.screen='faith_hub'; save(); render();
   },
-  checkFaithTime(){
-    if(G.faith.pa<=0){
-      G.faith.month++; G.faith.pa=3; G.f.form=clamp(G.f.form-5,0,100);
-      if(G.faith.month>12){ G.faith.month=12; CL.prepareFaithYearEnd(); }
-    }
-  },
   faithRest(){
-    if(G.faith.pa<1) return;
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
-    G.faith.pa-=1; CL.checkFaithTime(); save(); render();
+    G.faith.step=3; G.screen='faith_hub'; save(); render();
   },
-  faithTrain(){
-    if(G.faith.pa<1) return;
-    G.train=trainingOptions(G.f); G.screen='faith_train'; save(); render();
-  },
+  faithTrain(){ G.train=trainingOptions(G.f); G.screen='faith_train'; save(); render(); },
   chooseFaithTrain(i){
     const opt=G.train[i];
     applyDeltas(G.f,opt.d);
     if(!G.faith.trainingTags) G.faith.trainingTags=[];
     G.faith.trainingTags.push(...opt.t);
     G.faith.trainingsThisYear=(G.faith.trainingsThisYear||0)+1;
-    G.faith.pa-=1; G.lastMsg="Entraînement terminé : "+opt.label;
-    CL.checkFaithTime();
-    if(G.screen!=='faith_year_end') G.screen='faith_hub';
-    save(); render();
+    G.lastMsg="Entraînement terminé : "+opt.label;
+    G.faith.step=2; G.screen='faith_hub'; save(); render();
   },
-  faithScout(){ if(G.faith.pa<1) return; G.screen='faith_scout'; render(); },
+  faithScout(){ G.screen='faith_scout'; save(); render(); },
   chooseFaithScout(type){
     const f=G.f; let P=0, success=false;
     if(!G.faith.nextFightBuffs) G.faith.nextFightBuffs={myMalus:null,oppMalus:null,neutralizePlanB:false};
@@ -2844,29 +2927,24 @@ const CL={
       if(success){ G.faith.nextFightBuffs.neutralizePlanB=true; G.faith.nextFightBuffs.oppMalus={adaptability:-25}; G.lastMsg="Succès : Le transfuge a livré tous les secrets. L\u2019adversaire n\u2019aura aucune adaptation."; }
       else { G.lastMsg="Échec : L\u2019information était fausse. 50k$ perdus pour rien."; }
     }
-    G.faith.pa-=1; CL.checkFaithTime();
-    if(G.screen!=='faith_year_end') G.screen='faith_hub';
-    save(); render();
+    G.faith.step=2; G.screen='faith_hub'; save(); render();
   },
   faithFight(){
-    if(G.faith.pa<3){ G.lastMsg="Il vous faut 3 PA (un mois entier) pour préparer et faire un combat."; render(); return; }
-    if(G.faith.fightsThisYear>=4){ G.lastMsg="Vous avez atteint la limite de 4 combats pour cette année."; render(); return; }
-    G.faith.pa-=3; G.faith.fightsThisYear+=1; CL.checkFaithTime();
+    G.faith.fightsThisYear=(G.faith.fightsThisYear||0)+1;
+    G.faith.step=4; // combat en cours — le retour se fera vers le bilan (voir afterResult)
     startFightSelect();
   },
   prepareFaithYearEnd(){
     const f=G.f;
-    const dmgHead=(G.season.fights||[]).reduce((acc,fight)=>acc+(fight.st.Me.dmgHead||0),0);
+    const dmgHead=(G.season.fights||[]).reduce((acc,fight)=>acc+((fight.st&&fight.st.Me&&fight.st.Me.dmgHead)||0),0);
     const eloDelta=Math.round(f.careerElo-(G.faith.startOfYearElo||f.careerElo));
     const earningsDelta=(f.earnings||0)-(G.faith.startOfYearEarnings||0);
     const rank=divRank(f);
-    // Influence gagnée selon le score P4P et les victoires de l'année
     const influenceGain=Math.floor((p4pScore(f)/10)*(G.season.fights||[]).filter(x=>x.win).length);
     G.faith.influence=(G.faith.influence||0)+influenceGain;
-    // Spécialisations méta — appliquées via un override personnel, jamais sur STYLE_PROFILE global
-    if((G.season.fights||[]).length>=4){
+    if((G.season.fights||[]).length>=1){
       let totalSig=0, totalTdAtt=0, totalCtrl=0, totalKD=0;
-      G.season.fights.forEach(fight=>{ totalSig+=fight.st.Me.sig||0; totalTdAtt+=fight.st.Me.tdAtt||0; totalCtrl+=fight.st.Me.ctrl||0; totalKD+=fight.st.Me.kd||0; });
+      G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0; });
       const totalRounds=G.season.fights.reduce((acc,fight)=>acc+(fight.round||3),0);
       if(!f.faithSpecs) f.faithSpecs=[];
       if(!f._styleProfileOverride) f._styleProfileOverride=Object.assign({},STYLE_PROFILE[f.style]||STYLE_PROFILE.mma);
@@ -2881,8 +2959,10 @@ const CL={
         G.lastMsg="Nouvelle Spécialisation : Tueur à Gages (+25% KO)";
       }
     }
-    // Tirage des compétences annuel
-    const nbRolls=Math.floor((G.faith.trainingsThisYear||0)/4);
+    // Tirage de compétence : 1 roll garanti si un entraînement a été fait cette
+    // année, sinon aucun — l'ancienne formule (trainingsThisYear/4) supposait
+    // jusqu'à 12 entraînements par an (système PA), désormais au maximum 1.
+    const nbRolls=(G.faith.trainingsThisYear||0)>=1?1:0;
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=9);
     const tags=G.faith.trainingTags||[];
@@ -2902,7 +2982,7 @@ const CL={
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
-    G.faith.month=1; G.faith.year++; G.faith.pa=3;
+    G.faith.year++; G.faith.step=1;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[];
     G.faith.startOfYearElo=G.f.careerElo; G.faith.startOfYearEarnings=G.f.earnings||0;
     G.season.fights=[];
@@ -2949,8 +3029,10 @@ const CL={
     const playerMatch=G.arcade.tournament.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
     G.arcade.opponent=playerMatch.a.id===G.f.id?playerMatch.b:playerMatch.a;
     G.screen='arcadehub'; save(); render(); },
-  pickArcadeTrain(idx){ if(G.arcade.upgradesChosen.train) return; applyDeltas(G.f,G.arcade.trainOpts[idx].d); G.arcade.upgradesChosen.train=true; render(); },
-  pickArcadeSkill(idx){ if(G.arcade.upgradesChosen.skill) return; grantSkill(G.f,G.arcade.skillOpts[idx]); G.arcade.upgradesChosen.skill=true; render(); },
+  pickArcadeTrain(idx){ if(G.arcade.upgradesChosen.train) return; applyDeltas(G.f,G.arcade.trainOpts[idx].d); G.arcade.upgradesChosen.train=true;
+    if(G.arcade.mode==='ladder_100') G.arcade.opponent=genWTUMMAOpponent();
+    CL.go('arcadehub'); },
+  pickArcadeSkill(idx){ if(G.arcade.upgradesChosen.skill) return; if(idx>=0) grantSkill(G.f,G.arcade.skillOpts[idx]); G.arcade.upgradesChosen.skill=true; render(); },
   retryArcade(){ CL.startArcade(); },
   fightArcade(){ resolveArcadeFight(); },
   acceptPromo(targetOrg){
@@ -3064,24 +3146,6 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
   const sh=o.shake?((Math.random()-0.5)*4):0;
   x+=face*(o.lunge*14)+sh;
   const bob=Math.sin(performance.now()/240 + (face>0?0:1))*2;
-  // ==== [ANCRE: LOT15_POSTURE_CLINCH] — posture debout distincte, collés l'un
-  // à l'autre bras enchevêtrés, backée par le vrai état A.curPhase==='clinch'
-  // (existant dans le moteur), plutôt qu'un état inventé. ====
-  if(o.phase==='clinch' && !o.grounded){
-    ctx.translate(x+face*8, groundY-50+bob);
-    ctx.fillStyle=o.flash?'#fff':color; ctx.strokeStyle=o.flash?'#fff':color;
-    ctx.lineWidth=14; ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(0,-5); ctx.lineTo(0,28); ctx.stroke(); // torse
-    ctx.lineWidth=6;
-    ctx.beginPath(); ctx.moveTo(-2,28); ctx.lineTo(-3,48); ctx.stroke(); // jambe arrière
-    ctx.beginPath(); ctx.moveTo(4,28); ctx.lineTo(9,48); ctx.stroke();  // jambe avant
-    ctx.beginPath(); ctx.arc(face*2,-17,9,0,Math.PI*2); ctx.fill(); // tête
-    ctx.lineWidth=5;
-    ctx.beginPath(); ctx.moveTo(0,-2); ctx.lineTo(face*17,-9); ctx.stroke(); // bras saisie nuque
-    ctx.beginPath(); ctx.moveTo(0,5); ctx.lineTo(face*14,9); ctx.stroke();   // bras saisie aisselle
-    ctx.restore(); return;
-  }
-  // ==== [FIN ANCRE] ====
   if(o.grounded){
     if(!o.top){
       // Sur le dos (garde) — buste allongé, tête décalée, jambes relevées
@@ -3104,8 +3168,8 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
     if(o.tap){ // halo de danger de soumission, pulsant, sur le combattant en péril
       const pulse=Math.abs(Math.sin(performance.now()/150))*5;
       ctx.beginPath(); ctx.arc(0,-15,20+pulse,0,Math.PI*2);
-      ctx.fillStyle='rgba(199,51,42,0.3)'; ctx.fill();
-      ctx.strokeStyle='#C7332A'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='rgba(217,56,41,0.3)'; ctx.fill();
+      ctx.strokeStyle='#D93829'; ctx.lineWidth=2; ctx.stroke();
     }
     ctx.restore(); return;
   }
@@ -3202,7 +3266,7 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
   fighter(ctx, xOp, gY, -1, '#6E8478', {lunge:A.lungeOp*(1-frac),flash:A.flashOp>0,shake:A.shakeOp>0,fallen:A.fall===2,grounded,phase:A.curPhase,top:A.curTop==='op',tap:isSubDanger&&A.curTop!=='op'});
   fighter(ctx, xMe, gY, 1, '#B23B36', {lunge:A.lungeMe*(1-frac),flash:A.flashMe>0,shake:A.shakeMe>0,fallen:A.fall===1,grounded,phase:A.curPhase,top:A.curTop==='me',tap:isSubDanger&&A.curTop!=='me'});
-  if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#C7332A'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
+  if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#D93829'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
   A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
   A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);
   A.lungeMe*=0.86; A.lungeOp*=0.86;

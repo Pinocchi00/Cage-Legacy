@@ -592,7 +592,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
   const tagsA=getTags(A), tagsB=getTags(B);
   for(let r=1;r<=rounds && !finish;r++){
     // ==== [ANCRE: JUGES_10PT_SNAP] ====
-    const _startSa=sa, _startSb=sb, _kdA0=st.A.kd, _kdB0=st.B.kd, _sigA0=st.A.sig, _sigB0=st.B.sig, _tdA0=st.A.td, _tdB0=st.B.td;
+    const _startSa=sa, _startSb=sb, _kdA0=st.A.kd, _kdB0=st.B.kd, _sigA0=st.A.sig, _sigB0=st.B.sig, _tdA0=st.A.td, _tdB0=st.B.td, _ctrlA0=st.A.ctrl||0, _ctrlB0=st.B.ctrl||0;
     // ==== [FIN ANCRE] ====
     // ==== [ANCRE: MICRO_SEQUENCES] — chaque round de 5 minutes est découpé en 6
     // micro-séquences de 50 secondes. La phase (debout/clinch/sol) persiste
@@ -657,14 +657,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
       } else { // debout
         const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
         let handled=false;
-        if(attA>0.14 && rnd()<0.45){ st.A.tdAtt++; handled=true;
+        if(attA>0.14 && rnd()<0.18){ st.A.tdAtt++; handled=true;
           const tdChanceA=sigmoid((a.takedown-b.tdd)/15)*attA;
           if(rnd()<clamp(tdChanceA,0.05,0.85)){ st.A.td++; currentPhase='sol'; topIsA=true;
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(k,6)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Bonne défense de ${B.name} sur la tentative d\u2019amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
-        } else if(attB>0.14 && rnd()<0.45){ st.B.tdAtt++; handled=true;
+        } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt++; handled=true;
           const tdChanceB=sigmoid((b.takedown-a.tdd)/15)*attB;
           if(rnd()<clamp(tdChanceB,0.05,0.85)){ st.B.td++; currentPhase='sol'; topIsA=false;
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
@@ -701,7 +701,12 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
     if(dmgA>45&&rnd()<.4)chinVulnA+=8;
     if(dmgB>45&&rnd()<.4)chinVulnB+=8;
     // ==== [ANCRE: JUGES_10PT_SCORE] — 10-9 par défaut, 10-8 si domination nette, 10-7 en cas extrême ====
-    const rSa=sa-_startSa, rSb=sb-_startSb, rDiff=rSa-rSb, kdDiff=(st.A.kd-_kdA0)-(st.B.kd-_kdB0);
+    const rSigA=st.A.sig-_sigA0, rSigB=st.B.sig-_sigB0;
+    const rTdA=st.A.td-_tdA0, rTdB=st.B.td-_tdB0;
+    const rCtrlA=(st.A.ctrl||0)-_ctrlA0, rCtrlB=(st.B.ctrl||0)-_ctrlB0;
+    const kdDiff=(st.A.kd-_kdA0)-(st.B.kd-_kdB0);
+    // 1 amenée = 4 frappes sig, 1 round complet de contrôle (6 ticks à 0.2 = 1.2) = ~14.4 pts
+    const rDiff=(rSigA-rSigB)+(rTdA-rTdB)*4+(rCtrlA-rCtrlB)*12;
     let sA=10,sB=10;
     if((rDiff>44&&kdDiff>=0)||kdDiff>=3){ sA=10;sB=7; }
     else if((rDiff>32&&kdDiff>=0)||kdDiff>=2){ sA=10;sB=8; }

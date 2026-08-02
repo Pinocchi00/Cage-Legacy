@@ -35,6 +35,7 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
   list.push({id:f.id,name:f.name,nick:f.nick,flag:f.flag,style:f.styleLabel,styleKey:f.style,div:f.div,divName:f.divName,W:f.W,L:f.L,ko:f.ko,sub:f.sub,
     titles:f.titles,defenses:f.defenses,world:!!f._world,euro:!!f._euro,ico,rank,epithets:epithets(f),score:hofScore(f),age:f.age,
     amaTitles:(f.amaTitles||[]).slice(),amaRec:f.amaRec?{W:f.amaRec.W,L:f.amaRec.L}:null,biggestRival:f.biggestRival||null,
+    gameMode:f.gameMode||'career',
     // Données profondes pour le Fantasy Fight / All-Stars / Vs Ami — reconstruction fidèle du combattant
     attrs:JSON.parse(JSON.stringify(f.attrs)),skills:(f.skills||[]).slice(),phys:f.phys?JSON.parse(JSON.stringify(f.phys)):null,overall:f.overall});
   list.sort((a,b)=>b.score-a.score); if(list.length>40)list.length=40; saveHOF(list);
@@ -62,6 +63,8 @@ function filterHallOfFame(criteria){
   return list.filter(f=>{
     if(criteria.style && f.style!==criteria.style) return false;
     if(criteria.minDefenses!==undefined && (f.defenses||0)<criteria.minDefenses) return false;
+    if(criteria.gameMode && (f.gameMode||'career')!==criteria.gameMode) return false;
+    if(criteria.divName && f.divName!==criteria.divName) return false;
     return true;
   });
 }
