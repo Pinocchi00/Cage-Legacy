@@ -1,31 +1,33 @@
 <!DOCTYPE html>
 <html lang="fr" data-theme="dark"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<meta name="theme-color" content="#FFFDF0"/><title>Cage Legacy</title>
+<meta name="theme-color" content="#14100B"/><title>Cage Legacy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* CAGE LEGACY — registre d'archives, thème clair (fond largement éclairci sur demande) */
+/* CAGE LEGACY — registre d'archives, thème sombre, contraste renforcé pour
+   une lisibilité maximale (y compris en plein soleil) */
 :root{
- --bg:#FAFAFA; --panel:#FFFFFF; --panel2:#F9F7F3; --line:#E8DCCB;
- --text:#1F1A15; --muted:#7A6F60; --faint:#C2B6A7;
- --blood:#D93829; --blood-d:#A62115; --gold:#DB9D18; --gold-d:#B37D10;
- --sage:#4E8064; --win:#48A155; --loss:#D93829;
+ --bg:#14100B; --panel:#14100B; --panel2:#241D13; --line:#4A3B26;
+ --text:#F5EFE0; --muted:#A89A81; --faint:#8A7C63;
+ --blood:#E8442F; --blood-d:#9C2C1E; --gold:#E6B93A; --gold-d:#8A6A1E;
+ --sage:#7C9788; --win:#7FC488; --loss:#E8442F;
  --r:0px; --maxw:560px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);overscroll-behavior-y:none}
 body{color:var(--text);font-family:'Fraunces',Georgia,serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
- background:linear-gradient(135deg,#FFFDF0 0%,#FFFFFF 45%,#FFF2E8 75%,#FFEBEB 100%);
+ /* dégradé rouge -> jaune, sombre et moody (pas un fond clair délavé) */
+ background:linear-gradient(135deg,#3A1210 0%,#1A0E08 35%,#241A08 65%,#3A2A0C 100%);
  background-attachment:fixed;transition:background .2s,color .2s;position:relative;min-height:100vh}
-/* grain fin résiduel — allégé et en multiply (adapté au fond clair, overlay ressortait trop sombre) */
+/* grain fin résiduel — discret, le Glass fait le gros du travail visuel */
 body::after{
- content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.015;mix-blend-mode:multiply;
+ content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.03;mix-blend-mode:overlay;
  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 /* zones de pouce mobiles : cible tactile minimale sur les éléments de liste */
 .opp,.glass{min-height:64px;margin-bottom:8px}
-.opp:hover{border-color:var(--gold-d);background:var(--line)}
+.opp:hover{border-color:var(--gold-d);background:rgba(255,255,255,.10)}
 #app{max-width:var(--maxw);margin:0 auto}
 .scr{padding:16px 15px 40px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -44,14 +46,21 @@ h2.disp{font-size:24px;margin-bottom:12px}
 /* GLASS PRONONCÉ — flou marqué, saturation, reflet diagonal façon "Liquid Glass" */
 .glass,.opp{
  position:relative;overflow:hidden;
- background:rgba(255,255,255,.70);
- -webkit-backdrop-filter:blur(16px) saturate(120%);backdrop-filter:blur(16px) saturate(120%);
- border:1px solid rgba(255,255,255,.9);
- box-shadow:0 6px 20px -8px rgba(0,0,0,.08);
+ background:rgba(255,255,255,.05);
+ -webkit-backdrop-filter:blur(44px) saturate(220%) brightness(1.12);backdrop-filter:blur(44px) saturate(220%) brightness(1.12);
+ border:1px solid rgba(255,255,255,.30);
+ border-top-color:rgba(255,255,255,.55);
+ box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -1px 0 rgba(0,0,0,.35) inset,0 20px 45px -16px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.5);
 }
 .glass::before,.opp::before{
  content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
- background:linear-gradient(125deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,.05) 40%,transparent 60%);
+ background:
+   linear-gradient(125deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.08) 22%,transparent 45%),
+   linear-gradient(15deg,transparent 60%,rgba(255,255,255,.06) 100%);
+}
+.glass::after,.opp::after{
+ content:'';position:absolute;top:0;left:8%;right:8%;height:1px;z-index:2;pointer-events:none;
+ background:linear-gradient(90deg,transparent,rgba(255,255,255,.65) 50%,transparent);
 }
 /* motion-wash — traînée diagonale teintée --blood, jamais un aplat */
 .mwash{background-image:
@@ -123,7 +132,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .gauge{display:inline-block;width:100%;height:4px;background:var(--line);border:none;border-radius:0;overflow:hidden;vertical-align:middle}
 .gauge>span{display:block;height:100%;background:var(--text)}
 /* adversaires / camp */
-.opp{background:var(--panel2);border:1px solid var(--line);border-radius:0;padding:13px;margin:10px 0;cursor:pointer;transition:border-color .12s,transform .05s}
+.opp{border:1px solid var(--line);border-radius:0;padding:13px;margin:10px 0;cursor:pointer;transition:border-color .12s,transform .05s,background .12s}
 .opp:active{transform:translateY(1px)}.opp:hover{border-color:var(--gold-d)}
 .opp-top{display:flex;justify-content:space-between;align-items:baseline}
 .opp-nm{font-family:'Oswald';text-transform:uppercase;font-weight:600;font-size:18px}

@@ -1107,19 +1107,22 @@ function genWTUMMAOpponent(){
 function scr_faith_draft(){
   const d=G.faithDraft;
   const opt=(key,val,icon,name,desc)=>`
-    <div class="glass opp" style="padding:12px;text-align:left;border-color:${d[key]===val?'var(--text)':'var(--line)'}" onclick="CL.selectFaithDraft('${key}','${val}')">
-      <div class="hero-name" style="font-size:18px;text-transform:none;color:${d[key]===val?'var(--text)':'var(--muted)'}">${icon} ${name}</div>
+    <div class="glass opp" style="padding:12px;text-align:left;border-color:${d[key]===val?'var(--gold)':'var(--line)'}" onclick="CL.selectFaithDraft('${key}','${val}')">
+      <div class="hero-name" style="font-size:18px;text-transform:none;color:${d[key]===val?'var(--gold)':'var(--text)'}">${icon} ${name}</div>
       <div class="muted small mt">${desc}</div>
     </div>`;
   return `<div class="scr center intro">
     <h2 class="disp big" style="font-size:32px">ORIGINES</h2>
     <p class="lede small">Forgez l\u2019histoire et la psychologie de votre combattant.</p>
 
+    <div class="fld" style="text-align:left"><label>Prénom</label><input id="fdn" maxlength="18" value="${esc(d.first||'')}" placeholder="Prénom" oninput="CL.faithDraftIn('first',this.value)"></div>
+    <div class="fld" style="text-align:left"><label>Pays</label><div class="pills">${COUNTRY_KEYS.map(c=>`<span class="pill ${d.country===c?'on':''}" onclick="CL.selectFaithDraft('country','${c}')">${COUNTRIES[c].flag} ${COUNTRIES[c].name}</span>`).join('')}</div></div>
+
     <div class="fld" style="text-align:left"><label>1. VOTRE ORIGINE</label>
-      ${opt('origin','traditional','🏛️','Académie Traditionnelle','Parcours structuré. (+IQ, +Discipline)')}
-      ${opt('origin','pro_child','🥊','Enfant de Combattant','Un nom qui ouvre des portes. (+Argent, -Sang-froid)')}
-      ${opt('origin','street','🚧','Quartier Populaire','À la dure. (+Menton, +Cœur)')}
-      ${opt('origin','late_bloomer','⏳','Talent Tardif','Le corps comme seul bagage. (+Puissance, -Technique)')}
+      ${opt('origin','traditional','🏛️','Dojo de la Discipline','Un maître obsessionnel vous a fait répéter le même jab dix mille fois avant le premier vrai sparring. (+IQ, +Discipline)')}
+      ${opt('origin','pro_child','🥊','Fils de la Maison','Votre nom de famille remplit les salles avant même votre premier combat — et pèse une tonne à chaque défaite. (+Argent, -Sang-froid)')}
+      ${opt('origin','street','🚧','École du Bitume','Les vraies leçons se sont passées dans les parkings, pas sur les tatamis. (+Menton, +Cœur)')}
+      ${opt('origin','late_bloomer','⏳','Le Retardataire','Personne ne pariait un centime sur vous à seize ans. La rage a fait le reste. (+Puissance, -Technique)')}
     </div>
 
     <div class="fld" style="text-align:left"><label>2. DISCIPLINE DE BASE</label>
@@ -1130,20 +1133,20 @@ function scr_faith_draft(){
     </div>
 
     <div class="fld" style="text-align:left"><label>3. HYGIÈNE DE VIE (ADO)</label>
-      ${opt('lifestyle','pro','🥗','Vie de Pro','Diète stricte, sommeil. (+Cardio, +Forme)')}
-      ${opt('lifestyle','balanced','⚖️','Équilibré','Sérieux mais détendu. (Stats équilibrées)')}
-      ${opt('lifestyle','party','🎉','La Belle Vie','Fêtes et réseaux. (+Hype, -Forme)')}
+      ${opt('lifestyle','pro','🥗','Moine Guerrier','Extinction des feux à 21h, zéro écart, zéro excuse. Les coachs vous adorent, vos amis vous ont oublié. (+Cardio, +Forme)')}
+      ${opt('lifestyle','balanced','⚖️','Ni Moine Ni Fêtard','Sérieux à la salle, tolérable en dehors. La voie du compromis. (Stats équilibrées)')}
+      ${opt('lifestyle','party','🎉','La Vie Est Courte','Les réseaux sociaux avant le sommeil, les sorties avant les rounds de sac. Le talent compensera... ou pas. (+Hype, -Forme)')}
     </div>
 
     <div class="fld" style="text-align:left"><label>4. LE CERCLE (MANAGEMENT)</label>
-      ${opt('circle','family','👨\u200d👩\u200d👦','Famille','Des parents qui gèrent tout. (+Moral)')}
-      ${opt('circle','agent','🦈','Agent Ambitieux','Un requin des affaires. (+Fonds de départ)')}
-      ${opt('circle','squad','🤜','Le Gang','Vos amis d\u2019enfance. (Neutre)')}
+      ${opt('circle','family','👨\u200d👩\u200d👦','Le Clan','Des parents qui négocient vos contrats en pyjama à la table de la cuisine. Rassurant, un peu étouffant. (+Moral)')}
+      ${opt('circle','agent','🦈','Le Requin','Un agent qui a senti l\u2019argent avant que vous ne sachiez lacer vos gants. Il prend sa part, toujours. (+Fonds de départ)')}
+      ${opt('circle','squad','🤜','La Bande','Vos potes d\u2019enfance, bruyants et loyaux, présents à chaque combat sans jamais comprendre les règles. (Neutre)')}
     </div>
 
     <div class="fld" style="text-align:left"><label>5. PERSONNALITÉ (MÉDIAS)</label>
-      ${opt('personality','villain','🦹','Villain / Trash Talker','Génère de la hype, mais draine le moral.')}
-      ${opt('personality','humble','🙏','Humble / Respecté','Mental d\u2019acier, apprécié des puristes.')}
+      ${opt('personality','villain','🦹','Le Vilain','Chaque conférence de presse est un règlement de comptes. Ça remplit les salles, ça vide le moral. (+Hype, -Moral)')}
+      ${opt('personality','humble','🙏','Le Taiseux','Deux phrases par interview, un mental de granit. Les puristes vous respectent, les promoteurs s\u2019arrachent les cheveux. (+Moral, +Concentration)')}
     </div>
 
     <button class="btn primary mt" style="padding:16px;font-size:18px" onclick="CL.finalizeFaithDraft()">VALIDER ET COMMENCER</button>
@@ -1335,8 +1338,8 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>`;
   }
   const isVictory=a.victory;
-  const points={1:10,2:50,3:120,4:250,5:500,6:1000,7:1000};
-  const earned=points[a.tournament.roundStep]||10;
+  const points={1:2,2:6,3:14,4:28,5:50,6:100,7:100};
+  const earned=points[a.tournament.roundStep]||2;
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
      <div class="hero-name" style="color:${isVictory?'var(--gold)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':'ÉLIMINÉ'}<em style="color:var(--muted)">${a.tournament.stepName}</em></div>
@@ -2467,30 +2470,61 @@ function scr_codex(){
 /* ==== [ANCRE: LOT14_ECRAN_SALLE_LEGENDES] ==== */
 function scr_legends(){
   const meta=loadMetaStats(); const pts=meta.legendPoints||0;
+  const categories=[...new Set(LEGEND_UNLOCKABLES.map(i=>i.cat))];
+  const owned=LEGEND_UNLOCKABLES.filter(i=>checkLegendUnlock(i.id));
+  const remaining=LEGEND_UNLOCKABLES.filter(i=>!checkLegendUnlock(i.id));
+  const nextUp=remaining.sort((a,b)=>a.cost-b.cost)[0];
   return `<div class="scr"><div class="bar"><span class="eyebrow">Salle des Légendes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp gold">${pts} points de salle</h2>
    <p class="lede small">L\u2019héritage de vos retraités ouvre de nouvelles possibilités pour le compte — aucun avantage de statistiques en combat, jamais.</p>
+
    <div class="stat-band mb" style="border-top:none;padding-top:10px">
-     <div><span class="stat-big" style="font-size:22px">${meta.totalFights||0}</span><span class="stat-lbl">Combats disputés</span></div>
-     <div><span class="stat-big" style="font-size:22px">${meta.totalKO||0}</span><span class="stat-lbl">KO toutes carrières</span></div>
-     <div><span class="stat-big" style="font-size:22px">${meta.totalBelts||0}</span><span class="stat-lbl">Ceintures remportées</span></div>
+     <div><span class="stat-big" style="font-size:20px">${meta.totalRetirements||0}</span><span class="stat-lbl">Carrières terminées</span></div>
+     <div><span class="stat-big" style="font-size:20px">${meta.totalFights||0}</span><span class="stat-lbl">Combats disputés</span></div>
+     <div><span class="stat-big" style="font-size:20px">${meta.totalKO||0}</span><span class="stat-lbl">KO toutes carrières</span></div>
    </div>
-   ${LEGEND_UNLOCKABLES.map(item=>{
-     const isOwned=checkLegendUnlock(item.id);
-     const color=isOwned?'var(--sage)':'var(--line)';
-     const btnHtml=isOwned?`<span class="mono small" style="color:var(--sage)">Déjà acquis</span>`
-       :`<button class="btn ghost" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto" onclick="CL.purchaseUnlock('${item.id}')">Acheter (${item.cost} pts)</button>`;
-     return `<div class="glass card mb" style="border-left:3px solid ${color};background:var(--panel2);padding:12px;display:flex;justify-content:space-between;align-items:center">
-       <b style="font-size:14px">${item.name}</b>${btnHtml}</div>`;
-   }).join('')}
+   <div class="stat-band mb" style="border-top:none;padding-top:0">
+     <div><span class="stat-big" style="font-size:20px">${meta.totalSub||0}</span><span class="stat-lbl">Soumissions</span></div>
+     <div><span class="stat-big" style="font-size:20px">${meta.totalBelts||0}</span><span class="stat-lbl">Ceintures remportées</span></div>
+     <div><span class="stat-big" style="font-size:20px">${formatArgent(meta.totalMoney||0)}</span><span class="stat-lbl">Gains cumulés</span></div>
+   </div>
+   <div class="mono small muted mb">${owned.length} / ${LEGEND_UNLOCKABLES.length} déblocages acquis</div>
+
+   ${nextUp?`<div class="glass card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
+     <div class="eyebrow mb" style="color:var(--gold)">Prochain déblocage abordable</div>
+     <b style="font-size:15px">${nextUp.name}</b>
+     <div class="mono small muted mt">Encore ${Math.max(0,nextUp.cost-pts)} points nécessaires</div>
+     <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden;margin-top:8px">
+       <span style="display:block;height:100%;width:${clamp(Math.round(pts/nextUp.cost*100),0,100)}%;background:var(--gold)"></span>
+     </div>
+   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">Tout est débloqué. Le Panthéon n\u2019a plus rien à t\u2019apprendre.</span></div>`}
+
+   ${categories.map(cat=>`
+     <div class="eyebrow mb mt" style="border-bottom:1px solid var(--line);padding-bottom:6px">${cat.toUpperCase()}</div>
+     ${LEGEND_UNLOCKABLES.filter(i=>i.cat===cat).map(item=>{
+       const isOwned=checkLegendUnlock(item.id);
+       const canAfford=pts>=item.cost;
+       const color=isOwned?'var(--sage)':(canAfford?'var(--gold)':'var(--line)');
+       const btnHtml=isOwned?`<span class="mono small" style="color:var(--sage)">✓ Acquis</span>`
+         :`<button class="btn ghost" style="border-color:${canAfford?'var(--gold)':'var(--line)'};color:${canAfford?'var(--gold)':'var(--muted)'};padding:6px 10px;width:auto" onclick="CL.purchaseUnlock('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button>`;
+       return `<div class="glass card mb" style="border-left:3px solid ${color};background:var(--panel2);padding:12px">
+         <div style="display:flex;justify-content:space-between;align-items:center">
+           <b style="font-size:14px">${item.name}</b>${btnHtml}
+         </div>
+         <div class="muted small mt">${item.desc||''}</div>
+       </div>`;
+     }).join('')}
+   `).join('')}
+
    ${(()=>{ const unlockedThemes=ARENA_THEMES.filter(t=>t.id==='classic'||checkLegendUnlock('cosmetic_'+t.id));
      if(unlockedThemes.length<=1) return '';
      const curTheme=G.arenaCosmetic||'classic';
      return `<div class="card mt" style="background:var(--panel2);padding:12px">
-       <div class="eyebrow mb">Thème visuel de l\u2019octogone</div>
+       <div class="eyebrow mb">Thème visuel de l\u2019octogone actif</div>
        <div class="tagrow">${unlockedThemes.map(t=>`<span class="tag2 ${curTheme===t.id?'hot':''}" style="cursor:pointer" onclick="CL.setArenaTheme('${t.id}')">${t.name}</span>`).join('')}</div>
      </div>`;
    })()}
+   <div class="hr" style="margin:20px 0"></div>
    ${checkLegendUnlock('mode_fantasy')?`<button class="btn primary mt" style="font-size:16px;padding:16px" onclick="CL.go('fantasy_setup')">LANCER FANTASY FIGHT</button>`:''}
    ${checkLegendUnlock('mode_allstars')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--gold);color:var(--gold)" onclick="CL.initAllStars()">LANCER TOURNOI ALL-STARS</button>`:''}
    ${checkLegendUnlock('mode_vs_friend')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--blood);color:var(--blood)" onclick="CL.go('vs_friend')">DÉFI VS AMI</button>`:''}
@@ -2816,14 +2850,14 @@ const CL={
       }
       if(G.arcade.mode==='ladder_100'){
         if(!win){
-          const earned=Math.max(10,Math.round((101-G.arcade.rank)*8));
+          const earned=Math.max(2,Math.round((101-G.arcade.rank)*0.8));
           const meta=loadMetaStats(); meta.legendPoints=(meta.legendPoints||0)+earned; saveMetaStats(meta);
           G.arcade.active=false; G.screen='gameover'; save(); render(); return;
         }
         G.arcade.fightsDone=(G.arcade.fightsDone||0)+1;
         G.arcade.rank=G.arcade.opponent.ladderRank; // le joueur prend la place du vaincu
         if(G.arcade.rank===1){
-          const meta=loadMetaStats(); meta.legendPoints=(meta.legendPoints||0)+800; saveMetaStats(meta);
+          const meta=loadMetaStats(); meta.legendPoints=(meta.legendPoints||0)+80; saveMetaStats(meta);
           G.arcade.active=false; G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
         }
         G.f.form=Math.min(100,G.f.form+20);
@@ -2832,9 +2866,9 @@ const CL={
       }
       // ==== Bracket 64 (WTUMMA) ====
       if(!win){
-        const points={1:10,2:50,3:120,4:250,5:500,6:1000,7:1000};
+        const points={1:2,2:6,3:14,4:28,5:50,6:100,7:100};
         const meta=loadMetaStats();
-        meta.legendPoints=(meta.legendPoints||0)+(points[G.arcade.tournament.roundStep]||10);
+        meta.legendPoints=(meta.legendPoints||0)+(points[G.arcade.tournament.roundStep]||2);
         saveMetaStats(meta);
         G.arcade.active=false; G.screen='gameover'; save(); render(); return;
       }
@@ -2843,7 +2877,7 @@ const CL={
         const meta=loadMetaStats();
         meta.wtNemesis={name:G.f.name,nick:G.f.nick,flag:G.f.flag,overall:G.f.overall,
           attrs:JSON.parse(JSON.stringify(G.f.attrs)),skills:[...G.f.skills],style:G.f.style,div:G.f.div};
-        const points={1:10,2:50,3:120,4:250,5:500,6:1000,7:1000};
+        const points={1:2,2:6,3:14,4:28,5:50,6:100,7:100};
         meta.legendPoints=(meta.legendPoints||0)+(points[7]);
         saveMetaStats(meta);
         G.arcade.active=false; G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
@@ -2856,14 +2890,15 @@ const CL={
   startArcade(){ injectExtendedArchetypes(); G.arcade={active:true,streak:0,target:5,pool:buildArcadePool()}; G.screen='draft'; save(); render(); },
   startBossRun(){ startBossRun(); },
   startLadder100(){ injectExtendedArchetypes(); G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool()}; G.screen='draft'; save(); render(); },
-  startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:''}; G.screen='faith_draft'; save(); render(); },
+  startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
+  faithDraftIn(k,v){ G.faithDraft[k]=v; },
   selectFaithDraft(key,value){ G.faithDraft[key]=value; render(); },
   finalizeFaithDraft(){
     const d=G.faithDraft;
     if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality){
       G.lastMsg="Complète les 5 catégories avant de commencer."; render(); return;
     }
-    const f=makeFighter({gender:'H',style:d.style,countryKey:'FR',age:18});
+    const f=makeFighter({gender:'H',style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18});
     f.gameMode='faith';
     if(d.origin==='traditional'){ f.attrs.fightIQ+=8; f.attrs.discipline+=8; }
     if(d.origin==='pro_child'){ f.earnings=50; f.attrs.composure-=10; f.hypeBonus=1.5; }
@@ -3168,8 +3203,8 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
     if(o.tap){ // halo de danger de soumission, pulsant, sur le combattant en péril
       const pulse=Math.abs(Math.sin(performance.now()/150))*5;
       ctx.beginPath(); ctx.arc(0,-15,20+pulse,0,Math.PI*2);
-      ctx.fillStyle='rgba(217,56,41,0.3)'; ctx.fill();
-      ctx.strokeStyle='#D93829'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='rgba(232,68,47,0.3)'; ctx.fill();
+      ctx.strokeStyle='#E8442F'; ctx.lineWidth=2; ctx.stroke();
     }
     ctx.restore(); return;
   }
@@ -3266,7 +3301,7 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
   fighter(ctx, xOp, gY, -1, '#6E8478', {lunge:A.lungeOp*(1-frac),flash:A.flashOp>0,shake:A.shakeOp>0,fallen:A.fall===2,grounded,phase:A.curPhase,top:A.curTop==='op',tap:isSubDanger&&A.curTop!=='op'});
   fighter(ctx, xMe, gY, 1, '#B23B36', {lunge:A.lungeMe*(1-frac),flash:A.flashMe>0,shake:A.shakeMe>0,fallen:A.fall===1,grounded,phase:A.curPhase,top:A.curTop==='me',tap:isSubDanger&&A.curTop!=='me'});
-  if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#D93829'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
+  if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#E8442F'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
   A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
   A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);
   A.lungeMe*=0.86; A.lungeOp*=0.86;

@@ -47,15 +47,15 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
    du combattant actif, comme le Panthéon lui-même). ==== */
 const META_STATS_KEY='cage-legacy-metastats';
 function loadMetaStats(){
-  try{ return JSON.parse(localStorage.getItem(META_STATS_KEY))||{totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,legendPoints:0,unlockedItems:[]}; }
-  catch(e){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,legendPoints:0,unlockedItems:[]}; }
+  try{ return JSON.parse(localStorage.getItem(META_STATS_KEY))||{totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
+  catch(e){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
 }
 function saveMetaStats(meta){ try{ localStorage.setItem(META_STATS_KEY,JSON.stringify(meta)); }catch(e){} }
 function updateMetaStatsOnRetirement(f){
   const meta=loadMetaStats();
   const fights=f.W+f.L+(f.D||0);
   meta.totalFights+=fights; meta.totalKO+=(f.ko||0); meta.totalSub+=(f.sub||0); meta.totalDec+=(f.dec||0);
-  meta.totalMoney+=(f.earnings||0); meta.totalBelts+=(f.titles||0);
+  meta.totalMoney+=(f.earnings||0); meta.totalBelts+=(f.titles||0); meta.totalRetirements=(meta.totalRetirements||0)+1;
   saveMetaStats(meta);
 }
 function filterHallOfFame(criteria){
@@ -76,16 +76,20 @@ function filterHallOfFame(criteria){
    makeFighter() ou applyDeltas() — vérifié : aucune des fonctions ci-dessous
    ne touche à f.attrs, f.potential ni aux fonctions de création/entraînement. ==== */
 const LEGEND_UNLOCKABLES=[
-  {id:'tool_codex',name:'Codex Inter-carrières',cost:150},
-  {id:'tool_scouting',name:'Module de Scouting Pro',cost:300},
-  {id:'mode_boss',name:'Arcade : Boss Run',cost:500},
-  {id:'mode_fantasy',name:'Fantasy Fight (Sandbox)',cost:400},
-  {id:'mode_allstars',name:'Tournoi All-Stars (8 Légendes)',cost:600},
-  {id:'mode_vs_friend',name:'Défi Multijoueur (Vs Ami)',cost:300},
-  {id:'cosmetic_pride',name:'Toile Héritage Blanche & Bleue',cost:200},
-  {id:'cosmetic_gold',name:'Bâche Royale (Prestige)',cost:350}
+  {id:'tool_codex',name:'Codex Inter-carrières',cat:'Outils',cost:60,desc:'Recense toutes les compétences déjà croisées, toutes carrières confondues.'},
+  {id:'tool_scouting',name:'Module de Scouting Pro',cat:'Outils',cost:120,desc:'Révèle les séquelles et la marge de progression réelle des adversaires en circuit pro.'},
+  {id:'cosmetic_pride',name:'Toile Héritage Blanche & Bleue',cat:'Cosmétiques',cost:90,desc:'Nouveau thème visuel pour l\u2019octogone.'},
+  {id:'cosmetic_gold',name:'Bâche Royale (Prestige)',cat:'Cosmétiques',cost:150,desc:'Thème visuel doré pour l\u2019octogone.'},
+  {id:'mode_vs_friend',name:'Défi Multijoueur (Vs Ami)',cat:'Modes annexes',cost:140,desc:'Oppose une de tes légendes retraitées au combattant d\u2019un ami, généré à la volée.'},
+  {id:'mode_fantasy',name:'Fantasy Fight (Sandbox)',cat:'Modes annexes',cost:180,desc:'Simule un combat entre deux légendes de ton Panthéon.'},
+  {id:'mode_boss',name:'Arcade : Boss Run',cat:'Modes annexes',cost:220,desc:'5 champions d\u2019affilée, KO uniquement. Le format le plus punitif du Gauntlet.'},
+  {id:'mode_allstars',name:'Tournoi All-Stars (8 Légendes)',cat:'Modes annexes',cost:300,desc:'Tournoi à élimination directe entre tes 8 meilleures légendes pour désigner ton GOAT.'}
 ];
-function awardLegendPoints(f){ const meta=loadMetaStats(); const earned=hofScore(f)||0; meta.legendPoints=(meta.legendPoints||0)+Math.max(0,earned); saveMetaStats(meta); }
+// Gain divisé par 10 par rapport au score brut : hofScore() peut dépasser 500
+// pour une belle carrière (titre mondial + défenses + palmarès), ce qui
+// débloquait tout le contenu en une seule retraite. Vise plusieurs semaines
+// de jeu réel pour tout débloquer, pas quelques jours.
+function awardLegendPoints(f){ const meta=loadMetaStats(); const earned=Math.round((hofScore(f)||0)/10); meta.legendPoints=(meta.legendPoints||0)+Math.max(0,earned); saveMetaStats(meta); }
 function checkLegendUnlock(itemId){ return (loadMetaStats().unlockedItems||[]).includes(itemId); }
 function purchaseLegendUnlock(itemId){
   const meta=loadMetaStats(); const item=LEGEND_UNLOCKABLES.find(i=>i.id===itemId);
