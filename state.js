@@ -77,9 +77,13 @@ function filterHallOfFame(criteria){
    ne touche à f.attrs, f.potential ni aux fonctions de création/entraînement. ==== */
 const LEGEND_UNLOCKABLES=[
   {id:'tool_codex',name:'Codex Inter-carrières',cat:'Outils',cost:60,desc:'Recense toutes les compétences déjà croisées, toutes carrières confondues.'},
-  {id:'tool_scouting',name:'Module de Scouting Pro',cat:'Outils',cost:120,desc:'Révèle les séquelles et la marge de progression réelle des adversaires en circuit pro.'},
   {id:'cosmetic_pride',name:'Toile Héritage Blanche & Bleue',cat:'Cosmétiques',cost:90,desc:'Nouveau thème visuel pour l\u2019octogone.'},
   {id:'cosmetic_gold',name:'Bâche Royale (Prestige)',cat:'Cosmétiques',cost:150,desc:'Thème visuel doré pour l\u2019octogone.'},
+  {id:'cosmetic_neon',name:'Néons Cyberpunk',cat:'Cosmétiques',cost:110,desc:'Thème visuel nocturne et futuriste pour l\u2019octogone.'},
+  {id:'cosmetic_underground',name:'Béton Clandestin',cat:'Cosmétiques',cost:75,desc:'L\u2019ambiance rugueuse et sombre des combats clandestins.'},
+  {id:'arch_titan',name:'Archétype : Le Titan Antique',cat:'Archétypes Arcade',cost:80,desc:'Débloque un colosse inarrêtable spécialisé en lutte pour le mode Gauntlet.'},
+  {id:'arch_ninja',name:'Archétype : Le Shinobi',cat:'Archétypes Arcade',cost:80,desc:'Débloque un expert en furtivité et soumissions éclairs pour le mode Gauntlet.'},
+  {id:'arch_brawler',name:'Archétype : Le Roi de la Rue',cat:'Archétypes Arcade',cost:80,desc:'Débloque un spécialiste de la boxe sale et de la survie pour le mode Gauntlet.'},
   {id:'mode_vs_friend',name:'Défi Multijoueur (Vs Ami)',cat:'Modes annexes',cost:140,desc:'Oppose une de tes légendes retraitées au combattant d\u2019un ami, généré à la volée.'},
   {id:'mode_fantasy',name:'Fantasy Fight (Sandbox)',cat:'Modes annexes',cost:180,desc:'Simule un combat entre deux légendes de ton Panthéon.'},
   {id:'mode_boss',name:'Arcade : Boss Run',cat:'Modes annexes',cost:220,desc:'5 champions d\u2019affilée, KO uniquement. Le format le plus punitif du Gauntlet.'},

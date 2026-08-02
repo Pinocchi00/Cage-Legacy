@@ -85,21 +85,23 @@ function eraBuffSnapshot(f){
 }
 function restoreSnapshot(f,saved){ for(const k in saved){ f.attrs[k]=saved[k]; } }
 
-function generateNPCNews(){
+function generateNPCNews(forceBatch){
   if(!G.divisionNews) G.divisionNews=[];
   const top15=G.roster.filter(o=>!o.champion).slice(0,15);
   if(top15.length<2) return;
-  if(rnd()<0.12){
+  const numNews=forceBatch?3:(rnd()<0.12?1:0);
+  for(let i=0;i<numNews;i++){
     const p1=pick(top15); let p2=pick(top15); while(p1.id===p2.id) p2=pick(top15);
     const events=[
       `Altercation en coulisses entre ${p1.name} et ${p2.name}. La tension monte.`,
       `${p1.name} a subi une grave blessure à l\u2019entraînement.`,
       `${p2.name} évoque une montée de catégorie imminente.`,
-      `${p1.name} provoque publiquement ${p2.name} sur les réseaux sociaux.`
+      `${p1.name} provoque publiquement ${p2.name} sur les réseaux sociaux.`,
+      `L\u2019équipe de ${p1.name} dénonce ouvertement l\u2019arbitrage de son dernier combat.`
     ];
     G.divisionNews.unshift({year:(G.season&&G.season.year)||1,text:pick(events)});
-    if(G.divisionNews.length>20) G.divisionNews.length=20;
   }
+  if(G.divisionNews.length>20) G.divisionNews.length=20;
 }
 
 // Mémoire tactique de rematch : boost temporaire ciblé sur l'adversaire (attributs
@@ -340,17 +342,6 @@ function syncPlayerSkillsToCodex(f){ if(!f||!f.skills) return; f.skills.forEach(
 
 /* ==== [ANCRE: LOT10_SCOUTING] — outils de scouting/analyse (logique — le
    rendu HTML va dans ui.js) ==== */
-function getScoutingReport(f,opp){
-  if(f.stage!=='pro') return null;
-  const report={chinWarning:false,potentialGapText:null};
-  if(opp.koLoss>=1||opp.attrs.chin<65||opp.attrs.durability<65){ report.chinWarning=true; }
-  const gap=opp.potential-opp.overall;
-  if(gap>=15) report.potentialGapText="Diamant brut (progression fulgurante attendue)";
-  else if(gap>=6) report.potentialGapText="En pleine évolution (marge de progression solide)";
-  else if(gap<=0) report.potentialGapText="Plafond atteint (potentiel maximisé)";
-  else report.potentialGapText="Progression marginale restante";
-  return report;
-}
 /* ==== [FIN ANCRE] ==== */
 
 const STYLES={
@@ -648,7 +639,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
           if(rnd()<0.28){ currentPhase='sol'; topIsA=domIsA; (domIsA?st.A:st.B).td++;
             log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
-            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${dom.name} domine contre la cage avec ${hits} coups courts.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            const clinchTxt=getUniqueLog([
+              `${dom.name} étouffe son adversaire contre le grillage.`,
+              `Lutte rugueuse le long de la cage à l\u2019avantage de ${dom.name}.`,
+              `${dom.name} pèse de tout son poids et place de petits coups vicieux.`,
+              `Le clinch s\u2019éternise, ${dom.name} grignote l\u2019énergie adverse.`,
+              `${dom.name} domine contre la cage avec ${hits} coups courts.`
+            ]);
+            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${clinchTxt}`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
         } else {
           currentPhase='debout';
@@ -885,7 +883,13 @@ function p4pScore(f){ const fights=f.W+f.L+f.D;
   return Math.max(1, score);
 }
 /* ==== [FIN ANCRE] ==== */
-function rankPool(list){ return list.slice().sort((x,y)=>p4pScore(y)-p4pScore(x)); }
+function rankPool(list){
+  return list.slice().sort((x,y)=>{
+    if(x.champion && !y.champion) return -1;
+    if(y.champion && !x.champion) return 1;
+    return p4pScore(y)-p4pScore(x);
+  });
+}
 function isDeclining(f){ return f.age>=(isHeavy(f)?35:33); }
 function isHeavy(f){ return f.div==='H-heavy'||f.div==='H-lheavy'; }
 function applyAging(f){ const A=f.age; if(isDeclining(f)){ // déclin, poids lourds plus tardif

@@ -82,6 +82,13 @@ function checkAmaChampionship(f){
   if(f.org!==0 || (f.W+f.L+(f.D||0))<5) return null;
   if(!f.amaTitles) f.amaTitles=[];
   if(!f.amaAttempted) f.amaAttempted=[];
+  // Plafond de réalisme : être top 8 d'un pool national restreint ne suffit
+  // pas si le classement général est médiocre (confirmé : joueur classé #44
+  // au global repêché pour un tournoi censé représenter l'élite du pays,
+  // à cause d'un pool pays/division trop petit). On exige en plus d'être
+  // dans le premier quart du classement général de la division.
+  const globalCeiling=Math.max(8, Math.round(G.roster.length*0.25));
+  if(divRank(f)>globalCeiling) return null;
   for(const cfg of AMA_CHAMPIONSHIPS){
     if(f.amaAttempted.includes(cfg.id)) continue;
     if(cfg.country && f.countryKey!==cfg.country) continue;
@@ -124,7 +131,7 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     f.amateurRivals.forEach(r=>{ r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; r.orgWins=RI(0,2); pool.push(r); });
   }
   const toGenerate=needed-pool.length;
-  for(let i=0;i<toGenerate;i++){ const lv=clamp(base+RI(-10,14),20,97);
+  for(let i=0;i<toGenerate;i++){ const lv=clamp(base+RI(-10,14)+3,20,97);
     const age=isAmateur?RI(17,24):RI(22,35);
     const o=makeFighter({gender:f.gender,div:f.div,level:lv,potential:lv+RI(2,12),age});
     o.org=f.org; // bug confirmé et corrigé : restait à 0 par défaut, faussant le x1.4 Pacific Championship
@@ -209,6 +216,15 @@ function advanceRoster(){
    et l.styleKey (vrai ID de style) — PAS l.style/l.divName qui sont des noms
    d'affichage humains, incompatibles avec divById()/STYLES[] qui cherchent
    par ID exact. ==== */
+// Neutralise l'avantage d'allonge entre deux combattants pour un combat
+// d'exhibition inter-catégories (Fantasy Fight, Vs Ami, All-Stars) : on
+// juge le combattant, pas son gabarit. N'affecte jamais les combats de
+// carrière réels, qui restent intra-division par construction.
+function neutralizeWeightGap(A,B){
+  const avgReach=Math.round((((A.phys&&A.phys.reach)||0)+((B.phys&&B.phys.reach)||0))/2);
+  if(A.phys) A.phys.reach=avgReach;
+  if(B.phys) B.phys.reach=avgReach;
+}
 function reconstructLegend(l){
   const f=makeFighter({gender:'H',div:l.div||'H-welter',style:l.styleKey||'mma',first:l.name,age:l.age||35});
   if(l.attrs) f.attrs=JSON.parse(JSON.stringify(l.attrs));
@@ -235,10 +251,12 @@ function getCardSlot(f,kind){
 }
 function renderFightPoster(f,opp,kind){
   const slot=getCardSlot(f,kind);
+  const slotColors={'CARTE AMATEUR':'var(--muted)','EARLY PRELIMS':'var(--line)','PRELIMS':'#4DA6FF','MAIN CARD':'var(--sage)','CO-MAIN EVENT':'var(--blood)','MAIN EVENT':'var(--gold)'};
+  const borderColor=slotColors[slot]||'var(--gold-d)';
   const orgName=orgDisplayName(f).toUpperCase();
   const fLast=esc(f.last||f.name).toUpperCase();
   const oppLast=esc(opp.last||opp.name).toUpperCase();
-  return `<div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:24px 16px;margin-bottom:24px;position:relative;overflow:hidden">
+  return `<div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:${borderColor};padding:24px 16px;margin-bottom:24px;position:relative;overflow:hidden">
     <div style="position:absolute;top:-20px;left:-20px;font-size:120px;opacity:0.03;font-family:'Oswald';font-weight:700;color:var(--gold);pointer-events:none;z-index:0">${orgName}</div>
     <div class="eyebrow gold mb" style="position:relative;z-index:2;letter-spacing:0.3em">${orgName} // ${slot}</div>
     <div class="disp" style="position:relative;z-index:2;font-size:clamp(32px,9vw,42px);line-height:1.1;margin:12px 0">
@@ -294,22 +312,23 @@ function scr_allstars(){
   if(t.champion){
     h+=`<div class="card glass raise" style="text-align:center;padding:32px 16px;background:var(--panel2);border-color:var(--gold)">
           <div class="eyebrow gold mb">VAINQUEUR DU TOURNOI</div>
-          <div style="font-size:60px">${SVG.goat}</div>
+          <div style="font-size:60px">${getStyleEmoji(t.champion.styleLabel||t.champion.style)}</div>
           <div class="disp" style="font-size:42px;margin:16px 0">${esc(t.champion.name).toUpperCase()} ${t.champion.flag}</div>
-          <p class="muted small">A écrasé les meilleures légendes de l\u2019histoire pour s\u2019asseoir sur le trône ultime.</p>
+          <p class="muted small">${getFighterBlurb(t.champion)}</p>
         </div>
         <button class="btn ghost mt" onclick="CL.leaveAllStars()">Retour à la Salle des Légendes</button>`;
   } else {
     h+=`<div class="eyebrow mb" style="color:var(--text);border-bottom:1px solid var(--line);padding-bottom:8px">${t.step.toUpperCase()}</div>
         <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">`;
     t.matches.forEach(m=>{
-      h+=`<div class="card glass" style="background:var(--panel2);padding:12px;display:flex;justify-content:space-between;align-items:center">
-            <div style="flex:1;text-align:right;font-family:'Oswald';font-size:18px">${esc(m.a.name)} ${m.a.flag}</div>
-            <div class="mono muted" style="padding:0 16px;font-size:12px">VS</div>
-            <div style="flex:1;text-align:left;font-family:'Oswald';font-size:18px">${m.b.flag} ${esc(m.b.name)}</div>
+      h+=`<div class="card glass" style="background:var(--panel2);padding:12px;display:flex;justify-content:space-between;align-items:center;opacity:${m.winner?0.55:1}">
+            <div style="flex:1;text-align:right;font-family:'Oswald';font-size:18px">${getStyleEmoji(m.a.styleLabel||m.a.style)} ${esc(m.a.name)} ${m.a.flag}</div>
+            <div class="mono muted" style="padding:0 16px;font-size:12px">${m.winner?(m.winner===m.a?'◀ GAGNE':'GAGNE ▶'):'VS'}</div>
+            <div style="flex:1;text-align:left;font-family:'Oswald';font-size:18px">${m.b.flag} ${esc(m.b.name)} ${getStyleEmoji(m.b.styleLabel||m.b.style)}</div>
           </div>`;
     });
-    h+=`</div><button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.advanceAllStars()">SIMULER LE TOUR</button>`;
+    const remaining=t.matches.filter(m=>!m.winner).length;
+    h+=`</div><button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.advanceAllStars()">${remaining?'COMBAT SUIVANT':'PASSER AU TOUR SUIVANT'}</button>`;
   }
   if(t.history && t.history.length>0){
     h+=`<div class="card mt"><div class="eyebrow mb">Résultats précédents</div>`;
@@ -324,33 +343,31 @@ function scr_allstars(){
 /* ==== [ANCRE: ECRAN_VS_FRIEND] ==== */
 function scr_vs_friend(){
   const list=loadHOF();
-  if(list.length===0){
-    return `<div class="scr center intro"><div class="eyebrow gold">Défi Multijoueur</div><h2 class="disp">Panthéon vide</h2><p class="lede">Il te faut au moins 1 légende au Panthéon pour défier un ami.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
+  if(list.length<2){
+    return `<div class="scr center intro"><div class="eyebrow gold">Défi Multijoueur</div><h2 class="disp">Panthéon incomplet</h2><p class="lede">Il te faut au moins 2 légendes au Panthéon pour organiser un défi.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
   }
-  let sel=G.vsFriendSel!==undefined?G.vsFriendSel:0;
-  const lA=list[sel];
-  const stylesOpts=STYLE_KEYS.map(k=>`<option value="${k}">${STYLES[k].label}</option>`).join('');
+  let selA=G.vsFriendSelA!==undefined?G.vsFriendSelA:0;
+  let selB=G.vsFriendSelB!==undefined?G.vsFriendSelB:(list.length>1?1:0);
+  const lA=list[selA], lB=list[selB];
   return `<div class="scr center intro">
     <div class="eyebrow gold">Défi Multijoueur</div>
     <h2 class="disp">Combattant d\u2019un ami</h2>
-    <p class="lede small">Sélectionne ta légende et recrée le combattant de ton ami. Le combat se déroule dans ta catégorie de poids.</p>
+    <p class="lede small">Choisis ta légende, puis choisis la légende de ton Panthéon que ton ami incarne. Le combat se déroule dans ta catégorie de poids.</p>
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:32px 0;gap:16px">
       <div style="flex:1;text-align:center">
          <div class="eyebrow mb">Ta légende</div>
          <div class="hero-name" style="font-size:22px;color:var(--blood)">${esc(lA.name)}</div>
          <div class="muted small mb">${lA.style} · OVR ${lA.overall||'?'}</div>
-         <div><button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(-1)">◀</button>
-         <button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1)">▶</button></div>
+         <div><button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(0,-1)">◀</button>
+         <button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(0,1)">▶</button></div>
       </div>
       <div class="disp gold" style="font-size:24px;padding-top:20px">VS</div>
-      <div style="flex:1;text-align:left">
-         <div class="eyebrow mb center">Son combattant</div>
-         <input id="fr_name" placeholder="Nom de l\u2019ami" class="mb" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'Fraunces';font-size:14px;border-radius:0">
-         <select id="fr_style" class="mb" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'Fraunces';font-size:14px;border-radius:0">${stylesOpts}</select>
-         <div style="display:flex;align-items:center;gap:8px">
-           <span class="muted small mono">OVR (20-99):</span>
-           <input id="fr_level" type="number" min="20" max="99" value="${lA.overall||75}" style="flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';border-radius:0">
-         </div>
+      <div style="flex:1;text-align:center">
+         <div class="eyebrow mb">Légende de l\u2019ami</div>
+         <div class="hero-name" style="font-size:22px;color:var(--sage)">${esc(lB.name)}</div>
+         <div class="muted small mb">${lB.style} · OVR ${lB.overall||'?'}</div>
+         <div><button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,-1)">◀</button>
+         <button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,1)">▶</button></div>
       </div>
     </div>
     <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.launchVsFriend()">LANCER LE DÉFI</button>
@@ -431,13 +448,19 @@ function genOpponents(f){
       chosen.push(bottom[bottom.length-1], bottom[Math.floor(bottom.length/2)], bottom[0]);
     } else if(f.streak<=-2){
       // SCÉNARIO A : Le Rebond (Prospect vs Vétéran)
-      const prospect=normalPool.find(o=>(o.W+o.L)<=5 && o.W>o.L && p4pScore(o)<p4pScore(f)) || normalPool[Math.min(normalPool.length-1, rk+spread)];
-      const veteran=normalPool.find(o=>o.age>=32 && o.streak<0) || normalPool[Math.min(normalPool.length-1, rk+spread+1)];
+      // Bug corrigé : .find() scannait tout normalPool depuis le rang #1, donc
+      // un joueur classé #30 pouvait se voir proposer le #1 du classement s'il
+      // correspondait par hasard au profil recherché (confirmé : items #7/#13).
+      // On borne désormais la recherche à une fenêtre autour du rang réel (rk).
+      const searchWindow=normalPool.slice(Math.max(0,rk-spread*2), Math.min(normalPool.length,rk+spread*2+1));
+      const prospect=searchWindow.find(o=>(o.W+o.L)<=5 && o.W>o.L && p4pScore(o)<p4pScore(f)) || normalPool[Math.min(normalPool.length-1, rk+spread)];
+      const veteran=searchWindow.find(o=>o.age>=32 && o.streak<0) || normalPool[Math.min(normalPool.length-1, rk+spread+1)];
       const mid=normalPool[rk]||normalPool[0];
       chosen.push(prospect, veteran, mid);
     } else if(f.streak>=2){
-      // SCÉNARIO B : L'Anti-chambre (Gatekeeper)
-      const gatekeeper=normalPool.find(o=>o.attrs.durability>75 || o.attrs.tdd>75) || normalPool[Math.max(0, rk-spread)];
+      // SCÉNARIO B : L'Anti-chambre (Gatekeeper) — même correction de fenêtre
+      const searchWindow=normalPool.slice(Math.max(0,rk-spread*2), Math.min(normalPool.length,rk+spread*2+1));
+      const gatekeeper=searchWindow.find(o=>o.attrs.durability>75 || o.attrs.tdd>75) || normalPool[Math.max(0, rk-spread)];
       const higher=normalPool[Math.max(0, rk-spread-1)];
       const trap=normalPool[Math.min(normalPool.length-1, rk+1)];
       chosen.push(gatekeeper, higher, trap);
@@ -819,10 +842,18 @@ function evaluateProOffer(f, res, oppRank){
     else if(finishes>=8) msg=`Avec ton style ultra-spectaculaire (${finishes} finitions) et ta réputation de tueur, le public pro te réclame malgré tes ${f.L} défaites.`;
     else if(f.age<=20) msg=`Tu n\u2019as que ${f.age} ans, mais ta maturité dans la cage affole les recruteurs régionaux. Tu es un prospect majeur.`;
     else msg='Tes résultats réguliers et ton classement sur le circuit IMMAF t\u2019ouvrent enfin les portes du monde professionnel.';
-    const orgFlavor1=pick(ORG_FLAVORS[1]); const phrase1=pick(CONTRACT_PHRASES)(orgFlavor1);
+    // L'organisation proposée dépend désormais du classement/hype plutôt que
+    // d'être fixée à un tier arbitraire (item #9) — un meilleur palmarès amateur
+    // ouvre l'accès à des organisations plus prestigieuses dès le départ.
+    let baseTier=1; const rk=divRank(f);
+    if(rk<=10 || hypeScore>=40) baseTier=2;
+    if(rk<=3 || hypeScore>=60) baseTier=3;
+    const orgFlavor1=ORG_FLAVORS[baseTier]?pick(ORG_FLAVORS[baseTier]):ORGS[baseTier];
+    const phrase1=pick(CONTRACT_PHRASES)(orgFlavor1);
+    const fastTier=Math.min(4, baseTier+1);
     let orgFlavor3=null, phrase3=null;
-    if(fastTrack){ orgFlavor3=pick(ORG_FLAVORS[3]); phrase3=pick(CONTRACT_PHRASES)(orgFlavor3); }
-    return { forced:false, msg, fastTrack, orgFlavor1, phrase1, orgFlavor3, phrase3 };
+    if(fastTrack){ orgFlavor3=ORG_FLAVORS[fastTier]?pick(ORG_FLAVORS[fastTier]):ORGS[fastTier]; phrase3=pick(CONTRACT_PHRASES)(orgFlavor3); }
+    return { forced:false, msg, fastTrack, orgFlavor1, phrase1, orgFlavor3, phrase3, baseTier, fastTier };
   }
   return null;
 }
@@ -908,7 +939,23 @@ const ARCADE_EXTENDED_ARCHETYPES=[
     attrs:{kick:98,explosiveness:95,footSpeed:90,tdd:15,jab:20,chin:30,cardio:60,power:80},
     perk:'Des coups de pied retournés constants. Soit il vous éteint, soit il s\u2019épuise en un round.'}
 ];
-function injectExtendedArchetypes(){ ARCADE_EXTENDED_ARCHETYPES.forEach(a=>{ if(!ARCADE_ARCHETYPES.some(x=>x.nick===a.nick)) ARCADE_ARCHETYPES.push(a); }); }
+const ARCADE_UNLOCKABLE_ARCHETYPES=[
+  {unlockId:'arch_titan',nick:'Le Titan Antique',flag:'🇬🇷',country:'GR',style:'wrestler',styleLabel:'Titan',div:'H-heavy',age:39,
+    attrs:{strength:99,durability:95,power:90,takedown:85,topControl:90,cardio:40,footSpeed:10},
+    perk:'Une force herculéenne. Brise la volonté de tout ce qu\u2019il attrape.'},
+  {unlockId:'arch_ninja',nick:'Le Shinobi',flag:'🇯🇵',country:'JP',style:'bjj',styleLabel:'Furtif',div:'H-light',age:26,
+    attrs:{submission:98,footSpeed:95,handSpeed:90,adaptability:90,power:30,chin:40},
+    perk:'Disparaît du champ de vision pour réapparaître accroché à un cou.'},
+  {unlockId:'arch_brawler',nick:'Le Roi de la Rue',flag:'🇮🇪',country:'IE',style:'boxer',styleLabel:'Bare Knuckle',div:'H-welter',age:31,
+    attrs:{hook:95,clinchStr:95,durability:90,heart:99,killer:90,tdd:60,cardio:75},
+    perk:'Refuse d\u2019aller au sol. Transforme la cage en bagarre de pub.'}
+];
+function injectExtendedArchetypes(){
+  ARCADE_EXTENDED_ARCHETYPES.forEach(a=>{ if(!ARCADE_ARCHETYPES.some(x=>x.nick===a.nick)) ARCADE_ARCHETYPES.push(a); });
+  ARCADE_UNLOCKABLE_ARCHETYPES.forEach(a=>{
+    if(checkLegendUnlock(a.unlockId) && !ARCADE_ARCHETYPES.some(x=>x.nick===a.nick)) ARCADE_ARCHETYPES.push(a);
+  });
+}
 function startBossRun(){
   G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only'};
   G.screen='draft'; save(); render();
@@ -1173,14 +1220,11 @@ function scr_faith_hub(){
   let actionsHtml='';
   if(step===1){
     actionsHtml=`<div class="eyebrow mb">PHASE 1 : PRÉPARATION</div>
-    <p class="lede small">Sélectionnez votre approche pour cette saison.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithTrain()">
-        <div class="disp" style="font-size:18px;color:var(--text)">ENTRAÎNEMENT</div>
-        <div class="mono muted small mt" style="font-size:10px">Améliorer vos stats physiques et techniques</div></div>
-      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithScout()">
-        <div class="disp" style="font-size:18px;color:var(--text)">SCOUT / MÉDIAS</div>
-        <div class="mono muted small mt" style="font-size:10px">Étude stratégique & guerre psychologique</div></div>
+    <p class="lede small">Affrontez les péripéties de la vie d\u2019un combattant.</p>
+    <div style="display:grid;grid-template-columns:1fr;gap:10px">
+      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithLifeEvent()">
+        <div class="disp" style="font-size:18px;color:var(--text)">ÉVÉNEMENT DE VIE</div>
+        <div class="mono muted small mt" style="font-size:10px">Choix narratif impactant votre condition et vos attributs</div></div>
     </div>`;
   } else if(step===2){
     actionsHtml=`<div class="eyebrow mb">PHASE 2 : AJUSTEMENT</div>
@@ -1210,42 +1254,66 @@ function scr_faith_hub(){
   </div>`;
 }
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */
-function scr_faith_train(){
-  const deltaHtml=d=>d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
-    const vague=(k==='morale'||k==='form')?(v>0?`+${lbl}`:`-${lbl}`):(v>0?`Potentiel : ${lbl} ↑`:`Potentiel : ${lbl} ↓`);
-    return `<span class="dlt ${v>=0?'up':'dn'}">${vague}</span>`; }).join('');
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Salle d\u2019entraînement</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
-   <p class="lede small">L\u2019entraînement consomme du temps et de la forme, mais augmente vos attributs vers leurs plafonds uniques.</p>
-   ${G.train.map((t,i)=>`<div class="opp" onclick="CL.chooseFaithTrain(${i})">
-     <div class="opp-top"><span class="opp-nm">${t.label}</span></div>
-     <div class="opp-mid">${t.hint}</div><div class="dlts">${deltaHtml(t.d)}</div></div>`).join('')}
-  </div>`;
-}
-function scr_faith_scout(){
-  return `<div class="scr center intro">
-   <div class="eyebrow sage">Analyse & Médias</div>
-   <h2 class="disp big" style="font-size:32px">Préparation Stratégique</h2>
-   <p class="lede small">Préparez le terrain pour votre prochain combat. Les bonus/malus s\u2019appliqueront directement lors de votre prochaine montée dans la cage.</p>
-   <div style="display:flex;flex-direction:column;gap:12px;margin-top:24px;text-align:left">
-     <div class="glass opp" style="padding:16px" onclick="CL.chooseFaithScout('sparring')">
-       <div class="hero-name" style="font-size:20px;text-transform:none">🥊 Partenaire de Sparring</div>
-       <div class="muted small mt">Tente d\u2019imiter le style adverse. Succès basé sur votre QI de Combat.</div>
-       <div class="mono small mt" style="color:var(--sage)">Risque : Malus personnel si l\u2019imitation est mauvaise.</div></div>
-     <div class="glass opp" style="padding:16px;border-color:var(--gold-d)" onclick="CL.chooseFaithScout('espion')">
-       <div class="hero-name" style="font-size:20px;text-transform:none;color:var(--gold)">🕵️ L\u2019Espion Infiltré (15k$)</div>
-       <div class="muted small mt">Paie un membre de son camp pour connaître son plan. 80% de fiabilité.</div>
-       <div class="mono small mt" style="color:var(--loss)">Risque : S\u2019il est démasqué, l\u2019adversaire gagne un gros bonus d\u2019IQ.</div></div>
-     <div class="glass opp" style="padding:16px" onclick="CL.chooseFaithScout('media')">
-       <div class="hero-name" style="font-size:20px;text-transform:none">📱 Désinformation (Médias)</div>
-       <div class="muted small mt">Bluff et trash-talk sur les réseaux. Succès basé sur votre Moral.</div>
-       <div class="mono small mt" style="color:var(--sage)">Bénéfice : Détruit son Sang-froid (Composure).</div></div>
-     <div class="glass opp" style="padding:16px;border-color:var(--blood-d)" onclick="CL.chooseFaithScout('transfuge')">
-       <div class="hero-name" style="font-size:20px;text-transform:none;color:var(--blood)">🤝 Le Transfuge (50k$)</div>
-       <div class="muted small mt">Acheter son ancien partenaire principal. 50% de fiabilité.</div>
-       <div class="mono small mt" style="color:var(--blood)">Bénéfice : Détruit totalement la capacité d\u2019adaptation adverse.</div></div>
-   </div>
-   <button class="btn ghost mt" onclick="CL.go('faith_hub')">Annuler</button>
-  </div>`;
+const FAITH_LIFE_EVENTS=[
+  {id:'evt_eco_exam',title:'Semaine de partiels',text:'La session d\u2019examens approche à l\u2019université. Vous passez vos nuits à réviser au lieu de récupérer de vos sparrings.',
+    choices:[{label:'Prioriser les révisions (assurer l\u2019avenir)',d:[['fightIQ',3],['form',-12],['morale',5]]},
+             {label:'Ignorer la fac, aller tourner à la salle',d:[['footwork',0],['jab',2],['morale',-15]]}]},
+  {id:'evt_calisthenics',title:'Routine au poids du corps',text:'Vous remplacez votre séance de musculation lourde par une session stricte de calisthénie en plein air.',
+    choices:[{label:'Focus explosivité & figures',d:[['explosiveness',3],['flexibility',2],['cardio',-4]]},
+             {label:'Focus isométrie & maintien',d:[['strength',2],['durability',2],['form',-2]]}]},
+  {id:'evt_plants',title:'Invasion de nuisibles',text:'Les feuilles de vos plantes tropicales sont attaquées. Vous passez des heures à les soigner au lieu de visualiser votre combat.',
+    choices:[{label:'Sauver les plantes (patience & soin)',d:[['composure',4],['focus',2],['form',-5]]},
+             {label:'Abandonner et aller s\u2019entraîner',d:[['morale',-10],['aggression',3]]}]},
+  {id:'evt_streetwear',title:'Le tech pack',text:'Vous finalisez seul le dossier technique de votre marque indépendante. L\u2019usine attend vos mensurations exactes.',
+    choices:[{label:'Financer la production (15k$)',cost:15,d:[['focus',-5],['morale',12],['composure',3]]},
+             {label:'Repousser le drop, focus sur le MMA',d:[['morale',-12],['focus',6]]}]},
+  {id:'evt_rainy_run',title:'Pluie battante',text:'Une pluie glaciale s\u2019abat sur la région. Votre footing matinal s\u2019annonce particulièrement misérable.',
+    choices:[{label:'Courir quand même sous l\u2019averse',d:[['durability',5],['heart',4],['form',-8],['morale',-5]]},
+             {label:'Rester au chaud',d:[['form',10],['discipline',-8]]}]},
+  {id:'evt_ufc_live',title:'Main event à 5h du matin',text:'La carte principale d\u2019un événement majeur commence en pleine nuit, avec un combat crucial pour votre catégorie.',
+    choices:[{label:'Analyser en direct',d:[['fightIQ',5],['adaptability',3],['form',-15]]},
+             {label:'Dormir et regarder le replay',d:[['form',5],['fightIQ',1]]}]},
+  {id:'evt_kaiju',title:'Soirée grand spectacle',text:'Pour décompresser avec votre cercle proche, vous organisez une soirée cinéma.',
+    choices:[{label:'Profiter de la soirée',d:[['morale',12],['composure',3],['discipline',-4]]}]},
+  {id:'evt_sparring_heavy',title:'Sparring lourd imprévu',text:'Un vétéran de la salle vous propose un sparring très appuyé, sans casque.',
+    choices:[{label:'Accepter la guerre',d:[['chin',3],['durability',3],['form',-18],['morale',5]]},
+             {label:'Refuser, travail technique',d:[['footSpeed',3],['jab',2],['morale',-5]]}]},
+  {id:'evt_diet_temptation',title:'Tentation de triche',text:'En plein milieu de votre perte de poids, la faim vous tenaille l\u2019estomac.',
+    choices:[{label:'Craquer pour un repas lourd',d:[['form',15],['morale',10],['discipline',-15]]},
+             {label:'Boire de l\u2019eau et souffrir',d:[['discipline',5],['heart',2],['morale',-8]]}]},
+  {id:'evt_wrestling_seminar',title:'Séminaire de l\u2019Est',text:'Un ancien lutteur médaillé donne un séminaire technique très coûteux sur le contrôle au sol.',
+    choices:[{label:'Payer l\u2019accès (5k$)',cost:5,d:[['topControl',4],['takedown',3],['fightIQ',2]]},
+             {label:'S\u2019entraîner seul',d:[['strength',2],['form',-3]]}]},
+  {id:'evt_coach_clash',title:'Tension tactique',text:'Votre entraîneur veut vous imposer un plan de jeu extrêmement prudent qui va à l\u2019encontre de vos instincts.',
+    choices:[{label:'Se plier à ses exigences',d:[['fightIQ',4],['composure',3],['aggression',-5]]},
+             {label:'Refuser, imposer votre vision',d:[['aggression',4],['confidence',3],['morale',-10]]}]},
+  {id:'evt_media_call',title:'Interview locale',text:'Un média régional vous contacte pour un long format vidéo, sur votre journée de repos.',
+    choices:[{label:'Faire le show',d:[['morale',8],['confidence',4],['form',-6],['focus',-3]]},
+             {label:'Décliner poliment',d:[['focus',4],['form',5],['morale',-5]]}]},
+  {id:'evt_sauna_break',title:'Le sauna en panne',text:'Pour maintenir votre perte de poids, vous devez enfiler une combinaison de sudation et enchaîner les sprints.',
+    choices:[{label:'Faire les sprints (épuisant)',d:[['cardio',4],['heart',3],['form',-15]]},
+             {label:'Décaler la perte de poids',d:[['form',5],['discipline',-10]]}]},
+  {id:'evt_shadow_mirror',title:'Perfectionnisme',text:'La salle est vide. Vous passez une heure devant le miroir à corriger une micro-imperfection technique.',
+    choices:[{label:'Chirurgie technique',d:[['handSpeed',3],['cross',3],['focus',2],['form',-4]]}]},
+  {id:'evt_gourou',title:'Le gourou psychologique',text:'Un coach mental vous vend une préparation "prédateur alpha" à prix fort.',
+    choices:[{label:'Payer la séance (8k$)',cost:8,d:[['confidence',4],['composure',3],['form',-6]]},
+             {label:'Refuser, rester terre-à-terre',d:[['discipline',3],['morale',-3]]}]}
+];
+function scr_faith_event(){
+  const ev=G.faith.currentEvent;
+  if(!ev) return `<div class="scr center intro"><p class="lede">Aucun événement en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const f=G.f;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Événement de vie</span></div>
+   <h2 class="disp" style="font-size:24px">${esc(ev.title)}</h2>
+   <p class="lede small mt">${esc(ev.text)}</p>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+     ${ev.choices.map((c,i)=>{
+       const locked=c.cost&&(f.earnings||0)<c.cost;
+       return `<div class="glass opp" style="padding:14px;text-align:left;opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
+         <b>${esc(c.label)}</b>${c.cost?`<span class="muted small"> (${c.cost}k$)</span>`:''}
+       </div>`;
+     }).join('')}
+   </div></div>`;
 }
 function scr_faith_year_end(){
   const ys=G.faith.yearStats; const f=G.f;
@@ -1376,9 +1444,9 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run</button></div>`;
   }
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
-   <div class="hero-name" style="text-align:center">SEED #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
+   <div class="hero-name" style="text-align:center">TÊTE DE SÉRIE #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:20px">
-     <div class="eyebrow mb">Prochain adversaire : Seed #${a.opponent.seed}</div>
+     <div class="eyebrow mb">Prochain adversaire : Tête de série #${a.opponent.seed}</div>
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · OVR ${a.opponent.overall}</div></div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
@@ -1408,7 +1476,9 @@ function scr_arcade_upgrades(){
         <div class="eyebrow mt mb" style="color:var(--gold)">2. CONDITIONNEMENT & SPARRING</div>`;
     a.trainOpts.forEach((t,i)=>{
       const deltas=t.d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
-        return `<span class="dlt ${v>=0?'up':'dn'}">${v>=0?'+':''}${v} ${lbl}</span>`; }).join('');
+        const isGauge=(k==='morale'||k==='form');
+        const shown=isGauge?v:Math.round(v/5); // même ratio que d20() pour les vrais attributs /20
+        return `<span class="dlt ${v>=0?'up':'dn'}">${shown>=0?'+':''}${shown} ${lbl}</span>`; }).join('');
       h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
             <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
     });
@@ -1425,7 +1495,14 @@ function scr_arcade_upgrades(){
    et fightKind(). Avant : les deux vérifiaient des choses différentes
    (streak vs orgWins), ce qui permettait de battre le vrai champion sans que
    le combat soit jamais reconnu comme un combat de titre. ==== */
-function isTitleEligible(f){ return f.org>=1 && f.streak>0 && (divRank(f)<=2 || ((f.streak||0)>=6 && divRank(f)<=4)); }
+function isTitleEligible(f){
+  if(f.org<1 || f.streak<=0) return false;
+  if(f.history && f.history.length>=3){
+    const recentLosses=f.history.slice(-3).filter(h=>h.res==='loss').length;
+    if(recentLosses>=2) return false;
+  }
+  return (divRank(f)<=2 || ((f.streak||0)>=6 && divRank(f)<=4));
+}
 /* ==== [FIN ANCRE] ==== */
 function fightKind(){ const f=G.f; if(f.champion) return 'defense'; if(isTitleEligible(f)) return 'title'; return 'normal'; }
 
@@ -1807,6 +1884,7 @@ function last5(f){ const h=f.history.slice(-5); if(!h.length)return '<span class
   return '<div class="l5">'+h.map(x=>{ const ko=x.method&&x.method.startsWith('KO'),sub=x.method&&x.method.startsWith('Soum');
     const letter=x.res==='win'?'V':(x.res==='draw'?'N':'D'); const cls=x.res==='win'?'w':(x.res==='draw'?'d':'l');
     return `<span class="p ${cls}" title="${x.method||''}">${letter}<i>${ko?'KO':sub?'SUB':'DÉC'}</i></span>`; }).join('')+'</div>'; }
+function formatCtrl(v){ const totalSec=Math.round((v||0)*100); const m=Math.floor(totalSec/60), s=totalSec%60; return `${m}:${s<10?'0':''}${s}`; }
 function formatArgent(kMontant){ const total=Math.round((kMontant||0)*1000);
   if(total>=1000000) return (total/1000000).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:1})+' M $';
   return total.toLocaleString('fr-FR')+' $';
@@ -1883,7 +1961,9 @@ function scr_create(){ const d=G.draft, divs=DIVISIONS[d.gender];
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 
 function scr_hub(){ const f=G.f; const champ=f.champion;
-  const msgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--loss);background:var(--panel2)"><div class="small" style="color:var(--loss)">${esc(G.lastMsg)}</div></div>`:'';
+  const isGoodMsg=G.lastMsg && G.lastMsg.includes('sponsor validé');
+  const msgColor=isGoodMsg?'var(--win)':'var(--loss)';
+  const msgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid ${msgColor};background:var(--panel2)"><div class="small" style="color:${msgColor}">${esc(G.lastMsg)}</div></div>`:'';
   if(G.lastMsg) G.lastMsg=null;
   const injuryHtml=f.injury?`<div class="card gold-b glass" style="border-color:var(--loss);margin-bottom:16px">
      <span class="eyebrow mb" style="color:var(--loss)">⚠ RAPPORT MÉDICAL CRITIQUE</span>
@@ -1968,7 +2048,7 @@ function scr_select(){ const f=G.f;
     const diffText=(opp,me)=>{ const diff=me-opp; if(diff>=12)return'Ton avantage net';if(diff>=5)return'Léger avantage';if(diff>-5&&diff<5)return'Équilibré';if(diff<=-12)return'Son avantage net';return'Léger désavantage'; };
     const getDiffColor=(txt)=>txt.startsWith('Son')||txt==='Léger désavantage'?'var(--loss)':(txt.startsWith('Ton')||txt==='Léger avantage')?'var(--gold)':'var(--text)';
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-      <div class="meta-strip"><div><span>Record</span><b style="white-space:nowrap">${recordStr(o)}</b></div>${o.amaRec?`<div><span>Amateur</span><b style="white-space:nowrap">${o.amaRec.W}-${o.amaRec.L}</b></div>`:''}</div>
+      <div class="meta-strip"><div><span>Record</span><b style="white-space:nowrap">${recordStr(o)}</b></div>${o.amaRec?`<div><span>Amateur</span><b style="white-space:nowrap">${o.amaRec.W}-${o.amaRec.L}</b></div>`:''}<div><span>Mensurations</span><b style="white-space:nowrap">${o.phys.height}cm / ${o.phys.reach}cm</b></div></div>
       <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
       <div class="tagrow">
         ${e.context?`<span class="tag2 hot" style="background:var(--gold);color:var(--bg);border-color:var(--gold)">${e.context}</span>`:''}
@@ -1999,9 +2079,15 @@ function scr_camp(){ const f=G.f;
   if(activeTier.id==='gratuit') tierDesc='Aucun coût financier. <span style="color:var(--loss)">Risque de blessure de 5%</span> (-15 Forme, -10 Moral).';
   else if(activeTier.id==='premium') tierDesc='Coût : 15k$. <span style="color:var(--win)">Zéro risque de blessure. Bonus garanti : +5 Forme, +5 Moral.</span>';
   else if(activeTier.id==='sparring') tierDesc='Coût : 35k$. <span style="color:var(--win)">Zéro risque. Bonus : +5 Forme.</span> L\u2019adversaire subira un lourd malus (-15 Adapt., -10 QI).';
+  const tierTags=CAMP_TIERS.map(t=>{
+    const canAfford=(f.earnings||0)>=t.cost;
+    const style=`cursor:${canAfford?'pointer':'not-allowed'};opacity:${canAfford?1:0.35}`;
+    const click=canAfford?` onclick="CL.setCampTier('${t.id}')"`:'';
+    return `<span class="tag2 ${curTier===t.id?'hot':''}" style="${style}"${click}>${t.name}${t.cost?` (${t.cost}k$)`:''}</span>`;
+  }).join('');
   return `<div class="scr"><div class="bar"><span class="eyebrow">Camp d\u2019entraînement</span><span class="eyebrow x" onclick="CL.go('select')">✕</span></div>
    <p class="lede small">Un seul axe avant ce combat. Chaque choix <b>monte et baisse</b> des attributs (bornés par ton potentiel).</p>
-   <div class="tagrow mb">${CAMP_TIERS.map(t=>`<span class="tag2 ${curTier===t.id?'hot':''}" style="cursor:pointer" onclick="CL.setCampTier('${t.id}')">${t.name}${t.cost?` (${t.cost}k$)`:''}</span>`).join('')}</div>
+   <div class="tagrow mb">${tierTags}</div>
    <div class="card glass mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><div class="mono small">${tierDesc}</div></div>
    ${G.train.map((t,i)=>`<div class="opp" onclick="CL.train(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
       <div class="opp-mid">${t.hint}</div><div class="dlts">${deltaHtml(t.d)}</div></div>`).join('')}
@@ -2042,7 +2128,7 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
     if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
      <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
      <div class="mono small">${G.activeSponsor.text}</div></div>`;
-    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">VALIDER LES RÉSULTATS MÉDICAUX</button>`;
+    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
   } else {
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
      <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
@@ -2130,7 +2216,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   return `<div class="scr">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px;text-align:center">
      <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
-     <div class="hero-name" style="color:${p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)')}">${p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE')}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
+     <div class="hero-name" style="color:${p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)')}">${p.isFantasy?(p.res.winner==='D'?'ÉGALITÉ':`CÔTÉ ${p.win?'ROUGE':'BLEU'} GAGNE — ${esc(p.win?f.name:p.opp.name)}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
      <div class="tagrow" style="justify-content:center">
        ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
          const typeStr=p.method.startsWith('KO')?'KO/TKO':'Soumission';
@@ -2147,7 +2233,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
-     <div class="st-row"><span>${(st.A.ctrl||0).toFixed(1)}</span><span class="st-l">Contrôle (rounds)</span><span>${(st.B.ctrl||0).toFixed(1)}</span></div>
+     <div class="st-row"><span>${formatCtrl(st.A.ctrl||0)}</span><span class="st-l">Temps de contrôle</span><span>${formatCtrl(st.B.ctrl||0)}</span></div>
      <div class="st-row"><span>${st.A.kd}</span><span class="st-l">Knockdowns</span><span>${st.B.kd}</span></div></div>
    ${p.purseDetail?`<div class="card"><div class="eyebrow mb">Bourse</div>
      <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Bourse brute</span><span>${formatArgent(p.purseDetail.gross)}</span></div>
@@ -2159,12 +2245,12 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt(f)} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
    <button class="btn primary" onclick="CL.${p.forced?'toLegacy':'afterResult'}()">${p.forced?'Voir mon palmarès':'Continuer'}</button></div>`; }
 
-function scr_profile(){ const f=G.f; const g=groupAvg(f);
+function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.faith?'faith_hub':'hub';
   const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
      ${ATTR[key].map(a=>`<div class="attr"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="CL.go('hub')">✕</span></div>
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="CL.go('${backScreen}')">✕</span></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-     <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Gabarit</span><b>${f.phys.height}cm / ${f.phys.reach}cm</b></div></div>
+     <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div></div>
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
      <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
@@ -2192,7 +2278,7 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f);
    </div>
    ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
    <div class="rarity-guide"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>
-   <button class="btn ghost" onclick="CL.go('hub')">Retour</button></div>`; }
+   <button class="btn ghost" onclick="CL.go('${backScreen}')">Retour</button></div>`; }
 
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
   let h=`<div class="scr">
@@ -2218,7 +2304,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
       <div class="mono" style="width:70px;text-align:right;font-size:10.5px;opacity:.7;${!o.champion?('color:'+arrowColor):''}">${statusStr}</div>
     </div>`;
   });
-  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`;
+  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.faith?'faith_hub':'hub'}')">← Revenir au hub</button></div>`;
   return h;
 }
 
@@ -2285,12 +2371,12 @@ function scr_promo(){
        <div class="hero-name" style="font-size:20px">${offer.orgFlavor1}<em style="color:var(--muted)">Contrat standard</em></div>
        <p class="muted small mt">${offer.msg}</p>
        <div class="muted small mt">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
-       <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(1,'${offer.orgFlavor1}')">${offer.phrase1}</button>
+       <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">${offer.phrase1}</button>
      </div>
-     ${offer.fastTrack?`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--blood-d);text-align:left;padding:16px;margin-top:15px">
-       <div class="hero-name" style="font-size:20px;color:var(--blood)">${offer.orgFlavor3}<em style="color:var(--muted)">Fast-Track (opposition bien plus dure)</em></div>
-       <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
-       <button class="btn mt" style="border-color:var(--gold);color:var(--gold);position:relative;z-index:2" onclick="CL.acceptPro(3,'${offer.orgFlavor3}')">${offer.phrase3}</button>
+     ${offer.fastTrack?`<div class="glass" style="position:relative;background:var(--gold);color:#fff;-webkit-backdrop-filter:blur(44px) saturate(220%);backdrop-filter:blur(44px) saturate(220%);border:1px solid #fff;text-align:left;padding:16px;margin-top:15px">
+       <div class="hero-name" style="font-size:20px;color:#fff">${offer.orgFlavor3}<em style="color:rgba(255,255,255,0.85)">Fast-Track (opposition bien plus dure)</em></div>
+       <p class="small mt" style="color:#fff">Ton parcours fulgurant te permet de griller les étapes.</p>
+       <button class="btn mt" style="background:#fff;color:var(--gold-d);border-color:#fff;font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">${offer.phrase3}</button>
      </div>`:''}
      ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus en amateur</button>`:''}
      </div>`;
@@ -2449,20 +2535,58 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
    <button class="btn primary" onclick="CL.newCareer()">Nouvelle carrière</button></div>`; }
 
 /* ==== [ANCRE: LOT9_ECRAN_CODEX] ==== */
+function formatSkillFx(fx){
+  if(!fx) return '';
+  return Object.entries(fx).map(([k,v])=>{
+    const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1];
+    const scaled=Math.round(v/5); // même ratio que d20() : fx est toujours un multiple de 5
+    return `${scaled>=0?'+':''}${scaled} ${label}`;
+  }).join(', ');
+}
 function scr_codex(){
   const unlocked=loadCodex(); const total=SKILLS.length;
+  if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'};
+  const filteredSkills=SKILLS.filter(s=>{
+    if(G.codexFilter.style!=='all' && s.key!==G.codexFilter.style) return false;
+    if(G.codexFilter.rar!=='all' && s.rar!==G.codexFilter.rar) return false;
+    const isUnlocked=unlocked.includes(s.id);
+    if(G.codexFilter.status==='unlocked' && !isUnlocked) return false;
+    if(G.codexFilter.status==='locked' && isUnlocked) return false;
+    return true;
+  });
   return `<div class="scr"><div class="bar"><span class="eyebrow">Codex · ${unlocked.length} / ${total} découvertes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp">Codex des compétences</h2>
    <p class="lede small">La base de données inter-carrières recense toutes les compétences débloquées dans l\u2019histoire de vos parties.</p>
-   ${SKILLS.map(s=>{
+   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+     <select style="background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px" onchange="CL.filterCodex('style',this.value)">
+       <option value="all" ${G.codexFilter.style==='all'?'selected':''}>Tous les styles</option>
+       ${STYLE_KEYS.map(k=>`<option value="${k}" ${G.codexFilter.style===k?'selected':''}>${STYLES[k].label}</option>`).join('')}
+     </select>
+     <select style="background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px" onchange="CL.filterCodex('rar',this.value)">
+       <option value="all" ${G.codexFilter.rar==='all'?'selected':''}>Toutes raretés</option>
+       <option value="C" ${G.codexFilter.rar==='C'?'selected':''}>Commune</option>
+       <option value="R" ${G.codexFilter.rar==='R'?'selected':''}>Rare</option>
+       <option value="E" ${G.codexFilter.rar==='E'?'selected':''}>Épique</option>
+       <option value="L" ${G.codexFilter.rar==='L'?'selected':''}>Légendaire</option>
+       <option value="M" ${G.codexFilter.rar==='M'?'selected':''}>Mythique</option>
+     </select>
+     <select style="background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px" onchange="CL.filterCodex('status',this.value)">
+       <option value="all" ${G.codexFilter.status==='all'?'selected':''}>Tout afficher</option>
+       <option value="unlocked" ${G.codexFilter.status==='unlocked'?'selected':''}>Découvertes</option>
+       <option value="locked" ${G.codexFilter.status==='locked'?'selected':''}>Verrouillées</option>
+     </select>
+   </div>
+   ${filteredSkills.map(s=>{
      const isUnlocked=unlocked.includes(s.id);
      const color=isUnlocked?(RAR_COLORS[s.rar]||'var(--gold)'):'var(--line)';
      const name=isUnlocked?s.name:'???';
      const desc=isUnlocked?(s.desc||s.blurb||''):'Compétence verrouillée. Découvrez-la naturellement en carrière.';
      return `<div class="glass card mb" style="border-left:3px solid ${color};opacity:${isUnlocked?1:.55};background:var(--panel2);padding:12px">
        <b style="color:${color};font-size:15px">${name}</b> <em class="muted small">(${s.rar})</em>
-       <div class="muted small mt">${desc}</div></div>`;
+       <div class="muted small mt">${desc}</div>
+       ${isUnlocked&&s.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(s.fx)}</div>`:''}</div>`;
    }).join('')}
+   ${filteredSkills.length===0?'<div class="muted small">Aucune compétence ne correspond à ces filtres.</div>':''}
    <button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -2557,25 +2681,63 @@ function scr_scenarios(){
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: LOGIQUE_ALLSTARS] ==== */
+function getStyleEmoji(styleLabel){
+  if(!styleLabel) return '🥋';
+  const s=styleLabel.toLowerCase();
+  if(s.includes('box')||s.includes('pugil')) return '🥊';
+  if(s.includes('lutt')||s.includes('wrest')) return '🤼';
+  if(s.includes('jiu')||s.includes('jitsu')||s.includes('bjj')) return '🕷️';
+  if(s.includes('muay')||s.includes('thai')) return '🇹🇭';
+  if(s.includes('karat')) return '🥋';
+  if(s.includes('sambo')) return '🐻';
+  if(s.includes('kick')) return '🦵';
+  return '⚔️';
+}
+function getFighterBlurb(f){
+  const ko=f.ko||0, sub=f.sub||0;
+  if(ko>sub) return `Frappeur redoutable, son pouvoir de KO a terrifié sa génération.`;
+  if(sub>ko) return `Maître du sol, une soumission inévitable pour quiconque croise son chemin.`;
+  return `Combattant hybride par excellence, aucun domaine ne lui échappe.`;
+}
 function initAllStarsTournament(){
   const fullList=loadHOF();
   if(fullList.length<8){ G.lastMsg="Il faut au moins 8 légendes au Panthéon pour organiser un Tournoi All-Stars."; return; }
-  const top8=fullList.slice(0,8).map(l=>reconstructLegend(l));
-  G.allstars={active:true,step:'Quarts de finale',roundNum:1,
-    matches:[{a:top8[0],b:top8[7]},{a:top8[1],b:top8[6]},{a:top8[2],b:top8[5]},{a:top8[3],b:top8[4]}],
-    history:[]};
-  G.screen='allstars';
+  G.allstarsDraft=[]; G.screen='allstars_setup';
+}
+function scr_allstars_setup(){
+  const fullList=loadHOF();
+  G.allstarsDraft=G.allstarsDraft||[];
+  return `<div class="scr center intro">
+     <div class="eyebrow gold">Tournoi All-Stars</div>
+     <h2 class="disp">Sélection des participants</h2>
+     <p class="lede small">Choisis 8 légendes de ton Panthéon pour le tournoi. (${G.allstarsDraft.length}/8)</p>
+     <div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;margin-bottom:24px;text-align:left">
+       ${fullList.map((f,i)=>{
+         const isSelected=G.allstarsDraft.includes(i);
+         return `<div class="glass opp" style="border-color:${isSelected?'var(--gold)':'var(--line)'};padding:12px" onclick="CL.toggleAllStarsDraft(${i})">
+           <div style="display:flex;justify-content:space-between;align-items:center">
+             <div><b style="color:${isSelected?'var(--gold)':'var(--text)'}">${getStyleEmoji(f.style)} ${esc(f.name)} ${f.flag||''}</b><br><span class="muted small">${f.style||''} · OVR ${f.overall||'?'}</span></div>
+             <div>${isSelected?'☑':''}</div>
+           </div>
+         </div>`;
+       }).join('')}
+     </div>
+     ${G.allstarsDraft.length===8?`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="CL.launchAllStars()">LANCER LE TOURNOI</button>`:`<button class="btn mt" disabled style="opacity:0.5;padding:16px;font-size:18px">LANCER LE TOURNOI</button>`}
+     <button class="btn ghost mt" onclick="CL.go('legends')">Annuler</button>
+  </div>`;
 }
 function advanceAllStarsTournament(){
   const t=G.allstars; if(!t||!t.active) return;
-  const survivors=[];
-  t.matches.forEach(m=>{
-    const res=simulateFight(m.a,m.b,3);
-    const winner=res.winner==='A'?m.a:m.b, loser=res.winner==='A'?m.b:m.a;
-    m.winner=winner;
+  const next=t.matches.find(m=>!m.winner);
+  if(next){
+    neutralizeWeightGap(next.a,next.b);
+    const res=simulateFight(next.a,next.b,3);
+    const winner=res.winner==='A'?next.a:next.b, loser=res.winner==='A'?next.b:next.a;
+    next.winner=winner;
     t.history.unshift(`${winner.name} bat ${loser.name} par ${res.method} (R${res.round||3})`);
-    survivors.push(winner);
-  });
+    return;
+  }
+  const survivors=t.matches.map(m=>m.winner);
   if(t.step==='Quarts de finale'){ t.step='Demi-finale'; t.roundNum=2; t.matches=[{a:survivors[0],b:survivors[3]},{a:survivors[1],b:survivors[2]}]; }
   else if(t.step==='Demi-finale'){ t.step='Finale'; t.roundNum=3; t.matches=[{a:survivors[0],b:survivors[1]}]; }
   else if(t.step==='Finale'){ t.step='Terminé'; t.champion=survivors[0]; t.active=false; }
@@ -2621,8 +2783,8 @@ function scr_faith_shop(){
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,
-  fantasy_setup:scr_fantasySetup,allstars:scr_allstars,vs_friend:scr_vs_friend,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_train:scr_faith_train,faith_scout:scr_faith_scout,faith_year_end:scr_faith_year_end,faith_shop:scr_faith_shop,
+  fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,arcade_upgrades:scr_arcade_upgrades,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_shop:scr_faith_shop,
   gauntlet_menu:scr_gauntlet_menu};
 
 /* ============================== RENDER + CL =============================== */
@@ -2631,6 +2793,7 @@ function render(){ const app=document.getElementById('app'); if(!app)return;
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
+  filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
   setArenaTheme(themeId){ setArenaCosmeticTheme(themeId); render(); },
   leaveSandbox(){ if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; } G.fantasyActive=false; G.vsFriendActive=false; CL.go('legends'); },
@@ -2647,6 +2810,7 @@ const CL={
      const list=loadHOF();
      const lA=list[G.fantasyA||0], lB=list[G.fantasyB!==undefined?G.fantasyB:(list.length>1?1:0)];
      const A=reconstructLegend(lA), B=reconstructLegend(lB);
+     neutralizeWeightGap(A,B);
      if(!G._backupF){ G._backupF=G.f; G._backupFight=G.fight; }
      G.f=A; G.fight={kind:'fantasy',opp:B,rounds:5,plan:null}; G.fantasyActive=true;
      const res=simulateFight(A,B,5);
@@ -2654,22 +2818,36 @@ const CL={
      buildTimeline(); G.screen='arena'; render();
   },
   initAllStars(){ initAllStarsTournament(); render(); },
+  toggleAllStarsDraft(index){
+     G.allstarsDraft=G.allstarsDraft||[];
+     if(G.allstarsDraft.includes(index)) G.allstarsDraft=G.allstarsDraft.filter(i=>i!==index);
+     else if(G.allstarsDraft.length<8) G.allstarsDraft.push(index);
+     render();
+  },
+  launchAllStars(){
+     if(!G.allstarsDraft || G.allstarsDraft.length!==8) return;
+     const fullList=loadHOF();
+     const top8=G.allstarsDraft.map(idx=>reconstructLegend(fullList[idx])).sort(()=>0.5-Math.random());
+     G.allstars={active:true,step:'Quarts de finale',roundNum:1,
+       matches:[{a:top8[0],b:top8[1]},{a:top8[2],b:top8[3]},{a:top8[4],b:top8[5]},{a:top8[6],b:top8[7]}],
+       history:[]};
+     G.screen='allstars'; render();
+  },
   advanceAllStars(){ advanceAllStarsTournament(); render(); },
-  setVsFriendPlayer(dir){
+  setVsFriendPlayer(side,dir){
      const max=loadHOF().length-1;
-     let n=(G.vsFriendSel||0)+dir; if(n<0)n=max; if(n>max)n=0;
-     G.vsFriendSel=n; render();
+     if(side===0){ let n=(G.vsFriendSelA||0)+dir; if(n<0)n=max; if(n>max)n=0; G.vsFriendSelA=n; }
+     else { let n=(G.vsFriendSelB!==undefined?G.vsFriendSelB:1)+dir; if(n<0)n=max; if(n>max)n=0; G.vsFriendSelB=n; }
+     render();
   },
   launchVsFriend(){
      const list=loadHOF();
-     const lA=list[G.vsFriendSel||0];
+     const lA=list[G.vsFriendSelA||0];
+     const lB=list[G.vsFriendSelB!==undefined?G.vsFriendSelB:1];
      const A=reconstructLegend(lA);
-     const frNameElem=document.getElementById('fr_name');
-     const frName=(frNameElem&&frNameElem.value.trim()!=='')?frNameElem.value.trim():'Combattant Mystère';
-     const frStyleElem=document.getElementById('fr_style'); const frStyle=(frStyleElem&&frStyleElem.value)||'mma';
-     const frLevelElem=document.getElementById('fr_level'); const frLevel=clamp(parseInt(frLevelElem&&frLevelElem.value)||75,20,99);
-     const B=makeFighter({gender:'H',div:A.div,style:frStyle,first:frName,level:frLevel,potential:Math.min(99,frLevel+5)});
-     B.champion='monde'; B.flag='🏴\u200d☠️';
+     const B=reconstructLegend(lB);
+     B.champion='monde'; B.flag=B.flag||'🏴\u200d☠️';
+     neutralizeWeightGap(A,B);
      if(!G._backupF){ G._backupF=G.f; G._backupFight=G.fight; }
      G.f=A; G.fight={kind:'fantasy',opp:B,rounds:5,plan:null}; G.vsFriendActive=true;
      const res=simulateFight(A,B,5);
@@ -2928,40 +3106,23 @@ const CL={
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
     G.faith.step=3; G.screen='faith_hub'; save(); render();
   },
-  faithTrain(){ G.train=trainingOptions(G.f); G.screen='faith_train'; save(); render(); },
-  chooseFaithTrain(i){
-    const opt=G.train[i];
-    applyDeltas(G.f,opt.d);
-    if(!G.faith.trainingTags) G.faith.trainingTags=[];
-    G.faith.trainingTags.push(...opt.t);
-    G.faith.trainingsThisYear=(G.faith.trainingsThisYear||0)+1;
-    G.lastMsg="Entraînement terminé : "+opt.label;
-    G.faith.step=2; G.screen='faith_hub'; save(); render();
+  faithLifeEvent(){
+    if(!G.faith.seenEvents) G.faith.seenEvents=[];
+    let pool=FAITH_LIFE_EVENTS.filter(e=>!G.faith.seenEvents.includes(e.id));
+    if(pool.length===0){ G.faith.seenEvents=[]; pool=FAITH_LIFE_EVENTS; }
+    G.faith.currentEvent=pick(pool);
+    G.screen='faith_event'; save(); render();
   },
-  faithScout(){ G.screen='faith_scout'; save(); render(); },
-  chooseFaithScout(type){
-    const f=G.f; let P=0, success=false;
-    if(!G.faith.nextFightBuffs) G.faith.nextFightBuffs={myMalus:null,oppMalus:null,neutralizePlanB:false};
-    if(type==='sparring'){
-      P=Math.min(0.95,((f.attrs.fightIQ+f.attrs.composure)/200)+R(-0.10,0.15));
-      success=rnd()<P;
-      if(success){ G.faith.nextFightBuffs.oppMalus={fightIQ:-10,adaptability:-10}; G.lastMsg="Succès : Ton partenaire a parfaitement imité son style. Failles exposées."; }
-      else { G.faith.nextFightBuffs.myMalus={fightIQ:-15,footSpeed:-10}; G.lastMsg="Échec : Le camp a été un désastre tactique. Ton partenaire t\u2019a induit en erreur."; }
-    } else if(type==='espion'){
-      if((f.earnings||0)<15){ G.lastMsg="Fonds insuffisants (15k$)."; render(); return; }
-      f.earnings-=15; P=0.80; success=rnd()<P;
-      if(success){ G.faith.nextFightBuffs.oppMalus={fightIQ:-20,composure:-10}; G.lastMsg="Succès : L\u2019espion a rapporté le plan de match exact de l\u2019adversaire."; }
-      else { G.faith.nextFightBuffs.oppMalus={fightIQ:15}; G.lastMsg="Échec : Ton espion a été démasqué. L\u2019adversaire gagne en lucidité tactique (+15 IQ)."; }
-    } else if(type==='media'){
-      P=f.morale/100; success=rnd()<P;
-      if(success){ G.faith.nextFightBuffs.oppMalus={composure:-15}; G.lastMsg="Succès : Tes attaques médiatiques ont percé son armure psychologique."; }
-      else { f.morale=clamp(f.morale-10,0,100); G.lastMsg="Échec : Le bluff a fait un flop total, les réseaux se moquent de toi (-10 Moral)."; }
-    } else if(type==='transfuge'){
-      if((f.earnings||0)<50){ G.lastMsg="Fonds insuffisants (50k$)."; render(); return; }
-      f.earnings-=50; P=0.50; success=rnd()<P;
-      if(success){ G.faith.nextFightBuffs.neutralizePlanB=true; G.faith.nextFightBuffs.oppMalus={adaptability:-25}; G.lastMsg="Succès : Le transfuge a livré tous les secrets. L\u2019adversaire n\u2019aura aucune adaptation."; }
-      else { G.lastMsg="Échec : L\u2019information était fausse. 50k$ perdus pour rien."; }
-    }
+  chooseFaithEvent(i){
+    const ev=G.faith.currentEvent; if(!ev) return;
+    const c=ev.choices[i]; if(!c) return;
+    if(c.cost && (G.f.earnings||0)<c.cost){ G.lastMsg="Fonds insuffisants ("+c.cost+"k$)."; render(); return; }
+    if(c.cost) G.f.earnings-=c.cost;
+    applyDeltas(G.f,c.d);
+    if(!G.faith.seenEvents) G.faith.seenEvents=[];
+    G.faith.seenEvents.push(ev.id);
+    G.faith.currentEvent=null;
+    G.lastMsg="Événement résolu : "+ev.title;
     G.faith.step=2; G.screen='faith_hub'; save(); render();
   },
   faithFight(){
@@ -3093,7 +3254,7 @@ const CL={
     G.screen='hub'; save(); render(); },
   acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
-  nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; G.screen='hub'; save(); render(); },
+  nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.screen='legacy'; save(); render(); },
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
@@ -3238,7 +3399,9 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
 const ARENA_THEMES=[
   {id:'classic',name:'Toile Noire (Classique)',floorColors:['#1c1710','#241d14'],railColor:'#4a3c1f',padColor:'#5C4B2E'},
   {id:'pride',name:'Toile Blanche & Bleue (Héritage)',floorColors:['#DCE2EB','#FFFFFF'],railColor:'#1A4D8F',padColor:'#B22222'},
-  {id:'gold',name:'Bâche Royale (Prestige)',floorColors:['#3A2C10','#D4AF37'],railColor:'#FFFFFF',padColor:'#000000'}
+  {id:'gold',name:'Bâche Royale (Prestige)',floorColors:['#E6B93A','#8A6A1E'],railColor:'#241D13',padColor:'#14100B'},
+  {id:'neon',name:'Néons Cyberpunk',floorColors:['#0d0221','#26045c'],railColor:'#ff003c',padColor:'#00f0ff'},
+  {id:'underground',name:'Béton Clandestin',floorColors:['#2a2a2a','#1a1a1a'],railColor:'#555555',padColor:'#000000'}
 ];
 function setArenaCosmeticTheme(themeId){ G.arenaCosmetic=themeId; save(); }
 function getArenaTheme(){ return ARENA_THEMES.find(t=>t.id===(G.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }
@@ -3311,7 +3474,7 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
   ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
   const rnd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
-  let label = grounded?'SOL':'DEBOUT';
+  let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
   if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
   ctx.fillText(A.done?label:('ROUND '+rnd+' · '+label), W/2, 20);
   if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }

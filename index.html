@@ -18,7 +18,7 @@
 html,body{margin:0;padding:0;background:var(--bg);overscroll-behavior-y:none}
 body{color:var(--text);font-family:'Fraunces',Georgia,serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
  /* dégradé rouge -> jaune, sombre et moody (pas un fond clair délavé) */
- background:linear-gradient(135deg,#3A1210 0%,#1A0E08 35%,#241A08 65%,#3A2A0C 100%);
+ background:linear-gradient(135deg,#661814 0%,#2A120A 35%,#34220A 65%,#66460F 100%);
  background-attachment:fixed;transition:background .2s,color .2s;position:relative;min-height:100vh}
 /* grain fin résiduel — discret, le Glass fait le gros du travail visuel */
 body::after{
@@ -99,6 +99,10 @@ h2.disp{font-size:24px;margin-bottom:12px}
 button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;font-size:16px;letter-spacing:.05em}
 .btn{display:block;width:100%;text-align:center;background:transparent;color:var(--text);border:1px solid var(--line);padding:14px;margin:9px 0;text-transform:uppercase;font-weight:500;transition:all .1s}
 .btn:hover,.btn:active{background:var(--text);color:var(--bg)}
+.btn.primary,.btn.gold{position:relative;overflow:hidden;-webkit-backdrop-filter:blur(44px) saturate(220%) brightness(1.12);backdrop-filter:blur(44px) saturate(220%) brightness(1.12);
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -1px 0 rgba(0,0,0,.35) inset,0 20px 45px -16px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.5)}
+.btn.primary::before,.btn.gold::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:linear-gradient(125deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.08) 22%,transparent 45%),linear-gradient(15deg,transparent 60%,rgba(255,255,255,.06) 100%)}
 .btn.primary{background:var(--blood);color:#fff;border-color:var(--blood)}
 .btn.primary:hover{background:#fff;color:var(--blood);border-color:var(--blood)}
 .btn.gold{background:var(--gold);color:#241c12;border-color:var(--gold)}
