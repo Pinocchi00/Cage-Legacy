@@ -225,6 +225,22 @@ function neutralizeWeightGap(A,B){
   if(A.phys) A.phys.reach=avgReach;
   if(B.phys) B.phys.reach=avgReach;
 }
+// Export/import d'une légende sous forme de code texte copiable — permet à un
+// ami de partager une légende de SON Panthéon (stocké uniquement sur son
+// appareil, il n'y a pas de serveur) pour l'affronter dans Vs Ami. Le code
+// encode exactement la même forme d'objet que les entrées du Panthéon
+// (voir enshrine() dans state.js), donc reconstructLegend() les traite de
+// façon identique, qu'elles viennent de ton Panthéon ou d'un import.
+function encodeLegendCode(l){
+  try{ return btoa(unescape(encodeURIComponent(JSON.stringify(l)))); }catch(e){ return null; }
+}
+function decodeLegendCode(code){
+  try{
+    const obj=JSON.parse(decodeURIComponent(escape(atob((code||'').trim()))));
+    if(!obj || !obj.name || !obj.attrs) return null;
+    return obj;
+  }catch(e){ return null; }
+}
 function reconstructLegend(l){
   const f=makeFighter({gender:'H',div:l.div||'H-welter',style:l.styleKey||'mma',first:l.name,age:l.age||35});
   if(l.attrs) f.attrs=JSON.parse(JSON.stringify(l.attrs));
@@ -343,16 +359,28 @@ function scr_allstars(){
 /* ==== [ANCRE: ECRAN_VS_FRIEND] ==== */
 function scr_vs_friend(){
   const list=loadHOF();
-  if(list.length<2){
-    return `<div class="scr center intro"><div class="eyebrow gold">Défi Multijoueur</div><h2 class="disp">Panthéon incomplet</h2><p class="lede">Il te faut au moins 2 légendes au Panthéon pour organiser un défi.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
+  const imported=G.importedFriendLegend;
+  if(list.length===0){
+    return `<div class="scr center intro"><div class="eyebrow gold">Défi Multijoueur</div><h2 class="disp">Panthéon vide</h2><p class="lede">${imported?`La légende de ${esc(imported.name)} a bien été importée, mais il te faut aussi au moins 1 légende dans TON propre Panthéon pour te représenter.`:'Il te faut au moins 1 légende au Panthéon pour défier un ami.'}</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
+  }
+  if(list.length<2 && !imported){
+    return `<div class="scr center intro">
+      <div class="eyebrow gold">Défi Multijoueur</div>
+      <h2 class="disp">Combattant d\u2019un ami</h2>
+      <p class="lede small">Colle ici le code que ton ami t\u2019a envoyé (généré depuis son Panthéon, bouton "Exporter"). Sans code, il te faut au moins 2 légendes dans ton propre Panthéon.</p>
+      <textarea id="friend_code" placeholder="Colle le code ici..." style="width:100%;min-height:80px;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px;font-family:'JetBrains Mono';font-size:12px;margin-top:16px"></textarea>
+      <button class="btn primary mt" onclick="CL.importFriendCode()">IMPORTER LE CODE</button>
+      <button class="btn ghost mt" onclick="CL.leaveSandbox()">Retour à la salle</button>
+    </div>`;
   }
   let selA=G.vsFriendSelA!==undefined?G.vsFriendSelA:0;
   let selB=G.vsFriendSelB!==undefined?G.vsFriendSelB:(list.length>1?1:0);
-  const lA=list[selA], lB=list[selB];
+  const lA=list[selA];
+  const lB=imported||list[selB];
   return `<div class="scr center intro">
     <div class="eyebrow gold">Défi Multijoueur</div>
     <h2 class="disp">Combattant d\u2019un ami</h2>
-    <p class="lede small">Choisis ta légende, puis choisis la légende de ton Panthéon que ton ami incarne. Le combat se déroule dans ta catégorie de poids.</p>
+    <p class="lede small">Choisis ta légende. ${imported?'La légende de ton ami a été importée.':'Choisis la légende de ton Panthéon que ton ami incarne, ou importe un vrai code d\u2019ami ci-dessous.'} Le combat se déroule dans ta catégorie de poids.</p>
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:32px 0;gap:16px">
       <div style="flex:1;text-align:center">
          <div class="eyebrow mb">Ta légende</div>
@@ -363,13 +391,19 @@ function scr_vs_friend(){
       </div>
       <div class="disp gold" style="font-size:24px;padding-top:20px">VS</div>
       <div style="flex:1;text-align:center">
-         <div class="eyebrow mb">Légende de l\u2019ami</div>
+         <div class="eyebrow mb">${imported?'Légende importée de l\u2019ami':'Légende de l\u2019ami'}</div>
          <div class="hero-name" style="font-size:22px;color:var(--sage)">${esc(lB.name)}</div>
          <div class="muted small mb">${lB.style} · OVR ${lB.overall||'?'}</div>
-         <div><button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,-1)">◀</button>
-         <button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,1)">▶</button></div>
+         ${imported?`<button class="btn ghost" style="width:auto;padding:8px" onclick="CL.clearImportedFriend()">Retirer l\u2019import</button>`:
+           `<div><button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,-1)">◀</button>
+           <button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,1)">▶</button></div>`}
       </div>
     </div>
+    ${!imported?`<div class="glass card mb" style="background:var(--panel2);padding:12px;text-align:left">
+      <div class="eyebrow mb">Importer une vraie légende d\u2019ami</div>
+      <textarea id="friend_code" placeholder="Colle le code de ton ami ici..." style="width:100%;min-height:60px;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px"></textarea>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.importFriendCode()">Importer</button>
+    </div>`:''}
     <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.launchVsFriend()">LANCER LE DÉFI</button>
     <button class="btn ghost mt" onclick="CL.leaveSandbox()">Retour à la salle</button>
   </div>`;
@@ -2167,6 +2201,15 @@ function scr_hof(){
    ${divisions.length>1?`<div class="eyebrow mb mt">Divisions</div><div class="tagrow mb"><span class="tag2 ${!filt.divName?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','')">Toutes</span>${divisions.map(d=>`<span class="tag2 ${filt.divName===d?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','${esc(d)}')">${esc(d)}</span>`).join('')}</div>`:''}
    <div class="eyebrow mb mt">Défenses</div><div class="tagrow mb"><span class="tag2 ${!filt.minDefenses?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',0)">Toutes</span><span class="tag2 ${filt.minDefenses>=2?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',2)">2+ défenses</span></div>
    </div>`:''}
+   ${G.exportedCode?`<div class="card glass mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)">
+     <div class="eyebrow mb" style="color:var(--gold)">Lien de ${esc(G.exportedName||'')} — envoie-le à ton ami</div>
+     ${G.exportedLink?`<input readonly value="${esc(G.exportedLink)}" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px" onclick="this.select()">
+     <button class="btn primary mt" style="width:auto;padding:6px 14px" onclick="CL.copyExportedLink()">Copier le lien</button>`:''}
+     <details class="mt"><summary class="muted small" style="cursor:pointer">Le lien ne marche pas ? Utiliser le code à la place</summary>
+       <textarea readonly style="width:100%;min-height:70px;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px;resize:none;margin-top:8px" onclick="this.select()">${G.exportedCode}</textarea>
+     </details>
+     <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
+   </div>`:''}
    ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:var(--panel2);padding:16px">
       <div class="hero-name" style="font-size:20px">${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
@@ -2175,7 +2218,8 @@ function scr_hof(){
       </div>
       ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow" style="margin-bottom:8px">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
       ${f.biggestRival?`<div class="mono small" style="color:var(--blood);margin-bottom:8px">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} (${f.biggestRival.count} confrontations)</div>`:''}
-      <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div></div>`).join(''):
+      <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button></div>`).join(''):
       '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}
    <div class="tagrow mb">
      <button class="btn ghost" style="width:auto;padding:8px 12px" onclick="CL.go('codex')">Codex des compétences</button>
@@ -2794,6 +2838,21 @@ const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
+  exportLegend(id){
+    const l=loadHOF().find(x=>x.id===id); if(!l) return;
+    G.exportedCode=encodeLegendCode(l); G.exportedName=l.name;
+    try{ G.exportedLink=location.origin+location.pathname+'?legend='+encodeURIComponent(G.exportedCode); }catch(e){ G.exportedLink=null; }
+    render();
+  },
+  copyExportedLink(){
+    if(!G.exportedLink) return;
+    try{
+      navigator.clipboard.writeText(G.exportedLink);
+      G.lastMsg="Lien copié !";
+    }catch(e){ /* le champ texte reste sélectionnable en secours */ }
+    render();
+  },
+  clearExportedCode(){ G.exportedCode=null; G.exportedName=null; G.exportedLink=null; render(); },
   purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
   setArenaTheme(themeId){ setArenaCosmeticTheme(themeId); render(); },
   leaveSandbox(){ if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; } G.fantasyActive=false; G.vsFriendActive=false; CL.go('legends'); },
@@ -2840,10 +2899,18 @@ const CL={
      else { let n=(G.vsFriendSelB!==undefined?G.vsFriendSelB:1)+dir; if(n<0)n=max; if(n>max)n=0; G.vsFriendSelB=n; }
      render();
   },
+  importFriendCode(){
+     const el=document.getElementById('friend_code');
+     const code=el&&el.value;
+     const legend=decodeLegendCode(code);
+     if(!legend){ G.lastMsg="Code invalide ou corrompu."; render(); return; }
+     G.importedFriendLegend=legend; render();
+  },
+  clearImportedFriend(){ G.importedFriendLegend=null; render(); },
   launchVsFriend(){
      const list=loadHOF();
      const lA=list[G.vsFriendSelA||0];
-     const lB=list[G.vsFriendSelB!==undefined?G.vsFriendSelB:1];
+     const lB=G.importedFriendLegend||list[G.vsFriendSelB!==undefined?G.vsFriendSelB:1];
      const A=reconstructLegend(lA);
      const B=reconstructLegend(lB);
      B.champion='monde'; B.flag=B.flag||'🏴\u200d☠️';

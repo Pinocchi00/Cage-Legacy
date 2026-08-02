@@ -28,4 +28,18 @@ function validateSkills(){
 }
 validateSkills();
 /* ==== [FIN ANCRE] ==== */
-if(document.getElementById('app')){ G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme('dark'); render(); }
+if(document.getElementById('app')){
+  G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}};
+  setTheme('dark');
+  try{
+    const params=new URLSearchParams(location.search);
+    const code=params.get('legend');
+    if(code){
+      const legend=decodeLegendCode(code);
+      if(legend){ G.importedFriendLegend=legend; G.screen='vs_friend'; }
+      // Nettoie l'URL pour éviter de ré-importer en boucle à chaque rechargement/partage accidentel
+      history.replaceState(null,'',location.pathname);
+    }
+  }catch(e){ /* lien invalide ou navigateur trop ancien — le joueur atterrit simplement sur le titre */ }
+  render();
+}
