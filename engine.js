@@ -56,6 +56,303 @@ const allDivisions=()=>DIVISIONS.H.concat(DIVISIONS.F);
 const divById=id=>allDivisions().find(d=>d.id===id);
 
 /* biais de style : quels attributs sont naturellement plus hauts au départ */
+/* ==== [ANCRE: LOT1_ECOSYSTEME] — écosystème vivant & méta-narratif.
+   Note d'intégration : les buffs d'ère et de synergie s'appliquent aux
+   ATTRIBUTS BRUTS (f.attrs), pas aux canaux calculés par eff() — 'kick',
+   'footSpeed', 'durability', 'composure' n'existent QUE comme attributs
+   bruts (repliés dans striking/footwork/chin/fightIQ par eff()), donc un
+   buff sur ces clés appliqué à un objet de canaux eff() serait silencieusement
+   ignoré. Ce choix mime exactement comment grantSkill() applique déjà fx. ==== */
+const MMA_ERAS=[
+  {id:'era_calf',name:"L\u2019Ère du Calf-Kick",buff:{kick:12},duration:4},
+  {id:'era_daghestan',name:"L\u2019Âge d\u2019Or de la Lutte Daghestanaise",buff:{takedown:15,topControl:10},duration:5},
+  {id:'era_boxing',name:"Le Renouveau du Noble Art",buff:{handSpeed:10,footSpeed:15},duration:4},
+  {id:'era_bjj',name:"La Menace des Leglocks",buff:{submission:15,guardWork:10},duration:4},
+  {id:'era_clinch',name:"L\u2019Ère de la Boxe Sale",buff:{clinchStr:15,chin:10},duration:5},
+  {id:'era_karate',name:"L\u2019Avènement du Style Fuyant",buff:{footSpeed:15,fightIQ:10},duration:4}
+];
+function checkAndApplyEra(){
+  if(!G.currentEra){ if(rnd()<0.15){ const era=pick(MMA_ERAS); G.currentEra={...era,startYear:(G.season&&G.season.year)||1}; } }
+  else { if(((G.season&&G.season.year)||1)-G.currentEra.startYear>=G.currentEra.duration){ G.currentEra=null; } }
+}
+// Appelé une fois par combat sur chaque combattant (attributs bruts, temporaire —
+// à restaurer après simulateFight comme le fait déjà le mécanisme meta05/malus).
+function eraBuffSnapshot(f){
+  const saved={};
+  if(G.currentEra){ for(const k in G.currentEra.buff){ if(f.attrs[k]!==undefined){
+    saved[k]=f.attrs[k]; f.attrs[k]=clamp(Math.round(f.attrs[k]*(1+G.currentEra.buff[k]/100)),1,100); } } }
+  return saved;
+}
+function restoreSnapshot(f,saved){ for(const k in saved){ f.attrs[k]=saved[k]; } }
+
+function generateNPCNews(){
+  if(!G.divisionNews) G.divisionNews=[];
+  const top15=G.roster.filter(o=>!o.champion).slice(0,15);
+  if(top15.length<2) return;
+  if(rnd()<0.12){
+    const p1=pick(top15); let p2=pick(top15); while(p1.id===p2.id) p2=pick(top15);
+    const events=[
+      `Altercation en coulisses entre ${p1.name} et ${p2.name}. La tension monte.`,
+      `${p1.name} a subi une grave blessure à l\u2019entraînement.`,
+      `${p2.name} évoque une montée de catégorie imminente.`,
+      `${p1.name} provoque publiquement ${p2.name} sur les réseaux sociaux.`
+    ];
+    G.divisionNews.unshift({year:(G.season&&G.season.year)||1,text:pick(events)});
+    if(G.divisionNews.length>20) G.divisionNews.length=20;
+  }
+}
+
+// Mémoire tactique de rematch : boost temporaire ciblé sur l'adversaire (attributs
+// bruts, restaurer après le combat) selon la méthode de la victoire du joueur au
+// combat précédent contre ce même adversaire précis.
+function applyTacticalMemory(npc,player){
+  const saved={};
+  if(!player.history) return saved;
+  const pastFights=player.history.filter(h=>h.oppId===npc.id);
+  if(pastFights.length>=1){
+    const lastFight=pastFights[pastFights.length-1];
+    if(lastFight.res==='win'){
+      const keys=(lastFight.method.startsWith('Soum'))?['tdd','fightIQ']:(lastFight.method.startsWith('KO')?['footSpeed','chin']:[]);
+      keys.forEach(k=>{ if(npc.attrs[k]!==undefined){ saved[k]=npc.attrs[k]; npc.attrs[k]=clamp(npc.attrs[k]+(k==='fightIQ'?5:15),1,100); } });
+    }
+  }
+  return saved;
+}
+
+const SPONSOR_OBJECTIVES=[
+  {id:'td_3',text:"+15 000$ si 3 takedowns réussis",reward:15,check:(st)=>st.A.td>=3},
+  {id:'sig_50',text:"+20 000$ si plus de 50 frappes significatives",reward:20,check:(st)=>st.A.sig>=50},
+  {id:'ko_r1',text:"+30 000$ si victoire par KO au Round 1",reward:30,check:(st,res)=>res.method.startsWith('KO')&&res.round===1&&res.winner==='A'},
+  {id:'no_td',text:"+10 000$ si 0 takedown subi",reward:10,check:(st)=>st.B.td===0}
+];
+function generateSponsorObjective(f){ if(f.org>0 && rnd()<0.25){ G.activeSponsor=pick(SPONSOR_OBJECTIVES); } else { G.activeSponsor=null; } }
+function evaluateSponsor(res){
+  if(G.activeSponsor && G.activeSponsor.check(res.stats,res)){
+    G.f.earnings=(G.f.earnings||0)+G.activeSponsor.reward;
+    G.lastMsg=`Objectif sponsor validé : +${G.activeSponsor.reward}k$.`;
+  }
+  G.activeSponsor=null;
+}
+
+function attemptChampChamp(targetDivId){
+  if(!G.f.champion) return {success:false,msg:"Vous devez déjà posséder une ceinture."};
+  G.f.champChampTarget=targetDivId;
+  G.f.champChampDefenses={[G.f.div]:G.f.defenses,[targetDivId]:0};
+  return {success:true,msg:`Objectif Champ-Champ : vous visez la catégorie ${targetDivId}.`};
+}
+function resolveChampChampDefense(foughtDivId,win){
+  if(!G.f.champChampTarget) return null;
+  const neglectedDiv=foughtDivId===G.f.div?G.f.champChampTarget:G.f.div;
+  if(win){
+    if(!G.f.champChampDefenses) G.f.champChampDefenses={};
+    G.f.champChampDefenses[foughtDivId]=(G.f.champChampDefenses[foughtDivId]||0)+1;
+    G.f.champChampInactivity=0;
+    return null;
+  }
+  G.f.champChampInactivity=(G.f.champChampInactivity||0)+1;
+  if(G.f.champChampInactivity>=3){ G.f.champChampTarget=null; G.f.champChampInactivity=0;
+    return `Destitution ! Vous avez perdu votre statut dans la division ${neglectedDiv} pour inactivité.`; }
+  return null;
+}
+
+function setPersonality(alignment){
+  G.f.personality=alignment;
+  if(alignment==='villain'){ G.f.hypeBonus=1.3; G.f.morale=clamp(G.f.morale-10,0,100); }
+  else if(alignment==='humble'){ G.f.hypeBonus=1.0; G.f.morale=clamp(G.f.morale+15,0,100); G.f.attrs.focus=clamp((G.f.attrs.focus||50)+10,1,100); }
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT2_MODES] — modes de jeu alternatifs ==== */
+const SCENARIOS=[
+  {id:'scen_sauveur',name:"Le Sauveur de la Ligue",
+    desc:"Vétéran de 35 ans sur une série de 3 défaites doit remporter le titre avant sa retraite forcée.",
+    init:(f)=>{ f.age=35; f.streak=-3; f.org=3; f.W=15; f.L=8; f.stage='pro'; },
+    checkWin:(f)=>!!f.champion, checkLoss:(f)=>f.retired||f.streak<=-5},
+  {id:'scen_undersized',name:"L\u2019Undersized Heavyweight",
+    desc:"Poids Moyen tentant la catégorie Poids Lourds.",
+    init:(f)=>{ f.div='H-heavy'; f.phys.height=184; f.phys.reach=189; f.org=2; },
+    checkWin:(f)=>f.org>=5 && !!f.champion, checkLoss:(f)=>f.retired},
+  {id:'scen_invasion',name:"L\u2019Invasion de l\u2019Est",
+    desc:"Sambo/Lutte, champion mondial sans concéder un seul takedown.",
+    init:(f)=>{ f.style='sambo'; f.org=4; f.W=10; f.L=0; f.tdConceded=0; },
+    checkWin:(f)=>f.org>=5 && !!f.champion && f.tdConceded===0, checkLoss:(f)=>f.tdConceded>0||f.retired}
+];
+function checkScenarioState(res){
+  if(!G.activeScenario) return;
+  const scen=SCENARIOS.find(s=>s.id===G.activeScenario);
+  if(!scen) return;
+  if(scen.id==='scen_invasion' && res && res.stats && res.stats.B.td>0){ G.f.tdConceded=(G.f.tdConceded||0)+res.stats.B.td; }
+  if(scen.checkWin(G.f)){ G.lastMsg=`Scénario accompli : ${scen.name} !`; G.activeScenario=null; }
+  else if(scen.checkLoss(G.f)){ G.lastMsg=`Échec du scénario : ${scen.name}. Retraite forcée.`; G.f.retired=true; G.activeScenario=null; }
+}
+function checkIronManDeath(res,injury){
+  if(!G.ironMan) return;
+  const isLoss=res && res.winner!=='A' && res.winner!=='D';
+  const isGraveInjury=injury && injury.fights>=3;
+  if(isLoss||isGraveInjury){ G.f.retired=true; G.lastMsg="MODE IRON MAN : défaite ou blessure grave. Fin définitive de la carrière."; }
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT3_TAGS_PHYSIQUES] — exploitation des tags physiques rares ==== */
+function getExclusiveTactics(f){
+  const tactics=[]; const tags=(f.phys&&f.phys.tags)||[];
+  if(tags.includes('allonge hors-norme')||tags.includes('allonge démesurée')){
+    tactics.push({id:'ex_reach',lbl:'Sniper Hors-Portée',desc:'Exploite une envergure anormale pour détruire à distance en restant intouchable.',m:{str:1.3,def:1.4,ko:0.8,tdd:1.2}});
+  }
+  if(tags.includes('densité rare (type Ngannou)')){
+    tactics.push({id:'ex_dense',lbl:'Destruction Massive',desc:'Avance avec une masse inarrêtable. Sacrifice total de la mobilité pour la létalité.',m:{ko:1.6,tdd:1.3,def:0.6,str:0.8}});
+  }
+  return tactics;
+}
+function getExclusiveTraining(f){
+  const trainings=[]; const tags=(f.phys&&f.phys.tags)||[];
+  if(tags.includes('explosivité rare (type Cormier)')){
+    trainings.push({t:['all'],label:'Surcharge Pliométrique',hint:'Affûter les fibres blanches pour des entrées en lutte terrifiantes.',d:[['explosiveness',4],['takedown',3],['form',-3]]});
+  }
+  if(tags.includes('gabarit hors-norme pour la division')){
+    trainings.push({t:['all'],label:'Cutting de la Mort',hint:'Conditionnement drastique pour faire le poids malgré une ossature gigantesque.',d:[['cardio',3],['recovery',3],['durability',-2],['morale',-6]]});
+  }
+  return trainings;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT4_MUE_MARTIALE] — reconversion de style ==== */
+function checkMueMartialeEligibility(f){
+  const isBlocked=f.age>=30 && (f.orgWins||0)>=10 && !canPromote(f);
+  const isLosing=(f.streak||0)<=-3;
+  return isLosing||isBlocked;
+}
+function triggerMueMartiale(f,newStyleId){
+  if(!checkMueMartialeEligibility(f)) return {success:false,msg:"Les conditions pour une Mue Martiale ne sont pas réunies."};
+  if(!STYLES[newStyleId]) return {success:false,msg:"Style martial invalide."};
+  f.style=newStyleId; f._drought=0;
+  G.lastMsg=`Mue Martiale effectuée avec succès. Vous abordez désormais l\u2019octogone dans un style différent.`;
+  return {success:true};
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT5_SYNERGIES] — synergies de compétences (mêmes règles que le
+   Lot 1 : clés d'attributs bruts, à vérifier contre le vrai catalogue avant
+   usage — les IDs ci-dessous sont indicatifs et non confirmés) ==== */
+const SKILL_SYNERGIES=[
+  {requires:['boxer28','bjj29'],label:'Prédateur Hybride',desc:'La terreur debout ouvre des opportunités terrifiantes au sol.',effect:{power:6,submission:6,fightIQ:3}},
+  {requires:['wrestler32','muayThai34'],label:'Forteresse Vivante',desc:'Une fondation inébranlable couplée à une résistance à la douleur absolue.',effect:{tdd:8,durability:8,heart:4}},
+  {requires:['karate38','kickboxer31'],label:'Ombre Mortelle',desc:'Des déplacements imperceptibles couplés à des frappes indétectables.',effect:{footSpeed:10,fightIQ:5,composure:5}}
+];
+function getActiveSynergies(f){ if(!f.skills) return []; return SKILL_SYNERGIES.filter(syn=>syn.requires.every(id=>f.skills.includes(id))); }
+// Appliqué aux attributs bruts au moment de la création du combattant ou d'un
+// nouveau skill (permanent, contrairement aux buffs temporaires ci-dessus).
+function applySynergyBuffs(f){
+  if(!f._appliedSynergies) f._appliedSynergies=[];
+  getActiveSynergies(f).forEach(syn=>{
+    const key=syn.requires.join('+');
+    if(f._appliedSynergies.includes(key)) return; // déjà appliquée cette carrière, jamais deux fois
+    f._appliedSynergies.push(key);
+    for(const k in syn.effect){ if(f.attrs[k]!==undefined){ f.attrs[k]=clamp(f.attrs[k]+syn.effect[k],1,100); } }
+  });
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT6_IA_ADAPTATIVE] — IA adaptative en rematch/trilogie. Les
+   clés de TACTICS[].m (td,tdd,str,ko,sub,gnp,ctrl,def) et leur mapping vers
+   les canaux eff() (takedown,tdd,striking,power,submission,ground,topControl,
+   footwork+fightIQ) sont vérifiées EXACTES contre le vrai code — c'est le même
+   mapping que celui déjà utilisé par le plan tactique du joueur dans
+   simulateFight(). Contrairement aux lots 1/5, celui-ci s'applique donc bien
+   aux canaux calculés (car c'est un multiplicateur temporaire de combat, pas
+   un buff permanent d'attribut). ==== */
+function getAdaptiveNPCTactics(npc,player){
+  if(!player.history) return null;
+  const encounters=player.history.filter(h=>h.oppId===npc.id);
+  if(encounters.length<2) return null;
+  const lastEncounter=encounters[encounters.length-1];
+  const npcStyleTactics=TACTICS[npc.style]||TACTICS.mma;
+  if(lastEncounter.res==='win'){
+    const method=lastEncounter.method||'';
+    if(method.startsWith('Soum')||method.includes('sol')||method.includes('Décision')){
+      const antiLutteTactic=npcStyleTactics.find(t=>t.m&&(t.m.tdd>1.1||t.m.def>1.1));
+      if(antiLutteTactic) return antiLutteTactic;
+    } else if(method.startsWith('KO')){
+      const defensiveTactic=npcStyleTactics.find(t=>t.m&&(t.m.def>1.2||t.m.td>1.1));
+      if(defensiveTactic) return defensiveTactic;
+    }
+  } else if(lastEncounter.res==='loss'){
+    const method=lastEncounter.method||'';
+    if(method.startsWith('KO')){
+      const aggressiveTactic=npcStyleTactics.find(t=>t.m&&t.m.str>1.1);
+      if(aggressiveTactic) return aggressiveTactic;
+    }
+  }
+  return null;
+}
+// Applique le plan adaptatif directement aux canaux eff() de l'adversaire,
+// juste avant simulateFight (même mapping que le plan tactique du joueur).
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT7_TENSION_ECO] — tension économique de l'entraînement.
+   G.fight.malus (attributs bruts, restauré après combat) n'était appliqué
+   QU'AU JOUEUR jusqu'ici — jamais à l'adversaire. G.fight.oppMalus est un
+   nouveau champ, l'application à opp.attrs + sa restauration doivent être
+   ajoutées dans resolveFight() (ui.js), au même endroit que G.fight.malus. ==== */
+const CAMP_TIERS=[
+  {id:'gratuit',name:'Camp local (Gratuit)',cost:0,risk:0.05,buff:null,oppDebuff:null},
+  {id:'premium',name:'Camp Premium',cost:15,risk:0.0,buff:{morale:5,form:5},oppDebuff:null},
+  {id:'sparring',name:'Sparring Sur-Mesure',cost:35,risk:0.0,buff:{form:5},oppDebuff:{adaptability:-15,fightIQ:-10}}
+];
+function executeCampTier(f,tierId,trainingOpt){
+  const tier=CAMP_TIERS.find(t=>t.id===tierId);
+  if(!tier) return {success:false,msg:"Tier invalide."};
+  if((f.earnings||0)<tier.cost) return {success:false,msg:"Fonds insuffisants pour ce camp."};
+  f.earnings-=tier.cost;
+  if(tier.risk>0 && rnd()<tier.risk){
+    const inj=rollInjury(); f.injury={name:inj.name,left:inj.fights};
+    f.form=clamp(f.form-15,0,100); f.morale=clamp(f.morale-10,0,100);
+    return {success:true,injured:true,msg:"Blessure pendant le camp !"};
+  }
+  const appliedDeltas=applyDeltas(f,trainingOpt.d);
+  if(tier.buff){ if(tier.buff.morale) f.morale=clamp(f.morale+tier.buff.morale,0,100); if(tier.buff.form) f.form=clamp(f.form+tier.buff.form,0,100); }
+  if(tier.oppDebuff){ if(!G.fight.oppMalus) G.fight.oppMalus={}; for(const key in tier.oppDebuff){ G.fight.oppMalus[key]=tier.oppDebuff[key]; } }
+  return {success:true,injured:false,deltas:appliedDeltas};
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT8_RIVALITE_HYPE] — rivalités & prime hype ==== */
+function getRivalryPurseMultiplier(f,opp){ if(f.rivalId===opp.id){ return +(1.5+rnd()*0.5).toFixed(2); } return 1.0; }
+function triggerRivalPressConference(f,opp){
+  if(f.rivalId!==opp.id||f._rivalryPressDone) return null;
+  f._rivalryPressDone=true;
+  const moraleGain=rnd()<0.5?15:-15;
+  f.morale=clamp(f.morale+moraleGain,0,100);
+  return {title:"Tension maximale en conférence",text:`La conférence de presse contre ${opp.name} a failli tourner à la bagarre générale. L\u2019animosité est à son comble.`,moraleEffect:moraleGain};
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT9_CODEX] — codex interactif des compétences (logique pure —
+   la construction de l'écran UI va dans ui.js) ==== */
+const CODEX_KEY='cage-legacy-codex';
+function loadCodex(){ try{ return JSON.parse(localStorage.getItem(CODEX_KEY))||[]; }catch(e){ return []; } }
+function saveToCodex(skillId){
+  const unlocked=loadCodex();
+  if(!unlocked.includes(skillId)){ unlocked.push(skillId); try{ localStorage.setItem(CODEX_KEY,JSON.stringify(unlocked)); }catch(e){} }
+}
+function syncPlayerSkillsToCodex(f){ if(!f||!f.skills) return; f.skills.forEach(skillId=>saveToCodex(skillId)); }
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT10_SCOUTING] — outils de scouting/analyse (logique — le
+   rendu HTML va dans ui.js) ==== */
+function getScoutingReport(f,opp){
+  if(f.stage!=='pro') return null;
+  const report={chinWarning:false,potentialGapText:null};
+  if(opp.koLoss>=1||opp.attrs.chin<65||opp.attrs.durability<65){ report.chinWarning=true; }
+  const gap=opp.potential-opp.overall;
+  if(gap>=15) report.potentialGapText="Diamant brut (progression fulgurante attendue)";
+  else if(gap>=6) report.potentialGapText="En pleine évolution (marge de progression solide)";
+  else if(gap<=0) report.potentialGapText="Plafond atteint (potentiel maximisé)";
+  else report.potentialGapText="Progression marginale restante";
+  return report;
+}
+/* ==== [FIN ANCRE] ==== */
+
 const STYLES={
   boxer:{label:'Boxe',b:{jab:8,cross:9,hook:8,handSpeed:8,footSpeed:5,power:4,tdd:3},grap:0.15},
   kickboxer:{label:'Kickboxing',b:{kick:11,cross:8,clinchStr:7,footSpeed:6,power:5,tdd:4},grap:0.2},
@@ -227,8 +524,8 @@ const STYLE_PROFILE={
   mma:{sigVol:1.00,koMod:1.00,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
 };
 /* ==== [FIN ANCRE] ==== */
-function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
-  const profA=STYLE_PROFILE[A.style]||STYLE_PROFILE.mma, profB=STYLE_PROFILE[B.style]||STYLE_PROFILE.mma;
+function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(B);
+  const profA=A._styleProfileOverride||STYLE_PROFILE[A.style]||STYLE_PROFILE.mma, profB=B._styleProfileOverride||STYLE_PROFILE[B.style]||STYLE_PROFILE.mma;
   const wf=weightFactor(A);
   const koWeightMult=1+(wf-0.5)*0.5;
   const noiseWeightMult=1+(wf-0.5)*0.4;
@@ -250,6 +547,23 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     if(plan.def){ a.footwork*=plan.def; a.fightIQ*=plan.def; }
     for(const k in a){ if(typeof a[k]==='number') a[k]=clamp(a[k],1,150); }
   }
+  // ==== [ANCRE: PLAN_TACTIQUE_B] — même mécanisme que ci-dessus, côté B cette
+  // fois. Sert à l'IA adaptative en rematch (getAdaptiveNPCTactics) qui, faute
+  // de ce paramètre, ne pouvait modifier que des canaux jamais lus (eff() étant
+  // recalculé en interne à chaque appel de simulateFight, un ajustement fait
+  // depuis l'extérieur n'avait aucun effet réel). ====
+  if(planB){
+    if(planB.td) b.takedown*=planB.td;
+    if(planB.tdd) b.tdd*=planB.tdd;
+    if(planB.str) b.striking*=planB.str;
+    if(planB.ko) b.power*=planB.ko;
+    if(planB.sub) b.submission*=planB.sub;
+    if(planB.gnp) b.ground*=planB.gnp;
+    if(planB.ctrl) b.topControl*=planB.ctrl;
+    if(planB.def){ b.footwork*=planB.def; b.fightIQ*=planB.def; }
+    for(const k in b){ if(typeof b[k]==='number') b[k]=clamp(b[k],1,150); }
+  }
+  // ==== [FIN ANCRE] ====
   const giA=myGi, giB=STYLES[B.style].grap; const rEdge=reachEdge(A,B);
   let sa=0,sb=0,dmgA=0,dmgB=0,finish=null; const log=[];
   // ==== [ANCRE: CHIN_TEMPORAIRE] — un round brutal fragilise le menton pour LE
@@ -280,88 +594,110 @@ function simulateFight(A,B,rounds=3,plan=null){ const a=eff(A),b=eff(B);
     // ==== [ANCRE: JUGES_10PT_SNAP] ====
     const _startSa=sa, _startSb=sb, _kdA0=st.A.kd, _kdB0=st.B.kd, _sigA0=st.A.sig, _sigB0=st.B.sig, _tdA0=st.A.td, _tdB0=st.B.td;
     // ==== [FIN ANCRE] ====
-    const outA=st.A.sig+st.A.tdAtt*0.6, outB=st.B.sig+st.B.tdAtt*0.6;
-    const fatA=clamp(((dmgA+outA*0.2)-a.cardio)*0.06,0,18), fatB=clamp(((dmgB+outB*0.2)-b.cardio)*0.06,0,18);
-    const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
-    if(attA>0.14)st.A.tdAtt+=Math.floor(attA*8); if(attB>0.14)st.B.tdAtt+=Math.floor(attB*8);
-    const tdA=attA>0.14?sigmoid((a.takedown-b.tdd)/15)*attA:0;
-    const tdB=attB>0.14?sigmoid((b.takedown-a.tdd)/15)*attB:0;
-    let grounded=false,topIsA=false; const gTop=Math.max(tdA,tdB);
-    if(gTop>0.10 && rnd()<clamp(gTop*1.5,0,0.85)){ grounded=true; topIsA=tdA>=tdB; if(topIsA)st.A.td++; else st.B.td++; }
-    else if(profA.guardPull && b.tdd>a.takedown && rnd()<profA.guardPull){ grounded=true; topIsA=false; } // BJJ (A) tire sa propre garde — pas de contrôle pour celui qui se retrouve en dessous
-    else if(profB.guardPull && a.tdd>b.takedown && rnd()<profB.guardPull){ grounded=true; topIsA=true; } // BJJ (B) tire sa propre garde
-    if(grounded){ const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
-      const topProf=topIsA?profA:profB, botProf=topIsA?profB:profA;
-      const control=clamp((top.topControl-bot.guard)*0.32,0,11);
-      const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45)*topProf.gnpDmg;
-      const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod;
-      const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35)*botProf.subMod;
-      const topPts=6+control*0.5+gnp*0.46+subTop*0.22; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.16+3;
-      if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=1;st.A.sig+=Math.round(gnp*0.4);} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=1;st.B.sig+=Math.round(gnp*0.4);}
-      const heartR=1-(bot.heart*0.0016);
-      const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/22,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod;
-      const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod;
-      const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod;
-      if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
-      else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
-      else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
-      // ==== journal granulaire (sol) — 4 sous-événements narratifs, aucun impact sur le calcul ci-dessus ====
-      for(let k=0;k<4;k++){
-        const isMe=(k===0)?(tdA>=tdB):topIsA;
-        momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
-        const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB;
-        const tgt=isMe?st.B:st.A;
+    // ==== [ANCRE: MICRO_SEQUENCES] — chaque round de 5 minutes est découpé en 6
+    // micro-séquences de 50 secondes. La phase (debout/clinch/sol) persiste
+    // d'une séquence à l'autre DANS le même round, mais repart toujours de
+    // 'debout' à la cloche — permet de vrais retournements de situation dans
+    // un même round (domination debout, takedown, puis sol, par exemple). ====
+    let currentPhase='debout', topIsA=false;
+    const cardioFactorA=(a.cardio<60)?0.09:0.06, cardioFactorB=(b.cardio<60)?0.09:0.06;
+    const roundPenalty=(r>=4)?1.3:1.0;
+    for(let k=0;k<6 && !finish;k++){
+      const outA=st.A.sig+st.A.tdAtt*0.6, outB=st.B.sig+st.B.tdAtt*0.6;
+      const fatA=clamp(((dmgA+outA*0.2)-a.cardio)*cardioFactorA*roundPenalty,0,28);
+      const fatB=clamp(((dmgB+outB*0.2)-b.cardio)*cardioFactorB*roundPenalty,0,28);
+
+      if(currentPhase==='sol'){
+        const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
+        const topProf=topIsA?profA:profB, botProf=topIsA?profB:profA;
+        const control=clamp((top.topControl-bot.guard)*0.32,0,11)*0.2;
+        const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45)*topProf.gnpDmg*0.2;
+        const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod*0.2;
+        const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35)*botProf.subMod*0.2;
+        const topPts=1.2+control*0.5+gnp*0.46+subTop*0.22; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.032+0.6;
+        if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=0.2;st.A.sig+=Math.round(gnp*0.4);} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=0.2;st.B.sig+=Math.round(gnp*0.4);}
+        const heartR=1-(bot.heart*0.0016);
+        const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.32;
+        const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4;
+        const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4;
+        if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
+        else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
+        else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
+        const isMe=topIsA; momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
+        const atk=isMe?A:B, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
         tgt.dmgBody+=RI(0,2); tgt.dmgHead+=RI(0,1);
-        let txtPool=k===0?[`Amenée au sol de ${atk.name}.`,`Takedown validé par ${atk.name}.`,`${atk.name} fauche les appuis adverses.`,`Projection nette de ${atk.name}.`]:[`${atk.name} consolide son contrôle.`,`${atk.name} maintient une lourde pression.`,`Lutte de position : ${atk.name} prend l\u2019avantage.`,`${atk.name} verrouille les hanches de son adversaire.`];
-        if(k!==0 && tgs.includes('GNP')) txtPool.push(`${atk.name} fait pleuvoir un lourd Ground & Pound.`);
-        if(k!==0 && tgs.includes('Soumission')) txtPool.push(`${atk.name} cherche l\u2019ouverture pour soumettre.`);
-        if(k===0 && tgs.includes('Judo')) txtPool.push(`${atk.name} fauche ${def.name} avec un balayage net.`);
-        if(plan && isMe){
-          if(plan.sub>1.2) txtPool.push(`${atk.name} priorise ouvertement la recherche de soumission.`);
-          else if(plan.ctrl>1.2) txtPool.push(`Fidèle à son plan, ${atk.name} consolide sans prendre de risque.`);
-          else if(plan.gnp>1.2) txtPool.push(`${atk.name} applique la consigne : frapper à tout prix au sol.`);
+        let txtPool=[`${atk.name} consolide son contrôle.`,`${atk.name} maintient une lourde pression.`,`Lutte de position : ${atk.name} prend l\u2019avantage.`,`${atk.name} verrouille les hanches de son adversaire.`];
+        if(tgs.includes('GNP')) txtPool.push(`${atk.name} fait pleuvoir un lourd Ground & Pound.`);
+        if(tgs.includes('Soumission')) txtPool.push(`${atk.name} cherche l\u2019ouverture pour soumettre.`);
+        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,6)}] `+getUniqueLog(txtPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
+          last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
+        else {
+          const evadeCh=clamp((bot.footwork+bot.fightIQ-topFat*0.5)/280,0.06,0.28);
+          if(rnd()<evadeCh){ if(rnd()<0.5){ topIsA=!topIsA; } else { currentPhase='debout'; } }
         }
-        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,4)}] `+getUniqueLog(txtPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
-      }
-      if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
-        last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
-    } else {
-      const offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
-      const offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
-      const noiseAmt=Math.round(18*noiseWeightMult); const pA=clamp(offA*0.42+RI(-noiseAmt,noiseAmt),0,70), pB=clamp(offB*0.42+RI(-noiseAmt,noiseAmt),0,70);
-      sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22,0,22);dmgB+=clamp(offA*0.22,0,22);
-      st.A.sig+=clamp(Math.round(pA*0.5),0,40); st.B.sig+=clamp(Math.round(pB*0.5),0,40);
-      const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016)*profA.koMod;
-      const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016)*profB.koMod;
-      const isKdA=rnd()<koA*1.5, isKdB=!isKdA&&rnd()<koB*1.5;
-      let kdSurvivedText=null;
-      if(isKdA){ st.A.kd++; if(rnd()<0.6){ finish={by:A,loser:B,method:'KO/TKO',round:r}; } else { kdSurvivedText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; } }
-      else if(isKdB){ st.B.kd++; if(rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } else { kdSurvivedText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; } }
-      if(kdSurvivedText){ momentum=clamp(momentum+(kdSurvivedText.by==='me'?25:-25),5,95);
-        log.push({r,phase:'debout',by:kdSurvivedText.by,text:`[04:30] ${kdSurvivedText.txt}`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}}); }
-      // ==== journal granulaire (debout) — 5 sous-événements narratifs, aucun impact sur le calcul ci-dessus ====
-      for(let k=0;k<5;k++){
-        const isMe=rnd()<(offA/(offA+offB+1));
-        momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
-        const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB;
-        const tgt=isMe?st.B:st.A;
-        const rDmg=rnd(); if(rDmg<0.4) tgt.dmgHead+=RI(1,4); else if(rDmg<0.7) tgt.dmgBody+=RI(1,4); else tgt.dmgLegs+=RI(1,4);
-        let txtPool=[`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l\u2019ouverture en striking.`,`Superbe échange remporté par ${atk.name}.`,`Le bras arrière de ${atk.name} fait mouche.`,`${atk.name} casse la distance et punit.`,`Combinaison nette et sans bavure de ${atk.name}.`,`Le jab de ${atk.name} dicte le rythme de l\u2019échange.`];
-        if(tgs.includes('Kick')) txtPool.push(`${atk.name} claque un lourd kick.`);
-        if(tgs.includes('Blitz')) txtPool.push(`${atk.name} explose en blitz !`);
-        if(tgs.includes('Sniper')) txtPool.push(`${atk.name} pique à distance avec précision.`);
-        if(tgs.includes('Teep')) txtPool.push(`${atk.name} repousse l\u2019assaut d\u2019un teep.`);
-        if(plan && isMe){
-          if(plan.ko>1.2) txtPool.push(`Conformément au plan, ${atk.name} plante ses appuis pour chercher le coup dur.`);
-          else if(plan.def>1.2) txtPool.push(`${atk.name} respecte la consigne : gérer la distance, refuser la guerre.`);
-          else if(plan.gi>1.2) txtPool.push(`${atk.name} utilise sa boxe uniquement pour masquer une entrée en lutte.`);
-          else if(plan.str>1.2 && (plan.ko||1)<=1.0) txtPool.push(`${atk.name} mise sur un volume de frappes méthodique.`);
+      } else if(currentPhase==='clinch'){
+        const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA;
+        const clinchB=(b.clinch*0.6+b.striking*0.25+b.power*0.15)*profB.clinchDmg-fatB;
+        const diff=clinchA-clinchB;
+        if(Math.abs(diff)>8){
+          const domIsA=diff>0; const dom=domIsA?A:B;
+          const hits=RI(0,4); (domIsA?st.A:st.B).sig+=hits; if(domIsA) dmgB+=hits*1.8; else dmgA+=hits*1.8;
+          (domIsA?st.B:st.A).dmgBody+=RI(0,2);
+          momentum=clamp(momentum+(domIsA?RI(3,7):-RI(3,7)),5,95);
+          if(rnd()<0.28){ currentPhase='sol'; topIsA=domIsA; (domIsA?st.A:st.B).td++;
+            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          } else {
+            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${dom.name} domine contre la cage avec ${hits} coups courts.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          }
+        } else {
+          currentPhase='debout';
+          log.push({r,phase:'clinch',by:'me',text:`[${formatTime(k,6)}] Séparation, le combat reprend au centre de la cage.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         }
-        log.push({r,phase:'debout',by:isMe?'me':'op',text:`[${formatTime(k,5)}] `+getUniqueLog(txtPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      } else { // debout
+        const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
+        let handled=false;
+        if(attA>0.14 && rnd()<0.45){ st.A.tdAtt++; handled=true;
+          const tdChanceA=sigmoid((a.takedown-b.tdd)/15)*attA;
+          if(rnd()<clamp(tdChanceA,0.05,0.85)){ st.A.td++; currentPhase='sol'; topIsA=true;
+            log.push({r,phase:'debout',by:'me',text:`[${formatTime(k,6)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          } else {
+            log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Bonne défense de ${B.name} sur la tentative d\u2019amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          }
+        } else if(attB>0.14 && rnd()<0.45){ st.B.tdAtt++; handled=true;
+          const tdChanceB=sigmoid((b.takedown-a.tdd)/15)*attB;
+          if(rnd()<clamp(tdChanceB,0.05,0.85)){ st.B.td++; currentPhase='sol'; topIsA=false;
+            log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          } else {
+            log.push({r,phase:'debout',by:'me',text:`[${formatTime(k,6)}] ${A.name} repousse une tentative d\u2019amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          }
+        }
+        if(!handled && currentPhase==='debout'){
+          const offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
+          const offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
+          const noiseAmt=Math.round(6*noiseWeightMult);
+          const pA=clamp(offA*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20), pB=clamp(offB*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20);
+          sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22*0.22,0,6);dmgB+=clamp(offA*0.22*0.22,0,6);
+          st.A.sig+=clamp(Math.round(pA*0.5),0,10); st.B.sig+=clamp(Math.round(pB*0.5),0,10);
+          const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016)*profA.koMod*0.22;
+          const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016)*profB.koMod*0.22;
+          const isKdA=rnd()<koA*1.5, isKdB=!isKdA&&rnd()<koB*1.5;
+          let kdText=null;
+          if(isKdA){ st.A.kd++; if(rnd()<0.6){ finish={by:A,loser:B,method:'KO/TKO',round:r}; } else kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
+          else if(isKdB){ st.B.kd++; if(rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
+          const isMe=rnd()<(offA/(offA+offB+1));
+          momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
+          const atk=isMe?A:B, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
+          const rDmg=rnd(); if(rDmg<0.4) tgt.dmgHead+=RI(1,3); else if(rDmg<0.7) tgt.dmgBody+=RI(1,3); else tgt.dmgLegs+=RI(1,3);
+          let txt=kdText?kdText.txt:getUniqueLog([`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l\u2019ouverture en striking.`,`Superbe échange remporté par ${atk.name}.`,`Le bras arrière de ${atk.name} fait mouche.`,`${atk.name} casse la distance et punit.`,`${tgs.includes('Kick')?atk.name+' claque un lourd kick.':atk.name+' place une combinaison nette.'}`]);
+          log.push({r,phase:'debout',by:kdText?kdText.by:(isMe?'me':'op'),text:`[${formatTime(k,6)}] `+txt,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
+            last.text=`[00:00] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
+          else if(rnd()<0.15){ currentPhase='clinch'; }
+        }
       }
-      if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
-        last.text=`[00:00] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
     }
+    // ==== [FIN ANCRE] ====
     if(dmgA>45&&rnd()<.4)chinVulnA+=8;
     if(dmgB>45&&rnd()<.4)chinVulnB+=8;
     // ==== [ANCRE: JUGES_10PT_SCORE] — 10-9 par défaut, 10-8 si domination nette, 10-7 en cas extrême ====
@@ -449,7 +785,7 @@ function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!
   // last5()/scr_history()/l'succès a4 lisent G.f.history spécifiquement).
   if(G.f && F.id===G.f.id){
     F.history.push({res:isDraw?'draw':(win?'win':'loss'),method:m,round:res.round||null,oppId:opp&&opp.id,
-      oppName:opp&&opp.name,oppFlag:opp&&opp.flag,oppWasChamp:!!(opp&&opp.champion),oppRecord:opp?`${opp.W}-${opp.L}`:null});
+      oppName:opp&&opp.name,oppFlag:opp&&opp.flag,oppWasChamp:!!(opp&&opp.champion),oppRecord:opp?`${opp.W}-${opp.L}`:null,oppElo:opp&&opp.orgElo});
     if(F.history.length>60)F.history=F.history.slice(-60);
   }
   return win;
@@ -572,7 +908,7 @@ function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
     // borne haute = potentiel — mais ne DOIT JAMAIS redescendre en-dessous de la
     // valeur déjà acquise (ex: via une compétence, non bornée par le potentiel) :
     // le plafond bloque une nouvelle progression, il ne reprend jamais l'existant.
-    if(dv>0) after=Math.min(after, Math.max(before, f.potential+4));
+    if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4));
     f.attrs[k]=clamp(after,1,100); const real=Math.round(f.attrs[k]-before);
     if(real!==0) applied.push({key:k,label:attrLabel(k),delta:real,before,after:f.attrs[k]});
   } f.overall=overall(f); return applied;
@@ -609,6 +945,7 @@ function getFallbackSkill(pool, baseRarity){ const hierarchy=['L','E','R','C'];
 }
 function grantSkill(f, skill){ if(!f.skills) f.skills=[]; f.skills.push(skill.id);
   if(skill.fx){ for(const stat in skill.fx){ if(f.attrs && f.attrs[stat]!==undefined) f.attrs[stat]=clamp(f.attrs[stat]+skill.fx[stat],1,100); } }
+  if(typeof applySynergyBuffs==='function') applySynergyBuffs(f);
   f.overall=overall(f); return skill;
 }
 function rollSkill(f){
