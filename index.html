@@ -44,7 +44,7 @@ h2.disp{font-size:24px;margin-bottom:12px}
 .card{background:transparent;border:none;border-top:2px solid var(--line);border-bottom:2px solid var(--line);border-radius:0;padding:16px 0;margin:-1px 0}
 .card.gold-b{border-color:var(--gold);background:transparent}
 /* GLASS PRONONCÉ — flou marqué, saturation, reflet diagonal façon "Liquid Glass" */
-.glass,.opp{
+.glass{
  position:relative;overflow:hidden;
  background:rgba(255,255,255,.05);
  -webkit-backdrop-filter:blur(44px) saturate(220%) brightness(1.12);backdrop-filter:blur(44px) saturate(220%) brightness(1.12);
@@ -52,15 +52,21 @@ h2.disp{font-size:24px;margin-bottom:12px}
  border-top-color:rgba(255,255,255,.55);
  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -1px 0 rgba(0,0,0,.35) inset,0 20px 45px -16px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.5);
 }
-.glass::before,.opp::before{
+.glass::before{
  content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
  background:
    linear-gradient(125deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.08) 22%,transparent 45%),
    linear-gradient(15deg,transparent 60%,rgba(255,255,255,.06) 100%);
 }
-.glass::after,.opp::after{
+.glass::after{
  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;z-index:2;pointer-events:none;
  background:linear-gradient(90deg,transparent,rgba(255,255,255,.65) 50%,transparent);
+}
+.opp{
+ position:relative;overflow:hidden;
+ background:var(--panel2);
+ border:1px solid var(--line);
+ border-radius:0;padding:13px;margin:10px 0;cursor:pointer;transition:border-color .12s,transform .05s,background .12s;
 }
 /* motion-wash — traînée diagonale teintée --blood, jamais un aplat */
 .mwash{background-image:
@@ -136,7 +142,6 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .gauge{display:inline-block;width:100%;height:4px;background:var(--line);border:none;border-radius:0;overflow:hidden;vertical-align:middle}
 .gauge>span{display:block;height:100%;background:var(--text)}
 /* adversaires / camp */
-.opp{border:1px solid var(--line);border-radius:0;padding:13px;margin:10px 0;cursor:pointer;transition:border-color .12s,transform .05s,background .12s}
 .opp:active{transform:translateY(1px)}.opp:hover{border-color:var(--gold-d)}
 .opp-top{display:flex;justify-content:space-between;align-items:baseline}
 .opp-nm{font-family:'Oswald';text-transform:uppercase;font-weight:600;font-size:18px}

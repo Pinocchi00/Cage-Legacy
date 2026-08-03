@@ -24,7 +24,18 @@ const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])
 function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
 /* ==== [FIN ANCRE] ==== */
 function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ G=migrate(JSON.parse(s)); validateState(); return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
-function hasSave(){ try{ return !!localStorage.getItem(SAVE_KEY); }catch(e){ return false; } }
+function hasSave(mode){
+  try{
+    const s=localStorage.getItem(SAVE_KEY);
+    if(s){
+      const p=JSON.parse(s);
+      if(mode==='faith') return !!p.faith;
+      if(mode==='career') return !p.faith;
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
 function wipe(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
 /* ==== [ANCRE: PANTHEON] — hors wipe(), survit d'une carrière à l'autre ==== */
 const HOF_KEY='cage-legacy-hof', SAVE_VERSION=2;
