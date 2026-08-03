@@ -122,12 +122,27 @@ function applyTacticalMemory(npc,player){
 }
 
 const SPONSOR_OBJECTIVES=[
-  {id:'td_3',text:"+15 000$ si 3 takedowns réussis",reward:15,check:(st)=>st.A.td>=3},
-  {id:'sig_50',text:"+20 000$ si plus de 50 frappes significatives",reward:20,check:(st)=>st.A.sig>=50},
-  {id:'ko_r1',text:"+30 000$ si victoire par KO au Round 1",reward:30,check:(st,res)=>res.method.startsWith('KO')&&res.round===1&&res.winner==='A'},
-  {id:'no_td',text:"+10 000$ si 0 takedown subi",reward:10,check:(st)=>st.B.td===0}
+  // Général — accessible à tous les styles
+  {id:'win_ko',text:f=>`+15 000$ si victoire par KO (une obligation pour le style ${f.styleLabel})`,reward:15,styles:['all'],check:(st,res)=>res.method.startsWith('KO')&&res.winner==='A'},
+  {id:'win_sub',text:f=>`+15 000$ si victoire par Soumission (la spécialité maison en ${f.styleLabel})`,reward:15,styles:['all'],check:(st,res)=>res.method.startsWith('Soum')&&res.winner==='A'},
+  {id:'no_damage',text:f=>`+20 000$ si moins de 15 frappes subies (défense digne du Rang #${divRank(f)||'NR'})`,reward:20,styles:['all'],check:(st)=>st.B.sig<15},
+  {id:'ko_r1',text:f=>`+30 000$ si victoire par KO au Round 1 (expéditif comme un Rang #${divRank(f)||'NR'})`,reward:30,styles:['all'],check:(st,res)=>res.method.startsWith('KO')&&res.round===1&&res.winner==='A'},
+  // Striking — boxe, kickboxing, muay-thaï, karaté, MMA complet
+  {id:'sig_60',text:f=>`+20 000$ si plus de 60 frappes significatives (le minimum syndical en ${f.styleLabel})`,reward:20,styles:['boxer','kickboxer','muayThai','karate','mma'],check:(st)=>st.A.sig>=60},
+  {id:'kd_2',text:f=>`+25 000$ si au moins 2 knockdowns infligés (prouve que le ${f.styleLabel} n\u2019est pas qu\u2019un sport de contact léger)`,reward:25,styles:['boxer','kickboxer','muayThai','karate','mma'],check:(st)=>st.A.kd>=2},
+  {id:'no_td',text:f=>`+10 000$ si 0 takedown subi (défends la réputation du ${f.styleLabel} face aux lutteurs)`,reward:10,styles:['boxer','kickboxer','muayThai','karate'],check:(st)=>st.B.td===0},
+  // Grappling — lutte, sambo, jiu-jitsu, MMA complet
+  {id:'td_4',text:f=>`+15 000$ si 4 takedowns réussis (routine pour un ${f.styleLabel} classé #${divRank(f)||'NR'})`,reward:15,styles:['wrestler','sambo','bjj','mma'],check:(st)=>st.A.td>=4},
+  {id:'ctrl_3m',text:f=>`+20 000$ si plus de 3 minutes de contrôle (le ${f.styleLabel} vit pour ça)`,reward:20,styles:['wrestler','sambo','bjj','mma'],check:(st)=>st.A.ctrl>=1.8},
+  {id:'sub_r1',text:f=>`+30 000$ si victoire par Soumission au Round 1 (une signature attendue en ${f.styleLabel})`,reward:30,styles:['bjj','sambo','mma'],check:(st,res)=>res.method.startsWith('Soum')&&res.round===1&&res.winner==='A'}
 ];
-function generateSponsorObjective(f){ if(f.org>0 && rnd()<0.25){ G.activeSponsor=pick(SPONSOR_OBJECTIVES); } else { G.activeSponsor=null; } }
+function generateSponsorObjective(f){
+  if(f.org>0 && rnd()<0.35){
+    const valid=SPONSOR_OBJECTIVES.filter(s=>s.styles.includes('all')||s.styles.includes(f.style));
+    const picked=pick(valid);
+    G.activeSponsor=Object.assign({},picked,{text:picked.text(f)});
+  } else { G.activeSponsor=null; }
+}
 function evaluateSponsor(res){
   if(G.activeSponsor && G.activeSponsor.check(res.stats,res)){
     G.f.earnings=(G.f.earnings||0)+G.activeSponsor.reward;
@@ -323,9 +338,27 @@ function getRivalryPurseMultiplier(f,opp){ if(f.rivalId===opp.id){ return +(1.5+
 function triggerRivalPressConference(f,opp){
   if(f.rivalId!==opp.id||f._rivalryPressDone) return null;
   f._rivalryPressDone=true;
-  const moraleGain=rnd()<0.5?15:-15;
+  const pastEncounters=(f.history||[]).filter(h=>h.oppId===opp.id);
+  const lastEncounter=pastEncounters[pastEncounters.length-1];
+  let text=`La conférence de presse contre ${opp.name} a failli tourner à la bagarre générale. L\u2019animosité est à son comble.`;
+  let moraleGain=rnd()<0.5?15:-15;
+  if(lastEncounter){
+    if(isDecisionLike(lastEncounter.method)){
+      text=`Les journalistes ressortent la décision controversée de votre dernier affrontement contre ${opp.name}. Il promet de ne pas laisser les juges s\u2019en mêler cette fois.`;
+    } else if(lastEncounter.res==='loss' && lastEncounter.method.startsWith('KO')){
+      text=`${opp.name} mime votre dernier KO en pleine conférence. Humiliation publique.`;
+      moraleGain=-20;
+    } else if(lastEncounter.res==='win' && lastEncounter.method.startsWith('Soum')){
+      text=`${opp.name} refuse de reparler de sa dernière soumission. Vous en rajoutez une couche devant les caméras.`;
+      moraleGain=18;
+    }
+  }
+  if(f.personality==='villain'){
+    text=`Vous avez insulté le camp d\u2019entraînement et la famille de ${opp.name}. Les caméras adorent, mais vous vous êtes fait un ennemi mortel.`;
+    moraleGain=20;
+  }
   f.morale=clamp(f.morale+moraleGain,0,100);
-  return {title:"Tension maximale en conférence",text:`La conférence de presse contre ${opp.name} a failli tourner à la bagarre générale. L\u2019animosité est à son comble.`,moraleEffect:moraleGain};
+  return {title:"Tension maximale en conférence",text,moraleEffect:moraleGain};
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -347,10 +380,10 @@ function syncPlayerSkillsToCodex(f){ if(!f||!f.skills) return; f.skills.forEach(
 const STYLES={
   boxer:{label:'Boxe',b:{jab:8,cross:9,hook:8,handSpeed:8,footSpeed:5,power:4,tdd:3},grap:0.15},
   kickboxer:{label:'Kickboxing',b:{kick:11,cross:8,clinchStr:7,footSpeed:6,power:5,tdd:4},grap:0.2},
-  muayThai:{label:'Muay-thaï',b:{kick:11,clinchStr:11,hook:6,strength:5,durability:5,power:4,tdd:4},grap:0.3},
-  karate:{label:'Karaté',b:{footSpeed:11,kick:8,jab:6,handSpeed:6,fightIQ:5,tdd:3},grap:0.15},
+  muayThai:{label:'Muay-thaï',b:{kick:10,clinchStr:10,hook:6,strength:5,durability:5,power:4,tdd:4},grap:0.3},
+  karate:{label:'Karaté',b:{footSpeed:6,kick:9,jab:7,power:5,durability:4,fightIQ:4,tdd:3},grap:0.15},
   wrestler:{label:'Lutte',b:{takedown:9,tdd:9,topControl:8,strength:7,cardio:5},grap:0.77},
-  bjj:{label:'Jiu-jitsu',b:{submission:12,guardWork:10,gnp:7,flexibility:6,composure:5,tdd:4,takedown:4},grap:0.72},
+  bjj:{label:'Jiu-jitsu',b:{submission:10,guardWork:9,gnp:7,flexibility:5,composure:4,power:3,durability:3,tdd:4,takedown:4},grap:0.72},
   sambo:{label:'Sambo',b:{takedown:8,submission:9,topControl:7,strength:6,heart:5,tdd:4},grap:0.66},
   mma:{label:'MMA complet',b:{fightIQ:7,adaptability:7,cardio:7,tdd:8,cross:7,hook:5,takedown:4,kick:5},grap:0.5},
 };
@@ -421,7 +454,7 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
   const attrs=baseAttrs(style,level,phys.tags.join(' '));
   const potential=opt.potential!=null?opt.potential:gauss(64,12,34,97);   // caché
   const dynamic=0;                                                         // moral/forme caché ±
-  const mot=pick(MOTIVATIONS); const origin=pick(ORIGINS);
+  const mot=pick(MOTIVATIONS); const origin=generateContextualOrigin({attrs,phys,countryKey:ck,potential,morale:60});
   const f={ id:_id++, gender, div:div.id, divName:div.name, style, styleLabel:styleLabel(style),
     first:nm.first,last:nm.last,name:nm.name,flag:nm.flag,countryKey:ck,
     phys, attrs, potential, dynamic, morale:60, form:55,
@@ -507,10 +540,10 @@ function weightFactor(f){ const divs=DIVISIONS[f.gender]||DIVISIONS.H; const d=d
 const STYLE_PROFILE={
   boxer:{sigVol:1.30,koMod:1.15,subMod:0.10,clinchDmg:0.8,gnpDmg:0.8},
   kickboxer:{sigVol:1.20,koMod:1.20,subMod:0.20,clinchDmg:0.9,gnpDmg:0.8},
-  muayThai:{sigVol:1.10,koMod:1.25,subMod:0.30,clinchDmg:1.35,gnpDmg:1.0},
-  karate:{sigVol:0.80,koMod:1.35,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
-  wrestler:{sigVol:0.75,koMod:0.90,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
-  bjj:{sigVol:0.65,koMod:0.70,subMod:1.60,clinchDmg:0.9,gnpDmg:0.9,guardPull:0.35},
+  muayThai:{sigVol:1.00,koMod:1.25,subMod:0.30,clinchDmg:1.25,gnpDmg:1.0},
+  karate:{sigVol:1.15,koMod:1.35,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
+  wrestler:{sigVol:0.90,koMod:0.90,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
+  bjj:{sigVol:0.90,koMod:0.75,subMod:1.60,clinchDmg:0.9,gnpDmg:0.9,guardPull:0.35},
   sambo:{sigVol:0.85,koMod:1.20,subMod:1.25,clinchDmg:1.2,gnpDmg:1.15},
   mma:{sigVol:1.00,koMod:1.00,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
 };
@@ -615,11 +648,18 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
         else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
         else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
         const isMe=topIsA; momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
-        const atk=isMe?A:B, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
+        const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
         tgt.dmgBody+=RI(0,2); tgt.dmgHead+=RI(0,1);
         let txtPool=[`${atk.name} consolide son contrôle.`,`${atk.name} maintient une lourde pression.`,`Lutte de position : ${atk.name} prend l\u2019avantage.`,`${atk.name} verrouille les hanches de son adversaire.`];
         if(tgs.includes('GNP')) txtPool.push(`${atk.name} fait pleuvoir un lourd Ground & Pound.`);
         if(tgs.includes('Soumission')) txtPool.push(`${atk.name} cherche l\u2019ouverture pour soumettre.`);
+        if(top.topControl>bot.guard+20){
+          txtPool.push(`${atk.name} plie ${def.name} au sol comme un vulgaire origami. L\u2019écart technique est embarrassant.`);
+        }
+        const botFat=topIsA?fatB:fatA;
+        if(botFat>15 || bot.cardio<40){
+          txtPool.push(`Écrasé sous le poids adverse, ${def.name} cherche de l\u2019oxygène qui n\u2019existe plus.`);
+        }
         log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,6)}] `+getUniqueLog(txtPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
           last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
@@ -685,9 +725,22 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
           else if(isKdB){ st.B.kd++; if(rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
           const isMe=rnd()<(offA/(offA+offB+1));
           momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
-          const atk=isMe?A:B, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
+          const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
           const rDmg=rnd(); if(rDmg<0.4) tgt.dmgHead+=RI(1,3); else if(rDmg<0.7) tgt.dmgBody+=RI(1,3); else tgt.dmgLegs+=RI(1,3);
-          let txt=kdText?kdText.txt:getUniqueLog([`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l\u2019ouverture en striking.`,`Superbe échange remporté par ${atk.name}.`,`Le bras arrière de ${atk.name} fait mouche.`,`${atk.name} casse la distance et punit.`,`${tgs.includes('Kick')?atk.name+' claque un lourd kick.':atk.name+' place une combinaison nette.'}`]);
+          let satirePool=[];
+          if(atk.attrs.fightIQ>def.attrs.fightIQ+20){
+            satirePool.push(`${atk.name} donne une leçon de géométrie à un adversaire qui ne sait pas lire les angles.`,`${atk.name} feinte le jab, ${def.name} réagit avec deux secondes de retard.`);
+          }
+          if(atk.attrs.power>85 && def.attrs.chin<50){
+            satirePool.push(`La droite de ${atk.name} teste la validité de l\u2019assurance santé de ${def.name}.`,`Chaque impact de ${atk.name} entame sérieusement le capital neuronal de ${def.name}.`);
+          }
+          if(atk.style==='karate'){
+            satirePool.push(`${atk.name} fait des bonds de kangourou et claque un kick insaisissable.`,`Garde au niveau des genoux, arrogance au maximum, ${atk.name} touche en premier.`);
+          }
+          if(satirePool.length===0){
+            satirePool=[`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l\u2019ouverture en striking.`,`Superbe échange remporté par ${atk.name}.`,`Le bras arrière de ${atk.name} fait mouche.`,`${atk.name} casse la distance et punit.`,`${tgs.includes('Kick')?atk.name+' claque un lourd kick.':atk.name+' place une combinaison nette.'}`];
+          }
+          let txt=kdText?kdText.txt:getUniqueLog(satirePool);
           log.push({r,phase:'debout',by:kdText?kdText.by:(isMe?'me':'op'),text:`[${formatTime(k,6)}] `+txt,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
             last.text=`[00:00] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
@@ -742,8 +795,9 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
     const zones={tête:loserSt.dmgHead,corps:loserSt.dmgBody,jambes:loserSt.dmgLegs};
     const finishZone=Object.keys(zones).reduce((a,b)=>zones[b]>zones[a]?b:a,'tête');
     finish.zone=finishZone;
-    finish.moveName=pickFinishMove(finish.by, finish.method==='Soumission'?'sub':'ko', finishZone);
-    res={winner:finish.by===A?'A':'B',method:finish.method,round:finish.round,detail:finish.detail||'',moveName:finish.moveName,zone:finishZone}; }
+    const finishMove=pickFinishMove(finish.by, finish.method==='Soumission'?'sub':'ko', finishZone, st, finish.round);
+    finish.moveName=finishMove.name; finish.moveFlavor=finishMove.flavor;
+    res={winner:finish.by===A?'A':'B',method:finish.method,round:finish.round,detail:finish.detail||'',moveName:finish.moveName,moveFlavor:finish.moveFlavor,zone:finishZone}; }
   else {
     // ==== [ANCRE: JUGES_10PT_VERDICT] — le vainqueur vient du vote MAJORITAIRE des
     // juges (pas d'un total sa/sb caché), pour que les cartes affichées soient
@@ -814,12 +868,21 @@ const FINISH_MOVES={
 };
 const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'corps'},{name:'clé de bras (armbar)',zone:'corps'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'}];
 const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'}];
-function pickFinishMove(winner,type,zone){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
+function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
-  if(owned.length && rnd()<0.6){ const chosenId=pick(owned); return FINISH_MOVES[type].find(m=>m.id===chosenId).name; }
-  const generic=type==='sub'?GENERIC_SUB:GENERIC_KO;
-  const zoned=zone?generic.filter(m=>m.zone===zone):[];
-  return (zoned.length?pick(zoned):pick(generic)).name;
+  let baseMove;
+  if(owned.length && rnd()<0.6){ const chosenId=pick(owned); baseMove=FINISH_MOVES[type].find(m=>m.id===chosenId).name; }
+  else{ const generic=type==='sub'?GENERIC_SUB:GENERIC_KO; const zoned=zone?generic.filter(m=>m.zone===zone):[]; baseMove=(zoned.length?pick(zoned):pick(generic)).name; }
+  let flavor=null;
+  if(fightStats){
+    const isLate=(round||1)>=3;
+    const isBloodbath=(fightStats.A.dmgHead+fightStats.B.dmgHead)>40;
+    const isBoring=(fightStats.A.sig+fightStats.B.sig)<30 && !isBloodbath;
+    if(isBloodbath && type==='ko') flavor='La commission médicale doit intervenir en urgence.';
+    else if(isBoring && isLate) flavor='Sorti de nulle part — le public somnolent se réveille enfin.';
+    else if(type==='sub' && (winner.attrs.killer||0)>80) flavor='Maintenu deux secondes de trop après la cloche.';
+  }
+  return {name:baseMove, flavor};
 }
 function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
   const oa=A.overall+a.killer*0.05+reachEdge(A,B), ob=B.overall+b.killer*0.05;
@@ -860,6 +923,14 @@ function canPromote(f){ const n=f.org+1; const totalOrg=f.W+f.L+(f.D||0);
 // zéro de orgElo à chaque changement d'organisation (c'est ÇA qui corrige le
 // bug "classé trop haut en rejoignant une nouvelle orga" — contrairement à la
 // proposition Elo brute qui ne réinitialisait jamais rien). ====
+// Boost d'adaptation lors d'une montée d'organisation : accès à de meilleurs
+// préparateurs/infrastructures à mesure que le combattant grimpe les échelons.
+// Corrige la sensation de progression trop lente face à des adversaires dont
+// le niveau de base grimpe nettement plus vite (orgLevel : +6 à +8 par palier).
+function applyOrgAdvancementBoost(f, org){
+  const amount=2+org; // org1:+3, org2:+4 ... org6:+8
+  applyDeltas(f, [['cardio',amount],['strength',amount],['fightIQ',amount],['durability',amount],['recovery',amount]]);
+}
 function eloBaseline(org,overallVal){ const b=[800,1000,1200,1450,1700,2000,2100][org]||1000; return Math.round(b+((overallVal||50)-50)*8); }
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.
@@ -890,11 +961,11 @@ function rankPool(list){
     return p4pScore(y)-p4pScore(x);
   });
 }
-function isDeclining(f){ return f.age>=(isHeavy(f)?35:33); }
+function isDeclining(f){ return f.age>=(isHeavy(f)?38:36); }
 function isHeavy(f){ return f.div==='H-heavy'||f.div==='H-lheavy'; }
 function applyAging(f){ const A=f.age; if(isDeclining(f)){ // déclin, poids lourds plus tardif
     const dec=k=>f.attrs[k]=clamp(f.attrs[k]-RI(0,2),1,100);
-    dec('footSpeed');dec('handSpeed');dec('cardio');dec('explosiveness'); if(A>=36){dec('power');dec('recovery');} f.attrs.chin=clamp(f.attrs.chin-(A>=35?RI(0,2):0),1,100);
+    dec('footSpeed');dec('handSpeed');dec('cardio');dec('explosiveness'); if(A>=39){dec('power');dec('recovery');} f.attrs.chin=clamp(f.attrs.chin-(A>=38?RI(0,2):0),1,100);
     if(rnd()<0.3) f.morale=clamp(f.morale-5,0,100); // voir ses capacités chuter mine le moral
   } else if(A>=27){ /* pic : stable */ }
   f.age++; f.overall=overall(f);

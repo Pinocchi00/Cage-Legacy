@@ -28,6 +28,29 @@ const ORIGINS=[
  'n\u2019a jamais rien réussi à l\u2019école et voit la cage comme la seule et unique alternative au chômage de longue durée'
 ];
 
+// Origine contextuelle : lit les vraies anomalies statistiques du combattant
+// (gabarit, durabilité/QI, pays, potentiel/moral) avant de retomber sur le
+// pool ORIGINS ci-dessus si rien de statistiquement notable ne ressort.
+function generateContextualOrigin(f){
+  const a=f.attrs;
+  if(f.phys && f.phys.tags && f.phys.tags.includes('gabarit hors-norme pour la division')){
+    return 'a été recruté à la sortie d\u2019un club de rugby universitaire uniquement parce qu\u2019il terrifiait les videurs';
+  }
+  if(a.durability>85 && a.fightIQ<40){
+    return 'a servi de cobaye pour des tests de casques de moto : aucune technique, mais ne ressent plus la douleur physique';
+  }
+  if(a.takedown>85 && f.countryKey==='DAG'){
+    return 'a passé son enfance à lutter contre du bétail dans les montagnes avant de découvrir qu\u2019on pouvait être payé pour le faire sur des humains';
+  }
+  if(a.submission>85 && a.power<30){
+    return 'est incapable de briser une vitre d\u2019un coup de poing, mais connaît quarante façons de luxer un genou humain';
+  }
+  if(f.potential>90 && f.morale<40){
+    return 'est un prodige absolu qui déteste profondément ce sport, poussé dans la cage par un manager tyrannique';
+  }
+  return pick(ORIGINS);
+}
+
 const MOTIVATIONS=[
  // Tes ajouts
  {short:'Cherche à détruire ses adversaires avec violence pour combler un profond complexe d\u2019infériorité',drive:'killer'},

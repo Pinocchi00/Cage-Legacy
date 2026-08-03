@@ -5,7 +5,7 @@
    compétence est {id,name,rar,fx,desc,tags,fam,key}. rar ∈ C/R/E/L/M
    (barème du plan §18.6). N'empêche jamais le jeu de démarrer : les erreurs
    sont seulement journalisées en console pour diagnostic. */
-const RAR_TOTAL={C:5,R:10,E:15,L:20,M:30};
+const RAR_BAND={C:[6,10],R:[12,18],E:[18,26],L:[26,36],M:[40,56]};
 function validateSkills(){
   const errs=[], seen=new Set();
   for(const s of SKILLS){
@@ -17,8 +17,8 @@ function validateSkills(){
       if(k===CHIN && s.fam!=='gen') errs.push(`${s.id} : chin interdit hors famille génétique`);
       total+=s.fx[k];
     }
-    const attendu=RAR_TOTAL[s.rar];
-    if(attendu!=null && total!==attendu) errs.push(`${s.id} : total ${total}, barème ${s.rar}=${attendu}`);
+    const band=RAR_BAND[s.rar];
+    if(band && (total<band[0] || total>band[1])) errs.push(`${s.id} : total ${total}, fourchette ${s.rar}=${band[0]}-${band[1]}`);
     if(!s.desc || s.desc.length<40) errs.push(`${s.id} : descriptif absent ou trop court`);
     if(!s.tags || !s.tags.length) errs.push(`${s.id} : mots-clés manquants`);
   }

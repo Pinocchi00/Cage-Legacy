@@ -411,10 +411,10 @@ function scr_vs_friend(){
 /* ==== [FIN ANCRE] ==== */
 
 function tacticalRead(f,o){ const a=eff(f),b=eff(o);
-  let prefix=''; const fights=o.W+o.L+o.D;
-  if(fights<=5 && o.W>o.L) prefix='Jeune loup imprévisible. ';
-  else if(o.streak<=-2 && o.age>=32) prefix='Vétéran sur le déclin. ';
-  else if(o.streak>=3) prefix='Sur une grosse série de victoires. ';
+  let prefix=(o.styleLabel||'')+'. '; const fights=o.W+o.L+o.D;
+  if(fights<=5 && o.W>o.L) prefix+='Jeune loup imprévisible. ';
+  else if(o.streak<=-2 && o.age>=32) prefix+='Vétéran sur le déclin. ';
+  else if(o.streak>=3) prefix+='Sur une grosse série de victoires. ';
   // cohérence avec le scouting affiché (striking/grappling/danger) : si au moins
   // 2 des 3 catégories montrées penchent nettement dans le même sens, la lecture
   // tactique doit le refléter — pas seulement l'écart d'overall, qui peut rester
@@ -642,9 +642,24 @@ function generateRandomEvent(){ const f=G.f;
   }
   // ==== [FIN ANCRE] ====
   if((typeof checkMueMartialeEligibility==='function') && checkMueMartialeEligibility(f) && !f._mueOffered){ pool.push('mue_martiale'); }
+  // ==== [ANCRE: EVENEMENTS_DYNAMIQUES] — événements conditionnels basés sur l'état
+  // réel du combattant (âge/récupération, hype précoce, difficultés financières),
+  // plutôt qu'un tirage uniforme déconnecté du profil. ====
+  const DYNAMIC_EVENTS=[
+    {id:'dyn_aging',req:f=>f.age>=35&&f.attrs.recovery<60,title:'Réveil douloureux',text:`À ${f.age} ans, la récupération n\u2019est plus la même. Vos vieilles blessures dictent l\u2019intensité du camp.`,malus:{recovery:-5,form:-10}},
+    {id:'dyn_prospect',req:f=>f.age<=22&&(f.streak||0)>=3,title:'Excès de confiance',text:'La presse vous encense comme le prodige de l\u2019année. Vous avez séché deux séances pour des interviews.',malus:{discipline:-10,form:-5},bonus:{morale:15}},
+    {id:'dyn_broke',req:f=>f.org>0&&(f.earnings||0)<15,title:'Fins de mois difficiles',text:'Vos finances sont dans le rouge. L\u2019angoisse de ne pas pouvoir payer votre manager parasite votre concentration.',malus:{focus:-15,composure:-10}}
+  ];
+  DYNAMIC_EVENTS.filter(e=>e.req(f)).forEach(e=>pool.push(e.id));
+  // ==== [FIN ANCRE] ====
   const type=pick(pool);
   let title='', text='', btn='Continuer', actionId=type;
-  if(type==='mue_martiale'){
+  const dynMatch=DYNAMIC_EVENTS.find(e=>e.id===type);
+  if(dynMatch){
+    title=dynMatch.title; text=dynMatch.text;
+    if(dynMatch.malus) G.fight.malus=Object.assign({},G.fight.malus,dynMatch.malus);
+    if(dynMatch.bonus && dynMatch.bonus.morale) f.morale=clamp(f.morale+dynMatch.bonus.morale,0,100);
+  } else if(type==='mue_martiale'){
     f._mueOffered=true;
     title='Remise en question'; actionId='mue_martiale';
     text=`${f.name} traverse une crise sportive profonde. Un vieux coach propose une refonte complète de l\u2019approche technique — une Mue Martiale. Cela coûtera un cycle de combat complet, mais pourrait relancer la carrière sous un jour nouveau.`;
@@ -863,7 +878,12 @@ const CONTRACT_PHRASES=[
 /* ==== [FIN ANCRE] ==== */
 function evaluateProOffer(f, res, oppRank){
   if(f.org!==0 || (f.proOfferCooldown||0)>0) return null;
-  if(f.age>=26) return { forced:true, msg:'La limite d\u2019âge du circuit amateur (26 ans) est atteinte. Vous êtes forcé de passer professionnel aujourd\u2019hui ou de ranger les gants.' };
+  if(f.age>=26){
+    const baseTier=1;
+    const orgFlavor1=ORG_FLAVORS[baseTier]?pick(ORG_FLAVORS[baseTier]):ORGS[baseTier];
+    const phrase1=pick(CONTRACT_PHRASES)(orgFlavor1);
+    return { forced:true, msg:'La limite d\u2019âge du circuit amateur (26 ans) est atteinte. Vous êtes forcé de passer professionnel aujourd\u2019hui ou de ranger les gants.', orgFlavor1, phrase1, baseTier };
+  }
   const totalFights=f.W+f.L+f.D;
   if(totalFights<5) return null;
   const finishes=f.ko+f.sub;
@@ -1188,7 +1208,7 @@ function genWTUMMAOpponent(){
 function scr_faith_draft(){
   const d=G.faithDraft;
   const opt=(key,val,icon,name,desc)=>`
-    <div class="glass opp" style="padding:12px;text-align:left;border-color:${d[key]===val?'var(--gold)':'var(--line)'}" onclick="CL.selectFaithDraft('${key}','${val}')">
+    <div class="opp" style="padding:12px;text-align:left;border-color:${d[key]===val?'var(--gold)':'var(--line)'}" onclick="CL.selectFaithDraft('${key}','${val}')">
       <div class="hero-name" style="font-size:18px;text-transform:none;color:${d[key]===val?'var(--gold)':'var(--text)'}">${icon} ${name}</div>
       <div class="muted small mt">${desc}</div>
     </div>`;
@@ -1200,34 +1220,34 @@ function scr_faith_draft(){
     <div class="fld" style="text-align:left"><label>Pays</label><div class="pills">${COUNTRY_KEYS.map(c=>`<span class="pill ${d.country===c?'on':''}" onclick="CL.selectFaithDraft('country','${c}')">${COUNTRIES[c].flag} ${COUNTRIES[c].name}</span>`).join('')}</div></div>
 
     <div class="fld" style="text-align:left"><label>1. VOTRE ORIGINE</label>
-      ${opt('origin','traditional','🏛️','Dojo de la Discipline','Un maître obsessionnel vous a fait répéter le même jab dix mille fois avant le premier vrai sparring. (+IQ, +Discipline)')}
-      ${opt('origin','pro_child','🥊','Fils de la Maison','Votre nom de famille remplit les salles avant même votre premier combat — et pèse une tonne à chaque défaite. (+Argent, -Sang-froid)')}
-      ${opt('origin','street','🚧','École du Bitume','Les vraies leçons se sont passées dans les parkings, pas sur les tatamis. (+Menton, +Cœur)')}
-      ${opt('origin','late_bloomer','⏳','Le Retardataire','Personne ne pariait un centime sur vous à seize ans. La rage a fait le reste. (+Puissance, -Technique)')}
+      ${opt('origin','traditional','⛩️','Dojo de la Discipline','Un maître obsessionnel vous a fait répéter le même jab dix mille fois avant le premier vrai sparring. (+IQ, +Discipline)')}
+      ${opt('origin','pro_child','👑','Fils de la Maison','Votre nom de famille remplit les salles avant même votre premier combat — et pèse une tonne à chaque défaite. (+Argent, -Sang-froid)')}
+      ${opt('origin','street','🩸','École du Bitume','Les vraies leçons se sont passées dans les parkings, pas sur les tatamis. (+Menton, +Cœur)')}
+      ${opt('origin','late_bloomer','🕰️','Le Retardataire','Personne ne pariait un centime sur vous à seize ans. La rage a fait le reste. (+Puissance, -Technique)')}
     </div>
 
     <div class="fld" style="text-align:left"><label>2. DISCIPLINE DE BASE</label>
       ${opt('style','boxer','🥊','Boxe','Mains lourdes et déplacements.')}
       ${opt('style','wrestler','🤼','Lutte','Projections et contrôle absolu.')}
-      ${opt('style','bjj','🥋','Jiu-Jitsu','Soumissions et jeu au sol.')}
-      ${opt('style','muayThai','🇹🇭','Muay-Thaï','Clinch, genoux et coudes.')}
+      ${opt('style','bjj','🕷️','Jiu-Jitsu','Soumissions et jeu au sol.')}
+      ${opt('style','muayThai','🦴','Muay-Thaï','Clinch, genoux et coudes.')}
     </div>
 
     <div class="fld" style="text-align:left"><label>3. HYGIÈNE DE VIE (ADO)</label>
-      ${opt('lifestyle','pro','🥗','Moine Guerrier','Extinction des feux à 21h, zéro écart, zéro excuse. Les coachs vous adorent, vos amis vous ont oublié. (+Cardio, +Forme)')}
-      ${opt('lifestyle','balanced','⚖️','Ni Moine Ni Fêtard','Sérieux à la salle, tolérable en dehors. La voie du compromis. (Stats équilibrées)')}
-      ${opt('lifestyle','party','🎉','La Vie Est Courte','Les réseaux sociaux avant le sommeil, les sorties avant les rounds de sac. Le talent compensera... ou pas. (+Hype, -Forme)')}
+      ${opt('lifestyle','pro','💧','Moine Guerrier','Extinction des feux à 21h, zéro écart, zéro excuse. Les coachs vous adorent, vos amis vous ont oublié. (+Cardio, +Forme)')}
+      ${opt('lifestyle','balanced','🧭','Ni Moine Ni Fêtard','Sérieux à la salle, tolérable en dehors. La voie du compromis. (Stats équilibrées)')}
+      ${opt('lifestyle','party','🔥','La Vie Est Courte','Les réseaux sociaux avant le sommeil, les sorties avant les rounds de sac. Le talent compensera... ou pas. (+Hype, -Forme)')}
     </div>
 
     <div class="fld" style="text-align:left"><label>4. LE CERCLE (MANAGEMENT)</label>
-      ${opt('circle','family','👨\u200d👩\u200d👦','Le Clan','Des parents qui négocient vos contrats en pyjama à la table de la cuisine. Rassurant, un peu étouffant. (+Moral)')}
-      ${opt('circle','agent','🦈','Le Requin','Un agent qui a senti l\u2019argent avant que vous ne sachiez lacer vos gants. Il prend sa part, toujours. (+Fonds de départ)')}
-      ${opt('circle','squad','🤜','La Bande','Vos potes d\u2019enfance, bruyants et loyaux, présents à chaque combat sans jamais comprendre les règles. (Neutre)')}
+      ${opt('circle','family','🛡️','Le Clan','Des parents qui négocient vos contrats en pyjama à la table de la cuisine. Rassurant, un peu étouffant. (+Moral)')}
+      ${opt('circle','agent','💼','Le Requin','Un agent qui a senti l\u2019argent avant que vous ne sachiez lacer vos gants. Il prend sa part, toujours. (+Fonds de départ)')}
+      ${opt('circle','squad','🐺','La Bande','Vos potes d\u2019enfance, bruyants et loyaux, présents à chaque combat sans jamais comprendre les règles. (Neutre)')}
     </div>
 
     <div class="fld" style="text-align:left"><label>5. PERSONNALITÉ (MÉDIAS)</label>
-      ${opt('personality','villain','🦹','Le Vilain','Chaque conférence de presse est un règlement de comptes. Ça remplit les salles, ça vide le moral. (+Hype, -Moral)')}
-      ${opt('personality','humble','🙏','Le Taiseux','Deux phrases par interview, un mental de granit. Les puristes vous respectent, les promoteurs s\u2019arrachent les cheveux. (+Moral, +Concentration)')}
+      ${opt('personality','villain','🎭','Le Vilain','Chaque conférence de presse est un règlement de comptes. Ça remplit les salles, ça vide le moral. (+Hype, -Moral)')}
+      ${opt('personality','humble','🧘','Le Taiseux','Deux phrases par interview, un mental de granit. Les puristes vous respectent, les promoteurs s\u2019arrachent les cheveux. (+Moral, +Concentration)')}
     </div>
 
     <button class="btn primary mt" style="padding:16px;font-size:18px" onclick="CL.finalizeFaithDraft()">VALIDER ET COMMENCER</button>
@@ -1261,13 +1281,33 @@ function scr_faith_hub(){
         <div class="mono muted small mt" style="font-size:10px">Choix narratif impactant votre condition et vos attributs</div></div>
     </div>`;
   } else if(step===2){
+    const inf=G.faith.influence||0;
     actionsHtml=`<div class="eyebrow mb">PHASE 2 : AJUSTEMENT</div>
-    <p class="lede small">Gérez votre condition ou investissez avant l\u2019affrontement.</p>
+    <p class="lede small">Gérez votre condition ou investissez avant l\u2019affrontement. Influence : <b class="gold">${inf} pts</b> · Fonds : <b>${formatArgent(f.earnings)}</b></p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithRest()">
-        <div class="disp" style="font-size:18px;color:var(--text)">REPOS & RÉCUPÉRATION</div>
+      <div class="opp" style="padding:12px;text-align:center" onclick="CL.faithRest()">
+        <div class="disp" style="font-size:18px;color:var(--text)">REPOS & RÉCUPÉRATION (Gratuit)</div>
         <div class="mono muted small mt" style="font-size:10px">+25 Forme, +10 Moral</div></div>
-      <button class="btn" style="border-color:var(--text);color:var(--text);font-size:16px;padding:16px;margin:0" onclick="CL.go('faith_shop')">Boutique d\u2019Influence & Investissements</button>
+
+      <div class="eyebrow mt" style="color:var(--gold)">Privilèges d\u2019influence</div>
+      <div class="opp" onclick="CL.buyFaithPerk('hometown')"><b class="gold">Combat à Domicile (50 pts)</b>
+        <div class="muted small mt">Le prochain combat sera chez vous. +15 Moral, +8 Forme.</div></div>
+      <div class="opp" onclick="CL.buyFaithPerk('catchweight')"><b class="gold">Forcer un Catchweight (100 pts)</b>
+        <div class="muted small mt">L\u2019adversaire subira un lourd malus de déshydratation (Cardio/Durabilité).</div></div>
+      <div class="opp" onclick="CL.buyFaithPerk('protect_title')"><b class="gold">Sanctuariser le Titre (150 pts)</b>
+        <div class="muted small mt">Annule la pénalité d\u2019inactivité cette année.</div></div>
+
+      <div class="eyebrow mt">Investissements financiers & illégaux</div>
+      <div class="opp" style="border-left:3px solid var(--loss)" onclick="CL.buyFaithPerk('ped')"><b>Cellule de récupération PED (30k$)</b>
+        <div class="muted small mt">+4 Menton et Résistance. <span style="color:var(--loss)">Risque de suspension (15%).</span></div></div>
+      <div class="opp" style="border-left:3px solid var(--sage)" onclick="CL.buyFaithPerk('tiger')"><b>Stage au Tiger Muay Thai (50k$)</b>
+        <div class="muted small mt">+5 Kick et Clinch garantis (hors-plafond). <span style="color:var(--loss)">Risque de blessure mineure (25%).</span></div></div>
+      <div class="opp" style="border-left:3px solid var(--gold-d)" onclick="CL.buyFaithPerk('lobbying')"><b>Lobbying Managérial (100k$)</b>
+        <div class="muted small mt">Force une offre de promotion après le prochain combat. <span style="color:var(--loss)">50% de chance d\u2019échec.</span></div></div>
+      <div class="opp" style="border-left:3px solid var(--blood-d)" onclick="CL.buyFaithPerk('judges')"><b>Influence sur les Juges (20% des gains)</b>
+        <div class="muted small mt">Clémence en cas de décision. <span style="color:var(--loss)">Risque de scandale et rétrogradation.</span></div></div>
+      <div class="opp" onclick="CL.buyFaithPerk('diet')"><b>Diététicien Élite (40k$ / an)</b>
+        <div class="muted small mt">Pesées "Sans effort" garanties pour les 12 prochains mois.</div></div>
     </div>`;
   } else {
     actionsHtml=`<div class="eyebrow mb">PHASE 3 : L\u2019OCTOGONE</div>
@@ -1276,6 +1316,10 @@ function scr_faith_hub(){
   }
   return `<div class="scr">
     ${topBar}
+    ${G.currentEra?`<div class="card glass mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
+      <div class="eyebrow gold mb">CONTEXTE MONDIAL : ${esc(G.currentEra.name).toUpperCase()}</div>
+      <div class="muted small">L\u2019évolution du sport impose ses règles sur la division. Prépare-toi à affronter des spécialistes.</div>
+    </div>`:''}
     <div class="glass mwash card" style="padding:16px;margin-bottom:20px;border-radius:8px;background:var(--panel2)">
       <div class="meta-strip" style="margin-bottom:8px;color:var(--text)">
         <span style="background:var(--line);padding:4px 8px;border-radius:4px">SAISON ${G.faith.year}</span>
@@ -1290,8 +1334,8 @@ function scr_faith_hub(){
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */
 const FAITH_LIFE_EVENTS=[
   {id:'evt_eco_exam',title:'Semaine de partiels',text:'La session d\u2019examens approche à l\u2019université. Vous passez vos nuits à réviser au lieu de récupérer de vos sparrings.',
-    choices:[{label:'Prioriser les révisions (assurer l\u2019avenir)',d:[['fightIQ',3],['form',-12],['morale',5]]},
-             {label:'Ignorer la fac, aller tourner à la salle',d:[['footwork',0],['jab',2],['morale',-15]]}]},
+    choices:[{label:'Prioriser les révisions (assurer l\u2019avenir)',d:[['fightIQ',3],['form',-12],['morale',5]],traitTag:'ascetic'},
+             {label:'Ignorer la fac, aller tourner à la salle',d:[['jab',2],['morale',-15]]}]},
   {id:'evt_calisthenics',title:'Routine au poids du corps',text:'Vous remplacez votre séance de musculation lourde par une session stricte de calisthénie en plein air.',
     choices:[{label:'Focus explosivité & figures',d:[['explosiveness',3],['flexibility',2],['cardio',-4]]},
              {label:'Focus isométrie & maintien',d:[['strength',2],['durability',2],['form',-2]]}]},
@@ -1319,19 +1363,94 @@ const FAITH_LIFE_EVENTS=[
     choices:[{label:'Payer l\u2019accès (5k$)',cost:5,d:[['topControl',4],['takedown',3],['fightIQ',2]]},
              {label:'S\u2019entraîner seul',d:[['strength',2],['form',-3]]}]},
   {id:'evt_coach_clash',title:'Tension tactique',text:'Votre entraîneur veut vous imposer un plan de jeu extrêmement prudent qui va à l\u2019encontre de vos instincts.',
-    choices:[{label:'Se plier à ses exigences',d:[['fightIQ',4],['composure',3],['aggression',-5]]},
-             {label:'Refuser, imposer votre vision',d:[['aggression',4],['confidence',3],['morale',-10]]}]},
+    choices:[{label:'Se plier à ses exigences',d:[['fightIQ',4],['composure',3],['aggression',-5]],traitTag:'ascetic'},
+             {label:'Refuser, imposer votre vision',d:[['aggression',4],['confidence',3],['morale',-10]],traitTag:'rebel'}]},
   {id:'evt_media_call',title:'Interview locale',text:'Un média régional vous contacte pour un long format vidéo, sur votre journée de repos.',
-    choices:[{label:'Faire le show',d:[['morale',8],['confidence',4],['form',-6],['focus',-3]]},
+    choices:[{label:'Faire le show',d:[['morale',8],['confidence',4],['form',-6],['focus',-3]],traitTag:'showman'},
              {label:'Décliner poliment',d:[['focus',4],['form',5],['morale',-5]]}]},
   {id:'evt_sauna_break',title:'Le sauna en panne',text:'Pour maintenir votre perte de poids, vous devez enfiler une combinaison de sudation et enchaîner les sprints.',
-    choices:[{label:'Faire les sprints (épuisant)',d:[['cardio',4],['heart',3],['form',-15]]},
+    choices:[{label:'Faire les sprints (épuisant)',d:[['cardio',4],['heart',3],['form',-15]],traitTag:'ascetic'},
              {label:'Décaler la perte de poids',d:[['form',5],['discipline',-10]]}]},
   {id:'evt_shadow_mirror',title:'Perfectionnisme',text:'La salle est vide. Vous passez une heure devant le miroir à corriger une micro-imperfection technique.',
     choices:[{label:'Chirurgie technique',d:[['handSpeed',3],['cross',3],['focus',2],['form',-4]]}]},
   {id:'evt_gourou',title:'Le gourou psychologique',text:'Un coach mental vous vend une préparation "prédateur alpha" à prix fort.',
     choices:[{label:'Payer la séance (8k$)',cost:8,d:[['confidence',4],['composure',3],['form',-6]]},
-             {label:'Refuser, rester terre-à-terre',d:[['discipline',3],['morale',-3]]}]}
+             {label:'Refuser, rester terre-à-terre',d:[['discipline',3],['morale',-3]]}]},
+  // --- Événements conditionnels (req) : n'apparaissent que si l'état réel du combattant les justifie ---
+  {id:'evt_crypto_crash',req:f=>(f.earnings||0)>50,title:'Sponsor véreux',text:'Le fondateur de "PunchCoin", votre sponsor principal, s\u2019est enfui aux Bahamas. Vous perdez votre investissement de départ, mais la communauté a pitié de vous.',
+    choices:[{label:'Faire profil bas et encaisser la perte (20k$)',cost:20,d:[['composure',5],['morale',10],['focus',3]]},
+             {label:'Insulter le fondateur sur les réseaux',d:[['aggression',6],['composure',-10],['morale',-5]]}]},
+  {id:'evt_tax_audit',req:f=>(f.earnings||0)>150,title:'Contrôle fiscal',text:'L\u2019administration fiscale s\u2019intéresse de très près à vos déclarations. Votre comptable, qui a le charisme d\u2019une huître, vous conseille de payer pour éviter le tribunal.',
+    choices:[{label:'Régler le redressement sans faire de bruit (40k$)',cost:40,d:[['focus',5],['morale',-10]]},
+             {label:'Aller au tribunal (guerre d\u2019usure)',d:[['composure',-15],['discipline',-10],['fightIQ',2]]}]},
+  {id:'evt_exotic_pet',req:f=>(f.earnings||0)>80,title:'Achat compulsif',text:'Suite à un pari avec un influenceur, vous venez d\u2019acheter un tigre albinos. L\u2019animal est magnifique, mais il a dévoré votre canapé et terrorise vos sparring-partners.',
+    choices:[{label:'Le revendre à un zoo et payer l\u2019amende (15k$)',cost:15,d:[['discipline',5],['morale',-5]]},
+             {label:'Le garder et s\u2019en occuper',d:[['focus',-12],['heart',4],['form',-8]]}]},
+  {id:'evt_aging_joints',req:f=>f.age>33,title:'Le poids des années',text:'En vous levant ce matin, vos genoux ont craqué avec le bruit d\u2019un coup de fusil. Le déni ne fonctionne plus, votre corps réclame une maintenance drastique.',
+    choices:[{label:'Investir dans des cellules souches expérimentales (25k$)',cost:25,d:[['recovery',6],['durability',4],['form',10]]},
+             {label:'Prendre des anti-inflammatoires et serrer les dents',d:[['durability',-5],['heart',5],['recovery',-8]]}]},
+  {id:'evt_prospect_hype',req:f=>f.age<22&&(f.streak||0)>=3,title:'Le hype train',text:'Les médias vous considèrent comme le nouveau prodige de la décennie. Vos DM explosent, les marques vous harcèlent et votre ego enfle dangereusement.',
+    choices:[{label:'Couper le téléphone et retourner au sac de frappe',d:[['discipline',8],['focus',6],['morale',-5]],traitTag:'ascetic'},
+             {label:'Profiter de la gloire et des soirées mondaines',d:[['composure',-12],['cardio',-10],['morale',20]],traitTag:'showman'}]},
+  {id:'evt_losing_streak',req:f=>(f.streak||0)<=-2,title:'Le gouffre',text:'Les défaites s\u2019accumulent. Les fans qui vous adulaient hier vous conseillent de prendre votre retraite dans les commentaires de vos photos de vacances.',
+    choices:[{label:'Isolement total et remise en question',d:[['fightIQ',6],['focus',8],['confidence',-15]],traitTag:'ascetic'},
+             {label:'Répondre aux trolls avec agressivité',d:[['aggression',10],['composure',-15],['focus',-10]],traitTag:'rebel'}]},
+  {id:'evt_champion_target',req:f=>!!f.champion,title:'La cible sur le dos',text:'En tant que champion, vous êtes épié. Le challenger numéro 1 a disséqué chacun de vos rounds et vient de publier une vidéo pointant vos défauts biomécaniques.',
+    choices:[{label:'Modifier sa garde dans l\u2019urgence',d:[['adaptability',8],['fightIQ',4],['confidence',-8]]},
+             {label:'Parier sur ses fondamentaux bruts',d:[['confidence',10],['adaptability',-6],['composure',4]]}]},
+  {id:'evt_chin_check',req:f=>f.attrs.chin<50,title:'Verre pilé',text:'Pendant un sparring léger, un jab anodin vous fait vaciller. Votre menton est de plus en plus fragile et votre coach propose de changer toute l\u2019approche défensive.',
+    choices:[{label:'Passer à un style purement évasif',d:[['footSpeed',8],['fightIQ',4],['power',-6],['aggression',-10]]},
+             {label:'Refuser de reculer (risque de KO accru)',d:[['heart',8],['durability',-5],['composure',-5]],traitTag:'rebel'}]},
+  {id:'evt_bjj_nerd',req:f=>f.style==='bjj'||f.attrs.submission>80,title:'Obsession articulaire',text:'Vous avez passé les 72 dernières heures à visionner des tutoriels de clés de cheville lituaniennes. Vous voyez des angles de soumission même quand vous pliez votre linge.',
+    choices:[{label:'Intégrer ce savoir au gameplan',d:[['submission',6],['fightIQ',4],['cardio',-5]]},
+             {label:'Forcer l\u2019application en sparring (risque de blesser un ami)',d:[['killer',8],['submission',2],['morale',-12]]}]},
+  {id:'evt_podcast_disaster',req:null,title:'Le micro ouvert',text:'Vous êtes invité dans un podcast populaire de 4 heures. Vers la 3ème heure, fatigué, vous lâchez une théorie du complot absurde sur la forme de la Terre.',
+    choices:[{label:'Assumer et embrasser le rôle de vilain',d:[['composure',-8],['aggression',6],['morale',15]],traitTag:'showman'},
+             {label:'Engager une agence de gestion de crise (10k$)',cost:10,d:[['discipline',5],['focus',5],['morale',-10]]}]},
+  {id:'evt_reality_tv',req:null,title:'Romance cathodique',text:'Vous commencez à fréquenter une star de télé-réalité. Les paparazzis campent devant votre salle d\u2019entraînement, brisant la concentration de tout le camp.',
+    choices:[{label:'Mettre fin à la relation pour le sport',d:[['focus',10],['discipline',8],['morale',-20]],traitTag:'ascetic'},
+             {label:'Gérer les caméras et la relation',d:[['composure',-10],['form',-15],['morale',15]],traitTag:'showman'}]},
+  {id:'evt_bar_fight',req:null,title:'Désamorcer la bombe',text:'Dans un bar, un type éméché qui a fait deux mois de Krav Maga en 2014 décide que vous êtes l\u2019adversaire idéal pour prouver sa virilité à ses amis.',
+    choices:[{label:'Lui payer un verre et quitter les lieux',d:[['composure',8],['fightIQ',4],['aggression',-5]]},
+             {label:'Le balayer sèchement pour l\u2019exemple',d:[['aggression',8],['discipline',-15],['focus',-5]]}]},
+  {id:'evt_guru_supplement',req:null,title:'La poudre magique',text:'Un préparateur physique douteux vous propose un complément alimentaire non-étiqueté qui "révolutionnera votre testostérone" mais sent fortement l\u2019ammoniaque.',
+    choices:[{label:'Refuser et s\u2019en tenir au poulet-brocolis',d:[['discipline',6],['durability',3],['recovery',-4]]},
+             {label:'Tester le produit (risque absolu)',d:[['explosiveness',8],['power',5],['cardio',-15],['form',-10]]}]},
+  // --- Événements verrouillés par un trait émergent (cristallisé après 3 choix dans la même direction) ---
+  {id:'evt_trait_rebel_sponsor',req:f=>f.faithTraits&&f.faithTraits.includes('Tête Brûlée'),title:'Conséquence : marque toxique',text:'Votre réputation de Tête Brûlée fait fuir les annonceurs traditionnels, mais attire une marque de boisson énergisante ultra-agressive qui adore votre image.',
+    choices:[{label:'Signer le contrat controversé',reward:25,d:[['morale',15],['focus',-5]]},
+             {label:'Refuser pour redorer son image',d:[['composure',5],['morale',-10]]}]},
+  {id:'evt_trait_ascetic_camp',req:f=>f.faithTraits&&f.faithTraits.includes('Ascète'),title:'Conséquence : le vide absolu',text:'En tant qu\u2019Ascète reconnu, vous avez éliminé toute distraction. Vous passez un mois entier sans parler à personne d\u2019autre qu\u2019à votre sac de frappe.',
+    choices:[{label:'Embrasser l\u2019isolement martial',d:[['focus',10],['discipline',5],['morale',-15]]}]},
+  {id:'evt_trait_showman_deal',req:f=>f.faithTraits&&f.faithTraits.includes('Showman'),title:'Conséquence : le cirque médiatique',text:'Votre réputation de Showman précède chaque combat. Une chaîne de streaming vous propose une série documentaire intrusive sur votre quotidien.',
+    choices:[{label:'Accepter, caméras partout',reward:35,d:[['focus',-10],['morale',10],['composure',-5]]},
+             {label:'Refuser, préserver l\u2019intimité du camp',d:[['discipline',4],['morale',-5]]}]},
+  // --- Événements liés à l'agent (Le Requin) — n'apparaissent que si ce cercle a été choisi au draft ---
+  {id:'evt_agent_scheme',req:f=>f.agentCut>0,title:'Coup de fil du Requin',text:'Votre agent vous a décroché un spot publicitaire pour une marque d\u2019outillage peu glorieuse. "C\u2019est humiliant mais ça paye, gamin", dit-il.',
+    choices:[{label:'Tourner la pub',reward:20,d:[['morale',-15],['focus',-10]]},
+             {label:'Refuser catégoriquement (l\u2019agent s\u2019énerve)',d:[['confidence',5],['morale',5]]}]},
+  {id:'evt_agent_lobby',req:f=>f.agentCut>0&&f.org>0,title:'Trafic d\u2019influence',text:'Votre agent utilise son carnet d\u2019adresses pour vous obtenir de meilleurs créneaux d\u2019entraînement, mais la facture vous revient.',
+    choices:[{label:'Payer l\u2019accès VIP (10k$)',cost:10,d:[['form',20],['cardio',3]]},
+             {label:'Se débrouiller seul',d:[['discipline',5],['form',-5]]}]},
+  // --- Événements liés aux ères martiales (MMA_ERAS) ---
+  {id:'evt_era_daghestan',req:f=>G.currentEra&&G.currentEra.id==='era_daghestan',title:'L\u2019invasion de l\u2019Est',text:'La ligue est inondée de lutteurs effrayants. L\u2019angoisse de finir sur le dos pousse votre coach à modifier tout votre camp d\u2019entraînement.',
+    choices:[{label:'S\u2019entraîner spécifiquement contre la lutte',d:[['tdd',6],['guardWork',4],['form',-12]]},
+             {label:'Faire confiance à son style',d:[['confidence',5],['adaptability',-5]]}]},
+  {id:'evt_era_calf',req:f=>G.currentEra&&G.currentEra.id==='era_calf',title:'Chasse aux chevilles',text:'Détruire l\u2019appui avant est devenu la norme. Vos tibias sont couverts de contusions rien qu\u2019en sparring.',
+    choices:[{label:'Adapter sa garde',d:[['power',-5],['footSpeed',5],['durability',3]]},
+             {label:'Ignorer la mode (vos appuis sont en miettes)',d:[['durability',-8],['morale',5]]}]},
+  {id:'evt_era_boxing',req:f=>G.currentEra&&G.currentEra.id==='era_boxing',title:'Le renouveau du noble art',text:'Les combattants avec une excellente anglaise règnent en maîtres. Les échanges de pur striking sont d\u2019une violence rare.',
+    choices:[{label:'Affûter son jeu de jambes',d:[['footSpeed',6],['jab',3],['form',-8]]},
+             {label:'Compenser par le clinch sale',d:[['clinchStr',5],['aggression',4],['fightIQ',-3]]}]},
+  {id:'evt_era_bjj',req:f=>G.currentEra&&G.currentEra.id==='era_bjj',title:'La menace des leglocks',text:'Plus personne ne se sent en sécurité les jambes tendues. Toute la salle révise ses défenses articulaires.',
+    choices:[{label:'Blinder sa défense de jambes',d:[['flexibility',5],['tdd',3],['form',-8]]},
+             {label:'Rester concentré sur son propre jeu',d:[['confidence',4],['adaptability',-4]]}]},
+  {id:'evt_era_clinch',req:f=>G.currentEra&&G.currentEra.id==='era_clinch',title:'L\u2019ère de la boxe sale',text:'Le clinch contre la cage est devenu une arme à part entière. Les coudes pleuvent dans chaque combat de haut niveau.',
+    choices:[{label:'Travailler la boxe sale au clinch',d:[['clinchStr',6],['durability',3],['form',-10]]},
+             {label:'Fuir le clinch systématiquement',d:[['footSpeed',4],['cardio',-4]]}]},
+  {id:'evt_era_karate',req:f=>G.currentEra&&G.currentEra.id==='era_karate',title:'L\u2019avènement du style fuyant',text:'La distance et l\u2019angle deviennent rois. Les combattants qui restent statiques se font punir sans jamais toucher personne.',
+    choices:[{label:'Adopter un jeu de jambes fuyant',d:[['footSpeed',6],['fightIQ',4],['power',-4]]},
+             {label:'S\u2019en tenir à la pression constante',d:[['aggression',4],['cardio',-5]]}]}
 ];
 function scr_faith_event(){
   const ev=G.faith.currentEvent;
@@ -1344,7 +1463,7 @@ function scr_faith_event(){
      ${ev.choices.map((c,i)=>{
        const locked=c.cost&&(f.earnings||0)<c.cost;
        return `<div class="glass opp" style="padding:14px;text-align:left;opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
-         <b>${esc(c.label)}</b>${c.cost?`<span class="muted small"> (${c.cost}k$)</span>`:''}
+         <b>${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}${c.reward?`<span class="small" style="color:var(--win)"> (+${c.reward}k$)</span>`:''}
        </div>`;
      }).join('')}
    </div></div>`;
@@ -1501,7 +1620,8 @@ function scr_arcade_upgrades(){
       const color=RAR_COLORS[s.rar]||'var(--gold)';
       h+=`<div class="opp" style="border-left:3px solid ${color}" onclick="CL.pickArcadeSkill(${i})">
             <b style="color:${color}">${s.name}</b> <span class="muted small">(${s.rar})</span>
-            <div class="muted small mt">${s.desc||s.blurb||''}</div></div>`;
+            <div class="muted small mt">${s.desc||s.blurb||''}</div>
+            ${s.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(s.fx)}</div>`:''}</div>`;
     });
     if(!a.skillOpts.length) h+=`<div class="card glass mt"><span class="muted small">Aucune compétence disponible pour l\u2019instant.</span></div>
           <button class="btn ghost mt" onclick="CL.pickArcadeSkill(-1)">Continuer vers le camp</button>`;
@@ -1616,9 +1736,11 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.fight.pursePenalty) purse=Math.floor(purse*G.fight.pursePenalty*100)/100;
   const purseGross=purse;
   purse=Math.floor(purse*0.75*100)/100; // frais de camp fixes (manager, coach, salle) : ~25% de la bourse brute
-  const campFee=+(purseGross-purse).toFixed(2);
+  let agentFee=0;
+  if(G.f.agentCut){ agentFee=Math.floor(purseGross*G.f.agentCut*100)/100; purse=Math.floor((purse-agentFee)*100)/100; }
+  const campFee=+(purseGross-purse-agentFee).toFixed(2);
   G.f.earnings=(G.f.earnings||0)+purse;
-  G.fight.purseDetail={gross:purseGross,fee:campFee,net:purse};
+  G.fight.purseDetail={gross:purseGross,fee:campFee,agentFee,net:purse};
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: RIVALITE] — une défaite, ou une décision très serrée, crée une animosité ====
   const scoreDiff=Math.abs((res.scoreA||0)-(res.scoreB||0));
@@ -1692,19 +1814,31 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // combats faciles déclenchait une rétrogradation, une série de défaites
   // n'avait aucun effet structurel en dehors des paliers internationaux).
   if(!forced && (G.f.streak||0)<=-3){
-    if(G.f.org>0 && G.f.org<5){
+    if(G.f.org>1 && G.f.org<5){
       G.f.org--; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
       G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
       if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
       G.roster=makeOrgRoster(G.f);
       milestone='Rétrogradé d\u2019organisation suite à cette série de défaites.';
+    } else if(G.f.org===1){
+      if(!G.f.org1Warned){
+        G.f.org1Warned=true; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
+        G.f.orgElo=eloBaseline(1,G.f.overall); G.f.rankBoost=0;
+        milestone='Dernier avertissement du circuit pro. Une nouvelle série de défaites mettra fin à ton contrat.';
+      } else {
+        G.f.retired=true; forced=true; milestone='Renvoyé du circuit pro suite à vos défaites. Votre carrière s\u2019arrête ici.';
+      }
     } else if(G.f.org===0 && (G.f.W<G.f.L || G.f.age>=26)){
       G.f.retired=true; forced=true; milestone='Éliminé du circuit amateur. Aucune organisation ne vous réengage.';
     }
   }
   // ==== [FIN ANCRE] ====
   if((G.f.easyFights||0)>=3){
-    if(G.f.org>0){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
+    if(G.f.org>1){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
+    else if(G.f.org===1){
+      if(!G.f.org1Warned){ G.f.org1Warned=true; G.f.easyFights=0; milestone='Dernier avertissement pour refus de combattre.'; }
+      else { G.f.retired=true; forced=true; milestone='Contrat pro coupé pour refus de combattre. Retraite forcée.'; }
+    }
     else { G.f.retired=true; forced=true; milestone='Contrat coupé par l\u2019organisation.'; }
   }
   // ==== [FIN ANCRE] ====
@@ -1939,6 +2073,7 @@ function scr_title(){
    </div>
    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
+   ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
      <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l\u2019argent, les camps et l\u2019héritage</span></button>
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
@@ -1966,7 +2101,7 @@ function scr_gauntlet_menu(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-function scr_intro(){ const c=hasSave();
+function scr_intro(){ const c=hasSave('career');
   return `<div class="scr center intro">
    <div class="eyebrow">Simulateur de gestion MMA</div>
    <h1 class="disp big">CAGE<br>LEGACY</h1>
@@ -2019,6 +2154,10 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
    </div>
    ${msgHtml}
    ${injuryHtml}
+   ${G.currentEra?`<div class="card glass mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
+     <div class="eyebrow gold mb">CONTEXTE MONDIAL : ${esc(G.currentEra.name).toUpperCase()}</div>
+     <div class="muted small">L\u2019évolution du sport impose ses règles sur la division. Prépare-toi à affronter des spécialistes.</div>
+   </div>`:''}
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
      <div class="tagrow">${rankTag}${streakTag}${amaTag}</div>
@@ -2110,9 +2249,9 @@ function scr_camp(){ const f=G.f;
   const curTier=G.selectedCampTier||'gratuit';
   const activeTier=CAMP_TIERS.find(t=>t.id===curTier)||CAMP_TIERS[0];
   let tierDesc='';
-  if(activeTier.id==='gratuit') tierDesc='Aucun coût financier. <span style="color:var(--loss)">Risque de blessure de 5%</span> (-15 Forme, -10 Moral).';
-  else if(activeTier.id==='premium') tierDesc='Coût : 15k$. <span style="color:var(--win)">Zéro risque de blessure. Bonus garanti : +5 Forme, +5 Moral.</span>';
-  else if(activeTier.id==='sparring') tierDesc='Coût : 35k$. <span style="color:var(--win)">Zéro risque. Bonus : +5 Forme.</span> L\u2019adversaire subira un lourd malus (-15 Adapt., -10 QI).';
+  if(activeTier.id==='gratuit') tierDesc='Aucun coût financier. <span style="color:var(--loss)">Risque de blessure de 5%</span> (-15% Forme, -10% Moral).';
+  else if(activeTier.id==='premium') tierDesc='Coût : 15k$. <span style="color:var(--win)">Zéro risque de blessure. Bonus garanti : +5% Forme, +5% Moral.</span>';
+  else if(activeTier.id==='sparring') tierDesc='Coût : 35k$. <span style="color:var(--win)">Zéro risque. Bonus : +5% Forme.</span> L\u2019adversaire subira un malus tactique (-3 Adapt., -2 QI).';
   const tierTags=CAMP_TIERS.map(t=>{
     const canAfford=(f.earnings||0)>=t.cost;
     const style=`cursor:${canAfford?'pointer':'not-allowed'};opacity:${canAfford?1:0.35}`;
@@ -2187,8 +2326,8 @@ function scr_hof(){
   const fullList=loadHOF();
   const filt=G.hofFilter||{};
   const list=(typeof filterHallOfFame==='function')?filterHallOfFame(filt):fullList;
-  const styles=[...new Set(fullList.map(f=>f.style))];
-  const divisions=[...new Set(fullList.map(f=>f.divName).filter(Boolean))];
+  const styles=Object.values(STYLES).map(s=>s.label);
+  const divisions=[...new Set(DIVISIONS.F.concat(DIVISIONS.H).map(d=>d.name))];
   const modes=[...new Set(fullList.map(f=>f.gameMode||'career'))];
   const modeLabels={career:'Carrière Complète',faith:'MMA Faith'};
   const showFilters=!!G.showHofFilters;
@@ -2260,7 +2399,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   return `<div class="scr">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px;text-align:center">
      <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
-     <div class="hero-name" style="color:${p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)')}">${p.isFantasy?(p.res.winner==='D'?'ÉGALITÉ':`CÔTÉ ${p.win?'ROUGE':'BLEU'} GAGNE — ${esc(p.win?f.name:p.opp.name)}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
+     <div class="hero-name" style="color:${p.isFantasy||p.isVsFriend?(p.res.winner==='D'?'var(--gold)':(p.win?'var(--blood)':'#4DA6FF')):(p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)'))}">${(p.isFantasy||p.isVsFriend)?(p.res.winner==='D'?'ÉGALITÉ':`${esc(p.win?f.name:p.opp.name)} gagne par ${p.method}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${(p.isFantasy||p.isVsFriend)?'':p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
      <div class="tagrow" style="justify-content:center">
        ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
          const typeStr=p.method.startsWith('KO')?'KO/TKO':'Soumission';
@@ -2270,6 +2409,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
        })():''}
        ${p.planLabel?`<span class="tag2">Tactique : ${p.planLabel}</span>`:''}
      </div>
+     ${p.res.moveFlavor?`<div class="muted small mt" style="font-style:italic">${esc(p.res.moveFlavor)}</div>`:''}
    </div>
    ${judgesHtml}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
@@ -2282,6 +2422,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    ${p.purseDetail?`<div class="card"><div class="eyebrow mb">Bourse</div>
      <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Bourse brute</span><span>${formatArgent(p.purseDetail.gross)}</span></div>
      <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Frais de camp (manager, coach, salle)</span><span style="color:var(--loss)">-${formatArgent(p.purseDetail.fee)}</span></div>
+     ${p.purseDetail.agentFee?`<div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Part de l\u2019agent (${Math.round((f.agentCut||0)*100)}%)</span><span style="color:var(--loss)">-${formatArgent(p.purseDetail.agentFee)}</span></div>`:''}
      <div class="mono small" style="display:flex;justify-content:space-between;margin-top:4px"><b>Net perçu</b><b class="gold">${formatArgent(p.purseDetail.net)}</b></div></div>`:''}
    <div class="card"><div class="eyebrow mb">Déroulé</div>${fightLog(p.res)}</div>
    ${campHtml}
@@ -2298,6 +2439,7 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.fai
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
      <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
+     ${(f.faithTraits && f.faithTraits.length)?`<div class="story" style="position:relative;z-index:2;color:var(--blood)"><b>Traits de caractère.</b> ${f.faithTraits.join(', ')}.</div>`:''}
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
      ${f.skills.length?(()=>{
        const rarOrder={C:0,R:1,E:2,L:3,M:4,X:5};
@@ -2417,10 +2559,10 @@ function scr_promo(){
        <div class="muted small mt">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
        <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">${offer.phrase1}</button>
      </div>
-     ${offer.fastTrack?`<div class="glass" style="position:relative;background:var(--gold);color:#fff;-webkit-backdrop-filter:blur(44px) saturate(220%);backdrop-filter:blur(44px) saturate(220%);border:1px solid #fff;text-align:left;padding:16px;margin-top:15px">
-       <div class="hero-name" style="font-size:20px;color:#fff">${offer.orgFlavor3}<em style="color:rgba(255,255,255,0.85)">Fast-Track (opposition bien plus dure)</em></div>
-       <p class="small mt" style="color:#fff">Ton parcours fulgurant te permet de griller les étapes.</p>
-       <button class="btn mt" style="background:#fff;color:var(--gold-d);border-color:#fff;font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">${offer.phrase3}</button>
+     ${offer.fastTrack?`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
+       <div class="hero-name" style="font-size:20px;color:var(--blood)">${offer.orgFlavor3}<em style="color:var(--muted)">Fast-Track (opposition bien plus dure)</em></div>
+       <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
+       <button class="btn mt" style="background:var(--gold);color:#fff;border-color:var(--gold);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">${offer.phrase3}</button>
      </div>`:''}
      ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus en amateur</button>`:''}
      </div>`;
@@ -2787,53 +2929,17 @@ function advanceAllStarsTournament(){
   else if(t.step==='Finale'){ t.step='Terminé'; t.champion=survivors[0]; t.active=false; }
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: FAITH_SHOP] — Lot 3 du mode MMA Faith ==== */
-function scr_faith_shop(){
-  const f=G.f; const inf=G.faith.influence||0;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Le Sommet du Milieu</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
-   <div class="glass card mwash" style="background:var(--panel2);padding:16px;margin-bottom:20px;border-color:var(--gold)">
-     <div class="stat-band" style="border:none;padding:0;margin:0">
-       <div><span class="stat-big hot">${inf}</span><span class="stat-lbl">Points d\u2019Influence</span></div>
-       <div style="text-align:right"><span class="stat-big" style="font-size:24px">${formatArgent(f.earnings)}</span><span class="stat-lbl">Fonds Disponibles</span></div>
-     </div>
-   </div>
-   <h3 class="disp" style="font-size:18px;margin-top:24px;color:var(--gold)">Privilèges d\u2019Influence</h3>
-   <p class="lede small" style="margin-bottom:12px">Utilisez votre réputation pour plier les règles de l\u2019organisation à votre avantage.</p>
-   <div style="display:flex;flex-direction:column;gap:10px">
-     <div class="glass opp" onclick="CL.buyFaithPerk('hometown')"><b class="gold">Combat à Domicile (50 pts)</b>
-       <div class="muted small mt">Le prochain combat sera chez vous. Gain immédiat de +15 Moral et +8 Forme.</div></div>
-     <div class="glass opp" onclick="CL.buyFaithPerk('catchweight')"><b class="gold">Forcer un Catchweight (100 pts)</b>
-       <div class="muted small mt">Oblige le prochain adversaire à se déshydrater massivement (Malus Cardio/Durabilité).</div></div>
-     <div class="glass opp" onclick="CL.buyFaithPerk('protect_title')"><b class="gold">Sanctuariser le Titre (150 pts)</b>
-       <div class="muted small mt">Annule la pénalité d\u2019inactivité. L\u2019organisation ne vous destituera pas cette année.</div></div>
-   </div>
-   <h3 class="disp" style="font-size:18px;margin-top:24px">Investissements Financiers & Illégaux</h3>
-   <p class="lede small" style="margin-bottom:12px">L\u2019argent résout les problèmes que le talent ne peut pas couvrir.</p>
-   <div style="display:flex;flex-direction:column;gap:10px">
-     <div class="glass opp" style="border-left:3px solid var(--loss)" onclick="CL.buyFaithPerk('ped')"><b>Cellule de récupération PED (30k$)</b>
-       <div class="muted small mt">Restaure Menton et Résistance (+4). <span style="color:var(--loss)">Risque de suspension (15%).</span></div></div>
-     <div class="glass opp" style="border-left:3px solid var(--sage)" onclick="CL.buyFaithPerk('tiger')"><b>Stage au Tiger Muay Thai (50k$)</b>
-       <div class="muted small mt">+5 Kick et Clinch garantis (outrepasse le potentiel max). <span style="color:var(--loss)">Risque de blessure mineure (25%).</span></div></div>
-     <div class="glass opp" style="border-left:3px solid var(--gold-d)" onclick="CL.buyFaithPerk('lobbying')"><b>Lobbying Managérial (100k$)</b>
-       <div class="muted small mt">Force une offre de promotion après le prochain combat. <span style="color:var(--loss)">50% de chance d\u2019échec (argent perdu).</span></div></div>
-     <div class="glass opp" style="border-left:3px solid var(--blood-d)" onclick="CL.buyFaithPerk('judges')"><b>Influence sur les Juges (20% des gains)</b>
-       <div class="muted small mt">Bienveillance des juges en cas de décision. <span style="color:var(--loss)">Risque de scandale et rétrogradation.</span></div></div>
-     <div class="glass opp" onclick="CL.buyFaithPerk('diet')"><b>Diététicien Élite (40k$ / an)</b>
-       <div class="muted small mt">Garantit des pesées "Sans effort" sans aucun malus pour les 12 prochains mois.</div></div>
-   </div>
-  </div>`;
-}
 /* ==== [FIN ANCRE] ==== */
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_shop:scr_faith_shop,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   gauntlet_menu:scr_gauntlet_menu};
 
 /* ============================== RENDER + CL =============================== */
-function render(){ const app=document.getElementById('app'); if(!app)return;
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); window.scrollTo&&window.scrollTo(0,0); }
+function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
+  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
@@ -2954,8 +3060,8 @@ const CL={
     G.f.careerElo=eloBaseline(G.f.org,G.f.overall)+Math.round(bias*0.6);
     G.roster=makeOrgRoster(G.f);
     G.screen='hub'; save(); render(); },
-  cont(){ if(load()){ setTheme(G.theme||'dark'); G.screen='hub'; render(); } },
-  draft(k,v){ G.draft[k]=v; if(k==='gender')G.draft.div=DIVISIONS[v][Math.min(3,DIVISIONS[v].length-1)].id; render(); },
+  cont(){ if(load()){ setTheme(G.theme||'dark'); G.screen=G.faith?'faith_hub':'hub'; render(); } },
+  draft(k,v){ G.draft[k]=v; if(k==='gender')G.draft.div=DIVISIONS[v][Math.min(3,DIVISIONS[v].length-1)].id; render(true); },
   draftIn(k,v){ G.draft[k]=v; },
   create(){ const d=G.draft; const f=makeFighter({gender:d.gender,div:d.div,style:d.style,countryKey:d.country,first:(d.first||'').trim()||undefined,age:RI(15,16),potential:RI(70,94)});
     f.stage='amateur'; f.org=0; f._fy=0;
@@ -3137,7 +3243,7 @@ const CL={
   startLadder100(){ injectExtendedArchetypes(); G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool()}; G.screen='draft'; save(); render(); },
   startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
-  selectFaithDraft(key,value){ G.faithDraft[key]=value; render(); },
+  selectFaithDraft(key,value){ G.faithDraft[key]=value; render(true); },
   finalizeFaithDraft(){
     const d=G.faithDraft;
     if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality){
@@ -3175,8 +3281,8 @@ const CL={
   },
   faithLifeEvent(){
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
-    let pool=FAITH_LIFE_EVENTS.filter(e=>!G.faith.seenEvents.includes(e.id));
-    if(pool.length===0){ G.faith.seenEvents=[]; pool=FAITH_LIFE_EVENTS; }
+    let pool=FAITH_LIFE_EVENTS.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
+    if(pool.length===0){ G.faith.seenEvents=[]; pool=FAITH_LIFE_EVENTS.filter(e=>!e.req||e.req(G.f)); }
     G.faith.currentEvent=pick(pool);
     G.screen='faith_event'; save(); render();
   },
@@ -3185,11 +3291,25 @@ const CL={
     const c=ev.choices[i]; if(!c) return;
     if(c.cost && (G.f.earnings||0)<c.cost){ G.lastMsg="Fonds insuffisants ("+c.cost+"k$)."; render(); return; }
     if(c.cost) G.f.earnings-=c.cost;
+    if(c.reward) G.f.earnings=(G.f.earnings||0)+c.reward;
     applyDeltas(G.f,c.d);
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
     G.faith.currentEvent=null;
     G.lastMsg="Événement résolu : "+ev.title;
+    // Moteur d'émergence : un choix taggé traitTag renforce une tendance cachée ;
+    // au 3e choix dans la même direction, elle se cristallise en trait permanent.
+    if(c.traitTag){
+      if(!G.f.hiddenTraits) G.f.hiddenTraits={};
+      if(!G.f.faithTraits) G.f.faithTraits=[];
+      G.f.hiddenTraits[c.traitTag]=(G.f.hiddenTraits[c.traitTag]||0)+1;
+      const TRAIT_NAMES={rebel:'Tête Brûlée',ascetic:'Ascète',showman:'Showman'};
+      const traitName=TRAIT_NAMES[c.traitTag];
+      if(traitName && G.f.hiddenTraits[c.traitTag]>=3 && !G.f.faithTraits.includes(traitName)){
+        G.f.faithTraits.push(traitName);
+        G.lastMsg=`Événement résolu : ${ev.title}. NOUVEAU TRAIT ACQUIS : ${traitName} !`;
+      }
+    }
     G.faith.step=2; G.screen='faith_hub'; save(); render();
   },
   faithFight(){
@@ -3301,6 +3421,7 @@ const CL={
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
+    applyOrgAdvancementBoost(G.f,G.f.org);
     G.roster=makeOrgRoster(G.f);
     if(G.pending) G.pending.promoOffer=false;
     G.screen='hub'; save(); render();
@@ -3316,10 +3437,11 @@ const CL={
     G.screen='hub'; save(); render();
   },
   signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); G.f.rankBoost=0; if(G.pending)G.pending.topTierOffer=false;
+    applyOrgAdvancementBoost(G.f,orgId);
     G.roster=makeOrgRoster(G.f);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
     G.screen='hub'; save(); render(); },
-  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
+  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); applyOrgAdvancementBoost(G.f,G.f.org); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
   nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
