@@ -191,10 +191,11 @@ function advanceRoster(){
   G.roster.forEach(o=>{
     if(o.champion){ freshR.push(o); return; } // un champion ne part jamais sur un tirage aléatoire
     if(rnd()<0.15) o.age=(o.age||20)+1;
-    const isTooOld=(o.age>=39 && rnd()<0.5);
-    const isWashedUp=((o.streak||0)<=-4);
+    const isNemesis=G.faith && o.id===G.f.faithNemesisId; // vieillit normalement, mais ne peut jamais être remplacée par un nouveau prospect
+    const isTooOld=!isNemesis && (o.age>=39 && rnd()<0.5);
+    const isWashedUp=!isNemesis && ((o.streak||0)<=-4);
     const totalOF=o.W+o.L;
-    const isGatekeeper=(totalOF>=15 && o.L>o.W+4);
+    const isGatekeeper=!isNemesis && (totalOF>=15 && o.L>o.W+4);
     if(isTooOld||isWashedUp||isGatekeeper){
       const lv=clamp(orgLevel(G.f.org)+RI(-8,15),20,97);
       const prospect=makeFighter({gender:o.gender,div:o.div,level:lv,potential:lv+RI(3,14),age:RI(20,23)});
@@ -586,12 +587,30 @@ function finishTrainingFlow(pendingOppMalus){
     G.f.form=clamp(G.f.form-15,0,100); G.f.morale=clamp(G.f.morale-12,0,100);
     if(G.f.botchedWeightCuts>=3 && !isTopDivision){
       const divs=DIVISIONS[G.f.gender]; const curIdx=divs.findIndex(d=>d.id===G.f.div); const nextDiv=divs[curIdx+1];
-      if(nextDiv){ G.f.div=nextDiv.id; G.f.divName=nextDiv.name; G.f.botchedWeightCuts=0; G.f.champion=null;
-        G.f.orgWins=0; G.f.defenses=0;
+      if(nextDiv){
+        G.f.div=nextDiv.id; G.f.divName=nextDiv.name; G.f.botchedWeightCuts=0;
+        // Purge du statut dans l'ancienne division
+        G.f.champion=null; G.f.titles=0; G.f.defenses=0; G.f.orgWins=0; G.f.rankBoost=0;
+        // Purge du contexte relationnel et des objectifs croisés — une nouvelle
+        // division, c'est un nouveau roster, les rivalités de l'ancienne n'ont
+        // plus de sens.
+        G.f.rivalId=null; G.f._rivalries={};
+        if(G.f.gameMode==='faith') G.f.faithNemesisId=null;
+        G.f.recentOpps=[];
+        G.f.champChampTarget=null; delete G.f._champChampHomeDiv; delete G.f._champChampHomeRoster;
+        // Ajustement biomécanique naturel : plus lourd, plus fort, plus résistant,
+        // mais moins véloce — cohérent avec le changement de gabarit.
+        G.f.attrs.strength=clamp((G.f.attrs.strength||50)+6,1,100);
+        G.f.attrs.durability=clamp((G.f.attrs.durability||50)+4,1,100);
+        G.f.attrs.footSpeed=clamp((G.f.attrs.footSpeed||50)-5,1,100);
+        G.f.attrs.handSpeed=clamp((G.f.attrs.handSpeed||50)-4,1,100);
+        G.f.overall=overall(G.f);
+        G.f.orgElo=eloBaseline(G.f.org,G.f.overall);
         G.roster=makeOrgRoster(G.f);
-        G.lastMsg=`Le corps dit stop. La commission vous interdit de redescendre : monté en ${G.f.divName}.`; }
+        G.lastMsg=`Le corps dit stop. Le piège métabolique s\u2019est refermé : la commission vous interdit de redescendre. Vous êtes monté définitivement en ${G.f.divName}. Vos stats physiques se sont adaptées à votre nouveau gabarit.`;
+      }
       else G.lastMsg='Pesée ratée. Le combat est annulé.';
-      G.screen='hub'; save(); render(); return; // 3e coupe ratée : conséquence déjà tranchée plus haut
+      G.screen=G.faith?'faith_hub':'hub'; save(); render(); return; // 3e coupe ratée : conséquence déjà tranchée plus haut
     }
     // Négociation : l'adversaire peut accepter de maintenir le combat contre une part de la bourse
     G.activeEvent={
@@ -621,7 +640,32 @@ function finishTrainingFlow(pendingOppMalus){
   if(rnd()<0.08){ generateRandomEvent(); G.screen='event'; save(); render(); }
   else { proceedToFight(); }
 }
-function proceedToFight(){ G.screen='plan'; save(); render(); }
+function proceedToFight(){
+  const opp=G.fight.opp, kind=G.fight.kind;
+  // Face-à-face / pesée (Faith uniquement — la Carrière Complète a déjà son
+  // propre événement de pesée ratée dans chooseOpponent(), pas besoin d'un
+  // deuxième rituel de pesée qui ferait doublon).
+  if(G.faith && !G.fight._faceoffDone){
+    G.fight._faceoffDone=true;
+    const isRanked=divRank(opp)<=15 && (opp.W+opp.L+(opp.D||0))>0;
+    if(kind==='title' || kind==='defense' || (isRanked && rnd()<0.40)){
+      const scenarios=[
+        {title:'Pesée : le coup de pression',
+         text:`Sous les flashs des journalistes, ${esc(opp.name)} s\u2019approche front contre front et vous pousse violemment au niveau du torse. L\u2019arène retient son souffle.`,
+         btn:'Sourire avec un sang-froid glacial',actionId:'faceoff_smile',
+         btn2:'Le repousser avec agressivité',actionId2:'faceoff_shove'},
+        {title:'Pesée : guerre verbale',
+         text:`Lors du face-à-face, ${esc(opp.name)} commence à vous insulter à voix basse, ciblant directement votre entourage et votre dernier camp d\u2019entraînement.`,
+         btn:'L\u2019ignorer royalement',actionId:'faceoff_ignore',
+         btn2:'Répondre du tac au tac',actionId2:'faceoff_talkback'}
+      ];
+      G.activeEvent=pick(scenarios);
+      G.screen='event'; save(); render();
+      return;
+    }
+  }
+  G.screen='plan'; save(); render();
+}
 /* ==== [ANCRE: EVENEMENT] — blessures/coupe de poids, disruptif façon Destiny Eleven.
    H-heavy (poids lourd) et F-feather (poids plume) sont les catégories les PLUS
    HAUTES de leur genre (pas les plus petites) : la condition sert à empêcher
@@ -1262,6 +1306,8 @@ function scr_faith_hub(){
       <b style="font-size:16px;font-family:'Oswald'">${formatArgent(f.earnings)}</b></div>
     <div class="glass" style="flex:1;text-align:center;padding:8px 0;border-radius:6px;min-height:auto">
       <b class="mono" style="font-size:14px;color:var(--text)">OVR ${f.overall}</b></div>
+    ${(f.org>0 && f.contract)?`<div class="glass" style="flex:1;text-align:center;padding:8px 0;border-radius:6px;min-height:auto">
+      <b class="mono" style="font-size:14px;color:var(--gold)">${f.contract.fightsLeft} combat(s)</b></div>`:''}
   </div>
   <div style="display:flex;gap:16px;margin-bottom:24px;padding:0 4px">
     <div style="flex:1"><span class="stat-lbl" style="margin-bottom:4px">FORME</span>
@@ -1270,7 +1316,9 @@ function scr_faith_hub(){
     <div style="flex:1"><span class="stat-lbl" style="margin-bottom:4px">MORAL</span>
       <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden">
         <span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--text)"></span></div></div>
-  </div>`;
+  </div>
+  ${(f.chinDegradationLevel>0)?`<div class="mono small mb" style="color:var(--loss);border-top:1px dashed var(--loss);padding-top:6px">⚠ Séquelles neurologiques : plafond d\u2019encaissement définitivement réduit (Stade ${f.chinDegradationLevel}).</div>`:''}
+  ${(f.age>=28 && f.div!=='H-heavy' && f.div!=='F-feather')?`<div class="mono small mb" style="color:var(--gold);border-top:1px dashed var(--gold);padding-top:6px">⚠ Piège métabolique : ton corps s\u2019alourdit. Maintenir ce poids de forme devient difficile.</div>`:''}`;
   let actionsHtml='';
   if(step===1){
     actionsHtml=`<div class="eyebrow mb">PHASE 1 : PRÉPARATION</div>
@@ -1281,20 +1329,29 @@ function scr_faith_hub(){
         <div class="mono muted small mt" style="font-size:10px">Choix narratif impactant votre condition et vos attributs</div></div>
     </div>`;
   } else if(step===2){
-    const inf=G.faith.influence||0;
     actionsHtml=`<div class="eyebrow mb">PHASE 2 : AJUSTEMENT</div>
-    <p class="lede small">Gérez votre condition ou investissez avant l\u2019affrontement. Influence : <b class="gold">${inf} pts</b> · Fonds : <b>${formatArgent(f.earnings)}</b></p>
+    <p class="lede small">Gérez votre condition ou investissez avant l\u2019affrontement. Fonds : <b>${formatArgent(f.earnings)}</b></p>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="opp" style="padding:12px;text-align:center" onclick="CL.faithRest()">
         <div class="disp" style="font-size:18px;color:var(--text)">REPOS & RÉCUPÉRATION (Gratuit)</div>
         <div class="mono muted small mt" style="font-size:10px">+25 Forme, +10 Moral</div></div>
 
-      <div class="eyebrow mt" style="color:var(--gold)">Privilèges d\u2019influence</div>
-      <div class="opp" onclick="CL.buyFaithPerk('hometown')"><b class="gold">Combat à Domicile (50 pts)</b>
+      ${(G.faith.gym && G.faith.gym.length>0)?`
+      <div class="eyebrow mt" style="color:var(--sage)">La Salle d\u2019Entraînement</div>
+      ${G.faith.gym.map(p=>`
+        <div class="opp" style="border-left:3px solid var(--sage)" onclick="CL.faithSparring('${p.id}')">
+          <b style="color:var(--sage)">Tourner avec ${esc(p.first)}</b>
+          <div class="muted small mt">${p.styleLabel} · OVR ${p.overall} · ${p.age} ans.<br>Vous formez ce prospect (+15 Forme). Il copie vos meilleures armes.</div>
+        </div>
+      `).join('')}
+      `:''}
+
+      <div class="eyebrow mt" style="color:var(--gold)">Investissements de carrière</div>
+      <div class="opp" onclick="CL.buyFaithPerk('hometown')"><b class="gold">Combat à Domicile (15k$)</b>
         <div class="muted small mt">Le prochain combat sera chez vous. +15 Moral, +8 Forme.</div></div>
-      <div class="opp" onclick="CL.buyFaithPerk('catchweight')"><b class="gold">Forcer un Catchweight (100 pts)</b>
+      <div class="opp" onclick="CL.buyFaithPerk('catchweight')"><b class="gold">Forcer un Catchweight (35k$)</b>
         <div class="muted small mt">L\u2019adversaire subira un lourd malus de déshydratation (Cardio/Durabilité).</div></div>
-      <div class="opp" onclick="CL.buyFaithPerk('protect_title')"><b class="gold">Sanctuariser le Titre (150 pts)</b>
+      <div class="opp" onclick="CL.buyFaithPerk('protect_title')"><b class="gold">Sanctuariser le Titre (50k$)</b>
         <div class="muted small mt">Annule la pénalité d\u2019inactivité cette année.</div></div>
 
       <div class="eyebrow mt">Investissements financiers & illégaux</div>
@@ -1450,8 +1507,201 @@ const FAITH_LIFE_EVENTS=[
              {label:'Fuir le clinch systématiquement',d:[['footSpeed',4],['cardio',-4]]}]},
   {id:'evt_era_karate',req:f=>G.currentEra&&G.currentEra.id==='era_karate',title:'L\u2019avènement du style fuyant',text:'La distance et l\u2019angle deviennent rois. Les combattants qui restent statiques se font punir sans jamais toucher personne.',
     choices:[{label:'Adopter un jeu de jambes fuyant',d:[['footSpeed',6],['fightIQ',4],['power',-4]]},
-             {label:'S\u2019en tenir à la pression constante',d:[['aggression',4],['cardio',-5]]}]}
+             {label:'S\u2019en tenir à la pression constante',d:[['aggression',4],['cardio',-5]]}]},
+  // --- Lot d'expansion : chaque choix est un vrai entraînement, pas un simple texte ---
+  {id:'evt_boxing_pads',title:'Séance de pao',text:'Le coach vous colle aux patins pendant quarante minutes sans pause, à corriger chaque angle de frappe.',
+    choices:[{label:'Vitesse et précision',d:[['handSpeed',4],['jab',3],['form',-6]]},
+             {label:'Puissance et enracinement',d:[['power',4],['cross',3],['form',-8]]}]},
+  {id:'evt_wrestling_room',title:'La salle de lutte',text:'Un vétéran vous propose de reprendre les bases : niveau des hanches, changements de direction, chaînes d\u2019amenées.',
+    choices:[{label:'Perfectionner les amenées simples',d:[['takedown',5],['strength',3],['form',-10]]},
+             {label:'Travailler la défense de projection',d:[['tdd',5],['footSpeed',2],['form',-8]]}]},
+  {id:'evt_jiujitsu_open_mat',title:'Open mat du dimanche',text:'La salle ouvre ses tapis à tout le monde. Ceintures noires, débutants, tout le monde roule ensemble.',
+    choices:[{label:'Chasser les soumissions',d:[['submission',5],['flexibility',2],['form',-6]]},
+             {label:'Travailler la garde et la patience',d:[['guardWork',5],['composure',3],['form',-5]]}]},
+  {id:'evt_clinch_work',title:'Travail au clinch',text:'Deux heures collé à un partenaire contre le mur, à chercher les genoux et à casser la posture adverse.',
+    choices:[{label:'Genoux et coudes sales',d:[['clinchStr',5],['aggression',3],['form',-8]]},
+             {label:'Contrôle et projection depuis le clinch',d:[['clinchStr',3],['takedown',3],['form',-6]]}]},
+  {id:'evt_gnp_drilling',title:'Ground and pound au sac lesté',text:'Le préparateur physique a inventé un exercice à base de sac de sable posé sur un mannequin. C\u2019est aussi ridicule qu\u2019efficace.',
+    choices:[{label:'Rafales courtes et répétées',d:[['gnp',5],['handSpeed',2],['form',-9]]},
+             {label:'Frappes lourdes et posture',d:[['gnp',4],['power',3],['form',-7]]}]},
+  {id:'evt_footwork_ladder',title:'L\u2019échelle de rythme',text:'Une session entière consacrée au jeu de jambes, digne d\u2019un boxeur des années 70.',
+    choices:[{label:'Vitesse pure',d:[['footSpeed',5],['explosiveness',2],['form',-5]]},
+             {label:'Angles et déplacements latéraux',d:[['footSpeed',3],['fightIQ',3],['form',-5]]}]},
+  {id:'evt_iron_chin',title:'Renforcement du cou',text:'Un protocole spécifique de musculation cervicale, réputé réduire l\u2019impact des coups à la tête.',
+    choices:[{label:'S\u2019y tenir sérieusement',d:[['durability',4],['discipline',3],['form',-4]]},
+             {label:'Bâcler pour gagner du temps',d:[['durability',1],['form',2]]}]},
+  {id:'evt_film_study',title:'Séance vidéo',text:'Des heures à décortiquer vos propres combats et ceux de la division au ralenti.',
+    choices:[{label:'Analyser ses propres erreurs',d:[['fightIQ',5],['composure',2],['focus',-3]]},
+             {label:'Étudier le style du prochain adversaire',d:[['adaptability',5],['fightIQ',2],['focus',-3]]}]},
+  {id:'evt_altitude_camp',title:'Stage en altitude',text:'Deux semaines à 2000 mètres. Chaque respiration est un combat en soi.',
+    choices:[{label:'S\u2019y donner à fond',d:[['cardio',6],['heart',3],['form',-15]]},
+             {label:'Doser l\u2019effort pour ne pas se griller',d:[['cardio',3],['recovery',2],['form',-6]]}]},
+  {id:'evt_flexibility_yoga',title:'Séance de mobilité',text:'Le staff insiste : un corps plus mobile encaisse mieux et attaque sous des angles impossibles.',
+    choices:[{label:'S\u2019investir sérieusement',d:[['flexibility',5],['recovery',2],['form',-3]]},
+             {label:'Le faire du bout des lèvres',d:[['flexibility',1],['discipline',-3]]}]},
+  {id:'evt_mental_coach',title:'Le préparateur mental',text:'Un psychologue du sport propose des séances de visualisation avant chaque gros combat.',
+    choices:[{label:'Adhérer pleinement à la méthode',d:[['composure',5],['confidence',3],['focus',2]]},
+             {label:'Rester sceptique mais écouter poliment',d:[['composure',2],['discipline',1]]}]},
+  {id:'evt_weight_class_debate',title:'Le débat de catégorie',text:'Votre entourage se dispute : rester dans votre catégorie actuelle, ou tenter le grand saut vers une division voisine ?',
+    choices:[{label:'Se concentrer sur la catégorie actuelle',d:[['discipline',4],['composure',2]]},
+             {label:'Se préparer mentalement à un changement futur',d:[['adaptability',5],['confidence',-3]]}]},
+  {id:'evt_condition_check',title:'Bilan physique complet',text:'Un check-up médical complet, des pieds à la tête, pour repartir sur des bases saines.',
+    choices:[{label:'Suivre à la lettre les recommandations',d:[['durability',3],['recovery',3],['discipline',2]]},
+             {label:'Garder seulement ce qui vous arrange',d:[['confidence',3],['durability',-2]]}]},
+  {id:'evt_sparring_partner_bond',title:'Le partenaire de confiance',text:'Un partenaire d\u2019entraînement régulier commence à vraiment comprendre votre jeu — dans les deux sens.',
+    choices:[{label:'Approfondir cette complicité technique',d:[['adaptability',4],['fightIQ',3],['composure',2]]},
+             {label:'Varier les partenaires pour rester imprévisible',d:[['adaptability',2],['confidence',3]]}]},
+  {id:'evt_local_seminar',title:'Séminaire de passage',text:'Un ancien champion de passage dans la région donne un séminaire technique très demandé.',
+    choices:[{label:'Payer l\u2019accès (6k$)',cost:6,d:[['fightIQ',4],['adaptability',3]]},
+             {label:'Ne pas s\u2019y rendre',d:[['discipline',2]]}]},
+  {id:'evt_referee_incident',title:'Incident avec un arbitre',text:'Un mauvais souvenir d\u2019arrêt de combat controversé refait surface dans les médias locaux.',
+    choices:[{label:'Répondre calmement en interview',d:[['composure',4],['confidence',2]]},
+             {label:'Laisser sa colère s\u2019exprimer publiquement',d:[['aggression',5],['composure',-6],['morale',8]]}]},
+  {id:'evt_new_gym_offer',title:'Offre d\u2019une salle rivale',text:'Une salle réputée de l\u2019autre bout du pays propose de vous accueillir, avec des infrastructures bien supérieures.',
+    choices:[{label:'Rester fidèle à sa salle d\u2019origine',d:[['discipline',3],['morale',6]]},
+             {label:'Envisager sérieusement le changement',d:[['adaptability',3],['confidence',3],['morale',-4]]}]},
+  {id:'evt_injury_scare',title:'Alerte à l\u2019entraînement',text:'Une torsion du genou pendant un exercice de niveau fait craindre le pire un instant. Finalement rien de cassé, mais l\u2019inquiétude reste.',
+    choices:[{label:'Reprendre prudemment',d:[['durability',2],['discipline',2],['form',-8]]},
+             {label:'Reprendre comme si de rien n\u2019était',d:[['confidence',4],['durability',-3],['form',-4]]}]},
+  {id:'evt_public_workout',title:'Entraînement public',text:'L\u2019organisation demande une séance ouverte aux médias avant le prochain événement.',
+    choices:[{label:'Montrer un vrai travail technique',d:[['fightIQ',3],['confidence',2],['focus',-3]]},
+             {label:'Mettre en scène de la puissance brute',d:[['power',3],['aggression',3],['focus',-3]]}]},
+  {id:'evt_old_footage',title:'Vieilles images',text:'Un fan retrouve une vidéo de vos tout premiers combats amateurs et la partage en ligne. Le contraste est saisissant.',
+    choices:[{label:'En rire publiquement',d:[['composure',3],['morale',8]]},
+             {label:'Ignorer complètement',d:[['discipline',2]]}]},
+  {id:'evt_camp_relocation',title:'Délocalisation de camp',text:'Pour préparer un combat à l\u2019étranger, tout le camp part s\u2019installer un mois sur place.',
+    choices:[{label:'S\u2019adapter au fuseau horaire et à la nourriture',d:[['adaptability',4],['recovery',2],['form',-6]]},
+             {label:'Reproduire sa routine habituelle à tout prix',d:[['discipline',4],['adaptability',-2],['form',-4]]}]},
+  {id:'evt_style_switch_temptation',title:'La tentation du style adverse',text:'En observant un adversaire dominer avec un style qui n\u2019est pas le vôtre, l\u2019envie de tout changer vous traverse.',
+    choices:[{label:'Résister et approfondir son propre style',d:[['discipline',4],['confidence',3]]},
+             {label:'Emprunter un peu de cette approche',d:[['adaptability',5],['fightIQ',2],['confidence',-2]]}]},
+  {id:'evt_fan_letter',title:'Une lettre de fan',text:'Un jeune combattant amateur vous écrit une longue lettre expliquant à quel point votre parcours l\u2019a inspiré.',
+    choices:[{label:'Répondre personnellement',d:[['morale',10],['composure',2]]},
+             {label:'Passer à autre chose, trop de sollicitations',d:[['focus',3]]}]},
+  {id:'evt_camp_conflict',title:'Tension entre coachs',text:'Deux membres de votre staff ne s\u2019entendent plus sur l\u2019approche à adopter pour le prochain combat.',
+    choices:[{label:'Trancher soi-même la question',d:[['fightIQ',3],['confidence',3],['composure',-3]]},
+             {label:'Laisser le coach principal décider',d:[['discipline',3],['confidence',-2]]}]},
+  {id:'evt_documentary_offer',title:'Offre de documentaire',text:'Une équipe de tournage souhaite suivre une saison entière de votre carrière pour un documentaire.',
+    choices:[{label:'Accepter, caméras partout',reward:15,d:[['focus',-8],['morale',12]]},
+             {label:'Refuser, préserver la tranquillité du camp',d:[['discipline',3],['morale',-3]]}]},
+  {id:'evt_home_gym_build',req:f=>(f.earnings||0)>100,title:'Salle personnelle',text:'Vos moyens permettent enfin d\u2019installer une salle privée chez vous, loin du bruit du club.',
+    choices:[{label:'Investir dans l\u2019équipement (25k$)',cost:25,d:[['discipline',3],['recovery',3],['form',6]]},
+             {label:'Continuer à s\u2019entraîner en club',d:[['composure',2]]}]},
+  {id:'evt_weight_cut_horror',req:f=>f.age>28,title:'Une coupe de poids terrible',text:'La déshydratation de cette semaine a été la pire de votre carrière. Votre corps a mis des jours à s\u2019en remettre.',
+    choices:[{label:'Revoir sérieusement sa méthode de coupe',d:[['discipline',4],['durability',3],['form',-10]]},
+             {label:'Serrer les dents et continuer pareil',d:[['heart',5],['durability',-4],['form',-6]]}]},
+  // --- Lot 2 (Gemini, vérifié) ---
+  {id:'evt_ice_bath_extreme',title:'Bain de glace prolongé',text:'Votre préparateur vous met au défi de rester cinq minutes de plus dans l\u2019eau à 2°C pour tester vos limites mentales.',
+    choices:[{label:'Serrer les dents et rester',d:[['recovery',5],['heart',4],['form',-8]]},
+             {label:'Sortir, la récupération standard suffit',d:[['form',5],['discipline',-4]]}]},
+  {id:'evt_prodigy_sparring',req:f=>f.org>0,title:'Le petit nouveau',text:'Un jeune prodige de 19 ans fraîchement débarqué à la salle vous met en réelle difficulté lors d\u2019un sparring. Votre ego en prend un coup.',
+    choices:[{label:'Ranger son ego et analyser son jeu',d:[['fightIQ',5],['focus',4],['morale',-8]]},
+             {label:'Durcir le sparring pour le calmer',d:[['aggression',6],['power',2],['form',-10]]}]},
+  {id:'evt_mansion_buy',req:f=>(f.earnings||0)>=100,title:'Folie immobilière',text:'Avec vos récents gains, l\u2019envie d\u2019acheter une immense villa avec piscine devient obsédante. C\u2019est le symbole ultime de la réussite.',
+    choices:[{label:'Acheter la villa (60k$)',cost:60,d:[['morale',20],['confidence',5],['focus',-10]]},
+             {label:'Placer l\u2019argent sagement',d:[['discipline',6],['focus',4],['morale',-5]]}]},
+  {id:'evt_food_poisoning',title:'Le buffet maudit',text:'Une intoxication alimentaire fulgurante vous cloue au lit à trois semaines du combat. Vous êtes complètement déshydraté et affaibli.',
+    choices:[{label:'S\u2019entraîner quand même dans la douleur',d:[['heart',6],['durability',3],['form',-20],['cardio',-5]]},
+             {label:'Garder le lit et se soigner',d:[['form',8],['recovery',4],['cardio',-8]]}]},
+  {id:'evt_boxer_hands',req:f=>f.style==='boxer',title:'Mains de cristal',text:'Vos phalanges vous font atrocement souffrir après chaque séance aux paos. C\u2019est le prix à payer pour frapper aussi lourdement.',
+    choices:[{label:'Bander lourdement et continuer de frapper',d:[['power',4],['hook',3],['form',-12]]},
+             {label:'Mettre les poings au repos, focus jambes',d:[['footSpeed',5],['adaptability',3],['cross',-4]]}]},
+  {id:'evt_wrestler_ear',req:f=>f.style==='wrestler',title:'Oreille en chou-fleur',text:'Votre oreille gauche vient de gonfler dramatiquement après un frottement sévère sur le tapis. Elle est prête à exploser.',
+    choices:[{label:'La faire ponctionner chez le médecin',d:[['composure',5],['focus',3],['form',-8]]},
+             {label:'La laisser durcir comme un trophée',d:[['durability',5],['confidence',3],['focus',-5]]}]},
+  {id:'evt_era_calf_def',req:f=>G.currentEra&&G.currentEra.id==='era_calf',title:'Hachoir à viande',text:'Dans cette ère du calf-kick, vos mollets sont ciblés à chaque session d\u2019entraînement. Vous avez du mal à marcher le matin.',
+    choices:[{label:'Conditionner les tibias sur des sacs durs',d:[['durability',6],['kick',3],['form',-15]]},
+             {label:'Travailler les changements de garde fluides',d:[['adaptability',5],['footSpeed',4],['power',-5]]}]},
+  {id:'evt_imposter_syndrome',title:'Le syndrome de l\u2019imposteur',text:'Il est 3h du matin. Vous fixez le plafond en vous demandant si vous avez vraiment le niveau pour monter dans cette cage face à des tueurs.',
+    choices:[{label:'Regarder les vidéos de ses anciennes victoires',d:[['confidence',6],['morale',5],['form',-6]]},
+             {label:'Appeler son coach en pleine nuit pour parler tactique',d:[['fightIQ',5],['focus',4],['morale',-5]]}]},
+  {id:'evt_hollywood_cameo',req:f=>(f.earnings||0)>30,title:'Caméo hollywoodien',text:'Un studio de cinéma vous propose un petit rôle de mercenaire dans un film d\u2019action. Le tournage empiétera sur vos horaires de camp.',
+    choices:[{label:'Accepter le rôle',reward:20,d:[['morale',15],['focus',-10],['form',-8]]},
+             {label:'Refuser pour rester 100% focus sur le sport',d:[['discipline',8],['focus',6],['morale',-10]]}]},
+  {id:'evt_overtraining',title:'La ligne rouge',text:'Votre corps vous supplie d\u2019arrêter. Vos temps de réaction s\u2019effondrent et votre système nerveux est complètement grillé par le surentraînement.',
+    choices:[{label:'Prendre trois jours de repos complet',d:[['recovery',6],['form',15],['discipline',-6]]},
+             {label:'Pousser la machine jusqu\u2019à la rupture',d:[['heart',8],['cardio',4],['form',-25]]}]},
+  {id:'evt_forgotten_belt',req:f=>!!f.champion,title:'Ceinture oubliée',text:'Vous avez oublié votre ceinture de champion dans le coffre d\u2019un VTC après une soirée de célébration. Le chauffeur exige une récompense pour la rendre.',
+    choices:[{label:'Payer la rançon discrètement (5k$)',cost:5,d:[['focus',5],['discipline',3],['morale',-5]]},
+             {label:'Le menacer publiquement sur les réseaux',d:[['aggression',6],['confidence',4],['composure',-10]]}]},
+  {id:'evt_lumpinee_trip',req:f=>f.style==='muayThai',title:'Pèlerinage au Lumpinee',text:'L\u2019appel de la Thaïlande se fait sentir. Partir s\u2019entraîner à la dure, dans la chaleur étouffante de Bangkok, pourrait raviver votre instinct animal.',
+    choices:[{label:'Financer le voyage martial (15k$)',cost:15,d:[['clinchStr',6],['kick',5],['durability',4],['form',-12]]},
+             {label:'Rester s\u2019entraîner dans son confort habituel',d:[['discipline',4],['morale',-6]]}]},
+  {id:'evt_hot_yoga',title:'Yoga infernal',text:'Un coéquipier vous traîne dans un cours de yoga Bikram à 40°C. Vos muscles raides d\u2019artiste martial crient à l\u2019agonie dès les premières postures.',
+    choices:[{label:'Souffrir en silence jusqu\u2019à la fin de la séance',d:[['flexibility',8],['recovery',4],['power',-4]]},
+             {label:'Quitter la salle en plein milieu, trempé de sueur',d:[['power',3],['flexibility',-5],['morale',-2]]}]},
+  {id:'evt_twitter_beef',title:'Guerre des claviers',text:'Un combattant que vous n\u2019avez même pas provoqué lance une attaque cinglante sur votre style de combat en ligne. Vos notifications explosent.',
+    choices:[{label:'Rentrer dans le clash virtuel et faire le buzz',d:[['aggression',6],['confidence',5],['focus',-10]]},
+             {label:'Désinstaller l\u2019application et l\u2019ignorer',d:[['composure',8],['discipline',5],['morale',-8]]}]},
+  {id:'evt_boxing_gloves_16',req:f=>G.currentEra&&G.currentEra.id==='era_boxing',title:'Le test des 16oz',text:'Dans cette ère dominée par la boxe, d\u2019anciens pros viennent tourner à la salle avec des gants de 16oz pour vous donner une leçon d\u2019anglaise.',
+    choices:[{label:'Mettre les gros gants et boxer avec eux',d:[['handSpeed',6],['cross',4],['kick',-5],['form',-8]]},
+             {label:'Les emmener au sol (imposer les règles du MMA)',d:[['adaptability',6],['takedown',4],['handSpeed',-5]]}]},
+  {id:'evt_invincible_aura',req:f=>(f.streak||0)>=4,title:'Aura d\u2019invincibilité',text:'Votre série de victoires vous donne l\u2019impression d\u2019être un demi-dieu. Plus rien ne semble pouvoir vous blesser dans la cage.',
+    choices:[{label:'Embrasser cette confiance absolue',d:[['confidence',8],['power',5],['fightIQ',-8]]},
+             {label:'Se forcer à rester humble et paranoïaque',d:[['composure',6],['focus',5],['morale',-6]]}]},
+  {id:'evt_change_scenery',req:f=>(f.streak||0)<=-2,title:'Changement de décor',text:'La spirale de la défaite empoisonne l\u2019air de votre salle habituelle. Vous ressentez un besoin vital de vous exiler pour ce camp d\u2019entraînement.',
+    choices:[{label:'Partir en camp d\u2019isolement à l\u2019étranger (10k$)',cost:10,d:[['adaptability',6],['fightIQ',5],['confidence',4],['form',-10]]},
+             {label:'Serrer les dents et rester fidèle à son équipe',d:[['heart',6],['discipline',4],['confidence',-5]]}]},
+  {id:'evt_intrusive_fan',title:'Le fan envahissant',text:'Pendant votre footing matinal à l\u2019aube, un fan vous reconnaît et commence à courir à côté de vous en vous posant mille questions.',
+    choices:[{label:'Lui répondre gentiment et faire le footing ensemble',d:[['cardio',4],['morale',8],['focus',-5]]},
+             {label:'Accélérer violemment l\u2019allure pour le semer',d:[['footSpeed',5],['explosiveness',4],['morale',-4]]}]},
+  {id:'evt_creaky_knee',title:'Genou qui grince',text:'Sur une tentative de takedown routinière, votre genou émet un craquement sourd. La douleur est minime, mais l\u2019angoisse d\u2019une rupture ligamentaire est totale.',
+    choices:[{label:'Consulter un spécialiste en urgence (5k$)',cost:5,d:[['recovery',6],['composure',4],['form',-4]]},
+             {label:'Bander l\u2019articulation fortement et prier',d:[['heart',5],['durability',3],['confidence',-8]]}]},
+  {id:'evt_martial_wisdom',req:f=>f.age>=35,title:'Sagesse martiale',text:'Vos fibres blanches disparaissent, votre explosivité n\u2019est plus ce qu\u2019elle était. Mais là où le corps ralentit, l\u2019esprit commence à voir tout au ralenti.',
+    choices:[{label:'Adapter son style sur le timing et le coup d\u2019œil',d:[['fightIQ',8],['composure',6],['handSpeed',-6]]},
+             {label:'Refuser l\u2019âge et forcer les drills de vitesse',d:[['handSpeed',5],['explosiveness',3],['recovery',-10],['form',-12]]}]},
+  {id:'evt_stubborn_scale',title:'La balance qui stagne',text:'À une semaine de la pesée, votre poids refuse de descendre. Votre métabolisme s\u2019est mis en mode survie et stocke la moindre goutte d\u2019eau.',
+    choices:[{label:'Enfiler la combinaison de sudation et courir',d:[['cardio',5],['chin',-8],['form',-18]]},
+             {label:'Jeûne hydrique total et absolu dans le noir',d:[['discipline',8],['power',-8],['form',-15]]}]},
+  {id:'evt_tape_study',title:'Nuit de cassettes',text:'Vous retrouvez une clé USB contenant des centaines d\u2019heures de combats d\u2019anciennes époques et de vieux tournois.',
+    choices:[{label:'Analyser les vieux maîtres toute la nuit',d:[['fightIQ',6],['adaptability',5],['form',-8]]},
+             {label:'Aller dormir, le sport a évolué de toute façon',d:[['recovery',5],['form',5],['fightIQ',-3]]}]},
+  {id:'evt_cooper_test',title:'Le test de Cooper',text:'Votre préparateur physique apporte un sifflet sur la piste d\u2019athlétisme. "12 minutes. Montrez-moi de quoi vous êtes fait."',
+    choices:[{label:'Vomir ses poumons pour battre le record de la salle',d:[['cardio',8],['heart',6],['form',-20]]},
+             {label:'Gérer son allure pour faire le strict minimum syndical',d:[['recovery',5],['discipline',-5],['cardio',-2]]}]},
+  {id:'evt_tv_documentary',req:f=>f.org>=3,title:'Dans l\u2019intimité du camp',text:'Une équipe télévisée réalise un documentaire "Embedded" sur votre préparation. Ils vous suivent même à la cantine et chez le kiné.',
+    choices:[{label:'Jouer le jeu des caméras et faire le show',d:[['confidence',6],['morale',10],['focus',-10]]},
+             {label:'Leur montrer la monotonie brutale et silencieuse du métier',d:[['discipline',6],['focus',5],['morale',-6]]}]},
+  {id:'evt_gi_nogi',req:f=>f.style==='bjj',title:'L\u2019appel du Kimono',text:'Vos racines vous manquent. Vous ressentez l\u2019envie viscérale de remettre un Gi pour rouler, même si le MMA moderne se pratique en No-Gi.',
+    choices:[{label:'Passer la semaine en Kimono',d:[['guardWork',6],['submission',5],['explosiveness',-6]]},
+             {label:'Rester pragmatique et s\u2019entraîner en No-Gi',d:[['takedown',4],['adaptability',3],['morale',-5]]}]},
+  {id:'evt_forest_kata',req:f=>f.style==='karate',title:'L\u2019esprit de la forêt',text:'Vous décidez de fuir les néons clignotants de la salle pour exécuter vos Katas pieds nus dans la forêt, au lever du soleil.',
+    choices:[{label:'Rechercher la fluidité et le vide mental',d:[['footSpeed',6],['composure',5],['durability',-5]]},
+             {label:'Durcir ses tibias et poings contre les écorces d\u2019arbres',d:[['durability',8],['kick',4],['form',-12]]}]},
+  {id:'evt_neck_harness',title:'Collier de plomb',text:'Un lutteur de passage vous montre un vieil exercice avec un harnais de cou lesté de disques de fonte. Cela a l\u2019air dangereux pour les cervicales.',
+    choices:[{label:'Charger les poids et renforcer la nuque',d:[['chin',6],['clinchStr',5],['form',-10]]},
+             {label:'Protéger ses cervicales et faire des étirements',d:[['flexibility',5],['recovery',4],['chin',-4]]}]},
+  {id:'evt_management_sim',title:'Nuit blanche tactique',text:'Un ami vous offre le dernier jeu de simulation de management sportif. Vous lancez une partie "juste pour voir les menus" et il est soudainement 6h du matin.',
+    choices:[{label:'Terminer la saison (esprit tactique en ébullition)',d:[['fightIQ',5],['morale',12],['form',-18]]},
+             {label:'Sauvegarder et aller dormir de force',d:[['discipline',6],['recovery',4],['morale',-5]]}]},
+  {id:'evt_train_south',req:f=>f.org>0,title:'Retraite au soleil',text:'Pour couper avec la pression asphyxiante du camp, vous partez quelques jours dans le Sud. Le trajet est long, mais le soleil régénère l\u2019esprit.',
+    choices:[{label:'Payer le voyage et s\u2019évader (4k$)',cost:4,d:[['morale',18],['recovery',6],['focus',-8]]},
+             {label:'Annuler à la dernière minute et s\u2019enfermer à la salle',d:[['focus',6],['discipline',4],['morale',-10]]}]},
+  {id:'evt_repotting',title:'Rempotage printanier',text:'Vos plantes d\u2019appartement commencent à étouffer dans leurs vieux pots. L\u2019opération de sauvetage botanique va vous prendre l\u2019après-midi entière.',
+    choices:[{label:'Prendre le temps d\u2019avoir la main verte',d:[['composure',6],['recovery',4],['form',-6]]},
+             {label:'Laisser les plantes souffrir pour le moment',d:[['focus',5],['aggression',3],['morale',-8]]}]},
+  // --- Némésis parallèle : lit l'état réel du rival verrouillé dans le roster ---
+  {id:'evt_nemesis_loss',req:f=>f.faithNemesisId&&G.roster.some(o=>o.id===f.faithNemesisId&&(o.streak||0)<0),title:'Chute du rival',text:'Votre rival historique vient de subir un lourd revers. Les journalistes s\u2019empressent de vous demander votre réaction à chaud.',
+    choices:[{label:'L\u2019enterrer publiquement',d:[['aggression',4],['morale',5],['composure',-5]]},
+             {label:'Lui souhaiter un bon rétablissement',d:[['composure',5],['focus',3]]}]},
+  {id:'evt_nemesis_win',req:f=>f.faithNemesisId&&G.roster.some(o=>o.id===f.faithNemesisId&&(o.streak||0)>=3),title:'L\u2019ombre du rival',text:'Votre némésis enchaîne les victoires impressionnantes. Sa hype médiatique commence sérieusement à éclipser la vôtre.',
+    choices:[{label:'S\u2019entraîner deux fois plus dur',d:[['form',-15],['focus',8],['cardio',4]]},
+             {label:'L\u2019ignorer et rester concentré',d:[['confidence',5],['composure',3],['morale',-5]]}]},
+  {id:'evt_nemesis_gym',req:f=>f.faithNemesisId&&G.roster.some(o=>o.id===f.faithNemesisId),title:'Guerre à distance',text:'Rumeur confirmée : votre némésis vient de rejoindre une salle rivale réputée pour sa lutte agressive. Le message est clair.',
+    choices:[{label:'Travailler sa défense de lutte en prévision',d:[['tdd',6],['form',-8]]},
+             {label:'Parier sur son propre striking',d:[['power',4],['handSpeed',3],['form',-6]]}]}
 ];
+function formatEventDelta(d){
+  if(!d || !d.length) return '';
+  return d.map(([k,v])=>{
+    const isGauge=(k==='morale'||k==='form');
+    const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
+    const shown=isGauge?v:Math.round(v/5); // même ratio que d20() pour les vrais attributs /20
+    if(shown===0) return '';
+    return `<span class="tag2" style="border-color:${shown>=0?'var(--win)':'var(--loss)'};color:${shown>=0?'var(--win)':'var(--loss)'}">${shown>=0?'+':''}${shown} ${lbl}</span>`;
+  }).join('');
+}
 function scr_faith_event(){
   const ev=G.faith.currentEvent;
   if(!ev) return `<div class="scr center intro"><p class="lede">Aucun événement en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
@@ -1464,12 +1714,20 @@ function scr_faith_event(){
        const locked=c.cost&&(f.earnings||0)<c.cost;
        return `<div class="glass opp" style="padding:14px;text-align:left;opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
          <b>${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}${c.reward?`<span class="small" style="color:var(--win)"> (+${c.reward}k$)</span>`:''}
+         <div class="tagrow" style="margin-top:8px">${formatEventDelta(c.d)}</div>
        </div>`;
      }).join('')}
    </div></div>`;
 }
 function scr_faith_year_end(){
   const ys=G.faith.yearStats; const f=G.f;
+  let logHtml='';
+  if(ys.yearLog && ys.yearLog.length>0){
+    logHtml=`<div class="card glass mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--sage)">
+      <div class="eyebrow mb" style="color:var(--sage)">Journal de bord</div>
+      ${ys.yearLog.map(l=>`<div style="padding:6px 0;border-bottom:1px dotted var(--line)"><b style="color:var(--text)">${esc(l.title)}</b><br><span class="muted small">↳ Vous avez choisi : ${esc(l.choice)}</span></div>`).join('')}
+    </div>`;
+  }
   let skillsHtml='';
   if(ys.newSkills && ys.newSkills.length>0){
     skillsHtml=`<div class="eyebrow mt mb" style="color:var(--gold)">COMPÉTENCES DÉBLOQUÉES</div>`+
@@ -1495,6 +1753,7 @@ function scr_faith_year_end(){
        <div class="card" style="margin:0;padding:12px"><span class="stat-big" style="font-size:24px;color:${ys.dmgHead>30?'var(--loss)':'var(--text)'}">${ys.dmgHead}</span><span class="stat-lbl">Dégâts Crâniens Reçus</span></div>
      </div>
    </div>
+   ${logHtml}
    ${skillsHtml}
    <button class="btn primary mt" style="padding:20px;font-size:20px;margin-top:32px" onclick="CL.nextFaithYear()">DÉBUTER LA SAISON ${G.faith.year+1}</button>
   </div>`;
@@ -1719,15 +1978,49 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   for(const k in oppSavedAttrs){ opp.attrs[k]=oppSavedAttrs[k]; }
   if(typeof restoreSnapshot==='function'){ restoreSnapshot(G.f,eraSavedMe); restoreSnapshot(opp,eraSavedOpp); restoreSnapshot(opp,tacticalSavedOpp); }
   if(Object.keys(savedAttrs).length) G.f.overall=overall(G.f);
+  // ==== [ANCRE: DEGENERESCENCE_MENTON] — remplace l'ancienne dégradation
+  // aléatoire et invisible (retirée de simulateFight) par des paliers de
+  // dégâts crâniens cumulés, toujours explicites : les petits combats
+  // techniques n'entament plus rien au hasard, seules les guerres et les KO
+  // subis remplissent la jauge ; quand elle déborde, le plafond du menton
+  // s'effondre d'un coup, avec un avertissement clair plutôt qu'un tirage
+  // silencieux que le joueur ne peut jamais relier à une cause précise.
+  const dmgTaken=res.stats.A.dmgHead||0;
+  G.f.cumulativeHeadDamage=(G.f.cumulativeHeadDamage||0)+dmgTaken;
+  if(!win && res.method.startsWith('KO')) G.f.cumulativeHeadDamage+=25;
+  const degLevel=G.f.chinDegradationLevel||0;
+  const chinThreshold=120+(degLevel*80); // seuils de rupture : 120, 200, 280...
+  if(G.f.cumulativeHeadDamage>=chinThreshold){
+    G.f.chinDegradationLevel=degLevel+1;
+    if(!G.f.maxAttrs) G.f.maxAttrs={};
+    const oldMax=G.f.maxAttrs.chin!=null?G.f.maxAttrs.chin:100;
+    const drop=RI(10,15);
+    G.f.maxAttrs.chin=Math.max(10,oldMax-drop);
+    if(G.f.attrs.chin>G.f.maxAttrs.chin) G.f.attrs.chin=G.f.maxAttrs.chin;
+    else G.f.attrs.chin=Math.max(1,G.f.attrs.chin-drop);
+    G.f.overall=overall(G.f);
+    G.lastMsg="ALERTE MÉDICALE CRITIQUE : le scanner post-combat est formel. Les commotions répétées ont laissé des traces. Votre menton s\u2019est brisé — vous ne pourrez plus jamais encaisser comme avant. Changez de style ou préparez votre retraite.";
+  }
+  // ==== [FIN ANCRE] ====
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: CACHET] — bourse en milliers $, structure Show/Win réaliste
   // (audit économie #9) : garantie de présence + prime de victoire séparées,
   // multiplicateur de champion différencié par palier, prime de performance
   // proportionnelle plutôt qu'un forfait fixe identique à tous les niveaux.
+  // Lot 2 (contrat réel) : si un contrat existe (org pro), la bourse suit son
+  // cachet fixé à la signature plutôt que le barème brut de l'organisation —
+  // repli sur l'ancien barème pour l'amateur (pas de contrat) et les
+  // sauvegardes migrées sans contrat encore assigné.
   const ORG_PURSES=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[30,30],[250,0]];
   const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,5.0,2.0];
-  let [showPurse,winBonus]=ORG_PURSES[G.f.org]||[0,0];
-  if(G.f.champion){ const m=CHAMP_MULT[G.f.org]||1; showPurse*=m; winBonus*=m; }
+  let showPurse,winBonus;
+  if(G.f.org>0 && G.f.contract){
+    showPurse=G.f.contract.show; winBonus=G.f.contract.win;
+    if(G.f.champion && !G.f.contract.isChampContract){ const m=CHAMP_MULT[G.f.org]||1; showPurse*=m; winBonus*=m; }
+  } else {
+    [showPurse,winBonus]=ORG_PURSES[G.f.org]||[0,0];
+    if(G.f.champion){ const m=CHAMP_MULT[G.f.org]||1; showPurse*=m; winBonus*=m; }
+  }
   const rivalryMult=(typeof getRivalryPurseMultiplier==='function')?getRivalryPurseMultiplier(G.f,opp):1.0;
   showPurse*=rivalryMult; winBonus*=rivalryMult;
   let purse=showPurse;
@@ -1741,6 +2034,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const campFee=+(purseGross-purse-agentFee).toFixed(2);
   G.f.earnings=(G.f.earnings||0)+purse;
   G.fight.purseDetail={gross:purseGross,fee:campFee,agentFee,net:purse};
+  // Décompte du contrat : un combat de moins avant renégociation.
+  let contractExpiry=false;
+  if(G.f.org>0 && G.f.contract){
+    G.f.contract.fightsLeft--;
+    if(G.f.contract.fightsLeft<=0) contractExpiry=true;
+  }
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: RIVALITE] — une défaite, ou une décision très serrée, crée une animosité ====
   const scoreDiff=Math.abs((res.scoreA||0)-(res.scoreB||0));
@@ -1749,6 +2048,10 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     G.f._rivalries[opp.id]=(G.f._rivalries[opp.id]||0)+1;
     if(G.f._rivalries[opp.id]>=2) G.f.rivalId=opp.id;
   }
+  // Némésis Faith : verrouillée dès la première vraie rivalité, ne change plus
+  // jamais ensuite (contrairement à f.rivalId qui peut glisser vers l'animosité
+  // la plus récente) — c'est le fil rouge narratif de toute la carrière.
+  if(G.faith && !G.f.faithNemesisId && G.f.rivalId){ G.f.faithNemesisId=G.f.rivalId; }
   // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
   // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
   // donc un adversaire battu 15 fois de façon décisive n'était presque jamais
@@ -1970,7 +2273,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
     if(G.f.retired) forced=true;
   }
-  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,narrative,purseDetail:G.fight.purseDetail,
+  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,narrative,purseDetail:G.fight.purseDetail,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
@@ -2141,12 +2444,15 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
      <button class="btn mt" style="width:100%;border-color:var(--loss);color:var(--loss)" onclick="CL.recoverInjury()">Laisser le corps récupérer</button>
    </div>`:'';
   const declineHtml=(!f.injury && isDeclining(f))?`<div class="mono small" style="color:var(--loss);margin-top:6px;border-top:1px dashed var(--loss);padding-top:6px">⚠ Tu prends de l\u2019âge, le corps commence à souffrir.</div>`:'';
+  const neuroHtml=(f.chinDegradationLevel>0)?`<div class="mono small" style="color:var(--loss);margin-top:6px;border-top:1px dashed var(--loss);padding-top:6px">⚠ Séquelles neurologiques : plafond d\u2019encaissement définitivement réduit (Stade ${f.chinDegradationLevel}).</div>`:'';
+  const metabolicHtml=(f.age>=28 && f.div!=='H-heavy' && f.div!=='F-feather')?`<div class="mono small" style="color:var(--gold);margin-top:6px;border-top:1px dashed var(--gold);padding-top:6px">⚠ Piège métabolique : ton corps s\u2019alourdit. Maintenir ce poids de forme devient difficile.</div>`:'';
   const fightBtnHtml=f.injury
     ?`<button class="btn ghost" style="font-size:20px;padding:18px;opacity:.5;cursor:not-allowed" disabled>Athlète inapte</button>`
     :`<button class="btn primary" style="font-size:20px;padding:18px" onclick="CL.fightSelect()">Évaluer les contrats (Matchmaking)</button>`;
   const rankTag=champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`);
   const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
   const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
+  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">Contrat : ${f.contract.fightsLeft} combat(s)</span>`:'';
   return `<div class="scr">
    <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
      <span class="eyebrow mono">${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
@@ -2160,8 +2466,10 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
    </div>`:''}
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
-     <div class="tagrow">${rankTag}${streakTag}${amaTag}</div>
+     <div class="tagrow">${rankTag}${streakTag}${contractTag}${amaTag}</div>
      ${declineHtml}
+     ${neuroHtml}
+     ${metabolicHtml}
      <div class="stat-band">
        <div><span class="stat-big">${recordStr(f)}</span><span class="stat-lbl">Record actuel</span></div>
        <div style="text-align:right">${f.ko===f.sub?`<span class="stat-lbl" style="display:block;margin-bottom:2px">FINITIONS</span><span class="mono" style="font-size:20px"><span class="gold">${f.ko}</span> KO / <span class="gold">${f.sub}</span> SUB</span>`:f.ko>f.sub?`<span class="stat-big hot">${f.ko}</span><span class="stat-lbl">KO / ${f.sub} SUB</span>`:`<span class="stat-big hot">${f.sub}</span><span class="stat-lbl">SUB / ${f.ko} KO</span>`}</div>
@@ -2207,11 +2515,31 @@ function scr_select(){ const f=G.f;
      <span class="eyebrow mono">BUREAU DU MATCHMAKER // ${orgDisplayName(f).toUpperCase()}</span>
    </div>
    <p class="lede" style="margin-bottom:32px;font-size:15px">Analysez les profils et signez le contrat. L\u2019ordre des propositions dicte le niveau de risque et la récompense au classement.</p>`;
+  const rkMe=divRank(f);
   G.opps.forEach((e,i)=>{ const o=e.o;
     const isRival=(f.rivalId===o.id); const isAmaRival=(!isRival && o.isAmateurRival);
     const rnk=divRank(o); const fightsTot=o.W+o.L+(o.D||0);
     const rTag=o.champion?'CHAMPION':(fightsTot===0?'NON CLASSÉ':(rnk===1?'CHALLENGER #1':`RANG #${rnk}`));
-    // Trio de scouting calculé à partir des vrais attributs (pas de "grappling" scalaire dans le moteur)
+
+    // Archétype de matchmaking : la logique de fond ne change pas (mêmes 3
+    // adversaires que genOpponents() proposait déjà), seul l'habillage devient
+    // un vrai dilemme risque/récompense lisible d'un coup d'œil.
+    let mmRole='Opposition Logique', mmReward='Niveau équivalent, progression saine au classement.', roleColor='var(--text)';
+    const isProspect=(o.age<=23 && fightsTot<=6 && o.W>o.L);
+    const isVeteran=(o.age>=34 && o.L>=3);
+    const isGatekeeper=(o.attrs.durability>75 || o.attrs.tdd>75) && o.L>o.W/2;
+    if(e.context==='CHAMP-CHAMP'){ mmRole='Défi Historique'; mmReward='Devenir double monarque. La consécration ultime.'; roleColor='var(--gold)'; }
+    else if(e.context && e.context.includes('TOURNOI')){ mmRole='Combat de Bracket'; mmReward='Avancer dans le tournoi amateur.'; roleColor='var(--sage)'; }
+    else if(o.champion || e.context==='COMBAT DE TITRE'){ mmRole='Le Champion en Titre'; mmReward='Risque immense. Récompense absolue : la Ceinture.'; roleColor='var(--gold)'; }
+    else if(f.champion){ mmRole='Challenger Légitime'; mmReward='Défense de titre. Confirme votre statut de roi de la division.'; roleColor='var(--sage)'; }
+    else if(isRival){ mmRole='Rivalité Historique'; mmReward='L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.'; roleColor='var(--blood)'; }
+    else if(fightsTot===0){ mmRole='Le Débutant'; mmReward='Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.'; roleColor='var(--muted)'; }
+    else if(rnk<rkMe-4){ mmRole='Le Raccourci (Risqué)'; mmReward='Gros écart de niveau en votre faveur. Bond massif au classement assuré si vous créez la surprise.'; roleColor='var(--gold)'; }
+    else if(isProspect){ mmRole='Le Prodige Régional'; mmReward='Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.'; roleColor='#4DA6FF'; }
+    else if(isGatekeeper){ mmRole='Le Gardien du Temple'; mmReward='Combat bourbier garanti. Passage obligatoire pour le haut du classement.'; roleColor='var(--sage)'; }
+    else if(isVeteran){ mmRole='Le Vétéran'; mmReward='Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.'; roleColor='var(--text)'; }
+    else if(rnk>rkMe+5){ mmRole='Le Combat Piège'; mmReward='Classement inférieur au vôtre. Tout à perdre, rien à gagner.'; roleColor='var(--loss)'; }
+
     const striking=Math.round((o.attrs.jab+o.attrs.cross+o.attrs.hook+o.attrs.kick)/4);
     const grappling=Math.round((o.attrs.takedown+o.attrs.submission+o.attrs.topControl)/3);
     const danger=o.attrs.power;
@@ -2221,6 +2549,10 @@ function scr_select(){ const f=G.f;
     const diffText=(opp,me)=>{ const diff=me-opp; if(diff>=12)return'Ton avantage net';if(diff>=5)return'Léger avantage';if(diff>-5&&diff<5)return'Équilibré';if(diff<=-12)return'Son avantage net';return'Léger désavantage'; };
     const getDiffColor=(txt)=>txt.startsWith('Son')||txt==='Léger désavantage'?'var(--loss)':(txt.startsWith('Ton')||txt==='Léger avantage')?'var(--gold)':'var(--text)';
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
+      <div style="border-left:3px solid ${roleColor};padding-left:12px;margin-bottom:16px">
+         <div class="disp" style="font-size:18px;color:${roleColor};line-height:1">${mmRole.toUpperCase()}</div>
+         <div class="mono small muted" style="margin-top:4px">${mmReward}</div>
+      </div>
       <div class="meta-strip"><div><span>Record</span><b style="white-space:nowrap">${recordStr(o)}</b></div>${o.amaRec?`<div><span>Amateur</span><b style="white-space:nowrap">${o.amaRec.W}-${o.amaRec.L}</b></div>`:''}<div><span>Mensurations</span><b style="white-space:nowrap">${o.phys.height}cm / ${o.phys.reach}cm</b></div></div>
       <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
       <div class="tagrow">
@@ -2301,6 +2633,12 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
     if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
      <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
      <div class="mono small">${G.activeSponsor.text}</div></div>`;
+    if(G.lastMsg){
+      h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
+       <div class="eyebrow mb" style="color:var(--text)">Bilan du face-à-face</div>
+       <div class="small">${esc(G.lastMsg)}</div></div>`;
+      G.lastMsg=null;
+    }
     h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
   } else {
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
@@ -2543,6 +2881,43 @@ function scr_toptier(){
    </div>`; }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: LOT2_CONTRAT] — négociation de fin de contrat, remplace la
+   promotion purement automatique par un vrai choix de carrière. ==== */
+function scr_contract_nego(){
+  const f=G.f;
+  return `<div class="scr center intro">
+    <div class="eyebrow gold">Fin de contrat</div>
+    <h2 class="disp">Négociations</h2>
+    <p class="lede">Votre contrat avec ${orgDisplayName(f)} est arrivé à son terme. Il est temps de discuter de votre avenir.</p>
+    <div class="glass card mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--gold)">
+       <div class="eyebrow mb">Statut actuel</div>
+       <div class="mono small">Cachet de base : ${f.contract.show}k$ / ${f.contract.win}k$</div>
+       <div class="mono small mt">Représentant : <b style="color:${f.agentCut>0?'var(--win)':'var(--text)'}">${f.agentCut>0?'Agent (booste les négociations)':'Aucun (négociation en solo)'}</b></div>
+    </div>
+    <button class="btn primary mt" onclick="CL.negoRenew()">Renouveler aux mêmes conditions (sûr)</button>
+    <button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.negoRaise()">Exiger une revalorisation (+40% cachet, risqué)</button>
+    <button class="btn ghost mt" onclick="CL.negoMarket(false)">Tester le marché (free agency)</button>
+  </div>`;
+}
+function scr_free_agency(){
+  const offers=G.freeAgencyOffers||[];
+  return `<div class="scr center intro">
+    <div class="eyebrow gold">Marché libre (Free Agency)</div>
+    <h2 class="disp">Offres de contrat</h2>
+    <p class="lede">Voici les contrats disponibles sur la table.</p>
+    ${offers.map((o,i)=>`
+      <div class="glass card mb" style="background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px">
+        <div class="hero-name" style="font-size:20px">${o.flavor}</div>
+        <div class="mono small gold">Ligue de niveau ${o.org} · ${o.contract.show}k$ Show / ${o.contract.win}k$ Win</div>
+        <p class="muted small mt">${o.desc}</p>
+        <button class="btn primary mt" onclick="CL.acceptFreeAgency(${i})">Signer (4 combats)</button>
+      </div>
+    `).join('')}
+    ${offers.length===0?`<p class="muted">Aucune offre. Fin de carrière forcée.</p><button class="btn primary mt" onclick="CL.toLegacy()">Retraite</button>`:''}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: ECRAN_PROMO] — la promotion devient un choix du joueur (au lieu
    d'automatique) : rester chasser la ceinture locale, ou monter tout de suite. ==== */
 function scr_promo(){
@@ -2704,6 +3079,28 @@ function legacyTitle(f){ const s=(f._world?300:0)+(f._euro?120:0)+f.defenses*30+
   if(s>=10)return[SVG.veteran,'VÉTÉRAN DU CIRCUIT']; return[SVG.hammer,'GUERRIER DE L\u2019OMBRE']; }
 function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=epithets(f);
   const notableWins=(f.history||[]).filter(h=>h.res==='win'&&h.oppWasChamp&&h.oppName).slice(-6).reverse();
+  let nemesisHtml='';
+  if(f.gameMode==='faith' && f.faithNemesisId){
+    const nemesis=G.roster.find(o=>o.id===f.faithNemesisId);
+    if(nemesis){
+      const diffW=f.W-nemesis.W;
+      nemesisHtml=`<div class="card mt glass" style="border-left:3px solid var(--blood);background:var(--panel2);padding:16px;text-align:left">
+        <div class="eyebrow mb" style="color:var(--blood)">L\u2019ultime face-à-face (Némésis)</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="flex:1;text-align:center">
+            <b style="font-size:18px">${esc(f.name)}</b>
+            <div class="mono small muted mt">${f.W}-${f.L} · ${f.titles||0} Titre(s)</div>
+          </div>
+          <div class="disp gold" style="font-size:24px;padding:0 16px">VS</div>
+          <div style="flex:1;text-align:center">
+            <b style="font-size:18px">${esc(nemesis.name)}</b>
+            <div class="mono small muted mt">${nemesis.W}-${nemesis.L} · ${nemesis.titles||0} Titre(s)</div>
+          </div>
+        </div>
+        <div class="muted small" style="font-style:italic">« ${diffW>=0?`L\u2019histoire retiendra que vous avez surpassé ${esc(nemesis.name)}. Vous avez remporté cette guerre d\u2019usure.`:`Malgré tous vos efforts, le palmarès de ${esc(nemesis.name)} restera une ombre sur votre héritage.`} »</div>
+      </div>`;
+    }
+  }
   return `<div class="scr center"><div class="eyebrow">Palmarès scellé</div>
    <div style="font-size:60px">${ico}</div>
    <div class="hero-name" style="text-align:center;color:var(--gold)">${rank}<em style="color:var(--muted)">${esc(f.name)}${f.nick?' « '+f.nick+' »':''}</em></div>
@@ -2717,6 +3114,7 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
      </div>
      <div class="muted small mt" style="position:relative;z-index:2">${f.motivation}</div>
      ${f.biggestRival?`<div class="mono small mt" style="color:var(--blood);position:relative;z-index:2">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div>`:''}</div>
+   ${nemesisHtml}
    ${notableWins.length?`<div class="card mt"><div class="eyebrow mb">Adversaires notables battus</div>${notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
    <button class="btn primary" onclick="CL.newCareer()">Nouvelle carrière</button></div>`; }
 
@@ -2935,15 +3333,21 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
+  contract_nego:scr_contract_nego,free_agency:scr_free_agency,
   gauntlet_menu:scr_gauntlet_menu};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+function routeAfterOrgChange(){
+  if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
+  G.screen='hub'; save(); render();
+}
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
+  purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
   exportLegend(id){
     const l=loadHOF().find(x=>x.id===id); if(!l) return;
     G.exportedCode=encodeLegendCode(l); G.exportedName=l.name;
@@ -3122,7 +3526,7 @@ const CL={
       else if(wc.cutPct<=18) cutTier='complique';
       else cutTier='impossible';
       G.fight.cutResult={tier:cutTier,effPct:(G.faith.dietYear===G.faith.year)?0:wc.cutPct,kg:(G.faith.dietYear===G.faith.year)?0:wc.cutKg,walk:wc.walk,limit:wc.limit};
-      G.screen='plan'; save(); render();
+      proceedToFight();
     } else { chooseOpponent(i); }
   },
   train(i){ chooseTraining(i); },
@@ -3163,6 +3567,15 @@ const CL={
       G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(2,4)){ applyAging(G.f); G.f._fy=0; }
       advanceRoster();
       G.screen='hub'; save(); render();
+    } else if(id==='faceoff_smile' || id==='faceoff_ignore'){
+      G.fight.malus=Object.assign({},G.fight.malus,{composure:8,focus:5,aggression:-5});
+      G.f.morale=clamp(G.f.morale+5,0,100);
+      G.lastMsg='Vous avez remporté la guerre psychologique de la pesée (+ Sang-froid/Moral).';
+      proceedToFight();
+    } else if(id==='faceoff_shove' || id==='faceoff_talkback'){
+      G.fight.malus=Object.assign({},G.fight.malus,{confidence:8,aggression:10,composure:-10});
+      G.lastMsg='L\u2019adrénaline monte avant même d\u2019entrer dans la cage (+ Agressivité/Confiance, - Sang-froid).';
+      proceedToFight();
     } else { proceedToFight(); }
   },
   recoverInjury(){ const f=G.f; if(!f.injury)return;
@@ -3185,6 +3598,11 @@ const CL={
       G.vsFriendActive=false; G.screen='vs_friend'; render(); return;
     }
     if(G.faith){
+      const p=G.pending;
+      if(p&&p.proOffer){ G.screen='promo'; save(); render(); return; }
+      if(p&&p.topTierOffer){ G.screen='toptier'; save(); render(); return; }
+      if(p&&p.promoOffer){ G.screen='promo'; save(); render(); return; }
+      if(p&&p.contractExpiry){ G.screen='contract_nego'; save(); render(); return; }
       if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd();
       return;
     }
@@ -3271,7 +3689,14 @@ const CL={
       f.maxAttrs[k]=clamp(f.attrs[k]+margin,1,100);
     }
     G.f=f; G.roster=makeOrgRoster(f);
-    G.faith={year:2026,step:1,fightsThisYear:0,influence:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0};
+    // Partenaires de salle (Lot 7) : deux prospects générés dans la même
+    // division/genre, qui progresseront en copiant les stats du joueur s'il
+    // s'entraîne avec eux (voir CL.faithSparring).
+    const p1=makeFighter({gender:f.gender,div:f.div,age:18,level:clamp(f.overall-15,20,60),potential:95});
+    const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10,20,60),potential:85});
+    p1.isGymPartner=true; p2.isGymPartner=true;
+    p1.nick='Le Prodige'; p2.nick='L\u2019Aspirant';
+    G.faith={year:2026,step:1,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2]};
     G.season={year:1,fights:[]};
     G.screen='faith_hub'; save(); render();
   },
@@ -3279,7 +3704,40 @@ const CL={
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
     G.faith.step=3; G.screen='faith_hub'; save(); render();
   },
+  faithSparring(partnerId){
+    const partner=(G.faith.gym||[]).find(p=>p.id===partnerId); if(!partner) return;
+    G.f.form=clamp(G.f.form+15,0,100);
+    applyDeltas(G.f,[['fightIQ',1]]); // enseigner renforce l'intellect tactique
+    // Syndrome de Frankenstein : le partenaire copie violemment les 2
+    // meilleures stats du joueur — c'est lui qui, des années plus tard,
+    // reviendra armé de vos propres armes.
+    const bestStats=ATTR_KEYS.map(k=>({k,v:G.f.attrs[k]})).sort((a,b)=>b.v-a.v).slice(0,2);
+    applyDeltas(partner,[[bestStats[0].k,3],[bestStats[1].k,3],['adaptability',2],['fightIQ',2]]);
+    partner.overall=overall(partner);
+    G.lastMsg=`Séance intense. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
+    if(!G.faith.yearLog) G.faith.yearLog=[];
+    G.faith.yearLog.push({title:'Sparring',choice:`A tourné avec ${esc(partner.name)}`});
+    G.faith.step=3; save(); render();
+  },
   faithLifeEvent(){
+    // Syndrome de Frankenstein : si un protégé a rattrapé (ou dépassé) le
+    // joueur, il quitte la salle — court-circuite le pool normal d'événements
+    // pour ce tour, ce moment doit être vécu, pas noyé dans la pioche.
+    if(G.faith.gym){
+      const monster=G.faith.gym.find(p=>p.overall>=G.f.overall-2 && p.overall>45);
+      if(monster){
+        G.faith.currentEvent={
+          id:'evt_frankenstein_betrayal', monsterId:monster.id, title:'Le monstre s\u2019échappe',
+          text:`Votre protégé, ${esc(monster.name)}, vient de vider son casier. "Je connais ton jeu par cœur, tu n\u2019as plus rien à m\u2019apprendre", lâche-t-il devant la salle. Il a signé un contrat dans votre ligue et promet de prendre votre place.`,
+          choices:[
+            {label:'Le laisser partir et préparer la guerre',d:[['aggression',8],['morale',-15],['focus',10]]},
+            {label:'Le provoquer publiquement',d:[['composure',-10],['confidence',5],['morale',-10]]}
+          ]
+        };
+        G.screen='faith_event'; save(); render();
+        return;
+      }
+    }
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     let pool=FAITH_LIFE_EVENTS.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
     if(pool.length===0){ G.faith.seenEvents=[]; pool=FAITH_LIFE_EVENTS.filter(e=>!e.req||e.req(G.f)); }
@@ -3293,10 +3751,31 @@ const CL={
     if(c.cost) G.f.earnings-=c.cost;
     if(c.reward) G.f.earnings=(G.f.earnings||0)+c.reward;
     applyDeltas(G.f,c.d);
+    // Syndrome de Frankenstein : le protégé qui trahit rejoint réellement le
+    // roster de l'organisation, en Némésis si aucune n'est encore verrouillée.
+    if(ev.id==='evt_frankenstein_betrayal'){
+      const monster=(G.faith.gym||[]).find(p=>p.id===ev.monsterId);
+      if(monster){
+        monster.org=G.f.org; monster.stage='pro';
+        monster.W=Math.max(0,G.f.W-2); monster.L=1;
+        monster.orgWins=0;
+        monster.orgElo=Math.max(500,eloBaseline(G.f.org,monster.overall)+150);
+        monster.careerElo=Math.max(500,eloBaseline(G.f.org,monster.overall)+100);
+        G.roster.push(monster);
+        if(!G.f.faithNemesisId) G.f.faithNemesisId=monster.id;
+        G.f.rivalId=monster.id;
+        if(!G.f._rivalries) G.f._rivalries={};
+        G.f._rivalries[monster.id]=3;
+        G.faith.gym=G.faith.gym.filter(p=>p.id!==monster.id);
+        G.roster=rankPool(G.roster);
+      }
+    }
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
     G.faith.currentEvent=null;
     G.lastMsg="Événement résolu : "+ev.title;
+    if(!G.faith.yearLog) G.faith.yearLog=[];
+    G.faith.yearLog.push({title:ev.title,choice:c.label});
     // Moteur d'émergence : un choix taggé traitTag renforce une tendance cachée ;
     // au 3e choix dans la même direction, elle se cristallise en trait permanent.
     if(c.traitTag){
@@ -3323,8 +3802,6 @@ const CL={
     const eloDelta=Math.round(f.careerElo-(G.faith.startOfYearElo||f.careerElo));
     const earningsDelta=(f.earnings||0)-(G.faith.startOfYearEarnings||0);
     const rank=divRank(f);
-    const influenceGain=Math.floor((p4pScore(f)/10)*(G.season.fights||[]).filter(x=>x.win).length);
-    G.faith.influence=(G.faith.influence||0)+influenceGain;
     if((G.season.fights||[]).length>=1){
       let totalSig=0, totalTdAtt=0, totalCtrl=0, totalKD=0;
       G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0; });
@@ -3342,10 +3819,13 @@ const CL={
         G.lastMsg="Nouvelle Spécialisation : Tueur à Gages (+25% KO)";
       }
     }
-    // Tirage de compétence : 1 roll garanti si un entraînement a été fait cette
-    // année, sinon aucun — l'ancienne formule (trainingsThisYear/4) supposait
-    // jusqu'à 12 entraînements par an (système PA), désormais au maximum 1.
-    const nbRolls=(G.faith.trainingsThisYear||0)>=1?1:0;
+    // Tirage de compétence : 1 roll garanti si un événement de vie a été résolu
+    // cette année (toujours vrai en pratique, Phase 1 en impose un). Corrige un
+    // bug trouvé en vérifiant : l'ancienne condition (trainingsThisYear>=1)
+    // dépendait d'un compteur mort depuis le remplacement de l'entraînement par
+    // les événements de vie — plus aucune compétence ne pouvait plus se
+    // débloquer en Faith.
+    const nbRolls=((G.faith.yearLog||[]).length>=1)?1:0;
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=9);
     const tags=G.faith.trainingTags||[];
@@ -3360,36 +3840,38 @@ const CL={
       fights:G.faith.fightsThisYear,
       wins:(G.season.fights||[]).filter(x=>x.win).length,
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
-      eloDelta, earningsDelta, rank, dmgHead, newSkills
+      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[]
     };
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
     G.faith.year++; G.faith.step=1;
-    G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[];
+    G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
     G.faith.startOfYearElo=G.f.careerElo; G.faith.startOfYearEarnings=G.f.earnings||0;
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
     advanceRoster();
+    if(G.faith.gym){
+      G.faith.gym.forEach(p=>{
+        p.age++;
+        applyDeltas(p,[['strength',1],['fightIQ',1],['cardio',1],['durability',1]]);
+        p.overall=overall(p);
+      });
+    }
     G.screen='faith_hub'; save(); render();
   },
   buyFaithPerk(perkId){
     const f=G.f; if(!G.faith.perks) G.faith.perks={};
-    const costInf={hometown:50,catchweight:100,protect_title:150};
-    const costMoney={ped:30,tiger:50,lobbying:100,diet:40};
-    if(costInf[perkId]){
-      if((G.faith.influence||0)<costInf[perkId]){ G.lastMsg="Influence insuffisante."; render(); return; }
-      G.faith.influence-=costInf[perkId];
-      if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : Votre prochain combat sera à domicile."; }
-      if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
-      if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
-    }
+    const costMoney={hometown:15,catchweight:35,protect_title:50,ped:30,tiger:50,lobbying:100,diet:40};
     if(costMoney[perkId]||perkId==='judges'){
       let actualCost=costMoney[perkId];
       if(perkId==='judges') actualCost=(f.earnings||0)*0.20;
       if((f.earnings||0)<actualCost){ G.lastMsg="Fonds insuffisants."; render(); return; }
       f.earnings-=actualCost;
-      if(perkId==='ped'){
+      if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : Votre prochain combat sera à domicile."; }
+      else if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
+      else if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
+      else if(perkId==='ped'){
         if(rnd()<0.15){ G.lastMsg="CATASTROPHE : Test antidopage positif ! Suspendu 1 an."; G.faith.month=1; G.faith.year++; G.faith.pa=3; f.rankBoost=Math.max(0,(f.rankBoost||0)-100); }
         else { f.attrs.chin=clamp(f.attrs.chin+4,1,100); f.attrs.durability=clamp(f.attrs.durability+4,1,100); f.overall=overall(f); G.faith.pedActive=G.faith.year; G.lastMsg="Protocoles PED réussis : Menton et Résistance +4."; }
       } else if(perkId==='tiger'){
@@ -3421,28 +3903,91 @@ const CL={
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
+    G.f.contract=generateContract(G.f,G.f.org,false);
     applyOrgAdvancementBoost(G.f,G.f.org);
     G.roster=makeOrgRoster(G.f);
     if(G.pending) G.pending.promoOffer=false;
-    G.screen='hub'; save(); render();
+    routeAfterOrgChange();
   },
   declinePromo(){
     G.f.promoCooldown=2;
     if(G.pending) G.pending.promoOffer=false;
-    G.screen='hub'; save(); render();
+    routeAfterOrgChange();
   },
   declineTopTier(){
     G.f.promoCooldown=2;
     if(G.pending) G.pending.topTierOffer=false;
-    G.screen='hub'; save(); render();
+    routeAfterOrgChange();
   },
   signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); G.f.rankBoost=0; if(G.pending)G.pending.topTierOffer=false;
+    G.f.contract=generateContract(G.f,orgId,false);
     applyOrgAdvancementBoost(G.f,orgId);
     G.roster=makeOrgRoster(G.f);
     if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
-    G.screen='hub'; save(); render(); },
-  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null); applyOrgAdvancementBoost(G.f,G.f.org); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
-  declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3; if(G.pending)G.pending.proOffer=null; G.screen='hub'; save(); render(); },
+    routeAfterOrgChange(); },
+  acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null);
+    G.f.contract=generateContract(G.f,G.f.org,false);
+    applyOrgAdvancementBoost(G.f,G.f.org); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; routeAfterOrgChange(); },
+  declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3; if(G.pending)G.pending.proOffer=null; routeAfterOrgChange(); },
+  negoRenew(){
+    G.f.contract=generateContract(G.f,G.f.org,false);
+    if(G.pending) G.pending.contractExpiry=false;
+    G.lastMsg="Contrat renouvelé (4 combats).";
+    if(G.faith){ routeAfterOrgChange(); } else { G.screen=(G.pending&&G.pending.endOfSeason)?'season':'hub'; save(); render(); }
+  },
+  negoRaise(){
+    const f=G.f; const hasAgent=(f.agentCut>0);
+    let prob=0.3;
+    if(f.champion) prob+=0.5;
+    if(hasAgent) prob+=0.25;
+    if((f.streak||0)>=2) prob+=0.15;
+    if(rnd()<prob){
+      G.f.contract=generateContract(f,f.org,true);
+      if(G.pending) G.pending.contractExpiry=false;
+      G.lastMsg="Coup de poker réussi ! L\u2019organisation s\u2019aligne sur vos exigences (+40%).";
+      if(G.faith){ routeAfterOrgChange(); } else { G.screen=(G.pending&&G.pending.endOfSeason)?'season':'hub'; save(); render(); }
+    } else {
+      G.lastMsg="Négociations rompues. L\u2019organisation refuse vos conditions et vous libère.";
+      CL.negoMarket(true);
+    }
+  },
+  negoMarket(forcedPenalty){
+    const f=G.f; const offers=[];
+    const canUp=canPromote(f); const agentBonus=(f.agentCut>0);
+    if(canUp && f.org===4){
+      offers.push({org:5,flavor:'Pacific Championship',contract:generateContract(f,5,false),desc:"La ligue la plus prestigieuse. (+4 OVR pour l\u2019opposition)."});
+      offers.push({org:6,flavor:'Ultimate Rim',contract:generateContract(f,6,false),desc:"La ligue des millionnaires. Suivi médical de pointe."});
+    } else if(canUp && f.org<6){
+      const nextOrg=f.org+1;
+      offers.push({org:nextOrg,flavor:ORG_FLAVORS[nextOrg]?pick(ORG_FLAVORS[nextOrg]):(ORGS[nextOrg]||'Ligue supérieure'),contract:generateContract(f,nextOrg,false),desc:"La ligue supérieure veut vous signer."});
+      if(agentBonus && nextOrg+1<=6 && ((f.defenses||0)>=2 || (f.streak||0)>=6)){
+        const fastOrg=nextOrg+1;
+        offers.push({org:fastOrg,flavor:ORG_FLAVORS[fastOrg]?pick(ORG_FLAVORS[fastOrg]):(ORGS[fastOrg]||'Ligue supérieure'),contract:generateContract(f,fastOrg,false),desc:"Votre agent a fait jouer ses contacts pour vous faire sauter une étape !"});
+      }
+    }
+    let currentMult=forcedPenalty?0.7:1.1;
+    if(agentBonus && forcedPenalty) currentMult=0.9;
+    const latContract=generateContract(f,f.org,false);
+    latContract.show=+(latContract.show*currentMult).toFixed(2); latContract.win=+(latContract.win*currentMult).toFixed(2);
+    offers.push({org:f.org,flavor:ORG_FLAVORS[f.org]?pick(ORG_FLAVORS[f.org]):(ORGS[f.org]||'Concurrence'),contract:latContract,desc:forcedPenalty?"Une ligue concurrente vous repêche au rabais.":"Une ligue concurrente cherche à vous débaucher."});
+    if(!forcedPenalty){ offers.push({org:f.org,flavor:orgDisplayName(f),contract:generateContract(f,f.org,false),desc:"Votre organisation actuelle s\u2019aligne pour vous garder."}); }
+    G.freeAgencyOffers=offers;
+    G.screen='free_agency'; save(); render();
+  },
+  acceptFreeAgency(index){
+    const offer=G.freeAgencyOffers[index]; const isNewOrg=(offer.org!==G.f.org);
+    G.f.contract=offer.contract;
+    if(isNewOrg){
+      G.f.org=offer.org; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
+      G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=offer.flavor;
+      applyOrgAdvancementBoost(G.f,G.f.org);
+      G.roster=makeOrgRoster(G.f);
+    }
+    if(G.pending){ G.pending.contractExpiry=false; }
+    G.freeAgencyOffers=null;
+    G.lastMsg=`Contrat signé avec ${offer.flavor} !`;
+    if(G.faith){ routeAfterOrgChange(); } else { G.screen=(G.pending&&G.pending.endOfSeason)?'season':'hub'; save(); render(); }
+  },
   nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.screen='legacy'; save(); render(); },

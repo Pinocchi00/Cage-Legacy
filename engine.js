@@ -435,7 +435,12 @@ function makePhysical(div){ const D=div||pick(allDivisions());
    poids de forme figé à la création) : reflète les fluctuations naturelles
    entre deux camps, moyenne ~9%, profils extrêmes jusqu'à ~24%. ---------------- */
 function weightCutInfo(f){ const D=divById(f.div); const limit=D?D.kg:70;
-  const cutPct=gauss(9,5,0,24);
+  // Piège métabolique : à partir de 26 ans, le métabolisme ralentit et stocke
+  // davantage d'eau/graisse — la coupe de poids dérive mécaniquement vers des
+  // paliers plus durs avec l'âge, pas juste narrativement.
+  const ageFactor=Math.max(0,f.age-26);
+  const metabolicPenalty=ageFactor*0.6;
+  const cutPct=gauss(9+metabolicPenalty,5,0,24+metabolicPenalty);
   const walk=+(limit/(1-cutPct/100)).toFixed(1);
   const cutKg=+(walk-limit).toFixed(1);
   return {limit,walk,cutKg,cutPct};
@@ -812,18 +817,6 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
   res.scoreA=j1A+j2A+j3A; res.scoreB=j1B+j2B+j3B;
   res.judges={j1:[j1A,j1B],j2:[j2A,j2B],j3:[j3A,j3B]}; res.roundStats=roundStats;
   res.log=log; res.stats=st;
-  // ==== [ANCRE: CHIN_PERMANENT] — dégâts neurologiques cumulatifs et
-  // irréversibles, demandés explicitement malgré la règle "jamais de
-  // dégradation silencieuse" établie plus tôt : ici le déclencheur est
-  // toujours explicite et compréhensible (KO subi, ou guerre confirmée),
-  // jamais un tirage aléatoire déconnecté d'un événement précis.
-  if(finish && finish.method==='KO/TKO'){
-    const loserAttrs=(finish.loser===A)?A.attrs:B.attrs;
-    loserAttrs.chin=clamp(loserAttrs.chin-RI(1,3),1,100);
-  }
-  if(st.A.dmgHead>=15 && rnd()<0.4) A.attrs.chin=clamp(A.attrs.chin-1,1,100);
-  if(st.B.dmgHead>=15 && rnd()<0.4) B.attrs.chin=clamp(B.attrs.chin-1,1,100);
-  // ==== [FIN ANCRE] ====
   return res;
 }
 function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!isDraw&&res.winner===side; const m=res.method;
@@ -932,6 +925,22 @@ function applyOrgAdvancementBoost(f, org){
   applyDeltas(f, [['cardio',amount],['strength',amount],['fightIQ',amount],['durability',amount],['recovery',amount]]);
 }
 function eloBaseline(org,overallVal){ const b=[800,1000,1200,1450,1700,2000,2100][org]||1000; return Math.round(b+((overallVal||50)-50)*8); }
+// ==== [ANCRE: CONTRAT_GENERATION] — génère un contrat de 4 combats à cachet
+// fixe (mêmes barèmes que ORG_PURSES/CHAMP_MULT déjà validés dans
+// resolveFight, jamais dupliqués ni réinventés ici). L'agent (Cercle "Le
+// Requin") améliore le cachet de base ; une revalorisation forcée réussie
+// l'améliore encore ; être déjà champion au moment de la signature déclenche
+// le même multiplicateur de titre que celui utilisé pour la bourse en combat. ====
+function generateContract(f,org,raise){
+  const base=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[30,30],[250,0]][org]||[1,1];
+  const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,5.0,2.0];
+  let mult=1;
+  if(raise) mult+=0.40;
+  if(f.agentCut>0) mult+=0.25;
+  const isChampContract=!!f.champion;
+  if(isChampContract) mult*=(CHAMP_MULT[org]||1);
+  return { fightsLeft:4, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract };
+}
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.
 function calculateEloDelta(ratingA,ratingB,winnerSide,method,round){
