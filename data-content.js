@@ -18,11 +18,11 @@ const ORIGINS=[
  'a refusé l\u2019emprise des gangs de son quartier en s\u2019enfermant quatorze heures par jour à la salle pour ne penser qu\u2019à la frappe',
 
  // Famille, prodiges et environnement
- 'est un{e/} enfant prodige {couvé/couvée} par un père tyrannique qui l\u2019entraîne comme un soldat spartiate depuis qu\u2019il sait marcher',
+ 'est un{/e} enfant prodige {couvé/couvée} par un père tyrannique qui l\u2019entraîne comme un soldat spartiate depuis qu\u2019il sait marcher',
  'vient d\u2019une famille déchirée par les dettes et a compris très tôt que son corps était sa seule véritable porte de sortie',
  'enfant de diplomates, a fugué de sa pension dorée par rejet viscéral du confort et de l\u2019hypocrisie bourgeoise',
  'a grandi dans l\u2019ombre d\u2019un père ancien combattant tombé dans l\u2019oubli, jurant très jeune de laver le nom de sa famille',
- 's\u2019est mis{e/} au combat par pure nécessité de survie après s\u2019être {retrouvé seul/retrouvée seule} à la rue à l\u2019âge de quatorze ans',
+ 's\u2019est mis{/e} au combat par pure nécessité de survie après s\u2019être {retrouvé seul/retrouvée seule} à la rue à l\u2019âge de quatorze ans',
  '{brutalisé/brutalisée} pendant toute son enfance à cause de son bégaiement, a fini par découvrir que la violence n\u2019avait pas besoin de mots',
  'passait ses nuits à regarder des cassettes de combats clandestins dans sa chambre d\u2019ado en rêvant de brutalité, jusqu\u2019à franchir le pas',
  'n\u2019a jamais rien réussi à l\u2019école et voit la cage comme la seule et unique alternative au chômage de longue durée'
@@ -46,7 +46,7 @@ function generateContextualOrigin(f){
     return 'est incapable de briser une vitre d\u2019un coup de poing, mais connaît quarante façons de luxer un genou humain';
   }
   if(f.potential>90 && f.morale<40){
-    return 'est un{e/} prodige absolu{e/} qui déteste profondément ce sport, {poussé/poussée} dans la cage par un manager tyrannique';
+    return 'est un{/e} prodige absolu{/e} qui déteste profondément ce sport, {poussé/poussée} dans la cage par un manager tyrannique';
   }
   return pick(ORIGINS);
 }
@@ -71,7 +71,7 @@ const MOTIVATIONS=[
  {short:'Suivre à la lettre les enseignements d\u2019un vieux coach qui est sa seule véritable figure paternelle',drive:'discipline'},
  {short:'Analyser la peur dans les yeux de ses adversaires pour essayer de comprendre ses propres démons',drive:'fightIQ'},
  {short:'Échapper à son quartier : l\u2019octogone est littéralement son seul et unique ticket de sortie',drive:'adaptability'},
- {short:'Cherche l\u2019immortalité précoce : devenir le{la/} plus jeune champion{ne/} de l\u2019histoire pour qu\u2019on ne {l\u2019oublie/l\u2019oublie} jamais',drive:'focus'},
+ {short:'Cherche l\u2019immortalité précoce : devenir {le/la} plus jeune champion{/ne} de l\u2019histoire pour qu\u2019on ne {l\u2019oublie/l\u2019oublie} jamais',drive:'focus'},
  {short:'Racheter les erreurs de son adolescence en prouvant qu\u2019{il est/elle est} capable de respecter des règles strictes',drive:'composure'},
  {short:'Approche la bagarre comme un jeu d\u2019échecs macabre où chaque mouvement de l\u2019adversaire est calculé avec froideur',drive:'fightIQ'},
  {short:'Simplement pour l\u2019argent de poche, car détruire des gens dans une cage paie infiniment mieux que de faire la plonge',drive:'adaptability'},
@@ -181,5 +181,28 @@ const TRAIN=[
  // ==========================================
  {t:['mma'],label:'Bagarre dans la boue',hint:'Survivre aux transitions chaotiques quand tout glisse avec le sang et la sueur.',d:[['adaptability',3],['tdd',2],['topControl',1],['morale',-2],['form',3]]},
  {t:['mma'],label:'Leurre systémique',hint:'Faire semblant de savoir boxer uniquement pour forcer la garde à monter et voler une cheville.',d:[['fightIQ',3],['takedown',2],['cross',1],['focus',1]]},
- {t:['mma'],label:'Dirty Boxing en cage',hint:'Tenir la nuque de la main gauche, uppercut sale de la droite contre le grillage.',d:[['clinchStr',3],['hook',2],['aggression',1],['form',3]]}
+ {t:['mma'],label:'Dirty Boxing en cage',hint:'Tenir la nuque de la main gauche, uppercut sale de la droite contre le grillage.',d:[['clinchStr',3],['hook',2],['aggression',1],['form',3]]},
+
+ // ==========================================
+ // 14. OPTIONS CROISÉES (item demandé : combler les attributs qu'aucune
+ // option n'entraînait jamais pour certains styles, empêchant le niveau
+ // d'approcher le potentiel sur une carrière entière — cf. audit de
+ // couverture par style)
+ // ==========================================
+ {t:['all'],label:'Souplesse fonctionnelle',hint:'Étirements dynamiques et mobilité articulaire pour repousser les limites du corps.',d:[['flexibility',4],['adaptability',1],['form',3]]},
+ {t:['boxer','kickboxer','muayThai','karate','mma'],label:'Ground and Pound basique',hint:'Apprendre à finir un combat une fois l\u2019adversaire au sol, même sans bagage de lutteur.',d:[['gnp',3],['topControl',1],['power',1],['form',2]]},
+ {t:['wrestler','sambo','bjj'],label:'Pilonnage au sol',hint:'Transformer un contrôle dominant en dégâts constants, coude après coude.',d:[['gnp',3],['strength',1],['aggression',1],['form',2]]},
+ {t:['boxer','kickboxer','karate','wrestler'],label:'Guerre de clinch',hint:'S\u2019accrocher au corps à corps pour étouffer la puissance adverse.',d:[['clinchStr',3],['strength',1],['composure',1],['form',2]]},
+ {t:['boxer','kickboxer','muayThai','karate'],label:'Défense anti-lutte',hint:'Apprendre à rester debout coûte que coûte face à un lutteur déterminé.',d:[['tdd',3],['footSpeed',1],['discipline',1],['form',2]]},
+ {t:['boxer','kickboxer','muayThai','karate'],label:'Bases de soumission défensive',hint:'Survivre au minimum vital une fois au sol, même sans bagage de spécialiste.',d:[['guardWork',3],['heart',1],['composure',1],['form',1]]},
+ {t:['boxer','karate'],label:'Initiation à la lutte',hint:'Apprendre les bases du double-leg pour ne plus être unidimensionnel.',d:[['takedown',2],['topControl',2],['strength',1],['form',2]]},
+ {t:['wrestler','sambo','bjj'],label:'Bases de striking',hint:'Ajouter un minimum de frappe pour ne pas être totalement prévisible debout.',d:[['jab',2],['cross',1],['handSpeed',1],['form',2]]},
+ {t:['wrestler','sambo'],label:'Percussion improvisée',hint:'Développer un crochet et un high kick de fortune pour garder les strikers honnêtes.',d:[['hook',2],['kick',2],['footSpeed',1],['form',1]]},
+ {t:['mma'],label:'Instinct du finisseur',hint:'Cultiver ce petit supplément d\u2019âme qui transforme une domination en KO.',d:[['killer',3],['confidence',1],['aggression',1],['form',2]]},
+ {t:['mma'],label:'Soumissions improvisées',hint:'Ajouter un arsenal minimal au sol pour ne pas être un pur frappeur perdu par terre.',d:[['submission',2],['guardWork',2],['adaptability',1],['form',1]]},
+ {t:['mma'],label:'Jeu de jambes complet',hint:'Ajouter le coup de pied à un arsenal de poings pour varier les angles d\u2019attaque.',d:[['kick',3],['footSpeed',1],['form',2]]},
+ {t:['boxer','kickboxer','muayThai','karate'],label:'Soumissions de fortune',hint:'Mémoriser deux ou trois clés basiques, juste de quoi ne pas être totalement démuni au sol.',d:[['submission',2],['adaptability',1],['form',1]]},
+ {t:['boxer'],label:'Ajout du jeu de jambes',hint:'Intégrer le coup de pied circulaire à un arsenal jusque-là 100% poings.',d:[['kick',3],['footSpeed',1],['form',2]]},
+ {t:['kickboxer','muayThai'],label:'Double-leg improvisé',hint:'Voler une jambe entre deux échanges pour casser le rythme d\u2019un pur frappeur.',d:[['takedown',2],['strength',1],['form',1]]},
+ {t:['bjj'],label:'Frappe complémentaire',hint:'Ajouter crochet, coup de pied et clinch à un jeu jusque-là exclusivement au sol.',d:[['hook',2],['kick',1],['clinchStr',1],['form',1]]}
 ];

@@ -28,6 +28,12 @@ body::after{
 /* zones de pouce mobiles : cible tactile minimale sur les éléments de liste */
 .opp,.glass{min-height:64px;margin-bottom:8px}
 .opp:hover{border-color:var(--gold-d);background:rgba(255,255,255,.10)}
+/* Chevron animé pour les blocs dépliables (Panthéon du combattant, écran de
+   retraite) — signale clairement qu'un élément .opp utilisé en <summary> est
+   interactif, au-delà du simple curseur pointer. */
+details>summary{outline:none}
+details>summary::-webkit-details-marker{display:none}
+details[open]>summary span[style*="font-size:18px"]{transform:rotate(90deg);display:inline-block;transition:transform .15s}
 #app{max-width:var(--maxw);margin:0 auto}
 .scr{padding:16px 15px 40px;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}

@@ -406,7 +406,18 @@ const FIRST_F=['Amara','Lena','Sofia','Nadia','Yuki','Maya','Zara','Ana','Ines',
 function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?FIRST_F:FIRST_M); const last=pick(c.last); return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
 
 /* ------------------------- CRÉATION D'UN COMBATTANT ----------------------- */
-let _id=1;
+// ==== [ANCRE: CORRECTIF_ID_UNIQUE] — bug majeur trouvé : l'ancien compteur
+// `let _id=1` repartait de 1 à CHAQUE rechargement de page. Le Panthéon
+// persiste pourtant en localStorage entre les sessions : deux combattants
+// retraités lors de sessions différentes (donc de rechargements différents)
+// pouvaient très facilement partager le même id numérique (souvent le tout
+// premier combattant créé de chaque session = id 1). Résultat : supprimer UNE
+// légende individuellement effaçait TOUTES celles qui partageaient son id, y
+// compris — dans le pire cas observé — le Panthéon entier. Remplacé par un
+// identifiant réellement unique (horodatage + suffixe aléatoire), stable
+// quel que soit le nombre de rechargements.
+let _idCounter=0;
+function uniqueFighterId(){ _idCounter++; return Date.now().toString(36)+'_'+_idCounter.toString(36)+'_'+Math.random().toString(36).slice(2,8); }
 function makePhysical(div){ const D=div||pick(allDivisions());
   let height=gauss(D.h,4,D.h-9,D.h+11);
   const tags=[];
@@ -429,9 +440,26 @@ function weightCutInfo(f){ const D=divById(f.div); const limit=D?D.kg:70;
   const cutKg=+(walk-limit).toFixed(1);
   return {limit,walk,cutKg,cutPct};
 }
-function baseAttrs(style,level,predis){ const o={}; const bias=(STYLES[style]||{b:{}}).b;
-  for(const k of ATTR_KEYS){ let v=gauss(level, 9, 6, 96); if(bias[k])v=clamp(v+bias[k]); o[k]=v; }
-  if(predis){ if(predis.includes('densité'))o.power=clamp(o.power+RI(8,16)); if(predis.includes('explosivité')){o.explosiveness=clamp(o.explosiveness+RI(8,14));o.takedown=clamp(o.takedown+RI(5,10));} }
+// ==== [ANCRE: STATS_DEPART_RESSERREES] — item demandé : les attributs de
+// départ tombaient parfois très bas (jusqu'à 1/20 sur certains, écart-type
+// de 9 sur une échelle /100 avec un plancher à 6). Resserré pour que CHAQUE
+// attribut individuel tombe toujours entre 8/20 et 12/20 (40-60/100) à la
+// création, potentiel cette fois variable entre 80 et 95 (au lieu de 45-97)
+// — c'est le potentiel, pas le niveau de départ, qui doit différencier un
+// prospect ordinaire d'un prodige.
+// ==== [ANCRE: STATS_DEPART_RESSERREES] — item demandé : les attributs de
+// départ d'un COMBATTANT JOUEUR FRAIS tombaient parfois très bas (jusqu'à
+// 1/20, écart-type 9 sur une échelle /100 avec un plancher à 6). Un
+// paramètre dédié `tightSpread` resserre le tirage UNIQUEMENT pour la
+// création d'un nouveau joueur (chaque attribut individuel garanti entre
+// 8/20 et 12/20, soit 40-60/100) sans toucher à baseAttrs pour la génération
+// des adversaires/roster (qui a besoin de toute l'amplitude 6-96 pour les
+// paliers élevés — un adversaire de haut niveau n'est pas concerné par cette
+// contrainte, seulement le combattant qu'on incarne).
+function baseAttrs(style,level,predis,tightSpread){ const o={}; const bias=(STYLES[style]||{b:{}}).b;
+  const sd=tightSpread?3:9, lo=tightSpread?40:6, hi=tightSpread?60:96;
+  for(const k of ATTR_KEYS){ let v=gauss(level, sd, lo, hi); if(bias[k])v=clamp(v+bias[k], lo, hi); o[k]=v; }
+  if(predis){ if(predis.includes('densité'))o.power=clamp(o.power+RI(8,16), lo, hi); if(predis.includes('explosivité')){o.explosiveness=clamp(o.explosiveness+RI(8,14), lo, hi);o.takedown=clamp(o.takedown+RI(5,10), lo, hi);} }
   return o;
 }
 function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
@@ -439,12 +467,15 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
   const style=opt.style||pick(STYLE_KEYS); const ck=opt.countryKey||pick(COUNTRY_KEYS);
   const nm=makeName(gender,ck,opt.first);
   const phys=makePhysical(div);
-  const level=opt.level!=null?opt.level:gauss(46,10,20,80);
-  const attrs=baseAttrs(style,level,phys.tags.join(' '));
-  const potential=opt.potential!=null?opt.potential:gauss(68,12,45,97);   // caché
+  // Le tirage resserré s'active automatiquement quand aucun niveau explicite
+  // n'est fourni ET que l'appelant le demande via opt.freshPlayer — jamais
+  // pour le roster/les adversaires (toujours créés avec un level explicite).
+  const level=opt.level!=null?opt.level:gauss(50,3,42,58);
+  const attrs=baseAttrs(style,level,phys.tags.join(' '),!!opt.freshPlayer);
+  const potential=opt.potential!=null?opt.potential:gauss(87,4,80,95);   // caché
   const dynamic=0;                                                         // moral/forme caché ±
   const mot=pick(MOTIVATIONS); const origin=parseGender(generateContextualOrigin({attrs,phys,countryKey:ck,potential,morale:60}),gender);
-  const f={ id:_id++, gender, div:div.id, divName:div.name, style, styleLabel:styleLabel(style),
+  const f={ id:uniqueFighterId(), gender, div:div.id, divName:div.name, style, styleLabel:styleLabel(style),
     first:nm.first,last:nm.last,name:nm.name,flag:nm.flag,countryKey:ck,
     phys, attrs, potential, dynamic, morale:60, form:55,
     stage:'amateur', org:0, orgWins:0, age:opt.age!=null?opt.age:RI(18,22),
@@ -842,19 +873,61 @@ const FINISH_MOVES={
   {id:'mma30',name:'Ground and Pound de l\u2019enfer',zone:'tête'},{id:'mma37',name:'instinct de destruction',zone:'tête'},
  ]
 };
-const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'corps'},{name:'clé de bras (armbar)',zone:'corps'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'},{name:'clé de genou (kneebar)',zone:'jambes'},{name:'étranglement d\u2019Arce',zone:'tête'},{name:'cravate péruvienne',zone:'tête'},{name:'clé de poignet (wristlock)',zone:'corps'},{name:'compression des mollets (calf slicer)',zone:'jambes'}];
-const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'},{name:'coup de pied retourné (spinning back kick)',zone:'tête'},{name:'coup de genou sauté',zone:'tête'},{name:'overhand dévastateur',zone:'tête'},{name:'chassé frontal (teep) qui coupe le souffle',zone:'corps'},
-  // ==== [ANCRE: FINITIONS_DEBOUT_SUPPLEMENTAIRES] — variété enrichie de
-  // finitions debout (item demandé), toutes accessibles à tous les styles
-  // via le pool générique (pas besoin de compétence spécifique).
-  {name:'genou volant en pleine charge',zone:'tête'},{name:'coude retourné (spinning elbow)',zone:'tête'},
-  {name:'combo poing-genou qui ne laisse aucune chance',zone:'corps'},{name:'crochet au foie qui coupe les jambes',zone:'corps'}];
+// ==== [ANCRE: FINITIONS_GENERIQUES_REFONTE] — remplace l'ancien pool de
+// finitions génériques (qui mélangeait noms de coups et phrases descriptives,
+// ex. "crochet au foie qui coupe les jambes") par des noms de coups PROPRES
+// uniquement — chacun avec sa propre variante "signature" dédiée (voir
+// MOVE_SIGNATURE_FLAVOR ci-dessous), au lieu d'un message générique unique.
+const GENERIC_SUB=[
+  {name:'Kimura',zone:'corps'},{name:'Americana',zone:'corps'},{name:'Armbar',zone:'corps'},
+  {name:'Triangle',zone:'tête'},{name:'Rear Naked Choke',zone:'tête'},{name:'Guillotine',zone:'tête'},
+  {name:'Anaconda',zone:'tête'},{name:'Twister',zone:'corps'},{name:'Heel Hook',zone:'jambes'},
+  {name:'Clé de cheville',zone:'jambes'}
+];
+const GENERIC_KO=[
+  {name:'Crochet',zone:'tête'},{name:'Uppercut',zone:'tête'},{name:'Overhand',zone:'tête'},
+  {name:'Jab chanceux',zone:'tête'},{name:'Direct puissant',zone:'tête'},{name:'Marteau au sol',zone:'tête'},
+  {name:'Coup de genou sauté',zone:'tête'},{name:'Coup de coude retourné',zone:'tête'},
+  {name:'Coup de pied au corps',zone:'corps'},{name:'Coup de genou au corps',zone:'corps'},{name:'Crochet au foie',zone:'corps'},
+  {name:'Low kick',zone:'jambes'},{name:'Calf kick',zone:'jambes'},
+  {name:'High kick',zone:'tête'},{name:'Coup de pied retourné',zone:'tête'},{name:'Superman punch',zone:'tête'}
+];
+// Une variante narrative dédiée par coup, utilisée à la fois pour le
+// déblocage du mouvement signature et pour ses répétitions ultérieures.
+const MOVE_SIGNATURE_FLAVOR={
+  'Crochet':'Le crochet est devenu sa signature — un mensonge qui arrive toujours de là où on l\u2019attend.',
+  'Uppercut':'L\u2019uppercut est devenu sa signature — droit sous le menton, à chaque fois.',
+  'Overhand':'L\u2019overhand est devenu sa signature — une bombe qui passe par-dessus la garde.',
+  'Jab chanceux':'Le jab chanceux est devenu sa signature — un coup de rien qui finit tout.',
+  'Direct puissant':'Le direct puissant est devenu sa signature — la ligne la plus courte vers le KO.',
+  'Marteau au sol':'Le marteau au sol est devenu sa signature — implacable une fois l\u2019adversaire à terre.',
+  'Coup de genou sauté':'Le genou sauté est devenu sa signature — personne ne voit le décollage venir.',
+  'Coup de coude retourné':'Le coude retourné est devenu sa signature — un geste qu\u2019on ne voit qu\u2019une fois.',
+  'Coup de pied au corps':'Le coup de pied au corps est devenu sa signature — il vide les poumons un round à l\u2019avance.',
+  'Coup de genou au corps':'Le genou au corps est devenu sa signature — plié en deux, à chaque clinch.',
+  'Crochet au foie':'Le crochet au foie est devenu sa signature — personne ne s\u2019en relève à temps.',
+  'Low kick':'Le low kick est devenu sa signature — il ne casse pas l\u2019adversaire, il l\u2019use.',
+  'Calf kick':'Le calf kick est devenu sa signature — la jambe d\u2019appui cède avant le mental.',
+  'High kick':'Le high kick est devenu sa signature — une explosion qui vient de nulle part.',
+  'Coup de pied retourné':'Le coup de pied retourné est devenu sa signature — le dos tourné, l\u2019instant d\u2019avant.',
+  'Superman punch':'Le superman punch est devenu sa signature — il s\u2019envole avant de frapper.',
+  'Kimura':'Le kimura est devenu sa signature — l\u2019épaule cède avant la fierté.',
+  'Americana':'L\u2019americana est devenue sa signature — le bras plaqué au sol, sans échappatoire.',
+  'Armbar':'L\u2019armbar est devenu sa signature — le coude tendu jusqu\u2019au point de rupture.',
+  'Triangle':'Le triangle est devenu sa signature — les jambes se referment, l\u2019air disparaît.',
+  'Rear Naked Choke':'Le rear naked choke est devenu sa signature — accroché dans le dos, inévitable.',
+  'Guillotine':'La guillotine est devenue sa signature — la tête coincée dès le premier contact.',
+  'Anaconda':'L\u2019anaconda est devenu sa signature — un étau qui se resserre sans prévenir.',
+  'Twister':'Le twister est devenu sa signature — la colonne tordue jusqu\u2019à l\u2019abandon.',
+  'Heel Hook':'Le heel hook est devenu sa signature — le genou cède avant que ça fasse mal.',
+  'Clé de cheville':'La clé de cheville est devenue sa signature — la cheville plie, l\u2019adversaire tape.'
+};
 function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
   // Mouvement signature (#6) : si le combattant a déjà déverrouillé une prise
   // signature (5 finitions identiques auparavant), 40% de chance de la rejouer
   // directement plutôt que de repartir sur le tirage normal.
   if(winner.signatureMove && winner.signatureMove.type===type && rnd()<0.40){
-    return {name:winner.signatureMove.name, flavor:'Le geste devenu sa signature — le public le voit venir, mais personne ne peut l\u2019arrêter.'};
+    return {name:winner.signatureMove.name, flavor:MOVE_SIGNATURE_FLAVOR[winner.signatureMove.name]||'Le geste devenu sa signature — le public le voit venir, mais personne ne peut l\u2019arrêter.'};
   }
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
   let baseMove;
@@ -876,7 +949,7 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
     if(!(winner.skills||[]).includes(skillId)){
       grantSkill(winner,{id:skillId,name:baseMove+' (Signature)',rar:'M',fx:{},desc:`${winner.name} a répété ce geste jusqu\u2019à le rendre inévitable : ${baseMove}, désormais sa marque de fabrique.`,tags:['Signature']});
     }
-    flavor=`MOUVEMENT SIGNATURE DÉBLOQUÉ : ${baseMove} devient sa marque de fabrique.`;
+    flavor=`MOUVEMENT SIGNATURE DÉBLOQUÉ : ${MOVE_SIGNATURE_FLAVOR[baseMove]||baseMove+' devient sa marque de fabrique.'}`;
   }
   if(fightStats && !flavor){
     const isLate=(round||1)>=3;
@@ -894,7 +967,7 @@ function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
 }
 
 /* ------------------------- ORGS / CLASSEMENT / ÂGE ------------------------ */
-const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Continentale','Pacific Championship (Gloire)','Ultimate Rim (Argent)'];
+const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Continentale','Ultimate Rim (Argent)','Pacific Championship (Gloire)'];
 const ORG_PROMO_SCORE=[0,100,250,450,650,900,900]; // score ELO requis par palier
 /* ==== [ANCRE: ORG_FLAVOR] — Version A validée : cosmétique uniquement, aucune
    incidence mécanique. Amateur (0) et Pacific Championship/Ultimate Rim (5/6, déjà nommés)
@@ -935,7 +1008,7 @@ function applyOrgAdvancementBoost(f, org){
   const amount=2+org; // org1:+3, org2:+4 ... org6:+8
   applyDeltas(f, [['cardio',amount],['strength',amount],['fightIQ',amount],['durability',amount],['recovery',amount]]);
 }
-function eloBaseline(org,overallVal){ const b=[800,1000,1200,1450,1700,2000,2100][org]||1000; return Math.round(b+((overallVal||50)-50)*8); }
+function eloBaseline(org,overallVal){ const b=[800,1000,1200,1450,1700,2100,2000][org]||1000; return Math.round(b+((overallVal||50)-50)*8); }
 // ==== [ANCRE: CONTRAT_GENERATION] — génère un contrat de 4 combats à cachet
 // fixe (mêmes barèmes que ORG_PURSES/CHAMP_MULT déjà validés dans
 // resolveFight, jamais dupliqués ni réinventés ici). L'agent (Cercle "Le
@@ -943,8 +1016,13 @@ function eloBaseline(org,overallVal){ const b=[800,1000,1200,1450,1700,2000,2100
 // l'améliore encore ; être déjà champion au moment de la signature déclenche
 // le même multiplicateur de titre que celui utilisé pour la bourse en combat. ====
 function generateContract(f,org,raise){
-  const base=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[30,30],[250,0]][org]||[1,1];
-  const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,5.0,2.0];
+  // ==== [ANCRE: SWAP_PACIFIC_ULTIMATE] — item demandé : Pacific Championship
+  // (Gloire) passe au niveau 6 (sommet), Ultimate Rim (Argent) au niveau 5.
+  // Chaque organisation garde exactement son identité mécanique d'origine
+  // (cachet, multiplicateur de titre, elo de référence) — seul l'INDEX
+  // change, comme demandé, pas le comportement propre à chaque ligue.
+  const base=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[250,0],[30,30]][org]||[1,1];
+  const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,2.0,5.0];
   let mult=1;
   if(raise) mult+=0.40;
   if(f.agentCut>0) mult+=0.25;
@@ -982,15 +1060,14 @@ function p4pScore(f){ const fights=f.W+f.L+f.D;
   if(f.careerElo===undefined) f.careerElo=eloBaseline(f.org,f.overall);
   if(f.orgElo===undefined) f.orgElo=eloBaseline(f.org,f.overall);
   const leapfrog=f.rankBoost||0;
-  // ==== [ANCRE: BONUS_DOUBLE_CHAMPION] — le statut de champion donnait déjà
-  // +50 au score P4P ; la double ceinture (champ-champ) n'apportait
-  // strictement RIEN de plus. Un deuxième +50 (donc +100 au total pour un
-  // double champion) reflète enfin la domination réelle sur deux
-  // catégories — affiché aussi dans la fiche du combattant (scr_profile).
-  const champBonus=(f.champion?50:0)+(f.champChampBelt?50:0);
-  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+champBonus+leapfrog);
-  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+champBonus+leapfrog;
-  if(f.org===5) score*=1.4;
+  // ==== [ANCRE: RETRAIT_BONUS_CHAMPION] — item demandé : le statut de
+  // champion (simple ou double) ne donne plus de bonus au score de
+  // classement P4P. La reconnaissance du titre se fait désormais uniquement
+  // via un badge dédié dans la fiche complète (scr_profile), pas via un
+  // avantage chiffré caché dans le classement.
+  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+leapfrog);
+  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+leapfrog;
+  if(f.org===6) score*=1.4;
   return Math.max(1, score);
 }
 /* ==== [FIN ANCRE] ==== */
@@ -1040,8 +1117,11 @@ function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
    Math.random(). Bornes /1-100 et recalcul de l'overall ajoutés, comme le
    faisait l'ancien rollSkill(). ==== */
 const SKILL_CONSTANTS = {
-  BASE_RATE: 0.095, DROUGHT_INC: 0.01, MYTHIC_CHANCE: 0.0009,
-  MAX_CAREER_SKILLS: 9, AGE_META: 34,
+  // Taux de tirage augmenté (item demandé : ~10 compétences par partie en
+  // moyenne, contre ~8 auparavant) et plafond de carrière relevé en
+  // conséquence (9 → 10).
+  BASE_RATE: 0.12, DROUGHT_INC: 0.012, MYTHIC_CHANCE: 0.0009,
+  MAX_CAREER_SKILLS: 10, AGE_META: 34,
 };
 function tirerRarete(){ const roll=rnd()*100;
   if(roll<58.3) return 'C'; if(roll<87.4) return 'R'; if(roll<97.1) return 'E'; return 'L';

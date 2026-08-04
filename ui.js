@@ -118,11 +118,11 @@ function recordTitleDefense(org,divName,champion){
   if(reign) reign.defenses+=1;
 }
 /* ==== [FIN ANCRE] ====*/
-// ==== [ANCRE: DIFFICULTE_GLOBALE] — barème abaissé de 9 points sur /100 (item
-// demandé : le jeu était trop dur). Le delta reste identique entre paliers,
-// seul le niveau plancher baisse, donc la courbe de progression n'est pas
-// dénaturée, juste rendue plus accessible à tous les étages. ====
-function orgLevel(org){ return [29,37,45,52,58,64,64][org]||31; }
+// ==== [ANCRE: DIFFICULTE_GLOBALE] — barème initial abaissé de 9 points sur
+// /100 (le jeu était trop dur), puis réajusté à la hausse sur les paliers
+// les plus bas (item demandé : amateur +4, palier 1 +2, palier 2 +2) car ce
+// premier abaissement les avait rendus trop faciles. Paliers 3+ inchangés.
+function orgLevel(org){ return [33,39,47,52,58,64,64][org]||31; }
 function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const pool=[];
   const isAmateur=(f.org===0);
   const needed=isAmateur?100:30; // pro : 1 champion + 15 contenders classés + 14 non classés
@@ -163,7 +163,19 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
   if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgElo=Math.max(ranked[0].orgElo||0,eloBaseline(f.org,ranked[0].overall)+RI(150,300)); }
   return ranked;
 }
-function divRank(f){ return rankPool(G.roster.filter(o=>!o.champion).concat([f])).findIndex(o=>o===f)+1; }
+// ==== [ANCRE: CORRECTIF_DOUBLE_RANG_1] — bug trouvé : divRank(x) ajoutait
+// TOUJOURS le fighter passé en argument à son propre pool de classement,
+// jamais le vrai joueur (G.f) quand on classait un ADVERSAIRE. Résultat : le
+// joueur pouvait être rang #1 ET un adversaire proposé être calculé comme
+// rang #1 lui aussi (chacun manquant l'autre dans son propre calcul) — deux
+// "rang #1" simultanés, exactement le cas signalé (adversaire "Challenger #1"
+// alors que le joueur est déjà #1). Le pool de classement est maintenant
+// construit UNE SEULE FOIS, en y incluant toujours le vrai joueur (sauf s'il
+// est déjà champion, comme pour tout autre classement de la division).
+function divRank(target){
+  const pool=rankPool(G.roster.filter(o=>!o.champion).concat(G.f.champion?[]:[G.f]));
+  return pool.findIndex(o=>o===target)+1;
+}
 function advanceRoster(){
   if(typeof generateNPCNews==='function') generateNPCNews();
   const allFighters=G.roster.concat(G.f.champion?[]:[G.f]);
@@ -264,7 +276,7 @@ function reconstructLegend(l){
    affiche officielle, jamais construits auparavant (confirmé absent). ==== */
 function getCardSlot(f,kind){
   if(f.org===0) return "CARTE AMATEUR";
-  if(kind==='title'||kind==='defense') return "MAIN EVENT";
+  if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "MAIN EVENT";
   const rnk=divRank(f);
   if(rnk<=3) return "CO-MAIN EVENT";
   if(rnk<=7) return "MAIN CARD";
@@ -451,6 +463,24 @@ function tacticalRead(f,o){ const a=eff(f),b=eff(o);
   else if(a.overall>o.overall+8 || edgeMe>=2) base='Sur le papier, tu domines. Ne te relâche pas.';
   else if(o.overall>f.overall+8 || edgeOpp>=2) base='Plus fort que toi. Il te faudra un plan.';
   return prefix+base;
+}
+/* ==== [ANCRE: COMPARATIF_STATS_REUTILISABLE] — extrait de scr_select() pour
+   être réutilisé ailleurs (ex. offre de supercombat champ-champ, item
+   demandé : afficher striking/grappling/danger du champion adverse). ==== */
+function statComparisonHtml(f,o){
+  const striking=Math.round((o.attrs.jab+o.attrs.cross+o.attrs.hook+o.attrs.kick)/4);
+  const grappling=Math.round((o.attrs.takedown+o.attrs.submission+o.attrs.topControl)/3);
+  const danger=o.attrs.power;
+  const myStr=Math.round((f.attrs.jab+f.attrs.cross+f.attrs.hook+f.attrs.kick)/4);
+  const myGrap=Math.round((f.attrs.takedown+f.attrs.submission+f.attrs.topControl)/3);
+  const myDan=f.attrs.power;
+  const diffText=(opp,me)=>{ const diff=me-opp; if(diff>=12)return'Ton avantage net';if(diff>=5)return'Léger avantage';if(diff>-5&&diff<5)return'Équilibré';if(diff<=-12)return'Son avantage net';return'Léger désavantage'; };
+  const getDiffColor=(txt)=>txt.startsWith('Son')||txt==='Léger désavantage'?'var(--loss)':(txt.startsWith('Ton')||txt==='Léger avantage')?'var(--gold)':'var(--text)';
+  return `<div class="stat-band" style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:left;border-top:1px dashed var(--line)">
+    <div><span class="stat-lbl">STRIKING</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(striking,myStr))}">${diffText(striking,myStr)}</b></div>
+    <div><span class="stat-lbl">GRAPPLING</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(grappling,myGrap))}">${diffText(grappling,myGrap)}</b></div>
+    <div><span class="stat-lbl">DANGER (KO)</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(danger,myDan))}">${diffText(danger,myDan)}</b></div>
+  </div>`;
 }
 function genOpponents(f){
   let pool=G.roster.filter(o=>o.id!==f.id);
@@ -2166,8 +2196,8 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // cachet fixé à la signature plutôt que le barème brut de l'organisation —
   // repli sur l'ancien barème pour l'amateur (pas de contrat) et les
   // sauvegardes migrées sans contrat encore assigné.
-  const ORG_PURSES=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[30,30],[250,0]];
-  const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,5.0,2.0];
+  const ORG_PURSES=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[250,0],[30,30]];
+  const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,2.0,5.0];
   let showPurse,winBonus;
   if(G.f.org>0 && G.f.contract){
     showPurse=G.f.contract.show; winBonus=G.f.contract.win;
@@ -2180,7 +2210,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   showPurse*=rivalryMult; winBonus*=rivalryMult;
   let purse=showPurse;
   if(win) purse+=winBonus;
-  if(win && !isDecisionLike(res.method)){ purse+=(G.f.org===5)?50:showPurse*0.25; }
+  if(win && !isDecisionLike(res.method)){ purse+=(G.f.org===6)?50:showPurse*0.25; }
   if(G.fight.pursePenalty) purse=Math.floor(purse*G.fight.pursePenalty*100)/100;
   const purseGross=purse;
   purse=Math.floor(purse*0.75*100)/100; // frais de camp fixes (manager, coach, salle) : ~25% de la bourse brute
@@ -2201,17 +2231,23 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.f.contract.fightsLeft<=0) contractExpiry=true;
   }
   // ==== [ANCRE: NON_RENOUVELLEMENT] — à l'échéance, l'organisation évalue le
-  // bilan RÉEL du contrat (pas juste "gagné/perdu") : chaque défaite pèse
-  // 20%, chaque victoire aux points (peu spectaculaire) pèse 5% — une
-  // victoire par finition ne pèse rien. Exemple validé : 2 décisions + 2
-  // défaites sur 4 combats = 0.20*2 + 0.05*2 = 50% de non-renouvellement,
-  // conforme au cas de référence demandé.
+  // bilan RÉEL du contrat. Formule corrigée (item demandé : 1 défaite + 3
+  // victoires aux points ne devrait PAS risquer le contrat — un bilan encore
+  // largement gagnant ne doit jamais être une raison sérieuse de se faire
+  // couper) : tant que le combattant reste gagnant ou à égalité (victoires >=
+  // défaites), seul un "ennui" mineur lié aux décisions joue, plafonné bas.
+  // Le vrai risque de non-renouvellement n'apparaît que sur un bilan
+  // RÉELLEMENT perdant (plus de défaites que de victoires sur le contrat).
   let contractNonRenewed=false;
   if(contractExpiry && G.f.contract && G.f.contract.record && G.f.contract.record.length){
     const rec=G.f.contract.record;
     const losses=rec.filter(r=>r.res==='loss').length;
+    const wins=rec.filter(r=>r.res==='win').length;
     const decisionWins=rec.filter(r=>r.res==='win' && isDecisionLike(r.method)).length;
-    const nonRenewChance=Math.min(0.9, losses*0.20 + decisionWins*0.05);
+    let nonRenewChance;
+    if(losses===0) nonRenewChance=0; // invaincu sur ce contrat : jamais de risque
+    else if(wins>=losses) nonRenewChance=Math.min(0.15, decisionWins*0.03); // bilan gagnant/nul : ennui mineur seulement, plafonné à 15%
+    else nonRenewChance=Math.min(0.9, losses*0.25 + decisionWins*0.05); // bilan réellement perdant
     if(rnd()<nonRenewChance){
       contractNonRenewed=true;
       G.f.contractNonRenewed=true;
@@ -2320,6 +2356,20 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       if(!G.f.org1Warned){ G.f.org1Warned=true; G.f.easyFights=0; milestone='Dernier avertissement pour refus de combattre.'; }
       else { G.f.retired=true; forced=true; milestone='Contrat pro coupé pour refus de combattre. Retraite forcée.'; }
     }
+    // ==== [ANCRE: CORRECTIF_RETRAITE_AMATEUR_SANS_PREAVIS] — bug trouvé : un
+    // amateur (org 0) subissait une retraite DÉFINITIVE et IMMÉDIATE dès le
+    // 1er déclenchement, sans le moindre avertissement préalable (contraire à
+    // tous les autres paliers). Pire : ce compteur s'incrémente simplement
+    // quand le matchmaking propose (et que le joueur accepte, sans intention
+    // de "esquiver" quoi que ce soit) un adversaire classé 5+ rangs en
+    // dessous — un simple prospect qui grimpe vite au classement peut
+    // enchaîner ce cas de figure sans jamais avoir "refusé" un combat.
+    // Amateur reçoit désormais le même palier d'avertissement que le pro
+    // niveau 1, avec un message explicite sur la cause réelle.
+    else if(G.f.org===0){
+      if(!G.f.org0Warned){ G.f.org0Warned=true; G.f.easyFights=0; milestone='La fédération amateur s\u2019impatiente : trop d\u2019adversaires trop faibles pour ton niveau. Accepte des défis plus relevés, ou ta carrière amateur pourrait s\u2019arrêter là.'; }
+      else { G.f.retired=true; forced=true; milestone='Éliminé du circuit amateur : trop d\u2019adversaires trop faciles acceptés malgré l\u2019avertissement.'; }
+    }
     else { G.f.retired=true; forced=true; milestone='Contrat coupé par l\u2019organisation.'; }
   }
   // ==== [FIN ANCRE] ====
@@ -2395,7 +2445,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // (dommage neurologique) ne remonte JAMAIS, même ici — règle absolue. La
     // résistance générale (conditionnement physique, pas neuronal) reste un
     // vrai privilège de cette ligue, distinct du bonus classement d'Apex. ====
-    if(G.f.org===6){ G.f.attrs.durability=clamp(G.f.attrs.durability+2,1,100); G.f.overall=overall(G.f); }
+    if(G.f.org===5){ G.f.attrs.durability=clamp(G.f.attrs.durability+2,1,100); G.f.overall=overall(G.f); }
     // ==== [FIN ANCRE] ====
   }
   let retAge=Math.max(39,42-(G.f.chinDegradationLevel||0)); if(G.f.skills.includes('meta01')) retAge+=2;
@@ -2527,8 +2577,8 @@ const ACH=[
  {id:'vet',cat:'Technique & Héritage',ico:SVG.veteran,h:'Vétéran',d:'30 combats pro',t:f=>f.stage==='pro'&&(f.W+f.L+f.D)>=30},
  {id:'amachamp',cat:'Carrière & Titres',ico:SVG.trophy,h:'Champion amateur',d:'Remporter un tournoi amateur (WMA/DMMA)',t:f=>!!(f.amaTitles&&f.amaTitles.length>=1)},
  {id:'amachamp2',cat:'Carrière & Titres',ico:SVG.flag,h:'Double couronne amateur',d:'Remporter 2 tournois amateurs différents',t:f=>!!(f.amaTitles&&f.amaTitles.length>=2)},
- {id:'pacific',cat:'Carrière & Titres',ico:SVG.compass,h:'Gloire internationale',d:'Signer avec Pacific Championship',t:f=>f.org===5},
- {id:'ultimaterim',cat:'Carrière & Titres',ico:SVG.gem,h:'Contrat en argent',d:'Signer avec Ultimate Rim',t:f=>f.org===6},
+ {id:'pacific',cat:'Carrière & Titres',ico:SVG.compass,h:'Gloire internationale',d:'Signer avec Pacific Championship',t:f=>f.org===6},
+ {id:'ultimaterim',cat:'Carrière & Titres',ico:SVG.gem,h:'Contrat en argent',d:'Signer avec Ultimate Rim',t:f=>f.org===5},
  {id:'rivalry',cat:'Finitions & Séries',ico:SVG.mask,h:'Rivalité légendaire',d:'4 confrontations contre le même rival',t:f=>!!(f.biggestRival&&f.biggestRival.count>=4)},
  {id:'skill9',cat:'Technique & Héritage',ico:SVG.book,h:'Encyclopédie vivante',d:'Débloquer 9 compétences',t:f=>f.skills.length>=9},
  // ==== [ANCRE: LOT8_VENGEANCE] ====
@@ -2651,8 +2701,17 @@ function scr_create(){ const d=G.draft, divs=DIVISIONS[d.gender];
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 
 function scr_hub(){ const f=G.f; const champ=f.champion;
-  const isGoodMsg=G.lastMsg && G.lastMsg.includes('sponsor validé');
-  const msgColor=isGoodMsg?'var(--win)':'var(--loss)';
+  // ==== [ANCRE: CORRECTIF_COULEUR_MESSAGE] — bug trouvé : un seul message
+  // ("sponsor validé") était reconnu comme positif ; TOUS les autres
+  // messages, y compris clairement positifs (ex. "Contrat renouvelé"),
+  // s'affichaient donc en rouge par défaut. Classification élargie par
+  // mots-clés, avec un ton neutre (doré) par défaut plutôt que négatif.
+  const msgLower=(G.lastMsg||'').toLowerCase();
+  const POSITIVE_HINTS=['sponsor validé','renouvelé','copié','remporté','accepté','testamentaire actif','débloqué avec succès','victoire','succès','signé'];
+  const NEGATIVE_HINTS=['refus','annulé','insuffisant','invalide','corrompu','impossible','ratée','échec','mauvaise impression','interdit','critique'];
+  const isGoodMsg=POSITIVE_HINTS.some(k=>msgLower.includes(k));
+  const isBadMsg=!isGoodMsg && NEGATIVE_HINTS.some(k=>msgLower.includes(k));
+  const msgColor=isGoodMsg?'var(--win)':isBadMsg?'var(--loss)':'var(--gold)';
   const msgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid ${msgColor};background:var(--panel2)"><div class="small" style="color:${msgColor}">${esc(G.lastMsg)}</div></div>`:'';
   if(G.lastMsg) G.lastMsg=null;
   const injuryHtml=f.injury?`<div class="card gold-b glass" style="border-color:var(--loss);margin-bottom:16px">
@@ -2700,8 +2759,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
    ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--blood)">Double Champion</div>
      <div class="small">Vous détenez également la ceinture ${f.champChampBelt}.</div>
-     <div class="mono small gold mt">Bonus de prestige doublé : +100 au score de classement (au lieu de +50 pour une seule ceinture).</div>
-   </div>`:(f.champion?`<div class="card mt" style="background:var(--panel2);padding:10px"><div class="mono small muted">Bonus de champion : +50 au score de classement.</div></div>`:'')}
+   </div>`:''}
    ${(G.divisionNews&&G.divisionNews.length)?`<div class="card mt" style="background:var(--panel2);padding:12px">
      <div class="eyebrow mb">Actualités de la division</div>
      ${G.divisionNews.slice(0,3).map(n=>`<div class="mono small muted" style="margin-top:4px">S${n.year} — ${n.text}</div>`).join('')}
@@ -2740,14 +2798,7 @@ function scr_select(){ const f=G.f;
     else if(isVeteran){ mmRole='Le Vétéran'; mmReward='Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.'; roleColor='var(--text)'; }
     else if(rnk>rkMe+5){ mmRole='Le Combat Piège'; mmReward='Classement inférieur au vôtre. Tout à perdre, rien à gagner.'; roleColor='var(--loss)'; }
 
-    const striking=Math.round((o.attrs.jab+o.attrs.cross+o.attrs.hook+o.attrs.kick)/4);
-    const grappling=Math.round((o.attrs.takedown+o.attrs.submission+o.attrs.topControl)/3);
-    const danger=o.attrs.power;
-    const myStr=Math.round((f.attrs.jab+f.attrs.cross+f.attrs.hook+f.attrs.kick)/4);
-    const myGrap=Math.round((f.attrs.takedown+f.attrs.submission+f.attrs.topControl)/3);
-    const myDan=f.attrs.power;
-    const diffText=(opp,me)=>{ const diff=me-opp; if(diff>=12)return'Ton avantage net';if(diff>=5)return'Léger avantage';if(diff>-5&&diff<5)return'Équilibré';if(diff<=-12)return'Son avantage net';return'Léger désavantage'; };
-    const getDiffColor=(txt)=>txt.startsWith('Son')||txt==='Léger désavantage'?'var(--loss)':(txt.startsWith('Ton')||txt==='Léger avantage')?'var(--gold)':'var(--text)';
+    // ==== [ANCRE: COMPARATIF_STATS_REUTILISABLE] — factorisé dans statComparisonHtml() ====
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
       <div style="border-left:3px solid ${roleColor};padding-left:12px;margin-bottom:16px">
          <div class="disp" style="font-size:18px;color:${roleColor};line-height:1">${mmRole.toUpperCase()}</div>
@@ -2761,11 +2812,7 @@ function scr_select(){ const f=G.f;
         ${isAmaRival?'<span class="tag2" style="color:var(--sage);border-color:var(--sage)">RIVAL AMATEUR</span>':''}
         <span class="tag2 hot">${rTag}</span>
       </div>
-      <div class="stat-band" style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:left;border-top:1px dashed var(--line)">
-        <div><span class="stat-lbl">STRIKING</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(striking,myStr))}">${diffText(striking,myStr)}</b></div>
-        <div><span class="stat-lbl">GRAPPLING</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(grappling,myGrap))}">${diffText(grappling,myGrap)}</b></div>
-        <div><span class="stat-lbl">DANGER (KO)</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(danger,myDan))}">${diffText(danger,myDan)}</b></div>
-      </div>
+      ${statComparisonHtml(f,o)}
       <p class="event-text mono" style="font-size:11.5px;opacity:.85;margin:14px 0 0;position:relative;z-index:2;border-left:2px solid var(--gold);padding-left:10px">ANALYSE : ${e.read}</p>
       <button class="btn ${isRival?'primary':''}" style="margin-top:14px;font-size:15px;letter-spacing:.05em;position:relative;z-index:2" onclick="CL.opp(${i})">${isRival?'RÉGLER SES COMPTES':'ACCEPTER LE COMBAT'}</button>
     </div>`;
@@ -3024,6 +3071,27 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    bonus existait déjà mécaniquement (+6 sur 2 attributs) mais n'était visible
    nulle part dans l'interface — corrigé ici avec un encart dédié dans la
    fiche complète, affichant le geste ET les gains concrets qu'il a apportés. ==== */
+/* ==== [ANCRE: BADGE_CHAMPION] — remplace l'ancien bonus chiffré de champion
+   (retiré du score de classement, item demandé) par un badge purement
+   informatif dans le bilan technique : ceinture(s), organisation, et statut
+   actuel/ancien clairement précisé. ==== */
+function championBadgeCard(f){
+  const badges=[];
+  if(f.champion){
+    badges.push({label:`Champion ${orgDisplayName(f)} — ${f.divName}`,status:'Titre actuel',current:true});
+  }
+  if(f.champChampBelt){
+    badges.push({label:`Champion ${orgDisplayName(f)} — ${f.champChampBelt}`,status:'Titre actuel (double couronne)',current:true});
+  }
+  if(!f.champion && !f.champChampBelt && (f.titles||0)>0){
+    badges.push({label:`${f.titles} règne(s) de champion à son actif`,status:'Titre(s) ancien(s) — ceinture perdue ou abandonnée',current:false});
+  }
+  if(!badges.length) return '';
+  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid ${badges.some(b=>b.current)?'var(--gold)':'var(--line)'};padding:14px;text-align:left">
+    <div class="eyebrow mb" style="color:${badges.some(b=>b.current)?'var(--gold)':'var(--muted)'}">${SVG.crown} Statut de championnat</div>
+    ${badges.map(b=>`<div class="mono small" style="margin-top:4px"><b style="color:${b.current?'var(--win)':'var(--muted)'}">${b.status}</b> — ${esc(b.label)}</div>`).join('')}
+  </div>`;
+}
 function signatureMoveCard(f){
   if(!f.signatureMove) return '';
   const sm=f.signatureMove;
@@ -3048,6 +3116,7 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.fai
      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
      ${(f.faithTraits && f.faithTraits.length)?`<div class="story" style="position:relative;z-index:2;color:var(--blood)"><b>Traits de caractère.</b> ${f.faithTraits.join(', ')}.</div>`:''}
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+     ${championBadgeCard(f)}
      ${signatureMoveCard(f)}
      ${f.skills.length?(()=>{
        const rarOrder={C:0,R:1,E:2,L:3,M:4,X:5};
@@ -3082,7 +3151,16 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
    <div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
      <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:70px;text-align:right">STATUT</div>
    </div>`;
-  dr.slice(0,16).forEach((o,i)=>{ const isPlayer=(o===f); const rank=i+1;
+  // ==== [ANCRE: CORRECTIF_NUMEROTATION_CLASSEMENT] — bug trouvé : le rang
+  // affiché utilisait l'index brut dans le pool (qui inclut le champion à la
+  // 1re place), donc le premier VRAI challenger affichait "#2" au lieu de
+  // "#1" — la numérotation sautait le 1. Un compteur dédié aux non-champions
+  // redémarre proprement à 1 (item demandé : C, puis 1, 2... jusqu'à 15).
+  const hasChampInPool=dr.some(o=>o.champion);
+  let contenderRank=0;
+  dr.slice(0,hasChampInPool?16:15).forEach((o,i)=>{ const isPlayer=(o===f);
+    if(!o.champion) contenderRank++;
+    const rank=contenderRank;
     let arrow='–'; let arrowColor='var(--muted)';
     if(o.lastRankDelta>0){arrow='▲';arrowColor='var(--win)';} if(o.lastRankDelta<0){arrow='▼';arrowColor='var(--loss)';}
     const fightsTot=o.W+o.L+(o.D||0);
@@ -3134,19 +3212,26 @@ function scr_season(){ const f=G.f; const sData=G.season||{year:1,fights:[]};
 
 /* ==== [ANCRE: SOMMET] — dilemme Pacific Championship (gloire) vs Ultimate Rim (argent+santé) ==== */
 function scr_toptier(){
+  // ==== [ANCRE: HARMONISATION_OFFRES_SOMMET] — item demandé : afficher ces
+  // deux organisations avec exactement le même gabarit de carte que toutes
+  // les autres offres (contractPayLine, nombre de combats, bouton "Signer
+  // avec X"), au lieu d'un style ad hoc rouge/sauge à part.
+  const offers=[
+    {org:6,flavor:'Pacific Championship',sub:'Gloire',color:'var(--gold)',contract:generateContract(G.f,6,false),
+      desc:"L\u2019organisation la plus prestigieuse et brutale au monde. Le niveau d\u2019opposition y est effrayant (+4 OVR pour tous les adversaires), mais la gloire y est inégalée (+40% de progression au classement)."},
+    {org:5,flavor:'Ultimate Rim',sub:'Argent & Santé',color:'var(--sage)',contract:generateContract(G.f,5,false),
+      desc:"La ligue des millionnaires. Salaires multipliés par 3, niveau élite mais régulé, et suivi médical de pointe qui entretient votre conditionnement physique — mais aucun médecin ne rend les neurones perdus au combat."}
+  ];
   return `<div class="scr center intro"><div class="eyebrow gold">Le Sommet du Monde</div>
    <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">L\u2019Heure du Choix</div>
-   <p class="lede">Vous avez conquis l\u2019Europe. Les deux plus grandes organisations mondiales vous offrent un contrat d\u2019exclusivité. Votre décision est définitive.</p>
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--blood-d);text-align:left;padding:16px">
-     <div class="hero-name" style="font-size:22px;color:var(--blood)">PACIFIC CHAMPIONSHIP<em style="color:var(--muted)">Gloire</em></div>
-     <p class="muted small mt" style="position:relative;z-index:2">L\u2019organisation la plus prestigieuse et brutale au monde. Le niveau d\u2019opposition y est effrayant (+4 OVR pour tous les adversaires), mais la gloire y est inégalée (+40% de progression au classement). Les salaires restent standards.</p>
-     <button class="btn primary" style="position:relative;z-index:2" onclick="CL.signTopTier(5)">Signer chez Pacific Championship</button>
-   </div>
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--sage);text-align:left;padding:16px;margin-top:15px">
-     <div class="hero-name" style="font-size:22px;color:var(--sage)">ULTIMATE RIM<em style="color:var(--muted)">Argent & Santé</em></div>
-     <p class="muted small mt" style="position:relative;z-index:2">La ligue des millionnaires. Les salaires sont multipliés par 3. Le niveau y est élite mais régulé, et le suivi médical de pointe entretient votre conditionnement physique au fil des mois — mais aucun médecin ne rend les neurones perdus au combat.</p>
-     <button class="btn" style="background:var(--sage);color:#fff;border:none;position:relative;z-index:2" onclick="CL.signTopTier(6)">Signer chez Ultimate Rim</button>
-   </div>
+   <p class="lede">Vous avez conquis l\u2019Europe. Les deux plus grandes organisations mondiales vous offrent un contrat d\u2019exclusivité — chacune distincte, à comparer avant de signer. Votre décision est définitive.</p>
+   ${offers.map(o=>`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid ${o.color};text-align:left;padding:16px;margin-top:18px">
+     <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${o.sub}</em></div>
+     <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
+     <div class="mono small muted">Contrat de ${o.contract.fightsLeft} combats</div>
+     <p class="muted small mt">${o.desc}</p>
+     <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.signTopTier(${o.org})">Signer avec ${o.flavor}</button>
+   </div>`).join('')}
    <button class="btn ghost mt" onclick="CL.declineTopTier()">Ne rien signer — rester en Continentale</button>
    </div>`; }
 /* ==== [FIN ANCRE] ==== */
@@ -3234,6 +3319,7 @@ function scr_champ_champ_offer(){
     <div class="glass card mb" style="background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:16px">
       <div class="hero-name" style="font-size:20px">${esc(offer.champion.name)} ${offer.champion.flag}<em>${offer.champion.styleLabel}, ${offer.champion.age} ans</em></div>
       <div class="mono small muted mt">Champion ${offer.targetDivName} · ${recordStr(offer.champion)}</div>
+      ${statComparisonHtml(f,offer.champion)}
     </div>
     <button class="btn primary mt" onclick="CL.acceptChampChampOffer()">Accepter le supercombat (5 rounds)</button>
     <button class="btn ghost mt" onclick="CL.declineChampChampOffer()">Décliner pour l\u2019instant</button>
@@ -3448,7 +3534,6 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
   return `<div class="scr center"><div class="eyebrow">Palmarès scellé</div>
    <div style="font-size:60px">${ico}</div>
    <div class="hero-name" style="text-align:center;color:var(--gold)">${rank}<em style="color:var(--muted)">${esc(f.name)}${f.nick?' « '+f.nick+' »':''}</em></div>
-   <button class="btn primary mt" style="margin-bottom:16px" onclick="CL.newCareer()">Nouvelle carrière</button>
    <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px"><div class="epis" style="position:relative;z-index:2">${ep.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
      <div class="hr"></div>
      <div class="stat-band" style="border-top:none;padding-top:0;margin-top:0;flex-wrap:wrap;gap:16px">
@@ -3464,7 +3549,8 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
    ${retireSeasonRecapHtml(f)}
    ${retireAchievementsHtml(f)}
    ${retireLegendPointsHtml(f)}
-   <button class="btn primary mt" onclick="CL.newCareer()">Nouvelle carrière</button></div>`; }
+   <button class="btn primary mt" onclick="CL.newCareer()">Nouvelle carrière</button>
+   <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button></div>`; }
 /* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — trois blocs ajoutés à l'écran de
    retraite : bilan saison par saison, succès débloqués pendant CETTE
    carrière, et points de légende gagnés grâce à elle.
@@ -3483,22 +3569,33 @@ function retireSeasonRecapHtml(f){
       <div class="mono small"><span style="color:var(--win)">${s.W}V</span> — <span style="color:var(--loss)">${s.L}D</span>
         <span class="muted"> · ${s.koW} KO / ${s.subW} SUB / ${s.decW} DÉC</span></div>
     </div>${s.trophies.length?`<div class="muted small" style="padding:2px 0 4px 0">🏆 ${s.trophies.join(', ')}</div>`:''}`).join('');
-  const summary=`📅 Bilan saison par saison <span class="muted" style="font-weight:normal">— ${recap.length} saison(s), ${totalW}V-${totalL}D au total</span>`;
+  const summaryTxt=`📅 Bilan saison par saison`;
+  const subTxt=`${recap.length} saison(s) · ${totalW}V-${totalL}D au total`;
   if(recap.length>5){
-    return `<div class="card mt"><details><summary class="eyebrow" style="cursor:pointer;list-style:none">${summary}</summary><div class="mt">${rows}</div></details></div>`;
+    // ==== [ANCRE: AFFORDANCE_DEPLIABLE] — item demandé : le <details> ne
+    // signalait pas visuellement qu'il était cliquable. Repris avec le même
+    // langage visuel que les cartes cliquables du matchmaking (classe .opp,
+    // curseur, bordure) + chevron explicite et texte "Toucher pour déplier".
+    return `<details class="mt"><summary class="opp" style="list-style:none;display:flex;justify-content:space-between;align-items:center">
+        <span><span class="eyebrow" style="display:block">${summaryTxt}</span><span class="muted small">${subTxt}</span></span>
+        <span class="gold mono" style="font-size:18px">▸</span>
+      </summary><div class="card mt" style="border-top:none">${rows}</div></details>`;
   }
-  return `<div class="card mt"><div class="eyebrow mb">${summary}</div>${rows}</div>`;
+  return `<div class="card mt"><div class="eyebrow mb">${summaryTxt} <span class="muted" style="font-weight:normal">— ${subTxt}</span></div>${rows}</div>`;
 }
 function retireAchievementsHtml(f){
   const earned=ACH.filter(a=>{ try{ return a.t(f); }catch(e){ return false; } });
   if(!earned.length) return '';
   const chips=earned.map(a=>`<span class="tag2 hot" style="display:inline-flex;align-items:center;gap:5px" title="${esc(a.d)}"><span style="font-size:15px">${a.ico}</span>${esc(a.h)}</span>`).join('');
-  const summary=`🏆 Succès débloqués <span class="muted" style="font-weight:normal">(${earned.length}/${ACH.length})</span>`;
+  const summaryTxt=`🏆 Succès débloqués`;
+  const subTxt=`${earned.length}/${ACH.length} obtenus`;
   if(earned.length>10){
-    return `<div class="card mt"><details><summary class="eyebrow" style="cursor:pointer;list-style:none">${summary}</summary>
-      <div class="mt" style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div></details></div>`;
+    return `<details class="mt"><summary class="opp" style="list-style:none;display:flex;justify-content:space-between;align-items:center">
+        <span><span class="eyebrow" style="display:block">${summaryTxt}</span><span class="muted small">${subTxt}</span></span>
+        <span class="gold mono" style="font-size:18px">▸</span>
+      </summary><div class="card mt" style="border-top:none;display:flex;flex-wrap:wrap;gap:8px">${chips}</div></details>`;
   }
-  return `<div class="card mt"><div class="eyebrow mb">${summary}</div>
+  return `<div class="card mt"><div class="eyebrow mb">${summaryTxt} <span class="muted" style="font-weight:normal">(${subTxt})</span></div>
     <div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
   </div>`;
 }
@@ -3946,7 +4043,7 @@ const CL={
   cont(){ if(load()){ setTheme(G.theme||'dark'); G.screen=G.faith?'faith_hub':'hub'; render(); } },
   draft(k,v){ G.draft[k]=v; if(k==='gender')G.draft.div=DIVISIONS[v][Math.min(3,DIVISIONS[v].length-1)].id; render(true); },
   draftIn(k,v){ G.draft[k]=v; },
-  create(){ const d=G.draft; const f=makeFighter({gender:d.gender,div:d.div,style:d.style,countryKey:d.country,first:(d.first||'').trim()||undefined,age:RI(15,16),potential:RI(70,94)});
+  create(){ const d=G.draft; const f=makeFighter({gender:d.gender,div:d.div,style:d.style,countryKey:d.country,first:(d.first||'').trim()||undefined,age:RI(15,16),potential:RI(80,95),freshPlayer:true});
     f.stage='amateur'; f.org=0; f._fy=0;
     if(d.personality){ f.personality=d.personality;
       if(d.personality==='villain'){ f.hypeBonus=1.3; f.morale=clamp(f.morale-10,0,100); }
@@ -4180,7 +4277,7 @@ const CL={
     if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality){
       G.lastMsg="Complète les 5 catégories avant de commencer."; render(); return;
     }
-    const f=makeFighter({gender:d.gender||'H',style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18});
+    const f=makeFighter({gender:d.gender||'H',style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18,freshPlayer:true});
     f.gameMode='faith';
     if(d.origin==='traditional'){ f.attrs.fightIQ+=8; f.attrs.discipline+=8; }
     if(d.origin==='pro_child'){ f.earnings=50; f.attrs.composure-=10; f.hypeBonus=1.5; }
@@ -4340,14 +4437,14 @@ const CL={
     // débloquer en Faith.
     const nbRolls=((G.faith.yearLog||[]).length>=1)?1:0;
     const newSkills=[];
-    let pool=poolEligible(f,f.age>=34,f.skills.length>=9);
+    let pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS);
     const tags=G.faith.trainingTags||[];
     for(let i=0;i<nbRolls;i++){
       if(pool.length===0) break;
       let currentPool=pool;
       if(tags.length>0 && rnd()<0.5){ const filtered=pool.filter(s=>s.fam==='style'&&s.key && tags.includes(s.key)); if(filtered.length>0) currentPool=filtered; }
       const rar=tirerRarete(); const sk=getFallbackSkill(currentPool,rar);
-      if(sk){ grantSkill(f,sk); newSkills.push(sk); pool=poolEligible(f,f.age>=34,f.skills.length>=9); }
+      if(sk){ grantSkill(f,sk); newSkills.push(sk); pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS); }
     }
     G.faith.yearStats={
       fights:G.faith.fightsThisYear,
@@ -4441,7 +4538,7 @@ const CL={
     G.f.contract=generateContract(G.f,orgId,false);
     applyOrgAdvancementBoost(G.f,orgId);
     G.roster=makeOrgRoster(G.f);
-    if(orgId===5){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
+    if(orgId===6){ G.roster.forEach(o=>{ o.overall=clamp(o.overall+4,30,99); o.attrs.fightIQ=clamp(o.attrs.fightIQ+5,1,100); }); }
     routeAfterOrgChange(); },
   acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null);
     G.f.contract=generateContract(G.f,G.f.org,false);
@@ -4472,9 +4569,25 @@ const CL={
   negoMarket(forcedPenalty){
     const f=G.f; const offers=[];
     const canUp=canPromote(f); const agentBonus=(f.agentCut>0);
-    if(canUp && f.org===4){
-      offers.push({org:5,flavor:'Pacific Championship',contract:generateContract(f,5,false),desc:"La ligue la plus prestigieuse. (+4 OVR pour l\u2019opposition)."});
-      offers.push({org:6,flavor:'Ultimate Rim',contract:generateContract(f,6,false),desc:"La ligue des millionnaires. Suivi médical de pointe."});
+    // ==== [ANCRE: CORRECTIF_SOMMET_LATERAL] — bug trouvé : une fois dans
+    // Pacific Championship (6) OU Ultimate Rim (5), aucune des deux
+    // organisations ne pouvait plus jamais proposer l'AUTRE (canPromote()
+    // bloque tout mouvement au-delà du plafond 6, et l'organisation 6 n'a
+    // pas de pool de noms alternatifs) — la négociation ne proposait donc
+    // que soi-même, en double. Les deux ligues du sommet sont des
+    // alternatives PARALLÈLES (choix ponctuel depuis la Continentale) : l'une
+    // doit pouvoir proposer un transfert latéral vers l'autre à tout moment.
+    let currentMult=forcedPenalty?0.7:1.1;
+    if(agentBonus && forcedPenalty) currentMult=0.9;
+    if(f.org===5 || f.org===6){
+      const otherTop=f.org===5?6:5;
+      const topContract=generateContract(f,otherTop,false);
+      topContract.show=+(topContract.show*currentMult).toFixed(2); topContract.win=+(topContract.win*currentMult).toFixed(2);
+      offers.push({org:otherTop,flavor:ORGS[otherTop],contract:topContract,
+        desc:otherTop===6?"L\u2019organisation la plus prestigieuse et brutale au monde vous fait de l\u2019\u0153il.":"La ligue des millionnaires vous propose un transfert."});
+    } else if(canUp && f.org===4){
+      offers.push({org:5,flavor:'Ultimate Rim',contract:generateContract(f,5,false),desc:"La ligue des millionnaires. Suivi médical de pointe."});
+      offers.push({org:6,flavor:'Pacific Championship',contract:generateContract(f,6,false),desc:"La ligue la plus prestigieuse. (+4 OVR pour l\u2019opposition)."});
     } else if(canUp && f.org<6){
       const nextOrg=f.org+1;
       offers.push({org:nextOrg,flavor:ORG_FLAVORS[nextOrg]?pick(ORG_FLAVORS[nextOrg]):(ORGS[nextOrg]||'Ligue supérieure'),contract:generateContract(f,nextOrg,false),desc:"La ligue supérieure veut vous signer."});
@@ -4483,18 +4596,22 @@ const CL={
         offers.push({org:fastOrg,flavor:ORG_FLAVORS[fastOrg]?pick(ORG_FLAVORS[fastOrg]):(ORGS[fastOrg]||'Ligue supérieure'),contract:generateContract(f,fastOrg,false),desc:"Votre agent a fait jouer ses contacts pour vous faire sauter une étape !"});
       }
     }
-    let currentMult=forcedPenalty?0.7:1.1;
-    if(agentBonus && forcedPenalty) currentMult=0.9;
     const latContract=generateContract(f,f.org,false);
     latContract.show=+(latContract.show*currentMult).toFixed(2); latContract.win=+(latContract.win*currentMult).toFixed(2);
     // ==== [ANCRE: CORRECTIF_DOUBLON_ORGA] — pick() choisissait un nom au
     // hasard dans le pool de l'organisation ACTUELLE, avec un risque réel (1
     // chance sur 3, pool de 3 noms) de retomber sur le nom déjà utilisé par
     // l'organisation en cours (orgDisplayName). Exclusion explicite du nom
-    // actuel avant tirage.
-    const rivalPool=(ORG_FLAVORS[f.org]||[]).filter(n=>n!==orgDisplayName(f));
-    const rivalFlavor=rivalPool.length?pick(rivalPool):(ORGS[f.org]||'Concurrence');
-    offers.push({org:f.org,flavor:rivalFlavor,contract:latContract,desc:forcedPenalty?"Une ligue concurrente vous repêche au rabais.":"Une ligue concurrente cherche à vous débaucher."});
+    // actuel avant tirage. Au sommet (5/6), il n'existe pas de pool de noms
+    // concurrents (une seule Pacific, une seule Ultimate Rim) : l'offre
+    // "ligue concurrente" n'a alors aucun sens et est simplement omise, la
+    // vraie alternative étant déjà l'autre organisation du sommet ajoutée
+    // ci-dessus.
+    if(f.org!==5 && f.org!==6){
+      const rivalPool=(ORG_FLAVORS[f.org]||[]).filter(n=>n!==orgDisplayName(f));
+      const rivalFlavor=rivalPool.length?pick(rivalPool):(ORGS[f.org]||'Concurrence');
+      offers.push({org:f.org,flavor:rivalFlavor,contract:latContract,desc:forcedPenalty?"Une ligue concurrente vous repêche au rabais.":"Une ligue concurrente cherche à vous débaucher."});
+    }
     if(!forcedPenalty){ offers.push({org:f.org,flavor:orgDisplayName(f),contract:generateContract(f,f.org,false),desc:"Votre organisation actuelle s\u2019aligne pour vous garder."}); }
     G.freeAgencyOffers=offers;
     G.screen='free_agency'; save(); render();
