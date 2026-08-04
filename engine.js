@@ -16,6 +16,7 @@ const RI=(a,b)=>Math.floor(rnd()*(b-a+1))+a;
 const R=(a,b)=>a+rnd()*(b-a);
 const pick=a=>a[Math.floor(rnd()*a.length)];
 const clamp=(v,lo=1,hi=100)=>v<lo?lo:v>hi?hi:v;
+const num=(v,d=50)=>typeof v==='number'&&!isNaN(v)?v:d;
 function gauss(m,sd,lo,hi){ let u=0,v=0; while(!u)u=rnd(); while(!v)v=rnd(); let g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); let x=Math.round(m+g*sd); if(lo!=null)x=Math.max(lo,x); if(hi!=null)x=Math.min(hi,x); return x; }
 const sigmoid=x=>1/(1+Math.exp(-x));
 const d20=v=>Math.max(1,Math.min(20,Math.round(v/5)));   // /100 -> /20 affiché
@@ -462,47 +463,45 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
 }
 
 /* ------------------- canaux de combat dérivés des 30 attributs ------------ */
-function eff(f){ const a=f.attrs; const dyn=(f.morale-50)*0.10+(f.form-50)*0.10; // moral/forme -> ±
+function eff(f){ const a=f.attrs||{}; const dyn=(num(f.morale)-50)*0.10+(num(f.form)-50)*0.10; // moral/forme -> ±
   const ch={
-    striking: a.jab*0.24+a.cross*0.24+a.hook*0.2+a.kick*0.18+a.clinchStr*0.14 + a.fightIQ*0.06,
-    power:    a.power + a.strength*0.12,
-    handSpeed:a.handSpeed*0.85 + a.footSpeed*0.15,
-    footwork: a.footSpeed*0.8 + a.flexibility*0.2,
-    clinch:   a.clinchStr*0.8 + a.strength*0.2,
-    takedown: a.takedown*0.78 + a.strength*0.12 + a.explosiveness*0.08,
-    tdd:      a.tdd*0.88 + a.strength*0.08 + a.flexibility*0.06 + 2,
-    topControl:a.topControl*0.82 + a.strength*0.18,
-    ground:   a.gnp*0.82 + a.power*0.18,
-    submission:a.submission*0.9 + a.flexibility*0.1,
-    guard:    a.guardWork*0.85 + a.flexibility*0.15,
-    cardio:   a.cardio*0.82 + a.recovery*0.18,
-    chin:     a.chin*0.72 + a.durability*0.28,
-    fightIQ:  a.fightIQ*0.7 + a.composure*0.18 + a.adaptability*0.12,
-    killer:   a.killer, heart:a.heart, aggression:a.aggression,
+    striking: num(a.jab)*0.24+num(a.cross)*0.24+num(a.hook)*0.2+num(a.kick)*0.18+num(a.clinchStr)*0.14+num(a.fightIQ)*0.06,
+    power:    num(a.power)+num(a.strength)*0.12,
+    handSpeed:num(a.handSpeed)*0.85+num(a.footSpeed)*0.15,
+    footwork: num(a.footSpeed)*0.8+num(a.flexibility)*0.2,
+    clinch:   num(a.clinchStr)*0.8+num(a.strength)*0.2,
+    takedown: num(a.takedown)*0.78+num(a.strength)*0.12+num(a.explosiveness)*0.08,
+    tdd:      num(a.tdd)*0.88+num(a.strength)*0.08+num(a.flexibility)*0.06+2,
+    topControl:num(a.topControl)*0.82+num(a.strength)*0.18,
+    ground:   num(a.gnp)*0.82+num(a.power)*0.18,
+    submission:num(a.submission)*0.9+num(a.flexibility)*0.1,
+    guard:    num(a.guardWork)*0.85+num(a.flexibility)*0.15,
+    cardio:   num(a.cardio)*0.82+num(a.recovery)*0.18,
+    chin:     num(a.chin)*0.72+num(a.durability)*0.28,
+    fightIQ:  num(a.fightIQ)*0.7+num(a.composure)*0.18+num(a.adaptability)*0.12,
+    killer:   num(a.killer), heart:num(a.heart), aggression:num(a.aggression),
   };
   for(const k in ch){ if(k!=='chin'&&k!=='killer'&&k!=='heart'&&k!=='aggression') ch[k]=clamp(ch[k]+dyn,1,100); }
-  // bonus de compétences débloquées
-  for(const sid of f.skills){ const S=SKILLS.find(s=>s.id===sid); if(S&&S.fx){} }
   return ch;
 }
-function overall(f){ const a=f.attrs;
+function overall(f){ const a=f.attrs||{};
   // récompense la spécialisation : le coeur des meilleurs attributs pèse plus
-  const vals=ATTR_KEYS.map(k=>a[k]).sort((x,y)=>y-x);
+  const vals=ATTR_KEYS.map(k=>num(a[k])).sort((x,y)=>y-x);
   const top=vals.slice(0,10), topAvg=top.reduce((s,v)=>s+v,0)/top.length;
   const allAvg=vals.reduce((s,v)=>s+v,0)/vals.length;
   let ov=topAvg*0.68+allAvg*0.32 + (f.dynamic||0)*0.3 - 5;
   return clamp(Math.round(ov),1,100);
 }
-function groupAvg(f){ const a=f.attrs; const g=k=>Math.round(k.reduce((s,x)=>s+a[x[0]],0)/k.length);
+function groupAvg(f){ const a=f.attrs||{}; const g=k=>Math.round(k.reduce((s,x)=>s+num(a[x[0]]),0)/k.length);
   return {tech:g(ATTR.tech),ment:g(ATTR.ment),phys:g(ATTR.phys)}; }
 /* ------------------ MENACE DE FINITION (remplace "Danger") ---------------- */
-function getMenace(f){ const a=f.attrs;
-  const menaceScore=(a.power*0.4)+(a.submission*0.4)+(a.killer*0.2);
+function getMenace(f){ const a=f.attrs||{};
+  const menaceScore=num(a.power)*0.4+num(a.submission)*0.4+num(a.killer)*0.2;
   return clamp(Math.round(menaceScore),1,100);
 }
 
 /* ------------------------------- COMBAT ----------------------------------- */
-function reachEdge(A,B){ return clamp((A.phys.reach-B.phys.reach)*0.14,-6,6); }
+function reachEdge(A,B){ const rA=(A.phys&&A.phys.reach)||175, rB=(B.phys&&B.phys.reach)||175; return clamp((rA-rB)*0.14,-6,6); }
 /* ==== [ANCRE: EQUILIBRAGE_MC] - recalibrage Monte-Carlo (audit d'equilibrage).
    Mesure avant/apres sur 10000+ combats simules : victoire ecrasante a 97%
    des un ecart de niveau modere, soumissions quasi jamais declenchees (4%).
@@ -547,7 +546,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
   // une seule fois sur les canaux de A avant la boucle des rounds. Clés vérifiées
   // contre les canaux réels de eff() : striking, power, footwork/fightIQ (def),
   // takedown (td), tdd, submission (sub), ground (gnp), topControl (ctrl). ====
-  let myGi=STYLES[A.style].grap;
+  let myGi=(STYLES[A.style]||STYLES.mma).grap;
   if(plan){
     if(plan.gi) myGi*=plan.gi;
     if(plan.td) a.takedown*=plan.td;
@@ -577,7 +576,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
     for(const k in b){ if(typeof b[k]==='number') b[k]=clamp(b[k],1,150); }
   }
   // ==== [FIN ANCRE] ====
-  const giA=myGi, giB=STYLES[B.style].grap; const rEdge=reachEdge(A,B);
+  const giA=myGi, giB=(STYLES[B.style]||STYLES.mma).grap; const rEdge=reachEdge(A,B);
   let sa=0,sb=0,dmgA=0,dmgB=0,finish=null; const log=[];
   // ==== [ANCRE: CHIN_TEMPORAIRE] — un round brutal fragilise le menton pour LE
   // RESTE DE CE COMBAT uniquement (variable locale), jamais l'attribut permanent
@@ -957,6 +956,7 @@ function generateContract(f,org,raise){
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.
 function calculateEloDelta(ratingA,ratingB,winnerSide,method,round){
+  ratingA=num(ratingA,1000); ratingB=num(ratingB,1000);
   const expectedA=1/(1+Math.pow(10,(ratingB-ratingA)/400)); const expectedB=1-expectedA;
   const scoreA=winnerSide==='A'?1:(winnerSide==='D'?0.5:0), scoreB=winnerSide==='B'?1:(winnerSide==='D'?0.5:0);
   let kFactor=32;

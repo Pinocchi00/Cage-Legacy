@@ -23,7 +23,7 @@ const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])
    comme un roguelite classique — la vraie carrière reste intacte pendant ce temps. ==== */
 function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
 /* ==== [FIN ANCRE] ==== */
-function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ G=migrate(JSON.parse(s)); validateState(); return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
+function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object'){ G=null; return false; } G=migrate(parsed); if(!validateState()){ console.error('Sauvegarde corrompue : état irrécupérable.'); G=null; return false; } return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
 function hasSave(mode){
   try{
     const s=localStorage.getItem(SAVE_KEY);
@@ -136,8 +136,43 @@ function migrate(g){ if(!g)return g; g.version=g.version||1;
    n'existe pas de champ G.mode ici (l'arcade vit sous G.arcade.active) donc
    rien à y combler. Ne touche jamais une sauvegarde valide : uniquement les
    champs manquants (typeof===undefined / pas un tableau / pas un objet). ==== */
+function repairFighter(f){
+  if(!f||typeof f!=='object') return null;
+  if(!f.attrs||typeof f.attrs!=='object') f.attrs={};
+  for(const k of ATTR_KEYS){
+    const v=f.attrs[k];
+    if(typeof v!=='number'||isNaN(v)) f.attrs[k]=50;
+  }
+  f.morale=num(f.morale,60); f.form=num(f.form,55);
+  f.morale=clamp(f.morale,0,100); f.form=clamp(f.form,0,100);
+  if(!f.gender||!['H','F'].includes(f.gender)) f.gender='H';
+  if(!f.style||!STYLES[f.style]) f.style='mma';
+  f.styleLabel=styleLabel(f.style);
+  const div=divById(f.div);
+  if(!div) f.div=f.gender==='F'?DIVISIONS.F[0].id:DIVISIONS.H[3].id;
+  f.divName=(divById(f.div)||{}).name||'';
+  if(!f.phys||typeof f.phys!=='object'){
+    f.phys=makePhysical(divById(f.div));
+  } else {
+    f.phys.height=num(f.phys.height,175);
+    f.phys.reach=num(f.phys.reach,f.phys.height+2);
+    if(!Array.isArray(f.phys.tags)) f.phys.tags=[];
+  }
+  if(typeof f.overall!=='number'||isNaN(f.overall)) f.overall=overall(f);
+  if(typeof f.orgElo!=='number'||isNaN(f.orgElo)) f.orgElo=eloBaseline(f.org||0,f.overall);
+  if(typeof f.careerElo!=='number'||isNaN(f.careerElo)) f.careerElo=eloBaseline(f.org||0,f.overall);
+  if(typeof f.W!=='number'||isNaN(f.W)) f.W=0;
+  if(typeof f.L!=='number'||isNaN(f.L)) f.L=0;
+  if(typeof f.D!=='number'||isNaN(f.D)) f.D=0;
+  if(typeof f.org!=='number'||isNaN(f.org)) f.org=0;
+  if(!Array.isArray(f.skills)) f.skills=[];
+  if(!Array.isArray(f.history)) f.history=[];
+  return f;
+}
 function validateState(){
-  if(!G || !G.f) return;
+  if(!G||typeof G!=='object') return false;
+  if(!G.f||typeof G.f!=='object') return false;
+  repairFighter(G.f);
   const f=G.f;
   if(typeof f.earnings==='undefined') f.earnings=0;
   if(typeof f.rivalId==='undefined') f.rivalId=null;
@@ -156,9 +191,16 @@ function validateState(){
   if(!Array.isArray(f.amateurRivals)) f.amateurRivals=[];
   if(!G.season || typeof G.season!=='object' || !Array.isArray(G.season.fights)) G.season={year:(G.season&&G.season.year)||1,fights:[]};
   if(!Array.isArray(G.roster)) G.roster=makeOrgRoster(f);
+  else G.roster.forEach(o=>repairFighter(o));
+  if(G.fight && typeof G.fight==='object'){
+    if(G.fight.opp) repairFighter(G.fight.opp);
+    else if(['plan','arena','result','event'].includes(G.screen)) G.screen='hub';
+  }
+  if(typeof G.screen!=='string') G.screen='hub';
   if(!Array.isArray(G.ach)) G.ach=[];
   if(!Array.isArray(G.titleHistory)) G.titleHistory=[];
   if(G.arcade && typeof G.arcade.active==='undefined') G.arcade=null; // état arcade incomplet -> repli sûr, jamais 'actif' par erreur
+  return true;
 }
 /* ==== [FIN ANCRE] ==== */
 function setTheme(t){ G.theme=t; try{ if(document.documentElement)document.documentElement.setAttribute('data-theme',t); }catch(e){} }

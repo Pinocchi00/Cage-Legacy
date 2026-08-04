@@ -434,9 +434,9 @@ function tacticalRead(f,o){ const a=eff(f),b=eff(o);
   // 2 des 3 catégories montrées penchent nettement dans le même sens, la lecture
   // tactique doit le refléter — pas seulement l'écart d'overall, qui peut rester
   // sous le seuil même quand les 3 catégories visibles sont unanimes.
-  const oStr=(o.attrs.jab+o.attrs.cross+o.attrs.hook+o.attrs.kick)/4, fStr=(f.attrs.jab+f.attrs.cross+f.attrs.hook+f.attrs.kick)/4;
-  const oGrap=(o.attrs.takedown+o.attrs.submission+o.attrs.topControl)/3, fGrap=(f.attrs.takedown+f.attrs.submission+f.attrs.topControl)/3;
-  const oDan=o.attrs.power, fDan=f.attrs.power;
+  const oStr=(num(o.attrs.jab)+num(o.attrs.cross)+num(o.attrs.hook)+num(o.attrs.kick))/4, fStr=(num(f.attrs.jab)+num(f.attrs.cross)+num(f.attrs.hook)+num(f.attrs.kick))/4;
+  const oGrap=(num(o.attrs.takedown)+num(o.attrs.submission)+num(o.attrs.topControl))/3, fGrap=(num(f.attrs.takedown)+num(f.attrs.submission)+num(f.attrs.topControl))/3;
+  const oDan=num(o.attrs.power), fDan=num(f.attrs.power);
   const edgeOpp=[oStr-fStr,oGrap-fGrap,oDan-fDan].filter(d=>d>=8).length;
   const edgeMe=[oStr-fStr,oGrap-fGrap,oDan-fDan].filter(d=>d<=-8).length;
   let base='Combat équilibré — l\u2019intelligence fera la différence.';
@@ -4132,7 +4132,7 @@ const CL={
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }
       document.body.removeChild(ta); }catch(e){ alert('Export impossible.'); } },
-  importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ G=migrate(JSON.parse(s)); validateState(); setTheme(G.theme||'dark'); G.screen='hub'; save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
+  importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object') throw new Error('invalid'); G=migrate(parsed); if(!validateState()) throw new Error('corrupt'); setTheme(G.theme||'dark'); G.screen='hub'; save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
 };
 window.CL=CL;
 /* ============================ ARÈNE 2D & HYBRIDE ========================== */
@@ -4162,6 +4162,24 @@ function buildTimeline(){
     currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:res.zone||null,
     nmeName:you.first,nopName:opp.first,meFlag:you.flag,opFlag:opp.flag};
 }
+function cacheArenaGfx(){
+  const A=ARENA, ctx=A.ctx, W=A.W, H=A.H;
+  const topY=H*0.30, topL=W*0.08, topR=W*0.92, botL=W*0.03, botR=W*0.97, gY=H-16, gY2=H-6;
+  A._geom={topY,topL,topR,botL,botR,gY,gY2,W,H};
+  const spot=ctx.createRadialGradient(W*0.5,topY*0.3,0,W*0.5,topY*0.3,W*0.7);
+  spot.addColorStop(0,'rgba(255,225,170,.34)'); spot.addColorStop(0.5,'rgba(255,225,170,.12)'); spot.addColorStop(1,'rgba(0,0,0,0)');
+  A._spotGrad=spot;
+  A._bleacherFill=[]; A._bleacherDots=[];
+  for(let r=0;r<6;r++){ A._bleacherFill.push(`rgba(58,49,38,${0.55+r*0.06})`); A._bleacherDots.push(`rgba(190,140,105,${0.35+r*0.05})`); }
+  A._theme=getArenaTheme();
+  A._floorGrad=ctx.createLinearGradient(0,topY,0,H);
+  A._floorGrad.addColorStop(0,A._theme.floorColors[0]); A._floorGrad.addColorStop(1,A._theme.floorColors[1]);
+  A._vignetteGrad=ctx.createRadialGradient(W/2,H*0.55,H*0.25,W/2,H*0.55,Math.max(W,H)*0.62);
+  A._vignetteGrad.addColorStop(0,'rgba(0,0,0,0)'); A._vignetteGrad.addColorStop(1,'rgba(0,0,0,.38)');
+  A._pads=[[botL,H],[botR,H],[W,gY2],[W,gY],[topL,topY],[topR,topY],[0,gY],[0,gY2]];
+  A._foMe={lunge:0,flash:false,shake:false,fallen:false,grounded:false,phase:null,top:false,tap:false};
+  A._foOp={lunge:0,flash:false,shake:false,fallen:false,grounded:false,phase:null,top:false,tap:false};
+}
 function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   const cv=document.getElementById('arena-cv');
   if(!cv||!cv.getContext||typeof requestAnimationFrame==='undefined'){ ARENA.done=true; return; } // pas de canvas (test)
@@ -4169,6 +4187,7 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
   ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.t0=performance.now(); ARENA.pauseOffset=0; ARENA.roundPause=false;
   ARENA.noise=makeNoisePattern(ctx);
+  cacheArenaGfx();
   const total=ARENA.beats.length*BEAT_MS;
   const loop=(now)=>{ if(ARENA.roundPause) return; const el=now-ARENA.t0-ARENA.pauseOffset; const bi=Math.min(ARENA.beats.length-1,Math.floor(el/BEAT_MS));
     if(bi!==ARENA.lastBeat){
@@ -4277,72 +4296,51 @@ const ARENA_THEMES=[
 function setArenaCosmeticTheme(themeId){ G.arenaCosmetic=themeId; save(); }
 function getArenaTheme(){ return ARENA_THEMES.find(t=>t.id===(G.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }
 /* ==== [FIN ANCRE] ==== */
-function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const W=A.W,H=A.H;
+function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)return; const {W,H,topY,topL,topR,botL,botR,gY,gY2}=A._geom;
   ctx.clearRect(0,0,W,H);
-  const gY=H-16;
-  // Octogone agrandi (bord du haut à 84% de la largeur au lieu de 44%
-  // auparavant) — occupe désormais la quasi-totalité du canevas, comme
-  // demandé sur le schéma annoté.
-  const topY=H*0.30, topL=W*0.08, topR=W*0.92;
-  // ==== [ANCRE: ECLAIRAGE_GRADINS] — gradins en bande pleine sur toute la
-  // largeur du haut (au lieu de petits rectangles cantonnés aux coins),
-  // avec projecteur suspendu — pour correspondre au schéma envoyé (zone
-  // rouge = gradins occupant tout le bandeau supérieur, zone jaune =
-  // octogone agrandi). ====
-  const spot=ctx.createRadialGradient(W*0.5,topY*0.3,0,W*0.5,topY*0.3,W*0.7);
-  spot.addColorStop(0,'rgba(255,225,170,.34)'); spot.addColorStop(0.5,'rgba(255,225,170,.12)'); spot.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=spot; ctx.fillRect(0,0,W,topY);
-  const bleacherRows=6;
-  for(let r=0;r<bleacherRows;r++){ const ry=r*(topY/bleacherRows);
-    const rh=(topY/bleacherRows)-1;
-    ctx.fillStyle=`rgba(58,49,38,${0.55+r*0.06})`;
-    ctx.fillRect(0,ry,W,rh);
-    // silhouettes/lumières de foule sur chaque rangée
-    ctx.fillStyle=`rgba(190,140,105,${0.35+r*0.05})`;
+  ctx.fillStyle=A._spotGrad; ctx.fillRect(0,0,W,topY);
+  const bleacherRows=6, rowH=topY/bleacherRows;
+  for(let r=0;r<bleacherRows;r++){ const ry=r*rowH, rh=rowH-1;
+    ctx.fillStyle=A._bleacherFill[r]; ctx.fillRect(0,ry,W,rh);
+    ctx.fillStyle=A._bleacherDots[r];
     const dots=14+r*3;
     for(let d=0;d<dots;d++){ const dx=(d/dots)*W+Math.sin(d+r)*3;
       ctx.beginPath(); ctx.arc(dx,ry+rh*0.5,1.6,0,Math.PI*2); ctx.fill(); }
   }
-  // ==== [FIN ANCRE] ====
-  // Sol en véritable octogone (8 côtés), agrandi pour occuper le canevas
-  const botL=W*0.03, botR=W*0.97, gY2=H-6;
   ctx.beginPath();
   ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.lineTo(W,gY2); ctx.lineTo(W,gY);
   ctx.lineTo(topR,topY); ctx.lineTo(topL,topY); ctx.lineTo(0,gY); ctx.lineTo(0,gY2);
   ctx.closePath();
-  const arenaTheme=getArenaTheme();
-  const g=ctx.createLinearGradient(0,topY,0,H); g.addColorStop(0,arenaTheme.floorColors[0]); g.addColorStop(1,arenaTheme.floorColors[1]);
-  ctx.fillStyle=g; ctx.fill();
+  const arenaTheme=A._theme;
+  ctx.fillStyle=A._floorGrad; ctx.fill();
   if(A.noise){ ctx.save(); ctx.clip(); ctx.fillStyle=A.noise; ctx.fillRect(0,0,W,H); ctx.restore(); }
   ctx.strokeStyle='#3a2f20'; ctx.lineWidth=1;
   for(let i=0;i<=8;i++){ const x=i*W/8; ctx.globalAlpha=.5; ctx.beginPath(); ctx.moveTo(x,gY); ctx.lineTo(x*0.86+W*0.05,topY); ctx.stroke(); }
   ctx.globalAlpha=1; ctx.strokeStyle=arenaTheme.railColor; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.stroke();      // rail bas
-  ctx.beginPath(); ctx.moveTo(topL,topY); ctx.lineTo(topR,topY); ctx.stroke(); // rail haut
-  ctx.beginPath(); ctx.moveTo(0,gY); ctx.lineTo(0,gY2); ctx.stroke();          // rail gauche
-  ctx.beginPath(); ctx.moveTo(W,gY); ctx.lineTo(W,gY2); ctx.stroke();          // rail droit
-  // poteaux d'angle — les 8 sommets de l'octogone
+  ctx.beginPath(); ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(topL,topY); ctx.lineTo(topR,topY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,gY); ctx.lineTo(0,gY2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W,gY); ctx.lineTo(W,gY2); ctx.stroke();
   ctx.fillStyle=arenaTheme.padColor;
-  [[botL,H],[botR,H],[W,gY2],[W,gY],[topL,topY],[topR,topY],[0,gY],[0,gY2]].forEach(([px,py])=>{ ctx.fillRect(px-2,py-10,4,20); });
+  for(let i=0,p=A._pads;i<p.length;i++){ const px=p[i][0], py=p[i][1]; ctx.fillRect(px-2,py-10,4,20); }
   const grounded=A.curPhase==='sol';
-  // contrôle de cage : le momentum (0-100, 50=neutre) décale le centre du duel —
-  // au-dessus de 50 le joueur pousse l'adversaire vers son propre mur.
   const mom=(A.currentMomentum!=null?A.currentMomentum:50);
   const shift=grounded?0:clamp((mom-50)/50,-1,1)*(W*0.09);
   let xOp=W*0.68+shift, xMe=W*0.32+shift;
-  // au sol : chevauchement plus marqué (12px) pour un vrai rendu de dominance visuelle
   if(grounded){ const center=W*0.5+shift; xOp=center+(A.curTop==='op'?12:-12); xMe=center+(A.curTop==='me'?-12:12); }
   const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
-  fighter(ctx, xOp, gY, -1, '#6E8478', {lunge:A.lungeOp*(1-frac),flash:A.flashOp>0,shake:A.shakeOp>0,fallen:A.fall===2,grounded,phase:A.curPhase,top:A.curTop==='op',tap:isSubDanger&&A.curTop!=='op'});
-  fighter(ctx, xMe, gY, 1, '#B23B36', {lunge:A.lungeMe*(1-frac),flash:A.flashMe>0,shake:A.shakeMe>0,fallen:A.fall===1,grounded,phase:A.curPhase,top:A.curTop==='me',tap:isSubDanger&&A.curTop!=='me'});
+  const foOp=A._foOp, foMe=A._foMe;
+  foOp.lunge=A.lungeOp*(1-frac); foOp.flash=A.flashOp>0; foOp.shake=A.shakeOp>0; foOp.fallen=A.fall===2;
+  foOp.grounded=grounded; foOp.phase=A.curPhase; foOp.top=A.curTop==='op'; foOp.tap=isSubDanger&&A.curTop!=='op';
+  foMe.lunge=A.lungeMe*(1-frac); foMe.flash=A.flashMe>0; foMe.shake=A.shakeMe>0; foMe.fallen=A.fall===1;
+  foMe.grounded=grounded; foMe.phase=A.curPhase; foMe.top=A.curTop==='me'; foMe.tap=isSubDanger&&A.curTop!=='me';
+  fighter(ctx, xOp, gY, -1, '#6E8478', foOp);
+  fighter(ctx, xMe, gY, 1, '#B23B36', foMe);
   if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#E8442F'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
   A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
   A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);
   A.lungeMe*=0.86; A.lungeOp*=0.86;
-  // vignette — profondeur de "fiche imprimée", jamais un aplat plat
-  const vg=ctx.createRadialGradient(W/2,H*0.55,H*0.25,W/2,H*0.55,Math.max(W,H)*0.62);
-  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.38)');
-  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=A._vignetteGrad; ctx.fillRect(0,0,W,H);
   ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
   const rnd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
   let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
@@ -4385,12 +4383,12 @@ function scr_arena(){ const A=ARENA||{};
    </div>
    <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Couper la transmission vidéo ▸</button>
   </div>`; }
+const ARENA_ZONE_COLOR=v=>v>28?'var(--blood)':v>14?'var(--gold)':'var(--sage)';
 /* mise à jour des barres HTML (plus de HP globaux) + momentum + points de dégâts par zone + terminal texte, à chaque frame */
 function paintBars(){ if(!ARENA)return; const set=(id,v)=>{const e=document.getElementById(id); if(e)e.style.width=clamp(v,0,100)+'%';};
   set('st-me',ARENA.stMe); set('st-op',ARENA.stOp);
   if(ARENA.currentMomentum!==undefined) set('ar-momentum',ARENA.currentMomentum);
-  const zoneColor=v=>v>28?'var(--blood)':v>14?'var(--gold)':'var(--sage)';
-  const setZone=(id,v)=>{ const e=document.getElementById(id); if(e)e.style.background=zoneColor(v); };
+  const setZone=(id,v)=>{ const e=document.getElementById(id); if(e)e.style.background=ARENA_ZONE_COLOR(v); };
   if(ARENA.snapA){ setZone('dm-h',ARENA.snapA.h); setZone('dm-b',ARENA.snapA.b); setZone('dm-l',ARENA.snapA.l); }
   if(ARENA.snapB){ setZone('do-h',ARENA.snapB.h); setZone('do-b',ARENA.snapB.b); setZone('do-l',ARENA.snapB.l); }
   if(ARENA.flashZoneId){ const e=document.getElementById(ARENA.flashZoneId); if(e){ e.style.background='var(--blood)'; e.style.boxShadow='0 0 6px var(--blood)'; } }
