@@ -167,6 +167,7 @@ function repairFighter(f){
   if(typeof f.org!=='number'||isNaN(f.org)) f.org=0;
   if(!Array.isArray(f.skills)) f.skills=[];
   if(!Array.isArray(f.history)) f.history=[];
+  if(!Array.isArray(f.seasonRecap)) f.seasonRecap=[];
   return f;
 }
 function validateState(){

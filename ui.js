@@ -118,7 +118,11 @@ function recordTitleDefense(org,divName,champion){
   if(reign) reign.defenses+=1;
 }
 /* ==== [FIN ANCRE] ====*/
-function orgLevel(org){ return [38,46,54,61,67,73,73][org]||40; }
+// ==== [ANCRE: DIFFICULTE_GLOBALE] — barème abaissé de 9 points sur /100 (item
+// demandé : le jeu était trop dur). Le delta reste identique entre paliers,
+// seul le niveau plancher baisse, donc la courbe de progression n'est pas
+// dénaturée, juste rendue plus accessible à tous les étages. ====
+function orgLevel(org){ return [29,37,45,52,58,64,64][org]||31; }
 function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const pool=[];
   const isAmateur=(f.org===0);
   const needed=isAmateur?100:30; // pro : 1 champion + 15 contenders classés + 14 non classés
@@ -703,19 +707,53 @@ function proceedToFight(){
    HAUTES de leur genre (pas les plus petites) : la condition sert à empêcher
    toute tentative de "monter de catégorie" pour un combattant déjà au sommet,
    faute de catégorie supérieure où l'envoyer. ==== */
+/* ==== [ANCRE: RENDU_EFFETS_EVENEMENT] — affichage uniforme des effets d'un
+   événement de carrière : malus temporaires (combat en cours) en rouge,
+   effets persistants (Moral/Forme/argent) en vert ou rouge selon le signe,
+   attributs toujours ramenés à l'échelle /20 affichée partout ailleurs dans
+   le jeu (division par 5, jamais 0 pour un effet réellement appliqué). ====*/
+function renderEventEffects(fx){
+  if(!fx) return '';
+  const chips=[];
+  const chip=(txt,positive)=>`<span class="tag2" style="border-color:${positive?'var(--win)':'var(--loss)'};color:${positive?'var(--win)':'var(--loss)'}">${txt}</span>`;
+  if(fx.malus){ Object.entries(fx.malus).forEach(([k,v])=>{ if(!v) return;
+    const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+    chips.push(chip(`${shown} ${attrLabel(k)} (ce combat)`,shown>=0)); }); }
+  if(fx.bonusAttrs){ Object.entries(fx.bonusAttrs).forEach(([k,v])=>{ if(!v) return;
+    const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+    chips.push(chip(`${shown>=0?'+':''}${shown} ${attrLabel(k)} (ce combat)`,shown>=0)); }); }
+  if(fx.moraleDelta){ const shown=Math.sign(fx.moraleDelta)*Math.max(1,Math.round(Math.abs(fx.moraleDelta)/5));
+    chips.push(chip(`${shown>=0?'+':''}${shown} Moral`,shown>=0)); }
+  if(fx.formDelta){ const shown=Math.sign(fx.formDelta)*Math.max(1,Math.round(Math.abs(fx.formDelta)/5));
+    chips.push(chip(`${shown>=0?'+':''}${shown} Forme`,shown>=0)); }
+  if(fx.money){ chips.push(chip(`${fx.money>=0?'+':''}${formatArgent(fx.money)}`,fx.money>=0)); }
+  return chips.length?`<div class="tagrow mt" style="position:relative;z-index:2">${chips.join('')}</div>`:'';
+}
+/* ==== [ANCRE: EVENEMENT] — blessures/coupe de poids, disruptif façon Destiny Eleven.
+   H-heavy (poids lourd) et F-feather (poids plume) sont les catégories les PLUS
+   HAUTES de leur genre (pas les plus petites) : la condition sert à empêcher
+   toute tentative de "monter de catégorie" pour un combattant déjà au sommet,
+   faute de catégorie supérieure où l'envoyer. ==== */
 function generateRandomEvent(){ const f=G.f;
   const isTopDivision=(f.div==='H-heavy' || f.div==='F-feather');
-  let pool=['minor_injury','minor_injury','training_partner_hurt','old_injury_flareup'];
+  // ==== [ANCRE: POOL_EVENEMENTS_ELARGI] — pool élargi (item demandé : les
+  // événements revenaient trop souvent) : ajout de 7 nouveaux scénarios
+  // (positifs, mixtes et négatifs) répartis sur les mêmes conditions
+  // d'éligibilité que l'existant, sans rien retirer.
+  let pool=['minor_injury','minor_injury','training_partner_hurt','old_injury_flareup',
+    'sparring_breakthrough','bad_camp_conditions','rival_trashtalk','motivational_speech'];
   if(rnd()<0.25) pool.push('major_injury');
   if(f.W+f.L+(f.D||0)>=3) pool.push('hometown_crowd');
+  if((f.streak||0)>=2) pool.push('super_fan_boost');
   // ==== [ANCRE: EVENEMENTS_ARGENT] — dilemmes financiers, réservés aux pros ====
   if(f.org>0){
-    pool.push('media_chaos');
+    pool.push('media_chaos','social_media_storm');
     if(f.org>=2) pool.push('coaching_change');
     if(f.org>=3) pool.push('streaming_deal');
     if(f.org>=3 && !f.bossUnimpressed) pool.push('boss_unimpressed');
     if(f.org>=5) pool.push('sponsor_clash','short_notice_money');
     if(f.org===4) pool.push('sell_out_fight');
+    if((f.earnings||0)>=20) pool.push('training_camp_upgrade');
   }
   // ==== [FIN ANCRE] ====
   if((typeof checkMueMartialeEligibility==='function') && checkMueMartialeEligibility(f) && !f._mueOffered){ pool.push('mue_martiale'); }
@@ -730,12 +768,14 @@ function generateRandomEvent(){ const f=G.f;
   DYNAMIC_EVENTS.filter(e=>e.req(f)).forEach(e=>pool.push(e.id));
   // ==== [FIN ANCRE] ====
   const type=pick(pool);
-  let title='', text='', btn='Continuer', actionId=type;
+  let title='', text='', btn='Continuer', actionId=type, fx=null;
   const dynMatch=DYNAMIC_EVENTS.find(e=>e.id===type);
   if(dynMatch){
     title=dynMatch.title; text=dynMatch.text;
+    fx={malus:dynMatch.malus};
     if(dynMatch.malus) G.fight.malus=Object.assign({},G.fight.malus,dynMatch.malus);
-    if(dynMatch.bonus && dynMatch.bonus.morale) f.morale=clamp(f.morale+dynMatch.bonus.morale,0,100);
+    if(dynMatch.malus && dynMatch.malus.form){ fx.formDelta=dynMatch.malus.form; delete fx.malus.form; }
+    if(dynMatch.bonus && dynMatch.bonus.morale){ f.morale=clamp(f.morale+dynMatch.bonus.morale,0,100); fx.moraleDelta=dynMatch.bonus.morale; }
   } else if(type==='mue_martiale'){
     f._mueOffered=true;
     title='Remise en question'; actionId='mue_martiale';
@@ -745,66 +785,111 @@ function generateRandomEvent(){ const f=G.f;
   }
   if(type==='minor_injury'){
     title='Pépin physique';
-    text='Mauvaise torsion du genou lors du dernier sparring. Rien qui n\u2019empêche de combattre, mais vous allez le sentir dans l\u2019octogone.<br><br><b style="color:var(--loss)">[EFFET]</b> -3 Vitesse de jambes, -2 Explosivité pour ce combat.';
-    G.fight.malus={footSpeed:-15,explosiveness:-12};
+    text='Mauvaise torsion du genou lors du dernier sparring. Rien qui n\u2019empêche de combattre, mais vous allez le sentir dans l\u2019octogone.';
+    G.fight.malus={footSpeed:-15,explosiveness:-12}; fx={malus:{footSpeed:-15,explosiveness:-12}};
   } else if(type==='major_injury'){
     title='Déchirure !';
     text='Sur un appui anodin à l\u2019entraînement, un claquement sourd. Le médecin est catégorique : combat annulé, et plusieurs mois de rééducation.';
     btn='Accepter le sort';
   } else if(type==='training_partner_hurt'){
     title='Partenaire d\u2019entraînement blessé';
-    text='Ton partenaire de sparring principal se blesse à dix jours du combat. Impossible de reproduire son style à temps, la préparation en pâtit.<br><br><b style="color:var(--loss)">[EFFET]</b> -2 QI de combat, -2 Adaptabilité pour ce combat.';
-    G.fight.malus={fightIQ:-10,adaptability:-8};
+    text='Ton partenaire de sparring principal se blesse à dix jours du combat. Impossible de reproduire son style à temps, la préparation en pâtit.';
+    G.fight.malus={fightIQ:-10,adaptability:-8}; fx={malus:{fightIQ:-10,adaptability:-8}};
   } else if(type==='old_injury_flareup'){
     title='Vieille blessure qui se réveille';
-    text='Cette épaule que tu t\u2019es abîmée il y a des années recommence à te lâcher pendant les derniers rounds de sparring. Rien de cassé, mais la confiance en prend un coup.<br><br><b style="color:var(--loss)">[EFFET]</b> -2 Résistance, -2 Confiance pour ce combat.';
-    G.fight.malus={durability:-10,confidence:-8};
+    text='Cette épaule que tu t\u2019es abîmée il y a des années recommence à te lâcher pendant les derniers rounds de sparring. Rien de cassé, mais la confiance en prend un coup.';
+    G.fight.malus={durability:-10,confidence:-8}; fx={malus:{durability:-10,confidence:-8}};
   } else if(type==='hometown_crowd'){
     title='Retour au pays';
-    text='Le combat se tient près de chez toi. Ta famille, tes potes de toujours, la salle qui t\u2019a vu débuter : tout le monde sera là ce soir.<br><br><b style="color:var(--win)">[EFFET]</b> +15 Moral, +8 Forme.';
+    text='Le combat se tient près de chez toi. Ta famille, tes potes de toujours, la salle qui t\u2019a vu débuter : tout le monde sera là ce soir.';
     f.morale=clamp(f.morale+15,0,100); f.form=clamp(f.form+8,0,100);
+    fx={moraleDelta:15,formDelta:8};
+  } else if(type==='sparring_breakthrough'){
+    title='Déclic à l\u2019entraînement';
+    text='Un détail technique répété cent fois finit par cliquer en plein sparring. Le coach n\u2019en revient pas : quelque chose vient de changer dans ta lecture du combat.';
+    // G.fight.malus est le SEUL canal lu par resolveFight() pour les effets
+    // temporaires de combat (voir ui.js ~L2077) — malgré son nom, il accepte
+    // aussi bien des valeurs positives (comme ici) que négatives.
+    G.fight.malus=Object.assign({},G.fight.malus,{fightIQ:8}); f.morale=clamp(f.morale+10,0,100);
+    fx={bonusAttrs:{fightIQ:8},moraleDelta:10};
+  } else if(type==='bad_camp_conditions'){
+    title='Camp d\u2019entraînement chaotique';
+    text='Salle surchauffée, partenaires indisponibles, matériel défaillant : ce camp n\u2019a pas ressemblé aux précédents, et ça se sent dans les jambes.';
+    f.form=clamp(f.form-12,0,100);
+    fx={formDelta:-12};
+  } else if(type==='rival_trashtalk'){
+    title='Provocation publique';
+    text='Ton adversaire multiplie les déclarations mordantes en conférence de presse. Ça te met dans un état d\u2019esprit combatif, mais un peu trop nerveux pour ce soir.';
+    G.fight.malus={composure:-10}; f.morale=clamp(f.morale+8,0,100);
+    fx={malus:{composure:-10},moraleDelta:8};
+  } else if(type==='motivational_speech'){
+    title='Discours du coach';
+    text='La veille du combat, ton coach prend dix minutes pour te rappeler pourquoi tu es là. Simple, direct, efficace.';
+    f.morale=clamp(f.morale+12,0,100);
+    fx={moraleDelta:12};
+  } else if(type==='super_fan_boost'){
+    title='La série fait parler';
+    text='Ta série de victoires commence à faire du bruit. Les réseaux s\u2019enflamment, le public te porte.';
+    f.morale=clamp(f.morale+18,0,100); f.hypeBonus=Math.min(2,(f.hypeBonus||1)+0.05);
+    fx={moraleDelta:18};
   } else if(type==='media_chaos'){
     title='Conférence de presse chaotique';
-    text='La conférence de presse dégénère en foire d\u2019empoigne verbale avec ton adversaire. Les caméras adorent ça, ton mental un peu moins.<br><br><b style="color:var(--win)">[EFFET]</b> +10 Moral.<br><b style="color:var(--loss)">[RISQUE]</b> -3 Sang-froid pour ce combat.';
+    text='La conférence de presse dégénère en foire d\u2019empoigne verbale avec ton adversaire. Les caméras adorent ça, ton mental un peu moins.';
     G.fight.malus={composure:-15};
     f.morale=clamp(f.morale+10,0,100);
+    fx={malus:{composure:-15},moraleDelta:10};
+  } else if(type==='social_media_storm'){
+    title='Bad buzz';
+    text='Une déclaration mal interprétée s\u2019est transformée en polémique en ligne. Impossible d\u2019y échapper, même en camp fermé.';
+    f.morale=clamp(f.morale-15,0,100);
+    fx={moraleDelta:-15};
   } else if(type==='coaching_change'){
     title='Changement de coach';
-    text='Ton entraîneur principal part accompagner un autre combattant à dix jours du combat. Tu dois t\u2019adapter à une nouvelle voix dans le coin.<br><br><b style="color:var(--loss)">[EFFET]</b> -2 Adaptabilité, -2 Sang-froid pour ce combat.';
-    G.fight.malus={adaptability:-12,composure:-8};
+    text='Ton entraîneur principal part accompagner un autre combattant à dix jours du combat. Tu dois t\u2019adapter à une nouvelle voix dans le coin.';
+    G.fight.malus={adaptability:-12,composure:-8}; fx={malus:{adaptability:-12,composure:-8}};
   } else if(type==='streaming_deal'){
     title='Contrat de streaming exclusif';
-    text='Une plateforme de streaming te propose un cachet supplémentaire pour une exclusivité média, contre un calendrier de déplacements épuisant avant le combat.<br><br><b style="color:var(--win)">[RÉCOMPENSE]</b> +80 000 $.<br><b style="color:var(--loss)">[RISQUE]</b> -10 Forme.';
+    text='Une plateforme de streaming te propose un cachet supplémentaire pour une exclusivité média, contre un calendrier de déplacements épuisant avant le combat.';
     f.earnings=(f.earnings||0)+80; f.form=clamp(f.form-10,0,100);
+    fx={money:80,formDelta:-10};
+  } else if(type==='training_camp_upgrade'){
+    title='Stage de préparation premium';
+    text='Un centre haute performance te propose un stage intensif de dix jours, tout confort, contre une partie de ta bourse à venir.';
+    f.earnings=Math.max(0,(f.earnings||0)-20); f.form=clamp(f.form+15,0,100);
+    fx={money:-20,formDelta:15};
   } else if(type==='short_notice_money'){
     title='Sauver la carte (Short Notice)';
     const oldOppName=G.fight.opp.name;
     const swapPool=G.roster.filter(o=>o.id!==f.id && o.id!==G.fight.opp.id);
     const newOpp=swapPool.length?pick(swapPool):G.fight.opp;
     G.fight.opp=newOpp;
-    text=`${esc(oldOppName)} se blesse et se retire du main-event. L\u2019organisation vous supplie de sauver la carte contre ${esc(newOpp.name)} avec seulement 4 jours de préparation.<br><br><b style="color:var(--win)">[RÉCOMPENSE]</b> Prime massive de 500 000 $ garantie.<br><b style="color:var(--loss)">[RISQUE]</b> Votre condition physique sera catastrophique ce soir (-25 en cardio, -30 de forme).`;
+    text=`${esc(oldOppName)} se blesse et se retire du main-event. L\u2019organisation vous supplie de sauver la carte contre ${esc(newOpp.name)} avec seulement 4 jours de préparation.`;
     // 'form' est un champ direct du combattant (f.form), pas un attribut de f.attrs :
     // il ne peut pas passer par G.fight.malus (qui n'agit que sur f.attrs).
     G.fight.malus={cardio:-25};
     f.form=clamp(f.form-30,0,100);
     f.earnings=(f.earnings||0)+500;
+    fx={malus:{cardio:-25},formDelta:-30,money:500};
   } else if(type==='boss_unimpressed'){
     title='Le patron n\u2019est pas impressionné';
     text='Le président de l\u2019organisation vous convoque : "Vos victoires aux points m\u2019endorment. Le public veut du spectacle." Tant que vous gagnerez sans finir vos adversaires, votre progression au classement restera freinée — une finition (KO ou soumission) effacera immédiatement cette pénalité.';
     f.bossUnimpressed=3;
   } else if(type==='sponsor_clash'){
     title='Guerre de Sponsors';
-    text='Vous avez porté les couleurs d\u2019un sponsor concurrent lors de la pesée. L\u2019organisation vous met à l\u2019amende mais votre aura auprès des fans rebelles explose.<br><br><b style="color:var(--loss)">[AMENDE]</b> -150 000 $.<br><b style="color:var(--win)">[EFFET]</b> +20 Moral.';
+    text='Vous avez porté les couleurs d\u2019un sponsor concurrent lors de la pesée. L\u2019organisation vous met à l\u2019amende mais votre aura auprès des fans rebelles explose.';
     f.earnings=Math.max(0,(f.earnings||0)-150);
     f.morale=clamp(f.morale+20,0,100);
+    fx={money:-150,moraleDelta:20};
   } else if(type==='sell_out_fight'){
     title='Combat Arrangé ?';
-    text='Un bookmaker véreux vous offre 200 000 $ pour perdre le premier round volontairement avant de reprendre le combat. Accepter vous draine mentalement et ruine votre concentration.<br><br><b style="color:var(--win)">[RÉCOMPENSE]</b> +200 000 $.<br><b style="color:var(--loss)">[RISQUE]</b> -3 Sang-froid pour ce combat, -3 Moral.';
+    text='Un bookmaker véreux vous offre une forte somme pour perdre le premier round volontairement avant de reprendre le combat. Accepter vous draine mentalement et ruine votre concentration.';
     f.earnings=(f.earnings||0)+200;
     G.fight.malus={composure:-20};
     f.morale=clamp(f.morale-15,0,100);
+    fx={malus:{composure:-20},moraleDelta:-15,money:200};
   }
-  G.activeEvent={title,text,btn,actionId};
+  const effectsHtml=renderEventEffects(fx);
+  G.activeEvent={title,text,btn,actionId,effectsHtml};
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: SAISON] — moteur de bilan annuel + 70 trophées (audit §12).
@@ -858,7 +943,23 @@ const SVG = {
   goat: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><circle cx="12" cy="11" r="3"/></svg>`,
   veteran: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   star: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
-  hammer: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4l-4 4M21.5 2.5a2.12 2.12 0 0 0-3 0L3 18l3 3 15.5-15.5a2.12 2.12 0 0 0 0-3z"/></svg>`
+  hammer: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4l-4 4M21.5 2.5a2.12 2.12 0 0 0-3 0L3 18l3 3 15.5-15.5a2.12 2.12 0 0 0 0-3z"/></svg>`,
+  /* ==== [ANCRE: ICONES_SUCCES_UNIQUES] — jeu d'icônes additionnel pour que
+     chaque succès (ACH) ait un pictogramme distinct, sans doublon. ==== */
+  trophy: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4M17 5h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4"/></svg>`,
+  shield: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z"/></svg>`,
+  flag: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v18M5 4h13l-3 4 3 4H5"/></svg>`,
+  compass: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16 8 14 14 8 16 10 10 16 8"/></svg>`,
+  gem: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l4-5h10l4 5-9 13z"/><path d="M3 8h18M9 3l3 5 3-5M7 8l5 13 5-13"/></svg>`,
+  mask: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8c0-3 3-5 8-5s8 2 8 5-2 9-8 9-8-6-8-9z"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/><path d="M9 13c1 1 5 1 6 0"/></svg>`,
+  book: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+  target: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>`,
+  phoenix: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V10M12 10c-4-1-7-5-6-10 3 1 6 4 6 8 0-4 3-7 6-8 1 5-2 9-6 10z"/></svg>`,
+  hourglass: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h12v4l-6 6 6 6v4H6v-4l6-6-6-6V2z"/></svg>`,
+  infinity: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 12c0-2.2 1.8-4 4-4 3 0 3 8 6 8 2.2 0 4-1.8 4-4s-1.8-4-4-4c-3 0-3 8-6 8-2.2 0-4-1.8-4-4z"/></svg>`,
+  coin: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.2c0 3-6 1.5-6 4.5 0 1.4 1.3 2.3 3 2.3s3-1 3-2.5"/></svg>`,
+  axe: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3c4 0 7 3 7 7l-3 3c-4 0-7-3-7-7l3-3z"/><path d="M12 12l7 7-2 2-7-7"/></svg>`,
+  circuit: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M7 3v4M17 3v4M7 17v4M17 17v4M3 7h4M17 7h4M3 17h4M17 17h4"/></svg>`
 };
 
 const SEASON_AWARDS=[
@@ -2213,9 +2314,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     st:{Me:res.stats.A, Op:res.stats.B}, myRank:myRankBefore, oppRank:oppRankBefore,
     isTitle:(kind==='title'||kind==='defense') });
   // ==== [FIN ANCRE] ====
-  // vieillissement (1 an = 1 à 3 combats, moyenne 2, depuis la correction #12)
+  // vieillissement (1 an = N combats). Entre 18 et 23 ans (jeune prospect en
+  // pleine activité), on vise 3 à 4 combats/an en moyenne — au-delà, rythme
+  // plus posé (1 à 3) pour refléter les carrières confirmées/vétérans.
   let endOfSeason=false;
-  G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; endOfSeason=true;
+  const fightsPerYear=(G.f.age>=18&&G.f.age<=23)?RI(3,4):RI(1,3);
+  G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=fightsPerYear){ applyAging(G.f); G.f._fy=0; endOfSeason=true;
     // ==== [ANCRE: SANTE_GFL] — Ultimate Rim : suivi médical premium. Le menton
     // (dommage neurologique) ne remonte JAMAIS, même ici — règle absolue. La
     // résistance générale (conditionnement physique, pas neuronal) reste un
@@ -2345,7 +2449,7 @@ const ACH=[
  {id:'pro',cat:'Carrière & Titres',ico:SVG.pro,h:'Passage pro',d:'Devenir professionnel',t:f=>f.stage==='pro'},
  {id:'euro',cat:'Carrière & Titres',ico:SVG.medal,h:'Roi d\u2019Europe',d:'Ceinture européenne',t:f=>f.titles>=1&&f._euro},
  {id:'world',cat:'Carrière & Titres',ico:SVG.crown,h:'Champion du monde',d:'Ceinture mondiale',t:f=>f._world},
- {id:'defend5',cat:'Carrière & Titres',ico:SVG.crown,h:'Dynastie',d:'5 défenses de titre',t:f=>f.defenses>=5},
+ {id:'defend5',cat:'Carrière & Titres',ico:SVG.shield,h:'Dynastie',d:'5 défenses de titre',t:f=>f.defenses>=5},
  {id:'undef',cat:'Carrière & Titres',ico:SVG.diamond,h:'L\u2019Invaincu',d:'Champion sans défaite pro',t:f=>f._world&&f.L===0},
  {id:'ko1',cat:'Finitions & Séries',ico:SVG.ko,h:'Bonne nuit',d:'Gagner par KO',t:f=>f.ko>=1},
  {id:'sub1',cat:'Finitions & Séries',ico:SVG.sub,h:'Le piège',d:'Gagner par soumission',t:f=>f.sub>=1},
@@ -2356,14 +2460,14 @@ const ACH=[
  {id:'skill8',cat:'Technique & Héritage',ico:SVG.dna,h:'Prodige technique',d:'Débloquer 8 compétences',t:f=>f.skills.length>=8},
  {id:'legend',cat:'Technique & Héritage',ico:SVG.goat,h:'Légende vivante',d:'Mondial + 5 défenses',t:f=>f._world&&f.defenses>=5},
  {id:'vet',cat:'Technique & Héritage',ico:SVG.veteran,h:'Vétéran',d:'30 combats pro',t:f=>f.stage==='pro'&&(f.W+f.L+f.D)>=30},
- {id:'amachamp',cat:'Carrière & Titres',ico:SVG.medal,h:'Champion amateur',d:'Remporter un tournoi amateur (WMA/DMMA)',t:f=>!!(f.amaTitles&&f.amaTitles.length>=1)},
- {id:'amachamp2',cat:'Carrière & Titres',ico:SVG.crown,h:'Double couronne amateur',d:'Remporter 2 tournois amateurs différents',t:f=>!!(f.amaTitles&&f.amaTitles.length>=2)},
- {id:'pacific',cat:'Carrière & Titres',ico:SVG.diamond,h:'Gloire internationale',d:'Signer avec Pacific Championship',t:f=>f.org===5},
- {id:'ultimaterim',cat:'Carrière & Titres',ico:SVG.diamond,h:'Contrat en argent',d:'Signer avec Ultimate Rim',t:f=>f.org===6},
- {id:'rivalry',cat:'Finitions & Séries',ico:SVG.skull,h:'Rivalité légendaire',d:'4 confrontations contre le même rival',t:f=>!!(f.biggestRival&&f.biggestRival.count>=4)},
- {id:'skill9',cat:'Technique & Héritage',ico:SVG.dna,h:'Encyclopédie vivante',d:'Débloquer 9 compétences',t:f=>f.skills.length>=9},
+ {id:'amachamp',cat:'Carrière & Titres',ico:SVG.trophy,h:'Champion amateur',d:'Remporter un tournoi amateur (WMA/DMMA)',t:f=>!!(f.amaTitles&&f.amaTitles.length>=1)},
+ {id:'amachamp2',cat:'Carrière & Titres',ico:SVG.flag,h:'Double couronne amateur',d:'Remporter 2 tournois amateurs différents',t:f=>!!(f.amaTitles&&f.amaTitles.length>=2)},
+ {id:'pacific',cat:'Carrière & Titres',ico:SVG.compass,h:'Gloire internationale',d:'Signer avec Pacific Championship',t:f=>f.org===5},
+ {id:'ultimaterim',cat:'Carrière & Titres',ico:SVG.gem,h:'Contrat en argent',d:'Signer avec Ultimate Rim',t:f=>f.org===6},
+ {id:'rivalry',cat:'Finitions & Séries',ico:SVG.mask,h:'Rivalité légendaire',d:'4 confrontations contre le même rival',t:f=>!!(f.biggestRival&&f.biggestRival.count>=4)},
+ {id:'skill9',cat:'Technique & Héritage',ico:SVG.book,h:'Encyclopédie vivante',d:'Débloquer 9 compétences',t:f=>f.skills.length>=9},
  // ==== [ANCRE: LOT8_VENGEANCE] ====
- {id:'vengeance_ultime',cat:'Finitions & Séries',ico:SVG.skull,h:'Vengeance Ultime',d:'Finir par KO ou Soumission un rival qui vous a battu lors de votre première rencontre.',
+ {id:'vengeance_ultime',cat:'Finitions & Séries',ico:SVG.target,h:'Vengeance Ultime',d:'Finir par KO ou Soumission un rival qui vous a battu lors de votre première rencontre.',
    t:f=>{ if(!f.history) return false; const rivalIds=Object.keys(f._rivalries||{});
      for(const rId of rivalIds){ const encounters=f.history.filter(h=>h.oppId==rId);
        if(encounters.length>=2){ const first=encounters[0], last=encounters[encounters.length-1];
@@ -2371,17 +2475,17 @@ const ACH=[
      return false; }},
  // ==== [FIN ANCRE] ====
  // ==== [ANCRE: FAITH_ACHIEVEMENTS] — Lot 3 du mode MMA Faith ====
- {id:'f_phenix',cat:'Carrière & Titres',ico:SVG.fire,h:'Phénix',d:'Remonter d\u2019une série de 3 défaites pour devenir champion.',
+ {id:'f_phenix',cat:'Carrière & Titres',ico:SVG.phoenix,h:'Phénix',d:'Remonter d\u2019une série de 3 défaites pour devenir champion.',
    t:f=>f.champion && f.history && f.history.length>5 && f.history.slice(-4).filter(x=>x.res==='loss').length>=3},
- {id:'f_murdutemps',cat:'Carrière & Titres',ico:SVG.skull,h:'Le Mur du Temps',d:'Rester invaincu professionnellement jusqu\u2019à l\u2019âge de 35 ans.',
+ {id:'f_murdutemps',cat:'Carrière & Titres',ico:SVG.hourglass,h:'Le Mur du Temps',d:'Rester invaincu professionnellement jusqu\u2019à l\u2019âge de 35 ans.',
    t:f=>f.L===0 && f.age>=35 && f.stage==='pro'},
- {id:'f_doublemonarque',cat:'Carrière & Titres',ico:SVG.crown,h:'Double Monarque',d:'Remporter le supercombat et devenir double champion de deux catégories différentes.',
+ {id:'f_doublemonarque',cat:'Carrière & Titres',ico:SVG.infinity,h:'Double Monarque',d:'Remporter le supercombat et devenir double champion de deux catégories différentes.',
    t:f=>!!f.champChampBelt},
- {id:'f_cyborg',cat:'Technique & Héritage',ico:SVG.veteran,h:'Cyborg',d:'Subir moins de 50 dégâts crâniens sur une série de 10 combats.',
+ {id:'f_cyborg',cat:'Technique & Héritage',ico:SVG.circuit,h:'Cyborg',d:'Subir moins de 50 dégâts crâniens sur une série de 10 combats.',
    t:f=>G.season && G.season.fights && G.season.fights.length>=10 && G.season.fights.slice(-10).reduce((acc,fight)=>acc+((fight.st&&fight.st.Me&&fight.st.Me.dmgHead)||0),0)<50},
- {id:'f_ruine',cat:'Carrière & Titres',ico:SVG.hammer,h:'Hémorragie Financière',d:'Se retrouver ruiné (gains négatifs) après un événement ou investissement payant.',
+ {id:'f_ruine',cat:'Carrière & Titres',ico:SVG.coin,h:'Hémorragie Financière',d:'Se retrouver ruiné (gains négatifs) après un événement ou investissement payant.',
    t:f=>(f.earnings||0)<0},
- {id:'f_bourreau',cat:'Technique & Héritage',ico:SVG.diamond,h:'Bourreau des Légendes',d:'Battre 3 adversaires distincts ayant un Elo supérieur à 1800.',
+ {id:'f_bourreau',cat:'Technique & Héritage',ico:SVG.axe,h:'Bourreau des Légendes',d:'Battre 3 adversaires distincts ayant un Elo supérieur à 1800.',
    t:f=>f.history && [...new Set(f.history.filter(h=>h.res==='win' && h.oppElo>1800).map(h=>h.oppId))].length>=3},
  {id:'f_plafondverre',cat:'Finitions & Séries',ico:SVG.star,h:'Plafond de Verre Percé',d:'Gagner par KO alors que votre puissance brute est inférieure à 40.',
    t:f=>f.attrs && f.attrs.power<40 && f.history && f.history.length>0 && f.history[f.history.length-1].method.startsWith('KO') && f.history[f.history.length-1].res==='win'}
@@ -2615,7 +2719,8 @@ function scr_press_conf(){
       <p class="lede" style="margin:0">${pc.text}</p>
     </div>
     <div class="tagrow" style="justify-content:center;margin-bottom:24px">
-      <span class="tag2 hot" style="color:${pc.moraleEffect>=0?'var(--win)':'var(--loss)'};border-color:${pc.moraleEffect>=0?'var(--win)':'var(--loss)'}">${pc.moraleEffect>=0?'+':''}${pc.moraleEffect} Moral</span>
+      ${(()=>{ const shown=Math.sign(pc.moraleEffect)*Math.max(1,Math.round(Math.abs(pc.moraleEffect)/5));
+        return `<span class="tag2 hot" style="color:${shown>=0?'var(--win)':'var(--loss)'};border-color:${shown>=0?'var(--win)':'var(--loss)'}">${shown>=0?'+':''}${shown} Moral</span>`; })()}
     </div>
     <button class="btn primary" onclick="G.pressConf=null; CL.go('camp')">Continuer vers le camp d\u2019entraînement</button>
   </div>`;
@@ -2816,6 +2921,24 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt(f)} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
    <button class="btn primary" onclick="CL.${p.forced?'toLegacy':'afterResult'}()">${p.forced?'Voir mon palmarès':'Continuer'}</button></div>`; }
 
+/* ==== [ANCRE: CARTE_MOUVEMENT_SIGNATURE] — met en avant le geste devenu
+   signature (5 finitions identiques, cf. pickFinishMove dans engine.js) : ce
+   bonus existait déjà mécaniquement (+6 sur 2 attributs) mais n'était visible
+   nulle part dans l'interface — corrigé ici avec un encart dédié dans la
+   fiche complète, affichant le geste ET les gains concrets qu'il a apportés. ==== */
+function signatureMoveCard(f){
+  if(!f.signatureMove) return '';
+  const sm=f.signatureMove;
+  const boostKeys=sm.type==='sub'?['submission','killer']:['power','killer'];
+  const boostTxt=boostKeys.map(k=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(6/5))} ${lbl}`; }).join(', ');
+  const typeLbl=sm.type==='sub'?'Soumission':'KO';
+  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
+    <div class="eyebrow gold mb">${SVG.star} Mouvement Signature</div>
+    <b style="font-size:17px;color:var(--gold)">${esc(sm.name)}</b> <span class="muted small">(${typeLbl})</span>
+    <div class="muted small mt">Répété jusqu'à devenir sa marque de fabrique — 40% de chances de conclure ainsi chaque finition future.</div>
+    <div class="mono small mt" style="color:var(--win)">Effets acquis : ${boostTxt}</div>
+  </div>`;
+}
 function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.faith?'faith_hub':'hub';
   const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
      ${ATTR[key].map(a=>`<div class="attr"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
@@ -2827,6 +2950,7 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.fai
      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
      ${(f.faithTraits && f.faithTraits.length)?`<div class="story" style="position:relative;z-index:2;color:var(--blood)"><b>Traits de caractère.</b> ${f.faithTraits.join(', ')}.</div>`:''}
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+     ${signatureMoveCard(f)}
      ${f.skills.length?(()=>{
        const rarOrder={C:0,R:1,E:2,L:3,M:4,X:5};
        const sorted=f.skills.filter(id=>SKILLS.some(s=>s.id===id)).slice().sort((a,b)=>{
@@ -2883,7 +3007,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
 function scr_event(){ const ev=G.activeEvent;
   return `<div class="scr center" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh"><div class="eyebrow blood">Événement imprévu</div>
    <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,36px)">${ev.title}</div>
-   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:16px 0"><p class="lede" style="margin:0;text-align:left;max-width:100%">${ev.text}</p></div>
+   <div class="glass card" style="position:relative;background:var(--panel2);text-align:left;padding:16px;margin:16px 0"><p class="lede" style="margin:0;text-align:left;max-width:100%">${ev.text}</p>${ev.effectsHtml||''}</div>
    <button class="btn primary" onclick="CL.handleEvent('${ev.actionId}')">${ev.btn}</button>
    ${ev.btn2?`<button class="btn ghost mt" onclick="CL.handleEvent('${ev.actionId2}')">${ev.btn2}</button>`:''}</div>`; }
 
@@ -2931,6 +3055,12 @@ function scr_toptier(){
 
 /* ==== [ANCRE: LOT2_CONTRAT] — négociation de fin de contrat, remplace la
    promotion purement automatique par un vrai choix de carrière. ==== */
+/* ==== [ANCRE: AFFICHAGE_CACHET_CONTRAT] — remplace les anciens libellés bruts
+   du type "0.6k$ / 0.6k$" (illisible, cf. item demandé) par un montant réel
+   et explicite en euros/dollars, avec le nombre de combats du contrat. ==== */
+function contractPayLine(c){
+  return `${formatArgent(c.show)} <span class="muted">par combat</span> + ${formatArgent(c.win)} <span class="muted">par victoire</span>`;
+}
 function scr_contract_nego(){
   const f=G.f;
   return `<div class="scr center intro">
@@ -2939,9 +3069,9 @@ function scr_contract_nego(){
     <p class="lede">Votre contrat avec ${orgDisplayName(f)} est arrivé à son terme. Il est temps de discuter de votre avenir.</p>
     <div class="glass card mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--gold)">
        <div class="eyebrow mb">Statut actuel</div>
-       <div class="mono small">Cachet de base : ${f.contract.show}k$ / ${f.contract.win}k$</div>
+       <div class="mono small">Cachet : ${contractPayLine(f.contract)}</div>
+       <div class="mono small mt">Combats restants sur le contrat : <b>${f.contract.fightsLeft||4}</b></div>
        <div class="mono small mt">Réputation : <b class="gold">${f.contract.reputation||'Solide'}</b></div>
-       <div class="mono small mt">Représentant : <b style="color:${f.agentCut>0?'var(--win)':'var(--text)'}">${f.agentCut>0?'Agent (booste les négociations)':'Aucun (négociation en solo)'}</b></div>
     </div>
     <button class="btn primary mt" onclick="CL.negoRenew()">Renouveler aux mêmes conditions (sûr)</button>
     <button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.negoRaise()">Exiger une revalorisation (+40% cachet, risqué)</button>
@@ -2953,13 +3083,14 @@ function scr_free_agency(){
   return `<div class="scr center intro">
     <div class="eyebrow gold">Marché libre (Free Agency)</div>
     <h2 class="disp">Offres de contrat</h2>
-    <p class="lede">Voici les contrats disponibles sur la table.</p>
+    <p class="lede">Voici les contrats disponibles sur la table — chacun distinct, à comparer avant de signer.</p>
     ${offers.map((o,i)=>`
       <div class="glass card mb" style="background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px">
-        <div class="hero-name" style="font-size:20px">${o.flavor}</div>
-        <div class="mono small gold">Ligue de niveau ${o.org} · ${o.contract.show}k$ Show / ${o.contract.win}k$ Win</div>
+        <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">Ligue de niveau ${o.org}</em></div>
+        <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
+        <div class="mono small muted">Contrat de ${o.contract.fightsLeft||4} combats</div>
         <p class="muted small mt">${o.desc}</p>
-        <button class="btn primary mt" onclick="CL.acceptFreeAgency(${i})">Signer (4 combats)</button>
+        <button class="btn primary mt" onclick="CL.acceptFreeAgency(${i})">Signer avec ${o.flavor}</button>
       </div>
     `).join('')}
     ${offers.length===0?`<p class="muted">Aucune offre. Fin de carrière forcée.</p><button class="btn primary mt" onclick="CL.toLegacy()">Retraite</button>`:''}
@@ -3009,47 +3140,53 @@ function scr_promo(){
   const isAmateurOffer=(f.org===0 && G.pending && G.pending.proOffer);
   if(isAmateurOffer){
     const offer=G.pending.proOffer;
+    const previewStd=generateContract(f,offer.baseTier||1,false);
     return `<div class="scr center intro"><div class="eyebrow gold">Offre de Contrat Professionnel</div>
      <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Quelqu\u2019un veut te signer</div>
-     <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure.</p>
+     <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure. ${offer.fastTrack?'Deux offres sont sur la table — compare-les avant de choisir.':''}</p>
      <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:18px">
        <div class="hero-name" style="font-size:20px">${offer.orgFlavor1}<em style="color:var(--muted)">Contrat standard</em></div>
+       <div class="mono small gold mt">${contractPayLine(previewStd)}</div>
+       <div class="mono small muted">Contrat de ${previewStd.fightsLeft} combats</div>
        <p class="muted small mt">${offer.msg}</p>
        <div class="muted small mt">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
-       <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">${offer.phrase1}</button>
+       <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">Signer avec ${offer.orgFlavor1}</button>
      </div>
-     ${offer.fastTrack?`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
+     ${offer.fastTrack?(()=>{ const previewFast=generateContract(f,offer.fastTier||3,false); return `<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
        <div class="hero-name" style="font-size:20px">${offer.orgFlavor3}<em style="color:var(--muted)">Fast-Track (opposition bien plus dure)</em></div>
+       <div class="mono small gold mt">${contractPayLine(previewFast)}</div>
+       <div class="mono small muted">Contrat de ${previewFast.fightsLeft} combats</div>
        <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
-       <button class="btn mt" style="background:var(--gold-d);color:#fff;border-color:var(--gold-d);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">${offer.phrase3}</button>
-     </div>`:''}
+       <button class="btn mt" style="background:var(--gold-d);color:#fff;border-color:var(--gold-d);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">Signer avec ${offer.orgFlavor3}</button>
+     </div>`; })():''}
      ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus en amateur</button>`:''}
      </div>`;
   }
   // ==== [ANCRE: MARCHE_OFFRES] — le "tier" des orgas qui te veulent dépend de
   // tes accomplissements (titre, défenses, série) : un palmarès dominant ouvre
   // une offre "fast-track" concurrente en plus de l'offre standard, chacune
-  // avec sa propre description et sa propre bourse — pas un simple "signer
-  // avec X" unique. ====
-  const orgPurseTotal=[0,1.2,4,10,30,60,250];
+  // avec sa propre description et sa propre bourse — deux offres clairement
+  // séparées, chacune avec son cachet précis et son nombre de combats. ====
   const nextOrg=f.org+1;
   const flavorNext=ORG_FLAVORS[nextOrg]?pick(ORG_FLAVORS[nextOrg]):(ORGS[nextOrg]||'Ligue supérieure');
-  const offers=[{org:nextOrg,flavor:flavorNext,purseTxt:formatArgent(orgPurseTotal[nextOrg]||0),
+  const offers=[{org:nextOrg,flavor:flavorNext,contract:generateContract(f,nextOrg,false),
     desc:isChamp?`En tant que champion ${f.divName} dominant, ${flavorNext} veut racheter votre contrat. Accepter signifie abandonner votre ceinture actuelle pour monter d\u2019un cran.`
       :`${flavorNext} a suivi tes performances de près. Ils pensent que tu es prêt pour une salle plus grande.`}];
   const dominant=(isChamp||f.titles>=1) && ((f.defenses||0)>=2 || (f.streak||0)>=6);
   if(dominant && nextOrg+1<5){
     const flavorSkip=ORG_FLAVORS[nextOrg+1]?pick(ORG_FLAVORS[nextOrg+1]):(ORGS[nextOrg+1]||'Ligue supérieure');
-    offers.push({org:nextOrg+1,flavor:flavorSkip,purseTxt:formatArgent(orgPurseTotal[nextOrg+1]||0),
+    offers.push({org:nextOrg+1,flavor:flavorSkip,contract:generateContract(f,nextOrg+1,false),
       desc:`Ta domination a fait le tour du milieu : ${flavorSkip} veut te griller la politesse et t\u2019offre de brûler une étape.`});
   }
   return `<div class="scr center intro"><div class="eyebrow gold">${isChamp?'Free Agency (Transfert)':'Le Marché'}</div>
    <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Quelqu\u2019un veut te signer</div>
-   <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure.</p>
+   <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure. ${offers.length>1?'Deux offres sont sur la table — compare-les avant de choisir.':''}</p>
    ${offers.map(o=>`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:18px">
-     <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">Niveau ${o.org} · ${o.purseTxt} par combat</em></div>
+     <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">Niveau ${o.org}</em></div>
+     <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
+     <div class="mono small muted">Contrat de ${o.contract.fightsLeft} combats</div>
      <p class="muted small mt">${o.desc}</p>
-     <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPromo(${o.org})">${isChamp&&o.org===nextOrg?'Rendre la ceinture et signer avec ':'Signer avec '}${o.flavor}</button>
+     <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPromo(${o.org})">Signer avec ${o.flavor}</button>
    </div>`).join('')}
    <button class="btn ghost mt" onclick="CL.declinePromo()">Ne rien signer — rester ici</button>
    </div>`;
@@ -3200,7 +3337,41 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
      ${f.biggestRival?`<div class="mono small mt" style="color:var(--blood);position:relative;z-index:2">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div>`:''}</div>
    ${nemesisHtml}
    ${notableWins.length?`<div class="card mt"><div class="eyebrow mb">Adversaires notables battus</div>${notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
+   ${retireSeasonRecapHtml(f)}
+   ${retireAchievementsHtml(f)}
+   ${retireLegendPointsHtml(f)}
    <button class="btn primary" onclick="CL.newCareer()">Nouvelle carrière</button></div>`; }
+/* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — trois blocs ajoutés à l'écran de
+   retraite : bilan saison par saison, succès débloqués pendant CETTE
+   carrière, et points de légende gagnés grâce à elle. ==== */
+function retireSeasonRecapHtml(f){
+  const recap=f.seasonRecap||[];
+  if(!recap.length) return '';
+  return `<div class="card mt"><div class="eyebrow mb">Bilan saison par saison</div>
+    ${recap.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dotted var(--line)">
+      <div><b>Année ${s.year}</b> <span class="muted small">(${s.age} ans · ${s.divName})</span></div>
+      <div class="mono small"><span style="color:var(--win)">${s.W}V</span> — <span style="color:var(--loss)">${s.L}D</span>
+        <span class="muted"> · ${s.koW} KO / ${s.subW} SUB / ${s.decW} DÉC</span></div>
+    </div>${s.trophies.length?`<div class="muted small" style="padding:2px 0 4px 0">🏆 ${s.trophies.join(', ')}</div>`:''}`).join('')}
+  </div>`;
+}
+function retireAchievementsHtml(f){
+  const earned=ACH.filter(a=>{ try{ return a.t(f); }catch(e){ return false; } });
+  if(!earned.length) return '';
+  return `<div class="card mt"><div class="eyebrow mb">Succès débloqués (${earned.length}/${ACH.length})</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${earned.map(a=>`<span class="tag2 hot" style="display:inline-flex;align-items:center;gap:5px" title="${esc(a.d)}"><span style="font-size:15px">${a.ico}</span>${esc(a.h)}</span>`).join('')}
+    </div>
+  </div>`;
+}
+function retireLegendPointsHtml(f){
+  const earned=Math.max(0,Math.round((hofScore(f)||0)/10));
+  return `<div class="card mt glass" style="border-left:3px solid var(--gold);background:var(--panel2)">
+    <div class="eyebrow mb" style="color:var(--gold)">Points de Légende gagnés</div>
+    <div class="stat-big gold" style="font-size:30px">+${earned}</div>
+    <div class="muted small mt">Score d\u2019héritage : ${hofScore(f)||0} (défenses, victoires, titres, finitions). Utilisables dans la Salle des Légendes pour débloquer modes, archétypes et cosmétiques.</div>
+  </div>`;
+}
 
 /* ==== [ANCRE: LOT9_ECRAN_CODEX] ==== */
 function formatSkillFx(fx){
@@ -4125,7 +4296,19 @@ const CL={
     G.lastMsg=`Contrat signé avec ${offer.flavor} !`;
     if(G.faith){ routeAfterOrgChange(); } else { G.screen=(G.pending&&G.pending.endOfSeason)?'season':'hub'; save(); render(); }
   },
-  nextSeason(){ G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
+  nextSeason(){
+    // ==== [ANCRE: RECAP_SAISON_RETRAITE] — archive un résumé de la saison qui
+    // se termine AVANT de vider G.season.fights, pour pouvoir reconstituer
+    // l'historique saison par saison dans l'écran de retraite (item demandé).
+    const sData=G.season||{year:1,fights:[]};
+    if(sData.fights && sData.fights.length){
+      const seasonEval=evaluateSeason(G.f,sData.fights);
+      if(!G.f.seasonRecap) G.f.seasonRecap=[];
+      G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
+        koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
+        trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
+    }
+    G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.screen='legacy'; save(); render(); },
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
