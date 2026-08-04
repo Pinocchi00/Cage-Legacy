@@ -843,7 +843,12 @@ const FINISH_MOVES={
  ]
 };
 const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'corps'},{name:'clé de bras (armbar)',zone:'corps'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'},{name:'clé de genou (kneebar)',zone:'jambes'},{name:'étranglement d\u2019Arce',zone:'tête'},{name:'cravate péruvienne',zone:'tête'},{name:'clé de poignet (wristlock)',zone:'corps'},{name:'compression des mollets (calf slicer)',zone:'jambes'}];
-const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'},{name:'coup de pied retourné (spinning back kick)',zone:'tête'},{name:'coup de genou sauté',zone:'tête'},{name:'overhand dévastateur',zone:'tête'},{name:'chassé frontal (teep) au plexus',zone:'corps'}];
+const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'},{name:'coup de pied retourné (spinning back kick)',zone:'tête'},{name:'coup de genou sauté',zone:'tête'},{name:'overhand dévastateur',zone:'tête'},{name:'chassé frontal (teep) qui coupe le souffle',zone:'corps'},
+  // ==== [ANCRE: FINITIONS_DEBOUT_SUPPLEMENTAIRES] — variété enrichie de
+  // finitions debout (item demandé), toutes accessibles à tous les styles
+  // via le pool générique (pas besoin de compétence spécifique).
+  {name:'genou volant en pleine charge',zone:'tête'},{name:'coude retourné (spinning elbow)',zone:'tête'},
+  {name:'combo poing-genou qui ne laisse aucune chance',zone:'corps'},{name:'crochet au foie qui coupe les jambes',zone:'corps'}];
 function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
   // Mouvement signature (#6) : si le combattant a déjà déverrouillé une prise
   // signature (5 finitions identiques auparavant), 40% de chance de la rejouer
@@ -951,7 +956,13 @@ function generateContract(f,org,raise){
   const isChampContract=!!f.champion;
   if(isChampContract) mult*=(CHAMP_MULT[org]||1);
   const repTier=hype>=1.5?'Superstar':hype>=1.2?'Attraction montante':hype>=0.9?'Solide':'Discret';
-  return { fightsLeft:4, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract, reputation:repTier };
+  // ==== [ANCRE: DUREE_CONTRAT_REPUTATION] — avant : durée fixe de 4 combats
+  // pour tout le monde. Un combattant plus réputé représente une valeur plus
+  // sûre pour l'organisation, qui sécurise l'investissement avec un contrat
+  // plus long — cohérent avec le palier de réputation déjà calculé ci-dessus.
+  const fightsByRep={Discret:3,Solide:4,'Attraction montante':5,Superstar:6};
+  const fightsLeft=(fightsByRep[repTier]||4)+(isChampContract?1:0);
+  return { fightsLeft, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract, reputation:repTier, record:[] };
 }
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.
@@ -971,8 +982,14 @@ function p4pScore(f){ const fights=f.W+f.L+f.D;
   if(f.careerElo===undefined) f.careerElo=eloBaseline(f.org,f.overall);
   if(f.orgElo===undefined) f.orgElo=eloBaseline(f.org,f.overall);
   const leapfrog=f.rankBoost||0;
-  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+(f.champion?50:0)+leapfrog);
-  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+(f.champion?50:0)+leapfrog;
+  // ==== [ANCRE: BONUS_DOUBLE_CHAMPION] — le statut de champion donnait déjà
+  // +50 au score P4P ; la double ceinture (champ-champ) n'apportait
+  // strictement RIEN de plus. Un deuxième +50 (donc +100 au total pour un
+  // double champion) reflète enfin la domination réelle sur deux
+  // catégories — affiché aussi dans la fiche du combattant (scr_profile).
+  const champBonus=(f.champion?50:0)+(f.champChampBelt?50:0);
+  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+champBonus+leapfrog);
+  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+champBonus+leapfrog;
   if(f.org===5) score*=1.4;
   return Math.max(1, score);
 }

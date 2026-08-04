@@ -386,8 +386,8 @@ function scr_vs_friend(){
     return `<div class="scr center intro">
       <div class="eyebrow gold">Défi Multijoueur</div>
       <h2 class="disp">Combattant d\u2019un ami</h2>
-      <p class="lede small">Colle ici le code que ton ami t\u2019a envoyé (généré depuis son Panthéon, bouton "Exporter"). Sans code, il te faut au moins 2 légendes dans ton propre Panthéon.</p>
-      <textarea id="friend_code" placeholder="Colle le code ici..." style="width:100%;min-height:80px;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px;font-family:'JetBrains Mono';font-size:12px;margin-top:16px"></textarea>
+      <p class="lede small">Colle ici le LIEN ou le code que ton ami t\u2019a envoyé (généré depuis son Panthéon, bouton "Exporter"). Sans ça, il te faut au moins 2 légendes dans ton propre Panthéon.</p>
+      <textarea id="friend_code" placeholder="Colle ici le lien ou le code que ton ami t\u2019a envoyé..." style="width:100%;min-height:80px;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px;font-family:'JetBrains Mono';font-size:12px;margin-top:16px"></textarea>
       <button class="btn primary mt" onclick="CL.importFriendCode()">IMPORTER LE CODE</button>
       <button class="btn ghost mt" onclick="CL.leaveSandbox()">Retour à la salle</button>
     </div>`;
@@ -399,7 +399,7 @@ function scr_vs_friend(){
   return `<div class="scr center intro">
     <div class="eyebrow gold">Défi Multijoueur</div>
     <h2 class="disp">Combattant d\u2019un ami</h2>
-    <p class="lede small">Choisis ta légende. ${imported?'La légende de ton ami a été importée.':'Choisis la légende de ton Panthéon que ton ami incarne, ou importe un vrai code d\u2019ami ci-dessous.'} Le combat se déroule dans ta catégorie de poids.</p>
+    <p class="lede small">Choisis ta légende. ${imported?'La légende de ton ami a été importée.':'Choisis la légende de ton Panthéon que ton ami incarne, ou importe son lien/code ci-dessous.'} Le combat se déroule dans ta catégorie de poids.</p>
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:32px 0;gap:16px">
       <div style="flex:1;text-align:center">
          <div class="eyebrow mb">Ta légende</div>
@@ -420,7 +420,7 @@ function scr_vs_friend(){
     </div>
     ${!imported?`<div class="glass card mb" style="background:var(--panel2);padding:12px;text-align:left">
       <div class="eyebrow mb">Importer une vraie légende d\u2019ami</div>
-      <textarea id="friend_code" placeholder="Colle le code de ton ami ici..." style="width:100%;min-height:60px;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px"></textarea>
+      <textarea id="friend_code" placeholder="Colle ici le lien ou le code de ton ami..." style="width:100%;min-height:60px;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px"></textarea>
       <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.importFriendCode()">Importer</button>
     </div>`:''}
     <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.launchVsFriend()">LANCER LE DÉFI</button>
@@ -585,11 +585,22 @@ function chooseTraining(i){ const opt=G.train[i];
   return finishTrainingFlow(null);
 }
 function finishTrainingFlow(pendingOppMalus){
-  const kind=fightKind(); const opp=G.sel.o;
+  // ==== [ANCRE: CORRECTIF_KIND_CHAMPCHAMP] — bug majeur trouvé : ce flux
+  // écrasait TOUJOURS G.fight (donc G.fight.kind) avec fightKind(), qui
+  // renvoie 'defense' dès que f.champion est vrai — ce qui est TOUJOURS le
+  // cas pour un supercombat champ-champ (le joueur détient déjà sa première
+  // ceinture). Résultat : le supercombat était traité comme une simple
+  // défense de titre ordinaire, jamais reconnu comme la conquête d'une
+  // double couronne (cause commune des deux bugs signalés : pas de message
+  // "double champion", pas de choix de division, pas de bonus dédié). On
+  // préserve maintenant explicitement le kind 'champchamp_title' déjà posé
+  // par acceptChampChampOffer() avant d'entrer dans ce flux.
+  const isChampChamp=G.fight && G.fight.kind==='champchamp_title';
+  const kind=isChampChamp?'champchamp_title':fightKind(); const opp=G.sel.o;
   // Popularité (#3) : un combattant très en vue décroche parfois le statut de
   // combat vedette (5 rounds, feu des projecteurs) même hors combat de titre.
-  const isStarFight=(kind!=='title' && kind!=='defense') && (G.f.hypeBonus||1)>=1.4 && rnd()<0.30;
-  const rounds=(kind==='title'||kind==='defense'||isStarFight)?5:3;
+  const isStarFight=(kind!=='title' && kind!=='defense' && kind!=='champchamp_title') && (G.f.hypeBonus||1)>=1.4 && rnd()<0.30;
+  const rounds=(kind==='title'||kind==='defense'||kind==='champchamp_title'||isStarFight)?5:3;
   G.fight={kind,opp,rounds,malus:null,oppMalus:pendingOppMalus||null,isStarFight};
   // ==== [ANCRE: CUTTING_5PALIERS] — déterministe, à CHAQUE combat. Le poids de
   // forme est un trait VARIABLE (weightCutInfo tire un % neuf à chaque appel),
@@ -750,7 +761,17 @@ function generateRandomEvent(){ const f=G.f;
     pool.push('media_chaos','social_media_storm');
     if(f.org>=2) pool.push('coaching_change');
     if(f.org>=3) pool.push('streaming_deal');
-    if(f.org>=3 && !f.bossUnimpressed) pool.push('boss_unimpressed');
+    // ==== [ANCRE: CORRECTIF_BOSS_UNIMPRESSED] — avant : se déclenchait au
+    // hasard dès org>=3, y compris au tout premier combat après une finition
+    // (illogique : "vos victoires aux points m'endorment" sans qu'aucune
+    // victoire aux points n'ait jamais eu lieu). Exige désormais un vrai
+    // historique récent de victoires par décision (au moins 2 des 3
+    // dernières victoires), preuve concrète du reproche formulé.
+    if(f.org>=3 && !f.bossUnimpressed && f.history && f.history.length>=3){
+      const recentWins=f.history.slice(-5).filter(h=>h.res==='win');
+      const decisionWins=recentWins.filter(h=>isDecisionLike(h.method));
+      if(recentWins.length>=3 && decisionWins.length>=2) pool.push('boss_unimpressed');
+    }
     if(f.org>=5) pool.push('sponsor_clash','short_notice_money');
     if(f.org===4) pool.push('sell_out_fight');
     if((f.earnings||0)>=20) pool.push('training_camp_upgrade');
@@ -849,7 +870,7 @@ function generateRandomEvent(){ const f=G.f;
     G.fight.malus={adaptability:-12,composure:-8}; fx={malus:{adaptability:-12,composure:-8}};
   } else if(type==='streaming_deal'){
     title='Contrat de streaming exclusif';
-    text='Une plateforme de streaming te propose un cachet supplémentaire pour une exclusivité média, contre un calendrier de déplacements épuisant avant le combat.';
+    text='Une plateforme de streaming te propose un salaire supplémentaire pour une exclusivité média, contre un calendrier de déplacements épuisant avant le combat.';
     f.earnings=(f.earnings||0)+80; f.form=clamp(f.form-10,0,100);
     fx={money:80,formDelta:-10};
   } else if(type==='training_camp_upgrade'){
@@ -859,17 +880,29 @@ function generateRandomEvent(){ const f=G.f;
     fx={money:-20,formDelta:15};
   } else if(type==='short_notice_money'){
     title='Sauver la carte (Short Notice)';
+    // ==== [ANCRE: CORRECTIF_SHORT_NOTICE] — avant : l'adversaire était
+    // échangé et les effets appliqués AUTOMATIQUEMENT, sans que le joueur
+    // puisse voir contre qui il se retrouvait ni refuser. Corrigé : aperçu
+    // complet de l'adversaire de remplacement + vrai choix accepter/refuser
+    // (traité dans handleEvent). Prime également réduite de moitié (500k$
+    // → 250k$), jugée excessive pour un simple remplacement de dernière
+    // minute.
     const oldOppName=G.fight.opp.name;
     const swapPool=G.roster.filter(o=>o.id!==f.id && o.id!==G.fight.opp.id);
     const newOpp=swapPool.length?pick(swapPool):G.fight.opp;
-    G.fight.opp=newOpp;
-    text=`${esc(oldOppName)} se blesse et se retire du main-event. L\u2019organisation vous supplie de sauver la carte contre ${esc(newOpp.name)} avec seulement 4 jours de préparation.`;
-    // 'form' est un champ direct du combattant (f.form), pas un attribut de f.attrs :
-    // il ne peut pas passer par G.fight.malus (qui n'agit que sur f.attrs).
-    G.fight.malus={cardio:-25};
-    f.form=clamp(f.form-30,0,100);
-    f.earnings=(f.earnings||0)+500;
-    fx={malus:{cardio:-25},formDelta:-30,money:500};
+    G._pendingShortNoticeOpp=newOpp;
+    const oppFights=newOpp.W+newOpp.L+(newOpp.D||0);
+    text=`${esc(oldOppName)} se blesse et se retire du main-event. L\u2019organisation vous supplie de sauver la carte contre <b>${esc(newOpp.name)} ${newOpp.flag||''}</b> avec seulement 4 jours de préparation.`;
+    const previewHtml=`<div class="card mt" style="background:var(--bg);padding:10px;border-left:3px solid var(--gold)">
+      <div class="mono small"><b>${esc(newOpp.name)}</b> — ${newOpp.styleLabel||newOpp.style} · ${newOpp.W}-${newOpp.L}${newOpp.D?`-${newOpp.D}`:''} · OVR ${newOpp.overall||'?'} <span class="muted">(${oppFights} combat(s) pro)</span></div>
+      <div class="muted small mt">${tacticalRead(f,newOpp)}</div>
+    </div>`;
+    // Rien n'est appliqué tant que le joueur n'a pas choisi — le malus/forme/
+    // argent ci-dessous ne sont qu'un APERÇU (voir handleEvent pour l'application réelle).
+    const shortNoticeEffectsHtml=previewHtml+renderEventEffects({malus:{cardio:-25},formDelta:-30,money:250});
+    btn='Accepter le remplacement'; actionId='short_notice_accept';
+    btn2='Refuser, garder le combat prévu'; actionId2='short_notice_decline';
+    G.activeEvent={title,text,btn,actionId,btn2,actionId2,effectsHtml:shortNoticeEffectsHtml}; return;
   } else if(type==='boss_unimpressed'){
     title='Le patron n\u2019est pas impressionné';
     text='Le président de l\u2019organisation vous convoque : "Vos victoires aux points m\u2019endorment. Le public veut du spectacle." Tant que vous gagnerez sans finir vos adversaires, votre progression au classement restera freinée — une finition (KO ou soumission) effacera immédiatement cette pénalité.';
@@ -1073,9 +1106,13 @@ function evaluateProOffer(f, res, oppRank){
   const upset=oppRank<=10 && res.method!=='Décision';
   let threshold=35; if(f.age<=20) threshold=55; if(f.age>=23) threshold=25;
   if(hypeScore>=threshold || upset || (rnd()<0.05 && hypeScore>15)){
-    let msg=''; const fastTrack=upset||finishes>=8;
+    // Seuil abaissé (8→4 finitions) et ajout d'une série de victoires comme
+    // second déclencheur — item demandé : rendre le fast-track atteignable
+    // sans exiger une razzia quasi-parfaite en KO/soumission.
+    let msg=''; const fastTrack=upset||finishes>=4||(f.streak||0)>=3;
     if(upset) msg='Ton finish retentissant sur un membre du Top 10 national a fait le tour des réseaux. Les promoteurs frappent à la porte.';
-    else if(finishes>=8) msg=`Avec ton style ultra-spectaculaire (${finishes} finitions) et ta réputation de tueur, le public pro te réclame malgré tes ${f.L} défaites.`;
+    else if(finishes>=4) msg=`Avec ton style spectaculaire (${finishes} finitions) et ta réputation de tueur, le public pro te réclame malgré tes ${f.L} défaites.`;
+    else if((f.streak||0)>=3) msg=`${f.streak} victoires d\u2019affilée sans lever le pied : les recruteurs pro ont remarqué la série.`;
     else if(f.age<=20) msg=`Tu n\u2019as que ${f.age} ans, mais ta maturité dans la cage affole les recruteurs régionaux. Tu es un prospect majeur.`;
     else msg='Tes résultats réguliers et ton classement sur le circuit IMMAF t\u2019ouvrent enfin les portes du monde professionnel.';
     // L'organisation proposée dépend désormais du classement/hype plutôt que
@@ -1184,7 +1221,10 @@ const ARCADE_UNLOCKABLE_ARCHETYPES=[
     perk:'Disparaît du champ de vision pour réapparaître accroché à un cou.'},
   {unlockId:'arch_brawler',nick:'Le Roi de la Rue',flag:'🇮🇪',country:'IE',style:'boxer',styleLabel:'Bare Knuckle',div:'H-welter',age:31,
     attrs:{hook:95,clinchStr:95,durability:90,heart:99,killer:90,tdd:60,cardio:75},
-    perk:'Refuse d\u2019aller au sol. Transforme la cage en bagarre de pub.'}
+    perk:'Refuse d\u2019aller au sol. Transforme la cage en bagarre de pub.'},
+  {unlockId:'arch_sniper',nick:'Le Sniper',flag:'🇹🇭',country:'TH',style:'muayThai',styleLabel:'Longue Distance',div:'H-feather',age:27,
+    attrs:{kick:98,footSpeed:92,fightIQ:85,composure:80,power:70,tdd:70,cardio:70,chin:35},
+    perk:'Ne laisse jamais personne entrer dans sa distance. Démonte à coups de tibia depuis l\u2019extérieur.'}
 ];
 function injectExtendedArchetypes(){
   ARCADE_EXTENDED_ARCHETYPES.forEach(a=>{ if(!ARCADE_ARCHETYPES.some(x=>x.nick===a.nick)) ARCADE_ARCHETYPES.push(a); });
@@ -2024,8 +2064,10 @@ function scr_arcade_upgrades(){
         <div class="eyebrow mt mb" style="color:var(--gold)">2. CONDITIONNEMENT & SPARRING</div>`;
     a.trainOpts.forEach((t,i)=>{
       const deltas=t.d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
-        const isGauge=(k==='morale'||k==='form');
-        const shown=isGauge?v:Math.round(v/5); // même ratio que d20() pour les vrais attributs /20
+        // Bug corrigé : Moral/Forme s'affichaient en valeur brute /100 (ex.
+        // "-16 Moral") au lieu de l'échelle /20 utilisée partout ailleurs.
+        // Même ratio que d20() désormais pour TOUS les deltas, sans exception.
+        const shown=Math.sign(v)*Math.max(v!==0?1:0,Math.round(Math.abs(v)/5));
         return `<span class="dlt ${v>=0?'up':'dn'}">${shown>=0?'+':''}${shown} ${lbl}</span>`; }).join('');
       h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
             <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
@@ -2146,11 +2188,36 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const campFee=+(purseGross-purse-agentFee).toFixed(2);
   G.f.earnings=(G.f.earnings||0)+purse;
   G.fight.purseDetail={gross:purseGross,fee:campFee,agentFee,net:purse};
-  // Décompte du contrat : un combat de moins avant renégociation.
+  // ==== [ANCRE: BILAN_CONTRAT] — trace chaque combat sous le contrat en
+  // cours, pour pouvoir juger le bilan réel à l'échéance (item demandé),
+  // plutôt qu'une rétrogradation aveugle basée seulement sur la série en
+  // cours au moment précis d'une défaite.
   let contractExpiry=false;
   if(G.f.org>0 && G.f.contract){
+    if(!Array.isArray(G.f.contract.record)) G.f.contract.record=[];
+    G.f.contract.record.push({res:win?'win':'loss',method:res.method});
     G.f.contract.fightsLeft--;
     if(G.f.contract.fightsLeft<=0) contractExpiry=true;
+  }
+  // ==== [ANCRE: NON_RENOUVELLEMENT] — à l'échéance, l'organisation évalue le
+  // bilan RÉEL du contrat (pas juste "gagné/perdu") : chaque défaite pèse
+  // 20%, chaque victoire aux points (peu spectaculaire) pèse 5% — une
+  // victoire par finition ne pèse rien. Exemple validé : 2 décisions + 2
+  // défaites sur 4 combats = 0.20*2 + 0.05*2 = 50% de non-renouvellement,
+  // conforme au cas de référence demandé.
+  let contractNonRenewed=false;
+  if(contractExpiry && G.f.contract && G.f.contract.record && G.f.contract.record.length){
+    const rec=G.f.contract.record;
+    const losses=rec.filter(r=>r.res==='loss').length;
+    const decisionWins=rec.filter(r=>r.res==='win' && isDecisionLike(r.method)).length;
+    const nonRenewChance=Math.min(0.9, losses*0.20 + decisionWins*0.05);
+    if(rnd()<nonRenewChance){
+      contractNonRenewed=true;
+      G.f.contractNonRenewed=true;
+      G.f.contractNonRenewalReason=`${losses} défaite(s) et ${decisionWins} victoire(s) aux points sur les ${rec.length} derniers combats du contrat`;
+    } else {
+      G.f.contractNonRenewed=false;
+    }
   }
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: RIVALITE] — une défaite, ou une décision très serrée, crée une animosité ====
@@ -2224,18 +2291,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // ==== [FIN ANCRE] ====
   }
   let milestone='';
-  // ==== [ANCRE: CASCADE_SERIE_DEFAITES] — 3 défaites d'affilée ont désormais
-  // une vraie conséquence (manque confirmé : jusqu'ici seul le refus répété de
-  // combats faciles déclenchait une rétrogradation, une série de défaites
-  // n'avait aucun effet structurel en dehors des paliers internationaux).
+  // ==== [ANCRE: CASCADE_SERIE_DEFAITES] — item demandé : la rétrogradation
+  // INSTANTANÉE en pleine série de défaites (mi-contrat) est remplacée par un
+  // risque de NON-RENOUVELLEMENT calculé à l'échéance du contrat, à partir du
+  // bilan réel des combats sous contrat (voir ANCRE: BILAN_CONTRAT et
+  // ANCRE: NON_RENOUVELLEMENT plus bas). Les paliers 0 (amateur) et 1
+  // (premier contrat pro) gardent leur sanction immédiate : il n'y a pas
+  // encore de contrat pluriannuel à ce stade, la logique de "bilan de fin de
+  // contrat" ne s'y applique pas.
   if(!forced && (G.f.streak||0)<=-3){
-    if(G.f.org>1 && G.f.org<5){
-      G.f.org--; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
-      G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
-      if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
-      G.roster=makeOrgRoster(G.f);
-      milestone='Rétrogradé d\u2019organisation suite à cette série de défaites.';
-    } else if(G.f.org===1){
+    if(G.f.org===1){
       if(!G.f.org1Warned){
         G.f.org1Warned=true; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
         G.f.orgElo=eloBaseline(1,G.f.overall); G.f.rankBoost=0;
@@ -2270,7 +2335,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.medal} CEINTURE ${orgDisplayName(G.f).toUpperCase()}</span>`;
     recordTitleChange(G.f.org,G.f.divName,G.f.name,opp.name);
   }
-  else if(win && kind==='defense'){ G.f.defenses++; milestone='Titre défendu ('+G.f.defenses+')'; recordTitleDefense(G.f.org,G.f.divName,G.f.name); }
+  else if(win && kind==='defense'){ G.f.defenses++;
+    // Un défenseur qui est déjà double champion doit le voir rappelé ici
+    // (item #14 : le statut de double champion n'était visible nulle part
+    // sur l'écran de résultat d'une défense ordinaire).
+    milestone=G.f.champChampBelt?`Titre défendu (${G.f.defenses}) — toujours Double Champion (${G.f.divName} + ${G.f.champChampBelt})`:'Titre défendu ('+G.f.defenses+')';
+    recordTitleDefense(G.f.org,G.f.divName,G.f.name); }
   else if(kind==='defense' && res.winner==='D'){ milestone='Titre conservé (match nul)'; }
   else if(win && kind==='champchamp_title'){
     // Supercombat pour la double ceinture : gagné. Ceinture stockée à part —
@@ -2396,16 +2466,10 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       if(G.f.org===4){ topTierOffer=true; }
       else { promoOffer=true; } // réutilise l'écran de promo, adapté pour signaler le transfert
     }
-  } else if(G.f.org>=5 && (G.f.streak||0)<=-3){
-    // ==== [ANCRE: RETROGRADATION_INTERNATIONAL] — les ligues internationales
-    // (Pacific/Ultimate Rim) ne proposent JAMAIS de promotion (rien au-dessus),
-    // mais sanctionnent une série de défaites par une vraie rétrogradation.
-    G.f.org=4; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(4,G.f.overall); G.f.rankBoost=0;
-    if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
-    G.roster=makeOrgRoster(G.f);
-    milestone=milestone||'Rétrogradé : la ligue internationale coupe ton contrat après cette série de défaites.';
-    // ==== [FIN ANCRE] ====
   }
+  // (org>=5 : plus de rétrogradation immédiate en pleine série de défaites —
+  // remplacée par le risque de non-renouvellement à l'échéance du contrat,
+  // cf. ANCRE: NON_RENOUVELLEMENT.)
   if(G.f.promoCooldown>0) G.f.promoCooldown--;
   // ==== [FIN ANCRE] ====
   const newAch=checkAch();
@@ -2414,7 +2478,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
     if(G.f.retired) forced=true;
   }
-  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,
+  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
@@ -2634,7 +2698,8 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
    ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--blood)">Double Champion</div>
      <div class="small">Vous détenez également la ceinture ${f.champChampBelt}.</div>
-   </div>`:''}
+     <div class="mono small gold mt">Bonus de prestige doublé : +100 au score de classement (au lieu de +50 pour une seule ceinture).</div>
+   </div>`:(f.champion?`<div class="card mt" style="background:var(--panel2);padding:10px"><div class="mono small muted">Bonus de champion : +50 au score de classement.</div></div>`:'')}
    ${(G.divisionNews&&G.divisionNews.length)?`<div class="card mt" style="background:var(--panel2);padding:12px">
      <div class="eyebrow mb">Actualités de la division</div>
      ${G.divisionNews.slice(0,3).map(n=>`<div class="mono small muted" style="margin-top:4px">S${n.year} — ${n.text}</div>`).join('')}
@@ -2803,7 +2868,27 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
   return h;
 }
 /* ==== [FIN ANCRE] ==== */
-
+/* ==== [ANCRE: PLAN_VS_AMI] — choix tactique dédié au Défi Multijoueur,
+   même logique que le vestiaire de carrière (scr_plan) mais simplifié (pas
+   de coupe de poids, ces deux légendes sont déjà reconstruites telles
+   quelles). ==== */
+function scr_vs_friend_plan(){
+  const A=G.vsFriendLegendA, B=G.vsFriendLegendB;
+  if(!A||!B) return `<div class="scr center intro"><p class="lede">Série interrompue.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
+  const plans=TACTICS[A.style]||[];
+  const s=G.vsFriendScore;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Défi Multijoueur · Plan de combat</span></div>
+   <div class="hero-name" style="text-align:center;font-size:20px">${esc(A.name)} <span class="muted">${s.A} - ${s.B}</span> ${esc(B.name)}</div>
+   <div class="card mt" style="border-color:transparent;padding:0 0 16px 0">
+     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(A,B)}</div>
+   </div>
+   <p class="lede small mt">Quelle est ta consigne tactique pour cette manche ?</p>
+   ${getExclusiveTactics(A).concat(plans).map((p,i)=>`<div class="opp" onclick="CL.chooseVsFriendPlan(${i})">
+     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: NARRATION] — log texte à partir de res.log/res.stats, déjà calculés ==== */
 function fightLog(res){ if(!res.log||!res.log.length)return '<span class="muted small">Décision aux cartes.</span>';
   const rows=res.log.map(L=>`<div class="log-row ${L.finish?'gold':''}"><span class="log-r">R${L.r}</span><span style="flex:1">${L.text||(L.phase==='sol'?'échanges au sol':'échanges debout')}</span></div>`);
@@ -2837,8 +2922,8 @@ function scr_hof(){
      </details>
      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
    </div>`:''}
-   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:var(--panel2);padding:16px">
-      <div class="hero-name" style="font-size:20px">${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
+   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'}">
+      <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
         <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
         ${f.amaRec?`<div style="text-align:right"><span class="stat-big" style="font-size:24px">${f.amaRec.W}<span class="muted">-</span><span class="loss">${f.amaRec.L}</span></span><span class="stat-lbl">Amateur</span></div>`:''}
@@ -2894,13 +2979,24 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      <div class="tagrow" style="justify-content:center">
        ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
          const typeStr=p.method.startsWith('KO')?'KO/TKO':'Soumission';
-         const zoneRedundant=p.res.zone && p.res.moveName.toLowerCase().includes(p.res.zone.toLowerCase());
+         // ==== [ANCRE: DETECTION_ZONE_REDONDANTE] — élargie aux synonymes
+         // anatomiques (ex. "plexus"/"menton" pour la zone "corps"/"tête") :
+         // avant, seule une correspondance texte EXACTE du mot de zone
+         // évitait le doublon d'affichage (ex. "Chassé frontal (teep) au
+         // plexus — CORPS", redondant car "plexus" ET "corps" désignent la
+         // même zone sans que le mot "corps" apparaisse littéralement).
+         const ZONE_SYNONYMS={'tête':['tête','tete','menton','crâne','crane','visage','mâchoire','machoire','tempe'],
+           'corps':['corps','plexus','foie','côtes','cotes','ventre','tronc','flanc'],
+           'jambes':['jambe','tibia','genou','cuisse','mollet','cheville']};
+         const synonyms=(p.res.zone && ZONE_SYNONYMS[p.res.zone])||[p.res.zone];
+         const moveNameLower=p.res.moveName.toLowerCase();
+         const zoneRedundant=p.res.zone && synonyms.some(s=>moveNameLower.includes(s));
          const zoneDetail=(p.res.zone && !zoneRedundant)?` — ${p.res.zone}`:'';
          return `<span class="tag2 hot">${typeStr} (${esc(p.res.moveName)})${zoneDetail}</span>`;
        })():''}
        ${p.planLabel?`<span class="tag2">Tactique : ${p.planLabel}</span>`:''}
      </div>
-     ${p.res.moveFlavor?`<div class="muted small mt" style="font-style:italic">${esc(p.res.moveFlavor)}</div>`:''}
+     ${p.res.moveFlavor?(()=>{ const isSig=p.res.moveFlavor.includes('MOUVEMENT SIGNATURE'); return `<div class="${isSig?'':'muted'} small mt" style="font-style:italic;${isSig?'color:var(--gold);font-weight:bold;font-style:normal':''}">${esc(p.res.moveFlavor)}</div>`; })():''}
    </div>
    ${judgesHtml}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
@@ -3063,18 +3159,35 @@ function contractPayLine(c){
 }
 function scr_contract_nego(){
   const f=G.f;
+  if(f.contractNonRenewed){
+    // ==== [ANCRE: ECRAN_NON_RENOUVELLEMENT] — remplace l'ancienne
+    // rétrogradation instantanée : à l'échéance, l'organisation explique
+    // pourquoi elle ne prolonge pas, avec le bilan chiffré du contrat, puis
+    // renvoie directement vers le marché (offres d'organisations de niveaux
+    // variés, cf. negoMarket).
+    return `<div class="scr center intro">
+      <div class="eyebrow blood">Fin de contrat</div>
+      <h2 class="disp">Non-renouvellement</h2>
+      <p class="lede">${orgDisplayName(f)} ne souhaite pas prolonger votre contrat : ${esc(f.contractNonRenewalReason||'bilan jugé insuffisant sur ce contrat')}.</p>
+      <div class="glass card mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--loss)">
+         <div class="eyebrow mb" style="color:var(--loss)">Statut actuel</div>
+         <div class="mono small">Dernier salaire : ${contractPayLine(f.contract)}</div>
+      </div>
+      <button class="btn primary mt" onclick="CL.negoMarket(true)">Chercher un nouveau contrat</button>
+    </div>`;
+  }
   return `<div class="scr center intro">
     <div class="eyebrow gold">Fin de contrat</div>
     <h2 class="disp">Négociations</h2>
     <p class="lede">Votre contrat avec ${orgDisplayName(f)} est arrivé à son terme. Il est temps de discuter de votre avenir.</p>
     <div class="glass card mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--gold)">
        <div class="eyebrow mb">Statut actuel</div>
-       <div class="mono small">Cachet : ${contractPayLine(f.contract)}</div>
+       <div class="mono small">Salaire : ${contractPayLine(f.contract)}</div>
        <div class="mono small mt">Combats restants sur le contrat : <b>${f.contract.fightsLeft||4}</b></div>
        <div class="mono small mt">Réputation : <b class="gold">${f.contract.reputation||'Solide'}</b></div>
     </div>
     <button class="btn primary mt" onclick="CL.negoRenew()">Renouveler aux mêmes conditions (sûr)</button>
-    <button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.negoRaise()">Exiger une revalorisation (+40% cachet, risqué)</button>
+    <button class="btn mt" style="border-color:var(--gold);color:var(--gold)" onclick="CL.negoRaise()">Exiger une revalorisation (+40% salaire, risqué)</button>
     <button class="btn ghost mt" onclick="CL.negoMarket(false)">Tester le marché (free agency)</button>
   </div>`;
 }
@@ -3172,11 +3285,19 @@ function scr_promo(){
   const offers=[{org:nextOrg,flavor:flavorNext,contract:generateContract(f,nextOrg,false),
     desc:isChamp?`En tant que champion ${f.divName} dominant, ${flavorNext} veut racheter votre contrat. Accepter signifie abandonner votre ceinture actuelle pour monter d\u2019un cran.`
       :`${flavorNext} a suivi tes performances de près. Ils pensent que tu es prêt pour une salle plus grande.`}];
-  const dominant=(isChamp||f.titles>=1) && ((f.defenses||0)>=2 || (f.streak||0)>=6);
+  const recentFinishes=(f.history||[]).slice(-3).filter(h=>h.res==='win' && !isDecisionLike(h.method)).length;
+  // ==== [ANCRE: FAST_TRACK_ELARGI] — avant : réservé aux champions/tenants de
+  // titre (barre très haute). Un jeune prospect qui enchaîne 3 victoires avec
+  // des finitions mérite lui aussi une offre concurrente, sans attendre une
+  // ceinture — item demandé : choix plus intéressants pour monter vite.
+  const dominantChamp=(isChamp||f.titles>=1) && ((f.defenses||0)>=2 || (f.streak||0)>=6);
+  const hotProspect=!dominantChamp && (f.streak||0)>=3 && recentFinishes>=2;
+  const dominant=dominantChamp||hotProspect;
   if(dominant && nextOrg+1<5){
     const flavorSkip=ORG_FLAVORS[nextOrg+1]?pick(ORG_FLAVORS[nextOrg+1]):(ORGS[nextOrg+1]||'Ligue supérieure');
     offers.push({org:nextOrg+1,flavor:flavorSkip,contract:generateContract(f,nextOrg+1,false),
-      desc:`Ta domination a fait le tour du milieu : ${flavorSkip} veut te griller la politesse et t\u2019offre de brûler une étape.`});
+      desc:hotProspect?`Trois victoires d\\u2019affilée, presque toutes avant la limite : ${flavorSkip} ne veut pas rater le prochain grand nom et t\\u2019offre de brûler une étape.`
+        :`Ta domination a fait le tour du milieu : ${flavorSkip} veut te griller la politesse et t\\u2019offre de brûler une étape.`});
   }
   return `<div class="scr center intro"><div class="eyebrow gold">${isChamp?'Free Agency (Transfert)':'Le Marché'}</div>
    <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Quelqu\u2019un veut te signer</div>
@@ -3294,7 +3415,7 @@ function scr_retire(){ return `<div class="scr center"><div class="eyebrow">Fin 
    <button class="btn primary" onclick="CL.toLegacy()">Prendre ma retraite</button><button class="btn ghost" onclick="CL.go('hub')">Continuer</button>
    <button class="btn ghost" onclick="CL.exportSave()">Copier ma sauvegarde</button></div>`; }
 
-function legacyTitle(f){ const s=(f._world?300:0)+(f._euro?120:0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2;
+function legacyTitle(f){ const s=(f._world?300:0)+(f._euro?120:0)+(f.champChampBelt?150:0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2;
   if(s>=380)return[SVG.goat,'LÉGENDE ÉTERNELLE']; if(s>=250)return[SVG.crown,'GRAND CHAMPION'];
   if(s>=140)return[SVG.star,'CHAMPION RESPECTÉ']; if(s>=60)return[SVG.glove,'COMBATTANT ACCOMPLI'];
   if(s>=10)return[SVG.veteran,'VÉTÉRAN DU CIRCUIT']; return[SVG.hammer,'GUERRIER DE L\u2019OMBRE']; }
@@ -3325,6 +3446,7 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
   return `<div class="scr center"><div class="eyebrow">Palmarès scellé</div>
    <div style="font-size:60px">${ico}</div>
    <div class="hero-name" style="text-align:center;color:var(--gold)">${rank}<em style="color:var(--muted)">${esc(f.name)}${f.nick?' « '+f.nick+' »':''}</em></div>
+   <button class="btn primary mt" style="margin-bottom:16px" onclick="CL.newCareer()">Nouvelle carrière</button>
    <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px"><div class="epis" style="position:relative;z-index:2">${ep.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
      <div class="hr"></div>
      <div class="stat-band" style="border-top:none;padding-top:0;margin-top:0;flex-wrap:wrap;gap:16px">
@@ -3336,32 +3458,46 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
      <div class="muted small mt" style="position:relative;z-index:2">${f.motivation}</div>
      ${f.biggestRival?`<div class="mono small mt" style="color:var(--blood);position:relative;z-index:2">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div>`:''}</div>
    ${nemesisHtml}
-   ${notableWins.length?`<div class="card mt"><div class="eyebrow mb">Adversaires notables battus</div>${notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
+   ${notableWins.length?`<div class="card mt"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
    ${retireSeasonRecapHtml(f)}
    ${retireAchievementsHtml(f)}
    ${retireLegendPointsHtml(f)}
-   <button class="btn primary" onclick="CL.newCareer()">Nouvelle carrière</button></div>`; }
+   <button class="btn primary mt" onclick="CL.newCareer()">Nouvelle carrière</button></div>`; }
 /* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — trois blocs ajoutés à l'écran de
    retraite : bilan saison par saison, succès débloqués pendant CETTE
-   carrière, et points de légende gagnés grâce à elle. ==== */
+   carrière, et points de légende gagnés grâce à elle.
+   ==== [ANCRE: LISIBILITE_RETRAITE] — item demandé : l'écran devenait un mur
+   ininterrompu de texte sur une longue carrière (15+ saisons, 20+ succès).
+   Corrections : bouton "Nouvelle carrière" dupliqué en haut (plus besoin de
+   tout parcourir pour relancer une partie), et le détail saison par saison —
+   de loin le bloc le plus long — est replié par défaut au-delà de 5 saisons
+   via <details>, un résumé chiffré restant visible en permanence. ==== */
 function retireSeasonRecapHtml(f){
   const recap=f.seasonRecap||[];
   if(!recap.length) return '';
-  return `<div class="card mt"><div class="eyebrow mb">Bilan saison par saison</div>
-    ${recap.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dotted var(--line)">
+  const totalW=recap.reduce((s,y)=>s+y.W,0), totalL=recap.reduce((s,y)=>s+y.L,0);
+  const rows=recap.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dotted var(--line)">
       <div><b>Année ${s.year}</b> <span class="muted small">(${s.age} ans · ${s.divName})</span></div>
       <div class="mono small"><span style="color:var(--win)">${s.W}V</span> — <span style="color:var(--loss)">${s.L}D</span>
         <span class="muted"> · ${s.koW} KO / ${s.subW} SUB / ${s.decW} DÉC</span></div>
-    </div>${s.trophies.length?`<div class="muted small" style="padding:2px 0 4px 0">🏆 ${s.trophies.join(', ')}</div>`:''}`).join('')}
-  </div>`;
+    </div>${s.trophies.length?`<div class="muted small" style="padding:2px 0 4px 0">🏆 ${s.trophies.join(', ')}</div>`:''}`).join('');
+  const summary=`📅 Bilan saison par saison <span class="muted" style="font-weight:normal">— ${recap.length} saison(s), ${totalW}V-${totalL}D au total</span>`;
+  if(recap.length>5){
+    return `<div class="card mt"><details><summary class="eyebrow" style="cursor:pointer;list-style:none">${summary}</summary><div class="mt">${rows}</div></details></div>`;
+  }
+  return `<div class="card mt"><div class="eyebrow mb">${summary}</div>${rows}</div>`;
 }
 function retireAchievementsHtml(f){
   const earned=ACH.filter(a=>{ try{ return a.t(f); }catch(e){ return false; } });
   if(!earned.length) return '';
-  return `<div class="card mt"><div class="eyebrow mb">Succès débloqués (${earned.length}/${ACH.length})</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
-      ${earned.map(a=>`<span class="tag2 hot" style="display:inline-flex;align-items:center;gap:5px" title="${esc(a.d)}"><span style="font-size:15px">${a.ico}</span>${esc(a.h)}</span>`).join('')}
-    </div>
+  const chips=earned.map(a=>`<span class="tag2 hot" style="display:inline-flex;align-items:center;gap:5px" title="${esc(a.d)}"><span style="font-size:15px">${a.ico}</span>${esc(a.h)}</span>`).join('');
+  const summary=`🏆 Succès débloqués <span class="muted" style="font-weight:normal">(${earned.length}/${ACH.length})</span>`;
+  if(earned.length>10){
+    return `<div class="card mt"><details><summary class="eyebrow" style="cursor:pointer;list-style:none">${summary}</summary>
+      <div class="mt" style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div></details></div>`;
+  }
+  return `<div class="card mt"><div class="eyebrow mb">${summary}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
   </div>`;
 }
 function retireLegendPointsHtml(f){
@@ -3396,6 +3532,22 @@ function scr_codex(){
   return `<div class="scr"><div class="bar"><span class="eyebrow">Codex · ${unlocked.length} / ${total} découvertes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp">Codex des compétences</h2>
    <p class="lede small">La base de données inter-carrières recense toutes les compétences débloquées dans l\u2019histoire de vos parties.</p>
+   ${checkLegendUnlock('tool_codex')?(()=>{
+     const byRar={C:0,R:0,E:0,L:0,M:0};
+     unlocked.forEach(id=>{ const s=SKILLS.find(x=>x.id===id); if(s) byRar[s.rar]=(byRar[s.rar]||0)+1; });
+     const meta=loadMetaStats();
+     return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
+       <div class="eyebrow mb" style="color:var(--gold)">Codex Inter-carrières — statistiques cumulées</div>
+       <div class="tagrow">
+         <span class="tag2" style="border-color:${RAR_COLORS.C};color:${RAR_COLORS.C}">${byRar.C} Communes</span>
+         <span class="tag2" style="border-color:${RAR_COLORS.R};color:${RAR_COLORS.R}">${byRar.R} Rares</span>
+         <span class="tag2" style="border-color:${RAR_COLORS.E};color:${RAR_COLORS.E}">${byRar.E} Épiques</span>
+         <span class="tag2" style="border-color:${RAR_COLORS.L};color:${RAR_COLORS.L}">${byRar.L} Légendaires</span>
+         <span class="tag2" style="border-color:${RAR_COLORS.M};color:${RAR_COLORS.M}">${byRar.M} Mythiques</span>
+       </div>
+       <div class="muted small mt">${meta.totalRetirements||0} carrière(s) retraitée(s) · ${meta.totalFights||0} combat(s) au total, toutes carrières confondues.</div>
+     </div>`;
+   })():''}
    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
      <select style="background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px" onchange="CL.filterCodex('style',this.value)">
        <option value="all" ${G.codexFilter.style==='all'?'selected':''}>Tous les styles</option>
@@ -3488,8 +3640,10 @@ function scr_legends(){
      </div>`;
    })()}
    <div class="hr" style="margin:20px 0"></div>
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mt glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    ${checkLegendUnlock('mode_fantasy')?`<button class="btn primary mt" style="font-size:16px;padding:16px" onclick="CL.go('fantasy_setup')">LANCER FANTASY FIGHT</button>`:''}
-   ${checkLegendUnlock('mode_allstars')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--gold);color:var(--gold)" onclick="CL.initAllStars()">LANCER TOURNOI ALL-STARS</button>`:''}
+   ${checkLegendUnlock('mode_allstars')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--gold);color:var(--gold)" onclick="CL.initAllStars()">LANCER TOURNOI ALL-STARS</button>
+     <div class="muted small" style="text-align:center;margin-top:4px">Nécessite 8 légendes au Panthéon (tu en as ${loadHOF().length})</div>`:''}
    ${checkLegendUnlock('mode_vs_friend')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--blood);color:var(--blood)" onclick="CL.go('vs_friend')">DÉFI VS AMI</button>`:''}
    <button class="btn ghost mt" onclick="CL.go('hof')">Consulter le Panthéon</button></div>`;
 }
@@ -3586,7 +3740,7 @@ function advanceAllStarsTournament(){
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,
-  fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,arcade_upgrades:scr_arcade_upgrades,
+  fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu};
@@ -3604,19 +3758,27 @@ const CL={
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
   toggleHofFav(id){
-    const list=loadHOF(); const f=list.find(x=>x.id===id);
+    // ==== [ANCRE: BUG_ID_PANTHEON] — f.id est un NOMBRE (compteur interne),
+    // mais l'attribut onclick="...('${f.id}')" le transmet toujours en
+    // CHAÎNE. Une comparaison stricte ===/!== entre nombre et chaîne est
+    // TOUJOURS fausse en JS, donc find()/filter() ne matchaient jamais rien
+    // : Supprimer, Favori et Exporter étaient tous les trois silencieusement
+    // cassés par ce seul bug. Corrigé avec String(...) des deux côtés,
+    // compatible aussi bien avec les id numériques qu'avec les id texte des
+    // légendes importées (ex. 'legend_1234').
+    const list=loadHOF(); const f=list.find(x=>String(x.id)===String(id));
     if(f){ f.favorite=!f.favorite; saveHOF(list); render(); }
   },
   deleteHof(id){
     if(!confirm('Supprimer cette légende définitivement ?')) return;
-    let list=loadHOF(); list=list.filter(x=>x.id!==id); saveHOF(list); render();
+    let list=loadHOF(); list=list.filter(x=>String(x.id)!==String(id)); saveHOF(list); render();
   },
   resetHof(){
     if(!confirm('Effacer tout le Panthéon, sauf les favoris ?')) return;
     let list=loadHOF(); list=list.filter(x=>x.favorite); saveHOF(list); render();
   },
   exportLegend(id){
-    const l=loadHOF().find(x=>x.id===id); if(!l) return;
+    const l=loadHOF().find(x=>String(x.id)===String(id)); if(!l) return;
     G.exportedCode=encodeLegendCode(l); G.exportedName=l.name;
     try{ G.exportedLink=location.origin+location.pathname+'?legend='+encodeURIComponent(G.exportedCode); }catch(e){ G.exportedLink=null; }
     render();
@@ -3678,9 +3840,21 @@ const CL={
   },
   importFriendCode(){
      const el=document.getElementById('friend_code');
-     const code=el&&el.value;
-     const legend=decodeLegendCode(code);
-     if(!legend){ G.lastMsg="Code invalide ou corrompu."; render(); return; }
+     let raw=(el&&el.value||'').trim();
+     // ==== [ANCRE: IMPORT_LIEN_AMI] — le champ acceptait uniquement le code
+     // brut ; on accepte désormais aussi le lien complet collé tel quel
+     // (ex. https://.../?legend=XXXX), en extrayant le paramètre 'legend'.
+     if(raw.includes('legend=')){
+       try{
+         const url=new URL(raw);
+         raw=url.searchParams.get('legend')||raw;
+       }catch(e){
+         const m=raw.match(/legend=([^&\s]+)/);
+         if(m) raw=decodeURIComponent(m[1]);
+       }
+     }
+     const legend=decodeLegendCode(raw);
+     if(!legend){ G.lastMsg="Code ou lien invalide/corrompu."; render(); return; }
      G.importedFriendLegend=legend; render();
   },
   clearImportedFriend(){ G.importedFriendLegend=null; render(); },
@@ -3695,14 +3869,22 @@ const CL={
        neutralizeWeightGap(G.vsFriendLegendA,G.vsFriendLegendB);
        G.vsFriendScore={A:0,B:0,round:0};
      }
+     // ==== [ANCRE: TACTIQUE_VS_AMI] — avant : la manche était simulée
+     // instantanément sans jamais demander de consigne tactique. On route
+     // maintenant vers un choix de tactique (comme en carrière) avant de
+     // lancer réellement la simulation, via chooseVsFriendPlan().
+     G.screen='vs_friend_plan'; save(); render();
+  },
+  chooseVsFriendPlan(idx){
      const A=G.vsFriendLegendA, B=G.vsFriendLegendB;
+     const combined=getExclusiveTactics(A).concat(TACTICS[A.style]||[]);
+     const planObj=combined[idx]; if(!planObj) return;
      G.vsFriendScore.round++;
-     // Manche décisive (3e combat après une égalité 1-1) : 5 rounds au lieu de 3.
      const isDecider=G.vsFriendScore.A===1 && G.vsFriendScore.B===1;
      const rounds=isDecider?5:3;
      if(!G._backupF){ G._backupF=G.f; G._backupFight=G.fight; }
-     G.f=A; G.fight={kind:'fantasy',opp:B,rounds,plan:null}; G.vsFriendActive=true;
-     const res=simulateFight(A,B,rounds);
+     G.f=A; G.fight={kind:'fantasy',opp:B,rounds,plan:planObj.m,planLabel:planObj.lbl}; G.vsFriendActive=true;
+     const res=simulateFight(A,B,rounds,planObj.m);
      G.pending={res,win:res.winner==='A',method:res.method,finish:!isDecisionLike(res.method),opp:{name:B.name,flag:B.flag},isVsFriend:true,isDecider};
      buildTimeline(); G.screen='arena'; render();
   },
@@ -3822,6 +4004,20 @@ const CL={
     if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
   },
   handleEvent(actionId){ const ev=G.activeEvent; const id=actionId||(ev&&ev.actionId);
+    if(id==='short_notice_accept'){
+      const newOpp=G._pendingShortNoticeOpp;
+      if(newOpp) G.fight.opp=newOpp;
+      G.fight.malus=Object.assign({},G.fight.malus,{cardio:-25});
+      G.f.form=clamp(G.f.form-30,0,100);
+      G.f.earnings=(G.f.earnings||0)+250;
+      delete G._pendingShortNoticeOpp;
+      proceedToFight(); return;
+    }
+    if(id==='short_notice_decline'){
+      delete G._pendingShortNoticeOpp;
+      G.lastMsg='Vous refusez de sauver la carte. Votre combat initial est maintenu, sans prime ni pénalité.';
+      proceedToFight(); return;
+    }
     if(id==='mue_martiale'){ G.screen='mueChoice'; save(); render(); return; }
     if(id==='mue_martiale_decline'){ G.f.morale=clamp(G.f.morale-5,0,100); G.lastMsg='Vous restez fidèle à votre style, pour le meilleur ou pour le pire.'; G.screen='hub'; save(); render(); return; }
     if(id==='major_injury'){ const f=G.f;
@@ -4277,7 +4473,14 @@ const CL={
     if(agentBonus && forcedPenalty) currentMult=0.9;
     const latContract=generateContract(f,f.org,false);
     latContract.show=+(latContract.show*currentMult).toFixed(2); latContract.win=+(latContract.win*currentMult).toFixed(2);
-    offers.push({org:f.org,flavor:ORG_FLAVORS[f.org]?pick(ORG_FLAVORS[f.org]):(ORGS[f.org]||'Concurrence'),contract:latContract,desc:forcedPenalty?"Une ligue concurrente vous repêche au rabais.":"Une ligue concurrente cherche à vous débaucher."});
+    // ==== [ANCRE: CORRECTIF_DOUBLON_ORGA] — pick() choisissait un nom au
+    // hasard dans le pool de l'organisation ACTUELLE, avec un risque réel (1
+    // chance sur 3, pool de 3 noms) de retomber sur le nom déjà utilisé par
+    // l'organisation en cours (orgDisplayName). Exclusion explicite du nom
+    // actuel avant tirage.
+    const rivalPool=(ORG_FLAVORS[f.org]||[]).filter(n=>n!==orgDisplayName(f));
+    const rivalFlavor=rivalPool.length?pick(rivalPool):(ORGS[f.org]||'Concurrence');
+    offers.push({org:f.org,flavor:rivalFlavor,contract:latContract,desc:forcedPenalty?"Une ligue concurrente vous repêche au rabais.":"Une ligue concurrente cherche à vous débaucher."});
     if(!forcedPenalty){ offers.push({org:f.org,flavor:orgDisplayName(f),contract:generateContract(f,f.org,false),desc:"Votre organisation actuelle s\u2019aligne pour vous garder."}); }
     G.freeAgencyOffers=offers;
     G.screen='free_agency'; save(); render();
@@ -4474,7 +4677,8 @@ const ARENA_THEMES=[
   {id:'pride',name:'Toile Blanche & Bleue (Héritage)',floorColors:['#DCE2EB','#FFFFFF'],railColor:'#1A4D8F',padColor:'#B22222'},
   {id:'gold',name:'Bâche Royale (Prestige)',floorColors:['#E6B93A','#8A6A1E'],railColor:'#241D13',padColor:'#14100B'},
   {id:'neon',name:'Néons Cyberpunk',floorColors:['#0d0221','#26045c'],railColor:'#ff003c',padColor:'#00f0ff'},
-  {id:'underground',name:'Béton Clandestin',floorColors:['#2a2a2a','#1a1a1a'],railColor:'#555555',padColor:'#000000'}
+  {id:'underground',name:'Béton Clandestin',floorColors:['#2a2a2a','#1a1a1a'],railColor:'#555555',padColor:'#000000'},
+  {id:'crimson',name:'Arène Écarlate',floorColors:['#2a0a0a','#170505'],railColor:'#E8442F',padColor:'#1a0303'}
 ];
 function setArenaCosmeticTheme(themeId){ G.arenaCosmetic=themeId; save(); }
 function getArenaTheme(){ return ARENA_THEMES.find(t=>t.id===(G.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }

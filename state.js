@@ -41,7 +41,9 @@ function wipe(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
 const HOF_KEY='cage-legacy-hof', SAVE_VERSION=2;
 function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY))||[]; }catch(e){ return []; } }
 function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catch(e){} }
-function hofScore(f){ return (f._world?300:0)+(f._euro?120:0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2; }
+// Bonus double champion (+150, cf. ANCRE: BONUS_DOUBLE_CHAMPION dans engine.js) :
+// une double ceinture doit peser sur le score d'héritage et les points de Légende.
+function hofScore(f){ return (f._world?300:0)+(f._euro?120:0)+(f.champChampBelt?150:0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2; }
 function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
   list.push({id:f.id,name:f.name,nick:f.nick,flag:f.flag,style:f.styleLabel,styleKey:f.style,div:f.div,divName:f.divName,W:f.W,L:f.L,ko:f.ko,sub:f.sub,
     titles:f.titles,defenses:f.defenses,world:!!f._world,euro:!!f._euro,ico,rank,epithets:epithets(f),score:hofScore(f),age:f.age,
@@ -95,14 +97,16 @@ function filterHallOfFame(criteria){
    makeFighter() ou applyDeltas() — vérifié : aucune des fonctions ci-dessous
    ne touche à f.attrs, f.potential ni aux fonctions de création/entraînement. ==== */
 const LEGEND_UNLOCKABLES=[
-  {id:'tool_codex',name:'Codex Inter-carrières',cat:'Outils',cost:60,desc:'Recense toutes les compétences déjà croisées, toutes carrières confondues.'},
+  {id:'tool_codex',name:'Codex Inter-carrières',cat:'Outils',cost:60,desc:'Ajoute un panneau de statistiques cumulées (compétences par rareté, carrières et combats totaux) directement dans le Codex.'},
   {id:'cosmetic_pride',name:'Toile Héritage Blanche & Bleue',cat:'Cosmétiques',cost:90,desc:'Nouveau thème visuel pour l\u2019octogone.'},
   {id:'cosmetic_gold',name:'Bâche Royale (Prestige)',cat:'Cosmétiques',cost:150,desc:'Thème visuel doré pour l\u2019octogone.'},
   {id:'cosmetic_neon',name:'Néons Cyberpunk',cat:'Cosmétiques',cost:110,desc:'Thème visuel nocturne et futuriste pour l\u2019octogone.'},
   {id:'cosmetic_underground',name:'Béton Clandestin',cat:'Cosmétiques',cost:75,desc:'L\u2019ambiance rugueuse et sombre des combats clandestins.'},
+  {id:'cosmetic_crimson',name:'Arène Écarlate',cat:'Cosmétiques',cost:130,desc:'Thème visuel rouge sang pour l\u2019octogone, pour les carrières les plus brutales.'},
   {id:'arch_titan',name:'Archétype : Le Titan Antique',cat:'Archétypes Arcade',cost:80,desc:'Débloque un colosse inarrêtable spécialisé en lutte pour le mode Gauntlet.'},
   {id:'arch_ninja',name:'Archétype : Le Shinobi',cat:'Archétypes Arcade',cost:80,desc:'Débloque un expert en furtivité et soumissions éclairs pour le mode Gauntlet.'},
   {id:'arch_brawler',name:'Archétype : Le Roi de la Rue',cat:'Archétypes Arcade',cost:80,desc:'Débloque un spécialiste de la boxe sale et de la survie pour le mode Gauntlet.'},
+  {id:'arch_sniper',name:'Archétype : Le Sniper',cat:'Archétypes Arcade',cost:80,desc:'Débloque un spécialiste du combat à distance en Muay Thaï pour le mode Gauntlet.'},
   {id:'mode_vs_friend',name:'Défi Multijoueur (Vs Ami)',cat:'Modes annexes',cost:140,desc:'Oppose une de tes légendes retraitées au combattant d\u2019un ami, généré à la volée.'},
   {id:'mode_fantasy',name:'Fantasy Fight (Sandbox)',cat:'Modes annexes',cost:180,desc:'Simule un combat entre deux légendes de ton Panthéon.'},
   {id:'mode_boss',name:'Arcade : Boss Run',cat:'Modes annexes',cost:220,desc:'5 champions d\u2019affilée, KO uniquement. Le format le plus punitif du Gauntlet.'},
