@@ -37,9 +37,21 @@ if(document.getElementById('app')){
     if(code){
       const legend=decodeLegendCode(code);
       if(legend){ G.importedFriendLegend=legend; G.screen='vs_friend'; }
+      else{
+        // ==== [ANCRE: FEEDBACK_LIEN_AMI] — avant : un lien corrompu ou
+        // tronqué (partage SMS/WhatsApp notamment) échouait EN SILENCE — le
+        // joueur atterrissait sur le titre sans le moindre message, laissant
+        // penser que "le lien ne marche pas" sans aucune piste. Un message
+        // clair est maintenant affiché sur l'écran d'accueil.
+        G.screen='title';
+        G.lastMsg="Le lien reçu est corrompu ou incomplet (souvent tronqué par l'appli de messagerie utilisée pour le partager). Demande à ton ami de te renvoyer le bouton \u00abExporter\u00bb depuis son Panthéon, ou de te l'envoyer par un autre moyen (copier-coller direct plutôt qu'un lien cliquable).";
+      }
       // Nettoie l'URL pour éviter de ré-importer en boucle à chaque rechargement/partage accidentel
       history.replaceState(null,'',location.pathname);
     }
-  }catch(e){ /* lien invalide ou navigateur trop ancien — le joueur atterrit simplement sur le titre */ }
+  }catch(e){
+    G.screen='title';
+    G.lastMsg="Le lien reçu est invalide ou ton navigateur ne le supporte pas.";
+  }
   render();
 }

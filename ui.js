@@ -387,6 +387,7 @@ function scr_vs_friend(){
       <div class="eyebrow gold">Défi Multijoueur</div>
       <h2 class="disp">Combattant d\u2019un ami</h2>
       <p class="lede small">Colle ici le LIEN ou le code que ton ami t\u2019a envoyé (généré depuis son Panthéon, bouton "Exporter"). Sans ça, il te faut au moins 2 légendes dans ton propre Panthéon.</p>
+      ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:10px 14px;margin-top:12px"><span class="small">${esc(m)}</span></div>`; })():''}
       <textarea id="friend_code" placeholder="Colle ici le lien ou le code que ton ami t\u2019a envoyé..." style="width:100%;min-height:80px;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px;font-family:'JetBrains Mono';font-size:12px;margin-top:16px"></textarea>
       <button class="btn primary mt" onclick="CL.importFriendCode()">IMPORTER LE CODE</button>
       <button class="btn ghost mt" onclick="CL.leaveSandbox()">Retour à la salle</button>
@@ -2590,6 +2591,7 @@ function scr_title(){
      <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
      <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
    </div>
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`; })():''}
    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
    ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
@@ -3779,7 +3781,19 @@ const CL={
   },
   exportLegend(id){
     const l=loadHOF().find(x=>String(x.id)===String(id)); if(!l) return;
-    G.exportedCode=encodeLegendCode(l); G.exportedName=l.name;
+    // ==== [ANCRE: CORRECTIF_LIEN_AMI] — bug trouvé : le code exportait le
+    // record COMPLET du Panthéon (icône SVG entière, épithètes narratives,
+    // score, rang, historique amateur, rival...), aucun de ces champs n'étant
+    // utilisé par reconstructLegend() ni par le duel lui-même. Sur une
+    // carrière longue et décorée, ça produisait des liens de ~1900+
+    // caractères — largement suffisant pour être tronqués ou rejetés en
+    // silence par SMS/WhatsApp/Messenger lors du partage, ce qui donnait
+    // l'impression que "le lien ne marche pas" sans aucun message d'erreur.
+    // Le payload est réduit aux seuls champs réellement nécessaires.
+    const slim={id:l.id,name:l.name,nick:l.nick,flag:l.flag,style:l.style,styleKey:l.styleKey,
+      div:l.div,divName:l.divName,W:l.W,L:l.L,ko:l.ko,sub:l.sub,
+      attrs:l.attrs,skills:l.skills,phys:l.phys,overall:l.overall};
+    G.exportedCode=encodeLegendCode(slim); G.exportedName=l.name;
     try{ G.exportedLink=location.origin+location.pathname+'?legend='+encodeURIComponent(G.exportedCode); }catch(e){ G.exportedLink=null; }
     render();
   },
