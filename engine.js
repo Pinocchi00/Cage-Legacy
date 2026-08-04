@@ -423,12 +423,7 @@ function makePhysical(div){ const D=div||pick(allDivisions());
    poids de forme figé à la création) : reflète les fluctuations naturelles
    entre deux camps, moyenne ~9%, profils extrêmes jusqu'à ~24%. ---------------- */
 function weightCutInfo(f){ const D=divById(f.div); const limit=D?D.kg:70;
-  // Piège métabolique : à partir de 26 ans, le métabolisme ralentit et stocke
-  // davantage d'eau/graisse — la coupe de poids dérive mécaniquement vers des
-  // paliers plus durs avec l'âge, pas juste narrativement.
-  const ageFactor=Math.max(0,f.age-26);
-  const metabolicPenalty=ageFactor*0.6;
-  const cutPct=gauss(9+metabolicPenalty,5,0,24+metabolicPenalty);
+  const cutPct=gauss(9,5,0,24);
   const walk=+(limit/(1-cutPct/100)).toFixed(1);
   const cutKg=+(walk-limit).toFixed(1);
   return {limit,walk,cutKg,cutPct};
@@ -851,12 +846,35 @@ const FINISH_MOVES={
 const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'corps'},{name:'clé de bras (armbar)',zone:'corps'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'},{name:'clé de genou (kneebar)',zone:'jambes'},{name:'étranglement d\u2019Arce',zone:'tête'},{name:'cravate péruvienne',zone:'tête'},{name:'clé de poignet (wristlock)',zone:'corps'},{name:'compression des mollets (calf slicer)',zone:'jambes'}];
 const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'},{name:'coup de pied retourné (spinning back kick)',zone:'tête'},{name:'coup de genou sauté',zone:'tête'},{name:'overhand dévastateur',zone:'tête'},{name:'chassé frontal (teep) au plexus',zone:'corps'}];
 function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
+  // Mouvement signature (#6) : si le combattant a déjà déverrouillé une prise
+  // signature (5 finitions identiques auparavant), 40% de chance de la rejouer
+  // directement plutôt que de repartir sur le tirage normal.
+  if(winner.signatureMove && winner.signatureMove.type===type && rnd()<0.40){
+    return {name:winner.signatureMove.name, flavor:'Le geste devenu sa signature — le public le voit venir, mais personne ne peut l\u2019arrêter.'};
+  }
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
   let baseMove;
   if(owned.length && rnd()<0.6){ const chosenId=pick(owned); baseMove=FINISH_MOVES[type].find(m=>m.id===chosenId).name; }
   else{ const generic=type==='sub'?GENERIC_SUB:GENERIC_KO; const zoned=zone?generic.filter(m=>m.zone===zone):[]; baseMove=(zoned.length?pick(zoned):pick(generic)).name; }
+  // Comptage des finitions identiques — au 5e succès avec le même geste, il
+  // devient signature : compétence unique + boost de stat + 40% de retour
+  // automatique désormais géré ci-dessus.
+  if(!winner.finishMoveCounts) winner.finishMoveCounts={};
+  const key=type+':'+baseMove;
+  winner.finishMoveCounts[key]=(winner.finishMoveCounts[key]||0)+1;
   let flavor=null;
-  if(fightStats){
+  if(!winner.signatureMove && winner.finishMoveCounts[key]>=5){
+    winner.signatureMove={name:baseMove,type,zone};
+    const boostKeys=type==='sub'?['submission','killer']:['power','killer'];
+    boostKeys.forEach(k=>{ winner.attrs[k]=clamp((winner.attrs[k]||50)+6,1,100); });
+    winner.overall=overall(winner);
+    const skillId='sig_'+baseMove.replace(/[^a-z0-9]/gi,'').toLowerCase().slice(0,20);
+    if(!(winner.skills||[]).includes(skillId)){
+      grantSkill(winner,{id:skillId,name:baseMove+' (Signature)',rar:'M',fx:{},desc:`${winner.name} a répété ce geste jusqu\u2019à le rendre inévitable : ${baseMove}, désormais sa marque de fabrique.`,tags:['Signature']});
+    }
+    flavor=`MOUVEMENT SIGNATURE DÉBLOQUÉ : ${baseMove} devient sa marque de fabrique.`;
+  }
+  if(fightStats && !flavor){
     const isLate=(round||1)>=3;
     const isBloodbath=(fightStats.A.dmgHead+fightStats.B.dmgHead)>40;
     const isBoring=(fightStats.A.sig+fightStats.B.sig)<30 && !isBloodbath;
@@ -926,9 +944,15 @@ function generateContract(f,org,raise){
   let mult=1;
   if(raise) mult+=0.40;
   if(f.agentCut>0) mult+=0.25;
+  // Popularité (#3) : hypeBonus (1.0 à ~1.8 selon origine/personnalité/mode de
+  // vie choisis) fait varier le cachet réel — un combattant charismatique
+  // négocie mieux, peu importe son niveau technique.
+  const hype=f.hypeBonus||1;
+  mult*=(0.75+hype*0.35);
   const isChampContract=!!f.champion;
   if(isChampContract) mult*=(CHAMP_MULT[org]||1);
-  return { fightsLeft:4, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract };
+  const repTier=hype>=1.5?'Superstar':hype>=1.2?'Attraction montante':hype>=0.9?'Solide':'Discret';
+  return { fightsLeft:4, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract, reputation:repTier };
 }
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.
