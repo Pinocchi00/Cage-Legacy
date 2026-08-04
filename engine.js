@@ -19,6 +19,14 @@ const clamp=(v,lo=1,hi=100)=>v<lo?lo:v>hi?hi:v;
 function gauss(m,sd,lo,hi){ let u=0,v=0; while(!u)u=rnd(); while(!v)v=rnd(); let g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); let x=Math.round(m+g*sd); if(lo!=null)x=Math.max(lo,x); if(hi!=null)x=Math.min(hi,x); return x; }
 const sigmoid=x=>1/(1+Math.exp(-x));
 const d20=v=>Math.max(1,Math.min(20,Math.round(v/5)));   // /100 -> /20 affiché
+// Accord de genre (#1) : remplace {forme masculine/forme féminine} selon
+// f.gender. Jamais une simple substitution "il"->"elle" qui casserait
+// l'accord des participes/adjectifs environnants — chaque texte gendré
+// porte ses deux formes complètes, écrites à la main.
+function parseGender(txt,gender){
+  if(!txt || typeof txt!=='string') return txt;
+  return txt.replace(/\{([^}]*)\/([^}]*)\}/g,(match,m,f)=>gender==='F'?f:m);
+}
 /* ==== [ANCRE: IS_DECISION_LIKE] — un seul point de vérité pour "ce combat s'est
    terminé aux cartes des juges" (Décision, Décision partagée, OU Égalité).
    Avant : 13 vérifications startsWith('Déc') éparpillées dans le code, toutes
@@ -151,26 +159,6 @@ function evaluateSponsor(res){
   G.activeSponsor=null;
 }
 
-function attemptChampChamp(targetDivId){
-  if(!G.f.champion) return {success:false,msg:"Vous devez déjà posséder une ceinture."};
-  G.f.champChampTarget=targetDivId;
-  G.f.champChampDefenses={[G.f.div]:G.f.defenses,[targetDivId]:0};
-  return {success:true,msg:`Objectif Champ-Champ : vous visez la catégorie ${targetDivId}.`};
-}
-function resolveChampChampDefense(foughtDivId,win){
-  if(!G.f.champChampTarget) return null;
-  const neglectedDiv=foughtDivId===G.f.div?G.f.champChampTarget:G.f.div;
-  if(win){
-    if(!G.f.champChampDefenses) G.f.champChampDefenses={};
-    G.f.champChampDefenses[foughtDivId]=(G.f.champChampDefenses[foughtDivId]||0)+1;
-    G.f.champChampInactivity=0;
-    return null;
-  }
-  G.f.champChampInactivity=(G.f.champChampInactivity||0)+1;
-  if(G.f.champChampInactivity>=3){ G.f.champChampTarget=null; G.f.champChampInactivity=0;
-    return `Destitution ! Vous avez perdu votre statut dans la division ${neglectedDiv} pour inactivité.`; }
-  return null;
-}
 
 function setPersonality(alignment){
   G.f.personality=alignment;
@@ -392,20 +380,20 @@ const styleLabel=s=>(STYLES[s]||{label:s}).label;
 
 /* ------------------------------ NOMS -------------------------------------- */
 const COUNTRIES={
- FR:{name:'France',flag:'🇫🇷',last:['Moreau','Lefevre','Dubois','Girard','Faure','Roussel','Blanc','Mercier']},
- BR:{name:'Brésil',flag:'🇧🇷',last:['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha']},
- US:{name:'États-Unis',flag:'🇺🇸',last:['Johnson','Williams','Brown','Miller','Davis','Wilson','Carter','Reed']},
- DAG:{name:'Daghestan',flag:'🏔️',last:['Nurmagomedov','Aliev','Magomedov','Gadzhiev','Ramazanov','Shamilov','Umarov']},
- JP:{name:'Japon',flag:'🇯🇵',last:['Sato','Suzuki','Takahashi','Tanaka','Watanabe','Kobayashi','Nakamura']},
- NG:{name:'Nigéria',flag:'🇳🇬',last:['Adeyemi','Okafor','Balogun','Eze','Okoye','Abubakar','Nwosu']},
- GB:{name:'Royaume-Uni',flag:'🇬🇧',last:['Smith','Taylor','Walker','Wright','Hughes','Ward','Bennett']},
- RU:{name:'Russie',flag:'🇷🇺',last:['Volkov','Petrov','Sokolov','Ivanov','Popov','Kozlov','Orlov']},
- MX:{name:'Mexique',flag:'🇲🇽',last:['Hernández','García','Martínez','López','Ramírez','Torres','Flores']},
- IE:{name:'Irlande',flag:'🇮🇪',last:['Murphy','Kelly','OBrien','Byrne','Ryan','Walsh','McCarthy']},
- TH:{name:'Thaïlande',flag:'🇹🇭',last:['Sittichai','Petchyindee','Kiatmoo','Sor','Rungravee']},
- KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon']},
- CM:{name:'Cameroun',flag:'🇨🇲',last:['Ngannou','Mbappe','Etoo','Nkemdirim','Fotso','Biya']},
- GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze']},
+ FR:{name:'France',flag:'🇫🇷',last:['Moreau','Lefevre','Dubois','Girard','Faure','Roussel','Blanc','Mercier','Garnier','Leroy','Roux','Dupont','Bernard','Petit','Durand','Leroux']},
+ BR:{name:'Brésil',flag:'🇧🇷',last:['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha','Carvalho','Gomes','Martins','Araujo','Ribeiro','Melo','Cardoso','Dias']},
+ US:{name:'États-Unis',flag:'🇺🇸',last:['Johnson','Williams','Brown','Miller','Davis','Wilson','Carter','Reed','Smith','Jones','Taylor','Moore','Jackson','Martin','Lee','Thompson']},
+ DAG:{name:'Daghestan',flag:'🏔️',last:['Nurmagomedov','Aliev','Magomedov','Gadzhiev','Ramazanov','Shamilov','Umarov','Makhachev','Gasanov','Kurbanov','Omarov','Isaev']},
+ JP:{name:'Japon',flag:'🇯🇵',last:['Sato','Suzuki','Takahashi','Tanaka','Watanabe','Kobayashi','Nakamura','Ito','Yamamoto','Saito','Yoshida','Yamada','Sasaki','Yamaguchi']},
+ NG:{name:'Nigéria',flag:'🇳🇬',last:['Adeyemi','Okafor','Balogun','Eze','Okoye','Abubakar','Nwosu','Ibrahim','Musa','Bello','Olawale','Abdullahi','Chukwu','Onyeka']},
+ GB:{name:'Royaume-Uni',flag:'🇬🇧',last:['Smith','Taylor','Walker','Wright','Hughes','Ward','Bennett','Jones','Williams','Brown','Davies','Evans','Thomas','Roberts']},
+ RU:{name:'Russie',flag:'🇷🇺',last:['Volkov','Petrov','Sokolov','Ivanov','Popov','Kozlov','Orlov','Smirnov','Kuznetsov','Lebedev','Novikov','Morozov','Makarov']},
+ MX:{name:'Mexique',flag:'🇲🇽',last:['Hernández','García','Martínez','López','Ramírez','Torres','Flores','Pérez','Rodriguez','Sanchez','Cruz','Gomez','Morales','Reyes']},
+ IE:{name:'Irlande',flag:'🇮🇪',last:['Murphy','Kelly','OBrien','Byrne','Ryan','Walsh','McCarthy','OSullivan','OConnor','Doyle','Gallagher','Kennedy','Lynch','Murray']},
+ TH:{name:'Thaïlande',flag:'🇹🇭',last:['Sittichai','Petchyindee','Kiatmoo','Sor','Rungravee','Saenchai','Banchamek','Srisaket','Tawanchai','Pramuk','Khamsing']},
+ KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon']},
+ CM:{name:'Cameroun',flag:'🇨🇲',last:['Ngannou','Mbappe','Etoo','Nkemdirim','Fotso','Biya','Kamga','Takam','Ndi','Abate','Tchakoute','Ndong']},
+ GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze']},
 };
 const COUNTRY_KEYS=Object.keys(COUNTRIES);
 /* ==== [ANCRE: COUNTRY_MMA_PREFIX] — 1re lettre du nom FR, 2 lettres si collision
@@ -457,15 +445,17 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
   const phys=makePhysical(div);
   const level=opt.level!=null?opt.level:gauss(46,10,20,80);
   const attrs=baseAttrs(style,level,phys.tags.join(' '));
-  const potential=opt.potential!=null?opt.potential:gauss(64,12,34,97);   // caché
+  const potential=opt.potential!=null?opt.potential:gauss(68,12,45,97);   // caché
   const dynamic=0;                                                         // moral/forme caché ±
-  const mot=pick(MOTIVATIONS); const origin=generateContextualOrigin({attrs,phys,countryKey:ck,potential,morale:60});
+  const skin=pick(['#f1c27d','#e0ac69','#8d5524','#c68642','#3d2210']); // teinte de peau
+  const shorts=pick(['#B23B36','#6E8478','#2c3e50','#d35400','#f39c12']); // short de combat
+  const mot=pick(MOTIVATIONS); const origin=parseGender(generateContextualOrigin({attrs,phys,countryKey:ck,potential,morale:60}),gender);
   const f={ id:_id++, gender, div:div.id, divName:div.name, style, styleLabel:styleLabel(style),
     first:nm.first,last:nm.last,name:nm.name,flag:nm.flag,countryKey:ck,
-    phys, attrs, potential, dynamic, morale:60, form:55,
+    phys, attrs, potential, dynamic, morale:60, form:55, skin, shorts,
     stage:'amateur', org:0, orgWins:0, age:opt.age!=null?opt.age:RI(18,22),
     W:0,L:0,D:0,ko:0,sub:0,dec:0,koLoss:0,streak:0, champion:null, titles:0, defenses:0,
-    skills:[], history:[], origin, motivation:mot.short, drive:mot.drive, amaRec:null, amaTitle:false, nick:null, epithets:[] };
+    skills:[], history:[], origin, motivation:parseGender(mot.short,gender), drive:mot.drive, amaRec:null, amaTitle:false, nick:null, epithets:[] };
   f.overall=overall(f);
   f.orgElo=eloBaseline(0,f.overall); f.careerElo=eloBaseline(0,f.overall); f.inactivityCycles=0;
   // ==== [ANCRE: GENETIQUE] — jet unique à la création, jamais via rollSkill ====
@@ -556,7 +546,8 @@ const STYLE_PROFILE={
 function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(B);
   const profA=A._styleProfileOverride||STYLE_PROFILE[A.style]||STYLE_PROFILE.mma, profB=B._styleProfileOverride||STYLE_PROFILE[B.style]||STYLE_PROFILE.mma;
   const wf=weightFactor(A);
-  const koWeightMult=1+(wf-0.5)*0.5;
+  const koWeightMult=1+(wf-0.5)*0.8;
+  const subWeightMult=1+(0.5-Math.abs(wf-0.5))*0.7; // pic d'efficacité au poids moyen (wf≈0.5)
   const noiseWeightMult=1+(wf-0.5)*0.4;
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: PLAN_TACTIQUE] — modificateurs du vestiaire (audit §11), appliqués
@@ -647,8 +638,8 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
         if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=0.2;st.A.sig+=Math.round(gnp*0.4);} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=0.2;st.B.sig+=Math.round(gnp*0.4);}
         const heartR=1-(bot.heart*0.0016);
         const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.32;
-        const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4;
-        const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4;
+        const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult;
+        const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult;
         if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
         else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
         else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
@@ -859,8 +850,8 @@ const FINISH_MOVES={
   {id:'mma30',name:'Ground and Pound de l\u2019enfer',zone:'tête'},{id:'mma37',name:'instinct de destruction',zone:'tête'},
  ]
 };
-const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'corps'},{name:'clé de bras (armbar)',zone:'corps'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'}];
-const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'}];
+const GENERIC_SUB=[{name:'étranglement arrière (rear-naked choke)',zone:'tête'},{name:'guillotine',zone:'tête'},{name:'kimura',zone:'corps'},{name:'clé de bras (armbar)',zone:'corps'},{name:'triangle',zone:'tête'},{name:'clé de cheville',zone:'jambes'},{name:'heel hook',zone:'jambes'},{name:'étranglement de côté (arm-triangle)',zone:'tête'},{name:'clé de genou (kneebar)',zone:'jambes'},{name:'étranglement d\u2019Arce',zone:'tête'},{name:'cravate péruvienne',zone:'tête'},{name:'clé de poignet (wristlock)',zone:'corps'},{name:'compression des mollets (calf slicer)',zone:'jambes'}];
+const GENERIC_KO=[{name:'crochet au menton',zone:'tête'},{name:'direct explosif',zone:'tête'},{name:'uppercut',zone:'tête'},{name:'coup de pied à la tête',zone:'tête'},{name:'coup de pied circulaire au corps',zone:'corps'},{name:'genou en clinch',zone:'corps'},{name:'low kick qui casse l\u2019appui',zone:'jambes'},{name:'coude au sol',zone:'tête'},{name:'enchaînement de coups au sol',zone:'tête'},{name:'coup de pied retourné (spinning back kick)',zone:'tête'},{name:'coup de genou sauté',zone:'tête'},{name:'overhand dévastateur',zone:'tête'},{name:'chassé frontal (teep) au plexus',zone:'corps'}];
 function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
   let baseMove;
@@ -949,7 +940,8 @@ function calculateEloDelta(ratingA,ratingB,winnerSide,method,round){
   let kFactor=32;
   if(method&&method.startsWith('KO')) kFactor=48; else if(method&&method.startsWith('Soum')) kFactor=44; else if(method==='Décision partagée') kFactor=24;
   if(round===1) kFactor*=1.25;
-  return {deltaA:Math.round(kFactor*(scoreA-expectedA)), deltaB:Math.round(kFactor*(scoreB-expectedB))};
+  const rawDeltaA=kFactor*(scoreA-expectedA), rawDeltaB=kFactor*(scoreB-expectedB);
+  return {deltaA:Math.round(rawDeltaA<0?rawDeltaA*1.5:rawDeltaA), deltaB:Math.round(rawDeltaB<0?rawDeltaB*1.5:rawDeltaB)};
 }
 /* ==== [FIN ANCRE] ==== */
 function p4pScore(f){ const fights=f.W+f.L+f.D;

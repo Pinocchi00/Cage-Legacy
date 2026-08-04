@@ -46,10 +46,15 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
   list.push({id:f.id,name:f.name,nick:f.nick,flag:f.flag,style:f.styleLabel,styleKey:f.style,div:f.div,divName:f.divName,W:f.W,L:f.L,ko:f.ko,sub:f.sub,
     titles:f.titles,defenses:f.defenses,world:!!f._world,euro:!!f._euro,ico,rank,epithets:epithets(f),score:hofScore(f),age:f.age,
     amaTitles:(f.amaTitles||[]).slice(),amaRec:f.amaRec?{W:f.amaRec.W,L:f.amaRec.L}:null,biggestRival:f.biggestRival||null,
-    gameMode:f.gameMode||'career',
+    gameMode:f.gameMode||'career',favorite:false,
     // Données profondes pour le Fantasy Fight / All-Stars / Vs Ami — reconstruction fidèle du combattant
     attrs:JSON.parse(JSON.stringify(f.attrs)),skills:(f.skills||[]).slice(),phys:f.phys?JSON.parse(JSON.stringify(f.phys)):null,overall:f.overall});
-  list.sort((a,b)=>b.score-a.score); if(list.length>40)list.length=40; saveHOF(list);
+  // Limite à 20 : les favoris sont protégés, seuls les non-favoris sont purgés
+  // au tri par score une fois la limite atteinte.
+  const favs=list.filter(x=>x.favorite);
+  const nonFavs=list.filter(x=>!x.favorite).sort((a,b)=>b.score-a.score);
+  const keepNonFavs=nonFavs.slice(0,Math.max(0,20-favs.length));
+  saveHOF(favs.concat(keepNonFavs).sort((a,b)=>b.score-a.score));
   updateMetaStatsOnRetirement(f); awardLegendPoints(f); }
 /* ==== [FIN ANCRE] ==== */
 
@@ -57,6 +62,9 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
    statistiques globales, persistant inter-carrières (clé localStorage séparée
    du combattant actif, comme le Panthéon lui-même). ==== */
 const META_STATS_KEY='cage-legacy-metastats';
+const ACH_KEY='cage-legacy-achievements';
+function loadAch(){ try{ return JSON.parse(localStorage.getItem(ACH_KEY))||[]; }catch(e){ return []; } }
+function saveAch(ach){ try{ localStorage.setItem(ACH_KEY,JSON.stringify(ach)); }catch(e){} }
 function loadMetaStats(){
   try{ return JSON.parse(localStorage.getItem(META_STATS_KEY))||{totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
   catch(e){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
