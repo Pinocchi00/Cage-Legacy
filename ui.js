@@ -765,7 +765,7 @@ function generateRandomEvent(){ const f=G.f;
   }
   if(type==='minor_injury'){
     title='Pépin physique';
-    text='Mauvaise torsion du genou lors du dernier sparring. Rien qui n\u2019empêche de combattre, mais vous allez le sentir dans l\u2019octogone.';
+    text='Mauvaise torsion du genou lors du dernier sparring. Rien qui n\u2019empêche de combattre, mais vous allez le sentir dans l\u2019octogone.<br><br><b style="color:var(--loss)">[EFFET]</b> -3 Vitesse de jambes, -2 Explosivité pour ce combat.';
     G.fight.malus={footSpeed:-15,explosiveness:-12};
   } else if(type==='major_injury'){
     title='Déchirure !';
@@ -773,28 +773,28 @@ function generateRandomEvent(){ const f=G.f;
     btn='Accepter le sort';
   } else if(type==='training_partner_hurt'){
     title='Partenaire d\u2019entraînement blessé';
-    text='Ton partenaire de sparring principal se blesse à dix jours du combat. Impossible de reproduire son style à temps, la préparation en pâtit.';
+    text='Ton partenaire de sparring principal se blesse à dix jours du combat. Impossible de reproduire son style à temps, la préparation en pâtit.<br><br><b style="color:var(--loss)">[EFFET]</b> -2 QI de combat, -2 Adaptabilité pour ce combat.';
     G.fight.malus={fightIQ:-10,adaptability:-8};
   } else if(type==='old_injury_flareup'){
     title='Vieille blessure qui se réveille';
-    text='Cette épaule que tu t\u2019es abîmée il y a des années recommence à te lâcher pendant les derniers rounds de sparring. Rien de cassé, mais la confiance en prend un coup.';
+    text='Cette épaule que tu t\u2019es abîmée il y a des années recommence à te lâcher pendant les derniers rounds de sparring. Rien de cassé, mais la confiance en prend un coup.<br><br><b style="color:var(--loss)">[EFFET]</b> -2 Résistance, -2 Confiance pour ce combat.';
     G.fight.malus={durability:-10,confidence:-8};
   } else if(type==='hometown_crowd'){
     title='Retour au pays';
-    text='Le combat se tient près de chez toi. Ta famille, tes potes de toujours, la salle qui t\u2019a vu débuter : tout le monde sera là ce soir.';
+    text='Le combat se tient près de chez toi. Ta famille, tes potes de toujours, la salle qui t\u2019a vu débuter : tout le monde sera là ce soir.<br><br><b style="color:var(--win)">[EFFET]</b> +15 Moral, +8 Forme.';
     f.morale=clamp(f.morale+15,0,100); f.form=clamp(f.form+8,0,100);
   } else if(type==='media_chaos'){
     title='Conférence de presse chaotique';
-    text='La conférence de presse dégénère en foire d\u2019empoigne verbale avec ton adversaire. Les caméras adorent ça, ton mental un peu moins.';
+    text='La conférence de presse dégénère en foire d\u2019empoigne verbale avec ton adversaire. Les caméras adorent ça, ton mental un peu moins.<br><br><b style="color:var(--win)">[EFFET]</b> +10 Moral.<br><b style="color:var(--loss)">[RISQUE]</b> -3 Sang-froid pour ce combat.';
     G.fight.malus={composure:-15};
     f.morale=clamp(f.morale+10,0,100);
   } else if(type==='coaching_change'){
     title='Changement de coach';
-    text='Ton entraîneur principal part accompagner un autre combattant à dix jours du combat. Tu dois t\u2019adapter à une nouvelle voix dans le coin.';
+    text='Ton entraîneur principal part accompagner un autre combattant à dix jours du combat. Tu dois t\u2019adapter à une nouvelle voix dans le coin.<br><br><b style="color:var(--loss)">[EFFET]</b> -2 Adaptabilité, -2 Sang-froid pour ce combat.';
     G.fight.malus={adaptability:-12,composure:-8};
   } else if(type==='streaming_deal'){
     title='Contrat de streaming exclusif';
-    text='Une plateforme de streaming te propose un cachet supplémentaire pour une exclusivité média, contre un calendrier de déplacements épuisant avant le combat.';
+    text='Une plateforme de streaming te propose un cachet supplémentaire pour une exclusivité média, contre un calendrier de déplacements épuisant avant le combat.<br><br><b style="color:var(--win)">[RÉCOMPENSE]</b> +80 000 $.<br><b style="color:var(--loss)">[RISQUE]</b> -10 Forme.';
     f.earnings=(f.earnings||0)+80; f.form=clamp(f.form-10,0,100);
   } else if(type==='short_notice_money'){
     title='Sauver la carte (Short Notice)';
@@ -814,12 +814,12 @@ function generateRandomEvent(){ const f=G.f;
     f.bossUnimpressed=3;
   } else if(type==='sponsor_clash'){
     title='Guerre de Sponsors';
-    text='Vous avez porté les couleurs d\u2019un sponsor concurrent lors de la pesée. L\u2019organisation vous met à l\u2019amende (perte de 150 000 $) mais votre aura auprès des fans rebelles explose.';
+    text='Vous avez porté les couleurs d\u2019un sponsor concurrent lors de la pesée. L\u2019organisation vous met à l\u2019amende mais votre aura auprès des fans rebelles explose.<br><br><b style="color:var(--loss)">[AMENDE]</b> -150 000 $.<br><b style="color:var(--win)">[EFFET]</b> +20 Moral.';
     f.earnings=Math.max(0,(f.earnings||0)-150);
     f.morale=clamp(f.morale+20,0,100);
   } else if(type==='sell_out_fight'){
     title='Combat Arrangé ?';
-    text='Un bookmaker véreux vous offre 200 000 $ pour perdre le premier round volontairement avant de reprendre le combat. Accepter vous draine mentalement et ruine votre concentration.';
+    text='Un bookmaker véreux vous offre 200 000 $ pour perdre le premier round volontairement avant de reprendre le combat. Accepter vous draine mentalement et ruine votre concentration.<br><br><b style="color:var(--win)">[RÉCOMPENSE]</b> +200 000 $.<br><b style="color:var(--loss)">[RISQUE]</b> -3 Sang-froid pour ce combat, -3 Moral.';
     f.earnings=(f.earnings||0)+200;
     G.fight.malus={composure:-20};
     f.morale=clamp(f.morale-15,0,100);
@@ -831,7 +831,7 @@ function generateRandomEvent(){ const f=G.f;
    Corrigé par rapport au brouillon de Gemini : la vraie structure de combat
    est res.stats.A/res.stats.B (pas st.Me/st.Op) — remappée ici une seule fois
    à l'enregistrement pour que les 70 conditions restent lisibles telles
-   quelles. Le rythme de vieillissement est désormais fixe : 3 combats/an,
+   quelles. Le rythme de vieillissement est de 1 à 3 combats/an (moyenne 2),
    cycle fixe de 3 combats comme le supposait Gemini — la fin de saison est
    accrochée au vrai cycle existant, sans le remplacer. ==== */
 function compileSeasonStats(f, fights){
@@ -894,68 +894,68 @@ const SEASON_AWARDS=[
   {id:'a9',lbl:'Le Chouchou du Public',ico:SVG.medal,c:(s,f)=>s.total>=3&&s.wars>=2},
   {id:'a10',lbl:'Saison Parfaite',ico:SVG.skull,c:(s,f)=>s.total>=3&&s.W===s.total&&s.koW+s.subW===s.total},
   // --- STRIKING & DÉGÂTS (20) ---
-  {id:'a11',lbl:'La Mitrailleuse',c:(s,f)=>s.sigMe>=120},
-  {id:'a12',lbl:'Le Sniper',c:(s,f)=>s.koW>=2&&s.sigMe<=40},
-  {id:'a13',lbl:'Le Marteau',c:(s,f)=>s.kdMe>=3},
-  {id:'a14',lbl:'Tête Brûlée',c:(s,f)=>s.sigMe>80&&s.sigOp>80},
-  {id:'a15',lbl:'Bain de Sang',c:(s,f)=>s.sigMe+s.sigOp>=180},
-  {id:'a16',lbl:'Menton d\u2019Acier',c:(s,f)=>s.sigOp>=100&&s.koL===0},
-  {id:'a17',lbl:'Intouchable',c:(s,f)=>s.W>=2&&s.sigOp<=15},
-  {id:'a18',lbl:'One-Punch Man',c:(s,f)=>s.r1KOs>=2},
-  {id:'a19',lbl:'Puncheur de l\u2019année',c:(s,f)=>s.koW>=2},
-  {id:'a20',lbl:'Guerre d\u2019Usure',c:(s,f)=>s.decW>=2&&s.sigMe>=90},
-  {id:'a21',lbl:'Brawler',c:(s,f)=>s.sigMe>50&&s.sigOp>50&&s.koW>=1},
-  {id:'a22',lbl:'L\u2019Exécuteur',c:(s,f)=>s.kdMe>=4},
-  {id:'a23',lbl:'Mâchoire de Verre',c:(s,f)=>s.koL>=2},
-  {id:'a24',lbl:'Chasseur de Foie',c:(s,f)=>s.koW>=1&&f.style==='kickboxer'},
-  {id:'a25',lbl:'Coudes Rasoirs',c:(s,f)=>s.koW>=1&&f.style==='muayThai'},
-  {id:'a26',lbl:'Le Chirurgien',c:(s,f)=>s.sigMe>=60&&s.sigOp<=20},
-  {id:'a27',lbl:'Blitzkrieg',c:(s,f)=>s.r1KOs>=1&&f.style==='karate'},
-  {id:'a28',lbl:'Casting Mortel',c:(s,f)=>s.koW>=1&&f.style==='sambo'},
-  {id:'a29',lbl:'Dirty Boxer',c:(s,f)=>s.sigMe>=70&&s.ctrlMe>0},
-  {id:'a30',lbl:'Main Lourde',c:(s,f)=>s.koW>=1&&f.attrs.power>=80},
+  {id:'a11',ico:SVG.hammer,lbl:'La Mitrailleuse',c:(s,f)=>s.sigMe>=120},
+  {id:'a12',ico:SVG.ko,lbl:'Le Sniper',c:(s,f)=>s.koW>=2&&s.sigMe<=40},
+  {id:'a13',ico:SVG.hammer,lbl:'Le Marteau',c:(s,f)=>s.kdMe>=3},
+  {id:'a14',ico:SVG.fire,lbl:'Tête Brûlée',c:(s,f)=>s.sigMe>80&&s.sigOp>80},
+  {id:'a15',ico:SVG.skull,lbl:'Bain de Sang',c:(s,f)=>s.sigMe+s.sigOp>=180},
+  {id:'a16',ico:SVG.veteran,lbl:'Menton d\u2019Acier',c:(s,f)=>s.sigOp>=100&&s.koL===0},
+  {id:'a17',ico:SVG.star,lbl:'Intouchable',c:(s,f)=>s.W>=2&&s.sigOp<=15},
+  {id:'a18',ico:SVG.ko,lbl:'One-Punch Man',c:(s,f)=>s.r1KOs>=2},
+  {id:'a19',ico:SVG.ko,lbl:'Puncheur de l\u2019année',c:(s,f)=>s.koW>=2},
+  {id:'a20',ico:SVG.fire,lbl:'Guerre d\u2019Usure',c:(s,f)=>s.decW>=2&&s.sigMe>=90},
+  {id:'a21',ico:SVG.fire,lbl:'Brawler',c:(s,f)=>s.sigMe>50&&s.sigOp>50&&s.koW>=1},
+  {id:'a22',ico:SVG.hammer,lbl:'L\u2019Exécuteur',c:(s,f)=>s.kdMe>=4},
+  {id:'a23',ico:SVG.skull,lbl:'Mâchoire de Verre',c:(s,f)=>s.koL>=2},
+  {id:'a24',ico:SVG.ko,lbl:'Chasseur de Foie',c:(s,f)=>s.koW>=1&&f.style==='kickboxer'},
+  {id:'a25',ico:SVG.ko,lbl:'Coudes Rasoirs',c:(s,f)=>s.koW>=1&&f.style==='muayThai'},
+  {id:'a26',ico:SVG.diamond,lbl:'Le Chirurgien',c:(s,f)=>s.sigMe>=60&&s.sigOp<=20},
+  {id:'a27',ico:SVG.ko,lbl:'Blitzkrieg',c:(s,f)=>s.r1KOs>=1&&f.style==='karate'},
+  {id:'a28',ico:SVG.skull,lbl:'Casting Mortel',c:(s,f)=>s.koW>=1&&f.style==='sambo'},
+  {id:'a29',ico:SVG.fire,lbl:'Dirty Boxer',c:(s,f)=>s.sigMe>=70&&s.ctrlMe>0},
+  {id:'a30',ico:SVG.hammer,lbl:'Main Lourde',c:(s,f)=>s.koW>=1&&f.attrs.power>=80},
   // --- GRAPPLING & CONTRÔLE (20) ---
-  {id:'a31',lbl:'La Sangsue',c:(s,f)=>s.ctrlMe>=6},
-  {id:'a32',lbl:'Machine à Takedowns',c:(s,f)=>s.tdMe>=8},
-  {id:'a33',lbl:'Le Destructeur au Sol',c:(s,f)=>s.koW>=1&&s.ctrlMe>=2},
-  {id:'a34',lbl:'L\u2019Étau',c:(s,f)=>s.subW>=2},
-  {id:'a35',lbl:'Mur de Briques',c:(s,f)=>s.tdOp===0&&s.W>=2&&f.attrs.tdd>=80},
-  {id:'a36',lbl:'Grappler de l\u2019année',c:(s,f)=>s.subW>=1&&s.tdMe>=4},
-  {id:'a37',lbl:'Suplex City',c:(s,f)=>s.tdMe>=5&&f.style==='wrestler'},
-  {id:'a38',lbl:'Artiste de la Fuite',c:(s,f)=>s.ctrlOp>=4&&s.subL===0&&s.W>=1},
-  {id:'a39',lbl:'Anaconda',c:(s,f)=>s.subW>=1&&f.style==='bjj'},
-  {id:'a40',lbl:'Tireur d\u2019Élite (Sol)',c:(s,f)=>s.subW>=1&&s.ctrlMe<=1},
-  {id:'a41',lbl:'Le Compresseur',c:(s,f)=>s.ctrlMe>=8},
-  {id:'a42',lbl:'Pression Daghestanaise',c:(s,f)=>s.tdMe>=4&&s.ctrlMe>=5},
-  {id:'a43',lbl:'Le Voleur de Jambes',c:(s,f)=>s.subW>=1&&s.tdMe===0},
-  {id:'a44',lbl:'Roi du Scramble',c:(s,f)=>s.tdMe>=3&&s.tdOp>=3},
-  {id:'a45',lbl:'Anti-Lutte',c:(s,f)=>s.tdOp===0&&s.sigMe>=50},
-  {id:'a46',lbl:'Sol Étouffant',c:(s,f)=>s.ctrlMe>=4&&s.sigOp<=10},
-  {id:'a47',lbl:'Ceinture Noire',c:(s,f)=>s.subW>=2&&f.attrs.submission>=85},
-  {id:'a48',lbl:'Ground & Pounder',c:(s,f)=>s.koW>=1&&s.ctrlMe>=3},
-  {id:'a49',lbl:'Lutte Universitaire',c:(s,f)=>s.tdMe>=6&&s.subW===0},
-  {id:'a50',lbl:'L\u2019Enclume',c:(s,f)=>s.ctrlOp>=6&&s.L===s.total},
+  {id:'a31',ico:SVG.web,lbl:'La Sangsue',c:(s,f)=>s.ctrlMe>=6},
+  {id:'a32',ico:SVG.skill,lbl:'Machine à Takedowns',c:(s,f)=>s.tdMe>=8},
+  {id:'a33',ico:SVG.hammer,lbl:'Le Destructeur au Sol',c:(s,f)=>s.koW>=1&&s.ctrlMe>=2},
+  {id:'a34',ico:SVG.sub,lbl:'L\u2019Étau',c:(s,f)=>s.subW>=2},
+  {id:'a35',ico:SVG.veteran,lbl:'Mur de Briques',c:(s,f)=>s.tdOp===0&&s.W>=2&&f.attrs.tdd>=80},
+  {id:'a36',ico:SVG.web,lbl:'Grappler de l\u2019année',c:(s,f)=>s.subW>=1&&s.tdMe>=4},
+  {id:'a37',ico:SVG.skill,lbl:'Suplex City',c:(s,f)=>s.tdMe>=5&&f.style==='wrestler'},
+  {id:'a38',ico:SVG.goat,lbl:'Artiste de la Fuite',c:(s,f)=>s.ctrlOp>=4&&s.subL===0&&s.W>=1},
+  {id:'a39',ico:SVG.sub,lbl:'Anaconda',c:(s,f)=>s.subW>=1&&f.style==='bjj'},
+  {id:'a40',ico:SVG.diamond,lbl:'Tireur d\u2019Élite (Sol)',c:(s,f)=>s.subW>=1&&s.ctrlMe<=1},
+  {id:'a41',ico:SVG.web,lbl:'Le Compresseur',c:(s,f)=>s.ctrlMe>=8},
+  {id:'a42',ico:SVG.skill,lbl:'Pression Daghestanaise',c:(s,f)=>s.tdMe>=4&&s.ctrlMe>=5},
+  {id:'a43',ico:SVG.sub,lbl:'Le Voleur de Jambes',c:(s,f)=>s.subW>=1&&s.tdMe===0},
+  {id:'a44',ico:SVG.skill,lbl:'Roi du Scramble',c:(s,f)=>s.tdMe>=3&&s.tdOp>=3},
+  {id:'a45',ico:SVG.veteran,lbl:'Anti-Lutte',c:(s,f)=>s.tdOp===0&&s.sigMe>=50},
+  {id:'a46',ico:SVG.web,lbl:'Sol Étouffant',c:(s,f)=>s.ctrlMe>=4&&s.sigOp<=10},
+  {id:'a47',ico:SVG.sub,lbl:'Ceinture Noire',c:(s,f)=>s.subW>=2&&f.attrs.submission>=85},
+  {id:'a48',ico:SVG.hammer,lbl:'Ground & Pounder',c:(s,f)=>s.koW>=1&&s.ctrlMe>=3},
+  {id:'a49',ico:SVG.skill,lbl:'Lutte Universitaire',c:(s,f)=>s.tdMe>=6&&s.subW===0},
+  {id:'a50',ico:SVG.skull,lbl:'L\u2019Enclume',c:(s,f)=>s.ctrlOp>=6&&s.L===s.total},
   // --- NARRATIF & CONTEXTE (20) ---
-  {id:'a51',lbl:'Upset de l\u2019année',c:(s,f)=>s.biggestUpset>=8},
-  {id:'a52',lbl:'Le Gatekeeper',c:(s,f)=>s.W>=1&&s.L>=1&&s.highestOppRank<=5&&!f.champion},
-  {id:'a53',lbl:'Le Marathonien',c:(s,f)=>s.decW===s.total&&s.total>=3},
-  {id:'a54',lbl:'Hold-up',c:(s,f)=>s.decW>=1&&s.sigMe<s.sigOp&&s.ctrlMe<s.ctrlOp},
-  {id:'a55',lbl:'Domination Totale',c:(s,f)=>s.flawless>=1},
-  {id:'a56',lbl:'Le Bourreau des Favoris',c:(s,f)=>s.biggestUpset>=4&&s.koW>=1},
-  {id:'a57',lbl:'Roi de la Décision',c:(s,f)=>s.decW>=2&&s.L===0},
-  {id:'a58',lbl:'Tueur de Vétérans',c:(s,f)=>s.W>=2&&f.age<=25},
-  {id:'a59',lbl:'Garde du Temple',c:(s,f)=>s.L>=2&&s.highestOppRank>=10&&s.highestOppRank<999},
-  {id:'a60',lbl:'L\u2019Artisan',c:(s,f)=>s.W>=2&&s.sigMe<=60&&s.ctrlMe<=3},
-  {id:'a61',lbl:'Hype Train',c:(s,f)=>s.W>=3&&f.streak>=5},
-  {id:'a62',lbl:'Hype Déraillée',c:(s,f)=>s.L>=2&&f.streak<=-3},
-  {id:'a63',lbl:'Vengeance',c:(s,f)=>s.W>=1&&s.closeFights>=1},
-  {id:'a64',lbl:'Le Fantôme',c:(s,f)=>s.sigOp<=20&&s.L===0&&s.total>=2},
-  {id:'a65',lbl:'L\u2019Acrobate',c:(s,f)=>s.koW>=1&&f.attrs.flexibility>=80},
-  {id:'a66',lbl:'Le Survivant',c:(s,f)=>s.ctrlOp>=5&&s.sigOp>=50&&s.W>=1},
-  {id:'a67',lbl:'Sang Froid',c:(s,f)=>s.closeFights>=2&&s.W>=2},
-  {id:'a68',lbl:'L\u2019Opportuniste',c:(s,f)=>s.subW>=1&&s.ctrlMe===0},
-  {id:'a69',lbl:'Constance',c:(s,f)=>s.total>=3&&s.L===0&&s.decW>=2},
-  {id:'a70',lbl:'Année Noire',c:(s,f)=>s.L===s.total&&s.total>=2},
+  {id:'a51',ico:SVG.star,lbl:'Upset de l\u2019année',c:(s,f)=>s.biggestUpset>=8},
+  {id:'a52',ico:SVG.veteran,lbl:'Le Gatekeeper',c:(s,f)=>s.W>=1&&s.L>=1&&s.highestOppRank<=5&&!f.champion},
+  {id:'a53',ico:SVG.medal,lbl:'Le Marathonien',c:(s,f)=>s.decW===s.total&&s.total>=3},
+  {id:'a54',ico:SVG.diamond,lbl:'Hold-up',c:(s,f)=>s.decW>=1&&s.sigMe<s.sigOp&&s.ctrlMe<s.ctrlOp},
+  {id:'a55',ico:SVG.crown,lbl:'Domination Totale',c:(s,f)=>s.flawless>=1},
+  {id:'a56',ico:SVG.skull,lbl:'Le Bourreau des Favoris',c:(s,f)=>s.biggestUpset>=4&&s.koW>=1},
+  {id:'a57',ico:SVG.medal,lbl:'Roi de la Décision',c:(s,f)=>s.decW>=2&&s.L===0},
+  {id:'a58',ico:SVG.goat,lbl:'Tueur de Vétérans',c:(s,f)=>s.W>=2&&f.age<=25},
+  {id:'a59',ico:SVG.veteran,lbl:'Garde du Temple',c:(s,f)=>s.L>=2&&s.highestOppRank>=10&&s.highestOppRank<999},
+  {id:'a60',ico:SVG.diamond,lbl:'L\u2019Artisan',c:(s,f)=>s.W>=2&&s.sigMe<=60&&s.ctrlMe<=3},
+  {id:'a61',ico:SVG.fire,lbl:'Hype Train',c:(s,f)=>s.W>=3&&f.streak>=5},
+  {id:'a62',ico:SVG.skull,lbl:'Hype Déraillée',c:(s,f)=>s.L>=2&&f.streak<=-3},
+  {id:'a63',ico:SVG.fire,lbl:'Vengeance',c:(s,f)=>s.W>=1&&s.closeFights>=1},
+  {id:'a64',ico:SVG.goat,lbl:'Le Fantôme',c:(s,f)=>s.sigOp<=20&&s.L===0&&s.total>=2},
+  {id:'a65',ico:SVG.star,lbl:'L\u2019Acrobate',c:(s,f)=>s.koW>=1&&f.attrs.flexibility>=80},
+  {id:'a66',ico:SVG.veteran,lbl:'Le Survivant',c:(s,f)=>s.ctrlOp>=5&&s.sigOp>=50&&s.W>=1},
+  {id:'a67',ico:SVG.diamond,lbl:'Sang Froid',c:(s,f)=>s.closeFights>=2&&s.W>=2},
+  {id:'a68',ico:SVG.sub,lbl:'L\u2019Opportuniste',c:(s,f)=>s.subW>=1&&s.ctrlMe===0},
+  {id:'a69',ico:SVG.medal,lbl:'Constance',c:(s,f)=>s.total>=3&&s.L===0&&s.decW>=2},
+  {id:'a70',ico:SVG.skull,lbl:'Année Noire',c:(s,f)=>s.L===s.total&&s.total>=2},
 ];
 function evaluateSeason(f,fights){ const s=compileSeasonStats(f,fights);
   let won=[]; SEASON_AWARDS.forEach(a=>{ if(a.c(s,f)) won.push(a); });
@@ -2263,9 +2263,9 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     st:{Me:res.stats.A, Op:res.stats.B}, myRank:myRankBefore, oppRank:oppRankBefore,
     isTitle:(kind==='title'||kind==='defense') });
   // ==== [FIN ANCRE] ====
-  // vieillissement (1 an = 3 combats, rythme fixe depuis la correction #12)
+  // vieillissement (1 an = 1 à 3 combats, moyenne 2, depuis la correction #12)
   let endOfSeason=false;
-  G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=3){ applyAging(G.f); G.f._fy=0; endOfSeason=true;
+  G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; endOfSeason=true;
     // ==== [ANCRE: SANTE_GFL] — Ultimate Rim : suivi médical premium. Le menton
     // (dommage neurologique) ne remonte JAMAIS, même ici — règle absolue. La
     // résistance générale (conditionnement physique, pas neuronal) reste un
@@ -3609,7 +3609,7 @@ const CL={
     G.screen=G.faith?'faith_hub':'hub'; save(); render();
   },
   chooseMue(styleId){ const r=triggerMueMartiale(G.f,styleId); G.lastMsg=r.msg||G.lastMsg;
-    G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=3){ applyAging(G.f); G.f._fy=0; }
+    G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
     advanceRoster(); G.screen='hub'; save(); render(); },
   pickScenario(scenId){
     const scen=SCENARIOS.find(s=>s.id===scenId); if(!scen) return;
@@ -3707,7 +3707,7 @@ const CL={
     if(id==='mue_martiale'){ G.screen='mueChoice'; save(); render(); return; }
     if(id==='mue_martiale_decline'){ G.f.morale=clamp(G.f.morale-5,0,100); G.lastMsg='Vous restez fidèle à votre style, pour le meilleur ou pour le pire.'; G.screen='hub'; save(); render(); return; }
     if(id==='major_injury'){ const f=G.f;
-      f._fy=(f._fy||0)+1; if(f._fy>=3){ applyAging(f); f._fy=0; }
+      f._fy=(f._fy||0)+1; if(f._fy>=RI(1,3)){ applyAging(f); f._fy=0; }
       const inj=rollInjury(); f.injury={name:inj.name,left:inj.fights};
       f.form=clamp(f.form-20,0,100); f.morale=clamp(f.morale-15,0,100);
       if(typeof checkIronManDeath==='function') checkIronManDeath(null,inj);
@@ -3719,7 +3719,7 @@ const CL={
     } else if(id==='botched_weight_decline'){
       G.f.morale=clamp(G.f.morale-8,0,100);
       G.lastMsg='Combat annulé. Mauvaise impression garantie auprès de l\u2019organisation.';
-      G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=3){ applyAging(G.f); G.f._fy=0; }
+      G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
       advanceRoster();
       G.screen='hub'; save(); render();
     } else if(id==='opp_overweight_accept'){
@@ -3730,7 +3730,7 @@ const CL={
     } else if(id==='opp_overweight_decline'){
       G.f.form=clamp(G.f.form-5,0,100);
       G.lastMsg='Combat annulé suite au surpoids adverse. Un remplaçant est recherché pour la prochaine carte.';
-      G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=3){ applyAging(G.f); G.f._fy=0; }
+      G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
       advanceRoster();
       G.screen='hub'; save(); render();
     } else if(id==='faceoff_smile' || id==='faceoff_ignore'){
@@ -3746,7 +3746,7 @@ const CL={
   },
   recoverInjury(){ const f=G.f; if(!f.injury)return;
     f.injury.left-=1; f.morale=clamp(f.morale+5,0,100); f.form=clamp(f.form+15,0,100);
-    f._fy=(f._fy||0)+1; if(f._fy>=3){ applyAging(f); f._fy=0; }
+    f._fy=(f._fy||0)+1; if(f._fy>=RI(1,3)){ applyAging(f); f._fy=0; }
     advanceRoster();
     if(f.injury.left<=0) f.injury=null;
     save(); render(); },
@@ -4084,7 +4084,12 @@ const CL={
     if(G.arcade.mode==='ladder_100') G.arcade.opponent=genWTUMMAOpponent();
     CL.go('arcadehub'); },
   pickArcadeSkill(idx){ if(G.arcade.upgradesChosen.skill) return; if(idx>=0) grantSkill(G.f,G.arcade.skillOpts[idx]); G.arcade.upgradesChosen.skill=true; render(); },
-  retryArcade(){ CL.startArcade(); },
+  retryArcade(){
+    const prevMode=G.arcade&&G.arcade.mode;
+    if(prevMode==='ladder_100') CL.startLadder100();
+    else if(prevMode==='boss_run') CL.startBossRun();
+    else CL.startArcade();
+  },
   fightArcade(){ resolveArcadeFight(); },
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
@@ -4265,31 +4270,28 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
   A.currentText=b.text; A.currentMomentum=b.momentum;
   if(b.snapA) A.snapA=b.snapA; if(b.snapB) A.snapB=b.snapB;
 }
-function fighter(ctx,x,groundY,face,colorObj,o){ // o: {lunge,flash,shake,fallen,grounded,phase,top,tap} · colorObj: {skin,shorts}
+function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,grounded,phase,top,tap}
   ctx.save();
   const sh=o.shake?((Math.random()-0.5)*4):0;
   x+=face*(o.lunge*14)+sh;
   const bob=Math.sin(performance.now()/240 + (face>0?0:1))*2;
-  const skinCol=o.flash?'#fff':colorObj.skin, shortsCol=o.flash?'#fff':colorObj.shorts;
   if(o.grounded){
     if(!o.top){
-      // Sur le dos (garde) — buste allongé (short), tête décalée (peau), jambes relevées (peau)
+      // Sur le dos (garde) — buste allongé, tête décalée, jambes relevées
       ctx.translate(x, groundY-5);
-      ctx.fillStyle=shortsCol; ctx.globalAlpha=.95;
+      ctx.fillStyle=o.flash?'#fff':color; ctx.globalAlpha=.95;
       ctx.beginPath(); ctx.ellipse(0,0,30,9,0,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle=skinCol;
       ctx.beginPath(); ctx.arc(-face*25,-2,7,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle=skinCol; ctx.lineWidth=5; ctx.lineCap='round';
+      ctx.strokeStyle=color; ctx.lineWidth=5; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(0,-20); ctx.lineTo(-face*15,-15); ctx.stroke();
     } else {
-      // Au-dessus (dominant) — torse (peau), short (pelvis), bras qui contrôle/frappe (peau)
+      // Au-dessus (dominant) — buste vertical, bras qui contrôle/frappe
       ctx.translate(x-face*8, groundY-22);
-      ctx.fillStyle=skinCol; ctx.strokeStyle=skinCol;
+      ctx.fillStyle=o.flash?'#fff':color; ctx.strokeStyle=o.flash?'#fff':color;
       ctx.lineWidth=12; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(0,10); ctx.lineTo(0,-15); ctx.stroke();
       ctx.beginPath(); ctx.arc(0,-22,8,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle=shortsCol; ctx.lineWidth=16; ctx.beginPath(); ctx.moveTo(0,10); ctx.lineTo(0,18); ctx.stroke();
-      ctx.strokeStyle=skinCol; ctx.lineWidth=5;
+      ctx.lineWidth=5;
       ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(face*15,(o.lunge*15)); ctx.stroke();
     }
     if(o.tap){ // halo de danger de soumission, pulsant, sur le combattant en péril
@@ -4302,16 +4304,12 @@ function fighter(ctx,x,groundY,face,colorObj,o){ // o: {lunge,flash,shake,fallen
   }
   ctx.translate(x, groundY-52+bob+(o.fallen?46:0));
   if(o.fallen) ctx.rotate(face*1.3);
-  // Jambes (peau)
-  ctx.strokeStyle=skinCol; ctx.lineWidth=6; ctx.lineCap='round';
+  const col=o.flash?'#fff':color;
+  ctx.strokeStyle=col; ctx.lineWidth=6; ctx.lineCap='round';
   ctx.beginPath(); ctx.moveTo(-3,4); ctx.lineTo(-10,46); ctx.moveTo(4,4); ctx.lineTo(12,46); ctx.stroke();
-  // Torse haut (peau)
-  ctx.lineWidth=15; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(0,10); ctx.stroke();
-  // Short de combat (pelvis)
-  ctx.strokeStyle=shortsCol; ctx.lineWidth=16; ctx.beginPath(); ctx.moveTo(0,10); ctx.lineTo(0,26); ctx.stroke();
-  // Tête (peau)
-  ctx.fillStyle=skinCol; ctx.beginPath(); ctx.arc(0,-20,9,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle=skinCol; ctx.lineWidth=6;
+  ctx.lineWidth=15; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(0,26); ctx.stroke();
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(0,-20,9,0,Math.PI*2); ctx.fill();
+  ctx.lineWidth=6;
   const reach=o.lunge;
   // flou de mouvement — traînée du bras avant en pleine frappe
   if(reach>0.1 && !o.fallen){
@@ -4324,7 +4322,7 @@ function fighter(ctx,x,groundY,face,colorObj,o){ // o: {lunge,flash,shake,fallen
   ctx.globalAlpha=1;
   ctx.beginPath(); ctx.moveTo(0,2); ctx.lineTo(-face*8,-10); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(face*(10+reach*20), -8+reach*4); ctx.stroke();
-  ctx.fillStyle=shortsCol; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=o.flash?'#fff':color; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,Math.PI*2); ctx.fill();
   ctx.restore();
 }
 /* ==== [ANCRE: LOT12_COSMETIQUE_ARENE] — thèmes visuels de l'octogone. Adapté
@@ -4397,8 +4395,8 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx)return; const
   // au sol : chevauchement plus marqué (12px) pour un vrai rendu de dominance visuelle
   if(grounded){ const center=W*0.5+shift; xOp=center+(A.curTop==='op'?12:-12); xMe=center+(A.curTop==='me'?-12:12); }
   const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
-  fighter(ctx, xOp, gY, -1, {skin:(G.fight&&G.fight.opp&&G.fight.opp.skin)||'#e0ac69',shorts:(G.fight&&G.fight.opp&&G.fight.opp.shorts)||'#6E8478'}, {lunge:A.lungeOp*(1-frac),flash:A.flashOp>0,shake:A.shakeOp>0,fallen:A.fall===2,grounded,phase:A.curPhase,top:A.curTop==='op',tap:isSubDanger&&A.curTop!=='op'});
-  fighter(ctx, xMe, gY, 1, {skin:(G.f&&G.f.skin)||'#8d5524',shorts:(G.f&&G.f.shorts)||'#B23B36'}, {lunge:A.lungeMe*(1-frac),flash:A.flashMe>0,shake:A.shakeMe>0,fallen:A.fall===1,grounded,phase:A.curPhase,top:A.curTop==='me',tap:isSubDanger&&A.curTop!=='me'});
+  fighter(ctx, xOp, gY, -1, '#6E8478', {lunge:A.lungeOp*(1-frac),flash:A.flashOp>0,shake:A.shakeOp>0,fallen:A.fall===2,grounded,phase:A.curPhase,top:A.curTop==='op',tap:isSubDanger&&A.curTop!=='op'});
+  fighter(ctx, xMe, gY, 1, '#B23B36', {lunge:A.lungeMe*(1-frac),flash:A.flashMe>0,shake:A.shakeMe>0,fallen:A.fall===1,grounded,phase:A.curPhase,top:A.curTop==='me',tap:isSubDanger&&A.curTop!=='me'});
   if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#E8442F'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
   A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
   A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);

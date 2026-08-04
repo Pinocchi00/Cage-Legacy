@@ -447,12 +447,10 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
   const attrs=baseAttrs(style,level,phys.tags.join(' '));
   const potential=opt.potential!=null?opt.potential:gauss(68,12,45,97);   // caché
   const dynamic=0;                                                         // moral/forme caché ±
-  const skin=pick(['#f1c27d','#e0ac69','#8d5524','#c68642','#3d2210']); // teinte de peau
-  const shorts=pick(['#B23B36','#6E8478','#2c3e50','#d35400','#f39c12']); // short de combat
   const mot=pick(MOTIVATIONS); const origin=parseGender(generateContextualOrigin({attrs,phys,countryKey:ck,potential,morale:60}),gender);
   const f={ id:_id++, gender, div:div.id, divName:div.name, style, styleLabel:styleLabel(style),
     first:nm.first,last:nm.last,name:nm.name,flag:nm.flag,countryKey:ck,
-    phys, attrs, potential, dynamic, morale:60, form:55, skin, shorts,
+    phys, attrs, potential, dynamic, morale:60, form:55,
     stage:'amateur', org:0, orgWins:0, age:opt.age!=null?opt.age:RI(18,22),
     W:0,L:0,D:0,ko:0,sub:0,dec:0,koLoss:0,streak:0, champion:null, titles:0, defenses:0,
     skills:[], history:[], origin, motivation:parseGender(mot.short,gender), drive:mot.drive, amaRec:null, amaTitle:false, nick:null, epithets:[] };
@@ -497,7 +495,7 @@ function overall(f){ const a=f.attrs;
   const vals=ATTR_KEYS.map(k=>a[k]).sort((x,y)=>y-x);
   const top=vals.slice(0,10), topAvg=top.reduce((s,v)=>s+v,0)/top.length;
   const allAvg=vals.reduce((s,v)=>s+v,0)/vals.length;
-  let ov=topAvg*0.68+allAvg*0.32 + (f.dynamic||0)*0.3;
+  let ov=topAvg*0.68+allAvg*0.32 + (f.dynamic||0)*0.3 - 5;
   return clamp(Math.round(ov),1,100);
 }
 function groupAvg(f){ const a=f.attrs; const g=k=>Math.round(k.reduce((s,x)=>s+a[x[0]],0)/k.length);
@@ -533,14 +531,14 @@ function weightFactor(f){ const divs=DIVISIONS[f.gender]||DIVISIONS.H; const d=d
 // (boxeur 0.15 vs lutteur 0.77, écart ×5) — l'ajouter aurait fait ×48, une
 // surcorrection qui aurait quasiment supprimé la lutte chez les boxeurs. ====
 const STYLE_PROFILE={
-  boxer:{sigVol:1.30,koMod:1.15,subMod:0.10,clinchDmg:0.8,gnpDmg:0.8},
-  kickboxer:{sigVol:1.20,koMod:1.20,subMod:0.20,clinchDmg:0.9,gnpDmg:0.8},
-  muayThai:{sigVol:1.00,koMod:1.25,subMod:0.30,clinchDmg:1.25,gnpDmg:1.0},
-  karate:{sigVol:1.15,koMod:1.35,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
-  wrestler:{sigVol:0.90,koMod:0.90,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
-  bjj:{sigVol:0.90,koMod:0.75,subMod:1.60,clinchDmg:0.9,gnpDmg:0.9,guardPull:0.35},
-  sambo:{sigVol:0.85,koMod:1.20,subMod:1.25,clinchDmg:1.2,gnpDmg:1.15},
-  mma:{sigVol:1.00,koMod:1.00,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
+  boxer:{sigVol:1.18,koMod:1.15,subMod:0.10,clinchDmg:0.8,gnpDmg:0.8},
+  kickboxer:{sigVol:1.05,koMod:1.20,subMod:0.20,clinchDmg:0.9,gnpDmg:0.8},
+  muayThai:{sigVol:0.88,koMod:1.25,subMod:0.30,clinchDmg:1.25,gnpDmg:1.0},
+  karate:{sigVol:1.26,koMod:1.52,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
+  wrestler:{sigVol:0.98,koMod:1.10,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
+  bjj:{sigVol:0.95,koMod:0.75,subMod:1.98,clinchDmg:0.9,gnpDmg:0.9,guardPull:0.35},
+  sambo:{sigVol:0.85,koMod:1.20,subMod:1.30,clinchDmg:1.2,gnpDmg:1.15},
+  mma:{sigVol:1.05,koMod:1.05,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
 };
 /* ==== [FIN ANCRE] ==== */
 function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(B);
