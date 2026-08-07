@@ -349,7 +349,7 @@ function scr_hof(){
      </details>
      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
    </div>`:''}
-   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'}">
+   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
       <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
         <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
@@ -358,9 +358,9 @@ function scr_hof(){
       ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow" style="margin-bottom:8px">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
       ${f.biggestRival?`<div class="mono small" style="color:var(--blood);margin-bottom:8px">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} (${f.biggestRival.count} confrontations)</div>`:''}
       <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="CL.deleteHof('${f.id}')">Supprimer</button></div>`).join(''):
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="event.stopPropagation();CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="event.stopPropagation();CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="event.stopPropagation();CL.deleteHof('${f.id}')">Supprimer</button></div>`).join(''):
       '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}
    <div class="tagrow mb">
      <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
@@ -368,6 +368,67 @@ function scr_hof(){
      <button class="btn ghost" style="width:auto;padding:8px 12px;border-color:var(--gold);color:var(--gold)" onclick="CL.go('legends')">Salle des Légendes</button>
    </div>
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
+// ==== [ANCRE: ECRAN_DETAIL_LEGENDE] (rendu) — bug bloquant corrigé : le
+// routeur (ui-08-controller-arena.js) référence scr_legend_detail comme
+// gestionnaire de l'écran 'legend_detail' (déclenché par CL.viewLegend()),
+// mais cette fonction n'existait nulle part dans le codebase -> ReferenceError
+// au chargement du script (objet-routeur évalué immédiatement), donc page
+// blanche totale avant même le premier rendu. Fiche complète reprenant les
+// données déjà capturées par enshrine() (state.js) pour chaque légende.
+function scr_legend_detail(){
+  const list=loadHOF(); const f=list.find(x=>String(x.id)===String(G.viewingLegendId));
+  if(!f) return `<div class="scr center"><p class="lede">Légende introuvable.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
+   <div class="glass mwash card" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:16px">
+     <div class="hero-name" style="position:relative;z-index:2">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div}${f.classLabel?` · ${f.classLabel}`:''}</em></div>
+     ${f.motivation?`<div class="story" style="position:relative;z-index:2"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
+     <div class="epis mt" style="position:relative;z-index:2">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
+     <div class="stat-band" style="position:relative;z-index:2">
+       <div><span class="stat-big" style="font-size:26px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">Bilan pro · retraite ${f.age} ans</span></div>
+       <div style="text-align:right"><span class="stat-big" style="font-size:26px">${f.ko+f.sub}<span class="muted small"> fin.</span></span><span class="stat-lbl">${f.ko} KO / ${f.sub} SUB</span></div>
+     </div>
+     ${f.amaRec?`<div class="mono small muted mt">Amateur : ${f.amaRec.W}-${f.amaRec.L}</div>`:''}
+   </div>
+   ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mb">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+   ${f.champChampBelt?`<div class="card mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><span class="mono small" style="color:var(--gold)">${SVG.crown} Double Champion — ${esc(f.champChampBelt)}</span></div>`:''}
+   ${f.beltHistory&&f.beltHistory.length?`<div class="card mb"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — ${b.defenses} défense(s)</span></div>`).join('')}</div>`:''}
+   ${f.biggestRival?`<div class="card mb"><div class="eyebrow mb">⚔ Plus grand rival</div><div class="small" style="color:var(--blood)">${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div></div>`:''}
+   ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
+   ${f.nicknameHistory&&f.nicknameHistory.length?`<div class="card mb"><div class="eyebrow mb">Historique des surnoms</div>${f.nicknameHistory.map(n=>`<div class="small muted" style="padding:4px 0">« ${esc(n)} »</div>`).join('')}</div>`:''}
+   ${f.earnedAchievements&&f.earnedAchievements.length?`<div class="card mb"><div class="eyebrow mb">Succès obtenus (${f.earnedAchievements.length}/${ACH.length})</div>${f.earnedAchievements.map(id=>{const a=ACH.find(x=>x.id===id); return a?`<div class="ach"><span class="ico" style="display:flex;align-items:center;color:var(--gold)">${a.ico}</span><span><b class="gold">${a.h}</b><div class="muted small">${a.d}</div></span></div>`:'';}).join('')}</div>`:''}
+   <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
+   <button class="btn ghost" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
+}
+// ==== [ANCRE: SYSTEME_CLASSES] (rendu) — bug bloquant corrigé : même
+// symptôme que scr_legend_detail juste au-dessus. Le routeur référence
+// scr_class_choice pour l'écran 'class_choice' (levé par classOffer en
+// ui-05, résolu par CL.chooseClass() déjà présent dans ui-08), mais aucune
+// fonction de ce nom n'existait -> ReferenceError au chargement -> page
+// blanche. fx est en échelle brute /100 (25/15/-15 depuis le rééquilibrage
+// Bug #8) : affiché divisé par 5 pour matcher la note /20 (+5/+3/-3), comme
+// pour tout le reste de l'UI (voir d20()).
+function scr_class_choice(){
+  const f=G.f; const pool=CLASSES[f.style]||[];
+  return `<div class="scr center intro">
+   <div class="eyebrow gold">Choix de Classe</div>
+   <h2 class="disp">Une spécialisation définitive</h2>
+   <p class="lede">À 23 ans, chaque combattant choisit une identité qui le suivra pour le reste de sa carrière. Ce choix ne pourra jamais être changé.</p>
+   ${pool.map((cls,idx)=>{
+     const fits=(()=>{ try{ return cls.fit(f); }catch(e){ return false; } })();
+     const deltaTags=Object.entries(cls.fx||{}).map(([k,v])=>{
+       const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+       return `<span class="dlt ${v>=0?'up':'dn'}">${shown>0?'+':''}${shown} ${attrLabel(k)}</span>`;
+     }).join('');
+     return `<div class="glass card mt" style="text-align:left;background:var(--panel2);border:1px solid var(--line);padding:16px">
+       <b style="font-size:17px;color:var(--gold)">${cls.lbl}</b>
+       <div class="story mt" style="font-style:italic">« ${cls.desc} »</div>
+       <div class="dlts mt">${deltaTags}</div>
+       <div class="mono small mt" style="color:${fits?'var(--win)':'var(--muted)'}">${fits?'✓ Correspond à ton parcours jusqu\u2019ici':'Ne correspond pas particulièrement à ton style actuel — reste un choix valide.'}</div>
+       <button class="btn primary mt" onclick="CL.chooseClass(${idx})">Choisir « ${cls.lbl} » — définitif</button>
+     </div>`;
+   }).join('')}
+  </div>`;
+}
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   let judgesHtml='';
   if(isDecisionLike(p.method) && !p.res.judges && p.res.scoreA!==undefined){
