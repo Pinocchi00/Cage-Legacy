@@ -15,6 +15,14 @@ function rnd(){ SEED=(SEED*1664525+1013904223)>>>0; return SEED/4294967296; }
 const RI=(a,b)=>Math.floor(rnd()*(b-a+1))+a;
 const R=(a,b)=>a+rnd()*(b-a);
 const pick=a=>a[Math.floor(rnd()*a.length)];
+// ==== [ANCRE: CORRECTIF_REPETITION_TEXTES] — item demandé : varier les textes
+// susceptibles de revenir identiques à chaque combat (rôles de matchmaking,
+// lecture tactique...). pick() seul re-tirerait à CHAQUE rendu (flicker si
+// l'écran se redessine sans nouveau combat) — pickStable() choisit dans un
+// pool de façon déterministe à partir d'un seed (ex. id de l'adversaire +
+// clé de contexte), donc stable tant que l'adversaire ne change pas, mais
+// varié d'un adversaire ou d'un combat à l'autre.
+function pickStable(pool,seed){ if(!pool||!pool.length) return ''; let h=0; const s=String(seed); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return pool[h%pool.length]; }
 const clamp=(v,lo=1,hi=100)=>v<lo?lo:v>hi?hi:v;
 const num=(v,d=50)=>typeof v==='number'&&!isNaN(v)?v:d;
 function gauss(m,sd,lo,hi){ let u=0,v=0; while(!u)u=rnd(); while(!v)v=rnd(); let g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); let x=Math.round(m+g*sd); if(lo!=null)x=Math.max(lo,x); if(hi!=null)x=Math.min(hi,x); return x; }
@@ -169,19 +177,45 @@ function setPersonality(alignment){
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: LOT2_MODES] — modes de jeu alternatifs ==== */
+/* ==== [ANCRE: REFONTE_SCENARIOS] — item demandé : 5 scénarios fonctionnels,
+   dont 2 réservés (verrouillés) à la Salle des Légendes via le champ
+   `legendUnlock` (même mécanisme que checkLegendUnlock('mode_boss') déjà
+   utilisé pour le Boss Run). Chaque checkWin/checkLoss a été vérifié pour ne
+   dépendre que de champs simples et toujours présents sur f (org, champion en
+   string, defenses, dec, W/L, retired) — aucun état complexe non initialisé
+   qui pourrait planter en cours de scénario.
+   ⚠ IMPORTANT — dépendance non résolue : LEGEND_UNLOCKABLES,
+   checkLegendUnlock(), purchaseLegendUnlock() et loadMetaStats() ne sont
+   présents dans AUCUN des fichiers fournis (engine.js, data-content.js,
+   ui-01 à ui-08) alors qu'ils sont appelés depuis ui-06/07/08 — ils vivent
+   forcément dans un fichier non uploadé. Le verrouillage ci-dessous appelle
+   checkLegendUnlock(id) comme le fait déjà le Boss Run (donc ça fonctionnera
+   tel quel une fois chargé avec le reste du jeu), mais je n'ai PAS pu ajouter
+   les entrées correspondantes dans LEGEND_UNLOCKABLES (coût en points,
+   catégorie, description) puisque je n'ai pas ce fichier — sans lui, les
+   deux scénarios resteront verrouillés pour toujours, aucun bouton d'achat
+   n'existera. Envoie-moi ce fichier pour terminer le câblage. ==== */
 const SCENARIOS=[
   {id:'scen_sauveur',name:"Le Sauveur de la Ligue",
     desc:"Vétéran de 35 ans sur une série de 3 défaites doit remporter le titre avant sa retraite forcée.",
     init:(f)=>{ f.age=35; f.streak=-3; f.org=3; f.W=15; f.L=8; f.stage='pro'; },
     checkWin:(f)=>!!f.champion, checkLoss:(f)=>f.retired||f.streak<=-5},
   {id:'scen_undersized',name:"L\u2019Undersized Heavyweight",
-    desc:"Poids Moyen tentant la catégorie Poids Lourds.",
+    desc:"Poids Moyen tentant la catégorie Poids Lourds. Doit devenir champion d\u2019une des deux organisations mondiales.",
     init:(f)=>{ f.div='H-heavy'; f.phys.height=184; f.phys.reach=189; f.org=2; },
     checkWin:(f)=>f.org>=5 && !!f.champion, checkLoss:(f)=>f.retired},
   {id:'scen_invasion',name:"L\u2019Invasion de l\u2019Est",
     desc:"Sambo/Lutte, champion mondial sans concéder un seul takedown.",
     init:(f)=>{ f.style='sambo'; f.org=4; f.W=10; f.L=0; f.tdConceded=0; },
-    checkWin:(f)=>f.org>=5 && !!f.champion && f.tdConceded===0, checkLoss:(f)=>f.tdConceded>0||f.retired}
+    checkWin:(f)=>f.org>=5 && !!f.champion && f.tdConceded===0, checkLoss:(f)=>f.tdConceded>0||f.retired},
+  {id:'scen_finisseur',name:"Le Finisseur",legendUnlock:'scenario_finisseur',
+    desc:"Aucune décision autorisée : chaque combat doit finir en KO ou soumission jusqu\u2019au titre mondial.",
+    init:(f)=>{ f.org=3; f.W=0; f.L=0; f.dec=0; },
+    checkWin:(f)=>f.org>=5 && !!f.champion && f.dec===0, checkLoss:(f)=>f.dec>0||f.retired},
+  {id:'scen_regne',name:"Le Règne Sans Faille",legendUnlock:'scenario_regne',
+    desc:"Déjà champion continental, doit enchaîner 5 défenses de titre sans jamais perdre la ceinture.",
+    init:(f)=>{ f.org=4; f.champion='europe'; f.defenses=0; f.W=20; f.L=5; f.titles=1; },
+    checkWin:(f)=>(f.defenses||0)>=5 && !!f.champion, checkLoss:(f)=>!f.champion||f.retired}
 ];
 function checkScenarioState(res){
   if(!G.activeScenario) return;
@@ -231,7 +265,7 @@ function checkMueMartialeEligibility(f){
 function triggerMueMartiale(f,newStyleId){
   if(!checkMueMartialeEligibility(f)) return {success:false,msg:"Les conditions pour une Mue Martiale ne sont pas réunies."};
   if(!STYLES[newStyleId]) return {success:false,msg:"Style martial invalide."};
-  f.style=newStyleId; f._drought=0;
+  f.style=newStyleId; f.styleLabel=styleLabel(newStyleId); f._drought=0;
   G.lastMsg=`Mue Martiale effectuée avec succès. Vous abordez désormais l\u2019octogone dans un style différent.`;
   return {success:true};
 }
@@ -456,12 +490,20 @@ function weightCutInfo(f){ const D=divById(f.div); const limit=D?D.kg:70;
 // des adversaires/roster (qui a besoin de toute l'amplitude 6-96 pour les
 // paliers élevés — un adversaire de haut niveau n'est pas concerné par cette
 // contrainte, seulement le combattant qu'on incarne).
+/** @returns {FighterAttrs} */
 function baseAttrs(style,level,predis,tightSpread){ const o={}; const bias=(STYLES[style]||{b:{}}).b;
   const sd=tightSpread?3:9, lo=tightSpread?40:6, hi=tightSpread?60:96;
   for(const k of ATTR_KEYS){ let v=gauss(level, sd, lo, hi); if(bias[k])v=clamp(v+bias[k], lo, hi); o[k]=v; }
   if(predis){ if(predis.includes('densité'))o.power=clamp(o.power+RI(8,16), lo, hi); if(predis.includes('explosivité')){o.explosiveness=clamp(o.explosiveness+RI(8,14), lo, hi);o.takedown=clamp(o.takedown+RI(5,10), lo, hi);} }
-  return o;
+  // La boucle ci-dessus remplit dynamiquement les 30 clés de ATTR_KEYS (une
+  // affectation calculée `o[k]=v`, que TypeScript ne peut pas prouver
+  // statiquement complète même si elle l'est réellement à l'exécution —
+  // vérifié par la suite de tests, ex. `un champion qui défend son titre...`
+  // et par l'audit de couverture des attributs entraînables cette session).
+  // Cast explicite pour le confirmer au vérificateur de types.
+  return /** @type {FighterAttrs} */ (o);
 }
+/** @returns {Fighter} */
 function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
   const div=divById(opt.div)|| (gender==='H'?pick(DIVISIONS.H):pick(DIVISIONS.F));
   const style=opt.style||pick(STYLE_KEYS); const ck=opt.countryKey||pick(COUNTRY_KEYS);
@@ -931,7 +973,19 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
   }
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
   let baseMove;
-  if(owned.length && rnd()<0.6){ const chosenId=pick(owned); baseMove=FINISH_MOVES[type].find(m=>m.id===chosenId).name; }
+  // ==== [ANCRE: CORRECTIF_ZONE_MOUVEMENT_ACQUIS] — bug trouvé : un geste
+  // possédé (compétence débloquée) était choisi sans jamais vérifier sa zone
+  // propre contre la zone réellement la plus endommagée (finishZone) — un
+  // Heel Hook (jambes) pouvait ainsi être narré sur un KO déclenché par des
+  // dégâts à la tête. On restreint désormais la sélection aux gestes possédés
+  // dont la zone correspond, quand au moins un correspond ; sinon on retombe
+  // sur l'ensemble des gestes possédés (mieux vaut un geste possédé mal zoné
+  // qu'un geste totalement générique).
+  if(owned.length && rnd()<0.6){
+    let candidates=owned;
+    if(zone){ const zoneMatches=owned.filter(id=>FINISH_MOVES[type].find(m=>m.id===id).zone===zone); if(zoneMatches.length) candidates=zoneMatches; }
+    const chosenId=pick(candidates); baseMove=FINISH_MOVES[type].find(m=>m.id===chosenId).name;
+  }
   else{ const generic=type==='sub'?GENERIC_SUB:GENERIC_KO; const zoned=zone?generic.filter(m=>m.zone===zone):[]; baseMove=(zoned.length?pick(zoned):pick(generic)).name; }
   // Comptage des finitions identiques — au 5e succès avec le même geste, il
   // devient signature : compétence unique + boost de stat + 40% de retour
@@ -942,7 +996,20 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
   let flavor=null;
   if(!winner.signatureMove && winner.finishMoveCounts[key]>=5){
     winner.signatureMove={name:baseMove,type,zone};
-    const boostKeys=type==='sub'?['submission','killer']:['power','killer'];
+    // ==== [ANCRE: CORRECTIF_BOOST_SIGNATURE_DIFFERENCIE] — bug trouvé : TOUS
+    // les mouvements signature donnaient exactement le même boost (submission+
+    // killer pour toute soumission, power+killer pour tout KO), peu importe le
+    // geste réel. Le boost dépend désormais de la ZONE ciblée par le geste
+    // (tête/corps/jambes), cohérent avec ce que le geste représente : une
+    // soumission à la tête (étranglement) récompense le cardio/contrôle, une
+    // soumission au corps (clé de bras) récompense la force, une soumission
+    // aux jambes récompense l'explosivité ; un KO à la tête récompense la
+    // puissance pure, au corps l'endurance à encaisser en pression, aux jambes
+    // l'explosivité des coups de pied. Table définie une seule fois au niveau
+    // module (SIGNATURE_BOOST_BY_ZONE plus bas) — réutilisée telle quelle par
+    // signatureMoveCard() côté affichage, pour ne jamais désynchroniser le
+    // texte montré au joueur du boost réellement appliqué.
+    const boostKeys=(SIGNATURE_BOOST_BY_ZONE[type]&&SIGNATURE_BOOST_BY_ZONE[type][zone])||(type==='sub'?['submission','killer']:['power','killer']);
     boostKeys.forEach(k=>{ winner.attrs[k]=clamp((winner.attrs[k]||50)+6,1,100); });
     winner.overall=overall(winner);
     const skillId='sig_'+baseMove.replace(/[^a-z0-9]/gi,'').toLowerCase().slice(0,20);
@@ -950,6 +1017,18 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
       grantSkill(winner,{id:skillId,name:baseMove+' (Signature)',rar:'M',fx:{},desc:`${winner.name} a répété ce geste jusqu\u2019à le rendre inévitable : ${baseMove}, désormais sa marque de fabrique.`,tags:['Signature']});
     }
     flavor=`MOUVEMENT SIGNATURE DÉBLOQUÉ : ${MOVE_SIGNATURE_FLAVOR[baseMove]||baseMove+' devient sa marque de fabrique.'}`;
+  }
+  // ==== [ANCRE: CORRECTIF_FLAVOR_SIGNATURE_MANQUANT] — bug trouvé : le texte
+  // signature ne s'affichait QUE dans deux cas précis : le tout premier
+  // déblocage (une fois dans toute la carrière), et le chemin de "rejeu
+  // délibéré" (40% de chance, tiré au tout début de la fonction). Si le geste
+  // signature était retrouvé par le tirage normal (les 60% restants — d'où le
+  // "2/3 du temps" remonté), aucun texte n'était attaché, alors que c'était
+  // pourtant bien le même geste. On rattache maintenant systématiquement le
+  // flavor signature dès que baseMove correspond au geste signature déjà
+  // déverrouillé, quel que soit le chemin qui l'a sélectionné.
+  if(!flavor && winner.signatureMove && winner.signatureMove.type===type && winner.signatureMove.name===baseMove){
+    flavor=MOVE_SIGNATURE_FLAVOR[baseMove]||'Le geste devenu sa signature — le public le voit venir, mais personne ne peut l\u2019arrêter.';
   }
   if(fightStats && !flavor){
     const isLate=(round||1)>=3;
@@ -969,6 +1048,31 @@ function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
 /* ------------------------- ORGS / CLASSEMENT / ÂGE ------------------------ */
 const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Continentale','Ultimate Rim (Argent)','Pacific Championship (Gloire)'];
 const ORG_PROMO_SCORE=[0,100,250,450,650,900,900]; // score ELO requis par palier
+// ==== [ANCRE: CORRECTIF_DUPLICATION_BOURSE] — ORG_PURSES et CHAMP_MULT
+// étaient dupliqués À L'IDENTIQUE dans generateContract() (ce fichier) ET
+// dans resolveFight() (ui-05-fight-resolution.js) — exactement le genre de
+// duplication qui avait causé le décalage Ultimate Rim (un seul des deux
+// tableaux avait été recalibré, l'autre gardait les anciennes valeurs).
+// Source unique désormais, référencée aux deux endroits.
+// ==== [ANCRE: RECALIBRAGE_ULTIMATE_RIM] — item demandé : Ultimate Rim
+// (Argent) passait de 250k$/combat à 0$ de prime de victoire — écart bien
+// trop grand avec Pacific Championship (30k$/30k$) pour une ligue pourtant
+// présentée comme "juste en dessous" du sommet. Recalé à 75k$ le combat +
+// 75k$ la victoire, cohérent avec son identité "Argent" (bon salaire fixe
+// ET bonne prime) sans écraser Pacific Championship (Gloire — prestige et
+// multiplicateur de titre bien plus haut : x5 contre x2 ici).
+const ORG_PURSES=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[75,75],[30,30]]; // [cachet, prime de victoire] en k$, par palier d'organisation
+const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,2.0,5.0]; // multiplicateur de bourse pour un champion, par palier d'organisation
+// ==== [ANCRE: CORRECTIF_BOOST_SIGNATURE_DIFFERENCIE] — table remontée au
+// niveau module (au lieu d'être recréée à chaque déblocage dans
+// pickFinishMove) pour pouvoir être réutilisée telle quelle par
+// signatureMoveCard() (ui-06-career-screens.js), qui recalculait sinon un
+// boost générique et FAUX (submission+killer / power+killer pour tout,
+// ignorant la zone) — même bug de duplication que ORG_PURSES/CHAMP_MULT.
+const SIGNATURE_BOOST_BY_ZONE={
+  sub:{'tête':['submission','cardio'],'corps':['submission','strength'],'jambes':['submission','explosiveness']},
+  ko:{'tête':['power','killer'],'corps':['power','cardio'],'jambes':['power','explosiveness']}
+};
 /* ==== [ANCRE: ORG_FLAVOR] — Version A validée : cosmétique uniquement, aucune
    incidence mécanique. Amateur (0) et Pacific Championship/Ultimate Rim (5/6, déjà nommés)
    n'ont pas de variante. Noms négociables. ==== */
@@ -1008,7 +1112,13 @@ function applyOrgAdvancementBoost(f, org){
   const amount=2+org; // org1:+3, org2:+4 ... org6:+8
   applyDeltas(f, [['cardio',amount],['strength',amount],['fightIQ',amount],['durability',amount],['recovery',amount]]);
 }
-function eloBaseline(org,overallVal){ const b=[800,1000,1200,1450,1700,2100,2000][org]||1000; return Math.round(b+((overallVal||50)-50)*8); }
+function eloBaseline(org,overallVal){
+  // ==== [ANCRE: RECALIBRAGE_ULTIMATE_RIM] — Ultimate Rim (org 5) avait un elo
+  // de référence (2100) plus élevé que Pacific Championship (org 6, 2000),
+  // alors que ce dernier est la ligue "sommet" — incohérent. Abaissé à 1900,
+  // sous Pacific Championship, tout en restant au-dessus de Continentale (1700).
+  const b=[800,1000,1200,1450,1700,1900,2000][org]||1000; return Math.round(b+((overallVal||50)-50)*8);
+}
 // ==== [ANCRE: CONTRAT_GENERATION] — génère un contrat de 4 combats à cachet
 // fixe (mêmes barèmes que ORG_PURSES/CHAMP_MULT déjà validés dans
 // resolveFight, jamais dupliqués ni réinventés ici). L'agent (Cercle "Le
@@ -1021,8 +1131,7 @@ function generateContract(f,org,raise){
   // Chaque organisation garde exactement son identité mécanique d'origine
   // (cachet, multiplicateur de titre, elo de référence) — seul l'INDEX
   // change, comme demandé, pas le comportement propre à chaque ligue.
-  const base=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[250,0],[30,30]][org]||[1,1];
-  const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,2.0,5.0];
+  const base=ORG_PURSES[org]||[1,1];
   let mult=1;
   if(raise) mult+=0.40;
   if(f.agentCut>0) mult+=0.25;
@@ -1040,7 +1149,17 @@ function generateContract(f,org,raise){
   // plus long — cohérent avec le palier de réputation déjà calculé ci-dessus.
   const fightsByRep={Discret:3,Solide:4,'Attraction montante':5,Superstar:6};
   const fightsLeft=(fightsByRep[repTier]||4)+(isChampContract?1:0);
-  return { fightsLeft, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract, reputation:repTier, record:[] };
+  // ==== [ANCRE: RETRAITE_LIEE_AU_CONTRAT] — item demandé : avertir explicitement
+  // à la SIGNATURE quand ce contrat sera la dernière danse, en indiquant quel
+  // combat précis du contrat (son nombre total de combats, fightsLeft) sera
+  // le dernier avant que la retraite ne devienne obligatoire. Seuil : l'âge
+  // atteindra ou dépassera retAge-1 avant la fin du contrat dans l'immense
+  // majorité des cas (le vieillissement avance d'environ 1 an tous les 1 à 4
+  // combats), donc on avertit dès que l'âge actuel est à 1 an ou moins du
+  // seuil de retraite.
+  const retAge=Math.max(39,42-(f.chinDegradationLevel||0))+((f.skills&&f.skills.includes('meta01'))?2:0);
+  const isFinalContract=(f.age||18)>=retAge-1;
+  return { fightsLeft, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract, reputation:repTier, record:[], isFinalContract, finalFightNumber:isFinalContract?fightsLeft:null };
 }
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.
@@ -1060,13 +1179,23 @@ function p4pScore(f){ const fights=f.W+f.L+f.D;
   if(f.careerElo===undefined) f.careerElo=eloBaseline(f.org,f.overall);
   if(f.orgElo===undefined) f.orgElo=eloBaseline(f.org,f.overall);
   const leapfrog=f.rankBoost||0;
+  // ==== [ANCRE: COMPOSANTE_PALMARES] — item demandé : le classement Elo pur
+  // pouvait laisser un 8-0 quasi immobile (rang #23) si ses victoires venaient
+  // toutes contre des adversaires de niveau proche/inférieur (peu de gain Elo
+  // par victoire "attendue"), alors qu'un palmarès aussi net devrait peser
+  // plus lourd. On ajoute une composante directe basée sur le PALMARÈS RÉEL :
+  // différentiel victoires/défaites, bonus finition (KO/soumission valent
+  // plus qu'une décision), et série en cours (positive = victoires, négative
+  // = défaites — capture les deux à la fois via le signe de f.streak).
+  const recordBonus=(f.W||0)*5-(f.L||0)*5+((f.ko||0)+(f.sub||0))*10+(f.streak||0)*8;
+  // ==== [FIN ANCRE] ====
   // ==== [ANCRE: RETRAIT_BONUS_CHAMPION] — item demandé : le statut de
   // champion (simple ou double) ne donne plus de bonus au score de
   // classement P4P. La reconnaissance du titre se fait désormais uniquement
   // via un badge dédié dans la fiche complète (scr_profile), pas via un
   // avantage chiffré caché dans le classement.
-  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+leapfrog);
-  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+leapfrog;
+  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+leapfrog+recordBonus);
+  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+leapfrog+recordBonus;
   if(f.org===6) score*=1.4;
   return Math.max(1, score);
 }

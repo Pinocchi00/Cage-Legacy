@@ -3,13 +3,13 @@
    État global G, sauvegarde/chargement, Panthéon persistant, migration.
    Dépend de engine.js (epithets, appelé par enshrine). legacyTitle (dans ui.js,
    appelé par enshrine) n'est résolu qu'à l'exécution : ui.js doit être chargé
-   avant toute partie jouée, jamais avant l'exécution de state.js lui-même. */
-/* =========================================================================
-   CAGE LEGACY — Couche jouable v3 (sur moteur v2 : engine2.js concaténé).
-   Lisible mobile · thème sombre/clair · 3 adversaires + %estimé · camp = 3
-   choix liés au sport avec deltas visibles et bornés · orgs · fiche /20 ·
-   stats de combat · 5 derniers combats · surnom gagné · épithètes de fin.
-   ========================================================================= */
+   avant toute partie jouée, jamais avant l'exécution de state.js lui-même.
+
+   Couche jouable v3 (sur moteur v2 : engine2.js concaténé) : lisible mobile,
+   thème sombre/clair, 3 adversaires + %estimé, camp = 3 choix liés au sport
+   avec deltas visibles et bornés, orgs, fiche /20, stats de combat, 5
+   derniers combats, surnom gagné, épithètes de fin. */
+/** @type {GameState} */
 let G=null;
 const SAVE_KEY='cage-legacy-v3';
 const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -45,10 +45,39 @@ function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catc
 // une double ceinture doit peser sur le score d'héritage et les points de Légende.
 function hofScore(f){ return (f._world?300:0)+(f._euro?120:0)+(f.champChampBelt?150:0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2; }
 function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
+  // ==== [ANCRE: CORRECTIF_CEINTURES_PANTHEON] — bug remonté : seules les
+  // ceintures amateur (WMA/DMMA, via amaTitles) étaient visibles dans le
+  // Panthéon — aucune trace des ceintures pro gagnées dans les organisations
+  // à nom d'ambiance (PVM, Iguana Iguana, etc., orgs 1 à 4), alors même que
+  // G.titleHistory les enregistre déjà (recordTitleChange, ui-01). On extrait
+  // ici tous les règnes de CE combattant (par nom, seule clé disponible dans
+  // titleHistory) pour les figer définitivement dans l'entrée du Panthéon —
+  // G.titleHistory lui-même est remis à zéro à chaque nouvelle carrière
+  // (wipe()), donc cette capture est la seule façon de préserver l'info.
+  const myReigns=(G.titleHistory||[]).filter(r=>r.champion===f.name);
+  const beltHistory=myReigns.map(r=>({
+    org:r.org,
+    // Nom d'ambiance fiable uniquement pour l'organisation ACTUELLE du
+    // combattant (f.orgFlavor n'est qu'une valeur courante, pas un historique
+    // par palier) — on retombe sur le nom générique du palier sinon, pour ne
+    // jamais afficher un nom d'ambiance qui ne correspond pas au bon règne.
+    orgName:(r.org===f.org && f.orgFlavor)?f.orgFlavor:(ORGS[r.org]||'Organisation'),
+    divName:r.divName, year:r.year, defenses:r.defenses||0
+  }));
   list.push({id:f.id,name:f.name,nick:f.nick,flag:f.flag,style:f.styleLabel,styleKey:f.style,div:f.div,divName:f.divName,W:f.W,L:f.L,ko:f.ko,sub:f.sub,
     titles:f.titles,defenses:f.defenses,world:!!f._world,euro:!!f._euro,ico,rank,epithets:epithets(f),score:hofScore(f),age:f.age,
     amaTitles:(f.amaTitles||[]).slice(),amaRec:f.amaRec?{W:f.amaRec.W,L:f.amaRec.L}:null,biggestRival:f.biggestRival||null,
     gameMode:f.gameMode||'career',favorite:false,
+    // ==== [ANCRE: ECRAN_DETAIL_LEGENDE] — item demandé : fiche complète
+    // consultable depuis le Panthéon (clic sur une carte), reprenant le même
+    // esprit que l'écran de retraite. Champs additionnels capturés ici.
+    beltHistory,champChampBelt:f.champChampBelt||null,
+    class:f.class||null,classLabel:f.classLabel||null,
+    motivation:f.motivation||null,
+    seasonRecap:(f.seasonRecap||[]).slice(),
+    notableWins:(f.history||[]).filter(h=>h.res==='win'&&h.oppWasChamp&&h.oppName).slice(-6).reverse(),
+    earnedAchievements:ACH.filter(a=>{ try{ return a.t(f); }catch(e){ return false; } }).map(a=>a.id),
+    nicknameHistory:(f.nicknameHistory||[]).slice(),
     // Données profondes pour le Fantasy Fight / All-Stars / Vs Ami — reconstruction fidèle du combattant
     attrs:JSON.parse(JSON.stringify(f.attrs)),skills:(f.skills||[]).slice(),phys:f.phys?JSON.parse(JSON.stringify(f.phys)):null,overall:f.overall});
   // Limite à 20 : les favoris sont protégés, seuls les non-favoris sont purgés
@@ -110,7 +139,14 @@ const LEGEND_UNLOCKABLES=[
   {id:'mode_vs_friend',name:'Défi Multijoueur (Vs Ami)',cat:'Modes annexes',cost:140,desc:'Oppose une de tes légendes retraitées au combattant d\u2019un ami, généré à la volée.'},
   {id:'mode_fantasy',name:'Fantasy Fight (Sandbox)',cat:'Modes annexes',cost:180,desc:'Simule un combat entre deux légendes de ton Panthéon.'},
   {id:'mode_boss',name:'Arcade : Boss Run',cat:'Modes annexes',cost:220,desc:'5 champions d\u2019affilée, KO uniquement. Le format le plus punitif du Gauntlet.'},
-  {id:'mode_allstars',name:'Tournoi All-Stars (8 Légendes)',cat:'Modes annexes',cost:300,desc:'Tournoi à élimination directe entre tes 8 meilleures légendes pour désigner ton GOAT.'}
+  {id:'mode_allstars',name:'Tournoi All-Stars (8 Légendes)',cat:'Modes annexes',cost:300,desc:'Tournoi à élimination directe entre tes 8 meilleures légendes pour désigner ton GOAT.'},
+  // ==== [ANCRE: REFONTE_SCENARIOS] — 2 scénarios réservés (cf. SCENARIOS dans
+  // engine.js, champ legendUnlock). Coûts calés entre les archétypes (80) et
+  // le Boss Run (220) : plus exigeants qu'un simple cosmétique/archétype
+  // (un scénario entier à réussir), mais plus accessibles qu'un mode annexe
+  // complet.
+  {id:'scenario_finisseur',name:'Scénario : Le Finisseur',cat:'Scénarios',cost:100,desc:'Débloque le défi "Le Finisseur" : titre mondial sans jamais gagner à la décision.'},
+  {id:'scenario_regne',name:'Scénario : Le Règne Sans Faille',cat:'Scénarios',cost:160,desc:'Débloque le défi "Le Règne Sans Faille" : 5 défenses de titre continental sans jamais perdre la ceinture.'}
 ];
 // Gain divisé par 10 par rapport au score brut : hofScore() peut dépasser 500
 // pour une belle carrière (titre mondial + défenses + palmarès), ce qui
@@ -130,7 +166,7 @@ function purchaseLegendUnlock(itemId){
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MIGRATION] — on empile les blocs, on n'en modifie jamais un livré ==== */
 function migrate(g){ if(!g)return g; g.version=g.version||1;
-  if(g.version<2){ g.version=2; }
+  if(g.version<SAVE_VERSION){ g.version=SAVE_VERSION; }
   return g; }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: VALIDATE_STATE] — comble les champs manquants d'une ancienne

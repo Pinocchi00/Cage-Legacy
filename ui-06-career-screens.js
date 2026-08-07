@@ -1,0 +1,686 @@
+"use strict";
+/* CAGE LEGACY — js/ui-06-career-screens.js
+   ============================================================================
+   Fichier 6/8 issu du découpage de l'ancien ui.js monolithique (~400 Ko).
+   Écrans principaux de la carrière : titre, création de personnage, vestiaire, sélection d'adversaire, plan de combat, fiche de résultat, classement.
+
+   IMPORTANT : ce découpage préserve l'ORDRE EXACT du code d'origine — aucune
+   fonction n'a été déplacée ou réordonnée, seules des frontières de fichier
+   ont été insérées à des points sûrs (toujours juste avant une déclaration de
+   premier niveau, jamais au milieu d'une fonction ou d'un objet). Tous ces
+   fichiers partagent la même portée globale que l'ancien ui.js (variables et
+   fonctions visibles d'un fichier à l'autre, comme avant), il faut donc les
+   charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
+   ============================================================================ */
+
+function scr_title(){
+  return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
+   <div style="text-align:center;margin-bottom:48px">
+     <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
+     <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
+   </div>
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`; })():''}
+   <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
+     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
+   ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
+   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l\u2019argent, les camps et l\u2019héritage</span></button>
+   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Tournois et défis d\u2019ascension arcade</span></button>
+   <div class="hr" style="margin:24px 0"></div>
+   <button class="btn ghost" style="font-size:16px;padding:16px;border:1px dashed var(--gold);background:var(--panel2);color:var(--gold)" onclick="CL.go('legends')">BOUTIQUE : SALLE DES LÉGENDES
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
+   </div>`;
+}
+/* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
+   (Bracket 64, Classement des 100, Boss Run), auparavant tous au même niveau
+   que les modes principaux sur l'écran titre. ==== */
+function scr_gauntlet_menu(){
+  return `<div class="scr center intro">
+   <div class="eyebrow sage">Mode Arcade</div>
+   <h2 class="disp big">GAUNTLET</h2>
+   <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
+   <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
+     <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span></button>
+   <button class="btn" style="font-size:18px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet</span></button>
+   ${checkLegendUnlock('mode_boss')?`<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--gold);color:var(--gold)" onclick="CL.startBossRun()">BOSS RUN
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span></button>`:''}
+   <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+function scr_intro(){ const c=hasSave('career');
+  return `<div class="scr center intro">
+   <div class="eyebrow">Simulateur de gestion MMA</div>
+   <h1 class="disp big">CAGE<br>LEGACY</h1>
+   <p class="lede">Capital physique limité. Chaque camp d\u2019entraînement laisse des traces.</p>
+   ${c?`<button class="btn gold" onclick="CL.cont()">Reprendre le dossier</button>`:''}
+   <button class="btn primary" onclick="CL.go('create')">${c?'Nouveau prospect':'Jouer une future légende'}</button>
+   <button class="btn ghost" onclick="CL.go('hof')">🏛️ Archives</button>
+   <button class="btn ghost" onclick="CL.go('title')">← Retour au menu</button></div>`; }
+
+function scr_create(){ const d=G.draft, divs=DIVISIONS[d.gender];
+  const pills=(arr,key,fn)=>arr.map(x=>`<span class="pill ${d[key]===fn(x).v?'on':''}" onclick="CL.draft('${key}','${fn(x).v}')">${fn(x).t}</span>`).join('');
+  return `<div class="scr"><div class="eyebrow">Création</div><h2 class="disp">Ton combattant</h2>
+   <div class="fld"><label>Genre</label><div class="pills">${pills(['H','F'],'gender',g=>({v:g,t:g==='H'?'Homme':'Femme'}))}</div></div>
+   <div class="fld"><label>Prénom</label><input id="fn" maxlength="18" value="${esc(d.first||'')}" placeholder="Prénom" oninput="CL.draftIn('first',this.value)"></div>
+   <div class="fld"><label>Pays</label><div class="pills">${COUNTRY_KEYS.map(c=>`<span class="pill ${d.country===c?'on':''}" onclick="CL.draft('country','${c}')">${COUNTRIES[c].flag} ${COUNTRIES[c].name}</span>`).join('')}</div></div>
+   <div class="fld"><label>Division</label><div class="pills">${divs.map(x=>`<span class="pill ${d.div===x.id?'on':''}" onclick="CL.draft('div','${x.id}')">${x.name}</span>`).join('')}</div></div>
+   <div class="fld"><label>Discipline de base <span class="muted">(toutes équilibrées)</span></label><div class="pills">${STYLE_KEYS.map(s=>`<span class="pill ${d.style===s?'on':''}" onclick="CL.draft('style','${s}')">${styleLabel(s)}</span>`).join('')}</div></div>
+   <div class="note small">Ton <b>origine</b>, ta <b>motivation</b> et ton <b>surnom</b> (au passage pro) se révéleront en jeu.</div>
+   <div class="fld"><label>Mode <span class="muted">(optionnel)</span></label><div class="pills">
+     <span class="pill ${d.ironMan?'on':''}" onclick="CL.draft('ironMan',${!d.ironMan})">Iron Man — une défaite ou blessure grave = fin définitive</span>
+   </div></div>
+   <div class="fld"><label>Défis prédéfinis <span class="muted">(Scénarios)</span></label>
+     <button class="btn ghost" style="border:1px solid var(--line);margin:0;padding:12px" onclick="CL.go('scenarios')">Parcourir les scénarios</button>
+   </div>
+   <button class="btn primary" onclick="CL.create()">Débuter la carrière</button>
+   <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
+
+function scr_hub(){ const f=G.f; const champ=f.champion;
+  // ==== [ANCRE: CORRECTIF_COULEUR_MESSAGE] — bug trouvé : un seul message
+  // ("sponsor validé") était reconnu comme positif ; TOUS les autres
+  // messages, y compris clairement positifs (ex. "Contrat renouvelé"),
+  // s'affichaient donc en rouge par défaut. Classification élargie par
+  // mots-clés, avec un ton neutre (doré) par défaut plutôt que négatif.
+  const msgLower=(G.lastMsg||'').toLowerCase();
+  const POSITIVE_HINTS=['sponsor validé','renouvelé','copié','remporté','accepté','testamentaire actif','débloqué avec succès','victoire','succès','signé'];
+  const NEGATIVE_HINTS=['refus','annulé','insuffisant','invalide','corrompu','impossible','ratée','échec','mauvaise impression','interdit','critique'];
+  const isGoodMsg=POSITIVE_HINTS.some(k=>msgLower.includes(k));
+  const isBadMsg=!isGoodMsg && NEGATIVE_HINTS.some(k=>msgLower.includes(k));
+  const msgColor=isGoodMsg?'var(--win)':isBadMsg?'var(--loss)':'var(--gold)';
+  const msgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid ${msgColor};background:var(--panel2)"><div class="small" style="color:${msgColor}">${esc(G.lastMsg)}</div></div>`:'';
+  if(G.lastMsg) G.lastMsg=null;
+  const injuryHtml=f.injury?`<div class="card gold-b glass" style="border-color:var(--loss);margin-bottom:16px">
+     <span class="eyebrow mb" style="color:var(--loss)">⚠ RAPPORT MÉDICAL CRITIQUE</span>
+     <div class="disp" style="font-size:18px">${esc(f.injury.name)}</div>
+     <div class="mono small mt">Convalescence requise : ${f.injury.left} cycle(s)</div>
+     <button class="btn mt" style="width:100%;border-color:var(--loss);color:var(--loss)" onclick="CL.recoverInjury()">Laisser le corps récupérer</button>
+   </div>`:'';
+  const declineHtml=(!f.injury && isDeclining(f))?`<div class="mono small" style="color:var(--loss);margin-top:6px;border-top:1px dashed var(--loss);padding-top:6px">⚠ Tu prends de l\u2019âge, le corps commence à souffrir.</div>`:'';
+  const fightBtnHtml=(f.injury||f.retired)
+    ?`<button class="btn ghost" style="font-size:20px;padding:18px;opacity:.5;cursor:not-allowed" disabled>${f.retired?'Carrière terminée':'Athlète inapte'}</button>`
+    :`<button class="btn primary" style="font-size:20px;padding:18px" onclick="CL.fightSelect()">Évaluer les contrats (Matchmaking)</button>`;
+  const rankTag=f.champChampBelt?`<span class="tag2 hot" style="border-color:var(--blood);color:var(--blood)">DOUBLE CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:(champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`));
+  const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
+  const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
+  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">Contrat : ${f.contract.fightsLeft} combat(s)</span>`:'';
+  return `<div class="scr">
+   <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
+     <span class="eyebrow mono">${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
+     <span class="eyebrow mono gold">${formatArgent(f.earnings)}</span>
+   </div>
+   ${msgHtml}
+   ${injuryHtml}
+   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
+     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.classLabel?esc(f.classLabel):f.styleLabel}, ${f.age} ans</em></div>
+     <div class="tagrow">${rankTag}${streakTag}${contractTag}${amaTag}</div>
+     ${declineHtml}
+     <div class="stat-band">
+       <div><span class="stat-big">${recordStr(f)}</span><span class="stat-lbl">Record actuel</span></div>
+       <div style="text-align:right">${f.ko===f.sub?`<span class="stat-lbl" style="display:block;margin-bottom:2px">FINITIONS</span><span class="mono" style="font-size:20px"><span class="gold">${f.ko}</span> KO / <span class="gold">${f.sub}</span> SUB</span>`:f.ko>f.sub?`<span class="stat-big hot">${f.ko}</span><span class="stat-lbl">KO / ${f.sub} SUB</span>`:`<span class="stat-big hot">${f.sub}</span><span class="stat-lbl">SUB / ${f.ko} KO</span>`}</div>
+     </div>
+   </div>
+   <div style="margin-bottom:20px">
+     <div class="eyebrow" style="margin-bottom:8px">Derniers combats</div>
+     ${last5(f)}
+   </div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
+     <div><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>MORAL</span><b class="mono" style="color:var(--text);font-size:12px">${d20(f.morale)}</b></span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--win)"></span></div></div>
+     <div><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>FORME</span><b class="mono" style="color:var(--text);font-size:12px">${d20(f.form)}</b></span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--sage)"></span></div></div>
+   </div>
+   ${fightBtnHtml}
+   <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
+   <div class="g2"><button class="btn ghost" onclick="CL.go('ach')">Palmarès</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
+   <button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Registre des ceintures</button>
+   ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
+     <div class="eyebrow mb" style="color:var(--blood)">Double Champion</div>
+     <div class="small">Vous détenez également la ceinture ${f.champChampBelt}.</div>
+   </div>`:''}
+   ${(G.divisionNews&&G.divisionNews.length)?`<div class="card mt" style="background:var(--panel2);padding:12px">
+     <div class="eyebrow mb">Actualités de la division</div>
+     ${G.divisionNews.slice(0,3).map(n=>`<div class="mono small muted" style="margin-top:4px">S${n.year} — ${n.text}</div>`).join('')}
+   </div>`:''}
+   <button class="btn ghost" style="color:var(--loss);margin-top:16px;border-top:1px dashed var(--line);padding-top:16px" onclick="CL.go('retire')">Déclarer la retraite (Définitif)</button>
+   </div>`; }
+
+function scr_select(){ const f=G.f;
+  let h=`<div class="scr">
+   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
+     <span class="eyebrow mono">BUREAU DU MATCHMAKER // ${orgDisplayName(f).toUpperCase()}</span>
+   </div>
+   <p class="lede" style="margin-bottom:32px;font-size:15px">Analysez les profils et signez le contrat. L\u2019ordre des propositions dicte le niveau de risque et la récompense au classement.</p>`;
+  const rkMe=divRank(f);
+  G.opps.forEach((e,i)=>{ const o=e.o;
+    const isRival=(f.rivalId===o.id); const isAmaRival=(!isRival && o.isAmateurRival);
+    const rnk=divRank(o); const fightsTot=o.W+o.L+(o.D||0);
+    const rTag=o.champion?'CHAMPION':(fightsTot===0?'NON CLASSÉ':(rnk===1?'CHALLENGER #1':`RANG #${rnk}`));
+
+    // Archétype de matchmaking : la logique de fond ne change pas (mêmes 3
+    // adversaires que genOpponents() proposait déjà), seul l'habillage devient
+    // un vrai dilemme risque/récompense lisible d'un coup d'œil.
+    // ==== [ANCRE: CORRECTIF_REPETITION_TEXTES] — item demandé : mmReward
+    // n'avait qu'UNE phrase fixe par archétype ("Le Raccourci", "Le Prodige"
+    // etc. toujours le même texte). mmRole (l'étiquette catégorie) reste
+    // stable — c'est un repère de lecture rapide, pas un texte narratif — mais
+    // mmReward pioche désormais dans un pool via pickStable (seed=id de
+    // l'adversaire), donc varié d'un combat à l'autre sans changer à chaque
+    // re-rendu du même écran.
+    let mmRole='Opposition Logique', mmReward=pickStable(['Niveau équivalent, progression saine au classement.','Un adversaire à ta mesure — rien à gagner en prestige, rien à perdre non plus.','Match logique, sans grand risque ni grande gloire.','Le genre de combat qui construit un palmarès solide, sans éclat particulier.'],o.id+'r0'), roleColor='var(--text)';
+    const isProspect=(o.age<=23 && fightsTot<=6 && o.W>o.L);
+    const isVeteran=(o.age>=34 && o.L>=3);
+    const isGatekeeper=(o.attrs.durability>75 || o.attrs.tdd>75) && o.L>o.W/2;
+    if(e.context==='CHAMP-CHAMP'){ mmRole='Défi Historique'; mmReward=pickStable(['Devenir double monarque. La consécration ultime.','Entrer dans l\u2019histoire en portant deux ceintures à la fois.','Le genre de combat qu\u2019on ne propose qu\u2019une fois dans une carrière.'],o.id+'cc'); roleColor='var(--gold)'; }
+    else if(e.context && e.context.includes('TOURNOI')){ mmRole='Combat de Bracket'; mmReward=pickStable(['Avancer dans le tournoi amateur.','Une victoire de plus vers le sacre amateur.','Chaque round de bracket rapproche un peu plus du titre.'],o.id+'tn'); roleColor='var(--sage)'; }
+    else if(o.champion || e.context==='COMBAT DE TITRE'){ mmRole='Le Champion en Titre'; mmReward=pickStable(['Risque immense. Récompense absolue : la Ceinture.','Tout miser sur une seule soirée — la ceinture ou rien.','L\u2019occasion de sa carrière, contre le meilleur en place.'],o.id+'ti'); roleColor='var(--gold)'; }
+    else if(f.champion){ mmRole='Challenger Légitime'; mmReward=pickStable(['Défense de titre. Confirme votre statut de roi de la division.','Une défense de plus pour asseoir durablement le règne.','Prouver, encore, que la ceinture est entre les bonnes mains.'],o.id+'df'); roleColor='var(--sage)'; }
+    else if(isRival){ mmRole='Rivalité Historique'; mmReward=pickStable(['L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.','Une histoire à régler, devant un public qui ne rate pas ça.','Ce combat ne se résume jamais à un simple classement.'],o.id+'rv'); roleColor='var(--blood)'; }
+    else if(fightsTot===0){ mmRole='Le Débutant'; mmReward=pickStable(['Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.','Un adversaire encore sans historique — sert surtout à retrouver du rythme.','Combat sans grand enjeu, utile pour reprendre confiance.'],o.id+'db'); roleColor='var(--muted)'; }
+    else if(rnk<rkMe-4){ mmRole='Le Raccourci (Risqué)'; mmReward=pickStable(['Gros écart de niveau en votre faveur. Bond massif au classement assuré si vous créez la surprise.','Sur le papier, tu n\u2019as rien à faire dans cette division — d\u2019où la récompense si tu gagnes.','Un pari audacieux : l\u2019écart est énorme, mais le classement suit si tu réussis.'],o.id+'sc'); roleColor='var(--gold)'; }
+    else if(isProspect){ mmRole='Le Prodige Régional'; mmReward=pickStable(['Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.','Le nouveau chouchou des médias — le faire taire rapporte gros, le nourrir coûte cher.','Toute la presse le regarde. Une défaite face à lui ferait très mal à ta réputation.'],o.id+'pr'); roleColor='#4DA6FF'; }
+    else if(isGatekeeper){ mmRole='Le Gardien du Temple'; mmReward=pickStable(['Combat bourbier garanti. Passage obligatoire pour le haut du classement.','Increvable et frustrant — mais personne n\u2019atteint le sommet sans passer par lui.','Un mur qu\u2019il faut traverser un jour ou l\u2019autre, autant que ce soit maintenant.'],o.id+'gk'); roleColor='var(--sage)'; }
+    else if(isVeteran){ mmRole='Le Vétéran'; mmReward=pickStable(['Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.','Un ancien grand nom qui n\u2019a plus tout à fait les jambes d\u2019avant.','Le genre de victoire qui rassure sans vraiment impressionner personne.'],o.id+'vt'); roleColor='var(--text)'; }
+    else if(rnk>rkMe+5){ mmRole='Le Combat Piège'; mmReward=pickStable(['Classement inférieur au vôtre. Tout à perdre, rien à gagner.','Une victoire attendue et vite oubliée — une défaite, elle, ferait grand bruit.','Ce genre de combat ne rapporte presque rien, mais peut coûter énormément.'],o.id+'tp'); roleColor='var(--loss)'; }
+
+    // ==== [ANCRE: COMPARATIF_STATS_REUTILISABLE] — factorisé dans statComparisonHtml() ====
+    h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
+      <div style="border-left:3px solid ${roleColor};padding-left:12px;margin-bottom:16px">
+         <div class="disp" style="font-size:18px;color:${roleColor};line-height:1">${mmRole.toUpperCase()}</div>
+         <div class="mono small muted" style="margin-top:4px">${mmReward}</div>
+      </div>
+      <div class="meta-strip"><div><span>Record</span><b style="white-space:nowrap">${recordStr(o)}</b></div>${o.amaRec?`<div><span>Amateur</span><b style="white-space:nowrap">${o.amaRec.W}-${o.amaRec.L}</b></div>`:''}<div><span>Mensurations</span><b style="white-space:nowrap">${o.phys.height}cm / ${o.phys.reach}cm</b></div></div>
+      <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
+      <div class="tagrow">
+        ${e.context?`<span class="tag2 hot" style="background:var(--gold);color:var(--bg);border-color:var(--gold)">${e.context}</span>`:''}
+        ${isRival?'<span class="tag2" style="color:var(--bg);background:var(--blood);border-color:var(--blood)">RIVALITÉ ACTIVE</span>':''}
+        ${isAmaRival?'<span class="tag2" style="color:var(--sage);border-color:var(--sage)">RIVAL AMATEUR</span>':''}
+        <span class="tag2 hot">${rTag}</span>
+      </div>
+      ${statComparisonHtml(f,o)}
+      <p class="event-text mono" style="font-size:11.5px;opacity:.85;margin:14px 0 0;position:relative;z-index:2;border-left:2px solid var(--gold);padding-left:10px">ANALYSE : ${e.read}</p>
+      <button class="btn ${isRival?'primary':''}" style="margin-top:14px;font-size:15px;letter-spacing:.05em;position:relative;z-index:2" onclick="CL.opp(${i})">${isRival?'RÉGLER SES COMPTES':'ACCEPTER LE COMBAT'}</button>
+    </div>`;
+  });
+  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Retour au vestiaire</button></div>`;
+  return h;
+}
+
+/* ==== [ANCRE: PRESS_CONF_ECRAN] — écran dédié, plutôt qu'une carte noyée
+   dans le vestiaire (le joueur passait complètement à côté). ==== */
+function scr_press_conf(){
+  const pc=G.pressConf;
+  if(!pc) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('camp')">Continuer</button></div>`;
+  return `<div class="scr center intro">
+    <div class="eyebrow blood">Médiatisation</div>
+    <h2 class="disp">${pc.title}</h2>
+    <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:20px 0;border-left:3px solid var(--blood)">
+      <p class="lede" style="margin:0">${pc.text}</p>
+    </div>
+    <div class="tagrow" style="justify-content:center;margin-bottom:24px">
+      ${(()=>{ const shown=Math.sign(pc.moraleEffect)*Math.max(1,Math.round(Math.abs(pc.moraleEffect)/5));
+        return `<span class="tag2 hot" style="color:${shown>=0?'var(--win)':'var(--loss)'};border-color:${shown>=0?'var(--win)':'var(--loss)'}">${shown>=0?'+':''}${shown} Moral</span>`; })()}
+    </div>
+    <button class="btn primary" onclick="G.pressConf=null; CL.go('camp')">Continuer vers le camp d\u2019entraînement</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+function scr_camp(){ const f=G.f;
+  const deltaHtml=d=>d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
+     const vague=(k==='morale'||k==='form')?(v>0?`+${lbl}`:`-${lbl}`):(v>0?`Potentiel : ${lbl} ↑`:`Potentiel : ${lbl} ↓`);
+     return `<span class="dlt ${v>=0?'up':'dn'}">${vague}</span>`; }).join('');
+  const curTier=G.selectedCampTier||'gratuit';
+  const activeTier=CAMP_TIERS.find(t=>t.id===curTier)||CAMP_TIERS[0];
+  let tierDesc='';
+  if(activeTier.id==='gratuit') tierDesc='Aucun coût financier. <span style="color:var(--loss)">Risque de blessure de 5%</span> (-15% Forme, -10% Moral).';
+  else if(activeTier.id==='premium') tierDesc='Coût : 15k$. <span style="color:var(--win)">Zéro risque de blessure. Bonus garanti : +5% Forme, +5% Moral.</span>';
+  else if(activeTier.id==='sparring') tierDesc='Coût : 35k$. <span style="color:var(--win)">Zéro risque. Bonus : +5% Forme.</span> L\u2019adversaire subira un malus tactique (-3 Adapt., -2 QI).';
+  const tierTags=CAMP_TIERS.map(t=>{
+    const canAfford=(f.earnings||0)>=t.cost;
+    const style=`cursor:${canAfford?'pointer':'not-allowed'};opacity:${canAfford?1:0.35}`;
+    const click=canAfford?` onclick="CL.setCampTier('${t.id}')"`:'';
+    return `<span class="tag2 ${curTier===t.id?'hot':''}" style="${style}"${click}>${t.name}${t.cost?` (${t.cost}k$)`:''}</span>`;
+  }).join('');
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Camp d\u2019entraînement</span><span class="eyebrow x" onclick="CL.go('select')">✕</span></div>
+   <p class="lede small">Un seul axe avant ce combat. Chaque choix <b>monte et baisse</b> des attributs (bornés par ton potentiel).</p>
+   <div class="tagrow mb">${tierTags}</div>
+   <div class="card glass mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><div class="mono small">${tierDesc}</div></div>
+   ${G.train.map((t,i)=>`<div class="opp" onclick="CL.train(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
+      <div class="opp-mid">${t.hint}</div><div class="dlts">${deltaHtml(t.d)}</div></div>`).join('')}
+   </div>`; }
+
+/* ==== [ANCRE: PLAN_COMBAT] — vestiaire, choix tactique juste avant le combat ==== */
+function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
+  const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
+  const step=G.fight.planStep||1;
+  const wcHtml={
+    sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div>
+      <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="small muted" style="margin-top:8px">Un moine bouddhiste au régime.</div>
+      <div class="small" style="color:var(--sage);font-weight:bold;margin-top:4px">Bonus ce soir : cardio et solidité.</div></div>`,
+    facile:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Cutting facile</div>
+      <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="mono small" style="margin-top:2px">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
+      <div class="small muted" style="margin-top:8px">Deux jours de sauna et un sandwich en moins, rien de dramatique.</div>
+      <div class="small muted" style="margin-top:4px">Aucun impact ce soir.</div></div>`,
+    normal:`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px"><div class="eyebrow gold mb">Cutting normal</div>
+      <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="mono small" style="margin-top:2px">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
+      <div class="small muted" style="margin-top:8px">Le sauna, le sac poubelle, la routine du métier.</div>
+      <div class="small muted" style="margin-top:4px">Dans la norme du métier, aucun impact.</div></div>`,
+    complique:`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding-left:14px"><div class="eyebrow mb" style="color:var(--loss)">Cutting compliqué</div>
+      <div class="mono small" style="margin-top:6px;position:relative;z-index:2">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
+      <div class="mono small" style="margin-top:2px;position:relative;z-index:2">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
+      <div class="small muted" style="margin-top:8px;position:relative;z-index:2">Tu vas cracher dans un gobelet pendant six heures et dormir dans un sac poubelle. Pitoyable, mais professionnel.</div>
+      <div class="small" style="color:var(--loss);font-weight:bold;margin-top:4px;position:relative;z-index:2">Malus ce soir : cardio, force, solidité et menton (déshydratation).</div></div>`,
+  }[cr.tier]||'';
+  let h=`<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
+   ${G.fight.isStarFight?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px"><span class="mono small gold">★ COMBAT VEDETTE — ta popularité t\u2019offre 5 rounds sous les projecteurs ce soir.</span></div>`:''}
+   ${renderFightPoster(f,opp,G.fight.kind)}`;
+  if(step===1){
+    h+=wcHtml;
+    if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
+     <div class="mono small">${G.activeSponsor.text}</div></div>`;
+    if(G.lastMsg){
+      h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
+       <div class="eyebrow mb" style="color:var(--text)">Bilan du face-à-face</div>
+       <div class="small">${esc(G.lastMsg)}</div></div>`;
+      G.lastMsg=null;
+    }
+    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
+  } else {
+    h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
+     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
+   </div>
+   <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
+   ${getExclusiveTactics(f).concat(plans).map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
+     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}`;
+  }
+  h+=`</div>`;
+  return h;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: PLAN_VS_AMI] — choix tactique dédié au Défi Multijoueur,
+   même logique que le vestiaire de carrière (scr_plan) mais simplifié (pas
+   de coupe de poids, ces deux légendes sont déjà reconstruites telles
+   quelles). ==== */
+function scr_vs_friend_plan(){
+  const A=G.vsFriendLegendA, B=G.vsFriendLegendB;
+  if(!A||!B) return `<div class="scr center intro"><p class="lede">Série interrompue.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
+  const plans=TACTICS[A.style]||[];
+  const s=G.vsFriendScore;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Défi Multijoueur · Plan de combat</span></div>
+   <div class="hero-name" style="text-align:center;font-size:20px">${esc(A.name)} <span class="muted">${s.A} - ${s.B}</span> ${esc(B.name)}</div>
+   <div class="card mt" style="border-color:transparent;padding:0 0 16px 0">
+     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(A,B)}</div>
+   </div>
+   <p class="lede small mt">Quelle est ta consigne tactique pour cette manche ?</p>
+   ${getExclusiveTactics(A).concat(plans).map((p,i)=>`<div class="opp" onclick="CL.chooseVsFriendPlan(${i})">
+     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: NARRATION] — log texte à partir de res.log/res.stats, déjà calculés ==== */
+function fightLog(res){ if(!res.log||!res.log.length)return '<span class="muted small">Décision aux cartes.</span>';
+  const rows=res.log.map(L=>`<div class="log-row ${L.finish?'gold':''}"><span class="log-r">R${L.r}</span><span style="flex:1">${L.text||(L.phase==='sol'?'échanges au sol':'échanges debout')}</span></div>`);
+  if(isDecisionLike(res.method)) rows.push(`<div class="log-row gold"><span class="log-r">R${res.round||3}</span><span style="flex:1">${res.method}${res.detail?' — '+res.detail:''}</span></div>`);
+  return `<div class="fight-log" style="max-height:220px;overflow-y:auto;padding-right:5px">${rows.join('')}</div>`; }
+/* ==== [FIN ANCRE] ==== */
+function scr_hof(){
+  const fullList=loadHOF();
+  const filt=G.hofFilter||{};
+  const list=(typeof filterHallOfFame==='function')?filterHallOfFame(filt):fullList;
+  const styles=Object.values(STYLES).map(s=>s.label);
+  const divisions=[...new Set(DIVISIONS.F.concat(DIVISIONS.H).map(d=>d.name))];
+  const modes=[...new Set(fullList.map(f=>f.gameMode||'career'))];
+  const modeLabels={career:'Carrière Complète',faith:'MMA Faith'};
+  const showFilters=!!G.showHofFilters;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon · ${list.length}/${fullList.length} légende(s)</span><span class="eyebrow x" onclick="CL.go('intro')">✕</span></div>
+   <h2 class="disp">Tes anciens combattants</h2>
+   <button class="btn ghost mb" style="border:1px solid var(--line);width:auto;padding:8px 16px" onclick="CL.toggleHofFilters()">Filtres ${showFilters?'−':'+'}</button>
+   ${showFilters?`<div style="background:var(--panel2);padding:12px;border:1px solid var(--line);margin-bottom:16px">
+   ${modes.length>1?`<div class="eyebrow mb">Mode</div><div class="tagrow mb"><span class="tag2 ${!filt.gameMode?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','')">Tous</span>${modes.map(m=>`<span class="tag2 ${filt.gameMode===m?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','${m}')">${modeLabels[m]||m}</span>`).join('')}</div>`:''}
+   ${styles.length>1?`<div class="eyebrow mb mt">Styles</div><div class="tagrow mb"><span class="tag2 ${!filt.style?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','')">Tous</span>${styles.map(s=>`<span class="tag2 ${filt.style===s?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','${esc(s)}')">${esc(s)}</span>`).join('')}</div>`:''}
+   ${divisions.length>1?`<div class="eyebrow mb mt">Divisions</div><div class="tagrow mb"><span class="tag2 ${!filt.divName?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','')">Toutes</span>${divisions.map(d=>`<span class="tag2 ${filt.divName===d?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','${esc(d)}')">${esc(d)}</span>`).join('')}</div>`:''}
+   <div class="eyebrow mb mt">Défenses</div><div class="tagrow mb"><span class="tag2 ${!filt.minDefenses?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',0)">Toutes</span><span class="tag2 ${filt.minDefenses>=2?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',2)">2+ défenses</span></div>
+   </div>`:''}
+   ${G.exportedCode?`<div class="card glass mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)">
+     <div class="eyebrow mb" style="color:var(--gold)">Lien de ${esc(G.exportedName||'')} — envoie-le à ton ami</div>
+     ${G.exportedLink?`<input readonly value="${esc(G.exportedLink)}" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px" onclick="this.select()">
+     <button class="btn primary mt" style="width:auto;padding:6px 14px" onclick="CL.copyExportedLink()">Copier le lien</button>`:''}
+     <details class="mt"><summary class="muted small" style="cursor:pointer">Le lien ne marche pas ? Utiliser le code à la place</summary>
+       <textarea readonly style="width:100%;min-height:70px;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px;resize:none;margin-top:8px" onclick="this.select()">${G.exportedCode}</textarea>
+     </details>
+     <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
+   </div>`:''}
+   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
+      <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.classLabel?esc(f.classLabel):f.style} · ${f.div} · retraite ${f.age} ans</em></div>
+      <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
+        <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
+        ${f.amaRec?`<div style="text-align:right"><span class="stat-big" style="font-size:24px">${f.amaRec.W}<span class="muted">-</span><span class="loss">${f.amaRec.L}</span></span><span class="stat-lbl">Amateur</span></div>`:''}
+      </div>
+      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow" style="margin-bottom:8px">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+      ${(f.beltHistory&&f.beltHistory.length)?`<div class="tagrow" style="margin-bottom:8px">${[...new Map(f.beltHistory.map(r=>[r.org+'|'+r.orgName+'|'+r.divName,r])).values()].map(r=>`<span class="tag2 hot" style="border-color:var(--gold);color:var(--gold)">${SVG.crown} ${esc(r.orgName)} — ${esc(r.divName)}</span>`).join('')}</div>`:''}
+      ${f.champChampBelt?`<div class="tagrow" style="margin-bottom:8px"><span class="tag2 hot" style="border-color:var(--blood);color:var(--blood)">${SVG.crown} Double champion — ${esc(f.champChampBelt)}</span></div>`:''}
+      ${f.biggestRival?`<div class="mono small" style="color:var(--blood);margin-bottom:8px">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} (${f.biggestRival.count} confrontations)</div>`:''}
+      <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="event.stopPropagation();CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="event.stopPropagation();CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="event.stopPropagation();CL.deleteHof('${f.id}')">Supprimer</button></div>`).join(''):
+      '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}
+   <div class="tagrow mb">
+     <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
+     <button class="btn ghost" style="width:auto;padding:8px 12px" onclick="CL.go('codex')">Codex des compétences</button>
+     <button class="btn ghost" style="width:auto;padding:8px 12px;border-color:var(--gold);color:var(--gold)" onclick="CL.go('legends')">Salle des Légendes</button>
+   </div>
+   <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
+/* ==== [ANCRE: ECRAN_DETAIL_LEGENDE] — item demandé : fiche complète pour
+   une légende retraitée, accessible par clic depuis le Panthéon, dans le même
+   esprit que l'écran de retraite (scr_legacy) mais lisant des données figées
+   (l'entrée HOF) plutôt que le combattant actif G.f. ==== */
+function scr_legend_detail(){
+  const id=G.viewingLegendId;
+  const list=loadHOF();
+  const f=list.find(x=>String(x.id)===String(id));
+  if(!f) return `<div class="scr center"><p class="lede">Cette légende n\u2019est plus dans le Panthéon.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
+  const belts=[...new Map((f.beltHistory||[]).map(r=>[r.org+'|'+r.orgName+'|'+r.divName,r])).values()];
+  const achChips=(f.earnedAchievements||[]).map(id2=>{ const a=ACH.find(x=>x.id===id2); return a?`<span class="tag2 hot" style="display:inline-flex;align-items:center;gap:5px" title="${esc(a.d)}"><span style="font-size:15px">${a.ico}</span>${esc(a.h)}</span>`:''; }).filter(Boolean).join('');
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche de légende</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
+   <div style="font-size:50px;text-align:center">${f.ico}</div>
+   <div class="hero-name" style="text-align:center;color:var(--gold)">${f.rank}<em style="color:var(--muted)">${esc(f.name)}${f.nick?' « '+esc(f.nick)+' »':''} ${f.flag}</em></div>
+   ${f.classLabel?`<div class="mono small gold" style="text-align:center;margin-top:-8px;margin-bottom:8px">${esc(f.classLabel)} (${esc(f.style)})</div>`:''}
+   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px">
+     <div class="epis" style="position:relative;z-index:2">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
+     ${(f.nicknameHistory&&f.nicknameHistory.length)?`<div class="mono small muted mt">Ancien(s) surnom(s) : ${f.nicknameHistory.map(n=>`« ${esc(n)} »`).join(', ')}</div>`:''}
+     <div class="hr"></div>
+     <div class="stat-band" style="border-top:none;padding-top:0;margin-top:0;flex-wrap:wrap;gap:16px">
+       <div><span class="stat-big" style="font-size:26px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
+       <div>${f.ko===f.sub?`<span class="stat-lbl" style="display:block;margin-bottom:2px">FINITIONS</span><span class="mono" style="font-size:20px"><span class="gold">${f.ko}</span> KO / <span class="gold">${f.sub}</span> SUB</span>`:f.ko>f.sub?`<span class="stat-big hot" style="font-size:26px">${f.ko}</span><span class="stat-lbl">KO / ${f.sub} SUB</span>`:`<span class="stat-big hot" style="font-size:26px">${f.sub}</span><span class="stat-lbl">SUB / ${f.ko} KO</span>`}</div>
+       <div><span class="stat-big" style="font-size:26px">${f.defenses||0}</span><span class="stat-lbl">Défenses</span></div>
+       <div><span class="stat-big" style="font-size:26px">${(f.skills||[]).length}</span><span class="stat-lbl">Compét.</span></div>
+     </div>
+     ${f.motivation?`<div class="muted small mt" style="position:relative;z-index:2;font-style:italic">« ${esc(f.motivation)} »</div>`:''}
+     ${f.biggestRival?`<div class="mono small mt" style="color:var(--blood);position:relative;z-index:2">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div>`:''}
+   </div>
+   ${belts.length?`<div class="card mt"><div class="eyebrow mb gold">${SVG.crown} Ceintures remportées</div>${belts.map(r=>`<div class="small" style="padding:4px 0"><b class="gold">${esc(r.orgName)}</b> — ${esc(r.divName)} <span class="mono muted" style="opacity:.7">(${r.defenses} défense(s))</span></div>`).join('')}</div>`:''}
+   ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood)"><div class="eyebrow mb" style="color:var(--blood)">${SVG.crown} Double champion</div><div class="small">A également détenu la ceinture ${esc(f.champChampBelt)}.</div></div>`:''}
+   ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mt">${f.amaTitles.map(aid=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===aid); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+   ${(f.notableWins&&f.notableWins.length)?`<div class="card mt"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
+   ${retireSeasonRecapHtml(f)}
+   ${achChips?`<div class="card mt"><div class="eyebrow mb">🏆 Succès débloqués</div><div style="display:flex;flex-wrap:wrap;gap:8px">${achChips}</div></div>`:''}
+   <button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: SYSTEME_CLASSES] (écran) — choix définitif à 23 ans. Affiche
+   un indice de cohérence ("fit") avec le palmarès réel plutôt que de forcer
+   un choix — le joueur reste libre, l'indice n'est qu'informatif. ==== */
+function scr_class_choice(){
+  const f=G.f; const pool=CLASSES[f.style]||[];
+  return `<div class="scr center intro">
+   <div class="eyebrow gold">Cap des 23 ans</div>
+   <h2 class="disp">Choisir sa Classe</h2>
+   <p class="lede">Une spécialisation permanente et définitive. Ce choix ne pourra plus jamais être changé — regarde ton parcours jusqu\u2019ici avant de trancher.</p>
+   ${pool.map((c,i)=>{
+     const fits=(()=>{ try{ return c.fit(f); }catch(e){ return false; } })();
+     const fxTxt=Object.entries(c.fx).map(([k,v])=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `<span class="dlt ${v>0?'up':'dn'}">${v>0?'+':''}${v} ${lbl}</span>`; }).join(' ');
+     return `<div class="glass card mb" style="background:var(--panel2);border:1px solid ${fits?'var(--gold)':'var(--line)'};text-align:left;padding:16px">
+       <div class="hero-name" style="font-size:19px">${esc(c.lbl)}</div>
+       <p class="muted small mt" style="font-style:italic">« ${esc(c.desc)} »</p>
+       <div class="mono small mt">${fxTxt}</div>
+       <div class="mono small mt" style="color:${fits?'var(--gold)':'var(--muted)'}">${fits?'✓ Correspond à ton parcours jusqu\u2019ici':'Ne correspond pas particulièrement à ton style actuel — reste un choix valide.'}</div>
+       <button class="btn primary mt" onclick="CL.chooseClass(${i})">Choisir « ${esc(c.lbl)} » — définitif</button>
+     </div>`;
+   }).join('')}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
+  let judgesHtml='';
+  if(isDecisionLike(p.method) && !p.res.judges && p.res.scoreA!==undefined){
+    judgesHtml=`<div class="card gold-b" style="text-align:center"><div class="eyebrow mb">Pointage (total)</div><div class="disp" style="font-size:22px">${p.res.scoreA} – ${p.res.scoreB}</div></div>`;
+  } else if(isDecisionLike(p.method) && p.res.judges){
+    const J=p.res.judges;
+    judgesHtml=`<div class="card gold-b" style="text-align:center">
+      <div class="eyebrow mb">Pointage des juges (10-point must)</div>
+      <div class="duel2" style="justify-content:center;gap:16px">
+        <span class="num ${J.j1[0]>J.j1[1]?'a':'b'}">${J.j1[0]}-${J.j1[1]}</span>
+        <span class="num ${J.j2[0]>J.j2[1]?'a':'b'}">${J.j2[0]}-${J.j2[1]}</span>
+        <span class="num ${J.j3[0]>J.j3[1]?'a':'b'}">${J.j3[0]}-${J.j3[1]}</span>
+      </div>
+      <div class="hr"></div>
+      <div class="mono small muted" style="text-align:left;font-size:10px">
+        <div style="display:flex;justify-content:space-between;color:var(--text);margin-bottom:4px"><span>RND</span><span>J1</span><span>J2</span><span>J3</span><span>SIG</span><span>TD</span><span>KD</span></div>
+        ${(p.res.roundStats||[]).map(rs=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--line)">
+          <span style="color:var(--gold)">R${rs.r}</span><span>${rs.j1[0]}-${rs.j1[1]}</span><span>${rs.j2[0]}-${rs.j2[1]}</span><span>${rs.j3[0]}-${rs.j3[1]}</span><span>${rs.sigA}-${rs.sigB}</span><span>${rs.tdA}-${rs.tdB}</span><span>${rs.kdA}-${rs.kdB}</span>
+        </div>`).join('')}
+      </div></div>`;
+  }
+  let campHtml='';
+  if(p.camp && p.camp.deltas.length){
+    const rows=p.camp.deltas.map(d=>{
+      if(Array.isArray(d)){ const scaled=Math.sign(d[1])*Math.max(1,Math.round(Math.abs(d[1])/5)); return `<span class="dlt ${d[1]>=0?'up':'dn'}">${scaled>0?'+':''}${scaled} ${d[0]}</span>`; }
+      const b20=d20(d.before), a20=d20(d.after);
+      if(b20===a20) return '';
+      return `<span class="dlt ${a20>=b20?'up':'dn'}">${d.label} : ${b20} ➔ ${a20}</span>`;
+    }).filter(Boolean);
+    if(rows.length) campHtml=`<div class="card"><div class="eyebrow mb">Évolution (sur 20)</div><div class="dlts">${rows.join('')}</div></div>`;
+  }
+  return `<div class="scr">
+   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px;text-align:center">
+     <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
+     <div class="hero-name" style="color:${p.isFantasy||p.isVsFriend?(p.res.winner==='D'?'var(--gold)':(p.win?'var(--blood)':'#4DA6FF')):(p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)'))}">${(p.isFantasy||p.isVsFriend)?(p.res.winner==='D'?'ÉGALITÉ':`${esc(p.win?f.name:p.opp.name)} gagne par ${p.method}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${(p.isFantasy||p.isVsFriend)?'':p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
+     <div class="tagrow" style="justify-content:center">
+       ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
+         const typeStr=p.method.startsWith('KO')?'KO/TKO':'Soumission';
+         // ==== [ANCRE: DETECTION_ZONE_REDONDANTE] — élargie aux synonymes
+         // anatomiques (ex. "plexus"/"menton" pour la zone "corps"/"tête") :
+         // avant, seule une correspondance texte EXACTE du mot de zone
+         // évitait le doublon d'affichage (ex. "Chassé frontal (teep) au
+         // plexus — CORPS", redondant car "plexus" ET "corps" désignent la
+         // même zone sans que le mot "corps" apparaisse littéralement).
+         const ZONE_SYNONYMS={'tête':['tête','tete','menton','crâne','crane','visage','mâchoire','machoire','tempe'],
+           'corps':['corps','plexus','foie','côtes','cotes','ventre','tronc','flanc'],
+           'jambes':['jambe','tibia','genou','cuisse','mollet','cheville']};
+         const synonyms=(p.res.zone && ZONE_SYNONYMS[p.res.zone])||[p.res.zone];
+         const moveNameLower=p.res.moveName.toLowerCase();
+         const zoneRedundant=p.res.zone && synonyms.some(s=>moveNameLower.includes(s));
+         const zoneDetail=(p.res.zone && !zoneRedundant)?` — ${p.res.zone}`:'';
+         return `<span class="tag2 hot">${typeStr} (${esc(p.res.moveName)})${zoneDetail}</span>`;
+       })():''}
+       ${p.planLabel?`<span class="tag2">Tactique : ${p.planLabel}</span>`:''}
+     </div>
+     ${p.res.moveFlavor?(()=>{ const isSig=p.res.moveFlavor.includes('MOUVEMENT SIGNATURE'); return `<div class="${isSig?'':'muted'} small mt" style="font-style:italic;${isSig?'color:var(--gold);font-weight:bold;font-style:normal':''}">${esc(p.res.moveFlavor)}</div>`; })():''}
+   </div>
+   ${judgesHtml}
+   ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
+   ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const before=d20(f.attrs[k]-v); return `<div style="color:var(--win)">${before} → ${after} ${label}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
+     <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
+     <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
+     <div class="st-row"><span>${formatCtrl(st.A.ctrl||0)}</span><span class="st-l">Temps de contrôle</span><span>${formatCtrl(st.B.ctrl||0)}</span></div>
+     <div class="st-row"><span>${st.A.kd}</span><span class="st-l">Knockdowns</span><span>${st.B.kd}</span></div></div>
+   ${p.purseDetail?`<div class="card"><div class="eyebrow mb">Bourse</div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Bourse brute</span><span>${formatArgent(p.purseDetail.gross)}</span></div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Frais de camp (manager, coach, salle)</span><span style="color:var(--loss)">-${formatArgent(p.purseDetail.fee)}</span></div>
+     ${p.purseDetail.agentFee?`<div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Part de l\u2019agent (${Math.round((f.agentCut||0)*100)}%)</span><span style="color:var(--loss)">-${formatArgent(p.purseDetail.agentFee)}</span></div>`:''}
+     <div class="mono small" style="display:flex;justify-content:space-between;margin-top:4px"><b>Net perçu</b><b class="gold">${formatArgent(p.purseDetail.net)}</b></div></div>`:''}
+   <div class="card"><div class="eyebrow mb">Déroulé</div>${fightLog(p.res)}</div>
+   ${campHtml}
+   ${p.newAch&&p.newAch.length?`<div class="card">${p.newAch.map(a=>`<div class="ach"><span class="ico">${a.ico}</span><b class="gold">${a.h}</b> <span class="muted small">${a.d}</span></div>`).join('')}</div>`:''}
+   ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt(f)} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
+   <button class="btn primary" onclick="CL.${p.forced?'toLegacy':'afterResult'}()">${p.forced?'Voir mon palmarès':'Continuer'}</button></div>`; }
+
+/* ==== [ANCRE: CARTE_MOUVEMENT_SIGNATURE] — met en avant le geste devenu
+   signature (5 finitions identiques, cf. pickFinishMove dans engine.js) : ce
+   bonus existait déjà mécaniquement (+6 sur 2 attributs) mais n'était visible
+   nulle part dans l'interface — corrigé ici avec un encart dédié dans la
+   fiche complète, affichant le geste ET les gains concrets qu'il a apportés. ==== */
+/* ==== [ANCRE: BADGE_CHAMPION] — remplace l'ancien bonus chiffré de champion
+   (retiré du score de classement, item demandé) par un badge purement
+   informatif dans le bilan technique : ceinture(s), organisation, et statut
+   actuel/ancien clairement précisé. ==== */
+function championBadgeCard(f){
+  const badges=[];
+  if(f.champion){
+    badges.push({label:`Champion ${orgDisplayName(f)} — ${f.divName}`,status:'Titre actuel',current:true});
+  }
+  if(f.champChampBelt){
+    badges.push({label:`Champion ${orgDisplayName(f)} — ${f.champChampBelt}`,status:'Titre actuel (double couronne)',current:true});
+  }
+  if(!f.champion && !f.champChampBelt && (f.titles||0)>0){
+    // ==== [ANCRE: CORRECTIF_CEINTURES_PANTHEON] (suite) — même correction que
+    // pour le Panthéon : lister les organisations réelles plutôt qu'un vague
+    // décompte, en s'appuyant sur G.titleHistory (disponible ici puisque le
+    // combattant est encore actif dans la carrière en cours).
+    const myReigns=(G.titleHistory||[]).filter(r=>r.champion===f.name);
+    const orgNames=[...new Set(myReigns.map(r=>(r.org===f.org && f.orgFlavor)?f.orgFlavor:(ORGS[r.org]||'Organisation')))];
+    badges.push({label:orgNames.length?`${f.titles} règne(s) — ${orgNames.join(', ')}`:`${f.titles} règne(s) de champion à son actif`,status:'Titre(s) ancien(s) — ceinture perdue ou abandonnée',current:false});
+  }
+  if(!badges.length) return '';
+  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid ${badges.some(b=>b.current)?'var(--gold)':'var(--line)'};padding:14px;text-align:left">
+    <div class="eyebrow mb" style="color:${badges.some(b=>b.current)?'var(--gold)':'var(--muted)'}">${SVG.crown} Statut de championnat</div>
+    ${badges.map(b=>`<div class="mono small" style="margin-top:4px"><b style="color:${b.current?'var(--win)':'var(--muted)'}">${b.status}</b> — ${esc(b.label)}</div>`).join('')}
+  </div>`;
+}
+// ==== [ANCRE: SYSTEME_CLASSES] (carte profil) — affiche la spécialisation
+// permanente choisie à 23 ans, dans le même esprit que signatureMoveCard().
+function classCard(f){
+  if(!f.classChosen || !f.class) return '';
+  const pool=CLASSES[f.style]||[]; const cls=pool.find(c=>c.id===f.class);
+  if(!cls) return '';
+  const fxTxt=Object.entries(cls.fx).map(([k,v])=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `<span class="dlt ${v>0?'up':'dn'}">${v>0?'+':''}${v} ${lbl}</span>`; }).join(' ');
+  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
+    <div class="eyebrow gold mb">Classe : ${esc(cls.lbl)}</div>
+    <div class="muted small" style="font-style:italic">« ${esc(cls.desc)} »</div>
+    <div class="mono small mt">${fxTxt}</div>
+  </div>`;
+}
+function signatureMoveCard(f){
+  if(!f.signatureMove) return '';
+  const sm=f.signatureMove;
+  // ==== [ANCRE: CORRECTIF_BOOST_SIGNATURE_DIFFERENCIE] (affichage) — bug
+  // trouvé : cette carte recalculait un boostKeys générique (submission+
+  // killer / power+killer) au lieu de lire SIGNATURE_BOOST_BY_ZONE (engine.js)
+  // — le texte affiché pouvait donc annoncer un boost différent de celui
+  // réellement appliqué dès que la zone n'était pas 'tête'. Utilise
+  // désormais exactement la même table que pickFinishMove().
+  const boostKeys=(SIGNATURE_BOOST_BY_ZONE[sm.type]&&SIGNATURE_BOOST_BY_ZONE[sm.type][sm.zone])||(sm.type==='sub'?['submission','killer']:['power','killer']);
+  const boostTxt=boostKeys.map(k=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(6/5))} ${lbl}`; }).join(', ');
+  const typeLbl=sm.type==='sub'?'Soumission':'KO';
+  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
+    <div class="eyebrow gold mb">${SVG.star} Mouvement Signature</div>
+    <b style="font-size:17px;color:var(--gold)">${esc(sm.name)}</b> <span class="muted small">(${typeLbl})</span>
+    <div class="muted small mt">Répété jusqu'à devenir sa marque de fabrique — 40% de chances de conclure ainsi chaque finition future.</div>
+    <div class="mono small mt" style="color:var(--win)">Effets acquis : ${boostTxt}</div>
+  </div>`;
+}
+function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.faith?'faith_hub':'hub';
+  const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
+     ${ATTR[key].map(a=>`<div class="attr"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="CL.go('${backScreen}')">✕</span></div>
+   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
+     <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div></div>
+     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.classLabel?esc(f.classLabel)+' ('+f.styleLabel+')':f.styleLabel}, ${f.age} ans</em></div>
+     <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
+     <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
+     ${(f.faithTraits && f.faithTraits.length)?`<div class="story" style="position:relative;z-index:2;color:var(--blood)"><b>Traits de caractère.</b> ${f.faithTraits.join(', ')}.</div>`:''}
+     ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+     ${championBadgeCard(f)}
+     ${classCard(f)}
+     ${signatureMoveCard(f)}
+     ${f.skills.length?(()=>{
+       const rarOrder={C:0,R:1,E:2,L:3,M:4,X:5};
+       const sorted=f.skills.filter(id=>SKILLS.some(s=>s.id===id)).slice().sort((a,b)=>{
+         const sa=SKILLS.find(s=>s.id===a), sb=SKILLS.find(s=>s.id===b);
+         return (rarOrder[sa.rar]??9)-(rarOrder[sb.rar]??9);
+       });
+       // hash déterministe simple : même tag = même couleur, sans mapping manuel sur 640 compétences
+       const tagColor=t=>{ let h=0; for(let i=0;i<t.length;i++) h=(h*31+t.charCodeAt(i))>>>0;
+         const palette=['var(--win)','var(--gold)','var(--loss)']; return palette[h%palette.length]; };
+       return `<div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Compétences.</b> <span class="muted small">(clique pour le détail)</span></div>`+
+         sorted.map((id,i)=>{const sk=SKILLS.find(s=>s.id===id);
+           const fxTxt=sk.fx?Object.entries(sk.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(v/5))} ${label}`;}).join(', '):'';
+           return `<div style="margin:4px 0;position:relative;z-index:2">
+             <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;cursor:pointer" onclick="const d=document.getElementById('skdet${i}'); d.style.display=d.style.display==='none'?'block':'none';">
+               <span class="story" style="margin:0;color:${RAR_COLORS[sk.rar]||'var(--gold)'}">${sk.name}</span>
+               ${(sk.tags||[]).map(t=>`<span class="tag" style="color:${tagColor(t)};border-color:${tagColor(t)}">${t}</span>`).join('')}
+             </div>
+             <div id="skdet${i}" class="muted small" style="display:none;margin:4px 0 0 0;padding-left:8px;border-left:2px solid var(--line)">${sk.desc||''}${fxTxt?`<div class="mono" style="color:var(--win);margin-top:2px">${fxTxt}</div>`:''}</div>
+           </div>`;}).join('');
+     })():''}
+   </div>
+   ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
+   <div class="rarity-guide"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>
+   <button class="btn ghost" onclick="CL.go('${backScreen}')">Retour</button></div>`; }
+
+function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
+  let h=`<div class="scr">
+   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
+     <span class="eyebrow mono" style="letter-spacing:.1em">BASE DE DONNÉES // ${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
+   </div>
+   <div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
+     <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:70px;text-align:right">STATUT</div>
+   </div>`;
+  // ==== [ANCRE: CORRECTIF_NUMEROTATION_CLASSEMENT] — bug trouvé : le rang
+  // affiché utilisait l'index brut dans le pool (qui inclut le champion à la
+  // 1re place), donc le premier VRAI challenger affichait "#2" au lieu de
+  // "#1" — la numérotation sautait le 1. Un compteur dédié aux non-champions
+  // redémarre proprement à 1 (item demandé : C, puis 1, 2... jusqu'à 15).
+  const hasChampInPool=dr.some(o=>o.champion);
+  let contenderRank=0;
+  dr.slice(0,hasChampInPool?16:15).forEach((o,i)=>{ const isPlayer=(o===f);
+    if(!o.champion) contenderRank++;
+    const rank=contenderRank;
+    let arrow='–'; let arrowColor='var(--muted)';
+    if(o.lastRankDelta>0){arrow='▲';arrowColor='var(--win)';} if(o.lastRankDelta<0){arrow='▼';arrowColor='var(--loss)';}
+    const fightsTot=o.W+o.L+(o.D||0);
+    const statusStr=o.champion?'CHAMPION':(fightsTot===0?'NR':arrow);
+    const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
+    h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}">
+      <div class="mono" style="width:32px;font-size:15px;${o.champion&&!isPlayer?'color:var(--gold)':''}">${o.champion?'C':rank}</div>
+      <div style="flex:1;display:flex;flex-direction:column">
+        <span class="disp" style="font-size:17px;line-height:1.1">${esc(o.name)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}</span>
+        <span class="mono" style="font-size:10.5px;opacity:.7">${(o.styleLabel||'').toUpperCase()}</span>
+      </div>
+      <div class="mono" style="width:82px;text-align:right;font-size:14px;white-space:nowrap">${o.W}-${o.L}${o.D?'-'+o.D:''}</div>
+      <div class="mono" style="width:70px;text-align:right;font-size:10.5px;opacity:.7;${!o.champion?('color:'+arrowColor):''}">${statusStr}</div>
+    </div>`;
+  });
+  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.faith?'faith_hub':'hub'}')">← Revenir au hub</button></div>`;
+  return h;
+}
+
+function scr_event(){ const ev=G.activeEvent;
+  return `<div class="scr center" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh"><div class="eyebrow blood">Événement imprévu</div>
+   <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,36px)">${ev.title}</div>
+   <div class="glass card" style="position:relative;background:var(--panel2);text-align:left;padding:16px;margin:16px 0"><p class="lede" style="margin:0;text-align:left;max-width:100%">${ev.text}</p>${ev.effectsHtml||''}</div>
+   <button class="btn primary" onclick="CL.handleEvent('${ev.actionId}')">${ev.btn}</button>
+   ${ev.btn2?`<button class="btn ghost mt" onclick="CL.handleEvent('${ev.actionId2}')">${ev.btn2}</button>`:''}</div>`; }
+
+/* ==== [ANCRE: ECRAN_SAISON] — 'eval' renommé en 'seasonEval' : mot réservé en
+   mode strict, une déclaration const eval=... provoque une SyntaxError. ==== */
+function scr_season(){ const f=G.f; const sData=G.season||{year:1,fights:[]};
+  const seasonEval=evaluateSeason(f,sData.fights); const s=seasonEval.stats;
+  return `<div class="scr center intro"><div class="eyebrow gold">Bilan Saisonnier</div>
+   <div class="hero-name" style="text-align:center">Année ${sData.year}<em style="color:var(--muted)">${s.W} V — ${s.L} D</em></div>
+   <div class="glass card gold-b" style="margin:20px 0;background:var(--panel2)">
+     <div class="tagrow" style="justify-content:center">
+       <span class="tag2">${s.koW} KO</span><span class="tag2">${s.subW} SUB</span><span class="tag2">${s.decW} DÉC</span>
+     </div>
+     <div class="hr"></div>
+     <div class="stat-band" style="justify-content:space-around;text-align:center">
+       <div><span class="stat-big" style="font-size:24px">${s.sigMe}</span><span class="stat-lbl">Frappes</span></div>
+       <div><span class="stat-big" style="font-size:24px">${s.tdMe}</span><span class="stat-lbl">Takedowns</span></div>
+     </div>
+   </div>
+   <h3 class="disp" style="font-size:18px;color:var(--gold);margin-bottom:10px">Trophées de la Saison</h3>
+   ${seasonEval.trophies.length>0?
+     `<div class="tagrow" style="justify-content:center">${seasonEval.trophies.map(t=>`<span class="tag2 hot" style="display:inline-flex;align-items:center;gap:4px">${t.ico||SVG.medal} ${t.lbl}</span>`).join('')}</div>`
+     : `<p class="muted small">Saison de transition. Aucun trophée majeur remporté cette année.</p>`}
+   <button class="btn primary mt" onclick="CL.nextSeason()">Passer à l\u2019année suivante</button></div>`; }
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: SOMMET] — dilemme Pacific Championship (gloire) vs Ultimate Rim (argent+santé) ==== */

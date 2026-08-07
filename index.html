@@ -206,6 +206,17 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="data-content.js"></script>
 <script src="engine.js"></script>
 <script src="state.js"></script>
-<script src="ui.js"></script>
+<!-- ui.js a été découpé en 8 fichiers plus petits (refactor du __/2026) pour
+     rester lisible et maintenable — l'ORDRE de chargement ci-dessous est
+     important et ne doit jamais être changé (voir le commentaire d'en-tête
+     de chaque fichier ui-0X-*.js pour le détail). -->
+<script src="ui-01-roster-matchmaking.js"></script>
+<script src="ui-02-fight-prep-events.js"></script>
+<script src="ui-03-contracts-arcade-data.js"></script>
+<script src="ui-04-faith-arcade-screens.js"></script>
+<script src="ui-05-fight-resolution.js"></script>
+<script src="ui-06-career-screens.js"></script>
+<script src="ui-07-contracts-legacy-screens.js"></script>
+<script src="ui-08-controller-arena.js"></script>
 <script src="main.js"></script>
 </body></html>
