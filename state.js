@@ -61,9 +61,15 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
     // combattant (f.orgFlavor n'est qu'une valeur courante, pas un historique
     // par palier) — on retombe sur le nom générique du palier sinon, pour ne
     // jamais afficher un nom d'ambiance qui ne correspond pas au bon règne.
-    orgName:(r.org===f.org && f.orgFlavor)?f.orgFlavor:(ORGS[r.org]||'Organisation'),
+    orgName:(r.org===f.org && f.orgFlavor && ORG_FLAVORS[r.org] && ORG_FLAVORS[r.org].includes(f.orgFlavor)) ? f.orgFlavor : (ORGS[r.org]||'Organisation'),
     divName:r.divName, year:r.year, defenses:r.defenses||0
   }));
+  // Bug #11 (correctif complémentaire, hors proposition Gemini) : beltHistory
+  // n'était jamais écrit sur f lui-même, seulement poussé dans l'entrée HOF —
+  // le fix UI de scr_legacy() lit f.beltHistory, qui restait donc toujours
+  // undefined sur l'écran de retraite. On le fixe ici pour que les deux
+  // lectures (HOF et écran de retraite) pointent vers la même donnée.
+  f.beltHistory=beltHistory;
   list.push({id:f.id,name:f.name,nick:f.nick,flag:f.flag,style:f.styleLabel,styleKey:f.style,div:f.div,divName:f.divName,W:f.W,L:f.L,ko:f.ko,sub:f.sub,
     titles:f.titles,defenses:f.defenses,world:!!f._world,euro:!!f._euro,ico,rank,epithets:epithets(f),score:hofScore(f),age:f.age,
     amaTitles:(f.amaTitles||[]).slice(),amaRec:f.amaRec?{W:f.amaRec.W,L:f.amaRec.L}:null,biggestRival:f.biggestRival||null,
@@ -240,7 +246,7 @@ function validateState(){
   if(typeof G.screen!=='string') G.screen='hub';
   if(!Array.isArray(G.ach)) G.ach=[];
   if(!Array.isArray(G.titleHistory)) G.titleHistory=[];
-  if(G.arcade && typeof G.arcade.active==='undefined') G.arcade=null; // état arcade incomplet -> repli sûr, jamais 'actif' par erreur
+  if(G.arcade && !G.arcade.active) G.arcade=null; // état arcade incomplet ou terminé -> repli sûr, jamais 'actif' par erreur
   return true;
 }
 /* ==== [FIN ANCRE] ==== */

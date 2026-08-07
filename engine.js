@@ -817,8 +817,9 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
     const rTdA=st.A.td-_tdA0, rTdB=st.B.td-_tdB0;
     const rCtrlA=(st.A.ctrl||0)-_ctrlA0, rCtrlB=(st.B.ctrl||0)-_ctrlB0;
     const kdDiff=(st.A.kd-_kdA0)-(st.B.kd-_kdB0);
-    // 1 amenée = 4 frappes sig, 1 round complet de contrôle (6 ticks à 0.2 = 1.2) = ~14.4 pts
-    const rDiff=(rSigA-rSigB)+(rTdA-rTdB)*4+(rCtrlA-rCtrlB)*12;
+    // Règles unifiées MMA : le dommage prime sur le contrôle positionnel.
+    // 1 amenée = 1.5 frappe sig, 1 round complet de contrôle (1.2) = ~3.6 pts (critère secondaire)
+    const rDiff=(rSigA-rSigB)+(rTdA-rTdB)*1.5+(rCtrlA-rCtrlB)*3;
     let sA=10,sB=10;
     if((rDiff>44&&kdDiff>=0)||kdDiff>=3){ sA=10;sB=7; }
     else if((rDiff>32&&kdDiff>=0)||kdDiff>=2){ sA=10;sB=8; }
@@ -1088,7 +1089,7 @@ function orgDisplayName(f){ if(f.org===0||f.org>=5) return ORGS[f.org]; return f
 /* ==== [FIN ANCRE] ==== */
 function canPromote(f){ const n=f.org+1; const totalOrg=f.W+f.L+(f.D||0);
   const winRate=totalOrg>0?f.W/totalOrg:0;
-  return n<ORGS.length && (f.orgWins||0)>=3 && winRate>=0.55 && p4pScore(f)>=ORG_PROMO_SCORE[n]; }
+  return n<ORGS.length && (f.orgWins||0)>=5 && winRate>=0.60 && p4pScore(f)>=ORG_PROMO_SCORE[n]; }
 /* ==== [ANCRE: P4P_SCORE_80_20] — le classement pesait 100% le palmarès de
    CARRIÈRE (jamais remis à zéro entre deux paliers pro), alors que seul
    turnPro() (amateur->pro) réinitialise W/L. Une promotion tier 1->2 gardait

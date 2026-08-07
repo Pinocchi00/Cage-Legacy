@@ -31,18 +31,18 @@
    dépassent largement. ==== */
 const TACTICS = {
   boxer: [
-    { id: 'bx1', lbl: 'Sac de Frappe Ambulant', desc: 'Le plan : noyer l\u2019adversaire sous les jabs jusqu\u2019à la décision. Le public s\u2019endort, les juges adorent, personne ne se souvient du combat le lendemain.', m: { str: 2.2, ko: 0.25 } },
-    { id: 'bx2', lbl: 'Tout Ou Rien, Menton Compris', desc: 'Une seule idée en tête : l\u2019éteindre. La garde reste grande ouverte — si ça ne marche pas au premier round, ça risque de très mal finir.', m: { ko: 2.3, def: 0.3 } },
-    { id: 'bx3', lbl: 'Le Marathonien Du Ring', desc: 'Courir, esquiver, pointer de loin, ne jamais s\u2019engager. Gagner au style, c\u2019est bien. Gagner au menton, c\u2019est mieux. Au moins tu rentres chez toi entier.', m: { def: 2.2, ko: 0.2, str: 0.7 } }
+    { id: 'bx1', lbl: 'Sac de Frappe Ambulant', desc: 'Le plan : envoyer 200 coups significatifs façon Max Holloway. On noie l\u2019adversaire sous le volume. Le combat est long, ennuyeux à mourir, mais la victoire aux points est garantie.', m: { str: 2.2, ko: 0.25 } },
+    { id: 'bx2', lbl: 'Tout Ou Rien, Menton Compris', desc: 'Une seule idée en tête : l\u2019éteindre. La garde reste grande ouverte — ça passe au premier round ou ça finit très mal pour toi.', m: { ko: 1.8, def: 0.5 } },
+    { id: 'bx3', lbl: 'Le Marathonien Du Ring', desc: 'Courir, esquiver, pointer de loin et ne jamais s\u2019engager. Gagner à la touche, c\u2019est bien. Rentrer chez soi entier, c\u2019est mieux. Le cauchemar des bagarreurs.', m: { def: 2.2, ko: 0.2, str: 0.7 } }
   ],
   bjj: [
     { id: 'bj1', lbl: 'Bienvenue Au Sol, Direction Obligatoire', desc: 'Debout, tu n\u2019existes pas. Chaque seconde loin du tapis est une seconde perdue — au pire, tu prends une droite en te jetant sur les jambes.', m: { td: 2.2, gi: 1.8, str: 0.25 } },
-    { id: 'bj2', lbl: 'La Chasse À L\u2019Anaconda', desc: 'Chaque échange devient une pêche au trésor pour un bras ou un cou. Tant pis pour la position — si ça échoue, tu te retrouves en dessous, à découvert.', m: { sub: 2.3, ctrl: 0.3, tdd: 0.4 } },
+    { id: 'bj2', lbl: 'La Chasse À L\u2019Anaconda', desc: 'Chaque échange devient une pêche au trésor pour un bras ou un cou. Tant pis pour la position — si ça échoue, tu te retrouves en dessous, à découvert.', m: { sub: 1.8, ctrl: 0.5, tdd: 0.4 } },
     { id: 'bj3', lbl: 'L\u2019Araignée Renversée', desc: 'Tu te jettes volontairement sur le dos et tu attends que l\u2019adversaire vienne se faire piéger dans ta toile. Génial si ça marche, catastrophique face au Ground and Pound.', m: { sub: 1.9, gi: 1.6, ctrl: 0.2, td: 0.3 } }
   ],
   wrestler: [
     { id: 'wr1', lbl: 'Le Rouleau Compresseur', desc: 'Amener, se faire repousser, recommencer. Encore. Encore. Jusqu\u2019à ce que l\u2019un des deux n\u2019ait plus de jambes pour tenir debout.', m: { td: 2.2, gi: 1.8, str: 0.3 } },
-    { id: 'wr2', lbl: 'Marteau-Piqueur Humain', desc: 'Une fois au sol, oublie la position parfaite — juste frapper, frapper, encore frapper, jusqu\u2019à ce que l\u2019arbitre intervienne ou que tes mains lâchent.', m: { gnp: 2.3, ctrl: 0.35, sub: 0.4 } },
+    { id: 'wr2', lbl: 'Marteau-Piqueur Humain', desc: 'Une fois au sol, oublie la position parfaite — juste frapper, frapper, encore frapper, jusqu\u2019à ce que l\u2019arbitre intervienne ou que tes mains lâchent.', m: { gnp: 1.8, ctrl: 0.5, sub: 0.4 } },
     { id: 'wr3', lbl: 'Refuse De Perdre, Refuse De Finir', desc: 'L\u2019objectif n\u2019est pas de gagner spectaculairement, c\u2019est de ne jamais perdre. Ennuyer trois juges pendant 15 minutes : une carrière entière résumée dans un seul plan.', m: { ctrl: 2.2, tdd: 1.6, gnp: 0.3, sub: 0.25 } }
   ],
   kickboxer: [
@@ -52,17 +52,17 @@ const TACTICS = {
   ],
   muayThai: [
     { id: 'mt1', lbl: 'Le Mur T\u2019Écrase', desc: 'Ferme la distance, colle-toi au clinch, martèle de genoux jusqu\u2019à l\u2019effondrement. Le seul souci : un bon lutteur adore ce genre d\u2019invitation à terre.', m: { str: 2.1, tdd: 0.35 } },
-    { id: 'mt2', lbl: 'Chasseur De Têtes Certifié', desc: 'Chaque frappe part pour tuer. La garde ? Un détail sans importance. Soit tu l\u2019endors en un round, soit tu regardes le plafond du plancher.', m: { ko: 2.3, def: 0.3 } },
+    { id: 'mt2', lbl: 'Chasseur De Têtes Certifié', desc: 'Chaque frappe part pour tuer. La garde ? Un détail sans importance. Soit tu l\u2019endors en un round, soit tu regardes le plafond du plancher.', m: { ko: 1.8, def: 0.5 } },
     { id: 'mt3', lbl: 'Béton Armé', desc: 'Ne pas bouger. Encaisser. Attendre. Contrer. Une stratégie qui demande un menton en granit et une patience que peu de gens possèdent vraiment.', m: { def: 2.1, tdd: 1.6, ko: 0.3, str: 0.6 } }
   ],
   karate: [
-    { id: 'ka1', lbl: 'Blitzkrieg Ou Rien', desc: 'Une explosion, un coup, la lumière qui s\u2019éteint — ou ta propre garde qui s\u2019effondre au même instant. Aucun entre-deux n\u2019existe dans ce plan.', m: { ko: 2.3, def: 0.3, str: 0.6 } },
+    { id: 'ka1', lbl: 'Blitzkrieg Ou Rien', desc: 'Une explosion, un coup, la lumière qui s\u2019éteint — ou ta propre garde qui s\u2019effondre au même instant. Aucun entre-deux n\u2019existe dans ce plan.', m: { ko: 1.8, def: 0.5, str: 0.6 } },
     { id: 'ka2', lbl: 'Le Fantôme Assumé', desc: 'Toucher et disparaître avant même que l\u2019adversaire ne réalise qu\u2019il a été touché. Magnifique à regarder, terriblement frustrant à devoir conclure.', m: { def: 2.2, ko: 0.3, str: 0.7 } },
     { id: 'ka3', lbl: 'Le Contre Kamikaze', desc: 'Attendre l\u2019engagement adverse pour placer le high kick ou le coup d\u2019arrêt parfait. Rate ta fenêtre et tu te retrouves à découvert des deux côtés à la fois.', m: { ko: 2.2, str: 0.4, def: 0.4 } }
   ],
   sambo: [
     { id: 'sb1', lbl: 'Suplex Ou Silence', desc: 'Chaque échange se termine en vol plané. Spectaculaire pour le public, terrifiant pour ton dos le jour où ça ne fonctionne pas comme prévu.', m: { td: 2.2, gnp: 1.6, str: 0.3 } },
-    { id: 'sb2', lbl: 'Le Voleur De Chevilles', desc: 'Plonger sur la jambe, verrouiller, tordre. Fonctionne à merveille — sauf contre quelqu\u2019un qui sait exactement où placer un coude pendant que tu es occupé en bas.', m: { sub: 2.3, ctrl: 0.3, tdd: 0.35 } },
+    { id: 'sb2', lbl: 'Le Voleur De Chevilles', desc: 'Plonger sur la jambe, verrouiller, tordre. Fonctionne à merveille — sauf contre quelqu\u2019un qui sait exactement où placer un coude pendant que tu es occupé en bas.', m: { sub: 1.8, ctrl: 0.5, tdd: 0.35 } },
     { id: 'sb3', lbl: 'Overhand Généralisé', desc: 'Cacher chaque tentative d\u2019amenée derrière un crochet capable de tout terminer d\u2019un seul coup. Le double jeu parfait — quand il fonctionne vraiment.', m: { ko: 2.0, td: 1.5, def: 0.3 } }
   ],
   mma: [
@@ -85,67 +85,67 @@ const TACTICS = {
    cohérence avec son palmarès réel plutôt que de le forcer. */
 const CLASSES = {
   boxer: [
-    { id:'cl_bx1', lbl:'Le Puncheur', desc:'Une seule question compte désormais : combien de temps l\u2019adversaire tient debout.', fx:{power:8,killer:6,cardio:-6},
+    { id:'cl_bx1', lbl:'Le Puncheur', desc:'Une seule question compte désormais : combien de temps l\u2019adversaire tient debout.', fx:{power:25,killer:15,cardio:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
-    { id:'cl_bx2', lbl:'Le Technicien', desc:'Chaque échange devient un problème de géométrie à résoudre, pas une bagarre à gagner par la force.', fx:{fightIQ:8,jab:6,power:-6},
+    { id:'cl_bx2', lbl:'Le Technicien', desc:'Chaque échange devient un problème de géométrie à résoudre, pas une bagarre à gagner par la force.', fx:{fightIQ:25,jab:15,power:-15},
       fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 },
-    { id:'cl_bx3', lbl:'Le Roc', desc:'On ne le fait pas reculer. On ne le fait même pas cligner des yeux.', fx:{chin:8,durability:6,footSpeed:-6},
+    { id:'cl_bx3', lbl:'Le Roc', desc:'On ne le fait pas reculer. On ne le fait même pas cligner des yeux.', fx:{chin:25,durability:15,footSpeed:-15},
       fit:f=>(f.koLoss||0)===0 && (f.L||0)>=2 }
   ],
   bjj:[
-    { id:'cl_bj1', lbl:'Le Chasseur de Soumission', desc:'Le combat ne se termine qu\u2019à un endroit : au bout de son bras.', fx:{submission:8,flexibility:6,takedown:-6},
+    { id:'cl_bj1', lbl:'Le Chasseur de Soumission', desc:'Le combat ne se termine qu\u2019à un endroit : au bout de son bras.', fx:{submission:25,flexibility:15,takedown:-15},
       fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.5 },
-    { id:'cl_bj2', lbl:'Le Contrôleur', desc:'Gagner un round, ce n\u2019est pas frapper le plus fort. C\u2019est ne jamais laisser l\u2019autre respirer.', fx:{topControl:8,gnp:6,submission:-6},
+    { id:'cl_bj2', lbl:'Le Contrôleur', desc:'Gagner un round, ce n\u2019est pas frapper le plus fort. C\u2019est ne jamais laisser l\u2019autre respirer.', fx:{topControl:25,gnp:15,submission:-15},
       fit:f=>(f.defenses||0)>=2 },
-    { id:'cl_bj3', lbl:'L\u2019Araignée', desc:'Se retrouver en dessous n\u2019a jamais été un problème quand c\u2019est exactement là qu\u2019on voulait être.', fx:{guardWork:8,submission:6,tdd:-6},
+    { id:'cl_bj3', lbl:'L\u2019Araignée', desc:'Se retrouver en dessous n\u2019a jamais été un problème quand c\u2019est exactement là qu\u2019on voulait être.', fx:{guardWork:25,submission:15,tdd:-15},
       fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.3 }
   ],
   wrestler:[
-    { id:'cl_wr1', lbl:'L\u2019Amenée Parfaite', desc:'Le combat commence debout et se termine toujours ailleurs.', fx:{takedown:8,explosiveness:6,chin:-6},
+    { id:'cl_wr1', lbl:'L\u2019Amenée Parfaite', desc:'Le combat commence debout et se termine toujours ailleurs.', fx:{takedown:25,explosiveness:15,chin:-15},
       fit:f=>(f.W||0)>=8 },
-    { id:'cl_wr2', lbl:'Le Marteau', desc:'Une fois au sol, il ne reste plus qu\u2019une seule question de mathématiques : combien de coups avant l\u2019arrêt.', fx:{gnp:8,strength:6,cardio:-6},
+    { id:'cl_wr2', lbl:'Le Marteau', desc:'Une fois au sol, il ne reste plus qu\u2019une seule question de mathématiques : combien de coups avant l\u2019arrêt.', fx:{gnp:25,strength:15,cardio:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.3 },
-    { id:'cl_wr3', lbl:'Le Verrou', desc:'Il n\u2019a besoin ni de finir ni d\u2019impressionner. Juste de ne jamais lâcher.', fx:{topControl:8,tdd:6,gnp:-6},
+    { id:'cl_wr3', lbl:'Le Verrou', desc:'Il n\u2019a besoin ni de finir ni d\u2019impressionner. Juste de ne jamais lâcher.', fx:{topControl:25,tdd:15,gnp:-15},
       fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 }
   ],
   kickboxer:[
-    { id:'cl_kb1', lbl:'Le Bombardier', desc:'Chaque jambe adverse est un projet de démolition en cours.', fx:{kick:8,power:6,footSpeed:-6},
+    { id:'cl_kb1', lbl:'Le Bombardier', desc:'Chaque jambe adverse est un projet de démolition en cours.', fx:{kick:25,power:15,footSpeed:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
-    { id:'cl_kb2', lbl:'Le Mobile', desc:'Impossible à trouver, impossible à toucher, à peine possible à suivre des yeux.', fx:{footSpeed:8,handSpeed:6,power:-6},
+    { id:'cl_kb2', lbl:'Le Mobile', desc:'Impossible à trouver, impossible à toucher, à peine possible à suivre des yeux.', fx:{footSpeed:25,handSpeed:15,power:-15},
       fit:f=>(f.koLoss||0)===0 },
-    { id:'cl_kb3', lbl:'Le Mur Défensif', desc:'La lutte adverse vient s\u2019écraser ici et nulle part ailleurs.', fx:{tdd:8,composure:6,aggression:-6},
+    { id:'cl_kb3', lbl:'Le Mur Défensif', desc:'La lutte adverse vient s\u2019écraser ici et nulle part ailleurs.', fx:{tdd:25,composure:15,aggression:-15},
       fit:f=>(f.defenses||0)>=1 }
   ],
   muayThai:[
-    { id:'cl_mt1', lbl:'Le Clinch Roi', desc:'Une fois collé, il ne lâche plus — et ses genoux non plus.', fx:{clinchStr:8,strength:6,footSpeed:-6},
+    { id:'cl_mt1', lbl:'Le Clinch Roi', desc:'Une fois collé, il ne lâche plus — et ses genoux non plus.', fx:{clinchStr:25,strength:15,footSpeed:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.35 },
-    { id:'cl_mt2', lbl:'Le Bourreau', desc:'Chaque round n\u2019a qu\u2019un seul objectif : abréger le suivant.', fx:{power:8,killer:6,chin:-6},
+    { id:'cl_mt2', lbl:'Le Bourreau', desc:'Chaque round n\u2019a qu\u2019un seul objectif : abréger le suivant.', fx:{power:25,killer:15,chin:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 },
-    { id:'cl_mt3', lbl:'Le Mur Thaï', desc:'On peut le frapper. On ne peut pas le faire reculer.', fx:{durability:8,chin:6,handSpeed:-6},
+    { id:'cl_mt3', lbl:'Le Mur Thaï', desc:'On peut le frapper. On ne peut pas le faire reculer.', fx:{durability:25,chin:15,handSpeed:-15},
       fit:f=>(f.koLoss||0)===0 && (f.L||0)>=1 }
   ],
   karate:[
-    { id:'cl_ka1', lbl:'L\u2019Éclair', desc:'Le temps que l\u2019adversaire comprenne ce qui vient de se passer, c\u2019est déjà terminé.', fx:{footSpeed:8,explosiveness:6,durability:-6},
+    { id:'cl_ka1', lbl:'L\u2019Éclair', desc:'Le temps que l\u2019adversaire comprenne ce qui vient de se passer, c\u2019est déjà terminé.', fx:{footSpeed:25,explosiveness:15,durability:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.35 },
-    { id:'cl_ka2', lbl:'Le Maître Du Point', desc:'Un combat, c\u2019est une équation. Lui, il connaît toutes les solutions.', fx:{fightIQ:8,composure:6,power:-6},
+    { id:'cl_ka2', lbl:'Le Maître Du Point', desc:'Un combat, c\u2019est une équation. Lui, il connaît toutes les solutions.', fx:{fightIQ:25,composure:15,power:-15},
       fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 },
-    { id:'cl_ka3', lbl:'Le Kamikaze', desc:'Chaque coup de pied part pour terminer le combat. Tant pis pour la suite s\u2019il rate.', fx:{kick:8,killer:6,composure:-6},
+    { id:'cl_ka3', lbl:'Le Kamikaze', desc:'Chaque coup de pied part pour terminer le combat. Tant pis pour la suite s\u2019il rate.', fx:{kick:25,killer:15,composure:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 }
   ],
   sambo:[
-    { id:'cl_sb1', lbl:'Le Projeteur', desc:'Il n\u2019y a pas de meilleure façon de commencer un round qu\u2019en finissant l\u2019autre dans les airs.', fx:{takedown:8,strength:6,submission:-6},
+    { id:'cl_sb1', lbl:'Le Projeteur', desc:'Il n\u2019y a pas de meilleure façon de commencer un round qu\u2019en finissant l\u2019autre dans les airs.', fx:{takedown:25,strength:15,submission:-15},
       fit:f=>(f.W||0)>=8 },
-    { id:'cl_sb2', lbl:'Le Casse-Membres', desc:'Une articulation à la fois, jusqu\u2019à ce que l\u2019un des deux cède.', fx:{submission:8,flexibility:6,strength:-6},
+    { id:'cl_sb2', lbl:'Le Casse-Membres', desc:'Une articulation à la fois, jusqu\u2019à ce que l\u2019un des deux cède.', fx:{submission:25,flexibility:15,strength:-15},
       fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.4 },
-    { id:'cl_sb3', lbl:'Le Bulldozer', desc:'Avancer, encaisser, avancer encore. La fatigue, c\u2019est le problème de l\u2019autre.', fx:{power:8,gnp:6,cardio:-6},
+    { id:'cl_sb3', lbl:'Le Bulldozer', desc:'Avancer, encaisser, avancer encore. La fatigue, c\u2019est le problème de l\u2019autre.', fx:{power:25,gnp:15,cardio:-15},
       fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.35 }
   ],
   mma:[
-    { id:'cl_mm1', lbl:'Le Généraliste Complet', desc:'Aucune faiblesse identifiable — et c\u2019est bien ça le problème pour ceux d\u2019en face.', fx:{fightIQ:8,adaptability:6,power:-6},
+    { id:'cl_mm1', lbl:'Le Généraliste Complet', desc:'Aucune faiblesse identifiable — et c\u2019est bien ça le problème pour ceux d\u2019en face.', fx:{fightIQ:25,adaptability:15,power:-15},
       fit:f=>(f.L||0)<=2 && (f.W||0)>=6 },
-    { id:'cl_mm2', lbl:'Le Finisseur Universel', desc:'Peu importe où le combat se déroule — debout, au sol, dans un coin — ça finit toujours pareil.', fx:{killer:8,power:6,composure:-6},
+    { id:'cl_mm2', lbl:'Le Finisseur Universel', desc:'Peu importe où le combat se déroule — debout, au sol, dans un coin — ça finit toujours pareil.', fx:{killer:25,power:15,composure:-15},
       fit:f=>(((f.ko||0)+(f.sub||0))/Math.max(1,f.W))>=0.5 },
-    { id:'cl_mm3', lbl:'Le Stratège', desc:'Chaque round est un problème résolu avant même d\u2019entrer dans la cage.', fx:{composure:8,discipline:6,aggression:-6},
+    { id:'cl_mm3', lbl:'Le Stratège', desc:'Chaque round est un problème résolu avant même d\u2019entrer dans la cage.', fx:{composure:25,discipline:15,aggression:-15},
       fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 }
   ]
 };
@@ -389,11 +389,14 @@ function getCardSlot(f,opp,kind){
   // adversaire d'une autre org) — dans ce cas on ignore son rang plutôt que
   // de mal interpréter 0 comme "meilleur combattant du monde".
   const rnkOppRaw=(opp && opp.org===f.org)?divRank(opp):0;
-  const rnkOpp=rnkOppRaw>0?rnkOppRaw:rnkF;
-  const rnk=Math.min(rnkF,rnkOpp);
-  if(rnk<=3) return "CO-MAIN EVENT";
-  if(rnk<=7) return "MAIN CARD";
-  if(rnk<=12) return "PRELIMS";
+  const rnkOpp=rnkOppRaw>0?rnkOppRaw:999;
+  if(rnkF<=15 && rnkOpp<=15){
+    const rnk=Math.min(rnkF,rnkOpp);
+    if(rnk<=3) return "CO-MAIN EVENT";
+    if(rnk<=10) return "MAIN CARD";
+    return "PRELIMS";
+  }
+  if(rnkF<=15 || rnkOpp<=15) return "PRELIMS";
   return "EARLY PRELIMS";
 }
 function renderFightPoster(f,opp,kind){

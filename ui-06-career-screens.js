@@ -114,7 +114,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
    ${msgHtml}
    ${injuryHtml}
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.classLabel?esc(f.classLabel):f.styleLabel}, ${f.age} ans</em></div>
+     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
      <div class="tagrow">${rankTag}${streakTag}${contractTag}${amaTag}</div>
      ${declineHtml}
      <div class="stat-band">
@@ -160,28 +160,21 @@ function scr_select(){ const f=G.f;
     // Archétype de matchmaking : la logique de fond ne change pas (mêmes 3
     // adversaires que genOpponents() proposait déjà), seul l'habillage devient
     // un vrai dilemme risque/récompense lisible d'un coup d'œil.
-    // ==== [ANCRE: CORRECTIF_REPETITION_TEXTES] — item demandé : mmReward
-    // n'avait qu'UNE phrase fixe par archétype ("Le Raccourci", "Le Prodige"
-    // etc. toujours le même texte). mmRole (l'étiquette catégorie) reste
-    // stable — c'est un repère de lecture rapide, pas un texte narratif — mais
-    // mmReward pioche désormais dans un pool via pickStable (seed=id de
-    // l'adversaire), donc varié d'un combat à l'autre sans changer à chaque
-    // re-rendu du même écran.
-    let mmRole='Opposition Logique', mmReward=pickStable(['Niveau équivalent, progression saine au classement.','Un adversaire à ta mesure — rien à gagner en prestige, rien à perdre non plus.','Match logique, sans grand risque ni grande gloire.','Le genre de combat qui construit un palmarès solide, sans éclat particulier.'],o.id+'r0'), roleColor='var(--text)';
+    let mmRole='Opposition Logique', mmReward='Niveau équivalent, progression saine au classement.', roleColor='var(--text)';
     const isProspect=(o.age<=23 && fightsTot<=6 && o.W>o.L);
     const isVeteran=(o.age>=34 && o.L>=3);
     const isGatekeeper=(o.attrs.durability>75 || o.attrs.tdd>75) && o.L>o.W/2;
-    if(e.context==='CHAMP-CHAMP'){ mmRole='Défi Historique'; mmReward=pickStable(['Devenir double monarque. La consécration ultime.','Entrer dans l\u2019histoire en portant deux ceintures à la fois.','Le genre de combat qu\u2019on ne propose qu\u2019une fois dans une carrière.'],o.id+'cc'); roleColor='var(--gold)'; }
-    else if(e.context && e.context.includes('TOURNOI')){ mmRole='Combat de Bracket'; mmReward=pickStable(['Avancer dans le tournoi amateur.','Une victoire de plus vers le sacre amateur.','Chaque round de bracket rapproche un peu plus du titre.'],o.id+'tn'); roleColor='var(--sage)'; }
-    else if(o.champion || e.context==='COMBAT DE TITRE'){ mmRole='Le Champion en Titre'; mmReward=pickStable(['Risque immense. Récompense absolue : la Ceinture.','Tout miser sur une seule soirée — la ceinture ou rien.','L\u2019occasion de sa carrière, contre le meilleur en place.'],o.id+'ti'); roleColor='var(--gold)'; }
-    else if(f.champion){ mmRole='Challenger Légitime'; mmReward=pickStable(['Défense de titre. Confirme votre statut de roi de la division.','Une défense de plus pour asseoir durablement le règne.','Prouver, encore, que la ceinture est entre les bonnes mains.'],o.id+'df'); roleColor='var(--sage)'; }
-    else if(isRival){ mmRole='Rivalité Historique'; mmReward=pickStable(['L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.','Une histoire à régler, devant un public qui ne rate pas ça.','Ce combat ne se résume jamais à un simple classement.'],o.id+'rv'); roleColor='var(--blood)'; }
-    else if(fightsTot===0){ mmRole='Le Débutant'; mmReward=pickStable(['Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.','Un adversaire encore sans historique — sert surtout à retrouver du rythme.','Combat sans grand enjeu, utile pour reprendre confiance.'],o.id+'db'); roleColor='var(--muted)'; }
-    else if(rnk<rkMe-4){ mmRole='Le Raccourci (Risqué)'; mmReward=pickStable(['Gros écart de niveau en votre faveur. Bond massif au classement assuré si vous créez la surprise.','Sur le papier, tu n\u2019as rien à faire dans cette division — d\u2019où la récompense si tu gagnes.','Un pari audacieux : l\u2019écart est énorme, mais le classement suit si tu réussis.'],o.id+'sc'); roleColor='var(--gold)'; }
-    else if(isProspect){ mmRole='Le Prodige Régional'; mmReward=pickStable(['Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.','Le nouveau chouchou des médias — le faire taire rapporte gros, le nourrir coûte cher.','Toute la presse le regarde. Une défaite face à lui ferait très mal à ta réputation.'],o.id+'pr'); roleColor='#4DA6FF'; }
-    else if(isGatekeeper){ mmRole='Le Gardien du Temple'; mmReward=pickStable(['Combat bourbier garanti. Passage obligatoire pour le haut du classement.','Increvable et frustrant — mais personne n\u2019atteint le sommet sans passer par lui.','Un mur qu\u2019il faut traverser un jour ou l\u2019autre, autant que ce soit maintenant.'],o.id+'gk'); roleColor='var(--sage)'; }
-    else if(isVeteran){ mmRole='Le Vétéran'; mmReward=pickStable(['Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.','Un ancien grand nom qui n\u2019a plus tout à fait les jambes d\u2019avant.','Le genre de victoire qui rassure sans vraiment impressionner personne.'],o.id+'vt'); roleColor='var(--text)'; }
-    else if(rnk>rkMe+5){ mmRole='Le Combat Piège'; mmReward=pickStable(['Classement inférieur au vôtre. Tout à perdre, rien à gagner.','Une victoire attendue et vite oubliée — une défaite, elle, ferait grand bruit.','Ce genre de combat ne rapporte presque rien, mais peut coûter énormément.'],o.id+'tp'); roleColor='var(--loss)'; }
+    if(e.context==='CHAMP-CHAMP'){ mmRole='Défi Historique'; mmReward='Devenir double monarque. La consécration ultime.'; roleColor='var(--gold)'; }
+    else if(e.context && e.context.includes('TOURNOI')){ mmRole='Combat de Bracket'; mmReward='Avancer dans le tournoi amateur.'; roleColor='var(--sage)'; }
+    else if(o.champion || e.context==='COMBAT DE TITRE'){ mmRole='Le Champion en Titre'; mmReward='Risque immense. Récompense absolue : la Ceinture.'; roleColor='var(--gold)'; }
+    else if(f.champion){ mmRole='Challenger Légitime'; mmReward='Défense de titre. Confirme votre statut de roi de la division.'; roleColor='var(--sage)'; }
+    else if(isRival){ mmRole='Rivalité Historique'; mmReward='L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.'; roleColor='var(--blood)'; }
+    else if(fightsTot===0){ mmRole='Le Débutant'; mmReward='Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.'; roleColor='var(--muted)'; }
+    else if(rnk<rkMe-4){ mmRole='Le Raccourci (Risqué)'; mmReward='Sur le papier, vous n\u2019avez rien à faire ici — l\u2019adversaire est bien mieux classé. D\u2019où le bond massif au classement si vous créez la surprise.'; roleColor='var(--gold)'; }
+    else if(isProspect){ mmRole='Le Prodige Régional'; mmReward='Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.'; roleColor='#4DA6FF'; }
+    else if(isGatekeeper){ mmRole='Le Gardien du Temple'; mmReward='Combat bourbier garanti. Passage obligatoire pour le haut du classement.'; roleColor='var(--sage)'; }
+    else if(isVeteran){ mmRole='Le Vétéran'; mmReward='Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.'; roleColor='var(--text)'; }
+    else if(rnk>rkMe+5){ mmRole='Le Combat Piège'; mmReward='Classement inférieur au vôtre. Tout à perdre, rien à gagner.'; roleColor='var(--loss)'; }
 
     // ==== [ANCRE: COMPARATIF_STATS_REUTILISABLE] — factorisé dans statComparisonHtml() ====
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
@@ -356,20 +349,18 @@ function scr_hof(){
      </details>
      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
    </div>`:''}
-   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
-      <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.classLabel?esc(f.classLabel):f.style} · ${f.div} · retraite ${f.age} ans</em></div>
+   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'}">
+      <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
         <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
         ${f.amaRec?`<div style="text-align:right"><span class="stat-big" style="font-size:24px">${f.amaRec.W}<span class="muted">-</span><span class="loss">${f.amaRec.L}</span></span><span class="stat-lbl">Amateur</span></div>`:''}
       </div>
       ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow" style="margin-bottom:8px">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
-      ${(f.beltHistory&&f.beltHistory.length)?`<div class="tagrow" style="margin-bottom:8px">${[...new Map(f.beltHistory.map(r=>[r.org+'|'+r.orgName+'|'+r.divName,r])).values()].map(r=>`<span class="tag2 hot" style="border-color:var(--gold);color:var(--gold)">${SVG.crown} ${esc(r.orgName)} — ${esc(r.divName)}</span>`).join('')}</div>`:''}
-      ${f.champChampBelt?`<div class="tagrow" style="margin-bottom:8px"><span class="tag2 hot" style="border-color:var(--blood);color:var(--blood)">${SVG.crown} Double champion — ${esc(f.champChampBelt)}</span></div>`:''}
       ${f.biggestRival?`<div class="mono small" style="color:var(--blood);margin-bottom:8px">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} (${f.biggestRival.count} confrontations)</div>`:''}
       <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="event.stopPropagation();CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="event.stopPropagation();CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="event.stopPropagation();CL.deleteHof('${f.id}')">Supprimer</button></div>`).join(''):
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="CL.deleteHof('${f.id}')">Supprimer</button></div>`).join(''):
       '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}
    <div class="tagrow mb">
      <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
@@ -377,66 +368,6 @@ function scr_hof(){
      <button class="btn ghost" style="width:auto;padding:8px 12px;border-color:var(--gold);color:var(--gold)" onclick="CL.go('legends')">Salle des Légendes</button>
    </div>
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
-/* ==== [ANCRE: ECRAN_DETAIL_LEGENDE] — item demandé : fiche complète pour
-   une légende retraitée, accessible par clic depuis le Panthéon, dans le même
-   esprit que l'écran de retraite (scr_legacy) mais lisant des données figées
-   (l'entrée HOF) plutôt que le combattant actif G.f. ==== */
-function scr_legend_detail(){
-  const id=G.viewingLegendId;
-  const list=loadHOF();
-  const f=list.find(x=>String(x.id)===String(id));
-  if(!f) return `<div class="scr center"><p class="lede">Cette légende n\u2019est plus dans le Panthéon.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
-  const belts=[...new Map((f.beltHistory||[]).map(r=>[r.org+'|'+r.orgName+'|'+r.divName,r])).values()];
-  const achChips=(f.earnedAchievements||[]).map(id2=>{ const a=ACH.find(x=>x.id===id2); return a?`<span class="tag2 hot" style="display:inline-flex;align-items:center;gap:5px" title="${esc(a.d)}"><span style="font-size:15px">${a.ico}</span>${esc(a.h)}</span>`:''; }).filter(Boolean).join('');
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche de légende</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
-   <div style="font-size:50px;text-align:center">${f.ico}</div>
-   <div class="hero-name" style="text-align:center;color:var(--gold)">${f.rank}<em style="color:var(--muted)">${esc(f.name)}${f.nick?' « '+esc(f.nick)+' »':''} ${f.flag}</em></div>
-   ${f.classLabel?`<div class="mono small gold" style="text-align:center;margin-top:-8px;margin-bottom:8px">${esc(f.classLabel)} (${esc(f.style)})</div>`:''}
-   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px">
-     <div class="epis" style="position:relative;z-index:2">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
-     ${(f.nicknameHistory&&f.nicknameHistory.length)?`<div class="mono small muted mt">Ancien(s) surnom(s) : ${f.nicknameHistory.map(n=>`« ${esc(n)} »`).join(', ')}</div>`:''}
-     <div class="hr"></div>
-     <div class="stat-band" style="border-top:none;padding-top:0;margin-top:0;flex-wrap:wrap;gap:16px">
-       <div><span class="stat-big" style="font-size:26px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
-       <div>${f.ko===f.sub?`<span class="stat-lbl" style="display:block;margin-bottom:2px">FINITIONS</span><span class="mono" style="font-size:20px"><span class="gold">${f.ko}</span> KO / <span class="gold">${f.sub}</span> SUB</span>`:f.ko>f.sub?`<span class="stat-big hot" style="font-size:26px">${f.ko}</span><span class="stat-lbl">KO / ${f.sub} SUB</span>`:`<span class="stat-big hot" style="font-size:26px">${f.sub}</span><span class="stat-lbl">SUB / ${f.ko} KO</span>`}</div>
-       <div><span class="stat-big" style="font-size:26px">${f.defenses||0}</span><span class="stat-lbl">Défenses</span></div>
-       <div><span class="stat-big" style="font-size:26px">${(f.skills||[]).length}</span><span class="stat-lbl">Compét.</span></div>
-     </div>
-     ${f.motivation?`<div class="muted small mt" style="position:relative;z-index:2;font-style:italic">« ${esc(f.motivation)} »</div>`:''}
-     ${f.biggestRival?`<div class="mono small mt" style="color:var(--blood);position:relative;z-index:2">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div>`:''}
-   </div>
-   ${belts.length?`<div class="card mt"><div class="eyebrow mb gold">${SVG.crown} Ceintures remportées</div>${belts.map(r=>`<div class="small" style="padding:4px 0"><b class="gold">${esc(r.orgName)}</b> — ${esc(r.divName)} <span class="mono muted" style="opacity:.7">(${r.defenses} défense(s))</span></div>`).join('')}</div>`:''}
-   ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood)"><div class="eyebrow mb" style="color:var(--blood)">${SVG.crown} Double champion</div><div class="small">A également détenu la ceinture ${esc(f.champChampBelt)}.</div></div>`:''}
-   ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mt">${f.amaTitles.map(aid=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===aid); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
-   ${(f.notableWins&&f.notableWins.length)?`<div class="card mt"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
-   ${retireSeasonRecapHtml(f)}
-   ${achChips?`<div class="card mt"><div class="eyebrow mb">🏆 Succès débloqués</div><div style="display:flex;flex-wrap:wrap;gap:8px">${achChips}</div></div>`:''}
-   <button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
-}
-/* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: SYSTEME_CLASSES] (écran) — choix définitif à 23 ans. Affiche
-   un indice de cohérence ("fit") avec le palmarès réel plutôt que de forcer
-   un choix — le joueur reste libre, l'indice n'est qu'informatif. ==== */
-function scr_class_choice(){
-  const f=G.f; const pool=CLASSES[f.style]||[];
-  return `<div class="scr center intro">
-   <div class="eyebrow gold">Cap des 23 ans</div>
-   <h2 class="disp">Choisir sa Classe</h2>
-   <p class="lede">Une spécialisation permanente et définitive. Ce choix ne pourra plus jamais être changé — regarde ton parcours jusqu\u2019ici avant de trancher.</p>
-   ${pool.map((c,i)=>{
-     const fits=(()=>{ try{ return c.fit(f); }catch(e){ return false; } })();
-     const fxTxt=Object.entries(c.fx).map(([k,v])=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `<span class="dlt ${v>0?'up':'dn'}">${v>0?'+':''}${v} ${lbl}</span>`; }).join(' ');
-     return `<div class="glass card mb" style="background:var(--panel2);border:1px solid ${fits?'var(--gold)':'var(--line)'};text-align:left;padding:16px">
-       <div class="hero-name" style="font-size:19px">${esc(c.lbl)}</div>
-       <p class="muted small mt" style="font-style:italic">« ${esc(c.desc)} »</p>
-       <div class="mono small mt">${fxTxt}</div>
-       <div class="mono small mt" style="color:${fits?'var(--gold)':'var(--muted)'}">${fits?'✓ Correspond à ton parcours jusqu\u2019ici':'Ne correspond pas particulièrement à ton style actuel — reste un choix valide.'}</div>
-       <button class="btn primary mt" onclick="CL.chooseClass(${i})">Choisir « ${esc(c.lbl)} » — définitif</button>
-     </div>`;
-   }).join('')}
-  </div>`;
-}
-/* ==== [FIN ANCRE] ==== */
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   let judgesHtml='';
   if(isDecisionLike(p.method) && !p.res.judges && p.res.scoreA!==undefined){
@@ -531,13 +462,7 @@ function championBadgeCard(f){
     badges.push({label:`Champion ${orgDisplayName(f)} — ${f.champChampBelt}`,status:'Titre actuel (double couronne)',current:true});
   }
   if(!f.champion && !f.champChampBelt && (f.titles||0)>0){
-    // ==== [ANCRE: CORRECTIF_CEINTURES_PANTHEON] (suite) — même correction que
-    // pour le Panthéon : lister les organisations réelles plutôt qu'un vague
-    // décompte, en s'appuyant sur G.titleHistory (disponible ici puisque le
-    // combattant est encore actif dans la carrière en cours).
-    const myReigns=(G.titleHistory||[]).filter(r=>r.champion===f.name);
-    const orgNames=[...new Set(myReigns.map(r=>(r.org===f.org && f.orgFlavor)?f.orgFlavor:(ORGS[r.org]||'Organisation')))];
-    badges.push({label:orgNames.length?`${f.titles} règne(s) — ${orgNames.join(', ')}`:`${f.titles} règne(s) de champion à son actif`,status:'Titre(s) ancien(s) — ceinture perdue ou abandonnée',current:false});
+    badges.push({label:`${f.titles} règne(s) de champion à son actif`,status:'Titre(s) ancien(s) — ceinture perdue ou abandonnée',current:false});
   }
   if(!badges.length) return '';
   return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid ${badges.some(b=>b.current)?'var(--gold)':'var(--line)'};padding:14px;text-align:left">
@@ -545,29 +470,10 @@ function championBadgeCard(f){
     ${badges.map(b=>`<div class="mono small" style="margin-top:4px"><b style="color:${b.current?'var(--win)':'var(--muted)'}">${b.status}</b> — ${esc(b.label)}</div>`).join('')}
   </div>`;
 }
-// ==== [ANCRE: SYSTEME_CLASSES] (carte profil) — affiche la spécialisation
-// permanente choisie à 23 ans, dans le même esprit que signatureMoveCard().
-function classCard(f){
-  if(!f.classChosen || !f.class) return '';
-  const pool=CLASSES[f.style]||[]; const cls=pool.find(c=>c.id===f.class);
-  if(!cls) return '';
-  const fxTxt=Object.entries(cls.fx).map(([k,v])=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `<span class="dlt ${v>0?'up':'dn'}">${v>0?'+':''}${v} ${lbl}</span>`; }).join(' ');
-  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
-    <div class="eyebrow gold mb">Classe : ${esc(cls.lbl)}</div>
-    <div class="muted small" style="font-style:italic">« ${esc(cls.desc)} »</div>
-    <div class="mono small mt">${fxTxt}</div>
-  </div>`;
-}
 function signatureMoveCard(f){
   if(!f.signatureMove) return '';
   const sm=f.signatureMove;
-  // ==== [ANCRE: CORRECTIF_BOOST_SIGNATURE_DIFFERENCIE] (affichage) — bug
-  // trouvé : cette carte recalculait un boostKeys générique (submission+
-  // killer / power+killer) au lieu de lire SIGNATURE_BOOST_BY_ZONE (engine.js)
-  // — le texte affiché pouvait donc annoncer un boost différent de celui
-  // réellement appliqué dès que la zone n'était pas 'tête'. Utilise
-  // désormais exactement la même table que pickFinishMove().
-  const boostKeys=(SIGNATURE_BOOST_BY_ZONE[sm.type]&&SIGNATURE_BOOST_BY_ZONE[sm.type][sm.zone])||(sm.type==='sub'?['submission','killer']:['power','killer']);
+  const boostKeys=sm.type==='sub'?['submission','killer']:['power','killer'];
   const boostTxt=boostKeys.map(k=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(6/5))} ${lbl}`; }).join(', ');
   const typeLbl=sm.type==='sub'?'Soumission':'KO';
   return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
@@ -583,13 +489,12 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.fai
   return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="CL.go('${backScreen}')">✕</span></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
      <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div></div>
-     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.classLabel?esc(f.classLabel)+' ('+f.styleLabel+')':f.styleLabel}, ${f.age} ans</em></div>
+     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
      <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
      ${(f.faithTraits && f.faithTraits.length)?`<div class="story" style="position:relative;z-index:2;color:var(--blood)"><b>Traits de caractère.</b> ${f.faithTraits.join(', ')}.</div>`:''}
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
      ${championBadgeCard(f)}
-     ${classCard(f)}
      ${signatureMoveCard(f)}
      ${f.skills.length?(()=>{
        const rarOrder={C:0,R:1,E:2,L:3,M:4,X:5};

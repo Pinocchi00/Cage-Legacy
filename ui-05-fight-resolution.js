@@ -226,9 +226,9 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     const oppScoreNow=p4pScore(opp), myScoreNow=p4pScore(G.f);
     if(oppScoreNow>myScoreNow){
       const rankGap=myRankNow-oppRankNow;
-      let leapMult=0.5;
-      if(rankGap>=10) leapMult=1.0;
-      else if(rankGap>=5) leapMult=0.75;
+      let leapMult=0.75;
+      if(rankGap>=10) leapMult=1.5;
+      else if(rankGap>=5) leapMult=1.0;
       G.f.rankBoost=(G.f.rankBoost||0)+Math.round((oppScoreNow-myScoreNow)*leapMult);
     }
     // ==== [FIN ANCRE] ====
@@ -400,7 +400,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // combat-ci (pas de sens à renommer quelqu'un qui raccroche les gants).
   if(!forced && !G.f.retired){
     const nickEvo=checkNicknameEvolution(G.f);
-    if(nickEvo) milestone=milestone||`Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).`;
+    if(nickEvo) milestone = milestone ? milestone + `<br>Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).` : `Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).`;
   }
   // ==== [ANCRE: SYSTEME_CLASSES] (déclencheur) — item demandé : proposition
   // UNIQUE à 23 ans (choix définitif), jamais reproposée une fois tranchée.
@@ -657,7 +657,7 @@ function recordStr(f){ return `${f.W}<span class="muted">-</span><span class="lo
 // le nom brut ORGS[f.org] sans tenir compte des noms d'ambiance (PVM,
 // Iguana Iguana...) — orgDisplayName(f), utilisée partout ailleurs dans le
 // jeu, l'a visiblement remplacée sans que ce reliquat soit nettoyé.
-function gauge(v){ return `<span class="gauge"><span style="width:${clamp(v,0,100)}%"></span></span>`; }
+function gauge(v){ return `<span class="gauge"><span style="width:${clamp(d20(v)/20*100,0,100)}%"></span></span>`; }
 
 /* ==== [ANCRE: ECRAN_TITRE] — sas d'entrée séparant Carrière et Arcade.
    Adapté aux vrais gestionnaires existants : CL.go('intro') pour la carrière

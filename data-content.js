@@ -5,25 +5,25 @@
 /* ----------------------- BACKSTORY & MOTIVATION --------------------------- */
 const ORIGINS=[
  // Tes idées adaptées à l'âge (15/16 ans)
- 'a fugué de sa campagne pour la capitale, s\u2019est {retrouvé piégé/retrouvée piégée} dans un réseau de combats clandestins pour survivre, et y a pris goût',
- 'possède une carrure si effrayante pour son âge qu\u2019un manager véreux l\u2019a {sorti/sortie} du lycée pour en faire une machine à cash',
+ 'a fugué de sa campagne pour la capitale, tombant dans le piège d\u2019un réseau de combats clandestins pour survivre, et y a pris goût',
+ 'possède une carrure si effrayante pour son âge qu\u2019un manager véreux a forcé sa sortie du lycée pour en faire une machine à cash',
 
  // Délinquance, foyers et rue
- 'a été {renvoyé/renvoyée} de quatre collèges différents pour bagarre avant qu\u2019un éducateur ne l\u2019emmène de force dans une salle de sport',
- 'a grandi dans les foyers de l\u2019État, où savoir frapper {le premier/la première} était la seule règle pour ne pas se faire écraser',
+ 'a accumulé les renvois de quatre collèges différents pour bagarre avant qu\u2019un éducateur n\u2019impose une salle de sport',
+ 'a grandi dans les foyers de l\u2019État, où savoir frapper en premier était la seule règle pour ne pas se faire écraser',
  'a passé son adolescence à organiser des combats à mains nues dans des parkings abandonnés pour impressionner son grand frère',
- 's\u2019est {réfugié/réfugiée} dans les sports de combat pour canaliser une hyperactivité sévère qui menaçait de {le/la} faire finir en prison',
+ 'a trouvé refuge dans les sports de combat pour canaliser une hyperactivité sévère qui menaçait de mener droit en prison',
  'a simulé son âge avec de faux papiers pour pouvoir entrer dans le circuit des combats adultes dès ses quinze ans',
- 'a été {repéré/repérée} par hasard par un coach en train d\u2019assommer trois racketteurs à la sortie de son lycée',
+ 'a attiré l\u2019attention d\u2019un coach par hasard en assommant trois racketteurs à la sortie du lycée',
  'a refusé l\u2019emprise des gangs de son quartier en s\u2019enfermant quatorze heures par jour à la salle pour ne penser qu\u2019à la frappe',
 
  // Famille, prodiges et environnement
- 'est un{/e} enfant prodige {couvé/couvée} par un père tyrannique qui l\u2019entraîne comme un soldat spartiate depuis qu\u2019il sait marcher',
+ 'enfant prodige sous l\u2019emprise d\u2019un père tyrannique qui impose un entraînement de soldat spartiate depuis le plus jeune âge',
  'vient d\u2019une famille déchirée par les dettes et a compris très tôt que son corps était sa seule véritable porte de sortie',
  'enfant de diplomates, a fugué de sa pension dorée par rejet viscéral du confort et de l\u2019hypocrisie bourgeoise',
  'a grandi dans l\u2019ombre d\u2019un père ancien combattant tombé dans l\u2019oubli, jurant très jeune de laver le nom de sa famille',
- 's\u2019est mis{/e} au combat par pure nécessité de survie après s\u2019être {retrouvé seul/retrouvée seule} à la rue à l\u2019âge de quatorze ans',
- '{brutalisé/brutalisée} pendant toute son enfance à cause de son bégaiement, a fini par découvrir que la violence n\u2019avait pas besoin de mots',
+ 'a commencé le combat par pure nécessité de survie face à la solitude de la rue à l\u2019âge de quatorze ans',
+ 'Victime de brutalité pendant toute son enfance à cause d\u2019un bégaiement, a fini par découvrir que la violence n\u2019avait pas besoin de mots',
  'passait ses nuits à regarder des cassettes de combats clandestins dans sa chambre d\u2019ado en rêvant de brutalité, jusqu\u2019à franchir le pas',
  'n\u2019a jamais rien réussi à l\u2019école et voit la cage comme la seule et unique alternative au chômage de longue durée'
 ];
@@ -34,7 +34,7 @@ const ORIGINS=[
 function generateContextualOrigin(f){
   const a=f.attrs;
   if(f.phys && f.phys.tags && f.phys.tags.includes('gabarit hors-norme pour la division')){
-    return 'a été {recruté/recrutée} à la sortie d\u2019un club de rugby universitaire uniquement parce qu\u2019{il/elle} terrifiait les videurs';
+    return 'a reçu une offre à la sortie d\u2019un club de rugby universitaire uniquement pour sa capacité à terrifier les videurs';
   }
   if(a.durability>85 && a.fightIQ<40){
     return 'a servi de cobaye pour des tests de casques de moto : aucune technique, mais ne ressent plus la douleur physique';
@@ -46,7 +46,7 @@ function generateContextualOrigin(f){
     return 'est incapable de briser une vitre d\u2019un coup de poing, mais connaît quarante façons de luxer un genou humain';
   }
   if(f.potential>90 && f.morale<40){
-    return 'est un{/e} prodige absolu{/e} qui déteste profondément ce sport, {poussé/poussée} dans la cage par un manager tyrannique';
+    return 'prodige absolu qui déteste profondément ce sport, sous l\u2019emprise d\u2019un manager tyrannique qui impose la cage';
   }
   return pick(ORIGINS);
 }
@@ -57,25 +57,25 @@ const MOTIVATIONS=[
  {short:'C\u2019était soit le lycée général, soit la cage. Le choix a été vite fait',drive:'confidence'},
 
  // Motivations de jeunesse (Adolescence / Preuve de soi)
- {short:'Prouver à ses parents qu\u2019{il n\u2019est/elle n\u2019est} pas le "bon à rien" qu\u2019ils {lui/lui} ont toujours décrit',drive:'aggression'},
+ {short:'Prouver à ses parents que l\u2019étiquette de "bon à rien" qu\u2019ils ont toujours imposée est fausse',drive:'aggression'},
  {short:'Sortir sa famille de la misère avant même d\u2019avoir l\u2019âge légal pour passer le permis de conduire',drive:'heart'},
  {short:'Gagner assez d\u2019argent pour payer les frais médicaux et protéger son petit frère',drive:'composure'},
  {short:'Une soif de reconnaissance maladive, nourrie par la quête du buzz sur les réseaux sociaux',drive:'focus'},
  {short:'Refuse l\u2019avenir d\u2019employé de bureau qu\u2019on lui promettait et veut marquer l\u2019Histoire jeune',drive:'confidence'},
- {short:'Canaliser une rage sourde et inexpliquée qui {lui/lui} donne envie de tout casser depuis l\u2019enfance',drive:'aggression'},
+ {short:'Canaliser une rage sourde et inexpliquée qui donne envie de tout casser depuis l\u2019enfance',drive:'aggression'},
  {short:'Rembourser ses avocats et se sortir d\u2019un dossier judiciaire lourd qui pèse sur sa jeunesse',drive:'discipline'},
- {short:'Détruire méthodiquement l\u2019ego des adultes arrogants qui {le/la} prennent de haut à cause de son âge',drive:'killer'},
+ {short:'Détruire méthodiquement l\u2019ego des adultes arrogants qui prennent de haut à cause de l\u2019âge',drive:'killer'},
  {short:'Besoin pathologique de ressentir la douleur physique pour se sentir vivant et ancré dans le réel',drive:'heart'},
 
  // Motivations martiales et tactiques (Génériques à tous les styles)
  {short:'Suivre à la lettre les enseignements d\u2019un vieux coach qui est sa seule véritable figure paternelle',drive:'discipline'},
  {short:'Analyser la peur dans les yeux de ses adversaires pour essayer de comprendre ses propres démons',drive:'fightIQ'},
  {short:'Échapper à son quartier : l\u2019octogone est littéralement son seul et unique ticket de sortie',drive:'adaptability'},
- {short:'Cherche l\u2019immortalité précoce : devenir {le/la} plus jeune champion{/ne} de l\u2019histoire pour qu\u2019on ne {l\u2019oublie/l\u2019oublie} jamais',drive:'focus'},
- {short:'Racheter les erreurs de son adolescence en prouvant qu\u2019{il est/elle est} capable de respecter des règles strictes',drive:'composure'},
+ {short:'Cherche l\u2019immortalité précoce : devenir la plus jeune star de l\u2019histoire pour marquer les mémoires',drive:'focus'},
+ {short:'Racheter les erreurs de son adolescence en prouvant sa capacité à respecter des règles strictes',drive:'composure'},
  {short:'Approche la bagarre comme un jeu d\u2019échecs macabre où chaque mouvement de l\u2019adversaire est calculé avec froideur',drive:'fightIQ'},
  {short:'Simplement pour l\u2019argent de poche, car détruire des gens dans une cage paie infiniment mieux que de faire la plonge',drive:'adaptability'},
- {short:'Une haine viscérale de la défaite : {il préfère/elle préfère} littéralement se laisser casser un membre plutôt que d\u2019abandonner',drive:'heart'}
+ {short:'Une haine viscérale de la défaite : aller jusqu\u2019à se laisser casser un membre plutôt que d\u2019abandonner',drive:'heart'}
 ];
 /* --------------------- camp : 3 choix liés au sport ----------------------- */
 /* chaque choix = un paquet de deltas VISIBLES et bornés par le potentiel. */

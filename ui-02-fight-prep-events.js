@@ -24,7 +24,7 @@ function tacticalRead(f,o){ const a=eff(f),b=eff(o);
   // à chaque re-rendu du même écran.
   if(fights<=5 && o.W>o.L) prefix+=pickStable(['Jeune loup imprévisible. ','Prospect encore instable, mais dangereux. ','Débutant fougueux, difficile à lire. ','Trop tôt dans sa carrière pour être prévisible. '],o.id+'p1');
   else if(o.streak<=-2 && o.age>=32) prefix+=pickStable(['Vétéran sur le déclin. ','Les jambes ne suivent plus comme avant. ','Un nom connu, mais une fin de carrière difficile. ','Le corps commence à lâcher. '],o.id+'p2');
-  else if(o.streak>=3) prefix+=pickStable(['Sur une grosse série de victoires. ','En pleine confiance après plusieurs succès. ','Personne ne l\u2019a arrêté depuis longtemps. ','La dynamique est clairement de son côté. '],o.id+'p3');
+  else if(o.streak>=3) prefix+=pickStable(['Sur une grosse série de victoires. ','En pleine confiance après plusieurs succès. ','Personne ne l\u2019a arrêté depuis longtemps. ','Il arrive avec une belle dynamique de victoires. '],o.id+'p3');
   // cohérence avec le scouting affiché (striking/grappling/danger) : si au moins
   // 2 des 3 catégories montrées penchent nettement dans le même sens, la lecture
   // tactique doit le refléter — pas seulement l'écart d'overall, qui peut rester
