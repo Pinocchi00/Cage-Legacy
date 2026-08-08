@@ -350,7 +350,7 @@ const SKILLS=[
   {id:'gen20',name:'L’Élu de la violence',rar:'M',fx:{power:25,chin:15,explosiveness:15},desc:'Né avec toutes les caractéristiques pour dominer l’espèce humaine.',tags:["Dieu de la guerre","Génétique"],fam:'gen',key:null},
   {id:'meta01',name:'Retraite retardée',rar:'X',fx:{},desc:'Un corps qui refuse de rendre les armes. Repousse la retraite de deux ans.',tags:["Longévité","Méta"],fam:'meta',key:null},
   {id:'meta02',name:'Mentor testamentaire',rar:'X',fx:{},desc:'Transmet un bonus permanent à ta prochaine carrière (Nouvelle Partie +).',tags:["Héritage","Méta"],fam:'meta',key:null},
-  {id:'meta03',name:'Contrat à vie',rar:'X',fx:{},desc:'Verrouille un cachet minimum garanti jusqu’à la fin de la carrière.',tags:["Statut","Méta"],fam:'meta',key:null},
+  {id:'meta03',name:'Contrat à vie',rar:'X',fx:{},desc:'Dès l\u2019obtention, votre cachet de présence ne pourra plus jamais redescendre sous le meilleur cachet déjà touché.',tags:["Statut","Méta"],fam:'meta',key:null},
   {id:'meta04',name:'Légende locale',rar:'X',fx:{},desc:'La popularité ne redescend plus jamais. Le public a décidé qui tu es.',tags:["Aura","Méta"],fam:'meta',key:null},
   {id:'meta05',name:'Chant du cygne',rar:'X',fx:{},desc:'Dernier combat de carrière : +6 sur tous les attributs offensifs en adrénaline pure.',tags:["Ultime","Méta"],fam:'meta',key:null},
   {id:'meta06',name:'Vice de vétéran',rar:'C',fx:{clinchStr:9},desc:'Sait placer son poids pour écraser l’autre et se reposer en douce.',tags:["Vice","Méta"],fam:'meta',key:null},

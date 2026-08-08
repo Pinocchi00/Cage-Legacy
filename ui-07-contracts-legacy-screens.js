@@ -31,7 +31,7 @@ function scr_toptier(){
      <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${o.sub}</em></div>
      <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
      <div class="mono small muted">Contrat de ${o.contract.fightsLeft} combats</div>
-     ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood)">⚠ Dernière danse : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
+     ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:rgba(198,40,40,0.08)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
      <p class="muted small mt">${o.desc}</p>
      <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.signTopTier(${o.org})">Signer avec ${o.flavor}</button>
    </div>`).join('')}
@@ -96,7 +96,7 @@ function scr_free_agency(){
         <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">Ligue de niveau ${o.org}</em></div>
         <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
         <div class="mono small muted">Contrat de ${o.contract.fightsLeft||4} combats</div>
-        ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood)">⚠ Dernière danse : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
+        ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:rgba(198,40,40,0.08)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
         <p class="muted small mt">${o.desc}</p>
         <button class="btn primary mt" onclick="CL.acceptFreeAgency(${i})">Signer avec ${o.flavor}</button>
       </div>
@@ -275,8 +275,16 @@ function scr_beltLineage(){
     h+=`<div class="card mono muted small" style="text-align:center;padding:24px">Aucun titre n\u2019a encore été disputé.</div>`;
   } else {
     keys.forEach(key=>{ const reigns=groups[key]; const [org,divName]=[Number(key.split('|')[0]),reigns[0].divName];
+      // ==== [ANCRE: CORRECTIF_NOM_ORG_REGISTRE] — item demandé : n'afficher que
+      // de vrais noms d'organisation (ex. "Octogone MMA"), jamais le label
+      // générique de palier ("Continentale") qui n'est qu'un TIER interne —
+      // orgFlavor était déjà enregistré par recordTitleChange() mais jamais lu
+      // ici. On prend le flavor du règne le plus récent qui en a un, avec
+      // repli sur le label de palier seulement si aucun flavor n'a jamais été
+      // capturé pour cette lignée (anciennes sauvegardes).
+      const orgLabel=(reigns.find(r=>r.orgFlavor)||{}).orgFlavor||ORGS[org]||'Organisation';
       h+=`<div class="card glass mb" style="background:var(--panel2);padding:16px">
-        <div class="hero-name" style="font-size:18px">${esc(ORGS[org]||'Organisation')}<em style="font-size:13px">${esc(divName)}</em></div>`;
+        <div class="hero-name" style="font-size:18px">${esc(orgLabel)}<em style="font-size:13px">${esc(divName)}</em></div>`;
       reigns.forEach((r,idx)=>{ const isCurrent=(idx===0);
         h+=`<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:6px 0;font-size:13px">
           <div><b style="color:${isCurrent?'var(--gold)':'var(--text)'}">${esc(r.champion)}</b>

@@ -22,13 +22,24 @@ const CONTRACT_PHRASES=[
 ];
 /* ==== [FIN ANCRE] ==== */
 function evaluateProOffer(f, res, oppRank){
-  if(f.org!==0 || (f.proOfferCooldown||0)>0) return null;
+  if(f.org!==0) return null;
+  // ==== [ANCRE: CORRECTIF_PLAFOND_AGE_COOLDOWN] — bug remonté ("forcé de
+  // quitter l'amateur à 28 ans au lieu de 26") : le verrou proOfferCooldown
+  // (posé pour espacer les offres VOLONTAIRES précoces refusées, cf.
+  // declinePro) bloquait aussi le couperet OBLIGATOIRE de 26 ans ci-dessous,
+  // qui n'a rien de facultatif. Un refus d'offre vers 24-25 ans pouvait ainsi
+  // laisser le cooldown actif pendant que l'âge continuait d'avancer,
+  // repoussant silencieusement le passage pro obligatoire jusqu'à ce que le
+  // cooldown retombe à 0. Le plafond d'âge est désormais vérifié AVANT toute
+  // dépendance au cooldown, qui ne s'applique plus qu'aux offres facultatives
+  // (totalFights/hypeScore) plus bas dans la fonction.
   if(f.age>=26){
     const baseTier=1;
     const orgFlavor1=ORG_FLAVORS[baseTier]?pick(ORG_FLAVORS[baseTier]):ORGS[baseTier];
     const phrase1=pick(CONTRACT_PHRASES)(orgFlavor1);
-    return { forced:true, msg:'La limite d\u2019âge du circuit amateur (26 ans) est atteinte. Vous êtes forcé de passer professionnel aujourd\u2019hui ou de ranger les gants.', orgFlavor1, phrase1, baseTier };
+    return { forced:true, msg:`La limite d\u2019âge du circuit amateur (26 ans) est atteinte (vous avez ${f.age} ans). Vous êtes forcé de passer professionnel aujourd\u2019hui ou de ranger les gants.`, orgFlavor1, phrase1, baseTier };
   }
+  if((f.proOfferCooldown||0)>0) return null;
   const totalFights=f.W+f.L+f.D;
   if(totalFights<5) return null;
   const finishes=f.ko+f.sub;

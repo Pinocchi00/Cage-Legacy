@@ -57,6 +57,13 @@ const CL={
   // ==== [ANCRE: SYSTEME_CLASSES] (contrôleur) — choix unique et définitif,
   // vérifié par f.classChosen (jamais réinitialisé, contrairement à un simple
   // f.class qui pourrait légitimement sembler modifiable).
+  // ==== [ANCRE: CLASSE_EXCEPTION_PLAFOND_AGE] — confirmé explicitement : les
+  // malus de Classe (ex. -3 Menton) sont une EXCEPTION volontaire au plafond
+  // anti-remontée du vieillissement (f.agedCeilings, cf. applyAging/
+  // grantSkill/applyDeltas dans engine.js). Un attribut baissé par une Classe
+  // reste librement remontable ensuite par l'entraînement ou une compétence —
+  // contrairement à un attribut baissé par l'âge. Volontairement, on
+  // n'écrit donc PAS dans f.agedCeilings ici.
   chooseClass(idx){
     const pool=CLASSES[G.f.style]||[];
     const cls=pool[idx]; if(!cls || G.f.classChosen) return;
@@ -325,6 +332,17 @@ const CL={
       }
     }catch(e){}
     // ==== [FIN ANCRE] ====
+    // ==== [ANCRE: CORRECTIF_RESET_TITLEHISTORY] — bug remonté ("le registre des
+    // ceintures d'un combattant affiche les ceintures d'un autre combattant") :
+    // le commentaire d'origine (LINEAGE, ui-01) affirmait déjà que G.titleHistory
+    // "est remis à zéro à chaque nouvelle carrière", mais aucun code ne le
+    // faisait réellement — seule une initialisation paresseuse existait
+    // (if(!G.titleHistory)...), donc le registre s'accumulait sans fin d'une
+    // légende à l'autre. Les règnes déjà accomplis restent gravés dans le
+    // Panthéon (enshrine(), state.js) — ce reset ne perd donc aucune trace,
+    // il empêche seulement une nouvelle carrière d'hériter du registre d'une
+    // carrière précédente.
+    G.titleHistory=[];
     G.f=f; G.roster=makeOrgRoster(f); G.ach=[]; G.season={year:1,fights:[]}; checkAch(); G.screen='hub'; save(); render(); },
   fightSelect(){ startFightSelect(); },
   opp(i){
@@ -571,8 +589,8 @@ const CL={
       if(d.origin==='late_bloomer' && ['power','strength'].includes(k)) margin+=10;
       f.maxAttrs[k]=Math.max(45,clamp(f.attrs[k]+margin,1,100));
     }
+    G.titleHistory=[];
     G.f=f; G.roster=makeOrgRoster(f);
-    // Partenaires de salle (Lot 7) : deux prospects générés dans la même
     // division/genre, qui progresseront en copiant les stats du joueur s'il
     // s'entraîne avec eux (voir CL.faithSparring).
     const p1=makeFighter({gender:f.gender,div:f.div,age:18,level:clamp(f.overall-15,20,60),potential:95});
@@ -790,6 +808,7 @@ const CL={
   fightArcade(){ resolveArcadeFight(); },
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
+    G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
     G.f.contract=generateContract(G.f,G.f.org,false);
     applyOrgAdvancementBoost(G.f,G.f.org);
@@ -808,6 +827,7 @@ const CL={
     routeAfterOrgChange();
   },
   signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); G.f.rankBoost=0; if(G.pending)G.pending.topTierOffer=false;
+    G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null; G.f.defenses=0;
     G.f.contract=generateContract(G.f,orgId,false);
     applyOrgAdvancementBoost(G.f,orgId);
     G.roster=makeOrgRoster(G.f);
@@ -894,6 +914,7 @@ const CL={
     G.f.contract=offer.contract;
     if(isNewOrg){
       G.f.org=offer.org; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
+      G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null;
       G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=offer.flavor;
       applyOrgAdvancementBoost(G.f,G.f.org);
       G.roster=makeOrgRoster(G.f);
@@ -1200,7 +1221,18 @@ function scr_arena(){ const A=ARENA||{};
    </div>
    <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Couper la transmission vidéo ▸</button>
   </div>`; }
-const ARENA_ZONE_COLOR=v=>v>28?'var(--blood)':v>14?'var(--gold)':'var(--sage)';
+// ==== [ANCRE: CORRECTIF_COULEUR_ZONES_DEGATS] — bug remonté : le rouge
+// (var(--blood)) était utilisé pour un simple seuil de dégâts CUMULÉS
+// (v>28), qui devient quasi systématique dès le round 2-3 puisque ces
+// valeurs ne redescendent jamais de tout le combat (contrairement à dmgA/
+// dmgB, la vraie jauge de risque KO, qui se résorbe chaque round via
+// RECUP_INTER_ROUND). Le rouge se confondait donc avec le flash de finition
+// réel (ARENA.flashZoneId, déclenché uniquement sur un KO effectif) — un
+// combattant "en rouge" en permanence sans jamais tomber. Sémantique
+// corrigée, alignée sur l'attente : sauge = indemne, or = touché/blessé ;
+// le rouge reste exclusivement réservé au flash de KO (flashZoneId
+// ci-dessous), jamais à un simple cumul de dégâts.
+const ARENA_ZONE_COLOR=v=>v>10?'var(--gold)':'var(--sage)';
 /* mise à jour des barres HTML (plus de HP globaux) + momentum + points de dégâts par zone + terminal texte, à chaque frame */
 function paintBars(){ if(!ARENA)return; const set=(id,v)=>{const e=document.getElementById(id); if(e)e.style.width=clamp(v,0,100)+'%';};
   set('st-me',ARENA.stMe); set('st-op',ARENA.stOp);

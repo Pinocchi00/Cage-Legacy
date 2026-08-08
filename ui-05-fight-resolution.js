@@ -104,6 +104,18 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   const rivalryMult=(typeof getRivalryPurseMultiplier==='function')?getRivalryPurseMultiplier(G.f,opp):1.0;
   showPurse*=rivalryMult; winBonus*=rivalryMult;
+  // ==== [ANCRE: EFFET_META03_CACHET_VIE] — la compétence 'Contrat à vie'
+  // (meta03) avait une description ("verrouille un cachet minimum garanti
+  // jusqu'à la fin de la carrière") mais aucun effet codé nulle part (fx:{}
+  // vide, jamais référencée) — jugée inutile à raison. Implémentation
+  // littérale : dès qu'elle est acquise, le cachet de présence ne peut plus
+  // jamais redescendre sous le meilleur cachet déjà touché (protection contre
+  // une rétrogradation d'organisation ou un contrat moins bon en fin de
+  // carrière), plafond mis à jour vers le haut à chaque nouveau record.
+  if(G.f.skills && G.f.skills.includes('meta03')){
+    if(showPurse>(G.f.minGuaranteedShow||0)) G.f.minGuaranteedShow=showPurse;
+    else showPurse=G.f.minGuaranteedShow;
+  }
   let purse=showPurse;
   if(win) purse+=winBonus;
   if(win && !isDecisionLike(res.method)){ purse+=(G.f.org===6)?50:showPurse*0.25; }
@@ -144,7 +156,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       contractExpiry=true;
       if(G.f.contract.isFinalContract && !G.f.retired){
         G.f.retired=true; contractExpiry=false; lastDanceCompleted=true;
-        milestone='Dernière danse accomplie. Comme annoncé à la signature de ce contrat, la retraite est désormais obligatoire.';
+        milestone='Bonne retraite, bonne vacances.';
       }
     }
   }
@@ -230,6 +242,23 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       if(rankGap>=10) leapMult=1.5;
       else if(rankGap>=5) leapMult=1.0;
       G.f.rankBoost=(G.f.rankBoost||0)+Math.round((oppScoreNow-myScoreNow)*leapMult);
+    } else {
+      // ==== [ANCRE: CORRECTIF_PROGRESSION_ADVERSAIRE_INFERIEUR] — bug remonté
+      // et confirmé par simulation sur le vrai makeOrgRoster() : le leapfrog
+      // ci-dessus ne se déclenche QUE sur un upset (adversaire mieux classé).
+      // Or genOpponents() propose très souvent un adversaire à ton niveau ou
+      // juste en dessous (scénarios Statu Quo / Gatekeeper) — dans ce cas
+      // très fréquent, aucun bonus de classement n'était jamais accordé, seul
+      // l'ELO de base (modeste, puisque déjà favori) s'appliquait. Résultat
+      // mesuré : 6 victoires d'affilée contre des adversaires juste en
+      // dessous ne faisaient avancer que de 5 à 10 places sur un pool de 30.
+      // Un plus petit bonus, proportionnel à la série en cours (jamais aussi
+      // fort qu'un vrai upset), garantit qu'une série de victoires "normales"
+      // fasse enfin progresser visiblement, sans dupliquer la récompense déjà
+      // donnée par recordBonus (qui reste, elle, minime face à l'écart de
+      // score total du pool).
+      const streakBonus=Math.min(40, Math.max(0, (G.f.streak||0))*6);
+      if(streakBonus>0) G.f.rankBoost=(G.f.rankBoost||0)+streakBonus;
     }
     // ==== [FIN ANCRE] ====
   } else if(res.winner==='D'){
@@ -279,6 +308,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.f.org===1){
       if(!G.f.org1Warned){
         G.f.org1Warned=true; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
+        G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null;
         G.f.orgElo=eloBaseline(1,G.f.overall); G.f.rankBoost=0;
         milestone='Dernier avertissement du circuit pro. Une nouvelle série de défaites mettra fin à ton contrat.';
       } else {
@@ -296,7 +326,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // combattant rétrogradé en Continentale continuait de toucher le cachet
     // de l'Ultimate Rim. Le contrat est désormais régénéré pour coller à la
     // nouvelle organisation, comme pour toute autre signature.
-    if(G.f.org>1){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.contract=generateContract(G.f,G.f.org,false); milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
+    if(G.f.org>1){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.contract=generateContract(G.f,G.f.org,false); milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
     else if(G.f.org===1){
       if(!G.f.org1Warned){ G.f.org1Warned=true; G.f.easyFights=0; milestone='Dernier avertissement pour refus de combattre.'; }
       else { G.f.retired=true; forced=true; milestone='Contrat pro coupé pour refus de combattre. Retraite forcée.'; }
@@ -396,7 +426,14 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // plus posé (1 à 3) pour refléter les carrières confirmées/vétérans.
   let endOfSeason=false;
   const fightsPerYear=(G.f.age>=18&&G.f.age<=23)?RI(3,4):RI(1,3);
-  G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=fightsPerYear){ applyAging(G.f); G.f._fy=0; endOfSeason=true;
+  G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=fightsPerYear){ const declineLog=applyAging(G.f); G.f._fy=0; endOfSeason=true;
+    // ==== [ANCRE: NOTIF_DECLIN_VIEILLESSE] (suite, voir applyAging) — le
+    // joueur doit être informé explicitement quand l'âge fait baisser un
+    // attribut, plutôt que de le découvrir sans explication sur sa fiche.
+    if(declineLog && declineLog.length){
+      const declineTxt=declineLog.map(d=>`${d.label} : ${d.before} ➔ ${d.after}`).join(', ');
+      milestone = milestone ? milestone + `<br>L\u2019âge se fait sentir (${G.f.age} ans) : ${declineTxt}. Ce déclin est définitif, aucune compétence ne pourra le compenser.` : `L\u2019âge se fait sentir (${G.f.age} ans) : ${declineTxt}. Ce déclin est définitif, aucune compétence ne pourra le compenser.`;
+    }
     // ==== [ANCRE: SANTE_GFL] — Ultimate Rim : suivi médical premium. Le menton
     // (dommage neurologique) ne remonte JAMAIS, même ici — règle absolue. La
     // résistance générale (conditionnement physique, pas neuronal) reste un
@@ -435,7 +472,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // contractExpiry plus haut — la sélection réelle se fait ailleurs
   // (CL.chooseClass), ce bloc ne fait que lever le drapeau.
   let classOffer=false;
-  if(!forced && !G.f.retired && !G.f.classChosen && G.f.age>=23 && G.f.org>0){
+  if(!forced && !G.f.retired && !G.f.classChosen && G.f.age>=23){
     classOffer=true;
   }
   // ==== [ANCRE: SYSTEME_CLASSES_31] (déclencheur) — même principe que
@@ -450,7 +487,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // placé après classOffer dans routeAfterCareerPending() par cohérence
   // chronologique (23 ans avant 31 ans).
   let class31Offer=false;
-  if(!forced && !G.f.retired && G.f.classChosen && !G.f.class31Chosen && G.f.age>=31 && G.f.org>0){
+  if(!forced && !G.f.retired && G.f.classChosen && !G.f.class31Chosen && G.f.age>=31){
     class31Offer=true;
   }
   // ==== [ANCRE: CIRCUIT_AMATEUR] — remplace la promotion automatique org 0->1
@@ -546,7 +583,7 @@ function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   // registre des combats de la saison en cours est remis à zéro.
   G.season={year:G.season.year,fights:[]};
   f.nick=earnNickname(f); }
-function earnNickname(f){ const a=f.attrs;
+function earnNickname(f,excludeGrappler){ const a=f.attrs;
   const striker=['le Sniper','le Marteau','la Foudre','le Bourreau','Mains de Pierre','le Cogneur','le Fossoyeur','l\u2019Exécuteur','le Dynamiteur','Poings de Fer','le Chasseur','la Tempête','le Fauve','Double Détonation','le Dévastateur','l\u2019Incendiaire'];
   const grappler=['l\u2019Anaconda','le Python','le Boa','l\u2019Étau','le Nœud Coulant','le Suffocateur','la Pieuvre','le Verrou','l\u2019Étrangleur','le Chirurgien du Sol','la Tenaille','le Croc','l\u2019Ancre','le Serpent','le Cadenas'];
   const pressure=['le Bulldozer','le Rouleau','Cœur de Lion','la Machine','l\u2019Ouragan','le Métronome Infernal','l\u2019Increvable','le Marathonien','la Locomotive','le Mur','l\u2019Inébranlable','la Digue'];
@@ -566,7 +603,7 @@ function earnNickname(f){ const a=f.attrs;
   // compare désormais deux scores agrégés représentatifs de chaque identité.
   const grappleScore=((a.submission||0)+(a.takedown||0)+(a.topControl||0)+(a.gnp||0)+(a.clinchStr||0))/5;
   const strikeScore=((a.power||0)+(a.jab||0)+(a.cross||0)+(a.hook||0)+(a.kick||0))/5;
-  if(grappleScore>=strikeScore && grappleScore>=55) return pick(grappler);
+  if(!excludeGrappler && grappleScore>=strikeScore && grappleScore>=55) return pick(grappler);
   if(a.power>=70 || a.killer>=70) return pick(striker);
   if(a.fightIQ>=70 || a.adaptability>=70) return pick(tech);
   if(a.heart>=70 || a.cardio>=70) return pick(pressure);
@@ -604,7 +641,13 @@ function checkNicknameEvolution(f,win){
   else if(!invincible.includes(f.nick) && f.champion && (f.titles||0)===1) reason='a enfin justifié tous les espoirs placés en lui';
   if(!reason) return null;
   if(rnd()>=0.35) return null;
-  const newNick=earnNickname(f);
+  // le combattant qui n'a plus soumis personne quitte l'identité "grappler" :
+  // le nouveau surnom ne doit pas être repioché dans ce même pool sous prétexte
+  // que ses attributs bruts de soumission restent élevés (sinon le changement
+  // n'a aucun sens narratif — un boxeur qui ne finit jamais au sol hérite d'un
+  // surnom de soumission).
+  const excludeGrappler=grappler.includes(f.nick) && (f.sub||0)===0;
+  const newNick=earnNickname(f,excludeGrappler);
   if(newNick===f.nick) return null;
   if(!f.nicknameHistory) f.nicknameHistory=[];
   f.nicknameHistory.push(f.nick);

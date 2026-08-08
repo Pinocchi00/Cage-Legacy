@@ -311,7 +311,7 @@ function scr_vs_friend_plan(){
 /* ==== [ANCRE: NARRATION] — log texte à partir de res.log/res.stats, déjà calculés ==== */
 function fightLog(res){ if(!res.log||!res.log.length)return '<span class="muted small">Décision aux cartes.</span>';
   const rows=res.log.map(L=>`<div class="log-row ${L.finish?'gold':''}"><span class="log-r">R${L.r}</span><span style="flex:1">${L.text||(L.phase==='sol'?'échanges au sol':'échanges debout')}</span></div>`);
-  if(isDecisionLike(res.method)) rows.push(`<div class="log-row gold"><span class="log-r">R${res.round||3}</span><span style="flex:1">${res.method}${res.detail?' — '+res.detail:''}</span></div>`);
+  if(isDecisionLike(res.method)) rows.push(`<div class="log-row gold"><span class="log-r">R${res.round||(res.roundStats&&res.roundStats.length)||3}</span><span style="flex:1">${res.method}${res.detail?' — '+res.detail:''}</span></div>`);
   return `<div class="fight-log" style="max-height:220px;overflow-y:auto;padding-right:5px">${rows.join('')}</div>`; }
 /* ==== [FIN ANCRE] ==== */
 function scr_hof(){
@@ -342,7 +342,7 @@ function scr_hof(){
      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
    </div>`:''}
    ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
-      <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div} · retraite ${f.age} ans</em></div>
+      <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
         <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
         ${f.amaRec?`<div style="text-align:right"><span class="stat-big" style="font-size:24px">${f.amaRec.W}<span class="muted">-</span><span class="loss">${f.amaRec.L}</span></span><span class="stat-lbl">Amateur</span></div>`:''}
@@ -372,7 +372,7 @@ function scr_legend_detail(){
   if(!f) return `<div class="scr center"><p class="lede">Légende introuvable.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <div class="glass mwash card" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:16px">
-     <div class="hero-name" style="position:relative;z-index:2">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
+     <div class="hero-name" style="position:relative;z-index:2">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
      ${f.motivation?`<div class="story" style="position:relative;z-index:2"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
      <div class="epis mt" style="position:relative;z-index:2">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
      <div class="stat-band" style="position:relative;z-index:2">
@@ -492,7 +492,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   }
   return `<div class="scr">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px;text-align:center">
-     <div class="meta-strip" style="justify-content:center">${p.opp.flag} vs ${esc(p.opp.name)}</div>
+     <div class="meta-strip" style="justify-content:center">${f.flag} ${esc(f.name)} vs ${p.opp.flag} ${esc(p.opp.name)}</div>
      <div class="hero-name" style="color:${p.isFantasy||p.isVsFriend?(p.res.winner==='D'?'var(--gold)':(p.win?'var(--blood)':'#4DA6FF')):(p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)'))}">${(p.isFantasy||p.isVsFriend)?(p.res.winner==='D'?'ÉGALITÉ':`${esc(p.win?f.name:p.opp.name)} gagne par ${p.method}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${(p.isFantasy||p.isVsFriend)?'':p.method}${p.res.round?' · Round '+p.res.round:''}</em></div>
      <div class="tagrow" style="justify-content:center">
        ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{

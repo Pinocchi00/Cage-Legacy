@@ -149,11 +149,13 @@ function genOpponents(f){
     // ~100 a besoin d'une fenêtre bien plus large qu'un pool pro de ~30, sinon
     // rk±2 retombe régulièrement sur le tout premier du classement par accident.
     const spread=Math.max(2,Math.round(normalPool.length*0.06));
-    // Filet de sécurité explicite : premier combat pro (0 combat dans cette
-    // organisation), en plus de la protection déjà assurée par le clamp de rk
-    // ci-dessus — garantit que les 3 propositions viennent du tout bas du
-    // classement, sans dépendre du bon comportement de p4pScore/findIndex.
-    if(f.org>0 && (f.W+f.L+(f.D||0))===0 && normalPool.length>=5){
+    // Filet de sécurité explicite : premier combat dans le pool actuel (0 combat
+    // dans cette organisation, amateur INCLUS — corrige le cas où un débutant
+    // amateur 0-0 se voyait proposer le premier du classement), en plus de la
+    // protection déjà assurée par le clamp de rk ci-dessus — garantit que les 3
+    // propositions viennent du tout bas du classement, sans dépendre du bon
+    // comportement de p4pScore/findIndex.
+    if((f.W+f.L+(f.D||0))===0 && normalPool.length>=5){
       const bottom=normalPool.slice(-5);
       chosen.push(bottom[bottom.length-1], bottom[Math.floor(bottom.length/2)], bottom[0]);
     } else if(f.streak<=-2){
@@ -349,9 +351,21 @@ function finishTrainingFlow(pendingOppMalus){
   // ==== [ANCRE: ADVERSAIRE_SURPOIDS] — l'inverse du catchweight joueur : c'est
   // l'adversaire qui rate sa pesée. Ici pas de tirage aléatoire côté adversaire :
   // c'est le JOUEUR qui choisit d'accepter (l'adversaire plus lourd gagne un vrai
-  // bonus mécanique) ou de refuser (combat annulé). ====
-  if(rnd()<0.1){
-    const oppOverKg=+(RI(2,8)+rnd()).toFixed(1);
+  // bonus mécanique) ou de refuser (combat annulé).
+  // ==== [ANCRE: CORRECTIF_SURPOIDS_ADVERSAIRE_SYMETRIE] — item demandé : même
+  // plafond strict de 1,3kg que côté joueur (CORRECTIF_CATCHWEIGHT_PLAFOND) —
+  // au-delà, la commission annule directement au lieu de proposer un choix.
+  // Fréquence aussi réduite (10% → 5%), jugée trop élevée par le joueur.
+  if(rnd()<0.05){
+    const oppOverKg=+(RI(0,3)+rnd()).toFixed(1);
+    if(oppOverKg>1.3){
+      G.activeEvent={
+        title:'L\u2019adversaire a raté sa pesée',
+        text:`${esc(opp.name)} se présente ${oppOverKg}kg au-dessus de la limite — bien au-delà du plafond de 1,3kg toléré en catchweight. La commission annule le combat sur-le-champ, un remplaçant est cherché.`,
+        btn:'Encaisser la nouvelle', actionId:'opp_overweight_decline'
+      };
+      G.screen='event'; save(); render(); return;
+    }
     G.activeEvent={
       title:'L\u2019adversaire a raté sa pesée',
       text:`${esc(opp.name)} se présente ${oppOverKg}kg au-dessus de la limite. L\u2019organisation vous laisse décider : accepter le combat en catchweight (il combattra avec un vrai avantage de gabarit) ou le refuser (combat annulé, un remplaçant est cherché).`,

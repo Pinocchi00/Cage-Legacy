@@ -850,8 +850,26 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
     const margin=Math.max(Math.abs(rDiff),Math.abs(kdDiff)*20);
     const dissent2=clamp(0.35-margin*0.004,0.04,0.35);
     const dissent3=clamp(0.15-margin*0.002,0.02,0.15);
-    if(rnd()<dissent2) j2=[sB===10?9:10, sA===10?9:10];
-    if(rnd()<dissent3) j3=[sB===10?9:10, sA===10?9:10];
+    // ==== [ANCRE: CORRECTIF_DISSIDENCE_NOOP] — bug remonté ("les juges scorent
+    // toujours de manière identique") : l'ancienne formule
+    // [sB===10?9:10, sA===10?9:10] retombait EXACTEMENT sur [sA,sB] pour le cas
+    // le plus fréquent de tous (round serré 10-9/9-10) — vérifié : sA=10,sB=9
+    // donnait [10,9], identique à la majorité. Le tirage dissent2/dissent3
+    // réussissait donc régulièrement sans jamais rien changer à l'affichage.
+    // Nouvelle règle, conforme au commentaire d'intention ci-dessus : sur un
+    // round déjà serré (10-9), le seul écart réaliste pour un juge est de
+    // basculer le round à l'adversaire (9-10) — pas de palier intermédiaire
+    // possible. Sur un round net (10-7/10-8), le juge dissident adoucit d'un
+    // point sans changer de vainqueur (10-8/10-9), comme décrit plus haut.
+    const dissentJudge=()=>{
+      if(sA===10 && sB===9) return [9,10];
+      if(sB===10 && sA===9) return [10,9];
+      if(sA===10 && sB<9) return [10,sB+1];
+      if(sB===10 && sA<9) return [sA+1,10];
+      return [sA,sB];
+    };
+    if(rnd()<dissent2) j2=dissentJudge();
+    if(rnd()<dissent3) j3=dissentJudge();
     j1A+=j1[0];j1B+=j1[1];j2A+=j2[0];j2B+=j2[1];j3A+=j3[0];j3B+=j3[1];
     roundStats.push({r,j1,j2,j3,sigA:st.A.sig-_sigA0,sigB:st.B.sig-_sigB0,tdA:st.A.td-_tdA0,tdB:st.B.td-_tdB0,kdA:st.A.kd-_kdA0,kdB:st.B.kd-_kdB0});
     // ==== [ANCRE: RECUP_INTER_ROUND] — la minute de repos entre rounds allège
@@ -1237,12 +1255,32 @@ function rankPool(list){
 }
 function isDeclining(f){ return f.age>=(isHeavy(f)?38:36); }
 function isHeavy(f){ return f.div==='H-heavy'||f.div==='H-lheavy'; }
-function applyAging(f){ const A=f.age; if(isDeclining(f)){ // déclin, poids lourds plus tardif
-    const dec=k=>f.attrs[k]=clamp(f.attrs[k]-RI(0,2),1,100);
-    dec('footSpeed');dec('handSpeed');dec('cardio');dec('explosiveness'); if(A>=39){dec('power');dec('recovery');} f.attrs.chin=clamp(f.attrs.chin-(A>=38?RI(0,2):0),1,100);
+function applyAging(f){ const A=f.age; const declineLog=[];
+  if(isDeclining(f)){ // déclin, poids lourds plus tardif
+    // ==== [ANCRE: NOTIF_DECLIN_VIEILLESSE] — item demandé : toute baisse
+    // d'attribut doit venir UNIQUEMENT du vieillissement, d'un choix de
+    // Classe, ou du menton — jamais d'une compétence ou d'un entraînement
+    // (déjà le cas : audité, aucune compétence n'a de fx négatif, aucun
+    // entraînement ne baisse un attribut réel, seuls morale/forme le font).
+    // Ce qui manquait : (1) prévenir clairement le joueur quand LE
+    // VIEILLISSEMENT fait baisser un attribut, et (2) empêcher qu'une
+    // compétence ou un entraînement ultérieur ne fasse remonter un attribut
+    // au-delà du plafond qu'il vient d'atteindre par le déclin — sinon le
+    // déclin serait cosmétique. f.agedCeilings[k] fige ce nouveau plafond,
+    // lu par applyDeltas()/grantSkill() en plus du potentiel habituel.
+    const dec=k=>{ const before=f.attrs[k]; const after=clamp(before-RI(0,2),1,100);
+      if(after<before){ f.attrs[k]=after; declineLog.push({key:k,label:attrLabel(k),before,after});
+        if(!f.agedCeilings) f.agedCeilings={}; f.agedCeilings[k]=after; }
+    };
+    dec('footSpeed');dec('handSpeed');dec('cardio');dec('explosiveness'); if(A>=39){dec('power');dec('recovery');}
+    const chinBefore=f.attrs.chin, chinAfter=clamp(chinBefore-(A>=38?RI(0,2):0),1,100);
+    if(chinAfter<chinBefore){ f.attrs.chin=chinAfter; declineLog.push({key:'chin',label:attrLabel('chin'),before:chinBefore,after:chinAfter});
+      if(!f.agedCeilings) f.agedCeilings={}; f.agedCeilings.chin=chinAfter; }
     if(rnd()<0.3) f.morale=clamp(f.morale-5,0,100); // voir ses capacités chuter mine le moral
   } else if(A>=27){ /* pic : stable */ }
   f.age++; f.overall=overall(f);
+  if(declineLog.length){ f.lastAgingDecline={age:f.age,items:declineLog}; }
+  return declineLog;
 }
 /* ------------------ INFIRMERIE — catalogue de blessures ---------------- */
 const INJURY_TYPES=[
@@ -1263,6 +1301,11 @@ function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
     // valeur déjà acquise (ex: via une compétence, non bornée par le potentiel) :
     // le plafond bloque une nouvelle progression, il ne reprend jamais l'existant.
     if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4));
+    // ==== [ANCRE: PLAFOND_DECLIN_VIEILLESSE] — item demandé : un attribut
+    // rabaissé par le vieillissement (f.agedCeilings, cf. applyAging) ne peut
+    // plus jamais être remonté par un entraînement au-delà de ce plafond —
+    // sinon le déclin lié à l'âge serait annulable, ce qui n'a pas de sens.
+    if(dv>0 && f.agedCeilings && f.agedCeilings[k]!=null) after=Math.min(after, Math.max(before, f.agedCeilings[k]));
     f.attrs[k]=clamp(after,1,100); const real=Math.round(f.attrs[k]-before);
     if(real!==0) applied.push({key:k,label:attrLabel(k),delta:real,before,after:f.attrs[k]});
   } f.overall=overall(f); return applied;
@@ -1301,7 +1344,18 @@ function getFallbackSkill(pool, baseRarity){ const hierarchy=['L','E','R','C'];
   return null;
 }
 function grantSkill(f, skill){ if(!f.skills) f.skills=[]; f.skills.push(skill.id);
-  if(skill.fx){ for(const stat in skill.fx){ if(f.attrs && f.attrs[stat]!==undefined) f.attrs[stat]=clamp(f.attrs[stat]+skill.fx[stat],1,100); } }
+  // ==== [ANCRE: CAP_COMPETENCE_ATTRIBUT] — bug remonté : une compétence
+  // pouvait faire dépasser le plafond de potentiel d'un attribut (borne déjà
+  // appliquée pour toute PROGRESSION normale via applyDeltas, mais absente
+  // ici). Même règle : un gain positif ne peut jamais dépasser le potentiel
+  // (ou maxAttrs si défini), mais ne redescend jamais une valeur déjà acquise
+  // au-dessus de ce plafond (ex. via une autre compétence antérieure).
+  if(skill.fx){ for(const stat in skill.fx){ if(f.attrs && f.attrs[stat]!==undefined){
+    const dv=skill.fx[stat]; const before=f.attrs[stat]; let after=before+dv;
+    if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4));
+    if(dv>0 && f.agedCeilings && f.agedCeilings[stat]!=null) after=Math.min(after, Math.max(before, f.agedCeilings[stat]));
+    f.attrs[stat]=clamp(after,1,100);
+  } } }
   if(typeof applySynergyBuffs==='function') applySynergyBuffs(f);
   f.overall=overall(f); return skill;
 }
