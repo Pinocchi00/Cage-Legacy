@@ -311,6 +311,7 @@ function scr_ach(){ if(!G.ach) G.ach=loadAch();
       h+=`<div class="ach ${got?'':'lk'}"><span class="ico" style="display:flex;align-items:center;color:var(--gold)">${a.ico}</span><span><b class="${got?'gold':''}">${a.h}</b><div class="muted small">${a.d}</div></span></div>`;
     });
   });
+  h+=`<div class="mono small muted" style="text-align:center;margin-top:24px;opacity:.6">Un jeu développé par Pinocchio et testé par Garfield</div>`;
   h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`;
   return h; }
 
@@ -568,7 +569,8 @@ function scr_legends(){
    ${checkLegendUnlock('mode_allstars')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--gold);color:var(--gold)" onclick="CL.initAllStars()">LANCER TOURNOI ALL-STARS</button>
      <div class="muted small" style="text-align:center;margin-top:4px">Nécessite 8 légendes au Panthéon (tu en as ${loadHOF().length})</div>`:''}
    ${checkLegendUnlock('mode_vs_friend')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--blood);color:var(--blood)" onclick="CL.go('vs_friend')">DÉFI VS AMI</button>`:''}
-   <button class="btn ghost mt" onclick="CL.go('hof')">Consulter le Panthéon</button></div>`;
+   <button class="btn ghost mt" onclick="CL.go('hof')">Consulter le Panthéon</button>
+   <button class="btn ghost mt" onclick="CL.go('ach')">Voir les succès</button></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 
