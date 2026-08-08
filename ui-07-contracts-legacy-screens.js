@@ -361,7 +361,7 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
      ${f.biggestRival?`<div class="mono small mt" style="color:var(--blood);position:relative;z-index:2">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div>`:''}</div>
    ${nemesisHtml}
    ${notableWins.length?`<div class="card mt"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
-   ${f.beltHistory && f.beltHistory.length ? `<div class="card mt"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — ${b.defenses} défense(s)</span></div>`).join('')}</div>` : ''}
+   ${f.beltHistory && f.beltHistory.length ? `<div class="card mt"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — Année ${b.year} — ${b.defenses} défense(s)</span></div>`).join('')}</div>` : ''}
    ${retireSeasonRecapHtml(f)}
    ${retireAchievementsHtml(f)}
    ${retireLegendPointsHtml(f)}

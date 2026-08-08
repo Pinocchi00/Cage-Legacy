@@ -170,7 +170,7 @@ function scr_select(){ const f=G.f;
     else if(f.champion){ mmRole='Challenger Légitime'; mmReward='Défense de titre. Confirme votre statut de roi de la division.'; roleColor='var(--sage)'; }
     else if(isRival){ mmRole='Rivalité Historique'; mmReward='L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.'; roleColor='var(--blood)'; }
     else if(fightsTot===0){ mmRole='Le Débutant'; mmReward='Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.'; roleColor='var(--muted)'; }
-    else if(rnk<rkMe-4){ mmRole='Le Raccourci (Risqué)'; mmReward='Sur le papier, vous n\u2019avez rien à faire ici — l\u2019adversaire est bien mieux classé. D\u2019où le bond massif au classement si vous créez la surprise.'; roleColor='var(--gold)'; }
+    else if(rnk<rkMe-4){ mmRole='Le Raccourci (Risqué)'; mmReward='Adversaire bien mieux classé. Bond massif au classement si vous créez la surprise.'; roleColor='var(--gold)'; }
     else if(isProspect){ mmRole='Le Prodige Régional'; mmReward='Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.'; roleColor='#4DA6FF'; }
     else if(isGatekeeper){ mmRole='Le Gardien du Temple'; mmReward='Combat bourbier garanti. Passage obligatoire pour le haut du classement.'; roleColor='var(--sage)'; }
     else if(isVeteran){ mmRole='Le Vétéran'; mmReward='Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.'; roleColor='var(--text)'; }
@@ -391,7 +391,7 @@ function scr_legend_detail(){
    </div>
    ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mb">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
    ${f.champChampBelt?`<div class="card mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><span class="mono small" style="color:var(--gold)">${SVG.crown} Double Champion — ${esc(f.champChampBelt)}</span></div>`:''}
-   ${f.beltHistory&&f.beltHistory.length?`<div class="card mb"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — ${b.defenses} défense(s)</span></div>`).join('')}</div>`:''}
+   ${f.beltHistory&&f.beltHistory.length?`<div class="card mb"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — Année ${b.year} — ${b.defenses} défense(s)</span></div>`).join('')}</div>`:''}
    ${f.biggestRival?`<div class="card mb"><div class="eyebrow mb">⚔ Plus grand rival</div><div class="small" style="color:var(--blood)">${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div></div>`:''}
    ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
    ${f.nicknameHistory&&f.nicknameHistory.length?`<div class="card mb"><div class="eyebrow mb">Historique des surnoms</div>${f.nicknameHistory.map(n=>`<div class="small muted" style="padding:4px 0">« ${esc(n)} »</div>`).join('')}</div>`:''}
@@ -427,6 +427,7 @@ function scr_class_choice(){
        <button class="btn primary mt" onclick="CL.chooseClass(${idx})">Choisir « ${cls.lbl} » — définitif</button>
      </div>`;
    }).join('')}
+   <button class="btn ghost mt" onclick="G._profileReturn='class_choice';CL.go('profile')">Voir la fiche complète du combattant</button>
   </div>`;
 }
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
@@ -544,7 +545,7 @@ function signatureMoveCard(f){
     <div class="mono small mt" style="color:var(--win)">Effets acquis : ${boostTxt}</div>
   </div>`;
 }
-function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G.faith?'faith_hub':'hub';
+function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._profileReturn||(G.faith?'faith_hub':'hub'); G._profileReturn=null;
   const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
      ${ATTR[key].map(a=>`<div class="attr"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="CL.go('${backScreen}')">✕</span></div>

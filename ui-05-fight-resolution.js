@@ -313,7 +313,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(win && kind==='title'){
     G.f.champion=(G.f.org>=5?'monde':G.f.org===4?'europe':G.f.org===3?'national':G.f.org===2?'regional':'local'); G.f.titles++; G.roster.forEach(o=>o.champion=null);
     milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.medal} CEINTURE ${orgDisplayName(G.f).toUpperCase()}</span>`;
-    recordTitleChange(G.f.org,G.f.divName,G.f.name,opp.name);
+    recordTitleChange(G.f.org,G.f.divName,G.f.name,opp.name,orgDisplayName(G.f));
   }
   else if(win && kind==='defense'){ G.f.defenses++;
     // Un défenseur qui est déjà double champion doit le voir rappelé ici
@@ -329,7 +329,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(!G.f.champChampDefenses) G.f.champChampDefenses={};
     G.f.champChampDefenses[G.f.div]=G.f.defenses; G.f.champChampDefenses[G.f.champChampOffer.targetDivId]=0;
     milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.crown} DOUBLE CHAMPION — ${orgDisplayName(G.f).toUpperCase()}</span>`;
-    recordTitleChange(G.f.org,G.f.champChampOffer.targetDivName,G.f.name,opp.name);
+    recordTitleChange(G.f.org,G.f.champChampOffer.targetDivName,G.f.name,opp.name,orgDisplayName(G.f));
     G.f.champChampOffer=null;
     champChampDecision=true; // déclenche l'écran de choix de division après le résultat
   }
@@ -338,6 +338,17 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     milestone='Supercombat perdu — votre ceinture actuelle reste intacte.';
     G.f.champChampOffer=null;
   }
+  // ==== [ANCRE: CORRECTIF_KIND_CHAMPCHAMP_PERSISTANT] — bug majeur trouvé :
+  // G.fight n'était jamais réinitialisé après résolution d'un combat. Comme
+  // finishTrainingFlow() préserve intentionnellement G.fight.kind quand il
+  // vaut déjà 'champchamp_title' (cf. CORRECTIF_KIND_CHAMPCHAMP plus haut),
+  // ce kind restait figé pour TOUS les combats suivants une fois le premier
+  // supercombat déclenché — chaque victoire ultérieure tentait alors de lire
+  // G.f.champChampOffer.targetDivName alors que champChampOffer venait d'être
+  // remis à null (ligne au-dessus / branche gagnée), provoquant un plantage
+  // JS silencieux (bouton qui ne répond plus, victoires qui ne se valident
+  // jamais). On efface explicitement le marqueur une fois ce combat consommé.
+  if(kind==='champchamp_title') G.fight.kind=null;
   else if(!win && res.winner!=='D' && G.f.champion){ G.f.champion=null; G.f.defenses=0; milestone='Titre perdu'; }
   // Le président de l'organisation propose le supercombat après 3 défenses,
   // puis tous les 2 défenses supplémentaires si refusé — jamais déclenché par
@@ -399,7 +410,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // Panthéon. Vérifié uniquement si le combattant ne prend pas sa retraite ce
   // combat-ci (pas de sens à renommer quelqu'un qui raccroche les gants).
   if(!forced && !G.f.retired){
-    const nickEvo=checkNicknameEvolution(G.f);
+    const nickEvo=checkNicknameEvolution(G.f,win);
     if(nickEvo) milestone = milestone ? milestone + `<br>Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).` : `Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).`;
   }
   // ==== [ANCRE: SYSTEME_CLASSES] (déclencheur) — item demandé : proposition
@@ -454,7 +465,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
           G.f.amaAttempted=G.f.amaAttempted||[]; G.f.amaAttempted.push(t.cfg.id);
           G.f.rankBoost=(G.f.rankBoost||0)+100;
           milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.medal} Ceinture ${t.cfg.label} remportée !</span>`;
-          recordTitleChange(0, t.cfg.name, G.f.name, opp.name);
+          recordTitleChange(0, t.cfg.name, G.f.name, opp.name, orgDisplayName(G.f));
           proOffer=evaluateProOffer(G.f,res,oppRankBefore);
         }
       } else {
@@ -544,7 +555,7 @@ function earnNickname(f){ const a=f.attrs;
 //   seulement se dégrader.
 // - Tirage à 35% une fois la condition remplie : garde un peu d'aléatoire,
 //   le changement n'est jamais garanti au combat exact qui l'a déclenché.
-function checkNicknameEvolution(f){
+function checkNicknameEvolution(f,win){
   if(!f.nick || f.org===0) return null;
   const changes=f.nicknameChanges||0;
   if(changes>=2) return null;
@@ -555,7 +566,7 @@ function checkNicknameEvolution(f){
   const pressure=['le Bulldozer','le Rouleau','C\u0153ur de Lion','la Machine','l\u2019Ouragan','le Métronome Infernal','l\u2019Increvable','le Marathonien','la Locomotive','le Mur','l\u2019Inébranlable','la Digue'];
   const totalFights=(f.W||0)+(f.L||0);
   let reason=null;
-  if(invincible.includes(f.nick) && (f.L||0)>=1) reason='a perdu son invincibilité';
+  if(invincible.includes(f.nick) && !win) reason='a perdu son invincibilité';
   else if(invincible.includes(f.nick) && (f.org||0)<=3 && totalFights>=25) reason='stagne loin du sommet malgré son surnom';
   else if(grappler.includes(f.nick) && totalFights>=10 && (f.sub||0)===0) reason='n\u2019a plus soumis personne depuis longtemps';
   else if(pressure.includes(f.nick) && (f.koLoss||0)>=3) reason='a montré des fissures inattendues';
@@ -648,8 +659,13 @@ function last5(f){ const h=f.history.slice(-5); if(!h.length)return '<span class
     return `<span class="p ${cls}" title="${x.method||''}">${letter}<i>${ko?'KO':sub?'SUB':'DÉC'}</i></span>`; }).join('')+'</div>'; }
 function formatCtrl(v){ const totalSec=Math.round((v||0)*100); const m=Math.floor(totalSec/60), s=totalSec%60; return `${m}:${s<10?'0':''}${s}`; }
 function formatArgent(kMontant){ const total=Math.round((kMontant||0)*1000);
-  if(total>=1000000) return (total/1000000).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:1})+' M $';
-  return total.toLocaleString('fr-FR')+' $';
+  // ==== [ANCRE: CORRECTIF_DOLLAR_INSECABLE] — bug remonté : le symbole "$"
+  // se retrouvait décalé/repoussé à la ligne suivante dans les conteneurs
+  // flex étroits (ex. "Frais de camp (manager, coach, salle)"), car l'espace
+  // avant "$" était un espace normal (cassable). Espace insécable (\u00A0)
+  // pour garder le montant et le symbole solidaires sur une seule ligne.
+  if(total>=1000000) return (total/1000000).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:1}).replace(/\s/g,'\u00A0')+'\u00A0M\u00A0$';
+  return total.toLocaleString('fr-FR').replace(/\s/g,'\u00A0')+'\u00A0$';
 }
 function recordStr(f){ return `${f.W}<span class="muted">-</span><span class="loss">${f.L}</span>${f.D?('<span class="muted">-</span>'+f.D):''}`; }
 // ==== [ANCRE: CORRECTIF_CODE_MORT] — orgTag() supprimée : définie mais

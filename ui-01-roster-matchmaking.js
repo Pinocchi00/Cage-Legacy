@@ -198,9 +198,9 @@ function checkAmaChampionship(f){
    pas de clé composite string (évite toute ambiguïté de parsing) ; groupé par
    org+divName seulement à l'affichage (scr_beltLineage). Année réelle prise
    sur G.season.year (G.year n'existe nulle part dans l'état du jeu). ==== */
-function recordTitleChange(org,divName,champion,dethroned){
+function recordTitleChange(org,divName,champion,dethroned,orgFlavor){
   if(!G.titleHistory) G.titleHistory=[];
-  G.titleHistory.unshift({org,divName,champion,year:(G.season&&G.season.year)||1,defenses:0,dethroned:dethroned||'Aucun'});
+  G.titleHistory.unshift({org,divName,champion,year:(G.season&&G.season.year)||1,defenses:0,dethroned:dethroned||'Aucun',orgFlavor:orgFlavor||null});
   if(G.titleHistory.length>200) G.titleHistory.length=200;
 }
 function recordTitleDefense(org,divName,champion){
@@ -213,7 +213,16 @@ function recordTitleDefense(org,divName,champion){
 // /100 (le jeu était trop dur), puis réajusté à la hausse sur les paliers
 // les plus bas (item demandé : amateur +4, palier 1 +2, palier 2 +2) car ce
 // premier abaissement les avait rendus trop faciles. Paliers 3+ inchangés.
-function orgLevel(org){ return [33,39,47,52,58,64,64][org]||31; }
+// ==== [ANCRE: COURBE_PROGRESSION_V2] — item demandé (retours groupés) : (1)
+// les promotions arrivaient à un niveau ressenti comme trop élevé trop vite
+// après chaque palier bas/moyen — écarts adoucis en début de courbe (33→37→
+// 42→48, contre 33→39→47→52 avant) ; (2) le jeu restait trop facile en fin
+// de carrière, sans vraie marche à franchir au sommet — écart Ultimate Rim→
+// Pacific Championship porté de +0 (64→64, les deux ligues du sommet étaient
+// AU MÊME niveau brut) à +10 (64→74), pour une vraie escalade de difficulté
+// jusqu'au bout. Premier passage de tuning raisonné, à valider via l'audit
+// Monte Carlo existant (8000 combats / 300 carrières) avant tuning fin.
+function orgLevel(org){ return [42,46,51,57,63,71,80][org]||40; }
 function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const pool=[];
   const isAmateur=(f.org===0);
   const needed=isAmateur?100:30; // pro : 1 champion + 15 contenders classés + 14 non classés

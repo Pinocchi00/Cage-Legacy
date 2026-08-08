@@ -908,6 +908,23 @@ const CL={
     }
     G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
   toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
+    // ==== [ANCRE: CORRECTIF_SAISON_PARTIELLE_RETRAITE] — bug remonté : le
+    // bilan saison par saison (retireSeasonRecapHtml) totalisait moins de
+    // victoires/défaites que le palmarès réel du combattant. Cause : seule
+    // nextSeason() archivait G.season.fights dans f.seasonRecap, jamais
+    // appelée pour la DERNIÈRE saison (partielle) au moment de la retraite —
+    // ses combats restaient comptés dans f.W/f.L mais disparaissaient du
+    // récapitulatif. On archive donc cette saison en cours ici aussi, avant
+    // de sceller la carrière.
+    const sData=G.season||{year:1,fights:[]};
+    if(sData.fights && sData.fights.length){
+      const seasonEval=evaluateSeason(G.f,sData.fights);
+      if(!G.f.seasonRecap) G.f.seasonRecap=[];
+      G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
+        koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
+        trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
+      G.season.fights=[];
+    }
     G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.screen='legacy'; save(); render(); },
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();

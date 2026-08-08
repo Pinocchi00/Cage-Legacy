@@ -72,6 +72,19 @@ function genOpponents(f){
     const filtered=pool.filter(o=>!f.recentOpps.includes(o.id));
     if(filtered.length>=5) pool=filtered;
   }
+  // ==== [ANCRE: CORRECTIF_RIVALITE_PLAFOND] — bug remonté : rien ne limitait
+  // le nombre TOTAL de confrontations contre le même adversaire sur toute la
+  // carrière (seule la fenêtre glissante des 4 derniers combats ci-dessus
+  // protégeait, insuffisant sur un long règne de champion — un même prétendant
+  // n°1 pouvait ressortir indéfiniment dès qu'il sortait de cette fenêtre,
+  // menant à des rivalités à 14 confrontations, bien au-delà du seuil de
+  // l'achievement "Rivalité légendaire" — 4). Plafond dur à 6 confrontations
+  // totales, appliqué avec le même filet de sécurité (pool restant suffisant)
+  // que le filtre ci-dessus pour ne jamais casser un petit roster.
+  if(f._allMeetings){
+    const capped=pool.filter(o=>o.champion || (f._allMeetings[o.id]||0)<6);
+    if(capped.length>=5) pool=capped;
+  }
   let chosen=[];
   if(G.tournament && G.tournament.active && f.org===0){
     const myMatch=G.tournament.matches.find(m=>m.a.id===f.id || m.b.id===f.id);
@@ -268,22 +281,16 @@ function finishTrainingFlow(pendingOppMalus){
       else G.lastMsg='Pesée ratée. Le combat est annulé.';
       G.screen=G.faith?'faith_hub':'hub'; save(); render(); return; // 3e coupe ratée : conséquence déjà tranchée plus haut
     }
-    // ==== [ANCRE: CORRECTIF_CATCHWEIGHT_GRADUE] — bug remonté : un dépassement
-    // de seulement 0,4kg pouvait déclencher une ANNULATION (35% de chance avec
-    // l'ancien palier binaire "≤1.5kg → 65% flat"). D'après les tendances
-    // réelles en MMA (historique UFC) : jusqu'à ~1,3kg (3lbs) le combat est
-    // PRESQUE TOUJOURS maintenu en catchweight ; entre 1,3 et 2,2kg (3-5lbs)
-    // c'est une vraie zone de tension (pénalité plus lourde, refus fréquent) ;
-    // au-delà de 2,2kg (5lbs+) le risque d'annulation devient élevé.
-    // La probabilité d'acceptation est donc désormais graduée sur l'écart réel,
-    // et la pénalité en % de bourse suit la même logique (plus l'écart est
-    // grand, plus la pénalité — et le malus physique — sont lourds).
+    // ==== [ANCRE: CORRECTIF_CATCHWEIGHT_PLAFOND] — item demandé : plafond
+    // strict à 1,3kg (3lbs) — au-delà, l'organisation refuse systématiquement
+    // le combat en catchweight (plus de tirage probabiliste 55%/15% au-delà
+    // de ce seuil, remplacé par un rejet automatique). En dessous de 1,3kg,
+    // le comportement gradué existant (90% d'acceptation, pénalité 20-30%)
+    // est conservé tel quel.
     const missedBy=rnd()<0.05?+(1.6+rnd()*2.9).toFixed(1):+(0.1+rnd()*1.2).toFixed(1);
-    let acceptChance,penaltyPct;
-    if(missedBy<=1.3){ acceptChance=0.90; penaltyPct=RI(20,30); }
-    else if(missedBy<=2.2){ acceptChance=0.55; penaltyPct=RI(40,50); }
-    else { acceptChance=0.15; penaltyPct=RI(45,50); }
-    const willAccept=rnd()<acceptChance;
+    const withinLimit=missedBy<=1.3;
+    const acceptChance=withinLimit?0.90:0, penaltyPct=withinLimit?RI(20,30):0;
+    const willAccept=withinLimit && rnd()<acceptChance;
     if(willAccept){
       G.fight.cutResult.catchweightPenaltyPct=penaltyPct;
       G.activeEvent={
@@ -296,7 +303,7 @@ function finishTrainingFlow(pendingOppMalus){
     }
     G.activeEvent={
       title:'Pesée ratée (Annulation)',
-      text:`Catastrophe sur la balance : ${missedBy}kg au-dessus de la limite (${wc.limit}kg). ${missedBy>2.2?'L\u2019écart est jugé trop dangereux et refusé net par la commission médicale.':esc(opp.name)+' refuse catégoriquement ce désavantage.'} Le combat est annulé sur-le-champ.`,
+      text:`Catastrophe sur la balance : ${missedBy}kg au-dessus de la limite (${wc.limit}kg). ${withinLimit?esc(opp.name)+' refuse catégoriquement ce désavantage.':'L\u2019écart dépasse le plafond de 1,3kg toléré en catchweight — la commission refuse net.'} Le combat est annulé sur-le-champ.`,
       btn:'Encaisser l\u2019humiliation', actionId:'botched_weight_decline'
     };
     G.screen='event'; save(); render(); return;

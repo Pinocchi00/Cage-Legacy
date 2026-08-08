@@ -562,7 +562,17 @@ function overall(f){ const a=f.attrs||{};
   const vals=ATTR_KEYS.map(k=>num(a[k])).sort((x,y)=>y-x);
   const top=vals.slice(0,10), topAvg=top.reduce((s,v)=>s+v,0)/top.length;
   const allAvg=vals.reduce((s,v)=>s+v,0)/vals.length;
-  let ov=topAvg*0.68+allAvg*0.32 + (f.dynamic||0)*0.3 - 5;
+  // ==== [ANCRE: CORRECTIF_PLAFOND_POTENTIEL] — bug remonté : même avec un
+  // potentiel élevé (jusqu'à 95, cf. makeFighter), l'OVR affiché dépassait
+  // rarement 75. Cause : un malus fixe de -5, appliqué uniformément à TOUS
+  // les combattants sans lien avec leur potentiel réel — un combattant à
+  // potentiel 95 parfaitement optimisé subissait exactement la même
+  // pénalité qu'un combattant à potentiel 80 quelconque. Rien dans le
+  // calcul ne reliait ce -5 au potentiel individuel ; il ne faisait que
+  // déflater artificiellement tout le monde de 5 points. Supprimé — le
+  // plafond individuel par attribut (f.potential+4, cf. applyDeltas)
+  // continue de faire tout le travail de limitation par potentiel.
+  let ov=topAvg*0.68+allAvg*0.32 + (f.dynamic||0)*0.3;
   return clamp(Math.round(ov),1,100);
 }
 function groupAvg(f){ const a=f.attrs||{}; const g=k=>Math.round(k.reduce((s,x)=>s+num(a[x[0]]),0)/k.length);
@@ -1048,7 +1058,16 @@ function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
 
 /* ------------------------- ORGS / CLASSEMENT / ÂGE ------------------------ */
 const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Continentale','Ultimate Rim (Argent)','Pacific Championship (Gloire)'];
-const ORG_PROMO_SCORE=[0,100,250,450,650,900,900]; // score ELO requis par palier
+const ORG_PROMO_SCORE=[0,115,290,520,750,1035,1035]; // score ELO requis par palier
+// ==== [ANCRE: RALENTISSEMENT_PROMOTIONS] — item demandé : les organisations
+// se proposaient trop vite (score p4p absolu facile à atteindre via quelques
+// finitions + une série en cours) par rapport au rythme réel de progression
+// au classement (rankPool relatif, qui bouge lentement car le reste du
+// roster gagne aussi de l'Elo en arrière-plan via advanceRoster()). Seuils
+// ORG_PROMO_SCORE remontés d'environ 15%, et exigences de canPromote()
+// resserrées (orgWins 5→6, winRate 60%→63%) pour que chaque promotion
+// arrive une fois réellement mérité, pas seulement possible. Premier passage
+// de tuning, à valider via l'audit Monte Carlo existant avant réglage fin.
 // ==== [ANCRE: CORRECTIF_DUPLICATION_BOURSE] — ORG_PURSES et CHAMP_MULT
 // étaient dupliqués À L'IDENTIQUE dans generateContract() (ce fichier) ET
 // dans resolveFight() (ui-05-fight-resolution.js) — exactement le genre de
@@ -1063,7 +1082,15 @@ const ORG_PROMO_SCORE=[0,100,250,450,650,900,900]; // score ELO requis par palie
 // ET bonne prime) sans écraser Pacific Championship (Gloire — prestige et
 // multiplicateur de titre bien plus haut : x5 contre x2 ici).
 const ORG_PURSES=[[0,0],[0.6,0.6],[2,2],[5,5],[15,15],[75,75],[30,30]]; // [cachet, prime de victoire] en k$, par palier d'organisation
-const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,2.0,5.0]; // multiplicateur de bourse pour un champion, par palier d'organisation
+// ==== [ANCRE: CORRECTIF_PARITE_CHAMPION_SOMMET] — bug remonté : les deux
+// offres du Sommet (scr_toptier) affichaient EXACTEMENT le même salaire pour
+// un combattant déjà champion (cas fréquent, cf. ligne 477 ui-05 : offre
+// déclenchée aussi pour un champion avec 2+ défenses). Cause : coïncidence
+// numérique pure — 30(Pacific)×5.0 = 75(Ultimate Rim)×2.0 = 150. Multiplicateur
+// Pacific ajusté à 5.3 (reste nettement le plus haut, identité "Gloire"
+// préservée) pour casser cette égalité sans toucher aux cachets de base ni
+// au multiplicateur Ultimate Rim, déjà recalibrés et documentés ailleurs.
+const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,2.0,5.3]; // multiplicateur de bourse pour un champion, par palier d'organisation
 // ==== [ANCRE: CORRECTIF_BOOST_SIGNATURE_DIFFERENCIE] — table remontée au
 // niveau module (au lieu d'être recréée à chaque déblocage dans
 // pickFinishMove) pour pouvoir être réutilisée telle quelle par
@@ -1089,7 +1116,7 @@ function orgDisplayName(f){ if(f.org===0||f.org>=5) return ORGS[f.org]; return f
 /* ==== [FIN ANCRE] ==== */
 function canPromote(f){ const n=f.org+1; const totalOrg=f.W+f.L+(f.D||0);
   const winRate=totalOrg>0?f.W/totalOrg:0;
-  return n<ORGS.length && (f.orgWins||0)>=5 && winRate>=0.60 && p4pScore(f)>=ORG_PROMO_SCORE[n]; }
+  return n<ORGS.length && (f.orgWins||0)>=6 && winRate>=0.63 && p4pScore(f)>=ORG_PROMO_SCORE[n]; }
 /* ==== [ANCRE: P4P_SCORE_80_20] — le classement pesait 100% le palmarès de
    CARRIÈRE (jamais remis à zéro entre deux paliers pro), alors que seul
    turnPro() (amateur->pro) réinitialise W/L. Une promotion tier 1->2 gardait

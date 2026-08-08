@@ -57,11 +57,15 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
   const myReigns=(G.titleHistory||[]).filter(r=>r.champion===f.name);
   const beltHistory=myReigns.map(r=>({
     org:r.org,
-    // Nom d'ambiance fiable uniquement pour l'organisation ACTUELLE du
-    // combattant (f.orgFlavor n'est qu'une valeur courante, pas un historique
-    // par palier) — on retombe sur le nom générique du palier sinon, pour ne
-    // jamais afficher un nom d'ambiance qui ne correspond pas au bon règne.
-    orgName:(r.org===f.org && f.orgFlavor && ORG_FLAVORS[r.org] && ORG_FLAVORS[r.org].includes(f.orgFlavor)) ? f.orgFlavor : (ORGS[r.org]||'Organisation'),
+    // ==== [ANCRE: CORRECTIF_ORGNAME_HISTORIQUE] — bug remonté : le nom
+    // d'ambiance n'était fiable que pour l'organisation ACTUELLE du
+    // combattant (fallback générique "Circuit national" etc. pour toutes les
+    // autres), rendant les anciens règnes indiscernables entre eux malgré des
+    // organisations en réalité différentes. recordTitleChange() capture
+    // désormais le nom d'ambiance réel au moment même du titre (orgFlavor) —
+    // on l'utilise en priorité, le fallback générique ne sert plus que pour
+    // les sauvegardes antérieures à ce correctif (orgFlavor absent).
+    orgName:r.orgFlavor||((r.org===f.org && f.orgFlavor && ORG_FLAVORS[r.org] && ORG_FLAVORS[r.org].includes(f.orgFlavor)) ? f.orgFlavor : (ORGS[r.org]||'Organisation')),
     divName:r.divName, year:r.year, defenses:r.defenses||0
   }));
   // Bug #11 (correctif complémentaire, hors proposition Gemini) : beltHistory
