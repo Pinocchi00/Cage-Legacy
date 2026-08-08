@@ -157,24 +157,16 @@ function scr_select(){ const f=G.f;
     const rnk=divRank(o); const fightsTot=o.W+o.L+(o.D||0);
     const rTag=o.champion?'CHAMPION':(fightsTot===0?'NON CLASSÉ':(rnk===1?'CHALLENGER #1':`RANG #${rnk}`));
 
-    // Archétype de matchmaking : la logique de fond ne change pas (mêmes 3
-    // adversaires que genOpponents() proposait déjà), seul l'habillage devient
-    // un vrai dilemme risque/récompense lisible d'un coup d'œil.
-    let mmRole='Opposition Logique', mmReward='Niveau équivalent, progression saine au classement.', roleColor='var(--text)';
-    const isProspect=(o.age<=23 && fightsTot<=6 && o.W>o.L);
-    const isVeteran=(o.age>=34 && o.L>=3);
-    const isGatekeeper=(o.attrs.durability>75 || o.attrs.tdd>75) && o.L>o.W/2;
-    if(e.context==='CHAMP-CHAMP'){ mmRole='Défi Historique'; mmReward='Devenir double monarque. La consécration ultime.'; roleColor='var(--gold)'; }
-    else if(e.context && e.context.includes('TOURNOI')){ mmRole='Combat de Bracket'; mmReward='Avancer dans le tournoi amateur.'; roleColor='var(--sage)'; }
-    else if(o.champion || e.context==='COMBAT DE TITRE'){ mmRole='Le Champion en Titre'; mmReward='Risque immense. Récompense absolue : la Ceinture.'; roleColor='var(--gold)'; }
-    else if(f.champion){ mmRole='Challenger Légitime'; mmReward='Défense de titre. Confirme votre statut de roi de la division.'; roleColor='var(--sage)'; }
-    else if(isRival){ mmRole='Rivalité Historique'; mmReward='L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.'; roleColor='var(--blood)'; }
-    else if(fightsTot===0){ mmRole='Le Débutant'; mmReward='Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.'; roleColor='var(--muted)'; }
-    else if(rnk<rkMe-4){ mmRole='Le Raccourci (Risqué)'; mmReward='Adversaire bien mieux classé. Bond massif au classement si vous créez la surprise.'; roleColor='var(--gold)'; }
-    else if(isProspect){ mmRole='Le Prodige Régional'; mmReward='Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.'; roleColor='#4DA6FF'; }
-    else if(isGatekeeper){ mmRole='Le Gardien du Temple'; mmReward='Combat bourbier garanti. Passage obligatoire pour le haut du classement.'; roleColor='var(--sage)'; }
-    else if(isVeteran){ mmRole='Le Vétéran'; mmReward='Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.'; roleColor='var(--text)'; }
-    else if(rnk>rkMe+5){ mmRole='Le Combat Piège'; mmReward='Classement inférieur au vôtre. Tout à perdre, rien à gagner.'; roleColor='var(--loss)'; }
+    // ==== [ANCRE: MATCHMAKING_ROLES] — l'archétype (mêmes 3 adversaires que
+    // genOpponents() proposait déjà) est désormais calculé UNE FOIS dans
+    // genOpponents() (matchmakingRole(), ui-02) et figé sur l'entrée (e.mm),
+    // plutôt que recalculé à chaque render() : garantit la cohérence entre
+    // ce qui est affiché ici et ce que resolveFight() utilise réellement
+    // (voir CREDIBILITE_PRODIGE, ui-05). Filet de sécurité conservé pour les
+    // entrées qui n'en auraient pas (ex. sauvegarde ancienne rechargée).
+    const mmData=e.mm||matchmakingRole(f,o,e);
+    const mmRole=mmData.label, mmReward=mmData.reward, roleColor=mmData.color;
+
 
     // ==== [ANCRE: COMPARATIF_STATS_REUTILISABLE] — factorisé dans statComparisonHtml() ====
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
@@ -380,7 +372,7 @@ function scr_legend_detail(){
   if(!f) return `<div class="scr center"><p class="lede">Légende introuvable.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <div class="glass mwash card" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:16px">
-     <div class="hero-name" style="position:relative;z-index:2">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div}${f.classLabel?` · ${f.classLabel}`:''}</em></div>
+     <div class="hero-name" style="position:relative;z-index:2">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.div}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
      ${f.motivation?`<div class="story" style="position:relative;z-index:2"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
      <div class="epis mt" style="position:relative;z-index:2">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
      <div class="stat-band" style="position:relative;z-index:2">
@@ -428,6 +420,43 @@ function scr_class_choice(){
      </div>`;
    }).join('')}
    <button class="btn ghost mt" onclick="G._profileReturn='class_choice';CL.go('profile')">Voir la fiche complète du combattant</button>
+  </div>`;
+}
+// ==== [ANCRE: SYSTEME_CLASSES_31] (rendu) — même structure que
+// scr_class_choice() ci-dessus, mais le pool vient de CLASSES_31[style][f.class]
+// (dépend du choix fait à 23 ans, jamais du style seul). f.class est garanti
+// non-null ici : class31Offer (ui-05) ne se lève que si classChosen est déjà
+// vrai. Filet de sécurité quand même (pool vide) pour ne jamais planter sur
+// une sauvegarde où class31Offer aurait été levé sans classChosen valide.
+function scr_class_choice_31(){
+  const f=G.f; const pool=(CLASSES_31[f.style]&&CLASSES_31[f.style][f.class])||[];
+  const parentCls=(CLASSES[f.style]||[]).find(c=>c.id===f.class);
+  if(!pool.length){
+    return `<div class="scr center intro">
+     <div class="eyebrow gold">Choix de Classe (31 ans)</div>
+     <p class="lede">Aucune spécialisation complémentaire disponible pour ce profil.</p>
+     <button class="btn ghost mt" onclick="CL.go('hub')">Retour au vestiaire</button>
+    </div>`;
+  }
+  return `<div class="scr center intro">
+   <div class="eyebrow gold">Choix de Classe — 31 ans</div>
+   <h2 class="disp">Une seconde spécialisation, définitive elle aussi</h2>
+   <p class="lede">À 31 ans, l\u2019identité choisie à 23 ans${parentCls?' (« '+parentCls.lbl+' »)':''} se prolonge et se précise. Ce choix ne pourra jamais être changé.</p>
+   ${pool.map((cls,idx)=>{
+     const fits=(()=>{ try{ return cls.fit(f); }catch(e){ return false; } })();
+     const deltaTags=Object.entries(cls.fx||{}).map(([k,v])=>{
+       const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+       return `<span class="dlt ${v>=0?'up':'dn'}">${shown>0?'+':''}${shown} ${attrLabel(k)}</span>`;
+     }).join('');
+     return `<div class="glass card mt" style="text-align:left;background:var(--panel2);border:1px solid var(--line);padding:16px">
+       <b style="font-size:17px;color:var(--gold)">${cls.lbl}</b>
+       <div class="story mt" style="font-style:italic">« ${cls.desc} »</div>
+       <div class="dlts mt">${deltaTags}</div>
+       <div class="mono small mt" style="color:${fits?'var(--win)':'var(--muted)'}">${fits?'✓ Correspond à ton parcours jusqu\u2019ici':'Ne correspond pas particulièrement à ton style actuel — reste un choix valide.'}</div>
+       <button class="btn primary mt" onclick="CL.chooseClass31(${idx})">Choisir « ${cls.lbl} » — définitif</button>
+     </div>`;
+   }).join('')}
+   <button class="btn ghost mt" onclick="G._profileReturn='class_choice_31';CL.go('profile')">Voir la fiche complète du combattant</button>
   </div>`;
 }
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;

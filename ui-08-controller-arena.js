@@ -15,7 +15,7 @@
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
-  draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,
+  draft:scr_draft,arcadehub:scr_arcadehub,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
@@ -38,6 +38,7 @@ function routeAfterOrgChange(){
 function routeAfterCareerPending(){
   const p=G.pending;
   if(p&&p.classOffer) G.screen='class_choice';
+  else if(p&&p.class31Offer) G.screen='class_choice_31';
   else if(p&&p.contractExpiry) G.screen='contract_nego';
   else if(p&&p.proOffer) G.screen='promo';
   else if(p&&p.topTierOffer) G.screen='toptier';
@@ -63,6 +64,21 @@ const CL={
     G.f.class=cls.id; G.f.classLabel=cls.lbl; G.f.classChosen=true;
     G.f.overall=overall(G.f);
     if(G.pending) G.pending.classOffer=false;
+    G.lastMsg=`Classe choisie : ${cls.lbl}. Ce choix est définitif.`;
+    routeAfterCareerPending();
+    save(); render();
+  },
+  // ==== [ANCRE: SYSTEME_CLASSES_31] (contrôleur) — même garde-fou que
+  // chooseClass() (classChosen jamais réinitialisé). Le pool dépend de
+  // G.f.class (choix fait à 23 ans), pas seulement du style — cohérent avec
+  // scr_class_choice_31().
+  chooseClass31(idx){
+    const pool=(CLASSES_31[G.f.style]&&CLASSES_31[G.f.style][G.f.class])||[];
+    const cls=pool[idx]; if(!cls || G.f.class31Chosen) return;
+    Object.entries(cls.fx).forEach(([k,v])=>{ G.f.attrs[k]=clamp((G.f.attrs[k]||50)+v,1,100); });
+    G.f.class31=cls.id; G.f.class31Label=cls.lbl; G.f.class31Chosen=true;
+    G.f.overall=overall(G.f);
+    if(G.pending) G.pending.class31Offer=false;
     G.lastMsg=`Classe choisie : ${cls.lbl}. Ce choix est définitif.`;
     routeAfterCareerPending();
     save(); render();
@@ -328,7 +344,7 @@ const CL={
         if(!pendingOppMalus) pendingOppMalus={}; pendingOppMalus.cardio=-20; pendingOppMalus.durability=-15; G.faith.perks.catchweight=false;
       }
       const kind=fightKind(); const opp=G.sel.o; const rounds=(kind==='title'||kind==='defense')?5:3;
-      G.fight={kind,opp,rounds,malus:pendingMyMalus||null,oppMalus:pendingOppMalus||null};
+      G.fight={kind,opp,rounds,malus:pendingMyMalus||null,oppMalus:pendingOppMalus||null,mmRole:G.sel.mm?G.sel.mm.role:null};
       const wc=weightCutInfo(G.f);
       let cutTier;
       if(G.faith.dietYear===G.faith.year){ cutTier='sans_effort'; }

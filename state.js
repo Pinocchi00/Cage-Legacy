@@ -83,6 +83,7 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
     // esprit que l'écran de retraite. Champs additionnels capturés ici.
     beltHistory,champChampBelt:f.champChampBelt||null,
     class:f.class||null,classLabel:f.classLabel||null,
+    class31:f.class31||null,class31Label:f.class31Label||null,
     motivation:f.motivation||null,
     seasonRecap:(f.seasonRecap||[]).slice(),
     notableWins:(f.history||[]).filter(h=>h.res==='win'&&h.oppWasChamp&&h.oppName).slice(-6).reverse(),

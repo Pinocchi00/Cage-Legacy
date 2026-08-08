@@ -60,6 +60,37 @@ function statComparisonHtml(f,o){
     <div><span class="stat-lbl">DANGER (KO)</span><b class="mono" style="font-size:13px;color:${getDiffColor(diffText(danger,myDan))}">${diffText(danger,myDan)}</b></div>
   </div>`;
 }
+// ==== [ANCRE: MATCHMAKING_ROLES] — item demandé : les archétypes de
+// matchmaking (Prodige Régional, Gardien du Temple, Raccourci Risqué...)
+// existaient déjà comme habillage narratif recalculé à chaque render() dans
+// scr_select() (ui-06), sans exister comme donnée : impossible de s'y fier
+// ailleurs (résolution de combat, historique) et pas garanti de rester
+// stable entre deux rendus du même écran si la donnée sous-jacente change
+// (streak, morale...) pendant que le joueur regarde. Extrait ici en fonction
+// pure, appelée UNE FOIS par genOpponents() et figée sur l'entrée (e.mm) —
+// scr_select() consomme désormais cette donnée figée au lieu de la
+// recalculer. Permet un vrai enjeu mécanique (voir CREDIBILITE_PRODIGE plus
+// bas dans ui-05) au lieu d'une simple étiquette cosmétique.
+function matchmakingRole(f,o,e){
+  const rkMe=divRank(f), rnk=divRank(o), fightsTot=o.W+o.L+(o.D||0);
+  const isRival=(f.rivalId===o.id);
+  const isProspect=(o.age<=23 && fightsTot<=6 && o.W>o.L);
+  const isVeteran=(o.age>=34 && o.L>=3);
+  const isGatekeeper=(o.attrs.durability>75 || o.attrs.tdd>75) && o.L>o.W/2;
+  let role='logique', label='Opposition Logique', reward='Niveau équivalent, progression saine au classement.', color='var(--text)';
+  if(e.context==='CHAMP-CHAMP'){ role='champchamp'; label='Défi Historique'; reward='Devenir double monarque. La consécration ultime.'; color='var(--gold)'; }
+  else if(e.context && e.context.includes('TOURNOI')){ role='tournoi'; label='Combat de Bracket'; reward='Avancer dans le tournoi amateur.'; color='var(--sage)'; }
+  else if(o.champion || e.context==='COMBAT DE TITRE'){ role='titre'; label='Le Champion en Titre'; reward='Risque immense. Récompense absolue : la Ceinture.'; color='var(--gold)'; }
+  else if(f.champion){ role='challenger'; label='Challenger Légitime'; reward='Défense de titre. Confirme votre statut de roi de la division.'; color='var(--sage)'; }
+  else if(isRival){ role='rivalite'; label='Rivalité Historique'; reward='L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.'; color='var(--blood)'; }
+  else if(fightsTot===0){ role='debutant'; label='Le Débutant'; reward='Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.'; color='var(--muted)'; }
+  else if(rnk<rkMe-4){ role='raccourci'; label='Le Raccourci (Risqué)'; reward='Adversaire bien mieux classé. Bond massif au classement si vous créez la surprise.'; color='var(--gold)'; }
+  else if(isProspect){ role='prospect'; label='Le Prodige Régional'; reward='Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.'; color='#4DA6FF'; }
+  else if(isGatekeeper){ role='gatekeeper'; label='Le Gardien du Temple'; reward='Combat bourbier garanti. Passage obligatoire pour le haut du classement.'; color='var(--sage)'; }
+  else if(isVeteran){ role='veteran'; label='Le Vétéran'; reward='Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.'; color='var(--text)'; }
+  else if(rnk>rkMe+5){ role='piege'; label='Le Combat Piège'; reward='Classement inférieur au vôtre. Tout à perdre, rien à gagner.'; color='var(--loss)'; }
+  return {role,label,reward,color};
+}
 function genOpponents(f){
   let pool=G.roster.filter(o=>o.id!==f.id);
   // Anti-répétition globale : mémoire des 4 derniers adversaires, appliquée
@@ -90,13 +121,17 @@ function genOpponents(f){
     const myMatch=G.tournament.matches.find(m=>m.a.id===f.id || m.b.id===f.id);
     if(myMatch){
       const rival=myMatch.a.id===f.id?myMatch.b:myMatch.a;
-      return [{o:rival, read:`Élimination directe.`, context:`TOURNOI ${G.tournament.cfg.label} — ${G.tournament.step}`}];
+      const entry={o:rival, read:`Élimination directe.`, context:`TOURNOI ${G.tournament.cfg.label} — ${G.tournament.step}`};
+      entry.mm=matchmakingRole(f,rival,entry);
+      return [entry];
     }
   }
   const isDefense=!!f.champion;
   const isTitle=(!isDefense && isTitleEligible(f));
   if(isTitle){ const champ=pool.find(o=>o.champion)||pool[0];
-    return [{o:champ, read:tacticalRead(f,champ), context:`COMBAT DE TITRE`}]; }
+    const entry={o:champ, read:tacticalRead(f,champ), context:`COMBAT DE TITRE`};
+    entry.mm=matchmakingRole(f,champ,entry);
+    return [entry]; }
   if(isDefense){
     const r1=pool[0]||pool[1];
     const rest=pool.slice(1,8).filter(o=>o && o.id!==r1.id);
@@ -162,7 +197,9 @@ function genOpponents(f){
   uniqueOpps.sort((a,b)=>p4pScore(b)-p4pScore(a));
   return uniqueOpps.map(o=>{ let read=tacticalRead(f,o);
     if(f.rivalId===o.id) read='RIVALITÉ. '+read;
-    return {o, read}; });
+    const entry={o, read};
+    entry.mm=matchmakingRole(f,o,entry);
+    return entry; });
 }
 
 function trainingOptions(f){ const gen=TRAIN.filter(x=>x.t.includes('all'));
@@ -237,7 +274,7 @@ function finishTrainingFlow(pendingOppMalus){
   // combat vedette (5 rounds, feu des projecteurs) même hors combat de titre.
   const isStarFight=(kind!=='title' && kind!=='defense' && kind!=='champchamp_title') && (G.f.hypeBonus||1)>=1.4 && rnd()<0.30;
   const rounds=(kind==='title'||kind==='defense'||kind==='champchamp_title'||isStarFight)?5:3;
-  G.fight={kind,opp,rounds,malus:null,oppMalus:pendingOppMalus||null,isStarFight};
+  G.fight={kind,opp,rounds,malus:null,oppMalus:pendingOppMalus||null,isStarFight,mmRole:G.sel.mm?G.sel.mm.role:null};
   // ==== [ANCRE: CUTTING_5PALIERS] — déterministe, à CHAQUE combat. Le poids de
   // forme est un trait VARIABLE (weightCutInfo tire un % neuf à chaque appel),
   // pas un socle figé à la création — donc le palier change réellement d'un

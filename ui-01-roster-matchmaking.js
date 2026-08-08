@@ -150,6 +150,226 @@ const CLASSES = {
   ]
 };
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: SYSTEME_CLASSES_31] — item demandé : seconde couche de
+   spécialisation à 31 ans, 3 Classes complémentaires par style, PERSONNALISÉES
+   selon la Classe choisie à 23 ans (CLASSES ci-dessus) — 3 options différentes
+   par choix parent, jamais les mêmes d'un parent à l'autre. Même principe que
+   SYSTEME_CLASSES (choix unique et définitif, cumulatif avec TOUT le reste),
+   mais delta encore plus modeste (+18/+10/-10 contre +25/+15/-15) : il s'ajoute
+   par-dessus un delta déjà appliqué à 23 ans, un effet égal aurait repoussé
+   l'équilibre validé par l'audit Monte Carlo. Clé : CLASSES_31[style][idClasse23]
+   → tableau de 3 options. */
+const CLASSES_31={
+  boxer:{
+    cl_bx1:[ // Puncheur
+      { id:'cl_bx1_a', lbl:'Le Bourreau Silencieux', desc:'Il ne cherche plus l’esbroufe, il cherche la faille exacte — puis referme la lumière.', fx:{killer:18,focus:10,composure:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 },
+      { id:'cl_bx1_b', lbl:'Le Sismographe', desc:'Chaque coup part comme un tremblement de terre — tant pis si sa propre garde tremble avec.', fx:{power:18,explosiveness:10,chin:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 && (f.koLoss||0)>=1 },
+      { id:'cl_bx1_c', lbl:'Le Chasseur de Corps', desc:'Oublie la tête : le foie et les côtes cèdent bien avant, round après round.', fx:{power:18,cardio:10,jab:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+    cl_bx2:[ // Technicien
+      { id:'cl_bx2_a', lbl:'Le Chirurgien', desc:'Plus de fioritures : chaque échange devient une incision précise, calculée d’avance.', fx:{fightIQ:18,focus:10,aggression:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.5 },
+      { id:'cl_bx2_b', lbl:'Le Métronome', desc:'Le jab tombe encore et encore, au même endroit, à la même seconde — une horloge qu’on ne peut pas remonter contre soi.', fx:{jab:18,handSpeed:10,power:-10},
+        fit:f=>(f.W||0)>=10 },
+      { id:'cl_bx2_c', lbl:'L’Anticipateur', desc:'Il a déjà vu la suite avant que l’adversaire n’ait fini de la penser.', fx:{adaptability:18,composure:10,killer:-10},
+        fit:f=>(f.koLoss||0)===0 }
+    ],
+    cl_bx3:[ // Roc
+      { id:'cl_bx3_a', lbl:'L’Increvable', desc:'Le corps encaisse, récupère, recommence — indéfiniment, comme si la fatigue avait renoncé à lui.', fx:{durability:18,recovery:10,handSpeed:-10},
+        fit:f=>(f.L||0)>=3 },
+      { id:'cl_bx3_b', lbl:'Le Mur de Pierre', desc:'Rien ne le fait reculer, rien ne le fait douter — un mur ne discute pas.', fx:{chin:18,composure:10,aggression:-10},
+        fit:f=>(f.koLoss||0)===0 && (f.L||0)>=2 },
+      { id:'cl_bx3_c', lbl:'Le Broyeur d’Usure', desc:'La force ne faiblit jamais, même au round où tout le monde s’écroule.', fx:{strength:18,cardio:10,footSpeed:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+  },
+  bjj:{
+    cl_bj1:[ // Chasseur de Soumission
+      { id:'cl_bj1_a', lbl:'Le Bras Fantôme', desc:'La soumission arrive avant même que l’adversaire ne comprenne qu’il était en danger.', fx:{submission:18,focus:10,strength:-10},
+        fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.6 },
+      { id:'cl_bj1_b', lbl:'Le Métamorphe', desc:'Son corps se plie dans des positions que personne n’a jamais appris à défendre.', fx:{flexibility:18,adaptability:10,chin:-10},
+        fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_bj1_c', lbl:'Le Piège à Cou', desc:'Chaque échange n’est qu’un prétexte pour ramener le combat vers le seul endroit qui l’intéresse.', fx:{submission:18,fightIQ:10,cardio:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+    cl_bj2:[ // Contrôleur
+      { id:'cl_bj2_a', lbl:'Le Poids Mort', desc:'Une fois qu’il est dessus, il n’y a plus de dessous — juste une lente asphyxie de projet.', fx:{topControl:18,strength:10,footSpeed:-10},
+        fit:f=>(f.defenses||0)>=3 },
+      { id:'cl_bj2_b', lbl:'Le Marteau Patient', desc:'Il ne cherche pas la finition rapide — juste à cogner, encore, jusqu’à ce que l’arbitre tranche.', fx:{gnp:18,cardio:10,submission:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.3 },
+      { id:'cl_bj2_c', lbl:'Le Verrou Absolu', desc:'Gagner un round, pour lui, c’est ne rien laisser passer — jamais.', fx:{topControl:18,discipline:10,aggression:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 }
+    ],
+    cl_bj3:[ // Araignée
+      { id:'cl_bj3_a', lbl:'L’Araignée Venimeuse', desc:'Se retrouver en dessous n’a jamais autant ressemblé à une invitation piégée.', fx:{submission:18,flexibility:10,strength:-10},
+        fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_bj3_b', lbl:'Le Filet Renversé', desc:'La position ne veut plus rien dire — seule compte la toile qu’il a fini de tisser.', fx:{guardWork:18,composure:10,tdd:-10},
+        fit:f=>(f.L||0)>=2 },
+      { id:'cl_bj3_c', lbl:'La Toile Sans Fin', desc:'Il peut rester en dessous une éternité — c’est l’adversaire qui finit par s’épuiser le premier.', fx:{guardWork:18,cardio:10,power:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+  },
+  wrestler:{
+    cl_wr1:[ // L’Amenée Parfaite
+      { id:'cl_wr1_a', lbl:'Le Chain Wrestler', desc:'Une amenée refusée n’est jamais la fin — juste la première d’une longue série.', fx:{takedown:18,cardio:10,chin:-10},
+        fit:f=>(f.W||0)>=12 },
+      { id:'cl_wr1_b', lbl:'L’Explosion Pure', desc:'Une seule accélération suffit à effacer toute résistance.', fx:{explosiveness:18,power:10,discipline:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.3 },
+      { id:'cl_wr1_c', lbl:'Le Chasseur de Jambes', desc:'Ses amenées sont si constantes qu’elles finissent par sembler inévitables — pour lui comme pour l’adversaire.', fx:{takedown:18,tdd:10,submission:-10},
+        fit:f=>(f.koLoss||0)===0 }
+    ],
+    cl_wr2:[ // Le Marteau
+      { id:'cl_wr2_a', lbl:'Le Marteau-Piqueur', desc:'Une fois au sol, les mains ne s’arrêtent plus tant que l’arbitre n’intervient pas.', fx:{gnp:18,handSpeed:10,chin:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_wr2_b', lbl:'La Forge', desc:'Chaque round le rend plus dur à faire plier, pas l’inverse.', fx:{strength:18,durability:10,footSpeed:-10},
+        fit:f=>(f.L||0)>=2 },
+      { id:'cl_wr2_c', lbl:'L’Épuisement Programmé', desc:'Le plan n’a rien de subtil : vider l’adversaire round après round, jusqu’à ce qu’il n’ait plus rien.', fx:{cardio:18,gnp:10,power:-10},
+        fit:f=>(f.W||0)>=12 }
+    ],
+    cl_wr3:[ // Le Verrou
+      { id:'cl_wr3_a', lbl:'Le Cadenas', desc:'Une fois la position prise, il n’existe plus aucune sortie — juste l’attente.', fx:{topControl:18,discipline:10,killer:-10},
+        fit:f=>(f.defenses||0)>=2 },
+      { id:'cl_wr3_b', lbl:'Le Mur Anti-Lutte', desc:'Refuser le sol, encore et encore, jusqu’à ce que l’adversaire renonce à essayer.', fx:{tdd:18,composure:10,aggression:-10},
+        fit:f=>(f.koLoss||0)===0 },
+      { id:'cl_wr3_c', lbl:'Le Comptable des Points', desc:'Il ne cherche pas la finition — juste à gagner chaque minute, une par une.', fx:{fightIQ:18,topControl:10,submission:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.5 }
+    ],
+  },
+  kickboxer:{
+    cl_kb1:[ // Le Bombardier
+      { id:'cl_kb1_a', lbl:'Le Découpeur de Jambe', desc:'La jambe d’appui devient un projet de démolition méthodique, coup après coup.', fx:{kick:18,focus:10,cardio:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_kb1_b', lbl:'Le Marteau Aérien', desc:'Chaque frappe part pour terminer le combat sur-le-champ.', fx:{power:18,explosiveness:10,chin:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 },
+      { id:'cl_kb1_c', lbl:'L’Architecte de la Chute', desc:'Chaque échange rapproche méthodiquement l’adversaire de l’instant où il ne tient plus debout.', fx:{kick:18,fightIQ:10,handSpeed:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+    cl_kb2:[ // Le Mobile
+      { id:'cl_kb2_a', lbl:'Le Courant d’Air', desc:'Impossible à coincer, impossible à suivre — il n’est déjà plus là où on le cherchait.', fx:{footSpeed:18,adaptability:10,power:-10},
+        fit:f=>(f.koLoss||0)===0 },
+      { id:'cl_kb2_b', lbl:'Les Mains Rapides', desc:'La vitesse remplace la puissance — et personne n’a le temps de s’en plaindre.', fx:{handSpeed:18,jab:10,strength:-10},
+        fit:f=>(f.W||0)>=10 },
+      { id:'cl_kb2_c', lbl:'Le Point Fantôme', desc:'Toucher, disparaître, recommencer — un jeu que l’adversaire ne comprend jamais assez vite.', fx:{footSpeed:18,focus:10,aggression:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 }
+    ],
+    cl_kb3:[ // Le Mur Défensif
+      { id:'cl_kb3_a', lbl:'La Forteresse', desc:'Rien ne passe, rien ne s’use — la lutte adverse vient toujours s’écraser au même endroit.', fx:{tdd:18,durability:10,killer:-10},
+        fit:f=>(f.koLoss||0)===0 },
+      { id:'cl_kb3_b', lbl:'Le Contre Parfait', desc:'Il n’attaque jamais le premier — il n’en a pas besoin.', fx:{composure:18,fightIQ:10,aggression:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_kb3_c', lbl:'L’Attente Infinie', desc:'La patience devient une arme à part entière, plus fiable que n’importe quel coup.', fx:{discipline:18,composure:10,power:-10},
+        fit:f=>(f.L||0)>=2 }
+    ],
+  },
+  muayThai:{
+    cl_mt1:[ // Le Clinch Roi
+      { id:'cl_mt1_a', lbl:'Le Coude Sacré', desc:'Une fois collé, chaque coude devient une sentence.', fx:{clinchStr:18,killer:10,cardio:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_mt1_b', lbl:'L’Étau', desc:'Personne ne se décolle une fois qu’il a refermé sa prise.', fx:{strength:18,topControl:10,footSpeed:-10},
+        fit:f=>(f.W||0)>=10 },
+      { id:'cl_mt1_c', lbl:'Le Genou Long', desc:'Le genou revient sans relâche, minute après minute, jusqu’à ce que la garde cède.', fx:{clinchStr:18,cardio:10,handSpeed:-10},
+        fit:f=>(f.L||0)>=2 }
+    ],
+    cl_mt2:[ // Le Bourreau
+      { id:'cl_mt2_a', lbl:'L’Exécuteur', desc:'Aucune émotion, aucune hésitation — juste la fin, méthodiquement livrée.', fx:{killer:18,focus:10,composure:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.55 },
+      { id:'cl_mt2_b', lbl:'La Frappe Sismique', desc:'Un seul coup suffit — la garde du reste du corps n’est plus qu’un détail.', fx:{power:18,explosiveness:10,chin:-10},
+        fit:f=>(f.koLoss||0)>=1 },
+      { id:'cl_mt2_c', lbl:'Le Ciseau', desc:'Chaque round tranche un peu plus dans les appuis adverses.', fx:{power:18,kick:10,cardio:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+    cl_mt3:[ // Le Mur Thaï
+      { id:'cl_mt3_a', lbl:'Le Roc Thaï', desc:'Encaisser, récupérer, recommencer — le corps ne se souvient jamais de la douleur.', fx:{durability:18,recovery:10,handSpeed:-10},
+        fit:f=>(f.L||0)>=3 },
+      { id:'cl_mt3_b', lbl:'Le Menton de Fer', desc:'On peut tout lui envoyer — il ne cligne toujours pas des yeux.', fx:{chin:18,composure:10,aggression:-10},
+        fit:f=>(f.koLoss||0)===0 && (f.L||0)>=2 },
+      { id:'cl_mt3_c', lbl:'L’Absorbeur', desc:'Chaque échange l’use un peu moins que l’adversaire en face.', fx:{durability:18,cardio:10,killer:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+  },
+  karate:{
+    cl_ka1:[ // L’Éclair
+      { id:'cl_ka1_a', lbl:'L’Étincelle', desc:'Une seule accélération, et tout est déjà terminé avant que l’adversaire ne réagisse.', fx:{explosiveness:18,handSpeed:10,cardio:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_ka1_b', lbl:'Le Papillon', desc:'Il change de direction plus vite que l’œil ne peut suivre.', fx:{footSpeed:18,adaptability:10,strength:-10},
+        fit:f=>(f.koLoss||0)===0 },
+      { id:'cl_ka1_c', lbl:'Le Blitz Calculé', desc:'Chaque explosion est en réalité un plan préparé bien avant l’instant où elle se déclenche.', fx:{footSpeed:18,fightIQ:10,durability:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+    cl_ka2:[ // Le Maître du Point
+      { id:'cl_ka2_a', lbl:'Le Sage', desc:'Il a déjà résolu le combat dans sa tête, bien avant la première frappe.', fx:{fightIQ:18,discipline:10,aggression:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.5 },
+      { id:'cl_ka2_b', lbl:'Le Point Précis', desc:'Un seul coup, placé exactement là où il doit l’être, suffit à trancher le round.', fx:{composure:18,focus:10,killer:-10},
+        fit:f=>(f.koLoss||0)===0 },
+      { id:'cl_ka2_c', lbl:'Le Sniper', desc:'Le jab n’est plus un coup d’ouverture — c’est déjà la conclusion.', fx:{jab:18,fightIQ:10,power:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+    cl_ka3:[ // Le Kamikaze
+      { id:'cl_ka3_a', lbl:'Le Va-Tout', desc:'Chaque coup part pour tout terminer d’un coup — la prudence n’a jamais fait partie du plan.', fx:{killer:18,explosiveness:10,chin:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 },
+      { id:'cl_ka3_b', lbl:'Le High Kick Fatal', desc:'Le pied part vers la tête à chaque ouverture, sans jamais revoir sa copie.', fx:{kick:18,power:10,composure:-10},
+        fit:f=>(f.koLoss||0)>=1 },
+      { id:'cl_ka3_c', lbl:'Le Joueur de Roulette', desc:'Il ne calcule plus les risques — il fonce, et advienne que pourra.', fx:{killer:18,aggression:10,discipline:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+  },
+  sambo:{
+    cl_sb1:[ // Le Projeteur
+      { id:'cl_sb1_a', lbl:'Le Vol Plané', desc:'Chaque échange finit en trajectoire aérienne, sans exception.', fx:{takedown:18,explosiveness:10,cardio:-10},
+        fit:f=>(f.W||0)>=12 },
+      { id:'cl_sb1_b', lbl:'La Prise Russe', desc:'Le clinch devient un piège dont on ne ressort jamais debout.', fx:{strength:18,clinchStr:10,footSpeed:-10},
+        fit:f=>(f.L||0)>=2 },
+      { id:'cl_sb1_c', lbl:'L’Amenée Chirurgicale', desc:'Chaque amenée est étudiée, préparée, exécutée sans improvisation.', fx:{takedown:18,fightIQ:10,power:-10},
+        fit:f=>(f.koLoss||0)===0 }
+    ],
+    cl_sb2:[ // Le Casse-Membres
+      { id:'cl_sb2_a', lbl:'Le Tordeur de Membres', desc:'Une articulation à la fois — méthodique, presque scientifique.', fx:{submission:18,focus:10,cardio:-10},
+        fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.5 },
+      { id:'cl_sb2_b', lbl:'Le Contorsionniste', desc:'Son corps trouve des angles que personne d’autre n’a jamais essayés.', fx:{flexibility:18,adaptability:10,chin:-10},
+        fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.35 },
+      { id:'cl_sb2_c', lbl:'Le Verrou Discret', desc:'Il ne prévient jamais avant de refermer la clé — c’est déjà trop tard.', fx:{submission:18,composure:10,strength:-10},
+        fit:f=>(f.W||0)>=10 }
+    ],
+    cl_sb3:[ // Le Bulldozer
+      { id:'cl_sb3_a', lbl:'Le Rouleau Compresseur', desc:'Rien ne l’arrête, rien ne le ralentit — il avance, un point c’est tout.', fx:{power:18,strength:10,footSpeed:-10},
+        fit:f=>(f.W||0)>=12 },
+      { id:'cl_sb3_b', lbl:'Le Sans-Répit', desc:'Le rythme ne retombe jamais, quel que soit le round.', fx:{gnp:18,cardio:10,chin:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.3 },
+      { id:'cl_sb3_c', lbl:'Le Poids Écrasant', desc:'Une fois dessus, il ne reste plus qu’à subir.', fx:{power:18,gnp:10,handSpeed:-10},
+        fit:f=>(f.defenses||0)>=2 }
+    ],
+  },
+  mma:{
+    cl_mm1:[ // Le Généraliste Complet
+      { id:'cl_mm1_a', lbl:'Le Caméléon', desc:'Chaque style adverse devient un problème qu’il a déjà résolu ailleurs.', fx:{adaptability:18,fightIQ:10,killer:-10},
+        fit:f=>(f.L||0)<=2 && (f.W||0)>=10 },
+      { id:'cl_mm1_b', lbl:'L’Encyclopédie', desc:'Il connaît une réponse pour chaque situation — même les plus rares.', fx:{fightIQ:18,focus:10,aggression:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_mm1_c', lbl:'Le Polyvalent Total', desc:'Rien ne l’épuise, rien ne le surprend, quel que soit le terrain du combat.', fx:{adaptability:18,cardio:10,power:-10},
+        fit:f=>(f.W||0)>=12 }
+    ],
+    cl_mm2:[ // Le Finisseur Universel
+      { id:'cl_mm2_a', lbl:'Le Point Final', desc:'Debout, au sol, dans un coin — peu importe, le combat se termine toujours de la même façon.', fx:{killer:18,focus:10,cardio:-10},
+        fit:f=>(((f.ko||0)+(f.sub||0))/Math.max(1,f.W))>=0.55 },
+      { id:'cl_mm2_b', lbl:'La Machine à Finir', desc:'Chaque ouverture, aussi petite soit-elle, devient la dernière de l’adversaire.', fx:{power:18,explosiveness:10,discipline:-10},
+        fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
+      { id:'cl_mm2_c', lbl:'Le Multi-Menace', desc:'Personne ne sait jamais par où la fin va arriver — et c’est bien le problème.', fx:{killer:18,adaptability:10,composure:-10},
+        fit:f=>(((f.ko||0)+(f.sub||0))/Math.max(1,f.W))>=0.4 }
+    ],
+    cl_mm3:[ // Le Stratège
+      { id:'cl_mm3_a', lbl:'Le Joueur d’Échecs', desc:'Le combat est déjà résolu dans sa tête, plusieurs coups à l’avance.', fx:{composure:18,fightIQ:10,killer:-10},
+        fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.5 },
+      { id:'cl_mm3_b', lbl:'Le Métronome de Guerre', desc:'Le rythme reste constant, calme, imperturbable — round après round.', fx:{discipline:18,cardio:10,aggression:-10},
+        fit:f=>(f.W||0)>=12 },
+      { id:'cl_mm3_c', lbl:'L’Inébranlable', desc:'Rien ne le fait dévier de son plan, pas même l’adversité.', fx:{composure:18,durability:10,power:-10},
+        fit:f=>(f.koLoss||0)===0 && (f.L||0)>=2 }
+    ],
+  },
+};
+/* ==== [FIN ANCRE] ==== */
 const RAR_COLORS={C:'var(--text)',R:'#4DA6FF',E:'var(--gold)',L:'var(--blood)',M:'#8b5cf6'};
 /* --------------------------- roster / classement -------------------------- */
 /* ==== [ANCRE: AMA_CHAMPIONSHIPS] — un seul combat décisif (version légère

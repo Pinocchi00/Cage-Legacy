@@ -250,6 +250,22 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       if(scoreNoBoost>targetScore){ G.f.rankBoost=(G.f.rankBoost||0)-Math.round((scoreNoBoost-targetScore)*1.05); }
     }
     // ==== [FIN ANCRE] ====
+    // ==== [ANCRE: CREDIBILITE_PRODIGE] — item demandé : les rôles de
+    // matchmaking (ui-02/ui-06) promettaient déjà un enjeu réel pour le
+    // "Prodige Régional" ('Très risqué pour votre crédibilité si battu')
+    // sans qu'aucune mécanique ne le traduise — perte contre un jeune
+    // débutant retombait sur le même calcul générique que n'importe quelle
+    // autre défaite. Malus de crédibilité dédié : perte sèche de rankBoost
+    // (indépendante du calcul RANK_CRASH ci-dessus, qui ne s'applique
+    // qu'aux joueurs déjà top-3) + coup au moral, cohérent avec l'ampleur
+    // d'un accident de parcours face à un inconnu. Ne s'applique qu'aux
+    // combats issus du vrai flux de matchmaking (mmRole posé par
+    // finishTrainingFlow/CL.opp), jamais aux combats Fantasy/Vs Ami/Legends
+    // qui ne passent pas par genOpponents().
+    if(G.fight.mmRole==='prospect'){
+      G.f.rankBoost=(G.f.rankBoost||0)-8;
+      G.f.morale=clamp(G.f.morale-10,0,100);
+    }
   }
   // ==== [ANCRE: CASCADE_SERIE_DEFAITES] — item demandé : la rétrogradation
   // INSTANTANÉE en pleine série de défaites (mi-contrat) est remplacée par un
@@ -422,6 +438,21 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(!forced && !G.f.retired && !G.f.classChosen && G.f.age>=23 && G.f.org>0){
     classOffer=true;
   }
+  // ==== [ANCRE: SYSTEME_CLASSES_31] (déclencheur) — même principe que
+  // SYSTEME_CLASSES ci-dessus, décalé à 31 ans, avec une dépendance
+  // supplémentaire : ne peut être proposé qu'après le choix à 23 ans
+  // (classChosen) — sinon CLASSES_31[style][f.class] serait undefined côté
+  // écran/contrôleur. classOffer et class31Offer sont mutuellement
+  // exclusifs par construction (23 < 31, et classOffer se referme dès que
+  // classChosen passe à true la fois où il est résolu), donc jamais les
+  // deux en même temps sur un seul combat — pas besoin de priorité
+  // explicite entre eux dans le routeur, mais class31Offer est quand même
+  // placé après classOffer dans routeAfterCareerPending() par cohérence
+  // chronologique (23 ans avant 31 ans).
+  let class31Offer=false;
+  if(!forced && !G.f.retired && G.f.classChosen && !G.f.class31Chosen && G.f.age>=31 && G.f.org>0){
+    class31Offer=true;
+  }
   // ==== [ANCRE: CIRCUIT_AMATEUR] — remplace la promotion automatique org 0->1
   // par une offre de contrat pro (spectacle > ratio propre). Au-delà (org>=1),
   // la logique de promotion existante (canPromote) est inchangée, sauf à org 4
@@ -501,7 +532,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
     if(G.f.retired) forced=true;
   }
-  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,
+  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
