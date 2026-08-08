@@ -423,9 +423,15 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // ==== [FIN ANCRE] ====
   // vieillissement (1 an = N combats). Entre 18 et 23 ans (jeune prospect en
   // pleine activité), on vise 3 à 4 combats/an en moyenne — au-delà, rythme
-  // plus posé (1 à 3) pour refléter les carrières confirmées/vétérans.
+  // plus posé (1 à 4) pour refléter les carrières confirmées/vétérans.
+  // ==== [ANCRE: CORRECTIF_DUREE_CARRIERE] — item demandé : +5 combats en
+  // moyenne sur la durée totale d'une carrière. Le rythme vétéran (1 à 3
+  // combats/an, ~2/an) est remonté à 1-4 (~2,5/an) : sur une phase vétéran
+  // typique d'une dizaine de saisons, le delta (+0,5/saison) ajoute
+  // l'équivalent de ~5 combats sans changer le rythme jeune prospect (déjà
+  // dense) ni l'âge de retraite.
   let endOfSeason=false;
-  const fightsPerYear=(G.f.age>=18&&G.f.age<=23)?RI(3,4):RI(1,3);
+  const fightsPerYear=(G.f.age>=18&&G.f.age<=23)?RI(3,4):RI(1,4);
   G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=fightsPerYear){ const declineLog=applyAging(G.f); G.f._fy=0; endOfSeason=true;
     // ==== [ANCRE: NOTIF_DECLIN_VIEILLESSE] (suite, voir applyAging) — le
     // joueur doit être informé explicitement quand l'âge fait baisser un

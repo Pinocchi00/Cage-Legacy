@@ -460,6 +460,17 @@ const CL={
     f._fy=(f._fy||0)+1; if(f._fy>=RI(1,3)){ applyAging(f); f._fy=0; }
     advanceRoster();
     if(f.injury.left<=0) f.injury=null;
+    // ==== [ANCRE: CORRECTIF_CLASSE_BLESSURE] — bug remonté : une blessure
+    // qui fait franchir l'âge de 23 (ou 31) ans via applyAging() ci-dessus
+    // ne passe jamais par resolveFight(), seul endroit qui pose classOffer/
+    // class31Offer — la proposition de Classe pouvait donc être retardée
+    // indéfiniment au-delà de la guérison. Dès que la blessure est purgée,
+    // on revérifie l'éligibilité et on route directement vers l'écran de
+    // choix si applicable, sans attendre le prochain combat.
+    if(!f.injury && !f.retired){
+      if(!f.classChosen && f.age>=23){ G.screen='class_choice'; save(); render(); return; }
+      if(f.classChosen && !f.class31Chosen && f.age>=31){ G.screen='class_choice_31'; save(); render(); return; }
+    }
     save(); render(); },
   choosePlan(idx){ const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
@@ -818,11 +829,16 @@ const CL={
   },
   declinePromo(){
     G.f.promoCooldown=2;
+    // ==== [ANCRE: CORRECTIF_PRECEDEMMENT_DEMANDE] — mémorise qu'une orga
+    // supérieure a montré un intérêt réel, pour que negoMarket() puisse la
+    // reproposer plus tard même si canPromote() ne repasse plus le seuil.
+    G.f.priorPromoInterest=Math.max(G.f.priorPromoInterest||0,G.f.org+1);
     if(G.pending) G.pending.promoOffer=false;
     routeAfterOrgChange();
   },
   declineTopTier(){
     G.f.promoCooldown=2;
+    G.f.priorPromoInterest=Math.max(G.f.priorPromoInterest||0,5);
     if(G.pending) G.pending.topTierOffer=false;
     routeAfterOrgChange();
   },
@@ -836,7 +852,9 @@ const CL={
   acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null);
     G.f.contract=generateContract(G.f,G.f.org,false);
     applyOrgAdvancementBoost(G.f,G.f.org); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; routeAfterOrgChange(); },
-  declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3; if(G.pending)G.pending.proOffer=null; routeAfterOrgChange(); },
+  declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3;
+    if(G.pending && G.pending.proOffer) G.f.priorPromoInterest=Math.max(G.f.priorPromoInterest||0,G.pending.proOffer.baseTier||1);
+    if(G.pending)G.pending.proOffer=null; routeAfterOrgChange(); },
   negoRenew(){
     G.f.contract=generateContract(G.f,G.f.org,false);
     if(G.pending) G.pending.contractExpiry=false;
@@ -861,7 +879,19 @@ const CL={
   },
   negoMarket(forcedPenalty){
     const f=G.f; const offers=[];
-    const canUp=canPromote(f); const agentBonus=(f.agentCut>0);
+    // ==== [ANCRE: CORRECTIF_MARCHE_TOUJOURS_MEME_NIVEAU] — bug remonté : hors
+    // du cas forcedPenalty (négociation ratée), canUp=canPromote(f) est très
+    // strict (orgWins>=6, winRate>=63%, p4pScore) — un combattant qui teste
+    // le marché sans remplir ces critères stricts n'obtenait alors QUE des
+    // offres de même niveau (rival + réalignement), jamais de variété. On
+    // élargit canUp à deux signaux supplémentaires déjà en jeu ailleurs :
+    // popularité assez haute (hypeBonus, même seuil que le combat vedette),
+    // et intérêt PRÉCÉDEMMENT exprimé par une orga supérieure (déclinée plus
+    // tôt, cf. declinePromo/declineTopTier/declinePro) qu'on peut reproposer.
+    const hype=f.hypeBonus||1;
+    const priorInterestAbove=(f.priorPromoInterest||0)>f.org;
+    const canUp=canPromote(f) || hype>=1.4 || priorInterestAbove;
+    const agentBonus=(f.agentCut>0);
     // ==== [ANCRE: CORRECTIF_SOMMET_LATERAL] — bug trouvé : une fois dans
     // Pacific Championship (6) OU Ultimate Rim (5), aucune des deux
     // organisations ne pouvait plus jamais proposer l'AUTRE (canPromote()
@@ -883,7 +913,8 @@ const CL={
       offers.push({org:6,flavor:'Pacific Championship',contract:generateContract(f,6,false),desc:"La ligue la plus prestigieuse. (+4 OVR pour l\u2019opposition)."});
     } else if(canUp && f.org<6){
       const nextOrg=f.org+1;
-      offers.push({org:nextOrg,flavor:ORG_FLAVORS[nextOrg]?pick(ORG_FLAVORS[nextOrg]):(ORGS[nextOrg]||'Ligue supérieure'),contract:generateContract(f,nextOrg,false),desc:"La ligue supérieure veut vous signer."});
+      offers.push({org:nextOrg,flavor:ORG_FLAVORS[nextOrg]?pick(ORG_FLAVORS[nextOrg]):(ORGS[nextOrg]||'Ligue supérieure'),contract:generateContract(f,nextOrg,false),
+        desc:priorInterestAbove&&!canPromote(f)?"Ils avaient déjà tenté de vous signer. L\u2019offre est toujours sur la table.":"La ligue supérieure veut vous signer."});
       if(agentBonus && nextOrg+1<=6 && ((f.defenses||0)>=2 || (f.streak||0)>=6)){
         const fastOrg=nextOrg+1;
         offers.push({org:fastOrg,flavor:ORG_FLAVORS[fastOrg]?pick(ORG_FLAVORS[fastOrg]):(ORGS[fastOrg]||'Ligue supérieure'),contract:generateContract(f,fastOrg,false),desc:"Votre agent a fait jouer ses contacts pour vous faire sauter une étape !"});
@@ -908,10 +939,11 @@ const CL={
     if(!forcedPenalty){ offers.push({org:f.org,flavor:orgDisplayName(f),contract:generateContract(f,f.org,false),desc:"Votre organisation actuelle s\u2019aligne pour vous garder."}); }
     // ==== [ANCRE: OFFRE_LIGUE_INFERIEURE] — bug remonté : le marché libre ne
     // proposait jamais de ligue inférieure, uniquement même palier ou palier
-    // supérieur. Ajout ciblé au cas forcedPenalty (négociation rompue / fin
-    // de contrat sans renouvellement) : proposition logique dans ce contexte
-    // uniquement, pas sur un simple renouvellement classique.
-    if(forcedPenalty && f.org>=2){
+    // supérieur. Élargi au-delà du seul cas forcedPenalty (négociation rompue
+    // / fin de contrat sans renouvellement) : un combattant encore peu connu
+    // (hype bas) qui teste le marché de son propre chef doit aussi voir
+    // cette option de repli, pas seulement quand il y est forcé.
+    if((forcedPenalty || hype<1.15) && f.org>=2){
       const lowerOrg=f.org-1;
       const lowerContract=generateContract(f,lowerOrg,false);
       lowerContract.show=+(lowerContract.show*0.8).toFixed(2); lowerContract.win=+(lowerContract.win*0.8).toFixed(2);

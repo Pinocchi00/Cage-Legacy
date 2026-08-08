@@ -28,7 +28,7 @@ function scr_toptier(){
    <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">L\u2019Heure du Choix</div>
    <p class="lede">Vous avez conquis l\u2019Europe. Les deux plus grandes organisations mondiales vous offrent un contrat d\u2019exclusivité — chacune distincte, à comparer avant de signer. Votre décision est définitive.</p>
    ${offers.map(o=>`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid ${o.color};text-align:left;padding:16px;margin-top:18px">
-     <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${o.sub}</em></div>
+     <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${o.sub} · ${orgLevelTag(o.org)}</em></div>
      <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
      <div class="mono small muted">Contrat de ${o.contract.fightsLeft} combats</div>
      ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:rgba(198,40,40,0.08)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
@@ -90,10 +90,11 @@ function scr_free_agency(){
   return `<div class="scr center intro">
     <div class="eyebrow gold">Marché libre (Free Agency)</div>
     <h2 class="disp">Offres de contrat</h2>
+    <p class="lede">Actuellement : <b>${orgDisplayName(G.f)}</b> — ${orgLevelTag(G.f.org)}.</p>
     <p class="lede">Voici les contrats disponibles sur la table — chacun distinct, à comparer avant de signer.</p>
     ${offers.map((o,i)=>`
       <div class="glass card mb" style="background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px">
-        <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">Ligue de niveau ${o.org}</em></div>
+        <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${orgLevelTag(o.org)}</em></div>
         <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
         <div class="mono small muted">Contrat de ${o.contract.fightsLeft||4} combats</div>
         ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:rgba(198,40,40,0.08)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
@@ -152,9 +153,10 @@ function scr_promo(){
     const previewStd=generateContract(f,offer.baseTier||1,false);
     return `<div class="scr center intro"><div class="eyebrow gold">Offre de Contrat Professionnel</div>
      <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Quelqu\u2019un veut te signer</div>
+     <p class="lede mt">Actuellement : <b>Amateur</b> — ${orgLevelTag(0)}.</p>
      <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure. ${offer.fastTrack?'Deux offres sont sur la table — compare-les avant de choisir.':''}</p>
      <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:18px">
-       <div class="hero-name" style="font-size:20px">${offer.orgFlavor1}<em style="color:var(--muted)">Contrat standard</em></div>
+       <div class="hero-name" style="font-size:20px">${offer.orgFlavor1}<em style="color:var(--muted)">${orgLevelTag(offer.baseTier||1)}</em></div>
        <div class="mono small gold mt">${contractPayLine(previewStd)}</div>
        <div class="mono small muted">Contrat de ${previewStd.fightsLeft} combats</div>
        <p class="muted small mt">${offer.msg}</p>
@@ -162,7 +164,7 @@ function scr_promo(){
        <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">Signer avec ${offer.orgFlavor1}</button>
      </div>
      ${offer.fastTrack?(()=>{ const previewFast=generateContract(f,offer.fastTier||3,false); return `<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
-       <div class="hero-name" style="font-size:20px">${offer.orgFlavor3}<em style="color:var(--muted)">Fast-Track (opposition bien plus dure)</em></div>
+       <div class="hero-name" style="font-size:20px">${offer.orgFlavor3}<em style="color:var(--muted)">${orgLevelTag(offer.fastTier||3)} — Fast-Track</em></div>
        <div class="mono small gold mt">${contractPayLine(previewFast)}</div>
        <div class="mono small muted">Contrat de ${previewFast.fightsLeft} combats</div>
        <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
@@ -192,14 +194,15 @@ function scr_promo(){
   if(dominant && nextOrg+1<5){
     const flavorSkip=ORG_FLAVORS[nextOrg+1]?pick(ORG_FLAVORS[nextOrg+1]):(ORGS[nextOrg+1]||'Ligue supérieure');
     offers.push({org:nextOrg+1,flavor:flavorSkip,contract:generateContract(f,nextOrg+1,false),
-      desc:hotProspect?`Trois victoires d\\u2019affilée, presque toutes avant la limite : ${flavorSkip} ne veut pas rater le prochain grand nom et t\\u2019offre de brûler une étape.`
-        :`Ta domination a fait le tour du milieu : ${flavorSkip} veut te griller la politesse et t\\u2019offre de brûler une étape.`});
+      desc:hotProspect?`Trois victoires d\u2019affilée, presque toutes avant la limite : ${flavorSkip} ne veut pas rater le prochain grand nom et t\u2019offre de brûler une étape.`
+        :`Ta domination a fait le tour du milieu : ${flavorSkip} veut te griller la politesse et t\u2019offre de brûler une étape.`});
   }
   return `<div class="scr center intro"><div class="eyebrow gold">${isChamp?'Free Agency (Transfert)':'Le Marché'}</div>
    <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Quelqu\u2019un veut te signer</div>
+   <p class="lede mt">Actuellement : <b>${orgDisplayName(f)}</b> — ${orgLevelTag(f.org)}.</p>
    <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure. ${offers.length>1?'Deux offres sont sur la table — compare-les avant de choisir.':''}</p>
    ${offers.map(o=>`<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:18px">
-     <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">Niveau ${o.org}</em></div>
+     <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${orgLevelTag(o.org)}</em></div>
      <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
      <div class="mono small muted">Contrat de ${o.contract.fightsLeft} combats</div>
      <p class="muted small mt">${o.desc}</p>

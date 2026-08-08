@@ -34,7 +34,18 @@ function evaluateProOffer(f, res, oppRank){
   // dépendance au cooldown, qui ne s'applique plus qu'aux offres facultatives
   // (totalFights/hypeScore) plus bas dans la fonction.
   if(f.age>=26){
-    const baseTier=1;
+    // ==== [ANCRE: CORRECTIF_FORCED_TIER_PALMARES] — bug remonté : le couperet
+    // obligatoire de 26 ans retombait TOUJOURS sur baseTier=1 (palier le plus
+    // bas, ex. PVM), même pour un combattant classé/en série de victoires à
+    // qui une organisation bien plus prestigieuse (ex. U-Krenne) venait
+    // d'être proposée juste avant. Réutilise désormais le même calcul
+    // rang/hype que la branche volontaire ci-dessous, pour que le passage pro
+    // forcé reflète le palmarès réel au lieu de l'ignorer.
+    const hypeScoreForced=(f.ko*3.5)+(f.sub*2.5)+f.W-(f.L*0.5);
+    const rkForced=divRank(f);
+    let baseTier=1;
+    if(rkForced<=10 || hypeScoreForced>=40) baseTier=2;
+    if(rkForced<=3 || hypeScoreForced>=60) baseTier=3;
     const orgFlavor1=ORG_FLAVORS[baseTier]?pick(ORG_FLAVORS[baseTier]):ORGS[baseTier];
     const phrase1=pick(CONTRACT_PHRASES)(orgFlavor1);
     return { forced:true, msg:`La limite d\u2019âge du circuit amateur (26 ans) est atteinte (vous avez ${f.age} ans). Vous êtes forcé de passer professionnel aujourd\u2019hui ou de ranger les gants.`, orgFlavor1, phrase1, baseTier };

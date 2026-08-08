@@ -166,7 +166,7 @@ const CLASSES_31={
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 },
       { id:'cl_bx1_b', lbl:'Le Sismographe', desc:'Chaque coup part comme un tremblement de terre — tant pis si sa propre garde tremble avec.', fx:{power:18,explosiveness:10,chin:-10},
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 && (f.koLoss||0)>=1 },
-      { id:'cl_bx1_c', lbl:'Le Chasseur de Corps', desc:'Oublie la tête : le foie et les côtes cèdent bien avant, round après round.', fx:{power:18,cardio:10,jab:-10},
+      { id:'cl_bx1_c', lbl:'Le Chasseur de Corps', desc:'Oublie la tête : le foie et les côtes cèdent bien avant, round après round.', fx:{cardio:18,strength:10,jab:-10},
         fit:f=>(f.W||0)>=10 }
     ],
     cl_bx2:[ // Technicien
@@ -192,7 +192,7 @@ const CLASSES_31={
         fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.6 },
       { id:'cl_bj1_b', lbl:'Le Métamorphe', desc:'Son corps se plie dans des positions que personne n’a jamais appris à défendre.', fx:{flexibility:18,adaptability:10,chin:-10},
         fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.4 },
-      { id:'cl_bj1_c', lbl:'Le Piège à Cou', desc:'Chaque échange n’est qu’un prétexte pour ramener le combat vers le seul endroit qui l’intéresse.', fx:{submission:18,fightIQ:10,cardio:-10},
+      { id:'cl_bj1_c', lbl:'Le Piège à Cou', desc:'Chaque échange n’est qu’un prétexte pour ramener le combat vers le seul endroit qui l’intéresse.', fx:{fightIQ:18,submission:10,cardio:-10},
         fit:f=>(f.W||0)>=10 }
     ],
     cl_bj2:[ // Contrôleur
@@ -200,7 +200,7 @@ const CLASSES_31={
         fit:f=>(f.defenses||0)>=3 },
       { id:'cl_bj2_b', lbl:'Le Marteau Patient', desc:'Il ne cherche pas la finition rapide — juste à cogner, encore, jusqu’à ce que l’arbitre tranche.', fx:{gnp:18,cardio:10,submission:-10},
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.3 },
-      { id:'cl_bj2_c', lbl:'Le Verrou Absolu', desc:'Gagner un round, pour lui, c’est ne rien laisser passer — jamais.', fx:{topControl:18,discipline:10,aggression:-10},
+      { id:'cl_bj2_c', lbl:'Le Verrou Absolu', desc:'Gagner un round, pour lui, c’est ne rien laisser passer — jamais.', fx:{discipline:18,topControl:10,aggression:-10},
         fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 }
     ],
     cl_bj3:[ // Araignée
@@ -208,7 +208,7 @@ const CLASSES_31={
         fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.4 },
       { id:'cl_bj3_b', lbl:'Le Filet Renversé', desc:'La position ne veut plus rien dire — seule compte la toile qu’il a fini de tisser.', fx:{guardWork:18,composure:10,tdd:-10},
         fit:f=>(f.L||0)>=2 },
-      { id:'cl_bj3_c', lbl:'La Toile Sans Fin', desc:'Il peut rester en dessous une éternité — c’est l’adversaire qui finit par s’épuiser le premier.', fx:{guardWork:18,cardio:10,power:-10},
+      { id:'cl_bj3_c', lbl:'La Toile Sans Fin', desc:'Il peut rester en dessous une éternité — c’est l’adversaire qui finit par s’épuiser le premier.', fx:{cardio:18,guardWork:10,power:-10},
         fit:f=>(f.W||0)>=10 }
     ],
   },
@@ -218,7 +218,7 @@ const CLASSES_31={
         fit:f=>(f.W||0)>=12 },
       { id:'cl_wr1_b', lbl:'L’Explosion Pure', desc:'Une seule accélération suffit à effacer toute résistance.', fx:{explosiveness:18,power:10,discipline:-10},
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.3 },
-      { id:'cl_wr1_c', lbl:'Le Chasseur de Jambes', desc:'Ses amenées sont si constantes qu’elles finissent par sembler inévitables — pour lui comme pour l’adversaire.', fx:{takedown:18,tdd:10,submission:-10},
+      { id:'cl_wr1_c', lbl:'Le Chasseur de Jambes', desc:'Ses amenées sont si constantes qu’elles finissent par sembler inévitables — pour lui comme pour l’adversaire.', fx:{tdd:18,takedown:10,submission:-10},
         fit:f=>(f.koLoss||0)===0 }
     ],
     cl_wr2:[ // Le Marteau
@@ -244,7 +244,7 @@ const CLASSES_31={
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
       { id:'cl_kb1_b', lbl:'Le Marteau Aérien', desc:'Chaque frappe part pour terminer le combat sur-le-champ.', fx:{power:18,explosiveness:10,chin:-10},
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 },
-      { id:'cl_kb1_c', lbl:'L’Architecte de la Chute', desc:'Chaque échange rapproche méthodiquement l’adversaire de l’instant où il ne tient plus debout.', fx:{kick:18,fightIQ:10,handSpeed:-10},
+      { id:'cl_kb1_c', lbl:'L’Architecte de la Chute', desc:'Chaque échange rapproche méthodiquement l’adversaire de l’instant où il ne tient plus debout.', fx:{fightIQ:18,kick:10,handSpeed:-10},
         fit:f=>(f.W||0)>=10 }
     ],
     cl_kb2:[ // Le Mobile
@@ -252,7 +252,7 @@ const CLASSES_31={
         fit:f=>(f.koLoss||0)===0 },
       { id:'cl_kb2_b', lbl:'Les Mains Rapides', desc:'La vitesse remplace la puissance — et personne n’a le temps de s’en plaindre.', fx:{handSpeed:18,jab:10,strength:-10},
         fit:f=>(f.W||0)>=10 },
-      { id:'cl_kb2_c', lbl:'Le Point Fantôme', desc:'Toucher, disparaître, recommencer — un jeu que l’adversaire ne comprend jamais assez vite.', fx:{footSpeed:18,focus:10,aggression:-10},
+      { id:'cl_kb2_c', lbl:'Le Point Fantôme', desc:'Toucher, disparaître, recommencer — un jeu que l’adversaire ne comprend jamais assez vite.', fx:{focus:18,footSpeed:10,aggression:-10},
         fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 }
     ],
     cl_kb3:[ // Le Mur Défensif
@@ -270,7 +270,7 @@ const CLASSES_31={
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
       { id:'cl_mt1_b', lbl:'L’Étau', desc:'Personne ne se décolle une fois qu’il a refermé sa prise.', fx:{strength:18,topControl:10,footSpeed:-10},
         fit:f=>(f.W||0)>=10 },
-      { id:'cl_mt1_c', lbl:'Le Genou Long', desc:'Le genou revient sans relâche, minute après minute, jusqu’à ce que la garde cède.', fx:{clinchStr:18,cardio:10,handSpeed:-10},
+      { id:'cl_mt1_c', lbl:'Le Genou Long', desc:'Le genou revient sans relâche, minute après minute, jusqu’à ce que la garde cède.', fx:{cardio:18,clinchStr:10,handSpeed:-10},
         fit:f=>(f.L||0)>=2 }
     ],
     cl_mt2:[ // Le Bourreau
@@ -278,7 +278,7 @@ const CLASSES_31={
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.55 },
       { id:'cl_mt2_b', lbl:'La Frappe Sismique', desc:'Un seul coup suffit — la garde du reste du corps n’est plus qu’un détail.', fx:{power:18,explosiveness:10,chin:-10},
         fit:f=>(f.koLoss||0)>=1 },
-      { id:'cl_mt2_c', lbl:'Le Ciseau', desc:'Chaque round tranche un peu plus dans les appuis adverses.', fx:{power:18,kick:10,cardio:-10},
+      { id:'cl_mt2_c', lbl:'Le Ciseau', desc:'Chaque round tranche un peu plus dans les appuis adverses.', fx:{kick:18,power:10,cardio:-10},
         fit:f=>(f.W||0)>=10 }
     ],
     cl_mt3:[ // Le Mur Thaï
@@ -286,7 +286,7 @@ const CLASSES_31={
         fit:f=>(f.L||0)>=3 },
       { id:'cl_mt3_b', lbl:'Le Menton de Fer', desc:'On peut tout lui envoyer — il ne cligne toujours pas des yeux.', fx:{chin:18,composure:10,aggression:-10},
         fit:f=>(f.koLoss||0)===0 && (f.L||0)>=2 },
-      { id:'cl_mt3_c', lbl:'L’Absorbeur', desc:'Chaque échange l’use un peu moins que l’adversaire en face.', fx:{durability:18,cardio:10,killer:-10},
+      { id:'cl_mt3_c', lbl:'L’Absorbeur', desc:'Chaque échange l’use un peu moins que l’adversaire en face.', fx:{cardio:18,durability:10,killer:-10},
         fit:f=>(f.W||0)>=10 }
     ],
   },
@@ -296,7 +296,7 @@ const CLASSES_31={
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
       { id:'cl_ka1_b', lbl:'Le Papillon', desc:'Il change de direction plus vite que l’œil ne peut suivre.', fx:{footSpeed:18,adaptability:10,strength:-10},
         fit:f=>(f.koLoss||0)===0 },
-      { id:'cl_ka1_c', lbl:'Le Blitz Calculé', desc:'Chaque explosion est en réalité un plan préparé bien avant l’instant où elle se déclenche.', fx:{footSpeed:18,fightIQ:10,durability:-10},
+      { id:'cl_ka1_c', lbl:'Le Blitz Calculé', desc:'Chaque explosion est en réalité un plan préparé bien avant l’instant où elle se déclenche.', fx:{fightIQ:18,footSpeed:10,durability:-10},
         fit:f=>(f.W||0)>=10 }
     ],
     cl_ka2:[ // Le Maître du Point
@@ -312,7 +312,7 @@ const CLASSES_31={
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.5 },
       { id:'cl_ka3_b', lbl:'Le High Kick Fatal', desc:'Le pied part vers la tête à chaque ouverture, sans jamais revoir sa copie.', fx:{kick:18,power:10,composure:-10},
         fit:f=>(f.koLoss||0)>=1 },
-      { id:'cl_ka3_c', lbl:'Le Joueur de Roulette', desc:'Il ne calcule plus les risques — il fonce, et advienne que pourra.', fx:{killer:18,aggression:10,discipline:-10},
+      { id:'cl_ka3_c', lbl:'Le Joueur de Roulette', desc:'Il ne calcule plus les risques — il fonce, et advienne que pourra.', fx:{aggression:18,handSpeed:10,discipline:-10},
         fit:f=>(f.W||0)>=10 }
     ],
   },
@@ -322,7 +322,7 @@ const CLASSES_31={
         fit:f=>(f.W||0)>=12 },
       { id:'cl_sb1_b', lbl:'La Prise Russe', desc:'Le clinch devient un piège dont on ne ressort jamais debout.', fx:{strength:18,clinchStr:10,footSpeed:-10},
         fit:f=>(f.L||0)>=2 },
-      { id:'cl_sb1_c', lbl:'L’Amenée Chirurgicale', desc:'Chaque amenée est étudiée, préparée, exécutée sans improvisation.', fx:{takedown:18,fightIQ:10,power:-10},
+      { id:'cl_sb1_c', lbl:'L’Amenée Chirurgicale', desc:'Chaque amenée est étudiée, préparée, exécutée sans improvisation.', fx:{fightIQ:18,takedown:10,power:-10},
         fit:f=>(f.koLoss||0)===0 }
     ],
     cl_sb2:[ // Le Casse-Membres
@@ -330,7 +330,7 @@ const CLASSES_31={
         fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.5 },
       { id:'cl_sb2_b', lbl:'Le Contorsionniste', desc:'Son corps trouve des angles que personne d’autre n’a jamais essayés.', fx:{flexibility:18,adaptability:10,chin:-10},
         fit:f=>((f.sub||0)/Math.max(1,f.W))>=0.35 },
-      { id:'cl_sb2_c', lbl:'Le Verrou Discret', desc:'Il ne prévient jamais avant de refermer la clé — c’est déjà trop tard.', fx:{submission:18,composure:10,strength:-10},
+      { id:'cl_sb2_c', lbl:'Le Verrou Discret', desc:'Il ne prévient jamais avant de refermer la clé — c’est déjà trop tard.', fx:{composure:18,submission:10,strength:-10},
         fit:f=>(f.W||0)>=10 }
     ],
     cl_sb3:[ // Le Bulldozer
@@ -338,7 +338,7 @@ const CLASSES_31={
         fit:f=>(f.W||0)>=12 },
       { id:'cl_sb3_b', lbl:'Le Sans-Répit', desc:'Le rythme ne retombe jamais, quel que soit le round.', fx:{gnp:18,cardio:10,chin:-10},
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.3 },
-      { id:'cl_sb3_c', lbl:'Le Poids Écrasant', desc:'Une fois dessus, il ne reste plus qu’à subir.', fx:{power:18,gnp:10,handSpeed:-10},
+      { id:'cl_sb3_c', lbl:'Le Poids Écrasant', desc:'Une fois dessus, il ne reste plus qu’à subir.', fx:{strength:18,power:10,handSpeed:-10},
         fit:f=>(f.defenses||0)>=2 }
     ],
   },
@@ -348,7 +348,7 @@ const CLASSES_31={
         fit:f=>(f.L||0)<=2 && (f.W||0)>=10 },
       { id:'cl_mm1_b', lbl:'L’Encyclopédie', desc:'Il connaît une réponse pour chaque situation — même les plus rares.', fx:{fightIQ:18,focus:10,aggression:-10},
         fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.4 },
-      { id:'cl_mm1_c', lbl:'Le Polyvalent Total', desc:'Rien ne l’épuise, rien ne le surprend, quel que soit le terrain du combat.', fx:{adaptability:18,cardio:10,power:-10},
+      { id:'cl_mm1_c', lbl:'Le Polyvalent Total', desc:'Rien ne l’épuise, rien ne le surprend, quel que soit le terrain du combat.', fx:{cardio:18,adaptability:10,power:-10},
         fit:f=>(f.W||0)>=12 }
     ],
     cl_mm2:[ // Le Finisseur Universel
@@ -356,7 +356,7 @@ const CLASSES_31={
         fit:f=>(((f.ko||0)+(f.sub||0))/Math.max(1,f.W))>=0.55 },
       { id:'cl_mm2_b', lbl:'La Machine à Finir', desc:'Chaque ouverture, aussi petite soit-elle, devient la dernière de l’adversaire.', fx:{power:18,explosiveness:10,discipline:-10},
         fit:f=>((f.ko||0)/Math.max(1,f.W))>=0.4 },
-      { id:'cl_mm2_c', lbl:'Le Multi-Menace', desc:'Personne ne sait jamais par où la fin va arriver — et c’est bien le problème.', fx:{killer:18,adaptability:10,composure:-10},
+      { id:'cl_mm2_c', lbl:'Le Multi-Menace', desc:'Personne ne sait jamais par où la fin va arriver — et c’est bien le problème.', fx:{adaptability:18,killer:10,composure:-10},
         fit:f=>(((f.ko||0)+(f.sub||0))/Math.max(1,f.W))>=0.4 }
     ],
     cl_mm3:[ // Le Stratège
@@ -364,7 +364,7 @@ const CLASSES_31={
         fit:f=>((f.dec||0)/Math.max(1,f.W))>=0.5 },
       { id:'cl_mm3_b', lbl:'Le Métronome de Guerre', desc:'Le rythme reste constant, calme, imperturbable — round après round.', fx:{discipline:18,cardio:10,aggression:-10},
         fit:f=>(f.W||0)>=12 },
-      { id:'cl_mm3_c', lbl:'L’Inébranlable', desc:'Rien ne le fait dévier de son plan, pas même l’adversité.', fx:{composure:18,durability:10,power:-10},
+      { id:'cl_mm3_c', lbl:'L’Inébranlable', desc:'Rien ne le fait dévier de son plan, pas même l’adversité.', fx:{durability:18,composure:10,power:-10},
         fit:f=>(f.koLoss||0)===0 && (f.L||0)>=2 }
     ],
   },

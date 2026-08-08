@@ -1083,6 +1083,11 @@ function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
 
 /* ------------------------- ORGS / CLASSEMENT / ÂGE ------------------------ */
 const ORGS=['Amateur','Circuit local','Circuit régional','Circuit national','Continentale','Ultimate Rim (Argent)','Pacific Championship (Gloire)'];
+// ==== [ANCRE: CORRECTIF_LISIBILITE_NIVEAU_ORGA] — item demandé : les écrans
+// d'offre affichaient juste "Niveau ${o.org}" (l'indice brut 0-6), difficile
+// à situer sans connaître ORGS par cœur. Étiquette lisible réutilisable :
+// nom du palier + position numérique explicite sur l'échelle complète.
+function orgLevelTag(orgId){ return `${ORGS[orgId]||'?'} \u2014 Niveau ${orgId+1}/${ORGS.length}`; }
 const ORG_PROMO_SCORE=[0,115,290,520,750,1035,1035]; // score ELO requis par palier
 // ==== [ANCRE: RALENTISSEMENT_PROMOTIONS] — item demandé : les organisations
 // se proposaient trop vite (score p4p absolu facile à atteindre via quelques
