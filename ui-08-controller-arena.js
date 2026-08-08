@@ -906,6 +906,18 @@ const CL={
       offers.push({org:f.org,flavor:rivalFlavor,contract:latContract,desc:forcedPenalty?"Une ligue concurrente vous repêche au rabais.":"Une ligue concurrente cherche à vous débaucher."});
     }
     if(!forcedPenalty){ offers.push({org:f.org,flavor:orgDisplayName(f),contract:generateContract(f,f.org,false),desc:"Votre organisation actuelle s\u2019aligne pour vous garder."}); }
+    // ==== [ANCRE: OFFRE_LIGUE_INFERIEURE] — bug remonté : le marché libre ne
+    // proposait jamais de ligue inférieure, uniquement même palier ou palier
+    // supérieur. Ajout ciblé au cas forcedPenalty (négociation rompue / fin
+    // de contrat sans renouvellement) : proposition logique dans ce contexte
+    // uniquement, pas sur un simple renouvellement classique.
+    if(forcedPenalty && f.org>=2){
+      const lowerOrg=f.org-1;
+      const lowerContract=generateContract(f,lowerOrg,false);
+      lowerContract.show=+(lowerContract.show*0.8).toFixed(2); lowerContract.win=+(lowerContract.win*0.8).toFixed(2);
+      offers.push({org:lowerOrg,flavor:ORG_FLAVORS[lowerOrg]?pick(ORG_FLAVORS[lowerOrg]):(ORGS[lowerOrg]||'Ligue inférieure'),contract:lowerContract,desc:"Une ligue de niveau inférieur vous propose un tremplin pour rebondir."});
+    }
+    // ==== [FIN ANCRE] ====
     G.freeAgencyOffers=offers;
     G.screen='free_agency'; save(); render();
   },

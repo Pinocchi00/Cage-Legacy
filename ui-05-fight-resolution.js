@@ -583,7 +583,7 @@ function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   // registre des combats de la saison en cours est remis à zéro.
   G.season={year:G.season.year,fights:[]};
   f.nick=earnNickname(f); }
-function earnNickname(f,excludeGrappler){ const a=f.attrs;
+function earnNickname(f,excludeGrappler,excludeInvincible){ const a=f.attrs;
   const striker=['le Sniper','le Marteau','la Foudre','le Bourreau','Mains de Pierre','le Cogneur','le Fossoyeur','l\u2019Exécuteur','le Dynamiteur','Poings de Fer','le Chasseur','la Tempête','le Fauve','Double Détonation','le Dévastateur','l\u2019Incendiaire'];
   const grappler=['l\u2019Anaconda','le Python','le Boa','l\u2019Étau','le Nœud Coulant','le Suffocateur','la Pieuvre','le Verrou','l\u2019Étrangleur','le Chirurgien du Sol','la Tenaille','le Croc','l\u2019Ancre','le Serpent','le Cadenas'];
   const pressure=['le Bulldozer','le Rouleau','Cœur de Lion','la Machine','l\u2019Ouragan','le Métronome Infernal','l\u2019Increvable','le Marathonien','la Locomotive','le Mur','l\u2019Inébranlable','la Digue'];
@@ -592,7 +592,7 @@ function earnNickname(f,excludeGrappler){ const a=f.attrs;
   const invincible=['l\u2019Invaincu','le Phénomène','la Prophétie','l\u2019Élu','le Miracle'];
   const gritty=['le Survivant','le Cœur Brisé','l\u2019Increvable du Ring','le Guerrier','le Cicatrisé','l\u2019Increvable'];
   const amaW=(f.amaRec&&f.amaRec.W)||0, amaL=(f.amaRec&&f.amaRec.L)||0, amaTotal=amaW+amaL;
-  if(amaTotal>=5 && amaL===0) return pick(invincible);
+  if(!excludeInvincible && amaTotal>=5 && amaL===0) return pick(invincible);
   if(amaTotal>=6 && amaL>=amaW) return pick(gritty);
   // ==== [ANCRE: CORRECTIF_SURNOM_GRAPPLER] — bug remonté ("l'Étau" attribué à
   // tort) : l'ancienne condition ne comparait QUE la soumission à deux stats
@@ -634,7 +634,8 @@ function checkNicknameEvolution(f,win){
   const pressure=['le Bulldozer','le Rouleau','C\u0153ur de Lion','la Machine','l\u2019Ouragan','le Métronome Infernal','l\u2019Increvable','le Marathonien','la Locomotive','le Mur','l\u2019Inébranlable','la Digue'];
   const totalFights=(f.W||0)+(f.L||0);
   let reason=null;
-  if(invincible.includes(f.nick) && !win) reason='a perdu son invincibilité';
+  let lostInvincibility=false;
+  if(invincible.includes(f.nick) && !win){ reason='a perdu son invincibilité'; lostInvincibility=true; }
   else if(invincible.includes(f.nick) && (f.org||0)<=3 && totalFights>=25) reason='stagne loin du sommet malgré son surnom';
   else if(grappler.includes(f.nick) && totalFights>=10 && (f.sub||0)===0) reason='n\u2019a plus soumis personne depuis longtemps';
   else if(pressure.includes(f.nick) && (f.koLoss||0)>=3) reason='a montré des fissures inattendues';
@@ -647,7 +648,12 @@ function checkNicknameEvolution(f,win){
   // n'a aucun sens narratif — un boxeur qui ne finit jamais au sol hérite d'un
   // surnom de soumission).
   const excludeGrappler=grappler.includes(f.nick) && (f.sub||0)===0;
-  const newNick=earnNickname(f,excludeGrappler);
+  // ==== [ANCRE: CORRECTIF_SURNOM_INVAINCU] — bug remonté : un combattant qui
+  // vient de perdre (et donc de quitter le pool "invincible") pouvait se voir
+  // réattribuer un surnom du MÊME pool — y compris littéralement "L'Invaincu"
+  // — car earnNickname() se basait sur le record amateur (jamais réinitialisé
+  // en cours de carrière), sans lien avec la défaite qui vient de survenir.
+  const newNick=earnNickname(f,excludeGrappler,lostInvincibility);
   if(newNick===f.nick) return null;
   if(!f.nicknameHistory) f.nicknameHistory=[];
   f.nicknameHistory.push(f.nick);

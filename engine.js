@@ -861,9 +861,17 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
     // basculer le round à l'adversaire (9-10) — pas de palier intermédiaire
     // possible. Sur un round net (10-7/10-8), le juge dissident adoucit d'un
     // point sans changer de vainqueur (10-8/10-9), comme décrit plus haut.
+    // ==== [ANCRE: CORRECTIF_DISSIDENCE_LANDSLIDE] — bug remonté : un round
+    // classé 10-9 ("serré") pouvait être intégralement inversé par un juge
+    // dissident même quand rDiff montrait déjà une domination nette (ex.
+    // 18-3 en frappes significatives), simplement parce que ce rDiff restait
+    // sous le seuil >32 requis pour basculer en 10-8. Un round proche de ce
+    // palier (|rDiff|>20, plus de la moitié du chemin vers 10-8) n'est plus
+    // assez "serré" pour justifier un renversement complet du vainqueur —
+    // seuls les rounds vraiment courus (|rDiff|<=20) restent inversables.
     const dissentJudge=()=>{
-      if(sA===10 && sB===9) return [9,10];
-      if(sB===10 && sA===9) return [10,9];
+      if(sA===10 && sB===9) return (Math.abs(rDiff)>20 ? [sA,sB] : [9,10]);
+      if(sB===10 && sA===9) return (Math.abs(rDiff)>20 ? [sA,sB] : [10,9]);
       if(sA===10 && sB<9) return [10,sB+1];
       if(sB===10 && sA<9) return [sA+1,10];
       return [sA,sB];
@@ -1065,7 +1073,6 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
     const isBoring=(fightStats.A.sig+fightStats.B.sig)<30 && !isBloodbath;
     if(isBloodbath && type==='ko') flavor='La commission médicale doit intervenir en urgence.';
     else if(isBoring && isLate) flavor='Sorti de nulle part — le public somnolent se réveille enfin.';
-    else if(type==='sub' && (winner.attrs.killer||0)>80) flavor='Maintenu deux secondes de trop après la cloche.';
   }
   return {name:baseMove, flavor};
 }
@@ -1205,7 +1212,16 @@ function generateContract(f,org,raise){
   // seuil de retraite.
   const retAge=Math.max(39,42-(f.chinDegradationLevel||0))+((f.skills&&f.skills.includes('meta01'))?2:0);
   const isFinalContract=(f.age||18)>=retAge-1;
-  return { fightsLeft, show:+(base[0]*mult).toFixed(2), win:+(base[1]*mult).toFixed(2), org, isChampContract, reputation:repTier, record:[], isFinalContract, finalFightNumber:isFinalContract?fightsLeft:null };
+  // ==== [ANCRE: PLAFOND_BOURSE_SOMMET] — bug remonté : les multiplicateurs
+  // cumulés (raise, agent, hype, champion) pouvaient pousser Pacific
+  // Championship et Ultimate Rim bien au-delà de leurs plafonds voulus
+  // (174 900$/174 900$ et 165 000$/165 000$ observés), écrasant l'identité
+  // "Argent" (paie, org 5) vs "Gloire" (prestige, org 6) des deux ligues.
+  // Plafond dur appliqué après tous les multiplicateurs.
+  let show=+(base[0]*mult).toFixed(2), win=+(base[1]*mult).toFixed(2);
+  if(org===5){ show=Math.min(show,125); win=Math.min(win,125); }
+  else if(org===6){ show=Math.min(show,75); win=Math.min(win,75); }
+  return { fightsLeft, show, win, org, isChampContract, reputation:repTier, record:[], isFinalContract, finalFightNumber:isFinalContract?fightsLeft:null };
 }
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.

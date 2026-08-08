@@ -106,6 +106,15 @@ const NARRATIVES=[
   { tags:['WIN','PROSPECT','KO','ESTABLISHED'], src:'Média Spécialisé', txt:f=>`"Le hype train est officiellement inarrêtable. À seulement ${f.age} ans, il nettoie la division avec une violence inouïe."` },
   { tags:['WIN','VETERAN'], src:'Interview Octogone', txt:f=>`"Ne m'enterrez pas trop vite. Les jeunes courent vite, mais je connais le chemin. J'ai encore de belles années devant moi."` },
   { tags:['LOSS','VETERAN'], src:'Tweet Analyste', txt:f=>`"Le combat de trop ? Il faut savoir raccrocher les gants. ${esc(f.name)} a semblé subir le poids des années ce soir."` },
+  // ==== [ANCRE: CORRECTIF_REPETITION_VETERAN] — bug remonté : le combo
+  // LOSS+VETERAN n'avait qu'UNE SEULE citation possible, revenant donc à
+  // chaque défaite de vétéran — même schéma que le correctif WAR ci-dessus,
+  // pool élargi à 6 variantes au total.
+  { tags:['LOSS','VETERAN'], src:'Commentateur', txt:f=>`"Les jambes ne répondent plus comme avant. ${esc(f.name)} a essayé, mais le temps finit toujours par gagner."` },
+  { tags:['LOSS','VETERAN'], src:'Média Spécialisé', txt:f=>`"Une défaite qui pose question sur la suite de la carrière de ${esc(f.name)}. Le corps envoie des signaux qu'on ne peut plus ignorer."` },
+  { tags:['LOSS','VETERAN'], src:'Le Coin (Coach)', txt:f=>`"On savait que ce serait dur ce soir. Rien n'est décidé, on va s'asseoir et en reparler à tête reposée."` },
+  { tags:['LOSS','VETERAN'], src:'Interview Octogone', txt:f=>`"Je n'ai pas de regrets, j'ai tout donné. Le corps a ses limites, mais l'esprit, lui, n'a pas bougé."` },
+  { tags:['LOSS','VETERAN'], src:'Tweet d\u2019un fan', txt:f=>`"Dur à voir ce soir. ${esc(f.name)} reste une légende pour moi, peu importe le résultat."` },
   { tags:['WIN','UPSET'], src:'Commentateur', txt:f=>`"INCROYABLE ! Personne ne lui donnait la moindre chance ! ${esc(f.name)} vient de choquer le monde entier !"` },
   // ==== [ANCRE: CORRECTIF_REPETITION_CITATIONS] (suite) — la majorité des
   // combats (victoire/défaite "normale", sans KO spectaculaire, sans guerre,
