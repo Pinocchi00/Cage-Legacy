@@ -517,10 +517,11 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
        ${p.planLabel?`<span class="tag2">Tactique : ${p.planLabel}</span>`:''}
      </div>
      ${p.res.moveFlavor?(()=>{ const isSig=p.res.moveFlavor.includes('MOUVEMENT SIGNATURE'); return `<div class="${isSig?'':'muted'} small mt" style="font-style:italic;${isSig?'color:var(--gold);font-weight:bold;font-style:normal':''}">${esc(p.res.moveFlavor)}</div>`; })():''}
+     ${p.nickEvoHtml?`<div class="small mt" style="font-style:italic">${p.nickEvoHtml}</div>`:''}
    </div>
    ${judgesHtml}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
-   ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const before=d20(f.attrs[k]-v); return `<div style="color:var(--win)">${before} → ${after} ${label}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore); return `<div style="color:var(--win)">${before} → ${after} ${label}</div>`;}).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>

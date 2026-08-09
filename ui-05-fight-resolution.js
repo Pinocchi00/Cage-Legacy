@@ -473,9 +473,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // toujours consultable (nicknameHistory) sur l'écran de retraite et dans le
   // Panthéon. Vérifié uniquement si le combattant ne prend pas sa retraite ce
   // combat-ci (pas de sens à renommer quelqu'un qui raccroche les gants).
+  // ==== [ANCRE: CORRECTIF_SURNOM_EMPLACEMENT] — bug remonté : le texte
+  // "Surnom changé" était concaténé dans `milestone`, une carte à part plus
+  // bas dans l'écran de résultat (ceinture gagnée, retraite, etc.), alors
+  // qu'il doit apparaître au même endroit que le mouvement signature (bloc
+  // moveFlavor, en haut de l'écran). Stocké séparément dans nickEvoHtml pour
+  // être rendu à cet emplacement précis par scr_result().
+  let nickEvoHtml='';
   if(!forced && !G.f.retired){
     const nickEvo=checkNicknameEvolution(G.f,win);
-    if(nickEvo){ const nickTxt=`<span style="color:var(--gold);font-weight:bold">Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).</span>`; milestone = milestone ? milestone + `<br>${nickTxt}` : nickTxt; }
+    if(nickEvo){ nickEvoHtml=`<span style="color:var(--gold);font-weight:bold">Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).</span>`; }
   }
   // ==== [ANCRE: SYSTEME_CLASSES] (déclencheur) — item demandé : proposition
   // UNIQUE à 23 ans (choix définitif), jamais reproposée une fois tranchée.
@@ -580,7 +587,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
     if(G.f.retired) forced=true;
   }
-  G.pending={res,win,method:res.method,finish,milestone,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
+  G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
@@ -638,19 +645,30 @@ function checkNicknameEvolution(f,win){
   if(!f.nick || f.org===0) return null;
   const changes=f.nicknameChanges||0;
   if(changes>=2) return null;
-  f.fightsSinceNickChange=(f.fightsSinceNickChange||0)+1;
-  if(f.fightsSinceNickChange<8) return null;
   const invincible=['l\u2019Invaincu','le Phénomène','la Prophétie','l\u2019Élu','le Miracle'];
   const grappler=['l\u2019Anaconda','le Python','le Boa','l\u2019Étau','le Nœud Coulant','le Suffocateur','la Pieuvre','le Verrou','l\u2019Étrangleur','le Chirurgien du Sol','la Tenaille','le Croc','l\u2019Ancre','le Serpent','le Cadenas'];
   const pressure=['le Bulldozer','le Rouleau','C\u0153ur de Lion','la Machine','l\u2019Ouragan','le Métronome Infernal','l\u2019Increvable','le Marathonien','la Locomotive','le Mur','l\u2019Inébranlable','la Digue'];
   const totalFights=(f.W||0)+(f.L||0);
   let reason=null;
   let lostInvincibility=false;
+  // ==== [ANCRE: CORRECTIF_SURNOM_MOMENT_INVINCIBILITE] — bug remonté : la
+  // perte de l'invincibilité doit être détectée AU COMBAT MÊME où elle
+  // survient. Avant, ce cas passait par le même cooldown anti-spam de 8
+  // combats que les autres raisons (évite un surnom qui change trop souvent)
+  // — si la première défaite du combattant "invaincu" arrivait avant que ce
+  // cooldown ne soit écoulé, la vérification était sautée et le combat
+  // suivant testait `!win` sur un TOUT AUTRE combat, sans lien avec la vraie
+  // perte d'invincibilité. On sort donc ce cas précis du cooldown : il est
+  // vérifié sur chaque combat, indépendamment de fightsSinceNickChange.
   if(invincible.includes(f.nick) && !win){ reason='a perdu son invincibilité'; lostInvincibility=true; }
-  else if(invincible.includes(f.nick) && (f.org||0)<=3 && totalFights>=25) reason='stagne loin du sommet malgré son surnom';
-  else if(grappler.includes(f.nick) && totalFights>=10 && (f.sub||0)===0) reason='n\u2019a plus soumis personne depuis longtemps';
-  else if(pressure.includes(f.nick) && (f.koLoss||0)>=3) reason='a montré des fissures inattendues';
-  else if(!invincible.includes(f.nick) && f.champion && (f.titles||0)===1) reason='a enfin justifié tous les espoirs placés en lui';
+  f.fightsSinceNickChange=(f.fightsSinceNickChange||0)+1;
+  if(!reason){
+    if(f.fightsSinceNickChange<8) return null;
+    if(invincible.includes(f.nick) && (f.org||0)<=3 && totalFights>=25) reason='stagne loin du sommet malgré son surnom';
+    else if(grappler.includes(f.nick) && totalFights>=10 && (f.sub||0)===0) reason='n\u2019a plus soumis personne depuis longtemps';
+    else if(pressure.includes(f.nick) && (f.koLoss||0)>=3) reason='a montré des fissures inattendues';
+    else if(!invincible.includes(f.nick) && f.champion && (f.titles||0)===1) reason='a enfin justifié tous les espoirs placés en lui';
+  }
   if(!reason) return null;
   if(rnd()>=0.35) return null;
   // le combattant qui n'a plus soumis personne quitte l'identité "grappler" :

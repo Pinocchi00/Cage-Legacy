@@ -1342,15 +1342,17 @@ const SKILL_CONSTANTS = {
   // moyenne, contre ~8 auparavant) et plafond de carrière relevé en
   // conséquence (9 → 10).
   BASE_RATE: 0.12, DROUGHT_INC: 0.012,
-  // ==== [ANCRE: RARETE_BOOST_HAUT_TIER] — item demandé : hausse du taux
-  // d'apparition Épique/Légendaire/Mythique. Mythique quasi doublé
-  // (0.0009 → 0.0018) ; répartition C/R/E/L rééquilibrée dans
-  // tirerRarete() ci-dessous (E : 9.7%→16% ; L : 2.9%→6%).
-  MYTHIC_CHANCE: 0.0018,
+  // ==== [ANCRE: CORRECTIF_BAISSE_RARETE_HAUT_TIER] — item demandé : retour
+  // en arrière sur RARETE_BOOST_HAUT_TIER (trop de E/L/M en jeu), puis
+  // ajustement fin demandé explicitement : Mythique à 0.12% (0.0012) et
+  // Légendaire à 4.5% pile. Épique laissé à 10% (valeur pré-boost déjà
+  // posée juste avant), Commune/Rare réajustés en proportion pour combler
+  // les 85.5 points restants.
+  MYTHIC_CHANCE: 0.0012,
   MAX_CAREER_SKILLS: 10, AGE_META: 34,
 };
 function tirerRarete(){ const roll=rnd()*100;
-  if(roll<50) return 'C'; if(roll<78) return 'R'; if(roll<94) return 'E'; return 'L';
+  if(roll<55.5) return 'C'; if(roll<85.5) return 'R'; if(roll<95.5) return 'E'; return 'L';
 }
 // ==== [ANCRE: SKILL_SANS_EFFET] — bug remonté : une compétence pouvait être
 // tirée alors que TOUS les attributs qu'elle affecte étaient déjà à leur
@@ -1391,14 +1393,25 @@ function grantSkill(f, skill){ if(!f.skills) f.skills=[]; f.skills.push(skill.id
   // ici). Même règle : un gain positif ne peut jamais dépasser le potentiel
   // (ou maxAttrs si défini), mais ne redescend jamais une valeur déjà acquise
   // au-dessus de ce plafond (ex. via une autre compétence antérieure).
+  // ==== [ANCRE: CORRECTIF_DELTA_AFFICHE_COMPETENCE] — bug remonté : l'écran
+  // "Compétence débloquée" recalculait le "avant" en faisant after-fx[stat],
+  // en supposant que le delta nominal du fx avait été appliqué intégralement.
+  // Or juste au-dessus, ce gain est clampé au plafond : si le clamp a réduit
+  // le delta réel, l'"avant" recalculé était faux (trop bas), affichant un
+  // gain gonflé qui n'a jamais eu lieu. On capture ici le VRAI "avant" par
+  // stat (avant tout clamp) dans _realBefore, attaché à une COPIE renvoyée
+  // (jamais à l'objet SKILLS partagé, qui resterait alors pollué pour tous
+  // les futurs tirages/combattants).
+  const realBefore={};
   if(skill.fx){ for(const stat in skill.fx){ if(f.attrs && f.attrs[stat]!==undefined){
-    const dv=skill.fx[stat]; const before=f.attrs[stat]; let after=before+dv;
+    const dv=skill.fx[stat]; const before=f.attrs[stat]; realBefore[stat]=before; let after=before+dv;
     if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4));
     if(dv>0 && f.agedCeilings && f.agedCeilings[stat]!=null) after=Math.min(after, Math.max(before, f.agedCeilings[stat]));
     f.attrs[stat]=clamp(after,1,100);
   } } }
   if(typeof applySynergyBuffs==='function') applySynergyBuffs(f);
-  f.overall=overall(f); return skill;
+  f.overall=overall(f);
+  return Object.keys(realBefore).length ? Object.assign({},skill,{_realBefore:realBefore}) : skill;
 }
 function rollSkill(f){
   if(!f._drought) f._drought=0; if(!f.skills) f.skills=[];

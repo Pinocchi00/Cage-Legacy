@@ -657,7 +657,7 @@ function scr_arcade_upgrades(){
       h+=`<div class="opp" style="border-left:3px solid ${color}" onclick="CL.pickArcadeSkill(${i})">
             <b style="color:${color}">${s.name}</b> <span class="muted small">(${s.rar})</span>
             <div class="muted small mt">${s.desc||s.blurb||''}</div>
-            ${s.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(s.fx)}</div>`:''}</div>`;
+            ${s.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(s.fx,f)}</div>`:''}</div>`;
     });
     if(!a.skillOpts.length) h+=`<div class="card glass mt"><span class="muted small">Aucune compétence disponible pour l\u2019instant.</span></div>
           <button class="btn ghost mt" onclick="CL.pickArcadeSkill(-1)">Continuer vers le camp</button>`;

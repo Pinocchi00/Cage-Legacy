@@ -859,7 +859,14 @@ const CL={
     G.f.contract=generateContract(G.f,G.f.org,false);
     if(G.pending) G.pending.contractExpiry=false;
     G.lastMsg="Contrat renouvelé (4 combats).";
-    if(G.faith){ routeAfterOrgChange(); } else { G.screen=(G.pending&&G.pending.endOfSeason)?'season':'hub'; save(); render(); }
+    // ==== [ANCRE: CORRECTIF_SUPERCOMBAT_ZAPPE] — bug remonté : si l'offre de
+    // supercombat (champChampOfferReady) devenait disponible sur le même
+    // combat que la fin de contrat, ce routage direct vers 'season'/'hub'
+    // écrasait l'offre sans jamais l'afficher. routeAfterCareerPending()
+    // réévalue toute la chaîne de priorités (dont champChampOfferReady) une
+    // fois contractExpiry consommé, au lieu de sauter directement en fin de
+    // chaîne.
+    if(G.faith){ routeAfterOrgChange(); } else { routeAfterCareerPending(); save(); render(); }
   },
   negoRaise(){
     const f=G.f; const hasAgent=(f.agentCut>0);
@@ -871,7 +878,10 @@ const CL={
       G.f.contract=generateContract(f,f.org,true);
       if(G.pending) G.pending.contractExpiry=false;
       G.lastMsg="Coup de poker réussi ! L\u2019organisation s\u2019aligne sur vos exigences (+40%).";
-      if(G.faith){ routeAfterOrgChange(); } else { G.screen=(G.pending&&G.pending.endOfSeason)?'season':'hub'; save(); render(); }
+      // ==== [ANCRE: CORRECTIF_SUPERCOMBAT_ZAPPE] — voir negoRenew() : évite
+      // qu'une offre de supercombat concurrente à la fin de contrat soit
+      // perdue par un routage direct vers 'season'/'hub'.
+      if(G.faith){ routeAfterOrgChange(); } else { routeAfterCareerPending(); save(); render(); }
     } else {
       G.lastMsg="Négociations rompues. L\u2019organisation refuse vos conditions et vous libère.";
       CL.negoMarket(true);
@@ -973,7 +983,10 @@ const CL={
     if(G.pending){ G.pending.contractExpiry=false; }
     G.freeAgencyOffers=null;
     G.lastMsg=`Contrat signé avec ${offer.flavor} !`;
-    if(G.faith){ routeAfterOrgChange(); } else { G.screen=(G.pending&&G.pending.endOfSeason)?'season':'hub'; save(); render(); }
+    // ==== [ANCRE: CORRECTIF_SUPERCOMBAT_ZAPPE] — voir negoRenew() : évite
+    // qu'une offre de supercombat concurrente à la fin de contrat soit
+    // perdue par un routage direct vers 'season'/'hub'.
+    if(G.faith){ routeAfterOrgChange(); } else { routeAfterCareerPending(); save(); render(); }
   },
   nextSeason(){
     // ==== [ANCRE: RECAP_SAISON_RETRAITE] — archive un résumé de la saison qui
@@ -988,7 +1001,23 @@ const CL={
         trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
     }
     G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
-  toLegacy(){ if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
+  toLegacy(){
+    // ==== [ANCRE: CORRECTIF_DOUBLE_ENSHRINE] — bug remonté ("le Codex
+    // inter-carrières bugue") : ce contrôleur n'avait aucune protection
+    // contre un second déclenchement pour le MÊME combattant avant que
+    // render() ne remplace le bouton "Continuer"/"Voir mon palmarès" par
+    // l'écran 'legacy'. Un double-tap rapide (courant sur écran tactile,
+    // notamment le délai de tap historique de Safari iOS — d'où le repro sur
+    // iPhone, mais le bug lui-même n'a rien de spécifique à une plateforme :
+    // n'importe quel double-clic assez rapide sur desktop le déclenche
+    // pareil) appelait deux fois enshrine()/syncPlayerSkillsToCodex()/
+    // awardLegendPoints() : entrée dupliquée au Panthéon, et surtout
+    // totalFights/totalRetirements/legendPoints comptés deux fois dans les
+    // statistiques cumulées affichées par le Codex Inter-carrières
+    // (panneau tool_codex, scr_codex()). f._enshrined marque la carrière
+    // comme déjà scellée et rend tout appel suivant sans effet.
+    if(G.f._enshrined){ G.screen='legacy'; render(); return; }
+    if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     // ==== [ANCRE: CORRECTIF_SAISON_PARTIELLE_RETRAITE] — bug remonté : le
     // bilan saison par saison (retireSeasonRecapHtml) totalisait moins de
     // victoires/défaites que le palmarès réel du combattant. Cause : seule
@@ -1006,7 +1035,7 @@ const CL={
         trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
       G.season.fights=[];
     }
-    G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.screen='legacy'; save(); render(); },
+    G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true; G.screen='legacy'; save(); render(); },
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }

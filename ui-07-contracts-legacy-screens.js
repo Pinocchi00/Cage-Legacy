@@ -437,13 +437,27 @@ function retireLegendPointsHtml(f){
 }
 
 /* ==== [ANCRE: LOT9_ECRAN_CODEX] ==== */
-function formatSkillFx(fx){
+function formatSkillFx(fx, f){
   if(!fx) return '';
+  // ==== [ANCRE: CORRECTIF_FX_PLAFOND] — bug remonté (répété plusieurs fois) :
+  // cet aperçu affichait "+X Stat" pour CHAQUE stat du fx d'une compétence,
+  // y compris pour un combattant précis (f) dont cette stat est déjà à son
+  // plafond de potentiel — la compétence proposée au choix (écran arcade)
+  // promettait donc un gain qui ne se produirait jamais réellement une fois
+  // grantSkill() appliqué (même formule de plafond, cf. skillHasEffect()).
+  // Quand un fighter f est fourni, on masque simplement les stats déjà
+  // plafonnées au lieu d'afficher un gain fictif. Sans f (ex. Codex, simple
+  // catalogue hors contexte d'un combattant vivant), comportement inchangé.
   return Object.entries(fx).map(([k,v])=>{
     const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1];
     const scaled=Math.round(v/5); // même ratio que d20() : fx est toujours un multiple de 5
+    if(f && v>0 && f.attrs && f.attrs[k]!==undefined){
+      let cap=(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4;
+      if(f.agedCeilings && f.agedCeilings[k]!=null) cap=Math.min(cap, f.agedCeilings[k]);
+      if(f.attrs[k]>=cap) return null;
+    }
     return `${scaled>=0?'+':''}${scaled} ${label}`;
-  }).join(', ');
+  }).filter(x=>x!==null).join(', ');
 }
 function scr_codex(){
   const unlocked=loadCodex(); const total=SKILLS.length;
