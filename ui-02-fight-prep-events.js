@@ -315,7 +315,7 @@ function finishTrainingFlow(pendingOppMalus){
         G.f.overall=overall(G.f);
         G.f.orgElo=eloBaseline(G.f.org,G.f.overall);
         G.roster=makeOrgRoster(G.f);
-        G.lastMsg=`Le corps dit stop. Le piège métabolique s\u2019est refermé : la commission vous interdit de redescendre. Vous êtes monté définitivement en ${G.f.divName}. Vos stats physiques se sont adaptées à votre nouveau gabarit.`;
+        G.lastMsg=`Suite à de nombreuses coupes de poids compliquées, vous passez en ${G.f.divName}. Vos stats physiques se sont adaptées à votre nouveau gabarit.`;
       }
       else G.lastMsg='Pesée ratée. Le combat est annulé.';
       G.screen=G.faith?'faith_hub':'hub'; save(); render(); return; // 3e coupe ratée : conséquence déjà tranchée plus haut

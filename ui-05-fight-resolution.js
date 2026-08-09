@@ -436,9 +436,14 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // ==== [ANCRE: NOTIF_DECLIN_VIEILLESSE] (suite, voir applyAging) — le
     // joueur doit être informé explicitement quand l'âge fait baisser un
     // attribut, plutôt que de le découvrir sans explication sur sa fiche.
+    // ==== [ANCRE: DECLIN_DANS_EVOLUTION_20] — item demandé : retirer la
+    // phrase "l'âge se fait sentir" du milestone, et afficher les baisses
+    // dues à l'âge directement dans le bloc "Évolution (sur 20)" en bas de
+    // l'écran de résultat, en rouge (classe .dlt.dn), au même endroit que
+    // les hausses d'attributs — plutôt qu'un paragraphe de texte séparé.
     if(declineLog && declineLog.length){
-      const declineTxt=declineLog.map(d=>`${d.label} : ${d.before} ➔ ${d.after}`).join(', ');
-      milestone = milestone ? milestone + `<br>L\u2019âge se fait sentir (${G.f.age} ans) : ${declineTxt}. Ce déclin est définitif, aucune compétence ne pourra le compenser.` : `L\u2019âge se fait sentir (${G.f.age} ans) : ${declineTxt}. Ce déclin est définitif, aucune compétence ne pourra le compenser.`;
+      if(!G.campApplied) G.campApplied={label:'',deltas:[]};
+      G.campApplied.deltas=(G.campApplied.deltas||[]).concat(declineLog);
     }
     // ==== [ANCRE: SANTE_GFL] — Ultimate Rim : suivi médical premium. Le menton
     // (dommage neurologique) ne remonte JAMAIS, même ici — règle absolue. La
@@ -470,7 +475,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // combat-ci (pas de sens à renommer quelqu'un qui raccroche les gants).
   if(!forced && !G.f.retired){
     const nickEvo=checkNicknameEvolution(G.f,win);
-    if(nickEvo) milestone = milestone ? milestone + `<br>Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).` : `Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).`;
+    if(nickEvo){ const nickTxt=`<span style="color:var(--gold);font-weight:bold">Surnom changé : « ${nickEvo.oldNick} » devient « ${nickEvo.newNick} » (${nickEvo.reason}).</span>`; milestone = milestone ? milestone + `<br>${nickTxt}` : nickTxt; }
   }
   // ==== [ANCRE: SYSTEME_CLASSES] (déclencheur) — item demandé : proposition
   // UNIQUE à 23 ans (choix définitif), jamais reproposée une fois tranchée.

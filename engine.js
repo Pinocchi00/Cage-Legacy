@@ -1341,16 +1341,36 @@ const SKILL_CONSTANTS = {
   // Taux de tirage augmenté (item demandé : ~10 compétences par partie en
   // moyenne, contre ~8 auparavant) et plafond de carrière relevé en
   // conséquence (9 → 10).
-  BASE_RATE: 0.12, DROUGHT_INC: 0.012, MYTHIC_CHANCE: 0.0009,
+  BASE_RATE: 0.12, DROUGHT_INC: 0.012,
+  // ==== [ANCRE: RARETE_BOOST_HAUT_TIER] — item demandé : hausse du taux
+  // d'apparition Épique/Légendaire/Mythique. Mythique quasi doublé
+  // (0.0009 → 0.0018) ; répartition C/R/E/L rééquilibrée dans
+  // tirerRarete() ci-dessous (E : 9.7%→16% ; L : 2.9%→6%).
+  MYTHIC_CHANCE: 0.0018,
   MAX_CAREER_SKILLS: 10, AGE_META: 34,
 };
 function tirerRarete(){ const roll=rnd()*100;
-  if(roll<58.3) return 'C'; if(roll<87.4) return 'R'; if(roll<97.1) return 'E'; return 'L';
+  if(roll<50) return 'C'; if(roll<78) return 'R'; if(roll<94) return 'E'; return 'L';
+}
+// ==== [ANCRE: SKILL_SANS_EFFET] — bug remonté : une compétence pouvait être
+// tirée alors que TOUS les attributs qu'elle affecte étaient déjà à leur
+// plafond (potentiel/maxAttrs/agedCeilings) — le gain réel valait alors 0,
+// rendant la compétence inutile. Même formule de plafond que grantSkill().
+function skillHasEffect(f, s){
+  if(!s.fx) return true;
+  return Object.keys(s.fx).some(stat=>{
+    const dv=s.fx[stat];
+    if(dv<=0 || !f.attrs || f.attrs[stat]===undefined) return true;
+    let cap=(f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4;
+    if(f.agedCeilings && f.agedCeilings[stat]!=null) cap=Math.min(cap, f.agedCeilings[stat]);
+    return f.attrs[stat] < cap;
+  });
 }
 function poolEligible(f, isEndOfCareer, isCapped){
   return SKILLS.filter(s=>{
     if(f.skills && f.skills.includes(s.id)) return false;
     if(s.fam==='gen') return false;                 // jamais tiré en carrière, seulement à la création
+    if(!skillHasEffect(f, s)) return false;
     if(s.fam==='meta') return isEndOfCareer;
     if(isCapped) return false;
     if(s.fam==='style' && s.key===f.style) return true;
@@ -1390,7 +1410,7 @@ function rollSkill(f){
   //    du plafond et de la sécheresse (sinon il ne se déclenche presque jamais,
   //    comme observé lors des tests : 0% au lieu des ~4%/carrière visés).
   if(!hasMythic && rnd()<SKILL_CONSTANTS.MYTHIC_CHANCE){
-    const mythics=SKILLS.filter(s=>s.rar==='M' && s.fam==='style' && s.key===f.style && !(f.skills||[]).includes(s.id));
+    const mythics=SKILLS.filter(s=>s.rar==='M' && s.fam==='style' && s.key===f.style && !(f.skills||[]).includes(s.id) && skillHasEffect(f, s));
     if(mythics.length>0) return grantSkill(f, mythics[Math.floor(rnd()*mythics.length)]);
   }
   // 2) Pool éligible pour le tirage normal (style/pays/méta selon contexte)

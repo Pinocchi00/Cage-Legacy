@@ -107,7 +107,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   const rankTag=f.champChampBelt?`<span class="tag2 hot" style="border-color:var(--blood);color:var(--blood)">DOUBLE CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:(champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`));
   const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
   const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
-  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">Contrat : ${f.contract.fightsLeft} combat(s)</span>`:'';
+  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">Contrat : ${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''}</span>`:'';
   return `<div class="scr">
    <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
      <span class="eyebrow mono">${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
@@ -470,9 +470,9 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
     judgesHtml=`<div class="card gold-b" style="text-align:center">
       <div class="eyebrow mb">Pointage des juges (10-point must)</div>
       <div class="duel2" style="justify-content:center;gap:16px">
-        <span class="num ${J.j1[0]>J.j1[1]?'a':'b'}">${J.j1[0]}-${J.j1[1]}</span>
-        <span class="num ${J.j2[0]>J.j2[1]?'a':'b'}">${J.j2[0]}-${J.j2[1]}</span>
-        <span class="num ${J.j3[0]>J.j3[1]?'a':'b'}">${J.j3[0]}-${J.j3[1]}</span>
+        <span class="num ${J.j1[0]>J.j1[1]?'a':(J.j1[0]===J.j1[1]?'b':'dn')}">${J.j1[0]}-${J.j1[1]}</span>
+        <span class="num ${J.j2[0]>J.j2[1]?'a':(J.j2[0]===J.j2[1]?'b':'dn')}">${J.j2[0]}-${J.j2[1]}</span>
+        <span class="num ${J.j3[0]>J.j3[1]?'a':(J.j3[0]===J.j3[1]?'b':'dn')}">${J.j3[0]}-${J.j3[1]}</span>
       </div>
       <div class="hr"></div>
       <div class="mono small muted" style="text-align:left;font-size:10px">

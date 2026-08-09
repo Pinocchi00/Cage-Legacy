@@ -31,7 +31,7 @@
    dépassent largement. ==== */
 const TACTICS = {
   boxer: [
-    { id: 'bx1', lbl: 'Sac de Frappe Ambulant', desc: 'Le plan : envoyer 200 coups significatifs façon Max Holloway. On noie l\u2019adversaire sous le volume. Le combat est long, ennuyeux à mourir, mais la victoire aux points est garantie.', m: { str: 2.2, ko: 0.25 } },
+    { id: 'bx1', lbl: 'Sac de Frappe Ambulant', desc: 'Le plan : envoyer 200 coups significatifs et noyer l\u2019adversaire sous le volume. Le combat est long, ennuyeux à mourir, mais la victoire aux points est garantie.', m: { str: 2.2, ko: 0.25 } },
     { id: 'bx2', lbl: 'Tout Ou Rien, Menton Compris', desc: 'Une seule idée en tête : l\u2019éteindre. La garde reste grande ouverte — ça passe au premier round ou ça finit très mal pour toi.', m: { ko: 1.8, def: 0.5 } },
     { id: 'bx3', lbl: 'Le Marathonien Du Ring', desc: 'Courir, esquiver, pointer de loin et ne jamais s\u2019engager. Gagner à la touche, c\u2019est bien. Rentrer chez soi entier, c\u2019est mieux. Le cauchemar des bagarreurs.', m: { def: 2.2, ko: 0.2, str: 0.7 } }
   ],
