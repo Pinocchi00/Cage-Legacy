@@ -520,15 +520,33 @@ function scr_faith_year_end(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: REJOUABILITE_PERK_BADGE] — traduit f._styleProfileOverride
+   (dérivé mécaniquement par deriveArcadeMods(), ui-03) en un badge lisible
+   au draft. Sans ça, l'effet mécanique du perk resterait invisible pour le
+   joueur — donc sans impact réel sur sa décision de sélection. ==== */
+function arcadePerkBadge(p){
+  const m=p._styleProfileOverride; if(!m) return '';
+  const tags=[];
+  if(m.koMod>=1.35) tags.push({t:'FINISSEUR KO',c:'var(--gold)'});
+  else if(m.koMod<=0.85) tags.push({t:'PEU DE PUISSANCE',c:'var(--muted)'});
+  if(m.subMod>=1.3) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
+  if(m.sigVol>=1.25) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
+  if(m.gnpDmg>=1.2) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
+  if(!tags.length) return '';
+  return `<div class="mono small mt" style="position:relative;z-index:2">${tags.map(x=>`<span style="border:1px solid ${x.c};color:${x.c};padding:2px 8px;margin-right:6px;border-radius:2px">${x.t}</span>`).join('')}</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_draft(){ const pool=G.arcade.pool; const isBoss=G.arcade.mode==='boss_run'; const isLadder=G.arcade.mode==='ladder_100';
   let h=`<div class="scr"><div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
    <span class="eyebrow mono" style="color:var(--blood)">${isBoss?'BOSS RUN // 5 CHAMPIONS':isLadder?'WTUMMA // CLASSEMENT MONDIAL DES 100':'WTUMMA // WORLD TOURNAMENT'}</span></div>
-   <p class="lede" style="margin-bottom:32px;font-size:15px">${isBoss?'Affrontez 5 champions d\u2019affilée. KO uniquement. La défaite est éliminatoire.':isLadder?'Vous commencez au rang #100. Défiez les combattants mieux classés pour voler leur place jusqu\u2019au sommet. La défaite est éliminatoire.':'Bracket à 64 combattants. Un OVR élevé vous donne une meilleure Seed, un OVR faible vous garantit l\u2019enfer.'}</p>`;
+   <p class="lede" style="margin-bottom:32px;font-size:15px">${isBoss?'Affrontez 5 champions d\u2019affilée. KO uniquement. La défaite est éliminatoire.':isLadder?'Vous commencez au rang #100. Défiez les combattants mieux classés pour voler leur place jusqu\u2019au sommet. La défaite est éliminatoire.':'Bracket à 64 combattants. Un OVR élevé vous donne une meilleure Seed, un OVR faible vous garantit l\u2019enfer.'}</p>
+   <div class="mono small muted" style="margin:-20px 0 24px">Graine du run : <b>${G.arcade.seed}</b></div>`;
   pool.forEach((p,i)=>{
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
       <div class="meta-strip"><div><span>Style</span><b>${p.styleLabel}</b></div></div>
       <div class="hero-name">${p.nick} ${p.flag}</div>
       <div class="narr" style="margin:10px 0 0;position:relative;z-index:2"><blockquote style="font-size:14px">« ${p._perk||''} »</blockquote></div>
+      ${arcadePerkBadge(p)}
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;position:relative;z-index:2" class="mono">
         <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">STRK</span><b style="font-size:18px">${Math.round((p.attrs.jab+p.attrs.cross+p.attrs.hook)/3)}</b></div>
         <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">GRAP</span><b style="font-size:18px">${Math.round((p.attrs.takedown+p.attrs.submission+p.attrs.topControl)/3)}</b></div>
@@ -541,30 +559,55 @@ function scr_draft(){ const pool=G.arcade.pool; const isBoss=G.arcade.mode==='bo
   h+=`<button class="btn ghost mt" style="border:none;color:var(--muted)" onclick="CL.go('title')">← Annuler</button></div>`;
   return h;
 }
+/* ==== [ANCRE: REJOUABILITE_NEARMISS_BLOCK] — scorecard des 3 juges affichée
+   uniquement quand l'élimination s'est faite aux points (a.lastScorecard posé
+   dans afterResult, cf. ui-08) : distingue un near-miss (cartes serrées) d'une
+   déroute nette (cartes larges), là où l'écran ne disait jusqu'ici que
+   "R.I.P." sans donner aucun chiffre. ==== */
+function nearMissBlock(a){
+  if(!a.lastScorecard) return '';
+  const s=a.lastScorecard;
+  const rows=[s.judges.j1,s.judges.j2,s.judges.j3].map(([ja,jb])=>`<span class="mono small">${ja}-${jb}</span>`).join(' · ');
+  const margin=Math.abs(s.scoreA-s.scoreB);
+  const tightness=margin<=3?'Cartes très serrées — un round différent et le run continuait.':margin<=8?'Un écart net mais pas écrasant sur les cartes.':'Décision sans appel des 3 juges.';
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:24px">
+     <div class="eyebrow mb" style="font-size:11px">Cartes des juges (${s.method})</div>
+     <div>${rows}</div>
+     <div class="muted small mt">${tightness}</div>
+   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_gameover(){ const a=G.arcade, f=G.f;
   if(a.mode==='boss_run'){
+    const isVictory=!!a.victory;
+    const cashedOut=!!a.cashedOut;
     // ==== [ANCRE: CORRECTIF_BOSSRUN_RAISON_ELIMINATION] — utilise le flag
     // fiable a.victory (posé au moment exact de la victoire finale) plutôt que
     // de recalculer streak>=target, et distingue une vraie défaite d'une
     // victoire qui ne comptait pas car pas obtenue par KO/TKO (mode KO
     // uniquement) — les deux affichaient auparavant le même "R.I.P." muet.
-    const isVictory=!!a.victory;
     const noKo=a.eliminatedReason==='no_ko';
-    const title=isVictory?'CHAMPION ARCADE':(noKo?'VICTOIRE INVALIDÉE':'R.I.P.');
-    const subtitle=isVictory?'Survivant du Gauntlet':(noKo?'Pas de KO/TKO — la série s\u2019arrête':'Fin de la run');
+    const title=isVictory?'CHAMPION ARCADE':cashedOut?'RUN ENCAISSÉ':(noKo?'VICTOIRE INVALIDÉE':'R.I.P.');
+    const subtitle=isVictory?'Survivant du Gauntlet':cashedOut?`Sorti au palier ${a.streak}/${a.target}, mise en sécurité`:(noKo?'Pas de KO/TKO — la série s\u2019arrête':'Fin de la run');
     const narrative=isVictory
       ?`« Contre toute attente, il a marché sur l\u2019algorithme. 5 cadavres laissés dans la cage. Le contrat est rempli. »`
-      :noKo
-        ?`« Le combat est gagné aux points, mais le Boss Run n\u2019accepte que les KO et TKO. Une victoire à la décision ou par soumission ne compte pas ici — la série s\u2019arrête malgré la main levée. »`
-        :`« Le combat de trop. L\u2019ascension s\u2019arrête net sur la toile de l\u2019octogone. Les lumières s\u2019éteignent. »`;
+      :cashedOut
+        ?`« Pas de gloire, mais les points sont en banque. Certains soirs, la sagesse vaut mieux que le prochain KO. »`
+        :noKo
+          ?`« Le combat est gagné aux points, mais le Boss Run n\u2019accepte que les KO et TKO. Une victoire à la décision ou par soumission ne compte pas ici — la série s\u2019arrête malgré la main levée. »`
+          :`« Le combat de trop. L\u2019ascension s\u2019arrête net sur la toile de l\u2019octogone. Les lumières s\u2019éteignent. »`;
     return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
-     <div class="hero-name" style="color:${isVictory?'var(--gold)':'var(--loss)'}">${title}<em style="color:var(--muted)">${subtitle}</em></div>
+     <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${title}<em style="color:var(--muted)">${subtitle}</em></div>
    </div>
+   ${nearMissBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
-     <div class="stat-band"><div><span class="stat-big hot">${a.streak}/${a.target}</span><span class="stat-lbl">Victoires (KO uniquement)</span></div></div>
+     <div class="stat-band">
+       <div><span class="stat-big hot">${a.streak}/${a.target}</span><span class="stat-lbl">Victoires (KO uniquement)</span></div>
+       <div><span class="stat-big gold">+${a.earnedOnElimination||0}</span><span class="stat-lbl">Points de salle gagnés</span></div>
+     </div>
    </div>
    <div class="narr"><blockquote>${narrative}</blockquote></div>
    <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
@@ -573,11 +616,20 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
   }
   if(a.mode==='ladder_100'){
     const isVictory=a.rank===1;
-    const earned=Math.max(10,Math.round((101-a.rank)*8));
+    const cashedOut=!!a.cashedOut;
+    const isPact=a.eliminatedReason==='pact';
+    // ==== [ANCRE: REJOUABILITE_LADDER_POINTS_UNIFIES] — l'ancien calcul
+    // d'affichage (Math.max(10,round((101-rank)*8))) était DÉCONNECTÉ du
+    // barème réellement versé côté ui-08 (Math.max(2,round((101-rank)*0.8)))
+    // — facteur ×10 : l'écran promettait jusqu'à 10x plus que ce qui était
+    // réellement crédité en Salle des Légendes. a.earnedOnElimination est
+    // désormais la seule source de vérité, écrite au moment du paiement. ====
+    const earned=a.earnedOnElimination||0;
     return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
-     <div class="hero-name" style="color:${isVictory?'var(--gold)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':'R.I.P.'}<em style="color:var(--muted)">${isVictory?'Vous êtes le #1 mondial':'Éliminé au rang #'+a.rank}</em></div>
+     <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':'R.I.P.'}<em style="color:var(--muted)">${isVictory?'Vous êtes le #1 mondial':cashedOut?`Sorti au rang #${a.rank}, mise en sécurité`:isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':'Éliminé au rang #'+a.rank}</em></div>
    </div>
+   ${nearMissBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
@@ -586,29 +638,82 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
        <div><span class="stat-big gold">+${earned}</span><span class="stat-lbl">Points de salle gagnés</span></div>
      </div>
    </div>
-   <div class="narr"><blockquote>${isVictory?`« 99 cadavres en contrebas. L\u2019ascension est terminée, le trône vous appartient. »`:`« Une erreur et c\u2019est la chute libre. Le sommet restera hors de portée. »`}</blockquote></div>
+   <div class="narr"><blockquote>${isVictory?`« 99 cadavres en contrebas. L\u2019ascension est terminée, le trône vous appartient. »`:cashedOut?`« Pas de trône, mais la chute est évitée et les points sont en poche. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:`« Une erreur et c\u2019est la chute libre. Le sommet restera hors de portée. »`}</blockquote></div>
    <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
    <button class="btn ghost mt" onclick="CL.go('title')">RETOURNER AU MENU</button>
    </div>`;
   }
   const isVictory=a.victory;
-  const points={1:2,2:6,3:14,4:28,5:50,6:100,7:100};
-  const earned=points[a.tournament.roundStep]||2;
+  const cashedOut=!!a.cashedOut;
+  const isPact=a.eliminatedReason==='pact';
+  const earned=a.earnedOnElimination||0;
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
-     <div class="hero-name" style="color:${isVictory?'var(--gold)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':'ÉLIMINÉ'}<em style="color:var(--muted)">${a.tournament.stepName}</em></div>
+     <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':'ÉLIMINÉ'}<em style="color:var(--muted)">${cashedOut?'Sortie volontaire':isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':a.tournament.stepName}</em></div>
    </div>
+   ${nearMissBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
      <div class="stat-band"><div><span class="stat-big hot">+${earned}</span><span class="stat-lbl">WT Points gagnés</span></div></div>
    </div>
-   <div class="narr"><blockquote>${isVictory?`« 63 combattants laissés sur le carreau. L\u2019octogone vous appartient, jusqu\u2019à ce qu\u2019un nouveau challenger se présente. »`:`« Le bracket est impitoyable. Une seule erreur et c\u2019est le vol de retour. »`}</blockquote></div>
+   <div class="narr"><blockquote>${isVictory?`« 63 combattants laissés sur le carreau. L\u2019octogone vous appartient, jusqu\u2019à ce qu\u2019un nouveau challenger se présente. »`:cashedOut?`« Se retirer au bon moment est aussi un art. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:`« Le bracket est impitoyable. Une seule erreur et c\u2019est le vol de retour. »`}</blockquote></div>
    <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
    <button class="btn ghost mt" onclick="CL.go('title')">RETOURNER AU MENU</button>
    </div>`;
 }
-function scr_arcadehub(){ const f=G.f, a=G.arcade;
+/* ==== [ANCRE: REJOUABILITE_HUB_BANQUE_PACTE] — bouton d'encaissement (les 3
+   formats) + bascule du pacte de finition (Ladder 100 / Bracket 64
+   uniquement, Boss Run a déjà sa clause KO-only permanente). Valeurs
+   affichées calculées avec les MÊMES barèmes que cashOutGauntlet()/
+   afterResult() côté ui-08, pour que le chiffre annoncé soit celui
+   réellement versé. ==== */
+/* ==== [ANCRE: REJOUABILITE_RIVAL_BADGE] — a.opponent._isRival (posé par
+   fighterFromRivalSnapshot(), ui-03) n'était visible nulle part : les 3 hubs
+   n'affichent que .name, jamais .nick. Sans ce badge le système de némésis
+   serait mécaniquement actif mais totalement invisible pour le joueur. ==== */
+function rivalBadge(opp){
+  if(!opp||!opp._isRival) return '';
+  const srcLabel={boss_run:'Boss Run',ladder_100:'Ladder 100',bracket64:'Bracket 64'}[opp._rivalSource]||'un run précédent';
+  return `<div class="mono small" style="color:var(--blood);font-weight:bold;margin-bottom:4px">⚠ NÉMÉSIS — vous a déjà éliminé (${srcLabel})</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+function cashOutPreview(a){
+  if(a.mode==='boss_run'){ const payout={0:0,1:5,2:15,3:35,4:70,5:150}; return Math.round((payout[a.streak]||0)*0.6); }
+  if(a.mode==='ladder_100') return Math.max(2,Math.round((101-a.rank)*0.8));
+  const points={1:2,2:6,3:14,4:28,5:50,6:100,7:100}; return points[(a.tournament&&a.tournament.roundStep)||1]||2;
+}
+function pactToggleBlock(a){
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid ${a.pactActive?'var(--gold)':'var(--line)'};padding:12px;text-align:left;margin-top:12px;cursor:pointer" onclick="CL.togglePact()">
+     <div class="mono small ${a.pactActive?'gold':'muted'}" style="font-weight:bold">${a.pactActive?'✓ PACTE DE FINITION ACTIF':'☐ Prendre le pacte de finition'}</div>
+     <div class="muted small mt">Ce combat ne compte que par KO/TKO — une victoire aux points ou par soumission arrête le run comme une défaite. En échange : camp suivant plancher Rare garanti + une compétence Légendaire/Épique dans les choix.</div>
+   </div>`;
+}
+/* ==== [ANCRE: REJOUABILITE_PLAN_ARCADE] — resolveArcadeFight() (ui-03)
+   appelait simulateFight(G.f,opp,3) SANS le 4e paramètre plan : les TACTICS
+   (ui-01, déjà utilisées en carrière ET en Vs Ami via scr_vs_friend_plan) et
+   le canal plan de simulateFight (engine.js) existaient mais n'étaient
+   jamais branchés en arcade — aucune décision par combat, contrairement à
+   la carrière. Écran calqué sur scr_vs_friend_plan (déjà un précédent pour
+   un vestiaire allégé hors carrière), routé depuis les 3 hubs avant
+   CL.fightArcade(). ==== */
+function scr_arcade_plan(){
+  const f=G.f, opp=G.arcade.opponent; const plans=TACTICS[f.style]||[];
+  const combined=getExclusiveTactics(f).concat(plans);
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Gauntlet · Plan de combat</span></div>
+   <div class="hero-name" style="text-align:center;font-size:20px">${esc(f.nick||f.name)} <span class="muted">vs</span> ${esc(opp.name)}</div>
+   <div class="card mt" style="border-color:transparent;padding:0 0 16px 0">
+     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
+   </div>
+   <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ?</p>
+   ${combined.map((p,i)=>`<div class="opp" onclick="CL.chooseArcadePlan(${i})">
+     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+   <button class="btn ghost mt" onclick="CL.chooseArcadePlan(-1)">Aucune consigne particulière</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(a);
   if(a.mode==='boss_run'){
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
    <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur ce run</em></div>
@@ -617,29 +722,37 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
    </div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:12px">
      <div class="eyebrow mb">Prochain adversaire</div>
+     ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · ${a.opponent.age} ans</div></div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE</button>
-   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run</button></div>`;
+   ${cashOut>0?`<button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>`:''}
+   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
   }
   if(a.mode==='ladder_100'){
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--sage)">WTUMMA // ASCENSION</div>
    <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${f.nick} ${f.flag} — Objectif #1</em></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:20px">
      <div class="eyebrow mb">Prochaine cible : Rang #${a.opponent.ladderRank}</div>
+     ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · OVR ${a.opponent.overall}</div></div>
+   ${pactToggleBlock(a)}
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">DÉFIER LE RANG #${a.opponent.ladderRank}</button>
-   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run</button></div>`;
+   <button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
+   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
   }
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
    <div class="hero-name" style="text-align:center">TÊTE DE SÉRIE #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:20px">
      <div class="eyebrow mb">Prochain adversaire : Tête de série #${a.opponent.seed}</div>
+     ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · OVR ${a.opponent.overall}</div></div>
+   ${pactToggleBlock(a)}
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
-   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run</button></div>`;
+   <button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
+   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
 }
 /* ==== [ANCRE: ECRAN_ARCADE_UPGRADES] — camp d'entraînement roguelite entre
    chaque tour du Bracket 64 : un entraînement + une compétence à choisir. ==== */

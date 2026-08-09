@@ -42,6 +42,10 @@ function scr_gauntlet_menu(){
    <div class="eyebrow sage">Mode Arcade</div>
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
+   <div class="fld" style="margin-bottom:12px">
+     <label class="muted small">Graine du run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer un run identique)</label>
+     <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
+   </div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span></button>
    <button class="btn" style="font-size:18px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100

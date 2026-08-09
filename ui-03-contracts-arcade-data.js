@@ -182,12 +182,70 @@ function generateNarrativeQuote(f,p){
    Ce mode ne touche JAMAIS resolveFight()/le circuit amateur/les saisons/les
    promotions — un flux de combat entièrement séparé, pour ne rien risquer
    sur le mode Carrière déjà testé. ==== */
+/* ==== [ANCRE: REJOUABILITE_PERKS_MECANIQUES] — les 30 archétypes ont un
+   texte de perk (f._perk) qui n'a jamais eu d'effet mécanique (vérifié :
+   _perk n'est lu que par scr_draft pour l'affichage). Plutôt que d'annoter
+   à la main chaque archétype avec des mods sur mesure — 30 entrées, aucun
+   audit Monte Carlo derrière pour les calibrer, risque réel de casser
+   l'équilibre déjà stabilisé — les mods sont DÉRIVÉS des attrs réels de
+   chaque spec, sur les mêmes canaux que _styleProfileOverride (déjà lu par
+   simulateFight, engine.js, et déjà utilisé par les specs Faith). Un
+   Titan (power 90, submission absent) devient mécaniquement plus finisseur
+   que sa moyenne de style ; L'Anaconda (submission 95) inversement. Bornes
+   resserrées pour ne jamais dépasser ce qu'un skill ou une Classe produit
+   déjà par ailleurs. ==== */
+function deriveArcadeMods(f){
+  const a=f.attrs, base=STYLE_PROFILE[f.style]||STYLE_PROFILE.mma;
+  const strikeScore=(num(a.jab)+num(a.cross)+num(a.hook)+num(a.kick))/4;
+  const subScore=num(a.submission), powerScore=num(a.power), clinchScore=num(a.clinchStr,40);
+  const gnpScore=num(a.topControl,40);
+  return {
+    sigVol:clamp(base.sigVol*(0.75+strikeScore/100*0.4),0.6,1.6),
+    koMod:clamp(base.koMod*(0.7+powerScore/100*0.55),0.55,2.1),
+    subMod:clamp(base.subMod*(0.55+subScore/100*1.0),0.15,2.3),
+    clinchDmg:clamp(base.clinchDmg*(0.75+clinchScore/100*0.4),0.5,1.6),
+    gnpDmg:clamp(base.gnpDmg*(0.75+gnpScore/100*0.4),0.5,1.6),
+  };
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: REJOUABILITE_NEMESIS_MULTI] — meta.wtNemesis était un slot
+   UNIQUE écrasé à chaque victoire de Bracket 64, gated sur div===player.div,
+   et jamais alimenté par le Boss Run ni le Ladder 100. Remplacé par
+   meta.gauntletRivals (jusqu'à 3, alimenté par les 3 formats), avec
+   migration transparente de l'ancien wtNemesis au premier accès — aucune
+   perte de la némésis déjà en sauvegarde. Consommé par les 3 formats. ==== */
+function getGauntletRivals(meta){
+  if(!meta.gauntletRivals){ meta.gauntletRivals=meta.wtNemesis?[meta.wtNemesis]:[]; }
+  return meta.gauntletRivals;
+}
+function recordGauntletRival(meta,f,sourceLabel){
+  const snap={name:f.name,nick:f.nick,flag:f.flag,overall:f.overall,
+    attrs:JSON.parse(JSON.stringify(f.attrs)),skills:[...(f.skills||[])],style:f.style,div:f.div,source:sourceLabel};
+  let rivals=getGauntletRivals(meta).filter(r=>!(r.name===snap.name && r.div===snap.div));
+  rivals.unshift(snap);
+  if(rivals.length>3) rivals.length=3;
+  meta.gauntletRivals=rivals; delete meta.wtNemesis;
+}
+function pickGauntletRival(div){
+  const meta=loadMetaStats(); const rivals=getGauntletRivals(meta).filter(r=>r.div===div);
+  return rivals.length?pick(rivals):null;
+}
+function fighterFromRivalSnapshot(snap,levelHint,nick){
+  const boss=makeFighter({gender:'H',div:snap.div,style:snap.style,level:levelHint||90});
+  boss.attrs=JSON.parse(JSON.stringify(snap.attrs));
+  boss.skills=[...snap.skills]; boss.overall=snap.overall;
+  boss.name=snap.name; boss.flag=snap.flag; boss.nick=nick||snap.nick||'REVANCHE';
+  boss.stage='pro'; boss.org=6; boss._isRival=true; boss._rivalSource=snap.source;
+  return boss;
+}
+/* ==== [FIN ANCRE] ==== */
 function makeArcadeArchetype(spec){
   const f=makeFighter({gender:'H',div:spec.div,style:spec.style,countryKey:spec.country,first:spec.first,age:spec.age,potential:96,level:70});
   for(const k in spec.attrs) f.attrs[k]=spec.attrs[k];
   f.overall=overall(f); f.stage='pro'; f.org=4; f.morale=100; f.form=100;
   f.nick=spec.nick; f._perk=spec.perk; f.styleLabel=spec.styleLabel;
   if(spec.flag) f.flag=spec.flag; // drapeau de flavor, découplé du pays réel utilisé pour le patronyme
+  f._styleProfileOverride=deriveArcadeMods(f);
   return f;
 }
 /* 23 archétypes (audit "Draft Rapide"). Styles fictifs de Gemini (Sumo, Point
@@ -230,18 +288,43 @@ function injectExtendedArchetypes(){
     if(checkLegendUnlock(a.unlockId) && !ARCADE_ARCHETYPES.some(x=>x.nick===a.nick)) ARCADE_ARCHETYPES.push(a);
   });
 }
+/* ==== [ANCRE: CORRECTIF_BOSSRUN_ARCHETYPES] — startArcade()/startLadder100()
+   appellent injectExtendedArchetypes() (débloque les 3 archétypes légendes +
+   les 4 archétypes achetés en Salle des Légendes), startBossRun() ne le
+   faisait pas : le format le plus punitif du Gauntlet tirait dans un pool
+   plus pauvre que les deux autres, sans raison. ==== */
 function startBossRun(){
-  G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only'};
+  injectExtendedArchetypes();
+  G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only',banked:0};
   G.screen='draft'; save(); render();
 }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: REJOUABILITE_DIFFICULTE_BOSSRUN] — même principe que pour le
+   Bracket : passe de confort, pas un rééquilibrage audité. L'ancien
+   overall+5+streak*3 (plancher 70) mettait la barre au-dessus du joueur dès
+   le combat 1 et grimpait vite ; overall+streak*2 (plancher 60) laisse un
+   vrai combat à niveau égal en ouverture. ==== */
 function genBossOpponent(streak){
   const div=G.f.div;
-  const lv=clamp(G.f.overall+5+streak*3,70,99);
+  const lv=clamp(G.f.overall+streak*2,60,93);
+  /* ==== [ANCRE: REJOUABILITE_NEMESIS_BOSSRUN] — à partir du 3e combat,
+     chance croissante de retomber sur un rival réellement enregistré
+     (cf. recordGauntletRival) plutôt qu'un boss anonyme généré. Niveau du
+     rival RECALÉ sur la courbe de difficulté ci-dessus (via fighterFromRival
+     Snapshot(rival, lv, ...)) pour rester cohérent avec la baisse de
+     difficulté générale — pas l'attrs brute du rival qui pourrait très bien
+     dépasser 93 si le combattant qui l'a créé était très fort. ==== */
+  if(streak>=2 && rnd()<0.25+streak*0.08){
+    const rival=pickGauntletRival(div);
+    if(rival){ const o=fighterFromRivalSnapshot(rival,lv,'REVANCHE — '+(rival.nick||'')); o.champion='monde'; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W); o.sub=RI(0,o.W-o.ko); return o; }
+  }
+  /* ==== [FIN ANCRE] ==== */
   const o=makeFighter({gender:G.f.gender,div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(26,33)});
   o.stage='pro'; o.org=6; o.champion='monde'; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W); o.sub=RI(0,o.W-o.ko);
   o.nick=pick(['Le Tyran','Le Cauchemar','L\u2019Intouchable','Le Destructeur']);
   return o;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /** @type {Array<{unlockId?:string,nick:string,flag:string,country:string,style:string,styleLabel:string,div:string,age:number,attrs:Record<string,number>,perk:string}>}
  * Type élargi volontairement (attrs en dictionnaire générique, pas une forme
@@ -319,42 +402,61 @@ const ARCADE_ARCHETYPES=[
     attrs:{jab:70,cross:70,takedown:55,submission:45,power:72,chin:72,cardio:72,confidence:90},
     perk:'Stats moyennes, mais il attire la lumière. Capable d\u2019un miracle quand les caméras tournent.' },
 ];
+/* ==== [ANCRE: REJOUABILITE_DRAFT_SHUFFLE] — .sort(()=>0.5-rnd()) est un
+   shuffle biaisé connu (dépend de l'algo de tri du moteur JS, favorise
+   certaines positions) : sur 27 archétypes ça revenait à retirer presque
+   toujours le même sous-ensemble en tête de tableau. Fisher-Yates réel,
+   toujours sur rnd() (seedé) pour rester reproductible. ==== */
 function buildArcadePool(){
-  const shuffled=ARCADE_ARCHETYPES.slice().sort(()=>0.5-rnd());
+  const shuffled=ARCADE_ARCHETYPES.slice();
+  for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
   return shuffled.slice(0,3).map(makeArcadeArchetype);
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: CORRECTIF_CODE_MORT] — genArcadeOpponent() a été retirée :
    définie mais jamais appelée nulle part dans la codebase (vérifié par
    comptage d'usage). L'adversaire arcade "classique" (hors Boss Run/Ladder/
    Bracket) est en réalité généré ailleurs — cette fonction était un reliquat
    d'une version antérieure du mode. ==== */
+/* ==== [ANCRE: REJOUABILITE_PLAN_ARCADE_RESOLVE] — G.arcade.plan (posé par
+   CL.chooseArcadePlan(), ui-08, depuis scr_arcade_plan) était jusqu'ici
+   ignoré : simulateFight() était toujours appelée sans 4e paramètre, quel
+   que soit le choix fait à l'écran. G.fight.plan reflète maintenant le même
+   choix, pour que l'affichage du combat (qui lit G.fight.planLabel comme en
+   carrière) reste cohérent. ==== */
 function resolveArcadeFight(){
   const opp=G.arcade.opponent;
-  const res=simulateFight(G.f,opp,3);
+  const plan=G.arcade.plan||null;
+  const res=simulateFight(G.f,opp,3,plan);
   const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
   { const last=G.f.history[G.f.history.length-1];
     if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank='NR'; last.season=(G.arcade.mode==='boss_run')?(G.arcade.streak+1):(G.arcade.tournament?G.arcade.tournament.roundStep:1); } }
-  G.fight={kind:'arcade',opp,rounds:3,plan:null};
-  G.pending={res,win,method:res.method,finish:!isDecisionLike(res.method),opp:{name:opp.name,flag:opp.flag}};
+  G.fight={kind:'arcade',opp,rounds:3,plan,planLabel:G.arcade.planLabel||null};
+  G.pending={res,win,method:res.method,finish:!isDecisionLike(res.method),opp:{name:opp.name,flag:opp.flag},planLabel:G.fight.planLabel};
+  G.arcade.plan=null; G.arcade.planLabel=null;
   buildTimeline(); G.screen='arena'; save(); render();
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: WTUMMA_BRACKET64] — refonte du Gauntlet en tournoi à
    élimination directe à 64 combattants. N'affecte QUE le mode normal
    (G.arcade.mode!=='boss_run') — le Boss Run reste sur son propre système
    streak-based, séparé et intact. ==== */
+/* ==== [ANCRE: REJOUABILITE_DIFFICULTE_BRACKET] — passe d'ajustement de
+   confort, PAS un rééquilibrage complet (aucun audit Monte Carlo derrière,
+   contrairement au rebalancing de styles déjà fait sur le moteur) : seed de
+   départ plus clémente pour un même OVR (diviseur 2 → 1.3) et plafond de
+   niveau adverse abaissé (95/99 → 88/93). Réversible en un chiffre si ça se
+   révèle trop généreux à l'usage. ==== */
 function buildWTUMMABracket(player){
-  const pSeed=clamp(64-Math.floor((player.overall-40)/2),1,64);
-  const pool=[]; const meta=loadMetaStats();
+  const pSeed=clamp(64-Math.floor((player.overall-40)/1.3),1,64);
+  const pool=[];
+  const rival=pickGauntletRival(player.div);
   for(let i=1;i<=64;i++){
     if(i===pSeed){ player.seed=i; pool.push(player); }
-    else if(i===1 && meta.wtNemesis && meta.wtNemesis.div===player.div){
-      const boss=makeFighter({gender:player.gender,div:player.div,style:meta.wtNemesis.style,level:90});
-      boss.attrs=JSON.parse(JSON.stringify(meta.wtNemesis.attrs));
-      boss.skills=[...meta.wtNemesis.skills]; boss.overall=meta.wtNemesis.overall;
-      boss.name=meta.wtNemesis.name; boss.flag=meta.wtNemesis.flag; boss.nick="LE CHAMPION EN TITRE";
-      boss.stage='pro'; boss.org=6; boss.seed=1; pool.push(boss);
+    else if(i===1 && rival){
+      const boss=fighterFromRivalSnapshot(rival,88,'LE CHAMPION EN TITRE'); boss.seed=1; pool.push(boss);
     } else {
-      const lv=clamp(95-Math.floor(i/1.5)+RI(-3,3),30,99);
+      const lv=clamp(88-Math.floor(i/1.6)+RI(-3,3),25,93);
       const o=makeFighter({gender:player.gender,div:player.div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
       o.stage='pro'; o.org=6; o.seed=i; o.W=RI(15,35); o.L=RI(0,4);
       pool.push(o);
@@ -380,7 +482,12 @@ function advanceWTUMMABracket(){
   G.arcade.opponent=playerMatch.a.id===G.f.id?playerMatch.b:playerMatch.a;
   return false;
 }
-function generateArcadeUpgrades(){
+/* ==== [ANCRE: REJOUABILITE_PACTE_RECOMPENSE] — pactBonus (posé quand le
+   joueur a pris le pacte KO-only du combat précédent ET l'a rempli, cf.
+   togglePact()/pactFail dans afterResult) relève le plancher de rareté du
+   camp suivant d'un cran, sans dupliquer la logique déjà existante des
+   paliers rStep>=4/rStep===6 — juste un cran de plus par-dessus. ==== */
+function generateArcadeUpgrades(pactBonus){
   const baseOpts=trainingOptions(G.f).slice(0,3);
   // Bonus x4 : le format court (Bracket 64 / Ladder 100) rend les bonus
   // habituels de carrière (sur 100) quasi invisibles sur un parcours de
@@ -389,18 +496,20 @@ function generateArcadeUpgrades(){
   G.arcade.skillOpts=[];
   const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
   let validPool=poolEligible(G.f,false,false);
-  if(rStep>=4) validPool=validPool.filter(s=>s.rar!=='C');
+  if(rStep>=4 || pactBonus) validPool=validPool.filter(s=>s.rar!=='C');
   if(rStep===6) validPool=validPool.filter(s=>s.rar==='L'||s.rar==='M');
   for(let i=0;i<3;i++){
     if(validPool.length===0) break;
     let rarity=tirerRarete();
-    if(rStep>=4 && rarity==='C') rarity='R';
+    if((rStep>=4 || pactBonus) && rarity==='C') rarity='R';
     if(rStep===6) rarity=rnd()<0.7?'L':'M';
+    if(pactBonus && i===0 && rStep<6) rarity=rnd()<0.6?'L':'E';
     const sk=getFallbackSkill(validPool,rarity);
     if(sk){ G.arcade.skillOpts.push(sk); validPool=validPool.filter(s=>s.id!==sk.id); }
   }
   G.arcade.upgradesChosen={train:false,skill:false};
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: WTUMMA_LADDER100] — Lot 1, classement mondial à 100 PNJ avec
@@ -408,8 +517,22 @@ function generateArcadeUpgrades(){
    Run — ne modifie ni ne remplace aucun des deux. ==== */
 function buildWTUMMALadder(division){
   const ladder=[];
+  /* ==== [ANCRE: REJOUABILITE_NEMESIS_LADDER] — le rang #1 (le boss final de
+     l'ascension) devient, une fois sur deux si une némésis existe pour cette
+     division, le combattant qui vous a réellement éliminé lors d'un run
+     précédent — au lieu d'un boss anonyme piochant juste un nom générique
+     dans un pool de 5. Niveau calé sur ce que rang #1 vaut déjà normalement
+     dans la courbe existante (100-0.66+RI), courbe NON modifiée ici (seuls
+     Bracket 64 et Boss Run ont été assouplis, pas le Ladder). ==== */
+  const rival=(rnd()<0.5)?pickGauntletRival(division):null;
   for(let i=1;i<=100;i++){
     const lv=clamp(100-Math.floor(i*0.66)+RI(-2,3),30,99);
+    if(i===1 && rival){
+      const o=fighterFromRivalSnapshot(rival,lv,'LE CHAMPION EN TITRE — '+(rival.nick||''));
+      o.ladderRank=1; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W);
+      ladder.push(o); continue;
+    }
+    /* ==== [FIN ANCRE] ==== */
     const o=makeFighter({gender:'H',div:division,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
     o.stage='pro'; o.org=6; o.ladderRank=i;
     o.W=RI(10,40); o.L=RI(0,5); o.ko=RI(0,o.W);
