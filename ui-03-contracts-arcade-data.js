@@ -194,6 +194,64 @@ function generateNarrativeQuote(f,p){
    que sa moyenne de style ; L'Anaconda (submission 95) inversement. Bornes
    resserrées pour ne jamais dépasser ce qu'un skill ou une Classe produit
    déjà par ailleurs. ==== */
+/* ==== [ANCRE: REJOUABILITE_PAYOUT_TABLES] — les barèmes de points de salle
+   étaient dupliqués littéralement en 3 endroits (afterResult, cashOutGauntlet,
+   cashOutPreview, cf. ui-08/ui-04) : source d'un bug déjà vécu une fois
+   (facteur ×10 sur le Ladder, cf. ANCRE REJOUABILITE_LADDER_POINTS_UNIFIES).
+   Centralisés ici comme SEULE source de vérité, consommés par ui-08 et
+   ui-04. gauntletPayout(mode,progress) retourne le montant PLEIN TARIF pour
+   une progression donnée (roundStep / rang / streak selon le mode) — c'est
+   le montant d'un ENCAISSEMENT volontaire. gauntletEliminationRatio(mode)
+   donne la décote appliquée à ce même montant en cas d'élimination (mort ou
+   défaite) : l'encaissement volontaire doit TOUJOURS rapporter strictement
+   plus qu'une élimination au même palier, pour que "sortir proprement" soit
+   un vrai choix de prudence et non un simple raccourci sans coût. ==== */
+const BRACKET64_POINTS={1:2,2:6,3:14,4:28,5:50,6:100,7:100};
+const LADDER100_POINTS=rank=>Math.max(2,Math.round((101-rank)*0.8));
+const BOSSRUN_POINTS={0:0,1:5,2:15,3:35,4:70,5:150};
+const GAUNTLET_ELIMINATION_RATIO=0.5; // uniforme sur les 3 formats depuis la refonte
+function gauntletPayout(mode,progress){
+  if(mode==='boss_run') return BOSSRUN_POINTS[progress]||0;
+  if(mode==='ladder_100') return LADDER100_POINTS(progress);
+  return BRACKET64_POINTS[progress]||2;
+}
+function gauntletEliminationPayout(mode,progress){
+  return Math.round(gauntletPayout(mode,progress)*GAUNTLET_ELIMINATION_RATIO);
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — genWTUMMAOpponent() ne proposait
+   QU'UNE cible imposée (leapfrog auto -10/-15, saut direct au #1 sous la
+   barre des 15) : aucune décision de risque à chaque palier. Remplacé par
+   genWTUMMATargets(), qui propose 2-3 cibles simultanées à des profondeurs
+   de saut différentes (sûre / médiane / agressive), le #1 étant toujours
+   proposé une fois sous la barre des 15 comme avant. genWTUMMAOpponent()
+   reste présente (compat retryArcade()/tests) mais n'est plus appelée dans
+   le flux normal du Ladder. ==== */
+function genWTUMMATargets(){
+  const currentRank=G.arcade.rank; const targets=[];
+  const pushTarget=r=>{ if(r>=1 && !targets.some(t=>t.ladderRank===r)){ const o=G.arcade.ladder.find(x=>x.ladderRank===r); if(o) targets.push(o); } };
+  if(currentRank<=15){ pushTarget(Math.max(2,currentRank-RI(3,6))); pushTarget(1); }
+  else {
+    pushTarget(Math.max(2,currentRank-RI(4,7)));   // sûre
+    pushTarget(Math.max(2,currentRank-RI(10,15))); // médiane (ancien comportement)
+    pushTarget(Math.max(2,currentRank-RI(18,26))); // agressive
+  }
+  return targets.length?targets:[G.arcade.ladder.find(o=>o.ladderRank===Math.max(2,currentRank-10))||G.arcade.ladder[0]];
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: REJOUABILITE_CAMP_RECUPERATION] — attritionHeal() (ui-08)
+   fait bel et bien décroître la récup avec la profondeur du run, mais ce
+   coût était invisible et non-arbitrable : aucune option de camp ne rendait
+   de la forme. Ajoute une 4e option SYNTHÉTIQUE (hors pool TRAIN normal, qui
+   ne connaît que des deltas d'attributs) après le ×4 habituel de
+   generateArcadeUpgrades() — 18 points de forme brute (soit environ +3.6/20,
+   cohérent avec l'ampleur des autres options une fois ×4 appliqué), qui
+   entrent dans applyDeltas() via les clés spéciales 'form'/'morale' déjà
+   gérées (engine.js). ==== */
+function recoveryTrainOption(){
+  return {label:'Récupération active',hint:'Sauter le sparring dur pour laisser le corps encaisser le run. Rien à gagner sur les attributs, tout sur l\u2019endurance de la série.',d:[['form',18],['morale',5]]};
+}
+/* ==== [FIN ANCRE] ==== */
 function deriveArcadeMods(f){
   const a=f.attrs, base=STYLE_PROFILE[f.style]||STYLE_PROFILE.mma;
   const strikeScore=(num(a.jab)+num(a.cross)+num(a.hook)+num(a.kick))/4;
@@ -407,10 +465,21 @@ const ARCADE_ARCHETYPES=[
    certaines positions) : sur 27 archétypes ça revenait à retirer presque
    toujours le même sous-ensemble en tête de tableau. Fisher-Yates réel,
    toujours sur rnd() (seedé) pour rester reproductible. ==== */
+/* ==== [ANCRE: REJOUABILITE_DRAFT_ANTIREPET] — meta.lastArcadeDraft (3 nicks
+   du run précédent, toutes formats confondus) exclu du tirage courant tant
+   que le pool restant compte au moins 3 archétypes hors exclusion — sinon on
+   retombe sur le pool complet plutôt que de planter (cas d'un joueur qui n'a
+   débloqué aucun archétype bonus et n'a que le socle de base). ==== */
 function buildArcadePool(){
-  const shuffled=ARCADE_ARCHETYPES.slice();
+  const meta=loadMetaStats();
+  const excluded=meta.lastArcadeDraft||[];
+  let candidates=ARCADE_ARCHETYPES.filter(a=>!excluded.includes(a.nick));
+  if(candidates.length<3) candidates=ARCADE_ARCHETYPES.slice();
+  const shuffled=candidates.slice();
   for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
-  return shuffled.slice(0,3).map(makeArcadeArchetype);
+  const picked=shuffled.slice(0,3);
+  meta.lastArcadeDraft=picked.map(a=>a.nick); saveMetaStats(meta);
+  return picked.map(makeArcadeArchetype);
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: CORRECTIF_CODE_MORT] — genArcadeOpponent() a été retirée :
@@ -432,7 +501,16 @@ function resolveArcadeFight(){
   { const last=G.f.history[G.f.history.length-1];
     if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank='NR'; last.season=(G.arcade.mode==='boss_run')?(G.arcade.streak+1):(G.arcade.tournament?G.arcade.tournament.roundStep:1); } }
   G.fight={kind:'arcade',opp,rounds:3,plan,planLabel:G.arcade.planLabel||null};
-  G.pending={res,win,method:res.method,finish:!isDecisionLike(res.method),opp:{name:opp.name,flag:opp.flag},planLabel:G.fight.planLabel};
+  /* ==== [ANCRE: REJOUABILITE_ACH_ARCADE] — checkAch() (ui-05) n'était appelé
+     que par resolveFight() (carrière) : aucun succès n'était atteignable en
+     Gauntlet, alors que checkAch() est générique (lit G.f.W/L/ko/sub/history,
+     déjà tenus à jour en arcade via applyResult() ci-dessus). newAch rejoint
+     G.pending sous la même clé que resolveFight() : scr_result (ui-06,
+     PARTAGÉ entre carrière et arcade via G.screen='result') l'affiche déjà
+     sans aucune modification d'écran nécessaire. ==== */
+  const newAch=(typeof checkAch==='function')?checkAch():[];
+  /* ==== [FIN ANCRE] ==== */
+  G.pending={res,win,method:res.method,finish:!isDecisionLike(res.method),opp:{name:opp.name,flag:opp.flag},planLabel:G.fight.planLabel,newAch};
   G.arcade.plan=null; G.arcade.planLabel=null;
   buildTimeline(); G.screen='arena'; save(); render();
 }
@@ -487,12 +565,22 @@ function advanceWTUMMABracket(){
    togglePact()/pactFail dans afterResult) relève le plancher de rareté du
    camp suivant d'un cran, sans dupliquer la logique déjà existante des
    paliers rStep>=4/rStep===6 — juste un cran de plus par-dessus. ==== */
+/* ==== [ANCRE: REJOUABILITE_PACTE_ESCALADE] — pactBonus était un booléen
+   (le pacte du combat précédent a été rempli, oui/non). Devient un NIVEAU
+   entier (G.arcade.pactStreak, ui-08 : compte les pactes remplis D'AFFILÉE,
+   remis à 0 au premier pacte manqué) : les comparaisons `if(pactBonus)`
+   restent valides (un niveau 0 est falsy, ≥1 est truthy), donc aucune
+   régression sur le comportement au niveau 1. Au-delà, un palier
+   supplémentaire (niveau ≥3) garantit une Légendaire en 1ère position au
+   lieu d'un simple tirage favorisé — la seule façon de matérialiser une
+   VRAIE escalade sans toucher au tirage de base ni dupliquer tirerRarete(). ==== */
 function generateArcadeUpgrades(pactBonus){
   const baseOpts=trainingOptions(G.f).slice(0,3);
   // Bonus x4 : le format court (Bracket 64 / Ladder 100) rend les bonus
   // habituels de carrière (sur 100) quasi invisibles sur un parcours de
   // seulement 6-8 combats — l'affichage réel se fait ensuite sur /20 via d20().
   G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:opt.d.map(delta=>[delta[0],delta[1]*4])}));
+  G.arcade.trainOpts.push(recoveryTrainOption());
   G.arcade.skillOpts=[];
   const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
   let validPool=poolEligible(G.f,false,false);
@@ -504,12 +592,34 @@ function generateArcadeUpgrades(pactBonus){
     if((rStep>=4 || pactBonus) && rarity==='C') rarity='R';
     if(rStep===6) rarity=rnd()<0.7?'L':'M';
     if(pactBonus && i===0 && rStep<6) rarity=rnd()<0.6?'L':'E';
+    if(pactBonus>=3 && i===0) rarity='L';
     const sk=getFallbackSkill(validPool,rarity);
     if(sk){ G.arcade.skillOpts.push(sk); validPool=validPool.filter(s=>s.id!==sk.id); }
   }
   G.arcade.upgradesChosen={train:false,skill:false};
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: REJOUABILITE_CAMP_BOSSRUN] — Boss Run n'avait AUCUN écran de
+   camp entre les KO (contrairement à Bracket 64 / Ladder 100), alors que
+   scr_arcade_upgrades()/pickArcadeSkill() (ui-04/ui-08) le permettent déjà
+   pour peu qu'on leur fournisse skillOpts. Format allégé : 1 seule
+   compétence (pas d'entraînement — le format est un sprint de 5 combats,
+   pas d'écart d'attributs à combler), rareté indexée sur le streak déjà
+   atteint. upgradesChosen.train est posé à true D'EMBLÉE pour que
+   scr_arcade_upgrades saute directement à la section compétence. ==== */
+function generateBossRunUpgrade(streak){
+  G.arcade.trainOpts=[];
+  G.arcade.skillOpts=[];
+  let validPool=poolEligible(G.f,false,false);
+  if(streak>=3) validPool=validPool.filter(s=>s.rar!=='C');
+  let rarity=tirerRarete();
+  if(streak>=3 && rarity==='C') rarity='R';
+  if(streak>=4) rarity=rnd()<0.6?'L':'E';
+  const sk=getFallbackSkill(validPool,rarity);
+  if(sk) G.arcade.skillOpts.push(sk);
+  G.arcade.upgradesChosen={train:true,skill:false};
+}
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: WTUMMA_LADDER100] — Lot 1, classement mondial à 100 PNJ avec

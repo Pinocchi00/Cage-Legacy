@@ -37,6 +37,16 @@ function scr_title(){
 /* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
    (Bracket 64, Classement des 100, Boss Run), auparavant tous au même niveau
    que les modes principaux sur l'écran titre. ==== */
+/* ==== [ANCRE: REJOUABILITE_RECORD_GAUNTLET] — meta.gauntletBest (state.js),
+   affiché sous chaque bouton de format pour donner un objectif de retour au
+   menu, avant même de lancer un run. ==== */
+function gauntletMenuBestTag(mode){
+  const meta=loadMetaStats(); const best=(meta.gauntletBest||{})[mode];
+  if(best===undefined) return '';
+  const label=mode==='boss_run'?`Record : ${best}/5`:mode==='ladder_100'?`Record : rang #${best}`:(best>=7?'Record : Tournoi remporté':`Record : palier ${best}`);
+  return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.8">${label}</span>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_gauntlet_menu(){
   return `<div class="scr center intro">
    <div class="eyebrow sage">Mode Arcade</div>
@@ -47,11 +57,11 @@ function scr_gauntlet_menu(){
      <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
    </div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
-     <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span></button>
+     <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
    <button class="btn" style="font-size:18px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet</span></button>
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet</span>${gauntletMenuBestTag('ladder_100')}</button>
    ${checkLegendUnlock('mode_boss')?`<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--gold);color:var(--gold)" onclick="CL.startBossRun()">BOSS RUN
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span></button>`:''}
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span>${gauntletMenuBestTag('boss_run')}</button>`:''}
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }

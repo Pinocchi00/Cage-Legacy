@@ -112,6 +112,22 @@ function loadMetaStats(){
   catch(e){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
 }
 function saveMetaStats(meta){ try{ localStorage.setItem(META_STATS_KEY,JSON.stringify(meta)); }catch(e){} }
+/* ==== [ANCRE: REJOUABILITE_RECORD_GAUNTLET] — meta.gauntletBest{bracket64,
+   ladder_100,boss_run} : record persistant par format, lu au menu (ui-06) et
+   à l'écran de fin de run (ui-04). Sémantique par format (plus haut = mieux
+   SAUF ladder_100 où le rang #1 est le sommet, donc "plus BAS = mieux") :
+   bracket64 -> meilleur roundStep atteint (1 à 7=victoire) ; ladder_100 ->
+   meilleur (plus bas) rang atteint (100 au départ, 1 = sommet) ; boss_run ->
+   meilleur streak KO enchaîné (0 à 5). N'écrit JAMAIS d'attribut/potentiel —
+   même garde-fou que LOT14_SALLE_LEGENDES ci-dessus. ==== */
+function recordGauntletBest(meta,mode,value){
+  if(!meta.gauntletBest) meta.gauntletBest={};
+  const cur=meta.gauntletBest[mode];
+  const better=(mode==='ladder_100')?(cur===undefined||value<cur):(cur===undefined||value>cur);
+  if(better){ meta.gauntletBest[mode]=value; return true; }
+  return false;
+}
+/* ==== [FIN ANCRE] ==== */
 function updateMetaStatsOnRetirement(f){
   const meta=loadMetaStats();
   const fights=f.W+f.L+(f.D||0);
