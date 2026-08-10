@@ -19,7 +19,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
@@ -35,6 +35,39 @@ function routeAfterOrgChange(){
 // ici une seule fois. Le mode Faith garde sa propre logique séparée (pas de
 // classOffer/endOfSeason, fallback différent), volontairement non fusionnée
 // ici pour ne rien changer à son comportement.
+/* ==== [ANCRE: GAUNTLET_FIN_DE_RUN] — les 7 sorties de run (3 éliminations,
+   3 victoires, 1 encaissement) dupliquaient chacune leur propre séquence
+   « calculer / créditer legendPoints / recordGauntletBest / poser
+   earnedOnElimination ». C'est exactement le motif qui avait déjà produit le
+   bug de facteur ×10 sur le Ladder (cf. ANCRE REJOUABILITE_LADDER_POINTS_
+   UNIFIES) quand les barèmes étaient dupliqués. Point de sortie unique :
+   évalue le contrat de run, fige le multiplicateur, crédite, enregistre le
+   record AU BON PALIER d'Ascension, débloque le palier suivant en cas de
+   victoire, consomme la tentative du jour, et relance checkAch() pour les
+   succès de fin de run. Ne touche JAMAIS G.screen ni render() — le routage
+   reste sous la responsabilité de chaque branche appelante. ==== */
+function finaliseGauntletRun(a,opts){
+  const meta=loadMetaStats();
+  a.maxPactStreak=Math.max(a.maxPactStreak||0,a.pactStreak||0);
+  evalGauntletContract(a);
+  const base=(opts.kind==='elimination')
+    ? gauntletEliminationPayout(a.mode,opts.progress,opts.atRisk)
+    : gauntletPayout(a.mode,opts.progress);
+  const earned=gauntletFinalPayout(a,base);
+  if(earned>0) meta.legendPoints=(meta.legendPoints||0)+earned;
+  recordGauntletBest(meta,a.mode,opts.progress,a.asc||0);
+  if(opts.kind==='victory') recordGauntletAscension(meta,a.mode,a.asc||0);
+  if(a.daily) recordGauntletDaily(meta,a.mode,opts.progress);
+  saveMetaStats(meta);
+  a.earnedOnElimination=earned;
+  a.basePayout=base;
+  a.runMultApplied=gauntletRunMult(a);
+  a.active=false;
+  const got=(typeof checkAch==='function')?checkAch():[];
+  if(got&&got.length) a.newAch=(a.newAch||[]).concat(got);
+  return earned;
+}
+/* ==== [FIN ANCRE] ==== */
 function routeAfterCareerPending(){
   const p=G.pending;
   if(p&&p.classOffer) G.screen='class_choice';
@@ -543,6 +576,46 @@ const CL={
       const _depth=G.arcade.streak||G.arcade.fightsDone||(G.arcade.tournament?G.arcade.tournament.roundStep:0)||0;
       const attritionHeal=()=>{ G.f.form=clamp(G.f.form+Math.max(4,20-_depth*3+RI(-1,1)),0,100); };
       /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — consommée à chaque combat, comme le
+         pacte de finition juste au-dessus, qu'elle se déclenche ou non. Une
+         victoire sous mise double le multiplicateur du run (plafond ×8) ; une
+         élimination sous mise annule TOUT le paiement (cf.
+         gauntletEliminationPayout(...,atRisk)). Les deux clauses sont
+         cumulables volontairement : pacte + mise sur le même combat est le
+         pic de tension du mode. ==== */
+      const atRiskWasActive=!!G.arcade.atRisk; G.arcade.atRisk=false;
+      if(atRiskWasActive && win) G.arcade.riskMult=Math.min(8,(G.arcade.riskMult||1)*2);
+      /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — battre une némésis la retire de
+         meta.gauntletRivals et verse la prime immédiatement (hors barème de
+         palier) : le dossier est clos, elle ne peut plus repayer. ==== */
+      if(win && G.arcade.opponent && G.arcade.opponent._isRival){
+        const _b=claimGauntletBounty(G.arcade.opponent);
+        if(_b>0){ G.arcade.lastBounty=_b; G.arcade.bounties=(G.arcade.bounties||0)+1; }
+      } else { G.arcade.lastBounty=0; }
+      /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — drapeaux de run lus par les
+         contrats ct_nopact et ct_intact. Posés ici, jamais remis à zéro :
+         un contrat de type « ne jamais » se casse définitivement. ==== */
+      if(pactWasActive) G.arcade.pactTakenEver=true;
+      G.arcade.maxPactStreak=Math.max(G.arcade.maxPactStreak||0,G.arcade.pactStreak||0);
+      if(G.f.form<60) G.arcade.formBroken=true;
+      /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — remplace les 3 appels à
+         attritionHeal() : la forme remonte comme avant, mais un combat
+         réellement encaissé (frappes significatives subies / knockdowns, lus
+         sur res.stats.B) peut laisser une séquelle d'attributs pour le reste
+         du run. C'est le coût invisible de l'attrition rendu mécanique, et
+         l'argument principal en faveur de l'encaissement volontaire. ==== */
+      const runAttrition=()=>{
+        attritionHeal();
+        if(_res && rnd()<rollGauntletInjuryChance(_res)){
+          const inj=rollGauntletRunInjury(G.f);
+          G.arcade.runInjuries=(G.arcade.runInjuries||[]).concat([inj]);
+          G.arcade.lastInjury=inj;
+        } else { G.arcade.lastInjury=null; }
+      };
+      /* ==== [FIN ANCRE] ==== */
       if(G.arcade.mode==='boss_run'){
         const koOnlyFail=G.arcade.condition==='ko_only' && win && G.pending.method && !G.pending.method.startsWith('KO');
         // ==== [ANCRE: CORRECTIF_BOSSRUN_RAISON_ELIMINATION] — bug remonté : une
@@ -552,33 +625,31 @@ const CL={
         // combat venait d'être gagné. On mémorise désormais la vraie raison
         // pour que scr_gameover puisse distinguer les deux cas.
         if(!win || koOnlyFail){
-          /* ==== [ANCRE: REJOUABILITE_PAYOUT_TABLES] — table centralisée
-             (ui-03) : élimination = moitié du plein tarif que rapporterait un
-             encaissement volontaire au même palier (cf. cashOutGauntlet). ==== */
-          const earned=gauntletEliminationPayout('boss_run',G.arcade.streak);
-          if(earned>0){ const meta=loadMetaStats(); meta.legendPoints=(meta.legendPoints||0)+earned; saveMetaStats(meta); }
-          G.arcade.earnedOnElimination=earned;
-          /* ==== [FIN ANCRE] ==== */
           /* ==== [ANCRE: REJOUABILITE_NEMESIS_MULTI] — le vrai bourreau, pas le
              champion : n'enregistre comme rival QUE sur une vraie défaite
              (pas koOnlyFail, où l'adversaire n'a rien fait — c'est le pacte KO
              du Boss Run lui-même qui invalide la victoire). ==== */
-          if(!win){ const meta=loadMetaStats(); recordGauntletRival(meta,G.arcade.opponent,'boss_run'); saveMetaStats(meta); }
-          const meta2=loadMetaStats(); recordGauntletBest(meta2,'boss_run',G.arcade.streak); saveMetaStats(meta2);
+          /* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — killedAt (4e argument) : le
+             palier auquel cette némésis vous a tué, base de sa prime future. ==== */
+          if(!win){ const meta=loadMetaStats(); recordGauntletRival(meta,G.arcade.opponent,'boss_run',G.arcade.streak); saveMetaStats(meta); }
           /* ==== [FIN ANCRE] ==== */
-          G.arcade.active=false; G.arcade.eliminatedReason=koOnlyFail?'no_ko':'loss'; G.screen='gameover'; save(); render(); return; }
+          /* ==== [ANCRE: GAUNTLET_FIN_DE_RUN] — paiement, record et succès
+             centralisés (cf. finaliseGauntletRun). ==== */
+          finaliseGauntletRun(G.arcade,{kind:'elimination',progress:G.arcade.streak,atRisk:atRiskWasActive});
+          /* ==== [FIN ANCRE] ==== */
+          G.arcade.eliminatedReason=koOnlyFail?'no_ko':'loss'; G.screen='gameover'; save(); render(); return; }
         G.arcade.streak++;
         if(G.arcade.streak>=G.arcade.target){
-          const meta=loadMetaStats(); meta.legendPoints=(meta.legendPoints||0)+gauntletPayout('boss_run',5); recordGauntletBest(meta,'boss_run',5); saveMetaStats(meta); G.arcade.earnedOnElimination=gauntletPayout('boss_run',5);
-          G.arcade.active=false; G.arcade.victory=true; G.screen='gameover'; save(); render(); return; }
-        attritionHeal();
+          finaliseGauntletRun(G.arcade,{kind:'victory',progress:5});
+          G.arcade.victory=true; G.screen='gameover'; save(); render(); return; }
+        runAttrition();
         /* ==== [ANCRE: REJOUABILITE_BANQUE_BOSSRUN] — champ `banked` (posé à 0
            dans startBossRun(), ui-03) n'était jusqu'ici jamais réécrit : mort.
            Reflète désormais le montant RÉELLEMENT versé si le joueur encaisse
            maintenant (même table que gauntletPayout), affiché en cagnotte
            visible au hub (ui-04) pour matérialiser ce qui est mis en jeu à
            chaque KO suivant. ==== */
-        G.arcade.banked=gauntletPayout('boss_run',G.arcade.streak);
+        G.arcade.banked=gauntletFinalPayout(G.arcade,gauntletPayout('boss_run',G.arcade.streak));
         /* ==== [FIN ANCRE] ==== */
         G.arcade.opponent=genBossOpponent(G.arcade.streak);
         /* ==== [ANCRE: REJOUABILITE_CAMP_BOSSRUN] — camp allégé (1 compétence,
@@ -590,14 +661,15 @@ const CL={
       }
       if(G.arcade.mode==='ladder_100'){
         if(!win || pactFail){
-          const earned=gauntletEliminationPayout('ladder_100',G.arcade.rank);
-          const meta=loadMetaStats(); meta.legendPoints=(meta.legendPoints||0)+earned;
-          if(!win) recordGauntletRival(meta,G.arcade.opponent,'ladder_100');
-          recordGauntletBest(meta,'ladder_100',G.arcade.rank); saveMetaStats(meta);
-          G.arcade.earnedOnElimination=earned;
-          G.arcade.active=false; G.arcade.eliminatedReason=pactFail?'pact':'loss'; G.screen='gameover'; save(); render(); return;
+          if(!win){ const meta=loadMetaStats(); recordGauntletRival(meta,G.arcade.opponent,'ladder_100',G.arcade.rank); saveMetaStats(meta); }
+          finaliseGauntletRun(G.arcade,{kind:'elimination',progress:G.arcade.rank,atRisk:atRiskWasActive});
+          G.arcade.eliminatedReason=pactFail?'pact':'loss'; G.screen='gameover'; save(); render(); return;
         }
         G.arcade.fightsDone=(G.arcade.fightsDone||0)+1;
+        /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] — G.arcade.banked n'était
+           écrit QUE dans la branche boss_run : les deux autres formats
+           affichaient une cagnotte inexistante. Écrit ici et dans la branche
+           Bracket ci-dessous, avec la même table centralisée. ==== */
         // ==== [ANCRE: CORRECTIF_LADDER_RANG] — bug trouvé : seul G.arcade.rank
         // (le rang du joueur) était mis à jour ; le PNJ vaincu gardait son
         // ancien ladderRank, désormais "occupé" par le joueur. Un futur
@@ -606,35 +678,30 @@ const CL={
         const oldRank=G.arcade.rank;
         G.arcade.rank=G.arcade.opponent.ladderRank; // le joueur prend la place du vaincu
         G.arcade.opponent.ladderRank=oldRank;
+        G.arcade.banked=gauntletFinalPayout(G.arcade,gauntletPayout('ladder_100',G.arcade.rank));
         if(G.arcade.rank===1){
-          const meta=loadMetaStats(); meta.legendPoints=(meta.legendPoints||0)+gauntletPayout('ladder_100',1); recordGauntletBest(meta,'ladder_100',1); saveMetaStats(meta); G.arcade.earnedOnElimination=gauntletPayout('ladder_100',1);
-          G.arcade.active=false; G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
+          finaliseGauntletRun(G.arcade,{kind:'victory',progress:1});
+          G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
         }
-        attritionHeal();
+        runAttrition();
+        if(G.arcade.aggroCooldown>0) G.arcade.aggroCooldown--;
         generateArcadeUpgrades(G.arcade.pactStreak);
         G.screen='arcade_upgrades'; save(); render(); return;
       }
       // ==== Bracket 64 (WTUMMA) ====
       if(!win || pactFail){
-        const meta=loadMetaStats();
-        const earned=gauntletEliminationPayout('bracket64',G.arcade.tournament.roundStep);
-        meta.legendPoints=(meta.legendPoints||0)+earned;
-        if(!win) recordGauntletRival(meta,G.arcade.opponent,'bracket64');
-        recordGauntletBest(meta,'bracket64',G.arcade.tournament.roundStep);
-        saveMetaStats(meta);
-        G.arcade.earnedOnElimination=earned;
-        G.arcade.active=false; G.arcade.eliminatedReason=pactFail?'pact':'loss'; G.screen='gameover'; save(); render(); return;
+        if(!win){ const meta=loadMetaStats(); recordGauntletRival(meta,G.arcade.opponent,'bracket64',G.arcade.tournament.roundStep); saveMetaStats(meta); }
+        finaliseGauntletRun(G.arcade,{kind:'elimination',progress:G.arcade.tournament.roundStep,atRisk:atRiskWasActive});
+        G.arcade.eliminatedReason=pactFail?'pact':'loss'; G.screen='gameover'; save(); render(); return;
       }
       const wonTournament=advanceWTUMMABracket();
+      /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] ==== */
+      if(G.arcade.tournament) G.arcade.banked=gauntletFinalPayout(G.arcade,gauntletPayout('bracket64',G.arcade.tournament.roundStep));
       if(wonTournament){
-        const meta=loadMetaStats();
-        recordGauntletBest(meta,'bracket64',7);
-        meta.legendPoints=(meta.legendPoints||0)+gauntletPayout('bracket64',7);
-        saveMetaStats(meta);
-        G.arcade.earnedOnElimination=gauntletPayout('bracket64',7);
-        G.arcade.active=false; G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
+        finaliseGauntletRun(G.arcade,{kind:'victory',progress:7});
+        G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
       }
-      attritionHeal();
+      runAttrition();
       generateArcadeUpgrades(G.arcade.pactStreak);
       G.screen='arcade_upgrades'; save(); render(); return;
     }
@@ -651,9 +718,42 @@ const CL={
   _rollGauntletSeed(){ const s=G._pendingSeed; G._pendingSeed=null;
     const numeric=s&&/^[0-9]+$/.test(s)?parseInt(s,10):(s?[...s].reduce((h,c)=>((h*31+c.charCodeAt(0))>>>0),0):((Date.now()^0x9e3779b9)>>>0));
     setSeed(numeric); return numeric; },
-  startArcade(){ injectExtendedArchetypes(); const seed=CL._rollGauntletSeed(); G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed}; G.screen='draft'; save(); render(); },
-  startBossRun(){ const seed=CL._rollGauntletSeed(); startBossRun(); G.arcade.seed=seed; },
-  startLadder100(){ injectExtendedArchetypes(); const seed=CL._rollGauntletSeed(); G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed}; G.screen='draft'; save(); render(); },
+  /* ==== [ANCRE: GAUNTLET_ASCENSION] — palier choisi au menu (ui-06), borné au
+     palier réellement débloqué pour ce format : on ne peut jamais lancer un
+     palier supérieur à celui gagné, même en forçant l'état. Consommé une
+     seule fois au lancement puis figé sur G.arcade.asc pour toute la durée
+     du run (les courbes de difficulté et les payouts le relisent là). ==== */
+  setGauntletAsc(mode,v){ const meta=loadMetaStats();
+    G._pendingAsc=clamp(parseInt(v,10)||0,0,gauntletAscLevel(meta,mode)); render(true); },
+  _rollGauntletAsc(mode){ const meta=loadMetaStats();
+    const asc=clamp(parseInt(G._pendingAsc,10)||0,0,gauntletAscLevel(meta,mode));
+    return asc; },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_DAILY] — pré-remplit la graine du jour puis lance le
+     format demandé par le flux NORMAL (les start* ci-dessous), sans dupliquer
+     leur logique. dailyMode marque le run pour que la tentative soit
+     consommée en fin de run (cf. finaliseGauntletRun). ==== */
+  startGauntletDaily(mode){
+    const meta=loadMetaStats();
+    if(gauntletDailyDone(meta,mode)){ G.lastMsg='Tentative du jour déjà utilisée sur ce format. Revenez demain.'; render(); return; }
+    G._pendingSeed=gauntletDailyKey();
+    G._dailyPending=mode;
+    if(mode==='ladder_100') CL.startLadder100();
+    else if(mode==='boss_run') CL.startBossRun();
+    else CL.startArcade();
+  },
+  /* ==== [FIN ANCRE] ==== */
+  startArcade(){ injectExtendedArchetypes(); const asc=CL._rollGauntletAsc('bracket64'); const seed=CL._rollGauntletSeed();
+    G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed,asc,
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(),daily:G._dailyPending==='bracket64'};
+    G._dailyPending=null; G.screen='draft'; save(); render(); },
+  startBossRun(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
+    const wasDaily=G._dailyPending==='boss_run'; G._dailyPending=null;
+    startBossRun(seed,asc); G.arcade.daily=wasDaily; render(true); },
+  startLadder100(){ injectExtendedArchetypes(); const asc=CL._rollGauntletAsc('ladder_100'); const seed=CL._rollGauntletSeed();
+    G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed,asc,
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(),daily:G._dailyPending==='ladder_100'};
+    G._dailyPending=null; G.screen='draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
@@ -903,6 +1003,13 @@ const CL={
   pickLadderTarget(rank){
     if(!G.arcade||!G.arcade.targets) return;
     const t=G.arcade.targets.find(x=>x.ladderRank===rank); if(!t) return;
+    /* ==== [ANCRE: GAUNTLET_CIBLE_PERISSABLE] — prendre une cible sûre ou
+       médiane ferme la fenêtre agressive pour 2 paliers (décrémentée après
+       chaque combat gagné, cf. afterResult). Prendre la cible agressive la
+       laisse ouverte : la prudence a un coût d'opportunité, pas l'audace. ==== */
+    const gap=G.arcade.rank-t.ladderRank;
+    G.arcade.aggroCooldown=(gap>=18)?0:2;
+    /* ==== [FIN ANCRE] ==== */
     G.arcade.opponent=t; G.arcade.targets=null;
     CL.fightArcade();
   },
@@ -944,6 +1051,38 @@ const CL={
      de vestiaire entre les combats). ==== */
   togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; G.arcade.pactActive=!G.arcade.pactActive; render(); },
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — disponible sur les 3 formats (contrai-
+     rement au pacte de finition), y compris le Boss Run : c'est le seul
+     arbitrage économique qu'il possédait, sa clause KO-only étant permanente
+     et non négociable. Refusée tant que la cagnotte est nulle — il n'y a
+     alors rien à mettre en jeu et l'option n'aurait aucun coût. ==== */
+  toggleAtRisk(){ if(!G.arcade||!G.arcade.active) return;
+    if(!(G.arcade.banked>0) && !G.arcade.atRisk) return;
+    G.arcade.atRisk=!G.arcade.atRisk; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — consomme la phase compétence du camp
+     comme pickArcadeSkill(), en appliquant EN PLUS les deltas négatifs du
+     malus via applyDeltas() (engine.js). Même sortie de camp que
+     pickArcadeSkill pour le Boss Run (pas de phase entraînement). ==== */
+  pickCursedSkill(){ if(!G.arcade||!G.arcade.cursedOpt) return;
+    if(G.arcade.upgradesChosen.skill) return;
+    const c=G.arcade.cursedOpt;
+    grantSkill(G.f,c.skill);
+    applyDeltas(G.f,c.d);
+    G.arcade.cursedTaken=(G.arcade.cursedTaken||0)+1;
+    G.arcade.curses=(G.arcade.curses||[]).concat([c.curseLabel]);
+    G.arcade.upgradesChosen.skill=true;
+    G.arcade.cursedOpt=null;
+    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ CL.go('arcadehub'); return; }
+    render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_BRACKET_VISIBLE] — les 63 autres combattants et TOUS
+     les combats des autres branches sont déjà simulés par
+     advanceWTUMMABracket() (ui-03), mais seul a.opponent était affiché : le
+     tableau existait sans jamais être montré. Simple routage d'écran, aucune
+     donnée nouvelle à produire. ==== */
+  viewBracket(){ if(!G.arcade||!G.arcade.tournament) return; G.screen='bracket_view'; render(); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: REJOUABILITE_BANQUE_GAUNTLET] — quitter volontairement un run
      en cours en encaissant les points de salle du palier atteint, plutôt que
      d'être obligé de perdre pour toucher quoi que ce soit. Boss Run applique
@@ -956,22 +1095,17 @@ const CL={
      pénalité à modifier), seule l'option de sortir proprement manquait. ==== */
   cashOutGauntlet(){
     if(!G.arcade||!G.arcade.active) return;
-    const meta=loadMetaStats(); let earned=0;
-    /* ==== [ANCRE: REJOUABILITE_PAYOUT_TABLES] — gauntletPayout(mode,progress)
-       (ui-03) : PLEIN TARIF pour un encaissement volontaire, dans les 3
-       formats — c'est l'élimination qui est désormais décotée (×0.5,
-       gauntletEliminationPayout), pas l'inverse. Avant cette refonte, seul
-       Boss Run était décoté (×0.6) et à l'ENDROIT INVERSE (sur l'encaissement,
-       pas l'élimination) : sortir prudemment y rapportait MOINS que perdre. ==== */
-    if(G.arcade.mode==='boss_run') earned=gauntletPayout('boss_run',G.arcade.streak);
-    else if(G.arcade.mode==='ladder_100') earned=gauntletPayout('ladder_100',G.arcade.rank);
-    else earned=gauntletPayout('bracket64',(G.arcade.tournament&&G.arcade.tournament.roundStep)||1);
-    /* ==== [FIN ANCRE] ==== */
-    meta.legendPoints=(meta.legendPoints||0)+earned;
+    /* ==== [ANCRE: GAUNTLET_FIN_DE_RUN] — l'encaissement volontaire passe par le
+       MÊME point de sortie que les éliminations et les victoires : même
+       évaluation du contrat de run, même multiplicateur, même écriture du
+       record au bon palier d'Ascension. Le plein tarif reste la règle pour
+       une sortie volontaire (kind:'cashout' ne déclenche pas la décote), ce
+       qui préserve l'invariant de l'ancre REJOUABILITE_PAYOUT_TABLES :
+       sortir proprement rapporte TOUJOURS strictement plus que se faire
+       éliminer au même palier. ==== */
     const progress=G.arcade.mode==='boss_run'?G.arcade.streak:(G.arcade.mode==='ladder_100'?G.arcade.rank:((G.arcade.tournament&&G.arcade.tournament.roundStep)||1));
-    recordGauntletBest(meta,G.arcade.mode,progress);
-    saveMetaStats(meta);
-    G.arcade.active=false; G.arcade.cashedOut=true; G.arcade.earnedOnElimination=earned;
+    finaliseGauntletRun(G.arcade,{kind:'cashout',progress});
+    G.arcade.cashedOut=true;
     G.screen='gameover'; save(); render();
   },
   /* ==== [FIN ANCRE] ==== */

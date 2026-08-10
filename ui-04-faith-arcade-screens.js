@@ -540,7 +540,9 @@ function scr_draft(){ const pool=G.arcade.pool; const isBoss=G.arcade.mode==='bo
   let h=`<div class="scr"><div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
    <span class="eyebrow mono" style="color:var(--blood)">${isBoss?'BOSS RUN // 5 CHAMPIONS':isLadder?'WTUMMA // CLASSEMENT MONDIAL DES 100':'WTUMMA // WORLD TOURNAMENT'}</span></div>
    <p class="lede" style="margin-bottom:32px;font-size:15px">${isBoss?'Affrontez 5 champions d\u2019affilée. KO uniquement. La défaite est éliminatoire.':isLadder?'Vous commencez au rang #100. Défiez les combattants mieux classés pour voler leur place jusqu\u2019au sommet. La défaite est éliminatoire.':'Bracket à 64 combattants. Un OVR élevé vous donne une meilleure Seed, un OVR faible vous garantit l\u2019enfer.'}</p>
-   <div class="mono small muted" style="margin:-20px 0 24px">Graine du run : <b>${G.arcade.seed}</b></div>`;
+   <div class="mono small muted" style="margin:-20px 0 24px">Graine du run : <b>${G.arcade.seed}</b>${(G.arcade.asc||0)>0?` · <span class="gold">Ascension ${G.arcade.asc}</span>`:''}${G.arcade.daily?' · <span class="sage">DÉFI DU JOUR</span>':''}</div>
+   ${contractBlock(G.arcade,false)}
+   <div style="height:16px"></div>`;
   pool.forEach((p,i)=>{
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
       <div class="meta-strip"><div><span>Style</span><b>${p.styleLabel}</b></div></div>
@@ -589,11 +591,148 @@ function seedReplayBlock(a){
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_RECORD_GAUNTLET] — meta.gauntletBest (state.js)
    affiché au game over : sémantique par format (cf. recordGauntletBest). ==== */
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — le record est désormais indexé par palier
+   d'Ascension (gauntletBestGet) : comparer un palier 0 à un palier 3 n'aurait
+   aucun sens. Le palier du run en cours est affiché à côté. ==== */
 function gauntletBestLine(mode){
-  const meta=loadMetaStats(); const best=(meta.gauntletBest||{})[mode];
+  const meta=loadMetaStats();
+  const asc=(G.arcade&&G.arcade.asc)||0;
+  const best=gauntletBestGet(meta,mode,asc);
   if(best===undefined) return '';
   const label=mode==='boss_run'?`${best}/5 KO enchaînés`:mode==='ladder_100'?`Rang #${best} atteint`:(best>=7?'Tournoi remporté':`Palier ${best} atteint`);
-  return `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel : ${label}</div>`;
+  return `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel (Ascension ${asc}) : ${label}</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — bandeau du contrat, affiché au draft,
+   au hub ET au camp : un objectif global qu'on oublie à mi-run ne pèse sur
+   aucune décision. `live` recalcule l'état en direct via evalGauntletContract
+   (fonction pure vis-à-vis de l'écran : elle n'écrit que a.contract.done). ==== */
+function contractBlock(a,live){
+  if(!a||!a.contract) return '';
+  const c=a.contract;
+  const ok=live?evalGauntletContract(a):!!c.done;
+  const col=ok?'var(--sage)':'var(--gold)';
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${col};padding:12px;text-align:left;margin-top:12px">
+     <div class="eyebrow" style="font-size:11px">Contrat du run · ×${c.mult} sur le gain final</div>
+     <div class="mono small" style="color:${col};font-weight:bold">${ok?'✓ ':'☐ '}${c.label}</div>
+     <div class="muted small mt">${c.hint}</div>
+   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] — la cagnotte + ce qu'une
+   élimination laisserait, ligne identique aux 3 formats (le Boss Run avait
+   déjà la sienne en dur dans son hub, les 2 autres n'en avaient aucune). ==== */
+function gauntletBankLine(a){
+  const banked=a.banked||0; const elim=eliminationPreview(a);
+  if(banked<=0) return '';
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:center;margin-top:10px">
+     <div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b style="color:var(--loss)">+${elim} pts</b></div>
+   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — la bascule n'a de sens que si la
+   cagnotte est non nulle : sinon il n'y a rien à perdre et l'affichage
+   mentirait sur l'enjeu. Le montant réellement mis en jeu est affiché en
+   toutes lettres, pas seulement le multiplicateur. ==== */
+function atRiskToggleBlock(a){
+  const banked=a.banked||0;
+  if(banked<=0) return '';
+  const next=Math.min(8,(a.riskMult||1)*2);
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid ${a.atRisk?'var(--blood)':'var(--line)'};padding:12px;text-align:left;margin-top:12px;cursor:pointer" onclick="CL.toggleAtRisk()">
+     <div class="mono small" style="color:${a.atRisk?'var(--blood)':'var(--muted)'};font-weight:bold">${a.atRisk?'✓ CAGNOTTE EN JEU':'☐ Mettre la cagnotte en jeu'}</div>
+     <div class="muted small mt">Une victoire porte le multiplicateur du run à <b class="gold">×${next}</b>. Une élimination sur ce combat ne rapporte <b style="color:var(--loss)">absolument rien</b> — les ${banked} pts de cagnotte partent avec.</div>
+   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — les séquelles doivent être lisibles au
+   hub, sinon la baisse d'attributs est vécue comme un bug de simulation. ==== */
+function runInjuryBlock(a){
+  const list=a.runInjuries||[];
+  if(!list.length) return '';
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--loss);padding:12px;text-align:left;margin-top:10px">
+     <div class="eyebrow" style="font-size:11px;color:var(--loss)">Séquelles du run</div>
+     ${list.map(i=>`<div class="mono small"><b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`).join('')}
+   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_RUN_MULT] — le multiplicateur cumulé doit être visible
+   AVANT la décision suivante, pas seulement au game over. ==== */
+function runMultBlock(a){
+  const m=gauntletRunMult(a);
+  if(m<=1) return '';
+  const parts=[];
+  if((a.riskMult||1)>1) parts.push(`mise ×${a.riskMult}`);
+  if((a.maxPactStreak||0)>0) parts.push(`pactes +${Math.round((a.maxPactStreak||0)*10)} %`);
+  if(a.contract&&a.contract.done) parts.push(`contrat ×${a.contract.mult}`);
+  return `<div class="mono small gold" style="text-align:center;margin-top:8px">Multiplicateur du run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_BRACKET_VISIBLE] — rend le tableau réellement simulé
+   par advanceWTUMMABracket() (ui-03). Affiche le tour courant, le match du
+   joueur mis en évidence, et signale si une némésis est encore en lice
+   ailleurs dans le tableau — le vrai moteur d'anticipation du format. ==== */
+function scr_bracket_view(){
+  const a=G.arcade;
+  if(!a||!a.tournament) return `<div class="scr"><p class="lede">Aucun tableau en cours.</p><button class="btn ghost mt" onclick="CL.go('arcadehub')">Retour</button></div>`;
+  const t=a.tournament;
+  const rivalAlive=t.matches.some(m=>(m.a&&m.a._isRival)||(m.b&&m.b._isRival));
+  const row=(m,i)=>{
+    const mine=(m.a&&m.a.id===G.f.id)||(m.b&&m.b.id===G.f.id);
+    const side=x=>`${esc(x.name)} ${x.flag||''} <span class="muted small">#${x.seed||'?'} · OVR ${x.overall}</span>${x._isRival?' <span class="mono small" style="color:var(--blood)">⚠</span>':''}`;
+    return `<div class="opp" style="border-left:3px solid ${mine?'var(--gold)':'var(--line)'};${mine?'background:var(--panel2)':''}">
+      <div class="mono small muted">Match ${i+1}</div>
+      <div class="small">${side(m.a)}</div>
+      <div class="mono small muted">vs</div>
+      <div class="small">${side(m.b)}</div>
+    </div>`;
+  };
+  return `<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // TABLEAU — ${t.stepName.toUpperCase()}</span></div>
+   <p class="lede small">Votre tête de série : #${t.playerSeed}. ${rivalAlive?'<b style="color:var(--blood)">Une némésis est encore en lice dans ce tableau.</b>':'Aucune némésis dans les survivants.'}</p>
+   ${t.matches.map(row).join('')}
+   <button class="btn ghost mt" onclick="CL.go('arcadehub')">← Retour au vestiaire</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_FIN_DE_RUN] — bilan de sortie : décomposition du gain
+   (base × multiplicateur), état du contrat, primes de vengeance encaissées,
+   séquelles, palier d'Ascension débloqué et succès Gauntlet obtenus. Toutes
+   ces valeurs sont FIGÉES par finaliseGauntletRun() (ui-08) au moment du
+   paiement — l'écran ne recalcule rien, il ne peut donc pas diverger du
+   montant réellement crédité. ==== */
+function runDebriefBlock(a){
+  const mult=a.runMultApplied||1;
+  const base=a.basePayout||0;
+  const parts=[];
+  if((a.riskMult||1)>1) parts.push(`mise en jeu ×${a.riskMult}`);
+  if((a.maxPactStreak||0)>0) parts.push(`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`);
+  if(a.contract&&a.contract.done) parts.push(`contrat rempli ×${a.contract.mult}`);
+  const contractLine=a.contract
+    ? `<div class="mono small" style="color:${a.contract.done?'var(--sage)':'var(--muted)'}">${a.contract.done?'✓':'✗'} Contrat : ${a.contract.label}</div>`
+    : '';
+  const bounty=(a.bounties||0)>0?`<div class="mono small" style="color:var(--blood)">⚔ ${a.bounties} némésis vaincue(s) — primes déjà versées</div>`:'';
+  const inj=(a.runInjuries||[]).length?`<div class="mono small muted">${a.runInjuries.length} séquelle(s) encaissée(s) : ${a.runInjuries.map(i=>i.name).join(', ')}</div>`:'';
+  const curses=(a.cursedTaken||0)>0?`<div class="mono small muted">${a.cursedTaken} pacte(s) de camp maudit accepté(s)</div>`:'';
+  const daily=a.daily?`<div class="mono small sage">Tentative du DÉFI DU JOUR consommée.</div>`:'';
+  const multLine=(mult>1)
+    ? `<div class="mono small gold"><b>${base} pts</b> × <b>${mult}</b> = <b>${a.earnedOnElimination||0} pts</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`
+    : '';
+  const ach=(a.newAch||[]).length?`<div class="mono small gold mt">🏅 ${a.newAch.map(x=>x.h).join(' · ')}</div>`:'';
+  if(!multLine && !contractLine && !bounty && !inj && !curses && !daily && !ach) return '';
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:20px">
+     <div class="eyebrow mb" style="font-size:11px">Bilan du run</div>
+     ${multLine}${contractLine}${bounty}${inj}${curses}${daily}${ach}
+   </div>`;
+}
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — un palier ne se débloque qu'en gagnant le
+   format : le message n'apparaît donc que sur une victoire réelle. ==== */
+function ascensionUnlockBlock(a){
+  if(!a.victory) return '';
+  const meta=loadMetaStats();
+  const lvl=gauntletAscLevel(meta,a.mode);
+  if(lvl<=(a.asc||0)) return '';
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--gold);padding:12px;text-align:center;margin-bottom:20px">
+     <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${lvl} DÉBLOQUÉE — adversaires plus forts, récompenses ×${gauntletAscPayoutMod(lvl)}</div>
+   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_gameover(){ const a=G.arcade, f=G.f;
@@ -621,6 +760,8 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>
    ${gauntletBestLine('boss_run')}
    ${nearMissBlock(a)}
+   ${ascensionUnlockBlock(a)}
+   ${runDebriefBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
@@ -652,6 +793,8 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>
    ${gauntletBestLine('ladder_100')}
    ${nearMissBlock(a)}
+   ${ascensionUnlockBlock(a)}
+   ${runDebriefBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
@@ -676,6 +819,8 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>
    ${gauntletBestLine('bracket64')}
    ${nearMissBlock(a)}
+   ${ascensionUnlockBlock(a)}
+   ${runDebriefBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
@@ -712,15 +857,22 @@ function rivalBadge(opp){
    les 3 écrans (aperçu encaissement, aperçu élimination, paiement réel
    ui-08) — fini la duplication de tables qui avait déjà causé un bug de
    facteur ×10 sur le Ladder par le passé (cf. ANCRE ci-dessus). ==== */
+/* ==== [ANCRE: GAUNTLET_RUN_MULT] — les aperçus passent par gauntletFinalPayout
+   comme le paiement réel (finaliseGauntletRun, ui-08) : sans ça l'écran
+   annoncerait le tarif de base et verserait le tarif multiplié, exactement le
+   type d'écart qui avait produit le bug ×10 du Ladder. Le contrat est évalué
+   en direct pour que son ×mult apparaisse dès qu'il est rempli. ==== */
 function cashOutPreview(a){
-  if(a.mode==='boss_run') return gauntletPayout('boss_run',a.streak);
-  if(a.mode==='ladder_100') return gauntletPayout('ladder_100',a.rank);
-  return gauntletPayout('bracket64',(a.tournament&&a.tournament.roundStep)||1);
+  evalGauntletContract(a);
+  if(a.mode==='boss_run') return gauntletFinalPayout(a,gauntletPayout('boss_run',a.streak));
+  if(a.mode==='ladder_100') return gauntletFinalPayout(a,gauntletPayout('ladder_100',a.rank));
+  return gauntletFinalPayout(a,gauntletPayout('bracket64',(a.tournament&&a.tournament.roundStep)||1));
 }
 function eliminationPreview(a){
-  if(a.mode==='boss_run') return gauntletEliminationPayout('boss_run',a.streak);
-  if(a.mode==='ladder_100') return gauntletEliminationPayout('ladder_100',a.rank);
-  return gauntletEliminationPayout('bracket64',(a.tournament&&a.tournament.roundStep)||1);
+  evalGauntletContract(a);
+  if(a.mode==='boss_run') return gauntletFinalPayout(a,gauntletEliminationPayout('boss_run',a.streak,a.atRisk));
+  if(a.mode==='ladder_100') return gauntletFinalPayout(a,gauntletEliminationPayout('ladder_100',a.rank,a.atRisk));
+  return gauntletFinalPayout(a,gauntletEliminationPayout('bracket64',(a.tournament&&a.tournament.roundStep)||1,a.atRisk));
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_PACTE_ESCALADE] — affiche le niveau de stack
@@ -780,6 +932,10 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
      ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · ${a.opponent.age} ans</div></div>
+   ${contractBlock(a,true)}
+   ${atRiskToggleBlock(a)}
+   ${runInjuryBlock(a)}
+   ${runMultBlock(a)}
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE</button>
    ${cashOut>0?`<button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>`:''}
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
@@ -805,7 +961,13 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
    <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${f.nick} ${f.flag} — Objectif #1</em></div>
    <p class="lede small mt">Choisissez votre cible — plus le saut de rang est grand, plus l\u2019adversaire est fort.</p>
    ${targets.map(targetCard).join('')}
+   ${(a.aggroCooldown>0)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
+   ${gauntletBankLine(a)}
    ${pactToggleBlock(a)}
+   ${atRiskToggleBlock(a)}
+   ${contractBlock(a,true)}
+   ${runInjuryBlock(a)}
+   ${runMultBlock(a)}
    <button class="btn gold mt" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
   }
@@ -816,8 +978,14 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
      ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · OVR ${a.opponent.overall}</div></div>
+   ${gauntletBankLine(a)}
    ${pactToggleBlock(a)}
+   ${atRiskToggleBlock(a)}
+   ${contractBlock(a,true)}
+   ${runInjuryBlock(a)}
+   ${runMultBlock(a)}
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
+   <button class="btn ghost" style="margin-top:8px" onclick="CL.viewBracket()">VOIR LE TABLEAU COMPLET</button>
    <button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
 }
@@ -839,7 +1007,26 @@ function scr_arcade_upgrades(){
             <div class="muted small mt">${s.desc||s.blurb||''}</div>
             ${s.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(s.fx,f)}</div>`:''}</div>`;
     });
-    if(!a.skillOpts.length) h+=`<div class="card glass mt"><span class="muted small">Aucune compétence disponible pour l\u2019instant.</span></div>
+    /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — 4e carte, visuellement séparée des 3
+       options normales : une Légendaire/Mythique garantie payée par un malus
+       permanent sur le run. C'est le seul choix du camp qui puisse EMPIRER le
+       combattant, donc le seul qui demande un arbitrage réel. ==== */
+    if(a.cursedOpt){
+      const cs=a.cursedOpt;
+      const deltasTxt=cs.d.map(x=>{ const k=x[0], v=x[1];
+        const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
+        const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+        return `<span class="dlt dn">${shown} ${lbl}</span>`; }).join('');
+      h+=`<div class="eyebrow mt mb" style="color:var(--blood)">PACTE DU CAMP — OPTION MAUDITE</div>
+          <div class="opp" style="border-left:3px solid var(--blood)" onclick="CL.pickCursedSkill()">
+            <b style="color:${RAR_COLORS[cs.skill.rar]||'var(--gold)'}">${cs.skill.name}</b> <span class="muted small">(${cs.skill.rar}) — garantie</span>
+            <div class="muted small mt">${cs.skill.desc||cs.skill.blurb||''}</div>
+            <div class="mono small mt" style="color:var(--blood)"><b>${cs.curseLabel}</b> — séquelle permanente sur ce run</div>
+            <div class="dlts">${deltasTxt}</div>
+          </div>`;
+    }
+    /* ==== [FIN ANCRE] ==== */
+    if(!a.skillOpts.length && !a.cursedOpt) h+=`<div class="card glass mt"><span class="muted small">Aucune compétence disponible pour l\u2019instant.</span></div>
           <button class="btn ghost mt" onclick="CL.pickArcadeSkill(-1)">Continuer vers le camp</button>`;
   } else if(!a.upgradesChosen.train){
     h+=`<p class="lede small">Sélectionnez un ajustement physique.</p>
@@ -863,6 +1050,8 @@ function scr_arcade_upgrades(){
   h+=`<div class="hr" style="margin:24px 0"></div>
       <div class="card" style="border-left:3px solid var(--sage)"><div class="grp-h"><span class="disp" style="font-size:17px">Forme</span><span class="gold mono">${d20(f.form)}/20</span></div>
       <div class="attr"><span class="attr-l">Récupération du run</span>${gauge(f.form)}<span class="attr-v">${d20(f.form)}</span></div></div>
+      ${contractBlock(a,true)}
+      ${runInjuryBlock(a)}
       <div class="eyebrow mb mt">Attributs du combattant (temps réel)</div>
       ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
   </div>`;

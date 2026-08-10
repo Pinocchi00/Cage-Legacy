@@ -740,15 +740,43 @@ const ACH=[
    t:f=>f.L===0 && f.age>=35 && f.stage==='pro'},
  {id:'f_doublemonarque',cat:'Carrière & Titres',ico:SVG.infinity,h:'Double Monarque',d:'Remporter le supercombat et devenir double champion de deux catégories différentes.',
    t:f=>!!f.champChampBelt},
- {id:'f_cyborg',cat:'Technique & Héritage',ico:SVG.circuit,h:'Cyborg',d:'Subir moins de 50 dégâts crâniens sur une série de 10 combats.',
+ {id:'f_cyborg',cat:'Technique & Héritage',ico:SVG.gem,h:'Cyborg',d:'Subir moins de 50 dégâts crâniens sur une série de 10 combats.',
    t:f=>G.season && G.season.fights && G.season.fights.length>=10 && G.season.fights.slice(-10).reduce((acc,fight)=>acc+((fight.st&&fight.st.Me&&fight.st.Me.dmgHead)||0),0)<50},
- {id:'f_ruine',cat:'Carrière & Titres',ico:SVG.coin,h:'Hémorragie Financière',d:'Se retrouver ruiné (gains négatifs) après un événement ou investissement payant.',
+ {id:'f_ruine',cat:'Carrière & Titres',ico:SVG.compass,h:'Hémorragie Financière',d:'Se retrouver ruiné (gains négatifs) après un événement ou investissement payant.',
    t:f=>(f.earnings||0)<0},
- {id:'f_bourreau',cat:'Technique & Héritage',ico:SVG.axe,h:'Bourreau des Légendes',d:'Battre 3 adversaires distincts ayant un Elo supérieur à 1800.',
+ {id:'f_bourreau',cat:'Technique & Héritage',ico:SVG.veteran,h:'Bourreau des Légendes',d:'Battre 3 adversaires distincts ayant un Elo supérieur à 1800.',
    t:f=>f.history && [...new Set(f.history.filter(h=>h.res==='win' && h.oppElo>1800).map(h=>h.oppId))].length>=3},
  {id:'f_plafondverre',cat:'Finitions & Séries',ico:SVG.star,h:'Plafond de Verre Percé',d:'Gagner par KO alors que votre puissance brute est inférieure à 40.',
-   t:f=>f.attrs && f.attrs.power<40 && f.history && f.history.length>0 && f.history[f.history.length-1].method.startsWith('KO') && f.history[f.history.length-1].res==='win'}
+   t:f=>f.attrs && f.attrs.power<40 && f.history && f.history.length>0 && f.history[f.history.length-1].method.startsWith('KO') && f.history[f.history.length-1].res==='win'},
  // ==== [FIN ANCRE] ====
+ /* ==== [ANCRE: GAUNTLET_SUCCES] — checkAch() tournait DÉJÀ en arcade (cf.
+    ANCRE REJOUABILITE_ACH_ARCADE, ui-03) mais aucune des 29 entrées n'était
+    atteignable autrement qu'en carrière : plusieurs conditions (champion,
+    defenses, retraite) ne peuvent structurellement jamais se produire dans un
+    run. Ces entrées lisent l'état du run sur le global G.arcade — même style
+    que les succès Faith existants qui lisent déjà G.season. La garde
+    `G.arcade &&` est obligatoire : ACH est parcouru intégralement à CHAQUE
+    combat de carrière, où G.arcade vaut null. checkAch() est appelé deux fois
+    en arcade — pendant le combat (resolveArcadeFight) et en fin de run
+    (finaliseGauntletRun, ui-08) — donc les conditions de fin de run sont bien
+    évaluées avant que G.arcade.active ne soit remis à false ailleurs. ==== */
+ {id:'g_mise',cat:'Gauntlet',ico:SVG.fire,h:'Tout ou Rien',d:'Atteindre un multiplicateur de mise ×4 dans un run du Gauntlet.',
+   t:()=>!!(G.arcade && (G.arcade.riskMult||1)>=4)},
+ {id:'g_contrat',cat:'Gauntlet',ico:SVG.medal,h:'Parole Tenue',d:'Terminer un run du Gauntlet en ayant rempli son contrat de run.',
+   t:()=>!!(G.arcade && G.arcade.contract && G.arcade.contract.done)},
+ {id:'g_ascension',cat:'Gauntlet',ico:SVG.crown,h:'Vertige',d:'Terminer un run lancé en Ascension 3 ou plus.',
+   t:()=>!!(G.arcade && (G.arcade.asc||0)>=3)},
+ {id:'g_vengeance',cat:'Gauntlet',ico:SVG.hammer,h:'Dossier Clos',d:'Battre une némésis qui vous avait éliminé lors d\\u2019un run précédent.',
+   t:()=>!!(G.arcade && (G.arcade.bounties||0)>=1)},
+ {id:'g_maudit',cat:'Gauntlet',ico:SVG.skull,h:'Le Prix du Pouvoir',d:'Accepter deux pactes de camp maudits dans un même run.',
+   t:()=>!!(G.arcade && (G.arcade.cursedTaken||0)>=2)},
+ {id:'g_estropie',cat:'Gauntlet',ico:SVG.shield,h:'Sur les Rotules',d:'Encaisser 3 séquelles dans un même run et continuer malgré tout.',
+   t:()=>!!(G.arcade && (G.arcade.runInjuries||[]).length>=3)},
+ {id:'g_daily',cat:'Gauntlet',ico:SVG.hourglass,h:'Rendez-vous Quotidien',d:'Terminer un Défi du Jour du Gauntlet.',
+   t:()=>!!(G.arcade && G.arcade.daily && !G.arcade.active)},
+ {id:'g_intact',cat:'Gauntlet',ico:SVG.diamond,h:'Sans une Égratignure',d:'Remporter un run du Gauntlet sans la moindre séquelle.',
+   t:()=>!!(G.arcade && G.arcade.victory && !(G.arcade.runInjuries||[]).length)}
+ /* ==== [FIN ANCRE] ==== */
 ];
 /* ==== [FIN ANCRE] ==== */
 function checkAch(){

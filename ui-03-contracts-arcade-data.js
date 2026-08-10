@@ -210,14 +210,51 @@ const BRACKET64_POINTS={1:2,2:6,3:14,4:28,5:50,6:100,7:100};
 const LADDER100_POINTS=rank=>Math.max(2,Math.round((101-rank)*0.8));
 const BOSSRUN_POINTS={0:0,1:5,2:15,3:35,4:70,5:150};
 const GAUNTLET_ELIMINATION_RATIO=0.5; // uniforme sur les 3 formats depuis la refonte
-function gauntletPayout(mode,progress){
-  if(mode==='boss_run') return BOSSRUN_POINTS[progress]||0;
-  if(mode==='ladder_100') return LADDER100_POINTS(progress);
-  return BRACKET64_POINTS[progress]||2;
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — facteur de récompense indexé sur le
+   palier d'Ascension du run (G.arcade.asc, 0 par défaut). Passé en 3e
+   argument OPTIONNEL de gauntletPayout() pour que les ~10 appels existants
+   (ui-04 previews, ui-08 paiements) restent valides sans modification et
+   deviennent automatiquement corrects : à défaut d'argument, le palier est
+   lu sur le run en cours. ==== */
+function gauntletAscPayoutMod(asc){ return 1+0.35*(asc||0); }
+function gauntletRunAsc(){ return (typeof G!=='undefined'&&G&&G.arcade&&G.arcade.asc)||0; }
+function gauntletPayout(mode,progress,asc){
+  const lvl=(asc===undefined||asc===null)?gauntletRunAsc():asc;
+  let base;
+  if(mode==='boss_run') base=BOSSRUN_POINTS[progress]||0;
+  else if(mode==='ladder_100') base=LADDER100_POINTS(progress);
+  else base=BRACKET64_POINTS[progress]||2;
+  return Math.round(base*gauntletAscPayoutMod(lvl));
 }
-function gauntletEliminationPayout(mode,progress){
+/* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — 3e argument atRisk : quand le joueur a
+   mis sa cagnotte en jeu pour ce combat (CL.toggleAtRisk, ui-08), la décote
+   d'élimination ne vaut plus 0.5 mais 0 — perdre ne rapporte STRICTEMENT
+   rien. C'est la contrepartie du doublement du multiplicateur de run en cas
+   de victoire (cf. gauntletRunMult). Le paramètre est optionnel : les appels
+   existants à 2 arguments conservent exactement l'ancien comportement. ==== */
+function gauntletEliminationPayout(mode,progress,atRisk){
+  if(atRisk) return 0;
   return Math.round(gauntletPayout(mode,progress)*GAUNTLET_ELIMINATION_RATIO);
 }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_RUN_MULT] — multiplicateur FINAL du run, appliqué une
+   seule fois au moment du paiement (encaissement, victoire ou élimination),
+   JAMAIS dans gauntletPayout() lui-même : les tables de points restent la
+   source de vérité unique voulue par l'ancre REJOUABILITE_PAYOUT_TABLES, et
+   les aperçus d'écran (cashOutPreview/eliminationPreview, ui-04) restent
+   cohérents au centime près avec ce qui est versé côté ui-08 tant que les
+   deux passent par ici. Trois canaux cumulatifs :
+   - riskMult : doublé à chaque combat gagné avec la cagnotte en jeu (plafond 8)
+   - maxPactStreak : +10 % par pacte de finition consécutif atteint dans le run
+   - contract : bonus du contrat de run si rempli (cf. GAUNTLET_CONTRACTS) ==== */
+function gauntletRunMult(a){
+  if(!a) return 1;
+  let m=(a.riskMult||1);
+  m*=1+0.1*(a.maxPactStreak||0);
+  if(a.contract && a.contract.done) m*=a.contract.mult;
+  return Math.round(m*100)/100;
+}
+function gauntletFinalPayout(a,base){ return Math.round((base||0)*gauntletRunMult(a)); }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — genWTUMMAOpponent() ne proposait
    QU'UNE cible imposée (leapfrog auto -10/-15, saut direct au #1 sous la
@@ -227,6 +264,13 @@ function gauntletEliminationPayout(mode,progress){
    proposé une fois sous la barre des 15 comme avant. genWTUMMAOpponent()
    reste présente (compat retryArcade()/tests) mais n'est plus appelée dans
    le flux normal du Ladder. ==== */
+/* ==== [ANCRE: GAUNTLET_CIBLE_PERISSABLE] — les 3 cibles étaient regénérées à
+   l'identique en profondeur à chaque camp : ne pas prendre la cible agressive
+   ne coûtait rien, elle repassait au tour suivant. G.arcade.aggroCooldown
+   (posé à 2 par pickLadderTarget quand le joueur choisit une cible SÛRE ou
+   MÉDIANE, décrémenté sinon) supprime la 3e cible pendant 2 paliers : la
+   fenêtre de tir agressive devient un vrai « maintenant ou jamais ». Le cas
+   currentRank<=15 est inchangé — le #1 doit toujours rester proposable. ==== */
 function genWTUMMATargets(){
   const currentRank=G.arcade.rank; const targets=[];
   const pushTarget=r=>{ if(r>=1 && !targets.some(t=>t.ladderRank===r)){ const o=G.arcade.ladder.find(x=>x.ladderRank===r); if(o) targets.push(o); } };
@@ -234,7 +278,7 @@ function genWTUMMATargets(){
   else {
     pushTarget(Math.max(2,currentRank-RI(4,7)));   // sûre
     pushTarget(Math.max(2,currentRank-RI(10,15))); // médiane (ancien comportement)
-    pushTarget(Math.max(2,currentRank-RI(18,26))); // agressive
+    if(!(G.arcade.aggroCooldown>0)) pushTarget(Math.max(2,currentRank-RI(18,26))); // agressive — périssable
   }
   return targets.length?targets:[G.arcade.ladder.find(o=>o.ladderRank===Math.max(2,currentRank-10))||G.arcade.ladder[0]];
 }
@@ -276,14 +320,129 @@ function getGauntletRivals(meta){
   if(!meta.gauntletRivals){ meta.gauntletRivals=meta.wtNemesis?[meta.wtNemesis]:[]; }
   return meta.gauntletRivals;
 }
-function recordGauntletRival(meta,f,sourceLabel){
+/* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — le snapshot ne mémorisait PAS à
+   quel palier la némésis vous avait tué : impossible de calibrer une prime
+   sur ce qu'elle vous a réellement coûté. killedAt (progression au moment de
+   l'élimination) + killedMode sont ajoutés au snapshot. Champs purement
+   additifs : un ancien snapshot sans killedAt retombe sur la prime plancher
+   via le ||0 de gauntletBountyFor(). ==== */
+function recordGauntletRival(meta,f,sourceLabel,killedAt){
   const snap={name:f.name,nick:f.nick,flag:f.flag,overall:f.overall,
-    attrs:JSON.parse(JSON.stringify(f.attrs)),skills:[...(f.skills||[])],style:f.style,div:f.div,source:sourceLabel};
+    attrs:JSON.parse(JSON.stringify(f.attrs)),skills:[...(f.skills||[])],style:f.style,div:f.div,source:sourceLabel,
+    killedAt:killedAt||0,killedMode:sourceLabel};
   let rivals=getGauntletRivals(meta).filter(r=>!(r.name===snap.name && r.div===snap.div));
   rivals.unshift(snap);
   if(rivals.length>3) rivals.length=3;
   meta.gauntletRivals=rivals; delete meta.wtNemesis;
 }
+/* Prime versée quand on bat enfin la némésis : la moitié du plein tarif du
+   palier où elle vous avait éliminé, plancher à 5 points. Elle est alors
+   RETIRÉE de meta.gauntletRivals — la vengeance close le dossier, sinon la
+   même némésis paierait indéfiniment. */
+function gauntletBountyFor(snap){
+  if(!snap) return 0;
+  const mode=snap.killedMode||'bracket64';
+  const base=gauntletPayout(mode,snap.killedAt||0,0);
+  return Math.max(5,Math.round(base*0.5));
+}
+function claimGauntletBounty(opp){
+  if(!opp||!opp._isRival) return 0;
+  const meta=loadMetaStats();
+  const rivals=getGauntletRivals(meta);
+  const idx=rivals.findIndex(r=>r.name===opp.name && r.div===opp.div);
+  if(idx<0) return 0;
+  const bounty=gauntletBountyFor(rivals[idx]);
+  rivals.splice(idx,1);
+  meta.gauntletRivals=rivals;
+  meta.legendPoints=(meta.legendPoints||0)+bounty;
+  saveMetaStats(meta);
+  return bounty;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — objectif global tiré AU DRAFT, valable
+   sur tout le run, payé en multiplicateur final (cf. gauntletRunMult). Les
+   conditions ne lisent que des données DÉJÀ maintenues en arcade :
+   G.f.history (alimenté par applyResult — res/method/round/oppWasChamp) et
+   deux drapeaux de run posés dans afterResult. Le combattant arcade est
+   recréé à neuf à chaque run par makeArcadeArchetype()->makeFighter(), donc
+   son history est naturellement run-scoped : aucun champ de reset à prévoir.
+   Les closures `check` ne posent aucun problème de sérialisation : un run
+   Gauntlet n'est JAMAIS écrit en localStorage (save() sort immédiatement si
+   G.arcade.active, cf. state.js ANCRE SAVE_GARDE_ARCADE). ==== */
+const GAUNTLET_CONTRACTS=[
+  {id:'ct_nodec',label:'Aucune victoire aux points',mult:1.5,
+   hint:'Toutes vos victoires du run doivent être des finitions — KO/TKO ou soumission.',
+   check:(f)=>{ const wins=f.history.filter(h=>h.res==='win'); return wins.length>0 && wins.every(h=>!isDecisionLike(h.method)); }},
+  {id:'ct_r1',label:'Trois éclairs',mult:1.6,
+   hint:'Terminer trois combats du run dès le 1er round.',
+   check:(f)=>f.history.filter(h=>h.res==='win'&&h.round===1&&!isDecisionLike(h.method)).length>=3},
+  {id:'ct_champs',label:'Bourreau de champions',mult:1.45,
+   hint:'Battre deux adversaires qui portaient déjà une ceinture.',
+   check:(f)=>f.history.filter(h=>h.res==='win'&&h.oppWasChamp).length>=2},
+  {id:'ct_sub',label:'Le fil de soie',mult:1.5,
+   hint:'Gagner deux combats par soumission dans le run.',
+   check:(f)=>f.history.filter(h=>h.res==='win'&&h.method&&h.method.startsWith('Soum')).length>=2},
+  {id:'ct_nopact',label:'Sans filet',mult:1.3,
+   hint:'Terminer le run sans jamais prendre le pacte de finition.',
+   check:(f,a)=>!a.pactTakenEver},
+  {id:'ct_intact',label:'Corps intact',mult:1.4,
+   hint:'Ne jamais descendre sous 60 de forme pendant tout le run.',
+   check:(f,a)=>!a.formBroken}
+];
+function drawGauntletContract(){
+  const c=pick(GAUNTLET_CONTRACTS);
+  return {id:c.id,label:c.label,hint:c.hint,mult:c.mult,done:false};
+}
+function evalGauntletContract(a){
+  if(!a||!a.contract) return false;
+  const spec=GAUNTLET_CONTRACTS.find(x=>x.id===a.contract.id);
+  if(!spec||!G.f||!G.f.history){ a.contract.done=false; return false; }
+  let ok=false;
+  try{ ok=!!spec.check(G.f,a); }catch(e){ ok=false; }
+  a.contract.done=ok;
+  return ok;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — EXCEPTION EXPLICITEMENT ASSUMÉE à la
+   règle « un attribut ne baisse QUE par vieillissement, Classe ou mécanique
+   de menton ». Elle est ici confinée au Gauntlet, pour trois raisons
+   vérifiées dans le code : (1) le combattant arcade est un archétype jetable
+   recréé à chaque run par makeArcadeArchetype(), jamais un combattant de
+   carrière ; (2) un run n'est jamais persisté (save() sort si
+   G.arcade.active), donc la baisse ne peut PAS fuiter dans une sauvegarde de
+   carrière ; (3) l'arcade ne passe jamais par la retraite, donc ni le
+   Panthéon ni hofScore() ne peuvent hériter d'attributs rabaissés.
+   rollInjury()/f.injury (engine.js) N'EST PAS réutilisée : sa sémantique est
+   en « cycles de convalescence », notion qui n'existe pas dans un run. ==== */
+const GAUNTLET_RUN_INJURIES=[
+  {name:'Arcade ouverte',attrs:[['composure',-8],['fightIQ',-5]]},
+  {name:'Côtes fêlées',attrs:[['cardio',-10],['durability',-6]]},
+  {name:'Main abîmée',attrs:[['power',-9],['handSpeed',-5]]},
+  {name:'Genou tordu',attrs:[['footSpeed',-10],['takedown',-6]]},
+  {name:'Mâchoire fragilisée',attrs:[['chin',-12]]},
+  {name:'Épaule déboîtée',attrs:[['clinchStr',-10],['takedown',-5]]}
+];
+function rollGauntletRunInjury(f){
+  const inj=pick(GAUNTLET_RUN_INJURIES);
+  const applied=[];
+  inj.attrs.forEach(pair=>{
+    const k=pair[0], v=pair[1];
+    if(typeof f.attrs[k]==='number'){ f.attrs[k]=clamp(f.attrs[k]+v,1,100); applied.push([k,v]); }
+  });
+  f.overall=overall(f);
+  return {name:inj.name,attrs:applied};
+}
+/* Probabilité indexée sur les dégâts RÉELLEMENT encaissés pendant le combat :
+   res.stats.B.sig (frappes significatives subies par le joueur, qui est
+   toujours le côté A en arcade — cf. resolveArcadeFight) et res.stats.B.kd
+   (knockdowns subis). Mêmes champs que ceux déjà lus par les objectifs de
+   combat en carrière (`check:(st)=>st.B.sig<15`). */
+function rollGauntletInjuryChance(res){
+  if(!res||!res.stats||!res.stats.B) return 0;
+  const sig=res.stats.B.sig||0, kd=res.stats.B.kd||0;
+  return clamp(0.04+Math.max(0,sig-25)*0.006+kd*0.12,0,0.55);
+}
+/* ==== [FIN ANCRE] ==== */
 function pickGauntletRival(div){
   const meta=loadMetaStats(); const rivals=getGauntletRivals(meta).filter(r=>r.div===div);
   return rivals.length?pick(rivals):null;
@@ -351,9 +510,18 @@ function injectExtendedArchetypes(){
    les 4 archétypes achetés en Salle des Légendes), startBossRun() ne le
    faisait pas : le format le plus punitif du Gauntlet tirait dans un pool
    plus pauvre que les deux autres, sans raison. ==== */
-function startBossRun(){
+/* ==== [ANCRE: CORRECTIF_SEED_BOSSRUN] — bug trouvé : CL.startBossRun() (ui-08)
+   faisait `startBossRun(); G.arcade.seed=seed;` alors que cette fonction
+   appelle render() AVANT le retour — l'écran de draft affichait donc
+   « Graine du run : undefined » sur le seul format qui ne recevait pas sa
+   graine à temps. La graine (et le palier d'Ascension) sont désormais passés
+   en argument et présents dans le littéral G.arcade, comme dans
+   CL.startArcade()/CL.startLadder100(). Arguments optionnels : un appel
+   startBossRun() sans argument reste valide (compat tests). ==== */
+function startBossRun(seed,asc){
   injectExtendedArchetypes();
-  G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only',banked:0};
+  G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only',banked:0,
+    seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract()};
   G.screen='draft'; save(); render();
 }
 /* ==== [FIN ANCRE] ==== */
@@ -362,9 +530,19 @@ function startBossRun(){
    overall+5+streak*3 (plancher 70) mettait la barre au-dessus du joueur dès
    le combat 1 et grimpait vite ; overall+streak*2 (plancher 60) laisse un
    vrai combat à niveau égal en ouverture. ==== */
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — les 3 courbes de difficulté du Gauntlet
+   tiennent chacune sur UNE ligne (ici, buildWTUMMABracket et
+   buildWTUMMALadder). ascensionCurveMod() y est injecté sans rien changer
+   d'autre : +3 niveaux d'adversaire et +2 de plafond par palier, réversible
+   en un chiffre. Ce n'est PAS un rééquilibrage audité (aucun Monte Carlo
+   derrière) — c'est un facteur de difficulté opt-in, choisi par le joueur au
+   menu, pas une modification de la difficulté par défaut : au palier 0 les
+   formules sont strictement identiques à avant. ==== */
+function ascensionCurveMod(asc){ return {lv:3*(asc||0),cap:2*(asc||0)}; }
 function genBossOpponent(streak){
   const div=G.f.div;
-  const lv=clamp(G.f.overall+streak*2,60,93);
+  const am=ascensionCurveMod(G.arcade&&G.arcade.asc);
+  const lv=clamp(G.f.overall+streak*2+am.lv,60,93+am.cap);
   /* ==== [ANCRE: REJOUABILITE_NEMESIS_BOSSRUN] — à partir du 3e combat,
      chance croissante de retomber sur un rival réellement enregistré
      (cf. recordGauntletRival) plutôt qu'un boss anonyme généré. Niveau du
@@ -534,7 +712,8 @@ function buildWTUMMABracket(player){
     else if(i===1 && rival){
       const boss=fighterFromRivalSnapshot(rival,88,'LE CHAMPION EN TITRE'); boss.seed=1; pool.push(boss);
     } else {
-      const lv=clamp(88-Math.floor(i/1.6)+RI(-3,3),25,93);
+      const _am=ascensionCurveMod(G.arcade&&G.arcade.asc);
+      const lv=clamp(88-Math.floor(i/1.6)+RI(-3,3)+_am.lv,25,93+_am.cap);
       const o=makeFighter({gender:player.gender,div:player.div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
       o.stage='pro'; o.org=6; o.seed=i; o.W=RI(15,35); o.L=RI(0,4);
       pool.push(o);
@@ -596,7 +775,36 @@ function generateArcadeUpgrades(pactBonus){
     const sk=getFallbackSkill(validPool,rarity);
     if(sk){ G.arcade.skillOpts.push(sk); validPool=validPool.filter(s=>s.id!==sk.id); }
   }
+  generateCursedOption();
   G.arcade.upgradesChosen={train:false,skill:false};
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — 4e choix de camp, hors des 3 options
+   normales : une compétence Légendaire/Mythique GARANTIE, payée par un malus
+   d'attributs permanent sur le run. Les paliers de rareté existants
+   (rStep>=4, rStep===6, pactBonus) ne sont pas touchés — c'est une option
+   parallèle, jamais un remplacement. Réutilise le pool déjà filtré par
+   generateArcadeUpgrades pour ne pas proposer deux fois la même compétence
+   dans le même camp. Les deltas passent par applyDeltas() (engine.js), qui
+   gère déjà les valeurs négatives comme pour les options de camp de carrière
+   à contrepartie. Même exception assumée que GAUNTLET_BLESSURE_RUN : baisse
+   d'attribut confinée à un combattant arcade jetable et non persisté. ==== */
+function generateCursedOption(){
+  G.arcade.cursedOpt=null;
+  const base=poolEligible(G.f,false,false);
+  const chosenIds=(G.arcade.skillOpts||[]).map(s=>s.id);
+  let elite=base.filter(s=>(s.rar==='L'||s.rar==='M') && !chosenIds.includes(s.id));
+  if(!elite.length) elite=base.filter(s=>s.rar==='E' && !chosenIds.includes(s.id));
+  if(!elite.length) return;
+  const sk=pick(elite);
+  const curses=[
+    {label:'Surentraînement',d:[['cardio',-14],['form',-12]]},
+    {label:'Sparring sanglant',d:[['chin',-12],['durability',-8]]},
+    {label:'Obsession technique',d:[['footSpeed',-12],['explosiveness',-10]]},
+    {label:'Coupe de poids sauvage',d:[['strength',-12],['recovery',-9]]}
+  ];
+  const c=pick(curses);
+  G.arcade.cursedOpt={skill:sk,curseLabel:c.label,d:c.d};
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
@@ -618,6 +826,10 @@ function generateBossRunUpgrade(streak){
   if(streak>=4) rarity=rnd()<0.6?'L':'E';
   const sk=getFallbackSkill(validPool,rarity);
   if(sk) G.arcade.skillOpts.push(sk);
+  /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — le Boss Run a un camp allégé (1 seule
+     compétence, pas d'entraînement) : l'option maudite y est le SEUL arbitrage
+     réel du camp, donc à plus forte raison présente. ==== */
+  generateCursedOption();
   G.arcade.upgradesChosen={train:true,skill:false};
 }
 /* ==== [FIN ANCRE] ==== */
@@ -635,8 +847,9 @@ function buildWTUMMALadder(division){
      dans la courbe existante (100-0.66+RI), courbe NON modifiée ici (seuls
      Bracket 64 et Boss Run ont été assouplis, pas le Ladder). ==== */
   const rival=(rnd()<0.5)?pickGauntletRival(division):null;
+  const _amL=ascensionCurveMod(G.arcade&&G.arcade.asc);
   for(let i=1;i<=100;i++){
-    const lv=clamp(100-Math.floor(i*0.66)+RI(-2,3),30,99);
+    const lv=clamp(100-Math.floor(i*0.66)+RI(-2,3)+_amL.lv,30,99);
     if(i===1 && rival){
       const o=fighterFromRivalSnapshot(rival,lv,'LE CHAMPION EN TITRE — '+(rival.nick||''));
       o.ladderRank=1; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W);

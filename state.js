@@ -120,12 +120,71 @@ function saveMetaStats(meta){ try{ localStorage.setItem(META_STATS_KEY,JSON.stri
    meilleur (plus bas) rang atteint (100 au départ, 1 = sommet) ; boss_run ->
    meilleur streak KO enchaîné (0 à 5). N'écrit JAMAIS d'attribut/potentiel —
    même garde-fou que LOT14_SALLE_LEGENDES ci-dessus. ==== */
-function recordGauntletBest(meta,mode,value){
-  if(!meta.gauntletBest) meta.gauntletBest={};
-  const cur=meta.gauntletBest[mode];
-  const better=(mode==='ladder_100')?(cur===undefined||value<cur):(cur===undefined||value>cur);
-  if(better){ meta.gauntletBest[mode]=value; return true; }
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — meta.gauntletBest[mode] était un SCALAIRE
+   (un record unique par format). Avec les paliers d'Ascension, un record de
+   palier 0 et un record de palier 3 ne sont plus comparables : le champ
+   devient un dictionnaire {niveauAscension: valeur}. migrateGauntletBest()
+   convertit l'ancien scalaire en {0:valeur} au premier accès — aucune perte
+   de record existant. recordGauntletBest() garde sa signature à 3 arguments
+   (les 6 appels existants dans ui-08 restent valides) : le niveau est lu sur
+   G.arcade.asc quand il n'est pas passé explicitement.
+   RÈGLE LOT14 RESPECTÉE : aucune de ces fonctions n'écrit d'attribut, de
+   potentiel ni de vitesse — uniquement des compteurs de méta-progression. ==== */
+const GAUNTLET_ASC_MAX=5;
+function migrateGauntletBest(meta){
+  if(!meta.gauntletBest){ meta.gauntletBest={}; return meta; }
+  for(const k in meta.gauntletBest){
+    if(typeof meta.gauntletBest[k]==='number') meta.gauntletBest[k]={0:meta.gauntletBest[k]};
+  }
+  return meta;
+}
+function gauntletAscLevel(meta,mode){ return (meta.gauntletAscension&&meta.gauntletAscension[mode])||0; }
+function gauntletBestGet(meta,mode,asc){
+  migrateGauntletBest(meta);
+  const per=meta.gauntletBest[mode]; if(!per) return undefined;
+  return per[asc===undefined?0:asc];
+}
+function recordGauntletAscension(meta,mode,asc){
+  if(!meta.gauntletAscension) meta.gauntletAscension={};
+  const cur=meta.gauntletAscension[mode]||0;
+  const next=Math.min(GAUNTLET_ASC_MAX,(asc||0)+1);
+  if(next>cur){ meta.gauntletAscension[mode]=next; return true; }
   return false;
+}
+function recordGauntletBest(meta,mode,value,asc){
+  migrateGauntletBest(meta);
+  const lvl=(asc===undefined||asc===null)
+    ?((typeof G!=='undefined'&&G&&G.arcade&&G.arcade.asc)||0)
+    :asc;
+  if(!meta.gauntletBest[mode]) meta.gauntletBest[mode]={};
+  const cur=meta.gauntletBest[mode][lvl];
+  const better=(mode==='ladder_100')?(cur===undefined||value<cur):(cur===undefined||value>cur);
+  if(better){ meta.gauntletBest[mode][lvl]=value; return true; }
+  return false;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_DAILY] — graine du jour. Aucun serveur, aucun compte :
+   la graine est DÉRIVÉE de la date locale (YYYYMMDD), donc identique pour
+   tout le monde le même jour sans échange réseau, et _rollGauntletSeed()
+   (ui-08) sait déjà hacher une chaîne numérique. Une seule tentative par
+   jour et par format, mémorisée dans meta (clé localStorage séparée de la
+   sauvegarde, donc survit au fait qu'un run Gauntlet n'est JAMAIS persisté —
+   cf. ANCRE SAVE_GARDE_ARCADE ci-dessus). ==== */
+function gauntletDailyKey(d){
+  const t=d||new Date();
+  return `${t.getFullYear()}${String(t.getMonth()+1).padStart(2,'0')}${String(t.getDate()).padStart(2,'0')}`;
+}
+function gauntletDailyState(meta){
+  const key=gauntletDailyKey();
+  if(!meta.gauntletDaily||meta.gauntletDaily.date!==key) return {date:key,done:{}};
+  if(!meta.gauntletDaily.done) meta.gauntletDaily.done={};
+  return meta.gauntletDaily;
+}
+function gauntletDailyDone(meta,mode){ return !!gauntletDailyState(meta).done[mode]; }
+function recordGauntletDaily(meta,mode,progress){
+  const st=gauntletDailyState(meta);
+  st.done[mode]={progress,at:Date.now()};
+  meta.gauntletDaily=st;
 }
 /* ==== [FIN ANCRE] ==== */
 function updateMetaStatsOnRetirement(f){

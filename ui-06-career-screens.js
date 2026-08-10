@@ -40,11 +40,47 @@ function scr_title(){
 /* ==== [ANCRE: REJOUABILITE_RECORD_GAUNTLET] — meta.gauntletBest (state.js),
    affiché sous chaque bouton de format pour donner un objectif de retour au
    menu, avant même de lancer un run. ==== */
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — le record affiché est celui du palier
+   SÉLECTIONNÉ (G._pendingAsc, borné au palier débloqué pour ce format), pas
+   un record global qui mélangerait des difficultés incomparables. ==== */
+function gauntletSelectedAsc(mode){
+  const meta=loadMetaStats();
+  return clamp(parseInt(G._pendingAsc,10)||0,0,gauntletAscLevel(meta,mode));
+}
 function gauntletMenuBestTag(mode){
-  const meta=loadMetaStats(); const best=(meta.gauntletBest||{})[mode];
-  if(best===undefined) return '';
+  const meta=loadMetaStats();
+  const asc=gauntletSelectedAsc(mode);
+  const best=gauntletBestGet(meta,mode,asc);
+  if(best===undefined) return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.6">Ascension ${asc} — aucun record</span>`;
   const label=mode==='boss_run'?`Record : ${best}/5`:mode==='ladder_100'?`Record : rang #${best}`:(best>=7?'Record : Tournoi remporté':`Record : palier ${best}`);
-  return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.8">${label}</span>`;
+  return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.8">Ascension ${asc} · ${label}</span>`;
+}
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — sélecteur de palier. Rendu uniquement si
+   au moins un palier est débloqué sur ce format : un joueur qui n'a jamais
+   gagné le format ne voit aucune option supplémentaire, l'écran reste
+   identique à avant pour lui. ==== */
+function gauntletAscPicker(mode){
+  const meta=loadMetaStats();
+  const max=gauntletAscLevel(meta,mode);
+  if(max<=0) return '';
+  const cur=gauntletSelectedAsc(mode);
+  let btns='';
+  for(let i=0;i<=max;i++){
+    btns+=`<span onclick="CL.setGauntletAsc('${mode}',${i})" style="display:inline-block;cursor:pointer;border:1px solid ${i===cur?'var(--gold)':'var(--line)'};color:${i===cur?'var(--gold)':'var(--muted)'};padding:3px 10px;margin:0 4px 4px 0;border-radius:2px;font-size:11px" class="mono">A${i}</span>`;
+  }
+  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:10px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_DAILY] — bouton de défi du jour par format. La graine
+   étant dérivée de la date (state.js), tous les joueurs affrontent le même
+   run le même jour SANS aucun serveur ni compte : la comparaison se fait
+   hors-jeu, le jeu ne fait que garantir l'identité du tirage. Une seule
+   tentative par jour et par format. ==== */
+function gauntletDailyTag(mode){
+  const meta=loadMetaStats();
+  const done=gauntletDailyDone(meta,mode);
+  const label=done?`Défi du jour déjà tenté (${gauntletDailyKey()})`:`Tenter le DÉFI DU JOUR (${gauntletDailyKey()})`;
+  return `<div class="mono small" style="margin-top:6px"><span onclick="${done?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${done?'default':'pointer'};border:1px dashed ${done?'var(--line)':'var(--sage)'};color:${done?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px">${label}</span></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_gauntlet_menu(){
@@ -58,10 +94,13 @@ function scr_gauntlet_menu(){
    </div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
+   ${gauntletAscPicker('bracket64')}${gauntletDailyTag('bracket64')}
    <button class="btn" style="font-size:18px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet</span>${gauntletMenuBestTag('ladder_100')}</button>
+   ${gauntletAscPicker('ladder_100')}${gauntletDailyTag('ladder_100')}
    ${checkLegendUnlock('mode_boss')?`<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--gold);color:var(--gold)" onclick="CL.startBossRun()">BOSS RUN
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span>${gauntletMenuBestTag('boss_run')}</button>`:''}
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span>${gauntletMenuBestTag('boss_run')}</button>
+   ${gauntletAscPicker('boss_run')}${gauntletDailyTag('boss_run')}`:''}
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }
