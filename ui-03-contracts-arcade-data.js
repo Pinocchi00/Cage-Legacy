@@ -63,7 +63,7 @@ function evaluateProOffer(f, res, oppRank){
     // sans exiger une razzia quasi-parfaite en KO/soumission.
     let msg=''; const fastTrack=upset||finishes>=4||(f.streak||0)>=3;
     if(upset) msg='Ton finish retentissant sur un membre du Top 10 national a fait le tour des réseaux. Les promoteurs frappent à la porte.';
-    else if(finishes>=4) msg=`Avec ton style spectaculaire (${finishes} finitions) et ta réputation de tueur, le public pro te réclame malgré t${f.L>1?'es':'a'} ${f.L} défaite${f.L>1?'s':''}.`;
+    else if(finishes>=4) msg=`Avec ton style spectaculaire (${finishes} finitions) et ta réputation de tueur, le public pro te réclame${f.L>0?` malgré t${f.L>1?'es':'a'} ${f.L} défaite${f.L>1?'s':''}`:' — un palmarès sans la moindre défaite'}.`;
     else if((f.streak||0)>=3) msg=`${f.streak} victoires d\u2019affilée sans lever le pied : les recruteurs pro ont remarqué la série.`;
     else if(f.age<=20) msg=`Tu n\u2019as que ${f.age} ans, mais ta maturité dans la cage affole les recruteurs régionaux. Tu es un prospect majeur.`;
     else msg='Tes résultats réguliers et ton classement sur le circuit IMMAF t\u2019ouvrent enfin les portes du monde professionnel.';

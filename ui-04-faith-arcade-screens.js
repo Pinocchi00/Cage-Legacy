@@ -473,7 +473,7 @@ function scr_faith_event(){
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
      ${ev.choices.map((c,i)=>{
        const locked=c.cost&&(f.earnings||0)<c.cost;
-       return `<div class="glass opp" style="padding:14px;text-align:left;opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
+       return `<div class="glass${locked?'':' opp'}" style="padding:14px;text-align:left;opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
          <b>${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}${c.reward?`<span class="small" style="color:var(--win)"> (+${c.reward}k$)</span>`:''}
          <div class="tagrow" style="margin-top:8px">${formatEventDelta(c.d)}</div>
        </div>`;
@@ -600,7 +600,10 @@ function gauntletBestLine(mode){
   const best=gauntletBestGet(meta,mode,asc);
   if(best===undefined) return '';
   const label=mode==='boss_run'?`${best}/5 KO enchaînés`:mode==='ladder_100'?`Rang #${best} atteint`:(best>=7?'Tournoi remporté':`Palier ${best} atteint`);
-  return `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel (Ascension ${asc}) : ${label}</div>`;
+  const isNew=G.arcade&&G.arcade.isNewRecord;
+  return isNew
+    ? `<div class="mono small" style="text-align:center;margin-bottom:12px;color:var(--frost)">✦ NOUVEAU RECORD (Ascension ${asc}) : ${label}</div>`
+    : `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel (Ascension ${asc}) : ${label}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — bandeau du contrat, affiché au draft,
@@ -622,13 +625,9 @@ function contractBlock(a,live){
 /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] — la cagnotte + ce qu'une
    élimination laisserait, ligne identique aux 3 formats (le Boss Run avait
    déjà la sienne en dur dans son hub, les 2 autres n'en avaient aucune). ==== */
-function gauntletBankLine(a){
-  const banked=a.banked||0; const elim=eliminationPreview(a);
-  if(banked<=0) return '';
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:center;margin-top:10px">
-     <div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b style="color:var(--loss)">+${elim} pts</b></div>
-   </div>`;
-}
+/* ==== [ANCRE: CORRECTIF_CODE_MORT] — gauntletBankLine() retirée : sa logique
+   vit désormais dans gauntletStatusBlock() (voir ANCRE GAUNTLET_STATUT_
+   CONSOLIDE), plus aucun appelant. ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — la bascule n'a de sens que si la
    cagnotte est non nulle : sinon il n'y a rien à perdre et l'affichage
@@ -638,7 +637,7 @@ function atRiskToggleBlock(a){
   const banked=a.banked||0;
   if(banked<=0) return '';
   const next=Math.min(8,(a.riskMult||1)*2);
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid ${a.atRisk?'var(--blood)':'var(--line)'};padding:12px;text-align:left;margin-top:12px;cursor:pointer" onclick="CL.toggleAtRisk()">
+  return `<div class="glass mwash toggle-card" style="position:relative;background:var(--panel2);border:1px solid ${a.atRisk?'var(--blood)':'var(--line)'};padding:12px;text-align:left;margin-top:12px" onclick="CL.toggleAtRisk()">
      <div class="mono small" style="color:${a.atRisk?'var(--blood)':'var(--muted)'};font-weight:bold">${a.atRisk?'✓ CAGNOTTE EN JEU':'☐ Mettre la cagnotte en jeu'}</div>
      <div class="muted small mt">Une victoire porte le multiplicateur du run à <b class="gold">×${next}</b>. Une élimination sur ce combat ne rapporte <b style="color:var(--loss)">absolument rien</b> — les ${banked} pts de cagnotte partent avec.</div>
    </div>`;
@@ -646,25 +645,47 @@ function atRiskToggleBlock(a){
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — les séquelles doivent être lisibles au
    hub, sinon la baisse d'attributs est vécue comme un bug de simulation. ==== */
-function runInjuryBlock(a){
-  const list=a.runInjuries||[];
-  if(!list.length) return '';
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--loss);padding:12px;text-align:left;margin-top:10px">
-     <div class="eyebrow" style="font-size:11px;color:var(--loss)">Séquelles du run</div>
-     ${list.map(i=>`<div class="mono small"><b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`).join('')}
-   </div>`;
-}
+/* ==== [ANCRE: CORRECTIF_CODE_MORT] — runInjuryBlock() retirée : sa logique
+   vit désormais dans gauntletStatusBlock(), plus aucun appelant. ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_RUN_MULT] — le multiplicateur cumulé doit être visible
    AVANT la décision suivante, pas seulement au game over. ==== */
-function runMultBlock(a){
+/* ==== [ANCRE: CORRECTIF_CODE_MORT] — runMultBlock() retirée : sa logique
+   vit désormais dans gauntletStatusBlock(), plus aucun appelant. ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_STATUT_CONSOLIDE] — regroupe l'état PASSIF du run
+   (contrat, cagnotte, séquelles, multiplicateur) dans une seule carte au lieu
+   de 4 empilées : sur les 3 hubs, contractBlock + gauntletBankLine +
+   runInjuryBlock + runMultBlock rendaient jusqu'à 6 boîtes .glass quasi
+   identiques avant même les 2 vraies décisions du tour (pacte, mise en jeu),
+   noyant l'information sous la répétition du même habillage visuel. Même
+   pattern qu'un bloc déjà éprouvé de ce fichier (runDebriefBlock, écran de
+   fin de run) : une carte, un eyebrow, des lignes mono empilées. ==== */
+function gauntletStatusBlock(a,live){
+  const rows=[];
+  if(a.contract){
+    const c=a.contract, ok=live?evalGauntletContract(a):!!c.done;
+    rows.push(`<div class="mono small" style="color:${ok?'var(--sage)':'var(--gold)'}"><b>${SVG.pact} ${ok?'✓':'☐'} ${c.label}</b> <span class="muted">— ${c.hint} (×${c.mult} sur le gain)</span></div>`);
+  }
+  const banked=a.banked||0;
+  if(banked>0){
+    const elim=eliminationPreview(a);
+    rows.push(`<div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b style="color:var(--loss)">+${elim} pts</b></div>`);
+  }
+  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)"><b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`));
   const m=gauntletRunMult(a);
-  if(m<=1) return '';
-  const parts=[];
-  if((a.riskMult||1)>1) parts.push(`mise ×${a.riskMult}`);
-  if((a.maxPactStreak||0)>0) parts.push(`pactes +${Math.round((a.maxPactStreak||0)*10)} %`);
-  if(a.contract&&a.contract.done) parts.push(`contrat ×${a.contract.mult}`);
-  return `<div class="mono small gold" style="text-align:center;margin-top:8px">Multiplicateur du run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`;
+  if(m>1){
+    const parts=[];
+    if((a.riskMult||1)>1) parts.push(`mise ×${a.riskMult}`);
+    if((a.maxPactStreak||0)>0) parts.push(`pactes +${Math.round((a.maxPactStreak||0)*10)} %`);
+    if(a.contract&&a.contract.done) parts.push(`contrat ×${a.contract.mult}`);
+    rows.push(`<div class="mono small gold">Multiplicateur du run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`);
+  }
+  if(!rows.length) return '';
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:left;margin-top:12px">
+     <div class="eyebrow mb" style="font-size:11px">État du run</div>
+     ${rows.join('')}
+   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BRACKET_VISIBLE] — rend le tableau réellement simulé
@@ -679,7 +700,7 @@ function scr_bracket_view(){
   const row=(m,i)=>{
     const mine=(m.a&&m.a.id===G.f.id)||(m.b&&m.b.id===G.f.id);
     const side=x=>`${esc(x.name)} ${x.flag||''} <span class="muted small">#${x.seed||'?'} · OVR ${x.overall}</span>${x._isRival?' <span class="mono small" style="color:var(--blood)">⚠</span>':''}`;
-    return `<div class="opp" style="border-left:3px solid ${mine?'var(--gold)':'var(--line)'};${mine?'background:var(--panel2)':''}">
+    return `<div style="background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${mine?'var(--gold)':'var(--line)'};padding:13px;margin:10px 0">
       <div class="mono small muted">Match ${i+1}</div>
       <div class="small">${side(m.a)}</div>
       <div class="mono small muted">vs</div>
@@ -881,7 +902,7 @@ function eliminationPreview(a){
 function pactToggleBlock(a){
   const streak=a.pactStreak||0;
   const streakLine=streak>0?`<div class="mono small gold mt" style="font-weight:bold">🔥 Série de pactes remplis : ${streak}${streak>=3?' — Légendaire garantie au prochain camp !':''}</div>`:'';
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid ${a.pactActive?'var(--gold)':'var(--line)'};padding:12px;text-align:left;margin-top:12px;cursor:pointer" onclick="CL.togglePact()">
+  return `<div class="glass mwash toggle-card" style="position:relative;background:var(--panel2);border:1px solid ${a.pactActive?'var(--gold)':'var(--line)'};padding:12px;text-align:left;margin-top:12px" onclick="CL.togglePact()">
      <div class="mono small ${a.pactActive?'gold':'muted'}" style="font-weight:bold">${a.pactActive?'✓ PACTE DE FINITION ACTIF':'☐ Prendre le pacte de finition'}</div>
      <div class="muted small mt">Ce combat ne compte que par KO/TKO — une victoire aux points ou par soumission arrête le run comme une défaite. En échange : camp suivant plancher Rare garanti + une compétence Légendaire/Épique dans les choix.</div>
      ${streakLine}
@@ -918,24 +939,18 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
        comme cagnotte visible, avec ce qui est en jeu si le KO suivant échoue
        (eliminationPreview) juste en-dessous : la tension risque/récompense
        doit être LISIBLE, pas seulement calculée en coulisses. ==== */
-    const elim=eliminationPreview(a);
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
    <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur ce run</em></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:center;margin-top:12px;border-left:3px solid var(--gold)">
      <div class="mono small gold" style="font-weight:bold">⚠ SEUL LE KO/TKO COMPTE — une victoire par décision ou soumission arrête la série.</div>
-   </div>
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:center;margin-top:10px">
-     <div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${a.banked||0} pts</b><span class="muted"> · si KO suivant raté : </span><b style="color:var(--loss)">+${elim} pts</b></div>
    </div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:12px">
      <div class="eyebrow mb">Prochain adversaire</div>
      ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · ${a.opponent.age} ans</div></div>
-   ${contractBlock(a,true)}
+   ${gauntletStatusBlock(a,true)}
    ${atRiskToggleBlock(a)}
-   ${runInjuryBlock(a)}
-   ${runMultBlock(a)}
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE</button>
    ${cashOut>0?`<button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>`:''}
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
@@ -962,12 +977,9 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
    <p class="lede small mt">Choisissez votre cible — plus le saut de rang est grand, plus l\u2019adversaire est fort.</p>
    ${targets.map(targetCard).join('')}
    ${(a.aggroCooldown>0)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
-   ${gauntletBankLine(a)}
+   ${gauntletStatusBlock(a,true)}
    ${pactToggleBlock(a)}
    ${atRiskToggleBlock(a)}
-   ${contractBlock(a,true)}
-   ${runInjuryBlock(a)}
-   ${runMultBlock(a)}
    <button class="btn gold mt" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
   }
@@ -978,12 +990,9 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
      ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · OVR ${a.opponent.overall}</div></div>
-   ${gauntletBankLine(a)}
+   ${gauntletStatusBlock(a,true)}
    ${pactToggleBlock(a)}
    ${atRiskToggleBlock(a)}
-   ${contractBlock(a,true)}
-   ${runInjuryBlock(a)}
-   ${runMultBlock(a)}
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
    <button class="btn ghost" style="margin-top:8px" onclick="CL.viewBracket()">VOIR LE TABLEAU COMPLET</button>
    <button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
@@ -1050,8 +1059,7 @@ function scr_arcade_upgrades(){
   h+=`<div class="hr" style="margin:24px 0"></div>
       <div class="card" style="border-left:3px solid var(--sage)"><div class="grp-h"><span class="disp" style="font-size:17px">Forme</span><span class="gold mono">${d20(f.form)}/20</span></div>
       <div class="attr"><span class="attr-l">Récupération du run</span>${gauge(f.form)}<span class="attr-v">${d20(f.form)}</span></div></div>
-      ${contractBlock(a,true)}
-      ${runInjuryBlock(a)}
+      ${gauntletStatusBlock(a,true)}
       <div class="eyebrow mb mt">Attributs du combattant (temps réel)</div>
       ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
   </div>`;

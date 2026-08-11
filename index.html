@@ -12,6 +12,7 @@
  --text:#F5EFE0; --muted:#A89A81; --faint:#8A7C63;
  --blood:#E8442F; --blood-d:#9C2C1E; --gold:#E6B93A; --gold-d:#8A6A1E;
  --sage:#7C9788; --win:#7FC488; --loss:#E8442F;
+ --frost:#8FC7D9; --frost-d:#4F7E8F;
  --r:0px; --maxw:560px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -35,17 +36,34 @@ details>summary{outline:none}
 details>summary::-webkit-details-marker{display:none}
 details[open]>summary span[style*="font-size:18px"]{transform:rotate(90deg);display:inline-block;transition:transform .15s}
 #app{max-width:var(--maxw);margin:0 auto}
-.scr{padding:16px 15px 40px;animation:fade .22s ease}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.scr{padding:16px 15px 40px;animation:fade .32s cubic-bezier(.2,.9,.25,1.15)}
+@keyframes fade{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.scr{animation:none}}
+/* ==== [ANCRE: DA_STAGGER] — apparition échelonnée des listes. Chaque enfant
+   direct de .stagger reprend l'animation fade ci-dessus mais avec un délai
+   croissant (45ms/élément, plafonné à 10) : à appliquer sur le conteneur
+   d'une liste de cartes (adversaires, palmarès, compétences...) sans toucher
+   aux cartes elles-mêmes. ==== */
+.stagger>*{animation:fade .32s cubic-bezier(.2,.9,.25,1.15) both}
+.stagger>*:nth-child(1){animation-delay:0ms}
+.stagger>*:nth-child(2){animation-delay:45ms}
+.stagger>*:nth-child(3){animation-delay:90ms}
+.stagger>*:nth-child(4){animation-delay:135ms}
+.stagger>*:nth-child(5){animation-delay:180ms}
+.stagger>*:nth-child(6){animation-delay:225ms}
+.stagger>*:nth-child(7){animation-delay:270ms}
+.stagger>*:nth-child(8){animation-delay:315ms}
+.stagger>*:nth-child(9){animation-delay:360ms}
+.stagger>*:nth-child(n+10){animation-delay:405ms}
+@media(prefers-reduced-motion:reduce){.stagger>*{animation:none}}
 .disp{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.02em;line-height:1;margin:0}
 .disp.big{font-size:clamp(40px,13vw,58px);font-weight:700}
-.mono{font-family:'JetBrains Mono',monospace}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
 .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 .lede{color:var(--muted);font-size:15px;max-width:400px;margin:10px auto 20px}
 .lede.small{font-size:13.5px;margin:6px 0 16px}
 h2.disp{font-size:24px;margin-bottom:12px}
-.center{text-align:center}.muted{color:var(--muted)}.gold{color:var(--gold)}.loss{color:var(--loss)}.small{font-size:13px}.mb{margin-bottom:8px}.mt{margin-top:10px}
+.center{text-align:center}.muted{color:var(--muted)}.gold{color:var(--gold)}.loss{color:var(--loss)}.blood{color:var(--blood)}.sage{color:var(--sage)}.small{font-size:13px}.mb{margin-bottom:8px}.mt{margin-top:10px}
 .intro{padding-top:12vh;position:relative}
 .card{background:transparent;border:none;border-top:2px solid var(--line);border-bottom:2px solid var(--line);border-radius:0;padding:16px 0;margin:-1px 0}
 .card.gold-b{border-color:var(--gold);background:transparent}
@@ -56,10 +74,10 @@ h2.disp{font-size:24px;margin-bottom:12px}
  -webkit-backdrop-filter:blur(44px) saturate(220%) brightness(1.12);backdrop-filter:blur(44px) saturate(220%) brightness(1.12);
  border:1px solid rgba(255,255,255,.30);
  border-top-color:rgba(255,255,255,.55);
- box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -1px 0 rgba(0,0,0,.35) inset,0 20px 45px -16px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.5);
+ box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -1px 0 rgba(0,0,0,.35) inset,0 24px 52px -18px rgba(0,0,0,.82),0 3px 10px rgba(0,0,0,.55);
 }
 .glass::before{
- content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
+ content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;
  background:
    linear-gradient(125deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.08) 22%,transparent 45%),
    linear-gradient(15deg,transparent 60%,rgba(255,255,255,.06) 100%);
@@ -68,12 +86,40 @@ h2.disp{font-size:24px;margin-bottom:12px}
  content:'';position:absolute;top:0;left:8%;right:8%;height:1px;z-index:2;pointer-events:none;
  background:linear-gradient(90deg,transparent,rgba(255,255,255,.65) 50%,transparent);
 }
+/* ==== [ANCRE: CORRECTIF_CLASSE_RAISE_MANQUANTE] — .raise était référencée
+   3 fois (affiche de combat, victoire All-Stars, carte de dominance en
+   arène) sans jamais avoir de règle CSS : ces moments-clés ne se
+   distinguaient en rien d'une carte .glass ordinaire. Approfondit
+   uniquement l'ombre déjà définie par .glass (mêmes teintes de noir), pour
+   donner aux moments forts le relief que le code annonçait déjà. ==== */
+.glass.raise{box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -1px 0 rgba(0,0,0,.35) inset,0 32px 70px -18px rgba(0,0,0,.9),0 6px 18px rgba(0,0,0,.6)}
+/* ==== [ANCRE: TEST_GRAIN_TEXTURE] — texture de grain, test isolé à une seule
+   carte (championBadgeCard) avant tout déploiement plus large. SVG
+   feTurbulence en data-URI : pas d'asset externe, pas de requête réseau.
+   Opacité très faible (.05) + mix-blend-mode:overlay pour rester un
+   "grain de pellicule" discret, jamais un obstacle à la lecture du texte
+   dessus (les éléments internes de la carte restent au-dessus via z-index,
+   même logique que .glass::before déjà en place). ==== */
+.grain{position:relative}
+.grain::after{
+ content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;opacity:.05;mix-blend-mode:overlay;
+ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
 .opp{
  position:relative;overflow:hidden;
  background:var(--panel2);
  border:1px solid var(--line);
  border-radius:0;padding:13px;margin:10px 0;cursor:pointer;transition:border-color .12s,transform .05s,background .12s;
 }
+/* ==== [ANCRE: CORRECTIF_BASCULE_GAUNTLET_SANS_RETOUR] — pactToggleBlock() et
+   atRiskToggleBlock() sont cliquables (onclick sur la div) mais stylées en
+   dur exactement comme les cartes d'info passives voisines (contrat,
+   cagnotte, séquelles) : rien ne distinguait au repos ni au survol une vraie
+   décision d'un simple readout. Même transition et même retour que .opp,
+   déjà le langage établi pour tout élément cliquable du jeu. ==== */
+.toggle-card{transition:border-color .12s,background .12s,transform .05s;cursor:pointer}
+.toggle-card:hover{background:rgba(255,255,255,.06)}
+.toggle-card:active{transform:scale(.985) translateY(1px)}
 /* motion-wash — traînée diagonale teintée --blood, jamais un aplat */
 .mwash{background-image:
  repeating-linear-gradient(115deg, transparent 0 18px, color-mix(in srgb, var(--blood) 8%, transparent) 18px 20px),
@@ -114,11 +160,13 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .btn:hover,.btn:active{background:var(--text);color:var(--bg)}
 .btn.primary,.btn.gold{position:relative;overflow:hidden;-webkit-backdrop-filter:blur(44px) saturate(220%) brightness(1.12);backdrop-filter:blur(44px) saturate(220%) brightness(1.12);
   box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 -1px 0 rgba(0,0,0,.35) inset,0 20px 45px -16px rgba(0,0,0,.8),0 2px 8px rgba(0,0,0,.5)}
-.btn.primary::before,.btn.gold::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
+.btn.primary::before,.btn.gold::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;
   background:linear-gradient(125deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.08) 22%,transparent 45%),linear-gradient(15deg,transparent 60%,rgba(255,255,255,.06) 100%)}
+.btn.primary,.btn.gold{transition:transform .08s ease,box-shadow .08s ease}
+.btn.primary:active,.btn.gold:active{transform:scale(.97) translateY(1px)}
 .btn.primary{background:var(--blood);color:#fff;border-color:var(--blood)}
 .btn.primary:hover{background:#fff;color:var(--blood);border-color:var(--blood)}
-.btn.gold{background:var(--gold);color:#241c12;border-color:var(--gold)}
+.btn.gold{background:linear-gradient(160deg,#F4D580 0%,var(--gold) 45%,var(--gold-d) 100%);color:#241c12;border-color:var(--gold)}
 .btn.ghost{background:transparent;color:var(--muted);font-size:13px;letter-spacing:.12em;padding:11px}
 .g2{display:flex;gap:9px}.g2>*{flex:1;margin:9px 0}
 .bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
@@ -150,6 +198,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .gauge>span{display:block;height:100%;background:var(--text)}
 /* adversaires / camp */
 .opp:active{transform:translateY(1px)}.opp:hover{border-color:var(--gold-d)}
+.tag2.gold-fill{background:linear-gradient(160deg,#F4D580 0%,var(--gold) 55%,var(--gold-d) 100%);color:var(--bg);border-color:var(--gold)}
 .opp-top{display:flex;justify-content:space-between;align-items:baseline}
 .opp-nm{font-family:'Oswald';text-transform:uppercase;font-weight:600;font-size:18px}
 .opp-rec{font-family:'JetBrains Mono';color:var(--muted);font-size:13px}

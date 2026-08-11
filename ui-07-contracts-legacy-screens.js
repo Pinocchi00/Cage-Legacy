@@ -31,7 +31,7 @@ function scr_toptier(){
      <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${o.sub} · ${orgLevelTag(o.org)}</em></div>
      <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
      <div class="mono small muted">Contrat de ${o.contract.fightsLeft} combats</div>
-     ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:rgba(198,40,40,0.08)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
+     ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:color-mix(in srgb, var(--blood) 8%, transparent)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
      <p class="muted small mt">${o.desc}</p>
      <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.signTopTier(${o.org})">Signer avec ${o.flavor}</button>
    </div>`).join('')}
@@ -97,7 +97,7 @@ function scr_free_agency(){
         <div class="hero-name" style="font-size:20px">${o.flavor}<em style="color:var(--muted)">${orgLevelTag(o.org)}</em></div>
         <div class="mono small gold mt">${contractPayLine(o.contract)}</div>
         <div class="mono small muted">Contrat de ${o.contract.fightsLeft||4} combats</div>
-        ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:rgba(198,40,40,0.08)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
+        ${o.contract.isFinalContract?`<div class="mono small mt" style="color:var(--blood);border:1px solid var(--blood);padding:6px 8px;border-radius:4px;background:color-mix(in srgb, var(--blood) 8%, transparent)">⚠ DERNIÈRE DANSE : le ${o.contract.finalFightNumber||o.contract.fightsLeft}e combat de ce contrat sera le dernier avant retraite obligatoire.</div>`:''}
         <p class="muted small mt">${o.desc}</p>
         <button class="btn primary mt" onclick="CL.acceptFreeAgency(${i})">Signer avec ${o.flavor}</button>
       </div>
@@ -271,7 +271,7 @@ function scr_beltLineage(){
      <span class="eyebrow mono">ARCHIVES MONDIALES</span>
      <span class="eyebrow x" onclick="CL.go('hub')" style="cursor:pointer">✕</span>
    </div>
-   <h3 class="disp" style="font-size:22px;margin-bottom:8px">Registre des ceintures</h3>
+   <h3 class="disp" style="font-size:22px;margin-bottom:8px">${SVG.belt} Registre des ceintures</h3>
    <p class="lede small">L\u2019historique des règnes, des passations de pouvoir et du nombre de défenses.</p>`;
   const keys=Object.keys(groups);
   if(!keys.length){
@@ -610,7 +610,7 @@ function scr_scenarios(){
    ${SCENARIOS.map(s=>{
      const locked=s.legendUnlock && typeof checkLegendUnlock==='function' && !checkLegendUnlock(s.legendUnlock);
      if(locked){
-       return `<div class="opp" style="opacity:.55;cursor:default">
+       return `<div style="background:var(--panel2);border:1px solid var(--line);border-radius:0;padding:13px;margin:10px 0;opacity:.55">
          <div class="opp-top"><span class="opp-nm" style="color:var(--line)">🔒 ${s.name}</span></div>
          <div class="opp-read" style="margin-top:4px;opacity:1">${s.desc}</div>
          <div class="mono small mt" style="color:var(--gold)">À débloquer dans la Salle des Légendes</div></div>`;

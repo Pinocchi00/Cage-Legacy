@@ -415,7 +415,7 @@ function renderEventEffects(fx){
   const chip=(txt,positive)=>`<span class="tag2" style="border-color:${positive?'var(--win)':'var(--loss)'};color:${positive?'var(--win)':'var(--loss)'}">${txt}</span>`;
   if(fx.malus){ Object.entries(fx.malus).forEach(([k,v])=>{ if(!v) return;
     const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
-    chips.push(chip(`${shown} ${attrLabel(k)} (ce combat)`,shown>=0)); }); }
+    chips.push(chip(`${shown>=0?'+':''}${shown} ${attrLabel(k)} (ce combat)`,shown>=0)); }); }
   if(fx.bonusAttrs){ Object.entries(fx.bonusAttrs).forEach(([k,v])=>{ if(!v) return;
     const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
     chips.push(chip(`${shown>=0?'+':''}${shown} ${attrLabel(k)} (ce combat)`,shown>=0)); }); }
@@ -668,6 +668,8 @@ const SVG = {
   goat: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><circle cx="12" cy="11" r="3"/></svg>`,
   veteran: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   star: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  belt: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4M18 12h4"/><path d="M9 7h9v10H6v-7l3-3z"/><circle cx="11.5" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg>`,
+  pact: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><circle cx="12" cy="15" r="3"/><path d="M12 18l-1.5 3 1.5-1 1.5 1-1.5-3"/></svg>`,
   hammer: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4l-4 4M21.5 2.5a2.12 2.12 0 0 0-3 0L3 18l3 3 15.5-15.5a2.12 2.12 0 0 0 0-3z"/></svg>`,
   /* ==== [ANCRE: ICONES_SUCCES_UNIQUES] — jeu d'icônes additionnel pour que
      chaque succès (ACH) ait un pictogramme distinct, sans doublon. ==== */

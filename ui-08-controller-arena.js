@@ -55,7 +55,7 @@ function finaliseGauntletRun(a,opts){
     : gauntletPayout(a.mode,opts.progress);
   const earned=gauntletFinalPayout(a,base);
   if(earned>0) meta.legendPoints=(meta.legendPoints||0)+earned;
-  recordGauntletBest(meta,a.mode,opts.progress,a.asc||0);
+  a.isNewRecord=recordGauntletBest(meta,a.mode,opts.progress,a.asc||0);
   if(opts.kind==='victory') recordGauntletAscension(meta,a.mode,a.asc||0);
   if(a.daily) recordGauntletDaily(meta,a.mode,opts.progress);
   saveMetaStats(meta);
@@ -1360,7 +1360,21 @@ function buildTimeline(){
     stMe:100,stOp:100,
     flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:res.method,meWin,
     currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:res.zone||null,
-    nmeName:you.first,nopName:opp.first,meFlag:you.flag,opFlag:opp.flag};
+    nmeName:you.first,nopName:opp.first,meFlag:you.flag,opFlag:opp.flag,
+    /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop (gel bref à l'impact), zoom
+       caméra et secousse d'écran globale. camZoom/camShakeX/Y sont les
+       valeurs COURANTES (interpolées chaque frame vers leur repos), jamais
+       appliquées directement en un saut. ==== */
+    hitStopMs:0,hitStopStart:0,_lastNow:0,camZoom:1,camShakeMag:0,camFocusX:0.5,
+    /* ==== [ANCRE: JUICE_NIVEAU2] — pool de particules générique (étincelles
+       d'impact, poussière de takedown, confettis de victoire). _particles est
+       un tableau plat consommé/rempli par spawnParticles()/updateParticles()/
+       drawParticles(), tous génériques (le "kind" pilote le rendu). ==== */
+    _particles:[],_wasGrounded:false,
+    /* ==== [ANCRE: JUICE_NIVEAU4] — ralenti (slowMo*), chromatic aberration
+       au KO (_chromaKOActive) et réaction de foule (crowdPulse, 0=calme,
+       1=en délire). ==== */
+    slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
 }
 function cacheArenaGfx(){
   const A=ARENA, ctx=A.ctx, W=A.W, H=A.H;
@@ -1387,11 +1401,36 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   if(!cv||!cv.getContext||typeof requestAnimationFrame==='undefined'){ ARENA.done=true; return; } // pas de canvas (test)
   const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=220;
   cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.t0=performance.now(); ARENA.pauseOffset=0; ARENA.roundPause=false;
+  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr; ARENA.t0=performance.now(); ARENA.pauseOffset=0; ARENA.roundPause=false;
   ARENA.noise=makeNoisePattern(ctx);
   cacheArenaGfx();
   const total=ARENA.beats.length*BEAT_MS;
-  const loop=(now)=>{ if(ARENA.roundPause) return; const el=now-ARENA.t0-ARENA.pauseOffset; const bi=Math.min(ARENA.beats.length-1,Math.floor(el/BEAT_MS));
+  const loop=(now)=>{ if(ARENA.roundPause) return;
+    /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop : pendant le gel, on absorbe le
+       temps réel dans pauseOffset au lieu de laisser el avancer, donc la
+       frame reste identique sans jamais sauter de beat au dégel. */
+    if(ARENA.hitStopMs>0){
+      if(now-ARENA.hitStopStart<ARENA.hitStopMs){
+        ARENA.pauseOffset+=now-(ARENA._lastNow||now); ARENA._lastNow=now;
+        drawArena((ARENA._lastFrac||0),true); ARENA.raf=requestAnimationFrame(loop); return;
+      }
+      ARENA.hitStopMs=0; ARENA._chromaKOActive=false;
+    }
+    /* ==== [ANCRE: JUICE_NIVEAU4] — ralenti sur les finitions : même principe
+       que le hit-stop (absorber le temps réel dans pauseOffset), mais PARTIEL
+       (facteur slowMoFactor) au lieu de total — la frappe/chute se termine en
+       temps étiré au lieu de reprendre net à vitesse normale après le gel. */
+    if(ARENA.slowMoUntil && now<ARENA.slowMoUntil){
+      const dtReal=now-(ARENA._lastNow||now); const dtSlow=dtReal*(ARENA.slowMoFactor||1);
+      ARENA.pauseOffset+=dtReal-dtSlow; ARENA._lastNow=now;
+      const elS=now-ARENA.t0-ARENA.pauseOffset;
+      ARENA._lastFrac=(elS%BEAT_MS)/BEAT_MS;
+      drawArena(ARENA._lastFrac,false); paintBars();
+      ARENA.raf=requestAnimationFrame(loop); return;
+    }
+    ARENA.slowMoUntil=0;
+    ARENA._lastNow=now;
+    const el=now-ARENA.t0-ARENA.pauseOffset; const bi=Math.min(ARENA.beats.length-1,Math.floor(el/BEAT_MS));
     if(bi!==ARENA.lastBeat){
       // pause au changement de round (sauf le tout premier beat) — laisse le
       // joueur enchaîner manuellement plutôt qu'un défilement continu.
@@ -1406,8 +1445,22 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
       }
       ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]);
     }
-    drawArena((el%BEAT_MS)/BEAT_MS); paintBars();
-    if(el>=total){ ARENA.done=true; drawArena(1,true); ARENA.to=setTimeout(()=>CL.toResult(),1300); return; }
+    ARENA._lastFrac=(el%BEAT_MS)/BEAT_MS;
+    drawArena(ARENA._lastFrac); paintBars();
+    if(el>=total){ ARENA.done=true;
+      /* ==== [ANCRE: JUICE_NIVEAU2] — confettis de victoire : sans une courte
+         boucle dédiée après la fin du combat, drawArena(1,true) ne serait
+         appelé qu'UNE fois (gel plat) et les confettis n'auraient jamais la
+         moindre frame pour tomber avant la navigation vers l'écran de
+         résultat. */
+      if(ARENA.meWin) spawnParticles(ARENA,ARENA.W/2,-10,{count:44,xSpread:ARENA.W*0.9,
+        colors:['#E6B93A','#E8442F','#7FC488','#F5EFE0'],spreadX:2,spreadY:1,vy0:1.5,gravity:0.085,life:120,size:6,kind:'confetti'});
+      const outroStart=performance.now();
+      const outroLoop=(now2)=>{ updateParticles(ARENA); drawArena(1,true); paintBars();
+        if(now2-outroStart<1100){ ARENA.raf=requestAnimationFrame(outroLoop); }
+        else { ARENA.to=setTimeout(()=>CL.toResult(),200); } };
+      ARENA.raf=requestAnimationFrame(outroLoop); return;
+    }
     ARENA.raf=requestAnimationFrame(loop); };
   ARENA.loopFn=loop;
   paintBars(); ARENA.raf=requestAnimationFrame(loop);
@@ -1421,6 +1474,28 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
   if(b.by==='me'){ A.flashOp=1; A.shakeOp=1; A.lungeMe=1; }
   else { A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }
   A.stMe=clamp(A.stMe-RI(2,5),12,100); A.stOp=clamp(A.stOp-RI(2,5),12,100);
+  /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop + secousse d'écran, magnitude
+     différenciée : un échange normal mérite un micro-gel discret, une
+     finition mérite un vrai temps d'arrêt. Le point de focus caméra suit le
+     combattant qui ENCAISSE (pas celui qui frappe) — c'est lui que l'œil
+     cherche instinctivement au moment de l'impact. ==== */
+  A.hitStopMs=b.finish?170:55; A.hitStopStart=performance.now();
+  A.camShakeMag=Math.min(1,(A.camShakeMag||0)+(b.finish?1:0.45));
+  A.camFocusX=b.by==='me'?0.68:0.32;
+  A.camZoomTarget=b.finish?1.22:1.08;
+  /* ==== [ANCRE: JUICE_NIVEAU2] — intention de burst d'impact, consommée une
+     seule fois dans drawArena dès que la position réelle du receveur (xOp/
+     xMe, qui dépend du momentum) est connue — applyBeat n'a pas cette info. */
+  A._fxSpawn={receiver:b.by==='me'?'op':'me',finish:!!b.finish};
+  /* ==== [ANCRE: JUICE_NIVEAU4] — ralenti + chromatic aberration + foule.
+     Le ralenti ne concerne QUE les finitions (un échange normal n'a pas
+     besoin de s'étirer). La chromatic aberration ne concerne QUE le KO —
+     une soumission n'a pas ce "choc caméra", elle a déjà sa propre tension
+     (halo TAP! existant). La foule réagit à TOUT coup, mais plus fort sur
+     une finition, et décroît ensuite (cf. drawArena). */
+  if(b.finish){ A.slowMoFactor=0.22; A.slowMoUntil=performance.now()+900; }
+  A._chromaKOActive=!!(b.finish && b.method && b.method.startsWith('KO'));
+  A.crowdPulse=Math.min(1,(A.crowdPulse||0)+(b.finish?1:0.35));
   if(b.finish){ if(b.method&&b.method.startsWith('KO')){ if(A.meWin){A.fall=2;} else {A.fall=1;} }
     else if(b.method&&b.method.startsWith('Soum')){ A.tap=A.meWin?2:1; }
     if(A.finishZone){ const zoneLetter=A.finishZone==='tête'?'h':A.finishZone==='corps'?'b':'l';
@@ -1429,16 +1504,103 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
   A.currentText=b.text; A.currentMomentum=b.momentum;
   if(b.snapA) A.snapA=b.snapA; if(b.snapB) A.snapB=b.snapB;
 }
+/* ==== [ANCRE: JUICE_NIVEAU2] — système de particules générique. Chaque
+   particule est un objet plat {x,y,vx,vy,g,life,maxLife,size,color,kind,rot}.
+   spawnParticles() en crée un lot, updateParticles() les fait vivre une
+   frame (gravité + décroissance de vie), drawParticles() les dessine selon
+   leur "kind". Pas de classe, pas de lib : cohérent avec le reste du fichier. ==== */
+function spawnParticles(A,x,y,opts){
+  if(!A._particles) A._particles=[];
+  const n=opts.count||6;
+  for(let i=0;i<n;i++){
+    const ox=opts.xSpread?( (Math.random()-0.5)*opts.xSpread ):0;
+    A._particles.push({
+      x:x+ox, y:y+(opts.ySpread?(Math.random()-0.5)*opts.ySpread:0),
+      vx:(Math.random()-0.5)*(opts.spreadX||4),
+      vy:(opts.vy0||0)-(Math.random()*(opts.spreadY||4)),
+      g:opts.gravity!=null?opts.gravity:0.32,
+      life:opts.life||24, maxLife:opts.life||24,
+      size:(opts.size||3)*(0.65+Math.random()*0.7),
+      color:opts.colors[Math.floor(Math.random()*opts.colors.length)],
+      kind:opts.kind||'spark', rot:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*0.3
+    });
+  }
+}
+function updateParticles(A){
+  if(!A._particles||!A._particles.length) return;
+  A._particles=A._particles.filter(p=>{
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.life-=1; p.rot+=p.rotSpeed;
+    return p.life>0;
+  });
+}
+/* ==== [ANCRE: JUICE_NIVEAU4] — chromatic aberration au KO. Décale le canal
+   rouge vers la gauche et le bleu vers la droite (vert centré, inchangé) sur
+   quelques pixels — le "choc caméra" qu'on voit dans beaucoup de jeux de
+   combat modernes sur un gros impact. Volontairement réservé au KO (voir
+   _chromaKOActive posé dans applyBeat) : appelé une fois par frame gelée
+   pendant le hit-stop, jamais pendant le reste du combat — le coût O(pixels)
+   de getImageData/putImageData est négligeable sur une poignée de frames
+   rares, il serait déraisonnable à 60fps en continu. ==== */
+function applyChromaAberration(ctx,offsetPx){
+  try{
+    const cv=ctx.canvas; if(!cv||!cv.width||!cv.height) return;
+    const w=cv.width, h=cv.height;
+    const img=ctx.getImageData(0,0,w,h); const d=img.data;
+    const out=new Uint8ClampedArray(d.length);
+    for(let y=0;y<h;y++){ const rowBase=y*w;
+      for(let x=0;x<w;x++){ const i=(rowBase+x)*4;
+        const xr=x-offsetPx<0?0:(x-offsetPx); const xb=x+offsetPx>=w?w-1:(x+offsetPx);
+        const ir=(rowBase+xr)*4, ib=(rowBase+xb)*4;
+        out[i]=d[ir]; out[i+1]=d[i+1]; out[i+2]=d[ib+2]; out[i+3]=d[i+3];
+      }
+    }
+    img.data.set(out);
+    ctx.putImageData(img,0,0);
+  }catch(e){ /* getImageData peut échouer (canvas "tainted", environnement de test) — dégrade silencieusement */ }
+}
+function drawParticles(ctx,A){
+  if(!A._particles||!A._particles.length) return;
+  for(const p of A._particles){
+    const t=Math.max(0,p.life/p.maxLife);
+    ctx.save();
+    if(p.kind==='confetti'){
+      ctx.globalAlpha=t; ctx.fillStyle=p.color;
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillRect(-p.size/2,-p.size/2*0.6,p.size,p.size*0.6);
+    } else if(p.kind==='dust'){
+      ctx.globalAlpha=t*0.5; ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*(1.4-t*0.4),0,Math.PI*2); ctx.fill();
+    } else { // spark
+      ctx.globalAlpha=t; ctx.fillStyle=p.color;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*t,0,Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+/* ==== [FIN ANCRE] ==== */
 function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,grounded,phase,top,tap}
   ctx.save();
   const sh=o.shake?((Math.random()-0.5)*4):0;
   x+=face*(o.lunge*14)+sh;
   const bob=Math.sin(performance.now()/240 + (face>0?0:1))*2;
+  /* ==== [ANCRE: JUICE_NIVEAU3] — ombre portée, ancrée au sol (groundY fixe,
+     jamais le bob vertical du buste — sinon elle "respirerait" avec lui,
+     ce qui casserait l'ancrage au sol). Légèrement plus large en pleine
+     extension : le poids se porte en avant. ==== */
+  ctx.save(); ctx.globalAlpha=0.30; ctx.fillStyle='#000';
+  ctx.beginPath(); ctx.ellipse(x, groundY-2, 14+o.lunge*3, 4.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
   if(o.grounded){
     if(!o.top){
       // Sur le dos (garde) — buste allongé, tête décalée, jambes relevées
       ctx.translate(x, groundY-5);
-      ctx.fillStyle=o.flash?'#fff':color; ctx.globalAlpha=.95;
+      /* ==== [ANCRE: JUICE_NIVEAU3] — halo lumineux au lieu du blanc plat :
+         le combattant garde sa couleur, un glow diffus derrière souligne
+         l'impact sans effacer qui il est. */
+      if(o.flash){ ctx.save(); ctx.shadowColor='#fff'; ctx.shadowBlur=16; ctx.fillStyle='rgba(255,255,255,.8)';
+        ctx.beginPath(); ctx.ellipse(0,0,30,9,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+      ctx.fillStyle=color; ctx.globalAlpha=.95;
       ctx.beginPath(); ctx.ellipse(0,0,30,9,0,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(-face*25,-2,7,0,Math.PI*2); ctx.fill();
       ctx.strokeStyle=color; ctx.lineWidth=5; ctx.lineCap='round';
@@ -1446,7 +1608,9 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
     } else {
       // Au-dessus (dominant) — buste vertical, bras qui contrôle/frappe
       ctx.translate(x-face*8, groundY-22);
-      ctx.fillStyle=o.flash?'#fff':color; ctx.strokeStyle=o.flash?'#fff':color;
+      if(o.flash){ ctx.save(); ctx.shadowColor='#fff'; ctx.shadowBlur=16; ctx.fillStyle='rgba(255,255,255,.8)';
+        ctx.beginPath(); ctx.ellipse(0,-6,14,22,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+      ctx.fillStyle=color; ctx.strokeStyle=color;
       ctx.lineWidth=12; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(0,10); ctx.lineTo(0,-15); ctx.stroke();
       ctx.beginPath(); ctx.arc(0,-22,8,0,Math.PI*2); ctx.fill();
@@ -1463,13 +1627,33 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
   }
   ctx.translate(x, groundY-52+bob+(o.fallen?46:0));
   if(o.fallen) ctx.rotate(face*1.3);
-  const col=o.flash?'#fff':color;
+  /* ==== [ANCRE: JUICE_NIVEAU3] — même halo pour la pose debout, dessiné
+     derrière avant tout le reste (jambes/buste/tête/bras gardent leur
+     couleur propre, plus de flip vers un blanc plat). */
+  if(o.flash){ ctx.save(); ctx.shadowColor='#fff'; ctx.shadowBlur=18; ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.beginPath(); ctx.ellipse(0,-5,17,32,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+  const col=color;
+  const reach=o.lunge;
   ctx.strokeStyle=col; ctx.lineWidth=6; ctx.lineCap='round';
   ctx.beginPath(); ctx.moveTo(-3,4); ctx.lineTo(-10,46); ctx.moveTo(4,4); ctx.lineTo(12,46); ctx.stroke();
+  ctx.save();
+  ctx.scale(1+reach*0.14, 1-reach*0.10);
   ctx.lineWidth=15; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(0,26); ctx.stroke();
   ctx.fillStyle=col; ctx.beginPath(); ctx.arc(0,-20,9,0,Math.PI*2); ctx.fill();
+  /* ==== [ANCRE: JUICE_NIVEAU3] — volume : surbrillance douce en haut à
+     gauche du buste/tête (lumière du projecteur, cohérent avec _spotGrad
+     déjà centré au-dessus de l'octogone), fondue via 'overlay' plutôt qu'un
+     dégradé de teinte calculé — un simple trait de couleur unie gagne un
+     semblant de relief sans ajouter de complexité de calcul de couleur. */
+  ctx.save(); ctx.globalCompositeOperation='overlay';
+  const hl=ctx.createRadialGradient(-3,-24,0,-3,-24,15);
+  hl.addColorStop(0,'rgba(255,255,255,.55)'); hl.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=hl;
+  ctx.beginPath(); ctx.arc(0,-20,9,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0,8,8,18,0,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+  ctx.restore();
   ctx.lineWidth=6;
-  const reach=o.lunge;
   // flou de mouvement — traînée du bras avant en pleine frappe
   if(reach>0.1 && !o.fallen){
     for(let i=1;i<=3;i++){
@@ -1481,7 +1665,7 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
   ctx.globalAlpha=1;
   ctx.beginPath(); ctx.moveTo(0,2); ctx.lineTo(-face*8,-10); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(face*(10+reach*20), -8+reach*4); ctx.stroke();
-  ctx.fillStyle=o.flash?'#fff':color; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,Math.PI*2); ctx.fill();
   ctx.restore();
 }
 /* ==== [ANCRE: LOT12_COSMETIQUE_ARENE] — thèmes visuels de l'octogone. Adapté
@@ -1501,14 +1685,32 @@ function getArenaTheme(){ return ARENA_THEMES.find(t=>t.id===(G.arenaCosmetic||'
 /* ==== [FIN ANCRE] ==== */
 function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)return; const {W,H,topY,topL,topR,botL,botR,gY,gY2}=A._geom;
   ctx.clearRect(0,0,W,H);
+  /* ==== [ANCRE: JUICE_NIVEAU1] — caméra : zoom vers la cible (tenu, pas
+     assoupli, pendant le hit-stop) + secousse globale qui décroît en
+     exponentielle. focusX suit qui encaisse (posé par applyBeat) pour que le
+     zoom recentre naturellement sur l'action plutôt que sur le centre fixe. */
+  if(!freeze){
+    const zt=A.camZoomTarget||1; A.camZoom=(A.camZoom||1)+(zt-(A.camZoom||1))*0.22;
+    A.camZoomTarget=1+((A.camZoomTarget||1)-1)*0.86;
+    A.camShakeMag=Math.max(0,(A.camShakeMag||0)-0.09);
+  }
+  const shakeMag=(A.camShakeMag||0)*7;
+  const shakeX=shakeMag?(Math.random()-0.5)*shakeMag:0, shakeY=shakeMag?(Math.random()-0.5)*shakeMag*0.6:0;
+  const zoom=A.camZoom||1, focusX=W*(A.camFocusX!=null?A.camFocusX:0.5), focusY=H*0.62;
+  ctx.save();
+  ctx.translate(shakeX,shakeY);
+  if(zoom>1.002){ ctx.translate(focusX,focusY); ctx.scale(zoom,zoom); ctx.translate(-focusX,-focusY); }
   ctx.fillStyle=A._spotGrad; ctx.fillRect(0,0,W,topY);
+  if(!freeze) A.crowdPulse=Math.max(0,(A.crowdPulse||0)-0.02);
+  const cp=A.crowdPulse||0;
   const bleacherRows=6, rowH=topY/bleacherRows;
   for(let r=0;r<bleacherRows;r++){ const ry=r*rowH, rh=rowH-1;
     ctx.fillStyle=A._bleacherFill[r]; ctx.fillRect(0,ry,W,rh);
     ctx.fillStyle=A._bleacherDots[r];
     const dots=14+r*3;
     for(let d=0;d<dots;d++){ const dx=(d/dots)*W+Math.sin(d+r)*3;
-      ctx.beginPath(); ctx.arc(dx,ry+rh*0.5,1.6,0,Math.PI*2); ctx.fill(); }
+      const jump=cp>0.02?Math.sin(performance.now()/80+d*1.7+r*2)*cp*3:0;
+      ctx.beginPath(); ctx.arc(dx,ry+rh*0.5-Math.abs(jump),1.6,0,Math.PI*2); ctx.fill(); }
   }
   ctx.beginPath();
   ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.lineTo(W,gY2); ctx.lineTo(W,gY);
@@ -1531,6 +1733,20 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
   const shift=grounded?0:clamp((mom-50)/50,-1,1)*(W*0.09);
   let xOp=W*0.68+shift, xMe=W*0.32+shift;
   if(grounded){ const center=W*0.5+shift; xOp=center+(A.curTop==='op'?12:-12); xMe=center+(A.curTop==='me'?-12:12); }
+  /* ==== [ANCRE: JUICE_NIVEAU2] — consommation des intentions de particules
+     posées plus tôt (applyBeat pour l'impact, transition de phase ici pour
+     le takedown) : c'est ICI que xOp/xMe/gY sont enfin connus. */
+  if(A._fxSpawn){
+    const s=A._fxSpawn; const px=s.receiver==='op'?xOp:xMe; const py=grounded?gY-15:gY-58;
+    spawnParticles(A,px,py,{count:s.finish?14:7,colors:['#F5EFE0','#E6B93A','#E8442F'],
+      spreadX:s.finish?7:4,spreadY:s.finish?6:3.5,gravity:0.32,life:s.finish?32:20,size:s.finish?3.2:2.2,kind:'spark'});
+    A._fxSpawn=null;
+  }
+  if(grounded && !A._wasGrounded){
+    spawnParticles(A,(xOp+xMe)/2,gY,{count:10,colors:['#4a3c1f','#3a2f20','#5C4B2E'],
+      spreadX:5,spreadY:2,gravity:0.05,life:34,size:5,kind:'dust'});
+  }
+  A._wasGrounded=grounded;
   const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
   const foOp=A._foOp, foMe=A._foMe;
   foOp.lunge=A.lungeOp*(1-frac); foOp.flash=A.flashOp>0; foOp.shake=A.shakeOp>0; foOp.fallen=A.fall===2;
@@ -1540,10 +1756,16 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
   fighter(ctx, xOp, gY, -1, '#6E8478', foOp);
   fighter(ctx, xMe, gY, 1, '#B23B36', foMe);
   if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#E8442F'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
-  A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
-  A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);
-  A.lungeMe*=0.86; A.lungeOp*=0.86;
+  if(!freeze) updateParticles(A);
+  drawParticles(ctx,A);
+  if(!freeze){
+    A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
+    A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);
+    A.lungeMe*=0.86; A.lungeOp*=0.86;
+  }
   ctx.fillStyle=A._vignetteGrad; ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  if(A._chromaKOActive) applyChromaAberration(ctx,Math.round(3*(A.dpr||1)));
   ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
   const rnd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
   let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
@@ -1553,7 +1775,7 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
 }
 function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='undefined')cancelAnimationFrame(ARENA.raf); if(ARENA.to)clearTimeout(ARENA.to); } }
 function scr_arena(){ const A=ARENA||{};
-  return `<div class="fade">
+  return `<div class="scr">
    <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:var(--text)">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
    <div class="card glass raise" style="padding:12px;border-color:var(--line);background:var(--panel2)">
      <div class="eyebrow center" style="font-size:9px;margin-bottom:6px">DOMINATION TERRITORIALE</div>

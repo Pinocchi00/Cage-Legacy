@@ -1047,7 +1047,7 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
     // signatureMoveCard() côté affichage, pour ne jamais désynchroniser le
     // texte montré au joueur du boost réellement appliqué.
     const boostKeys=(SIGNATURE_BOOST_BY_ZONE[type]&&SIGNATURE_BOOST_BY_ZONE[type][zone])||(type==='sub'?['submission','killer']:['power','killer']);
-    boostKeys.forEach(k=>{ winner.attrs[k]=clamp((winner.attrs[k]||50)+6,1,100); });
+    boostKeys.forEach(k=>{ winner.attrs[k]=clamp((winner.attrs[k]||50)+SIGNATURE_BOOST_PTS,1,100); });
     winner.overall=overall(winner);
     const skillId='sig_'+baseMove.replace(/[^a-z0-9]/gi,'').toLowerCase().slice(0,20);
     if(!(winner.skills||[]).includes(skillId)){
@@ -1127,6 +1127,7 @@ const CHAMP_MULT=[1,2.0,2.2,2.5,2.5,2.0,5.3]; // multiplicateur de bourse pour u
 // signatureMoveCard() (ui-06-career-screens.js), qui recalculait sinon un
 // boost générique et FAUX (submission+killer / power+killer pour tout,
 // ignorant la zone) — même bug de duplication que ORG_PURSES/CHAMP_MULT.
+const SIGNATURE_BOOST_PTS=6;
 const SIGNATURE_BOOST_BY_ZONE={
   sub:{'tête':['submission','cardio'],'corps':['submission','strength'],'jambes':['submission','explosiveness']},
   ko:{'tête':['power','killer'],'corps':['power','cardio'],'jambes':['power','explosiveness']}

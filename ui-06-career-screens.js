@@ -205,8 +205,8 @@ function scr_select(){ const f=G.f;
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
      <span class="eyebrow mono">BUREAU DU MATCHMAKER // ${orgDisplayName(f).toUpperCase()}</span>
    </div>
-   <p class="lede" style="margin-bottom:32px;font-size:15px">Analysez les profils et signez le contrat. L\u2019ordre des propositions dicte le niveau de risque et la récompense au classement.</p>`;
-  const rkMe=divRank(f);
+   <p class="lede" style="margin-bottom:32px;font-size:15px">Analysez les profils et signez le contrat. L\u2019ordre des propositions dicte le niveau de risque et la récompense au classement.</p>
+   <div class="stagger">`;
   G.opps.forEach((e,i)=>{ const o=e.o;
     const isRival=(f.rivalId===o.id); const isAmaRival=(!isRival && o.isAmateurRival);
     const rnk=divRank(o); const fightsTot=o.W+o.L+(o.D||0);
@@ -232,7 +232,7 @@ function scr_select(){ const f=G.f;
       <div class="meta-strip"><div><span>Record</span><b style="white-space:nowrap">${recordStr(o)}</b></div>${o.amaRec?`<div><span>Amateur</span><b style="white-space:nowrap">${o.amaRec.W}-${o.amaRec.L}</b></div>`:''}<div><span>Mensurations</span><b style="white-space:nowrap">${o.phys.height}cm / ${o.phys.reach}cm</b></div></div>
       <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
       <div class="tagrow">
-        ${e.context?`<span class="tag2 hot" style="background:var(--gold);color:var(--bg);border-color:var(--gold)">${e.context}</span>`:''}
+        ${e.context?`<span class="tag2 hot gold-fill">${e.context}</span>`:''}
         ${isRival?'<span class="tag2" style="color:var(--bg);background:var(--blood);border-color:var(--blood)">RIVALITÉ ACTIVE</span>':''}
         ${isAmaRival?'<span class="tag2" style="color:var(--sage);border-color:var(--sage)">RIVAL AMATEUR</span>':''}
         <span class="tag2 hot">${rTag}</span>
@@ -242,7 +242,7 @@ function scr_select(){ const f=G.f;
       <button class="btn ${isRival?'primary':''}" style="margin-top:14px;font-size:15px;letter-spacing:.05em;position:relative;z-index:2" onclick="CL.opp(${i})">${isRival?'RÉGLER SES COMPTES':'ACCEPTER LE COMBAT'}</button>
     </div>`;
   });
-  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Retour au vestiaire</button></div>`;
+  h+=`</div><button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Retour au vestiaire</button></div>`;
   return h;
 }
 
@@ -396,7 +396,7 @@ function scr_hof(){
      </details>
      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
    </div>`:''}
-   ${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
+   <div class="stagger">${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
       <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
         <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
@@ -408,7 +408,7 @@ function scr_hof(){
       <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="event.stopPropagation();CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
       <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="event.stopPropagation();CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
       <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="event.stopPropagation();CL.deleteHof('${f.id}')">Supprimer</button></div>`).join(''):
-      '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}
+      '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}</div>
    <div class="tagrow mb">
      <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
      <button class="btn ghost" style="width:auto;padding:8px 12px" onclick="CL.go('codex')">Codex des compétences</button>
@@ -612,28 +612,41 @@ function championBadgeCard(f){
     badges.push({label:`${f.titles} règne(s) de champion à son actif`,status:'Titre(s) ancien(s) — ceinture perdue ou abandonnée',current:false});
   }
   if(!badges.length) return '';
-  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid ${badges.some(b=>b.current)?'var(--gold)':'var(--line)'};padding:14px;text-align:left">
+  return `<div class="card mt grain" style="position:relative;z-index:2;background:var(--panel2);border:1px solid ${badges.some(b=>b.current)?'var(--gold)':'var(--line)'};padding:14px;text-align:left">
     <div class="eyebrow mb" style="color:${badges.some(b=>b.current)?'var(--gold)':'var(--muted)'}">${SVG.crown} Statut de championnat</div>
-    ${badges.map(b=>`<div class="mono small" style="margin-top:4px"><b style="color:${b.current?'var(--win)':'var(--muted)'}">${b.status}</b> — ${esc(b.label)}</div>`).join('')}
+    ${badges.map(b=>`<div class="mono small" style="margin-top:4px"><b style="color:${b.current?'var(--gold)':'var(--muted)'}">${b.status}</b> — ${esc(b.label)}</div>`).join('')}
   </div>`;
 }
 function signatureMoveCard(f){
   if(!f.signatureMove) return '';
   const sm=f.signatureMove;
-  const boostKeys=sm.type==='sub'?['submission','killer']:['power','killer'];
-  const boostTxt=boostKeys.map(k=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(6/5))} ${lbl}`; }).join(', ');
+  /* ==== [ANCRE: CORRECTIF_BOOST_SIGNATURE_AFFICHAGE] — bug trouvé : la fiche
+     recalculait un boost générique (submission+killer / power+killer pour
+     tout), ignorant la zone, alors que engine.js applique
+     SIGNATURE_BOOST_BY_ZONE depuis ANCRE CORRECTIF_BOOST_SIGNATURE_
+     DIFFERENCIE. Même table, même constante SIGNATURE_BOOST_PTS que
+     l'engine : le texte affiché correspond désormais au boost réellement
+     appliqué. ==== */
+  const boostKeys=(SIGNATURE_BOOST_BY_ZONE[sm.type]&&SIGNATURE_BOOST_BY_ZONE[sm.type][sm.zone])||(sm.type==='sub'?['submission','killer']:['power','killer']);
+  const boostTxt=boostKeys.map(k=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(SIGNATURE_BOOST_PTS/5))} ${lbl}`; }).join(', ');
   const typeLbl=sm.type==='sub'?'Soumission':'KO';
-  return `<div class="glass card mt" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
+  return `<div class="card mt" style="position:relative;z-index:2;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
     <div class="eyebrow gold mb">${SVG.star} Mouvement Signature</div>
     <b style="font-size:17px;color:var(--gold)">${esc(sm.name)}</b> <span class="muted small">(${typeLbl})</span>
-    <div class="muted small mt">Répété jusqu'à devenir sa marque de fabrique — 40% de chances de conclure ainsi chaque finition future.</div>
+    <div class="muted small mt">40 % de chances de conclure par ce geste à chaque finition.</div>
     <div class="mono small mt" style="color:var(--win)">Effets acquis : ${boostTxt}</div>
   </div>`;
 }
-function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._profileReturn||(G.faith?'faith_hub':'hub'); G._profileReturn=null;
-  const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
-     ${ATTR[key].map(a=>`<div class="attr"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="CL.go('${backScreen}')">✕</span></div>
+/* ==== [ANCRE: CORRECTIF_RETOUR_FICHE_PROFIL] — bug trouvé : G._profileReturn
+   était nullé dès le rendu de l'écran, pas au moment de la sortie. Tout
+   render() déclenché pendant que la fiche est ouverte (ex. CL.theme())
+   écrasait donc la cible et renvoyait au hub au lieu de class_choice/
+   class_choice_31 — sortie latérale sur un choix bloquant non résolu. Le
+   nullage est déplacé sur les deux points de sortie réels (✕ et Retour). ==== */
+function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._profileReturn||(G.faith?'faith_hub':'hub');
+  const grp=(key,title,avg,hero)=>`<div class="card" style="${hero?'padding:20px 0':'flex:1;padding:14px 0'}"><div class="grp-h"><span class="disp" style="font-size:${hero?'22px':'15px'}">${title}</span><span class="gold mono" style="font-size:${hero?'16px':'13px'}">${d20(avg)}/20</span></div>
+     ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'}"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="G._profileReturn=null;CL.go('${backScreen}')">✕</span></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
      <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div></div>
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
@@ -663,10 +676,11 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
              <div id="skdet${i}" class="muted small" style="display:none;margin:4px 0 0 0;padding-left:8px;border-left:2px solid var(--line)">${sk.desc||''}${fxTxt?`<div class="mono" style="color:var(--win);margin-top:2px">${fxTxt}</div>`:''}</div>
            </div>`;}).join('');
      })():''}
+   ${f.skills.length?`<div class="rarity-guide" style="margin-top:12px"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>`:''}
    </div>
-   ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}
-   <div class="rarity-guide"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>
-   <button class="btn ghost" onclick="CL.go('${backScreen}')">Retour</button></div>`; }
+   ${grp('tech','Technique',g.tech,true)}
+   <div style="display:flex;gap:16px">${grp('ment','Mental',g.ment,false)}${grp('phys','Physique',g.phys,false)}</div>
+   <button class="btn ghost" onclick="G._profileReturn=null;CL.go('${backScreen}')">Retour</button></div>`; }
 
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
   let h=`<div class="scr">

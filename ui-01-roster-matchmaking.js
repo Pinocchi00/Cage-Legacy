@@ -727,7 +727,7 @@ function scr_vs_friend_next(){
   if(!s||!A||!B) return `<div class="scr center intro"><p class="lede">Série interrompue.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
   return `<div class="scr center intro">
     <div class="eyebrow gold">Défi Multijoueur — Série</div>
-    <h2 class="disp">${A.name} ${s.A} - ${s.B} ${B.name}</h2>
+    <h2 class="disp">${esc(A.name)} ${s.A} - ${s.B} ${esc(B.name)}</h2>
     <p class="lede">${s.A===1&&s.B===1?'Égalité. La manche décisive se jouera en 5 rounds.':`Manche ${s.round+1} sur 3 maximum.`}</p>
     <button class="btn primary mt" onclick="CL.launchVsFriend()">MANCHE SUIVANTE</button>
   </div>`;
