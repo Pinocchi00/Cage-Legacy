@@ -76,11 +76,72 @@ function gauntletAscPicker(mode){
    run le même jour SANS aucun serveur ni compte : la comparaison se fait
    hors-jeu, le jeu ne fait que garantir l'identité du tirage. Une seule
    tentative par jour et par format. ==== */
+/* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — streak affichée AVANT de jouer, sur
+   le même modèle que pactToggleBlock (ui-04) pour pactStreak : le joueur
+   doit voir ce qu'il a à perdre en sautant un jour, pas seulement le
+   découvrir après coup au bilan de run. ==== */
 function gauntletDailyTag(mode){
   const meta=loadMetaStats();
   const done=gauntletDailyDone(meta,mode);
   const label=done?`Défi du jour déjà tenté (${gauntletDailyKey()})`:`Tenter le DÉFI DU JOUR (${gauntletDailyKey()})`;
-  return `<div class="mono small" style="margin-top:6px"><span onclick="${done?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${done?'default':'pointer'};border:1px dashed ${done?'var(--line)':'var(--sage)'};color:${done?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px">${label}</span></div>`;
+  const streak=meta.gauntletDailyStreak||0;
+  const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis du jour : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>`:'';
+  return `<div class="mono small" style="margin-top:6px"><span onclick="${done?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${done?'default':'pointer'};border:1px dashed ${done?'var(--line)':'var(--sage)'};color:${done?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px">${label}</span>${streakLine}</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — n'apparaît qu'une fois 5 rivaux
+   historiques battus (meta.gauntletRivalsDefeated, jamais purgé, alimenté
+   par claimGauntletBounty() en ui-03). Condition indépendante de
+   checkLegendUnlock('mode_boss') : les deux se cumulent naturellement
+   puisqu'il faut déjà avoir débloqué et joué le Boss Run normal pour
+   accumuler 5 rivaux vaincus dedans, mais rien ne l'impose techniquement. ==== */
+function gauntletCapstoneEntry(){
+  const meta=loadMetaStats();
+  const n=(meta.gauntletRivalsDefeated||[]).length;
+  if(n<5) return '';
+  return `<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--blood);color:var(--blood)" onclick="CL.startBossRunCapstone()">BOSS RUN — LES ANCIENS BOURREAUX
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Vos 5 pires némésis historiques, régénérées pour la revanche finale</span></button>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — écran dédié, sur le modèle
+   visuel du Panthéon carrière (scr_hof, eyebrow+bar+liste), mais SANS
+   persistance de combattant individuel : uniquement les scores lus dans
+   meta.gauntletBestByArchetype (state.js), cohérent avec le principe déjà
+   documenté ailleurs que les combattants arcade sont jetables et non
+   persistés. injectExtendedArchetypes() garantit que les archétypes
+   légendes/achetés débloqués apparaissent dans la grille, pas seulement les
+   23 de base. ==== */
+function scr_archetype_pantheon(){
+  injectExtendedArchetypes();
+  const meta=loadMetaStats();
+  const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
+  const mode=G._archPantheonMode||'bracket64';
+  const maxAsc=gauntletAscLevel(meta,mode);
+  const asc=clamp(parseInt(G._archPantheonAsc,10)||0,0,maxAsc);
+  const rows=ARCADE_ARCHETYPES.map(a=>{
+    const val=gauntletBestByArchetypeGet(meta,mode,asc,a.nick);
+    const label=val===undefined?'—':(mode==='boss_run'?`${val}/5`:mode==='ladder_100'?`#${val}`:(val>=7?'Tournoi remporté':`Palier ${val}`));
+    return `<div class="mono small" style="display:flex;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--line)">
+      <span>${a.flag||''} ${esc(a.nick)}</span>
+      <span style="color:${val===undefined?'var(--muted)':'var(--gold)'};font-weight:${val===undefined?'normal':'bold'}">${label}</span>
+    </div>`;
+  }).join('');
+  const modeTabs=Object.keys(modeLabel).map(m=>`<span class="pill ${mode===m?'on':''}" onclick="CL.setArchPantheonMode('${m}')">${modeLabel[m]}</span>`).join('');
+  let ascTabs='';
+  if(maxAsc>0){
+    let btns='';
+    for(let i=0;i<=maxAsc;i++) btns+=`<span onclick="CL.setArchPantheonAsc(${i})" style="display:inline-block;cursor:pointer;border:1px solid ${i===asc?'var(--gold)':'var(--line)'};color:${i===asc?'var(--gold)':'var(--muted)'};padding:3px 10px;margin:0 4px 4px 0;border-radius:2px;font-size:11px" class="mono">A${i}</span>`;
+    ascTabs=`<div style="margin:8px 0">${btns}</div>`;
+  }
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon des archétypes — ${modeLabel[mode]}</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
+   <h2 class="disp">Meilleur run par archétype</h2>
+   <p class="lede small">Chaque archétype garde son propre record — battre l\u2019un ne touche jamais celui d\u2019un autre. Uniquement des scores : les combattants arcade sont jetables et non persistés.</p>
+   <div class="pills mb">${modeTabs}</div>
+   ${ascTabs}
+   <div class="glass" style="background:var(--panel2);border:1px solid var(--line);margin-top:8px">${rows}</div>
+   <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
+  </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_gauntlet_menu(){
@@ -101,6 +162,8 @@ function scr_gauntlet_menu(){
    ${checkLegendUnlock('mode_boss')?`<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--gold);color:var(--gold)" onclick="CL.startBossRun()">BOSS RUN
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span>${gauntletMenuBestTag('boss_run')}</button>
    ${gauntletAscPicker('boss_run')}${gauntletDailyTag('boss_run')}`:''}
+   ${gauntletCapstoneEntry()}
+   <button class="btn ghost mt" style="border:1px dashed var(--line)" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }

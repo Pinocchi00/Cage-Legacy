@@ -19,7 +19,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
@@ -53,15 +53,38 @@ function finaliseGauntletRun(a,opts){
   const base=(opts.kind==='elimination')
     ? gauntletEliminationPayout(a.mode,opts.progress,opts.atRisk)
     : gauntletPayout(a.mode,opts.progress);
-  const earned=gauntletFinalPayout(a,base);
+  const preBonus=gauntletFinalPayout(a,base);
+  /* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — streak calculée et créditée ICI,
+     au point de sortie unique du run, pour compter une tentative du jour
+     effectivement jouée jusqu'au bout (victoire, élimination OU
+     encaissement — les 3 passent par finaliseGauntletRun). Le bonus
+     s'applique en plus de gauntletRunMult (mise, pactes, contrat), pas à sa
+     place — deux systèmes indépendants, cf. la ligne dédiée dans
+     runDebriefBlock (ui-04). ==== */
+  let dailyStreak=null, dailyBonusMult=1;
+  if(a.daily){
+    dailyStreak=recordGauntletDailyStreak(meta);
+    dailyBonusMult=gauntletDailyStreakBonusMult(dailyStreak);
+  }
+  const earned=Math.round(preBonus*dailyBonusMult);
+  /* ==== [FIN ANCRE] ==== */
   if(earned>0) meta.legendPoints=(meta.legendPoints||0)+earned;
   a.isNewRecord=recordGauntletBest(meta,a.mode,opts.progress,a.asc||0);
+  /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — enregistré EN PLUS du record
+     global ci-dessus, jamais à sa place. G.f est toujours défini à ce stade
+     (un run Gauntlet ne peut se terminer sans combattant actif) mais le
+     garde-fou reste défensif au cas où finaliseGauntletRun soit un jour
+     appelée hors contexte réel (tests, retryArcade...). ==== */
+  if(typeof G!=='undefined' && G && G.f && G.f.nick) a.isNewArchetypeRecord=recordGauntletBestByArchetype(meta,a.mode,opts.progress,a.asc||0,G.f.nick);
+  /* ==== [FIN ANCRE] ==== */
   if(opts.kind==='victory') recordGauntletAscension(meta,a.mode,a.asc||0);
   if(a.daily) recordGauntletDaily(meta,a.mode,opts.progress);
   saveMetaStats(meta);
   a.earnedOnElimination=earned;
   a.basePayout=base;
   a.runMultApplied=gauntletRunMult(a);
+  a.dailyStreak=dailyStreak;
+  a.dailyStreakBonusMult=dailyBonusMult;
   a.active=false;
   const got=(typeof checkAch==='function')?checkAch():[];
   if(got&&got.length) a.newAch=(a.newAch||[]).concat(got);
@@ -554,7 +577,15 @@ const CL={
          sa propre clause KO-only permanente (condition==='ko_only') et n'a
          pas d'écran de camp entre les combats. Consommée à chaque combat,
          qu'elle se déclenche ou non. ==== */
-      const pactWasActive=!!G.arcade.pactActive; G.arcade.pactActive=false;
+      /* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — A3 : à partir du palier
+         3, le pacte de finition n'est plus un choix combat par combat
+         (CL.togglePact()) mais une clause permanente sur tout le run pour
+         Bracket 64 / Ladder 100 — Boss Run est explicitement exclu car il a
+         déjà sa propre clause KO-only permanente (condition==='ko_only',
+         vérifiée plus bas) : cumuler les deux n'ajouterait rien. ==== */
+      const pactForcedByAscension=(G.arcade.asc||0)>=3 && G.arcade.mode!=='boss_run';
+      const pactWasActive=pactForcedByAscension||!!G.arcade.pactActive; G.arcade.pactActive=false;
+      /* ==== [FIN ANCRE] ==== */
       const pactFail=pactWasActive && win && G.pending.method && !G.pending.method.startsWith('KO');
       /* ==== [ANCRE: REJOUABILITE_PACTE_ESCALADE] — pactStreak compte les
          pactes remplis D'AFFILÉE (pris ET terminés par KO/TKO). Remis à 0 dès
@@ -745,14 +776,22 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   startArcade(){ injectExtendedArchetypes(); const asc=CL._rollGauntletAsc('bracket64'); const seed=CL._rollGauntletSeed();
     G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(),daily:G._dailyPending==='bracket64'};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc),daily:G._dailyPending==='bracket64'};
     G._dailyPending=null; G.screen='draft'; save(); render(); },
   startBossRun(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
     const wasDaily=G._dailyPending==='boss_run'; G._dailyPending=null;
     startBossRun(seed,asc); G.arcade.daily=wasDaily; render(true); },
+  /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — variante Boss Run débloquée
+     depuis scr_gauntlet_menu (ui-06) une fois 5 rivaux historiques battus.
+     Pas de défi du jour sur cette entrée (G._dailyPending non consommé ici,
+     symétrique avec le fait que boss_capstone n'a pas d'entrée dans
+     gauntletDailyTag). ==== */
+  startBossRunCapstone(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
+    startBossRun(seed,asc,true); render(true); },
+  /* ==== [FIN ANCRE] ==== */
   startLadder100(){ injectExtendedArchetypes(); const asc=CL._rollGauntletAsc('ladder_100'); const seed=CL._rollGauntletSeed();
     G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(),daily:G._dailyPending==='ladder_100'};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc),daily:G._dailyPending==='ladder_100'};
     G._dailyPending=null; G.screen='draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
@@ -1049,7 +1088,19 @@ const CL={
   /* ==== [ANCRE: REJOUABILITE_PACTE_TOGGLE] — Bracket 64 / Ladder 100
      seulement (Boss Run a déjà sa clause KO-only permanente et pas d'écran
      de vestiaire entre les combats). ==== */
-  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; G.arcade.pactActive=!G.arcade.pactActive; render(); },
+  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — A3 : le pacte forcé par
+     l'Ascension (palier>=3) n'est pas un CL.togglePact() de plus à activer,
+     c'est une clause déjà lue directement sur G.arcade.asc dans afterResult
+     — le bouton ne doit donc plus rien faire une fois forcé, pour ne pas
+     laisser croire au joueur qu'il peut le désactiver. ==== */
+  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; if((G.arcade.asc||0)>=3) return; G.arcade.pactActive=!G.arcade.pactActive; render(); },
+  /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — filtres de scr_archetype_pantheon
+     (ui-06), même pattern que setGauntletAsc (mémorisé sur G, jamais
+     persisté — un filtre d'affichage, pas une donnée de progression). ==== */
+  setArchPantheonMode(mode){ G._archPantheonMode=mode; G._archPantheonAsc=0; render(); },
+  setArchPantheonAsc(asc){ G._archPantheonAsc=asc; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — disponible sur les 3 formats (contrai-
      rement au pacte de finition), y compris le Boss Run : c'est le seul

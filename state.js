@@ -163,6 +163,35 @@ function recordGauntletBest(meta,mode,value,asc){
   return false;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — meta.gauntletBest[mode][asc]
+   reste un SCALAIRE global partagé par les 23+ archétypes (comportement
+   inchangé, lu par gauntletMenuBestTag/finaliseGauntletRun) : y ajouter une
+   dimension archétype en place aurait exigé de migrer sa forme partout où
+   il est lu, avec le risque de casser le record global déjà en place chez
+   des joueurs existants. À la place, meta.gauntletBestByArchetype[mode]
+   [asc][archetypeNick] est une structure PARALLÈLE et INDÉPENDANTE, jamais
+   lue par l'ancien système : aucune migration nécessaire, aucun risque sur
+   les records déjà enregistrés. archetypeNick = G.f.nick au moment du run
+   (identifiant stable posé par makeArcadeArchetype(), jamais modifié en
+   arcade — pas d'évolution de surnom hors mode carrière). ==== */
+function gauntletBestByArchetypeGet(meta,mode,asc,archetypeNick){
+  const perMode=meta.gauntletBestByArchetype&&meta.gauntletBestByArchetype[mode];
+  const perAsc=perMode&&perMode[asc===undefined?0:asc];
+  return perAsc?perAsc[archetypeNick]:undefined;
+}
+function recordGauntletBestByArchetype(meta,mode,value,asc,archetypeNick){
+  if(!archetypeNick) return false;
+  const lvl=asc===undefined||asc===null?0:asc;
+  if(!meta.gauntletBestByArchetype) meta.gauntletBestByArchetype={};
+  if(!meta.gauntletBestByArchetype[mode]) meta.gauntletBestByArchetype[mode]={};
+  if(!meta.gauntletBestByArchetype[mode][lvl]) meta.gauntletBestByArchetype[mode][lvl]={};
+  const per=meta.gauntletBestByArchetype[mode][lvl];
+  const cur=per[archetypeNick];
+  const better=(mode==='ladder_100')?(cur===undefined||value<cur):(cur===undefined||value>cur);
+  if(better){ per[archetypeNick]=value; return true; }
+  return false;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_DAILY] — graine du jour. Aucun serveur, aucun compte :
    la graine est DÉRIVÉE de la date locale (YYYYMMDD), donc identique pour
    tout le monde le même jour sans échange réseau, et _rollGauntletSeed()
@@ -185,6 +214,45 @@ function recordGauntletDaily(meta,mode,progress){
   const st=gauntletDailyState(meta);
   st.done[mode]={progress,at:Date.now()};
   meta.gauntletDaily=st;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — meta.gauntletDailyStreak compte les
+   jours CONSÉCUTIFS où au moins un défi du jour a été mené jusqu'au bout,
+   sur le même modèle que pactStreak/maxPactStreak (ui-08) : un compteur qui
+   monte tant que la condition est remplie, remis à 1 — pas 0, le jour
+   courant compte toujours comme une tentative — dès que l'écart dépasse
+   1 jour. meta.gauntletLastDailyDate sert à la fois de mémoire du dernier
+   jour ET de garde contre un double comptage si le joueur tente le défi du
+   jour sur 2 formats le même jour (gap===0 : streak inchangé). Appelé une
+   seule fois, dans finaliseGauntletRun (ui-08) — au moment où le run du jour
+   se termine réellement, pas à son lancement, pour ne compter que les
+   tentatives effectivement jouées jusqu'au bout (victoire, élimination ou
+   encaissement — les 3 comptent, cf. finaliseGauntletRun déjà appelé sur
+   les 3 issues). ==== */
+function gauntletDayGap(keyA,keyB){
+  const toDate=k=>Date.UTC(+String(k).slice(0,4),+String(k).slice(4,6)-1,+String(k).slice(6,8));
+  return Math.round((toDate(keyB)-toDate(keyA))/86400000);
+}
+function recordGauntletDailyStreak(meta){
+  const today=gauntletDailyKey();
+  const last=meta.gauntletLastDailyDate;
+  if(!last){ meta.gauntletDailyStreak=1; }
+  else{
+    const gap=gauntletDayGap(last,today);
+    if(gap===1) meta.gauntletDailyStreak=(meta.gauntletDailyStreak||0)+1;
+    else if(gap>1) meta.gauntletDailyStreak=1;
+    // gap===0 (2e tentative du même jour) ou gap<0 (horloge locale qui recule) : streak inchangé
+  }
+  meta.gauntletLastDailyDate=today;
+  return meta.gauntletDailyStreak;
+}
+/* Bonus de cagnotte aux paliers 3 et 7 du streak, appliqué au payout du
+   défi du jour concerné (finaliseGauntletRun, ui-08) — pas un rééquilibrage
+   audité, un facteur de fidélité comme le reste du système Gauntlet. */
+function gauntletDailyStreakBonusMult(streak){
+  if((streak||0)>=7) return 1.5;
+  if((streak||0)>=3) return 1.2;
+  return 1;
 }
 /* ==== [FIN ANCRE] ==== */
 function updateMetaStatsOnRetirement(f){

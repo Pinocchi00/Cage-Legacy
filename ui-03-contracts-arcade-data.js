@@ -326,25 +326,52 @@ function getGauntletRivals(meta){
    l'élimination) + killedMode sont ajoutés au snapshot. Champs purement
    additifs : un ancien snapshot sans killedAt retombe sur la prime plancher
    via le ||0 de gauntletBountyFor(). ==== */
+/* ==== [ANCRE: GAUNTLET_NEMESIS_ACCUMULATION] — le snapshot ne gardait
+   aucune trace du nombre de fois où un même rival vous a battu : il était
+   juste écrasé par le nouveau snapshot à chaque défaite, killedAt/killedMode
+   remis à zéro comme si c'était la première fois. killedCount est reporté
+   depuis l'ancien snapshot (même name+div, trouvé AVANT le filter qui le
+   retire du tableau) et incrémenté — 1 à la première défaite, 2+ à partir
+   de la 2e, seuil lu par gauntletBountyFor() (prime doublée) et
+   fighterFromRivalSnapshot() (buff de réapparition). Un ancien snapshot sans
+   killedCount retombe sur 0 avant incrémentation, donc sur 1 : aucune
+   régression sur les rivaux déjà en sauvegarde. ==== */
 function recordGauntletRival(meta,f,sourceLabel,killedAt){
+  const existing=getGauntletRivals(meta).find(r=>r.name===f.name && r.div===f.div);
   const snap={name:f.name,nick:f.nick,flag:f.flag,overall:f.overall,
     attrs:JSON.parse(JSON.stringify(f.attrs)),skills:[...(f.skills||[])],style:f.style,div:f.div,source:sourceLabel,
-    killedAt:killedAt||0,killedMode:sourceLabel};
+    killedAt:killedAt||0,killedMode:sourceLabel,killedCount:(existing&&existing.killedCount||0)+1};
   let rivals=getGauntletRivals(meta).filter(r=>!(r.name===snap.name && r.div===snap.div));
   rivals.unshift(snap);
   if(rivals.length>3) rivals.length=3;
   meta.gauntletRivals=rivals; delete meta.wtNemesis;
 }
+/* ==== [FIN ANCRE] ==== */
 /* Prime versée quand on bat enfin la némésis : la moitié du plein tarif du
    palier où elle vous avait éliminé, plancher à 5 points. Elle est alors
    RETIRÉE de meta.gauntletRivals — la vengeance close le dossier, sinon la
    même némésis paierait indéfiniment. */
+/* ==== [ANCRE: GAUNTLET_NEMESIS_ACCUMULATION] — prime doublée (tarif plein
+   au lieu de la moitié) si le rival vous a déjà battu 2 fois ou plus : la
+   revanche sur une némésis récurrente doit payer plus cher que sur un
+   accident isolé. ==== */
 function gauntletBountyFor(snap){
   if(!snap) return 0;
   const mode=snap.killedMode||'bracket64';
   const base=gauntletPayout(mode,snap.killedAt||0,0);
-  return Math.max(5,Math.round(base*0.5));
+  const mult=(snap.killedCount||0)>=2?1.0:0.5;
+  return Math.max(5,Math.round(base*mult));
 }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — meta.gauntletRivals plafonne à 3
+   et le vaincu est jusqu'ici RETIRÉ définitivement (splice ci-dessous) : la
+   prime encaissée efface toute trace du rival. meta.gauntletRivalsDefeated
+   (JAMAIS purgé, contrairement à gauntletRivals) garde le même snapshot en
+   parallèle — alimenté ICI, au moment où la vengeance est déjà actée, pas
+   avant. Lu par genBossOpponent() pour le Boss Run capstone une fois 5
+   entrées atteintes. ==== */
+function getGauntletRivalsDefeated(meta){ return meta.gauntletRivalsDefeated||[]; }
+/* ==== [FIN ANCRE] ==== */
 function claimGauntletBounty(opp){
   if(!opp||!opp._isRival) return 0;
   const meta=loadMetaStats();
@@ -352,6 +379,9 @@ function claimGauntletBounty(opp){
   const idx=rivals.findIndex(r=>r.name===opp.name && r.div===opp.div);
   if(idx<0) return 0;
   const bounty=gauntletBountyFor(rivals[idx]);
+  const defeated=getGauntletRivalsDefeated(meta);
+  defeated.push(rivals[idx]);
+  meta.gauntletRivalsDefeated=defeated;
   rivals.splice(idx,1);
   meta.gauntletRivals=rivals;
   meta.legendPoints=(meta.legendPoints||0)+bounty;
@@ -389,10 +419,22 @@ const GAUNTLET_CONTRACTS=[
    hint:'Ne jamais descendre sous 60 de forme pendant tout le run.',
    check:(f,a)=>!a.formBroken}
 ];
-function drawGauntletContract(){
-  const c=pick(GAUNTLET_CONTRACTS);
+/* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — ct_nopact ("Sans filet" :
+   terminer le run sans jamais prendre le pacte de finition) devient
+   IMPOSSIBLE à remplir dès Ascension>=3 sur Bracket 64 / Ladder 100 : le
+   pacte y est désormais forcé dès le 1er combat (cf. afterResult, ui-08),
+   donc a.pactTakenEver passe systématiquement à true. Plutôt que de laisser
+   un contrat non gagnable entrer dans le tirage aléatoire (1 run sur 6 dans
+   une impasse silencieuse), il est exclu du pool dès ce palier — au lieu
+   d'être exclu seulement pour boss_run où la question ne se pose de toute
+   façon pas (pactTakenEver n'y est jamais posé, cf. condition ko_only déjà
+   permanente et indépendante du pacte). ==== */
+function drawGauntletContract(asc){
+  const pool=(asc||0)>=3?GAUNTLET_CONTRACTS.filter(c=>c.id!=='ct_nopact'):GAUNTLET_CONTRACTS;
+  const c=pick(pool);
   return {id:c.id,label:c.label,hint:c.hint,mult:c.mult,done:false};
 }
+/* ==== [FIN ANCRE] ==== */
 function evalGauntletContract(a){
   if(!a||!a.contract) return false;
   const spec=GAUNTLET_CONTRACTS.find(x=>x.id===a.contract.id);
@@ -447,14 +489,28 @@ function pickGauntletRival(div){
   const meta=loadMetaStats(); const rivals=getGauntletRivals(meta).filter(r=>r.div===div);
   return rivals.length?pick(rivals):null;
 }
+/* ==== [ANCRE: GAUNTLET_NEMESIS_ACCUMULATION] — killedCount>=2 (rival qui
+   vous a déjà battu au moins deux fois) applique un petit bonus mécanique
+   permanent à sa réapparition, sur le même canal que les spécialisations
+   MMA Faith (ui-08, ANCRE FAITH_SPECS) : _styleProfileOverride, lu par
+   simulateFight (engine.js). koMod/subMod choisis plutôt qu'une hausse
+   d'attrs brute pour rester visible en combat sans fausser l'affichage
+   des stats du profil adverse. boss._killedCount est reporté pour que
+   rivalBadge() (ui-04) puisse l'afficher. ==== */
 function fighterFromRivalSnapshot(snap,levelHint,nick){
   const boss=makeFighter({gender:'H',div:snap.div,style:snap.style,level:levelHint||90});
   boss.attrs=JSON.parse(JSON.stringify(snap.attrs));
   boss.skills=[...snap.skills]; boss.overall=snap.overall;
   boss.name=snap.name; boss.flag=snap.flag; boss.nick=nick||snap.nick||'REVANCHE';
   boss.stage='pro'; boss.org=6; boss._isRival=true; boss._rivalSource=snap.source;
+  boss._killedCount=snap.killedCount||0;
+  if(boss._killedCount>=2){
+    boss._styleProfileOverride=Object.assign({},STYLE_PROFILE[boss.style]||STYLE_PROFILE.mma);
+    boss._styleProfileOverride.koMod+=0.12; boss._styleProfileOverride.subMod+=0.12;
+  }
   return boss;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 function makeArcadeArchetype(spec){
   const f=makeFighter({gender:'H',div:spec.div,style:spec.style,countryKey:spec.country,first:spec.first,age:spec.age,potential:96,level:70});
@@ -518,10 +574,15 @@ function injectExtendedArchetypes(){
    en argument et présents dans le littéral G.arcade, comme dans
    CL.startArcade()/CL.startLadder100(). Arguments optionnels : un appel
    startBossRun() sans argument reste valide (compat tests). ==== */
-function startBossRun(seed,asc){
+/* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — capstone (4e argument, optionnel)
+   active le pool spécial de genBossOpponent() ci-dessous, débloqué depuis
+   scr_gauntlet_menu (ui-06) une fois meta.gauntletRivalsDefeated à 5
+   entrées ou plus. N'affecte que la génération des adversaires : réutilise
+   sinon exactement le même run (target 5, condition ko_only, Ascension). ==== */
+function startBossRun(seed,asc,capstone){
   injectExtendedArchetypes();
   G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only',banked:0,
-    seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract()};
+    seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc),capstone:!!capstone};
   G.screen='draft'; save(); render();
 }
 /* ==== [FIN ANCRE] ==== */
@@ -543,6 +604,23 @@ function genBossOpponent(streak){
   const div=G.f.div;
   const am=ascensionCurveMod(G.arcade&&G.arcade.asc);
   const lv=clamp(G.f.overall+streak*2+am.lv,60,93+am.cap);
+  /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — Boss Run capstone
+     (G.arcade.capstone, débloqué à 5 entrées dans meta.gauntletRivalsDefeated,
+     cf. scr_gauntlet_menu/ui-06) : au lieu du pool normal (rival aléatoire
+     dès streak>=2, sinon boss anonyme), les 5 combats sont TOUJOURS les 5
+     pires ennemis historiques du joueur, triés par overall décroissant —
+     regénérés via fighterFromRivalSnapshot() comme une revanche normale,
+     recalés sur la même courbe de niveau lv que le reste du Boss Run.
+     Fallback sur la génération normale si le tableau est plus court que
+     prévu (garde-fou, ne devrait jamais arriver vu la condition de
+     déblocage). ==== */
+  if(G.arcade&&G.arcade.capstone){
+    const meta=loadMetaStats();
+    const worst=getGauntletRivalsDefeated(meta).slice().sort((a,b)=>(b.overall||0)-(a.overall||0)).slice(0,5);
+    const pick5=worst[streak];
+    if(pick5){ const o=fighterFromRivalSnapshot(pick5,lv,'CAPSTONE — '+(pick5.nick||'')); o.champion='monde'; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W); o.sub=RI(0,o.W-o.ko); return o; }
+  }
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: REJOUABILITE_NEMESIS_BOSSRUN] — à partir du 3e combat,
      chance croissante de retomber sur un rival réellement enregistré
      (cf. recordGauntletRival) plutôt qu'un boss anonyme généré. Niveau du
@@ -753,13 +831,25 @@ function advanceWTUMMABracket(){
    supplémentaire (niveau ≥3) garantit une Légendaire en 1ère position au
    lieu d'un simple tirage favorisé — la seule façon de matérialiser une
    VRAIE escalade sans toucher au tirage de base ni dupliquer tirerRarete(). ==== */
+/* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — chaque palier d'Ascension
+   (G.arcade.asc, déjà lu par ascensionCurveMod plus haut) ajoute une règle
+   FIXE et permanente en plus du simple scaling de niveau, au lieu de se
+   contenter de rendre les adversaires plus forts. A1 (camp à 2 options) et
+   A2 (retrait de la Table de soins / Récupération active) sont appliqués
+   ici, au point de génération du camp — A3 (pacte de finition obligatoire)
+   est traité séparément dans afterResult (ui-08), au point où pactWasActive
+   est calculé, et dans togglePact()/pactToggleBlock() pour verrouiller le
+   toggle côté joueur. Tous conditionnés sur G.arcade.asc>=N, jamais un
+   remplacement de la courbe existante. ==== */
 function generateArcadeUpgrades(pactBonus){
-  const baseOpts=trainingOptions(G.f).slice(0,3);
+  const asc=(G.arcade&&G.arcade.asc)||0;
+  const baseOpts=trainingOptions(G.f).slice(0,asc>=1?2:3);
   // Bonus x4 : le format court (Bracket 64 / Ladder 100) rend les bonus
   // habituels de carrière (sur 100) quasi invisibles sur un parcours de
   // seulement 6-8 combats — l'affichage réel se fait ensuite sur /20 via d20().
   G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:opt.d.map(delta=>[delta[0],delta[1]*4])}));
-  G.arcade.trainOpts.push(recoveryTrainOption());
+  if(asc<2) G.arcade.trainOpts.push(recoveryTrainOption());
+  /* ==== [FIN ANCRE] ==== */
   G.arcade.skillOpts=[];
   const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
   let validPool=poolEligible(G.f,false,false);
@@ -869,6 +959,68 @@ function genWTUMMAOpponent(){
   if(currentRank<=15){ targetRank=1; }
   else { targetRank=Math.max(2,currentRank-RI(10,15)); }
   return G.arcade.ladder.find(o=>o.ladderRank===targetRank)||G.arcade.ladder[0];
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_BRUIT_DU_MILIEU] — sur les combats à fort enjeu
+   (Boss Run entier, 2 derniers tours du Bracket 64), la fiche technique
+   exacte de l'adversaire est remplacée par une rumeur de vestiaire : 1-2
+   lignes générées à partir du VRAI profil (via eff(), engine.js — mêmes
+   scores dérivés que tacticalRead), mais fiable seulement 70% du temps —
+   les 30% restants pointent vers une catégorie différente, délibérément
+   trompeuse. Le taux de fiabilité n'est JAMAIS affiché ni indiqué au
+   joueur : la carte se lit comme une rumeur, pas comme un scouting
+   incertain avec un pourcentage.
+   Fiabilité et catégorie dérivées par hachage STABLE de l'identité de
+   l'adversaire (même pattern que pickStable, engine.js) plutôt que par
+   rnd() : un appel à rnd() ici consommerait le flux du générateur seedé à
+   chaque rendu de scr_arcade_plan, décalant tous les tirages du combat qui
+   suit selon le nombre de fois où l'écran a été affiché — exactement le
+   type de bug déjà corrigé ailleurs dans cette codebase (cf. ANCRE
+   CORRECTIF_SEED_BOSSRUN). Cette approche garantit aussi que la rumeur ne
+   change jamais entre deux rendus du même écran, sans avoir à la mettre en
+   cache sur l'adversaire. ==== */
+function gauntletRumorActive(a){
+  if(!a) return false;
+  if(a.mode==='boss_run') return true;
+  if(a.mode==='bracket64') return !!(a.tournament && a.tournament.roundStep>=5); // Demi-finale + Finale
+  return false; // jamais en Ladder 100 (progression continue, pas de "gros combat" isolé)
+}
+function gauntletRumorTrueCategory(opp){
+  const e=eff(opp);
+  const scores={frappeur:e.striking,lutteur:e.takedown,soumission:e.submission};
+  const sorted=Object.keys(scores).sort((x,y)=>scores[y]-scores[x]);
+  if(scores[sorted[0]]-scores[sorted[1]]<8) return 'équilibré'; // même seuil que edgeOpp/edgeMe dans tacticalRead
+  return sorted[0];
+}
+function gauntletRumorReliable(opp){
+  let h=0; const s=String(opp.id)+'rumorReliable';
+  for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0;
+  return (h%10)<7; // 70% fiable, 30% trompeuse
+}
+function gauntletRumorCategory(opp){
+  const trueCat=gauntletRumorTrueCategory(opp);
+  if(gauntletRumorReliable(opp)) return trueCat;
+  const others=['frappeur','lutteur','soumission','équilibré'].filter(c=>c!==trueCat);
+  return pickStable(others,String(opp.id)+'rumorFalse');
+}
+const GAUNTLET_RUMOR_TEMPLATES={
+  frappeur:['On dit qu\u2019il vit et meurt par les mains — dangereux à distance, bien moins sur le dos.',
+    'La rumeur du milieu : un cogneur pur, rien d\u2019autre à redouter chez lui.',
+    'Les habitués de la salle le donnent létal debout, perdu au sol.'],
+  lutteur:['Un lutteur, dit-on — il chercherait l\u2019amenée dès la cloche.',
+    'La rumeur : il ne saurait faire qu\u2019une chose, plaquer et tenir contre la cage.',
+    'On raconte qu\u2019il évite systématiquement l\u2019échange debout.'],
+  soumission:['On murmure qu\u2019il termine tout au sol, sans exception.',
+    'La rumeur du milieu : ne jamais le suivre volontairement au tapis.',
+    'Il aurait fini l\u2019essentiel de sa carrière par soumission, à en croire le vestiaire.'],
+  'équilibré':['Aucune vraie faiblesse, à en croire les habitués de la salle.',
+    'La rumeur : un profil complet, sans angle d\u2019attaque évident.',
+    'On ne lui connaît pas de point faible exploitable — méfiance de partout.']
+};
+function gauntletRumorText(opp){
+  const cat=gauntletRumorCategory(opp);
+  const line=pickStable(GAUNTLET_RUMOR_TEMPLATES[cat],String(opp.id)+'rumorLine');
+  return `Bruit de vestiaire (${opp.styleLabel||'style inconnu'}) : ${line}`;
 }
 /* ==== [FIN ANCRE] ==== */
 

@@ -601,9 +601,17 @@ function gauntletBestLine(mode){
   if(best===undefined) return '';
   const label=mode==='boss_run'?`${best}/5 KO enchaînés`:mode==='ladder_100'?`Rang #${best} atteint`:(best>=7?'Tournoi remporté':`Palier ${best} atteint`);
   const isNew=G.arcade&&G.arcade.isNewRecord;
-  return isNew
+  /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — ligne dédiée, séparée du
+     record global ci-dessus : les deux compteurs sont indépendants (cf.
+     state.js), donc battre l'un ne dit rien sur l'autre — un joueur peut
+     battre son record perso sur cet archétype précis sans toucher au
+     record global (déjà tenu par un archétype plus fort), et vice-versa. ==== */
+  const archNew=G.arcade&&G.arcade.isNewArchetypeRecord;
+  const archLine=archNew?`<div class="mono small" style="text-align:center;margin-bottom:12px;color:var(--frost)">✦ Nouveau record pour « ${esc(G.f&&G.f.nick||'')} »</div>`:'';
+  /* ==== [FIN ANCRE] ==== */
+  return (isNew
     ? `<div class="mono small" style="text-align:center;margin-bottom:12px;color:var(--frost)">✦ NOUVEAU RECORD (Ascension ${asc}) : ${label}</div>`
-    : `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel (Ascension ${asc}) : ${label}</div>`;
+    : `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel (Ascension ${asc}) : ${label}</div>`)+archLine;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — bandeau du contrat, affiché au draft,
@@ -727,6 +735,14 @@ function runDebriefBlock(a){
   if((a.riskMult||1)>1) parts.push(`mise en jeu ×${a.riskMult}`);
   if((a.maxPactStreak||0)>0) parts.push(`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`);
   if(a.contract&&a.contract.done) parts.push(`contrat rempli ×${a.contract.mult}`);
+  /* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — le bonus de streak (finaliseGauntletRun,
+     ui-08) s'applique EN PLUS de gauntletRunMult : le multiplicateur affiché
+     doit l'inclure, sinon l'équation base×mult=gain ne balance plus dès
+     qu'un défi du jour à streak>=3 est joué. ==== */
+  const dailyBonusMult=a.dailyStreakBonusMult||1;
+  if(dailyBonusMult>1) parts.push(`série de défis du jour (${a.dailyStreak}) ×${dailyBonusMult}`);
+  const displayMult=Math.round(mult*dailyBonusMult*100)/100;
+  /* ==== [FIN ANCRE] ==== */
   const contractLine=a.contract
     ? `<div class="mono small" style="color:${a.contract.done?'var(--sage)':'var(--muted)'}">${a.contract.done?'✓':'✗'} Contrat : ${a.contract.label}</div>`
     : '';
@@ -734,8 +750,8 @@ function runDebriefBlock(a){
   const inj=(a.runInjuries||[]).length?`<div class="mono small muted">${a.runInjuries.length} séquelle(s) encaissée(s) : ${a.runInjuries.map(i=>i.name).join(', ')}</div>`:'';
   const curses=(a.cursedTaken||0)>0?`<div class="mono small muted">${a.cursedTaken} pacte(s) de camp maudit accepté(s)</div>`:'';
   const daily=a.daily?`<div class="mono small sage">Tentative du DÉFI DU JOUR consommée.</div>`:'';
-  const multLine=(mult>1)
-    ? `<div class="mono small gold"><b>${base} pts</b> × <b>${mult}</b> = <b>${a.earnedOnElimination||0} pts</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`
+  const multLine=(displayMult>1)
+    ? `<div class="mono small gold"><b>${base} pts</b> × <b>${displayMult}</b> = <b>${a.earnedOnElimination||0} pts</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`
     : '';
   const ach=(a.newAch||[]).length?`<div class="mono small gold mt">🏅 ${a.newAch.map(x=>x.h).join(' · ')}</div>`:'';
   if(!multLine && !contractLine && !bounty && !inj && !curses && !daily && !ach) return '';
@@ -867,11 +883,17 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    appelé sur la défaite, pas la victoire, cf. ui-08) qui a été corrigée : le
    badge affichait auparavant tes propres champions passés, jamais tes vrais
    bourreaux. ==== */
+/* ==== [ANCRE: GAUNTLET_NEMESIS_ACCUMULATION] — killedCount>=2 ajoute une
+   ligne dédiée sous le badge némésis habituel : le joueur doit voir POURQUOI
+   cet adversaire est plus dangereux (buff _styleProfileOverride posé dans
+   fighterFromRivalSnapshot, ui-03) avant d'entrer dans le plan de combat. ==== */
 function rivalBadge(opp){
   if(!opp||!opp._isRival) return '';
   const srcLabel={boss_run:'Boss Run',ladder_100:'Ladder 100',bracket64:'Bracket 64'}[opp._rivalSource]||'un run précédent';
-  return `<div class="mono small" style="color:var(--blood);font-weight:bold;margin-bottom:4px">⚠ NÉMÉSIS — vous a déjà éliminé (${srcLabel})</div>`;
+  const buffLine=(opp._killedCount||0)>=2?`<div class="mono small" style="color:var(--blood);margin-bottom:4px">☠ Vous a déjà battu ${opp._killedCount} fois — frappe plus dur, plus dangereux en soumission</div>`:'';
+  return `<div class="mono small" style="color:var(--blood);font-weight:bold;margin-bottom:4px">⚠ NÉMÉSIS — vous a déjà éliminé (${srcLabel})</div>${buffLine}`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_PAYOUT_TABLES] — gauntletPayout()/
    gauntletEliminationPayout() (ui-03) sont la SEULE source de vérité pour
@@ -899,15 +921,28 @@ function eliminationPreview(a){
 /* ==== [ANCRE: REJOUABILITE_PACTE_ESCALADE] — affiche le niveau de stack
    (G.arcade.pactStreak, ui-08) : le joueur voit ce qu'il a à perdre en
    laissant tomber le pacte, pas seulement ce qu'il gagnerait à le prendre. ==== */
+/* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — A3 : à partir du palier
+   d'Ascension 3 (Bracket 64 / Ladder 100), le pacte n'est plus un choix —
+   la carte devient un badge non cliquable (pas d'onclick) plutôt que le
+   toggle-card habituel, pour que le joueur voie la contrainte au lieu de
+   croire à un bug quand son clic ne fait plus rien. ==== */
 function pactToggleBlock(a){
   const streak=a.pactStreak||0;
   const streakLine=streak>0?`<div class="mono small gold mt" style="font-weight:bold">🔥 Série de pactes remplis : ${streak}${streak>=3?' — Légendaire garantie au prochain camp !':''}</div>`:'';
+  if((a.asc||0)>=3){
+    return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--blood);padding:12px;text-align:left;margin-top:12px">
+     <div class="mono small" style="font-weight:bold;color:var(--blood)">⚠ PACTE DE FINITION OBLIGATOIRE — Ascension ${a.asc}</div>
+     <div class="muted small mt">Palier 3 et au-delà : chaque combat du run ne compte que par KO/TKO, sans exception. Une victoire aux points ou par soumission arrête le run comme une défaite.</div>
+     ${streakLine}
+   </div>`;
+  }
   return `<div class="glass mwash toggle-card" style="position:relative;background:var(--panel2);border:1px solid ${a.pactActive?'var(--gold)':'var(--line)'};padding:12px;text-align:left;margin-top:12px" onclick="CL.togglePact()">
      <div class="mono small ${a.pactActive?'gold':'muted'}" style="font-weight:bold">${a.pactActive?'✓ PACTE DE FINITION ACTIF':'☐ Prendre le pacte de finition'}</div>
      <div class="muted small mt">Ce combat ne compte que par KO/TKO — une victoire aux points ou par soumission arrête le run comme une défaite. En échange : camp suivant plancher Rare garanti + une compétence Légendaire/Épique dans les choix.</div>
      ${streakLine}
    </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_PLAN_ARCADE] — resolveArcadeFight() (ui-03)
    appelait simulateFight(G.f,opp,3) SANS le 4e paramètre plan : les TACTICS
@@ -920,10 +955,18 @@ function pactToggleBlock(a){
 function scr_arcade_plan(){
   const f=G.f, opp=G.arcade.opponent; const plans=TACTICS[f.style]||[];
   const combined=getExclusiveTactics(f).concat(plans);
+  /* ==== [ANCRE: GAUNTLET_BRUIT_DU_MILIEU] — sur les combats à fort enjeu
+     (cf. gauntletRumorActive, ui-03), l'analyse tactique VÉRIDIQUE
+     (tacticalRead) est remplacée par une rumeur — parfois fausse, jamais
+     signalée comme telle. Le joueur choisit sa tactique sur ce qu'il
+     entend, pas sur les vrais chiffres. ==== */
+  const analysis=gauntletRumorActive(G.arcade)?gauntletRumorText(opp):tacticalRead(f,opp);
+  const analysisLabel=gauntletRumorActive(G.arcade)?'Rumeur':'Analyse';
+  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Gauntlet · Plan de combat</span></div>
    <div class="hero-name" style="text-align:center;font-size:20px">${esc(f.nick||f.name)} <span class="muted">vs</span> ${esc(opp.name)}</div>
    <div class="card mt" style="border-color:transparent;padding:0 0 16px 0">
-     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
+     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>${analysisLabel} :</b> ${analysis}</div>
    </div>
    <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ?</p>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.chooseArcadePlan(${i})">
@@ -989,7 +1032,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
      <div class="eyebrow mb">Prochain adversaire : Tête de série #${a.opponent.seed}</div>
      ${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
-     <div class="muted small mt">${a.opponent.styleLabel} · OVR ${a.opponent.overall}</div></div>
+     <div class="muted small mt">${gauntletRumorActive(a)?a.opponent.styleLabel:`${a.opponent.styleLabel} · OVR ${a.opponent.overall}`}</div></div>
    ${gauntletStatusBlock(a,true)}
    ${pactToggleBlock(a)}
    ${atRiskToggleBlock(a)}
