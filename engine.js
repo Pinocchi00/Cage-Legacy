@@ -536,7 +536,20 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
 }
 
 /* ------------------- canaux de combat dérivés des 30 attributs ------------ */
-function eff(f){ const a=f.attrs||{}; const dyn=(num(f.morale)-50)*0.10+(num(f.form)-50)*0.10; // moral/forme -> ±
+/* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — item demandé : le Gauntlet ne
+   connaît plus ni moral ni forme. Neutralisation à la SOURCE plutôt qu'au
+   niveau de l'affichage : masquer les deux jauges en laissant `dyn` actif
+   aurait produit une mécanique invisible (±10 sur tous les canaux) — exactement
+   le travers que l'ancre GAUNTLET_BLESSURE_RUN cherchait à éviter. Le test porte
+   sur G.arcade.active, donc il coupe le canal SYMÉTRIQUEMENT pour le joueur et
+   pour l'adversaire : aucun des deux camps n'y gagne. La carrière et le mode
+   Faith sont strictement inchangés — c'est le seul point du moteur où moral et
+   forme entrent dans le calcul de combat. L'usure d'une run passe désormais
+   exclusivement par les séquelles d'attributs (GAUNTLET_BLESSURE_RUN), qui sont
+   lisibles, arbitrables et déjà en place. ==== */
+function eff(f){ const a=f.attrs||{};
+  const _arcade=(typeof G!=='undefined' && G && G.arcade && G.arcade.active);
+  const dyn=_arcade?0:((num(f.morale)-50)*0.10+(num(f.form)-50)*0.10); // moral/forme -> ± (carrière uniquement)
   const ch={
     striking: num(a.jab)*0.24+num(a.cross)*0.24+num(a.hook)*0.2+num(a.kick)*0.18+num(a.clinchStr)*0.14+num(a.fightIQ)*0.06,
     power:    num(a.power)+num(a.strength)*0.12,
@@ -895,7 +908,11 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
     finish.zone=finishZone;
     const finishMove=pickFinishMove(finish.by, finish.method==='Soumission'?'sub':'ko', finishZone, st, finish.round);
     finish.moveName=finishMove.name; finish.moveFlavor=finishMove.flavor;
-    res={winner:finish.by===A?'A':'B',method:finish.method,round:finish.round,detail:finish.detail||'',moveName:finish.moveName,moveFlavor:finish.moveFlavor,zone:finishZone}; }
+    /* ==== [ANCRE: CORRECTIF_ZONE_AFFICHEE] — zone anatomique NARRÉE = celle du
+       geste joué (finishMove.moveZone), pas celle des dégâts cumulés. Repli sur
+       finishZone si le geste n'est référencé dans aucune table. ==== */
+    const shownZone=finishMove.moveZone||finishZone;
+    res={winner:finish.by===A?'A':'B',method:finish.method,round:finish.round,detail:finish.detail||'',moveName:finish.moveName,moveFlavor:finish.moveFlavor,zone:shownZone}; }
   else {
     // ==== [ANCRE: JUGES_10PT_VERDICT] — le vainqueur vient du vote MAJORITAIRE des
     // juges (pas d'un total sa/sb caché), pour que les cartes affichées soient
@@ -1005,8 +1022,20 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
   // Mouvement signature (#6) : si le combattant a déjà déverrouillé une prise
   // signature (5 finitions identiques auparavant), 40% de chance de la rejouer
   // directement plutôt que de repartir sur le tirage normal.
+  /* ==== [ANCRE: CORRECTIF_ZONE_AFFICHEE] — bug remonté : « Soumission (clé de
+     jambe fatale) — CORPS ». La zone AFFICHÉE venait de res.zone (zone la plus
+     endommagée du perdant), jamais du geste réellement joué. Trois chemins la
+     désynchronisaient : (1) le rejeu de signature ci-dessous ne renvoyait
+     aucune zone, (2) le repli `candidates=owned` quand aucun geste possédé ne
+     matche la zone, (3) le repli `pick(generic)` quand aucun générique ne
+     matche. On renvoie désormais la zone PROPRE du geste choisi ; l'appelant
+     s'en sert pour l'affichage. La zone de dégâts reste inchangée côté
+     mécanique (SIGNATURE_BOOST_BY_ZONE lit toujours `zone`). ==== */
+  const zoneOfGeneric=n=>{ const g=(type==='sub'?GENERIC_SUB:GENERIC_KO).find(m=>m.name===n); return g?g.zone:null; };
+  const zoneOfOwned=n=>{ const o=FINISH_MOVES[type].find(m=>m.name===n); return o?o.zone:null; };
   if(winner.signatureMove && winner.signatureMove.type===type && rnd()<0.40){
-    return {name:winner.signatureMove.name, flavor:MOVE_SIGNATURE_FLAVOR[winner.signatureMove.name]||'Le geste devenu sa signature — le public le voit venir, mais personne ne peut l\u2019arrêter.'};
+    const _n=winner.signatureMove.name;
+    return {name:_n, moveZone:zoneOfOwned(_n)||zoneOfGeneric(_n)||winner.signatureMove.zone||null, flavor:MOVE_SIGNATURE_FLAVOR[_n]||'Le geste devenu sa signature — le public le voit venir, mais personne ne peut l\u2019arrêter.'};
   }
   const owned=(winner.skills||[]).filter(id=>FINISH_MOVES[type].some(m=>m.id===id));
   let baseMove;
@@ -1074,7 +1103,7 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
     if(isBloodbath && type==='ko') flavor='La commission médicale doit intervenir en urgence.';
     else if(isBoring && isLate) flavor='Sorti de nulle part — le public somnolent se réveille enfin.';
   }
-  return {name:baseMove, flavor};
+  return {name:baseMove, moveZone:zoneOfOwned(baseMove)||zoneOfGeneric(baseMove)||null, flavor};
 }
 function winProbEstimate(A,B){ const a=eff(A),b=eff(B);
   const oa=A.overall+a.killer*0.05+reachEdge(A,B), ob=B.overall+b.killer*0.05;

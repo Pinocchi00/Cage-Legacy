@@ -55,7 +55,7 @@ function finaliseGauntletRun(a,opts){
     : gauntletPayout(a.mode,opts.progress);
   const preBonus=gauntletFinalPayout(a,base);
   /* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — streak calculée et créditée ICI,
-     au point de sortie unique du run, pour compter une tentative du jour
+     au point de sortie unique de la run, pour compter une tentative du jour
      effectivement jouée jusqu'au bout (victoire, élimination OU
      encaissement — les 3 passent par finaliseGauntletRun). Le bonus
      s'applique en plus de gauntletRunMult (mise, pactes, contrat), pas à sa
@@ -72,7 +72,7 @@ function finaliseGauntletRun(a,opts){
   a.isNewRecord=recordGauntletBest(meta,a.mode,opts.progress,a.asc||0);
   /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — enregistré EN PLUS du record
      global ci-dessus, jamais à sa place. G.f est toujours défini à ce stade
-     (un run Gauntlet ne peut se terminer sans combattant actif) mais le
+     (une run Gauntlet ne peut se terminer sans combattant actif) mais le
      garde-fou reste défensif au cas où finaliseGauntletRun soit un jour
      appelée hors contexte réel (tests, retryArcade...). ==== */
   if(typeof G!=='undefined' && G && G.f && G.f.nick) a.isNewArchetypeRecord=recordGauntletBestByArchetype(meta,a.mode,opts.progress,a.asc||0,G.f.nick);
@@ -567,7 +567,7 @@ const CL={
          (juges 10-point) sont calculés par simulateFight() pour CHAQUE combat
          mais n'étaient jamais lus en arcade : une élimination aux points
          affichait "R.I.P." muet, identique à une déroute nette. Mémorisé sur
-         chaque issue à cartes (avant le kill du run plus bas), lu par
+         chaque issue à cartes (avant le kill de la run plus bas), lu par
          scr_gameover pour distinguer une défaite écrasée d'un near-miss. ==== */
       G.arcade.lastScorecard=(_res && isDecisionLike(_res.method))?{scoreA:_res.scoreA,scoreB:_res.scoreB,judges:_res.judges,method:_res.method}:null;
       /* ==== [FIN ANCRE] ==== */
@@ -579,19 +579,24 @@ const CL={
          qu'elle se déclenche ou non. ==== */
       /* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — A3 : à partir du palier
          3, le pacte de finition n'est plus un choix combat par combat
-         (CL.togglePact()) mais une clause permanente sur tout le run pour
+         (CL.togglePact()) mais une clause permanente sur tout la run pour
          Bracket 64 / Ladder 100 — Boss Run est explicitement exclu car il a
          déjà sa propre clause KO-only permanente (condition==='ko_only',
          vérifiée plus bas) : cumuler les deux n'ajouterait rien. ==== */
       const pactForcedByAscension=(G.arcade.asc||0)>=3 && G.arcade.mode!=='boss_run';
       const pactWasActive=pactForcedByAscension||!!G.arcade.pactActive; G.arcade.pactActive=false;
       /* ==== [FIN ANCRE] ==== */
-      const pactFail=pactWasActive && win && G.pending.method && !G.pending.method.startsWith('KO');
+      /* ==== [ANCRE: ITEM_PACTE_AVEC_SOUMISSIONS] — item demandé : le pacte de
+         finition ne validait QUE le KO/TKO (`!method.startsWith('KO')`), une
+         victoire par soumission comptait comme un échec au même titre qu'une
+         décision aux points. Élargi aux deux méthodes de finition : seule une
+         victoire aux points (method vide) reste un échec du pacte. ==== */
+      const pactFail=pactWasActive && win && G.pending.method && !(G.pending.method.startsWith('KO')||G.pending.method==='Soumission');
       /* ==== [ANCRE: REJOUABILITE_PACTE_ESCALADE] — pactStreak compte les
          pactes remplis D'AFFILÉE (pris ET terminés par KO/TKO). Remis à 0 dès
          qu'un combat se joue SANS pacte pris, ou dès qu'un pacte pris échoue
          — la stack n'existe que pour une prise de risque répétée et continue,
-         pas pour un pacte isolé au milieu du run. Lu par generateArcadeUpgrades
+         pas pour un pacte isolé au milieu de la run. Lu par generateArcadeUpgrades
          (ui-03) pour hausser encore le plancher de rareté au-delà du simple
          pactBonus booléen d'origine. ==== */
       const pactFulfilled=pactWasActive && win && !pactFail;
@@ -600,16 +605,22 @@ const CL={
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: REJOUABILITE_ATTRITION] — G.f.form remontait à +20 fixe
          après CHAQUE victoire quel que soit le nombre de combats déjà encaissés
-         dans le run (0 fatigue cumulative sur un format censé être une
-         épreuve d'endurance). La récup diminue avec la profondeur du run —
+         dans la run (0 fatigue cumulative sur un format censé être une
+         épreuve d'endurance). La récup diminue avec la profondeur de la run —
          le dernier combat d'un Gauntlet doit se jouer sur un combattant usé.
          RI(−1,1) évite un palier trop lisible/mécanique. ==== */
-      const _depth=G.arcade.streak||G.arcade.fightsDone||(G.arcade.tournament?G.arcade.tournament.roundStep:0)||0;
-      const attritionHeal=()=>{ G.f.form=clamp(G.f.form+Math.max(4,20-_depth*3+RI(-1,1)),0,100); };
+      /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — attritionHeal() faisait
+         remonter G.f.form d'un montant décroissant avec la profondeur de la
+         run. La forme n'ayant plus aucun effet mécanique en Gauntlet (cf.
+         eff(), engine.js) ni aucun affichage, la fonction devient un no-op :
+         la profondeur de la run se paie désormais uniquement en séquelles
+         d'attributs, dont la probabilité est déjà indexée sur les dégâts
+         réellement encaissés (rollGauntletInjuryChance, ui-03). ==== */
+      const attritionHeal=()=>{};
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — consommée à chaque combat, comme le
          pacte de finition juste au-dessus, qu'elle se déclenche ou non. Une
-         victoire sous mise double le multiplicateur du run (plafond ×8) ; une
+         victoire sous mise double le multiplicateur de la run (plafond ×8) ; une
          élimination sous mise annule TOUT le paiement (cf.
          gauntletEliminationPayout(...,atRisk)). Les deux clauses sont
          cumulables volontairement : pacte + mise sur le même combat est le
@@ -617,7 +628,7 @@ const CL={
       const atRiskWasActive=!!G.arcade.atRisk; G.arcade.atRisk=false;
       if(atRiskWasActive && win) G.arcade.riskMult=Math.min(8,(G.arcade.riskMult||1)*2);
       /* ==== [FIN ANCRE] ==== */
-      /* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — battre une némésis la retire de
+      /* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — battre un némésis le retire de
          meta.gauntletRivals et verse la prime immédiatement (hors barème de
          palier) : le dossier est clos, elle ne peut plus repayer. ==== */
       if(win && G.arcade.opponent && G.arcade.opponent._isRival){
@@ -630,13 +641,17 @@ const CL={
          un contrat de type « ne jamais » se casse définitivement. ==== */
       if(pactWasActive) G.arcade.pactTakenEver=true;
       G.arcade.maxPactStreak=Math.max(G.arcade.maxPactStreak||0,G.arcade.pactStreak||0);
-      if(G.f.form<60) G.arcade.formBroken=true;
+      /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — remplace `if(G.f.form<60)
+         G.arcade.formBroken=true`. Drapeau « ne jamais » du même type, posé une
+         fois pour toutes : une séquelle soignée plus tard au camp ne rouvre pas
+         le contrat Corps intact. ==== */
+      if((G.arcade.runInjuries||[]).length) G.arcade.injuredEver=true;
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — remplace les 3 appels à
          attritionHeal() : la forme remonte comme avant, mais un combat
          réellement encaissé (frappes significatives subies / knockdowns, lus
          sur res.stats.B) peut laisser une séquelle d'attributs pour le reste
-         du run. C'est le coût invisible de l'attrition rendu mécanique, et
+         de la run. C'est le coût invisible de l'attrition rendu mécanique, et
          l'argument principal en faveur de l'encaissement volontaire. ==== */
       const runAttrition=()=>{
         attritionHeal();
@@ -648,7 +663,11 @@ const CL={
       };
       /* ==== [FIN ANCRE] ==== */
       if(G.arcade.mode==='boss_run'){
-        const koOnlyFail=G.arcade.condition==='ko_only' && win && G.pending.method && !G.pending.method.startsWith('KO');
+        /* ==== [ANCRE: ITEM_PACTE_AVEC_SOUMISSIONS] — même élargissement que le
+           pacte de finition (Bracket 64/Ladder 100, ci-dessus) appliqué à la
+           clause permanente du Boss Run. Seule une victoire aux points
+           (method vide) invalide désormais le combat. ==== */
+        const koOnlyFail=G.arcade.condition==='ko_only' && win && G.pending.method && !(G.pending.method.startsWith('KO')||G.pending.method==='Soumission');
         // ==== [ANCRE: CORRECTIF_BOSSRUN_RAISON_ELIMINATION] — bug remonté : une
         // victoire par décision/soumission en Boss Run (mode KO uniquement)
         // était traitée comme une élimination SANS AUCUNE explication — l'écran
@@ -661,7 +680,7 @@ const CL={
              (pas koOnlyFail, où l'adversaire n'a rien fait — c'est le pacte KO
              du Boss Run lui-même qui invalide la victoire). ==== */
           /* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — killedAt (4e argument) : le
-             palier auquel cette némésis vous a tué, base de sa prime future. ==== */
+             palier auquel ce némésis vous a tué, base de sa prime future. ==== */
           if(!win){ const meta=loadMetaStats(); recordGauntletRival(meta,G.arcade.opponent,'boss_run',G.arcade.streak); saveMetaStats(meta); }
           /* ==== [FIN ANCRE] ==== */
           /* ==== [ANCRE: GAUNTLET_FIN_DE_RUN] — paiement, record et succès
@@ -753,7 +772,7 @@ const CL={
      palier réellement débloqué pour ce format : on ne peut jamais lancer un
      palier supérieur à celui gagné, même en forçant l'état. Consommé une
      seule fois au lancement puis figé sur G.arcade.asc pour toute la durée
-     du run (les courbes de difficulté et les payouts le relisent là). ==== */
+     de la run (les courbes de difficulté et les payouts le relisent là). ==== */
   setGauntletAsc(mode,v){ const meta=loadMetaStats();
     G._pendingAsc=clamp(parseInt(v,10)||0,0,gauntletAscLevel(meta,mode)); render(true); },
   _rollGauntletAsc(mode){ const meta=loadMetaStats();
@@ -762,7 +781,7 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_DAILY] — pré-remplit la graine du jour puis lance le
      format demandé par le flux NORMAL (les start* ci-dessous), sans dupliquer
-     leur logique. dailyMode marque le run pour que la tentative soit
+     leur logique. dailyMode marque la run pour que la tentative soit
      consommée en fin de run (cf. finaliseGauntletRun). ==== */
   startGauntletDaily(mode){
     const meta=loadMetaStats();
@@ -1033,7 +1052,12 @@ const CL={
     const playerMatch=G.arcade.tournament.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
     G.arcade.opponent=playerMatch.a.id===G.f.id?playerMatch.b:playerMatch.a;
     G.screen='arcadehub'; save(); render(); },
-  pickArcadeTrain(idx){ if(G.arcade.upgradesChosen.train) return; applyDeltas(G.f,G.arcade.trainOpts[idx].d); G.arcade.upgradesChosen.train=true;
+  pickArcadeTrain(idx){ if(G.arcade.upgradesChosen.train) return; const _opt=G.arcade.trainOpts[idx]; applyDeltas(G.f,_opt.d);
+    /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — la carte de soin doit aussi vider
+       la liste des séquelles, sinon gauntletStatusBlock (ui-04) continuerait à
+       les afficher en rouge alors que les attributs ont été rendus. ==== */
+    if(_opt._heal){ G.arcade.runInjuries=[]; G.arcade.lastInjury=null; }
+    G.arcade.upgradesChosen.train=true;
     if(G.arcade.mode==='ladder_100') G.arcade.targets=genWTUMMATargets();
     CL.go('arcadehub'); },
   /* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — choix du joueur parmi les
@@ -1080,7 +1104,12 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   fightArcade(){ G.screen='arcade_plan'; save(); render(); },
   chooseArcadePlan(idx){
-    const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]);
+    /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — même ordre de composition
+       QUE scr_arcade_plan (ui-04) : la tactique exclusive de l'archétype
+       d'abord, sinon l'index cliqué ne correspondrait plus à la carte
+       réellement affichée. ==== */
+    const archTactic=ARCADE_EXCLUSIVE_TACTICS[G.f.nick];
+    const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(G.f)).concat(TACTICS[G.f.style]||[]);
     const planObj=idx>=0?combined[idx]:null;
     G.arcade.plan=planObj?planObj.m:null; G.arcade.planLabel=planObj?planObj.lbl:null;
     resolveArcadeFight();
@@ -1134,7 +1163,7 @@ const CL={
      donnée nouvelle à produire. ==== */
   viewBracket(){ if(!G.arcade||!G.arcade.tournament) return; G.screen='bracket_view'; render(); },
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: REJOUABILITE_BANQUE_GAUNTLET] — quitter volontairement un run
+  /* ==== [ANCRE: REJOUABILITE_BANQUE_GAUNTLET] — quitter volontairement une run
      en cours en encaissant les points de salle du palier atteint, plutôt que
      d'être obligé de perdre pour toucher quoi que ce soit. Boss Run applique
      une décote (×0.6) sur son propre barème d'élimination : la banque
@@ -1144,21 +1173,15 @@ const CL={
      100 réutilisent tels quels leurs barèmes d'élimination existants : chez
      eux, perdre ou décrocher soi-même a toujours rapporté pareil (aucune
      pénalité à modifier), seule l'option de sortir proprement manquait. ==== */
-  cashOutGauntlet(){
-    if(!G.arcade||!G.arcade.active) return;
-    /* ==== [ANCRE: GAUNTLET_FIN_DE_RUN] — l'encaissement volontaire passe par le
-       MÊME point de sortie que les éliminations et les victoires : même
-       évaluation du contrat de run, même multiplicateur, même écriture du
-       record au bon palier d'Ascension. Le plein tarif reste la règle pour
-       une sortie volontaire (kind:'cashout' ne déclenche pas la décote), ce
-       qui préserve l'invariant de l'ancre REJOUABILITE_PAYOUT_TABLES :
-       sortir proprement rapporte TOUJOURS strictement plus que se faire
-       éliminer au même palier. ==== */
-    const progress=G.arcade.mode==='boss_run'?G.arcade.streak:(G.arcade.mode==='ladder_100'?G.arcade.rank:((G.arcade.tournament&&G.arcade.tournament.roundStep)||1));
-    finaliseGauntletRun(G.arcade,{kind:'cashout',progress});
-    G.arcade.cashedOut=true;
-    G.screen='gameover'; save(); render();
-  },
+  /* ==== [ANCRE: CORRECTIF_CODE_MORT] — cashOutGauntlet() retirée : plus aucun
+     bouton n'y appelle (GAUNTLET_SORTIE_UNIQUE, ui-04). Les branches
+     `a.cashedOut` dans les 3 écrans de fin de run (gameover boss_run/
+     ladder_100/bracket64, ui-04) restent en l'état : a.cashedOut ne sera
+     plus jamais posé à true nulle part dans le code, ces branches sont donc
+     du texte mort mais inoffensif (jamais atteint). Les nettoyer implique de
+     retoucher 3 narrations distinctes sans rapport avec ce correctif — hors
+     du périmètre de cette passe, à faire si l'un de ces écrans est retouché
+     pour une autre raison. ==== */
   /* ==== [FIN ANCRE] ==== */
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;

@@ -668,7 +668,15 @@ const SVG = {
   goat: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><circle cx="12" cy="11" r="3"/></svg>`,
   veteran: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   star: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
-  belt: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4M18 12h4"/><path d="M9 7h9v10H6v-7l3-3z"/><circle cx="11.5" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="12" r="1.1" fill="currentColor" stroke="none"/></svg>`,
+  /* ==== [ANCRE: CORRECTIF_GLYPHE_CEINTURE] — bug remonté : l'icône ne lit pas
+     comme une ceinture. Vérification git : il n'existe AUCUN « SVG d'origine »
+     à restaurer — `${SVG.belt}` a été ajouté à ui-07 au dernier commit, l'en-tête
+     n'avait aucune icône avant. Le glyphe précédent (pentagone + 2 points)
+     évoquait une boîte, pas une ceinture de champion. Remplacé par la silhouette
+     canonique : sangle horizontale de part et d'autre d'une grosse plaque
+     centrale ovale. Pour un vrai retour à l'état antérieur, retirer `${SVG.belt}`
+     de ui-07 (Registre des ceintures) — une ligne. ==== */
+  belt: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h5M17 12h5"/><ellipse cx="12" cy="12" rx="5" ry="6.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>`,
   pact: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><circle cx="12" cy="15" r="3"/><path d="M12 18l-1.5 3 1.5-1 1.5 1-1.5-3"/></svg>`,
   hammer: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4l-4 4M21.5 2.5a2.12 2.12 0 0 0-3 0L3 18l3 3 15.5-15.5a2.12 2.12 0 0 0 0-3z"/></svg>`,
   /* ==== [ANCRE: ICONES_SUCCES_UNIQUES] — jeu d'icônes additionnel pour que

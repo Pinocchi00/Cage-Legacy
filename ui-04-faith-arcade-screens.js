@@ -524,6 +524,14 @@ function scr_faith_year_end(){
    (dérivé mécaniquement par deriveArcadeMods(), ui-03) en un badge lisible
    au draft. Sans ça, l'effet mécanique du perk resterait invisible pour le
    joueur — donc sans impact réel sur sa décision de sélection. ==== */
+/* ==== [ANCRE: ITEM_BADGE_EQUILIBRE] — item demandé : « faire en sorte que
+   chaque archétype à un descriptif » — VÉRIFIÉ AVANT CORRECTION : sur les 23
+   archétypes de base (et les 7 étendus/débloquables), plusieurs ne
+   franchissaient aucun des 5 seuils (koMod/subMod/sigVol/gnpDmg) et
+   arcadePerkBadge() retournait ''. Repli honnête plutôt qu'abaisser les
+   seuils existants (ce qui aurait dilué leur sens pour les autres) : un 6e
+   badge neutre ÉQUILIBRÉ, affiché seulement quand aucun des 5 traits marqués
+   ne s'applique. ==== */
 function arcadePerkBadge(p){
   const m=p._styleProfileOverride; if(!m) return '';
   const tags=[];
@@ -532,28 +540,58 @@ function arcadePerkBadge(p){
   if(m.subMod>=1.3) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
   if(m.sigVol>=1.25) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
   if(m.gnpDmg>=1.2) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
-  if(!tags.length) return '';
-  return `<div class="mono small mt" style="position:relative;z-index:2">${tags.map(x=>`<span style="border:1px solid ${x.c};color:${x.c};padding:2px 8px;margin-right:6px;border-radius:2px">${x.t}</span>`).join('')}</div>`;
+  if(!tags.length) tags.push({t:'ÉQUILIBRÉ',c:'var(--muted)'});
+  /* ==== [ANCRE: CORRECTIF_BADGES_EMPILEMENT] — bug remonté : sur un
+     archétype à 2 badges (ex. Le Surfer : PEU DE PUISSANCE + FINISSEUR
+     SOUMISSION), l'absence de marge verticale entre les <span> faisait
+     visuellement se toucher/chevaucher les badges quand ils passaient à la
+     ligne (aucun flex-wrap avec gap, juste des spans inline avec
+     margin-right seul). Ajout de margin-bottom sur chaque badge : suffisant
+     pour créer un espacement propre au retour à la ligne, sans toucher au
+     conteneur ni au CSS global. ==== */
+  return `<div class="mono small mt" style="position:relative;z-index:2">${tags.map(x=>`<span style="display:inline-block;border:1px solid ${x.c};color:${x.c};padding:2px 8px;margin:0 6px 6px 0;border-radius:2px">${x.t}</span>`).join('')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_draft(){ const pool=G.arcade.pool; const isBoss=G.arcade.mode==='boss_run'; const isLadder=G.arcade.mode==='ladder_100';
   let h=`<div class="scr"><div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
    <span class="eyebrow mono" style="color:var(--blood)">${isBoss?'BOSS RUN // 5 CHAMPIONS':isLadder?'WTUMMA // CLASSEMENT MONDIAL DES 100':'WTUMMA // WORLD TOURNAMENT'}</span></div>
-   <p class="lede" style="margin-bottom:32px;font-size:15px">${isBoss?'Affrontez 5 champions d\u2019affilée. KO uniquement. La défaite est éliminatoire.':isLadder?'Vous commencez au rang #100. Défiez les combattants mieux classés pour voler leur place jusqu\u2019au sommet. La défaite est éliminatoire.':'Bracket à 64 combattants. Un OVR élevé vous donne une meilleure Seed, un OVR faible vous garantit l\u2019enfer.'}</p>
-   <div class="mono small muted" style="margin:-20px 0 24px">Graine du run : <b>${G.arcade.seed}</b>${(G.arcade.asc||0)>0?` · <span class="gold">Ascension ${G.arcade.asc}</span>`:''}${G.arcade.daily?' · <span class="sage">DÉFI DU JOUR</span>':''}</div>
-   ${contractBlock(G.arcade,false)}
+   <p class="lede" style="margin-bottom:32px;font-size:15px">${isBoss?'Affrontez 5 champions d\u2019affilée. Finitions uniquement. La défaite est éliminatoire.':isLadder?'Vous commencez au rang #100. Défiez les combattants mieux classés pour voler leur place jusqu\u2019au sommet. La défaite est éliminatoire.':'Bracket à 64 combattants. Un OVR élevé vous donne une meilleure Seed, un OVR faible vous garantit l\u2019enfer.'}</p>
+   <div class="mono small muted" style="margin:-20px 0 24px">Graine de la run : <b>${G.arcade.seed}</b>${(G.arcade.asc||0)>0?` · <span class="gold">Ascension ${G.arcade.asc}</span>`:''}${G.arcade.daily?' · <span class="sage">DÉFI DU JOUR</span>':''}</div>
+   ${(()=>{ /* ==== [ANCRE: LISIBILITE_CONTRAT_PASSIF] — item demandé : contractBlock()
+        rendait le contrat en entier ici, puis CL.selectDraft() (ui-08) navigue
+        directement vers arcadehub où gauntletStatusBlock() le réaffiche déjà en
+        entier (label, hint, ×mult), SANS qu'aucun combat n'ait eu lieu entre les
+        deux écrans — le joueur lisait la même carte deux fois d'affilée. Ne
+        garder ici qu'un repère d'une ligne, pour savoir qu'un contrat existe
+        sans lire son détail deux fois. */
+     const c=G.arcade.contract; if(!c) return '';
+     return `<div class="mono small muted" style="margin:-16px 0 20px">${SVG.pact} Contrat de la run posé — détail au vestiaire une fois le profil choisi.</div>`;
+   })()}
    <div style="height:16px"></div>`;
   pool.forEach((p,i)=>{
+    /* ==== [ANCRE: ITEM_VITRINE_STAT_DYNAMIQUE] — item demandé : la case PUIS
+       était en surbrillance dorée EN PERMANENCE, quel que soit l'archétype —
+       Le Fantôme (power 50, la plus faible de son propre profil) affichait
+       donc sa stat la moins pertinente comme point fort. La surbrillance
+       suit maintenant la vraie meilleure valeur parmi les 4 cases affichées
+       (gold, même convention que le reste de l'écran) et la plus faible
+       ressort en rouge (var(--loss), même code couleur que les malus
+       ailleurs dans le Gauntlet) — sur ces 4 agrégats seulement, pas sur les
+       20 attributs bruts, pour rester lisible dans une grille à 4 cases. */
+    const _stk=Math.round((p.attrs.jab+p.attrs.cross+p.attrs.hook)/3);
+    const _grp=Math.round((p.attrs.takedown+p.attrs.submission+p.attrs.topControl)/3);
+    const _pui=p.attrs.power, _crd=p.attrs.cardio;
+    const _max=Math.max(_stk,_grp,_pui,_crd), _min=Math.min(_stk,_grp,_pui,_crd);
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
       <div class="meta-strip"><div><span>Style</span><b>${p.styleLabel}</b></div></div>
       <div class="hero-name">${p.nick} ${p.flag}</div>
       <div class="narr" style="margin:10px 0 0;position:relative;z-index:2"><blockquote style="font-size:14px">« ${p._perk||''} »</blockquote></div>
       ${arcadePerkBadge(p)}
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;position:relative;z-index:2" class="mono">
-        <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">STRK</span><b style="font-size:18px">${Math.round((p.attrs.jab+p.attrs.cross+p.attrs.hook)/3)}</b></div>
-        <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">GRAP</span><b style="font-size:18px">${Math.round((p.attrs.takedown+p.attrs.submission+p.attrs.topControl)/3)}</b></div>
-        <div style="background:var(--panel2);border:1px solid var(--gold-d);padding:8px 0;text-align:center"><span class="stat-lbl">PUIS</span><b style="font-size:18px" class="gold">${p.attrs.power}</b></div>
-        <div style="background:var(--panel2);border:1px solid var(--line);padding:8px 0;text-align:center"><span class="stat-lbl">CARDIO</span><b style="font-size:18px">${p.attrs.cardio}</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_stk===_max?'var(--gold-d)':_stk===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">STRK</span><b style="font-size:18px;${_stk===_max?'color:var(--gold)':_stk===_min?'color:var(--loss)':''}">${_stk}</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_grp===_max?'var(--gold-d)':_grp===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">GRAP</span><b style="font-size:18px;${_grp===_max?'color:var(--gold)':_grp===_min?'color:var(--loss)':''}">${_grp}</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_pui===_max?'var(--gold-d)':_pui===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">PUIS</span><b style="font-size:18px;${_pui===_max?'color:var(--gold)':_pui===_min?'color:var(--loss)':''}">${_pui}</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_crd===_max?'var(--gold-d)':_crd===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">CARDIO</span><b style="font-size:18px;${_crd===_max?'color:var(--gold)':_crd===_min?'color:var(--loss)':''}">${_crd}</b></div>
       </div>
       <button class="btn" style="border-color:var(--text);position:relative;z-index:2" onclick="CL.selectDraft(${i})">SÉLECTIONNER CE PROFIL</button>
     </div>`;
@@ -571,7 +609,7 @@ function nearMissBlock(a){
   const s=a.lastScorecard;
   const rows=[s.judges.j1,s.judges.j2,s.judges.j3].map(([ja,jb])=>`<span class="mono small">${ja}-${jb}</span>`).join(' · ');
   const margin=Math.abs(s.scoreA-s.scoreB);
-  const tightness=margin<=3?'Cartes très serrées — un round différent et le run continuait.':margin<=8?'Un écart net mais pas écrasant sur les cartes.':'Décision sans appel des 3 juges.';
+  const tightness=margin<=3?'Cartes très serrées — un round différent et la run continuait.':margin<=8?'Un écart net mais pas écrasant sur les cartes.':'Décision sans appel des 3 juges.';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:24px">
      <div class="eyebrow mb" style="font-size:11px">Cartes des juges (${s.method})</div>
      <div>${rows}</div>
@@ -581,7 +619,7 @@ function nearMissBlock(a){
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_SEED_REJOUABLE] — la graine n'était affichée
    qu'au draft (scr_draft), jamais reprise au game over : impossible de
-   comparer un run raté à la même graine sans la retenir manuellement.
+   comparer une run raté à la même graine sans la retenir manuellement.
    CL.retrySameSeed() (ui-08) capture a.seed avant reset et le repose en
    G._pendingSeed. ==== */
 function seedReplayBlock(a){
@@ -593,7 +631,7 @@ function seedReplayBlock(a){
    affiché au game over : sémantique par format (cf. recordGauntletBest). ==== */
 /* ==== [ANCRE: GAUNTLET_ASCENSION] — le record est désormais indexé par palier
    d'Ascension (gauntletBestGet) : comparer un palier 0 à un palier 3 n'aurait
-   aucun sens. Le palier du run en cours est affiché à côté. ==== */
+   aucun sens. Le palier de la run en cours est affiché à côté. ==== */
 function gauntletBestLine(mode){
   const meta=loadMetaStats();
   const asc=(G.arcade&&G.arcade.asc)||0;
@@ -614,21 +652,15 @@ function gauntletBestLine(mode){
     : `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel (Ascension ${asc}) : ${label}</div>`)+archLine;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — bandeau du contrat, affiché au draft,
-   au hub ET au camp : un objectif global qu'on oublie à mi-run ne pèse sur
-   aucune décision. `live` recalcule l'état en direct via evalGauntletContract
-   (fonction pure vis-à-vis de l'écran : elle n'écrit que a.contract.done). ==== */
-function contractBlock(a,live){
-  if(!a||!a.contract) return '';
-  const c=a.contract;
-  const ok=live?evalGauntletContract(a):!!c.done;
-  const col=ok?'var(--sage)':'var(--gold)';
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${col};padding:12px;text-align:left;margin-top:12px">
-     <div class="eyebrow" style="font-size:11px">Contrat du run · ×${c.mult} sur le gain final</div>
-     <div class="mono small" style="color:${col};font-weight:bold">${ok?'✓ ':'☐ '}${c.label}</div>
-     <div class="muted small mt">${c.hint}</div>
-   </div>`;
-}
+/* ==== [ANCRE: CORRECTIF_CODE_MORT] — contractBlock() retirée : son unique
+   appelant restant (scr_draft) a été remplacé par un repère d'une ligne
+   (LISIBILITE_CONTRAT_PASSIF ci-dessus) pour ne plus doubler ce que
+   gauntletStatusBlock affiche déjà sur l'écran suivant immédiat (arcadehub,
+   atteint sans aucun combat entre les deux). L'ancre GAUNTLET_CONTRAT_RUN
+   d'origine visait « draft, hub ET camp » : les appels hub/camp avaient déjà
+   disparu au profit de gauntletStatusBlock lors de GAUNTLET_STATUT_CONSOLIDE
+   sans que ce commentaire ait été mis à jour ; seul l'appel draft restait,
+   désormais retiré à son tour. ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] — la cagnotte + ce qu'une
    élimination laisserait, ligne identique aux 3 formats (le Boss Run avait
@@ -645,9 +677,10 @@ function atRiskToggleBlock(a){
   const banked=a.banked||0;
   if(banked<=0) return '';
   const next=Math.min(8,(a.riskMult||1)*2);
-  return `<div class="glass mwash toggle-card" style="position:relative;background:var(--panel2);border:1px solid ${a.atRisk?'var(--blood)':'var(--line)'};padding:12px;text-align:left;margin-top:12px" onclick="CL.toggleAtRisk()">
-     <div class="mono small" style="color:${a.atRisk?'var(--blood)':'var(--muted)'};font-weight:bold">${a.atRisk?'✓ CAGNOTTE EN JEU':'☐ Mettre la cagnotte en jeu'}</div>
-     <div class="muted small mt">Une victoire porte le multiplicateur du run à <b class="gold">×${next}</b>. Une élimination sur ce combat ne rapporte <b style="color:var(--loss)">absolument rien</b> — les ${banked} pts de cagnotte partent avec.</div>
+  const on=!!a.atRisk;
+  return `<div class="toggle-card" style="flex:1;min-width:0" onclick="CL.toggleAtRisk()">
+     <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid ${on?'var(--blood)':'var(--line)'};color:${on?'var(--blood)':'var(--muted)'};font-weight:bold">${on?'✓ ':'☐ '}Mise en jeu</div>
+     ${on?`<div class="muted small mt">Une victoire porte le multiplicateur de la run à <b class="gold">×${next}</b>. Une élimination sur ce combat ne rapporte <b style="color:var(--loss)">absolument rien</b> — les ${banked} pts de cagnotte partent avec.</div>`:''}
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -661,7 +694,7 @@ function atRiskToggleBlock(a){
 /* ==== [ANCRE: CORRECTIF_CODE_MORT] — runMultBlock() retirée : sa logique
    vit désormais dans gauntletStatusBlock(), plus aucun appelant. ==== */
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_STATUT_CONSOLIDE] — regroupe l'état PASSIF du run
+/* ==== [ANCRE: GAUNTLET_STATUT_CONSOLIDE] — regroupe l'état PASSIF de la run
    (contrat, cagnotte, séquelles, multiplicateur) dans une seule carte au lieu
    de 4 empilées : sur les 3 hubs, contractBlock + gauntletBankLine +
    runInjuryBlock + runMultBlock rendaient jusqu'à 6 boîtes .glass quasi
@@ -687,18 +720,18 @@ function gauntletStatusBlock(a,live){
     if((a.riskMult||1)>1) parts.push(`mise ×${a.riskMult}`);
     if((a.maxPactStreak||0)>0) parts.push(`pactes +${Math.round((a.maxPactStreak||0)*10)} %`);
     if(a.contract&&a.contract.done) parts.push(`contrat ×${a.contract.mult}`);
-    rows.push(`<div class="mono small gold">Multiplicateur du run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`);
+    rows.push(`<div class="mono small gold">Multiplicateur de la run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`);
   }
   if(!rows.length) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:left;margin-top:12px">
-     <div class="eyebrow mb" style="font-size:11px">État du run</div>
+     <div class="eyebrow mb" style="font-size:11px">État de la run</div>
      ${rows.join('')}
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BRACKET_VISIBLE] — rend le tableau réellement simulé
    par advanceWTUMMABracket() (ui-03). Affiche le tour courant, le match du
-   joueur mis en évidence, et signale si une némésis est encore en lice
+   joueur mis en évidence, et signale si un némésis est encore en lice
    ailleurs dans le tableau — le vrai moteur d'anticipation du format. ==== */
 function scr_bracket_view(){
   const a=G.arcade;
@@ -707,7 +740,15 @@ function scr_bracket_view(){
   const rivalAlive=t.matches.some(m=>(m.a&&m.a._isRival)||(m.b&&m.b._isRival));
   const row=(m,i)=>{
     const mine=(m.a&&m.a.id===G.f.id)||(m.b&&m.b.id===G.f.id);
-    const side=x=>`${esc(x.name)} ${x.flag||''} <span class="muted small">#${x.seed||'?'} · OVR ${x.overall}</span>${x._isRival?' <span class="mono small" style="color:var(--blood)">⚠</span>':''}`;
+    /* ==== [ANCRE: CORRECTIF_SURNOM_TABLEAU] — bug remonté : le joueur figurait
+       dans le tableau sous le patronyme généré par makeFighter() (ex. « Bruno
+       Hughes »), alors que TOUS les autres écrans du Gauntlet l'identifient par
+       son surnom d'archétype (f.nick — cf. les 3 hubs, scr_draft,
+       scr_arcade_plan). Le nom généré n'a aucune existence pour le joueur : il
+       n'a choisi qu'un archétype. Les PNJ gardent leur patronyme, c'est leur
+       seule identité. ==== */
+    const label=x=>((x.id===G.f.id && x.nick)?x.nick:x.name);
+    const side=x=>`${esc(label(x))} ${x.flag||''} <span class="muted small">#${x.seed||'?'} · OVR ${x.overall}</span>${x._isRival?' <span class="mono small" style="color:var(--blood)">⚠</span>':''}`;
     return `<div style="background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${mine?'var(--gold)':'var(--line)'};padding:13px;margin:10px 0">
       <div class="mono small muted">Match ${i+1}</div>
       <div class="small">${side(m.a)}</div>
@@ -716,7 +757,7 @@ function scr_bracket_view(){
     </div>`;
   };
   return `<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // TABLEAU — ${t.stepName.toUpperCase()}</span></div>
-   <p class="lede small">Votre tête de série : #${t.playerSeed}. ${rivalAlive?'<b style="color:var(--blood)">Une némésis est encore en lice dans ce tableau.</b>':'Aucune némésis dans les survivants.'}</p>
+   <p class="lede small">Votre tête de série : #${t.playerSeed}. ${rivalAlive?'<b style="color:var(--blood)">Un némésis est encore en lice dans ce tableau.</b>':'Aucun némésis dans les survivants.'}</p>
    ${t.matches.map(row).join('')}
    <button class="btn ghost mt" onclick="CL.go('arcadehub')">← Retour au vestiaire</button>
   </div>`;
@@ -756,7 +797,7 @@ function runDebriefBlock(a){
   const ach=(a.newAch||[]).length?`<div class="mono small gold mt">🏅 ${a.newAch.map(x=>x.h).join(' · ')}</div>`:'';
   if(!multLine && !contractLine && !bounty && !inj && !curses && !daily && !ach) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:20px">
-     <div class="eyebrow mb" style="font-size:11px">Bilan du run</div>
+     <div class="eyebrow mb" style="font-size:11px">Bilan de la run</div>
      ${multLine}${contractLine}${bounty}${inj}${curses}${daily}${ach}
    </div>`;
 }
@@ -809,7 +850,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>
    <div class="narr"><blockquote>${narrative}</blockquote></div>
    ${seedReplayBlock(a)}
-   <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
+   <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVELLE RUN</button>
    <button class="btn ghost mt" onclick="CL.go('title')">${isVictory?'RETOURNER DANS L\u2019OMBRE':'ACCEPTER LA DÉFAITE'}</button>
    </div>`;
   }
@@ -842,7 +883,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>
    <div class="narr"><blockquote>${isVictory?`« 99 cadavres en contrebas. L\u2019ascension est terminée, le trône vous appartient. »`:cashedOut?`« Pas de trône, mais la chute est évitée et les points sont en poche. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:`« Une erreur et c\u2019est la chute libre. Le sommet restera hors de portée. »`}</blockquote></div>
    ${seedReplayBlock(a)}
-   <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
+   <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVELLE RUN</button>
    <button class="btn ghost mt" onclick="CL.go('title')">RETOURNER AU MENU</button>
    </div>`;
   }
@@ -865,7 +906,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>
    <div class="narr"><blockquote>${isVictory?`« 63 combattants laissés sur le carreau. L\u2019octogone vous appartient, jusqu\u2019à ce qu\u2019un nouveau challenger se présente. »`:cashedOut?`« Se retirer au bon moment est aussi un art. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:`« Le bracket est impitoyable. Une seule erreur et c\u2019est le vol de retour. »`}</blockquote></div>
    ${seedReplayBlock(a)}
-   <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVEAU RUN</button>
+   <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVELLE RUN</button>
    <button class="btn ghost mt" onclick="CL.go('title')">RETOURNER AU MENU</button>
    </div>`;
 }
@@ -889,7 +930,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    fighterFromRivalSnapshot, ui-03) avant d'entrer dans le plan de combat. ==== */
 function rivalBadge(opp){
   if(!opp||!opp._isRival) return '';
-  const srcLabel={boss_run:'Boss Run',ladder_100:'Ladder 100',bracket64:'Bracket 64'}[opp._rivalSource]||'un run précédent';
+  const srcLabel={boss_run:'Boss Run',ladder_100:'Ladder 100',bracket64:'Bracket 64'}[opp._rivalSource]||'une run précédente';
   const buffLine=(opp._killedCount||0)>=2?`<div class="mono small" style="color:var(--blood);margin-bottom:4px">☠ Vous a déjà battu ${opp._killedCount} fois — frappe plus dur, plus dangereux en soumission</div>`:'';
   return `<div class="mono small" style="color:var(--blood);font-weight:bold;margin-bottom:4px">⚠ NÉMÉSIS — vous a déjà éliminé (${srcLabel})</div>${buffLine}`;
 }
@@ -905,12 +946,16 @@ function rivalBadge(opp){
    annoncerait le tarif de base et verserait le tarif multiplié, exactement le
    type d'écart qui avait produit le bug ×10 du Ladder. Le contrat est évalué
    en direct pour que son ×mult apparaisse dès qu'il est rempli. ==== */
-function cashOutPreview(a){
-  evalGauntletContract(a);
-  if(a.mode==='boss_run') return gauntletFinalPayout(a,gauntletPayout('boss_run',a.streak));
-  if(a.mode==='ladder_100') return gauntletFinalPayout(a,gauntletPayout('ladder_100',a.rank));
-  return gauntletFinalPayout(a,gauntletPayout('bracket64',(a.tournament&&a.tournament.roundStep)||1));
-}
+/* ==== [ANCRE: CORRECTIF_CODE_MORT] — cashOutPreview() retirée : item demandé,
+   « Encaisser et sortir » n'a plus aucun appelant sur les 3 hubs (bracket64,
+   ladder_100, boss_run — cf. GAUNTLET_SORTIE_UNIQUE ci-dessus). L'option
+   n'avait pas de bug — les chiffres étaient sains, l'encaissement rapportait
+   toujours strictement plus qu'une élimination au même palier — mais elle
+   n'était en pratique jamais choisie : sortir d'une run en cours va contre
+   l'intérêt du joueur tant que la cagnotte suivante reste accessible via
+   « Abandonner ». eliminationPreview() reste seule active : elle sert
+   toujours à gauntletStatusBlock() pour annoncer ce que rapporterait une
+   défaite sur le combat suivant. ==== */
 function eliminationPreview(a){
   evalGauntletContract(a);
   if(a.mode==='boss_run') return gauntletFinalPayout(a,gauntletEliminationPayout('boss_run',a.streak,a.atRisk));
@@ -926,20 +971,26 @@ function eliminationPreview(a){
    la carte devient un badge non cliquable (pas d'onclick) plutôt que le
    toggle-card habituel, pour que le joueur voie la contrainte au lieu de
    croire à un bug quand son clic ne fait plus rien. ==== */
+/* ==== [ANCRE: LISIBILITE_PACTE_MISE_PASTILLES] — item demandé : « beaucoup
+   trop d'informations » — pactToggleBlock() rendait un paragraphe complet en
+   PERMANENCE. Passe en pastille courte, le paragraphe ne réapparaît que
+   quand l'option est ACTIVE (ou verrouillée par le mutateur A3, où elle est
+   de toute façon permanente). Le texte accepte désormais KO/TKO OU
+   soumission (ITEM_PACTE_AVEC_SOUMISSIONS) — seule une victoire aux points
+   reste un échec du pacte, cohérent avec le check réel côté ui-08. ==== */
 function pactToggleBlock(a){
   const streak=a.pactStreak||0;
-  const streakLine=streak>0?`<div class="mono small gold mt" style="font-weight:bold">🔥 Série de pactes remplis : ${streak}${streak>=3?' — Légendaire garantie au prochain camp !':''}</div>`:'';
+  const streakLine=streak>0?`<br><b class="gold">🔥 Série : ${streak}${streak>=3?' — Légendaire garantie au prochain camp !':''}</b>`:'';
   if((a.asc||0)>=3){
-    return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--blood);padding:12px;text-align:left;margin-top:12px">
-     <div class="mono small" style="font-weight:bold;color:var(--blood)">⚠ PACTE DE FINITION OBLIGATOIRE — Ascension ${a.asc}</div>
-     <div class="muted small mt">Palier 3 et au-delà : chaque combat du run ne compte que par KO/TKO, sans exception. Une victoire aux points ou par soumission arrête le run comme une défaite.</div>
-     ${streakLine}
+    return `<div style="flex:1;min-width:0">
+     <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid var(--blood);color:var(--blood);font-weight:bold">⚠ Pacte obligatoire</div>
+     <div class="muted small mt">Ascension ${a.asc} : chaque combat ne compte que par finition (KO/TKO ou soumission), sans exception. Une victoire aux points arrête la run comme une défaite.${streakLine}</div>
    </div>`;
   }
-  return `<div class="glass mwash toggle-card" style="position:relative;background:var(--panel2);border:1px solid ${a.pactActive?'var(--gold)':'var(--line)'};padding:12px;text-align:left;margin-top:12px" onclick="CL.togglePact()">
-     <div class="mono small ${a.pactActive?'gold':'muted'}" style="font-weight:bold">${a.pactActive?'✓ PACTE DE FINITION ACTIF':'☐ Prendre le pacte de finition'}</div>
-     <div class="muted small mt">Ce combat ne compte que par KO/TKO — une victoire aux points ou par soumission arrête le run comme une défaite. En échange : camp suivant plancher Rare garanti + une compétence Légendaire/Épique dans les choix.</div>
-     ${streakLine}
+  const on=!!a.pactActive;
+  return `<div class="toggle-card" style="flex:1;min-width:0" onclick="CL.togglePact()">
+     <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid ${on?'var(--gold)':'var(--line)'};color:${on?'var(--gold)':'var(--muted)'};font-weight:bold">${on?'✓ ':'☐ '}Pacte</div>
+     ${on?`<div class="muted small mt">Ce combat ne compte que par finition (KO/TKO ou soumission) — une victoire aux points arrête la run comme une défaite. En échange : camp suivant plancher Rare garanti + une compétence Légendaire/Épique dans les choix.${streakLine}</div>`:''}
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -954,7 +1005,13 @@ function pactToggleBlock(a){
    CL.fightArcade(). ==== */
 function scr_arcade_plan(){
   const f=G.f, opp=G.arcade.opponent; const plans=TACTICS[f.style]||[];
-  const combined=getExclusiveTactics(f).concat(plans);
+  /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — la tactique exclusive de
+     l'archétype (ARCADE_EXCLUSIVE_TACTICS, ui-03) passe en tête de liste,
+     avant les tactiques exclusives génériques (allonge/densité, engine.js) et
+     les 3 options de style partagées — c'est la plus spécifique au
+     combattant, elle doit être la première chose vue. ==== */
+  const archTactic=ARCADE_EXCLUSIVE_TACTICS[f.nick];
+  const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(f)).concat(plans);
   /* ==== [ANCRE: GAUNTLET_BRUIT_DU_MILIEU] — sur les combats à fort enjeu
      (cf. gauntletRumorActive, ui-03), l'analyse tactique VÉRIDIQUE
      (tacticalRead) est remplacée par une rumeur — parfois fausse, jamais
@@ -976,16 +1033,24 @@ function scr_arcade_plan(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(a);
+/* ==== [ANCRE: GAUNTLET_SORTIE_UNIQUE] — item demandé : « personne n'accepte
+   d'encaisser et partir ». Décision de design confirmée, pas un bug — les
+   barèmes de GAUNTLET_FIN_DE_RUN étaient sains (sortir a toujours rapporté
+   strictement plus qu'une élimination au même palier). L'option existait
+   sur les 3 formats mais n'était jamais choisie : abandonner la run garde
+   la cagnotte accessible plus tard sans y renoncer maintenant, elle
+   dominait donc systématiquement l'encaissement. Un seul point de sortie
+   reste : « Abandonner la run » (0 pt, déjà présent partout). ==== */
+function scr_arcadehub(){ const f=G.f, a=G.arcade;
   if(a.mode==='boss_run'){
     /* ==== [ANCRE: REJOUABILITE_BANQUE_BOSSRUN] — a.banked (ui-08) affiché
        comme cagnotte visible, avec ce qui est en jeu si le KO suivant échoue
        (eliminationPreview) juste en-dessous : la tension risque/récompense
        doit être LISIBLE, pas seulement calculée en coulisses. ==== */
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
-   <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur ce run</em></div>
+   <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur cette run</em></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:center;margin-top:12px;border-left:3px solid var(--gold)">
-     <div class="mono small gold" style="font-weight:bold">⚠ SEUL LE KO/TKO COMPTE — une victoire par décision ou soumission arrête la série.</div>
+     <div class="mono small gold" style="font-weight:bold">⚠ SEULE UNE FINITION COMPTE — une victoire aux points arrête la série.</div>
    </div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:12px">
      <div class="eyebrow mb">Prochain adversaire</div>
@@ -993,10 +1058,9 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${a.opponent.styleLabel} · ${a.opponent.age} ans</div></div>
    ${gauntletStatusBlock(a,true)}
-   ${atRiskToggleBlock(a)}
+   <div style="display:flex;gap:10px;margin-top:12px">${atRiskToggleBlock(a)}</div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE</button>
-   ${cashOut>0?`<button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>`:''}
-   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
+   <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button></div>`;
   }
   if(a.mode==='ladder_100'){
     /* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — a.targets (2-3 profils,
@@ -1021,10 +1085,8 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
    ${targets.map(targetCard).join('')}
    ${(a.aggroCooldown>0)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
    ${gauntletStatusBlock(a,true)}
-   ${pactToggleBlock(a)}
-   ${atRiskToggleBlock(a)}
-   <button class="btn gold mt" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
-   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
+   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${atRiskToggleBlock(a)}</div>
+   <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button></div>`;
   }
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
    <div class="hero-name" style="text-align:center">TÊTE DE SÉRIE #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
@@ -1034,12 +1096,10 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade; const cashOut=cashOutPreview(
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${gauntletRumorActive(a)?a.opponent.styleLabel:`${a.opponent.styleLabel} · OVR ${a.opponent.overall}`}</div></div>
    ${gauntletStatusBlock(a,true)}
-   ${pactToggleBlock(a)}
-   ${atRiskToggleBlock(a)}
+   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${atRiskToggleBlock(a)}</div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
-   <button class="btn ghost" style="margin-top:8px" onclick="CL.viewBracket()">VOIR LE TABLEAU COMPLET</button>
-   <button class="btn gold" style="margin-top:8px" onclick="CL.cashOutGauntlet()">ENCAISSER ET SORTIR (+${cashOut} pts)</button>
-   <button class="btn ghost" onclick="CL.go('title')">Abandonner le run (0 pt)</button></div>`;
+   <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button>
+   <button class="btn ghost" style="margin-top:8px;opacity:0.75" onclick="CL.viewBracket()">Voir le tableau complet</button></div>`;
 }
 /* ==== [ANCRE: ECRAN_ARCADE_UPGRADES] — camp d'entraînement roguelite entre
    chaque tour du Bracket 64 : un entraînement + une compétence à choisir. ==== */
@@ -1061,19 +1121,25 @@ function scr_arcade_upgrades(){
     });
     /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — 4e carte, visuellement séparée des 3
        options normales : une Légendaire/Mythique garantie payée par un malus
-       permanent sur le run. C'est le seul choix du camp qui puisse EMPIRER le
+       permanent sur la run. C'est le seul choix du camp qui puisse EMPIRER le
        combattant, donc le seul qui demande un arbitrage réel. ==== */
     if(a.cursedOpt){
       const cs=a.cursedOpt;
+      /* ==== [ANCRE: ITEM_LISIBILITE_GAINS_ATTRIBUTS] — même traitement que
+         formatSkillFx (ui-07) : "avant → après" plutôt qu'un delta brut sans
+         repère. La séquelle maudite ne connaît pas de plafond haut (elle ne
+         fait que baisser), pas besoin de reproduire que la borne basse
+         (clamp 1-100 via d20 à l'affichage). ==== */
       const deltasTxt=cs.d.map(x=>{ const k=x[0], v=x[1];
         const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
-        const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
-        return `<span class="dlt dn">${shown} ${lbl}</span>`; }).join('');
+        const before=k==='morale'?f.morale:k==='form'?f.form:f.attrs[k];
+        const after=Math.max(1,before+v);
+        return `<span class="dlt dn">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).join('');
       h+=`<div class="eyebrow mt mb" style="color:var(--blood)">PACTE DU CAMP — OPTION MAUDITE</div>
           <div class="opp" style="border-left:3px solid var(--blood)" onclick="CL.pickCursedSkill()">
             <b style="color:${RAR_COLORS[cs.skill.rar]||'var(--gold)'}">${cs.skill.name}</b> <span class="muted small">(${cs.skill.rar}) — garantie</span>
             <div class="muted small mt">${cs.skill.desc||cs.skill.blurb||''}</div>
-            <div class="mono small mt" style="color:var(--blood)"><b>${cs.curseLabel}</b> — séquelle permanente sur ce run</div>
+            <div class="mono small mt" style="color:var(--blood)"><b>${cs.curseLabel}</b> — séquelle permanente sur cette run</div>
             <div class="dlts">${deltasTxt}</div>
           </div>`;
     }
@@ -1084,24 +1150,38 @@ function scr_arcade_upgrades(){
     h+=`<p class="lede small">Sélectionnez un ajustement physique.</p>
         <div class="eyebrow mt mb" style="color:var(--gold)">2. CONDITIONNEMENT & SPARRING</div>`;
     a.trainOpts.forEach((t,i)=>{
+      /* ==== [ANCRE: ITEM_LISIBILITE_GAINS_ATTRIBUTS] — item demandé : "+2
+         Cardio" n'indiquait jamais où en est réellement le combattant, ni si
+         l'attribut est déjà à son plafond de potentiel. Même convention
+         "avant → après" que formatSkillFx (ui-07) et le récapitulatif
+         post-combat (ui-06). Un attribut déjà au plafond affiche sa valeur
+         telle quelle avec la mention, plutôt qu'un gain qui ne
+         s'appliquerait pas réellement une fois applyDeltas() exécuté. ==== */
       const deltas=t.d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
-        // Bug corrigé : Moral/Forme s'affichaient en valeur brute /100 (ex.
-        // "-16 Moral") au lieu de l'échelle /20 utilisée partout ailleurs.
-        // Même ratio que d20() désormais pour TOUS les deltas, sans exception.
-        const shown=Math.sign(v)*Math.max(v!==0?1:0,Math.round(Math.abs(v)/5));
-        return `<span class="dlt ${v>=0?'up':'dn'}">${shown>=0?'+':''}${shown} ${lbl}</span>`; }).join('');
+        const before=k==='morale'?f.morale:k==='form'?f.form:f.attrs[k];
+        if(v>0 && k!=='morale' && k!=='form'){
+          let cap=(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4;
+          if(f.agedCeilings && f.agedCeilings[k]!=null) cap=Math.min(cap, f.agedCeilings[k]);
+          if(before>=cap) return `<span class="dlt">${lbl} ${d20(before)} (déjà au max)</span>`;
+          return `<span class="dlt up">${lbl} ${d20(before)} → ${d20(Math.min(before+v,cap))}</span>`;
+        }
+        const after=k==='morale'||k==='form'?clamp(before+v,0,100):Math.max(1,before+v);
+        return `<span class="dlt ${v>=0?'up':'dn'}">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).join('');
       h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
             <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
     });
   }
   /* ==== [ANCRE: REJOUABILITE_CAMP_RECUPERATION] — la forme (attritionHeal(),
-     ui-08) décroît réellement avec la profondeur du run mais restait
+     ui-08) décroît réellement avec la profondeur de la run mais restait
      invisible sur cet écran, rendant l'option "Récupération active"
      (ui-03) illisible faute de référence. Jauge affichée juste avant les
      groupes d'attributs, même style que le reste de l'écran. ==== */
+  /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — le bloc jauge « Forme /
+     Récupération de la run » est retiré : la valeur n'est plus lue par eff()
+     en arcade et n'a donc plus rien à communiquer. L'état passif de la run
+     (contrat, cagnotte, séquelles, multiplicateur) reste le seul bloc de
+     contexte avant les attributs. ==== */
   h+=`<div class="hr" style="margin:24px 0"></div>
-      <div class="card" style="border-left:3px solid var(--sage)"><div class="grp-h"><span class="disp" style="font-size:17px">Forme</span><span class="gold mono">${d20(f.form)}/20</span></div>
-      <div class="attr"><span class="attr-l">Récupération du run</span>${gauge(f.form)}<span class="attr-v">${d20(f.form)}</span></div></div>
       ${gauntletStatusBlock(a,true)}
       <div class="eyebrow mb mt">Attributs du combattant (temps réel)</div>
       ${grp('tech','Technique',g.tech)}${grp('ment','Mental',g.ment)}${grp('phys','Physique',g.phys)}

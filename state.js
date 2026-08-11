@@ -18,7 +18,7 @@ const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])
 /* ==== [ANCRE: SAVE_GARDE_ARCADE] — bug trouvé : arcade et carrière partageaient
    la MÊME clé de sauvegarde. Démarrer un Gauntlet écrasait la carrière dans
    localStorage ; "Reprendre" (toujours G.screen='hub') rechargeait alors le
-   combattant du Gauntlet dans le hub de carrière. Un run Gauntlet ne doit
+   combattant du Gauntlet dans le hub de carrière. Une run Gauntlet ne doit
    jamais toucher au localStorage : il ne survit pas à une fermeture, exactement
    comme un roguelite classique — la vraie carrière reste intacte pendant ce temps. ==== */
 function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
@@ -197,7 +197,7 @@ function recordGauntletBestByArchetype(meta,mode,value,asc,archetypeNick){
    tout le monde le même jour sans échange réseau, et _rollGauntletSeed()
    (ui-08) sait déjà hacher une chaîne numérique. Une seule tentative par
    jour et par format, mémorisée dans meta (clé localStorage séparée de la
-   sauvegarde, donc survit au fait qu'un run Gauntlet n'est JAMAIS persisté —
+   sauvegarde, donc survit au fait qu'une run Gauntlet n'est JAMAIS persisté —
    cf. ANCRE SAVE_GARDE_ARCADE ci-dessus). ==== */
 function gauntletDailyKey(d){
   const t=d||new Date();

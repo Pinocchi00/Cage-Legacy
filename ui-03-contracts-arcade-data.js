@@ -211,11 +211,11 @@ const LADDER100_POINTS=rank=>Math.max(2,Math.round((101-rank)*0.8));
 const BOSSRUN_POINTS={0:0,1:5,2:15,3:35,4:70,5:150};
 const GAUNTLET_ELIMINATION_RATIO=0.5; // uniforme sur les 3 formats depuis la refonte
 /* ==== [ANCRE: GAUNTLET_ASCENSION] — facteur de récompense indexé sur le
-   palier d'Ascension du run (G.arcade.asc, 0 par défaut). Passé en 3e
+   palier d'Ascension de la run (G.arcade.asc, 0 par défaut). Passé en 3e
    argument OPTIONNEL de gauntletPayout() pour que les ~10 appels existants
    (ui-04 previews, ui-08 paiements) restent valides sans modification et
    deviennent automatiquement corrects : à défaut d'argument, le palier est
-   lu sur le run en cours. ==== */
+   lu sur la run en cours. ==== */
 function gauntletAscPayoutMod(asc){ return 1+0.35*(asc||0); }
 function gauntletRunAsc(){ return (typeof G!=='undefined'&&G&&G.arcade&&G.arcade.asc)||0; }
 function gauntletPayout(mode,progress,asc){
@@ -237,7 +237,7 @@ function gauntletEliminationPayout(mode,progress,atRisk){
   return Math.round(gauntletPayout(mode,progress)*GAUNTLET_ELIMINATION_RATIO);
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_RUN_MULT] — multiplicateur FINAL du run, appliqué une
+/* ==== [ANCRE: GAUNTLET_RUN_MULT] — multiplicateur FINAL de la run, appliqué une
    seule fois au moment du paiement (encaissement, victoire ou élimination),
    JAMAIS dans gauntletPayout() lui-même : les tables de points restent la
    source de vérité unique voulue par l'ancre REJOUABILITE_PAYOUT_TABLES, et
@@ -245,7 +245,7 @@ function gauntletEliminationPayout(mode,progress,atRisk){
    cohérents au centime près avec ce qui est versé côté ui-08 tant que les
    deux passent par ici. Trois canaux cumulatifs :
    - riskMult : doublé à chaque combat gagné avec la cagnotte en jeu (plafond 8)
-   - maxPactStreak : +10 % par pacte de finition consécutif atteint dans le run
+   - maxPactStreak : +10 % par pacte de finition consécutif atteint dans la run
    - contract : bonus du contrat de run si rempli (cf. GAUNTLET_CONTRACTS) ==== */
 function gauntletRunMult(a){
   if(!a) return 1;
@@ -283,19 +283,27 @@ function genWTUMMATargets(){
   return targets.length?targets:[G.arcade.ladder.find(o=>o.ladderRank===Math.max(2,currentRank-10))||G.arcade.ladder[0]];
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: REJOUABILITE_CAMP_RECUPERATION] — attritionHeal() (ui-08)
-   fait bel et bien décroître la récup avec la profondeur du run, mais ce
-   coût était invisible et non-arbitrable : aucune option de camp ne rendait
-   de la forme. Ajoute une 4e option SYNTHÉTIQUE (hors pool TRAIN normal, qui
-   ne connaît que des deltas d'attributs) après le ×4 habituel de
-   generateArcadeUpgrades() — 18 points de forme brute (soit environ +3.6/20,
-   cohérent avec l'ampleur des autres options une fois ×4 appliqué), qui
-   entrent dans applyDeltas() via les clés spéciales 'form'/'morale' déjà
-   gérées (engine.js). ==== */
-function recoveryTrainOption(){
-  return {label:'Récupération active',hint:'Sauter le sparring dur pour laisser le corps encaisser le run. Rien à gagner sur les attributs, tout sur l\u2019endurance de la série.',d:[['form',18],['morale',5]]};
+/* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — l'option de camp « Récupération
+   active » n'existait QUE pour rendre de la forme (+18 form / +5 morale) :
+   sans ces deux canaux elle devient une carte vide. Elle n'est pas supprimée
+   mais reportée sur la seule mécanique d'usure qui subsiste dans une run — les
+   séquelles d'attributs de GAUNTLET_BLESSURE_RUN. Rendre 12 points sur CHAQUE
+   attribut déjà abaissé par une séquelle conserve exactement le rôle
+   d'arbitrage de l'ancienne carte (renoncer à progresser pour réparer), sur une
+   grandeur cette fois réellement lue par le moteur. La carte est masquée quand
+   il n'y a rien à soigner : proposer un soin à un combattant intact serait un
+   choix nul, pas un arbitrage. ==== */
+function runInjuryHealOption(){
+  const inj=(G.arcade&&G.arcade.runInjuries)||[];
+  if(!inj.length) return null;
+  const keys=[]; inj.forEach(i=>(i.attrs||[]).forEach(p=>{ if(!keys.includes(p[0])) keys.push(p[0]); }));
+  if(!keys.length) return null;
+  const labels=keys.map(attrLabel).join(', ');
+  return {label:'Table de soins',
+    hint:`Sauter le sparring dur pour faire traiter les séquelles de la run (${inj.length}). Rien à gagner ailleurs, tout sur la remise en état.`,
+    d:keys.map(k=>[k,12]), _heal:true, _healLabels:labels};
 }
-/* ==== [FIN ANCRE] ==== */
+function recoveryTrainOption(){ return runInjuryHealOption(); }
 function deriveArcadeMods(f){
   const a=f.attrs, base=STYLE_PROFILE[f.style]||STYLE_PROFILE.mma;
   const strikeScore=(num(a.jab)+num(a.cross)+num(a.hook)+num(a.kick))/4;
@@ -315,13 +323,13 @@ function deriveArcadeMods(f){
    et jamais alimenté par le Boss Run ni le Ladder 100. Remplacé par
    meta.gauntletRivals (jusqu'à 3, alimenté par les 3 formats), avec
    migration transparente de l'ancien wtNemesis au premier accès — aucune
-   perte de la némésis déjà en sauvegarde. Consommé par les 3 formats. ==== */
+   perte de le némésis déjà en sauvegarde. Consommé par les 3 formats. ==== */
 function getGauntletRivals(meta){
   if(!meta.gauntletRivals){ meta.gauntletRivals=meta.wtNemesis?[meta.wtNemesis]:[]; }
   return meta.gauntletRivals;
 }
 /* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — le snapshot ne mémorisait PAS à
-   quel palier la némésis vous avait tué : impossible de calibrer une prime
+   quel palier le némésis vous avait tué : impossible de calibrer une prime
    sur ce qu'elle vous a réellement coûté. killedAt (progression au moment de
    l'élimination) + killedMode sont ajoutés au snapshot. Champs purement
    additifs : un ancien snapshot sans killedAt retombe sur la prime plancher
@@ -347,13 +355,13 @@ function recordGauntletRival(meta,f,sourceLabel,killedAt){
   meta.gauntletRivals=rivals; delete meta.wtNemesis;
 }
 /* ==== [FIN ANCRE] ==== */
-/* Prime versée quand on bat enfin la némésis : la moitié du plein tarif du
+/* Prime versée quand on bat enfin le némésis : la moitié du plein tarif du
    palier où elle vous avait éliminé, plancher à 5 points. Elle est alors
    RETIRÉE de meta.gauntletRivals — la vengeance close le dossier, sinon la
    même némésis paierait indéfiniment. */
 /* ==== [ANCRE: GAUNTLET_NEMESIS_ACCUMULATION] — prime doublée (tarif plein
    au lieu de la moitié) si le rival vous a déjà battu 2 fois ou plus : la
-   revanche sur une némésis récurrente doit payer plus cher que sur un
+   revanche sur un némésis récurrente doit payer plus cher que sur un
    accident isolé. ==== */
 function gauntletBountyFor(snap){
   if(!snap) return 0;
@@ -390,37 +398,45 @@ function claimGauntletBounty(opp){
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — objectif global tiré AU DRAFT, valable
-   sur tout le run, payé en multiplicateur final (cf. gauntletRunMult). Les
+   sur tout la run, payé en multiplicateur final (cf. gauntletRunMult). Les
    conditions ne lisent que des données DÉJÀ maintenues en arcade :
    G.f.history (alimenté par applyResult — res/method/round/oppWasChamp) et
    deux drapeaux de run posés dans afterResult. Le combattant arcade est
    recréé à neuf à chaque run par makeArcadeArchetype()->makeFighter(), donc
    son history est naturellement run-scoped : aucun champ de reset à prévoir.
-   Les closures `check` ne posent aucun problème de sérialisation : un run
+   Les closures `check` ne posent aucun problème de sérialisation : une run
    Gauntlet n'est JAMAIS écrit en localStorage (save() sort immédiatement si
    G.arcade.active, cf. state.js ANCRE SAVE_GARDE_ARCADE). ==== */
 const GAUNTLET_CONTRACTS=[
   {id:'ct_nodec',label:'Aucune victoire aux points',mult:1.5,
-   hint:'Toutes vos victoires du run doivent être des finitions — KO/TKO ou soumission.',
+   hint:'Toutes vos victoires de la run doivent être des finitions — KO/TKO ou soumission.',
    check:(f)=>{ const wins=f.history.filter(h=>h.res==='win'); return wins.length>0 && wins.every(h=>!isDecisionLike(h.method)); }},
   {id:'ct_r1',label:'Trois éclairs',mult:1.6,
-   hint:'Terminer trois combats du run dès le 1er round.',
+   hint:'Terminer trois combats de la run dès le 1er round.',
    check:(f)=>f.history.filter(h=>h.res==='win'&&h.round===1&&!isDecisionLike(h.method)).length>=3},
   {id:'ct_champs',label:'Bourreau de champions',mult:1.45,
    hint:'Battre deux adversaires qui portaient déjà une ceinture.',
    check:(f)=>f.history.filter(h=>h.res==='win'&&h.oppWasChamp).length>=2},
   {id:'ct_sub',label:'Le fil de soie',mult:1.5,
-   hint:'Gagner deux combats par soumission dans le run.',
+   hint:'Gagner deux combats par soumission dans la run.',
    check:(f)=>f.history.filter(h=>h.res==='win'&&h.method&&h.method.startsWith('Soum')).length>=2},
   {id:'ct_nopact',label:'Sans filet',mult:1.3,
-   hint:'Terminer le run sans jamais prendre le pacte de finition.',
+   hint:'Terminer la run sans jamais prendre le pacte de finition.',
    check:(f,a)=>!a.pactTakenEver},
   {id:'ct_intact',label:'Corps intact',mult:1.4,
-   hint:'Ne jamais descendre sous 60 de forme pendant tout le run.',
-   check:(f,a)=>!a.formBroken}
+   /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — ct_intact reposait sur la forme
+      (`!a.formBroken`, seuil 60). La forme n'existant plus dans le Gauntlet, le
+      contrat est reporté sur la mécanique d'usure qui subsiste : terminer la run
+      sans jamais encaisser de séquelle (a.runInjuries, GAUNTLET_BLESSURE_RUN).
+      L'id est CONSERVÉ pour ne pas casser meta.gauntletBest ni les succès qui le
+      citeraient. Le multiplicateur reste à 1.4 : la difficulté est comparable —
+      passer une run entier sans séquelle est du même ordre que ne jamais tomber
+      sous 60. ==== */
+   hint:'Terminer la run sans jamais encaisser la moindre séquelle.',
+   check:(f,a)=>!((a.runInjuries||[]).length) && !a.injuredEver}
 ];
 /* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — ct_nopact ("Sans filet" :
-   terminer le run sans jamais prendre le pacte de finition) devient
+   terminer la run sans jamais prendre le pacte de finition) devient
    IMPOSSIBLE à remplir dès Ascension>=3 sur Bracket 64 / Ladder 100 : le
    pacte y est désormais forcé dès le 1er combat (cf. afterResult, ui-08),
    donc a.pactTakenEver passe systématiquement à true. Plutôt que de laisser
@@ -450,12 +466,12 @@ function evalGauntletContract(a){
    de menton ». Elle est ici confinée au Gauntlet, pour trois raisons
    vérifiées dans le code : (1) le combattant arcade est un archétype jetable
    recréé à chaque run par makeArcadeArchetype(), jamais un combattant de
-   carrière ; (2) un run n'est jamais persisté (save() sort si
+   carrière ; (2) une run n'est jamais persisté (save() sort si
    G.arcade.active), donc la baisse ne peut PAS fuiter dans une sauvegarde de
    carrière ; (3) l'arcade ne passe jamais par la retraite, donc ni le
    Panthéon ni hofScore() ne peuvent hériter d'attributs rabaissés.
    rollInjury()/f.injury (engine.js) N'EST PAS réutilisée : sa sémantique est
-   en « cycles de convalescence », notion qui n'existe pas dans un run. ==== */
+   en « cycles de convalescence », notion qui n'existe pas dans une run. ==== */
 const GAUNTLET_RUN_INJURIES=[
   {name:'Arcade ouverte',attrs:[['composure',-8],['fightIQ',-5]]},
   {name:'Côtes fêlées',attrs:[['cardio',-10],['durability',-6]]},
@@ -569,7 +585,7 @@ function injectExtendedArchetypes(){
 /* ==== [ANCRE: CORRECTIF_SEED_BOSSRUN] — bug trouvé : CL.startBossRun() (ui-08)
    faisait `startBossRun(); G.arcade.seed=seed;` alors que cette fonction
    appelle render() AVANT le retour — l'écran de draft affichait donc
-   « Graine du run : undefined » sur le seul format qui ne recevait pas sa
+   « Graine de la run : undefined » sur le seul format qui ne recevait pas sa
    graine à temps. La graine (et le palier d'Ascension) sont désormais passés
    en argument et présents dans le littéral G.arcade, comme dans
    CL.startArcade()/CL.startLadder100(). Arguments optionnels : un appel
@@ -716,13 +732,64 @@ const ARCADE_ARCHETYPES=[
     attrs:{jab:70,cross:70,takedown:55,submission:45,power:72,chin:72,cardio:72,confidence:90},
     perk:'Stats moyennes, mais il attire la lumière. Capable d\u2019un miracle quand les caméras tournent.' },
 ];
+/* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — item demandé : « les tactiques
+   utilisées sont toujours les mêmes que carrière complète » — VÉRIFIÉ AVANT
+   CORRECTION : scr_arcade_plan (ui-04) tirait TACTICS[f.style] (ui-01, pool de
+   carrière, 3 options par STYLE), commun à tous les archétypes partageant un
+   style. Deux archétypes du même style avaient donc EXACTEMENT le même plan de
+   combat proposé.
+   Chaque archétype reçoit désormais UNE tactique qui lui est propre, ajoutée
+   par scr_arcade_plan à la liste existante (pas un remplacement — les 3
+   options de style restent disponibles, celle-ci s'ajoute). Le mécanisme
+   réutilise exactement le canal déjà en place pour getExclusiveTactics()
+   (engine.js) : mêmes clés de modificateur (str/ko/def/td/tdd/sub/gnp/ctrl),
+   mêmes bornes de puissance que le reste du pool TACTICS (~1.2-2.3), aucun
+   nouveau système. Chaque entrée est dérivée du profil réel de l'archétype
+   (son couple de stats extrêmes) et de son .perk déjà existant, pas d'un
+   thème générique plaqué dessus. Couvre les 23 archétypes de base ET les 7
+   archétypes de LOT11_GAUNTLET_ETENDU (3 étendus + 4 débloquables, injectés
+   dans ARCADE_ARCHETYPES par injectExtendedArchetypes() plus bas) — la table
+   est indexée par nick, donc indépendante de l'ordre/moment d'injection. ==== */
+const ARCADE_EXCLUSIVE_TACTICS={
+  'Le Bûcheron':{id:'aex_bucheron',lbl:'La Hache Nucléaire',desc:'Une bûche, une droite, un adversaire au sol. Le plan tient en une phrase — le cardio de toute façon n\u2019en permettrait pas une deuxième.',m:{ko:2.1,str:1.1,def:0.3}},
+  'L\u2019Anaconda':{id:'aex_anaconda',lbl:'L\u2019Étreinte Fatale',desc:'Chaque échange rapproché est une invitation à l\u2019étouffement. Le combat debout n\u2019est qu\u2019une formalité avant l\u2019inévitable.',m:{sub:2.0,td:1.3,str:0.3}},
+  'Le Cyborg':{id:'aex_cyborg',lbl:'Protocole Standard',desc:'Aucune fioriture, aucune improvisation. Exécuter le plan de base à la perfection, combat après combat, sans jamais dévier.',m:{str:1.2,td:1.2,def:1.2,ko:0.8}},
+  'Le Kaiju':{id:'aex_kaiju',lbl:'Le Poids Qui Écrase',desc:'Un seul takedown suffit. Une fois en dessous de cette masse, il n\u2019y a plus d\u2019échappatoire — seulement des os qui craquent.',m:{td:1.8,gnp:1.6,def:0.4}},
+  'Le Tacticien':{id:'aex_tacticien',lbl:'Le Comptable Du Cage-Time',desc:'Chaque frappe est budgétée, chaque round évalué comme un bilan. Zéro gaspillage, zéro passion — juste des points qui s\u2019accumulent.',m:{str:1.3,def:1.4,ko:0.4}},
+  'Le Poids du Corps':{id:'aex_poidscorps',lbl:'Le Marathon Sans Fin',desc:'Le rythme ne retombe jamais. Épuiser l\u2019adversaire par la seule durée du combat, round après round, jusqu\u2019à ce qu\u2019il n\u2019ait plus rien.',m:{td:1.4,ctrl:1.3,ko:0.5}},
+  'La Brique':{id:'aex_brique',lbl:'Encaisse Et Réponds',desc:'Chaque coup reçu est une invitation à en rendre deux. Le menton ne cède jamais, alors pourquoi bouger la tête ?',m:{str:1.5,ko:1.2,def:0.4}},
+  'Le Botaniste':{id:'aex_botaniste',lbl:'La Cueillette Tardive',desc:'Regarder l\u2019adversaire s\u2019épuiser tout seul avant de placer le coup qui compte, jamais avant le round 3.',m:{def:1.6,ko:1.4,str:0.6}},
+  'Le Fantôme':{id:'aex_fantome',lbl:'Zéro Contact, Sinon Rien',desc:'La seule règle : ne jamais être touché. Un menton de verre ne pardonne aucune erreur, alors il n\u2019en fait aucune.',m:{def:2.3,str:0.8,ko:0.3}},
+  'Le Zombie':{id:'aex_zombie',lbl:'La Marche Qui Ne S\u2019arrête Jamais',desc:'Avancer, encaisser, avancer encore. La pression psychologique de ne jamais reculer finit toujours par briser l\u2019adversaire en premier.',m:{str:1.2,ctrl:1.3,def:0.5}},
+  'L\u2019Assassin':{id:'aex_assassin',lbl:'Les Coudes D\u2019abord',desc:'La clinch n\u2019est qu\u2019un prétexte pour ouvrir des coupures. Chaque échange rapproché saigne un peu plus l\u2019adversaire.',m:{str:1.7,ko:1.3,def:0.5}},
+  'La Pieuvre':{id:'aex_pieuvre',lbl:'Un Contact, Une Sentence',desc:'Dès que ses mains touchent la peau, le combat est fini — il ne reste plus qu\u2019à choisir le bras ou le cou.',m:{td:2.0,sub:1.5,str:0.3}},
+  'Le Professeur':{id:'aex_professeur',lbl:'Le Livre Est Déjà Écrit',desc:'Il a vu chaque scénario possible et a la réponse pour chacun — le seul problème, c\u2019est que le corps ne suit plus le plan aussi longtemps qu\u2019avant.',m:{def:1.5,ctrl:1.3,str:0.7}},
+  'Flash':{id:'aex_flash',lbl:'L\u2019Éclair Ou Rien',desc:'Un coup de pied retourné sorti de nulle part peut finir le combat en une seconde — s\u2019il rate, il n\u2019y a pas de plan B.',m:{ko:1.9,str:1.2,def:0.4}},
+  'Le Boucher':{id:'aex_boucher',lbl:'La Cabine Téléphonique',desc:'Aucun pas en arrière, aucun calcul. Juste échanger coup pour coup jusqu\u2019à ce que l\u2019un des deux ne se relève plus.',m:{str:1.8,ko:1.3,def:0.3}},
+  'L\u2019Ours':{id:'aex_ours',lbl:'Trois Minutes De Fin Du Monde',desc:'Une fenêtre de force brute avant l\u2019hibernation. Tout doit se jouer avant que le carburant ne manque.',m:{td:1.8,ko:1.5,def:0.4}},
+  'Le Gamin':{id:'aex_gamin',lbl:'L\u2019Énergie Qui Ne Tarit Jamais',desc:'Aucune notion de fatigue, aucun respect de la hiérarchie. Juste emmener au sol, encore et encore, jusqu\u2019à l\u2019épuisement de l\u2019autre.',m:{td:1.9,ctrl:1.2,str:0.5}},
+  'L\u2019Aristocrate':{id:'aex_aristocrate',lbl:'Le Jab Chirurgical',desc:'Une seule arme, utilisée avec une précision totale. Refuse catégoriquement d\u2019aller au sol — ça salirait le costume.',m:{str:1.6,tdd:1.6,ko:0.5}},
+  'Le Moine':{id:'aex_moine',lbl:'L\u2019Indifférence À La Douleur',desc:'Aucune douleur ne perturbe le rythme. Un état zen qui rend chaque échange mécanique, presque ennuyeux à subir.',m:{def:1.5,str:1.2,ko:0.6}},
+  'Le Contrebandier':{id:'aex_contrebandier',lbl:'Tout Ce Que L\u2019arbitre Ne Voit Pas',desc:'Doigts dans les yeux, coudes dans la nuque, accrochages à la cage. La cage a des angles morts, il les connaît tous.',m:{str:1.4,ko:1.3,def:0.6}},
+  'Le Surfer':{id:'aex_surfer',lbl:'Le Sourire Avant L\u2019étranglement',desc:'Aucune urgence, aucun stress. Attendre la bonne clé, sourire, et refermer la prise sans jamais forcer.',m:{sub:1.8,td:1.2,str:0.4}},
+  'Le Météore':{id:'aex_meteore',lbl:'L\u2019Exécution Publique Du Round 1',desc:'Tout est joué dans les 5 premières minutes. Après ça, il ne reste plus qu\u2019un homme qui cherche son souffle.',m:{ko:2.0,str:1.3,def:0.3}},
+  'La Machine à Sous':{id:'aex_machinesous',lbl:'Le Miracle Sous Les Projecteurs',desc:'Rien ne le distingue sur le papier — sauf sa capacité à sortir un geste impossible dès que les caméras s\u2019allument.',m:{ko:1.4,sub:1.3,str:1.1}},
+  'Le Chirurgien':{id:'aex_chirurgien',lbl:'Rien Au-Dessus Du Genou',desc:'Ignore tout ce qui se passe à la tête. Une cheville qui dépasse suffit à finir n\u2019importe quel combat.',m:{sub:2.0,td:1.4,str:0.3}},
+  'Le Colosse de Chair':{id:'aex_colosse',lbl:'Rien Ne Passe, Rien Ne Presse',desc:'Aucune urgence à esquiver ce qui ne fait pas mal. Avancer lentement jusqu\u2019à ce que l\u2019adversaire comprenne qu\u2019il a déjà perdu.',m:{def:1.6,str:1.1,ko:0.6}},
+  'L\u2019Hélicoptère':{id:'aex_helicoptere',lbl:'La Tempête Ou Rien',desc:'Une rafale de coups de pied retournés qui doit finir le combat avant que le souffle ne manque — et il manquera vite.',m:{ko:1.9,str:1.3,def:0.4}},
+  'Le Titan Antique':{id:'aex_titan',lbl:'Le Poids Des Âges',desc:'Une prise et le combat est déjà écrit. La seule question est combien de temps l\u2019adversaire survit en dessous.',m:{td:2.0,gnp:1.5,def:0.4}},
+  'Le Shinobi':{id:'aex_shinobi',lbl:'Invisible Jusqu\u2019à L\u2019étranglement',desc:'Aucun angle d\u2019attaque prévisible. Il n\u2019est nulle part, puis il est accroché à un cou et c\u2019est déjà fini.',m:{sub:1.9,def:1.3,str:0.4}},
+  'Le Roi de la Rue':{id:'aex_roirue',lbl:'La Bagarre De Pub',desc:'Refuse catégoriquement d\u2019aller au sol. Le combat se règle debout, au corps à corps, jusqu\u2019à ce qu\u2019un des deux tombe.',m:{str:1.6,tdd:1.5,ko:1.1}},
+  'Le Sniper':{id:'aex_sniper',lbl:'Jamais À Portée',desc:'La distance est la seule arme qui compte. Démonter au tibia depuis l\u2019extérieur, sans jamais laisser l\u2019adversaire entrer.',m:{str:1.5,def:1.5,ko:0.6}},
+};
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_DRAFT_SHUFFLE] — .sort(()=>0.5-rnd()) est un
    shuffle biaisé connu (dépend de l'algo de tri du moteur JS, favorise
    certaines positions) : sur 27 archétypes ça revenait à retirer presque
    toujours le même sous-ensemble en tête de tableau. Fisher-Yates réel,
    toujours sur rnd() (seedé) pour rester reproductible. ==== */
 /* ==== [ANCRE: REJOUABILITE_DRAFT_ANTIREPET] — meta.lastArcadeDraft (3 nicks
-   du run précédent, toutes formats confondus) exclu du tirage courant tant
+   de la run précédent, toutes formats confondus) exclu du tirage courant tant
    que le pool restant compte au moins 3 archétypes hors exclusion — sinon on
    retombe sur le pool complet plutôt que de planter (cas d'un joueur qui n'a
    débloqué aucun archétype bonus et n'a que le socle de base). ==== */
@@ -847,8 +914,17 @@ function generateArcadeUpgrades(pactBonus){
   // Bonus x4 : le format court (Bracket 64 / Ladder 100) rend les bonus
   // habituels de carrière (sur 100) quasi invisibles sur un parcours de
   // seulement 6-8 combats — l'affichage réel se fait ensuite sur /20 via d20().
-  G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:opt.d.map(delta=>[delta[0],delta[1]*4])}));
-  if(asc<2) G.arcade.trainOpts.push(recoveryTrainOption());
+  /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — les options de camp viennent du
+     pool TRAIN de carrière (data-content.js), où 'morale' et 'form' sont des
+     contreparties courantes. On les retire à la source : sans le canal `dyn`
+     d'eff(), un « -12 Moral » ne coûterait plus rien et polluerait l'écran d'un
+     chiffre sans conséquence — c'était d'ailleurs le « -10 Moral » remonté,
+     amplifié par le ×4 ci-dessous. Une option vidée de tous ses deltas est
+     écartée du tirage plutôt que proposée à vide. ==== */
+  const stripDyn=d=>d.filter(delta=>delta[0]!=='morale' && delta[0]!=='form');
+  G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:stripDyn(opt.d).map(delta=>[delta[0],delta[1]*4])}))
+                             .filter(opt=>opt.d.length>0);
+  if(asc<2){ const _heal=recoveryTrainOption(); if(_heal) G.arcade.trainOpts.push(_heal); }
   /* ==== [FIN ANCRE] ==== */
   G.arcade.skillOpts=[];
   const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
@@ -871,7 +947,7 @@ function generateArcadeUpgrades(pactBonus){
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — 4e choix de camp, hors des 3 options
    normales : une compétence Légendaire/Mythique GARANTIE, payée par un malus
-   d'attributs permanent sur le run. Les paliers de rareté existants
+   d'attributs permanent sur la run. Les paliers de rareté existants
    (rStep>=4, rStep===6, pactBonus) ne sont pas touchés — c'est une option
    parallèle, jamais un remplacement. Réutilise le pool déjà filtré par
    generateArcadeUpgrades pour ne pas proposer deux fois la même compétence
@@ -888,7 +964,10 @@ function generateCursedOption(){
   if(!elite.length) return;
   const sk=pick(elite);
   const curses=[
-    {label:'Surentraînement',d:[['cardio',-14],['form',-12]]},
+    /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — le malus `['form',-12]` de
+       Surentraînement n'aurait plus aucun effet mécanique : reporté sur le
+       cardio et la récupération, deux attributs réellement lus par eff(). ==== */
+    {label:'Surentraînement',d:[['cardio',-14],['recovery',-10]]},
     {label:'Sparring sanglant',d:[['chin',-12],['durability',-8]]},
     {label:'Obsession technique',d:[['footSpeed',-12],['explosiveness',-10]]},
     {label:'Coupe de poids sauvage',d:[['strength',-12],['recovery',-9]]}
@@ -930,8 +1009,8 @@ function generateBossRunUpgrade(streak){
 function buildWTUMMALadder(division){
   const ladder=[];
   /* ==== [ANCRE: REJOUABILITE_NEMESIS_LADDER] — le rang #1 (le boss final de
-     l'ascension) devient, une fois sur deux si une némésis existe pour cette
-     division, le combattant qui vous a réellement éliminé lors d'un run
+     l'ascension) devient, une fois sur deux si un némésis existe pour cette
+     division, le combattant qui vous a réellement éliminé lors d'une run
      précédent — au lieu d'un boss anonyme piochant juste un nom générique
      dans un pool de 5. Niveau calé sur ce que rang #1 vaut déjà normalement
      dans la courbe existante (100-0.66+RI), courbe NON modifiée ici (seuls

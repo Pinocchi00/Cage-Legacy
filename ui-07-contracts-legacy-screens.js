@@ -439,25 +439,28 @@ function retireLegendPointsHtml(f){
 /* ==== [ANCRE: LOT9_ECRAN_CODEX] ==== */
 function formatSkillFx(fx, f){
   if(!fx) return '';
-  // ==== [ANCRE: CORRECTIF_FX_PLAFOND] — bug remonté (répété plusieurs fois) :
-  // cet aperçu affichait "+X Stat" pour CHAQUE stat du fx d'une compétence,
-  // y compris pour un combattant précis (f) dont cette stat est déjà à son
-  // plafond de potentiel — la compétence proposée au choix (écran arcade)
-  // promettait donc un gain qui ne se produirait jamais réellement une fois
-  // grantSkill() appliqué (même formule de plafond, cf. skillHasEffect()).
-  // Quand un fighter f est fourni, on masque simplement les stats déjà
-  // plafonnées au lieu d'afficher un gain fictif. Sans f (ex. Codex, simple
-  // catalogue hors contexte d'un combattant vivant), comportement inchangé.
+  /* ==== [ANCRE: ITEM_LISIBILITE_GAINS_ATTRIBUTS] — item demandé : cette carte
+     affichait "+2 Cardio" sans jamais dire où en est réellement le
+     combattant, obligeant à ouvrir la fiche complète et chercher la ligne
+     correspondante pour savoir si le gain a un sens. Quand un fighter f est
+     fourni (carte de compétence en cours de run), le format bascule en
+     "avant → après" (même convention que le récapitulatif post-combat,
+     ui-06 ANCRE ci-dessus). Un attribut déjà à son plafond n'est plus
+     MASQUÉ (perte d'information : la carte pouvait sembler ne rien
+     apporter) mais affiché explicitement "Label 20" avec sa mention.
+     Sans f (Codex, catalogue hors combattant vivant), le format "+X"
+     d'origine est conservé — aucun avant/après n'a de sens hors contexte. ==== */
   return Object.entries(fx).map(([k,v])=>{
     const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1];
-    const scaled=Math.round(v/5); // même ratio que d20() : fx est toujours un multiple de 5
-    if(f && v>0 && f.attrs && f.attrs[k]!==undefined){
-      let cap=(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4;
-      if(f.agedCeilings && f.agedCeilings[k]!=null) cap=Math.min(cap, f.agedCeilings[k]);
-      if(f.attrs[k]>=cap) return null;
-    }
-    return `${scaled>=0?'+':''}${scaled} ${label}`;
-  }).filter(x=>x!==null).join(', ');
+    const scaled=Math.round(v/5);
+    if(!f || v<=0 || !f.attrs || f.attrs[k]===undefined) return `${scaled>=0?'+':''}${scaled} ${label}`;
+    let cap=(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4;
+    if(f.agedCeilings && f.agedCeilings[k]!=null) cap=Math.min(cap, f.agedCeilings[k]);
+    const before=f.attrs[k];
+    if(before>=cap) return `${label} ${d20(before)} (déjà au max)`;
+    const after=Math.min(before+v, cap);
+    return `${label} ${d20(before)} → ${d20(after)}`;
+  }).join(', ');
 }
 function scr_codex(){
   const unlocked=loadCodex(); const total=SKILLS.length;

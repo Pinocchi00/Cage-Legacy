@@ -39,7 +39,7 @@ function scr_title(){
    que les modes principaux sur l'écran titre. ==== */
 /* ==== [ANCRE: REJOUABILITE_RECORD_GAUNTLET] — meta.gauntletBest (state.js),
    affiché sous chaque bouton de format pour donner un objectif de retour au
-   menu, avant même de lancer un run. ==== */
+   menu, avant même de lancer une run. ==== */
 /* ==== [ANCRE: GAUNTLET_ASCENSION] — le record affiché est celui du palier
    SÉLECTIONNÉ (G._pendingAsc, borné au palier débloqué pour ce format), pas
    un record global qui mélangerait des difficultés incomparables. ==== */
@@ -144,26 +144,49 @@ function scr_archetype_pantheon(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — item demandé (capture à l'appui) :
+   les 3 défis du jour étaient dispersés sous chaque format (gauntletDailyTag
+   appelé 3 fois), et la graine occupait le haut de l'écran alors que c'est
+   une option de niche que la majorité des sessions laisse vide. Le défi du
+   jour est au contraire la raison de revenir CHAQUE jour : il remonte en
+   tête, regroupé en une seule carte, la graine descend sous les formats.
+   Aucun changement de logique — gauntletDailyTag() reste la brique unitaire,
+   seul son point d'appel change. Le Boss Run n'apparaît dans le groupe que
+   s'il est débloqué, exactement comme son bouton de format plus bas. ==== */
+function gauntletDailyGroup(){
+  const modes=[['bracket64','Bracket 64'],['ladder_100','Ladder 100']];
+  if(checkLegendUnlock('mode_boss')) modes.push(['boss_run','Boss Run']);
+  const rows=modes.map(([m,label])=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px">
+     <span class="mono small muted" style="flex:0 0 auto">${label}</span>${gauntletDailyTag(m)}
+   </div>`).join('');
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--sage);padding:12px;text-align:left;margin-bottom:20px">
+     <div class="eyebrow mb" style="font-size:11px;color:var(--sage)">Défis du jour · ${gauntletDailyKey()}</div>
+     <div class="muted small">Même tirage pour tout le monde, une tentative par format.</div>
+     ${rows}
+   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_gauntlet_menu(){
   return `<div class="scr center intro">
    <div class="eyebrow sage">Mode Arcade</div>
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
-   <div class="fld" style="margin-bottom:12px">
-     <label class="muted small">Graine du run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer un run identique)</label>
-     <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
-   </div>
+   ${gauntletDailyGroup()}
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
-   ${gauntletAscPicker('bracket64')}${gauntletDailyTag('bracket64')}
+   ${gauntletAscPicker('bracket64')}
    <button class="btn" style="font-size:18px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet</span>${gauntletMenuBestTag('ladder_100')}</button>
-   ${gauntletAscPicker('ladder_100')}${gauntletDailyTag('ladder_100')}
+   ${gauntletAscPicker('ladder_100')}
    ${checkLegendUnlock('mode_boss')?`<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--gold);color:var(--gold)" onclick="CL.startBossRun()">BOSS RUN
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, KO uniquement</span>${gauntletMenuBestTag('boss_run')}</button>
-   ${gauntletAscPicker('boss_run')}${gauntletDailyTag('boss_run')}`:''}
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, finitions uniquement</span>${gauntletMenuBestTag('boss_run')}</button>
+   ${gauntletAscPicker('boss_run')}`:''}
    ${gauntletCapstoneEntry()}
    <button class="btn ghost mt" style="border:1px dashed var(--line)" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
+   <div class="fld" style="margin-top:24px">
+     <label class="muted small">Graine de la run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer une run identique)</label>
+     <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
+   </div>
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }
@@ -707,7 +730,17 @@ function signatureMoveCard(f){
    class_choice_31 — sortie latérale sur un choix bloquant non résolu. Le
    nullage est déplacé sur les deux points de sortie réels (✕ et Retour). ==== */
 function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._profileReturn||(G.faith?'faith_hub':'hub');
-  const grp=(key,title,avg,hero)=>`<div class="card" style="${hero?'padding:20px 0':'flex:1;padding:14px 0'}"><div class="grp-h"><span class="disp" style="font-size:${hero?'22px':'15px'}">${title}</span><span class="gold mono" style="font-size:${hero?'16px':'13px'}">${d20(avg)}/20</span></div>
+  /* ==== [ANCRE: LISIBILITE_FICHE_TECHNIQUE] — item demandé : la jauge .gauge
+     (flex:1, cf. index.html) n'avait quasi aucune largeur disponible dans le
+     layout Mental/Physique côte à côte (2 colonnes de ~150px sur mobile,
+     .attr-l prenant 120px fixes + .attr-v 26px fixes) — la barre était
+     réduite à quelques pixels, fonctionnellement invisible. Mental et
+     Physique passent en pleine largeur, empilés comme Technique (déjà en
+     hero), ce qui résout le manque de place à la source plutôt que de
+     compresser le contenu davantage. `flex:1` sur .card (hérité du layout en
+     ligne d'origine) est retiré : sans conteneur flex-row, il ne servait qu'à
+     forcer les deux cartes à la même hauteur artificielle. ==== */
+  const grp=(key,title,avg,hero)=>`<div class="card" style="padding:${hero?'20':'14'}px 0"><div class="grp-h"><span class="disp" style="font-size:${hero?'22px':'15px'}">${title}</span><span class="gold mono" style="font-size:${hero?'16px':'13px'}">${d20(avg)}/20</span></div>
      ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'}"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="G._profileReturn=null;CL.go('${backScreen}')">✕</span></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
@@ -742,7 +775,7 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
    ${f.skills.length?`<div class="rarity-guide" style="margin-top:12px"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>`:''}
    </div>
    ${grp('tech','Technique',g.tech,true)}
-   <div style="display:flex;gap:16px">${grp('ment','Mental',g.ment,false)}${grp('phys','Physique',g.phys,false)}</div>
+   <div style="display:flex;flex-direction:column;gap:16px">${grp('ment','Mental',g.ment,false)}${grp('phys','Physique',g.phys,false)}</div>
    <button class="btn ghost" onclick="G._profileReturn=null;CL.go('${backScreen}')">Retour</button></div>`; }
 
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
