@@ -529,13 +529,67 @@ function scr_codex(){
 /* ==== [ANCRE: LOT14_ECRAN_SALLE_LEGENDES] ==== */
 function scr_legends(){
   const meta=loadMetaStats(); const pts=meta.legendPoints||0;
-  const categories=[...new Set(LEGEND_UNLOCKABLES.map(i=>i.cat))];
-  const owned=LEGEND_UNLOCKABLES.filter(i=>checkLegendUnlock(i.id));
-  const remaining=LEGEND_UNLOCKABLES.filter(i=>!checkLegendUnlock(i.id));
+  /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
+     filtre Gauntlet, actif par défaut quand on arrive depuis
+     CL.goShopGauntlet() (scr_gauntlet_menu, ui-06), retirable sur place —
+     G._shopGauntletFilter reste undefined pour toute entrée classique
+     (Panthéon, etc.), donc aucun changement de comportement ailleurs. ==== */
+  const filterOn=!!G._shopGauntletFilter;
+  const visibleItems=filterOn?LEGEND_UNLOCKABLES.filter(i=>i.gauntlet):LEGEND_UNLOCKABLES;
+  const filterBar=`<div class="mono small" style="margin-bottom:12px"><span onclick="CL.toggleShopGauntletFilter()" style="cursor:pointer;border:1px dashed ${filterOn?'var(--gold)':'var(--line)'};color:${filterOn?'var(--gold)':'var(--muted)'};padding:4px 10px;border-radius:2px">${filterOn?'✓ Filtré : contenu Gauntlet uniquement — cliquer pour tout afficher':'Afficher tout le contenu (retirer le filtre Gauntlet)'}</span></div>`;
+  /* ==== [FIN ANCRE] ==== */
+  const categories=[...new Set(visibleItems.map(i=>i.cat))];
+  const owned=visibleItems.filter(i=>checkLegendUnlock(i.id));
+  const remaining=visibleItems.filter(i=>!checkLegendUnlock(i.id));
   const nextUp=remaining.sort((a,b)=>a.cost-b.cost)[0];
+  /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
+  const offer=gauntletExclusiveOfferToday(meta);
+  const offerItem=GAUNTLET_EXCLUSIVE_OFFERS.find(i=>i.id===offer.id);
+  const offerOwned=checkLegendUnlock(offer.id);
+  const offerHtml=`<div class="glass card mb" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
+     <div class="eyebrow mb" style="color:var(--blood)">⚡ OFFRE DU JOUR — EXCLUSIVE, -${offer.discountPct}%</div>
+     <b style="font-size:15px">${offerItem.name}</b>
+     <div class="muted small mt">${offerItem.desc}</div>
+     ${offerOwned?`<div class="mono small mt" style="color:var(--sage)">✓ Acquise</div>`:
+       `<button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 10px;width:auto" onclick="CL.purchaseExclusiveOffer()" ${pts>=offer.cost?'':'disabled'}>${offer.cost} pts <span class="muted" style="text-decoration:line-through">${offerItem.baseCost}</span></button>`}
+     <div class="muted small mt" style="font-size:10px">Ne revient jamais 2 jours d\u2019affilée — peut revenir plus tard.</div>
+   </div>`;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
+  const lotteryAvail=gauntletLotteryAvailable(meta);
+  const lotteryHtml=`<div class="glass card mb" style="border-left:3px solid var(--sage);background:var(--panel2);padding:12px">
+     <div class="eyebrow mb" style="color:var(--sage)">🎁 CAISSE MYSTÈRE — Loterie des Légendes</div>
+     <div class="muted small">Une par jour. 1% de chance d\u2019un archétype ultra-exclusif ; sinon, un cosmétique/déblocage au hasard.</div>
+     ${lotteryAvail?`<button class="btn ghost mt" style="border-color:var(--sage);color:var(--sage);padding:6px 10px;width:auto" onclick="CL.drawGauntletLottery()" ${pts>=GAUNTLET_LOTTERY_COST?'':'disabled'}>Tenter — ${GAUNTLET_LOTTERY_COST} pts</button>`
+       :`<div class="mono small mt" style="color:var(--muted)">Déjà tentée aujourd\u2019hui — revenez demain.</div>`}
+   </div>`;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
+     section dédiée, cachée par le filtre Gauntlet OFF n'a pas de sens à
+     masquer (elle EST du contenu Gauntlet) — toujours visible, mais mise en
+     avant seulement quand filterOn pour rester cohérente avec le reste. ==== */
+  const pendingId=meta.gauntletPendingConsumable;
+  const pendingItem=pendingId?GAUNTLET_CONSUMABLES.find(i=>i.id===pendingId):null;
+  const consumablesHtml=`<div class="glass card mb" style="border-left:3px solid var(--blood-d);background:var(--panel2);padding:12px">
+     <div class="eyebrow mb" style="color:var(--blood)">☠ MARCHÉ NOIR — consommables à usage unique</div>
+     <div class="muted small mb">Appliqué automatiquement au début de ta prochaine run Gauntlet — pas de réserve, un seul en attente à la fois.</div>
+     ${pendingItem?`<div class="mono small" style="color:var(--gold)">En attente pour ta prochaine run : ${pendingItem.name}</div>`:
+       GAUNTLET_CONSUMABLES.map(item=>{
+         const canAfford=pts>=item.cost;
+         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)">
+           <div><b style="font-size:13px">${item.name}</b><div class="muted small">${item.desc}</div></div>
+           <button class="btn ghost" style="border-color:${canAfford?'var(--blood)':'var(--line)'};color:${canAfford?'var(--blood)':'var(--muted)'};padding:6px 10px;width:auto;flex:0 0 auto" onclick="CL.purchaseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button>
+         </div>`;
+       }).join('')}
+   </div>`;
+  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Salle des Légendes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp gold">${pts} points de salle</h2>
    <p class="lede small">L\u2019héritage de vos retraités ouvre de nouvelles possibilités pour le compte — aucun avantage de statistiques en combat, jamais.</p>
+   ${filterBar}
+   ${offerHtml}
+   ${lotteryHtml}
+   ${consumablesHtml}
 
    <div class="stat-band mb" style="border-top:none;padding-top:10px">
      <div><span class="stat-big" style="font-size:20px">${meta.totalRetirements||0}</span><span class="stat-lbl">Carrières terminées</span></div>
@@ -547,7 +601,7 @@ function scr_legends(){
      <div><span class="stat-big" style="font-size:20px">${meta.totalBelts||0}</span><span class="stat-lbl">Ceintures remportées</span></div>
      <div><span class="stat-big" style="font-size:20px">${formatArgent(meta.totalMoney||0)}</span><span class="stat-lbl">Gains cumulés</span></div>
    </div>
-   <div class="mono small muted mb">${owned.length} / ${LEGEND_UNLOCKABLES.length} déblocages acquis</div>
+   <div class="mono small muted mb">${owned.length} / ${visibleItems.length} déblocages acquis${filterOn?' (filtré Gauntlet)':''}</div>
 
    ${nextUp?`<div class="glass card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--gold)">Prochain déblocage abordable</div>
@@ -556,11 +610,11 @@ function scr_legends(){
      <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden;margin-top:8px">
        <span style="display:block;height:100%;width:${clamp(Math.round(pts/nextUp.cost*100),0,100)}%;background:var(--gold)"></span>
      </div>
-   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">Tout est débloqué. Le Panthéon n\u2019a plus rien à t\u2019apprendre.</span></div>`}
+   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">${filterOn?'Tout le contenu Gauntlet est débloqué.':'Tout est débloqué. Le Panthéon n\u2019a plus rien à t\u2019apprendre.'}</span></div>`}
 
    ${categories.map(cat=>`
      <div class="eyebrow mb mt" style="border-bottom:1px solid var(--line);padding-bottom:6px">${cat.toUpperCase()}</div>
-     ${LEGEND_UNLOCKABLES.filter(i=>i.cat===cat).map(item=>{
+     ${visibleItems.filter(i=>i.cat===cat).map(item=>{
        const isOwned=checkLegendUnlock(item.id);
        const canAfford=pts>=item.cost;
        const color=isOwned?'var(--sage)':(canAfford?'var(--gold)':'var(--line)');

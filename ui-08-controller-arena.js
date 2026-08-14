@@ -19,7 +19,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
@@ -54,6 +54,16 @@ function finaliseGauntletRun(a,opts){
     ? gauntletEliminationPayout(a.mode,opts.progress,opts.atRisk)
     : gauntletPayout(a.mode,opts.progress);
   const preBonus=gauntletFinalPayout(a,base);
+  /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
+     bonus ×1.5 UNIQUEMENT sur une victoire réelle (opts.kind==='victory')
+     après un refus de l'ultimatum — une élimination après refus reste une
+     élimination normale, sans pénalité NI bonus (cf. spec : "refuse + perd
+     = élimination normale"). Appliqué sur preBonus, AVANT le bonus de série
+     quotidienne (dailyBonusMult, juste en dessous) — les deux bonus sont
+     indépendants et se cumulent, comme le reste des multiplicateurs de run. ==== */
+  const doctorBonusMult=(opts.kind==='victory' && a.doctorRefused)?1.5:1;
+  const preBonusWithDoctor=Math.round(preBonus*doctorBonusMult);
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — streak calculée et créditée ICI,
      au point de sortie unique de la run, pour compter une tentative du jour
      effectivement jouée jusqu'au bout (victoire, élimination OU
@@ -63,10 +73,23 @@ function finaliseGauntletRun(a,opts){
      runDebriefBlock (ui-04). ==== */
   let dailyStreak=null, dailyBonusMult=1;
   if(a.daily){
-    dailyStreak=recordGauntletDailyStreak(meta);
+    /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
+       la série ne progresse plus sur simple tentative jouée jusqu'au bout,
+       mais uniquement quand l'objectif du jour est réellement atteint
+       (prog.completed, mis à jour au fil des combats — cf. afterResult ci-
+       dessus). streakCredited empêche un double crédit si l'objectif était
+       déjà atteint plus tôt dans la journée (2e run du jour, par ex.). ==== */
+    const prog=meta.gauntletDailyObjProgress;
+    if(prog && prog.completed && !prog.streakCredited){
+      dailyStreak=recordGauntletDailyStreak(meta);
+      prog.streakCredited=true;
+    } else {
+      dailyStreak=meta.gauntletDailyStreak||0;
+    }
+    /* ==== [FIN ANCRE] ==== */
     dailyBonusMult=gauntletDailyStreakBonusMult(dailyStreak);
   }
-  const earned=Math.round(preBonus*dailyBonusMult);
+  const earned=Math.round(preBonusWithDoctor*dailyBonusMult);
   /* ==== [FIN ANCRE] ==== */
   if(earned>0) meta.legendPoints=(meta.legendPoints||0)+earned;
   a.isNewRecord=recordGauntletBest(meta,a.mode,opts.progress,a.asc||0);
@@ -77,7 +100,27 @@ function finaliseGauntletRun(a,opts){
      appelée hors contexte réel (tests, retryArcade...). ==== */
   if(typeof G!=='undefined' && G && G.f && G.f.nick) a.isNewArchetypeRecord=recordGauntletBestByArchetype(meta,a.mode,opts.progress,a.asc||0,G.f.nick);
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_FANTOME] — ajout #5 (24 ajouts, 12/08/2026) : le
+     journal de combats de CETTE run (G.arcade.ghostFights, alimenté par
+     resolveArcadeFight, ui-03) ne remplace la référence enregistrée QUE si
+     cette run vient de battre le record d'archétype ci-dessus — jamais
+     avant, sinon une run moyenne écraserait le fantôme d'une run bien
+     meilleure. ==== */
+  if(a.isNewArchetypeRecord && typeof G!=='undefined' && G && G.f && G.f.nick) recordGauntletGhostLog(meta,a.mode,a.asc||0,G.f.nick,a.ghostFights||[]);
+  /* ==== [FIN ANCRE] ==== */
   if(opts.kind==='victory') recordGauntletAscension(meta,a.mode,a.asc||0);
+  /* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026) :
+     victoire au palier MAX (GAUNTLET_ASC_MAX, state.js) avec l'archétype
+     G.f.nick — récompense fixe et unique par couple (mode, archétype),
+     jamais réattribuée deux fois (grantGauntletRelic renvoie false si déjà
+     possédée). a.newRelic/a.newMastery lus par scr_gameover (ui-04) pour
+     l'annonce, exactement sur le même principe que a.newAch juste
+     au-dessus pour les succès. ==== */
+  if(opts.kind==='victory' && (a.asc||0)>=GAUNTLET_ASC_MAX && typeof G!=='undefined' && G && G.f && G.f.nick){
+    if(grantGauntletRelic(meta,a.mode,G.f.nick)) a.newRelic=gauntletRelicContent(a.mode,G.f.nick);
+    if(checkGauntletModeMastery(meta,a.mode) && grantGauntletModeMastery(meta,a.mode)) a.newMastery=GAUNTLET_MODE_MASTERY_RELIC[a.mode];
+  }
+  /* ==== [FIN ANCRE] ==== */
   if(a.daily) recordGauntletDaily(meta,a.mode,opts.progress);
   saveMetaStats(meta);
   a.earnedOnElimination=earned;
@@ -109,6 +152,46 @@ const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
+  /* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
+     UNIQUEMENT en Gauntlet (G.arcade), sur scr_gameover (ui-04), bouton
+     discret déjà caché côté UI si le joueur ne peut pas payer — garde-fou
+     recalculé ici quand même (jamais confiance aveugle dans l'affichage).
+     Ne touche PAS a.earnedOnElimination déjà crédité par finaliseGauntletRun
+     (bonus conservé, pas annulé) : le rachat s'ajoute par-dessus, il ne
+     rembourse rien. ==== */
+  buyDevilContinue(){
+    const a=G.arcade; if(!a) return;
+    const cost=gauntletDevilCost(a.mode,a);
+    const meta=loadMetaStats();
+    if((meta.legendPoints||0)<cost) return;
+    meta.legendPoints-=cost; saveMetaStats(meta);
+    a.active=true; a.victory=false; a.cashedOut=false; a.eliminatedReason=null;
+    if(a.mode==='boss_run'){ a.opponent=genBossOpponent(a.streak||0); a.revealed=false; a.bossMalus=null; }
+    else if(a.mode==='ladder_100'){ a.targets=genWTUMMATargets(); }
+    else { regenerateBracketOpponent(); }
+    G.lastMsg=`Le Diable a été payé : ${cost} points de Légende. La run continue.`;
+    G.screen='arcadehub'; save(); render();
+  },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026). ==== */
+  equipDecoration(hofId,decId){ const r=equipPantheonDecoration(hofId,decId); G.lastMsg=r.msg; render(); },
+  unequipDecoration(hofId,decId){ const r=unequipPantheonDecoration(hofId,decId); G.lastMsg=r.msg; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026). ==== */
+  purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
+  purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
+  drawGauntletLottery(){ const meta=loadMetaStats(); const r=drawGauntletLottery(meta); G.lastMsg=r.msg; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
+     section c) du nouveau menu Gauntlet — boutique filtrée par défaut, avec
+     option pour retirer le filtre (cf. scr_legends, ui-07). ==== */
+  goShopGauntlet(){ G._shopGauntletFilter=true; CL.go('legends'); },
+  toggleShopGauntletFilter(){ G._shopGauntletFilter=!G._shopGauntletFilter; render(); },
+  /* ==== [FIN ANCRE] ==== */
   viewLegend(id){ G.viewingLegendId=id; G.screen='legend_detail'; render(); },
   // ==== [ANCRE: SYSTEME_CLASSES] (contrôleur) — choix unique et définitif,
   // vérifié par f.classChosen (jamais réinitialisé, contrairement à un simple
@@ -563,6 +646,49 @@ const CL={
     if(G.arcade && G.arcade.active){
       const win=G.pending&&G.pending.win;
       const _res=G.pending&&G.pending.res;
+      /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
+         suivi générique des compteurs de l'objectif du jour, exécuté une
+         seule fois par combat, AVANT le branchement par mode ci-dessous
+         (bracket64/ladder_100/boss_run partagent donc exactement la même
+         logique). Compteurs "run" (koStreak/winStreak/flawless) vivent sur
+         G.arcade — remis à zéro à chaque nouvelle run par la simple absence
+         de champ au lancement. Compteurs "day" vivent dans
+         meta.gauntletDailyObjProgress (cumulés sur toutes les tentatives du
+         jour, tous modes confondus). ==== */
+      (()=>{
+        const meta=loadMetaStats();
+        gauntletDailyObjective(meta); // garantit l'existence + gère un éventuel changement de jour
+        const prog=meta.gauntletDailyObjProgress;
+        if(_res){
+          if(win && G.pending.method==='Soumission') prog.subWins=(prog.subWins||0)+1;
+          prog.takedowns=(prog.takedowns||0)+(_res.stats.A.td||0);
+          prog.kdCount=(prog.kdCount||0)+(_res.stats.A.kd||0);
+        }
+        G.arcade.koStreak=(win && G.pending.method && G.pending.method.startsWith('KO'))?(G.arcade.koStreak||0)+1:0;
+        G.arcade.winStreak=win?(G.arcade.winStreak||0)+1:0;
+        if(_res && win && (_res.stats.A.dmgHead+_res.stats.A.dmgBody+_res.stats.A.dmgLegs)===0) G.arcade.flawlessAchieved=true;
+        /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
+           "Mise à l'abri automatique" : dès le 1er combat GAGNÉ de la run
+           (peu importe le mode), petite somme versée immédiatement en
+           points de Légende, une seule fois par run (autobankTriggered). ==== */
+        if(win && G.arcade.consumableAutobank && !G.arcade.autobankTriggered){
+          G.arcade.autobankTriggered=true;
+          meta.legendPoints=(meta.legendPoints||0)+15;
+          G.lastMsg='Mise à l\u2019abri automatique : 15 points de Légende sécurisés.';
+        }
+        /* ==== [FIN ANCRE] ==== */
+        const obj=meta.gauntletDailyObj;
+        if(obj && !prog.completed && (!obj.scope || obj.scope===G.arcade.mode)){
+          let val=0;
+          if(obj.kind==='day') val=prog[obj.metric]||0;
+          else if(obj.metric==='koStreak') val=G.arcade.koStreak||0;
+          else if(obj.metric==='winStreak') val=G.arcade.winStreak||0;
+          else if(obj.metric==='flawless') val=G.arcade.flawlessAchieved?1:0;
+          if(val>=obj.target) prog.completed=true;
+        }
+        saveMetaStats(meta);
+      })();
+      /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: REJOUABILITE_NEARMISS] — res.scoreA/scoreB/res.judges
          (juges 10-point) sont calculés par simulateFight() pour CHAQUE combat
          mais n'étaient jamais lus en arcade : une élimination aux points
@@ -577,13 +703,11 @@ const CL={
          sa propre clause KO-only permanente (condition==='ko_only') et n'a
          pas d'écran de camp entre les combats. Consommée à chaque combat,
          qu'elle se déclenche ou non. ==== */
-      /* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — A3 : à partir du palier
-         3, le pacte de finition n'est plus un choix combat par combat
-         (CL.togglePact()) mais une clause permanente sur tout la run pour
-         Bracket 64 / Ladder 100 — Boss Run est explicitement exclu car il a
-         déjà sa propre clause KO-only permanente (condition==='ko_only',
-         vérifiée plus bas) : cumuler les deux n'ajouterait rien. ==== */
-      const pactForcedByAscension=(G.arcade.asc||0)>=3 && G.arcade.mode!=='boss_run';
+      /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
+         12/08/2026) : remplace la condition asc>=3 par une lecture directe
+         du mutateur tiré pour cette run (G.arcade.mutator.id) — plus aucun
+         lien avec le palier d'Ascension lui-même. ==== */
+      const pactForcedByAscension=G.arcade.mutator&&G.arcade.mutator.id==='mut_pacte_force' && G.arcade.mode!=='boss_run';
       const pactWasActive=pactForcedByAscension||!!G.arcade.pactActive; G.arcade.pactActive=false;
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: ITEM_PACTE_AVEC_SOUMISSIONS] — item demandé : le pacte de
@@ -592,6 +716,18 @@ const CL={
          décision aux points. Élargi aux deux méthodes de finition : seule une
          victoire aux points (method vide) reste un échec du pacte. ==== */
       const pactFail=pactWasActive && win && G.pending.method && !(G.pending.method.startsWith('KO')||G.pending.method==='Soumission');
+      /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
+         12/08/2026) : "Juges sévères" — une victoire aux points (method
+         vide = décision, cf. pactFail juste au-dessus qui utilise le même
+         critère) ne suffit plus si la marge est trop faible. Marge lue sur
+         G.arcade.lastScorecard (posé juste au-dessus, ANCRE
+         REJOUABILITE_NEARMISS), qui cumule déjà les 3 juges — seuil de 6
+         points choisi pour représenter une décision "large" sur une échelle
+         10-point sur 3 rounds (soit ~2 points d'écart par round et par
+         juge, une marge réellement confortable, pas un simple 29-28). ==== */
+      const judgesMutActive=G.arcade.mutator&&G.arcade.mutator.id==='mut_juges_severes';
+      const judgesFail=judgesMutActive && win && isDecisionLike(G.pending.method) && G.arcade.lastScorecard && (G.arcade.lastScorecard.scoreA-G.arcade.lastScorecard.scoreB)<6;
+      /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: REJOUABILITE_PACTE_ESCALADE] — pactStreak compte les
          pactes remplis D'AFFILÉE (pris ET terminés par KO/TKO). Remis à 0 dès
          qu'un combat se joue SANS pacte pris, ou dès qu'un pacte pris échoue
@@ -675,6 +811,19 @@ const CL={
         // combat venait d'être gagné. On mémorise désormais la vraie raison
         // pour que scr_gameover puisse distinguer les deux cas.
         if(!win || koOnlyFail){
+          /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts,
+             12/08/2026) : "Filet de sécurité", 1er combat de la run
+             uniquement (streak===0 avant incrément), une seule fois. Ne se
+             déclenche PAS sur koOnlyFail (victoire aux points en Boss Run) :
+             le combattant n'a pas vraiment perdu, rien à "sauver". ==== */
+          if(!win && G.arcade.streak===0 && G.arcade.consumableSafetynet){
+            G.arcade.consumableSafetynet=false;
+            G.arcade.opponent=genBossOpponent(0);
+            G.arcade.revealed=false; G.arcade.bossMalus=null;
+            G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. Un nouvel adversaire t\u2019attend.';
+            save(); render(); return;
+          }
+          /* ==== [FIN ANCRE] ==== */
           /* ==== [ANCRE: REJOUABILITE_NEMESIS_MULTI] — le vrai bourreau, pas le
              champion : n'enregistre comme rival QUE sur une vraie défaite
              (pas koOnlyFail, où l'adversaire n'a rien fait — c'est le pacte KO
@@ -702,6 +851,11 @@ const CL={
         G.arcade.banked=gauntletFinalPayout(G.arcade,gauntletPayout('boss_run',G.arcade.streak));
         /* ==== [FIN ANCRE] ==== */
         G.arcade.opponent=genBossOpponent(G.arcade.streak);
+        /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 : nouveau boss
+           généré pour le combat suivant -> re-masqué jusqu'au prochain
+           reveal. S'applique donc aux 5 combats, pas seulement au premier. ==== */
+        G.arcade.revealed=false; G.arcade.bossMalus=null;
+        /* ==== [FIN ANCRE] ==== */
         /* ==== [ANCRE: REJOUABILITE_CAMP_BOSSRUN] — camp allégé (1 compétence,
            cf. ui-03) entre chaque KO, absent jusqu'ici du seul format qui n'a
            aucun répit entre les combats. ==== */
@@ -710,10 +864,19 @@ const CL={
         /* ==== [FIN ANCRE] ==== */
       }
       if(G.arcade.mode==='ladder_100'){
-        if(!win || pactFail){
+        if(!win || pactFail || judgesFail){
+          /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 : 1er combat
+             de la run = fightsDone encore à 0 (pas incrémenté sur défaite). ==== */
+          if(!win && (G.arcade.fightsDone||0)===0 && G.arcade.consumableSafetynet){
+            G.arcade.consumableSafetynet=false;
+            G.arcade.targets=genWTUMMATargets();
+            G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. De nouvelles cibles te sont proposées.';
+            save(); render(); return;
+          }
+          /* ==== [FIN ANCRE] ==== */
           if(!win){ const meta=loadMetaStats(); recordGauntletRival(meta,G.arcade.opponent,'ladder_100',G.arcade.rank); saveMetaStats(meta); }
           finaliseGauntletRun(G.arcade,{kind:'elimination',progress:G.arcade.rank,atRisk:atRiskWasActive});
-          G.arcade.eliminatedReason=pactFail?'pact':'loss'; G.screen='gameover'; save(); render(); return;
+          G.arcade.eliminatedReason=pactFail?'pact':judgesFail?'judges':'loss'; G.screen='gameover'; save(); render(); return;
         }
         G.arcade.fightsDone=(G.arcade.fightsDone||0)+1;
         /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] — G.arcade.banked n'était
@@ -739,10 +902,21 @@ const CL={
         G.screen='arcade_upgrades'; save(); render(); return;
       }
       // ==== Bracket 64 (WTUMMA) ====
-      if(!win || pactFail){
+      if(!win || pactFail || judgesFail){
+        /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 : 1er combat de
+           la run = roundStep encore à 1 (1er tour du tableau). ==== */
+        if(!win && G.arcade.tournament && G.arcade.tournament.roundStep===1 && G.arcade.consumableSafetynet){
+          G.arcade.consumableSafetynet=false;
+          G.arcade.tournament=buildWTUMMABracket(G.f);
+          const rematch=G.arcade.tournament.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
+          G.arcade.opponent=rematch.a.id===G.f.id?rematch.b:rematch.a;
+          G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. Un nouveau tableau t\u2019attend.';
+          save(); render(); return;
+        }
+        /* ==== [FIN ANCRE] ==== */
         if(!win){ const meta=loadMetaStats(); recordGauntletRival(meta,G.arcade.opponent,'bracket64',G.arcade.tournament.roundStep); saveMetaStats(meta); }
         finaliseGauntletRun(G.arcade,{kind:'elimination',progress:G.arcade.tournament.roundStep,atRisk:atRiskWasActive});
-        G.arcade.eliminatedReason=pactFail?'pact':'loss'; G.screen='gameover'; save(); render(); return;
+        G.arcade.eliminatedReason=pactFail?'pact':judgesFail?'judges':'loss'; G.screen='gameover'; save(); render(); return;
       }
       const wonTournament=advanceWTUMMABracket();
       /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] ==== */
@@ -765,6 +939,17 @@ const CL={
      saisie via CL.setGauntletSeed() (G._pendingSeed) n'est consommée qu'une
      fois puis effacée, pour ne pas figer TOUS les runs suivants par erreur. ==== */
   setGauntletSeed(v){ G._pendingSeed=(v!==undefined&&v!==null&&String(v).trim()!=='')?String(v).trim():null; render(true); },
+  /* ==== [ANCRE: PRISE_SIGNATURE_NOMMEE] — ajout #1 (24 ajouts, 12/08/2026).
+     _draftSuffix vit sur f.signatureMove lui-même (pas sur G, comme
+     G._pendingSeed) : la fiche peut être quittée et rouverte sans perdre la
+     saisie en cours, tant qu'elle n'a pas été validée. render(true) même
+     pattern que setGauntletSeed : préserve le scroll à chaque frappe. ==== */
+  setSignatureSuffix(v){ const sm=G.f&&G.f.signatureMove; if(!sm||sm.locked) return;
+    sm._draftSuffix=(v!==undefined&&v!==null)?String(v).slice(0,24):''; render(true); },
+  lockSignatureSuffix(){ const sm=G.f&&G.f.signatureMove; if(!sm||sm.locked) return;
+    const val=(sm._draftSuffix||'').trim(); if(!val) return;
+    sm.customSuffix=val; sm.locked=true; delete sm._draftSuffix; save(); render(); },
+  /* ==== [FIN ANCRE] ==== */
   _rollGauntletSeed(){ const s=G._pendingSeed; G._pendingSeed=null;
     const numeric=s&&/^[0-9]+$/.test(s)?parseInt(s,10):(s?[...s].reduce((h,c)=>((h*31+c.charCodeAt(0))>>>0),0):((Date.now()^0x9e3779b9)>>>0));
     setSeed(numeric); return numeric; },
@@ -792,10 +977,24 @@ const CL={
     else if(mode==='boss_run') CL.startBossRun();
     else CL.startArcade();
   },
+  /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
+     rachat de série depuis le menu Gauntlet (scr_gauntlet_menu, ui-06),
+     visible uniquement si meta.gauntletDailyRescueOffer est posé (jour
+     manqué détecté par gauntletDailyObjective au dernier changement de
+     date). ==== */
+  buybackGauntletDailyStreak(){
+    const meta=loadMetaStats();
+    const r=buybackGauntletDailyStreak(meta);
+    G.lastMsg=r.msg; saveMetaStats(meta); render();
+  },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   startArcade(){ injectExtendedArchetypes(); const asc=CL._rollGauntletAsc('bracket64'); const seed=CL._rollGauntletSeed();
+    /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts, 12/08/2026). ==== */
+    const mutator=rollGauntletMutator(asc);
     G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc),daily:G._dailyPending==='bracket64'};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),daily:G._dailyPending==='bracket64',mutator};
+    /* ==== [FIN ANCRE] ==== */
     G._dailyPending=null; G.screen='draft'; save(); render(); },
   startBossRun(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
     const wasDaily=G._dailyPending==='boss_run'; G._dailyPending=null;
@@ -809,8 +1008,11 @@ const CL={
     startBossRun(seed,asc,true); render(true); },
   /* ==== [FIN ANCRE] ==== */
   startLadder100(){ injectExtendedArchetypes(); const asc=CL._rollGauntletAsc('ladder_100'); const seed=CL._rollGauntletSeed();
+    /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts, 12/08/2026). ==== */
+    const mutator=rollGauntletMutator(asc);
     G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc),daily:G._dailyPending==='ladder_100'};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),daily:G._dailyPending==='ladder_100',mutator};
+    /* ==== [FIN ANCRE] ==== */
     G._dailyPending=null; G.screen='draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
@@ -1042,16 +1244,68 @@ const CL={
     save(); render();
   },
   selectDraft(i){ G.f=G.arcade.pool[i];
-    if(G.arcade.mode==='boss_run'){ G.arcade.opponent=genBossOpponent(0); G.screen='arcadehub'; save(); render(); return; }
+    /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
+       point unique, commun aux 3 modes : G.f est déjà le combattant réel de
+       la run (nécessaire pour un effet 'buff' sur G.f.attrs), et c'est
+       AVANT toute génération d'adversaire ci-dessous, donc le flag 'veto'
+       est prêt à être lu par les 3 branches qui suivent. ==== */
+    applyPendingGauntletConsumable(G.arcade);
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
+       12/08/2026) : effets de run posés une seule fois, avant tout combat.
+       'mut_sans_filet' invalide le Filet de sécurité/Mise à l'abri même si
+       achetés au Marché Noir AVANT que le mutateur ne soit connu (le joueur
+       achète son consommable sans savoir quel mutateur sortira à la run
+       suivante — cohérent avec "pas de réserve", l'achat reste consommé
+       même s'il se retrouve neutralisé). 'mut_depart_affaibli' applique un
+       malus permanent-pour-la-run sur G.f, mêmes conventions d'échelle que
+       les consommables buff (state.js : ×5 pour passer de /20 à 1-100). ==== */
+    const mutId=G.arcade.mutator&&G.arcade.mutator.id;
+    if(mutId==='mut_sans_filet'){ G.arcade.consumableSafetynet=false; G.arcade.consumableAutobank=false; }
+    if(mutId==='mut_depart_affaibli'){
+      G.f.attrs.power=clamp((G.f.attrs.power||50)-10,1,100);
+      G.f.attrs.cardio=clamp((G.f.attrs.cardio||50)-10,1,100);
+    }
+    /* ==== [FIN ANCRE] ==== */
+    if(G.arcade.mode==='boss_run'){ G.arcade.opponent=genBossOpponent(0);
+      /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — Droit de véto : un seul
+         nouveau tirage, jamais en boucle (pas de "véto en cascade"). ==== */
+      if(G.arcade.consumableVeto){ G.arcade.opponent=genBossOpponent(0); G.arcade.consumableVeto=false; }
+      /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 (24 ajouts, 12/08/2026) :
+         revealed=false tant que le joueur n'a pas franchi l'écran de reveal
+         (scr_boss_reveal) — masque l'identité/stats au hub et au vestiaire
+         tactique jusqu'à l'instant juste avant le combat. bossMalus tiré au
+         moment du reveal (CL.chooseArcadePlan), pas ici : voir plus bas. ==== */
+      G.arcade.revealed=false; G.arcade.bossMalus=null;
+      /* ==== [FIN ANCRE] ==== */
+      goArcadeHubOrIdentity(); save(); render(); return; }
     /* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — G.arcade.targets (2-3 choix,
        cf. genWTUMMATargets ui-03) remplace l'opponent unique imposé. G.arcade.
        opponent reste undefined tant que CL.pickLadderTarget() n'a pas tranché. ==== */
-    if(G.arcade.mode==='ladder_100'){ G.arcade.ladder=buildWTUMMALadder(G.f.div); G.arcade.targets=genWTUMMATargets(); G.screen='arcadehub'; save(); render(); return; }
+    if(G.arcade.mode==='ladder_100'){ G.arcade.ladder=buildWTUMMALadder(G.f.div); G.arcade.targets=genWTUMMATargets();
+      /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — véto en Ladder 100 : pas
+         d'adversaire unique à ce stade (le joueur choisit sa cible), le
+         véto reroll donc l'ensemble des cibles proposées. ==== */
+      if(G.arcade.consumableVeto){ G.arcade.targets=genWTUMMATargets(); G.arcade.consumableVeto=false; }
+      /* ==== [FIN ANCRE] ==== */
+      goArcadeHubOrIdentity(); save(); render(); return; }
     /* ==== [FIN ANCRE] ==== */
     G.arcade.tournament=buildWTUMMABracket(G.f);
     const playerMatch=G.arcade.tournament.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
     G.arcade.opponent=playerMatch.a.id===G.f.id?playerMatch.b:playerMatch.a;
-    G.screen='arcadehub'; save(); render(); },
+    /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — véto en Bracket 64 : le
+       premier adversaire dépend du tirage complet du tableau ; reconstruire
+       tout le tableau est le seul moyen fiable de changer le 1er adversaire
+       sans casser la cohérence de l'arbre. ==== */
+    if(G.arcade.consumableVeto){
+      G.arcade.tournament=buildWTUMMABracket(G.f);
+      const rematch=G.arcade.tournament.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
+      G.arcade.opponent=rematch.a.id===G.f.id?rematch.b:rematch.a;
+      G.arcade.consumableVeto=false;
+    }
+    /* ==== [FIN ANCRE] ==== */
+    goArcadeHubOrIdentity(); save(); render(); },
   pickArcadeTrain(idx){ if(G.arcade.upgradesChosen.train) return; const _opt=G.arcade.trainOpts[idx]; applyDeltas(G.f,_opt.d);
     /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — la carte de soin doit aussi vider
        la liste des séquelles, sinon gauntletStatusBlock (ui-04) continuerait à
@@ -1112,22 +1366,111 @@ const CL={
     const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(G.f)).concat(TACTICS[G.f.style]||[]);
     const planObj=idx>=0?combined[idx]:null;
     G.arcade.plan=planObj?planObj.m:null; G.arcade.planLabel=planObj?planObj.lbl:null;
+    /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 (24 ajouts, 12/08/2026) :
+       en Boss Run, la tactique vient d'être verrouillée à l'aveugle
+       (scr_arcade_plan, isBossBlind) — au lieu de résoudre le combat tout de
+       suite, on bascule sur l'écran de reveal (scr_boss_reveal). Le malus
+       est tiré ICI, une seule fois par combat, jamais recalculé au
+       re-render de l'écran de reveal. Pool = tous les attributs existants
+       (ALL_ATTR, engine.js) : le Gauntlet n'a pas de forme/moral (juste le
+       flag interne formBroken), donc on retient des stats mécaniquement
+       réelles plutôt que "forme/moral" au sens littéral du document source. ==== */
+    if(G.arcade.mode==='boss_run' && !G.arcade.revealed){
+      const pick_=ALL_ATTR[Math.floor(rnd()*ALL_ATTR.length)];
+      G.arcade.bossMalus={key:pick_[0],label:pick_[1],amount:-RI(6,14)};
+      G.screen='boss_reveal'; save(); render(); return;
+    }
+    /* ==== [FIN ANCRE] ==== */
     resolveArcadeFight();
   },
+  /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 : confirme le reveal
+     (plus de retour en arrière possible sur la tactique), marque revealed,
+     puis résout le combat. Le malus lui-même est appliqué et restauré à
+     l'intérieur de resolveArcadeFight (ui-03), au même endroit que le reste
+     de la logique de combat, pour ne pas dupliquer la restauration ici. ==== */
+  confirmBossReveal(){ if(!G.arcade||G.arcade.mode!=='boss_run') return;
+    G.arcade.revealed=true; resolveArcadeFight(); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: REJOUABILITE_PACTE_TOGGLE] — Bracket 64 / Ladder 100
      seulement (Boss Run a déjà sa clause KO-only permanente et pas d'écran
      de vestiaire entre les combats). ==== */
-  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — A3 : le pacte forcé par
-     l'Ascension (palier>=3) n'est pas un CL.togglePact() de plus à activer,
-     c'est une clause déjà lue directement sur G.arcade.asc dans afterResult
-     — le bouton ne doit donc plus rien faire une fois forcé, pour ne pas
-     laisser croire au joueur qu'il peut le désactiver. ==== */
-  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; if((G.arcade.asc||0)>=3) return; G.arcade.pactActive=!G.arcade.pactActive; render(); },
+  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
+     12/08/2026) : le pacte forcé n'est plus lié au palier d'Ascension
+     (asc>=3) mais au mutateur tiré pour cette run. ==== */
+  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; if(G.arcade.mutator&&G.arcade.mutator.id==='mut_pacte_force') return; G.arcade.pactActive=!G.arcade.pactActive; render(); },
   /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — filtres de scr_archetype_pantheon
      (ui-06), même pattern que setGauntletAsc (mémorisé sur G, jamais
      persisté — un filtre d'affichage, pas une donnée de progression). ==== */
   setArchPantheonMode(mode){ G._archPantheonMode=mode; G._archPantheonAsc=0; render(); },
   setArchPantheonAsc(asc){ G._archPantheonAsc=asc; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: TOUR_ASCENSION_VISUELLE] — ajout #6 (24 ajouts, 12/08/2026). ==== */
+  viewAscensionTower(mode){ G._towerMode=mode; CL.go('ascension_tower'); },
+  setTowerMode(mode){ G._towerMode=mode; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026). ==== */
+  setGauntletProfile(relicId){ const meta=loadMetaStats(); const r=setGauntletProfileDisplay(meta,relicId); G.lastMsg=r.msg; saveMetaStats(meta); render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: INFIRMERIE_FORTUNE] — ajout #20 (24 ajouts, 12/08/2026). ==== */
+  healGauntletZone(zone){
+    if(!G.arcade||!G.arcade.active) return;
+    const meta=loadMetaStats();
+    const r=healGauntletZone(meta,G.arcade,zone);
+    G.lastMsg=r.msg; if(r.success) saveMetaStats(meta); render();
+  },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
+     toggle refusé une fois un combat de coaching déjà entamé (G.arcade.
+     coaching non nul) — le joueur ne doit pas pouvoir désactiver le
+     coaching EN PLEIN round pour se soustraire à une tendance défavorable. ==== */
+  toggleCoaching(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.coaching) return; G.arcade.coachingActive=!G.arcade.coachingActive; render(); },
+  /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — même ordre de composition que
+     scr_coaching_round (ui-04) et scr_arcade_plan : archétype exclusif
+     d'abord, sinon l'index cliqué ne correspond plus à la carte affichée. ==== */
+  pickCoachingTactic(idx){
+    if(!G.arcade||!G.arcade.coaching) return;
+    const archTactic=ARCADE_EXCLUSIVE_TACTICS[G.f.nick];
+    const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(G.f)).concat(TACTICS[G.f.style]||[]);
+    const planObj=idx>=0?combined[idx]:null;
+    const plan=planObj?planObj.m:null;
+    G.arcade.plan=plan; G.arcade.planLabel=planObj?planObj.lbl:null;
+    runCoachingRound(plan);
+  },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: IDENTITE_DE_CAMP] — ajout #22 (24 ajouts, 12/08/2026). ==== */
+  pickCampIdentity(idx){
+    if(!G.arcade||G.arcade.campIdentity) return;
+    const opts=G.arcade.campIdentityOptions||[]; const chosen=opts[idx]; if(!chosen) return;
+    Object.entries(chosen.fx).forEach(([k,v])=>{ G.f.attrs[k]=clamp((G.f.attrs[k]||50)+v,1,100); });
+    G.f.overall=overall(G.f);
+    G.arcade.campIdentity=chosen; G.arcade.campIdentityOptions=null;
+    G.screen='arcadehub'; save(); render();
+  },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: PREPARATION_CIBLEE] — ajout #23 (24 ajouts, 12/08/2026). ==== */
+  pierceRumor(){ if(!G.arcade) return; const r=pierceGauntletRumor(G.arcade); G.lastMsg=r.msg; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026). ==== */
+  acceptSecondSouffle(){ acceptGauntletSecondSouffle(); render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
+     déclenché depuis le camp (scr_arcade_upgrades, ui-04) quand le
+     combattant cumule >=2 séquelles actives (ringDoctorUltimatumActive,
+     ui-03). Accepter = encaisser proprement (ranime le mécanisme
+     a.cashedOut, existant mais mort depuis le retrait de cashOutGauntlet(),
+     cf. ANCRE CORRECTIF_CODE_MORT ci-dessus). Refuser = continuer, avec un
+     bonus ×1.5 en cas de victoire finale de la run (appliqué dans
+     finaliseGauntletRun, ui-08) — mais rien ne change en cas de défaite
+     (élimination normale). ==== */
+  acceptRingDoctor(){
+    if(!G.arcade||!G.arcade.active) return;
+    const a=G.arcade;
+    const progress=a.mode==='boss_run'?a.streak:a.mode==='ladder_100'?a.rank:(a.tournament?a.tournament.roundStep:1);
+    finaliseGauntletRun(a,{kind:'cashout',progress});
+    a.victory=false; a.cashedOut=true; a.eliminatedReason=null;
+    G.screen='gameover'; save(); render();
+  },
+  refuseRingDoctor(){ if(!G.arcade||!G.arcade.active) return; G.arcade.doctorRefused=true; render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
@@ -1752,7 +2095,14 @@ const ARENA_THEMES=[
   {id:'gold',name:'Bâche Royale (Prestige)',floorColors:['#E6B93A','#8A6A1E'],railColor:'#241D13',padColor:'#14100B'},
   {id:'neon',name:'Néons Cyberpunk',floorColors:['#0d0221','#26045c'],railColor:'#ff003c',padColor:'#00f0ff'},
   {id:'underground',name:'Béton Clandestin',floorColors:['#2a2a2a','#1a1a1a'],railColor:'#555555',padColor:'#000000'},
-  {id:'crimson',name:'Arène Écarlate',floorColors:['#2a0a0a','#170505'],railColor:'#E8442F',padColor:'#1a0303'}
+  {id:'crimson',name:'Arène Écarlate',floorColors:['#2a0a0a','#170505'],railColor:'#E8442F',padColor:'#1a0303'},
+  /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
+     récompense exclusive de série de 7 jours (GAUNTLET_DAILY_STREAK_REWARD,
+     state.js) — checkLegendUnlock('cosmetic_renegade') la rend
+     sélectionnable ici sans jamais figurer dans LEGEND_UNLOCKABLES (donc
+     jamais achetable). ==== */
+  {id:'renegade',name:'Toile Braise du Renégat (exclusive)',floorColors:['#3a0e02','#1a0500'],railColor:'#ff5a1f',padColor:'#1a0500'}
+  /* ==== [FIN ANCRE] ==== */
 ];
 function setArenaCosmeticTheme(themeId){ G.arenaCosmetic=themeId; save(); }
 function getArenaTheme(){ return ARENA_THEMES.find(t=>t.id===(G.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }

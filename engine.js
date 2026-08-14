@@ -1061,7 +1061,13 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
   winner.finishMoveCounts[key]=(winner.finishMoveCounts[key]||0)+1;
   let flavor=null;
   if(!winner.signatureMove && winner.finishMoveCounts[key]>=5){
-    winner.signatureMove={name:baseMove,type,zone};
+    /* ==== [ANCRE: PRISE_SIGNATURE_NOMMEE] — ajout #1 (24 ajouts, 12/08/2026) :
+       customSuffix (null tant que le joueur n'a pas validé un complément
+       libre) et locked (figé une fois validé, cf. CL.setSignatureSuffix
+       ci-dessous dans ui-08). Le nom de base (baseMove) n'est JAMAIS
+       remplacé — customSuffix s'affiche uniquement en complément. ==== */
+    winner.signatureMove={name:baseMove,type,zone,customSuffix:null,locked:false};
+    /* ==== [FIN ANCRE] ==== */
     // ==== [ANCRE: CORRECTIF_BOOST_SIGNATURE_DIFFERENCIE] — bug trouvé : TOUS
     // les mouvements signature donnaient exactement le même boost (submission+
     // killer pour toute soumission, power+killer pour tout KO), peu importe le

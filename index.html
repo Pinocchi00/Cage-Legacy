@@ -39,6 +39,14 @@ details[open]>summary span[style*="font-size:18px"]{transform:rotate(90deg);disp
 .scr{padding:16px 15px 40px;animation:fade .32s cubic-bezier(.2,.9,.25,1.15)}
 @keyframes fade{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.scr{animation:none}}
+/* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 (24 ajouts, 12/08/2026) :
+   animation d'entrée intimidante pour le reveal du boss (scr_boss_reveal,
+   ui-04) — zoom d'impact + flash oxblood, se substitue à l'animation .fade
+   standard de .scr (même durée de base, juste un peu plus marquée). ==== */
+.boss-reveal-in{animation:bossRevealIn .45s cubic-bezier(.15,.8,.2,1.2)}
+@keyframes bossRevealIn{0%{opacity:0;transform:scale(1.12)}45%{opacity:1}60%{filter:brightness(1.6) saturate(1.3)}100%{opacity:1;transform:none;filter:none}}
+@media(prefers-reduced-motion:reduce){.boss-reveal-in{animation:none}}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: DA_STAGGER] — apparition échelonnée des listes. Chaque enfant
    direct de .stagger reprend l'animation fade ci-dessus mais avec un délai
    croissant (45ms/élément, plafonné à 10) : à appliquer sur le conteneur

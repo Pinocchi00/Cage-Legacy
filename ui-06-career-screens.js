@@ -68,27 +68,98 @@ function gauntletAscPicker(mode){
   for(let i=0;i<=max;i++){
     btns+=`<span onclick="CL.setGauntletAsc('${mode}',${i})" style="display:inline-block;cursor:pointer;border:1px solid ${i===cur?'var(--gold)':'var(--line)'};color:${i===cur?'var(--gold)':'var(--muted)'};padding:3px 10px;margin:0 4px 4px 0;border-radius:2px;font-size:11px" class="mono">A${i}</span>`;
   }
-  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:10px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span></div>`;
+  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:10px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span>
+   <span onclick="CL.viewAscensionTower('${mode}')" style="display:inline-block;cursor:pointer;margin-top:4px;color:var(--gold);text-decoration:underline dotted;font-size:10px">🗼 Voir la Tour d\u2019Ascension</span></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_DAILY] — bouton de défi du jour par format. La graine
-   étant dérivée de la date (state.js), tous les joueurs affrontent le même
-   run le même jour SANS aucun serveur ni compte : la comparaison se fait
-   hors-jeu, le jeu ne fait que garantir l'identité du tirage. Une seule
-   tentative par jour et par format. ==== */
-/* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — streak affichée AVANT de jouer, sur
-   le même modèle que pactToggleBlock (ui-04) pour pactStreak : le joueur
-   doit voir ce qu'il a à perdre en sautant un jour, pas seulement le
-   découvrir après coup au bilan de run. ==== */
+/* ==== [ANCRE: TOUR_ASCENSION_VISUELLE] — ajout #6 (24 ajouts, 12/08/2026) :
+   écran de progression dédié, 5 paliers empilés visuellement du bas (palier
+   0, base) vers le haut (palier 5, sommet). Réutilise gauntletAscLevel/
+   gauntletBestGet/gauntletAscPayoutMod déjà existants — aucune nouvelle
+   donnée de progression, uniquement une nouvelle façon de la montrer.
+   ⚠️ Scope assumé : la spec demande une "silhouette joueur statique
+   réutilisée du canvas de l'arène" — la fonction de rendu du combattant
+   dans ARENA (drawArena, ui-08) est étroitement couplée à l'état d'un combat
+   EN COURS (positions, hit-stop, caméra...), l'extraire proprement pour un
+   usage statique hors combat dépasse une passe sûre. Remplacé par une
+   silhouette SVG autonome, simple et thématiquement cohérente, plutôt que
+   de risquer de casser le rendu de combat en tirant dessus depuis un écran
+   qui n'a rien à voir. ==== */
+function ascensionTowerSilhouette(){
+  return `<svg width="72" height="120" viewBox="0 0 72 120" fill="none" stroke="var(--gold)" stroke-width="2.5" style="display:block;margin:0 auto">
+    <circle cx="36" cy="16" r="11"/>
+    <path d="M36 27v34M36 40l-18 14M36 40l18 14M36 61l-12 34M36 61l12 34"/>
+  </svg>`;
+}
+function scr_ascension_tower(){
+  const meta=loadMetaStats();
+  const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
+  const mode=G._towerMode||'bracket64';
+  const unlocked=gauntletAscLevel(meta,mode);
+  const modeTabs=Object.keys(modeLabel).map(m=>`<span class="pill ${mode===m?'on':''}" onclick="CL.setTowerMode('${m}')">${modeLabel[m]}</span>`).join('');
+  const tiers=[];
+  for(let i=GAUNTLET_ASC_MAX;i>=0;i--){
+    const isUnlocked=i<=unlocked;
+    const best=gauntletBestGet(meta,mode,i);
+    const bestLabel=best===undefined?'Aucun record':(mode==='boss_run'?`${best}/5`:mode==='ladder_100'?`Rang #${best}`:(best>=7?'Tournoi remporté':`Palier ${best}`));
+    tiers.push(`<div class="glass" style="position:relative;background:${isUnlocked?'var(--panel2)':'var(--panel)'};border:1px solid ${i===unlocked?'var(--gold)':'var(--line)'};border-left:4px solid ${isUnlocked?'var(--gold)':'var(--line)'};padding:12px;margin-bottom:6px;opacity:${isUnlocked?1:0.5}">
+       <div style="display:flex;justify-content:space-between;align-items:center">
+         <b style="font-size:15px;color:${isUnlocked?'var(--gold)':'var(--muted)'}">${i===0?'Palier 0 — Base':`Ascension ${i}`}</b>
+         ${i===unlocked?'<span class="mono small" style="color:var(--sage)">★ ACTUEL</span>':!isUnlocked?'<span class="mono small muted">🔒 Verrouillé</span>':''}
+       </div>
+       <div class="muted small mt">Adversaires +${3*i} niveau(x) · Gains ×${gauntletAscPayoutMod(i)}${i>=1?' · un mutateur aléatoire par run':''}</div>
+       ${isUnlocked?`<div class="mono small mt" style="color:var(--gold)">${bestLabel}</div>`:`<div class="mono small mt">À débloquer : remporter le format au palier ${i-1}.</div>`}
+     </div>`);
+  }
+  return `<div class="scr"><div class="bar"><span class="eyebrow">🗼 Tour d\u2019Ascension — ${modeLabel[mode]}</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
+   ${ascensionTowerSilhouette()}
+   <p class="lede small mt" style="text-align:center">Chaque palier remporté ouvre le suivant. Depuis l\u2019ajout des Mutateurs d\u2019Ascension, tout palier ≥1 tire un mutateur aléatoire par run plutôt qu\u2019une règle fixe.</p>
+   <div class="pills mb" style="justify-content:center">${modeTabs}</div>
+   ${tiers.join('')}
+   <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
+   remplace gauntletDailyTag/gauntletDailyGroup par l'affichage du VRAI
+   mini-objectif du jour (state.js, gauntletDailyObjective), avec sa portée
+   (3 modes ou un mode nommé), la série en cours, une éventuelle offre de
+   rachat, et les boutons de tentative PAR FORMAT (le verrou 1 tentative/
+   format/jour est conservé tel quel — cf. state.js pour le raisonnement). ==== */
 function gauntletDailyTag(mode){
   const meta=loadMetaStats();
+  const obj=gauntletDailyObjective(meta);
+  const scopeOk=!obj.scope||obj.scope===mode;
   const done=gauntletDailyDone(meta,mode);
-  const label=done?`Défi du jour déjà tenté (${gauntletDailyKey()})`:`Tenter le DÉFI DU JOUR (${gauntletDailyKey()})`;
-  const streak=meta.gauntletDailyStreak||0;
-  const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis du jour : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>`:'';
-  return `<div class="mono small" style="margin-top:6px"><span onclick="${done?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${done?'default':'pointer'};border:1px dashed ${done?'var(--line)':'var(--sage)'};color:${done?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px">${label}</span>${streakLine}</div>`;
+  const label=!scopeOk?`Défi du jour non applicable à ce format`:done?`Tentative du jour déjà jouée`:`Tenter ce format pour le défi du jour`;
+  const disabled=done||!scopeOk;
+  return `<div class="mono small" style="margin-top:6px"><span onclick="${disabled?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${disabled?'default':'pointer'};border:1px dashed ${disabled?'var(--line)':'var(--sage)'};color:${disabled?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px;opacity:${scopeOk?1:0.5}">${label}</span></div>`;
 }
-/* ==== [FIN ANCRE] ==== */
+function gauntletDailyGroup(){
+  const meta=loadMetaStats();
+  const obj=gauntletDailyObjective(meta);
+  const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
+  const scopeLabel=obj.scope?`Valable uniquement en ${modeLabel[obj.scope]}`:'Valable dans les 3 formats';
+  const streak=meta.gauntletDailyStreak||0;
+  const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis réussis : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>`:'';
+  const rescue=meta.gauntletDailyRescueOffer;
+  const rescueHtml=rescue?`<div class="card mt" style="background:var(--panel2);border:1px solid var(--blood);padding:10px">
+     <div class="mono small" style="color:var(--blood)">Série de ${rescue.streakAtRisk} jour(s) manquée hier.</div>
+     <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 10px;font-size:12px" onclick="CL.buybackGauntletDailyStreak()">Racheter — ${gauntletDailyBuybackCost(rescue.streakAtRisk)} points de Légende</button>
+   </div>`:'';
+  const modes=[['bracket64','Bracket 64'],['ladder_100','Ladder 100']];
+  if(checkLegendUnlock('mode_boss')) modes.push(['boss_run','Boss Run']);
+  const rows=modes.map(([m,label])=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px">
+     <span class="mono small muted" style="flex:0 0 auto">${label}</span>${gauntletDailyTag(m)}
+   </div>`).join('');
+  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--sage);padding:12px;text-align:left;margin-bottom:20px">
+     <div class="eyebrow mb" style="font-size:11px;color:var(--sage)">Défi du jour · ${gauntletDailyKey()}${gauntletDailyObjectiveDone(meta)?' — ✓ réussi':''}</div>
+     <div class="small" style="color:var(--text)">${obj.label}</div>
+     <div class="muted small mt">${scopeLabel} · même tirage pour tout le monde.</div>
+     ${streakLine}${rescueHtml}
+     ${rows}
+   </div>`;
+}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — n'apparaît qu'une fois 5 rivaux
    historiques battus (meta.gauntletRivalsDefeated, jamais purgé, alimenté
@@ -144,34 +215,19 @@ function scr_archetype_pantheon(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — item demandé (capture à l'appui) :
-   les 3 défis du jour étaient dispersés sous chaque format (gauntletDailyTag
-   appelé 3 fois), et la graine occupait le haut de l'écran alors que c'est
-   une option de niche que la majorité des sessions laisse vide. Le défi du
-   jour est au contraire la raison de revenir CHAQUE jour : il remonte en
-   tête, regroupé en une seule carte, la graine descend sous les formats.
-   Aucun changement de logique — gauntletDailyTag() reste la brique unitaire,
-   seul son point d'appel change. Le Boss Run n'apparaît dans le groupe que
-   s'il est débloqué, exactement comme son bouton de format plus bas. ==== */
-function gauntletDailyGroup(){
-  const modes=[['bracket64','Bracket 64'],['ladder_100','Ladder 100']];
-  if(checkLegendUnlock('mode_boss')) modes.push(['boss_run','Boss Run']);
-  const rows=modes.map(([m,label])=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px">
-     <span class="mono small muted" style="flex:0 0 auto">${label}</span>${gauntletDailyTag(m)}
-   </div>`).join('');
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--sage);padding:12px;text-align:left;margin-bottom:20px">
-     <div class="eyebrow mb" style="font-size:11px;color:var(--sage)">Défis du jour · ${gauntletDailyKey()}</div>
-     <div class="muted small">Même tirage pour tout le monde, une tentative par format.</div>
-     ${rows}
-   </div>`;
-}
-/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — la nouvelle gauntletDailyGroup()
+   (ajout #2, ancre GAUNTLET_DEFI_JOUR_V2 plus haut) remplace celle-ci —
+   ancienne version retirée pour éviter une redéclaration de fonction (la
+   dernière définition l'aurait de toute façon emporté silencieusement en
+   JS, mais garder les deux aurait été trompeur à la lecture). ==== */
 function scr_gauntlet_menu(){
   return `<div class="scr center intro">
    <div class="eyebrow sage">Mode Arcade</div>
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
+   <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">a) DÉFI DU JOUR</div>
    ${gauntletDailyGroup()}
+   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">b) MODES DE JEU CLASSIQUES</div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
    ${gauntletAscPicker('bracket64')}
@@ -183,6 +239,10 @@ function scr_gauntlet_menu(){
    ${gauntletAscPicker('boss_run')}`:''}
    ${gauntletCapstoneEntry()}
    <button class="btn ghost mt" style="border:1px dashed var(--line)" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
+   <button class="btn ghost mt" style="border:1px dashed var(--gold)" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
+   <button class="btn ghost mt" style="border:1px dashed var(--gold)" onclick="CL.go('gauntlet_profile')">🏺 Profil du joueur (Reliques)</button>
+   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">c) BOUTIQUE</div>
+   <button class="btn ghost mt" style="border:1px dashed var(--gold);color:var(--gold)" onclick="CL.goShopGauntlet()">🛒 Boutique (filtrée Gauntlet)</button>
    <div class="fld" style="margin-top:24px">
      <label class="muted small">Graine de la run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer une run identique)</label>
      <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
@@ -190,6 +250,38 @@ function scr_gauntlet_menu(){
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: PROFIL_JOUEUR_RELIQUES] — ajout #7 (24 ajouts, 12/08/2026) :
+   écran de compte, PAS lié à un combattant précis (les combattants arcade
+   sont jetables et non persistés, cf. règle déjà établie ailleurs) — max 1
+   titre + 1 effet affichés à la fois, comme demandé. ==== */
+function scr_gauntlet_profile(){
+  const meta=loadMetaStats();
+  const owned=listOwnedGauntletRelics(meta);
+  const curTitle=meta.gauntletProfileTitle, curEffect=meta.gauntletProfileEffect;
+  const preview=`<div class="glass mwash" style="position:relative;background:var(--panel2);padding:16px;text-align:center;margin-bottom:16px;${curEffect?curEffect.style:'border:1px solid var(--line)'}">
+     <div class="eyebrow mb">Aperçu du profil</div>
+     <b style="font-size:16px;color:var(--gold)">${curTitle?esc(curTitle):'Aucun titre affiché'}</b>
+     ${curEffect?`<div class="muted small mt">${esc(curEffect.label)}</div>`:''}
+   </div>`;
+  const list=owned.length?owned.map(r=>{
+    const isCurrent=curTitle===r.title;
+    return `<div class="glass card mb" style="border-left:3px solid ${r.mastery?'var(--gold)':'var(--line)'};background:var(--panel2);padding:12px">
+       <div style="display:flex;justify-content:space-between;align-items:center">
+         <div><b class="small" style="color:${r.mastery?'var(--gold)':'var(--text)'}">${r.mastery?'👑 ':'🏺 '}${esc(r.title)}</b><div class="muted small">${esc(r.effect.label)}${r.mastery?'':` — ${GAUNTLET_RELIC_MODE_LABEL?GAUNTLET_RELIC_MODE_LABEL[r.mode]:r.mode} · ${esc(r.archetype)}`}</div></div>
+         <button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;border-color:${isCurrent?'var(--sage)':'var(--gold)'};color:${isCurrent?'var(--sage)':'var(--gold)'}" onclick="CL.setGauntletProfile('${r.id}')" ${isCurrent?'disabled':''}>${isCurrent?'✓ Affiché':'Afficher'}</button>
+       </div>
+     </div>`;
+  }).join(''):`<div class="card" style="background:var(--panel2);padding:14px"><span class="mono small muted">Aucune Relique de Survie obtenue pour l\u2019instant — remporte un format Gauntlet au palier d\u2019Ascension maximum (${GAUNTLET_ASC_MAX}) avec un archétype pour en débloquer une.</span></div>`;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Profil du joueur</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
+   <h2 class="disp">Reliques de Survie</h2>
+   <p class="lede small">${owned.length} relique(s) possédée(s). Un seul titre et un seul effet affichés à la fois.</p>
+   ${preview}
+   ${list}
+   <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
+  </div>`;
+}
+const GAUNTLET_RELIC_MODE_LABEL={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
 /* ==== [FIN ANCRE] ==== */
 function scr_intro(){ const c=hasSave('career');
   return `<div class="scr center intro">
@@ -511,23 +603,53 @@ function scr_hof(){
 function scr_legend_detail(){
   const list=loadHOF(); const f=list.find(x=>String(x.id)===String(G.viewingLegendId));
   if(!f) return `<div class="scr center"><p class="lede">Légende introuvable.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
+  /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
+     rendu visuel léger des décorations équipées (cadre, halo, typographie,
+     diamant) directement sur la carte hero existante, plus un panneau de
+     gestion (équiper/retirer) listant les décorations réellement possédées
+     (checkLegendUnlock) — jamais celles simplement affichées en boutique. ==== */
+  const decorations=f.decorations||[];
+  const hasFrameGold=decorations.includes('deco_frame_gold');
+  const hasFrameCrimson=decorations.includes('deco_frame_crimson');
+  const hasGlow=decorations.includes('deco_glow');
+  const hasTypo=decorations.includes('deco_typography');
+  const hasDiamond=decorations.includes('deco_diamond');
+  const cardBorder=hasFrameGold?'2px solid var(--gold)':hasFrameCrimson?'2px solid var(--blood)':'1px solid var(--line)';
+  const cardGlowStyle=hasGlow?'box-shadow:0 0 26px rgba(230,185,58,0.4);':'';
+  const nameStyle=hasTypo?'font-family:Georgia,\'Times New Roman\',serif;letter-spacing:0.5px;':'';
+  const ownedDecorations=LEGEND_UNLOCKABLES.filter(i=>i.cat==='Ennoblissement du Panthéon'&&checkLegendUnlock(i.id));
+  const decorationPanel=ownedDecorations.length?`<div class="card mb"><div class="eyebrow mb">Décorations (${decorations.length}/3)</div>
+     ${ownedDecorations.map(item=>{
+       const equippedHere=decorations.includes(item.id);
+       const equippedElsewhere=!equippedHere&&list.some(x=>String(x.id)!==String(f.id)&&(x.decorations||[]).includes(item.id));
+       const canEquip=!equippedHere&&decorations.length<3;
+       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)">
+         <div><b class="small">${item.name}</b>${equippedElsewhere?`<div class="muted small" style="font-size:10px">Actuellement portée par un autre combattant — l\u2019équiper ici la lui retire.</div>`:''}</div>
+         ${equippedHere?`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;border-color:var(--blood);color:var(--blood)" onclick="CL.unequipDecoration('${f.id}','${item.id}')">Retirer</button>`
+           :`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px" onclick="CL.equipDecoration('${f.id}','${item.id}')" ${canEquip?'':'disabled'}>Équiper</button>`}
+       </div>`;
+     }).join('')}
+   </div>`:'';
+  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
-   <div class="glass mwash card" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:16px">
-     <div class="hero-name" style="position:relative;z-index:2">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
+   <div class="glass mwash card" style="position:relative;background:var(--panel2);border:${cardBorder};${cardGlowStyle}padding:16px;margin-bottom:16px">
+     <div class="hero-name" style="position:relative;z-index:2;${nameStyle}">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
      ${f.motivation?`<div class="story" style="position:relative;z-index:2"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
      <div class="epis mt" style="position:relative;z-index:2">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
      <div class="stat-band" style="position:relative;z-index:2">
-       <div><span class="stat-big" style="font-size:26px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">Bilan pro · retraite ${f.age} ans</span></div>
+       <div><span class="stat-big" style="font-size:26px;${hasDiamond?'background:linear-gradient(135deg,#b9f2ff,#ffffff,#8ec9d8);-webkit-background-clip:text;background-clip:text;color:transparent':''}">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${hasDiamond?'💎 ':''}Bilan pro · retraite ${f.age} ans</span></div>
        <div style="text-align:right"><span class="stat-big" style="font-size:26px">${f.ko+f.sub}<span class="muted small"> fin.</span></span><span class="stat-lbl">${f.ko} KO / ${f.sub} SUB</span></div>
      </div>
      ${f.amaRec?`<div class="mono small muted mt">Amateur : ${f.amaRec.W}-${f.amaRec.L}</div>`:''}
    </div>
    ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mb">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
    ${f.champChampBelt?`<div class="card mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><span class="mono small" style="color:var(--gold)">${SVG.crown} Double Champion — ${esc(f.champChampBelt)}</span></div>`:''}
+   ${decorationPanel}
    ${f.beltHistory&&f.beltHistory.length?`<div class="card mb"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — Année ${b.year} — ${b.defenses} défense(s)</span></div>`).join('')}</div>`:''}
    ${f.biggestRival?`<div class="card mb"><div class="eyebrow mb">⚔ Plus grand rival</div><div class="small" style="color:var(--blood)">${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div></div>`:''}
    ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
    ${f.nicknameHistory&&f.nicknameHistory.length?`<div class="card mb"><div class="eyebrow mb">Historique des surnoms</div>${f.nicknameHistory.map(n=>`<div class="small muted" style="padding:4px 0">« ${esc(n)} »</div>`).join('')}</div>`:''}
+   ${f.signatureMove?`<div class="card mb" style="border-left:3px solid var(--gold-d)"><div class="eyebrow gold mb">${SVG.star} Mouvement Signature</div><b style="color:var(--gold)">${esc(f.signatureMove.customSuffix?`${f.signatureMove.name} ${f.signatureMove.customSuffix}`:f.signatureMove.name)}</b></div>`:''}
    ${f.earnedAchievements&&f.earnedAchievements.length?`<div class="card mb"><div class="eyebrow mb">Succès obtenus (${f.earnedAchievements.length}/${ACH.length})</div>${f.earnedAchievements.map(id=>{const a=ACH.find(x=>x.id===id); return a?`<div class="ach"><span class="ico" style="display:flex;align-items:center;color:var(--gold)">${a.ico}</span><span><b class="gold">${a.h}</b><div class="muted small">${a.d}</div></span></div>`:'';}).join('')}</div>`:''}
    <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
    <button class="btn ghost" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
@@ -675,7 +797,37 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    ${campHtml}
    ${p.newAch&&p.newAch.length?`<div class="card">${p.newAch.map(a=>`<div class="ach"><span class="ico">${a.ico}</span><b class="gold">${a.h}</b> <span class="muted small">${a.d}</span></div>`).join('')}</div>`:''}
    ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt(f)} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
+   ${ghostComparisonHtml()}
    <button class="btn primary" onclick="CL.${p.forced?'toLegacy':'afterResult'}()">${p.forced?'Voir mon palmarès':'Continuer'}</button></div>`; }
+/* ==== [ANCRE: GAUNTLET_FANTOME] — ajout #5 (24 ajouts, 12/08/2026) : compare
+   le combat qui vient de se jouer à la même position dans la MEILLEURE run
+   connue du joueur sur ce même archétype/mode/palier (meta.gauntletGhostLog,
+   state.js). N'affiche rien tant qu'aucun record n'existe encore (première
+   run sur cette combinaison) — le message par défaut (narrative ci-dessus,
+   ou rien) reste seul visible, comme demandé. Même habillage visuel
+   (.card.glass.narr) que le bloc de citation d'ambiance juste au-dessus,
+   pour rester dans le même bloc visuel de bas d'écran. ==== */
+function ghostComparisonHtml(){
+  if(!G.arcade || !G.arcade.active) return '';
+  const meta=loadMetaStats();
+  const ghostLog=gauntletGhostLogGet(meta,G.arcade.mode,G.arcade.asc||0,G.f.nick);
+  if(!ghostLog || !ghostLog.length) return '';
+  const pos=(G.arcade.ghostFights||[]).length;
+  const ghost=ghostLog[pos-1];
+  const cur=G.arcade.ghostFights&&G.arcade.ghostFights[pos-1];
+  if(!ghost || !cur) return '';
+  const curDmg=cur.dmgHead+cur.dmgBody+cur.dmgLegs, ghostDmg=ghost.dmgHead+ghost.dmgBody+ghost.dmgLegs;
+  const lines=[];
+  if(curDmg!==ghostDmg) lines.push(`${curDmg<ghostDmg?'Moins':'Plus'} de dégâts encaissés qu\u2019à ce stade de ta meilleure run (${curDmg} contre ${ghostDmg}).`);
+  if(cur.td!==ghost.td) lines.push(`${cur.td>ghost.td?'Plus':'Moins'} d\u2019amenées au sol qu\u2019à ce stade de ta meilleure run (${cur.td} contre ${ghost.td}).`);
+  if(cur.kd!==ghost.kd) lines.push(`${cur.kd>ghost.kd?'Plus':'Moins'} de knockdowns qu\u2019à ce stade de ta meilleure run (${cur.kd} contre ${ghost.kd}).`);
+  if(!lines.length) lines.push('Exactement le même rythme qu\u2019à ce stade de ta meilleure run.');
+  return `<div class="card glass narr" style="background:var(--panel2);padding:16px;border-left:3px solid var(--gold-d)">
+    <div class="eyebrow gold mb">${SVG.star} Le Fantôme — combat ${pos}</div>
+    ${lines.map(l=>`<div class="small muted" style="padding:2px 0">${l}</div>`).join('')}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: CARTE_MOUVEMENT_SIGNATURE] — met en avant le geste devenu
    signature (5 finitions identiques, cf. pickFinishMove dans engine.js) : ce
@@ -716,12 +868,28 @@ function signatureMoveCard(f){
   const boostKeys=(SIGNATURE_BOOST_BY_ZONE[sm.type]&&SIGNATURE_BOOST_BY_ZONE[sm.type][sm.zone])||(sm.type==='sub'?['submission','killer']:['power','killer']);
   const boostTxt=boostKeys.map(k=>{ const lbl=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; return `+${Math.max(1,Math.round(SIGNATURE_BOOST_PTS/5))} ${lbl}`; }).join(', ');
   const typeLbl=sm.type==='sub'?'Soumission':'KO';
+  /* ==== [ANCRE: PRISE_SIGNATURE_NOMMEE] — ajout #1 (24 ajouts, 12/08/2026) :
+     tant que le joueur n'a pas validé (sm.locked===true), un champ libre
+     permet de taper un complément qui s'ajoute au nom de base (jamais ne le
+     remplace) — aperçu mis à jour lettre par lettre via CL.setSignatureSuffix
+     (render(true) : préserve le scroll, cf. pattern CL.setGauntletSeed).
+     Une fois validé (CL.lockSignatureSuffix), le champ disparaît et le nom
+     complet est figé définitivement. ==== */
+  const fullName=sm.customSuffix?`${sm.name} ${sm.customSuffix}`:sm.name;
+  const namingHtml=sm.locked?'':`<div class="mt" style="text-align:left">
+      <div class="muted small mb">Donne un nom complet à ta prise signature (le nom de base reste toujours affiché) :</div>
+      <div class="mono" style="color:var(--gold);font-size:15px;margin-bottom:6px">Aperçu : ${esc(sm.name)}${sm._draftSuffix?' '+esc(sm._draftSuffix):''}</div>
+      <input maxlength="24" placeholder="ex. de Marseille, du Valhalla" value="${esc(sm._draftSuffix||'')}" oninput="CL.setSignatureSuffix(this.value)">
+      <button class="btn primary" style="margin-top:8px;padding:8px 14px;font-size:13px" onclick="CL.lockSignatureSuffix()" ${sm._draftSuffix&&sm._draftSuffix.trim()?'':'disabled'}>Valider (définitif)</button>
+    </div>`;
   return `<div class="card mt" style="position:relative;z-index:2;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
     <div class="eyebrow gold mb">${SVG.star} Mouvement Signature</div>
-    <b style="font-size:17px;color:var(--gold)">${esc(sm.name)}</b> <span class="muted small">(${typeLbl})</span>
+    <b style="font-size:17px;color:var(--gold)">${esc(fullName)}</b> <span class="muted small">(${typeLbl})</span>
     <div class="muted small mt">40 % de chances de conclure par ce geste à chaque finition.</div>
     <div class="mono small mt" style="color:var(--win)">Effets acquis : ${boostTxt}</div>
+    ${namingHtml}
   </div>`;
+  /* ==== [FIN ANCRE] ==== */
 }
 /* ==== [ANCRE: CORRECTIF_RETOUR_FICHE_PROFIL] — bug trouvé : G._profileReturn
    était nullé dès le rendu de l'écran, pas au moment de la sortie. Tout

@@ -435,18 +435,24 @@ const GAUNTLET_CONTRACTS=[
    hint:'Terminer la run sans jamais encaisser la moindre séquelle.',
    check:(f,a)=>!((a.runInjuries||[]).length) && !a.injuredEver}
 ];
-/* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — ct_nopact ("Sans filet" :
-   terminer la run sans jamais prendre le pacte de finition) devient
-   IMPOSSIBLE à remplir dès Ascension>=3 sur Bracket 64 / Ladder 100 : le
-   pacte y est désormais forcé dès le 1er combat (cf. afterResult, ui-08),
-   donc a.pactTakenEver passe systématiquement à true. Plutôt que de laisser
-   un contrat non gagnable entrer dans le tirage aléatoire (1 run sur 6 dans
-   une impasse silencieuse), il est exclu du pool dès ce palier — au lieu
-   d'être exclu seulement pour boss_run où la question ne se pose de toute
-   façon pas (pactTakenEver n'y est jamais posé, cf. condition ko_only déjà
-   permanente et indépendante du pacte). ==== */
-function drawGauntletContract(asc){
-  const pool=(asc||0)>=3?GAUNTLET_CONTRACTS.filter(c=>c.id!=='ct_nopact'):GAUNTLET_CONTRACTS;
+/* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) : "trop
+   endommagé" faute de forme/moral en Gauntlet (cf. GAUNTLET_SANS_MORAL_FORME)
+   est ici défini par le cumul de séquelles ACTIVES (runInjuries.length>=2,
+   même seuil que ct_intact.check juste au-dessus, pour rester cohérent avec
+   ce que le jeu considère déjà comme "une run qui a souffert"). Ne se
+   déclenche plus une fois refusé — G.arcade.doctorRefused n'est jamais remis
+   à false (le bonus ×1.5 doit tenir pour TOUTE la run après un refus, pas
+   seulement jusqu'au prochain déclenchement). ==== */
+function ringDoctorUltimatumActive(a){
+  return (a.runInjuries||[]).length>=2 && !a.doctorRefused;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
+   12/08/2026) : ct_nopact devient injouable quand le mutateur tiré pour
+   CETTE run est 'mut_pacte_force' (remplace l'ancienne condition
+   asc>=3, désormais sans rapport avec le pacte forcé). ==== */
+function drawGauntletContract(asc,mutatorId){
+  const pool=mutatorId==='mut_pacte_force'?GAUNTLET_CONTRACTS.filter(c=>c.id!=='ct_nopact'):GAUNTLET_CONTRACTS;
   const c=pick(pool);
   return {id:c.id,label:c.label,hint:c.hint,mult:c.mult,done:false};
 }
@@ -472,14 +478,28 @@ function evalGauntletContract(a){
    Panthéon ni hofScore() ne peuvent hériter d'attributs rabaissés.
    rollInjury()/f.injury (engine.js) N'EST PAS réutilisée : sa sémantique est
    en « cycles de convalescence », notion qui n'existe pas dans une run. ==== */
+/* ==== [ANCRE: INFIRMERIE_FORTUNE] — ajout #20 (24 ajouts, 12/08/2026) :
+   migration de runInjuries vers un suivi PAR ZONE anatomique (tête/corps/
+   jambes) — chaque séquelle porte désormais un champ `zone`, condition
+   nécessaire pour que l'Infirmerie de fortune (soin ciblé, payant, ci-
+   dessous dans ui-04/ui-08) puisse soigner UNE zone sans toucher aux autres.
+   Structure de a.runInjuries elle-même INCHANGÉE (toujours un tableau plat)
+   — c'est le champ `zone` sur chaque entrée qui porte la migration, pas une
+   réorganisation en objet {tete:[],corps:[],jambes:[]} : ça évite de casser
+   les 3 lectures existantes de a.runInjuries (gauntletStatusBlock ui-04,
+   runDebriefBlock ui-04, ct_intact ui-03) qui itèrent déjà le tableau tel
+   quel. Cheville foulée ajoutée pour équilibrer les 3 zones (2 têtes,
+   3 corps, 2 jambes désormais). ==== */
 const GAUNTLET_RUN_INJURIES=[
-  {name:'Arcade ouverte',attrs:[['composure',-8],['fightIQ',-5]]},
-  {name:'Côtes fêlées',attrs:[['cardio',-10],['durability',-6]]},
-  {name:'Main abîmée',attrs:[['power',-9],['handSpeed',-5]]},
-  {name:'Genou tordu',attrs:[['footSpeed',-10],['takedown',-6]]},
-  {name:'Mâchoire fragilisée',attrs:[['chin',-12]]},
-  {name:'Épaule déboîtée',attrs:[['clinchStr',-10],['takedown',-5]]}
+  {name:'Arcade ouverte',zone:'tete',attrs:[['composure',-8],['fightIQ',-5]]},
+  {name:'Côtes fêlées',zone:'corps',attrs:[['cardio',-10],['durability',-6]]},
+  {name:'Main abîmée',zone:'corps',attrs:[['power',-9],['handSpeed',-5]]},
+  {name:'Genou tordu',zone:'jambes',attrs:[['footSpeed',-10],['takedown',-6]]},
+  {name:'Mâchoire fragilisée',zone:'tete',attrs:[['chin',-12]]},
+  {name:'Épaule déboîtée',zone:'corps',attrs:[['clinchStr',-10],['takedown',-5]]},
+  {name:'Cheville foulée',zone:'jambes',attrs:[['footSpeed',-7],['explosiveness',-6]]}
 ];
+const GAUNTLET_ZONE_LABEL={tete:'Tête',corps:'Corps',jambes:'Jambes'};
 function rollGauntletRunInjury(f){
   const inj=pick(GAUNTLET_RUN_INJURIES);
   const applied=[];
@@ -488,8 +508,28 @@ function rollGauntletRunInjury(f){
     if(typeof f.attrs[k]==='number'){ f.attrs[k]=clamp(f.attrs[k]+v,1,100); applied.push([k,v]); }
   });
   f.overall=overall(f);
-  return {name:inj.name,attrs:applied};
+  return {name:inj.name,zone:inj.zone,attrs:applied};
 }
+/* Coût fixe par blessure soignée dans la zone visée (pas un coût unique par
+   zone) : soigner une zone qui cumule 2 séquelles coûte logiquement plus
+   cher que n'en soigner qu'une seule. */
+const GAUNTLET_INFIRMARY_COST_PER_INJURY=40;
+function gauntletInfirmaryCost(a,zone){ return GAUNTLET_INFIRMARY_COST_PER_INJURY*((a.runInjuries||[]).filter(i=>i.zone===zone).length); }
+function healGauntletZone(meta,a,zone){
+  const targets=(a.runInjuries||[]).filter(i=>i.zone===zone);
+  if(!targets.length) return {success:false,msg:'Aucune séquelle à soigner sur cette zone.'};
+  const cost=gauntletInfirmaryCost(a,zone);
+  if((meta.legendPoints||0)<cost) return {success:false,msg:'Points de Légende insuffisants.'};
+  meta.legendPoints-=cost;
+  targets.forEach(inj=>inj.attrs.forEach(pair=>{
+    const k=pair[0], v=pair[1];
+    if(typeof G.f.attrs[k]==='number') G.f.attrs[k]=clamp(G.f.attrs[k]-v,1,100);
+  }));
+  G.f.overall=overall(G.f);
+  a.runInjuries=(a.runInjuries||[]).filter(i=>i.zone!==zone);
+  return {success:true,msg:`${GAUNTLET_ZONE_LABEL[zone]} soignée pour ${cost} points de Légende.`};
+}
+/* ==== [FIN ANCRE] ==== */
 /* Probabilité indexée sur les dégâts RÉELLEMENT encaissés pendant le combat :
    res.stats.B.sig (frappes significatives subies par le joueur, qui est
    toujours le côté A en arcade — cf. resolveArcadeFight) et res.stats.B.kd
@@ -569,7 +609,17 @@ const ARCADE_UNLOCKABLE_ARCHETYPES=[
     perk:'Refuse d\u2019aller au sol. Transforme la cage en bagarre de pub.'},
   {unlockId:'arch_sniper',nick:'Le Sniper',flag:'🇹🇭',country:'TH',style:'muayThai',styleLabel:'Longue Distance',div:'H-feather',age:27,
     attrs:{kick:98,footSpeed:92,fightIQ:85,composure:80,power:70,tdd:70,cardio:70,chin:35},
-    perk:'Ne laisse jamais personne entrer dans sa distance. Démonte à coups de tibia depuis l\u2019extérieur.'}
+    perk:'Ne laisse jamais personne entrer dans sa distance. Démonte à coups de tibia depuis l\u2019extérieur.'},
+  /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026) :
+     archétype ultra-exclusif, UNIQUEMENT accessible via le 1% de la Caisse
+     Mystère (drawGauntletLottery, state.js) — jamais acheté directement,
+     jamais dans LEGEND_UNLOCKABLES. Même mécanisme d'injection que les 4
+     archétypes ci-dessus (checkLegendUnlock générique dans
+     injectExtendedArchetypes ci-dessous). ==== */
+  {unlockId:'arch_lottery_phoenix',nick:'Le Phénix Cendré',flag:'🏴',country:'BR',style:'mma',styleLabel:'Renaissance',div:'H-middle',age:33,
+    attrs:{heart:99,recovery:95,composure:92,chin:80,power:75,cardio:85,adaptability:88,killer:80},
+    perk:'Ne meurt jamais deux fois de la même façon. Chaque round encaissé le rend plus dangereux au suivant.'}
+  /* ==== [FIN ANCRE] ==== */
 ];
 function injectExtendedArchetypes(){
   ARCADE_EXTENDED_ARCHETYPES.forEach(a=>{ if(!ARCADE_ARCHETYPES.some(x=>x.nick===a.nick)) ARCADE_ARCHETYPES.push(a); });
@@ -597,8 +647,22 @@ function injectExtendedArchetypes(){
    sinon exactement le même run (target 5, condition ko_only, Ascension). ==== */
 function startBossRun(seed,asc,capstone){
   injectExtendedArchetypes();
+  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
+     12/08/2026) : tiré ICI, avant drawGauntletContract (qui doit connaître
+     mutId pour exclure ct_nopact), et avant selectDraft (qui n'a besoin que
+     de G.f pour le consommable, jamais du mutateur). Pas de dépendance à
+     G.f : peut donc être tiré dès la création de la run pour les 3 modes. ==== */
+  const mutator=rollGauntletMutator(asc,'boss_run');
   G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only',banked:0,
-    seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc),capstone:!!capstone};
+    seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),capstone:!!capstone,mutator};
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
+     applique le consommable en attente dès la création de la run — G.f
+     n'est pas encore le combattant sélectionné à ce stade (choisi ensuite
+     via selectDraft), donc un éventuel effet 'buff' ne peut pas encore
+     s'appliquer ici pour le Boss Run : appliqué à la place juste après le
+     choix d'archétype, dans CL.selectDraft (ui-08), qui appelle cette même
+     fonction pour les 3 modes. ==== */
   G.screen='draft'; save(); render();
 }
 /* ==== [FIN ANCRE] ==== */
@@ -616,6 +680,166 @@ function startBossRun(seed,asc,capstone){
    menu, pas une modification de la difficulté par défaut : au palier 0 les
    formules sont strictement identiques à avant. ==== */
 function ascensionCurveMod(asc){ return {lv:3*(asc||0),cap:2*(asc||0)}; }
+/* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts, 12/08/2026) :
+   REMPLACE le système A1/A2/A3 fixe et cumulatif (chaque palier ajoutait une
+   règle en plus des précédentes) par UN SEUL mutateur tiré au hasard parmi 8
+   au lancement d'une run avec Ascension>=1 (aucun mutateur si asc===0,
+   comportement de base inchangé). L'ancien code A1/A2/A3 est retiré de ses 5
+   points d'application (generateArcadeUpgrades, afterResult, togglePact,
+   pactToggleBlock, drawGauntletContract — ui-03/ui-08/ui-04) et remplacé par
+   une lecture de G.arcade.mutator.id à chacun de ces mêmes points, cf.
+   ancres GAUNTLET_MUTATEURS_ALEATOIRES locales dans chaque fichier.
+   ⚠️ Scope assumé sur 'mut_sans_repit' : la spec suggère une fatigue round
+   par round ("sans round de répit"), ce qui impliquerait de toucher la
+   boucle interne de simulateFight() (engine.js) — hors scope sûr en une
+   passe pour un moteur de combat déjà audité au Monte Carlo. Approximé à la
+   place par un cardio réduit AVANT le combat (même canal exact qui pilote la
+   fatigue round par round dans le moteur, cf. ligne ~715 engine.js), donc
+   l'effet perçu (fatigue plus rapide) est réel, seule la MÉCANIQUE exacte
+   (round par round vs pré-combat) diffère de la lettre de la spec. ==== */
+const GAUNTLET_ASCENSION_MUTATORS=[
+  {id:'mut_violent',label:'Adversaires plus violents',desc:'Tous les adversaires de la run frappent plus fort (+3 Puissance/20).'},
+  {id:'mut_sans_filet',label:'Sans filet',desc:'Les consommables « Filet de sécurité » et « Mise à l\u2019abri automatique » sont désactivés pour cette run.'},
+  {id:'mut_pacte_force',label:'Pacte forcé',desc:'Chaque combat ne compte que par finition (KO/TKO ou soumission), sans exception, pour toute la run (Bracket 64 / Ladder 100 uniquement).'},
+  {id:'mut_camp_reduit',label:'Choix réduits au camp',desc:'Le camp d\u2019entraînement ne propose plus que 2 options au lieu de 3.'},
+  {id:'mut_depart_affaibli',label:'Départ affaibli',desc:'Le combattant démarre la run avec -2 Puissance et -2 Cardio (/20).'},
+  {id:'mut_mise_a_nu',label:'Mise à nu',desc:'L\u2019identité et les stats de CHAQUE adversaire de la run restent cachées jusqu\u2019au dernier moment, comme un Boss Run permanent.'},
+  {id:'mut_juges_severes',label:'Juges sévères',desc:'Une victoire aux points trop serrée ne suffit plus : la run s\u2019arrête comme sur une défaite.'},
+  {id:'mut_sans_repit',label:'Sans round de répit',desc:'Cardio réduit pour toute la run (-3/20) : la fatigue s\u2019installe plus vite à chaque combat.'}
+];
+function rollGauntletMutator(asc,mode){
+  if((asc||0)<1) return null;
+  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — le Boss Run a déjà sa
+     propre clause KO-only permanente et un camp allégé sans écran de
+     3 options (generateBossRunUpgrade, distinct de generateArcadeUpgrades) :
+     3 des 8 mutateurs y seraient inertes ou redondants (pacte forcé/juges
+     sévères déjà subsumés par la règle KO-only, camp réduit sans effet sur
+     un camp qui n'a jamais 3 options). Exclus du tirage pour ce mode
+     uniquement, pour que les 5 restants restent tous significatifs. ==== */
+  const pool=mode==='boss_run'?GAUNTLET_ASCENSION_MUTATORS.filter(m=>!['mut_pacte_force','mut_camp_reduit','mut_juges_severes'].includes(m.id)):GAUNTLET_ASCENSION_MUTATORS;
+  /* ==== [FIN ANCRE] ==== */
+  return pick(pool);
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
+   ⚠️ SCOPE ASSUMÉ ET EXPLICITE : la spec demande de "mettre en pause
+   simulateFight() après chaque round" — impossible tel quel : la boucle de
+   rounds vit ENTIÈREMENT à l'intérieur de simulateFight() (engine.js), avec
+   un état local (momentum, chinVulnA/B, fatigue cumulée round par round)
+   qui n'existe qu'à l'intérieur de cet unique appel synchrone. L'extraire
+   proprement pour permettre une vraie pause/reprise dépasse une passe sûre
+   sur un moteur de combat déjà audité (Monte Carlo). Implémentation
+   alternative RÉELLE et FONCTIONNELLE : simulateFight() est appelée 3 FOIS
+   avec rounds=1 (un vrai appel par round), le score et les stats de chaque
+   mini-round sont cumulés manuellement, et une fatigue APPROXIMÉE (cardio
+   réduit proportionnellement aux dégâts encaissés ce round-là, restaurée à
+   aucun moment — elle doit durer tout le combat) fait le lien entre deux
+   appels. Le joueur choisit réellement une nouvelle tactique entre chaque
+   round (CL.pickCoachingTactic, ui-08), avec un effet réel sur le round
+   suivant — l'objectif de la spec (décision tactique round par round) est
+   donc atteint, seule la MÉCANIQUE interne (3 appels vs 1 pause-reprise)
+   diffère de la lettre du texte source. Carrière INCHANGÉE : ce chemin
+   n'est emprunté que depuis resolveArcadeFight() (Gauntlet uniquement),
+   jamais depuis resolveFight() (carrière, ui-05). ==== */
+function startCoachingFight(){
+  const blankStats=()=>({sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0});
+  /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — les effets de malus/mutateur qui,
+     hors coaching, sont appliqués puis restaurés autour d'un SEUL appel
+     simulateFight (resolveArcadeFight ci-dessus), sont ici appliqués UNE
+     FOIS avant le round 1 et restaurés UNE FOIS à la toute fin du combat
+     (dans runCoachingRound, branche finalisation) — sinon ils seraient
+     perdus dès le round 2 (3 appels simulateFight distincts, chacun partant
+     de G.f.attrs tel quel à cet instant). ==== */
+  const opp=G.arcade.opponent;
+  let bossMalusSaved=null;
+  if(G.arcade.mode==='boss_run' && G.arcade.bossMalus){
+    const bm=G.arcade.bossMalus;
+    bossMalusSaved={key:bm.key,before:G.f.attrs[bm.key]};
+    G.f.attrs[bm.key]=clamp(G.f.attrs[bm.key]+bm.amount,1,100);
+  }
+  const mutId=G.arcade.mutator&&G.arcade.mutator.id;
+  let mutOppSaved=null, mutSelfSaved=null;
+  if(mutId==='mut_violent'){ mutOppSaved={before:opp.attrs.power}; opp.attrs.power=clamp(opp.attrs.power+15,1,100); }
+  if(mutId==='mut_sans_repit'){ mutSelfSaved={before:G.f.attrs.cardio}; G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); }
+  G.arcade.coaching={round:1,scoreA:0,scoreB:0,stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved}};
+  /* ==== [FIN ANCRE] ==== */
+  runCoachingRound(G.arcade.plan||null);
+}
+function runCoachingRound(plan){
+  const c=G.arcade.coaching, opp=G.arcade.opponent;
+  const res=simulateFight(G.f,opp,1,plan);
+  const finished=res.method && (res.method.startsWith('KO')||res.method==='Soumission');
+  const mergeStats=(dst,src)=>{ Object.keys(dst).forEach(k=>dst[k]=(dst[k]||0)+(src[k]||0)); };
+  if(finished || c.round>=3){
+    /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — restauration symétrique de
+       startCoachingFight(), au tout dernier moment avant finalisation. ==== */
+    const rst=c._restore||{};
+    if(rst.bossMalusSaved) G.f.attrs[rst.bossMalusSaved.key]=rst.bossMalusSaved.before;
+    if(rst.mutOppSaved) opp.attrs.power=rst.mutOppSaved.before;
+    if(rst.mutSelfSaved) G.f.attrs.cardio=rst.mutSelfSaved.before;
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) :
+       restauration du boost temporaire (voir plus bas, offre proposée sur
+       scr_coaching_round) — "jusqu'à la fin du combat en cours", donc
+       retiré ici, exactement au moment où ce combat se termine réellement. ==== */
+    if(c.secondSouffleSaved){ Object.entries(c.secondSouffleSaved).forEach(([k,v])=>{ G.f.attrs[k]=v; }); c.secondSouffleSaved=null; }
+    /* ==== [FIN ANCRE] ==== */
+    let finalRes=res;
+    if(!finished){
+      // pas de finition au round 3 (ou avant) : décision cumulée sur les 3 rounds
+      const totScoreA=c.scoreA+res.scoreA, totScoreB=c.scoreB+res.scoreB;
+      mergeStats(c.stats.A,res.stats.A); mergeStats(c.stats.B,res.stats.B);
+      const winner=totScoreA===totScoreB?'D':(totScoreA>totScoreB?'A':'B');
+      finalRes={winner,method:winner==='D'?'Égalité':'Décision',round:3,scoreA:totScoreA,scoreB:totScoreB,judges:res.judges,stats:c.stats,log:res.log};
+    } else {
+      // finition anticipée : fusionne quand même les stats des rounds
+      // précédents (sinon Le Fantôme, ajout #5, ne verrait que le dernier round)
+      mergeStats(res.stats.A,c.stats.A); mergeStats(res.stats.B,c.stats.B);
+    }
+    G.arcade.coaching=null;
+    finalizeArcadeCombatResult(finalRes,plan);
+    return;
+  }
+  // round non conclusif : cumule le score/les stats, applique la fatigue
+  // approximée (cf. ANCRE ci-dessus), garde le round pour l'écran de coaching
+  c.scoreA+=res.scoreA; c.scoreB+=res.scoreB;
+  mergeStats(c.stats.A,res.stats.A); mergeStats(c.stats.B,res.stats.B);
+  G.f.attrs.cardio=clamp(G.f.attrs.cardio-Math.round((res.stats.A.dmgHead+res.stats.A.dmgBody+res.stats.A.dmgLegs)*0.4),1,100);
+  opp.attrs.cardio=clamp(opp.attrs.cardio-Math.round((res.stats.B.dmgHead+res.stats.B.dmgBody+res.stats.B.dmgLegs)*0.4),1,100);
+  c.lastRoundRes=res; c.round++;
+  /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) :
+     ⚠️ SCOPE ASSUMÉ ET EXPLICITE : "peut se déclencher en perdant les 2
+     premiers rounds selon l'estimation des juges" exige de connaître le
+     score round par round PENDANT le combat — cette visibilité n'existe
+     QUE dans le Coaching entre les rounds (ajout #21, cette même run de
+     travail), qui est lui-même optionnel (toggle du hub). Le Second Souffle
+     est donc, par construction, un événement du Coaching — jamais déclenché
+     hors coaching, puisque aucune autre voie du jeu n'expose une estimation
+     des juges à mi-combat. Offre calculée UNE FOIS en entrant dans le round
+     3 (jamais recalculée à chaque render de scr_coaching_round), rare
+     (20%), uniquement si le joueur est mené aux cartes après 2 rounds. ==== */
+  if(c.round===3 && !c.secondSouffleOffered){
+    c.secondSouffleOffered=true;
+    c.secondSouffleAvailable=(c.scoreA<c.scoreB) && rnd()<0.20;
+  }
+  /* ==== [FIN ANCRE] ==== */
+  G.screen='coaching_round'; save(); render();
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) : +8 au
+   total sur l'échelle /20 (soit +40 en interne, ×5) auto-distribué sur 4
+   statistiques transversales (utile quel que soit le style/l'archétype),
+   +10 chacune. Restauré à la fin du combat (runCoachingRound, branche
+   finalisation) — ne dure jamais au-delà. ==== */
+function acceptGauntletSecondSouffle(){
+  const c=G.arcade&&G.arcade.coaching; if(!c||!c.secondSouffleAvailable||c.secondSouffleUsed) return;
+  const keys=['composure','cardio','power','chin'];
+  const saved={};
+  keys.forEach(k=>{ saved[k]=G.f.attrs[k]; G.f.attrs[k]=clamp((G.f.attrs[k]||50)+10,1,100); });
+  c.secondSouffleSaved=saved; c.secondSouffleUsed=true;
+}
+/* ==== [FIN ANCRE] ==== */
 function genBossOpponent(streak){
   const div=G.f.div;
   const am=ascensionCurveMod(G.arcade&&G.arcade.asc);
@@ -793,6 +1017,37 @@ const ARCADE_EXCLUSIVE_TACTICS={
    que le pool restant compte au moins 3 archétypes hors exclusion — sinon on
    retombe sur le pool complet plutôt que de planter (cas d'un joueur qui n'a
    débloqué aucun archétype bonus et n'a que le socle de base). ==== */
+/* ==== [ANCRE: IDENTITE_DE_CAMP] — ajout #22 (24 ajouts, 12/08/2026) : choix
+   UNIQUE et définitif pour toute la run, parmi 3 identités tirées au hasard
+   sur 8 possibles — posé juste après le tirage d'archétype (selectDraft,
+   ui-08), avant le premier combat. Effets exprimés en échelle brute
+   (×5 depuis /20, même convention que consommables/mutateurs). ==== */
+const GAUNTLET_CAMP_IDENTITIES=[
+  {id:'camp_spartiate',name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10}},
+  {id:'camp_mercenaire',name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10}},
+  {id:'camp_universitaire',name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10}},
+  {id:'camp_familial',name:'Camp Familial',desc:'Un clan qui protège, jamais qui pousse à bout.',fx:{composure:15,cardio:-10}},
+  {id:'camp_silence',name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10}},
+  {id:'camp_meute',name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10}},
+  {id:'camp_ascetique',name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10}},
+  {id:'camp_spectacle',name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10}}
+];
+function drawGauntletCampIdentityOptions(){
+  const shuffled=GAUNTLET_CAMP_IDENTITIES.slice();
+  for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+  return shuffled.slice(0,3);
+}
+/* Point de passage unique après selectDraft (ui-08) : force le choix
+   d'identité une seule fois par run, avant tout accès au hub. */
+function goArcadeHubOrIdentity(){
+  if(!G.arcade.campIdentity && !G.arcade.campIdentityOptions){
+    G.arcade.campIdentityOptions=drawGauntletCampIdentityOptions();
+    G.screen='camp_identity_pick';
+    return;
+  }
+  G.screen='arcadehub';
+}
+/* ==== [FIN ANCRE] ==== */
 function buildArcadePool(){
   const meta=loadMetaStats();
   const excluded=meta.lastArcadeDraft||[];
@@ -819,8 +1074,73 @@ function buildArcadePool(){
 function resolveArcadeFight(){
   const opp=G.arcade.opponent;
   const plan=G.arcade.plan||null;
+  /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
+     si le coaching est activé (toggle du hub, cf. ui-04/ui-08), le combat
+     n'est PAS résolu d'un bloc ici — startCoachingFight() prend le relais et
+     rappelle finalizeArcadeCombatResult() lui-même une fois les 3 rounds
+     joués (ou une finition anticipée). ==== */
+  if(G.arcade.coachingActive){ startCoachingFight(); return; }
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 (24 ajouts, 12/08/2026) :
+     malus tiré au reveal (CL.chooseArcadePlan, ui-08) appliqué ici,
+     temporairement, le temps de simulateFight() — même pattern que
+     savedAttrs dans resolveFight() (ui-05), restauré juste après pour ne
+     jamais laisser de trace permanente sur G.f.attrs. ==== */
+  let bossMalusSaved=null;
+  if(G.arcade.mode==='boss_run' && G.arcade.bossMalus){
+    const bm=G.arcade.bossMalus;
+    bossMalusSaved={key:bm.key,before:G.f.attrs[bm.key]};
+    G.f.attrs[bm.key]=clamp(G.f.attrs[bm.key]+bm.amount,1,100);
+  }
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
+     12/08/2026) : 'mut_violent' (opp) et 'mut_sans_repit' (joueur) sont des
+     effets combat-par-combat, appliqués/restaurés ici selon EXACTEMENT le
+     même pattern avant/après que bossMalus juste au-dessus — actifs sur les
+     3 modes, à chaque combat de la run tant que le mutateur reste tiré. ==== */
+  const mutId=G.arcade.mutator&&G.arcade.mutator.id;
+  let mutOppSaved=null, mutSelfSaved=null;
+  if(mutId==='mut_violent'){ mutOppSaved={before:opp.attrs.power}; opp.attrs.power=clamp(opp.attrs.power+15,1,100); }
+  if(mutId==='mut_sans_repit'){ mutSelfSaved={before:G.f.attrs.cardio}; G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); }
+  /* ==== [FIN ANCRE] ==== */
   const res=simulateFight(G.f,opp,3,plan);
+  /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — restauration immédiate après
+     résolution, avant tout autre effet (applyResult, etc.) qui pourrait
+     lire G.f.attrs comme valeur "propre" du combattant. ==== */
+  if(bossMalusSaved) G.f.attrs[bossMalusSaved.key]=bossMalusSaved.before;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — restauration symétrique. ==== */
+  if(mutOppSaved) opp.attrs.power=mutOppSaved.before;
+  if(mutSelfSaved) G.f.attrs.cardio=mutSelfSaved.before;
+  /* ==== [FIN ANCRE] ==== */
+  finalizeArcadeCombatResult(res,plan);
+}
+/* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
+   extrait de resolveArcadeFight() (avant : tout le bloc "après simulate"
+   vivait directement dans resolveArcadeFight) pour être appelable aussi
+   depuis le chemin coaching (runCoachingRound() plus bas), qui construit son
+   propre `res` cumulé sur 3 appels round-par-round au lieu d'un seul appel
+   3 rounds. AUCUN changement de comportement pour le chemin normal
+   (non-coaching) — simple découpage, la logique est copiée à l'identique. ==== */
+function finalizeArcadeCombatResult(res,plan){
+  const opp=G.arcade.opponent;
+  /* ==== [ANCRE: PREPARATION_CIBLEE] — ajout #23 (24 ajouts, 12/08/2026) :
+     restauration du malus fightIQ payé pour percer la rumeur de CE combat
+     (pierceGauntletRumor, plus haut) — jamais permanent, et réinitialisé
+     pour que le combat suivant redémarre sur une rumeur normale (ou puisse
+     être percée à nouveau, contre un nouveau coût). ==== */
+  if(G.arcade._pierceMalusSaved){ G.f.attrs.fightIQ=G.arcade._pierceMalusSaved.before; G.arcade._pierceMalusSaved=null; }
+  G.arcade.analysisPierced=false;
+  /* ==== [FIN ANCRE] ==== */
   const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
+  /* ==== [ANCRE: GAUNTLET_FANTOME] — ajout #5 (24 ajouts, 12/08/2026) : snapshot
+     du combat qui vient de se dérouler, empilé dans l'ordre pour former le
+     journal de la run en cours. res.stats.A = côté joueur en arcade (cf.
+     ANCRE juste au-dessus, ligne 495) : dégâts SUBIS par zone + amenées/
+     knockdowns RÉALISÉS par le joueur. Comparé position par position à
+     meta.gauntletGhostLog (meilleure run connue) dans scr_result (ui-06). ==== */
+  G.arcade.ghostFights=(G.arcade.ghostFights||[]).concat([{dmgHead:res.stats.A.dmgHead,dmgBody:res.stats.A.dmgBody,dmgLegs:res.stats.A.dmgLegs,td:res.stats.A.td,kd:res.stats.A.kd}]);
+  /* ==== [FIN ANCRE] ==== */
   { const last=G.f.history[G.f.history.length-1];
     if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank='NR'; last.season=(G.arcade.mode==='boss_run')?(G.arcade.streak+1):(G.arcade.tournament?G.arcade.tournament.roundStep:1); } }
   G.fight={kind:'arcade',opp,rounds:3,plan,planLabel:G.arcade.planLabel||null};
@@ -884,6 +1204,24 @@ function advanceWTUMMABracket(){
   G.arcade.opponent=playerMatch.a.id===G.f.id?playerMatch.b:playerMatch.a;
   return false;
 }
+/* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
+   remplace UNIQUEMENT l'adversaire du match courant du joueur (roundStep
+   inchangé, arbre du tournoi intact pour tout le reste) — la profondeur
+   déjà atteinte n'est jamais perdue, seul l'adversaire qui vient d'éliminer
+   le joueur est effacé. Formule de niveau identique à celle de
+   buildWTUMMABracket() (ci-dessus) pour rester cohérente avec la difficulté
+   attendue à ce palier, avec le même modificateur d'Ascension. ==== */
+function regenerateBracketOpponent(){
+  const t=G.arcade.tournament; if(!t) return;
+  const am=ascensionCurveMod(G.arcade&&G.arcade.asc);
+  const lv=clamp(88-Math.floor((t.roundStep||1)*3)+RI(-3,3)+am.lv,25,93+am.cap);
+  const o=makeFighter({gender:G.f.gender,div:G.f.div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
+  o.stage='pro'; o.org=6; o.seed=0; o.W=RI(15,35); o.L=RI(0,4);
+  const m=t.matches.find(mm=>mm.a.id===G.f.id||mm.b.id===G.f.id);
+  if(m){ if(m.a.id===G.f.id) m.b=o; else m.a=o; }
+  G.arcade.opponent=o;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_PACTE_RECOMPENSE] — pactBonus (posé quand le
    joueur a pris le pacte KO-only du combat précédent ET l'a rempli, cf.
    togglePact()/pactFail dans afterResult) relève le plancher de rareté du
@@ -898,19 +1236,18 @@ function advanceWTUMMABracket(){
    supplémentaire (niveau ≥3) garantit une Légendaire en 1ère position au
    lieu d'un simple tirage favorisé — la seule façon de matérialiser une
    VRAIE escalade sans toucher au tirage de base ni dupliquer tirerRarete(). ==== */
-/* ==== [ANCRE: GAUNTLET_MUTATEURS_ASCENSION] — chaque palier d'Ascension
-   (G.arcade.asc, déjà lu par ascensionCurveMod plus haut) ajoute une règle
-   FIXE et permanente en plus du simple scaling de niveau, au lieu de se
-   contenter de rendre les adversaires plus forts. A1 (camp à 2 options) et
-   A2 (retrait de la Table de soins / Récupération active) sont appliqués
-   ici, au point de génération du camp — A3 (pacte de finition obligatoire)
-   est traité séparément dans afterResult (ui-08), au point où pactWasActive
-   est calculé, et dans togglePact()/pactToggleBlock() pour verrouiller le
-   toggle côté joueur. Tous conditionnés sur G.arcade.asc>=N, jamais un
-   remplacement de la courbe existante. ==== */
+/* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 : A1 ("camp à 2
+   options") et A2 ("retrait de la Table de soins") ne sont plus liés au
+   palier d'Ascension lui-même, mais au mutateur tiré pour CETTE run
+   (G.arcade.mutator.id) — 'mut_camp_reduit' remplace A1 seul ; A2 (retrait
+   de la récupération active) n'a PAS d'équivalent dans le pool des 8
+   mutateurs de la spec, donc retiré purement et simplement (aucun mutateur
+   ne le remplace — la Table de soins reste désormais toujours disponible,
+   quel que soit le palier). ==== */
 function generateArcadeUpgrades(pactBonus){
-  const asc=(G.arcade&&G.arcade.asc)||0;
-  const baseOpts=trainingOptions(G.f).slice(0,asc>=1?2:3);
+  const mutId=G.arcade&&G.arcade.mutator&&G.arcade.mutator.id;
+  const baseOpts=trainingOptions(G.f).slice(0,mutId==='mut_camp_reduit'?2:3);
+  /* ==== [FIN ANCRE] ==== */
   // Bonus x4 : le format court (Bracket 64 / Ladder 100) rend les bonus
   // habituels de carrière (sur 100) quasi invisibles sur un parcours de
   // seulement 6-8 combats — l'affichage réel se fait ensuite sur /20 via d20().
@@ -924,7 +1261,7 @@ function generateArcadeUpgrades(pactBonus){
   const stripDyn=d=>d.filter(delta=>delta[0]!=='morale' && delta[0]!=='form');
   G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:stripDyn(opt.d).map(delta=>[delta[0],delta[1]*4])}))
                              .filter(opt=>opt.d.length>0);
-  if(asc<2){ const _heal=recoveryTrainOption(); if(_heal) G.arcade.trainOpts.push(_heal); }
+  const _heal=recoveryTrainOption(); if(_heal) G.arcade.trainOpts.push(_heal);
   /* ==== [FIN ANCRE] ==== */
   G.arcade.skillOpts=[];
   const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
@@ -1100,6 +1437,25 @@ function gauntletRumorText(opp){
   const cat=gauntletRumorCategory(opp);
   const line=pickStable(GAUNTLET_RUMOR_TEMPLATES[cat],String(opp.id)+'rumorLine');
   return `Bruit de vestiaire (${opp.styleLabel||'style inconnu'}) : ${line}`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: PREPARATION_CIBLEE] — ajout #23 (24 ajouts, 12/08/2026) :
+   "L'Analyse" — perce le Bruit du Milieu pour CE combat uniquement, contre
+   -2 (/20) sur une statistique mentale. fightIQ choisie comme stat visée :
+   c'est littéralement la lecture tactique (tacticalRead, engine.js) que
+   cette option débloque, cohérent thématiquement avec "payer en clarté
+   d'esprit pour de la clarté d'information". Malus appliqué immédiatement
+   (coût visible tout de suite) puis restauré à la fin du combat concerné
+   (finalizeArcadeCombatResult, même fichier) — jamais permanent, comme
+   spécifié ("pour un combat"). Répétable à chaque combat de la run si le
+   joueur veut payer le coût à nouveau (rien dans la spec ne limite à un
+   usage unique par run, contrairement à l'Identité de Camp). ==== */
+function pierceGauntletRumor(a){
+  if(!gauntletRumorActive(a) || a.analysisPierced) return {success:false,msg:'Rien à percer ici.'};
+  a.analysisPierced=true;
+  a._pierceMalusSaved={before:G.f.attrs.fightIQ};
+  G.f.attrs.fightIQ=clamp(G.f.attrs.fightIQ-10,1,100);
+  return {success:true,msg:'Analyse débloquée pour ce combat — Intelligence tactique -2/20.'};
 }
 /* ==== [FIN ANCRE] ==== */
 
