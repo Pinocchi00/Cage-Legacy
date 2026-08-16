@@ -629,9 +629,9 @@ function scr_legends(){
      }).join('')}
    `).join('')}
 
-   ${(()=>{ const unlockedThemes=ARENA_THEMES.filter(t=>t.id==='classic'||checkLegendUnlock('cosmetic_'+t.id));
+   ${(()=>{ const unlockedThemes=ARENA_THEMES.filter(t=>t.id==='classic'||checkLegendUnlock('cosmetic_'+t.id)||checkLegendUnlock('excl_'+t.id));
      if(unlockedThemes.length<=1) return '';
-     const curTheme=G.arenaCosmetic||'classic';
+     const curTheme=loadMetaStats().arenaCosmetic||'classic';
      return `<div class="card mt" style="background:var(--panel2);padding:12px">
        <div class="eyebrow mb">Thème visuel de l\u2019octogone actif</div>
        <div class="tagrow">${unlockedThemes.map(t=>`<span class="tag2 ${curTheme===t.id?'hot':''}" style="cursor:pointer" onclick="CL.setArenaTheme('${t.id}')">${t.name}</span>`).join('')}</div>

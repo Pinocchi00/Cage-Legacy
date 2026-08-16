@@ -631,7 +631,15 @@ const STYLE_PROFILE={
   mma:{sigVol:1.05,koMod:1.05,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
 };
 /* ==== [FIN ANCRE] ==== */
-function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(B);
+function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff(A),b=eff(B);
+  /* ==== [ANCRE: IMMUNITE_FINITION_CAMP] — item demandé : passifs de camp
+     "impossible à finir" (Familial round 1, Ascétique round 3). Purement
+     additif : opts est undefined sur tous les appels existants (carrière,
+     fantasy, vs ami, arcade non-coaching), donc leur comportement est
+     inchangé à l'identique. immuneA n'empêche que le TIRAGE d'une finition
+     contre A pendant CET appel — n'affecte jamais B. ==== */
+  const immuneA=!!(opts&&opts.immuneA);
+  /* ==== [FIN ANCRE] ==== */
   const profA=A._styleProfileOverride||STYLE_PROFILE[A.style]||STYLE_PROFILE.mma, profB=B._styleProfileOverride||STYLE_PROFILE[B.style]||STYLE_PROFILE.mma;
   const wf=weightFactor(A);
   const koWeightMult=1+(wf-0.5)*0.8;
@@ -728,9 +736,9 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
         const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.32;
         const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult;
         const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult;
-        if(rnd()<subChT){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
-        else if(rnd()<koGnp){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
-        else if(rnd()<subChB){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
+        if(rnd()<subChT && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
+        else if(rnd()<koGnp && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.B:st.A).kd++;}
+        else if(rnd()<subChB && !(immuneA&&topF===A)){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
         const isMe=topIsA; momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
         const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
         tgt.dmgBody+=RI(0,2); tgt.dmgHead+=RI(0,1);
@@ -806,7 +814,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null){ const a=eff(A),b=eff(
           const isKdA=rnd()<koA*1.5, isKdB=!isKdA&&rnd()<koB*1.5;
           let kdText=null;
           if(isKdA){ st.A.kd++; if(rnd()<0.6){ finish={by:A,loser:B,method:'KO/TKO',round:r}; } else kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
-          else if(isKdB){ st.B.kd++; if(rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
+          else if(isKdB){ st.B.kd++; if(!immuneA && rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
           const isMe=rnd()<(offA/(offA+offB+1));
           momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
           const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;

@@ -582,17 +582,33 @@ function scr_draft(){ const pool=G.arcade.pool; const isBoss=G.arcade.mode==='bo
     const _grp=Math.round((p.attrs.takedown+p.attrs.submission+p.attrs.topControl)/3);
     const _pui=p.attrs.power, _crd=p.attrs.cardio;
     const _max=Math.max(_stk,_grp,_pui,_crd), _min=Math.min(_stk,_grp,_pui,_crd);
+    /* ==== [ANCRE: APERCU_STATS_DRAFT] — item demandé : la grille 4-cases
+       affichait des moyennes brutes /100 (ex. 82), incohérentes avec le
+       reste de l'UI qui affiche toujours /20 (d20()) — corrigé, sans
+       toucher à _max/_min (comparaisons sur les valeurs brutes, d20 étant
+       monotone le résultat du max/min est identique converti ou non).
+       Ajout d'un aperçu dépliable des 20 attributs complets (Technique/
+       Mental/Physique en /20), même rendu que scr_profile (ATTR/gauge/d20),
+       pour choisir un profil sans se fier uniquement aux 4 agrégats. ==== */
+    const previewOpen=G._draftPreview===i;
+    const previewBlock=previewOpen?['tech','ment','phys'].map(key=>`<div class="card" style="padding:10px 0;text-align:left">
+        <div class="grp-h"><span class="disp" style="font-size:14px">${key==='tech'?'Technique':key==='ment'?'Mental':'Physique'}</span></div>
+        ${ATTR[key].map(a=>`<div class="attr" style="font-size:12px"><span class="attr-l">${a[1]}</span>${gauge(p.attrs[a[0]])}<span class="attr-v">${d20(p.attrs[a[0]])}</span></div>`).join('')}
+      </div>`).join(''):'';
+    /* ==== [FIN ANCRE] ==== */
     h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
       <div class="meta-strip"><div><span>Style</span><b>${p.styleLabel}</b></div></div>
       <div class="hero-name">${p.nick} ${p.flag}</div>
       <div class="narr" style="margin:10px 0 0;position:relative;z-index:2"><blockquote style="font-size:14px">« ${p._perk||''} »</blockquote></div>
       ${arcadePerkBadge(p)}
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;position:relative;z-index:2" class="mono">
-        <div style="background:var(--panel2);border:1px solid ${_stk===_max?'var(--gold-d)':_stk===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">STRK</span><b style="font-size:18px;${_stk===_max?'color:var(--gold)':_stk===_min?'color:var(--loss)':''}">${_stk}</b></div>
-        <div style="background:var(--panel2);border:1px solid ${_grp===_max?'var(--gold-d)':_grp===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">GRAP</span><b style="font-size:18px;${_grp===_max?'color:var(--gold)':_grp===_min?'color:var(--loss)':''}">${_grp}</b></div>
-        <div style="background:var(--panel2);border:1px solid ${_pui===_max?'var(--gold-d)':_pui===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">PUIS</span><b style="font-size:18px;${_pui===_max?'color:var(--gold)':_pui===_min?'color:var(--loss)':''}">${_pui}</b></div>
-        <div style="background:var(--panel2);border:1px solid ${_crd===_max?'var(--gold-d)':_crd===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">CARDIO</span><b style="font-size:18px;${_crd===_max?'color:var(--gold)':_crd===_min?'color:var(--loss)':''}">${_crd}</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_stk===_max?'var(--gold-d)':_stk===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">STRK</span><b style="font-size:18px;${_stk===_max?'color:var(--gold)':_stk===_min?'color:var(--loss)':''}">${d20(_stk)}/20</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_grp===_max?'var(--gold-d)':_grp===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">GRAP</span><b style="font-size:18px;${_grp===_max?'color:var(--gold)':_grp===_min?'color:var(--loss)':''}">${d20(_grp)}/20</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_pui===_max?'var(--gold-d)':_pui===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">PUIS</span><b style="font-size:18px;${_pui===_max?'color:var(--gold)':_pui===_min?'color:var(--loss)':''}">${d20(_pui)}/20</b></div>
+        <div style="background:var(--panel2);border:1px solid ${_crd===_max?'var(--gold-d)':_crd===_min?'var(--blood-d)':'var(--line)'};padding:8px 0;text-align:center"><span class="stat-lbl">CARDIO</span><b style="font-size:18px;${_crd===_max?'color:var(--gold)':_crd===_min?'color:var(--loss)':''}">${d20(_crd)}/20</b></div>
       </div>
+      <button class="btn ghost" style="position:relative;z-index:2;padding:8px" onclick="CL.toggleDraftPreview(${i})">${previewOpen?'▴ Masquer les statistiques complètes':'▾ Voir les statistiques complètes'}</button>
+      ${previewBlock}
       <button class="btn" style="border-color:var(--text);position:relative;z-index:2" onclick="CL.selectDraft(${i})">SÉLECTIONNER CE PROFIL</button>
     </div>`;
   });
@@ -684,15 +700,16 @@ function atRiskToggleBlock(a){
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
-   toggle du hub, désactivable/activable tant que la run n'a pas déjà un
-   combat en cours de coaching (G.arcade.coaching absent en dehors d'un
-   round intermédiaire). Gauntlet uniquement, sur les 3 formats. ==== */
+/* ==== [ANCRE: COACHING_OBLIGATOIRE] — item demandé : le coaching entre les
+   rounds n'est plus un choix (toggle togglable via CL.toggleCoaching()) mais
+   une pièce systématique du Gauntlet, sur les 3 formats — resolveArcadeFight()
+   (ui-03) ne passe plus que par startCoachingFight(). Le bloc devient un
+   simple badge informatif, non cliquable, pour que le joueur sache à quoi
+   s'attendre avant de lancer le combat, sans pouvoir le désactiver. ==== */
 function coachingToggleBlock(a){
-  const on=!!a.coachingActive;
-  return `<div class="toggle-card" style="flex:1;min-width:0" onclick="CL.toggleCoaching()">
-     <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid ${on?'var(--gold)':'var(--line)'};color:${on?'var(--gold)':'var(--muted)'};font-weight:bold">${on?'✓ ':'☐ '}Coaching</div>
-     ${on?`<div class="muted small mt">Pause tactique après chaque round : dégâts + tendance des juges affichés, nouvelle consigne à choisir avant le round suivant.</div>`:''}
+  return `<div class="toggle-card" style="flex:1;min-width:0">
+     <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid var(--gold);color:var(--gold);font-weight:bold">✓ Coaching</div>
+     <div class="muted small mt">Pause tactique après chaque round : dégâts + tendance des juges affichés, nouvelle consigne à choisir avant le round suivant.</div>
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -724,7 +741,7 @@ function gauntletStatusBlock(a,live){
   if(a.mutator) rows.push(`<div class="mono small" style="color:var(--blood)"><b>☣ Mutateur : ${a.mutator.label}</b> <span class="muted">— ${a.mutator.desc}</span></div>`);
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: IDENTITE_DE_CAMP] — ajout #22 (24 ajouts, 12/08/2026). ==== */
-  if(a.campIdentity) rows.push(`<div class="mono small sage"><b>🏕 ${a.campIdentity.name}</b> <span class="muted">— ${a.campIdentity.desc}</span></div>`);
+  if(a.campIdentity) rows.push(`<div class="mono small sage"><b>🏕 ${a.campIdentity.name}</b> <span class="muted">— ${a.campIdentity.desc}</span>${a.campIdentity.passive?`<br><span class="gold">⚡ ${a.campIdentity.passive.label}</span>`:''}</div>`);
   /* ==== [FIN ANCRE] ==== */
   if(a.contract){
     const c=a.contract, ok=live?evalGauntletContract(a):!!c.done;
@@ -1235,13 +1252,21 @@ function scr_arcade_upgrades(){
         const before=k==='morale'?f.morale:k==='form'?f.form:f.attrs[k];
         const after=Math.max(1,before+v);
         return `<span class="dlt dn">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).join('');
+      /* ==== [ANCRE: CORRECTIF_PACTE_CAMP_BONUS_MASQUE] — bug remonté : les 3
+         cartes de compétence normales affichent formatSkillFx(s.fx,f) (les
+         bonus), mais cette carte n'affichait que deltasTxt (le malus de la
+         malédiction) — le bonus propre à la compétence garantie (cs.skill.fx)
+         n'était jamais montré, donc la carte avait l'air d'un pur malus et
+         personne ne la choisissait. ==== */
       h+=`<div class="eyebrow mt mb" style="color:var(--blood)">PACTE DU CAMP — OPTION MAUDITE</div>
           <div class="opp" style="border-left:3px solid var(--blood)" onclick="CL.pickCursedSkill()">
             <b style="color:${RAR_COLORS[cs.skill.rar]||'var(--gold)'}">${cs.skill.name}</b> <span class="muted small">(${cs.skill.rar}) — garantie</span>
             <div class="muted small mt">${cs.skill.desc||cs.skill.blurb||''}</div>
+            ${cs.skill.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(cs.skill.fx,f)}</div>`:''}
             <div class="mono small mt" style="color:var(--blood)"><b>${cs.curseLabel}</b> — séquelle permanente sur cette run</div>
             <div class="dlts">${deltasTxt}</div>
           </div>`;
+      /* ==== [FIN ANCRE] ==== */
     }
     /* ==== [FIN ANCRE] ==== */
     if(!a.skillOpts.length && !a.cursedOpt) h+=`<div class="card glass mt"><span class="muted small">Aucune compétence disponible pour l\u2019instant.</span></div>
@@ -1301,11 +1326,21 @@ function scr_camp_identity_pick(){
    <h2 class="disp big">IDENTITÉ DE CAMP</h2>
    <p class="lede">Un choix définitif, pour toute la durée de cette run.</p>
    ${opts.map((c,i)=>{
-     const fxTxt=Object.entries(c.fx).map(([k,v])=>`<span class="dlt ${v>0?'up':'dn'}">${attrLabel(k)} ${v>0?'+':''}${Math.round(v/5)}</span>`).join('');
+     const fxTxt=Object.entries(c.fx).map(([k,v])=>{
+       const cur=d20(G.f.attrs[k]); const proj=d20(clamp(G.f.attrs[k]+v,1,100));
+       return `<span class="dlt ${v>0?'up':'dn'}">${attrLabel(k)} ${cur} → ${proj}</span>`;
+     }).join('');
+     /* ==== [ANCRE: PASSIF_IDENTITE_DE_CAMP] — item demandé : le passif doit
+        être explicite au moment du choix, pas découvert en cours de run.
+        Ligne distincte du delta de stats (fxTxt), absente pour Camp du
+        Silence (passive:null, aucun passif). ==== */
+     const passiveTxt=c.passive?`<div class="mono small mt gold">⚡ ${c.passive.label}</div>`:'';
+     /* ==== [FIN ANCRE] ==== */
      return `<div class="opp" onclick="CL.pickCampIdentity(${i})">
        <div class="opp-top"><span class="opp-nm gold">${c.name}</span></div>
        <div class="opp-read" style="margin-top:4px;opacity:1">${c.desc}</div>
        <div class="dlts mt">${fxTxt}</div>
+       ${passiveTxt}
      </div>`;
    }).join('')}
   </div>`;
@@ -1357,12 +1392,29 @@ function ringDoctorUltimatumBlock(a){
    tactiques que scr_arcade_plan (archétype exclusif + exclusive style +
    3 options de style) pour rester cohérent avec l'écran de pré-combat. ==== */
 function scr_coaching_round(){
-  const a=G.arcade, c=a.coaching, f=G.f, opp=a.opponent, r=c.lastRoundRes;
+  const a=G.arcade, c=a.coaching, f=G.f, r=c.lastRoundRes;
   const archTactic=ARCADE_EXCLUSIVE_TACTICS[f.nick];
   const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(f)).concat(TACTICS[f.style]||[]);
-  const tendA=c.scoreA, tendB=c.scoreB;
-  const tendLabel=tendA===tendB?'Cartes à égalité':tendA>tendB?`${esc(f.nick||f.name)} devant sur les cartes`:`${esc(opp.name)} devant sur les cartes`;
-  const tendColor=tendA===tendB?'var(--muted)':tendA>tendB?'var(--sage)':'var(--loss)';
+  /* ==== [ANCRE: REFONTE_ECRAN_COACHING] — item demandé : refonte visuelle de
+     cet écran uniquement (pas la transition ni le rendu de combat). Le
+     "total combiné" (c.scoreA/c.scoreB, somme des 3 juges, jusqu'à 90 sur 3
+     rounds) est remplacé par le vrai détail PAR JUGE (c.judges, corrigé
+     ci-dessus dans runCoachingRound) — chaque juge reste sur 10 par round
+     vu, jusqu'à 30 en fin de combat, même convention que scr_result (ui-06).
+     Réutilise .duel2/.num TEL QUEL (mêmes classes, mêmes couleurs a/b/dn)
+     pour que la tendance mi-combat ressemble visuellement au scorecard final
+     — même langage, deux moments différents. ==== */
+  const roundJustEnded=c.round-1;
+  /* ==== [ANCRE: ESTIMATION_JUGES_COACHING] — affichage de l'ESTIMATION
+     (c.judgesEstimate, calculée dans runCoachingRound), jamais du vrai
+     score (c.judges) — repli sur c.judges seulement si une sauvegarde
+     antérieure à ce correctif n'a pas encore ce champ. ==== */
+  const displayedJudges=c.judgesEstimate||c.judges;
+  const judgeCards=['j1','j2','j3'].map(j=>{ const [ja,jb]=displayedJudges[j];
+    const cls=ja>jb?'a':(ja===jb?'b':'dn');
+    return `<span class="num ${cls}">${ja}-${jb}</span>`; }).join('');
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) : offre
      rare, affichée une seule fois (avant le round 3, si l'offre a été tirée
      favorable côté runCoachingRound) — disparaît dès qu'utilisée. ==== */
@@ -1372,16 +1424,18 @@ function scr_coaching_round(){
      <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto" onclick="CL.acceptSecondSouffle()">Puiser dans les réserves</button>
    </div>`:'';
   /* ==== [FIN ANCRE] ==== */
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Coaching — fin du round ${c.round-1}</span></div>
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:14px;text-align:left;margin-bottom:12px">
-     <div class="eyebrow mb">Dégâts ce round</div>
-     <div class="mono small">Encaissés : <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b> · Infligés : <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b></div>
-     <div class="mono small mt" style="color:${tendColor};font-weight:bold">${tendLabel} (${tendA}-${tendB} cumulé)</div>
+  return `<div class="scr"><div class="bar"><span class="eyebrow">LE COIN · ROUND ${c.round}</span></div>
+   <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:20px 16px;margin-bottom:16px;position:relative;overflow:hidden">
+     <div style="position:absolute;top:-30px;right:-10px;font-size:120px;opacity:0.05;font-family:'Oswald';font-weight:700;color:var(--gold);pointer-events:none;z-index:0;line-height:1">${roundJustEnded}</div>
+     <div class="eyebrow gold mb" style="position:relative;z-index:2;letter-spacing:0.3em">FIN DU ROUND ${roundJustEnded}</div>
+     <div class="mono small mt" style="position:relative;z-index:2">Infligés <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b> · Encaissés <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b></div>
+     <div class="eyebrow mb mt" style="position:relative;z-index:2">Score des juges (estimation)</div>
+     <div class="duel2" style="position:relative;z-index:2;justify-content:center;gap:14px">${judgeCards}</div>
    </div>
    ${secondSouffleBlock}
-   <p class="lede small">Nouvelle consigne pour le round ${c.round} :</p>
+   <div class="eyebrow gold mb" style="letter-spacing:0.2em">LE COACH TE GUEULE — ROUND ${c.round} :</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">
-     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
+     <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${p.lbl}</span></div>
      <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
    <button class="btn ghost mt" onclick="CL.pickCoachingTactic(-1)">Garder la même consigne</button>
   </div>`;

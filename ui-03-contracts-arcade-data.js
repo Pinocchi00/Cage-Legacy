@@ -761,13 +761,50 @@ function startCoachingFight(){
   let mutOppSaved=null, mutSelfSaved=null;
   if(mutId==='mut_violent'){ mutOppSaved={before:opp.attrs.power}; opp.attrs.power=clamp(opp.attrs.power+15,1,100); }
   if(mutId==='mut_sans_repit'){ mutSelfSaved={before:G.f.attrs.cardio}; G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); }
-  G.arcade.coaching={round:1,scoreA:0,scoreB:0,stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved}};
+  /* ==== [ANCRE: PASSIF_IDENTITE_DE_CAMP] — passif 'oppPermanent' (Mercenaire,
+     Universitaire) : même pattern que bossMalus/mutateurs ci-dessus, mais
+     générique sur plusieurs clés à la fois (fx peut avoir 1 ou 2 stats). ==== */
+  let campPassiveOppSaved=null;
+  const campPassive=G.arcade.campIdentity&&G.arcade.campIdentity.passive;
+  if(campPassive&&campPassive.type==='oppPermanent'){
+    campPassiveOppSaved={};
+    Object.entries(campPassive.fx).forEach(([k,v])=>{ campPassiveOppSaved[k]=opp.attrs[k]; opp.attrs[k]=clamp(opp.attrs[k]+v,1,100); });
+  }
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_JUGES_CUMUL_COACHING] — bug remonté : seul le total
+     combiné (scoreA/scoreB, somme des 3 juges) était cumulé round par round.
+     Le détail PAR JUGE (judges.j1/j2/j3) n'était jamais accumulé — à la
+     finalisation, `judges:res.judges` ne reprenait que le DERNIER round
+     simulé (rounds=1 par appel), donc un score final du style "10-9" au lieu
+     du vrai cumul "30-27" sur 3 rounds. Invisible jusqu'ici car rien
+     n'affichait le détail par juge pendant le coaching — mais ça faussait
+     déjà l'écran de résultat final (scr_result, ui-06) pour tout combat
+     Gauntlet coaché allant aux points. ==== */
+  G.arcade.coaching={round:1,scoreA:0,scoreB:0,judges:{j1:[0,0],j2:[0,0],j3:[0,0]},stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved,campPassiveOppSaved}};
   /* ==== [FIN ANCRE] ==== */
   runCoachingRound(G.arcade.plan||null);
 }
 function runCoachingRound(plan){
   const c=G.arcade.coaching, opp=G.arcade.opponent;
-  const res=simulateFight(G.f,opp,1,plan);
+  /* ==== [ANCRE: PASSIF_IDENTITE_DE_CAMP] — passifs 'roundBoost' (Spartiate,
+     Meute, Spectacle) et 'finishImmunity' (Familial, Ascétique) : contrairement
+     à 'oppPermanent' (appliqué une fois pour tout le combat dans
+     startCoachingFight), ceux-ci ne concernent QUE le round c.round en cours
+     — appliqués juste avant cet appel simulateFight, le roundBoost est
+     restauré immédiatement après (pas à la fin du combat), et
+     finishImmunity ne vit que le temps de cet appel via le paramètre opts
+     (ANCRE IMMUNITE_FINITION_CAMP, engine.js). ==== */
+  const campPassive=G.arcade.campIdentity&&G.arcade.campIdentity.passive;
+  let roundBoostSaved=null, immuneA=false;
+  if(campPassive&&campPassive.round===c.round){
+    if(campPassive.type==='roundBoost'){
+      roundBoostSaved={};
+      Object.entries(campPassive.fx).forEach(([k,v])=>{ roundBoostSaved[k]=G.f.attrs[k]; G.f.attrs[k]=clamp(G.f.attrs[k]+v,1,100); });
+    } else if(campPassive.type==='finishImmunity'){ immuneA=true; }
+  }
+  const res=simulateFight(G.f,opp,1,plan,null,{immuneA});
+  if(roundBoostSaved){ Object.entries(roundBoostSaved).forEach(([k,v])=>{ G.f.attrs[k]=v; }); }
+  /* ==== [FIN ANCRE] ==== */
   const finished=res.method && (res.method.startsWith('KO')||res.method==='Soumission');
   const mergeStats=(dst,src)=>{ Object.keys(dst).forEach(k=>dst[k]=(dst[k]||0)+(src[k]||0)); };
   if(finished || c.round>=3){
@@ -777,6 +814,7 @@ function runCoachingRound(plan){
     if(rst.bossMalusSaved) G.f.attrs[rst.bossMalusSaved.key]=rst.bossMalusSaved.before;
     if(rst.mutOppSaved) opp.attrs.power=rst.mutOppSaved.before;
     if(rst.mutSelfSaved) G.f.attrs.cardio=rst.mutSelfSaved.before;
+    if(rst.campPassiveOppSaved) Object.entries(rst.campPassiveOppSaved).forEach(([k,v])=>{ opp.attrs[k]=v; });
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) :
        restauration du boost temporaire (voir plus bas, offre proposée sur
@@ -790,7 +828,15 @@ function runCoachingRound(plan){
       const totScoreA=c.scoreA+res.scoreA, totScoreB=c.scoreB+res.scoreB;
       mergeStats(c.stats.A,res.stats.A); mergeStats(c.stats.B,res.stats.B);
       const winner=totScoreA===totScoreB?'D':(totScoreA>totScoreB?'A':'B');
-      finalRes={winner,method:winner==='D'?'Égalité':'Décision',round:3,scoreA:totScoreA,scoreB:totScoreB,judges:res.judges,stats:c.stats,log:res.log};
+      /* ==== [ANCRE: CORRECTIF_JUGES_CUMUL_COACHING] — cumul RÉEL par juge
+         (rounds précédents + round de cette finalisation), au lieu de ne
+         reprendre que res.judges (le dernier round seul). Chaque juge reste
+         sur 10 par round jugé, jusqu'à 30 en fin de combat 3 rounds — même
+         convention que pour un combat non coaché (engine.js). ==== */
+      const finalJudges={};
+      ['j1','j2','j3'].forEach(j=>{ finalJudges[j]=[c.judges[j][0]+res.judges[j][0], c.judges[j][1]+res.judges[j][1]]; });
+      finalRes={winner,method:winner==='D'?'Égalité':'Décision',round:3,scoreA:totScoreA,scoreB:totScoreB,judges:finalJudges,stats:c.stats,log:res.log};
+      /* ==== [FIN ANCRE] ==== */
     } else {
       // finition anticipée : fusionne quand même les stats des rounds
       // précédents (sinon Le Fantôme, ajout #5, ne verrait que le dernier round)
@@ -803,24 +849,53 @@ function runCoachingRound(plan){
   // round non conclusif : cumule le score/les stats, applique la fatigue
   // approximée (cf. ANCRE ci-dessus), garde le round pour l'écran de coaching
   c.scoreA+=res.scoreA; c.scoreB+=res.scoreB;
+  /* ==== [ANCRE: CORRECTIF_JUGES_CUMUL_COACHING] — même cumul par juge que
+     dans la branche finalisation ci-dessus, pour que c.judges soit toujours
+     à jour (sur 10 par round vu, jusqu'à 30 cumulé) au moment où
+     scr_coaching_round affiche la tendance entre les rounds. ==== */
+  ['j1','j2','j3'].forEach(j=>{ c.judges[j][0]+=res.judges[j][0]; c.judges[j][1]+=res.judges[j][1]; });
+  /* ==== [ANCRE: ESTIMATION_JUGES_COACHING] — item demandé : le coin ne voit
+     jamais les vraies cartes en direct dans un vrai combat, seulement une
+     impression. c.judges (exact) reste la source de vérité utilisée pour
+     déterminer le vainqueur en fin de combat (jamais modifié ici) ; on
+     dérive juste UNE ESTIMATION affichée à l'écran de coaching, avec un
+     bruit de 0 à 2 points par juge, dans un sens ou l'autre. Le total du
+     round reste cohérent (rien n'est ajouté ni retiré, juste réparti
+     différemment) — cf. le commentaire SECOND_SOUFFLE plus bas, qui
+     nommait déjà ce concept ("selon l'estimation des juges") sans jamais
+     l'avoir vraiment implémenté. Recalculée à chaque round (pas figée une
+     fois pour toutes) : une nouvelle lecture à chaque pause, comme un vrai
+     coin qui réévalue le combat round après round. ==== */
+  c.judgesEstimate={};
+  ['j1','j2','j3'].forEach(j=>{
+    const [ta,tb]=c.judges[j], noise=Math.floor(rnd()*3), dir=rnd()<0.5?1:-1;
+    const estA=clamp(ta+dir*noise,0,ta+tb);
+    c.judgesEstimate[j]=[estA,(ta+tb)-estA];
+  });
+  /* ==== [FIN ANCRE] ==== */
   mergeStats(c.stats.A,res.stats.A); mergeStats(c.stats.B,res.stats.B);
   G.f.attrs.cardio=clamp(G.f.attrs.cardio-Math.round((res.stats.A.dmgHead+res.stats.A.dmgBody+res.stats.A.dmgLegs)*0.4),1,100);
   opp.attrs.cardio=clamp(opp.attrs.cardio-Math.round((res.stats.B.dmgHead+res.stats.B.dmgBody+res.stats.B.dmgLegs)*0.4),1,100);
   c.lastRoundRes=res; c.round++;
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) :
-     ⚠️ SCOPE ASSUMÉ ET EXPLICITE : "peut se déclencher en perdant les 2
-     premiers rounds selon l'estimation des juges" exige de connaître le
-     score round par round PENDANT le combat — cette visibilité n'existe
-     QUE dans le Coaching entre les rounds (ajout #21, cette même run de
-     travail), qui est lui-même optionnel (toggle du hub). Le Second Souffle
-     est donc, par construction, un événement du Coaching — jamais déclenché
+     "peut se déclencher en perdant les 2 premiers rounds selon l'estimation
+     des juges" — jusqu'ici implémenté avec le score EXACT (c.scoreA/scoreB),
+     pas une estimation. Corrigé : utilise désormais c.judgesEstimate (bruité,
+     calculé juste au-dessus), donc le joueur peut être trompé par une
+     estimation trop optimiste (pas d'offre alors qu'il est réellement mené)
+     ou trop pessimiste (offre alors qu'il mène en réalité) — comme un vrai
+     coin qui n'a jamais les cartes exactes sous les yeux. Le Second Souffle
+     reste, par construction, un événement du Coaching — jamais déclenché
      hors coaching, puisque aucune autre voie du jeu n'expose une estimation
      des juges à mi-combat. Offre calculée UNE FOIS en entrant dans le round
      3 (jamais recalculée à chaque render de scr_coaching_round), rare
-     (20%), uniquement si le joueur est mené aux cartes après 2 rounds. ==== */
+     (20%), uniquement si l'estimation donne le joueur mené aux cartes après
+     2 rounds. ==== */
   if(c.round===3 && !c.secondSouffleOffered){
     c.secondSouffleOffered=true;
-    c.secondSouffleAvailable=(c.scoreA<c.scoreB) && rnd()<0.20;
+    const estA=['j1','j2','j3'].reduce((s,j)=>s+c.judgesEstimate[j][0],0);
+    const estB=['j1','j2','j3'].reduce((s,j)=>s+c.judgesEstimate[j][1],0);
+    c.secondSouffleAvailable=(estA<estB) && rnd()<0.20;
   }
   /* ==== [FIN ANCRE] ==== */
   G.screen='coaching_round'; save(); render();
@@ -1022,16 +1097,36 @@ const ARCADE_EXCLUSIVE_TACTICS={
    sur 8 possibles — posé juste après le tirage d'archétype (selectDraft,
    ui-08), avant le premier combat. Effets exprimés en échelle brute
    (×5 depuis /20, même convention que consommables/mutateurs). ==== */
+/* ==== [ANCRE: PASSIF_IDENTITE_DE_CAMP] — item demandé : chaque identité (sauf
+   Camp du Silence, qui n'en a volontairement aucun) débloque un passif
+   mécanique réel, appliqué/retiré autour des appels simulateFight() du
+   coaching Gauntlet (runCoachingRound/startCoachingFight, ui-03) — jamais
+   du texte de flaveur seul. Types :
+   - 'roundBoost' : boost temporaire sur G.f.attrs, UN round précis seulement.
+   - 'oppPermanent' : malus permanent sur opp.attrs, tout le combat.
+   - 'finishImmunity' : immuneA passé à simulateFight (ANCRE
+     IMMUNITE_FINITION_CAMP, engine.js), UN round précis seulement.
+   `label` est affiché tel quel à l'écran de choix (scr_camp_identity_pick)
+   et dans le statut de run (gauntletStatusBlock). ==== */
 const GAUNTLET_CAMP_IDENTITIES=[
-  {id:'camp_spartiate',name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10}},
-  {id:'camp_mercenaire',name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10}},
-  {id:'camp_universitaire',name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10}},
-  {id:'camp_familial',name:'Camp Familial',desc:'Un clan qui protège, jamais qui pousse à bout.',fx:{composure:15,cardio:-10}},
-  {id:'camp_silence',name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10}},
-  {id:'camp_meute',name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10}},
-  {id:'camp_ascetique',name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10}},
-  {id:'camp_spectacle',name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10}}
+  {id:'camp_spartiate',name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10},
+   passive:{type:'roundBoost',round:3,fx:{cardio:10,power:10},label:'Round 3 : +10 Cardio, +10 Puissance (temporaire, ce round uniquement)'}},
+  {id:'camp_mercenaire',name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10},
+   passive:{type:'oppPermanent',fx:{chin:-8},label:'Menton de l\u2019adversaire fragilisé pour tout le combat (-8, invisible pour lui)'}},
+  {id:'camp_universitaire',name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10},
+   passive:{type:'oppPermanent',fx:{power:-6,footSpeed:-6},label:'Adversaire légèrement affaibli pour tout le combat (-6 Puissance, -6 Jeu de jambes)'}},
+  {id:'camp_familial',name:'Camp Familial',desc:'Un clan qui protège, jamais qui pousse à bout.',fx:{composure:15,cardio:-10},
+   passive:{type:'finishImmunity',round:1,label:'Round 1 : impossible à finir (KO/TKO/Soumission)'}},
+  {id:'camp_silence',name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10},
+   passive:null},
+  {id:'camp_meute',name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10},
+   passive:{type:'roundBoost',round:2,fx:{takedown:10,topControl:10},label:'Round 2 : +10 Lutte, +10 Contrôle au sol (temporaire, ce round uniquement)'}},
+  {id:'camp_ascetique',name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10},
+   passive:{type:'finishImmunity',round:3,label:'Round 3 : impossible à finir (KO/TKO/Soumission)'}},
+  {id:'camp_spectacle',name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10},
+   passive:{type:'roundBoost',round:1,fx:{explosiveness:10,power:10},label:'Round 1 : +10 Explosivité, +10 Puissance (temporaire, ce round uniquement)'}}
 ];
+/* ==== [FIN ANCRE] ==== */
 function drawGauntletCampIdentityOptions(){
   const shuffled=GAUNTLET_CAMP_IDENTITIES.slice();
   for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
@@ -1072,48 +1167,17 @@ function buildArcadePool(){
    choix, pour que l'affichage du combat (qui lit G.fight.planLabel comme en
    carrière) reste cohérent. ==== */
 function resolveArcadeFight(){
-  const opp=G.arcade.opponent;
-  const plan=G.arcade.plan||null;
-  /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
-     si le coaching est activé (toggle du hub, cf. ui-04/ui-08), le combat
-     n'est PAS résolu d'un bloc ici — startCoachingFight() prend le relais et
-     rappelle finalizeArcadeCombatResult() lui-même une fois les 3 rounds
-     joués (ou une finition anticipée). ==== */
-  if(G.arcade.coachingActive){ startCoachingFight(); return; }
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 (24 ajouts, 12/08/2026) :
-     malus tiré au reveal (CL.chooseArcadePlan, ui-08) appliqué ici,
-     temporairement, le temps de simulateFight() — même pattern que
-     savedAttrs dans resolveFight() (ui-05), restauré juste après pour ne
-     jamais laisser de trace permanente sur G.f.attrs. ==== */
-  let bossMalusSaved=null;
-  if(G.arcade.mode==='boss_run' && G.arcade.bossMalus){
-    const bm=G.arcade.bossMalus;
-    bossMalusSaved={key:bm.key,before:G.f.attrs[bm.key]};
-    G.f.attrs[bm.key]=clamp(G.f.attrs[bm.key]+bm.amount,1,100);
-  }
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
-     12/08/2026) : 'mut_violent' (opp) et 'mut_sans_repit' (joueur) sont des
-     effets combat-par-combat, appliqués/restaurés ici selon EXACTEMENT le
-     même pattern avant/après que bossMalus juste au-dessus — actifs sur les
-     3 modes, à chaque combat de la run tant que le mutateur reste tiré. ==== */
-  const mutId=G.arcade.mutator&&G.arcade.mutator.id;
-  let mutOppSaved=null, mutSelfSaved=null;
-  if(mutId==='mut_violent'){ mutOppSaved={before:opp.attrs.power}; opp.attrs.power=clamp(opp.attrs.power+15,1,100); }
-  if(mutId==='mut_sans_repit'){ mutSelfSaved={before:G.f.attrs.cardio}; G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); }
-  /* ==== [FIN ANCRE] ==== */
-  const res=simulateFight(G.f,opp,3,plan);
-  /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — restauration immédiate après
-     résolution, avant tout autre effet (applyResult, etc.) qui pourrait
-     lire G.f.attrs comme valeur "propre" du combattant. ==== */
-  if(bossMalusSaved) G.f.attrs[bossMalusSaved.key]=bossMalusSaved.before;
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — restauration symétrique. ==== */
-  if(mutOppSaved) opp.attrs.power=mutOppSaved.before;
-  if(mutSelfSaved) G.f.attrs.cardio=mutSelfSaved.before;
-  /* ==== [FIN ANCRE] ==== */
-  finalizeArcadeCombatResult(res,plan);
+  /* ==== [ANCRE: COACHING_OBLIGATOIRE] — item demandé : le coaching entre les
+     rounds n'est plus un toggle optionnel (coachingToggleBlock ne fait plus
+     que l'afficher comme actif, cf. ui-04) — startCoachingFight() est
+     désormais le SEUL chemin de résolution d'un combat Gauntlet, sur les
+     3 formats. L'ancien chemin direct (bossMalus/mutateurs appliqués puis
+     simulateFight(3 rounds) d'un bloc) est retiré : il est désormais mort
+     (plus jamais atteint) et sa logique équivalente vit déjà dans
+     startCoachingFight()/runCoachingRound() (mêmes ANCREs BOSSRUN_MISE_EN_SCENE
+     et GAUNTLET_MUTATEURS_ALEATOIRES, appliquées/restaurées round par round
+     au lieu d'un seul bloc). ==== */
+  startCoachingFight();
 }
 /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
    extrait de resolveArcadeFight() (avant : tout le bloc "après simulate"

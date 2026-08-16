@@ -1243,7 +1243,13 @@ const CL={
     }
     save(); render();
   },
+  /* ==== [ANCRE: APERCU_STATS_DRAFT] — item demandé : aperçu dépliable des
+     stats complètes par profil, avant sélection définitive (scr_draft,
+     ui-04). Un seul profil déplié à la fois (toggle simple, pas de Set). ==== */
+  toggleDraftPreview(i){ G._draftPreview=G._draftPreview===i?null:i; render(); },
+  /* ==== [FIN ANCRE] ==== */
   selectDraft(i){ G.f=G.arcade.pool[i];
+    G._draftPreview=null;
     /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
        point unique, commun aux 3 modes : G.f est déjà le combattant réel de
        la run (nécessaire pour un effet 'buff' sur G.f.attrs), et c'est
@@ -1419,11 +1425,14 @@ const CL={
     G.lastMsg=r.msg; if(r.success) saveMetaStats(meta); render();
   },
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — ajout #21 (24 ajouts, 12/08/2026) :
-     toggle refusé une fois un combat de coaching déjà entamé (G.arcade.
-     coaching non nul) — le joueur ne doit pas pouvoir désactiver le
-     coaching EN PLEIN round pour se soustraire à une tendance défavorable. ==== */
-  toggleCoaching(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.coaching) return; G.arcade.coachingActive=!G.arcade.coachingActive; render(); },
+  /* ==== [ANCRE: COACHING_OBLIGATOIRE] — toggleCoaching() retirée : le
+     coaching Gauntlet n'est plus togglable (coachingToggleBlock, ui-04, est
+     désormais un badge informatif non cliquable ; resolveArcadeFight(),
+     ui-03, ne passe plus que par startCoachingFight()). Plus aucun appelant
+     dans le codebase — retrait plutôt que méthode morte laissée en place,
+     conformément à la convention CORRECTIF_CODE_MORT déjà utilisée ailleurs
+     dans ce fichier. ==== */
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — même ordre de composition que
      scr_coaching_round (ui-04) et scr_arcade_plan : archétype exclusif
      d'abord, sinon l'index cliqué ne correspond plus à la carte affichée. ==== */
@@ -2101,11 +2110,25 @@ const ARENA_THEMES=[
      state.js) — checkLegendUnlock('cosmetic_renegade') la rend
      sélectionnable ici sans jamais figurer dans LEGEND_UNLOCKABLES (donc
      jamais achetable). ==== */
-  {id:'renegade',name:'Toile Braise du Renégat (exclusive)',floorColors:['#3a0e02','#1a0500'],railColor:'#ff5a1f',padColor:'#1a0500'}
+  {id:'renegade',name:'Toile Braise du Renégat (exclusive)',floorColors:['#3a0e02','#1a0500'],railColor:'#ff5a1f',padColor:'#1a0500'},
+  /* ==== [ANCRE: CORRECTIF_BANNIERE_CENDREE] — bug remonté : excl_banner_ash
+     (GAUNTLET_EXCLUSIVE_OFFERS, state.js) était vendu comme "thème
+     d'octogone" mais n'avait aucune entrée ici, donc aucun moyen de le
+     sélectionner après achat. Id aligné sur celui de l'offre (banner_ash)
+     pour matcher le checkLegendUnlock('excl_'+t.id) ajouté ci-dessous
+     (ui-07-contracts-legacy-screens.js). ==== */
+  {id:'banner_ash',name:'Bannière Cendrée (exclusive)',floorColors:['#180404','#0c0202'],railColor:'#7a1f16',padColor:'#0c0202'}
   /* ==== [FIN ANCRE] ==== */
 ];
-function setArenaCosmeticTheme(themeId){ G.arenaCosmetic=themeId; save(); }
-function getArenaTheme(){ return ARENA_THEMES.find(t=>t.id===(G.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }
+/* ==== [ANCRE: CORRECTIF_PERSISTANCE_SKIN_ARENE] — bug remonté : le skin
+   actif vivait sur G (réinitialisé par newCareer(), voir CL.newCareer plus
+   bas), donc perdu à chaque nouvelle carrière même si le déblocage
+   (meta.unlockedItems) survivait bien. Déplacé sur meta, comme tous les
+   autres déblocages achetés en points de Légende — jamais touché par
+   newCareer(). ==== */
+function setArenaCosmeticTheme(themeId){ const meta=loadMetaStats(); meta.arenaCosmetic=themeId; saveMetaStats(meta); }
+function getArenaTheme(){ const meta=loadMetaStats(); return ARENA_THEMES.find(t=>t.id===(meta.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)return; const {W,H,topY,topL,topR,botL,botR,gY,gY2}=A._geom;
   ctx.clearRect(0,0,W,H);

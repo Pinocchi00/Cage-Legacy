@@ -574,7 +574,14 @@ function scr_hof(){
      </details>
      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
    </div>`:''}
-   <div class="stagger">${list.length?list.map((f,i)=>`<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:1px solid ${f.favorite?'var(--gold)':'transparent'};border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
+   <div class="stagger">${list.length?list.map((f,i)=>{
+      const decorations=f.decorations||[];
+      const hasFrameGold=decorations.includes('deco_frame_gold');
+      const hasFrameCrimson=decorations.includes('deco_frame_crimson');
+      const hasGlow=decorations.includes('deco_glow');
+      const cardBorder=hasFrameGold?'2px solid var(--gold)':hasFrameCrimson?'2px solid var(--blood)':(f.favorite?'1px solid var(--gold)':'1px solid transparent');
+      const cardGlow=hasGlow?'box-shadow:0 0 20px rgba(230,185,58,0.35);':'';
+      return `<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:${cardBorder};${cardGlow}border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
       <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName} · retraite ${f.age} ans</em></div>
       <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
         <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
@@ -585,7 +592,8 @@ function scr_hof(){
       <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
       <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="event.stopPropagation();CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
       <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="event.stopPropagation();CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="event.stopPropagation();CL.deleteHof('${f.id}')">Supprimer</button></div>`).join(''):
+      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="event.stopPropagation();CL.deleteHof('${f.id}')">Supprimer</button></div>`;
+    }).join(''):
       '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}</div>
    <div class="tagrow mb">
      <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
@@ -632,6 +640,7 @@ function scr_legend_detail(){
    </div>`:'';
   /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    <div class="glass mwash card" style="position:relative;background:var(--panel2);border:${cardBorder};${cardGlowStyle}padding:16px;margin-bottom:16px">
      <div class="hero-name" style="position:relative;z-index:2;${nameStyle}">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
      ${f.motivation?`<div class="story" style="position:relative;z-index:2"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
@@ -782,7 +791,15 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    </div>
    ${judgesHtml}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
-   ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore); return `<div style="color:var(--win)">${before} → ${after} ${label}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);
+   /* ==== [ANCRE: CORRECTIF_GAIN_MASQUE_ARRONDI] — bug remonté : d20()
+      arrondit /100->/20 (Math.round(v/5)), donc un petit gain interne réel
+      peut ne franchir aucun palier affiché et ressortir "17 -> 17", identique
+      à un gain nul (clamp au plafond), sans que le joueur puisse distinguer
+      les deux cas. On annote explicitement quand un gain a bien eu lieu mais
+      ne se voit pas sur l'échelle affichée. ==== */
+   const noVisibleGain=before===after && f.attrs[k]>realBefore;
+   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:10px">(gain interne minime)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
@@ -943,7 +960,7 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
    ${f.skills.length?`<div class="rarity-guide" style="margin-top:12px"><span><i style="background:${RAR_COLORS.C}"></i> Commune</span><span><i style="background:${RAR_COLORS.R}"></i> Rare</span><span><i style="background:${RAR_COLORS.E}"></i> Épique</span><span><i style="background:${RAR_COLORS.L}"></i> Légendaire</span><span><i style="background:${RAR_COLORS.M}"></i> Mythique</span></div>`:''}
    </div>
    ${grp('tech','Technique',g.tech,true)}
-   <div style="display:flex;flex-direction:column;gap:16px">${grp('ment','Mental',g.ment,false)}${grp('phys','Physique',g.phys,false)}</div>
+   <div style="display:flex;flex-direction:column;gap:16px">${grp('ment','Mental',g.ment,true)}${grp('phys','Physique',g.phys,true)}</div>
    <button class="btn ghost" onclick="G._profileReturn=null;CL.go('${backScreen}')">Retour</button></div>`; }
 
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));

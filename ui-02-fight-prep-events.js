@@ -128,7 +128,15 @@ function genOpponents(f){
   }
   const isDefense=!!f.champion;
   const isTitle=(!isDefense && isTitleEligible(f));
-  if(isTitle){ const champ=pool.find(o=>o.champion)||pool[0];
+  /* ==== [ANCRE: CORRECTIF_TITRE_VS_NONCHAMPION] — bug remonté : pool était
+     déjà filtré plus haut (anti-répétition sur 4 combats, puis plafond de
+     6 confrontations totales). Si le champion réel se trouvait exclu par
+     l'un de ces filtres, le fallback ||pool[0] retombait silencieusement sur
+     n'importe quel adversaire — un "combat de titre" pouvait donc être
+     proposé contre un rang #2. Recherche désormais dans G.roster (non
+     filtré), car un combat de titre doit toujours viser le vrai détenteur,
+     indépendamment des filtres pensés pour le matchmaking normal. ==== */
+  if(isTitle){ const champ=G.roster.find(o=>o.champion && o.id!==f.id)||pool[0];
     const entry={o:champ, read:tacticalRead(f,champ), context:`COMBAT DE TITRE`};
     entry.mm=matchmakingRole(f,champ,entry);
     return [entry]; }
@@ -216,7 +224,18 @@ function trainingOptions(f){ const gen=TRAIN.filter(x=>x.t.includes('all'));
 }
 
 /* ------------------------------- flux ------------------------------------- */
-function startFightSelect(){ if(G.f.injury) return; G.opps=genOpponents(G.f); G.screen='select'; save(); render(); }
+/* ==== [ANCRE: CORRECTIF_REGEN_MATCHMAKING] — bug remonté : G.opps était
+   régénéré à chaque appel de startFightSelect(), donc à chaque fois que le
+   joueur rouvrait le matchmaking (ex. après un aller-retour au classement),
+   même sans qu'aucun combat n'ait eu lieu entretemps — les 3 propositions
+   déjà affichées disparaissaient sans raison. On ne régénère plus que si
+   aucune offre n'existe, ou si le total de combats du fighter a changé
+   depuis la dernière génération (un combat a bien eu lieu). ==== */
+function startFightSelect(){ if(G.f.injury) return;
+  const curFights=(G.f.W||0)+(G.f.L||0)+(G.f.D||0);
+  if(!G.opps || G.oppsFightCount!==curFights){ G.opps=genOpponents(G.f); G.oppsFightCount=curFights; }
+  G.screen='select'; save(); render(); }
+/* ==== [FIN ANCRE] ==== */
 function chooseOpponent(i){ G.sel=G.opps[i]; G.train=trainingOptions(G.f); generateSponsorObjective(G.f);
   G.f._rivalryPressDone=false; G.pressConf=(typeof triggerRivalPressConference==='function')?triggerRivalPressConference(G.f,G.sel.o):null;
   G.screen=G.pressConf?'press_conf':'camp'; save(); render(); }
