@@ -49,6 +49,61 @@ function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catc
    décoration reste possédée (meta.unlockedItems, jamais touché ici) donc
    immédiatement rééquipable ailleurs — pas de code de "recyclage" séparé
    nécessaire. */
+/* ==== [ANCRE: CORRECTIF_DECORATION_UNIQUE_PANTHEON] — bug remonté : une
+   décoration achetée est un déblocage de COMPTE, permanent (comme tout
+   LEGEND_UNLOCKABLES) — mais l'équiper ne pouvait s'appliquer qu'à UN SEUL
+   combattant à la fois dans tout le Panthéon (la boucle ci-dessous la
+   retirait silencieusement de tout autre porteur). Résultat concret : dès
+   qu'on possède 2-3 types de décoration, on finit par tout concentrer sur
+   une seule légende "favorite", et équiper une décoration déjà portée
+   ailleurs revient à la voler sans prévenir — ressenti comme "je ne peux
+   personnaliser qu'un seul combattant". Chaque combattant a toujours son
+   propre plafond de 3 décorations SIMULTANÉES (ligne juste au-dessus,
+   inchangée), mais un même type de décoration peut désormais être porté par
+   plusieurs légendes en même temps — c'est un déblocage de compte, pas un
+   objet physique unique. ==== */
+/* ==== [ANCRE: ALBUM_LEGEND_STYLE] — refonte demandée : le Panthéon adopte
+   le langage "carte à collectionner" de L'Album (déjà choisi en Boutique
+   pour la Vitrine ; ici son équivalent Panthéon). Deux fonctions PARTAGÉES,
+   utilisées par scr_hof (tuiles liste), scr_legend_detail (fiche complète)
+   et shopPreviewHtml (aperçu boutique) pour que le même combattant rende
+   EXACTEMENT pareil partout — un seul endroit à modifier si la palette
+   change un jour.
+   - legendTierColor(rank) : couleur du coin de carte, par palier de
+     legacyTitle (déjà calculé et stocké sur f.rank à l'intronisation,
+     state.js ligne ~105 — aucune donnée nouvelle).
+   - legendDecoStyle(decorations) : transforme chaque décoration en variante
+     de carte plutôt qu'en simple bordure/halo générique — bordure devient
+     "bordure foil", halo devient un effet holographique diagonal,
+     typographie devient une gravure en relief (text-shadow), diamant reste
+     un insert dégradé sur le bilan, et les 2 cosmétiques exclusifs sans
+     rendu jusqu'ici (excl_mask_oni, excl_gloves_relic) deviennent des
+     stickers apposés sur la carte — cohérent avec la mécanique de
+     collection déjà présente (Vitrine actuelle, GOAT de ta collection). ==== */
+const LEGEND_TIER_COLOR={
+  'LÉGENDE ÉTERNELLE':'#F4D580','GRAND CHAMPION':'var(--gold)','CHAMPION RESPECTÉ':'var(--sage)',
+  'COMBATTANT ACCOMPLI':'#4DA6FF','VÉTÉRAN DU CIRCUIT':'var(--muted)','GUERRIER DE L\u2019OMBRE':'var(--blood)'
+};
+function legendTierColor(rank){ return LEGEND_TIER_COLOR[rank]||'var(--line)'; }
+function legendDecoStyle(decorations){
+  decorations=decorations||[];
+  const hasGold=decorations.includes('deco_frame_gold');
+  const hasCrimson=decorations.includes('deco_frame_crimson');
+  const hasHolo=decorations.includes('deco_glow');
+  const hasEngraved=decorations.includes('deco_typography');
+  const hasDiamond=decorations.includes('deco_diamond');
+  const stickers=[];
+  if(decorations.includes('excl_mask_oni')) stickers.push('🎭');
+  if(decorations.includes('excl_gloves_relic')) stickers.push('🥊');
+  return{
+    borderCss:hasGold?'border-color:var(--gold);border-width:2px;':hasCrimson?'border-color:var(--blood);border-width:2px;':'',
+    holoCss:hasHolo?'background-image:linear-gradient(120deg,transparent 30%,rgba(230,185,58,.30) 45%,rgba(124,151,136,.22) 58%,transparent 74%);':'',
+    nameCss:hasEngraved?'text-shadow:0 1px 0 rgba(0,0,0,.65),0 -1px 0 rgba(255,255,255,.12);letter-spacing:.03em;':'',
+    recordCss:hasDiamond?'background:linear-gradient(135deg,#b9f2ff,#ffffff,#8ec9d8);-webkit-background-clip:text;background-clip:text;color:transparent':'',
+    stickers
+  };
+}
+/* ==== [FIN ANCRE] ==== */
 function equipPantheonDecoration(hofId,decId){
   if(!checkLegendUnlock(decId)) return {success:false,msg:'Décoration non possédée.'};
   const list=loadHOF(); const f=list.find(x=>String(x.id)===String(hofId));
@@ -56,11 +111,10 @@ function equipPantheonDecoration(hofId,decId){
   f.decorations=f.decorations||[];
   if(f.decorations.includes(decId)) return {success:false,msg:'Déjà équipée sur ce combattant.'};
   if(f.decorations.length>=3) return {success:false,msg:'Maximum 3 décorations par combattant.'};
-  // Unique : retire la décoration de tout autre combattant qui la porterait déjà.
-  list.forEach(x=>{ if(x.decorations&&x.decorations.length) x.decorations=x.decorations.filter(d=>d!==decId); });
   f.decorations.push(decId); saveHOF(list);
   return {success:true,msg:'Décoration équipée.'};
 }
+/* ==== [FIN ANCRE] ==== */
 function unequipPantheonDecoration(hofId,decId){
   const list=loadHOF(); const f=list.find(x=>String(x.id)===String(hofId));
   if(!f||!f.decorations) return {success:false,msg:'Rien à retirer.'};
@@ -577,10 +631,24 @@ function applyPendingGauntletConsumable(a){
    objets) — à enrichir librement plus tard, la mécanique de rotation ne
    dépend pas de sa taille. ==== */
 const GAUNTLET_EXCLUSIVE_OFFERS=[
-  {id:'excl_mask_oni',name:'Masque du Oni (cosmétique Panthéon)',desc:'Décoration de fiche exclusive, jamais vendue autrement.',baseCost:220},
+  /* ==== [ANCRE: CORRECTIF_COSMETIQUES_EXCLUSIFS_INVISIBLES] — bug remonté :
+     excl_mask_oni et excl_gloves_relic étaient achetables via l'offre du
+     jour (checkLegendUnlock les marque bien possédés) mais n'apparaissaient
+     ensuite NULLE PART — le panneau d'équipement du Panthéon (ui-06,
+     ownedDecorations) ne lit que LEGEND_UNLOCKABLES, jamais
+     GAUNTLET_EXCLUSIVE_OFFERS. Ajout du champ cat (même valeur que les
+     décorations classiques) pour que ces 2 objets soient reconnus par ce
+     panneau une fois le correctif appliqué côté ui-06 — sans dupliquer leur
+     id ni les rendre achetables ailleurs (ils restent absents de
+     LEGEND_UNLOCKABLES). excl_title_ghost n'a pas d'équivalent : aucun
+     emplacement d'affichage de titre n'existe dans le jeu (ni fiche, ni
+     Panthéon) — hors scope d'un correctif ciblé, à traiter comme un ajout
+     de fonctionnalité à part entière. ==== */
+  {id:'excl_mask_oni',name:'Masque du Oni (cosmétique Panthéon)',cat:'Ennoblissement du Panthéon',desc:'Décoration de fiche exclusive, jamais vendue autrement.',baseCost:220},
   {id:'excl_banner_ash',name:'Bannière Cendrée (thème d\u2019octogone)',desc:'Variante sombre et exclusive du thème Arène Écarlate.',baseCost:260},
   {id:'excl_title_ghost',name:'Titre « L\u2019Insaisissable » (Profil)',desc:'Titre cosmétique exclusif, sans effet mécanique.',baseCost:180},
-  {id:'excl_gloves_relic',name:'Gants-Relique (cosmétique Panthéon)',desc:'Décoration de fiche exclusive au style usé et ancien.',baseCost:240},
+  {id:'excl_gloves_relic',name:'Gants-Relique (cosmétique Panthéon)',cat:'Ennoblissement du Panthéon',desc:'Décoration de fiche exclusive au style usé et ancien.',baseCost:240},
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
      "Disponible à la fois en achat classique ET via la Rotation des offres
      exclusives" — ID PARTAGÉ avec LEGEND_UNLOCKABLES (deco_diamond) au lieu

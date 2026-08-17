@@ -152,6 +152,14 @@ const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
+  /* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — bascule d'aperçu pour
+     les objets réellement prévisualisables (thèmes d'octogone et
+     décorations Panthéon, cf. shopPreviewHtml ui-07). Un seul aperçu ouvert
+     à la fois : cliquer sur l'objet déjà ouvert le referme. ==== */
+  toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(); },
+  /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — bascule d'aperçu pour un exploit :
+     un seul ouvert à la fois. ==== */
+  toggleAchPreview(achId){ G._achPreview=(G._achPreview===achId?null:achId); render(); },
   /* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
      UNIQUEMENT en Gauntlet (G.arcade), sur scr_gameover (ui-04), bouton
      discret déjà caché côté UI si le joueur ne peut pas payer — garde-fou
@@ -174,8 +182,18 @@ const CL={
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026). ==== */
-  equipDecoration(hofId,decId){ const r=equipPantheonDecoration(hofId,decId); G.lastMsg=r.msg; render(); },
-  unequipDecoration(hofId,decId){ const r=unequipPantheonDecoration(hofId,decId); G.lastMsg=r.msg; render(); },
+  /* ==== [ANCRE: CORRECTIF_LASTMSG_DECORATION] — bug remonté : G.lastMsg est un
+     canal GLOBAL relu par plusieurs écrans (hub ui-01, ui-06, ui-07, et même
+     scr_legend_detail) — un message posé ici pouvait donc réapparaître hors
+     contexte (ex. sur le menu principal) si un render() intermédiaire ne
+     l'avait pas déjà consommé. Équiper/retirer une décoration est une action
+     cosmétique dont le retour visuel est déjà immédiat (bordure/halo sur la
+     carte) : le message texte est déplacé sur G._decoMsg, lu UNIQUEMENT par
+     scr_legend_detail (seul écran où cette action est possible), donc jamais
+     susceptible de fuiter ailleurs. ==== */
+  equipDecoration(hofId,decId){ const r=equipPantheonDecoration(hofId,decId); G._decoMsg=r.msg; render(); },
+  unequipDecoration(hofId,decId){ const r=unequipPantheonDecoration(hofId,decId); G._decoMsg=r.msg; render(); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026). ==== */
   purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(); },

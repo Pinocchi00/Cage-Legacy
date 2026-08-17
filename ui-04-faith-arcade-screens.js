@@ -1424,6 +1424,21 @@ function scr_coaching_round(){
      <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto" onclick="CL.acceptSecondSouffle()">Puiser dans les réserves</button>
    </div>`:'';
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_STATS_COACHING_ABSENTES] — bug remonté : l'écran
+     de coaching n'affichait que dégâts + juges, jamais l'état réel du
+     combattant (les mêmes attributs déjà utilisés partout ailleurs en
+     Gauntlet — cf. scr_arcade_plan, ui-04 — via groupAvg/ATTR, engine.js).
+     Bloc compact (3 lignes, pas la liste détaillée par attribut : le coin
+     n'a besoin que d'une lecture rapide entre 2 rounds, pas de la fiche
+     complète). ==== */
+  const gAvg=groupAvg(f);
+  const coachStatsBlock=`<div class="card glass mb" style="background:var(--panel2);padding:12px">
+     <div class="eyebrow mb">Ton combattant, round ${c.round}</div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Technique</span><b>${d20(gAvg.tech)}/20</b></div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Mental</span><b>${d20(gAvg.ment)}/20</b></div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Physique</span><b>${d20(gAvg.phys)}/20</b></div>
+   </div>`;
+  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">LE COIN · ROUND ${c.round}</span></div>
    <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:20px 16px;margin-bottom:16px;position:relative;overflow:hidden">
      <div style="position:absolute;top:-30px;right:-10px;font-size:120px;opacity:0.05;font-family:'Oswald';font-weight:700;color:var(--gold);pointer-events:none;z-index:0;line-height:1">${roundJustEnded}</div>
@@ -1432,6 +1447,7 @@ function scr_coaching_round(){
      <div class="eyebrow mb mt" style="position:relative;z-index:2">Score des juges (estimation)</div>
      <div class="duel2" style="position:relative;z-index:2;justify-content:center;gap:14px">${judgeCards}</div>
    </div>
+   ${coachStatsBlock}
    ${secondSouffleBlock}
    <div class="eyebrow gold mb" style="letter-spacing:0.2em">LE COACH TE GUEULE — ROUND ${c.round} :</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">

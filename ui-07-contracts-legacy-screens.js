@@ -302,21 +302,67 @@ function scr_beltLineage(){
   return h;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — même vocabulaire que la Boutique
+   (Vitrine), appliqué aux Succès. Les exploits n'ont pas de "rareté" par
+   coût comme la Boutique : la couleur du socle porte ici la CATÉGORIE (une
+   couleur fixe et stable, reconnaissable d'un coup d'œil), en réutilisant
+   les teintes déjà chargées de sens ailleurs dans le jeu (or = prestige,
+   sang = violence/finition, sauge = technique) plus le bleu déjà utilisé
+   pour la rareté "Rare" des compétences (Codex), pour la 4e catégorie
+   Gauntlet plutôt que d'inventer une couleur sans lien avec le reste.
+   Cette réécriture absorbe 3 correctifs ponctuels précédents : la
+   catégorie Gauntlet manquante à l'affichage, l'en-tête ✕/.disp aligné
+   sur Boutique/Panthéon, et la progression X/Y — tous trois toujours
+   présents ici, réintégrés dans une structure en rails. ==== */
+const ACH_CAT_COLOR={'Carrière & Titres':'var(--gold)','Finitions & Séries':'var(--blood)','Technique & Héritage':'var(--sage)','Gauntlet':'#4DA6FF'};
 function scr_ach(){ if(!G.ach) G.ach=loadAch();
+  const cats=['Carrière & Titres','Finitions & Séries','Technique & Héritage','Gauntlet'];
   let h=`<div class="scr">
-   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
-     <span class="eyebrow mono" style="letter-spacing:.1em">PALMARÈS ${G.ach.length}/${ACH.length}</span>
-   </div>`;
-  const cats=['Carrière & Titres','Finitions & Séries','Technique & Héritage'];
+   <div class="bar"><span class="eyebrow">Palmarès</span><span class="eyebrow x" onclick="CL.go('${G.f?'hub':'title'}')">✕</span></div>
+   <h2 class="disp">${G.ach.length} / ${ACH.length} exploits</h2>`;
+
   cats.forEach(c=>{
-    h+=`<h3 class="disp" style="font-size:18px;margin:24px 0 12px;color:var(--muted)">${c}</h3>`;
-    ACH.filter(a=>a.cat===c).forEach(a=>{ const got=G.ach.includes(a.id);
-      h+=`<div class="ach ${got?'':'lk'}"><span class="ico" style="display:flex;align-items:center;color:var(--gold)">${a.ico}</span><span><b class="${got?'gold':''}">${a.h}</b><div class="muted small">${a.d}</div></span></div>`;
+    const items=ACH.filter(a=>a.cat===c).map(a=>{
+      const got=G.ach.includes(a.id);
+      const progPair=(!got && G.f && a.prog)?a.prog(G.f):null;
+      const ratio=progPair?progPair[0]/progPair[1]:0;
+      return {a,got,progPair};
     });
+    /* Tri : obtenus d'abord, puis en cours (du plus proche du but au plus
+       loin), puis jamais entamés — pour que ce qu'il reste à viser en
+       priorité soit toujours le premier exploit non obtenu visible. */
+    items.sort((x,y)=>{
+      if(x.got!==y.got) return x.got?-1:1;
+      const rx=x.progPair?x.progPair[0]/x.progPair[1]:-1, ry=y.progPair?y.progPair[0]/y.progPair[1]:-1;
+      return ry-rx;
+    });
+    const gc=ACH_CAT_COLOR[c];
+    h+=`<div class="gal-rail-title">${c}<span class="n">${items.filter(i=>i.got).length}/${items.length}</span></div>
+    <div class="gal-rail">${items.map(({a,got,progPair})=>{
+      const started=progPair&&progPair[0]>0;
+      const isOpen=G._achPreview===a.id;
+      const baseTxt=got?'✓ Obtenu':(progPair?`${progPair[0]}/${progPair[1]}`:(started?'En cours':'Verrouillé'));
+      return `<div class="gal-tile ${got?'owned':''} ${!got&&!started?'locked':''}" style="--gc:${gc}" onclick="CL.toggleAchPreview('${a.id}')">
+        <div class="glow"></div>
+        <div><span class="ico">${a.ico}</span><div class="nm">${a.h}</div><div class="preview-hint">${isOpen?'▲ Fermer':'▼ Détail'}</div></div>
+        <div class="base">${baseTxt}</div>
+      </div>`;
+    }).join('')}</div>
+    ${(()=>{ const open=items.find(i=>i.a.id===G._achPreview); if(!open) return '';
+      const {a,got,progPair}=open;
+      const statusLine=got?`<span class="mono small" style="color:var(--sage)">✓ Déjà obtenu</span>`
+        :progPair?`<span class="mono small" style="color:${gc}">Progression : ${progPair[0]} / ${progPair[1]}</span>`
+        :`<span class="mono small muted">Pas encore entamé — condition binaire, se débloque d\u2019un coup</span>`;
+      return `<div class="card mb" style="background:var(--panel2);border-left:3px solid ${gc};padding:14px">
+        <b>${a.h}</b>
+        <div class="muted small mt">Condition : ${a.d}</div>
+        <div class="mt">${statusLine}</div>
+      </div>`; })()}`;
   });
   h+=`<div class="mono small muted" style="text-align:center;margin-top:24px;opacity:.6">Un jeu développé par Pinocchio et testé par Garfield</div>`;
   h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.f?'hub':'title'}')">← Revenir au ${G.f?'hub':'menu principal'}</button></div>`;
   return h; }
+/* ==== [FIN ANCRE] ==== */
 
 function scr_retire(){ return `<div class="scr center"><div class="eyebrow">Fin de carrière</div><h2 class="disp">Raccrocher les gants ?</h2>
    <p class="lede">Décision définitive. Ton palmarès sera scellé.</p>
@@ -527,6 +573,56 @@ function scr_codex(){
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: LOT14_ECRAN_SALLE_LEGENDES] ==== */
+/* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE] — item demandé : le catalogue
+   (categories.map plus bas) rendait chaque objet en carte identique — même
+   bordure grise/dorée/verte pour un cosmétique à 60 pts et un mode de jeu
+   entier à 300 pts, aucune hiérarchie. Réutilise RAR_COLORS (ui-01), déjà la
+   palette de rareté des compétences (Commune/Rare/Épique/Légendaire/
+   Mythique) affichée en Codex et en fiche combattant — même langage visuel,
+   pas une palette inventée pour l'occasion. Paliers calés sur la fourchette
+   réelle de LEGEND_UNLOCKABLES (60 à 300 pts). ==== */
+function shopRarity(cost){
+  if(cost>=250) return 'M'; if(cost>=180) return 'L'; if(cost>=120) return 'E'; if(cost>=90) return 'R'; return 'C';
+}
+const SHOP_RAR_LABEL={C:'Commune',R:'Rare',E:'Épique',L:'Légendaire',M:'Mythique'};
+/* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — aperçu réel avant achat.
+   Seuls les objets à effet visuel CONNU sont prévisualisables :
+   - cosmetic_* → thème d'octogone (ARENA_THEMES, ui-08 : floorColors/railColor)
+   - deco_* → décoration Panthéon, mêmes styles exacts que scr_legend_detail/
+     scr_hof (ui-06 : hasFrameGold/hasFrameCrimson/hasGlow/hasDiamond/hasTypo),
+     dupliqués ici à dessein plutôt que factorisés : coupler ces deux écrans
+     via une fonction partagée pour un gain cosmétique mineur aurait été un
+     risque de régression hors scope de cette passe.
+   Les archétypes/modes/scénarios/outils et les cosmétiques exclusifs sans
+   rendu codé (excl_mask_oni, excl_gloves_relic — cf. correctif précédent)
+   n'ont pas d'aperçu : rien à leur sujet n'est aujourd'hui visuel. ==== */
+function shopPreviewHtml(item){
+  if(item.id.indexOf('cosmetic_')===0){
+    const theme=ARENA_THEMES.find(t=>t.id===item.id.replace('cosmetic_',''));
+    if(!theme) return '';
+    return `<div class="card mb" style="background:linear-gradient(160deg,${theme.floorColors[0]},${theme.floorColors[1]});border:2px solid ${theme.railColor};padding:22px 12px;text-align:center">
+      <div class="mono small" style="display:inline-block;padding:3px 9px;letter-spacing:.1em;background:rgba(0,0,0,.45);color:${theme.padColor}">APERÇU DE L\u2019OCTOGONE</div>
+    </div>`;
+  }
+  const isDecoItem=item.id.indexOf('deco_')===0||item.id==='excl_mask_oni'||item.id==='excl_gloves_relic';
+  if(isDecoItem){
+    const f=G.f;
+    const name=f?f.name:'Ton combattant';
+    const deco=legendDecoStyle([item.id]);
+    return `<div class="glass card mb" style="position:relative;overflow:hidden;background:var(--panel2);${deco.borderCss||'border:1px solid var(--line);'}padding:16px;text-align:center">
+      ${deco.holoCss?`<div style="position:absolute;inset:0;pointer-events:none;${deco.holoCss}"></div>`:''}
+      <div class="hero-name" style="position:relative;z-index:1;font-size:18px;${deco.nameCss}">${esc(name)}</div>
+      <div class="stat-big mt" style="position:relative;z-index:1;font-size:22px;${deco.recordCss}">12-3</div>
+      ${deco.stickers.length?`<div style="position:relative;z-index:1;font-size:17px;margin-top:6px">${deco.stickers.map(s=>`<span>${s}</span>`).join(' ')}</div>`:''}
+      <div class="mono small muted mt" style="position:relative;z-index:1">Aperçu — s\u2019applique une fois équipée sur une légende du Panthéon</div>
+    </div>`;
+  }
+  return `<div class="card mb" style="background:var(--panel2);padding:14px">
+    <div class="muted small">${item.desc||''}</div>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
 function scr_legends(){
   const meta=loadMetaStats(); const pts=meta.legendPoints||0;
   /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
@@ -559,7 +655,7 @@ function scr_legends(){
   const lotteryAvail=gauntletLotteryAvailable(meta);
   const lotteryHtml=`<div class="glass card mb" style="border-left:3px solid var(--sage);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--sage)">🎁 CAISSE MYSTÈRE — Loterie des Légendes</div>
-     <div class="muted small">Une par jour. 1% de chance d\u2019un archétype ultra-exclusif ; sinon, un cosmétique/déblocage au hasard.</div>
+     <div class="muted small">Une par jour. 1% de chance d\u2019un archétype ultra-exclusif ; sinon, un des déblocages ci-dessous, tiré au hasard parmi ceux qu\u2019il te reste à obtenir.</div>
      ${lotteryAvail?`<button class="btn ghost mt" style="border-color:var(--sage);color:var(--sage);padding:6px 10px;width:auto" onclick="CL.drawGauntletLottery()" ${pts>=GAUNTLET_LOTTERY_COST?'':'disabled'}>Tenter — ${GAUNTLET_LOTTERY_COST} pts</button>`
        :`<div class="mono small mt" style="color:var(--muted)">Déjà tentée aujourd\u2019hui — revenez demain.</div>`}
    </div>`;
@@ -583,9 +679,23 @@ function scr_legends(){
        }).join('')}
    </div>`;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: VITRINE_BOUTIQUE] — item demandé : les achats retombaient
+     dans un simple "✓ Acquis" sans jamais montrer ce qu'ils avaient produit
+     en jeu. Deux données déjà calculées ailleurs (getArenaTheme, ui-08 ;
+     décorations équipées, comptées sur chaque légende du Panthéon) —
+     assemblées ici en une carte de synthèse, sans nouvelle mécanique. ==== */
+  const activeTheme=getArenaTheme();
+  const equippedDecoCount=loadHOF().reduce((s,leg)=>s+((leg.decorations||[]).length),0);
+  const showcaseHtml=(activeTheme.id!=='classic'||equippedDecoCount>0)?`<div class="card mb" style="background:var(--panel2);padding:12px">
+     <div class="eyebrow mb">Vitrine actuelle</div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Thème d\u2019octogone</span><b class="gold">${activeTheme.name}</b></div>
+     ${equippedDecoCount>0?`<div class="mono small mt" style="display:flex;justify-content:space-between"><span class="muted">Décorations portées au Panthéon</span><b class="gold">${equippedDecoCount}</b></div>`:''}
+   </div>`:'';
+  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Salle des Légendes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp gold">${pts} points de salle</h2>
-   <p class="lede small">L\u2019héritage de vos retraités ouvre de nouvelles possibilités pour le compte — aucun avantage de statistiques en combat, jamais.</p>
+   <p class="lede small">L\u2019héritage de tes retraités ouvre de nouvelles possibilités pour le compte — jamais un avantage de combat.</p>
+   ${showcaseHtml}
    ${filterBar}
    ${offerHtml}
    ${lotteryHtml}
@@ -612,22 +722,30 @@ function scr_legends(){
      </div>
    </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">${filterOn?'Tout le contenu Gauntlet est débloqué.':'Tout est débloqué. Le Panthéon n\u2019a plus rien à t\u2019apprendre.'}</span></div>`}
 
-   ${categories.map(cat=>`
-     <div class="eyebrow mb mt" style="border-bottom:1px solid var(--line);padding-bottom:6px">${cat.toUpperCase()}</div>
-     ${visibleItems.filter(i=>i.cat===cat).map(item=>{
+   ${categories.map(cat=>{
+     const catItems=visibleItems.filter(i=>i.cat===cat);
+     return `
+     <div class="shop-rail-title">${cat}<span class="n">${catItems.length}</span></div>
+     <div class="shop-rail">${catItems.map(item=>{
        const isOwned=checkLegendUnlock(item.id);
        const canAfford=pts>=item.cost;
-       const color=isOwned?'var(--sage)':(canAfford?'var(--gold)':'var(--line)');
-       const btnHtml=isOwned?`<span class="mono small" style="color:var(--sage)">✓ Acquis</span>`
-         :`<button class="btn ghost" style="border-color:${canAfford?'var(--gold)':'var(--line)'};color:${canAfford?'var(--gold)':'var(--muted)'};padding:6px 10px;width:auto" onclick="CL.purchaseUnlock('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button>`;
-       return `<div class="glass card mb" style="border-left:3px solid ${color};background:var(--panel2);padding:12px">
-         <div style="display:flex;justify-content:space-between;align-items:center">
-           <b style="font-size:14px">${item.name}</b>${btnHtml}
-         </div>
-         <div class="muted small mt">${item.desc||''}</div>
+       const rar=shopRarity(item.cost);
+       const rarColor=RAR_COLORS[rar];
+       const isLocked=!isOwned&&!canAfford;
+       const isVisualPreview=item.id.indexOf('cosmetic_')===0||item.id.indexOf('deco_')===0||item.id==='excl_mask_oni'||item.id==='excl_gloves_relic';
+       const clickAttr=` onclick="CL.toggleShopPreview('${item.id}')"`;
+       const hintLabel=G._shopPreview===item.id?'▲ Fermer':(isVisualPreview?'▼ Voir l\u2019aperçu':'▼ Voir le détail');
+       return `<div class="shop-tile ${isOwned?'owned':''} ${isLocked?'locked':''}" style="--gc:${rarColor}"${clickAttr}>
+         ${isLocked?'<div class="frost"></div><span class="lock-ico">🔒</span>':''}
+         <div class="glow"></div>
+         <div><div class="rar-lbl">${SHOP_RAR_LABEL[rar]}</div><div class="nm">${item.name}</div><div class="shop-preview-hint">${hintLabel}</div></div>
+         <div class="base">${isOwned?`<span class="price">Possédé</span>`:isLocked?`<span class="price" style="color:var(--muted)">${item.cost} pts</span>`:`<button class="price" onclick="event.stopPropagation();CL.purchaseUnlock('${item.id}')">${item.cost} pts</button>`}</div>
        </div>`;
-     }).join('')}
-   `).join('')}
+     }).join('')}</div>
+     ${(G._shopPreview&&catItems.some(i=>i.id===G._shopPreview))?shopPreviewHtml(catItems.find(i=>i.id===G._shopPreview)):''}
+   `;
+   }).join('')}
+   <div class="rarity-guide">${Object.entries(SHOP_RAR_LABEL).map(([k,lbl])=>`<span><i style="background:${RAR_COLORS[k]}"></i> ${lbl}</span>`).join('')}</div>
 
    ${(()=>{ const unlockedThemes=ARENA_THEMES.filter(t=>t.id==='classic'||checkLegendUnlock('cosmetic_'+t.id)||checkLegendUnlock('excl_'+t.id));
      if(unlockedThemes.length<=1) return '';

@@ -141,7 +141,15 @@ function gauntletDailyGroup(){
   const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
   const scopeLabel=obj.scope?`Valable uniquement en ${modeLabel[obj.scope]}`:'Valable dans les 3 formats';
   const streak=meta.gauntletDailyStreak||0;
-  const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis réussis : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>`:'';
+  /* ==== [ANCRE: CORRECTIF_RECOMPENSE_STREAK_INVISIBLE] — bug remonté : la
+     série de 7 jours débloque cosmetic_renegade (GAUNTLET_DAILY_STREAK_REWARD,
+     state.js) sans que rien ne le dise avant l'obtention — personne ne
+     comprenait l'intérêt de tenir la série. Annonce explicite tant que la
+     récompense n'est pas encore acquise ; disparaît une fois débloquée
+     (checkLegendUnlock), pour ne pas polluer l'écran après coup. ==== */
+  const streakGoalLine=(!checkLegendUnlock(GAUNTLET_DAILY_STREAK_REWARD.id))?`<div class="muted small mt">À 7 jours d\\u2019affilée : ${GAUNTLET_DAILY_STREAK_REWARD.name} (thème d\\u2019octogone exclusif) débloqué.</div>`:'';
+  /* ==== [FIN ANCRE] ==== */
+  const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis réussis : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>${streakGoalLine}`:streakGoalLine;
   const rescue=meta.gauntletDailyRescueOffer;
   const rescueHtml=rescue?`<div class="card mt" style="background:var(--panel2);border:1px solid var(--blood);padding:10px">
      <div class="mono small" style="color:var(--blood)">Série de ${rescue.streakAtRisk} jour(s) manquée hier.</div>
@@ -574,27 +582,35 @@ function scr_hof(){
      </details>
      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
    </div>`:''}
-   <div class="stagger">${list.length?list.map((f,i)=>{
+   <div class="leg-grid">${(()=>{
+     /* ==== [ANCRE: GOAT_PANTHEON] — item demandé : la liste est déjà triée
+        par f.score (posé à l'intronisation, state.js) mais ce classement
+        restait invisible — juste une position, jamais présenté comme un
+        mérite. Recalculé sur 'list' (donc valable sous filtre actif), pas
+        sur l'ordre de tri brut (les favoris passent en tête indépendamment
+        du score). ==== */
+     const topScore=list.length?Math.max(...list.map(x=>x.score||0)):0;
+     return list.length?list.map((f,i)=>{
+      const isGoat=topScore>0 && f.score===topScore;
       const decorations=f.decorations||[];
-      const hasFrameGold=decorations.includes('deco_frame_gold');
-      const hasFrameCrimson=decorations.includes('deco_frame_crimson');
-      const hasGlow=decorations.includes('deco_glow');
-      const cardBorder=hasFrameGold?'2px solid var(--gold)':hasFrameCrimson?'2px solid var(--blood)':(f.favorite?'1px solid var(--gold)':'1px solid transparent');
-      const cardGlow=hasGlow?'box-shadow:0 0 20px rgba(230,185,58,0.35);':'';
-      return `<div class="glass card mb" style="background:${f.favorite?'linear-gradient(135deg,rgba(212,175,55,.12),var(--panel2))':'var(--panel2)'};padding:16px;border:${cardBorder};${cardGlow}border-left:3px solid ${f.favorite?'var(--gold)':'var(--line)'};cursor:pointer" onclick="CL.viewLegend('${f.id}')">
-      <div class="hero-name" style="font-size:20px">${f.favorite?'★ ':''}${i+1}. ${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName} · retraite ${f.age} ans</em></div>
-      <div class="stat-band" style="border-top:none;padding-top:8px;margin-top:8px">
-        <div><span class="stat-big" style="font-size:24px">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${f.rank}</span></div>
-        ${f.amaRec?`<div style="text-align:right"><span class="stat-big" style="font-size:24px">${f.amaRec.W}<span class="muted">-</span><span class="loss">${f.amaRec.L}</span></span><span class="stat-lbl">Amateur</span></div>`:''}
-      </div>
-      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow" style="margin-bottom:8px">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
-      ${f.biggestRival?`<div class="mono small" style="color:var(--blood);margin-bottom:8px">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} (${f.biggestRival.count} confrontations)</div>`:''}
-      <div class="epis" style="position:relative;z-index:2">${f.epithets.map(e=>`<span class="epi">${e}</span>`).join('')}</div>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="event.stopPropagation();CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="event.stopPropagation();CL.toggleHofFav('${f.id}')">${f.favorite?'★ Favori':'☆ Favori'}</button>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px;color:var(--loss)" onclick="event.stopPropagation();CL.deleteHof('${f.id}')">Supprimer</button></div>`;
+      const deco=legendDecoStyle(decorations);
+      const tc=legendTierColor(f.rank);
+      return `<div class="leg-tcard ${isGoat?'goat':''}" style="--tc:${tc};${deco.borderCss}" onclick="CL.viewLegend('${f.id}')">
+      <div class="tier-corner"></div>
+      ${deco.holoCss?`<div class="holo" style="${deco.holoCss}"></div>`:''}
+      <div class="tier-lbl">${isGoat?'👑 ':''}${f.rank}</div>
+      <div class="nm" style="${deco.nameCss}">${f.favorite?'★ ':''}${esc(f.name)}</div>
+      <div class="muted small" style="position:relative;z-index:1">${f.style} · ${f.divName}</div>
+      <div class="rec" style="${deco.recordCss}">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></div>
+      ${deco.stickers.length?`<div class="stickers">${deco.stickers.map(s=>`<span>${s}</span>`).join('')}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:9px;position:relative;z-index:1" onclick="event.stopPropagation()">
+        <button class="btn ghost" style="padding:4px 7px;width:auto;font-size:11px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="CL.toggleHofFav('${f.id}')" title="Favori">${f.favorite?'★':'☆'}</button>
+        <button class="btn ghost" style="padding:4px 7px;width:auto;font-size:11px" onclick="CL.exportLegend('${f.id}')" title="Exporter">🔗</button>
+        <button class="btn ghost" style="padding:4px 7px;width:auto;font-size:11px;color:var(--loss)" onclick="CL.deleteHof('${f.id}')" title="Supprimer">🗑</button>
+      </div></div>`;
     }).join(''):
-      '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>'}</div>
+      '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>';
+   })()}</div>
    <div class="tagrow mb">
      <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
      <button class="btn ghost" style="width:auto;padding:8px 12px" onclick="CL.go('codex')">Codex des compétences</button>
@@ -611,45 +627,51 @@ function scr_hof(){
 function scr_legend_detail(){
   const list=loadHOF(); const f=list.find(x=>String(x.id)===String(G.viewingLegendId));
   if(!f) return `<div class="scr center"><p class="lede">Légende introuvable.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
-  /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
-     rendu visuel léger des décorations équipées (cadre, halo, typographie,
-     diamant) directement sur la carte hero existante, plus un panneau de
-     gestion (équiper/retirer) listant les décorations réellement possédées
-     (checkLegendUnlock) — jamais celles simplement affichées en boutique. ==== */
+  /* ==== [ANCRE: ALBUM_LEGEND_STYLE] — la fiche complète devient la version
+     grand format de la même carte que dans la grille (scr_hof) : coin de
+     palier identique (legendTierColor), décorations rendues par la MÊME
+     fonction partagée (legendDecoStyle) plutôt que par une logique
+     dupliquée et différente de celle de la liste. Ouvrir une légende, c'est
+     visuellement "sortir sa carte du classeur", pas changer d'écran. ==== */
   const decorations=f.decorations||[];
-  const hasFrameGold=decorations.includes('deco_frame_gold');
-  const hasFrameCrimson=decorations.includes('deco_frame_crimson');
-  const hasGlow=decorations.includes('deco_glow');
-  const hasTypo=decorations.includes('deco_typography');
-  const hasDiamond=decorations.includes('deco_diamond');
-  const cardBorder=hasFrameGold?'2px solid var(--gold)':hasFrameCrimson?'2px solid var(--blood)':'1px solid var(--line)';
-  const cardGlowStyle=hasGlow?'box-shadow:0 0 26px rgba(230,185,58,0.4);':'';
-  const nameStyle=hasTypo?'font-family:Georgia,\'Times New Roman\',serif;letter-spacing:0.5px;':'';
-  const ownedDecorations=LEGEND_UNLOCKABLES.filter(i=>i.cat==='Ennoblissement du Panthéon'&&checkLegendUnlock(i.id));
+  const deco=legendDecoStyle(decorations);
+  const tc=legendTierColor(f.rank);
+  /* ==== [ANCRE: CORRECTIF_COSMETIQUES_EXCLUSIFS_INVISIBLES] — voir ancre
+     jumelle dans state.js : excl_mask_oni/excl_gloves_relic partagent
+     désormais le même cat que les décorations classiques, donc simplement
+     concaténer GAUNTLET_EXCLUSIVE_OFFERS suffit à les faire apparaître ici
+     une fois possédées, sans toucher au reste du panneau. ==== */
+  const ownedDecorations=LEGEND_UNLOCKABLES.concat(GAUNTLET_EXCLUSIVE_OFFERS).filter(i=>i.cat==='Ennoblissement du Panthéon'&&checkLegendUnlock(i.id));
+  /* ==== [FIN ANCRE] ==== */
   const decorationPanel=ownedDecorations.length?`<div class="card mb"><div class="eyebrow mb">Décorations (${decorations.length}/3)</div>
+     <div class="muted small mb" style="font-size:10.5px">Un déblocage de compte : la même décoration peut être portée par plusieurs combattants à la fois.</div>
      ${ownedDecorations.map(item=>{
        const equippedHere=decorations.includes(item.id);
-       const equippedElsewhere=!equippedHere&&list.some(x=>String(x.id)!==String(f.id)&&(x.decorations||[]).includes(item.id));
        const canEquip=!equippedHere&&decorations.length<3;
        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)">
-         <div><b class="small">${item.name}</b>${equippedElsewhere?`<div class="muted small" style="font-size:10px">Actuellement portée par un autre combattant — l\u2019équiper ici la lui retire.</div>`:''}</div>
-         ${equippedHere?`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;border-color:var(--blood);color:var(--blood)" onclick="CL.unequipDecoration('${f.id}','${item.id}')">Retirer</button>`
-           :`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px" onclick="CL.equipDecoration('${f.id}','${item.id}')" ${canEquip?'':'disabled'}>Équiper</button>`}
+         <b class="small">${item.name}</b>
+         ${equippedHere?`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;border-color:var(--blood);color:var(--blood);flex:0 0 auto" onclick="CL.unequipDecoration('${f.id}','${item.id}')">Retirer</button>`
+           :`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;flex:0 0 auto" onclick="CL.equipDecoration('${f.id}','${item.id}')" ${canEquip?'':'disabled'}>Équiper</button>`}
        </div>`;
      }).join('')}
    </div>`:'';
   /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
-   <div class="glass mwash card" style="position:relative;background:var(--panel2);border:${cardBorder};${cardGlowStyle}padding:16px;margin-bottom:16px">
-     <div class="hero-name" style="position:relative;z-index:2;${nameStyle}">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
-     ${f.motivation?`<div class="story" style="position:relative;z-index:2"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
-     <div class="epis mt" style="position:relative;z-index:2">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
-     <div class="stat-band" style="position:relative;z-index:2">
-       <div><span class="stat-big" style="font-size:26px;${hasDiamond?'background:linear-gradient(135deg,#b9f2ff,#ffffff,#8ec9d8);-webkit-background-clip:text;background-clip:text;color:transparent':''}">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">${hasDiamond?'💎 ':''}Bilan pro · retraite ${f.age} ans</span></div>
+   ${G._decoMsg?(()=>{ const m=G._decoMsg; G._decoMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
+   <div class="leg-hero-card" style="${deco.borderCss}">
+     <div class="tier-corner-lg"></div>
+     ${deco.holoCss?`<div class="holo" style="${deco.holoCss}"></div>`:''}
+     <div class="tier-lbl-lg">${f.ico} ${f.rank}</div>
+     <div class="hero-name" style="position:relative;z-index:1;${deco.nameCss}">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
+     ${f.motivation?`<div class="story" style="position:relative;z-index:1"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
+     <div class="epis mt" style="position:relative;z-index:1">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
+     ${deco.stickers.length?`<div class="stickers-lg mt">${deco.stickers.map(s=>`<span>${s}</span>`).join('')}</div>`:''}
+     <div class="stat-band" style="position:relative;z-index:1">
+       <div><span class="stat-big" style="font-size:26px;${deco.recordCss}">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">Bilan pro · retraite ${f.age} ans</span></div>
        <div style="text-align:right"><span class="stat-big" style="font-size:26px">${f.ko+f.sub}<span class="muted small"> fin.</span></span><span class="stat-lbl">${f.ko} KO / ${f.sub} SUB</span></div>
      </div>
-     ${f.amaRec?`<div class="mono small muted mt">Amateur : ${f.amaRec.W}-${f.amaRec.L}</div>`:''}
+     ${f.amaRec?`<div class="mono small muted mt" style="position:relative;z-index:1">Amateur : ${f.amaRec.W}-${f.amaRec.L}</div>`:''}
    </div>
    ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mb">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
    ${f.champChampBelt?`<div class="card mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><span class="mono small" style="color:var(--gold)">${SVG.crown} Double Champion — ${esc(f.champChampBelt)}</span></div>`:''}

@@ -182,6 +182,70 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .rarity-guide{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:12px;margin-top:16px;border-top:1px dotted var(--line);font-size:11px}
 .rarity-guide span{display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono';color:var(--muted)}
 .rarity-guide i{width:8px;height:8px;border-radius:50%;display:inline-block}
+/* ==== [ANCRE: ALBUM_LEGEND_STYLE] — Panthéon en "carte à collectionner" :
+   coin de palier (legendTierColor, state.js) partagé entre la tuile de
+   liste (.leg-tcard, scr_hof) et la grande carte de fiche (.leg-hero-card,
+   scr_legend_detail) — même vocabulaire, deux échelles. ==== */
+.leg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.leg-tcard{background:var(--panel2);border:1px solid var(--line);padding:12px;position:relative;overflow:hidden;cursor:pointer}
+.leg-tcard.goat{box-shadow:0 0 0 1px var(--gold),0 0 18px rgba(230,185,58,.25)}
+.leg-tcard .tier-corner{position:absolute;top:0;right:0;width:30px;height:30px;background:var(--tc);clip-path:polygon(100% 0,0 0,100% 100%)}
+.leg-tcard .tier-lbl{font-family:'JetBrains Mono';font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--tc)}
+.leg-tcard .nm{font-family:'Oswald';font-size:12.5px;text-transform:uppercase;line-height:1.18;margin-top:3px;position:relative;z-index:1}
+.leg-tcard .rec{font-family:'JetBrains Mono';font-size:17px;margin-top:9px;position:relative;z-index:1}
+.leg-tcard .stickers{display:flex;gap:3px;margin-top:6px;font-size:12px;position:relative;z-index:1}
+.leg-tcard .holo{position:absolute;inset:0;pointer-events:none}
+.leg-hero-card{position:relative;overflow:hidden;background:var(--panel2);border:1px solid var(--line);padding:20px 16px;margin-bottom:16px}
+.leg-hero-card .tier-corner-lg{position:absolute;top:0;right:0;width:58px;height:58px;background:var(--tc);clip-path:polygon(100% 0,0 0,100% 100%)}
+.leg-hero-card .tier-lbl-lg{position:relative;z-index:1;font-family:'JetBrains Mono';font-size:10px;letter-spacing:.15em;color:var(--tc);text-transform:uppercase}
+.leg-hero-card .holo{position:absolute;inset:0;pointer-events:none}
+.leg-hero-card .stickers-lg{display:flex;gap:6px;font-size:17px;position:relative;z-index:1}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — même vocabulaire visuel que
+   .shop-rail/.shop-tile (Boutique), dupliqué sous un nom générique .gal-*
+   pour être réutilisé sur l'écran Succès sans coupler les deux écrans ni
+   risquer de régression sur la Boutique déjà livrée. ==== */
+.gal-rail-title{font-family:'Oswald';font-size:14px;text-transform:uppercase;letter-spacing:.03em;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+.gal-rail-title span.n{font-family:'JetBrains Mono';font-size:10px;color:var(--faint);font-weight:400;letter-spacing:.05em}
+.gal-rail{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin:0 -15px;padding-left:15px;padding-right:15px;scrollbar-width:none}
+.gal-rail::-webkit-scrollbar{display:none}
+.gal-tile{flex:0 0 128px;background:rgba(255,255,255,.045);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.14);position:relative;padding:11px 10px 9px;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:space-between;min-height:118px}
+.gal-tile .glow{position:absolute;inset:0;pointer-events:none;box-shadow:0 0 24px -4px var(--gc) inset}
+.gal-tile .ico{font-size:16px;position:relative;z-index:1}
+.gal-tile .nm{font-family:'Oswald';font-size:12px;text-transform:uppercase;line-height:1.2;position:relative;z-index:1;margin-top:4px}
+.gal-tile .base{border-top:1px solid var(--gc);margin-top:7px;padding-top:5px;position:relative;z-index:1;font-family:'JetBrains Mono';font-size:10.5px;color:var(--gc);font-weight:700}
+.gal-tile.owned .base{color:var(--sage)}
+.gal-tile.locked{background:rgba(255,255,255,.02)}
+.gal-tile.locked .nm,.gal-tile.locked .ico{opacity:.4}
+.gal-tile .preview-hint{font-family:'JetBrains Mono';font-size:8.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;position:relative;z-index:1;margin-top:3px}
+/* ==== [FIN ANCRE] ==== */
+   validée) : rails horizontaux par catégorie plutôt qu'une liste verticale,
+   chaque objet sur un socle dont la couleur porte la rareté (RAR_COLORS,
+   déjà la palette du Codex de compétences). Un objet non possédé et hors de
+   portée passe derrière une vitre embuée (filtre + cadenas) plutôt que
+   d'être simplement grisé — l'absence se voit comme une case vide de vitrine,
+   pas comme un bouton désactivé. ==== */
+.shop-rail-title{font-family:'Oswald';font-size:14px;text-transform:uppercase;letter-spacing:.03em;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+.shop-rail-title span.n{font-family:'JetBrains Mono';font-size:10px;color:var(--faint);font-weight:400;letter-spacing:.05em}
+.shop-rail{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin:0 -15px;padding-left:15px;padding-right:15px;scrollbar-width:none}
+.shop-rail::-webkit-scrollbar{display:none}
+.shop-tile{flex:0 0 138px;background:rgba(255,255,255,.045);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.14);position:relative;padding:12px 10px 10px;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:space-between;min-height:150px}
+.shop-tile .glow{position:absolute;inset:0;pointer-events:none;box-shadow:0 0 26px -4px var(--gc) inset}
+.shop-tile .nm{font-family:'Oswald';font-size:13px;text-transform:uppercase;line-height:1.2;position:relative;z-index:1}
+.shop-tile .base{border-top:1px solid var(--gc);margin-top:8px;padding-top:6px;position:relative;z-index:1}
+.shop-tile .price{font-family:'JetBrains Mono';font-size:12px;color:var(--gc);font-weight:700;background:none;border:0;padding:0;width:auto;text-align:left}
+.shop-tile.owned .price{color:var(--sage)}
+.shop-tile .rar-lbl{font-family:'JetBrains Mono';font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;position:relative;z-index:1}
+.shop-tile.locked{background:rgba(255,255,255,.02)}
+.shop-tile.locked .nm,.shop-tile.locked .rar-lbl{opacity:.4}
+.shop-tile.locked .lock-ico{position:absolute;top:9px;right:9px;font-size:11px;opacity:.55;z-index:1}
+.shop-tile.locked .frost{position:absolute;inset:0;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);background:rgba(20,16,11,.35)}
+.shop-preview-hint{font-family:'JetBrains Mono';font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;position:relative;z-index:1}
+/* ==== [FIN ANCRE] ==== */
 .bar .x{cursor:pointer;font-size:15px}
 .fld{margin:12px 0}.fld label{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 .fld input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:12px;border-radius:var(--r);font-family:'Fraunces',serif;font-size:16px}
@@ -225,7 +289,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .st-row span:first-child{text-align:right;color:var(--blood)}.st-row span:last-child{text-align:left;color:var(--sage)}
 .skill-unlock{font-size:14.5px}
 .ach{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
-.ach .ico{font-size:19px}.ach.lk{opacity:.32}
+.ach .ico{font-size:19px}.ach.lk{opacity:.32}.ach.prog{opacity:.7}
 /* profil */
 .grp-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
 .attr{display:flex;align-items:center;gap:9px;margin:5px 0}
