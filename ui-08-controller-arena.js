@@ -691,7 +691,14 @@ const CL={
         }
         G.arcade.koStreak=(win && G.pending.method && G.pending.method.startsWith('KO'))?(G.arcade.koStreak||0)+1:0;
         G.arcade.winStreak=win?(G.arcade.winStreak||0)+1:0;
-        if(_res && win && (_res.stats.A.dmgHead+_res.stats.A.dmgBody+_res.stats.A.dmgLegs)===0) G.arcade.flawlessAchieved=true;
+        /* ==== [ANCRE: CORRECTIF_DEFI_SANS_DEGAT] — seuil assoupli de "===0"
+           à "<=3" (cf. state.js, GAUNTLET_DAILY_OBJECTIVES) : le moteur
+           inflige 1 à 3 dégâts à chaque échange debout perdu, donc une
+           égalité stricte à zéro exigeait de ne perdre AUCUN échange sur
+           tout le combat — un défi du jour irréalisable en pratique, pas
+           seulement rare. ==== */
+        if(_res && win && (_res.stats.A.dmgHead+_res.stats.A.dmgBody+_res.stats.A.dmgLegs)<=3) G.arcade.flawlessAchieved=true;
+        /* ==== [FIN ANCRE] ==== */
         /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
            "Mise à l'abri automatique" : dès le 1er combat GAGNÉ de la run
            (peu importe le mode), petite somme versée immédiatement en

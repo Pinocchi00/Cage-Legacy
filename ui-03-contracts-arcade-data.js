@@ -876,11 +876,21 @@ function runCoachingRound(plan){
      l'avoir vraiment implémenté. Recalculée à chaque round (pas figée une
      fois pour toutes) : une nouvelle lecture à chaque pause, comme un vrai
      coin qui réévalue le combat round après round. ==== */
+  /* ==== [ANCRE: CORRECTIF_JUGES_ESTIMATION_PLAFOND] — bug remonté : le
+     bruit était borné sur le TOTAL cumulé (0 à ta+tb, jusqu'à 30 sur 3
+     rounds) au lieu du plafond RÉEL "10 points par juge et par round jugé"
+     — un vrai 10-9 après le round 1 (total 19) pouvait ressortir comme
+     11-8 ou 7-12 à l'écran, des cartes qu'aucun juge ne peut donner. Le
+     plafond par côté est désormais c.round*10 (c.round n'est incrémenté
+     qu'après ce calcul, donc il vaut encore le nombre de rounds déjà
+     jugés) — la somme reste inchangée (même principe que l'original), mais
+     chaque côté reste dans les bornes crédibles. ==== */
   c.judgesEstimate={};
+  const roundsJudgedCap=c.round*10;
   ['j1','j2','j3'].forEach(j=>{
-    const [ta,tb]=c.judges[j], noise=Math.floor(rnd()*3), dir=rnd()<0.5?1:-1;
-    const estA=clamp(ta+dir*noise,0,ta+tb);
-    c.judgesEstimate[j]=[estA,(ta+tb)-estA];
+    const [ta,tb]=c.judges[j], total=ta+tb, noise=Math.floor(rnd()*3), dir=rnd()<0.5?1:-1;
+    const estA=clamp(ta+dir*noise,Math.max(0,total-roundsJudgedCap),Math.min(roundsJudgedCap,total));
+    c.judgesEstimate[j]=[estA,total-estA];
   });
   /* ==== [FIN ANCRE] ==== */
   mergeStats(c.stats.A,res.stats.A); mergeStats(c.stats.B,res.stats.B);
@@ -1118,23 +1128,38 @@ const ARCADE_EXCLUSIVE_TACTICS={
      IMMUNITE_FINITION_CAMP, engine.js), UN round précis seulement.
    `label` est affiché tel quel à l'écran de choix (scr_camp_identity_pick)
    et dans le statut de run (gauntletStatusBlock). ==== */
+/* ==== [ANCRE: CORRECTIF_PASSIF_ECHELLE] — bug remonté : les labels de
+   passif écrivaient le delta interne BRUT (échelle /100 de G.f.attrs, ex.
+   "+10 Cardio"), affiché juste au-dessus/à côté de deltas correctement
+   convertis en /20 (fxTxt de scr_camp_identity_pick, ui-04 : "Cardio 18 →
+   20", ou deltaTags ailleurs) — même origine que le bug, deux échelles
+   mélangées sur le même écran. Même formule de conversion que ces deltas
+   déjà corrects (Math.sign×Math.max(1,Math.round(/5))) : jamais le nombre
+   interne tel quel dans un texte destiné au joueur. ==== */
+function campFxLabel(fx){
+  return Object.entries(fx).map(([k,v])=>{
+    const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+    return `${shown>0?'+':''}${shown} ${attrLabel(k)}`;
+  }).join(', ');
+}
+/* ==== [FIN ANCRE] ==== */
 const GAUNTLET_CAMP_IDENTITIES=[
   {id:'camp_spartiate',name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10},
-   passive:{type:'roundBoost',round:3,fx:{cardio:10,power:10},label:'Round 3 de chaque combat : +10 Cardio, +10 Puissance (ce round-là uniquement)'}},
+   passive:(()=>{ const fx={cardio:10,power:10}; return {type:'roundBoost',round:3,fx,label:`Round 3 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()},
   {id:'camp_mercenaire',name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10},
-   passive:{type:'oppPermanent',fx:{chin:-8},label:'Menton de l\u2019adversaire fragilisé pour tout le combat (-8, invisible pour lui)'}},
+   passive:(()=>{ const fx={chin:-8}; return {type:'oppPermanent',fx,label:`Menton de l\u2019adversaire fragilisé pour tout le combat (${campFxLabel(fx)}, invisible pour lui)`}; })()},
   {id:'camp_universitaire',name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10},
-   passive:{type:'oppPermanent',fx:{power:-6,footSpeed:-6},label:'Adversaire légèrement affaibli pour tout le combat (-6 Puissance, -6 Jeu de jambes)'}},
+   passive:(()=>{ const fx={power:-6,footSpeed:-6}; return {type:'oppPermanent',fx,label:`Adversaire légèrement affaibli pour tout le combat (${campFxLabel(fx)})`}; })()},
   {id:'camp_familial',name:'Camp Familial',desc:'Un clan qui protège, jamais qui pousse à bout.',fx:{composure:15,cardio:-10},
    passive:{type:'finishImmunity',round:1,label:'Round 1 : impossible à finir (KO/TKO/Soumission)'}},
   {id:'camp_silence',name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10},
    passive:null},
   {id:'camp_meute',name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10},
-   passive:{type:'roundBoost',round:2,fx:{takedown:10,topControl:10},label:'Round 2 de chaque combat : +10 Lutte, +10 Contrôle au sol (ce round-là uniquement)'}},
+   passive:(()=>{ const fx={takedown:10,topControl:10}; return {type:'roundBoost',round:2,fx,label:`Round 2 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()},
   {id:'camp_ascetique',name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10},
    passive:{type:'finishImmunity',round:3,label:'Round 3 : impossible à finir (KO/TKO/Soumission)'}},
   {id:'camp_spectacle',name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10},
-   passive:{type:'roundBoost',round:1,fx:{explosiveness:10,power:10},label:'Round 1 de chaque combat : +10 Explosivité, +10 Puissance (ce round-là uniquement)'}}
+   passive:(()=>{ const fx={explosiveness:10,power:10}; return {type:'roundBoost',round:1,fx,label:`Round 1 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()}
 ];
 /* ==== [FIN ANCRE] ==== */
 function drawGauntletCampIdentityOptions(){

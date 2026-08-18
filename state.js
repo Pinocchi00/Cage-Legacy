@@ -413,7 +413,18 @@ function recordGauntletDaily(meta,mode,progress){
 const GAUNTLET_DAILY_OBJECTIVES=[
   {id:'ko2straight',kind:'run',metric:'koStreak',target:2,label:'2 KO d\u2019affilée dans la même run'},
   {id:'win3straight',kind:'run',metric:'winStreak',target:3,label:'3 victoires d\u2019affilée dans la même run'},
-  {id:'flawless1',kind:'run',metric:'flawless',target:1,label:'Un combat terminé sans le moindre dégât reçu'},
+  /* ==== [ANCRE: CORRECTIF_DEFI_SANS_DEGAT] — bug remonté : "sans le
+     moindre dégât reçu" (dmgHead+dmgBody+dmgLegs===0) demandait de ne
+     JAMAIS perdre un seul échange debout ou au sol sur tout le combat — le
+     moteur inflige 1 à 3 points à l'un des deux camps à chaque échange
+     debout (engine.js, ANCRE MICRO_SEQUENCES), donc une victoire à zéro
+     dégât exige de gagner CHAQUE micro-séquence du combat, dans l'ordre,
+     sans exception : un défi du jour vécu comme irréalisable plutôt que
+     comme rare. Seuil assoupli à "quasiment aucun dégât" (cf. ui-08,
+     ANCRE GAUNTLET_DEFI_JOUR_V2) — reste une victoire très dominante, mais
+     plus un tirage à annulation totale du hasard. ==== */
+  {id:'flawless1',kind:'run',metric:'flawless',target:1,label:'Un combat terminé en n’encaissant presque aucun dégât (3 points ou moins)'},
+  /* ==== [FIN ANCRE] ==== */
   {id:'sub3day',kind:'day',metric:'subWins',target:3,label:'3 victoires par soumission aujourd\u2019hui (toutes tentatives confondues)'},
   {id:'td5day',kind:'day',metric:'takedowns',target:5,label:'5 amenées au sol réussies aujourd\u2019hui'},
   {id:'kd2day',kind:'day',metric:'kdCount',target:2,label:'2 knockdowns infligés aujourd\u2019hui'}
@@ -447,6 +458,20 @@ function gauntletDailyObjective(meta){
   const obj={date:key,id:tmpl.id,kind:tmpl.kind,metric:tmpl.metric,target:tmpl.target,label:tmpl.label,scope};
   meta.gauntletDailyObj=obj;
   meta.gauntletDailyObjProgress={date:key,subWins:0,takedowns:0,kdCount:0,completed:false,streakCredited:false,rescued:false};
+  /* ==== [ANCRE: CORRECTIF_OFFRE_RACHAT_PERDUE] — bug remonté : cette
+     fonction pose meta.gauntletDailyRescueOffer (juste au-dessus) mais ne
+     sauvegardait jamais elle-même — ses deux appelants d'affichage
+     (gauntletDailyTag/gauntletDailyGroup, ui-06) rechargent un meta neuf à
+     chaque render sans jamais persister. Résultat : l'offre n'existait que
+     dans la mémoire du render courant. Au clic sur "Racheter",
+     CL.buybackGauntletDailyStreak() (ui-08) recharge un meta FRAIS depuis
+     localStorage — sans l'offre — donc "Rien à racheter." même avec assez
+     de points. Sauvegarder ici, au seul point d'entrée qui écrit l'offre,
+     couvre tous les appelants sans les modifier un par un. La sauvegarde ne
+     se déclenche qu'au changement de jour/première init (l'early return
+     ci-dessus court-circuite le reste tant que la date n'a pas changé). ==== */
+  saveMetaStats(meta);
+  /* ==== [FIN ANCRE] ==== */
   return obj;
 }
 function gauntletDailyObjectiveDone(meta){ gauntletDailyObjective(meta); return !!meta.gauntletDailyObjProgress.completed; }
