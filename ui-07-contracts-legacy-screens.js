@@ -716,21 +716,24 @@ function scr_legends(){
      Panthéon — sans intérêt propre, seulement de la hauteur en plus. La
      phrase d'intro ("L'héritage de tes retraités...") est retirée pour la
      même raison : pure flaveur, aucune information. ==== */
+  /* ==== [ANCRE: CORRECTIF_ORDRE_BOUTIQUE] — item demandé : les statistiques
+     de carrière (bilan brut, informatif, jamais d'action possible dessus)
+     remontées tout en haut, juste sous le titre — l'offre du jour, la
+     Caisse Mystère et le Marché noir (tout ce qui se dépense) redescendent
+     avec le reste des choix d'achat (catalogue), au lieu de squatter le
+     haut de l'écran avant même que le joueur sache combien il a de points
+     à dépenser. ==== */
   /* ==== [ANCRE: CORRECTIF_MESSAGE_ACHAT_INVISIBLE] — bug remonté : le
      message de résultat (G.lastMsg — gain de la Caisse Mystère, achat de
      l'offre du jour, rachat de série...) s'affichait tout en bas de l'écran,
      après tout le catalogue : invisible sans un long défilement, donnant
-     l'impression de ne rien gagner. Remonté juste sous le titre, à portée
-     de vue immédiate après un clic sur n'importe quelle action du haut de
-     l'écran (offre, loterie, marché noir). ==== */
+     l'impression de ne rien gagner. Repositionné juste au-dessus du bloc
+     d'achats (offre/loterie/marché noir/catalogue, désormais tous groupés
+     ensemble plus bas, cf. ANCRE ci-dessus) : reste juste au-dessus de
+     l'action qui vient de le déclencher, où que ce bloc se trouve sur la
+     page. ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Salle des Légendes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp gold">${pts} points de salle</h2>
-   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
-   ${filterBar}
-   ${offerHtml}
-   ${lotteryHtml}
-   ${consumablesHtml}
-
    <div class="stat-band mb" style="border-top:none;padding-top:10px">
      <div><span class="stat-big" style="font-size:20px">${meta.totalRetirements||0}</span><span class="stat-lbl">Carrières terminées</span></div>
      <div><span class="stat-big" style="font-size:20px">${meta.totalFights||0}</span><span class="stat-lbl">Combats disputés</span></div>
@@ -741,6 +744,11 @@ function scr_legends(){
      <div><span class="stat-big" style="font-size:20px">${meta.totalBelts||0}</span><span class="stat-lbl">Ceintures remportées</span></div>
      <div><span class="stat-big" style="font-size:20px">${formatArgent(meta.totalMoney||0)}</span><span class="stat-lbl">Gains cumulés</span></div>
    </div>
+   ${filterBar}
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
+   ${offerHtml}
+   ${lotteryHtml}
+   ${consumablesHtml}
    <div class="mono small muted mb">${owned.length} / ${visibleItems.length} déblocages acquis${filterOn?' (filtré Gauntlet)':''}</div>
 
    ${nextUp?`<div class="glass card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">

@@ -851,6 +851,17 @@ function runCoachingRound(plan){
       // finition anticipée : fusionne quand même les stats des rounds
       // précédents (sinon Le Fantôme, ajout #5, ne verrait que le dernier round)
       mergeStats(res.stats.A,c.stats.A); mergeStats(res.stats.B,c.stats.B);
+      /* ==== [ANCRE: CORRECTIF_ROUND_FINITION_COACHING] — bug remonté (trouvé
+         en implémentant le rendu round par round, ANCRE
+         CORRECTIF_RENDU_ROUND_PAR_ROUND) : res.round vient du compteur LOCAL
+         du moteur pour cet appel simulateFight(1 round) — toujours 1, quel
+         que soit le vrai round de coaching (c.round) où la finition a eu
+         lieu. Un KO au round 2 ou 3 s'affichait donc "Round 1" sur la fiche
+         de résultat (scr_result, ui-06 : p.res.round). Réécrit avec le vrai
+         round de coaching avant de transmettre finalRes (même objet que res
+         ici, cf. `let finalRes=res;` plus haut). ==== */
+      res.round=c.round;
+      /* ==== [FIN ANCRE] ==== */
     }
     G.arcade.coaching=null;
     finalizeArcadeCombatResult(finalRes,plan);

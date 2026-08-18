@@ -237,14 +237,22 @@ function scr_archetype_pantheon(){
    ancienne version retirée pour éviter une redéclaration de fonction (la
    dernière définition l'aurait de toute façon emporté silencieusement en
    JS, mais garder les deux aurait été trompeur à la lecture). ==== */
+/* ==== [ANCRE: CORRECTIF_MENU_GAUNTLET_COMPACT] — bug remonté (10d élargi à
+   cet écran) : 4 liens secondaires (Panthéon, Tour d'Ascension, Profil,
+   Boutique) empilaient chacun un bouton pleine largeur, précédés d'un
+   en-tête "c) BOUTIQUE" séparé rien que pour le dernier — Boutique n'a rien
+   d'une nature différente des 3 autres (tous des raccourcis annexes, aucun
+   n'est un format de jeu). Regroupés en grille 2×2 (.leg-grid, déjà
+   utilisée pour le Panthéon carrière) sous un seul en-tête, sans le
+   numérotage "a)/b)/c)" qui n'apportait rien à la lecture. ==== */
 function scr_gauntlet_menu(){
   return `<div class="scr center intro">
    <div class="eyebrow sage">Mode Arcade</div>
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
-   <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">a) DÉFI DU JOUR</div>
+   <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">DÉFI DU JOUR</div>
    ${gauntletDailyGroup()}
-   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">b) MODES DE JEU CLASSIQUES</div>
+   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">MODES DE JEU CLASSIQUES</div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
    ${gauntletAscPicker('bracket64')}
@@ -255,11 +263,13 @@ function scr_gauntlet_menu(){
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, finitions uniquement</span>${gauntletMenuBestTag('boss_run')}</button>
    ${gauntletAscPicker('boss_run')}`:''}
    ${gauntletCapstoneEntry()}
-   <button class="btn ghost mt" style="border:1px dashed var(--line)" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
-   <button class="btn ghost mt" style="border:1px dashed var(--gold)" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
-   <button class="btn ghost mt" style="border:1px dashed var(--gold)" onclick="CL.go('gauntlet_profile')">🏺 Profil du joueur (Reliques)</button>
-   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">c) BOUTIQUE</div>
-   <button class="btn ghost mt" style="border:1px dashed var(--gold);color:var(--gold)" onclick="CL.goShopGauntlet()">🛒 Boutique (filtrée Gauntlet)</button>
+   <div class="eyebrow mb mt" style="color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px">Autres accès</div>
+   <div class="leg-grid">
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--line);padding:12px 8px;font-size:12px" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.go('gauntlet_profile')">🏺 Profil (Reliques)</button>
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);color:var(--gold);padding:12px 8px;font-size:12px" onclick="CL.goShopGauntlet()">🛒 Boutique</button>
+   </div>
    <div class="fld" style="margin-top:24px">
      <label class="muted small">Graine de la run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer une run identique)</label>
      <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
@@ -267,6 +277,7 @@ function scr_gauntlet_menu(){
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PROFIL_JOUEUR_RELIQUES] — ajout #7 (24 ajouts, 12/08/2026) :
    écran de compte, PAS lié à un combattant précis (les combattants arcade

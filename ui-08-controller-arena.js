@@ -164,6 +164,12 @@ const CL={
      à la fois : cliquer sur l'objet déjà ouvert le referme. ==== */
   toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(true); },
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_ETAT_RUN_ESPACE] — même bascule d'aperçu que la
+     boutique (toggleShopPreview ci-dessus), réutilisée pour replier par
+     défaut la description du mutateur/le rappel du contrat dans "État de la
+     run" (gauntletStatusBlock, ui-04) — un seul dépliage ouvert à la fois. ==== */
+  toggleRunStatusPreview(key){ G._runStatusPreview=(G._runStatusPreview===key?null:key); render(true); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — bascule d'aperçu pour un exploit :
      un seul ouvert à la fois. ==== */
   toggleAchPreview(achId){ G._achPreview=(G._achPreview===achId?null:achId); render(); },
