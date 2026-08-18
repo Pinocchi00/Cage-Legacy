@@ -227,13 +227,21 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    portée passe derrière une vitre embuée (filtre + cadenas) plutôt que
    d'être simplement grisé — l'absence se voit comme une case vide de vitrine,
    pas comme un bouton désactivé. ==== */
-.shop-rail-title{font-family:'Oswald';font-size:14px;text-transform:uppercase;letter-spacing:.03em;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+.shop-rail-title{font-family:'Oswald';font-size:14px;text-transform:uppercase;letter-spacing:.03em;margin:14px 0 8px;display:flex;justify-content:space-between;align-items:baseline}
 .shop-rail-title span.n{font-family:'JetBrains Mono';font-size:10px;color:var(--faint);font-weight:400;letter-spacing:.05em}
 .shop-rail{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin:0 -15px;padding-left:15px;padding-right:15px;scrollbar-width:none}
 .shop-rail::-webkit-scrollbar{display:none}
+/* ==== [ANCRE: CORRECTIF_BOUTIQUE_COMPACTE] — bug remonté : la boutique
+   était "très très longue" à défiler — les 7 rails (6 catégories du
+   catalogue + Marché noir) dominaient la hauteur totale de l'écran, chacun
+   payant min-height:150px + une marge de titre de 22px, quel que soit le
+   contenu réel des tuiles. Ce point de style est PARTAGÉ par tous les rails
+   (shop-rail-title/.shop-tile) — un seul réglage compacte donc l'écran
+   entier d'un coup, catalogue et Marché noir compris. ==== */
 .shop-tile{flex:0 0 138px;background:rgba(255,255,255,.045);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,.14);position:relative;padding:12px 10px 10px;cursor:pointer;
-  display:flex;flex-direction:column;justify-content:space-between;min-height:150px}
+  border:1px solid rgba(255,255,255,.14);position:relative;padding:10px 8px 8px;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:space-between;min-height:126px}
+/* ==== [FIN ANCRE] ==== */
 .shop-tile .glow{position:absolute;inset:0;pointer-events:none;box-shadow:0 0 26px -4px var(--gc) inset}
 .shop-tile .nm{font-family:'Oswald';font-size:13px;text-transform:uppercase;line-height:1.2;position:relative;z-index:1}
 .shop-tile .base{border-top:1px solid var(--gc);margin-top:8px;padding-top:6px;position:relative;z-index:1}

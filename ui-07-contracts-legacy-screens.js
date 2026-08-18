@@ -660,23 +660,29 @@ function scr_legends(){
   const offer=gauntletExclusiveOfferToday(meta);
   const offerItem=GAUNTLET_EXCLUSIVE_OFFERS.find(i=>i.id===offer.id);
   const offerOwned=checkLegendUnlock(offer.id);
-  const offerHtml=`<div class="glass card mb" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
-     <div class="eyebrow mb" style="color:var(--blood)">⚡ OFFRE DU JOUR — EXCLUSIVE, -${offer.discountPct}%</div>
-     <b style="font-size:15px">${offerItem.name}</b>
-     <div class="muted small mt">${offerItem.desc}</div>
+  const offerHtml=`<div class="glass" style="border:1px solid var(--blood);background:var(--panel2);padding:10px">
+     <div class="eyebrow mb" style="color:var(--blood);font-size:10px">⚡ OFFRE DU JOUR -${offer.discountPct}%</div>
+     <b style="font-size:13px">${offerItem.name}</b>
      ${offerOwned?`<div class="mono small mt" style="color:var(--sage)">✓ Acquise</div>`:
-       `<button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 10px;width:auto" onclick="CL.purchaseExclusiveOffer()" ${pts>=offer.cost?'':'disabled'}>${offer.cost} pts <span class="muted" style="text-decoration:line-through">${offerItem.baseCost}</span></button>`}
-     <div class="muted small mt" style="font-size:10px">Ne revient jamais 2 jours d\u2019affilée — peut revenir plus tard.</div>
+       `<button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 8px;width:auto;font-size:12px" onclick="CL.purchaseExclusiveOffer()" ${pts>=offer.cost?'':'disabled'}>${offer.cost} pts <span class="muted" style="text-decoration:line-through">${offerItem.baseCost}</span></button>`}
    </div>`;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
   const lotteryAvail=gauntletLotteryAvailable(meta);
-  const lotteryHtml=`<div class="glass card mb" style="border-left:3px solid var(--sage);background:var(--panel2);padding:12px">
-     <div class="eyebrow mb" style="color:var(--sage)">🎁 CAISSE MYSTÈRE — Loterie des Légendes</div>
-     <div class="muted small">Une par jour. 1% de chance d\u2019un archétype ultra-exclusif ; sinon, un des déblocages ci-dessous, tiré au hasard parmi ceux qu\u2019il te reste à obtenir.</div>
-     ${lotteryAvail?`<button class="btn ghost mt" style="border-color:var(--sage);color:var(--sage);padding:6px 10px;width:auto" onclick="CL.drawGauntletLottery()" ${pts>=GAUNTLET_LOTTERY_COST?'':'disabled'}>Tenter — ${GAUNTLET_LOTTERY_COST} pts</button>`
-       :`<div class="mono small mt" style="color:var(--muted)">Déjà tentée aujourd\u2019hui — revenez demain.</div>`}
+  const lotteryHtml=`<div class="glass" style="border:1px solid var(--sage);background:var(--panel2);padding:10px">
+     <div class="eyebrow mb" style="color:var(--sage);font-size:10px">🎁 CAISSE MYSTÈRE</div>
+     <div class="muted small">1% archétype exclusif, sinon un déblocage au hasard.</div>
+     ${lotteryAvail?`<button class="btn ghost mt" style="border-color:var(--sage);color:var(--sage);padding:6px 8px;width:auto;font-size:12px" onclick="CL.drawGauntletLottery()" ${pts>=GAUNTLET_LOTTERY_COST?'':'disabled'}>Tenter — ${GAUNTLET_LOTTERY_COST} pts</button>`
+       :`<div class="mono small mt" style="color:var(--muted)">Revenez demain.</div>`}
    </div>`;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_BOUTIQUE_COMPACTE] — bug remonté : "très très
+     longue" à défiler — offerHtml/lotteryHtml empilaient chacun une carte
+     pleine largeur (~90-110px). Placées côte à côte (.leg-grid, déjà
+     utilisée pour le Panthéon et le menu Gauntlet) : moitié moins de
+     hauteur pour exactement le même contenu, textes secondaires raccourcis
+     pour rester lisibles à mi-largeur. ==== */
+  const offerLotteryHtml=`<div class="leg-grid mb">${offerHtml}${lotteryHtml}</div>`;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
      section dédiée, cachée par le filtre Gauntlet OFF n'a pas de sens à
@@ -744,13 +750,7 @@ function scr_legends(){
      <div><span class="stat-big" style="font-size:20px">${meta.totalBelts||0}</span><span class="stat-lbl">Ceintures remportées</span></div>
      <div><span class="stat-big" style="font-size:20px">${formatArgent(meta.totalMoney||0)}</span><span class="stat-lbl">Gains cumulés</span></div>
    </div>
-   ${filterBar}
-   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
-   ${offerHtml}
-   ${lotteryHtml}
-   ${consumablesHtml}
    <div class="mono small muted mb">${owned.length} / ${visibleItems.length} déblocages acquis${filterOn?' (filtré Gauntlet)':''}</div>
-
    ${nextUp?`<div class="glass card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--gold)">Prochain déblocage abordable</div>
      <b style="font-size:15px">${nextUp.name}</b>
@@ -759,6 +759,10 @@ function scr_legends(){
        <span style="display:block;height:100%;width:${clamp(Math.round(pts/nextUp.cost*100),0,100)}%;background:var(--gold)"></span>
      </div>
    </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">${filterOn?'Tout le contenu Gauntlet est débloqué.':'Tout est débloqué. Il n\u2019y a plus rien à acheter ici.'}</span></div>`}
+   ${filterBar}
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="position:relative;border:1px solid var(--gold);background:linear-gradient(135deg,color-mix(in srgb, var(--gold) 24%, var(--panel2)) 0%,var(--panel2) 68%);padding:12px 14px;box-shadow:0 0 22px -6px color-mix(in srgb, var(--gold) 60%, transparent)"><span class="small" style="color:var(--text)">${esc(m)}</span></div>`; })():''}
+   ${offerLotteryHtml}
+   ${consumablesHtml}
 
    ${categories.map(cat=>{
      const catItems=visibleItems.filter(i=>i.cat===cat);
