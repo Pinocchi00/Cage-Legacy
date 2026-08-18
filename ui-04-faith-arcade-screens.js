@@ -703,15 +703,14 @@ function atRiskToggleBlock(a){
 /* ==== [ANCRE: COACHING_OBLIGATOIRE] — item demandé : le coaching entre les
    rounds n'est plus un choix (toggle togglable via CL.toggleCoaching()) mais
    une pièce systématique du Gauntlet, sur les 3 formats — resolveArcadeFight()
-   (ui-03) ne passe plus que par startCoachingFight(). Le bloc devient un
-   simple badge informatif, non cliquable, pour que le joueur sache à quoi
-   s'attendre avant de lancer le combat, sans pouvoir le désactiver. ==== */
-function coachingToggleBlock(a){
-  return `<div class="toggle-card" style="flex:1;min-width:0">
-     <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid var(--gold);color:var(--gold);font-weight:bold">✓ Coaching</div>
-     <div class="muted small mt">Pause tactique après chaque round : dégâts + tendance des juges affichés, nouvelle consigne à choisir avant le round suivant.</div>
-   </div>`;
-}
+   (ui-03) ne passe plus que par startCoachingFight(). */
+/* ==== [ANCRE: CORRECTIF_BADGE_COACHING_PERMANENT] — bug remonté : le badge
+   "✓ Coaching" avait bien été rendu non cliquable au moment où le coaching
+   est devenu permanent (ANCRE ci-dessus), mais continuait de prendre une
+   place entière dans la rangée de pastilles des 3 hubs Gauntlet — pour une
+   mécanique qui ne se désactive plus jamais, ce n'est plus une information
+   utile à afficher à chaque écran, juste de l'espace perdu. Fonction et ses
+   3 appels retirés (aucun autre appelant, cf. grep). ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — les séquelles doivent être lisibles au
    hub, sinon la baisse d'attributs est vécue comme un bug de simulation. ==== */
@@ -778,9 +777,34 @@ function gauntletStatusBlock(a,live){
     rows.push(`<div class="mono small gold">Multiplicateur de la run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`);
   }
   if(!rows.length) return '';
+  /* ==== [ANCRE: CORRECTIF_ETAT_RUN_COMPACT] — bug remonté : jusqu'à 6
+     lignes (mutateur, camp, contrat, cagnotte, séquelles, multiplicateur)
+     s'empilaient avec rows.join('') pur, sans le moindre espacement — un
+     bloc déjà chargé rendu encore plus difficile à lire. Chaque ligne
+     existante est enveloppée ici (aucun des appels rows.push() ci-dessus
+     n'a besoin de changer) avec une petite marge haute, sauf la première. ==== */
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:left;margin-top:12px">
      <div class="eyebrow mb" style="font-size:11px">État de la run</div>
-     ${rows.join('')}
+     ${rows.map((r,i)=>`<div${i>0?' style="margin-top:6px"':''}>${r}</div>`).join('')}
+   </div>`;
+  /* ==== [FIN ANCRE] ==== */
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORRECTIF_STATS_HUB_ABSENTES] — bug remonté : le bloc compact
+   "Ton combattant" (Technique/Mental/Physique sur 20, via groupAvg/d20,
+   engine.js) n'existait que sur l'écran de coaching (scr_coaching_round) —
+   au moment où se prennent les vraies décisions (choix de camp, cible du
+   prochain combat), le joueur n'avait aucun moyen de vérifier l'état actuel
+   de son combattant sans y aller à l'aveugle. Extrait ici pour être partagé
+   par les 3 hubs Gauntlet (scr_arcadehub) ET l'écran de coaching, au lieu de
+   dupliquer le même gabarit à 4 endroits. ==== */
+function fighterQuickStatsBlock(f,title){
+  const gAvg=groupAvg(f);
+  return `<div class="card glass mb" style="background:var(--panel2);padding:12px">
+     <div class="eyebrow mb">${title}</div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Technique</span><b>${d20(gAvg.tech)}/20</b></div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Mental</span><b>${d20(gAvg.ment)}/20</b></div>
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Physique</span><b>${d20(gAvg.phys)}/20</b></div>
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -1183,7 +1207,8 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
      <div class="muted small mt">Identité inconnue — révélée juste avant le combat.</div>`
      /* ==== [FIN ANCRE] ==== */}</div>
    ${gauntletStatusBlock(a,true)}
-   <div style="display:flex;gap:10px;margin-top:12px">${coachingToggleBlock(a)}${atRiskToggleBlock(a)}</div>
+   ${fighterQuickStatsBlock(f,'Ton combattant')}
+   <div style="display:flex;gap:10px;margin-top:12px">${atRiskToggleBlock(a)}</div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button></div>`;
   }
@@ -1219,7 +1244,8 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
    ${targets.map(targetCard).join('')}
    ${(a.aggroCooldown>0)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
    ${gauntletStatusBlock(a,true)}
-   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${coachingToggleBlock(a)}${atRiskToggleBlock(a)}</div>
+   ${fighterQuickStatsBlock(f,'Ton combattant')}
+   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${atRiskToggleBlock(a)}</div>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button></div>`;
   }
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
@@ -1236,7 +1262,8 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${gauntletRumorActive(a)?a.opponent.styleLabel:`${a.opponent.styleLabel} · OVR ${a.opponent.overall}`}</div>`}</div>
    ${gauntletStatusBlock(a,true)}
-   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${coachingToggleBlock(a)}${atRiskToggleBlock(a)}</div>
+   ${fighterQuickStatsBlock(f,'Ton combattant')}
+   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${atRiskToggleBlock(a)}</div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button>
    <button class="btn ghost" style="margin-top:8px;opacity:0.75" onclick="CL.viewBracket()">Voir le tableau complet</button></div>`;
@@ -1453,14 +1480,10 @@ function scr_coaching_round(){
      Gauntlet — cf. scr_arcade_plan, ui-04 — via groupAvg/ATTR, engine.js).
      Bloc compact (3 lignes, pas la liste détaillée par attribut : le coin
      n'a besoin que d'une lecture rapide entre 2 rounds, pas de la fiche
-     complète). ==== */
-  const gAvg=groupAvg(f);
-  const coachStatsBlock=`<div class="card glass mb" style="background:var(--panel2);padding:12px">
-     <div class="eyebrow mb">Ton combattant, round ${c.round}</div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Technique</span><b>${d20(gAvg.tech)}/20</b></div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Mental</span><b>${d20(gAvg.ment)}/20</b></div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Physique</span><b>${d20(gAvg.phys)}/20</b></div>
-   </div>`;
+     complète). Généré par fighterQuickStatsBlock (cf. ANCRE
+     CORRECTIF_STATS_HUB_ABSENTES ci-dessus), désormais partagée avec les
+     3 hubs Gauntlet. ==== */
+  const coachStatsBlock=fighterQuickStatsBlock(f,`Ton combattant, round ${c.round}`);
   /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">LE COIN · ROUND ${c.round}</span></div>
    <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:20px 16px;margin-bottom:16px;position:relative;overflow:hidden">

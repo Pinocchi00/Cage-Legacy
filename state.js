@@ -42,7 +42,7 @@ const HOF_KEY='cage-legacy-hof', SAVE_VERSION=2;
 function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY))||[]; }catch(e){ return []; } }
 function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catch(e){} }
 /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
-   f.decorations (array d'ids LEGEND_UNLOCKABLES, cat 'Ennoblissement du
+   f.decorations (array d'ids LEGEND_UNLOCKABLES, cat 'Décorations du
    Panthéon') vit directement sur l'entrée HOF — au même titre que
    favorite/beltHistory. "Récupération" à la suppression (deleteHof, ui-08)
    est automatique et gratuite : f.decorations disparaît avec l'entrée, la
@@ -572,11 +572,11 @@ const LEGEND_UNLOCKABLES=[
      plus bas, qui la retire d'un éventuel porteur précédent). Maximum 3
      équipées simultanément par combattant. gauntlet:false : ce sont des
      décorations de Panthéon (carrière), pas du contenu Gauntlet. */
-  {id:'deco_frame_gold',name:'Cadre Doré (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:70,desc:'Cadre doré autour de la fiche du combattant retraité.'},
-  {id:'deco_frame_crimson',name:'Cadre Écarlate (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:70,desc:'Cadre rouge sang autour de la fiche du combattant retraité.'},
-  {id:'deco_glow',name:'Effet de Lumière (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:90,desc:'Halo lumineux doré autour du nom du combattant.'},
-  {id:'deco_typography',name:'Typographie Gravée (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:60,desc:'Nom du combattant affiché dans une typographie ornementale exclusive.'},
-  {id:'deco_diamond',name:'Palmarès en Diamant (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:120,desc:'Le bilan (victoires-défaites) scintille en diamant sur la fiche.'}
+  {id:'deco_frame_gold',name:'Cadre Doré (Décoration)',cat:'Décorations du Panthéon',cost:70,desc:'Cadre doré autour de la fiche du combattant retraité.'},
+  {id:'deco_frame_crimson',name:'Cadre Écarlate (Décoration)',cat:'Décorations du Panthéon',cost:70,desc:'Cadre rouge sang autour de la fiche du combattant retraité.'},
+  {id:'deco_glow',name:'Effet de Lumière (Décoration)',cat:'Décorations du Panthéon',cost:90,desc:'Halo lumineux doré autour du nom du combattant.'},
+  {id:'deco_typography',name:'Typographie Gravée (Décoration)',cat:'Décorations du Panthéon',cost:60,desc:'Nom du combattant affiché dans une typographie ornementale exclusive.'},
+  {id:'deco_diamond',name:'Palmarès en Diamant (Décoration)',cat:'Décorations du Panthéon',cost:120,desc:'Le bilan (victoires-défaites) scintille en diamant sur la fiche.'}
   /* ==== [FIN ANCRE] ==== */
 ];
 // Gain divisé par 10 par rapport au score brut : hofScore() peut dépasser 500
@@ -669,10 +669,10 @@ const GAUNTLET_EXCLUSIVE_OFFERS=[
      emplacement d'affichage de titre n'existe dans le jeu (ni fiche, ni
      Panthéon) — hors scope d'un correctif ciblé, à traiter comme un ajout
      de fonctionnalité à part entière. ==== */
-  {id:'excl_mask_oni',name:'Masque du Oni (cosmétique Panthéon)',cat:'Ennoblissement du Panthéon',desc:'Décoration de fiche exclusive, jamais vendue autrement.',baseCost:220},
+  {id:'excl_mask_oni',name:'Masque du Oni (cosmétique Panthéon)',cat:'Décorations du Panthéon',desc:'Décoration de fiche exclusive, jamais vendue autrement.',baseCost:220},
   {id:'excl_banner_ash',name:'Bannière Cendrée (thème d\u2019octogone)',desc:'Variante sombre et exclusive du thème Arène Écarlate.',baseCost:260},
   {id:'excl_title_ghost',name:'Titre « L\u2019Insaisissable » (Profil)',desc:'Titre cosmétique exclusif, sans effet mécanique.',baseCost:180},
-  {id:'excl_gloves_relic',name:'Gants-Relique (cosmétique Panthéon)',cat:'Ennoblissement du Panthéon',desc:'Décoration de fiche exclusive au style usé et ancien.',baseCost:240},
+  {id:'excl_gloves_relic',name:'Gants-Relique (cosmétique Panthéon)',cat:'Décorations du Panthéon',desc:'Décoration de fiche exclusive au style usé et ancien.',baseCost:240},
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
      "Disponible à la fois en achat classique ET via la Rotation des offres
@@ -682,7 +682,7 @@ const GAUNTLET_EXCLUSIVE_OFFERS=[
      id évite toute désynchronisation entre les deux catalogues. baseCost
      recopié depuis son entrée LEGEND_UNLOCKABLES (120) pour que la réduction
      s'applique sur le même prix de référence. ==== */
-  {id:'deco_diamond',name:'Palmarès en Diamant (Ennoblissement)',desc:'Décoration de Panthéon, aussi disponible en achat classique.',baseCost:120}
+  {id:'deco_diamond',name:'Palmarès en Diamant (Décoration)',desc:'Décoration de Panthéon, aussi disponible en achat classique.',baseCost:120}
   /* ==== [FIN ANCRE] ==== */
 ];
 function gauntletExclusiveOfferToday(meta){

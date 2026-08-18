@@ -126,15 +126,24 @@ function scr_ascension_tower(){
    (3 modes ou un mode nommé), la série en cours, une éventuelle offre de
    rachat, et les boutons de tentative PAR FORMAT (le verrou 1 tentative/
    format/jour est conservé tel quel — cf. state.js pour le raisonnement). ==== */
+/* ==== [ANCRE: CORRECTIF_DEFI_JOUR_COMPACT] — bug remonté : chaque ligne de
+   format portait une phrase complète ("Tenter ce format pour le défi du
+   jour", "Défi du jour non applicable à ce format") qui passait sur 2
+   lignes dans le badge — répété 3 fois (un par format), c'est la moitié de
+   la hauteur du bloc "Défi du jour" à elle seule. Le contexte ("défi du
+   jour") est déjà donné une seule fois par l'eyebrow du bloc englobant
+   (gauntletDailyGroup) : inutile de le répéter dans chaque badge, un état
+   court par ligne suffit. ==== */
 function gauntletDailyTag(mode){
   const meta=loadMetaStats();
   const obj=gauntletDailyObjective(meta);
   const scopeOk=!obj.scope||obj.scope===mode;
   const done=gauntletDailyDone(meta,mode);
-  const label=!scopeOk?`Défi du jour non applicable à ce format`:done?`Tentative du jour déjà jouée`:`Tenter ce format pour le défi du jour`;
+  const label=!scopeOk?`Non applicable`:done?`Déjà tenté`:`Tenter`;
   const disabled=done||!scopeOk;
-  return `<div class="mono small" style="margin-top:6px"><span onclick="${disabled?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${disabled?'default':'pointer'};border:1px dashed ${disabled?'var(--line)':'var(--sage)'};color:${disabled?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px;opacity:${scopeOk?1:0.5}">${label}</span></div>`;
+  return `<span onclick="${disabled?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${disabled?'default':'pointer'};border:1px dashed ${disabled?'var(--line)':'var(--sage)'};color:${disabled?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px;opacity:${scopeOk?1:0.5}" class="mono">${label}</span>`;
 }
+/* ==== [FIN ANCRE] ==== */
 function gauntletDailyGroup(){
   const meta=loadMetaStats();
   const obj=gauntletDailyObjective(meta);
@@ -641,7 +650,7 @@ function scr_legend_detail(){
      désormais le même cat que les décorations classiques, donc simplement
      concaténer GAUNTLET_EXCLUSIVE_OFFERS suffit à les faire apparaître ici
      une fois possédées, sans toucher au reste du panneau. ==== */
-  const ownedDecorations=LEGEND_UNLOCKABLES.concat(GAUNTLET_EXCLUSIVE_OFFERS).filter(i=>i.cat==='Ennoblissement du Panthéon'&&checkLegendUnlock(i.id));
+  const ownedDecorations=LEGEND_UNLOCKABLES.concat(GAUNTLET_EXCLUSIVE_OFFERS).filter(i=>i.cat==='Décorations du Panthéon'&&checkLegendUnlock(i.id));
   /* ==== [FIN ANCRE] ==== */
   const decorationPanel=ownedDecorations.length?`<div class="card mb"><div class="eyebrow mb">Décorations (${decorations.length}/3)</div>
      <div class="muted small mb" style="font-size:10.5px">Un déblocage de compte : la même décoration peut être portée par plusieurs combattants à la fois.</div>

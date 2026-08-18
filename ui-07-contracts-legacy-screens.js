@@ -585,6 +585,17 @@ function shopRarity(cost){
   if(cost>=250) return 'M'; if(cost>=180) return 'L'; if(cost>=120) return 'E'; if(cost>=90) return 'R'; return 'C';
 }
 const SHOP_RAR_LABEL={C:'Commune',R:'Rare',E:'Épique',L:'Légendaire',M:'Mythique'};
+/* ==== [ANCRE: CORRECTIF_DIFFERENCIATION_CATEGORIES] — bug remonté : hors
+   la couleur de bordure liée au PRIX (shopRarity, même échelle pour tout le
+   catalogue), rien ne distinguait un mode de jeu d'un cosmétique ou d'un
+   outil au premier coup d'œil — d'où l'impression de répétition, un item à
+   300 pts et un item à 300 pts se ressemblant toujours, quel que soit ce
+   qu'ils débloquent réellement. Un pictogramme par catégorie, posé sur le
+   titre de chaque rail (pas sur chaque tuile, pour ne pas surcharger un
+   format déjà compact), donne une identité immédiate au balayage vertical
+   de l'écran, en plus de la couleur de rareté déjà en place. ==== */
+const SHOP_CAT_ICON={'Outils':'🧰','Cosmétiques':'🎨','Archétypes Arcade':'🥊','Modes annexes':'🎮','Scénarios':'📜','Décorations du Panthéon':'🎖'};
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — aperçu réel avant achat.
    Seuls les objets à effet visuel CONNU sont prévisualisables :
    - cosmetic_* → thème d'octogone (ARENA_THEMES, ui-08 : floorColors/railColor)
@@ -673,36 +684,48 @@ function scr_legends(){
      avant seulement quand filterOn pour rester cohérente avec le reste. ==== */
   const pendingId=meta.gauntletPendingConsumable;
   const pendingItem=pendingId?GAUNTLET_CONSUMABLES.find(i=>i.id===pendingId):null;
-  const consumablesHtml=`<div class="glass card mb" style="border-left:3px solid var(--blood-d);background:var(--panel2);padding:12px">
-     <div class="eyebrow mb" style="color:var(--blood)">☠ MARCHÉ NOIR — consommables à usage unique</div>
-     <div class="muted small mb">Appliqué automatiquement au début de ta prochaine run Gauntlet — pas de réserve, un seul en attente à la fois.</div>
-     ${pendingItem?`<div class="mono small" style="color:var(--gold)">En attente pour ta prochaine run : ${pendingItem.name}</div>`:
-       GAUNTLET_CONSUMABLES.map(item=>{
-         const canAfford=pts>=item.cost;
-         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)">
-           <div><b style="font-size:13px">${item.name}</b><div class="muted small">${item.desc}</div></div>
-           <button class="btn ghost" style="border-color:${canAfford?'var(--blood)':'var(--line)'};color:${canAfford?'var(--blood)':'var(--muted)'};padding:6px 10px;width:auto;flex:0 0 auto" onclick="CL.purchaseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button>
-         </div>`;
-       }).join('')}
-   </div>`;
+  /* ==== [ANCRE: CORRECTIF_MARCHE_NOIR_COMPACT] — bug remonté : la liste
+     complète (name+desc+bouton, un par ligne, pleine largeur) forçait un
+     long défilement vertical, hors de la direction artistique du reste de
+     la boutique (catalogue en rails horizontaux compacts, shop-rail/
+     shop-tile). Reprend exactement ce même gabarit — la description
+     complète n'apparaît plus qu'au clic (shopPreviewHtml, sa branche par
+     défaut lit déjà item.desc sans rien savoir des consommables : aucune
+     nouvelle mécanique, juste le même mécanisme de bascule d'aperçu que le
+     catalogue, réutilisé tel quel). ==== */
+  const consumablesHtml=`<div class="shop-rail-title">☠ Marché noir — consommables à usage unique<span class="n">${GAUNTLET_CONSUMABLES.length}</span></div>
+   <div class="muted small mb">Appliqué automatiquement au début de ta prochaine run Gauntlet — pas de réserve, un seul en attente à la fois.</div>
+   ${pendingItem?`<div class="mono small" style="color:var(--gold)">En attente pour ta prochaine run : ${pendingItem.name}</div>`:`
+   <div class="shop-rail">${GAUNTLET_CONSUMABLES.map(item=>{
+     const canAfford=pts>=item.cost;
+     const hintLabel=G._shopPreview===item.id?'▲ Fermer':'▼ Voir le détail';
+     return `<div class="shop-tile" style="--gc:var(--blood)" onclick="CL.toggleShopPreview('${item.id}')">
+       <div class="glow"></div>
+       <div><div class="rar-lbl">Consommable</div><div class="nm">${item.name}</div><div class="shop-preview-hint">${hintLabel}</div></div>
+       <div class="base"><button class="price" style="color:${canAfford?'var(--blood)':'var(--muted)'}" onclick="event.stopPropagation();CL.purchaseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button></div>
+     </div>`;
+   }).join('')}</div>
+   ${(G._shopPreview&&GAUNTLET_CONSUMABLES.some(i=>i.id===G._shopPreview))?shopPreviewHtml(GAUNTLET_CONSUMABLES.find(i=>i.id===G._shopPreview)):''}
+   `}`;
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: VITRINE_BOUTIQUE] — item demandé : les achats retombaient
-     dans un simple "✓ Acquis" sans jamais montrer ce qu'ils avaient produit
-     en jeu. Deux données déjà calculées ailleurs (getArenaTheme, ui-08 ;
-     décorations équipées, comptées sur chaque légende du Panthéon) —
-     assemblées ici en une carte de synthèse, sans nouvelle mécanique. ==== */
-  const activeTheme=getArenaTheme();
-  const equippedDecoCount=loadHOF().reduce((s,leg)=>s+((leg.decorations||[]).length),0);
-  const showcaseHtml=(activeTheme.id!=='classic'||equippedDecoCount>0)?`<div class="card mb" style="background:var(--panel2);padding:12px">
-     <div class="eyebrow mb">Vitrine actuelle</div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Thème d\u2019octogone</span><b class="gold">${activeTheme.name}</b></div>
-     ${equippedDecoCount>0?`<div class="mono small mt" style="display:flex;justify-content:space-between"><span class="muted">Décorations portées au Panthéon</span><b class="gold">${equippedDecoCount}</b></div>`:''}
-   </div>`:'';
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_VITRINE_REDONDANTE] — bug remonté : "Vitrine
+     actuelle" ne faisait que répéter le thème d'octogone actif, déjà
+     affiché plus bas dans "Thème visuel de l'octogone actif" (même écran),
+     et le nombre de décorations portées, visible sur chaque fiche du
+     Panthéon — sans intérêt propre, seulement de la hauteur en plus. La
+     phrase d'intro ("L'héritage de tes retraités...") est retirée pour la
+     même raison : pure flaveur, aucune information. ==== */
+  /* ==== [ANCRE: CORRECTIF_MESSAGE_ACHAT_INVISIBLE] — bug remonté : le
+     message de résultat (G.lastMsg — gain de la Caisse Mystère, achat de
+     l'offre du jour, rachat de série...) s'affichait tout en bas de l'écran,
+     après tout le catalogue : invisible sans un long défilement, donnant
+     l'impression de ne rien gagner. Remonté juste sous le titre, à portée
+     de vue immédiate après un clic sur n'importe quelle action du haut de
+     l'écran (offre, loterie, marché noir). ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Salle des Légendes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp gold">${pts} points de salle</h2>
-   <p class="lede small">L\u2019héritage de tes retraités ouvre de nouvelles possibilités pour le compte — jamais un avantage de combat.</p>
-   ${showcaseHtml}
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    ${filterBar}
    ${offerHtml}
    ${lotteryHtml}
@@ -732,7 +755,7 @@ function scr_legends(){
    ${categories.map(cat=>{
      const catItems=visibleItems.filter(i=>i.cat===cat);
      return `
-     <div class="shop-rail-title">${cat}<span class="n">${catItems.length}</span></div>
+     <div class="shop-rail-title">${SHOP_CAT_ICON[cat]||''} ${cat}<span class="n">${catItems.length}</span></div>
      <div class="shop-rail">${catItems.map(item=>{
        const isOwned=checkLegendUnlock(item.id);
        const canAfford=pts>=item.cost;
@@ -763,7 +786,6 @@ function scr_legends(){
      </div>`;
    })()}
    <div class="hr" style="margin:20px 0"></div>
-   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mt glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    ${checkLegendUnlock('mode_fantasy')?`<button class="btn primary mt" style="font-size:16px;padding:16px" onclick="CL.go('fantasy_setup')">LANCER FANTASY FIGHT</button>`:''}
    ${checkLegendUnlock('mode_allstars')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--gold);color:var(--gold)" onclick="CL.initAllStars()">LANCER TOURNOI ALL-STARS</button>
      <div class="muted small" style="text-align:center;margin-top:4px">Nécessite 8 légendes au Panthéon (tu en as ${loadHOF().length})</div>`:''}
