@@ -151,12 +151,19 @@ const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
-  purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
+  /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
+     tirage/bascule d'aperçu dans la Salle des Légendes appelait render()
+     sans préserver le scroll, ramenant la page tout en haut alors que
+     l'objet cliqué (et le message de résultat, tout en bas de l'écran —
+     cf. G.lastMsg dans scr_legends, ui-07) se trouve plus bas. render(true)
+     conserve la position de scroll (cf. ANCRE dans ui-08, fonction render). ==== */
+  purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(true); },
   /* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — bascule d'aperçu pour
      les objets réellement prévisualisables (thèmes d'octogone et
      décorations Panthéon, cf. shopPreviewHtml ui-07). Un seul aperçu ouvert
      à la fois : cliquer sur l'objet déjà ouvert le referme. ==== */
-  toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(); },
+  toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(true); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — bascule d'aperçu pour un exploit :
      un seul ouvert à la fois. ==== */
   toggleAchPreview(achId){ G._achPreview=(G._achPreview===achId?null:achId); render(); },
@@ -196,13 +203,13 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026). ==== */
-  purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(); },
+  purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
-  purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(); },
+  purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
-  drawGauntletLottery(){ const meta=loadMetaStats(); const r=drawGauntletLottery(meta); G.lastMsg=r.msg; render(); },
+  drawGauntletLottery(){ const meta=loadMetaStats(); const r=drawGauntletLottery(meta); G.lastMsg=r.msg; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
      section c) du nouveau menu Gauntlet — boutique filtrée par défaut, avec

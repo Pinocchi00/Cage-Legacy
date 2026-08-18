@@ -766,7 +766,7 @@ const ACH=[
    t:()=>!!(G.arcade && G.arcade.contract && G.arcade.contract.done)},
  {id:'g_ascension',cat:'Gauntlet',ico:SVG.crown,h:'Vertige',d:'Terminer une run lancé en Ascension 3 ou plus.',
    t:()=>!!(G.arcade && (G.arcade.asc||0)>=3)},
- {id:'g_vengeance',cat:'Gauntlet',ico:SVG.hammer,h:'Dossier Clos',d:'Battre un némésis qui vous avait éliminé lors d\\u2019un run précédent.',
+ {id:'g_vengeance',cat:'Gauntlet',ico:SVG.hammer,h:'Dossier Clos',d:'Battre un némésis qui vous avait éliminé lors d’un run précédent.',
    t:()=>!!(G.arcade && (G.arcade.bounties||0)>=1)},
  {id:'g_maudit',cat:'Gauntlet',ico:SVG.skull,h:'Le Prix du Pouvoir',d:'Accepter deux pactes de camp maudits dans une même run.',
    t:()=>!!(G.arcade && (G.arcade.cursedTaken||0)>=2)},

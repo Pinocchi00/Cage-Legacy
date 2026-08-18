@@ -147,7 +147,7 @@ function gauntletDailyGroup(){
      comprenait l'intérêt de tenir la série. Annonce explicite tant que la
      récompense n'est pas encore acquise ; disparaît une fois débloquée
      (checkLegendUnlock), pour ne pas polluer l'écran après coup. ==== */
-  const streakGoalLine=(!checkLegendUnlock(GAUNTLET_DAILY_STREAK_REWARD.id))?`<div class="muted small mt">À 7 jours d\\u2019affilée : ${GAUNTLET_DAILY_STREAK_REWARD.name} (thème d\\u2019octogone exclusif) débloqué.</div>`:'';
+  const streakGoalLine=(!checkLegendUnlock(GAUNTLET_DAILY_STREAK_REWARD.id))?`<div class="muted small mt">À 7 jours d’affilée : ${GAUNTLET_DAILY_STREAK_REWARD.name} (thème d’octogone exclusif) débloqué.</div>`:'';
   /* ==== [FIN ANCRE] ==== */
   const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis réussis : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>${streakGoalLine}`:streakGoalLine;
   const rescue=meta.gauntletDailyRescueOffer;
@@ -760,7 +760,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   } else if(isDecisionLike(p.method) && p.res.judges){
     const J=p.res.judges;
     judgesHtml=`<div class="card gold-b" style="text-align:center">
-      <div class="eyebrow mb">Pointage des juges (10-point must)</div>
+      <div class="eyebrow mb">Score des juges (10-point must)</div>
       <div class="duel2" style="justify-content:center;gap:16px">
         <span class="num ${J.j1[0]>J.j1[1]?'a':(J.j1[0]===J.j1[1]?'b':'dn')}">${J.j1[0]}-${J.j1[1]}</span>
         <span class="num ${J.j2[0]>J.j2[1]?'a':(J.j2[0]===J.j2[1]?'b':'dn')}">${J.j2[0]}-${J.j2[1]}</span>

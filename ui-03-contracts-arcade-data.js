@@ -780,7 +780,7 @@ function startCoachingFight(){
      n'affichait le détail par juge pendant le coaching — mais ça faussait
      déjà l'écran de résultat final (scr_result, ui-06) pour tout combat
      Gauntlet coaché allant aux points. ==== */
-  G.arcade.coaching={round:1,scoreA:0,scoreB:0,judges:{j1:[0,0],j2:[0,0],j3:[0,0]},stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved,campPassiveOppSaved}};
+  G.arcade.coaching={round:1,scoreA:0,scoreB:0,judges:{j1:[0,0],j2:[0,0],j3:[0,0]},roundStats:[],stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved,campPassiveOppSaved}};
   /* ==== [FIN ANCRE] ==== */
   runCoachingRound(G.arcade.plan||null);
 }
@@ -804,6 +804,16 @@ function runCoachingRound(plan){
   }
   const res=simulateFight(G.f,opp,1,plan,null,{immuneA});
   if(roundBoostSaved){ Object.entries(roundBoostSaved).forEach(([k,v])=>{ G.f.attrs[k]=v; }); }
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_ROUNDSTATS_COACHING] — bug remonté : le détail
+     juge-par-juge-par-round (res.roundStats, engine.js) n'était jamais
+     conservé entre les 3 appels simulateFight(1 round) du coaching — la
+     fiche de résultat (scr_result, ui-06) affichait donc l'en-tête du
+     tableau détaillé sans aucune ligne pour un combat Gauntlet allant aux
+     points. Chaque appel simulant un seul round, res.roundStats[0].r vaut
+     toujours 1 (numérotation locale à l'appel) : on le réécrit avec le
+     vrai numéro de round (c.round) avant de l'archiver. ==== */
+  if(res.roundStats&&res.roundStats.length) c.roundStats.push(Object.assign({},res.roundStats[0],{r:c.round}));
   /* ==== [FIN ANCRE] ==== */
   const finished=res.method && (res.method.startsWith('KO')||res.method==='Soumission');
   const mergeStats=(dst,src)=>{ Object.keys(dst).forEach(k=>dst[k]=(dst[k]||0)+(src[k]||0)); };
@@ -835,7 +845,7 @@ function runCoachingRound(plan){
          convention que pour un combat non coaché (engine.js). ==== */
       const finalJudges={};
       ['j1','j2','j3'].forEach(j=>{ finalJudges[j]=[c.judges[j][0]+res.judges[j][0], c.judges[j][1]+res.judges[j][1]]; });
-      finalRes={winner,method:winner==='D'?'Égalité':'Décision',round:3,scoreA:totScoreA,scoreB:totScoreB,judges:finalJudges,stats:c.stats,log:res.log};
+      finalRes={winner,method:winner==='D'?'Égalité':'Décision',round:3,scoreA:totScoreA,scoreB:totScoreB,judges:finalJudges,roundStats:c.roundStats,stats:c.stats,log:res.log};
       /* ==== [FIN ANCRE] ==== */
     } else {
       // finition anticipée : fusionne quand même les stats des rounds
@@ -1110,7 +1120,7 @@ const ARCADE_EXCLUSIVE_TACTICS={
    et dans le statut de run (gauntletStatusBlock). ==== */
 const GAUNTLET_CAMP_IDENTITIES=[
   {id:'camp_spartiate',name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10},
-   passive:{type:'roundBoost',round:3,fx:{cardio:10,power:10},label:'Round 3 : +10 Cardio, +10 Puissance (temporaire, ce round uniquement)'}},
+   passive:{type:'roundBoost',round:3,fx:{cardio:10,power:10},label:'Round 3 de chaque combat : +10 Cardio, +10 Puissance (ce round-là uniquement)'}},
   {id:'camp_mercenaire',name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10},
    passive:{type:'oppPermanent',fx:{chin:-8},label:'Menton de l\u2019adversaire fragilisé pour tout le combat (-8, invisible pour lui)'}},
   {id:'camp_universitaire',name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10},
@@ -1120,11 +1130,11 @@ const GAUNTLET_CAMP_IDENTITIES=[
   {id:'camp_silence',name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10},
    passive:null},
   {id:'camp_meute',name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10},
-   passive:{type:'roundBoost',round:2,fx:{takedown:10,topControl:10},label:'Round 2 : +10 Lutte, +10 Contrôle au sol (temporaire, ce round uniquement)'}},
+   passive:{type:'roundBoost',round:2,fx:{takedown:10,topControl:10},label:'Round 2 de chaque combat : +10 Lutte, +10 Contrôle au sol (ce round-là uniquement)'}},
   {id:'camp_ascetique',name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10},
    passive:{type:'finishImmunity',round:3,label:'Round 3 : impossible à finir (KO/TKO/Soumission)'}},
   {id:'camp_spectacle',name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10},
-   passive:{type:'roundBoost',round:1,fx:{explosiveness:10,power:10},label:'Round 1 : +10 Explosivité, +10 Puissance (temporaire, ce round uniquement)'}}
+   passive:{type:'roundBoost',round:1,fx:{explosiveness:10,power:10},label:'Round 1 de chaque combat : +10 Explosivité, +10 Puissance (ce round-là uniquement)'}}
 ];
 /* ==== [FIN ANCRE] ==== */
 function drawGauntletCampIdentityOptions(){

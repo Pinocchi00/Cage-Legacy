@@ -632,7 +632,14 @@ function scr_legends(){
      (Panthéon, etc.), donc aucun changement de comportement ailleurs. ==== */
   const filterOn=!!G._shopGauntletFilter;
   const visibleItems=filterOn?LEGEND_UNLOCKABLES.filter(i=>i.gauntlet):LEGEND_UNLOCKABLES;
-  const filterBar=`<div class="mono small" style="margin-bottom:12px"><span onclick="CL.toggleShopGauntletFilter()" style="cursor:pointer;border:1px dashed ${filterOn?'var(--gold)':'var(--line)'};color:${filterOn?'var(--gold)':'var(--muted)'};padding:4px 10px;border-radius:2px">${filterOn?'✓ Filtré : contenu Gauntlet uniquement — cliquer pour tout afficher':'Afficher tout le contenu (retirer le filtre Gauntlet)'}</span></div>`;
+  /* ==== [ANCRE: CORRECTIF_FILTRE_CHEVAUCHEMENT] — bug remonté : ce span
+     porte une bordure/un padding sans `display:inline-block` (contrairement
+     au même type de bouton ailleurs dans le fichier, ex. gauntletDailyTag,
+     ui-06) — en ligne pure, dès que son texte passe sur 2 lignes, sa
+     bordure déborde sur le texte au-dessus au lieu de pousser le contenu
+     vers le bas. ==== */
+  const filterBar=`<div class="mono small" style="margin-bottom:12px"><span onclick="CL.toggleShopGauntletFilter()" style="display:inline-block;cursor:pointer;border:1px dashed ${filterOn?'var(--gold)':'var(--line)'};color:${filterOn?'var(--gold)':'var(--muted)'};padding:4px 10px;border-radius:2px">${filterOn?'✓ Filtré : contenu Gauntlet uniquement — cliquer pour tout afficher':'Afficher tout le contenu (retirer le filtre Gauntlet)'}</span></div>`;
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   const categories=[...new Set(visibleItems.map(i=>i.cat))];
   const owned=visibleItems.filter(i=>checkLegendUnlock(i.id));
@@ -704,7 +711,7 @@ function scr_legends(){
    <div class="stat-band mb" style="border-top:none;padding-top:10px">
      <div><span class="stat-big" style="font-size:20px">${meta.totalRetirements||0}</span><span class="stat-lbl">Carrières terminées</span></div>
      <div><span class="stat-big" style="font-size:20px">${meta.totalFights||0}</span><span class="stat-lbl">Combats disputés</span></div>
-     <div><span class="stat-big" style="font-size:20px">${meta.totalKO||0}</span><span class="stat-lbl">KO toutes carrières</span></div>
+     <div><span class="stat-big" style="font-size:20px">${meta.totalKO||0}</span><span class="stat-lbl">KO/TKO toutes carrières</span></div>
    </div>
    <div class="stat-band mb" style="border-top:none;padding-top:0">
      <div><span class="stat-big" style="font-size:20px">${meta.totalSub||0}</span><span class="stat-lbl">Soumissions</span></div>
@@ -720,7 +727,7 @@ function scr_legends(){
      <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden;margin-top:8px">
        <span style="display:block;height:100%;width:${clamp(Math.round(pts/nextUp.cost*100),0,100)}%;background:var(--gold)"></span>
      </div>
-   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">${filterOn?'Tout le contenu Gauntlet est débloqué.':'Tout est débloqué. Le Panthéon n\u2019a plus rien à t\u2019apprendre.'}</span></div>`}
+   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">${filterOn?'Tout le contenu Gauntlet est débloqué.':'Tout est débloqué. Il n\u2019y a plus rien à acheter ici.'}</span></div>`}
 
    ${categories.map(cat=>{
      const catItems=visibleItems.filter(i=>i.cat===cat);
