@@ -639,7 +639,15 @@ const CL={
   choosePlan(idx){ const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
     resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
-  toResult(){ stopArena(); G.screen='result'; save(); render(); },
+  /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
+     l'arène (skipArena et la fin naturelle de l'animation passent tous les
+     deux par ici) : généralisé pour pouvoir router ailleurs qu'au résultat
+     final. G._arenaNext (posé par runCoachingRound, ui-03, avant un round
+     intermédiaire de coaching Gauntlet) redirige vers l'écran de coaching
+     au lieu du résultat ; undefined partout ailleurs préserve exactement
+     le comportement d'origine ('result'). ==== */
+  toResult(){ stopArena(); G.screen=G._arenaNext||'result'; G._arenaNext=null; save(); render(); },
+  /* ==== [FIN ANCRE] ==== */
   afterResult(){
     if(G.pending && G.pending.isFantasy){
       if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; }
@@ -1808,12 +1816,28 @@ function makeNoisePattern(ctx){ try{
   for(let i=0;i<id.data.length;i+=4){ const v=Math.random()*255; id.data[i]=v; id.data[i+1]=v; id.data[i+2]=v; id.data[i+3]=16; }
   nctx.putImageData(id,0,0); return ctx.createPattern(c,'repeat');
 }catch(e){ return null; } }
-function buildTimeline(){
+/* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — paramètre midFight ajouté :
+   true quand cette timeline ne couvre qu'UN round joué en cours de coaching
+   Gauntlet (runCoachingRound, ui-03), pas l'issue finale du combat — sert
+   uniquement à choisir le texte de la cloche de fin (round vs combat).
+   N'affecte aucun appelant existant (career/arcade non coaché), tous
+   passent midFight=undefined, donc le texte "Fin du combat" d'origine. ==== */
+function buildTimeline(midFight){
   const res=G.pending.res, you=G.f, opp=G.fight.opp, meWin=G.pending.win;
   const log=(res.log&&res.log.length)?res.log:[];
   const beats=log.map(L=>({phase:L.phase,by:L.by,round:L.r,finish:L.finish,method:L.method,
     text:L.text,momentum:L.momentum,snapA:L.snapA,snapB:L.snapB}));
-  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:res.round||3,text:'[00:00] Fin du combat. Décision des juges.'});
+  /* ==== [ANCRE: CORRECTIF_ROUND_CLOCHE] — bug remonté : le round de la
+     cloche de fin retombait toujours sur res.round||3 — res.round n'existe
+     QUE sur une finition (KO/Soumission), jamais sur une décision (la seule
+     branche où cette cloche s'ajoute), donc l'expression valait TOUJOURS 3
+     en pratique. Inoffensif tant qu'un seul round jusqu'au-boutiste
+     existait (toujours le round 3, en carrière) — devient faux dès qu'un
+     round 1 ou 2 de coaching Gauntlet se termine aux points : affichait
+     "ROUND 3" sur le Canvas au lieu du vrai round joué. Lit désormais le
+     round du dernier beat réel du log, cohérent quel que soit le contexte. ==== */
+  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:(beats.length?beats[beats.length-1].round:3),text:midFight?'[00:00] Fin du round.':'[00:00] Fin du combat. Décision des juges.'});
+  /* ==== [FIN ANCRE] ==== */
   ARENA={beats,idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
     stMe:100,stOp:100,
     flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:res.method,meWin,

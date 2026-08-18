@@ -29,10 +29,18 @@
    par l'IA adaptative (getAdaptiveNPCTactics, engine.js — tdd>1.1, def>1.2,
    str>1.1) restent valides sans modification : tous les nouveaux bonus les
    dépassent largement. ==== */
+/* ==== [ANCRE: CORRECTIF_TACTIQUE_ROUND_FIGE] — bug remonté : la description
+   de 'bx2' (seule entrée de TACTICS à référencer un round précis, cf.
+   grep "premier round") promettait "ça passe au premier round" — vrai
+   avant le tout premier round d'un combat, mais devenu absurde une fois
+   affichée entre deux rounds de coaching Gauntlet (scr_coaching_round,
+   ui-04, réutilise exactement les mêmes TACTICS) : le round 1 est déjà
+   joué à ce moment. Reformulée sans référence à un round précis — reste
+   valable qu'elle soit lue avant le combat ou entre deux rounds. ==== */
 const TACTICS = {
   boxer: [
     { id: 'bx1', lbl: 'Sac de Frappe Ambulant', desc: 'Le plan : envoyer 200 coups significatifs et noyer l\u2019adversaire sous le volume. Le combat est long, ennuyeux à mourir, mais la victoire aux points est garantie.', m: { str: 2.2, ko: 0.25 } },
-    { id: 'bx2', lbl: 'Tout Ou Rien, Menton Compris', desc: 'Une seule idée en tête : l\u2019éteindre. La garde reste grande ouverte — ça passe au premier round ou ça finit très mal pour toi.', m: { ko: 1.8, def: 0.5 } },
+    { id: 'bx2', lbl: 'Tout Ou Rien, Menton Compris', desc: 'Une seule idée en tête : l\u2019éteindre. La garde reste grande ouverte — ça passe vite ou ça finit très mal pour toi.', m: { ko: 1.8, def: 0.5 } },
     { id: 'bx3', lbl: 'Le Marathonien Du Ring', desc: 'Courir, esquiver, pointer de loin et ne jamais s\u2019engager. Gagner à la touche, c\u2019est bien. Rentrer chez soi entier, c\u2019est mieux. Le cauchemar des bagarreurs.', m: { def: 2.2, ko: 0.2, str: 0.7 } }
   ],
   bjj: [

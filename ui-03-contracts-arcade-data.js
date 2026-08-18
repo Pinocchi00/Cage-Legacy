@@ -918,7 +918,25 @@ function runCoachingRound(plan){
     c.secondSouffleAvailable=(estA<estB) && rnd()<0.20;
   }
   /* ==== [FIN ANCRE] ==== */
-  G.screen='coaching_round'; save(); render();
+  /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — bug remonté : ce round
+     venait d'être simulé (res, plus haut) mais son déroulé n'était jamais
+     montré — le jeu sautait directement à l'écran de texte du coaching
+     (Fin du round, tendance des juges), sans jamais faire jouer le Canvas
+     de combat pour ce round précis. Seul le TOUT DERNIER round du combat
+     finissait par y passer, une fois, tout à la fin (finalizeArcadeCombatResult).
+     Reconstruit ici le même G.fight/G.pending qu'un combat classique
+     (buildTimeline en lit la forme, engine.js/ui-08) à partir de CE round
+     seul, pour le faire rejouer sur le ring avant d'atterrir sur l'écran de
+     coaching. G._arenaNext (CL.toResult, ui-08) route la sortie de l'arène
+     vers 'coaching_round' au lieu du résultat final — cette redirection ne
+     dure qu'une sortie d'arène, remise à null aussitôt consommée. win/finish
+     figés à false : ce round seul ne décide jamais le combat (jamais de
+     confetti/chute de victoire prématurée, cf. ARENA.meWin, ui-08). ==== */
+  G.fight={kind:'arcade',opp,rounds:3,plan,planLabel:G.arcade.planLabel||null};
+  G.pending={res,win:false,method:res.method,finish:false,opp:{name:opp.name,flag:opp.flag},planLabel:G.arcade.planLabel||null,newAch:[]};
+  G._arenaNext='coaching_round';
+  buildTimeline(true); G.screen='arena'; save(); render();
+  /* ==== [FIN ANCRE] ==== */
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
