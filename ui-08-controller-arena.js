@@ -19,7 +19,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
@@ -170,9 +170,14 @@ const CL={
      run" (gauntletStatusBlock, ui-04) — un seul dépliage ouvert à la fois. ==== */
   toggleRunStatusPreview(key){ G._runStatusPreview=(G._runStatusPreview===key?null:key); render(true); },
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — bascule d'aperçu pour un exploit :
-     un seul ouvert à la fois. ==== */
-  toggleAchPreview(achId){ G._achPreview=(G._achPreview===achId?null:achId); render(); },
+  /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — clic sur une tuile d'exploit ->
+     "fenêtre" dédiée (scr_ach_preview, ui-07), même principe que
+     CL.viewConsumablePreview ci-dessous pour le Marché noir, plutôt que le
+     texte replié sur place utilisé auparavant. Pas de fenêtre Canvas ici :
+     un succès n'a pas d'effet à visualiser dans l'octogone, contrairement
+     à un consommable (buff/veto/filet de sécurité). ==== */
+  viewAchPreview(achId){ G._achPreviewId=achId; G.screen='ach_preview'; render(); },
+  closeAchPreview(){ G.screen='ach'; render(true); },
   /* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
      UNIQUEMENT en Gauntlet (G.arcade), sur scr_gameover (ui-04), bouton
      discret déjà caché côté UI si le joueur ne peut pas payer — garde-fou

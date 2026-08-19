@@ -340,28 +340,45 @@ function scr_ach(){ if(!G.ach) G.ach=loadAch();
     h+=`<div class="gal-rail-title">${c}<span class="n">${items.filter(i=>i.got).length}/${items.length}</span></div>
     <div class="gal-rail">${items.map(({a,got,progPair})=>{
       const started=progPair&&progPair[0]>0;
-      const isOpen=G._achPreview===a.id;
       const baseTxt=got?'✓ Obtenu':(progPair?`${progPair[0]}/${progPair[1]}`:(started?'En cours':'Verrouillé'));
-      return `<div class="gal-tile ${got?'owned':''} ${!got&&!started?'locked':''}" style="--gc:${gc}" onclick="CL.toggleAchPreview('${a.id}')">
+      return `<div class="gal-tile ${got?'owned':''} ${!got&&!started?'locked':''}" style="--gc:${gc}" onclick="CL.viewAchPreview('${a.id}')">
         <div class="glow"></div>
-        <div><span class="ico">${a.ico}</span><div class="nm">${a.h}</div><div class="preview-hint">${isOpen?'▲ Fermer':'▼ Détail'}</div></div>
+        <div><span class="ico">${a.ico}</span><div class="nm">${a.h}</div><div class="preview-hint">▼ Détail</div></div>
         <div class="base">${baseTxt}</div>
       </div>`;
-    }).join('')}</div>
-    ${(()=>{ const open=items.find(i=>i.a.id===G._achPreview); if(!open) return '';
-      const {a,got,progPair}=open;
-      const statusLine=got?`<span class="mono small" style="color:var(--sage)">✓ Déjà obtenu</span>`
-        :progPair?`<span class="mono small" style="color:${gc}">Progression : ${progPair[0]} / ${progPair[1]}</span>`
-        :`<span class="mono small muted">Pas encore entamé — condition binaire, se débloque d\u2019un coup</span>`;
-      return `<div class="card mb" style="background:var(--panel2);border-left:3px solid ${gc};padding:14px">
-        <b>${a.h}</b>
-        <div class="muted small mt">Condition : ${a.d}</div>
-        <div class="mt">${statusLine}</div>
-      </div>`; })()}`;
+    }).join('')}</div>`;
   });
   h+=`<div class="mono small muted" style="text-align:center;margin-top:24px;opacity:.6">Un jeu développé par Pinocchio et testé par Garfield</div>`;
   h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.f?'hub':'title'}')">← Revenir au ${G.f?'hub':'menu principal'}</button></div>`;
   return h; }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: PREVIEW_SUCCES_ECRAN_DEDIE] — item demandé : même principe que
+   la fenêtre dédiée du Marché noir (scr_consumable_preview, ui-08) plutôt
+   que le texte replié sur place utilisé jusqu'ici (CL.toggleAchPreview,
+   retiré) : le clic sur une tuile d'exploit ouvre un écran plein dédié
+   (même en-tête ✕/titre que les autres fenêtres de détail). Pas de fenêtre
+   Canvas ici : un succès n'a pas d'effet à visualiser dans l'octogone,
+   contrairement à un consommable (buff/veto/filet de sécurité). ==== */
+function scr_ach_preview(){
+  const a=ACH.find(x=>x.id===G._achPreviewId);
+  if(!a) return `<div class="scr center intro"><p class="lede">Exploit introuvable.</p><button class="btn ghost mt" onclick="CL.closeAchPreview()">Fermer</button></div>`;
+  if(!G.ach) G.ach=loadAch();
+  const got=G.ach.includes(a.id);
+  const progPair=(!got && G.f && a.prog)?a.prog(G.f):null;
+  const gc=ACH_CAT_COLOR[a.cat];
+  const statusLine=got?`<span class="mono small" style="color:var(--sage)">✓ Déjà obtenu</span>`
+    :progPair?`<span class="mono small" style="color:${gc}">Progression : ${progPair[0]} / ${progPair[1]}</span>`
+    :`<span class="mono small muted">Pas encore entamé — condition binaire, se débloque d’un coup</span>`;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Palmarès — détail</span><span class="eyebrow x" onclick="CL.closeAchPreview()">✕</span></div>
+   <h2 class="disp gold" style="font-size:20px"><span class="ico" style="margin-right:6px">${a.ico}</span>${a.h}</h2>
+   <div class="card glass mt" style="padding:14px;border-left:3px solid ${gc};background:var(--panel2)">
+     <div class="eyebrow mb" style="color:${gc}">${a.cat}</div>
+     <div class="muted small">Condition : ${a.d}</div>
+     <div class="mt">${statusLine}</div>
+   </div>
+   <button class="btn ghost mt" onclick="CL.closeAchPreview()">Fermer</button>
+  </div>`;
+}
 /* ==== [FIN ANCRE] ==== */
 
 function scr_retire(){ return `<div class="scr center"><div class="eyebrow">Fin de carrière</div><h2 class="disp">Raccrocher les gants ?</h2>
