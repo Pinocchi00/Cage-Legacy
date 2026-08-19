@@ -634,28 +634,20 @@ function shopPreviewHtml(item){
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORRECTIF_FILTRE_GAUNTLET_RETIRE] — item demandé : le filtre
+   "contenu Gauntlet uniquement" (bascule + bandeau dédié) est retiré — la
+   boutique affiche toujours tout son catalogue, quel que soit l'écran
+   d'où on y accède. G._shopGauntletFilter et CL.toggleShopGauntletFilter
+   n'ont plus aucun appelant (le bouton qui les déclenchait a disparu),
+   supprimés avec le reste ; CL.goShopGauntlet() (ui-08) redirige toujours
+   vers la boutique mais ne pose plus le drapeau de filtre. ==== */
 function scr_legends(){
   const meta=loadMetaStats(); const pts=meta.legendPoints||0;
-  /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
-     filtre Gauntlet, actif par défaut quand on arrive depuis
-     CL.goShopGauntlet() (scr_gauntlet_menu, ui-06), retirable sur place —
-     G._shopGauntletFilter reste undefined pour toute entrée classique
-     (Panthéon, etc.), donc aucun changement de comportement ailleurs. ==== */
-  const filterOn=!!G._shopGauntletFilter;
-  const visibleItems=filterOn?LEGEND_UNLOCKABLES.filter(i=>i.gauntlet):LEGEND_UNLOCKABLES;
-  /* ==== [ANCRE: CORRECTIF_FILTRE_CHEVAUCHEMENT] — bug remonté : ce span
-     porte une bordure/un padding sans `display:inline-block` (contrairement
-     au même type de bouton ailleurs dans le fichier, ex. gauntletDailyTag,
-     ui-06) — en ligne pure, dès que son texte passe sur 2 lignes, sa
-     bordure déborde sur le texte au-dessus au lieu de pousser le contenu
-     vers le bas. ==== */
-  const filterBar=`<div class="mono small" style="margin-bottom:12px"><span onclick="CL.toggleShopGauntletFilter()" style="display:inline-block;cursor:pointer;border:1px dashed ${filterOn?'var(--gold)':'var(--line)'};color:${filterOn?'var(--gold)':'var(--muted)'};padding:4px 10px;border-radius:2px">${filterOn?'✓ Filtré : contenu Gauntlet uniquement — cliquer pour tout afficher':'Afficher tout le contenu (retirer le filtre Gauntlet)'}</span></div>`;
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [FIN ANCRE] ==== */
-  const categories=[...new Set(visibleItems.map(i=>i.cat))];
-  const owned=visibleItems.filter(i=>checkLegendUnlock(i.id));
-  const remaining=visibleItems.filter(i=>!checkLegendUnlock(i.id));
+  const categories=[...new Set(LEGEND_UNLOCKABLES.map(i=>i.cat))];
+  const owned=LEGEND_UNLOCKABLES.filter(i=>checkLegendUnlock(i.id));
+  const remaining=LEGEND_UNLOCKABLES.filter(i=>!checkLegendUnlock(i.id));
   const nextUp=remaining.sort((a,b)=>a.cost-b.cost)[0];
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
   const offer=gauntletExclusiveOfferToday(meta);
   const offerItem=GAUNTLET_EXCLUSIVE_OFFERS.find(i=>i.id===offer.id);
@@ -685,9 +677,7 @@ function scr_legends(){
   const offerLotteryHtml=`<div class="leg-grid mb">${offerHtml}${lotteryHtml}</div>`;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
-     section dédiée, cachée par le filtre Gauntlet OFF n'a pas de sens à
-     masquer (elle EST du contenu Gauntlet) — toujours visible, mais mise en
-     avant seulement quand filterOn pour rester cohérente avec le reste. ==== */
+     section dédiée, toujours visible dans le catalogue. ==== */
   const pendingId=meta.gauntletPendingConsumable;
   const pendingItem=pendingId?GAUNTLET_CONSUMABLES.find(i=>i.id===pendingId):null;
   /* ==== [ANCRE: CORRECTIF_MARCHE_NOIR_COMPACT] — bug remonté : la liste
@@ -700,7 +690,6 @@ function scr_legends(){
      nouvelle mécanique, juste le même mécanisme de bascule d'aperçu que le
      catalogue, réutilisé tel quel). ==== */
   const consumablesHtml=`<div class="shop-rail-title">☠ Marché noir — consommables à usage unique<span class="n">${GAUNTLET_CONSUMABLES.length}</span></div>
-   <div class="muted small mb">Appliqué automatiquement au début de ta prochaine run Gauntlet — pas de réserve, un seul en attente à la fois.</div>
    ${pendingItem?`<div class="mono small" style="color:var(--gold)">En attente pour ta prochaine run : ${pendingItem.name}</div>`:`
    <div class="shop-rail">${GAUNTLET_CONSUMABLES.map(item=>{
      const canAfford=pts>=item.cost;
@@ -750,7 +739,7 @@ function scr_legends(){
      <div><span class="stat-big" style="font-size:20px">${meta.totalBelts||0}</span><span class="stat-lbl">Ceintures remportées</span></div>
      <div><span class="stat-big" style="font-size:20px">${formatArgent(meta.totalMoney||0)}</span><span class="stat-lbl">Gains cumulés</span></div>
    </div>
-   <div class="mono small muted mb">${owned.length} / ${visibleItems.length} déblocages acquis${filterOn?' (filtré Gauntlet)':''}</div>
+   <div class="mono small muted mb">${owned.length} / ${LEGEND_UNLOCKABLES.length} déblocages acquis</div>
    ${nextUp?`<div class="glass card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--gold)">Prochain déblocage abordable</div>
      <b style="font-size:15px">${nextUp.name}</b>
@@ -758,14 +747,13 @@ function scr_legends(){
      <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden;margin-top:8px">
        <span style="display:block;height:100%;width:${clamp(Math.round(pts/nextUp.cost*100),0,100)}%;background:var(--gold)"></span>
      </div>
-   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">${filterOn?'Tout le contenu Gauntlet est débloqué.':'Tout est débloqué. Il n\u2019y a plus rien à acheter ici.'}</span></div>`}
-   ${filterBar}
+   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">Tout est débloqué. Il n\u2019y a plus rien à acheter ici.</span></div>`}
    ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="position:relative;border:1px solid var(--gold);background:linear-gradient(135deg,color-mix(in srgb, var(--gold) 24%, var(--panel2)) 0%,var(--panel2) 68%);padding:12px 14px;box-shadow:0 0 22px -6px color-mix(in srgb, var(--gold) 60%, transparent)"><span class="small" style="color:var(--text)">${esc(m)}</span></div>`; })():''}
    ${offerLotteryHtml}
    ${consumablesHtml}
 
    ${categories.map(cat=>{
-     const catItems=visibleItems.filter(i=>i.cat===cat);
+     const catItems=LEGEND_UNLOCKABLES.filter(i=>i.cat===cat);
      return `
      <div class="shop-rail-title">${SHOP_CAT_ICON[cat]||''} ${cat}<span class="n">${catItems.length}</span></div>
      <div class="shop-rail">${catItems.map(item=>{

@@ -218,10 +218,13 @@ const CL={
   drawGauntletLottery(){ const meta=loadMetaStats(); const r=drawGauntletLottery(meta); G.lastMsg=r.msg; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
-     section c) du nouveau menu Gauntlet — boutique filtrée par défaut, avec
-     option pour retirer le filtre (cf. scr_legends, ui-07). ==== */
-  goShopGauntlet(){ G._shopGauntletFilter=true; CL.go('legends'); },
-  toggleShopGauntletFilter(){ G._shopGauntletFilter=!G._shopGauntletFilter; render(); },
+     accès à la boutique depuis le menu Gauntlet (cf. scr_legends, ui-07). */
+  /* ==== [ANCRE: CORRECTIF_FILTRE_GAUNTLET_RETIRE] — item demandé : le
+     filtre "contenu Gauntlet uniquement" est retiré (scr_legends, ui-07) —
+     goShopGauntlet() ne pose plus le drapeau, simple redirection ;
+     toggleShopGauntletFilter() n'a plus d'appelant, supprimée. ==== */
+  goShopGauntlet(){ CL.go('legends'); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   viewLegend(id){ G.viewingLegendId=id; G.screen='legend_detail'; render(); },
   // ==== [ANCRE: SYSTEME_CLASSES] (contrôleur) — choix unique et définitif,
