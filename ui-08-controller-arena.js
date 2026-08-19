@@ -2382,8 +2382,9 @@ function scr_arena(){ const A=ARENA||{};
    même gabarit de carte que scr_arena ci-dessus (silhouettes debout dans
    l'octogone), sans le HUD de combat (dégâts par zone, cardio, momentum,
    journal texte) qui n'a pas de sens hors combat réel : juste le Canvas,
-   le nom de l'objet, sa description et son effet chiffré (/20, même
-   formule que campFxLabel, ui-03), pour rester lisible sans jargon. ==== */
+   le nom de l'objet, sa description et son effet chiffré (même formule que
+   campFxLabel, ui-03 — le jeu affiche tout sur /20 sans jamais l'écrire,
+   donc ni ici ni ailleurs). ==== */
 function scr_consumable_preview(){
   const item=GAUNTLET_CONSUMABLES.find(i=>i.id===G._consumablePreviewId);
   if(!item) return `<div class="scr center intro"><p class="lede">Objet introuvable.</p><button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button></div>`;
@@ -2400,7 +2401,7 @@ function scr_consumable_preview(){
    </div>
    <div class="card mt" style="background:var(--panel2);padding:14px">
      <div class="muted small">${item.desc}</div>
-     ${fxTxt?`<div class="mono small gold mt">${fxTxt} (/20, actif pour toute la run)</div>`:''}
+     ${fxTxt?`<div class="mono small gold mt">${fxTxt} (actif pour toute la run)</div>`:''}
    </div>
    <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.purchaseConsumable('${item.id}');CL.closeConsumablePreview();" ${canAfford?'':'disabled'}>${owned?'Déjà un consommable en attente':`Acheter — ${item.cost} pts`}</button>
    <button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button>

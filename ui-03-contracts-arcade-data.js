@@ -698,14 +698,14 @@ function ascensionCurveMod(asc){ return {lv:3*(asc||0),cap:2*(asc||0)}; }
    l'effet perçu (fatigue plus rapide) est réel, seule la MÉCANIQUE exacte
    (round par round vs pré-combat) diffère de la lettre de la spec. ==== */
 const GAUNTLET_ASCENSION_MUTATORS=[
-  {id:'mut_violent',label:'Adversaires plus violents',desc:'Tous les adversaires de la run frappent plus fort (+3 Puissance/20).'},
+  {id:'mut_violent',label:'Adversaires plus violents',desc:'Tous les adversaires de la run frappent plus fort (+3 Puissance).'},
   {id:'mut_sans_filet',label:'Sans filet',desc:'Les consommables « Filet de sécurité » et « Mise à l\u2019abri automatique » sont désactivés pour cette run.'},
   {id:'mut_pacte_force',label:'Pacte forcé',desc:'Chaque combat ne compte que par finition (KO/TKO ou soumission), sans exception, pour toute la run (Bracket 64 / Ladder 100 uniquement).'},
   {id:'mut_camp_reduit',label:'Choix réduits au camp',desc:'Le camp d\u2019entraînement ne propose plus que 2 options au lieu de 3.'},
-  {id:'mut_depart_affaibli',label:'Départ affaibli',desc:'Le combattant démarre la run avec -2 Puissance et -2 Cardio (/20).'},
+  {id:'mut_depart_affaibli',label:'Départ affaibli',desc:'Le combattant démarre la run avec -2 Puissance et -2 Cardio.'},
   {id:'mut_mise_a_nu',label:'Mise à nu',desc:'L\u2019identité et les stats de CHAQUE adversaire de la run restent cachées jusqu\u2019au dernier moment, comme un Boss Run permanent.'},
   {id:'mut_juges_severes',label:'Juges sévères',desc:'Une victoire aux points trop serrée ne suffit plus : la run s\u2019arrête comme sur une défaite.'},
-  {id:'mut_sans_repit',label:'Sans round de répit',desc:'Cardio réduit pour toute la run (-3/20) : la fatigue s\u2019installe plus vite à chaque combat.'}
+  {id:'mut_sans_repit',label:'Sans round de répit',desc:'Cardio réduit pour toute la run (-3) : la fatigue s\u2019installe plus vite à chaque combat.'}
 ];
 function rollGauntletMutator(asc,mode){
   if((asc||0)<1) return null;
@@ -1583,7 +1583,7 @@ function pierceGauntletRumor(a){
   a.analysisPierced=true;
   a._pierceMalusSaved={before:G.f.attrs.fightIQ};
   G.f.attrs.fightIQ=clamp(G.f.attrs.fightIQ-10,1,100);
-  return {success:true,msg:'Analyse débloquée pour ce combat — Intelligence tactique -2/20.'};
+  return {success:true,msg:'Analyse débloquée pour ce combat — Intelligence tactique -2.'};
 }
 /* ==== [FIN ANCRE] ==== */
 
