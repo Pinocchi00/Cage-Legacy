@@ -684,24 +684,24 @@ function scr_legends(){
      complète (name+desc+bouton, un par ligne, pleine largeur) forçait un
      long défilement vertical, hors de la direction artistique du reste de
      la boutique (catalogue en rails horizontaux compacts, shop-rail/
-     shop-tile). Reprend exactement ce même gabarit — la description
-     complète n'apparaît plus qu'au clic (shopPreviewHtml, sa branche par
-     défaut lit déjà item.desc sans rien savoir des consommables : aucune
-     nouvelle mécanique, juste le même mécanisme de bascule d'aperçu que le
-     catalogue, réutilisé tel quel). ==== */
+     shop-tile). Reprend exactement ce même gabarit. ==== */
+  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : le clic sur une
+     tuile n'ouvre plus un simple texte replié sur place (shopPreviewHtml,
+     désormais réservé au catalogue classique) mais une "fenêtre" dédiée
+     (scr_consumable_preview, ui-08) avec un aperçu Canvas des deux
+     combattants dans l'octogone, un indice visuel différent par effet. ==== */
   const consumablesHtml=`<div class="shop-rail-title">☠ Marché noir — consommables à usage unique<span class="n">${GAUNTLET_CONSUMABLES.length}</span></div>
    ${pendingItem?`<div class="mono small" style="color:var(--gold)">En attente pour ta prochaine run : ${pendingItem.name}</div>`:`
    <div class="shop-rail">${GAUNTLET_CONSUMABLES.map(item=>{
      const canAfford=pts>=item.cost;
-     const hintLabel=G._shopPreview===item.id?'▲ Fermer':'▼ Voir le détail';
-     return `<div class="shop-tile" style="--gc:var(--blood)" onclick="CL.toggleShopPreview('${item.id}')">
+     return `<div class="shop-tile" style="--gc:var(--blood)" onclick="CL.viewConsumablePreview('${item.id}')">
        <div class="glow"></div>
-       <div><div class="rar-lbl">Consommable</div><div class="nm">${item.name}</div><div class="shop-preview-hint">${hintLabel}</div></div>
+       <div><div class="rar-lbl">Consommable</div><div class="nm">${item.name}</div><div class="shop-preview-hint">▼ Voir l\u2019aperçu</div></div>
        <div class="base"><button class="price" style="color:${canAfford?'var(--blood)':'var(--muted)'}" onclick="event.stopPropagation();CL.purchaseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button></div>
      </div>`;
    }).join('')}</div>
-   ${(G._shopPreview&&GAUNTLET_CONSUMABLES.some(i=>i.id===G._shopPreview))?shopPreviewHtml(GAUNTLET_CONSUMABLES.find(i=>i.id===G._shopPreview)):''}
    `}`;
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_VITRINE_REDONDANTE] — bug remonté : "Vitrine

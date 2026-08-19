@@ -19,11 +19,11 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
   G.screen='hub'; save(); render();
@@ -210,6 +210,15 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026). ==== */
   purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(true); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : clic sur une
+     tuile du Marché noir -> "fenêtre" dédiée (scr_consumable_preview)
+     plutôt que le texte replié sur place (shopPreviewHtml, réservé
+     désormais au catalogue classique). G._returnScreen mémorise l'écran de
+     départ (toujours 'legends' en pratique) pour y revenir exactement au
+     lieu de coder 'legends' en dur ici. ==== */
+  viewConsumablePreview(itemId){ G._consumablePreviewId=itemId; G._returnScreen=G.screen; G.screen='consumable_preview'; render(); },
+  closeConsumablePreview(){ G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
   purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(true); },
@@ -1867,6 +1876,26 @@ function buildTimeline(midFight){
        1=en délire). ==== */
     slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
 }
+/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : ouvrir une
+   "fenêtre" avec un aperçu de l'arène en plein rendu Canvas (les silhouettes
+   de combattants), un par effet du Marché noir, au lieu du simple texte
+   descriptif. Réutilise TEL QUEL le moteur de rendu déjà éprouvé du combat
+   réel (cacheArenaGfx/drawArena/fighter, tous inchangés) — seule différence :
+   une timeline VIDE (aucun beat, aucune boucle d'animation démarrée),
+   dessinée une seule fois en trame figée (drawArena(0,true), même mécanisme
+   que le gel final d'un vrai combat) pour montrer les deux combattants
+   debout dans l'octogone. ==== */
+function buildStaticPreviewArena(nameA,nameB,flagA,flagB){
+  ARENA={beats:[],idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
+    stMe:100,stOp:100,
+    flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:'',meWin:false,
+    currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:null,
+    nmeName:nameA,nopName:nameB,meFlag:flagA,opFlag:flagB,
+    hitStopMs:0,hitStopStart:0,_lastNow:0,camZoom:1,camShakeMag:0,camFocusX:0.5,
+    _particles:[],_wasGrounded:false,
+    slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
+}
+/* ==== [FIN ANCRE] ==== */
 function cacheArenaGfx(){
   const A=ARENA, ctx=A.ctx, W=A.W, H=A.H;
   const topY=H*0.30, topL=W*0.08, topR=W*0.92, botL=W*0.03, botR=W*0.97, gY=H-16, gY2=H-6;
@@ -2286,6 +2315,34 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
   if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }
 }
 function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='undefined')cancelAnimationFrame(ARENA.raf); if(ARENA.to)clearTimeout(ARENA.to); } }
+/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — appelée par render() dès que
+   G.screen==='consumable_preview' (même schéma que startArena/G.screen==
+   'arena'). Un seul dessin figé (drawArena(0,true)), pas de boucle
+   requestAnimationFrame : rien à animer sur un aperçu statique. ==== */
+function startConsumablePreviewArena(){
+  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
+  if(!cv||!cv.getContext) return;
+  const item=GAUNTLET_CONSUMABLES.find(i=>i.id===G._consumablePreviewId);
+  const you=G.f;
+  buildStaticPreviewArena(you?(you.nick||you.first||'Toi'):'Toi','Adversaire',you?(you.flag||''):'','');
+  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
+  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
+  cacheArenaGfx();
+  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_PAR_EFFET] — item demandé : "pour
+     chaque effet" — un indice visuel distinct par consommable, sur ce même
+     Canvas figé, sans nouveau code de dessin (le halo de flash existe déjà
+     dans fighter(), ui-08, pour le combat réel). "shake" est un tremblement
+     JOUÉ SUR PLUSIEURS FRAMES (jitter aléatoire à chaque appel) — invisible
+     sur une trame unique figée, donc écarté ici au profit du halo, qui SE
+     VOIT sur une image fixe. Droit de véto change l'ADVERSAIRE : c'est lui
+     qui brille. Tout le reste est un avantage direct pour le joueur
+     (banque, filet de sécurité, statistiques) : c'est lui qui brille. ==== */
+  if(item&&item.id==='cons_veto') ARENA.flashOp=1; else ARENA.flashMe=1;
+  /* ==== [FIN ANCRE] ==== */
+  drawArena(0,true);
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_arena(){ const A=ARENA||{};
   return `<div class="scr">
    <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:var(--text)">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
@@ -2320,6 +2377,36 @@ function scr_arena(){ const A=ARENA||{};
    </div>
    <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Couper la transmission vidéo ▸</button>
   </div>`; }
+/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — "fenêtre" ouverte au clic sur une
+   tuile du Marché noir (scr_legends, ui-07 : CL.viewConsumablePreview) —
+   même gabarit de carte que scr_arena ci-dessus (silhouettes debout dans
+   l'octogone), sans le HUD de combat (dégâts par zone, cardio, momentum,
+   journal texte) qui n'a pas de sens hors combat réel : juste le Canvas,
+   le nom de l'objet, sa description et son effet chiffré (/20, même
+   formule que campFxLabel, ui-03), pour rester lisible sans jargon. ==== */
+function scr_consumable_preview(){
+  const item=GAUNTLET_CONSUMABLES.find(i=>i.id===G._consumablePreviewId);
+  if(!item) return `<div class="scr center intro"><p class="lede">Objet introuvable.</p><button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button></div>`;
+  const meta=loadMetaStats(), pts=meta.legendPoints||0;
+  const owned=!!meta.gauntletPendingConsumable, canAfford=pts>=item.cost && !owned;
+  const fxTxt=item.fx?Object.entries(item.fx).map(([k,v])=>{
+    const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+    return `${shown>0?'+':''}${shown} ${attrLabel(k)}`;
+  }).join(', '):'';
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Marché noir — aperçu</span><span class="eyebrow x" onclick="CL.closeConsumablePreview()">✕</span></div>
+   <h2 class="disp gold" style="font-size:20px">${item.name}</h2>
+   <div class="card glass raise" style="padding:12px;border-color:var(--blood-d);background:var(--panel2)">
+     <canvas id="shop-preview-cv" style="width:100%;height:180px;display:block;border:1px solid var(--line);background:var(--bg)"></canvas>
+   </div>
+   <div class="card mt" style="background:var(--panel2);padding:14px">
+     <div class="muted small">${item.desc}</div>
+     ${fxTxt?`<div class="mono small gold mt">${fxTxt} (/20, actif pour toute la run)</div>`:''}
+   </div>
+   <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.purchaseConsumable('${item.id}');CL.closeConsumablePreview();" ${canAfford?'':'disabled'}>${owned?'Déjà un consommable en attente':`Acheter — ${item.cost} pts`}</button>
+   <button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 // ==== [ANCRE: CORRECTIF_COULEUR_ZONES_DEGATS] — bug remonté : le rouge
 // (var(--blood)) était utilisé pour un simple seuil de dégâts CUMULÉS
 // (v>28), qui devient quasi systématique dès le round 2-3 puisque ces
