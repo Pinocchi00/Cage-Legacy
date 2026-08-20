@@ -886,15 +886,24 @@ function runDebriefBlock(a){
 }
 /* ==== [ANCRE: GAUNTLET_ASCENSION] — un palier ne se débloque qu'en gagnant le
    format : le message n'apparaît donc que sur une victoire réelle. ==== */
+/* ==== [ANCRE: TOUR_ASCENSION_CONDITIONS_MESUREES] — ce bloc ne s'affichait
+   que sur une victoire totale (a.victory). Depuis que le palier suivant
+   s'ouvre aussi sur une bonne performance (cf. state.js), la garde se fait
+   sur a.ascJustUnlocked, posé par finaliseGauntletRun au moment exact où un
+   palier est réellement ouvert — sinon le joueur débloquerait l'Ascension
+   sans que rien ne le lui dise. L'ancienne condition sert de repli pour une
+   run commencée avant ce changement. ==== */
 function ascensionUnlockBlock(a){
-  if(!a.victory) return '';
   const meta=loadMetaStats();
   const lvl=gauntletAscLevel(meta,a.mode);
+  if(!a.ascJustUnlocked && !a.victory) return '';
   if(lvl<=(a.asc||0)) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--gold);padding:12px;text-align:center;margin-bottom:20px">
-     <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${lvl} DÉBLOQUÉE — adversaires plus forts, récompenses ×${gauntletAscPayoutMod(lvl)}</div>
+     <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${lvl} DÉBLOQUÉE</div>
+     <div class="muted small mt">Adversaires plus forts, mais points gagnés multipliés par ${gauntletAscPayoutMod(lvl)}. Choisis ce palier au menu du Gauntlet.</div>
    </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 function scr_gameover(){ const a=G.arcade, f=G.f;
   if(a.mode==='boss_run'){

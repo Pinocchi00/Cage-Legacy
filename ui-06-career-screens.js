@@ -99,29 +99,64 @@ function gauntletAscPicker(mode){
    silhouette SVG autonome, simple et thématiquement cohérente, plutôt que
    de risquer de casser le rendu de combat en tirant dessus depuis un écran
    qui n'a rien à voir. ==== */
+/** Une carte de palier de la Tour. Extraite de scr_ascension_tower pour
+ * garder les deux fonctions courtes et lisibles.
+ * @param {number} i palier @param {object} ctx {mode,unlocked,meta}
+ * @returns {string} HTML de la carte */
+function ascensionTierCard(i,ctx){
+  const {mode,unlocked,meta}=ctx;
+  const isUnlocked=i<=unlocked, isCurrent=(i===unlocked);
+  const best=gauntletBestGet(meta,mode,i);
+  const bestLabel=best===undefined?'Aucun record'
+    :(mode==='boss_run'?`Meilleur : ${best} boss sur 5`
+    :mode==='ladder_100'?`Meilleur : rang #${best}`
+    :(best>=7?'Tournoi remporté':`Meilleur : ${['','32es','16es','8es','quarts','demies','finale'][best]||('palier '+best)}`));
+  /* Descriptions en clair : "+15 niveau(x) · Gains ×2.75 · un mutateur
+     aléatoire" supposait de connaître le mot « mutateur » et de deviner ce
+     que multiplient les gains. Une ligne par effet, en français simple. */
+  const effets=i===0
+    ? `<div class="muted small mt">Difficulté normale, gains normaux. C\u2019est le palier de départ.</div>`
+    : `<div class="muted small mt">Adversaires plus forts : +${3*i} niveaux.</div>
+       <div class="muted small">Points gagnés multipliés par ${gauntletAscPayoutMod(i)}.</div>
+       <div class="muted small">Une règle spéciale, tirée au hasard au début de chaque run.</div>`;
+  const etat=isCurrent?'<span class="mono small" style="color:var(--sage)">★ PALIER ACTUEL</span>'
+    :!isUnlocked?'<span class="mono small muted">🔒 Verrouillé</span>'
+    :'<span class="mono small muted">✓ Franchi</span>';
+  const pied=isUnlocked
+    ? `<div class="mono small mt" style="color:var(--gold)">${bestLabel}</div>`
+    : `<div class="mono small mt">Pour l\u2019ouvrir : ${gauntletAscUnlockGoal(mode)} au palier ${i-1}.</div>`;
+  return `<div class="glass" style="position:relative;background:${isUnlocked?'var(--panel2)':'var(--panel)'};border:1px solid ${isCurrent?'var(--gold)':'var(--line)'};border-left:4px solid ${isUnlocked?'var(--gold)':'var(--line)'};padding:12px;margin-bottom:6px;opacity:${isUnlocked?1:0.5}">
+     <div style="display:flex;justify-content:space-between;align-items:center">
+       <b style="font-size:15px;color:${isUnlocked?'var(--gold)':'var(--muted)'}">${i===0?'Palier 0 — Base':`Ascension ${i}`}</b>
+       ${etat}
+     </div>${effets}${pied}
+   </div>`;
+}
+/* ==== [ANCRE: TOUR_ASCENSION_LISIBLE] — items demandés : (1) la silhouette
+   en bâton en tête d'écran est retirée ; (2) les paliers étaient listés du
+   plus haut au plus bas, donc l'écran s'ouvrait sur cinq cartes
+   VERROUILLÉES et le seul palier jouable — celui du joueur — se retrouvait
+   tout en bas, hors écran. Ordre inversé : on lit la tour du bas vers le
+   haut, comme on la gravit, le palier actuel est visible d'emblée ; (3) les
+   descriptions passent du jargon ("un mutateur aléatoire par run") à une
+   ligne par effet en français simple, et chaque palier verrouillé affiche
+   la performance exacte qui l'ouvre (cf. state.js, seuils mesurés). ==== */
 function scr_ascension_tower(){
   const meta=loadMetaStats();
   const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
+  const modeAide={bracket64:'Un tournoi à 64 combattants : six victoires d\u2019affilée pour le remporter.',
+    ladder_100:'Un classement de 100 combattants : tu pars 100e et tu défies plus fort que toi pour remonter.',
+    boss_run:'Cinq adversaires d\u2019élite à enchaîner, sans reprendre son souffle.'};
   const mode=G._towerMode||'bracket64';
   const unlocked=gauntletAscLevel(meta,mode);
   const modeTabs=Object.keys(modeLabel).map(m=>`<span class="pill ${mode===m?'on':''}" onclick="CL.setTowerMode('${m}')">${modeLabel[m]}</span>`).join('');
+  const ctx={mode,unlocked,meta};
   const tiers=[];
-  for(let i=GAUNTLET_ASC_MAX;i>=0;i--){
-    const isUnlocked=i<=unlocked;
-    const best=gauntletBestGet(meta,mode,i);
-    const bestLabel=best===undefined?'Aucun record':(mode==='boss_run'?`${best}/5`:mode==='ladder_100'?`Rang #${best}`:(best>=7?'Tournoi remporté':`Palier ${best}`));
-    tiers.push(`<div class="glass" style="position:relative;background:${isUnlocked?'var(--panel2)':'var(--panel)'};border:1px solid ${i===unlocked?'var(--gold)':'var(--line)'};border-left:4px solid ${isUnlocked?'var(--gold)':'var(--line)'};padding:12px;margin-bottom:6px;opacity:${isUnlocked?1:0.5}">
-       <div style="display:flex;justify-content:space-between;align-items:center">
-         <b style="font-size:15px;color:${isUnlocked?'var(--gold)':'var(--muted)'}">${i===0?'Palier 0 — Base':`Ascension ${i}`}</b>
-         ${i===unlocked?'<span class="mono small" style="color:var(--sage)">★ ACTUEL</span>':!isUnlocked?'<span class="mono small muted">🔒 Verrouillé</span>':''}
-       </div>
-       <div class="muted small mt">Adversaires +${3*i} niveau(x) · Gains ×${gauntletAscPayoutMod(i)}${i>=1?' · un mutateur aléatoire par run':''}</div>
-       ${isUnlocked?`<div class="mono small mt" style="color:var(--gold)">${bestLabel}</div>`:`<div class="mono small mt">À débloquer : remporter le format au palier ${i-1}.</div>`}
-     </div>`);
-  }
+  for(let i=0;i<=GAUNTLET_ASC_MAX;i++) tiers.push(ascensionTierCard(i,ctx));
   return `<div class="scr"><div class="bar"><span class="eyebrow">🗼 Tour d\u2019Ascension — ${modeLabel[mode]}</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
-   <p class="lede small mt" style="text-align:center">Chaque palier remporté ouvre le suivant. Depuis l\u2019ajout des Mutateurs d\u2019Ascension, tout palier ≥1 tire un mutateur aléatoire par run plutôt qu\u2019une règle fixe.</p>
+   <p class="lede small mt" style="text-align:center">Chaque palier franchi ouvre le suivant : les adversaires deviennent plus forts, mais rapportent plus.</p>
    <div class="pills mb" style="justify-content:center">${modeTabs}</div>
+   <div class="card mb" style="background:var(--panel2);padding:10px 12px"><span class="muted small">${modeAide[mode]}</span></div>
    ${tiers.join('')}
    <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
   </div>`;

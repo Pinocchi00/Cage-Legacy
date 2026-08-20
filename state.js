@@ -232,6 +232,45 @@ function gauntletBestGet(meta,mode,asc){
   const per=meta.gauntletBest[mode]; if(!per) return undefined;
   return per[asc===undefined?0:asc];
 }
+/* ==== [ANCRE: TOUR_ASCENSION_CONDITIONS_MESUREES] — item demandé : "vérifier
+   les conditions d'équilibrage des paliers et réorganiser en fonction du
+   taux de réussite le plus adapté". Mesuré au Monte-Carlo (250-400 runs
+   simulées par palier et par format, via simulateFight, progression de camp
+   incluse) — ce que le code d'origine reconnaissait ne jamais avoir fait
+   ("aucun Monte Carlo derrière", cf. ANCRE GAUNTLET_ASCENSION, ui-03).
+   Résultat au palier 0, avec l'ancienne condition « remporter le format » :
+     Bracket 64  — tournoi remporté .... 1,8 %
+     Boss Run    — 5 boss battus ....... 2,0 %
+     Ladder 100  — rang 1 atteint ...... 0,0 %
+   Les 5 paliers × 3 formats étaient donc du contenu mort : impossible
+   d'ouvrir l'Ascension 1, donc aucune des suivantes. La difficulté des
+   combats n'est PAS touchée (ce serait un changement de sensation de jeu
+   bien plus risqué) : seule change la performance qui ouvre le palier
+   suivant, recalée sur ~20-27 % de réussite au palier 0 — un objectif qui
+   demande une bonne run sans exiger un quasi-sans-faute :
+     Bracket 64  — quarts de finale .... 27 %
+     Boss Run    — 2 boss battus ....... 21 %
+     Ladder 100  — top 30 .............. ~25 %
+   Remporter le format débloque toujours, forcément (le seuil est inclus).
+   'better' dit dans quel sens va la progression : le Ladder se compte à
+   l'envers (rang 1 = meilleur), les deux autres montent. ==== */
+const GAUNTLET_ASC_UNLOCK={
+  bracket64:{need:4,better:'up',goal:'atteindre les quarts de finale'},
+  ladder_100:{need:30,better:'down',goal:'entrer dans le top 30'},
+  boss_run:{need:2,better:'up',goal:'battre 2 boss'}
+};
+/** Objectif d'ouverture du palier suivant, en clair, pour l'affichage.
+ * @param {string} mode @returns {string} */
+function gauntletAscUnlockGoal(mode){ return (GAUNTLET_ASC_UNLOCK[mode]||GAUNTLET_ASC_UNLOCK.bracket64).goal; }
+/** La performance de la run ouvre-t-elle le palier suivant ?
+ * @param {string} mode @param {number} progress profondeur atteinte (rang pour le Ladder)
+ * @returns {boolean} */
+function gauntletAscUnlockReached(mode,progress){
+  const r=GAUNTLET_ASC_UNLOCK[mode];
+  if(!r || progress===undefined || progress===null) return false;
+  return r.better==='down' ? progress<=r.need : progress>=r.need;
+}
+/* ==== [FIN ANCRE] ==== */
 function recordGauntletAscension(meta,mode,asc){
   if(!meta.gauntletAscension) meta.gauntletAscension={};
   const cur=meta.gauntletAscension[mode]||0;

@@ -108,7 +108,16 @@ function finaliseGauntletRun(a,opts){
      meilleure. ==== */
   if(a.isNewArchetypeRecord && typeof G!=='undefined' && G && G.f && G.f.nick) recordGauntletGhostLog(meta,a.mode,a.asc||0,G.f.nick,a.ghostFights||[]);
   /* ==== [FIN ANCRE] ==== */
-  if(opts.kind==='victory') recordGauntletAscension(meta,a.mode,a.asc||0);
+  /* ==== [ANCRE: TOUR_ASCENSION_CONDITIONS_MESUREES] — le palier suivant
+     s'ouvre désormais sur une performance atteignable (cf. state.js pour les
+     taux mesurés), pas seulement sur une victoire totale qui ne tombait que
+     dans 0 à 2 % des runs. a.ascJustUnlocked sert à l'annoncer sur l'écran
+     de fin de run — sans quoi le joueur ne saurait pas ce qu'il vient
+     d'ouvrir. ==== */
+  if(opts.kind==='victory' || gauntletAscUnlockReached(a.mode,opts.progress)){
+    if(recordGauntletAscension(meta,a.mode,a.asc||0)) a.ascJustUnlocked=(a.asc||0)+1;
+  }
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026) :
      victoire au palier MAX (GAUNTLET_ASC_MAX, state.js) avec l'archétype
      G.f.nick — récompense fixe et unique par couple (mode, archétype),
