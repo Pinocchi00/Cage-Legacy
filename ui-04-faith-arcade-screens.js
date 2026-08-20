@@ -730,8 +730,28 @@ function atRiskToggleBlock(a){
    noyant l'information sous la répétition du même habillage visuel. Même
    pattern qu'un bloc déjà éprouvé de ce fichier (runDebriefBlock, écran de
    fin de run) : une carte, un eyebrow, des lignes mono empilées. ==== */
+/** Rappel permanent de qui on joue : archétype, tempérament, discipline.
+ * @param {object} f le combattant @returns {string} HTML (vide si inconnu) */
+function gauntletIdentityRow(f){
+  if(!f) return '';
+  const arch=f.nick||f.first||f.name||'Ton combattant';
+  const temper=f.styleLabel?` — ${f.styleLabel}`:'';
+  const disc=f.style?` · ${styleLabel(f.style)}`:'';
+  return `<div class="mono small" style="color:var(--gold)"><b>🥊 Tu joues ${esc(arch)}</b><span class="muted">${esc(temper+disc)}</span></div>`;
+}
 function gauntletStatusBlock(a,live){
   const rows=[];
+  /* ==== [ANCRE: IDENTITE_TOUJOURS_VISIBLE] — item demandé : "préciser quel
+     archétype on a choisi et quel style, le but est que tout soit toujours à
+     disposition à chaque écran pour ne jamais être perdu". Les hubs de run
+     affichent l'ADVERSAIRE en grand et ne rappelaient nulle part qui, soi,
+     on joue : en reprenant une run entamée, il fallait ouvrir la fiche
+     complète pour retrouver son propre archétype et sa discipline — dont
+     dépendent pourtant les tactiques proposées. Placé en tête du bloc, avant
+     le mutateur : c'est le socle (qui je suis) avant les contraintes. ==== */
+  const identityRow=gauntletIdentityRow(G.f);
+  if(identityRow) rows.push(identityRow);
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
      12/08/2026) : mutateur de la run affiché EN PREMIER, avant même le
      contrat — c'est la contrainte la plus structurante de toute la run
@@ -1518,6 +1538,9 @@ function scr_coaching_round(){
    </div>
    ${secondSouffleBlock}
    <div class="eyebrow gold mb" style="letter-spacing:0.2em">TA CONSIGNE POUR LE ROUND ${c.round}</div>
+   <!-- ANCRE IDENTITE_TOUJOURS_VISIBLE : les consignes proposées dépendent de
+        la discipline du combattant, autant la rappeler juste au-dessus. -->
+   <div class="mb">${gauntletIdentityRow(f)}</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">
      <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${p.lbl}</span></div>
      <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
