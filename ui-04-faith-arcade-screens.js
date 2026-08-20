@@ -1478,6 +1478,19 @@ function scr_coaching_round(){
   const judgeCards=['j1','j2','j3'].map(j=>{ const [ja,jb]=displayedJudges[j];
     const cls=ja>jb?'a':(ja===jb?'b':'dn');
     return `<span class="num ${cls}">${ja}-${jb}</span>`; }).join('');
+  /* ==== [ANCRE: COACH_DU_COIN] — item demandé : la fin de round ressemblait
+     à une fin de COMBAT (grand "FIN DU ROUND", scorecard des juges façon
+     décision finale), alors que c'est une pause : le combat reprend juste
+     après. L'écran dit maintenant explicitement combien de rounds restent
+     et à quoi sert cet arrêt, et l'estimation chiffrée des juges — du
+     jargon de scorecard — laisse la place à ce que dit le coach, avec des
+     mots. Le détail chiffré reste consultable d'un clic pour qui le veut
+     (même dépliant que « État de la run »). ==== */
+  const totalRounds=(G.fight&&G.fight.rounds)||3;
+  const restants=Math.max(0,totalRounds-roundJustEnded);
+  const verdict=coachScoreLine(a,c);
+  const conseil=coachAdviceLine(a,c,r,f);
+  const juesOpen=G._runStatusPreview==='juges';
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) : offre
@@ -1489,16 +1502,22 @@ function scr_coaching_round(){
      <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto" onclick="CL.acceptSecondSouffle()">Puiser dans les réserves</button>
    </div>`:'';
   /* ==== [FIN ANCRE] ==== */
-  return `<div class="scr"><div class="bar"><span class="eyebrow">LE COIN · ROUND ${c.round}</span></div>
-   <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:20px 16px;margin-bottom:16px;position:relative;overflow:hidden">
+  return `<div class="scr"><div class="bar"><span class="eyebrow">DANS TON COIN · ENTRE LES ROUNDS</span></div>
+   <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:18px 16px;margin-bottom:16px;position:relative;overflow:hidden">
      <div style="position:absolute;top:-30px;right:-10px;font-size:120px;opacity:0.05;font-family:'Oswald';font-weight:700;color:var(--gold);pointer-events:none;z-index:0;line-height:1">${roundJustEnded}</div>
-     <div class="eyebrow gold mb" style="position:relative;z-index:2;letter-spacing:0.3em">FIN DU ROUND ${roundJustEnded}</div>
-     <div class="mono small mt" style="position:relative;z-index:2">Infligés <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b> · Encaissés <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b></div>
-     <div class="eyebrow mb mt" style="position:relative;z-index:2">Score des juges (estimation)</div>
-     <div class="duel2" style="position:relative;z-index:2;justify-content:center;gap:14px">${judgeCards}</div>
+     <div class="eyebrow gold mb" style="position:relative;z-index:2;letter-spacing:0.3em">PAUSE — ROUND ${roundJustEnded} TERMINÉ</div>
+     <div class="muted small" style="position:relative;z-index:2">Le combat n\u2019est pas fini : il reste ${restants} round${restants>1?'s':''}. Tu es dans ton coin, c\u2019est le moment de choisir la consigne du round suivant.</div>
+     <div class="mono small mt" style="position:relative;z-index:2">Coups placés <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b> · Coups encaissés <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b></div>
+   </div>
+   <div class="card mb" style="background:var(--panel2);border-left:3px solid var(--gold);padding:14px">
+     <div class="small" style="color:var(--text)">${verdict}</div>
+     <div class="small mt" style="color:var(--gold)">« ${conseil} »</div>
+     <div class="mono small mt" style="color:var(--muted);text-decoration:underline dotted;cursor:pointer" onclick="CL.toggleRunStatusPreview('juges')">${juesOpen?'▲ Masquer les cartes des juges':'▼ Voir les cartes des juges'}</div>
+     ${juesOpen?`<div class="duel2 mt" style="justify-content:center;gap:14px">${judgeCards}</div>
+     <div class="muted small mt">Estimation : ce que chaque juge te donnerait si le combat s\u2019arrêtait maintenant.</div>`:''}
    </div>
    ${secondSouffleBlock}
-   <div class="eyebrow gold mb" style="letter-spacing:0.2em">LE COACH TE GUEULE — ROUND ${c.round} :</div>
+   <div class="eyebrow gold mb" style="letter-spacing:0.2em">TA CONSIGNE POUR LE ROUND ${c.round}</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">
      <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${p.lbl}</span></div>
      <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
