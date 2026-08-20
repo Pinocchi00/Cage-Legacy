@@ -777,7 +777,13 @@ function gauntletStatusBlock(a,live){
   const banked=a.banked||0;
   if(banked>0){
     const elim=eliminationPreview(a);
-    rows.push(`<div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b style="color:var(--loss)">+${elim} pts</b></div>`);
+    /* ==== [ANCRE: CAGNOTTE_LISIBLE] — item demandé : la somme récupérée en
+       cas de défaite s'affichait "+4 pts" en rouge, alors que c'est un gain
+       (rouge = perte partout ailleurs dans le jeu) et que le "+" laissait
+       croire à un bonus qui s'ajoute à la cagnotte. Même or que la cagnotte,
+       sans signe : c'est simplement ce que rapporte le prochain combat s'il
+       est perdu. ==== */
+    rows.push(`<div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b class="gold">${elim} pts</b></div>`);
   }
   (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)"><b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`));
   const m=gauntletRunMult(a);
@@ -1323,16 +1329,25 @@ function scr_arcade_upgrades(){
          post-combat (ui-06). Un attribut déjà au plafond affiche sa valeur
          telle quelle avec la mention, plutôt qu'un gain qui ne
          s'appliquerait pas réellement une fois applyDeltas() exécuté. ==== */
+      /* ==== [ANCRE: GAINS_QUI_MONTENT_REELLEMENT] — même règle que
+         formatSkillFx (ui-07) : on ne liste que les attributs dont la note
+         sur 20 change vraiment. Un malus, lui, reste toujours affiché même
+         s'il ne fait pas bouger la note : masquer une perte tromperait le
+         joueur, alors que masquer un gain nul ne fait que retirer du bruit. ==== */
       const deltas=t.d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
         const before=k==='morale'?f.morale:k==='form'?f.form:f.attrs[k];
         if(v>0 && k!=='morale' && k!=='form'){
           let cap=(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4;
           if(f.agedCeilings && f.agedCeilings[k]!=null) cap=Math.min(cap, f.agedCeilings[k]);
-          if(before>=cap) return `<span class="dlt">${lbl} ${d20(before)} (déjà au max)</span>`;
-          return `<span class="dlt up">${lbl} ${d20(before)} → ${d20(Math.min(before+v,cap))}</span>`;
+          if(before>=cap) return '';
+          const capped=Math.min(before+v,cap);
+          if(d20(before)===d20(capped)) return '';
+          return `<span class="dlt up">${lbl} ${d20(before)} → ${d20(capped)}</span>`;
         }
         const after=k==='morale'||k==='form'?clamp(before+v,0,100):Math.max(1,before+v);
-        return `<span class="dlt ${v>=0?'up':'dn'}">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).join('');
+        if(v>=0 && d20(before)===d20(after)) return '';
+        return `<span class="dlt ${v>=0?'up':'dn'}">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).filter(Boolean).join('')
+        || `<span class="dlt">Progression légère</span>`;
       h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
             <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
     });

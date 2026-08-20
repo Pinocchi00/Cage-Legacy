@@ -392,10 +392,25 @@ function scr_retire(){ return `<div class="scr center"><div class="eyebrow">Fin 
 // (cf. engine.js). hofScore() est chargé avant ce fichier (state.js précède
 // les écrans ui-0X dans l'ordre de chargement), donc l'appeler directement
 // ici est sûr et élimine la duplication.
+/* ==== [ANCRE: TITRES_PANTHEON_DIVERSITE] — item demandé : avec seulement 6
+   paliers très espacés (380/250/140/60/10), la majorité des carrières
+   tombaient dans les deux mêmes cases — un Panthéon de 5 fiches affichait
+   3 fois "GRAND CHAMPION", donc aucune diversité visible d'une légende à
+   l'autre. 12 paliers, resserrés là où les scores se concentrent réellement
+   (55-340, la zone d'une carrière pro classique), pour qu'une carrière un
+   peu différente donne un titre différent. Les noms restent des formules
+   parlantes sans jargon MMA (cf. item « explicite pour un néophyte »).
+   enshrine() (state.js) fige le titre au moment de la retraite : les fiches
+   déjà au Panthéon gardent le leur, seules les futures retraites utilisent
+   cette échelle. ==== */
 function legacyTitle(f){ const s=hofScore(f);
-  if(s>=380)return[SVG.goat,'LÉGENDE ÉTERNELLE']; if(s>=250)return[SVG.crown,'GRAND CHAMPION'];
-  if(s>=140)return[SVG.star,'CHAMPION RESPECTÉ']; if(s>=60)return[SVG.glove,'COMBATTANT ACCOMPLI'];
+  if(s>=520)return[SVG.goat,'LÉGENDE ÉTERNELLE'];    if(s>=420)return[SVG.infinity,'MONUMENT DU SPORT'];
+  if(s>=340)return[SVG.trophy,'ROI DE LA CAGE'];     if(s>=270)return[SVG.crown,'GRAND CHAMPION'];
+  if(s>=210)return[SVG.belt,'CHAMPION DOMINANT'];    if(s>=160)return[SVG.star,'CHAMPION RESPECTÉ'];
+  if(s>=120)return[SVG.fire,'PRÉTENDANT AU TITRE'];  if(s>=85)return[SVG.medal,'TÊTE D’AFFICHE'];
+  if(s>=55)return[SVG.glove,'COMBATTANT ACCOMPLI'];  if(s>=30)return[SVG.skill,'ESPOIR CONFIRMÉ'];
   if(s>=10)return[SVG.veteran,'VÉTÉRAN DU CIRCUIT']; return[SVG.hammer,'GUERRIER DE L\u2019OMBRE']; }
+/* ==== [FIN ANCRE] ==== */
 function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=epithets(f);
   const notableWins=(f.history||[]).filter(h=>h.res==='win'&&h.oppWasChamp&&h.oppName).slice(-6).reverse();
   let nemesisHtml='';
@@ -513,18 +528,29 @@ function formatSkillFx(fx, f){
      apporter) mais affiché explicitement "Label 20" avec sa mention.
      Sans f (Codex, catalogue hors combattant vivant), le format "+X"
      d'origine est conservé — aucun avant/après n'a de sens hors contexte. ==== */
-  return Object.entries(fx).map(([k,v])=>{
+  /* ==== [ANCRE: GAINS_QUI_MONTENT_REELLEMENT] — item demandé : "enlever les
+     16 → 16, montrer ce qui monte réellement". Un gain interne (échelle
+     1-100) ne fait pas toujours bouger la note affichée sur 20 : la carte
+     listait alors des lignes "16 → 16" et "20 (déjà au max)" qui occupent
+     de la place pour dire qu'il ne se passe rien. Ces lignes sont retirées,
+     il ne reste que les attributs dont la note change vraiment. Si aucune
+     ne bouge, une mention courte remplace la liste — mieux qu'une carte
+     muette qui laisserait croire à un bug. ==== */
+  const shown=Object.entries(fx).map(([k,v])=>{
     const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1];
     const scaled=Math.round(v/5);
     if(!f || v<=0 || !f.attrs || f.attrs[k]===undefined) return `${scaled>=0?'+':''}${scaled} ${label}`;
     let cap=(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4;
     if(f.agedCeilings && f.agedCeilings[k]!=null) cap=Math.min(cap, f.agedCeilings[k]);
     const before=f.attrs[k];
-    if(before>=cap) return `${label} ${d20(before)} (déjà au max)`;
+    if(before>=cap) return '';
     const after=Math.min(before+v, cap);
+    if(d20(before)===d20(after)) return '';
     return `${label} ${d20(before)} → ${d20(after)}`;
-  }).join(', ');
+  }).filter(Boolean);
+  return shown.length?shown.join(', '):'Progression légère';
 }
+/* ==== [FIN ANCRE] ==== */
 function scr_codex(){
   const unlocked=loadCodex(); const total=SKILLS.length;
   if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'};

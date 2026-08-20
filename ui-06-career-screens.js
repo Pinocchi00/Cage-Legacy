@@ -19,7 +19,21 @@ function scr_title(){
      <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
      <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
    </div>
-   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`; })():''}
+   ${(()=>{ /* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — item demandé : les
+        notifications de partie (série rachetée, achat en boutique, points
+        gagnés…) remontaient jusqu'à l'écran d'accueil, alors qu'elles
+        concernent l'écran d'où vient l'action et n'ont aucun sens pour
+        quelqu'un qui arrive sur le jeu. G.lastMsg est donc consommé ici
+        SANS être affiché (sinon il ressortirait plus tard, hors contexte,
+        sur le premier écran qui le lit). Seul G.bootMsg — posé par main.js
+        quand un lien de légende partagé est corrompu — reste affiché : il
+        est produit AU démarrage, c'est le seul message dont l'accueil est
+        vraiment le bon endroit. ==== */
+      G.lastMsg=null;
+      if(!G.bootMsg) return '';
+      const m=G.bootMsg; G.bootMsg=null;
+      return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
+    })()}
    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
    ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
@@ -85,12 +99,6 @@ function gauntletAscPicker(mode){
    silhouette SVG autonome, simple et thématiquement cohérente, plutôt que
    de risquer de casser le rendu de combat en tirant dessus depuis un écran
    qui n'a rien à voir. ==== */
-function ascensionTowerSilhouette(){
-  return `<svg width="72" height="120" viewBox="0 0 72 120" fill="none" stroke="var(--gold)" stroke-width="2.5" style="display:block;margin:0 auto">
-    <circle cx="36" cy="16" r="11"/>
-    <path d="M36 27v34M36 40l-18 14M36 40l18 14M36 61l-12 34M36 61l12 34"/>
-  </svg>`;
-}
 function scr_ascension_tower(){
   const meta=loadMetaStats();
   const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
@@ -112,7 +120,6 @@ function scr_ascension_tower(){
      </div>`);
   }
   return `<div class="scr"><div class="bar"><span class="eyebrow">🗼 Tour d\u2019Ascension — ${modeLabel[mode]}</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
-   ${ascensionTowerSilhouette()}
    <p class="lede small mt" style="text-align:center">Chaque palier remporté ouvre le suivant. Depuis l\u2019ajout des Mutateurs d\u2019Ascension, tout palier ≥1 tire un mutateur aléatoire par run plutôt qu\u2019une règle fixe.</p>
    <div class="pills mb" style="justify-content:center">${modeTabs}</div>
    ${tiers.join('')}
