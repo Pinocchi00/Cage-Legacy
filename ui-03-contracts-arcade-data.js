@@ -698,14 +698,14 @@ function ascensionCurveMod(asc){ return {lv:3*(asc||0),cap:2*(asc||0)}; }
    l'effet perçu (fatigue plus rapide) est réel, seule la MÉCANIQUE exacte
    (round par round vs pré-combat) diffère de la lettre de la spec. ==== */
 const GAUNTLET_ASCENSION_MUTATORS=[
-  {id:'mut_violent',label:'Adversaires plus violents',desc:'Tous les adversaires de la run frappent plus fort (+3 Puissance/20).'},
+  {id:'mut_violent',label:'Adversaires plus violents',desc:'Tous les adversaires de la run frappent plus fort (+3 Puissance).'},
   {id:'mut_sans_filet',label:'Sans filet',desc:'Les consommables « Filet de sécurité » et « Mise à l\u2019abri automatique » sont désactivés pour cette run.'},
   {id:'mut_pacte_force',label:'Pacte forcé',desc:'Chaque combat ne compte que par finition (KO/TKO ou soumission), sans exception, pour toute la run (Bracket 64 / Ladder 100 uniquement).'},
   {id:'mut_camp_reduit',label:'Choix réduits au camp',desc:'Le camp d\u2019entraînement ne propose plus que 2 options au lieu de 3.'},
-  {id:'mut_depart_affaibli',label:'Départ affaibli',desc:'Le combattant démarre la run avec -2 Puissance et -2 Cardio (/20).'},
+  {id:'mut_depart_affaibli',label:'Départ affaibli',desc:'Le combattant démarre la run avec -2 Puissance et -2 Cardio.'},
   {id:'mut_mise_a_nu',label:'Mise à nu',desc:'L\u2019identité et les stats de CHAQUE adversaire de la run restent cachées jusqu\u2019au dernier moment, comme un Boss Run permanent.'},
   {id:'mut_juges_severes',label:'Juges sévères',desc:'Une victoire aux points trop serrée ne suffit plus : la run s\u2019arrête comme sur une défaite.'},
-  {id:'mut_sans_repit',label:'Sans round de répit',desc:'Cardio réduit pour toute la run (-3/20) : la fatigue s\u2019installe plus vite à chaque combat.'}
+  {id:'mut_sans_repit',label:'Sans round de répit',desc:'Cardio réduit pour toute la run (-3) : la fatigue s\u2019installe plus vite à chaque combat.'}
 ];
 function rollGauntletMutator(asc,mode){
   if((asc||0)<1) return null;
@@ -780,7 +780,7 @@ function startCoachingFight(){
      n'affichait le détail par juge pendant le coaching — mais ça faussait
      déjà l'écran de résultat final (scr_result, ui-06) pour tout combat
      Gauntlet coaché allant aux points. ==== */
-  G.arcade.coaching={round:1,scoreA:0,scoreB:0,judges:{j1:[0,0],j2:[0,0],j3:[0,0]},stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved,campPassiveOppSaved}};
+  G.arcade.coaching={round:1,scoreA:0,scoreB:0,judges:{j1:[0,0],j2:[0,0],j3:[0,0]},roundStats:[],stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved,campPassiveOppSaved}};
   /* ==== [FIN ANCRE] ==== */
   runCoachingRound(G.arcade.plan||null);
 }
@@ -804,6 +804,16 @@ function runCoachingRound(plan){
   }
   const res=simulateFight(G.f,opp,1,plan,null,{immuneA});
   if(roundBoostSaved){ Object.entries(roundBoostSaved).forEach(([k,v])=>{ G.f.attrs[k]=v; }); }
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_ROUNDSTATS_COACHING] — bug remonté : le détail
+     juge-par-juge-par-round (res.roundStats, engine.js) n'était jamais
+     conservé entre les 3 appels simulateFight(1 round) du coaching — la
+     fiche de résultat (scr_result, ui-06) affichait donc l'en-tête du
+     tableau détaillé sans aucune ligne pour un combat Gauntlet allant aux
+     points. Chaque appel simulant un seul round, res.roundStats[0].r vaut
+     toujours 1 (numérotation locale à l'appel) : on le réécrit avec le
+     vrai numéro de round (c.round) avant de l'archiver. ==== */
+  if(res.roundStats&&res.roundStats.length) c.roundStats.push(Object.assign({},res.roundStats[0],{r:c.round}));
   /* ==== [FIN ANCRE] ==== */
   const finished=res.method && (res.method.startsWith('KO')||res.method==='Soumission');
   const mergeStats=(dst,src)=>{ Object.keys(dst).forEach(k=>dst[k]=(dst[k]||0)+(src[k]||0)); };
@@ -835,12 +845,23 @@ function runCoachingRound(plan){
          convention que pour un combat non coaché (engine.js). ==== */
       const finalJudges={};
       ['j1','j2','j3'].forEach(j=>{ finalJudges[j]=[c.judges[j][0]+res.judges[j][0], c.judges[j][1]+res.judges[j][1]]; });
-      finalRes={winner,method:winner==='D'?'Égalité':'Décision',round:3,scoreA:totScoreA,scoreB:totScoreB,judges:finalJudges,stats:c.stats,log:res.log};
+      finalRes={winner,method:winner==='D'?'Égalité':'Décision',round:3,scoreA:totScoreA,scoreB:totScoreB,judges:finalJudges,roundStats:c.roundStats,stats:c.stats,log:res.log};
       /* ==== [FIN ANCRE] ==== */
     } else {
       // finition anticipée : fusionne quand même les stats des rounds
       // précédents (sinon Le Fantôme, ajout #5, ne verrait que le dernier round)
       mergeStats(res.stats.A,c.stats.A); mergeStats(res.stats.B,c.stats.B);
+      /* ==== [ANCRE: CORRECTIF_ROUND_FINITION_COACHING] — bug remonté (trouvé
+         en implémentant le rendu round par round, ANCRE
+         CORRECTIF_RENDU_ROUND_PAR_ROUND) : res.round vient du compteur LOCAL
+         du moteur pour cet appel simulateFight(1 round) — toujours 1, quel
+         que soit le vrai round de coaching (c.round) où la finition a eu
+         lieu. Un KO au round 2 ou 3 s'affichait donc "Round 1" sur la fiche
+         de résultat (scr_result, ui-06 : p.res.round). Réécrit avec le vrai
+         round de coaching avant de transmettre finalRes (même objet que res
+         ici, cf. `let finalRes=res;` plus haut). ==== */
+      res.round=c.round;
+      /* ==== [FIN ANCRE] ==== */
     }
     G.arcade.coaching=null;
     finalizeArcadeCombatResult(finalRes,plan);
@@ -866,11 +887,21 @@ function runCoachingRound(plan){
      l'avoir vraiment implémenté. Recalculée à chaque round (pas figée une
      fois pour toutes) : une nouvelle lecture à chaque pause, comme un vrai
      coin qui réévalue le combat round après round. ==== */
+  /* ==== [ANCRE: CORRECTIF_JUGES_ESTIMATION_PLAFOND] — bug remonté : le
+     bruit était borné sur le TOTAL cumulé (0 à ta+tb, jusqu'à 30 sur 3
+     rounds) au lieu du plafond RÉEL "10 points par juge et par round jugé"
+     — un vrai 10-9 après le round 1 (total 19) pouvait ressortir comme
+     11-8 ou 7-12 à l'écran, des cartes qu'aucun juge ne peut donner. Le
+     plafond par côté est désormais c.round*10 (c.round n'est incrémenté
+     qu'après ce calcul, donc il vaut encore le nombre de rounds déjà
+     jugés) — la somme reste inchangée (même principe que l'original), mais
+     chaque côté reste dans les bornes crédibles. ==== */
   c.judgesEstimate={};
+  const roundsJudgedCap=c.round*10;
   ['j1','j2','j3'].forEach(j=>{
-    const [ta,tb]=c.judges[j], noise=Math.floor(rnd()*3), dir=rnd()<0.5?1:-1;
-    const estA=clamp(ta+dir*noise,0,ta+tb);
-    c.judgesEstimate[j]=[estA,(ta+tb)-estA];
+    const [ta,tb]=c.judges[j], total=ta+tb, noise=Math.floor(rnd()*3), dir=rnd()<0.5?1:-1;
+    const estA=clamp(ta+dir*noise,Math.max(0,total-roundsJudgedCap),Math.min(roundsJudgedCap,total));
+    c.judgesEstimate[j]=[estA,total-estA];
   });
   /* ==== [FIN ANCRE] ==== */
   mergeStats(c.stats.A,res.stats.A); mergeStats(c.stats.B,res.stats.B);
@@ -898,7 +929,25 @@ function runCoachingRound(plan){
     c.secondSouffleAvailable=(estA<estB) && rnd()<0.20;
   }
   /* ==== [FIN ANCRE] ==== */
-  G.screen='coaching_round'; save(); render();
+  /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — bug remonté : ce round
+     venait d'être simulé (res, plus haut) mais son déroulé n'était jamais
+     montré — le jeu sautait directement à l'écran de texte du coaching
+     (Fin du round, tendance des juges), sans jamais faire jouer le Canvas
+     de combat pour ce round précis. Seul le TOUT DERNIER round du combat
+     finissait par y passer, une fois, tout à la fin (finalizeArcadeCombatResult).
+     Reconstruit ici le même G.fight/G.pending qu'un combat classique
+     (buildTimeline en lit la forme, engine.js/ui-08) à partir de CE round
+     seul, pour le faire rejouer sur le ring avant d'atterrir sur l'écran de
+     coaching. G._arenaNext (CL.toResult, ui-08) route la sortie de l'arène
+     vers 'coaching_round' au lieu du résultat final — cette redirection ne
+     dure qu'une sortie d'arène, remise à null aussitôt consommée. win/finish
+     figés à false : ce round seul ne décide jamais le combat (jamais de
+     confetti/chute de victoire prématurée, cf. ARENA.meWin, ui-08). ==== */
+  G.fight={kind:'arcade',opp,rounds:3,plan,planLabel:G.arcade.planLabel||null};
+  G.pending={res,win:false,method:res.method,finish:false,opp:{name:opp.name,flag:opp.flag},planLabel:G.arcade.planLabel||null,newAch:[]};
+  G._arenaNext='coaching_round';
+  buildTimeline(true); G.screen='arena'; save(); render();
+  /* ==== [FIN ANCRE] ==== */
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
@@ -1108,23 +1157,38 @@ const ARCADE_EXCLUSIVE_TACTICS={
      IMMUNITE_FINITION_CAMP, engine.js), UN round précis seulement.
    `label` est affiché tel quel à l'écran de choix (scr_camp_identity_pick)
    et dans le statut de run (gauntletStatusBlock). ==== */
+/* ==== [ANCRE: CORRECTIF_PASSIF_ECHELLE] — bug remonté : les labels de
+   passif écrivaient le delta interne BRUT (échelle /100 de G.f.attrs, ex.
+   "+10 Cardio"), affiché juste au-dessus/à côté de deltas correctement
+   convertis en /20 (fxTxt de scr_camp_identity_pick, ui-04 : "Cardio 18 →
+   20", ou deltaTags ailleurs) — même origine que le bug, deux échelles
+   mélangées sur le même écran. Même formule de conversion que ces deltas
+   déjà corrects (Math.sign×Math.max(1,Math.round(/5))) : jamais le nombre
+   interne tel quel dans un texte destiné au joueur. ==== */
+function campFxLabel(fx){
+  return Object.entries(fx).map(([k,v])=>{
+    const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+    return `${shown>0?'+':''}${shown} ${attrLabel(k)}`;
+  }).join(', ');
+}
+/* ==== [FIN ANCRE] ==== */
 const GAUNTLET_CAMP_IDENTITIES=[
   {id:'camp_spartiate',name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10},
-   passive:{type:'roundBoost',round:3,fx:{cardio:10,power:10},label:'Round 3 : +10 Cardio, +10 Puissance (temporaire, ce round uniquement)'}},
+   passive:(()=>{ const fx={cardio:10,power:10}; return {type:'roundBoost',round:3,fx,label:`Round 3 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()},
   {id:'camp_mercenaire',name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10},
-   passive:{type:'oppPermanent',fx:{chin:-8},label:'Menton de l\u2019adversaire fragilisé pour tout le combat (-8, invisible pour lui)'}},
+   passive:(()=>{ const fx={chin:-8}; return {type:'oppPermanent',fx,label:`Menton de l\u2019adversaire fragilisé pour tout le combat (${campFxLabel(fx)}, invisible pour lui)`}; })()},
   {id:'camp_universitaire',name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10},
-   passive:{type:'oppPermanent',fx:{power:-6,footSpeed:-6},label:'Adversaire légèrement affaibli pour tout le combat (-6 Puissance, -6 Jeu de jambes)'}},
+   passive:(()=>{ const fx={power:-6,footSpeed:-6}; return {type:'oppPermanent',fx,label:`Adversaire légèrement affaibli pour tout le combat (${campFxLabel(fx)})`}; })()},
   {id:'camp_familial',name:'Camp Familial',desc:'Un clan qui protège, jamais qui pousse à bout.',fx:{composure:15,cardio:-10},
    passive:{type:'finishImmunity',round:1,label:'Round 1 : impossible à finir (KO/TKO/Soumission)'}},
   {id:'camp_silence',name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10},
    passive:null},
   {id:'camp_meute',name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10},
-   passive:{type:'roundBoost',round:2,fx:{takedown:10,topControl:10},label:'Round 2 : +10 Lutte, +10 Contrôle au sol (temporaire, ce round uniquement)'}},
+   passive:(()=>{ const fx={takedown:10,topControl:10}; return {type:'roundBoost',round:2,fx,label:`Round 2 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()},
   {id:'camp_ascetique',name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10},
    passive:{type:'finishImmunity',round:3,label:'Round 3 : impossible à finir (KO/TKO/Soumission)'}},
   {id:'camp_spectacle',name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10},
-   passive:{type:'roundBoost',round:1,fx:{explosiveness:10,power:10},label:'Round 1 : +10 Explosivité, +10 Puissance (temporaire, ce round uniquement)'}}
+   passive:(()=>{ const fx={explosiveness:10,power:10}; return {type:'roundBoost',round:1,fx,label:`Round 1 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()}
 ];
 /* ==== [FIN ANCRE] ==== */
 function drawGauntletCampIdentityOptions(){
@@ -1519,7 +1583,7 @@ function pierceGauntletRumor(a){
   a.analysisPierced=true;
   a._pierceMalusSaved={before:G.f.attrs.fightIQ};
   G.f.attrs.fightIQ=clamp(G.f.attrs.fightIQ-10,1,100);
-  return {success:true,msg:'Analyse débloquée pour ce combat — Intelligence tactique -2/20.'};
+  return {success:true,msg:'Analyse débloquée pour ce combat — Intelligence tactique -2.'};
 }
 /* ==== [FIN ANCRE] ==== */
 

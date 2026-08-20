@@ -126,15 +126,24 @@ function scr_ascension_tower(){
    (3 modes ou un mode nommé), la série en cours, une éventuelle offre de
    rachat, et les boutons de tentative PAR FORMAT (le verrou 1 tentative/
    format/jour est conservé tel quel — cf. state.js pour le raisonnement). ==== */
+/* ==== [ANCRE: CORRECTIF_DEFI_JOUR_COMPACT] — bug remonté : chaque ligne de
+   format portait une phrase complète ("Tenter ce format pour le défi du
+   jour", "Défi du jour non applicable à ce format") qui passait sur 2
+   lignes dans le badge — répété 3 fois (un par format), c'est la moitié de
+   la hauteur du bloc "Défi du jour" à elle seule. Le contexte ("défi du
+   jour") est déjà donné une seule fois par l'eyebrow du bloc englobant
+   (gauntletDailyGroup) : inutile de le répéter dans chaque badge, un état
+   court par ligne suffit. ==== */
 function gauntletDailyTag(mode){
   const meta=loadMetaStats();
   const obj=gauntletDailyObjective(meta);
   const scopeOk=!obj.scope||obj.scope===mode;
   const done=gauntletDailyDone(meta,mode);
-  const label=!scopeOk?`Défi du jour non applicable à ce format`:done?`Tentative du jour déjà jouée`:`Tenter ce format pour le défi du jour`;
+  const label=!scopeOk?`Non applicable`:done?`Déjà tenté`:`Tenter`;
   const disabled=done||!scopeOk;
-  return `<div class="mono small" style="margin-top:6px"><span onclick="${disabled?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${disabled?'default':'pointer'};border:1px dashed ${disabled?'var(--line)':'var(--sage)'};color:${disabled?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px;opacity:${scopeOk?1:0.5}">${label}</span></div>`;
+  return `<span onclick="${disabled?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${disabled?'default':'pointer'};border:1px dashed ${disabled?'var(--line)':'var(--sage)'};color:${disabled?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px;opacity:${scopeOk?1:0.5}" class="mono">${label}</span>`;
 }
+/* ==== [FIN ANCRE] ==== */
 function gauntletDailyGroup(){
   const meta=loadMetaStats();
   const obj=gauntletDailyObjective(meta);
@@ -147,7 +156,7 @@ function gauntletDailyGroup(){
      comprenait l'intérêt de tenir la série. Annonce explicite tant que la
      récompense n'est pas encore acquise ; disparaît une fois débloquée
      (checkLegendUnlock), pour ne pas polluer l'écran après coup. ==== */
-  const streakGoalLine=(!checkLegendUnlock(GAUNTLET_DAILY_STREAK_REWARD.id))?`<div class="muted small mt">À 7 jours d\\u2019affilée : ${GAUNTLET_DAILY_STREAK_REWARD.name} (thème d\\u2019octogone exclusif) débloqué.</div>`:'';
+  const streakGoalLine=(!checkLegendUnlock(GAUNTLET_DAILY_STREAK_REWARD.id))?`<div class="muted small mt">À 7 jours d’affilée : ${GAUNTLET_DAILY_STREAK_REWARD.name} (thème d’octogone exclusif) débloqué.</div>`:'';
   /* ==== [FIN ANCRE] ==== */
   const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis réussis : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>${streakGoalLine}`:streakGoalLine;
   const rescue=meta.gauntletDailyRescueOffer;
@@ -228,14 +237,22 @@ function scr_archetype_pantheon(){
    ancienne version retirée pour éviter une redéclaration de fonction (la
    dernière définition l'aurait de toute façon emporté silencieusement en
    JS, mais garder les deux aurait été trompeur à la lecture). ==== */
+/* ==== [ANCRE: CORRECTIF_MENU_GAUNTLET_COMPACT] — bug remonté (10d élargi à
+   cet écran) : 4 liens secondaires (Panthéon, Tour d'Ascension, Profil,
+   Boutique) empilaient chacun un bouton pleine largeur, précédés d'un
+   en-tête "c) BOUTIQUE" séparé rien que pour le dernier — Boutique n'a rien
+   d'une nature différente des 3 autres (tous des raccourcis annexes, aucun
+   n'est un format de jeu). Regroupés en grille 2×2 (.leg-grid, déjà
+   utilisée pour le Panthéon carrière) sous un seul en-tête, sans le
+   numérotage "a)/b)/c)" qui n'apportait rien à la lecture. ==== */
 function scr_gauntlet_menu(){
   return `<div class="scr center intro">
    <div class="eyebrow sage">Mode Arcade</div>
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
-   <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">a) DÉFI DU JOUR</div>
+   <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">DÉFI DU JOUR</div>
    ${gauntletDailyGroup()}
-   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">b) MODES DE JEU CLASSIQUES</div>
+   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">MODES DE JEU CLASSIQUES</div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
    ${gauntletAscPicker('bracket64')}
@@ -246,11 +263,13 @@ function scr_gauntlet_menu(){
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, finitions uniquement</span>${gauntletMenuBestTag('boss_run')}</button>
    ${gauntletAscPicker('boss_run')}`:''}
    ${gauntletCapstoneEntry()}
-   <button class="btn ghost mt" style="border:1px dashed var(--line)" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
-   <button class="btn ghost mt" style="border:1px dashed var(--gold)" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
-   <button class="btn ghost mt" style="border:1px dashed var(--gold)" onclick="CL.go('gauntlet_profile')">🏺 Profil du joueur (Reliques)</button>
-   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">c) BOUTIQUE</div>
-   <button class="btn ghost mt" style="border:1px dashed var(--gold);color:var(--gold)" onclick="CL.goShopGauntlet()">🛒 Boutique (filtrée Gauntlet)</button>
+   <div class="eyebrow mb mt" style="color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px">Autres accès</div>
+   <div class="leg-grid">
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--line);padding:12px 8px;font-size:12px" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.go('gauntlet_profile')">🏺 Profil (Reliques)</button>
+     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);color:var(--gold);padding:12px 8px;font-size:12px" onclick="CL.goShopGauntlet()">🛒 Boutique</button>
+   </div>
    <div class="fld" style="margin-top:24px">
      <label class="muted small">Graine de la run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer une run identique)</label>
      <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
@@ -258,6 +277,7 @@ function scr_gauntlet_menu(){
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PROFIL_JOUEUR_RELIQUES] — ajout #7 (24 ajouts, 12/08/2026) :
    écran de compte, PAS lié à un combattant précis (les combattants arcade
@@ -641,7 +661,7 @@ function scr_legend_detail(){
      désormais le même cat que les décorations classiques, donc simplement
      concaténer GAUNTLET_EXCLUSIVE_OFFERS suffit à les faire apparaître ici
      une fois possédées, sans toucher au reste du panneau. ==== */
-  const ownedDecorations=LEGEND_UNLOCKABLES.concat(GAUNTLET_EXCLUSIVE_OFFERS).filter(i=>i.cat==='Ennoblissement du Panthéon'&&checkLegendUnlock(i.id));
+  const ownedDecorations=LEGEND_UNLOCKABLES.concat(GAUNTLET_EXCLUSIVE_OFFERS).filter(i=>i.cat==='Décorations du Panthéon'&&checkLegendUnlock(i.id));
   /* ==== [FIN ANCRE] ==== */
   const decorationPanel=ownedDecorations.length?`<div class="card mb"><div class="eyebrow mb">Décorations (${decorations.length}/3)</div>
      <div class="muted small mb" style="font-size:10.5px">Un déblocage de compte : la même décoration peut être portée par plusieurs combattants à la fois.</div>
@@ -760,7 +780,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   } else if(isDecisionLike(p.method) && p.res.judges){
     const J=p.res.judges;
     judgesHtml=`<div class="card gold-b" style="text-align:center">
-      <div class="eyebrow mb">Pointage des juges (10-point must)</div>
+      <div class="eyebrow mb">Score des juges (10-point must)</div>
       <div class="duel2" style="justify-content:center;gap:16px">
         <span class="num ${J.j1[0]>J.j1[1]?'a':(J.j1[0]===J.j1[1]?'b':'dn')}">${J.j1[0]}-${J.j1[1]}</span>
         <span class="num ${J.j2[0]>J.j2[1]?'a':(J.j2[0]===J.j2[1]?'b':'dn')}">${J.j2[0]}-${J.j2[1]}</span>

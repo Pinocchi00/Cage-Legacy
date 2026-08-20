@@ -340,28 +340,45 @@ function scr_ach(){ if(!G.ach) G.ach=loadAch();
     h+=`<div class="gal-rail-title">${c}<span class="n">${items.filter(i=>i.got).length}/${items.length}</span></div>
     <div class="gal-rail">${items.map(({a,got,progPair})=>{
       const started=progPair&&progPair[0]>0;
-      const isOpen=G._achPreview===a.id;
       const baseTxt=got?'✓ Obtenu':(progPair?`${progPair[0]}/${progPair[1]}`:(started?'En cours':'Verrouillé'));
-      return `<div class="gal-tile ${got?'owned':''} ${!got&&!started?'locked':''}" style="--gc:${gc}" onclick="CL.toggleAchPreview('${a.id}')">
+      return `<div class="gal-tile ${got?'owned':''} ${!got&&!started?'locked':''}" style="--gc:${gc}" onclick="CL.viewAchPreview('${a.id}')">
         <div class="glow"></div>
-        <div><span class="ico">${a.ico}</span><div class="nm">${a.h}</div><div class="preview-hint">${isOpen?'▲ Fermer':'▼ Détail'}</div></div>
+        <div><span class="ico">${a.ico}</span><div class="nm">${a.h}</div><div class="preview-hint">▼ Détail</div></div>
         <div class="base">${baseTxt}</div>
       </div>`;
-    }).join('')}</div>
-    ${(()=>{ const open=items.find(i=>i.a.id===G._achPreview); if(!open) return '';
-      const {a,got,progPair}=open;
-      const statusLine=got?`<span class="mono small" style="color:var(--sage)">✓ Déjà obtenu</span>`
-        :progPair?`<span class="mono small" style="color:${gc}">Progression : ${progPair[0]} / ${progPair[1]}</span>`
-        :`<span class="mono small muted">Pas encore entamé — condition binaire, se débloque d\u2019un coup</span>`;
-      return `<div class="card mb" style="background:var(--panel2);border-left:3px solid ${gc};padding:14px">
-        <b>${a.h}</b>
-        <div class="muted small mt">Condition : ${a.d}</div>
-        <div class="mt">${statusLine}</div>
-      </div>`; })()}`;
+    }).join('')}</div>`;
   });
   h+=`<div class="mono small muted" style="text-align:center;margin-top:24px;opacity:.6">Un jeu développé par Pinocchio et testé par Garfield</div>`;
   h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.f?'hub':'title'}')">← Revenir au ${G.f?'hub':'menu principal'}</button></div>`;
   return h; }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: PREVIEW_SUCCES_ECRAN_DEDIE] — item demandé : même principe que
+   la fenêtre dédiée du Marché noir (scr_consumable_preview, ui-08) plutôt
+   que le texte replié sur place utilisé jusqu'ici (CL.toggleAchPreview,
+   retiré) : le clic sur une tuile d'exploit ouvre un écran plein dédié
+   (même en-tête ✕/titre que les autres fenêtres de détail). Pas de fenêtre
+   Canvas ici : un succès n'a pas d'effet à visualiser dans l'octogone,
+   contrairement à un consommable (buff/veto/filet de sécurité). ==== */
+function scr_ach_preview(){
+  const a=ACH.find(x=>x.id===G._achPreviewId);
+  if(!a) return `<div class="scr center intro"><p class="lede">Exploit introuvable.</p><button class="btn ghost mt" onclick="CL.closeAchPreview()">Fermer</button></div>`;
+  if(!G.ach) G.ach=loadAch();
+  const got=G.ach.includes(a.id);
+  const progPair=(!got && G.f && a.prog)?a.prog(G.f):null;
+  const gc=ACH_CAT_COLOR[a.cat];
+  const statusLine=got?`<span class="mono small" style="color:var(--sage)">✓ Déjà obtenu</span>`
+    :progPair?`<span class="mono small" style="color:${gc}">Progression : ${progPair[0]} / ${progPair[1]}</span>`
+    :`<span class="mono small muted">Pas encore entamé — condition binaire, se débloque d’un coup</span>`;
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Palmarès — détail</span><span class="eyebrow x" onclick="CL.closeAchPreview()">✕</span></div>
+   <h2 class="disp gold" style="font-size:20px"><span class="ico" style="margin-right:6px">${a.ico}</span>${a.h}</h2>
+   <div class="card glass mt" style="padding:14px;border-left:3px solid ${gc};background:var(--panel2)">
+     <div class="eyebrow mb" style="color:${gc}">${a.cat}</div>
+     <div class="muted small">Condition : ${a.d}</div>
+     <div class="mt">${statusLine}</div>
+   </div>
+   <button class="btn ghost mt" onclick="CL.closeAchPreview()">Fermer</button>
+  </div>`;
+}
 /* ==== [FIN ANCRE] ==== */
 
 function scr_retire(){ return `<div class="scr center"><div class="eyebrow">Fin de carrière</div><h2 class="disp">Raccrocher les gants ?</h2>
@@ -585,6 +602,17 @@ function shopRarity(cost){
   if(cost>=250) return 'M'; if(cost>=180) return 'L'; if(cost>=120) return 'E'; if(cost>=90) return 'R'; return 'C';
 }
 const SHOP_RAR_LABEL={C:'Commune',R:'Rare',E:'Épique',L:'Légendaire',M:'Mythique'};
+/* ==== [ANCRE: CORRECTIF_DIFFERENCIATION_CATEGORIES] — bug remonté : hors
+   la couleur de bordure liée au PRIX (shopRarity, même échelle pour tout le
+   catalogue), rien ne distinguait un mode de jeu d'un cosmétique ou d'un
+   outil au premier coup d'œil — d'où l'impression de répétition, un item à
+   300 pts et un item à 300 pts se ressemblant toujours, quel que soit ce
+   qu'ils débloquent réellement. Un pictogramme par catégorie, posé sur le
+   titre de chaque rail (pas sur chaque tuile, pour ne pas surcharger un
+   format déjà compact), donne une identité immédiate au balayage vertical
+   de l'écran, en plus de la couleur de rareté déjà en place. ==== */
+const SHOP_CAT_ICON={'Outils':'🧰','Cosmétiques':'🎨','Archétypes Arcade':'🥊','Modes annexes':'🎮','Scénarios':'📜','Décorations du Panthéon':'🎖'};
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — aperçu réel avant achat.
    Seuls les objets à effet visuel CONNU sont prévisualisables :
    - cosmetic_* → thème d'octogone (ARENA_THEMES, ui-08 : floorColors/railColor)
@@ -623,96 +651,112 @@ function shopPreviewHtml(item){
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORRECTIF_FILTRE_GAUNTLET_RETIRE] — item demandé : le filtre
+   "contenu Gauntlet uniquement" (bascule + bandeau dédié) est retiré — la
+   boutique affiche toujours tout son catalogue, quel que soit l'écran
+   d'où on y accède. G._shopGauntletFilter et CL.toggleShopGauntletFilter
+   n'ont plus aucun appelant (le bouton qui les déclenchait a disparu),
+   supprimés avec le reste ; CL.goShopGauntlet() (ui-08) redirige toujours
+   vers la boutique mais ne pose plus le drapeau de filtre. ==== */
 function scr_legends(){
   const meta=loadMetaStats(); const pts=meta.legendPoints||0;
-  /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
-     filtre Gauntlet, actif par défaut quand on arrive depuis
-     CL.goShopGauntlet() (scr_gauntlet_menu, ui-06), retirable sur place —
-     G._shopGauntletFilter reste undefined pour toute entrée classique
-     (Panthéon, etc.), donc aucun changement de comportement ailleurs. ==== */
-  const filterOn=!!G._shopGauntletFilter;
-  const visibleItems=filterOn?LEGEND_UNLOCKABLES.filter(i=>i.gauntlet):LEGEND_UNLOCKABLES;
-  const filterBar=`<div class="mono small" style="margin-bottom:12px"><span onclick="CL.toggleShopGauntletFilter()" style="cursor:pointer;border:1px dashed ${filterOn?'var(--gold)':'var(--line)'};color:${filterOn?'var(--gold)':'var(--muted)'};padding:4px 10px;border-radius:2px">${filterOn?'✓ Filtré : contenu Gauntlet uniquement — cliquer pour tout afficher':'Afficher tout le contenu (retirer le filtre Gauntlet)'}</span></div>`;
-  /* ==== [FIN ANCRE] ==== */
-  const categories=[...new Set(visibleItems.map(i=>i.cat))];
-  const owned=visibleItems.filter(i=>checkLegendUnlock(i.id));
-  const remaining=visibleItems.filter(i=>!checkLegendUnlock(i.id));
+  const categories=[...new Set(LEGEND_UNLOCKABLES.map(i=>i.cat))];
+  const owned=LEGEND_UNLOCKABLES.filter(i=>checkLegendUnlock(i.id));
+  const remaining=LEGEND_UNLOCKABLES.filter(i=>!checkLegendUnlock(i.id));
   const nextUp=remaining.sort((a,b)=>a.cost-b.cost)[0];
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
   const offer=gauntletExclusiveOfferToday(meta);
   const offerItem=GAUNTLET_EXCLUSIVE_OFFERS.find(i=>i.id===offer.id);
   const offerOwned=checkLegendUnlock(offer.id);
-  const offerHtml=`<div class="glass card mb" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
-     <div class="eyebrow mb" style="color:var(--blood)">⚡ OFFRE DU JOUR — EXCLUSIVE, -${offer.discountPct}%</div>
-     <b style="font-size:15px">${offerItem.name}</b>
-     <div class="muted small mt">${offerItem.desc}</div>
+  const offerHtml=`<div class="glass" style="border:1px solid var(--blood);background:var(--panel2);padding:10px">
+     <div class="eyebrow mb" style="color:var(--blood);font-size:10px">⚡ OFFRE DU JOUR -${offer.discountPct}%</div>
+     <b style="font-size:13px">${offerItem.name}</b>
      ${offerOwned?`<div class="mono small mt" style="color:var(--sage)">✓ Acquise</div>`:
-       `<button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 10px;width:auto" onclick="CL.purchaseExclusiveOffer()" ${pts>=offer.cost?'':'disabled'}>${offer.cost} pts <span class="muted" style="text-decoration:line-through">${offerItem.baseCost}</span></button>`}
-     <div class="muted small mt" style="font-size:10px">Ne revient jamais 2 jours d\u2019affilée — peut revenir plus tard.</div>
+       `<button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 8px;width:auto;font-size:12px" onclick="CL.purchaseExclusiveOffer()" ${pts>=offer.cost?'':'disabled'}>${offer.cost} pts <span class="muted" style="text-decoration:line-through">${offerItem.baseCost}</span></button>`}
    </div>`;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
   const lotteryAvail=gauntletLotteryAvailable(meta);
-  const lotteryHtml=`<div class="glass card mb" style="border-left:3px solid var(--sage);background:var(--panel2);padding:12px">
-     <div class="eyebrow mb" style="color:var(--sage)">🎁 CAISSE MYSTÈRE — Loterie des Légendes</div>
-     <div class="muted small">Une par jour. 1% de chance d\u2019un archétype ultra-exclusif ; sinon, un des déblocages ci-dessous, tiré au hasard parmi ceux qu\u2019il te reste à obtenir.</div>
-     ${lotteryAvail?`<button class="btn ghost mt" style="border-color:var(--sage);color:var(--sage);padding:6px 10px;width:auto" onclick="CL.drawGauntletLottery()" ${pts>=GAUNTLET_LOTTERY_COST?'':'disabled'}>Tenter — ${GAUNTLET_LOTTERY_COST} pts</button>`
-       :`<div class="mono small mt" style="color:var(--muted)">Déjà tentée aujourd\u2019hui — revenez demain.</div>`}
+  const lotteryHtml=`<div class="glass" style="border:1px solid var(--sage);background:var(--panel2);padding:10px">
+     <div class="eyebrow mb" style="color:var(--sage);font-size:10px">🎁 CAISSE MYSTÈRE</div>
+     <div class="muted small">1% archétype exclusif, sinon un déblocage au hasard.</div>
+     ${lotteryAvail?`<button class="btn ghost mt" style="border-color:var(--sage);color:var(--sage);padding:6px 8px;width:auto;font-size:12px" onclick="CL.drawGauntletLottery()" ${pts>=GAUNTLET_LOTTERY_COST?'':'disabled'}>Tenter — ${GAUNTLET_LOTTERY_COST} pts</button>`
+       :`<div class="mono small mt" style="color:var(--muted)">Revenez demain.</div>`}
    </div>`;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_BOUTIQUE_COMPACTE] — bug remonté : "très très
+     longue" à défiler — offerHtml/lotteryHtml empilaient chacun une carte
+     pleine largeur (~90-110px). Placées côte à côte (.leg-grid, déjà
+     utilisée pour le Panthéon et le menu Gauntlet) : moitié moins de
+     hauteur pour exactement le même contenu, textes secondaires raccourcis
+     pour rester lisibles à mi-largeur. ==== */
+  const offerLotteryHtml=`<div class="leg-grid mb">${offerHtml}${lotteryHtml}</div>`;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
-     section dédiée, cachée par le filtre Gauntlet OFF n'a pas de sens à
-     masquer (elle EST du contenu Gauntlet) — toujours visible, mais mise en
-     avant seulement quand filterOn pour rester cohérente avec le reste. ==== */
+     section dédiée, toujours visible dans le catalogue. ==== */
   const pendingId=meta.gauntletPendingConsumable;
   const pendingItem=pendingId?GAUNTLET_CONSUMABLES.find(i=>i.id===pendingId):null;
-  const consumablesHtml=`<div class="glass card mb" style="border-left:3px solid var(--blood-d);background:var(--panel2);padding:12px">
-     <div class="eyebrow mb" style="color:var(--blood)">☠ MARCHÉ NOIR — consommables à usage unique</div>
-     <div class="muted small mb">Appliqué automatiquement au début de ta prochaine run Gauntlet — pas de réserve, un seul en attente à la fois.</div>
-     ${pendingItem?`<div class="mono small" style="color:var(--gold)">En attente pour ta prochaine run : ${pendingItem.name}</div>`:
-       GAUNTLET_CONSUMABLES.map(item=>{
-         const canAfford=pts>=item.cost;
-         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)">
-           <div><b style="font-size:13px">${item.name}</b><div class="muted small">${item.desc}</div></div>
-           <button class="btn ghost" style="border-color:${canAfford?'var(--blood)':'var(--line)'};color:${canAfford?'var(--blood)':'var(--muted)'};padding:6px 10px;width:auto;flex:0 0 auto" onclick="CL.purchaseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button>
-         </div>`;
-       }).join('')}
-   </div>`;
+  /* ==== [ANCRE: CORRECTIF_MARCHE_NOIR_COMPACT] — bug remonté : la liste
+     complète (name+desc+bouton, un par ligne, pleine largeur) forçait un
+     long défilement vertical, hors de la direction artistique du reste de
+     la boutique (catalogue en rails horizontaux compacts, shop-rail/
+     shop-tile). Reprend exactement ce même gabarit. ==== */
+  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : le clic sur une
+     tuile n'ouvre plus un simple texte replié sur place (shopPreviewHtml,
+     désormais réservé au catalogue classique) mais une "fenêtre" dédiée
+     (scr_consumable_preview, ui-08) avec un aperçu Canvas des deux
+     combattants dans l'octogone, un indice visuel différent par effet. ==== */
+  const consumablesHtml=`<div class="shop-rail-title">☠ Marché noir — consommables à usage unique<span class="n">${GAUNTLET_CONSUMABLES.length}</span></div>
+   ${pendingItem?`<div class="mono small" style="color:var(--gold)">En attente pour ta prochaine run : ${pendingItem.name}</div>`:`
+   <div class="shop-rail">${GAUNTLET_CONSUMABLES.map(item=>{
+     const canAfford=pts>=item.cost;
+     return `<div class="shop-tile" style="--gc:var(--blood)" onclick="CL.viewConsumablePreview('${item.id}')">
+       <div class="glow"></div>
+       <div><div class="rar-lbl">Consommable</div><div class="nm">${item.name}</div><div class="shop-preview-hint">▼ Voir l\u2019aperçu</div></div>
+       <div class="base"><button class="price" style="color:${canAfford?'var(--blood)':'var(--muted)'}" onclick="event.stopPropagation();CL.purchaseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${item.cost} pts</button></div>
+     </div>`;
+   }).join('')}</div>
+   `}`;
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: VITRINE_BOUTIQUE] — item demandé : les achats retombaient
-     dans un simple "✓ Acquis" sans jamais montrer ce qu'ils avaient produit
-     en jeu. Deux données déjà calculées ailleurs (getArenaTheme, ui-08 ;
-     décorations équipées, comptées sur chaque légende du Panthéon) —
-     assemblées ici en une carte de synthèse, sans nouvelle mécanique. ==== */
-  const activeTheme=getArenaTheme();
-  const equippedDecoCount=loadHOF().reduce((s,leg)=>s+((leg.decorations||[]).length),0);
-  const showcaseHtml=(activeTheme.id!=='classic'||equippedDecoCount>0)?`<div class="card mb" style="background:var(--panel2);padding:12px">
-     <div class="eyebrow mb">Vitrine actuelle</div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Thème d\u2019octogone</span><b class="gold">${activeTheme.name}</b></div>
-     ${equippedDecoCount>0?`<div class="mono small mt" style="display:flex;justify-content:space-between"><span class="muted">Décorations portées au Panthéon</span><b class="gold">${equippedDecoCount}</b></div>`:''}
-   </div>`:'';
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_VITRINE_REDONDANTE] — bug remonté : "Vitrine
+     actuelle" ne faisait que répéter le thème d'octogone actif, déjà
+     affiché plus bas dans "Thème visuel de l'octogone actif" (même écran),
+     et le nombre de décorations portées, visible sur chaque fiche du
+     Panthéon — sans intérêt propre, seulement de la hauteur en plus. La
+     phrase d'intro ("L'héritage de tes retraités...") est retirée pour la
+     même raison : pure flaveur, aucune information. ==== */
+  /* ==== [ANCRE: CORRECTIF_ORDRE_BOUTIQUE] — item demandé : les statistiques
+     de carrière (bilan brut, informatif, jamais d'action possible dessus)
+     remontées tout en haut, juste sous le titre — l'offre du jour, la
+     Caisse Mystère et le Marché noir (tout ce qui se dépense) redescendent
+     avec le reste des choix d'achat (catalogue), au lieu de squatter le
+     haut de l'écran avant même que le joueur sache combien il a de points
+     à dépenser. ==== */
+  /* ==== [ANCRE: CORRECTIF_MESSAGE_ACHAT_INVISIBLE] — bug remonté : le
+     message de résultat (G.lastMsg — gain de la Caisse Mystère, achat de
+     l'offre du jour, rachat de série...) s'affichait tout en bas de l'écran,
+     après tout le catalogue : invisible sans un long défilement, donnant
+     l'impression de ne rien gagner. Repositionné juste au-dessus du bloc
+     d'achats (offre/loterie/marché noir/catalogue, désormais tous groupés
+     ensemble plus bas, cf. ANCRE ci-dessus) : reste juste au-dessus de
+     l'action qui vient de le déclencher, où que ce bloc se trouve sur la
+     page. ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Salle des Légendes</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    <h2 class="disp gold">${pts} points de salle</h2>
-   <p class="lede small">L\u2019héritage de tes retraités ouvre de nouvelles possibilités pour le compte — jamais un avantage de combat.</p>
-   ${showcaseHtml}
-   ${filterBar}
-   ${offerHtml}
-   ${lotteryHtml}
-   ${consumablesHtml}
-
    <div class="stat-band mb" style="border-top:none;padding-top:10px">
      <div><span class="stat-big" style="font-size:20px">${meta.totalRetirements||0}</span><span class="stat-lbl">Carrières terminées</span></div>
      <div><span class="stat-big" style="font-size:20px">${meta.totalFights||0}</span><span class="stat-lbl">Combats disputés</span></div>
-     <div><span class="stat-big" style="font-size:20px">${meta.totalKO||0}</span><span class="stat-lbl">KO toutes carrières</span></div>
+     <div><span class="stat-big" style="font-size:20px">${meta.totalKO||0}</span><span class="stat-lbl">KO/TKO toutes carrières</span></div>
    </div>
    <div class="stat-band mb" style="border-top:none;padding-top:0">
      <div><span class="stat-big" style="font-size:20px">${meta.totalSub||0}</span><span class="stat-lbl">Soumissions</span></div>
      <div><span class="stat-big" style="font-size:20px">${meta.totalBelts||0}</span><span class="stat-lbl">Ceintures remportées</span></div>
      <div><span class="stat-big" style="font-size:20px">${formatArgent(meta.totalMoney||0)}</span><span class="stat-lbl">Gains cumulés</span></div>
    </div>
-   <div class="mono small muted mb">${owned.length} / ${visibleItems.length} déblocages acquis${filterOn?' (filtré Gauntlet)':''}</div>
-
+   <div class="mono small muted mb">${owned.length} / ${LEGEND_UNLOCKABLES.length} déblocages acquis</div>
    ${nextUp?`<div class="glass card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--gold)">Prochain déblocage abordable</div>
      <b style="font-size:15px">${nextUp.name}</b>
@@ -720,12 +764,15 @@ function scr_legends(){
      <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden;margin-top:8px">
        <span style="display:block;height:100%;width:${clamp(Math.round(pts/nextUp.cost*100),0,100)}%;background:var(--gold)"></span>
      </div>
-   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">${filterOn?'Tout le contenu Gauntlet est débloqué.':'Tout est débloqué. Le Panthéon n\u2019a plus rien à t\u2019apprendre.'}</span></div>`}
+   </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">Tout est débloqué. Il n\u2019y a plus rien à acheter ici.</span></div>`}
+   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="position:relative;border:1px solid var(--gold);background:linear-gradient(135deg,color-mix(in srgb, var(--gold) 24%, var(--panel2)) 0%,var(--panel2) 68%);padding:12px 14px;box-shadow:0 0 22px -6px color-mix(in srgb, var(--gold) 60%, transparent)"><span class="small" style="color:var(--text)">${esc(m)}</span></div>`; })():''}
+   ${offerLotteryHtml}
+   ${consumablesHtml}
 
    ${categories.map(cat=>{
-     const catItems=visibleItems.filter(i=>i.cat===cat);
+     const catItems=LEGEND_UNLOCKABLES.filter(i=>i.cat===cat);
      return `
-     <div class="shop-rail-title">${cat}<span class="n">${catItems.length}</span></div>
+     <div class="shop-rail-title">${SHOP_CAT_ICON[cat]||''} ${cat}<span class="n">${catItems.length}</span></div>
      <div class="shop-rail">${catItems.map(item=>{
        const isOwned=checkLegendUnlock(item.id);
        const canAfford=pts>=item.cost;
@@ -756,7 +803,6 @@ function scr_legends(){
      </div>`;
    })()}
    <div class="hr" style="margin:20px 0"></div>
-   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mt glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    ${checkLegendUnlock('mode_fantasy')?`<button class="btn primary mt" style="font-size:16px;padding:16px" onclick="CL.go('fantasy_setup')">LANCER FANTASY FIGHT</button>`:''}
    ${checkLegendUnlock('mode_allstars')?`<button class="btn mt" style="font-size:16px;padding:16px;border-color:var(--gold);color:var(--gold)" onclick="CL.initAllStars()">LANCER TOURNOI ALL-STARS</button>
      <div class="muted small" style="text-align:center;margin-top:4px">Nécessite 8 légendes au Panthéon (tu en as ${loadHOF().length})</div>`:''}

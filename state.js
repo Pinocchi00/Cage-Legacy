@@ -42,7 +42,7 @@ const HOF_KEY='cage-legacy-hof', SAVE_VERSION=2;
 function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY))||[]; }catch(e){ return []; } }
 function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catch(e){} }
 /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
-   f.decorations (array d'ids LEGEND_UNLOCKABLES, cat 'Ennoblissement du
+   f.decorations (array d'ids LEGEND_UNLOCKABLES, cat 'Décorations du
    Panthéon') vit directement sur l'entrée HOF — au même titre que
    favorite/beltHistory. "Récupération" à la suppression (deleteHof, ui-08)
    est automatique et gratuite : f.decorations disparaît avec l'entrée, la
@@ -413,7 +413,18 @@ function recordGauntletDaily(meta,mode,progress){
 const GAUNTLET_DAILY_OBJECTIVES=[
   {id:'ko2straight',kind:'run',metric:'koStreak',target:2,label:'2 KO d\u2019affilée dans la même run'},
   {id:'win3straight',kind:'run',metric:'winStreak',target:3,label:'3 victoires d\u2019affilée dans la même run'},
-  {id:'flawless1',kind:'run',metric:'flawless',target:1,label:'Un combat terminé sans le moindre dégât reçu'},
+  /* ==== [ANCRE: CORRECTIF_DEFI_SANS_DEGAT] — bug remonté : "sans le
+     moindre dégât reçu" (dmgHead+dmgBody+dmgLegs===0) demandait de ne
+     JAMAIS perdre un seul échange debout ou au sol sur tout le combat — le
+     moteur inflige 1 à 3 points à l'un des deux camps à chaque échange
+     debout (engine.js, ANCRE MICRO_SEQUENCES), donc une victoire à zéro
+     dégât exige de gagner CHAQUE micro-séquence du combat, dans l'ordre,
+     sans exception : un défi du jour vécu comme irréalisable plutôt que
+     comme rare. Seuil assoupli à "quasiment aucun dégât" (cf. ui-08,
+     ANCRE GAUNTLET_DEFI_JOUR_V2) — reste une victoire très dominante, mais
+     plus un tirage à annulation totale du hasard. ==== */
+  {id:'flawless1',kind:'run',metric:'flawless',target:1,label:'Un combat terminé en n’encaissant presque aucun dégât (3 points ou moins)'},
+  /* ==== [FIN ANCRE] ==== */
   {id:'sub3day',kind:'day',metric:'subWins',target:3,label:'3 victoires par soumission aujourd\u2019hui (toutes tentatives confondues)'},
   {id:'td5day',kind:'day',metric:'takedowns',target:5,label:'5 amenées au sol réussies aujourd\u2019hui'},
   {id:'kd2day',kind:'day',metric:'kdCount',target:2,label:'2 knockdowns infligés aujourd\u2019hui'}
@@ -447,6 +458,20 @@ function gauntletDailyObjective(meta){
   const obj={date:key,id:tmpl.id,kind:tmpl.kind,metric:tmpl.metric,target:tmpl.target,label:tmpl.label,scope};
   meta.gauntletDailyObj=obj;
   meta.gauntletDailyObjProgress={date:key,subWins:0,takedowns:0,kdCount:0,completed:false,streakCredited:false,rescued:false};
+  /* ==== [ANCRE: CORRECTIF_OFFRE_RACHAT_PERDUE] — bug remonté : cette
+     fonction pose meta.gauntletDailyRescueOffer (juste au-dessus) mais ne
+     sauvegardait jamais elle-même — ses deux appelants d'affichage
+     (gauntletDailyTag/gauntletDailyGroup, ui-06) rechargent un meta neuf à
+     chaque render sans jamais persister. Résultat : l'offre n'existait que
+     dans la mémoire du render courant. Au clic sur "Racheter",
+     CL.buybackGauntletDailyStreak() (ui-08) recharge un meta FRAIS depuis
+     localStorage — sans l'offre — donc "Rien à racheter." même avec assez
+     de points. Sauvegarder ici, au seul point d'entrée qui écrit l'offre,
+     couvre tous les appelants sans les modifier un par un. La sauvegarde ne
+     se déclenche qu'au changement de jour/première init (l'early return
+     ci-dessus court-circuite le reste tant que la date n'a pas changé). ==== */
+  saveMetaStats(meta);
+  /* ==== [FIN ANCRE] ==== */
   return obj;
 }
 function gauntletDailyObjectiveDone(meta){ gauntletDailyObjective(meta); return !!meta.gauntletDailyObjProgress.completed; }
@@ -547,11 +572,11 @@ const LEGEND_UNLOCKABLES=[
      plus bas, qui la retire d'un éventuel porteur précédent). Maximum 3
      équipées simultanément par combattant. gauntlet:false : ce sont des
      décorations de Panthéon (carrière), pas du contenu Gauntlet. */
-  {id:'deco_frame_gold',name:'Cadre Doré (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:70,desc:'Cadre doré autour de la fiche du combattant retraité.'},
-  {id:'deco_frame_crimson',name:'Cadre Écarlate (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:70,desc:'Cadre rouge sang autour de la fiche du combattant retraité.'},
-  {id:'deco_glow',name:'Effet de Lumière (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:90,desc:'Halo lumineux doré autour du nom du combattant.'},
-  {id:'deco_typography',name:'Typographie Gravée (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:60,desc:'Nom du combattant affiché dans une typographie ornementale exclusive.'},
-  {id:'deco_diamond',name:'Palmarès en Diamant (Ennoblissement)',cat:'Ennoblissement du Panthéon',cost:120,desc:'Le bilan (victoires-défaites) scintille en diamant sur la fiche.'}
+  {id:'deco_frame_gold',name:'Cadre Doré (Décoration)',cat:'Décorations du Panthéon',cost:70,desc:'Cadre doré autour de la fiche du combattant retraité.'},
+  {id:'deco_frame_crimson',name:'Cadre Écarlate (Décoration)',cat:'Décorations du Panthéon',cost:70,desc:'Cadre rouge sang autour de la fiche du combattant retraité.'},
+  {id:'deco_glow',name:'Effet de Lumière (Décoration)',cat:'Décorations du Panthéon',cost:90,desc:'Halo lumineux doré autour du nom du combattant.'},
+  {id:'deco_typography',name:'Typographie Gravée (Décoration)',cat:'Décorations du Panthéon',cost:60,desc:'Nom du combattant affiché dans une typographie ornementale exclusive.'},
+  {id:'deco_diamond',name:'Palmarès en Diamant (Décoration)',cat:'Décorations du Panthéon',cost:120,desc:'Le bilan (victoires-défaites) scintille en diamant sur la fiche.'}
   /* ==== [FIN ANCRE] ==== */
 ];
 // Gain divisé par 10 par rapport au score brut : hofScore() peut dépasser 500
@@ -584,9 +609,9 @@ const GAUNTLET_CONSUMABLES=[
   {id:'cons_veto',name:'Droit de véto',cost:70,kind:'veto',desc:'Annule le 1er adversaire généré de la prochaine run, un autre est tiré à sa place.'},
   {id:'cons_shelter',name:'Mise à l\u2019abri automatique',cost:60,kind:'autobank',desc:'Sécurise automatiquement une petite somme dès le 1er combat gagné de la run.'},
   {id:'cons_safetynet',name:'Filet de sécurité',cost:90,kind:'safetynet',desc:'Offre une 2e chance si tu perds le 1er combat de la run — l\u2019adversaire est retiré sans mettre fin à la run.'},
-  {id:'cons_strength',name:'Potion de force',cost:50,kind:'buff',fx:{power:15},desc:'Boost temporaire de Puissance (+3/20), actif pour toute la run.'},
-  {id:'cons_dope',name:'Dopage légal',cost:65,kind:'buff',fx:{cardio:15,power:20,durability:-5},desc:'+3 Cardio, +4 Puissance, -1 Résistance (/20), actif pour toute la run.'},
-  {id:'cons_camp',name:'Camp d\u2019entraînement rigoureux',cost:65,kind:'buff',fx:{strength:10,composure:10,fightIQ:10},desc:'+2 Force, +2 Sang-froid, +2 Intelligence (/20), actif pour toute la run.'}
+  {id:'cons_strength',name:'Potion de force',cost:50,kind:'buff',fx:{power:15},desc:'Boost temporaire de Puissance (+3), actif pour toute la run.'},
+  {id:'cons_dope',name:'Dopage légal',cost:65,kind:'buff',fx:{cardio:15,power:20,durability:-5},desc:'+3 Cardio, +4 Puissance, -1 Résistance, actif pour toute la run.'},
+  {id:'cons_camp',name:'Camp d\u2019entraînement rigoureux',cost:65,kind:'buff',fx:{strength:10,composure:10,fightIQ:10},desc:'+2 Force, +2 Sang-froid, +2 Intelligence, actif pour toute la run.'}
 ];
 function purchaseGauntletConsumable(meta,itemId){
   const item=GAUNTLET_CONSUMABLES.find(i=>i.id===itemId);
@@ -644,10 +669,10 @@ const GAUNTLET_EXCLUSIVE_OFFERS=[
      emplacement d'affichage de titre n'existe dans le jeu (ni fiche, ni
      Panthéon) — hors scope d'un correctif ciblé, à traiter comme un ajout
      de fonctionnalité à part entière. ==== */
-  {id:'excl_mask_oni',name:'Masque du Oni (cosmétique Panthéon)',cat:'Ennoblissement du Panthéon',desc:'Décoration de fiche exclusive, jamais vendue autrement.',baseCost:220},
+  {id:'excl_mask_oni',name:'Masque du Oni (cosmétique Panthéon)',cat:'Décorations du Panthéon',desc:'Décoration de fiche exclusive, jamais vendue autrement.',baseCost:220},
   {id:'excl_banner_ash',name:'Bannière Cendrée (thème d\u2019octogone)',desc:'Variante sombre et exclusive du thème Arène Écarlate.',baseCost:260},
   {id:'excl_title_ghost',name:'Titre « L\u2019Insaisissable » (Profil)',desc:'Titre cosmétique exclusif, sans effet mécanique.',baseCost:180},
-  {id:'excl_gloves_relic',name:'Gants-Relique (cosmétique Panthéon)',cat:'Ennoblissement du Panthéon',desc:'Décoration de fiche exclusive au style usé et ancien.',baseCost:240},
+  {id:'excl_gloves_relic',name:'Gants-Relique (cosmétique Panthéon)',cat:'Décorations du Panthéon',desc:'Décoration de fiche exclusive au style usé et ancien.',baseCost:240},
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
      "Disponible à la fois en achat classique ET via la Rotation des offres
@@ -657,7 +682,7 @@ const GAUNTLET_EXCLUSIVE_OFFERS=[
      id évite toute désynchronisation entre les deux catalogues. baseCost
      recopié depuis son entrée LEGEND_UNLOCKABLES (120) pour que la réduction
      s'applique sur le même prix de référence. ==== */
-  {id:'deco_diamond',name:'Palmarès en Diamant (Ennoblissement)',desc:'Décoration de Panthéon, aussi disponible en achat classique.',baseCost:120}
+  {id:'deco_diamond',name:'Palmarès en Diamant (Décoration)',desc:'Décoration de Panthéon, aussi disponible en achat classique.',baseCost:120}
   /* ==== [FIN ANCRE] ==== */
 ];
 function gauntletExclusiveOfferToday(meta){

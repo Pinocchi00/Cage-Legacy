@@ -703,15 +703,14 @@ function atRiskToggleBlock(a){
 /* ==== [ANCRE: COACHING_OBLIGATOIRE] — item demandé : le coaching entre les
    rounds n'est plus un choix (toggle togglable via CL.toggleCoaching()) mais
    une pièce systématique du Gauntlet, sur les 3 formats — resolveArcadeFight()
-   (ui-03) ne passe plus que par startCoachingFight(). Le bloc devient un
-   simple badge informatif, non cliquable, pour que le joueur sache à quoi
-   s'attendre avant de lancer le combat, sans pouvoir le désactiver. ==== */
-function coachingToggleBlock(a){
-  return `<div class="toggle-card" style="flex:1;min-width:0">
-     <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid var(--gold);color:var(--gold);font-weight:bold">✓ Coaching</div>
-     <div class="muted small mt">Pause tactique après chaque round : dégâts + tendance des juges affichés, nouvelle consigne à choisir avant le round suivant.</div>
-   </div>`;
-}
+   (ui-03) ne passe plus que par startCoachingFight(). */
+/* ==== [ANCRE: CORRECTIF_BADGE_COACHING_PERMANENT] — bug remonté : le badge
+   "✓ Coaching" avait bien été rendu non cliquable au moment où le coaching
+   est devenu permanent (ANCRE ci-dessus), mais continuait de prendre une
+   place entière dans la rangée de pastilles des 3 hubs Gauntlet — pour une
+   mécanique qui ne se désactive plus jamais, ce n'est plus une information
+   utile à afficher à chaque écran, juste de l'espace perdu. Fonction et ses
+   3 appels retirés (aucun autre appelant, cf. grep). ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — les séquelles doivent être lisibles au
    hub, sinon la baisse d'attributs est vécue comme un bug de simulation. ==== */
@@ -738,15 +737,43 @@ function gauntletStatusBlock(a,live){
      contrat — c'est la contrainte la plus structurante de toute la run
      (posée une fois au lancement, jamais renégociable), le joueur doit la
      voir avant toute autre info d'état. ==== */
-  if(a.mutator) rows.push(`<div class="mono small" style="color:var(--blood)"><b>☣ Mutateur : ${a.mutator.label}</b> <span class="muted">— ${a.mutator.desc}</span></div>`);
+  /* ==== [ANCRE: CORRECTIF_ETAT_RUN_ESPACE] — bug remonté (10d) : ce bloc
+     restait trop chargé même après l'espacement des lignes (ANCRE
+     CORRECTIF_ETAT_RUN_COMPACT plus bas) — la description complète du
+     mutateur n'est affichée NULLE PART ailleurs dans le jeu (seul point où
+     le joueur peut apprendre ce qu'il fait), donc pas question de la
+     supprimer. Repliée par défaut derrière un tap ("▼ Détail"), même
+     mécanisme que l'aperçu de la boutique (G._shopPreview/toggleShopPreview,
+     ui-07/ui-08) : la ligne compacte reste toujours visible, la phrase
+     complète ne prend de la place que si le joueur la demande. ==== */
+  if(a.mutator){
+    const open=G._runStatusPreview==='mutator';
+    rows.push(`<div class="mono small" style="color:var(--blood)" onclick="CL.toggleRunStatusPreview('mutator')"><b>☣ Mutateur : ${a.mutator.label}</b> <span class="muted" style="text-decoration:underline dotted;cursor:pointer">${open?'▲ Fermer':'▼ Détail'}</span>${open?`<div class="muted" style="margin-top:2px">${a.mutator.desc}</div>`:''}</div>`);
+  }
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: IDENTITE_DE_CAMP] — ajout #22 (24 ajouts, 12/08/2026). ==== */
-  if(a.campIdentity) rows.push(`<div class="mono small sage"><b>🏕 ${a.campIdentity.name}</b> <span class="muted">— ${a.campIdentity.desc}</span>${a.campIdentity.passive?`<br><span class="gold">⚡ ${a.campIdentity.passive.label}</span>`:''}</div>`);
+  /* ==== [ANCRE: CORRECTIF_CAMP_VERBEUX] — bug remonté : cette ligne
+     répétait la phrase de flaveur (c.desc) déjà lue en entier une fois pour
+     toutes à la sélection (scr_camp_identity_pick) et forçait un retour à
+     la ligne (<br>) avant le passif — sur un choix DÉFINITIF pour toute la
+     run (cf. ANCRE ci-dessus), affiché sur les 3 hubs à chaque render, ce
+     texte redondant gonflait un bloc déjà chargé (GAUNTLET_STATUT_CONSOLIDE)
+     pour rien. Ne garde que le nom (identification rapide) et le passif
+     (seule info encore utile en cours de run), sur une seule ligne. ==== */
+  if(a.campIdentity) rows.push(`<div class="mono small sage"><b>🏕 ${a.campIdentity.name}</b>${a.campIdentity.passive?` <span class="gold">— ⚡ ${a.campIdentity.passive.label}</span>`:''}</div>`);
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_CONTRAT_INDICATEUR] — bug remonté : ☐ est un
+     symbole de case À COCHER, alors que le contrat de run est évalué
+     automatiquement (evalGauntletContract) — le ✓/○ reste un simple point
+     d'état, jamais cliquable lui-même (cf. ANCRE CORRECTIF_ETAT_RUN_ESPACE
+     juste au-dessus : seul le lien "▼ Détail" l'est, distinct visuellement
+     pour ne pas réintroduire la même confusion). ==== */
   if(a.contract){
-    const c=a.contract, ok=live?evalGauntletContract(a):!!c.done;
-    rows.push(`<div class="mono small" style="color:${ok?'var(--sage)':'var(--gold)'}"><b>${SVG.pact} ${ok?'✓':'☐'} ${c.label}</b> <span class="muted">— ${c.hint} (×${c.mult} sur le gain)</span></div>`);
+    const c=a.contract, ok=live?evalGauntletContract(a):!!c.done, open=G._runStatusPreview==='contract';
+    rows.push(`<div class="mono small" style="color:${ok?'var(--sage)':'var(--gold)'}"><b>${SVG.pact} ${ok?'✓':'○'} ${c.label}</b> <span class="muted">(×${c.mult}) </span><span class="muted" style="text-decoration:underline dotted;cursor:pointer" onclick="CL.toggleRunStatusPreview('contract')">${open?'▲ Fermer':'▼ Détail'}</span>${open?`<div class="muted" style="margin-top:2px">${c.hint}</div>`:''}</div>`);
   }
+  /* ==== [FIN ANCRE] ==== */
   const banked=a.banked||0;
   if(banked>0){
     const elim=eliminationPreview(a);
@@ -762,10 +789,17 @@ function gauntletStatusBlock(a,live){
     rows.push(`<div class="mono small gold">Multiplicateur de la run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`);
   }
   if(!rows.length) return '';
+  /* ==== [ANCRE: CORRECTIF_ETAT_RUN_COMPACT] — bug remonté : jusqu'à 6
+     lignes (mutateur, camp, contrat, cagnotte, séquelles, multiplicateur)
+     s'empilaient avec rows.join('') pur, sans le moindre espacement — un
+     bloc déjà chargé rendu encore plus difficile à lire. Chaque ligne
+     existante est enveloppée ici (aucun des appels rows.push() ci-dessus
+     n'a besoin de changer) avec une petite marge haute, sauf la première. ==== */
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:left;margin-top:12px">
      <div class="eyebrow mb" style="font-size:11px">État de la run</div>
-     ${rows.join('')}
+     ${rows.map((r,i)=>`<div${i>0?' style="margin-top:6px"':''}>${r}</div>`).join('')}
    </div>`;
+  /* ==== [FIN ANCRE] ==== */
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BRACKET_VISIBLE] — rend le tableau réellement simulé
@@ -796,7 +830,7 @@ function scr_bracket_view(){
     </div>`;
   };
   return `<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // TABLEAU — ${t.stepName.toUpperCase()}</span></div>
-   <p class="lede small">Votre tête de série : #${t.playerSeed}. ${rivalAlive?'<b style="color:var(--blood)">Un némésis est encore en lice dans ce tableau.</b>':'Aucun némésis dans les survivants.'}</p>
+   <p class="lede small">Votre classement : #${t.playerSeed}. ${rivalAlive?'<b style="color:var(--blood)">Un némésis est encore en lice dans ce tableau.</b>':'Aucun némésis dans les survivants.'}</p>
    ${t.matches.map(row).join('')}
    <button class="btn ghost mt" onclick="CL.go('arcadehub')">← Retour au vestiaire</button>
   </div>`;
@@ -1088,9 +1122,16 @@ function scr_arcade_plan(){
   const analysisLabel=isBossBlind?'Inconnu':(rumorActive?'Rumeur':(gauntletRumorActive(G.arcade)?'Analyse (percée)':'Analyse'));
   const pierceButton=(!isBossBlind && rumorActive)?`<div class="mono small mt"><span onclick="CL.pierceRumor()" style="cursor:pointer;color:var(--gold);text-decoration:underline dotted">🔍 L\u2019Analyse — percer la rumeur pour ce combat (-2 Intelligence tactique)</span></div>`:'';
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_ANALYSE_COLLEE] — bug remonté : .hero-name a un
+     interlignage très serré (line-height:.92) sans marge basse, et cette
+     carte n'avait aucun padding en haut (padding:0 ...) — rien ne sépare
+     le nom des combattants de l'encadré d'analyse juste en dessous. Sur
+     l'écran équivalent en carrière (scr_plan, ui-06), le même padding:0
+     passe inaperçu car renderFightPoster (l'affiche de combat, absente
+     ici en Gauntlet) apporte déjà 24px de marge basse. ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Gauntlet · Plan de combat</span></div>
    <div class="hero-name" style="text-align:center;font-size:20px">${esc(f.nick||f.name)} <span class="muted">vs</span> ${isBossBlind?'<span style="color:var(--muted)">???</span>':esc(opp.name)}</div>
-   <div class="card mt" style="border-color:transparent;padding:0 0 16px 0">
+   <div class="card mt" style="border-color:transparent;padding:14px 0 16px 0">
      <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>${analysisLabel} :</b> ${analysis}</div>
      ${pierceButton}
    </div>
@@ -1160,7 +1201,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
      <div class="muted small mt">Identité inconnue — révélée juste avant le combat.</div>`
      /* ==== [FIN ANCRE] ==== */}</div>
    ${gauntletStatusBlock(a,true)}
-   <div style="display:flex;gap:10px;margin-top:12px">${coachingToggleBlock(a)}${atRiskToggleBlock(a)}</div>
+   <div style="display:flex;gap:10px;margin-top:12px">${atRiskToggleBlock(a)}</div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button></div>`;
   }
@@ -1196,7 +1237,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
    ${targets.map(targetCard).join('')}
    ${(a.aggroCooldown>0)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
    ${gauntletStatusBlock(a,true)}
-   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${coachingToggleBlock(a)}${atRiskToggleBlock(a)}</div>
+   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${atRiskToggleBlock(a)}</div>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button></div>`;
   }
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
@@ -1205,15 +1246,15 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
   const mutBlindBr=G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu';
   /* ==== [FIN ANCRE] ==== */
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
-   <div class="hero-name" style="text-align:center">TÊTE DE SÉRIE #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
+   <div class="hero-name" style="text-align:center">CLASSÉ #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:20px">
-     <div class="eyebrow mb">Prochain adversaire${mutBlindBr?'':` : Tête de série #${a.opponent.seed}`}</div>
+     <div class="eyebrow mb">Prochain adversaire${mutBlindBr?'':` : classé #${a.opponent.seed}`}</div>
      ${mutBlindBr?`<div class="hero-name" style="font-size:clamp(22px,6vw,28px);color:var(--muted)">??? <span style="filter:blur(4px)">████████</span></div>
      <div class="muted small mt">Identité inconnue — Mise à nu.</div>`:`${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
      <div class="muted small mt">${gauntletRumorActive(a)?a.opponent.styleLabel:`${a.opponent.styleLabel} · OVR ${a.opponent.overall}`}</div>`}</div>
    ${gauntletStatusBlock(a,true)}
-   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${coachingToggleBlock(a)}${atRiskToggleBlock(a)}</div>
+   <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${atRiskToggleBlock(a)}</div>
    <button class="btn primary mt" style="font-size:20px;padding:18px" onclick="CL.fightArcade()">COMBATTRE (${a.tournament.stepName.toUpperCase()})</button>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button>
    <button class="btn ghost" style="margin-top:8px;opacity:0.75" onclick="CL.viewBracket()">Voir le tableau complet</button></div>`;
@@ -1424,21 +1465,6 @@ function scr_coaching_round(){
      <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto" onclick="CL.acceptSecondSouffle()">Puiser dans les réserves</button>
    </div>`:'';
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: CORRECTIF_STATS_COACHING_ABSENTES] — bug remonté : l'écran
-     de coaching n'affichait que dégâts + juges, jamais l'état réel du
-     combattant (les mêmes attributs déjà utilisés partout ailleurs en
-     Gauntlet — cf. scr_arcade_plan, ui-04 — via groupAvg/ATTR, engine.js).
-     Bloc compact (3 lignes, pas la liste détaillée par attribut : le coin
-     n'a besoin que d'une lecture rapide entre 2 rounds, pas de la fiche
-     complète). ==== */
-  const gAvg=groupAvg(f);
-  const coachStatsBlock=`<div class="card glass mb" style="background:var(--panel2);padding:12px">
-     <div class="eyebrow mb">Ton combattant, round ${c.round}</div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Technique</span><b>${d20(gAvg.tech)}/20</b></div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Mental</span><b>${d20(gAvg.ment)}/20</b></div>
-     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Physique</span><b>${d20(gAvg.phys)}/20</b></div>
-   </div>`;
-  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">LE COIN · ROUND ${c.round}</span></div>
    <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:20px 16px;margin-bottom:16px;position:relative;overflow:hidden">
      <div style="position:absolute;top:-30px;right:-10px;font-size:120px;opacity:0.05;font-family:'Oswald';font-weight:700;color:var(--gold);pointer-events:none;z-index:0;line-height:1">${roundJustEnded}</div>
@@ -1447,7 +1473,6 @@ function scr_coaching_round(){
      <div class="eyebrow mb mt" style="position:relative;z-index:2">Score des juges (estimation)</div>
      <div class="duel2" style="position:relative;z-index:2;justify-content:center;gap:14px">${judgeCards}</div>
    </div>
-   ${coachStatsBlock}
    ${secondSouffleBlock}
    <div class="eyebrow gold mb" style="letter-spacing:0.2em">LE COACH TE GUEULE — ROUND ${c.round} :</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">

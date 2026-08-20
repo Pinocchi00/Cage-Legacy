@@ -19,11 +19,11 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
   G.screen='hub'; save(); render();
@@ -151,15 +151,33 @@ const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
-  purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(); },
+  /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
+     tirage/bascule d'aperçu dans la Salle des Légendes appelait render()
+     sans préserver le scroll, ramenant la page tout en haut alors que
+     l'objet cliqué (et le message de résultat, tout en bas de l'écran —
+     cf. G.lastMsg dans scr_legends, ui-07) se trouve plus bas. render(true)
+     conserve la position de scroll (cf. ANCRE dans ui-08, fonction render). ==== */
+  purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(true); },
   /* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — bascule d'aperçu pour
      les objets réellement prévisualisables (thèmes d'octogone et
      décorations Panthéon, cf. shopPreviewHtml ui-07). Un seul aperçu ouvert
      à la fois : cliquer sur l'objet déjà ouvert le referme. ==== */
-  toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(); },
-  /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — bascule d'aperçu pour un exploit :
-     un seul ouvert à la fois. ==== */
-  toggleAchPreview(achId){ G._achPreview=(G._achPreview===achId?null:achId); render(); },
+  toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(true); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_ETAT_RUN_ESPACE] — même bascule d'aperçu que la
+     boutique (toggleShopPreview ci-dessus), réutilisée pour replier par
+     défaut la description du mutateur/le rappel du contrat dans "État de la
+     run" (gauntletStatusBlock, ui-04) — un seul dépliage ouvert à la fois. ==== */
+  toggleRunStatusPreview(key){ G._runStatusPreview=(G._runStatusPreview===key?null:key); render(true); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — clic sur une tuile d'exploit ->
+     "fenêtre" dédiée (scr_ach_preview, ui-07), même principe que
+     CL.viewConsumablePreview ci-dessous pour le Marché noir, plutôt que le
+     texte replié sur place utilisé auparavant. Pas de fenêtre Canvas ici :
+     un succès n'a pas d'effet à visualiser dans l'octogone, contrairement
+     à un consommable (buff/veto/filet de sécurité). ==== */
+  viewAchPreview(achId){ G._achPreviewId=achId; G.screen='ach_preview'; render(); },
+  closeAchPreview(){ G.screen='ach'; render(true); },
   /* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
      UNIQUEMENT en Gauntlet (G.arcade), sur scr_gameover (ui-04), bouton
      discret déjà caché côté UI si le joueur ne peut pas payer — garde-fou
@@ -196,19 +214,31 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026). ==== */
-  purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(); },
+  purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(true); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : clic sur une
+     tuile du Marché noir -> "fenêtre" dédiée (scr_consumable_preview)
+     plutôt que le texte replié sur place (shopPreviewHtml, réservé
+     désormais au catalogue classique). G._returnScreen mémorise l'écran de
+     départ (toujours 'legends' en pratique) pour y revenir exactement au
+     lieu de coder 'legends' en dur ici. ==== */
+  viewConsumablePreview(itemId){ G._consumablePreviewId=itemId; G._returnScreen=G.screen; G.screen='consumable_preview'; render(); },
+  closeConsumablePreview(){ G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
-  purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(); },
+  purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
-  drawGauntletLottery(){ const meta=loadMetaStats(); const r=drawGauntletLottery(meta); G.lastMsg=r.msg; render(); },
+  drawGauntletLottery(){ const meta=loadMetaStats(); const r=drawGauntletLottery(meta); G.lastMsg=r.msg; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
-     section c) du nouveau menu Gauntlet — boutique filtrée par défaut, avec
-     option pour retirer le filtre (cf. scr_legends, ui-07). ==== */
-  goShopGauntlet(){ G._shopGauntletFilter=true; CL.go('legends'); },
-  toggleShopGauntletFilter(){ G._shopGauntletFilter=!G._shopGauntletFilter; render(); },
+     accès à la boutique depuis le menu Gauntlet (cf. scr_legends, ui-07). */
+  /* ==== [ANCRE: CORRECTIF_FILTRE_GAUNTLET_RETIRE] — item demandé : le
+     filtre "contenu Gauntlet uniquement" est retiré (scr_legends, ui-07) —
+     goShopGauntlet() ne pose plus le drapeau, simple redirection ;
+     toggleShopGauntletFilter() n'a plus d'appelant, supprimée. ==== */
+  goShopGauntlet(){ CL.go('legends'); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   viewLegend(id){ G.viewingLegendId=id; G.screen='legend_detail'; render(); },
   // ==== [ANCRE: SYSTEME_CLASSES] (contrôleur) — choix unique et définitif,
@@ -632,7 +662,15 @@ const CL={
   choosePlan(idx){ const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
     resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
-  toResult(){ stopArena(); G.screen='result'; save(); render(); },
+  /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
+     l'arène (skipArena et la fin naturelle de l'animation passent tous les
+     deux par ici) : généralisé pour pouvoir router ailleurs qu'au résultat
+     final. G._arenaNext (posé par runCoachingRound, ui-03, avant un round
+     intermédiaire de coaching Gauntlet) redirige vers l'écran de coaching
+     au lieu du résultat ; undefined partout ailleurs préserve exactement
+     le comportement d'origine ('result'). ==== */
+  toResult(){ stopArena(); G.screen=G._arenaNext||'result'; G._arenaNext=null; save(); render(); },
+  /* ==== [FIN ANCRE] ==== */
   afterResult(){
     if(G.pending && G.pending.isFantasy){
       if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; }
@@ -684,7 +722,14 @@ const CL={
         }
         G.arcade.koStreak=(win && G.pending.method && G.pending.method.startsWith('KO'))?(G.arcade.koStreak||0)+1:0;
         G.arcade.winStreak=win?(G.arcade.winStreak||0)+1:0;
-        if(_res && win && (_res.stats.A.dmgHead+_res.stats.A.dmgBody+_res.stats.A.dmgLegs)===0) G.arcade.flawlessAchieved=true;
+        /* ==== [ANCRE: CORRECTIF_DEFI_SANS_DEGAT] — seuil assoupli de "===0"
+           à "<=3" (cf. state.js, GAUNTLET_DAILY_OBJECTIVES) : le moteur
+           inflige 1 à 3 dégâts à chaque échange debout perdu, donc une
+           égalité stricte à zéro exigeait de ne perdre AUCUN échange sur
+           tout le combat — un défi du jour irréalisable en pratique, pas
+           seulement rare. ==== */
+        if(_res && win && (_res.stats.A.dmgHead+_res.stats.A.dmgBody+_res.stats.A.dmgLegs)<=3) G.arcade.flawlessAchieved=true;
+        /* ==== [FIN ANCRE] ==== */
         /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
            "Mise à l'abri automatique" : dès le 1er combat GAGNÉ de la run
            (peu importe le mode), petite somme versée immédiatement en
@@ -1794,12 +1839,28 @@ function makeNoisePattern(ctx){ try{
   for(let i=0;i<id.data.length;i+=4){ const v=Math.random()*255; id.data[i]=v; id.data[i+1]=v; id.data[i+2]=v; id.data[i+3]=16; }
   nctx.putImageData(id,0,0); return ctx.createPattern(c,'repeat');
 }catch(e){ return null; } }
-function buildTimeline(){
+/* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — paramètre midFight ajouté :
+   true quand cette timeline ne couvre qu'UN round joué en cours de coaching
+   Gauntlet (runCoachingRound, ui-03), pas l'issue finale du combat — sert
+   uniquement à choisir le texte de la cloche de fin (round vs combat).
+   N'affecte aucun appelant existant (career/arcade non coaché), tous
+   passent midFight=undefined, donc le texte "Fin du combat" d'origine. ==== */
+function buildTimeline(midFight){
   const res=G.pending.res, you=G.f, opp=G.fight.opp, meWin=G.pending.win;
   const log=(res.log&&res.log.length)?res.log:[];
   const beats=log.map(L=>({phase:L.phase,by:L.by,round:L.r,finish:L.finish,method:L.method,
     text:L.text,momentum:L.momentum,snapA:L.snapA,snapB:L.snapB}));
-  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:res.round||3,text:'[00:00] Fin du combat. Décision des juges.'});
+  /* ==== [ANCRE: CORRECTIF_ROUND_CLOCHE] — bug remonté : le round de la
+     cloche de fin retombait toujours sur res.round||3 — res.round n'existe
+     QUE sur une finition (KO/Soumission), jamais sur une décision (la seule
+     branche où cette cloche s'ajoute), donc l'expression valait TOUJOURS 3
+     en pratique. Inoffensif tant qu'un seul round jusqu'au-boutiste
+     existait (toujours le round 3, en carrière) — devient faux dès qu'un
+     round 1 ou 2 de coaching Gauntlet se termine aux points : affichait
+     "ROUND 3" sur le Canvas au lieu du vrai round joué. Lit désormais le
+     round du dernier beat réel du log, cohérent quel que soit le contexte. ==== */
+  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:(beats.length?beats[beats.length-1].round:3),text:midFight?'[00:00] Fin du round.':'[00:00] Fin du combat. Décision des juges.'});
+  /* ==== [FIN ANCRE] ==== */
   ARENA={beats,idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
     stMe:100,stOp:100,
     flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:res.method,meWin,
@@ -1820,6 +1881,26 @@ function buildTimeline(){
        1=en délire). ==== */
     slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
 }
+/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : ouvrir une
+   "fenêtre" avec un aperçu de l'arène en plein rendu Canvas (les silhouettes
+   de combattants), un par effet du Marché noir, au lieu du simple texte
+   descriptif. Réutilise TEL QUEL le moteur de rendu déjà éprouvé du combat
+   réel (cacheArenaGfx/drawArena/fighter, tous inchangés) — seule différence :
+   une timeline VIDE (aucun beat, aucune boucle d'animation démarrée),
+   dessinée une seule fois en trame figée (drawArena(0,true), même mécanisme
+   que le gel final d'un vrai combat) pour montrer les deux combattants
+   debout dans l'octogone. ==== */
+function buildStaticPreviewArena(nameA,nameB,flagA,flagB){
+  ARENA={beats:[],idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
+    stMe:100,stOp:100,
+    flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:'',meWin:false,
+    currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:null,
+    nmeName:nameA,nopName:nameB,meFlag:flagA,opFlag:flagB,
+    hitStopMs:0,hitStopStart:0,_lastNow:0,camZoom:1,camShakeMag:0,camFocusX:0.5,
+    _particles:[],_wasGrounded:false,
+    slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
+}
+/* ==== [FIN ANCRE] ==== */
 function cacheArenaGfx(){
   const A=ARENA, ctx=A.ctx, W=A.W, H=A.H;
   const topY=H*0.30, topL=W*0.08, topR=W*0.92, botL=W*0.03, botR=W*0.97, gY=H-16, gY2=H-6;
@@ -2239,6 +2320,34 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
   if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }
 }
 function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='undefined')cancelAnimationFrame(ARENA.raf); if(ARENA.to)clearTimeout(ARENA.to); } }
+/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — appelée par render() dès que
+   G.screen==='consumable_preview' (même schéma que startArena/G.screen==
+   'arena'). Un seul dessin figé (drawArena(0,true)), pas de boucle
+   requestAnimationFrame : rien à animer sur un aperçu statique. ==== */
+function startConsumablePreviewArena(){
+  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
+  if(!cv||!cv.getContext) return;
+  const item=GAUNTLET_CONSUMABLES.find(i=>i.id===G._consumablePreviewId);
+  const you=G.f;
+  buildStaticPreviewArena(you?(you.nick||you.first||'Toi'):'Toi','Adversaire',you?(you.flag||''):'','');
+  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
+  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
+  cacheArenaGfx();
+  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_PAR_EFFET] — item demandé : "pour
+     chaque effet" — un indice visuel distinct par consommable, sur ce même
+     Canvas figé, sans nouveau code de dessin (le halo de flash existe déjà
+     dans fighter(), ui-08, pour le combat réel). "shake" est un tremblement
+     JOUÉ SUR PLUSIEURS FRAMES (jitter aléatoire à chaque appel) — invisible
+     sur une trame unique figée, donc écarté ici au profit du halo, qui SE
+     VOIT sur une image fixe. Droit de véto change l'ADVERSAIRE : c'est lui
+     qui brille. Tout le reste est un avantage direct pour le joueur
+     (banque, filet de sécurité, statistiques) : c'est lui qui brille. ==== */
+  if(item&&item.id==='cons_veto') ARENA.flashOp=1; else ARENA.flashMe=1;
+  /* ==== [FIN ANCRE] ==== */
+  drawArena(0,true);
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_arena(){ const A=ARENA||{};
   return `<div class="scr">
    <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:var(--text)">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
@@ -2273,6 +2382,37 @@ function scr_arena(){ const A=ARENA||{};
    </div>
    <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Couper la transmission vidéo ▸</button>
   </div>`; }
+/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — "fenêtre" ouverte au clic sur une
+   tuile du Marché noir (scr_legends, ui-07 : CL.viewConsumablePreview) —
+   même gabarit de carte que scr_arena ci-dessus (silhouettes debout dans
+   l'octogone), sans le HUD de combat (dégâts par zone, cardio, momentum,
+   journal texte) qui n'a pas de sens hors combat réel : juste le Canvas,
+   le nom de l'objet, sa description et son effet chiffré (même formule que
+   campFxLabel, ui-03 — le jeu affiche tout sur /20 sans jamais l'écrire,
+   donc ni ici ni ailleurs). ==== */
+function scr_consumable_preview(){
+  const item=GAUNTLET_CONSUMABLES.find(i=>i.id===G._consumablePreviewId);
+  if(!item) return `<div class="scr center intro"><p class="lede">Objet introuvable.</p><button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button></div>`;
+  const meta=loadMetaStats(), pts=meta.legendPoints||0;
+  const owned=!!meta.gauntletPendingConsumable, canAfford=pts>=item.cost && !owned;
+  const fxTxt=item.fx?Object.entries(item.fx).map(([k,v])=>{
+    const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5));
+    return `${shown>0?'+':''}${shown} ${attrLabel(k)}`;
+  }).join(', '):'';
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Marché noir — aperçu</span><span class="eyebrow x" onclick="CL.closeConsumablePreview()">✕</span></div>
+   <h2 class="disp gold" style="font-size:20px">${item.name}</h2>
+   <div class="card glass raise" style="padding:12px;border-color:var(--blood-d);background:var(--panel2)">
+     <canvas id="shop-preview-cv" style="width:100%;height:180px;display:block;border:1px solid var(--line);background:var(--bg)"></canvas>
+   </div>
+   <div class="card mt" style="background:var(--panel2);padding:14px">
+     <div class="muted small">${item.desc}</div>
+     ${fxTxt?`<div class="mono small gold mt">${fxTxt} (actif pour toute la run)</div>`:''}
+   </div>
+   <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.purchaseConsumable('${item.id}');CL.closeConsumablePreview();" ${canAfford?'':'disabled'}>${owned?'Déjà un consommable en attente':`Acheter — ${item.cost} pts`}</button>
+   <button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 // ==== [ANCRE: CORRECTIF_COULEUR_ZONES_DEGATS] — bug remonté : le rouge
 // (var(--blood)) était utilisé pour un simple seuil de dégâts CUMULÉS
 // (v>28), qui devient quasi systématique dès le round 2-3 puisque ces
