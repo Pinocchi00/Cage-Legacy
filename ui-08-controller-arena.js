@@ -19,11 +19,11 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
   G.screen='hub'; save(); render();
@@ -167,11 +167,10 @@ const CL={
      cf. G.lastMsg dans scr_legends, ui-07) se trouve plus bas. render(true)
      conserve la position de scroll (cf. ANCRE dans ui-08, fonction render). ==== */
   purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(true); },
-  /* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — bascule d'aperçu pour
-     les objets réellement prévisualisables (thèmes d'octogone et
-     décorations Panthéon, cf. shopPreviewHtml ui-07). Un seul aperçu ouvert
-     à la fois : cliquer sur l'objet déjà ouvert le referme. ==== */
-  toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(true); },
+  /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — CL.toggleShopPreview (aperçu
+     replié sur place, réservé aux cosmétiques et décorations) est retiré :
+     le catalogue ouvre désormais la fenêtre dédiée CL.viewShopPreview pour
+     tous ses articles, sans exception. ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_ETAT_RUN_ESPACE] — même bascule d'aperçu que la
      boutique (toggleShopPreview ci-dessus), réutilisée pour replier par
@@ -233,6 +232,11 @@ const CL={
      lieu de coder 'legends' en dur ici. ==== */
   viewConsumablePreview(itemId){ G._consumablePreviewId=itemId; G._returnScreen=G.screen; G.screen='consumable_preview'; render(); },
   closeConsumablePreview(){ G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true); },
+  /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — même va-et-vient que le Marché
+     noir, pour tous les articles du catalogue. ==== */
+  viewShopPreview(itemId){ G._shopPreviewId=itemId; G._returnScreen=G.screen; G.screen='shop_preview'; render(); },
+  closeShopPreview(){ G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
   purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(true); },
@@ -1919,7 +1923,11 @@ function cacheArenaGfx(){
   A._spotGrad=spot;
   A._bleacherFill=[]; A._bleacherDots=[];
   for(let r=0;r<6;r++){ A._bleacherFill.push(`rgba(58,49,38,${0.55+r*0.06})`); A._bleacherDots.push(`rgba(190,140,105,${0.35+r*0.05})`); }
-  A._theme=getArenaTheme();
+  /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — _themeOverride permet de rendre
+     l'octogone avec un thème qui n'est PAS celui équipé, pour montrer un
+     cosmétique avant achat. Absent partout ailleurs : le comportement normal
+     (thème équipé) est strictement inchangé. ==== */
+  A._theme=A._themeOverride||getArenaTheme();
   A._floorGrad=ctx.createLinearGradient(0,topY,0,H);
   A._floorGrad.addColorStop(0,A._theme.floorColors[0]); A._floorGrad.addColorStop(1,A._theme.floorColors[1]);
   A._vignetteGrad=ctx.createRadialGradient(W/2,H*0.55,H*0.25,W/2,H*0.55,Math.max(W,H)*0.62);
@@ -2333,6 +2341,41 @@ function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='un
    G.screen==='consumable_preview' (même schéma que startArena/G.screen==
    'arena'). Un seul dessin figé (drawArena(0,true)), pas de boucle
    requestAnimationFrame : rien à animer sur un aperçu statique. ==== */
+/* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — item demandé : "que chaque aperçu
+   (comme ceux du marché noir) soit disponible sur absolument chaque élément
+   de la boutique". Le catalogue n'avait qu'un repli texte pour la majorité
+   de ses articles, et un aperçu replié sur place pour les cosmétiques et
+   décorations. Même fenêtre dédiée que le Marché noir pour TOUS les
+   articles, avec le rendu le plus parlant selon ce qu'on achète :
+     - cosmétique d'octogone -> l'octogone réellement rendu dans ce thème
+       (Canvas, via ARENA._themeOverride) — on voit ce qu'on achète ;
+     - archétype de Gauntlet -> les deux silhouettes dans la cage, le
+       combattant mis en avant, plus ses points forts chiffrés ;
+     - décoration -> la fiche de légende telle qu'elle sera décorée ;
+     - mode, scénario, outil -> pas de rendu visuel possible (rien de
+       visuel n'existe avant l'achat) : la fenêtre explique ce que
+       l'article ajoute et OÙ le retrouver une fois acheté, ce qui manquait
+       le plus au catalogue.
+   Réutilise intégralement le pipeline de dessin du combat (buildStatic
+   PreviewArena / cacheArenaGfx / drawArena), aucun code de rendu nouveau. ==== */
+function startShopPreviewArena(){
+  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
+  if(!cv||!cv.getContext) return;
+  const id=G._shopPreviewId||'';
+  const arch=(typeof ARCADE_UNLOCKABLE_ARCHETYPES!=='undefined')
+    ? ARCADE_UNLOCKABLE_ARCHETYPES.find(a=>a.unlockId===id) : null;
+  buildStaticPreviewArena(arch?arch.nick:'Toi','Adversaire',arch?arch.flag:'','');
+  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
+  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
+  /* Thème forcé pour un cosmétique, thème équipé pour tout le reste. */
+  const themeId=id.indexOf('cosmetic_')===0?id.replace('cosmetic_',''):(id.indexOf('excl_')===0?id.replace('excl_',''):null);
+  ARENA._themeOverride=themeId?(ARENA_THEMES.find(t=>t.id===themeId)||null):null;
+  cacheArenaGfx();
+  if(arch) ARENA.flashMe=1;
+  drawArena(0,true);
+  ARENA._themeOverride=null;
+}
 function startConsumablePreviewArena(){
   const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
   if(!cv||!cv.getContext) return;
