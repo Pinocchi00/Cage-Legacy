@@ -178,7 +178,7 @@ const CL={
      run" (gauntletStatusBlock, ui-04) — un seul dépliage ouvert à la fois. ==== */
   /* ==== [ANCRE: ATTRIBUTS_EXPLIQUES] — bascule des définitions d'attributs
      sur la fiche complète. ==== */
-  toggleAttrHelp(){ G._attrHelp=!G._attrHelp; render(true); },
+  toggleAttrHelp(k){ G._attrHelp=(G._attrHelp===k?null:k); render(true); },
   toggleRunStatusPreview(key){ G._runStatusPreview=(G._runStatusPreview===key?null:key); render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — clic sur une tuile d'exploit ->

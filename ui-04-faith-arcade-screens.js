@@ -1494,23 +1494,18 @@ function scr_coaching_round(){
      (c.judgesEstimate, calculée dans runCoachingRound), jamais du vrai
      score (c.judges) — repli sur c.judges seulement si une sauvegarde
      antérieure à ce correctif n'a pas encore ce champ. ==== */
-  const displayedJudges=c.judgesEstimate||c.judges;
-  const judgeCards=['j1','j2','j3'].map(j=>{ const [ja,jb]=displayedJudges[j];
-    const cls=ja>jb?'a':(ja===jb?'b':'dn');
-    return `<span class="num ${cls}">${ja}-${jb}</span>`; }).join('');
+
   /* ==== [ANCRE: COACH_DU_COIN] — item demandé : la fin de round ressemblait
      à une fin de COMBAT (grand "FIN DU ROUND", scorecard des juges façon
      décision finale), alors que c'est une pause : le combat reprend juste
      après. L'écran dit maintenant explicitement combien de rounds restent
      et à quoi sert cet arrêt, et l'estimation chiffrée des juges — du
-     jargon de scorecard — laisse la place à ce que dit le coach, avec des
-     mots. Le détail chiffré reste consultable d'un clic pour qui le veut
-     (même dépliant que « État de la run »). ==== */
+     jargon de scorecard — est REMPLACÉE par ce que dit le coach, avec des
+     mots : plus aucun chiffre de juge sur cet écran. ==== */
   const totalRounds=(G.fight&&G.fight.rounds)||3;
   const restants=Math.max(0,totalRounds-roundJustEnded);
   const verdict=coachScoreLine(a,c);
   const conseil=coachAdviceLine(a,c,r,f);
-  const juesOpen=G._runStatusPreview==='juges';
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) : offre
@@ -1532,9 +1527,6 @@ function scr_coaching_round(){
    <div class="card mb" style="background:var(--panel2);border-left:3px solid var(--gold);padding:14px">
      <div class="small" style="color:var(--text)">${verdict}</div>
      <div class="small mt" style="color:var(--gold)">« ${conseil} »</div>
-     <div class="mono small mt" style="color:var(--muted);text-decoration:underline dotted;cursor:pointer" onclick="CL.toggleRunStatusPreview('juges')">${juesOpen?'▲ Masquer les cartes des juges':'▼ Voir les cartes des juges'}</div>
-     ${juesOpen?`<div class="duel2 mt" style="justify-content:center;gap:14px">${judgeCards}</div>
-     <div class="muted small mt">Estimation : ce que chaque juge te donnerait si le combat s\u2019arrêtait maintenant.</div>`:''}
    </div>
    ${secondSouffleBlock}
    <div class="eyebrow gold mb" style="letter-spacing:0.2em">TA CONSIGNE POUR LE ROUND ${c.round}</div>

@@ -14,8 +14,9 @@
    ============================================================================ */
 
 /* ==== [ANCRE: PROCHAIN_OBJECTIF] — rendu du fil conducteur calculé dans
-   state.js. Affiché à l'accueil (on sait quoi faire en arrivant) et au menu
-   du Gauntlet (on sait pourquoi relancer juste après une run). ==== */
+   state.js. Affiché au menu du Gauntlet uniquement : la refonte de l'accueil
+   n'a pas convenu et celui-ci est revenu à sa forme d'origine, où cet encart
+   n'a plus sa place. ==== */
 function nextObjectiveBlock(){
   const o=nextObjective(); if(!o) return '';
   return `<div class="card glass mb" style="border-left:3px solid var(--gold);background:linear-gradient(135deg,color-mix(in srgb, var(--gold) 12%, var(--panel2)) 0%,var(--panel2) 70%);padding:14px">
@@ -25,70 +26,35 @@ function nextObjectiveBlock(){
     <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:8px 12px;width:auto;font-size:13px" onclick="${o.cta.onclick}">${o.cta.label}</button>
   </div>`;
 }
-/** Un bouton de mode de l'accueil : nom, ce que c'est en une phrase sans
- * jargon, et le temps que ça demande.
- * @param {{titre:string,quoi:string,duree:string,onclick:string,couleur:string,badge?:string}} m
- * @returns {string} HTML */
-function titleModeButton(m){
-  return `<button class="btn" style="font-size:18px;padding:18px;margin-top:10px;border-color:${m.couleur};color:${m.couleur};text-align:left" onclick="${m.onclick}">
-    ${m.titre}${m.badge?` <span class="mono" style="font-size:10px;background:${m.couleur};color:var(--bg);padding:2px 6px;vertical-align:middle">${m.badge}</span>`:''}
-    <span class="mono muted" style="display:block;font-size:12px;margin-top:6px;white-space:normal;line-height:1.4">${m.quoi}</span>
-    <span class="mono" style="display:block;font-size:11px;margin-top:4px;color:${m.couleur};opacity:.8">${m.duree}</span>
-  </button>`;
-}
-/* ==== [ANCRE: ACCUEIL_HIERARCHIE] — item demandé : "chaque menu ne se
-   valent pas dans la mise en avant ou la lisibilité (…) il faut que les
-   gens qui tombent sur le jeu aient envie de lancer directement". Les trois
-   modes étaient présentés comme équivalents, décrits en jargon
-   ("Destiny-like", "arcade"), et le plus court — le seul qu'on puisse
-   essayer sans y engager une soirée — arrivait en dernier. Trois
-   changements : (1) reprendre une partie en cours passe tout en haut, en
-   bouton plein, c'est ce que veut faire quelqu'un qui revient ; (2) les
-   modes sont classés par engagement croissant (leur ancienne numérotation
-   1/2/3 est retirée : elle se lisait à l'envers dans ce nouvel ordre et
-   n'apportait rien), chacun avec ce qu'il est en
-   une phrase et le temps qu'il demande, le plus court marqué comme point
-   d'entrée ; (3) boutique et succès, qui ne lancent aucune partie, passent
-   en bas sur une seule ligne discrète. L'ordre historique des modes est
-   conservé dans leur numérotation. ==== */
+/* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — accueil d'origine restauré tel
+   quel (la refonte par durée/hiérarchie n'a pas convenu). Seul correctif
+   conservé : les notifications de partie sont consommées ici SANS être
+   affichées — elles concernent l'écran d'où vient l'action, pas l'accueil —
+   et seule l'erreur de lien de légende partagé, posée au démarrage par
+   main.js dans G.bootMsg, reste visible. ==== */
 function scr_title(){
-  const reprise=hasSave('faith')||hasSave('career');
-  const modes=[
-    {titre:'GAUNTLET',couleur:'var(--sage)',badge:'POUR DÉCOUVRIR',
-     quoi:'Une session courte : un combattant tiré au sort, des adversaires à enchaîner, tout se joue d’un coup.',
-     duree:'≈ 10 à 15 minutes · rien à gérer',onclick:"CL.go('gauntlet_menu')"},
-    {titre:'CARRIÈRE COMPLÈTE',couleur:'var(--text)',
-     quoi:'Une carrière entière à mener : contrats, argent, camps d’entraînement et héritage laissé au Panthéon.',
-     duree:'≈ 1 heure · gestion complète',onclick:"CL.go('intro')"},
-    {titre:'MMA FAITH',couleur:'var(--blood)',
-     quoi:'La campagne longue : la vie du combattant autant que ses combats, des débuts jusqu’à la retraite.',
-     duree:'plusieurs heures · le mode le plus dense',onclick:'CL.startFaith()'}
-  ];
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div style="text-align:center;margin-bottom:28px">
+   <div style="text-align:center;margin-bottom:48px">
      <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
-     <div class="mono muted" style="margin-top:16px;font-size:13px;letter-spacing:.14em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">TU DIRIGES LA CARRIÈRE D’UN COMBATTANT</div>
-     <div class="muted small mt">Chaque combat est simulé coup par coup. Aucune décision ne se rejoue.</div>
+     <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
    </div>
-   ${(()=>{ /* ANCRE TITRE_SANS_NOTIFICATIONS — cf. commit précédent : les
-        notifications de partie sont consommées ici sans être affichées ;
-        seule l'erreur de lien partagé, posée au démarrage, s'affiche. */
-      G.lastMsg=null;
+   ${(()=>{ G.lastMsg=null;
       if(!G.bootMsg) return '';
       const m=G.bootMsg; G.bootMsg=null;
       return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
     })()}
-   ${reprise?`<button class="btn primary" style="font-size:20px;padding:22px" onclick="CL.cont()">▶ REPRENDRE MA PARTIE
-     <span class="mono" style="display:block;font-size:12px;margin-top:6px;opacity:.85">Tu as une carrière en cours</span></button>
-   <div class="eyebrow mt mb" style="letter-spacing:.2em">ou commencer autre chose</div>`
-   :`<div class="eyebrow mb" style="letter-spacing:.2em">CHOISIS PAR OÙ COMMENCER</div>`}
-   ${nextObjectiveBlock()}
-   ${modes.map(titleModeButton).join('')}
-   <div class="hr" style="margin:22px 0"></div>
-   <div class="g2">
-     <button class="btn ghost" style="font-size:14px;padding:12px" onclick="CL.go('legends')">🛒 Boutique</button>
-     <button class="btn ghost" style="font-size:14px;padding:12px" onclick="CL.go('ach')">🏆 Succès</button>
-   </div>
+   <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
+     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
+   ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
+   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l’argent, les camps et l’héritage</span></button>
+   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Tournois et défis d’ascension arcade</span></button>
+   <div class="hr" style="margin:24px 0"></div>
+   <button class="btn ghost" style="font-size:16px;padding:16px;border:1px dashed var(--gold);background:var(--panel2);color:var(--gold)" onclick="CL.go('legends')">BOUTIQUE : SALLE DES LÉGENDES
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
+   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>
    </div>`;
 }
 /* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
@@ -1053,14 +1019,16 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
      compresser le contenu davantage. `flex:1` sur .card (hérité du layout en
      ligne d'origine) est retiré : sans conteneur flex-row, il ne servait qu'à
      forcer les deux cartes à la même hauteur artificielle. ==== */
-  /* ==== [ANCRE: ATTRIBUTS_EXPLIQUES] — définitions repliées par défaut : la
-     fiche reste aussi dense qu'avant pour qui connaît déjà le sport, et
-     devient lisible pour qui découvre, d'un seul clic. ==== */
-  const aide=!!G._attrHelp;
+  /* ==== [ANCRE: ATTRIBUTS_EXPLIQUES] — retour utilisateur : le dépliant
+     global affichait les 30 définitions d'un coup et rallongeait beaucoup
+     trop la fiche. On clique désormais sur UNE ligne pour lire sa
+     définition, et elle seule ; recliquer la referme. La fiche garde
+     exactement sa longueur d'origine tant qu'on ne demande rien. ==== */
+  const aide=G._attrHelp;
   const grp=(key,title,avg,hero)=>`<div class="card" style="padding:${hero?'20':'14'}px 0"><div class="grp-h"><span class="disp" style="font-size:${hero?'22px':'15px'}">${title}</span><span class="gold mono" style="font-size:${hero?'16px':'13px'}">${d20(avg)}/20</span></div>
-     ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'}"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>${aide?`<div class="muted" style="font-size:11px;padding:0 12px 6px;line-height:1.35">${attrHelp(a[0])}</div>`:''}`).join('')}</div>`;
+     ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'};cursor:pointer" onclick="CL.toggleAttrHelp('${a[0]}')"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>${aide===a[0]?`<div class="muted" style="font-size:11px;padding:2px 12px 8px;line-height:1.35">${attrHelp(a[0])}</div>`:''}`).join('')}</div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="G._profileReturn=null;CL.go('${backScreen}')">✕</span></div>
-   <button class="btn ghost mb" style="padding:8px 12px;width:auto;font-size:12px;border-color:var(--line)" onclick="CL.toggleAttrHelp()">${aide?'▲ Masquer les explications':'❓ Que veut dire chaque ligne ?'}</button>
+   <div class="muted small mb">Touche une ligne pour savoir ce qu\u2019elle mesure.</div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
      <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div></div>
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
