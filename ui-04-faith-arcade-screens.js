@@ -556,7 +556,7 @@ function scr_draft(){ const pool=G.arcade.pool; const isBoss=G.arcade.mode==='bo
   let h=`<div class="scr"><div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
    <span class="eyebrow mono" style="color:var(--blood)">${isBoss?'BOSS RUN // 5 CHAMPIONS':isLadder?'WTUMMA // CLASSEMENT MONDIAL DES 100':'WTUMMA // WORLD TOURNAMENT'}</span></div>
    <p class="lede" style="margin-bottom:32px;font-size:15px">${isBoss?'Affrontez 5 champions d\u2019affilée. Finitions uniquement. La défaite est éliminatoire.':isLadder?'Vous commencez au rang #100. Défiez les combattants mieux classés pour voler leur place jusqu\u2019au sommet. La défaite est éliminatoire.':'Bracket à 64 combattants. Un OVR élevé vous donne une meilleure Seed, un OVR faible vous garantit l\u2019enfer.'}</p>
-   <div class="mono small muted" style="margin:-20px 0 24px">Graine de la run : <b>${G.arcade.seed}</b>${(G.arcade.asc||0)>0?` · <span class="gold">Ascension ${G.arcade.asc}</span>`:''}${G.arcade.daily?' · <span class="sage">DÉFI DU JOUR</span>':''}</div>
+   <div class="mono small muted" style="margin:-20px 0 24px">Graine de la run : <b>${G.arcade.seed}</b>${(G.arcade.asc||0)>0?` · <span class="gold">Ascension ${G.arcade.asc}</span>`:''}</div>
    ${(()=>{ /* ==== [ANCRE: LISIBILITE_CONTRAT_PASSIF] — item demandé : contractBlock()
         rendait le contrat en entier ici, puis CL.selectDraft() (ui-08) navigue
         directement vers arcadehub où gauntletStatusBlock() le réaffiche déjà en
@@ -730,8 +730,28 @@ function atRiskToggleBlock(a){
    noyant l'information sous la répétition du même habillage visuel. Même
    pattern qu'un bloc déjà éprouvé de ce fichier (runDebriefBlock, écran de
    fin de run) : une carte, un eyebrow, des lignes mono empilées. ==== */
+/** Rappel permanent de qui on joue : archétype, tempérament, discipline.
+ * @param {object} f le combattant @returns {string} HTML (vide si inconnu) */
+function gauntletIdentityRow(f){
+  if(!f) return '';
+  const arch=f.nick||f.first||f.name||'Ton combattant';
+  const temper=f.styleLabel?` — ${f.styleLabel}`:'';
+  const disc=f.style?` · ${styleLabel(f.style)}`:'';
+  return `<div class="mono small" style="color:var(--gold)"><b>🥊 Tu joues ${esc(arch)}</b><span class="muted">${esc(temper+disc)}</span></div>`;
+}
 function gauntletStatusBlock(a,live){
   const rows=[];
+  /* ==== [ANCRE: IDENTITE_TOUJOURS_VISIBLE] — item demandé : "préciser quel
+     archétype on a choisi et quel style, le but est que tout soit toujours à
+     disposition à chaque écran pour ne jamais être perdu". Les hubs de run
+     affichent l'ADVERSAIRE en grand et ne rappelaient nulle part qui, soi,
+     on joue : en reprenant une run entamée, il fallait ouvrir la fiche
+     complète pour retrouver son propre archétype et sa discipline — dont
+     dépendent pourtant les tactiques proposées. Placé en tête du bloc, avant
+     le mutateur : c'est le socle (qui je suis) avant les contraintes. ==== */
+  const identityRow=gauntletIdentityRow(G.f);
+  if(identityRow) rows.push(identityRow);
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
      12/08/2026) : mutateur de la run affiché EN PREMIER, avant même le
      contrat — c'est la contrainte la plus structurante de toute la run
@@ -777,7 +797,13 @@ function gauntletStatusBlock(a,live){
   const banked=a.banked||0;
   if(banked>0){
     const elim=eliminationPreview(a);
-    rows.push(`<div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b style="color:var(--loss)">+${elim} pts</b></div>`);
+    /* ==== [ANCRE: CAGNOTTE_LISIBLE] — item demandé : la somme récupérée en
+       cas de défaite s'affichait "+4 pts" en rouge, alors que c'est un gain
+       (rouge = perte partout ailleurs dans le jeu) et que le "+" laissait
+       croire à un bonus qui s'ajoute à la cagnotte. Même or que la cagnotte,
+       sans signe : c'est simplement ce que rapporte le prochain combat s'il
+       est perdu. ==== */
+    rows.push(`<div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b class="gold">${elim} pts</b></div>`);
   }
   (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)"><b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`));
   const m=gauntletRunMult(a);
@@ -849,46 +875,44 @@ function runDebriefBlock(a){
   if((a.riskMult||1)>1) parts.push(`mise en jeu ×${a.riskMult}`);
   if((a.maxPactStreak||0)>0) parts.push(`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`);
   if(a.contract&&a.contract.done) parts.push(`contrat rempli ×${a.contract.mult}`);
-  /* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — le bonus de streak (finaliseGauntletRun,
-     ui-08) s'applique EN PLUS de gauntletRunMult : le multiplicateur affiché
-     doit l'inclure, sinon l'équation base×mult=gain ne balance plus dès
-     qu'un défi du jour à streak>=3 est joué. ==== */
-  const dailyBonusMult=a.dailyStreakBonusMult||1;
-  if(dailyBonusMult>1) parts.push(`série de défis du jour (${a.dailyStreak}) ×${dailyBonusMult}`);
-  const displayMult=Math.round(mult*dailyBonusMult*100)/100;
-  /* ==== [FIN ANCRE] ==== */
+  const displayMult=Math.round(mult*100)/100;
   const contractLine=a.contract
     ? `<div class="mono small" style="color:${a.contract.done?'var(--sage)':'var(--muted)'}">${a.contract.done?'✓':'✗'} Contrat : ${a.contract.label}</div>`
     : '';
   const bounty=(a.bounties||0)>0?`<div class="mono small" style="color:var(--blood)">⚔ ${a.bounties} némésis vaincue(s) — primes déjà versées</div>`:'';
   const inj=(a.runInjuries||[]).length?`<div class="mono small muted">${a.runInjuries.length} séquelle(s) encaissée(s) : ${a.runInjuries.map(i=>i.name).join(', ')}</div>`:'';
   const curses=(a.cursedTaken||0)>0?`<div class="mono small muted">${a.cursedTaken} pacte(s) de camp maudit accepté(s)</div>`:'';
-  const daily=a.daily?`<div class="mono small sage">Tentative du DÉFI DU JOUR consommée.</div>`:'';
   const multLine=(displayMult>1)
     ? `<div class="mono small gold"><b>${base} pts</b> × <b>${displayMult}</b> = <b>${a.earnedOnElimination||0} pts</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`
     : '';
   const ach=(a.newAch||[]).length?`<div class="mono small gold mt">🏅 ${a.newAch.map(x=>x.h).join(' · ')}</div>`:'';
-  /* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026). ==== */
-  const relic=a.newRelic?`<div class="mono small mt" style="color:var(--gold)">🏺 Relique de Survie obtenue : « ${esc(a.newRelic.title)} » <span class="muted">(${a.newRelic.effect.label})</span></div>`:'';
-  const mastery=a.newMastery?`<div class="mono small mt" style="color:var(--gold);font-weight:bold">👑 Maîtrise complète : « ${esc(a.newMastery.title)} » débloqué — profil du joueur.</div>`:'';
-  /* ==== [FIN ANCRE] ==== */
-  if(!multLine && !contractLine && !bounty && !inj && !curses && !daily && !ach && !relic && !mastery) return '';
+  if(!multLine && !contractLine && !bounty && !inj && !curses && !ach) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:20px">
      <div class="eyebrow mb" style="font-size:11px">Bilan de la run</div>
-     ${multLine}${contractLine}${bounty}${inj}${curses}${daily}${ach}${relic}${mastery}
+     ${multLine}${contractLine}${bounty}${inj}${curses}${ach}
    </div>`;
 }
-/* ==== [ANCRE: GAUNTLET_ASCENSION] — un palier ne se débloque qu'en gagnant le
-   format : le message n'apparaît donc que sur une victoire réelle. ==== */
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — un palier s'ouvre sur une performance
+   mesurée (cf. state.js) ou sur une victoire : le message suit a.ascJust
+   Unlocked, posé au moment exact du déblocage. ==== */
+/* ==== [ANCRE: TOUR_ASCENSION_CONDITIONS_MESUREES] — ce bloc ne s'affichait
+   que sur une victoire totale (a.victory). Depuis que le palier suivant
+   s'ouvre aussi sur une bonne performance (cf. state.js), la garde se fait
+   sur a.ascJustUnlocked, posé par finaliseGauntletRun au moment exact où un
+   palier est réellement ouvert — sinon le joueur débloquerait l'Ascension
+   sans que rien ne le lui dise. L'ancienne condition sert de repli pour une
+   run commencée avant ce changement. ==== */
 function ascensionUnlockBlock(a){
-  if(!a.victory) return '';
   const meta=loadMetaStats();
   const lvl=gauntletAscLevel(meta,a.mode);
+  if(!a.ascJustUnlocked && !a.victory) return '';
   if(lvl<=(a.asc||0)) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--gold);padding:12px;text-align:center;margin-bottom:20px">
-     <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${lvl} DÉBLOQUÉE — adversaires plus forts, récompenses ×${gauntletAscPayoutMod(lvl)}</div>
+     <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${lvl} DÉBLOQUÉE</div>
+     <div class="muted small mt">Adversaires plus forts, mais points gagnés multipliés par ${gauntletAscPayoutMod(lvl)}. Choisis ce palier au menu du Gauntlet.</div>
    </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 function scr_gameover(){ const a=G.arcade, f=G.f;
   if(a.mode==='boss_run'){
@@ -1323,16 +1347,25 @@ function scr_arcade_upgrades(){
          post-combat (ui-06). Un attribut déjà au plafond affiche sa valeur
          telle quelle avec la mention, plutôt qu'un gain qui ne
          s'appliquerait pas réellement une fois applyDeltas() exécuté. ==== */
+      /* ==== [ANCRE: GAINS_QUI_MONTENT_REELLEMENT] — même règle que
+         formatSkillFx (ui-07) : on ne liste que les attributs dont la note
+         sur 20 change vraiment. Un malus, lui, reste toujours affiché même
+         s'il ne fait pas bouger la note : masquer une perte tromperait le
+         joueur, alors que masquer un gain nul ne fait que retirer du bruit. ==== */
       const deltas=t.d.map(([k,v])=>{ const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
         const before=k==='morale'?f.morale:k==='form'?f.form:f.attrs[k];
         if(v>0 && k!=='morale' && k!=='form'){
           let cap=(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4;
           if(f.agedCeilings && f.agedCeilings[k]!=null) cap=Math.min(cap, f.agedCeilings[k]);
-          if(before>=cap) return `<span class="dlt">${lbl} ${d20(before)} (déjà au max)</span>`;
-          return `<span class="dlt up">${lbl} ${d20(before)} → ${d20(Math.min(before+v,cap))}</span>`;
+          if(before>=cap) return '';
+          const capped=Math.min(before+v,cap);
+          if(d20(before)===d20(capped)) return '';
+          return `<span class="dlt up">${lbl} ${d20(before)} → ${d20(capped)}</span>`;
         }
         const after=k==='morale'||k==='form'?clamp(before+v,0,100):Math.max(1,before+v);
-        return `<span class="dlt ${v>=0?'up':'dn'}">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).join('');
+        if(v>=0 && d20(before)===d20(after)) return '';
+        return `<span class="dlt ${v>=0?'up':'dn'}">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).filter(Boolean).join('')
+        || `<span class="dlt">Progression légère</span>`;
       h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
             <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
     });
@@ -1450,10 +1483,18 @@ function scr_coaching_round(){
      (c.judgesEstimate, calculée dans runCoachingRound), jamais du vrai
      score (c.judges) — repli sur c.judges seulement si une sauvegarde
      antérieure à ce correctif n'a pas encore ce champ. ==== */
-  const displayedJudges=c.judgesEstimate||c.judges;
-  const judgeCards=['j1','j2','j3'].map(j=>{ const [ja,jb]=displayedJudges[j];
-    const cls=ja>jb?'a':(ja===jb?'b':'dn');
-    return `<span class="num ${cls}">${ja}-${jb}</span>`; }).join('');
+
+  /* ==== [ANCRE: COACH_DU_COIN] — item demandé : la fin de round ressemblait
+     à une fin de COMBAT (grand "FIN DU ROUND", scorecard des juges façon
+     décision finale), alors que c'est une pause : le combat reprend juste
+     après. L'écran dit maintenant explicitement combien de rounds restent
+     et à quoi sert cet arrêt, et l'estimation chiffrée des juges — du
+     jargon de scorecard — est REMPLACÉE par ce que dit le coach, avec des
+     mots : plus aucun chiffre de juge sur cet écran. ==== */
+  const totalRounds=(G.fight&&G.fight.rounds)||3;
+  const restants=Math.max(0,totalRounds-roundJustEnded);
+  const verdict=coachScoreLine(a,c);
+  const conseil=coachAdviceLine(a,c,r,f);
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) : offre
@@ -1465,16 +1506,22 @@ function scr_coaching_round(){
      <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto" onclick="CL.acceptSecondSouffle()">Puiser dans les réserves</button>
    </div>`:'';
   /* ==== [FIN ANCRE] ==== */
-  return `<div class="scr"><div class="bar"><span class="eyebrow">LE COIN · ROUND ${c.round}</span></div>
-   <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:20px 16px;margin-bottom:16px;position:relative;overflow:hidden">
+  return `<div class="scr"><div class="bar"><span class="eyebrow">DANS TON COIN · ENTRE LES ROUNDS</span></div>
+   <div class="card glass raise" style="text-align:center;background:linear-gradient(180deg,var(--panel2) 0%,var(--bg) 100%);border-color:var(--gold-d);padding:18px 16px;margin-bottom:16px;position:relative;overflow:hidden">
      <div style="position:absolute;top:-30px;right:-10px;font-size:120px;opacity:0.05;font-family:'Oswald';font-weight:700;color:var(--gold);pointer-events:none;z-index:0;line-height:1">${roundJustEnded}</div>
-     <div class="eyebrow gold mb" style="position:relative;z-index:2;letter-spacing:0.3em">FIN DU ROUND ${roundJustEnded}</div>
-     <div class="mono small mt" style="position:relative;z-index:2">Infligés <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b> · Encaissés <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b></div>
-     <div class="eyebrow mb mt" style="position:relative;z-index:2">Score des juges (estimation)</div>
-     <div class="duel2" style="position:relative;z-index:2;justify-content:center;gap:14px">${judgeCards}</div>
+     <div class="eyebrow gold mb" style="position:relative;z-index:2;letter-spacing:0.3em">PAUSE — ROUND ${roundJustEnded} TERMINÉ</div>
+     <div class="muted small" style="position:relative;z-index:2">Le combat n\u2019est pas fini : il reste ${restants} round${restants>1?'s':''}. Tu es dans ton coin, c\u2019est le moment de choisir la consigne du round suivant.</div>
+     <div class="mono small mt" style="position:relative;z-index:2">Coups placés <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b> · Coups encaissés <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b></div>
+   </div>
+   <div class="card mb" style="background:var(--panel2);border-left:3px solid var(--gold);padding:14px">
+     <div class="small" style="color:var(--text)">${verdict}</div>
+     <div class="small mt" style="color:var(--gold)">« ${conseil} »</div>
    </div>
    ${secondSouffleBlock}
-   <div class="eyebrow gold mb" style="letter-spacing:0.2em">LE COACH TE GUEULE — ROUND ${c.round} :</div>
+   <div class="eyebrow gold mb" style="letter-spacing:0.2em">TA CONSIGNE POUR LE ROUND ${c.round}</div>
+   <!-- ANCRE IDENTITE_TOUJOURS_VISIBLE : les consignes proposées dépendent de
+        la discipline du combattant, autant la rappeler juste au-dessus. -->
+   <div class="mb">${gauntletIdentityRow(f)}</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">
      <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${p.lbl}</span></div>
      <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}

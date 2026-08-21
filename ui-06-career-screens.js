@@ -13,20 +13,43 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: PROCHAIN_OBJECTIF] — retour utilisateur : l'encart prenait
+   trop de place et restait affiché en permanence. Il ne sert plus qu'à
+   l'amorçage — tant que le joueur n'a lancé aucune run — et disparaît de
+   lui-même dès la première terminée (nextObjective() renvoie null au-delà).
+   Format resserré : une ligne de titre, une d'explication, un bouton. ==== */
+function nextObjectiveBlock(){
+  const o=nextObjective(); if(!o) return '';
+  return `<div class="card glass mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 12px;text-align:left">
+    <b style="font-size:13px">${o.titre}</b>
+    <div class="muted small" style="font-size:11px;margin-top:2px">${o.detail}</div>
+    <button class="btn ghost" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto;font-size:12px;margin-top:8px" onclick="${o.cta.onclick}">${o.cta.label}</button>
+  </div>`;
+}
+/* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — accueil d'origine restauré tel
+   quel (la refonte par durée/hiérarchie n'a pas convenu). Seul correctif
+   conservé : les notifications de partie sont consommées ici SANS être
+   affichées — elles concernent l'écran d'où vient l'action, pas l'accueil —
+   et seule l'erreur de lien de légende partagé, posée au démarrage par
+   main.js dans G.bootMsg, reste visible. ==== */
 function scr_title(){
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    <div style="text-align:center;margin-bottom:48px">
      <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
      <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
    </div>
-   ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`; })():''}
+   ${(()=>{ G.lastMsg=null;
+      if(!G.bootMsg) return '';
+      const m=G.bootMsg; G.bootMsg=null;
+      return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
+    })()}
    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
    ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l\u2019argent, les camps et l\u2019héritage</span></button>
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l’argent, les camps et l’héritage</span></button>
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Tournois et défis d\u2019ascension arcade</span></button>
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Tournois et défis d’ascension arcade</span></button>
    <div class="hr" style="margin:24px 0"></div>
    <button class="btn ghost" style="font-size:16px;padding:16px;border:1px dashed var(--gold);background:var(--panel2);color:var(--gold)" onclick="CL.go('legends')">BOUTIQUE : SALLE DES LÉGENDES
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
@@ -85,98 +108,70 @@ function gauntletAscPicker(mode){
    silhouette SVG autonome, simple et thématiquement cohérente, plutôt que
    de risquer de casser le rendu de combat en tirant dessus depuis un écran
    qui n'a rien à voir. ==== */
-function ascensionTowerSilhouette(){
-  return `<svg width="72" height="120" viewBox="0 0 72 120" fill="none" stroke="var(--gold)" stroke-width="2.5" style="display:block;margin:0 auto">
-    <circle cx="36" cy="16" r="11"/>
-    <path d="M36 27v34M36 40l-18 14M36 40l18 14M36 61l-12 34M36 61l12 34"/>
-  </svg>`;
+/** Une carte de palier de la Tour. Extraite de scr_ascension_tower pour
+ * garder les deux fonctions courtes et lisibles.
+ * @param {number} i palier @param {object} ctx {mode,unlocked,meta}
+ * @returns {string} HTML de la carte */
+function ascensionTierCard(i,ctx){
+  const {mode,unlocked,meta}=ctx;
+  const isUnlocked=i<=unlocked, isCurrent=(i===unlocked);
+  const best=gauntletBestGet(meta,mode,i);
+  const bestLabel=best===undefined?'Aucun record'
+    :(mode==='boss_run'?`Meilleur : ${best} boss sur 5`
+    :mode==='ladder_100'?`Meilleur : rang #${best}`
+    :(best>=7?'Tournoi remporté':`Meilleur : ${['','32es','16es','8es','quarts','demies','finale'][best]||('palier '+best)}`));
+  /* Descriptions en clair : "+15 niveau(x) · Gains ×2.75 · un mutateur
+     aléatoire" supposait de connaître le mot « mutateur » et de deviner ce
+     que multiplient les gains. Une ligne par effet, en français simple. */
+  const effets=i===0
+    ? `<div class="muted small mt">Difficulté normale, gains normaux. C\u2019est le palier de départ.</div>`
+    : `<div class="muted small mt">Adversaires plus forts : +${3*i} niveaux.</div>
+       <div class="muted small">Points gagnés multipliés par ${gauntletAscPayoutMod(i)}.</div>
+       <div class="muted small">Une règle spéciale, tirée au hasard au début de chaque run.</div>`;
+  const etat=isCurrent?'<span class="mono small" style="color:var(--sage)">★ PALIER ACTUEL</span>'
+    :!isUnlocked?'<span class="mono small muted">🔒 Verrouillé</span>'
+    :'<span class="mono small muted">✓ Franchi</span>';
+  const pied=isUnlocked
+    ? `<div class="mono small mt" style="color:var(--gold)">${bestLabel}</div>`
+    : `<div class="mono small mt">Pour l\u2019ouvrir : ${gauntletAscUnlockGoal(mode)} au palier ${i-1}.</div>`;
+  return `<div class="glass" style="position:relative;background:${isUnlocked?'var(--panel2)':'var(--panel)'};border:1px solid ${isCurrent?'var(--gold)':'var(--line)'};border-left:4px solid ${isUnlocked?'var(--gold)':'var(--line)'};padding:12px;margin-bottom:6px;opacity:${isUnlocked?1:0.5}">
+     <div style="display:flex;justify-content:space-between;align-items:center">
+       <b style="font-size:15px;color:${isUnlocked?'var(--gold)':'var(--muted)'}">${i===0?'Palier 0 — Base':`Ascension ${i}`}</b>
+       ${etat}
+     </div>${effets}${pied}
+   </div>`;
 }
+/* ==== [ANCRE: TOUR_ASCENSION_LISIBLE] — items demandés : (1) la silhouette
+   en bâton en tête d'écran est retirée ; (2) les paliers étaient listés du
+   plus haut au plus bas, donc l'écran s'ouvrait sur cinq cartes
+   VERROUILLÉES et le seul palier jouable — celui du joueur — se retrouvait
+   tout en bas, hors écran. Ordre inversé : on lit la tour du bas vers le
+   haut, comme on la gravit, le palier actuel est visible d'emblée ; (3) les
+   descriptions passent du jargon ("un mutateur aléatoire par run") à une
+   ligne par effet en français simple, et chaque palier verrouillé affiche
+   la performance exacte qui l'ouvre (cf. state.js, seuils mesurés). ==== */
 function scr_ascension_tower(){
   const meta=loadMetaStats();
   const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
+  const modeAide={bracket64:'Un tournoi à 64 combattants : six victoires d\u2019affilée pour le remporter.',
+    ladder_100:'Un classement de 100 combattants : tu pars 100e et tu défies plus fort que toi pour remonter.',
+    boss_run:'Cinq adversaires d\u2019élite à enchaîner, sans reprendre son souffle.'};
   const mode=G._towerMode||'bracket64';
   const unlocked=gauntletAscLevel(meta,mode);
   const modeTabs=Object.keys(modeLabel).map(m=>`<span class="pill ${mode===m?'on':''}" onclick="CL.setTowerMode('${m}')">${modeLabel[m]}</span>`).join('');
+  const ctx={mode,unlocked,meta};
   const tiers=[];
-  for(let i=GAUNTLET_ASC_MAX;i>=0;i--){
-    const isUnlocked=i<=unlocked;
-    const best=gauntletBestGet(meta,mode,i);
-    const bestLabel=best===undefined?'Aucun record':(mode==='boss_run'?`${best}/5`:mode==='ladder_100'?`Rang #${best}`:(best>=7?'Tournoi remporté':`Palier ${best}`));
-    tiers.push(`<div class="glass" style="position:relative;background:${isUnlocked?'var(--panel2)':'var(--panel)'};border:1px solid ${i===unlocked?'var(--gold)':'var(--line)'};border-left:4px solid ${isUnlocked?'var(--gold)':'var(--line)'};padding:12px;margin-bottom:6px;opacity:${isUnlocked?1:0.5}">
-       <div style="display:flex;justify-content:space-between;align-items:center">
-         <b style="font-size:15px;color:${isUnlocked?'var(--gold)':'var(--muted)'}">${i===0?'Palier 0 — Base':`Ascension ${i}`}</b>
-         ${i===unlocked?'<span class="mono small" style="color:var(--sage)">★ ACTUEL</span>':!isUnlocked?'<span class="mono small muted">🔒 Verrouillé</span>':''}
-       </div>
-       <div class="muted small mt">Adversaires +${3*i} niveau(x) · Gains ×${gauntletAscPayoutMod(i)}${i>=1?' · un mutateur aléatoire par run':''}</div>
-       ${isUnlocked?`<div class="mono small mt" style="color:var(--gold)">${bestLabel}</div>`:`<div class="mono small mt">À débloquer : remporter le format au palier ${i-1}.</div>`}
-     </div>`);
-  }
+  for(let i=0;i<=GAUNTLET_ASC_MAX;i++) tiers.push(ascensionTierCard(i,ctx));
   return `<div class="scr"><div class="bar"><span class="eyebrow">🗼 Tour d\u2019Ascension — ${modeLabel[mode]}</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
-   ${ascensionTowerSilhouette()}
-   <p class="lede small mt" style="text-align:center">Chaque palier remporté ouvre le suivant. Depuis l\u2019ajout des Mutateurs d\u2019Ascension, tout palier ≥1 tire un mutateur aléatoire par run plutôt qu\u2019une règle fixe.</p>
+   <p class="lede small mt" style="text-align:center">Chaque palier franchi ouvre le suivant : les adversaires deviennent plus forts, mais rapportent plus.</p>
    <div class="pills mb" style="justify-content:center">${modeTabs}</div>
+   <div class="card mb" style="background:var(--panel2);padding:10px 12px"><span class="muted small">${modeAide[mode]}</span></div>
    ${tiers.join('')}
    <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-   remplace gauntletDailyTag/gauntletDailyGroup par l'affichage du VRAI
-   mini-objectif du jour (state.js, gauntletDailyObjective), avec sa portée
-   (3 modes ou un mode nommé), la série en cours, une éventuelle offre de
-   rachat, et les boutons de tentative PAR FORMAT (le verrou 1 tentative/
-   format/jour est conservé tel quel — cf. state.js pour le raisonnement). ==== */
-/* ==== [ANCRE: CORRECTIF_DEFI_JOUR_COMPACT] — bug remonté : chaque ligne de
-   format portait une phrase complète ("Tenter ce format pour le défi du
-   jour", "Défi du jour non applicable à ce format") qui passait sur 2
-   lignes dans le badge — répété 3 fois (un par format), c'est la moitié de
-   la hauteur du bloc "Défi du jour" à elle seule. Le contexte ("défi du
-   jour") est déjà donné une seule fois par l'eyebrow du bloc englobant
-   (gauntletDailyGroup) : inutile de le répéter dans chaque badge, un état
-   court par ligne suffit. ==== */
-function gauntletDailyTag(mode){
-  const meta=loadMetaStats();
-  const obj=gauntletDailyObjective(meta);
-  const scopeOk=!obj.scope||obj.scope===mode;
-  const done=gauntletDailyDone(meta,mode);
-  const label=!scopeOk?`Non applicable`:done?`Déjà tenté`:`Tenter`;
-  const disabled=done||!scopeOk;
-  return `<span onclick="${disabled?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${disabled?'default':'pointer'};border:1px dashed ${disabled?'var(--line)':'var(--sage)'};color:${disabled?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px;opacity:${scopeOk?1:0.5}" class="mono">${label}</span>`;
-}
 /* ==== [FIN ANCRE] ==== */
-function gauntletDailyGroup(){
-  const meta=loadMetaStats();
-  const obj=gauntletDailyObjective(meta);
-  const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
-  const scopeLabel=obj.scope?`Valable uniquement en ${modeLabel[obj.scope]}`:'Valable dans les 3 formats';
-  const streak=meta.gauntletDailyStreak||0;
-  /* ==== [ANCRE: CORRECTIF_RECOMPENSE_STREAK_INVISIBLE] — bug remonté : la
-     série de 7 jours débloque cosmetic_renegade (GAUNTLET_DAILY_STREAK_REWARD,
-     state.js) sans que rien ne le dise avant l'obtention — personne ne
-     comprenait l'intérêt de tenir la série. Annonce explicite tant que la
-     récompense n'est pas encore acquise ; disparaît une fois débloquée
-     (checkLegendUnlock), pour ne pas polluer l'écran après coup. ==== */
-  const streakGoalLine=(!checkLegendUnlock(GAUNTLET_DAILY_STREAK_REWARD.id))?`<div class="muted small mt">À 7 jours d’affilée : ${GAUNTLET_DAILY_STREAK_REWARD.name} (thème d’octogone exclusif) débloqué.</div>`:'';
-  /* ==== [FIN ANCRE] ==== */
-  const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis réussis : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>${streakGoalLine}`:streakGoalLine;
-  const rescue=meta.gauntletDailyRescueOffer;
-  const rescueHtml=rescue?`<div class="card mt" style="background:var(--panel2);border:1px solid var(--blood);padding:10px">
-     <div class="mono small" style="color:var(--blood)">Série de ${rescue.streakAtRisk} jour(s) manquée hier.</div>
-     <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 10px;font-size:12px" onclick="CL.buybackGauntletDailyStreak()">Racheter — ${gauntletDailyBuybackCost(rescue.streakAtRisk)} points de Légende</button>
-   </div>`:'';
-  const modes=[['bracket64','Bracket 64'],['ladder_100','Ladder 100']];
-  if(checkLegendUnlock('mode_boss')) modes.push(['boss_run','Boss Run']);
-  const rows=modes.map(([m,label])=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px">
-     <span class="mono small muted" style="flex:0 0 auto">${label}</span>${gauntletDailyTag(m)}
-   </div>`).join('');
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--sage);padding:12px;text-align:left;margin-bottom:20px">
-     <div class="eyebrow mb" style="font-size:11px;color:var(--sage)">Défi du jour · ${gauntletDailyKey()}${gauntletDailyObjectiveDone(meta)?' — ✓ réussi':''}</div>
-     <div class="small" style="color:var(--text)">${obj.label}</div>
-     <div class="muted small mt">${scopeLabel} · même tirage pour tout le monde.</div>
-     ${streakLine}${rescueHtml}
-     ${rows}
-   </div>`;
-}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — n'apparaît qu'une fois 5 rivaux
    historiques battus (meta.gauntletRivalsDefeated, jamais purgé, alimenté
@@ -232,7 +227,7 @@ function scr_archetype_pantheon(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — la nouvelle gauntletDailyGroup()
+/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — le bloc du défi du jour (retiré)
    (ajout #2, ancre GAUNTLET_DEFI_JOUR_V2 plus haut) remplace celle-ci —
    ancienne version retirée pour éviter une redéclaration de fonction (la
    dernière définition l'aurait de toute façon emporté silencieusement en
@@ -250,8 +245,7 @@ function scr_gauntlet_menu(){
    <div class="eyebrow sage">Mode Arcade</div>
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
-   <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">DÉFI DU JOUR</div>
-   ${gauntletDailyGroup()}
+   ${nextObjectiveBlock()}
    <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">MODES DE JEU CLASSIQUES</div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
@@ -267,7 +261,6 @@ function scr_gauntlet_menu(){
    <div class="leg-grid">
      <button class="btn ghost" style="margin:0;border:1px dashed var(--line);padding:12px 8px;font-size:12px" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
      <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
-     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.go('gauntlet_profile')">🏺 Profil (Reliques)</button>
      <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);color:var(--gold);padding:12px 8px;font-size:12px" onclick="CL.goShopGauntlet()">🛒 Boutique</button>
    </div>
    <div class="fld" style="margin-top:24px">
@@ -279,36 +272,6 @@ function scr_gauntlet_menu(){
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: PROFIL_JOUEUR_RELIQUES] — ajout #7 (24 ajouts, 12/08/2026) :
-   écran de compte, PAS lié à un combattant précis (les combattants arcade
-   sont jetables et non persistés, cf. règle déjà établie ailleurs) — max 1
-   titre + 1 effet affichés à la fois, comme demandé. ==== */
-function scr_gauntlet_profile(){
-  const meta=loadMetaStats();
-  const owned=listOwnedGauntletRelics(meta);
-  const curTitle=meta.gauntletProfileTitle, curEffect=meta.gauntletProfileEffect;
-  const preview=`<div class="glass mwash" style="position:relative;background:var(--panel2);padding:16px;text-align:center;margin-bottom:16px;${curEffect?curEffect.style:'border:1px solid var(--line)'}">
-     <div class="eyebrow mb">Aperçu du profil</div>
-     <b style="font-size:16px;color:var(--gold)">${curTitle?esc(curTitle):'Aucun titre affiché'}</b>
-     ${curEffect?`<div class="muted small mt">${esc(curEffect.label)}</div>`:''}
-   </div>`;
-  const list=owned.length?owned.map(r=>{
-    const isCurrent=curTitle===r.title;
-    return `<div class="glass card mb" style="border-left:3px solid ${r.mastery?'var(--gold)':'var(--line)'};background:var(--panel2);padding:12px">
-       <div style="display:flex;justify-content:space-between;align-items:center">
-         <div><b class="small" style="color:${r.mastery?'var(--gold)':'var(--text)'}">${r.mastery?'👑 ':'🏺 '}${esc(r.title)}</b><div class="muted small">${esc(r.effect.label)}${r.mastery?'':` — ${GAUNTLET_RELIC_MODE_LABEL?GAUNTLET_RELIC_MODE_LABEL[r.mode]:r.mode} · ${esc(r.archetype)}`}</div></div>
-         <button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;border-color:${isCurrent?'var(--sage)':'var(--gold)'};color:${isCurrent?'var(--sage)':'var(--gold)'}" onclick="CL.setGauntletProfile('${r.id}')" ${isCurrent?'disabled':''}>${isCurrent?'✓ Affiché':'Afficher'}</button>
-       </div>
-     </div>`;
-  }).join(''):`<div class="card" style="background:var(--panel2);padding:14px"><span class="mono small muted">Aucune Relique de Survie obtenue pour l\u2019instant — remporte un format Gauntlet au palier d\u2019Ascension maximum (${GAUNTLET_ASC_MAX}) avec un archétype pour en débloquer une.</span></div>`;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Profil du joueur</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
-   <h2 class="disp">Reliques de Survie</h2>
-   <p class="lede small">${owned.length} relique(s) possédée(s). Un seul titre et un seul effet affichés à la fois.</p>
-   ${preview}
-   ${list}
-   <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
-  </div>`;
-}
 const GAUNTLET_RELIC_MODE_LABEL={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
 /* ==== [FIN ANCRE] ==== */
 function scr_intro(){ const c=hasSave('career');
@@ -657,11 +620,10 @@ function scr_legend_detail(){
   const deco=legendDecoStyle(decorations);
   const tc=legendTierColor(f.rank);
   /* ==== [ANCRE: CORRECTIF_COSMETIQUES_EXCLUSIFS_INVISIBLES] — voir ancre
-     jumelle dans state.js : excl_mask_oni/excl_gloves_relic partagent
-     désormais le même cat que les décorations classiques, donc simplement
-     concaténer GAUNTLET_EXCLUSIVE_OFFERS suffit à les faire apparaître ici
-     une fois possédées, sans toucher au reste du panneau. ==== */
-  const ownedDecorations=LEGEND_UNLOCKABLES.concat(GAUNTLET_EXCLUSIVE_OFFERS).filter(i=>i.cat==='Décorations du Panthéon'&&checkLegendUnlock(i.id));
+     jumelle dans state.js : excl_mask_oni/excl_gloves_relic figurent
+     désormais directement dans LEGEND_UNLOCKABLES (l'offre du jour a été
+     retirée), donc ce panneau les voit sans traitement particulier. ==== */
+  const ownedDecorations=LEGEND_UNLOCKABLES.filter(i=>i.cat==='Décorations du Panthéon'&&checkLegendUnlock(i.id));
   /* ==== [FIN ANCRE] ==== */
   const decorationPanel=ownedDecorations.length?`<div class="card mb"><div class="eyebrow mb">Décorations (${decorations.length}/3)</div>
      <div class="muted small mb" style="font-size:10.5px">Un déblocage de compte : la même décoration peut être portée par plusieurs combattants à la fois.</div>
@@ -967,9 +929,16 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
      compresser le contenu davantage. `flex:1` sur .card (hérité du layout en
      ligne d'origine) est retiré : sans conteneur flex-row, il ne servait qu'à
      forcer les deux cartes à la même hauteur artificielle. ==== */
+  /* ==== [ANCRE: ATTRIBUTS_EXPLIQUES] — retour utilisateur : le dépliant
+     global affichait les 30 définitions d'un coup et rallongeait beaucoup
+     trop la fiche. On clique désormais sur UNE ligne pour lire sa
+     définition, et elle seule ; recliquer la referme. La fiche garde
+     exactement sa longueur d'origine tant qu'on ne demande rien. ==== */
+  const aide=G._attrHelp;
   const grp=(key,title,avg,hero)=>`<div class="card" style="padding:${hero?'20':'14'}px 0"><div class="grp-h"><span class="disp" style="font-size:${hero?'22px':'15px'}">${title}</span><span class="gold mono" style="font-size:${hero?'16px':'13px'}">${d20(avg)}/20</span></div>
-     ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'}"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
+     ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'};cursor:pointer" onclick="CL.toggleAttrHelp('${a[0]}')"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>${aide===a[0]?`<div class="muted" style="font-size:11px;padding:2px 12px 8px;line-height:1.35">${attrHelp(a[0])}</div>`:''}`).join('')}</div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="G._profileReturn=null;CL.go('${backScreen}')">✕</span></div>
+   <div class="muted small mb">Touche une ligne pour savoir ce qu\u2019elle mesure.</div>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
      <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div></div>
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>

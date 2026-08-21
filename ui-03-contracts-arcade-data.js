@@ -1173,24 +1173,69 @@ function campFxLabel(fx){
 }
 /* ==== [FIN ANCRE] ==== */
 const GAUNTLET_CAMP_IDENTITIES=[
-  {id:'camp_spartiate',name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10},
+  {id:'camp_spartiate',coach:{name:'Vassili',g:'H'},name:'Camp Spartiate',desc:'Endurance à outrance, jamais de repos.',fx:{cardio:15,recovery:-10},
    passive:(()=>{ const fx={cardio:10,power:10}; return {type:'roundBoost',round:3,fx,label:`Round 3 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()},
-  {id:'camp_mercenaire',name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10},
+  {id:'camp_mercenaire',coach:{name:'Marek',g:'H'},name:'Camp Mercenaire',desc:'On paie pour la puissance, pas pour la discipline.',fx:{power:15,composure:-10},
    passive:(()=>{ const fx={chin:-8}; return {type:'oppPermanent',fx,label:`Menton de l\u2019adversaire fragilisé pour tout le combat (${campFxLabel(fx)}, invisible pour lui)`}; })()},
-  {id:'camp_universitaire',name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10},
+  {id:'camp_universitaire',coach:{name:'Hélène',g:'F'},name:'Camp Universitaire',desc:'Chaque geste est étudié, disséqué, anticipé.',fx:{fightIQ:15,power:-10},
    passive:(()=>{ const fx={power:-6,footSpeed:-6}; return {type:'oppPermanent',fx,label:`Adversaire légèrement affaibli pour tout le combat (${campFxLabel(fx)})`}; })()},
-  {id:'camp_familial',name:'Camp Familial',desc:'Un clan qui protège, jamais qui pousse à bout.',fx:{composure:15,cardio:-10},
+  {id:'camp_familial',coach:{name:'Rosa',g:'F'},name:'Camp Familial',desc:'Un clan qui protège, jamais qui pousse à bout.',fx:{composure:15,cardio:-10},
    passive:{type:'finishImmunity',round:1,label:'Round 1 : impossible à finir (KO/TKO/Soumission)'}},
-  {id:'camp_silence',name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10},
+  {id:'camp_silence',coach:{name:'Kenji',g:'H'},name:'Camp du Silence',desc:'Aucun mot inutile. Encaisser sans broncher.',fx:{chin:15,footSpeed:-10},
    passive:null},
-  {id:'camp_meute',name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10},
+  {id:'camp_meute',coach:{name:'Nadia',g:'F'},name:'Camp de la Meute',desc:'Toujours à plusieurs sur le tapis, jamais seul.',fx:{takedown:15,handSpeed:-10},
    passive:(()=>{ const fx={takedown:10,topControl:10}; return {type:'roundBoost',round:2,fx,label:`Round 2 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()},
-  {id:'camp_ascetique',name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10},
+  {id:'camp_ascetique',coach:{name:'Anton',g:'H'},name:'Camp Ascétique',desc:'Le corps comme une armure qu\u2019on forge, rien de plus.',fx:{durability:15,explosiveness:-10},
    passive:{type:'finishImmunity',round:3,label:'Round 3 : impossible à finir (KO/TKO/Soumission)'}},
-  {id:'camp_spectacle',name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10},
+  {id:'camp_spectacle',coach:{name:'Vera',g:'F'},name:'Camp du Spectacle',desc:'On vient pour l\u2019étincelle, pas pour la tactique.',fx:{explosiveness:15,tdd:-10},
    passive:(()=>{ const fx={explosiveness:10,power:10}; return {type:'roundBoost',round:1,fx,label:`Round 1 de chaque combat : ${campFxLabel(fx)} (ce round-là uniquement)`}; })()}
 ];
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: COACH_DU_COIN] — item demandé : remplacer l'estimation
+   chiffrée des juges ("10-9 · 9-10 · 10-9", du jargon de scorecard MMA
+   illisible pour qui ne connaît pas le sport) par ce que TON coach pense,
+   dit avec des mots. Chaque identité de camp a désormais son coach nommé,
+   femme ou homme — d'où "ton coach Kenji" ou "ta coach Hélène", accordé
+   automatiquement. Les phrases sont construites à partir de l'état réel du
+   combat (estimation des juges, dégâts infligés et encaissés, round en
+   cours, profil de l'adversaire) : jamais un texte générique plaqué. ==== */
+/** "ton coach Kenji" / "ta coach Hélène", ou "ton coach" sans identité.
+ * @param {object} a G.arcade @returns {string} */
+function coachName(a){
+  const c=a&&a.campIdentity&&a.campIdentity.coach;
+  if(!c) return 'ton coach';
+  return `${c.g==='F'?'ta':'ton'} coach ${c.name}`;
+}
+/** Qui mène, d'après l'estimation des juges. @returns {string} */
+function coachScoreLine(a,c){
+  const j=c.judgesEstimate||c.judges; if(!j) return '';
+  let me=0,him=0; ['j1','j2','j3'].forEach(k=>{ if(j[k]){ me+=j[k][0]; him+=j[k][1]; } });
+  const d=me-him, qui=coachName(a);
+  if(d>=3) return `${qui} pense que tu es en train de gagner ce combat.`;
+  if(d<=-3) return `${qui} pense que tu es en train de perdre ce combat.`;
+  if(d>0) return `${qui} te donne devant, mais de très peu.`;
+  if(d<0) return `${qui} te donne derrière, mais ça se joue à rien.`;
+  return `${qui} trouve que personne ne se démarque pour l’instant.`;
+}
+/** Le conseil du round suivant, choisi sur le contexte réel du combat.
+ * @param {object} a @param {object} c @param {object} r dernier round
+ * @param {object} f le combattant @returns {string} */
+function coachAdviceLine(a,c,r,f){
+  const opp=a.opponent||c.opp||{}, oa=opp.attrs||{}, fa=(f&&f.attrs)||{};
+  const encaisse=r&&r.stats?(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs):0;
+  const inflige=r&&r.stats?(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs):0;
+  const dernier=c.round>=3;
+  let j=c.judgesEstimate||c.judges, me=0,him=0;
+  if(j) ['j1','j2','j3'].forEach(k=>{ if(j[k]){ me+=j[k][0]; him+=j[k][1]; } });
+  const mene=me-him;
+  if(dernier && mene<0) return 'Il te faut la finition : aux points, c’est perdu. Va le chercher.';
+  if((oa.chin||50)<45 && (fa.power||50)>60) return 'Son menton est fragile et tu frappes fort : tente de le sortir tôt.';
+  if((oa.tdd||50)<45 && (fa.takedown||50)>55) return 'Il ne défend pas la lutte : emmène-le au sol, il ne tiendra pas.';
+  if(encaisse>inflige*1.5) return 'Tu prends trop de coups. Bouge, sors de l’axe, arrête de rester devant lui.';
+  if((fa.cardio||50)<40) return 'Tu es cuit. Économise-toi et vole les échanges, ne cours pas après lui.';
+  if(mene>0) return 'Tu as l’avantage : garde le même plan, ne prends aucun risque inutile.';
+  return 'Ça se joue sur un détail : impose ton rythme dès la reprise.';
+}
 function drawGauntletCampIdentityOptions(){
   const shuffled=GAUNTLET_CAMP_IDENTITIES.slice();
   for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }

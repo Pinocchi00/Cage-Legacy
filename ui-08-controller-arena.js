@@ -19,11 +19,11 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
-  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,gauntlet_profile:scr_gauntlet_profile,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview};
+  gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
   G.screen='hub'; save(); render();
@@ -64,32 +64,10 @@ function finaliseGauntletRun(a,opts){
   const doctorBonusMult=(opts.kind==='victory' && a.doctorRefused)?1.5:1;
   const preBonusWithDoctor=Math.round(preBonus*doctorBonusMult);
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — streak calculée et créditée ICI,
-     au point de sortie unique de la run, pour compter une tentative du jour
-     effectivement jouée jusqu'au bout (victoire, élimination OU
-     encaissement — les 3 passent par finaliseGauntletRun). Le bonus
-     s'applique en plus de gauntletRunMult (mise, pactes, contrat), pas à sa
-     place — deux systèmes indépendants, cf. la ligne dédiée dans
-     runDebriefBlock (ui-04). ==== */
-  let dailyStreak=null, dailyBonusMult=1;
-  if(a.daily){
-    /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-       la série ne progresse plus sur simple tentative jouée jusqu'au bout,
-       mais uniquement quand l'objectif du jour est réellement atteint
-       (prog.completed, mis à jour au fil des combats — cf. afterResult ci-
-       dessus). streakCredited empêche un double crédit si l'objectif était
-       déjà atteint plus tôt dans la journée (2e run du jour, par ex.). ==== */
-    const prog=meta.gauntletDailyObjProgress;
-    if(prog && prog.completed && !prog.streakCredited){
-      dailyStreak=recordGauntletDailyStreak(meta);
-      prog.streakCredited=true;
-    } else {
-      dailyStreak=meta.gauntletDailyStreak||0;
-    }
-    /* ==== [FIN ANCRE] ==== */
-    dailyBonusMult=gauntletDailyStreakBonusMult(dailyStreak);
-  }
-  const earned=Math.round(preBonusWithDoctor*dailyBonusMult);
+  /* ==== [ANCRE: TOUT_EN_BOUTIQUE] — le défi du jour et sa série (avec son
+     bonus de cagnotte) sont retirés : les gains ne dépendent plus du jour
+     où l'on joue. ==== */
+  const earned=preBonusWithDoctor;
   /* ==== [FIN ANCRE] ==== */
   if(earned>0) meta.legendPoints=(meta.legendPoints||0)+earned;
   a.isNewRecord=recordGauntletBest(meta,a.mode,opts.progress,a.asc||0);
@@ -108,26 +86,23 @@ function finaliseGauntletRun(a,opts){
      meilleure. ==== */
   if(a.isNewArchetypeRecord && typeof G!=='undefined' && G && G.f && G.f.nick) recordGauntletGhostLog(meta,a.mode,a.asc||0,G.f.nick,a.ghostFights||[]);
   /* ==== [FIN ANCRE] ==== */
-  if(opts.kind==='victory') recordGauntletAscension(meta,a.mode,a.asc||0);
-  /* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026) :
-     victoire au palier MAX (GAUNTLET_ASC_MAX, state.js) avec l'archétype
-     G.f.nick — récompense fixe et unique par couple (mode, archétype),
-     jamais réattribuée deux fois (grantGauntletRelic renvoie false si déjà
-     possédée). a.newRelic/a.newMastery lus par scr_gameover (ui-04) pour
-     l'annonce, exactement sur le même principe que a.newAch juste
-     au-dessus pour les succès. ==== */
-  if(opts.kind==='victory' && (a.asc||0)>=GAUNTLET_ASC_MAX && typeof G!=='undefined' && G && G.f && G.f.nick){
-    if(grantGauntletRelic(meta,a.mode,G.f.nick)) a.newRelic=gauntletRelicContent(a.mode,G.f.nick);
-    if(checkGauntletModeMastery(meta,a.mode) && grantGauntletModeMastery(meta,a.mode)) a.newMastery=GAUNTLET_MODE_MASTERY_RELIC[a.mode];
+  /* ==== [ANCRE: TOUR_ASCENSION_CONDITIONS_MESUREES] — le palier suivant
+     s'ouvre désormais sur une performance atteignable (cf. state.js pour les
+     taux mesurés), pas seulement sur une victoire totale qui ne tombait que
+     dans 0 à 2 % des runs. a.ascJustUnlocked sert à l'annoncer sur l'écran
+     de fin de run — sans quoi le joueur ne saurait pas ce qu'il vient
+     d'ouvrir. ==== */
+  if(opts.kind==='victory' || gauntletAscUnlockReached(a.mode,opts.progress)){
+    if(recordGauntletAscension(meta,a.mode,a.asc||0)) a.ascJustUnlocked=(a.asc||0)+1;
   }
   /* ==== [FIN ANCRE] ==== */
-  if(a.daily) recordGauntletDaily(meta,a.mode,opts.progress);
+  /* ==== [ANCRE: TOUT_EN_BOUTIQUE] — les Reliques de Survie et la Maîtrise de
+     mode disparaissent avec l'écran Profil qui les affichait ; le suivi du
+     défi du jour disparaît avec le défi. ==== */
   saveMetaStats(meta);
   a.earnedOnElimination=earned;
   a.basePayout=base;
   a.runMultApplied=gauntletRunMult(a);
-  a.dailyStreak=dailyStreak;
-  a.dailyStreakBonusMult=dailyBonusMult;
   a.active=false;
   const got=(typeof checkAch==='function')?checkAch():[];
   if(got&&got.length) a.newAch=(a.newAch||[]).concat(got);
@@ -158,16 +133,18 @@ const CL={
      cf. G.lastMsg dans scr_legends, ui-07) se trouve plus bas. render(true)
      conserve la position de scroll (cf. ANCRE dans ui-08, fonction render). ==== */
   purchaseUnlock(itemId){ const r=purchaseLegendUnlock(itemId); G.lastMsg=r.msg; render(true); },
-  /* ==== [ANCRE: REFONTE_VISUELLE_BOUTIQUE_VITRINE] — bascule d'aperçu pour
-     les objets réellement prévisualisables (thèmes d'octogone et
-     décorations Panthéon, cf. shopPreviewHtml ui-07). Un seul aperçu ouvert
-     à la fois : cliquer sur l'objet déjà ouvert le referme. ==== */
-  toggleShopPreview(itemId){ G._shopPreview=(G._shopPreview===itemId?null:itemId); render(true); },
+  /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — CL.toggleShopPreview (aperçu
+     replié sur place, réservé aux cosmétiques et décorations) est retiré :
+     le catalogue ouvre désormais la fenêtre dédiée CL.viewShopPreview pour
+     tous ses articles, sans exception. ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_ETAT_RUN_ESPACE] — même bascule d'aperçu que la
      boutique (toggleShopPreview ci-dessus), réutilisée pour replier par
      défaut la description du mutateur/le rappel du contrat dans "État de la
      run" (gauntletStatusBlock, ui-04) — un seul dépliage ouvert à la fois. ==== */
+  /* ==== [ANCRE: ATTRIBUTS_EXPLIQUES] — bascule des définitions d'attributs
+     sur la fiche complète. ==== */
+  toggleAttrHelp(k){ G._attrHelp=(G._attrHelp===k?null:k); render(true); },
   toggleRunStatusPreview(key){ G._runStatusPreview=(G._runStatusPreview===key?null:key); render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SUCCES_VITRINE_DIRECTE] — clic sur une tuile d'exploit ->
@@ -224,12 +201,15 @@ const CL={
      lieu de coder 'legends' en dur ici. ==== */
   viewConsumablePreview(itemId){ G._consumablePreviewId=itemId; G._returnScreen=G.screen; G.screen='consumable_preview'; render(); },
   closeConsumablePreview(){ G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true); },
+  /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — même va-et-vient que le Marché
+     noir, pour tous les articles du catalogue. ==== */
+  viewShopPreview(itemId){ G._shopPreviewId=itemId; G._returnScreen=G.screen; G.screen='shop_preview'; render(); },
+  closeShopPreview(){ G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
-  purchaseExclusiveOffer(){ const meta=loadMetaStats(); const r=purchaseExclusiveOffer(meta); G.lastMsg=r.msg; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
-  drawGauntletLottery(){ const meta=loadMetaStats(); const r=drawGauntletLottery(meta); G.lastMsg=r.msg; render(true); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — ajout #2 (24 ajouts, 12/08/2026) :
      accès à la boutique depuis le menu Gauntlet (cf. scr_legends, ui-07). */
@@ -702,56 +682,6 @@ const CL={
     if(G.arcade && G.arcade.active){
       const win=G.pending&&G.pending.win;
       const _res=G.pending&&G.pending.res;
-      /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-         suivi générique des compteurs de l'objectif du jour, exécuté une
-         seule fois par combat, AVANT le branchement par mode ci-dessous
-         (bracket64/ladder_100/boss_run partagent donc exactement la même
-         logique). Compteurs "run" (koStreak/winStreak/flawless) vivent sur
-         G.arcade — remis à zéro à chaque nouvelle run par la simple absence
-         de champ au lancement. Compteurs "day" vivent dans
-         meta.gauntletDailyObjProgress (cumulés sur toutes les tentatives du
-         jour, tous modes confondus). ==== */
-      (()=>{
-        const meta=loadMetaStats();
-        gauntletDailyObjective(meta); // garantit l'existence + gère un éventuel changement de jour
-        const prog=meta.gauntletDailyObjProgress;
-        if(_res){
-          if(win && G.pending.method==='Soumission') prog.subWins=(prog.subWins||0)+1;
-          prog.takedowns=(prog.takedowns||0)+(_res.stats.A.td||0);
-          prog.kdCount=(prog.kdCount||0)+(_res.stats.A.kd||0);
-        }
-        G.arcade.koStreak=(win && G.pending.method && G.pending.method.startsWith('KO'))?(G.arcade.koStreak||0)+1:0;
-        G.arcade.winStreak=win?(G.arcade.winStreak||0)+1:0;
-        /* ==== [ANCRE: CORRECTIF_DEFI_SANS_DEGAT] — seuil assoupli de "===0"
-           à "<=3" (cf. state.js, GAUNTLET_DAILY_OBJECTIVES) : le moteur
-           inflige 1 à 3 dégâts à chaque échange debout perdu, donc une
-           égalité stricte à zéro exigeait de ne perdre AUCUN échange sur
-           tout le combat — un défi du jour irréalisable en pratique, pas
-           seulement rare. ==== */
-        if(_res && win && (_res.stats.A.dmgHead+_res.stats.A.dmgBody+_res.stats.A.dmgLegs)<=3) G.arcade.flawlessAchieved=true;
-        /* ==== [FIN ANCRE] ==== */
-        /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
-           "Mise à l'abri automatique" : dès le 1er combat GAGNÉ de la run
-           (peu importe le mode), petite somme versée immédiatement en
-           points de Légende, une seule fois par run (autobankTriggered). ==== */
-        if(win && G.arcade.consumableAutobank && !G.arcade.autobankTriggered){
-          G.arcade.autobankTriggered=true;
-          meta.legendPoints=(meta.legendPoints||0)+15;
-          G.lastMsg='Mise à l\u2019abri automatique : 15 points de Légende sécurisés.';
-        }
-        /* ==== [FIN ANCRE] ==== */
-        const obj=meta.gauntletDailyObj;
-        if(obj && !prog.completed && (!obj.scope || obj.scope===G.arcade.mode)){
-          let val=0;
-          if(obj.kind==='day') val=prog[obj.metric]||0;
-          else if(obj.metric==='koStreak') val=G.arcade.koStreak||0;
-          else if(obj.metric==='winStreak') val=G.arcade.winStreak||0;
-          else if(obj.metric==='flawless') val=G.arcade.flawlessAchieved?1:0;
-          if(val>=obj.target) prog.completed=true;
-        }
-        saveMetaStats(meta);
-      })();
-      /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: REJOUABILITE_NEARMISS] — res.scoreA/scoreB/res.judges
          (juges 10-point) sont calculés par simulateFight() pour CHAQUE combat
          mais n'étaient jamais lus en arcade : une élimination aux points
@@ -1027,41 +957,15 @@ const CL={
     const asc=clamp(parseInt(G._pendingAsc,10)||0,0,gauntletAscLevel(meta,mode));
     return asc; },
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: GAUNTLET_DAILY] — pré-remplit la graine du jour puis lance le
-     format demandé par le flux NORMAL (les start* ci-dessous), sans dupliquer
-     leur logique. dailyMode marque la run pour que la tentative soit
-     consommée en fin de run (cf. finaliseGauntletRun). ==== */
-  startGauntletDaily(mode){
-    const meta=loadMetaStats();
-    if(gauntletDailyDone(meta,mode)){ G.lastMsg='Tentative du jour déjà utilisée sur ce format. Revenez demain.'; render(); return; }
-    G._pendingSeed=gauntletDailyKey();
-    G._dailyPending=mode;
-    if(mode==='ladder_100') CL.startLadder100();
-    else if(mode==='boss_run') CL.startBossRun();
-    else CL.startArcade();
-  },
-  /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-     rachat de série depuis le menu Gauntlet (scr_gauntlet_menu, ui-06),
-     visible uniquement si meta.gauntletDailyRescueOffer est posé (jour
-     manqué détecté par gauntletDailyObjective au dernier changement de
-     date). ==== */
-  buybackGauntletDailyStreak(){
-    const meta=loadMetaStats();
-    const r=buybackGauntletDailyStreak(meta);
-    G.lastMsg=r.msg; saveMetaStats(meta); render();
-  },
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [FIN ANCRE] ==== */
   startArcade(){ injectExtendedArchetypes(); const asc=CL._rollGauntletAsc('bracket64'); const seed=CL._rollGauntletSeed();
     /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts, 12/08/2026). ==== */
     const mutator=rollGauntletMutator(asc);
     G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),daily:G._dailyPending==='bracket64',mutator};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
-    G._dailyPending=null; G.screen='draft'; save(); render(); },
+    G.screen='draft'; save(); render(); },
   startBossRun(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
-    const wasDaily=G._dailyPending==='boss_run'; G._dailyPending=null;
-    startBossRun(seed,asc); G.arcade.daily=wasDaily; render(true); },
+    startBossRun(seed,asc); render(true); },
   /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — variante Boss Run débloquée
      depuis scr_gauntlet_menu (ui-06) une fois 5 rivaux historiques battus.
      Pas de défi du jour sur cette entrée (G._dailyPending non consommé ici,
@@ -1074,9 +978,9 @@ const CL={
     /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts, 12/08/2026). ==== */
     const mutator=rollGauntletMutator(asc);
     G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),daily:G._dailyPending==='ladder_100',mutator};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
-    G._dailyPending=null; G.screen='draft'; save(); render(); },
+    G.screen='draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
@@ -1476,9 +1380,6 @@ const CL={
   /* ==== [ANCRE: TOUR_ASCENSION_VISUELLE] — ajout #6 (24 ajouts, 12/08/2026). ==== */
   viewAscensionTower(mode){ G._towerMode=mode; CL.go('ascension_tower'); },
   setTowerMode(mode){ G._towerMode=mode; render(); },
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026). ==== */
-  setGauntletProfile(relicId){ const meta=loadMetaStats(); const r=setGauntletProfileDisplay(meta,relicId); G.lastMsg=r.msg; saveMetaStats(meta); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: INFIRMERIE_FORTUNE] — ajout #20 (24 ajouts, 12/08/2026). ==== */
   healGauntletZone(zone){
@@ -1910,7 +1811,11 @@ function cacheArenaGfx(){
   A._spotGrad=spot;
   A._bleacherFill=[]; A._bleacherDots=[];
   for(let r=0;r<6;r++){ A._bleacherFill.push(`rgba(58,49,38,${0.55+r*0.06})`); A._bleacherDots.push(`rgba(190,140,105,${0.35+r*0.05})`); }
-  A._theme=getArenaTheme();
+  /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — _themeOverride permet de rendre
+     l'octogone avec un thème qui n'est PAS celui équipé, pour montrer un
+     cosmétique avant achat. Absent partout ailleurs : le comportement normal
+     (thème équipé) est strictement inchangé. ==== */
+  A._theme=A._themeOverride||getArenaTheme();
   A._floorGrad=ctx.createLinearGradient(0,topY,0,H);
   A._floorGrad.addColorStop(0,A._theme.floorColors[0]); A._floorGrad.addColorStop(1,A._theme.floorColors[1]);
   A._vignetteGrad=ctx.createRadialGradient(W/2,H*0.55,H*0.25,W/2,H*0.55,Math.max(W,H)*0.62);
@@ -2324,6 +2229,41 @@ function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='un
    G.screen==='consumable_preview' (même schéma que startArena/G.screen==
    'arena'). Un seul dessin figé (drawArena(0,true)), pas de boucle
    requestAnimationFrame : rien à animer sur un aperçu statique. ==== */
+/* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — item demandé : "que chaque aperçu
+   (comme ceux du marché noir) soit disponible sur absolument chaque élément
+   de la boutique". Le catalogue n'avait qu'un repli texte pour la majorité
+   de ses articles, et un aperçu replié sur place pour les cosmétiques et
+   décorations. Même fenêtre dédiée que le Marché noir pour TOUS les
+   articles, avec le rendu le plus parlant selon ce qu'on achète :
+     - cosmétique d'octogone -> l'octogone réellement rendu dans ce thème
+       (Canvas, via ARENA._themeOverride) — on voit ce qu'on achète ;
+     - archétype de Gauntlet -> les deux silhouettes dans la cage, le
+       combattant mis en avant, plus ses points forts chiffrés ;
+     - décoration -> la fiche de légende telle qu'elle sera décorée ;
+     - mode, scénario, outil -> pas de rendu visuel possible (rien de
+       visuel n'existe avant l'achat) : la fenêtre explique ce que
+       l'article ajoute et OÙ le retrouver une fois acheté, ce qui manquait
+       le plus au catalogue.
+   Réutilise intégralement le pipeline de dessin du combat (buildStatic
+   PreviewArena / cacheArenaGfx / drawArena), aucun code de rendu nouveau. ==== */
+function startShopPreviewArena(){
+  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
+  if(!cv||!cv.getContext) return;
+  const id=G._shopPreviewId||'';
+  const arch=(typeof ARCADE_UNLOCKABLE_ARCHETYPES!=='undefined')
+    ? ARCADE_UNLOCKABLE_ARCHETYPES.find(a=>a.unlockId===id) : null;
+  buildStaticPreviewArena(arch?arch.nick:'Toi','Adversaire',arch?arch.flag:'','');
+  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
+  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
+  /* Thème forcé pour un cosmétique, thème équipé pour tout le reste. */
+  const themeId=id.indexOf('cosmetic_')===0?id.replace('cosmetic_',''):(id.indexOf('excl_')===0?id.replace('excl_',''):null);
+  ARENA._themeOverride=themeId?(ARENA_THEMES.find(t=>t.id===themeId)||null):null;
+  cacheArenaGfx();
+  if(arch) ARENA.flashMe=1;
+  drawArena(0,true);
+  ARENA._themeOverride=null;
+}
 function startConsumablePreviewArena(){
   const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
   if(!cv||!cv.getContext) return;
