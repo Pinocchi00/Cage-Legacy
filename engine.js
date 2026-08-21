@@ -54,6 +54,50 @@ const ATTR={
         ['strength','Force'],['chin','Menton'],['recovery','Récupération'],['explosiveness','Explosivité'],['flexibility','Souplesse'],['durability','Résistance']],
 };
 const ALL_ATTR=[].concat(ATTR.tech,ATTR.ment,ATTR.phys);
+/* ==== [ANCRE: ATTRIBUTS_EXPLIQUES] — item demandé : "que tout le jeu soit
+   explicite et facile à comprendre même pour quelqu'un qui ne connaît rien
+   au MMA". Les 30 attributs portent des noms justes mais qui supposent le
+   vocabulaire du sport : "Menton" ne dit pas qu'il s'agit d'encaisser,
+   "Jeu de garde" ni "Défense lutte" ne parlent à personne hors du milieu.
+   Une définition en une phrase par attribut, sans jargon, affichée à la
+   demande sur la fiche complète (scr_profile, ui-06) — là où le joueur lit
+   justement ces lignes. ==== */
+const ATTR_HELP={
+  jab:'Le coup de poing du bras avant, pour tenir l’adversaire à distance.',
+  cross:'Le coup de poing du bras arrière, en ligne droite : le coup qui fait mal.',
+  hook:'Le coup de poing latéral, qui contourne la garde.',
+  kick:'Les coups de pied, de la cuisse jusqu’à la tête.',
+  clinchStr:'Le corps à corps debout, quand les deux combattants se tiennent.',
+  takedown:'Amener l’adversaire au sol contre sa volonté.',
+  tdd:'Empêcher l’adversaire de vous amener au sol.',
+  topControl:'Rester au-dessus et immobiliser l’adversaire au sol.',
+  gnp:'Frapper l’adversaire une fois qu’il est au sol.',
+  submission:'Les prises qui forcent l’abandon : étranglements et clés articulaires.',
+  guardWork:'Se défendre et attaquer depuis le sol, quand on est en dessous.',
+  fightIQ:'Lire le combat et choisir la bonne option au bon moment.',
+  composure:'Rester lucide sous la pression, sans paniquer.',
+  aggression:'La tendance à aller au contact et à prendre l’initiative.',
+  heart:'Continuer à se battre quand tout va mal.',
+  discipline:'Le sérieux à l’entraînement et le respect du plan de combat.',
+  adaptability:'Changer de plan quand le premier ne fonctionne pas.',
+  killer:'Savoir achever un adversaire déjà en difficulté.',
+  focus:'Rester concentré du début à la fin du combat.',
+  confidence:'La confiance en ses propres armes.',
+  power:'La force de frappe : faire mal en un seul coup.',
+  handSpeed:'La vitesse des poings.',
+  footSpeed:'Les déplacements : bouger, sortir de l’axe, couper la cage.',
+  cardio:'Le réservoir d’énergie : tenir la distance sans faiblir.',
+  strength:'La force physique brute, surtout au corps à corps.',
+  chin:'La capacité à encaisser un coup sans être assommé.',
+  recovery:'Récupérer entre les rounds et entre les combats.',
+  explosiveness:'Produire un effort violent d’un seul coup.',
+  flexibility:'La souplesse : se dégager, tenir des positions difficiles.',
+  durability:'Encaisser l’accumulation des coups sur la durée.'
+};
+/** Définition en clair d'un attribut. @param {string} k @returns {string} */
+const attrHelp=k=>ATTR_HELP[k]||'';
+/* ==== [FIN ANCRE] ==== */
+
 const ATTR_KEYS=ALL_ATTR.map(a=>a[0]);
 const CHIN='chin';                                  // ne monte jamais
 const TRAINABLE=ATTR_KEYS.filter(k=>k!==CHIN);

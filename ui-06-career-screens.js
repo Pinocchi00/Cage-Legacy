@@ -1053,9 +1053,14 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
      compresser le contenu davantage. `flex:1` sur .card (hérité du layout en
      ligne d'origine) est retiré : sans conteneur flex-row, il ne servait qu'à
      forcer les deux cartes à la même hauteur artificielle. ==== */
+  /* ==== [ANCRE: ATTRIBUTS_EXPLIQUES] — définitions repliées par défaut : la
+     fiche reste aussi dense qu'avant pour qui connaît déjà le sport, et
+     devient lisible pour qui découvre, d'un seul clic. ==== */
+  const aide=!!G._attrHelp;
   const grp=(key,title,avg,hero)=>`<div class="card" style="padding:${hero?'20':'14'}px 0"><div class="grp-h"><span class="disp" style="font-size:${hero?'22px':'15px'}">${title}</span><span class="gold mono" style="font-size:${hero?'16px':'13px'}">${d20(avg)}/20</span></div>
-     ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'}"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>`).join('')}</div>`;
+     ${ATTR[key].map(a=>`<div class="attr" style="${hero?'':'font-size:12px'}"><span class="attr-l">${a[1]}</span>${gauge(f.attrs[a[0]])}<span class="attr-v">${d20(f.attrs[a[0]])}</span></div>${aide?`<div class="muted" style="font-size:11px;padding:0 12px 6px;line-height:1.35">${attrHelp(a[0])}</div>`:''}`).join('')}</div>`;
   return `<div class="scr"><div class="bar"><span class="eyebrow">Fiche complète</span><span class="eyebrow x" onclick="G._profileReturn=null;CL.go('${backScreen}')">✕</span></div>
+   <button class="btn ghost mb" style="padding:8px 12px;width:auto;font-size:12px;border-color:var(--line)" onclick="CL.toggleAttrHelp()">${aide?'▲ Masquer les explications':'❓ Que veut dire chaque ligne ?'}</button>
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
      <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div></div>
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
