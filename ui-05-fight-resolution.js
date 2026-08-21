@@ -772,8 +772,6 @@ const ACH=[
    t:()=>!!(G.arcade && (G.arcade.cursedTaken||0)>=2)},
  {id:'g_estropie',cat:'Gauntlet',ico:SVG.shield,h:'Sur les Rotules',d:'Encaisser 3 séquelles dans une même run et continuer malgré tout.',
    t:()=>!!(G.arcade && (G.arcade.runInjuries||[]).length>=3)},
- {id:'g_daily',cat:'Gauntlet',ico:SVG.hourglass,h:'Rendez-vous Quotidien',d:'Terminer un Défi du Jour du Gauntlet.',
-   t:()=>!!(G.arcade && G.arcade.daily && !G.arcade.active)},
  {id:'g_intact',cat:'Gauntlet',ico:SVG.diamond,h:'Sans une Égratignure',d:'Remporter une run du Gauntlet sans la moindre séquelle.',
    t:()=>!!(G.arcade && G.arcade.victory && !(G.arcade.runInjuries||[]).length)}
  /* ==== [FIN ANCRE] ==== */

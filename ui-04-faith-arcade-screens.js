@@ -556,7 +556,7 @@ function scr_draft(){ const pool=G.arcade.pool; const isBoss=G.arcade.mode==='bo
   let h=`<div class="scr"><div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
    <span class="eyebrow mono" style="color:var(--blood)">${isBoss?'BOSS RUN // 5 CHAMPIONS':isLadder?'WTUMMA // CLASSEMENT MONDIAL DES 100':'WTUMMA // WORLD TOURNAMENT'}</span></div>
    <p class="lede" style="margin-bottom:32px;font-size:15px">${isBoss?'Affrontez 5 champions d\u2019affilée. Finitions uniquement. La défaite est éliminatoire.':isLadder?'Vous commencez au rang #100. Défiez les combattants mieux classés pour voler leur place jusqu\u2019au sommet. La défaite est éliminatoire.':'Bracket à 64 combattants. Un OVR élevé vous donne une meilleure Seed, un OVR faible vous garantit l\u2019enfer.'}</p>
-   <div class="mono small muted" style="margin:-20px 0 24px">Graine de la run : <b>${G.arcade.seed}</b>${(G.arcade.asc||0)>0?` · <span class="gold">Ascension ${G.arcade.asc}</span>`:''}${G.arcade.daily?' · <span class="sage">DÉFI DU JOUR</span>':''}</div>
+   <div class="mono small muted" style="margin:-20px 0 24px">Graine de la run : <b>${G.arcade.seed}</b>${(G.arcade.asc||0)>0?` · <span class="gold">Ascension ${G.arcade.asc}</span>`:''}</div>
    ${(()=>{ /* ==== [ANCRE: LISIBILITE_CONTRAT_PASSIF] — item demandé : contractBlock()
         rendait le contrat en entier ici, puis CL.selectDraft() (ui-08) navigue
         directement vers arcadehub où gauntletStatusBlock() le réaffiche déjà en
@@ -875,37 +875,26 @@ function runDebriefBlock(a){
   if((a.riskMult||1)>1) parts.push(`mise en jeu ×${a.riskMult}`);
   if((a.maxPactStreak||0)>0) parts.push(`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`);
   if(a.contract&&a.contract.done) parts.push(`contrat rempli ×${a.contract.mult}`);
-  /* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — le bonus de streak (finaliseGauntletRun,
-     ui-08) s'applique EN PLUS de gauntletRunMult : le multiplicateur affiché
-     doit l'inclure, sinon l'équation base×mult=gain ne balance plus dès
-     qu'un défi du jour à streak>=3 est joué. ==== */
-  const dailyBonusMult=a.dailyStreakBonusMult||1;
-  if(dailyBonusMult>1) parts.push(`série de défis du jour (${a.dailyStreak}) ×${dailyBonusMult}`);
-  const displayMult=Math.round(mult*dailyBonusMult*100)/100;
-  /* ==== [FIN ANCRE] ==== */
+  const displayMult=Math.round(mult*100)/100;
   const contractLine=a.contract
     ? `<div class="mono small" style="color:${a.contract.done?'var(--sage)':'var(--muted)'}">${a.contract.done?'✓':'✗'} Contrat : ${a.contract.label}</div>`
     : '';
   const bounty=(a.bounties||0)>0?`<div class="mono small" style="color:var(--blood)">⚔ ${a.bounties} némésis vaincue(s) — primes déjà versées</div>`:'';
   const inj=(a.runInjuries||[]).length?`<div class="mono small muted">${a.runInjuries.length} séquelle(s) encaissée(s) : ${a.runInjuries.map(i=>i.name).join(', ')}</div>`:'';
   const curses=(a.cursedTaken||0)>0?`<div class="mono small muted">${a.cursedTaken} pacte(s) de camp maudit accepté(s)</div>`:'';
-  const daily=a.daily?`<div class="mono small sage">Tentative du DÉFI DU JOUR consommée.</div>`:'';
   const multLine=(displayMult>1)
     ? `<div class="mono small gold"><b>${base} pts</b> × <b>${displayMult}</b> = <b>${a.earnedOnElimination||0} pts</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`
     : '';
   const ach=(a.newAch||[]).length?`<div class="mono small gold mt">🏅 ${a.newAch.map(x=>x.h).join(' · ')}</div>`:'';
-  /* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026). ==== */
-  const relic=a.newRelic?`<div class="mono small mt" style="color:var(--gold)">🏺 Relique de Survie obtenue : « ${esc(a.newRelic.title)} » <span class="muted">(${a.newRelic.effect.label})</span></div>`:'';
-  const mastery=a.newMastery?`<div class="mono small mt" style="color:var(--gold);font-weight:bold">👑 Maîtrise complète : « ${esc(a.newMastery.title)} » débloqué — profil du joueur.</div>`:'';
-  /* ==== [FIN ANCRE] ==== */
-  if(!multLine && !contractLine && !bounty && !inj && !curses && !daily && !ach && !relic && !mastery) return '';
+  if(!multLine && !contractLine && !bounty && !inj && !curses && !ach) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:20px">
      <div class="eyebrow mb" style="font-size:11px">Bilan de la run</div>
-     ${multLine}${contractLine}${bounty}${inj}${curses}${daily}${ach}${relic}${mastery}
+     ${multLine}${contractLine}${bounty}${inj}${curses}${ach}
    </div>`;
 }
-/* ==== [ANCRE: GAUNTLET_ASCENSION] — un palier ne se débloque qu'en gagnant le
-   format : le message n'apparaît donc que sur une victoire réelle. ==== */
+/* ==== [ANCRE: GAUNTLET_ASCENSION] — un palier s'ouvre sur une performance
+   mesurée (cf. state.js) ou sur une victoire : le message suit a.ascJust
+   Unlocked, posé au moment exact du déblocage. ==== */
 /* ==== [ANCRE: TOUR_ASCENSION_CONDITIONS_MESUREES] — ce bloc ne s'affichait
    que sur une victoire totale (a.victory). Depuis que le palier suivant
    s'ouvre aussi sur une bonne performance (cf. state.js), la garde se fait

@@ -357,78 +357,9 @@ function recordGauntletBest(meta,mode,value,asc){
   return false;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: RELIQUES_SURVIE] — ajout #7 (24 ajouts, 12/08/2026) : une
-   Relique par couple (mode, archétype) — jusqu'à 3 modes × ~32 archétypes
-   (23 de base + 4 légendes + 4 achetables + 1 loterie, cf. ARCADE_ARCHETYPES
-   et ses extensions dans ui-03) ≈ 96 combinaisons possibles, exactement
-   l'ordre de grandeur "~96" de la spec — débloquée en remportant le format
-   au palier d'Ascension MAXIMUM (GAUNTLET_ASC_MAX) avec cet archétype.
-   + 3 récompenses de maîtrise (une par mode), débloquées quand TOUTES les
-   Reliques de ce mode sont réunies.
-   ⚠️ SCOPE ASSUMÉ ET EXPLICITE : la spec évoque ~99 récompenses avec un
-   contenu réellement unique à rédiger une par une — un travail d'écriture
-   à cette échelle (99 titres + textes distincts) dépasse une passe sûre de
-   génie logiciel automatisé sans verser dans le remplissage artificiel.
-   Le contenu ci-dessous est donc généré PROCÉDURALEMENT à partir d'un petit
-   nombre de gabarits combinés à un hash déterministe par (mode, archétype)
-   — chaque Relique a un titre et un effet visuel distincts et stables (la
-   même combinaison ressort toujours pour le même couple), mais ce n'est pas
-   99 textes rédigés à la main. Le système mécanique (acquisition, unicité,
-   équipement, persistance) est en revanche complet et fonctionnel. ==== */
-const GAUNTLET_RELIC_TITLE_TEMPLATES=['Le Vainqueur de {arch}','L\u2019Ombre de {arch}','Le Bourreau de {arch}','Le Spectre de {arch}','L\u2019Héritier de {arch}','Le Fléau de {arch}'];
-const GAUNTLET_RELIC_EFFECT_TEMPLATES=[
-  {id:'fx_gold_frame',label:'Cadre Ascension Doré',style:'border:2px solid var(--gold);box-shadow:0 0 18px rgba(230,185,58,0.3)'},
-  {id:'fx_crimson_glow',label:'Halo Écarlate',style:'border:2px solid var(--blood);box-shadow:0 0 18px rgba(232,68,47,0.3)'},
-  {id:'fx_void_frame',label:'Cadre Abyssal',style:'border:2px solid #6b46c1;box-shadow:0 0 18px rgba(107,70,193,0.3)'}
-];
-const GAUNTLET_MODE_MASTERY_RELIC={
-  bracket64:{id:'mastery_bracket64',title:'Le Souverain du Bracket',effect:{id:'fx_gold_frame',label:'Couronne d\u2019Ascension',style:'border:3px double var(--gold);box-shadow:0 0 26px rgba(230,185,58,0.45)'}},
-  ladder_100:{id:'mastery_ladder_100',title:'Le Sommet Inaccessible',effect:{id:'fx_crimson_glow',label:'Aura du Sommet',style:'border:3px double var(--blood);box-shadow:0 0 26px rgba(232,68,47,0.45)'}},
-  boss_run:{id:'mastery_boss_run',title:'Le Bourreau Ultime',effect:{id:'fx_void_frame',label:'Ombre du Bourreau',style:'border:3px double #6b46c1;box-shadow:0 0 26px rgba(107,70,193,0.45)'}}
-};
-function hasGauntletRelic(meta,mode,nick){ return !!(meta.gauntletRelics&&meta.gauntletRelics[mode]&&meta.gauntletRelics[mode][nick]); }
-function grantGauntletRelic(meta,mode,nick){
-  if(hasGauntletRelic(meta,mode,nick)) return false;
-  if(!meta.gauntletRelics) meta.gauntletRelics={};
-  if(!meta.gauntletRelics[mode]) meta.gauntletRelics[mode]={};
-  meta.gauntletRelics[mode][nick]=true;
-  return true;
-}
-function gauntletRelicContent(mode,nick){
-  const h=_dailyHash(mode+'|'+nick);
-  const titleTpl=GAUNTLET_RELIC_TITLE_TEMPLATES[h%GAUNTLET_RELIC_TITLE_TEMPLATES.length];
-  const effect=GAUNTLET_RELIC_EFFECT_TEMPLATES[Math.floor(h/11)%GAUNTLET_RELIC_EFFECT_TEMPLATES.length];
-  return {id:`relic_${mode}_${nick.replace(/[^a-zA-Z0-9]/g,'')}`,title:titleTpl.replace('{arch}',nick),mode,archetype:nick,effect};
-}
-function checkGauntletModeMastery(meta,mode){
-  injectExtendedArchetypes();
-  return ARCADE_ARCHETYPES.length>0 && ARCADE_ARCHETYPES.every(a=>hasGauntletRelic(meta,mode,a.nick));
-}
-function hasGauntletModeMastery(meta,mode){ return !!(meta.gauntletMastery&&meta.gauntletMastery[mode]); }
-function grantGauntletModeMastery(meta,mode){
-  if(hasGauntletModeMastery(meta,mode)) return false;
-  if(!meta.gauntletMastery) meta.gauntletMastery={};
-  meta.gauntletMastery[mode]=true;
-  return true;
-}
 /* Profil du joueur : max 1 titre + 1 effet affichés à la fois (compte
    entier, pas par combattant — les combattants arcade sont jetables et non
    persistés, cf. règle déjà établie ailleurs dans ce fichier). */
-function listOwnedGauntletRelics(meta){
-  const out=[];
-  Object.keys(meta.gauntletRelics||{}).forEach(mode=>{
-    Object.keys(meta.gauntletRelics[mode]).forEach(nick=>out.push(gauntletRelicContent(mode,nick)));
-  });
-  Object.keys(meta.gauntletMastery||{}).forEach(mode=>{ if(meta.gauntletMastery[mode]) out.push({...GAUNTLET_MODE_MASTERY_RELIC[mode],mastery:true}); });
-  return out;
-}
-function setGauntletProfileDisplay(meta,relicId){
-  const owned=listOwnedGauntletRelics(meta);
-  const relic=owned.find(r=>r.id===relicId);
-  if(!relic) return {success:false,msg:'Relique non possédée.'};
-  meta.gauntletProfileTitle=relic.title; meta.gauntletProfileEffect=relic.effect;
-  return {success:true,msg:'Profil mis à jour.'};
-}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — meta.gauntletBest[mode][asc]
    reste un SCALAIRE global partagé par les 23+ archétypes (comportement
@@ -489,134 +420,8 @@ function recordGauntletGhostLog(meta,mode,asc,archetypeNick,fights){
    jour et par format, mémorisée dans meta (clé localStorage séparée de la
    sauvegarde, donc survit au fait qu'une run Gauntlet n'est JAMAIS persisté —
    cf. ANCRE SAVE_GARDE_ARCADE ci-dessus). ==== */
-function gauntletDailyKey(d){
-  const t=d||new Date();
-  return `${t.getFullYear()}${String(t.getMonth()+1).padStart(2,'0')}${String(t.getDate()).padStart(2,'0')}`;
-}
-function gauntletDailyState(meta){
-  const key=gauntletDailyKey();
-  if(!meta.gauntletDaily||meta.gauntletDaily.date!==key) return {date:key,done:{}};
-  if(!meta.gauntletDaily.done) meta.gauntletDaily.done={};
-  return meta.gauntletDaily;
-}
-function gauntletDailyDone(meta,mode){ return !!gauntletDailyState(meta).done[mode]; }
-function recordGauntletDaily(meta,mode,progress){
-  const st=gauntletDailyState(meta);
-  st.done[mode]={progress,at:Date.now()};
-  meta.gauntletDaily=st;
-}
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-   remplace le "défi du jour" (simple tentative, cf. GAUNTLET_DAILY ci-dessus,
-   CONSERVÉ tel quel pour le verrou 1 tentative/format/jour — décision
-   assumée : la doc demande de changer le CRITÈRE de réussite, pas de retirer
-   la protection anti-abus déjà en place) par un vrai mini-objectif tiré
-   chaque jour, parfois valable dans les 3 modes (scope:null), parfois
-   restreint à un mode nommé (scope:'bracket64'|'ladder_100'|'boss_run').
-   kind:'run' = à réaliser DANS une seule run (compteurs sur G.arcade, reset
-   à chaque run) ; kind:'day' = cumulé sur toutes les tentatives du jour
-   (compteurs dans meta.gauntletDailyObjProgress). ==== */
-const GAUNTLET_DAILY_OBJECTIVES=[
-  {id:'ko2straight',kind:'run',metric:'koStreak',target:2,label:'2 KO d\u2019affilée dans la même run'},
-  {id:'win3straight',kind:'run',metric:'winStreak',target:3,label:'3 victoires d\u2019affilée dans la même run'},
-  /* ==== [ANCRE: CORRECTIF_DEFI_SANS_DEGAT] — bug remonté : "sans le
-     moindre dégât reçu" (dmgHead+dmgBody+dmgLegs===0) demandait de ne
-     JAMAIS perdre un seul échange debout ou au sol sur tout le combat — le
-     moteur inflige 1 à 3 points à l'un des deux camps à chaque échange
-     debout (engine.js, ANCRE MICRO_SEQUENCES), donc une victoire à zéro
-     dégât exige de gagner CHAQUE micro-séquence du combat, dans l'ordre,
-     sans exception : un défi du jour vécu comme irréalisable plutôt que
-     comme rare. Seuil assoupli à "quasiment aucun dégât" (cf. ui-08,
-     ANCRE GAUNTLET_DEFI_JOUR_V2) — reste une victoire très dominante, mais
-     plus un tirage à annulation totale du hasard. ==== */
-  {id:'flawless1',kind:'run',metric:'flawless',target:1,label:'Un combat terminé en n’encaissant presque aucun dégât (3 points ou moins)'},
-  /* ==== [FIN ANCRE] ==== */
-  {id:'sub3day',kind:'day',metric:'subWins',target:3,label:'3 victoires par soumission aujourd\u2019hui (toutes tentatives confondues)'},
-  {id:'td5day',kind:'day',metric:'takedowns',target:5,label:'5 amenées au sol réussies aujourd\u2019hui'},
-  {id:'kd2day',kind:'day',metric:'kdCount',target:2,label:'2 knockdowns infligés aujourd\u2019hui'}
-];
-const GAUNTLET_DAILY_MODES=[null,'bracket64','ladder_100','boss_run'];
-/* Récompense exclusive de série (palier 7), jamais obtenable autrement —
-   réutilise le système de thèmes d'octogone existant (ARENA_THEMES,
-   ui-08) : checkLegendUnlock('cosmetic_renegade') suffit à la rendre
-   sélectionnable dans la Salle des Légendes, sans y ajouter d'entrée
-   achetable (elle ne figure PAS dans LEGEND_UNLOCKABLES). */
-const GAUNTLET_DAILY_STREAK_REWARD={id:'cosmetic_renegade',threshold:7,name:'Toile Braise du Renégat (exclusive)'};
-function _dailyHash(s){ return [...String(s)].reduce((h,c)=>((h*31+c.charCodeAt(0))>>>0),0); }
-/* Point d'entrée unique : garantit que l'objectif + la progression du jour
-   existent, gère le passage à un nouveau jour (règle le sort de la série
-   d'hier — cf. buybackGauntletDailyStreak ci-dessous — AVANT de régénérer). */
-function gauntletDailyObjective(meta){
-  const key=gauntletDailyKey();
-  if(meta.gauntletDailyObj && meta.gauntletDailyObj.date===key) return meta.gauntletDailyObj;
-  const prevProg=meta.gauntletDailyObjProgress;
-  if(prevProg && prevProg.date!==key){
-    if(!prevProg.completed && !prevProg.rescued){
-      meta.gauntletDailyRescueOffer={fromDate:prevProg.date,streakAtRisk:meta.gauntletDailyStreak||0};
-      meta.gauntletDailyStreak=0;
-    } else {
-      meta.gauntletDailyRescueOffer=null;
-    }
-  }
-  const h=_dailyHash(key);
-  const tmpl=GAUNTLET_DAILY_OBJECTIVES[h%GAUNTLET_DAILY_OBJECTIVES.length];
-  const scope=GAUNTLET_DAILY_MODES[Math.floor(h/97)%GAUNTLET_DAILY_MODES.length];
-  const obj={date:key,id:tmpl.id,kind:tmpl.kind,metric:tmpl.metric,target:tmpl.target,label:tmpl.label,scope};
-  meta.gauntletDailyObj=obj;
-  meta.gauntletDailyObjProgress={date:key,subWins:0,takedowns:0,kdCount:0,completed:false,streakCredited:false,rescued:false};
-  /* ==== [ANCRE: CORRECTIF_OFFRE_RACHAT_PERDUE] — bug remonté : cette
-     fonction pose meta.gauntletDailyRescueOffer (juste au-dessus) mais ne
-     sauvegardait jamais elle-même — ses deux appelants d'affichage
-     (gauntletDailyTag/gauntletDailyGroup, ui-06) rechargent un meta neuf à
-     chaque render sans jamais persister. Résultat : l'offre n'existait que
-     dans la mémoire du render courant. Au clic sur "Racheter",
-     CL.buybackGauntletDailyStreak() (ui-08) recharge un meta FRAIS depuis
-     localStorage — sans l'offre — donc "Rien à racheter." même avec assez
-     de points. Sauvegarder ici, au seul point d'entrée qui écrit l'offre,
-     couvre tous les appelants sans les modifier un par un. La sauvegarde ne
-     se déclenche qu'au changement de jour/première init (l'early return
-     ci-dessus court-circuite le reste tant que la date n'a pas changé). ==== */
-  saveMetaStats(meta);
-  /* ==== [FIN ANCRE] ==== */
-  return obj;
-}
-function gauntletDailyObjectiveDone(meta){ gauntletDailyObjective(meta); return !!meta.gauntletDailyObjProgress.completed; }
-function gauntletDailyBuybackCost(streakAtRisk){ return Math.max(40,(streakAtRisk||0)*40); }
-function buybackGauntletDailyStreak(meta){
-  const offer=meta.gauntletDailyRescueOffer;
-  if(!offer) return {success:false,msg:'Rien à racheter.'};
-  const cost=gauntletDailyBuybackCost(offer.streakAtRisk);
-  if((meta.legendPoints||0)<cost) return {success:false,msg:'Points de Légende insuffisants.'};
-  meta.legendPoints-=cost; meta.gauntletDailyStreak=offer.streakAtRisk; meta.gauntletDailyRescueOffer=null;
-  if(meta.gauntletDailyObjProgress) meta.gauntletDailyObjProgress.rescued=true;
-  saveMetaStats(meta);
-  return {success:true,msg:`Série sauvée pour ${cost} points de Légende.`};
-}
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_DAILY_STREAK] — appelée UNE SEULE FOIS par jour, dès
-   que l'objectif du jour est atteint (cf. finaliseGauntletRun, ui-08 : garde
-   prog.streakCredited pour éviter un double crédit si plusieurs tentatives
-   le même jour concluent l'objectif). Le cas "jour manqué" est désormais géré
-   en amont par gauntletDailyObjective() (reset ou rachat), donc cette
-   fonction n'a plus besoin de comparer les dates elle-même — simple
-   incrément, plus lisible que l'ancien calcul de gap. ==== */
-function recordGauntletDailyStreak(meta){
-  meta.gauntletDailyStreak=(meta.gauntletDailyStreak||0)+1;
-  meta.gauntletLastDailyDate=gauntletDailyKey();
-  if(meta.gauntletDailyStreak>=GAUNTLET_DAILY_STREAK_REWARD.threshold){
-    if(!meta.unlockedItems) meta.unlockedItems=[];
-    if(!meta.unlockedItems.includes(GAUNTLET_DAILY_STREAK_REWARD.id)) meta.unlockedItems.push(GAUNTLET_DAILY_STREAK_REWARD.id);
-  }
-  return meta.gauntletDailyStreak;
-}
-/* Bonus de cagnotte aux paliers 3 et 7 du streak, appliqué au payout du
-   défi du jour concerné (finaliseGauntletRun, ui-08) — pas un rééquilibrage
-   audité, un facteur de fidélité comme le reste du système Gauntlet. */
-function gauntletDailyStreakBonusMult(streak){
-  if((streak||0)>=7) return 1.5;
-  if((streak||0)>=3) return 1.2;
-  return 1;
-}
 /* ==== [FIN ANCRE] ==== */
 function updateMetaStatsOnRetirement(f){
   const meta=loadMetaStats();
@@ -650,27 +455,27 @@ const LEGEND_UNLOCKABLES=[
      ouvert depuis scr_gauntlet_menu. Les modes 100% carrière (Vs Ami,
      Fantasy, All-Stars) et les Scénarios restent gauntlet:false (absent =
      false), volontairement exclus du filtre pour ne pas le diluer. ==== */
-  {id:'tool_codex',name:'Codex Inter-carrières',cat:'Outils',cost:60,desc:'Ajoute un panneau de statistiques cumulées (compétences par rareté, carrières et combats totaux) directement dans le Codex.'},
-  {id:'cosmetic_pride',name:'Toile Héritage Blanche & Bleue',cat:'Cosmétiques',cost:90,desc:'Nouveau thème visuel pour l\u2019octogone.',gauntlet:true},
-  {id:'cosmetic_gold',name:'Bâche Royale (Prestige)',cat:'Cosmétiques',cost:150,desc:'Thème visuel doré pour l\u2019octogone.',gauntlet:true},
-  {id:'cosmetic_neon',name:'Néons Cyberpunk',cat:'Cosmétiques',cost:110,desc:'Thème visuel nocturne et futuriste pour l\u2019octogone.',gauntlet:true},
-  {id:'cosmetic_underground',name:'Béton Clandestin',cat:'Cosmétiques',cost:75,desc:'L\u2019ambiance rugueuse et sombre des combats clandestins.',gauntlet:true},
-  {id:'cosmetic_crimson',name:'Arène Écarlate',cat:'Cosmétiques',cost:130,desc:'Thème visuel rouge sang pour l\u2019octogone, pour les carrières les plus brutales.',gauntlet:true},
-  {id:'arch_titan',name:'Archétype : Le Titan Antique',cat:'Archétypes Arcade',cost:80,desc:'Débloque un colosse inarrêtable spécialisé en lutte pour le mode Gauntlet.',gauntlet:true},
-  {id:'arch_ninja',name:'Archétype : Le Shinobi',cat:'Archétypes Arcade',cost:80,desc:'Débloque un expert en furtivité et soumissions éclairs pour le mode Gauntlet.',gauntlet:true},
-  {id:'arch_brawler',name:'Archétype : Le Roi de la Rue',cat:'Archétypes Arcade',cost:80,desc:'Débloque un spécialiste de la boxe sale et de la survie pour le mode Gauntlet.',gauntlet:true},
-  {id:'arch_sniper',name:'Archétype : Le Sniper',cat:'Archétypes Arcade',cost:80,desc:'Débloque un spécialiste du combat à distance en Muay Thaï pour le mode Gauntlet.',gauntlet:true},
-  {id:'mode_vs_friend',name:'Défi Multijoueur (Vs Ami)',cat:'Modes annexes',cost:140,desc:'Oppose une de tes légendes retraitées au combattant d\u2019un ami, généré à la volée.'},
-  {id:'mode_fantasy',name:'Fantasy Fight (Sandbox)',cat:'Modes annexes',cost:180,desc:'Simule un combat entre deux légendes de ton Panthéon.'},
-  {id:'mode_boss',name:'Arcade : Boss Run',cat:'Modes annexes',cost:220,desc:'5 champions d\u2019affilée, KO uniquement. Le format le plus punitif du Gauntlet.',gauntlet:true},
-  {id:'mode_allstars',name:'Tournoi All-Stars (8 Légendes)',cat:'Modes annexes',cost:300,desc:'Tournoi à élimination directe entre tes 8 meilleures légendes pour désigner ton GOAT.'},
+  {id:'tool_codex',name:'Codex Inter-carrières',cat:'Outils',cost:40,desc:'Ajoute un panneau de statistiques cumulées (compétences par rareté, carrières et combats totaux) directement dans le Codex.'},
+  {id:'cosmetic_pride',name:'Toile Héritage Blanche & Bleue',cat:'Cosmétiques',cost:75,desc:'Nouveau thème visuel pour l\u2019octogone.',gauntlet:true},
+  {id:'cosmetic_gold',name:'Bâche Royale (Prestige)',cat:'Cosmétiques',cost:140,desc:'Thème visuel doré pour l\u2019octogone.',gauntlet:true},
+  {id:'cosmetic_neon',name:'Néons Cyberpunk',cat:'Cosmétiques',cost:105,desc:'Thème visuel nocturne et futuriste pour l\u2019octogone.',gauntlet:true},
+  {id:'cosmetic_underground',name:'Béton Clandestin',cat:'Cosmétiques',cost:50,desc:'L\u2019ambiance rugueuse et sombre des combats clandestins.',gauntlet:true},
+  {id:'cosmetic_crimson',name:'Arène Écarlate',cat:'Cosmétiques',cost:125,desc:'Thème visuel rouge sang pour l\u2019octogone, pour les carrières les plus brutales.',gauntlet:true},
+  {id:'arch_titan',name:'Archétype : Le Titan Antique',cat:'Archétypes Arcade',cost:90,desc:'Débloque un colosse inarrêtable spécialisé en lutte pour le mode Gauntlet.',gauntlet:true},
+  {id:'arch_ninja',name:'Archétype : Le Shinobi',cat:'Archétypes Arcade',cost:90,desc:'Débloque un expert en furtivité et soumissions éclairs pour le mode Gauntlet.',gauntlet:true},
+  {id:'arch_brawler',name:'Archétype : Le Roi de la Rue',cat:'Archétypes Arcade',cost:95,desc:'Débloque un spécialiste de la boxe sale et de la survie pour le mode Gauntlet.',gauntlet:true},
+  {id:'arch_sniper',name:'Archétype : Le Sniper',cat:'Archétypes Arcade',cost:95,desc:'Débloque un spécialiste du combat à distance en Muay Thaï pour le mode Gauntlet.',gauntlet:true},
+  {id:'mode_vs_friend',name:'Défi Multijoueur (Vs Ami)',cat:'Modes annexes',cost:165,desc:'Oppose une de tes légendes retraitées au combattant d\u2019un ami, généré à la volée.'},
+  {id:'mode_fantasy',name:'Fantasy Fight (Sandbox)',cat:'Modes annexes',cost:190,desc:'Simule un combat entre deux légendes de ton Panthéon.'},
+  {id:'mode_boss',name:'Arcade : Boss Run',cat:'Modes annexes',cost:250,desc:'5 champions d\u2019affilée, KO uniquement. Le format le plus punitif du Gauntlet.',gauntlet:true},
+  {id:'mode_allstars',name:'Tournoi All-Stars (8 Légendes)',cat:'Modes annexes',cost:270,desc:'Tournoi à élimination directe entre tes 8 meilleures légendes pour désigner ton GOAT.'},
   // ==== [ANCRE: REFONTE_SCENARIOS] — 2 scénarios réservés (cf. SCENARIOS dans
   // engine.js, champ legendUnlock). Coûts calés entre les archétypes (80) et
   // le Boss Run (220) : plus exigeants qu'un simple cosmétique/archétype
   // (un scénario entier à réussir), mais plus accessibles qu'un mode annexe
   // complet.
-  {id:'scenario_finisseur',name:'Scénario : Le Finisseur',cat:'Scénarios',cost:100,desc:'Débloque le défi "Le Finisseur" : titre mondial sans jamais gagner à la décision.'},
-  {id:'scenario_regne',name:'Scénario : Le Règne Sans Faille',cat:'Scénarios',cost:160,desc:'Débloque le défi "Le Règne Sans Faille" : 5 défenses de titre continental sans jamais perdre la ceinture.'},
+  {id:'scenario_finisseur',name:'Scénario : Le Finisseur',cat:'Scénarios',cost:110,desc:'Débloque le défi "Le Finisseur" : titre mondial sans jamais gagner à la décision.'},
+  {id:'scenario_regne',name:'Scénario : Le Règne Sans Faille',cat:'Scénarios',cost:135,desc:'Débloque le défi "Le Règne Sans Faille" : 5 défenses de titre continental sans jamais perdre la ceinture.'},
   /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
      décorations "flex" pour combattants retraités. Achat PERMANENT (compte),
      mais équipement UNIQUE (une décoration donnée n'est portée que par un
@@ -678,11 +483,25 @@ const LEGEND_UNLOCKABLES=[
      plus bas, qui la retire d'un éventuel porteur précédent). Maximum 3
      équipées simultanément par combattant. gauntlet:false : ce sont des
      décorations de Panthéon (carrière), pas du contenu Gauntlet. */
-  {id:'deco_frame_gold',name:'Cadre Doré (Décoration)',cat:'Décorations du Panthéon',cost:70,desc:'Cadre doré autour de la fiche du combattant retraité.'},
-  {id:'deco_frame_crimson',name:'Cadre Écarlate (Décoration)',cat:'Décorations du Panthéon',cost:70,desc:'Cadre rouge sang autour de la fiche du combattant retraité.'},
-  {id:'deco_glow',name:'Effet de Lumière (Décoration)',cat:'Décorations du Panthéon',cost:90,desc:'Halo lumineux doré autour du nom du combattant.'},
-  {id:'deco_typography',name:'Typographie Gravée (Décoration)',cat:'Décorations du Panthéon',cost:60,desc:'Nom du combattant affiché dans une typographie ornementale exclusive.'},
-  {id:'deco_diamond',name:'Palmarès en Diamant (Décoration)',cat:'Décorations du Panthéon',cost:120,desc:'Le bilan (victoires-défaites) scintille en diamant sur la fiche.'}
+  {id:'deco_frame_gold',name:'Cadre Doré (Décoration)',cat:'Décorations du Panthéon',cost:60,desc:'Cadre doré autour de la fiche du combattant retraité.'},
+  {id:'deco_frame_crimson',name:'Cadre Écarlate (Décoration)',cat:'Décorations du Panthéon',cost:60,desc:'Cadre rouge sang autour de la fiche du combattant retraité.'},
+  {id:'deco_glow',name:'Effet de Lumière (Décoration)',cat:'Décorations du Panthéon',cost:100,desc:'Halo lumineux doré autour du nom du combattant.'},
+  {id:'deco_typography',name:'Typographie Gravée (Décoration)',cat:'Décorations du Panthéon',cost:45,desc:'Nom du combattant affiché dans une typographie ornementale exclusive.'},
+  {id:'deco_diamond',name:'Palmarès en Diamant (Décoration)',cat:'Décorations du Panthéon',cost:120,desc:'Le bilan (victoires-défaites) scintille en diamant sur la fiche.'},
+  /* ==== [ANCRE: TOUT_EN_BOUTIQUE] — item demandé : les contenus qui
+     n'existaient qu'à travers une mécanique de rotation ou de hasard —
+     offre du jour, Caisse Mystère, récompense de série quotidienne —
+     rejoignent le catalogue et s'achètent directement, comme le reste.
+     Leurs identifiants sont conservés tels quels : un joueur qui les avait
+     déjà obtenus par l'ancien chemin les garde acquis, sans migration.
+     Prix calés en haut de leur catégorie, ces articles étant les plus
+     prestigieux (ils étaient rares ou exclusifs). ==== */
+  {id:'excl_banner_ash',name:'Bannière Cendrée',cat:'Cosmétiques',cost:180,desc:'Thème d\u2019octogone : variante sombre et cendrée de l\u2019Arène Écarlate.',gauntlet:true},
+  {id:'cosmetic_renegade',name:'Toile Braise du Renégat',cat:'Cosmétiques',cost:200,desc:'Thème d\u2019octogone : braises orange sur toile calcinée.',gauntlet:true},
+  {id:'arch_lottery_phoenix',name:'Archétype : Le Phénix Cendré',cat:'Archétypes Arcade',cost:215,desc:'Débloque un combattant qui renaît de ses cendres : plus il encaisse, plus il devient dangereux.',gauntlet:true},
+  {id:'excl_mask_oni',name:'Masque du Oni (Décoration)',cat:'Décorations du Panthéon',cost:145,desc:'Décoration de fiche au masque de démon, sur fond sombre.'},
+  {id:'excl_gloves_relic',name:'Gants-Relique (Décoration)',cat:'Décorations du Panthéon',cost:155,desc:'Décoration de fiche au style usé et ancien, comme des gants de légende.'}
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
 ];
 // Gain divisé par 10 par rapport au score brut : hofScore() peut dépasser 500
@@ -750,68 +569,6 @@ function applyPendingGauntletConsumable(a){
   else if(item.kind==='safetynet'){ a.consumableSafetynet=true; }
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026) :
-   "Offre du jour" — objets EXCLUSIFS, jamais obtenables autrement que par
-   cette rotation (ne figurent PAS dans LEGEND_UNLOCKABLES : pas de doublon
-   d'achat possible ailleurs). Tirage déterministe par date (même principe
-   que gauntletDailyObjective, salt différent pour ne pas tomber sur le même
-   index que l'objectif du jour), réduction -40% à -60% également dérivée du
-   hash. meta.gauntletExclusiveOfferLastId mémorise l'offre d'hier pour
-   garantir qu'elle ne revient jamais 2 jours d'affilée (peut revenir plus
-   tard, cf. spec). **Scope à anticiper** : pool volontairement restreint (4
-   objets) — à enrichir librement plus tard, la mécanique de rotation ne
-   dépend pas de sa taille. ==== */
-const GAUNTLET_EXCLUSIVE_OFFERS=[
-  /* ==== [ANCRE: CORRECTIF_COSMETIQUES_EXCLUSIFS_INVISIBLES] — bug remonté :
-     excl_mask_oni et excl_gloves_relic étaient achetables via l'offre du
-     jour (checkLegendUnlock les marque bien possédés) mais n'apparaissaient
-     ensuite NULLE PART — le panneau d'équipement du Panthéon (ui-06,
-     ownedDecorations) ne lit que LEGEND_UNLOCKABLES, jamais
-     GAUNTLET_EXCLUSIVE_OFFERS. Ajout du champ cat (même valeur que les
-     décorations classiques) pour que ces 2 objets soient reconnus par ce
-     panneau une fois le correctif appliqué côté ui-06 — sans dupliquer leur
-     id ni les rendre achetables ailleurs (ils restent absents de
-     LEGEND_UNLOCKABLES). excl_title_ghost n'a pas d'équivalent : aucun
-     emplacement d'affichage de titre n'existe dans le jeu (ni fiche, ni
-     Panthéon) — hors scope d'un correctif ciblé, à traiter comme un ajout
-     de fonctionnalité à part entière. ==== */
-  {id:'excl_mask_oni',name:'Masque du Oni (cosmétique Panthéon)',cat:'Décorations du Panthéon',desc:'Décoration de fiche exclusive, jamais vendue autrement.',baseCost:220},
-  {id:'excl_banner_ash',name:'Bannière Cendrée (thème d\u2019octogone)',desc:'Variante sombre et exclusive du thème Arène Écarlate.',baseCost:260},
-  {id:'excl_title_ghost',name:'Titre « L\u2019Insaisissable » (Profil)',desc:'Titre cosmétique exclusif, sans effet mécanique.',baseCost:180},
-  {id:'excl_gloves_relic',name:'Gants-Relique (cosmétique Panthéon)',cat:'Décorations du Panthéon',desc:'Décoration de fiche exclusive au style usé et ancien.',baseCost:240},
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
-     "Disponible à la fois en achat classique ET via la Rotation des offres
-     exclusives" — ID PARTAGÉ avec LEGEND_UNLOCKABLES (deco_diamond) au lieu
-     d'un doublon : checkLegendUnlock()/meta.unlockedItems fonctionnent déjà
-     à l'identique quel que soit le chemin d'achat, donc réutiliser le même
-     id évite toute désynchronisation entre les deux catalogues. baseCost
-     recopié depuis son entrée LEGEND_UNLOCKABLES (120) pour que la réduction
-     s'applique sur le même prix de référence. ==== */
-  {id:'deco_diamond',name:'Palmarès en Diamant (Décoration)',desc:'Décoration de Panthéon, aussi disponible en achat classique.',baseCost:120}
-  /* ==== [FIN ANCRE] ==== */
-];
-function gauntletExclusiveOfferToday(meta){
-  const key=gauntletDailyKey();
-  if(meta.gauntletExclusiveOffer && meta.gauntletExclusiveOffer.date===key) return meta.gauntletExclusiveOffer;
-  const h=_dailyHash(key+'|offer');
-  let idx=h%GAUNTLET_EXCLUSIVE_OFFERS.length;
-  if(GAUNTLET_EXCLUSIVE_OFFERS[idx].id===meta.gauntletExclusiveOfferLastId) idx=(idx+1)%GAUNTLET_EXCLUSIVE_OFFERS.length;
-  const item=GAUNTLET_EXCLUSIVE_OFFERS[idx];
-  const discountPct=40+(Math.floor(h/13)%3)*10; // 40, 50 ou 60 %
-  const cost=Math.round(item.baseCost*(1-discountPct/100));
-  const offer={date:key,id:item.id,discountPct,cost};
-  meta.gauntletExclusiveOffer=offer; meta.gauntletExclusiveOfferLastId=item.id;
-  return offer;
-}
-function purchaseExclusiveOffer(meta){
-  const offer=gauntletExclusiveOfferToday(meta);
-  if(checkLegendUnlock(offer.id)) return {success:false,msg:'Déjà possédé.'};
-  if((meta.legendPoints||0)<offer.cost) return {success:false,msg:'Points de Légende insuffisants.'};
-  meta.legendPoints-=offer.cost; if(!meta.unlockedItems) meta.unlockedItems=[]; meta.unlockedItems.push(offer.id);
-  saveMetaStats(meta);
-  return {success:true,msg:'Offre exclusive du jour débloquée !'};
-}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
    UNIQUEMENT en Gauntlet. Coût "astronomique", volontairement croissant
@@ -829,36 +586,6 @@ function gauntletDevilCost(mode,a){
   return 500+depth*150;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026) : Caisse
-   Mystère, une fois par jour, coût modique. Pioche parmi les consommables du
-   Marché Noir (ajout #8, implémenté juste avant celui-ci dans ce même
-   chantier — TODO résolu, plus de dépendance ouverte) ET les cosmétiques/
-   déblocages existants. Un consommable gagné ici respecte la même règle
-   "pas de réserve" que le Marché Noir (meta.gauntletPendingConsumable) :
-   s'il y en a déjà un en attente, la Caisse ne peut retomber que sur un
-   cosmétique/déblocage cette fois-là. L'exception 1% (archétype ultra-
-   exclusif nouveau) est pleinement implémentée : voir arch_lottery_phoenix
-   dans ARCADE_UNLOCKABLE_ARCHETYPES (ui-03). ==== */
-const GAUNTLET_LOTTERY_COST=25;
-const GAUNTLET_LOTTERY_JACKPOT_ID='arch_lottery_phoenix';
-function gauntletLotteryAvailable(meta){ return meta.gauntletLotteryLastDate!==gauntletDailyKey(); }
-function drawGauntletLottery(meta){
-  if(!gauntletLotteryAvailable(meta)) return {success:false,msg:'Déjà tentée aujourd\u2019hui.'};
-  if((meta.legendPoints||0)<GAUNTLET_LOTTERY_COST) return {success:false,msg:'Points de Légende insuffisants.'};
-  meta.legendPoints-=GAUNTLET_LOTTERY_COST; meta.gauntletLotteryLastDate=gauntletDailyKey();
-  if(!meta.unlockedItems) meta.unlockedItems=[];
-  if(rnd()<0.01 && !meta.unlockedItems.includes(GAUNTLET_LOTTERY_JACKPOT_ID)){
-    meta.unlockedItems.push(GAUNTLET_LOTTERY_JACKPOT_ID);
-    saveMetaStats(meta);
-    return {success:true,jackpot:true,msg:'🏆 JACKPOT — Archétype ultra-exclusif débloqué !'};
-  }
-  const pool=LEGEND_UNLOCKABLES.filter(i=>!meta.unlockedItems.includes(i.id));
-  if(!pool.length){ meta.legendPoints+=GAUNTLET_LOTTERY_COST*2; saveMetaStats(meta); return {success:true,jackpot:false,msg:'Tout est déjà débloqué — remboursé en points de Légende (×2).'}; }
-  const won=pool[Math.floor(rnd()*pool.length)];
-  meta.unlockedItems.push(won.id);
-  saveMetaStats(meta);
-  return {success:true,jackpot:false,msg:`Caisse Mystère : ${won.name} !`};
-}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MIGRATION] — on empile les blocs, on n'en modifie jamais un livré ==== */
 function migrate(g){ if(!g)return g; g.version=g.version||1;

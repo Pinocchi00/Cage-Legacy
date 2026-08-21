@@ -171,63 +171,7 @@ function scr_ascension_tower(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-   remplace gauntletDailyTag/gauntletDailyGroup par l'affichage du VRAI
-   mini-objectif du jour (state.js, gauntletDailyObjective), avec sa portée
-   (3 modes ou un mode nommé), la série en cours, une éventuelle offre de
-   rachat, et les boutons de tentative PAR FORMAT (le verrou 1 tentative/
-   format/jour est conservé tel quel — cf. state.js pour le raisonnement). ==== */
-/* ==== [ANCRE: CORRECTIF_DEFI_JOUR_COMPACT] — bug remonté : chaque ligne de
-   format portait une phrase complète ("Tenter ce format pour le défi du
-   jour", "Défi du jour non applicable à ce format") qui passait sur 2
-   lignes dans le badge — répété 3 fois (un par format), c'est la moitié de
-   la hauteur du bloc "Défi du jour" à elle seule. Le contexte ("défi du
-   jour") est déjà donné une seule fois par l'eyebrow du bloc englobant
-   (gauntletDailyGroup) : inutile de le répéter dans chaque badge, un état
-   court par ligne suffit. ==== */
-function gauntletDailyTag(mode){
-  const meta=loadMetaStats();
-  const obj=gauntletDailyObjective(meta);
-  const scopeOk=!obj.scope||obj.scope===mode;
-  const done=gauntletDailyDone(meta,mode);
-  const label=!scopeOk?`Non applicable`:done?`Déjà tenté`:`Tenter`;
-  const disabled=done||!scopeOk;
-  return `<span onclick="${disabled?'':`CL.startGauntletDaily('${mode}')`}" style="display:inline-block;cursor:${disabled?'default':'pointer'};border:1px dashed ${disabled?'var(--line)':'var(--sage)'};color:${disabled?'var(--muted)':'var(--sage)'};padding:4px 10px;border-radius:2px;font-size:11px;opacity:${scopeOk?1:0.5}" class="mono">${label}</span>`;
-}
 /* ==== [FIN ANCRE] ==== */
-function gauntletDailyGroup(){
-  const meta=loadMetaStats();
-  const obj=gauntletDailyObjective(meta);
-  const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
-  const scopeLabel=obj.scope?`Valable uniquement en ${modeLabel[obj.scope]}`:'Valable dans les 3 formats';
-  const streak=meta.gauntletDailyStreak||0;
-  /* ==== [ANCRE: CORRECTIF_RECOMPENSE_STREAK_INVISIBLE] — bug remonté : la
-     série de 7 jours débloque cosmetic_renegade (GAUNTLET_DAILY_STREAK_REWARD,
-     state.js) sans que rien ne le dise avant l'obtention — personne ne
-     comprenait l'intérêt de tenir la série. Annonce explicite tant que la
-     récompense n'est pas encore acquise ; disparaît une fois débloquée
-     (checkLegendUnlock), pour ne pas polluer l'écran après coup. ==== */
-  const streakGoalLine=(!checkLegendUnlock(GAUNTLET_DAILY_STREAK_REWARD.id))?`<div class="muted small mt">À 7 jours d’affilée : ${GAUNTLET_DAILY_STREAK_REWARD.name} (thème d’octogone exclusif) débloqué.</div>`:'';
-  /* ==== [FIN ANCRE] ==== */
-  const streakLine=streak>0?`<div class="mono small gold" style="margin-top:4px">🔥 Série de défis réussis : ${streak}${streak>=7?' — bonus ×1.5 actif':streak>=3?' — bonus ×1.2 actif':''}</div>${streakGoalLine}`:streakGoalLine;
-  const rescue=meta.gauntletDailyRescueOffer;
-  const rescueHtml=rescue?`<div class="card mt" style="background:var(--panel2);border:1px solid var(--blood);padding:10px">
-     <div class="mono small" style="color:var(--blood)">Série de ${rescue.streakAtRisk} jour(s) manquée hier.</div>
-     <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 10px;font-size:12px" onclick="CL.buybackGauntletDailyStreak()">Racheter — ${gauntletDailyBuybackCost(rescue.streakAtRisk)} points de Légende</button>
-   </div>`:'';
-  const modes=[['bracket64','Bracket 64'],['ladder_100','Ladder 100']];
-  if(checkLegendUnlock('mode_boss')) modes.push(['boss_run','Boss Run']);
-  const rows=modes.map(([m,label])=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px">
-     <span class="mono small muted" style="flex:0 0 auto">${label}</span>${gauntletDailyTag(m)}
-   </div>`).join('');
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--sage);padding:12px;text-align:left;margin-bottom:20px">
-     <div class="eyebrow mb" style="font-size:11px;color:var(--sage)">Défi du jour · ${gauntletDailyKey()}${gauntletDailyObjectiveDone(meta)?' — ✓ réussi':''}</div>
-     <div class="small" style="color:var(--text)">${obj.label}</div>
-     <div class="muted small mt">${scopeLabel} · même tirage pour tout le monde.</div>
-     ${streakLine}${rescueHtml}
-     ${rows}
-   </div>`;
-}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — n'apparaît qu'une fois 5 rivaux
    historiques battus (meta.gauntletRivalsDefeated, jamais purgé, alimenté
@@ -283,7 +227,7 @@ function scr_archetype_pantheon(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — la nouvelle gauntletDailyGroup()
+/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — le bloc du défi du jour (retiré)
    (ajout #2, ancre GAUNTLET_DEFI_JOUR_V2 plus haut) remplace celle-ci —
    ancienne version retirée pour éviter une redéclaration de fonction (la
    dernière définition l'aurait de toute façon emporté silencieusement en
@@ -302,8 +246,6 @@ function scr_gauntlet_menu(){
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
    ${nextObjectiveBlock()}
-   <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">DÉFI DU JOUR</div>
-   ${gauntletDailyGroup()}
    <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">MODES DE JEU CLASSIQUES</div>
    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
      <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
@@ -319,7 +261,6 @@ function scr_gauntlet_menu(){
    <div class="leg-grid">
      <button class="btn ghost" style="margin:0;border:1px dashed var(--line);padding:12px 8px;font-size:12px" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
      <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
-     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.go('gauntlet_profile')">🏺 Profil (Reliques)</button>
      <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);color:var(--gold);padding:12px 8px;font-size:12px" onclick="CL.goShopGauntlet()">🛒 Boutique</button>
    </div>
    <div class="fld" style="margin-top:24px">
@@ -331,36 +272,6 @@ function scr_gauntlet_menu(){
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: PROFIL_JOUEUR_RELIQUES] — ajout #7 (24 ajouts, 12/08/2026) :
-   écran de compte, PAS lié à un combattant précis (les combattants arcade
-   sont jetables et non persistés, cf. règle déjà établie ailleurs) — max 1
-   titre + 1 effet affichés à la fois, comme demandé. ==== */
-function scr_gauntlet_profile(){
-  const meta=loadMetaStats();
-  const owned=listOwnedGauntletRelics(meta);
-  const curTitle=meta.gauntletProfileTitle, curEffect=meta.gauntletProfileEffect;
-  const preview=`<div class="glass mwash" style="position:relative;background:var(--panel2);padding:16px;text-align:center;margin-bottom:16px;${curEffect?curEffect.style:'border:1px solid var(--line)'}">
-     <div class="eyebrow mb">Aperçu du profil</div>
-     <b style="font-size:16px;color:var(--gold)">${curTitle?esc(curTitle):'Aucun titre affiché'}</b>
-     ${curEffect?`<div class="muted small mt">${esc(curEffect.label)}</div>`:''}
-   </div>`;
-  const list=owned.length?owned.map(r=>{
-    const isCurrent=curTitle===r.title;
-    return `<div class="glass card mb" style="border-left:3px solid ${r.mastery?'var(--gold)':'var(--line)'};background:var(--panel2);padding:12px">
-       <div style="display:flex;justify-content:space-between;align-items:center">
-         <div><b class="small" style="color:${r.mastery?'var(--gold)':'var(--text)'}">${r.mastery?'👑 ':'🏺 '}${esc(r.title)}</b><div class="muted small">${esc(r.effect.label)}${r.mastery?'':` — ${GAUNTLET_RELIC_MODE_LABEL?GAUNTLET_RELIC_MODE_LABEL[r.mode]:r.mode} · ${esc(r.archetype)}`}</div></div>
-         <button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;border-color:${isCurrent?'var(--sage)':'var(--gold)'};color:${isCurrent?'var(--sage)':'var(--gold)'}" onclick="CL.setGauntletProfile('${r.id}')" ${isCurrent?'disabled':''}>${isCurrent?'✓ Affiché':'Afficher'}</button>
-       </div>
-     </div>`;
-  }).join(''):`<div class="card" style="background:var(--panel2);padding:14px"><span class="mono small muted">Aucune Relique de Survie obtenue pour l\u2019instant — remporte un format Gauntlet au palier d\u2019Ascension maximum (${GAUNTLET_ASC_MAX}) avec un archétype pour en débloquer une.</span></div>`;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Profil du joueur</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
-   <h2 class="disp">Reliques de Survie</h2>
-   <p class="lede small">${owned.length} relique(s) possédée(s). Un seul titre et un seul effet affichés à la fois.</p>
-   ${preview}
-   ${list}
-   <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
-  </div>`;
-}
 const GAUNTLET_RELIC_MODE_LABEL={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
 /* ==== [FIN ANCRE] ==== */
 function scr_intro(){ const c=hasSave('career');
@@ -709,11 +620,10 @@ function scr_legend_detail(){
   const deco=legendDecoStyle(decorations);
   const tc=legendTierColor(f.rank);
   /* ==== [ANCRE: CORRECTIF_COSMETIQUES_EXCLUSIFS_INVISIBLES] — voir ancre
-     jumelle dans state.js : excl_mask_oni/excl_gloves_relic partagent
-     désormais le même cat que les décorations classiques, donc simplement
-     concaténer GAUNTLET_EXCLUSIVE_OFFERS suffit à les faire apparaître ici
-     une fois possédées, sans toucher au reste du panneau. ==== */
-  const ownedDecorations=LEGEND_UNLOCKABLES.concat(GAUNTLET_EXCLUSIVE_OFFERS).filter(i=>i.cat==='Décorations du Panthéon'&&checkLegendUnlock(i.id));
+     jumelle dans state.js : excl_mask_oni/excl_gloves_relic figurent
+     désormais directement dans LEGEND_UNLOCKABLES (l'offre du jour a été
+     retirée), donc ce panneau les voit sans traitement particulier. ==== */
+  const ownedDecorations=LEGEND_UNLOCKABLES.filter(i=>i.cat==='Décorations du Panthéon'&&checkLegendUnlock(i.id));
   /* ==== [FIN ANCRE] ==== */
   const decorationPanel=ownedDecorations.length?`<div class="card mb"><div class="eyebrow mb">Décorations (${decorations.length}/3)</div>
      <div class="muted small mb" style="font-size:10.5px">Un déblocage de compte : la même décoration peut être portée par plusieurs combattants à la fois.</div>

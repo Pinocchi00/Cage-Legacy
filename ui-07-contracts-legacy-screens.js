@@ -715,8 +715,7 @@ function shopArchetypeStats(id){
    (scr_consumable_preview, ui-08) : barre avec ✕, titre, visuel quand il y
    en a un, ce que ça apporte, où le retrouver, puis l'achat. ==== */
 function scr_shop_preview(){
-  const item=LEGEND_UNLOCKABLES.find(i=>i.id===G._shopPreviewId)
-    ||(typeof GAUNTLET_EXCLUSIVE_OFFERS!=='undefined'?GAUNTLET_EXCLUSIVE_OFFERS.find(i=>i.id===G._shopPreviewId):null);
+  const item=LEGEND_UNLOCKABLES.find(i=>i.id===G._shopPreviewId);
   if(!item) return `<div class="scr center intro"><p class="lede">Article introuvable.</p><button class="btn ghost mt" onclick="CL.closeShopPreview()">Fermer</button></div>`;
   const meta=loadMetaStats(), pts=meta.legendPoints||0;
   const owned=checkLegendUnlock(item.id), canAfford=pts>=item.cost;
@@ -753,35 +752,10 @@ function scr_legends(){
   const remaining=LEGEND_UNLOCKABLES.filter(i=>!checkLegendUnlock(i.id));
   const nextUp=remaining.sort((a,b)=>a.cost-b.cost)[0];
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: ROTATION_OFFRES_EXCLUSIVES] — ajout #9 (24 ajouts, 12/08/2026). ==== */
-  const offer=gauntletExclusiveOfferToday(meta);
-  const offerItem=GAUNTLET_EXCLUSIVE_OFFERS.find(i=>i.id===offer.id);
-  const offerOwned=checkLegendUnlock(offer.id);
-  const offerHtml=`<div class="glass" style="border:1px solid var(--blood);background:var(--panel2);padding:10px">
-     <div class="eyebrow mb" style="color:var(--blood);font-size:10px">⚡ OFFRE DU JOUR -${offer.discountPct}%</div>
-     <b style="font-size:13px">${offerItem.name}</b>
-     <div class="shop-preview-hint" style="cursor:pointer" onclick="CL.viewShopPreview('${offer.id}')">▼ Voir l\u2019aperçu</div>
-     ${offerOwned?`<div class="mono small mt" style="color:var(--sage)">✓ Acquise</div>`:
-       `<button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood);padding:6px 8px;width:auto;font-size:12px" onclick="CL.purchaseExclusiveOffer()" ${pts>=offer.cost?'':'disabled'}>${offer.cost} pts <span class="muted" style="text-decoration:line-through">${offerItem.baseCost}</span></button>`}
-   </div>`;
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: LOTERIE_LEGENDES] — ajout #11 (24 ajouts, 12/08/2026). ==== */
-  const lotteryAvail=gauntletLotteryAvailable(meta);
-  const lotteryHtml=`<div class="glass" style="border:1px solid var(--sage);background:var(--panel2);padding:10px">
-     <div class="eyebrow mb" style="color:var(--sage);font-size:10px">🎁 CAISSE MYSTÈRE</div>
-     <div class="muted small">1% archétype exclusif, sinon un déblocage au hasard.</div>
-     ${lotteryAvail?`<button class="btn ghost mt" style="border-color:var(--sage);color:var(--sage);padding:6px 8px;width:auto;font-size:12px" onclick="CL.drawGauntletLottery()" ${pts>=GAUNTLET_LOTTERY_COST?'':'disabled'}>Tenter — ${GAUNTLET_LOTTERY_COST} pts</button>`
-       :`<div class="mono small mt" style="color:var(--muted)">Revenez demain.</div>`}
-   </div>`;
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: CORRECTIF_BOUTIQUE_COMPACTE] — bug remonté : "très très
-     longue" à défiler — offerHtml/lotteryHtml empilaient chacun une carte
-     pleine largeur (~90-110px). Placées côte à côte (.leg-grid, déjà
-     utilisée pour le Panthéon et le menu Gauntlet) : moitié moins de
-     hauteur pour exactement le même contenu, textes secondaires raccourcis
-     pour rester lisibles à mi-largeur. ==== */
-  const offerLotteryHtml=`<div class="leg-grid mb">${offerHtml}${lotteryHtml}</div>`;
-  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: TOUT_EN_BOUTIQUE] — l'offre du jour (rotation quotidienne
+     à prix réduit) et la Caisse Mystère (tirage au sort payant) sont
+     retirées : leur contenu est désormais vendu directement au catalogue,
+     à prix fixe et avec aperçu, comme le reste. ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
      section dédiée, toujours visible dans le catalogue. ==== */
   const pendingId=meta.gauntletPendingConsumable;
@@ -855,7 +829,6 @@ function scr_legends(){
      </div>
    </div>`:`<div class="card mb" style="background:var(--panel2);padding:12px"><span class="mono small" style="color:var(--sage)">Tout est débloqué. Il n\u2019y a plus rien à acheter ici.</span></div>`}
    ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="position:relative;border:1px solid var(--gold);background:linear-gradient(135deg,color-mix(in srgb, var(--gold) 24%, var(--panel2)) 0%,var(--panel2) 68%);padding:12px 14px;box-shadow:0 0 22px -6px color-mix(in srgb, var(--gold) 60%, transparent)"><span class="small" style="color:var(--text)">${esc(m)}</span></div>`; })():''}
-   ${offerLotteryHtml}
    ${consumablesHtml}
 
    ${categories.map(cat=>{
