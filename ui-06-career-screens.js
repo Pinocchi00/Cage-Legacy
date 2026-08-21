@@ -13,6 +13,18 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: PROCHAIN_OBJECTIF] — rendu du fil conducteur calculé dans
+   state.js. Affiché à l'accueil (on sait quoi faire en arrivant) et au menu
+   du Gauntlet (on sait pourquoi relancer juste après une run). ==== */
+function nextObjectiveBlock(){
+  const o=nextObjective(); if(!o) return '';
+  return `<div class="card glass mb" style="border-left:3px solid var(--gold);background:linear-gradient(135deg,color-mix(in srgb, var(--gold) 12%, var(--panel2)) 0%,var(--panel2) 70%);padding:14px">
+    <div class="eyebrow mb" style="color:var(--gold)">🎯 ${o.eyebrow}</div>
+    <b style="font-size:15px">${o.titre}</b>
+    <div class="muted small mt">${o.detail}</div>
+    <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:8px 12px;width:auto;font-size:13px" onclick="${o.cta.onclick}">${o.cta.label}</button>
+  </div>`;
+}
 /** Un bouton de mode de l'accueil : nom, ce que c'est en une phrase sans
  * jargon, et le temps que ça demande.
  * @param {{titre:string,quoi:string,duree:string,onclick:string,couleur:string,badge?:string}} m
@@ -70,6 +82,7 @@ function scr_title(){
      <span class="mono" style="display:block;font-size:12px;margin-top:6px;opacity:.85">Tu as une carrière en cours</span></button>
    <div class="eyebrow mt mb" style="letter-spacing:.2em">ou commencer autre chose</div>`
    :`<div class="eyebrow mb" style="letter-spacing:.2em">CHOISIS PAR OÙ COMMENCER</div>`}
+   ${nextObjectiveBlock()}
    ${modes.map(titleModeButton).join('')}
    <div class="hr" style="margin:22px 0"></div>
    <div class="g2">
@@ -322,6 +335,7 @@ function scr_gauntlet_menu(){
    <div class="eyebrow sage">Mode Arcade</div>
    <h2 class="disp big">GAUNTLET</h2>
    <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
+   ${nextObjectiveBlock()}
    <div class="eyebrow mb mt" style="color:var(--sage);border-bottom:1px solid var(--line);padding-bottom:6px">DÉFI DU JOUR</div>
    ${gauntletDailyGroup()}
    <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">MODES DE JEU CLASSIQUES</div>
