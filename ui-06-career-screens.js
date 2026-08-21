@@ -13,17 +13,17 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
-/* ==== [ANCRE: PROCHAIN_OBJECTIF] — rendu du fil conducteur calculé dans
-   state.js. Affiché au menu du Gauntlet uniquement : la refonte de l'accueil
-   n'a pas convenu et celui-ci est revenu à sa forme d'origine, où cet encart
-   n'a plus sa place. ==== */
+/* ==== [ANCRE: PROCHAIN_OBJECTIF] — retour utilisateur : l'encart prenait
+   trop de place et restait affiché en permanence. Il ne sert plus qu'à
+   l'amorçage — tant que le joueur n'a lancé aucune run — et disparaît de
+   lui-même dès la première terminée (nextObjective() renvoie null au-delà).
+   Format resserré : une ligne de titre, une d'explication, un bouton. ==== */
 function nextObjectiveBlock(){
   const o=nextObjective(); if(!o) return '';
-  return `<div class="card glass mb" style="border-left:3px solid var(--gold);background:linear-gradient(135deg,color-mix(in srgb, var(--gold) 12%, var(--panel2)) 0%,var(--panel2) 70%);padding:14px">
-    <div class="eyebrow mb" style="color:var(--gold)">🎯 ${o.eyebrow}</div>
-    <b style="font-size:15px">${o.titre}</b>
-    <div class="muted small mt">${o.detail}</div>
-    <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:8px 12px;width:auto;font-size:13px" onclick="${o.cta.onclick}">${o.cta.label}</button>
+  return `<div class="card glass mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 12px;text-align:left">
+    <b style="font-size:13px">${o.titre}</b>
+    <div class="muted small" style="font-size:11px;margin-top:2px">${o.detail}</div>
+    <button class="btn ghost" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto;font-size:12px;margin-top:8px" onclick="${o.cta.onclick}">${o.cta.label}</button>
   </div>`;
 }
 /* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — accueil d'origine restauré tel

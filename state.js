@@ -278,71 +278,22 @@ function recordGauntletAscension(meta,mode,asc){
   if(next>cur){ meta.gauntletAscension[mode]=next; return true; }
   return false;
 }
-/* ==== [ANCRE: PROCHAIN_OBJECTIF] — item demandé : "rajouter un élément (…)
-   pour me donner envie de jouer alors que je connais le jeu par cœur, pour
-   que tout le monde ait envie de le relancer, et qu'on ne se sente pas
-   perdu en arrivant". Le même manque servait les trois cas : rien, nulle
-   part, ne dit ce qu'il y a à viser MAINTENANT. Un débutant ouvre le jeu
-   sans savoir quoi faire ; un joueur qui connaît tout finit une run sans
-   raison précise d'en relancer une.
-   Cet objectif n'ajoute aucun système à équilibrer : il LIT l'état réel du
-   compte (records par format, paliers d'Ascension ouverts, points, combats
-   joués) et nomme la prochaine chose atteignable, chiffrée. Il change donc
-   tout seul au fil de la progression, et redevient pertinent à chaque run.
-   Ordre de priorité : d'abord jouer, puis ouvrir un palier, puis battre son
-   record, puis dépenser ses points — du plus structurant au plus accessoire. ==== */
-const GAUNTLET_MODE_LABEL={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
-/** Première lettre en majuscule — les objectifs sont écrits en minuscule
- * pour se glisser dans une phrase, mais servent aussi de titre.
- * @param {string} t @returns {string} */
-function capitalise(t){ return t?t.charAt(0).toUpperCase()+t.slice(1):t; }
-/** Record atteint, formulé en clair pour un format donné.
- * @param {string} mode @param {number|undefined} best @returns {string} */
-function gauntletBestLabelShort(mode,best){
-  if(best===undefined) return 'jamais tenté';
-  if(mode==='boss_run') return `${best} boss`;
-  if(mode==='ladder_100') return `rang #${best}`;
-  return ['','32es','16es','8es','quarts','demies','finale','tournoi remporté'][best]||`palier ${best}`;
-}
-/** Premier palier d'Ascension encore fermé, s'il en reste un.
- * @param {object} meta @returns {?object} */
-function objectifAscension(meta){
-  for(const mode of ['bracket64','boss_run','ladder_100']){
-    const asc=gauntletAscLevel(meta,mode);
-    if(asc>=GAUNTLET_ASC_MAX) continue;
-    const best=gauntletBestGet(meta,mode,asc);
-    return {eyebrow:'Prochain palier',
-      titre:`${capitalise(gauntletAscUnlockGoal(mode))} en ${GAUNTLET_MODE_LABEL[mode]}`,
-      detail:`Ça ouvrira l’Ascension ${asc+1} : adversaires plus forts, mais points multipliés. Ton meilleur résultat à ce palier : ${gauntletBestLabelShort(mode,best)}.`,
-      cta:{label:'Lancer une run',onclick:"CL.go('gauntlet_menu')"}};
-  }
-  return null;
-}
-/** Le déblocage le moins cher encore accessible, s'il en reste.
- * @param {object} meta @returns {?object} */
-function objectifBoutique(meta){
-  const pts=meta.legendPoints||0;
-  const reste=LEGEND_UNLOCKABLES.filter(i=>!checkLegendUnlock(i.id)).sort((a,b)=>a.cost-b.cost);
-  if(!reste.length) return null;
-  const cible=reste[0], manque=Math.max(0,cible.cost-pts);
-  return {eyebrow:manque?'Prochain déblocage':'À dépenser',
-    titre:manque?`Encore ${manque} points pour ${cible.name}`:`${cible.name} est à ta portée`,
-    detail:manque?`Tu as ${pts} points. Chaque run du Gauntlet en rapporte, même perdue.`
-      :`Tu as ${pts} points : de quoi le débloquer tout de suite.`,
-    cta:{label:manque?'Lancer une run':'Aller à la boutique',onclick:manque?"CL.go('gauntlet_menu')":"CL.go('legends')"}};
-}
-/** Ce qu'il y a à viser maintenant, d'après l'état réel du compte.
- * @returns {{eyebrow:string,titre:string,detail:string,cta:{label:string,onclick:string}}} */
+/* ==== [ANCRE: PROCHAIN_OBJECTIF] — un joueur qui ouvre le jeu pour la
+   première fois ne sait pas par où entrer. Un encart d'amorçage le lui dit,
+   au menu du Gauntlet, et disparaît dès qu'il a joué une run : passé ce
+   cap, il sait où il va et l'écran n'a plus à le lui répéter. La version
+   précédente restait affichée en permanence et changeait de cible au fil de
+   la progression — jugée trop encombrante, ramenée à ce seul rôle. ==== */
+/** L'amorçage, et lui seul : ce qu'il faut faire quand on n'a encore rien
+ * joué. Une fois la première run terminée, il n'y a plus rien à afficher —
+ * le joueur sait où il va, l'encart s'efface.
+ * @returns {?{titre:string,detail:string,cta:{label:string,onclick:string}}} */
 function nextObjective(){
   const meta=loadMetaStats();
-  if(!(meta.totalFights>0)) return {eyebrow:'Pour commencer',
-    titre:'Lance une première run de Gauntlet',
-    detail:'Un combattant tiré au sort, des adversaires à enchaîner : la façon la plus rapide de voir à quoi ressemble le jeu. Rien à gérer, rien à perdre.',
+  if(meta.totalFights>0) return null;
+  return {titre:'Lance une première run de Gauntlet',
+    detail:'Un combattant tiré au sort, des adversaires à enchaîner : la façon la plus rapide de voir à quoi ressemble le jeu.',
     cta:{label:'Commencer',onclick:"CL.go('gauntlet_menu')"}};
-  return objectifAscension(meta)||objectifBoutique(meta)||{eyebrow:'Objectif',
-    titre:'Bats ton propre record',
-    detail:'Tout est débloqué : il te reste à aller plus loin que la dernière fois, à un palier d’Ascension plus élevé.',
-    cta:{label:'Lancer une run',onclick:"CL.go('gauntlet_menu')"}};
 }
 /* ==== [FIN ANCRE] ==== */
 function recordGauntletBest(meta,mode,value,asc){
