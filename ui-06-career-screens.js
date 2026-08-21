@@ -13,39 +13,69 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/** Un bouton de mode de l'accueil : nom, ce que c'est en une phrase sans
+ * jargon, et le temps que ça demande.
+ * @param {{titre:string,quoi:string,duree:string,onclick:string,couleur:string,badge?:string}} m
+ * @returns {string} HTML */
+function titleModeButton(m){
+  return `<button class="btn" style="font-size:18px;padding:18px;margin-top:10px;border-color:${m.couleur};color:${m.couleur};text-align:left" onclick="${m.onclick}">
+    ${m.titre}${m.badge?` <span class="mono" style="font-size:10px;background:${m.couleur};color:var(--bg);padding:2px 6px;vertical-align:middle">${m.badge}</span>`:''}
+    <span class="mono muted" style="display:block;font-size:12px;margin-top:6px;white-space:normal;line-height:1.4">${m.quoi}</span>
+    <span class="mono" style="display:block;font-size:11px;margin-top:4px;color:${m.couleur};opacity:.8">${m.duree}</span>
+  </button>`;
+}
+/* ==== [ANCRE: ACCUEIL_HIERARCHIE] — item demandé : "chaque menu ne se
+   valent pas dans la mise en avant ou la lisibilité (…) il faut que les
+   gens qui tombent sur le jeu aient envie de lancer directement". Les trois
+   modes étaient présentés comme équivalents, décrits en jargon
+   ("Destiny-like", "arcade"), et le plus court — le seul qu'on puisse
+   essayer sans y engager une soirée — arrivait en dernier. Trois
+   changements : (1) reprendre une partie en cours passe tout en haut, en
+   bouton plein, c'est ce que veut faire quelqu'un qui revient ; (2) les
+   modes sont classés par engagement croissant (leur ancienne numérotation
+   1/2/3 est retirée : elle se lisait à l'envers dans ce nouvel ordre et
+   n'apportait rien), chacun avec ce qu'il est en
+   une phrase et le temps qu'il demande, le plus court marqué comme point
+   d'entrée ; (3) boutique et succès, qui ne lancent aucune partie, passent
+   en bas sur une seule ligne discrète. L'ordre historique des modes est
+   conservé dans leur numérotation. ==== */
 function scr_title(){
+  const reprise=hasSave('faith')||hasSave('career');
+  const modes=[
+    {titre:'GAUNTLET',couleur:'var(--sage)',badge:'POUR DÉCOUVRIR',
+     quoi:'Une session courte : un combattant tiré au sort, des adversaires à enchaîner, tout se joue d’un coup.',
+     duree:'≈ 10 à 15 minutes · rien à gérer',onclick:"CL.go('gauntlet_menu')"},
+    {titre:'CARRIÈRE COMPLÈTE',couleur:'var(--text)',
+     quoi:'Une carrière entière à mener : contrats, argent, camps d’entraînement et héritage laissé au Panthéon.',
+     duree:'≈ 1 heure · gestion complète',onclick:"CL.go('intro')"},
+    {titre:'MMA FAITH',couleur:'var(--blood)',
+     quoi:'La campagne longue : la vie du combattant autant que ses combats, des débuts jusqu’à la retraite.',
+     duree:'plusieurs heures · le mode le plus dense',onclick:'CL.startFaith()'}
+  ];
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div style="text-align:center;margin-bottom:48px">
+   <div style="text-align:center;margin-bottom:28px">
      <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
-     <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
+     <div class="mono muted" style="margin-top:16px;font-size:13px;letter-spacing:.14em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">TU DIRIGES LA CARRIÈRE D’UN COMBATTANT</div>
+     <div class="muted small mt">Chaque combat est simulé coup par coup. Aucune décision ne se rejoue.</div>
    </div>
-   ${(()=>{ /* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — item demandé : les
-        notifications de partie (série rachetée, achat en boutique, points
-        gagnés…) remontaient jusqu'à l'écran d'accueil, alors qu'elles
-        concernent l'écran d'où vient l'action et n'ont aucun sens pour
-        quelqu'un qui arrive sur le jeu. G.lastMsg est donc consommé ici
-        SANS être affiché (sinon il ressortirait plus tard, hors contexte,
-        sur le premier écran qui le lit). Seul G.bootMsg — posé par main.js
-        quand un lien de légende partagé est corrompu — reste affiché : il
-        est produit AU démarrage, c'est le seul message dont l'accueil est
-        vraiment le bon endroit. ==== */
+   ${(()=>{ /* ANCRE TITRE_SANS_NOTIFICATIONS — cf. commit précédent : les
+        notifications de partie sont consommées ici sans être affichées ;
+        seule l'erreur de lien partagé, posée au démarrage, s'affiche. */
       G.lastMsg=null;
       if(!G.bootMsg) return '';
       const m=G.bootMsg; G.bootMsg=null;
       return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
     })()}
-   <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
-     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
-   ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
-   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l\u2019argent, les camps et l\u2019héritage</span></button>
-   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Tournois et défis d\u2019ascension arcade</span></button>
-   <div class="hr" style="margin:24px 0"></div>
-   <button class="btn ghost" style="font-size:16px;padding:16px;border:1px dashed var(--gold);background:var(--panel2);color:var(--gold)" onclick="CL.go('legends')">BOUTIQUE : SALLE DES LÉGENDES
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
-   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>
+   ${reprise?`<button class="btn primary" style="font-size:20px;padding:22px" onclick="CL.cont()">▶ REPRENDRE MA PARTIE
+     <span class="mono" style="display:block;font-size:12px;margin-top:6px;opacity:.85">Tu as une carrière en cours</span></button>
+   <div class="eyebrow mt mb" style="letter-spacing:.2em">ou commencer autre chose</div>`
+   :`<div class="eyebrow mb" style="letter-spacing:.2em">CHOISIS PAR OÙ COMMENCER</div>`}
+   ${modes.map(titleModeButton).join('')}
+   <div class="hr" style="margin:22px 0"></div>
+   <div class="g2">
+     <button class="btn ghost" style="font-size:14px;padding:12px" onclick="CL.go('legends')">🛒 Boutique</button>
+     <button class="btn ghost" style="font-size:14px;padding:12px" onclick="CL.go('ach')">🏆 Succès</button>
+   </div>
    </div>`;
 }
 /* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
