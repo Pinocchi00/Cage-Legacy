@@ -27,11 +27,20 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      (papier/encre au lieu de cuir/or). Le basculement se fait par une classe
      sur <body> plutôt que par des styles en ligne dans chaque écran : un seul
      point de vérité, aucun écran Faith à retoucher pour changer la palette.
-     Le test porte sur le NOM de l'écran seul, pas sur l'existence de G.faith :
-     l'écran de création (faith_draft) s'affiche avant que G.faith existe, et
-     c'est justement le premier écran du mode — il doit être skinné lui
-     aussi. Aucun écran hors Faith ne commence par "faith". ==== */
-  document.body.classList.toggle('faith-skin', String((G&&G.screen)||'').indexOf('faith')===0);
+     Le test initial (préfixe "faith" sur le nom d'écran) laissait fuir le
+     skin sombre/or sur les écrans transverses (select, plan, result, profile,
+     hof, retire) atteints DEPUIS une carrière Faith mais dont le nom ne
+     commence pas par "faith" — ~40% du parcours affichait la mauvaise
+     palette. Le test porte désormais sur l'appartenance au mode
+     (G.f.gameMode==='faith'), avec le préfixe d'écran gardé en repli pour
+     faith_draft (s'affiche avant que G.faith/G.f existent). Exception
+     délibérée : l'écran "arena" (le combat lui-même) reste toujours en
+     cuir/or — papier=vie, noir=cage est un seuil narratif volontaire, pas un
+     oubli. ==== */
+  { const _sName=String((G&&G.screen)||'');
+    const _enFaith=(_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith'))
+      && _sName!=='arena';
+    document.body.classList.toggle('faith-skin', _enFaith); }
   /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
