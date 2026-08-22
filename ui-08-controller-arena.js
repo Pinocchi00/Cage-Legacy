@@ -1095,9 +1095,14 @@ const CL={
     if(c.cost && (G.f.earnings||0)<c.cost){ G.lastMsg="Fonds insuffisants ("+c.cost+"k$)."; render(); return; }
     if(c.cost) G.f.earnings-=c.cost;
     if(c.reward) G.f.earnings=(G.f.earnings||0)+c.reward;
-    /* c.d est facultatif depuis les offres de privilège : un choix peut n'avoir
-       aucun delta propre et ne faire que déclencher un achat. */
-    applyDeltas(G.f,c.d||[]);
+    /* ==== [ANCRE: FAITH_RISQUE_DECLARE] — résolution du pari. Un choix sans
+       champ `risk` reste strictement déterministe : le pool existant continue
+       de fonctionner sans modification. c.d est par ailleurs facultatif
+       depuis les offres de privilège — un choix peut n'avoir aucun delta
+       propre et ne faire que déclencher un achat. ==== */
+    const failed=c.risk?(rnd()<c.risk):false;
+    applyDeltas(G.f,(failed?c.bad:c.d)||[]);
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — un choix peut désormais déclencher
        un privilège. buyFaithPerk() gère seule l'argent, le tirage et ses
        conséquences ; elle peut même clore l'année sur une suspension, auquel
@@ -1135,9 +1140,11 @@ const CL={
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
     G.faith.currentEvent=null;
-    G.lastMsg="Événement résolu : "+ev.title;
+    /* Le pari perdu prime sur l'accusé de réception : c'est la seule
+       information que le joueur doit emporter de cet écran. */
+    G.lastMsg=failed?"Ça n\u2019a pas tourné comme prévu.":("Événement résolu : "+ev.title);
     if(!G.faith.yearLog) G.faith.yearLog=[];
-    G.faith.yearLog.push({title:ev.title,choice:c.label});
+    G.faith.yearLog.push({title:ev.title,choice:c.label,outcome:failed?'raté':'réussi'});
     // Moteur d'émergence : un choix taggé traitTag renforce une tendance cachée ;
     // au 3e choix dans la même direction, elle se cristallise en trait permanent.
     if(c.traitTag){

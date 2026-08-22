@@ -239,7 +239,7 @@ const FAITH_LIFE_EVENTS=[
   {id:'evt_kaiju',title:'Soirée grand spectacle',text:'Pour décompresser avec votre cercle proche, vous organisez une soirée cinéma.',
     choices:[{label:'Profiter de la soirée',d:[['morale',12],['composure',3],['discipline',-4]]}]},
   {id:'evt_sparring_heavy',title:'Sparring lourd imprévu',text:'Un vétéran de la salle vous propose un sparring très appuyé, sans casque.',
-    choices:[{label:'Accepter la guerre',d:[['chin',3],['durability',3],['form',-18],['morale',5]]},
+    choices:[{label:'Accepter la guerre',d:[['chin',3],['durability',3],['form',-18],['morale',5]],risk:0.35,bad:[['form',-32],['durability',-4],['morale',-10]]},
              {label:'Refuser, travail technique',d:[['footSpeed',3],['jab',2],['morale',-5]]}]},
   {id:'evt_diet_temptation',title:'Tentation de triche',text:'En plein milieu de votre perte de poids, la faim vous tenaille l\u2019estomac.',
     choices:[{label:'Craquer pour un repas lourd',d:[['form',15],['morale',10],['discipline',-15]]},
@@ -285,22 +285,22 @@ const FAITH_LIFE_EVENTS=[
              {label:'Parier sur ses fondamentaux bruts',d:[['confidence',10],['adaptability',-6],['composure',4]]}]},
   {id:'evt_chin_check',req:f=>f.attrs.chin<50,title:'Verre pilé',text:'Pendant un sparring léger, un jab anodin vous fait vaciller. Votre menton est de plus en plus fragile et votre coach propose de changer toute l\u2019approche défensive.',
     choices:[{label:'Passer à un style purement évasif',d:[['footSpeed',8],['fightIQ',4],['power',-6],['aggression',-10]]},
-             {label:'Refuser de reculer (risque de KO accru)',d:[['heart',8],['durability',-5],['composure',-5]],traitTag:'rebel'}]},
+             {label:'Refuser de reculer (risque de KO accru)',d:[['heart',8],['durability',-5],['composure',-5]],traitTag:'rebel',risk:0.4,bad:[['chin',-6],['durability',-9],['morale',-12]]}]},
   {id:'evt_bjj_nerd',req:f=>f.style==='bjj'||f.attrs.submission>80,title:'Obsession articulaire',text:'Vous avez passé les 72 dernières heures à visionner des tutoriels de clés de cheville lituaniennes. Vous voyez des angles de soumission même quand vous pliez votre linge.',
     choices:[{label:'Intégrer ce savoir au gameplan',d:[['submission',6],['fightIQ',4],['cardio',-5]]},
              {label:'Forcer l\u2019application en sparring (risque de blesser un ami)',d:[['killer',8],['submission',2],['morale',-12]]}]},
   {id:'evt_podcast_disaster',req:null,title:'Le micro ouvert',text:'Vous êtes invité dans un podcast populaire de 4 heures. Vers la 3ème heure, fatigué, vous lâchez une théorie du complot absurde sur la forme de la Terre.',
-    choices:[{label:'Assumer et embrasser le rôle de vilain',d:[['composure',-8],['aggression',6],['morale',15]],traitTag:'showman'},
+    choices:[{label:'Assumer et embrasser le rôle de vilain',d:[['composure',-8],['aggression',6],['morale',15]],traitTag:'showman',risk:0.35,bad:[['composure',-14],['morale',-14],['focus',-8]]},
              {label:'Engager une agence de gestion de crise (10k$)',cost:10,d:[['discipline',5],['focus',5],['morale',-10]]}]},
   {id:'evt_reality_tv',req:null,title:'Romance cathodique',text:'Vous commencez à fréquenter une star de télé-réalité. Les paparazzis campent devant votre salle d\u2019entraînement, brisant la concentration de tout le camp.',
     choices:[{label:'Mettre fin à la relation pour le sport',d:[['focus',10],['discipline',8],['morale',-20]],traitTag:'ascetic'},
              {label:'Gérer les caméras et la relation',d:[['composure',-10],['form',-15],['morale',15]],traitTag:'showman'}]},
   {id:'evt_bar_fight',req:null,title:'Désamorcer la bombe',text:'Dans un bar, un type éméché qui a fait deux mois de Krav Maga en 2014 décide que vous êtes l\u2019adversaire idéal pour prouver sa virilité à ses amis.',
     choices:[{label:'Lui payer un verre et quitter les lieux',d:[['composure',8],['fightIQ',4],['aggression',-5]]},
-             {label:'Le balayer sèchement pour l\u2019exemple',d:[['aggression',8],['discipline',-15],['focus',-5]]}]},
+             {label:'Le balayer sèchement pour l\u2019exemple',d:[['aggression',8],['discipline',-15],['focus',-5]],risk:0.3,bad:[['discipline',-22],['composure',-10],['morale',-12]]}]},
   {id:'evt_guru_supplement',req:null,title:'La poudre magique',text:'Un préparateur physique douteux vous propose un complément alimentaire non-étiqueté qui "révolutionnera votre testostérone" mais sent fortement l\u2019ammoniaque.',
     choices:[{label:'Refuser et s\u2019en tenir au poulet-brocolis',d:[['discipline',6],['durability',3],['recovery',-4]]},
-             {label:'Tester le produit (risque absolu)',d:[['explosiveness',8],['power',5],['cardio',-15],['form',-10]]}]},
+             {label:'Tester le produit (risque absolu)',d:[['explosiveness',8],['power',5],['cardio',-15],['form',-10]],risk:0.45,bad:[['cardio',-22],['form',-20],['discipline',-6]]}]},
   // --- Événements verrouillés par un trait émergent (cristallisé après 3 choix dans la même direction) ---
   {id:'evt_trait_rebel_sponsor',req:f=>f.faithTraits&&f.faithTraits.includes('Tête Brûlée'),title:'Conséquence : marque toxique',text:'Votre réputation de Tête Brûlée fait fuir les annonceurs traditionnels, mais attire une marque de boisson énergisante ultra-agressive qui adore votre image.',
     choices:[{label:'Signer le contrat controversé',reward:25,d:[['morale',15],['focus',-5]]},
@@ -362,7 +362,7 @@ const FAITH_LIFE_EVENTS=[
     choices:[{label:'Analyser ses propres erreurs',d:[['fightIQ',5],['composure',2],['focus',-3]]},
              {label:'Étudier le style du prochain adversaire',d:[['adaptability',5],['fightIQ',2],['focus',-3]]}]},
   {id:'evt_altitude_camp',title:'Stage en altitude',text:'Deux semaines à 2000 mètres. Chaque respiration est un combat en soi.',
-    choices:[{label:'S\u2019y donner à fond',d:[['cardio',6],['heart',3],['form',-15]]},
+    choices:[{label:'S\u2019y donner à fond',d:[['cardio',6],['heart',3],['form',-15]],risk:0.3,bad:[['form',-28],['recovery',-6]]},
              {label:'Doser l\u2019effort pour ne pas se griller',d:[['cardio',3],['recovery',2],['form',-6]]}]},
   {id:'evt_flexibility_yoga',title:'Séance de mobilité',text:'Le staff insiste : un corps plus mobile encaisse mieux et attaque sous des angles impossibles.',
     choices:[{label:'S\u2019investir sérieusement',d:[['flexibility',5],['recovery',2],['form',-3]]},
@@ -390,7 +390,7 @@ const FAITH_LIFE_EVENTS=[
              {label:'Envisager sérieusement le changement',d:[['adaptability',3],['confidence',3],['morale',-4]]}]},
   {id:'evt_injury_scare',title:'Alerte à l\u2019entraînement',text:'Une torsion du genou pendant un exercice de niveau fait craindre le pire un instant. Finalement rien de cassé, mais l\u2019inquiétude reste.',
     choices:[{label:'Reprendre prudemment',d:[['durability',2],['discipline',2],['form',-8]]},
-             {label:'Reprendre comme si de rien n\u2019était',d:[['confidence',4],['durability',-3],['form',-4]]}]},
+             {label:'Reprendre comme si de rien n\u2019était',d:[['confidence',4],['durability',-3],['form',-4]],risk:0.35,bad:[['durability',-9],['form',-22],['recovery',-5]]}]},
   {id:'evt_public_workout',title:'Entraînement public',text:'L\u2019organisation demande une séance ouverte aux médias avant le prochain événement.',
     choices:[{label:'Montrer un vrai travail technique',d:[['fightIQ',3],['confidence',2],['focus',-3]]},
              {label:'Mettre en scène de la puissance brute',d:[['power',3],['aggression',3],['focus',-3]]}]},
@@ -402,7 +402,7 @@ const FAITH_LIFE_EVENTS=[
              {label:'Reproduire sa routine habituelle à tout prix',d:[['discipline',4],['adaptability',-2],['form',-4]]}]},
   {id:'evt_style_switch_temptation',title:'La tentation du style adverse',text:'En observant un adversaire dominer avec un style qui n\u2019est pas le vôtre, l\u2019envie de tout changer vous traverse.',
     choices:[{label:'Résister et approfondir son propre style',d:[['discipline',4],['confidence',3]]},
-             {label:'Emprunter un peu de cette approche',d:[['adaptability',5],['fightIQ',2],['confidence',-2]]}]},
+             {label:'Emprunter un peu de cette approche',d:[['adaptability',5],['fightIQ',2],['confidence',-2]],risk:0.35,bad:[['confidence',-10],['focus',-8],['discipline',-5]]}]},
   {id:'evt_fan_letter',title:'Une lettre de fan',text:'Un jeune combattant amateur vous écrit une longue lettre expliquant à quel point votre parcours l\u2019a inspiré.',
     choices:[{label:'Répondre personnellement',d:[['morale',10],['composure',2]]},
              {label:'Passer à autre chose, trop de sollicitations',d:[['focus',3]]}]},
@@ -417,10 +417,10 @@ const FAITH_LIFE_EVENTS=[
              {label:'Continuer à s\u2019entraîner en club',d:[['composure',2]]}]},
   {id:'evt_weight_cut_horror',req:f=>f.age>28,title:'Une coupe de poids terrible',text:'La déshydratation de cette semaine a été la pire de votre carrière. Votre corps a mis des jours à s\u2019en remettre.',
     choices:[{label:'Revoir sérieusement sa méthode de coupe',d:[['discipline',4],['durability',3],['form',-10]]},
-             {label:'Serrer les dents et continuer pareil',d:[['heart',5],['durability',-4],['form',-6]]}]},
+             {label:'Serrer les dents et continuer pareil',d:[['heart',5],['durability',-4],['form',-6]],risk:0.4,bad:[['durability',-9],['form',-20],['cardio',-6]]}]},
   // --- Lot 2 (Gemini, vérifié) ---
   {id:'evt_ice_bath_extreme',title:'Bain de glace prolongé',text:'Votre préparateur vous met au défi de rester cinq minutes de plus dans l\u2019eau à 2°C pour tester vos limites mentales.',
-    choices:[{label:'Serrer les dents et rester',d:[['recovery',5],['heart',4],['form',-8]]},
+    choices:[{label:'Serrer les dents et rester',d:[['recovery',5],['heart',4],['form',-8]],risk:0.3,bad:[['form',-18],['recovery',-5],['morale',-8]]},
              {label:'Sortir, la récupération standard suffit',d:[['form',5],['discipline',-4]]}]},
   {id:'evt_prodigy_sparring',req:f=>f.org>0,title:'Le petit nouveau',text:'Un jeune prodige de 19 ans fraîchement débarqué à la salle vous met en réelle difficulté lors d\u2019un sparring. Votre ego en prend un coup.',
     choices:[{label:'Ranger son ego et analyser son jeu',d:[['fightIQ',5],['focus',4],['morale',-8]]},
@@ -448,7 +448,7 @@ const FAITH_LIFE_EVENTS=[
              {label:'Refuser pour rester 100% focus sur le sport',d:[['discipline',8],['focus',6],['morale',-10]]}]},
   {id:'evt_overtraining',title:'La ligne rouge',text:'Votre corps vous supplie d\u2019arrêter. Vos temps de réaction s\u2019effondrent et votre système nerveux est complètement grillé par le surentraînement.',
     choices:[{label:'Prendre trois jours de repos complet',d:[['recovery',6],['form',15],['discipline',-6]]},
-             {label:'Pousser la machine jusqu\u2019à la rupture',d:[['heart',8],['cardio',4],['form',-25]]}]},
+             {label:'Pousser la machine jusqu\u2019à la rupture',d:[['heart',8],['cardio',4],['form',-25]],risk:0.45,bad:[['form',-38],['recovery',-8],['morale',-12]]}]},
   {id:'evt_forgotten_belt',req:f=>!!f.champion,title:'Ceinture oubliée',text:'Vous avez oublié votre ceinture de champion dans le coffre d\u2019un VTC après une soirée de célébration. Le chauffeur exige une récompense pour la rendre.',
     choices:[{label:'Payer la rançon discrètement (5k$)',cost:5,d:[['focus',5],['discipline',3],['morale',-5]]},
              {label:'Le menacer publiquement sur les réseaux',d:[['aggression',6],['confidence',4],['composure',-10]]}]},
@@ -456,10 +456,10 @@ const FAITH_LIFE_EVENTS=[
     choices:[{label:'Financer le voyage martial (15k$)',cost:15,d:[['clinchStr',6],['kick',5],['durability',4],['form',-12]]},
              {label:'Rester s\u2019entraîner dans son confort habituel',d:[['discipline',4],['morale',-6]]}]},
   {id:'evt_hot_yoga',title:'Yoga infernal',text:'Un coéquipier vous traîne dans un cours de yoga Bikram à 40°C. Vos muscles raides d\u2019artiste martial crient à l\u2019agonie dès les premières postures.',
-    choices:[{label:'Souffrir en silence jusqu\u2019à la fin de la séance',d:[['flexibility',8],['recovery',4],['power',-4]]},
+    choices:[{label:'Souffrir en silence jusqu\u2019à la fin de la séance',d:[['flexibility',8],['recovery',4],['power',-4]],risk:0.25,bad:[['form',-14],['power',-6]]},
              {label:'Quitter la salle en plein milieu, trempé de sueur',d:[['power',3],['flexibility',-5],['morale',-2]]}]},
   {id:'evt_twitter_beef',title:'Guerre des claviers',text:'Un combattant que vous n\u2019avez même pas provoqué lance une attaque cinglante sur votre style de combat en ligne. Vos notifications explosent.',
-    choices:[{label:'Rentrer dans le clash virtuel et faire le buzz',d:[['aggression',6],['confidence',5],['focus',-10]]},
+    choices:[{label:'Rentrer dans le clash virtuel et faire le buzz',d:[['aggression',6],['confidence',5],['focus',-10]],risk:0.35,bad:[['focus',-20],['composure',-9],['morale',-12]]},
              {label:'Désinstaller l\u2019application et l\u2019ignorer',d:[['composure',8],['discipline',5],['morale',-8]]}]},
   {id:'evt_boxing_gloves_16',req:f=>G.currentEra&&G.currentEra.id==='era_boxing',title:'Le test des 16oz',text:'Dans cette ère dominée par la boxe, d\u2019anciens pros viennent tourner à la salle avec des gants de 16oz pour vous donner une leçon d\u2019anglaise.',
     choices:[{label:'Mettre les gros gants et boxer avec eux',d:[['handSpeed',6],['cross',4],['kick',-5],['form',-8]]},
@@ -529,23 +529,41 @@ function formatEventDelta(d){
     return `<span class="tag2" style="border-color:${shown>=0?'var(--win)':'var(--loss)'};color:${shown>=0?'var(--win)':'var(--loss)'}">${shown>=0?'+':''}${shown} ${lbl}</span>`;
   }).join('');
 }
+/* ==== [ANCRE: FAITH_RISQUE_DECLARE] — un choix Faith n'est plus un delta
+   certain mais un pari lisible. On affiche la mise ET la probabilité de
+   rater, jamais le résultat ni l'espérance : le joueur doit pouvoir
+   arbitrer, pas calculer une ligne optimale. Jouer prudent doit donner des
+   carrières correctes et plates, jouer risqué une variance élevée au plafond
+   très supérieur — sans qu'aucune ligne ne domine.
+   Les événements sans champ `risk` restent parfaitement déterministes : la
+   compatibilité avec le pool existant est totale, et il FAUT que la moitié
+   le reste, sinon le contraste disparaît et le risque cesse de se voir. ==== */
+function formatRiskBadge(c){
+  if(!c.risk) return `<span class="tag2" style="border-color:var(--line);color:var(--muted)">Sûr</span>`;
+  return `<span class="tag2" style="border-color:var(--f-red-hi);color:var(--gold)">${Math.round(c.risk*100)}% de rater</span>`;
+}
 function scr_faith_event(){
   const ev=G.faith.currentEvent;
   if(!ev) return `<div class="scr center intro"><p class="lede">Aucun événement en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
   const f=G.f;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Événement de vie</span></div>
-   <h2 class="disp" style="font-size:24px">${esc(ev.title)}</h2>
-   <p class="lede small mt">${esc(ev.text)}</p>
-   <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="eyebrow">${(G.faith.step||1)>=3?'Le monde':'La salle'}</div>
+   <h2 class="hero-name" style="font-size:28px;line-height:1.1">${esc(ev.title)}</h2>
+   <p class="lede small">${esc(ev.text)}</p>
+   <div style="display:flex;flex-direction:column;gap:10px">
      ${ev.choices.map((c,i)=>{
        const locked=c.cost&&(f.earnings||0)<c.cost;
-       return `<div class="glass${locked?'':' opp'}" style="padding:14px;text-align:left;opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
-         <b>${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}${c.reward?`<span class="small" style="color:var(--win)"> (+${c.reward}k$)</span>`:''}
-         <div class="tagrow" style="margin-top:8px">${formatEventDelta(c.d)}</div>
+       /* Un choix risqué porte UN seul marqueur — un filet à gauche. Trois
+          signaux redondants annuleraient le gain de lisibilité. */
+       const risque=!!c.risk;
+       return `<div class="glass${locked?'':' opp'}" style="padding:16px;min-height:72px;text-align:left;${risque?'border-left:3px solid var(--f-red-hi);':''}opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
+         <b style="font-size:15px">${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}${c.reward?`<span class="small" style="color:var(--win)"> (+${c.reward}k$)</span>`:''}
+         <div class="tagrow" style="margin-top:10px">${formatRiskBadge(c)}${formatEventDelta(c.d)}</div>
        </div>`;
      }).join('')}
    </div></div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_SCORE_LEGENDE] — scalaire de clôture du mode Faith.
    Sans un nombre unique en sortie, une carrière narrative n'a aucune raison
    d'être recommencée : c'est lui qui rend une partie comparable à la
