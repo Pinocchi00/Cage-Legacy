@@ -230,10 +230,19 @@ function trainingOptions(f){ const gen=TRAIN.filter(x=>x.t.includes('all'));
    même sans qu'aucun combat n'ait eu lieu entretemps — les 3 propositions
    déjà affichées disparaissaient sans raison. On ne régénère plus que si
    aucune offre n'existe, ou si le total de combats du fighter a changé
-   depuis la dernière génération (un combat a bien eu lieu). ==== */
+   depuis la dernière génération (un combat a bien eu lieu).
+   Extrait en fonction séparée (ensureOpponentsCached) pour que
+   scr_faith_hub() (ui-04) puisse afficher un aperçu du prochain adversaire
+   AVANT que le joueur clique sur "ENTRER DANS LA CAGE" — sans dupliquer
+   cette condition de cache à deux endroits, ce qui aurait risqué de
+   regénérer une liste différente entre l'aperçu et l'écran réel. ==== */
+function ensureOpponentsCached(f){
+  const curFights=(f.W||0)+(f.L||0)+(f.D||0);
+  if(!G.opps || G.oppsFightCount!==curFights){ G.opps=genOpponents(f); G.oppsFightCount=curFights; }
+  return G.opps;
+}
 function startFightSelect(){ if(G.f.injury) return;
-  const curFights=(G.f.W||0)+(G.f.L||0)+(G.f.D||0);
-  if(!G.opps || G.oppsFightCount!==curFights){ G.opps=genOpponents(G.f); G.oppsFightCount=curFights; }
+  ensureOpponentsCached(G.f);
   G.screen='select'; save(); render(); }
 /* ==== [FIN ANCRE] ==== */
 function chooseOpponent(i){ G.sel=G.opps[i]; G.train=trainingOptions(G.f); generateSponsorObjective(G.f);

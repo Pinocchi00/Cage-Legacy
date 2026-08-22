@@ -138,13 +138,41 @@ function faithSeasonBar(step){
     <div class="eyebrow" style="font-size:11px;margin-top:8px">${cur.saison} — ${cur.lieu}</div>
   </div>`;
 }
-function faithGauges(f){
-  const g=(lbl,val)=>`<div style="flex:1">
-    <span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between;font-size:11px"><span>${lbl}</span><b class="mono" style="font-size:11px">${d20(val)}</b></span>
-    <div class="gauge2" style="background:var(--line);height:6px;overflow:hidden">
-      <span style="display:block;height:100%;width:${clamp(val,0,100)}%;background:var(--text)"></span></div></div>`;
-  return `<div style="display:flex;gap:16px">${g('FORME',f.form)}${g('MORAL',f.morale)}</div>`;
+/* ==== [ANCRE: FAITH_HUB_GRILLE] — le bandeau du haut n'affichait jamais le
+   même nombre de blocs (2 en flex, 3 quand un contrat était actif), et les
+   jauges FORME/MORAL vivaient dans un second bloc séparé plus bas : la
+   composition entière du hub changeait de forme d'une saison à l'autre.
+   Miller/Cowan (limite de la mémoire de travail, ~4±1 éléments tenus à la
+   fois) plaide pour un nombre de blocs FIXE et prévisible plutôt que
+   variable — la grille 2×3 ci-dessous ne bouge jamais, quel que soit l'état
+   du contrat. Le contrat, qui n'est pas un état du combattant mais une
+   relation contractuelle, rejoint une ligne de contexte sous son nom
+   plutôt que de continuer à faire varier le nombre de cases. ==== */
+function faithHubNumCell(lbl,val,color){
+  return `<div class="glass" style="text-align:center;padding:8px 0;min-height:auto">
+    <b class="mono" style="font-size:14px;${color?`color:${color}`:''}">${val}</b>
+    <div class="stat-lbl" style="margin-top:2px;font-size:9px">${lbl}</div></div>`;
 }
+function faithHubGaugeCell(lbl,val){
+  return `<div class="glass" style="text-align:center;padding:8px 6px;min-height:auto">
+    <b class="mono" style="font-size:13px">${d20(val)}</b>
+    <div class="gauge2" style="background:var(--line);height:4px;margin-top:5px;overflow:hidden">
+      <span style="display:block;height:100%;width:${clamp(val,0,100)}%;background:var(--text)"></span></div>
+    <div class="stat-lbl" style="margin-top:4px;font-size:9px">${lbl}</div></div>`;
+}
+function faithHubGrid(f){
+  const fightsTot=(f.W||0)+(f.L||0)+(f.D||0);
+  const rank=f.champion?'CHAMPION':(fightsTot===0?'NC':'#'+divRank(f));
+  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    ${faithHubNumCell('ÂGE',f.age)}
+    ${faithHubNumCell('OVR',f.overall)}
+    ${faithHubNumCell('RANG',rank,f.champion?'var(--gold)':null)}
+    ${faithHubNumCell('GAINS',formatArgent(f.earnings))}
+    ${faithHubGaugeCell('FORME',f.form)}
+    ${faithHubGaugeCell('MORAL',f.morale)}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_PROTEGE_VISIBLE] — le Syndrome de Frankenstein est le
    meilleur système du mode, et il était invisible jusqu'à son déclenchement :
    le hub affichait « OVR 47 » sans dire que c'était 44 l'an dernier, ni que
@@ -170,14 +198,6 @@ function faithProtegeLine(p,f){
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_hub(){
   const f=G.f; const step=G.faith.step||1;
-  const topBar=`<div style="display:flex;gap:8px">
-    <div class="glass" style="flex:1.2;text-align:center;padding:8px 0;min-height:auto">
-      <b style="font-size:16px;font-family:'Oswald'">${formatArgent(f.earnings)}</b></div>
-    <div class="glass" style="flex:1;text-align:center;padding:8px 0;min-height:auto">
-      <b class="mono" style="font-size:14px;color:var(--text)">OVR ${f.overall}</b></div>
-    ${(f.org>0 && f.contract)?`<div class="glass" style="flex:1;text-align:center;padding:8px 0;min-height:auto">
-      <b class="mono" style="font-size:14px;color:var(--gold)">${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''}</b></div>`:''}
-  </div>`;
   let actionsHtml='';
   if(step===1 || step===3){
     const quoi=step===1?'Ce qui arrive à la salle':'Ce qui arrive dehors';
@@ -199,19 +219,40 @@ function scr_faith_hub(){
         </div>`).join('')}
     </div>`;
   } else {
-    actionsHtml=`<p class="lede small">Tout est en place.</p>
+    /* ==== [ANCRE: FAITH_HUB_ADVERSAIRE] — le temps 4 était le seul des cinq
+       à n'offrir aucune information avant l'action ("Tout est en place.") :
+       les temps 1 et 3 montrent l'événement à trancher, le temps 2 montre le
+       partenaire de sparring — seul celui-ci ouvrait sur du vide. On y
+       affiche désormais un aperçu réel du prochain rendez-vous : le plus
+       dangereux des 3 candidats que produira le Bureau du Matchmaker
+       (genOpponents() trie déjà du plus fort au plus faible — cf.
+       CORRECTIF_ORDRE_PROPOSITIONS, ui-02), via ensureOpponentsCached() pour
+       que ce soit VRAIMENT celui qui apparaîtra, pas un second tirage. Le
+       choix entre les 3 propositions reste sur son écran dédié
+       (scr_select) : un aperçu qui annonce la couleur, pas une
+       duplication de l'écran qui la révèle en entier. */
+    ensureOpponentsCached(f);
+    const preview=(G.opps&&G.opps[0])?G.opps[0]:null;
+    actionsHtml=preview?`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px">
+      <div class="eyebrow" style="font-size:10px;color:${preview.mm?preview.mm.color:'var(--muted)'}">PRESSENTI POUR LE PROCHAIN COMBAT</div>
+      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(preview.o.name)} ${preview.o.flag}</div>
+      <div class="mono small" style="margin-top:4px">${recordStr(preview.o)}</div>
+      <div class="small muted" style="margin-top:8px">${esc(preview.read)}</div>
+    </div>
+    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithFight()">ENTRER DANS LA CAGE</button>`
+    : `<p class="lede small">Tout est en place.</p>
     <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithFight()">ENTRER DANS LA CAGE</button>`;
   }
   return `<div class="scr" style="max-width:560px;margin:0 auto">
-    ${topBar}
+    ${faithHubGrid(f)}
     ${faithSeasonBar(step)}
     <div>
       <div class="mono" style="font-size:11px;color:var(--muted)">SAISON ${G.faith.year} · ${orgDisplayName(f)}</div>
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
+      ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''} restant${f.contract.fightsLeft>1?'s':''} au contrat</div>`:''}
       ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
       ${faithOathBadge(G.faith)}
     </div>
-    ${faithGauges(f)}
     ${actionsHtml}
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
   </div>`;
