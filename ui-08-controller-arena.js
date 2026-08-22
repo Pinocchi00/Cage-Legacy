@@ -688,6 +688,17 @@ const CL={
       G.screen='vs_friend_next'; render(); return;
     }
     if(G.faith){
+      /* ==== [ANCRE: FAITH_COMPTEUR_COMBATS] — l'incrément vivait dans
+         faithFight(), AVANT que startFightSelect() ne confirme même que le
+         combat allait avoir lieu (bloqué net par ex. si f.injury — cf.
+         FAITH_BOUTON_BLESSURE) : le compteur du bilan annuel pouvait donc
+         monter sans qu'aucun combat ne se soit produit. afterResult() n'est
+         atteint QUE depuis le bouton "Continuer" de l'écran de résultat
+         (scr_result, ui-06) — jamais avant qu'un combat ait réellement eu
+         lieu — c'est le seul endroit qui garantit un incrément par combat
+         réel, ni plus ni moins. ==== */
+      G.faith.fightsThisYear=(G.faith.fightsThisYear||0)+1;
+      /* ==== [FIN ANCRE] ==== */
       const p=G.pending;
       if(p&&p.contractExpiry){ G.screen='contract_nego'; save(); render(); return; }
       if(p&&p.proOffer){ G.screen='promo'; save(); render(); return; }
@@ -1001,7 +1012,16 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     G.screen='draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
-  startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
+  /* ==== [CORRECTIF FA-06] — contrairement à newCareer() (qui repart d'un G
+     entièrement neuf), startFaith() ne posait que faithDraft et l'écran :
+     G.arcade/G.pending/G.opps d'une session précédente (Gauntlet en cours,
+     combat carrière interrompu...) survivaient jusqu'à ce que
+     finalizeFaithDraft() écrase une partie de G. Ça ne tenait que parce que
+     le test `if(G.faith)` passe AVANT `if(G.arcade && G.arcade.active)` dans
+     afterResult() — de la chance, pas une garantie. Même ménage explicite
+     que newCareer(). ==== */
+  startFaith(){ G.arcade=null; G.pending=null; G.opps=null;
+    G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
   selectFaithDraft(key,value){ G.faithDraft[key]=value; render(true); },
   /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — la création n'est pas une
@@ -1221,8 +1241,16 @@ const CL={
        l'octogone. ==== */
     G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub'; save(); render();
   },
+  /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — startFightSelect() (ui-02) commence
+     par `if(G.f.injury) return;`, un no-op total : ni message, ni render. Le
+     bouton "ENTRER DANS LA CAGE" semblait mort au clic. fightsThisYear était
+     en plus incrémenté AVANT cet appel, donc même ce clic sans effet visible
+     faussait le compteur (repris tel quel dans le bilan annuel — cf.
+     FAITH_COMPTEUR_COMBATS un peu plus bas, qui déplace l'incrément au bon
+     endroit). On coupe court ici, avec un message, avant de toucher au
+     compteur ou d'appeler startFightSelect(). ==== */
   faithFight(){
-    G.faith.fightsThisYear=(G.faith.fightsThisYear||0)+1;
+    if(G.f.injury){ G.lastMsg="Toujours à l'infirmerie — pas de combat tant que le corps n'est pas prêt."; render(); return; }
     G.faith.step=4; // combat en cours — le retour se fera vers le bilan (voir afterResult)
     startFightSelect();
   },
@@ -1320,6 +1348,22 @@ const CL={
         p.overall=overall(p);
       });
     }
+    /* ==== [ANCRE: FAITH_ECURIE_RENOUVELEE] — G.faith.gym n'était alimenté
+       qu'à la création (2 partenaires) et seulement RETIRÉ ensuite (la
+       trahison du protégé, FAITH_PROTEGE_VISIBLE). Le Syndrome de
+       Frankenstein — le meilleur système du mode — s'éteignait donc
+       lui-même en s'exécutant : après une ou deux trahisons, le temps 2
+       dégénérait en un unique bouton "Se reposer". Un nouveau venu de 18
+       ans arrive dès que l'écurie descend sous 2 partenaires, avec le même
+       calibrage que les deux partenaires de départ (FAITH_ECURIE_DEPART,
+       quelques lignes plus haut). ==== */
+    if((G.faith.gym||[]).length<2){
+      const p3=makeFighter({gender:G.f.gender,div:G.f.div,age:18,level:clamp(G.f.overall-18,20,60),potential:RI(80,97)});
+      p3.isGymPartner=true; p3.nick=pick(FAITH_GYM_NEWCOMER_NICKS);
+      G.faith.gym.push(p3);
+      G.lastMsg=`Un gamin de 18 ans a poussé la porte de la salle cette semaine — ${esc(p3.nick)}.`;
+    }
+    /* ==== [FIN ANCRE] ==== */
     G.screen='faith_hub'; save(); render();
   },
   buyFaithPerk(perkId){
@@ -1922,9 +1966,16 @@ const CL={
     G.screen=G.faith?'faith_epilogue':'legacy'; save(); render(); },
   /* ==== [ANCRE: FAITH_EPILOGUE] — relancer une carrière Faith depuis
      l'épilogue : on repart de la création du mode, pas du menu principal.
-     wipe() est délibérément écarté — le Panthéon et les méta-statistiques
-     doivent survivre à la carrière qui vient de se clore. ==== */
-  newFaithCareer(){ const t=G.theme; G={theme:t,faithDraft:{gender:'H',country:COUNTRY_KEYS[0],first:''}}; setTheme(t); G.screen='faith_draft'; render(); },
+     ==== [CORRECTIF FA-05] — cette fonction ne sauvegardait jamais : G était
+     réassigné en mémoire, mais SAVE_KEY (localStorage) gardait la carrière
+     retirée. Fermer l'onglet pendant les 9 écrans de création (long) faisait
+     rouvrir le jeu sur le mort. wipe() avait été écarté par erreur — la
+     justification d'origine ("le Panthéon et les méta-statistiques doivent
+     survivre") repose sur une confusion : wipe() ne touche QUE SAVE_KEY
+     (state.js) ; HOF_KEY et META_STATS_KEY sont des clés localStorage
+     séparées, jamais concernées. Même symétrie que newCareer() ci-dessous,
+     qui appelle déjà wipe(). ==== */
+  newFaithCareer(){ wipe(); const t=G.theme; G={theme:t,faithDraft:{gender:'H',country:COUNTRY_KEYS[0],first:''}}; setTheme(t); G.screen='faith_draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: FAITH_LEGENDES_A_BATTRE] — sélection à deux, jamais plus :
      le 3e clic éjecte le plus ancien choix plutôt que de bloquer, pour que

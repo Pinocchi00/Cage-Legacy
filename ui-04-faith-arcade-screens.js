@@ -173,6 +173,13 @@ function faithHubGrid(f){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_ECURIE_RENOUVELEE] — surnoms des nouveaux venus qui
+   rejoignent l'écurie quand elle descend sous 2 partenaires (nextFaithYear,
+   ui-08) — distincts des deux surnoms de départ ("Le Prodige", "L'Aspirant",
+   FAITH_ECURIE_DEPART) pour qu'un renouvellement ne se lise pas comme une
+   simple réapparition du même personnage. ==== */
+const FAITH_GYM_NEWCOMER_NICKS=['Le Nouveau','La Relève','Le Croc','Le Silencieux','L’Affamé','Le Guetteur'];
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_PROTEGE_VISIBLE] — le Syndrome de Frankenstein est le
    meilleur système du mode, et il était invisible jusqu'à son déclenchement :
    le hub affichait « OVR 47 » sans dire que c'était 44 l'an dernier, ni que
@@ -218,6 +225,23 @@ function scr_faith_hub(){
           <div class="muted small mt">${p.styleLabel}, ${p.age} ans. ${faithProtegeLine(p,f)}</div>
         </div>`).join('')}
     </div>`;
+  } else if(f.injury){
+    /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — f.injury ne peut être posé que
+       par un mécanisme qui touche vraiment le mode Faith (aucun aujourd'hui
+       ne le fait — toute la chaîne blessure du mode carrière passe par
+       chooseTraining()/finishTrainingFlow(), que CL.opp() court-circuite
+       entièrement pour G.faith). Le champ existe malgré tout sur le
+       combattant (repairFighter() le garantit, state.js), et le condamner
+       à ne jamais s'afficher ici serait fragile au premier futur mécanisme
+       qui le poserait (stage violent, sparring qui tourne mal...). Un
+       combattant blessé ne voit plus d'adversaire pressenti : seule
+       l'Infirmerie, jusqu'à guérison. ==== */
+    actionsHtml=`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px;border-left:3px solid var(--loss)">
+      <div class="eyebrow" style="font-size:10px;color:var(--loss)">INFIRMERIE</div>
+      <div class="hero-name" style="font-size:20px;margin-top:6px">${esc(f.injury.name)}</div>
+      <div class="mono small muted" style="margin-top:4px">${f.injury.left} combat${f.injury.left>1?'s':''} avant guérison complète</div>
+    </div>
+    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.recoverInjury()">LAISSER LE CORPS RÉCUPÉRER</button>`;
   } else {
     /* ==== [ANCRE: FAITH_HUB_ADVERSAIRE] — le temps 4 était le seul des cinq
        à n'offrir aucune information avant l'action ("Tout est en place.") :
