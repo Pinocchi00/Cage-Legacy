@@ -1870,6 +1870,24 @@ const CL={
        autres (Panthéon, Codex, points de Légende : rien n'est retiré) mais
        sort par son propre épilogue, avec sa note. L'écran 'legacy' générique
        reste la sortie de la carrière standard. ==== */
+    /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — le score de la carrière qui se
+       termine doit être FIGÉ ici, avant que newFaithCareer() ne réinitialise
+       G en repartant d'une création vierge (le combattant f et G.faith
+       n'existeront plus). previousBest est lu AVANT recordFaithLegend() —
+       sinon la carrière qu'on vient de sceller s'auto-compare à elle-même
+       (déjà comptée dans meta.faithBest par son propre appel) et ne peut
+       plus jamais afficher "première légende" ni "meilleure carrière". ==== */
+    if(G.faith){
+      const finalScore=faithFinalScore(G.f,G.faith);
+      G.faith.finalScore=finalScore;
+      G.faith.previousBest=getFaithBest();
+      recordFaithLegend({id:G.f.id,name:G.f.name,nick:G.f.nick,flag:G.f.flag,
+        score:finalScore,sub:computeLegendScore(G.f),
+        W:G.f.W,L:G.f.L,ko:G.f.ko||0,
+        years:(G.faith.year||2026)-2026,
+        oath:G.faith.oath?{label:G.faith.oath.label,fulfilled:faithOathFulfilled(G.faith.oath,G.f,G.faith)}:null});
+    }
+    /* ==== [FIN ANCRE] ==== */
     G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
     G.screen=G.faith?'faith_epilogue':'legacy'; save(); render(); },
   /* ==== [ANCRE: FAITH_EPILOGUE] — relancer une carrière Faith depuis

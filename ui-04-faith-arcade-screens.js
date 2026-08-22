@@ -936,6 +936,22 @@ function computeLegendScore(f){
   return {total:clamp(palmares+sommet+longevite+empreinte+fortune,0,100),
           palmares,sommet,longevite,empreinte,fortune};
 }
+/* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — le score affiché à l'épilogue
+   (computeLegendScore().total, majoré ×1,15 si le serment est tenu) était
+   recalculé une seule fois, en ligne, dans scr_faith_epilogue(). Chantier 3
+   (mémoire des légendes) a besoin de la MÊME valeur au moment de la
+   retraite, pour la figer dans G.faith.finalScore avant que le combattant
+   ne soit remplacé (newFaithCareer() réinitialise G) — recalculer la
+   formule à cet autre endroit aurait dupliqué la logique (mult, plafond)
+   avec un risque de désynchronisation si l'une des deux copies changeait
+   sans l'autre. Un seul point de calcul, appelé des deux côtés. ==== */
+function faithFinalScore(f,F){
+  const sc=computeLegendScore(f);
+  const serment=(F&&F.oath)||null;
+  const tenu=serment?faithOathFulfilled(serment,f,F||{}):false;
+  return Math.min(100,Math.round(sc.total*(tenu?1.15:1)));
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_EPILOGUE] — l'écran de sortie du mode. Trois temps qui
    ne coexistent jamais dans la même zone de lecture : le bandeau, puis la
    note SEULE, puis sa décomposition. La note est le seul objet de sa zone —
@@ -954,13 +970,34 @@ function faithScoreRow(label,val,max,delay){
     <span class="mono" style="flex:0 0 52px;text-align:right;font-size:13px">${val}<span class="muted">/${max}</span></span>
   </div>`;
 }
+/* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — la comparaison au record personnel
+   affiché sous la décomposition. Le silence complet passé un écart trop
+   large est délibéré (effet Zeigarnik) : un petit manque donne envie de
+   rejouer pour le combler, un manque énorme décourage — punition, pas
+   motivation. Au-delà de 25 points d'écart, on affiche le record sans le
+   chiffrer davantage. ==== */
+function faithLegendCompareLine(total,previousBest){
+  if(!previousBest) return {text:'Première légende écrite.',color:'var(--muted)'};
+  if(total>previousBest) return {text:`Meilleure carrière — précédent record : ${previousBest}`,color:'var(--gold)'};
+  if(total===previousBest) return {text:'À égalité avec ta meilleure carrière.',color:'var(--muted)'};
+  const gap=previousBest-total;
+  return {text:gap<=25?`Record personnel : ${previousBest} — il manquait ${gap} points`:`Record personnel : ${previousBest}`,color:'var(--muted)'};
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_epilogue(){
   const f=G.f, sc=computeLegendScore(f);
   const debut=2026, fin=(G.faith&&G.faith.year)||debut;
   const serment=(G.faith&&G.faith.oath)||null;
   const tenu=serment?faithOathFulfilled(serment,f,G.faith||{}):false;
-  const mult=tenu?1.15:1;
-  const total=Math.min(100,Math.round(sc.total*mult));
+  /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — G.faith.finalScore/.previousBest
+     sont figés par toLegacy() (ui-08) au moment de la retraite. Repli sur un
+     recalcul en direct pour une partie déjà en cours au moment de ce
+     correctif, dont la sauvegarde a transité par l'ancien toLegacy() qui ne
+     posait pas ces deux champs. */
+  const total=(G.faith&&typeof G.faith.finalScore==='number')?G.faith.finalScore:faithFinalScore(f,G.faith||{});
+  const previousBest=(G.faith&&typeof G.faith.previousBest==='number')?G.faith.previousBest:getFaithBest();
+  const compare=faithLegendCompareLine(total,previousBest);
+  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div style="height:120px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:32px">
      <div class="hero-name" style="font-size:34px;line-height:1.05">${esc(f.name)}</div>
@@ -977,6 +1014,7 @@ function scr_faith_epilogue(){
      ${faithScoreRow('Empreinte',sc.empreinte,14,540)}
      ${faithScoreRow('Fortune',sc.fortune,10,720)}
    </div>
+   <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
    ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.newFaithCareer()">ÉCRIRE UNE AUTRE LÉGENDE</button>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('hof')">Voir le Panthéon</button>
