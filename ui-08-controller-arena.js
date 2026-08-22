@@ -17,12 +17,22 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
+  /* ==== [ANCRE: FAITH_SKIN_BASCULE] — MMA Faith inverse la luminance du jeu
+     (papier/encre au lieu de cuir/or). Le basculement se fait par une classe
+     sur <body> plutôt que par des styles en ligne dans chaque écran : un seul
+     point de vérité, aucun écran Faith à retoucher pour changer la palette.
+     Le test porte sur le NOM de l'écran seul, pas sur l'existence de G.faith :
+     l'écran de création (faith_draft) s'affiche avant que G.faith existe, et
+     c'est justement le premier écran du mode — il doit être skinné lui
+     aussi. Aucun écran hors Faith ne commence par "faith". ==== */
+  document.body.classList.toggle('faith-skin', String((G&&G.screen)||'').indexOf('faith')===0);
+  /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
@@ -985,10 +995,36 @@ const CL={
   startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
   selectFaithDraft(key,value){ G.faithDraft[key]=value; render(true); },
+  /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — la création n'est pas une
+     tâche à finir mais une série de portes : on avance d'une question à la
+     fois, et on peut revenir. ==== */
+  faithDraftPage(delta){
+    const d=G.faithDraft||{}; const max=FAITH_DRAFT_PAGES.length-1;
+    d.page=clamp((d.page||0)+delta,0,max);
+    render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: FAITH_SERMENTS] — le serment se jure APRÈS la synthèse et
+     AVANT le premier combat : c'est la dernière décision structurante, et
+     elle se prend en connaissant déjà le personnage. Quatre propositions
+     tirées du pool, jamais la liste complète. ==== */
+  offerFaithOaths(){
+    const d=G.faithDraft;
+    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality || !d.stable){
+      G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
+    }
+    const pool=FAITH_OATHS.slice();
+    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+    d.oathPool=pool.slice(0,4);
+    G.screen='faith_oath'; render(); },
+  swearOath(oathId){
+    const o=FAITH_OATHS.find(x=>x.id===oathId)||null;
+    G.faithDraft._oath=o?{id:o.id,label:o.label,broken:false}:null;
+    CL.finalizeFaithDraft(); },
+  /* ==== [FIN ANCRE] ==== */
   finalizeFaithDraft(){
     const d=G.faithDraft;
-    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality){
-      G.lastMsg="Complète les 5 catégories avant de commencer."; render(); return;
+    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality || !d.stable){
+      G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
     }
     const f=makeFighter({gender:d.gender||'H',style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18,freshPlayer:true});
     f.gameMode='faith';
@@ -1000,6 +1036,18 @@ const CL={
     if(d.lifestyle==='party'){ f.form=60; f.morale=90; f.hypeBonus=(f.hypeBonus||1)+0.3; }
     if(d.circle==='family'){ f.morale=100; }
     if(d.circle==='agent'){ f.earnings=(f.earnings||0)+30; f.agentCut=0.15; }
+    /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — origine, cercle et hygiène de
+       vie étaient consommés puis jetés : aucun événement ne pouvait s'y
+       brancher, ils n'étaient que des deltas déguisés. Conservés sur le
+       combattant, ils deviennent lisibles par le champ `req` du pool. ==== */
+    f._origin=d.origin; f._circle=d.circle; f._lifestyle=d.lifestyle; f._stable=d.stable;
+    /* ==== [ANCRE: FAITH_ECURIE_DEPART] — le premier dilemme réel : une salle
+       régionale fait combattre souvent contre des adversaires abordables, un
+       camp d'élite fait signer plus haut, contre plus dur. On agit sur
+       l'organisation de départ et sur la qualité des partenaires de salle,
+       tous deux déjà pilotés par le code existant. ==== */
+    if(d.stable==='elite'){ f.org=Math.max(f.org||0,1); f.earnings=(f.earnings||0)+10; f.attrs.fightIQ=clamp((f.attrs.fightIQ||50)+4,1,100); }
+    /* ==== [FIN ANCRE] ==== */
     f.personality=d.personality;
     if(d.personality==='villain'){ f.hypeBonus=(f.hypeBonus||1)+0.3; f.morale=clamp(f.morale-10,0,100); }
     else if(d.personality==='humble'){ f.hypeBonus=1.0; f.morale=clamp(f.morale+15,0,100); f.attrs.focus=clamp((f.attrs.focus||50)+10,1,100); }
@@ -1015,16 +1063,27 @@ const CL={
     G.f=f; G.roster=makeOrgRoster(f);
     // division/genre, qui progresseront en copiant les stats du joueur s'il
     // s'entraîne avec eux (voir CL.faithSparring).
-    const p1=makeFighter({gender:f.gender,div:f.div,age:18,level:clamp(f.overall-15,20,60),potential:95});
-    const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10,20,60),potential:85});
+    /* ==== [ANCRE: FAITH_ECURIE_DEPART] — un camp d'élite, ce sont d'abord des
+       partenaires meilleurs que soi : le Syndrome de Frankenstein s'y
+       déclenche plus tôt, ce qui est exactement le prix du prestige. ==== */
+    const boost=(d.stable==='elite')?8:0;
+    const p1=makeFighter({gender:f.gender,div:f.div,age:18,level:clamp(f.overall-15+boost,20,60),potential:95});
+    const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10+boost,20,60),potential:85});
     p1.isGymPartner=true; p2.isGymPartner=true;
     p1.nick='Le Prodige'; p2.nick='L\u2019Aspirant';
     G.faith={year:2026,step:1,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2]};
+    /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
+       brouillon de création : il doit survivre au rechargement. ==== */
+    if(G.faithDraft && G.faithDraft._oath) G.faith.oath=G.faithDraft._oath;
     G.season={year:1,fights:[]};
     G.screen='faith_hub'; save(); render();
   },
   faithRest(){
+    /* ==== [ANCRE: FAITH_CINQ_TEMPS] — le camp (temps 2) débouche sur le
+       monde (temps 3), pas sur le combat. ==== */
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
+    if(!G.faith.yearLog) G.faith.yearLog=[];
+    G.faith.yearLog.push({title:'Intersaison',choice:'Repos et récupération'});
     G.faith.step=3; G.screen='faith_hub'; save(); render();
   },
   faithSparring(partnerId){
@@ -1040,7 +1099,7 @@ const CL={
     G.lastMsg=`Séance intense. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Sparring',choice:`A tourné avec ${esc(partner.name)}`});
-    G.faith.step=3; save(); render();
+    G.faith.step=3; G.screen='faith_hub'; save(); render();
   },
   faithLifeEvent(){
     // Syndrome de Frankenstein : si un protégé a rattrapé (ou dépassé) le
@@ -1061,9 +1120,18 @@ const CL={
         return;
       }
     }
+    /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — les offres de privilège rejoignent
+       le pool du temps « Le monde » (temps 3) : elles viennent au joueur au
+       lieu de l'attendre dans un menu. Elles restent minoritaires (une chance
+       sur trois d'y basculer) pour ne pas transformer le mode en catalogue
+       ambulant, et la mémoire seenEvents s'applique à elles comme au reste. ==== */
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
-    let pool=FAITH_LIFE_EVENTS.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
-    if(pool.length===0){ G.faith.seenEvents=[]; pool=FAITH_LIFE_EVENTS.filter(e=>!e.req||e.req(G.f)); }
+    const base=FAITH_LIFE_EVENTS.concat(FAITH_BRANCH_EVENTS);
+    const source=((G.faith.step||1)>=3 && rnd()<0.34)
+      ? FAITH_PERK_OFFERS.concat(base)
+      : base;
+    let pool=source.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
+    if(pool.length===0){ G.faith.seenEvents=[]; pool=source.filter(e=>!e.req||e.req(G.f)); }
     G.faith.currentEvent=pick(pool);
     G.screen='faith_event'; save(); render();
   },
@@ -1073,7 +1141,32 @@ const CL={
     if(c.cost && (G.f.earnings||0)<c.cost){ G.lastMsg="Fonds insuffisants ("+c.cost+"k$)."; render(); return; }
     if(c.cost) G.f.earnings-=c.cost;
     if(c.reward) G.f.earnings=(G.f.earnings||0)+c.reward;
-    applyDeltas(G.f,c.d);
+    /* ==== [ANCRE: FAITH_RISQUE_DECLARE] — résolution du pari. Un choix sans
+       champ `risk` reste strictement déterministe : le pool existant continue
+       de fonctionner sans modification. c.d est par ailleurs facultatif
+       depuis les offres de privilège — un choix peut n'avoir aucun delta
+       propre et ne faire que déclencher un achat. ==== */
+    const failed=c.risk?(rnd()<c.risk):false;
+    applyDeltas(G.f,(failed?c.bad:c.d)||[]);
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — un choix peut désormais déclencher
+       un privilège. buyFaithPerk() gère seule l'argent, le tirage et ses
+       conséquences ; elle peut même clore l'année sur une suspension, auquel
+       cas on lui laisse la main sans poursuivre le déroulé de l'événement. ==== */
+    /* ==== [ANCRE: FAITH_SERMENTS] — un choix peut rompre un serment nommé.
+       Champ déclaratif : aucune logique par serment n'est câblée ici. ==== */
+    if(c.oathBreak && G.faith.oath && G.faith.oath.id===c.oathBreak) G.faith.oath.broken=true;
+    if(c.perk){
+      if(!G.faith.yearLog) G.faith.yearLog=[];
+      G.faith.yearLog.push({title:ev.title,choice:c.label});
+      if(!G.faith.seenEvents) G.faith.seenEvents=[];
+      G.faith.seenEvents.push(ev.id);
+      G.faith.currentEvent=null;
+      G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub';
+      CL.buyFaithPerk(c.perk);
+      return;
+    }
+    /* ==== [FIN ANCRE] ==== */
     // Syndrome de Frankenstein : le protégé qui trahit rejoint réellement le
     // roster de l'organisation, en Némésis si aucune n'est encore verrouillée.
     if(ev.id==='evt_frankenstein_betrayal'){
@@ -1096,9 +1189,11 @@ const CL={
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
     G.faith.currentEvent=null;
-    G.lastMsg="Événement résolu : "+ev.title;
+    /* Le pari perdu prime sur l'accusé de réception : c'est la seule
+       information que le joueur doit emporter de cet écran. */
+    G.lastMsg=failed?"Ça n\u2019a pas tourné comme prévu.":("Événement résolu : "+ev.title);
     if(!G.faith.yearLog) G.faith.yearLog=[];
-    G.faith.yearLog.push({title:ev.title,choice:c.label});
+    G.faith.yearLog.push({title:ev.title,choice:c.label,outcome:failed?'raté':'réussi'});
     // Moteur d'émergence : un choix taggé traitTag renforce une tendance cachée ;
     // au 3e choix dans la même direction, elle se cristallise en trait permanent.
     if(c.traitTag){
@@ -1112,7 +1207,10 @@ const CL={
         G.lastMsg=`Événement résolu : ${ev.title}. NOUVEAU TRAIT ACQUIS : ${traitName} !`;
       }
     }
-    G.faith.step=2; G.screen='faith_hub'; save(); render();
+    /* ==== [ANCRE: FAITH_CINQ_TEMPS] — deux événements de vie par an : celui
+       de la salle (temps 1) mène au camp, celui du monde (temps 3) mène à
+       l'octogone. ==== */
+    G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub'; save(); render();
   },
   faithFight(){
     G.faith.fightsThisYear=(G.faith.fightsThisYear||0)+1;
@@ -1125,6 +1223,17 @@ const CL={
     const eloDelta=Math.round(f.careerElo-(G.faith.startOfYearElo||f.careerElo));
     const earningsDelta=(f.earnings||0)-(G.faith.startOfYearEarnings||0);
     const rank=divRank(f);
+    /* ==== [ANCRE: FAITH_SUIVI_PICS] — le Score de Légende note le SOMMET
+       atteint, pas l'état final : une fin de carrière en déclin ne doit pas
+       effacer le pic. Les dégâts crâniens, eux, se cumulent sur toute la
+       carrière (le compteur annuel est remis à zéro avec season.fights). ==== */
+    /* ==== [ANCRE: FAITH_SERMENTS] — trace du « vieux lion » : une ceinture
+       portée à 34 ans ou plus. Relevé chaque fin d'année, jamais effacé. ==== */
+    if((f.age||0)>=34 && f.champion) G.faith.beltAfter34=true;
+    G.faith.peakElo=Math.max(G.faith.peakElo||0,f.careerElo||0);
+    G.faith.peakEarnings=Math.max(G.faith.peakEarnings||0,f.earnings||0);
+    G.faith.dmgHeadTotal=(G.faith.dmgHeadTotal||0)+dmgHead;
+    /* ==== [FIN ANCRE] ==== */
     if((G.season.fights||[]).length>=1){
       let totalSig=0, totalTdAtt=0, totalCtrl=0, totalKD=0;
       G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0; });
@@ -1165,11 +1274,16 @@ const CL={
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
       eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[]
     };
+    G.faith.step=5; /* dernier temps : le bilan, cf. FAITH_CINQ_TEMPS */
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
     G.faith.year++; G.faith.step=1;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
+    /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
+       qu'un millésime : le drapeau est levé ici, avec le reste des compteurs
+       annuels. ==== */
+    G.faith.suspended=false;
     G.faith.startOfYearElo=G.f.careerElo; G.faith.startOfYearEarnings=G.f.earnings||0;
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
@@ -1185,6 +1299,13 @@ const CL={
   },
   buyFaithPerk(perkId){
     const f=G.f; if(!G.faith.perks) G.faith.perks={};
+    /* ==== [ANCRE: FAITH_SERMENTS] — « Jamais de raccourci » se rompt à
+       l'instant où l'un de ces quatre privilèges est pris, et la rupture est
+       définitive : elle reste visible sur le hub jusqu'à la retraite. ==== */
+    if(G.faith.oath && G.faith.oath.id==='no_shortcut' && !G.faith.oath.broken
+       && ['ped','judges','lobbying','catchweight'].includes(perkId)){
+      G.faith.oath.broken=true;
+    }
     const costMoney={hometown:15,catchweight:35,protect_title:50,ped:30,tiger:50,lobbying:100,diet:40};
     if(costMoney[perkId]||perkId==='judges'){
       let actualCost=costMoney[perkId];
@@ -1195,7 +1316,26 @@ const CL={
       else if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
       else if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
       else if(perkId==='ped'){
-        if(rnd()<0.15){ G.lastMsg="CATASTROPHE : Test antidopage positif ! Suspendu 1 an."; G.faith.month=1; G.faith.year++; G.faith.pa=3; f.rankBoost=Math.max(0,(f.rankBoost||0)-100); }
+        /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — la branche positive
+           écrivait G.faith.month et G.faith.pa : deux champs qu'aucun code du
+           repo ne lit (vestiges d'une structure calendaire abandonnée). Pire,
+           elle incrémentait G.faith.year hors de nextFaithYear(), ce qui
+           laissait startOfYearElo, startOfYearEarnings, yearLog, season.fights
+           et step désynchronisés, et sautait applyAging() : la « suspension
+           d'un an » faisait donc avancer le millésime sans faire avancer la
+           simulation. La suspension passe désormais par le chemin normal de
+           fin d'année — on marque l'année comme blanche, on saute le combat,
+           et nextFaithYear() fait son travail habituel. ==== */
+        if(rnd()<0.15){
+          G.lastMsg="CATASTROPHE : Test antidopage positif. Année blanche, licence suspendue.";
+          G.faith.suspended=true;
+          G.faith.scandals=(G.faith.scandals||0)+1;
+          f.rankBoost=Math.max(0,(f.rankBoost||0)-100);
+          if(!G.faith.yearLog) G.faith.yearLog=[];
+          G.faith.yearLog.push({title:'Contrôle antidopage',choice:'Positif — suspension'});
+          CL.prepareFaithYearEnd(); return;
+        }
+        /* ==== [FIN ANCRE] ==== */
         else { f.attrs.chin=clamp(f.attrs.chin+4,1,100); f.attrs.durability=clamp(f.attrs.durability+4,1,100); f.overall=overall(f); G.faith.pedActive=G.faith.year; G.lastMsg="Protocoles PED réussis : Menton et Résistance +4."; }
       } else if(perkId==='tiger'){
         if(rnd()<0.25){ G.lastMsg="Le stage était d\u2019une rare violence. Blessure mineure contractée."; f.form=clamp(f.form-20,0,100); }
@@ -1204,7 +1344,7 @@ const CL={
         if(rnd()<0.50){ G.lastMsg="L\u2019argent a disparu dans les poches des promoteurs. Aucun effet."; }
         else { G.faith.perks.forcePromo=true; G.lastMsg="Lobbying réussi : Une offre de promotion sera forcée après votre prochain combat."; }
       } else if(perkId==='judges'){
-        if(rnd()<0.10){ G.lastMsg="SCANDALE : Corruption découverte. L\u2019organisation coupe votre contrat !"; if(f.org>1) f.org--; G.roster=makeOrgRoster(f); }
+        if(rnd()<0.10){ G.lastMsg="SCANDALE : Corruption découverte. L\u2019organisation coupe votre contrat !"; G.faith.scandals=(G.faith.scandals||0)+1; if(f.org>1) f.org--; G.roster=makeOrgRoster(f); }
         else { G.faith.perks.judges=true; G.lastMsg="Les juges ont été 'informés'. Vous bénéficierez d\u2019une grande clémence en cas de décision."; }
       } else if(perkId==='diet'){ G.faith.dietYear=G.faith.year; G.lastMsg="Diététicien Élite engagé pour l\u2019année. Les pesées seront une formalité."; }
     }
@@ -1717,7 +1857,19 @@ const CL={
         trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
       G.season.fights=[];
     }
-    G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true; G.screen='legacy'; save(); render(); },
+    /* ==== [ANCRE: FAITH_EPILOGUE] — une carrière Faith se scelle comme les
+       autres (Panthéon, Codex, points de Légende : rien n'est retiré) mais
+       sort par son propre épilogue, avec sa note. L'écran 'legacy' générique
+       reste la sortie de la carrière standard. ==== */
+    G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
+    G.screen=G.faith?'faith_epilogue':'legacy'; save(); render(); },
+  /* ==== [ANCRE: FAITH_EPILOGUE] — relancer une carrière Faith depuis
+     l'épilogue : on repart de la création du mode, pas du menu principal.
+     wipe() est délibérément écarté — le Panthéon et les méta-statistiques
+     doivent survivre à la carrière qui vient de se clore. ==== */
+  newFaithCareer(){ const t=G.theme; G={theme:t,faithDraft:{gender:'H',country:COUNTRY_KEYS[0],first:''}}; setTheme(t); G.screen='faith_draft'; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [FIN ANCRE] ==== */
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }

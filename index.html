@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta name="theme-color" content="#14100B"/><title>Cage Legacy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* CAGE LEGACY — registre d'archives, thème sombre, contraste renforcé pour
    une lisibilité maximale (y compris en plein soleil) */
@@ -15,6 +15,39 @@
  --frost:#8FC7D9; --frost-d:#4F7E8F;
  --r:0px; --maxw:560px;
 }
+/* ==== [ANCRE: FAITH_SKIN_BASCULE] — palette scopée du mode MMA Faith.
+   Le jeu entier est sombre (cuir, sépia, or) ; Faith raconte une vie et rend
+   son verdict en presse, d'où l'inversion de luminance : papier et encre.
+   C'est le signal de mode le moins coûteux qui existe, perçu en périphérie
+   avant toute lecture. Aucune police ni couleur inventée : l'accent réutilise
+   --blood/--blood-d du jeu.
+   RÈGLE À NE JAMAIS OUBLIER — deux rouges, deux usages :
+     #9C2C1E sur papier = 5,7:1 -> AA, c'est le seul rouge autorisé en TEXTE ;
+     #E8442F sur papier = 2,98:1 -> échoue partout, réservé aux filets,
+     remplissages de jauge et puces. Jamais de lettres dessus. ==== */
+body.faith-skin{
+  --bg:#E4DFD3; --panel:#E4DFD3; --panel2:#DAD4C6; --line:#B9B0A0;
+  --text:#16130E; --muted:#5C5346; --faint:#7A7161;
+  --gold:#9C2C1E; --gold-d:#7A2216; --sage:#4A5D50;
+  --blood:#9C2C1E; --blood-d:#7A2216; --win:#3F6B4A; --loss:#9C2C1E;
+  --f-red-hi:#E8442F;
+  background:#E4DFD3;
+}
+body.faith-skin .scr{ padding-left:20px; padding-right:20px; }
+body.faith-skin .scr > * + *{ margin-top:32px; }
+body.faith-skin .glass{ background:#DAD4C6; backdrop-filter:none; border:1px solid var(--line); border-radius:0; box-shadow:none; }
+body.faith-skin .glass::before,body.faith-skin .glass::after{ display:none; }
+body.faith-skin .card{ background:#DAD4C6; border:1px solid var(--line); border-radius:0; }
+body.faith-skin .disp,body.faith-skin .hero-name{ font-family:'Fraunces',Georgia,serif; font-weight:700; text-transform:none; letter-spacing:-0.01em; }
+body.faith-skin .eyebrow{ font-family:'Oswald',sans-serif; letter-spacing:.14em; color:var(--muted); }
+body.faith-skin .gauge2 > span,body.faith-skin .gauge > span{ background:var(--f-red-hi); }
+body.faith-skin .btn{ border-radius:0; }
+body.faith-skin .btn.primary{ background:var(--gold); color:#F3EEE3; border-color:var(--gold); }
+body.faith-skin .opp{ background:#DAD4C6; border:1px solid var(--line); border-radius:0; }
+/* Remplissage séquentiel des lignes du Score de Légende (scr_faith_epilogue). */
+@keyframes faithFill{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
+/* ==== [FIN ANCRE] ==== */
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);overscroll-behavior-y:none}
 body{color:var(--text);font-family:'Fraunces',Georgia,serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
