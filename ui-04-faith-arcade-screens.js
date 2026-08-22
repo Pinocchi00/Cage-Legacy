@@ -1226,9 +1226,49 @@ function scr_faith_year_end(){
      ${chiffre(ys.dmgHead,'Coups encaissés',ys.dmgHead>30?'var(--loss)':'')}
    </div>
    ${skills?`<div><div class="eyebrow" style="margin-bottom:4px">Ce qui a été appris</div>${skills}</div>`:''}
-   <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.nextFaithYear()">SAISON ${F.year+1}</button>
+   ${isDeclining(f)
+     ?`<button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.go('faith_retire')">CONTINUER</button>`
+     :`<button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.nextFaithYear()">SAISON ${F.year+1}</button>`}
   </div>`;
 }
+/* ==== [ANCRE: FAITH_RETRAITE_EVENEMENT] — la retraite n'existait tout
+   simplement pas comme décision dans le mode : rien dans nextFaithYear()
+   ni dans applyAging() ne la déclenchait jamais (audité — applyAging()
+   ne fait qu'appliquer un déclin d'attributs, il ne pose jamais
+   f.retired), donc une carrière Faith qui ne subissait pas de coupure de
+   contrat forcée ne se terminait JAMAIS. isDeclining() (engine.js, déjà
+   utilisée par applyAging() pour dater le début du déclin : 36 ans, 38
+   chez les lourds) sert de seuil de déclenchement — pas un âge inventé,
+   le même repère que le jeu utilise déjà pour dire "le corps commence à
+   flancher". Casse le gabarit exactement comme evt_frankenstein_betrayal
+   (seules les deux occurrences de min-height:90vh dans tout le fichier) :
+   une troisième aurait annulé l'effet de seuil des deux premières. Le
+   soupçon sur l'état du corps (dmgHeadTotal, déjà suivi par ailleurs)
+   reste qualitatif — jamais un nombre ni une probabilité : même règle
+   que FAITH_RISQUE_DECLARE, aucune espérance de gain affichée. ==== */
+function scr_faith_retire(){
+  const f=G.f, F=G.faith;
+  const dmg=F.dmgHeadTotal||0;
+  const risque=dmg>400?'Le corps a beaucoup donné. Une année de trop commence à se voir, sur la durée.'
+    :dmg>150?'Les coups laissent des traces. Rien d’alarmant, mais rien qui s’efface tout à fait non plus.'
+    :'Le corps encaisse encore bien.';
+  return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
+   <div class="eyebrow" style="color:var(--gold)">${f.age} ans</div>
+   <h2 class="hero-name" style="font-size:34px;line-height:1.06">Continuer ?</h2>
+   <p style="font-size:15px;line-height:1.55">${risque}</p>
+   <div style="display:flex;flex-direction:column;gap:10px">
+     <div class="opp" style="padding:16px;min-height:72px;text-align:left" onclick="CL.toLegacy()">
+       <b style="font-size:15px">Raccrocher</b>
+       <div class="muted small mt">Refermer la carrière ici, sur ses propres termes.</div>
+     </div>
+     <div class="opp" style="padding:16px;min-height:72px;text-align:left" onclick="CL.nextFaithYear()">
+       <b style="font-size:15px">Encore une année</b>
+       <div class="muted small mt">Continuer, en sachant ce que ça coûte.</div>
+     </div>
+   </div>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_PERK_BADGE] — traduit f._styleProfileOverride
