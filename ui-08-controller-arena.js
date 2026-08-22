@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -1003,6 +1003,24 @@ const CL={
     d.page=clamp((d.page||0)+delta,0,max);
     render(); },
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: FAITH_SERMENTS] — le serment se jure APRÈS la synthèse et
+     AVANT le premier combat : c'est la dernière décision structurante, et
+     elle se prend en connaissant déjà le personnage. Quatre propositions
+     tirées du pool, jamais la liste complète. ==== */
+  offerFaithOaths(){
+    const d=G.faithDraft;
+    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality || !d.stable){
+      G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
+    }
+    const pool=FAITH_OATHS.slice();
+    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+    d.oathPool=pool.slice(0,4);
+    G.screen='faith_oath'; render(); },
+  swearOath(oathId){
+    const o=FAITH_OATHS.find(x=>x.id===oathId)||null;
+    G.faithDraft._oath=o?{id:o.id,label:o.label,broken:false}:null;
+    CL.finalizeFaithDraft(); },
+  /* ==== [FIN ANCRE] ==== */
   finalizeFaithDraft(){
     const d=G.faithDraft;
     if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality || !d.stable){
@@ -1054,6 +1072,9 @@ const CL={
     p1.isGymPartner=true; p2.isGymPartner=true;
     p1.nick='Le Prodige'; p2.nick='L\u2019Aspirant';
     G.faith={year:2026,step:1,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2]};
+    /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
+       brouillon de création : il doit survivre au rechargement. ==== */
+    if(G.faithDraft && G.faithDraft._oath) G.faith.oath=G.faithDraft._oath;
     G.season={year:1,fights:[]};
     G.screen='faith_hub'; save(); render();
   },
@@ -1132,6 +1153,9 @@ const CL={
        un privilège. buyFaithPerk() gère seule l'argent, le tirage et ses
        conséquences ; elle peut même clore l'année sur une suspension, auquel
        cas on lui laisse la main sans poursuivre le déroulé de l'événement. ==== */
+    /* ==== [ANCRE: FAITH_SERMENTS] — un choix peut rompre un serment nommé.
+       Champ déclaratif : aucune logique par serment n'est câblée ici. ==== */
+    if(c.oathBreak && G.faith.oath && G.faith.oath.id===c.oathBreak) G.faith.oath.broken=true;
     if(c.perk){
       if(!G.faith.yearLog) G.faith.yearLog=[];
       G.faith.yearLog.push({title:ev.title,choice:c.label});
@@ -1203,6 +1227,9 @@ const CL={
        atteint, pas l'état final : une fin de carrière en déclin ne doit pas
        effacer le pic. Les dégâts crâniens, eux, se cumulent sur toute la
        carrière (le compteur annuel est remis à zéro avec season.fights). ==== */
+    /* ==== [ANCRE: FAITH_SERMENTS] — trace du « vieux lion » : une ceinture
+       portée à 34 ans ou plus. Relevé chaque fin d'année, jamais effacé. ==== */
+    if((f.age||0)>=34 && f.champion) G.faith.beltAfter34=true;
     G.faith.peakElo=Math.max(G.faith.peakElo||0,f.careerElo||0);
     G.faith.peakEarnings=Math.max(G.faith.peakEarnings||0,f.earnings||0);
     G.faith.dmgHeadTotal=(G.faith.dmgHeadTotal||0)+dmgHead;
@@ -1272,6 +1299,13 @@ const CL={
   },
   buyFaithPerk(perkId){
     const f=G.f; if(!G.faith.perks) G.faith.perks={};
+    /* ==== [ANCRE: FAITH_SERMENTS] — « Jamais de raccourci » se rompt à
+       l'instant où l'un de ces quatre privilèges est pris, et la rupture est
+       définitive : elle reste visible sur le hub jusqu'à la retraite. ==== */
+    if(G.faith.oath && G.faith.oath.id==='no_shortcut' && !G.faith.oath.broken
+       && ['ped','judges','lobbying','catchweight'].includes(perkId)){
+      G.faith.oath.broken=true;
+    }
     const costMoney={hometown:15,catchweight:35,protect_title:50,ped:30,tiger:50,lobbying:100,diet:40};
     if(costMoney[perkId]||perkId==='judges'){
       let actualCost=costMoney[perkId];

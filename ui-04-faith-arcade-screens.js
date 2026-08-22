@@ -103,7 +103,7 @@ function scr_faith_draft(){
     <div class="eyebrow" style="font-size:12px;letter-spacing:.14em">${cur.q}</div>
     <div style="display:flex;flex-direction:column;gap:12px">${corps}</div>
     ${dernier
-      ? `<button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.finalizeFaithDraft()">COMMENCER</button>`
+      ? `<button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.offerFaithOaths()">COMMENCER</button>`
       : `<button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithDraftPage(1)" ${pret?'':'disabled'}>${pret?'Continuer':'Faites un choix'}</button>`}
     <div style="display:flex;gap:8px;justify-content:center;align-items:center">${points}</div>
     <button class="btn ghost" onclick="${page===0?"CL.go('title')":'CL.faithDraftPage(-1)'}">${page===0?'Retour au menu':'Revenir en arrière'}</button>
@@ -209,6 +209,7 @@ function scr_faith_hub(){
       <div class="mono" style="font-size:11px;color:var(--muted)">SAISON ${G.faith.year} · ${orgDisplayName(f)}</div>
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
       ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
+      ${faithOathBadge(G.faith)}
     </div>
     ${faithGauges(f)}
     ${actionsHtml}
@@ -314,7 +315,7 @@ const FAITH_BRANCH_EVENTS=[
             {label:'S’autoriser une vraie coupure',d:[['morale',12],['form',8],['discipline',-6]]}]},
   {id:'evt_br_regional_loyalty',req:f=>f._stable==='regional',title:'L’offre du gros camp',
    text:'Une structure réputée vous propose une place. Votre salle régionale vous a tout donné, et n’a pas les moyens de s’aligner.',
-   choices:[{label:'Partir pour le camp d’élite',d:[['fightIQ',6],['adaptability',5],['morale',-10]]},
+   choices:[{label:'Partir pour le camp d’élite',d:[['fightIQ',6],['adaptability',5],['morale',-10]],oathBreak:'homegrown'},
             {label:'Rester là où on vous a formé',d:[['morale',10],['heart',5],['fightIQ',-3]]}]},
   {id:'evt_br_elite_pecking',req:f=>f._stable==='elite',title:'La hiérarchie du camp',
    text:'Dans cette salle, vous n’êtes ni le plus fort ni le mieux payé. On vous le fait sentir à chaque round de sparring.',
@@ -400,7 +401,7 @@ const FAITH_BRANCH_EVENTS=[
   {id:'evt_br_regional_coach',req:f=>f._stable==='regional',title:'Le coach qui plafonne',
    text:'Celui qui vous entraîne depuis le début n’a jamais mené personne au-delà du niveau régional. Il le sait.',
    choices:[{label:'Rester fidèle',d:[['morale',9],['heart',4],['fightIQ',-3]]},
-            {label:'Chercher un préparateur au-dessus',d:[['fightIQ',7],['adaptability',4],['morale',-9]]}]},
+            {label:'Chercher un préparateur au-dessus',d:[['fightIQ',7],['adaptability',4],['morale',-9]],oathBreak:'homegrown'}]},
   {id:'evt_br_elite_camera',req:f=>f._stable==='elite',title:'Les caméras dans la salle',
    text:'Le camp tourne un documentaire. Vos séances les plus dures seront diffusées, ratages compris.',
    choices:[{label:'Jouer le jeu',d:[['confidence',5],['morale',4],['focus',-5]],traitTag:'showman'},
@@ -829,6 +830,71 @@ function scr_faith_event(){
    </div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_SERMENTS] — la rejouabilité ne vient pas d'ajouter du
+   contenu, elle vient de contraintes qui rendent problématique le contenu
+   déjà connu. Un serment se jure avant la carrière : il n'est ni acheté, ni
+   équipé, ni stocké — il se déclare et il se tient. Il ne donne AUCUN
+   avantage mécanique, seulement un multiplicateur sur le Score de Légende et
+   une mention permanente. C'est le point : une carrière optimisée pour le
+   serment n'est pas une carrière optimisée pour la note, et il faut trancher
+   avant de commencer. Quatre serments seulement sont proposés, tirés d'un
+   pool plus large : offrir la liste complète inviterait à l'optimisation,
+   la rareté de l'offre force l'engagement. ==== */
+const FAITH_OATHS=[
+  {id:'no_shortcut',label:'Jamais de raccourci',
+   texte:'Je ne prendrai jamais de raccourci : ni produit, ni juge acheté, ni pesée arrangée.',
+   rappel:'Aucun privilège illégal de toute la carrière.'},
+  {id:'old_lion',label:'Le vieux lion',
+   texte:'Je serai encore champion quand on me dira que je suis trop vieux.',
+   rappel:'Décrocher une ceinture à 34 ans ou plus.'},
+  {id:'undefeated',label:'Invaincu jusqu’au titre',
+   texte:'Je porterai la ceinture sans avoir jamais connu la défaite.',
+   rappel:'Être champion en n’ayant jamais perdu.'},
+  {id:'blood_master',label:'Le sang du maître',
+   texte:'Celui que j’aurai formé tombera devant moi.',
+   rappel:'Battre son propre protégé devenu rival.'},
+  {id:'long_road',label:'La route longue',
+   texte:'Je combattrai jusqu’à ce que mon corps me le refuse.',
+   rappel:'Aller jusqu’à 38 ans sans raccrocher.'},
+  {id:'homegrown',label:'Fidèle à la salle',
+   texte:'Je ne quitterai jamais ceux qui m’ont appris à me battre.',
+   rappel:'Ne jamais accepter l’offre d’une autre écurie.'}
+];
+/** Le serment est-il tenu au moment de la retraite ?
+ * Un serment rompu en cours de route l'est définitivement.
+ * @param {object} oath @param {object} f @param {object} F G.faith @returns {boolean} */
+function faithOathFulfilled(oath,f,F){
+  if(!oath || oath.broken) return false;
+  const titres=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
+  switch(oath.id){
+    case 'no_shortcut': return true;              /* purement négatif : tenu tant que non rompu */
+    case 'homegrown':   return true;
+    case 'old_lion':    return !!F.beltAfter34;
+    case 'undefeated':  return titres>0 && (f.L||0)===0;
+    case 'blood_master':return !!F.nemesisBeaten;
+    case 'long_road':   return (f.age||0)>=38;
+    default: return false;
+  }
+}
+function faithOathBadge(F){
+  const o=F&&F.oath; if(!o) return '';
+  return `<div class="mono" style="font-size:11px;color:${o.broken?'var(--muted)':'var(--gold)'};${o.broken?'text-decoration:line-through':''}">${o.broken?'Serment rompu':'✦'} ${esc(o.label)}</div>`;
+}
+function scr_faith_oath(){
+  const choix=(G.faithDraft&&G.faithDraft.oathPool)||[];
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="eyebrow" style="font-size:12px;letter-spacing:.14em">Avant de commencer, jurez-vous quelque chose ?</div>
+   <p class="muted small">Un serment n’apporte aucun avantage. Tenu jusqu’au bout, il pèse sur ce qu’on retiendra de vous.</p>
+   <div style="display:flex;flex-direction:column;gap:12px">
+     ${choix.map(o=>`<div class="opp" style="padding:16px;min-height:96px;text-align:left;border:1px solid var(--line)" onclick="CL.swearOath('${o.id}')">
+       <div class="hero-name" style="font-size:16px">« ${o.texte} »</div>
+       <div class="muted" style="font-size:12px;margin-top:8px">${o.rappel}</div>
+     </div>`).join('')}
+   </div>
+   <button class="btn ghost" onclick="CL.swearOath('')">Ne rien jurer</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_SCORE_LEGENDE] — scalaire de clôture du mode Faith.
    Sans un nombre unique en sortie, une carrière narrative n'a aucune raison
    d'être recommencée : c'est lui qui rend une partie comparable à la
@@ -892,7 +958,8 @@ function scr_faith_epilogue(){
   const f=G.f, sc=computeLegendScore(f);
   const debut=2026, fin=(G.faith&&G.faith.year)||debut;
   const serment=(G.faith&&G.faith.oath)||null;
-  const mult=(serment&&serment.kept)?1.15:1;
+  const tenu=serment?faithOathFulfilled(serment,f,G.faith||{}):false;
+  const mult=tenu?1.15:1;
   const total=Math.min(100,Math.round(sc.total*mult));
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div style="height:120px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:32px">
@@ -910,7 +977,7 @@ function scr_faith_epilogue(){
      ${faithScoreRow('Empreinte',sc.empreinte,14,540)}
      ${faithScoreRow('Fortune',sc.fortune,10,720)}
    </div>
-   ${serment?`<div class="mono" style="font-size:11px;color:${serment.kept?'var(--gold)':'var(--muted)'};${serment.kept?'':'text-decoration:line-through'}">${serment.kept?'✦ Serment tenu — score ×1,15':'Serment rompu'} · ${esc(serment.label)}</div>`:''}
+   ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.newFaithCareer()">ÉCRIRE UNE AUTRE LÉGENDE</button>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('hof')">Voir le Panthéon</button>
   </div>`;
