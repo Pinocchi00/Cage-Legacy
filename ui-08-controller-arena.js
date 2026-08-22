@@ -1287,6 +1287,13 @@ const CL={
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
+    /* ==== [ANCRE: FAITH_PARCOURS] — archive AVANT la purge de yearLog
+       quelques lignes plus bas : G.faith.yearStats (posé par
+       prepareFaithYearEnd() pour l'écran de bilan qu'on quitte tout juste)
+       porte encore les données de l'année qui vient de se terminer, et
+       G.faith.year n'a pas encore été incrémenté. ==== */
+    if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
+    /* ==== [FIN ANCRE] ==== */
     G.faith.year++; G.faith.step=1;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
     /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
@@ -1294,6 +1301,15 @@ const CL={
        annuels. ==== */
     G.faith.suspended=false;
     G.faith.startOfYearElo=G.f.careerElo; G.faith.startOfYearEarnings=G.f.earnings||0;
+    /* ==== [ANCRE: FAITH_PARCOURS] — mêmes photographies de début d'année que
+       startOfYearElo/startOfYearEarnings juste au-dessus, pour que
+       faithArchiveYear() puisse mesurer CE QUI S'EST PASSÉ CETTE ANNÉE
+       (scandale, serment rompu) plutôt que l'état cumulé depuis toujours —
+       sinon toutes les années suivant une rupture hériteraient à tort du
+       marqueur de rupture. ==== */
+    G.faith.startOfYearScandals=G.faith.scandals||0;
+    G.faith.startOfYearOathBroken=!!(G.faith.oath&&G.faith.oath.broken);
+    /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
     advanceRoster();
@@ -1858,8 +1874,9 @@ const CL={
     // récapitulatif. On archive donc cette saison en cours ici aussi, avant
     // de sceller la carrière.
     const sData=G.season||{year:1,fights:[]};
+    let seasonEval=null;
     if(sData.fights && sData.fights.length){
-      const seasonEval=evaluateSeason(G.f,sData.fights);
+      seasonEval=evaluateSeason(G.f,sData.fights);
       if(!G.f.seasonRecap) G.f.seasonRecap=[];
       G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
         koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
@@ -1878,6 +1895,19 @@ const CL={
        (déjà comptée dans meta.faithBest par son propre appel) et ne peut
        plus jamais afficher "première légende" ni "meilleure carrière". ==== */
     if(G.faith){
+      /* ==== [ANCRE: FAITH_PARCOURS] — même angle mort que
+         CORRECTIF_SAISON_PARTIELLE_RETRAITE juste au-dessus, et pour la même
+         raison : la retraite ne passe jamais par nextFaithYear() (elle sort
+         par CE contrôleur-ci, pas par le bouton "SAISON N+1"), donc l'année
+         en cours n'aurait jamais été archivée dans le Parcours sans ce
+         bloc. seasonEval, calculé juste au-dessus pour f.seasonRecap, sert
+         aussi ici — G.season.fights vient d'être vidé, seule cette variable
+         garde encore le bilan de l'année partielle. */
+      if(seasonEval || (G.faith.yearLog&&G.faith.yearLog.length)){
+        faithArchiveYear(G.faith.year,{wins:seasonEval?seasonEval.stats.W:0,
+          losses:seasonEval?seasonEval.stats.L:0,rank:divRank(G.f),yearLog:G.faith.yearLog||[]},G.f,G.faith);
+      }
+      /* ==== [FIN ANCRE] ==== */
       const finalScore=faithFinalScore(G.f,G.faith);
       G.faith.finalScore=finalScore;
       G.faith.previousBest=getFaithBest();

@@ -1015,6 +1015,7 @@ function scr_faith_epilogue(){
      ${faithScoreRow('Fortune',sc.fortune,10,720)}
    </div>
    <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
+   ${faithJourneyBlock(G.faith)}
    ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.newFaithCareer()">ÉCRIRE UNE AUTRE LÉGENDE</button>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('hof')">Voir le Panthéon</button>
@@ -1112,6 +1113,52 @@ function faithPresseArticle(ys,f,F){
   return {titre:titres[h%titres.length],angle,
     corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0">${ton}</p>`:''}`};
 }
+/* ==== [ANCRE: FAITH_PARCOURS] — le bilan annuel (coupure de presse) se
+   lisait puis disparaissait : G.faith.yearLog était purgé à chaque nouvelle
+   année (cf. nextFaithYear(), ui-08), sans qu'aucune trace ne survive à
+   l'épilogue. Une carrière de dix ans ne pouvait raconter que sa toute
+   dernière saison. G.faith.journey archive chaque année AVANT cette purge :
+   le titre de presse déjà calculé par faithPresseArticle() (déterministe,
+   donc stable si jamais réaffiché), le palmarès et le rang de l'année,
+   jusqu'à deux événements notables (un raté prime toujours sur un réussi —
+   même logique que le "marquant" ci-dessus), et un repère de rupture
+   (serment brisé ou scandale survenu CETTE année précisément, pas juste
+   "actuellement brisé" — sinon toutes les années suivant une rupture
+   hériteraient à tort du marqueur). ==== */
+function faithArchiveYear(year,ys,f,F){
+  if(!F.journey) F.journey=[];
+  const log=(ys.yearLog||[]);
+  const rate=log.filter(l=>l.outcome==='raté');
+  const reste=log.filter(l=>l.outcome!=='raté');
+  const notables=rate.concat(reste).slice(0,2).map(l=>l.title);
+  const scandalsDelta=(F.scandals||0)-(F.startOfYearScandals||0);
+  const oathJustBroken=!F.startOfYearOathBroken && !!(F.oath&&F.oath.broken);
+  F.journey.push({year,W:ys.wins||0,L:ys.losses||0,rank:ys.rank,
+    title:faithPresseArticle(ys,f,F).titre,age:f.age,notables,
+    rupture:scandalsDelta>0||oathJustBroken});
+}
+/** Une ligne du Parcours, hauteur fixe (40px) : le regard descend la liste
+ * sans que rien ne se dérobe d'une année à l'autre.
+ * @param {object} e une entrée de G.faith.journey */
+function faithJourneyRow(e){
+  return `<div style="display:flex;align-items:center;gap:10px;height:40px;border-bottom:1px solid var(--line)">
+    <span class="mono" style="flex:0 0 38px;font-size:11px;color:var(--muted)">${e.year}</span>
+    <span class="mono" style="flex:0 0 44px;font-size:12px">${e.W}-${e.L}</span>
+    <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.title)}</span>
+    <span class="mono" style="flex:0 0 14px;text-align:center;font-size:13px;color:var(--loss)">${e.rupture?'✦':''}</span>
+    <span class="mono" style="flex:0 0 32px;text-align:right;font-size:11px;color:var(--muted)">#${e.rank||'—'}</span>
+  </div>`;
+}
+/** Le Parcours complet, positionné entre la décomposition du score et le
+ * badge de serment sur l'épilogue — jamais au-dessus de la note elle-même.
+ * @param {object} F G.faith @returns {string} */
+function faithJourneyBlock(F){
+  const j=(F&&F.journey)||[];
+  if(!j.length) return '';
+  return `<div class="eyebrow" style="font-size:11px;margin:20px 0 8px">LE PARCOURS</div>
+    <div style="margin-bottom:20px">${j.map(faithJourneyRow).join('')}</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_year_end(){
   const ys=G.faith.yearStats, f=G.f, F=G.faith;
   const art=faithPresseArticle(ys,f,F);
