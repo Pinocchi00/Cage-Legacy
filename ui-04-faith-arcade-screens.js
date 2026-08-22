@@ -849,9 +849,18 @@ function formatEventDelta(d){
    Les événements sans champ `risk` restent parfaitement déterministes : la
    compatibilité avec le pool existant est totale, et il FAUT que la moitié
    le reste, sinon le contraste disparaît et le risque cesse de se voir. ==== */
+/* ==== [CORRECTIF FA-21] — un pourcentage exact ("35% de rater") invite au
+   calcul et rouvre exactement la porte que FA-20 referme : le joueur
+   recommence à arbitrer sur un chiffre plutôt que sur ce qu'on lui raconte.
+   Trois paliers qualitatifs, dérivés du même champ c.risk (aucune donnée
+   changée). Absence de risque = silence complet, pas "Sûr" : un badge sur
+   CHAQUE carte sature l'écran, l'absence de marqueur EST le signal. Le
+   filet rouge à gauche de la carte (posé séparément par l'appelant) reste
+   l'unique repère visuel — un signal, un texte, rien de plus. ==== */
 function formatRiskBadge(c){
-  if(!c.risk) return `<span class="tag2" style="border-color:var(--line);color:var(--muted)">Sûr</span>`;
-  return `<span class="tag2" style="border-color:var(--f-red-hi);color:var(--gold)">${Math.round(c.risk*100)}% de rater</span>`;
+  if(!c.risk) return '';
+  const texte=c.risk<=0.25?'Ça peut mal tourner':c.risk<=0.45?'C’est un pari':'Vous savez que c’est stupide';
+  return `<span class="tag2" style="border-color:var(--f-red-hi);color:var(--gold)">${texte}</span>`;
 }
 function scr_faith_event(){
   const ev=G.faith.currentEvent;
@@ -863,7 +872,33 @@ function scr_faith_event(){
      rupture de gabarit se lit comme un signal d'importance avant même que le
      texte soit lu — c'est ce qui distingue l'aboutissement de ce système de
      n'importe quel autre événement de la pioche. ==== */
+  /* ==== [CORRECTIF FA-20] — les deltas (formatEventDelta) et la prime
+     s'affichaient sur CHAQUE carte avant même le clic : le joueur arbitrait
+     sur les chiffres, jamais sur le texte — l'exact inverse de la règle
+     déjà tenue par la création (FAITH_CREATION_SEQUENTIELLE). Résolution en
+     deux temps sur LE MÊME écran : G.faith.eventResolved (posé par
+     chooseFaithEvent(), ui-08) fait basculer ce rendu vers la vue "choix
+     retenu seul + conséquence révélée", sans navigation supplémentaire.
+     .stagger réutilise l'échelonnement déjà utilisé pour les listes
+     ailleurs dans le jeu, plutôt que d'inventer une seconde animation. ==== */
+  const resolved=G.faith.eventResolved;
   if(ev.id==='evt_frankenstein_betrayal'){
+    if(resolved){
+      const c=ev.choices[resolved.idx];
+      return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
+       <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
+       <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
+       <p style="font-size:15px;line-height:1.55">${esc(ev.text)}</p>
+       <div class="opp" style="padding:16px;min-height:72px;text-align:left">
+         <b style="font-size:15px">${esc(c.label)}</b>
+       </div>
+       <div class="stagger" style="margin-top:20px">
+         <div class="tagrow">${formatEventDelta(resolved.deltas)}</div>
+         ${resolved.traitAcquired?`<p class="small" style="color:var(--gold);margin-top:12px">NOUVEAU TRAIT ACQUIS : ${esc(resolved.traitAcquired)}</p>`:''}
+       </div>
+       <button class="btn primary" style="width:100%;height:56px;margin-top:32px;font-size:16px" onclick="CL.faithEventContinue()">CONTINUER</button>
+      </div>`;
+    }
     return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
      <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
      <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
@@ -871,12 +906,28 @@ function scr_faith_event(){
      <div style="display:flex;flex-direction:column;gap:10px">
        ${ev.choices.map((c,i)=>`<div class="opp" style="padding:16px;min-height:72px;text-align:left" onclick="CL.chooseFaithEvent(${i})">
          <b style="font-size:15px">${esc(c.label)}</b>
-         <div class="tagrow" style="margin-top:10px">${formatEventDelta(c.d)}</div>
        </div>`).join('')}
      </div>
     </div>`;
   }
   /* ==== [FIN ANCRE] ==== */
+  if(resolved){
+    const c=ev.choices[resolved.idx];
+    return `<div class="scr" style="max-width:560px;margin:0 auto">
+     <div class="eyebrow">${(G.faith.step||1)>=3?'Le monde':'La salle'}</div>
+     <h2 class="hero-name" style="font-size:28px;line-height:1.1">${esc(ev.title)}</h2>
+     <p class="lede small">${esc(ev.text)}</p>
+     <div class="opp" style="padding:16px;min-height:72px;text-align:left">
+       <b style="font-size:15px">${esc(c.label)}</b>${resolved.reward?`<span class="small" style="color:var(--win)"> (+${resolved.reward}k$)</span>`:''}
+     </div>
+     <div class="stagger" style="margin-top:20px">
+       <p class="small muted" style="margin:0">${resolved.failed?'Ça n’a pas tourné comme prévu.':'C’est fait.'}</p>
+       <div class="tagrow" style="margin-top:10px">${formatEventDelta(resolved.deltas)}</div>
+       ${resolved.traitAcquired?`<p class="small" style="color:var(--gold);margin-top:12px">NOUVEAU TRAIT ACQUIS : ${esc(resolved.traitAcquired)}</p>`:''}
+     </div>
+     <button class="btn primary" style="width:100%;height:56px;margin-top:32px;font-size:16px" onclick="CL.faithEventContinue()">CONTINUER</button>
+    </div>`;
+  }
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow">${(G.faith.step||1)>=3?'Le monde':'La salle'}</div>
    <h2 class="hero-name" style="font-size:28px;line-height:1.1">${esc(ev.title)}</h2>
@@ -888,8 +939,8 @@ function scr_faith_event(){
           signaux redondants annuleraient le gain de lisibilité. */
        const risque=!!c.risk;
        return `<div class="glass${locked?'':' opp'}" style="padding:16px;min-height:72px;text-align:left;${risque?'border-left:3px solid var(--f-red-hi);':''}opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
-         <b style="font-size:15px">${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}${c.reward?`<span class="small" style="color:var(--win)"> (+${c.reward}k$)</span>`:''}
-         <div class="tagrow" style="margin-top:10px">${formatRiskBadge(c)}${formatEventDelta(c.d)}</div>
+         <b style="font-size:15px">${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}
+         <div class="tagrow" style="margin-top:10px">${formatRiskBadge(c)}</div>
        </div>`;
      }).join('')}
    </div></div>`;
@@ -1063,25 +1114,32 @@ function scr_faith_epilogue(){
   const previousBest=(G.faith&&typeof G.faith.previousBest==='number')?G.faith.previousBest:getFaithBest();
   const compare=faithLegendCompareLine(total,previousBest);
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: FAITH_PAPIER_OBJET] — même traitement que la coupure de
+     presse annuelle : le verdict d'une carrière est le second (et dernier)
+     endroit où le papier a sa place. Les deux boutons d'action restent SUR
+     LE NOIR, hors du papier — ce sont des commandes du jeu, pas le contenu
+     du document. ==== */
   return `<div class="scr" style="max-width:560px;margin:0 auto">
-   <div style="height:120px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:32px">
-     <div class="hero-name" style="font-size:34px;line-height:1.05">${esc(f.name)}</div>
-     <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">${debut} – ${fin} · ${f.W}-${f.L}${f.ko?` · ${f.ko} KO`:''}</div>
+   <div class="faith-paper">
+     <div style="height:120px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:32px">
+       <div class="hero-name" style="font-size:34px;line-height:1.05">${esc(f.name)}</div>
+       <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">${debut} – ${fin} · ${f.W}-${f.L}${f.ko?` · ${f.ko} KO`:''}</div>
+     </div>
+     <div style="text-align:center;padding:48px 0">
+       <div class="hero-name" style="font-size:96px;font-weight:700;line-height:.9">${total}</div>
+       <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100</div>
+     </div>
+     <div style="margin-bottom:12px">
+       ${faithScoreRow('Palmarès',sc.palmares,32,0)}
+       ${faithScoreRow('Sommet',sc.sommet,26,180)}
+       ${faithScoreRow('Intégrité',sc.longevite,18,360)}
+       ${faithScoreRow('Empreinte',sc.empreinte,14,540)}
+       ${faithScoreRow('Fortune',sc.fortune,10,720)}
+     </div>
+     <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
+     ${faithJourneyBlock(G.faith)}
+     ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    </div>
-   <div style="text-align:center;padding:48px 0">
-     <div class="hero-name" style="font-size:96px;font-weight:700;line-height:.9">${total}</div>
-     <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100</div>
-   </div>
-   <div style="margin-bottom:12px">
-     ${faithScoreRow('Palmarès',sc.palmares,32,0)}
-     ${faithScoreRow('Sommet',sc.sommet,26,180)}
-     ${faithScoreRow('Intégrité',sc.longevite,18,360)}
-     ${faithScoreRow('Empreinte',sc.empreinte,14,540)}
-     ${faithScoreRow('Fortune',sc.fortune,10,720)}
-   </div>
-   <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
-   ${faithJourneyBlock(G.faith)}
-   ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.newFaithCareer()">ÉCRIRE UNE AUTRE LÉGENDE</button>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('faith_legends')">Voir les Légendes à battre</button>
   </div>`;
@@ -1295,12 +1353,14 @@ function scr_faith_year_end(){
       <div class="muted small">${sk.desc||sk.blurb||''}</div></div>`; }).join('');
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    ${faithSeasonBar(5)}
-   <div style="border-top:1px solid var(--text);border-bottom:3px solid var(--text);padding:10px 0;display:flex;justify-content:space-between;align-items:baseline">
-     <span class="hero-name" style="font-size:18px;letter-spacing:.06em">${media}</span>
-     <span class="mono" style="font-size:11px;color:var(--muted)">Saison ${F.year}</span>
+   <div class="faith-paper">
+     <div style="border-top:1px solid var(--text);border-bottom:3px solid var(--text);padding:10px 0;display:flex;justify-content:space-between;align-items:baseline">
+       <span class="hero-name" style="font-size:18px;letter-spacing:.06em">${media}</span>
+       <span class="mono" style="font-size:11px;color:var(--muted)">Saison ${F.year}</span>
+     </div>
+     <h2 class="hero-name" style="font-size:28px;line-height:1.08;margin:12px 0 0">${art.titre}</h2>
+     <div style="font-size:15px;line-height:1.55;margin-top:12px">${art.corps}</div>
    </div>
-   <h2 class="hero-name" style="font-size:28px;line-height:1.08;margin:0">${art.titre}</h2>
-   <div style="font-size:15px;line-height:1.55">${art.corps}</div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
      ${chiffre(`${ys.wins}-${ys.losses}`,'Bilan')}
      ${chiffre(`${ys.eloDelta>0?'+':''}${ys.eloDelta}`,'Progression',ys.eloDelta>=0?'var(--win)':'var(--loss)')}

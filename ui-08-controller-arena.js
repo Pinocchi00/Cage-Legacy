@@ -23,23 +23,26 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
-  /* ==== [ANCRE: FAITH_SKIN_BASCULE] — MMA Faith inverse la luminance du jeu
-     (papier/encre au lieu de cuir/or). Le basculement se fait par une classe
-     sur <body> plutôt que par des styles en ligne dans chaque écran : un seul
-     point de vérité, aucun écran Faith à retoucher pour changer la palette.
+  /* ==== [ANCRE: FAITH_SKIN_BASCULE] — MMA Faith bascule sur sa propre
+     palette (noir encre plat + accent oxblood, cf. FAITH_SKIN_BASCULE dans
+     index.html). Le basculement se fait par une classe sur <body> plutôt que
+     par des styles en ligne dans chaque écran : un seul point de vérité,
+     aucun écran Faith à retoucher pour changer la palette.
      Le test initial (préfixe "faith" sur le nom d'écran) laissait fuir le
-     skin sombre/or sur les écrans transverses (select, plan, result, profile,
-     hof, retire) atteints DEPUIS une carrière Faith mais dont le nom ne
-     commence pas par "faith" — ~40% du parcours affichait la mauvaise
-     palette. Le test porte désormais sur l'appartenance au mode
-     (G.f.gameMode==='faith'), avec le préfixe d'écran gardé en repli pour
-     faith_draft (s'affiche avant que G.faith/G.f existent). Exception
-     délibérée : l'écran "arena" (le combat lui-même) reste toujours en
-     cuir/or — papier=vie, noir=cage est un seuil narratif volontaire, pas un
-     oubli. ==== */
+     skin sur les écrans transverses (select, plan, result, profile, hof,
+     retire) atteints DEPUIS une carrière Faith mais dont le nom ne commence
+     pas par "faith" — ~40% du parcours affichait la mauvaise palette. Le
+     test porte sur l'appartenance au mode (G.f.gameMode==='faith'), avec le
+     préfixe d'écran gardé en repli pour faith_draft (s'affiche avant que
+     G.faith/G.f existent).
+     ==== [CORRECTIF FA-10bis] — l'écran "arena" était exclu par choix
+     narratif (papier=vie, noir=cage) tant que la palette Faith restait un
+     papier crème très clair : le contraste avec le cuir/or de l'arène
+     produisait un flash violent à chaque entrée en cage. Sans objet
+     maintenant que les deux palettes sont sombres (FA-08) — l'exception est
+     retirée, la transition hub->arène devient continue. ==== */
   { const _sName=String((G&&G.screen)||'');
-    const _enFaith=(_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith'))
-      && _sName!=='arena';
+    const _enFaith=_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith');
     document.body.classList.toggle('faith-skin', _enFaith); }
   /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
@@ -1217,14 +1220,11 @@ const CL={
     }
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
-    G.faith.currentEvent=null;
-    /* Le pari perdu prime sur l'accusé de réception : c'est la seule
-       information que le joueur doit emporter de cet écran. */
-    G.lastMsg=failed?"Ça n\u2019a pas tourné comme prévu.":("Événement résolu : "+ev.title);
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:ev.title,choice:c.label,outcome:failed?'raté':'réussi'});
     // Moteur d'émergence : un choix taggé traitTag renforce une tendance cachée ;
     // au 3e choix dans la même direction, elle se cristallise en trait permanent.
+    let traitAcquired=null;
     if(c.traitTag){
       if(!G.f.hiddenTraits) G.f.hiddenTraits={};
       if(!G.f.faithTraits) G.f.faithTraits=[];
@@ -1233,12 +1233,30 @@ const CL={
       const traitName=TRAIT_NAMES[c.traitTag];
       if(traitName && G.f.hiddenTraits[c.traitTag]>=3 && !G.f.faithTraits.includes(traitName)){
         G.f.faithTraits.push(traitName);
-        G.lastMsg=`Événement résolu : ${ev.title}. NOUVEAU TRAIT ACQUIS : ${traitName} !`;
+        traitAcquired=traitName;
       }
     }
-    /* ==== [ANCRE: FAITH_CINQ_TEMPS] — deux événements de vie par an : celui
-       de la salle (temps 1) mène au camp, celui du monde (temps 3) mène à
-       l'octogone. ==== */
+    /* ==== [CORRECTIF FA-20] — les deltas ne s'affichaient qu'AVANT le choix
+       (formatEventDelta() visible sur chaque carte), l'exact inverse de la
+       règle déjà tenue par la création (FAITH_CREATION_SEQUENTIELLE) : le
+       joueur arbitrait sur les chiffres, jamais sur le texte. G.faith.
+       currentEvent n'est PLUS effacé ici — scr_faith_event() (ui-04) en a
+       encore besoin pour rendre la vue "résolue" (choix retenu seul,
+       conséquence révélée) sur ce même écran. L'avance de temps
+       (step/écran), qui effaçait currentEvent au passage, est repoussée
+       dans faithEventContinue(), déclenchée par le bouton CONTINUER de
+       cette vue résolue. ==== */
+    G.faith.eventResolved={idx:i,failed,deltas:(failed?c.bad:c.d)||[],reward:c.reward||0,traitAcquired};
+    save(); render();
+  },
+  /* ==== [ANCRE: FAITH_CINQ_TEMPS] — deux événements de vie par an : celui
+     de la salle (temps 1) mène au camp, celui du monde (temps 3) mène à
+     l'octogone. Repoussé ici (hors de chooseFaithEvent()) par le correctif
+     FA-20 : l'avance de temps n'a plus lieu au moment du choix, mais au clic
+     sur CONTINUER, une fois la conséquence lue. ==== */
+  faithEventContinue(){
+    G.faith.currentEvent=null;
+    G.faith.eventResolved=null;
     G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub'; save(); render();
   },
   /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — startFightSelect() (ui-02) commence
