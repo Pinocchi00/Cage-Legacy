@@ -1459,6 +1459,29 @@ const CL={
     G.faith.peakEarnings=Math.max(G.faith.peakEarnings||0,f.earnings||0);
     G.faith.dmgHeadTotal=(G.faith.dmgHeadTotal||0)+dmgHead;
     /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: FA-28] — « le combat de trop ». isDeclining() (engine.js,
+       déjà le seuil qui déclenche l'écran de retraite, scr_faith_retire) et
+       dmgHeadTotal (déjà suivi, ci-dessus) existaient déjà séparément, mais
+       ne se parlaient pas : continuer à combattre en déclin ne coûtait
+       jamais rien de mécanique, seulement un texte d'ambiance sur l'écran
+       de retraite. Le seuil de 150 reprend celui déjà affiché par
+       scr_faith_retire ("les coups laissent des traces" à partir de 150).
+       -1 sur f.attrs ET f.maxAttrs (le plafond d'entraînement, engine.js/
+       applyDeltas) : sans toucher au plafond, l'entraînement futur
+       effacerait la perte, ce qui contredirait "irréversible". Jamais
+       chiffré à l'écran (règle H.1/H.2) — seule une phrase, à la coupure
+       de presse, au même rythme annuel que ce bloc (faithPresseArticle,
+       ui-04, lit G.faith.yearStats.sequelle, un champ purgé avec le reste
+       de yearStats à chaque nouvelle année) : au plus une séquelle par
+       année de carrière. */
+    let sequelle=null;
+    if(isDeclining(f) && G.faith.dmgHeadTotal>150 && (G.season.fights||[]).length>0 && rnd()<0.12){
+      const cible=rnd()<0.5?'chin':'composure';
+      f.attrs[cible]=clamp((f.attrs[cible]||50)-1,1,100);
+      if(f.maxAttrs) f.maxAttrs[cible]=clamp((f.maxAttrs[cible]||f.attrs[cible])-1,1,100);
+      sequelle=cible;
+    }
+    /* ==== [FIN ANCRE] ==== */
     if((G.season.fights||[]).length>=1){
       let totalSig=0, totalTdAtt=0, totalCtrl=0, totalKD=0;
       G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0; });
@@ -1497,7 +1520,7 @@ const CL={
       fights:G.faith.fightsThisYear,
       wins:(G.season.fights||[]).filter(x=>x.win).length,
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
-      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[]
+      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle
     };
     G.screen='faith_year_end'; save(); render();
   },

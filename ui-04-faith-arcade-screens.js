@@ -1581,8 +1581,19 @@ function faithPresseArticle(ys,f,F){
   const marquant=log.find(l=>l.outcome==='raté')||log[log.length-1]||null;
   const ligne=marquant?`<p style="margin:0 0 12px">« ${esc(marquant.title)} » aura marqué l’année${marquant.outcome==='raté'?' — et pas dans le bon sens':''}.</p>`:'';
   const ton=faithPresseTon(f,angle);
+  /* ==== [ANCRE: FA-28] — la seule trace visible de la séquelle posée par
+     prepareFaithYearEnd() (ui-08) : jamais un chiffre, jamais le mot
+     "définitif" — juste un détail que la presse a remarqué. Le lecteur qui
+     ne fait pas le lien ne perd rien à l'histoire ; celui qui consulte sa
+     fiche et voit un menton ou un sang-froid qui ne remonte plus comprend
+     rétrospectivement ce que cette ligne annonçait. */
+  const sequelleTxt=ys.sequelle==='chin'
+    ? 'On l’a vu accuser un coup, cette année, d’une manière qu’on ne lui connaissait pas.'
+    : ys.sequelle==='composure'
+    ? 'On l’a vu chercher ses mots en conférence, cette année, d’une manière qu’on ne lui connaissait pas.'
+    : '';
   return {titre:titres[h%titres.length],angle,
-    corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0">${ton}</p>`:''}`};
+    corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0 0 12px">${ton}</p>`:''}${sequelleTxt?`<p class="muted small" style="margin:0">${sequelleTxt}</p>`:''}`};
 }
 /* ==== [ANCRE: FAITH_PARCOURS] — le bilan annuel (coupure de presse) se
    lisait puis disparaissait : G.faith.yearLog était purgé à chaque nouvelle
