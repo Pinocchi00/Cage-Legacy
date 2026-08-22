@@ -1059,10 +1059,68 @@ function scr_faith_epilogue(){
    ${faithJourneyBlock(G.faith)}
    ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.newFaithCareer()">ÉCRIRE UNE AUTRE LÉGENDE</button>
-   <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('hof')">Voir le Panthéon</button>
+   <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('faith_legends')">Voir les Légendes à battre</button>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_LEGENDES_A_BATTRE] — couche 2 et 3 de la méta-
+   progression Faith (dépend entièrement de FAITH_MEMOIRE_LEGENDES,
+   state.js, qui alimente meta.faithLegends). L'épilogue pointait vers le
+   Panthéon général — utile, mais générique à tous les modes et sans
+   rapport avec le système de score propre à Faith. Cet écran remplace ce
+   lien par une vitrine spécifique : la galerie des 12 meilleures carrières
+   jamais scellées, et un face-à-face qui réutilise faithScoreRow() (déjà
+   la brique visuelle de la décomposition sur l'épilogue) plutôt que
+   d'inventer un second système d'affichage pour les mêmes cinq familles de
+   score. Le Panthéon général reste à un clic du menu principal (cf.
+   scr_title, ui-06) — retiré d'ici, il n'aurait sinon plus eu AUCUN chemin
+   pour un joueur qui ne joue qu'en Faith.
+   Volontairement absent : le "défi du jour" à origine/style/serment forcés
+   par la date, qui faisait partie de la même proposition côté document
+   mais a été explicitement écarté de cette passe. ==== */
+/** Une carrière de la galerie, sélectionnable pour le face-à-face.
+ * @param {object} e entrée de meta.faithLegends @param {number} idx rang (0-based) @param {boolean} sel sélectionnée */
+function faithLegendCard(e,idx,sel){
+  return `<div class="opp" style="padding:14px;text-align:left;${sel?'border:2px solid var(--gold);':''}" onclick="CL.toggleFaithLegendCompare('${e.id}')">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+      <b style="font-size:15px">#${idx+1} ${esc(e.name)} ${e.flag||''}</b>
+      <span class="mono" style="font-size:18px;flex:0 0 auto">${e.score}</span>
+    </div>
+    <div class="mono small muted" style="margin-top:4px">${e.W}-${e.L}${e.ko?` · ${e.ko} KO`:''} · ${e.years} an${e.years>1?'s':''}</div>
+    ${(e.oath&&e.oath.fulfilled)?`<div class="mono small" style="color:var(--gold);margin-top:4px">✦ ${esc(e.oath.label)}</div>`:''}
+  </div>`;
+}
+/** Décomposition d'une carrière pour le face-à-face — même faithScoreRow()
+ * que la décomposition de l'épilogue, empilées plutôt que côte à côte :
+ * faithScoreRow() a une étiquette à largeur fixe (128px) pensée pour la
+ * pleine largeur de l'écran, pas pour tenir dans une demi-colonne. Les deux
+ * décompositions complètes, l'une sous l'autre, restent lisibles à
+ * n'importe quelle largeur d'écran sans toucher à faithScoreRow() elle-même.
+ * @param {object} e entrée de meta.faithLegends */
+function faithLegendCompareCol(e){
+  return `<div style="margin-bottom:20px">
+    <div class="hero-name" style="font-size:18px;margin-bottom:8px">${esc(e.name)} <span class="mono" style="font-size:14px;color:var(--muted)">— ${e.score}/100</span></div>
+    ${faithScoreRow('Palmarès',e.sub.palmares,32,0)}
+    ${faithScoreRow('Sommet',e.sub.sommet,26,0)}
+    ${faithScoreRow('Intégrité',e.sub.longevite,18,0)}
+    ${faithScoreRow('Empreinte',e.sub.empreinte,14,0)}
+    ${faithScoreRow('Fortune',e.sub.fortune,10,0)}
+  </div>`;
+}
+function scr_faith_legends(){
+  const meta=loadMetaStats();
+  const list=(meta.faithLegends||[]);
+  const sel=G.faithLegendsCompare||[];
+  const selected=sel.map(id=>list.find(e=>e.id===id)).filter(Boolean);
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Légendes à battre</span><span class="eyebrow x" onclick="CL.go('faith_epilogue')">✕</span></div>
+   ${list.length?`<p class="lede small">Les meilleures carrières jamais écrites. Touche deux cartes pour les comparer.</p>
+   <div style="display:flex;flex-direction:column;gap:10px">${list.map((e,i)=>faithLegendCard(e,i,sel.includes(e.id))).join('')}</div>
+   ${selected.length===2?`<div class="eyebrow" style="margin:24px 0 12px">FACE-À-FACE</div>
+     ${faithLegendCompareCol(selected[0])}${faithLegendCompareCol(selected[1])}`:''}`
+   :`<p class="lede small">Aucune légende enregistrée pour l’instant. Termine une carrière pour l’inscrire ici.</p>`}
+  </div>`;
+}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_PRESSE] — le bilan annuel était une grille de quatre
    stat-cards et une liste à puces : le moteur rendait compte de lui-même,

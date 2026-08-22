@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -1926,6 +1926,17 @@ const CL={
      doivent survivre à la carrière qui vient de se clore. ==== */
   newFaithCareer(){ const t=G.theme; G={theme:t,faithDraft:{gender:'H',country:COUNTRY_KEYS[0],first:''}}; setTheme(t); G.screen='faith_draft'; render(); },
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: FAITH_LEGENDES_A_BATTRE] — sélection à deux, jamais plus :
+     le 3e clic éjecte le plus ancien choix plutôt que de bloquer, pour que
+     comparer une autre paire ne demande jamais de désélectionner
+     explicitement d'abord. */
+  toggleFaithLegendCompare(id){
+    if(!G.faithLegendsCompare) G.faithLegendsCompare=[];
+    const i=G.faithLegendsCompare.indexOf(id);
+    if(i>=0) G.faithLegendsCompare.splice(i,1);
+    else { G.faithLegendsCompare.push(id); if(G.faithLegendsCompare.length>2) G.faithLegendsCompare.shift(); }
+    render();
+  },
   /* ==== [FIN ANCRE] ==== */
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
