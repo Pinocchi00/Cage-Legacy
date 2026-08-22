@@ -995,10 +995,18 @@ const CL={
   startFaith(){ G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
   selectFaithDraft(key,value){ G.faithDraft[key]=value; render(true); },
+  /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — la création n'est pas une
+     tâche à finir mais une série de portes : on avance d'une question à la
+     fois, et on peut revenir. ==== */
+  faithDraftPage(delta){
+    const d=G.faithDraft||{}; const max=FAITH_DRAFT_PAGES.length-1;
+    d.page=clamp((d.page||0)+delta,0,max);
+    render(); },
+  /* ==== [FIN ANCRE] ==== */
   finalizeFaithDraft(){
     const d=G.faithDraft;
-    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality){
-      G.lastMsg="Complète les 5 catégories avant de commencer."; render(); return;
+    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality || !d.stable){
+      G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
     }
     const f=makeFighter({gender:d.gender||'H',style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18,freshPlayer:true});
     f.gameMode='faith';
@@ -1010,6 +1018,18 @@ const CL={
     if(d.lifestyle==='party'){ f.form=60; f.morale=90; f.hypeBonus=(f.hypeBonus||1)+0.3; }
     if(d.circle==='family'){ f.morale=100; }
     if(d.circle==='agent'){ f.earnings=(f.earnings||0)+30; f.agentCut=0.15; }
+    /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — origine, cercle et hygiène de
+       vie étaient consommés puis jetés : aucun événement ne pouvait s'y
+       brancher, ils n'étaient que des deltas déguisés. Conservés sur le
+       combattant, ils deviennent lisibles par le champ `req` du pool. ==== */
+    f._origin=d.origin; f._circle=d.circle; f._lifestyle=d.lifestyle; f._stable=d.stable;
+    /* ==== [ANCRE: FAITH_ECURIE_DEPART] — le premier dilemme réel : une salle
+       régionale fait combattre souvent contre des adversaires abordables, un
+       camp d'élite fait signer plus haut, contre plus dur. On agit sur
+       l'organisation de départ et sur la qualité des partenaires de salle,
+       tous deux déjà pilotés par le code existant. ==== */
+    if(d.stable==='elite'){ f.org=Math.max(f.org||0,1); f.earnings=(f.earnings||0)+10; f.attrs.fightIQ=clamp((f.attrs.fightIQ||50)+4,1,100); }
+    /* ==== [FIN ANCRE] ==== */
     f.personality=d.personality;
     if(d.personality==='villain'){ f.hypeBonus=(f.hypeBonus||1)+0.3; f.morale=clamp(f.morale-10,0,100); }
     else if(d.personality==='humble'){ f.hypeBonus=1.0; f.morale=clamp(f.morale+15,0,100); f.attrs.focus=clamp((f.attrs.focus||50)+10,1,100); }
@@ -1025,8 +1045,12 @@ const CL={
     G.f=f; G.roster=makeOrgRoster(f);
     // division/genre, qui progresseront en copiant les stats du joueur s'il
     // s'entraîne avec eux (voir CL.faithSparring).
-    const p1=makeFighter({gender:f.gender,div:f.div,age:18,level:clamp(f.overall-15,20,60),potential:95});
-    const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10,20,60),potential:85});
+    /* ==== [ANCRE: FAITH_ECURIE_DEPART] — un camp d'élite, ce sont d'abord des
+       partenaires meilleurs que soi : le Syndrome de Frankenstein s'y
+       déclenche plus tôt, ce qui est exactement le prix du prestige. ==== */
+    const boost=(d.stable==='elite')?8:0;
+    const p1=makeFighter({gender:f.gender,div:f.div,age:18,level:clamp(f.overall-15+boost,20,60),potential:95});
+    const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10+boost,20,60),potential:85});
     p1.isGymPartner=true; p2.isGymPartner=true;
     p1.nick='Le Prodige'; p2.nick='L\u2019Aspirant';
     G.faith={year:2026,step:1,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2]};
@@ -1081,9 +1105,10 @@ const CL={
        sur trois d'y basculer) pour ne pas transformer le mode en catalogue
        ambulant, et la mémoire seenEvents s'applique à elles comme au reste. ==== */
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
+    const base=FAITH_LIFE_EVENTS.concat(FAITH_BRANCH_EVENTS);
     const source=((G.faith.step||1)>=3 && rnd()<0.34)
-      ? FAITH_PERK_OFFERS.concat(FAITH_LIFE_EVENTS)
-      : FAITH_LIFE_EVENTS;
+      ? FAITH_PERK_OFFERS.concat(base)
+      : base;
     let pool=source.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
     if(pool.length===0){ G.faith.seenEvents=[]; pool=source.filter(e=>!e.req||e.req(G.f)); }
     G.faith.currentEvent=pick(pool);
