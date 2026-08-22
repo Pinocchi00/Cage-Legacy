@@ -23,6 +23,16 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
+  /* ==== [ANCRE: FAITH_SKIN_BASCULE] — MMA Faith inverse la luminance du jeu
+     (papier/encre au lieu de cuir/or). Le basculement se fait par une classe
+     sur <body> plutôt que par des styles en ligne dans chaque écran : un seul
+     point de vérité, aucun écran Faith à retoucher pour changer la palette.
+     Le test porte sur le NOM de l'écran seul, pas sur l'existence de G.faith :
+     l'écran de création (faith_draft) s'affiche avant que G.faith existe, et
+     c'est justement le premier écran du mode — il doit être skinné lui
+     aussi. Aucun écran hors Faith ne commence par "faith". ==== */
+  document.body.classList.toggle('faith-skin', String((G&&G.screen)||'').indexOf('faith')===0);
+  /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
@@ -1170,6 +1180,10 @@ const CL={
   nextFaithYear(){
     G.faith.year++; G.faith.step=1;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
+    /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
+       qu'un millésime : le drapeau est levé ici, avec le reste des compteurs
+       annuels. ==== */
+    G.faith.suspended=false;
     G.faith.startOfYearElo=G.f.careerElo; G.faith.startOfYearEarnings=G.f.earnings||0;
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
@@ -1195,7 +1209,25 @@ const CL={
       else if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
       else if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
       else if(perkId==='ped'){
-        if(rnd()<0.15){ G.lastMsg="CATASTROPHE : Test antidopage positif ! Suspendu 1 an."; G.faith.month=1; G.faith.year++; G.faith.pa=3; f.rankBoost=Math.max(0,(f.rankBoost||0)-100); }
+        /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — la branche positive
+           écrivait G.faith.month et G.faith.pa : deux champs qu'aucun code du
+           repo ne lit (vestiges d'une structure calendaire abandonnée). Pire,
+           elle incrémentait G.faith.year hors de nextFaithYear(), ce qui
+           laissait startOfYearElo, startOfYearEarnings, yearLog, season.fights
+           et step désynchronisés, et sautait applyAging() : la « suspension
+           d'un an » faisait donc avancer le millésime sans faire avancer la
+           simulation. La suspension passe désormais par le chemin normal de
+           fin d'année — on marque l'année comme blanche, on saute le combat,
+           et nextFaithYear() fait son travail habituel. ==== */
+        if(rnd()<0.15){
+          G.lastMsg="CATASTROPHE : Test antidopage positif. Année blanche, licence suspendue.";
+          G.faith.suspended=true;
+          f.rankBoost=Math.max(0,(f.rankBoost||0)-100);
+          if(!G.faith.yearLog) G.faith.yearLog=[];
+          G.faith.yearLog.push({title:'Contrôle antidopage',choice:'Positif — suspension'});
+          CL.prepareFaithYearEnd(); return;
+        }
+        /* ==== [FIN ANCRE] ==== */
         else { f.attrs.chin=clamp(f.attrs.chin+4,1,100); f.attrs.durability=clamp(f.attrs.durability+4,1,100); f.overall=overall(f); G.faith.pedActive=G.faith.year; G.lastMsg="Protocoles PED réussis : Menton et Résistance +4."; }
       } else if(perkId==='tiger'){
         if(rnd()<0.25){ G.lastMsg="Le stage était d\u2019une rare violence. Blessure mineure contractée."; f.form=clamp(f.form-20,0,100); }
