@@ -44,6 +44,8 @@ body.faith-skin .gauge2 > span,body.faith-skin .gauge > span{ background:var(--f
 body.faith-skin .btn{ border-radius:0; }
 body.faith-skin .btn.primary{ background:var(--gold); color:#F3EEE3; border-color:var(--gold); }
 body.faith-skin .opp{ background:#DAD4C6; border:1px solid var(--line); border-radius:0; }
+/* Remplissage séquentiel des lignes du Score de Légende (scr_faith_epilogue). */
+@keyframes faithFill{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
 /* ==== [FIN ANCRE] ==== */
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}

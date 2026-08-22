@@ -420,6 +420,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   G.season.fights.push({ win, method:res.method, round:res.round, scoreA:res.scoreA, scoreB:res.scoreB,
     st:{Me:res.stats.A, Op:res.stats.B}, myRank:myRankBefore, oppRank:oppRankBefore,
     isTitle:(kind==='title'||kind==='defense') });
+  /* ==== [ANCRE: FAITH_SCORE_LEGENDE] — battre sa némésis compte dans
+     l'« empreinte » du Score de Légende. Le drapeau se pose ICI, seul endroit
+     où l'adversaire du combat est connu : season.fights ne retient pas son
+     identité, et le roster peut avoir changé quand le bilan se calcule. ==== */
+  if(G.faith && win && opp && opp.id && opp.id===G.f.faithNemesisId) G.faith.nemesisBeaten=true;
+  /* ==== [FIN ANCRE] ==== */
   // ==== [FIN ANCRE] ====
   // vieillissement (1 an = N combats). Entre 18 et 23 ans (jeune prospect en
   // pleine activité), on vise 3 à 4 combats/an en moyenne — au-delà, rythme

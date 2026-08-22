@@ -480,6 +480,94 @@ function scr_faith_event(){
      }).join('')}
    </div></div>`;
 }
+/* ==== [ANCRE: FAITH_SCORE_LEGENDE] — scalaire de clôture du mode Faith.
+   Sans un nombre unique en sortie, une carrière narrative n'a aucune raison
+   d'être recommencée : c'est lui qui rend une partie comparable à la
+   précédente. Quatre familles en tension DÉLIBÉRÉE — « longévité &
+   intégrité » punit exactement les leviers qui maximisent « palmarès »
+   (dopage, juges achetés, guerres d'usure enchaînées). Le 100/100 est donc
+   structurellement hors d'atteinte — plafond réel mesuré à 95 — et c'est
+   voulu : une note plafonnée par design protège la rejouabilité mieux
+   qu'une note atteignable.
+   Tout est calculé sur des données qui existent déjà — aucun compteur
+   inventé pour l'occasion, hors les pics et scandales posés au fil du jeu. ==== */
+function computeLegendScore(f){
+  const F=(typeof G!=='undefined'&&G&&G.faith)||{};
+  /* Les règnes du joueur seulement : G.titleHistory enregistre TOUS les
+     champions du monde simulé, pas uniquement le sien. */
+  const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
+  const palmares=clamp(titles*8+(f.defenses||0)*4,0,32);
+
+  const peak=F.peakElo||f.careerElo||1000;
+  const sommet=clamp(Math.round(((peak-900)/900)*26),0,26);
+
+  /* L'intégrité se plafonne AVANT d'encaisser ses pénalités, sinon une
+     carrière longue absorbe silencieusement les dégâts et les scandales et
+     le 100/100 redevient atteignable. La pénalité de dégâts ne descend
+     jamais sous un plancher dérivé du palmarès : on ne devient pas champion
+     sans encaisser, même quand les compteurs disent le contraire. C'est ce
+     qui rend le sans-faute structurellement impossible — plafond réel 95. */
+  const years=Math.max(1,(F.year||2026)-2026);
+  const base=clamp(Math.round(years*1.6),0,18);
+  const usure=Math.max(Math.round((F.dmgHeadTotal||0)/40),Math.round(palmares/6));
+  const longevite=clamp(base-usure-((F.scandals||0)*6),0,18);
+
+  const empreinte=clamp((f.faithTraits||[]).length*3
+    +(f.faithSpecs||[]).length*3
+    +(F.nemesisBeaten?5:0),0,14);
+
+  const fortune=clamp(Math.round(((F.peakEarnings||f.earnings||0)/2500)*10),0,10);
+
+  return {total:clamp(palmares+sommet+longevite+empreinte+fortune,0,100),
+          palmares,sommet,longevite,empreinte,fortune};
+}
+/* ==== [ANCRE: FAITH_EPILOGUE] — l'écran de sortie du mode. Trois temps qui
+   ne coexistent jamais dans la même zone de lecture : le bandeau, puis la
+   note SEULE, puis sa décomposition. La note est le seul objet de sa zone —
+   rien ne lui dispute l'attention. La décomposition se remplit ligne à ligne
+   (180 ms d'écart) : un total qui se construit devant le joueur se retient
+   comme un accomplissement, un total posé d'emblée se lit comme une donnée.
+   Une seule action en bas : au moment précis où le joueur décide de rejouer,
+   il ne doit avoir aucun choix à arbitrer. ==== */
+function faithScoreRow(label,val,max,delay){
+  const pct=Math.max(0,Math.min(100,Math.round((val/max)*100)));
+  return `<div style="display:flex;align-items:center;gap:12px;height:44px;border-bottom:1px solid var(--line)">
+    <span class="eyebrow" style="flex:0 0 128px;font-size:11px;letter-spacing:.08em">${label}</span>
+    <span style="flex:1;height:3px;background:var(--line);position:relative;overflow:hidden">
+      <i style="position:absolute;inset:0 auto 0 0;width:${pct}%;background:var(--f-red-hi);transform-origin:left;animation:faithFill .5s ${delay}ms both"></i>
+    </span>
+    <span class="mono" style="flex:0 0 52px;text-align:right;font-size:13px">${val}<span class="muted">/${max}</span></span>
+  </div>`;
+}
+function scr_faith_epilogue(){
+  const f=G.f, sc=computeLegendScore(f);
+  const debut=2026, fin=(G.faith&&G.faith.year)||debut;
+  const serment=(G.faith&&G.faith.oath)||null;
+  const mult=(serment&&serment.kept)?1.15:1;
+  const total=Math.min(100,Math.round(sc.total*mult));
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div style="height:120px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:32px">
+     <div class="hero-name" style="font-size:34px;line-height:1.05">${esc(f.name)}</div>
+     <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">${debut} – ${fin} · ${f.W}-${f.L}${f.ko?` · ${f.ko} KO`:''}</div>
+   </div>
+   <div style="text-align:center;padding:48px 0">
+     <div class="hero-name" style="font-size:96px;font-weight:700;line-height:.9">${total}</div>
+     <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100</div>
+   </div>
+   <div style="margin-bottom:12px">
+     ${faithScoreRow('Palmarès',sc.palmares,32,0)}
+     ${faithScoreRow('Sommet',sc.sommet,26,180)}
+     ${faithScoreRow('Intégrité',sc.longevite,18,360)}
+     ${faithScoreRow('Empreinte',sc.empreinte,14,540)}
+     ${faithScoreRow('Fortune',sc.fortune,10,720)}
+   </div>
+   ${serment?`<div class="mono" style="font-size:11px;color:${serment.kept?'var(--gold)':'var(--muted)'};${serment.kept?'':'text-decoration:line-through'}">${serment.kept?'✦ Serment tenu — score ×1,15':'Serment rompu'} · ${esc(serment.label)}</div>`:''}
+   <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.newFaithCareer()">ÉCRIRE UNE AUTRE LÉGENDE</button>
+   <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('hof')">Voir le Panthéon</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_year_end(){
   const ys=G.faith.yearStats; const f=G.f;
   let logHtml='';

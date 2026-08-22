@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -1135,6 +1135,14 @@ const CL={
     const eloDelta=Math.round(f.careerElo-(G.faith.startOfYearElo||f.careerElo));
     const earningsDelta=(f.earnings||0)-(G.faith.startOfYearEarnings||0);
     const rank=divRank(f);
+    /* ==== [ANCRE: FAITH_SUIVI_PICS] — le Score de Légende note le SOMMET
+       atteint, pas l'état final : une fin de carrière en déclin ne doit pas
+       effacer le pic. Les dégâts crâniens, eux, se cumulent sur toute la
+       carrière (le compteur annuel est remis à zéro avec season.fights). ==== */
+    G.faith.peakElo=Math.max(G.faith.peakElo||0,f.careerElo||0);
+    G.faith.peakEarnings=Math.max(G.faith.peakEarnings||0,f.earnings||0);
+    G.faith.dmgHeadTotal=(G.faith.dmgHeadTotal||0)+dmgHead;
+    /* ==== [FIN ANCRE] ==== */
     if((G.season.fights||[]).length>=1){
       let totalSig=0, totalTdAtt=0, totalCtrl=0, totalKD=0;
       G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0; });
@@ -1222,6 +1230,7 @@ const CL={
         if(rnd()<0.15){
           G.lastMsg="CATASTROPHE : Test antidopage positif. Année blanche, licence suspendue.";
           G.faith.suspended=true;
+          G.faith.scandals=(G.faith.scandals||0)+1;
           f.rankBoost=Math.max(0,(f.rankBoost||0)-100);
           if(!G.faith.yearLog) G.faith.yearLog=[];
           G.faith.yearLog.push({title:'Contrôle antidopage',choice:'Positif — suspension'});
@@ -1236,7 +1245,7 @@ const CL={
         if(rnd()<0.50){ G.lastMsg="L\u2019argent a disparu dans les poches des promoteurs. Aucun effet."; }
         else { G.faith.perks.forcePromo=true; G.lastMsg="Lobbying réussi : Une offre de promotion sera forcée après votre prochain combat."; }
       } else if(perkId==='judges'){
-        if(rnd()<0.10){ G.lastMsg="SCANDALE : Corruption découverte. L\u2019organisation coupe votre contrat !"; if(f.org>1) f.org--; G.roster=makeOrgRoster(f); }
+        if(rnd()<0.10){ G.lastMsg="SCANDALE : Corruption découverte. L\u2019organisation coupe votre contrat !"; G.faith.scandals=(G.faith.scandals||0)+1; if(f.org>1) f.org--; G.roster=makeOrgRoster(f); }
         else { G.faith.perks.judges=true; G.lastMsg="Les juges ont été 'informés'. Vous bénéficierez d\u2019une grande clémence en cas de décision."; }
       } else if(perkId==='diet'){ G.faith.dietYear=G.faith.year; G.lastMsg="Diététicien Élite engagé pour l\u2019année. Les pesées seront une formalité."; }
     }
@@ -1749,7 +1758,19 @@ const CL={
         trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
       G.season.fights=[];
     }
-    G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true; G.screen='legacy'; save(); render(); },
+    /* ==== [ANCRE: FAITH_EPILOGUE] — une carrière Faith se scelle comme les
+       autres (Panthéon, Codex, points de Légende : rien n'est retiré) mais
+       sort par son propre épilogue, avec sa note. L'écran 'legacy' générique
+       reste la sortie de la carrière standard. ==== */
+    G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
+    G.screen=G.faith?'faith_epilogue':'legacy'; save(); render(); },
+  /* ==== [ANCRE: FAITH_EPILOGUE] — relancer une carrière Faith depuis
+     l'épilogue : on repart de la création du mode, pas du menu principal.
+     wipe() est délibérément écarté — le Panthéon et les méta-statistiques
+     doivent survivre à la carrière qui vient de se clore. ==== */
+  newFaithCareer(){ const t=G.theme; G={theme:t,faithDraft:{gender:'H',country:COUNTRY_KEYS[0],first:''}}; setTheme(t); G.screen='faith_draft'; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [FIN ANCRE] ==== */
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }
