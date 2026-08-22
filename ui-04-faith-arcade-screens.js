@@ -402,6 +402,21 @@ function faithProtegeLine(p,f){
 function scr_faith_hub(){
   const f=G.f;
   const monthEntry=(G.faith.calendar&&G.faith.calendar[G.faith.month])||{type:null};
+  /* ==== [CORRECTIF FA-25] — faithProtegeLine() (jauge + phrase qui se
+     durcit, le Syndrome de Frankenstein) n'était rendue que pendant
+     l'intersaison, à l'intérieur de la carte de sparring : trois mois sur
+     quatre, la menace n'existait pas à l'écran. Hissée ici, sous le nom du
+     combattant, tous types de mois confondus — la tension doit être là
+     quand le joueur n'y pense pas, sinon ce n'est pas de la tension, c'est
+     un rappel. Même sélection (le partenaire le plus avancé) que le choix
+     de sparring d'intersaison, calculée une seule fois et réutilisée par
+     les deux. ==== */
+  const topPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+  /* ==== [CORRECTIF FA-26] — « afficher son palmarès sur le hub, une
+     ligne » : le combattant peut avoir quitté G.roster (retraite NPC) sans
+     que f.faithNemesisId ne soit nettoyé nulle part — repli silencieux si
+     introuvable plutôt qu'un nom manquant à l'écran. */
+  const nemesis=f.faithNemesisId?(G.roster||[]).find(o=>o.id===f.faithNemesisId):null;
   let actionsHtml='';
   if(f.injury){
     /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — f.injury ne peut être posé que
@@ -434,8 +449,9 @@ function scr_faith_hub(){
        d'événements, cf. faithCamp()/FAITH_OFFRES_TENTATION). "Se reposer"
        n'est plus un choix gratuit : les partenaires progressent un peu plus
        vite cette année sans vous pour les canaliser (restedThisYear,
-       consommé par nextFaithYear) — un prix narratif, jamais chiffré ici. */
-    const topPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+       consommé par nextFaithYear) — un prix narratif, jamais chiffré ici.
+       topPartner est désormais calculé une seule fois en tête de fonction
+       (FA-25), réutilisé ici tel quel. */
     actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison.</p>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div class="opp" style="padding:16px" onclick="CL.faithRest()">
@@ -482,6 +498,8 @@ function scr_faith_hub(){
     <div>
       <div class="mono" style="font-size:11px;color:var(--muted)">SAISON ${G.faith.year} · ${orgDisplayName(f)}</div>
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
+      ${topPartner?`<div class="mono" style="font-size:11px;color:var(--muted);margin-top:8px">SALLE · ${esc(topPartner.first)}</div>${faithProtegeLine(topPartner,f)}`:''}
+      ${nemesis?`<div class="mono" style="font-size:11px;color:var(--f-red-hi);margin-top:8px">NÉMÉSIS · ${esc(nemesis.first)} (${(f.nemesisRecord&&f.nemesisRecord.w)||0}-${(f.nemesisRecord&&f.nemesisRecord.l)||0})</div>`:''}
       ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''} restant${f.contract.fightsLeft>1?'s':''} au contrat</div>`:''}
       ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
       ${faithOathBadge(G.faith)}
@@ -1389,8 +1407,10 @@ function scr_faith_epilogue(){
      ${faithJourneyBlock(G.faith)}
      ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    </div>
-   <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.newFaithCareer()">ÉCRIRE UNE AUTRE LÉGENDE</button>
-   <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.go('faith_legends')">Voir les Légendes à battre</button>
+   <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.faithRelaunchSame()">REPRENDRE LE MÊME CHEMIN</button>
+   <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.faithRelaunchEdit()">Changer une chose</button>
+   <button class="btn ghost" style="width:100%;margin-top:8px" onclick="CL.newFaithCareer()">Repartir de zéro</button>
+   <button class="btn ghost" style="width:100%;margin-top:8px" onclick="CL.go('faith_legends')">Voir les Légendes à battre</button>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -1438,15 +1458,36 @@ function faithLegendCompareCol(e){
     ${faithScoreRow('Fortune',e.sub.fortune,10,0)}
   </div>`;
 }
+/* ==== [CORRECTIF FA-27] — les serments (FAITH_OATHS) sont l'idée de
+   rejouabilité la plus forte du mode, mais rien ne les rendait
+   partageables ni comparables : un seul record global écrasait la nuance
+   entre « la meilleure carrière, toutes conditions confondues » et « la
+   meilleure carrière EN TENANT tel serment précis ». Chaque entrée de
+   meta.faithLegends porte déjà `oath:{label,fulfilled}` (posé par
+   toLegacy(), ui-08) — aucune nouvelle donnée à collecter, seulement un
+   filtre et une ligne d'affichage. Seules les carrières où le serment a
+   été TENU comptent pour un record par serment : un serment rompu n'est
+   pas une carrière à battre pour ce serment-là. ==== */
 function scr_faith_legends(){
   const meta=loadMetaStats();
   const list=(meta.faithLegends||[]);
+  const filtreId=G.faithLegendsFilterOath||null;
+  const filtre=filtreId?FAITH_OATHS.find(o=>o.id===filtreId):null;
+  const filtered=filtre?list.filter(e=>e.oath&&e.oath.fulfilled&&e.oath.label===filtre.label):list;
   const sel=G.faithLegendsCompare||[];
-  const selected=sel.map(id=>list.find(e=>e.id===id)).filter(Boolean);
+  const selected=sel.map(id=>filtered.find(e=>e.id===id)).filter(Boolean);
+  const pills=`<div class="pills" style="margin-bottom:12px">
+    <span class="pill ${!filtreId?'on':''}" onclick="CL.setFaithLegendsFilter('')">Tous</span>
+    ${FAITH_OATHS.map(o=>`<span class="pill ${filtreId===o.id?'on':''}" onclick="CL.setFaithLegendsFilter('${o.id}')">${esc(o.label)}</span>`).join('')}
+  </div>`;
+  const record=filtre?(filtered.length?`Meilleure carrière avec « ${esc(filtre.label)} » : ${filtered[0].score}.`
+    :`Aucune carrière n’a encore tenu ce serment jusqu’au bout.`):null;
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="bar"><span class="eyebrow">Légendes à battre</span><span class="eyebrow x" onclick="CL.go('faith_epilogue')">✕</span></div>
    ${list.length?`<p class="lede small">Les meilleures carrières jamais écrites. Touche deux cartes pour les comparer.</p>
-   <div style="display:flex;flex-direction:column;gap:10px">${list.map((e,i)=>faithLegendCard(e,i,sel.includes(e.id))).join('')}</div>
+   ${pills}
+   ${record?`<p class="mono small" style="color:var(--gold);margin-bottom:12px">${record}</p>`:''}
+   ${filtered.length?`<div style="display:flex;flex-direction:column;gap:10px">${filtered.map((e,i)=>faithLegendCard(e,i,sel.includes(e.id))).join('')}</div>`:''}
    ${selected.length===2?`<div class="eyebrow" style="margin:24px 0 12px">FACE-À-FACE</div>
      ${faithLegendCompareCol(selected[0])}${faithLegendCompareCol(selected[1])}`:''}`
    :`<p class="lede small">Aucune légende enregistrée pour l’instant. Termine une carrière pour l’inscrire ici.</p>`}
@@ -1593,6 +1634,19 @@ function scr_faith_year_end(){
   const ys=G.faith.yearStats, f=G.f, F=G.faith;
   const art=faithPresseArticle(ys,f,F);
   const media=FAITH_PRESSE_MEDIAS[(F.year||2026)%FAITH_PRESSE_MEDIAS.length];
+  /* ==== [CORRECTIF FA-23] — computeLegendScore() n'était appelé qu'à la
+     retraite/l'épilogue : pendant 15 ans de carrière, aucun repère chiffré.
+     Règle H.1 (un écran ne montre jamais un nombre qu'une phrase peut
+     porter) admet le bilan annuel comme une des deux exceptions explicites
+     — une fois par an, jamais sur le hub. getFaithBest() (state.js) lit le
+     record des carrières PRÉCÉDENTES ; stable pour toute la durée d'une
+     carrière en cours (G.faith.previousBest, lui, n'est figé qu'à la
+     retraite — cf. FAITH_MEMOIRE_LEGENDES, ui-08). ==== */
+  const legendeAn=computeLegendScore(f).total;
+  const legendeRecord=getFaithBest();
+  const legendeLigne=legendeRecord
+    ?`Estimation à ce jour : ${legendeAn}. Votre meilleure légende : ${legendeRecord}.`
+    :`Estimation à ce jour : ${legendeAn}. Vous écrivez votre première légende.`;
   const chiffre=(v,lbl,couleur)=>`<div style="border:1px solid var(--line);padding:12px;text-align:center">
     <div class="mono" style="font-size:20px;${couleur?`color:${couleur}`:''}">${v}</div>
     <div class="eyebrow" style="font-size:10px;margin-top:4px">${lbl}</div></div>`;
@@ -1609,6 +1663,7 @@ function scr_faith_year_end(){
      </div>
      <h2 class="hero-name" style="font-size:28px;line-height:1.08;margin:12px 0 0">${art.titre}</h2>
      <div style="font-size:15px;line-height:1.55;margin-top:12px">${art.corps}</div>
+     <p class="mono small" style="margin-top:12px;color:var(--muted)">${legendeLigne}</p>
    </div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
      ${chiffre(`${ys.wins}-${ys.losses}`,'Bilan')}

@@ -1143,7 +1143,10 @@ const CL={
        vie étaient consommés puis jetés : aucun événement ne pouvait s'y
        brancher, ils n'étaient que des deltas déguisés. Conservés sur le
        combattant, ils deviennent lisibles par le champ `req` du pool. ==== */
-    f._origin=d.origin; f._circle=d.circle; f._lifestyle=d.lifestyle; f._stable=d.stable;
+    /* ==== [CORRECTIF FA-24] — f._agent manquait ici : nécessaire pour que
+       « Reprendre le même chemin » (scr_faith_epilogue) puisse reconstruire
+       un brouillon identique sans repasser par les 9 écrans de création. */
+    f._origin=d.origin; f._circle=d.circle; f._lifestyle=d.lifestyle; f._stable=d.stable; f._agent=d.agent;
     /* ==== [ANCRE: FAITH_ECURIE_DEPART] — le premier dilemme réel : une salle
        régionale fait combattre souvent contre des adversaires abordables, un
        camp d'élite fait signer plus haut, contre plus dur. On agit sur
@@ -1319,7 +1322,15 @@ const CL={
         monster.orgElo=Math.max(500,eloBaseline(G.f.org,monster.overall)+150);
         monster.careerElo=Math.max(500,eloBaseline(G.f.org,monster.overall)+100);
         G.roster.push(monster);
-        if(!G.f.faithNemesisId) G.f.faithNemesisId=monster.id;
+        /* ==== [CORRECTIF FA-26] — la trahison du protégé est le MEILLEUR
+           cas de némésis (elle porte tout un fil narratif propre, contre le
+           franchissement de rang qui est un déclencheur générique) : elle
+           doit primer et remplacer une némésis déjà verrouillée, pas
+           seulement combler l'absence d'une. Le palmarès tête-à-tête
+           (nemesisRecord, ui-05) repart de zéro : il ne concerne que la
+           némésis EN COURS. */
+        G.f.faithNemesisId=monster.id;
+        G.f.nemesisRecord=null;
         G.f.rivalId=monster.id;
         if(!G.f._rivalries) G.f._rivalries={};
         G.f._rivalries[monster.id]=3;
@@ -1517,6 +1528,33 @@ const CL={
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
     advanceRoster();
+    /* ==== [ANCRE: FAITH_NEMESIS_PERMANENTE] — FA-26 : avant ce correctif,
+       f.faithNemesisId n'était posé que par la trahison du protégé
+       (evt_frankenstein_betrayal) ; sans trahison avant 30 ans, la carrière
+       entière se jouait sans antagoniste et 3 événements de vie écrits pour
+       la némésis (evt_nemesis_loss/win/gym) ne se déclenchaient jamais. Un
+       second déclencheur, vérifié une fois par an (les rangs ne sont
+       significatifs qu'après advanceRoster() ci-dessus, pas à chaque
+       combat, trop bruité) : un combattant du roster qui franchit le rang
+       du joueur deux années différentes (pas nécessairement consécutives)
+       verrouille la némésis, si aucune n'est déjà posée. G.faith.rankWatch
+       persiste sur toute la carrière — jamais réinitialisé ici, contraire
+       à l'esprit "portée sur toute la carrière" du correctif. ==== */
+    if(!G.f.faithNemesisId){
+      if(!G.faith.rankWatch) G.faith.rankWatch={};
+      const monRang=divRank(G.f);
+      for(const o of G.roster){
+        if(o.champion || o.isGymPartner) continue;
+        if(divRank(o)<monRang){
+          G.faith.rankWatch[o.id]=(G.faith.rankWatch[o.id]||0)+1;
+          if(G.faith.rankWatch[o.id]>=2){
+            G.f.faithNemesisId=o.id; G.f.rivalId=o.id;
+            break;
+          }
+        }
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
     if(G.faith.gym){
       /* ==== [CORRECTIF FA-15] — "Se reposer" n'est plus gratuit : si le
          combattant a choisi le repos pendant l'intersaison de l'année qui
@@ -2187,6 +2225,45 @@ const CL={
      séparées, jamais concernées. Même symétrie que newCareer() ci-dessous,
      qui appelle déjà wipe(). ==== */
   newFaithCareer(){ wipe(); const t=G.theme; G={theme:t,faithDraft:{gender:'H',country:COUNTRY_KEYS[0],first:''}}; setTheme(t); G.screen='faith_draft'; save(); render(); },
+  /* ==== [ANCRE: FAITH_RELANCE_RAPIDE] — FA-24 : neuf écrans de création
+     avant le premier clic de jeu, au moment précis où la motivation de
+     rejouer est maximale (juste après l'épilogue), est le calcul inverse de
+     ce qu'il faudrait faire. Trois sorties plutôt qu'un unique bouton :
+     - « Reprendre le même chemin » (faithRelaunchSame) reconstruit le
+       brouillon à l'identique (origine/style/catégorie/écurie/agent/
+       personnalité — via f._origin/f._circle/f._lifestyle/f._stable/
+       f._agent/f.style/f.div/f.personality, tous déjà conservés sur le
+       combattant, cf. FAITH_CREATION_SEQUENTIELLE) et saute directement à
+       finalizeFaithDraft() : un clic, premier temps de jeu. Seuls le
+       prénom (laissé vide → makeName() en tire un au hasard, engine.js) et
+       le pays (pick(COUNTRY_KEYS)) changent. Un serment aléatoire est tiré
+       plutôt qu'omis : c'est un des meilleurs leviers de rejouabilité du
+       mode (cf. FA-27), le faire disparaître silencieusement sur le chemin
+       rapide reviendrait à l'exclure de la plupart des parties.
+     - « Changer une chose » (faithRelaunchEdit) repasse par les 9 écrans
+       normaux, mais tout est déjà pré-rempli (y compris prénom/pays) : le
+       joueur ne modifie que ce qu'il veut.
+     - « Repartir de zéro » réutilise newFaithCareer() tel quel. ==== */
+  faithRelaunchSame(){
+    const f=G.f; if(!f) return;
+    const snap={gender:f.gender,div:f.div,origin:f._origin,style:f.style,lifestyle:f._lifestyle,circle:f._circle,agent:f._agent,personality:f.personality,stable:f._stable};
+    const oathPool=FAITH_OATHS.slice();
+    for(let i=oathPool.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [oathPool[i],oathPool[j]]=[oathPool[j],oathPool[i]]; }
+    const oath=oathPool[0]||null;
+    wipe(); const t=G.theme; G={theme:t}; setTheme(t);
+    G.faithDraft=Object.assign({country:pick(COUNTRY_KEYS),first:''},snap,
+      {_oath:oath?{id:oath.id,label:oath.label,broken:false}:null});
+    CL.finalizeFaithDraft();
+  },
+  faithRelaunchEdit(){
+    const f=G.f; if(!f) return;
+    wipe(); const t=G.theme;
+    G={theme:t,faithDraft:{gender:f.gender,country:f.countryKey,first:f.first,div:f.div,
+      origin:f._origin,style:f.style,lifestyle:f._lifestyle,circle:f._circle,agent:f._agent,
+      personality:f.personality,stable:f._stable,page:0}};
+    setTheme(t); G.screen='faith_draft'; save(); render();
+  },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: FAITH_LEGENDES_A_BATTRE] — sélection à deux, jamais plus :
      le 3e clic éjecte le plus ancien choix plutôt que de bloquer, pour que
@@ -2197,6 +2274,14 @@ const CL={
     const i=G.faithLegendsCompare.indexOf(id);
     if(i>=0) G.faithLegendsCompare.splice(i,1);
     else { G.faithLegendsCompare.push(id); if(G.faithLegendsCompare.length>2) G.faithLegendsCompare.shift(); }
+    render();
+  },
+  /* ==== [CORRECTIF FA-27] — changer de filtre remet la sélection de
+     face-à-face à zéro : comparer deux carrières d'un filtre précédent
+     n'a plus de sens une fois la galerie changée sous leurs pieds. */
+  setFaithLegendsFilter(oathId){
+    G.faithLegendsFilterOath=oathId||null;
+    G.faithLegendsCompare=[];
     render();
   },
   /* ==== [FIN ANCRE] ==== */

@@ -433,6 +433,15 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      identité, et le roster peut avoir changé quand le bilan se calcule. ==== */
   if(G.faith && win && opp && opp.id && opp.id===G.f.faithNemesisId) G.faith.nemesisBeaten=true;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: FA-26] — palmarès tête-à-tête affiché en une ligne sur le
+     hub (scr_faith_hub, ui-04). Remis à zéro quand la némésis change
+     (trahison du protégé, ui-08) — il ne porte que sur la rivalité EN
+     COURS. */
+  if(G.faith && opp && opp.id && opp.id===G.f.faithNemesisId){
+    if(!G.f.nemesisRecord) G.f.nemesisRecord={w:0,l:0};
+    if(win) G.f.nemesisRecord.w++; else G.f.nemesisRecord.l++;
+  }
+  /* ==== [FIN ANCRE] ==== */
   // ==== [FIN ANCRE] ====
   // vieillissement (1 an = N combats). Entre 18 et 23 ans (jeune prospect en
   // pleine activité), on vise 3 à 4 combats/an en moyenne — au-delà, rythme
