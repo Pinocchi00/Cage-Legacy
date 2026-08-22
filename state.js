@@ -80,9 +80,16 @@ function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catc
      rendu jusqu'ici (excl_mask_oni, excl_gloves_relic) deviennent des
      stickers apposés sur la carte — cohérent avec la mécanique de
      collection déjà présente (Vitrine actuelle, GOAT de ta collection). ==== */
+/* ==== [ANCRE: TITRES_PANTHEON_DIVERSITE] — la grille de titres est passée de
+   6 à 12 paliers : les 6 nouveaux tombaient sur le repli var(--line) et
+   perdaient leur coin de carte coloré. Un ton par palier de prestige, les
+   voisins partageant la même famille de couleur. ==== */
 const LEGEND_TIER_COLOR={
-  'LÉGENDE ÉTERNELLE':'#F4D580','GRAND CHAMPION':'var(--gold)','CHAMPION RESPECTÉ':'var(--sage)',
-  'COMBATTANT ACCOMPLI':'#4DA6FF','VÉTÉRAN DU CIRCUIT':'var(--muted)','GUERRIER DE L\u2019OMBRE':'var(--blood)'
+  'LÉGENDE ÉTERNELLE':'#F4D580','MONUMENT DU SPORT':'#E8D9A0',
+  'ROI DE LA CAGE':'var(--gold)','GRAND CHAMPION':'var(--gold)',
+  'CHAMPION DOMINANT':'var(--sage)','CHAMPION RESPECTÉ':'var(--sage)',
+  'PRÉTENDANT AU TITRE':'#4DA6FF','TÊTE D\u2019AFFICHE':'#4DA6FF','COMBATTANT ACCOMPLI':'#4DA6FF',
+  'ESPOIR CONFIRMÉ':'var(--muted)','VÉTÉRAN DU CIRCUIT':'var(--muted)','GUERRIER DE L\u2019OMBRE':'var(--blood)'
 };
 function legendTierColor(rank){ return LEGEND_TIER_COLOR[rank]||'var(--line)'; }
 function legendDecoStyle(decorations){
@@ -541,6 +548,18 @@ function gauntletDevilCost(mode,a){
 /* ==== [ANCRE: MIGRATION] — on empile les blocs, on n'en modifie jamais un livré ==== */
 function migrate(g){ if(!g)return g; g.version=g.version||1;
   if(g.version<SAVE_VERSION){ g.version=SAVE_VERSION; }
+  /* ==== [ANCRE: FAITH_CINQ_TEMPS] — l'année Faith est passée de 3 à 5 temps.
+     Une partie sauvegardée sous l'ancienne numérotation se retrouverait au
+     mauvais moment de l'année : step 3 valait « combat », il vaut désormais
+     « le monde ». Correspondance par intention, pas par arithmétique —
+     l'ancien 3 devient 4 (l'octogone), pas 5 (le bilan), sans quoi le joueur
+     sauterait le combat qu'il s'apprêtait à disputer. Le drapeau
+     stepScale5 rend la migration idempotente. ==== */
+  if(g.faith && !g.faith.stepScale5){
+    const ancien=g.faith.step||1;
+    g.faith.step=(ancien>=3)?4:ancien;
+    g.faith.stepScale5=true;
+  }
   return g; }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: VALIDATE_STATE] — comble les champs manquants d'une ancienne

@@ -1034,7 +1034,11 @@ const CL={
     G.screen='faith_hub'; save(); render();
   },
   faithRest(){
+    /* ==== [ANCRE: FAITH_CINQ_TEMPS] — le camp (temps 2) débouche sur le
+       monde (temps 3), pas sur le combat. ==== */
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
+    if(!G.faith.yearLog) G.faith.yearLog=[];
+    G.faith.yearLog.push({title:'Intersaison',choice:'Repos et récupération'});
     G.faith.step=3; G.screen='faith_hub'; save(); render();
   },
   faithSparring(partnerId){
@@ -1050,7 +1054,7 @@ const CL={
     G.lastMsg=`Séance intense. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Sparring',choice:`A tourné avec ${esc(partner.name)}`});
-    G.faith.step=3; save(); render();
+    G.faith.step=3; G.screen='faith_hub'; save(); render();
   },
   faithLifeEvent(){
     // Syndrome de Frankenstein : si un protégé a rattrapé (ou dépassé) le
@@ -1071,9 +1075,17 @@ const CL={
         return;
       }
     }
+    /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — les offres de privilège rejoignent
+       le pool du temps « Le monde » (temps 3) : elles viennent au joueur au
+       lieu de l'attendre dans un menu. Elles restent minoritaires (une chance
+       sur trois d'y basculer) pour ne pas transformer le mode en catalogue
+       ambulant, et la mémoire seenEvents s'applique à elles comme au reste. ==== */
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
-    let pool=FAITH_LIFE_EVENTS.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
-    if(pool.length===0){ G.faith.seenEvents=[]; pool=FAITH_LIFE_EVENTS.filter(e=>!e.req||e.req(G.f)); }
+    const source=((G.faith.step||1)>=3 && rnd()<0.34)
+      ? FAITH_PERK_OFFERS.concat(FAITH_LIFE_EVENTS)
+      : FAITH_LIFE_EVENTS;
+    let pool=source.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
+    if(pool.length===0){ G.faith.seenEvents=[]; pool=source.filter(e=>!e.req||e.req(G.f)); }
     G.faith.currentEvent=pick(pool);
     G.screen='faith_event'; save(); render();
   },
@@ -1083,7 +1095,24 @@ const CL={
     if(c.cost && (G.f.earnings||0)<c.cost){ G.lastMsg="Fonds insuffisants ("+c.cost+"k$)."; render(); return; }
     if(c.cost) G.f.earnings-=c.cost;
     if(c.reward) G.f.earnings=(G.f.earnings||0)+c.reward;
-    applyDeltas(G.f,c.d);
+    /* c.d est facultatif depuis les offres de privilège : un choix peut n'avoir
+       aucun delta propre et ne faire que déclencher un achat. */
+    applyDeltas(G.f,c.d||[]);
+    /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — un choix peut désormais déclencher
+       un privilège. buyFaithPerk() gère seule l'argent, le tirage et ses
+       conséquences ; elle peut même clore l'année sur une suspension, auquel
+       cas on lui laisse la main sans poursuivre le déroulé de l'événement. ==== */
+    if(c.perk){
+      if(!G.faith.yearLog) G.faith.yearLog=[];
+      G.faith.yearLog.push({title:ev.title,choice:c.label});
+      if(!G.faith.seenEvents) G.faith.seenEvents=[];
+      G.faith.seenEvents.push(ev.id);
+      G.faith.currentEvent=null;
+      G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub';
+      CL.buyFaithPerk(c.perk);
+      return;
+    }
+    /* ==== [FIN ANCRE] ==== */
     // Syndrome de Frankenstein : le protégé qui trahit rejoint réellement le
     // roster de l'organisation, en Némésis si aucune n'est encore verrouillée.
     if(ev.id==='evt_frankenstein_betrayal'){
@@ -1122,7 +1151,10 @@ const CL={
         G.lastMsg=`Événement résolu : ${ev.title}. NOUVEAU TRAIT ACQUIS : ${traitName} !`;
       }
     }
-    G.faith.step=2; G.screen='faith_hub'; save(); render();
+    /* ==== [ANCRE: FAITH_CINQ_TEMPS] — deux événements de vie par an : celui
+       de la salle (temps 1) mène au camp, celui du monde (temps 3) mène à
+       l'octogone. ==== */
+    G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub'; save(); render();
   },
   faithFight(){
     G.faith.fightsThisYear=(G.faith.fightsThisYear||0)+1;
@@ -1183,6 +1215,7 @@ const CL={
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
       eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[]
     };
+    G.faith.step=5; /* dernier temps : le bilan, cf. FAITH_CINQ_TEMPS */
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){

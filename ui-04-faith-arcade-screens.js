@@ -67,90 +67,156 @@ function scr_faith_draft(){
   </div>`;
 }
 
+/* ==== [ANCRE: FAITH_CINQ_TEMPS] — l'année passait par « 1 événement + 1 menu
+   de gestion + 1 combat » : 90 % gestion, 10 % narration. Elle est désormais
+   rythmée par les décisions — deux événements de vie au lieu d'un, et le
+   menu d'achats disparaît en tant que menu (cf. FAITH_OFFRES_TENTATION).
+   Les cinq temps : 1 la salle, 2 le camp, 3 le monde, 4 l'octogone, 5 le
+   bilan. Le temps 5 n'a pas d'écran de hub — il vit sur le bilan annuel,
+   qui affiche la barre à son dernier segment. ==== */
+const FAITH_TEMPS=[
+  {n:1,saison:'Hiver',lieu:'La salle'},
+  {n:2,saison:'Printemps',lieu:'Le camp'},
+  {n:3,saison:'Été',lieu:'Le monde'},
+  {n:4,saison:'Automne',lieu:'L’octogone'},
+  {n:5,saison:'Bilan',lieu:'La presse'}
+];
+/** Barre de saison : cinq segments, remplace « ÉTAPE 2 / 3 ».
+ * Une progression spatiale se lit sans être décodée, contrairement à une
+ * fraction ; et une séquence visiblement incomplète appelle son achèvement.
+ * @param {number} step temps courant (1-5) @returns {string} HTML */
+function faithSeasonBar(step){
+  const cur=FAITH_TEMPS.find(t=>t.n===step)||FAITH_TEMPS[0];
+  return `<div style="margin:12px 0 20px">
+    <div style="display:flex;gap:6px">${FAITH_TEMPS.map(t=>{
+      const passe=t.n<step, actif=t.n===step;
+      return `<span style="flex:1;height:3px;background:${passe?'var(--f-red-hi)':actif?'var(--text)':'transparent'};${passe||actif?'':'border-top:1px solid var(--line)'}"></span>`;
+    }).join('')}</div>
+    <div class="eyebrow" style="font-size:11px;margin-top:8px">${cur.saison} — ${cur.lieu}</div>
+  </div>`;
+}
+function faithGauges(f){
+  const g=(lbl,val)=>`<div style="flex:1">
+    <span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between;font-size:11px"><span>${lbl}</span><b class="mono" style="font-size:11px">${d20(val)}</b></span>
+    <div class="gauge2" style="background:var(--line);height:6px;overflow:hidden">
+      <span style="display:block;height:100%;width:${clamp(val,0,100)}%;background:var(--text)"></span></div></div>`;
+  return `<div style="display:flex;gap:16px">${g('FORME',f.form)}${g('MORAL',f.morale)}</div>`;
+}
+/* ==== [ANCRE: FAITH_PROTEGE_VISIBLE] — le Syndrome de Frankenstein est le
+   meilleur système du mode, et il était invisible jusqu'à son déclenchement :
+   le hub affichait « OVR 47 » sans dire que c'était 44 l'an dernier, ni que
+   la rupture survient à « ton OVR moins 2 ». Un système de tension sans
+   montée de tension. L'écart est désormais montré — mais jamais chiffré :
+   un écart en chiffres invite au calcul et désamorce la menace, une phrase
+   qui se durcit d'année en année produit de l'anticipation. La jauge porte
+   la précision, la phrase porte l'affect ; chacune fait exactement un
+   travail. ==== */
+function faithProtegeLine(p,f){
+  const ecart=(f.overall||0)-(p.overall||0);
+  const rempli=clamp(1-(ecart/15),0,1);
+  const proche=ecart<=5;
+  const phrase=ecart>8?'Il apprend vite.'
+    :ecart>3?'Il commence à lire vos feintes.'
+    :'Il vous attend au tournant.';
+  return `<div style="margin-top:8px">
+    <div class="gauge2" style="background:var(--line);height:6px;overflow:hidden">
+      <span style="display:block;height:100%;width:${Math.round(rempli*100)}%;background:${proche?'var(--f-red-hi)':'var(--sage)'}"></span></div>
+    <div class="small" style="margin-top:6px;color:${proche?'var(--gold)':'var(--muted)'}">${phrase}</div>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_hub(){
   const f=G.f; const step=G.faith.step||1;
-  const topBar=`<div style="display:flex;gap:8px;margin-bottom:12px">
-    <div class="glass" style="flex:1.2;text-align:center;padding:8px 0;border-radius:6px;min-height:auto">
+  const topBar=`<div style="display:flex;gap:8px">
+    <div class="glass" style="flex:1.2;text-align:center;padding:8px 0;min-height:auto">
       <b style="font-size:16px;font-family:'Oswald'">${formatArgent(f.earnings)}</b></div>
-    <div class="glass" style="flex:1;text-align:center;padding:8px 0;border-radius:6px;min-height:auto">
+    <div class="glass" style="flex:1;text-align:center;padding:8px 0;min-height:auto">
       <b class="mono" style="font-size:14px;color:var(--text)">OVR ${f.overall}</b></div>
-    ${(f.org>0 && f.contract)?`<div class="glass" style="flex:1;text-align:center;padding:8px 0;border-radius:6px;min-height:auto">
-      <b class="mono" style="font-size:14px;color:var(--gold)">${f.contract.fightsLeft} combat(s)</b></div>`:''}
-  </div>
-  <div style="display:flex;gap:16px;margin-bottom:24px;padding:0 4px">
-    <div style="flex:1"><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>FORME</span><b class="mono" style="font-size:11px">${d20(f.form)}</b></span>
-      <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden">
-        <span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--text)"></span></div></div>
-    <div style="flex:1"><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>MORAL</span><b class="mono" style="font-size:11px">${d20(f.morale)}</b></span>
-      <div class="gauge2" style="background:var(--line);height:4px;border-radius:2px;overflow:hidden">
-        <span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--text)"></span></div></div>
+    ${(f.org>0 && f.contract)?`<div class="glass" style="flex:1;text-align:center;padding:8px 0;min-height:auto">
+      <b class="mono" style="font-size:14px;color:var(--gold)">${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''}</b></div>`:''}
   </div>`;
   let actionsHtml='';
-  if(step===1){
-    actionsHtml=`<div class="eyebrow mb">PHASE 1 : PRÉPARATION</div>
-    <p class="lede small">Affrontez les péripéties de la vie d\u2019un combattant.</p>
-    <div style="display:grid;grid-template-columns:1fr;gap:10px">
-      <div class="glass opp" style="padding:12px;text-align:center" onclick="CL.faithLifeEvent()">
-        <div class="disp" style="font-size:18px;color:var(--text)">ÉVÉNEMENT DE VIE</div>
-        <div class="mono muted small mt" style="font-size:10px">Choix narratif impactant votre condition et vos attributs</div></div>
-    </div>`;
+  if(step===1 || step===3){
+    const quoi=step===1?'Ce qui arrive à la salle':'Ce qui arrive dehors';
+    actionsHtml=`<p class="lede small">${quoi}.</p>
+    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithLifeEvent()">CONTINUER</button>`;
   } else if(step===2){
-    actionsHtml=`<div class="eyebrow mb">PHASE 2 : AJUSTEMENT</div>
-    <p class="lede small">Gérez votre condition ou investissez avant l\u2019affrontement. Fonds : <b>${formatArgent(f.earnings)}</b></p>
+    /* Trois options, jamais plus : au-delà l'écran redevient un menu. Le
+       stage d'entraînement payant a rejoint les offres qui viennent au
+       joueur (FAITH_OFFRES_TENTATION), il n'est plus une carte de plus. */
+    actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison.</p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="opp" style="padding:12px;text-align:center" onclick="CL.faithRest()">
-        <div class="disp" style="font-size:18px;color:var(--text)">REPOS & RÉCUPÉRATION (Gratuit)</div>
-        <div class="mono muted small mt" style="font-size:10px">+25 Forme, +10 Moral</div></div>
-
-      ${(G.faith.gym && G.faith.gym.length>0)?`
-      <div class="eyebrow mt" style="color:var(--sage)">La Salle d\u2019Entraînement</div>
-      ${G.faith.gym.map(p=>`
-        <div class="opp" style="border-left:3px solid var(--sage)" onclick="CL.faithSparring('${p.id}')">
-          <b style="color:var(--sage)">Tourner avec ${esc(p.first)}</b>
-          <div class="muted small mt">${p.styleLabel} · OVR ${p.overall} · ${p.age} ans.<br>Vous formez ce prospect (+15 Forme). Il copie vos meilleures armes.</div>
-        </div>
-      `).join('')}
-      `:''}
-
-      <div class="eyebrow mt" style="color:var(--gold)">Investissements de carrière</div>
-      <div class="opp" onclick="CL.buyFaithPerk('hometown')"><b class="gold">Combat à Domicile (15k$)</b>
-        <div class="muted small mt">Le prochain combat sera chez vous. +15 Moral, +8 Forme.</div></div>
-      <div class="opp" onclick="CL.buyFaithPerk('catchweight')"><b class="gold">Forcer un Catchweight (35k$)</b>
-        <div class="muted small mt">L\u2019adversaire subira un lourd malus de déshydratation (Cardio/Durabilité).</div></div>
-      <div class="opp" onclick="CL.buyFaithPerk('protect_title')"><b class="gold">Sanctuariser le Titre (50k$)</b>
-        <div class="muted small mt">Annule la pénalité d\u2019inactivité cette année.</div></div>
-
-      <div class="eyebrow mt">Investissements financiers & illégaux</div>
-      <div class="opp" style="border-left:3px solid var(--loss)" onclick="CL.buyFaithPerk('ped')"><b>Cellule de récupération PED (30k$)</b>
-        <div class="muted small mt">+4 Menton et Résistance. <span style="color:var(--loss)">Risque de suspension (15%).</span></div></div>
-      <div class="opp" style="border-left:3px solid var(--sage)" onclick="CL.buyFaithPerk('tiger')"><b>Stage au Tiger Muay Thai (50k$)</b>
-        <div class="muted small mt">+5 Kick et Clinch garantis (hors-plafond). <span style="color:var(--loss)">Risque de blessure mineure (25%).</span></div></div>
-      <div class="opp" style="border-left:3px solid var(--gold-d)" onclick="CL.buyFaithPerk('lobbying')"><b>Lobbying Managérial (100k$)</b>
-        <div class="muted small mt">Force une offre de promotion après le prochain combat. <span style="color:var(--loss)">50% de chance d\u2019échec.</span></div></div>
-      <div class="opp" style="border-left:3px solid var(--blood-d)" onclick="CL.buyFaithPerk('judges')"><b>Influence sur les Juges (20% des gains)</b>
-        <div class="muted small mt">Clémence en cas de décision. <span style="color:var(--loss)">Risque de scandale et rétrogradation.</span></div></div>
-      <div class="opp" onclick="CL.buyFaithPerk('diet')"><b>Diététicien Élite (40k$ / an)</b>
-        <div class="muted small mt">Pesées "Sans effort" garanties pour les 12 prochains mois.</div></div>
+      <div class="opp" style="padding:16px" onclick="CL.faithRest()">
+        <b style="font-size:16px">Se reposer</b>
+        <div class="muted small mt">Récupérer, souffler, laisser le corps se refaire.</div></div>
+      ${(G.faith.gym||[]).slice(0,2).map(p=>`
+        <div class="opp" style="padding:16px;border-left:3px solid var(--sage)" onclick="CL.faithSparring('${p.id}')">
+          <b style="font-size:16px">Tourner avec ${esc(p.first)}</b>
+          <div class="muted small mt">${p.styleLabel}, ${p.age} ans. ${faithProtegeLine(p,f)}</div>
+        </div>`).join('')}
     </div>`;
   } else {
-    actionsHtml=`<div class="eyebrow mb">PHASE 3 : L\u2019OCTOGONE</div>
-    <p class="lede small">Tout est en place. Il est temps de valider cette saison.</p>
-    <button class="btn primary" style="padding:20px;font-size:20px;border-radius:8px;margin-top:10px" onclick="CL.faithFight()">COMBATTRE</button>`;
+    actionsHtml=`<p class="lede small">Tout est en place.</p>
+    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithFight()">ENTRER DANS LA CAGE</button>`;
   }
-  return `<div class="scr">
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
     ${topBar}
-    <div class="glass mwash card" style="padding:16px;margin-bottom:20px;border-radius:8px;background:var(--panel2)">
-      <div class="meta-strip" style="margin-bottom:8px;color:var(--text)">
-        <span style="background:var(--line);padding:4px 8px;border-radius:4px">SAISON ${G.faith.year}</span>
-        <span>ÉTAPE ${step} / 3</span></div>
-      <div class="hero-name" style="font-size:28px">${esc(f.name)} ${f.flag}</div>
-      <div class="mono small muted mt">Ligue : <b style="color:var(--text)">${orgDisplayName(f)}</b></div>
+    ${faithSeasonBar(step)}
+    <div>
+      <div class="mono" style="font-size:11px;color:var(--muted)">SAISON ${G.faith.year} · ${orgDisplayName(f)}</div>
+      <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
+      ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
     </div>
+    ${faithGauges(f)}
     ${actionsHtml}
-    <button class="btn ghost mt" onclick="CL.go('profile')">Voir fiche complète</button>
+    <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */
+/* ==== [ANCRE: FAITH_OFFRES_TENTATION] — les huit privilèges formaient un mur
+   de cartes toutes au même poids visuel, où « Repos gratuit » et « Influence
+   sur les juges » se ressemblaient. Ils ne disparaissent pas : ils viennent
+   au joueur, un à la fois, mis en scène. buyFaithPerk() reste le résolveur,
+   inchangé — seule la surface change. La mécanique cesse d'être un magasin
+   et redevient une tentation, ce qui est aussi la seule façon de faire peser
+   les scandales du Score de Légende : on ne choisit pas de tricher dans un
+   menu, on cède à une proposition. Les req garantissent qu'on ne propose
+   jamais une dépense que le joueur ne peut pas couvrir. ==== */
+const FAITH_PERK_OFFERS=[
+  {id:'evt_offer_hometown',title:'Un promoteur du coin',req:f=>(f.earnings||0)>=15&&f.org>0,
+   text:'Il connaît votre nom, votre salle, le nom de votre première victime amateur. Il peut faire venir le prochain combat ici, chez vous. Ça se paie.',
+   choices:[{label:'Accepter — combattre à domicile',perk:'hometown'},
+            {label:'Refuser, ça ne change rien au travail',d:[['focus',3]],traitTag:'ascetic'}]},
+  {id:'evt_offer_catchweight',title:'La pesée arrangée',req:f=>(f.earnings||0)>=35&&f.org>0,
+   text:'Votre manager a une idée : négocier un poids intermédiaire. L’adversaire acceptera — et arrivera vidé, à sec, sans jambes.',
+   choices:[{label:'Faire signer le catchweight',perk:'catchweight'},
+            {label:'Le prendre à son poids',d:[['confidence',4]],traitTag:'ascetic'}]},
+  {id:'evt_offer_protect',title:'La ceinture dort',req:f=>(f.earnings||0)>=50&&!!f.champion,
+   text:'La fédération s’agace de votre inactivité. Un versement au bon service, et le compteur repart à zéro.',
+   choices:[{label:'Payer pour sanctuariser le titre',perk:'protect_title'},
+            {label:'Laisser courir',d:[['composure',3]]}]},
+  {id:'evt_offer_ped',title:'Un homme vous attend sur le parking',req:f=>(f.earnings||0)>=30,
+   text:'Il ne se présente pas. Il parle de récupération, de cellule hyperbare, de « protocoles » que tout le monde utilise et que personne ne nomme. Il laisse une carte.',
+   choices:[{label:'Écouter ce qu’il propose',perk:'ped',tone:'gamble'},
+            {label:'Jeter la carte',d:[['discipline',5],['morale',-3]],traitTag:'ascetic'}]},
+  {id:'evt_offer_tiger',title:'Une place s’est libérée',req:f=>(f.earnings||0)>=50,
+   text:'Un camp thaïlandais réputé pour casser les hommes autant que les former a une place. Six semaines. On y entre entier, rarement.',
+   choices:[{label:'Partir six semaines',perk:'tiger',tone:'gamble'},
+            {label:'Rester à la salle',d:[['form',5]]}]},
+  {id:'evt_offer_lobbying',title:'Le dîner qui compte',req:f=>(f.earnings||0)>=100,
+   text:'Une table, trois costumes, personne ne parle de sport. On vous fait comprendre qu’une promotion se décide ici, pas dans la cage.',
+   choices:[{label:'Payer l’addition',perk:'lobbying',tone:'gamble'},
+            {label:'Partir avant le dessert',d:[['confidence',3],['morale',3]],traitTag:'rebel'}]},
+  {id:'evt_offer_judges',title:'Une enveloppe, pas une question',req:f=>(f.earnings||0)>=40&&f.org>0,
+   text:'On vous explique, sans jamais le dire, que les cartes des juges sont parfois écrites avant le premier round. Un cinquième de votre bourse suffirait.',
+   choices:[{label:'Faire glisser l’enveloppe',perk:'judges',tone:'gamble'},
+            {label:'Refuser net',d:[['heart',5],['discipline',3]],traitTag:'ascetic'}]},
+  {id:'evt_offer_diet',title:'La nutritionniste',req:f=>(f.earnings||0)>=40,
+   text:'Elle a fait descendre trois champions sans les vider. Elle prend cher, à l’année, et ne travaille qu’avec des gens sérieux.',
+   choices:[{label:'L’engager pour la saison',perk:'diet'},
+            {label:'Continuer à la sueur et au sauna',d:[['durability',2],['form',-4]]}]}
+];
+/* ==== [FIN ANCRE] ==== */
 const FAITH_LIFE_EVENTS=[
   {id:'evt_eco_exam',title:'Semaine de partiels',text:'La session d\u2019examens approche à l\u2019université. Vous passez vos nuits à réviser au lieu de récupérer de vos sparrings.',
     choices:[{label:'Prioriser les révisions (assurer l\u2019avenir)',d:[['fightIQ',3],['form',-12],['morale',5]],traitTag:'ascetic'},
