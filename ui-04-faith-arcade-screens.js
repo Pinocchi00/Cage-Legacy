@@ -32,6 +32,14 @@ const FAITH_DRAFT_PAGES=[
   {key:'style',q:'Où avez-vous appris à vous battre ?'},
   {key:'lifestyle',q:'Quel adolescent avez-vous été ?'},
   {key:'circle',q:'Qui vous entoure ?'},
+  /* ==== [ANCRE: FAITH_AGENT] — question distincte de "Qui vous entoure ?" :
+     le cercle (circle) est un champ narratif déjà chargé — une douzaine
+     d'événements de branche (FAITH_BRANCH_EVENTS) testent f._circle==='family'
+     /'agent'/'squad'. Réutiliser ces mêmes valeurs pour désigner les 3 agents
+     du document (le Requin/le Stratège/le Fidèle) aurait cassé silencieusement
+     tout ce contenu existant. Question séparée, agent mécaniquement
+     indépendant du cercle. ==== */
+  {key:'agent',q:'Qui gère votre carrière ?'},
   {key:'personality',q:'Que donnez-vous à voir ?'},
   {key:'stable',q:'Où signez-vous votre premier contrat ?'},
   {key:null,q:'Voilà qui vous êtes.'}
@@ -55,6 +63,15 @@ const FAITH_DRAFT_OPTIONS={
     ['family','Le clan','Des parents qui négocient vos contrats en pyjama à la table de la cuisine. Rassurant, un peu étouffant.'],
     ['agent','Le requin','Un agent qui a senti l’argent avant que vous sachiez lacer vos gants. Il prend sa part, toujours.'],
     ['squad','La bande','Vos potes d’enfance, bruyants et loyaux, présents à chaque combat sans jamais comprendre les règles.']],
+  /* ==== [ANCRE: FAITH_AGENT] — trois profils, trois façons de remplir le
+     calendrier : le Requin maximise l'argent immédiat au prix d'adversaires
+     trop durs, le Stratège calibre chaque affiche pour la progression au
+     classement quitte à laisser de l'argent sur la table, le Fidèle ne
+     négocie jamais rien mais ne prend rien non plus. ==== */
+  agent:[
+    ['requin','Le Requin','Il sent l’argent avant tout le monde. Les plus grosses bourses, tôt — et des adversaires qu’il choisit toujours un cran trop costauds.'],
+    ['stratege','Le Stratège','Chaque combat sert un plan. Il refuse ce qui ne fait pas progresser au classement, quitte à laisser de l’argent sur la table.'],
+    ['fidele','Le Fidèle','Loyauté totale, commission nulle. Il ne sait pas négocier une bourse, mais il ne vous lâchera jamais.']],
   personality:[
     ['villain','Le vilain','Chaque conférence de presse est un règlement de comptes. Ça remplit les salles.'],
     ['humble','Le taiseux','Deux phrases par interview, un mental de granit. Les puristes vous respectent, les promoteurs s’arrachent les cheveux.']],
@@ -66,15 +83,135 @@ const FAITH_DRAFT_OPTIONS={
     ['regional','Une salle régionale','On vous fera combattre souvent, contre des gens de votre niveau. Vous apprendrez sur le tas, loin des caméras.'],
     ['elite','Un camp d’élite','On ne vous fera pas de cadeau : des partenaires meilleurs que vous, des affiches plus dures, et du monde qui regarde.']]
 };
+/* ==== [ANCRE: FAITH_AGENT] — commission (cut, appliquée par la déduction de
+   bourse déjà en place, ui-05) et style de matchmaking par agent. Consultée
+   à la création (finalizeFaithDraft, ui-08) et à chaque offre de combat
+   (faithGenerateOffer, ui-08). ==== */
+const FAITH_AGENTS={
+  requin:{id:'requin',label:'Le Requin',cut:0.18},
+  stratege:{id:'stratege',label:'Le Stratège',cut:0.10},
+  fidele:{id:'fidele',label:'Le Fidèle',cut:0}
+};
+/* ==== [ANCRE: FAITH_CALENDRIER] — un an = 12 mois plutôt que 5 temps fixes,
+   pour absorber un nombre VARIABLE de combats (FA-10) : à 1 combat/an fixe,
+   un contrat de 4 combats durait mécaniquement 4 à 6 ans (cf. FA-04 —
+   engine.js:1297, fightsLeft = 4 à 6) et la "Dernière danse" ne pesait plus
+   rien. La logique du sport réel (on combat souvent en bas, rarement en
+   haut) produit gratuitement une courbe de progression ressentie : le
+   joueur constate son rythme ralentir en montant, sans qu'aucun texte n'ait
+   à le dire. ==== */
+function faithFightsPlanned(f){
+  if(f.injury) return 0;
+  if((f.form||100)<30) return 1;
+  if(f.champion) return 2;
+  if(f.org<=1) return 4;
+  if(f.org<=3) return 3;
+  if(f.org===4) return RI(2,3);
+  return 2;
+}
+/** Répartit n mois-combat sur un calendrier de 12, aussi régulièrement que
+ * possible (jamais deux collés si évitable).
+ * @param {number} n @returns {number[]} indices de mois (0-11) */
+function faithSpreadMonths(n){
+  if(n<=0) return [];
+  const months=[];
+  for(let i=0;i<n;i++){
+    let m=Math.round((i+0.5)*12/n)%12;
+    while(months.includes(m)) m=(m+1)%12;
+    months.push(m);
+  }
+  return months;
+}
+/** Calendrier annuel : N mois-combat (FA-10), 2-3 mois-vie, 1 mois
+ * intersaison, le reste vide (traversé automatiquement par
+ * faithAdvanceMonth(), ui-08).
+ * @param {object} f @returns {{type:?string}[]} 12 entrées */
+function faithGenerateCalendar(f){
+  const cal=new Array(12).fill(null).map(()=>({type:null}));
+  faithSpreadMonths(faithFightsPlanned(f)).forEach(m=>{ cal[m]={type:'fight'}; });
+  let vieLeft=RI(2,3), tries=0;
+  while(vieLeft>0 && tries<80){
+    const m=Math.floor(rnd()*12);
+    if(!cal[m].type){ cal[m]={type:'vie'}; vieLeft--; }
+    tries++;
+  }
+  tries=0;
+  while(tries<80){
+    const m=Math.floor(rnd()*12);
+    if(!cal[m].type){ cal[m]={type:'intersaison'}; break; }
+    tries++;
+  }
+  return cal;
+}
+/** Barre de calendrier : douze mois plutôt que cinq segments fixes, pour
+ * montrer la FORME de l'année entière au premier regard — "il me reste deux
+ * combats et un mois creux". Une séquence dont on voit la fin donne envie
+ * de la finir ce soir (effet Zeigarnik appliqué à l'année, pas au tour).
+ * @param {object} F G.faith @returns {string} */
+function faithCalendarBar(F){
+  const cal=F.calendar||[], cur=F.month||0;
+  const MOIS=['JANV','FÉVR','MARS','AVR','MAI','JUIN','JUIL','AOÛT','SEPT','OCT','NOV','DÉC'];
+  return `<div style="margin:12px 0 20px">
+    <div style="display:flex;gap:3px">${cal.map((c,i)=>{
+      const passe=i<cur, actif=i===cur;
+      return `<span style="position:relative;flex:1;height:3px;background:${passe?'var(--f-red-hi)':actif?'var(--text)':'transparent'};${passe||actif?'':'border-top:1px solid var(--line)'}">${c.type==='fight'?`<span style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--f-red-hi)"></span>`:''}</span>`;
+    }).join('')}</div>
+    <div class="eyebrow" style="font-size:11px;margin-top:8px">${MOIS[cur]||MOIS[11]} — SAISON ${F.year}</div>
+  </div>`;
+}
+/* ==== [ANCRE: FAITH_GALA] — ORGS (engine.js:1172) est une échelle de 7
+   paliers de prestige sans identité propre : combattre à "l'Ultimate Rim
+   (Argent)" ne ressemble à rien de particulier. Un gala nommé et daté rend
+   la même montée hiérarchique PHYSIQUE plutôt que lue : "j'ouvrais les
+   prélims il y a trois ans, ce soir je ferme le gala". Les préfixes
+   reprennent les noms d'ORGS eux-mêmes (Ultimate Rim -> URC, Pacific
+   Championship -> PCF), jamais inventés à côté. ==== */
+const FAITH_GALA_PREFIX=['AM','CL','CR','CN','CONT','URC','PCF'];
+const FAITH_GALA_CITIES=['Lyon','Marseille','Osaka','Rio','Manchester','Chicago','Lagos','Séoul','Varsovie','Montréal','Le Caire','Perth'];
+/** Position sur la carte : prélims/carte principale/main event, chacune sa
+ * bourse, sa hype, et son effet. Le rang bas (débutant) tombe naturellement
+ * dans "rang > 12" — pas besoin d'un second critère "peu de combats dans
+ * l'org" pour l'attraper.
+ * @param {object} f @returns {{tier:string,mult:number,hype:string,rounds:number}} */
+function faithGalaPosition(f){
+  const rk=divRank(f);
+  if(rk<=4 || f.champion || f.rivalId) return {tier:'Main event',mult:2,hype:'forte',rounds:5,pressConf:true};
+  if(rk<=12) return {tier:'Carte principale',mult:1,hype:'moyenne',rounds:3,pressConf:false};
+  return {tier:'Préliminaires',mult:0.6,hype:'faible',rounds:3,pressConf:false};
+}
+/** Nom et lieu du gala — déterministe par année+mois pour ne pas changer si
+ * l'écran est réaffiché sans qu'un mois ne s'écoule.
+ * @param {object} F G.faith @param {object} f */
+function faithGalaLabel(F,f){
+  const seed=(F.year||2026)*13+(F.month||0)*7+(f.org||0);
+  const prefix=FAITH_GALA_PREFIX[f.org]||FAITH_GALA_PREFIX[0];
+  const num=((seed*17)%89)+1;
+  const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
+  return `${prefix} ${num} — ${city}`;
+}
+/* ==== [ANCRE: FAITH_NEGOCIATION] — le pouvoir de négociation n'est jamais
+   chiffré à l'écran (cf. règle H.1 : un écran ne montre jamais un nombre
+   qu'une phrase peut porter), seulement son EFFET. Dérivé de données déjà
+   existantes : série en cours, rang, hype, personnalité (villain négocie
+   mieux — enfin une conséquence mécanique du choix de création). ==== */
+function faithNegotiationPower(f){
+  let score=0;
+  if((f.streak||0)>=2) score++;
+  if(divRank(f)<=15) score++;
+  if((f.hypeBonus||1)>1.2) score++;
+  if(f.personality==='villain') score++;
+  return score;
+}
 function faithDraftPortrait(d){
   const nom=(d.first||'').trim()||'Un combattant';
   const pays=d.country&&COUNTRIES[d.country]?COUNTRIES[d.country].name:'';
   const org={traditional:'sorti d’un dojo',pro_child:'né dans le métier',street:'sorti du bitume',late_bloomer:'venu tard au sport'}[d.origin]||'';
   const vie={pro:'discipliné',balanced:'équilibré',party:'insouciant'}[d.lifestyle]||'';
   const cer={family:'entouré des siens',agent:'piloté par un agent',squad:'entouré de sa bande'}[d.circle]||'';
+  const ag={requin:'représenté par un requin',stratege:'représenté par un stratège',fidele:'représenté par un fidèle'}[d.agent]||'';
   const per={villain:'qui parle fort',humble:'qui parle peu'}[d.personality]||'';
   const ecu={regional:'et qui signe dans une salle régionale',elite:'et qui signe dans un camp d’élite'}[d.stable]||'';
-  return [nom+(pays?`, ${pays}`:''),org,vie,cer,per,ecu].filter(Boolean).join(', ')+'.';
+  return [nom+(pays?`, ${pays}`:''),org,vie,cer,ag,per,ecu].filter(Boolean).join(', ')+'.';
 }
 function scr_faith_draft(){
   const d=G.faithDraft||(G.faithDraft={gender:'H',country:COUNTRY_KEYS[0],first:''});
@@ -114,30 +251,13 @@ function scr_faith_draft(){
    de gestion + 1 combat » : 90 % gestion, 10 % narration. Elle est désormais
    rythmée par les décisions — deux événements de vie au lieu d'un, et le
    menu d'achats disparaît en tant que menu (cf. FAITH_OFFRES_TENTATION).
-   Les cinq temps : 1 la salle, 2 le camp, 3 le monde, 4 l'octogone, 5 le
-   bilan. Le temps 5 n'a pas d'écran de hub — il vit sur le bilan annuel,
-   qui affiche la barre à son dernier segment. ==== */
-const FAITH_TEMPS=[
-  {n:1,saison:'Hiver',lieu:'La salle'},
-  {n:2,saison:'Printemps',lieu:'Le camp'},
-  {n:3,saison:'Été',lieu:'Le monde'},
-  {n:4,saison:'Automne',lieu:'L’octogone'},
-  {n:5,saison:'Bilan',lieu:'La presse'}
-];
-/** Barre de saison : cinq segments, remplace « ÉTAPE 2 / 3 ».
- * Une progression spatiale se lit sans être décodée, contrairement à une
- * fraction ; et une séquence visiblement incomplète appelle son achèvement.
- * @param {number} step temps courant (1-5) @returns {string} HTML */
-function faithSeasonBar(step){
-  const cur=FAITH_TEMPS.find(t=>t.n===step)||FAITH_TEMPS[0];
-  return `<div style="margin:12px 0 20px">
-    <div style="display:flex;gap:6px">${FAITH_TEMPS.map(t=>{
-      const passe=t.n<step, actif=t.n===step;
-      return `<span style="flex:1;height:3px;background:${passe?'var(--f-red-hi)':actif?'var(--text)':'transparent'};${passe||actif?'':'border-top:1px solid var(--line)'}"></span>`;
-    }).join('')}</div>
-    <div class="eyebrow" style="font-size:11px;margin-top:8px">${cur.saison} — ${cur.lieu}</div>
-  </div>`;
-}
+   ==== [REMPLACÉ PAR FA-11] — les cinq temps fixes ne pouvaient absorber
+   qu'un seul combat par an (cf. FA-10/FA-04 : un contrat de 4 combats durait
+   alors 4 à 6 ANNÉES). Remplacés par un calendrier de 12 mois généré par
+   faithGenerateCalendar() (FAITH_CALENDRIER, ci-dessus dans ce fichier) et
+   rendu par faithCalendarBar() — même principe de progression spatiale
+   qu'ici, mais un nombre de segments qui reflète VRAIMENT ce qui reste à
+   traverser cette année, variable d'une saison à l'autre. ==== */
 /* ==== [ANCRE: FAITH_HUB_GRILLE] — le bandeau du haut n'affichait jamais le
    même nombre de blocs (2 en flex, 3 quand un contrat était actif), et les
    jauges FORME/MORAL vivaient dans un second bloc séparé plus bas : la
@@ -204,28 +324,10 @@ function faithProtegeLine(p,f){
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_hub(){
-  const f=G.f; const step=G.faith.step||1;
+  const f=G.f;
+  const monthEntry=(G.faith.calendar&&G.faith.calendar[G.faith.month])||{type:null};
   let actionsHtml='';
-  if(step===1 || step===3){
-    const quoi=step===1?'Ce qui arrive à la salle':'Ce qui arrive dehors';
-    actionsHtml=`<p class="lede small">${quoi}.</p>
-    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithLifeEvent()">CONTINUER</button>`;
-  } else if(step===2){
-    /* Trois options, jamais plus : au-delà l'écran redevient un menu. Le
-       stage d'entraînement payant a rejoint les offres qui viennent au
-       joueur (FAITH_OFFRES_TENTATION), il n'est plus une carte de plus. */
-    actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison.</p>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="opp" style="padding:16px" onclick="CL.faithRest()">
-        <b style="font-size:16px">Se reposer</b>
-        <div class="muted small mt">Récupérer, souffler, laisser le corps se refaire.</div></div>
-      ${(G.faith.gym||[]).slice(0,2).map(p=>`
-        <div class="opp" style="padding:16px;border-left:3px solid var(--sage)" onclick="CL.faithSparring('${p.id}')">
-          <b style="font-size:16px">Tourner avec ${esc(p.first)}</b>
-          <div class="muted small mt">${p.styleLabel}, ${p.age} ans. ${faithProtegeLine(p,f)}</div>
-        </div>`).join('')}
-    </div>`;
-  } else if(f.injury){
+  if(f.injury){
     /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — f.injury ne peut être posé que
        par un mécanisme qui touche vraiment le mode Faith (aucun aujourd'hui
        ne le fait — toute la chaîne blessure du mode carrière passe par
@@ -233,21 +335,52 @@ function scr_faith_hub(){
        entièrement pour G.faith). Le champ existe malgré tout sur le
        combattant (repairFighter() le garantit, state.js), et le condamner
        à ne jamais s'afficher ici serait fragile au premier futur mécanisme
-       qui le poserait (stage violent, sparring qui tourne mal...). Un
-       combattant blessé ne voit plus d'adversaire pressenti : seule
-       l'Infirmerie, jusqu'à guérison. ==== */
+       qui le poserait (stage violent, sparring qui tourne mal...). Prime
+       sur tout, quel que soit le mois : un combattant blessé ne voit plus
+       d'adversaire pressenti ni de vie de salle, seule l'Infirmerie,
+       jusqu'à guérison. ==== */
     actionsHtml=`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px;border-left:3px solid var(--loss)">
       <div class="eyebrow" style="font-size:10px;color:var(--loss)">INFIRMERIE</div>
       <div class="hero-name" style="font-size:20px;margin-top:6px">${esc(f.injury.name)}</div>
       <div class="mono small muted" style="margin-top:4px">${f.injury.left} combat${f.injury.left>1?'s':''} avant guérison complète</div>
     </div>
     <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.recoverInjury()">LAISSER LE CORPS RÉCUPÉRER</button>`;
+  } else if(monthEntry.type==='vie'){
+    const quoi=((G.faith.month||0)%2===0)?'Ce qui arrive à la salle':'Ce qui arrive dehors';
+    actionsHtml=`<p class="lede small">${quoi}.</p>
+    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithLifeEvent()">CONTINUER</button>`;
+  } else if(monthEntry.type==='intersaison'){
+    /* ==== [CORRECTIF FA-15] — trois options PERMANENTES, jamais plus (règle
+       H.3 : au-delà, un écran de décision redevient un menu) : Se reposer,
+       Tourner avec [le partenaire le plus avancé — un seul, pas jusqu'à
+       deux comme avant : la règle des trois options l'exigeait déjà],
+       Partir en stage (perk 'tiger', qui venait au hasard dans le pool
+       d'événements, cf. faithCamp()/FAITH_OFFRES_TENTATION). "Se reposer"
+       n'est plus un choix gratuit : les partenaires progressent un peu plus
+       vite cette année sans vous pour les canaliser (restedThisYear,
+       consommé par nextFaithYear) — un prix narratif, jamais chiffré ici. */
+    const topPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+    actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="opp" style="padding:16px" onclick="CL.faithRest()">
+        <b style="font-size:16px">Se reposer</b>
+        <div class="muted small mt">Récupérer, souffler — mais laisser l’écurie tourner sans vous.</div></div>
+      ${topPartner?`<div class="opp" style="padding:16px;border-left:3px solid var(--sage)" onclick="CL.faithSparring('${topPartner.id}')">
+        <b style="font-size:16px">Tourner avec ${esc(topPartner.first)}</b>
+        <div class="muted small mt">${topPartner.styleLabel}, ${topPartner.age} ans. ${faithProtegeLine(topPartner,f)}</div>
+      </div>`:''}
+      <div class="opp" style="padding:16px" onclick="CL.faithCamp()">
+        <b style="font-size:16px">Partir en stage</b>
+        <div class="muted small mt">Six semaines dans un camp thaïlandais réputé pour casser les hommes autant que les former. 50k$.</div></div>
+    </div>`;
   } else {
-    /* ==== [ANCRE: FAITH_HUB_ADVERSAIRE] — le temps 4 était le seul des cinq
+    /* ==== [ANCRE: FAITH_HUB_ADVERSAIRE] — le mois-combat était le seul type
        à n'offrir aucune information avant l'action ("Tout est en place.") :
-       les temps 1 et 3 montrent l'événement à trancher, le temps 2 montre le
-       partenaire de sparring — seul celui-ci ouvrait sur du vide. On y
-       affiche désormais un aperçu réel du prochain rendez-vous : le plus
+       de mois à n'offrir aucune information avant l'action ("Tout est en
+       place.") : les mois-vie montrent l'événement à trancher, le mois
+       intersaison montre le partenaire de sparring — seul celui-ci ouvrait
+       sur du vide. On y affiche désormais un aperçu réel du prochain
+       rendez-vous : le plus
        dangereux des 3 candidats que produira le Bureau du Matchmaker
        (genOpponents() trie déjà du plus fort au plus faible — cf.
        CORRECTIF_ORDRE_PROPOSITIONS, ui-02), via ensureOpponentsCached() pour
@@ -269,7 +402,7 @@ function scr_faith_hub(){
   }
   return `<div class="scr" style="max-width:560px;margin:0 auto">
     ${faithHubGrid(f)}
-    ${faithSeasonBar(step)}
+    ${faithCalendarBar(G.faith)}
     <div>
       <div class="mono" style="font-size:11px;color:var(--muted)">SAISON ${G.faith.year} · ${orgDisplayName(f)}</div>
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
@@ -279,6 +412,46 @@ function scr_faith_hub(){
     </div>
     ${actionsHtml}
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
+  </div>`;
+}
+/* ==== [ANCRE: FAITH_AGENT] — remplace scr_select (menu à 3 adversaires,
+   matchmaking du mode carrière) pour les combats Faith : une offre UNIQUE,
+   apportée par l'agent, à accepter ou négocier (FA-12/FA-13). Aucun chiffre
+   de bourse exact avant la bonification négociée — l'estimation affichée
+   ici est la même formule que la bourse réelle (ORG_PURSES/contrat,
+   engine.js), gala et négociation appliqués, mais reste une ESTIMATION :
+   la bourse définitive dépend aussi du résultat du combat (prime de
+   victoire, finition), jamais connue avant. ==== */
+function scr_faith_offer(){
+  const f=G.f, F=G.faith, off=F.pendingOffer;
+  if(!off) return `<div class="scr center intro"><p class="lede">Aucune offre en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const o=off.opp.o, mm=off.opp.mm, gala=off.gala;
+  const base=(f.org>0 && f.contract)?f.contract.show:(ORG_PURSES[f.org]||[0,0])[0];
+  const bourseEst=Math.round(base*(gala.mult||1)*(off.bonusMult||1)*10)/10;
+  const patience=F.agentPatience!=null?F.agentPatience:3;
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="eyebrow">${esc((F.agent&&F.agent.label)||'Sans agent')}</div>
+   <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
+   <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · hype ${gala.hype}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
+   <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
+     <div class="eyebrow" style="font-size:10px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
+     <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
+     <div class="mono small" style="margin-top:4px">${recordStr(o)}</div>
+     <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
+   </div>
+   <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+     <button class="btn primary" style="height:56px;font-size:16px" onclick="CL.faithOfferSign()">SIGNER</button>
+     <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
+       <b style="font-size:15px">Demander plus d’argent</b>
+       <div class="muted small mt">${patience>0?'La bourse sera relevée, l’adversaire ne change pas.':'Il insiste encore, mais sa patience est épuisée pour cette année.'}</div>
+     </div>
+     <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandBetter()">
+       <b style="font-size:15px">Demander un meilleur adversaire</b>
+       <div class="muted small mt">Montée plus rapide au classement, risque plus élevé.</div>
+     </div>
+     <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser — perdre ce combat de l’année</button>
+   </div>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */
@@ -914,7 +1087,7 @@ function scr_faith_event(){
   if(resolved){
     const c=ev.choices[resolved.idx];
     return `<div class="scr" style="max-width:560px;margin:0 auto">
-     <div class="eyebrow">${(G.faith.step||1)>=3?'Le monde':'La salle'}</div>
+     <div class="eyebrow">${((G.faith.month||0)%2===0)?'La salle':'Le monde'}</div>
      <h2 class="hero-name" style="font-size:28px;line-height:1.1">${esc(ev.title)}</h2>
      <p class="lede small">${esc(ev.text)}</p>
      <div class="opp" style="padding:16px;min-height:72px;text-align:left">
@@ -929,7 +1102,7 @@ function scr_faith_event(){
     </div>`;
   }
   return `<div class="scr" style="max-width:560px;margin:0 auto">
-   <div class="eyebrow">${(G.faith.step||1)>=3?'Le monde':'La salle'}</div>
+   <div class="eyebrow">${((G.faith.month||0)%2===0)?'La salle':'Le monde'}</div>
    <h2 class="hero-name" style="font-size:28px;line-height:1.1">${esc(ev.title)}</h2>
    <p class="lede small">${esc(ev.text)}</p>
    <div style="display:flex;flex-direction:column;gap:10px">
@@ -1352,7 +1525,7 @@ function scr_faith_year_end(){
       <b style="color:${c}">${sk.name}</b> <span class="muted small">(${sk.rar})</span>
       <div class="muted small">${sk.desc||sk.blurb||''}</div></div>`; }).join('');
   return `<div class="scr" style="max-width:560px;margin:0 auto">
-   ${faithSeasonBar(5)}
+   ${faithCalendarBar(F)}
    <div class="faith-paper">
      <div style="border-top:1px solid var(--text);border-bottom:3px solid var(--text);padding:10px 0;display:flex;justify-content:space-between;align-items:baseline">
        <span class="hero-name" style="font-size:18px;letter-spacing:.06em">${media}</span>

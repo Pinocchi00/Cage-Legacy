@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -50,6 +50,47 @@ function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
   G.screen='hub'; save(); render();
 }
+/* ==== [ANCRE: FAITH_CALENDRIER] — remplace le compteur `step` (1-5, temps
+   fixes) par une position dans G.faith.calendar (12 mois, généré par
+   faithGenerateCalendar(), ui-04) : seul point de vérité pour savoir quel
+   mois est en cours et ce qui doit s'y passer. faithLandOnMonth() saute les
+   mois vides SANS jamais rendre d'écran intermédiaire pour eux ("traversées
+   automatiquement", cf. le document) ; si l'année entière est épuisée en
+   sautant, elle bascule directement sur le bilan. Appelée à l'entrée d'une
+   année (month=0, potentiellement vide) ET après chaque mois résolu
+   (faithAdvanceMonth). ==== */
+function faithLandOnMonth(){
+  while(G.faith.month<12 && !(G.faith.calendar[G.faith.month]||{}).type) G.faith.month++;
+  if(G.faith.month>=12){ CL.prepareFaithYearEnd(); return; }
+}
+function faithAdvanceMonth(){
+  G.faith.month++;
+  faithLandOnMonth();
+  if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
+  G.screen='faith_hub'; save(); render();
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_AGENT] — l'agent choisit LEQUEL des candidats du
+   Bureau du Matchmaker (genOpponents(), ui-02, inchangé — trié du plus fort
+   au plus faible, cf. CORRECTIF_ORDRE_PROPOSITIONS) devient l'offre unique,
+   selon son profil : le Requin vise le plus dangereux (plus dur, mieux payé
+   via faithGalaPosition), le Fidèle le plus abordable, le Stratège un
+   candidat calibré au milieu. ==== */
+function faithGenerateOffer(){
+  ensureOpponentsCached(G.f);
+  const opps=G.opps||[];
+  if(!opps.length){ faithAdvanceMonth(); return; }
+  const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
+  const chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
+  const gala=faithGalaPosition(G.f);
+  gala.label=faithGalaLabel(G.faith,G.f);
+  /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
+     nouveau se présente l'année suivante. */
+  if(!G.faith.agent) gala.mult*=0.75;
+  G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
+  G.screen='faith_offer'; save(); render();
+}
+/* ==== [FIN ANCRE] ==== */
 // ==== [ANCRE: CORRECTIF_DUPLICATION_ROUTAGE] — chooseClass() et
 // afterResult() (mode carrière/gauntlet, hors Faith qui a son propre
 // endpoint prepareFaithYearEnd) redirigeaient vers l'écran suivant via la
@@ -550,8 +591,26 @@ const CL={
       if(G.faith.perks && G.faith.perks.catchweight){
         if(!pendingOppMalus) pendingOppMalus={}; pendingOppMalus.cardio=-20; pendingOppMalus.durability=-15; G.faith.perks.catchweight=false;
       }
-      const kind=fightKind(); const opp=G.sel.o; const rounds=(kind==='title'||kind==='defense')?5:3;
+      const kind=fightKind(); const opp=G.sel.o; let rounds=(kind==='title'||kind==='defense')?5:3;
       G.fight={kind,opp,rounds,malus:pendingMyMalus||null,oppMalus:pendingOppMalus||null,mmRole:G.sel.mm?G.sel.mm.role:null};
+      /* ==== [CORRECTIF FA-14] — la carte de gala (position, multiplicateur
+         de bourse, rounds) posée par faithGenerateOffer()/scr_faith_offer
+         (ui-04) s'applique ici, au même endroit que les autres malus/buffs
+         en attente — un seul point d'entrée dans le combat Faith, jamais
+         deux chemins qui pourraient diverger. pursePenalty est le levier de
+         multiplicateur DÉJÀ utilisé par le calcul de bourse (ui-05, ex.
+         pénalité de catchweight) : le réutiliser évite de dupliquer la
+         logique de déduction. ==== */
+      if(G.faith.pendingOffer){
+        const off=G.faith.pendingOffer;
+        if(off.gala){
+          rounds=off.gala.rounds||rounds; G.fight.rounds=rounds;
+          const mult=(off.gala.mult||1)*(off.bonusMult||1);
+          if(mult!==1) G.fight.pursePenalty=(G.fight.pursePenalty||1)*mult;
+          G.fight.galaLabel=off.gala.label;
+        }
+        G.faith.pendingOffer=null;
+      }
       const wc=weightCutInfo(G.f);
       let cutTier;
       if(G.faith.dietYear===G.faith.year){ cutTier='sans_effort'; }
@@ -709,7 +768,14 @@ const CL={
       if(p&&p.promoOffer){ G.screen='promo'; save(); render(); return; }
       if(p&&p.champChampDecision){ G.screen='champ_champ_decision'; save(); render(); return; }
       if(p&&p.champChampOfferReady){ G.screen='champ_champ_offer'; save(); render(); return; }
-      if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd();
+      /* ==== [CORRECTIF FA-10] — un combat ne menait plus qu'au bilan annuel
+         direct : à 1 combat/an fixe, 18-36 ans de carrière ne produisaient
+         jamais plus de 18 combats, et un contrat de 4 combats (engine.js:
+         1297, fightsLeft 4 à 6) durait mécaniquement 4 à 6 ANNÉES (FA-04).
+         faithAdvanceMonth() avance au mois suivant du calendrier (FA-11) —
+         s'il reste d'autres mois-combat cette année, ils suivront
+         normalement ; sinon elle bascule elle-même sur le bilan. ==== */
+      faithAdvanceMonth();
       return;
     }
     if(G.arcade && G.arcade.active){
@@ -1041,7 +1107,7 @@ const CL={
      tirées du pool, jamais la liste complète. ==== */
   offerFaithOaths(){
     const d=G.faithDraft;
-    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality || !d.stable){
+    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.agent || !d.personality || !d.stable){
       G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
     }
     const pool=FAITH_OATHS.slice();
@@ -1055,7 +1121,7 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   finalizeFaithDraft(){
     const d=G.faithDraft;
-    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.personality || !d.stable){
+    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.agent || !d.personality || !d.stable){
       G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
     }
     const f=makeFighter({gender:d.gender||'H',style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18,freshPlayer:true});
@@ -1067,7 +1133,12 @@ const CL={
     if(d.lifestyle==='pro'){ f.attrs.cardio+=10; f.form=100; }
     if(d.lifestyle==='party'){ f.form=60; f.morale=90; f.hypeBonus=(f.hypeBonus||1)+0.3; }
     if(d.circle==='family'){ f.morale=100; }
-    if(d.circle==='agent'){ f.earnings=(f.earnings||0)+30; f.agentCut=0.15; }
+    if(d.circle==='agent'){ f.earnings=(f.earnings||0)+30; }
+    /* ==== [ANCRE: FAITH_AGENT] — commission appliquée via f.agentCut, déjà lue
+       par la déduction de bourse existante (ui-05) et par les événements
+       "Requin" déjà présents dans le pool (req:f=>f.agentCut>0). ==== */
+    const faithAgent=FAITH_AGENTS[d.agent]||FAITH_AGENTS.fidele;
+    f.agentCut=faithAgent.cut||0;
     /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — origine, cercle et hygiène de
        vie étaient consommés puis jetés : aucun événement ne pouvait s'y
        brancher, ils n'étaient que des deltas déguisés. Conservés sur le
@@ -1103,20 +1174,30 @@ const CL={
     const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10+boost,20,60),potential:85});
     p1.isGymPartner=true; p2.isGymPartner=true;
     p1.nick='Le Prodige'; p2.nick='L\u2019Aspirant';
-    G.faith={year:2026,step:1,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2]};
+    G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2],
+      agent:faithAgent,agentPatience:3};
     /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
        brouillon de création : il doit survivre au rechargement. ==== */
     if(G.faithDraft && G.faithDraft._oath) G.faith.oath=G.faithDraft._oath;
     G.season={year:1,fights:[]};
+    /* ==== [ANCRE: FAITH_CALENDRIER] — la première année se génère ici, les
+       suivantes dans nextFaithYear(). faithLandOnMonth() saute les mois vides
+       (le mois 0 peut l'être) jusqu'au premier mois occupé. ==== */
+    G.faith.month=0; G.faith.calendar=faithGenerateCalendar(f);
+    faithLandOnMonth();
     G.screen='faith_hub'; save(); render();
   },
+  /* ==== [CORRECTIF FA-15] — "Se reposer" (engine.js) donnait +25 forme/+10
+     moral SANS AUCUN COÛT : un choix dominant dès que la forme est basse, et
+     un choix vide sinon. Un coût narratif plutôt que chiffré — restedThisYear,
+     consommé par nextFaithYear() qui fait alors progresser les partenaires
+     un peu plus vite CETTE année-là (sans vous pour les canaliser). ==== */
   faithRest(){
-    /* ==== [ANCRE: FAITH_CINQ_TEMPS] — le camp (temps 2) débouche sur le
-       monde (temps 3), pas sur le combat. ==== */
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
+    G.faith.restedThisYear=true;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Intersaison',choice:'Repos et récupération'});
-    G.faith.step=3; G.screen='faith_hub'; save(); render();
+    faithAdvanceMonth();
   },
   faithSparring(partnerId){
     const partner=(G.faith.gym||[]).find(p=>p.id===partnerId); if(!partner) return;
@@ -1131,7 +1212,21 @@ const CL={
     G.lastMsg=`Séance intense. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Sparring',choice:`A tourné avec ${esc(partner.name)}`});
-    G.faith.step=3; G.screen='faith_hub'; save(); render();
+    faithAdvanceMonth();
+  },
+  /* ==== [CORRECTIF FA-15] — troisième option de l'intersaison : le stage
+     (perk 'tiger', jusqu'ici un tirage possible parmi FAITH_OFFRES_TENTATION)
+     devient une décision directe d'intersaison plutôt qu'un coup de chance
+     de la pioche — "Partir en stage" migre ici, comme le document le nomme.
+     Réutilise buyFaithPerk('tiger') telle quelle (même tirage 25%/75%, même
+     conséquence), qui ne change jamais d'écran ni de mois elle-même :
+     l'avance de mois est donc assumée ici, juste après. ==== */
+  faithCamp(){
+    if((G.f.earnings||0)<50){ G.lastMsg="Fonds insuffisants pour ce stage (50k$)."; render(); return; }
+    if(!G.faith.yearLog) G.faith.yearLog=[];
+    G.faith.yearLog.push({title:'Intersaison',choice:'Stage'});
+    CL.buyFaithPerk('tiger');
+    faithAdvanceMonth();
   },
   faithLifeEvent(){
     // Syndrome de Frankenstein : si un protégé a rattrapé (ou dépassé) le
@@ -1153,13 +1248,16 @@ const CL={
       }
     }
     /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — les offres de privilège rejoignent
-       le pool du temps « Le monde » (temps 3) : elles viennent au joueur au
-       lieu de l'attendre dans un menu. Elles restent minoritaires (une chance
-       sur trois d'y basculer) pour ne pas transformer le mode en catalogue
-       ambulant, et la mémoire seenEvents s'applique à elles comme au reste. ==== */
+       le pool des mois-vie : elles viennent au joueur au lieu de l'attendre
+       dans un menu. Elles restent minoritaires (une chance sur trois d'y
+       basculer) pour ne pas transformer le mode en catalogue ambulant, et la
+       mémoire seenEvents s'applique à elles comme au reste. La distinction
+       "temps 1 (la salle) / temps 3 (le monde)" a disparu avec le calendrier
+       à 12 mois (FA-11, plusieurs mois-vie génériques plutôt que deux temps
+       ordonnés) : la même chance s'applique à chaque mois-vie. ==== */
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     const base=FAITH_LIFE_EVENTS.concat(FAITH_BRANCH_EVENTS);
-    const source=((G.faith.step||1)>=3 && rnd()<0.34)
+    const source=(rnd()<0.34)
       ? FAITH_PERK_OFFERS.concat(base)
       : base;
     let pool=source.filter(e=>!G.faith.seenEvents.includes(e.id) && (!e.req||e.req(G.f)));
@@ -1194,8 +1292,11 @@ const CL={
       if(!G.faith.seenEvents) G.faith.seenEvents=[];
       G.faith.seenEvents.push(ev.id);
       G.faith.currentEvent=null;
-      G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub';
+      /* buyFaithPerk('ped') peut clore l'année elle-même (suspension) et a
+         déjà changé G.screen dans ce cas : ne PAS avancer le mois par-dessus
+         un bilan déjà affiché. */
       CL.buyFaithPerk(c.perk);
+      if(G.screen!=='faith_year_end') faithAdvanceMonth();
       return;
     }
     /* ==== [FIN ANCRE] ==== */
@@ -1249,15 +1350,14 @@ const CL={
     G.faith.eventResolved={idx:i,failed,deltas:(failed?c.bad:c.d)||[],reward:c.reward||0,traitAcquired};
     save(); render();
   },
-  /* ==== [ANCRE: FAITH_CINQ_TEMPS] — deux événements de vie par an : celui
-     de la salle (temps 1) mène au camp, celui du monde (temps 3) mène à
-     l'octogone. Repoussé ici (hors de chooseFaithEvent()) par le correctif
-     FA-20 : l'avance de temps n'a plus lieu au moment du choix, mais au clic
-     sur CONTINUER, une fois la conséquence lue. ==== */
+  /* ==== [ANCRE: FAITH_CALENDRIER] — l'avance de temps n'a plus lieu au
+     moment du choix (correctif FA-20) mais au clic sur CONTINUER, une fois
+     la conséquence lue ; elle avance désormais le CALENDRIER (FA-11) plutôt
+     que le compteur `step` à 5 temps fixes. ==== */
   faithEventContinue(){
     G.faith.currentEvent=null;
     G.faith.eventResolved=null;
-    G.faith.step=(G.faith.step>=3)?4:2; G.screen='faith_hub'; save(); render();
+    faithAdvanceMonth();
   },
   /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — startFightSelect() (ui-02) commence
      par `if(G.f.injury) return;`, un no-op total : ni message, ni render. Le
@@ -1267,10 +1367,61 @@ const CL={
      FAITH_COMPTEUR_COMBATS un peu plus bas, qui déplace l'incrément au bon
      endroit). On coupe court ici, avec un message, avant de toucher au
      compteur ou d'appeler startFightSelect(). ==== */
+  /* ==== [CORRECTIF FA-12] — remplace le menu à 3 adversaires
+     (startFightSelect()/scr_select, le matchmaking du mode carrière) par une
+     offre UNIQUE apportée par l'agent : un menu à trois options où l'une est
+     objectivement la meilleure n'est pas un choix, c'est un test de lecture.
+     Une offre à accepter ou refuser est une décision sous incertitude — la
+     refuser a un coût réel (la case combat de l'année est perdue). Voir
+     faithGenerateOffer() ci-dessous. ==== */
   faithFight(){
     if(G.f.injury){ G.lastMsg="Toujours à l'infirmerie — pas de combat tant que le corps n'est pas prêt."; render(); return; }
-    G.faith.step=4; // combat en cours — le retour se fera vers le bilan (voir afterResult)
-    startFightSelect();
+    faithGenerateOffer();
+  },
+  /* ==== [CORRECTIF FA-12] — signer l'offre telle quelle. G.opps est réduit
+     à ce seul candidat puis CL.opp(0) (ui-08, branche G.faith déjà en place)
+     est réutilisée intégralement : pesée, malus/buffs en attente, tout le
+     reste de la mise en jambe d'un combat Faith — un seul chemin de code,
+     pas une copie. Cette branche lit G.faith.pendingOffer elle-même pour
+     appliquer le multiplicateur de bourse et le nombre de rounds du gala. ==== */
+  faithOfferSign(){
+    const off=G.faith.pendingOffer; if(!off) return;
+    G.opps=[off.opp];
+    CL.opp(0);
+  },
+  /* ==== [CORRECTIF FA-13] — patience à 0 : l'agent négocie quand même
+     (jamais de blocage dur), juste avec une réserve affichée — c'est le
+     franchissement à 0 qui compte pour agentPatienceHitZero (bilan annuel,
+     nextFaithYear), pas le fait de rester dessus. La bonification n'est
+     JAMAIS un nombre affiché avant coup (mise à jour de l'offre seulement) —
+     le pouvoir de négociation reste implicite, cf. faithNegotiationPower(). */
+  faithOfferDemandMoney(){
+    const off=G.faith.pendingOffer; if(!off) return;
+    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; G.lastMsg="Il insiste encore, mais commence à parler de repositionner sa liste de clients."; }
+    else { G.faith.agentPatience--; G.lastMsg="Votre agent revient avec une meilleure offre."; }
+    const power=faithNegotiationPower(G.f);
+    const bump=0.15+Math.min(1,power/4)*0.25;
+    off.bonusMult=(off.bonusMult||1)*(1+bump);
+    save(); render();
+  },
+  faithOfferDemandBetter(){
+    const off=G.faith.pendingOffer; if(!off) return;
+    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; G.lastMsg="Il insiste encore, mais commence à parler de repositionner sa liste de clients."; }
+    else { G.faith.agentPatience--; }
+    const opps=G.opps||[]; const idx=opps.indexOf(off.opp);
+    if(idx>0){ off.opp=opps[idx-1]; }
+    off.gala=faithGalaPosition(G.f); off.gala.label=faithGalaLabel(G.faith,G.f);
+    if(!G.faith.agent) off.gala.mult*=0.75;
+    save(); render();
+  },
+  /* ==== [CORRECTIF FA-12] — refuser coûte réellement quelque chose : la
+     case combat de l'année est perdue (pas de nouvelle offre à la place),
+     exactement ce que le document demande. ==== */
+  faithOfferRefuse(){
+    G.faith.pendingOffer=null;
+    if(!G.faith.yearLog) G.faith.yearLog=[];
+    G.faith.yearLog.push({title:'Combat refusé',choice:'Aucune offre acceptée'});
+    faithAdvanceMonth();
   },
   prepareFaithYearEnd(){
     const f=G.f;
@@ -1329,7 +1480,6 @@ const CL={
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
       eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[]
     };
-    G.faith.step=5; /* dernier temps : le bilan, cf. FAITH_CINQ_TEMPS */
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
@@ -1340,7 +1490,7 @@ const CL={
        G.faith.year n'a pas encore été incrémenté. ==== */
     if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
     /* ==== [FIN ANCRE] ==== */
-    G.faith.year++; G.faith.step=1;
+    G.faith.year++;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
     /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
        qu'un millésime : le drapeau est levé ici, avec le reste des compteurs
@@ -1360,11 +1510,18 @@ const CL={
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
     advanceRoster();
     if(G.faith.gym){
+      /* ==== [CORRECTIF FA-15] — "Se reposer" n'est plus gratuit : si le
+         combattant a choisi le repos pendant l'intersaison de l'année qui
+         vient de se terminer (restedThisYear, posé par faithRest()), les
+         partenaires progressent un peu plus vite cette année — sans lui
+         pour les canaliser. Prix narratif, jamais chiffré à l'écran. ==== */
+      const soloBoost=G.faith.restedThisYear?1:0;
       G.faith.gym.forEach(p=>{
         p.age++;
-        applyDeltas(p,[['strength',1],['fightIQ',1],['cardio',1],['durability',1]]);
+        applyDeltas(p,[['strength',1+soloBoost],['fightIQ',1+soloBoost],['cardio',1+soloBoost],['durability',1+soloBoost]]);
         p.overall=overall(p);
       });
+      G.faith.restedThisYear=false;
     }
     /* ==== [ANCRE: FAITH_ECURIE_RENOUVELEE] — G.faith.gym n'était alimenté
        qu'à la création (2 partenaires) et seulement RETIRÉ ensuite (la
@@ -1381,6 +1538,34 @@ const CL={
       G.faith.gym.push(p3);
       G.lastMsg=`Un gamin de 18 ans a poussé la porte de la salle cette semaine — ${esc(p3.nick)}.`;
     }
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: FAITH_AGENT] — recouvrement AVANT le bilan de l'année qui
+       vient de s'écouler : si l'agent avait déjà été perdu à l'année N-1,
+       cette entrée en année N est le moment où un nouveau se présente
+       (jamais la MÊME année que la perte — sinon la pénalité "sans agent"
+       ne dure jamais). Le bilan patience de l'année qui vient de s'écouler
+       (agentPatienceHitZero, posé par faithOfferDemandMoney/Better) est
+       évalué ENSUITE, sur l'agent alors en poste. ==== */
+    if(!G.faith.agent){
+      const pick3=['requin','stratege','fidele'][Math.floor(rnd()*3)];
+      G.faith.agent=FAITH_AGENTS[pick3]; G.f.agentCut=G.faith.agent.cut||0;
+      G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${G.faith.agent.label} vous propose de vous représenter.`;
+    } else if(G.faith.agentPatienceHitZero){
+      G.faith.agentPatienceZeroStreak=(G.faith.agentPatienceZeroStreak||0)+1;
+      if(G.faith.agentPatienceZeroStreak>=2){
+        G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${G.faith.agent.label} vous lâche : trop sollicité, il repositionne sa liste de clients ailleurs.`;
+        G.faith.agent=null; G.f.agentCut=0; G.faith.agentPatienceZeroStreak=0;
+      }
+    } else {
+      G.faith.agentPatienceZeroStreak=0;
+    }
+    G.faith.agentPatience=3; G.faith.agentPatienceHitZero=false;
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: FAITH_CALENDRIER] — nouveau calendrier de 12 mois pour la
+       saison qui commence (cf. finalizeFaithDraft pour la 1ère année). ==== */
+    G.faith.month=0; G.faith.calendar=faithGenerateCalendar(G.f);
+    faithLandOnMonth();
+    if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
     /* ==== [FIN ANCRE] ==== */
     G.screen='faith_hub'; save(); render();
   },
