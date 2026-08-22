@@ -546,6 +546,26 @@ function scr_faith_event(){
   const ev=G.faith.currentEvent;
   if(!ev) return `<div class="scr center intro"><p class="lede">Aucun événement en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
   const f=G.f;
+  /* ==== [ANCRE: FAITH_PROTEGE_VISIBLE] — la trahison du protégé est le seul
+     écran du mode autorisé à casser le gabarit : pas de barre de saison, pas
+     de jauges, titre au double de la taille habituelle, fond retourné. Une
+     rupture de gabarit se lit comme un signal d'importance avant même que le
+     texte soit lu — c'est ce qui distingue l'aboutissement de ce système de
+     n'importe quel autre événement de la pioche. ==== */
+  if(ev.id==='evt_frankenstein_betrayal'){
+    return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
+     <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
+     <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
+     <p style="font-size:15px;line-height:1.55">${esc(ev.text)}</p>
+     <div style="display:flex;flex-direction:column;gap:10px">
+       ${ev.choices.map((c,i)=>`<div class="opp" style="padding:16px;min-height:72px;text-align:left" onclick="CL.chooseFaithEvent(${i})">
+         <b style="font-size:15px">${esc(c.label)}</b>
+         <div class="tagrow" style="margin-top:10px">${formatEventDelta(c.d)}</div>
+       </div>`).join('')}
+     </div>
+    </div>`;
+  }
+  /* ==== [FIN ANCRE] ==== */
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow">${(G.faith.step||1)>=3?'Le monde':'La salle'}</div>
    <h2 class="hero-name" style="font-size:28px;line-height:1.1">${esc(ev.title)}</h2>
