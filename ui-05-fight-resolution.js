@@ -198,6 +198,13 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // jamais ensuite (contrairement à f.rivalId qui peut glisser vers l'animosité
   // la plus récente) — c'est le fil rouge narratif de toute la carrière.
   if(G.faith && !G.f.faithNemesisId && G.f.rivalId){ G.f.faithNemesisId=G.f.rivalId; }
+  /* ==== [ANCRE: FA-19_SHOWMAN] — le showman vend le spectacle avant de le
+     livrer (personality créée dans finalizeFaithDraft, ui-08) : une victoire
+     aux points, sans finish, est par définition le résultat qu'il n'a pas
+     vendu au public. ==== */
+  if(G.faith && win && isDecisionLike(res.method) && G.f.personality==='showman'){
+    G.f.morale=clamp(G.f.morale-8,0,100);
+  }
   // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
   // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
   // donc un adversaire battu 15 fois de façon décisive n'était presque jamais

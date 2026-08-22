@@ -28,8 +28,24 @@
      s'y brancher via le champ `req` déjà supporté par le pool. ==== */
 const FAITH_DRAFT_PAGES=[
   {key:null,q:'Qui êtes-vous ?'},
+  /* ==== [CORRECTIF FA-16] — finalizeFaithDraft() (ui-08) appelait
+     makeFighter() sans jamais passer `div` : makeFighter() (engine.js)
+     tire alors la catégorie de poids AU HASARD dans DIVISIONS[gender]. Le
+     mode carrière, lui, la fait choisir (scr_create, ui-06). La catégorie
+     détermine la morphologie (taille/allonge) et une partie du profil de
+     départ — la laisser au hasard est un oubli, pas un choix de design. */
+  {key:'div',q:'Sur quelle balance montez-vous ?'},
   {key:'origin',q:'D’où venez-vous ?'},
-  {key:'style',q:'Où avez-vous appris à vous battre ?'},
+  /* ==== [CORRECTIF FA-18] — FAITH_DRAFT_OPTIONS.style ne proposait que 4
+     styles sur les 8 de STYLES (engine.js) : karaté, sambo, kickboxing et
+     MMA complet en étaient absents, alors que du contenu existant (l'événement
+     evt_forest_kata, spécifique au karaté) était de fait inatteignable en
+     Faith. Un style unique reste écrit sur `d.style` (le champ lu par
+     finalizeFaithDraft) mais réparti sur deux pages de 4 options pour tenir
+     la règle des 3-4 options/écran : `field` indique le champ réel à
+     renseigner quand il diffère de `key` (cf. scr_faith_draft). ==== */
+  {key:'style_stand',field:'style',q:'Où avez-vous appris à frapper ?'},
+  {key:'style_ground',field:'style',q:'Où avez-vous appris à finir un combat au sol ?'},
   {key:'lifestyle',q:'Quel adolescent avez-vous été ?'},
   {key:'circle',q:'Qui vous entoure ?'},
   /* ==== [ANCRE: FAITH_AGENT] — question distincte de "Qui vous entoure ?" :
@@ -44,25 +60,61 @@ const FAITH_DRAFT_PAGES=[
   {key:'stable',q:'Où signez-vous votre premier contrat ?'},
   {key:null,q:'Voilà qui vous êtes.'}
 ];
+/* ==== [CORRECTIF FA-16] — descriptions par ce qu'elles racontent, jamais
+   par leurs stats (même règle que le reste de la création, cf.
+   FAITH_CREATION_SEQUENTIELLE) : chaque catégorie nomme un rapport de force
+   dans le sport, pas une fourchette de kilos. Les noms/tailles/allonges
+   réels restent ceux de DIVISIONS (engine.js) — seul le texte est ajouté
+   ici, la rendu (scr_faith_draft) les combine. */
+const FAITH_DIVISION_TEXT={
+  H:{
+    'H-fly':'Vous ne mettrez jamais personne KO d’un seul coup. Vous ne vous arrêterez jamais non plus.',
+    'H-bantam':'La vitesse est le seul luxe que la catégorie vous accorde. Ne la gâchez pas.',
+    'H-feather':'Ni le plus rapide, ni le plus lourd. Il faudra être le plus complet.',
+    'H-light':'La division la plus encombrée du sport. Tout le monde sait se battre.',
+    'H-welter':'Assez de puissance pour finir, assez de vitesse pour ne pas se faire prendre. La plus regardée, pour cette raison.',
+    'H-middle':'Le gabarit qu’on met en couverture. On y attend des champions, pas des surprises.',
+    'H-lheavy':'Chaque échange peut tout changer d’un coup. Personne ne relâche vraiment sa garde.',
+    'H-heavy':'Un coup, une carrière. Le vôtre ou le sien.'
+  },
+  F:{
+    'F-straw':'La plus légère des catégories féminines. Le sport ne pardonne pas plus qu’aux autres.',
+    'F-fly':'Une vitesse d’exécution qui ne laisse le temps de réfléchir à personne — ni à vous, ni en face.',
+    'F-bantam':'Le juste milieu entre la vitesse et la capacité à faire mal. La catégorie reine du sport féminin.',
+    'F-feather':'La plus haute catégorie encore ouverte aux femmes. Peu de monde en face, et ça se voit vite.'
+  }
+};
+/* ==== [ANCRE: FAITH_VOCAB_MMA] — FA-17 : la structure de ces questions
+   (origine/milieu/adolescence/entourage/image) est une transposition directe
+   d'un mode carrière footballistique, et les descriptions en gardaient le
+   vocabulaire (statut social, argent, image). Règle d'écriture tenue ici :
+   une description ne dit jamais ce qu'elle donne (les bonus restent dans
+   finalizeFaithDraft), elle dit ce que ça a fait au corps ou aux habitudes
+   de combattant. ==== */
 const FAITH_DRAFT_OPTIONS={
   origin:[
-    ['traditional','Dojo de la discipline','Un maître obsessionnel vous a fait répéter le même jab dix mille fois avant le premier vrai sparring.'],
-    ['pro_child','Fils de la maison','Votre nom de famille remplit les salles avant votre premier combat — et pèse une tonne à chaque défaite.'],
-    ['street','École du bitume','Les vraies leçons se sont passées dans les parkings, pas sur les tatamis.'],
-    ['late_bloomer','Le retardataire','Personne ne pariait un centime sur vous à seize ans. La rage a fait le reste.']],
-  style:[
+    ['traditional','Dojo de la discipline','Un maître obsessionnel vous a fait répéter le même jab dix mille fois, jusqu’à ce qu’il ne demande plus rien à la tête. Le prix : vous ne sortez jamais du plan prévu.'],
+    ['pro_child','Fils de la maison','Votre nom remplissait la salle avant votre premier combat. Il vous a ouvert les meilleurs camps — et il vous interdit la moindre excuse le jour où ça tourne mal.'],
+    ['street','École du bitume','Les vraies leçons se sont passées dans les parkings, pas sur les tatamis. La garde reste basse, le temps mort n’existe pas : ces habitudes-là ne partent jamais.'],
+    ['late_bloomer','Le retardataire','Personne ne pariait un centime sur vous à seize ans. Ce qui a été arraché tard reste acquis pour de bon — la vitesse des autres, elle, ne se rattrape jamais tout à fait.']],
+  style_stand:[
     ['boxer','Boxe','Des mains lourdes, des appuis, et l’art de ne pas être là où le coup arrive.'],
+    ['kickboxer','Kickboxing','Les jambes aussi souvent que les mains. On vous a appris à changer de cible sans jamais changer de rythme.'],
+    ['muayThai','Muay-thaï','Le corps à corps, les genoux, les coudes. La distance où les gens renoncent.'],
+    ['karate','Karaté','Chaque geste répété jusqu’à l’os, jusqu’à ce que la distance devienne un réflexe plutôt qu’un calcul.']],
+  style_ground:[
     ['wrestler','Lutte','Décider où le combat se passe. Debout ou au sol, mais c’est vous qui choisissez.'],
     ['bjj','Jiu-jitsu','Laisser venir, encaisser la position, et refermer la prise quand personne ne l’attend.'],
-    ['muayThai','Muay-thaï','Le corps à corps, les genoux, les coudes. La distance où les gens renoncent.']],
+    ['sambo','Sambo','Lutte et soumission dans le même mouvement, appris là où l’un ne se pratique jamais sans l’autre.'],
+    ['mma','MMA complet','Aucune discipline n’a jamais été la maison. Compétent partout, jamais brillant nulle part en particulier.']],
   lifestyle:[
     ['pro','Moine guerrier','Extinction des feux à 21h, zéro écart, zéro excuse. Les coachs vous adorent, vos amis vous ont oublié.'],
     ['balanced','Ni moine ni fêtard','Sérieux à la salle, tolérable en dehors. La voie du compromis.'],
     ['party','La vie est courte','Les sorties avant les rounds de sac. Le talent compensera — ou pas.']],
   circle:[
-    ['family','Le clan','Des parents qui négocient vos contrats en pyjama à la table de la cuisine. Rassurant, un peu étouffant.'],
-    ['agent','Le requin','Un agent qui a senti l’argent avant que vous sachiez lacer vos gants. Il prend sa part, toujours.'],
-    ['squad','La bande','Vos potes d’enfance, bruyants et loyaux, présents à chaque combat sans jamais comprendre les règles.']],
+    ['family','Le clan','Vos parents ont réglé chaque détail avant que vous n’ayez un mot à dire. La table de la cuisine reste, aujourd’hui encore, votre vrai bureau.'],
+    ['agent','Le pourcentage','Quelqu’un négociait déjà vos contrats avant que vous sachiez lacer vos gants. Il prend sa part sur chaque bourse, encore aujourd’hui.'],
+    ['squad','La bande','Vos potes d’enfance vous suivent à chaque combat, bruyants et fidèles, sans jamais vraiment comprendre les règles.']],
   /* ==== [ANCRE: FAITH_AGENT] — trois profils, trois façons de remplir le
      calendrier : le Requin maximise l'argent immédiat au prix d'adversaires
      trop durs, le Stratège calibre chaque affiche pour la progression au
@@ -72,9 +124,20 @@ const FAITH_DRAFT_OPTIONS={
     ['requin','Le Requin','Il sent l’argent avant tout le monde. Les plus grosses bourses, tôt — et des adversaires qu’il choisit toujours un cran trop costauds.'],
     ['stratege','Le Stratège','Chaque combat sert un plan. Il refuse ce qui ne fait pas progresser au classement, quitte à laisser de l’argent sur la table.'],
     ['fidele','Le Fidèle','Loyauté totale, commission nulle. Il ne sait pas négocier une bourse, mais il ne vous lâchera jamais.']],
+  /* ==== [CORRECTIF FA-19] — personality n'offrait que 2 options (villain/
+     humble), un binaire au milieu d'une série de choix à 3-4 options. Le
+     showman existait déjà comme trait ÉMERGENT (TRAIT_NAMES.showman,
+     ui-08) — de fait déjà produit par une dizaine de choix du pool
+     FAITH_BRANCH_EVENTS déjà tagués traitTag:'showman' avant ce correctif,
+     contrairement au constat du document source qui affirmait qu'aucun ne
+     l'était (vérifié par relecture du pool actuel : 650, 662, 698, 702,
+     710, 750, 803, 828, 842, 846 le portent déjà). Ce qui manquait
+     réellement : le showman comme 3e option de PERSONNALITÉ dès la
+     création (mécaniquement indépendant du trait émergent). ==== */
   personality:[
     ['villain','Le vilain','Chaque conférence de presse est un règlement de comptes. Ça remplit les salles.'],
-    ['humble','Le taiseux','Deux phrases par interview, un mental de granit. Les puristes vous respectent, les promoteurs s’arrachent les cheveux.']],
+    ['humble','Le taiseux','Deux phrases par interview, un mental de granit. Les puristes vous respectent, les promoteurs s’arrachent les cheveux.'],
+    ['showman','Le showman','Vous vendez le combat avant de le livrer. Le public qui a payé pour un spectacle ne pardonne pas une victoire aux points sans éclat.']],
   /* ==== [ANCRE: FAITH_ECURIE_DEPART] — le premier vrai dilemme, absent
      jusqu'ici : temps de jeu contre prestige. Une salle régionale fait
      combattre souvent contre des adversaires abordables ; un camp d'élite
@@ -205,13 +268,14 @@ function faithNegotiationPower(f){
 function faithDraftPortrait(d){
   const nom=(d.first||'').trim()||'Un combattant';
   const pays=d.country&&COUNTRIES[d.country]?COUNTRIES[d.country].name:'';
+  const divName=d.div&&divById(d.div)?divById(d.div).name.toLowerCase():'';
   const org={traditional:'sorti d’un dojo',pro_child:'né dans le métier',street:'sorti du bitume',late_bloomer:'venu tard au sport'}[d.origin]||'';
   const vie={pro:'discipliné',balanced:'équilibré',party:'insouciant'}[d.lifestyle]||'';
   const cer={family:'entouré des siens',agent:'piloté par un agent',squad:'entouré de sa bande'}[d.circle]||'';
   const ag={requin:'représenté par un requin',stratege:'représenté par un stratège',fidele:'représenté par un fidèle'}[d.agent]||'';
-  const per={villain:'qui parle fort',humble:'qui parle peu'}[d.personality]||'';
+  const per={villain:'qui parle fort',humble:'qui parle peu',showman:'qui vend le spectacle'}[d.personality]||'';
   const ecu={regional:'et qui signe dans une salle régionale',elite:'et qui signe dans un camp d’élite'}[d.stable]||'';
-  return [nom+(pays?`, ${pays}`:''),org,vie,cer,ag,per,ecu].filter(Boolean).join(', ')+'.';
+  return [nom+(pays?`, ${pays}`:''),divName?`en ${divName}`:'',org,vie,cer,ag,per,ecu].filter(Boolean).join(', ')+'.';
 }
 function scr_faith_draft(){
   const d=G.faithDraft||(G.faithDraft={gender:'H',country:COUNTRY_KEYS[0],first:''});
@@ -225,16 +289,28 @@ function scr_faith_draft(){
         <span class="pill ${d.gender==='F'?'on':''}" onclick="CL.selectFaithDraft('gender','F')">Femme</span></div></div>
       <div class="fld" style="text-align:left"><label>Prénom</label><input id="fdn" maxlength="18" value="${esc(d.first||'')}" placeholder="Prénom" oninput="CL.faithDraftIn('first',this.value)"></div>
       <div class="fld" style="text-align:left"><label>Pays</label><div class="pills">${COUNTRY_KEYS.map(c=>`<span class="pill ${d.country===c?'on':''}" onclick="CL.selectFaithDraft('country','${c}')">${COUNTRIES[c].flag} ${COUNTRIES[c].name}</span>`).join('')}</div></div>`;
+  } else if(cur.key==='div'){
+    /* ==== [CORRECTIF FA-16] — options dépendantes du genre (page 0), donc
+       hors du format plat [val,titre,desc] des autres questions. ==== */
+    corps=(DIVISIONS[d.gender||'H']||[]).map(dv=>`
+      <div class="opp" style="padding:16px;min-height:88px;text-align:left;${d.div===dv.id?'border-left:3px solid var(--f-red-hi);':''}" onclick="CL.selectFaithDraft('div','${dv.id}')">
+        <div class="hero-name" style="font-size:17px">${dv.name}</div>
+        <div class="muted" style="font-size:13px;line-height:1.45;margin-top:6px">${(FAITH_DIVISION_TEXT[d.gender||'H']||{})[dv.id]||''}</div>
+      </div>`).join('');
   } else if(cur.key){
+    /* ==== [CORRECTIF FA-18] — `field` (par défaut = `key`) porte le nom du
+       champ réellement écrit sur G.faithDraft ; nécessaire quand plusieurs
+       pages (style_stand/style_ground) renseignent le même champ (style). ==== */
+    const champ=cur.field||cur.key;
     corps=(FAITH_DRAFT_OPTIONS[cur.key]||[]).map(([val,titre,desc])=>`
-      <div class="opp" style="padding:16px;min-height:88px;text-align:left;${d[cur.key]===val?'border-left:3px solid var(--f-red-hi);':''}" onclick="CL.selectFaithDraft('${cur.key}','${val}')">
+      <div class="opp" style="padding:16px;min-height:88px;text-align:left;${d[champ]===val?'border-left:3px solid var(--f-red-hi);':''}" onclick="CL.selectFaithDraft('${champ}','${val}')">
         <div class="hero-name" style="font-size:17px">${titre}</div>
         <div class="muted" style="font-size:13px;line-height:1.45;margin-top:6px">${desc}</div>
       </div>`).join('');
   } else {
     corps=`<p style="font-size:17px;line-height:1.5">${esc(faithDraftPortrait(d))}</p>`;
   }
-  const pret=page===0?true:(cur.key?!!d[cur.key]:true);
+  const pret=page===0?true:(cur.key?!!d[cur.field||cur.key]:true);
   const dernier=page===FAITH_DRAFT_PAGES.length-1;
   return `<div class="scr" style="max-width:560px;margin:0 auto">
     <div class="eyebrow" style="font-size:12px;letter-spacing:.14em">${cur.q}</div>

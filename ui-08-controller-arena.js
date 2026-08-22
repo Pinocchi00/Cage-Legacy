@@ -1107,7 +1107,7 @@ const CL={
      tirées du pool, jamais la liste complète. ==== */
   offerFaithOaths(){
     const d=G.faithDraft;
-    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.agent || !d.personality || !d.stable){
+    if(!d.div || !d.origin || !d.style || !d.lifestyle || !d.circle || !d.agent || !d.personality || !d.stable){
       G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
     }
     const pool=FAITH_OATHS.slice();
@@ -1121,10 +1121,10 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   finalizeFaithDraft(){
     const d=G.faithDraft;
-    if(!d.origin || !d.style || !d.lifestyle || !d.circle || !d.agent || !d.personality || !d.stable){
+    if(!d.div || !d.origin || !d.style || !d.lifestyle || !d.circle || !d.agent || !d.personality || !d.stable){
       G.lastMsg="Il reste une question sans réponse."; d.page=0; render(); return;
     }
-    const f=makeFighter({gender:d.gender||'H',style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18,freshPlayer:true});
+    const f=makeFighter({gender:d.gender||'H',div:d.div,style:d.style,countryKey:d.country||COUNTRY_KEYS[0],first:(d.first||'').trim()||undefined,age:18,freshPlayer:true});
     f.gameMode='faith';
     if(d.origin==='traditional'){ f.attrs.fightIQ+=8; f.attrs.discipline+=8; }
     if(d.origin==='pro_child'){ f.earnings=50; f.attrs.composure-=10; f.hypeBonus=1.5; }
@@ -1154,6 +1154,14 @@ const CL={
     f.personality=d.personality;
     if(d.personality==='villain'){ f.hypeBonus=(f.hypeBonus||1)+0.3; f.morale=clamp(f.morale-10,0,100); }
     else if(d.personality==='humble'){ f.hypeBonus=1.0; f.morale=clamp(f.morale+15,0,100); f.attrs.focus=clamp((f.attrs.focus||50)+10,1,100); }
+    /* ==== [CORRECTIF FA-19] — « hype ×1,4 » : hypeBonus est déjà lu par
+       faithNegotiationPower() (ui-04, score++ dès qu'il dépasse 1.2), donc
+       la conséquence « bourses+ » demandée par le document est obtenue
+       gratuitement via le système de négociation du Lot 3, sans champ
+       dédié à inventer. La pénalité « moral -8 après une victoire aux
+       points ennuyeuse » est posée côté résolution de combat
+       (ui-05-fight-resolution.js, ANCRE FA-19_SHOWMAN). ==== */
+    else if(d.personality==='showman'){ f.hypeBonus=(f.hypeBonus||1)*1.4; }
     for(const k in f.attrs) f.attrs[k]=clamp(f.attrs[k],1,100);
     f.overall=overall(f);
     f.maxAttrs={};
