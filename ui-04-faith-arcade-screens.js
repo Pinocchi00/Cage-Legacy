@@ -652,45 +652,126 @@ function scr_faith_epilogue(){
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_PRESSE] — le bilan annuel était une grille de quatre
+   stat-cards et une liste à puces : le moteur rendait compte de lui-même,
+   personne ne racontait la saison. C'est pourtant le point d'apprentissage
+   de la boucle — ceux qui plafonnent sont ceux qui enchaînent sans lire le
+   bilan. Le feedback est désormais écrit par le monde : un article court,
+   dont l'angle est choisi sur l'état réel de la saison, et dont le TON suit
+   la personnalité publique du combattant (un Vilain n'a pas la même presse
+   qu'un Taiseux — c'est là que le choix de création devient enfin visible).
+   Les chiffres ne disparaissent pas : ils passent SOUS l'article et cessent
+   d'être le message pour redevenir la source. ==== */
+const FAITH_PRESSE_MEDIAS=['LA GAZETTE DE LA CAGE','COMBAT HEBDO','LE ROUND','RINGSIDE'];
+/** Angle éditorial de l'année, du plus structurant au plus banal.
+ * @param {object} ys yearStats @param {object} F G.faith @returns {string} */
+function faithPresseAngle(ys,F){
+  if(F&&F.suspended) return 'blanche';
+  if((ys.wins||0)===0 && (ys.losses||0)===0) return 'creux';
+  if((ys.rank||99)<=3) return 'consecration';
+  if((ys.dmgHead||0)>60) return 'usure';
+  if((ys.eloDelta||0)>80) return 'ascension';
+  if((ys.eloDelta||0)<-60) return 'chute';
+  return 'stagnation';
+}
+const FAITH_PRESSE_TITRES={
+  blanche:['Une année pour rien','Le nom effacé des affiches','Suspendu, et déjà oublié','Douze mois de silence administratif','La saison qui n’a jamais eu lieu','Rayé du calendrier'],
+  consecration:['Le sommet, enfin','Plus personne devant','La division a un patron','On regarde tout le monde d’en haut','Le trône est occupé','Il n’y a plus d’adversaire évident'],
+  usure:['À quel prix ?','Les coups s’accumulent','Une guerre de trop','Le corps envoie la facture','Gagner en laissant des morceaux','Ce que le classement ne dit pas'],
+  ascension:['La marche a été franchie','On ne rigole plus','L’année qui change tout','Le saut que personne n’attendait','Un cran au-dessus','La hiérarchie a bougé'],
+  chute:['La chute','Le doute s’installe','Où est passé le combattant ?','Le classement ne pardonne pas','Une année à oublier','Le contrecoup'],
+  creux:['Une saison sans combat','Le silence de la cage','Absent des affiches','Une année en pointillés'],
+  stagnation:['Sur place','Ni progrès ni recul','Une année de transition','Le surplace','Rien n’a bougé','Une saison sans relief']
+};
+/* Plusieurs corps par angle : une carrière dure quinze saisons ou plus, et
+   un texte qui revient à l'identique tue la fiction plus vite qu'un texte
+   moyen. Le tirage est déterministe (dérivé de l'année et du bilan) pour
+   qu'une même saison relise toujours le même article. */
+const FAITH_PRESSE_CORPS={
+  blanche:[
+    'Licence suspendue, saison annulée. Le dossier restera dans les archives de la fédération bien après que le public aura tourné la page.',
+    'Une signature au bas d’un rapport de laboratoire aura suffi à rayer douze mois de travail. La cage, elle, n’a pas attendu.',
+    'Le calendrier s’est refermé sans un seul combat. Les concurrents, eux, ont continué d’avancer.'],
+  consecration:[
+    'Le classement ne se discute plus. Reste à savoir combien de temps un sommet se défend — l’histoire du sport dit rarement longtemps.',
+    'Il faudra désormais battre ce nom pour exister dans la division. Tous les calendriers de l’an prochain seront écrits autour de lui.',
+    'La place est prise, et personne ne semble pressé de la réclamer. C’est précisément là que les carrières deviennent dangereuses.'],
+  usure:[
+    'Le bilan comptable est correct. Le bilan médical l’est moins. En coulisses, plus d’un observateur compte les années qui restent.',
+    'Chaque victoire de cette saison s’est payée en coups encaissés. Ce genre d’arithmétique finit toujours par se solder.',
+    'On a vu un combattant gagner. On a aussi vu un homme rentrer au vestiaire plus lentement qu’il y était entré.'],
+  ascension:[
+    'La progression est nette, mesurable, et les promoteurs l’ont remarquée avant les fans. Le calendrier de l’an prochain sera plus dur.',
+    'Il y a douze mois, ce nom ne figurait dans aucune conversation sérieuse. Il ouvre désormais les discussions de matchmaking.',
+    'Le genre de saison qui déplace une carrière d’un étage. Reste à tenir le rythme quand les adversaires cesseront d’être des tests.'],
+  chute:[
+    'La saison laisse des traces au classement. Un accident de parcours, dit l’entourage ; une tendance, disent les chiffres.',
+    'Rien ne s’est écroulé d’un coup. C’est bien ce qui inquiète : la pente a été régulière, et personne ne l’a enrayée.',
+    'Les mêmes armes, les mêmes plans, mais plus les mêmes résultats. La division a appris à lire ce combattant.'],
+  creux:[
+    'Aucun combat cette année. Dans ce sport, l’absence se paie deux fois : au classement, et dans la mémoire du public.',
+    'Douze mois sans entrer dans la cage. Les fans passent à autre chose plus vite que les blessures ne guérissent.'],
+  stagnation:[
+    'Rien de déshonorant, rien de marquant non plus. Le genre de saison qu’on oublie avant même la suivante.',
+    'Une année propre, sans éclat. À ce niveau, ne pas monter revient déjà à laisser passer du monde.',
+    'Le travail est là, les résultats suivent à peine. La différence se fera ailleurs que dans la salle.']
+};
+/** La même saison ne se raconte pas pareil selon qui la vit.
+ * @param {object} f @param {string} angle @returns {string} */
+function faithPresseTon(f,angle){
+  const bon=(angle==='ascension'||angle==='consecration');
+  if(f.personality==='villain') return bon
+    ? 'On aurait aimé détester ce résultat. Impossible : les chiffres parlent plus fort que les provocations.'
+    : 'Les déclarations tonitruantes de l’intéressé n’auront pas suffi à masquer la saison.';
+  if(f.personality==='humble') return bon
+    ? 'Deux phrases en conférence, pas une de plus. Le reste s’est dit dans la cage.'
+    : 'Pas un mot plus haut que l’autre. Le silence, cette année, ressemblait à de la lassitude.';
+  return '';
+}
+function faithPresseArticle(ys,f,F){
+  const angle=faithPresseAngle(ys,F);
+  const h=Math.abs((F.year||2026)+(ys.wins||0)*7+(ys.losses||0)*13);
+  const titres=FAITH_PRESSE_TITRES[angle];
+  const corpsList=FAITH_PRESSE_CORPS[angle];
+  const corpsTxt=corpsList[(h*3)%corpsList.length];
+  /* Un pari perdu fait un meilleur papier qu'une routine réussie. */
+  const log=(ys.yearLog||[]);
+  const marquant=log.find(l=>l.outcome==='raté')||log[log.length-1]||null;
+  const ligne=marquant?`<p style="margin:0 0 12px">« ${esc(marquant.title)} » aura marqué l’année${marquant.outcome==='raté'?' — et pas dans le bon sens':''}.</p>`:'';
+  const ton=faithPresseTon(f,angle);
+  return {titre:titres[h%titres.length],angle,
+    corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0">${ton}</p>`:''}`};
+}
 function scr_faith_year_end(){
-  const ys=G.faith.yearStats; const f=G.f;
-  let logHtml='';
-  if(ys.yearLog && ys.yearLog.length>0){
-    logHtml=`<div class="card glass mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--sage)">
-      <div class="eyebrow mb" style="color:var(--sage)">Journal de bord</div>
-      ${ys.yearLog.map(l=>`<div style="padding:6px 0;border-bottom:1px dotted var(--line)"><b style="color:var(--text)">${esc(l.title)}</b><br><span class="muted small">↳ Vous avez choisi : ${esc(l.choice)}</span></div>`).join('')}
-    </div>`;
-  }
-  let skillsHtml='';
-  if(ys.newSkills && ys.newSkills.length>0){
-    skillsHtml=`<div class="eyebrow mt mb" style="color:var(--gold)">COMPÉTENCES DÉBLOQUÉES</div>`+
-      ys.newSkills.map(s=>{ const color=RAR_COLORS[s.rar]||'var(--gold)';
-        return `<div class="card glass" style="border-left:3px solid ${color};padding-left:12px;background:var(--panel2)">
-          <b style="color:${color}">${s.name}</b> <span class="muted small">(${s.rar})</span>
-          <div class="muted small">${s.desc||s.blurb||''}</div></div>`; }).join('');
-  } else {
-    skillsHtml=`<div class="mono muted small mt" style="padding:12px;border:1px dashed var(--line)">Aucune nouvelle compétence assimilée cette année. Entraînez-vous davantage.</div>`;
-  }
-  return `<div class="scr center intro">
-   <div class="eyebrow sage">Bilan Annuel</div>
-   <h2 class="disp big" style="font-size:42px">SAISON ${G.faith.year}</h2>
-   <p class="lede small">Le conseil d\u2019administration a évalué votre progression sportive et financière.</p>
-   <div class="glass" style="background:var(--panel2);border:1px solid var(--line);padding:16px;margin:20px 0;text-align:left">
-     <div class="hero-name" style="font-size:22px">${orgDisplayName(f).toUpperCase()}</div>
-     <div class="muted small">Ligue actuelle · Classement #${ys.rank}</div>
-     <div class="hr"></div>
-     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center">
-       <div class="card" style="margin:0;padding:12px"><span class="stat-big ${ys.wins>ys.losses?'hot':''}">${ys.wins}-${ys.losses}</span><span class="stat-lbl">Record Annuel</span></div>
-       <div class="card" style="margin:0;padding:12px"><span class="stat-big" style="color:${ys.eloDelta>=0?'var(--win)':'var(--loss)'}">${ys.eloDelta>0?'+':''}${ys.eloDelta}</span><span class="stat-lbl">Progression Elo</span></div>
-       <div class="card" style="margin:0;padding:12px"><span class="stat-big" style="font-size:24px">${formatArgent(ys.earningsDelta)}</span><span class="stat-lbl">Gains Nets</span></div>
-       <div class="card" style="margin:0;padding:12px"><span class="stat-big" style="font-size:24px;color:${ys.dmgHead>30?'var(--loss)':'var(--text)'}">${ys.dmgHead}</span><span class="stat-lbl">Dégâts Crâniens Reçus</span></div>
-     </div>
+  const ys=G.faith.yearStats, f=G.f, F=G.faith;
+  const art=faithPresseArticle(ys,f,F);
+  const media=FAITH_PRESSE_MEDIAS[(F.year||2026)%FAITH_PRESSE_MEDIAS.length];
+  const chiffre=(v,lbl,couleur)=>`<div style="border:1px solid var(--line);padding:12px;text-align:center">
+    <div class="mono" style="font-size:20px;${couleur?`color:${couleur}`:''}">${v}</div>
+    <div class="eyebrow" style="font-size:10px;margin-top:4px">${lbl}</div></div>`;
+  const skills=(ys.newSkills||[]).map(sk=>{ const c=RAR_COLORS[sk.rar]||'var(--gold)';
+    return `<div style="border-left:3px solid ${c};padding:8px 12px;margin-top:8px">
+      <b style="color:${c}">${sk.name}</b> <span class="muted small">(${sk.rar})</span>
+      <div class="muted small">${sk.desc||sk.blurb||''}</div></div>`; }).join('');
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   ${faithSeasonBar(5)}
+   <div style="border-top:1px solid var(--text);border-bottom:3px solid var(--text);padding:10px 0;display:flex;justify-content:space-between;align-items:baseline">
+     <span class="hero-name" style="font-size:18px;letter-spacing:.06em">${media}</span>
+     <span class="mono" style="font-size:11px;color:var(--muted)">Saison ${F.year}</span>
    </div>
-   ${logHtml}
-   ${skillsHtml}
-   <button class="btn primary mt" style="padding:20px;font-size:20px;margin-top:32px" onclick="CL.nextFaithYear()">DÉBUTER LA SAISON ${G.faith.year+1}</button>
+   <h2 class="hero-name" style="font-size:28px;line-height:1.08;margin:0">${art.titre}</h2>
+   <div style="font-size:15px;line-height:1.55">${art.corps}</div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+     ${chiffre(`${ys.wins}-${ys.losses}`,'Bilan')}
+     ${chiffre(`${ys.eloDelta>0?'+':''}${ys.eloDelta}`,'Progression',ys.eloDelta>=0?'var(--win)':'var(--loss)')}
+     ${chiffre(`#${ys.rank}`,'Classement')}
+     ${chiffre(ys.dmgHead,'Coups encaissés',ys.dmgHead>30?'var(--loss)':'')}
+   </div>
+   ${skills?`<div><div class="eyebrow" style="margin-bottom:4px">Ce qui a été appris</div>${skills}</div>`:''}
+   <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.nextFaithYear()">SAISON ${F.year+1}</button>
   </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_PERK_BADGE] — traduit f._styleProfileOverride
    (dérivé mécaniquement par deriveArcadeMods(), ui-03) en un badge lisible
