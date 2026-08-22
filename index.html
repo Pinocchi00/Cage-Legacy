@@ -29,10 +29,19 @@ body.faith-skin{
   --bg:#E4DFD3; --panel:#E4DFD3; --panel2:#DAD4C6; --line:#B9B0A0;
   --text:#16130E; --muted:#5C5346; --faint:#7A7161;
   --gold:#9C2C1E; --gold-d:#7A2216; --sage:#4A5D50;
-  --blood:#9C2C1E; --blood-d:#7A2216; --win:#3F6B4A; --loss:#9C2C1E;
+  --blood:#9C2C1E; --blood-d:#7A2216; --win:#3A5F42; --loss:#9C2C1E;
   --f-red-hi:#E8442F;
   background:#E4DFD3;
 }
+/* ==== [ANCRE: FAITH_CONTRAST_AUDIT] — audit WCAG 2.1 AA (contraste 4,5:1
+   texte normal) mené après l'élargissement de FAITH_SKIN_BASCULE aux écrans
+   select/plan/result/profile/hof/retire, qui utilisent tous --win/--loss en
+   couleur de texte (verdicts, deltas, boutons). --loss/#9C2C1E est déjà
+   couvert par la règle des deux rouges ci-dessus (5,7:1). --win n'avait
+   jamais été audité : #3F6B4A ne passait que 4,16:1 sur --panel2 (fond des
+   cards), sous le seuil AA. Assombri à #3A5F42 (4,91:1 sur panel2, 5,46:1
+   sur bg) — même teinte, luminosité corrigée, aucun autre token touché. ==== */
+/* ==== [FIN ANCRE] ==== */
 body.faith-skin .scr{ padding-left:20px; padding-right:20px; }
 body.faith-skin .scr > * + *{ margin-top:32px; }
 body.faith-skin .glass{ background:#DAD4C6; backdrop-filter:none; border:1px solid var(--line); border-radius:0; box-shadow:none; }

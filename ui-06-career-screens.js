@@ -55,6 +55,15 @@ function scr_title(){
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>
+   <!-- ==== [ANCRE: FAITH_LEGENDES_A_BATTRE] — l'épilogue Faith pointait vers
+        "Voir le Panthéon" ; ce bouton a été repris par l'écran faith_legends
+        (galerie + face-à-face), plus pertinent en sortie de carrière Faith.
+        Le Panthéon reste accessible en un clic depuis le menu principal,
+        seul endroit qui n'appartient à aucun mode en particulier — sans ce
+        bouton, un joueur qui ne joue qu'en Faith n'aurait plus eu AUCUN
+        chemin vers le Panthéon. ==== -->
+   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('hof')">VOIR LE PANTHÉON
+     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Toutes les légendes retraitées, tous modes confondus</span></button>
    </div>`;
 }
 /* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet

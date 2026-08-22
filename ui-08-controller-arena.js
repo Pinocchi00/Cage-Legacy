@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -27,11 +27,20 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      (papier/encre au lieu de cuir/or). Le basculement se fait par une classe
      sur <body> plutôt que par des styles en ligne dans chaque écran : un seul
      point de vérité, aucun écran Faith à retoucher pour changer la palette.
-     Le test porte sur le NOM de l'écran seul, pas sur l'existence de G.faith :
-     l'écran de création (faith_draft) s'affiche avant que G.faith existe, et
-     c'est justement le premier écran du mode — il doit être skinné lui
-     aussi. Aucun écran hors Faith ne commence par "faith". ==== */
-  document.body.classList.toggle('faith-skin', String((G&&G.screen)||'').indexOf('faith')===0);
+     Le test initial (préfixe "faith" sur le nom d'écran) laissait fuir le
+     skin sombre/or sur les écrans transverses (select, plan, result, profile,
+     hof, retire) atteints DEPUIS une carrière Faith mais dont le nom ne
+     commence pas par "faith" — ~40% du parcours affichait la mauvaise
+     palette. Le test porte désormais sur l'appartenance au mode
+     (G.f.gameMode==='faith'), avec le préfixe d'écran gardé en repli pour
+     faith_draft (s'affiche avant que G.faith/G.f existent). Exception
+     délibérée : l'écran "arena" (le combat lui-même) reste toujours en
+     cuir/or — papier=vie, noir=cage est un seuil narratif volontaire, pas un
+     oubli. ==== */
+  { const _sName=String((G&&G.screen)||'');
+    const _enFaith=(_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith'))
+      && _sName!=='arena';
+    document.body.classList.toggle('faith-skin', _enFaith); }
   /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
@@ -1278,6 +1287,13 @@ const CL={
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
+    /* ==== [ANCRE: FAITH_PARCOURS] — archive AVANT la purge de yearLog
+       quelques lignes plus bas : G.faith.yearStats (posé par
+       prepareFaithYearEnd() pour l'écran de bilan qu'on quitte tout juste)
+       porte encore les données de l'année qui vient de se terminer, et
+       G.faith.year n'a pas encore été incrémenté. ==== */
+    if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
+    /* ==== [FIN ANCRE] ==== */
     G.faith.year++; G.faith.step=1;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
     /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
@@ -1285,6 +1301,15 @@ const CL={
        annuels. ==== */
     G.faith.suspended=false;
     G.faith.startOfYearElo=G.f.careerElo; G.faith.startOfYearEarnings=G.f.earnings||0;
+    /* ==== [ANCRE: FAITH_PARCOURS] — mêmes photographies de début d'année que
+       startOfYearElo/startOfYearEarnings juste au-dessus, pour que
+       faithArchiveYear() puisse mesurer CE QUI S'EST PASSÉ CETTE ANNÉE
+       (scandale, serment rompu) plutôt que l'état cumulé depuis toujours —
+       sinon toutes les années suivant une rupture hériteraient à tort du
+       marqueur de rupture. ==== */
+    G.faith.startOfYearScandals=G.faith.scandals||0;
+    G.faith.startOfYearOathBroken=!!(G.faith.oath&&G.faith.oath.broken);
+    /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
     advanceRoster();
@@ -1849,8 +1874,9 @@ const CL={
     // récapitulatif. On archive donc cette saison en cours ici aussi, avant
     // de sceller la carrière.
     const sData=G.season||{year:1,fights:[]};
+    let seasonEval=null;
     if(sData.fights && sData.fights.length){
-      const seasonEval=evaluateSeason(G.f,sData.fights);
+      seasonEval=evaluateSeason(G.f,sData.fights);
       if(!G.f.seasonRecap) G.f.seasonRecap=[];
       G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
         koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
@@ -1861,6 +1887,37 @@ const CL={
        autres (Panthéon, Codex, points de Légende : rien n'est retiré) mais
        sort par son propre épilogue, avec sa note. L'écran 'legacy' générique
        reste la sortie de la carrière standard. ==== */
+    /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — le score de la carrière qui se
+       termine doit être FIGÉ ici, avant que newFaithCareer() ne réinitialise
+       G en repartant d'une création vierge (le combattant f et G.faith
+       n'existeront plus). previousBest est lu AVANT recordFaithLegend() —
+       sinon la carrière qu'on vient de sceller s'auto-compare à elle-même
+       (déjà comptée dans meta.faithBest par son propre appel) et ne peut
+       plus jamais afficher "première légende" ni "meilleure carrière". ==== */
+    if(G.faith){
+      /* ==== [ANCRE: FAITH_PARCOURS] — même angle mort que
+         CORRECTIF_SAISON_PARTIELLE_RETRAITE juste au-dessus, et pour la même
+         raison : la retraite ne passe jamais par nextFaithYear() (elle sort
+         par CE contrôleur-ci, pas par le bouton "SAISON N+1"), donc l'année
+         en cours n'aurait jamais été archivée dans le Parcours sans ce
+         bloc. seasonEval, calculé juste au-dessus pour f.seasonRecap, sert
+         aussi ici — G.season.fights vient d'être vidé, seule cette variable
+         garde encore le bilan de l'année partielle. */
+      if(seasonEval || (G.faith.yearLog&&G.faith.yearLog.length)){
+        faithArchiveYear(G.faith.year,{wins:seasonEval?seasonEval.stats.W:0,
+          losses:seasonEval?seasonEval.stats.L:0,rank:divRank(G.f),yearLog:G.faith.yearLog||[]},G.f,G.faith);
+      }
+      /* ==== [FIN ANCRE] ==== */
+      const finalScore=faithFinalScore(G.f,G.faith);
+      G.faith.finalScore=finalScore;
+      G.faith.previousBest=getFaithBest();
+      recordFaithLegend({id:G.f.id,name:G.f.name,nick:G.f.nick,flag:G.f.flag,
+        score:finalScore,sub:computeLegendScore(G.f),
+        W:G.f.W,L:G.f.L,ko:G.f.ko||0,
+        years:(G.faith.year||2026)-2026,
+        oath:G.faith.oath?{label:G.faith.oath.label,fulfilled:faithOathFulfilled(G.faith.oath,G.f,G.faith)}:null});
+    }
+    /* ==== [FIN ANCRE] ==== */
     G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
     G.screen=G.faith?'faith_epilogue':'legacy'; save(); render(); },
   /* ==== [ANCRE: FAITH_EPILOGUE] — relancer une carrière Faith depuis
@@ -1869,6 +1926,17 @@ const CL={
      doivent survivre à la carrière qui vient de se clore. ==== */
   newFaithCareer(){ const t=G.theme; G={theme:t,faithDraft:{gender:'H',country:COUNTRY_KEYS[0],first:''}}; setTheme(t); G.screen='faith_draft'; render(); },
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: FAITH_LEGENDES_A_BATTRE] — sélection à deux, jamais plus :
+     le 3e clic éjecte le plus ancien choix plutôt que de bloquer, pour que
+     comparer une autre paire ne demande jamais de désélectionner
+     explicitement d'abord. */
+  toggleFaithLegendCompare(id){
+    if(!G.faithLegendsCompare) G.faithLegendsCompare=[];
+    const i=G.faithLegendsCompare.indexOf(id);
+    if(i>=0) G.faithLegendsCompare.splice(i,1);
+    else { G.faithLegendsCompare.push(id); if(G.faithLegendsCompare.length>2) G.faithLegendsCompare.shift(); }
+    render();
+  },
   /* ==== [FIN ANCRE] ==== */
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();

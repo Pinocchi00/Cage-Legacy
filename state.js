@@ -315,6 +315,31 @@ function recordGauntletBest(meta,mode,value,asc){
   return false;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — couche 1 de la méta-progression du
+   mode Faith : une carrière scellée disparaît avec le combattant (retiré,
+   enshrine() l'a déjà copié dans le Panthéon), mais rien ne restait pour
+   comparer une carrière à celle d'avant — chaque partie recommençait de
+   zéro sans mémoire du record personnel. meta.faithLegends conserve les 12
+   meilleures carrières Faith jamais scellées (triées par score), et
+   meta.faithBest/meta.faithRuns le record et le nombre total de carrières
+   pour l'affichage "précédent record" sans avoir à parcourir la liste.
+   Même discipline que meta.gauntletBest ci-dessus (RÈGLE LOT14 RESPECTÉE) :
+   entry est un résumé de surface (score, identité, palmarès), jamais un
+   attribut, un potentiel ni une vitesse — aucune de ces fonctions ne
+   redonne le moindre avantage à une future carrière. ==== */
+const FAITH_LEGENDS_MAX=12;
+function recordFaithLegend(entry){
+  const meta=loadMetaStats();
+  if(!meta.faithLegends) meta.faithLegends=[];
+  meta.faithLegends.push(entry);
+  meta.faithLegends.sort((a,b)=>(b.score||0)-(a.score||0));
+  if(meta.faithLegends.length>FAITH_LEGENDS_MAX) meta.faithLegends.length=FAITH_LEGENDS_MAX;
+  meta.faithBest=Math.max(meta.faithBest||0,entry.score||0);
+  meta.faithRuns=(meta.faithRuns||0)+1;
+  saveMetaStats(meta);
+}
+function getFaithBest(){ return loadMetaStats().faithBest||0; }
+/* ==== [FIN ANCRE] ==== */
 /* Profil du joueur : max 1 titre + 1 effet affichés à la fois (compte
    entier, pas par combattant — les combattants arcade sont jetables et non
    persistés, cf. règle déjà établie ailleurs dans ce fichier). */
