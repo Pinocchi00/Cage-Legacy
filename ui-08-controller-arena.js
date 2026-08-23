@@ -1335,7 +1335,8 @@ const CL={
     /* ==== [ANCRE: V2-11] \u2014 fra\u00eecheur de d\u00e9part : "pr\u00eat", pas "aff\u00fbt\u00e9" \u2014
        une carri\u00e8re commence en forme normale, pas au sommet absolu. */
     f.freshness=70;
-    G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2],
+    G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
+      startOfYearChampion:false,startOfYearRank:divRank(f),startOfYearNemesisBeaten:false,gym:[p1,p2],
       agent:faithAgent,agentPatience:3};
     /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
        brouillon de création : il doit survivre au rechargement. ==== */
@@ -1847,6 +1848,13 @@ const CL={
     G.faith.peakElo=Math.max(G.faith.peakElo||0,f.careerElo||0);
     G.faith.peakEarnings=Math.max(G.faith.peakEarnings||0,f.earnings||0);
     G.faith.dmgHeadTotal=(G.faith.dmgHeadTotal||0)+dmgHead;
+    /* ==== [ANCRE: V2-35] — même logique de pic que peakElo/peakEarnings
+       juste au-dessus : computeLegendScore() (ui-04) note le SOMMET
+       overall/rang/série jamais l'état final. rank est déjà calculé
+       ci-dessus (divRank(f)), réutilisé tel quel. */
+    G.faith.peakOverall=Math.max(G.faith.peakOverall||0,f.overall||0);
+    G.faith.peakRank=Math.min(G.faith.peakRank!=null?G.faith.peakRank:99,rank||99);
+    G.faith.bestStreak=Math.max(G.faith.bestStreak||0,f.streak||0);
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: FA-28] — « le combat de trop ». isDeclining() (engine.js,
        déjà le seuil qui déclenche l'écran de retraite, scr_faith_retire) et
@@ -1944,6 +1952,14 @@ const CL={
        marqueur de rupture. ==== */
     G.faith.startOfYearScandals=G.faith.scandals||0;
     G.faith.startOfYearOathBroken=!!(G.faith.oath&&G.faith.oath.broken);
+    /* ==== [ANCRE: V2-32] — mêmes photographies de début d'année, pour la
+       table des faits saillants de l'article (faithYearFacts, ui-04) :
+       ceinture gagnée/perdue, mouvement de rang, némésis qui vient de
+       tomber — comparés à CETTE année précisément, jamais à l'état cumulé
+       depuis toujours. ==== */
+    G.faith.startOfYearChampion=!!G.f.champion;
+    G.faith.startOfYearRank=divRank(G.f);
+    G.faith.startOfYearNemesisBeaten=!!G.faith.nemesisBeaten;
     /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);

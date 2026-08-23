@@ -1729,35 +1729,47 @@ function scr_faith_oath(){
    qu'une note atteignable.
    Tout est calculé sur des données qui existent déjà — aucun compteur
    inventé pour l'occasion, hors les pics et scandales posés au fil du jeu. ==== */
+/* ==== [ANCRE: V2-35] — refonte autour de 3 piliers pondérés, remplaçant
+   les 5 sous-scores précédents (palmarès/sommet/intégrité/empreinte/
+   fortune, pondération de fait ~32/26/18/14/10 — proche mais pas alignée
+   sur le document). Note qui s'accumulait événement par événement,
+   inflationniste sur une longue carrière médiocre : recomposée pour que
+   CE QUE VOUS AVEZ ÉTÉ À VOTRE SOMMET (pic, ~40) et CE QUE VOUS AVEZ
+   GAGNÉ (palmarès, ~40) pèsent l'essentiel, la trace laissée (longévité,
+   hype, serment tenu, scandales en négatif) restant secondaire (~20).
+   Validation manuelle (règle du document — pas d'objectif numérique ici,
+   contrairement à V2-39) : une carrière 15-2 avec ceinture doit noter
+   nettement plus haut qu'une 40-25 sans titre — vérifié en testant les
+   deux profils avant livraison (cf. commit). */
 function computeLegendScore(f){
   const F=(typeof G!=='undefined'&&G&&G.faith)||{};
-  /* Les règnes du joueur seulement : G.titleHistory enregistre TOUS les
-     champions du monde simulé, pas uniquement le sien. */
   const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
-  const palmares=clamp(titles*8+(f.defenses||0)*4,0,32);
 
-  const peak=F.peakElo||f.careerElo||1000;
-  const sommet=clamp(Math.round(((peak-900)/900)*26),0,26);
+  /* PIC (~40) : le meilleur overall ET le meilleur rang jamais atteints —
+     jamais l'état final, une fin de carrière en déclin ne doit pas effacer
+     le sommet (peakOverall/peakRank, prepareFaithYearEnd, ui-08). */
+  const peakOverall=F.peakOverall||f.overall||0;
+  const ovrPart=clamp(Math.round((peakOverall-40)/55*24),0,24);
+  const peakRank=(F.peakRank!=null)?F.peakRank:99;
+  const rankPart=clamp(Math.round((21-Math.min(peakRank,21))/20*16),0,16);
+  const pic=clamp(ovrPart+rankPart,0,40);
 
-  /* L'intégrité se plafonne AVANT d'encaisser ses pénalités, sinon une
-     carrière longue absorbe silencieusement les dégâts et les scandales et
-     le 100/100 redevient atteignable. La pénalité de dégâts ne descend
-     jamais sous un plancher dérivé du palmarès : on ne devient pas champion
-     sans encaisser, même quand les compteurs disent le contraire. C'est ce
-     qui rend le sans-faute structurellement impossible — plafond réel 95. */
+  /* PALMARÈS (~40) : titres, défenses, et la meilleure série jamais tenue
+     (bestStreak, même ancre de suivi que les autres pics de carrière). */
+  const bestStreak=Math.max(F.bestStreak||0,f.streak||0,0);
+  const palmares=clamp(titles*11+(f.defenses||0)*3+Math.min(bestStreak,8)*2,0,40);
+
+  /* TRACE (~20) : longévité (freinée par l'usure crânienne cumulée,
+     jamais sous un plancher — l'usure ne redevient jamais gratuite),
+     hype, serment tenu, scandales en négatif. */
   const years=Math.max(1,(F.year||2026)-2026);
-  const base=clamp(Math.round(years*1.6),0,18);
-  const usure=Math.max(Math.round((F.dmgHeadTotal||0)/40),Math.round(palmares/6));
-  const longevite=clamp(base-usure-((F.scandals||0)*6),0,18);
+  const usure=Math.round((F.dmgHeadTotal||0)/70);
+  const longevite=clamp(Math.round(years*1.1)-usure,0,10);
+  const hype=clamp(Math.round(((f.hypeBonus||1)-1)*10),0,4);
+  const oathTenu=(F.oath && typeof faithOathFulfilled==='function' && faithOathFulfilled(F.oath,f,F))?3:0;
+  const trace=clamp(longevite+hype+oathTenu-((F.scandals||0)*4),0,20);
 
-  const empreinte=clamp((f.faithTraits||[]).length*3
-    +(f.faithSpecs||[]).length*3
-    +(F.nemesisBeaten?5:0),0,14);
-
-  const fortune=clamp(Math.round(((F.peakEarnings||f.earnings||0)/2500)*10),0,10);
-
-  return {total:clamp(palmares+sommet+longevite+empreinte+fortune,0,100),
-          palmares,sommet,longevite,empreinte,fortune};
+  return {total:clamp(pic+palmares+trace,0,100), pic, palmares, trace};
 }
 /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — le score affiché à l'épilogue
    (computeLegendScore().total, majoré ×1,15 si le serment est tenu) était
@@ -1792,6 +1804,17 @@ function faithScoreRow(label,val,max,delay){
     </span>
     <span class="mono" style="flex:0 0 52px;text-align:right;font-size:13px">${val}<span class="muted">/${max}</span></span>
   </div>`;
+}
+/* ==== [ANCRE: V2-35] — trois lignes désormais, pas cinq (pic/palmarès/
+   trace). Repli explicite sur l'ancienne décomposition à 5 lignes quand
+   `sub` vient d'une carrière du Panthéon sauvegardée AVANT ce correctif
+   (sub.pic absent) — jamais de ligne à "0/100" trompeuse pour une donnée
+   qui n'a simplement jamais existé sous ce nom-là.
+ * @param {object} sub computeLegendScore() @param {number[]} delays */
+function faithScoreRows(sub,delays){
+  const d=delays||[0,0,0];
+  if(sub.pic!=null) return `${faithScoreRow('Pic',sub.pic,40,d[0])}${faithScoreRow('Palmarès',sub.palmares,40,d[1])}${faithScoreRow('Trace',sub.trace,20,d[2])}`;
+  return `${faithScoreRow('Palmarès',sub.palmares||0,32,d[0])}${faithScoreRow('Sommet',sub.sommet||0,26,d[1])}${faithScoreRow('Intégrité',sub.longevite||0,18,d[2])}${faithScoreRow('Empreinte',sub.empreinte||0,14,d[2])}${faithScoreRow('Fortune',sub.fortune||0,10,d[2])}`;
 }
 /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — la comparaison au record personnel
    affiché sous la décomposition. Le silence complet passé un écart trop
@@ -1837,11 +1860,7 @@ function scr_faith_epilogue(){
        <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100</div>
      </div>
      <div style="margin-bottom:12px">
-       ${faithScoreRow('Palmarès',sc.palmares,32,0)}
-       ${faithScoreRow('Sommet',sc.sommet,26,180)}
-       ${faithScoreRow('Intégrité',sc.longevite,18,360)}
-       ${faithScoreRow('Empreinte',sc.empreinte,14,540)}
-       ${faithScoreRow('Fortune',sc.fortune,10,720)}
+       ${faithScoreRows(sc,[0,180,360])}
      </div>
      <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
      ${faithJourneyBlock(G.faith)}
@@ -1891,11 +1910,7 @@ function faithLegendCard(e,idx,sel){
 function faithLegendCompareCol(e){
   return `<div style="margin-bottom:20px">
     <div class="hero-name" style="font-size:18px;margin-bottom:8px">${esc(e.name)} <span class="mono" style="font-size:14px;color:var(--muted)">— ${e.score}/100</span></div>
-    ${faithScoreRow('Palmarès',e.sub.palmares,32,0)}
-    ${faithScoreRow('Sommet',e.sub.sommet,26,0)}
-    ${faithScoreRow('Intégrité',e.sub.longevite,18,0)}
-    ${faithScoreRow('Empreinte',e.sub.empreinte,14,0)}
-    ${faithScoreRow('Fortune',e.sub.fortune,10,0)}
+    ${faithScoreRows(e.sub,[0,0,0])}
   </div>`;
 }
 /* ==== [CORRECTIF FA-27] — les serments (FAITH_OATHS) sont l'idée de
@@ -1945,6 +1960,43 @@ function scr_faith_legends(){
    Les chiffres ne disparaissent pas : ils passent SOUS l'article et cessent
    d'être le message pour redevenir la source. ==== */
 const FAITH_PRESSE_MEDIAS=['LA GAZETTE DE LA CAGE','COMBAT HEBDO','LE ROUND','RINGSIDE'];
+/* ==== [ANCRE: V2-33] — un journaliste nommé, pas un média anonyme tiré par
+   year%length. F.journalist={name,media,sentiment} est posé UNE FOIS pour
+   toute la carrière (faithEnsureJournalist, même schéma idempotent que
+   faithEnsureOffer/faithEnsureIntersaisonDraw), sentiment de -3 à +3,
+   ajusté une fois par an (faithUpdateJournalistSentiment, gardé par
+   lastSentimentYear pour ne jamais compter deux fois la même saison). */
+const FAITH_JOURNALIST_NAMES=['Théo Vasseur','Inès Duplantier','Karim Belaïd','Sacha Moreno','Léa Fontaine','Marcus Webb','Nadia Cherif','Owen Blackwood'];
+function faithEnsureJournalist(F){
+  if(F.journalist) return F.journalist;
+  F.journalist={name:pick(FAITH_JOURNALIST_NAMES),media:pick(FAITH_PRESSE_MEDIAS),sentiment:0};
+  return F.journalist;
+}
+function faithUpdateJournalistSentiment(F,angle){
+  const j=faithEnsureJournalist(F);
+  if(j.lastSentimentYear===F.year) return j;
+  j.lastSentimentYear=F.year;
+  if(angle==='ascension'||angle==='consecration') j.sentiment=clamp(j.sentiment+1,-3,3);
+  else if(angle==='chute'||angle==='usure') j.sentiment=clamp(j.sentiment-1,-3,3);
+  if(((F.scandals||0)-(F.startOfYearScandals||0))>0) j.sentiment=clamp(j.sentiment-1,-3,3);
+  return j;
+}
+/* ==== [ANCRE: V2-34] — remplace "Estimation à ce jour : ${chiffre}" (un
+   chiffre nu, hors sujet dans un article de presse) par le verdict du
+   journaliste ET la place qu'il donne dans la division — le score de
+   légende lui-même disparaît de la coupure, il reste seulement sur la
+   fiche/épilogue (faithScoreRows, computeLegendScore). */
+function faithJournalistVerdict(F,f,ys){
+  const j=faithEnsureJournalist(F);
+  const rank=ys.rank;
+  const rankTxt=rank?` Il le classe ${rank}${rank===1?'er':'e'} de sa division${rank>1?` — il en met ${rank-1} devant lui`:''}.`:'';
+  const stance=j.sentiment>=2
+    ?`« ${esc(f.name)}, je le dis depuis un moment maintenant : c’est un des meilleurs de sa génération. »`
+    :j.sentiment<=-2
+    ?'« Je maintiens ce que j’ai écrit sur lui. Rien cette année ne m’a fait changer d’avis. »'
+    :'« Un combattant comme un autre, pour l’instant. »';
+  return `${stance} — ${esc(j.name)}, ${esc(j.media)}.${rankTxt}`;
+}
 /** Angle éditorial de l'année, du plus structurant au plus banal.
  * @param {object} ys yearStats @param {object} F G.faith @returns {string} */
 function faithPresseAngle(ys,F){
@@ -2010,38 +2062,72 @@ function faithPresseTon(f,angle){
     : 'Pas un mot plus haut que l’autre. Le silence, cette année, ressemblait à de la lassitude.';
   return '';
 }
+/* ==== [ANCRE: V2-32] — table des faits saillants de l'année, chacun avec
+   sa saillance. Remplace le tirage par hash de FAITH_PRESSE_CORPS
+   (angle,(année*bilan)%liste — ne lisait ni les adversaires, ni le rang,
+   ni les blessures, ni les promesses) : chaque ligne est dérivée d'un
+   VRAI événement de la saison (ys, F, G.season.fights — myRank/oppRank y
+   sont déjà stockés par combat, resolveFight(), ui-05). Les 3 plus
+   saillantes seulement (règle 6 : la rareté fait la saillance).
+ * @param {object} ys yearStats @param {object} f @param {object} F
+ * @returns {{text:string,sal:number}[]} */
+function faithYearFacts(ys,f,F){
+  const facts=[];
+  const fights=(G.season&&G.season.fights)||[];
+  if(!F.startOfYearChampion && f.champion) facts.push({text:'Le titre a changé de propriétaire : la ceinture est désormais autour de sa taille.',sal:5});
+  else if(F.startOfYearChampion && !f.champion) facts.push({text:'La ceinture, elle, a quitté sa taille cette année.',sal:5});
+  if(fights.some(x=>x.win && x.oppRank!=null && x.myRank!=null && x.oppRank<x.myRank)) facts.push({text:'Une victoire est venue face à un adversaire mieux classé que lui.',sal:4});
+  if(fights.some(x=>!x.win && x.oppRank!=null && x.myRank!=null && x.oppRank>x.myRank)) facts.push({text:'Une défaite est tombée face à un adversaire moins bien classé.',sal:4});
+  if((f.streak||0)>=3) facts.push({text:`Il termine l’année sur une série de ${f.streak} victoires.`,sal:4});
+  if(F.startOfYearRank!=null && ys.rank!=null){
+    const mvt=F.startOfYearRank-ys.rank;
+    if(mvt>=5) facts.push({text:'Le classement a grimpé de plusieurs places cette année.',sal:3});
+    else if(mvt<=-5) facts.push({text:'Le classement a reculé de plusieurs places cette année.',sal:3});
+  }
+  /* ==== [ANCRE: V2-27] — la promesse rappelée : tenue, une ligne de fierté
+     discrète ; trahie, une ligne cinglante — jamais neutre. */
+  if(ys.promiseOutcome) facts.push({text:ys.promiseOutcome.tenue
+    ?`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. Parole tenue.`
+    :`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. La décision des juges a eu le dernier mot.`,sal:4});
+  /* ==== [ANCRE: FA-28] — la seule trace visible de la séquelle : jamais un
+     chiffre, jamais le mot "définitif", juste un détail remarqué. */
+  if(ys.sequelle==='chin') facts.push({text:'On l’a vu accuser un coup, cette année, d’une manière qu’on ne lui connaissait pas.',sal:3});
+  else if(ys.sequelle==='composure') facts.push({text:'On l’a vu chercher ses mots en conférence, cette année, d’une manière qu’on ne lui connaissait pas.',sal:3});
+  else if(f.injury) facts.push({text:'Une blessure a interrompu une partie de la saison.',sal:3});
+  if((F.peakEarnings||0)>0 && (f.earnings||0)===F.peakEarnings) facts.push({text:'La bourse la plus haute de sa carrière est tombée cette année.',sal:3});
+  if(((F.scandals||0)-(F.startOfYearScandals||0))>0) facts.push({text:'Un scandale a entaché la réputation cette année.',sal:4});
+  if(!F.startOfYearOathBroken && !!(F.oath&&F.oath.broken)) facts.push({text:'Le serment prononcé au premier jour a été rompu.',sal:4});
+  if(!F.startOfYearNemesisBeaten && F.nemesisBeaten) facts.push({text:'La grande rivalité de sa carrière a enfin tourné en sa faveur.',sal:4});
+  return facts.sort((a,b)=>b.sal-a.sal).slice(0,3);
+}
 function faithPresseArticle(ys,f,F){
   const angle=faithPresseAngle(ys,F);
-  const h=Math.abs((F.year||2026)+(ys.wins||0)*7+(ys.losses||0)*13);
+  const facts=faithYearFacts(ys,f,F);
   const titres=FAITH_PRESSE_TITRES[angle];
-  const corpsList=FAITH_PRESSE_CORPS[angle];
-  const corpsTxt=corpsList[(h*3)%corpsList.length];
-  /* Un pari perdu fait un meilleur papier qu'une routine réussie. */
-  const log=(ys.yearLog||[]);
-  const marquant=log.find(l=>l.outcome==='raté')||log[log.length-1]||null;
-  const ligne=marquant?`<p style="margin:0 0 12px">« ${esc(marquant.title)} » aura marqué l’année${marquant.outcome==='raté'?' — et pas dans le bon sens':''}.</p>`:'';
+  /* ==== [ANCRE: V2-32] — "jamais deux fois le même gabarit de titre dans
+     une même carrière" : F.usedHeadlines mémorise les titres déjà tirés.
+     Le fait n°1 influence le CHOIX dans les titres restants de l'angle
+     (plus le fait est saillant, plus le titre pioché est loin dans la
+     liste — chaque liste va du plus mesuré au plus définitif). Une
+     carrière assez longue pour épuiser un angle entier autorise la
+     répétition plutôt que de planter. */
+  if(!F.usedHeadlines) F.usedHeadlines=[];
+  let pool=titres.filter(t=>!F.usedHeadlines.includes(t));
+  if(!pool.length) pool=titres.slice();
+  const topSal=facts.length?facts[0].sal:2;
+  const idx=Math.max(0,Math.min(pool.length-1,Math.floor((topSal/5)*pool.length)));
+  const titre=pool[idx]||pool[0];
+  if(!F.usedHeadlines.includes(titre)) F.usedHeadlines.push(titre);
   const ton=faithPresseTon(f,angle);
-  /* ==== [ANCRE: FA-28] — la seule trace visible de la séquelle posée par
-     prepareFaithYearEnd() (ui-08) : jamais un chiffre, jamais le mot
-     "définitif" — juste un détail que la presse a remarqué. Le lecteur qui
-     ne fait pas le lien ne perd rien à l'histoire ; celui qui consulte sa
-     fiche et voit un menton ou un sang-froid qui ne remonte plus comprend
-     rétrospectivement ce que cette ligne annonçait. */
-  const sequelleTxt=ys.sequelle==='chin'
-    ? 'On l’a vu accuser un coup, cette année, d’une manière qu’on ne lui connaissait pas.'
-    : ys.sequelle==='composure'
-    ? 'On l’a vu chercher ses mots en conférence, cette année, d’une manière qu’on ne lui connaissait pas.'
-    : '';
-  /* ==== [ANCRE: V2-27] — la promesse rappelée : tenue, une ligne de
-     fierté discrète ; trahie, une ligne cinglante — jamais neutre, une
-     boucle qui se referme doit se sentir. */
-  const promiseTxt=ys.promiseOutcome
-    ?(ys.promiseOutcome.tenue
-      ?`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. Parole tenue.`
-      :`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. La décision des juges a eu le dernier mot.`)
-    :'';
-  return {titre:titres[h%titres.length],angle,
-    corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0 0 12px">${ton}</p>`:''}${promiseTxt?`<p class="muted small" style="margin:0 0 8px">${promiseTxt}</p>`:''}${sequelleTxt?`<p class="muted small" style="margin:0">${sequelleTxt}</p>`:''}`};
+  /* Aucun fait saillant cette année (angle "creux"/"stagnation" typique) :
+     FAITH_PRESSE_CORPS devient un filet de sécurité plutôt que la source
+     principale — son premier texte par angle reste une prose de qualité,
+     seulement plus générique que la table de faits. */
+  const factsHtml=facts.length
+    ? facts.map(fa=>`<p style="margin:0 0 12px">${fa.text}</p>`).join('')
+    : `<p style="margin:0 0 12px">${(FAITH_PRESSE_CORPS[angle]||[''])[0]}</p>`;
+  return {titre,angle,
+    corps:`${factsHtml}${ton?`<p style="margin:0 0 12px">${ton}</p>`:''}`};
 }
 /* ==== [ANCRE: FAITH_PARCOURS] — le bilan annuel (coupure de presse) se
    lisait puis disparaissait : G.faith.yearLog était purgé à chaque nouvelle
@@ -2092,20 +2178,16 @@ function faithJourneyBlock(F){
 function scr_faith_year_end(){
   const ys=G.faith.yearStats, f=G.f, F=G.faith;
   const art=faithPresseArticle(ys,f,F);
-  const media=FAITH_PRESSE_MEDIAS[(F.year||2026)%FAITH_PRESSE_MEDIAS.length];
-  /* ==== [CORRECTIF FA-23] — computeLegendScore() n'était appelé qu'à la
-     retraite/l'épilogue : pendant 15 ans de carrière, aucun repère chiffré.
-     Règle H.1 (un écran ne montre jamais un nombre qu'une phrase peut
-     porter) admet le bilan annuel comme une des deux exceptions explicites
-     — une fois par an, jamais sur le hub. getFaithBest() (state.js) lit le
-     record des carrières PRÉCÉDENTES ; stable pour toute la durée d'une
-     carrière en cours (G.faith.previousBest, lui, n'est figé qu'à la
-     retraite — cf. FAITH_MEMOIRE_LEGENDES, ui-08). ==== */
-  const legendeAn=computeLegendScore(f).total;
-  const legendeRecord=getFaithBest();
-  const legendeLigne=legendeRecord
-    ?`Estimation à ce jour : ${legendeAn}. Votre meilleure légende : ${legendeRecord}.`
-    :`Estimation à ce jour : ${legendeAn}. Vous écrivez votre première légende.`;
+  /* ==== [ANCRE: V2-33/V2-34] — le journaliste nommé remplace le média
+     anonyme tiré par year%length ; son verdict (place dans la division,
+     ton selon son sentiment envers vous) remplace l'ancien
+     "Estimation à ce jour : ${chiffre}" — un chiffre nu qui cassait la
+     fiction du document de presse. Le score de légende lui-même n'a plus
+     sa place ici : il reste sur la fiche personnelle et l'épilogue
+     (faithScoreRows/computeLegendScore), jamais recopié sur la coupure. */
+  faithUpdateJournalistSentiment(F,art.angle);
+  const media=F.journalist.media;
+  const verdict=faithJournalistVerdict(F,f,ys);
   const chiffre=(v,lbl,couleur)=>`<div style="border:1px solid var(--line);padding:12px;text-align:center">
     <div class="mono" style="font-size:20px;${couleur?`color:${couleur}`:''}">${v}</div>
     <div class="eyebrow" style="font-size:11px;margin-top:4px">${lbl}</div></div>`;
@@ -2122,7 +2204,7 @@ function scr_faith_year_end(){
      </div>
      <h2 class="hero-name" style="font-size:28px;line-height:1.08;margin:12px 0 0">${art.titre}</h2>
      <div style="font-size:15px;line-height:1.55;margin-top:12px">${art.corps}</div>
-     <p class="mono small" style="margin-top:12px;color:var(--muted)">${legendeLigne}</p>
+     <p class="mono small" style="margin-top:12px;color:var(--muted)">${verdict}</p>
    </div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
      ${chiffre(`${ys.wins}-${ys.losses}`,'Bilan')}
