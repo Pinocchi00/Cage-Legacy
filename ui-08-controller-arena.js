@@ -13,7 +13,7 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
-const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
+const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
@@ -57,6 +57,18 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
     document.body.classList.toggle('faith-papier', _enFaith && !_nuit);
     document.body.classList.toggle('faith-nuit', _nuit); }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V2-28] — Rythme "Instantané" : ne passe jamais par ARENA
+     (aucune animation canvas) — résultat direct + résumé en trois lignes.
+     Point de passage unique (render(), pas choosePlan()) : couvre carrière,
+     Faith ET Gauntlet, quel que soit le chemin qui a posé G.screen='arena'.
+     G.pending._flashShown évite de reconstruire le résumé à chaque rendu
+     du même combat. */
+  if(G && G.screen==='arena' && G.pending && !G.pending._flashShown
+     && (((G.settings&&G.settings.fightPace)||'rapide')==='instantane')){
+    G.pending._flashShown=true;
+    G.pending.flashLines=buildFightFlashLines(G.pending.res);
+    G.screen='fight_flash';
+  }
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
@@ -254,6 +266,14 @@ const CL={
   setFaithAmbiance(val){
     if(!G.settings||typeof G.settings!=='object') G.settings={};
     G.settings.faithAmbiance=(val==='nuit')?'nuit':'papier';
+    save(); render();
+  },
+  /* ==== [ANCRE: V2-28/V2-44] — même statut que setFaithAmbiance juste
+     au-dessus : réglage exposé dès maintenant (scr_plan, ui-06), l'écran
+     Réglages du Batch 9 (V2-44) lui donnera son emplacement définitif. */
+  setFightPace(val){
+    if(!G.settings||typeof G.settings!=='object') G.settings={};
+    G.settings.fightPace=['integral','rapide','instantane'].includes(val)?val:'rapide';
     save(); render();
   },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
@@ -715,11 +735,29 @@ const CL={
   train(i){ chooseTraining(i); },
   setCampTier(tierId){ G.selectedCampTier=tierId; render(); },
   skipArena(){ CL.toResult(); },
-  nextRound(){ if(!ARENA||!ARENA.roundPause) return;
-    ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
-    ARENA.roundPause=false;
-    if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
+  nextRound(){ if(!ARENA||!ARENA.roundPause||ARENA.basculePending) return; resumeArenaPlayback(); },
+  /* ==== [ANCRE: V2-29] — une option choisie ne rend pas le même verdict
+     pour deux joueurs : le succès est pondéré par l'attribut du joueur
+     contre celui de l'adversaire sur ce point précis (resolveBasculeOption),
+     jamais un simple tirage à plat. La conséquence est immédiate (une
+     phrase) puis reste affichée jusqu'au tap suivant, qui reprend la
+     lecture — jamais de second tap requis pour ça (règle V2-31 point 3,
+     même esprit ici). */
+  pickBascule(i){
+    if(!ARENA||!ARENA.basculePending||ARENA.basculePending.resultMsg) return;
+    const m=BASCULE_MOMENTS[ARENA.basculePending.kind]; const opt=m&&m.options[i]; if(!opt) return;
+    const win=resolveBasculeOption(opt);
+    ARENA.basculeCount=(ARENA.basculeCount||0)+1;
+    if(win){
+      G.fight.pursePenalty=Math.min(1.15,(G.fight.pursePenalty||1)*1.05);
+      G.f.morale=clamp((G.f.morale||60)+2,0,100);
+    } else {
+      G.f.morale=clamp((G.f.morale||60)-3,0,100);
+    }
+    ARENA.basculePending.resultMsg=win?opt.successMsg:opt.failMsg;
+    renderArenaOverlay();
   },
+  continueAfterBascule(){ if(!ARENA||!ARENA.basculePending) return; ARENA.basculePending=null; resumeArenaPlayback(); },
   handleEvent(actionId){ const ev=G.activeEvent; const id=actionId||(ev&&ev.actionId);
     if(id==='short_notice_accept'){
       const newOpp=G._pendingShortNoticeOpp;
@@ -2713,7 +2751,12 @@ window.CL=CL;
    res.rounds n'existe pas (le champ réel est res.round, singulier) — corrigé
    ici par rapport au brouillon reçu. */
 let ARENA=null;
-const BEAT_MS=750; // ralenti pour laisser le temps de lire le flux narratif
+/* ==== [ANCRE: V2-28] — BEAT_MS n'est plus une constante figée : le réglage
+   Rythme de combat (G.settings.fightPace, persisté) l'ajuste au lancement
+   de startArena() — Intégral prend plus de temps par beat pour tout
+   laisser lire, Rapide (défaut) garde le rythme d'origine. Instantané ne
+   passe jamais par ARENA du tout (cf. render(), scr_fight_flash). */
+let BEAT_MS=750; // ralenti pour laisser le temps de lire le flux narratif
 function makeNoisePattern(ctx){ try{
   const n=64, c=document.createElement('canvas'); c.width=n; c.height=n;
   const nctx=c.getContext('2d'); const id=nctx.createImageData(n,n);
@@ -2762,6 +2805,32 @@ function buildTimeline(midFight){
        1=en délire). ==== */
     slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
 }
+/* ==== [ANCRE: V2-28] — résumé du Rythme "Instantané" : trois lignes
+   (le meilleur moment, le tournant, la fin), tirées du log réel du
+   combat déjà simulé — jamais un texte générique. "Meilleur moment" =
+   le plus grand écart de momentum entre deux événements consécutifs ;
+   "le tournant" = le premier événement où le momentum franchit
+   l'équilibre (50) après le début du combat, à défaut l'événement du
+   milieu ; "la fin" = l'événement de finition, ou le dernier du log.
+ * @param {object} res @returns {string[]} */
+function buildFightFlashLines(res){
+  const log=(res && res.log && res.log.length)?res.log:[];
+  const clean=t=>String(t||'').replace(/^\[\d+:\d+\]\s*/,'');
+  if(!log.length) return ['Le combat s’est résolu directement, sans temps mort.'];
+  let best=log[0], bestSwing=-1, prevM=50, tournant=null;
+  for(const L of log){
+    const m=(L.momentum!=null)?L.momentum:prevM;
+    const swing=Math.abs(m-prevM);
+    if(swing>bestSwing){ bestSwing=swing; best=L; }
+    if(tournant===null && (prevM-50)*(m-50)<0) tournant=L;
+    prevM=m;
+  }
+  if(!tournant) tournant=log[Math.floor(log.length/2)];
+  const finLog=log.find(L=>L.finish)||log[log.length-1];
+  const lines=[clean(best.text),clean(tournant.text),clean(finLog.text)];
+  return lines.filter((t,i)=>t && lines.indexOf(t)===i);
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : ouvrir une
    "fenêtre" avec un aperçu de l'arène en plein rendu Canvas (les silhouettes
    de combattants), un par effet du Marché noir, au lieu du simple texte
@@ -2805,6 +2874,10 @@ function cacheArenaGfx(){
   A._foOp={lunge:0,flash:false,shake:false,fallen:false,grounded:false,phase:null,top:false,tap:false};
 }
 function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
+  /* ==== [ANCRE: V2-28] — Rythme de combat : Intégral prend son temps
+     (beat plus long, on voit tout), Rapide (défaut) garde le rythme
+     d'origine. Instantané ne passe jamais ici (cf. render()). */
+  BEAT_MS=(((G.settings&&G.settings.fightPace)||'rapide')==='integral')?1050:750;
   // Cast JSDoc : getElementById() renvoie HTMLElement générique ; c'est bien
   // un <canvas> dans le HTML réel (width/height/getContext lui sont propres).
   const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('arena-cv'));
@@ -2851,7 +2924,14 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
       const prevRound=ARENA.lastBeat>=0?(ARENA.beats[ARENA.lastBeat].round||1):null;
       const newRound=ARENA.beats[bi].round||1;
       if(prevRound!==null && newRound!==prevRound && !ARENA.beats[bi].finish && bi!==ARENA.pauseHandledFor){
-        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; ARENA.pauseHandledFor=bi; renderArenaOverlay(); return;
+        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; ARENA.pauseHandledFor=bi;
+        /* ==== [ANCRE: V2-29] — moment de bascule détecté sur la reprise qui
+           vient de se terminer, à partir de l'état RÉEL de la simulation
+           (momentum/phase des beats de cette reprise) — jamais à chaque
+           reprise (règle 6), plafonné à 3 par combat (ARENA.basculeCount). */
+        const moment=detectBascule(prevRound);
+        if(moment) ARENA.basculePending={kind:moment.kind};
+        renderArenaOverlay(); return;
       }
       ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]);
     }
@@ -2875,9 +2955,115 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   ARENA.loopFn=loop;
   paintBars(); ARENA.raf=requestAnimationFrame(loop);
 }
+/* ==== [ANCRE: V2-29] — même mécanisme de reprise que "Round suivant"
+   (recalculer pauseOffset pour retomber pile sur pendingBeatIdx, relever
+   roundPause, relancer la boucle) : nextRound() ET continueAfterBascule()
+   partagent ce point unique plutôt que de dupliquer le calcul. */
+function resumeArenaPlayback(){
+  ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
+  ARENA.roundPause=false;
+  if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
+}
 function renderArenaOverlay(){ const el=document.getElementById('ar-log'); if(!el) return;
+  if(ARENA.basculePending){ renderBasculeOverlay(el); return; }
   const finishedRound=ARENA.beats[ARENA.lastBeat]?(ARENA.beats[ARENA.lastBeat].round||1):1;
   el.innerHTML=`<div style="text-align:center"><b class="gold">Fin du round ${finishedRound}</b><br><button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.nextRound()">Round suivant ▸</button></div>`;
+}
+/* ==== [ANCRE: V2-29] — les moments de bascule. Faute de flags dédiés dans
+   le log du moteur (pas de "sonné"/"coupure"/"dos à la cage" — cf. beat
+   shape réelle : phase/by/momentum/snapA/snapB seulement), les 4
+   situations ci-dessous sont dérivées de l'état RÉEL de la reprise qui
+   vient de se jouer (momentum de fin de round, domination en clinch) —
+   jamais fabriquées. Format imposé : une phrase de situation, 3 options,
+   aucun chiffre, conséquence en une phrase. */
+const BASCULE_MOMENTS={
+  sonne_lui:{situation:'Il recule, les jambes molles. La cage est derrière lui.',
+    options:[
+      {label:'Se jeter dessus',stat:'killer',oppStat:'chin',
+        successMsg:'Vous ne le laissez pas respirer — il craque un peu plus.',
+        failMsg:'Il vous accroche au passage : vous ralentissez, groggy vous aussi.'},
+      {label:'Rester structuré et le cueillir',stat:'composure',oppStat:'chin',
+        successMsg:'Vous le cueillez proprement, sans vous exposer.',
+        failMsg:'Il tient bon, et la reprise se referme sans rien de plus.'},
+      {label:'Le laisser revenir et garder le round',stat:'fightIQ',oppStat:'heart',
+        successMsg:'Vous gardez le contrôle de la reprise, sans risque inutile.',
+        failMsg:'Il revient dans le round : l’occasion est passée.'}
+    ]},
+  sonne_moi:{situation:'Vous encaissez, les jambes molles. Il sent l’occasion.',
+    options:[
+      {label:'Se réfugier au clinch',stat:'clinchStr',oppStat:'power',
+        successMsg:'Vous vous accrochez à lui, le temps que la tête se remette en place.',
+        failMsg:'Il vous décolle du clinch et continue d’appuyer.'},
+      {label:'Reculer et respirer',stat:'footSpeed',oppStat:'aggression',
+        successMsg:'Vous sortez de l’axe, il ne vous rattrape pas.',
+        failMsg:'Il coupe la cage et vous retrouve contre la grille.'},
+      {label:'Répondre pour le faire douter',stat:'heart',oppStat:'composure',
+        successMsg:'Votre réponse le fait hésiter une seconde de trop.',
+        failMsg:'Il encaisse sans broncher et continue d’avancer.'}
+    ]},
+  clinch:{situation:'Dos à la cage, il vous contrôle en clinch depuis un moment.',
+    options:[
+      {label:'Forcer la sortie tout de suite',stat:'strength',oppStat:'clinchStr',
+        successMsg:'Vous vous dégagez, retour au centre de la cage.',
+        failMsg:'Vous forcez pour rien : il vous replaque contre la grille.'},
+      {label:'Attendre l’ouverture pour sortir',stat:'fightIQ',oppStat:'topControl',
+        successMsg:'Vous sentez le bon moment et sortez proprement.',
+        failMsg:'L’ouverture ne vient jamais : la reprise se termine collé à la grille.'},
+      {label:'Accepter la position et encaisser au score',stat:'discipline',oppStat:'clinchStr',
+        successMsg:'Vous limitez les dégâts, sans paniquer.',
+        failMsg:'Il en profite pour accumuler les coups au corps.'}
+    ]},
+  serre:{situation:'Round qui se joue à rien, dans les dernières secondes.',
+    options:[
+      {label:'Se jeter dans un dernier échange',stat:'aggression',oppStat:'chin',
+        successMsg:'Vous prenez la reprise sur ce dernier coup d’éclat.',
+        failMsg:'L’échange tourne à votre désavantage sur la cloche.'},
+      {label:'Sécuriser ce qui est déjà fait',stat:'discipline',oppStat:'fightIQ',
+        successMsg:'Vous gérez la fin de round sans rien risquer.',
+        failMsg:'Trop passif : les juges retiennent surtout sa fin de round à lui.'},
+      {label:'Chercher l’amenée pour finir en contrôle',stat:'takedown',oppStat:'tdd',
+        successMsg:'L’amenée passe, vous terminez le round au-dessus.',
+        failMsg:'L’amenée échoue, vous perdez le peu de temps qu’il restait.'}
+    ]}
+};
+/** Dérive un éventuel moment de bascule de la reprise qui vient de se
+ * jouer, jamais fabriqué : lu sur les beats réels de cette reprise.
+ * @param {number} round @returns {{kind:string}|null} */
+function detectBascule(round){
+  if((ARENA.basculeCount||0)>=3) return null;
+  const roundBeats=ARENA.beats.filter(b=>b.round===round && b.phase!=='bell');
+  if(!roundBeats.length) return null;
+  const last=roundBeats[roundBeats.length-1];
+  const lastM=(last.momentum!=null)?last.momentum:50;
+  const clinchDom=roundBeats.filter(b=>b.phase==='clinch'&&b.by==='op').length>=3;
+  if(clinchDom && rnd()<0.6) return {kind:'clinch'};
+  if(lastM>=78 && rnd()<0.55) return {kind:'sonne_lui'};
+  if(lastM<=22 && rnd()<0.55) return {kind:'sonne_moi'};
+  if(Math.abs(lastM-50)<=8 && rnd()<0.35) return {kind:'serre'};
+  return null;
+}
+/** Chance de succès pondérée par l'attribut du joueur contre celui
+ * de l'adversaire sur le point précis de l'option — jamais un tirage à
+ * plat, jamais un chiffre affiché au joueur.
+ * @param {object} opt @returns {boolean} */
+function resolveBasculeOption(opt){
+  const f=G.f, opp=(G.fight&&G.fight.opp)||{};
+  const my=(f.attrs&&f.attrs[opt.stat])!=null?f.attrs[opt.stat]:50;
+  const their=(opp.attrs&&opp.attrs[opt.oppStat])!=null?opp.attrs[opt.oppStat]:50;
+  const chance=clamp(50+(my-their)/2,10,90);
+  return rnd()*100<chance;
+}
+function renderBasculeOverlay(el){
+  const b=ARENA.basculePending, m=BASCULE_MOMENTS[b.kind]; if(!m) return;
+  if(b.resultMsg){
+    el.innerHTML=`<div style="text-align:center"><div class="small" style="color:var(--gold)">${esc(b.resultMsg)}</div>
+      <button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.continueAfterBascule()">Continuer ▸</button></div>`;
+    return;
+  }
+  el.innerHTML=`<div style="text-align:left">
+    <div class="small mb">${esc(m.situation)}</div>
+    ${m.options.map((o,i)=>`<button class="btn ghost" style="display:block;width:100%;margin-top:6px;padding:8px;text-align:left" onclick="CL.pickBascule(${i})">${esc(o.label)}</button>`).join('')}
+  </div>`;
 }
 function applyBeat(b){ const A=ARENA; if(!b)return;
   if(b.phase==='bell'){ A.currentText=b.text; return; }
@@ -3268,6 +3454,19 @@ function startConsumablePreviewArena(){
   drawArena(0,true);
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-28] — écran du Rythme "Instantané" : résultat direct,
+   jamais d'animation canvas. ==== */
+function scr_fight_flash(){
+  const lines=(G.pending&&G.pending.flashLines)||[];
+  const meWin=!!(G.pending&&G.pending.win);
+  return `<div class="scr center intro">
+   <div class="eyebrow" style="color:${meWin?'var(--pos)':'var(--neg)'}">${meWin?'VICTOIRE':'DÉFAITE'}</div>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;text-align:left">
+     ${lines.map(l=>`<div class="card" style="padding:12px;background:var(--panel2)"><div class="small">${esc(l)}</div></div>`).join('')}
+   </div>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.toResult()">VOIR LE RÉSULTAT</button>
+  </div>`;
+}
 function scr_arena(){ const A=ARENA||{};
   /* ==== [CORRECTIF V2-06] — la cage reste sombre dans les deux ambiances
      (V2-01), mais son HUD (chrono/rounds/jauges — ici noms, zones de

@@ -468,6 +468,21 @@ function scr_camp(){ const f=G.f;
    </div>`; }
 
 /* ==== [ANCRE: PLAN_COMBAT] — vestiaire, choix tactique juste avant le combat ==== */
+/* ==== [ANCRE: V2-28] — réglage Rythme de combat exposé ici, temporairement
+   (comme l'ambiance Faith au lot précédent, V2-01) — le vrai foyer sera
+   l'écran Réglages unique de V2-44. Lecture défensive de G.settings, même
+   convention que faithAmbiance : G.settings n'est pas garanti exister à
+   tous les points d'entrée de G. */
+function combatPaceToggleBlock(){
+  const pace=(G.settings&&G.settings.fightPace)||'rapide';
+  const opts=[['integral','Intégral'],['rapide','Rapide'],['instantane','Instantané']];
+  return `<div class="card mt" style="padding:10px;background:var(--panel2)">
+   <div class="eyebrow mb" style="font-size:10px">RYTHME DE COMBAT</div>
+   <div style="display:flex;gap:8px">
+     ${opts.map(([id,lbl])=>`<button class="btn ${pace===id?'primary':'ghost'}" style="flex:1;padding:8px;font-size:12px" onclick="CL.setFightPace('${id}')">${lbl}</button>`).join('')}
+   </div>
+  </div>`;
+}
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
   const step=G.fight.planStep||1;
@@ -537,13 +552,32 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
       h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
     }
   } else {
+    /* ==== [ANCRE: V2-30] — "le plan de combat, un seul écran" : les trois
+       parties demandées par le document, dans l'ordre. 1) Ce qu'on sait de
+       lui (tacticalRead(), déjà réel — arme/faille de l'adversaire, jamais
+       un texte générique). 2) Le plan — TACTICS[f.style] est déjà à 3
+       entrées par style ; .slice(0,3) plafonne pour de bon même quand
+       getExclusiveTactics() en ajoute une 4e (règle H.3, pas respectée
+       jusqu'ici sur les rares tags physiques exclusifs). 3) La clé — un
+       seul détail exploitable, gagné hors combat (scoutKey, V2-08 côté
+       Faith) ou son absence assumée en toutes lettres, jamais une case
+       vide. ==== */
+    const combinedTactics=getExclusiveTactics(f).concat(plans).slice(0,3);
+    const hasKey=!!(G.faith && G.faith.scoutKey);
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
-     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
+     <div class="eyebrow gold mb" style="letter-spacing:0.2em">CE QU’ON SAIT DE LUI</div>
+     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px">${tacticalRead(f,opp)}</div>
    </div>
-   <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
-   ${getExclusiveTactics(f).concat(plans).map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
+   <div class="eyebrow gold mb" style="letter-spacing:0.2em">LE PLAN</div>
+   <p class="lede small">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
+   ${combinedTactics.map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
      <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}`;
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+   <div class="card mt" style="border-left:3px solid ${hasKey?'var(--sage)':'var(--line)'};padding-left:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="color:${hasKey?'var(--sage)':'var(--muted)'}">LA CLÉ</div>
+     <div class="small">${hasKey?`Grâce au sparring, vous savez qu’${esc(opp.name)} est particulièrement dangereux en ${esc(oppTopAttrLabel(opp))}.`:'Vous entrez sans rien de plus que ce que tout le monde sait de lui.'}</div>
+   </div>
+   ${combatPaceToggleBlock()}`;
   }
   h+=`</div>`;
   return h;

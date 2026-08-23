@@ -3169,9 +3169,16 @@ function scr_coaching_round(){
      <div class="muted small" style="position:relative;z-index:2">Le combat n\u2019est pas fini : il reste ${restants} round${restants>1?'s':''}. Tu es dans ton coin, c\u2019est le moment de choisir la consigne du round suivant.</div>
      <div class="mono small mt" style="position:relative;z-index:2">Coups placés <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b> · Coups encaissés <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b></div>
    </div>
+   <!-- ==== [CORRECTIF V2-31 point 2] — "un coach ne parle pas en
+        paragraphe entre deux rounds, il lâche trois choses" : les deux
+        répliques apparaissent l'une après l'autre (délai ~450ms), pas
+        d'un bloc. Rien ne bloque l'interaction pendant l'animation (les
+        boutons de consigne plus bas restent cliquables immédiatement) :
+        un seul tap suffit toujours, jamais besoin d'en attendre un second
+        pour que la mise en scène se termine (règle V2-31 point 3). ==== -->
    <div class="card mb" style="background:var(--panel2);border-left:3px solid var(--gold);padding:14px">
-     <div class="small" style="color:var(--text)">${verdict}</div>
-     <div class="small mt" style="color:var(--gold)">« ${conseil} »</div>
+     <div class="small" style="color:var(--text);opacity:0;animation:fade .3s ease .05s forwards">${verdict}</div>
+     <div class="small mt" style="color:var(--gold);opacity:0;animation:fade .3s ease .45s forwards">« ${conseil} »</div>
    </div>
    ${secondSouffleBlock}
    <div class="eyebrow gold mb" style="letter-spacing:0.2em">TA CONSIGNE POUR LE ROUND ${c.round}</div>
