@@ -13,8 +13,21 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: V2-13 règles 2/3] — garde-fous d'éligibilité au titre :
+   - règle 2, "série d'au moins 2 victoires" : f.streak<=0 laissait passer
+     une série d'exactement 1 (streak<=0 exclut 0 et négatif, pas 1).
+     Resserré à <=1.
+   - règle 3, "≥6 combats dans l'organisation ou ≥8 combats professionnels" :
+     absent avant ce correctif — rien n'empêchait un combat de titre après
+     2-3 combats seulement dans l'organisation. f.orgWins (victoires dans
+     l'org actuelle, déjà suivi et déjà seuil de promotion ailleurs,
+     engine.js) sert d'approximation raisonnable pour "combats dans
+     l'organisation" — aucun compteur séparé de combats totaux par org
+     n'existe dans l'état actuel, et l'ajouter serait une extension d'état
+     hors du périmètre de cette règle précise. ==== */
 function isTitleEligible(f){
-  if(f.org<1 || f.streak<=0) return false;
+  if(f.org<1 || f.streak<=1) return false;
+  if((f.orgWins||0)<6 && (f.W+f.L+(f.D||0))<8) return false;
   if(f.history && f.history.length>=3){
     const recentLosses=f.history.slice(-3).filter(h=>h.res==='loss').length;
     if(recentLosses>=2) return false;
@@ -610,8 +623,15 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
     if(G.f.retired) forced=true;
   }
+  /* ==== [ANCRE: V2-15 point 4] — "après chaque combat : une ligne de
+     mouvement de rang dans le résumé (#11 -> #7)". myRankBefore (capturé
+     en tout début de fonction) reste valable, mais un second divRank(G.f)
+     ICI, après que W/L/elo/streak aient tous été mis à jour par ce même
+     combat, donne le rang réel APRÈS résultat, sans attendre le cycle
+     annuel d'advanceRoster() (qui ne concerne que les PNJ). ==== */
+  const myRankAfter=divRank(G.f);
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
-    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
+    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   f.W=f.L=f.D=f.ko=f.sub=f.dec=f.koLoss=f.streak=0; f.orgWins=0; f.easyFights=0; f.history=[]; f.champion=null; f.titles=0; f.defenses=0; f._fy=0;

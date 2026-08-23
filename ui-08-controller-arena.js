@@ -90,12 +90,38 @@ function faithAdvanceMonth(){
    candidat calibré au milieu. ==== */
 function faithGenerateOffer(){
   ensureOpponentsCached(G.f);
-  const opps=G.opps||[];
+  let opps=G.opps||[];
+  const gala=faithGalaPosition(G.f);
+  gala.label=faithGalaLabel(G.faith,G.f);
+  /* ==== [ANCRE: V2-13 règles 1/4/5] — Faith a un vrai concept de position
+     de carte (faithGalaPosition, contrairement au mode carrière où seule
+     l'idée de défense/titre en tient lieu — le filtre équivalent vit dans
+     genOpponents(), ui-02, sur la branche isDefense) : sur une carte
+     principale ou un main event, exclure les candidats en déroute
+     (bilan négatif sur leurs 5 derniers combats, règle 1) et plafonner
+     l'écart de rang avec le joueur (règle 4 — fenêtre large sur une
+     carte principale, étroite en main event). Règle 5 : si les DEUX
+     filtres appliqués STRICTEMENT (sans repli silencieux sur la liste
+     non filtrée) ne laissent plus aucun candidat, ne jamais servir un
+     adversaire non conforme — un mois creux avec sa raison affichée vaut
+     mieux qu'un adversaire absurde sur la plus grosse affiche de l'année. */
+  if(gala.tier==='Main event' || gala.tier==='Carte principale'){
+    const myRank=divRank(G.f);
+    const rankCap=gala.tier==='Main event'?8:15;
+    const eligible=opps.filter(x=>{
+      const h=x.o.history;
+      const onASkid=h && h.length>=5 && h.slice(-5).filter(hh=>hh.res==='loss').length>=3;
+      return !onASkid && Math.abs(divRank(x.o)-myRank)<=rankCap;
+    });
+    if(!eligible.length){
+      G.lastMsg="L’organisation n’a personne à vous proposer pour une affiche pareille ce mois-ci — et ça commence à se voir.";
+      faithAdvanceMonth(); return;
+    }
+    opps=eligible;
+  }
   if(!opps.length){ faithAdvanceMonth(); return; }
   const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
   const chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
-  const gala=faithGalaPosition(G.f);
-  gala.label=faithGalaLabel(G.faith,G.f);
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
@@ -1614,6 +1640,33 @@ const CL={
             break;
           }
         }
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: V2-14] — FA-26 verrouillait une némésis pour la
+       carrière entière sans jamais vérifier qu'un rematch restait
+       plausible : un rival qui s'effondre (viré du haut niveau) ou qui
+       s'envole (double champion pendant que le joueur stagne en bas de
+       tableau) restait quand même "la" némésis, sans qu'aucune revanche
+       ne redevienne jamais réaliste. Vérifié une fois par an, juste après
+       le verrouillage éventuel ci-dessus (jamais la même année qu'un
+       verrouillage frais : `else` ci-dessous). Dissoute, jamais annulée
+       en silence : la carrière peut ensuite en reformer une nouvelle
+       (rankWatch n'est pas purgé : les compteurs déjà accumulés par
+       d'autres combattants du roster restent valables). ==== */
+    else if(G.f.faithNemesisId){
+      const nem=(G.roster||[]).find(o=>o.id===G.f.faithNemesisId);
+      const monRang=divRank(G.f);
+      const nemRang=nem?divRank(nem):null;
+      const gapTropGrand=!nem || Math.abs(nemRang-monRang)>20;
+      if(gapTropGrand){
+        const coule=!nem || nemRang>monRang;
+        G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+(coule
+          ?"Votre némésis a perdu trois fois de suite : plus personne ne veut de ce combat."
+          :"Elle est championne, et n'a pas cité votre nom une seule fois cette année.");
+        if(!G.faith.yearLog) G.faith.yearLog=[];
+        G.faith.yearLog.push({title:'Rivalité dissoute',choice:coule?'Il a coulé':'Il vous a dépassé'});
+        G.f.faithNemesisId=null; G.f.rivalId=null; G.f.nemesisRecord=null;
       }
     }
     /* ==== [FIN ANCRE] ==== */

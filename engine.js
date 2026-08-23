@@ -1379,6 +1379,22 @@ function rankPool(list){
     return p4pScore(y)-p4pScore(x);
   });
 }
+/* ==== [ANCRE: V2-12] — le document demande une fonction `standing()`
+   composite (rang + qualité du palmarès + série + palier d'org +
+   récence) partagée par tous les filtres de matchmaking. p4pScore()
+   (juste au-dessus) couvre déjà l'essentiel sans qu'il soit utile de la
+   dupliquer : orgElo/careerElo (eloBaseline) intègrent déjà le palier
+   d'organisation ET la qualité des adversaires battus — un système Elo
+   récompense structurellement plus une victoire sur un adversaire mieux
+   coté qu'un palmarès brut ne le ferait — recordBonus ajoute le
+   différentiel victoires/défaites et les finitions, f.streak la série en
+   cours, et la décroissance d'inactivité (Rank Rust, advanceRoster())
+   pénalise déjà la récence AVANT que rankPool()/p4pScore() ne classent
+   qui que ce soit. `standing()` réutilise donc strictement ce calcul —
+   un alias assumé, jamais un second système parallèle qui risquerait de
+   désynchroniser deux notions différentes du "niveau réel" d'un
+   combattant. ==== */
+function standing(f){ return p4pScore(f); }
 function isDeclining(f){ return f.age>=(isHeavy(f)?38:36); }
 function isHeavy(f){ return f.div==='H-heavy'||f.div==='H-lheavy'; }
 function applyAging(f){ const A=f.age; const declineLog=[];

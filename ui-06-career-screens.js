@@ -823,6 +823,12 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      ${p.nickEvoHtml?`<div class="small mt" style="font-style:italic">${p.nickEvoHtml}</div>`:''}
    </div>
    ${judgesHtml}
+   <!-- ==== [CORRECTIF V2-15 point 4] — mouvement de rang affiché en une
+        ligne après chaque combat (#11 -> #7), pas seulement visible en
+        creusant jusqu'à l'écran Classement. Silencieux si le rang n'a pas
+        bougé (ex-æquo, ou combattant encore non classé des deux côtés) :
+        une ligne "#7 -> #7" n'apporterait rien. ==== -->
+   ${(p.rankBefore!=null && p.rankAfter!=null && p.rankBefore!==p.rankAfter)?`<div class="mono small" style="text-align:center;color:${p.rankAfter<p.rankBefore?'var(--pos)':'var(--neg)'}">#${p.rankBefore} → #${p.rankAfter}</div>`:''}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);
    /* ==== [ANCRE: CORRECTIF_GAIN_MASQUE_ARRONDI] — bug remonté : d20()

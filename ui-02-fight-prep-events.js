@@ -141,10 +141,21 @@ function genOpponents(f){
     entry.mm=matchmakingRole(f,champ,entry);
     return [entry]; }
   if(isDefense){
-    const r1=pool[0]||pool[1];
-    const rest=pool.slice(1,8).filter(o=>o && o.id!==r1.id);
+    /* ==== [ANCRE: V2-13 règle 1] — "aucun combattant à bilan négatif sur
+       ses 5 derniers combats en carte principale ou main event". Une
+       défense de titre EST le main event par définition (fightKind(),
+       ui-05) : filtre appliqué ici, avant la sélection de r1/rest, avec
+       le même filet de sécurité (pool restant suffisant) que les autres
+       filtres de cette fonction pour ne jamais casser un petit roster. */
+    const notOnASkid=pool.filter(o=>{
+      if(!o.history || o.history.length<5) return true;
+      return o.history.slice(-5).filter(h=>h.res==='loss').length<3;
+    });
+    const defPool=notOnASkid.length>=5?notOnASkid:pool;
+    const r1=defPool[0]||defPool[1];
+    const rest=defPool.slice(1,8).filter(o=>o && o.id!==r1.id);
     rest.sort(()=>0.5-rnd());
-    chosen.push(r1, rest[0]||pool[1], rest[1]||pool[2]);
+    chosen.push(r1, rest[0]||defPool[1], rest[1]||defPool[2]);
   }
   else {
     let normalPool=rankPool(pool.filter(o=>!o.champion)); // trié du meilleur au pire — myRank/rk ci-dessous en dépendent directement

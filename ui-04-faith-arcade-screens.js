@@ -511,6 +511,13 @@ function scr_faith_hub(){
       ${faithOathBadge(G.faith)}
     </div>
     ${actionsHtml}
+    <!-- ==== [CORRECTIF V2-15] — le mode carrière a déjà scr_rankings()
+         (top 15 + rang du joueur en évidence + mouvement ▲▼ + ceinture
+         au-dessus, ui-06) accessible en un tap depuis son hub ; Faith en
+         était privé, seule sa carte /1f1f grille montrait un rang isolé
+         sans le classement complet autour. Réutilisé tel quel — l'écran
+         gère déjà les deux modes (CL.go('faith_hub') au retour). ==== -->
+    <button class="btn ghost" onclick="CL.go('rankings')">Classement</button>
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
     <!-- ==== [ANCRE: FAITH_AMBIANCE] — emplacement provisoire (V2-01) : le
          document place ce réglage dans l'écran d'accueil Faith et l'écran
@@ -550,6 +557,19 @@ function scr_faith_offer(){
      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
      <div class="mono small" style="margin-top:4px">${recordStr(o)}</div>
      <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
+     ${o.id===f.faithNemesisId?(()=>{
+       /* ==== [CORRECTIF V2-14] — "la revanche, quand elle a lieu, ouvre
+          l'écran avec le bilan du face-à-face et une ligne sur ce qui
+          s'est passé la dernière fois" : nemesisRecord (FA-26, tenu par
+          ui-05 à chaque combat contre CETTE némésis précise) en donne le
+          bilan tête-à-tête ; le sens (qui mène) porte à lui seul la ligne
+          sur "la dernière fois", sans stocker un second historique. ==== */
+       const rec=f.nemesisRecord||{w:0,l:0};
+       const bilan=rec.w>rec.l?`Vous menez ${rec.w}-${rec.l} sur cette rivalité.`
+         :rec.l>rec.w?`Il mène ${rec.l}-${rec.w} sur cette rivalité.`
+         :(rec.w+rec.l>0?`Vous êtes à égalité, ${rec.w}-${rec.l}.`:'Votre premier face-à-face.');
+       return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${bilan}</div>`;
+     })():''}
    </div>
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
