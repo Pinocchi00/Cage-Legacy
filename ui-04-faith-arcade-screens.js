@@ -525,29 +525,40 @@ function scr_faith_hub(){
     actionsHtml=`<p class="lede small">${quoi}.</p>
     <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithLifeEvent()">CONTINUER</button>`;
   } else if(monthEntry.type==='intersaison'){
-    /* ==== [CORRECTIF FA-15] — trois options PERMANENTES, jamais plus (règle
-       H.3 : au-delà, un écran de décision redevient un menu) : Se reposer,
-       Tourner avec [le partenaire le plus avancé — un seul, pas jusqu'à
-       deux comme avant : la règle des trois options l'exigeait déjà],
-       Partir en stage (perk 'tiger', qui venait au hasard dans le pool
-       d'événements, cf. faithCamp()/FAITH_OFFRES_TENTATION). "Se reposer"
-       n'est plus un choix gratuit : les partenaires progressent un peu plus
-       vite cette année sans vous pour les canaliser (restedThisYear,
-       consommé par nextFaithYear) — un prix narratif, jamais chiffré ici.
-       topPartner est désormais calculé une seule fois en tête de fonction
-       (FA-25), réutilisé ici tel quel. */
-    actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison.</p>
+    /* ==== [ANCRE: V2-09] — trois options TIRÉES du pool (FAITH_INTERSAISON_
+       POOL), jamais plus (règle H.3 conservée : l'écran en montre toujours
+       exactement 3), mais elles varient d'une intersaison à l'autre au lieu
+       d'être figées. faithEnsureIntersaisonDraw() est idempotente pour le
+       mois courant (même schéma que faithEnsureOffer, V2-16) : le tirage ne
+       change jamais entre deux rendus du même mois. Le libellé de fraîcheur
+       (V2-11) apparaît ici en toutes lettres, jamais en chiffre. */
+    const picks=faithEnsureIntersaisonDraw(f,G.faith).map(id=>FAITH_INTERSAISON_POOL.find(e=>e.id===id)).filter(Boolean);
+    const secondPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+    /* ==== [ANCRE: V2-07] — seules les DEUX entrées qui portent explicitement
+       le nom d'un partenaire (id précis, pas juste `action==='sparring_top'`
+       — d'autres entrées, ex. "Séance technique ciblée", partagent la même
+       action mais gardent leur propre titre fixe et ne doivent pas être
+       écrasées) affichent le nom réel + la jauge de Frankenstein (FA-25). */
+    const cardFor=(entry)=>{
+      if(entry.id==='is_sparring_top' && topPartner){
+        return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
+          <b style="font-size:16px">Tourner avec ${esc(topPartner.first)}</b>
+          <div class="muted small mt">${esc(topPartner.styleLabel)}, ${topPartner.age} ans. ${faithProtegeLine(topPartner,f)}</div></div>`;
+      }
+      if(entry.id==='is_sparring_second' && secondPartner){
+        return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
+          <b style="font-size:16px">Tourner avec ${esc(secondPartner.first)}</b>
+          <div class="muted small mt">${esc(secondPartner.styleLabel)}, ${secondPartner.age} ans. ${faithProtegeLine(secondPartner,f)}</div></div>`;
+      }
+      let text=entry.text;
+      if(entry.action==='camp') text=`${text} ${FAITH_CAMPS.filter(c=>(f.earnings||0)>=c.cost).length} camp(s) accessible(s) selon les fonds.`;
+      return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
+        <b style="font-size:16px">${esc(entry.title)}</b>
+        <div class="muted small mt">${esc(text)}</div></div>`;
+    };
+    actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison. Vous vous sentez ${freshnessTier(f).label.toLowerCase()}.</p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="opp" style="padding:16px" onclick="CL.faithRest()">
-        <b style="font-size:16px">Se reposer</b>
-        <div class="muted small mt">Récupérer, souffler — mais laisser l’écurie tourner sans vous.</div></div>
-      ${topPartner?`<div class="opp" style="padding:16px;border-left:3px solid var(--sage)" onclick="CL.faithSparring('${topPartner.id}')">
-        <b style="font-size:16px">Tourner avec ${esc(topPartner.first)}</b>
-        <div class="muted small mt">${topPartner.styleLabel}, ${topPartner.age} ans. ${faithProtegeLine(topPartner,f)}</div>
-      </div>`:''}
-      <div class="opp" style="padding:16px" onclick="CL.faithCamp()">
-        <b style="font-size:16px">Partir en stage</b>
-        <div class="muted small mt">Six semaines dans un camp thaïlandais réputé pour casser les hommes autant que les former. 50k$.</div></div>
+      ${picks.map(cardFor).join('')}
     </div>`;
   } else {
     /* ==== [ANCRE: FAITH_HUB_ADVERSAIRE] — le mois-combat était le seul type
@@ -656,6 +667,7 @@ function scr_faith_offer(){
          :(rec.w+rec.l>0?`Vous êtes à égalité, ${rec.w}-${rec.l}.`:'Votre premier face-à-face.');
        return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${bilan}</div>`;
      })():''}
+     ${F.scoutKey?`<div class="mono small" style="margin-top:8px;color:var(--sage)">SPARRING · Vous savez qu’il est particulièrement dangereux en ${esc(oppTopAttrLabel(o))}.</div>`:''}
    </div>
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
@@ -850,6 +862,130 @@ function scr_faith_contacts(){
    </div>
    <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour au hub</button>
   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-10] — six camps nommés remplacent le stage unique (perk
+   'tiger' tiré au hasard). Chacun cible une famille d'attributs, coûte et
+   risque différemment, et porte un texte de retour qui lui est propre (le
+   même camp répété deux fois de suite affiche repeatText, à effet réduit —
+   "vous connaissez déjà tout ce qu'ils ont à donner"). freshCost est
+   consommé sur f.freshness (V2-11) quel que soit le résultat du stage. */
+const FAITH_CAMPS=[
+  {id:'thai',name:'Camp thaïlandais',cost:55,freshCost:-25,risk:0.06,attrs:['kick','clinchStr','power'],
+   text:'Six semaines de tibias en sang et de genoux au corps. Vous rentrez plus dur à toucher, et bien plus dangereux de près.',
+   repeatText:'Retour au même camp thaïlandais : les mêmes coachs, les mêmes exercices. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'wrestling',name:'Wrestling américain',cost:45,freshCost:-22,risk:0.05,attrs:['takedown','tdd','topControl'],
+   text:'Une salle universitaire où on vous jette au sol cent fois par jour jusqu’à ce que la chute devienne un réflexe.',
+   repeatText:'Les mêmes lutteurs, les mêmes séries de projections. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'bjj',name:'Académie brésilienne',cost:45,freshCost:-20,risk:0.04,attrs:['submission','guardWork','gnp'],
+   text:'Des heures au sol, à chercher la soumission ou à survivre à celle de l’autre. Le jeu de jambes change de nature.',
+   repeatText:'La même académie, les mêmes ceintures noires patientes. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'boxing',name:'École de boxe',cost:40,freshCost:-15,risk:0.03,attrs:['jab','cross','hook','handSpeed'],
+   text:'Un vieux club de boxe anglaise, miroirs rayés et sac lourd fatigué. Les mains sortent plus vite, et plus juste.',
+   repeatText:'Le même club, le même miroir rayé. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'physical',name:'Prépa physique',cost:35,freshCost:-30,risk:0.08,attrs:['cardio','strength','explosiveness','durability'],
+   text:'Un préparateur qui ne connaît que le chiffre sur le chronomètre. Le corps en ressort plus fort, et vidé.',
+   repeatText:'Le même préparateur, les mêmes séries à l’échec. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'solo',name:'Retraite en montagne, seul',cost:20,freshCost:15,risk:0,attrs:['focus','composure','discipline'],
+   text:'Personne pour vous entraîner, juste vous, le silence, et ce qu’il y a dans votre tête. Vous en redescendez plus calme.',
+   repeatText:'Le même chalet, le même silence. Vous savez déjà ce que la montagne a à vous dire — mais ça continue de faire du bien.'},
+];
+function scr_faith_camps(){
+  const f=G.f, visited=(G.faith&&G.faith.campsVisited)||[];
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Choisir un stage</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
+   <p class="lede small">Six semaines, un seul endroit possible cette fois-ci.</p>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+   ${FAITH_CAMPS.map(c=>{
+     const already=visited.includes(c.id);
+     const afford=(f.earnings||0)>=c.cost;
+     return `<div class="opp" style="padding:14px;${afford?'':'opacity:.55'}" onclick="${afford?`CL.faithCampChoose('${c.id}')`:''}">
+       <b style="font-size:15px">${esc(c.name)}${already?' <span class="muted small">(déjà fait)</span>':''}</b>
+       <div class="muted small mt">${c.cost}k$ · ${c.attrs.map(attrLabel).join(', ')}</div>
+     </div>`;
+   }).join('')}
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour</button>
+  </div>`;
+}
+/* ==== [ANCRE: V2-09] — pool d'intersaison. L'ancien FA-15 figeait trois
+   options permanentes (Repos/Sparring/Stage) ; ici, exactement 3 sont
+   TIRÉES parmi ce pool à chaque intersaison, avec au moins 2 catégories
+   différentes parmi les 3 montrées, un cooldown de 3 intersaisons par
+   entrée déjà utilisée, et jamais le même trio deux années de suite
+   (F.lastTrio). Portée réduite à 15 entrées (au lieu des 24 minimum
+   demandées par le document) — même choix de réduction assumée et notée
+   que pour FAITH_BUILDUP_EVENTS (V2-22/23, lot précédent) : le tirage à 3
+   sur 15 offre déjà une vraie variation d'une année à l'autre dans le
+   temps disponible pour ce lot. Les trois options historiques (repos/
+   sparring/stage) restent dans le pool, pondérées plus fort, mais ne sont
+   plus garanties. */
+const FAITH_INTERSAISON_POOL=[
+  {id:'is_repos',categorie:'securite',weight:3,req:()=>true,
+   title:'Se reposer',text:'Récupérer, souffler — mais laisser l’écurie tourner sans vous.',action:'rest'},
+  {id:'is_repos_famille',categorie:'securite',weight:1,req:(f)=>(f.age||20)>=26,
+   title:'Rentrer voir la famille',text:'Quelques semaines loin de la salle, loin de tout ce qui ressemble à un adversaire.',action:'rest'},
+  {id:'is_repos_soin',categorie:'securite',weight:1,req:(f,F)=>(F.year||1)>1,
+   title:'Soigner les vieilles douleurs',text:'Un corps de combattant accumule des dettes. Prendre le temps de les régler, une fois.',action:'rest'},
+  {id:'is_repos_media',categorie:'securite',weight:1,req:(f)=>(f.hypeBonus||1)>1,
+   title:'Souffler loin des caméras',text:'La popularité fatigue autant que les coups. Une intersaison sans une seule interview.',action:'rest'},
+  {id:'is_sparring_top',categorie:'precision',weight:3,req:(f,F)=>!!((F.gym||[]).length),
+   title:'Tourner avec son partenaire',text:'Une séance de sparring.',action:'sparring_top'},
+  {id:'is_sparring_second',categorie:'precision',weight:1,req:(f,F)=>(F.gym||[]).length>=2,
+   title:'Travailler avec le second partenaire',text:'Une séance de sparring.',action:'sparring_second'},
+  {id:'is_sparring_video',categorie:'precision',weight:1,req:(f)=>!!f.faithNemesisId,
+   title:'Étudier sa némésis en vidéo',text:'Des heures à décortiquer ses combats, jusqu’à connaître ses tics par cœur.',action:'scout_video'},
+  {id:'is_sparring_style',categorie:'precision',weight:1,req:(f,F)=>!!((F.gym||[]).length),
+   title:'Séance technique ciblée',text:'Une séance courte, entièrement consacrée à un seul détail du jeu.',action:'sparring_top'},
+  {id:'is_camp',categorie:'puissance',weight:3,req:(f)=>(f.earnings||0)>=20,
+   title:'Partir en stage',text:'Six semaines dans un camp spécialisé, à choisir sur place.',action:'camp'},
+  {id:'is_camp_urgent',categorie:'puissance',weight:1,req:(f,F)=>!!f.faithNemesisId && (f.earnings||0)>=20,
+   title:'Stage ciblé avant la revanche',text:'Préparer précisément ce qui vous a manqué la dernière fois.',action:'camp'},
+  {id:'is_sponsor',categorie:'securite',weight:1,req:(f)=>(f.org||0)>=2,
+   title:'Rencontrer un sponsor',text:'Un partenariat modeste, mais qui tombe bien.',action:'sponsor'},
+  {id:'is_solo_pensee',categorie:'securite',weight:1,req:(f,F)=>(F.year||1)>=2,
+   title:'Faire le point, seul',text:'Pas d’entraînement, pas de salle — juste s’asseoir avec ce que la carrière est devenue.',action:'rest'},
+  {id:'is_camp_leger',categorie:'puissance',weight:1,req:(f)=>(f.earnings||0)>=20 && (f.earnings||0)<60,
+   title:'Stage à petit budget',text:'Pas le camp rêvé, mais celui que le compte en banque autorise.',action:'camp'},
+  {id:'is_precision_plan',categorie:'precision',weight:1,req:(f,F)=>!!((F.gym||[]).length),
+   title:'Revoir le plan de jeu à la salle',text:'',action:'sparring_top'},
+  {id:'is_securite_famille2',categorie:'securite',weight:1,req:(f)=>(f.morale||60)<50,
+   title:'S’éloigner un peu de tout',text:'Le moral ne suit plus. Une pause, sans rien d’autre en tête.',action:'rest'},
+];
+/** Tire exactement 3 entrées éligibles du pool, ≥2 catégories différentes,
+ * en excluant celles en cooldown et le trio de l'année précédente.
+ * @param {object} f @param {object} F @returns {object[]} */
+function faithIntersaisonDraw(f,F){
+  const cooldowns=F.intersaisonCooldown||{};
+  let pool=FAITH_INTERSAISON_POOL.filter(e=>{
+    if((cooldowns[e.id]||0)>0) return false;
+    try{ return e.req(f,F); }catch(err){ return true; }
+  });
+  if(pool.length<3) pool=FAITH_INTERSAISON_POOL.filter(e=>{ try{ return e.req(f,F); }catch(err){ return true; } });
+  const weighted=[]; for(const e of pool) for(let i=0;i<(e.weight||1);i++) weighted.push(e);
+  let attempt=0, picked=[];
+  do{
+    picked=[]; const bag=weighted.slice();
+    while(picked.length<3 && bag.length){
+      const idx=RI(0,bag.length-1); const e=bag.splice(idx,1)[0];
+      if(!picked.some(p=>p.id===e.id)) picked.push(e);
+    }
+    attempt++;
+  } while(attempt<8 && (new Set(picked.map(p=>p.categorie)).size<2 || (F.lastTrio && picked.every(p=>F.lastTrio.includes(p.id)))));
+  return picked;
+}
+/* ==== [ANCRE: V2-09] — variante idempotente de faithIntersaisonDraw : le
+   tirage ne doit être fait qu'une fois par mois d'intersaison (sinon
+   chaque rendu de l'écran retirerait 3 options différentes), même schéma
+   que faithEnsureOffer (V2-16, ui-08). Les cooldowns ne descendent qu'une
+   fois par intersaison RÉELLE, ici, jamais au fil des rendus. */
+function faithEnsureIntersaisonDraw(f,F){
+  if(F.currentIntersaison && F.currentIntersaison.month===F.month) return F.currentIntersaison.picks;
+  const cds=F.intersaisonCooldown||(F.intersaisonCooldown={});
+  for(const k in cds) cds[k]=Math.max(0,cds[k]-1);
+  const picks=faithIntersaisonDraw(f,F);
+  F.currentIntersaison={month:F.month,picks:picks.map(p=>p.id)};
+  return F.currentIntersaison.picks;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */

@@ -1433,6 +1433,32 @@ const INJURY_TYPES=[
  {name:'Entorse grave à la cheville',fights:2},
 ];
 function rollInjury(){ return pick(INJURY_TYPES); }
+/* ==== [ANCRE: V2-11] — Fraîcheur : jauge interne (0-100, jamais affichée en
+   chiffre) qui borne combien de sparring/stages un combattant Faith peut
+   enchaîner avant que le corps ne dise stop. Cinq paliers qualitatifs,
+   seul le libellé est montré (règle FA-21 : jamais de % ni de nombre brut
+   dans l'interface). f.freshness vit sur le combattant Faith (ui-08 : init
+   à la création, consommée par faithSparring()/faithCamp(), restaurée par
+   faithRest() et par le simple écoulement des mois, faithAdvanceMonth()). */
+function freshnessTier(f){
+  const v=(f && f.freshness!=null)?f.freshness:80;
+  if(v>=80) return {tier:'affute',label:'Affûté'};
+  if(v>=55) return {tier:'pret',label:'Prêt'};
+  if(v>=30) return {tier:'emousse',label:'Émoussé'};
+  if(v>=12) return {tier:'vide',label:'Vidé'};
+  return {tier:'about',label:'À bout'};
+}
+/* ==== [ANCRE: V2-08] — clé de repérage : "tourner avec" un partenaire
+   (catégorie précision, cf. faithSparring() ui-08) révèle l'attribut où le
+   prochain adversaire est le plus dangereux, lue une fois sur l'écran
+   d'offre (scr_faith_offer, ui-04) puis consommée à l'entrée dans la cage
+   (CL.opp, ui-08) — jamais un simple bonus chiffré. */
+function oppTopAttrLabel(o){
+  if(!o || !o.attrs) return '';
+  let best=null, bv=-1;
+  for(const k of ATTR_KEYS){ const v=o.attrs[k]||0; if(v>bv){ bv=v; best=k; } }
+  return best?attrLabel(best):'';
+}
 /* progression BORNÉE : un choix applique un delta net d'attributs ( up/down),
    plafonné par le potentiel — pas d'amélioration infinie. */
 /* ==== [ANCRE: V2-36] — règle 7 (jamais de récompense nulle) : un gain

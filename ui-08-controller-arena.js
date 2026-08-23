@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -77,6 +77,10 @@ function faithLandOnMonth(){
 }
 function faithAdvanceMonth(){
   G.faith.month++;
+  // ==== [ANCRE: V2-11] — le temps qui passe régénère un peu de fraîcheur,
+  // seul (sans repos actif) ce n'est jamais suffisant pour compenser un
+  // stage/sparring enchaîné mois après mois.
+  if(G.f) G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)+3,0,100);
   faithLandOnMonth();
   if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
   G.screen='faith_hub'; save(); render();
@@ -682,6 +686,19 @@ const CL={
            système de bourse. ==== */
         if(off.finishBonus) G.fight.finishBonusMult=2;
         G.faith.pendingOffer=null;
+        // clé de repérage (V2-08) : consommée à l'entrée dans la cage, qu'elle
+        // ait servi ou non — jamais transférable au combat suivant.
+        G.faith.scoutKey=false;
+      }
+      /* ==== [ANCRE: V2-11] — sous "émoussé", la fraîcheur basse se traduit
+         en malus de combat (même mécanisme que les autres malus temporaires
+         du fight, cf. G.fight.malus plus haut), jamais en risque de
+         blessure : la blessure reste l'affaire des stages/sparring, pas
+         du combat lui-même. */
+      const ft=freshnessTier(G.f).tier;
+      if(ft==='vide' || ft==='about'){
+        const penalty=(ft==='about')?{cardio:-15,durability:-10}:{cardio:-8,durability:-5};
+        G.fight.malus=Object.assign({},G.fight.malus,penalty);
       }
       const wc=weightCutInfo(G.f);
       let cutTier;
@@ -1274,6 +1291,12 @@ const CL={
     const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10+boost,20,60),potential:85});
     p1.isGymPartner=true; p2.isGymPartner=true;
     p1.nick='Le Prodige'; p2.nick='L\u2019Aspirant';
+    /* ==== [ANCRE: V2-07] \u2014 affinity (0-3) et sessions comptent la familiarit\u00e9
+       avec CHAQUE partenaire s\u00e9par\u00e9ment, lues par faithSparring(). ==== */
+    p1.affinity=0; p1.sessions=0; p2.affinity=0; p2.sessions=0;
+    /* ==== [ANCRE: V2-11] \u2014 fra\u00eecheur de d\u00e9part : "pr\u00eat", pas "aff\u00fbt\u00e9" \u2014
+       une carri\u00e8re commence en forme normale, pas au sommet absolu. */
+    f.freshness=70;
     G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2],
       agent:faithAgent,agentPatience:3};
     /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
@@ -1294,39 +1317,164 @@ const CL={
      un peu plus vite CETTE année-là (sans vous pour les canaliser). ==== */
   faithRest(){
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
+    /* ==== [ANCRE: V2-11] — le repos est la seule action qui restaure
+       vraiment la fraîcheur (le reste du temps ne fait que la grignoter
+       moins, cf. le petit regain passif de faithAdvanceMonth()). ==== */
+    G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)+25,0,100);
     G.faith.restedThisYear=true;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Intersaison',choice:'Repos et récupération'});
     faithAdvanceMonth();
   },
+  /* ==== [ANCRE: V2-07/V2-08] — "tourner avec" n'est plus un geste identique
+     à chaque fois : la familiarité avec CE partenaire précis (partner.
+     sessions, incrémentée ici) détermine ce que la séance rapporte. Palier 0
+     (jamais vu travailler) : rien de ciblé, juste la découverte de son
+     style. Palier 1 (~1-2 séances, "il vous jauge") : petit gain large.
+     Palier 2 (~3-4 séances, "il vous lit") : gain ciblé + clé de repérage
+     sur le prochain adversaire (scoutKey, lue par scr_faith_offer, ui-04).
+     Palier 3 (5 séances et plus, "il vous connaît par cœur") : gain fort ET
+     ouverture du Syndrome de Frankenstein — qui ne se déclenche donc plus
+     dès la première séance comme avant ce correctif, mais seulement une
+     fois la familiarité maximale atteinte. La clé de repérage, elle,
+     récompense la catégorie "précision" dès le palier 2, pas seulement au
+     sommet. ==== */
   faithSparring(partnerId){
     const partner=(G.faith.gym||[]).find(p=>p.id===partnerId); if(!partner) return;
     G.f.form=clamp(G.f.form+15,0,100);
-    applyDeltas(G.f,[['fightIQ',1]]); // enseigner renforce l'intellect tactique
-    // Syndrome de Frankenstein : le partenaire copie violemment les 2
-    // meilleures stats du joueur — c'est lui qui, des années plus tard,
-    // reviendra armé de vos propres armes.
-    const bestStats=ATTR_KEYS.map(k=>({k,v:G.f.attrs[k]})).sort((a,b)=>b.v-a.v).slice(0,2);
-    applyDeltas(partner,[[bestStats[0].k,3],[bestStats[1].k,3],['adaptability',2],['fightIQ',2]]);
-    partner.overall=overall(partner);
-    G.lastMsg=`Séance intense. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
+    G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)-10,0,100);
+    const priorSessions=partner.sessions||0;
+    partner.affinity=clamp((partner.affinity||0)+1,0,3);
+    partner.sessions=priorSessions+1;
+    let tierMsg;
+    if(priorSessions===0){
+      applyDeltas(G.f,[['fightIQ',1]]);
+      tierMsg=`Première séance ensemble : vous ne l’aviez jamais vu travailler. Vous découvrez son style, ${esc(partner.styleLabel||'')}.`;
+    } else if(priorSessions<3){
+      applyDeltas(G.f,[['fightIQ',1],[pick(TRAINABLE),1]]);
+      G.faith.scoutKey=true;
+      tierMsg=`Il commence à vous jauger. Séance utile, sans plus.`;
+    } else if(priorSessions<5){
+      applyDeltas(G.f,[['fightIQ',2],[pick(TRAINABLE),2]]);
+      G.faith.scoutKey=true;
+      tierMsg=`Il vous lit, maintenant, et cale la séance sur ce qui vous attend.`;
+    } else {
+      G.faith.scoutKey=true;
+      const bestStats=ATTR_KEYS.map(k=>({k,v:G.f.attrs[k]})).sort((a,b)=>b.v-a.v).slice(0,2);
+      applyDeltas(G.f,[[bestStats[0].k,2],['fightIQ',2]]);
+      // Syndrome de Frankenstein : le partenaire copie violemment les 2
+      // meilleures stats du joueur — c'est lui qui, des années plus tard,
+      // reviendra armé de vos propres armes.
+      applyDeltas(partner,[[bestStats[0].k,3],[bestStats[1].k,3],['adaptability',2],['fightIQ',2]]);
+      partner.overall=overall(partner);
+      tierMsg=`Il vous connaît par cœur. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
+    }
+    G.lastMsg=tierMsg;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Sparring',choice:`A tourné avec ${esc(partner.name)}`});
     faithAdvanceMonth();
   },
-  /* ==== [CORRECTIF FA-15] — troisième option de l'intersaison : le stage
-     (perk 'tiger', jusqu'ici un tirage possible parmi FAITH_OFFRES_TENTATION)
-     devient une décision directe d'intersaison plutôt qu'un coup de chance
-     de la pioche — "Partir en stage" migre ici, comme le document le nomme.
-     Réutilise buyFaithPerk('tiger') telle quelle (même tirage 25%/75%, même
-     conséquence), qui ne change jamais d'écran ni de mois elle-même :
-     l'avance de mois est donc assumée ici, juste après. ==== */
+  /* ==== [ANCRE: V2-10] — le stage unique (perk 'tiger' tiré au hasard) est
+     remplacé par un choix réel entre 6 camps nommés (FAITH_CAMPS, ui-04),
+     chacun avec son coût, sa famille d'attributs, son risque et son texte
+     de retour propre — plus un menu de sélection à part entière qu'une
+     décision narrative sous tension, la règle des 3 options (H.3) ne s'y
+     applique donc pas (comme les autres écrans de type "vitrine" du jeu :
+     choix de style, de camp d'entraînement en carrière...). ==== */
   faithCamp(){
-    if((G.f.earnings||0)<50){ G.lastMsg="Fonds insuffisants pour ce stage (50k$)."; render(); return; }
+    G.screen='faith_camps'; save(); render();
+  },
+  faithCampChoose(campId){
+    const camp=(typeof FAITH_CAMPS!=='undefined'?FAITH_CAMPS:[]).find(c=>c.id===campId);
+    if(!camp) return;
+    const f=G.f;
+    if((f.earnings||0)<camp.cost){ G.lastMsg=`Fonds insuffisants pour ce stage (${camp.cost}k$).`; render(); return; }
+    /* ==== [ANCRE: V2-11] — "le coach refuse en-dessous d'à bout" : jamais
+       de chiffre, une phrase qui ferme la porte. ==== */
+    if(freshnessTier(f).tier==='about'){
+      G.lastMsg="Votre coach refuse net : «Tu n’as plus rien à donner à un stage, là. Tu vas juste te faire mal.»";
+      render(); return;
+    }
+    const F=G.faith;
+    if(F.pendingIntersaisonEntry){
+      if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+      F.intersaisonCooldown[F.pendingIntersaisonEntry]=3;
+      F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
+      F.currentIntersaison=null;
+      F.pendingIntersaisonEntry=null;
+    }
+    f.earnings-=camp.cost;
+    const already=(G.faith.campsVisited||[]).includes(camp.id);
+    if(!G.faith.campsVisited) G.faith.campsVisited=[];
+    if(!already) G.faith.campsVisited.push(camp.id);
+    const freshCost=already?Math.round(camp.freshCost*0.6):camp.freshCost;
+    f.freshness=clamp((f.freshness==null?70:f.freshness)+freshCost,0,100);
+    const riskMult=(freshnessTier(f).tier==='vide'||freshnessTier(f).tier==='emousse')?1.6:1;
+    if(camp.risk>0 && rnd()<camp.risk*riskMult){
+      const inj=rollInjury(); f.injury={name:inj.name,left:inj.fights};
+      f.morale=clamp(f.morale-10,0,100);
+      G.lastMsg=`${camp.name} : blessure au stage. ${inj.name}.`;
+      if(!G.faith.yearLog) G.faith.yearLog=[];
+      G.faith.yearLog.push({title:'Intersaison',choice:`Stage — ${camp.name} (blessure)`});
+      faithAdvanceMonth(); return;
+    }
+    const gainMult=already?0.5:1;
+    const deltas=camp.attrs.map(k=>[k,Math.max(1,Math.round(3*gainMult))]);
+    applyDeltas(f,deltas);
+    G.lastMsg=already?camp.repeatText:camp.text;
     if(!G.faith.yearLog) G.faith.yearLog=[];
-    G.faith.yearLog.push({title:'Intersaison',choice:'Stage'});
-    CL.buyFaithPerk('tiger');
+    G.faith.yearLog.push({title:'Intersaison',choice:`Stage — ${camp.name}`});
     faithAdvanceMonth();
+  },
+  /* ==== [ANCRE: V2-09] — point d'entrée unique de l'intersaison : quelle
+     que soit l'entrée du pool choisie, le cooldown (3 intersaisons) et
+     F.lastTrio (jamais le même trio deux ans de suite) se posent ICI,
+     avant de router vers l'action réelle — camp/sparring/repos restent des
+     primitives réutilisables, indépendantes du système de pool. ==== */
+  faithIntersaisonChoose(entryId){
+    const F=G.faith, f=G.f;
+    const entry=(typeof FAITH_INTERSAISON_POOL!=='undefined'?FAITH_INTERSAISON_POOL:[]).find(e=>e.id===entryId);
+    if(!entry) return;
+    F.pendingIntersaisonEntry=null;
+    if(entry.action==='camp'){
+      /* Le stage ouvre un sous-écran (choix parmi 6, cf. V2-10) : le
+         cooldown/lastTrio de CE choix de pool ne sont posés qu'à la
+         résolution réelle du stage (faithCampChoose), pas ici — revenir en
+         arrière sans choisir de camp ne doit pas "consommer" l'intersaison. */
+      F.pendingIntersaisonEntry=entryId;
+      CL.faithCamp(); return;
+    }
+    if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+    F.intersaisonCooldown[entryId]=3;
+    F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
+    F.currentIntersaison=null;
+    if(!F.yearLog) F.yearLog=[];
+    if(entry.action==='rest'){ CL.faithRest(); return; }
+    if(entry.action==='sparring_top'){
+      const tp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+      if(tp) CL.faithSparring(tp.id); else CL.faithRest();
+      return;
+    }
+    if(entry.action==='sparring_second'){
+      const sp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+      if(sp) CL.faithSparring(sp.id); else CL.faithRest();
+      return;
+    }
+    if(entry.action==='scout_video'){
+      f.freshness=clamp((f.freshness==null?70:f.freshness)-3,0,100);
+      F.scoutKey=true;
+      applyDeltas(f,[['fightIQ',1]]);
+      G.lastMsg='Des heures à décortiquer ses combats. Vous savez désormais où il est le plus dangereux.';
+      F.yearLog.push({title:'Intersaison',choice:'Étude vidéo'});
+      faithAdvanceMonth(); return;
+    }
+    if(entry.action==='sponsor'){
+      f.earnings=(f.earnings||0)+15; f.morale=clamp(f.morale+5,0,100);
+      G.lastMsg='Un partenariat modeste, mais qui tombe bien.';
+      F.yearLog.push({title:'Intersaison',choice:'Rencontre sponsor'});
+      faithAdvanceMonth(); return;
+    }
+    CL.faithRest();
   },
   faithLifeEvent(){
     // Syndrome de Frankenstein : si un protégé a rattrapé (ou dépassé) le
@@ -1870,6 +2018,10 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: FAITH_CALENDRIER] — nouveau calendrier de 12 mois pour la
        saison qui commence (cf. finalizeFaithDraft pour la 1ère année). ==== */
+    // V2-09 : un tirage d'intersaison ne doit jamais survivre au changement
+    // d'année (le mois repart à 0 juste en dessous, un tirage figé sur un
+    // vieux mois=0 d'une année passée pourrait sinon se faire réutiliser à tort).
+    G.faith.currentIntersaison=null; G.faith.pendingIntersaisonEntry=null;
     G.faith.month=0; G.faith.calendar=faithGenerateCalendar(G.f);
     faithLandOnMonth();
     if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
