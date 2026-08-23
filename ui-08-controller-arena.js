@@ -43,7 +43,19 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      retirée, la transition hub->arène devient continue. ==== */
   { const _sName=String((G&&G.screen)||'');
     const _enFaith=_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith');
-    document.body.classList.toggle('faith-skin', _enFaith); }
+    document.body.classList.toggle('faith-skin', _enFaith);
+    /* ==== [ANCRE: FAITH_AMBIANCE] — V2-01 : classe papier/nuit posée EN PLUS
+       de faith-skin (cf. index.html, même ancre). Lecture défensive de
+       G.settings (peut ne pas encore exister : plusieurs points d'entrée
+       réassignent G={theme:t} sans repasser par validateState()/load()) —
+       défaut papier, arbitrage tranché, jamais un défaut nuit implicite.
+       La cage reste sombre dans les DEUX ambiances (point 4 du document) :
+       forcé ici plutôt que par CSS pour que ce soit vrai même si un futur
+       écran hors 'arena' voulait un jour la même règle. ==== */
+    const _ambiance=(G&&G.settings&&G.settings.faithAmbiance)||'papier';
+    const _nuit=_enFaith && (_sName==='arena' || _ambiance==='nuit');
+    document.body.classList.toggle('faith-papier', _enFaith && !_nuit);
+    document.body.classList.toggle('faith-nuit', _nuit); }
   /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
@@ -188,6 +200,15 @@ function routeAfterCareerPending(){
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
+  /* ==== [ANCRE: FAITH_AMBIANCE] — V2-01/V2-44 : réglage exposé pour
+     l'instant depuis le hub Faith (scr_faith_hub, ui-04) ; V2-43/44 (Batch
+     9) lui donneront ses emplacements définitifs (écran d'accueil Faith +
+     écran Réglages) sans changer cette action elle-même. */
+  setFaithAmbiance(val){
+    if(!G.settings||typeof G.settings!=='object') G.settings={};
+    G.settings.faithAmbiance=(val==='nuit')?'nuit':'papier';
+    save(); render();
+  },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
      tirage/bascule d'aperçu dans la Salle des Légendes appelait render()
@@ -2879,10 +2900,17 @@ function startConsumablePreviewArena(){
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_arena(){ const A=ARENA||{};
+  /* ==== [CORRECTIF V2-06] — la cage reste sombre dans les deux ambiances
+     (V2-01), mais son HUD (chrono/rounds/jauges — ici noms, zones de
+     dégâts, cardio) passe à un contraste renforcé, texte blanc pur plutôt
+     que var(--text)/var(--muted) : c'est un affichage lu en un coup d'œil
+     pendant l'action, pas du texte de lecture posée. Les jauges elles-
+     mêmes étaient déjà en aplats pleins (ARENA_ZONE_COLOR, plus bas),
+     jamais de dégradé — rien à corriger de ce côté. ==== */
   return `<div class="scr">
-   <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:var(--text)">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
+   <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:#FFFFFF">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
    <div class="card glass raise" style="padding:12px;border-color:var(--line);background:var(--panel2)">
-     <div class="eyebrow center" style="font-size:9px;margin-bottom:6px">DOMINATION TERRITORIALE</div>
+     <div class="eyebrow center" style="font-size:9px;margin-bottom:6px;color:#FFFFFF">DOMINATION TERRITORIALE</div>
      <div style="height:6px;background:var(--sage);margin-bottom:20px;position:relative;overflow:hidden;border-radius:2px">
        <div id="ar-momentum" style="height:100%;width:50%;background:var(--blood);transition:width .4s ease"></div>
        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--bg)"></div>
@@ -2891,22 +2919,22 @@ function scr_arena(){ const A=ARENA||{};
        <div style="display:flex;flex-direction:column;align-items:flex-start">
          <span class="ah-name blood mono" style="font-size:13px">${esc(A.nmeName||'Toi')}</span>
          <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:44px">Tête</span><div id="dm-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:44px">Corps</span><div id="dm-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:44px">Jambes</span><div id="dm-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Tête</span><div id="dm-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Corps</span><div id="dm-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Jambes</span><div id="dm-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
          </div>
        </div>
        <div style="display:flex;flex-direction:column;align-items:flex-end">
          <span class="ah-name sage mono" style="font-size:13px">${esc(A.nopName||'Adv.')}</span>
          <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;align-items:flex-end">
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:44px;text-align:right">Tête</span></div>
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:44px;text-align:right">Corps</span></div>
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:44px;text-align:right">Jambes</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Tête</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Corps</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Jambes</span></div>
          </div>
        </div>
      </div>
      <canvas id="arena-cv" style="width:100%;height:220px;display:block;margin-top:16px;border:1px solid var(--line);background:var(--bg)"></canvas>
-     <div class="arena-st" style="margin-top:16px"><div class="st-lbl">CARDIO</div><div class="st-lbl" style="text-align:right">CARDIO</div></div>
+     <div class="arena-st" style="margin-top:16px"><div class="st-lbl" style="color:#FFFFFF">CARDIO</div><div class="st-lbl" style="text-align:right;color:#FFFFFF">CARDIO</div></div>
      <div class="arena-bars sm" style="margin-top:6px"><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-me" style="background:var(--gold)"></div></div><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-op" style="background:var(--gold)"></div></div></div>
      <div id="ar-log" class="mono muted small" style="margin-top:20px;min-height:48px;display:flex;flex-direction:column;justify-content:flex-end;border-left:3px solid var(--gold);padding-left:12px;line-height:1.4;padding-bottom:4px"></div>
    </div>

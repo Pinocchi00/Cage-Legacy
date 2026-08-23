@@ -431,7 +431,7 @@ function scr_faith_hub(){
        d'adversaire pressenti ni de vie de salle, seule l'Infirmerie,
        jusqu'à guérison. ==== */
     actionsHtml=`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px;border-left:3px solid var(--loss)">
-      <div class="eyebrow" style="font-size:10px;color:var(--loss)">INFIRMERIE</div>
+      <div class="eyebrow" style="font-size:11px;color:var(--loss)">INFIRMERIE</div>
       <div class="hero-name" style="font-size:20px;margin-top:6px">${esc(f.injury.name)}</div>
       <div class="mono small muted" style="margin-top:4px">${f.injury.left} combat${f.injury.left>1?'s':''} avant guérison complète</div>
     </div>
@@ -483,7 +483,7 @@ function scr_faith_hub(){
     ensureOpponentsCached(f);
     const preview=(G.opps&&G.opps[0])?G.opps[0]:null;
     actionsHtml=preview?`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px">
-      <div class="eyebrow" style="font-size:10px;color:${preview.mm?preview.mm.color:'var(--muted)'}">PRESSENTI POUR LE PROCHAIN COMBAT</div>
+      <div class="eyebrow" style="font-size:11px;color:${preview.mm?preview.mm.color:'var(--muted)'}">PRESSENTI POUR LE PROCHAIN COMBAT</div>
       <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(preview.o.name)} ${preview.o.flag}</div>
       <div class="mono small" style="margin-top:4px">${recordStr(preview.o)}</div>
       <div class="small muted" style="margin-top:8px">${esc(preview.read)}</div>
@@ -506,6 +506,15 @@ function scr_faith_hub(){
     </div>
     ${actionsHtml}
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
+    <!-- ==== [ANCRE: FAITH_AMBIANCE] — emplacement provisoire (V2-01) : le
+         document place ce réglage dans l'écran d'accueil Faith et l'écran
+         Réglages, tous deux construits au Batch 9 (V2-43/V2-44). En
+         attendant, accessible ici pour que le réglage soit réellement
+         utilisable dès ce lot plutôt que théorique jusqu'au Batch 9. ==== -->
+    <div class="pills" style="justify-content:center;margin-top:8px">
+      <span class="pill ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'on':''}" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</span>
+      <span class="pill ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'on':''}" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</span>
+    </div>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_AGENT] — remplace scr_select (menu à 3 adversaires,
@@ -528,7 +537,7 @@ function scr_faith_offer(){
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
    <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · hype ${gala.hype}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
-     <div class="eyebrow" style="font-size:10px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
+     <div class="eyebrow" style="font-size:11px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
      <div class="mono small" style="margin-top:4px">${recordStr(o)}</div>
      <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
@@ -1660,7 +1669,7 @@ function scr_faith_year_end(){
     :`Estimation à ce jour : ${legendeAn}. Vous écrivez votre première légende.`;
   const chiffre=(v,lbl,couleur)=>`<div style="border:1px solid var(--line);padding:12px;text-align:center">
     <div class="mono" style="font-size:20px;${couleur?`color:${couleur}`:''}">${v}</div>
-    <div class="eyebrow" style="font-size:10px;margin-top:4px">${lbl}</div></div>`;
+    <div class="eyebrow" style="font-size:11px;margin-top:4px">${lbl}</div></div>`;
   const skills=(ys.newSkills||[]).map(sk=>{ const c=RAR_COLORS[sk.rar]||'var(--gold)';
     return `<div style="border-left:3px solid ${c};padding:8px 12px;margin-top:8px">
       <b style="color:${c}">${sk.name}</b> <span class="muted small">(${sk.rar})</span>

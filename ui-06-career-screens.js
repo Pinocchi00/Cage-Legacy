@@ -83,9 +83,9 @@ function gauntletMenuBestTag(mode){
   const meta=loadMetaStats();
   const asc=gauntletSelectedAsc(mode);
   const best=gauntletBestGet(meta,mode,asc);
-  if(best===undefined) return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.6">Ascension ${asc} — aucun record</span>`;
+  if(best===undefined) return `<span class="mono" style="display:block;font-size:11px;margin-top:4px;opacity:.6">Ascension ${asc} — aucun record</span>`;
   const label=mode==='boss_run'?`Record : ${best}/5`:mode==='ladder_100'?`Record : rang #${best}`:(best>=7?'Record : Tournoi remporté':`Record : palier ${best}`);
-  return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.8">Ascension ${asc} · ${label}</span>`;
+  return `<span class="mono" style="display:block;font-size:11px;margin-top:4px;opacity:.8">Ascension ${asc} · ${label}</span>`;
 }
 /* ==== [ANCRE: GAUNTLET_ASCENSION] — sélecteur de palier. Rendu uniquement si
    au moins un palier est débloqué sur ce format : un joueur qui n'a jamais
@@ -100,8 +100,8 @@ function gauntletAscPicker(mode){
   for(let i=0;i<=max;i++){
     btns+=`<span onclick="CL.setGauntletAsc('${mode}',${i})" style="display:inline-block;cursor:pointer;border:1px solid ${i===cur?'var(--gold)':'var(--line)'};color:${i===cur?'var(--gold)':'var(--muted)'};padding:3px 10px;margin:0 4px 4px 0;border-radius:2px;font-size:11px" class="mono">A${i}</span>`;
   }
-  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:10px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span>
-   <span onclick="CL.viewAscensionTower('${mode}')" style="display:inline-block;cursor:pointer;margin-top:4px;color:var(--gold);text-decoration:underline dotted;font-size:10px">🗼 Voir la Tour d\u2019Ascension</span></div>`;
+  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:11px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span>
+   <span onclick="CL.viewAscensionTower('${mode}')" style="display:inline-block;cursor:pointer;margin-top:4px;color:var(--gold);text-decoration:underline dotted;font-size:11px">🗼 Voir la Tour d\u2019Ascension</span></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: TOUR_ASCENSION_VISUELLE] — ajout #6 (24 ajouts, 12/08/2026) :
@@ -758,7 +758,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
         <span class="num ${J.j3[0]>J.j3[1]?'a':(J.j3[0]===J.j3[1]?'b':'dn')}">${J.j3[0]}-${J.j3[1]}</span>
       </div>
       <div class="hr"></div>
-      <div class="mono small muted" style="text-align:left;font-size:10px">
+      <div class="mono small muted" style="text-align:left;font-size:11px">
         <div style="display:flex;justify-content:space-between;color:var(--text);margin-bottom:4px"><span>RND</span><span>J1</span><span>J2</span><span>J3</span><span>SIG</span><span>TD</span><span>KD</span></div>
         ${(p.res.roundStats||[]).map(rs=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--line)">
           <span style="color:var(--gold)">R${rs.r}</span><span>${rs.j1[0]}-${rs.j1[1]}</span><span>${rs.j2[0]}-${rs.j2[1]}</span><span>${rs.j3[0]}-${rs.j3[1]}</span><span>${rs.sigA}-${rs.sigB}</span><span>${rs.tdA}-${rs.tdB}</span><span>${rs.kdA}-${rs.kdB}</span>
@@ -812,7 +812,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
       les deux cas. On annote explicitement quand un gain a bien eu lieu mais
       ne se voit pas sur l'échelle affichée. ==== */
    const noVisibleGain=before===after && f.attrs[k]>realBefore;
-   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:10px">(gain interne minime)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:11px">(gain interne minime)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>

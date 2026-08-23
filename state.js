@@ -630,6 +630,13 @@ function repairFighter(f){
 }
 function validateState(){
   if(!G||typeof G!=='object') return false;
+  /* ==== [ANCRE: V2_SETTINGS] — nouveau champ d'état (V2-01, réglage
+     Ambiance) : initialisé ici pour qu'une sauvegarde existante qui ne le
+     porte pas encore ne casse rien (cf. "CE QU'IL NE FAUT PAS CASSER" #8).
+     Défaut 'papier', arbitrage tranché — vaut aussi pour une valeur
+     corrompue/inconnue, jamais seulement pour l'absence du champ. ==== */
+  if(!G.settings||typeof G.settings!=='object') G.settings={};
+  if(G.settings.faithAmbiance!=='papier' && G.settings.faithAmbiance!=='nuit') G.settings.faithAmbiance='papier';
   if(!G.f||typeof G.f!=='object') return false;
   repairFighter(G.f);
   const f=G.f;
