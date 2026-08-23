@@ -231,6 +231,76 @@ function faithCalendarBar(F){
    Championship -> PCF), jamais inventés à côté. ==== */
 const FAITH_GALA_PREFIX=['AM','CL','CR','CN','CONT','URC','PCF'];
 const FAITH_GALA_CITIES=['Lyon','Marseille','Osaka','Rio','Manchester','Chicago','Lagos','Séoul','Varsovie','Montréal','Le Caire','Perth'];
+/* ==== [ANCRE: V2-19] — un directeur nommé par organisation (sept paliers,
+   ORGS/FAITH_GALA_PREFIX, engine.js/ui-04), persistant sur toute la
+   carrière. `grants`/`refuses`/`counter` sont lus par faithNegotiate*()
+   (ui-08) — jamais affichés tels quels, seulement leur EFFET. La mémoire
+   (G.faith.directors[org].trust, -3 à +3) n'est jamais chiffrée à
+   l'écran (règle H.1) : seule une phrase qualitative (faithDirectorMood,
+   plus bas) la traduit. ==== */
+const FAITH_DIRECTORS=[
+  {name:'Mourad',archetype:'comptable',grants:'chiffres',refuses:'base',counter:'prime_resultat'},
+  {name:'Vince',archetype:'showman',grants:'spectacle',refuses:'ennuyeux',counter:'montee_carte'},
+  {name:'Odette',archetype:'loyaliste',grants:'ancien',refuses:'nouveau',counter:'contrat_long'},
+  {name:'Silva',archetype:'requin',grants:'rien',refuses:'tout',counter:'revanche'},
+  {name:'Karl',archetype:'ancien',grants:'finisseur',refuses:'decisionneur',counter:'prime_finition'},
+  {name:'Nadia',archetype:'technocrate',grants:'grille',refuses:'ecart',counter:'clause_titre'},
+  {name:'Ruben',archetype:'patriarche',grants:'excuse',refuses:'humiliation',counter:'domicile'}
+];
+/** Humeur qualitative du directeur envers le joueur — jamais un chiffre.
+ * @param {number} org @returns {string} */
+function faithDirectorMood(org){
+  const t=(G.faith.directors&&G.faith.directors[org]&&G.faith.directors[org].trust)||0;
+  if(t>=2) return 'il vous doit tout';
+  if(t>=1) return 'il vous suit';
+  if(t<=-2) return 'il vous évite';
+  if(t<=-1) return 'il se méfie';
+  return 'il vous tolère';
+}
+/** Ajuste la mémoire du directeur d'une organisation (jamais affichée en
+ * chiffre — seule faithDirectorMood() la traduit).
+ * @param {number} org @param {number} dv */
+function faithDirectorAdjust(org,dv){
+  if(!G.faith.directors) G.faith.directors={};
+  if(!G.faith.directors[org]) G.faith.directors[org]={trust:0};
+  G.faith.directors[org].trust=clamp(G.faith.directors[org].trust+dv,-3,3);
+}
+/** Le profil du fighter correspond-il à ce que cet archétype de directeur
+ * accorde volontiers (FAITH_DIRECTORS.grants) ? Dérivé de signaux déjà
+ * suivis (personnalité, âge, palmarès de finition, régularité de série),
+ * jamais d'un nouveau champ dédié.
+ * @param {object} dir entrée de FAITH_DIRECTORS @param {object} f */
+function faithDirectorFavorable(dir,f){
+  switch(dir.archetype){
+    case 'comptable': return (f.earnings||0)>=100;
+    case 'showman': return f.personality==='showman'||f.personality==='villain';
+    case 'loyaliste': return (f.age||18)>=28;
+    case 'ancien': return ((f.ko||0)+(f.sub||0))>=Math.max(3,Math.round((f.W||0)*0.4));
+    case 'technocrate': return Math.abs(f.streak||0)<=3;
+    case 'patriarche': return f.personality==='humble';
+    default: return false; // le Requin n'est "favorable" au sens classique pour personne
+  }
+}
+const FAITH_DIRECTOR_REFUS={
+  comptable:'Les chiffres ne le permettent pas.',
+  showman:'Vous ne faites pas encore parler de vous.',
+  loyaliste:"Vous n'êtes pas encore d'ici.",
+  ancien:'Vous gagnez, mais vous ne finissez personne.',
+  technocrate:'Ça sort de la grille.',
+  patriarche:'Pas après ce que vous avez dit.',
+  requin:'Non.'
+};
+function faithDirectorRefusalLine(dir){ return FAITH_DIRECTOR_REFUS[dir.archetype]||'Non.'; }
+/** Motif contextuel de la demande "un meilleur adversaire" (V2-18) —
+ * un seul, choisi selon le contexte réel plutôt qu'un choix vide sans
+ * raison. @param {object} f @param {object} o l'adversaire proposé
+ * @returns {string} */
+function faithDemandMotif(f,o){
+  if(f.injury) return 'Je reviens de blessure, pas contre lui.';
+  if((o.W+o.L+(o.D||0))===0 && (f.W+f.L+(f.D||0))>0) return "Il n'est pas classé, ça ne me fait pas monter.";
+  if((f.streak||0)>=2) return 'Je veux un classé, je suis prêt.';
+  return 'Ce n’est pas lui que je veux affronter.';
+}
 /** Position sur la carte : prélims/carte principale/main event, chacune sa
  * bourse, sa hype, et son effet. Le rang bas (débutant) tombe naturellement
  * dans "rang > 12" — pas besoin d'un second critère "peu de combats dans
@@ -258,17 +328,25 @@ function faithGalaLabel(F,f){
   const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
   return `${prefix} ${num} — ${city}`;
 }
-/* ==== [ANCRE: FAITH_NEGOCIATION] — le pouvoir de négociation n'est jamais
-   chiffré à l'écran (cf. règle H.1 : un écran ne montre jamais un nombre
-   qu'une phrase peut porter), seulement son EFFET. Dérivé de données déjà
-   existantes : série en cours, rang, hype, personnalité (villain négocie
-   mieux — enfin une conséquence mécanique du choix de création). ==== */
-function faithNegotiationPower(f){
+/* ==== [ANCRE: FAITH_NEGOCIATION / V2-20] — le pouvoir de négociation n'est
+   jamais chiffré à l'écran (cf. règle H.1 : un écran ne montre jamais un
+   nombre qu'une phrase peut porter), seulement son EFFET. Dérivé de
+   données déjà existantes : série en cours, rang, hype, personnalité
+   (villain négocie mieux — enfin une conséquence mécanique du choix de
+   création). Renommée faithLeverage() (V2-20) : "sans levier, l'option
+   n'existe pas" — un score à 0 retire purement et simplement le bouton
+   "Demander plus d'argent" de l'écran d'offre (scr_faith_offer, ce
+   fichier), remplacé par la raison. `F.buildup.attente` (hype accumulée
+   DEPUIS l'annonce du combat, Lot E — Batch 5) s'y ajoutera quand ce
+   système existera ; en attendant, faithLeverage ne perd rien de ce
+   qu'avait faithNegotiationPower. ==== */
+function faithLeverage(f,F){
   let score=0;
   if((f.streak||0)>=2) score++;
   if(divRank(f)<=15) score++;
   if((f.hypeBonus||1)>1.2) score++;
   if(f.personality==='villain') score++;
+  if(F && F.buildup && F.buildup.attente>=2) score++;
   return score;
 }
 function faithDraftPortrait(d){
@@ -486,10 +564,15 @@ function scr_faith_hub(){
        choix entre les 3 propositions reste sur son écran dédié
        (scr_select) : un aperçu qui annonce la couleur, pas une
        duplication de l'écran qui la révèle en entier. */
-    ensureOpponentsCached(f);
-    const preview=(G.opps&&G.opps[0])?G.opps[0]:null;
+    /* ==== [CORRECTIF V2-16] — plus de "pressenti" : faithEnsureOffer()
+       (ui-08) fige la VRAIE offre (choisie par l'agent, cf. son ancre) dès
+       l'affichage du hub, jamais un second tirage juste pour l'aperçu —
+       ce qu'on montre ici est exactement ce que l'écran d'offre montrera
+       au clic. */
+    const hasOffer=(!f.injury)&&faithEnsureOffer();
+    const preview=hasOffer?G.faith.pendingOffer.opp:null;
     actionsHtml=preview?`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px">
-      <div class="eyebrow" style="font-size:11px;color:${preview.mm?preview.mm.color:'var(--muted)'}">PRESSENTI POUR LE PROCHAIN COMBAT</div>
+      <div class="eyebrow" style="font-size:11px;color:${preview.mm?preview.mm.color:'var(--muted)'}">PROCHAIN COMBAT</div>
       <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(preview.o.name)} ${preview.o.flag}</div>
       <div class="mono small" style="margin-top:4px">${recordStr(preview.o)}</div>
       <div class="small muted" style="margin-top:8px">${esc(preview.read)}</div>
@@ -518,6 +601,9 @@ function scr_faith_hub(){
          sans le classement complet autour. Réutilisé tel quel — l'écran
          gère déjà les deux modes (CL.go('faith_hub') au retour). ==== -->
     <button class="btn ghost" onclick="CL.go('rankings')">Classement</button>
+    <!-- ==== [CORRECTIF V2-17] — l'écran Contacts, vitrine permanente des
+         quatre interlocuteurs (agent/directeur/coach/partenaire). ==== -->
+    <button class="btn ghost" onclick="CL.go('faith_contacts')">Contacts</button>
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
     <!-- ==== [ANCRE: FAITH_AMBIANCE] — emplacement provisoire (V2-01) : le
          document place ce réglage dans l'écran d'accueil Faith et l'écran
@@ -574,13 +660,18 @@ function scr_faith_offer(){
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
      <button class="btn primary" style="height:56px;font-size:16px" onclick="CL.faithOfferSign()">SIGNER</button>
-     <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
+     <!-- ==== [CORRECTIF V2-20 point 2] — "sans levier, l'option n'existe
+          pas" : plus de bouton grisé en silence, remplacé par la raison
+          quand faithLeverage() est à 0. ==== -->
+     ${faithLeverage(f,F)>0?`<div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
        <b style="font-size:15px">Demander plus d’argent</b>
        <div class="muted small mt">${patience>0?'La bourse sera relevée, l’adversaire ne change pas.':'Il insiste encore, mais sa patience est épuisée pour cette année.'}</div>
-     </div>
+     </div>`:`<div class="muted small" style="text-align:center">Vous n’avez rien à négocier : personne ne parle de ce combat.</div>`}
+     <!-- ==== [CORRECTIF V2-18] — le motif réel (faithDemandMotif) est
+          affiché sur le bouton, pas juste sa conséquence mécanique. ==== -->
      <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandBetter()">
-       <b style="font-size:15px">Demander un meilleur adversaire</b>
-       <div class="muted small mt">Montée plus rapide au classement, risque plus élevé.</div>
+       <b style="font-size:15px">« ${esc(faithDemandMotif(f,o))} »</b>
+       <div class="muted small mt">Demander un autre adversaire à ${esc((F.agent&&F.agent.label)||'votre agent')}.</div>
      </div>
      <!-- ==== [CORRECTIF V2-21] — le libellé décrivait une punition, pas
           une action, et n'annonçait aucune conséquence avant le clic. Le
@@ -594,6 +685,45 @@ function scr_faith_offer(){
    </div>
   </div>`;
 }
+/* ==== [ANCRE: V2-17] — l'écran Contacts. Quatre interlocuteurs, chacun
+   sa jauge de crédit QUALITATIVE (règle H.1 — jamais un chiffre), aucun
+   n'a besoin d'une action dédiée ici : agent et directeur se négocient
+   déjà en contexte sur scr_faith_offer (V2-18/20), cet écran est leur
+   VITRINE permanente — savoir où on en est avec chacun, même hors
+   négociation active, ce qui manquait totalement avant ce correctif. */
+function scr_faith_contacts(){
+  const f=G.f, F=G.faith;
+  const dir=FAITH_DIRECTORS[f.org]||FAITH_DIRECTORS[0];
+  const topPartner=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+  const agentPatience=F.agentPatience!=null?F.agentPatience:3;
+  const agentMood=!F.agent?'sans agent cette année'
+    :agentPatience>=3?'il vous suit sans discuter'
+    :agentPatience>=1?'il commence à compter les faveurs'
+    :'il parle de repositionner sa liste de clients';
+  const card=(who,name,role,mood,detail)=>`<div class="opp" style="padding:16px;text-align:left">
+    <div class="eyebrow" style="font-size:11px">${esc(who)}</div>
+    <div class="hero-name" style="font-size:18px;margin-top:4px">${esc(name)}</div>
+    <div class="muted small" style="margin-top:2px">${esc(role)}</div>
+    <div class="mono small" style="margin-top:8px;color:var(--gold)">${esc(mood)}</div>
+    ${detail?`<div class="muted small" style="margin-top:6px">${detail}</div>`:''}
+  </div>`;
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Contacts</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
+   <div style="display:flex;flex-direction:column;gap:12px">
+     ${card('VOTRE AGENT',(F.agent&&F.agent.label)||'Aucun agent',
+       'Négocie vos combats — croisez-le sur chaque offre.',agentMood)}
+     ${card('DIRECTEUR DE L’ORGANISATION',dir.name,orgDisplayName(f),faithDirectorMood(f.org))}
+     ${card('VOTRE COACH','Le coin',
+       'Le plan, l’état du corps.',
+       (f.form||100)>=70?'« Le corps répond, on peut pousser. »':(f.form||100)>=40?'« Ça tient, sans plus. »':'« Il faut lever le pied, et vite. »')}
+     ${topPartner?card('PARTENAIRE D’ENTRAÎNEMENT',topPartner.first,topPartner.styleLabel,
+       (f.morale||60)>=70?'« Bonne ambiance à la salle en ce moment. »':'« L’ambiance est tendue depuis un moment. »',
+       faithProtegeLine(topPartner,f)):''}
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour au hub</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */
 /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — les huit privilèges formaient un mur
    de cartes toutes au même poids visuel, où « Repos gratuit » et « Influence

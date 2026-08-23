@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -88,7 +88,20 @@ function faithAdvanceMonth(){
    selon son profil : le Requin vise le plus dangereux (plus dur, mieux payé
    via faithGalaPosition), le Fidèle le plus abordable, le Stratège un
    candidat calibré au milieu. ==== */
-function faithGenerateOffer(){
+/* ==== [ANCRE: V2-16] — "fin du combattant pressenti". Avant ce
+   correctif, le hub (scr_faith_hub, ui-04) affichait `G.opps[0]` (le PLUS
+   DANGEREUX des candidats, cf. CORRECTIF_ORDRE_PROPOSITIONS) comme
+   "pressenti", alors que l'offre réelle générée au clic choisissait selon
+   l'AGENT (le Requin prend le plus dur, le Fidèle le plus abordable, le
+   Stratège le milieu) — pour deux agents sur trois, le pressenti et
+   l'offre réelle étaient systématiquement DIFFÉRENTS. Extrait ici en
+   fonction séparée, idempotente (ne régénère jamais une offre déjà
+   figée) : le hub l'appelle à l'affichage pour lire `pendingOffer.opp`
+   directement (la vraie offre, jamais un second tirage), et
+   faithGenerateOffer() la réutilise telle quelle plutôt que de dupliquer
+   la logique de sélection. @returns {boolean} une offre est disponible */
+function faithEnsureOffer(){
+  if(G.faith.pendingOffer) return true;
   ensureOpponentsCached(G.f);
   let opps=G.opps||[];
   const gala=faithGalaPosition(G.f);
@@ -115,17 +128,21 @@ function faithGenerateOffer(){
     });
     if(!eligible.length){
       G.lastMsg="L’organisation n’a personne à vous proposer pour une affiche pareille ce mois-ci — et ça commence à se voir.";
-      faithAdvanceMonth(); return;
+      return false;
     }
     opps=eligible;
   }
-  if(!opps.length){ faithAdvanceMonth(); return; }
+  if(!opps.length) return false;
   const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
   const chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
   G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
+  return true;
+}
+function faithGenerateOffer(){
+  if(!faithEnsureOffer()){ faithAdvanceMonth(); return; }
   G.screen='faith_offer'; save(); render();
 }
 /* ==== [FIN ANCRE] ==== */
@@ -656,6 +673,14 @@ const CL={
           if(mult!==1) G.fight.pursePenalty=(G.fight.pursePenalty||1)*mult;
           G.fight.galaLabel=off.gala.label;
         }
+        /* ==== [ANCRE: V2-20] — "une contre-proposition est un pari" :
+           certains directeurs (FAITH_DIRECTORS, ui-04) refusent la
+           revalorisation directe et contre-proposent une prime de
+           finition à la place — ne rapporte que si le combat se termine
+           avant la limite. Lu par le bonus de finition déjà existant
+           (ui-05, pursePenalty voisin) plutôt que d'inventer un second
+           système de bourse. ==== */
+        if(off.finishBonus) G.fight.finishBonusMult=2;
         G.faith.pendingOffer=null;
       }
       const wc=weightCutInfo(G.f);
@@ -1455,27 +1480,67 @@ const CL={
     G.opps=[off.opp];
     CL.opp(0);
   },
-  /* ==== [CORRECTIF FA-13] — patience à 0 : l'agent négocie quand même
-     (jamais de blocage dur), juste avec une réserve affichée — c'est le
-     franchissement à 0 qui compte pour agentPatienceHitZero (bilan annuel,
-     nextFaithYear), pas le fait de rester dessus. La bonification n'est
-     JAMAIS un nombre affiché avant coup (mise à jour de l'offre seulement) —
-     le pouvoir de négociation reste implicite, cf. faithNegotiationPower(). */
+  /* ==== [CORRECTIF FA-13 / V2-20] — patience à 0 : l'agent négocie quand
+     même (jamais de blocage dur), juste avec une réserve affichée — c'est
+     le franchissement à 0 qui compte pour agentPatienceHitZero (bilan
+     annuel, nextFaithYear), pas le fait de rester dessus. La bonification
+     n'est JAMAIS un nombre affiché avant coup — le pouvoir de négociation
+     reste implicite, cf. faithLeverage(). V2-20 : "sans levier, l'option
+     n'existe pas" — gardée ici en plus du bouton retiré côté écran
+     (scr_faith_offer, ui-04) pour ne jamais dépendre uniquement de
+     l'affichage. La réponse passe désormais par le directeur de
+     l'organisation (FAITH_DIRECTORS, ui-04), qui accepte, refuse, ou
+     contre-propose une prime de finition selon son profil et sa mémoire
+     envers le joueur (faithDirectorAdjust/Mood). */
   faithOfferDemandMoney(){
     const off=G.faith.pendingOffer; if(!off) return;
-    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; G.lastMsg="Il insiste encore, mais commence à parler de repositionner sa liste de clients."; }
-    else { G.faith.agentPatience--; G.lastMsg="Votre agent revient avec une meilleure offre."; }
-    const power=faithNegotiationPower(G.f);
-    const bump=0.15+Math.min(1,power/4)*0.25;
-    off.bonusMult=(off.bonusMult||1)*(1+bump);
+    const leverage=faithLeverage(G.f,G.faith);
+    if(leverage<=0){ G.lastMsg="Vous n’avez rien à négocier : personne ne parle de ce combat."; render(); return; }
+    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; }
+    else { G.faith.agentPatience--; }
+    const dir=FAITH_DIRECTORS[G.f.org]||FAITH_DIRECTORS[0];
+    const trust=(G.faith.directors&&G.faith.directors[G.f.org]&&G.faith.directors[G.f.org].trust)||0;
+    const favorable=faithDirectorFavorable(dir,G.f);
+    if(dir.archetype==='requin' && rnd()<0.6){
+      off.finishBonus=true;
+      G.lastMsg=`${dir.name} : « Pas un centime de plus. Mais finissez-le, et je double la prime. »`;
+    } else if(favorable || trust>=1){
+      const bump=0.15+Math.min(1,leverage/4)*0.25;
+      off.bonusMult=(off.bonusMult||1)*(1+bump);
+      faithDirectorAdjust(G.f.org,1);
+      G.lastMsg=`${dir.name} revient avec une meilleure offre.`;
+    } else if(trust<=-1){
+      G.lastMsg=`${dir.name} refuse net : « ${faithDirectorRefusalLine(dir)} »`;
+    } else {
+      off.finishBonus=true;
+      G.lastMsg=`${dir.name} : « La base ne bouge pas. Finissez-le, et on en reparle. »`;
+    }
     save(); render();
   },
+  /* ==== [ANCRE: V2-18] — "demander un autre combat, avec justification".
+     Le bouton unique portait une commande abstraite, sans motif ni
+     risque. Le motif réel (faithDemandMotif(), ui-04) est maintenant
+     affiché avant le clic ; la réponse passe enfin par la personnalité
+     de l'agent (requin/stratège/fidèle, déjà choisie à la création,
+     jusqu'ici jamais branchée sur ce comportement) plutôt que par un
+     échange systématique et gratuit. */
   faithOfferDemandBetter(){
     const off=G.faith.pendingOffer; if(!off) return;
-    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; G.lastMsg="Il insiste encore, mais commence à parler de repositionner sa liste de clients."; }
+    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; }
     else { G.faith.agentPatience--; }
     const opps=G.opps||[]; const idx=opps.indexOf(off.opp);
-    if(idx>0){ off.opp=opps[idx-1]; }
+    const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
+    if(agentId==='requin'){
+      if(idx>0) off.opp=opps[idx-1];
+      faithDirectorAdjust(G.f.org,-1);
+      G.lastMsg="Votre agent a forcé la main du directeur — ça ne passera pas inaperçu.";
+    } else if(agentId==='stratege'){
+      if(idx>0){ off.opp=opps[idx-1]; G.lastMsg="Un adversaire mieux calibré pour votre progression."; }
+      else { G.lastMsg="Le Stratège refuse : ce combat sert déjà le plan."; }
+    } else {
+      if(idx>0 && rnd()<0.8){ off.opp=opps[idx-1]; }
+      else if(idx<opps.length-1){ off.opp=opps[idx+1]; G.lastMsg="Le Fidèle s’est trompé d’adversaire — trop tard pour revenir dessus."; }
+    }
     off.gala=faithGalaPosition(G.f); off.gala.label=faithGalaLabel(G.faith,G.f);
     if(!G.faith.agent) off.gala.mult*=0.75;
     save(); render();

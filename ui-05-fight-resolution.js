@@ -131,7 +131,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   let purse=showPurse;
   if(win) purse+=winBonus;
-  if(win && !isDecisionLike(res.method)){ purse+=(G.f.org===6)?50:showPurse*0.25; }
+  /* ==== [CORRECTIF V2-20] — prime de finition contre-proposée par un
+     directeur (FAITH_DIRECTORS, ui-04, faithOfferDemandMoney) : simple
+     multiplicateur sur le bonus de finition déjà existant, jamais un
+     second système de bourse. Absent hors négociation (finishBonusMult
+     alors undefined -> ||1). */
+  if(win && !isDecisionLike(res.method)){ purse+=((G.f.org===6)?50:showPurse*0.25)*(G.fight.finishBonusMult||1); }
   if(G.fight.pursePenalty) purse=Math.floor(purse*G.fight.pursePenalty*100)/100;
   const purseGross=purse;
   purse=Math.floor(purse*0.75*100)/100; // frais de camp fixes (manager, coach, salle) : ~25% de la bourse brute
