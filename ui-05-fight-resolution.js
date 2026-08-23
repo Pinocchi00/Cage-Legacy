@@ -198,6 +198,13 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // jamais ensuite (contrairement à f.rivalId qui peut glisser vers l'animosité
   // la plus récente) — c'est le fil rouge narratif de toute la carrière.
   if(G.faith && !G.f.faithNemesisId && G.f.rivalId){ G.f.faithNemesisId=G.f.rivalId; }
+  /* ==== [ANCRE: FA-19_SHOWMAN] — le showman vend le spectacle avant de le
+     livrer (personality créée dans finalizeFaithDraft, ui-08) : une victoire
+     aux points, sans finish, est par définition le résultat qu'il n'a pas
+     vendu au public. ==== */
+  if(G.faith && win && isDecisionLike(res.method) && G.f.personality==='showman'){
+    G.f.morale=clamp(G.f.morale-8,0,100);
+  }
   // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
   // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
   // donc un adversaire battu 15 fois de façon décisive n'était presque jamais
@@ -425,6 +432,15 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      où l'adversaire du combat est connu : season.fights ne retient pas son
      identité, et le roster peut avoir changé quand le bilan se calcule. ==== */
   if(G.faith && win && opp && opp.id && opp.id===G.f.faithNemesisId) G.faith.nemesisBeaten=true;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: FA-26] — palmarès tête-à-tête affiché en une ligne sur le
+     hub (scr_faith_hub, ui-04). Remis à zéro quand la némésis change
+     (trahison du protégé, ui-08) — il ne porte que sur la rivalité EN
+     COURS. */
+  if(G.faith && opp && opp.id && opp.id===G.f.faithNemesisId){
+    if(!G.f.nemesisRecord) G.f.nemesisRecord={w:0,l:0};
+    if(win) G.f.nemesisRecord.w++; else G.f.nemesisRecord.l++;
+  }
   /* ==== [FIN ANCRE] ==== */
   // ==== [FIN ANCRE] ====
   // vieillissement (1 an = N combats). Entre 18 et 23 ans (jeune prospect en

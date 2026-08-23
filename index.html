@@ -16,45 +16,93 @@
  --r:0px; --maxw:560px;
 }
 /* ==== [ANCRE: FAITH_SKIN_BASCULE] — palette scopée du mode MMA Faith.
-   Le jeu entier est sombre (cuir, sépia, or) ; Faith raconte une vie et rend
-   son verdict en presse, d'où l'inversion de luminance : papier et encre.
-   C'est le signal de mode le moins coûteux qui existe, perçu en périphérie
-   avant toute lecture. Aucune police ni couleur inventée : l'accent réutilise
-   --blood/--blood-d du jeu.
-   RÈGLE À NE JAMAIS OUBLIER — deux rouges, deux usages :
-     #9C2C1E sur papier = 5,7:1 -> AA, c'est le seul rouge autorisé en TEXTE ;
-     #E8442F sur papier = 2,98:1 -> échoue partout, réservé aux filets,
-     remplissages de jauge et puces. Jamais de lettres dessus. ==== */
+   ==== [REFONTE FA-08] — la première version basculait vers un papier crème
+   très clair (#E4DFD3), à l'opposé du dégradé rouge/or sombre du reste du
+   jeu (index.html:64+). L'écart de LUMINOSITÉ était tel que Faith ne
+   ressemblait plus à un mode du jeu mais à une autre application, et le
+   passage arena<->hors-arène produisait un flash blanc/noir violent à
+   chaque combat. Nouvel axe de distinction : pas la luminosité (les deux
+   restent sombres), mais la MATIÈRE et la GÉOMÉTRIE — le jeu est une
+   affiche, Faith est un livre. Noir encre PLAT (aucun dégradé, contrairement
+   au fond du reste du jeu), un accent chromatique UNIQUE (l'oxblood), des
+   filets au lieu de cartes.
+   RÈGLE DEUX ROUGES, TOUJOURS VALABLE — juste réaudité pour la nouvelle
+   palette sombre (texte clair sur fond sombre : plus une couleur est CLAIRE,
+   plus elle contraste) :
+     #D65940 sur #100E0C = 4,92:1 / sur #17140F = 4,69:1 -> AA, seul rouge
+       autorisé en TEXTE (repose sur le même oxblood que la maquette
+       d'origine, #C8462F, éclairci pour tenir l'audit : #C8462F ne passait
+       que 4,01:1/3,83:1, sous le seuil) ;
+     #E8442F -> réservé aux filets, remplissages de jauge et puces, jamais
+       de lettres dessus (inchangé depuis la maquette papier). ==== */
 body.faith-skin{
+  --bg:#100E0C; --panel:#100E0C; --panel2:#17140F; --line:#3A342B;
+  --text:#EDE6D6; --muted:#9A907E; --faint:#6B6355;
+  --gold:#D65940; --gold-d:#8F3421; --sage:#9A907E;
+  --blood:#D65940; --blood-d:#8F3421; --win:#B8B29C; --loss:#D65940;
+  --f-red-hi:#E8442F;
+  background:#100E0C;
+}
+/* ==== [FIN ANCRE] ==== */
+body.faith-skin .scr{ padding-left:20px; padding-right:20px; }
+body.faith-skin .scr > * + *{ margin-top:32px; }
+/* ==== [ANCRE: FAITH_GEOMETRIE_LIVRE] — "Faith n'a pas de cartes, il a des
+   paragraphes séparés par des traits". .glass (habillage vitre du reste du
+   jeu : flou, saturation, reflet diagonal) perd tout ça en Faith — fond
+   transparent, pas de backdrop-filter, pas de bordure, juste un filet 1px
+   EN HAUT. .card utilisait déjà nativement ce traitement "paragraphe + trait"
+   dans la feuille de style de base (ligne ~118) ; l'ancienne palette papier
+   le recouvrait d'un encart plein — retiré, .card retombe sur son
+   comportement natif. .opp reste un encart (fond --panel2, filet --line) :
+   contrairement à .glass/.card, ce sont des OPTIONS cliquables dans une
+   liste (adversaires, choix d'événement, serments) — leur faire perdre tout
+   contour rendrait leurs limites illisibles au doigt. ==== */
+body.faith-skin .glass{ background:transparent; backdrop-filter:none; border:none; border-top:1px solid var(--line); border-radius:0; box-shadow:none; padding-top:16px; }
+body.faith-skin .glass::before,body.faith-skin .glass::after{ display:none; }
+body.faith-skin .opp{ background:var(--panel2); border:1px solid var(--line); border-radius:0; }
+/* ==== [FIN ANCRE] ==== */
+body.faith-skin .disp,body.faith-skin .hero-name{ font-family:'Fraunces',Georgia,serif; font-weight:700; text-transform:none; letter-spacing:-0.01em; }
+body.faith-skin .eyebrow{ font-family:'Oswald',sans-serif; letter-spacing:.14em; color:var(--muted); }
+body.faith-skin .gauge2 > span,body.faith-skin .gauge > span{ background:var(--f-red-hi); }
+body.faith-skin .btn{ border-radius:0; }
+/* ==== [ANCRE: FAITH_GEOMETRIE_LIVRE] — .btn.primary/.btn.gold portent le
+   traitement "Liquid Glass" du reste du jeu (flou, saturation, reflet
+   diagonal en dégradé, .btn.gold est même un dégradé plein) : tout l'inverse
+   du "noir plat, aucun dégradé" visé. Neutralisé pour un bouton mat, sans
+   reflet, en aplat de l'unique accent oxblood. ==== */
+body.faith-skin .btn.primary,body.faith-skin .btn.gold{ backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none; }
+body.faith-skin .btn.primary::before,body.faith-skin .btn.gold::before{ display:none; }
+body.faith-skin .btn.primary{ background:var(--gold); color:#FFF7EE; border-color:var(--gold); }
+body.faith-skin .btn.primary:hover{ background:#FFF7EE; color:var(--gold); border-color:var(--gold); }
+body.faith-skin .btn.gold{ background:var(--gold); color:#FFF7EE; border-color:var(--gold); }
+/* ==== [FIN ANCRE] ==== */
+/* Grain plus marqué qu'ailleurs (.06 au lieu de .03, cf. body::after) :
+   texture papier journal sur le noir plat, plutôt qu'un fond lisse. */
+body.faith-skin::after{ opacity:.06; }
+/* Remplissage séquentiel des lignes du Score de Légende (scr_faith_epilogue). */
+@keyframes faithFill{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
+/* ==== [ANCRE: FAITH_PAPIER_OBJET] — le crème d'origine (#E4DFD3) était bon,
+   juste appliqué à la mauvaise échelle : posé sur TOUT le mode, il n'était
+   plus qu'une couleur de fond parmi d'autres. Réservé à UN SEUL objet
+   diégétique — la coupure de presse annuelle et l'épilogue — il redevient
+   un événement visuel attendu : un objet physique posé sur l'écran noir,
+   pas l'écran lui-même. Le bloc redéfinit les tokens de couleur en local
+   (le crème et son texte sombre, mêmes valeurs que l'ancienne palette
+   papier, déjà auditées AA — cf. l'historique de FAITH_CONTRAST_AUDIT
+   avant cette refonte) : tout élément qui lit var(--text)/var(--gold)/etc.
+   à l'intérieur du bloc en hérite automatiquement, sans dupliquer les
+   styles de chaque écran. Légère rotation et ombre portée : un objet posé,
+   pas un panneau aligné à la grille. ==== */
+.faith-paper{
   --bg:#E4DFD3; --panel:#E4DFD3; --panel2:#DAD4C6; --line:#B9B0A0;
   --text:#16130E; --muted:#5C5346; --faint:#7A7161;
   --gold:#9C2C1E; --gold-d:#7A2216; --sage:#4A5D50;
   --blood:#9C2C1E; --blood-d:#7A2216; --win:#3A5F42; --loss:#9C2C1E;
   --f-red-hi:#E8442F;
-  background:#E4DFD3;
+  background:var(--bg); color:var(--text); font-family:'Fraunces',Georgia,serif;
+  padding:24px 20px; border:1px solid var(--line);
+  box-shadow:0 14px 34px rgba(0,0,0,.55); transform:rotate(-.4deg);
 }
-/* ==== [ANCRE: FAITH_CONTRAST_AUDIT] — audit WCAG 2.1 AA (contraste 4,5:1
-   texte normal) mené après l'élargissement de FAITH_SKIN_BASCULE aux écrans
-   select/plan/result/profile/hof/retire, qui utilisent tous --win/--loss en
-   couleur de texte (verdicts, deltas, boutons). --loss/#9C2C1E est déjà
-   couvert par la règle des deux rouges ci-dessus (5,7:1). --win n'avait
-   jamais été audité : #3F6B4A ne passait que 4,16:1 sur --panel2 (fond des
-   cards), sous le seuil AA. Assombri à #3A5F42 (4,91:1 sur panel2, 5,46:1
-   sur bg) — même teinte, luminosité corrigée, aucun autre token touché. ==== */
-/* ==== [FIN ANCRE] ==== */
-body.faith-skin .scr{ padding-left:20px; padding-right:20px; }
-body.faith-skin .scr > * + *{ margin-top:32px; }
-body.faith-skin .glass{ background:#DAD4C6; backdrop-filter:none; border:1px solid var(--line); border-radius:0; box-shadow:none; }
-body.faith-skin .glass::before,body.faith-skin .glass::after{ display:none; }
-body.faith-skin .card{ background:#DAD4C6; border:1px solid var(--line); border-radius:0; }
-body.faith-skin .disp,body.faith-skin .hero-name{ font-family:'Fraunces',Georgia,serif; font-weight:700; text-transform:none; letter-spacing:-0.01em; }
-body.faith-skin .eyebrow{ font-family:'Oswald',sans-serif; letter-spacing:.14em; color:var(--muted); }
-body.faith-skin .gauge2 > span,body.faith-skin .gauge > span{ background:var(--f-red-hi); }
-body.faith-skin .btn{ border-radius:0; }
-body.faith-skin .btn.primary{ background:var(--gold); color:#F3EEE3; border-color:var(--gold); }
-body.faith-skin .opp{ background:#DAD4C6; border:1px solid var(--line); border-radius:0; }
-/* Remplissage séquentiel des lignes du Score de Légende (scr_faith_epilogue). */
-@keyframes faithFill{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
 /* ==== [FIN ANCRE] ==== */
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
