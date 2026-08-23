@@ -151,7 +151,8 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.f.org>0 && G.f.contract){
     if(!Array.isArray(G.f.contract.record)) G.f.contract.record=[];
     G.f.contract.record.push({res:win?'win':'loss',method:res.method});
-    G.f.contract.fightsLeft--;
+    /* ==== [CORRECTIF V2-37] — jamais négatif : la garde manquait ici. ==== */
+    G.f.contract.fightsLeft=Math.max(0,(G.f.contract.fightsLeft||0)-1);
     if(G.f.contract.fightsLeft<=0){
       contractExpiry=true;
       if(G.f.contract.isFinalContract && !G.f.retired){

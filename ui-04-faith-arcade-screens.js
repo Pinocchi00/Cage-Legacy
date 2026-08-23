@@ -237,6 +237,12 @@ const FAITH_GALA_CITIES=['Lyon','Marseille','Osaka','Rio','Manchester','Chicago'
  * l'org" pour l'attraper.
  * @param {object} f @returns {{tier:string,mult:number,hype:string,rounds:number}} */
 function faithGalaPosition(f){
+  /* ==== [CORRECTIF V2-24 point 4] — le circuit amateur (org 0) n'a ni
+     hype ni conférence de presse : un gala amateur à Lyon n'a pas de main
+     event médiatisé, même si un rivalId ou un rang bas s'est déjà formé à
+     ce niveau (ex. via la némésis, verrouillable dès l'amateur — V2-26).
+     Verrouillé avant toute autre condition, pas juste en dernier recours. */
+  if((f.org||0)===0) return {tier:'Circuit amateur',mult:0.6,hype:'nulle',rounds:3,pressConf:false};
   const rk=divRank(f);
   if(rk<=4 || f.champion || f.rivalId) return {tier:'Main event',mult:2,hype:'forte',rounds:5,pressConf:true};
   if(rk<=12) return {tier:'Carte principale',mult:1,hype:'moyenne',rounds:3,pressConf:false};
@@ -500,7 +506,7 @@ function scr_faith_hub(){
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
       ${topPartner?`<div class="mono" style="font-size:11px;color:var(--muted);margin-top:8px">SALLE · ${esc(topPartner.first)}</div>${faithProtegeLine(topPartner,f)}`:''}
       ${nemesis?`<div class="mono" style="font-size:11px;color:var(--f-red-hi);margin-top:8px">NÉMÉSIS · ${esc(nemesis.first)} (${(f.nemesisRecord&&f.nemesisRecord.w)||0}-${(f.nemesisRecord&&f.nemesisRecord.l)||0})</div>`:''}
-      ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''} restant${f.contract.fightsLeft>1?'s':''} au contrat</div>`:''}
+      ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${contractFightsLeftLabel(f.contract)}</div>`:''}
       ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
       ${faithOathBadge(G.faith)}
     </div>
@@ -535,7 +541,10 @@ function scr_faith_offer(){
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow">${esc((F.agent&&F.agent.label)||'Sans agent')}</div>
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
-   <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · hype ${gala.hype}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
+   <!-- ==== [CORRECTIF V2-24 point 3] — "hype : faible" est une case
+        remplie, pas une information ; au plus bas, le mot "hype"
+        disparaît complètement au profit d'une phrase. ==== -->
+   <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · ${(gala.hype==='faible'||gala.hype==='nulle')?'Personne n’en parle encore.':`hype ${gala.hype}`}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
      <div class="eyebrow" style="font-size:11px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
@@ -553,7 +562,15 @@ function scr_faith_offer(){
        <b style="font-size:15px">Demander un meilleur adversaire</b>
        <div class="muted small mt">Montée plus rapide au classement, risque plus élevé.</div>
      </div>
-     <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser — perdre ce combat de l’année</button>
+     <!-- ==== [CORRECTIF V2-21] — le libellé décrivait une punition, pas
+          une action, et n'annonçait aucune conséquence avant le clic. Le
+          bouton dit maintenant ce qu'il fait ; la légende juste en
+          dessous dit ce que ça coûte, avant confirmation. ==== -->
+     <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser le combat</button>
+     <div class="muted small" style="text-align:center;margin-top:-6px">${
+       (f.injury && !G.faith.medicalRefusalUsed)?'Motif médical : refus sans conséquence, une fois cette année.'
+       :'Ce combat de l’année est perdu, et votre agent le prendra mal.'
+     }</div>
    </div>
   </div>`;
 }

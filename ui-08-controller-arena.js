@@ -1454,13 +1454,29 @@ const CL={
     if(!G.faith.agent) off.gala.mult*=0.75;
     save(); render();
   },
-  /* ==== [CORRECTIF FA-12] — refuser coûte réellement quelque chose : la
-     case combat de l'année est perdue (pas de nouvelle offre à la place),
-     exactement ce que le document demande. ==== */
+  /* ==== [CORRECTIF FA-12 / V2-21] — refuser coûte réellement quelque
+     chose : la case combat de l'année est perdue (FA-12, inchangé). V2-21
+     ajoute un vrai prix côté agent (réutilise agentPatience/
+     agentPatienceHitZero, déjà l'infrastructure de mécontentement de
+     l'agent — FA-13 — plutôt qu'un nouveau système de "crédit
+     d'organisation" à inventer pour Faith, qui n'a pas de directeurs
+     nommés à ce stade du document, cf. Batch 4/V2-19), et une franchise :
+     un refus est gratuit une fois par an si le combattant est
+     effectivement blessé au moment du refus (motif médical réel, pas
+     déclaratif — cf. f.injury, déjà suivi). refusalsThisYear/
+     medicalRefusalUsed repartent à zéro chaque année (nextFaithYear). ==== */
   faithOfferRefuse(){
+    const medical=!!G.f.injury && !G.faith.medicalRefusalUsed;
+    G.faith.refusalsThisYear=(G.faith.refusalsThisYear||0)+1;
+    if(medical){ G.faith.medicalRefusalUsed=true; }
+    else if(G.faith.agentPatience>0){ G.faith.agentPatience--; }
+    else { G.faith.agentPatienceHitZero=true; }
+    if(G.faith.refusalsThisYear>=3){
+      G.lastMsg="Votre agent vous prévient : à ce rythme de refus, il ne pourra bientôt plus vous représenter.";
+    }
     G.faith.pendingOffer=null;
     if(!G.faith.yearLog) G.faith.yearLog=[];
-    G.faith.yearLog.push({title:'Combat refusé',choice:'Aucune offre acceptée'});
+    G.faith.yearLog.push({title:'Combat refusé',choice:medical?'Refus médical':'Combat refusé'});
     faithAdvanceMonth();
   },
   prepareFaithYearEnd(){
@@ -1555,6 +1571,8 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     G.faith.year++;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
+    /* V2-21 : compteurs annuels de refus, remis à zéro comme le reste. */
+    G.faith.refusalsThisYear=0; G.faith.medicalRefusalUsed=false;
     /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
        qu'un millésime : le drapeau est levé ici, avec le reste des compteurs
        annuels. ==== */

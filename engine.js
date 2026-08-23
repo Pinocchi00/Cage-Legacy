@@ -1316,6 +1316,23 @@ function generateContract(f,org,raise){
   else if(org===6){ show=Math.min(show,75); win=Math.min(win,75); }
   return { fightsLeft, show, win, org, isChampContract, reputation:repTier, record:[], isFinalContract, finalFightNumber:isFinalContract?fightsLeft:null };
 }
+/* ==== [ANCRE: V2-37] — bug remonté : "Contrat : 0 combat" pouvait
+   s'afficher (un champion en 3-1 en était un cas). Cause : `fightsLeft`
+   compte à rebours (ui-05-fight-resolution.js, `G.f.contract.fightsLeft--`)
+   jusqu'à l'échéance, moment où `contractExpiry` déclenche la
+   renégociation (scr_result, ui-06) — mais tant que le joueur n'a pas
+   effectivement renégocié, `f.contract` reste l'ANCIEN objet, avec
+   `fightsLeft` à 0 (ou même négatif : `--` n'était pas gardé), lisible
+   sur le hub/la fiche entre-temps. Correctif à deux niveaux : (1) le
+   décompte est désormais gardé au plancher 0 (ui-05) ; (2) 0 n'est plus
+   jamais interpolé tel quel nulle part — ce point unique de formatage,
+   utilisé par tous les écrans qui affichent fightsLeft, fait qu'un seul
+   endroit à corriger vaut pour tous. ==== */
+function contractFightsLeftLabel(contract){
+  const n=(contract&&contract.fightsLeft)||0;
+  if(n<=1) return 'Dernier combat du contrat';
+  return `${n} combats restants`;
+}
 // Gain/perte Elo dynamique après un combat, K-factor modulé selon la méthode
 // de finition (KO/Soumission pèsent plus qu'une décision) et le round.
 function calculateEloDelta(ratingA,ratingB,winnerSide,method,round){
@@ -1402,6 +1419,41 @@ const INJURY_TYPES=[
 function rollInjury(){ return pick(INJURY_TYPES); }
 /* progression BORNÉE : un choix applique un delta net d'attributs ( up/down),
    plafonné par le potentiel — pas d'amélioration infinie. */
+/* ==== [ANCRE: V2-36] — règle 7 (jamais de récompense nulle) : un gain
+   plafonné (attribut déjà au maximum) sortait de applyDeltas() sans
+   laisser AUCUNE trace (real===0 => rien poussé dans `applied`) — l'écran
+   qui affiche le résultat n'avait donc rien à montrer, et le joueur
+   voyait parfois "10 -> 10" ou rien du tout selon l'écran, sans jamais
+   savoir qu'un gain avait bien été TENTÉ. Convertit un gain plafonné en
+   un point sur un attribut voisin de la même famille (ATTR.tech/ment/
+   phys) s'il en reste un non plafonné, sinon en un petit bonus d'argent
+   — jamais silencieux, toujours annoncé (converted:true, lu par les
+   écrans qui affichent `applied`). ==== */
+function attrFamilyOf(statKey){
+  if(ATTR.tech.some(a=>a[0]===statKey)) return ATTR.tech;
+  if(ATTR.ment.some(a=>a[0]===statKey)) return ATTR.ment;
+  if(ATTR.phys.some(a=>a[0]===statKey)) return ATTR.phys;
+  return null;
+}
+function convertZeroGain(f,statKey){
+  const fam=attrFamilyOf(statKey);
+  if(fam){
+    for(const [nk] of fam){
+      if(nk===statKey || f.attrs[nk]===undefined) continue;
+      const cap=Math.min((f.maxAttrs && f.maxAttrs[nk]!=null)?f.maxAttrs[nk]:f.potential+4,
+        (f.agedCeilings && f.agedCeilings[nk]!=null)?f.agedCeilings[nk]:100, 100);
+      const before=f.attrs[nk];
+      if(before<cap){
+        const after=clamp(Math.min(before+1,cap),1,100);
+        if(after>before){ f.attrs[nk]=after;
+          return {key:nk,label:attrLabel(nk),delta:after-before,before,after,converted:true,fromLabel:attrLabel(statKey)};
+        }
+      }
+    }
+  }
+  f.earnings=(f.earnings||0)+2;
+  return {key:null,label:null,delta:0,converted:true,money:2,fromLabel:attrLabel(statKey)};
+}
 function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
     if(k==='morale'){ f.morale=clamp(f.morale+dv,0,100); applied.push(['Moral',dv]); continue; }
     if(k==='form'){ f.form=clamp(f.form+dv,0,100); applied.push(['Forme',dv]); continue; }
@@ -1417,6 +1469,7 @@ function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
     if(dv>0 && f.agedCeilings && f.agedCeilings[k]!=null) after=Math.min(after, Math.max(before, f.agedCeilings[k]));
     f.attrs[k]=clamp(after,1,100); const real=Math.round(f.attrs[k]-before);
     if(real!==0) applied.push({key:k,label:attrLabel(k),delta:real,before,after:f.attrs[k]});
+    else if(dv>0) applied.push(convertZeroGain(f,k));
   } f.overall=overall(f); return applied;
 }
 /* ==== [ANCRE: TIRAGE] — moteur de compétences en deux temps (plan §6/§18).

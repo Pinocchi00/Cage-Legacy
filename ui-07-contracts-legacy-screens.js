@@ -73,7 +73,6 @@ function scr_contract_nego(){
     <div class="glass card mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--gold)">
        <div class="eyebrow mb">Statut actuel</div>
        <div class="mono small">Salaire : ${contractPayLine(f.contract)}</div>
-       <div class="mono small mt">Combats restants sur le contrat : <b>${f.contract.fightsLeft||4}</b></div>
        <div class="mono small mt">Réputation : <b class="gold">${f.contract.reputation||'Solide'}</b></div>
     </div>
     ${f.contract.isFinalContract?`<div class="glass card mb" style="background:var(--panel2);padding:16px;text-align:left;border-left:3px solid var(--blood)">

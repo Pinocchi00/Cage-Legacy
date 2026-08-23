@@ -338,7 +338,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   const rankTag=f.champChampBelt?`<span class="tag2 hot" style="border-color:var(--blood);color:var(--blood)">DOUBLE CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:(champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`));
   const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
   const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
-  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">Contrat : ${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''}</span>`:'';
+  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">${contractFightsLeftLabel(f.contract)}</span>`:'';
   return `<div class="scr">
    <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
      <span class="eyebrow mono">${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
@@ -767,10 +767,30 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   }
   let campHtml='';
   if(p.camp && p.camp.deltas.length){
+    /* ==== [CORRECTIF V2-36] — deux bugs de la même famille (règle 7 :
+       jamais de récompense nulle) corrigés ensemble ici :
+       1. `if(b20===a20) return '';` faisait disparaître silencieusement
+          toute ligne dont le gain réel (échelle /100) ne franchissait pas
+          de palier /20 — un gain qui a bien eu lieu s'évaporait purement
+          et simplement de l'écran, pire que "10 -> 10" (au moins ce
+          dernier restait visible). Remplacé par une annotation, jamais
+          par une disparition.
+       2. Les entrées `converted` (convertZeroGain(), engine.js) —
+          conversion vers un attribut voisin ou vers de l'argent quand
+          un gain demandé était totalement plafonné — ont leur propre
+          rendu : elles doivent toujours s'afficher, y compris quand la
+          conversion elle-même ne franchit pas de palier /20. ==== */
     const rows=p.camp.deltas.map(d=>{
       if(Array.isArray(d)){ const scaled=Math.sign(d[1])*Math.max(1,Math.round(Math.abs(d[1])/5)); return `<span class="dlt ${d[1]>=0?'up':'dn'}">${scaled>0?'+':''}${scaled} ${d[0]}</span>`; }
+      if(d.converted && d.key===null){
+        return `<span class="dlt up">${d.fromLabel} déjà au maximum — converti en +${d.money}k$</span>`;
+      }
       const b20=d20(d.before), a20=d20(d.after);
-      if(b20===a20) return '';
+      if(d.converted){
+        const suffix=b20===a20?' (gain minime)':'';
+        return `<span class="dlt up">${d.fromLabel} déjà au maximum — reporté sur ${d.label}${suffix}</span>`;
+      }
+      if(b20===a20) return `<span class="dlt ${d.delta>=0?'up':'dn'}">${d.label} <span class="muted">(gain interne minime)</span></span>`;
       return `<span class="dlt ${a20>=b20?'up':'dn'}">${d.label} : ${b20} ➔ ${a20}</span>`;
     }).filter(Boolean);
     if(rows.length) campHtml=`<div class="card"><div class="eyebrow mb">Évolution (sur 20)</div><div class="dlts">${rows.join('')}</div></div>`;
@@ -812,7 +832,14 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
       les deux cas. On annote explicitement quand un gain a bien eu lieu mais
       ne se voit pas sur l'échelle affichée. ==== */
    const noVisibleGain=before===after && f.attrs[k]>realBefore;
-   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:11px">(gain interne minime)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   /* ==== [CORRECTIF V2-36] — avant ce correctif, un attribut déjà à son
+      plafond (f.attrs[k]===realBefore, AUCUN gain interne réel, contrairement
+      au cas noVisibleGain juste au-dessus où un petit gain réel existe mais
+      ne franchit pas de palier /20) s'affichait en "10 -> 10" nu, comme si
+      rien ne s'était passé — sans jamais dire que le plafond en était la
+      cause. Règle 7 : jamais de récompense nulle sans explication. ==== */
+   const trueZeroGain=before===after && f.attrs[k]===realBefore;
+   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:11px">(gain interne minime)</span>':''}${trueZeroGain?' <span class="muted" style="font-size:11px">(déjà au maximum)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
