@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -795,6 +795,23 @@ const CL={
   choosePlan(idx){ const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
     resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
+  /* ==== [ANCRE: V2-26/V2-27] — trois postures, toutes valables (règle
+     H.3). La provocation plante une promesse (G.promise, carrière —
+     distincte de G.faith.promise) vérifiée à la résolution du combat
+     (ui-05, même ancre que côté Faith). */
+  chooseFaceoff(posture){
+    G.fight.faceoffDone=true;
+    const opp=G.fight.opp;
+    if(posture==='respect'){
+      G.f.morale=clamp((G.f.morale||60)+5,0,100);
+    } else if(posture==='provocation'){
+      G.promise={type:'finish',oppId:opp.id,oppName:opp.name};
+      G.lastMsg="Vous avez promis de le finir — il ne l’a pas oublié en montant sur la balance.";
+    } else {
+      G.f.morale=clamp((G.f.morale||60)+2,0,100);
+    }
+    G.fight.planStep=2; render();
+  },
   /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
      l'arène (skipArena et la fin naturelle de l'animation passent tous les
      deux par ici) : généralisé pour pouvoir router ailleurs qu'au résultat
@@ -1475,8 +1492,66 @@ const CL={
      reste de la mise en jambe d'un combat Faith — un seul chemin de code,
      pas une copie. Cette branche lit G.faith.pendingOffer elle-même pour
      appliquer le multiplicateur de bourse et le nombre de rounds du gala. ==== */
+  /* ==== [ANCRE: V2-23/V2-25] — chaîne entre la signature et l'entrée en
+     cage : un événement de build-up d'abord (tout combat, V2-23), puis la
+     conférence de presse si le gala l'impose (Main event uniquement,
+     V2-25). Chaque étape pose son propre drapeau "Done" sur l'offre pour
+     ne jamais se rejouer si l'écran est réaffiché sans avoir progressé. */
   faithOfferSign(){
     const off=G.faith.pendingOffer; if(!off) return;
+    if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
+    if(!off.buildupDone){
+      off.buildupDone=true;
+      G.faith.currentBuildupEvent=faithBuildupPick(G.f,G.faith);
+      G.screen='faith_buildup'; save(); render();
+      return;
+    }
+    if(off.gala && off.gala.pressConf && !off.pressConfDone){
+      off.pressConfDone=true;
+      G.screen='faith_press_conf'; save(); render();
+      return;
+    }
+    G.opps=[off.opp];
+    CL.opp(0);
+  },
+  /* ==== [ANCRE: V2-23] — applique le choix (deux options, réponse
+     immédiate) puis reprend la chaîne (faithOfferSign() gère la suite :
+     conférence ou signature directe). */
+  faithBuildupChoose(idx){
+    const ev=G.faith.currentBuildupEvent; if(!ev) return;
+    const c=ev.choices[idx]; if(!c) return;
+    const F=G.faith;
+    if(c.dv){
+      if(c.dv.attente) F.buildup.attente=Math.max(0,F.buildup.attente+c.dv.attente);
+      if(c.dv.tension) F.buildup.tension=Math.max(0,F.buildup.tension+c.dv.tension);
+    }
+    if(c.money) G.f.earnings=(G.f.earnings||0)+c.money;
+    if(c.morale) G.f.morale=clamp((G.f.morale||60)+c.morale,0,100);
+    if(c.director) faithDirectorAdjust(G.f.org,c.director);
+    F.buildup.causes.push({title:ev.title,choice:c.label});
+    G.faith.currentBuildupEvent=null;
+    CL.faithOfferSign();
+  },
+  /* ==== [ANCRE: V2-25/V2-27] — trois postures, toutes valables (règle
+     H.3). La provocation plante une promesse (V2-27, "je le finis") —
+     rappelée à la résolution du combat (ui-05, ANCRE V2-27) puis dans
+     la coupure de presse annuelle si elle a été tenue ou trahie. */
+  faithPressConfPosture(posture){
+    const off=G.faith.pendingOffer; if(!off) return;
+    if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
+    const F=G.faith;
+    if(posture==='respect'){
+      F.buildup.tension=Math.max(0,F.buildup.tension-1);
+      faithDirectorAdjust(G.f.org,1);
+      G.lastMsg="Ton posé, poignée de main. Le directeur retient le geste.";
+    } else if(posture==='provocation'){
+      F.buildup.attente++; F.buildup.tension++;
+      F.promise={type:'finish',oppId:off.opp.o.id,oppName:off.opp.o.name};
+      G.lastMsg="Vous avez promis de le finir — la salle ne l’oubliera pas si vous n’y arrivez pas.";
+    } else {
+      F.buildup.attente=Math.max(0,F.buildup.attente-1);
+      G.f.morale=clamp((G.f.morale||60)+5,0,100);
+    }
     G.opps=[off.opp];
     CL.opp(0);
   },
@@ -1644,11 +1719,17 @@ const CL={
       const rar=tirerRarete(); const sk=getFallbackSkill(currentPool,rar);
       if(sk){ grantSkill(f,sk); newSkills.push(sk); pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS); }
     }
+    /* ==== [ANCRE: V2-27] — G.faith.promiseOutcome (posé par resolveFight(),
+       ui-05, à la résolution du combat concerné) capturé dans yearStats
+       comme sequelle juste au-dessus, puis purgé pour ne jamais fuiter
+       sur une année suivante sans nouvelle promesse. */
+    const promiseOutcome=G.faith.promiseOutcome||null;
+    G.faith.promiseOutcome=null;
     G.faith.yearStats={
       fights:G.faith.fightsThisYear,
       wins:(G.season.fights||[]).filter(x=>x.win).length,
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
-      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle
+      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle, promiseOutcome
     };
     G.screen='faith_year_end'; save(); render();
   },

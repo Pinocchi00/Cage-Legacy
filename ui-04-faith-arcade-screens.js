@@ -685,6 +685,134 @@ function scr_faith_offer(){
    </div>
   </div>`;
 }
+/* ==== [ANCRE: V2-22/V2-23] — "rien ne se passe entre l'annonce et la
+   cage" : F.buildup={attente,tension} (V2-22, jauges qualitatives,
+   jamais chiffrées) existait déjà pour la conférence de presse (V2-25,
+   Main event uniquement) mais restait vide pour tous les autres combats.
+   Un événement tiré ici, sur CHAQUE combat (pas seulement Main event),
+   ferme cet écart. Douze entrées minimum (règle 6 : la rareté fait la
+   saillance — inutile d'en avoir plus si elles ne sont vues qu'une fois
+   par combat). Chacune stocke sa cause dans F.buildup.causes[]. ==== */
+const FAITH_BUILDUP_EVENTS=[
+  {id:'bu_missed_weight_his',title:'Pesée ratée (la sienne)',
+   text:'Il monte sur la balance en sueur, un kilo et demi au-dessus. L’organisation attend votre feu vert.',
+   choices:[{label:'Accepter le catchweight, contre compensation',dv:{attente:1},money:15},
+            {label:'Refuser : il perd le combat par forfait',dv:{attente:-1},director:1}]},
+  {id:'bu_missed_weight_mine',title:'Pesée ratée (la vôtre)',
+   text:'Le corps n’a pas suivi. La balance affiche un chiffre que personne dans votre camp ne voulait voir.',
+   choices:[{label:'Assumer devant les caméras',dv:{attente:1,tension:1},morale:-8},
+            {label:'Laisser l’agent gérer la communication',dv:{tension:1},director:-1}]},
+  {id:'bu_promotion',title:'Promotion sur la carte',
+   text:'La tête d’affiche prévue déclare forfait. Le matchmaker vous propose de monter d’un cran.',
+   choices:[{label:'Accepter — plus d’attente, plus de risque',dv:{attente:2}},
+            {label:'Décliner — rester là où le plan vous voulait',dv:{}}]},
+  {id:'bu_faceoff_degenerates',title:'Le face-à-face dégénère',
+   text:'Ce qui devait être une photo se transforme en échange de mots, puis de bousculade.',
+   choices:[{label:'Rester au contact, ne pas reculer',dv:{tension:2,attente:1}},
+            {label:'Laisser la sécurité s’interposer',dv:{tension:-1}}]},
+  {id:'bu_viral_clip',title:'Clip viral',
+   text:'Une séquence d’entraînement, sortie de son contexte, tourne en boucle depuis ce matin.',
+   choices:[{label:'En rire publiquement',dv:{attente:1},morale:5},
+            {label:'Demander son retrait',dv:{},director:-1}]},
+  {id:'bu_coach_declaration',title:'Déclaration de son coach',
+   text:'Le coach adverse promet en interview que "ça ne passera pas trois rounds".',
+   choices:[{label:'Répondre publiquement',dv:{attente:1,tension:1}},
+            {label:'Laisser parler',dv:{tension:-1}}]},
+  {id:'bu_old_rival_speaks',title:'Un ancien adversaire prend position',
+   text:'Quelqu’un que vous avez déjà affronté donne son pronostic en interview — sans vous ménager.',
+   choices:[{label:'Le prendre comme un compliment',dv:{attente:1},morale:5},
+            {label:'Ignorer complètement',dv:{}}]},
+  {id:'bu_gym_polemic',title:'Polémique sur votre salle',
+   text:'Une accusation, jamais vraiment prouvée, ressort sur les méthodes de votre salle d’entraînement.',
+   choices:[{label:'Défendre votre salle publiquement',dv:{tension:1},director:-1},
+            {label:'Ne pas commenter',dv:{}}]},
+  {id:'bu_ticket_sales',title:'Billetterie qui explose',
+   text:'Votre ville d’origine s’arrache les places pour ce combat.',
+   choices:[{label:'Multiplier les apparitions locales',dv:{attente:2},morale:-5},
+            {label:'Rester concentré sur le camp',dv:{attente:1}}]},
+  {id:'bu_broadcaster_offer',title:'Un diffuseur veut vous en ouverture',
+   text:'Une chaîne étrangère propose de vous mettre en tête de son émission d’avant-combat.',
+   choices:[{label:'Accepter l’interview',dv:{attente:1},money:10},
+            {label:'Décliner, rester concentré',dv:{}}]},
+  {id:'bu_weighin_stare',title:'Regard au pesage',
+   text:'Face à face sur la balance, il ne cligne pas des yeux. La salle retient son souffle.',
+   choices:[{label:'Soutenir le regard',dv:{tension:1,attente:1}},
+            {label:'Sourire et tourner la tête',dv:{tension:-1}}]},
+  {id:'bu_quiet_week',title:'Une semaine sans histoire',
+   text:'Aucune polémique, aucun clip, aucune déclaration. Le camp se déroule dans le silence.',
+   choices:[{label:'Profiter du calme pour travailler',dv:{}},
+            {label:'S’en inquiéter — le silence avant l’orage',dv:{tension:1}}]}
+];
+/** Tire et applique un événement de build-up (V2-23), sans écran séparé
+ * pour la sélection de choix — deux options, réponse immédiate (règle 6 :
+ * un choix par combat, pas un menu). @returns {{title:string,text:string,
+ * chosen:string}|null} */
+function faithBuildupPick(f,F){
+  if(!F.buildup) F.buildup={attente:0,tension:0,causes:[]};
+  const seen=F.buildupSeen||(F.buildupSeen=[]);
+  let pool=FAITH_BUILDUP_EVENTS.filter(e=>!seen.includes(e.id));
+  if(!pool.length){ seen.length=0; pool=FAITH_BUILDUP_EVENTS; }
+  const ev=pick(pool);
+  seen.push(ev.id);
+  return ev;
+}
+function scr_faith_buildup(){
+  const ev=G.faith.currentBuildupEvent;
+  if(!ev) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.faithOfferSign()">Continuer</button></div>`;
+  return `<div class="scr center intro">
+   <div class="eyebrow gold">Avant le combat</div>
+   <h2 class="disp">${esc(ev.title)}</h2>
+   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:16px 0">
+     <p class="lede" style="margin:0">${esc(ev.text)}</p>
+   </div>
+   <div style="display:flex;flex-direction:column;gap:10px">
+     ${ev.choices.map((c,i)=>`<div class="opp" style="padding:14px;text-align:left" onclick="CL.faithBuildupChoose(${i})">
+       <b style="font-size:15px">${esc(c.label)}</b>
+     </div>`).join('')}
+   </div>
+  </div>`;
+}
+/* ==== [ANCRE: V2-25] — écran de conférence de presse, déclenché quand
+   l'attente est suffisante (gala.pressConf, faithGalaPosition — Main
+   event uniquement). Les répliques de l'adversaire sont générées depuis
+   SES attributs/bilan/style réels (attrs.aggression, bilan, styleLabel),
+   jamais un texte générique. Trois postures, toutes valables (règle
+   H.3). ==== */
+function faithOppReplies(o){
+  const aggressif=(o.attrs&&o.attrs.aggression||50)>65;
+  const bilan=o.W>o.L?`Il rappelle son bilan, ${o.W}-${o.L}, "et ce n'est pas fini".`:`Il évite le sujet de son bilan, ${o.W}-${o.L}.`;
+  const style=aggressif?`"Je viens chercher la finition, pas les points."`:`"Je le laisse venir. ${esc(o.styleLabel||'')} n'a jamais eu besoin de se presser."`;
+  return [bilan, style];
+}
+function scr_faith_press_conf(){
+  const f=G.f, F=G.faith, off=F.pendingOffer;
+  if(!off) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const o=off.opp.o;
+  const replies=faithOppReplies(o);
+  return `<div class="scr center intro">
+   <div class="eyebrow blood">Conférence de presse</div>
+   <h2 class="disp">${esc(o.name)} face à vous</h2>
+   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:16px 0">
+     <p class="lede" style="margin:0">${replies[0]}</p>
+     <p class="lede" style="margin:12px 0 0">${replies[1]}</p>
+   </div>
+   <div style="display:flex;flex-direction:column;gap:10px">
+     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('respect')">
+       <b style="font-size:15px">Le respect</b>
+       <div class="muted small mt">Une poignée de main. Tension basse, crédit auprès du directeur.</div>
+     </div>
+     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('provocation')">
+       <b style="font-size:15px">La provocation</b>
+       <div class="muted small mt">Un levier pour négocier — mais il n'arrivera pas dans le même état.</div>
+     </div>
+     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('silence')">
+       <b style="font-size:15px">Le silence</b>
+       <div class="muted small mt">Deux phrases, pas une de plus. Personne ne pourra vous citer.</div>
+     </div>
+   </div>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-17] — l'écran Contacts. Quatre interlocuteurs, chacun
    sa jauge de crédit QUALITATIVE (règle H.1 — jamais un chiffre), aucun
    n'a besoin d'une action dédiée ici : agent et directeur se négocient
@@ -1768,8 +1896,16 @@ function faithPresseArticle(ys,f,F){
     : ys.sequelle==='composure'
     ? 'On l’a vu chercher ses mots en conférence, cette année, d’une manière qu’on ne lui connaissait pas.'
     : '';
+  /* ==== [ANCRE: V2-27] — la promesse rappelée : tenue, une ligne de
+     fierté discrète ; trahie, une ligne cinglante — jamais neutre, une
+     boucle qui se referme doit se sentir. */
+  const promiseTxt=ys.promiseOutcome
+    ?(ys.promiseOutcome.tenue
+      ?`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. Parole tenue.`
+      :`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. La décision des juges a eu le dernier mot.`)
+    :'';
   return {titre:titres[h%titres.length],angle,
-    corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0 0 12px">${ton}</p>`:''}${sequelleTxt?`<p class="muted small" style="margin:0">${sequelleTxt}</p>`:''}`};
+    corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0 0 12px">${ton}</p>`:''}${promiseTxt?`<p class="muted small" style="margin:0 0 8px">${promiseTxt}</p>`:''}${sequelleTxt?`<p class="muted small" style="margin:0">${sequelleTxt}</p>`:''}`};
 }
 /* ==== [ANCRE: FAITH_PARCOURS] — le bilan annuel (coupure de presse) se
    lisait puis disparaissait : G.faith.yearLog était purgé à chaque nouvelle

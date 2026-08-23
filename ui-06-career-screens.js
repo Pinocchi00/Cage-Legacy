@@ -500,13 +500,42 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
     if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
      <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
      <div class="mono small">${G.activeSponsor.text}</div></div>`;
-    if(G.lastMsg){
-      h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
-       <div class="eyebrow mb" style="color:var(--text)">Bilan du face-à-face</div>
-       <div class="small">${esc(G.lastMsg)}</div></div>`;
-      G.lastMsg=null;
+    /* ==== [CORRECTIF V2-26] — "Bilan du face-à-face" n'était qu'un
+       intitulé posé sur G.lastMsg (le texte affiché venait d'ailleurs,
+       sans rapport garanti avec un vrai face-à-face) : un titre qui
+       promettait une scène et ne livrait qu'un texte de passage, sur
+       lequel aucune décision ne se prenait. Remplacé par une vraie scène
+       à décision unique pour les combats qui la méritent (titre, défense,
+       rivalité) — la comparaison d'attributs qui ne débouchait sur rien
+       reste RETIRÉE (elle n'apportait rien ici ; l'analyse tactique du
+       step 2, déjà utile, la remplace). G.lastMsg continue d'exister
+       pour les autres textes de passage (sponsor, etc.), juste plus sous
+       ce titre trompeur. ==== */
+    /* !G.faith : Faith a déjà son propre passage obligé entre l'annonce et
+       la cage (build-up + conférence de presse, V2-23/V2-25, ui-08
+       faithOfferSign()) — un second face-à-face ici doublonnerait le
+       même moment plutôt que le remplacer. */
+    const faceoffEligible=!G.faith && (G.fight.kind==='title'||G.fight.kind==='defense'||f.rivalId===opp.id);
+    if(faceoffEligible && !G.fight.faceoffDone){
+      h+=`<div class="card mt glass" style="border-left:3px solid var(--blood);padding-left:14px;background:var(--panel2)">
+       <div class="eyebrow mb" style="color:var(--blood)">Face-à-face</div>
+       <p class="small" style="margin:0">Nez à nez, dix secondes. Les photographes attendent.</p></div>
+       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('respect')">
+           <b style="font-size:15px">Soutenir le regard sans rien dire</b></div>
+         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('provocation')">
+           <b style="font-size:15px">Lui dire une phrase que vous seuls comprendrez</b></div>
+         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('silence')">
+           <b style="font-size:15px">Tourner la tête le premier</b></div>
+       </div>`;
+    } else {
+      if(G.lastMsg){
+        h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
+         <div class="small">${esc(G.lastMsg)}</div></div>`;
+        G.lastMsg=null;
+      }
+      h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
     }
-    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
   } else {
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
      <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
@@ -829,6 +858,10 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
         bougé (ex-æquo, ou combattant encore non classé des deux côtés) :
         une ligne "#7 -> #7" n'apporterait rien. ==== -->
    ${(p.rankBefore!=null && p.rankAfter!=null && p.rankBefore!==p.rankAfter)?`<div class="mono small" style="text-align:center;color:${p.rankAfter<p.rankBefore?'var(--pos)':'var(--neg)'}">#${p.rankBefore} → #${p.rankAfter}</div>`:''}
+   <!-- ==== [CORRECTIF V2-27] — la promesse du face-à-face (V2-26,
+        CL.chooseFaceoff) rappelée ici : une boucle ouverte doit se
+        refermer au moment même où le joueur peut encore s'en souvenir. -->
+   ${p.promiseOutcome?`<div class="mono small" style="text-align:center;color:${p.promiseOutcome.tenue?'var(--pos)':'var(--neg)'}">${p.promiseOutcome.tenue?`Promesse tenue face à ${esc(p.promiseOutcome.oppName)}.`:`Promesse non tenue face à ${esc(p.promiseOutcome.oppName)}.`}</div>`:''}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);
    /* ==== [ANCRE: CORRECTIF_GAIN_MASQUE_ARRONDI] — bug remonté : d20()

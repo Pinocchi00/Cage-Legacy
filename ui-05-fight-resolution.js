@@ -224,6 +224,25 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.faith && win && isDecisionLike(res.method) && G.f.personality==='showman'){
     G.f.morale=clamp(G.f.morale-8,0,100);
   }
+  /* ==== [ANCRE: V2-27] — boucle ouverte, fermée ici : une promesse faite
+     en conférence (faithPressConfPosture('provocation'), ui-08) et
+     jamais rappelée n'aurait jamais existé. Vérifiée uniquement contre
+     l'adversaire CONCERNÉ (oppId) — une promesse ne se transfère pas au
+     combat suivant. Toujours consommée (G.faith.promise=null), tenue ou
+     non : elle ne doit jamais persister au-delà du combat qu'elle visait. */
+  if(G.faith && G.faith.promise && opp && opp.id===G.faith.promise.oppId){
+    const tenue=win && !isDecisionLike(res.method);
+    G.faith.promiseOutcome={tenue,oppName:G.faith.promise.oppName};
+    G.faith.promise=null;
+  }
+  /* ==== [ANCRE: V2-27 carrière] — même principe côté mode carrière
+     (G.promise, posé par CL.chooseFaceoff('provocation'), ui-08/scr_plan
+     V2-26) : consommé immédiatement, lu par scr_result (ui-06). */
+  let promiseOutcome=null;
+  if(G.promise && opp && opp.id===G.promise.oppId){
+    promiseOutcome={tenue:win && !isDecisionLike(res.method),oppName:G.promise.oppName};
+    G.promise=null;
+  }
   // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
   // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
   // donc un adversaire battu 15 fois de façon décisive n'était presque jamais
@@ -636,7 +655,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      annuel d'advanceRoster() (qui ne concerne que les PNJ). ==== */
   const myRankAfter=divRank(G.f);
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
-    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter};
+    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   f.W=f.L=f.D=f.ko=f.sub=f.dec=f.koLoss=f.streak=0; f.orgWins=0; f.easyFights=0; f.history=[]; f.champion=null; f.titles=0; f.defenses=0; f._fy=0;
