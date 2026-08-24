@@ -13,7 +13,29 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: V2-42, lecture (a), point 2] — une description écrite par
+   type d'anomalie physique, avec la conséquence concrète en cage —
+   remplace l'étiquette tactique générique retirée de getExclusiveTactics()
+   (engine.js). 'allonge hors-norme' (simple queue statistique, apeIndex
+   >=7) partage le texte de 'allonge démesurée' (la vraie anomalie rare) :
+   la différence entre les deux est déjà dans la fréquence d'apparition,
+   pas dans ce qu'on en dit. */
+const ANOMALY_READS={
+  'allonge démesurée':'Une envergure hors normes. Il vous touche depuis un endroit où vous ne vous croyez pas atteignable. Entrer coûtera cher, rester dehors aussi.',
+  'allonge hors-norme':'Une allonge nettement au-dessus de la moyenne. La distance lui appartient tant que vous ne la fermez pas.',
+  'gabarit hors-norme pour la division':'Un gabarit qui n’a rien à faire dans cette catégorie de poids. Chaque échange au contact se paie cher, pour lui comme pour vous.',
+  'densité rare (type Ngannou)':'Une masse qui ne se déplace jamais dans le vide. Le moindre coup qui porte peut suffire à tout changer.',
+  'explosivité rare (type Cormier)':'Une explosivité qui sort de nulle part, sans temps de charge visible. Il change de vitesse sans prévenir.'
+};
+/** @param {object} o @returns {string} vide si aucune anomalie */
+function anomalyReadLine(o){
+  const tags=(o.phys&&o.phys.tags)||[];
+  const key=Object.keys(ANOMALY_READS).find(k=>tags.includes(k));
+  return key?ANOMALY_READS[key]:'';
+}
 function tacticalRead(f,o){ const a=eff(f),b=eff(o);
+  const anomaly=anomalyReadLine(o);
+  if(anomaly) return (o.styleLabel||'')+'. '+anomaly;
   let prefix=(o.styleLabel||'')+'. '; const fights=o.W+o.L+o.D;
   // ==== [ANCRE: CORRECTIF_REPETITION_TEXTES] — chaque condition n'avait
   // qu'UNE seule phrase possible, répétée à l'identique à chaque adversaire
@@ -141,10 +163,21 @@ function genOpponents(f){
     entry.mm=matchmakingRole(f,champ,entry);
     return [entry]; }
   if(isDefense){
-    const r1=pool[0]||pool[1];
-    const rest=pool.slice(1,8).filter(o=>o && o.id!==r1.id);
+    /* ==== [ANCRE: V2-13 règle 1] — "aucun combattant à bilan négatif sur
+       ses 5 derniers combats en carte principale ou main event". Une
+       défense de titre EST le main event par définition (fightKind(),
+       ui-05) : filtre appliqué ici, avant la sélection de r1/rest, avec
+       le même filet de sécurité (pool restant suffisant) que les autres
+       filtres de cette fonction pour ne jamais casser un petit roster. */
+    const notOnASkid=pool.filter(o=>{
+      if(!o.history || o.history.length<5) return true;
+      return o.history.slice(-5).filter(h=>h.res==='loss').length<3;
+    });
+    const defPool=notOnASkid.length>=5?notOnASkid:pool;
+    const r1=defPool[0]||defPool[1];
+    const rest=defPool.slice(1,8).filter(o=>o && o.id!==r1.id);
     rest.sort(()=>0.5-rnd());
-    chosen.push(r1, rest[0]||pool[1], rest[1]||pool[2]);
+    chosen.push(r1, rest[0]||defPool[1], rest[1]||defPool[2]);
   }
   else {
     let normalPool=rankPool(pool.filter(o=>!o.champion)); // trié du meilleur au pire — myRank/rk ci-dessous en dépendent directement

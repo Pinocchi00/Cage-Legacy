@@ -43,9 +43,16 @@ function scr_title(){
       const m=G.bootMsg; G.bootMsg=null;
       return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
     })()}
-   <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.startFaith()">1. MMA FAITH
+   <!-- ==== [CORRECTIF V2-43] — "une seule porte d'entrée par mode" : les
+        deux boutons (lancer une nouvelle partie / reprendre celle en
+        cours, ce dernier conditionnel à hasSave) convergent maintenant
+        sur un unique écran d'accueil Faith (scr_faith_home, ui-04), qui
+        porte lui-même les deux actions — plus fidèle au traitement déjà
+        réservé au mode carrière complète juste en dessous (un seul
+        bouton "2. CARRIÈRE COMPLÈTE" → scr_intro, qui gère sa propre
+        reprise). ==== -->
+   <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.go('faith_home')">1. MMA FAITH
      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
-   ${hasSave('faith')?`<button class="btn gold" style="font-size:16px;padding:14px;margin-top:8px" onclick="CL.cont()">REPRENDRE LA PARTIE MMA FAITH EN COURS</button>`:''}
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
      <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l’argent, les camps et l’héritage</span></button>
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
@@ -64,6 +71,10 @@ function scr_title(){
         chemin vers le Panthéon. ==== -->
    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('hof')">VOIR LE PANTHÉON
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Toutes les légendes retraitées, tous modes confondus</span></button>
+   <!-- ==== [ANCRE: V2-44] — accès aux Réglages sans carrière chargée (le
+        Rythme de combat et les Moments de bascule s'appliquent à tous les
+        modes, pas seulement Faith). ==== -->
+   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('settings')">RÉGLAGES</button>
    </div>`;
 }
 /* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
@@ -83,9 +94,9 @@ function gauntletMenuBestTag(mode){
   const meta=loadMetaStats();
   const asc=gauntletSelectedAsc(mode);
   const best=gauntletBestGet(meta,mode,asc);
-  if(best===undefined) return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.6">Ascension ${asc} — aucun record</span>`;
+  if(best===undefined) return `<span class="mono" style="display:block;font-size:11px;margin-top:4px;opacity:.6">Ascension ${asc} — aucun record</span>`;
   const label=mode==='boss_run'?`Record : ${best}/5`:mode==='ladder_100'?`Record : rang #${best}`:(best>=7?'Record : Tournoi remporté':`Record : palier ${best}`);
-  return `<span class="mono" style="display:block;font-size:10px;margin-top:4px;opacity:.8">Ascension ${asc} · ${label}</span>`;
+  return `<span class="mono" style="display:block;font-size:11px;margin-top:4px;opacity:.8">Ascension ${asc} · ${label}</span>`;
 }
 /* ==== [ANCRE: GAUNTLET_ASCENSION] — sélecteur de palier. Rendu uniquement si
    au moins un palier est débloqué sur ce format : un joueur qui n'a jamais
@@ -100,8 +111,8 @@ function gauntletAscPicker(mode){
   for(let i=0;i<=max;i++){
     btns+=`<span onclick="CL.setGauntletAsc('${mode}',${i})" style="display:inline-block;cursor:pointer;border:1px solid ${i===cur?'var(--gold)':'var(--line)'};color:${i===cur?'var(--gold)':'var(--muted)'};padding:3px 10px;margin:0 4px 4px 0;border-radius:2px;font-size:11px" class="mono">A${i}</span>`;
   }
-  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:10px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span>
-   <span onclick="CL.viewAscensionTower('${mode}')" style="display:inline-block;cursor:pointer;margin-top:4px;color:var(--gold);text-decoration:underline dotted;font-size:10px">🗼 Voir la Tour d\u2019Ascension</span></div>`;
+  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:11px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span>
+   <span onclick="CL.viewAscensionTower('${mode}')" style="display:inline-block;cursor:pointer;margin-top:4px;color:var(--gold);text-decoration:underline dotted;font-size:11px">🗼 Voir la Tour d\u2019Ascension</span></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: TOUR_ASCENSION_VISUELLE] — ajout #6 (24 ajouts, 12/08/2026) :
@@ -338,7 +349,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   const rankTag=f.champChampBelt?`<span class="tag2 hot" style="border-color:var(--blood);color:var(--blood)">DOUBLE CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:(champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`));
   const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
   const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
-  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">Contrat : ${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''}</span>`:'';
+  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">${contractFightsLeftLabel(f.contract)}</span>`:'';
   return `<div class="scr">
    <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
      <span class="eyebrow mono">${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
@@ -468,6 +479,51 @@ function scr_camp(){ const f=G.f;
    </div>`; }
 
 /* ==== [ANCRE: PLAN_COMBAT] — vestiaire, choix tactique juste avant le combat ==== */
+/* ==== [ANCRE: V2-28] — réglage Rythme de combat exposé ici, temporairement
+   (comme l'ambiance Faith au lot précédent, V2-01) — le vrai foyer sera
+   l'écran Réglages unique de V2-44. Lecture défensive de G.settings, même
+   convention que faithAmbiance : G.settings n'est pas garanti exister à
+   tous les points d'entrée de G. */
+function combatPaceToggleBlock(){
+  const pace=(G.settings&&G.settings.fightPace)||'rapide';
+  const opts=[['integral','Intégral'],['rapide','Rapide'],['instantane','Instantané']];
+  return `<div class="card mt" style="padding:10px;background:var(--panel2)">
+   <div class="eyebrow mb" style="font-size:10px">RYTHME DE COMBAT</div>
+   <div style="display:flex;gap:8px">
+     ${opts.map(([id,lbl])=>`<button class="btn ${pace===id?'primary':'ghost'}" style="flex:1;padding:8px;font-size:12px" onclick="CL.setFightPace('${id}')">${lbl}</button>`).join('')}
+   </div>
+  </div>`;
+}
+/* ==== [ANCRE: V2-44] — écran Réglages regroupé : Ambiance (V2-01),
+   Rythme de combat (V2-28, combatPaceToggleBlock() réutilisé tel quel),
+   Moments de bascule activés/désactivés (V2-29, lu par detectBascule(),
+   ui-08). Trois réglages, pas plus — rien d'autre n'y est ajouté.
+   Atteint depuis le titre (aucune carrière requise) ou depuis le hub
+   Faith en cours de partie : le retour dépend simplement de si une
+   carrière Faith est chargée en mémoire (G.faith). */
+function scr_settings(){
+  const back=G.faith?'faith_hub':'title';
+  const basculeOn=!(G.settings && G.settings.basculeEnabled===false);
+  return `<div class="scr" style="max-width:480px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Réglages</span><span class="eyebrow x" onclick="CL.go('${back}')">✕</span></div>
+   <div class="card mt" style="padding:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="font-size:11px">AMBIANCE</div>
+     <div style="display:flex;gap:8px">
+       <button class="btn ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</button>
+       <button class="btn ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</button>
+     </div>
+   </div>
+   ${combatPaceToggleBlock()}
+   <div class="card mt" style="padding:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="font-size:11px">MOMENTS DE BASCULE</div>
+     <div style="display:flex;gap:8px">
+       <button class="btn ${basculeOn?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setBasculeEnabled(true)">Activés</button>
+       <button class="btn ${!basculeOn?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setBasculeEnabled(false)">Désactivés</button>
+     </div>
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('${back}')">← Retour</button>
+  </div>`;
+}
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
   const step=G.fight.planStep||1;
@@ -500,21 +556,69 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
     if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
      <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
      <div class="mono small">${G.activeSponsor.text}</div></div>`;
-    if(G.lastMsg){
-      h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
-       <div class="eyebrow mb" style="color:var(--text)">Bilan du face-à-face</div>
-       <div class="small">${esc(G.lastMsg)}</div></div>`;
-      G.lastMsg=null;
+    /* ==== [CORRECTIF V2-26] — "Bilan du face-à-face" n'était qu'un
+       intitulé posé sur G.lastMsg (le texte affiché venait d'ailleurs,
+       sans rapport garanti avec un vrai face-à-face) : un titre qui
+       promettait une scène et ne livrait qu'un texte de passage, sur
+       lequel aucune décision ne se prenait. Remplacé par une vraie scène
+       à décision unique pour les combats qui la méritent (titre, défense,
+       rivalité) — la comparaison d'attributs qui ne débouchait sur rien
+       reste RETIRÉE (elle n'apportait rien ici ; l'analyse tactique du
+       step 2, déjà utile, la remplace). G.lastMsg continue d'exister
+       pour les autres textes de passage (sponsor, etc.), juste plus sous
+       ce titre trompeur. ==== */
+    /* !G.faith : Faith a déjà son propre passage obligé entre l'annonce et
+       la cage (build-up + conférence de presse, V2-23/V2-25, ui-08
+       faithOfferSign()) — un second face-à-face ici doublonnerait le
+       même moment plutôt que le remplacer. */
+    const faceoffEligible=!G.faith && (G.fight.kind==='title'||G.fight.kind==='defense'||f.rivalId===opp.id);
+    if(faceoffEligible && !G.fight.faceoffDone){
+      h+=`<div class="card mt glass" style="border-left:3px solid var(--blood);padding-left:14px;background:var(--panel2)">
+       <div class="eyebrow mb" style="color:var(--blood)">Face-à-face</div>
+       <p class="small" style="margin:0">Nez à nez, dix secondes. Les photographes attendent.</p></div>
+       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('respect')">
+           <b style="font-size:15px">Soutenir le regard sans rien dire</b></div>
+         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('provocation')">
+           <b style="font-size:15px">Lui dire une phrase que vous seuls comprendrez</b></div>
+         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('silence')">
+           <b style="font-size:15px">Tourner la tête le premier</b></div>
+       </div>`;
+    } else {
+      if(G.lastMsg){
+        h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
+         <div class="small">${esc(G.lastMsg)}</div></div>`;
+        G.lastMsg=null;
+      }
+      h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
     }
-    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
   } else {
+    /* ==== [ANCRE: V2-30] — "le plan de combat, un seul écran" : les trois
+       parties demandées par le document, dans l'ordre. 1) Ce qu'on sait de
+       lui (tacticalRead(), déjà réel — arme/faille de l'adversaire, jamais
+       un texte générique). 2) Le plan — TACTICS[f.style] est déjà à 3
+       entrées par style ; .slice(0,3) plafonne pour de bon même quand
+       getExclusiveTactics() en ajoute une 4e (règle H.3, pas respectée
+       jusqu'ici sur les rares tags physiques exclusifs). 3) La clé — un
+       seul détail exploitable, gagné hors combat (scoutKey, V2-08 côté
+       Faith) ou son absence assumée en toutes lettres, jamais une case
+       vide. ==== */
+    const combinedTactics=getExclusiveTactics(f).concat(plans).slice(0,3);
+    const hasKey=!!(G.faith && G.faith.scoutKey);
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
-     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(f,opp)}</div>
+     <div class="eyebrow gold mb" style="letter-spacing:0.2em">CE QU’ON SAIT DE LUI</div>
+     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px">${tacticalRead(f,opp)}</div>
    </div>
-   <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
-   ${getExclusiveTactics(f).concat(plans).map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
+   <div class="eyebrow gold mb" style="letter-spacing:0.2em">LE PLAN</div>
+   <p class="lede small">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
+   ${combinedTactics.map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
      <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}`;
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+   <div class="card mt" style="border-left:3px solid ${hasKey?'var(--sage)':'var(--line)'};padding-left:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="color:${hasKey?'var(--sage)':'var(--muted)'}">LA CLÉ</div>
+     <div class="small">${hasKey?`Grâce au sparring, vous savez qu’${esc(opp.name)} est particulièrement dangereux en ${esc(oppTopAttrLabel(opp))}.`:'Vous entrez sans rien de plus que ce que tout le monde sait de lui.'}</div>
+   </div>
+   ${combatPaceToggleBlock()}`;
   }
   h+=`</div>`;
   return h;
@@ -758,7 +862,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
         <span class="num ${J.j3[0]>J.j3[1]?'a':(J.j3[0]===J.j3[1]?'b':'dn')}">${J.j3[0]}-${J.j3[1]}</span>
       </div>
       <div class="hr"></div>
-      <div class="mono small muted" style="text-align:left;font-size:10px">
+      <div class="mono small muted" style="text-align:left;font-size:11px">
         <div style="display:flex;justify-content:space-between;color:var(--text);margin-bottom:4px"><span>RND</span><span>J1</span><span>J2</span><span>J3</span><span>SIG</span><span>TD</span><span>KD</span></div>
         ${(p.res.roundStats||[]).map(rs=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--line)">
           <span style="color:var(--gold)">R${rs.r}</span><span>${rs.j1[0]}-${rs.j1[1]}</span><span>${rs.j2[0]}-${rs.j2[1]}</span><span>${rs.j3[0]}-${rs.j3[1]}</span><span>${rs.sigA}-${rs.sigB}</span><span>${rs.tdA}-${rs.tdB}</span><span>${rs.kdA}-${rs.kdB}</span>
@@ -767,10 +871,30 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   }
   let campHtml='';
   if(p.camp && p.camp.deltas.length){
+    /* ==== [CORRECTIF V2-36] — deux bugs de la même famille (règle 7 :
+       jamais de récompense nulle) corrigés ensemble ici :
+       1. `if(b20===a20) return '';` faisait disparaître silencieusement
+          toute ligne dont le gain réel (échelle /100) ne franchissait pas
+          de palier /20 — un gain qui a bien eu lieu s'évaporait purement
+          et simplement de l'écran, pire que "10 -> 10" (au moins ce
+          dernier restait visible). Remplacé par une annotation, jamais
+          par une disparition.
+       2. Les entrées `converted` (convertZeroGain(), engine.js) —
+          conversion vers un attribut voisin ou vers de l'argent quand
+          un gain demandé était totalement plafonné — ont leur propre
+          rendu : elles doivent toujours s'afficher, y compris quand la
+          conversion elle-même ne franchit pas de palier /20. ==== */
     const rows=p.camp.deltas.map(d=>{
       if(Array.isArray(d)){ const scaled=Math.sign(d[1])*Math.max(1,Math.round(Math.abs(d[1])/5)); return `<span class="dlt ${d[1]>=0?'up':'dn'}">${scaled>0?'+':''}${scaled} ${d[0]}</span>`; }
+      if(d.converted && d.key===null){
+        return `<span class="dlt up">${d.fromLabel} déjà au maximum — converti en +${d.money}k$</span>`;
+      }
       const b20=d20(d.before), a20=d20(d.after);
-      if(b20===a20) return '';
+      if(d.converted){
+        const suffix=b20===a20?' (gain minime)':'';
+        return `<span class="dlt up">${d.fromLabel} déjà au maximum — reporté sur ${d.label}${suffix}</span>`;
+      }
+      if(b20===a20) return `<span class="dlt ${d.delta>=0?'up':'dn'}">${d.label} <span class="muted">(gain interne minime)</span></span>`;
       return `<span class="dlt ${a20>=b20?'up':'dn'}">${d.label} : ${b20} ➔ ${a20}</span>`;
     }).filter(Boolean);
     if(rows.length) campHtml=`<div class="card"><div class="eyebrow mb">Évolution (sur 20)</div><div class="dlts">${rows.join('')}</div></div>`;
@@ -803,6 +927,16 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      ${p.nickEvoHtml?`<div class="small mt" style="font-style:italic">${p.nickEvoHtml}</div>`:''}
    </div>
    ${judgesHtml}
+   <!-- ==== [CORRECTIF V2-15 point 4] — mouvement de rang affiché en une
+        ligne après chaque combat (#11 -> #7), pas seulement visible en
+        creusant jusqu'à l'écran Classement. Silencieux si le rang n'a pas
+        bougé (ex-æquo, ou combattant encore non classé des deux côtés) :
+        une ligne "#7 -> #7" n'apporterait rien. ==== -->
+   ${(p.rankBefore!=null && p.rankAfter!=null && p.rankBefore!==p.rankAfter)?`<div class="mono small" style="text-align:center;color:${p.rankAfter<p.rankBefore?'var(--pos)':'var(--neg)'}">#${p.rankBefore} → #${p.rankAfter}</div>`:''}
+   <!-- ==== [CORRECTIF V2-27] — la promesse du face-à-face (V2-26,
+        CL.chooseFaceoff) rappelée ici : une boucle ouverte doit se
+        refermer au moment même où le joueur peut encore s'en souvenir. -->
+   ${p.promiseOutcome?`<div class="mono small" style="text-align:center;color:${p.promiseOutcome.tenue?'var(--pos)':'var(--neg)'}">${p.promiseOutcome.tenue?`Promesse tenue face à ${esc(p.promiseOutcome.oppName)}.`:`Promesse non tenue face à ${esc(p.promiseOutcome.oppName)}.`}</div>`:''}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);
    /* ==== [ANCRE: CORRECTIF_GAIN_MASQUE_ARRONDI] — bug remonté : d20()
@@ -812,7 +946,14 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
       les deux cas. On annote explicitement quand un gain a bien eu lieu mais
       ne se voit pas sur l'échelle affichée. ==== */
    const noVisibleGain=before===after && f.attrs[k]>realBefore;
-   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:10px">(gain interne minime)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   /* ==== [CORRECTIF V2-36] — avant ce correctif, un attribut déjà à son
+      plafond (f.attrs[k]===realBefore, AUCUN gain interne réel, contrairement
+      au cas noVisibleGain juste au-dessus où un petit gain réel existe mais
+      ne franchit pas de palier /20) s'affichait en "10 -> 10" nu, comme si
+      rien ne s'était passé — sans jamais dire que le plafond en était la
+      cause. Règle 7 : jamais de récompense nulle sans explication. ==== */
+   const trueZeroGain=before===after && f.attrs[k]===realBefore;
+   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:11px">(gain interne minime)</span>':''}${trueZeroGain?' <span class="muted" style="font-size:11px">(déjà au maximum)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
@@ -954,6 +1095,14 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
      <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
      ${(f.faithTraits && f.faithTraits.length)?`<div class="story" style="position:relative;z-index:2;color:var(--blood)"><b>Traits de caractère.</b> ${f.faithTraits.join(', ')}.</div>`:''}
+     <!-- ==== [ANCRE: V2-38] — bilan maison : le palmarès global (f.W/f.L,
+          jamais réinitialisé après le seul passage amateur→pro) reste la
+          référence affichée partout ailleurs ; cette ligne ajoute le détail
+          par organisation (f.orgRecords, engine.js applyResult()), un
+          second objectif de progression pour une carrière qui change
+          d'écurie plusieurs fois. Absente tant qu'aucun combat pro n'a
+          encore été disputé. ==== -->
+     ${(f.orgRecords && Object.keys(f.orgRecords).length)?`<div class="story" style="position:relative;z-index:2"><b>Bilan maison.</b> ${Object.entries(f.orgRecords).map(([orgId,rec])=>`${rec.W}-${rec.L}${rec.D?`-${rec.D}`:''} sous les couleurs de ${esc(ORGS[orgId]||'—')}`).join(' · ')}.</div>`:''}
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
      ${championBadgeCard(f)}
      ${signatureMoveCard(f)}

@@ -231,12 +231,88 @@ function faithCalendarBar(F){
    Championship -> PCF), jamais inventés à côté. ==== */
 const FAITH_GALA_PREFIX=['AM','CL','CR','CN','CONT','URC','PCF'];
 const FAITH_GALA_CITIES=['Lyon','Marseille','Osaka','Rio','Manchester','Chicago','Lagos','Séoul','Varsovie','Montréal','Le Caire','Perth'];
+/* ==== [ANCRE: V2-19] — un directeur nommé par organisation (sept paliers,
+   ORGS/FAITH_GALA_PREFIX, engine.js/ui-04), persistant sur toute la
+   carrière. `grants`/`refuses`/`counter` sont lus par faithNegotiate*()
+   (ui-08) — jamais affichés tels quels, seulement leur EFFET. La mémoire
+   (G.faith.directors[org].trust, -3 à +3) n'est jamais chiffrée à
+   l'écran (règle H.1) : seule une phrase qualitative (faithDirectorMood,
+   plus bas) la traduit. ==== */
+const FAITH_DIRECTORS=[
+  {name:'Mourad',archetype:'comptable',grants:'chiffres',refuses:'base',counter:'prime_resultat'},
+  {name:'Vince',archetype:'showman',grants:'spectacle',refuses:'ennuyeux',counter:'montee_carte'},
+  {name:'Odette',archetype:'loyaliste',grants:'ancien',refuses:'nouveau',counter:'contrat_long'},
+  {name:'Silva',archetype:'requin',grants:'rien',refuses:'tout',counter:'revanche'},
+  {name:'Karl',archetype:'ancien',grants:'finisseur',refuses:'decisionneur',counter:'prime_finition'},
+  {name:'Nadia',archetype:'technocrate',grants:'grille',refuses:'ecart',counter:'clause_titre'},
+  {name:'Ruben',archetype:'patriarche',grants:'excuse',refuses:'humiliation',counter:'domicile'}
+];
+/** Humeur qualitative du directeur envers le joueur — jamais un chiffre.
+ * @param {number} org @returns {string} */
+function faithDirectorMood(org){
+  const t=(G.faith.directors&&G.faith.directors[org]&&G.faith.directors[org].trust)||0;
+  if(t>=2) return 'il vous doit tout';
+  if(t>=1) return 'il vous suit';
+  if(t<=-2) return 'il vous évite';
+  if(t<=-1) return 'il se méfie';
+  return 'il vous tolère';
+}
+/** Ajuste la mémoire du directeur d'une organisation (jamais affichée en
+ * chiffre — seule faithDirectorMood() la traduit).
+ * @param {number} org @param {number} dv */
+function faithDirectorAdjust(org,dv){
+  if(!G.faith.directors) G.faith.directors={};
+  if(!G.faith.directors[org]) G.faith.directors[org]={trust:0};
+  G.faith.directors[org].trust=clamp(G.faith.directors[org].trust+dv,-3,3);
+}
+/** Le profil du fighter correspond-il à ce que cet archétype de directeur
+ * accorde volontiers (FAITH_DIRECTORS.grants) ? Dérivé de signaux déjà
+ * suivis (personnalité, âge, palmarès de finition, régularité de série),
+ * jamais d'un nouveau champ dédié.
+ * @param {object} dir entrée de FAITH_DIRECTORS @param {object} f */
+function faithDirectorFavorable(dir,f){
+  switch(dir.archetype){
+    case 'comptable': return (f.earnings||0)>=100;
+    case 'showman': return f.personality==='showman'||f.personality==='villain';
+    case 'loyaliste': return (f.age||18)>=28;
+    case 'ancien': return ((f.ko||0)+(f.sub||0))>=Math.max(3,Math.round((f.W||0)*0.4));
+    case 'technocrate': return Math.abs(f.streak||0)<=3;
+    case 'patriarche': return f.personality==='humble';
+    default: return false; // le Requin n'est "favorable" au sens classique pour personne
+  }
+}
+const FAITH_DIRECTOR_REFUS={
+  comptable:'Les chiffres ne le permettent pas.',
+  showman:'Vous ne faites pas encore parler de vous.',
+  loyaliste:"Vous n'êtes pas encore d'ici.",
+  ancien:'Vous gagnez, mais vous ne finissez personne.',
+  technocrate:'Ça sort de la grille.',
+  patriarche:'Pas après ce que vous avez dit.',
+  requin:'Non.'
+};
+function faithDirectorRefusalLine(dir){ return FAITH_DIRECTOR_REFUS[dir.archetype]||'Non.'; }
+/** Motif contextuel de la demande "un meilleur adversaire" (V2-18) —
+ * un seul, choisi selon le contexte réel plutôt qu'un choix vide sans
+ * raison. @param {object} f @param {object} o l'adversaire proposé
+ * @returns {string} */
+function faithDemandMotif(f,o){
+  if(f.injury) return 'Je reviens de blessure, pas contre lui.';
+  if((o.W+o.L+(o.D||0))===0 && (f.W+f.L+(f.D||0))>0) return "Il n'est pas classé, ça ne me fait pas monter.";
+  if((f.streak||0)>=2) return 'Je veux un classé, je suis prêt.';
+  return 'Ce n’est pas lui que je veux affronter.';
+}
 /** Position sur la carte : prélims/carte principale/main event, chacune sa
  * bourse, sa hype, et son effet. Le rang bas (débutant) tombe naturellement
  * dans "rang > 12" — pas besoin d'un second critère "peu de combats dans
  * l'org" pour l'attraper.
  * @param {object} f @returns {{tier:string,mult:number,hype:string,rounds:number}} */
 function faithGalaPosition(f){
+  /* ==== [CORRECTIF V2-24 point 4] — le circuit amateur (org 0) n'a ni
+     hype ni conférence de presse : un gala amateur à Lyon n'a pas de main
+     event médiatisé, même si un rivalId ou un rang bas s'est déjà formé à
+     ce niveau (ex. via la némésis, verrouillable dès l'amateur — V2-26).
+     Verrouillé avant toute autre condition, pas juste en dernier recours. */
+  if((f.org||0)===0) return {tier:'Circuit amateur',mult:0.6,hype:'nulle',rounds:3,pressConf:false};
   const rk=divRank(f);
   if(rk<=4 || f.champion || f.rivalId) return {tier:'Main event',mult:2,hype:'forte',rounds:5,pressConf:true};
   if(rk<=12) return {tier:'Carte principale',mult:1,hype:'moyenne',rounds:3,pressConf:false};
@@ -252,17 +328,25 @@ function faithGalaLabel(F,f){
   const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
   return `${prefix} ${num} — ${city}`;
 }
-/* ==== [ANCRE: FAITH_NEGOCIATION] — le pouvoir de négociation n'est jamais
-   chiffré à l'écran (cf. règle H.1 : un écran ne montre jamais un nombre
-   qu'une phrase peut porter), seulement son EFFET. Dérivé de données déjà
-   existantes : série en cours, rang, hype, personnalité (villain négocie
-   mieux — enfin une conséquence mécanique du choix de création). ==== */
-function faithNegotiationPower(f){
+/* ==== [ANCRE: FAITH_NEGOCIATION / V2-20] — le pouvoir de négociation n'est
+   jamais chiffré à l'écran (cf. règle H.1 : un écran ne montre jamais un
+   nombre qu'une phrase peut porter), seulement son EFFET. Dérivé de
+   données déjà existantes : série en cours, rang, hype, personnalité
+   (villain négocie mieux — enfin une conséquence mécanique du choix de
+   création). Renommée faithLeverage() (V2-20) : "sans levier, l'option
+   n'existe pas" — un score à 0 retire purement et simplement le bouton
+   "Demander plus d'argent" de l'écran d'offre (scr_faith_offer, ce
+   fichier), remplacé par la raison. `F.buildup.attente` (hype accumulée
+   DEPUIS l'annonce du combat, Lot E — Batch 5) s'y ajoutera quand ce
+   système existera ; en attendant, faithLeverage ne perd rien de ce
+   qu'avait faithNegotiationPower. ==== */
+function faithLeverage(f,F){
   let score=0;
   if((f.streak||0)>=2) score++;
   if(divRank(f)<=15) score++;
   if((f.hypeBonus||1)>1.2) score++;
   if(f.personality==='villain') score++;
+  if(F && F.buildup && F.buildup.attente>=2) score++;
   return score;
 }
 function faithDraftPortrait(d){
@@ -399,6 +483,61 @@ function faithProtegeLine(p,f){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-43] — écran d'accueil dédié au mode, atteint en tapant
+   "MMA Faith" depuis le titre (scr_title, ui-06) : une seule porte
+   d'entrée, comme le mode carrière complète (scr_intro) en a déjà une.
+   Remplace les deux boutons du titre ("1. MMA FAITH" + "REPRENDRE LA
+   PARTIE EN COURS" conditionnel). */
+/** Résumé de la carrière Faith sauvegardée, lu directement dans
+ * localStorage SANS passer par load() — ne doit jamais écraser le G en
+ * cours (le joueur peut consulter ce résumé avant même d'avoir décidé de
+ * reprendre). @returns {?object} */
+function faithSaveSummary(){
+  try{
+    const s=localStorage.getItem(SAVE_KEY); if(!s) return null;
+    const p=JSON.parse(s); if(!p||!p.faith||!p.f) return null;
+    const f=p.f, F=p.faith;
+    const monthEntry=(F.calendar&&F.calendar[F.month])||{type:null};
+    const next=f.injury?'Infirmerie'
+      :monthEntry.type==='combat'?'Un combat approche'
+      :monthEntry.type==='intersaison'?'Intersaison'
+      :monthEntry.type==='vie'?'Un événement de vie'
+      :'Calme, pour l’instant';
+    return {name:f.name,flag:f.flag,year:F.year,W:f.W||0,L:f.L||0,org:orgDisplayName(f),next};
+  }catch(e){ return null; }
+}
+function scr_faith_home(){
+  const sum=faithSaveSummary();
+  return `<div class="scr center intro">
+   <div class="eyebrow">MMA FAITH</div>
+   <h2 class="disp" style="margin-top:4px">Carrière longue</h2>
+   <p class="lede small">Gestion de vie — une saison à la fois.</p>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+     ${sum?`<div class="opp" style="padding:16px;text-align:left" onclick="CL.cont()">
+       <b style="font-size:16px">Reprendre</b>
+       <div class="hero-name" style="font-size:20px;margin-top:6px">${esc(sum.name)} ${sum.flag}</div>
+       <div class="mono small muted" style="margin-top:4px">Saison ${sum.year} · ${sum.W}-${sum.L} · ${esc(sum.org)}</div>
+       <div class="small muted" style="margin-top:6px">${esc(sum.next)}</div>
+     </div>`:''}
+     <div class="opp" style="padding:16px" onclick="CL.faithHomeNewCareer()">
+       <b style="font-size:16px">Nouvelle carrière</b>
+       <div class="muted small mt">${sum?'Remplace définitivement la carrière en cours.':'Créer un combattant et commencer.'}</div>
+     </div>
+     <div class="opp" style="padding:16px" onclick="CL.go('faith_legends')">
+       <b style="font-size:16px">Le Panthéon Faith</b>
+       <div class="muted small mt">Les carrières terminées et leurs scores.</div>
+     </div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="font-size:11px">AMBIANCE</div>
+     <div style="display:flex;gap:8px">
+       <button class="btn ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</button>
+       <button class="btn ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</button>
+     </div>
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('title')">← Retour</button>
+  </div>`;
+}
 function scr_faith_hub(){
   const f=G.f;
   const monthEntry=(G.faith.calendar&&G.faith.calendar[G.faith.month])||{type:null};
@@ -431,7 +570,7 @@ function scr_faith_hub(){
        d'adversaire pressenti ni de vie de salle, seule l'Infirmerie,
        jusqu'à guérison. ==== */
     actionsHtml=`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px;border-left:3px solid var(--loss)">
-      <div class="eyebrow" style="font-size:10px;color:var(--loss)">INFIRMERIE</div>
+      <div class="eyebrow" style="font-size:11px;color:var(--loss)">INFIRMERIE</div>
       <div class="hero-name" style="font-size:20px;margin-top:6px">${esc(f.injury.name)}</div>
       <div class="mono small muted" style="margin-top:4px">${f.injury.left} combat${f.injury.left>1?'s':''} avant guérison complète</div>
     </div>
@@ -441,29 +580,40 @@ function scr_faith_hub(){
     actionsHtml=`<p class="lede small">${quoi}.</p>
     <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithLifeEvent()">CONTINUER</button>`;
   } else if(monthEntry.type==='intersaison'){
-    /* ==== [CORRECTIF FA-15] — trois options PERMANENTES, jamais plus (règle
-       H.3 : au-delà, un écran de décision redevient un menu) : Se reposer,
-       Tourner avec [le partenaire le plus avancé — un seul, pas jusqu'à
-       deux comme avant : la règle des trois options l'exigeait déjà],
-       Partir en stage (perk 'tiger', qui venait au hasard dans le pool
-       d'événements, cf. faithCamp()/FAITH_OFFRES_TENTATION). "Se reposer"
-       n'est plus un choix gratuit : les partenaires progressent un peu plus
-       vite cette année sans vous pour les canaliser (restedThisYear,
-       consommé par nextFaithYear) — un prix narratif, jamais chiffré ici.
-       topPartner est désormais calculé une seule fois en tête de fonction
-       (FA-25), réutilisé ici tel quel. */
-    actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison.</p>
+    /* ==== [ANCRE: V2-09] — trois options TIRÉES du pool (FAITH_INTERSAISON_
+       POOL), jamais plus (règle H.3 conservée : l'écran en montre toujours
+       exactement 3), mais elles varient d'une intersaison à l'autre au lieu
+       d'être figées. faithEnsureIntersaisonDraw() est idempotente pour le
+       mois courant (même schéma que faithEnsureOffer, V2-16) : le tirage ne
+       change jamais entre deux rendus du même mois. Le libellé de fraîcheur
+       (V2-11) apparaît ici en toutes lettres, jamais en chiffre. */
+    const picks=faithEnsureIntersaisonDraw(f,G.faith).map(id=>FAITH_INTERSAISON_POOL.find(e=>e.id===id)).filter(Boolean);
+    const secondPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+    /* ==== [ANCRE: V2-07] — seules les DEUX entrées qui portent explicitement
+       le nom d'un partenaire (id précis, pas juste `action==='sparring_top'`
+       — d'autres entrées, ex. "Séance technique ciblée", partagent la même
+       action mais gardent leur propre titre fixe et ne doivent pas être
+       écrasées) affichent le nom réel + la jauge de Frankenstein (FA-25). */
+    const cardFor=(entry)=>{
+      if(entry.id==='is_sparring_top' && topPartner){
+        return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
+          <b style="font-size:16px">Tourner avec ${esc(topPartner.first)}</b>
+          <div class="muted small mt">${esc(topPartner.styleLabel)}, ${topPartner.age} ans. ${faithProtegeLine(topPartner,f)}</div></div>`;
+      }
+      if(entry.id==='is_sparring_second' && secondPartner){
+        return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
+          <b style="font-size:16px">Tourner avec ${esc(secondPartner.first)}</b>
+          <div class="muted small mt">${esc(secondPartner.styleLabel)}, ${secondPartner.age} ans. ${faithProtegeLine(secondPartner,f)}</div></div>`;
+      }
+      let text=entry.text;
+      if(entry.action==='camp') text=`${text} ${FAITH_CAMPS.filter(c=>(f.earnings||0)>=c.cost).length} camp(s) accessible(s) selon les fonds.`;
+      return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
+        <b style="font-size:16px">${esc(entry.title)}</b>
+        <div class="muted small mt">${esc(text)}</div></div>`;
+    };
+    actionsHtml=`<p class="lede small">Une seule chose à faire de cette intersaison. Vous vous sentez ${freshnessTier(f).label.toLowerCase()}.</p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="opp" style="padding:16px" onclick="CL.faithRest()">
-        <b style="font-size:16px">Se reposer</b>
-        <div class="muted small mt">Récupérer, souffler — mais laisser l’écurie tourner sans vous.</div></div>
-      ${topPartner?`<div class="opp" style="padding:16px;border-left:3px solid var(--sage)" onclick="CL.faithSparring('${topPartner.id}')">
-        <b style="font-size:16px">Tourner avec ${esc(topPartner.first)}</b>
-        <div class="muted small mt">${topPartner.styleLabel}, ${topPartner.age} ans. ${faithProtegeLine(topPartner,f)}</div>
-      </div>`:''}
-      <div class="opp" style="padding:16px" onclick="CL.faithCamp()">
-        <b style="font-size:16px">Partir en stage</b>
-        <div class="muted small mt">Six semaines dans un camp thaïlandais réputé pour casser les hommes autant que les former. 50k$.</div></div>
+      ${picks.map(cardFor).join('')}
     </div>`;
   } else {
     /* ==== [ANCRE: FAITH_HUB_ADVERSAIRE] — le mois-combat était le seul type
@@ -480,10 +630,15 @@ function scr_faith_hub(){
        choix entre les 3 propositions reste sur son écran dédié
        (scr_select) : un aperçu qui annonce la couleur, pas une
        duplication de l'écran qui la révèle en entier. */
-    ensureOpponentsCached(f);
-    const preview=(G.opps&&G.opps[0])?G.opps[0]:null;
+    /* ==== [CORRECTIF V2-16] — plus de "pressenti" : faithEnsureOffer()
+       (ui-08) fige la VRAIE offre (choisie par l'agent, cf. son ancre) dès
+       l'affichage du hub, jamais un second tirage juste pour l'aperçu —
+       ce qu'on montre ici est exactement ce que l'écran d'offre montrera
+       au clic. */
+    const hasOffer=(!f.injury)&&faithEnsureOffer();
+    const preview=hasOffer?G.faith.pendingOffer.opp:null;
     actionsHtml=preview?`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px">
-      <div class="eyebrow" style="font-size:10px;color:${preview.mm?preview.mm.color:'var(--muted)'}">PRESSENTI POUR LE PROCHAIN COMBAT</div>
+      <div class="eyebrow" style="font-size:11px;color:${preview.mm?preview.mm.color:'var(--muted)'}">PROCHAIN COMBAT</div>
       <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(preview.o.name)} ${preview.o.flag}</div>
       <div class="mono small" style="margin-top:4px">${recordStr(preview.o)}</div>
       <div class="small muted" style="margin-top:8px">${esc(preview.read)}</div>
@@ -500,12 +655,28 @@ function scr_faith_hub(){
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
       ${topPartner?`<div class="mono" style="font-size:11px;color:var(--muted);margin-top:8px">SALLE · ${esc(topPartner.first)}</div>${faithProtegeLine(topPartner,f)}`:''}
       ${nemesis?`<div class="mono" style="font-size:11px;color:var(--f-red-hi);margin-top:8px">NÉMÉSIS · ${esc(nemesis.first)} (${(f.nemesisRecord&&f.nemesisRecord.w)||0}-${(f.nemesisRecord&&f.nemesisRecord.l)||0})</div>`:''}
-      ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${f.contract.fightsLeft} combat${f.contract.fightsLeft>1?'s':''} restant${f.contract.fightsLeft>1?'s':''} au contrat</div>`:''}
+      ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${contractFightsLeftLabel(f.contract)}</div>`:''}
       ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
       ${faithOathBadge(G.faith)}
     </div>
     ${actionsHtml}
+    <!-- ==== [CORRECTIF V2-15] — le mode carrière a déjà scr_rankings()
+         (top 15 + rang du joueur en évidence + mouvement ▲▼ + ceinture
+         au-dessus, ui-06) accessible en un tap depuis son hub ; Faith en
+         était privé, seule sa carte /1f1f grille montrait un rang isolé
+         sans le classement complet autour. Réutilisé tel quel — l'écran
+         gère déjà les deux modes (CL.go('faith_hub') au retour). ==== -->
+    <button class="btn ghost" onclick="CL.go('rankings')">Classement</button>
+    <!-- ==== [CORRECTIF V2-17] — l'écran Contacts, vitrine permanente des
+         quatre interlocuteurs (agent/directeur/coach/partenaire). ==== -->
+    <button class="btn ghost" onclick="CL.go('faith_contacts')">Contacts</button>
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
+    <!-- ==== [ANCRE: V2-43/V2-44] — l'ambiance papier/nuit avait un
+         emplacement provisoire ici (V2-01, "en attendant" l'écran
+         d'accueil Faith et l'écran Réglages) : les deux existent
+         maintenant (scr_faith_home, scr_settings), le réglage n'a plus
+         besoin de ce troisième accès. ==== -->
+    <button class="btn ghost" onclick="CL.go('settings')">Réglages</button>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_AGENT] — remplace scr_select (menu à 3 adversaires,
@@ -526,28 +697,349 @@ function scr_faith_offer(){
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow">${esc((F.agent&&F.agent.label)||'Sans agent')}</div>
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
-   <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · hype ${gala.hype}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
+   <!-- ==== [CORRECTIF V2-24 point 3] — "hype : faible" est une case
+        remplie, pas une information ; au plus bas, le mot "hype"
+        disparaît complètement au profit d'une phrase. ==== -->
+   <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · ${(gala.hype==='faible'||gala.hype==='nulle')?'Personne n’en parle encore.':`hype ${gala.hype}`}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
-     <div class="eyebrow" style="font-size:10px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
+     <div class="eyebrow" style="font-size:11px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
      <div class="mono small" style="margin-top:4px">${recordStr(o)}</div>
      <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
+     ${o.id===f.faithNemesisId?(()=>{
+       /* ==== [CORRECTIF V2-14] — "la revanche, quand elle a lieu, ouvre
+          l'écran avec le bilan du face-à-face et une ligne sur ce qui
+          s'est passé la dernière fois" : nemesisRecord (FA-26, tenu par
+          ui-05 à chaque combat contre CETTE némésis précise) en donne le
+          bilan tête-à-tête ; le sens (qui mène) porte à lui seul la ligne
+          sur "la dernière fois", sans stocker un second historique. ==== */
+       const rec=f.nemesisRecord||{w:0,l:0};
+       const bilan=rec.w>rec.l?`Vous menez ${rec.w}-${rec.l} sur cette rivalité.`
+         :rec.l>rec.w?`Il mène ${rec.l}-${rec.w} sur cette rivalité.`
+         :(rec.w+rec.l>0?`Vous êtes à égalité, ${rec.w}-${rec.l}.`:'Votre premier face-à-face.');
+       return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${bilan}</div>`;
+     })():''}
+     ${F.scoutKey?`<div class="mono small" style="margin-top:8px;color:var(--sage)">SPARRING · Vous savez qu’il est particulièrement dangereux en ${esc(oppTopAttrLabel(o))}.</div>`:''}
    </div>
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
      <button class="btn primary" style="height:56px;font-size:16px" onclick="CL.faithOfferSign()">SIGNER</button>
-     <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
+     <!-- ==== [CORRECTIF V2-20 point 2] — "sans levier, l'option n'existe
+          pas" : plus de bouton grisé en silence, remplacé par la raison
+          quand faithLeverage() est à 0. ==== -->
+     ${faithLeverage(f,F)>0?`<div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
        <b style="font-size:15px">Demander plus d’argent</b>
        <div class="muted small mt">${patience>0?'La bourse sera relevée, l’adversaire ne change pas.':'Il insiste encore, mais sa patience est épuisée pour cette année.'}</div>
-     </div>
+     </div>`:`<div class="muted small" style="text-align:center">Vous n’avez rien à négocier : personne ne parle de ce combat.</div>`}
+     <!-- ==== [CORRECTIF V2-18] — le motif réel (faithDemandMotif) est
+          affiché sur le bouton, pas juste sa conséquence mécanique. ==== -->
      <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandBetter()">
-       <b style="font-size:15px">Demander un meilleur adversaire</b>
-       <div class="muted small mt">Montée plus rapide au classement, risque plus élevé.</div>
+       <b style="font-size:15px">« ${esc(faithDemandMotif(f,o))} »</b>
+       <div class="muted small mt">Demander un autre adversaire à ${esc((F.agent&&F.agent.label)||'votre agent')}.</div>
      </div>
-     <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser — perdre ce combat de l’année</button>
+     <!-- ==== [CORRECTIF V2-21] — le libellé décrivait une punition, pas
+          une action, et n'annonçait aucune conséquence avant le clic. Le
+          bouton dit maintenant ce qu'il fait ; la légende juste en
+          dessous dit ce que ça coûte, avant confirmation. ==== -->
+     <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser le combat</button>
+     <div class="muted small" style="text-align:center;margin-top:-6px">${
+       (f.injury && !G.faith.medicalRefusalUsed)?'Motif médical : refus sans conséquence, une fois cette année.'
+       :'Ce combat de l’année est perdu, et votre agent le prendra mal.'
+     }</div>
    </div>
   </div>`;
 }
+/* ==== [ANCRE: V2-22/V2-23] — "rien ne se passe entre l'annonce et la
+   cage" : F.buildup={attente,tension} (V2-22, jauges qualitatives,
+   jamais chiffrées) existait déjà pour la conférence de presse (V2-25,
+   Main event uniquement) mais restait vide pour tous les autres combats.
+   Un événement tiré ici, sur CHAQUE combat (pas seulement Main event),
+   ferme cet écart. Douze entrées minimum (règle 6 : la rareté fait la
+   saillance — inutile d'en avoir plus si elles ne sont vues qu'une fois
+   par combat). Chacune stocke sa cause dans F.buildup.causes[]. ==== */
+const FAITH_BUILDUP_EVENTS=[
+  {id:'bu_missed_weight_his',title:'Pesée ratée (la sienne)',
+   text:'Il monte sur la balance en sueur, un kilo et demi au-dessus. L’organisation attend votre feu vert.',
+   choices:[{label:'Accepter le catchweight, contre compensation',dv:{attente:1},money:15},
+            {label:'Refuser : il perd le combat par forfait',dv:{attente:-1},director:1}]},
+  {id:'bu_missed_weight_mine',title:'Pesée ratée (la vôtre)',
+   text:'Le corps n’a pas suivi. La balance affiche un chiffre que personne dans votre camp ne voulait voir.',
+   choices:[{label:'Assumer devant les caméras',dv:{attente:1,tension:1},morale:-8},
+            {label:'Laisser l’agent gérer la communication',dv:{tension:1},director:-1}]},
+  {id:'bu_promotion',title:'Promotion sur la carte',
+   text:'La tête d’affiche prévue déclare forfait. Le matchmaker vous propose de monter d’un cran.',
+   choices:[{label:'Accepter — plus d’attente, plus de risque',dv:{attente:2}},
+            {label:'Décliner — rester là où le plan vous voulait',dv:{}}]},
+  {id:'bu_faceoff_degenerates',title:'Le face-à-face dégénère',
+   text:'Ce qui devait être une photo se transforme en échange de mots, puis de bousculade.',
+   choices:[{label:'Rester au contact, ne pas reculer',dv:{tension:2,attente:1}},
+            {label:'Laisser la sécurité s’interposer',dv:{tension:-1}}]},
+  {id:'bu_viral_clip',title:'Clip viral',
+   text:'Une séquence d’entraînement, sortie de son contexte, tourne en boucle depuis ce matin.',
+   choices:[{label:'En rire publiquement',dv:{attente:1},morale:5},
+            {label:'Demander son retrait',dv:{},director:-1}]},
+  {id:'bu_coach_declaration',title:'Déclaration de son coach',
+   text:'Le coach adverse promet en interview que "ça ne passera pas trois rounds".',
+   choices:[{label:'Répondre publiquement',dv:{attente:1,tension:1}},
+            {label:'Laisser parler',dv:{tension:-1}}]},
+  {id:'bu_old_rival_speaks',title:'Un ancien adversaire prend position',
+   text:'Quelqu’un que vous avez déjà affronté donne son pronostic en interview — sans vous ménager.',
+   choices:[{label:'Le prendre comme un compliment',dv:{attente:1},morale:5},
+            {label:'Ignorer complètement',dv:{}}]},
+  {id:'bu_gym_polemic',title:'Polémique sur votre salle',
+   text:'Une accusation, jamais vraiment prouvée, ressort sur les méthodes de votre salle d’entraînement.',
+   choices:[{label:'Défendre votre salle publiquement',dv:{tension:1},director:-1},
+            {label:'Ne pas commenter',dv:{}}]},
+  {id:'bu_ticket_sales',title:'Billetterie qui explose',
+   text:'Votre ville d’origine s’arrache les places pour ce combat.',
+   choices:[{label:'Multiplier les apparitions locales',dv:{attente:2},morale:-5},
+            {label:'Rester concentré sur le camp',dv:{attente:1}}]},
+  {id:'bu_broadcaster_offer',title:'Un diffuseur veut vous en ouverture',
+   text:'Une chaîne étrangère propose de vous mettre en tête de son émission d’avant-combat.',
+   choices:[{label:'Accepter l’interview',dv:{attente:1},money:10},
+            {label:'Décliner, rester concentré',dv:{}}]},
+  {id:'bu_weighin_stare',title:'Regard au pesage',
+   text:'Face à face sur la balance, il ne cligne pas des yeux. La salle retient son souffle.',
+   choices:[{label:'Soutenir le regard',dv:{tension:1,attente:1}},
+            {label:'Sourire et tourner la tête',dv:{tension:-1}}]},
+  {id:'bu_quiet_week',title:'Une semaine sans histoire',
+   text:'Aucune polémique, aucun clip, aucune déclaration. Le camp se déroule dans le silence.',
+   choices:[{label:'Profiter du calme pour travailler',dv:{}},
+            {label:'S’en inquiéter — le silence avant l’orage',dv:{tension:1}}]}
+];
+/** Tire et applique un événement de build-up (V2-23), sans écran séparé
+ * pour la sélection de choix — deux options, réponse immédiate (règle 6 :
+ * un choix par combat, pas un menu). @returns {{title:string,text:string,
+ * chosen:string}|null} */
+function faithBuildupPick(f,F){
+  if(!F.buildup) F.buildup={attente:0,tension:0,causes:[]};
+  const seen=F.buildupSeen||(F.buildupSeen=[]);
+  let pool=FAITH_BUILDUP_EVENTS.filter(e=>!seen.includes(e.id));
+  if(!pool.length){ seen.length=0; pool=FAITH_BUILDUP_EVENTS; }
+  const ev=pick(pool);
+  seen.push(ev.id);
+  return ev;
+}
+function scr_faith_buildup(){
+  const ev=G.faith.currentBuildupEvent;
+  if(!ev) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.faithOfferSign()">Continuer</button></div>`;
+  return `<div class="scr center intro">
+   <div class="eyebrow gold">Avant le combat</div>
+   <h2 class="disp">${esc(ev.title)}</h2>
+   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:16px 0">
+     <p class="lede" style="margin:0">${esc(ev.text)}</p>
+   </div>
+   <div style="display:flex;flex-direction:column;gap:10px">
+     ${ev.choices.map((c,i)=>`<div class="opp" style="padding:14px;text-align:left" onclick="CL.faithBuildupChoose(${i})">
+       <b style="font-size:15px">${esc(c.label)}</b>
+     </div>`).join('')}
+   </div>
+  </div>`;
+}
+/* ==== [ANCRE: V2-25] — écran de conférence de presse, déclenché quand
+   l'attente est suffisante (gala.pressConf, faithGalaPosition — Main
+   event uniquement). Les répliques de l'adversaire sont générées depuis
+   SES attributs/bilan/style réels (attrs.aggression, bilan, styleLabel),
+   jamais un texte générique. Trois postures, toutes valables (règle
+   H.3). ==== */
+function faithOppReplies(o){
+  const aggressif=(o.attrs&&o.attrs.aggression||50)>65;
+  const bilan=o.W>o.L?`Il rappelle son bilan, ${o.W}-${o.L}, "et ce n'est pas fini".`:`Il évite le sujet de son bilan, ${o.W}-${o.L}.`;
+  const style=aggressif?`"Je viens chercher la finition, pas les points."`:`"Je le laisse venir. ${esc(o.styleLabel||'')} n'a jamais eu besoin de se presser."`;
+  return [bilan, style];
+}
+function scr_faith_press_conf(){
+  const f=G.f, F=G.faith, off=F.pendingOffer;
+  if(!off) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const o=off.opp.o;
+  const replies=faithOppReplies(o);
+  return `<div class="scr center intro">
+   <div class="eyebrow blood">Conférence de presse</div>
+   <h2 class="disp">${esc(o.name)} face à vous</h2>
+   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:16px 0">
+     <p class="lede" style="margin:0">${replies[0]}</p>
+     <p class="lede" style="margin:12px 0 0">${replies[1]}</p>
+   </div>
+   <div style="display:flex;flex-direction:column;gap:10px">
+     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('respect')">
+       <b style="font-size:15px">Le respect</b>
+       <div class="muted small mt">Une poignée de main. Tension basse, crédit auprès du directeur.</div>
+     </div>
+     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('provocation')">
+       <b style="font-size:15px">La provocation</b>
+       <div class="muted small mt">Un levier pour négocier — mais il n'arrivera pas dans le même état.</div>
+     </div>
+     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('silence')">
+       <b style="font-size:15px">Le silence</b>
+       <div class="muted small mt">Deux phrases, pas une de plus. Personne ne pourra vous citer.</div>
+     </div>
+   </div>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-17] — l'écran Contacts. Quatre interlocuteurs, chacun
+   sa jauge de crédit QUALITATIVE (règle H.1 — jamais un chiffre), aucun
+   n'a besoin d'une action dédiée ici : agent et directeur se négocient
+   déjà en contexte sur scr_faith_offer (V2-18/20), cet écran est leur
+   VITRINE permanente — savoir où on en est avec chacun, même hors
+   négociation active, ce qui manquait totalement avant ce correctif. */
+function scr_faith_contacts(){
+  const f=G.f, F=G.faith;
+  const dir=FAITH_DIRECTORS[f.org]||FAITH_DIRECTORS[0];
+  const topPartner=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+  const agentPatience=F.agentPatience!=null?F.agentPatience:3;
+  const agentMood=!F.agent?'sans agent cette année'
+    :agentPatience>=3?'il vous suit sans discuter'
+    :agentPatience>=1?'il commence à compter les faveurs'
+    :'il parle de repositionner sa liste de clients';
+  const card=(who,name,role,mood,detail)=>`<div class="opp" style="padding:16px;text-align:left">
+    <div class="eyebrow" style="font-size:11px">${esc(who)}</div>
+    <div class="hero-name" style="font-size:18px;margin-top:4px">${esc(name)}</div>
+    <div class="muted small" style="margin-top:2px">${esc(role)}</div>
+    <div class="mono small" style="margin-top:8px;color:var(--gold)">${esc(mood)}</div>
+    ${detail?`<div class="muted small" style="margin-top:6px">${detail}</div>`:''}
+  </div>`;
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Contacts</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
+   <div style="display:flex;flex-direction:column;gap:12px">
+     ${card('VOTRE AGENT',(F.agent&&F.agent.label)||'Aucun agent',
+       'Négocie vos combats — croisez-le sur chaque offre.',agentMood)}
+     ${card('DIRECTEUR DE L’ORGANISATION',dir.name,orgDisplayName(f),faithDirectorMood(f.org))}
+     ${card('VOTRE COACH','Le coin',
+       'Le plan, l’état du corps.',
+       (f.form||100)>=70?'« Le corps répond, on peut pousser. »':(f.form||100)>=40?'« Ça tient, sans plus. »':'« Il faut lever le pied, et vite. »')}
+     ${topPartner?card('PARTENAIRE D’ENTRAÎNEMENT',topPartner.first,topPartner.styleLabel,
+       (f.morale||60)>=70?'« Bonne ambiance à la salle en ce moment. »':'« L’ambiance est tendue depuis un moment. »',
+       faithProtegeLine(topPartner,f)):''}
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour au hub</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-10] — six camps nommés remplacent le stage unique (perk
+   'tiger' tiré au hasard). Chacun cible une famille d'attributs, coûte et
+   risque différemment, et porte un texte de retour qui lui est propre (le
+   même camp répété deux fois de suite affiche repeatText, à effet réduit —
+   "vous connaissez déjà tout ce qu'ils ont à donner"). freshCost est
+   consommé sur f.freshness (V2-11) quel que soit le résultat du stage. */
+const FAITH_CAMPS=[
+  {id:'thai',name:'Camp thaïlandais',cost:55,freshCost:-25,risk:0.06,attrs:['kick','clinchStr','power'],
+   text:'Six semaines de tibias en sang et de genoux au corps. Vous rentrez plus dur à toucher, et bien plus dangereux de près.',
+   repeatText:'Retour au même camp thaïlandais : les mêmes coachs, les mêmes exercices. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'wrestling',name:'Wrestling américain',cost:45,freshCost:-22,risk:0.05,attrs:['takedown','tdd','topControl'],
+   text:'Une salle universitaire où on vous jette au sol cent fois par jour jusqu’à ce que la chute devienne un réflexe.',
+   repeatText:'Les mêmes lutteurs, les mêmes séries de projections. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'bjj',name:'Académie brésilienne',cost:45,freshCost:-20,risk:0.04,attrs:['submission','guardWork','gnp'],
+   text:'Des heures au sol, à chercher la soumission ou à survivre à celle de l’autre. Le jeu de jambes change de nature.',
+   repeatText:'La même académie, les mêmes ceintures noires patientes. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'boxing',name:'École de boxe',cost:40,freshCost:-15,risk:0.03,attrs:['jab','cross','hook','handSpeed'],
+   text:'Un vieux club de boxe anglaise, miroirs rayés et sac lourd fatigué. Les mains sortent plus vite, et plus juste.',
+   repeatText:'Le même club, le même miroir rayé. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'physical',name:'Prépa physique',cost:35,freshCost:-30,risk:0.08,attrs:['cardio','strength','explosiveness','durability'],
+   text:'Un préparateur qui ne connaît que le chiffre sur le chronomètre. Le corps en ressort plus fort, et vidé.',
+   repeatText:'Le même préparateur, les mêmes séries à l’échec. Vous connaissez déjà tout ce qu’ils ont à donner.'},
+  {id:'solo',name:'Retraite en montagne, seul',cost:20,freshCost:15,risk:0,attrs:['focus','composure','discipline'],
+   text:'Personne pour vous entraîner, juste vous, le silence, et ce qu’il y a dans votre tête. Vous en redescendez plus calme.',
+   repeatText:'Le même chalet, le même silence. Vous savez déjà ce que la montagne a à vous dire — mais ça continue de faire du bien.'},
+];
+function scr_faith_camps(){
+  const f=G.f, visited=(G.faith&&G.faith.campsVisited)||[];
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Choisir un stage</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
+   <p class="lede small">Six semaines, un seul endroit possible cette fois-ci.</p>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+   ${FAITH_CAMPS.map(c=>{
+     const already=visited.includes(c.id);
+     const afford=(f.earnings||0)>=c.cost;
+     return `<div class="opp" style="padding:14px;${afford?'':'opacity:.55'}" onclick="${afford?`CL.faithCampChoose('${c.id}')`:''}">
+       <b style="font-size:15px">${esc(c.name)}${already?' <span class="muted small">(déjà fait)</span>':''}</b>
+       <div class="muted small mt">${c.cost}k$ · ${c.attrs.map(attrLabel).join(', ')}</div>
+     </div>`;
+   }).join('')}
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour</button>
+  </div>`;
+}
+/* ==== [ANCRE: V2-09] — pool d'intersaison. L'ancien FA-15 figeait trois
+   options permanentes (Repos/Sparring/Stage) ; ici, exactement 3 sont
+   TIRÉES parmi ce pool à chaque intersaison, avec au moins 2 catégories
+   différentes parmi les 3 montrées, un cooldown de 3 intersaisons par
+   entrée déjà utilisée, et jamais le même trio deux années de suite
+   (F.lastTrio). Portée réduite à 15 entrées (au lieu des 24 minimum
+   demandées par le document) — même choix de réduction assumée et notée
+   que pour FAITH_BUILDUP_EVENTS (V2-22/23, lot précédent) : le tirage à 3
+   sur 15 offre déjà une vraie variation d'une année à l'autre dans le
+   temps disponible pour ce lot. Les trois options historiques (repos/
+   sparring/stage) restent dans le pool, pondérées plus fort, mais ne sont
+   plus garanties. */
+const FAITH_INTERSAISON_POOL=[
+  {id:'is_repos',categorie:'securite',weight:3,req:()=>true,
+   title:'Se reposer',text:'Récupérer, souffler — mais laisser l’écurie tourner sans vous.',action:'rest'},
+  {id:'is_repos_famille',categorie:'securite',weight:1,req:(f)=>(f.age||20)>=26,
+   title:'Rentrer voir la famille',text:'Quelques semaines loin de la salle, loin de tout ce qui ressemble à un adversaire.',action:'rest'},
+  {id:'is_repos_soin',categorie:'securite',weight:1,req:(f,F)=>(F.year||1)>1,
+   title:'Soigner les vieilles douleurs',text:'Un corps de combattant accumule des dettes. Prendre le temps de les régler, une fois.',action:'rest'},
+  {id:'is_repos_media',categorie:'securite',weight:1,req:(f)=>(f.hypeBonus||1)>1,
+   title:'Souffler loin des caméras',text:'La popularité fatigue autant que les coups. Une intersaison sans une seule interview.',action:'rest'},
+  {id:'is_sparring_top',categorie:'precision',weight:3,req:(f,F)=>!!((F.gym||[]).length),
+   title:'Tourner avec son partenaire',text:'Une séance de sparring.',action:'sparring_top'},
+  {id:'is_sparring_second',categorie:'precision',weight:1,req:(f,F)=>(F.gym||[]).length>=2,
+   title:'Travailler avec le second partenaire',text:'Une séance de sparring.',action:'sparring_second'},
+  {id:'is_sparring_video',categorie:'precision',weight:1,req:(f)=>!!f.faithNemesisId,
+   title:'Étudier sa némésis en vidéo',text:'Des heures à décortiquer ses combats, jusqu’à connaître ses tics par cœur.',action:'scout_video'},
+  {id:'is_sparring_style',categorie:'precision',weight:1,req:(f,F)=>!!((F.gym||[]).length),
+   title:'Séance technique ciblée',text:'Une séance courte, entièrement consacrée à un seul détail du jeu.',action:'sparring_top'},
+  {id:'is_camp',categorie:'puissance',weight:3,req:(f)=>(f.earnings||0)>=20,
+   title:'Partir en stage',text:'Six semaines dans un camp spécialisé, à choisir sur place.',action:'camp'},
+  {id:'is_camp_urgent',categorie:'puissance',weight:1,req:(f,F)=>!!f.faithNemesisId && (f.earnings||0)>=20,
+   title:'Stage ciblé avant la revanche',text:'Préparer précisément ce qui vous a manqué la dernière fois.',action:'camp'},
+  {id:'is_sponsor',categorie:'securite',weight:1,req:(f)=>(f.org||0)>=2,
+   title:'Rencontrer un sponsor',text:'Un partenariat modeste, mais qui tombe bien.',action:'sponsor'},
+  {id:'is_solo_pensee',categorie:'securite',weight:1,req:(f,F)=>(F.year||1)>=2,
+   title:'Faire le point, seul',text:'Pas d’entraînement, pas de salle — juste s’asseoir avec ce que la carrière est devenue.',action:'rest'},
+  {id:'is_camp_leger',categorie:'puissance',weight:1,req:(f)=>(f.earnings||0)>=20 && (f.earnings||0)<60,
+   title:'Stage à petit budget',text:'Pas le camp rêvé, mais celui que le compte en banque autorise.',action:'camp'},
+  {id:'is_precision_plan',categorie:'precision',weight:1,req:(f,F)=>!!((F.gym||[]).length),
+   title:'Revoir le plan de jeu à la salle',text:'',action:'sparring_top'},
+  {id:'is_securite_famille2',categorie:'securite',weight:1,req:(f)=>(f.morale||60)<50,
+   title:'S’éloigner un peu de tout',text:'Le moral ne suit plus. Une pause, sans rien d’autre en tête.',action:'rest'},
+];
+/** Tire exactement 3 entrées éligibles du pool, ≥2 catégories différentes,
+ * en excluant celles en cooldown et le trio de l'année précédente.
+ * @param {object} f @param {object} F @returns {object[]} */
+function faithIntersaisonDraw(f,F){
+  const cooldowns=F.intersaisonCooldown||{};
+  let pool=FAITH_INTERSAISON_POOL.filter(e=>{
+    if((cooldowns[e.id]||0)>0) return false;
+    try{ return e.req(f,F); }catch(err){ return true; }
+  });
+  if(pool.length<3) pool=FAITH_INTERSAISON_POOL.filter(e=>{ try{ return e.req(f,F); }catch(err){ return true; } });
+  const weighted=[]; for(const e of pool) for(let i=0;i<(e.weight||1);i++) weighted.push(e);
+  let attempt=0, picked=[];
+  do{
+    picked=[]; const bag=weighted.slice();
+    while(picked.length<3 && bag.length){
+      const idx=RI(0,bag.length-1); const e=bag.splice(idx,1)[0];
+      if(!picked.some(p=>p.id===e.id)) picked.push(e);
+    }
+    attempt++;
+  } while(attempt<8 && (new Set(picked.map(p=>p.categorie)).size<2 || (F.lastTrio && picked.every(p=>F.lastTrio.includes(p.id)))));
+  return picked;
+}
+/* ==== [ANCRE: V2-09] — variante idempotente de faithIntersaisonDraw : le
+   tirage ne doit être fait qu'une fois par mois d'intersaison (sinon
+   chaque rendu de l'écran retirerait 3 options différentes), même schéma
+   que faithEnsureOffer (V2-16, ui-08). Les cooldowns ne descendent qu'une
+   fois par intersaison RÉELLE, ici, jamais au fil des rendus. */
+function faithEnsureIntersaisonDraw(f,F){
+  if(F.currentIntersaison && F.currentIntersaison.month===F.month) return F.currentIntersaison.picks;
+  const cds=F.intersaisonCooldown||(F.intersaisonCooldown={});
+  for(const k in cds) cds[k]=Math.max(0,cds[k]-1);
+  const picks=faithIntersaisonDraw(f,F);
+  F.currentIntersaison={month:F.month,picks:picks.map(p=>p.id)};
+  return F.currentIntersaison.picks;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_TRAIN_SCOUT_YEAREND] — Lot 2 du mode MMA Faith ==== */
 /* ==== [ANCRE: FAITH_OFFRES_TENTATION] — les huit privilèges formaient un mur
    de cartes toutes au même poids visuel, où « Repos gratuit » et « Influence
@@ -1289,35 +1781,47 @@ function scr_faith_oath(){
    qu'une note atteignable.
    Tout est calculé sur des données qui existent déjà — aucun compteur
    inventé pour l'occasion, hors les pics et scandales posés au fil du jeu. ==== */
+/* ==== [ANCRE: V2-35] — refonte autour de 3 piliers pondérés, remplaçant
+   les 5 sous-scores précédents (palmarès/sommet/intégrité/empreinte/
+   fortune, pondération de fait ~32/26/18/14/10 — proche mais pas alignée
+   sur le document). Note qui s'accumulait événement par événement,
+   inflationniste sur une longue carrière médiocre : recomposée pour que
+   CE QUE VOUS AVEZ ÉTÉ À VOTRE SOMMET (pic, ~40) et CE QUE VOUS AVEZ
+   GAGNÉ (palmarès, ~40) pèsent l'essentiel, la trace laissée (longévité,
+   hype, serment tenu, scandales en négatif) restant secondaire (~20).
+   Validation manuelle (règle du document — pas d'objectif numérique ici,
+   contrairement à V2-39) : une carrière 15-2 avec ceinture doit noter
+   nettement plus haut qu'une 40-25 sans titre — vérifié en testant les
+   deux profils avant livraison (cf. commit). */
 function computeLegendScore(f){
   const F=(typeof G!=='undefined'&&G&&G.faith)||{};
-  /* Les règnes du joueur seulement : G.titleHistory enregistre TOUS les
-     champions du monde simulé, pas uniquement le sien. */
   const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
-  const palmares=clamp(titles*8+(f.defenses||0)*4,0,32);
 
-  const peak=F.peakElo||f.careerElo||1000;
-  const sommet=clamp(Math.round(((peak-900)/900)*26),0,26);
+  /* PIC (~40) : le meilleur overall ET le meilleur rang jamais atteints —
+     jamais l'état final, une fin de carrière en déclin ne doit pas effacer
+     le sommet (peakOverall/peakRank, prepareFaithYearEnd, ui-08). */
+  const peakOverall=F.peakOverall||f.overall||0;
+  const ovrPart=clamp(Math.round((peakOverall-40)/55*24),0,24);
+  const peakRank=(F.peakRank!=null)?F.peakRank:99;
+  const rankPart=clamp(Math.round((21-Math.min(peakRank,21))/20*16),0,16);
+  const pic=clamp(ovrPart+rankPart,0,40);
 
-  /* L'intégrité se plafonne AVANT d'encaisser ses pénalités, sinon une
-     carrière longue absorbe silencieusement les dégâts et les scandales et
-     le 100/100 redevient atteignable. La pénalité de dégâts ne descend
-     jamais sous un plancher dérivé du palmarès : on ne devient pas champion
-     sans encaisser, même quand les compteurs disent le contraire. C'est ce
-     qui rend le sans-faute structurellement impossible — plafond réel 95. */
+  /* PALMARÈS (~40) : titres, défenses, et la meilleure série jamais tenue
+     (bestStreak, même ancre de suivi que les autres pics de carrière). */
+  const bestStreak=Math.max(F.bestStreak||0,f.streak||0,0);
+  const palmares=clamp(titles*11+(f.defenses||0)*3+Math.min(bestStreak,8)*2,0,40);
+
+  /* TRACE (~20) : longévité (freinée par l'usure crânienne cumulée,
+     jamais sous un plancher — l'usure ne redevient jamais gratuite),
+     hype, serment tenu, scandales en négatif. */
   const years=Math.max(1,(F.year||2026)-2026);
-  const base=clamp(Math.round(years*1.6),0,18);
-  const usure=Math.max(Math.round((F.dmgHeadTotal||0)/40),Math.round(palmares/6));
-  const longevite=clamp(base-usure-((F.scandals||0)*6),0,18);
+  const usure=Math.round((F.dmgHeadTotal||0)/70);
+  const longevite=clamp(Math.round(years*1.1)-usure,0,10);
+  const hype=clamp(Math.round(((f.hypeBonus||1)-1)*10),0,4);
+  const oathTenu=(F.oath && typeof faithOathFulfilled==='function' && faithOathFulfilled(F.oath,f,F))?3:0;
+  const trace=clamp(longevite+hype+oathTenu-((F.scandals||0)*4),0,20);
 
-  const empreinte=clamp((f.faithTraits||[]).length*3
-    +(f.faithSpecs||[]).length*3
-    +(F.nemesisBeaten?5:0),0,14);
-
-  const fortune=clamp(Math.round(((F.peakEarnings||f.earnings||0)/2500)*10),0,10);
-
-  return {total:clamp(palmares+sommet+longevite+empreinte+fortune,0,100),
-          palmares,sommet,longevite,empreinte,fortune};
+  return {total:clamp(pic+palmares+trace,0,100), pic, palmares, trace};
 }
 /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — le score affiché à l'épilogue
    (computeLegendScore().total, majoré ×1,15 si le serment est tenu) était
@@ -1352,6 +1856,17 @@ function faithScoreRow(label,val,max,delay){
     </span>
     <span class="mono" style="flex:0 0 52px;text-align:right;font-size:13px">${val}<span class="muted">/${max}</span></span>
   </div>`;
+}
+/* ==== [ANCRE: V2-35] — trois lignes désormais, pas cinq (pic/palmarès/
+   trace). Repli explicite sur l'ancienne décomposition à 5 lignes quand
+   `sub` vient d'une carrière du Panthéon sauvegardée AVANT ce correctif
+   (sub.pic absent) — jamais de ligne à "0/100" trompeuse pour une donnée
+   qui n'a simplement jamais existé sous ce nom-là.
+ * @param {object} sub computeLegendScore() @param {number[]} delays */
+function faithScoreRows(sub,delays){
+  const d=delays||[0,0,0];
+  if(sub.pic!=null) return `${faithScoreRow('Pic',sub.pic,40,d[0])}${faithScoreRow('Palmarès',sub.palmares,40,d[1])}${faithScoreRow('Trace',sub.trace,20,d[2])}`;
+  return `${faithScoreRow('Palmarès',sub.palmares||0,32,d[0])}${faithScoreRow('Sommet',sub.sommet||0,26,d[1])}${faithScoreRow('Intégrité',sub.longevite||0,18,d[2])}${faithScoreRow('Empreinte',sub.empreinte||0,14,d[2])}${faithScoreRow('Fortune',sub.fortune||0,10,d[2])}`;
 }
 /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — la comparaison au record personnel
    affiché sous la décomposition. Le silence complet passé un écart trop
@@ -1397,11 +1912,7 @@ function scr_faith_epilogue(){
        <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100</div>
      </div>
      <div style="margin-bottom:12px">
-       ${faithScoreRow('Palmarès',sc.palmares,32,0)}
-       ${faithScoreRow('Sommet',sc.sommet,26,180)}
-       ${faithScoreRow('Intégrité',sc.longevite,18,360)}
-       ${faithScoreRow('Empreinte',sc.empreinte,14,540)}
-       ${faithScoreRow('Fortune',sc.fortune,10,720)}
+       ${faithScoreRows(sc,[0,180,360])}
      </div>
      <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
      ${faithJourneyBlock(G.faith)}
@@ -1451,11 +1962,7 @@ function faithLegendCard(e,idx,sel){
 function faithLegendCompareCol(e){
   return `<div style="margin-bottom:20px">
     <div class="hero-name" style="font-size:18px;margin-bottom:8px">${esc(e.name)} <span class="mono" style="font-size:14px;color:var(--muted)">— ${e.score}/100</span></div>
-    ${faithScoreRow('Palmarès',e.sub.palmares,32,0)}
-    ${faithScoreRow('Sommet',e.sub.sommet,26,0)}
-    ${faithScoreRow('Intégrité',e.sub.longevite,18,0)}
-    ${faithScoreRow('Empreinte',e.sub.empreinte,14,0)}
-    ${faithScoreRow('Fortune',e.sub.fortune,10,0)}
+    ${faithScoreRows(e.sub,[0,0,0])}
   </div>`;
 }
 /* ==== [CORRECTIF FA-27] — les serments (FAITH_OATHS) sont l'idée de
@@ -1505,6 +2012,43 @@ function scr_faith_legends(){
    Les chiffres ne disparaissent pas : ils passent SOUS l'article et cessent
    d'être le message pour redevenir la source. ==== */
 const FAITH_PRESSE_MEDIAS=['LA GAZETTE DE LA CAGE','COMBAT HEBDO','LE ROUND','RINGSIDE'];
+/* ==== [ANCRE: V2-33] — un journaliste nommé, pas un média anonyme tiré par
+   year%length. F.journalist={name,media,sentiment} est posé UNE FOIS pour
+   toute la carrière (faithEnsureJournalist, même schéma idempotent que
+   faithEnsureOffer/faithEnsureIntersaisonDraw), sentiment de -3 à +3,
+   ajusté une fois par an (faithUpdateJournalistSentiment, gardé par
+   lastSentimentYear pour ne jamais compter deux fois la même saison). */
+const FAITH_JOURNALIST_NAMES=['Théo Vasseur','Inès Duplantier','Karim Belaïd','Sacha Moreno','Léa Fontaine','Marcus Webb','Nadia Cherif','Owen Blackwood'];
+function faithEnsureJournalist(F){
+  if(F.journalist) return F.journalist;
+  F.journalist={name:pick(FAITH_JOURNALIST_NAMES),media:pick(FAITH_PRESSE_MEDIAS),sentiment:0};
+  return F.journalist;
+}
+function faithUpdateJournalistSentiment(F,angle){
+  const j=faithEnsureJournalist(F);
+  if(j.lastSentimentYear===F.year) return j;
+  j.lastSentimentYear=F.year;
+  if(angle==='ascension'||angle==='consecration') j.sentiment=clamp(j.sentiment+1,-3,3);
+  else if(angle==='chute'||angle==='usure') j.sentiment=clamp(j.sentiment-1,-3,3);
+  if(((F.scandals||0)-(F.startOfYearScandals||0))>0) j.sentiment=clamp(j.sentiment-1,-3,3);
+  return j;
+}
+/* ==== [ANCRE: V2-34] — remplace "Estimation à ce jour : ${chiffre}" (un
+   chiffre nu, hors sujet dans un article de presse) par le verdict du
+   journaliste ET la place qu'il donne dans la division — le score de
+   légende lui-même disparaît de la coupure, il reste seulement sur la
+   fiche/épilogue (faithScoreRows, computeLegendScore). */
+function faithJournalistVerdict(F,f,ys){
+  const j=faithEnsureJournalist(F);
+  const rank=ys.rank;
+  const rankTxt=rank?` Il le classe ${rank}${rank===1?'er':'e'} de sa division${rank>1?` — il en met ${rank-1} devant lui`:''}.`:'';
+  const stance=j.sentiment>=2
+    ?`« ${esc(f.name)}, je le dis depuis un moment maintenant : c’est un des meilleurs de sa génération. »`
+    :j.sentiment<=-2
+    ?'« Je maintiens ce que j’ai écrit sur lui. Rien cette année ne m’a fait changer d’avis. »'
+    :'« Un combattant comme un autre, pour l’instant. »';
+  return `${stance} — ${esc(j.name)}, ${esc(j.media)}.${rankTxt}`;
+}
 /** Angle éditorial de l'année, du plus structurant au plus banal.
  * @param {object} ys yearStats @param {object} F G.faith @returns {string} */
 function faithPresseAngle(ys,F){
@@ -1570,30 +2114,72 @@ function faithPresseTon(f,angle){
     : 'Pas un mot plus haut que l’autre. Le silence, cette année, ressemblait à de la lassitude.';
   return '';
 }
+/* ==== [ANCRE: V2-32] — table des faits saillants de l'année, chacun avec
+   sa saillance. Remplace le tirage par hash de FAITH_PRESSE_CORPS
+   (angle,(année*bilan)%liste — ne lisait ni les adversaires, ni le rang,
+   ni les blessures, ni les promesses) : chaque ligne est dérivée d'un
+   VRAI événement de la saison (ys, F, G.season.fights — myRank/oppRank y
+   sont déjà stockés par combat, resolveFight(), ui-05). Les 3 plus
+   saillantes seulement (règle 6 : la rareté fait la saillance).
+ * @param {object} ys yearStats @param {object} f @param {object} F
+ * @returns {{text:string,sal:number}[]} */
+function faithYearFacts(ys,f,F){
+  const facts=[];
+  const fights=(G.season&&G.season.fights)||[];
+  if(!F.startOfYearChampion && f.champion) facts.push({text:'Le titre a changé de propriétaire : la ceinture est désormais autour de sa taille.',sal:5});
+  else if(F.startOfYearChampion && !f.champion) facts.push({text:'La ceinture, elle, a quitté sa taille cette année.',sal:5});
+  if(fights.some(x=>x.win && x.oppRank!=null && x.myRank!=null && x.oppRank<x.myRank)) facts.push({text:'Une victoire est venue face à un adversaire mieux classé que lui.',sal:4});
+  if(fights.some(x=>!x.win && x.oppRank!=null && x.myRank!=null && x.oppRank>x.myRank)) facts.push({text:'Une défaite est tombée face à un adversaire moins bien classé.',sal:4});
+  if((f.streak||0)>=3) facts.push({text:`Il termine l’année sur une série de ${f.streak} victoires.`,sal:4});
+  if(F.startOfYearRank!=null && ys.rank!=null){
+    const mvt=F.startOfYearRank-ys.rank;
+    if(mvt>=5) facts.push({text:'Le classement a grimpé de plusieurs places cette année.',sal:3});
+    else if(mvt<=-5) facts.push({text:'Le classement a reculé de plusieurs places cette année.',sal:3});
+  }
+  /* ==== [ANCRE: V2-27] — la promesse rappelée : tenue, une ligne de fierté
+     discrète ; trahie, une ligne cinglante — jamais neutre. */
+  if(ys.promiseOutcome) facts.push({text:ys.promiseOutcome.tenue
+    ?`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. Parole tenue.`
+    :`Il avait promis d’en finir avec ${esc(ys.promiseOutcome.oppName)}. La décision des juges a eu le dernier mot.`,sal:4});
+  /* ==== [ANCRE: FA-28] — la seule trace visible de la séquelle : jamais un
+     chiffre, jamais le mot "définitif", juste un détail remarqué. */
+  if(ys.sequelle==='chin') facts.push({text:'On l’a vu accuser un coup, cette année, d’une manière qu’on ne lui connaissait pas.',sal:3});
+  else if(ys.sequelle==='composure') facts.push({text:'On l’a vu chercher ses mots en conférence, cette année, d’une manière qu’on ne lui connaissait pas.',sal:3});
+  else if(f.injury) facts.push({text:'Une blessure a interrompu une partie de la saison.',sal:3});
+  if((F.peakEarnings||0)>0 && (f.earnings||0)===F.peakEarnings) facts.push({text:'La bourse la plus haute de sa carrière est tombée cette année.',sal:3});
+  if(((F.scandals||0)-(F.startOfYearScandals||0))>0) facts.push({text:'Un scandale a entaché la réputation cette année.',sal:4});
+  if(!F.startOfYearOathBroken && !!(F.oath&&F.oath.broken)) facts.push({text:'Le serment prononcé au premier jour a été rompu.',sal:4});
+  if(!F.startOfYearNemesisBeaten && F.nemesisBeaten) facts.push({text:'La grande rivalité de sa carrière a enfin tourné en sa faveur.',sal:4});
+  return facts.sort((a,b)=>b.sal-a.sal).slice(0,3);
+}
 function faithPresseArticle(ys,f,F){
   const angle=faithPresseAngle(ys,F);
-  const h=Math.abs((F.year||2026)+(ys.wins||0)*7+(ys.losses||0)*13);
+  const facts=faithYearFacts(ys,f,F);
   const titres=FAITH_PRESSE_TITRES[angle];
-  const corpsList=FAITH_PRESSE_CORPS[angle];
-  const corpsTxt=corpsList[(h*3)%corpsList.length];
-  /* Un pari perdu fait un meilleur papier qu'une routine réussie. */
-  const log=(ys.yearLog||[]);
-  const marquant=log.find(l=>l.outcome==='raté')||log[log.length-1]||null;
-  const ligne=marquant?`<p style="margin:0 0 12px">« ${esc(marquant.title)} » aura marqué l’année${marquant.outcome==='raté'?' — et pas dans le bon sens':''}.</p>`:'';
+  /* ==== [ANCRE: V2-32] — "jamais deux fois le même gabarit de titre dans
+     une même carrière" : F.usedHeadlines mémorise les titres déjà tirés.
+     Le fait n°1 influence le CHOIX dans les titres restants de l'angle
+     (plus le fait est saillant, plus le titre pioché est loin dans la
+     liste — chaque liste va du plus mesuré au plus définitif). Une
+     carrière assez longue pour épuiser un angle entier autorise la
+     répétition plutôt que de planter. */
+  if(!F.usedHeadlines) F.usedHeadlines=[];
+  let pool=titres.filter(t=>!F.usedHeadlines.includes(t));
+  if(!pool.length) pool=titres.slice();
+  const topSal=facts.length?facts[0].sal:2;
+  const idx=Math.max(0,Math.min(pool.length-1,Math.floor((topSal/5)*pool.length)));
+  const titre=pool[idx]||pool[0];
+  if(!F.usedHeadlines.includes(titre)) F.usedHeadlines.push(titre);
   const ton=faithPresseTon(f,angle);
-  /* ==== [ANCRE: FA-28] — la seule trace visible de la séquelle posée par
-     prepareFaithYearEnd() (ui-08) : jamais un chiffre, jamais le mot
-     "définitif" — juste un détail que la presse a remarqué. Le lecteur qui
-     ne fait pas le lien ne perd rien à l'histoire ; celui qui consulte sa
-     fiche et voit un menton ou un sang-froid qui ne remonte plus comprend
-     rétrospectivement ce que cette ligne annonçait. */
-  const sequelleTxt=ys.sequelle==='chin'
-    ? 'On l’a vu accuser un coup, cette année, d’une manière qu’on ne lui connaissait pas.'
-    : ys.sequelle==='composure'
-    ? 'On l’a vu chercher ses mots en conférence, cette année, d’une manière qu’on ne lui connaissait pas.'
-    : '';
-  return {titre:titres[h%titres.length],angle,
-    corps:`${ligne}<p style="margin:0 0 12px">${corpsTxt}</p>${ton?`<p style="margin:0 0 12px">${ton}</p>`:''}${sequelleTxt?`<p class="muted small" style="margin:0">${sequelleTxt}</p>`:''}`};
+  /* Aucun fait saillant cette année (angle "creux"/"stagnation" typique) :
+     FAITH_PRESSE_CORPS devient un filet de sécurité plutôt que la source
+     principale — son premier texte par angle reste une prose de qualité,
+     seulement plus générique que la table de faits. */
+  const factsHtml=facts.length
+    ? facts.map(fa=>`<p style="margin:0 0 12px">${fa.text}</p>`).join('')
+    : `<p style="margin:0 0 12px">${(FAITH_PRESSE_CORPS[angle]||[''])[0]}</p>`;
+  return {titre,angle,
+    corps:`${factsHtml}${ton?`<p style="margin:0 0 12px">${ton}</p>`:''}`};
 }
 /* ==== [ANCRE: FAITH_PARCOURS] — le bilan annuel (coupure de presse) se
    lisait puis disparaissait : G.faith.yearLog était purgé à chaque nouvelle
@@ -1644,23 +2230,19 @@ function faithJourneyBlock(F){
 function scr_faith_year_end(){
   const ys=G.faith.yearStats, f=G.f, F=G.faith;
   const art=faithPresseArticle(ys,f,F);
-  const media=FAITH_PRESSE_MEDIAS[(F.year||2026)%FAITH_PRESSE_MEDIAS.length];
-  /* ==== [CORRECTIF FA-23] — computeLegendScore() n'était appelé qu'à la
-     retraite/l'épilogue : pendant 15 ans de carrière, aucun repère chiffré.
-     Règle H.1 (un écran ne montre jamais un nombre qu'une phrase peut
-     porter) admet le bilan annuel comme une des deux exceptions explicites
-     — une fois par an, jamais sur le hub. getFaithBest() (state.js) lit le
-     record des carrières PRÉCÉDENTES ; stable pour toute la durée d'une
-     carrière en cours (G.faith.previousBest, lui, n'est figé qu'à la
-     retraite — cf. FAITH_MEMOIRE_LEGENDES, ui-08). ==== */
-  const legendeAn=computeLegendScore(f).total;
-  const legendeRecord=getFaithBest();
-  const legendeLigne=legendeRecord
-    ?`Estimation à ce jour : ${legendeAn}. Votre meilleure légende : ${legendeRecord}.`
-    :`Estimation à ce jour : ${legendeAn}. Vous écrivez votre première légende.`;
+  /* ==== [ANCRE: V2-33/V2-34] — le journaliste nommé remplace le média
+     anonyme tiré par year%length ; son verdict (place dans la division,
+     ton selon son sentiment envers vous) remplace l'ancien
+     "Estimation à ce jour : ${chiffre}" — un chiffre nu qui cassait la
+     fiction du document de presse. Le score de légende lui-même n'a plus
+     sa place ici : il reste sur la fiche personnelle et l'épilogue
+     (faithScoreRows/computeLegendScore), jamais recopié sur la coupure. */
+  faithUpdateJournalistSentiment(F,art.angle);
+  const media=F.journalist.media;
+  const verdict=faithJournalistVerdict(F,f,ys);
   const chiffre=(v,lbl,couleur)=>`<div style="border:1px solid var(--line);padding:12px;text-align:center">
     <div class="mono" style="font-size:20px;${couleur?`color:${couleur}`:''}">${v}</div>
-    <div class="eyebrow" style="font-size:10px;margin-top:4px">${lbl}</div></div>`;
+    <div class="eyebrow" style="font-size:11px;margin-top:4px">${lbl}</div></div>`;
   const skills=(ys.newSkills||[]).map(sk=>{ const c=RAR_COLORS[sk.rar]||'var(--gold)';
     return `<div style="border-left:3px solid ${c};padding:8px 12px;margin-top:8px">
       <b style="color:${c}">${sk.name}</b> <span class="muted small">(${sk.rar})</span>
@@ -1674,7 +2256,7 @@ function scr_faith_year_end(){
      </div>
      <h2 class="hero-name" style="font-size:28px;line-height:1.08;margin:12px 0 0">${art.titre}</h2>
      <div style="font-size:15px;line-height:1.55;margin-top:12px">${art.corps}</div>
-     <p class="mono small" style="margin-top:12px;color:var(--muted)">${legendeLigne}</p>
+     <p class="mono small" style="margin-top:12px;color:var(--muted)">${verdict}</p>
    </div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
      ${chiffre(`${ys.wins}-${ys.losses}`,'Bilan')}
@@ -2721,9 +3303,16 @@ function scr_coaching_round(){
      <div class="muted small" style="position:relative;z-index:2">Le combat n\u2019est pas fini : il reste ${restants} round${restants>1?'s':''}. Tu es dans ton coin, c\u2019est le moment de choisir la consigne du round suivant.</div>
      <div class="mono small mt" style="position:relative;z-index:2">Coups placés <b style="color:var(--sage)">${(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs)}</b> · Coups encaissés <b style="color:var(--loss)">${(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs)}</b></div>
    </div>
+   <!-- ==== [CORRECTIF V2-31 point 2] — "un coach ne parle pas en
+        paragraphe entre deux rounds, il lâche trois choses" : les deux
+        répliques apparaissent l'une après l'autre (délai ~450ms), pas
+        d'un bloc. Rien ne bloque l'interaction pendant l'animation (les
+        boutons de consigne plus bas restent cliquables immédiatement) :
+        un seul tap suffit toujours, jamais besoin d'en attendre un second
+        pour que la mise en scène se termine (règle V2-31 point 3). ==== -->
    <div class="card mb" style="background:var(--panel2);border-left:3px solid var(--gold);padding:14px">
-     <div class="small" style="color:var(--text)">${verdict}</div>
-     <div class="small mt" style="color:var(--gold)">« ${conseil} »</div>
+     <div class="small" style="color:var(--text);opacity:0;animation:fade .3s ease .05s forwards">${verdict}</div>
+     <div class="small mt" style="color:var(--gold);opacity:0;animation:fade .3s ease .45s forwards">« ${conseil} »</div>
    </div>
    ${secondSouffleBlock}
    <div class="eyebrow gold mb" style="letter-spacing:0.2em">TA CONSIGNE POUR LE ROUND ${c.round}</div>

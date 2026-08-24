@@ -13,8 +13,21 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: V2-13 règles 2/3] — garde-fous d'éligibilité au titre :
+   - règle 2, "série d'au moins 2 victoires" : f.streak<=0 laissait passer
+     une série d'exactement 1 (streak<=0 exclut 0 et négatif, pas 1).
+     Resserré à <=1.
+   - règle 3, "≥6 combats dans l'organisation ou ≥8 combats professionnels" :
+     absent avant ce correctif — rien n'empêchait un combat de titre après
+     2-3 combats seulement dans l'organisation. f.orgWins (victoires dans
+     l'org actuelle, déjà suivi et déjà seuil de promotion ailleurs,
+     engine.js) sert d'approximation raisonnable pour "combats dans
+     l'organisation" — aucun compteur séparé de combats totaux par org
+     n'existe dans l'état actuel, et l'ajouter serait une extension d'état
+     hors du périmètre de cette règle précise. ==== */
 function isTitleEligible(f){
-  if(f.org<1 || f.streak<=0) return false;
+  if(f.org<1 || f.streak<=1) return false;
+  if((f.orgWins||0)<6 && (f.W+f.L+(f.D||0))<8) return false;
   if(f.history && f.history.length>=3){
     const recentLosses=f.history.slice(-3).filter(h=>h.res==='loss').length;
     if(recentLosses>=2) return false;
@@ -118,7 +131,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   }
   let purse=showPurse;
   if(win) purse+=winBonus;
-  if(win && !isDecisionLike(res.method)){ purse+=(G.f.org===6)?50:showPurse*0.25; }
+  /* ==== [CORRECTIF V2-20] — prime de finition contre-proposée par un
+     directeur (FAITH_DIRECTORS, ui-04, faithOfferDemandMoney) : simple
+     multiplicateur sur le bonus de finition déjà existant, jamais un
+     second système de bourse. Absent hors négociation (finishBonusMult
+     alors undefined -> ||1). */
+  if(win && !isDecisionLike(res.method)){ purse+=((G.f.org===6)?50:showPurse*0.25)*(G.fight.finishBonusMult||1); }
   if(G.fight.pursePenalty) purse=Math.floor(purse*G.fight.pursePenalty*100)/100;
   const purseGross=purse;
   purse=Math.floor(purse*0.75*100)/100; // frais de camp fixes (manager, coach, salle) : ~25% de la bourse brute
@@ -151,7 +169,8 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.f.org>0 && G.f.contract){
     if(!Array.isArray(G.f.contract.record)) G.f.contract.record=[];
     G.f.contract.record.push({res:win?'win':'loss',method:res.method});
-    G.f.contract.fightsLeft--;
+    /* ==== [CORRECTIF V2-37] — jamais négatif : la garde manquait ici. ==== */
+    G.f.contract.fightsLeft=Math.max(0,(G.f.contract.fightsLeft||0)-1);
     if(G.f.contract.fightsLeft<=0){
       contractExpiry=true;
       if(G.f.contract.isFinalContract && !G.f.retired){
@@ -204,6 +223,25 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      vendu au public. ==== */
   if(G.faith && win && isDecisionLike(res.method) && G.f.personality==='showman'){
     G.f.morale=clamp(G.f.morale-8,0,100);
+  }
+  /* ==== [ANCRE: V2-27] — boucle ouverte, fermée ici : une promesse faite
+     en conférence (faithPressConfPosture('provocation'), ui-08) et
+     jamais rappelée n'aurait jamais existé. Vérifiée uniquement contre
+     l'adversaire CONCERNÉ (oppId) — une promesse ne se transfère pas au
+     combat suivant. Toujours consommée (G.faith.promise=null), tenue ou
+     non : elle ne doit jamais persister au-delà du combat qu'elle visait. */
+  if(G.faith && G.faith.promise && opp && opp.id===G.faith.promise.oppId){
+    const tenue=win && !isDecisionLike(res.method);
+    G.faith.promiseOutcome={tenue,oppName:G.faith.promise.oppName};
+    G.faith.promise=null;
+  }
+  /* ==== [ANCRE: V2-27 carrière] — même principe côté mode carrière
+     (G.promise, posé par CL.chooseFaceoff('provocation'), ui-08/scr_plan
+     V2-26) : consommé immédiatement, lu par scr_result (ui-06). */
+  let promiseOutcome=null;
+  if(G.promise && opp && opp.id===G.promise.oppId){
+    promiseOutcome={tenue:win && !isDecisionLike(res.method),oppName:G.promise.oppName};
+    G.promise=null;
   }
   // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
   // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
@@ -609,8 +647,15 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
     if(G.f.retired) forced=true;
   }
+  /* ==== [ANCRE: V2-15 point 4] — "après chaque combat : une ligne de
+     mouvement de rang dans le résumé (#11 -> #7)". myRankBefore (capturé
+     en tout début de fonction) reste valable, mais un second divRank(G.f)
+     ICI, après que W/L/elo/streak aient tous été mis à jour par ce même
+     combat, donne le rang réel APRÈS résultat, sans attendre le cycle
+     annuel d'advanceRoster() (qui ne concerne que les PNJ). ==== */
+  const myRankAfter=divRank(G.f);
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
-    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied};
+    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   f.W=f.L=f.D=f.ko=f.sub=f.dec=f.koLoss=f.streak=0; f.orgWins=0; f.easyFights=0; f.history=[]; f.champion=null; f.titles=0; f.defenses=0; f._fy=0;

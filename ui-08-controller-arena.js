@@ -13,11 +13,11 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
-const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,
+const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,settings:scr_settings,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -43,8 +43,32 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      retirée, la transition hub->arène devient continue. ==== */
   { const _sName=String((G&&G.screen)||'');
     const _enFaith=_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith');
-    document.body.classList.toggle('faith-skin', _enFaith); }
+    document.body.classList.toggle('faith-skin', _enFaith);
+    /* ==== [ANCRE: FAITH_AMBIANCE] — V2-01 : classe papier/nuit posée EN PLUS
+       de faith-skin (cf. index.html, même ancre). Lecture défensive de
+       G.settings (peut ne pas encore exister : plusieurs points d'entrée
+       réassignent G={theme:t} sans repasser par validateState()/load()) —
+       défaut papier, arbitrage tranché, jamais un défaut nuit implicite.
+       La cage reste sombre dans les DEUX ambiances (point 4 du document) :
+       forcé ici plutôt que par CSS pour que ce soit vrai même si un futur
+       écran hors 'arena' voulait un jour la même règle. ==== */
+    const _ambiance=(G&&G.settings&&G.settings.faithAmbiance)||'papier';
+    const _nuit=_enFaith && (_sName==='arena' || _ambiance==='nuit');
+    document.body.classList.toggle('faith-papier', _enFaith && !_nuit);
+    document.body.classList.toggle('faith-nuit', _nuit); }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V2-28] — Rythme "Instantané" : ne passe jamais par ARENA
+     (aucune animation canvas) — résultat direct + résumé en trois lignes.
+     Point de passage unique (render(), pas choosePlan()) : couvre carrière,
+     Faith ET Gauntlet, quel que soit le chemin qui a posé G.screen='arena'.
+     G.pending._flashShown évite de reconstruire le résumé à chaque rendu
+     du même combat. */
+  if(G && G.screen==='arena' && G.pending && !G.pending._flashShown
+     && (((G.settings&&G.settings.fightPace)||'rapide')==='instantane')){
+    G.pending._flashShown=true;
+    G.pending.flashLines=buildFightFlashLines(G.pending.res);
+    G.screen='fight_flash';
+  }
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
@@ -65,6 +89,10 @@ function faithLandOnMonth(){
 }
 function faithAdvanceMonth(){
   G.faith.month++;
+  // ==== [ANCRE: V2-11] — le temps qui passe régénère un peu de fraîcheur,
+  // seul (sans repos actif) ce n'est jamais suffisant pour compenser un
+  // stage/sparring enchaîné mois après mois.
+  if(G.f) G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)+3,0,100);
   faithLandOnMonth();
   if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
   G.screen='faith_hub'; save(); render();
@@ -76,18 +104,61 @@ function faithAdvanceMonth(){
    selon son profil : le Requin vise le plus dangereux (plus dur, mieux payé
    via faithGalaPosition), le Fidèle le plus abordable, le Stratège un
    candidat calibré au milieu. ==== */
-function faithGenerateOffer(){
+/* ==== [ANCRE: V2-16] — "fin du combattant pressenti". Avant ce
+   correctif, le hub (scr_faith_hub, ui-04) affichait `G.opps[0]` (le PLUS
+   DANGEREUX des candidats, cf. CORRECTIF_ORDRE_PROPOSITIONS) comme
+   "pressenti", alors que l'offre réelle générée au clic choisissait selon
+   l'AGENT (le Requin prend le plus dur, le Fidèle le plus abordable, le
+   Stratège le milieu) — pour deux agents sur trois, le pressenti et
+   l'offre réelle étaient systématiquement DIFFÉRENTS. Extrait ici en
+   fonction séparée, idempotente (ne régénère jamais une offre déjà
+   figée) : le hub l'appelle à l'affichage pour lire `pendingOffer.opp`
+   directement (la vraie offre, jamais un second tirage), et
+   faithGenerateOffer() la réutilise telle quelle plutôt que de dupliquer
+   la logique de sélection. @returns {boolean} une offre est disponible */
+function faithEnsureOffer(){
+  if(G.faith.pendingOffer) return true;
   ensureOpponentsCached(G.f);
-  const opps=G.opps||[];
-  if(!opps.length){ faithAdvanceMonth(); return; }
-  const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
-  const chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
+  let opps=G.opps||[];
   const gala=faithGalaPosition(G.f);
   gala.label=faithGalaLabel(G.faith,G.f);
+  /* ==== [ANCRE: V2-13 règles 1/4/5] — Faith a un vrai concept de position
+     de carte (faithGalaPosition, contrairement au mode carrière où seule
+     l'idée de défense/titre en tient lieu — le filtre équivalent vit dans
+     genOpponents(), ui-02, sur la branche isDefense) : sur une carte
+     principale ou un main event, exclure les candidats en déroute
+     (bilan négatif sur leurs 5 derniers combats, règle 1) et plafonner
+     l'écart de rang avec le joueur (règle 4 — fenêtre large sur une
+     carte principale, étroite en main event). Règle 5 : si les DEUX
+     filtres appliqués STRICTEMENT (sans repli silencieux sur la liste
+     non filtrée) ne laissent plus aucun candidat, ne jamais servir un
+     adversaire non conforme — un mois creux avec sa raison affichée vaut
+     mieux qu'un adversaire absurde sur la plus grosse affiche de l'année. */
+  if(gala.tier==='Main event' || gala.tier==='Carte principale'){
+    const myRank=divRank(G.f);
+    const rankCap=gala.tier==='Main event'?8:15;
+    const eligible=opps.filter(x=>{
+      const h=x.o.history;
+      const onASkid=h && h.length>=5 && h.slice(-5).filter(hh=>hh.res==='loss').length>=3;
+      return !onASkid && Math.abs(divRank(x.o)-myRank)<=rankCap;
+    });
+    if(!eligible.length){
+      G.lastMsg="L’organisation n’a personne à vous proposer pour une affiche pareille ce mois-ci — et ça commence à se voir.";
+      return false;
+    }
+    opps=eligible;
+  }
+  if(!opps.length) return false;
+  const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
+  const chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
   G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
+  return true;
+}
+function faithGenerateOffer(){
+  if(!faithEnsureOffer()){ faithAdvanceMonth(); return; }
   G.screen='faith_offer'; save(); render();
 }
 /* ==== [FIN ANCRE] ==== */
@@ -188,6 +259,78 @@ function routeAfterCareerPending(){
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
+  /* ==== [ANCRE: V2-43] — scr_faith_home (ui-04) est atteint DEPUIS le
+     titre, AVANT tout load() : G n'y contient qu'un objet minimal
+     ({theme, screen:'faith_home', ...}), jamais la carrière sauvegardée.
+     save() sérialise TOUJOURS G tel quel dans SAVE_KEY — l'appeler ici
+     écraserait donc la vraie sauvegarde Faith (f/faith/roster complets)
+     avec ce G minimal, un bug de perte de partie strictement introduit
+     par ce nouvel écran. Tant qu'aucune carrière n'est chargée en
+     mémoire (G.faith absent), le réglage est fusionné directement dans
+     le blob déjà stocké, sans jamais passer par save(). Une fois une
+     carrière chargée (depuis scr_faith_hub, où ce réglage restait déjà
+     accessible avant ce lot), le comportement d'origine s'applique : G
+     contient alors la vraie carrière, save() est sûr. */
+  setFaithAmbiance(val){
+    const value=(val==='nuit')?'nuit':'papier';
+    if(G && G.faith){
+      if(!G.settings||typeof G.settings!=='object') G.settings={};
+      G.settings.faithAmbiance=value;
+      save(); render();
+      return;
+    }
+    try{
+      const raw=localStorage.getItem(SAVE_KEY);
+      if(raw){ const parsed=JSON.parse(raw);
+        if(parsed && typeof parsed==='object'){
+          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
+          parsed.settings.faithAmbiance=value;
+          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
+        }
+      }
+    }catch(e){}
+    if(!G.settings||typeof G.settings!=='object') G.settings={};
+    G.settings.faithAmbiance=value; // rendu immédiat cohérent de cet écran précis
+    render();
+  },
+  /* ==== [ANCRE: V2-44] — écran Réglages construit (scr_settings, ui-06) :
+     ce réglage garde son accès depuis scr_plan (ui-06, pratique juste
+     avant un combat) EN PLUS de l'écran Réglages, les deux écrivent le
+     même G.settings.fightPace. Toujours atteint APRÈS chargement d'une
+     carrière (scr_plan n'existe qu'en combat), donc save() y est sûr —
+     contrairement à setFaithAmbiance(), pas de garde nécessaire ici. */
+  setFightPace(val){
+    if(!G.settings||typeof G.settings!=='object') G.settings={};
+    G.settings.fightPace=['integral','rapide','instantane'].includes(val)?val:'rapide';
+    save(); render();
+  },
+  /* ==== [ANCRE: V2-44] — Moments de bascule, activés/désactivés. Même
+     garde qu'setFaithAmbiance() : l'écran Réglages est accessible AVANT
+     tout chargement de carrière (depuis scr_title/scr_faith_home), save()
+     y écraserait donc la vraie sauvegarde avec un G minimal si une
+     carrière n'est pas déjà en mémoire. */
+  setBasculeEnabled(val){
+    const value=!!val;
+    if(G && (G.f || G.faith)){
+      if(!G.settings||typeof G.settings!=='object') G.settings={};
+      G.settings.basculeEnabled=value;
+      save(); render();
+      return;
+    }
+    try{
+      const raw=localStorage.getItem(SAVE_KEY);
+      if(raw){ const parsed=JSON.parse(raw);
+        if(parsed && typeof parsed==='object'){
+          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
+          parsed.settings.basculeEnabled=value;
+          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
+        }
+      }
+    }catch(e){}
+    if(!G.settings||typeof G.settings!=='object') G.settings={};
+    G.settings.basculeEnabled=value;
+    render();
+  },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
      tirage/bascule d'aperçu dans la Salle des Légendes appelait render()
@@ -609,7 +752,28 @@ const CL={
           if(mult!==1) G.fight.pursePenalty=(G.fight.pursePenalty||1)*mult;
           G.fight.galaLabel=off.gala.label;
         }
+        /* ==== [ANCRE: V2-20] — "une contre-proposition est un pari" :
+           certains directeurs (FAITH_DIRECTORS, ui-04) refusent la
+           revalorisation directe et contre-proposent une prime de
+           finition à la place — ne rapporte que si le combat se termine
+           avant la limite. Lu par le bonus de finition déjà existant
+           (ui-05, pursePenalty voisin) plutôt que d'inventer un second
+           système de bourse. ==== */
+        if(off.finishBonus) G.fight.finishBonusMult=2;
         G.faith.pendingOffer=null;
+        // clé de repérage (V2-08) : consommée à l'entrée dans la cage, qu'elle
+        // ait servi ou non — jamais transférable au combat suivant.
+        G.faith.scoutKey=false;
+      }
+      /* ==== [ANCRE: V2-11] — sous "émoussé", la fraîcheur basse se traduit
+         en malus de combat (même mécanisme que les autres malus temporaires
+         du fight, cf. G.fight.malus plus haut), jamais en risque de
+         blessure : la blessure reste l'affaire des stages/sparring, pas
+         du combat lui-même. */
+      const ft=freshnessTier(G.f).tier;
+      if(ft==='vide' || ft==='about'){
+        const penalty=(ft==='about')?{cardio:-15,durability:-10}:{cardio:-8,durability:-5};
+        G.fight.malus=Object.assign({},G.fight.malus,penalty);
       }
       const wc=weightCutInfo(G.f);
       let cutTier;
@@ -626,11 +790,29 @@ const CL={
   train(i){ chooseTraining(i); },
   setCampTier(tierId){ G.selectedCampTier=tierId; render(); },
   skipArena(){ CL.toResult(); },
-  nextRound(){ if(!ARENA||!ARENA.roundPause) return;
-    ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
-    ARENA.roundPause=false;
-    if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
+  nextRound(){ if(!ARENA||!ARENA.roundPause||ARENA.basculePending) return; resumeArenaPlayback(); },
+  /* ==== [ANCRE: V2-29] — une option choisie ne rend pas le même verdict
+     pour deux joueurs : le succès est pondéré par l'attribut du joueur
+     contre celui de l'adversaire sur ce point précis (resolveBasculeOption),
+     jamais un simple tirage à plat. La conséquence est immédiate (une
+     phrase) puis reste affichée jusqu'au tap suivant, qui reprend la
+     lecture — jamais de second tap requis pour ça (règle V2-31 point 3,
+     même esprit ici). */
+  pickBascule(i){
+    if(!ARENA||!ARENA.basculePending||ARENA.basculePending.resultMsg) return;
+    const m=BASCULE_MOMENTS[ARENA.basculePending.kind]; const opt=m&&m.options[i]; if(!opt) return;
+    const win=resolveBasculeOption(opt);
+    ARENA.basculeCount=(ARENA.basculeCount||0)+1;
+    if(win){
+      G.fight.pursePenalty=Math.min(1.15,(G.fight.pursePenalty||1)*1.05);
+      G.f.morale=clamp((G.f.morale||60)+2,0,100);
+    } else {
+      G.f.morale=clamp((G.f.morale||60)-3,0,100);
+    }
+    ARENA.basculePending.resultMsg=win?opt.successMsg:opt.failMsg;
+    renderArenaOverlay();
   },
+  continueAfterBascule(){ if(!ARENA||!ARENA.basculePending) return; ARENA.basculePending=null; resumeArenaPlayback(); },
   handleEvent(actionId){ const ev=G.activeEvent; const id=actionId||(ev&&ev.actionId);
     if(id==='short_notice_accept'){
       const newOpp=G._pendingShortNoticeOpp;
@@ -723,6 +905,23 @@ const CL={
   choosePlan(idx){ const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
     resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
+  /* ==== [ANCRE: V2-26/V2-27] — trois postures, toutes valables (règle
+     H.3). La provocation plante une promesse (G.promise, carrière —
+     distincte de G.faith.promise) vérifiée à la résolution du combat
+     (ui-05, même ancre que côté Faith). */
+  chooseFaceoff(posture){
+    G.fight.faceoffDone=true;
+    const opp=G.fight.opp;
+    if(posture==='respect'){
+      G.f.morale=clamp((G.f.morale||60)+5,0,100);
+    } else if(posture==='provocation'){
+      G.promise={type:'finish',oppId:opp.id,oppName:opp.name};
+      G.lastMsg="Vous avez promis de le finir — il ne l’a pas oublié en montant sur la balance.";
+    } else {
+      G.f.morale=clamp((G.f.morale||60)+2,0,100);
+    }
+    G.fight.planStep=2; render();
+  },
   /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
      l'arène (skipArena et la fin naturelle de l'animation passent tous les
      deux par ici) : généralisé pour pouvoir router ailleurs qu'au résultat
@@ -1091,6 +1290,16 @@ const CL={
      que newCareer(). ==== */
   startFaith(){ G.arcade=null; G.pending=null; G.opps=null;
     G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
+  /* ==== [ANCRE: V2-43] — "confirmation explicite si une carrière est en
+     cours (une carrière Faith perdue par erreur est une session
+     détruite)" : startFaith() écrase la sauvegarde dès son premier
+     save() (ci-dessus), sans jamais redemander — comportement
+     préexistant à ce lot, gardé tel quel, seule une confirmation
+     s'ajoute avant de l'atteindre depuis l'accueil Faith. */
+  faithHomeNewCareer(){
+    if(hasSave('faith') && !confirm('Une carrière Faith est en cours. La remplacer définitivement par une nouvelle ?')) return;
+    CL.startFaith();
+  },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
   selectFaithDraft(key,value){ G.faithDraft[key]=value; render(true); },
   /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — la création n'est pas une
@@ -1185,7 +1394,14 @@ const CL={
     const p2=makeFighter({gender:f.gender,div:f.div,age:21,level:clamp(f.overall-10+boost,20,60),potential:85});
     p1.isGymPartner=true; p2.isGymPartner=true;
     p1.nick='Le Prodige'; p2.nick='L\u2019Aspirant';
-    G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,gym:[p1,p2],
+    /* ==== [ANCRE: V2-07] \u2014 affinity (0-3) et sessions comptent la familiarit\u00e9
+       avec CHAQUE partenaire s\u00e9par\u00e9ment, lues par faithSparring(). ==== */
+    p1.affinity=0; p1.sessions=0; p2.affinity=0; p2.sessions=0;
+    /* ==== [ANCRE: V2-11] \u2014 fra\u00eecheur de d\u00e9part : "pr\u00eat", pas "aff\u00fbt\u00e9" \u2014
+       une carri\u00e8re commence en forme normale, pas au sommet absolu. */
+    f.freshness=70;
+    G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
+      startOfYearChampion:false,startOfYearRank:divRank(f),startOfYearNemesisBeaten:false,gym:[p1,p2],
       agent:faithAgent,agentPatience:3};
     /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
        brouillon de création : il doit survivre au rechargement. ==== */
@@ -1205,39 +1421,164 @@ const CL={
      un peu plus vite CETTE année-là (sans vous pour les canaliser). ==== */
   faithRest(){
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
+    /* ==== [ANCRE: V2-11] — le repos est la seule action qui restaure
+       vraiment la fraîcheur (le reste du temps ne fait que la grignoter
+       moins, cf. le petit regain passif de faithAdvanceMonth()). ==== */
+    G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)+25,0,100);
     G.faith.restedThisYear=true;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Intersaison',choice:'Repos et récupération'});
     faithAdvanceMonth();
   },
+  /* ==== [ANCRE: V2-07/V2-08] — "tourner avec" n'est plus un geste identique
+     à chaque fois : la familiarité avec CE partenaire précis (partner.
+     sessions, incrémentée ici) détermine ce que la séance rapporte. Palier 0
+     (jamais vu travailler) : rien de ciblé, juste la découverte de son
+     style. Palier 1 (~1-2 séances, "il vous jauge") : petit gain large.
+     Palier 2 (~3-4 séances, "il vous lit") : gain ciblé + clé de repérage
+     sur le prochain adversaire (scoutKey, lue par scr_faith_offer, ui-04).
+     Palier 3 (5 séances et plus, "il vous connaît par cœur") : gain fort ET
+     ouverture du Syndrome de Frankenstein — qui ne se déclenche donc plus
+     dès la première séance comme avant ce correctif, mais seulement une
+     fois la familiarité maximale atteinte. La clé de repérage, elle,
+     récompense la catégorie "précision" dès le palier 2, pas seulement au
+     sommet. ==== */
   faithSparring(partnerId){
     const partner=(G.faith.gym||[]).find(p=>p.id===partnerId); if(!partner) return;
     G.f.form=clamp(G.f.form+15,0,100);
-    applyDeltas(G.f,[['fightIQ',1]]); // enseigner renforce l'intellect tactique
-    // Syndrome de Frankenstein : le partenaire copie violemment les 2
-    // meilleures stats du joueur — c'est lui qui, des années plus tard,
-    // reviendra armé de vos propres armes.
-    const bestStats=ATTR_KEYS.map(k=>({k,v:G.f.attrs[k]})).sort((a,b)=>b.v-a.v).slice(0,2);
-    applyDeltas(partner,[[bestStats[0].k,3],[bestStats[1].k,3],['adaptability',2],['fightIQ',2]]);
-    partner.overall=overall(partner);
-    G.lastMsg=`Séance intense. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
+    G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)-10,0,100);
+    const priorSessions=partner.sessions||0;
+    partner.affinity=clamp((partner.affinity||0)+1,0,3);
+    partner.sessions=priorSessions+1;
+    let tierMsg;
+    if(priorSessions===0){
+      applyDeltas(G.f,[['fightIQ',1]]);
+      tierMsg=`Première séance ensemble : vous ne l’aviez jamais vu travailler. Vous découvrez son style, ${esc(partner.styleLabel||'')}.`;
+    } else if(priorSessions<3){
+      applyDeltas(G.f,[['fightIQ',1],[pick(TRAINABLE),1]]);
+      G.faith.scoutKey=true;
+      tierMsg=`Il commence à vous jauger. Séance utile, sans plus.`;
+    } else if(priorSessions<5){
+      applyDeltas(G.f,[['fightIQ',2],[pick(TRAINABLE),2]]);
+      G.faith.scoutKey=true;
+      tierMsg=`Il vous lit, maintenant, et cale la séance sur ce qui vous attend.`;
+    } else {
+      G.faith.scoutKey=true;
+      const bestStats=ATTR_KEYS.map(k=>({k,v:G.f.attrs[k]})).sort((a,b)=>b.v-a.v).slice(0,2);
+      applyDeltas(G.f,[[bestStats[0].k,2],['fightIQ',2]]);
+      // Syndrome de Frankenstein : le partenaire copie violemment les 2
+      // meilleures stats du joueur — c'est lui qui, des années plus tard,
+      // reviendra armé de vos propres armes.
+      applyDeltas(partner,[[bestStats[0].k,3],[bestStats[1].k,3],['adaptability',2],['fightIQ',2]]);
+      partner.overall=overall(partner);
+      tierMsg=`Il vous connaît par cœur. ${esc(partner.first)} a parfaitement mimé votre ${attrLabel(bestStats[0].k)}. Il progresse à une vitesse terrifiante.`;
+    }
+    G.lastMsg=tierMsg;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Sparring',choice:`A tourné avec ${esc(partner.name)}`});
     faithAdvanceMonth();
   },
-  /* ==== [CORRECTIF FA-15] — troisième option de l'intersaison : le stage
-     (perk 'tiger', jusqu'ici un tirage possible parmi FAITH_OFFRES_TENTATION)
-     devient une décision directe d'intersaison plutôt qu'un coup de chance
-     de la pioche — "Partir en stage" migre ici, comme le document le nomme.
-     Réutilise buyFaithPerk('tiger') telle quelle (même tirage 25%/75%, même
-     conséquence), qui ne change jamais d'écran ni de mois elle-même :
-     l'avance de mois est donc assumée ici, juste après. ==== */
+  /* ==== [ANCRE: V2-10] — le stage unique (perk 'tiger' tiré au hasard) est
+     remplacé par un choix réel entre 6 camps nommés (FAITH_CAMPS, ui-04),
+     chacun avec son coût, sa famille d'attributs, son risque et son texte
+     de retour propre — plus un menu de sélection à part entière qu'une
+     décision narrative sous tension, la règle des 3 options (H.3) ne s'y
+     applique donc pas (comme les autres écrans de type "vitrine" du jeu :
+     choix de style, de camp d'entraînement en carrière...). ==== */
   faithCamp(){
-    if((G.f.earnings||0)<50){ G.lastMsg="Fonds insuffisants pour ce stage (50k$)."; render(); return; }
+    G.screen='faith_camps'; save(); render();
+  },
+  faithCampChoose(campId){
+    const camp=(typeof FAITH_CAMPS!=='undefined'?FAITH_CAMPS:[]).find(c=>c.id===campId);
+    if(!camp) return;
+    const f=G.f;
+    if((f.earnings||0)<camp.cost){ G.lastMsg=`Fonds insuffisants pour ce stage (${camp.cost}k$).`; render(); return; }
+    /* ==== [ANCRE: V2-11] — "le coach refuse en-dessous d'à bout" : jamais
+       de chiffre, une phrase qui ferme la porte. ==== */
+    if(freshnessTier(f).tier==='about'){
+      G.lastMsg="Votre coach refuse net : «Tu n’as plus rien à donner à un stage, là. Tu vas juste te faire mal.»";
+      render(); return;
+    }
+    const F=G.faith;
+    if(F.pendingIntersaisonEntry){
+      if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+      F.intersaisonCooldown[F.pendingIntersaisonEntry]=3;
+      F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
+      F.currentIntersaison=null;
+      F.pendingIntersaisonEntry=null;
+    }
+    f.earnings-=camp.cost;
+    const already=(G.faith.campsVisited||[]).includes(camp.id);
+    if(!G.faith.campsVisited) G.faith.campsVisited=[];
+    if(!already) G.faith.campsVisited.push(camp.id);
+    const freshCost=already?Math.round(camp.freshCost*0.6):camp.freshCost;
+    f.freshness=clamp((f.freshness==null?70:f.freshness)+freshCost,0,100);
+    const riskMult=(freshnessTier(f).tier==='vide'||freshnessTier(f).tier==='emousse')?1.6:1;
+    if(camp.risk>0 && rnd()<camp.risk*riskMult){
+      const inj=rollInjury(); f.injury={name:inj.name,left:inj.fights};
+      f.morale=clamp(f.morale-10,0,100);
+      G.lastMsg=`${camp.name} : blessure au stage. ${inj.name}.`;
+      if(!G.faith.yearLog) G.faith.yearLog=[];
+      G.faith.yearLog.push({title:'Intersaison',choice:`Stage — ${camp.name} (blessure)`});
+      faithAdvanceMonth(); return;
+    }
+    const gainMult=already?0.5:1;
+    const deltas=camp.attrs.map(k=>[k,Math.max(1,Math.round(3*gainMult))]);
+    applyDeltas(f,deltas);
+    G.lastMsg=already?camp.repeatText:camp.text;
     if(!G.faith.yearLog) G.faith.yearLog=[];
-    G.faith.yearLog.push({title:'Intersaison',choice:'Stage'});
-    CL.buyFaithPerk('tiger');
+    G.faith.yearLog.push({title:'Intersaison',choice:`Stage — ${camp.name}`});
     faithAdvanceMonth();
+  },
+  /* ==== [ANCRE: V2-09] — point d'entrée unique de l'intersaison : quelle
+     que soit l'entrée du pool choisie, le cooldown (3 intersaisons) et
+     F.lastTrio (jamais le même trio deux ans de suite) se posent ICI,
+     avant de router vers l'action réelle — camp/sparring/repos restent des
+     primitives réutilisables, indépendantes du système de pool. ==== */
+  faithIntersaisonChoose(entryId){
+    const F=G.faith, f=G.f;
+    const entry=(typeof FAITH_INTERSAISON_POOL!=='undefined'?FAITH_INTERSAISON_POOL:[]).find(e=>e.id===entryId);
+    if(!entry) return;
+    F.pendingIntersaisonEntry=null;
+    if(entry.action==='camp'){
+      /* Le stage ouvre un sous-écran (choix parmi 6, cf. V2-10) : le
+         cooldown/lastTrio de CE choix de pool ne sont posés qu'à la
+         résolution réelle du stage (faithCampChoose), pas ici — revenir en
+         arrière sans choisir de camp ne doit pas "consommer" l'intersaison. */
+      F.pendingIntersaisonEntry=entryId;
+      CL.faithCamp(); return;
+    }
+    if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+    F.intersaisonCooldown[entryId]=3;
+    F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
+    F.currentIntersaison=null;
+    if(!F.yearLog) F.yearLog=[];
+    if(entry.action==='rest'){ CL.faithRest(); return; }
+    if(entry.action==='sparring_top'){
+      const tp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+      if(tp) CL.faithSparring(tp.id); else CL.faithRest();
+      return;
+    }
+    if(entry.action==='sparring_second'){
+      const sp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+      if(sp) CL.faithSparring(sp.id); else CL.faithRest();
+      return;
+    }
+    if(entry.action==='scout_video'){
+      f.freshness=clamp((f.freshness==null?70:f.freshness)-3,0,100);
+      F.scoutKey=true;
+      applyDeltas(f,[['fightIQ',1]]);
+      G.lastMsg='Des heures à décortiquer ses combats. Vous savez désormais où il est le plus dangereux.';
+      F.yearLog.push({title:'Intersaison',choice:'Étude vidéo'});
+      faithAdvanceMonth(); return;
+    }
+    if(entry.action==='sponsor'){
+      f.earnings=(f.earnings||0)+15; f.morale=clamp(f.morale+5,0,100);
+      G.lastMsg='Un partenariat modeste, mais qui tombe bien.';
+      F.yearLog.push({title:'Intersaison',choice:'Rencontre sponsor'});
+      faithAdvanceMonth(); return;
+    }
+    CL.faithRest();
   },
   faithLifeEvent(){
     // Syndrome de Frankenstein : si un protégé a rattrapé (ou dépassé) le
@@ -1403,43 +1744,157 @@ const CL={
      reste de la mise en jambe d'un combat Faith — un seul chemin de code,
      pas une copie. Cette branche lit G.faith.pendingOffer elle-même pour
      appliquer le multiplicateur de bourse et le nombre de rounds du gala. ==== */
+  /* ==== [ANCRE: V2-23/V2-25] — chaîne entre la signature et l'entrée en
+     cage : un événement de build-up d'abord (tout combat, V2-23), puis la
+     conférence de presse si le gala l'impose (Main event uniquement,
+     V2-25). Chaque étape pose son propre drapeau "Done" sur l'offre pour
+     ne jamais se rejouer si l'écran est réaffiché sans avoir progressé. */
   faithOfferSign(){
     const off=G.faith.pendingOffer; if(!off) return;
+    if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
+    if(!off.buildupDone){
+      off.buildupDone=true;
+      G.faith.currentBuildupEvent=faithBuildupPick(G.f,G.faith);
+      G.screen='faith_buildup'; save(); render();
+      return;
+    }
+    if(off.gala && off.gala.pressConf && !off.pressConfDone){
+      off.pressConfDone=true;
+      G.screen='faith_press_conf'; save(); render();
+      return;
+    }
     G.opps=[off.opp];
     CL.opp(0);
   },
-  /* ==== [CORRECTIF FA-13] — patience à 0 : l'agent négocie quand même
-     (jamais de blocage dur), juste avec une réserve affichée — c'est le
-     franchissement à 0 qui compte pour agentPatienceHitZero (bilan annuel,
-     nextFaithYear), pas le fait de rester dessus. La bonification n'est
-     JAMAIS un nombre affiché avant coup (mise à jour de l'offre seulement) —
-     le pouvoir de négociation reste implicite, cf. faithNegotiationPower(). */
+  /* ==== [ANCRE: V2-23] — applique le choix (deux options, réponse
+     immédiate) puis reprend la chaîne (faithOfferSign() gère la suite :
+     conférence ou signature directe). */
+  faithBuildupChoose(idx){
+    const ev=G.faith.currentBuildupEvent; if(!ev) return;
+    const c=ev.choices[idx]; if(!c) return;
+    const F=G.faith;
+    if(c.dv){
+      if(c.dv.attente) F.buildup.attente=Math.max(0,F.buildup.attente+c.dv.attente);
+      if(c.dv.tension) F.buildup.tension=Math.max(0,F.buildup.tension+c.dv.tension);
+    }
+    if(c.money) G.f.earnings=(G.f.earnings||0)+c.money;
+    if(c.morale) G.f.morale=clamp((G.f.morale||60)+c.morale,0,100);
+    if(c.director) faithDirectorAdjust(G.f.org,c.director);
+    F.buildup.causes.push({title:ev.title,choice:c.label});
+    G.faith.currentBuildupEvent=null;
+    CL.faithOfferSign();
+  },
+  /* ==== [ANCRE: V2-25/V2-27] — trois postures, toutes valables (règle
+     H.3). La provocation plante une promesse (V2-27, "je le finis") —
+     rappelée à la résolution du combat (ui-05, ANCRE V2-27) puis dans
+     la coupure de presse annuelle si elle a été tenue ou trahie. */
+  faithPressConfPosture(posture){
+    const off=G.faith.pendingOffer; if(!off) return;
+    if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
+    const F=G.faith;
+    if(posture==='respect'){
+      F.buildup.tension=Math.max(0,F.buildup.tension-1);
+      faithDirectorAdjust(G.f.org,1);
+      G.lastMsg="Ton posé, poignée de main. Le directeur retient le geste.";
+    } else if(posture==='provocation'){
+      F.buildup.attente++; F.buildup.tension++;
+      F.promise={type:'finish',oppId:off.opp.o.id,oppName:off.opp.o.name};
+      G.lastMsg="Vous avez promis de le finir — la salle ne l’oubliera pas si vous n’y arrivez pas.";
+    } else {
+      F.buildup.attente=Math.max(0,F.buildup.attente-1);
+      G.f.morale=clamp((G.f.morale||60)+5,0,100);
+    }
+    G.opps=[off.opp];
+    CL.opp(0);
+  },
+  /* ==== [CORRECTIF FA-13 / V2-20] — patience à 0 : l'agent négocie quand
+     même (jamais de blocage dur), juste avec une réserve affichée — c'est
+     le franchissement à 0 qui compte pour agentPatienceHitZero (bilan
+     annuel, nextFaithYear), pas le fait de rester dessus. La bonification
+     n'est JAMAIS un nombre affiché avant coup — le pouvoir de négociation
+     reste implicite, cf. faithLeverage(). V2-20 : "sans levier, l'option
+     n'existe pas" — gardée ici en plus du bouton retiré côté écran
+     (scr_faith_offer, ui-04) pour ne jamais dépendre uniquement de
+     l'affichage. La réponse passe désormais par le directeur de
+     l'organisation (FAITH_DIRECTORS, ui-04), qui accepte, refuse, ou
+     contre-propose une prime de finition selon son profil et sa mémoire
+     envers le joueur (faithDirectorAdjust/Mood). */
   faithOfferDemandMoney(){
     const off=G.faith.pendingOffer; if(!off) return;
-    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; G.lastMsg="Il insiste encore, mais commence à parler de repositionner sa liste de clients."; }
-    else { G.faith.agentPatience--; G.lastMsg="Votre agent revient avec une meilleure offre."; }
-    const power=faithNegotiationPower(G.f);
-    const bump=0.15+Math.min(1,power/4)*0.25;
-    off.bonusMult=(off.bonusMult||1)*(1+bump);
+    const leverage=faithLeverage(G.f,G.faith);
+    if(leverage<=0){ G.lastMsg="Vous n’avez rien à négocier : personne ne parle de ce combat."; render(); return; }
+    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; }
+    else { G.faith.agentPatience--; }
+    const dir=FAITH_DIRECTORS[G.f.org]||FAITH_DIRECTORS[0];
+    const trust=(G.faith.directors&&G.faith.directors[G.f.org]&&G.faith.directors[G.f.org].trust)||0;
+    const favorable=faithDirectorFavorable(dir,G.f);
+    if(dir.archetype==='requin' && rnd()<0.6){
+      off.finishBonus=true;
+      G.lastMsg=`${dir.name} : « Pas un centime de plus. Mais finissez-le, et je double la prime. »`;
+    } else if(favorable || trust>=1){
+      const bump=0.15+Math.min(1,leverage/4)*0.25;
+      off.bonusMult=(off.bonusMult||1)*(1+bump);
+      faithDirectorAdjust(G.f.org,1);
+      G.lastMsg=`${dir.name} revient avec une meilleure offre.`;
+    } else if(trust<=-1){
+      G.lastMsg=`${dir.name} refuse net : « ${faithDirectorRefusalLine(dir)} »`;
+    } else {
+      off.finishBonus=true;
+      G.lastMsg=`${dir.name} : « La base ne bouge pas. Finissez-le, et on en reparle. »`;
+    }
     save(); render();
   },
+  /* ==== [ANCRE: V2-18] — "demander un autre combat, avec justification".
+     Le bouton unique portait une commande abstraite, sans motif ni
+     risque. Le motif réel (faithDemandMotif(), ui-04) est maintenant
+     affiché avant le clic ; la réponse passe enfin par la personnalité
+     de l'agent (requin/stratège/fidèle, déjà choisie à la création,
+     jusqu'ici jamais branchée sur ce comportement) plutôt que par un
+     échange systématique et gratuit. */
   faithOfferDemandBetter(){
     const off=G.faith.pendingOffer; if(!off) return;
-    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; G.lastMsg="Il insiste encore, mais commence à parler de repositionner sa liste de clients."; }
+    if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; }
     else { G.faith.agentPatience--; }
     const opps=G.opps||[]; const idx=opps.indexOf(off.opp);
-    if(idx>0){ off.opp=opps[idx-1]; }
+    const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
+    if(agentId==='requin'){
+      if(idx>0) off.opp=opps[idx-1];
+      faithDirectorAdjust(G.f.org,-1);
+      G.lastMsg="Votre agent a forcé la main du directeur — ça ne passera pas inaperçu.";
+    } else if(agentId==='stratege'){
+      if(idx>0){ off.opp=opps[idx-1]; G.lastMsg="Un adversaire mieux calibré pour votre progression."; }
+      else { G.lastMsg="Le Stratège refuse : ce combat sert déjà le plan."; }
+    } else {
+      if(idx>0 && rnd()<0.8){ off.opp=opps[idx-1]; }
+      else if(idx<opps.length-1){ off.opp=opps[idx+1]; G.lastMsg="Le Fidèle s’est trompé d’adversaire — trop tard pour revenir dessus."; }
+    }
     off.gala=faithGalaPosition(G.f); off.gala.label=faithGalaLabel(G.faith,G.f);
     if(!G.faith.agent) off.gala.mult*=0.75;
     save(); render();
   },
-  /* ==== [CORRECTIF FA-12] — refuser coûte réellement quelque chose : la
-     case combat de l'année est perdue (pas de nouvelle offre à la place),
-     exactement ce que le document demande. ==== */
+  /* ==== [CORRECTIF FA-12 / V2-21] — refuser coûte réellement quelque
+     chose : la case combat de l'année est perdue (FA-12, inchangé). V2-21
+     ajoute un vrai prix côté agent (réutilise agentPatience/
+     agentPatienceHitZero, déjà l'infrastructure de mécontentement de
+     l'agent — FA-13 — plutôt qu'un nouveau système de "crédit
+     d'organisation" à inventer pour Faith, qui n'a pas de directeurs
+     nommés à ce stade du document, cf. Batch 4/V2-19), et une franchise :
+     un refus est gratuit une fois par an si le combattant est
+     effectivement blessé au moment du refus (motif médical réel, pas
+     déclaratif — cf. f.injury, déjà suivi). refusalsThisYear/
+     medicalRefusalUsed repartent à zéro chaque année (nextFaithYear). ==== */
   faithOfferRefuse(){
+    const medical=!!G.f.injury && !G.faith.medicalRefusalUsed;
+    G.faith.refusalsThisYear=(G.faith.refusalsThisYear||0)+1;
+    if(medical){ G.faith.medicalRefusalUsed=true; }
+    else if(G.faith.agentPatience>0){ G.faith.agentPatience--; }
+    else { G.faith.agentPatienceHitZero=true; }
+    if(G.faith.refusalsThisYear>=3){
+      G.lastMsg="Votre agent vous prévient : à ce rythme de refus, il ne pourra bientôt plus vous représenter.";
+    }
     G.faith.pendingOffer=null;
     if(!G.faith.yearLog) G.faith.yearLog=[];
-    G.faith.yearLog.push({title:'Combat refusé',choice:'Aucune offre acceptée'});
+    G.faith.yearLog.push({title:'Combat refusé',choice:medical?'Refus médical':'Combat refusé'});
     faithAdvanceMonth();
   },
   prepareFaithYearEnd(){
@@ -1458,6 +1913,13 @@ const CL={
     G.faith.peakElo=Math.max(G.faith.peakElo||0,f.careerElo||0);
     G.faith.peakEarnings=Math.max(G.faith.peakEarnings||0,f.earnings||0);
     G.faith.dmgHeadTotal=(G.faith.dmgHeadTotal||0)+dmgHead;
+    /* ==== [ANCRE: V2-35] — même logique de pic que peakElo/peakEarnings
+       juste au-dessus : computeLegendScore() (ui-04) note le SOMMET
+       overall/rang/série jamais l'état final. rank est déjà calculé
+       ci-dessus (divRank(f)), réutilisé tel quel. */
+    G.faith.peakOverall=Math.max(G.faith.peakOverall||0,f.overall||0);
+    G.faith.peakRank=Math.min(G.faith.peakRank!=null?G.faith.peakRank:99,rank||99);
+    G.faith.bestStreak=Math.max(G.faith.bestStreak||0,f.streak||0);
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: FA-28] — « le combat de trop ». isDeclining() (engine.js,
        déjà le seuil qui déclenche l'écran de retraite, scr_faith_retire) et
@@ -1516,11 +1978,17 @@ const CL={
       const rar=tirerRarete(); const sk=getFallbackSkill(currentPool,rar);
       if(sk){ grantSkill(f,sk); newSkills.push(sk); pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS); }
     }
+    /* ==== [ANCRE: V2-27] — G.faith.promiseOutcome (posé par resolveFight(),
+       ui-05, à la résolution du combat concerné) capturé dans yearStats
+       comme sequelle juste au-dessus, puis purgé pour ne jamais fuiter
+       sur une année suivante sans nouvelle promesse. */
+    const promiseOutcome=G.faith.promiseOutcome||null;
+    G.faith.promiseOutcome=null;
     G.faith.yearStats={
       fights:G.faith.fightsThisYear,
       wins:(G.season.fights||[]).filter(x=>x.win).length,
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
-      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle
+      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle, promiseOutcome
     };
     G.screen='faith_year_end'; save(); render();
   },
@@ -1534,6 +2002,8 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     G.faith.year++;
     G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
+    /* V2-21 : compteurs annuels de refus, remis à zéro comme le reste. */
+    G.faith.refusalsThisYear=0; G.faith.medicalRefusalUsed=false;
     /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
        qu'un millésime : le drapeau est levé ici, avec le reste des compteurs
        annuels. ==== */
@@ -1547,6 +2017,14 @@ const CL={
        marqueur de rupture. ==== */
     G.faith.startOfYearScandals=G.faith.scandals||0;
     G.faith.startOfYearOathBroken=!!(G.faith.oath&&G.faith.oath.broken);
+    /* ==== [ANCRE: V2-32] — mêmes photographies de début d'année, pour la
+       table des faits saillants de l'article (faithYearFacts, ui-04) :
+       ceinture gagnée/perdue, mouvement de rang, némésis qui vient de
+       tomber — comparés à CETTE année précisément, jamais à l'état cumulé
+       depuis toujours. ==== */
+    G.faith.startOfYearChampion=!!G.f.champion;
+    G.faith.startOfYearRank=divRank(G.f);
+    G.faith.startOfYearNemesisBeaten=!!G.faith.nemesisBeaten;
     /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
@@ -1575,6 +2053,33 @@ const CL={
             break;
           }
         }
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: V2-14] — FA-26 verrouillait une némésis pour la
+       carrière entière sans jamais vérifier qu'un rematch restait
+       plausible : un rival qui s'effondre (viré du haut niveau) ou qui
+       s'envole (double champion pendant que le joueur stagne en bas de
+       tableau) restait quand même "la" némésis, sans qu'aucune revanche
+       ne redevienne jamais réaliste. Vérifié une fois par an, juste après
+       le verrouillage éventuel ci-dessus (jamais la même année qu'un
+       verrouillage frais : `else` ci-dessous). Dissoute, jamais annulée
+       en silence : la carrière peut ensuite en reformer une nouvelle
+       (rankWatch n'est pas purgé : les compteurs déjà accumulés par
+       d'autres combattants du roster restent valables). ==== */
+    else if(G.f.faithNemesisId){
+      const nem=(G.roster||[]).find(o=>o.id===G.f.faithNemesisId);
+      const monRang=divRank(G.f);
+      const nemRang=nem?divRank(nem):null;
+      const gapTropGrand=!nem || Math.abs(nemRang-monRang)>20;
+      if(gapTropGrand){
+        const coule=!nem || nemRang>monRang;
+        G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+(coule
+          ?"Votre némésis a perdu trois fois de suite : plus personne ne veut de ce combat."
+          :"Elle est championne, et n'a pas cité votre nom une seule fois cette année.");
+        if(!G.faith.yearLog) G.faith.yearLog=[];
+        G.faith.yearLog.push({title:'Rivalité dissoute',choice:coule?'Il a coulé':'Il vous a dépassé'});
+        G.f.faithNemesisId=null; G.f.rivalId=null; G.f.nemesisRecord=null;
       }
     }
     /* ==== [FIN ANCRE] ==== */
@@ -1632,6 +2137,10 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: FAITH_CALENDRIER] — nouveau calendrier de 12 mois pour la
        saison qui commence (cf. finalizeFaithDraft pour la 1ère année). ==== */
+    // V2-09 : un tirage d'intersaison ne doit jamais survivre au changement
+    // d'année (le mois repart à 0 juste en dessous, un tirage figé sur un
+    // vieux mois=0 d'une année passée pourrait sinon se faire réutiliser à tort).
+    G.faith.currentIntersaison=null; G.faith.pendingIntersaisonEntry=null;
     G.faith.month=0; G.faith.calendar=faithGenerateCalendar(G.f);
     faithLandOnMonth();
     if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
@@ -2323,7 +2832,12 @@ window.CL=CL;
    res.rounds n'existe pas (le champ réel est res.round, singulier) — corrigé
    ici par rapport au brouillon reçu. */
 let ARENA=null;
-const BEAT_MS=750; // ralenti pour laisser le temps de lire le flux narratif
+/* ==== [ANCRE: V2-28] — BEAT_MS n'est plus une constante figée : le réglage
+   Rythme de combat (G.settings.fightPace, persisté) l'ajuste au lancement
+   de startArena() — Intégral prend plus de temps par beat pour tout
+   laisser lire, Rapide (défaut) garde le rythme d'origine. Instantané ne
+   passe jamais par ARENA du tout (cf. render(), scr_fight_flash). */
+let BEAT_MS=750; // ralenti pour laisser le temps de lire le flux narratif
 function makeNoisePattern(ctx){ try{
   const n=64, c=document.createElement('canvas'); c.width=n; c.height=n;
   const nctx=c.getContext('2d'); const id=nctx.createImageData(n,n);
@@ -2372,6 +2886,32 @@ function buildTimeline(midFight){
        1=en délire). ==== */
     slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
 }
+/* ==== [ANCRE: V2-28] — résumé du Rythme "Instantané" : trois lignes
+   (le meilleur moment, le tournant, la fin), tirées du log réel du
+   combat déjà simulé — jamais un texte générique. "Meilleur moment" =
+   le plus grand écart de momentum entre deux événements consécutifs ;
+   "le tournant" = le premier événement où le momentum franchit
+   l'équilibre (50) après le début du combat, à défaut l'événement du
+   milieu ; "la fin" = l'événement de finition, ou le dernier du log.
+ * @param {object} res @returns {string[]} */
+function buildFightFlashLines(res){
+  const log=(res && res.log && res.log.length)?res.log:[];
+  const clean=t=>String(t||'').replace(/^\[\d+:\d+\]\s*/,'');
+  if(!log.length) return ['Le combat s’est résolu directement, sans temps mort.'];
+  let best=log[0], bestSwing=-1, prevM=50, tournant=null;
+  for(const L of log){
+    const m=(L.momentum!=null)?L.momentum:prevM;
+    const swing=Math.abs(m-prevM);
+    if(swing>bestSwing){ bestSwing=swing; best=L; }
+    if(tournant===null && (prevM-50)*(m-50)<0) tournant=L;
+    prevM=m;
+  }
+  if(!tournant) tournant=log[Math.floor(log.length/2)];
+  const finLog=log.find(L=>L.finish)||log[log.length-1];
+  const lines=[clean(best.text),clean(tournant.text),clean(finLog.text)];
+  return lines.filter((t,i)=>t && lines.indexOf(t)===i);
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : ouvrir une
    "fenêtre" avec un aperçu de l'arène en plein rendu Canvas (les silhouettes
    de combattants), un par effet du Marché noir, au lieu du simple texte
@@ -2415,6 +2955,10 @@ function cacheArenaGfx(){
   A._foOp={lunge:0,flash:false,shake:false,fallen:false,grounded:false,phase:null,top:false,tap:false};
 }
 function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
+  /* ==== [ANCRE: V2-28] — Rythme de combat : Intégral prend son temps
+     (beat plus long, on voit tout), Rapide (défaut) garde le rythme
+     d'origine. Instantané ne passe jamais ici (cf. render()). */
+  BEAT_MS=(((G.settings&&G.settings.fightPace)||'rapide')==='integral')?1050:750;
   // Cast JSDoc : getElementById() renvoie HTMLElement générique ; c'est bien
   // un <canvas> dans le HTML réel (width/height/getContext lui sont propres).
   const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('arena-cv'));
@@ -2461,7 +3005,14 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
       const prevRound=ARENA.lastBeat>=0?(ARENA.beats[ARENA.lastBeat].round||1):null;
       const newRound=ARENA.beats[bi].round||1;
       if(prevRound!==null && newRound!==prevRound && !ARENA.beats[bi].finish && bi!==ARENA.pauseHandledFor){
-        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; ARENA.pauseHandledFor=bi; renderArenaOverlay(); return;
+        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; ARENA.pauseHandledFor=bi;
+        /* ==== [ANCRE: V2-29] — moment de bascule détecté sur la reprise qui
+           vient de se terminer, à partir de l'état RÉEL de la simulation
+           (momentum/phase des beats de cette reprise) — jamais à chaque
+           reprise (règle 6), plafonné à 3 par combat (ARENA.basculeCount). */
+        const moment=detectBascule(prevRound);
+        if(moment) ARENA.basculePending={kind:moment.kind};
+        renderArenaOverlay(); return;
       }
       ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]);
     }
@@ -2485,9 +3036,117 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   ARENA.loopFn=loop;
   paintBars(); ARENA.raf=requestAnimationFrame(loop);
 }
+/* ==== [ANCRE: V2-29] — même mécanisme de reprise que "Round suivant"
+   (recalculer pauseOffset pour retomber pile sur pendingBeatIdx, relever
+   roundPause, relancer la boucle) : nextRound() ET continueAfterBascule()
+   partagent ce point unique plutôt que de dupliquer le calcul. */
+function resumeArenaPlayback(){
+  ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
+  ARENA.roundPause=false;
+  if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
+}
 function renderArenaOverlay(){ const el=document.getElementById('ar-log'); if(!el) return;
+  if(ARENA.basculePending){ renderBasculeOverlay(el); return; }
   const finishedRound=ARENA.beats[ARENA.lastBeat]?(ARENA.beats[ARENA.lastBeat].round||1):1;
   el.innerHTML=`<div style="text-align:center"><b class="gold">Fin du round ${finishedRound}</b><br><button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.nextRound()">Round suivant ▸</button></div>`;
+}
+/* ==== [ANCRE: V2-29] — les moments de bascule. Faute de flags dédiés dans
+   le log du moteur (pas de "sonné"/"coupure"/"dos à la cage" — cf. beat
+   shape réelle : phase/by/momentum/snapA/snapB seulement), les 4
+   situations ci-dessous sont dérivées de l'état RÉEL de la reprise qui
+   vient de se jouer (momentum de fin de round, domination en clinch) —
+   jamais fabriquées. Format imposé : une phrase de situation, 3 options,
+   aucun chiffre, conséquence en une phrase. */
+const BASCULE_MOMENTS={
+  sonne_lui:{situation:'Il recule, les jambes molles. La cage est derrière lui.',
+    options:[
+      {label:'Se jeter dessus',stat:'killer',oppStat:'chin',
+        successMsg:'Vous ne le laissez pas respirer — il craque un peu plus.',
+        failMsg:'Il vous accroche au passage : vous ralentissez, groggy vous aussi.'},
+      {label:'Rester structuré et le cueillir',stat:'composure',oppStat:'chin',
+        successMsg:'Vous le cueillez proprement, sans vous exposer.',
+        failMsg:'Il tient bon, et la reprise se referme sans rien de plus.'},
+      {label:'Le laisser revenir et garder le round',stat:'fightIQ',oppStat:'heart',
+        successMsg:'Vous gardez le contrôle de la reprise, sans risque inutile.',
+        failMsg:'Il revient dans le round : l’occasion est passée.'}
+    ]},
+  sonne_moi:{situation:'Vous encaissez, les jambes molles. Il sent l’occasion.',
+    options:[
+      {label:'Se réfugier au clinch',stat:'clinchStr',oppStat:'power',
+        successMsg:'Vous vous accrochez à lui, le temps que la tête se remette en place.',
+        failMsg:'Il vous décolle du clinch et continue d’appuyer.'},
+      {label:'Reculer et respirer',stat:'footSpeed',oppStat:'aggression',
+        successMsg:'Vous sortez de l’axe, il ne vous rattrape pas.',
+        failMsg:'Il coupe la cage et vous retrouve contre la grille.'},
+      {label:'Répondre pour le faire douter',stat:'heart',oppStat:'composure',
+        successMsg:'Votre réponse le fait hésiter une seconde de trop.',
+        failMsg:'Il encaisse sans broncher et continue d’avancer.'}
+    ]},
+  clinch:{situation:'Dos à la cage, il vous contrôle en clinch depuis un moment.',
+    options:[
+      {label:'Forcer la sortie tout de suite',stat:'strength',oppStat:'clinchStr',
+        successMsg:'Vous vous dégagez, retour au centre de la cage.',
+        failMsg:'Vous forcez pour rien : il vous replaque contre la grille.'},
+      {label:'Attendre l’ouverture pour sortir',stat:'fightIQ',oppStat:'topControl',
+        successMsg:'Vous sentez le bon moment et sortez proprement.',
+        failMsg:'L’ouverture ne vient jamais : la reprise se termine collé à la grille.'},
+      {label:'Accepter la position et encaisser au score',stat:'discipline',oppStat:'clinchStr',
+        successMsg:'Vous limitez les dégâts, sans paniquer.',
+        failMsg:'Il en profite pour accumuler les coups au corps.'}
+    ]},
+  serre:{situation:'Round qui se joue à rien, dans les dernières secondes.',
+    options:[
+      {label:'Se jeter dans un dernier échange',stat:'aggression',oppStat:'chin',
+        successMsg:'Vous prenez la reprise sur ce dernier coup d’éclat.',
+        failMsg:'L’échange tourne à votre désavantage sur la cloche.'},
+      {label:'Sécuriser ce qui est déjà fait',stat:'discipline',oppStat:'fightIQ',
+        successMsg:'Vous gérez la fin de round sans rien risquer.',
+        failMsg:'Trop passif : les juges retiennent surtout sa fin de round à lui.'},
+      {label:'Chercher l’amenée pour finir en contrôle',stat:'takedown',oppStat:'tdd',
+        successMsg:'L’amenée passe, vous terminez le round au-dessus.',
+        failMsg:'L’amenée échoue, vous perdez le peu de temps qu’il restait.'}
+    ]}
+};
+/** Dérive un éventuel moment de bascule de la reprise qui vient de se
+ * jouer, jamais fabriqué : lu sur les beats réels de cette reprise.
+ * @param {number} round @returns {{kind:string}|null} */
+function detectBascule(round){
+  // V2-44 : réglage Moments de bascule (activés par défaut), Réglages, ui-06.
+  if(G.settings && G.settings.basculeEnabled===false) return null;
+  if((ARENA.basculeCount||0)>=3) return null;
+  const roundBeats=ARENA.beats.filter(b=>b.round===round && b.phase!=='bell');
+  if(!roundBeats.length) return null;
+  const last=roundBeats[roundBeats.length-1];
+  const lastM=(last.momentum!=null)?last.momentum:50;
+  const clinchDom=roundBeats.filter(b=>b.phase==='clinch'&&b.by==='op').length>=3;
+  if(clinchDom && rnd()<0.6) return {kind:'clinch'};
+  if(lastM>=78 && rnd()<0.55) return {kind:'sonne_lui'};
+  if(lastM<=22 && rnd()<0.55) return {kind:'sonne_moi'};
+  if(Math.abs(lastM-50)<=8 && rnd()<0.35) return {kind:'serre'};
+  return null;
+}
+/** Chance de succès pondérée par l'attribut du joueur contre celui
+ * de l'adversaire sur le point précis de l'option — jamais un tirage à
+ * plat, jamais un chiffre affiché au joueur.
+ * @param {object} opt @returns {boolean} */
+function resolveBasculeOption(opt){
+  const f=G.f, opp=(G.fight&&G.fight.opp)||{};
+  const my=(f.attrs&&f.attrs[opt.stat])!=null?f.attrs[opt.stat]:50;
+  const their=(opp.attrs&&opp.attrs[opt.oppStat])!=null?opp.attrs[opt.oppStat]:50;
+  const chance=clamp(50+(my-their)/2,10,90);
+  return rnd()*100<chance;
+}
+function renderBasculeOverlay(el){
+  const b=ARENA.basculePending, m=BASCULE_MOMENTS[b.kind]; if(!m) return;
+  if(b.resultMsg){
+    el.innerHTML=`<div style="text-align:center"><div class="small" style="color:var(--gold)">${esc(b.resultMsg)}</div>
+      <button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.continueAfterBascule()">Continuer ▸</button></div>`;
+    return;
+  }
+  el.innerHTML=`<div style="text-align:left">
+    <div class="small mb">${esc(m.situation)}</div>
+    ${m.options.map((o,i)=>`<button class="btn ghost" style="display:block;width:100%;margin-top:6px;padding:8px;text-align:left" onclick="CL.pickBascule(${i})">${esc(o.label)}</button>`).join('')}
+  </div>`;
 }
 function applyBeat(b){ const A=ARENA; if(!b)return;
   if(b.phase==='bell'){ A.currentText=b.text; return; }
@@ -2878,11 +3537,31 @@ function startConsumablePreviewArena(){
   drawArena(0,true);
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-28] — écran du Rythme "Instantané" : résultat direct,
+   jamais d'animation canvas. ==== */
+function scr_fight_flash(){
+  const lines=(G.pending&&G.pending.flashLines)||[];
+  const meWin=!!(G.pending&&G.pending.win);
+  return `<div class="scr center intro">
+   <div class="eyebrow" style="color:${meWin?'var(--pos)':'var(--neg)'}">${meWin?'VICTOIRE':'DÉFAITE'}</div>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;text-align:left">
+     ${lines.map(l=>`<div class="card" style="padding:12px;background:var(--panel2)"><div class="small">${esc(l)}</div></div>`).join('')}
+   </div>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.toResult()">VOIR LE RÉSULTAT</button>
+  </div>`;
+}
 function scr_arena(){ const A=ARENA||{};
+  /* ==== [CORRECTIF V2-06] — la cage reste sombre dans les deux ambiances
+     (V2-01), mais son HUD (chrono/rounds/jauges — ici noms, zones de
+     dégâts, cardio) passe à un contraste renforcé, texte blanc pur plutôt
+     que var(--text)/var(--muted) : c'est un affichage lu en un coup d'œil
+     pendant l'action, pas du texte de lecture posée. Les jauges elles-
+     mêmes étaient déjà en aplats pleins (ARENA_ZONE_COLOR, plus bas),
+     jamais de dégradé — rien à corriger de ce côté. ==== */
   return `<div class="scr">
-   <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:var(--text)">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
+   <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:#FFFFFF">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
    <div class="card glass raise" style="padding:12px;border-color:var(--line);background:var(--panel2)">
-     <div class="eyebrow center" style="font-size:9px;margin-bottom:6px">DOMINATION TERRITORIALE</div>
+     <div class="eyebrow center" style="font-size:9px;margin-bottom:6px;color:#FFFFFF">DOMINATION TERRITORIALE</div>
      <div style="height:6px;background:var(--sage);margin-bottom:20px;position:relative;overflow:hidden;border-radius:2px">
        <div id="ar-momentum" style="height:100%;width:50%;background:var(--blood);transition:width .4s ease"></div>
        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--bg)"></div>
@@ -2891,22 +3570,22 @@ function scr_arena(){ const A=ARENA||{};
        <div style="display:flex;flex-direction:column;align-items:flex-start">
          <span class="ah-name blood mono" style="font-size:13px">${esc(A.nmeName||'Toi')}</span>
          <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:44px">Tête</span><div id="dm-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:44px">Corps</span><div id="dm-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:10px;color:var(--muted);width:44px">Jambes</span><div id="dm-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Tête</span><div id="dm-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Corps</span><div id="dm-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
+           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Jambes</span><div id="dm-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
          </div>
        </div>
        <div style="display:flex;flex-direction:column;align-items:flex-end">
          <span class="ah-name sage mono" style="font-size:13px">${esc(A.nopName||'Adv.')}</span>
          <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;align-items:flex-end">
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:44px;text-align:right">Tête</span></div>
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:44px;text-align:right">Corps</span></div>
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:10px;color:var(--muted);width:44px;text-align:right">Jambes</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Tête</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Corps</span></div>
+           <div style="display:flex;align-items:center;gap:6px"><div id="do-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Jambes</span></div>
          </div>
        </div>
      </div>
      <canvas id="arena-cv" style="width:100%;height:220px;display:block;margin-top:16px;border:1px solid var(--line);background:var(--bg)"></canvas>
-     <div class="arena-st" style="margin-top:16px"><div class="st-lbl">CARDIO</div><div class="st-lbl" style="text-align:right">CARDIO</div></div>
+     <div class="arena-st" style="margin-top:16px"><div class="st-lbl" style="color:#FFFFFF">CARDIO</div><div class="st-lbl" style="text-align:right;color:#FFFFFF">CARDIO</div></div>
      <div class="arena-bars sm" style="margin-top:6px"><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-me" style="background:var(--gold)"></div></div><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-op" style="background:var(--gold)"></div></div></div>
      <div id="ar-log" class="mono muted small" style="margin-top:20px;min-height:48px;display:flex;flex-direction:column;justify-content:flex-end;border-left:3px solid var(--gold);padding-left:12px;line-height:1.4;padding-bottom:4px"></div>
    </div>
