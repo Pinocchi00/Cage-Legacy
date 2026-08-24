@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,settings:scr_settings,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -259,22 +259,77 @@ function routeAfterCareerPending(){
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
-  /* ==== [ANCRE: FAITH_AMBIANCE] — V2-01/V2-44 : réglage exposé pour
-     l'instant depuis le hub Faith (scr_faith_hub, ui-04) ; V2-43/44 (Batch
-     9) lui donneront ses emplacements définitifs (écran d'accueil Faith +
-     écran Réglages) sans changer cette action elle-même. */
+  /* ==== [ANCRE: V2-43] — scr_faith_home (ui-04) est atteint DEPUIS le
+     titre, AVANT tout load() : G n'y contient qu'un objet minimal
+     ({theme, screen:'faith_home', ...}), jamais la carrière sauvegardée.
+     save() sérialise TOUJOURS G tel quel dans SAVE_KEY — l'appeler ici
+     écraserait donc la vraie sauvegarde Faith (f/faith/roster complets)
+     avec ce G minimal, un bug de perte de partie strictement introduit
+     par ce nouvel écran. Tant qu'aucune carrière n'est chargée en
+     mémoire (G.faith absent), le réglage est fusionné directement dans
+     le blob déjà stocké, sans jamais passer par save(). Une fois une
+     carrière chargée (depuis scr_faith_hub, où ce réglage restait déjà
+     accessible avant ce lot), le comportement d'origine s'applique : G
+     contient alors la vraie carrière, save() est sûr. */
   setFaithAmbiance(val){
+    const value=(val==='nuit')?'nuit':'papier';
+    if(G && G.faith){
+      if(!G.settings||typeof G.settings!=='object') G.settings={};
+      G.settings.faithAmbiance=value;
+      save(); render();
+      return;
+    }
+    try{
+      const raw=localStorage.getItem(SAVE_KEY);
+      if(raw){ const parsed=JSON.parse(raw);
+        if(parsed && typeof parsed==='object'){
+          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
+          parsed.settings.faithAmbiance=value;
+          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
+        }
+      }
+    }catch(e){}
     if(!G.settings||typeof G.settings!=='object') G.settings={};
-    G.settings.faithAmbiance=(val==='nuit')?'nuit':'papier';
-    save(); render();
+    G.settings.faithAmbiance=value; // rendu immédiat cohérent de cet écran précis
+    render();
   },
-  /* ==== [ANCRE: V2-28/V2-44] — même statut que setFaithAmbiance juste
-     au-dessus : réglage exposé dès maintenant (scr_plan, ui-06), l'écran
-     Réglages du Batch 9 (V2-44) lui donnera son emplacement définitif. */
+  /* ==== [ANCRE: V2-44] — écran Réglages construit (scr_settings, ui-06) :
+     ce réglage garde son accès depuis scr_plan (ui-06, pratique juste
+     avant un combat) EN PLUS de l'écran Réglages, les deux écrivent le
+     même G.settings.fightPace. Toujours atteint APRÈS chargement d'une
+     carrière (scr_plan n'existe qu'en combat), donc save() y est sûr —
+     contrairement à setFaithAmbiance(), pas de garde nécessaire ici. */
   setFightPace(val){
     if(!G.settings||typeof G.settings!=='object') G.settings={};
     G.settings.fightPace=['integral','rapide','instantane'].includes(val)?val:'rapide';
     save(); render();
+  },
+  /* ==== [ANCRE: V2-44] — Moments de bascule, activés/désactivés. Même
+     garde qu'setFaithAmbiance() : l'écran Réglages est accessible AVANT
+     tout chargement de carrière (depuis scr_title/scr_faith_home), save()
+     y écraserait donc la vraie sauvegarde avec un G minimal si une
+     carrière n'est pas déjà en mémoire. */
+  setBasculeEnabled(val){
+    const value=!!val;
+    if(G && (G.f || G.faith)){
+      if(!G.settings||typeof G.settings!=='object') G.settings={};
+      G.settings.basculeEnabled=value;
+      save(); render();
+      return;
+    }
+    try{
+      const raw=localStorage.getItem(SAVE_KEY);
+      if(raw){ const parsed=JSON.parse(raw);
+        if(parsed && typeof parsed==='object'){
+          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
+          parsed.settings.basculeEnabled=value;
+          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
+        }
+      }
+    }catch(e){}
+    if(!G.settings||typeof G.settings!=='object') G.settings={};
+    G.settings.basculeEnabled=value;
+    render();
   },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
@@ -1235,6 +1290,16 @@ const CL={
      que newCareer(). ==== */
   startFaith(){ G.arcade=null; G.pending=null; G.opps=null;
     G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
+  /* ==== [ANCRE: V2-43] — "confirmation explicite si une carrière est en
+     cours (une carrière Faith perdue par erreur est une session
+     détruite)" : startFaith() écrase la sauvegarde dès son premier
+     save() (ci-dessus), sans jamais redemander — comportement
+     préexistant à ce lot, gardé tel quel, seule une confirmation
+     s'ajoute avant de l'atteindre depuis l'accueil Faith. */
+  faithHomeNewCareer(){
+    if(hasSave('faith') && !confirm('Une carrière Faith est en cours. La remplacer définitivement par une nouvelle ?')) return;
+    CL.startFaith();
+  },
   faithDraftIn(k,v){ G.faithDraft[k]=v; },
   selectFaithDraft(key,value){ G.faithDraft[key]=value; render(true); },
   /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — la création n'est pas une
@@ -3046,6 +3111,8 @@ const BASCULE_MOMENTS={
  * jouer, jamais fabriqué : lu sur les beats réels de cette reprise.
  * @param {number} round @returns {{kind:string}|null} */
 function detectBascule(round){
+  // V2-44 : réglage Moments de bascule (activés par défaut), Réglages, ui-06.
+  if(G.settings && G.settings.basculeEnabled===false) return null;
   if((ARENA.basculeCount||0)>=3) return null;
   const roundBeats=ARENA.beats.filter(b=>b.round===round && b.phase!=='bell');
   if(!roundBeats.length) return null;

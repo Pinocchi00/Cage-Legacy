@@ -277,17 +277,22 @@ function checkIronManDeath(res,injury){
 }
 /* ==== [FIN ANCRE] ==== */
 
-/* ==== [ANCRE: LOT3_TAGS_PHYSIQUES] — exploitation des tags physiques rares ==== */
-function getExclusiveTactics(f){
-  const tactics=[]; const tags=(f.phys&&f.phys.tags)||[];
-  if(tags.includes('allonge hors-norme')||tags.includes('allonge démesurée')){
-    tactics.push({id:'ex_reach',lbl:'Sniper Hors-Portée',desc:'Exploite une envergure anormale pour détruire à distance en restant intouchable.',m:{str:1.3,def:1.4,ko:0.8,tdd:1.2}});
-  }
-  if(tags.includes('densité rare (type Ngannou)')){
-    tactics.push({id:'ex_dense',lbl:'Destruction Massive',desc:'Avance avec une masse inarrêtable. Sacrifice total de la mobilité pour la létalité.',m:{ko:1.6,tdd:1.3,def:0.6,str:0.8}});
-  }
-  return tactics;
-}
+/* ==== [ANCRE: V2-42, lecture (a)] — "un combattant porteur d'une anomalie
+   n'affiche plus d'étiquette tactique générique : son anomalie EST sa
+   lecture." Les deux tactiques exclusives ("Sniper Hors-Portée",
+   "Destruction Massive") issues des anomalies physiques sont retirées —
+   remplacées par une vraie description lue sur l'adversaire
+   (ANOMALY_READS/anomalyReadLine, ui-02 tacticalRead()), pas jouée comme
+   un choix. getExclusiveTactics() est gardée (9 points d'appel dans
+   ui-03/04/06/08, chacun réutilisé À L'IDENTIQUE côté affichage ET côté
+   action choisie — les retirer un par un aurait risqué un désalignement
+   d'index entre l'écran et le combattant réellement joué) mais réduite à
+   un tableau toujours vide : le comportement de tous ses appelants
+   converge naturellement vers "aucune tactique exclusive", sans toucher
+   à leur code. getExclusiveTraining() (juste en dessous, écran
+   d'entraînement, pas de plan de combat) n'est PAS concernée : ce n'est
+   pas l'étiquette tactique visée par le document. */
+function getExclusiveTactics(f){ return []; }
 function getExclusiveTraining(f){
   const trainings=[]; const tags=(f.phys&&f.phys.tags)||[];
   if(tags.includes('explosivité rare (type Cormier)')){
@@ -496,17 +501,28 @@ function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=f
 // quel que soit le nombre de rechargements.
 let _idCounter=0;
 function uniqueFighterId(){ _idCounter++; return Date.now().toString(36)+'_'+_idCounter.toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+/* ==== [ANCRE: V2-42, lecture (a), point 3] — fréquence des VRAIES anomalies
+   (les 4 tirages rnd()<0.02 ci-dessous — pas 'allonge hors-norme', simple
+   queue statistique dérivée d'apeIndex>=7, pas un tirage d'anomalie)
+   réduite à 0.008 : rarement rencontrée, une anomalie devient un souvenir ;
+   rencontrée souvent, c'est un modificateur. Un seul et unique combattant
+   ne peut plus cumuler deux anomalies (hasAnomaly, posé dès la première) —
+   sans ce garde-fou, réduire la fréquence de chaque tirage individuel
+   n'empêchait pas leur cumul (deux tirages à faible probabilité restent
+   indépendants). */
 function makePhysical(div){ const D=div||pick(allDivisions());
   let height=gauss(D.h,4,D.h-9,D.h+11);
   const tags=[];
+  let hasAnomaly=false;
   // Anomalie statistique rare : une taille réellement hors-norme pour la division
-  if(rnd()<0.02){ height=D.h+RI(16,24); tags.push('gabarit hors-norme pour la division'); }
+  if(!hasAnomaly && rnd()<0.008){ height=D.h+RI(16,24); tags.push('gabarit hors-norme pour la division'); hasAnomaly=true; }
   // Allonge découplée de la taille (indice de singe), plutôt que dérivée de D.h/D.r directement
   let apeIndex=gauss(0,5,-8,12);
-  if(rnd()<0.02){ apeIndex=RI(15,22); tags.push('allonge démesurée'); } // anomalie rare, indépendante de la taille
+  if(!hasAnomaly && rnd()<0.008){ apeIndex=RI(15,22); tags.push('allonge démesurée'); hasAnomaly=true; } // anomalie rare, indépendante de la taille
   let reach=Math.round(height+apeIndex); if(reach<height-1)reach=height-1;
   if(apeIndex>=7 && !tags.includes('allonge démesurée'))tags.push('allonge hors-norme');
-  if(rnd()<0.02)tags.push('densité rare (type Ngannou)'); if(rnd()<0.02)tags.push('explosivité rare (type Cormier)');
+  if(!hasAnomaly && rnd()<0.008){ tags.push('densité rare (type Ngannou)'); hasAnomaly=true; }
+  if(!hasAnomaly && rnd()<0.008){ tags.push('explosivité rare (type Cormier)'); hasAnomaly=true; }
   return {height,reach,tags};
 }
 /* ------------------ CUTTING — trait VARIABLE, retiré à chaque combat (pas un
@@ -985,6 +1001,18 @@ function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!
   if(isDraw){ F.D=(F.D||0)+1; F.morale=clamp(F.morale+RI(-2,2),0,100); }
   else if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(m.startsWith('KO'))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(6,12),0,100); }
   else { F.L++; F.streak=Math.min(-1,F.streak-1); if(m.startsWith('KO'))F.koLoss++; F.morale=clamp(F.morale-RI(8,16),0,100); }
+  /* ==== [ANCRE: V2-38] — "bilan maison" par organisation, en plus du
+     palmarès pro global (F.W/F.L, qui ne se remet jamais à zéro après le
+     seul passage amateur→pro, turnPro()) : un nouvel objectif de
+     progression demandé par le document, jamais un remplacement du
+     palmarès existant. Réservé au joueur en carrière pro (F===G.f, jamais
+     les PNJ simulés par advanceRoster()/rankPool() ni les combats Faith/
+     Gauntlet, hors périmètre de cet item). ==== */
+  if(typeof G!=='undefined' && G && F===G.f && F.stage==='pro' && F.org>0){
+    if(!F.orgRecords) F.orgRecords={};
+    const rec=F.orgRecords[F.org]||(F.orgRecords[F.org]={W:0,L:0,D:0});
+    if(isDraw) rec.D=(rec.D||0)+1; else if(win) rec.W++; else rec.L++;
+  }
   F.form=clamp(F.form+(win?RI(3,8):isDraw?0:-RI(5,12)),0,100);
   // ==== [ANCRE: META04_06] — planchers de moral. Le jeu n'a pas de système de
   // popularité distinct : ces deux compétences sont adaptées sur `morale`,
@@ -1395,7 +1423,16 @@ function rankPool(list){
    désynchroniser deux notions différentes du "niveau réel" d'un
    combattant. ==== */
 function standing(f){ return p4pScore(f); }
-function isDeclining(f){ return f.age>=(isHeavy(f)?38:36); }
+/* ==== [ANCRE: V2-39] — levier 2/3 des "+5 combats sur une carrière
+   complète" : le pic avant déclin s'allonge d'environ un an (36/38 →
+   37/39). Les leviers 1 (bande de combats/an élargie, RI(1,4) vétéran)
+   et 3 (durée de contrat dépendante de la réputation, fightsByRep
+   ci-dessous dans generateContract()) existaient déjà avant ce lot,
+   posés par un correctif antérieur à ce document (CORRECTIF_DUREE_
+   CARRIERE / DUREE_CONTRAT_REPUTATION) — seul le déclin restait à
+   toucher. Validation : sim_v39_careers.js (script jetable, résultats
+   dans le message de commit). ==== */
+function isDeclining(f){ return f.age>=(isHeavy(f)?39:37); }
 function isHeavy(f){ return f.div==='H-heavy'||f.div==='H-lheavy'; }
 function applyAging(f){ const A=f.age; const declineLog=[];
   if(isDeclining(f)){ // déclin, poids lourds plus tardif
@@ -1410,12 +1447,18 @@ function applyAging(f){ const A=f.age; const declineLog=[];
     // au-delà du plafond qu'il vient d'atteindre par le déclin — sinon le
     // déclin serait cosmétique. f.agedCeilings[k] fige ce nouveau plafond,
     // lu par applyDeltas()/grantSkill() en plus du potentiel habituel.
-    const dec=k=>{ const before=f.attrs[k]; const after=clamp(before-RI(0,2),1,100);
+    /* ==== [ANCRE: V2-39] — "déclin plus progressif" : les 3 premières
+       années après l'entrée en déclin restent douces (RI(0,1)), le rythme
+       antérieur (RI(0,2)) ne reprend qu'ensuite — un pic étiré ne sert à
+       rien si la chute qui suit est aussi brutale qu'avant. */
+    const yearsIntoDecline=A-(isHeavy(f)?39:37);
+    const declineCap=yearsIntoDecline<3?1:2;
+    const dec=k=>{ const before=f.attrs[k]; const after=clamp(before-RI(0,declineCap),1,100);
       if(after<before){ f.attrs[k]=after; declineLog.push({key:k,label:attrLabel(k),before,after});
         if(!f.agedCeilings) f.agedCeilings={}; f.agedCeilings[k]=after; }
     };
     dec('footSpeed');dec('handSpeed');dec('cardio');dec('explosiveness'); if(A>=39){dec('power');dec('recovery');}
-    const chinBefore=f.attrs.chin, chinAfter=clamp(chinBefore-(A>=38?RI(0,2):0),1,100);
+    const chinBefore=f.attrs.chin, chinAfter=clamp(chinBefore-(A>=38?RI(0,declineCap):0),1,100);
     if(chinAfter<chinBefore){ f.attrs.chin=chinAfter; declineLog.push({key:'chin',label:attrLabel('chin'),before:chinBefore,after:chinAfter});
       if(!f.agedCeilings) f.agedCeilings={}; f.agedCeilings.chin=chinAfter; }
     if(rnd()<0.3) f.morale=clamp(f.morale-5,0,100); // voir ses capacités chuter mine le moral

@@ -13,7 +13,29 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: V2-42, lecture (a), point 2] — une description écrite par
+   type d'anomalie physique, avec la conséquence concrète en cage —
+   remplace l'étiquette tactique générique retirée de getExclusiveTactics()
+   (engine.js). 'allonge hors-norme' (simple queue statistique, apeIndex
+   >=7) partage le texte de 'allonge démesurée' (la vraie anomalie rare) :
+   la différence entre les deux est déjà dans la fréquence d'apparition,
+   pas dans ce qu'on en dit. */
+const ANOMALY_READS={
+  'allonge démesurée':'Une envergure hors normes. Il vous touche depuis un endroit où vous ne vous croyez pas atteignable. Entrer coûtera cher, rester dehors aussi.',
+  'allonge hors-norme':'Une allonge nettement au-dessus de la moyenne. La distance lui appartient tant que vous ne la fermez pas.',
+  'gabarit hors-norme pour la division':'Un gabarit qui n’a rien à faire dans cette catégorie de poids. Chaque échange au contact se paie cher, pour lui comme pour vous.',
+  'densité rare (type Ngannou)':'Une masse qui ne se déplace jamais dans le vide. Le moindre coup qui porte peut suffire à tout changer.',
+  'explosivité rare (type Cormier)':'Une explosivité qui sort de nulle part, sans temps de charge visible. Il change de vitesse sans prévenir.'
+};
+/** @param {object} o @returns {string} vide si aucune anomalie */
+function anomalyReadLine(o){
+  const tags=(o.phys&&o.phys.tags)||[];
+  const key=Object.keys(ANOMALY_READS).find(k=>tags.includes(k));
+  return key?ANOMALY_READS[key]:'';
+}
 function tacticalRead(f,o){ const a=eff(f),b=eff(o);
+  const anomaly=anomalyReadLine(o);
+  if(anomaly) return (o.styleLabel||'')+'. '+anomaly;
   let prefix=(o.styleLabel||'')+'. '; const fights=o.W+o.L+o.D;
   // ==== [ANCRE: CORRECTIF_REPETITION_TEXTES] — chaque condition n'avait
   // qu'UNE seule phrase possible, répétée à l'identique à chaque adversaire

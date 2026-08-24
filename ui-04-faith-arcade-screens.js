@@ -483,6 +483,61 @@ function faithProtegeLine(p,f){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-43] — écran d'accueil dédié au mode, atteint en tapant
+   "MMA Faith" depuis le titre (scr_title, ui-06) : une seule porte
+   d'entrée, comme le mode carrière complète (scr_intro) en a déjà une.
+   Remplace les deux boutons du titre ("1. MMA FAITH" + "REPRENDRE LA
+   PARTIE EN COURS" conditionnel). */
+/** Résumé de la carrière Faith sauvegardée, lu directement dans
+ * localStorage SANS passer par load() — ne doit jamais écraser le G en
+ * cours (le joueur peut consulter ce résumé avant même d'avoir décidé de
+ * reprendre). @returns {?object} */
+function faithSaveSummary(){
+  try{
+    const s=localStorage.getItem(SAVE_KEY); if(!s) return null;
+    const p=JSON.parse(s); if(!p||!p.faith||!p.f) return null;
+    const f=p.f, F=p.faith;
+    const monthEntry=(F.calendar&&F.calendar[F.month])||{type:null};
+    const next=f.injury?'Infirmerie'
+      :monthEntry.type==='combat'?'Un combat approche'
+      :monthEntry.type==='intersaison'?'Intersaison'
+      :monthEntry.type==='vie'?'Un événement de vie'
+      :'Calme, pour l’instant';
+    return {name:f.name,flag:f.flag,year:F.year,W:f.W||0,L:f.L||0,org:orgDisplayName(f),next};
+  }catch(e){ return null; }
+}
+function scr_faith_home(){
+  const sum=faithSaveSummary();
+  return `<div class="scr center intro">
+   <div class="eyebrow">MMA FAITH</div>
+   <h2 class="disp" style="margin-top:4px">Carrière longue</h2>
+   <p class="lede small">Gestion de vie — une saison à la fois.</p>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+     ${sum?`<div class="opp" style="padding:16px;text-align:left" onclick="CL.cont()">
+       <b style="font-size:16px">Reprendre</b>
+       <div class="hero-name" style="font-size:20px;margin-top:6px">${esc(sum.name)} ${sum.flag}</div>
+       <div class="mono small muted" style="margin-top:4px">Saison ${sum.year} · ${sum.W}-${sum.L} · ${esc(sum.org)}</div>
+       <div class="small muted" style="margin-top:6px">${esc(sum.next)}</div>
+     </div>`:''}
+     <div class="opp" style="padding:16px" onclick="CL.faithHomeNewCareer()">
+       <b style="font-size:16px">Nouvelle carrière</b>
+       <div class="muted small mt">${sum?'Remplace définitivement la carrière en cours.':'Créer un combattant et commencer.'}</div>
+     </div>
+     <div class="opp" style="padding:16px" onclick="CL.go('faith_legends')">
+       <b style="font-size:16px">Le Panthéon Faith</b>
+       <div class="muted small mt">Les carrières terminées et leurs scores.</div>
+     </div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="font-size:11px">AMBIANCE</div>
+     <div style="display:flex;gap:8px">
+       <button class="btn ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</button>
+       <button class="btn ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</button>
+     </div>
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('title')">← Retour</button>
+  </div>`;
+}
 function scr_faith_hub(){
   const f=G.f;
   const monthEntry=(G.faith.calendar&&G.faith.calendar[G.faith.month])||{type:null};
@@ -616,15 +671,12 @@ function scr_faith_hub(){
          quatre interlocuteurs (agent/directeur/coach/partenaire). ==== -->
     <button class="btn ghost" onclick="CL.go('faith_contacts')">Contacts</button>
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
-    <!-- ==== [ANCRE: FAITH_AMBIANCE] — emplacement provisoire (V2-01) : le
-         document place ce réglage dans l'écran d'accueil Faith et l'écran
-         Réglages, tous deux construits au Batch 9 (V2-43/V2-44). En
-         attendant, accessible ici pour que le réglage soit réellement
-         utilisable dès ce lot plutôt que théorique jusqu'au Batch 9. ==== -->
-    <div class="pills" style="justify-content:center;margin-top:8px">
-      <span class="pill ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'on':''}" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</span>
-      <span class="pill ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'on':''}" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</span>
-    </div>
+    <!-- ==== [ANCRE: V2-43/V2-44] — l'ambiance papier/nuit avait un
+         emplacement provisoire ici (V2-01, "en attendant" l'écran
+         d'accueil Faith et l'écran Réglages) : les deux existent
+         maintenant (scr_faith_home, scr_settings), le réglage n'a plus
+         besoin de ce troisième accès. ==== -->
+    <button class="btn ghost" onclick="CL.go('settings')">Réglages</button>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_AGENT] — remplace scr_select (menu à 3 adversaires,

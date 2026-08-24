@@ -154,12 +154,25 @@ function scr_promo(){
      <div class="hero-name" style="text-align:center;font-size:clamp(26px,8vw,34px)">Quelqu\u2019un veut te signer</div>
      <p class="lede mt">Actuellement : <b>Amateur</b> — ${orgLevelTag(0)}.</p>
      <p class="lede mt">Où tu combats décide qui tu combats. Une salle plus grande est une salle plus dure. ${offer.fastTrack?'Deux offres sont sur la table — compare-les avant de choisir.':''}</p>
+     <!-- ==== [CORRECTIF V2-38, option (a)] — ce message décrit le passage
+          amateur → pro lui-même, pas une des deux offres en particulier :
+          avant ce correctif il ne s'affichait que sous l'offre standard,
+          jamais sous l'offre Fast-Track, alors que signer L'UNE OU L'AUTRE
+          déclenche exactement la même remise à zéro (turnPro(), ui-05).
+          Décision (b) du document (palmarès pro global, sans remise à
+          zéro) écartée ici : turnPro() ne s'exécute qu'une seule fois par
+          carrière (à ce seul écran), donc f.W/f.L EST déjà le palmarès pro
+          global demandé — rien à changer côté remise à zéro elle-même, le
+          bug réel était uniquement ce message à moitié affiché. Le bilan
+          maison par organisation (f.orgRecords, engine.js applyResult())
+          reste ajouté comme le préconise (b), affiché sur la fiche
+          (scr_profile, ui-06). ==== -->
+     <div class="muted small mt" style="text-align:center">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
      <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:18px">
        <div class="hero-name" style="font-size:20px">${offer.orgFlavor1}<em style="color:var(--muted)">${orgLevelTag(offer.baseTier||1)}</em></div>
        <div class="mono small gold mt">${contractPayLine(previewStd)}</div>
        <div class="mono small muted">Contrat de ${previewStd.fightsLeft} combats</div>
        <p class="muted small mt">${offer.msg}</p>
-       <div class="muted small mt">Si tu acceptes, ton palmarès sera réinitialisé à 0-0 pour ta carrière Pro. Ton record amateur (${f.W}-${f.L}) restera gravé dans ta fiche.</div>
        <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">Signer avec ${offer.orgFlavor1}</button>
      </div>
      ${offer.fastTrack?(()=>{ const previewFast=generateContract(f,offer.fastTier||3,false); return `<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
