@@ -2028,7 +2028,10 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
-    advanceRoster();
+    /* ==== [ANCRE: WORLD_TICK_HOOK] — Plan V3 LOT 0 §4.3 : point d'appel
+       principal de worldTick(), qui enveloppe advanceRoster() (inchangé) et
+       archive le rang dans G.faith.rankHistory pour LOT 7 (P20). ==== */
+    worldTick(G.faith.year);
     /* ==== [ANCRE: FAITH_NEMESIS_PERMANENTE] — FA-26 : avant ce correctif,
        f.faithNemesisId n'était posé que par la trahison du protégé
        (evt_frankenstein_betrayal) ; sans trahison avant 30 ans, la carrière

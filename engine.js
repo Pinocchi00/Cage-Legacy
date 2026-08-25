@@ -1676,3 +1676,77 @@ function epithets(f){ const e=[]; const fights=f.W+f.L+f.D; const wr=f.W/Math.ma
   if(f.koLoss>=6)e.push('La guerre l\u2019a marqué'); if(!e.length)e.push('L\u2019artisan de la cage');
   return e;
 }
+
+/* ==== [ANCRE: TEXT_ENGINE] — Plan V3 LOT 0 §4.2. Moteur de tirage contextuel
+   générique : une chaîne visible n'est plus « la même à chaque combat » mais
+   un pool d'entrées {id, text, req(ctx), weight, tier} filtré par le contexte
+   courant et protégé d'une répétition rapprochée par un carnet persistant
+   (F.textLedger). N'ATTEND PAS que les pools existants (data-faith-content.js)
+   soient déjà au format {req,weight,tier} — ils restent de simples tableaux
+   de chaînes pour l'instant, migrés lot par lot (LOT 4/5/6/7, chacun sur ses
+   propres écrans) ; TEXT_POOLS n'accueille QUE les pools déjà migrés. Une
+   entrée sans `req` est valide (silencieusement toujours éligible) mais
+   `tools/lint-content.js` (§6.3) l'interdira dans les pools à haute
+   fréquence — ce n'est pas au moteur de le refuser à l'exécution. */
+const TEXT_POOLS={};
+/** @param {string} poolId @param {{id:string,text:string,req?:(ctx:object)=>boolean,weight?:number,tier?:string}[]} entries */
+function registerTextPool(poolId,entries){ TEXT_POOLS[poolId]=entries||[]; }
+function ensureTextLedger(F){
+  if(!F) return null;
+  if(!F.textLedger||typeof F.textLedger!=='object') F.textLedger={};
+  return F.textLedger;
+}
+/** Tire une entrée d'un pool enregistré, filtrée par ctx.req/tier, pondérée
+ *  par weight, et jamais identique à une des dernières tirées de ce pool
+ *  (fenêtre = min(8, taille du pool / 3), §4.2). Retourne '' si le pool est
+ *  vide ou inconnu — jamais d'exception, jamais de texte fabriqué. */
+function txtPick(poolId,ctx){
+  ctx=ctx||{};
+  const pool=TEXT_POOLS[poolId];
+  if(!pool||!pool.length) return '';
+  let elig=pool.filter(e=>(!e.req||e.req(ctx)) && (!e.tier||!ctx.rankTier||e.tier===ctx.rankTier));
+  if(!elig.length) elig=pool.filter(e=>!e.req); // repli : au moins les entrées sans condition, jamais un pool vide
+  if(!elig.length) elig=pool; // dernier repli : mieux vaut une redite qu'une chaîne vide
+  const ledger=ctx.F?ensureTextLedger(ctx.F):null;
+  const recent=ledger&&ledger[poolId]?ledger[poolId]:[];
+  const window=Math.min(8,Math.max(1,Math.floor(pool.length/3)));
+  let candidates=elig.filter(e=>!recent.includes(e.id));
+  if(!candidates.length) candidates=elig; // tout le pool éligible a déjà été vu récemment : on retire quand même plutôt que de bloquer
+  const totalWeight=candidates.reduce((s,e)=>s+(e.weight||1),0);
+  let roll=rnd()*totalWeight, chosen=candidates[0];
+  for(const e of candidates){ roll-=(e.weight||1); if(roll<=0){ chosen=e; break; } }
+  if(ledger){
+    if(!ledger[poolId]) ledger[poolId]=[];
+    ledger[poolId].push(chosen.id);
+    while(ledger[poolId].length>window) ledger[poolId].shift();
+  }
+  return chosen.text;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: WORLD_TICK] — Plan V3 LOT 0 §4.3. Simulation de fond annuelle,
+   silencieuse et synchrone. Ne réinvente pas advanceRoster() (ui-01) qui
+   simule déjà les combats PNJ-vs-PNJ, applique un vrai delta Elo et fait
+   vieillir/partir en retraite le roster — c'est déjà la mécanique visée par
+   « les records doivent progresser de façon plausible » (corrige P16 :
+   0-1 à 25-4 en 4 combats n'était PAS un défaut d'advanceRoster() mais du
+   classement qui se recalculait entièrement au lieu d'incrémenter, déjà vrai
+   ici via applyResult()). worldTick() enveloppe advanceRoster() et y ajoute
+   la mémoire de classement inter-saison (F.rankHistory) que P20/LOT 7
+   liront pour afficher un delta de rang réel. La progression indépendante
+   des sparring-partners (Person) et la composition de carte (undercard)
+   sont explicitement DIFFÉRÉES à LOT 2 et LOT 6 — ce sont leurs propres
+   items (P01/P18), pas une omission ici. Budget : <50ms pour un roster
+   complet (mesuré en dev, jamais laissé en production — pas de
+   console.time ici, cf. §6.4). */
+function worldTick(year){
+  advanceRoster();
+  const F=G.faith;
+  if(F && G.f){
+    if(!Array.isArray(F.rankHistory)) F.rankHistory=[];
+    F.rankHistory.push({year:year!=null?year:F.year,rank:divRank(G.f),p4p:Math.round(p4pScore(G.f))});
+    const MAX_HISTORY=60; // ~carrière la plus longue plausible (§6.2 INV-06 vise 25-40 combats, marge large)
+    while(F.rankHistory.length>MAX_HISTORY) F.rankHistory.shift();
+  }
+}
+/* ==== [FIN ANCRE] ==== */

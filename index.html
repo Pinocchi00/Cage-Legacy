@@ -486,6 +486,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <body><div id="app"></div>
 <script src="data-skills.js"></script>
 <script src="data-content.js"></script>
+<!-- ==== [ANCRE: DATA_FAITH_SPLIT_V3] — Plan V3 LOT 0 §0.2 : ui-04 dépassait
+     3300 lignes en mélangeant écrans ET corpus. Deux fichiers de données
+     pures, aucune fonction d'écran dedans, chargés avant engine.js (aucune
+     de leurs constantes n'a besoin d'autre chose que des littéraux JS). ==== -->
+<script src="data-people.js"></script>
+<script src="data-faith-content.js"></script>
 <script src="engine.js"></script>
 <script src="state.js"></script>
 <!-- ui.js a été découpé en 8 fichiers plus petits (refactor du __/2026) pour
