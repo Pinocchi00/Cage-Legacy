@@ -422,7 +422,11 @@ function scr_faith_hub(){
      un rappel. Même sélection (le partenaire le plus avancé) que le choix
      de sparring d'intersaison, calculée une seule fois et réutilisée par
      les deux. ==== */
-  const topPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+  /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
+     stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
+     rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
+  const topPartner=(G.faith.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
   /* ==== [CORRECTIF FA-26] — « afficher son palmarès sur le hub, une
      ligne » : le combattant peut avoir quitté G.roster (retraite NPC) sans
      que f.faithNemesisId ne soit nettoyé nulle part — repli silencieux si
@@ -460,7 +464,10 @@ function scr_faith_hub(){
        change jamais entre deux rendus du même mois. Le libellé de fraîcheur
        (V2-11) apparaît ici en toutes lettres, jamais en chiffre. */
     const picks=faithEnsureIntersaisonDraw(f,G.faith).map(id=>FAITH_INTERSAISON_POOL.find(e=>e.id===id)).filter(Boolean);
-    const secondPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+    /* Même correctif que topPartner ci-dessus : le "second" partenaire est
+       simplement celui qui n'est pas le principal, jamais un second tri —
+       sinon le même bug d'identité flottante réapparaîtrait ici. */
+    const secondPartner=(G.faith.gym||[]).find(p=>p.id!==G.faith.sparringPrimaryId);
     /* ==== [ANCRE: V2-07] — seules les DEUX entrées qui portent explicitement
        le nom d'un partenaire (id précis, pas juste `action==='sparring_top'`
        — d'autres entrées, ex. "Séance technique ciblée", partagent la même
@@ -704,37 +711,98 @@ function scr_faith_press_conf(){
    déjà en contexte sur scr_faith_offer (V2-18/20), cet écran est leur
    VITRINE permanente — savoir où on en est avec chacun, même hors
    négociation active, ce qui manquait totalement avant ce correctif. */
+/* ==== [ANCRE: V3_FAITH_COACH_LOOKUP] — Plan V3 LOT 2 §P04 : lecture
+   défensive du coach nommé (personEnsure() posé à finalizeFaithDraft(),
+   ui-08) — une sauvegarde antérieure à ce correctif n'a pas encore
+   F.coachId, mintée ici à la volée plutôt que forcer une migration
+   dédiée dans validateState() pour un champ qui n'existe que niché sous
+   G.faith (optionnel par nature, actif seulement en carrière). */
+function faithCoachPerson(F){
+  if(!F.coachId || !G.people || !G.people.byId[F.coachId]) F.coachId=personEnsure('coach',{slot:'main'}).id;
+  return G.people.byId[F.coachId];
+}
 function scr_faith_contacts(){
   const f=G.f, F=G.faith;
   const dir=FAITH_DIRECTORS[f.org]||FAITH_DIRECTORS[0];
-  const topPartner=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+  /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
+     stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
+     rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
+  const topPartner=(F.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
+  const coach=faithCoachPerson(F);
   const agentPatience=F.agentPatience!=null?F.agentPatience:3;
   const agentMood=!F.agent?'sans agent cette année'
     :agentPatience>=3?'il vous suit sans discuter'
     :agentPatience>=1?'il commence à compter les faveurs'
     :'il parle de repositionner sa liste de clients';
-  const card=(who,name,role,mood,detail)=>`<div class="opp" style="padding:16px;text-align:left">
+  const card=(who,name,role,mood,detail,onclick)=>`<div class="opp" style="padding:16px;text-align:left"${onclick?` onclick="${onclick}"`:''}>
     <div class="eyebrow" style="font-size:11px">${esc(who)}</div>
     <div class="hero-name" style="font-size:18px;margin-top:4px">${esc(name)}</div>
     <div class="muted small" style="margin-top:2px">${esc(role)}</div>
     <div class="mono small" style="margin-top:8px;color:var(--gold)">${esc(mood)}</div>
     ${detail?`<div class="muted small" style="margin-top:6px">${detail}</div>`:''}
   </div>`;
+  /* ==== [ANCRE: V3_COACH_ETAT_CORPS] — Plan V3 LOT 2 §P04 : "un fait de
+     carrière + une ligne d'état du corps", jamais un rôle générique. Le
+     fait vient de la Person (bio.origin = palmarès réel du pool
+     FAITH_COACHES) ; l'état du corps reste la lecture existante de
+     f.form, inchangée. */
+  const coachDetail=(f.form||100)>=70?'« Le corps répond, on peut pousser. »':(f.form||100)>=40?'« Ça tient, sans plus. »':'« Il faut lever le pied, et vite. »';
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="bar"><span class="eyebrow">Contacts</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
    <div style="display:flex;flex-direction:column;gap:12px">
      ${card('VOTRE AGENT',(F.agent&&F.agent.label)||'Aucun agent',
        'Négocie vos combats — croisez-le sur chaque offre.',agentMood)}
      ${card('DIRECTEUR DE L’ORGANISATION',dir.name,orgDisplayName(f),faithDirectorMood(f.org))}
-     ${card('VOTRE COACH','Le coin',
-       'Le plan, l’état du corps.',
-       (f.form||100)>=70?'« Le corps répond, on peut pousser. »':(f.form||100)>=40?'« Ça tient, sans plus. »':'« Il faut lever le pied, et vite. »')}
+     ${card('VOTRE COACH',personName(coach,{withNick:true}),specialtyLabel(coach.bio.trait),
+       '« '+coach.bio.origin+' »',coachDetail,"CL.go('faith_coach_detail')")}
      ${topPartner?card('PARTENAIRE D’ENTRAÎNEMENT',topPartner.first,topPartner.styleLabel,
        (f.morale||60)>=70?'« Bonne ambiance à la salle en ce moment. »':'« L’ambiance est tendue depuis un moment. »',
        faithProtegeLine(topPartner,f)):''}
    </div>
    <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour au hub</button>
   </div>`;
+}
+/* ==== [ANCRE: V3_FAITH_COACH_DETAIL] — Plan V3 LOT 2 §P04/§P08 : "chaque
+   carte de contact cliquable → détail avec historique daté (rel.arc[]) +
+   1-2 actions contextuelles". Le coach est le seul contact déjà porté par
+   une vraie Person (PersonRegistry, LOT 0) sur ce chemin de jeu — agent et
+   directeur restent, pour l'instant, de simples objets d'archétype
+   (FAITH_AGENTS/FAITH_DIRECTORS), pas des Person avec rel.arc ; leur
+   propre mise à niveau est explicitement le sujet de LOT 4 (P05a, "l'agent
+   devient une Person"), pas répétée ici par anticipation. */
+function scr_faith_coach_detail(){
+  const F=G.faith, f=G.f;
+  const coach=faithCoachPerson(F);
+  const trust=coach.rel.trust;
+  const trustLabel=trust>=70?'Une vraie confiance, construite dans la durée.':trust>=40?'Une relation correcte, sans plus.':'La confiance n’y est plus vraiment.';
+  const arc=(coach.rel.arc||[]).slice().reverse();
+  return `<div class="scr" style="max-width:480px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Votre coach</span><span class="eyebrow x" onclick="CL.go('faith_contacts')">✕</span></div>
+   <h2 class="hero-name" style="font-size:26px;margin-top:8px">${esc(personName(coach,{withNick:true}))}</h2>
+   <div class="muted small mt">${esc(specialtyLabel(coach.bio.trait))}${coach.extra&&coach.extra.cost?` · ${coach.extra.cost}k$/an`:''}</div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QU’IL A DÉJÀ FAIT</div>
+     <div class="small">${esc(coach.bio.origin)}</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE LIMITE</div>
+     <div class="small">${esc(coach.bio.past)}</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CONFIANCE</div>
+     <div class="small">${trustLabel}</div>
+   </div>
+   ${arc.length?`<div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">HISTORIQUE</div>
+     ${arc.map(a=>`<div class="mono small muted" style="margin-top:4px">${a.year} · ${esc(a.text)}</div>`).join('')}
+   </div>`:''}
+   <button class="btn ghost mt" onclick="CL.go('faith_contacts')">← Retour aux contacts</button>
+  </div>`;
+}
+function specialtyLabel(key){
+  return ({frappe:'Spécialiste frappe',lutte:'Spécialiste lutte',soumission:'Spécialiste soumission',
+    cardio:'Préparateur physique',dur_au_mal:'Spécialiste encaissement',mental:'Préparateur mental'})[key]||'Coach';
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-10] — six camps nommés remplacent le stage unique (perk

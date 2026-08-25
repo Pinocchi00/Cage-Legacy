@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -74,6 +74,24 @@ function lockFaithNemesis(person){
   G.f.nemesisRecord=null;
   if(!person.nick) person.nick=earnNickname(person);
   if(G.faith) G.faith.pendingNemesisConsecration=true;
+}
+/* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : cause exacte
+   du bug "Marcus est devenu Sean sans raison" (cf. ANCRE PERSON_REGISTRY,
+   state.js) — l'ancien topPartner se recalculait par TRI à chaque rendu
+   (F.gym.slice().sort((a,b)=>b.overall-a.overall)[0]), donc changeait
+   d'identité dès qu'un entraînement faisait franchir à un partenaire
+   l'overall de l'autre, sans aucun événement pour l'expliquer. F.
+   sparringPrimaryId est désormais LA seule référence stable, réévaluée
+   uniquement à des points de rupture explicites (création de l'écurie,
+   départ d'un partenaire) — jamais au rendu. Appelée après TOUTE
+   modification de G.faith.gym qui pourrait invalider la référence
+   actuelle (départ, arrivée) ; no-op si la référence est encore valide. */
+function ensureSparringPrimary(){
+  if(!G.faith) return;
+  const gym=G.faith.gym||[];
+  if(gym.some(p=>p.id===G.faith.sparringPrimaryId)) return;
+  const best=gym.slice().sort((a,b)=>b.overall-a.overall)[0];
+  G.faith.sparringPrimaryId=best?best.id:null;
 }
 /** Nom complet + surnom d'un combattant du roster, seule source d'affichage
  * pour rester cohérent partout (Loi 1) — jamais juste `.first`. */
@@ -1434,10 +1452,20 @@ const CL={
     G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
       startOfYearChampion:false,startOfYearRank:divRank(f),startOfYearNemesisBeaten:false,gym:[p1,p2],
       agent:faithAgent,agentPatience:3};
+    ensureSparringPrimary();
     /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
        brouillon de création : il doit survivre au rechargement. ==== */
     if(G.faithDraft && G.faithDraft._oath) G.faith.oath=G.faithDraft._oath;
     forceFightPaceForMode('faith');
+    /* ==== [ANCRE: V3_FAITH_COACH] — Plan V3 LOT 2 §P04/§P08 : le coach
+       affiché sur Contacts était la chaîne littérale 'Le coin' — jamais un
+       nom. personEnsure('coach',{slot:'main'}) (PersonRegistry, LOT 0)
+       tire UNE fois, ici, un vrai coach du pool FAITH_COACHES (data-people.
+       js, déjà livré en LOT 0 mais jamais câblé jusqu'ici) — palmarès,
+       défaut et spécialité déjà portés par la Person, réutilisés tels
+       quels par scr_faith_contacts() (ui-04). G.faith.coachId est la
+       référence stable, jamais recalculée. */
+    G.faith.coachId=personEnsure('coach',{slot:'main'}).id;
     G.season={year:1,fights:[]};
     /* ==== [ANCRE: FAITH_CALENDRIER] — la première année se génère ici, les
        suivantes dans nextFaithYear(). faithLandOnMonth() saute les mois vides
@@ -1706,6 +1734,7 @@ const CL={
         if(!G.f._rivalries) G.f._rivalries={};
         G.f._rivalries[monster.id]=3;
         G.faith.gym=G.faith.gym.filter(p=>p.id!==monster.id);
+        ensureSparringPrimary();
         G.roster=rankPool(G.roster);
       }
     }
@@ -2143,6 +2172,7 @@ const CL={
       const p3=makeFighter({gender:G.f.gender,div:G.f.div,age:18,level:clamp(G.f.overall-18,20,60),potential:RI(80,97)});
       p3.isGymPartner=true; p3.nick=pick(FAITH_GYM_NEWCOMER_NICKS);
       G.faith.gym.push(p3);
+      ensureSparringPrimary();
       G.lastMsg=`Un gamin de 18 ans a poussé la porte de la salle cette semaine — ${esc(p3.nick)}.`;
     }
     /* ==== [FIN ANCRE] ==== */
