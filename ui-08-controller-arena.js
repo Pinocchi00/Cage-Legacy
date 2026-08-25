@@ -17,9 +17,42 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,settings:scr_settings,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
+
+/* ==== [ANCRE: V3_GAME_MODE] — Plan V3 LOT 1 §P02/§P07, arbitrage A4 :
+   point de vérité unique du mode courant, remplace la lecture éparpillée
+   de G.f.gameMode/G.arcade. Gauntlet se reconnaît à G.arcade.active (posé
+   par startArcade/startBossRun/startLadder100, jamais par gameMode) ; Faith
+   à f.gameMode==='faith' (finalizeFaithDraft) avec un repli sur le nom
+   d'écran pour faith_draft/faith_home (avant que G.f n'existe) — même
+   logique que le test _enFaith de render() avant ce lot. Carrière classique
+   est le défaut : aucun marqueur dédié ne lui correspond, elle n'a jamais
+   eu besoin d'en poser un tant qu'aucun autre mode ne partageait son
+   apparence. */
+function currentGameMode(){
+  if(G && G.arcade && G.arcade.active) return 'gauntlet';
+  const sName=String((G&&G.screen)||'');
+  if((G&&G.f&&G.f.gameMode==='faith') || sName.indexOf('faith')===0) return 'faith';
+  return 'career';
+}
+/* Rythme de combat forcé par le mode (arbitrage A4, §3) : Gauntlet en
+   intégral (round par round complet, BEAT_MS=1050 — c'est le format
+   spectacle du jeu), Carrière en rapide (round par round, BEAT_MS=750).
+   Faith ne lit plus fightPace pour décider de l'arène : elle ne l'atteint
+   simplement jamais (scr_faith_fight_pending() la remplace, cf. plus bas),
+   mais la valeur est quand même posée à 'instantane' par cohérence, pour
+   qu'un futur code qui lirait G.settings.fightPace sans connaître le mode
+   ne tombe jamais sur une valeur incohérente avec ce que Faith fait
+   réellement (jamais d'arène round par round). Appelée UNE FOIS à l'entrée
+   de chaque mode (finalizeFaithDraft/newCareer/startArcade et variantes),
+   jamais reproposée au joueur ensuite. */
+function forceFightPaceForMode(mode){
+  if(!G.settings||typeof G.settings!=='object') G.settings={};
+  G.settings.fightPace=mode==='gauntlet'?'integral':mode==='faith'?'instantane':'rapide';
+}
+/* ==== [FIN ANCRE] ==== */
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
@@ -44,18 +77,15 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
   { const _sName=String((G&&G.screen)||'');
     const _enFaith=_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith');
     document.body.classList.toggle('faith-skin', _enFaith);
-    /* ==== [ANCRE: FAITH_AMBIANCE] — V2-01 : classe papier/nuit posée EN PLUS
-       de faith-skin (cf. index.html, même ancre). Lecture défensive de
-       G.settings (peut ne pas encore exister : plusieurs points d'entrée
-       réassignent G={theme:t} sans repasser par validateState()/load()) —
-       défaut papier, arbitrage tranché, jamais un défaut nuit implicite.
-       La cage reste sombre dans les DEUX ambiances (point 4 du document) :
-       forcé ici plutôt que par CSS pour que ce soit vrai même si un futur
-       écran hors 'arena' voulait un jour la même règle. ==== */
-    const _ambiance=(G&&G.settings&&G.settings.faithAmbiance)||'papier';
-    const _nuit=_enFaith && (_sName==='arena' || _ambiance==='nuit');
-    document.body.classList.toggle('faith-papier', _enFaith && !_nuit);
-    document.body.classList.toggle('faith-nuit', _nuit); }
+    /* ==== [ANCRE: V3_DATA_MODE] — Plan V3 LOT 1 §P02 : remplace la classe
+       papier/nuit (réglage joueur, ANCRE FAITH_AMBIANCE ci-dessus dans
+       l'historique) par un attribut [data-mode] sur <html>, seule source
+       des trois dégradés sombres (index.html, ANCRE V3_MODE_GRADIENTS).
+       currentGameMode() (plus bas dans ce fichier) est le point de vérité
+       unique mode Faith/Gauntlet/Carrière, réutilisé aussi par §P07 pour
+       forcer le rythme de combat par mode plutôt que par réglage. ==== */
+    try{ document.documentElement.setAttribute('data-mode', currentGameMode()); }catch(e){}
+  }
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: V2-28] — Rythme "Instantané" : ne passe jamais par ARENA
      (aucune animation canvas) — résultat direct + résumé en trois lignes.
@@ -67,9 +97,19 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      && (((G.settings&&G.settings.fightPace)||'rapide')==='instantane')){
     G.pending._flashShown=true;
     G.pending.flashLines=buildFightFlashLines(G.pending.res);
-    G.screen='fight_flash';
+    /* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — Plan V3 LOT 1 §P07, arbitrage
+       A4 : Faith ne passe plus jamais par l'écran-résumé "Instantané" en
+       direct — scr_faith_fight_pending() (ui-08, plus bas) s'intercale
+       d'abord (2,5-4s, barre de progression non linéaire, confettis sur
+       victoire), puis bascule elle-même vers fight_flash une fois le
+       temps de suspense écoulé (cf. finishFaithFightPending()). Carrière
+       et Gauntlet, qui n'ont jamais utilisé "Instantané" par défaut
+       (forceFightPaceForMode()), ne sont pas concernés en pratique — mais
+       le test reste sur le mode, pas sur le pace, pour rester correct si
+       une sauvegarde plus ancienne porte encore une valeur différente. */
+    G.screen=(currentGameMode()==='faith')?'faith_fight_pending':'fight_flash';
   }
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(G&&G.screen==='faith_fight_pending') startFaithFightPending(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
   G.screen='hub'; save(); render();
@@ -259,78 +299,6 @@ function routeAfterCareerPending(){
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
-  /* ==== [ANCRE: V2-43] — scr_faith_home (ui-04) est atteint DEPUIS le
-     titre, AVANT tout load() : G n'y contient qu'un objet minimal
-     ({theme, screen:'faith_home', ...}), jamais la carrière sauvegardée.
-     save() sérialise TOUJOURS G tel quel dans SAVE_KEY — l'appeler ici
-     écraserait donc la vraie sauvegarde Faith (f/faith/roster complets)
-     avec ce G minimal, un bug de perte de partie strictement introduit
-     par ce nouvel écran. Tant qu'aucune carrière n'est chargée en
-     mémoire (G.faith absent), le réglage est fusionné directement dans
-     le blob déjà stocké, sans jamais passer par save(). Une fois une
-     carrière chargée (depuis scr_faith_hub, où ce réglage restait déjà
-     accessible avant ce lot), le comportement d'origine s'applique : G
-     contient alors la vraie carrière, save() est sûr. */
-  setFaithAmbiance(val){
-    const value=(val==='nuit')?'nuit':'papier';
-    if(G && G.faith){
-      if(!G.settings||typeof G.settings!=='object') G.settings={};
-      G.settings.faithAmbiance=value;
-      save(); render();
-      return;
-    }
-    try{
-      const raw=localStorage.getItem(SAVE_KEY);
-      if(raw){ const parsed=JSON.parse(raw);
-        if(parsed && typeof parsed==='object'){
-          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
-          parsed.settings.faithAmbiance=value;
-          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
-        }
-      }
-    }catch(e){}
-    if(!G.settings||typeof G.settings!=='object') G.settings={};
-    G.settings.faithAmbiance=value; // rendu immédiat cohérent de cet écran précis
-    render();
-  },
-  /* ==== [ANCRE: V2-44] — écran Réglages construit (scr_settings, ui-06) :
-     ce réglage garde son accès depuis scr_plan (ui-06, pratique juste
-     avant un combat) EN PLUS de l'écran Réglages, les deux écrivent le
-     même G.settings.fightPace. Toujours atteint APRÈS chargement d'une
-     carrière (scr_plan n'existe qu'en combat), donc save() y est sûr —
-     contrairement à setFaithAmbiance(), pas de garde nécessaire ici. */
-  setFightPace(val){
-    if(!G.settings||typeof G.settings!=='object') G.settings={};
-    G.settings.fightPace=['integral','rapide','instantane'].includes(val)?val:'rapide';
-    save(); render();
-  },
-  /* ==== [ANCRE: V2-44] — Moments de bascule, activés/désactivés. Même
-     garde qu'setFaithAmbiance() : l'écran Réglages est accessible AVANT
-     tout chargement de carrière (depuis scr_title/scr_faith_home), save()
-     y écraserait donc la vraie sauvegarde avec un G minimal si une
-     carrière n'est pas déjà en mémoire. */
-  setBasculeEnabled(val){
-    const value=!!val;
-    if(G && (G.f || G.faith)){
-      if(!G.settings||typeof G.settings!=='object') G.settings={};
-      G.settings.basculeEnabled=value;
-      save(); render();
-      return;
-    }
-    try{
-      const raw=localStorage.getItem(SAVE_KEY);
-      if(raw){ const parsed=JSON.parse(raw);
-        if(parsed && typeof parsed==='object'){
-          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
-          parsed.settings.basculeEnabled=value;
-          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
-        }
-      }
-    }catch(e){}
-    if(!G.settings||typeof G.settings!=='object') G.settings={};
-    G.settings.basculeEnabled=value;
-    render();
-  },
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
      tirage/bascule d'aperçu dans la Salle des Légendes appelait render()
@@ -716,7 +684,9 @@ const CL={
     // il empêche seulement une nouvelle carrière d'hériter du registre d'une
     // carrière précédente.
     G.titleHistory=[];
-    G.f=f; G.roster=makeOrgRoster(f); G.ach=[]; G.season={year:1,fights:[]}; checkAch(); G.screen='hub'; save(); render(); },
+    G.f=f; G.roster=makeOrgRoster(f); G.ach=[]; G.season={year:1,fights:[]}; checkAch();
+    forceFightPaceForMode('career');
+    G.screen='hub'; save(); render(); },
   fightSelect(){ startFightSelect(); },
   opp(i){
     if(G.faith){
@@ -790,6 +760,11 @@ const CL={
   train(i){ chooseTraining(i); },
   setCampTier(tierId){ G.selectedCampTier=tierId; render(); },
   skipArena(){ CL.toResult(); },
+  /* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — bouton "Passer" de
+     scr_faith_fight_pending() : même logique que skipArena() ci-dessus,
+     coupe l'animation en cours (barre + confettis) et bascule
+     immédiatement sur le verdict, sans attendre le minuteur. */
+  skipFaithFightPending(){ finishFaithFightPending(); },
   nextRound(){ if(!ARENA||!ARENA.roundPause||ARENA.basculePending) return; resumeArenaPlayback(); },
   /* ==== [ANCRE: V2-29] — une option choisie ne rend pas le même verdict
      pour deux joueurs : le succès est pondéré par l'attribut du joueur
@@ -1261,6 +1236,7 @@ const CL={
     G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed,asc,
       riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
+    forceFightPaceForMode('gauntlet');
     G.screen='draft'; save(); render(); },
   startBossRun(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
     startBossRun(seed,asc); render(true); },
@@ -1278,6 +1254,7 @@ const CL={
     G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed,asc,
       riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
+    forceFightPaceForMode('gauntlet');
     G.screen='draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [CORRECTIF FA-06] — contrairement à newCareer() (qui repart d'un G
@@ -1406,6 +1383,7 @@ const CL={
     /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
        brouillon de création : il doit survivre au rechargement. ==== */
     if(G.faithDraft && G.faithDraft._oath) G.faith.oath=G.faithDraft._oath;
+    forceFightPaceForMode('faith');
     G.season={year:1,fights:[]};
     /* ==== [ANCRE: FAITH_CALENDRIER] — la première année se génère ici, les
        suivantes dans nextFaithYear(). faithLandOnMonth() saute les mois vides
@@ -3553,6 +3531,79 @@ function scr_fight_flash(){
    <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.toResult()">VOIR LE RÉSULTAT</button>
   </div>`;
 }
+/* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — Plan V3 LOT 1 §P07 : Faith ne
+   montre plus jamais l'arène round par round (arbitrage A4, "resolved-
+   with-suspense-screen") — ce nouvel écran s'intercale entre le combat déjà
+   simulé (G.pending.res, résolu en un calcul synchrone comme tout le
+   moteur) et sa révélation (scr_fight_flash, réutilisé tel quel juste au-
+   dessus). Barre de progression non linéaire (accélère puis ralentit avant
+   le verdict — startFaithFightPending() plus bas) sur 2,5 à 4s, confettis
+   sur victoire via spawnParticles/updateParticles/drawParticles
+   (ANCRE JUICE_NIVEAU2/PARTICLES, réutilisées telles quelles — même pool
+   d'objets réutilisés, juste porté par FFP plutôt que par ARENA) sur une
+   perte plus lente et silencieuse, sans confettis. Aucun bouton : la
+   bascule vers fight_flash est automatique (finishFaithFightPending()). */
+function scr_faith_fight_pending(){
+  const meWin=!!(G.pending&&G.pending.win);
+  return `<div class="scr center intro">
+   <div class="eyebrow muted">LE VERDICT ARRIVE</div>
+   <div class="mono small muted" style="margin-top:8px">La commission délibère.</div>
+   <div style="height:8px;background:var(--panel2);border:1px solid var(--line);border-radius:2px;overflow:hidden;margin-top:28px">
+     <div id="ffp-bar" style="height:100%;width:0%;background:var(--gold);transition:none"></div>
+   </div>
+   ${meWin?'<canvas id="ffp-cv" style="width:100%;height:140px;margin-top:4px;display:block"></canvas>':''}
+   <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipFaithFightPending()">Passer ▸</button>
+  </div>`;
+}
+/* Pool de particules dédié à cet écran (confettis) : même mécanisme que
+   celui de l'arène (ARENA._particles), objet séparé parce que Faith
+   n'instancie jamais ARENA/le canvas de l'arène — cf. l'ancre ci-dessus.
+   Déclaré une seule fois, réutilisé (jamais réalloué) d'un combat Faith à
+   l'autre : seul son tableau ._particles se vide/se remplit. */
+let FFP={_particles:[],raf:0,to:0};
+function startFaithFightPending(){
+  if(!G.pending) return;
+  const meWin=!!G.pending.win;
+  const durationMs=2500+Math.random()*1500; // 2,5 à 4s, cf. §P07
+  const t0=(typeof performance!=='undefined'?performance.now():Date.now());
+  const bar=document.getElementById('ffp-bar');
+  const cv=meWin?/** @type {HTMLCanvasElement|null} */(document.getElementById('ffp-cv')):null;
+  let ctx=null, W=0, H=0, spawned=false;
+  if(cv && cv.getContext){
+    const dpr=Math.min((typeof window!=='undefined'&&window.devicePixelRatio)||1,2);
+    W=cv.clientWidth||320; H=140; cv.width=W*dpr; cv.height=H*dpr;
+    ctx=cv.getContext('2d'); if(ctx) ctx.scale(dpr,dpr);
+  }
+  FFP._particles.length=0; // vidé, jamais réalloué (cf. déclaration de FFP)
+  /* Non-linéaire : easeOutQuint jusqu'à 85%, puis un dernier tiers de temps
+     "suspendu" (progression très lente) avant de sauter à 100% — le
+     joueur voit la barre presque finie puis hésiter, comme un jury. */
+  function ease(t){ return t<0.7 ? 1-Math.pow(1-(t/0.7),5) : 0.92+(t-0.7)/0.3*0.08; }
+  function frame(now){
+    const t=Math.min(1,(now-t0)/durationMs);
+    if(bar) bar.style.width=(ease(t)*100).toFixed(1)+'%';
+    if(ctx){
+      if(!spawned && t>0.15){ spawned=true;
+        spawnParticles(FFP,W/2,-10,{count:44,xSpread:W*0.9,ySpread:10,spreadX:2,spreadY:1,vy0:1.5,gravity:0.085,life:130,size:6,
+          colors:['#E6B93A','#E8442F','#7FC488','#F5EFE0'],kind:'confetti'});
+      }
+      updateParticles(FFP);
+      ctx.clearRect(0,0,W,H);
+      drawParticles(ctx,FFP);
+    }
+    if(t<1){ FFP.raf=requestAnimationFrame(frame); }
+    else { finishFaithFightPending(); }
+  }
+  if(typeof requestAnimationFrame!=='undefined'){ FFP.raf=requestAnimationFrame(frame); }
+  else { FFP.to=setTimeout(finishFaithFightPending,durationMs); } // repli (tests jsdom sans rAF)
+}
+function finishFaithFightPending(){
+  if(FFP.raf){ cancelAnimationFrame(FFP.raf); FFP.raf=0; }
+  if(FFP.to){ clearTimeout(FFP.to); FFP.to=0; }
+  if(G.screen!=='faith_fight_pending') return; // déjà quitté (retour rapide, changement d'écran ailleurs)
+  G.screen='fight_flash'; render();
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_arena(){ const A=ARENA||{};
   /* ==== [CORRECTIF V2-06] — la cage reste sombre dans les deux ambiances
      (V2-01), mais son HUD (chrono/rounds/jauges — ici noms, zones de

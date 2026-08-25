@@ -407,13 +407,6 @@ function scr_faith_home(){
        <div class="muted small mt">Les carrières terminées et leurs scores.</div>
      </div>
    </div>
-   <div class="card mt" style="padding:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="font-size:11px">AMBIANCE</div>
-     <div style="display:flex;gap:8px">
-       <button class="btn ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</button>
-       <button class="btn ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</button>
-     </div>
-   </div>
    <button class="btn ghost mt" onclick="CL.go('title')">← Retour</button>
   </div>`;
 }
@@ -550,12 +543,6 @@ function scr_faith_hub(){
          quatre interlocuteurs (agent/directeur/coach/partenaire). ==== -->
     <button class="btn ghost" onclick="CL.go('faith_contacts')">Contacts</button>
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
-    <!-- ==== [ANCRE: V2-43/V2-44] — l'ambiance papier/nuit avait un
-         emplacement provisoire ici (V2-01, "en attendant" l'écran
-         d'accueil Faith et l'écran Réglages) : les deux existent
-         maintenant (scr_faith_home, scr_settings), le réglage n'a plus
-         besoin de ce troisième accès. ==== -->
-    <button class="btn ghost" onclick="CL.go('settings')">Réglages</button>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_AGENT] — remplace scr_select (menu à 3 adversaires,

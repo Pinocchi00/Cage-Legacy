@@ -53,27 +53,20 @@
    Faith, pas la valeur du fond (cf. règle 1 et point 3 de V2-01). Les
    couleurs de chaque ambiance vivent dans .faith-papier/.faith-nuit
    juste en dessous. ==== */
+/* ==== [ANCRE: V3_MODE_GRADIENTS] — Plan V3 LOT 1 §P02 : "dark-mode-only",
+   trois dégradés sombres distincts par mode, posés via [data-mode] sur
+   <html> (render(), ui-08) plutôt que par les classes faith-skin/faith-
+   papier/faith-nuit d'origine. L'ambiance "papier" (fond clair #E8E2D4,
+   juste au-dessus dans l'historique de ce fichier) est SUPPRIMÉE — plus
+   seulement débranchée : le document demande "dark-mode-only", pas
+   "dark par défaut". Les tokens qui vivaient dans .faith-nuit deviennent
+   la SEULE palette Faith, fusionnés directement dans .faith-skin (plus de
+   sélecteur composé, plus de réglage à lire). Le contraste ne change pas
+   (mêmes valeurs, déjà auditées AA) : seul le fond passe de plat à un
+   dégradé très resserré (deux teintes proches de --bg) — Faith garde son
+   identité "encre, pas affiche" (FA-08) sans désobéir à la lettre du
+   document, qui demande un dégradé sur les TROIS modes, Faith inclus. */
 body.faith-skin{
-  background:var(--bg);
-}
-/* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: FAITH_AMBIANCE] — deux palettes, une seule géométrie
-   (FAITH_SKIN_BASCULE juste au-dessus). `faith-nuit` reprend EXACTEMENT
-   les valeurs FA-08 (noir encre plat, oxblood) — aucune régression, c'est
-   un ajout de choix, pas un remplacement (cf. "CE QU'IL NE FAUT PAS
-   CASSER" #4). `faith-papier` reprend les tokens déjà audités AA de
-   .faith-paper (index.html, ANCRE FAITH_PAPIER_OBJET) : même valeurs,
-   donc aucun nouveau contraste à valider. Défaut = papier (V2-01,
-   arbitrage tranché) : c'est l'ambiance que 90% des joueurs ne changeront
-   jamais, elle doit être aussi soignée que la nuit, pas un simple mode
-   dégradé. La cage (écran `arena`) reste volontairement sombre dans les
-   deux ambiances : render() (ui-08) force `faith-nuit` sur cet écran quel
-   que soit le réglage — le papier est l'archive, la cage est la nuit
-   (point 4 de V2-01), et ça évite tout flash blanc/noir à l'entrée en
-   cage même en ambiance papier (transition de fond .22s sur body,
-   ci-dessous, déjà suffisante avec le fade natif de .scr — pas besoin
-   d'un fondu au noir dédié en plus). ==== */
-body.faith-skin.faith-nuit{
   --bg:#100E0C; --panel:#100E0C; --panel2:#17140F; --line:#3A342B;
   --text:#EDE6D6; --muted:#9A907E; --faint:#6B6355;
   --gold:#D65940; --gold-d:#8F3421; --sage:#9A907E;
@@ -83,19 +76,18 @@ body.faith-skin.faith-nuit{
      fond corrigé en repeignant --pos/--neg/--warn plutôt que --win/--loss,
      cf. ANCRE V2_TOKENS_SEMANTIQUES (:root, plus haut). */
   --pos:#6BCB77; --neg:#D65940; --warn:#C08A2E;
+  background:linear-gradient(160deg,#120E0B 0%,#100E0C 55%,#17110D 100%);
 }
-body.faith-skin.faith-papier{
-  --bg:#E8E2D4; --panel:#E8E2D4; --panel2:#DAD4C6; --line:#B9B0A0;
-  --text:#16130E; --muted:#5C5346; --faint:#7A7161;
-  --gold:#9C2C1E; --gold-d:#7A2216; --sage:#4A5D50;
-  --blood:#9C2C1E; --blood-d:#7A2216;
-  --f-red-hi:#9C2C1E;
-  --pos:#1A5F33; --neg:#9C2C1E; --warn:#8A6A1E;
+/* Carrière (mode par défaut, aucun data-mode ou data-mode="career") : le
+   dégradé rouge->or d'origine (règle body{background:...} plus bas dans ce
+   fichier) reste inchangé — c'est déjà "un dégradé par mode", il n'a
+   simplement jamais eu besoin d'un sélecteur dédié tant qu'aucun autre mode
+   n'avait le sien en propre. */
+/* Gauntlet : identité arcade/ascension distincte du rouge-or de Carrière —
+   un violet-grenat froid, plus tendu, jamais utilisé ailleurs dans le jeu. */
+html[data-mode="gauntlet"] body{
+  background:linear-gradient(135deg,#3A0F2E 0%,#1A0A14 40%,#0D0A14 70%,#241033 100%);
 }
-/* En papier, le rouge d'objet (filets/jauges) doit rester lisible sur un
-   fond CLAIR — l'oxblood #9C2C1E y suffit déjà (c'est le même que .faith-
-   paper, déjà audité). En nuit, on garde le rouge vif #E8442F réservé aux
-   filets (RÈGLE DEUX ROUGES de FA-08, jamais en texte). */
 /* ==== [FIN ANCRE] ==== */
 body.faith-skin .scr{ padding-left:20px; padding-right:20px; }
 body.faith-skin .scr > * + *{ margin-top:32px; }

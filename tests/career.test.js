@@ -5,7 +5,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
-const { playCareer } = require('./helpers/playthrough');
+const { playCareer, clickThrough, totalFightsPlayed } = require('./helpers/playthrough');
 
 test('une carrière complète (amateur -> pro -> 40 combats) ne produit jamais d\'erreur JS', () => {
   const win = newGameWindow({ runMain: true });
@@ -21,21 +21,29 @@ test('une carrière complète (amateur -> pro -> 40 combats) ne produit jamais d
   assert.ok(win.G.f, 'G.f doit rester défini en fin de simulation');
 });
 
-test('le bilan W+L+D ne redescend jamais pendant une même carrière', () => {
+test('le nombre total de combats joués (f.history) ne redescend jamais pendant une même carrière', () => {
+  /* ==== [ANCRE: TESTS_TURNPRO_RESET] — f.W+f.L+f.D N'EST PAS ce test à
+     l'origine testait : turnPro() (ui-05) remet volontairement W/L à zéro
+     au passage amateur->pro (palmarès amateur archivé à part dans
+     f.amaRec, cf. ANCRE P4P_SCORE_80_20, engine.js:1266) — une carrière
+     qui franchit cette étape voit son "bilan" redescendre légitimement,
+     ce que l'ancienne version de ce test prenait à tort pour un bug.
+     f.history (poussé une fois par combat résolu, jamais remis à zéro,
+     cf. playthrough.js/totalFightsPlayed) est la mesure réellement
+     monotone sur toute la carrière — trouvé et corrigé en stress-testant
+     le Plan V3 LOT 1. ==== */
   const win = newGameWindow({ runMain: true });
   win.CL.newCareer();
   win.G.draft.first = 'Sim';
   win.CL.create();
-  const { clickThrough } = require('./helpers/playthrough');
   let lastTotal = 0;
   for(let i = 0; i < 8 && !win.G.f.retired; i++){
-    const before = (win.G.f.W || 0) + (win.G.f.L || 0) + (win.G.f.D || 0);
+    const before = totalFightsPlayed(win);
     clickThrough(win, { maxSteps: 200, stopWhen: w => {
-      const t = (w.G.f.W || 0) + (w.G.f.L || 0) + (w.G.f.D || 0);
-      return t > before || w.G.f.retired || w.G.screen === 'gameover';
+      return totalFightsPlayed(w) > before || w.G.f.retired || w.G.screen === 'gameover';
     }});
-    const total = (win.G.f.W || 0) + (win.G.f.L || 0) + (win.G.f.D || 0);
-    assert.ok(total >= lastTotal, `le bilan total ne doit jamais décroître (était ${lastTotal}, est ${total})`);
+    const total = totalFightsPlayed(win);
+    assert.ok(total >= lastTotal, `le nombre de combats joués ne doit jamais décroître (était ${lastTotal}, est ${total})`);
     if(total === lastTotal && !win.G.f.retired) break; // plus de progrès possible : fin légitime de ce run de test
     lastTotal = total;
   }

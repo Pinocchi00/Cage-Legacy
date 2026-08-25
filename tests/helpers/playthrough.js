@@ -85,6 +85,21 @@ function clickThrough(win, opts){
  * résolus ou la retraite, selon ce qui arrive en premier.
  * @param {Window} win @param {{targetFights?:number, first?:string}} [opts]
  * @returns {{fights:number, retired:boolean}} */
+/* ==== [ANCRE: TESTS_TURNPRO_RESET] — trouvé en stress-testant le Plan V3
+   LOT 1 : compter les combats via f.W+f.L+f.D casse dès que la carrière
+   franchit amateur->pro, où turnPro() (ui-05) remet volontairement W/L à
+   zéro (palmarès amateur archivé à part dans f.amaRec — seul reset
+   légitime du jeu, cf. ANCRE P4P_SCORE_80_20, engine.js:1266). Le total
+   observable retombait alors sous sa valeur d'avant-promotion pour
+   plusieurs combats d'affilée : `after > before` ne se déclenchait plus,
+   et clickThrough épuisait ses 200 pas au milieu d'un combat au lieu de
+   rendre la main proprement — et même corrigé en `!==`, le compteur de
+   combats renvoyé par playCareer() restait faux (redescendu) juste après
+   la promotion. f.history (engine.js:1026, poussé une fois par combat
+   résolu, amateur ET pro, jamais remis à zéro par turnPro()) est le seul
+   compteur réellement monotone sur toute la carrière — utilisé partout
+   ci-dessous à la place de W+L+D. */
+function totalFightsPlayed(win){ return (win.G.f.history||[]).length; }
 function playCareer(win, opts){
   const targetFights = (opts && opts.targetFights) || 15;
   const first = (opts && opts.first) || 'Auto';
@@ -95,16 +110,26 @@ function playCareer(win, opts){
   let guard = 0;
   while(fights < targetFights && !win.G.f.retired && guard < 2000){
     guard++;
-    const before = (win.G.f.W || 0) + (win.G.f.L || 0) + (win.G.f.D || 0);
-    clickThrough(win, { maxSteps: 200, stopWhen: w => {
-      const after = (w.G.f.W || 0) + (w.G.f.L || 0) + (w.G.f.D || 0);
-      return after > before || w.G.f.retired || w.G.screen === 'gameover';
+    const before = totalFightsPlayed(win);
+    /* maxSteps:400, pas 200 — trouvé en stress-testant le Plan V3 LOT 1
+       (seed=1 reproduit systématiquement) : un cycle complet hub->
+       sélection->camp->plan->arène->résultat coûte ~12-13 clics, mais un
+       enchaînement de plusieurs écrans à un seul clic après un combat
+       (jalon débloqué, promotion, contrat...) peut en ajouter plusieurs
+       dizaines — avec 200, clickThrough pouvait épuiser son budget PENDANT
+       la traversée vers le combat suivant, juste avant d'atteindre les
+       boutons de plan de combat (déjà vérifié manuellement : les cliquer
+       fonctionne, il ne restait simplement plus de pas pour les essayer).
+       400 laisse une marge large sans jamais masquer un vrai blocage
+       (un écran mort épuiserait 400 pas tout aussi sûrement que 200). */
+    clickThrough(win, { maxSteps: 400, stopWhen: w => {
+      return totalFightsPlayed(w) > before || w.G.f.retired || w.G.screen === 'gameover';
     }});
-    const after = (win.G.f.W || 0) + (win.G.f.L || 0) + (win.G.f.D || 0);
+    const after = totalFightsPlayed(win);
     if(after <= before && !win.G.f.retired) break; // plus aucune action possible : on sort plutôt que de boucler à vide
     fights = after;
   }
   return { fights, retired: !!win.G.f.retired };
 }
 
-module.exports = { firstOnclick, allOnclicks, clickThrough, playCareer };
+module.exports = { firstOnclick, allOnclicks, clickThrough, playCareer, totalFightsPlayed };
