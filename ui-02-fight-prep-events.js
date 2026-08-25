@@ -225,8 +225,20 @@ function genOpponents(f){
       if(rival && !chosen.includes(rival)) chosen[1]=rival; }
   }
   let uniqueOpps=[...new Set(chosen)].filter(Boolean);
-  while(uniqueOpps.length<3 && uniqueOpps.length<pool.length){ const rand=pick(pool);
-    if(!uniqueOpps.includes(rand) && !rand.champion) uniqueOpps.push(rand); }
+  /* ==== [ANCRE: V3_GARDE_MATCHMAKING] — Plan V3 LOT 3 §P14, INV-01 : un
+     combattant à 0-0 (jamais combattu) proposé à un joueur qui a déjà
+     >=5 combats casse la crédibilité du classement autant qu'un décalage
+     d'expérience non plausible. Filtré ici, seul endroit qui construit la
+     liste finale quelle que soit la branche (scénario A/B/C) empruntée —
+     avec le même filet de sécurité que la boucle de complément juste en
+     dessous (jamais de pool vidé sous 3 par ce filtre). */
+  const experienced=((f.W||0)+(f.L||0)+(f.D||0))>=5;
+  if(experienced){
+    const filtered=uniqueOpps.filter(o=>(o.W||0)>0 || (o.L||0)>0);
+    if(filtered.length>=1) uniqueOpps=filtered;
+  }
+  for(let tries=0; uniqueOpps.length<3 && uniqueOpps.length<pool.length && tries<pool.length*2; tries++){ const rand=pick(pool);
+    if(!uniqueOpps.includes(rand) && !rand.champion && !(experienced && (rand.W||0)===0 && (rand.L||0)===0)) uniqueOpps.push(rand); }
   uniqueOpps=uniqueOpps.slice(0,3);
   // ==== [ANCRE: CORRECTIF_ORDRE_PROPOSITIONS] — bug remonté : l'écran du
   // Bureau du Matchmaker (scr_select) affirme que "l'ordre des propositions

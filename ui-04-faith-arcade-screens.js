@@ -13,6 +13,18 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: DATA_FAITH_SPLIT_V3] — Plan V3 LOT 0 §0.2 : le corpus texte
+   pur (FAITH_BUILDUP_EVENTS, FAITH_LIFE_EVENTS, FAITH_BRANCH_EVENTS,
+   FAITH_PRESSE_*, FAITH_CAMPS, FAITH_INTERSAISON_POOL, FAITH_PERK_OFFERS,
+   FAITH_DRAFT_PAGES/OPTIONS, FAITH_DIVISION_TEXT, FAITH_GALA_*, FAITH_OATHS)
+   a été déplacé dans data-faith-content.js, et le registre humain
+   (FAITH_AGENTS, FAITH_DIRECTORS, FAITH_DIRECTOR_REFUS,
+   FAITH_GYM_NEWCOMER_NICKS, FAITH_JOURNALIST_NAMES) dans data-people.js —
+   chargés avant ce fichier (index.html), mêmes noms de constantes, aucune
+   réécriture. Ce fichier ne garde que les FONCTIONS d'écran Faith/Arcade.
+   ==== */
+
+
 /* ==== [ANCRE: FAITH_CREATION_SEQUENTIELLE] — la création tenait sur un seul
    écran de seize options simultanées. À ce nombre, on ne compare plus : on
    abandonne et on clique. Une question par écran, trois à quatre réponses,
@@ -26,64 +38,12 @@
      puis les jetait ; ils sont désormais conservés sur le combattant
      (f._origin, f._circle, f._lifestyle) pour que des événements puissent
      s'y brancher via le champ `req` déjà supporté par le pool. ==== */
-const FAITH_DRAFT_PAGES=[
-  {key:null,q:'Qui êtes-vous ?'},
-  /* ==== [CORRECTIF FA-16] — finalizeFaithDraft() (ui-08) appelait
-     makeFighter() sans jamais passer `div` : makeFighter() (engine.js)
-     tire alors la catégorie de poids AU HASARD dans DIVISIONS[gender]. Le
-     mode carrière, lui, la fait choisir (scr_create, ui-06). La catégorie
-     détermine la morphologie (taille/allonge) et une partie du profil de
-     départ — la laisser au hasard est un oubli, pas un choix de design. */
-  {key:'div',q:'Sur quelle balance montez-vous ?'},
-  {key:'origin',q:'D’où venez-vous ?'},
-  /* ==== [CORRECTIF FA-18] — FAITH_DRAFT_OPTIONS.style ne proposait que 4
-     styles sur les 8 de STYLES (engine.js) : karaté, sambo, kickboxing et
-     MMA complet en étaient absents, alors que du contenu existant (l'événement
-     evt_forest_kata, spécifique au karaté) était de fait inatteignable en
-     Faith. Un style unique reste écrit sur `d.style` (le champ lu par
-     finalizeFaithDraft) mais réparti sur deux pages de 4 options pour tenir
-     la règle des 3-4 options/écran : `field` indique le champ réel à
-     renseigner quand il diffère de `key` (cf. scr_faith_draft). ==== */
-  {key:'style_stand',field:'style',q:'Où avez-vous appris à frapper ?'},
-  {key:'style_ground',field:'style',q:'Où avez-vous appris à finir un combat au sol ?'},
-  {key:'lifestyle',q:'Quel adolescent avez-vous été ?'},
-  {key:'circle',q:'Qui vous entoure ?'},
-  /* ==== [ANCRE: FAITH_AGENT] — question distincte de "Qui vous entoure ?" :
-     le cercle (circle) est un champ narratif déjà chargé — une douzaine
-     d'événements de branche (FAITH_BRANCH_EVENTS) testent f._circle==='family'
-     /'agent'/'squad'. Réutiliser ces mêmes valeurs pour désigner les 3 agents
-     du document (le Requin/le Stratège/le Fidèle) aurait cassé silencieusement
-     tout ce contenu existant. Question séparée, agent mécaniquement
-     indépendant du cercle. ==== */
-  {key:'agent',q:'Qui gère votre carrière ?'},
-  {key:'personality',q:'Que donnez-vous à voir ?'},
-  {key:'stable',q:'Où signez-vous votre premier contrat ?'},
-  {key:null,q:'Voilà qui vous êtes.'}
-];
 /* ==== [CORRECTIF FA-16] — descriptions par ce qu'elles racontent, jamais
    par leurs stats (même règle que le reste de la création, cf.
    FAITH_CREATION_SEQUENTIELLE) : chaque catégorie nomme un rapport de force
    dans le sport, pas une fourchette de kilos. Les noms/tailles/allonges
    réels restent ceux de DIVISIONS (engine.js) — seul le texte est ajouté
    ici, la rendu (scr_faith_draft) les combine. */
-const FAITH_DIVISION_TEXT={
-  H:{
-    'H-fly':'Vous ne mettrez jamais personne KO d’un seul coup. Vous ne vous arrêterez jamais non plus.',
-    'H-bantam':'La vitesse est le seul luxe que la catégorie vous accorde. Ne la gâchez pas.',
-    'H-feather':'Ni le plus rapide, ni le plus lourd. Il faudra être le plus complet.',
-    'H-light':'La division la plus encombrée du sport. Tout le monde sait se battre.',
-    'H-welter':'Assez de puissance pour finir, assez de vitesse pour ne pas se faire prendre. La plus regardée, pour cette raison.',
-    'H-middle':'Le gabarit qu’on met en couverture. On y attend des champions, pas des surprises.',
-    'H-lheavy':'Chaque échange peut tout changer d’un coup. Personne ne relâche vraiment sa garde.',
-    'H-heavy':'Un coup, une carrière. Le vôtre ou le sien.'
-  },
-  F:{
-    'F-straw':'La plus légère des catégories féminines. Le sport ne pardonne pas plus qu’aux autres.',
-    'F-fly':'Une vitesse d’exécution qui ne laisse le temps de réfléchir à personne — ni à vous, ni en face.',
-    'F-bantam':'Le juste milieu entre la vitesse et la capacité à faire mal. La catégorie reine du sport féminin.',
-    'F-feather':'La plus haute catégorie encore ouverte aux femmes. Peu de monde en face, et ça se voit vite.'
-  }
-};
 /* ==== [ANCRE: FAITH_VOCAB_MMA] — FA-17 : la structure de ces questions
    (origine/milieu/adolescence/entourage/image) est une transposition directe
    d'un mode carrière footballistique, et les descriptions en gardaient le
@@ -91,70 +51,10 @@ const FAITH_DIVISION_TEXT={
    une description ne dit jamais ce qu'elle donne (les bonus restent dans
    finalizeFaithDraft), elle dit ce que ça a fait au corps ou aux habitudes
    de combattant. ==== */
-const FAITH_DRAFT_OPTIONS={
-  origin:[
-    ['traditional','Dojo de la discipline','Un maître obsessionnel vous a fait répéter le même jab dix mille fois, jusqu’à ce qu’il ne demande plus rien à la tête. Le prix : vous ne sortez jamais du plan prévu.'],
-    ['pro_child','Fils de la maison','Votre nom remplissait la salle avant votre premier combat. Il vous a ouvert les meilleurs camps — et il vous interdit la moindre excuse le jour où ça tourne mal.'],
-    ['street','École du bitume','Les vraies leçons se sont passées dans les parkings, pas sur les tatamis. La garde reste basse, le temps mort n’existe pas : ces habitudes-là ne partent jamais.'],
-    ['late_bloomer','Le retardataire','Personne ne pariait un centime sur vous à seize ans. Ce qui a été arraché tard reste acquis pour de bon — la vitesse des autres, elle, ne se rattrape jamais tout à fait.']],
-  style_stand:[
-    ['boxer','Boxe','Des mains lourdes, des appuis, et l’art de ne pas être là où le coup arrive.'],
-    ['kickboxer','Kickboxing','Les jambes aussi souvent que les mains. On vous a appris à changer de cible sans jamais changer de rythme.'],
-    ['muayThai','Muay-thaï','Le corps à corps, les genoux, les coudes. La distance où les gens renoncent.'],
-    ['karate','Karaté','Chaque geste répété jusqu’à l’os, jusqu’à ce que la distance devienne un réflexe plutôt qu’un calcul.']],
-  style_ground:[
-    ['wrestler','Lutte','Décider où le combat se passe. Debout ou au sol, mais c’est vous qui choisissez.'],
-    ['bjj','Jiu-jitsu','Laisser venir, encaisser la position, et refermer la prise quand personne ne l’attend.'],
-    ['sambo','Sambo','Lutte et soumission dans le même mouvement, appris là où l’un ne se pratique jamais sans l’autre.'],
-    ['mma','MMA complet','Aucune discipline n’a jamais été la maison. Compétent partout, jamais brillant nulle part en particulier.']],
-  lifestyle:[
-    ['pro','Moine guerrier','Extinction des feux à 21h, zéro écart, zéro excuse. Les coachs vous adorent, vos amis vous ont oublié.'],
-    ['balanced','Ni moine ni fêtard','Sérieux à la salle, tolérable en dehors. La voie du compromis.'],
-    ['party','La vie est courte','Les sorties avant les rounds de sac. Le talent compensera — ou pas.']],
-  circle:[
-    ['family','Le clan','Vos parents ont réglé chaque détail avant que vous n’ayez un mot à dire. La table de la cuisine reste, aujourd’hui encore, votre vrai bureau.'],
-    ['agent','Le pourcentage','Quelqu’un négociait déjà vos contrats avant que vous sachiez lacer vos gants. Il prend sa part sur chaque bourse, encore aujourd’hui.'],
-    ['squad','La bande','Vos potes d’enfance vous suivent à chaque combat, bruyants et fidèles, sans jamais vraiment comprendre les règles.']],
-  /* ==== [ANCRE: FAITH_AGENT] — trois profils, trois façons de remplir le
-     calendrier : le Requin maximise l'argent immédiat au prix d'adversaires
-     trop durs, le Stratège calibre chaque affiche pour la progression au
-     classement quitte à laisser de l'argent sur la table, le Fidèle ne
-     négocie jamais rien mais ne prend rien non plus. ==== */
-  agent:[
-    ['requin','Le Requin','Il sent l’argent avant tout le monde. Les plus grosses bourses, tôt — et des adversaires qu’il choisit toujours un cran trop costauds.'],
-    ['stratege','Le Stratège','Chaque combat sert un plan. Il refuse ce qui ne fait pas progresser au classement, quitte à laisser de l’argent sur la table.'],
-    ['fidele','Le Fidèle','Loyauté totale, commission nulle. Il ne sait pas négocier une bourse, mais il ne vous lâchera jamais.']],
-  /* ==== [CORRECTIF FA-19] — personality n'offrait que 2 options (villain/
-     humble), un binaire au milieu d'une série de choix à 3-4 options. Le
-     showman existait déjà comme trait ÉMERGENT (TRAIT_NAMES.showman,
-     ui-08) — de fait déjà produit par une dizaine de choix du pool
-     FAITH_BRANCH_EVENTS déjà tagués traitTag:'showman' avant ce correctif,
-     contrairement au constat du document source qui affirmait qu'aucun ne
-     l'était (vérifié par relecture du pool actuel : 650, 662, 698, 702,
-     710, 750, 803, 828, 842, 846 le portent déjà). Ce qui manquait
-     réellement : le showman comme 3e option de PERSONNALITÉ dès la
-     création (mécaniquement indépendant du trait émergent). ==== */
-  personality:[
-    ['villain','Le vilain','Chaque conférence de presse est un règlement de comptes. Ça remplit les salles.'],
-    ['humble','Le taiseux','Deux phrases par interview, un mental de granit. Les puristes vous respectent, les promoteurs s’arrachent les cheveux.'],
-    ['showman','Le showman','Vous vendez le combat avant de le livrer. Le public qui a payé pour un spectacle ne pardonne pas une victoire aux points sans éclat.']],
-  /* ==== [ANCRE: FAITH_ECURIE_DEPART] — le premier vrai dilemme, absent
-     jusqu'ici : temps de jeu contre prestige. Une salle régionale fait
-     combattre souvent contre des adversaires abordables ; un camp d'élite
-     fait signer plus haut, contre plus dur, avec ce que ça implique. ==== */
-  stable:[
-    ['regional','Une salle régionale','On vous fera combattre souvent, contre des gens de votre niveau. Vous apprendrez sur le tas, loin des caméras.'],
-    ['elite','Un camp d’élite','On ne vous fera pas de cadeau : des partenaires meilleurs que vous, des affiches plus dures, et du monde qui regarde.']]
-};
 /* ==== [ANCRE: FAITH_AGENT] — commission (cut, appliquée par la déduction de
    bourse déjà en place, ui-05) et style de matchmaking par agent. Consultée
    à la création (finalizeFaithDraft, ui-08) et à chaque offre de combat
    (faithGenerateOffer, ui-08). ==== */
-const FAITH_AGENTS={
-  requin:{id:'requin',label:'Le Requin',cut:0.18},
-  stratege:{id:'stratege',label:'Le Stratège',cut:0.10},
-  fidele:{id:'fidele',label:'Le Fidèle',cut:0}
-};
 /* ==== [ANCRE: FAITH_CALENDRIER] — un an = 12 mois plutôt que 5 temps fixes,
    pour absorber un nombre VARIABLE de combats (FA-10) : à 1 combat/an fixe,
    un contrat de 4 combats durait mécaniquement 4 à 6 ans (cf. FA-04 —
@@ -229,8 +129,6 @@ function faithCalendarBar(F){
    prélims il y a trois ans, ce soir je ferme le gala". Les préfixes
    reprennent les noms d'ORGS eux-mêmes (Ultimate Rim -> URC, Pacific
    Championship -> PCF), jamais inventés à côté. ==== */
-const FAITH_GALA_PREFIX=['AM','CL','CR','CN','CONT','URC','PCF'];
-const FAITH_GALA_CITIES=['Lyon','Marseille','Osaka','Rio','Manchester','Chicago','Lagos','Séoul','Varsovie','Montréal','Le Caire','Perth'];
 /* ==== [ANCRE: V2-19] — un directeur nommé par organisation (sept paliers,
    ORGS/FAITH_GALA_PREFIX, engine.js/ui-04), persistant sur toute la
    carrière. `grants`/`refuses`/`counter` sont lus par faithNegotiate*()
@@ -238,15 +136,6 @@ const FAITH_GALA_CITIES=['Lyon','Marseille','Osaka','Rio','Manchester','Chicago'
    (G.faith.directors[org].trust, -3 à +3) n'est jamais chiffrée à
    l'écran (règle H.1) : seule une phrase qualitative (faithDirectorMood,
    plus bas) la traduit. ==== */
-const FAITH_DIRECTORS=[
-  {name:'Mourad',archetype:'comptable',grants:'chiffres',refuses:'base',counter:'prime_resultat'},
-  {name:'Vince',archetype:'showman',grants:'spectacle',refuses:'ennuyeux',counter:'montee_carte'},
-  {name:'Odette',archetype:'loyaliste',grants:'ancien',refuses:'nouveau',counter:'contrat_long'},
-  {name:'Silva',archetype:'requin',grants:'rien',refuses:'tout',counter:'revanche'},
-  {name:'Karl',archetype:'ancien',grants:'finisseur',refuses:'decisionneur',counter:'prime_finition'},
-  {name:'Nadia',archetype:'technocrate',grants:'grille',refuses:'ecart',counter:'clause_titre'},
-  {name:'Ruben',archetype:'patriarche',grants:'excuse',refuses:'humiliation',counter:'domicile'}
-];
 /** Humeur qualitative du directeur envers le joueur — jamais un chiffre.
  * @param {number} org @returns {string} */
 function faithDirectorMood(org){
@@ -281,15 +170,6 @@ function faithDirectorFavorable(dir,f){
     default: return false; // le Requin n'est "favorable" au sens classique pour personne
   }
 }
-const FAITH_DIRECTOR_REFUS={
-  comptable:'Les chiffres ne le permettent pas.',
-  showman:'Vous ne faites pas encore parler de vous.',
-  loyaliste:"Vous n'êtes pas encore d'ici.",
-  ancien:'Vous gagnez, mais vous ne finissez personne.',
-  technocrate:'Ça sort de la grille.',
-  patriarche:'Pas après ce que vous avez dit.',
-  requin:'Non.'
-};
 function faithDirectorRefusalLine(dir){ return FAITH_DIRECTOR_REFUS[dir.archetype]||'Non.'; }
 /** Motif contextuel de la demande "un meilleur adversaire" (V2-18) —
  * un seul, choisi selon le contexte réel plutôt qu'un choix vide sans
@@ -318,6 +198,22 @@ function faithGalaPosition(f){
   if(rk<=12) return {tier:'Carte principale',mult:1,hype:'moyenne',rounds:3,pressConf:false};
   return {tier:'Préliminaires',mult:0.6,hype:'faible',rounds:3,pressConf:false};
 }
+/* ==== [ANCRE: V3_REGIONAL_CEILING_GUARD] — Plan V3 LOT 6 §5.6.3 point 3 :
+   condition réelle avant de proposer "Le plafond régional" (data-faith-
+   content.js, evt_br_regional_ceiling) — un plancher de combats (l'ancien
+   comportement pouvait se déclencher dès 6 victoires, cité tel quel par le
+   joueur comme absurde) ET un ratio d'adversaires du roster ACTUEL déjà
+   battus, pas un compteur brut qui ne dit rien du contenu réel de ces
+   victoires. */
+function faithRegionalCeilingEligible(f){
+  if(((f.W||0)+(f.L||0))<12) return false;
+  const beatenIds=new Set((f.history||[]).filter(h=>h.res==='win' && h.oppId).map(h=>h.oppId));
+  const roster=(typeof G!=='undefined'&&G&&G.roster)||[];
+  if(!roster.length) return beatenIds.size>=8;
+  const beatenRatio=roster.filter(o=>beatenIds.has(o.id)).length/roster.length;
+  return beatenRatio>=0.5 || beatenIds.size>=8;
+}
+/* ==== [FIN ANCRE] ==== */
 /** Nom et lieu du gala — déterministe par année+mois pour ne pas changer si
  * l'écran est réaffiché sans qu'un mois ne s'écoule.
  * @param {object} F G.faith @param {object} f */
@@ -328,6 +224,26 @@ function faithGalaLabel(F,f){
   const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
   return `${prefix} ${num} — ${city}`;
 }
+/* ==== [ANCRE: V3_GALA_VENUE_INFO] — Plan V3 LOT 6 §P09 point 2/3 : "bandeau
+   de carte" (salle, affluence, audience) et "le public existe" (domicile ou
+   pas). Même seed que faithGalaLabel ci-dessus (déterministe tant que
+   année+mois+org ne changent pas) pour ne jamais désynchroniser les deux
+   affichages d'un même gala. L'affluence/audience suivent gala.mult (déjà
+   la mesure d'enjeu existante, faithGalaPosition) plutôt qu'un second
+   barème inventé.
+   @param {object} F @param {object} f @param {object} gala faithGalaPosition(f)
+   @returns {{city:string,venue:string,home:boolean,attendance:number,audienceM:number}} */
+function faithGalaVenueInfo(F,f,gala){
+  const seed=(F.year||2026)*13+(F.month||0)*7+(f.org||0);
+  const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
+  const venue=FAITH_GALA_VENUES[city]||city;
+  const home=!!(FAITH_GALA_CITY_COUNTRY[city] && f.countryKey===FAITH_GALA_CITY_COUNTRY[city]);
+  const mult=(gala&&gala.mult)||0.6;
+  const attendance=Math.round(1800+mult*7200+(seed%700));
+  const audienceM=Math.round((0.4+mult*2.8+(seed%40)/100)*10)/10;
+  return {city,venue,home,attendance,audienceM};
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_NEGOCIATION / V2-20] — le pouvoir de négociation n'est
    jamais chiffré à l'écran (cf. règle H.1 : un écran ne montre jamais un
    nombre qu'une phrase peut porter), seulement son EFFET. Dérivé de
@@ -458,7 +374,6 @@ function faithHubGrid(f){
    ui-08) — distincts des deux surnoms de départ ("Le Prodige", "L'Aspirant",
    FAITH_ECURIE_DEPART) pour qu'un renouvellement ne se lise pas comme une
    simple réapparition du même personnage. ==== */
-const FAITH_GYM_NEWCOMER_NICKS=['Le Nouveau','La Relève','Le Croc','Le Silencieux','L’Affamé','Le Guetteur'];
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_PROTEGE_VISIBLE] — le Syndrome de Frankenstein est le
    meilleur système du mode, et il était invisible jusqu'à son déclenchement :
@@ -528,13 +443,6 @@ function scr_faith_home(){
        <div class="muted small mt">Les carrières terminées et leurs scores.</div>
      </div>
    </div>
-   <div class="card mt" style="padding:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="font-size:11px">AMBIANCE</div>
-     <div style="display:flex;gap:8px">
-       <button class="btn ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</button>
-       <button class="btn ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</button>
-     </div>
-   </div>
    <button class="btn ghost mt" onclick="CL.go('title')">← Retour</button>
   </div>`;
 }
@@ -550,7 +458,11 @@ function scr_faith_hub(){
      un rappel. Même sélection (le partenaire le plus avancé) que le choix
      de sparring d'intersaison, calculée une seule fois et réutilisée par
      les deux. ==== */
-  const topPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+  /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
+     stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
+     rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
+  const topPartner=(G.faith.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
   /* ==== [CORRECTIF FA-26] — « afficher son palmarès sur le hub, une
      ligne » : le combattant peut avoir quitté G.roster (retraite NPC) sans
      que f.faithNemesisId ne soit nettoyé nulle part — repli silencieux si
@@ -588,7 +500,10 @@ function scr_faith_hub(){
        change jamais entre deux rendus du même mois. Le libellé de fraîcheur
        (V2-11) apparaît ici en toutes lettres, jamais en chiffre. */
     const picks=faithEnsureIntersaisonDraw(f,G.faith).map(id=>FAITH_INTERSAISON_POOL.find(e=>e.id===id)).filter(Boolean);
-    const secondPartner=(G.faith.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+    /* Même correctif que topPartner ci-dessus : le "second" partenaire est
+       simplement celui qui n'est pas le principal, jamais un second tri —
+       sinon le même bug d'identité flottante réapparaîtrait ici. */
+    const secondPartner=(G.faith.gym||[]).find(p=>p.id!==G.faith.sparringPrimaryId);
     /* ==== [ANCRE: V2-07] — seules les DEUX entrées qui portent explicitement
        le nom d'un partenaire (id précis, pas juste `action==='sparring_top'`
        — d'autres entrées, ex. "Séance technique ciblée", partagent la même
@@ -654,12 +569,13 @@ function scr_faith_hub(){
       <div class="mono" style="font-size:11px;color:var(--muted)">SAISON ${G.faith.year} · ${orgDisplayName(f)}</div>
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
       ${topPartner?`<div class="mono" style="font-size:11px;color:var(--muted);margin-top:8px">SALLE · ${esc(topPartner.first)}</div>${faithProtegeLine(topPartner,f)}`:''}
-      ${nemesis?`<div class="mono" style="font-size:11px;color:var(--f-red-hi);margin-top:8px">NÉMÉSIS · ${esc(nemesis.first)} (${(f.nemesisRecord&&f.nemesisRecord.w)||0}-${(f.nemesisRecord&&f.nemesisRecord.l)||0})</div>`:''}
+      ${nemesis?`<div class="mono" style="font-size:11px;color:var(--f-red-hi);margin-top:8px">NÉMÉSIS · ${esc(fighterDisplayName(nemesis))} (${(f.nemesisRecord&&f.nemesisRecord.w)||0}-${(f.nemesisRecord&&f.nemesisRecord.l)||0})</div>`:''}
       ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${contractFightsLeftLabel(f.contract)}</div>`:''}
       ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
       ${faithOathBadge(G.faith)}
     </div>
     ${actionsHtml}
+    ${(G.faith.currentCard && G.faith.currentCard.playerResult && !G.faith.pendingOffer)?`<div class="mono small" style="text-align:center;margin-top:12px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Résultats de la dernière carte ▸</span></div>`:''}
     <!-- ==== [CORRECTIF V2-15] — le mode carrière a déjà scr_rankings()
          (top 15 + rang du joueur en évidence + mouvement ▲▼ + ceinture
          au-dessus, ui-06) accessible en un tap depuis son hub ; Faith en
@@ -671,12 +587,6 @@ function scr_faith_hub(){
          quatre interlocuteurs (agent/directeur/coach/partenaire). ==== -->
     <button class="btn ghost" onclick="CL.go('faith_contacts')">Contacts</button>
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
-    <!-- ==== [ANCRE: V2-43/V2-44] — l'ambiance papier/nuit avait un
-         emplacement provisoire ici (V2-01, "en attendant" l'écran
-         d'accueil Faith et l'écran Réglages) : les deux existent
-         maintenant (scr_faith_home, scr_settings), le réglage n'a plus
-         besoin de ce troisième accès. ==== -->
-    <button class="btn ghost" onclick="CL.go('settings')">Réglages</button>
   </div>`;
 }
 /* ==== [ANCRE: FAITH_AGENT] — remplace scr_select (menu à 3 adversaires,
@@ -694,17 +604,42 @@ function scr_faith_offer(){
   const base=(f.org>0 && f.contract)?f.contract.show:(ORG_PURSES[f.org]||[0,0])[0];
   const bourseEst=Math.round(base*(gala.mult||1)*(off.bonusMult||1)*10)/10;
   const patience=F.agentPatience!=null?F.agentPatience:3;
+  /* ==== [ANCRE: V3_BANDEAU_CARTE] — Plan V3 LOT 6 §P09 point 2 : nom du
+     gala, ville, salle, position sur la carte, affluence et audience — un
+     combat d'ouverture régional (petite salle, peu de monde) et un main
+     event à Rio (salle pleine, audience large) ne doivent plus se
+     ressembler visuellement. Bordure/fond suivent gala.hype (déjà la
+     mesure d'enjeu existante), jamais un second barème. ==== */
+  const venueInfo=faithGalaVenueInfo(F,f,gala);
+  if(!TEXT_POOLS['faith_crowd_ambiance']) registerTextPool('faith_crowd_ambiance',FAITH_CROWD_AMBIANCE);
+  const crowdLine=txtPick('faith_crowd_ambiance',{city:venueInfo.city,venue:venueInfo.venue,home:venueInfo.home,hype:gala.hype});
+  const bandeauStrong=(gala.hype==='forte');
   return `<div class="scr" style="max-width:560px;margin:0 auto">
-   <div class="eyebrow">${esc((F.agent&&F.agent.label)||'Sans agent')}</div>
+   <div class="eyebrow">${esc(F.agent?faithAgentDisplayName():'Sans agent')}</div>
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
    <!-- ==== [CORRECTIF V2-24 point 3] — "hype : faible" est une case
         remplie, pas une information ; au plus bas, le mot "hype"
         disparaît complètement au profit d'une phrase. ==== -->
    <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · ${(gala.hype==='faible'||gala.hype==='nulle')?'Personne n’en parle encore.':`hype ${gala.hype}`}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
+   <div class="card mt" style="padding:${bandeauStrong?'18px':'12px'};background:var(--panel2);border:1px solid ${bandeauStrong?'var(--gold)':'var(--line)'};text-align:left">
+     <div class="mono small" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px">
+       <span class="${bandeauStrong?'gold':'muted'}">${esc(venueInfo.venue)} · ${esc(venueInfo.city)}</span>
+       <span class="muted">${venueInfo.attendance.toLocaleString('fr-FR')} spectateurs attendus · ${venueInfo.audienceM}M en audience</span>
+     </div>
+     ${venueInfo.home?'<div class="small mt" style="color:var(--sage)">Vous combattez à domicile.</div>':''}
+     <!-- ==== [ANCRE: V3_SPECTACLE_HYPE] — Plan V3 LOT 7 §5.7.1 point 5 :
+          lecture qualitative de f.spectacle, jamais un chiffre (règle H.1). -->
+     ${f.spectacle>=70?'<div class="small mt" style="color:var(--gold)">Le public parle encore de votre dernier combat.</div>':f.spectacle<=30?'<div class="small mt" style="color:var(--muted)">On respecte votre palmarès. On ne se déplace pas pour autant.</div>':''}
+     <p class="lede small mt" style="margin:8px 0 0">${esc(crowdLine)}</p>
+   </div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
      <div class="eyebrow" style="font-size:11px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
-     <div class="mono small" style="margin-top:4px">${recordStr(o)}</div>
+     <!-- ==== [ANCRE: V3_RANG_OFFRE] — Plan V3 LOT 4 §P05a : "le rang de
+          l'adversaire toujours visible à côté du palmarès" — signer une
+          offre sans jamais savoir où l'adversaire se situe au classement
+          était l'un des symptômes cités. ==== -->
+     <div class="mono small" style="margin-top:4px">${recordStr(o)} · <span class="muted">#${divRank(o)}</span></div>
      <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
      ${o.id===f.faithNemesisId?(()=>{
        /* ==== [CORRECTIF V2-14] — "la revanche, quand elle a lieu, ouvre
@@ -717,7 +652,12 @@ function scr_faith_offer(){
        const bilan=rec.w>rec.l?`Vous menez ${rec.w}-${rec.l} sur cette rivalité.`
          :rec.l>rec.w?`Il mène ${rec.l}-${rec.w} sur cette rivalité.`
          :(rec.w+rec.l>0?`Vous êtes à égalité, ${rec.w}-${rec.l}.`:'Votre premier face-à-face.');
-       return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${bilan}</div>`;
+       /* ==== [ANCRE: V3_NEMESIS_ESCALADE] — Plan V3 LOT 3 §P16 : palier
+          affiché sur l'offre elle-même, avant la signature — le joueur
+          sait ce qu'il signe (une revanche n'a pas le même poids qu'une
+          trilogie). ==== */
+       const tier=nemesisTierLabel(rec.w+rec.l);
+       return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${esc(tier)} · ${bilan}</div>`;
      })():''}
      ${F.scoutKey?`<div class="mono small" style="margin-top:8px;color:var(--sage)">SPARRING · Vous savez qu’il est particulièrement dangereux en ${esc(oppTopAttrLabel(o))}.</div>`:''}
    </div>
@@ -735,18 +675,26 @@ function scr_faith_offer(){
           affiché sur le bouton, pas juste sa conséquence mécanique. ==== -->
      <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandBetter()">
        <b style="font-size:15px">« ${esc(faithDemandMotif(f,o))} »</b>
-       <div class="muted small mt">Demander un autre adversaire à ${esc((F.agent&&F.agent.label)||'votre agent')}.</div>
+       <div class="muted small mt">Demander un autre adversaire à ${esc(F.agent?faithAgentDisplayName():'votre agent')}.</div>
      </div>
      <!-- ==== [CORRECTIF V2-21] — le libellé décrivait une punition, pas
           une action, et n'annonçait aucune conséquence avant le clic. Le
           bouton dit maintenant ce qu'il fait ; la légende juste en
           dessous dit ce que ça coûte, avant confirmation. ==== -->
      <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser le combat</button>
+     <!-- ==== [ANCRE: V3_REFUS_CONSEQUENCE_REELLE] — Plan V3 LOT 4 §P05a/
+          §P05b : "Ce combat de l'année est perdu" ne correspondait à
+          AUCUN mécanisme du jeu (aucune notion de "combat de l'année"
+          n'existe nulle part dans le code) — une menace fabriquée, jamais
+          honorée. Remplacée par la conséquence RÉELLE de faithOfferRefuse()
+          (ui-08) : la patience de l'agent (déjà affichée sur Contacts),
+          ou l'exemption médicale quand elle s'applique. ==== -->
      <div class="muted small" style="text-align:center;margin-top:-6px">${
        (f.injury && !G.faith.medicalRefusalUsed)?'Motif médical : refus sans conséquence, une fois cette année.'
-       :'Ce combat de l’année est perdu, et votre agent le prendra mal.'
+       :(G.faith.agentPatience>0?`${esc(F.agent?faithAgentDisplayName():'Votre agent')} perd un peu patience.`:'La patience de votre agent est déjà à bout.')
      }</div>
    </div>
+   <div class="mono small" style="text-align:center;margin-top:14px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Voir la carte complète ▸</span></div>
   </div>`;
 }
 /* ==== [ANCRE: V2-22/V2-23] — "rien ne se passe entre l'annonce et la
@@ -757,56 +705,6 @@ function scr_faith_offer(){
    ferme cet écart. Douze entrées minimum (règle 6 : la rareté fait la
    saillance — inutile d'en avoir plus si elles ne sont vues qu'une fois
    par combat). Chacune stocke sa cause dans F.buildup.causes[]. ==== */
-const FAITH_BUILDUP_EVENTS=[
-  {id:'bu_missed_weight_his',title:'Pesée ratée (la sienne)',
-   text:'Il monte sur la balance en sueur, un kilo et demi au-dessus. L’organisation attend votre feu vert.',
-   choices:[{label:'Accepter le catchweight, contre compensation',dv:{attente:1},money:15},
-            {label:'Refuser : il perd le combat par forfait',dv:{attente:-1},director:1}]},
-  {id:'bu_missed_weight_mine',title:'Pesée ratée (la vôtre)',
-   text:'Le corps n’a pas suivi. La balance affiche un chiffre que personne dans votre camp ne voulait voir.',
-   choices:[{label:'Assumer devant les caméras',dv:{attente:1,tension:1},morale:-8},
-            {label:'Laisser l’agent gérer la communication',dv:{tension:1},director:-1}]},
-  {id:'bu_promotion',title:'Promotion sur la carte',
-   text:'La tête d’affiche prévue déclare forfait. Le matchmaker vous propose de monter d’un cran.',
-   choices:[{label:'Accepter — plus d’attente, plus de risque',dv:{attente:2}},
-            {label:'Décliner — rester là où le plan vous voulait',dv:{}}]},
-  {id:'bu_faceoff_degenerates',title:'Le face-à-face dégénère',
-   text:'Ce qui devait être une photo se transforme en échange de mots, puis de bousculade.',
-   choices:[{label:'Rester au contact, ne pas reculer',dv:{tension:2,attente:1}},
-            {label:'Laisser la sécurité s’interposer',dv:{tension:-1}}]},
-  {id:'bu_viral_clip',title:'Clip viral',
-   text:'Une séquence d’entraînement, sortie de son contexte, tourne en boucle depuis ce matin.',
-   choices:[{label:'En rire publiquement',dv:{attente:1},morale:5},
-            {label:'Demander son retrait',dv:{},director:-1}]},
-  {id:'bu_coach_declaration',title:'Déclaration de son coach',
-   text:'Le coach adverse promet en interview que "ça ne passera pas trois rounds".',
-   choices:[{label:'Répondre publiquement',dv:{attente:1,tension:1}},
-            {label:'Laisser parler',dv:{tension:-1}}]},
-  {id:'bu_old_rival_speaks',title:'Un ancien adversaire prend position',
-   text:'Quelqu’un que vous avez déjà affronté donne son pronostic en interview — sans vous ménager.',
-   choices:[{label:'Le prendre comme un compliment',dv:{attente:1},morale:5},
-            {label:'Ignorer complètement',dv:{}}]},
-  {id:'bu_gym_polemic',title:'Polémique sur votre salle',
-   text:'Une accusation, jamais vraiment prouvée, ressort sur les méthodes de votre salle d’entraînement.',
-   choices:[{label:'Défendre votre salle publiquement',dv:{tension:1},director:-1},
-            {label:'Ne pas commenter',dv:{}}]},
-  {id:'bu_ticket_sales',title:'Billetterie qui explose',
-   text:'Votre ville d’origine s’arrache les places pour ce combat.',
-   choices:[{label:'Multiplier les apparitions locales',dv:{attente:2},morale:-5},
-            {label:'Rester concentré sur le camp',dv:{attente:1}}]},
-  {id:'bu_broadcaster_offer',title:'Un diffuseur veut vous en ouverture',
-   text:'Une chaîne étrangère propose de vous mettre en tête de son émission d’avant-combat.',
-   choices:[{label:'Accepter l’interview',dv:{attente:1},money:10},
-            {label:'Décliner, rester concentré',dv:{}}]},
-  {id:'bu_weighin_stare',title:'Regard au pesage',
-   text:'Face à face sur la balance, il ne cligne pas des yeux. La salle retient son souffle.',
-   choices:[{label:'Soutenir le regard',dv:{tension:1,attente:1}},
-            {label:'Sourire et tourner la tête',dv:{tension:-1}}]},
-  {id:'bu_quiet_week',title:'Une semaine sans histoire',
-   text:'Aucune polémique, aucun clip, aucune déclaration. Le camp se déroule dans le silence.',
-   choices:[{label:'Profiter du calme pour travailler',dv:{}},
-            {label:'S’en inquiéter — le silence avant l’orage',dv:{tension:1}}]}
-];
 /** Tire et applique un événement de build-up (V2-23), sans écran séparé
  * pour la sélection de choix — deux options, réponse immédiate (règle 6 :
  * un choix par combat, pas un menu). @returns {{title:string,text:string,
@@ -838,21 +736,43 @@ function scr_faith_buildup(){
 }
 /* ==== [ANCRE: V2-25] — écran de conférence de presse, déclenché quand
    l'attente est suffisante (gala.pressConf, faithGalaPosition — Main
-   event uniquement). Les répliques de l'adversaire sont générées depuis
-   SES attributs/bilan/style réels (attrs.aggression, bilan, styleLabel),
-   jamais un texte générique. Trois postures, toutes valables (règle
-   H.3). ==== */
-function faithOppReplies(o){
-  const aggressif=(o.attrs&&o.attrs.aggression||50)>65;
-  const bilan=o.W>o.L?`Il rappelle son bilan, ${o.W}-${o.L}, "et ce n'est pas fini".`:`Il évite le sujet de son bilan, ${o.W}-${o.L}.`;
-  const style=aggressif?`"Je viens chercher la finition, pas les points."`:`"Je le laisse venir. ${esc(o.styleLabel||'')} n'a jamais eu besoin de se presser."`;
-  return [bilan, style];
+   event uniquement). Trois postures, toutes valables (règle H.3). ====
+   ==== [ANCRE: V3_PRESSCONF_TEXTENGINE] — Plan V3 LOT 5 §P15 : les
+   répliques passent par txtPick()/FAITH_PRESSCONF_REPLIES (data-faith-
+   content.js), un vrai pool avec req(ctx) plutôt que deux formules
+   figées. Deux tirages successifs (le ledger de txtPick exclut
+   automatiquement le premier id du second, cf. engine.js) donnent deux
+   répliques différentes à chaque conférence. */
+/* ==== [ANCRE: V3_TITLE_PROMO_EXCLUSIF] — Plan V3 LOT 6 §5.6.1, temps 4 :
+   une conférence de titre pioche TOUJOURS sa première réplique dans
+   FAITH_TITLE_PROMO_REPLIES (data-faith-content.js), jamais dans le pool
+   ordinaire — "jamais les pools ordinaires" (spec). La seconde réplique
+   reste tirée du pool ordinaire (variété, cf. LOT 5) : les deux mondes ne
+   se confondent que pour compléter l'écran. */
+function faithOppReplies(o,f,F,ctxExtra){
+  const ctx=Object.assign({opp:o,f,F},ctxExtra);
+  if(ctx.isTitle){
+    if(!TEXT_POOLS['faith_title_promo']) registerTextPool('faith_title_promo',FAITH_TITLE_PROMO_REPLIES);
+    return [txtPick('faith_title_promo',ctx), txtPick('faith_pressconf_reply',ctx)];
+  }
+  return [txtPick('faith_pressconf_reply',ctx), txtPick('faith_pressconf_reply',ctx)];
 }
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_press_conf(){
   const f=G.f, F=G.faith, off=F.pendingOffer;
   if(!off) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
   const o=off.opp.o;
-  const replies=faithOppReplies(o);
+  if(!TEXT_POOLS['faith_pressconf_reply']) registerTextPool('faith_pressconf_reply',FAITH_PRESSCONF_REPLIES);
+  /* ==== [CORRECTIF V3_TITLE_PROMO_EXCLUSIF] — Plan V3 LOT 6 §5.6.1 : isTitle
+     lisait le NIVEAU de carte (gala.tier==='Main event', LOT 5), donc
+     confondait "grosse affiche" (rang <=4, ou rivalId) et "vrai combat de
+     titre". Depuis ce lot, un combat de titre a son propre écran de
+     négociation (scr_faith_title_negotiation) — le signal exact existe
+     déjà (fightKind()==='title'/'defense', ui-05) : plus besoin d'un
+     proxy. Les répliques exclusives (FAITH_TITLE_PROMO_REPLIES) ne sortent
+     donc plus jamais pour un simple Main event non-titré. */
+  const fk=fightKind();
+  const replies=faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:(fk==='title'||fk==='defense'),favorite:divRank(o)<divRank(f)});
   return `<div class="scr center intro">
    <div class="eyebrow blood">Conférence de presse</div>
    <h2 class="disp">${esc(o.name)} face à vous</h2>
@@ -883,37 +803,98 @@ function scr_faith_press_conf(){
    déjà en contexte sur scr_faith_offer (V2-18/20), cet écran est leur
    VITRINE permanente — savoir où on en est avec chacun, même hors
    négociation active, ce qui manquait totalement avant ce correctif. */
+/* ==== [ANCRE: V3_FAITH_COACH_LOOKUP] — Plan V3 LOT 2 §P04 : lecture
+   défensive du coach nommé (personEnsure() posé à finalizeFaithDraft(),
+   ui-08) — une sauvegarde antérieure à ce correctif n'a pas encore
+   F.coachId, mintée ici à la volée plutôt que forcer une migration
+   dédiée dans validateState() pour un champ qui n'existe que niché sous
+   G.faith (optionnel par nature, actif seulement en carrière). */
+function faithCoachPerson(F){
+  if(!F.coachId || !G.people || !G.people.byId[F.coachId]) F.coachId=personEnsure('coach',{slot:'main'}).id;
+  return G.people.byId[F.coachId];
+}
 function scr_faith_contacts(){
   const f=G.f, F=G.faith;
   const dir=FAITH_DIRECTORS[f.org]||FAITH_DIRECTORS[0];
-  const topPartner=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+  /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
+     stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
+     rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
+  const topPartner=(F.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
+  const coach=faithCoachPerson(F);
   const agentPatience=F.agentPatience!=null?F.agentPatience:3;
   const agentMood=!F.agent?'sans agent cette année'
     :agentPatience>=3?'il vous suit sans discuter'
     :agentPatience>=1?'il commence à compter les faveurs'
     :'il parle de repositionner sa liste de clients';
-  const card=(who,name,role,mood,detail)=>`<div class="opp" style="padding:16px;text-align:left">
+  const card=(who,name,role,mood,detail,onclick)=>`<div class="opp" style="padding:16px;text-align:left"${onclick?` onclick="${onclick}"`:''}>
     <div class="eyebrow" style="font-size:11px">${esc(who)}</div>
     <div class="hero-name" style="font-size:18px;margin-top:4px">${esc(name)}</div>
     <div class="muted small" style="margin-top:2px">${esc(role)}</div>
     <div class="mono small" style="margin-top:8px;color:var(--gold)">${esc(mood)}</div>
     ${detail?`<div class="muted small" style="margin-top:6px">${detail}</div>`:''}
   </div>`;
+  /* ==== [ANCRE: V3_COACH_ETAT_CORPS] — Plan V3 LOT 2 §P04 : "un fait de
+     carrière + une ligne d'état du corps", jamais un rôle générique. Le
+     fait vient de la Person (bio.origin = palmarès réel du pool
+     FAITH_COACHES) ; l'état du corps reste la lecture existante de
+     f.form, inchangée. */
+  const coachDetail=(f.form||100)>=70?'« Le corps répond, on peut pousser. »':(f.form||100)>=40?'« Ça tient, sans plus. »':'« Il faut lever le pied, et vite. »';
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="bar"><span class="eyebrow">Contacts</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
    <div style="display:flex;flex-direction:column;gap:12px">
-     ${card('VOTRE AGENT',(F.agent&&F.agent.label)||'Aucun agent',
+     ${card('VOTRE AGENT',F.agent?faithAgentDisplayName():'Aucun agent',
        'Négocie vos combats — croisez-le sur chaque offre.',agentMood)}
      ${card('DIRECTEUR DE L’ORGANISATION',dir.name,orgDisplayName(f),faithDirectorMood(f.org))}
-     ${card('VOTRE COACH','Le coin',
-       'Le plan, l’état du corps.',
-       (f.form||100)>=70?'« Le corps répond, on peut pousser. »':(f.form||100)>=40?'« Ça tient, sans plus. »':'« Il faut lever le pied, et vite. »')}
+     ${card('VOTRE COACH',personName(coach,{withNick:true}),specialtyLabel(coach.bio.trait),
+       '« '+coach.bio.origin+' »',coachDetail,"CL.go('faith_coach_detail')")}
      ${topPartner?card('PARTENAIRE D’ENTRAÎNEMENT',topPartner.first,topPartner.styleLabel,
        (f.morale||60)>=70?'« Bonne ambiance à la salle en ce moment. »':'« L’ambiance est tendue depuis un moment. »',
        faithProtegeLine(topPartner,f)):''}
    </div>
    <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour au hub</button>
   </div>`;
+}
+/* ==== [ANCRE: V3_FAITH_COACH_DETAIL] — Plan V3 LOT 2 §P04/§P08 : "chaque
+   carte de contact cliquable → détail avec historique daté (rel.arc[]) +
+   1-2 actions contextuelles". Le coach est le seul contact déjà porté par
+   une vraie Person (PersonRegistry, LOT 0) sur ce chemin de jeu — agent et
+   directeur restent, pour l'instant, de simples objets d'archétype
+   (FAITH_AGENTS/FAITH_DIRECTORS), pas des Person avec rel.arc ; leur
+   propre mise à niveau est explicitement le sujet de LOT 4 (P05a, "l'agent
+   devient une Person"), pas répétée ici par anticipation. */
+function scr_faith_coach_detail(){
+  const F=G.faith, f=G.f;
+  const coach=faithCoachPerson(F);
+  const trust=coach.rel.trust;
+  const trustLabel=trust>=70?'Une vraie confiance, construite dans la durée.':trust>=40?'Une relation correcte, sans plus.':'La confiance n’y est plus vraiment.';
+  const arc=(coach.rel.arc||[]).slice().reverse();
+  return `<div class="scr" style="max-width:480px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Votre coach</span><span class="eyebrow x" onclick="CL.go('faith_contacts')">✕</span></div>
+   <h2 class="hero-name" style="font-size:26px;margin-top:8px">${esc(personName(coach,{withNick:true}))}</h2>
+   <div class="muted small mt">${esc(specialtyLabel(coach.bio.trait))}${coach.extra&&coach.extra.cost?` · ${coach.extra.cost}k$/an`:''}</div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QU’IL A DÉJÀ FAIT</div>
+     <div class="small">${esc(coach.bio.origin)}</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE LIMITE</div>
+     <div class="small">${esc(coach.bio.past)}</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CONFIANCE</div>
+     <div class="small">${trustLabel}</div>
+   </div>
+   ${arc.length?`<div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">HISTORIQUE</div>
+     ${arc.map(a=>`<div class="mono small muted" style="margin-top:4px">${a.year} · ${esc(a.text)}</div>`).join('')}
+   </div>`:''}
+   <button class="btn ghost mt" onclick="CL.go('faith_contacts')">← Retour aux contacts</button>
+  </div>`;
+}
+function specialtyLabel(key){
+  return ({frappe:'Spécialiste frappe',lutte:'Spécialiste lutte',soumission:'Spécialiste soumission',
+    cardio:'Préparateur physique',dur_au_mal:'Spécialiste encaissement',mental:'Préparateur mental'})[key]||'Coach';
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-10] — six camps nommés remplacent le stage unique (perk
@@ -922,26 +903,6 @@ function scr_faith_contacts(){
    même camp répété deux fois de suite affiche repeatText, à effet réduit —
    "vous connaissez déjà tout ce qu'ils ont à donner"). freshCost est
    consommé sur f.freshness (V2-11) quel que soit le résultat du stage. */
-const FAITH_CAMPS=[
-  {id:'thai',name:'Camp thaïlandais',cost:55,freshCost:-25,risk:0.06,attrs:['kick','clinchStr','power'],
-   text:'Six semaines de tibias en sang et de genoux au corps. Vous rentrez plus dur à toucher, et bien plus dangereux de près.',
-   repeatText:'Retour au même camp thaïlandais : les mêmes coachs, les mêmes exercices. Vous connaissez déjà tout ce qu’ils ont à donner.'},
-  {id:'wrestling',name:'Wrestling américain',cost:45,freshCost:-22,risk:0.05,attrs:['takedown','tdd','topControl'],
-   text:'Une salle universitaire où on vous jette au sol cent fois par jour jusqu’à ce que la chute devienne un réflexe.',
-   repeatText:'Les mêmes lutteurs, les mêmes séries de projections. Vous connaissez déjà tout ce qu’ils ont à donner.'},
-  {id:'bjj',name:'Académie brésilienne',cost:45,freshCost:-20,risk:0.04,attrs:['submission','guardWork','gnp'],
-   text:'Des heures au sol, à chercher la soumission ou à survivre à celle de l’autre. Le jeu de jambes change de nature.',
-   repeatText:'La même académie, les mêmes ceintures noires patientes. Vous connaissez déjà tout ce qu’ils ont à donner.'},
-  {id:'boxing',name:'École de boxe',cost:40,freshCost:-15,risk:0.03,attrs:['jab','cross','hook','handSpeed'],
-   text:'Un vieux club de boxe anglaise, miroirs rayés et sac lourd fatigué. Les mains sortent plus vite, et plus juste.',
-   repeatText:'Le même club, le même miroir rayé. Vous connaissez déjà tout ce qu’ils ont à donner.'},
-  {id:'physical',name:'Prépa physique',cost:35,freshCost:-30,risk:0.08,attrs:['cardio','strength','explosiveness','durability'],
-   text:'Un préparateur qui ne connaît que le chiffre sur le chronomètre. Le corps en ressort plus fort, et vidé.',
-   repeatText:'Le même préparateur, les mêmes séries à l’échec. Vous connaissez déjà tout ce qu’ils ont à donner.'},
-  {id:'solo',name:'Retraite en montagne, seul',cost:20,freshCost:15,risk:0,attrs:['focus','composure','discipline'],
-   text:'Personne pour vous entraîner, juste vous, le silence, et ce qu’il y a dans votre tête. Vous en redescendez plus calme.',
-   repeatText:'Le même chalet, le même silence. Vous savez déjà ce que la montagne a à vous dire — mais ça continue de faire du bien.'},
-];
 function scr_faith_camps(){
   const f=G.f, visited=(G.faith&&G.faith.campsVisited)||[];
   return `<div class="scr" style="max-width:560px;margin:0 auto">
@@ -972,38 +933,6 @@ function scr_faith_camps(){
    temps disponible pour ce lot. Les trois options historiques (repos/
    sparring/stage) restent dans le pool, pondérées plus fort, mais ne sont
    plus garanties. */
-const FAITH_INTERSAISON_POOL=[
-  {id:'is_repos',categorie:'securite',weight:3,req:()=>true,
-   title:'Se reposer',text:'Récupérer, souffler — mais laisser l’écurie tourner sans vous.',action:'rest'},
-  {id:'is_repos_famille',categorie:'securite',weight:1,req:(f)=>(f.age||20)>=26,
-   title:'Rentrer voir la famille',text:'Quelques semaines loin de la salle, loin de tout ce qui ressemble à un adversaire.',action:'rest'},
-  {id:'is_repos_soin',categorie:'securite',weight:1,req:(f,F)=>(F.year||1)>1,
-   title:'Soigner les vieilles douleurs',text:'Un corps de combattant accumule des dettes. Prendre le temps de les régler, une fois.',action:'rest'},
-  {id:'is_repos_media',categorie:'securite',weight:1,req:(f)=>(f.hypeBonus||1)>1,
-   title:'Souffler loin des caméras',text:'La popularité fatigue autant que les coups. Une intersaison sans une seule interview.',action:'rest'},
-  {id:'is_sparring_top',categorie:'precision',weight:3,req:(f,F)=>!!((F.gym||[]).length),
-   title:'Tourner avec son partenaire',text:'Une séance de sparring.',action:'sparring_top'},
-  {id:'is_sparring_second',categorie:'precision',weight:1,req:(f,F)=>(F.gym||[]).length>=2,
-   title:'Travailler avec le second partenaire',text:'Une séance de sparring.',action:'sparring_second'},
-  {id:'is_sparring_video',categorie:'precision',weight:1,req:(f)=>!!f.faithNemesisId,
-   title:'Étudier sa némésis en vidéo',text:'Des heures à décortiquer ses combats, jusqu’à connaître ses tics par cœur.',action:'scout_video'},
-  {id:'is_sparring_style',categorie:'precision',weight:1,req:(f,F)=>!!((F.gym||[]).length),
-   title:'Séance technique ciblée',text:'Une séance courte, entièrement consacrée à un seul détail du jeu.',action:'sparring_top'},
-  {id:'is_camp',categorie:'puissance',weight:3,req:(f)=>(f.earnings||0)>=20,
-   title:'Partir en stage',text:'Six semaines dans un camp spécialisé, à choisir sur place.',action:'camp'},
-  {id:'is_camp_urgent',categorie:'puissance',weight:1,req:(f,F)=>!!f.faithNemesisId && (f.earnings||0)>=20,
-   title:'Stage ciblé avant la revanche',text:'Préparer précisément ce qui vous a manqué la dernière fois.',action:'camp'},
-  {id:'is_sponsor',categorie:'securite',weight:1,req:(f)=>(f.org||0)>=2,
-   title:'Rencontrer un sponsor',text:'Un partenariat modeste, mais qui tombe bien.',action:'sponsor'},
-  {id:'is_solo_pensee',categorie:'securite',weight:1,req:(f,F)=>(F.year||1)>=2,
-   title:'Faire le point, seul',text:'Pas d’entraînement, pas de salle — juste s’asseoir avec ce que la carrière est devenue.',action:'rest'},
-  {id:'is_camp_leger',categorie:'puissance',weight:1,req:(f)=>(f.earnings||0)>=20 && (f.earnings||0)<60,
-   title:'Stage à petit budget',text:'Pas le camp rêvé, mais celui que le compte en banque autorise.',action:'camp'},
-  {id:'is_precision_plan',categorie:'precision',weight:1,req:(f,F)=>!!((F.gym||[]).length),
-   title:'Revoir le plan de jeu à la salle',text:'',action:'sparring_top'},
-  {id:'is_securite_famille2',categorie:'securite',weight:1,req:(f)=>(f.morale||60)<50,
-   title:'S’éloigner un peu de tout',text:'Le moral ne suit plus. Une pause, sans rien d’autre en tête.',action:'rest'},
-];
 /** Tire exactement 3 entrées éligibles du pool, ≥2 catégories différentes,
  * en excluant celles en cooldown et le trio de l'année précédente.
  * @param {object} f @param {object} F @returns {object[]} */
@@ -1050,40 +979,6 @@ function faithEnsureIntersaisonDraw(f,F){
    les scandales du Score de Légende : on ne choisit pas de tricher dans un
    menu, on cède à une proposition. Les req garantissent qu'on ne propose
    jamais une dépense que le joueur ne peut pas couvrir. ==== */
-const FAITH_PERK_OFFERS=[
-  {id:'evt_offer_hometown',title:'Un promoteur du coin',req:f=>(f.earnings||0)>=15&&f.org>0,
-   text:'Il connaît votre nom, votre salle, le nom de votre première victime amateur. Il peut faire venir le prochain combat ici, chez vous. Ça se paie.',
-   choices:[{label:'Accepter — combattre à domicile',perk:'hometown'},
-            {label:'Refuser, ça ne change rien au travail',d:[['focus',3]],traitTag:'ascetic'}]},
-  {id:'evt_offer_catchweight',title:'La pesée arrangée',req:f=>(f.earnings||0)>=35&&f.org>0,
-   text:'Votre manager a une idée : négocier un poids intermédiaire. L’adversaire acceptera — et arrivera vidé, à sec, sans jambes.',
-   choices:[{label:'Faire signer le catchweight',perk:'catchweight'},
-            {label:'Le prendre à son poids',d:[['confidence',4]],traitTag:'ascetic'}]},
-  {id:'evt_offer_protect',title:'La ceinture dort',req:f=>(f.earnings||0)>=50&&!!f.champion,
-   text:'La fédération s’agace de votre inactivité. Un versement au bon service, et le compteur repart à zéro.',
-   choices:[{label:'Payer pour sanctuariser le titre',perk:'protect_title'},
-            {label:'Laisser courir',d:[['composure',3]]}]},
-  {id:'evt_offer_ped',title:'Un homme vous attend sur le parking',req:f=>(f.earnings||0)>=30,
-   text:'Il ne se présente pas. Il parle de récupération, de cellule hyperbare, de « protocoles » que tout le monde utilise et que personne ne nomme. Il laisse une carte.',
-   choices:[{label:'Écouter ce qu’il propose',perk:'ped',tone:'gamble'},
-            {label:'Jeter la carte',d:[['discipline',5],['morale',-3]],traitTag:'ascetic'}]},
-  {id:'evt_offer_tiger',title:'Une place s’est libérée',req:f=>(f.earnings||0)>=50,
-   text:'Un camp thaïlandais réputé pour casser les hommes autant que les former a une place. Six semaines. On y entre entier, rarement.',
-   choices:[{label:'Partir six semaines',perk:'tiger',tone:'gamble'},
-            {label:'Rester à la salle',d:[['form',5]]}]},
-  {id:'evt_offer_lobbying',title:'Le dîner qui compte',req:f=>(f.earnings||0)>=100,
-   text:'Une table, trois costumes, personne ne parle de sport. On vous fait comprendre qu’une promotion se décide ici, pas dans la cage.',
-   choices:[{label:'Payer l’addition',perk:'lobbying',tone:'gamble'},
-            {label:'Partir avant le dessert',d:[['confidence',3],['morale',3]],traitTag:'rebel'}]},
-  {id:'evt_offer_judges',title:'Une enveloppe, pas une question',req:f=>(f.earnings||0)>=40&&f.org>0,
-   text:'On vous explique, sans jamais le dire, que les cartes des juges sont parfois écrites avant le premier round. Un cinquième de votre bourse suffirait.',
-   choices:[{label:'Faire glisser l’enveloppe',perk:'judges',tone:'gamble'},
-            {label:'Refuser net',d:[['heart',5],['discipline',3]],traitTag:'ascetic'}]},
-  {id:'evt_offer_diet',title:'La nutritionniste',req:f=>(f.earnings||0)>=40,
-   text:'Elle a fait descendre trois champions sans les vider. Elle prend cher, à l’année, et ne travaille qu’avec des gens sérieux.',
-   choices:[{label:'L’engager pour la saison',perk:'diet'},
-            {label:'Continuer à la sueur et au sauna',d:[['durability',2],['form',-4]]}]}
-];
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_BRANCHES_CREATION] — les choix de création ne filtraient
    aucun événement : origine, cercle et hygiène de vie n'étaient que des
@@ -1092,504 +987,7 @@ const FAITH_PERK_OFFERS=[
    via le champ `req` que le pool supportait déjà — aucune modification du
    moteur d'événements n'a été nécessaire. Chaque choix de création ouvre au
    moins deux situations que les autres ne verront jamais. ==== */
-const FAITH_BRANCH_EVENTS=[
-  {id:'evt_br_street_parking',req:f=>f._origin==='street',title:'Retour au parking',
-   text:'Le terrain vague où vous vous battiez à seize ans est devenu un chantier. Un ancien vous reconnaît et vous propose « une dernière, pour la route ».',
-   choices:[{label:'Remettre les mains dedans, une fois',d:[['aggression',6],['heart',4],['discipline',-8]],risk:0.35,bad:[['form',-18],['discipline',-12],['morale',-8]],traitTag:'rebel'},
-            {label:'Serrer la main et repartir',d:[['composure',6],['focus',3]],traitTag:'ascetic'}]},
-  {id:'evt_br_street_family',req:f=>f._origin==='street',title:'Le petit frère du quartier',
-   text:'Un gamin de la cité traîne devant la salle tous les soirs. Il ne demande rien, il regarde.',
-   choices:[{label:'Lui ouvrir la porte',d:[['morale',8],['discipline',4],['form',-5]]},
-            {label:'Le renvoyer chez lui',d:[['focus',5],['morale',-6]]}]},
-  {id:'evt_br_dojo_master',req:f=>f._origin==='traditional',title:'Le maître est malade',
-   text:'Celui qui vous a fait répéter le même jab dix mille fois ne se lève plus. Il demande à vous voir avant votre prochain camp.',
-   choices:[{label:'Tout arrêter et partir le voir',d:[['fightIQ',6],['composure',6],['form',-10]],traitTag:'ascetic'},
-            {label:'Envoyer un message, rester au camp',d:[['discipline',4],['morale',-10]]}]},
-  {id:'evt_br_dojo_kata',req:f=>f._origin==='traditional',title:'Le retour aux formes',
-   text:'Votre coach actuel trouve vos routines d’échauffement « folkloriques ». Elles viennent du dojo, et vous n’avez jamais su vous en passer.',
-   choices:[{label:'Les garder, quoi qu’on en dise',d:[['discipline',6],['focus',4],['adaptability',-4]]},
-            {label:'Passer à la méthode moderne',d:[['adaptability',6],['cardio',3],['composure',-3]]}]},
-  {id:'evt_br_prochild_name',req:f=>f._origin==='pro_child',title:'Le nom sur l’affiche',
-   text:'L’affiche du prochain gala met votre nom de famille en plus gros que votre prénom. Votre père n’a jamais combattu dans cette salle, et pourtant c’est lui qu’on vient voir.',
-   choices:[{label:'Exiger que l’affiche change',d:[['confidence',7],['morale',5],['discipline',-4]],traitTag:'rebel'},
-            {label:'Laisser courir et gagner',d:[['focus',6],['morale',-6]]}]},
-  {id:'evt_br_late_doubt',req:f=>f._origin==='late_bloomer',title:'Le temps perdu',
-   text:'Un journaliste vous rappelle en direct que les combattants de votre niveau ont commencé dix ans avant vous.',
-   choices:[{label:'Le prendre comme un carburant',d:[['aggression',7],['heart',5],['composure',-5]]},
-            {label:'Reconnaître le retard, et travailler',d:[['discipline',7],['fightIQ',4],['morale',-4]],traitTag:'ascetic'}]},
-  {id:'evt_br_agent_cut',req:f=>f._circle==='agent',title:'La clause en petits caractères',
-   text:'Votre agent a fait passer un avenant. Le pourcentage a bougé, discrètement, en sa faveur.',
-   choices:[{label:'Le confronter, quitte à tout casser',d:[['confidence',6],['morale',-8]],risk:0.30,bad:[['morale',-16],['focus',-8]],traitTag:'rebel'},
-            {label:'Signer et continuer à combattre',d:[['composure',5],['focus',4]]}]},
-  {id:'evt_br_family_dinner',req:f=>f._circle==='family',title:'Le repas de famille',
-   text:'Toute la table a un avis sur votre prochain adversaire. Personne autour n’a jamais mis un gant.',
-   choices:[{label:'Écouter jusqu’au bout',d:[['morale',8],['composure',4],['focus',-5]]},
-            {label:'Quitter la table',d:[['focus',7],['morale',-8]]}]},
-  {id:'evt_br_squad_night',req:f=>f._circle==='squad',title:'La bande débarque',
-   text:'Vos potes ont réservé une soirée pour « fêter le camp ». Le camp commence dans neuf heures.',
-   choices:[{label:'Y aller une heure, pas plus',d:[['morale',7],['form',-8]],risk:0.35,bad:[['form',-20],['discipline',-10],['morale',-5]]},
-            {label:'Annuler et dormir',d:[['discipline',6],['form',6],['morale',-6]],traitTag:'ascetic'}]},
-  {id:'evt_br_party_relapse',req:f=>f._lifestyle==='party',title:'La vieille habitude',
-   text:'Trois semaines de camp irréprochable. Ce soir, la tentation est exactement la même qu’à dix-sept ans.',
-   choices:[{label:'Céder une dernière fois',d:[['morale',10],['form',-12]],risk:0.40,bad:[['form',-26],['discipline',-12],['morale',-10]]},
-            {label:'Tenir',d:[['discipline',8],['confidence',4]],traitTag:'ascetic'}]},
-  {id:'evt_br_pro_burnout',req:f=>f._lifestyle==='pro',title:'La machine bien huilée',
-   text:'Rien à redire : sommeil, nutrition, séances. C’est justement ce que votre préparateur trouve inquiétant — vous ne vivez plus rien d’autre.',
-   choices:[{label:'Continuer, la rigueur paie',d:[['discipline',6],['cardio',4],['morale',-8]],traitTag:'ascetic'},
-            {label:'S’autoriser une vraie coupure',d:[['morale',12],['form',8],['discipline',-6]]}]},
-  {id:'evt_br_regional_loyalty',req:f=>f._stable==='regional',title:'L’offre du gros camp',
-   text:'Une structure réputée vous propose une place. Votre salle régionale vous a tout donné, et n’a pas les moyens de s’aligner.',
-   choices:[{label:'Partir pour le camp d’élite',d:[['fightIQ',6],['adaptability',5],['morale',-10]],oathBreak:'homegrown'},
-            {label:'Rester là où on vous a formé',d:[['morale',10],['heart',5],['fightIQ',-3]]}]},
-  {id:'evt_br_elite_pecking',req:f=>f._stable==='elite',title:'La hiérarchie du camp',
-   text:'Dans cette salle, vous n’êtes ni le plus fort ni le mieux payé. On vous le fait sentir à chaque round de sparring.',
-   choices:[{label:'Serrer les dents et encaisser',d:[['durability',5],['heart',6],['form',-12]],risk:0.30,bad:[['form',-24],['morale',-12]]},
-            {label:'Changer de partenaires d’entraînement',d:[['composure',5],['adaptability',4],['morale',-4]]}]}
-,
-  {id:'evt_br_dojo_belt',req:f=>f._origin==='traditional',title:'La ceinture du dojo',
-   text:'On vous propose de venir remettre les ceintures aux enfants du club. Le même tatami, la même odeur, vingt ans plus tard.',
-   choices:[{label:'Y passer la journée',d:[['morale',9],['composure',4],['form',-6]]},
-            {label:'Décliner, le camp d’abord',d:[['focus',6],['morale',-5]],traitTag:'ascetic'}]},
-  {id:'evt_br_prochild_shadow',req:f=>f._origin==='pro_child',title:'L’ombre du père',
-   text:'Un ancien adversaire de votre père vous arrête dans un couloir : « Tu frappes moins fort que lui, mais tu réfléchis mieux. »',
-   choices:[{label:'Prendre ça pour un compliment',d:[['fightIQ',6],['confidence',4]]},
-            {label:'Le prendre très mal',d:[['aggression',8],['composure',-6]],traitTag:'rebel'}]},
-  {id:'evt_br_prochild_money',req:f=>f._origin==='pro_child',title:'L’héritage encombrant',
-   text:'La salle familiale coule. On vous demande de remettre de l’argent, discrètement, pour éviter la fermeture.',
-   choices:[{label:'Payer sans faire de bruit',cost:25,d:[['morale',8],['discipline',3]]},
-            {label:'Refuser, ce n’est plus votre histoire',d:[['focus',6],['morale',-10]],traitTag:'rebel'}]},
-  {id:'evt_br_street_cops',req:f=>f._origin==='street',title:'Le contrôle',
-   text:'Trois heures au commissariat pour une histoire qui ne vous concerne pas, la veille d’une séance décisive.',
-   choices:[{label:'Encaisser sans rien dire',d:[['composure',7],['form',-8]],traitTag:'ascetic'},
-            {label:'Hausser le ton',d:[['aggression',6],['morale',-8]],risk:0.35,bad:[['morale',-16],['discipline',-10],['form',-10]],traitTag:'rebel'}]},
-  {id:'evt_br_late_body',req:f=>f._origin==='late_bloomer',title:'Un corps de trente ans',
-   text:'Le kiné est formel : vos articulations ont commencé le sport dix ans trop tard, et elles vous le rappellent chaque matin.',
-   choices:[{label:'Adapter tout le programme',d:[['recovery',7],['durability',4],['explosiveness',-4]]},
-            {label:'Ignorer et charger la mule',d:[['power',6],['heart',4]],risk:0.40,bad:[['durability',-10],['form',-20]]}]},
-  {id:'evt_br_late_proof',req:f=>f._origin==='late_bloomer',title:'La preuve par les faits',
-   text:'Un podcast vous présente comme « l’exception qui confirme la règle ». Vos coachs détestent la formule.',
-   choices:[{label:'La reprendre à votre compte',d:[['confidence',7],['morale',6]],traitTag:'showman'},
-            {label:'Refuser l’étiquette',d:[['focus',6],['discipline',4]],traitTag:'ascetic'}]},
-  {id:'evt_br_family_pressure',req:f=>f._circle==='family',title:'La peur des siens',
-   text:'Votre mère a vu le dernier combat en entier. Elle ne veut plus jamais le revoir, et le dit à table.',
-   choices:[{label:'Promettre d’arrêter les guerres',d:[['composure',6],['morale',6],['aggression',-6]]},
-            {label:'Expliquer que c’est le métier',d:[['confidence',5],['morale',-6]]}]},
-  {id:'evt_br_family_manager',req:f=>f._circle==='family',title:'Le contrat sur la table de la cuisine',
-   text:'Votre oncle a « négocié » votre prochaine bourse. Le promoteur a souri poliment pendant tout l’appel.',
-   choices:[{label:'Laisser la famille gérer',d:[['morale',7]],risk:0.35,bad:[['morale',-10]]},
-            {label:'Reprendre la main soi-même',d:[['fightIQ',5],['discipline',4],['morale',-6]]}]},
-  {id:'evt_br_agent_media',req:f=>f._circle==='agent',title:'Le plan média',
-   text:'Votre agent a bloqué trois jours de tournage promotionnel en plein pic de charge. « C’est ça ou tu restes invisible. »',
-   choices:[{label:'Faire le tournage',d:[['confidence',5],['form',-10]],traitTag:'showman'},
-            {label:'Tout annuler et s’entraîner',d:[['form',8],['discipline',5],['morale',-6]],traitTag:'ascetic'}]},
-  {id:'evt_br_agent_rival',req:f=>f._circle==='agent',title:'Le poulain d’à côté',
-   text:'Vous découvrez que votre agent gère aussi un combattant de votre division, plus jeune, mieux placé.',
-   choices:[{label:'Exiger l’exclusivité',d:[['confidence',6],['morale',-6]],risk:0.30,bad:[['morale',-14],['focus',-8]],traitTag:'rebel'},
-            {label:'S’en servir comme motivation',d:[['aggression',5],['focus',5]]}]},
-  {id:'evt_br_squad_loyalty',req:f=>f._circle==='squad',title:'Un des vôtres dérape',
-   text:'Un ami d’enfance s’est battu dans un bar en se réclamant de vous. La vidéo circule.',
-   choices:[{label:'Le défendre publiquement',d:[['morale',6],['composure',-8]],risk:0.35,bad:[['morale',-14],['focus',-10]],traitTag:'rebel'},
-            {label:'Prendre ses distances',d:[['focus',6],['morale',-8]],traitTag:'ascetic'}]},
-  {id:'evt_br_squad_ride',req:f=>f._circle==='squad',title:'Le convoi',
-   text:'Toute la bande veut vous accompagner au gala, à six heures de route. Personne n’a de billet.',
-   choices:[{label:'Les emmener quand même',cost:8,d:[['morale',10],['focus',-5]]},
-            {label:'Partir seul avec le staff',d:[['focus',7],['morale',-7]]}]},
-  {id:'evt_br_pro_science',req:f=>f._lifestyle==='pro',title:'Le laboratoire',
-   text:'Une équipe universitaire veut faire de vous un cas d’étude : capteurs, prises de sang, sommeil surveillé.',
-   choices:[{label:'Se prêter au protocole',d:[['cardio',5],['recovery',5],['morale',-5]]},
-            {label:'Refuser d’être un sujet',d:[['composure',5],['confidence',4]],traitTag:'rebel'}]},
-  {id:'evt_br_pro_isolation',req:f=>f._lifestyle==='pro',title:'La chambre d’hôtel',
-   text:'Quatrième camp de l’année loin de chez vous. Tout est optimal, et personne ne vous attend le soir.',
-   choices:[{label:'Tenir le protocole jusqu’au bout',d:[['discipline',7],['morale',-10]],traitTag:'ascetic'},
-            {label:'Rentrer une semaine',d:[['morale',12],['form',-8]]}]},
-  {id:'evt_br_balanced_choice',req:f=>f._lifestyle==='balanced',title:'Le milieu du gué',
-   text:'Votre préparateur pose le constat : ni assez rigoureux pour les protocoles de pointe, ni assez relâché pour tenir sur la durée.',
-   choices:[{label:'Basculer vers la rigueur totale',d:[['discipline',8],['cardio',4],['morale',-8]],traitTag:'ascetic'},
-            {label:'Assumer l’équilibre',d:[['morale',8],['composure',5],['discipline',-3]]}]},
-  {id:'evt_br_balanced_job',req:f=>f._lifestyle==='balanced',title:'Le travail à côté',
-   text:'Le poste à mi-temps que vous gardez « au cas où » tombe en plein camp. Il faut choisir cette semaine.',
-   choices:[{label:'Démissionner et tout miser',d:[['focus',7],['confidence',5]],risk:0.35,bad:[['morale',-14],['form',-10]]},
-            {label:'Garder la sécurité',d:[['composure',6],['morale',4],['focus',-4]]}]},
-  {id:'evt_br_balanced_friends',req:f=>f._lifestyle==='balanced',title:'Les deux vies',
-   text:'Un mariage le samedi, une pesée le dimanche. Les deux comptent, et vous ne pouvez pas être entier aux deux.',
-   choices:[{label:'Y aller, partir tôt',d:[['morale',7],['form',-6]]},
-            {label:'S’excuser et rester au camp',d:[['discipline',6],['morale',-7]],traitTag:'ascetic'}]},
-  {id:'evt_br_party_image',req:f=>f._lifestyle==='party',title:'La photo de trop',
-   text:'Une story de 3h du matin circule, trois jours avant la pesée. Votre coach l’a vue avant vous.',
-   choices:[{label:'En rire publiquement',d:[['confidence',6],['morale',5],['discipline',-8]],traitTag:'showman'},
-            {label:'Fermer les comptes une saison',d:[['focus',8],['discipline',6],['morale',-8]],traitTag:'ascetic'}]},
-  {id:'evt_br_regional_crowd',req:f=>f._stable==='regional',title:'La salle des fêtes',
-   text:'Six cents personnes, un ring monté le matin même, et la moitié du public qui connaît votre prénom.',
-   choices:[{label:'Leur donner le spectacle',d:[['confidence',6],['morale',8],['form',-6]],traitTag:'showman'},
-            {label:'Faire le travail proprement',d:[['focus',6],['fightIQ',4]],traitTag:'ascetic'}]},
-  {id:'evt_br_regional_coach',req:f=>f._stable==='regional',title:'Le coach qui plafonne',
-   text:'Celui qui vous entraîne depuis le début n’a jamais mené personne au-delà du niveau régional. Il le sait.',
-   choices:[{label:'Rester fidèle',d:[['morale',9],['heart',4],['fightIQ',-3]]},
-            {label:'Chercher un préparateur au-dessus',d:[['fightIQ',7],['adaptability',4],['morale',-9]],oathBreak:'homegrown'}]},
-  {id:'evt_br_elite_camera',req:f=>f._stable==='elite',title:'Les caméras dans la salle',
-   text:'Le camp tourne un documentaire. Vos séances les plus dures seront diffusées, ratages compris.',
-   choices:[{label:'Jouer le jeu',d:[['confidence',5],['morale',4],['focus',-5]],traitTag:'showman'},
-            {label:'Exiger d’être coupé au montage',d:[['focus',6],['composure',4],['morale',-4]]}]},
-  {id:'evt_br_elite_bench',req:f=>f._stable==='elite',title:'Le second couteau',
-   text:'Le camp prépare une tête d’affiche pour un titre mondial. Vous êtes officiellement son partenaire d’entraînement.',
-   choices:[{label:'Servir de sparring et tout apprendre',d:[['fightIQ',7],['adaptability',5],['form',-10]]},
-            {label:'Refuser de tenir la lampe',d:[['confidence',6],['aggression',5],['morale',-6]],traitTag:'rebel'}]},
-  {id:'evt_br_party_crash',req:f=>f._lifestyle==='party',title:'Le réveil difficile',
-   text:'Séance de 7h. Vous y êtes, debout, mais votre corps est resté quelque part entre hier soir et ce matin.',
-   choices:[{label:'Faire la séance quand même',d:[['heart',5],['form',-10]],risk:0.40,bad:[['form',-22],['durability',-6]]},
-            {label:'Rentrer dormir et assumer',d:[['form',6],['discipline',-6],['morale',4]]}]},
-  {id:'evt_br_party_manager',req:f=>f._lifestyle==='party',title:'L’ultimatum du staff',
-   text:'Le coach pose les choses simplement : soit vous levez le pied cette saison, soit il passe la main à quelqu’un d’autre.',
-   choices:[{label:'Promettre et tenir',d:[['discipline',9],['form',6],['morale',-6]],traitTag:'ascetic'},
-            {label:'Changer de coach',d:[['confidence',6],['morale',5],['fightIQ',-4]],traitTag:'rebel'}]},
-  {id:'evt_br_dojo_lineage',req:f=>f._origin==='traditional',title:'La lignée',
-   text:'On vous demande de porter le nom du dojo sur votre short. C’est un honneur, et une dette.',
-   choices:[{label:'Le porter fièrement',d:[['discipline',6],['morale',6],['confidence',-3]]},
-            {label:'Combattre sous son propre nom',d:[['confidence',7],['morale',-6]],traitTag:'rebel'}]},
-  {id:'evt_br_prochild_press',req:f=>f._origin==='pro_child',title:'La question qui revient',
-   text:'Quinzième interview de l’année, quinzième question sur votre père.',
-   choices:[{label:'Couper court sèchement',d:[['aggression',6],['composure',-5]],traitTag:'rebel'},
-            {label:'Répondre patiemment, encore',d:[['composure',7],['focus',3]],traitTag:'ascetic'}]},
-  {id:'evt_br_street_debt',req:f=>f._origin==='street',title:'Une vieille dette',
-   text:'Quelqu’un du quartier vous rappelle un service rendu il y a dix ans. Il ne demande pas d’argent.',
-   choices:[{label:'Rendre le service',d:[['morale',6],['focus',-6]],risk:0.35,bad:[['morale',-14],['discipline',-10]]},
-            {label:'Dire que c’est une autre vie',d:[['focus',7],['morale',-7]]}]},
-  {id:'evt_br_late_mentor',req:f=>f._origin==='late_bloomer',title:'Le vétéran',
-   text:'Un combattant en fin de carrière vous prend à part : « Tu as moins de temps que les autres. Ne le gaspille pas en technique inutile. »',
-   choices:[{label:'Se spécialiser à outrance',d:[['power',6],['killer',5],['adaptability',-5]]},
-            {label:'Continuer à tout apprendre',d:[['fightIQ',6],['adaptability',6],['power',-3]]}]},
-  {id:'evt_br_family_child',req:f=>f._circle==='family',title:'Un nouveau venu',
-   text:'La famille s’agrandit. Les nuits raccourcissent, et le regard sur le métier change.',
-   choices:[{label:'Redoubler d’ambition',d:[['heart',7],['focus',5],['form',-8]]},
-            {label:'Lever le pied cette saison',d:[['morale',10],['form',6],['aggression',-6]]}]},
-  {id:'evt_br_agent_offer',req:f=>f._circle==='agent',title:'Le transfert',
-   text:'Une écurie concurrente propose à votre agent de vous racheter. Il vous en parle après avoir dit oui.',
-   choices:[{label:'Accepter le mouvement',d:[['adaptability',6],['fightIQ',4],['morale',-6]]},
-            {label:'Bloquer le transfert',d:[['confidence',7],['morale',-8]],traitTag:'rebel'}]},
-  {id:'evt_br_squad_business',req:f=>f._circle==='squad',title:'Le projet des potes',
-   text:'La bande veut monter une marque de vêtements à votre nom. Personne dans le groupe n’a jamais géré une entreprise.',
-   choices:[{label:'Investir dedans',cost:20,d:[['morale',9]],risk:0.45,bad:[['morale',-12],['focus',-8]],traitTag:'showman'},
-            {label:'Refuser poliment',d:[['focus',6],['morale',-5]]}]},
-  {id:'evt_br_pro_plateau',req:f=>f._lifestyle==='pro',title:'Le plateau',
-   text:'Tout est parfait sur le papier, et pourtant plus rien ne progresse depuis six mois.',
-   choices:[{label:'Tout casser et repartir de zéro',d:[['adaptability',8],['form',-12]],risk:0.35,bad:[['form',-22],['confidence',-8]]},
-            {label:'Faire confiance au protocole',d:[['discipline',6],['composure',4]],traitTag:'ascetic'}]},
-  {id:'evt_br_balanced_doubt',req:f=>f._lifestyle==='balanced',title:'La question du soir',
-   text:'Un soir de fatigue, la question tombe toute seule : est-ce que vous voulez vraiment de cette vie-là ?',
-   choices:[{label:'Répondre oui, et s’y remettre',d:[['heart',7],['focus',5]]},
-            {label:'Ne pas répondre',d:[['composure',5],['morale',-5]]}]},
-  {id:'evt_br_regional_ceiling',req:f=>f._stable==='regional',title:'Le plafond régional',
-   text:'Vous avez battu tout le monde dans un rayon de trois cents kilomètres. Il n’y a plus personne à affronter ici.',
-   choices:[{label:'Aller chercher plus loin',d:[['confidence',6],['adaptability',5],['morale',-5]]},
-            {label:'Régner sur son territoire',d:[['morale',9],['confidence',4],['fightIQ',-3]]}]},
-  {id:'evt_br_elite_cut',req:f=>f._stable==='elite',title:'La coupe du camp',
-   text:'Le camp réduit son effectif. Deux places sautent, et la vôtre n’est pas garantie.',
-   choices:[{label:'Se battre pour rester',d:[['focus',7],['aggression',5],['form',-8]]},
-            {label:'Partir avant qu’on vous pousse',d:[['confidence',5],['composure',5],['morale',-6]]}]}];
 /* ==== [FIN ANCRE] ==== */
-const FAITH_LIFE_EVENTS=[
-  {id:'evt_eco_exam',title:'Semaine de partiels',text:'La session d\u2019examens approche à l\u2019université. Vous passez vos nuits à réviser au lieu de récupérer de vos sparrings.',
-    choices:[{label:'Prioriser les révisions (assurer l\u2019avenir)',d:[['fightIQ',3],['form',-12],['morale',5]],traitTag:'ascetic'},
-             {label:'Ignorer la fac, aller tourner à la salle',d:[['jab',2],['morale',-15]]}]},
-  {id:'evt_calisthenics',title:'Routine au poids du corps',text:'Vous remplacez votre séance de musculation lourde par une session stricte de calisthénie en plein air.',
-    choices:[{label:'Focus explosivité & figures',d:[['explosiveness',3],['flexibility',2],['cardio',-4]]},
-             {label:'Focus isométrie & maintien',d:[['strength',2],['durability',2],['form',-2]]}]},
-  {id:'evt_plants',title:'Invasion de nuisibles',text:'Les feuilles de vos plantes tropicales sont attaquées. Vous passez des heures à les soigner au lieu de visualiser votre combat.',
-    choices:[{label:'Sauver les plantes (patience & soin)',d:[['composure',4],['focus',2],['form',-5]]},
-             {label:'Abandonner et aller s\u2019entraîner',d:[['morale',-10],['aggression',3]]}]},
-  {id:'evt_streetwear',title:'Le tech pack',text:'Vous finalisez seul le dossier technique de votre marque indépendante. L\u2019usine attend vos mensurations exactes.',
-    choices:[{label:'Financer la production (15k$)',cost:15,d:[['focus',-5],['morale',12],['composure',3]]},
-             {label:'Repousser le drop, focus sur le MMA',d:[['morale',-12],['focus',6]]}]},
-  {id:'evt_rainy_run',title:'Pluie battante',text:'Une pluie glaciale s\u2019abat sur la région. Votre footing matinal s\u2019annonce particulièrement misérable.',
-    choices:[{label:'Courir quand même sous l\u2019averse',d:[['durability',5],['heart',4],['form',-8],['morale',-5]]},
-             {label:'Rester au chaud',d:[['form',10],['discipline',-8]]}]},
-  {id:'evt_ufc_live',title:'Main event à 5h du matin',text:'La carte principale d\u2019un événement majeur commence en pleine nuit, avec un combat crucial pour votre catégorie.',
-    choices:[{label:'Analyser en direct',d:[['fightIQ',5],['adaptability',3],['form',-15]]},
-             {label:'Dormir et regarder le replay',d:[['form',5],['fightIQ',1]]}]},
-  {id:'evt_kaiju',title:'Soirée grand spectacle',text:'Pour décompresser avec votre cercle proche, vous organisez une soirée cinéma.',
-    choices:[{label:'Profiter de la soirée',d:[['morale',12],['composure',3],['discipline',-4]]}]},
-  {id:'evt_sparring_heavy',title:'Sparring lourd imprévu',text:'Un vétéran de la salle vous propose un sparring très appuyé, sans casque.',
-    choices:[{label:'Accepter la guerre',d:[['chin',3],['durability',3],['form',-18],['morale',5]],risk:0.35,bad:[['form',-32],['durability',-4],['morale',-10]]},
-             {label:'Refuser, travail technique',d:[['footSpeed',3],['jab',2],['morale',-5]]}]},
-  {id:'evt_diet_temptation',title:'Tentation de triche',text:'En plein milieu de votre perte de poids, la faim vous tenaille l\u2019estomac.',
-    choices:[{label:'Craquer pour un repas lourd',d:[['form',15],['morale',10],['discipline',-15]]},
-             {label:'Boire de l\u2019eau et souffrir',d:[['discipline',5],['heart',2],['morale',-8]]}]},
-  {id:'evt_wrestling_seminar',title:'Séminaire de l\u2019Est',text:'Un ancien lutteur médaillé donne un séminaire technique très coûteux sur le contrôle au sol.',
-    choices:[{label:'Payer l\u2019accès (5k$)',cost:5,d:[['topControl',4],['takedown',3],['fightIQ',2]]},
-             {label:'S\u2019entraîner seul',d:[['strength',2],['form',-3]]}]},
-  {id:'evt_coach_clash',title:'Tension tactique',text:'Votre entraîneur veut vous imposer un plan de jeu extrêmement prudent qui va à l\u2019encontre de vos instincts.',
-    choices:[{label:'Se plier à ses exigences',d:[['fightIQ',4],['composure',3],['aggression',-5]],traitTag:'ascetic'},
-             {label:'Refuser, imposer votre vision',d:[['aggression',4],['confidence',3],['morale',-10]],traitTag:'rebel'}]},
-  {id:'evt_media_call',title:'Interview locale',text:'Un média régional vous contacte pour un long format vidéo, sur votre journée de repos.',
-    choices:[{label:'Faire le show',d:[['morale',8],['confidence',4],['form',-6],['focus',-3]],traitTag:'showman'},
-             {label:'Décliner poliment',d:[['focus',4],['form',5],['morale',-5]]}]},
-  {id:'evt_sauna_break',title:'Le sauna en panne',text:'Pour maintenir votre perte de poids, vous devez enfiler une combinaison de sudation et enchaîner les sprints.',
-    choices:[{label:'Faire les sprints (épuisant)',d:[['cardio',4],['heart',3],['form',-15]],traitTag:'ascetic'},
-             {label:'Décaler la perte de poids',d:[['form',5],['discipline',-10]]}]},
-  {id:'evt_shadow_mirror',title:'Perfectionnisme',text:'La salle est vide. Vous passez une heure devant le miroir à corriger une micro-imperfection technique.',
-    choices:[{label:'Chirurgie technique',d:[['handSpeed',3],['cross',3],['focus',2],['form',-4]]}]},
-  {id:'evt_gourou',title:'Le gourou psychologique',text:'Un coach mental vous vend une préparation "prédateur alpha" à prix fort.',
-    choices:[{label:'Payer la séance (8k$)',cost:8,d:[['confidence',4],['composure',3],['form',-6]]},
-             {label:'Refuser, rester terre-à-terre',d:[['discipline',3],['morale',-3]]}]},
-  // --- Événements conditionnels (req) : n'apparaissent que si l'état réel du combattant les justifie ---
-  {id:'evt_crypto_crash',req:f=>(f.earnings||0)>50,title:'Sponsor véreux',text:'Le fondateur de "PunchCoin", votre sponsor principal, s\u2019est enfui aux Bahamas. Vous perdez votre investissement de départ, mais la communauté a pitié de vous.',
-    choices:[{label:'Faire profil bas et encaisser la perte (20k$)',cost:20,d:[['composure',5],['morale',10],['focus',3]]},
-             {label:'Insulter le fondateur sur les réseaux',d:[['aggression',6],['composure',-10],['morale',-5]]}]},
-  {id:'evt_tax_audit',req:f=>(f.earnings||0)>150,title:'Contrôle fiscal',text:'L\u2019administration fiscale s\u2019intéresse de très près à vos déclarations. Votre comptable, qui a le charisme d\u2019une huître, vous conseille de payer pour éviter le tribunal.',
-    choices:[{label:'Régler le redressement sans faire de bruit (40k$)',cost:40,d:[['focus',5],['morale',-10]]},
-             {label:'Aller au tribunal (guerre d\u2019usure)',d:[['composure',-15],['discipline',-10],['fightIQ',2]]}]},
-  {id:'evt_exotic_pet',req:f=>(f.earnings||0)>80,title:'Achat compulsif',text:'Suite à un pari avec un influenceur, vous venez d\u2019acheter un tigre albinos. L\u2019animal est magnifique, mais il a dévoré votre canapé et terrorise vos sparring-partners.',
-    choices:[{label:'Le revendre à un zoo et payer l\u2019amende (15k$)',cost:15,d:[['discipline',5],['morale',-5]]},
-             {label:'Le garder et s\u2019en occuper',d:[['focus',-12],['heart',4],['form',-8]]}]},
-  {id:'evt_aging_joints',req:f=>f.age>33,title:'Le poids des années',text:'En vous levant ce matin, vos genoux ont craqué avec le bruit d\u2019un coup de fusil. Le déni ne fonctionne plus, votre corps réclame une maintenance drastique.',
-    choices:[{label:'Investir dans des cellules souches expérimentales (25k$)',cost:25,d:[['recovery',6],['durability',4],['form',10]]},
-             {label:'Prendre des anti-inflammatoires et serrer les dents',d:[['durability',-5],['heart',5],['recovery',-8]]}]},
-  {id:'evt_prospect_hype',req:f=>f.age<22&&(f.streak||0)>=3,title:'Le hype train',text:'Les médias vous considèrent comme le nouveau prodige de la décennie. Vos DM explosent, les marques vous harcèlent et votre ego enfle dangereusement.',
-    choices:[{label:'Couper le téléphone et retourner au sac de frappe',d:[['discipline',8],['focus',6],['morale',-5]],traitTag:'ascetic'},
-             {label:'Profiter de la gloire et des soirées mondaines',d:[['composure',-12],['cardio',-10],['morale',20]],traitTag:'showman'}]},
-  {id:'evt_losing_streak',req:f=>(f.streak||0)<=-2,title:'Le gouffre',text:'Les défaites s\u2019accumulent. Les fans qui vous adulaient hier vous conseillent de prendre votre retraite dans les commentaires de vos photos de vacances.',
-    choices:[{label:'Isolement total et remise en question',d:[['fightIQ',6],['focus',8],['confidence',-15]],traitTag:'ascetic'},
-             {label:'Répondre aux trolls avec agressivité',d:[['aggression',10],['composure',-15],['focus',-10]],traitTag:'rebel'}]},
-  {id:'evt_champion_target',req:f=>!!f.champion,title:'La cible sur le dos',text:'En tant que champion, vous êtes épié. Le challenger numéro 1 a disséqué chacun de vos rounds et vient de publier une vidéo pointant vos défauts biomécaniques.',
-    choices:[{label:'Modifier sa garde dans l\u2019urgence',d:[['adaptability',8],['fightIQ',4],['confidence',-8]]},
-             {label:'Parier sur ses fondamentaux bruts',d:[['confidence',10],['adaptability',-6],['composure',4]]}]},
-  {id:'evt_chin_check',req:f=>f.attrs.chin<50,title:'Verre pilé',text:'Pendant un sparring léger, un jab anodin vous fait vaciller. Votre menton est de plus en plus fragile et votre coach propose de changer toute l\u2019approche défensive.',
-    choices:[{label:'Passer à un style purement évasif',d:[['footSpeed',8],['fightIQ',4],['power',-6],['aggression',-10]]},
-             {label:'Refuser de reculer (risque de KO accru)',d:[['heart',8],['durability',-5],['composure',-5]],traitTag:'rebel',risk:0.4,bad:[['chin',-6],['durability',-9],['morale',-12]]}]},
-  {id:'evt_bjj_nerd',req:f=>f.style==='bjj'||f.attrs.submission>80,title:'Obsession articulaire',text:'Vous avez passé les 72 dernières heures à visionner des tutoriels de clés de cheville lituaniennes. Vous voyez des angles de soumission même quand vous pliez votre linge.',
-    choices:[{label:'Intégrer ce savoir au gameplan',d:[['submission',6],['fightIQ',4],['cardio',-5]]},
-             {label:'Forcer l\u2019application en sparring (risque de blesser un ami)',d:[['killer',8],['submission',2],['morale',-12]]}]},
-  {id:'evt_podcast_disaster',req:null,title:'Le micro ouvert',text:'Vous êtes invité dans un podcast populaire de 4 heures. Vers la 3ème heure, fatigué, vous lâchez une théorie du complot absurde sur la forme de la Terre.',
-    choices:[{label:'Assumer et embrasser le rôle de vilain',d:[['composure',-8],['aggression',6],['morale',15]],traitTag:'showman',risk:0.35,bad:[['composure',-14],['morale',-14],['focus',-8]]},
-             {label:'Engager une agence de gestion de crise (10k$)',cost:10,d:[['discipline',5],['focus',5],['morale',-10]]}]},
-  {id:'evt_reality_tv',req:null,title:'Romance cathodique',text:'Vous commencez à fréquenter une star de télé-réalité. Les paparazzis campent devant votre salle d\u2019entraînement, brisant la concentration de tout le camp.',
-    choices:[{label:'Mettre fin à la relation pour le sport',d:[['focus',10],['discipline',8],['morale',-20]],traitTag:'ascetic'},
-             {label:'Gérer les caméras et la relation',d:[['composure',-10],['form',-15],['morale',15]],traitTag:'showman'}]},
-  {id:'evt_bar_fight',req:null,title:'Désamorcer la bombe',text:'Dans un bar, un type éméché qui a fait deux mois de Krav Maga en 2014 décide que vous êtes l\u2019adversaire idéal pour prouver sa virilité à ses amis.',
-    choices:[{label:'Lui payer un verre et quitter les lieux',d:[['composure',8],['fightIQ',4],['aggression',-5]]},
-             {label:'Le balayer sèchement pour l\u2019exemple',d:[['aggression',8],['discipline',-15],['focus',-5]],risk:0.3,bad:[['discipline',-22],['composure',-10],['morale',-12]]}]},
-  {id:'evt_guru_supplement',req:null,title:'La poudre magique',text:'Un préparateur physique douteux vous propose un complément alimentaire non-étiqueté qui "révolutionnera votre testostérone" mais sent fortement l\u2019ammoniaque.',
-    choices:[{label:'Refuser et s\u2019en tenir au poulet-brocolis',d:[['discipline',6],['durability',3],['recovery',-4]]},
-             {label:'Tester le produit (risque absolu)',d:[['explosiveness',8],['power',5],['cardio',-15],['form',-10]],risk:0.45,bad:[['cardio',-22],['form',-20],['discipline',-6]]}]},
-  // --- Événements verrouillés par un trait émergent (cristallisé après 3 choix dans la même direction) ---
-  {id:'evt_trait_rebel_sponsor',req:f=>f.faithTraits&&f.faithTraits.includes('Tête Brûlée'),title:'Conséquence : marque toxique',text:'Votre réputation de Tête Brûlée fait fuir les annonceurs traditionnels, mais attire une marque de boisson énergisante ultra-agressive qui adore votre image.',
-    choices:[{label:'Signer le contrat controversé',reward:25,d:[['morale',15],['focus',-5]]},
-             {label:'Refuser pour redorer son image',d:[['composure',5],['morale',-10]]}]},
-  {id:'evt_trait_ascetic_camp',req:f=>f.faithTraits&&f.faithTraits.includes('Ascète'),title:'Conséquence : le vide absolu',text:'En tant qu\u2019Ascète reconnu, vous avez éliminé toute distraction. Vous passez un mois entier sans parler à personne d\u2019autre qu\u2019à votre sac de frappe.',
-    choices:[{label:'Embrasser l\u2019isolement martial',d:[['focus',10],['discipline',5],['morale',-15]]}]},
-  {id:'evt_trait_showman_deal',req:f=>f.faithTraits&&f.faithTraits.includes('Showman'),title:'Conséquence : le cirque médiatique',text:'Votre réputation de Showman précède chaque combat. Une chaîne de streaming vous propose une série documentaire intrusive sur votre quotidien.',
-    choices:[{label:'Accepter, caméras partout',reward:35,d:[['focus',-10],['morale',10],['composure',-5]]},
-             {label:'Refuser, préserver l\u2019intimité du camp',d:[['discipline',4],['morale',-5]]}]},
-  // --- Événements liés à l'agent (Le Requin) — n'apparaissent que si ce cercle a été choisi au draft ---
-  {id:'evt_agent_scheme',req:f=>f.agentCut>0,title:'Coup de fil du Requin',text:'Votre agent vous a décroché un spot publicitaire pour une marque d\u2019outillage peu glorieuse. "C\u2019est humiliant mais ça paye, gamin", dit-il.',
-    choices:[{label:'Tourner la pub',reward:20,d:[['morale',-15],['focus',-10]]},
-             {label:'Refuser catégoriquement (l\u2019agent s\u2019énerve)',d:[['confidence',5],['morale',5]]}]},
-  {id:'evt_agent_lobby',req:f=>f.agentCut>0&&f.org>0,title:'Trafic d\u2019influence',text:'Votre agent utilise son carnet d\u2019adresses pour vous obtenir de meilleurs créneaux d\u2019entraînement, mais la facture vous revient.',
-    choices:[{label:'Payer l\u2019accès VIP (10k$)',cost:10,d:[['form',20],['cardio',3]]},
-             {label:'Se débrouiller seul',d:[['discipline',5],['form',-5]]}]},
-  // --- Événements liés aux ères martiales (MMA_ERAS) ---
-  {id:'evt_era_daghestan',req:f=>G.currentEra&&G.currentEra.id==='era_daghestan',title:'L\u2019invasion de l\u2019Est',text:'La ligue est inondée de lutteurs effrayants. L\u2019angoisse de finir sur le dos pousse votre coach à modifier tout votre camp d\u2019entraînement.',
-    choices:[{label:'S\u2019entraîner spécifiquement contre la lutte',d:[['tdd',6],['guardWork',4],['form',-12]]},
-             {label:'Faire confiance à son style',d:[['confidence',5],['adaptability',-5]]}]},
-  {id:'evt_era_calf',req:f=>G.currentEra&&G.currentEra.id==='era_calf',title:'Chasse aux chevilles',text:'Détruire l\u2019appui avant est devenu la norme. Vos tibias sont couverts de contusions rien qu\u2019en sparring.',
-    choices:[{label:'Adapter sa garde',d:[['power',-5],['footSpeed',5],['durability',3]]},
-             {label:'Ignorer la mode (vos appuis sont en miettes)',d:[['durability',-8],['morale',5]]}]},
-  {id:'evt_era_boxing',req:f=>G.currentEra&&G.currentEra.id==='era_boxing',title:'Le renouveau du noble art',text:'Les combattants avec une excellente anglaise règnent en maîtres. Les échanges de pur striking sont d\u2019une violence rare.',
-    choices:[{label:'Affûter son jeu de jambes',d:[['footSpeed',6],['jab',3],['form',-8]]},
-             {label:'Compenser par le clinch sale',d:[['clinchStr',5],['aggression',4],['fightIQ',-3]]}]},
-  {id:'evt_era_bjj',req:f=>G.currentEra&&G.currentEra.id==='era_bjj',title:'La menace des leglocks',text:'Plus personne ne se sent en sécurité les jambes tendues. Toute la salle révise ses défenses articulaires.',
-    choices:[{label:'Blinder sa défense de jambes',d:[['flexibility',5],['tdd',3],['form',-8]]},
-             {label:'Rester concentré sur son propre jeu',d:[['confidence',4],['adaptability',-4]]}]},
-  {id:'evt_era_clinch',req:f=>G.currentEra&&G.currentEra.id==='era_clinch',title:'L\u2019ère de la boxe sale',text:'Le clinch contre la cage est devenu une arme à part entière. Les coudes pleuvent dans chaque combat de haut niveau.',
-    choices:[{label:'Travailler la boxe sale au clinch',d:[['clinchStr',6],['durability',3],['form',-10]]},
-             {label:'Fuir le clinch systématiquement',d:[['footSpeed',4],['cardio',-4]]}]},
-  {id:'evt_era_karate',req:f=>G.currentEra&&G.currentEra.id==='era_karate',title:'L\u2019avènement du style fuyant',text:'La distance et l\u2019angle deviennent rois. Les combattants qui restent statiques se font punir sans jamais toucher personne.',
-    choices:[{label:'Adopter un jeu de jambes fuyant',d:[['footSpeed',6],['fightIQ',4],['power',-4]]},
-             {label:'S\u2019en tenir à la pression constante',d:[['aggression',4],['cardio',-5]]}]},
-  // --- Lot d'expansion : chaque choix est un vrai entraînement, pas un simple texte ---
-  {id:'evt_boxing_pads',title:'Séance de pao',text:'Le coach vous colle aux patins pendant quarante minutes sans pause, à corriger chaque angle de frappe.',
-    choices:[{label:'Vitesse et précision',d:[['handSpeed',4],['jab',3],['form',-6]]},
-             {label:'Puissance et enracinement',d:[['power',4],['cross',3],['form',-8]]}]},
-  {id:'evt_wrestling_room',title:'La salle de lutte',text:'Un vétéran vous propose de reprendre les bases : niveau des hanches, changements de direction, chaînes d\u2019amenées.',
-    choices:[{label:'Perfectionner les amenées simples',d:[['takedown',5],['strength',3],['form',-10]]},
-             {label:'Travailler la défense de projection',d:[['tdd',5],['footSpeed',2],['form',-8]]}]},
-  {id:'evt_jiujitsu_open_mat',title:'Open mat du dimanche',text:'La salle ouvre ses tapis à tout le monde. Ceintures noires, débutants, tout le monde roule ensemble.',
-    choices:[{label:'Chasser les soumissions',d:[['submission',5],['flexibility',2],['form',-6]]},
-             {label:'Travailler la garde et la patience',d:[['guardWork',5],['composure',3],['form',-5]]}]},
-  {id:'evt_clinch_work',title:'Travail au clinch',text:'Deux heures collé à un partenaire contre le mur, à chercher les genoux et à casser la posture adverse.',
-    choices:[{label:'Genoux et coudes sales',d:[['clinchStr',5],['aggression',3],['form',-8]]},
-             {label:'Contrôle et projection depuis le clinch',d:[['clinchStr',3],['takedown',3],['form',-6]]}]},
-  {id:'evt_gnp_drilling',title:'Ground and pound au sac lesté',text:'Le préparateur physique a inventé un exercice à base de sac de sable posé sur un mannequin. C\u2019est aussi ridicule qu\u2019efficace.',
-    choices:[{label:'Rafales courtes et répétées',d:[['gnp',5],['handSpeed',2],['form',-9]]},
-             {label:'Frappes lourdes et posture',d:[['gnp',4],['power',3],['form',-7]]}]},
-  {id:'evt_footwork_ladder',title:'L\u2019échelle de rythme',text:'Une session entière consacrée au jeu de jambes, digne d\u2019un boxeur des années 70.',
-    choices:[{label:'Vitesse pure',d:[['footSpeed',5],['explosiveness',2],['form',-5]]},
-             {label:'Angles et déplacements latéraux',d:[['footSpeed',3],['fightIQ',3],['form',-5]]}]},
-  {id:'evt_iron_chin',title:'Renforcement du cou',text:'Un protocole spécifique de musculation cervicale, réputé réduire l\u2019impact des coups à la tête.',
-    choices:[{label:'S\u2019y tenir sérieusement',d:[['durability',4],['discipline',3],['form',-4]]},
-             {label:'Bâcler pour gagner du temps',d:[['durability',1],['form',2]]}]},
-  {id:'evt_film_study',title:'Séance vidéo',text:'Des heures à décortiquer vos propres combats et ceux de la division au ralenti.',
-    choices:[{label:'Analyser ses propres erreurs',d:[['fightIQ',5],['composure',2],['focus',-3]]},
-             {label:'Étudier le style du prochain adversaire',d:[['adaptability',5],['fightIQ',2],['focus',-3]]}]},
-  {id:'evt_altitude_camp',title:'Stage en altitude',text:'Deux semaines à 2000 mètres. Chaque respiration est un combat en soi.',
-    choices:[{label:'S\u2019y donner à fond',d:[['cardio',6],['heart',3],['form',-15]],risk:0.3,bad:[['form',-28],['recovery',-6]]},
-             {label:'Doser l\u2019effort pour ne pas se griller',d:[['cardio',3],['recovery',2],['form',-6]]}]},
-  {id:'evt_flexibility_yoga',title:'Séance de mobilité',text:'Le staff insiste : un corps plus mobile encaisse mieux et attaque sous des angles impossibles.',
-    choices:[{label:'S\u2019investir sérieusement',d:[['flexibility',5],['recovery',2],['form',-3]]},
-             {label:'Le faire du bout des lèvres',d:[['flexibility',1],['discipline',-3]]}]},
-  {id:'evt_mental_coach',title:'Le préparateur mental',text:'Un psychologue du sport propose des séances de visualisation avant chaque gros combat.',
-    choices:[{label:'Adhérer pleinement à la méthode',d:[['composure',5],['confidence',3],['focus',2]]},
-             {label:'Rester sceptique mais écouter poliment',d:[['composure',2],['discipline',1]]}]},
-  {id:'evt_weight_class_debate',title:'Le débat de catégorie',text:'Votre entourage se dispute : rester dans votre catégorie actuelle, ou tenter le grand saut vers une division voisine ?',
-    choices:[{label:'Se concentrer sur la catégorie actuelle',d:[['discipline',4],['composure',2]]},
-             {label:'Se préparer mentalement à un changement futur',d:[['adaptability',5],['confidence',-3]]}]},
-  {id:'evt_condition_check',title:'Bilan physique complet',text:'Un check-up médical complet, des pieds à la tête, pour repartir sur des bases saines.',
-    choices:[{label:'Suivre à la lettre les recommandations',d:[['durability',3],['recovery',3],['discipline',2]]},
-             {label:'Garder seulement ce qui vous arrange',d:[['confidence',3],['durability',-2]]}]},
-  {id:'evt_sparring_partner_bond',title:'Le partenaire de confiance',text:'Un partenaire d\u2019entraînement régulier commence à vraiment comprendre votre jeu — dans les deux sens.',
-    choices:[{label:'Approfondir cette complicité technique',d:[['adaptability',4],['fightIQ',3],['composure',2]]},
-             {label:'Varier les partenaires pour rester imprévisible',d:[['adaptability',2],['confidence',3]]}]},
-  {id:'evt_local_seminar',title:'Séminaire de passage',text:'Un ancien champion de passage dans la région donne un séminaire technique très demandé.',
-    choices:[{label:'Payer l\u2019accès (6k$)',cost:6,d:[['fightIQ',4],['adaptability',3]]},
-             {label:'Ne pas s\u2019y rendre',d:[['discipline',2]]}]},
-  {id:'evt_referee_incident',title:'Incident avec un arbitre',text:'Un mauvais souvenir d\u2019arrêt de combat controversé refait surface dans les médias locaux.',
-    choices:[{label:'Répondre calmement en interview',d:[['composure',4],['confidence',2]]},
-             {label:'Laisser sa colère s\u2019exprimer publiquement',d:[['aggression',5],['composure',-6],['morale',8]]}]},
-  {id:'evt_new_gym_offer',title:'Offre d\u2019une salle rivale',text:'Une salle réputée de l\u2019autre bout du pays propose de vous accueillir, avec des infrastructures bien supérieures.',
-    choices:[{label:'Rester fidèle à sa salle d\u2019origine',d:[['discipline',3],['morale',6]]},
-             {label:'Envisager sérieusement le changement',d:[['adaptability',3],['confidence',3],['morale',-4]]}]},
-  {id:'evt_injury_scare',title:'Alerte à l\u2019entraînement',text:'Une torsion du genou pendant un exercice de niveau fait craindre le pire un instant. Finalement rien de cassé, mais l\u2019inquiétude reste.',
-    choices:[{label:'Reprendre prudemment',d:[['durability',2],['discipline',2],['form',-8]]},
-             {label:'Reprendre comme si de rien n\u2019était',d:[['confidence',4],['durability',-3],['form',-4]],risk:0.35,bad:[['durability',-9],['form',-22],['recovery',-5]]}]},
-  {id:'evt_public_workout',title:'Entraînement public',text:'L\u2019organisation demande une séance ouverte aux médias avant le prochain événement.',
-    choices:[{label:'Montrer un vrai travail technique',d:[['fightIQ',3],['confidence',2],['focus',-3]]},
-             {label:'Mettre en scène de la puissance brute',d:[['power',3],['aggression',3],['focus',-3]]}]},
-  {id:'evt_old_footage',title:'Vieilles images',text:'Un fan retrouve une vidéo de vos tout premiers combats amateurs et la partage en ligne. Le contraste est saisissant.',
-    choices:[{label:'En rire publiquement',d:[['composure',3],['morale',8]]},
-             {label:'Ignorer complètement',d:[['discipline',2]]}]},
-  {id:'evt_camp_relocation',title:'Délocalisation de camp',text:'Pour préparer un combat à l\u2019étranger, tout le camp part s\u2019installer un mois sur place.',
-    choices:[{label:'S\u2019adapter au fuseau horaire et à la nourriture',d:[['adaptability',4],['recovery',2],['form',-6]]},
-             {label:'Reproduire sa routine habituelle à tout prix',d:[['discipline',4],['adaptability',-2],['form',-4]]}]},
-  {id:'evt_style_switch_temptation',title:'La tentation du style adverse',text:'En observant un adversaire dominer avec un style qui n\u2019est pas le vôtre, l\u2019envie de tout changer vous traverse.',
-    choices:[{label:'Résister et approfondir son propre style',d:[['discipline',4],['confidence',3]]},
-             {label:'Emprunter un peu de cette approche',d:[['adaptability',5],['fightIQ',2],['confidence',-2]],risk:0.35,bad:[['confidence',-10],['focus',-8],['discipline',-5]]}]},
-  {id:'evt_fan_letter',title:'Une lettre de fan',text:'Un jeune combattant amateur vous écrit une longue lettre expliquant à quel point votre parcours l\u2019a inspiré.',
-    choices:[{label:'Répondre personnellement',d:[['morale',10],['composure',2]]},
-             {label:'Passer à autre chose, trop de sollicitations',d:[['focus',3]]}]},
-  {id:'evt_camp_conflict',title:'Tension entre coachs',text:'Deux membres de votre staff ne s\u2019entendent plus sur l\u2019approche à adopter pour le prochain combat.',
-    choices:[{label:'Trancher soi-même la question',d:[['fightIQ',3],['confidence',3],['composure',-3]]},
-             {label:'Laisser le coach principal décider',d:[['discipline',3],['confidence',-2]]}]},
-  {id:'evt_documentary_offer',title:'Offre de documentaire',text:'Une équipe de tournage souhaite suivre une saison entière de votre carrière pour un documentaire.',
-    choices:[{label:'Accepter, caméras partout',reward:15,d:[['focus',-8],['morale',12]]},
-             {label:'Refuser, préserver la tranquillité du camp',d:[['discipline',3],['morale',-3]]}]},
-  {id:'evt_home_gym_build',req:f=>(f.earnings||0)>100,title:'Salle personnelle',text:'Vos moyens permettent enfin d\u2019installer une salle privée chez vous, loin du bruit du club.',
-    choices:[{label:'Investir dans l\u2019équipement (25k$)',cost:25,d:[['discipline',3],['recovery',3],['form',6]]},
-             {label:'Continuer à s\u2019entraîner en club',d:[['composure',2]]}]},
-  {id:'evt_weight_cut_horror',req:f=>f.age>28,title:'Une coupe de poids terrible',text:'La déshydratation de cette semaine a été la pire de votre carrière. Votre corps a mis des jours à s\u2019en remettre.',
-    choices:[{label:'Revoir sérieusement sa méthode de coupe',d:[['discipline',4],['durability',3],['form',-10]]},
-             {label:'Serrer les dents et continuer pareil',d:[['heart',5],['durability',-4],['form',-6]],risk:0.4,bad:[['durability',-9],['form',-20],['cardio',-6]]}]},
-  // --- Lot 2 (Gemini, vérifié) ---
-  {id:'evt_ice_bath_extreme',title:'Bain de glace prolongé',text:'Votre préparateur vous met au défi de rester cinq minutes de plus dans l\u2019eau à 2°C pour tester vos limites mentales.',
-    choices:[{label:'Serrer les dents et rester',d:[['recovery',5],['heart',4],['form',-8]],risk:0.3,bad:[['form',-18],['recovery',-5],['morale',-8]]},
-             {label:'Sortir, la récupération standard suffit',d:[['form',5],['discipline',-4]]}]},
-  {id:'evt_prodigy_sparring',req:f=>f.org>0,title:'Le petit nouveau',text:'Un jeune prodige de 19 ans fraîchement débarqué à la salle vous met en réelle difficulté lors d\u2019un sparring. Votre ego en prend un coup.',
-    choices:[{label:'Ranger son ego et analyser son jeu',d:[['fightIQ',5],['focus',4],['morale',-8]]},
-             {label:'Durcir le sparring pour le calmer',d:[['aggression',6],['power',2],['form',-10]]}]},
-  {id:'evt_mansion_buy',req:f=>(f.earnings||0)>=100,title:'Folie immobilière',text:'Avec vos récents gains, l\u2019envie d\u2019acheter une immense villa avec piscine devient obsédante. C\u2019est le symbole ultime de la réussite.',
-    choices:[{label:'Acheter la villa (60k$)',cost:60,d:[['morale',20],['confidence',5],['focus',-10]]},
-             {label:'Placer l\u2019argent sagement',d:[['discipline',6],['focus',4],['morale',-5]]}]},
-  {id:'evt_food_poisoning',title:'Le buffet maudit',text:'Une intoxication alimentaire fulgurante vous cloue au lit à trois semaines du combat. Vous êtes complètement déshydraté et affaibli.',
-    choices:[{label:'S\u2019entraîner quand même dans la douleur',d:[['heart',6],['durability',3],['form',-20],['cardio',-5]]},
-             {label:'Garder le lit et se soigner',d:[['form',8],['recovery',4],['cardio',-8]]}]},
-  {id:'evt_boxer_hands',req:f=>f.style==='boxer',title:'Mains de cristal',text:'Vos phalanges vous font atrocement souffrir après chaque séance aux paos. C\u2019est le prix à payer pour frapper aussi lourdement.',
-    choices:[{label:'Bander lourdement et continuer de frapper',d:[['power',4],['hook',3],['form',-12]]},
-             {label:'Mettre les poings au repos, focus jambes',d:[['footSpeed',5],['adaptability',3],['cross',-4]]}]},
-  {id:'evt_wrestler_ear',req:f=>f.style==='wrestler',title:'Oreille en chou-fleur',text:'Votre oreille gauche vient de gonfler dramatiquement après un frottement sévère sur le tapis. Elle est prête à exploser.',
-    choices:[{label:'La faire ponctionner chez le médecin',d:[['composure',5],['focus',3],['form',-8]]},
-             {label:'La laisser durcir comme un trophée',d:[['durability',5],['confidence',3],['focus',-5]]}]},
-  {id:'evt_era_calf_def',req:f=>G.currentEra&&G.currentEra.id==='era_calf',title:'Hachoir à viande',text:'Dans cette ère du calf-kick, vos mollets sont ciblés à chaque session d\u2019entraînement. Vous avez du mal à marcher le matin.',
-    choices:[{label:'Conditionner les tibias sur des sacs durs',d:[['durability',6],['kick',3],['form',-15]]},
-             {label:'Travailler les changements de garde fluides',d:[['adaptability',5],['footSpeed',4],['power',-5]]}]},
-  {id:'evt_imposter_syndrome',title:'Le syndrome de l\u2019imposteur',text:'Il est 3h du matin. Vous fixez le plafond en vous demandant si vous avez vraiment le niveau pour monter dans cette cage face à des tueurs.',
-    choices:[{label:'Regarder les vidéos de ses anciennes victoires',d:[['confidence',6],['morale',5],['form',-6]]},
-             {label:'Appeler son coach en pleine nuit pour parler tactique',d:[['fightIQ',5],['focus',4],['morale',-5]]}]},
-  {id:'evt_hollywood_cameo',req:f=>(f.earnings||0)>30,title:'Caméo hollywoodien',text:'Un studio de cinéma vous propose un petit rôle de mercenaire dans un film d\u2019action. Le tournage empiétera sur vos horaires de camp.',
-    choices:[{label:'Accepter le rôle',reward:20,d:[['morale',15],['focus',-10],['form',-8]]},
-             {label:'Refuser pour rester 100% focus sur le sport',d:[['discipline',8],['focus',6],['morale',-10]]}]},
-  {id:'evt_overtraining',title:'La ligne rouge',text:'Votre corps vous supplie d\u2019arrêter. Vos temps de réaction s\u2019effondrent et votre système nerveux est complètement grillé par le surentraînement.',
-    choices:[{label:'Prendre trois jours de repos complet',d:[['recovery',6],['form',15],['discipline',-6]]},
-             {label:'Pousser la machine jusqu\u2019à la rupture',d:[['heart',8],['cardio',4],['form',-25]],risk:0.45,bad:[['form',-38],['recovery',-8],['morale',-12]]}]},
-  {id:'evt_forgotten_belt',req:f=>!!f.champion,title:'Ceinture oubliée',text:'Vous avez oublié votre ceinture de champion dans le coffre d\u2019un VTC après une soirée de célébration. Le chauffeur exige une récompense pour la rendre.',
-    choices:[{label:'Payer la rançon discrètement (5k$)',cost:5,d:[['focus',5],['discipline',3],['morale',-5]]},
-             {label:'Le menacer publiquement sur les réseaux',d:[['aggression',6],['confidence',4],['composure',-10]]}]},
-  {id:'evt_lumpinee_trip',req:f=>f.style==='muayThai',title:'Pèlerinage au Lumpinee',text:'L\u2019appel de la Thaïlande se fait sentir. Partir s\u2019entraîner à la dure, dans la chaleur étouffante de Bangkok, pourrait raviver votre instinct animal.',
-    choices:[{label:'Financer le voyage martial (15k$)',cost:15,d:[['clinchStr',6],['kick',5],['durability',4],['form',-12]]},
-             {label:'Rester s\u2019entraîner dans son confort habituel',d:[['discipline',4],['morale',-6]]}]},
-  {id:'evt_hot_yoga',title:'Yoga infernal',text:'Un coéquipier vous traîne dans un cours de yoga Bikram à 40°C. Vos muscles raides d\u2019artiste martial crient à l\u2019agonie dès les premières postures.',
-    choices:[{label:'Souffrir en silence jusqu\u2019à la fin de la séance',d:[['flexibility',8],['recovery',4],['power',-4]],risk:0.25,bad:[['form',-14],['power',-6]]},
-             {label:'Quitter la salle en plein milieu, trempé de sueur',d:[['power',3],['flexibility',-5],['morale',-2]]}]},
-  {id:'evt_twitter_beef',title:'Guerre des claviers',text:'Un combattant que vous n\u2019avez même pas provoqué lance une attaque cinglante sur votre style de combat en ligne. Vos notifications explosent.',
-    choices:[{label:'Rentrer dans le clash virtuel et faire le buzz',d:[['aggression',6],['confidence',5],['focus',-10]],risk:0.35,bad:[['focus',-20],['composure',-9],['morale',-12]]},
-             {label:'Désinstaller l\u2019application et l\u2019ignorer',d:[['composure',8],['discipline',5],['morale',-8]]}]},
-  {id:'evt_boxing_gloves_16',req:f=>G.currentEra&&G.currentEra.id==='era_boxing',title:'Le test des 16oz',text:'Dans cette ère dominée par la boxe, d\u2019anciens pros viennent tourner à la salle avec des gants de 16oz pour vous donner une leçon d\u2019anglaise.',
-    choices:[{label:'Mettre les gros gants et boxer avec eux',d:[['handSpeed',6],['cross',4],['kick',-5],['form',-8]]},
-             {label:'Les emmener au sol (imposer les règles du MMA)',d:[['adaptability',6],['takedown',4],['handSpeed',-5]]}]},
-  {id:'evt_invincible_aura',req:f=>(f.streak||0)>=4,title:'Aura d\u2019invincibilité',text:'Votre série de victoires vous donne l\u2019impression d\u2019être un demi-dieu. Plus rien ne semble pouvoir vous blesser dans la cage.',
-    choices:[{label:'Embrasser cette confiance absolue',d:[['confidence',8],['power',5],['fightIQ',-8]]},
-             {label:'Se forcer à rester humble et paranoïaque',d:[['composure',6],['focus',5],['morale',-6]]}]},
-  {id:'evt_change_scenery',req:f=>(f.streak||0)<=-2,title:'Changement de décor',text:'La spirale de la défaite empoisonne l\u2019air de votre salle habituelle. Vous ressentez un besoin vital de vous exiler pour ce camp d\u2019entraînement.',
-    choices:[{label:'Partir en camp d\u2019isolement à l\u2019étranger (10k$)',cost:10,d:[['adaptability',6],['fightIQ',5],['confidence',4],['form',-10]]},
-             {label:'Serrer les dents et rester fidèle à son équipe',d:[['heart',6],['discipline',4],['confidence',-5]]}]},
-  {id:'evt_intrusive_fan',title:'Le fan envahissant',text:'Pendant votre footing matinal à l\u2019aube, un fan vous reconnaît et commence à courir à côté de vous en vous posant mille questions.',
-    choices:[{label:'Lui répondre gentiment et faire le footing ensemble',d:[['cardio',4],['morale',8],['focus',-5]]},
-             {label:'Accélérer violemment l\u2019allure pour le semer',d:[['footSpeed',5],['explosiveness',4],['morale',-4]]}]},
-  {id:'evt_creaky_knee',title:'Genou qui grince',text:'Sur une tentative de takedown routinière, votre genou émet un craquement sourd. La douleur est minime, mais l\u2019angoisse d\u2019une rupture ligamentaire est totale.',
-    choices:[{label:'Consulter un spécialiste en urgence (5k$)',cost:5,d:[['recovery',6],['composure',4],['form',-4]]},
-             {label:'Bander l\u2019articulation fortement et prier',d:[['heart',5],['durability',3],['confidence',-8]]}]},
-  {id:'evt_martial_wisdom',req:f=>f.age>=35,title:'Sagesse martiale',text:'Vos fibres blanches disparaissent, votre explosivité n\u2019est plus ce qu\u2019elle était. Mais là où le corps ralentit, l\u2019esprit commence à voir tout au ralenti.',
-    choices:[{label:'Adapter son style sur le timing et le coup d\u2019œil',d:[['fightIQ',8],['composure',6],['handSpeed',-6]]},
-             {label:'Refuser l\u2019âge et forcer les drills de vitesse',d:[['handSpeed',5],['explosiveness',3],['recovery',-10],['form',-12]]}]},
-  {id:'evt_stubborn_scale',title:'La balance qui stagne',text:'À une semaine de la pesée, votre poids refuse de descendre. Votre métabolisme s\u2019est mis en mode survie et stocke la moindre goutte d\u2019eau.',
-    choices:[{label:'Enfiler la combinaison de sudation et courir',d:[['cardio',5],['chin',-8],['form',-18]]},
-             {label:'Jeûne hydrique total et absolu dans le noir',d:[['discipline',8],['power',-8],['form',-15]]}]},
-  {id:'evt_tape_study',title:'Nuit de cassettes',text:'Vous retrouvez une clé USB contenant des centaines d\u2019heures de combats d\u2019anciennes époques et de vieux tournois.',
-    choices:[{label:'Analyser les vieux maîtres toute la nuit',d:[['fightIQ',6],['adaptability',5],['form',-8]]},
-             {label:'Aller dormir, le sport a évolué de toute façon',d:[['recovery',5],['form',5],['fightIQ',-3]]}]},
-  {id:'evt_cooper_test',title:'Le test de Cooper',text:'Votre préparateur physique apporte un sifflet sur la piste d\u2019athlétisme. "12 minutes. Montrez-moi de quoi vous êtes fait."',
-    choices:[{label:'Vomir ses poumons pour battre le record de la salle',d:[['cardio',8],['heart',6],['form',-20]]},
-             {label:'Gérer son allure pour faire le strict minimum syndical',d:[['recovery',5],['discipline',-5],['cardio',-2]]}]},
-  {id:'evt_tv_documentary',req:f=>f.org>=3,title:'Dans l\u2019intimité du camp',text:'Une équipe télévisée réalise un documentaire "Embedded" sur votre préparation. Ils vous suivent même à la cantine et chez le kiné.',
-    choices:[{label:'Jouer le jeu des caméras et faire le show',d:[['confidence',6],['morale',10],['focus',-10]]},
-             {label:'Leur montrer la monotonie brutale et silencieuse du métier',d:[['discipline',6],['focus',5],['morale',-6]]}]},
-  {id:'evt_gi_nogi',req:f=>f.style==='bjj',title:'L\u2019appel du Kimono',text:'Vos racines vous manquent. Vous ressentez l\u2019envie viscérale de remettre un Gi pour rouler, même si le MMA moderne se pratique en No-Gi.',
-    choices:[{label:'Passer la semaine en Kimono',d:[['guardWork',6],['submission',5],['explosiveness',-6]]},
-             {label:'Rester pragmatique et s\u2019entraîner en No-Gi',d:[['takedown',4],['adaptability',3],['morale',-5]]}]},
-  {id:'evt_forest_kata',req:f=>f.style==='karate',title:'L\u2019esprit de la forêt',text:'Vous décidez de fuir les néons clignotants de la salle pour exécuter vos Katas pieds nus dans la forêt, au lever du soleil.',
-    choices:[{label:'Rechercher la fluidité et le vide mental',d:[['footSpeed',6],['composure',5],['durability',-5]]},
-             {label:'Durcir ses tibias et poings contre les écorces d\u2019arbres',d:[['durability',8],['kick',4],['form',-12]]}]},
-  {id:'evt_neck_harness',title:'Collier de plomb',text:'Un lutteur de passage vous montre un vieil exercice avec un harnais de cou lesté de disques de fonte. Cela a l\u2019air dangereux pour les cervicales.',
-    choices:[{label:'Charger les poids et renforcer la nuque',d:[['chin',6],['clinchStr',5],['form',-10]]},
-             {label:'Protéger ses cervicales et faire des étirements',d:[['flexibility',5],['recovery',4],['chin',-4]]}]},
-  {id:'evt_management_sim',title:'Nuit blanche tactique',text:'Un ami vous offre le dernier jeu de simulation de management sportif. Vous lancez une partie "juste pour voir les menus" et il est soudainement 6h du matin.',
-    choices:[{label:'Terminer la saison (esprit tactique en ébullition)',d:[['fightIQ',5],['morale',12],['form',-18]]},
-             {label:'Sauvegarder et aller dormir de force',d:[['discipline',6],['recovery',4],['morale',-5]]}]},
-  {id:'evt_train_south',req:f=>f.org>0,title:'Retraite au soleil',text:'Pour couper avec la pression asphyxiante du camp, vous partez quelques jours dans le Sud. Le trajet est long, mais le soleil régénère l\u2019esprit.',
-    choices:[{label:'Payer le voyage et s\u2019évader (4k$)',cost:4,d:[['morale',18],['recovery',6],['focus',-8]]},
-             {label:'Annuler à la dernière minute et s\u2019enfermer à la salle',d:[['focus',6],['discipline',4],['morale',-10]]}]},
-  {id:'evt_repotting',title:'Rempotage printanier',text:'Vos plantes d\u2019appartement commencent à étouffer dans leurs vieux pots. L\u2019opération de sauvetage botanique va vous prendre l\u2019après-midi entière.',
-    choices:[{label:'Prendre le temps d\u2019avoir la main verte',d:[['composure',6],['recovery',4],['form',-6]]},
-             {label:'Laisser les plantes souffrir pour le moment',d:[['focus',5],['aggression',3],['morale',-8]]}]},
-  // --- Némésis parallèle : lit l'état réel du rival verrouillé dans le roster ---
-  {id:'evt_nemesis_loss',req:f=>f.faithNemesisId&&G.roster.some(o=>o.id===f.faithNemesisId&&(o.streak||0)<0),title:'Chute du rival',text:'Votre rival historique vient de subir un lourd revers. Les journalistes s\u2019empressent de vous demander votre réaction à chaud.',
-    choices:[{label:'L\u2019enterrer publiquement',d:[['aggression',4],['morale',5],['composure',-5]]},
-             {label:'Lui souhaiter un bon rétablissement',d:[['composure',5],['focus',3]]}]},
-  {id:'evt_nemesis_win',req:f=>f.faithNemesisId&&G.roster.some(o=>o.id===f.faithNemesisId&&(o.streak||0)>=3),title:'L\u2019ombre du rival',text:'Votre némésis enchaîne les victoires impressionnantes. Sa hype médiatique commence sérieusement à éclipser la vôtre.',
-    choices:[{label:'S\u2019entraîner deux fois plus dur',d:[['form',-15],['focus',8],['cardio',4]]},
-             {label:'L\u2019ignorer et rester concentré',d:[['confidence',5],['composure',3],['morale',-5]]}]},
-  {id:'evt_nemesis_gym',req:f=>f.faithNemesisId&&G.roster.some(o=>o.id===f.faithNemesisId),title:'Guerre à distance',text:'Rumeur confirmée : votre némésis vient de rejoindre une salle rivale réputée pour sa lutte agressive. Le message est clair.',
-    choices:[{label:'Travailler sa défense de lutte en prévision',d:[['tdd',6],['form',-8]]},
-             {label:'Parier sur son propre striking',d:[['power',4],['handSpeed',3],['form',-6]]}]}
-];
 function formatEventDelta(d){
   if(!d || !d.length) return '';
   return d.map(([k,v])=>{
@@ -1715,26 +1113,6 @@ function scr_faith_event(){
    avant de commencer. Quatre serments seulement sont proposés, tirés d'un
    pool plus large : offrir la liste complète inviterait à l'optimisation,
    la rareté de l'offre force l'engagement. ==== */
-const FAITH_OATHS=[
-  {id:'no_shortcut',label:'Jamais de raccourci',
-   texte:'Je ne prendrai jamais de raccourci : ni produit, ni juge acheté, ni pesée arrangée.',
-   rappel:'Aucun privilège illégal de toute la carrière.'},
-  {id:'old_lion',label:'Le vieux lion',
-   texte:'Je serai encore champion quand on me dira que je suis trop vieux.',
-   rappel:'Décrocher une ceinture à 34 ans ou plus.'},
-  {id:'undefeated',label:'Invaincu jusqu’au titre',
-   texte:'Je porterai la ceinture sans avoir jamais connu la défaite.',
-   rappel:'Être champion en n’ayant jamais perdu.'},
-  {id:'blood_master',label:'Le sang du maître',
-   texte:'Celui que j’aurai formé tombera devant moi.',
-   rappel:'Battre son propre protégé devenu rival.'},
-  {id:'long_road',label:'La route longue',
-   texte:'Je combattrai jusqu’à ce que mon corps me le refuse.',
-   rappel:'Aller jusqu’à 38 ans sans raccrocher.'},
-  {id:'homegrown',label:'Fidèle à la salle',
-   texte:'Je ne quitterai jamais ceux qui m’ont appris à me battre.',
-   rappel:'Ne jamais accepter l’offre d’une autre écurie.'}
-];
 /** Le serment est-il tenu au moment de la retraite ?
  * Un serment rompu en cours de route l'est définitivement.
  * @param {object} oath @param {object} f @param {object} F G.faith @returns {boolean} */
@@ -1793,6 +1171,29 @@ function scr_faith_oath(){
    contrairement à V2-39) : une carrière 15-2 avec ceinture doit noter
    nettement plus haut qu'une 40-25 sans titre — vérifié en testant les
    deux profils avant livraison (cf. commit). */
+/* ==== [ANCRE: V3_CAREER_LIFETIME_TOTAL] — Plan V3 LOT 7 §5.7.2 point 4 :
+   "BUG — longueur de carrière […] j'ai pu faire seulement 15 combats".
+   INVESTIGATION (obligatoire, cf. spec) : faithFightsPlanned()/
+   faithGenerateCalendar()/nextFaithYear()/isDeclining() ont été audités —
+   aucun n'empêche mécaniquement d'atteindre 25-40 combats. Une simulation
+   de 8 carrières complètes (jsdom, clickThrough jusqu'à retraite naturelle)
+   donne un total RÉEL de 25 à 32 combats par carrière (médiane ~28-29),
+   déjà dans la cible du document, avec retraite naturelle vers 37-40 ans
+   (isDeclining()). La cause racine du "15 combats" n'est donc PAS un
+   plafond de combats manquant, mais un problème d'AFFICHAGE : turnPro()
+   (ui-05) réinitialise volontairement f.W/f.L/f.history au passage
+   amateur→pro (le palmarès amateur est archivé à part dans f.amaRec, par
+   conception — cf. ANCRE P4P_SCORE_80_20) — et AUCUN écran ne recombine
+   jamais les deux pour afficher le total de carrière réel. Un joueur qui a
+   disputé 14 combats amateurs puis 17 combats pro ne voit jamais que "17"
+   (son record pro affiché partout), jamais son vrai total de 31. Corrigé
+   ici en exposant le total réel (épilogue, fiche) plutôt qu'en modifiant
+   le rythme de combat, qui n'est pas le problème. */
+function faithCareerTotalFights(f){
+  const ama=(f.amaRec&&(f.amaRec.W+f.amaRec.L))||0;
+  return ama+((f.history||[]).length);
+}
+/* ==== [FIN ANCRE] ==== */
 function computeLegendScore(f){
   const F=(typeof G!=='undefined'&&G&&G.faith)||{};
   const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
@@ -1868,6 +1269,37 @@ function faithScoreRows(sub,delays){
   if(sub.pic!=null) return `${faithScoreRow('Pic',sub.pic,40,d[0])}${faithScoreRow('Palmarès',sub.palmares,40,d[1])}${faithScoreRow('Trace',sub.trace,20,d[2])}`;
   return `${faithScoreRow('Palmarès',sub.palmares||0,32,d[0])}${faithScoreRow('Sommet',sub.sommet||0,26,d[1])}${faithScoreRow('Intégrité',sub.longevite||0,18,d[2])}${faithScoreRow('Empreinte',sub.empreinte||0,14,d[2])}${faithScoreRow('Fortune',sub.fortune||0,10,d[2])}`;
 }
+/* ==== [ANCRE: V3_CAREER_STATS_GRID] — Plan V3 LOT 7 §5.7.2 point 2 : "sous
+   l'overall, tout le reste — en une grille dense, pas en prose […] bloc
+   chiffres (grille mono, 12 cases max)". Portée réduite à ce que l'état du
+   jeu suit déjà réellement (aucune donnée inventée) : temps de contrôle et
+   coups mis/reçus sont désormais accumulés sur toute la carrière
+   (f.careerSig/careerCtrl, ANCRE V3_CAREER_LIFETIME_STATS, ui-08) plutôt
+   que remis à zéro chaque saison. "Pesées réussies/ratées" (spec) n'a pas
+   d'équivalent dans l'état actuel (le poids se négocie en tier de
+   difficulté, jamais en pass/fail binaire) — case omise plutôt
+   qu'inventée. */
+function faithCareerStatsGrid(f,F){
+  const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
+  const cell=(v,lbl)=>`<div style="border:1px solid var(--line);padding:8px;text-align:center"><div class="mono" style="font-size:15px">${v}</div><div class="eyebrow" style="font-size:9px;margin-top:2px;opacity:.8">${lbl}</div></div>`;
+  const cells=[
+    cell(faithCareerTotalFights(f),'Combats (total)'),
+    cell((f.ko||0)+(f.sub||0),'Finitions'),
+    cell(f.ko||0,'KO/TKO'),
+    cell(f.sub||0,'Soumissions'),
+    cell(f.dec||0,'Décisions'),
+    cell(f.careerSig||0,'Coups mis'),
+    cell((F&&F.dmgHeadTotal)||0,'Coups encaissés'),
+    cell(f.careerCtrl||0,'Temps de contrôle (s)'),
+    cell(Math.max((F&&F.bestStreak)||0,f.streak||0,0),'Meilleure série'),
+    cell((F&&F.peakRank!=null)?`#${F.peakRank}`:'—','Meilleur classement'),
+    cell(formatArgent((F&&F.peakEarnings)||f.earnings||0),'Plus grosse bourse'),
+    cell(titles,'Titres'),
+  ];
+  return `<div class="mt"><div class="eyebrow mb" style="font-size:11px">En chiffres</div>
+   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${cells.join('')}</div></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — la comparaison au record personnel
    affiché sous la décomposition. Le silence complet passé un écart trop
    large est délibéré (effet Zeigarnik) : un petit manque donne envie de
@@ -1880,6 +1312,31 @@ function faithLegendCompareLine(total,previousBest){
   if(total===previousBest) return {text:'À égalité avec ta meilleure carrière.',color:'var(--muted)'};
   const gap=previousBest-total;
   return {text:gap<=25?`Record personnel : ${previousBest} — il manquait ${gap} points`:`Record personnel : ${previousBest}`,color:'var(--muted)'};
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V3_NEMESIS_EPILOGUE] — Plan V3 LOT 3 §P16 : "un destin dédié
+   pour la némésis" à la clôture de la carrière — jamais juste absente si
+   elle existe. Toujours cherchée dans G.roster : contrairement à tout
+   autre combattant, la némésis est explicitement protégée du
+   remplacement par un nouveau prospect tant qu'elle est en poste
+   (isNemesis, advanceRoster(), ui-01) — elle ne peut donc jamais avoir
+   disparu en silence au moment où l'épilogue s'affiche. */
+function faithNemesisEpilogueBlock(f){
+  if(!f.faithNemesisId) return '';
+  const nem=(G.roster||[]).find(o=>o.id===f.faithNemesisId);
+  if(!nem) return '';
+  const rec=f.nemesisRecord||{w:0,l:0};
+  const meAhead=rec.w>rec.l;
+  const tied=rec.w===rec.l;
+  const fate=nem.champion
+    ?`${esc(fighterDisplayName(nem))} porte aujourd'hui une ceinture. Votre nom reste attaché au sien, que vous l'ayez voulu ou non.`
+    :`${esc(fighterDisplayName(nem))} combat toujours, à ${nem.W||0}-${nem.L||0}. L'histoire entre vous deux n'est peut-être pas finie.`;
+  const bilan=tied?`Face à face à égalité, ${rec.w}-${rec.l}.`:meAhead?`Vous menez ${rec.w}-${rec.l} sur cette rivalité — la dernière ligne de son bilan face au vôtre.`:`Il mène ${rec.l}-${rec.w} sur cette rivalité, jusqu'au bout.`;
+  return `<div class="card mt" style="padding:14px;background:var(--panel2);border-left:3px solid var(--f-red-hi);text-align:left">
+   <div class="eyebrow mb" style="font-size:11px;color:var(--f-red-hi)">${esc(nemesisTierLabel(rec.w+rec.l))} · némésis</div>
+   <div class="small">${bilan}</div>
+   <div class="small muted mt">${fate}</div>
+  </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_epilogue(){
@@ -1905,19 +1362,36 @@ function scr_faith_epilogue(){
    <div class="faith-paper">
      <div style="height:120px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:32px">
        <div class="hero-name" style="font-size:34px;line-height:1.05">${esc(f.name)}</div>
-       <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">${debut} – ${fin} · ${f.W}-${f.L}${f.ko?` · ${f.ko} KO`:''}</div>
+       <!-- ==== [CORRECTIF V3_CAREER_LIFETIME_TOTAL] — le record affiché ici
+            était SEULEMENT f.W-f.L (palmarès pro, réinitialisé par turnPro()
+            au passage amateur→pro) — jamais le total réel de la carrière.
+            Le total (faithCareerTotalFights) est désormais la donnée mise
+            en avant ; le détail amateur/pro reste visible juste en dessous
+            pour qui veut le détail, jamais caché. ==== -->
+       <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">${debut} – ${fin} · ${faithCareerTotalFights(f)} combats au total${f.ko?` · ${f.ko} KO`:''}</div>
+       ${f.amaRec?`<div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">Amateur ${f.amaRec.W}-${f.amaRec.L} · Pro ${f.W}-${f.L}${f.D?`-${f.D}`:''}</div>`:''}
+       <!-- ==== [ANCRE: V3_NICKNAME_HISTORY] — Plan V3 LOT 7 §5.7.2 point 3 :
+            "historique des surnoms qu'on t'a donnés". f.nicknameHistory
+            (checkNicknameEvolution, ui-05) existait déjà — accumulé mais
+            jamais affiché nulle part. Le mécanisme "garder le surnom sous
+            condition spécifique" (spec) reste hors périmètre : les surnoms
+            évoluent déjà uniquement par le jeu (jamais choisis par le
+            joueur), condition déjà proche de l'esprit de la demande. ==== -->
+       ${(f.nicknameHistory&&f.nicknameHistory.length)?`<div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">Surnoms portés : ${f.nicknameHistory.map(esc).join(' → ')}${f.nick?` → ${esc(f.nick)}`:''}</div>`:''}
      </div>
      <div style="text-align:center;padding:48px 0">
        <div class="hero-name" style="font-size:96px;font-weight:700;line-height:.9">${total}</div>
-       <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100</div>
+       <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100 · Score de Légende (Héritage)</div>
      </div>
      <div style="margin-bottom:12px">
        ${faithScoreRows(sc,[0,180,360])}
      </div>
      <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
+     ${faithCareerStatsGrid(f,G.faith)}
      ${faithJourneyBlock(G.faith)}
      ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    </div>
+   ${faithNemesisEpilogueBlock(f)}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.faithRelaunchSame()">REPRENDRE LE MÊME CHEMIN</button>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.faithRelaunchEdit()">Changer une chose</button>
    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="CL.newFaithCareer()">Repartir de zéro</button>
@@ -2011,14 +1485,12 @@ function scr_faith_legends(){
    qu'un Taiseux — c'est là que le choix de création devient enfin visible).
    Les chiffres ne disparaissent pas : ils passent SOUS l'article et cessent
    d'être le message pour redevenir la source. ==== */
-const FAITH_PRESSE_MEDIAS=['LA GAZETTE DE LA CAGE','COMBAT HEBDO','LE ROUND','RINGSIDE'];
 /* ==== [ANCRE: V2-33] — un journaliste nommé, pas un média anonyme tiré par
    year%length. F.journalist={name,media,sentiment} est posé UNE FOIS pour
    toute la carrière (faithEnsureJournalist, même schéma idempotent que
    faithEnsureOffer/faithEnsureIntersaisonDraw), sentiment de -3 à +3,
    ajusté une fois par an (faithUpdateJournalistSentiment, gardé par
    lastSentimentYear pour ne jamais compter deux fois la même saison). */
-const FAITH_JOURNALIST_NAMES=['Théo Vasseur','Inès Duplantier','Karim Belaïd','Sacha Moreno','Léa Fontaine','Marcus Webb','Nadia Cherif','Owen Blackwood'];
 function faithEnsureJournalist(F){
   if(F.journalist) return F.journalist;
   F.journalist={name:pick(FAITH_JOURNALIST_NAMES),media:pick(FAITH_PRESSE_MEDIAS),sentiment:0};
@@ -2038,11 +1510,27 @@ function faithUpdateJournalistSentiment(F,angle){
    journaliste ET la place qu'il donne dans la division — le score de
    légende lui-même disparaît de la coupure, il reste seulement sur la
    fiche/épilogue (faithScoreRows, computeLegendScore). */
+/* ==== [CORRECTIF V3_JOURNALIST_MEMORY] — Plan V3 LOT 7 §5.7.1 point 3 (P20) :
+   "Karim Belaïd m'a répété la même phrase toute ma carrière, alors que je
+   suis n°1 — il disait la même chose quand j'étais n°30". j.sentiment
+   (déjà réel, évolue chaque année — cf. faithUpdateJournalistSentiment)
+   ne pouvait jamais se CONTREDIRE : un journaliste sceptique restait
+   sceptique mot pour mot après une ascension spectaculaire. F.rankHistory
+   (worldTick, engine.js, LOT 0) donne la trajectoire réelle — comparée
+   au premier rang connu, pas seulement au sentiment accumulé. Portée
+   réduite face à la demande complète (pool ≥40 segmenté par tier) : une
+   seule ligne de retournement, ajoutée au constat existant plutôt que de
+   dupliquer tout le système de verdict. */
 function faithJournalistVerdict(F,f,ys){
   const j=faithEnsureJournalist(F);
   const rank=ys.rank;
   const rankTxt=rank?` Il le classe ${rank}${rank===1?'er':'e'} de sa division${rank>1?` — il en met ${rank-1} devant lui`:''}.`:'';
-  const stance=j.sentiment>=2
+  const hist=Array.isArray(F.rankHistory)?F.rankHistory:[];
+  const firstRank=hist.length?hist[0].rank:null;
+  const surprised=firstRank!=null && rank!=null && (firstRank-rank)>=15 && j.sentiment<2;
+  const stance=surprised
+    ?`« Je ne le voyais pas arriver, très honnêtement. Il était ${firstRank}e à mes yeux il y a quelques saisons. »`
+    :j.sentiment>=2
     ?`« ${esc(f.name)}, je le dis depuis un moment maintenant : c’est un des meilleurs de sa génération. »`
     :j.sentiment<=-2
     ?'« Je maintiens ce que j’ai écrit sur lui. Rien cette année ne m’a fait changer d’avis. »'
@@ -2060,48 +1548,10 @@ function faithPresseAngle(ys,F){
   if((ys.eloDelta||0)<-60) return 'chute';
   return 'stagnation';
 }
-const FAITH_PRESSE_TITRES={
-  blanche:['Une année pour rien','Le nom effacé des affiches','Suspendu, et déjà oublié','Douze mois de silence administratif','La saison qui n’a jamais eu lieu','Rayé du calendrier'],
-  consecration:['Le sommet, enfin','Plus personne devant','La division a un patron','On regarde tout le monde d’en haut','Le trône est occupé','Il n’y a plus d’adversaire évident'],
-  usure:['À quel prix ?','Les coups s’accumulent','Une guerre de trop','Le corps envoie la facture','Gagner en laissant des morceaux','Ce que le classement ne dit pas'],
-  ascension:['La marche a été franchie','On ne rigole plus','L’année qui change tout','Le saut que personne n’attendait','Un cran au-dessus','La hiérarchie a bougé'],
-  chute:['La chute','Le doute s’installe','Où est passé le combattant ?','Le classement ne pardonne pas','Une année à oublier','Le contrecoup'],
-  creux:['Une saison sans combat','Le silence de la cage','Absent des affiches','Une année en pointillés'],
-  stagnation:['Sur place','Ni progrès ni recul','Une année de transition','Le surplace','Rien n’a bougé','Une saison sans relief']
-};
 /* Plusieurs corps par angle : une carrière dure quinze saisons ou plus, et
    un texte qui revient à l'identique tue la fiction plus vite qu'un texte
    moyen. Le tirage est déterministe (dérivé de l'année et du bilan) pour
    qu'une même saison relise toujours le même article. */
-const FAITH_PRESSE_CORPS={
-  blanche:[
-    'Licence suspendue, saison annulée. Le dossier restera dans les archives de la fédération bien après que le public aura tourné la page.',
-    'Une signature au bas d’un rapport de laboratoire aura suffi à rayer douze mois de travail. La cage, elle, n’a pas attendu.',
-    'Le calendrier s’est refermé sans un seul combat. Les concurrents, eux, ont continué d’avancer.'],
-  consecration:[
-    'Le classement ne se discute plus. Reste à savoir combien de temps un sommet se défend — l’histoire du sport dit rarement longtemps.',
-    'Il faudra désormais battre ce nom pour exister dans la division. Tous les calendriers de l’an prochain seront écrits autour de lui.',
-    'La place est prise, et personne ne semble pressé de la réclamer. C’est précisément là que les carrières deviennent dangereuses.'],
-  usure:[
-    'Le bilan comptable est correct. Le bilan médical l’est moins. En coulisses, plus d’un observateur compte les années qui restent.',
-    'Chaque victoire de cette saison s’est payée en coups encaissés. Ce genre d’arithmétique finit toujours par se solder.',
-    'On a vu un combattant gagner. On a aussi vu un homme rentrer au vestiaire plus lentement qu’il y était entré.'],
-  ascension:[
-    'La progression est nette, mesurable, et les promoteurs l’ont remarquée avant les fans. Le calendrier de l’an prochain sera plus dur.',
-    'Il y a douze mois, ce nom ne figurait dans aucune conversation sérieuse. Il ouvre désormais les discussions de matchmaking.',
-    'Le genre de saison qui déplace une carrière d’un étage. Reste à tenir le rythme quand les adversaires cesseront d’être des tests.'],
-  chute:[
-    'La saison laisse des traces au classement. Un accident de parcours, dit l’entourage ; une tendance, disent les chiffres.',
-    'Rien ne s’est écroulé d’un coup. C’est bien ce qui inquiète : la pente a été régulière, et personne ne l’a enrayée.',
-    'Les mêmes armes, les mêmes plans, mais plus les mêmes résultats. La division a appris à lire ce combattant.'],
-  creux:[
-    'Aucun combat cette année. Dans ce sport, l’absence se paie deux fois : au classement, et dans la mémoire du public.',
-    'Douze mois sans entrer dans la cage. Les fans passent à autre chose plus vite que les blessures ne guérissent.'],
-  stagnation:[
-    'Rien de déshonorant, rien de marquant non plus. Le genre de saison qu’on oublie avant même la suivante.',
-    'Une année propre, sans éclat. À ce niveau, ne pas monter revient déjà à laisser passer du monde.',
-    'Le travail est là, les résultats suivent à peine. La différence se fera ailleurs que dans la salle.']
-};
 /** La même saison ne se raconte pas pareil selon qui la vit.
  * @param {object} f @param {string} angle @returns {string} */
 function faithPresseTon(f,angle){
@@ -2112,6 +1562,13 @@ function faithPresseTon(f,angle){
   if(f.personality==='humble') return bon
     ? 'Deux phrases en conférence, pas une de plus. Le reste s’est dit dans la cage.'
     : 'Pas un mot plus haut que l’autre. Le silence, cette année, ressemblait à de la lassitude.';
+  /* ==== [CORRECTIF V3_PERSONNALITE_SHOWMAN] — Plan V3 LOT 7 §5.7.1 point 4 :
+     "un showman qui perd est raconté autrement qu'un taiseux qui perd" —
+     'showman' (ajouté en LOT 4) ressortait ici avec une chaîne vide, la
+     seule des trois personnalités sans ton propre. */
+  if(f.personality==='showman') return bon
+    ? 'Le spectacle et les chiffres, pour une fois, racontent la même histoire.'
+    : 'La mise en scène était au rendez-vous. Le résultat, beaucoup moins.';
   return '';
 }
 /* ==== [ANCRE: V2-32] — table des faits saillants de l'année, chacun avec
@@ -2261,8 +1718,12 @@ function scr_faith_year_end(){
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
      ${chiffre(`${ys.wins}-${ys.losses}`,'Bilan')}
      ${chiffre(`${ys.eloDelta>0?'+':''}${ys.eloDelta}`,'Progression',ys.eloDelta>=0?'var(--win)':'var(--loss)')}
-     ${chiffre(`#${ys.rank}`,'Classement')}
-     ${chiffre(ys.dmgHead,'Coups encaissés',ys.dmgHead>30?'var(--loss)':'')}
+     <!-- ==== [CORRECTIF V3_CHAMPION_RANG/V3_RANG_DELTA] — Plan V3 LOT 7
+          §5.7.1 points 7/8 : "marquer dans le rang quand on est champion
+          (petit effet)" (P20) et "delta de classement visible" avec la
+          valeur de départ (rankStart, F.startOfYearRank déjà suivi). ==== -->
+     ${f.champion?chiffre('CHAMPION','Classement','var(--gold)'):chiffre(`#${ys.rank}${(ys.rankStart!=null&&ys.rankStart!==ys.rank)?` <span class="small" style="font-size:11px">(${ys.rankStart>ys.rank?'+':''}${ys.rankStart-ys.rank})</span>`:''}`,'Classement')}
+     ${chiffre(ys.finitions||0,'Finitions',(ys.finitions||0)>0?'var(--win)':'')}
    </div>
    ${skills?`<div><div class="eyebrow" style="margin-bottom:4px">Ce qui a été appris</div>${skills}</div>`:''}
    ${isDeclining(f)

@@ -216,7 +216,10 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // Némésis Faith : verrouillée dès la première vraie rivalité, ne change plus
   // jamais ensuite (contrairement à f.rivalId qui peut glisser vers l'animosité
   // la plus récente) — c'est le fil rouge narratif de toute la carrière.
-  if(G.faith && !G.f.faithNemesisId && G.f.rivalId){ G.f.faithNemesisId=G.f.rivalId; }
+  if(G.faith && !G.f.faithNemesisId && G.f.rivalId){
+    const rival=(G.roster||[]).find(o=>o.id===G.f.rivalId);
+    if(rival) lockFaithNemesis(rival);
+  }
   /* ==== [ANCRE: FA-19_SHOWMAN] — le showman vend le spectacle avant de le
      livrer (personality créée dans finalizeFaithDraft, ui-08) : une victoire
      aux points, sans finish, est par définition le résultat qu'il n'a pas
@@ -400,19 +403,41 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     else { G.f.bossUnimpressed--; G.f.rankBoost=(G.f.rankBoost||0)-10; }
   }
   let champChampDecision=false;
+  /* ==== [ANCRE: V3_TITLE_ATTEMPTS] — Plan V3 LOT 6 §P18 : "la ligne finale
+     […] doit varier selon le chemin parcouru, pas selon le résultat seul".
+     Compte les tentatives de titre Faith AVANT ce combat-ci (capturé avant
+     l'incrément, cf. titleAttemptsBefore transmis à G.pending plus bas) —
+     un premier essai réussi et une ceinture arrachée après 3 échecs ne
+     méritent pas la même ligne de consécration. ==== */
+  const titleAttemptsBefore=(G.faith&&G.faith.titleAttempts)||0;
+  if(G.faith && (kind==='title'||kind==='defense')) G.faith.titleAttempts=titleAttemptsBefore+1;
   // titre
   if(win && kind==='title'){
     G.f.champion=(G.f.org>=5?'monde':G.f.org===4?'europe':G.f.org===3?'national':G.f.org===2?'regional':'local'); G.f.titles++; G.roster.forEach(o=>o.champion=null);
     milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.medal} CEINTURE ${orgDisplayName(G.f).toUpperCase()}</span>`;
     recordTitleChange(G.f.org,G.f.divName,G.f.name,opp.name,orgDisplayName(G.f));
+    if(G.faith) G.faith.pendingTitleConsecration={type:'won',oppId:opp.id,titleAttemptsBefore,wasNemesis:opp.id===G.f.faithNemesisId};
   }
   else if(win && kind==='defense'){ G.f.defenses++;
     // Un défenseur qui est déjà double champion doit le voir rappelé ici
     // (item #14 : le statut de double champion n'était visible nulle part
     // sur l'écran de résultat d'une défense ordinaire).
     milestone=G.f.champChampBelt?`Titre défendu (${G.f.defenses}) — toujours Double Champion (${G.f.divName} + ${G.f.champChampBelt})`:'Titre défendu ('+G.f.defenses+')';
-    recordTitleDefense(G.f.org,G.f.divName,G.f.name); }
+    recordTitleDefense(G.f.org,G.f.divName,G.f.name);
+    if(G.faith) G.faith.pendingTitleConsecration={type:'defended',oppId:opp.id,titleAttemptsBefore};
+  }
   else if(kind==='defense' && res.winner==='D'){ milestone='Titre conservé (match nul)'; }
+  /* ==== [ANCRE: V3_TITLE_LOSS_CLAUSE] — Plan V3 LOT 6 §5.6.1.b : la clause
+     de revanche posée à la négociation (scr_faith_title_negotiation, ui-08)
+     ne sert QUE si le titre est perdu — elle garantit que la PROCHAINE
+     offre (faithEnsureOffer, ui-08) proposera le même adversaire, au lieu
+     d'un tirage normal par l'agent. Consommée ici, au moment précis où
+     "perdre" devient un fait acquis, jamais avant. */
+  else if(!win && res.winner!=='D' && kind==='title' && G.faith && G.faith.pendingRevengeClause){
+    G.faith.guaranteedRematchId=opp.id;
+    G.faith.pendingRevengeClause=false;
+  }
+  /* ==== [FIN ANCRE] ==== */
   else if(win && kind==='champchamp_title'){
     // Supercombat pour la double ceinture : gagné. Ceinture stockée à part —
     // f.champion (ceinture d'origine) n'est jamais touché ici.
@@ -478,6 +503,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.faith && opp && opp.id && opp.id===G.f.faithNemesisId){
     if(!G.f.nemesisRecord) G.f.nemesisRecord={w:0,l:0};
     if(win) G.f.nemesisRecord.w++; else G.f.nemesisRecord.l++;
+    /* ==== [ANCRE: V3_NEMESIS_MEMOIRE] — Plan V3 LOT 3 §P03/§P16 : mémoire[]
+       d'un combattant du roster — ici la némésis, seul combattant du
+       roster dont le joueur suit chaque confrontation individuellement,
+       les autres passent par le résumé agrégé du worldTick (advanceRoster,
+       ui-01). Plafonné comme f.history (engine.js) pour rester borné sur
+       une très longue carrière. */
+    if(!opp.memory) opp.memory=[];
+    const tierNow=nemesisTierLabel(G.f.nemesisRecord.w+G.f.nemesisRecord.l-1);
+    opp.memory.push({year:G.faith.year,text:win?`Battu par vous (${tierNow}).`:`Vous a battu (${tierNow}).`});
+    if(opp.memory.length>20) opp.memory=opp.memory.slice(-20);
   }
   /* ==== [FIN ANCRE] ==== */
   // ==== [FIN ANCRE] ====
@@ -654,8 +689,48 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      combat, donne le rang réel APRÈS résultat, sans attendre le cycle
      annuel d'advanceRoster() (qui ne concerne que les PNJ). ==== */
   const myRankAfter=divRank(G.f);
+  /* ==== [ANCRE: V3_UPSET_WIN_LINE] — Plan V3 LOT 6 §P09 point 4 : "la
+     psychologie de l'accomplissement, sans en faire des tonnes […] une
+     seule phrase, écrite pour ce cas précis, jamais réutilisée dans la
+     même carrière". Calculé ICI (résolution du combat), pas dans
+     scr_result() (ui-06) : un écran de résultat peut être ré-affiché sans
+     rejouer le combat (retour arrière, preserveScroll) — le drapeau
+     upsetCelebrated doit être posé une seule fois, au moment du combat
+     réel, jamais à chaque rendu. Écart fixé à 10 points d'overall (échelle
+     déjà utilisée partout ailleurs dans le fichier, ex. V3_GALA_VENUE_INFO)
+     pour rester "objectivement supérieur", pas juste "un peu favori". */
+  let upsetLine=null;
+  if(win && G.faith && !G.faith.upsetCelebrated && ((opp.overall||0)-(G.f.overall||0))>=10){
+    G.faith.upsetCelebrated=true;
+    if(!TEXT_POOLS['faith_upset_win']) registerTextPool('faith_upset_win',FAITH_UPSET_WIN);
+    upsetLine=txtPick('faith_upset_win',{});
+  }
+  if(G.faith && G.faith.pendingTitleConsecration) G.faith.pendingTitleConsecration.wasUnderdog=!!upsetLine;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V3_FIGHT_CARD_RESULT] — Plan V3 LOT 6 §5.6.1.b : "le joueur
+     doit pouvoir revenir après et voir qui a gagné" — complète la carte
+     générée à l'offre (generateFightCard, ui-08) avec le résultat du
+     combat du joueur lui-même, une fois qu'il est connu. */
+  if(G.faith && G.faith.currentCard && G.faith.currentCard.oppId===opp.id){
+    G.faith.currentCard.playerResult={win,method:res.method};
+  }
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V3_SPECTACLE_UPDATE] — Plan V3 LOT 7 §5.7.1 point 5 : une
+     victoire par finition fait vivre le public, une victoire aux points
+     l'endort ; une défaite par finition coûte plus cher qu'une défaite aux
+     points, qui elle-même reste un combat regardé jusqu'au bout. Jamais
+     affiché en chiffre (règle H.1) — seule sa lecture qualitative
+     (ANCRE V3_SPECTACLE_HYPE, ui-08) transparaît. */
+  if(G.faith){
+    const finish=!isDecisionLike(res.method);
+    let dv=0;
+    if(win) dv=finish?5:-2;
+    else if(res.winner!=='D') dv=finish?-3:0;
+    if(dv) G.f.spectacle=clamp((G.f.spectacle==null?50:G.f.spectacle)+dv,0,100);
+  }
+  /* ==== [FIN ANCRE] ==== */
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
-    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome};
+    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome, upsetLine};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   f.W=f.L=f.D=f.ko=f.sub=f.dec=f.koLoss=f.streak=0; f.orgWins=0; f.easyFights=0; f.history=[]; f.champion=null; f.titles=0; f.defenses=0; f._fy=0;

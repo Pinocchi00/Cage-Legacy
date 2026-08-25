@@ -1525,8 +1525,9 @@ function convertZeroGain(f,statKey){
   if(fam){
     for(const [nk] of fam){
       if(nk===statKey || f.attrs[nk]===undefined) continue;
-      const cap=Math.min((f.maxAttrs && f.maxAttrs[nk]!=null)?f.maxAttrs[nk]:f.potential+4,
-        (f.agedCeilings && f.agedCeilings[nk]!=null)?f.agedCeilings[nk]:100, 100);
+      // Même logique que skillHasEffect() (V3_DIMINISHING_RETURNS) : le seuil
+      // de potentiel n'est plus un mur, seul le déclin par l'âge (ou 100) l'est.
+      const cap=(f.agedCeilings && f.agedCeilings[nk]!=null)?f.agedCeilings[nk]:100;
       const before=f.attrs[nk];
       if(before<cap){
         const after=clamp(Math.min(before+1,cap),1,100);
@@ -1539,14 +1540,36 @@ function convertZeroGain(f,statKey){
   f.earnings=(f.earnings||0)+2;
   return {key:null,label:null,delta:0,converted:true,money:2,fromLabel:attrLabel(statKey)};
 }
+/* ==== [ANCRE: V3_DIMINISHING_RETURNS] — Plan V3 LOT 7 §5.7.3/P17 : "Pas de
+   palier minimum ou maximum […] Si le combattant a la chance d'avoir les
+   bonnes compétences, fait les bons camps d'entraînement, les bons choix,
+   il peut devenir le meilleur combattant de l'histoire." Le plafond dur de
+   potentiel (f.potential+4 / f.maxAttrs[k], ci-dessous jusqu'à ce lot)
+   remplacé par un rendement décroissant : EN DESSOUS du seuil, la
+   progression est strictement inchangée (aucune régression de contenu) ;
+   AU-DESSUS, chaque gain est réduit selon l'écart déjà creusé au-delà du
+   seuil — 90→95 coûte beaucoup plus que 50→55, mais reste possible, sans
+   jamais s'arrêter net. Le plafond de déclin par l'âge (f.agedCeilings,
+   ANCRE PLAFOND_DECLIN_VIEILLESSE, juste en dessous) N'EST PAS concerné —
+   "le déclin par l'âge reste" (spec, point 4) : lui seul demeure un mur
+   dur, un choix narratif assumé (le corps vieillit, l'entraînement seul ne
+   défait jamais ça), pas une limite arbitraire de potentiel. */
+function softCapDelta(before,dv,ceiling){
+  if(dv<=0) return before+dv;
+  if(before<ceiling) return before+dv;
+  const overshoot=before-ceiling;
+  const factor=Math.max(0.05,1/(1+overshoot*0.5));
+  return before+dv*factor;
+}
+/* ==== [FIN ANCRE] ==== */
 function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
     if(k==='morale'){ f.morale=clamp(f.morale+dv,0,100); applied.push(['Moral',dv]); continue; }
     if(k==='form'){ f.form=clamp(f.form+dv,0,100); applied.push(['Forme',dv]); continue; }
     const before=f.attrs[k]; let after=before+dv;
-    // borne haute = potentiel — mais ne DOIT JAMAIS redescendre en-dessous de la
-    // valeur déjà acquise (ex: via une compétence, non bornée par le potentiel) :
-    // le plafond bloque une nouvelle progression, il ne reprend jamais l'existant.
-    if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4));
+    // Rendement décroissant au-delà du seuil de potentiel (V3_DIMINISHING_RETURNS
+    // ci-dessus) — plus de mur dur : la valeur déjà acquise n'est jamais reprise,
+    // mais la progression au-delà ralentit au lieu de s'arrêter.
+    if(dv>0) after=softCapDelta(before,dv,(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4);
     // ==== [ANCRE: PLAFOND_DECLIN_VIEILLESSE] — item demandé : un attribut
     // rabaissé par le vieillissement (f.agedCeilings, cf. applyAging) ne peut
     // plus jamais être remonté par un entraînement au-delà de ce plafond —
@@ -1589,8 +1612,13 @@ function skillHasEffect(f, s){
   return Object.keys(s.fx).some(stat=>{
     const dv=s.fx[stat];
     if(dv<=0 || !f.attrs || f.attrs[stat]===undefined) return true;
-    let cap=(f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4;
-    if(f.agedCeilings && f.agedCeilings[stat]!=null) cap=Math.min(cap, f.agedCeilings[stat]);
+    /* ==== [CORRECTIF V3_DIMINISHING_RETURNS] — le seuil de potentiel n'est
+       plus un mur (cf. softCapDelta, engine.js) : une compétence garde un
+       effet réel tant que l'attribut n'a pas atteint son SEUL vrai plafond
+       restant, le déclin par l'âge (agedCeilings) ou 100 à défaut. Un
+       rendement décroissant très faible reste un gain non nul — jamais
+       "sans effet" tant que la marge existe. ==== */
+    const cap=(f.agedCeilings && f.agedCeilings[stat]!=null) ? f.agedCeilings[stat] : 100;
     return f.attrs[stat] < cap;
   });
 }
@@ -1631,7 +1659,10 @@ function grantSkill(f, skill){ if(!f.skills) f.skills=[]; f.skills.push(skill.id
   const realBefore={};
   if(skill.fx){ for(const stat in skill.fx){ if(f.attrs && f.attrs[stat]!==undefined){
     const dv=skill.fx[stat]; const before=f.attrs[stat]; realBefore[stat]=before; let after=before+dv;
-    if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4));
+    // Même rendement décroissant qu'applyDeltas() (ANCRE V3_DIMINISHING_RETURNS,
+    // engine.js) — une compétence ne doit pas contourner la règle que suit
+    // tout le reste de la progression.
+    if(dv>0) after=softCapDelta(before,dv,(f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4);
     if(dv>0 && f.agedCeilings && f.agedCeilings[stat]!=null) after=Math.min(after, Math.max(before, f.agedCeilings[stat]));
     f.attrs[stat]=clamp(after,1,100);
   } } }
@@ -1676,3 +1707,84 @@ function epithets(f){ const e=[]; const fights=f.W+f.L+f.D; const wr=f.W/Math.ma
   if(f.koLoss>=6)e.push('La guerre l\u2019a marqué'); if(!e.length)e.push('L\u2019artisan de la cage');
   return e;
 }
+
+/* ==== [ANCRE: TEXT_ENGINE] — Plan V3 LOT 0 §4.2. Moteur de tirage contextuel
+   générique : une chaîne visible n'est plus « la même à chaque combat » mais
+   un pool d'entrées {id, text, req(ctx), weight, tier} filtré par le contexte
+   courant et protégé d'une répétition rapprochée par un carnet persistant
+   (F.textLedger). N'ATTEND PAS que les pools existants (data-faith-content.js)
+   soient déjà au format {req,weight,tier} — ils restent de simples tableaux
+   de chaînes pour l'instant, migrés lot par lot (LOT 4/5/6/7, chacun sur ses
+   propres écrans) ; TEXT_POOLS n'accueille QUE les pools déjà migrés. Une
+   entrée sans `req` est valide (silencieusement toujours éligible) mais
+   `tools/lint-content.js` (§6.3) l'interdira dans les pools à haute
+   fréquence — ce n'est pas au moteur de le refuser à l'exécution. */
+const TEXT_POOLS={};
+/** @param {string} poolId @param {{id:string,text:string,req?:(ctx:object)=>boolean,weight?:number,tier?:string}[]} entries */
+function registerTextPool(poolId,entries){ TEXT_POOLS[poolId]=entries||[]; }
+function ensureTextLedger(F){
+  if(!F) return null;
+  if(!F.textLedger||typeof F.textLedger!=='object') F.textLedger={};
+  return F.textLedger;
+}
+/** Tire une entrée d'un pool enregistré, filtrée par ctx.req/tier, pondérée
+ *  par weight, et jamais identique à une des dernières tirées de ce pool
+ *  (fenêtre = min(8, taille du pool / 3), §4.2). Retourne '' si le pool est
+ *  vide ou inconnu — jamais d'exception, jamais de texte fabriqué. */
+function txtPick(poolId,ctx){
+  ctx=ctx||{};
+  const pool=TEXT_POOLS[poolId];
+  if(!pool||!pool.length) return '';
+  let elig=pool.filter(e=>(!e.req||e.req(ctx)) && (!e.tier||!ctx.rankTier||e.tier===ctx.rankTier));
+  if(!elig.length) elig=pool.filter(e=>!e.req); // repli : au moins les entrées sans condition, jamais un pool vide
+  if(!elig.length) elig=pool; // dernier repli : mieux vaut une redite qu'une chaîne vide
+  const ledger=ctx.F?ensureTextLedger(ctx.F):null;
+  const recent=ledger&&ledger[poolId]?ledger[poolId]:[];
+  const window=Math.min(8,Math.max(1,Math.floor(pool.length/3)));
+  let candidates=elig.filter(e=>!recent.includes(e.id));
+  if(!candidates.length) candidates=elig; // tout le pool éligible a déjà été vu récemment : on retire quand même plutôt que de bloquer
+  const totalWeight=candidates.reduce((s,e)=>s+(e.weight||1),0);
+  let roll=rnd()*totalWeight, chosen=candidates[0];
+  for(const e of candidates){ roll-=(e.weight||1); if(roll<=0){ chosen=e; break; } }
+  if(ledger){
+    if(!ledger[poolId]) ledger[poolId]=[];
+    ledger[poolId].push(chosen.id);
+    while(ledger[poolId].length>window) ledger[poolId].shift();
+  }
+  /* ==== [ANCRE: TEXT_ENGINE_INTERPOLATION] — Plan V3 LOT 5 : "toute phrase
+     fréquente doit consommer >=1 jeton de contexte" (§4.2). `text` peut
+     être une fonction (ctx)=>string plutôt qu'une chaîne figée — c'est
+     elle qui permet à un pool de rester générique (un seul id ledger,
+     dédupliqué normalement) tout en nommant l'adversaire réel, son
+     palmarès, etc. à chaque tirage. Chaînes figées toujours acceptées,
+     inchangé pour les pools déjà écrits ainsi (LOT 0). ==== */
+  return typeof chosen.text==='function'?chosen.text(ctx):chosen.text;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: WORLD_TICK] — Plan V3 LOT 0 §4.3. Simulation de fond annuelle,
+   silencieuse et synchrone. Ne réinvente pas advanceRoster() (ui-01) qui
+   simule déjà les combats PNJ-vs-PNJ, applique un vrai delta Elo et fait
+   vieillir/partir en retraite le roster — c'est déjà la mécanique visée par
+   « les records doivent progresser de façon plausible » (corrige P16 :
+   0-1 à 25-4 en 4 combats n'était PAS un défaut d'advanceRoster() mais du
+   classement qui se recalculait entièrement au lieu d'incrémenter, déjà vrai
+   ici via applyResult()). worldTick() enveloppe advanceRoster() et y ajoute
+   la mémoire de classement inter-saison (F.rankHistory) que P20/LOT 7
+   liront pour afficher un delta de rang réel. La progression indépendante
+   des sparring-partners (Person) et la composition de carte (undercard)
+   sont explicitement DIFFÉRÉES à LOT 2 et LOT 6 — ce sont leurs propres
+   items (P01/P18), pas une omission ici. Budget : <50ms pour un roster
+   complet (mesuré en dev, jamais laissé en production — pas de
+   console.time ici, cf. §6.4). */
+function worldTick(year){
+  advanceRoster();
+  const F=G.faith;
+  if(F && G.f){
+    if(!Array.isArray(F.rankHistory)) F.rankHistory=[];
+    F.rankHistory.push({year:year!=null?year:F.year,rank:divRank(G.f),p4p:Math.round(p4pScore(G.f))});
+    const MAX_HISTORY=60; // ~carrière la plus longue plausible (§6.2 INV-06 vise 25-40 combats, marge large)
+    while(F.rankHistory.length>MAX_HISTORY) F.rankHistory.shift();
+  }
+}
+/* ==== [FIN ANCRE] ==== */

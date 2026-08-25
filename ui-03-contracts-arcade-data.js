@@ -656,6 +656,7 @@ function startBossRun(seed,asc,capstone){
   G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only',banked:0,
     seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),capstone:!!capstone,mutator};
   /* ==== [FIN ANCRE] ==== */
+  forceFightPaceForMode('gauntlet');
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
      applique le consommable en attente dès la création de la run — G.f
      n'est pas encore le combattant sélectionné à ce stade (choisi ensuite

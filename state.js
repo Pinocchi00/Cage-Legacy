@@ -628,6 +628,155 @@ function repairFighter(f){
   if(!Array.isArray(f.seasonRecap)) f.seasonRecap=[];
   return f;
 }
+/* ==== [ANCRE: PERSON_REGISTRY] — Plan V3 LOT 0 §4.1. « Le jeu n'a pas de
+   notion d'être humain persistant. » Avant ce correctif, le coach était la
+   chaîne littérale 'Le coin' (ui-04), l'agent un archétype sans nom
+   (FAITH_AGENTS), et le partenaire d'entraînement affiché était recalculé
+   par tri à chaque rendu (topPartner=F.gym.slice().sort(...)[0]) — c'est
+   la cause EXACTE du bug remonté « Marcus est devenu Sean sans raison » :
+   il n'était jamais désigné, seulement premier au tri.
+
+   G.people = {byId, byKey, nextId} est le registre. Une Person mintée pour
+   une clé stable (directeur d'une organisation, agent en poste, coach
+   principal, journaliste qui suit la carrière) est TOUJOURS récupérée par
+   personEnsure(), jamais reminée — c'est ce qui garantit qu'un
+   personId stocké sur G.faith (F.coachId, F.sparringIds[]...) ne change
+   que par un événement explicite portant une cause (state.leftReason),
+   jamais par un recalcul de tri. Les rôles sans clé stable (sparring,
+   fighter générique) mintent une personne réellement nouvelle à chaque
+   appel — c'est le comportement voulu pour peupler un roster.
+
+   Ce lot construit le REGISTRE et sa migration ; le RACCORDEMENT des
+   écrans existants (scr_faith_contacts, F.agent, FAITH_DIRECTORS[org]...)
+   à des Person réelles est le travail des LOTs 2 (coach/salle/contacts) et
+   4 (agent) — les rattacher tous ici aurait mélangé fondation et
+   contenu/écrans, contrairement à l'ordre de dépendance du document. ==== */
+/** Représente humainement un rôle (LOT 2, 5.2.1c : 5 axes de relation, pas
+ * une jauge unique — `debt`/`distance` étendent le triplet trust/respect/
+ * resentment déjà écrit en §4.1 ; superset qui satisfait les deux
+ * descriptions du document sans migration douloureuse plus tard).
+ * @typedef {{id:number, firstName:string, lastName:string,
+ *   nickname:?string, flag:string, born:string,
+ *   role:'coach'|'sparring'|'agent'|'director'|'journalist'|'fighter',
+ *   bio:{origin:string,past:string,trait:string},
+ *   rel:{since:number,trust:number,respect:number,resentment:number,
+ *     debt:number,distance:number,arc:{year:number,text:string}[]},
+ *   state:{gymId:?string,active:boolean,leftAt:?number,leftReason:?string},
+ *   memory:string[], extra:?object}} Person */
+function ensurePeopleRegistry(){
+  if(!G.people || typeof G.people!=='object' || !G.people.byId){
+    G.people = { byId:{}, byKey:{}, nextId:1 };
+  }
+  if(!G.people.byKey || typeof G.people.byKey!=='object') G.people.byKey={};
+  return G.people;
+}
+function personDefaultRel(){
+  return { since:(G.faith&&G.faith.year)||(G.season&&G.season.year)||1,
+    trust:50, respect:50, resentment:0, debt:0, distance:0, arc:[] };
+}
+/** Clé de dédoublonnage stable — deux appels avec la même clé renvoient
+ * TOUJOURS la même Person (jamais reminée). null = pas de dédoublonnage
+ * (sparrings/fighters génériques : chaque appel doit créer quelqu'un de
+ * réellement nouveau).
+ * @param {string} role @param {object} ctx @returns {?string} */
+function personKeyFor(role,ctx){
+  if(ctx && ctx.key!=null) return role+':'+ctx.key;
+  if(role==='director') return 'director:'+((ctx&&ctx.org)||0);
+  if(role==='agent') return 'agent:'+((ctx&&ctx.slot)||'main');
+  if(role==='coach') return 'coach:'+((ctx&&ctx.slot)||'main');
+  if(role==='journalist') return 'journalist:main';
+  return null;
+}
+/** Construit une Person neuve à partir des pools de data-people.js pour
+ * les rôles nommés, ou d'une identité générée (makeName, engine.js) pour
+ * les rôles sans pool dédié. Jamais appelée directement par un écran —
+ * seulement par personEnsure(). @param {string} role @param {object} ctx
+ * @returns {Person} */
+function personMint(role,ctx){
+  ctx = ctx||{};
+  const reg = ensurePeopleRegistry();
+  const id = reg.nextId++;
+  const base = { id, nickname:null, role, bio:{origin:'',past:'',trait:''},
+    rel:personDefaultRel(), state:{gymId:ctx.gymId||null,active:true,leftAt:null,leftReason:null}, memory:[] };
+  if(role==='director'){
+    const pool=(typeof FAITH_DIRECTORS!=='undefined')?FAITH_DIRECTORS:[];
+    const d=pool[ctx.org]||pool[0]||{name:'Inconnu',lastName:'',archetype:'loyaliste',trait:''};
+    return Object.assign(base,{firstName:d.name,lastName:d.lastName||'',flag:'',born:'',
+      bio:{origin:'Dirige l’organisation.',past:d.trait||'',trait:d.trait||''},
+      extra:{archetype:d.archetype,grants:d.grants,refuses:d.refuses,counter:d.counter}});
+  }
+  if(role==='agent'){
+    const pool=((typeof FAITH_AGENT_ROSTER!=='undefined')?FAITH_AGENT_ROSTER:[]).filter(a=>!reg.byId[reg.byKey['agent:'+a.id]]);
+    const a=pick(pool.length?pool:((typeof FAITH_AGENT_ROSTER!=='undefined')?FAITH_AGENT_ROSTER:[{firstName:'Agent',lastName:'',archetype:'fidele',ck:'FR',trait:''}]));
+    const flag=(typeof COUNTRIES!=='undefined'&&COUNTRIES[a.ck])?COUNTRIES[a.ck].flag:'';
+    return Object.assign(base,{firstName:a.firstName,lastName:a.lastName,flag,born:a.ck||'',
+      bio:{origin:'Agent de combattants.',past:a.trait||'',trait:a.trait||''},
+      extra:{archetype:a.archetype}});
+  }
+  if(role==='coach'){
+    const pool=(typeof FAITH_COACHES!=='undefined')?FAITH_COACHES:[];
+    const c=ctx.coachId?pool.find(x=>x.id===ctx.coachId):pick(pool.length?pool:[{firstName:'Coach',lastName:'',specialty:'mental',palmares:'',flaw:'',cost:0}]);
+    return Object.assign(base,{firstName:c.firstName,lastName:c.lastName,nickname:c.nickname||null,flag:'',born:'',
+      bio:{origin:c.palmares||'',past:c.flaw||'',trait:c.specialty||''},
+      extra:{specialty:c.specialty,cost:c.cost,requirement:c.requirement,coachId:c.id}});
+  }
+  if(role==='journalist'){
+    const names=(typeof FAITH_JOURNALIST_NAMES!=='undefined')?FAITH_JOURNALIST_NAMES:['Anonyme'];
+    const full=pick(names);
+    const parts=full.split(' '); const traits=(typeof FAITH_JOURNALIST_TRAITS!=='undefined')?FAITH_JOURNALIST_TRAITS:{};
+    const media=(typeof FAITH_PRESSE_MEDIAS!=='undefined'&&FAITH_PRESSE_MEDIAS.length)?pick(FAITH_PRESSE_MEDIAS):'';
+    return Object.assign(base,{firstName:parts[0]||full,lastName:parts.slice(1).join(' '),flag:'',born:'',
+      bio:{origin:media,past:traits[full]||'',trait:traits[full]||''},
+      extra:{media,sentiment:0}});
+  }
+  // sparring / fighter / rôle inconnu : identité générée, jamais inventée
+  // "à la volée" par un écran — c'est makeName() (engine.js) qui la
+  // produit, la même fonction que pour tout combattant du jeu.
+  const gender=ctx.gender||(rnd()<0.5?'F':'H');
+  const ck=ctx.countryKey||pick(COUNTRY_KEYS);
+  const nm=makeName(gender,ck);
+  const bio={origin:(typeof pick==='function'&&typeof ORIGINS!=='undefined')?pick(ORIGINS):'',
+    past:(typeof MOTIVATIONS!=='undefined')?pick(MOTIVATIONS):'',
+    trait:(typeof PERSON_TRAITS!=='undefined')?pick(PERSON_TRAITS):''};
+  return Object.assign(base,{firstName:nm.first,lastName:nm.last,flag:nm.flag,born:ck,bio,
+    nickname:(role==='sparring'&&typeof FAITH_GYM_NEWCOMER_NICKS!=='undefined')?pick(FAITH_GYM_NEWCOMER_NICKS):null});
+}
+/** Crée ou récupère une Person. Aucun écran n'a le droit d'inventer un nom
+ * à la volée — c'est le seul point d'entrée pour peupler G.people.
+ * @param {'coach'|'sparring'|'agent'|'director'|'journalist'|'fighter'} role
+ * @param {object} [ctx] @returns {Person} */
+function personEnsure(role,ctx){
+  const reg=ensurePeopleRegistry();
+  const key=personKeyFor(role,ctx);
+  if(key && reg.byKey[key]!=null && reg.byId[reg.byKey[key]]) return reg.byId[reg.byKey[key]];
+  const p=personMint(role,ctx);
+  reg.byId[p.id]=p;
+  if(key) reg.byKey[key]=p.id;
+  return p;
+}
+/** Source unique d'affichage d'une Person — jamais recomposer "prénom nom"
+ * ailleurs, sinon deux écrans peuvent finir par afficher deux formats
+ * différents pour la même personne. @param {Person} p
+ * @param {{short?:boolean,withNick?:boolean}} [opts] @returns {string} */
+function personName(p,opts){
+  if(!p) return '';
+  opts=opts||{};
+  if(opts.short) return p.firstName||'';
+  const full=[p.firstName,p.lastName].filter(Boolean).join(' ');
+  if(opts.withNick && p.nickname) return `${full} « ${p.nickname} »`;
+  return full;
+}
+/** Marque une Person comme partie EXPLICITEMENT — jamais un simple
+ * "disparaît sans qu'on sache pourquoi" (Loi 3 : la perte doit être
+ * traçable). Ajoute l'entrée datée à rel.arc AVANT de figer l'état.
+ * @param {Person} p @param {string} reason texte daté, lisible tel quel */
+function personDepart(p,reason){
+  if(!p) return;
+  const year=(G.faith&&G.faith.year)||(G.season&&G.season.year)||1;
+  p.rel.arc.push({year,text:reason});
+  p.state.active=false; p.state.leftAt=year; p.state.leftReason=reason;
+}
+/* ==== [FIN ANCRE] ==== */
 function validateState(){
   if(!G||typeof G!=='object') return false;
   /* ==== [ANCRE: V2_SETTINGS] — nouveau champ d'état (V2-01, réglage
@@ -637,6 +786,11 @@ function validateState(){
      corrompue/inconnue, jamais seulement pour l'absence du champ. ==== */
   if(!G.settings||typeof G.settings!=='object') G.settings={};
   if(G.settings.faithAmbiance!=='papier' && G.settings.faithAmbiance!=='nuit') G.settings.faithAmbiance='papier';
+  /* ==== [ANCRE: MIGRATION_PERSON_REGISTRY] — Plan V3 LOT 0 §4.1 : bloc de
+     migration additif, même motif que G.settings ci-dessus — une sauvegarde
+     antérieure au registre reçoit un G.people vide et fonctionnel, aucune
+     donnée existante n'est réécrite. ==== */
+  ensurePeopleRegistry();
   if(!G.f||typeof G.f!=='object') return false;
   repairFighter(G.f);
   const f=G.f;

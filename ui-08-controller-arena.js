@@ -17,9 +17,141 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,settings:scr_settings,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,
+  faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
+
+/* ==== [ANCRE: V3_GAME_MODE] — Plan V3 LOT 1 §P02/§P07, arbitrage A4 :
+   point de vérité unique du mode courant, remplace la lecture éparpillée
+   de G.f.gameMode/G.arcade. Gauntlet se reconnaît à G.arcade.active (posé
+   par startArcade/startBossRun/startLadder100, jamais par gameMode) ; Faith
+   à f.gameMode==='faith' (finalizeFaithDraft) avec un repli sur le nom
+   d'écran pour faith_draft/faith_home (avant que G.f n'existe) — même
+   logique que le test _enFaith de render() avant ce lot. Carrière classique
+   est le défaut : aucun marqueur dédié ne lui correspond, elle n'a jamais
+   eu besoin d'en poser un tant qu'aucun autre mode ne partageait son
+   apparence. */
+function currentGameMode(){
+  if(G && G.arcade && G.arcade.active) return 'gauntlet';
+  const sName=String((G&&G.screen)||'');
+  if((G&&G.f&&G.f.gameMode==='faith') || sName.indexOf('faith')===0) return 'faith';
+  return 'career';
+}
+/* Rythme de combat forcé par le mode (arbitrage A4, §3) : Gauntlet en
+   intégral (round par round complet, BEAT_MS=1050 — c'est le format
+   spectacle du jeu), Carrière en rapide (round par round, BEAT_MS=750).
+   Faith ne lit plus fightPace pour décider de l'arène : elle ne l'atteint
+   simplement jamais (scr_faith_fight_pending() la remplace, cf. plus bas),
+   mais la valeur est quand même posée à 'instantane' par cohérence, pour
+   qu'un futur code qui lirait G.settings.fightPace sans connaître le mode
+   ne tombe jamais sur une valeur incohérente avec ce que Faith fait
+   réellement (jamais d'arène round par round). Appelée UNE FOIS à l'entrée
+   de chaque mode (finalizeFaithDraft/newCareer/startArcade et variantes),
+   jamais reproposée au joueur ensuite. */
+function forceFightPaceForMode(mode){
+  if(!G.settings||typeof G.settings!=='object') G.settings={};
+  G.settings.fightPace=mode==='gauntlet'?'integral':mode==='faith'?'instantane':'rapide';
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: V3_LOCK_NEMESIS] — Plan V3 LOT 3 §P16. Point de verrouillage
+   UNIQUE d'une némésis Faith, quel que soit le déclencheur (franchissement
+   de rang, rivalité répétée, trahison du protégé) : les trois anciens
+   sites d'affectation directe de G.f.faithNemesisId sont remplacés par un
+   appel ici, pour ne jamais oublier l'un des deux effets attendus par
+   §P16 sur un futur 4e déclencheur : (1) un surnom mérité — earnNickname()
+   (ui-05, déjà utilisé pour le joueur à turnPro()) tant que la personne
+   n'en a pas déjà un (jamais écrasé, une trahison de protégé peut réutiliser
+   un allié déjà surnommé) ; (2) un écran de consécration à la prochaine
+   occasion de rendu (scr_faith_nemesis_consecration, plus bas) via un
+   drapeau consommé une seule fois. nemesisRecord repart TOUJOURS de zéro
+   ici (FA-26 : "ne concerne que la némésis EN COURS"), y compris le
+   rattachement d'une rivalité déjà comptée par ailleurs (f._rivalries). */
+function lockFaithNemesis(person){
+  if(!person) return;
+  G.f.faithNemesisId=person.id;
+  G.f.rivalId=person.id;
+  G.f.nemesisRecord=null;
+  if(!person.nick) person.nick=earnNickname(person);
+  if(G.faith) G.faith.pendingNemesisConsecration=true;
+}
+/* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : cause exacte
+   du bug "Marcus est devenu Sean sans raison" (cf. ANCRE PERSON_REGISTRY,
+   state.js) — l'ancien topPartner se recalculait par TRI à chaque rendu
+   (F.gym.slice().sort((a,b)=>b.overall-a.overall)[0]), donc changeait
+   d'identité dès qu'un entraînement faisait franchir à un partenaire
+   l'overall de l'autre, sans aucun événement pour l'expliquer. F.
+   sparringPrimaryId est désormais LA seule référence stable, réévaluée
+   uniquement à des points de rupture explicites (création de l'écurie,
+   départ d'un partenaire) — jamais au rendu. Appelée après TOUTE
+   modification de G.faith.gym qui pourrait invalider la référence
+   actuelle (départ, arrivée) ; no-op si la référence est encore valide. */
+function ensureSparringPrimary(){
+  if(!G.faith) return;
+  const gym=G.faith.gym||[];
+  if(gym.some(p=>p.id===G.faith.sparringPrimaryId)) return;
+  const best=gym.slice().sort((a,b)=>b.overall-a.overall)[0];
+  G.faith.sparringPrimaryId=best?best.id:null;
+}
+/* ==== [ANCRE: V3_FAITH_AGENT_PERSON] — Plan V3 LOT 4 §P05a : "l'agent
+   devient une Person, en gardant son surnom d'archétype". G.faith.agent
+   reste TEL QUEL — c'est l'objet d'archétype (FAITH_AGENTS, {id,label,cut})
+   dont dépend toute la mécanique de négociation existante (agentId===
+   'requin'/'stratege'/'fidele', une dizaine de sites) : le retoucher
+   aurait un rayon d'action bien plus large que ce lot. Une Person séparée
+   (G.faith.agentPersonId) porte l'IDENTITÉ (nom réel, tirée de
+   FAITH_AGENT_ROSTER, LOT 0) et l'HISTOIRE (rel.arc[]) — l'affichage
+   combine les deux : nom réel + « surnom d'archétype ». Re-mintée
+   uniquement quand l'archétype change réellement (nouvel agent signé),
+   jamais à chaque rendu. */
+function ensureFaithAgentPerson(){
+  if(!G.faith || !G.faith.agent) return null;
+  const archetypeId=G.faith.agent.id;
+  const reg=ensurePeopleRegistry();
+  const current=G.faith.agentPersonId?reg.byId[G.faith.agentPersonId]:null;
+  if(current && current.extra && current.extra.archetype===archetypeId) return current;
+  const usedRosterIds=Object.values(reg.byId).filter(p=>p.role==='agent').map(p=>p.extra&&p.extra.rosterId);
+  const pool=(typeof FAITH_AGENT_ROSTER!=='undefined'?FAITH_AGENT_ROSTER:[]).filter(a=>a.archetype===archetypeId && usedRosterIds.indexOf(a.id)===-1);
+  const fallback=(typeof FAITH_AGENT_ROSTER!=='undefined'?FAITH_AGENT_ROSTER:[]).find(a=>a.archetype===archetypeId);
+  const chosen=pool.length?pick(pool):(fallback||{firstName:'Agent',lastName:'',ck:'',trait:''});
+  const id=reg.nextId++;
+  const flag=(typeof COUNTRIES!=='undefined' && COUNTRIES[chosen.ck])?COUNTRIES[chosen.ck].flag:'';
+  const p={id,firstName:chosen.firstName,lastName:chosen.lastName||'',nickname:null,role:'agent',flag,born:chosen.ck||'',
+    bio:{origin:'Agent de combattants.',past:chosen.trait||'',trait:chosen.trait||''},
+    rel:personDefaultRel(),state:{gymId:null,active:true,leftAt:null,leftReason:null},memory:[],
+    extra:{archetype:archetypeId,rosterId:chosen.id}};
+  reg.byId[id]=p;
+  G.faith.agentPersonId=id;
+  return p;
+}
+/** Nom réel + surnom d'archétype de l'agent Faith — seule source
+ * d'affichage (§P05a). */
+function faithAgentDisplayName(){
+  const p=ensureFaithAgentPerson();
+  if(!p) return (G.faith&&G.faith.agent&&G.faith.agent.label)||'Sans agent';
+  const label=(G.faith.agent&&G.faith.agent.label)||'';
+  return label?`${personName(p,{})} « ${label} »`:personName(p,{});
+}
+/** Nom complet + surnom d'un combattant du roster, seule source d'affichage
+ * pour rester cohérent partout (Loi 1) — jamais juste `.first`. */
+function fighterDisplayName(o,withNick){
+  if(!o) return '';
+  const full=o.name||[o.first,o.last].filter(Boolean).join(' ');
+  return (withNick!==false && o.nick)?`${full} « ${o.nick} »`:full;
+}
+/* ==== [ANCRE: V3_NEMESIS_ESCALADE] — Plan V3 LOT 3 §P16 : paliers narratifs
+   d'une rivalité, dérivés du nombre de confrontations déjà jouées
+   (nemesisRecord.w+l, ui-05) — jamais un compteur séparé à tenir à jour
+   ailleurs. 0 combat joué = on vient tout juste de se désigner l'un
+   l'autre ; le PROCHAIN combat porte le palier suivant. */
+function nemesisTierLabel(fightsPlayed){
+  if(fightsPlayed<=0) return 'Première rencontre';
+  if(fightsPlayed===1) return 'La revanche';
+  if(fightsPlayed===2) return 'La trilogie';
+  return 'Le règlement de comptes';
+}
+/* ==== [FIN ANCRE] ==== */
 
 /* ============================== RENDER + CL =============================== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
@@ -44,18 +176,15 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
   { const _sName=String((G&&G.screen)||'');
     const _enFaith=_sName.indexOf('faith')===0 || !!(G&&G.f&&G.f.gameMode==='faith');
     document.body.classList.toggle('faith-skin', _enFaith);
-    /* ==== [ANCRE: FAITH_AMBIANCE] — V2-01 : classe papier/nuit posée EN PLUS
-       de faith-skin (cf. index.html, même ancre). Lecture défensive de
-       G.settings (peut ne pas encore exister : plusieurs points d'entrée
-       réassignent G={theme:t} sans repasser par validateState()/load()) —
-       défaut papier, arbitrage tranché, jamais un défaut nuit implicite.
-       La cage reste sombre dans les DEUX ambiances (point 4 du document) :
-       forcé ici plutôt que par CSS pour que ce soit vrai même si un futur
-       écran hors 'arena' voulait un jour la même règle. ==== */
-    const _ambiance=(G&&G.settings&&G.settings.faithAmbiance)||'papier';
-    const _nuit=_enFaith && (_sName==='arena' || _ambiance==='nuit');
-    document.body.classList.toggle('faith-papier', _enFaith && !_nuit);
-    document.body.classList.toggle('faith-nuit', _nuit); }
+    /* ==== [ANCRE: V3_DATA_MODE] — Plan V3 LOT 1 §P02 : remplace la classe
+       papier/nuit (réglage joueur, ANCRE FAITH_AMBIANCE ci-dessus dans
+       l'historique) par un attribut [data-mode] sur <html>, seule source
+       des trois dégradés sombres (index.html, ANCRE V3_MODE_GRADIENTS).
+       currentGameMode() (plus bas dans ce fichier) est le point de vérité
+       unique mode Faith/Gauntlet/Carrière, réutilisé aussi par §P07 pour
+       forcer le rythme de combat par mode plutôt que par réglage. ==== */
+    try{ document.documentElement.setAttribute('data-mode', currentGameMode()); }catch(e){}
+  }
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: V2-28] — Rythme "Instantané" : ne passe jamais par ARENA
      (aucune animation canvas) — résultat direct + résumé en trois lignes.
@@ -67,9 +196,46 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      && (((G.settings&&G.settings.fightPace)||'rapide')==='instantane')){
     G.pending._flashShown=true;
     G.pending.flashLines=buildFightFlashLines(G.pending.res);
-    G.screen='fight_flash';
+    /* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — Plan V3 LOT 1 §P07, arbitrage
+       A4 : Faith ne passe plus jamais par l'écran-résumé "Instantané" en
+       direct — scr_faith_fight_pending() (ui-08, plus bas) s'intercale
+       d'abord (2,5-4s, barre de progression non linéaire, confettis sur
+       victoire), puis bascule elle-même vers fight_flash une fois le
+       temps de suspense écoulé (cf. finishFaithFightPending()). Carrière
+       et Gauntlet, qui n'ont jamais utilisé "Instantané" par défaut
+       (forceFightPaceForMode()), ne sont pas concernés en pratique — mais
+       le test reste sur le mode, pas sur le pace, pour rester correct si
+       une sauvegarde plus ancienne porte encore une valeur différente. */
+    G.screen=(currentGameMode()==='faith')?'faith_fight_pending':'fight_flash';
   }
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+  /* ==== [ANCRE: V3_NEMESIS_CONSECRATION] — Plan V3 LOT 3 §P16 : intercepte
+     le tout premier rendu suivant lockFaithNemesis() (posé depuis 3 points
+     d'entrée différents — franchissement de rang en fin d'année, rivalité
+     répétée juste après un combat, trahison du protégé — donc pas un point
+     de sortie unique comme "Instantané" ci-dessus). Jamais pendant une
+     séquence de combat déjà engagée (arena/attente/résumé/résultat) : le
+     drapeau reste posé et se déclenche au rendu calme suivant. */
+  const FIGHT_SEQUENCE_SCREENS=['arena','faith_fight_pending','fight_flash','result'];
+  if(G && G.faith && G.faith.pendingNemesisConsecration && FIGHT_SEQUENCE_SCREENS.indexOf(G.screen)===-1){
+    G.faith.pendingNemesisConsecration=false;
+    G.screen='faith_nemesis_consecration';
+  }
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V3_TITLE_CONSECRATION] — Plan V3 LOT 6 §5.6.1, temps 5 :
+     même mécanisme d'interception que V3_NEMESIS_CONSECRATION ci-dessus
+     (posé par resolveFight, ui-05, sur une victoire de titre ou une
+     défense réussie) — prioritaire sur la consécration de némésis si les
+     deux tombent le même rendu (un combat de titre contre sa propre
+     némésis est le cas qui les ferait coïncider), l'apogée de la carrière
+     passe avant l'apparition d'une rivalité. */
+  if(G && G.faith && G.faith.pendingTitleConsecration && FIGHT_SEQUENCE_SCREENS.indexOf(G.screen)===-1){
+    G.faith.pendingNemesisConsecration=false;
+    G.faith.lastTitleConsecration=G.faith.pendingTitleConsecration;
+    G.faith.pendingTitleConsecration=null;
+    G.screen='faith_title_consecration';
+  }
+  /* ==== [FIN ANCRE] ==== */
+  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(G&&G.screen==='faith_fight_pending') startFaithFightPending(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
   G.screen='hub'; save(); render();
@@ -149,18 +315,78 @@ function faithEnsureOffer(){
     opps=eligible;
   }
   if(!opps.length) return false;
+  /* ==== [ANCRE: V3_REMATCH_GUARANTEE] — Plan V3 LOT 6 §5.6.1.b : clause de
+     revanche posée à la négociation de titre (scr_faith_title_negotiation)
+     et consommée à la défaite (ui-05, ANCRE V3_TITLE_LOSS_CLAUSE) — la
+     prochaine offre DOIT être contre le même adversaire, en dehors du choix
+     normal de l'agent. Silencieuse et sans échec si l'adversaire n'est
+     plus dans le pool proposé (retraité, changé d'organisation) : la
+     clause s'efface plutôt que de bloquer le jeu. */
+  let chosen;
+  if(G.faith.guaranteedRematchId){
+    const forced=opps.find(x=>x.o.id===G.faith.guaranteedRematchId);
+    G.faith.guaranteedRematchId=null;
+    if(forced) chosen=forced;
+  }
+  /* ==== [FIN ANCRE] ==== */
   const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
-  const chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
+  if(!chosen) chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
+  /* ==== [ANCRE: V3_SPECTACLE_HYPE] — Plan V3 LOT 7 §5.7.1 point 5 : "cet axe
+     pilote la hype, les bourses, l'accueil du public". Modeste (±10%,
+     jamais un second système de bourse) — le palmarès (déjà gala.mult via
+     le rang/statut de titre) reste le levier principal, le spectacle
+     n'est qu'un correctif. */
+  const spec=G.f.spectacle==null?50:G.f.spectacle;
+  if(spec>=70) gala.mult*=1.1; else if(spec<=30) gala.mult*=0.9;
+  /* ==== [FIN ANCRE] ==== */
   G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
+  G.faith.pendingRevengeClause=false; // nouvelle offre : la clause d'une offre précédente ne survit jamais
+  G.faith.currentCard=generateFightCard(gala,chosen.o);
   return true;
 }
+/* ==== [ANCRE: V3_FIGHT_CARD] — Plan V3 LOT 6 §5.6.1.b : "remplacer la
+   mention Main event par la carte complète : 5 à 8 combats, avec les vrais
+   combattants du roster [...] résolus par worldTick() et font bouger le
+   classement". Généré UNE FOIS par offre (appelé depuis faithEnsureOffer()
+   ci-dessus, jamais régénéré à un re-rendu) : les combats de complément
+   sont RÉELLEMENT simulés ici (simulateFight+applyResult, exactement le
+   mécanisme déjà éprouvé d'advanceRoster(), ui-01) — leurs W/L bougent
+   vraiment, contrairement à un habillage cosmétique. Le combat du joueur
+   lui-même n'est PAS simulé ici (il reste résolu normalement par
+   resolveFight, ui-05) — seul son adversaire et sa position sur la carte y
+   figurent, son propre résultat est complété après coup (cf.
+   V3_FIGHT_CARD_RESULT, ui-05). */
+function generateFightCard(gala,opponent){
+  const pool=(G.roster||[]).filter(o=>o.id!==opponent.id && !o.champion);
+  const ranked=rankPool(pool);
+  const n=Math.min(RI(4,7),Math.floor(ranked.length/2));
+  const fights=[];
+  for(let i=0;i<n;i++){
+    const a=ranked[i*2], b=ranked[i*2+1];
+    if(!a||!b) break;
+    const res=simulateFight(a,b,3);
+    applyResult(a,b,res,'A'); applyResult(b,a,res,'B');
+    const aWin=res.winner==='A';
+    fights.push({aId:a.id,aName:a.name,aFlag:a.flag,bId:b.id,bName:b.name,bFlag:b.flag,method:res.method,winnerName:aWin?a.name:(res.winner==='D'?null:b.name)});
+  }
+  return {label:gala.label,tier:gala.tier,oppId:opponent.id,oppName:opponent.name,fights,playerResult:null};
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V3_TITLE_NEGOTIATION_ROUTE] — Plan V3 LOT 6 §5.6.1, temps 3 :
+   "offre distincte de scr_faith_offer(), avec ses propres leviers" — un
+   combat de titre ou de défense route vers scr_faith_title_negotiation()
+   (ui-08, plus bas) au lieu de l'offre ordinaire, MAIS réutilise le même
+   G.faith.pendingOffer (posé par faithEnsureOffer() juste au-dessus,
+   inchangé) : un seul mécanisme d'offre, deux présentations. */
 function faithGenerateOffer(){
   if(!faithEnsureOffer()){ faithAdvanceMonth(); return; }
-  G.screen='faith_offer'; save(); render();
+  const kind=fightKind();
+  G.screen=(kind==='title'||kind==='defense')?'faith_title_negotiation':'faith_offer'; save(); render();
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 // ==== [ANCRE: CORRECTIF_DUPLICATION_ROUTAGE] — chooseClass() et
 // afterResult() (mode carrière/gauntlet, hors Faith qui a son propre
@@ -259,78 +485,15 @@ function routeAfterCareerPending(){
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
-  /* ==== [ANCRE: V2-43] — scr_faith_home (ui-04) est atteint DEPUIS le
-     titre, AVANT tout load() : G n'y contient qu'un objet minimal
-     ({theme, screen:'faith_home', ...}), jamais la carrière sauvegardée.
-     save() sérialise TOUJOURS G tel quel dans SAVE_KEY — l'appeler ici
-     écraserait donc la vraie sauvegarde Faith (f/faith/roster complets)
-     avec ce G minimal, un bug de perte de partie strictement introduit
-     par ce nouvel écran. Tant qu'aucune carrière n'est chargée en
-     mémoire (G.faith absent), le réglage est fusionné directement dans
-     le blob déjà stocké, sans jamais passer par save(). Une fois une
-     carrière chargée (depuis scr_faith_hub, où ce réglage restait déjà
-     accessible avant ce lot), le comportement d'origine s'applique : G
-     contient alors la vraie carrière, save() est sûr. */
-  setFaithAmbiance(val){
-    const value=(val==='nuit')?'nuit':'papier';
-    if(G && G.faith){
-      if(!G.settings||typeof G.settings!=='object') G.settings={};
-      G.settings.faithAmbiance=value;
-      save(); render();
-      return;
-    }
-    try{
-      const raw=localStorage.getItem(SAVE_KEY);
-      if(raw){ const parsed=JSON.parse(raw);
-        if(parsed && typeof parsed==='object'){
-          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
-          parsed.settings.faithAmbiance=value;
-          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
-        }
-      }
-    }catch(e){}
-    if(!G.settings||typeof G.settings!=='object') G.settings={};
-    G.settings.faithAmbiance=value; // rendu immédiat cohérent de cet écran précis
-    render();
-  },
-  /* ==== [ANCRE: V2-44] — écran Réglages construit (scr_settings, ui-06) :
-     ce réglage garde son accès depuis scr_plan (ui-06, pratique juste
-     avant un combat) EN PLUS de l'écran Réglages, les deux écrivent le
-     même G.settings.fightPace. Toujours atteint APRÈS chargement d'une
-     carrière (scr_plan n'existe qu'en combat), donc save() y est sûr —
-     contrairement à setFaithAmbiance(), pas de garde nécessaire ici. */
-  setFightPace(val){
-    if(!G.settings||typeof G.settings!=='object') G.settings={};
-    G.settings.fightPace=['integral','rapide','instantane'].includes(val)?val:'rapide';
-    save(); render();
-  },
-  /* ==== [ANCRE: V2-44] — Moments de bascule, activés/désactivés. Même
-     garde qu'setFaithAmbiance() : l'écran Réglages est accessible AVANT
-     tout chargement de carrière (depuis scr_title/scr_faith_home), save()
-     y écraserait donc la vraie sauvegarde avec un G minimal si une
-     carrière n'est pas déjà en mémoire. */
-  setBasculeEnabled(val){
-    const value=!!val;
-    if(G && (G.f || G.faith)){
-      if(!G.settings||typeof G.settings!=='object') G.settings={};
-      G.settings.basculeEnabled=value;
-      save(); render();
-      return;
-    }
-    try{
-      const raw=localStorage.getItem(SAVE_KEY);
-      if(raw){ const parsed=JSON.parse(raw);
-        if(parsed && typeof parsed==='object'){
-          if(!parsed.settings||typeof parsed.settings!=='object') parsed.settings={};
-          parsed.settings.basculeEnabled=value;
-          localStorage.setItem(SAVE_KEY,JSON.stringify(parsed));
-        }
-      }
-    }catch(e){}
-    if(!G.settings||typeof G.settings!=='object') G.settings={};
-    G.settings.basculeEnabled=value;
-    render();
-  },
+  /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
+     (ui-06), cf. son ancre pour le détail. */
+  setRankingsTab(tab){ G._rankingsTab=tab; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V3_SCR_FIGHT_CARD] — mémorise l'écran d'origine (offre,
+     négociation de titre, ou hub) pour que "← Retour" (scr_faith_card,
+     ui-08) revienne au bon endroit plutôt que toujours au hub. */
+  viewFightCard(){ G._cardReturn=G.screen; G.screen='faith_card'; render(); },
+  /* ==== [FIN ANCRE] ==== */
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
      tirage/bascule d'aperçu dans la Salle des Légendes appelait render()
@@ -716,7 +879,9 @@ const CL={
     // il empêche seulement une nouvelle carrière d'hériter du registre d'une
     // carrière précédente.
     G.titleHistory=[];
-    G.f=f; G.roster=makeOrgRoster(f); G.ach=[]; G.season={year:1,fights:[]}; checkAch(); G.screen='hub'; save(); render(); },
+    G.f=f; G.roster=makeOrgRoster(f); G.ach=[]; G.season={year:1,fights:[]}; checkAch();
+    forceFightPaceForMode('career');
+    G.screen='hub'; save(); render(); },
   fightSelect(){ startFightSelect(); },
   opp(i){
     if(G.faith){
@@ -790,6 +955,11 @@ const CL={
   train(i){ chooseTraining(i); },
   setCampTier(tierId){ G.selectedCampTier=tierId; render(); },
   skipArena(){ CL.toResult(); },
+  /* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — bouton "Passer" de
+     scr_faith_fight_pending() : même logique que skipArena() ci-dessus,
+     coupe l'animation en cours (barre + confettis) et bascule
+     immédiatement sur le verdict, sans attendre le minuteur. */
+  skipFaithFightPending(){ finishFaithFightPending(); },
   nextRound(){ if(!ARENA||!ARENA.roundPause||ARENA.basculePending) return; resumeArenaPlayback(); },
   /* ==== [ANCRE: V2-29] — une option choisie ne rend pas le même verdict
      pour deux joueurs : le succès est pondéré par l'attribut du joueur
@@ -1261,6 +1431,7 @@ const CL={
     G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed,asc,
       riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
+    forceFightPaceForMode('gauntlet');
     G.screen='draft'; save(); render(); },
   startBossRun(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
     startBossRun(seed,asc); render(true); },
@@ -1278,6 +1449,7 @@ const CL={
     G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed,asc,
       riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
+    forceFightPaceForMode('gauntlet');
     G.screen='draft'; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [CORRECTIF FA-06] — contrairement à newCareer() (qui repart d'un G
@@ -1374,6 +1546,17 @@ const CL={
        points ennuyeuse » est posée côté résolution de combat
        (ui-05-fight-resolution.js, ANCRE FA-19_SHOWMAN). ==== */
     else if(d.personality==='showman'){ f.hypeBonus=(f.hypeBonus||1)*1.4; }
+    /* ==== [ANCRE: V3_SPECTACLE_AXIS] — Plan V3 LOT 7 §5.7.1 point 5 : "gagner
+       mais être chiant / perdre mais être divertissant" — le palmarès et la
+       popularité doivent être deux monnaies distinctes. f.spectacle (0-100,
+       jamais affiché en chiffre — règle H.1) démarre neutre, alimenté par
+       le TYPE de finish/décision à chaque combat (ANCRE V3_SPECTACLE_UPDATE,
+       ui-05) et lu par la bourse du prochain gala (ANCRE V3_SPECTACLE_HYPE,
+       ui-08). Portée réduite par rapport à la spec complète (postures de
+       conférence et KO subis n'alimentent pas encore l'axe — la demande la
+       plus riche du document, gardée pour un futur lot plutôt que bâclée). */
+    f.spectacle=50;
+    /* ==== [FIN ANCRE] ==== */
     for(const k in f.attrs) f.attrs[k]=clamp(f.attrs[k],1,100);
     f.overall=overall(f);
     f.maxAttrs={};
@@ -1403,9 +1586,20 @@ const CL={
     G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
       startOfYearChampion:false,startOfYearRank:divRank(f),startOfYearNemesisBeaten:false,gym:[p1,p2],
       agent:faithAgent,agentPatience:3};
+    ensureSparringPrimary();
     /* ==== [ANCRE: FAITH_SERMENTS] — le serment vit sur la partie, pas sur le
        brouillon de création : il doit survivre au rechargement. ==== */
     if(G.faithDraft && G.faithDraft._oath) G.faith.oath=G.faithDraft._oath;
+    forceFightPaceForMode('faith');
+    /* ==== [ANCRE: V3_FAITH_COACH] — Plan V3 LOT 2 §P04/§P08 : le coach
+       affiché sur Contacts était la chaîne littérale 'Le coin' — jamais un
+       nom. personEnsure('coach',{slot:'main'}) (PersonRegistry, LOT 0)
+       tire UNE fois, ici, un vrai coach du pool FAITH_COACHES (data-people.
+       js, déjà livré en LOT 0 mais jamais câblé jusqu'ici) — palmarès,
+       défaut et spécialité déjà portés par la Person, réutilisés tels
+       quels par scr_faith_contacts() (ui-04). G.faith.coachId est la
+       référence stable, jamais recalculée. */
+    G.faith.coachId=personEnsure('coach',{slot:'main'}).id;
     G.season={year:1,fights:[]};
     /* ==== [ANCRE: FAITH_CALENDRIER] — la première année se génère ici, les
        suivantes dans nextFaithYear(). faithLandOnMonth() saute les mois vides
@@ -1670,15 +1864,36 @@ const CL={
            seulement combler l'absence d'une. Le palmarès tête-à-tête
            (nemesisRecord, ui-05) repart de zéro : il ne concerne que la
            némésis EN COURS. */
-        G.f.faithNemesisId=monster.id;
-        G.f.nemesisRecord=null;
-        G.f.rivalId=monster.id;
+        lockFaithNemesis(monster);
         if(!G.f._rivalries) G.f._rivalries={};
         G.f._rivalries[monster.id]=3;
         G.faith.gym=G.faith.gym.filter(p=>p.id!==monster.id);
+        ensureSparringPrimary();
         G.roster=rankPool(G.roster);
       }
     }
+    /* ==== [ANCRE: V3_REGIONAL_CEILING_WORLD] — Plan V3 LOT 6 §5.6.3 point 4 :
+       "Les choix changent l'univers, pas les attributs […] deux univers de
+       jeu différents, pas deux +1." "Aller chercher plus loin" déplace
+       réellement la carrière (nouvelle organisation, nouveau bassin
+       d'adversaires — même mécanisme que acceptPromo()/free agency en
+       carrière, réduit aux champs qui comptent vraiment pour Faith,
+       contrat non touché : hors périmètre de ce lot). "Régner sur son
+       territoire" ouvre un statut permanent et VISIBLE (f.faithTraits,
+       déjà affiché sur le hub, ui-04) — pas un delta d'attribut de plus. */
+    if(ev.id==='evt_br_regional_ceiling'){
+      if(i===0 && G.f.org<6){
+        G.f.org++; G.f.orgWins=0; G.f.rivalId=null; G.f.faithNemesisId=null; G.f.nemesisRecord=null;
+        G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
+        if(typeof ORG_FLAVORS!=='undefined' && ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
+        G.roster=makeOrgRoster(G.f);
+      } else if(i===1){
+        if(!G.f.faithTraits) G.f.faithTraits=[];
+        if(!G.f.faithTraits.includes('Patron régional')) G.f.faithTraits.push('Patron régional');
+        G.faith.regionalPatron=true;
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
     if(!G.faith.yearLog) G.faith.yearLog=[];
@@ -1734,10 +1949,27 @@ const CL={
      Une offre à accepter ou refuser est une décision sous incertitude — la
      refuser a un coût réel (la case combat de l'année est perdue). Voir
      faithGenerateOffer() ci-dessous. ==== */
+  /* ==== [ANCRE: V3_TITLE_MERIT_GATE] — Plan V3 LOT 6 §5.6.1, temps 2 "Le
+     mérite" : la toute première fois qu'un combat de titre devient
+     accessible (fightKind()==='title', ui-05 — le combattant n'est pas
+     encore champion), on s'arrête sur un écran qui expose FACTUELLEMENT
+     pourquoi ("ta série, qui tu as battu, qui tu as passé devant"), avant
+     même l'offre. G.faith.titleShotSeen empêche de rejouer cet écran à
+     chaque mois tant que l'éligibilité reste vraie (sinon "ENTRER DANS LA
+     CAGE" s'arrêterait dessus indéfiniment) ; remis à false dès que
+     fightKind() n'est plus 'title', pour qu'une FUTURE fenêtre d'éligibilité
+     (après une défaite, une nouvelle série) déclenche à nouveau l'écran. */
   faithFight(){
     if(G.f.injury){ G.lastMsg="Toujours à l'infirmerie — pas de combat tant que le corps n'est pas prêt."; render(); return; }
+    const kind=fightKind();
+    if(kind!=='title') G.faith.titleShotSeen=false;
+    else if(!G.faith.titleShotSeen){
+      G.faith.titleShotSeen=true;
+      G.screen='faith_title_merit'; save(); render(); return;
+    }
     faithGenerateOffer();
   },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [CORRECTIF FA-12] — signer l'offre telle quelle. G.opps est réduit
      à ce seul candidat puis CL.opp(0) (ui-08, branche G.faith déjà en place)
      est réutilisée intégralement : pesée, malus/buffs en attente, tout le
@@ -1766,6 +1998,20 @@ const CL={
     G.opps=[off.opp];
     CL.opp(0);
   },
+  /* ==== [ANCRE: V3_TITLE_REVENGE_CLAUSE] — Plan V3 LOT 6 §5.6.1, temps 3 :
+     "clause de revanche" — un des leviers propres à scr_faith_title_
+     negotiation (ui-04), jamais proposé sur une offre ordinaire. Simple
+     bascule (pas de coût immédiat, contrairement à demander plus d'argent)
+     : son seul effet est consommé PLUS TARD, et seulement en cas de
+     défaite (ui-05, ANCRE V3_TITLE_LOSS_CLAUSE) — poser la clause n'a
+     donc aucun risque à signer, cohérent avec ce qu'elle représente
+     (une garantie, pas une négociation financière). */
+  faithTitleToggleRevengeClause(){
+    const off=G.faith.pendingOffer; if(!off) return;
+    G.faith.pendingRevengeClause=!G.faith.pendingRevengeClause;
+    render();
+  },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: V2-23] — applique le choix (deux options, réponse
      immédiate) puis reprend la chaîne (faithOfferSign() gère la suite :
      conférence ou signature directe). */
@@ -1889,6 +2135,14 @@ const CL={
     if(medical){ G.faith.medicalRefusalUsed=true; }
     else if(G.faith.agentPatience>0){ G.faith.agentPatience--; }
     else { G.faith.agentPatienceHitZero=true; }
+    /* ==== [ANCRE: V3_REFUS_AGENT_ARC] — Plan V3 LOT 4 §P05a : "réaction
+       datée de l'agent dans rel.arc[]" — une trace réelle de la Person,
+       jamais une punition abstraite. Absente pour un refus médical
+       (légitime, sans réaction de l'agent). */
+    if(!medical){
+      const agentPerson=ensureFaithAgentPerson();
+      if(agentPerson) agentPerson.rel.arc.push({year:G.faith.year,text:'Un combat refusé de plus — sa patience s’use.'});
+    }
     if(G.faith.refusalsThisYear>=3){
       G.lastMsg="Votre agent vous prévient : à ce rythme de refus, il ne pourra bientôt plus vous représenter.";
     }
@@ -1944,9 +2198,20 @@ const CL={
       sequelle=cible;
     }
     /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: V3_CAREER_LIFETIME_STATS] — Plan V3 LOT 7 §5.7.2 point 2 :
+       "coups mis · coups encaissés · temps de contrôle" dans le "bloc
+       chiffres" de la fiche demandent un total DE CARRIÈRE, pas juste la
+       saison qui vient de s'écouler (G.season.fights est vidé à chaque
+       nouvelle année). totalSig/totalTdAtt/totalCtrl/totalKD ci-dessous
+       existaient déjà pour détecter les spécialisations (juste en dessous)
+       — accumulés ici sur f, jamais recalculés depuis zéro, jamais réinitialisés. */
+    let finitionsSeason=0;
     if((G.season.fights||[]).length>=1){
       let totalSig=0, totalTdAtt=0, totalCtrl=0, totalKD=0;
-      G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0; });
+      G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0;
+        if(fight.win && !isDecisionLike(fight.method)) finitionsSeason++; });
+      f.careerSig=(f.careerSig||0)+totalSig; f.careerTdAtt=(f.careerTdAtt||0)+totalTdAtt;
+      f.careerCtrl=(f.careerCtrl||0)+totalCtrl; f.careerKD=(f.careerKD||0)+totalKD;
       const totalRounds=G.season.fights.reduce((acc,fight)=>acc+(fight.round||3),0);
       if(!f.faithSpecs) f.faithSpecs=[];
       if(!f._styleProfileOverride) f._styleProfileOverride=Object.assign({},STYLE_PROFILE[f.style]||STYLE_PROFILE.mma);
@@ -1988,7 +2253,13 @@ const CL={
       fights:G.faith.fightsThisYear,
       wins:(G.season.fights||[]).filter(x=>x.win).length,
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
-      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle, promiseOutcome
+      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle, promiseOutcome,
+      /* ==== [ANCRE: V3_YEAR_END_FACTS] — Plan V3 LOT 7 §5.7.1 points 6/8 :
+         finitions de la saison (remplace "Coups encaissés" sur la coupure,
+         cf. scr_faith_year_end) et delta de rang depuis le début de saison
+         (F.startOfYearRank, déjà posé par nextFaithYear() — jamais
+         recalculé, juste comparé). */
+      finitions:finitionsSeason, rankStart:G.faith.startOfYearRank
     };
     G.screen='faith_year_end'; save(); render();
   },
@@ -2028,7 +2299,10 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
     if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
-    advanceRoster();
+    /* ==== [ANCRE: WORLD_TICK_HOOK] — Plan V3 LOT 0 §4.3 : point d'appel
+       principal de worldTick(), qui enveloppe advanceRoster() (inchangé) et
+       archive le rang dans G.faith.rankHistory pour LOT 7 (P20). ==== */
+    worldTick(G.faith.year);
     /* ==== [ANCRE: FAITH_NEMESIS_PERMANENTE] — FA-26 : avant ce correctif,
        f.faithNemesisId n'était posé que par la trahison du protégé
        (evt_frankenstein_betrayal) ; sans trahison avant 30 ans, la carrière
@@ -2049,7 +2323,7 @@ const CL={
         if(divRank(o)<monRang){
           G.faith.rankWatch[o.id]=(G.faith.rankWatch[o.id]||0)+1;
           if(G.faith.rankWatch[o.id]>=2){
-            G.f.faithNemesisId=o.id; G.f.rivalId=o.id;
+            lockFaithNemesis(o);
             break;
           }
         }
@@ -2110,6 +2384,7 @@ const CL={
       const p3=makeFighter({gender:G.f.gender,div:G.f.div,age:18,level:clamp(G.f.overall-18,20,60),potential:RI(80,97)});
       p3.isGymPartner=true; p3.nick=pick(FAITH_GYM_NEWCOMER_NICKS);
       G.faith.gym.push(p3);
+      ensureSparringPrimary();
       G.lastMsg=`Un gamin de 18 ans a poussé la porte de la salle cette semaine — ${esc(p3.nick)}.`;
     }
     /* ==== [FIN ANCRE] ==== */
@@ -2123,11 +2398,14 @@ const CL={
     if(!G.faith.agent){
       const pick3=['requin','stratege','fidele'][Math.floor(rnd()*3)];
       G.faith.agent=FAITH_AGENTS[pick3]; G.f.agentCut=G.faith.agent.cut||0;
-      G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${G.faith.agent.label} vous propose de vous représenter.`;
+      G.faith.agentPersonId=null; // archétype différent -> nouvelle Person (ensureFaithAgentPerson)
+      G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${faithAgentDisplayName()} vous propose de vous représenter.`;
     } else if(G.faith.agentPatienceHitZero){
       G.faith.agentPatienceZeroStreak=(G.faith.agentPatienceZeroStreak||0)+1;
       if(G.faith.agentPatienceZeroStreak>=2){
-        G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${G.faith.agent.label} vous lâche : trop sollicité, il repositionne sa liste de clients ailleurs.`;
+        const leavingAgent=ensureFaithAgentPerson();
+        if(leavingAgent) leavingAgent.rel.arc.push({year:G.faith.year,text:'Vous a lâché : trop sollicité, il a repositionné sa liste de clients ailleurs.'});
+        G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${faithAgentDisplayName()} vous lâche : trop sollicité, il repositionne sa liste de clients ailleurs.`;
         G.faith.agent=null; G.f.agentCut=0; G.faith.agentPatienceZeroStreak=0;
       }
     } else {
@@ -3550,6 +3828,254 @@ function scr_fight_flash(){
    <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.toResult()">VOIR LE RÉSULTAT</button>
   </div>`;
 }
+/* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — Plan V3 LOT 1 §P07 : Faith ne
+   montre plus jamais l'arène round par round (arbitrage A4, "resolved-
+   with-suspense-screen") — ce nouvel écran s'intercale entre le combat déjà
+   simulé (G.pending.res, résolu en un calcul synchrone comme tout le
+   moteur) et sa révélation (scr_fight_flash, réutilisé tel quel juste au-
+   dessus). Barre de progression non linéaire (accélère puis ralentit avant
+   le verdict — startFaithFightPending() plus bas) sur 2,5 à 4s, confettis
+   sur victoire via spawnParticles/updateParticles/drawParticles
+   (ANCRE JUICE_NIVEAU2/PARTICLES, réutilisées telles quelles — même pool
+   d'objets réutilisés, juste porté par FFP plutôt que par ARENA) sur une
+   perte plus lente et silencieuse, sans confettis. Aucun bouton : la
+   bascule vers fight_flash est automatique (finishFaithFightPending()). */
+function scr_faith_fight_pending(){
+  const meWin=!!(G.pending&&G.pending.win);
+  return `<div class="scr center intro">
+   <div class="eyebrow muted">LE VERDICT ARRIVE</div>
+   <div class="mono small muted" style="margin-top:8px">La commission délibère.</div>
+   <div style="height:8px;background:var(--panel2);border:1px solid var(--line);border-radius:2px;overflow:hidden;margin-top:28px">
+     <div id="ffp-bar" style="height:100%;width:0%;background:var(--gold);transition:none"></div>
+   </div>
+   ${meWin?'<canvas id="ffp-cv" style="width:100%;height:140px;margin-top:4px;display:block"></canvas>':''}
+   <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipFaithFightPending()">Passer ▸</button>
+  </div>`;
+}
+/* Pool de particules dédié à cet écran (confettis) : même mécanisme que
+   celui de l'arène (ARENA._particles), objet séparé parce que Faith
+   n'instancie jamais ARENA/le canvas de l'arène — cf. l'ancre ci-dessus.
+   Déclaré une seule fois, réutilisé (jamais réalloué) d'un combat Faith à
+   l'autre : seul son tableau ._particles se vide/se remplit. */
+let FFP={_particles:[],raf:0,to:0};
+function startFaithFightPending(){
+  if(!G.pending) return;
+  const meWin=!!G.pending.win;
+  /* ==== [ANCRE: V3_TITLE_EXTENDED_WAIT] — Plan V3 LOT 6 §5.6.1, temps 5 :
+     "écran d'attente allongé" pour un combat de titre ou de défense —
+     G.fight.kind reste posé à ce stade (seul champchamp_title est effacé
+     après résolution, cf. ANCRE CORRECTIF_KIND_CHAMPCHAMP_PERSISTANT,
+     ui-05), donc lisible directement ici sans état supplémentaire. */
+  const isTitleFight=G.fight&&(G.fight.kind==='title'||G.fight.kind==='defense');
+  const durationMs=isTitleFight?(4000+Math.random()*2000):(2500+Math.random()*1500); // 2,5-4s normal, 4-6s titre (§P07/§P18)
+  /* ==== [FIN ANCRE] ==== */
+  const t0=(typeof performance!=='undefined'?performance.now():Date.now());
+  const bar=document.getElementById('ffp-bar');
+  const cv=meWin?/** @type {HTMLCanvasElement|null} */(document.getElementById('ffp-cv')):null;
+  let ctx=null, W=0, H=0, spawned=false;
+  if(cv && cv.getContext){
+    const dpr=Math.min((typeof window!=='undefined'&&window.devicePixelRatio)||1,2);
+    W=cv.clientWidth||320; H=140; cv.width=W*dpr; cv.height=H*dpr;
+    ctx=cv.getContext('2d'); if(ctx) ctx.scale(dpr,dpr);
+  }
+  FFP._particles.length=0; // vidé, jamais réalloué (cf. déclaration de FFP)
+  /* Non-linéaire : easeOutQuint jusqu'à 85%, puis un dernier tiers de temps
+     "suspendu" (progression très lente) avant de sauter à 100% — le
+     joueur voit la barre presque finie puis hésiter, comme un jury. */
+  function ease(t){ return t<0.7 ? 1-Math.pow(1-(t/0.7),5) : 0.92+(t-0.7)/0.3*0.08; }
+  function frame(now){
+    const t=Math.min(1,(now-t0)/durationMs);
+    if(bar) bar.style.width=(ease(t)*100).toFixed(1)+'%';
+    if(ctx){
+      if(!spawned && t>0.15){ spawned=true;
+        spawnParticles(FFP,W/2,-10,{count:44,xSpread:W*0.9,ySpread:10,spreadX:2,spreadY:1,vy0:1.5,gravity:0.085,life:130,size:6,
+          colors:['#E6B93A','#E8442F','#7FC488','#F5EFE0'],kind:'confetti'});
+      }
+      updateParticles(FFP);
+      ctx.clearRect(0,0,W,H);
+      drawParticles(ctx,FFP);
+    }
+    if(t<1){ FFP.raf=requestAnimationFrame(frame); }
+    else { finishFaithFightPending(); }
+  }
+  if(typeof requestAnimationFrame!=='undefined'){ FFP.raf=requestAnimationFrame(frame); }
+  else { FFP.to=setTimeout(finishFaithFightPending,durationMs); } // repli (tests jsdom sans rAF)
+}
+function finishFaithFightPending(){
+  if(FFP.raf){ cancelAnimationFrame(FFP.raf); FFP.raf=0; }
+  if(FFP.to){ clearTimeout(FFP.to); FFP.to=0; }
+  if(G.screen!=='faith_fight_pending') return; // déjà quitté (retour rapide, changement d'écran ailleurs)
+  G.screen='fight_flash'; render();
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V3_NEMESIS_CONSECRATION_SCREEN] — Plan V3 LOT 3 §P16 : écran
+   dédié, une seule fois par nemesis désigné (drapeau consommé dans
+   render(), plus haut). Loi 1 (victime identifiable) : nom complet +
+   surnom fraîchement gagné (lockFaithNemesis()) + un détail concret (son
+   rang/palmarès actuel, jamais une case vide). Toujours "faith_hub" au
+   retour : c'est l'écran calme depuis lequel ce rendu a été intercepté
+   dans tous les cas (fin d'année, sortie de combat, résolution d'un
+   événement de vie — jamais une séquence de combat, filtrée en amont). */
+function scr_faith_nemesis_consecration(){
+  const f=G.f;
+  const nem=(G.roster||[]).find(o=>o.id===f.faithNemesisId);
+  if(!nem) return `<div class="scr center intro"><p class="lede">La rivalité s’est déjà dissoute.</p><button class="btn primary mt" onclick="CL.go('faith_hub')">Continuer</button></div>`;
+  const rang=divRank(nem);
+  return `<div class="scr center intro" style="max-width:480px;margin:0 auto">
+   <div class="eyebrow" style="color:var(--f-red-hi)">UNE NÉMÉSIS EST NÉE</div>
+   <h2 class="hero-name" style="font-size:28px;line-height:1.1;margin-top:8px">${esc(fighterDisplayName(nem))}</h2>
+   <div class="mono small muted" style="margin-top:10px">${esc(nem.divName||'')} · rang #${rang} · ${nem.W||0}-${nem.L||0}${nem.D?`-${nem.D}`:''}</div>
+   <p class="lede small" style="margin-top:16px">${esc(fighterDisplayName(nem,false))} portera désormais ce surnom partout où votre carrière le recroisera — sur les affiches, dans la presse, dans vos souvenirs.</p>
+   <div class="card mt" style="padding:14px;background:var(--panel2);border-left:3px solid var(--f-red-hi);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px;color:var(--f-red-hi)">${esc(nemesisTierLabel(0))}</div>
+     <div class="small muted">Aucun combat encore joué entre vous deux — le premier écrira le reste.</div>
+   </div>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.go('faith_hub')">Continuer</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: V3_TITLE_SEQUENCE] — Plan V3 LOT 6 §5.6.1 : la séquence de
+   titre en 5 temps ("jamais un bouton"). Portée réduite par rapport à la
+   spécification complète (temps 1 "la rumeur" — un mois ou deux de
+   rumeurs progressives avant l'annonce — n'a pas de représentation dans
+   l'état actuel du jeu, qui ne connaît que le mois EN COURS ; l'ajouter
+   demanderait un système de rumeurs différées hors du périmètre de ce
+   lot, explicitement différé) : les temps 2 (mérite), 3 (négociation),
+   4 (montée, cf. V3_TITLE_PROMO_EXCLUSIF plus haut) et 5 (attente
+   allongée + consécration) sont, eux, réellement construits ci-dessous. */
+/** Temps 2 — "Le mérite" : expose FACTUELLEMENT pourquoi ce combat de
+ * titre existe (série, adversaires notables battus, rang), et qui le
+ * conteste (le PNJ le mieux classé du roster). Le cas "pas encore mérité"
+ * n'a pas d'écran dédié ici : fightKind() (ui-05) EST déjà la garde
+ * d'éligibilité — on n'atteint cet écran que lorsqu'elle est vraie. */
+function scr_faith_title_merit(){
+  const f=G.f;
+  const rang=divRank(f);
+  const contenders=rankPool(G.roster||[]);
+  const contender=contenders[0]||null;
+  const notableWins=(f.history||[]).filter(h=>h.res==='win' && (h.oppWasChamp || (h.oppElo||0)>=1500)).slice(-3);
+  const recentWins=notableWins.length?notableWins:(f.history||[]).filter(h=>h.res==='win').slice(-2);
+  return `<div class="scr center intro" style="max-width:480px;margin:0 auto">
+   <div class="eyebrow gold">LE MÉRITE</div>
+   <h2 class="disp" style="margin-top:6px">On parle de vous pour le titre.</h2>
+   <div class="card mt" style="padding:16px;background:var(--panel2);border:1px solid var(--gold);text-align:left">
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Rang actuel</span><span class="gold">#${rang}</span></div>
+     <div class="mono small mt" style="display:flex;justify-content:space-between"><span class="muted">Série en cours</span><span class="${(f.streak||0)>0?'sage':'muted'}">${f.streak>0?`${f.streak} victoire(s) de suite`:'—'}</span></div>
+     ${recentWins.length?`<div class="mt"><div class="eyebrow" style="font-size:10px;margin-bottom:6px">CE QUI VOUS Y AMÈNE</div>
+       ${recentWins.map(h=>`<div class="small muted">Victoire face à ${esc(h.oppName||'un adversaire')}${h.oppWasChamp?' — alors champion':''}${h.oppRecord?` (${h.oppRecord})`:''}</div>`).join('')}
+     </div>`:''}
+   </div>
+   ${contender?`<div class="card mt" style="padding:14px;background:var(--panel2);border-left:3px solid var(--blood);text-align:left">
+     <div class="eyebrow" style="font-size:10px;color:var(--blood)">QUI CONTESTE</div>
+     <div class="hero-name" style="font-size:18px;margin-top:4px">${esc(fighterDisplayName(contender))} ${contender.flag||''}</div>
+     <div class="small muted mt">${recordStr(contender)} · rang #${divRank(contender)} — pense encore mériter sa place avant vous.</div>
+   </div>`:''}
+   <p class="lede small mt">Le mérite ne se discute plus. Reste à le confirmer dans la cage.</p>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.faithFight()">Continuer</button>
+  </div>`;
+}
+/** Temps 3 — négociation de titre, distincte de scr_faith_offer() : leviers
+ * propres (clause de revanche, part de la billetterie), rounds fixés par
+ * faithGalaPosition() (déjà 5 pour un Main event, jamais un choix ici — la
+ * spec ne le liste qu'à titre indicatif, la valeur existe déjà). Le choix
+ * du lieu (spec, "5 rounds, part de la billetterie, choix du lieu")
+ * suppose de pouvoir surcharger la ville déterministe du gala
+ * (faithGalaVenueInfo, ui-04) — hors périmètre de ce lot, différé. */
+function scr_faith_title_negotiation(){
+  const f=G.f, F=G.faith, off=F.pendingOffer;
+  if(!off) return `<div class="scr center intro"><p class="lede">Aucune offre en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const o=off.opp.o, gala=off.gala;
+  const base=(f.org>0 && f.contract)?f.contract.show:(ORG_PURSES[f.org]||[0,0])[0];
+  const bourseEst=Math.round(base*(gala.mult||1)*(off.bonusMult||1)*10)/10;
+  const isDefense=!!f.champion;
+  const canRevengeClause=faithLeverage(f,F)>0 && o.id!==f.faithNemesisId;
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="eyebrow" style="color:var(--gold)">${isDefense?'DÉFENSE DU TITRE':'COMBAT DE TITRE'}</div>
+   <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
+   <div class="mono small muted" style="margin-top:4px">5 reprises · registre spectacle · conférence et pesée obligatoires</div>
+   <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
+     <div class="hero-name" style="font-size:22px">${esc(o.name)} ${o.flag}</div>
+     <div class="mono small" style="margin-top:4px">${recordStr(o)} · <span class="muted">#${divRank(o)}</span>${o.champion?' · Champion':''}</div>
+     <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
+   </div>
+   <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+     <button class="btn primary" style="height:56px;font-size:16px" onclick="CL.faithOfferSign()">SIGNER</button>
+     ${faithLeverage(f,F)>0?`<div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
+       <b style="font-size:15px">Négocier la part de la billetterie</b>
+       <div class="muted small mt">Une bourse à la hauteur de l'enjeu, ou rien.</div>
+     </div>`:''}
+     ${canRevengeClause?`<div class="opp" style="padding:14px;border-color:${F.pendingRevengeClause?'var(--gold)':'var(--line)'}" onclick="CL.faithTitleToggleRevengeClause()">
+       <b style="font-size:15px">${F.pendingRevengeClause?'✓ ':''}Clause de revanche</b>
+       <div class="muted small mt">${F.pendingRevengeClause?'Si vous perdez, la revanche est garantie — le même adversaire, pas un autre.':'En cas de défaite, garantit une revanche immédiate plutôt qu’un tirage classique.'}</div>
+     </div>`:''}
+     <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser le combat</button>
+   </div>
+   <div class="mono small" style="text-align:center;margin-top:14px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Voir la carte complète ▸</span></div>
+  </div>`;
+}
+/** Temps 5 (suite) — consécration, une seule fois, après l'écran de
+ * résultat (interceptée par render(), ANCRE V3_TITLE_CONSECRATION
+ * ci-dessus). La ligne finale (FAITH_TITLE_FINAL_LINES) est LE point le
+ * plus important de cet écran — mise en avant seule, en dernier. */
+function scr_faith_title_consecration(){
+  const f=G.f, F=G.faith;
+  const c=F.lastTitleConsecration;
+  if(!c) return `<div class="scr center intro"><p class="lede">Le moment est déjà passé.</p><button class="btn primary mt" onclick="CL.go('faith_hub')">Continuer</button></div>`;
+  const won=c.type==='won';
+  if(!TEXT_POOLS['faith_title_final_line']) registerTextPool('faith_title_final_line',FAITH_TITLE_FINAL_LINES);
+  const finalLine=txtPick('faith_title_final_line',{type:c.type,wasNemesis:c.wasNemesis,wasUnderdog:c.wasUnderdog,attemptsBefore:c.titleAttemptsBefore,personality:f.personality});
+  const coach=(typeof faithCoachPerson==='function')?faithCoachPerson(F):null;
+  const gymTop=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId);
+  const nem=(G.roster||[]).find(o=>o.id===f.faithNemesisId);
+  const journ=faithEnsureJournalist(F);
+  const reign=(G.titleHistory||[]).find(r=>r.org===f.org && r.divName===f.divName && r.champion===f.name);
+  return `<div class="scr center intro" style="max-width:480px;margin:0 auto">
+   <div class="eyebrow gold" style="letter-spacing:0.3em">${won?'CONSÉCRATION':'TITRE DÉFENDU'}</div>
+   <div style="font-size:64px;margin-top:10px">${SVG&&SVG.medal?SVG.medal:'🏆'}</div>
+   <h2 class="hero-name" style="font-size:28px;line-height:1.1;margin-top:8px">${esc(orgDisplayName(f).toUpperCase())} · ${esc(f.divName||'')}</h2>
+   ${reign?`<div class="mono small muted mt">Règne inscrit — ${reign.defenses||0} défense(s) à ce jour.</div>`:''}
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     ${coach?`<div class="small muted">${esc(personName(coach,{}))}, votre coach : « Ce n'est pas un accident. On l'a construit. »</div>`:''}
+     ${gymTop?`<div class="small muted mt">${esc(gymTop.first||gymTop.name||'')} à la salle : « On l'a vu se battre pour ça tous les jours. »</div>`:''}
+     ${nem?`<div class="small mt" style="color:var(--f-red-hi)">${esc(fighterDisplayName(nem,false))} regarde en silence, depuis les vestiaires adverses.</div>`:''}
+     <div class="small muted mt">${esc(journ.name)}, ${esc(journ.media)} : « Retenez cette date. »</div>
+   </div>
+   <p class="lede mt" style="font-style:italic;font-size:17px;line-height:1.4">${esc(finalLine)}</p>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.go('faith_hub')">Continuer</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: V3_SCR_FIGHT_CARD] — Plan V3 LOT 6 §5.6.1.b : la carte
+   complète, en 1 tap depuis l'offre (scr_faith_offer/scr_faith_title_
+   negotiation, "Voir la carte complète") ou depuis le hub une fois le
+   combat du joueur résolu ("Résultats de la carte"). Les combats de
+   complément sont DÉJÀ joués (generateFightCard, ui-08) au moment où cet
+   écran s'affiche — ce n'est pas une prévisualisation, ce sont de vrais
+   résultats. */
+function scr_faith_card(){
+  const card=G.faith&&G.faith.currentCard;
+  if(!card) return `<div class="scr center intro"><p class="lede">Aucune carte pour l'instant.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const pr=card.playerResult;
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="eyebrow gold">LA CARTE COMPLÈTE</div>
+   <h2 class="hero-name" style="font-size:24px;line-height:1.1">${esc(card.label)}</h2>
+   <div class="mono small muted" style="margin-top:4px">${card.fights.length+1} combats · ${esc(card.tier||'')}</div>
+   <div class="opp" style="padding:14px;text-align:left;margin-top:16px;border-left:3px solid var(--gold)">
+     <div class="eyebrow" style="font-size:10px;color:var(--gold)">${card.tier==='Main event'?"TÊTE D'AFFICHE":'VOTRE COMBAT'}</div>
+     <div class="small mt">${esc(G.f.name)} vs ${esc(card.oppName)}</div>
+     ${pr?`<div class="mono small mt" style="color:${pr.win?'var(--win)':'var(--loss)'}">${pr.win?'Victoire':'Défaite'} · ${esc(pr.method)}</div>`:'<div class="muted small mt">Pas encore joué.</div>'}
+   </div>
+   ${card.fights.map(fi=>`<div class="opp" style="padding:12px;text-align:left;margin-top:8px">
+     <div class="small">${esc(fi.aName)} ${fi.aFlag||''} vs ${esc(fi.bName)} ${fi.bFlag||''}</div>
+     <div class="mono small muted mt">${fi.winnerName?`${esc(fi.winnerName)} gagne par ${esc(fi.method)}`:'Match nul'}</div>
+   </div>`).join('')}
+   <button class="btn ghost mt" onclick="CL.go('${G._cardReturn||'faith_hub'}')">← Retour</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_arena(){ const A=ARENA||{};
   /* ==== [CORRECTIF V2-06] — la cage reste sombre dans les deux ambiances
      (V2-01), mais son HUD (chrono/rounds/jauges — ici noms, zones de

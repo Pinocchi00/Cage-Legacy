@@ -517,8 +517,25 @@ function advanceRoster(){
   const oldRanks={}; rankPool(allFighters).forEach((o,i)=>oldRanks[o.id]=i);
   const r=G.roster.filter(o=>!o.champion);
   const simCount=Math.min(Math.floor(r.length/1.5),20); // plafonné : roster amateur = 100, sans cap ça ferait ~66 combats simulés à chaque cycle
+  /* ==== [ANCRE: V3_PLAFOND_INVAINCUS] — Plan V3 LOT 3 §P03/§P14, arbitrage
+     A1 (§3) : "retirer les plafonds/avertissements côté JOUEUR, resserrer
+     la plausibilité du roster PNJ". Le joueur reste libre d'être invaincu
+     aussi longtemps qu'il gagne — ceci ne le concerne jamais. Si plus de
+     20% du top 10 de la division est déjà invaincu (L===0), une partie des
+     combats simulés ce cycle oppose deux invaincus du top 10 entre eux :
+     au moins l'un des deux prend une vraie défaite, jamais une statistique
+     retouchée après coup (worldTick incrémente, ne recalcule jamais). */
+  const top10=rankPool(r).slice(0,10);
+  const unbeatenTop10=top10.filter(o=>(o.L||0)===0);
+  const excessUnbeaten=unbeatenTop10.length-Math.ceil(top10.length*0.2);
+  const forcedPairs=[];
+  if(excessUnbeaten>0 && unbeatenTop10.length>=2){
+    const shuffled=unbeatenTop10.slice().sort(()=>rnd()-0.5);
+    for(let i=0;i+1<shuffled.length && forcedPairs.length<excessUnbeaten;i+=2) forcedPairs.push([shuffled[i],shuffled[i+1]]);
+  }
+  /* ==== [FIN ANCRE] ==== */
   const fought=new Set();
-  for(let n=0;n<simCount;n++){ const a=pick(r),b=pick(r); if(a===b)continue; const res=simulateFight(a,b,3); applyResult(a,b,res,'A'); applyResult(b,a,res,'B');
+  for(let n=0;n<simCount;n++){ const pair=forcedPairs[n]; const a=pair?pair[0]:pick(r), b=pair?pair[1]:pick(r); if(a===b)continue; const res=simulateFight(a,b,3); applyResult(a,b,res,'A'); applyResult(b,a,res,'B');
     if(a.orgElo===undefined) a.orgElo=eloBaseline(a.org,a.overall); if(a.careerElo===undefined) a.careerElo=eloBaseline(a.org,a.overall);
     if(b.orgElo===undefined) b.orgElo=eloBaseline(b.org,b.overall); if(b.careerElo===undefined) b.careerElo=eloBaseline(b.org,b.overall);
     const d=calculateEloDelta(a.orgElo,b.orgElo,res.winner,res.method,res.round);
@@ -617,9 +634,16 @@ function reconstructLegend(l){
    (le combattant le mieux classé "tire" le combat vers le haut de l'affiche),
    comme en pratique réelle où l'affiche se construit autour du nom le plus
    fort, pas du statut de celui qu'on suit. ==== */
+/* ==== [ANCRE: V3_ANGLICISMES_CARTE] — Plan V3 LOT 6 §P09 : "chercher et
+   corriger tous les anglicismes du même type" — ces libellés de position sur
+   la carte (poster vestiaire, mode carrière) étaient du vocabulaire anglais
+   brut inséré tel quel dans une interface française, même défaut que BOUT
+   ci-dessus. Les clés internes restent en anglais (comparaisons ailleurs
+   dans le fichier, ex. slotColors juste en dessous) — seuls les LIBELLÉS
+   affichés changent. ==== */
 function getCardSlot(f,opp,kind){
   if(f.org===0) return "CARTE AMATEUR";
-  if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "MAIN EVENT";
+  if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "TÊTE D'AFFICHE";
   const rnkF=divRank(f);
   // Sécurité : divRank() renvoie 0 si l'adversaire n'est pas trouvé dans le
   // roster de l'organisation courante (combat spécial, invité hors roster,
@@ -629,16 +653,17 @@ function getCardSlot(f,opp,kind){
   const rnkOpp=rnkOppRaw>0?rnkOppRaw:999;
   if(rnkF<=15 && rnkOpp<=15){
     const rnk=Math.min(rnkF,rnkOpp);
-    if(rnk<=3) return "CO-MAIN EVENT";
-    if(rnk<=10) return "MAIN CARD";
-    return "PRELIMS";
+    if(rnk<=3) return "CO-VEDETTE";
+    if(rnk<=10) return "CARTE PRINCIPALE";
+    return "PRÉLIMINAIRES";
   }
-  if(rnkF<=15 || rnkOpp<=15) return "PRELIMS";
-  return "EARLY PRELIMS";
+  if(rnkF<=15 || rnkOpp<=15) return "PRÉLIMINAIRES";
+  return "PREMIÈRES PRÉLIMINAIRES";
 }
+/* ==== [FIN ANCRE] ==== */
 function renderFightPoster(f,opp,kind){
   const slot=getCardSlot(f,opp,kind);
-  const slotColors={'CARTE AMATEUR':'var(--muted)','EARLY PRELIMS':'var(--line)','PRELIMS':'#4DA6FF','MAIN CARD':'var(--sage)','CO-MAIN EVENT':'var(--blood)','MAIN EVENT':'var(--gold)'};
+  const slotColors={'CARTE AMATEUR':'var(--muted)','PREMIÈRES PRÉLIMINAIRES':'var(--line)','PRÉLIMINAIRES':'#4DA6FF','CARTE PRINCIPALE':'var(--sage)','CO-VEDETTE':'var(--blood)',"TÊTE D'AFFICHE":'var(--gold)'};
   const borderColor=slotColors[slot]||'var(--gold-d)';
   const orgName=orgDisplayName(f).toUpperCase();
   const fLast=esc(f.last||f.name).toUpperCase();
@@ -651,7 +676,7 @@ function renderFightPoster(f,opp,kind){
       <span class="muted" style="font-size:18px;display:inline-block;margin:8px 0;font-family:'JetBrains Mono'">VS</span><br>
       <span style="color:var(--sage)">${oppLast}</span>
     </div>
-    <div class="mono small muted mt" style="position:relative;z-index:2;border-top:1px solid var(--line);padding-top:12px">${(f.divName||'').toUpperCase()} BOUT · ${(kind==='title'||kind==='defense')?'5 ROUNDS':'3 ROUNDS'}</div>
+    <div class="mono small muted mt" style="position:relative;z-index:2;border-top:1px solid var(--line);padding-top:12px">${(f.divName||'').toUpperCase()} · ${(kind==='title'||kind==='defense')?'5 REPRISES':'3 REPRISES'}</div>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */

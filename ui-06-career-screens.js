@@ -36,7 +36,12 @@ function scr_title(){
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    <div style="text-align:center;margin-bottom:48px">
      <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
-     <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">SIMULATEUR DE MANAGEMENT & ARCHIVES</div>
+     <!-- ==== [ANCRE: V3_TITRE_PROMESSE] — Plan V3 LOT 1 §P22 : "SIMULATEUR
+          DE MANAGEMENT & ARCHIVES" énumérait des fonctionnalités (gérer,
+          archiver) au lieu de dire ce que le joueur va RESSENTIR (Loi 6,
+          test de substitution du §1.3 — cette phrase serait vraie de
+          n'importe quel jeu de gestion, pas seulement de celui-ci). ==== -->
+     <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">BÂTISSEZ UN NOM QUE PERSONNE N’OUBLIERA</div>
    </div>
    ${(()=>{ G.lastMsg=null;
       if(!G.bootMsg) return '';
@@ -51,12 +56,18 @@ function scr_title(){
         réservé au mode carrière complète juste en dessous (un seul
         bouton "2. CARRIÈRE COMPLÈTE" → scr_intro, qui gère sa propre
         reprise). ==== -->
+   <!-- ==== [ANCRE: V3_MODES_PROMESSE] — Plan V3 LOT 1 §P22 : les trois
+        descriptions énuméraient des fonctionnalités ("gérez l'argent, les
+        camps...") au lieu de promettre une expérience ; celle de Faith
+        citait même un jeu concurrent ("Destiny-like", jargon qui suppose
+        que le joueur le connaît, contraire à la Loi 6). Chacune tient en
+        moins de 12 mots. ==== -->
    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.go('faith_home')">1. MMA FAITH
-     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Carrière longue — Gestion de vie (Destiny-like)</span></button>
+     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Une vie de combattant, du premier pas au dernier souvenir</span></button>
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Gérez l’argent, les camps et l’héritage</span></button>
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Montez les échelons, un combat à la fois</span></button>
    <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Tournois et défis d’ascension arcade</span></button>
+     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Un seul combattant. Une chute, et tout s’arrête</span></button>
    <div class="hr" style="margin:24px 0"></div>
    <button class="btn ghost" style="font-size:16px;padding:16px;border:1px dashed var(--gold);background:var(--panel2);color:var(--gold)" onclick="CL.go('legends')">BOUTIQUE : SALLE DES LÉGENDES
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
@@ -71,10 +82,6 @@ function scr_title(){
         chemin vers le Panthéon. ==== -->
    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('hof')">VOIR LE PANTHÉON
      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Toutes les légendes retraitées, tous modes confondus</span></button>
-   <!-- ==== [ANCRE: V2-44] — accès aux Réglages sans carrière chargée (le
-        Rythme de combat et les Moments de bascule s'appliquent à tous les
-        modes, pas seulement Faith). ==== -->
-   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('settings')">RÉGLAGES</button>
    </div>`;
 }
 /* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
@@ -479,51 +486,17 @@ function scr_camp(){ const f=G.f;
    </div>`; }
 
 /* ==== [ANCRE: PLAN_COMBAT] — vestiaire, choix tactique juste avant le combat ==== */
-/* ==== [ANCRE: V2-28] — réglage Rythme de combat exposé ici, temporairement
-   (comme l'ambiance Faith au lot précédent, V2-01) — le vrai foyer sera
-   l'écran Réglages unique de V2-44. Lecture défensive de G.settings, même
-   convention que faithAmbiance : G.settings n'est pas garanti exister à
-   tous les points d'entrée de G. */
-function combatPaceToggleBlock(){
-  const pace=(G.settings&&G.settings.fightPace)||'rapide';
-  const opts=[['integral','Intégral'],['rapide','Rapide'],['instantane','Instantané']];
-  return `<div class="card mt" style="padding:10px;background:var(--panel2)">
-   <div class="eyebrow mb" style="font-size:10px">RYTHME DE COMBAT</div>
-   <div style="display:flex;gap:8px">
-     ${opts.map(([id,lbl])=>`<button class="btn ${pace===id?'primary':'ghost'}" style="flex:1;padding:8px;font-size:12px" onclick="CL.setFightPace('${id}')">${lbl}</button>`).join('')}
-   </div>
-  </div>`;
-}
-/* ==== [ANCRE: V2-44] — écran Réglages regroupé : Ambiance (V2-01),
-   Rythme de combat (V2-28, combatPaceToggleBlock() réutilisé tel quel),
-   Moments de bascule activés/désactivés (V2-29, lu par detectBascule(),
-   ui-08). Trois réglages, pas plus — rien d'autre n'y est ajouté.
-   Atteint depuis le titre (aucune carrière requise) ou depuis le hub
-   Faith en cours de partie : le retour dépend simplement de si une
-   carrière Faith est chargée en mémoire (G.faith). */
-function scr_settings(){
-  const back=G.faith?'faith_hub':'title';
-  const basculeOn=!(G.settings && G.settings.basculeEnabled===false);
-  return `<div class="scr" style="max-width:480px;margin:0 auto">
-   <div class="bar"><span class="eyebrow">Réglages</span><span class="eyebrow x" onclick="CL.go('${back}')">✕</span></div>
-   <div class="card mt" style="padding:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="font-size:11px">AMBIANCE</div>
-     <div style="display:flex;gap:8px">
-       <button class="btn ${((G.settings&&G.settings.faithAmbiance)||'papier')==='papier'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('papier')">☀️ Papier</button>
-       <button class="btn ${(G.settings&&G.settings.faithAmbiance)==='nuit'?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setFaithAmbiance('nuit')">🌙 Nuit</button>
-     </div>
-   </div>
-   ${combatPaceToggleBlock()}
-   <div class="card mt" style="padding:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="font-size:11px">MOMENTS DE BASCULE</div>
-     <div style="display:flex;gap:8px">
-       <button class="btn ${basculeOn?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setBasculeEnabled(true)">Activés</button>
-       <button class="btn ${!basculeOn?'primary':'ghost'}" style="flex:1;padding:10px" onclick="CL.setBasculeEnabled(false)">Désactivés</button>
-     </div>
-   </div>
-   <button class="btn ghost mt" onclick="CL.go('${back}')">← Retour</button>
-  </div>`;
-}
+/* ==== [ANCRE: V3_REGLAGES_SUPPRIMES] — Plan V3 LOT 1 §P07, arbitrage A4 :
+   l'écran Réglages (V2-44) et son bloc Rythme de combat (V2-28,
+   combatPaceToggleBlock(), qui vivait aussi ici dans scr_plan) sont
+   supprimés du menu. Le rythme n'est plus un réglage joueur : il est forcé
+   par le mode à l'entrée (forceFightPaceForMode(), ui-08) — Gauntlet en
+   intégral, Carrière en rapide, Faith ne passe plus jamais par l'arène
+   (scr_faith_fight_pending() la remplace). "Moments de bascule"
+   (basculeEnabled) perd son seul point d'accès et reste à sa valeur par
+   défaut (activé) — G.settings.* est conservé pour la compatibilité des
+   sauvegardes existantes (state.js/validateState()), seule l'édition par
+   le joueur disparaît. ==== */
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
   const step=G.fight.planStep||1;
@@ -617,8 +590,7 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
    <div class="card mt" style="border-left:3px solid ${hasKey?'var(--sage)':'var(--line)'};padding-left:14px;background:var(--panel2)">
      <div class="eyebrow mb" style="color:${hasKey?'var(--sage)':'var(--muted)'}">LA CLÉ</div>
      <div class="small">${hasKey?`Grâce au sparring, vous savez qu’${esc(opp.name)} est particulièrement dangereux en ${esc(oppTopAttrLabel(opp))}.`:'Vous entrez sans rien de plus que ce que tout le monde sait de lui.'}</div>
-   </div>
-   ${combatPaceToggleBlock()}`;
+   </div>`;
   }
   h+=`</div>`;
   return h;
@@ -938,6 +910,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
         refermer au moment même où le joueur peut encore s'en souvenir. -->
    ${p.promiseOutcome?`<div class="mono small" style="text-align:center;color:${p.promiseOutcome.tenue?'var(--pos)':'var(--neg)'}">${p.promiseOutcome.tenue?`Promesse tenue face à ${esc(p.promiseOutcome.oppName)}.`:`Promesse non tenue face à ${esc(p.promiseOutcome.oppName)}.`}</div>`:''}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
+   ${p.upsetLine?`<div class="card" style="text-align:center;background:var(--panel2);border-left:3px solid var(--gold)"><p class="lede small" style="margin:0;font-style:italic">${esc(p.upsetLine)}</p></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);
    /* ==== [ANCRE: CORRECTIF_GAIN_MASQUE_ARRONDI] — bug remonté : d20()
       arrondit /100->/20 (Math.round(v/5)), donc un petit gain interne réel
@@ -1104,6 +1077,12 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
           encore été disputé. ==== -->
      ${(f.orgRecords && Object.keys(f.orgRecords).length)?`<div class="story" style="position:relative;z-index:2"><b>Bilan maison.</b> ${Object.entries(f.orgRecords).map(([orgId,rec])=>`${rec.W}-${rec.L}${rec.D?`-${rec.D}`:''} sous les couleurs de ${esc(ORGS[orgId]||'—')}`).join(' · ')}.</div>`:''}
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+     <!-- ==== [CORRECTIF V3_CAREER_LIFETIME_TOTAL] — Plan V3 LOT 7 §5.7.2
+          point 4 : le total de carrière (amateur + pro, jamais recombiné
+          nulle part ailleurs — cf. faithCareerTotalFights, ui-04) affiché
+          sur la fiche elle-même, pas seulement à l'épilogue Faith. ==== -->
+     ${f.amaRec?`<div class="story" style="position:relative;z-index:2"><b>Combats au total.</b> ${f.amaRec.W+f.amaRec.L+f.W+f.L+(f.D||0)} (amateur + pro).</div>`:''}
+     ${(G.faith)?faithCareerStatsGrid(f,G.faith):''}
      ${championBadgeCard(f)}
      ${signatureMoveCard(f)}
      ${f.skills.length?(()=>{
@@ -1132,12 +1111,66 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
    <div style="display:flex;flex-direction:column;gap:16px">${grp('ment','Mental',g.ment,true)}${grp('phys','Physique',g.phys,true)}</div>
    <button class="btn ghost" onclick="G._profileReturn=null;CL.go('${backScreen}')">Retour</button></div>`; }
 
+/* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — Plan V3 LOT 6 §5.6.3 point 1 : "un
+   onglet P4P dans l'écran Classement", exposant l'ancre P4P_SCORE_80_20
+   (engine.js:1266) déjà calculée par p4pScore() mais jamais montrée
+   telle quelle. Portée réduite par rapport à un vrai "classement mondial
+   toutes divisions confondues" : le jeu ne modélise à aucun moment un
+   roster couvrant plusieurs divisions/organisations simultanément (chaque
+   G.roster est régénéré pour LA division/organisation courante du joueur,
+   cf. makeOrgRoster) — synthétiser un vrai classement mondial croisé
+   demanderait de construire cette donnée de toutes pièces, hors périmètre
+   de ce lot. L'onglet P4P reclasse donc le MÊME pool par score pur
+   (p4pScore, sans l'exception "champion toujours premier" du classement de
+   division), ce qui EST la vraie différence P4P/division dans ce jeu : un
+   prétendant en pleine bourre peut dépasser un champion qui ronronne. */
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
+  const tab=(G._rankingsTab==='p4p')?'p4p':'division';
   let h=`<div class="scr">
-   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
+   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:12px;padding-bottom:8px">
      <span class="eyebrow mono" style="letter-spacing:.1em">BASE DE DONNÉES // ${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
    </div>
-   <div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
+   <div class="pills" style="margin-bottom:16px">
+     <span class="pill ${tab==='division'?'on':''}" onclick="CL.setRankingsTab('division')">Division</span>
+     <span class="pill ${tab==='p4p'?'on':''}" onclick="CL.setRankingsTab('p4p')">P4P</span>
+   </div>`;
+  if(tab==='p4p'){
+    /* ==== [ANCRE: V3_RANK_HISTORY_DELTA] — Plan V3 LOT 6 §5.6.3 point 2 :
+       F.rankHistory[] (worldTick, engine.js) donne un delta réel de rang
+       et de score P4P depuis la dernière année jouée — Faith uniquement
+       (seul mode où worldTick() tourne). Granularité annuelle, pas "par
+       combat ET par saison" comme le demande le texte intégral : la
+       version par-combat demanderait un second point d'écriture dans
+       resolveFight() en plus de worldTick(), différé pour ce lot. */
+    const hist=(G.faith && Array.isArray(G.faith.rankHistory))?G.faith.rankHistory:null;
+    if(hist && hist.length>=2){
+      const cur=hist[hist.length-1], prev=hist[hist.length-2];
+      const rankDelta=prev.rank-cur.rank, p4pDelta=cur.p4p-prev.p4p;
+      h+=`<div class="card mt" style="padding:12px;background:var(--panel2);margin-bottom:12px">
+        <div class="eyebrow" style="font-size:10px">DEPUIS LA SAISON ${prev.year}</div>
+        <div class="mono small mt">Rang : #${prev.rank} → #${cur.rank} (${rankDelta>0?'+':''}${rankDelta})</div>
+        <div class="mono small">Score P4P : ${prev.p4p} → ${cur.p4p} (${p4pDelta>=0?'+':''}${p4pDelta})</div>
+      </div>`;
+    }
+    const p4pSorted=dr.slice().sort((a,b)=>p4pScore(b)-p4pScore(a)).slice(0,15);
+    h+=`<div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
+     <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:56px;text-align:right">P4P</div>
+    </div>`;
+    p4pSorted.forEach((o,i)=>{ const isPlayer=(o===f); const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
+      h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}">
+        <div class="mono" style="width:32px;font-size:15px">${i+1}</div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <span class="disp" style="font-size:17px;line-height:1.1">${esc(o.name)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}${o.champion?' <span class="mono gold" style="font-size:11px">C</span>':''}</span>
+          <span class="mono" style="font-size:10.5px;opacity:.7">${(o.styleLabel||'').toUpperCase()}</span>
+        </div>
+        <div class="mono" style="width:82px;text-align:right;font-size:14px;white-space:nowrap">${o.W}-${o.L}${o.D?'-'+o.D:''}</div>
+        <div class="mono" style="width:56px;text-align:right;font-size:14px">${Math.round(p4pScore(o))}</div>
+      </div>`;
+    });
+    h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.faith?'faith_hub':'hub'}')">← Revenir au hub</button></div>`;
+    return h;
+  }
+  h+=`<div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
      <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:70px;text-align:right">STATUT</div>
    </div>`;
   // ==== [ANCRE: CORRECTIF_NUMEROTATION_CLASSEMENT] — bug trouvé : le rang
