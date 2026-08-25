@@ -133,6 +133,28 @@ const FAITH_GALA_PREFIX=['AM','CL','CR','CN','CONT','URC','PCF'];
 
 const FAITH_GALA_CITIES=['Lyon','Marseille','Osaka','Rio','Manchester','Chicago','Lagos','Séoul','Varsovie','Montréal','Le Caire','Perth'];
 
+/* ==== [ANCRE: V3_GALA_BANDEAU] — Plan V3 LOT 6 §P09 point 2 : "un combat
+   d'ouverture régional et un main event à Rio ne doivent pas se ressembler
+   visuellement" — deux données déterministes par ville (même seed que
+   faithGalaLabel, ui-04, pour ne jamais changer entre deux affichages du
+   même gala) : la salle réelle, et la nationalité locale (pour savoir si le
+   combattant est à domicile — §P09 point 3). Une ville sur trois n'a pas
+   d'équivalent dans COUNTRIES (Varsovie/Montréal/Le Caire/Perth) : jamais de
+   "domicile" pour un combat qui s'y tient, ce qui est correct (aucun
+   combattant du roster n'est tiré de ces pays). */
+const FAITH_GALA_VENUES={
+  'Lyon':'Halle Tony-Garnier',Marseille:'Palais des Sports',Osaka:'Osaka-jō Hall',
+  Rio:'Jeunesse Arena',Manchester:'AO Arena',Chicago:'United Center',
+  Lagos:'Teslim Balogun Stadium',Séoul:'Jamsil Arena',Varsovie:'Torwar Hall',
+  Montréal:'Centre Bell',
+  'Le Caire':'Cairo Stadium Indoor Hall',Perth:'RAC Arena'
+};
+const FAITH_GALA_CITY_COUNTRY={
+  Lyon:'FR',Marseille:'FR',Osaka:'JP',Rio:'BR',Manchester:'GB',Chicago:'US',
+  Lagos:'NG',Séoul:'KR',Varsovie:null,Montréal:null,'Le Caire':null,Perth:null
+};
+/* ==== [FIN ANCRE] ==== */
+
 const FAITH_BUILDUP_EVENTS=[
   {id:'bu_missed_weight_his',title:'Pesée ratée (la sienne)',
    text:'Il monte sur la balance en sueur, un kilo et demi au-dessus. L’organisation attend votre feu vert.',
@@ -459,7 +481,13 @@ const FAITH_BRANCH_EVENTS=[
    text:'Un soir de fatigue, la question tombe toute seule : est-ce que vous voulez vraiment de cette vie-là ?',
    choices:[{label:'Répondre oui, et s’y remettre',d:[['heart',7],['focus',5]]},
             {label:'Ne pas répondre',d:[['composure',5],['morale',-5]]}]},
-  {id:'evt_br_regional_ceiling',req:f=>f._stable==='regional',title:'Le plafond régional',
+  /* ==== [CORRECTIF V3_REGIONAL_CEILING_GUARD] — Plan V3 LOT 6 §5.6.3 point
+     3 : "cet écran ne peut pas se déclencher avec 6 victoires. Condition =
+     avoir réellement épuisé l'opposition locale". faithRegionalCeilingEligible()
+     (ui-04) lit le ratio d'adversaires du roster ACTUEL déjà battus — pas
+     juste un nombre de combats — pour ne se déclencher que quand "battu
+     tout le monde dans un rayon de 300km" est vrai au sens du jeu. ==== */
+  {id:'evt_br_regional_ceiling',req:f=>f._stable==='regional'&&faithRegionalCeilingEligible(f),title:'Le plafond régional',
    text:'Vous avez battu tout le monde dans un rayon de trois cents kilomètres. Il n’y a plus personne à affronter ici.',
    choices:[{label:'Aller chercher plus loin',d:[['confidence',6],['adaptability',5],['morale',-5]]},
             {label:'Régner sur son territoire',d:[['morale',9],['confidence',4],['fightIQ',-3]]}]},
@@ -904,3 +932,106 @@ const FAITH_PRESSCONF_REPLIES=[
   {id:'pc_gapclasse',weight:1,req:ctx=>Math.abs((ctx.opp.overall||50)-(ctx.f.overall||50))>=15,
    text:ctx=>`${esc(ctx.opp.name)} évite soigneusement de commenter l'écart de niveau que tout le monde chuchote en coulisses.`},
 ];
+
+/* ==== [ANCRE: DATA_FAITH_CROWD_AMBIANCE_V3] — Plan V3 LOT 6 §P09 point 3 :
+   "le public existe" — une ligne tirée du TextEngine selon la ville,
+   l'enjeu, et si le combattant est à domicile (§P09 : "l'origine du
+   combattant est déjà en base", cf. FAITH_GALA_CITY_COUNTRY et f.countryKey,
+   ui-04). req(ctx) lit ctx.home (bool) et ctx.hype ('forte'/'moyenne'/
+   'faible'/'nulle', faithGalaPosition). Portée réduite (12 entrées, pas un
+   pool par ville) — même choix assumé que FAITH_PRESSCONF_REPLIES (LOT 5). */
+const FAITH_CROWD_AMBIANCE=[
+  {id:'ca_home_forte',weight:1,req:ctx=>ctx.home&&ctx.hype==='forte',
+   text:ctx=>`La salle est à vous avant même le premier coup — ${esc(ctx.city)} scande votre nom en entrant.`},
+  {id:'ca_home_moyenne',weight:1,req:ctx=>ctx.home&&(ctx.hype==='moyenne'||ctx.hype==='faible'),
+   text:ctx=>`Une bonne partie du public de ${esc(ctx.city)} est venue pour vous — l'accueil est chaleureux, sans excès.`},
+  {id:'ca_home_family',weight:1,req:ctx=>ctx.home,
+   text:()=>`Quelque part dans les gradins, des visages que vous reconnaissez. Ce n'est pas rien.`},
+  {id:'ca_away_forte',weight:2,req:ctx=>!ctx.home&&ctx.hype==='forte',
+   text:ctx=>`${esc(ctx.city)} vous accueille comme l'ennemi qu'il faut voir tomber — les sifflets couvrent presque l'hymne.`},
+  {id:'ca_away_hostile',weight:1,req:ctx=>!ctx.home&&ctx.hype!=='nulle',
+   text:ctx=>`La salle de ${esc(ctx.city)} soutient l'autre nom que le vôtre. Vous l'entendez dès l'entrée.`},
+  {id:'ca_away_indiff',weight:1,req:ctx=>!ctx.home&&(ctx.hype==='faible'||ctx.hype==='nulle'),
+   text:ctx=>`${esc(ctx.city)} ne vous connaît pas encore. Le public regarde surtout sa montre.`},
+  {id:'ca_neutre_curieux',weight:1,req:ctx=>!ctx.home,
+   text:()=>`Un public neutre, venu voir un bon combat plus qu'un nom précis. À vous de le convaincre.`},
+  {id:'ca_forte_bruit',weight:1,req:ctx=>ctx.hype==='forte',
+   text:ctx=>`Le bruit dans ${esc(ctx.venue)} est déjà assourdissant avant l'entrée en cage.`},
+  {id:'ca_faible_vide',weight:1,req:ctx=>ctx.hype==='faible'||ctx.hype==='nulle',
+   text:ctx=>`${esc(ctx.venue)} est loin d'être plein ce soir — les rangs du fond restent vides.`},
+  {id:'ca_default_1',weight:1,
+   text:ctx=>`Le public de ${esc(ctx.city)} prend place. Dans quelques minutes, il aura un avis sur vous.`},
+];
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: DATA_FAITH_UPSET_WIN_V3] — Plan V3 LOT 6 §P09 point 4 : "la
+   psychologie de l'accomplissement, sans en faire des tonnes" — le joueur
+   demande explicitement UNE SEULE phrase, jamais un paragraphe. La rareté
+   est appliquée côté code (faithMaybeUpsetLine, ui-06) : ce pool ne fournit
+   que la variété de LA phrase, tirée au plus une fois par carrière. */
+const FAITH_UPSET_WIN=[
+  {id:'up_1',weight:1,text:()=>`Personne ne pariait sur vous ce soir. Vous venez de le leur rappeler.`},
+  {id:'up_2',weight:1,text:()=>`Il était donné largement favori. Le classement, lui, ne ment plus.`},
+  {id:'up_3',weight:1,text:()=>`Ce genre de victoire ne s'explique pas dans une interview — elle se vit une fois, peut-être.`},
+  {id:'up_4',weight:1,text:()=>`Vous entrez dans la catégorie des gens qui ont fait tomber plus fort qu'eux.`},
+  {id:'up_5',weight:1,text:()=>`Un instant, en sortant de la cage, vous n'y croyez pas non plus.`},
+];
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: DATA_FAITH_TITLE_PROMO_V3] — Plan V3 LOT 6 §5.6.1, temps 4 :
+   "conférence obligatoire + pesée obligatoire, tous deux en registre
+   « spectacle », avec textes EXCLUSIFS au titre (jamais les pools
+   ordinaires)". faithOppReplies() (ui-04) pioche TOUJOURS au moins une
+   réplique ici plutôt que dans FAITH_PRESSCONF_REPLIES quand ctx.isTitle,
+   pour que la différence se voie réellement, pas seulement en probabilité
+   via un req(ctx). Portée réduite (8 entrées, pas la pesée séparée que
+   P19/LOT 6 diffère explicitement) — même choix assumé que les pools
+   précédents. */
+const FAITH_TITLE_PROMO_REPLIES=[
+  {id:'tp_1',weight:1,text:ctx=>`« Une ceinture ne se prête pas, elle se prend. » ${esc(ctx.opp.name)} ne quitte pas la caméra des yeux en le disant.`},
+  {id:'tp_2',weight:1,req:ctx=>!!ctx.opp.champion,
+   text:ctx=>`« Cette ceinture, je la porte depuis ${ctx.opp.defenses||0} défense(s). Elle ne va nulle part. » ${esc(ctx.opp.name)} pose la main dessus en le disant.`},
+  {id:'tp_3',weight:1,req:ctx=>!ctx.opp.champion,
+   text:ctx=>`« Un champion, ça se juge une seule fois : le soir où on va le chercher. » ${esc(ctx.opp.name)} refuse tout autre sujet.`},
+  {id:'tp_4',weight:1,req:ctx=>!!ctx.isNemesis,
+   text:ctx=>`« Cette histoire ne pouvait se terminer que pour un titre. » ${esc(ctx.opp.name)} le dit sans sourire.`},
+  {id:'tp_5',weight:1,text:()=>`La salle de conférence est pleine ce soir — jusqu'aux journalistes qui ne suivent d'habitude que les autres catégories.`},
+  {id:'tp_6',weight:1,text:ctx=>`« Tout ce que j'ai fait jusqu'ici menait à ce podium. » ${esc(ctx.opp.name)} pèse la phrase comme si elle était préparée depuis longtemps.`},
+  {id:'tp_7',weight:1,text:ctx=>`« Après ce soir, un seul de nous deux repart avec la ceinture — et une place dans l'histoire de la maison. » ${esc(ctx.opp.name)} ne cherche plus à se montrer modeste.`},
+  {id:'tp_8',weight:1,text:()=>`Les questions habituelles disparaissent — ce soir, la salle ne parle que du titre.`},
+];
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: DATA_FAITH_TITLE_FINAL_LINE_V3] — Plan V3 LOT 6 §5.6.1 :
+   "la ligne finale de cet écran est la phrase que le joueur retiendra de
+   toute sa partie […] elle doit varier selon le chemin parcouru, pas selon
+   le résultat seul". req(ctx) lit ctx.type ('won'/'defended'),
+   ctx.wasNemesis, ctx.wasUnderdog, ctx.attemptsBefore (0 = premier essai),
+   ctx.personality ('villain'/'humble'/'showman'). Priorité des entrées
+   spécifiques (nemesis/outsider/personnalité) sur les génériques via
+   weight, jamais via ordre de tableau (txtPick ne lit pas l'ordre). */
+const FAITH_TITLE_FINAL_LINES=[
+  {id:'tf_first_try',weight:2,req:ctx=>ctx.type==='won'&&(ctx.attemptsBefore||0)===0,
+   text:()=>`Vous n'avez pas eu besoin d'une deuxième chance. Peu de gens peuvent dire ça.`},
+  {id:'tf_many_tries',weight:3,req:ctx=>ctx.type==='won'&&(ctx.attemptsBefore||0)>=2,
+   text:ctx=>`Il vous aura fallu ${ctx.attemptsBefore+1} tentatives pour ce moment précis. Personne ne se souviendra des échecs — seulement de celle-ci.`},
+  {id:'tf_nemesis',weight:3,req:ctx=>ctx.type==='won'&&!!ctx.wasNemesis,
+   text:()=>`Ce n'était pas seulement un titre. C'était LUI, en face, ce soir-là. La ceinture, presque en second.`},
+  {id:'tf_underdog',weight:3,req:ctx=>ctx.type==='won'&&!!ctx.wasUnderdog,
+   text:()=>`Personne, absolument personne, ne vous voyait tenir cette ceinture aujourd'hui. Retenez ce sentiment — il ne dure jamais assez longtemps.`},
+  {id:'tf_villain',weight:1,req:ctx=>ctx.type==='won'&&ctx.personality==='villain',
+   text:()=>`Les sifflets se transforment lentement en autre chose. Vous n'avez jamais eu besoin d'être aimé pour être respecté.`},
+  {id:'tf_humble',weight:1,req:ctx=>ctx.type==='won'&&ctx.personality==='humble',
+   text:()=>`Vous ne dites rien de grand devant les caméras. La ceinture, elle, parle pour vous.`},
+  {id:'tf_showman',weight:1,req:ctx=>ctx.type==='won'&&ctx.personality==='showman',
+   text:()=>`Vous saviez déjà, avant même la décision, exactement quelle image resterait de ce soir.`},
+  {id:'tf_won_default',weight:1,req:ctx=>ctx.type==='won',
+   text:()=>`À partir de maintenant, tout ce que vous ferez sera mesuré à l'aune de ce soir-là.`},
+  {id:'tf_defended_many',weight:2,req:ctx=>ctx.type==='defended'&&(ctx.attemptsBefore||0)>=4,
+   text:ctx=>`Une ${ctx.attemptsBefore+1}e nuit où la ceinture reste chez vous. Les chiffres commencent à parler d'un règne, pas d'un accident.`},
+  {id:'tf_defended_nemesis',weight:3,req:ctx=>ctx.type==='defended'&&!!ctx.wasNemesis,
+   text:()=>`Face à lui, précisément, vous ne pouviez pas vous permettre le doute. Vous ne l'avez pas laissé passer.`},
+  {id:'tf_defended_default',weight:1,req:ctx=>ctx.type==='defended',
+   text:()=>`Défendre une ceinture, ce n'est jamais aussi bruyant que la gagner — et c'est pourtant ce qui construit une légende.`},
+];
+/* ==== [FIN ANCRE] ==== */

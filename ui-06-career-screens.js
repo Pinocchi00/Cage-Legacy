@@ -910,6 +910,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
         refermer au moment même où le joueur peut encore s'en souvenir. -->
    ${p.promiseOutcome?`<div class="mono small" style="text-align:center;color:${p.promiseOutcome.tenue?'var(--pos)':'var(--neg)'}">${p.promiseOutcome.tenue?`Promesse tenue face à ${esc(p.promiseOutcome.oppName)}.`:`Promesse non tenue face à ${esc(p.promiseOutcome.oppName)}.`}</div>`:''}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
+   ${p.upsetLine?`<div class="card" style="text-align:center;background:var(--panel2);border-left:3px solid var(--gold)"><p class="lede small" style="margin:0;font-style:italic">${esc(p.upsetLine)}</p></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);
    /* ==== [ANCRE: CORRECTIF_GAIN_MASQUE_ARRONDI] — bug remonté : d20()
       arrondit /100->/20 (Math.round(v/5)), donc un petit gain interne réel
@@ -1104,12 +1105,66 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
    <div style="display:flex;flex-direction:column;gap:16px">${grp('ment','Mental',g.ment,true)}${grp('phys','Physique',g.phys,true)}</div>
    <button class="btn ghost" onclick="G._profileReturn=null;CL.go('${backScreen}')">Retour</button></div>`; }
 
+/* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — Plan V3 LOT 6 §5.6.3 point 1 : "un
+   onglet P4P dans l'écran Classement", exposant l'ancre P4P_SCORE_80_20
+   (engine.js:1266) déjà calculée par p4pScore() mais jamais montrée
+   telle quelle. Portée réduite par rapport à un vrai "classement mondial
+   toutes divisions confondues" : le jeu ne modélise à aucun moment un
+   roster couvrant plusieurs divisions/organisations simultanément (chaque
+   G.roster est régénéré pour LA division/organisation courante du joueur,
+   cf. makeOrgRoster) — synthétiser un vrai classement mondial croisé
+   demanderait de construire cette donnée de toutes pièces, hors périmètre
+   de ce lot. L'onglet P4P reclasse donc le MÊME pool par score pur
+   (p4pScore, sans l'exception "champion toujours premier" du classement de
+   division), ce qui EST la vraie différence P4P/division dans ce jeu : un
+   prétendant en pleine bourre peut dépasser un champion qui ronronne. */
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
+  const tab=(G._rankingsTab==='p4p')?'p4p':'division';
   let h=`<div class="scr">
-   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:24px;padding-bottom:8px">
+   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:12px;padding-bottom:8px">
      <span class="eyebrow mono" style="letter-spacing:.1em">BASE DE DONNÉES // ${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
    </div>
-   <div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
+   <div class="pills" style="margin-bottom:16px">
+     <span class="pill ${tab==='division'?'on':''}" onclick="CL.setRankingsTab('division')">Division</span>
+     <span class="pill ${tab==='p4p'?'on':''}" onclick="CL.setRankingsTab('p4p')">P4P</span>
+   </div>`;
+  if(tab==='p4p'){
+    /* ==== [ANCRE: V3_RANK_HISTORY_DELTA] — Plan V3 LOT 6 §5.6.3 point 2 :
+       F.rankHistory[] (worldTick, engine.js) donne un delta réel de rang
+       et de score P4P depuis la dernière année jouée — Faith uniquement
+       (seul mode où worldTick() tourne). Granularité annuelle, pas "par
+       combat ET par saison" comme le demande le texte intégral : la
+       version par-combat demanderait un second point d'écriture dans
+       resolveFight() en plus de worldTick(), différé pour ce lot. */
+    const hist=(G.faith && Array.isArray(G.faith.rankHistory))?G.faith.rankHistory:null;
+    if(hist && hist.length>=2){
+      const cur=hist[hist.length-1], prev=hist[hist.length-2];
+      const rankDelta=prev.rank-cur.rank, p4pDelta=cur.p4p-prev.p4p;
+      h+=`<div class="card mt" style="padding:12px;background:var(--panel2);margin-bottom:12px">
+        <div class="eyebrow" style="font-size:10px">DEPUIS LA SAISON ${prev.year}</div>
+        <div class="mono small mt">Rang : #${prev.rank} → #${cur.rank} (${rankDelta>0?'+':''}${rankDelta})</div>
+        <div class="mono small">Score P4P : ${prev.p4p} → ${cur.p4p} (${p4pDelta>=0?'+':''}${p4pDelta})</div>
+      </div>`;
+    }
+    const p4pSorted=dr.slice().sort((a,b)=>p4pScore(b)-p4pScore(a)).slice(0,15);
+    h+=`<div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
+     <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:56px;text-align:right">P4P</div>
+    </div>`;
+    p4pSorted.forEach((o,i)=>{ const isPlayer=(o===f); const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
+      h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}">
+        <div class="mono" style="width:32px;font-size:15px">${i+1}</div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <span class="disp" style="font-size:17px;line-height:1.1">${esc(o.name)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}${o.champion?' <span class="mono gold" style="font-size:11px">C</span>':''}</span>
+          <span class="mono" style="font-size:10.5px;opacity:.7">${(o.styleLabel||'').toUpperCase()}</span>
+        </div>
+        <div class="mono" style="width:82px;text-align:right;font-size:14px;white-space:nowrap">${o.W}-${o.L}${o.D?'-'+o.D:''}</div>
+        <div class="mono" style="width:56px;text-align:right;font-size:14px">${Math.round(p4pScore(o))}</div>
+      </div>`;
+    });
+    h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.faith?'faith_hub':'hub'}')">← Revenir au hub</button></div>`;
+    return h;
+  }
+  h+=`<div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
      <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:70px;text-align:right">STATUT</div>
    </div>`;
   // ==== [ANCRE: CORRECTIF_NUMEROTATION_CLASSEMENT] — bug trouvé : le rang

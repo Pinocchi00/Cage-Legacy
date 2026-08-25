@@ -198,6 +198,22 @@ function faithGalaPosition(f){
   if(rk<=12) return {tier:'Carte principale',mult:1,hype:'moyenne',rounds:3,pressConf:false};
   return {tier:'Préliminaires',mult:0.6,hype:'faible',rounds:3,pressConf:false};
 }
+/* ==== [ANCRE: V3_REGIONAL_CEILING_GUARD] — Plan V3 LOT 6 §5.6.3 point 3 :
+   condition réelle avant de proposer "Le plafond régional" (data-faith-
+   content.js, evt_br_regional_ceiling) — un plancher de combats (l'ancien
+   comportement pouvait se déclencher dès 6 victoires, cité tel quel par le
+   joueur comme absurde) ET un ratio d'adversaires du roster ACTUEL déjà
+   battus, pas un compteur brut qui ne dit rien du contenu réel de ces
+   victoires. */
+function faithRegionalCeilingEligible(f){
+  if(((f.W||0)+(f.L||0))<12) return false;
+  const beatenIds=new Set((f.history||[]).filter(h=>h.res==='win' && h.oppId).map(h=>h.oppId));
+  const roster=(typeof G!=='undefined'&&G&&G.roster)||[];
+  if(!roster.length) return beatenIds.size>=8;
+  const beatenRatio=roster.filter(o=>beatenIds.has(o.id)).length/roster.length;
+  return beatenRatio>=0.5 || beatenIds.size>=8;
+}
+/* ==== [FIN ANCRE] ==== */
 /** Nom et lieu du gala — déterministe par année+mois pour ne pas changer si
  * l'écran est réaffiché sans qu'un mois ne s'écoule.
  * @param {object} F G.faith @param {object} f */
@@ -208,6 +224,26 @@ function faithGalaLabel(F,f){
   const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
   return `${prefix} ${num} — ${city}`;
 }
+/* ==== [ANCRE: V3_GALA_VENUE_INFO] — Plan V3 LOT 6 §P09 point 2/3 : "bandeau
+   de carte" (salle, affluence, audience) et "le public existe" (domicile ou
+   pas). Même seed que faithGalaLabel ci-dessus (déterministe tant que
+   année+mois+org ne changent pas) pour ne jamais désynchroniser les deux
+   affichages d'un même gala. L'affluence/audience suivent gala.mult (déjà
+   la mesure d'enjeu existante, faithGalaPosition) plutôt qu'un second
+   barème inventé.
+   @param {object} F @param {object} f @param {object} gala faithGalaPosition(f)
+   @returns {{city:string,venue:string,home:boolean,attendance:number,audienceM:number}} */
+function faithGalaVenueInfo(F,f,gala){
+  const seed=(F.year||2026)*13+(F.month||0)*7+(f.org||0);
+  const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
+  const venue=FAITH_GALA_VENUES[city]||city;
+  const home=!!(FAITH_GALA_CITY_COUNTRY[city] && f.countryKey===FAITH_GALA_CITY_COUNTRY[city]);
+  const mult=(gala&&gala.mult)||0.6;
+  const attendance=Math.round(1800+mult*7200+(seed%700));
+  const audienceM=Math.round((0.4+mult*2.8+(seed%40)/100)*10)/10;
+  return {city,venue,home,attendance,audienceM};
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_NEGOCIATION / V2-20] — le pouvoir de négociation n'est
    jamais chiffré à l'écran (cf. règle H.1 : un écran ne montre jamais un
    nombre qu'une phrase peut porter), seulement son EFFET. Dérivé de
@@ -539,6 +575,7 @@ function scr_faith_hub(){
       ${faithOathBadge(G.faith)}
     </div>
     ${actionsHtml}
+    ${(G.faith.currentCard && G.faith.currentCard.playerResult && !G.faith.pendingOffer)?`<div class="mono small" style="text-align:center;margin-top:12px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Résultats de la dernière carte ▸</span></div>`:''}
     <!-- ==== [CORRECTIF V2-15] — le mode carrière a déjà scr_rankings()
          (top 15 + rang du joueur en évidence + mouvement ▲▼ + ceinture
          au-dessus, ui-06) accessible en un tap depuis son hub ; Faith en
@@ -567,6 +604,16 @@ function scr_faith_offer(){
   const base=(f.org>0 && f.contract)?f.contract.show:(ORG_PURSES[f.org]||[0,0])[0];
   const bourseEst=Math.round(base*(gala.mult||1)*(off.bonusMult||1)*10)/10;
   const patience=F.agentPatience!=null?F.agentPatience:3;
+  /* ==== [ANCRE: V3_BANDEAU_CARTE] — Plan V3 LOT 6 §P09 point 2 : nom du
+     gala, ville, salle, position sur la carte, affluence et audience — un
+     combat d'ouverture régional (petite salle, peu de monde) et un main
+     event à Rio (salle pleine, audience large) ne doivent plus se
+     ressembler visuellement. Bordure/fond suivent gala.hype (déjà la
+     mesure d'enjeu existante), jamais un second barème. ==== */
+  const venueInfo=faithGalaVenueInfo(F,f,gala);
+  if(!TEXT_POOLS['faith_crowd_ambiance']) registerTextPool('faith_crowd_ambiance',FAITH_CROWD_AMBIANCE);
+  const crowdLine=txtPick('faith_crowd_ambiance',{city:venueInfo.city,venue:venueInfo.venue,home:venueInfo.home,hype:gala.hype});
+  const bandeauStrong=(gala.hype==='forte');
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow">${esc(F.agent?faithAgentDisplayName():'Sans agent')}</div>
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
@@ -574,6 +621,14 @@ function scr_faith_offer(){
         remplie, pas une information ; au plus bas, le mot "hype"
         disparaît complètement au profit d'une phrase. ==== -->
    <div class="mono small muted" style="margin-top:4px">${esc(gala.tier)} · ${(gala.hype==='faible'||gala.hype==='nulle')?'Personne n’en parle encore.':`hype ${gala.hype}`}${gala.pressConf?' · conférence de presse obligatoire':''}</div>
+   <div class="card mt" style="padding:${bandeauStrong?'18px':'12px'};background:var(--panel2);border:1px solid ${bandeauStrong?'var(--gold)':'var(--line)'};text-align:left">
+     <div class="mono small" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px">
+       <span class="${bandeauStrong?'gold':'muted'}">${esc(venueInfo.venue)} · ${esc(venueInfo.city)}</span>
+       <span class="muted">${venueInfo.attendance.toLocaleString('fr-FR')} spectateurs attendus · ${venueInfo.audienceM}M en audience</span>
+     </div>
+     ${venueInfo.home?'<div class="small mt" style="color:var(--sage)">Vous combattez à domicile.</div>':''}
+     <p class="lede small mt" style="margin:8px 0 0">${esc(crowdLine)}</p>
+   </div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
      <div class="eyebrow" style="font-size:11px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
@@ -636,6 +691,7 @@ function scr_faith_offer(){
        :(G.faith.agentPatience>0?`${esc(F.agent?faithAgentDisplayName():'Votre agent')} perd un peu patience.`:'La patience de votre agent est déjà à bout.')
      }</div>
    </div>
+   <div class="mono small" style="text-align:center;margin-top:14px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Voir la carte complète ▸</span></div>
   </div>`;
 }
 /* ==== [ANCRE: V2-22/V2-23] — "rien ne se passe entre l'annonce et la
@@ -684,16 +740,36 @@ function scr_faith_buildup(){
    figées. Deux tirages successifs (le ledger de txtPick exclut
    automatiquement le premier id du second, cf. engine.js) donnent deux
    répliques différentes à chaque conférence. */
+/* ==== [ANCRE: V3_TITLE_PROMO_EXCLUSIF] — Plan V3 LOT 6 §5.6.1, temps 4 :
+   une conférence de titre pioche TOUJOURS sa première réplique dans
+   FAITH_TITLE_PROMO_REPLIES (data-faith-content.js), jamais dans le pool
+   ordinaire — "jamais les pools ordinaires" (spec). La seconde réplique
+   reste tirée du pool ordinaire (variété, cf. LOT 5) : les deux mondes ne
+   se confondent que pour compléter l'écran. */
 function faithOppReplies(o,f,F,ctxExtra){
   const ctx=Object.assign({opp:o,f,F},ctxExtra);
+  if(ctx.isTitle){
+    if(!TEXT_POOLS['faith_title_promo']) registerTextPool('faith_title_promo',FAITH_TITLE_PROMO_REPLIES);
+    return [txtPick('faith_title_promo',ctx), txtPick('faith_pressconf_reply',ctx)];
+  }
   return [txtPick('faith_pressconf_reply',ctx), txtPick('faith_pressconf_reply',ctx)];
 }
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_press_conf(){
   const f=G.f, F=G.faith, off=F.pendingOffer;
   if(!off) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
   const o=off.opp.o;
   if(!TEXT_POOLS['faith_pressconf_reply']) registerTextPool('faith_pressconf_reply',FAITH_PRESSCONF_REPLIES);
-  const replies=faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:!!(off.gala&&off.gala.tier==='Main event'),favorite:divRank(o)<divRank(f)});
+  /* ==== [CORRECTIF V3_TITLE_PROMO_EXCLUSIF] — Plan V3 LOT 6 §5.6.1 : isTitle
+     lisait le NIVEAU de carte (gala.tier==='Main event', LOT 5), donc
+     confondait "grosse affiche" (rang <=4, ou rivalId) et "vrai combat de
+     titre". Depuis ce lot, un combat de titre a son propre écran de
+     négociation (scr_faith_title_negotiation) — le signal exact existe
+     déjà (fightKind()==='title'/'defense', ui-05) : plus besoin d'un
+     proxy. Les répliques exclusives (FAITH_TITLE_PROMO_REPLIES) ne sortent
+     donc plus jamais pour un simple Main event non-titré. */
+  const fk=fightKind();
+  const replies=faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:(fk==='title'||fk==='defense'),favorite:divRank(o)<divRank(f)});
   return `<div class="scr center intro">
    <div class="eyebrow blood">Conférence de presse</div>
    <h2 class="disp">${esc(o.name)} face à vous</h2>

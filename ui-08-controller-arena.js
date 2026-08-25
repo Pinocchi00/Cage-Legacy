@@ -18,6 +18,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,
+  faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -220,6 +221,20 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
     G.screen='faith_nemesis_consecration';
   }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V3_TITLE_CONSECRATION] — Plan V3 LOT 6 §5.6.1, temps 5 :
+     même mécanisme d'interception que V3_NEMESIS_CONSECRATION ci-dessus
+     (posé par resolveFight, ui-05, sur une victoire de titre ou une
+     défense réussie) — prioritaire sur la consécration de némésis si les
+     deux tombent le même rendu (un combat de titre contre sa propre
+     némésis est le cas qui les ferait coïncider), l'apogée de la carrière
+     passe avant l'apparition d'une rivalité. */
+  if(G && G.faith && G.faith.pendingTitleConsecration && FIGHT_SEQUENCE_SCREENS.indexOf(G.screen)===-1){
+    G.faith.pendingNemesisConsecration=false;
+    G.faith.lastTitleConsecration=G.faith.pendingTitleConsecration;
+    G.faith.pendingTitleConsecration=null;
+    G.screen='faith_title_consecration';
+  }
+  /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(G&&G.screen==='faith_fight_pending') startFaithFightPending(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
@@ -300,18 +315,70 @@ function faithEnsureOffer(){
     opps=eligible;
   }
   if(!opps.length) return false;
+  /* ==== [ANCRE: V3_REMATCH_GUARANTEE] — Plan V3 LOT 6 §5.6.1.b : clause de
+     revanche posée à la négociation de titre (scr_faith_title_negotiation)
+     et consommée à la défaite (ui-05, ANCRE V3_TITLE_LOSS_CLAUSE) — la
+     prochaine offre DOIT être contre le même adversaire, en dehors du choix
+     normal de l'agent. Silencieuse et sans échec si l'adversaire n'est
+     plus dans le pool proposé (retraité, changé d'organisation) : la
+     clause s'efface plutôt que de bloquer le jeu. */
+  let chosen;
+  if(G.faith.guaranteedRematchId){
+    const forced=opps.find(x=>x.o.id===G.faith.guaranteedRematchId);
+    G.faith.guaranteedRematchId=null;
+    if(forced) chosen=forced;
+  }
+  /* ==== [FIN ANCRE] ==== */
   const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
-  const chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
+  if(!chosen) chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
   G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
+  G.faith.pendingRevengeClause=false; // nouvelle offre : la clause d'une offre précédente ne survit jamais
+  G.faith.currentCard=generateFightCard(gala,chosen.o);
   return true;
 }
+/* ==== [ANCRE: V3_FIGHT_CARD] — Plan V3 LOT 6 §5.6.1.b : "remplacer la
+   mention Main event par la carte complète : 5 à 8 combats, avec les vrais
+   combattants du roster [...] résolus par worldTick() et font bouger le
+   classement". Généré UNE FOIS par offre (appelé depuis faithEnsureOffer()
+   ci-dessus, jamais régénéré à un re-rendu) : les combats de complément
+   sont RÉELLEMENT simulés ici (simulateFight+applyResult, exactement le
+   mécanisme déjà éprouvé d'advanceRoster(), ui-01) — leurs W/L bougent
+   vraiment, contrairement à un habillage cosmétique. Le combat du joueur
+   lui-même n'est PAS simulé ici (il reste résolu normalement par
+   resolveFight, ui-05) — seul son adversaire et sa position sur la carte y
+   figurent, son propre résultat est complété après coup (cf.
+   V3_FIGHT_CARD_RESULT, ui-05). */
+function generateFightCard(gala,opponent){
+  const pool=(G.roster||[]).filter(o=>o.id!==opponent.id && !o.champion);
+  const ranked=rankPool(pool);
+  const n=Math.min(RI(4,7),Math.floor(ranked.length/2));
+  const fights=[];
+  for(let i=0;i<n;i++){
+    const a=ranked[i*2], b=ranked[i*2+1];
+    if(!a||!b) break;
+    const res=simulateFight(a,b,3);
+    applyResult(a,b,res,'A'); applyResult(b,a,res,'B');
+    const aWin=res.winner==='A';
+    fights.push({aId:a.id,aName:a.name,aFlag:a.flag,bId:b.id,bName:b.name,bFlag:b.flag,method:res.method,winnerName:aWin?a.name:(res.winner==='D'?null:b.name)});
+  }
+  return {label:gala.label,tier:gala.tier,oppId:opponent.id,oppName:opponent.name,fights,playerResult:null};
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V3_TITLE_NEGOTIATION_ROUTE] — Plan V3 LOT 6 §5.6.1, temps 3 :
+   "offre distincte de scr_faith_offer(), avec ses propres leviers" — un
+   combat de titre ou de défense route vers scr_faith_title_negotiation()
+   (ui-08, plus bas) au lieu de l'offre ordinaire, MAIS réutilise le même
+   G.faith.pendingOffer (posé par faithEnsureOffer() juste au-dessus,
+   inchangé) : un seul mécanisme d'offre, deux présentations. */
 function faithGenerateOffer(){
   if(!faithEnsureOffer()){ faithAdvanceMonth(); return; }
-  G.screen='faith_offer'; save(); render();
+  const kind=fightKind();
+  G.screen=(kind==='title'||kind==='defense')?'faith_title_negotiation':'faith_offer'; save(); render();
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 // ==== [ANCRE: CORRECTIF_DUPLICATION_ROUTAGE] — chooseClass() et
 // afterResult() (mode carrière/gauntlet, hors Faith qui a son propre
@@ -410,6 +477,15 @@ function routeAfterCareerPending(){
 const CL={
   theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
+  /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
+     (ui-06), cf. son ancre pour le détail. */
+  setRankingsTab(tab){ G._rankingsTab=tab; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V3_SCR_FIGHT_CARD] — mémorise l'écran d'origine (offre,
+     négociation de titre, ou hub) pour que "← Retour" (scr_faith_card,
+     ui-08) revienne au bon endroit plutôt que toujours au hub. */
+  viewFightCard(){ G._cardReturn=G.screen; G.screen='faith_card'; render(); },
+  /* ==== [FIN ANCRE] ==== */
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: CORRECTIF_SCROLL_BOUTIQUE] — bug remonté : chaque achat/
      tirage/bascule d'aperçu dans la Salle des Légendes appelait render()
@@ -1777,6 +1853,28 @@ const CL={
         G.roster=rankPool(G.roster);
       }
     }
+    /* ==== [ANCRE: V3_REGIONAL_CEILING_WORLD] — Plan V3 LOT 6 §5.6.3 point 4 :
+       "Les choix changent l'univers, pas les attributs […] deux univers de
+       jeu différents, pas deux +1." "Aller chercher plus loin" déplace
+       réellement la carrière (nouvelle organisation, nouveau bassin
+       d'adversaires — même mécanisme que acceptPromo()/free agency en
+       carrière, réduit aux champs qui comptent vraiment pour Faith,
+       contrat non touché : hors périmètre de ce lot). "Régner sur son
+       territoire" ouvre un statut permanent et VISIBLE (f.faithTraits,
+       déjà affiché sur le hub, ui-04) — pas un delta d'attribut de plus. */
+    if(ev.id==='evt_br_regional_ceiling'){
+      if(i===0 && G.f.org<6){
+        G.f.org++; G.f.orgWins=0; G.f.rivalId=null; G.f.faithNemesisId=null; G.f.nemesisRecord=null;
+        G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
+        if(typeof ORG_FLAVORS!=='undefined' && ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
+        G.roster=makeOrgRoster(G.f);
+      } else if(i===1){
+        if(!G.f.faithTraits) G.f.faithTraits=[];
+        if(!G.f.faithTraits.includes('Patron régional')) G.f.faithTraits.push('Patron régional');
+        G.faith.regionalPatron=true;
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
     if(!G.faith.yearLog) G.faith.yearLog=[];
@@ -1832,10 +1930,27 @@ const CL={
      Une offre à accepter ou refuser est une décision sous incertitude — la
      refuser a un coût réel (la case combat de l'année est perdue). Voir
      faithGenerateOffer() ci-dessous. ==== */
+  /* ==== [ANCRE: V3_TITLE_MERIT_GATE] — Plan V3 LOT 6 §5.6.1, temps 2 "Le
+     mérite" : la toute première fois qu'un combat de titre devient
+     accessible (fightKind()==='title', ui-05 — le combattant n'est pas
+     encore champion), on s'arrête sur un écran qui expose FACTUELLEMENT
+     pourquoi ("ta série, qui tu as battu, qui tu as passé devant"), avant
+     même l'offre. G.faith.titleShotSeen empêche de rejouer cet écran à
+     chaque mois tant que l'éligibilité reste vraie (sinon "ENTRER DANS LA
+     CAGE" s'arrêterait dessus indéfiniment) ; remis à false dès que
+     fightKind() n'est plus 'title', pour qu'une FUTURE fenêtre d'éligibilité
+     (après une défaite, une nouvelle série) déclenche à nouveau l'écran. */
   faithFight(){
     if(G.f.injury){ G.lastMsg="Toujours à l'infirmerie — pas de combat tant que le corps n'est pas prêt."; render(); return; }
+    const kind=fightKind();
+    if(kind!=='title') G.faith.titleShotSeen=false;
+    else if(!G.faith.titleShotSeen){
+      G.faith.titleShotSeen=true;
+      G.screen='faith_title_merit'; save(); render(); return;
+    }
     faithGenerateOffer();
   },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [CORRECTIF FA-12] — signer l'offre telle quelle. G.opps est réduit
      à ce seul candidat puis CL.opp(0) (ui-08, branche G.faith déjà en place)
      est réutilisée intégralement : pesée, malus/buffs en attente, tout le
@@ -1864,6 +1979,20 @@ const CL={
     G.opps=[off.opp];
     CL.opp(0);
   },
+  /* ==== [ANCRE: V3_TITLE_REVENGE_CLAUSE] — Plan V3 LOT 6 §5.6.1, temps 3 :
+     "clause de revanche" — un des leviers propres à scr_faith_title_
+     negotiation (ui-04), jamais proposé sur une offre ordinaire. Simple
+     bascule (pas de coût immédiat, contrairement à demander plus d'argent)
+     : son seul effet est consommé PLUS TARD, et seulement en cas de
+     défaite (ui-05, ANCRE V3_TITLE_LOSS_CLAUSE) — poser la clause n'a
+     donc aucun risque à signer, cohérent avec ce qu'elle représente
+     (une garantie, pas une négociation financière). */
+  faithTitleToggleRevengeClause(){
+    const off=G.faith.pendingOffer; if(!off) return;
+    G.faith.pendingRevengeClause=!G.faith.pendingRevengeClause;
+    render();
+  },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: V2-23] — applique le choix (deux options, réponse
      immédiate) puis reprend la chaîne (faithOfferSign() gère la suite :
      conférence ou signature directe). */
@@ -3696,7 +3825,14 @@ let FFP={_particles:[],raf:0,to:0};
 function startFaithFightPending(){
   if(!G.pending) return;
   const meWin=!!G.pending.win;
-  const durationMs=2500+Math.random()*1500; // 2,5 à 4s, cf. §P07
+  /* ==== [ANCRE: V3_TITLE_EXTENDED_WAIT] — Plan V3 LOT 6 §5.6.1, temps 5 :
+     "écran d'attente allongé" pour un combat de titre ou de défense —
+     G.fight.kind reste posé à ce stade (seul champchamp_title est effacé
+     après résolution, cf. ANCRE CORRECTIF_KIND_CHAMPCHAMP_PERSISTANT,
+     ui-05), donc lisible directement ici sans état supplémentaire. */
+  const isTitleFight=G.fight&&(G.fight.kind==='title'||G.fight.kind==='defense');
+  const durationMs=isTitleFight?(4000+Math.random()*2000):(2500+Math.random()*1500); // 2,5-4s normal, 4-6s titre (§P07/§P18)
+  /* ==== [FIN ANCRE] ==== */
   const t0=(typeof performance!=='undefined'?performance.now():Date.now());
   const bar=document.getElementById('ffp-bar');
   const cv=meWin?/** @type {HTMLCanvasElement|null} */(document.getElementById('ffp-cv')):null;
@@ -3759,6 +3895,148 @@ function scr_faith_nemesis_consecration(){
      <div class="small muted">Aucun combat encore joué entre vous deux — le premier écrira le reste.</div>
    </div>
    <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.go('faith_hub')">Continuer</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: V3_TITLE_SEQUENCE] — Plan V3 LOT 6 §5.6.1 : la séquence de
+   titre en 5 temps ("jamais un bouton"). Portée réduite par rapport à la
+   spécification complète (temps 1 "la rumeur" — un mois ou deux de
+   rumeurs progressives avant l'annonce — n'a pas de représentation dans
+   l'état actuel du jeu, qui ne connaît que le mois EN COURS ; l'ajouter
+   demanderait un système de rumeurs différées hors du périmètre de ce
+   lot, explicitement différé) : les temps 2 (mérite), 3 (négociation),
+   4 (montée, cf. V3_TITLE_PROMO_EXCLUSIF plus haut) et 5 (attente
+   allongée + consécration) sont, eux, réellement construits ci-dessous. */
+/** Temps 2 — "Le mérite" : expose FACTUELLEMENT pourquoi ce combat de
+ * titre existe (série, adversaires notables battus, rang), et qui le
+ * conteste (le PNJ le mieux classé du roster). Le cas "pas encore mérité"
+ * n'a pas d'écran dédié ici : fightKind() (ui-05) EST déjà la garde
+ * d'éligibilité — on n'atteint cet écran que lorsqu'elle est vraie. */
+function scr_faith_title_merit(){
+  const f=G.f;
+  const rang=divRank(f);
+  const contenders=rankPool(G.roster||[]);
+  const contender=contenders[0]||null;
+  const notableWins=(f.history||[]).filter(h=>h.res==='win' && (h.oppWasChamp || (h.oppElo||0)>=1500)).slice(-3);
+  const recentWins=notableWins.length?notableWins:(f.history||[]).filter(h=>h.res==='win').slice(-2);
+  return `<div class="scr center intro" style="max-width:480px;margin:0 auto">
+   <div class="eyebrow gold">LE MÉRITE</div>
+   <h2 class="disp" style="margin-top:6px">On parle de vous pour le titre.</h2>
+   <div class="card mt" style="padding:16px;background:var(--panel2);border:1px solid var(--gold);text-align:left">
+     <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Rang actuel</span><span class="gold">#${rang}</span></div>
+     <div class="mono small mt" style="display:flex;justify-content:space-between"><span class="muted">Série en cours</span><span class="${(f.streak||0)>0?'sage':'muted'}">${f.streak>0?`${f.streak} victoire(s) de suite`:'—'}</span></div>
+     ${recentWins.length?`<div class="mt"><div class="eyebrow" style="font-size:10px;margin-bottom:6px">CE QUI VOUS Y AMÈNE</div>
+       ${recentWins.map(h=>`<div class="small muted">Victoire face à ${esc(h.oppName||'un adversaire')}${h.oppWasChamp?' — alors champion':''}${h.oppRecord?` (${h.oppRecord})`:''}</div>`).join('')}
+     </div>`:''}
+   </div>
+   ${contender?`<div class="card mt" style="padding:14px;background:var(--panel2);border-left:3px solid var(--blood);text-align:left">
+     <div class="eyebrow" style="font-size:10px;color:var(--blood)">QUI CONTESTE</div>
+     <div class="hero-name" style="font-size:18px;margin-top:4px">${esc(fighterDisplayName(contender))} ${contender.flag||''}</div>
+     <div class="small muted mt">${recordStr(contender)} · rang #${divRank(contender)} — pense encore mériter sa place avant vous.</div>
+   </div>`:''}
+   <p class="lede small mt">Le mérite ne se discute plus. Reste à le confirmer dans la cage.</p>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.faithFight()">Continuer</button>
+  </div>`;
+}
+/** Temps 3 — négociation de titre, distincte de scr_faith_offer() : leviers
+ * propres (clause de revanche, part de la billetterie), rounds fixés par
+ * faithGalaPosition() (déjà 5 pour un Main event, jamais un choix ici — la
+ * spec ne le liste qu'à titre indicatif, la valeur existe déjà). Le choix
+ * du lieu (spec, "5 rounds, part de la billetterie, choix du lieu")
+ * suppose de pouvoir surcharger la ville déterministe du gala
+ * (faithGalaVenueInfo, ui-04) — hors périmètre de ce lot, différé. */
+function scr_faith_title_negotiation(){
+  const f=G.f, F=G.faith, off=F.pendingOffer;
+  if(!off) return `<div class="scr center intro"><p class="lede">Aucune offre en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const o=off.opp.o, gala=off.gala;
+  const base=(f.org>0 && f.contract)?f.contract.show:(ORG_PURSES[f.org]||[0,0])[0];
+  const bourseEst=Math.round(base*(gala.mult||1)*(off.bonusMult||1)*10)/10;
+  const isDefense=!!f.champion;
+  const canRevengeClause=faithLeverage(f,F)>0 && o.id!==f.faithNemesisId;
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="eyebrow" style="color:var(--gold)">${isDefense?'DÉFENSE DU TITRE':'COMBAT DE TITRE'}</div>
+   <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
+   <div class="mono small muted" style="margin-top:4px">5 reprises · registre spectacle · conférence et pesée obligatoires</div>
+   <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
+     <div class="hero-name" style="font-size:22px">${esc(o.name)} ${o.flag}</div>
+     <div class="mono small" style="margin-top:4px">${recordStr(o)} · <span class="muted">#${divRank(o)}</span>${o.champion?' · Champion':''}</div>
+     <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
+   </div>
+   <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+     <button class="btn primary" style="height:56px;font-size:16px" onclick="CL.faithOfferSign()">SIGNER</button>
+     ${faithLeverage(f,F)>0?`<div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
+       <b style="font-size:15px">Négocier la part de la billetterie</b>
+       <div class="muted small mt">Une bourse à la hauteur de l'enjeu, ou rien.</div>
+     </div>`:''}
+     ${canRevengeClause?`<div class="opp" style="padding:14px;border-color:${F.pendingRevengeClause?'var(--gold)':'var(--line)'}" onclick="CL.faithTitleToggleRevengeClause()">
+       <b style="font-size:15px">${F.pendingRevengeClause?'✓ ':''}Clause de revanche</b>
+       <div class="muted small mt">${F.pendingRevengeClause?'Si vous perdez, la revanche est garantie — le même adversaire, pas un autre.':'En cas de défaite, garantit une revanche immédiate plutôt qu’un tirage classique.'}</div>
+     </div>`:''}
+     <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser le combat</button>
+   </div>
+   <div class="mono small" style="text-align:center;margin-top:14px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Voir la carte complète ▸</span></div>
+  </div>`;
+}
+/** Temps 5 (suite) — consécration, une seule fois, après l'écran de
+ * résultat (interceptée par render(), ANCRE V3_TITLE_CONSECRATION
+ * ci-dessus). La ligne finale (FAITH_TITLE_FINAL_LINES) est LE point le
+ * plus important de cet écran — mise en avant seule, en dernier. */
+function scr_faith_title_consecration(){
+  const f=G.f, F=G.faith;
+  const c=F.lastTitleConsecration;
+  if(!c) return `<div class="scr center intro"><p class="lede">Le moment est déjà passé.</p><button class="btn primary mt" onclick="CL.go('faith_hub')">Continuer</button></div>`;
+  const won=c.type==='won';
+  if(!TEXT_POOLS['faith_title_final_line']) registerTextPool('faith_title_final_line',FAITH_TITLE_FINAL_LINES);
+  const finalLine=txtPick('faith_title_final_line',{type:c.type,wasNemesis:c.wasNemesis,wasUnderdog:c.wasUnderdog,attemptsBefore:c.titleAttemptsBefore,personality:f.personality});
+  const coach=(typeof faithCoachPerson==='function')?faithCoachPerson(F):null;
+  const gymTop=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId);
+  const nem=(G.roster||[]).find(o=>o.id===f.faithNemesisId);
+  const journ=faithEnsureJournalist(F);
+  const reign=(G.titleHistory||[]).find(r=>r.org===f.org && r.divName===f.divName && r.champion===f.name);
+  return `<div class="scr center intro" style="max-width:480px;margin:0 auto">
+   <div class="eyebrow gold" style="letter-spacing:0.3em">${won?'CONSÉCRATION':'TITRE DÉFENDU'}</div>
+   <div style="font-size:64px;margin-top:10px">${SVG&&SVG.medal?SVG.medal:'🏆'}</div>
+   <h2 class="hero-name" style="font-size:28px;line-height:1.1;margin-top:8px">${esc(orgDisplayName(f).toUpperCase())} · ${esc(f.divName||'')}</h2>
+   ${reign?`<div class="mono small muted mt">Règne inscrit — ${reign.defenses||0} défense(s) à ce jour.</div>`:''}
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     ${coach?`<div class="small muted">${esc(personName(coach,{}))}, votre coach : « Ce n'est pas un accident. On l'a construit. »</div>`:''}
+     ${gymTop?`<div class="small muted mt">${esc(gymTop.first||gymTop.name||'')} à la salle : « On l'a vu se battre pour ça tous les jours. »</div>`:''}
+     ${nem?`<div class="small mt" style="color:var(--f-red-hi)">${esc(fighterDisplayName(nem,false))} regarde en silence, depuis les vestiaires adverses.</div>`:''}
+     <div class="small muted mt">${esc(journ.name)}, ${esc(journ.media)} : « Retenez cette date. »</div>
+   </div>
+   <p class="lede mt" style="font-style:italic;font-size:17px;line-height:1.4">${esc(finalLine)}</p>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.go('faith_hub')">Continuer</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: V3_SCR_FIGHT_CARD] — Plan V3 LOT 6 §5.6.1.b : la carte
+   complète, en 1 tap depuis l'offre (scr_faith_offer/scr_faith_title_
+   negotiation, "Voir la carte complète") ou depuis le hub une fois le
+   combat du joueur résolu ("Résultats de la carte"). Les combats de
+   complément sont DÉJÀ joués (generateFightCard, ui-08) au moment où cet
+   écran s'affiche — ce n'est pas une prévisualisation, ce sont de vrais
+   résultats. */
+function scr_faith_card(){
+  const card=G.faith&&G.faith.currentCard;
+  if(!card) return `<div class="scr center intro"><p class="lede">Aucune carte pour l'instant.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  const pr=card.playerResult;
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="eyebrow gold">LA CARTE COMPLÈTE</div>
+   <h2 class="hero-name" style="font-size:24px;line-height:1.1">${esc(card.label)}</h2>
+   <div class="mono small muted" style="margin-top:4px">${card.fights.length+1} combats · ${esc(card.tier||'')}</div>
+   <div class="opp" style="padding:14px;text-align:left;margin-top:16px;border-left:3px solid var(--gold)">
+     <div class="eyebrow" style="font-size:10px;color:var(--gold)">${card.tier==='Main event'?"TÊTE D'AFFICHE":'VOTRE COMBAT'}</div>
+     <div class="small mt">${esc(G.f.name)} vs ${esc(card.oppName)}</div>
+     ${pr?`<div class="mono small mt" style="color:${pr.win?'var(--win)':'var(--loss)'}">${pr.win?'Victoire':'Défaite'} · ${esc(pr.method)}</div>`:'<div class="muted small mt">Pas encore joué.</div>'}
+   </div>
+   ${card.fights.map(fi=>`<div class="opp" style="padding:12px;text-align:left;margin-top:8px">
+     <div class="small">${esc(fi.aName)} ${fi.aFlag||''} vs ${esc(fi.bName)} ${fi.bFlag||''}</div>
+     <div class="mono small muted mt">${fi.winnerName?`${esc(fi.winnerName)} gagne par ${esc(fi.method)}`:'Match nul'}</div>
+   </div>`).join('')}
+   <button class="btn ghost mt" onclick="CL.go('${G._cardReturn||'faith_hub'}')">← Retour</button>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
