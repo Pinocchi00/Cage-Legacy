@@ -93,6 +93,45 @@ function ensureSparringPrimary(){
   const best=gym.slice().sort((a,b)=>b.overall-a.overall)[0];
   G.faith.sparringPrimaryId=best?best.id:null;
 }
+/* ==== [ANCRE: V3_FAITH_AGENT_PERSON] — Plan V3 LOT 4 §P05a : "l'agent
+   devient une Person, en gardant son surnom d'archétype". G.faith.agent
+   reste TEL QUEL — c'est l'objet d'archétype (FAITH_AGENTS, {id,label,cut})
+   dont dépend toute la mécanique de négociation existante (agentId===
+   'requin'/'stratege'/'fidele', une dizaine de sites) : le retoucher
+   aurait un rayon d'action bien plus large que ce lot. Une Person séparée
+   (G.faith.agentPersonId) porte l'IDENTITÉ (nom réel, tirée de
+   FAITH_AGENT_ROSTER, LOT 0) et l'HISTOIRE (rel.arc[]) — l'affichage
+   combine les deux : nom réel + « surnom d'archétype ». Re-mintée
+   uniquement quand l'archétype change réellement (nouvel agent signé),
+   jamais à chaque rendu. */
+function ensureFaithAgentPerson(){
+  if(!G.faith || !G.faith.agent) return null;
+  const archetypeId=G.faith.agent.id;
+  const reg=ensurePeopleRegistry();
+  const current=G.faith.agentPersonId?reg.byId[G.faith.agentPersonId]:null;
+  if(current && current.extra && current.extra.archetype===archetypeId) return current;
+  const usedRosterIds=Object.values(reg.byId).filter(p=>p.role==='agent').map(p=>p.extra&&p.extra.rosterId);
+  const pool=(typeof FAITH_AGENT_ROSTER!=='undefined'?FAITH_AGENT_ROSTER:[]).filter(a=>a.archetype===archetypeId && usedRosterIds.indexOf(a.id)===-1);
+  const fallback=(typeof FAITH_AGENT_ROSTER!=='undefined'?FAITH_AGENT_ROSTER:[]).find(a=>a.archetype===archetypeId);
+  const chosen=pool.length?pick(pool):(fallback||{firstName:'Agent',lastName:'',ck:'',trait:''});
+  const id=reg.nextId++;
+  const flag=(typeof COUNTRIES!=='undefined' && COUNTRIES[chosen.ck])?COUNTRIES[chosen.ck].flag:'';
+  const p={id,firstName:chosen.firstName,lastName:chosen.lastName||'',nickname:null,role:'agent',flag,born:chosen.ck||'',
+    bio:{origin:'Agent de combattants.',past:chosen.trait||'',trait:chosen.trait||''},
+    rel:personDefaultRel(),state:{gymId:null,active:true,leftAt:null,leftReason:null},memory:[],
+    extra:{archetype:archetypeId,rosterId:chosen.id}};
+  reg.byId[id]=p;
+  G.faith.agentPersonId=id;
+  return p;
+}
+/** Nom réel + surnom d'archétype de l'agent Faith — seule source
+ * d'affichage (§P05a). */
+function faithAgentDisplayName(){
+  const p=ensureFaithAgentPerson();
+  if(!p) return (G.faith&&G.faith.agent&&G.faith.agent.label)||'Sans agent';
+  const label=(G.faith.agent&&G.faith.agent.label)||'';
+  return label?`${personName(p,{})} « ${label} »`:personName(p,{});
+}
 /** Nom complet + surnom d'un combattant du roster, seule source d'affichage
  * pour rester cohérent partout (Loi 1) — jamais juste `.first`. */
 function fighterDisplayName(o,withNick){
@@ -1948,6 +1987,14 @@ const CL={
     if(medical){ G.faith.medicalRefusalUsed=true; }
     else if(G.faith.agentPatience>0){ G.faith.agentPatience--; }
     else { G.faith.agentPatienceHitZero=true; }
+    /* ==== [ANCRE: V3_REFUS_AGENT_ARC] — Plan V3 LOT 4 §P05a : "réaction
+       datée de l'agent dans rel.arc[]" — une trace réelle de la Person,
+       jamais une punition abstraite. Absente pour un refus médical
+       (légitime, sans réaction de l'agent). */
+    if(!medical){
+      const agentPerson=ensureFaithAgentPerson();
+      if(agentPerson) agentPerson.rel.arc.push({year:G.faith.year,text:'Un combat refusé de plus — sa patience s’use.'});
+    }
     if(G.faith.refusalsThisYear>=3){
       G.lastMsg="Votre agent vous prévient : à ce rythme de refus, il ne pourra bientôt plus vous représenter.";
     }
@@ -2186,11 +2233,14 @@ const CL={
     if(!G.faith.agent){
       const pick3=['requin','stratege','fidele'][Math.floor(rnd()*3)];
       G.faith.agent=FAITH_AGENTS[pick3]; G.f.agentCut=G.faith.agent.cut||0;
-      G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${G.faith.agent.label} vous propose de vous représenter.`;
+      G.faith.agentPersonId=null; // archétype différent -> nouvelle Person (ensureFaithAgentPerson)
+      G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${faithAgentDisplayName()} vous propose de vous représenter.`;
     } else if(G.faith.agentPatienceHitZero){
       G.faith.agentPatienceZeroStreak=(G.faith.agentPatienceZeroStreak||0)+1;
       if(G.faith.agentPatienceZeroStreak>=2){
-        G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${G.faith.agent.label} vous lâche : trop sollicité, il repositionne sa liste de clients ailleurs.`;
+        const leavingAgent=ensureFaithAgentPerson();
+        if(leavingAgent) leavingAgent.rel.arc.push({year:G.faith.year,text:'Vous a lâché : trop sollicité, il a repositionné sa liste de clients ailleurs.'});
+        G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+`${faithAgentDisplayName()} vous lâche : trop sollicité, il repositionne sa liste de clients ailleurs.`;
         G.faith.agent=null; G.f.agentCut=0; G.faith.agentPatienceZeroStreak=0;
       }
     } else {

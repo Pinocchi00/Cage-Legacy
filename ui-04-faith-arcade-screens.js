@@ -568,7 +568,7 @@ function scr_faith_offer(){
   const bourseEst=Math.round(base*(gala.mult||1)*(off.bonusMult||1)*10)/10;
   const patience=F.agentPatience!=null?F.agentPatience:3;
   return `<div class="scr" style="max-width:560px;margin:0 auto">
-   <div class="eyebrow">${esc((F.agent&&F.agent.label)||'Sans agent')}</div>
+   <div class="eyebrow">${esc(F.agent?faithAgentDisplayName():'Sans agent')}</div>
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
    <!-- ==== [CORRECTIF V2-24 point 3] — "hype : faible" est une case
         remplie, pas une information ; au plus bas, le mot "hype"
@@ -577,7 +577,11 @@ function scr_faith_offer(){
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
      <div class="eyebrow" style="font-size:11px;color:${mm?mm.color:'var(--muted)'}">${mm?esc(mm.label.toUpperCase()):''}</div>
      <div class="hero-name" style="font-size:22px;margin-top:6px">${esc(o.name)} ${o.flag}</div>
-     <div class="mono small" style="margin-top:4px">${recordStr(o)}</div>
+     <!-- ==== [ANCRE: V3_RANG_OFFRE] — Plan V3 LOT 4 §P05a : "le rang de
+          l'adversaire toujours visible à côté du palmarès" — signer une
+          offre sans jamais savoir où l'adversaire se situe au classement
+          était l'un des symptômes cités. ==== -->
+     <div class="mono small" style="margin-top:4px">${recordStr(o)} · <span class="muted">#${divRank(o)}</span></div>
      <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
      ${o.id===f.faithNemesisId?(()=>{
        /* ==== [CORRECTIF V2-14] — "la revanche, quand elle a lieu, ouvre
@@ -613,16 +617,23 @@ function scr_faith_offer(){
           affiché sur le bouton, pas juste sa conséquence mécanique. ==== -->
      <div class="opp" style="padding:14px" onclick="CL.faithOfferDemandBetter()">
        <b style="font-size:15px">« ${esc(faithDemandMotif(f,o))} »</b>
-       <div class="muted small mt">Demander un autre adversaire à ${esc((F.agent&&F.agent.label)||'votre agent')}.</div>
+       <div class="muted small mt">Demander un autre adversaire à ${esc(F.agent?faithAgentDisplayName():'votre agent')}.</div>
      </div>
      <!-- ==== [CORRECTIF V2-21] — le libellé décrivait une punition, pas
           une action, et n'annonçait aucune conséquence avant le clic. Le
           bouton dit maintenant ce qu'il fait ; la légende juste en
           dessous dit ce que ça coûte, avant confirmation. ==== -->
      <button class="btn ghost" onclick="CL.faithOfferRefuse()">Refuser le combat</button>
+     <!-- ==== [ANCRE: V3_REFUS_CONSEQUENCE_REELLE] — Plan V3 LOT 4 §P05a/
+          §P05b : "Ce combat de l'année est perdu" ne correspondait à
+          AUCUN mécanisme du jeu (aucune notion de "combat de l'année"
+          n'existe nulle part dans le code) — une menace fabriquée, jamais
+          honorée. Remplacée par la conséquence RÉELLE de faithOfferRefuse()
+          (ui-08) : la patience de l'agent (déjà affichée sur Contacts),
+          ou l'exemption médicale quand elle s'applique. ==== -->
      <div class="muted small" style="text-align:center;margin-top:-6px">${
        (f.injury && !G.faith.medicalRefusalUsed)?'Motif médical : refus sans conséquence, une fois cette année.'
-       :'Ce combat de l’année est perdu, et votre agent le prendra mal.'
+       :(G.faith.agentPatience>0?`${esc(F.agent?faithAgentDisplayName():'Votre agent')} perd un peu patience.`:'La patience de votre agent est déjà à bout.')
      }</div>
    </div>
   </div>`;
@@ -751,7 +762,7 @@ function scr_faith_contacts(){
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="bar"><span class="eyebrow">Contacts</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
    <div style="display:flex;flex-direction:column;gap:12px">
-     ${card('VOTRE AGENT',(F.agent&&F.agent.label)||'Aucun agent',
+     ${card('VOTRE AGENT',F.agent?faithAgentDisplayName():'Aucun agent',
        'Négocie vos combats — croisez-le sur chaque offre.',agentMood)}
      ${card('DIRECTEUR DE L’ORGANISATION',dir.name,orgDisplayName(f),faithDirectorMood(f.org))}
      ${card('VOTRE COACH',personName(coach,{withNick:true}),specialtyLabel(coach.bio.trait),
