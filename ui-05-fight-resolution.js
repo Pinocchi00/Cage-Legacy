@@ -216,7 +216,10 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // Némésis Faith : verrouillée dès la première vraie rivalité, ne change plus
   // jamais ensuite (contrairement à f.rivalId qui peut glisser vers l'animosité
   // la plus récente) — c'est le fil rouge narratif de toute la carrière.
-  if(G.faith && !G.f.faithNemesisId && G.f.rivalId){ G.f.faithNemesisId=G.f.rivalId; }
+  if(G.faith && !G.f.faithNemesisId && G.f.rivalId){
+    const rival=(G.roster||[]).find(o=>o.id===G.f.rivalId);
+    if(rival) lockFaithNemesis(rival);
+  }
   /* ==== [ANCRE: FA-19_SHOWMAN] — le showman vend le spectacle avant de le
      livrer (personality créée dans finalizeFaithDraft, ui-08) : une victoire
      aux points, sans finish, est par définition le résultat qu'il n'a pas
@@ -478,6 +481,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.faith && opp && opp.id && opp.id===G.f.faithNemesisId){
     if(!G.f.nemesisRecord) G.f.nemesisRecord={w:0,l:0};
     if(win) G.f.nemesisRecord.w++; else G.f.nemesisRecord.l++;
+    /* ==== [ANCRE: V3_NEMESIS_MEMOIRE] — Plan V3 LOT 3 §P03/§P16 : mémoire[]
+       d'un combattant du roster — ici la némésis, seul combattant du
+       roster dont le joueur suit chaque confrontation individuellement,
+       les autres passent par le résumé agrégé du worldTick (advanceRoster,
+       ui-01). Plafonné comme f.history (engine.js) pour rester borné sur
+       une très longue carrière. */
+    if(!opp.memory) opp.memory=[];
+    const tierNow=nemesisTierLabel(G.f.nemesisRecord.w+G.f.nemesisRecord.l-1);
+    opp.memory.push({year:G.faith.year,text:win?`Battu par vous (${tierNow}).`:`Vous a battu (${tierNow}).`});
+    if(opp.memory.length>20) opp.memory=opp.memory.slice(-20);
   }
   /* ==== [FIN ANCRE] ==== */
   // ==== [FIN ANCRE] ====

@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -51,6 +51,47 @@ function currentGameMode(){
 function forceFightPaceForMode(mode){
   if(!G.settings||typeof G.settings!=='object') G.settings={};
   G.settings.fightPace=mode==='gauntlet'?'integral':mode==='faith'?'instantane':'rapide';
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: V3_LOCK_NEMESIS] — Plan V3 LOT 3 §P16. Point de verrouillage
+   UNIQUE d'une némésis Faith, quel que soit le déclencheur (franchissement
+   de rang, rivalité répétée, trahison du protégé) : les trois anciens
+   sites d'affectation directe de G.f.faithNemesisId sont remplacés par un
+   appel ici, pour ne jamais oublier l'un des deux effets attendus par
+   §P16 sur un futur 4e déclencheur : (1) un surnom mérité — earnNickname()
+   (ui-05, déjà utilisé pour le joueur à turnPro()) tant que la personne
+   n'en a pas déjà un (jamais écrasé, une trahison de protégé peut réutiliser
+   un allié déjà surnommé) ; (2) un écran de consécration à la prochaine
+   occasion de rendu (scr_faith_nemesis_consecration, plus bas) via un
+   drapeau consommé une seule fois. nemesisRecord repart TOUJOURS de zéro
+   ici (FA-26 : "ne concerne que la némésis EN COURS"), y compris le
+   rattachement d'une rivalité déjà comptée par ailleurs (f._rivalries). */
+function lockFaithNemesis(person){
+  if(!person) return;
+  G.f.faithNemesisId=person.id;
+  G.f.rivalId=person.id;
+  G.f.nemesisRecord=null;
+  if(!person.nick) person.nick=earnNickname(person);
+  if(G.faith) G.faith.pendingNemesisConsecration=true;
+}
+/** Nom complet + surnom d'un combattant du roster, seule source d'affichage
+ * pour rester cohérent partout (Loi 1) — jamais juste `.first`. */
+function fighterDisplayName(o,withNick){
+  if(!o) return '';
+  const full=o.name||[o.first,o.last].filter(Boolean).join(' ');
+  return (withNick!==false && o.nick)?`${full} « ${o.nick} »`:full;
+}
+/* ==== [ANCRE: V3_NEMESIS_ESCALADE] — Plan V3 LOT 3 §P16 : paliers narratifs
+   d'une rivalité, dérivés du nombre de confrontations déjà jouées
+   (nemesisRecord.w+l, ui-05) — jamais un compteur séparé à tenir à jour
+   ailleurs. 0 combat joué = on vient tout juste de se désigner l'un
+   l'autre ; le PROCHAIN combat porte le palier suivant. */
+function nemesisTierLabel(fightsPlayed){
+  if(fightsPlayed<=0) return 'Première rencontre';
+  if(fightsPlayed===1) return 'La revanche';
+  if(fightsPlayed===2) return 'La trilogie';
+  return 'Le règlement de comptes';
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -109,6 +150,19 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
        une sauvegarde plus ancienne porte encore une valeur différente. */
     G.screen=(currentGameMode()==='faith')?'faith_fight_pending':'fight_flash';
   }
+  /* ==== [ANCRE: V3_NEMESIS_CONSECRATION] — Plan V3 LOT 3 §P16 : intercepte
+     le tout premier rendu suivant lockFaithNemesis() (posé depuis 3 points
+     d'entrée différents — franchissement de rang en fin d'année, rivalité
+     répétée juste après un combat, trahison du protégé — donc pas un point
+     de sortie unique comme "Instantané" ci-dessus). Jamais pendant une
+     séquence de combat déjà engagée (arena/attente/résumé/résultat) : le
+     drapeau reste posé et se déclenche au rendu calme suivant. */
+  const FIGHT_SEQUENCE_SCREENS=['arena','faith_fight_pending','fight_flash','result'];
+  if(G && G.faith && G.faith.pendingNemesisConsecration && FIGHT_SEQUENCE_SCREENS.indexOf(G.screen)===-1){
+    G.faith.pendingNemesisConsecration=false;
+    G.screen='faith_nemesis_consecration';
+  }
+  /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(G&&G.screen==='faith_fight_pending') startFaithFightPending(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
@@ -1648,9 +1702,7 @@ const CL={
            seulement combler l'absence d'une. Le palmarès tête-à-tête
            (nemesisRecord, ui-05) repart de zéro : il ne concerne que la
            némésis EN COURS. */
-        G.f.faithNemesisId=monster.id;
-        G.f.nemesisRecord=null;
-        G.f.rivalId=monster.id;
+        lockFaithNemesis(monster);
         if(!G.f._rivalries) G.f._rivalries={};
         G.f._rivalries[monster.id]=3;
         G.faith.gym=G.faith.gym.filter(p=>p.id!==monster.id);
@@ -2030,7 +2082,7 @@ const CL={
         if(divRank(o)<monRang){
           G.faith.rankWatch[o.id]=(G.faith.rankWatch[o.id]||0)+1;
           if(G.faith.rankWatch[o.id]>=2){
-            G.f.faithNemesisId=o.id; G.f.rivalId=o.id;
+            lockFaithNemesis(o);
             break;
           }
         }
@@ -3602,6 +3654,32 @@ function finishFaithFightPending(){
   if(FFP.to){ clearTimeout(FFP.to); FFP.to=0; }
   if(G.screen!=='faith_fight_pending') return; // déjà quitté (retour rapide, changement d'écran ailleurs)
   G.screen='fight_flash'; render();
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V3_NEMESIS_CONSECRATION_SCREEN] — Plan V3 LOT 3 §P16 : écran
+   dédié, une seule fois par nemesis désigné (drapeau consommé dans
+   render(), plus haut). Loi 1 (victime identifiable) : nom complet +
+   surnom fraîchement gagné (lockFaithNemesis()) + un détail concret (son
+   rang/palmarès actuel, jamais une case vide). Toujours "faith_hub" au
+   retour : c'est l'écran calme depuis lequel ce rendu a été intercepté
+   dans tous les cas (fin d'année, sortie de combat, résolution d'un
+   événement de vie — jamais une séquence de combat, filtrée en amont). */
+function scr_faith_nemesis_consecration(){
+  const f=G.f;
+  const nem=(G.roster||[]).find(o=>o.id===f.faithNemesisId);
+  if(!nem) return `<div class="scr center intro"><p class="lede">La rivalité s’est déjà dissoute.</p><button class="btn primary mt" onclick="CL.go('faith_hub')">Continuer</button></div>`;
+  const rang=divRank(nem);
+  return `<div class="scr center intro" style="max-width:480px;margin:0 auto">
+   <div class="eyebrow" style="color:var(--f-red-hi)">UNE NÉMÉSIS EST NÉE</div>
+   <h2 class="hero-name" style="font-size:28px;line-height:1.1;margin-top:8px">${esc(fighterDisplayName(nem))}</h2>
+   <div class="mono small muted" style="margin-top:10px">${esc(nem.divName||'')} · rang #${rang} · ${nem.W||0}-${nem.L||0}${nem.D?`-${nem.D}`:''}</div>
+   <p class="lede small" style="margin-top:16px">${esc(fighterDisplayName(nem,false))} portera désormais ce surnom partout où votre carrière le recroisera — sur les affiches, dans la presse, dans vos souvenirs.</p>
+   <div class="card mt" style="padding:14px;background:var(--panel2);border-left:3px solid var(--f-red-hi);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px;color:var(--f-red-hi)">${esc(nemesisTierLabel(0))}</div>
+     <div class="small muted">Aucun combat encore joué entre vous deux — le premier écrira le reste.</div>
+   </div>
+   <button class="btn primary mt" style="width:100%;height:52px;font-size:16px" onclick="CL.go('faith_hub')">Continuer</button>
+  </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_arena(){ const A=ARENA||{};

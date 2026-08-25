@@ -439,11 +439,11 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
           </div>
           <div class="disp gold" style="font-size:24px;padding:0 16px">VS</div>
           <div style="flex:1;text-align:center">
-            <b style="font-size:18px">${esc(nemesis.name)}</b>
+            <b style="font-size:18px">${esc(fighterDisplayName(nemesis))}</b>
             <div class="mono small muted mt">${nemesis.W}-${nemesis.L} · ${nemesis.titles||0} Titre(s)</div>
           </div>
         </div>
-        <div class="muted small" style="font-style:italic">« ${diffW>=0?`L\u2019histoire retiendra que vous avez surpassé ${esc(nemesis.name)}. Vous avez remporté cette guerre d\u2019usure.`:`Malgré tous vos efforts, le palmarès de ${esc(nemesis.name)} restera une ombre sur votre héritage.`} »</div>
+        <div class="muted small" style="font-style:italic">« ${diffW>=0?`L\u2019histoire retiendra que vous avez surpassé ${esc(fighterDisplayName(nemesis))}. Vous avez remporté cette guerre d\u2019usure.`:`Malgré tous vos efforts, le palmarès de ${esc(fighterDisplayName(nemesis))} restera une ombre sur votre héritage.`} »</div>
       </div>`;
     }
   }

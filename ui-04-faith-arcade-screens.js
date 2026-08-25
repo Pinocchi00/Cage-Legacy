@@ -526,7 +526,7 @@ function scr_faith_hub(){
       <div class="mono" style="font-size:11px;color:var(--muted)">SAISON ${G.faith.year} · ${orgDisplayName(f)}</div>
       <div class="hero-name" style="font-size:28px;margin-top:4px">${esc(f.name)} ${f.flag}</div>
       ${topPartner?`<div class="mono" style="font-size:11px;color:var(--muted);margin-top:8px">SALLE · ${esc(topPartner.first)}</div>${faithProtegeLine(topPartner,f)}`:''}
-      ${nemesis?`<div class="mono" style="font-size:11px;color:var(--f-red-hi);margin-top:8px">NÉMÉSIS · ${esc(nemesis.first)} (${(f.nemesisRecord&&f.nemesisRecord.w)||0}-${(f.nemesisRecord&&f.nemesisRecord.l)||0})</div>`:''}
+      ${nemesis?`<div class="mono" style="font-size:11px;color:var(--f-red-hi);margin-top:8px">NÉMÉSIS · ${esc(fighterDisplayName(nemesis))} (${(f.nemesisRecord&&f.nemesisRecord.w)||0}-${(f.nemesisRecord&&f.nemesisRecord.l)||0})</div>`:''}
       ${(f.org>0 && f.contract)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:4px">${contractFightsLeftLabel(f.contract)}</div>`:''}
       ${(f.faithTraits&&f.faithTraits.length)?`<div class="mono" style="font-size:11px;color:var(--gold);margin-top:6px">${f.faithTraits.join(' · ')}</div>`:''}
       ${faithOathBadge(G.faith)}
@@ -583,7 +583,12 @@ function scr_faith_offer(){
        const bilan=rec.w>rec.l?`Vous menez ${rec.w}-${rec.l} sur cette rivalité.`
          :rec.l>rec.w?`Il mène ${rec.l}-${rec.w} sur cette rivalité.`
          :(rec.w+rec.l>0?`Vous êtes à égalité, ${rec.w}-${rec.l}.`:'Votre premier face-à-face.');
-       return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${bilan}</div>`;
+       /* ==== [ANCRE: V3_NEMESIS_ESCALADE] — Plan V3 LOT 3 §P16 : palier
+          affiché sur l'offre elle-même, avant la signature — le joueur
+          sait ce qu'il signe (une revanche n'a pas le même poids qu'une
+          trilogie). ==== */
+       const tier=nemesisTierLabel(rec.w+rec.l);
+       return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${esc(tier)} · ${bilan}</div>`;
      })():''}
      ${F.scoutKey?`<div class="mono small" style="margin-top:8px;color:var(--sage)">SPARRING · Vous savez qu’il est particulièrement dangereux en ${esc(oppTopAttrLabel(o))}.</div>`:''}
    </div>
@@ -1095,6 +1100,31 @@ function faithLegendCompareLine(total,previousBest){
   return {text:gap<=25?`Record personnel : ${previousBest} — il manquait ${gap} points`:`Record personnel : ${previousBest}`,color:'var(--muted)'};
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V3_NEMESIS_EPILOGUE] — Plan V3 LOT 3 §P16 : "un destin dédié
+   pour la némésis" à la clôture de la carrière — jamais juste absente si
+   elle existe. Toujours cherchée dans G.roster : contrairement à tout
+   autre combattant, la némésis est explicitement protégée du
+   remplacement par un nouveau prospect tant qu'elle est en poste
+   (isNemesis, advanceRoster(), ui-01) — elle ne peut donc jamais avoir
+   disparu en silence au moment où l'épilogue s'affiche. */
+function faithNemesisEpilogueBlock(f){
+  if(!f.faithNemesisId) return '';
+  const nem=(G.roster||[]).find(o=>o.id===f.faithNemesisId);
+  if(!nem) return '';
+  const rec=f.nemesisRecord||{w:0,l:0};
+  const meAhead=rec.w>rec.l;
+  const tied=rec.w===rec.l;
+  const fate=nem.champion
+    ?`${esc(fighterDisplayName(nem))} porte aujourd'hui une ceinture. Votre nom reste attaché au sien, que vous l'ayez voulu ou non.`
+    :`${esc(fighterDisplayName(nem))} combat toujours, à ${nem.W||0}-${nem.L||0}. L'histoire entre vous deux n'est peut-être pas finie.`;
+  const bilan=tied?`Face à face à égalité, ${rec.w}-${rec.l}.`:meAhead?`Vous menez ${rec.w}-${rec.l} sur cette rivalité — la dernière ligne de son bilan face au vôtre.`:`Il mène ${rec.l}-${rec.w} sur cette rivalité, jusqu'au bout.`;
+  return `<div class="card mt" style="padding:14px;background:var(--panel2);border-left:3px solid var(--f-red-hi);text-align:left">
+   <div class="eyebrow mb" style="font-size:11px;color:var(--f-red-hi)">${esc(nemesisTierLabel(rec.w+rec.l))} · némésis</div>
+   <div class="small">${bilan}</div>
+   <div class="small muted mt">${fate}</div>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_epilogue(){
   const f=G.f, sc=computeLegendScore(f);
   const debut=2026, fin=(G.faith&&G.faith.year)||debut;
@@ -1131,6 +1161,7 @@ function scr_faith_epilogue(){
      ${faithJourneyBlock(G.faith)}
      ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    </div>
+   ${faithNemesisEpilogueBlock(f)}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.faithRelaunchSame()">REPRENDRE LE MÊME CHEMIN</button>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.faithRelaunchEdit()">Changer une chose</button>
    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="CL.newFaithCareer()">Repartir de zéro</button>
