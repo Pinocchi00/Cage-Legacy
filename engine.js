@@ -1525,8 +1525,9 @@ function convertZeroGain(f,statKey){
   if(fam){
     for(const [nk] of fam){
       if(nk===statKey || f.attrs[nk]===undefined) continue;
-      const cap=Math.min((f.maxAttrs && f.maxAttrs[nk]!=null)?f.maxAttrs[nk]:f.potential+4,
-        (f.agedCeilings && f.agedCeilings[nk]!=null)?f.agedCeilings[nk]:100, 100);
+      // Même logique que skillHasEffect() (V3_DIMINISHING_RETURNS) : le seuil
+      // de potentiel n'est plus un mur, seul le déclin par l'âge (ou 100) l'est.
+      const cap=(f.agedCeilings && f.agedCeilings[nk]!=null)?f.agedCeilings[nk]:100;
       const before=f.attrs[nk];
       if(before<cap){
         const after=clamp(Math.min(before+1,cap),1,100);
@@ -1539,14 +1540,36 @@ function convertZeroGain(f,statKey){
   f.earnings=(f.earnings||0)+2;
   return {key:null,label:null,delta:0,converted:true,money:2,fromLabel:attrLabel(statKey)};
 }
+/* ==== [ANCRE: V3_DIMINISHING_RETURNS] — Plan V3 LOT 7 §5.7.3/P17 : "Pas de
+   palier minimum ou maximum […] Si le combattant a la chance d'avoir les
+   bonnes compétences, fait les bons camps d'entraînement, les bons choix,
+   il peut devenir le meilleur combattant de l'histoire." Le plafond dur de
+   potentiel (f.potential+4 / f.maxAttrs[k], ci-dessous jusqu'à ce lot)
+   remplacé par un rendement décroissant : EN DESSOUS du seuil, la
+   progression est strictement inchangée (aucune régression de contenu) ;
+   AU-DESSUS, chaque gain est réduit selon l'écart déjà creusé au-delà du
+   seuil — 90→95 coûte beaucoup plus que 50→55, mais reste possible, sans
+   jamais s'arrêter net. Le plafond de déclin par l'âge (f.agedCeilings,
+   ANCRE PLAFOND_DECLIN_VIEILLESSE, juste en dessous) N'EST PAS concerné —
+   "le déclin par l'âge reste" (spec, point 4) : lui seul demeure un mur
+   dur, un choix narratif assumé (le corps vieillit, l'entraînement seul ne
+   défait jamais ça), pas une limite arbitraire de potentiel. */
+function softCapDelta(before,dv,ceiling){
+  if(dv<=0) return before+dv;
+  if(before<ceiling) return before+dv;
+  const overshoot=before-ceiling;
+  const factor=Math.max(0.05,1/(1+overshoot*0.5));
+  return before+dv*factor;
+}
+/* ==== [FIN ANCRE] ==== */
 function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
     if(k==='morale'){ f.morale=clamp(f.morale+dv,0,100); applied.push(['Moral',dv]); continue; }
     if(k==='form'){ f.form=clamp(f.form+dv,0,100); applied.push(['Forme',dv]); continue; }
     const before=f.attrs[k]; let after=before+dv;
-    // borne haute = potentiel — mais ne DOIT JAMAIS redescendre en-dessous de la
-    // valeur déjà acquise (ex: via une compétence, non bornée par le potentiel) :
-    // le plafond bloque une nouvelle progression, il ne reprend jamais l'existant.
-    if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4));
+    // Rendement décroissant au-delà du seuil de potentiel (V3_DIMINISHING_RETURNS
+    // ci-dessus) — plus de mur dur : la valeur déjà acquise n'est jamais reprise,
+    // mais la progression au-delà ralentit au lieu de s'arrêter.
+    if(dv>0) after=softCapDelta(before,dv,(f.maxAttrs && f.maxAttrs[k]!=null) ? f.maxAttrs[k] : f.potential+4);
     // ==== [ANCRE: PLAFOND_DECLIN_VIEILLESSE] — item demandé : un attribut
     // rabaissé par le vieillissement (f.agedCeilings, cf. applyAging) ne peut
     // plus jamais être remonté par un entraînement au-delà de ce plafond —
@@ -1589,8 +1612,13 @@ function skillHasEffect(f, s){
   return Object.keys(s.fx).some(stat=>{
     const dv=s.fx[stat];
     if(dv<=0 || !f.attrs || f.attrs[stat]===undefined) return true;
-    let cap=(f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4;
-    if(f.agedCeilings && f.agedCeilings[stat]!=null) cap=Math.min(cap, f.agedCeilings[stat]);
+    /* ==== [CORRECTIF V3_DIMINISHING_RETURNS] — le seuil de potentiel n'est
+       plus un mur (cf. softCapDelta, engine.js) : une compétence garde un
+       effet réel tant que l'attribut n'a pas atteint son SEUL vrai plafond
+       restant, le déclin par l'âge (agedCeilings) ou 100 à défaut. Un
+       rendement décroissant très faible reste un gain non nul — jamais
+       "sans effet" tant que la marge existe. ==== */
+    const cap=(f.agedCeilings && f.agedCeilings[stat]!=null) ? f.agedCeilings[stat] : 100;
     return f.attrs[stat] < cap;
   });
 }
@@ -1631,7 +1659,10 @@ function grantSkill(f, skill){ if(!f.skills) f.skills=[]; f.skills.push(skill.id
   const realBefore={};
   if(skill.fx){ for(const stat in skill.fx){ if(f.attrs && f.attrs[stat]!==undefined){
     const dv=skill.fx[stat]; const before=f.attrs[stat]; realBefore[stat]=before; let after=before+dv;
-    if(dv>0) after=Math.min(after, Math.max(before, (f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4));
+    // Même rendement décroissant qu'applyDeltas() (ANCRE V3_DIMINISHING_RETURNS,
+    // engine.js) — une compétence ne doit pas contourner la règle que suit
+    // tout le reste de la progression.
+    if(dv>0) after=softCapDelta(before,dv,(f.maxAttrs && f.maxAttrs[stat]!=null) ? f.maxAttrs[stat] : f.potential+4);
     if(dv>0 && f.agedCeilings && f.agedCeilings[stat]!=null) after=Math.min(after, Math.max(before, f.agedCeilings[stat]));
     f.attrs[stat]=clamp(after,1,100);
   } } }

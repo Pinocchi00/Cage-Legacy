@@ -334,6 +334,14 @@ function faithEnsureOffer(){
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
+  /* ==== [ANCRE: V3_SPECTACLE_HYPE] — Plan V3 LOT 7 §5.7.1 point 5 : "cet axe
+     pilote la hype, les bourses, l'accueil du public". Modeste (±10%,
+     jamais un second système de bourse) — le palmarès (déjà gala.mult via
+     le rang/statut de titre) reste le levier principal, le spectacle
+     n'est qu'un correctif. */
+  const spec=G.f.spectacle==null?50:G.f.spectacle;
+  if(spec>=70) gala.mult*=1.1; else if(spec<=30) gala.mult*=0.9;
+  /* ==== [FIN ANCRE] ==== */
   G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
   G.faith.pendingRevengeClause=false; // nouvelle offre : la clause d'une offre précédente ne survit jamais
   G.faith.currentCard=generateFightCard(gala,chosen.o);
@@ -1538,6 +1546,17 @@ const CL={
        points ennuyeuse » est posée côté résolution de combat
        (ui-05-fight-resolution.js, ANCRE FA-19_SHOWMAN). ==== */
     else if(d.personality==='showman'){ f.hypeBonus=(f.hypeBonus||1)*1.4; }
+    /* ==== [ANCRE: V3_SPECTACLE_AXIS] — Plan V3 LOT 7 §5.7.1 point 5 : "gagner
+       mais être chiant / perdre mais être divertissant" — le palmarès et la
+       popularité doivent être deux monnaies distinctes. f.spectacle (0-100,
+       jamais affiché en chiffre — règle H.1) démarre neutre, alimenté par
+       le TYPE de finish/décision à chaque combat (ANCRE V3_SPECTACLE_UPDATE,
+       ui-05) et lu par la bourse du prochain gala (ANCRE V3_SPECTACLE_HYPE,
+       ui-08). Portée réduite par rapport à la spec complète (postures de
+       conférence et KO subis n'alimentent pas encore l'axe — la demande la
+       plus riche du document, gardée pour un futur lot plutôt que bâclée). */
+    f.spectacle=50;
+    /* ==== [FIN ANCRE] ==== */
     for(const k in f.attrs) f.attrs[k]=clamp(f.attrs[k],1,100);
     f.overall=overall(f);
     f.maxAttrs={};
@@ -2179,9 +2198,20 @@ const CL={
       sequelle=cible;
     }
     /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: V3_CAREER_LIFETIME_STATS] — Plan V3 LOT 7 §5.7.2 point 2 :
+       "coups mis · coups encaissés · temps de contrôle" dans le "bloc
+       chiffres" de la fiche demandent un total DE CARRIÈRE, pas juste la
+       saison qui vient de s'écouler (G.season.fights est vidé à chaque
+       nouvelle année). totalSig/totalTdAtt/totalCtrl/totalKD ci-dessous
+       existaient déjà pour détecter les spécialisations (juste en dessous)
+       — accumulés ici sur f, jamais recalculés depuis zéro, jamais réinitialisés. */
+    let finitionsSeason=0;
     if((G.season.fights||[]).length>=1){
       let totalSig=0, totalTdAtt=0, totalCtrl=0, totalKD=0;
-      G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0; });
+      G.season.fights.forEach(fight=>{ totalSig+=(fight.st&&fight.st.Me&&fight.st.Me.sig)||0; totalTdAtt+=(fight.st&&fight.st.Me&&fight.st.Me.tdAtt)||0; totalCtrl+=(fight.st&&fight.st.Me&&fight.st.Me.ctrl)||0; totalKD+=(fight.st&&fight.st.Me&&fight.st.Me.kd)||0;
+        if(fight.win && !isDecisionLike(fight.method)) finitionsSeason++; });
+      f.careerSig=(f.careerSig||0)+totalSig; f.careerTdAtt=(f.careerTdAtt||0)+totalTdAtt;
+      f.careerCtrl=(f.careerCtrl||0)+totalCtrl; f.careerKD=(f.careerKD||0)+totalKD;
       const totalRounds=G.season.fights.reduce((acc,fight)=>acc+(fight.round||3),0);
       if(!f.faithSpecs) f.faithSpecs=[];
       if(!f._styleProfileOverride) f._styleProfileOverride=Object.assign({},STYLE_PROFILE[f.style]||STYLE_PROFILE.mma);
@@ -2223,7 +2253,13 @@ const CL={
       fights:G.faith.fightsThisYear,
       wins:(G.season.fights||[]).filter(x=>x.win).length,
       losses:(G.season.fights||[]).filter(x=>!x.win).length,
-      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle, promiseOutcome
+      eloDelta, earningsDelta, rank, dmgHead, newSkills, yearLog:G.faith.yearLog||[], sequelle, promiseOutcome,
+      /* ==== [ANCRE: V3_YEAR_END_FACTS] — Plan V3 LOT 7 §5.7.1 points 6/8 :
+         finitions de la saison (remplace "Coups encaissés" sur la coupure,
+         cf. scr_faith_year_end) et delta de rang depuis le début de saison
+         (F.startOfYearRank, déjà posé par nextFaithYear() — jamais
+         recalculé, juste comparé). */
+      finitions:finitionsSeason, rankStart:G.faith.startOfYearRank
     };
     G.screen='faith_year_end'; save(); render();
   },

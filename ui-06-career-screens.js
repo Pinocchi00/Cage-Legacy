@@ -1077,6 +1077,12 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
           encore été disputé. ==== -->
      ${(f.orgRecords && Object.keys(f.orgRecords).length)?`<div class="story" style="position:relative;z-index:2"><b>Bilan maison.</b> ${Object.entries(f.orgRecords).map(([orgId,rec])=>`${rec.W}-${rec.L}${rec.D?`-${rec.D}`:''} sous les couleurs de ${esc(ORGS[orgId]||'—')}`).join(' · ')}.</div>`:''}
      ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">Champion ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+     <!-- ==== [CORRECTIF V3_CAREER_LIFETIME_TOTAL] — Plan V3 LOT 7 §5.7.2
+          point 4 : le total de carrière (amateur + pro, jamais recombiné
+          nulle part ailleurs — cf. faithCareerTotalFights, ui-04) affiché
+          sur la fiche elle-même, pas seulement à l'épilogue Faith. ==== -->
+     ${f.amaRec?`<div class="story" style="position:relative;z-index:2"><b>Combats au total.</b> ${f.amaRec.W+f.amaRec.L+f.W+f.L+(f.D||0)} (amateur + pro).</div>`:''}
+     ${(G.faith)?faithCareerStatsGrid(f,G.faith):''}
      ${championBadgeCard(f)}
      ${signatureMoveCard(f)}
      ${f.skills.length?(()=>{

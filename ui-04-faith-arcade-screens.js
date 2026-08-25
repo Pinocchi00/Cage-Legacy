@@ -627,6 +627,9 @@ function scr_faith_offer(){
        <span class="muted">${venueInfo.attendance.toLocaleString('fr-FR')} spectateurs attendus · ${venueInfo.audienceM}M en audience</span>
      </div>
      ${venueInfo.home?'<div class="small mt" style="color:var(--sage)">Vous combattez à domicile.</div>':''}
+     <!-- ==== [ANCRE: V3_SPECTACLE_HYPE] — Plan V3 LOT 7 §5.7.1 point 5 :
+          lecture qualitative de f.spectacle, jamais un chiffre (règle H.1). -->
+     ${f.spectacle>=70?'<div class="small mt" style="color:var(--gold)">Le public parle encore de votre dernier combat.</div>':f.spectacle<=30?'<div class="small mt" style="color:var(--muted)">On respecte votre palmarès. On ne se déplace pas pour autant.</div>':''}
      <p class="lede small mt" style="margin:8px 0 0">${esc(crowdLine)}</p>
    </div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
@@ -1168,6 +1171,29 @@ function scr_faith_oath(){
    contrairement à V2-39) : une carrière 15-2 avec ceinture doit noter
    nettement plus haut qu'une 40-25 sans titre — vérifié en testant les
    deux profils avant livraison (cf. commit). */
+/* ==== [ANCRE: V3_CAREER_LIFETIME_TOTAL] — Plan V3 LOT 7 §5.7.2 point 4 :
+   "BUG — longueur de carrière […] j'ai pu faire seulement 15 combats".
+   INVESTIGATION (obligatoire, cf. spec) : faithFightsPlanned()/
+   faithGenerateCalendar()/nextFaithYear()/isDeclining() ont été audités —
+   aucun n'empêche mécaniquement d'atteindre 25-40 combats. Une simulation
+   de 8 carrières complètes (jsdom, clickThrough jusqu'à retraite naturelle)
+   donne un total RÉEL de 25 à 32 combats par carrière (médiane ~28-29),
+   déjà dans la cible du document, avec retraite naturelle vers 37-40 ans
+   (isDeclining()). La cause racine du "15 combats" n'est donc PAS un
+   plafond de combats manquant, mais un problème d'AFFICHAGE : turnPro()
+   (ui-05) réinitialise volontairement f.W/f.L/f.history au passage
+   amateur→pro (le palmarès amateur est archivé à part dans f.amaRec, par
+   conception — cf. ANCRE P4P_SCORE_80_20) — et AUCUN écran ne recombine
+   jamais les deux pour afficher le total de carrière réel. Un joueur qui a
+   disputé 14 combats amateurs puis 17 combats pro ne voit jamais que "17"
+   (son record pro affiché partout), jamais son vrai total de 31. Corrigé
+   ici en exposant le total réel (épilogue, fiche) plutôt qu'en modifiant
+   le rythme de combat, qui n'est pas le problème. */
+function faithCareerTotalFights(f){
+  const ama=(f.amaRec&&(f.amaRec.W+f.amaRec.L))||0;
+  return ama+((f.history||[]).length);
+}
+/* ==== [FIN ANCRE] ==== */
 function computeLegendScore(f){
   const F=(typeof G!=='undefined'&&G&&G.faith)||{};
   const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
@@ -1243,6 +1269,37 @@ function faithScoreRows(sub,delays){
   if(sub.pic!=null) return `${faithScoreRow('Pic',sub.pic,40,d[0])}${faithScoreRow('Palmarès',sub.palmares,40,d[1])}${faithScoreRow('Trace',sub.trace,20,d[2])}`;
   return `${faithScoreRow('Palmarès',sub.palmares||0,32,d[0])}${faithScoreRow('Sommet',sub.sommet||0,26,d[1])}${faithScoreRow('Intégrité',sub.longevite||0,18,d[2])}${faithScoreRow('Empreinte',sub.empreinte||0,14,d[2])}${faithScoreRow('Fortune',sub.fortune||0,10,d[2])}`;
 }
+/* ==== [ANCRE: V3_CAREER_STATS_GRID] — Plan V3 LOT 7 §5.7.2 point 2 : "sous
+   l'overall, tout le reste — en une grille dense, pas en prose […] bloc
+   chiffres (grille mono, 12 cases max)". Portée réduite à ce que l'état du
+   jeu suit déjà réellement (aucune donnée inventée) : temps de contrôle et
+   coups mis/reçus sont désormais accumulés sur toute la carrière
+   (f.careerSig/careerCtrl, ANCRE V3_CAREER_LIFETIME_STATS, ui-08) plutôt
+   que remis à zéro chaque saison. "Pesées réussies/ratées" (spec) n'a pas
+   d'équivalent dans l'état actuel (le poids se négocie en tier de
+   difficulté, jamais en pass/fail binaire) — case omise plutôt
+   qu'inventée. */
+function faithCareerStatsGrid(f,F){
+  const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
+  const cell=(v,lbl)=>`<div style="border:1px solid var(--line);padding:8px;text-align:center"><div class="mono" style="font-size:15px">${v}</div><div class="eyebrow" style="font-size:9px;margin-top:2px;opacity:.8">${lbl}</div></div>`;
+  const cells=[
+    cell(faithCareerTotalFights(f),'Combats (total)'),
+    cell((f.ko||0)+(f.sub||0),'Finitions'),
+    cell(f.ko||0,'KO/TKO'),
+    cell(f.sub||0,'Soumissions'),
+    cell(f.dec||0,'Décisions'),
+    cell(f.careerSig||0,'Coups mis'),
+    cell((F&&F.dmgHeadTotal)||0,'Coups encaissés'),
+    cell(f.careerCtrl||0,'Temps de contrôle (s)'),
+    cell(Math.max((F&&F.bestStreak)||0,f.streak||0,0),'Meilleure série'),
+    cell((F&&F.peakRank!=null)?`#${F.peakRank}`:'—','Meilleur classement'),
+    cell(formatArgent((F&&F.peakEarnings)||f.earnings||0),'Plus grosse bourse'),
+    cell(titles,'Titres'),
+  ];
+  return `<div class="mt"><div class="eyebrow mb" style="font-size:11px">En chiffres</div>
+   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${cells.join('')}</div></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: FAITH_MEMOIRE_LEGENDES] — la comparaison au record personnel
    affiché sous la décomposition. Le silence complet passé un écart trop
    large est délibéré (effet Zeigarnik) : un petit manque donne envie de
@@ -1305,16 +1362,32 @@ function scr_faith_epilogue(){
    <div class="faith-paper">
      <div style="height:120px;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:32px">
        <div class="hero-name" style="font-size:34px;line-height:1.05">${esc(f.name)}</div>
-       <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">${debut} – ${fin} · ${f.W}-${f.L}${f.ko?` · ${f.ko} KO`:''}</div>
+       <!-- ==== [CORRECTIF V3_CAREER_LIFETIME_TOTAL] — le record affiché ici
+            était SEULEMENT f.W-f.L (palmarès pro, réinitialisé par turnPro()
+            au passage amateur→pro) — jamais le total réel de la carrière.
+            Le total (faithCareerTotalFights) est désormais la donnée mise
+            en avant ; le détail amateur/pro reste visible juste en dessous
+            pour qui veut le détail, jamais caché. ==== -->
+       <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">${debut} – ${fin} · ${faithCareerTotalFights(f)} combats au total${f.ko?` · ${f.ko} KO`:''}</div>
+       ${f.amaRec?`<div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">Amateur ${f.amaRec.W}-${f.amaRec.L} · Pro ${f.W}-${f.L}${f.D?`-${f.D}`:''}</div>`:''}
+       <!-- ==== [ANCRE: V3_NICKNAME_HISTORY] — Plan V3 LOT 7 §5.7.2 point 3 :
+            "historique des surnoms qu'on t'a donnés". f.nicknameHistory
+            (checkNicknameEvolution, ui-05) existait déjà — accumulé mais
+            jamais affiché nulle part. Le mécanisme "garder le surnom sous
+            condition spécifique" (spec) reste hors périmètre : les surnoms
+            évoluent déjà uniquement par le jeu (jamais choisis par le
+            joueur), condition déjà proche de l'esprit de la demande. ==== -->
+       ${(f.nicknameHistory&&f.nicknameHistory.length)?`<div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">Surnoms portés : ${f.nicknameHistory.map(esc).join(' → ')}${f.nick?` → ${esc(f.nick)}`:''}</div>`:''}
      </div>
      <div style="text-align:center;padding:48px 0">
        <div class="hero-name" style="font-size:96px;font-weight:700;line-height:.9">${total}</div>
-       <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100</div>
+       <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100 · Score de Légende (Héritage)</div>
      </div>
      <div style="margin-bottom:12px">
        ${faithScoreRows(sc,[0,180,360])}
      </div>
      <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
+     ${faithCareerStatsGrid(f,G.faith)}
      ${faithJourneyBlock(G.faith)}
      ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    </div>
@@ -1437,11 +1510,27 @@ function faithUpdateJournalistSentiment(F,angle){
    journaliste ET la place qu'il donne dans la division — le score de
    légende lui-même disparaît de la coupure, il reste seulement sur la
    fiche/épilogue (faithScoreRows, computeLegendScore). */
+/* ==== [CORRECTIF V3_JOURNALIST_MEMORY] — Plan V3 LOT 7 §5.7.1 point 3 (P20) :
+   "Karim Belaïd m'a répété la même phrase toute ma carrière, alors que je
+   suis n°1 — il disait la même chose quand j'étais n°30". j.sentiment
+   (déjà réel, évolue chaque année — cf. faithUpdateJournalistSentiment)
+   ne pouvait jamais se CONTREDIRE : un journaliste sceptique restait
+   sceptique mot pour mot après une ascension spectaculaire. F.rankHistory
+   (worldTick, engine.js, LOT 0) donne la trajectoire réelle — comparée
+   au premier rang connu, pas seulement au sentiment accumulé. Portée
+   réduite face à la demande complète (pool ≥40 segmenté par tier) : une
+   seule ligne de retournement, ajoutée au constat existant plutôt que de
+   dupliquer tout le système de verdict. */
 function faithJournalistVerdict(F,f,ys){
   const j=faithEnsureJournalist(F);
   const rank=ys.rank;
   const rankTxt=rank?` Il le classe ${rank}${rank===1?'er':'e'} de sa division${rank>1?` — il en met ${rank-1} devant lui`:''}.`:'';
-  const stance=j.sentiment>=2
+  const hist=Array.isArray(F.rankHistory)?F.rankHistory:[];
+  const firstRank=hist.length?hist[0].rank:null;
+  const surprised=firstRank!=null && rank!=null && (firstRank-rank)>=15 && j.sentiment<2;
+  const stance=surprised
+    ?`« Je ne le voyais pas arriver, très honnêtement. Il était ${firstRank}e à mes yeux il y a quelques saisons. »`
+    :j.sentiment>=2
     ?`« ${esc(f.name)}, je le dis depuis un moment maintenant : c’est un des meilleurs de sa génération. »`
     :j.sentiment<=-2
     ?'« Je maintiens ce que j’ai écrit sur lui. Rien cette année ne m’a fait changer d’avis. »'
@@ -1473,6 +1562,13 @@ function faithPresseTon(f,angle){
   if(f.personality==='humble') return bon
     ? 'Deux phrases en conférence, pas une de plus. Le reste s’est dit dans la cage.'
     : 'Pas un mot plus haut que l’autre. Le silence, cette année, ressemblait à de la lassitude.';
+  /* ==== [CORRECTIF V3_PERSONNALITE_SHOWMAN] — Plan V3 LOT 7 §5.7.1 point 4 :
+     "un showman qui perd est raconté autrement qu'un taiseux qui perd" —
+     'showman' (ajouté en LOT 4) ressortait ici avec une chaîne vide, la
+     seule des trois personnalités sans ton propre. */
+  if(f.personality==='showman') return bon
+    ? 'Le spectacle et les chiffres, pour une fois, racontent la même histoire.'
+    : 'La mise en scène était au rendez-vous. Le résultat, beaucoup moins.';
   return '';
 }
 /* ==== [ANCRE: V2-32] — table des faits saillants de l'année, chacun avec
@@ -1622,8 +1718,12 @@ function scr_faith_year_end(){
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
      ${chiffre(`${ys.wins}-${ys.losses}`,'Bilan')}
      ${chiffre(`${ys.eloDelta>0?'+':''}${ys.eloDelta}`,'Progression',ys.eloDelta>=0?'var(--win)':'var(--loss)')}
-     ${chiffre(`#${ys.rank}`,'Classement')}
-     ${chiffre(ys.dmgHead,'Coups encaissés',ys.dmgHead>30?'var(--loss)':'')}
+     <!-- ==== [CORRECTIF V3_CHAMPION_RANG/V3_RANG_DELTA] — Plan V3 LOT 7
+          §5.7.1 points 7/8 : "marquer dans le rang quand on est champion
+          (petit effet)" (P20) et "delta de classement visible" avec la
+          valeur de départ (rankStart, F.startOfYearRank déjà suivi). ==== -->
+     ${f.champion?chiffre('CHAMPION','Classement','var(--gold)'):chiffre(`#${ys.rank}${(ys.rankStart!=null&&ys.rankStart!==ys.rank)?` <span class="small" style="font-size:11px">(${ys.rankStart>ys.rank?'+':''}${ys.rankStart-ys.rank})</span>`:''}`,'Classement')}
+     ${chiffre(ys.finitions||0,'Finitions',(ys.finitions||0)>0?'var(--win)':'')}
    </div>
    ${skills?`<div><div class="eyebrow" style="margin-bottom:4px">Ce qui a été appris</div>${skills}</div>`:''}
    ${isDeclining(f)

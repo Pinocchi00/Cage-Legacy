@@ -715,6 +715,20 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     G.faith.currentCard.playerResult={win,method:res.method};
   }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V3_SPECTACLE_UPDATE] — Plan V3 LOT 7 §5.7.1 point 5 : une
+     victoire par finition fait vivre le public, une victoire aux points
+     l'endort ; une défaite par finition coûte plus cher qu'une défaite aux
+     points, qui elle-même reste un combat regardé jusqu'au bout. Jamais
+     affiché en chiffre (règle H.1) — seule sa lecture qualitative
+     (ANCRE V3_SPECTACLE_HYPE, ui-08) transparaît. */
+  if(G.faith){
+    const finish=!isDecisionLike(res.method);
+    let dv=0;
+    if(win) dv=finish?5:-2;
+    else if(res.winner!=='D') dv=finish?-3:0;
+    if(dv) G.f.spectacle=clamp((G.f.spectacle==null?50:G.f.spectacle)+dv,0,100);
+  }
+  /* ==== [FIN ANCRE] ==== */
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome, upsetLine};
 }
