@@ -834,3 +834,73 @@ const FAITH_PRESSE_CORPS={
     'Une année propre, sans éclat. À ce niveau, ne pas monter revient déjà à laisser passer du monde.',
     'Le travail est là, les résultats suivent à peine. La différence se fera ailleurs que dans la salle.']
 };
+
+/* ==== [ANCRE: DATA_FAITH_PRESSCONF_REPLIES_V3] — Plan V3 LOT 5 §P15 :
+   répliques d'adversaire pour la conférence de presse, migrées vers le
+   moteur de texte contextuel (TEXT_POOLS/txtPick, engine.js — LOT 0
+   §4.2). Remplace faithOppReplies() (ui-04), qui ne produisait que 2
+   formules figées par adversaire, jamais un vrai pool. Chaque entrée
+   déclare `req(ctx)` (lu sur l'adversaire/le contexte réels — jamais un
+   texte générique, anti-générique §1.3) et `text` comme FONCTION de ctx
+   (jeton de contexte obligatoire, ANCRE TEXT_ENGINE_INTERPOLATION,
+   engine.js). Portée réduite à 28 entrées (le document en demande 80+
+   pour respecter la Loi 4 sur la fréquence réelle de la conférence — very
+   limitée par construction, réservée au Main event, cf. faithGalaPosition
+   ui-04 : quelques occurrences par carrière au mieux). Même choix de
+   réduction assumée et notée que pour FAITH_BUILDUP_EVENTS (LOT 0). */
+const FAITH_PRESSCONF_REPLIES=[
+  {id:'pc_agr_finish',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)>65,
+   text:ctx=>`« Je viens chercher la finition, pas les points. » ${esc(ctx.opp.name)} ne cache rien de ses intentions.`},
+  {id:'pc_agr_pression',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)>70,
+   text:ctx=>`« Je mets la pression dès la cloche, et je ne la relâche pas. » ${esc(ctx.opp.name)} ne parle que d'aller de l'avant.`},
+  {id:'pc_calme_laisser_venir',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)<40,
+   text:ctx=>`« Je le laisse venir. ${esc(ctx.opp.styleLabel||'Mon style')} n'a jamais eu besoin de se presser. » ${esc(ctx.opp.name)} reste de marbre devant les questions.`},
+  {id:'pc_calme_patience',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)<35,
+   text:ctx=>`« La patience gagne plus de combats que la colère. » ${esc(ctx.opp.name)} répond posément, presque trop.`},
+  {id:'pc_winrecord',weight:1,req:ctx=>ctx.opp.W>ctx.opp.L+3,
+   text:ctx=>`Il rappelle son bilan, ${ctx.opp.W}-${ctx.opp.L}, « et ce n'est pas fini ».`},
+  {id:'pc_winrecord_confiance',weight:1,req:ctx=>ctx.opp.W>ctx.opp.L+5,
+   text:ctx=>`« ${ctx.opp.W} victoires, ce n'est pas de la chance. » ${esc(ctx.opp.name)} n'a pas l'air de douter une seconde.`},
+  {id:'pc_losing_evite',weight:1,req:ctx=>ctx.opp.L>=ctx.opp.W,
+   text:ctx=>`Il évite le sujet de son bilan, ${ctx.opp.W}-${ctx.opp.L}, et détourne la question vers l'avenir.`},
+  {id:'pc_losing_revanche',weight:1,req:ctx=>ctx.opp.L>ctx.opp.W,
+   text:ctx=>`« Les chiffres ne racontent pas tout. » ${esc(ctx.opp.name)} parle d'un tournant, pas d'un déclin.`},
+  {id:'pc_favori',weight:1,req:ctx=>ctx.favorite===true,
+   text:ctx=>`« Je suis ici parce que je suis le meilleur choix, pas le plus commode. » ${esc(ctx.opp.name)} rappelle son rang au classement.`},
+  {id:'pc_outsider',weight:1,req:ctx=>ctx.favorite===false,
+   text:ctx=>`« Personne ne me voyait ici il y a un an. » ${esc(ctx.opp.name)} joue la carte de l'outsider, sans en avoir l'air gêné.`},
+  {id:'pc_nemesis_1',weight:2,req:ctx=>!!ctx.isNemesis,
+   text:ctx=>`« On se connaît déjà, tous les deux. » ${esc(ctx.opp.name)} ne prend même plus la peine de faire semblant de découvrir un inconnu.`},
+  {id:'pc_nemesis_2',weight:2,req:ctx=>!!ctx.isNemesis,
+   text:()=>`« Cette fois, on règle vraiment la question. » Le ton est différent des autres conférences — plus court, plus tendu.`},
+  {id:'pc_title_1',weight:1,req:ctx=>!!ctx.isTitle,
+   text:ctx=>`« Une ceinture, ça se prend, ça ne se donne pas. » ${esc(ctx.opp.name)} pèse chaque mot devant les caméras du titre.`},
+  {id:'pc_grappler',weight:1,req:ctx=>ctx.opp.styleLabel&&/lutte|jiu|jitsu|sol/i.test(ctx.opp.styleLabel),
+   text:ctx=>`« Debout ou au sol, l'issue est la même. » ${esc(ctx.opp.name)} ne cache pas où il veut amener le combat.`},
+  {id:'pc_striker',weight:1,req:ctx=>ctx.opp.styleLabel&&/boxe|kick|muay|karate/i.test(ctx.opp.styleLabel),
+   text:ctx=>`« Je frappe plus vite que ce qu'on peut anticiper. » ${esc(ctx.opp.name)} n'a pas l'intention de traîner debout.`},
+  {id:'pc_veteran',weight:1,req:ctx=>(ctx.opp.age||25)>=33,
+   text:ctx=>`« L'expérience ne s'use pas comme le corps. » ${esc(ctx.opp.name)}, ${ctx.opp.age} ans, a entendu la question sur l'âge un millier de fois.`},
+  {id:'pc_jeune',weight:1,req:ctx=>(ctx.opp.age||25)<=22,
+   text:ctx=>`« L'âge, ça ne se voit pas dans la cage. » À ${ctx.opp.age} ans, ${esc(ctx.opp.name)} balaie la question d'un revers de main.`},
+  {id:'pc_champion',weight:1,req:ctx=>!!ctx.opp.champion,
+   text:ctx=>`« Cette ceinture n'est pas un souvenir, c'est un outil de travail. » ${esc(ctx.opp.name)} parle en champion, pas en challenger.`},
+  {id:'pc_default_1',weight:1,
+   text:ctx=>`« Le meilleur gagne le soir du combat, pas dans une salle de conférence. » ${esc(ctx.opp.name)} garde ses vraies cartes pour la cage.`},
+  {id:'pc_default_2',weight:1,
+   text:ctx=>`« On en a assez dit. La cage tranchera. » ${esc(ctx.opp.name)} coupe court aux questions.`},
+  {id:'pc_default_3',weight:1,
+   text:ctx=>`${esc(ctx.opp.name)} sourit, sans grand-chose à ajouter — le combat parlera de lui-même, dit-il.`},
+  {id:'pc_default_4',weight:1,
+   text:ctx=>`« Respect, mais aucune pitié. » ${esc(ctx.opp.name)} garde le ton mesuré, sans un mot de trop.`},
+  {id:'pc_streak_win',weight:1,req:ctx=>(ctx.opp.streak||0)>=3,
+   text:ctx=>`« Cette série n'est pas un accident. » ${esc(ctx.opp.name)}, ${ctx.opp.streak} victoires de suite, ne compte pas s'arrêter là.`},
+  {id:'pc_streak_loss',weight:1,req:ctx=>(ctx.opp.streak||0)<=-2,
+   text:ctx=>`« Une série, ça se retourne en un soir. » ${esc(ctx.opp.name)} n'esquive pas la question des défaites récentes.`},
+  {id:'pc_ko_specialist',weight:1,req:ctx=>(ctx.opp.ko||0)>=5 && (ctx.opp.ko||0)>(ctx.opp.sub||0),
+   text:ctx=>`« Je ne vais pas au tableau des juges pour gagner du temps. » ${ctx.opp.ko} KO à son actif, ${esc(ctx.opp.name)} le rappelle sans détour.`},
+  {id:'pc_sub_specialist',weight:1,req:ctx=>(ctx.opp.sub||0)>=5 && (ctx.opp.sub||0)>(ctx.opp.ko||0),
+   text:ctx=>`« Une soumission, c'est une conversation qu'on termine soi-même. » ${ctx.opp.sub} finitions par soumission parlent pour ${esc(ctx.opp.name)}.`},
+  {id:'pc_gapclasse',weight:1,req:ctx=>Math.abs((ctx.opp.overall||50)-(ctx.f.overall||50))>=15,
+   text:ctx=>`${esc(ctx.opp.name)} évite soigneusement de commenter l'écart de niveau que tout le monde chuchote en coulisses.`},
+];

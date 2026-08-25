@@ -1720,7 +1720,14 @@ function txtPick(poolId,ctx){
     ledger[poolId].push(chosen.id);
     while(ledger[poolId].length>window) ledger[poolId].shift();
   }
-  return chosen.text;
+  /* ==== [ANCRE: TEXT_ENGINE_INTERPOLATION] — Plan V3 LOT 5 : "toute phrase
+     fréquente doit consommer >=1 jeton de contexte" (§4.2). `text` peut
+     être une fonction (ctx)=>string plutôt qu'une chaîne figée — c'est
+     elle qui permet à un pool de rester générique (un seul id ledger,
+     dédupliqué normalement) tout en nommant l'adversaire réel, son
+     palmarès, etc. à chaque tirage. Chaînes figées toujours acceptées,
+     inchangé pour les pools déjà écrits ainsi (LOT 0). ==== */
+  return typeof chosen.text==='function'?chosen.text(ctx):chosen.text;
 }
 /* ==== [FIN ANCRE] ==== */
 

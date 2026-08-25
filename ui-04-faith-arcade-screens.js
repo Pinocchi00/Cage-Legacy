@@ -677,21 +677,23 @@ function scr_faith_buildup(){
 }
 /* ==== [ANCRE: V2-25] — écran de conférence de presse, déclenché quand
    l'attente est suffisante (gala.pressConf, faithGalaPosition — Main
-   event uniquement). Les répliques de l'adversaire sont générées depuis
-   SES attributs/bilan/style réels (attrs.aggression, bilan, styleLabel),
-   jamais un texte générique. Trois postures, toutes valables (règle
-   H.3). ==== */
-function faithOppReplies(o){
-  const aggressif=(o.attrs&&o.attrs.aggression||50)>65;
-  const bilan=o.W>o.L?`Il rappelle son bilan, ${o.W}-${o.L}, "et ce n'est pas fini".`:`Il évite le sujet de son bilan, ${o.W}-${o.L}.`;
-  const style=aggressif?`"Je viens chercher la finition, pas les points."`:`"Je le laisse venir. ${esc(o.styleLabel||'')} n'a jamais eu besoin de se presser."`;
-  return [bilan, style];
+   event uniquement). Trois postures, toutes valables (règle H.3). ====
+   ==== [ANCRE: V3_PRESSCONF_TEXTENGINE] — Plan V3 LOT 5 §P15 : les
+   répliques passent par txtPick()/FAITH_PRESSCONF_REPLIES (data-faith-
+   content.js), un vrai pool avec req(ctx) plutôt que deux formules
+   figées. Deux tirages successifs (le ledger de txtPick exclut
+   automatiquement le premier id du second, cf. engine.js) donnent deux
+   répliques différentes à chaque conférence. */
+function faithOppReplies(o,f,F,ctxExtra){
+  const ctx=Object.assign({opp:o,f,F},ctxExtra);
+  return [txtPick('faith_pressconf_reply',ctx), txtPick('faith_pressconf_reply',ctx)];
 }
 function scr_faith_press_conf(){
   const f=G.f, F=G.faith, off=F.pendingOffer;
   if(!off) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
   const o=off.opp.o;
-  const replies=faithOppReplies(o);
+  if(!TEXT_POOLS['faith_pressconf_reply']) registerTextPool('faith_pressconf_reply',FAITH_PRESSCONF_REPLIES);
+  const replies=faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:!!(off.gala&&off.gala.tier==='Main event'),favorite:divRank(o)<divRank(f)});
   return `<div class="scr center intro">
    <div class="eyebrow blood">Conférence de presse</div>
    <h2 class="disp">${esc(o.name)} face à vous</h2>
