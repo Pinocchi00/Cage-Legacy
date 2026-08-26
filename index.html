@@ -485,11 +485,18 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="data-people.js"></script>
 <script src="data-faith-content.js"></script>
 <script src="engine.js"></script>
+<!-- ==== [ANCRE: ENGINE_CAREER_SPLIT] — chantier 4 (refactorisation progressive
+     du moteur) : engine-career.js extrait d'engine.js à l'IDENTIQUE (échelle
+     d'organisations, cachets/contrats, Elo, classement P4P). Dépend des
+     primitives d'engine.js (num/clamp/eff/reachEdge/overall/applyDeltas...)
+     donc chargé juste après lui. ==== -->
+<script src="engine-career.js"></script>
 <!-- ==== [ANCRE: ENGINE_EVENTS_SPLIT] — chantier 4 (refactorisation progressive
      du moteur) : engine-events.js extrait d'engine.js à l'IDENTIQUE (eras MMA,
      actualités, mémoire tactique, sponsor, personnalité, modes alternatifs,
      Mue Martiale, synergies, IA adaptative, camps, rivalités/hype/arcs
-     narratifs, worldTick). Dépend des primitives d'engine.js (rnd/pick/clamp/
+     narratifs, worldTick — worldTick() appelle p4pScore(), donc chargé après
+     engine-career.js). Dépend des primitives d'engine.js (rnd/pick/clamp/
      DIVISIONS/STYLES/ATTR_KEYS...) donc chargé juste après lui, jamais avant,
      et toujours avant state.js/ui-*.js qui appellent ces fonctions. ==== -->
 <script src="engine-events.js"></script>
