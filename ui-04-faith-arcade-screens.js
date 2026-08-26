@@ -1197,7 +1197,11 @@ function scr_faith_oath(){
    ici en exposant le total réel (épilogue, fiche) plutôt qu'en modifiant
    le rythme de combat, qui n'est pas le problème. */
 function faithCareerTotalFights(f){
-  const ama=(f.amaRec&&(f.amaRec.W+f.amaRec.L))||0;
+  /* [ANCRE: V3_HISTORIQUE_PRESERVE] Plan V4 C2 : amaHistory (ui-05 turnPro)
+     est la source exacte du volet amateur depuis que l'historique est
+     déplacé plutôt que détruit ; amaRec.W+L reste le repli pour une
+     sauvegarde antérieure à ce correctif, où amaHistory n'existe pas. */
+  const ama=f.amaHistory?f.amaHistory.length:((f.amaRec&&(f.amaRec.W+f.amaRec.L))||0);
   return ama+((f.history||[]).length);
 }
 /* ==== [FIN ANCRE] ==== */

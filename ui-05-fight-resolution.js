@@ -741,6 +741,11 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome, upsetLine};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
+  /* ==== [ANCRE: V3_HISTORIQUE_PRESERVE] — Plan V4 §2.2 : les compteurs pro
+     repartent de zéro (règle du sport), mais l'historique des combats est la
+     matière première des Archives (C10) et de la fiche (C17/C19). Déplacé,
+     jamais détruit. ==== */
+  f.amaHistory=(f.history||[]).slice();
   f.W=f.L=f.D=f.ko=f.sub=f.dec=f.koLoss=f.streak=0; f.orgWins=0; f.easyFights=0; f.history=[]; f.champion=null; f.titles=0; f.defenses=0; f._fy=0;
   // ==== [ANCRE: CORRECTIF_CONTAMINATION_SAISON] — bug trouvé : turnPro()
   // nettoyait bien tous les compteurs du combattant, mais oubliait le
