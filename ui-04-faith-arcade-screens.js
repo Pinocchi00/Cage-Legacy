@@ -1225,6 +1225,18 @@ function faithCareerTotalFights(f){
   return ama+((f.history||[]).length);
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V4_C10_WEIGH_IN] — « pesées réussies » (P21.14), plan V4 C10 :
+   weighInPassed est posé par combat depuis la résolution (ui-02/ui-08,
+   ANCRE V4_C10_WEIGH_IN) et copié sur l'entrée d'historique (ui-05,
+   HISTORIQUE_ENRICHI). Absent (undefined) sur une entrée d'une sauvegarde
+   antérieure à ce correctif : traité comme réussi plutôt que comme raté,
+   pour ne pas faire chuter le compteur d'une carrière déjà en cours sur des
+   combats qui n'ont jamais posé la question. */
+function faithWeighInsPassed(f){
+  const all=(f.amaHistory||[]).concat(f.history||[]);
+  return all.filter(h=>h.weighInPassed!==false).length;
+}
+/* ==== [FIN ANCRE] ==== */
 function computeLegendScore(f){
   const F=(typeof G!=='undefined'&&G&&G.faith)||{};
   const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
@@ -1306,15 +1318,18 @@ function faithScoreRows(sub,delays){
    jeu suit déjà réellement (aucune donnée inventée) : temps de contrôle et
    coups mis/reçus sont désormais accumulés sur toute la carrière
    (f.careerSig/careerCtrl, ANCRE V3_CAREER_LIFETIME_STATS, ui-08) plutôt
-   que remis à zéro chaque saison. "Pesées réussies/ratées" (spec) n'a pas
-   d'équivalent dans l'état actuel (le poids se négocie en tier de
-   difficulté, jamais en pass/fail binaire) — case omise plutôt
-   qu'inventée. */
+   que remis à zéro chaque saison.
+   ==== [ANCRE: V4_C10_WEIGH_IN] — "Pesées réussies" (P21.14), omise ici par
+   la passe V3 faute d'équivalent pass/fail binaire, existe désormais
+   (weighInPassed par combat, posé à la résolution du cutting). Ajoutée en
+   13e case : le plafond de 12 de la spec V3 protégeait contre l'invention
+   de données, pas contre une vraie donnée qui n'existait pas encore. ==== */
 function faithCareerStatsGrid(f,F){
   const titles=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
   const cell=(v,lbl)=>`<div style="border:1px solid var(--line);padding:8px;text-align:center"><div class="mono" style="font-size:15px">${v}</div><div class="eyebrow" style="font-size:9px;margin-top:2px;opacity:.8">${lbl}</div></div>`;
+  const totalFights=faithCareerTotalFights(f);
   const cells=[
-    cell(faithCareerTotalFights(f),'Combats (total)'),
+    cell(totalFights,'Combats (total)'),
     cell((f.ko||0)+(f.sub||0),'Finitions'),
     cell(f.ko||0,'KO/TKO'),
     cell(f.sub||0,'Soumissions'),
@@ -1326,6 +1341,7 @@ function faithCareerStatsGrid(f,F){
     cell((F&&F.peakRank!=null)?`#${F.peakRank}`:'—','Meilleur classement'),
     cell(formatArgent((F&&F.peakEarnings)||f.earnings||0),'Plus grosse bourse'),
     cell(titles,'Titres'),
+    cell(`${faithWeighInsPassed(f)}/${totalFights}`,'Pesées réussies'),
   ];
   return `<div class="mt"><div class="eyebrow mb" style="font-size:11px">En chiffres</div>
    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${cells.join('')}</div></div>`;
@@ -1371,7 +1387,8 @@ function faithNemesisEpilogueBlock(f){
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_epilogue(){
-  const f=G.f, sc=computeLegendScore(f);
+  const f=G.f, sc=computeLegendScore(f), F=G.faith||{};
+  const peakOverall=F.peakOverall||f.overall||0;
   const debut=2026, fin=(G.faith&&G.faith.year)||debut;
   const serment=(G.faith&&G.faith.oath)||null;
   const tenu=serment?faithOathFulfilled(serment,f,G.faith||{}):false;
@@ -1410,9 +1427,23 @@ function scr_faith_epilogue(){
             joueur), condition déjà proche de l'esprit de la demande. ==== -->
        ${(f.nicknameHistory&&f.nicknameHistory.length)?`<div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">Surnoms portés : ${f.nicknameHistory.map(esc).join(' → ')}${f.nick?` → ${esc(f.nick)}`:''}</div>`:''}
      </div>
+     <!-- ==== [ANCRE: V3_OVERALL_VS_LEGENDE] — Plan V4 C8 (P21.1) : ce chiffre
+          était le score composite (pic+palmarès+trace), sous une étiquette
+          "Score de Légende" — un correctif de façade antérieur n'avait changé
+          que le texte, jamais la valeur. Le grand chiffre de la fiche devient
+          le pic d'overall réellement atteint (peakOverall, déjà suivi par
+          prepareFaithYearEnd, ui-08) ; le score composite descend dans un
+          bloc "Héritage" séparé, où sa décomposition pic/palmarès/trace a
+          enfin un sens propre plutôt que de se faire passer pour l'overall.
+          computeLegendScore() n'est pas modifié : il était juste, seulement
+          au mauvais endroit. ==== -->
      <div style="text-align:center;padding:48px 0">
-       <div class="hero-name" style="font-size:96px;font-weight:700;line-height:.9">${total}</div>
-       <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100 · Score de Légende (Héritage)</div>
+       <div class="hero-name" style="font-size:96px;font-weight:700;line-height:.9">${peakOverall}</div>
+       <div class="mono" style="font-size:14px;color:var(--muted);margin-top:16px">/100 · Niveau atteint au sommet</div>
+     </div>
+     <div class="eyebrow" style="margin-top:32px">HÉRITAGE</div>
+     <div style="text-align:center;padding:12px 0">
+       <div class="hero-name" style="font-size:40px">${total}<span class="mono small">/100</span></div>
      </div>
      <div style="margin-bottom:12px">
        ${faithScoreRows(sc,[0,180,360])}
@@ -1695,15 +1726,44 @@ function faithArchiveYear(year,ys,f,F){
 }
 /** Une ligne du Parcours, hauteur fixe (40px) : le regard descend la liste
  * sans que rien ne se dérobe d'une année à l'autre.
- * @param {object} e une entrée de G.faith.journey */
-function faithJourneyRow(e){
-  return `<div style="display:flex;align-items:center;gap:10px;height:40px;border-bottom:1px solid var(--line)">
+ * @param {object} e une entrée de G.faith.journey @param {boolean} open déroulé */
+function faithJourneyRow(e,open){
+  return `<div style="display:flex;align-items:center;gap:10px;height:40px;border-bottom:1px solid var(--line);cursor:pointer" onclick="CL.toggleFaithJourneyYear(${e.year})">
     <span class="mono" style="flex:0 0 38px;font-size:11px;color:var(--muted)">${e.year}</span>
     <span class="mono" style="flex:0 0 44px;font-size:12px">${e.W}-${e.L}</span>
     <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.title)}</span>
     <span class="mono" style="flex:0 0 14px;text-align:center;font-size:13px;color:var(--loss)">${e.rupture?'✦':''}</span>
     <span class="mono" style="flex:0 0 32px;text-align:right;font-size:11px;color:var(--muted)">#${e.rank||'—'}</span>
+    <span class="mono" style="flex:0 0 14px;text-align:center;font-size:10px;color:var(--muted)">${open?'▾':'▸'}</span>
   </div>`;
+}
+/* ==== [ANCRE: V4_C9_FIGHT_BY_FIGHT] — Plan V4 C9 : le déroulé combat par
+   combat d'une saison, affiché au tap sur sa ligne du Parcours. Les données
+   viennent de f.amaHistory+f.history (préservées par C2), filtrées par
+   `season` — désormais l'année Faith réelle du combat plutôt que l'horloge
+   Carrière classique jamais avancée en Faith (cf. resolveFight(), ui-05,
+   ANCRE V4_C9_SEASON_FAITH). oppRank existait déjà par combat (vérifié) ;
+   seul le rattachement saison→combat manquait pour pouvoir filtrer ici. ==== */
+/** Une ligne de combat sous une saison déroulée du Parcours.
+ * @param {object} h une entrée de f.amaHistory/f.history */
+function faithFightRow(h){
+  const resLabel=h.res==='win'?'V':h.res==='loss'?'D':'N';
+  const resColor=h.res==='win'?'var(--win)':h.res==='loss'?'var(--loss)':'var(--muted)';
+  return `<div style="display:flex;align-items:center;gap:8px;height:32px;padding-left:20px;border-bottom:1px dashed var(--line)">
+    <span class="mono" style="flex:0 0 16px;font-size:11px;font-weight:700;color:${resColor}">${resLabel}</span>
+    <span style="flex:1;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.oppFlag||''} ${esc(h.oppName||'—')}</span>
+    <span class="mono" style="flex:0 0 100px;text-align:right;font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.method||'')}${h.round?` R${h.round}`:''}</span>
+    <span class="mono" style="flex:0 0 32px;text-align:right;font-size:10px;color:var(--muted)">#${h.oppRank||'—'}</span>
+  </div>`;
+}
+/** Le déroulé complet d'une saison, ou rien si aucun combat ne porte cette
+ * année (sauvegarde antérieure à ce correctif — season n'existait pas encore
+ * comme année Faith réelle sur les entrées déjà archivées).
+ * @param {object} f G.f @param {number} year */
+function faithJourneyFightsBlock(f,year){
+  const fights=(f.amaHistory||[]).concat(f.history||[]).filter(h=>h.season===year);
+  if(!fights.length) return `<div class="muted" style="font-size:11px;padding:8px 0 8px 20px">Détail indisponible pour cette saison.</div>`;
+  return fights.map(faithFightRow).join('');
 }
 /** Le Parcours complet, positionné entre la décomposition du score et le
  * badge de serment sur l'épilogue — jamais au-dessus de la note elle-même.
@@ -1711,8 +1771,9 @@ function faithJourneyRow(e){
 function faithJourneyBlock(F){
   const j=(F&&F.journey)||[];
   if(!j.length) return '';
+  const openYear=G.faithJourneyExpandedYear;
   return `<div class="eyebrow" style="font-size:11px;margin:20px 0 8px">LE PARCOURS</div>
-    <div style="margin-bottom:20px">${j.map(faithJourneyRow).join('')}</div>`;
+    <div style="margin-bottom:20px">${j.map(e=>`${faithJourneyRow(e,e.year===openYear)}${e.year===openYear?faithJourneyFightsBlock(G.f,e.year):''}`).join('')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_year_end(){

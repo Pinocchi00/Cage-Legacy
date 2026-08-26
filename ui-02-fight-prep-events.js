@@ -356,13 +356,21 @@ function finishTrainingFlow(pendingOppMalus){
   // combat à l'autre sans avoir besoin d'une variance ajoutée par-dessus.
   const wc=weightCutInfo(G.f); const isTopDivision=(G.f.div==='H-heavy'||G.f.div==='F-feather');
   const effPct=wc.cutPct;
-  let cutTier, cutMods=null;
+  /* ==== [ANCRE: V4_C10_WEIGH_IN] — Plan V4 C10 (P21.14) : « pesées
+     réussies/ratées » n'avait pas d'équivalent binaire dans l'état existant
+     (le poids se négociait uniquement en tier de difficulté). weighInPassed
+     est vrai par défaut sur les trois premiers paliers ; le tier `complique`
+     — le seul assez dur pour être un vrai risque sans déjà annuler le combat
+     — peut échouer (30%) ; `impossible` échoue toujours (qu'il aboutisse à
+     un changement de division, une annulation, ou un combat en catchweight
+     accepté plus bas : dans les trois cas la pesée elle-même a été ratée). ==== */
+  let cutTier, cutMods=null, weighInPassed=true;
   if(effPct<=3){ cutTier='sans_effort'; cutMods={cardio:6,durability:4}; }
   else if(effPct<=8){ cutTier='facile'; }
   else if(effPct<=13){ cutTier='normal'; }
-  else if(effPct<=18){ cutTier='complique'; cutMods={cardio:-12,strength:-10,durability:-8,chin:-12}; }
-  else { cutTier='impossible'; }
-  G.fight.cutResult={tier:cutTier,effPct,kg:wc.cutKg,walk:wc.walk,limit:wc.limit};
+  else if(effPct<=18){ cutTier='complique'; cutMods={cardio:-12,strength:-10,durability:-8,chin:-12}; weighInPassed=rnd()>=0.3; }
+  else { cutTier='impossible'; weighInPassed=false; }
+  G.fight.cutResult={tier:cutTier,effPct,kg:wc.cutKg,walk:wc.walk,limit:wc.limit,weighInPassed};
   if(cutTier==='impossible'){
     G.f.botchedWeightCuts=(G.f.botchedWeightCuts||0)+1;
     G.f.form=clamp(G.f.form-15,0,100); G.f.morale=clamp(G.f.morale-12,0,100);

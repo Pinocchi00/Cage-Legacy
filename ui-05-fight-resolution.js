@@ -88,9 +88,23 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // ==== [ANCRE: HISTORIQUE_ENRICHI] — la dernière entrée poussée par applyResult()
   // (partagée avec les combats PNJ en coulisses, donc jamais modifiée elle-même)
   // est enrichie ici, seulement pour le joueur, avec les infos d'affichage que
-  // scr_history() a besoin (adversaire, rang au moment du combat, année, narration). ====
+  // scr_history() a besoin (adversaire, rang au moment du combat, année, narration).
+  // Le rang de l'adversaire (oppRank, ci-dessous) était déjà posé avant Plan V4 —
+  // vérifié par simulation (harnais jsdom) : chaque entrée de f.history porte
+  // bien oppRank, y compris en carrière Faith, où oppRankBefore vient du même
+  // divRank(opp) que côté Carrière classique. ====
+  /* ==== [ANCRE: V4_C9_SEASON_FAITH] — `season` lisait G.season.year, l'horloge
+     du mode Carrière classique — jamais avancée en Faith (qui a la sienne,
+     G.faith.year, FAITH_CALENDRIER). Toute entrée de f.history posée en
+     carrière Faith portait donc `season:1`, quelle que soit l'année réelle du
+     combat : faithJourneyBlock() (C9) ne peut pas relier un combat à la ligne
+     de saison qui l'archive (faithArchiveYear, `journey[].year`) sans cette
+     donnée juste. ==== */
   { const last=G.f.history[G.f.history.length-1];
-    if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank=oppRankBefore; last.season=(G.season&&G.season.year)||1; last.narrative=narrative.txt(G.f); } }
+    if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank=oppRankBefore;
+      last.season=G.faith?(G.faith.year||1):((G.season&&G.season.year)||1);
+      last.weighInPassed=(G.fight.cutResult&&typeof G.fight.cutResult.weighInPassed==='boolean')?G.fight.cutResult.weighInPassed:true;
+      last.narrative=narrative.txt(G.f); } }
   // ==== [FIN ANCRE] ====
   for(const k in savedAttrs){ G.f.attrs[k]=savedAttrs[k]; }
   for(const k in oppSavedAttrs){ opp.attrs[k]=oppSavedAttrs[k]; }
