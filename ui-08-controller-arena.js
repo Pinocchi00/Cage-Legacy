@@ -14,10 +14,10 @@
    ============================================================================ */
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
-  result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
+  result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,opponent_card:scr_opponent_card,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,faith_coach_choice:scr_faith_coach_choice,faith_sparring_detail:scr_faith_sparring_detail,
   faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
@@ -87,10 +87,25 @@ function lockFaithNemesis(person){
    départ d'un partenaire) — jamais au rendu. Appelée après TOUTE
    modification de G.faith.gym qui pourrait invalider la référence
    actuelle (départ, arrivée) ; no-op si la référence est encore valide. */
+/* ==== [CORRECTIF C13] — Plan V4 LOT 5 : cette fonction est le SEUL endroit
+   qui peut faire changer G.faith.sparringPrimaryId — les écrans (ui-04) ne
+   font plus jamais de repli silencieux (`||gym[0]`) quand l'id référencé
+   est introuvable. Un appelant qui retire un partenaire (ex.
+   evt_frankenstein_betrayal) doit faire partir sa Person explicitement
+   (personDepart, avec la vraie raison) AVANT d'appeler cette fonction ;
+   si un appel futur l'omettait, le repli ci-dessous consigne quand même un
+   départ daté générique — jamais une identité qui glisse en silence
+   (Loi 3 : la perte doit être traçable). */
 function ensureSparringPrimary(){
   if(!G.faith) return;
   const gym=G.faith.gym||[];
   if(gym.some(p=>p.id===G.faith.sparringPrimaryId)) return;
+  if(G.faith.sparringPrimaryId!=null && G.people){
+    const key='sparring:'+G.faith.sparringPrimaryId;
+    const pid=G.people.byKey&&G.people.byKey[key];
+    const p=pid!=null?G.people.byId[pid]:null;
+    if(p && p.state.active) personDepart(p,'A quitté la salle, sans que la raison n’ait été enregistrée à temps.');
+  }
   const best=gym.slice().sort((a,b)=>b.overall-a.overall)[0];
   G.faith.sparringPrimaryId=best?best.id:null;
 }
@@ -1675,17 +1690,25 @@ const CL={
     faithAdvanceMonth();
   },
   /* ==== [ANCRE: V2-10] — le stage unique (perk 'tiger' tiré au hasard) est
-     remplacé par un choix réel entre 6 camps nommés (FAITH_CAMPS, ui-04),
-     chacun avec son coût, sa famille d'attributs, son risque et son texte
-     de retour propre — plus un menu de sélection à part entière qu'une
-     décision narrative sous tension, la règle des 3 options (H.3) ne s'y
-     applique donc pas (comme les autres écrans de type "vitrine" du jeu :
-     choix de style, de camp d'entraînement en carrière...). ==== */
+     remplacé par un choix réel entre plusieurs salles nommées (FAITH_GYMS,
+     data-people.js — cf. CORRECTIF C11, ui-04), chacune avec son coût, sa
+     famille d'attributs, son risque et son texte de retour propre — plus un
+     menu de sélection à part entière qu'une décision narrative sous
+     tension, la règle des 3 options (H.3) ne s'y applique donc pas (comme
+     les autres écrans de type "vitrine" du jeu : choix de style, de camp
+     d'entraînement en carrière...). ==== */
   faithCamp(){
     G.screen='faith_camps'; save(); render();
   },
+  /* ==== [CORRECTIF C11] — campId référence désormais un id de FAITH_GYMS
+     (gym_xxx) ; le repli sur FAITH_CAMPS (co_/thai/wrestling/...) n'est
+     gardé que pour une sauvegarde antérieure à ce correctif, jamais proposé
+     par l'écran depuis. faithGymAsCamp() (state.js) traduit la salle dans
+     la même forme qu'un ancien camp, pour ne garder qu'une seule mécanique
+     de résolution ci-dessous. */
   faithCampChoose(campId){
-    const camp=(typeof FAITH_CAMPS!=='undefined'?FAITH_CAMPS:[]).find(c=>c.id===campId);
+    const gym=(typeof FAITH_GYMS!=='undefined'?FAITH_GYMS:[]).find(g=>g.id===campId);
+    const camp=gym?faithGymAsCamp(gym):(typeof FAITH_CAMPS!=='undefined'?FAITH_CAMPS:[]).find(c=>c.id===campId);
     if(!camp) return;
     const f=G.f;
     if((f.earnings||0)<camp.cost){ G.lastMsg=`Fonds insuffisants pour ce stage (${camp.cost}k$).`; render(); return; }
@@ -1816,6 +1839,23 @@ const CL={
   chooseFaithEvent(i){
     const ev=G.faith.currentEvent; if(!ev) return;
     const c=ev.choices[i]; if(!c) return;
+    /* ==== [CORRECTIF C12] — Plan V4 LOT 5 : "Chercher un préparateur
+       au-dessus" n'applique plus de delta d'attributs — l'effet réel est un
+       nouveau coach, choisi sur un écran dédié (scr_faith_coach_choice,
+       ui-04). Retour anticipé AVANT la résolution générique plus bas
+       (cost/d ne s'appliquent pas à ce choix) ; oathBreak reste pertinent
+       ici (rompre le serment "homegrown" en allant chercher ailleurs) donc
+       reproduit explicitement puisqu'on saute le bloc générique. */
+    if(ev.id==='evt_br_regional_coach' && i===1){
+      if(c.oathBreak && G.faith.oath && G.faith.oath.id===c.oathBreak) G.faith.oath.broken=true;
+      if(!G.faith.seenEvents) G.faith.seenEvents=[];
+      G.faith.seenEvents.push(ev.id);
+      G.faith.currentEvent=null;
+      G.faith.currentCoachChoices=null;
+      G.screen='faith_coach_choice';
+      save(); render();
+      return;
+    }
     if(c.cost && (G.f.earnings||0)<c.cost){ G.lastMsg="Fonds insuffisants ("+c.cost+"k$)."; render(); return; }
     if(c.cost) G.f.earnings-=c.cost;
     if(c.reward) G.f.earnings=(G.f.earnings||0)+c.reward;
@@ -1853,6 +1893,12 @@ const CL={
     if(ev.id==='evt_frankenstein_betrayal'){
       const monster=(G.faith.gym||[]).find(p=>p.id===ev.monsterId);
       if(monster){
+        /* ==== [CORRECTIF C13] — départ EXPLICITE et daté de la Person du
+           protégé, avant de le retirer de G.faith.gym : le repli générique
+           d'ensureSparringPrimary() (juste plus bas) ne doit jamais avoir à
+           deviner pourquoi — la vraie raison, la meilleure, est connue ici. */
+        const leaving=faithSparringPerson(monster);
+        if(leaving) personDepart(leaving,'A quitté la salle pour signer chez l’adversaire, après sa trahison.');
         monster.org=G.f.org; monster.stage='pro';
         monster.W=Math.max(0,G.f.W-2); monster.L=1;
         monster.orgWins=0;
@@ -1896,6 +1942,16 @@ const CL={
       }
     }
     /* ==== [FIN ANCRE] ==== */
+    /* ==== [CORRECTIF C12] — "Rester fidèle" ne devait plus être la branche
+       perdante par défaut (moral/cœur contre une pénalité d'IQ) : la fidélité
+       gagne un effet réel sur la relation avec le coach — une vraie Person
+       depuis LOT 2 (faithCoachPerson) — plutôt qu'un chiffre de plus sur f. */
+    if(ev.id==='evt_br_regional_coach' && i===0){
+      const coach=faithCoachPerson(G.faith);
+      coach.rel.trust=clamp(coach.rel.trust+15,0,100);
+      coach.rel.arc.push({year:G.faith.year,text:'Vous êtes resté fidèle, malgré son plafond.'});
+    }
+    /* ==== [FIN ANCRE] ==== */
     if(!G.faith.seenEvents) G.faith.seenEvents=[];
     G.faith.seenEvents.push(ev.id);
     if(!G.faith.yearLog) G.faith.yearLog=[];
@@ -1934,6 +1990,23 @@ const CL={
   faithEventContinue(){
     G.faith.currentEvent=null;
     G.faith.eventResolved=null;
+    faithAdvanceMonth();
+  },
+  /* ==== [CORRECTIF C12] — résolution de scr_faith_coach_choice() : contrat
+     avec l'ancien coach rompu (personDepart via faithHireCoach, state.js —
+     jamais un simple écrasement de F.coachId), le nouveau prend sa place
+     sous la même clé stable. Même schéma que faithCampChoose() : la
+     conséquence choisie EST l'écran qu'on vient de quitter, donc on avance
+     directement le mois plutôt que de repasser par la vue "résolue" d'un
+     événement de vie ordinaire. */
+  chooseFaithCoach(coachId){
+    const F=G.faith;
+    const old=faithCoachPerson(F);
+    const hired=faithHireCoach(coachId,`Vous avez quitté ${personName(old,{withNick:true})} pour un préparateur au-dessus.`);
+    G.lastMsg=`${personName(hired,{withNick:true})} accepte de vous entraîner désormais.`;
+    if(!F.yearLog) F.yearLog=[];
+    F.yearLog.push({title:'Nouveau coach',choice:personName(hired,{withNick:true})});
+    F.currentCoachChoices=null;
     faithAdvanceMonth();
   },
   /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — startFightSelect() (ui-02) commence

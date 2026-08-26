@@ -468,8 +468,9 @@ function scr_faith_hub(){
   /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
      stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
      rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
-     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
-  const topPartner=(G.faith.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). Repli `||gym[0]` supprimé
+     (CORRECTIF C13, cf. scr_faith_contacts plus bas — même raison). ==== */
+  const topPartner=(G.faith.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId);
   /* ==== [CORRECTIF FA-26] — « afficher son palmarès sur le hub, une
      ligne » : le combattant peut avoir quitté G.roster (retraite NPC) sans
      que f.faithNemesisId ne soit nettoyé nulle part — repli silencieux si
@@ -528,7 +529,13 @@ function scr_faith_hub(){
           <div class="muted small mt">${esc(secondPartner.styleLabel)}, ${secondPartner.age} ans. ${faithProtegeLine(secondPartner,f)}</div></div>`;
       }
       let text=entry.text;
-      if(entry.action==='camp') text=`${text} ${FAITH_CAMPS.filter(c=>(f.earnings||0)>=c.cost).length} camp(s) accessible(s) selon les fonds.`;
+      if(entry.action==='camp'){
+        const accessibles=faithEligibleGyms(f).filter(g=>{
+          const co=FAITH_COACHES.find(c=>c.id===g.coachId);
+          return (f.earnings||0)>=((co&&co.cost)||0);
+        }).length;
+        text=`${text} ${accessibles} salle(s) accessible(s) selon les fonds.`;
+      }
       return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
         <b style="font-size:16px">${esc(entry.title)}</b>
         <div class="muted small mt">${esc(text)}</div></div>`;
@@ -604,6 +611,56 @@ function scr_faith_hub(){
    engine.js), gala et négociation appliqués, mais reste une ESTIMATION :
    la bourse définitive dépend aussi du résultat du combat (prime de
    victoire, finition), jamais connue avant. ==== */
+/* ==== [ANCRE: FIGHTER_BIO_C14] — Plan V4 LOT 5 §C14 : bio.origin/bio.past/
+   bio.trait existent maintenant sur tout combattant (posés une seule fois à
+   la génération, makeFighter()/engine.js) mais ne s'affichaient nulle
+   part. Trois surfaces : une seule ligne pertinente sur l'offre (ci-dessous,
+   jamais les trois à la fois — un adversaire ne se résume pas d'un coup),
+   la fiche complète sur la nouvelle "fiche adverse" (scr_opponent_card,
+   plus bas) et au classement (scr_rankings, ui-06, désormais tapable). */
+/** Choisit LA ligne de lore pertinente pour CE combat précis, jamais les
+ * trois à la fois (règle H.1-like : un adversaire ne se résume pas d'un
+ * coup) : une némésis mérite qu'on sache ce qui le définit, un vétéran
+ * connu se lit par ce qui le pousse encore, un inconnu se découvre par
+ * d'où il vient. @param {object} o @param {object} f @returns {?{label:string,text:string}} */
+function oppRelevantLore(o,f){
+  if(!o.bio) return null;
+  if(o.id===f.faithNemesisId) return {label:'CE QUI LE DÉFINIT',text:o.bio.trait};
+  const fights=(o.W||0)+(o.L||0)+(o.D||0);
+  if(fights>=15) return {label:'CE QUI LE POUSSE',text:o.bio.past};
+  return {label:'D’OÙ IL VIENT',text:o.bio.origin};
+}
+/** La "fiche adverse" : identité, palmarès et les trois lignes de lore
+ * d'un combattant du roster (opposant), jamais celles du joueur (déjà sur
+ * scr_profile). Cible dynamique (G._oppCardId, posé par l'appelant avant
+ * CL.go) — même convention que G._profileReturn (scr_profile, ui-06) pour
+ * un écran qui n'a pas de référence fixe unique dans SCREENS. */
+function scr_opponent_card(){
+  const o=(G.roster||[]).find(x=>x.id===G._oppCardId);
+  const back=G._oppCardReturn||'faith_hub';
+  if(!o) return `<div class="scr center intro"><p class="lede">Adversaire introuvable.</p><button class="btn ghost mt" onclick="CL.go('${back}')">Retour</button></div>`;
+  const rnk=divRank(o);
+  return `<div class="scr" style="max-width:480px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Fiche adverse</span><span class="eyebrow x" onclick="CL.go('${back}')">✕</span></div>
+   <h2 class="hero-name" style="font-size:26px;margin-top:8px">${esc(o.name)} ${o.flag||''}</h2>
+   <div class="muted small mt">${esc(o.styleLabel||'')}, ${o.age} ans</div>
+   <div class="mono small mt">${recordStr(o)} · ${o.champion?'CHAMPION':`#${rnk}`}</div>
+   ${o.bio?`<div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">D’OÙ IL VIENT</div>
+     <div class="small">${esc(o.name)} ${esc(o.bio.origin)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE POUSSE</div>
+     <div class="small">${esc(o.bio.past)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE DÉFINIT</div>
+     <div class="small">${esc(o.bio.trait)}</div>
+   </div>`:''}
+   <button class="btn ghost mt" onclick="CL.go('${back}')">← Retour</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_offer(){
   const f=G.f, F=G.faith, off=F.pendingOffer;
   if(!off) return `<div class="scr center intro"><p class="lede">Aucune offre en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
@@ -667,6 +724,7 @@ function scr_faith_offer(){
        return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${esc(tier)} · ${bilan}</div>`;
      })():''}
      ${F.scoutKey?`<div class="mono small" style="margin-top:8px;color:var(--sage)">SPARRING · Vous savez qu’il est particulièrement dangereux en ${esc(oppTopAttrLabel(o))}.</div>`:''}
+     ${(()=>{ const lore=oppRelevantLore(o,f); return lore?`<div class="small muted" style="margin-top:8px">${esc(lore.label)} · ${esc(lore.text)}</div>`:''; })()}
    </div>
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
@@ -702,6 +760,7 @@ function scr_faith_offer(){
      }</div>
    </div>
    <div class="mono small" style="text-align:center;margin-top:14px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Voir la carte complète ▸</span></div>
+   <div class="mono small" style="text-align:center;margin-top:8px"><span onclick="G._oppCardId='${o.id}';G._oppCardReturn='faith_offer';CL.go('opponent_card')" style="color:var(--muted);cursor:pointer;text-decoration:underline">Voir la fiche adverse ▸</span></div>
   </div>`;
 }
 /* ==== [ANCRE: V2-22/V2-23] — "rien ne se passe entre l'annonce et la
@@ -820,14 +879,52 @@ function faithCoachPerson(F){
   if(!F.coachId || !G.people || !G.people.byId[F.coachId]) F.coachId=personEnsure('coach',{slot:'main'}).id;
   return G.people.byId[F.coachId];
 }
+/* ==== [ANCRE: V3_SPARRING_PERSON_C13] — Plan V4 LOT 5 §C13 : le partenaire
+   de sparring principal reste un objet combattant (makeFighter(), engine.js
+   — il a besoin de vrais attributs pour le Syndrome de Frankenstein), mais
+   il lui manquait ce que le coach a déjà depuis LOT 2 : une Person avec
+   bio/rel.arc[]. faithSparringPerson() en construit une qui REND l'identité
+   déjà affichée (partner.first/last/nick), jamais une nouvelle générée par
+   makeName() (Loi 1 : une seule identité par personne) — dédoublonnée par
+   id de combattant ('sparring:<id>', personKeyFor), donc rappeler cette
+   fonction pour le même partenaire renvoie toujours la même Person.
+   Depuis §C14, partner.bio (posé une seule fois à la génération par
+   makeFighter(), engine.js) EST déjà la source stable — la Person ne fait
+   que la reprendre, jamais un second tirage indépendant qui pourrait
+   diverger (repli sur PERSON_TRAITS seulement pour une sauvegarde
+   antérieure à C14, où partner.bio n'existe pas encore). */
+function faithSparringPerson(partner){
+  if(!partner) return null;
+  const reg=ensurePeopleRegistry();
+  const key='sparring:'+partner.id;
+  if(reg.byKey[key]!=null && reg.byId[reg.byKey[key]]) return reg.byId[reg.byKey[key]];
+  const id=reg.nextId++;
+  const p={id,firstName:partner.first,lastName:partner.last||'',nickname:partner.nick||null,
+    flag:partner.flag||'',born:partner.countryKey||'',role:'sparring',
+    bio:partner.bio||{origin:partner.origin||'',past:partner.motivation||'',trait:pick(PERSON_TRAITS)},
+    rel:personDefaultRel(),state:{gymId:null,active:true,leftAt:null,leftReason:null},memory:[],
+    extra:{fighterId:partner.id}};
+  reg.byId[id]=p; reg.byKey[key]=p.id;
+  return p;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_contacts(){
   const f=G.f, F=G.faith;
   const dir=FAITH_DIRECTORS[f.org]||FAITH_DIRECTORS[0];
   /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
      stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
      rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
-     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
-  const topPartner=(F.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). */
+  /* ==== [CORRECTIF C13] — le repli `||(G.faith.gym||[])[0]` est supprimé :
+     c'est exactement le chemin par lequel le bug pouvait revenir (un id
+     introuvable retombait en silence sur le premier de la liste, sans
+     jamais dire pourquoi). ensureSparringPrimary() (ui-08) est désormais le
+     SEUL endroit qui peut faire "partir" un partenaire, et il le fait
+     traçable (personDepart) — plus jamais ici. Si topPartner est null, la
+     carte ne s'affiche simplement pas (cf. plus bas), ce qui n'arrive en
+     pratique jamais : l'écurie ne descend jamais sous 2 partenaires
+     (FAITH_ECURIE_RENOUVELEE, ui-08). ==== */
+  const topPartner=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId);
   const coach=faithCoachPerson(F);
   const agentPatience=F.agentPatience!=null?F.agentPatience:3;
   /* ==== [ANCRE: V3_AGENT_CONSEQUENTIEL] — Plan V3 §5.2.2 point 3 : l'humeur de
@@ -864,7 +961,7 @@ function scr_faith_contacts(){
        '« '+coach.bio.origin+' »',coachDetail,"CL.go('faith_coach_detail')")}
      ${topPartner?card('PARTENAIRE D’ENTRAÎNEMENT',topPartner.first,topPartner.styleLabel,
        (f.morale||60)>=70?'« Bonne ambiance à la salle en ce moment. »':'« L’ambiance est tendue depuis un moment. »',
-       faithProtegeLine(topPartner,f)):''}
+       faithProtegeLine(topPartner,f),"CL.go('faith_sparring_detail')"):''}
    </div>
    <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour au hub</button>
   </div>`;
@@ -906,29 +1003,114 @@ function scr_faith_coach_detail(){
    <button class="btn ghost mt" onclick="CL.go('faith_contacts')">← Retour aux contacts</button>
   </div>`;
 }
+/* ==== [ANCRE: V3_SPARRING_DETAIL_C13] — Plan V4 LOT 5 §C13 : même traitement
+   que le coach (scr_faith_coach_detail juste au-dessus) — historique daté
+   (rel.arc[]) + 1-2 informations contextuelles — pour le partenaire de
+   sparring principal, désormais lui aussi porté par une vraie Person
+   (faithSparringPerson). Les informations propres au combattant (style,
+   âge, familiarité) restent lues sur l'objet fighter (partner), la Person
+   ne portant que l'identité/relation (Loi de séparation, cf. bio/rel). */
+function scr_faith_sparring_detail(){
+  const F=G.faith, f=G.f;
+  const partner=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId);
+  if(!partner) return `<div class="scr center intro"><p class="lede">Aucun partenaire pour l’instant.</p><button class="btn ghost mt" onclick="CL.go('faith_contacts')">Retour</button></div>`;
+  const person=faithSparringPerson(partner);
+  const trust=person.rel.trust;
+  const trustLabel=trust>=70?'Une vraie confiance, construite dans la durée.':trust>=40?'Une relation correcte, sans plus.':'La confiance n’y est plus vraiment.';
+  const arc=(person.rel.arc||[]).slice().reverse();
+  return `<div class="scr" style="max-width:480px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Partenaire d’entraînement</span><span class="eyebrow x" onclick="CL.go('faith_contacts')">✕</span></div>
+   <h2 class="hero-name" style="font-size:26px;margin-top:8px">${esc(personName(person,{withNick:true}))}</h2>
+   <div class="muted small mt">${esc(partner.styleLabel||'')}, ${partner.age} ans</div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QU’IL A DÉJÀ FAIT</div>
+     <div class="small">${esc(person.firstName)} ${esc(person.bio.origin)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE POUSSE</div>
+     <div class="small">${esc(person.bio.past)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CONFIANCE</div>
+     <div class="small">${trustLabel}</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">SYNDROME DE FRANKENSTEIN</div>
+     ${faithProtegeLine(partner,f)}
+   </div>
+   ${arc.length?`<div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">HISTORIQUE</div>
+     ${arc.map(a=>`<div class="mono small muted" style="margin-top:4px">${a.year} · ${esc(a.text)}</div>`).join('')}
+   </div>`:''}
+   <button class="btn ghost mt" onclick="CL.go('faith_contacts')">← Retour aux contacts</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function specialtyLabel(key){
   return ({frappe:'Spécialiste frappe',lutte:'Spécialiste lutte',soumission:'Spécialiste soumission',
     cardio:'Préparateur physique',dur_au_mal:'Spécialiste encaissement',mental:'Préparateur mental'})[key]||'Coach';
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: V2-10] — six camps nommés remplacent le stage unique (perk
-   'tiger' tiré au hasard). Chacun cible une famille d'attributs, coûte et
-   risque différemment, et porte un texte de retour qui lui est propre (le
-   même camp répété deux fois de suite affiche repeatText, à effet réduit —
-   "vous connaissez déjà tout ce qu'ils ont à donner"). freshCost est
-   consommé sur f.freshness (V2-11) quel que soit le résultat du stage. */
+/* ==== [ANCRE: FAITH_COACH_CHOICE_C12] — Plan V4 LOT 5 §C12 : nouvel écran,
+   déclenché quand "Chercher un préparateur au-dessus" (evt_br_regional_coach,
+   data-faith-content.js) route ici (CL.chooseFaithEvent, ui-08) au lieu
+   d'appliquer un delta d'attributs. Trois coachs parmi les 24, filtrés par
+   légitimité (faithEnsureCoachChoices, state.js — un coach de champion
+   refuse un combattant qui n'a pas le palmarès), chacun avec son palmarès
+   (bio.origin déjà écrit pour ça, cf. personMint) : c'est le "pourquoi lui
+   et pas un autre", jamais un chiffre de plus. */
+function scr_faith_coach_choice(){
+  const f=G.f, F=G.faith;
+  const coaches=faithEnsureCoachChoices(f,F);
+  const current=faithCoachPerson(F);
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Choisir un nouveau coach</span></div>
+   <p class="lede small">${esc(personName(current,{withNick:true}))} vous a mené jusqu’ici. Ce préparateur ira plus loin.</p>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+   ${coaches.length?coaches.map(c=>`<div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaithCoach('${c.id}')">
+       <b style="font-size:15px">${esc(c.firstName)} ${esc(c.lastName)}${c.nickname?` « ${esc(c.nickname)} »`:''}</b>
+       <div class="muted small mt">${specialtyLabel(c.specialty)} · ${c.cost}k$/an</div>
+       <div class="small mt">${esc(c.palmares)}</div>
+       <div class="muted small mt">${esc(c.flaw)}</div>
+     </div>`).join(''):'<p class="muted small">Aucun coach de ce niveau n’accepte votre palmarès actuel — restez avec le vôtre pour l’instant.</p>'}
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Rester avec ${esc(personName(current,{short:true}))} pour l’instant</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V2-10] — six camps ANONYMES remplaçaient à l'origine le
+   stage unique (perk 'tiger' tiré au hasard). ==== */
+/* ==== [CORRECTIF C11] — Plan V4 LOT 5 : les six camps anonymes (FAITH_CAMPS)
+   sont remplacés par les vraies salles de data-people.js (FAITH_GYMS, 10
+   salles nommées, jamais lues par aucun écran avant ce correctif). Même
+   geste qu'avant (un lieu, six semaines, un effet chiffré sur 3 attributs),
+   mais chaque carte porte maintenant un nom, une ville, une spécialité, la
+   culture de la salle en une phrase et le coach principal qui l'anime —
+   faithEnsureCampGyms() (state.js) filtre à 3 salles éligibles selon la
+   réputation (vs f.org) et le style du combattant, figées pour tout le mois
+   en cours. FAITH_CAMPS et faithCampChoose() gardent leur nom (repli
+   défensif si une sauvegarde antérieure a encore un id de l'ancien pool),
+   mais la liste par défaut ne les propose plus. */
 function scr_faith_camps(){
-  const f=G.f, visited=(G.faith&&G.faith.campsVisited)||[];
+  const f=G.f, F=G.faith, visited=F.campsVisited||[];
+  const gyms=faithEnsureCampGyms(f,F);
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="bar"><span class="eyebrow">Choisir un stage</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
-   <p class="lede small">Six semaines, un seul endroit possible cette fois-ci.</p>
+   <p class="lede small">Six semaines, une seule salle possible cette fois-ci.</p>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
-   ${FAITH_CAMPS.map(c=>{
-     const already=visited.includes(c.id);
-     const afford=(f.earnings||0)>=c.cost;
-     return `<div class="opp" style="padding:14px;${afford?'':'opacity:.55'}" onclick="${afford?`CL.faithCampChoose('${c.id}')`:''}">
-       <b style="font-size:15px">${esc(c.name)}${already?' <span class="muted small">(déjà fait)</span>':''}</b>
-       <div class="muted small mt">${c.cost}k$ · ${c.attrs.map(attrLabel).join(', ')}</div>
+   ${gyms.map(g=>{
+     const coach=FAITH_COACHES.find(c=>c.id===g.coachId)||{firstName:'',lastName:'',cost:0};
+     const already=visited.includes(g.id);
+     const cost=coach.cost||0;
+     const afford=(f.earnings||0)>=cost;
+     const flag=(typeof COUNTRIES!=='undefined'&&COUNTRIES[g.ck])?COUNTRIES[g.ck].flag:'';
+     const effect=(GYM_SPECIALTY_ATTRS[g.specialty]||[]).map(k=>`+3 ${attrLabel(k)}`).join(' · ');
+     return `<div class="opp" style="padding:14px;text-align:left;${afford?'':'opacity:.55'}" onclick="${afford?`CL.faithCampChoose('${g.id}')`:''}">
+       <b style="font-size:15px">${esc(g.name)}${already?' <span class="muted small">(déjà fait)</span>':''}</b>
+       <div class="muted small mt">${esc(g.city)} ${flag} · ${specialtyLabel(g.specialty)} · ${cost}k$</div>
+       <div class="small mt">« ${esc(g.culture)} »</div>
+       <div class="muted small mt">Coach principal : ${esc(coach.firstName)} ${esc(coach.lastName)}</div>
+       <div class="mono small mt" style="color:var(--gold)">${effect}</div>
      </div>`;
    }).join('')}
    </div>
@@ -1080,7 +1262,14 @@ function scr_faith_event(){
        Exception à documenter : le choix de coach (LOT 5, C12) affiche le
        palmarès du coach, PAS un delta d'attributs — un être humain ne se
        choisit pas au calcul (arbitrage §4 contradiction 3). Ne pas
-       "corriger" cette incohérence apparente là-bas. ==== */
+       "corriger" cette incohérence apparente là-bas.
+       Seconde exception (même arbitrage) : un choix peut porter `hideDelta:
+       true` (lu dans le rendu générique juste en dessous) pour cacher SON
+       PROPRE tagrow avant clic sans priver les autres choix du même
+       événement — ex. "Rester fidèle" (evt_br_regional_coach, LOT 5, C12) :
+       la fidélité à un coach ne se pèse pas non plus en chiffres, le
+       joueur la découvre dans la vue résolue (formatEventDelta(resolved.
+       deltas) plus bas, jamais retiré). ==== */
     return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
      <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
      <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
@@ -1124,7 +1313,7 @@ function scr_faith_event(){
        const risque=!!c.risk;
        return `<div class="glass${locked?'':' opp'}" style="padding:16px;min-height:72px;text-align:left;${risque?'border-left:3px solid var(--f-red-hi);':''}opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
          <b style="font-size:15px">${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}
-         <div class="tagrow" style="margin-top:10px">${c.d?formatEventDelta(c.d):''}${formatRiskBadge(c)}</div>
+         <div class="tagrow" style="margin-top:10px">${(c.d&&!c.hideDelta)?formatEventDelta(c.d):''}${formatRiskBadge(c)}</div>
        </div>`;
      }).join('')}
    </div></div>`;
