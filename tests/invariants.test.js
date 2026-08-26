@@ -46,11 +46,32 @@ function makeFaithCareer(win, first){
   win.CL.finalizeFaithDraft();
 }
 
+/* ==== [ANCRE: TESTS_FAITH_TURNPRO_RESET] — trouvé en instrumentant INV-06
+   après le merge de LOT 1 : la médiane mesurée restait sous la cible
+   (21 sur [16..35]) alors qu'une sonde sans plafond montrait des carrières
+   Faith retraitant à [30..39] combats réels — pile dans 25-40. Même bug que
+   celui déjà documenté et contourné côté Carrière classique (ANCRE
+   TESTS_TURNPRO_RESET, helpers/playthrough.js) : turnPro() (ui-05) remet
+   f.W/f.L/f.D ET f.history à zéro au passage amateur->pro (une seule fois
+   par carrière), en archivant l'historique amateur dans f.amaHistory
+   (ANCRE V3_HISTORIQUE_PRESERVE, Plan V4 C2). `f.W+f.L+f.D` retombe donc à
+   0 à cet instant précis — sous-comptant chaque carrière Faith simulée de
+   la taille exacte de sa phase amateur, ET cassant la condition de progrès
+   `after <= before` de la boucle ci-dessous pile à ce moment (le run
+   croyait la carrière bloquée et s'arrêtait). `f.amaHistory.length +
+   f.history.length` est monotone sur toute la carrière (jamais remis à
+   zéro par turnPro(), seulement déplacé) : c'est la mesure correcte du
+   nombre de combats réellement joués, utilisée ci-dessous pour la boucle,
+   les échantillons d'offre/némésis et la longueur finale (INV-01/03/06).
+   `wlSamples` (INV-02) continue en revanche à lire le `W+L+D` BRUT : c'est
+   précisément la remise à zéro par turnPro() qu'INV-02 doit voir et
+   tolérer (une seule fois), pas une mesure dont on veut l'éliminer. ==== */
 /** Joue une carrière Faith jusqu'à `maxFights` combats résolus ou retraite,
  * en échantillonnant à chaque écran d'offre (scr_faith_offer) l'adversaire
  * proposé — c'est le point d'observation d'INV-01. */
 function playFaithCareerSampling(win, maxFights){
-  const totalFights = () => (win.G.f.W||0)+(win.G.f.L||0)+(win.G.f.D||0);
+  const totalFights = () => (win.G.f.amaHistory||[]).length + (win.G.f.history||[]).length;
+  const rawWLD = () => (win.G.f.W||0)+(win.G.f.L||0)+(win.G.f.D||0);
   const offerSamples = [];
   const wlSamples = [];
   const nemesisSamples = [];
@@ -66,14 +87,16 @@ function playFaithCareerSampling(win, maxFights){
     }
     const before = totalFights();
     clickThrough(win, { maxSteps: 300, stopWhen: w => {
-      return ((w.G.f.W||0)+(w.G.f.L||0)+(w.G.f.D||0)) > before || w.G.f.retired || w.G.screen === 'gameover';
+      const wf = w.G.f;
+      return ((wf.amaHistory||[]).length + (wf.history||[]).length) > before || w.G.f.retired || w.G.screen === 'gameover';
     }});
     const after = totalFights();
-    wlSamples.push(after);
+    wlSamples.push(rawWLD());
     if(after <= before && !win.G.f.retired) break;
   }
   return { fights: totalFights(), retired: !!win.G.f.retired, offerSamples, wlSamples, nemesisSamples };
 }
+/* ==== [FIN ANCRE] ==== */
 
 test('INV-01/02/03/06 — sur ' + N_CAREERS + ' carrières Faith simulées', () => {
   const results = [];
