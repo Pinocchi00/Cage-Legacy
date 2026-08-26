@@ -858,13 +858,18 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
           conversion elle-même ne franchit pas de palier /20. ==== */
     const rows=p.camp.deltas.map(d=>{
       if(Array.isArray(d)){ const scaled=Math.sign(d[1])*Math.max(1,Math.round(Math.abs(d[1])/5)); return `<span class="dlt ${d[1]>=0?'up':'dn'}">${scaled>0?'+':''}${scaled} ${d[0]}</span>`; }
+      /* ==== [ANCRE: V3_PLAFOND_INVISIBLE] P17.2 : le joueur ne lit jamais
+         qu'il a atteint une limite — il n'y en a plus (V3_DIMINISHING_RETURNS,
+         engine.js) que le déclin par l'âge. La conversion elle-même reste
+         annoncée (règle 7, jamais de récompense nulle sans explication),
+         seule la mention du plafond disparaît. ==== */
       if(d.converted && d.key===null){
-        return `<span class="dlt up">${d.fromLabel} déjà au maximum — converti en +${d.money}k$</span>`;
+        return `<span class="dlt up">${d.fromLabel} converti en +${d.money}k$</span>`;
       }
       const b20=d20(d.before), a20=d20(d.after);
       if(d.converted){
         const suffix=b20===a20?' (gain minime)':'';
-        return `<span class="dlt up">${d.fromLabel} déjà au maximum — reporté sur ${d.label}${suffix}</span>`;
+        return `<span class="dlt up">${d.fromLabel} reporté sur ${d.label}${suffix}</span>`;
       }
       if(b20===a20) return `<span class="dlt ${d.delta>=0?'up':'dn'}">${d.label} <span class="muted">(gain interne minime)</span></span>`;
       return `<span class="dlt ${a20>=b20?'up':'dn'}">${d.label} : ${b20} ➔ ${a20}</span>`;
@@ -919,14 +924,12 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
       les deux cas. On annote explicitement quand un gain a bien eu lieu mais
       ne se voit pas sur l'échelle affichée. ==== */
    const noVisibleGain=before===after && f.attrs[k]>realBefore;
-   /* ==== [CORRECTIF V2-36] — avant ce correctif, un attribut déjà à son
-      plafond (f.attrs[k]===realBefore, AUCUN gain interne réel, contrairement
-      au cas noVisibleGain juste au-dessus où un petit gain réel existe mais
-      ne franchit pas de palier /20) s'affichait en "10 -> 10" nu, comme si
-      rien ne s'était passé — sans jamais dire que le plafond en était la
-      cause. Règle 7 : jamais de récompense nulle sans explication. ==== */
-   const trueZeroGain=before===after && f.attrs[k]===realBefore;
-   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:11px">(gain interne minime)</span>':''}${trueZeroGain?' <span class="muted" style="font-size:11px">(déjà au maximum)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   /* ==== [ANCRE: V3_PLAFOND_INVISIBLE] P17.2 : le joueur ne lit jamais qu'il
+      a atteint une limite. Un gain qui ne franchit aucun palier /20 reste nul
+      à l'écran ("10 -> 10" nu), il n'est plus commenté par un plafond — il
+      n'y en a plus (V3_DIMINISHING_RETURNS, engine.js) hormis le déclin par
+      l'âge, qui ne concerne pas cet affichage. ==== */
+   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:11px">(gain interne minime)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
@@ -1037,7 +1040,8 @@ function signatureMoveCard(f){
 }
 /* ==== [ANCRE: CORRECTIF_RETOUR_FICHE_PROFIL] — bug trouvé : G._profileReturn
    était nullé dès le rendu de l'écran, pas au moment de la sortie. Tout
-   render() déclenché pendant que la fiche est ouverte (ex. CL.theme())
+   render() déclenché pendant que la fiche est ouverte (ex. un bouton qui
+   appelle render() sans changer d'écran)
    écrasait donc la cible et renvoyait au hub au lieu de class_choice/
    class_choice_31 — sortie latérale sur un choix bloquant non résolu. Le
    nullage est déplacé sur les deux points de sortie réels (✕ et Retour). ==== */

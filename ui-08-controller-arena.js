@@ -483,7 +483,6 @@ function routeAfterCareerPending(){
   else G.screen='hub';
 }
 const CL={
-  theme(){ setTheme(G.theme==='light'?'dark':'light'); save(); render(); },
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
      (ui-06), cf. son ancre pour le détail. */
