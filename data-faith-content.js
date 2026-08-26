@@ -425,10 +425,18 @@ const FAITH_BRANCH_EVENTS=[
    text:'Six cents personnes, un ring monté le matin même, et la moitié du public qui connaît votre prénom.',
    choices:[{label:'Leur donner le spectacle',d:[['confidence',6],['morale',8],['form',-6]],traitTag:'showman'},
             {label:'Faire le travail proprement',d:[['focus',6],['fightIQ',4]],traitTag:'ascetic'}]},
+  /* ==== [CORRECTIF C12] — Plan V4 LOT 5 : "Rester fidèle" ne portait qu'un
+     delta mitigé (moral/cœur contre une pénalité d'IQ), la branche perdante
+     par défaut face à l'autre choix. Son effet réel est désormais sur la
+     RELATION avec le coach (rel.trust, cf. CL.chooseFaithEvent, ui-08) —
+     jamais un chiffre de plus ici. "Chercher un préparateur au-dessus" ne
+     porte plus de delta d'attributs du tout : le vrai effet est un nouveau
+     coach, choisi sur un écran dédié (scr_faith_coach_choice, ui-04) vers
+     lequel CL.chooseFaithEvent() route directement pour ce choix précis. */
   {id:'evt_br_regional_coach',req:f=>f._stable==='regional',title:'Le coach qui plafonne',
    text:'Celui qui vous entraîne depuis le début n’a jamais mené personne au-delà du niveau régional. Il le sait.',
-   choices:[{label:'Rester fidèle',d:[['morale',9],['heart',4],['fightIQ',-3]]},
-            {label:'Chercher un préparateur au-dessus',d:[['fightIQ',7],['adaptability',4],['morale',-9]],oathBreak:'homegrown'}]},
+   choices:[{label:'Rester fidèle',d:[['morale',9],['heart',4]]},
+            {label:'Chercher un préparateur au-dessus',d:[],oathBreak:'homegrown'}]},
   {id:'evt_br_elite_camera',req:f=>f._stable==='elite',title:'Les caméras dans la salle',
    text:'Le camp tourne un documentaire. Vos séances les plus dures seront diffusées, ratages compris.',
    choices:[{label:'Jouer le jeu',d:[['confidence',5],['morale',4],['focus',-5]],traitTag:'showman'},

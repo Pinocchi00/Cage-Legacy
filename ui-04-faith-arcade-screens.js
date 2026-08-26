@@ -917,6 +917,33 @@ function specialtyLabel(key){
     cardio:'Préparateur physique',dur_au_mal:'Spécialiste encaissement',mental:'Préparateur mental'})[key]||'Coach';
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_COACH_CHOICE_C12] — Plan V4 LOT 5 §C12 : nouvel écran,
+   déclenché quand "Chercher un préparateur au-dessus" (evt_br_regional_coach,
+   data-faith-content.js) route ici (CL.chooseFaithEvent, ui-08) au lieu
+   d'appliquer un delta d'attributs. Trois coachs parmi les 24, filtrés par
+   légitimité (faithEnsureCoachChoices, state.js — un coach de champion
+   refuse un combattant qui n'a pas le palmarès), chacun avec son palmarès
+   (bio.origin déjà écrit pour ça, cf. personMint) : c'est le "pourquoi lui
+   et pas un autre", jamais un chiffre de plus. */
+function scr_faith_coach_choice(){
+  const f=G.f, F=G.faith;
+  const coaches=faithEnsureCoachChoices(f,F);
+  const current=faithCoachPerson(F);
+  return `<div class="scr" style="max-width:560px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Choisir un nouveau coach</span></div>
+   <p class="lede small">${esc(personName(current,{withNick:true}))} vous a mené jusqu’ici. Ce préparateur ira plus loin.</p>
+   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+   ${coaches.length?coaches.map(c=>`<div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaithCoach('${c.id}')">
+       <b style="font-size:15px">${esc(c.firstName)} ${esc(c.lastName)}${c.nickname?` « ${esc(c.nickname)} »`:''}</b>
+       <div class="muted small mt">${specialtyLabel(c.specialty)} · ${c.cost}k$/an</div>
+       <div class="small mt">${esc(c.palmares)}</div>
+       <div class="muted small mt">${esc(c.flaw)}</div>
+     </div>`).join(''):'<p class="muted small">Aucun coach de ce niveau n’accepte votre palmarès actuel — restez avec le vôtre pour l’instant.</p>'}
+   </div>
+   <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Rester avec ${esc(personName(current,{short:true}))} pour l’instant</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-10] — six camps ANONYMES remplaçaient à l'origine le
    stage unique (perk 'tiger' tiré au hasard). ==== */
 /* ==== [CORRECTIF C11] — Plan V4 LOT 5 : les six camps anonymes (FAITH_CAMPS)

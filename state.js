@@ -863,6 +863,78 @@ function faithGymAsCamp(gym){
     repeatText:`Retour à ${gym.name} : la salle n’a plus rien de nouveau à vous apprendre — le travail rapporte moins.`
   };
 }
+/* ==== [ANCRE: FAITH_COACH_CHOICE_C12] — Plan V4 LOT 5 §C12 : les 24 coachs
+   de FAITH_COACHES n'étaient tirés qu'au hasard, une seule fois, à la
+   création (personMint('coach',...)). "Chercher un préparateur au-dessus"
+   (evt_br_regional_coach, data-faith-content.js) ouvre maintenant un vrai
+   choix parmi eux plutôt qu'un delta d'attributs — mais un coach qui a
+   mené des champions ne prend pas n'importe qui : COACH_LEGITIMACY_CHECK
+   traduit en code le champ `requirement` déjà écrit (texte libre) pour les
+   7 coachs qui en portent un ; les 17 autres n'ont aucune exigence
+   déclarée, donc toujours légitimes. Portée réduite assumée : deux
+   exigences ("2 ans de pratique du sol", "une finition cette année") n'ont
+   pas de compteur dédié dans f — approximées par la lecture la plus proche
+   déjà disponible (attributs de sol, dernières entrées de f.history),
+   plutôt que d'ajouter un champ rien que pour ce texte. */
+const COACH_LEGITIMACY_CHECK={
+  co_nakamura:f=>(f.attrs.submission||0)>=40 || (f.attrs.guardWork||0)>=40,
+  co_ferreira:f=>(f.W||0)>=8,
+  co_silva:f=>{
+    const n=(G.faith&&G.faith.fightsThisYear)||0;
+    if(n<=0) return false;
+    return (f.history||[]).slice(-n).some(h=>h.res==='win' && (h.method==='Soumission'||h.method==='KO/TKO'));
+  },
+  co_kravets:f=>(f.age||0)>=25,
+  co_johansen:f=>f.style==='wrestler'||f.style==='mma',
+  co_essien:f=>(f.attrs.discipline||0)>=60,
+  co_park:f=>(f.W||0)>=5
+};
+/** Un coach sans exigence déclarée (`requirement===null`) est toujours
+ * légitime ; les 7 qui en ont une sont vérifiés via COACH_LEGITIMACY_CHECK.
+ * @param {object} coach @param {object} f @returns {boolean} */
+function faithCoachLegitimate(coach,f){
+  const check=COACH_LEGITIMACY_CHECK[coach.id];
+  return check?check(f):true;
+}
+/** @param {object} f @returns {object[]} coachs légitimes, ordre de FAITH_COACHES */
+function faithEligibleCoaches(f){
+  return (typeof FAITH_COACHES!=='undefined'?FAITH_COACHES:[]).filter(c=>faithCoachLegitimate(c,f));
+}
+/** Tirage idempotent d'au plus 3 coachs légitimes, figé pour la durée de
+ * l'écran (jamais recalculé au fil des rendus — même raison que
+ * faithEnsureCampGyms : re-visiter l'écran ne doit jamais changer le choix
+ * proposé). @param {object} f @param {object} F @returns {object[]} */
+function faithEnsureCoachChoices(f,F){
+  if(F.currentCoachChoices){
+    const byId=F.currentCoachChoices.map(id=>FAITH_COACHES.find(c=>c.id===id)).filter(Boolean);
+    if(byId.length) return byId;
+  }
+  const elig=faithEligibleCoaches(f);
+  let picks=elig;
+  if(elig.length>3){
+    const bag=elig.slice(); picks=[];
+    while(picks.length<3 && bag.length) picks.push(bag.splice(RI(0,bag.length-1),1)[0]);
+  }
+  F.currentCoachChoices=picks.map(c=>c.id);
+  return picks;
+}
+/** Remplace le coach principal : l'ancien PART (Loi 3, personDepart — jamais
+ * un simple écrasement silencieux), le nouveau est minté sur l'id choisi de
+ * FAITH_COACHES et prend la même clé stable ('coach:main') pour que
+ * faithCoachPerson()/personEnsure() le retrouvent ensuite sans le reminer.
+ * @param {string} coachId @param {string} reason texte daté pour l'ancien coach
+ * @returns {Person} le nouveau coach */
+function faithHireCoach(coachId,reason){
+  const F=G.faith, reg=ensurePeopleRegistry();
+  const old=F.coachId?reg.byId[F.coachId]:null;
+  if(old) personDepart(old,reason);
+  const p=personMint('coach',{coachId,slot:'main'});
+  reg.byId[p.id]=p;
+  reg.byKey['coach:main']=p.id;
+  F.coachId=p.id;
+  return p;
+}
+/* ==== [FIN ANCRE] ==== */
 function validateState(){
   if(!G||typeof G!=='object') return false;
   if(!G.settings||typeof G.settings!=='object') G.settings={};
