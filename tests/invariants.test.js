@@ -14,15 +14,16 @@
    constante (ex. pour un audit ponctuel avant une release), ce que le code
    ne empêche pas.
 
-   INV-06 (longueur de carrière médiane 25-40 combats) est OBSERVÉE et
-   rapportée mais PAS assertée en échec bloquant : le run empirique fait ici
-   pendant la construction de ce fichier a confirmé le bug déjà identifié et
-   explicitement planifié pour LOT 7/P21 (carrières Faith qui atteignent
-   scr_faith_epilogue après 12-19 combats au lieu de 25-40). Rendre cette
-   assertion bloquante dès LOT 0 casserait `npm test` pour les 7 lots
-   suivants sans que rien ici ne puisse le corriger — la Loi 7 du document
+   INV-06 (longueur de carrière médiane 25-40 combats) était OBSERVÉE et
+   rapportée mais PAS assertée en échec bloquant tant que le bug d'horloge
+   double de LOT 1 (Plan V4 §2.1/C1 — carrières Faith deux fois trop
+   courtes) n'était pas corrigé : le rendre bloquant plus tôt aurait cassé
+   `npm test` sans que rien ici ne puisse le corriger — la Loi 7 du document
    ("une incohérence bloque le build") vise les incohérences DE STRUCTURE
-   introduites par un lot, pas un bug pré-existant déjà planifié ailleurs. */
+   introduites par un lot, pas un bug pré-existant déjà planifié ailleurs.
+   Plan V4 LOT 2/C3 réarme cette assertion (et celle du saut de
+   nemesisRecord, cf. plus bas) maintenant que LOT 1 (C1/C2) a livré le
+   correctif de la cause racine. */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
@@ -124,10 +125,11 @@ test('INV-01/02/03/06 — sur ' + N_CAREERS + ' carrières Faith simulées', () 
   // par combat résolu — la cause exacte (double appel de resolveFight(),
   // combat d'exhibition qui partage l'id du roster avec le némésis sans
   // compter dans f.W/L, ou autre) n'a pas pu être isolée dans le temps
-  // disponible pour ce lot. Rapporté ici en observation non bloquante
-  // plutôt qu'en échec strict — le bloquer casserait `npm test` pour les
-  // lots suivants sans corriger la cause — et signalé pour investigation
-  // dans LOT 3/P16 (dédié à la némésis), qui touche justement ce code.
+  // disponible pour ce lot. Plan V4 LOT 2/C3 réarme cette assertion en
+  // échec bloquant (elle n'était qu'observée jusqu'ici) : si elle échoue,
+  // ce n'est pas une régression de ce lot, c'est le bug non résolu
+  // ci-dessus qui redevient visible — investigation prévue LOT 3/P16
+  // (dédié à la némésis), qui touche justement ce code.
   let recordJumpAnomalies = 0;
   for(const r of results){
     let last = null;
@@ -143,13 +145,17 @@ test('INV-01/02/03/06 — sur ' + N_CAREERS + ' carrières Faith simulées', () 
       last = { total, playerFights: s.playerFights };
     }
   }
-  if(recordJumpAnomalies>0) console.log(`[INV-03, observation non bloquante — cf. LOT 3/P16] ${recordJumpAnomalies} saut(s) de nemesisRecord plus rapide que le nombre de combats joués, sur ${N_CAREERS} carrières.`);
+  assert.equal(recordJumpAnomalies, 0,
+    `INV-03 violé : ${recordJumpAnomalies} saut(s) de nemesisRecord plus rapide que le nombre de combats joués, sur ${N_CAREERS} carrières (cf. LOT 3/P16).`);
 
-  // INV-06 : observé et rapporté, non bloquant (cf. commentaire d'en-tête).
+  // INV-06 : réarmé en échec bloquant par Plan V4 LOT 2/C3, maintenant que
+  // LOT 1 (C1/C2) a corrigé la cause racine (horloge double, historique
+  // amateur détruit à la promotion pro) — cf. commentaire d'en-tête.
   const lengths = results.map(r => r.fights).sort((a,b)=>a-b);
   const median = lengths[Math.floor(lengths.length/2)];
-  console.log(`[INV-06, observation non bloquante] longueurs de carrière : [${lengths.join(', ')}], médiane ${median} (cible document : 25-40 — cf. LOT 7/P21).`);
   assert.ok(results.every(r => r.fights >= 1), 'chaque carrière simulée doit au moins produire un combat');
+  assert.ok(median >= 25 && median <= 40,
+    `INV-06 violé : longueur de carrière médiane hors cible — [${lengths.join(', ')}], médiane ${median} (cible document : 25-40).`);
 });
 
 test('INV-04 — aucun changement d\'identité d\'interlocuteur sans arc[] daté (PersonRegistry)', () => {
@@ -165,6 +171,82 @@ test('INV-04 — aucun changement d\'identité d\'interlocuteur sans arc[] daté
   assert.ok(departed.rel.arc.length >= 1, 'le départ doit laisser une trace datée dans rel.arc');
   assert.ok(departed.rel.arc[departed.rel.arc.length-1].year != null, 'l\'entrée d\'arc doit être datée');
 });
+
+/* ==== [ANCRE: INV05_NARRATIF_REQ] — Plan V4 LOT 2/C3. INV-05 était absent
+   du fichier (audit §1, ligne 28) : "aucun événement narratif ne se
+   déclenche sans que son req(ctx) soit satisfait" — c'est l'invariant qui
+   garde P05b, P12 et P20 (des exigences qui, elles, ne sont pas encore
+   codées). Deux volets, parce que "req(ctx)" recouvre deux mécanismes
+   réellement distincts dans ce dépôt :
+   1) le moteur générique documenté avec cette signature exacte,
+      TEXT_ENGINE/txtPick (engine.js:1711-1763) — celui que P05b/P12/P20
+      utiliseront quand ils migreront un pool de contenu (§4.2). Testé ici
+      par fuzzing direct sur un pool jetable, sans dépendre d'aucun contenu
+      de jeu existant : protège le mécanisme lui-même, pas un pool précis.
+   2) le sélecteur d'événement de vie Faith déjà en production,
+      CL.faithLifeEvent() (ui-08:1805-1809), qui filtre `!e.req||e.req(G.f)`
+      à la main plutôt que via txtPick — un bug ici (ex. pool non filtré)
+      ne serait PAS détecté par (1). Testé par une vraie carrière simulée,
+      même harnais que INV-01/02/03/06, avec CL.faithLifeEvent() intercepté
+      pour capturer l'événement retenu au moment exact de son tirage. ==== */
+test('INV-05 — un événement narratif ne se déclenche jamais sans que son req(ctx) soit satisfait (moteur générique)', () => {
+  const win = newGameWindow({ runMain: true });
+  const ev = expr => win.eval(expr);
+  ev(`registerTextPool('inv05_engine_test', [
+    {id:'always',text:'INV05_ALWAYS'},
+    {id:'lowFocus',req: ctx => (ctx.f.focus||0) < 30, text:'INV05_LOW_FOCUS'},
+    {id:'highMorale',req: ctx => (ctx.f.morale||0) >= 70, text:'INV05_HIGH_MORALE'},
+    {id:'evenYear',req: ctx => (ctx.year||0) % 2 === 0, text:'INV05_EVEN_YEAR'},
+    {id:'never',req: ctx => false, text:'INV05_NEVER'}
+  ])`);
+  const violations = ev(`
+    (function(){
+      var bad = [];
+      var pool = TEXT_POOLS['inv05_engine_test'];
+      for(var k = 0; k < 200; k++){
+        var ctx = { f: { focus: Math.floor(rnd()*100), morale: Math.floor(rnd()*100) }, year: Math.floor(rnd()*10) };
+        var chosenText = txtPick('inv05_engine_test', ctx);
+        var entry = pool.find(function(e){ return e.text === chosenText; });
+        if(entry && entry.req && !entry.req(ctx)) bad.push({ id: entry.id, ctx: ctx });
+      }
+      return bad;
+    })()
+  `);
+  assert.equal(violations.length, 0,
+    `INV-05 violé (moteur txtPick) ${violations.length} fois : ${JSON.stringify(violations.slice(0,3))}`);
+});
+
+test('INV-05 — un événement de vie Faith ne se déclenche jamais avec son req(f) non satisfait (carrières simulées)', () => {
+  for(let i = 0; i < 3; i++){
+    const win = newGameWindow({ runMain: true });
+    win.eval(`
+      (function(){
+        window.__inv05Log = [];
+        var orig = CL.faithLifeEvent;
+        CL.faithLifeEvent = function(){
+          var r = orig.apply(this, arguments);
+          var chosen = G.faith && G.faith.currentEvent;
+          if(chosen && chosen.req) window.__inv05Log.push({ id: chosen.id, ok: !!chosen.req(G.f) });
+          return r;
+        };
+      })();
+    `);
+    makeFaithCareer(win, 'Sim05_' + i);
+    const totalFights = () => (win.G.f.W||0)+(win.G.f.L||0)+(win.G.f.D||0);
+    let guard = 0;
+    while(totalFights() < 20 && !win.G.f.retired && win.G.screen !== 'gameover' && guard < 600){
+      guard++;
+      const before = totalFights();
+      clickThrough(win, { maxSteps: 300, stopWhen: w => ((w.G.f.W||0)+(w.G.f.L||0)+(w.G.f.D||0)) > before || w.G.f.retired || w.G.screen === 'gameover' });
+      if(totalFights() <= before && !win.G.f.retired) break;
+    }
+    const log = win.eval('window.__inv05Log') || [];
+    const violations = Array.from(log).filter(s => !s.ok);
+    assert.equal(violations.length, 0,
+      `INV-05 violé (carrière Faith simulée ${i}) : ${JSON.stringify(violations)}`);
+  }
+});
+/* ==== [FIN ANCRE] ==== */
 
 test('INV-07 — aucune chaîne visible tirée deux fois dans une fenêtre de 8 tirages du même pool', () => {
   const win = newGameWindow({ runMain: true });
