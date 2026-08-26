@@ -429,13 +429,16 @@ const FAITH_BRANCH_EVENTS=[
      delta mitigé (moral/cœur contre une pénalité d'IQ), la branche perdante
      par défaut face à l'autre choix. Son effet réel est désormais sur la
      RELATION avec le coach (rel.trust, cf. CL.chooseFaithEvent, ui-08) —
-     jamais un chiffre de plus ici. "Chercher un préparateur au-dessus" ne
-     porte plus de delta d'attributs du tout : le vrai effet est un nouveau
-     coach, choisi sur un écran dédié (scr_faith_coach_choice, ui-04) vers
-     lequel CL.chooseFaithEvent() route directement pour ce choix précis. */
+     jamais un chiffre de plus ici ; `hideDelta` (scr_faith_event, ui-04)
+     cache aussi son tagrow avant clic, la fidélité ne se pesant pas plus en
+     chiffres que le choix d'un nouveau coach juste à côté. "Chercher un
+     préparateur au-dessus" ne porte plus de delta d'attributs du tout : le
+     vrai effet est un nouveau coach, choisi sur un écran dédié
+     (scr_faith_coach_choice, ui-04) vers lequel CL.chooseFaithEvent() route
+     directement pour ce choix précis. */
   {id:'evt_br_regional_coach',req:f=>f._stable==='regional',title:'Le coach qui plafonne',
    text:'Celui qui vous entraîne depuis le début n’a jamais mené personne au-delà du niveau régional. Il le sait.',
-   choices:[{label:'Rester fidèle',d:[['morale',9],['heart',4]]},
+   choices:[{label:'Rester fidèle',d:[['morale',9],['heart',4]],hideDelta:true},
             {label:'Chercher un préparateur au-dessus',d:[],oathBreak:'homegrown'}]},
   {id:'evt_br_elite_camera',req:f=>f._stable==='elite',title:'Les caméras dans la salle',
    text:'Le camp tourne un documentaire. Vos séances les plus dures seront diffusées, ratages compris.',

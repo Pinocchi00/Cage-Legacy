@@ -1128,7 +1128,14 @@ function scr_faith_event(){
        Exception à documenter : le choix de coach (LOT 5, C12) affiche le
        palmarès du coach, PAS un delta d'attributs — un être humain ne se
        choisit pas au calcul (arbitrage §4 contradiction 3). Ne pas
-       "corriger" cette incohérence apparente là-bas. ==== */
+       "corriger" cette incohérence apparente là-bas.
+       Seconde exception (même arbitrage) : un choix peut porter `hideDelta:
+       true` (lu dans le rendu générique juste en dessous) pour cacher SON
+       PROPRE tagrow avant clic sans priver les autres choix du même
+       événement — ex. "Rester fidèle" (evt_br_regional_coach, LOT 5, C12) :
+       la fidélité à un coach ne se pèse pas non plus en chiffres, le
+       joueur la découvre dans la vue résolue (formatEventDelta(resolved.
+       deltas) plus bas, jamais retiré). ==== */
     return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
      <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
      <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
@@ -1172,7 +1179,7 @@ function scr_faith_event(){
        const risque=!!c.risk;
        return `<div class="glass${locked?'':' opp'}" style="padding:16px;min-height:72px;text-align:left;${risque?'border-left:3px solid var(--f-red-hi);':''}opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
          <b style="font-size:15px">${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}
-         <div class="tagrow" style="margin-top:10px">${c.d?formatEventDelta(c.d):''}${formatRiskBadge(c)}</div>
+         <div class="tagrow" style="margin-top:10px">${(c.d&&!c.hideDelta)?formatEventDelta(c.d):''}${formatRiskBadge(c)}</div>
        </div>`;
      }).join('')}
    </div></div>`;
