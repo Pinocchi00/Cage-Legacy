@@ -18,7 +18,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,faith_coach_choice:scr_faith_coach_choice,faith_sparring_detail:scr_faith_sparring_detail,
-  faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,
+  faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,faith_archives:scr_faith_archives,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
 
@@ -503,6 +503,14 @@ const CL={
      (ui-06), cf. son ancre pour le détail. */
   setRankingsTab(tab){ G._rankingsTab=tab; render(); },
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V4_C15_FAITH_ARCHIVES] — scr_faith_archives() (ui-04).
+     viewFaithArchives() mémorise l'écran d'origine (même schéma que
+     viewFightCard() juste en dessous) pour que "← Retour"/"✕" revienne au
+     bon endroit ; oppId, s'il est passé, pré-filtre sur cet adversaire —
+     depuis une fiche adverse ou la fiche complète, l'écran s'ouvre déjà sur
+     la trilogie plutôt que sur la liste entière. */
+  viewFaithArchives(oppId){ G._archivesReturn=G.screen; G._archivesFilterOppId=oppId||null; G.screen='faith_archives'; render(); },
+  setArchivesFilter(oppId){ G._archivesFilterOppId=oppId||null; render(); },
   /* ==== [ANCRE: V3_SCR_FIGHT_CARD] — mémorise l'écran d'origine (offre,
      négociation de titre, ou hub) pour que "← Retour" (scr_faith_card,
      ui-08) revienne au bon endroit plutôt que toujours au hub. */
@@ -1935,10 +1943,18 @@ const CL={
         G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
         if(typeof ORG_FLAVORS!=='undefined' && ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
         G.roster=makeOrgRoster(G.f);
+        /* ==== [ANCRE: V4_C16_TERRITOIRE_GALA] — Plan V4 LOT 6 C16 : au-delà
+           du bassin d'adversaires (déjà changé ci-dessus), "aller chercher
+           plus loin" pilote aussi le tirage des galas (faithGalaCity,
+           ui-04) — ne plus jouer qu'à l'étranger, jamais plus à domicile. */
+        G.faith.territoire='international';
       } else if(i===1){
         if(!G.f.faithTraits) G.f.faithTraits=[];
         if(!G.f.faithTraits.includes('Patron régional')) G.f.faithTraits.push('Patron régional');
         G.faith.regionalPatron=true;
+        // "Régner sur son territoire" : même mécanisme, en sens inverse —
+        // les galas ne se tiennent plus que dans le pays du combattant.
+        G.faith.territoire='regional';
       }
     }
     /* ==== [FIN ANCRE] ==== */

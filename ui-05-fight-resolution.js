@@ -159,6 +159,13 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const campFee=+(purseGross-purse-agentFee).toFixed(2);
   G.f.earnings=(G.f.earnings||0)+purse;
   G.fight.purseDetail={gross:purseGross,fee:campFee,agentFee,net:purse};
+  /* ==== [ANCRE: V4_C15_FAITH_ARCHIVES] — Plan V4 LOT 6 C15 : la bourse est
+     calculée APRÈS que applyResult() ait poussé l'entrée d'historique
+     (l'ordre exact du fichier n'est pas modifié, cf. IMPORTANT en tête de
+     fichier) — postée ici sur cette même entrée, la seule fois qu'elle est
+     connue, pour que scr_faith_archives() (ui-04) puisse l'afficher. */
+  { const last=G.f.history[G.f.history.length-1]; if(last) last.purse=purse; }
+  /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: CORRECTIF_MILESTONE_TDZ] — bug critique trouvé (introduit
   // pendant l'implémentation de la retraite liée au contrat) : `milestone`
   // était assigné ici (ligne "Dernière danse accomplie...") AVANT sa

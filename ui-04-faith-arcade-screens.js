@@ -221,6 +221,29 @@ function faithRegionalCeilingEligible(f){
   return beatenRatio>=0.5 || beatenIds.size>=8;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V4_C16_TERRITOIRE_GALA] — Plan V4 LOT 6 C16 : "je veux que
+   l'univers du jeu change" — le socle existait déjà (FAITH_GALA_CITIES,
+   FAITH_GALA_CITY_COUNTRY, avantage du terrain) mais aucun choix ne le
+   pilotait : les deux branches du plafond régional (evt_br_regional_
+   ceiling, data-faith-content.js) ne faisaient que des deltas d'attributs.
+   F.territoire ('regional'|'international', posé par ce choix dans
+   chooseFaithEvent(), ui-08) restreint désormais le pool de villes tirées
+   au sort : "régner sur son territoire" ne joue plus qu'à domicile (dans
+   le pays du combattant, quand une ville y correspond), "aller chercher
+   plus loin" ne joue plus qu'à l'étranger. Même seed que l'existant :
+   déterministe tant qu'année+mois+org ne changent pas. */
+function faithGalaCity(F,f){
+  const seed=(F.year||2026)*13+(F.month||0)*7+(f.org||0);
+  if(F.territoire==='regional'){
+    const home=FAITH_GALA_CITIES.filter(c=>FAITH_GALA_CITY_COUNTRY[c]===f.countryKey);
+    if(home.length) return home[seed%home.length];
+  } else if(F.territoire==='international'){
+    const away=FAITH_GALA_CITIES.filter(c=>FAITH_GALA_CITY_COUNTRY[c]!==f.countryKey);
+    if(away.length) return away[seed%away.length];
+  }
+  return FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
+}
+/* ==== [FIN ANCRE] ==== */
 /** Nom et lieu du gala — déterministe par année+mois pour ne pas changer si
  * l'écran est réaffiché sans qu'un mois ne s'écoule.
  * @param {object} F G.faith @param {object} f */
@@ -228,7 +251,7 @@ function faithGalaLabel(F,f){
   const seed=(F.year||2026)*13+(F.month||0)*7+(f.org||0);
   const prefix=FAITH_GALA_PREFIX[f.org]||FAITH_GALA_PREFIX[0];
   const num=((seed*17)%89)+1;
-  const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
+  const city=faithGalaCity(F,f);
   return `${prefix} ${num} — ${city}`;
 }
 /* ==== [ANCRE: V3_GALA_VENUE_INFO] — Plan V3 LOT 6 §P09 point 2/3 : "bandeau
@@ -242,7 +265,7 @@ function faithGalaLabel(F,f){
    @returns {{city:string,venue:string,home:boolean,attendance:number,audienceM:number}} */
 function faithGalaVenueInfo(F,f,gala){
   const seed=(F.year||2026)*13+(F.month||0)*7+(f.org||0);
-  const city=FAITH_GALA_CITIES[seed%FAITH_GALA_CITIES.length];
+  const city=faithGalaCity(F,f);
   const venue=FAITH_GALA_VENUES[city]||city;
   const home=!!(FAITH_GALA_CITY_COUNTRY[city] && f.countryKey===FAITH_GALA_CITY_COUNTRY[city]);
   const mult=(gala&&gala.mult)||0.6;
@@ -351,10 +374,11 @@ function scr_faith_draft(){
    du contrat. Le contrat, qui n'est pas un état du combattant mais une
    relation contractuelle, rejoint une ligne de contexte sous son nom
    plutôt que de continuer à faire varier le nombre de cases. ==== */
-function faithHubNumCell(lbl,val,color){
+function faithHubNumCell(lbl,val,color,sub){
   return `<div class="glass" style="text-align:center;padding:8px 0;min-height:auto">
     <b class="mono" style="font-size:14px;${color?`color:${color}`:''}">${val}</b>
-    <div class="stat-lbl" style="margin-top:2px;font-size:9px">${lbl}</div></div>`;
+    <div class="stat-lbl" style="margin-top:2px;font-size:9px">${lbl}</div>
+    ${sub?`<div class="mono" style="margin-top:2px;font-size:9px;color:var(--muted)">${sub}</div>`:''}</div>`;
 }
 function faithHubGaugeCell(lbl,val){
   return `<div class="glass" style="text-align:center;padding:8px 6px;min-height:auto">
@@ -366,10 +390,15 @@ function faithHubGaugeCell(lbl,val){
 function faithHubGrid(f){
   const fightsTot=(f.W||0)+(f.L||0)+(f.D||0);
   const rank=f.champion?'CHAMPION':(fightsTot===0?'NC':'#'+divRank(f));
+  /* ==== [ANCRE: V4_C17_P4P_RANG_MONDIAL] — cf. engine.js pour le détail du
+     calcul. Affiché comme sous-ligne de la case RANG (division) plutôt
+     qu'une 7e case : la grille 2×3 est volontairement fixe (ANCRE
+     FAITH_HUB_GRILLE juste au-dessus), jamais variable. */
+  const p4p=fightsTot>0?p4pRank(f):null;
   return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
     ${faithHubNumCell('ÂGE',f.age)}
     ${faithHubNumCell('OVR',f.overall)}
-    ${faithHubNumCell('RANG',rank,f.champion?'var(--gold)':null)}
+    ${faithHubNumCell('RANG',rank,f.champion?'var(--gold)':null,p4p?`P4P #${p4p}`:null)}
     ${faithHubNumCell('GAINS',formatArgent(f.earnings))}
     ${faithHubGaugeCell('FORME',f.form)}
     ${faithHubGaugeCell('MORAL',f.morale)}
@@ -600,6 +629,9 @@ function scr_faith_hub(){
     <!-- ==== [CORRECTIF V2-17] — l'écran Contacts, vitrine permanente des
          quatre interlocuteurs (agent/directeur/coach/partenaire). ==== -->
     <button class="btn ghost" onclick="CL.go('faith_contacts')">Contacts</button>
+    <!-- ==== [ANCRE: V4_C15_FAITH_ARCHIVES] — Plan V4 LOT 6 C15 : accessible
+         depuis le hub, cf. scr_faith_archives (ui-04). ==== -->
+    <button class="btn ghost" onclick="CL.viewFaithArchives()">Archives</button>
     <button class="btn ghost" onclick="CL.go('profile')">Voir la fiche complète</button>
   </div>`;
 }
@@ -657,6 +689,12 @@ function scr_opponent_card(){
      <div class="eyebrow mb" style="font-size:11px">CE QUI LE DÉFINIT</div>
      <div class="small">${esc(o.bio.trait)}</div>
    </div>`:''}
+   <!-- ==== [ANCRE: V4_C15_FAITH_ARCHIVES] — Plan V4 LOT 6 C15 : accessible
+        depuis toute fiche de combattant — celle-ci en est une (fiche
+        adverse). Le lien pré-filtre sur cet adversaire (CL.viewFaithArchives
+        (o.id)) pour montrer la trilogie d'un coup, mais seulement s'il y a
+        déjà un face-à-face à montrer. ==== -->
+   ${(G.faith && ((G.f.amaHistory||[]).concat(G.f.history||[])).some(h=>h.oppId===o.id))?`<div class="mono small" style="text-align:center;margin-top:8px"><span onclick="CL.viewFaithArchives('${o.id}')" style="color:var(--muted);cursor:pointer;text-decoration:underline">Voir le face-à-face dans les Archives ▸</span></div>`:''}
    <button class="btn ghost mt" onclick="CL.go('${back}')">← Retour</button>
   </div>`;
 }
@@ -1963,6 +2001,52 @@ function faithJourneyBlock(F){
   const openYear=G.faithJourneyExpandedYear;
   return `<div class="eyebrow" style="font-size:11px;margin:20px 0 8px">LE PARCOURS</div>
     <div style="margin-bottom:20px">${j.map(e=>`${faithJourneyRow(e,e.year===openYear)}${e.year===openYear?faithJourneyFightsBlock(G.f,e.year):''}`).join('')}</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V4_C15_FAITH_ARCHIVES] — Plan V4 LOT 6 C15 : "possible
+   seulement depuis C2" — l'historique complet (amateur + pro) n'est
+   disponible que depuis que turnPro() le déplace au lieu de le détruire
+   (f.amaHistory, C2) ; le rang de l'adversaire au moment du combat et la
+   saison réelle existent déjà par entrée (oppRank/season, C9). Densité
+   `mono`, aucune prose (contrairement à scr_history(), ui-07, la version
+   Carrière classique, qui affiche la citation narrative de chaque combat) :
+   une ligne = saison, adversaire + son rang à l'époque, résultat, méthode,
+   round, bourse (posée par ANCRE V4_C15_FAITH_ARCHIVES, ui-05). Filtrable
+   par adversaire (G._archivesFilterOppId, CL.setArchivesFilter) pour revoir
+   une trilogie d'un coup — pré-rempli quand on arrive depuis la fiche
+   adverse (scr_opponent_card) ou la fiche complète (scr_profile). ==== */
+function scr_faith_archives(){
+  const f=G.f;
+  const back=G._archivesReturn||'faith_hub';
+  const all=(f.amaHistory||[]).concat(f.history||[]).slice().reverse();
+  const filterId=G._archivesFilterOppId||null;
+  const rows=filterId?all.filter(h=>h.oppId===filterId):all;
+  const seen=new Set(); const opponents=[];
+  all.forEach(h=>{ if(h.oppId && !seen.has(h.oppId)){ seen.add(h.oppId); opponents.push({id:h.oppId,name:h.oppName||'—',flag:h.oppFlag||''}); } });
+  const resLetter=r=>r==='win'?'V':r==='loss'?'D':'N';
+  const resColor=r=>r==='win'?'var(--win)':r==='loss'?'var(--loss)':'var(--muted)';
+  return `<div class="scr">
+   <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:16px;padding-bottom:8px">
+     <span class="eyebrow mono">ARCHIVES</span>
+     <span class="eyebrow x" onclick="CL.go('${back}')">✕</span>
+   </div>
+   ${opponents.length?`<div class="pills" style="margin-bottom:12px;flex-wrap:wrap">
+     <span class="pill ${!filterId?'on':''}" onclick="CL.setArchivesFilter(null)">Tout</span>
+     ${opponents.map(o=>`<span class="pill ${filterId===o.id?'on':''}" onclick="CL.setArchivesFilter('${o.id}')">${o.flag||''} ${esc(o.name)}</span>`).join('')}
+   </div>`:''}
+   ${rows.length===0?`<div class="mono muted" style="padding:24px 0">Aucun combat archivé.</div>`
+   :`<div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:10px;color:var(--muted)" class="mono">
+     <div style="width:20px">R</div><div style="width:32px">SAIS.</div><div style="flex:1">ADVERSAIRE</div><div style="width:78px;text-align:right">MÉTHODE</div><div style="width:60px;text-align:right">BOURSE</div>
+   </div>
+   ${rows.map(h=>`<div class="mono" style="display:flex;align-items:center;padding:8px 0;border-bottom:1px dotted var(--line);font-size:12px">
+     <div style="width:20px;font-weight:700;color:${resColor(h.res)}">${resLetter(h.res)}</div>
+     <div style="width:32px;color:var(--muted)">S${h.season||'—'}</div>
+     <div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.oppFlag||''} ${esc(h.oppName||'Adversaire inconnu')} <span style="opacity:.6">(${h.oppRank?'#'+h.oppRank:'—'})</span></div>
+     <div style="width:78px;text-align:right;color:var(--muted)">${esc((h.method||'—').split(' ')[0])}${h.round?' R'+h.round:''}</div>
+     <div style="width:60px;text-align:right">${h.purse!=null?formatArgent(h.purse):'—'}</div>
+   </div>`).join('')}`}
+   <button class="btn ghost mt" style="border:none" onclick="CL.go('${back}')">← Retour</button>
+  </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_year_end(){
