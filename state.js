@@ -777,6 +777,92 @@ function personDepart(p,reason){
   p.state.active=false; p.state.leftAt=year; p.state.leftReason=reason;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FAITH_GYMS_ELIGIBILITE] — Plan V4 LOT 5 §C11 : les 10 salles
+   nommées de FAITH_GYMS (data-people.js) n'étaient lues par aucun écran ;
+   scr_faith_camps() (ui-04) tournait toujours sur FAITH_CAMPS, 6 stages
+   anonymes. Le stage reste le même geste (six semaines, un lieu, un
+   effet chiffré sur 3 attributs) — seule la source change : une salle
+   réelle, avec ville, spécialité et coach nommé, plutôt qu'un nom de
+   discipline. GYM_SPECIALTY_ATTRS reprend la logique déjà écrite pour
+   FAITH_CAMPS (trois attributs par famille) ; GYM_REP_TIER dérive coût
+   d'accès en fraîcheur/risque du niveau de réputation de la salle (le
+   coût en argent, lui, vient du coach principal qui l'anime — déjà
+   chiffré dans FAITH_COACHES, jamais dupliqué ici). */
+const GYM_SPECIALTY_ATTRS={
+  frappe:['jab','cross','power'],
+  lutte:['takedown','tdd','topControl'],
+  soumission:['submission','guardWork','gnp'],
+  cardio:['cardio','strength','explosiveness'],
+  dur_au_mal:['chin','durability','recovery'],
+  mental:['focus','composure','discipline']
+};
+const GYM_REP_TIER={
+  'régionale':{minOrg:0,freshCost:-15,risk:0.04},
+  'nationale':{minOrg:2,freshCost:-20,risk:0.05},
+  'internationale':{minOrg:4,freshCost:-25,risk:0.07}
+};
+/** Famille de spécialités qu'un style de combat rend légitimes chez lui —
+ * les spécialités "universelles" (cardio/mental/dur_au_mal) s'entraînent
+ * n'importe où, jamais filtrées par le style. @type {Object<string,string[]>} */
+const STYLE_TO_GYM_SPECIALTY={
+  boxer:['frappe'],kickboxer:['frappe'],muayThai:['frappe'],karate:['frappe'],
+  wrestler:['lutte'],sambo:['lutte'],bjj:['soumission'],
+  mma:['frappe','lutte','soumission']
+};
+/** Une salle est éligible si sa réputation correspond au niveau de
+ * l'organisation (f.org) et si sa spécialité correspond au style du
+ * combattant (ou est universelle). L'argent n'entre pas dans ce filtre :
+ * il reste un signal d'affordabilité affiché carte par carte (§C11),
+ * jamais une raison de faire disparaître une salle de la liste.
+ * @param {object} gym @param {object} f @returns {boolean} */
+function faithGymEligible(gym,f){
+  const tier=GYM_REP_TIER[gym.reputation]||GYM_REP_TIER['régionale'];
+  if((f.org||0)<tier.minOrg) return false;
+  if(['cardio','mental','dur_au_mal'].includes(gym.specialty)) return true;
+  const fam=STYLE_TO_GYM_SPECIALTY[f.style]||[];
+  return fam.includes(gym.specialty);
+}
+/** @param {object} f @returns {object[]} salles éligibles, ordre de FAITH_GYMS */
+function faithEligibleGyms(f){
+  return (typeof FAITH_GYMS!=='undefined'?FAITH_GYMS:[]).filter(g=>faithGymEligible(g,f));
+}
+/** Tirage idempotent d'au plus 3 salles parmi les éligibles, figé pour tout
+ * le mois d'intersaison courant (même schéma que faithEnsureIntersaisonDraw,
+ * data-faith-content.js/ui-08 : re-visiter l'écran ne doit jamais réduire
+ * le choix). @param {object} f @param {object} F @returns {object[]} */
+function faithEnsureCampGyms(f,F){
+  const elig=faithEligibleGyms(f);
+  if(F.currentCampGyms && F.currentCampGyms.month===F.month){
+    const ids=F.currentCampGyms.ids;
+    const byId=elig.filter(g=>ids.includes(g.id));
+    if(byId.length) return byId;
+  }
+  let picks=elig;
+  if(elig.length>3){
+    const bag=elig.slice(); picks=[];
+    while(picks.length<3 && bag.length) picks.push(bag.splice(RI(0,bag.length-1),1)[0]);
+  }
+  F.currentCampGyms={month:F.month,ids:picks.map(g=>g.id)};
+  return picks;
+}
+/** Traduit une salle (FAITH_GYMS) dans la même forme que jouait un ancien
+ * camp anonyme (FAITH_CAMPS) — id, coût, famille d'attributs, fraîcheur/
+ * risque, texte — pour que faithCampChoose() (ui-08) n'ait qu'une seule
+ * mécanique à résoudre. Le coût vient du coach principal de la salle
+ * (FAITH_COACHES), jamais dupliqué sur la salle elle-même.
+ * @param {object} gym @returns {?object} */
+function faithGymAsCamp(gym){
+  if(!gym) return null;
+  const coach=(typeof FAITH_COACHES!=='undefined'?FAITH_COACHES:[]).find(c=>c.id===gym.coachId);
+  const tier=GYM_REP_TIER[gym.reputation]||GYM_REP_TIER['régionale'];
+  return {
+    id:gym.id,name:gym.name,cost:(coach&&coach.cost)||0,
+    freshCost:tier.freshCost,risk:tier.risk,
+    attrs:GYM_SPECIALTY_ATTRS[gym.specialty]||[],
+    text:`${gym.culture} Vous progressez sous l’œil de ${(coach&&coach.firstName)||''} ${(coach&&coach.lastName)||''}.`,
+    repeatText:`Retour à ${gym.name} : la salle n’a plus rien de nouveau à vous apprendre — le travail rapporte moins.`
+  };
+}
 function validateState(){
   if(!G||typeof G!=='object') return false;
   if(!G.settings||typeof G.settings!=='object') G.settings={};

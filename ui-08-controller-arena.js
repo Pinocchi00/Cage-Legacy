@@ -1675,17 +1675,25 @@ const CL={
     faithAdvanceMonth();
   },
   /* ==== [ANCRE: V2-10] — le stage unique (perk 'tiger' tiré au hasard) est
-     remplacé par un choix réel entre 6 camps nommés (FAITH_CAMPS, ui-04),
-     chacun avec son coût, sa famille d'attributs, son risque et son texte
-     de retour propre — plus un menu de sélection à part entière qu'une
-     décision narrative sous tension, la règle des 3 options (H.3) ne s'y
-     applique donc pas (comme les autres écrans de type "vitrine" du jeu :
-     choix de style, de camp d'entraînement en carrière...). ==== */
+     remplacé par un choix réel entre plusieurs salles nommées (FAITH_GYMS,
+     data-people.js — cf. CORRECTIF C11, ui-04), chacune avec son coût, sa
+     famille d'attributs, son risque et son texte de retour propre — plus un
+     menu de sélection à part entière qu'une décision narrative sous
+     tension, la règle des 3 options (H.3) ne s'y applique donc pas (comme
+     les autres écrans de type "vitrine" du jeu : choix de style, de camp
+     d'entraînement en carrière...). ==== */
   faithCamp(){
     G.screen='faith_camps'; save(); render();
   },
+  /* ==== [CORRECTIF C11] — campId référence désormais un id de FAITH_GYMS
+     (gym_xxx) ; le repli sur FAITH_CAMPS (co_/thai/wrestling/...) n'est
+     gardé que pour une sauvegarde antérieure à ce correctif, jamais proposé
+     par l'écran depuis. faithGymAsCamp() (state.js) traduit la salle dans
+     la même forme qu'un ancien camp, pour ne garder qu'une seule mécanique
+     de résolution ci-dessous. */
   faithCampChoose(campId){
-    const camp=(typeof FAITH_CAMPS!=='undefined'?FAITH_CAMPS:[]).find(c=>c.id===campId);
+    const gym=(typeof FAITH_GYMS!=='undefined'?FAITH_GYMS:[]).find(g=>g.id===campId);
+    const camp=gym?faithGymAsCamp(gym):(typeof FAITH_CAMPS!=='undefined'?FAITH_CAMPS:[]).find(c=>c.id===campId);
     if(!camp) return;
     const f=G.f;
     if((f.earnings||0)<camp.cost){ G.lastMsg=`Fonds insuffisants pour ce stage (${camp.cost}k$).`; render(); return; }

@@ -528,7 +528,13 @@ function scr_faith_hub(){
           <div class="muted small mt">${esc(secondPartner.styleLabel)}, ${secondPartner.age} ans. ${faithProtegeLine(secondPartner,f)}</div></div>`;
       }
       let text=entry.text;
-      if(entry.action==='camp') text=`${text} ${FAITH_CAMPS.filter(c=>(f.earnings||0)>=c.cost).length} camp(s) accessible(s) selon les fonds.`;
+      if(entry.action==='camp'){
+        const accessibles=faithEligibleGyms(f).filter(g=>{
+          const co=FAITH_COACHES.find(c=>c.id===g.coachId);
+          return (f.earnings||0)>=((co&&co.cost)||0);
+        }).length;
+        text=`${text} ${accessibles} salle(s) accessible(s) selon les fonds.`;
+      }
       return `<div class="opp" style="padding:16px" onclick="CL.faithIntersaisonChoose('${entry.id}')">
         <b style="font-size:16px">${esc(entry.title)}</b>
         <div class="muted small mt">${esc(text)}</div></div>`;
@@ -911,24 +917,39 @@ function specialtyLabel(key){
     cardio:'Préparateur physique',dur_au_mal:'Spécialiste encaissement',mental:'Préparateur mental'})[key]||'Coach';
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: V2-10] — six camps nommés remplacent le stage unique (perk
-   'tiger' tiré au hasard). Chacun cible une famille d'attributs, coûte et
-   risque différemment, et porte un texte de retour qui lui est propre (le
-   même camp répété deux fois de suite affiche repeatText, à effet réduit —
-   "vous connaissez déjà tout ce qu'ils ont à donner"). freshCost est
-   consommé sur f.freshness (V2-11) quel que soit le résultat du stage. */
+/* ==== [ANCRE: V2-10] — six camps ANONYMES remplaçaient à l'origine le
+   stage unique (perk 'tiger' tiré au hasard). ==== */
+/* ==== [CORRECTIF C11] — Plan V4 LOT 5 : les six camps anonymes (FAITH_CAMPS)
+   sont remplacés par les vraies salles de data-people.js (FAITH_GYMS, 10
+   salles nommées, jamais lues par aucun écran avant ce correctif). Même
+   geste qu'avant (un lieu, six semaines, un effet chiffré sur 3 attributs),
+   mais chaque carte porte maintenant un nom, une ville, une spécialité, la
+   culture de la salle en une phrase et le coach principal qui l'anime —
+   faithEnsureCampGyms() (state.js) filtre à 3 salles éligibles selon la
+   réputation (vs f.org) et le style du combattant, figées pour tout le mois
+   en cours. FAITH_CAMPS et faithCampChoose() gardent leur nom (repli
+   défensif si une sauvegarde antérieure a encore un id de l'ancien pool),
+   mais la liste par défaut ne les propose plus. */
 function scr_faith_camps(){
-  const f=G.f, visited=(G.faith&&G.faith.campsVisited)||[];
+  const f=G.f, F=G.faith, visited=F.campsVisited||[];
+  const gyms=faithEnsureCampGyms(f,F);
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="bar"><span class="eyebrow">Choisir un stage</span><span class="eyebrow x" onclick="CL.go('faith_hub')">✕</span></div>
-   <p class="lede small">Six semaines, un seul endroit possible cette fois-ci.</p>
+   <p class="lede small">Six semaines, une seule salle possible cette fois-ci.</p>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
-   ${FAITH_CAMPS.map(c=>{
-     const already=visited.includes(c.id);
-     const afford=(f.earnings||0)>=c.cost;
-     return `<div class="opp" style="padding:14px;${afford?'':'opacity:.55'}" onclick="${afford?`CL.faithCampChoose('${c.id}')`:''}">
-       <b style="font-size:15px">${esc(c.name)}${already?' <span class="muted small">(déjà fait)</span>':''}</b>
-       <div class="muted small mt">${c.cost}k$ · ${c.attrs.map(attrLabel).join(', ')}</div>
+   ${gyms.map(g=>{
+     const coach=FAITH_COACHES.find(c=>c.id===g.coachId)||{firstName:'',lastName:'',cost:0};
+     const already=visited.includes(g.id);
+     const cost=coach.cost||0;
+     const afford=(f.earnings||0)>=cost;
+     const flag=(typeof COUNTRIES!=='undefined'&&COUNTRIES[g.ck])?COUNTRIES[g.ck].flag:'';
+     const effect=(GYM_SPECIALTY_ATTRS[g.specialty]||[]).map(k=>`+3 ${attrLabel(k)}`).join(' · ');
+     return `<div class="opp" style="padding:14px;text-align:left;${afford?'':'opacity:.55'}" onclick="${afford?`CL.faithCampChoose('${g.id}')`:''}">
+       <b style="font-size:15px">${esc(g.name)}${already?' <span class="muted small">(déjà fait)</span>':''}</b>
+       <div class="muted small mt">${esc(g.city)} ${flag} · ${specialtyLabel(g.specialty)} · ${cost}k$</div>
+       <div class="small mt">« ${esc(g.culture)} »</div>
+       <div class="muted small mt">Coach principal : ${esc(coach.firstName)} ${esc(coach.lastName)}</div>
+       <div class="mono small mt" style="color:var(--gold)">${effect}</div>
      </div>`;
    }).join('')}
    </div>
