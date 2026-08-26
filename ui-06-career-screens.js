@@ -1040,7 +1040,8 @@ function signatureMoveCard(f){
 }
 /* ==== [ANCRE: CORRECTIF_RETOUR_FICHE_PROFIL] — bug trouvé : G._profileReturn
    était nullé dès le rendu de l'écran, pas au moment de la sortie. Tout
-   render() déclenché pendant que la fiche est ouverte (ex. CL.theme())
+   render() déclenché pendant que la fiche est ouverte (ex. un bouton qui
+   appelle render() sans changer d'écran)
    écrasait donc la cible et renvoyait au hub au lieu de class_choice/
    class_choice_31 — sortie latérale sur un choix bloquant non résolu. Le
    nullage est déplacé sur les deux points de sortie réels (✕ et Retour). ==== */
