@@ -21,14 +21,75 @@ const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])
    combattant du Gauntlet dans le hub de carrière. Une run Gauntlet ne doit
    jamais toucher au localStorage : il ne survit pas à une fermeture, exactement
    comme un roguelite classique — la vraie carrière reste intacte pendant ce temps. ==== */
-function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
+/* ==== [ANCRE: SAVE_BACKUP_RECOVERY] — audit "sécurité des sauvegardes" : la clé
+   SAVE_KEY était écrite en une seule copie, sans filet — une écriture interrompue
+   (fermeture d'onglet pendant le JSON.stringify, quota localStorage dépassé au
+   milieu de l'écriture) ou une corruption silencieuse du navigateur perdait la
+   carrière entière, sans recours. SAVE_BACKUP_KEY conserve toujours la DERNIÈRE
+   version connue-bonne : save() y recopie l'ancien contenu de SAVE_KEY avant
+   d'écrire le nouveau (jamais l'inverse — le backup a toujours un combat de
+   retard, jamais plus), et load() bascule dessus automatiquement si SAVE_KEY est
+   illisible ou ne passe pas validateSave(). Aucune suppression : une ancienne
+   sauvegarde invalide reste en place jusqu'à la prochaine écriture réussie,
+   restaurable manuellement au besoin. ==== */
+const SAVE_BACKUP_KEY=SAVE_KEY+'_backup';
+/** Vérification STRUCTURELLE, en lecture seule, d'une sauvegarde brute (juste
+ * parsée, avant migrate()/validateState() qui eux RÉPARENT en place). Ne
+ * mute jamais son argument — sert uniquement à décider si cette copie est
+ * assez saine pour être chargée, ou s'il faut basculer sur le backup.
+ * @param {*} raw @returns {boolean} */
+function validateSave(raw){
+  if(!raw||typeof raw!=='object') return false;
+  if(raw.version!==undefined && (typeof raw.version!=='number'||isNaN(raw.version)||raw.version<1)) return false;
+  const f=raw.f;
+  if(!f||typeof f!=='object') return false;
+  if(typeof f.name!=='string'||!f.name) return false;
+  for(const k of ['W','L']){ if(f[k]!==undefined && (typeof f[k]!=='number'||isNaN(f[k])||f[k]<0)) return false; }
+  if(f.D!==undefined && (typeof f.D!=='number'||isNaN(f.D)||f.D<0)) return false;
+  if(f.age!==undefined && (typeof f.age!=='number'||isNaN(f.age)||f.age<0||f.age>100)) return false;
+  if(f.history!==undefined && !Array.isArray(f.history)) return false;
+  if(f.div!==undefined && f.div!==null && typeof divById==='function' && !divById(f.div)) return false;
+  if(raw.season!==undefined && raw.season!==null){
+    if(typeof raw.season!=='object') return false;
+    if(raw.season.year!==undefined && (typeof raw.season.year!=='number'||isNaN(raw.season.year)||raw.season.year<0)) return false;
+  }
+  return true;
+}
+function parseAndValidate(raw){
+  if(!raw) return null;
+  try{ const parsed=JSON.parse(raw); return validateSave(parsed)?parsed:null; }catch(e){ return null; }
+}
+function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return;
+  try{
+    const previous=localStorage.getItem(SAVE_KEY);
+    if(previous) localStorage.setItem(SAVE_BACKUP_KEY,previous);
+    localStorage.setItem(SAVE_KEY,JSON.stringify(G));
+  }catch(e){}
+}
 /* ==== [FIN ANCRE] ==== */
-function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object'){ G=null; return false; } G=migrate(parsed); if(!validateState()){ console.error('Sauvegarde corrompue : état irrécupérable.'); G=null; return false; } return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
+function load(){
+  try{
+    const primary=parseAndValidate(localStorage.getItem(SAVE_KEY));
+    let parsed=primary, usedBackup=false;
+    if(!parsed){
+      parsed=parseAndValidate(localStorage.getItem(SAVE_BACKUP_KEY));
+      if(parsed) usedBackup=true;
+    }
+    if(!parsed){ G=null; return false; }
+    G=migrate(parsed);
+    if(!validateState()){ console.error('Sauvegarde corrompue : état irrécupérable.'); G=null; return false; }
+    if(usedBackup){ console.warn('Sauvegarde principale illisible ou invalide : restauration automatique depuis la copie de secours.'); save(); }
+    return true;
+  }catch(e){ console.error('Sauvegarde illisible:',e); G=null; }
+  return false;
+}
 function hasSave(mode){
   try{
-    const s=localStorage.getItem(SAVE_KEY);
-    if(s){
-      const p=JSON.parse(s);
+    let s=localStorage.getItem(SAVE_KEY);
+    let p=s?JSON.parse(s):null;
+    if(!validateSave(p)) p=null;
+    if(!p){ const b=localStorage.getItem(SAVE_BACKUP_KEY); if(b){ const bp=JSON.parse(b); if(validateSave(bp)) p=bp; } }
+    if(p){
       if(mode==='faith') return !!p.faith;
       if(mode==='career') return !p.faith;
       return true;
@@ -36,9 +97,9 @@ function hasSave(mode){
   }catch(e){}
   return false;
 }
-function wipe(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+function wipe(){ try{ localStorage.removeItem(SAVE_KEY); localStorage.removeItem(SAVE_BACKUP_KEY); }catch(e){} }
 /* ==== [ANCRE: PANTHEON] — hors wipe(), survit d'une carrière à l'autre ==== */
-const HOF_KEY='cage-legacy-hof', SAVE_VERSION=2;
+const HOF_KEY='cage-legacy-hof', SAVE_VERSION=3;
 function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY))||[]; }catch(e){ return []; } }
 function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catch(e){} }
 /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
