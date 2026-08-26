@@ -862,6 +862,28 @@ function faithOppReplies(o,f,F,ctxExtra){
   return [txtPick('faith_pressconf_reply',ctx), txtPick('faith_pressconf_reply',ctx)];
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: V4_C19_PRESSCONF_POSTURES] — Plan V4 LOT 7 §C19 point 1 : les
+   trois postures de scr_faith_press_conf (respect/provocation/silence)
+   restaient trois libellés fixes, identiques à chaque conférence d'une
+   carrière qui en traverse pourtant plusieurs dizaines depuis le Lot 1.
+   Le TROIS RESTE TROIS (faithPressConfPosture(), ui-08, ne connaît que ces
+   trois branches mécaniques — respect/provocation/silence — jamais touchée
+   ici) : seul le LIBELLÉ/l'accroche affiché sur chaque bouton est tiré
+   d'un pool de 15 (FAITH_PRESSCONF_POSTURES, data-faith-content.js), un
+   par catégorie via le filtre `tier` déjà prévu par txtPick (réutilisé ici
+   pour la catégorie de posture plutôt que pour un rang). req(ctx) lit
+   f.personality et l'historique commun avec cet adversaire précis
+   (ctx.commonHistory), les deux champs demandés. */
+function faithPressConfPostureOptions(f,o){
+  if(!TEXT_POOLS['faith_pressconf_posture']) registerTextPool('faith_pressconf_posture',FAITH_PRESSCONF_POSTURES);
+  const commonHistory=(f.history||[]).filter(h=>h.oppId===o.id).length;
+  const base={personality:f.personality,commonHistory,F:f};
+  return ['respect','provocation','silence'].map(type=>{
+    const picked=txtPick('faith_pressconf_posture',Object.assign({},base,{rankTier:type}));
+    return Object.assign({type},picked&&typeof picked==='object'?picked:{label:type,hint:''});
+  });
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_press_conf(){
   const f=G.f, F=G.faith, off=F.pendingOffer;
   if(!off) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
@@ -876,7 +898,10 @@ function scr_faith_press_conf(){
      proxy. Les répliques exclusives (FAITH_TITLE_PROMO_REPLIES) ne sortent
      donc plus jamais pour un simple Main event non-titré. */
   const fk=fightKind();
-  const replies=faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:(fk==='title'||fk==='defense'),favorite:divRank(o)<divRank(f)});
+  const venueInfo=faithGalaVenueInfo(F,f,off.gala);
+  const commonHistory=(f.history||[]).filter(h=>h.oppId===o.id).length;
+  const replies=faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:(fk==='title'||fk==='defense'),favorite:divRank(o)<divRank(f),home:venueInfo.home,commonHistory});
+  const postures=faithPressConfPostureOptions(f,o);
   return `<div class="scr center intro">
    <div class="eyebrow blood">Conférence de presse</div>
    <h2 class="disp">${esc(o.name)} face à vous</h2>
@@ -885,21 +910,50 @@ function scr_faith_press_conf(){
      <p class="lede" style="margin:12px 0 0">${replies[1]}</p>
    </div>
    <div style="display:flex;flex-direction:column;gap:10px">
-     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('respect')">
-       <b style="font-size:15px">Le respect</b>
-       <div class="muted small mt">Une poignée de main. Tension basse, crédit auprès du directeur.</div>
-     </div>
-     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('provocation')">
-       <b style="font-size:15px">La provocation</b>
-       <div class="muted small mt">Un levier pour négocier — mais il n'arrivera pas dans le même état.</div>
-     </div>
-     <div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('silence')">
-       <b style="font-size:15px">Le silence</b>
-       <div class="muted small mt">Deux phrases, pas une de plus. Personne ne pourra vous citer.</div>
-     </div>
+     ${postures.map(p=>`<div class="opp" style="padding:14px;text-align:left" onclick="CL.faithPressConfPosture('${p.type}')">
+       <b style="font-size:15px">${esc(p.label)}</b>
+       <div class="muted small mt">${esc(p.hint)}</div>
+     </div>`).join('')}
    </div>
   </div>`;
 }
+/* ==== [ANCRE: V4_C19_PESEE] — Plan V4 LOT 7 §C19 point 3 : la pesée
+   n'existait qu'en coulisses (calcul silencieux du palier de coupe,
+   CUTTING_5PALIERS — ui-02/ui-08), jamais montrée au joueur en Faith,
+   contrairement à la conférence de presse qui a son écran depuis le LOT 5.
+   Le REGISTRE (calme/tendu/comique/menaçant/spectacle) est pondéré par
+   f.personality — un vilain fait monter la tension, un showman cherche le
+   spectacle, un taiseux préfère le calme — puis une mise en scène concrète
+   est tirée dans ce registre (FAITH_PESEE_SITUATIONS, data-faith-content.
+   js) via `tier`, en lisant f.personality et le trait de l'adversaire
+   (opp.bio.trait), les deux champs demandés. Calculé UNE SEULE FOIS par
+   faithOfferSign() (ui-08, ANCRE V4_C19_PESEE_GATING) au moment d'entrer
+   sur l'écran — jamais retiré à chaque rendu, même règle que
+   G.faith.currentBuildupEvent. */
+function faithPeseeRegistre(f){
+  const w=f.personality==='villain'?{calme:1,tendu:4,comique:1,menacant:4,spectacle:2}
+    :f.personality==='showman'?{calme:1,tendu:1,comique:4,menacant:1,spectacle:5}
+    :f.personality==='humble'?{calme:4,tendu:2,comique:2,menacant:1,spectacle:1}
+    :{calme:2,tendu:2,comique:2,menacant:2,spectacle:2};
+  const entries=Object.entries(w); const total=entries.reduce((s,e)=>s+e[1],0);
+  let roll=rnd()*total;
+  for(const [k,v] of entries){ roll-=v; if(roll<=0) return k; }
+  return entries[entries.length-1][0];
+}
+const FAITH_PESEE_REGISTRE_LABEL={calme:'Pesée sous contrôle',tendu:'Pesée électrique',comique:'Pesée qui tourne au sketch',menacant:'Pesée qui dérape',spectacle:'Pesée-spectacle'};
+function scr_faith_pesee(){
+  const F=G.faith, off=F.pendingOffer;
+  if(!off||!off.pesee) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
+  return `<div class="scr center intro">
+   <div class="eyebrow blood">Pesée officielle</div>
+   <h2 class="disp">${esc(FAITH_PESEE_REGISTRE_LABEL[off.pesee.registre]||'Pesée officielle')}</h2>
+   <div class="glass card" style="background:var(--panel2);text-align:left;padding:16px;margin:16px 0">
+     <p class="lede" style="margin:0">${off.pesee.line}</p>
+   </div>
+   <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithPeseeContinue()">Continuer vers la cage</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-17] — l'écran Contacts. Quatre interlocuteurs, chacun
    sa jauge de crédit QUALITATIVE (règle H.1 — jamais un chiffre), aucun
@@ -1789,8 +1843,8 @@ function faithUpdateJournalistSentiment(F,angle){
   const j=faithEnsureJournalist(F);
   if(j.lastSentimentYear===F.year) return j;
   j.lastSentimentYear=F.year;
-  if(angle==='ascension'||angle==='consecration') j.sentiment=clamp(j.sentiment+1,-3,3);
-  else if(angle==='chute'||angle==='usure') j.sentiment=clamp(j.sentiment-1,-3,3);
+  if(angle==='ascension'||angle==='consecration'||angle==='spectacle_vend'||angle==='spectacle_divertit') j.sentiment=clamp(j.sentiment+1,-3,3);
+  else if(angle==='chute'||angle==='usure'||angle==='spectacle_ennuie'||angle==='spectacle_disparait') j.sentiment=clamp(j.sentiment-1,-3,3);
   if(((F.scandals||0)-(F.startOfYearScandals||0))>0) j.sentiment=clamp(j.sentiment-1,-3,3);
   return j;
 }
@@ -1827,16 +1881,43 @@ function faithJournalistVerdict(F,f,ys){
   return `${stance} — ${esc(j.name)}, ${esc(j.media)}.${rankTxt}`;
 }
 /** Angle éditorial de l'année, du plus structurant au plus banal.
- * @param {object} ys yearStats @param {object} F G.faith @returns {string} */
-function faithPresseAngle(ys,F){
+ * @param {object} ys yearStats @param {object} F G.faith @param {object} f G.f
+ * @returns {string} */
+/* ==== [ANCRE: V4_C20_SPECTACLE_ANGLE] — Plan V4 LOT 7 §C20 : f.spectacle
+   (0-100, alimenté à chaque combat — ui-05, ANCRE V3_SPECTACLE_UPDATE)
+   n'était lu qu'UNE SEULE FOIS dans tout le jeu (la citation qualitative de
+   scr_faith_offer, ui-04, ANCRE V3_SPECTACLE_HYPE) — jamais croisé avec le
+   bilan de saison, alors même que "gagner mais être chiant" / "perdre mais
+   être divertissant" est exactement l'axe que f.spectacle a été créé pour
+   capturer (ANCRE V3_SPECTACLE_AXIS, ui-08). Les quatre familles ci-dessous
+   (gagne et vend / gagne et ennuie / perd et divertit / perd et disparaît)
+   sont insérées juste avant le repli générique 'stagnation' : les angles
+   déjà spécifiques (blanche/creux/consecration/usure/ascension/chute)
+   restent prioritaires — un titre gagné ou une blessure grave RESTENT le
+   titre de l'année, le spectacle ne fait que différencier les saisons
+   autrement mornes que 'stagnation' aurait toutes traitées à l'identique.
+   Seuils (>=65/<=35) alignés sur ceux déjà utilisés pour la lecture
+   qualitative de spectacle (ANCRE V3_SPECTACLE_HYPE utilise 70/30 sur un
+   passage plus resserré ; une marge légèrement plus large ici évite qu'une
+   saison entière retombe systématiquement en 'stagnation' faute d'y
+   arriver jamais sur le cumul de plusieurs combats). */
+function faithPresseAngle(ys,F,f){
   if(F&&F.suspended) return 'blanche';
   if((ys.wins||0)===0 && (ys.losses||0)===0) return 'creux';
   if((ys.rank||99)<=3) return 'consecration';
   if((ys.dmgHead||0)>60) return 'usure';
   if((ys.eloDelta||0)>80) return 'ascension';
   if((ys.eloDelta||0)<-60) return 'chute';
+  const spectacle=(f&&f.spectacle!=null)?f.spectacle:50;
+  const wonSeason=(ys.wins||0)>(ys.losses||0);
+  const lostSeason=(ys.losses||0)>(ys.wins||0);
+  if(wonSeason && spectacle>=65) return 'spectacle_vend';
+  if(wonSeason && spectacle<=35) return 'spectacle_ennuie';
+  if(lostSeason && spectacle>=65) return 'spectacle_divertit';
+  if(lostSeason && spectacle<=35) return 'spectacle_disparait';
   return 'stagnation';
 }
+/* ==== [FIN ANCRE] ==== */
 /* Plusieurs corps par angle : une carrière dure quinze saisons ou plus, et
    un texte qui revient à l'identique tue la fiction plus vite qu'un texte
    moyen. Le tirage est déterministe (dérivé de l'année et du bilan) pour
@@ -1844,7 +1925,7 @@ function faithPresseAngle(ys,F){
 /** La même saison ne se raconte pas pareil selon qui la vit.
  * @param {object} f @param {string} angle @returns {string} */
 function faithPresseTon(f,angle){
-  const bon=(angle==='ascension'||angle==='consecration');
+  const bon=(angle==='ascension'||angle==='consecration'||angle==='spectacle_vend'||angle==='spectacle_divertit');
   if(f.personality==='villain') return bon
     ? 'On aurait aimé détester ce résultat. Impossible : les chiffres parlent plus fort que les provocations.'
     : 'Les déclarations tonitruantes de l’intéressé n’auront pas suffi à masquer la saison.';
@@ -1899,7 +1980,7 @@ function faithYearFacts(ys,f,F){
   return facts.sort((a,b)=>b.sal-a.sal).slice(0,3);
 }
 function faithPresseArticle(ys,f,F){
-  const angle=faithPresseAngle(ys,F);
+  const angle=faithPresseAngle(ys,F,f);
   const facts=faithYearFacts(ys,f,F);
   const titres=FAITH_PRESSE_TITRES[angle];
   /* ==== [ANCRE: V2-32] — "jamais deux fois le même gabarit de titre dans

@@ -104,6 +104,14 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank=oppRankBefore;
       last.season=G.faith?(G.faith.year||1):((G.season&&G.season.year)||1);
       last.weighInPassed=(G.fight.cutResult&&typeof G.fight.cutResult.weighInPassed==='boolean')?G.fight.cutResult.weighInPassed:true;
+      /* ==== [ANCRE: V4_C18_CUT_HISTORY] — Plan V4 LOT 7 §C18 : `cutTier`/`div`
+         n'existaient sur aucune entrée d'historique — purement informatif
+         (ne change ni bourse ni combat), lu seulement par le pool de texte
+         FAITH_CUTTING_LINES (data-faith-content.js, ctx.thirdComplique/
+         ctx.divDescended, ui-06 scr_plan) pour varier l'ambiance du vestiaire
+         selon le VRAI passé du combattant plutôt qu'un gabarit fixe. */
+      last.cutTier=G.fight.cutResult?G.fight.cutResult.tier:null;
+      last.div=G.f.div;
       last.narrative=narrative.txt(G.f); } }
   // ==== [FIN ANCRE] ====
   for(const k in savedAttrs){ G.f.attrs[k]=savedAttrs[k]; }

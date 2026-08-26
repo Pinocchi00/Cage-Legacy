@@ -849,7 +849,16 @@ const FAITH_PRESSE_TITRES={
   ascension:['La marche a été franchie','On ne rigole plus','L’année qui change tout','Le saut que personne n’attendait','Un cran au-dessus','La hiérarchie a bougé'],
   chute:['La chute','Le doute s’installe','Où est passé le combattant ?','Le classement ne pardonne pas','Une année à oublier','Le contrecoup'],
   creux:['Une saison sans combat','Le silence de la cage','Absent des affiches','Une année en pointillés'],
-  stagnation:['Sur place','Ni progrès ni recul','Une année de transition','Le surplace','Rien n’a bougé','Une saison sans relief']
+  stagnation:['Sur place','Ni progrès ni recul','Une année de transition','Le surplace','Rien n’a bougé','Une saison sans relief'],
+  /* ==== [ANCRE: V4_C20_SPECTACLE_TITRES] — Plan V4 LOT 7 §C20 : voir ANCRE
+     V4_C20_SPECTACLE_ANGLE (ui-04, faithPresseAngle) pour le calcul de ces
+     quatre angles, croisant f.spectacle avec le bilan W/L de la saison —
+     jusqu'ici lu une seule fois dans tout le jeu (scr_faith_offer). 10+
+     titres par famille, comme demandé. */
+  spectacle_vend:['Le nom qui remplit les salles','On paie pour le voir gagner','La victoire qui se vend','Une saison qui fait recette','Le public en redemande','Gagner en remplissant les gradins','La star que la division attendait','Chaque combat, un événement','Le genre de vainqueur qu’on veut revoir','Rentable et invaincu cette année','Le guichet ne désemplit pas'],
+  spectacle_ennuie:['Gagner sans convaincre','Le vainqueur qu’on oublie vite','Une efficacité qui n’attire personne','Les victoires, jamais le public','Le classement monte, l’audience non','Trois victoires, zéro frisson','Gagner dans l’indifférence','Le travail bien fait, jamais applaudi','La méthode sans le spectacle','Des chiffres qui ne remplissent pas les salles','Invaincu et invisible'],
+  spectacle_divertit:['Perdre en héros','Le public l’aime encore plus après la défaite','Battu, mais jamais oublié','La défaite qui fait vibrer la salle','On revient pour lui, gagnant ou perdant','Le combattant que personne ne veut voir partir','Perdre n’a jamais aussi bien vendu','Une saison de défaites et de standing ovations','Le charisme survit au classement','Battu au tableau, vainqueur du public','La popularité qui ignore les statistiques'],
+  spectacle_disparait:['La saison qui efface un nom','Perdu, et déjà oublié','Plus personne ne se déplace pour le voir','Le silence qui suit la défaite','Une saison à disparaître des radars','Ni victoires, ni raisons de rester','Le public a déjà tourné la page','Une carrière qui s’éteint dans l’indifférence','Battu et invisible','La sortie par la petite porte','Le nom qui ne fait plus vendre un billet']
 };
 
 const FAITH_PRESSE_CORPS={
@@ -879,7 +888,23 @@ const FAITH_PRESSE_CORPS={
   stagnation:[
     'Rien de déshonorant, rien de marquant non plus. Le genre de saison qu’on oublie avant même la suivante.',
     'Une année propre, sans éclat. À ce niveau, ne pas monter revient déjà à laisser passer du monde.',
-    'Le travail est là, les résultats suivent à peine. La différence se fera ailleurs que dans la salle.']
+    'Le travail est là, les résultats suivent à peine. La différence se fera ailleurs que dans la salle.'],
+  spectacle_vend:[
+    'Les victoires s’enchaînent, et les guichets suivent. Ce genre de combinaison ne dure jamais éternellement — les promoteurs comptent en profiter.',
+    'Gagner ne suffit pas toujours à remplir une salle. Cette saison, les deux se sont tenus par la main du début à la fin.',
+    'Le classement progresse, l’audience aussi. Rares sont les saisons où les deux courbes montent ensemble.'],
+  spectacle_ennuie:[
+    'Le palmarès ne ment pas : que des victoires. Les chiffres d’audience, eux, racontent une tout autre histoire.',
+    'Gagner aux points, encore et encore, use la patience d’un public venu pour un spectacle. Le classement grimpe, les tribunes se vident.',
+    'Personne ne conteste les résultats. Personne ne se bouscule non plus pour la prochaine affiche.'],
+  spectacle_divertit:[
+    'La défaite fait mal au classement, jamais à la popularité. Ce genre de combattant se reconstruit une carrière sur l’enthousiasme du public.',
+    'Perdre en donnant tout n’a jamais autant fait vendre de billets. Les promoteurs le savent, et en profitent sans complexe.',
+    'Le bilan est mauvais sur le papier. Dans les gradins, personne n’a eu l’impression d’avoir perdu son soir.'],
+  spectacle_disparait:[
+    'Perdre sans jamais inquiéter personne finit par coûter plus cher que la défaite elle-même — le public s’en va avant le classement ne recule.',
+    'Les combats se sont enchaînés sans éclat ni résultat. Les cartes suivantes se sont composées sans même y penser.',
+    'Une saison qui n’a rien laissé — ni une victoire à retenir, ni un moment à raconter. Le pire des deux mondes.']
 };
 
 /* ==== [ANCRE: DATA_FAITH_PRESSCONF_REPLIES_V3] — Plan V3 LOT 5 §P15 :
@@ -890,66 +915,157 @@ const FAITH_PRESSE_CORPS={
    déclare `req(ctx)` (lu sur l'adversaire/le contexte réels — jamais un
    texte générique, anti-générique §1.3) et `text` comme FONCTION de ctx
    (jeton de contexte obligatoire, ANCRE TEXT_ENGINE_INTERPOLATION,
-   engine.js). Portée réduite à 28 entrées (le document en demande 80+
-   pour respecter la Loi 4 sur la fréquence réelle de la conférence — very
-   limitée par construction, réservée au Main event, cf. faithGalaPosition
-   ui-04 : quelques occurrences par carrière au mieux). Même choix de
-   réduction assumée et notée que pour FAITH_BUILDUP_EVENTS (LOT 0). */
+   engine.js). Portée à 80 entrées (Plan V4 LOT 7 §C19 point 2 — la
+   carrière ayant doublé de longueur au Lot 1, la Main event, bien que
+   limitée par construction à rang<=4/champion/rival (faithGalaPosition,
+   ui-04), revient assez souvent pour justifier le seuil de la Loi 4 :
+   voir ANCRE V4_C19_PRESSCONF_EXTENSION plus bas pour les 53 entrées
+   ajoutées à ce lot, au-delà des 27 déjà écrites au LOT 5). */
 const FAITH_PRESSCONF_REPLIES=[
   {id:'pc_agr_finish',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)>65,
-   text:ctx=>`« Je viens chercher la finition, pas les points. » ${esc(ctx.opp.name)} ne cache rien de ses intentions.`},
+   text:({opp:{name}})=>`« Je viens chercher la finition, pas les points. » ${esc(name)} ne cache rien de ses intentions.`},
   {id:'pc_agr_pression',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)>70,
-   text:ctx=>`« Je mets la pression dès la cloche, et je ne la relâche pas. » ${esc(ctx.opp.name)} ne parle que d'aller de l'avant.`},
+   text:({opp:{name}})=>`« Je mets la pression dès la cloche, et je ne la relâche pas. » ${esc(name)} ne parle que d'aller de l'avant.`},
   {id:'pc_calme_laisser_venir',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)<40,
-   text:ctx=>`« Je le laisse venir. ${esc(ctx.opp.styleLabel||'Mon style')} n'a jamais eu besoin de se presser. » ${esc(ctx.opp.name)} reste de marbre devant les questions.`},
+   text:({opp:{name,styleLabel}})=>`« Je le laisse venir, ${esc(styleLabel||'mon style')} n'a jamais eu besoin de se presser. » ${esc(name)} reste de marbre.`},
   {id:'pc_calme_patience',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.aggression||50)<35,
-   text:ctx=>`« La patience gagne plus de combats que la colère. » ${esc(ctx.opp.name)} répond posément, presque trop.`},
+   text:({opp:{name}})=>`« La patience gagne plus de combats que la colère. » ${esc(name)} répond posément, presque trop.`},
   {id:'pc_winrecord',weight:1,req:ctx=>ctx.opp.W>ctx.opp.L+3,
-   text:ctx=>`Il rappelle son bilan, ${ctx.opp.W}-${ctx.opp.L}, « et ce n'est pas fini ».`},
+   text:({opp:{W,L}})=>`Il rappelle son bilan, ${W}-${L}, « et ce n'est pas fini ».`},
   {id:'pc_winrecord_confiance',weight:1,req:ctx=>ctx.opp.W>ctx.opp.L+5,
-   text:ctx=>`« ${ctx.opp.W} victoires, ce n'est pas de la chance. » ${esc(ctx.opp.name)} n'a pas l'air de douter une seconde.`},
+   text:({opp:{name,W}})=>`« ${W} victoires, ce n'est pas de la chance. » ${esc(name)} n'a pas l'air de douter une seconde.`},
   {id:'pc_losing_evite',weight:1,req:ctx=>ctx.opp.L>=ctx.opp.W,
-   text:ctx=>`Il évite le sujet de son bilan, ${ctx.opp.W}-${ctx.opp.L}, et détourne la question vers l'avenir.`},
+   text:({opp:{W,L}})=>`Il évite le sujet de son bilan, ${W}-${L}, et détourne la question vers l'avenir.`},
   {id:'pc_losing_revanche',weight:1,req:ctx=>ctx.opp.L>ctx.opp.W,
-   text:ctx=>`« Les chiffres ne racontent pas tout. » ${esc(ctx.opp.name)} parle d'un tournant, pas d'un déclin.`},
+   text:({opp:{name}})=>`« Les chiffres ne racontent pas tout. » ${esc(name)} parle d'un tournant, pas d'un déclin.`},
   {id:'pc_favori',weight:1,req:ctx=>ctx.favorite===true,
-   text:ctx=>`« Je suis ici parce que je suis le meilleur choix, pas le plus commode. » ${esc(ctx.opp.name)} rappelle son rang au classement.`},
+   text:({opp:{name}})=>`« Je suis ici parce que je suis le meilleur choix, pas le plus commode. » ${esc(name)} rappelle son rang.`},
   {id:'pc_outsider',weight:1,req:ctx=>ctx.favorite===false,
-   text:ctx=>`« Personne ne me voyait ici il y a un an. » ${esc(ctx.opp.name)} joue la carte de l'outsider, sans en avoir l'air gêné.`},
+   text:({opp:{name}})=>`« Personne ne me voyait ici il y a un an. » ${esc(name)} joue la carte de l'outsider, sans en avoir l'air gêné.`},
   {id:'pc_nemesis_1',weight:2,req:ctx=>!!ctx.isNemesis,
-   text:ctx=>`« On se connaît déjà, tous les deux. » ${esc(ctx.opp.name)} ne prend même plus la peine de faire semblant de découvrir un inconnu.`},
+   text:({opp:{name}})=>`« On se connaît déjà, tous les deux. » ${esc(name)} ne prend même plus la peine de feindre découvrir un inconnu.`},
   {id:'pc_nemesis_2',weight:2,req:ctx=>!!ctx.isNemesis,
    text:()=>`« Cette fois, on règle vraiment la question. » Le ton est différent des autres conférences — plus court, plus tendu.`},
   {id:'pc_title_1',weight:1,req:ctx=>!!ctx.isTitle,
-   text:ctx=>`« Une ceinture, ça se prend, ça ne se donne pas. » ${esc(ctx.opp.name)} pèse chaque mot devant les caméras du titre.`},
+   text:({opp:{name}})=>`« Une ceinture, ça se prend, ça ne se donne pas. » ${esc(name)} pèse chaque mot devant les caméras du titre.`},
   {id:'pc_grappler',weight:1,req:ctx=>ctx.opp.styleLabel&&/lutte|jiu|jitsu|sol/i.test(ctx.opp.styleLabel),
-   text:ctx=>`« Debout ou au sol, l'issue est la même. » ${esc(ctx.opp.name)} ne cache pas où il veut amener le combat.`},
+   text:({opp:{name}})=>`« Debout ou au sol, l'issue est la même. » ${esc(name)} ne cache pas où il veut amener le combat.`},
   {id:'pc_striker',weight:1,req:ctx=>ctx.opp.styleLabel&&/boxe|kick|muay|karate/i.test(ctx.opp.styleLabel),
-   text:ctx=>`« Je frappe plus vite que ce qu'on peut anticiper. » ${esc(ctx.opp.name)} n'a pas l'intention de traîner debout.`},
+   text:({opp:{name}})=>`« Je frappe plus vite que ce qu'on peut anticiper. » ${esc(name)} n'a pas l'intention de traîner debout.`},
   {id:'pc_veteran',weight:1,req:ctx=>(ctx.opp.age||25)>=33,
-   text:ctx=>`« L'expérience ne s'use pas comme le corps. » ${esc(ctx.opp.name)}, ${ctx.opp.age} ans, a entendu la question sur l'âge un millier de fois.`},
+   text:({opp:{name,age}})=>`« L'expérience ne s'use pas comme le corps. » ${esc(name)}, ${age} ans, a entendu la question mille fois.`},
   {id:'pc_jeune',weight:1,req:ctx=>(ctx.opp.age||25)<=22,
-   text:ctx=>`« L'âge, ça ne se voit pas dans la cage. » À ${ctx.opp.age} ans, ${esc(ctx.opp.name)} balaie la question d'un revers de main.`},
+   text:({opp:{name,age}})=>`« L'âge ne se voit pas dans la cage. » À ${age} ans, ${esc(name)} balaie la question d'un revers de main.`},
   {id:'pc_champion',weight:1,req:ctx=>!!ctx.opp.champion,
-   text:ctx=>`« Cette ceinture n'est pas un souvenir, c'est un outil de travail. » ${esc(ctx.opp.name)} parle en champion, pas en challenger.`},
+   text:({opp:{name}})=>`« Cette ceinture n'est pas un souvenir, c'est un outil de travail. » ${esc(name)} parle en champion.`},
   {id:'pc_default_1',weight:1,
-   text:ctx=>`« Le meilleur gagne le soir du combat, pas dans une salle de conférence. » ${esc(ctx.opp.name)} garde ses vraies cartes pour la cage.`},
+   text:({opp:{name}})=>`« Le meilleur gagne le soir du combat, pas en salle de conférence. » ${esc(name)} garde ses vraies cartes pour la cage.`},
   {id:'pc_default_2',weight:1,
-   text:ctx=>`« On en a assez dit. La cage tranchera. » ${esc(ctx.opp.name)} coupe court aux questions.`},
+   text:({opp:{name}})=>`« On en a assez dit. La cage tranchera. » ${esc(name)} coupe court aux questions.`},
   {id:'pc_default_3',weight:1,
-   text:ctx=>`${esc(ctx.opp.name)} sourit, sans grand-chose à ajouter — le combat parlera de lui-même, dit-il.`},
+   text:({opp:{name}})=>`${esc(name)} sourit, sans grand-chose à ajouter — le combat parlera de lui-même, dit-il.`},
   {id:'pc_default_4',weight:1,
-   text:ctx=>`« Respect, mais aucune pitié. » ${esc(ctx.opp.name)} garde le ton mesuré, sans un mot de trop.`},
+   text:({opp:{name}})=>`« Respect, mais aucune pitié. » ${esc(name)} garde le ton mesuré, sans un mot de trop.`},
   {id:'pc_streak_win',weight:1,req:ctx=>(ctx.opp.streak||0)>=3,
-   text:ctx=>`« Cette série n'est pas un accident. » ${esc(ctx.opp.name)}, ${ctx.opp.streak} victoires de suite, ne compte pas s'arrêter là.`},
+   text:({opp:{name,streak}})=>`« Cette série n'est pas un accident. » ${esc(name)}, ${streak} victoires de suite, ne compte pas s'arrêter là.`},
   {id:'pc_streak_loss',weight:1,req:ctx=>(ctx.opp.streak||0)<=-2,
-   text:ctx=>`« Une série, ça se retourne en un soir. » ${esc(ctx.opp.name)} n'esquive pas la question des défaites récentes.`},
+   text:({opp:{name}})=>`« Une série se retourne en un soir. » ${esc(name)} n'esquive pas la question des défaites récentes.`},
   {id:'pc_ko_specialist',weight:1,req:ctx=>(ctx.opp.ko||0)>=5 && (ctx.opp.ko||0)>(ctx.opp.sub||0),
-   text:ctx=>`« Je ne vais pas au tableau des juges pour gagner du temps. » ${ctx.opp.ko} KO à son actif, ${esc(ctx.opp.name)} le rappelle sans détour.`},
+   text:({opp:{name,ko}})=>`« Je ne vais pas au tableau des juges pour gagner du temps. » ${ko} KO à son actif, ${esc(name)} le rappelle sans détour.`},
   {id:'pc_sub_specialist',weight:1,req:ctx=>(ctx.opp.sub||0)>=5 && (ctx.opp.sub||0)>(ctx.opp.ko||0),
-   text:ctx=>`« Une soumission, c'est une conversation qu'on termine soi-même. » ${ctx.opp.sub} finitions par soumission parlent pour ${esc(ctx.opp.name)}.`},
+   text:({opp:{name,sub}})=>`« Une soumission, c'est une conversation qu'on termine soi-même. » ${sub} finitions parlent pour ${esc(name)}.`},
   {id:'pc_gapclasse',weight:1,req:ctx=>Math.abs((ctx.opp.overall||50)-(ctx.f.overall||50))>=15,
-   text:ctx=>`${esc(ctx.opp.name)} évite soigneusement de commenter l'écart de niveau que tout le monde chuchote en coulisses.`},
+   text:({opp:{name}})=>`${esc(name)} évite soigneusement de commenter l'écart de niveau que tout le monde chuchote en coulisses.`},
+  /* ==== [ANCRE: V4_C19_PRESSCONF_EXTENSION] — Plan V4 LOT 7 §C19 point 2 :
+     28 entrées mesurées trop courtes pour la fréquence réelle de la
+     conférence sur une carrière doublée par le Lot 1 (Main event, rang<=4/
+     champion/rival — cf. faithGalaPosition, ui-04). 53 entrées ajoutées,
+     chacune sur un axe non couvert ci-dessus : blessure en cours, trait de
+     lore (bio.trait, déjà posé à la création — engine.js FIGHTER_BIO_C14),
+     nationalité, palmarès rond, statut de champion à sa première/énième
+     défense, gabarit hors-norme, terrain (ctx.home, ajouté à l'appel dans
+     scr_faith_press_conf), attributs bruts (cardio/menton/QI/puissance/
+     lutte/soumission), rivalité déjà rejouée plusieurs fois
+     (ctx.commonHistory, également ajouté à l'appel), match serré, nul(s)
+     au palmarès, styles debout distincts (muay-thaï/karaté), et davantage
+     de répliques neutres pour ne pas surcharger pc_default_1..4. */
+  {id:'pc_injury',weight:1,req:ctx=>!!ctx.opp.injury,
+   text:({opp:{name}})=>`${esc(name)} balaie la question de sa blessure d'un revers de main — « je suis là, c'est tout ce qui compte. »`},
+  {id:'pc_injury_2',weight:1,req:ctx=>!!ctx.opp.injury,
+   text:({opp:{name}})=>`« Les médecins ont donné leur feu vert, pas les paris. » ${esc(name)} sait ce qu'on chuchote sur sa forme.`},
+  {id:'pc_injury_3',weight:1,req:ctx=>!!ctx.opp.injury,
+   text:({opp:{name}})=>`On l'interroge sur sa convalescence. ${esc(name)} répond en une phrase et change immédiatement de sujet.`},
+  {id:'pc_trait_1',weight:1,req:ctx=>!!(ctx.opp.bio&&ctx.opp.bio.trait),
+   text:({opp:{name,bio:{trait}}})=>`Quelqu'un rappelle une habitude connue de ${esc(name)} : ${esc(trait)} Ce soir ne fera pas exception.`},
+  {id:'pc_trait_2',weight:1,req:ctx=>!!(ctx.opp.bio&&ctx.opp.bio.trait),
+   text:({opp:{bio:{trait}}})=>`${esc(trait)} Un détail que les habitués de la salle connaissent bien, que vous découvrez ce soir.`},
+  {id:'pc_country_1',weight:1,text:({opp:{name,flag}})=>`« Je porte tout un pays sur ce podium. » ${esc(name)} ${flag} n'en fait pas mystère.`},
+  {id:'pc_country_2',weight:1,text:({opp:{name,flag}})=>`Une partie de la salle est venue exprès pour ${esc(name)} ${flag}, drapeaux compris.`},
+  {id:'pc_milestone_win',weight:1,req:ctx=>(ctx.opp.W||0)>0&&(ctx.opp.W%10)===0,
+   text:({opp:{name,W}})=>`Une ${W}e victoire serait un chiffre rond que ${esc(name)} ne cache pas vouloir décrocher ce soir.`},
+  {id:'pc_champ_first_defense',weight:1,req:ctx=>!!ctx.opp.champion&&(ctx.opp.defenses||0)===0,
+   text:({opp:{name}})=>`« Une première défense, ça se prépare différemment. » ${esc(name)} n'a jamais eu à protéger cette ceinture.`},
+  {id:'pc_champ_many_defenses',weight:1,req:ctx=>!!ctx.opp.champion&&(ctx.opp.defenses||0)>=3,
+   text:({opp:{name,defenses}})=>`${defenses} défenses au compteur. ${esc(name)} en parle comme d'une habitude, pas d'un exploit.`},
+  {id:'pc_anomaly',weight:1,req:ctx=>!!(ctx.opp.phys&&ctx.opp.phys.tags&&ctx.opp.phys.tags.length),
+   text:({opp:{name}})=>`Le gabarit de ${esc(name)} fait déjà parler avant le premier coup — il le sait, et ne s'en cache pas.`},
+  {id:'pc_home_opp',weight:1,req:ctx=>ctx.home===false,
+   text:({opp:{name}})=>`« Un peu d'hostilité ne m'a jamais dérangé. » ${esc(name)} sait qu'il évolue en terrain conquis ce soir.`},
+  {id:'pc_away_opp',weight:1,req:ctx=>ctx.home===true,
+   text:({opp:{name}})=>`${esc(name)} sourit en évoquant le public venu vous soutenir — « ça ne changera rien dans la cage. »`},
+  {id:'pc_cardio_high',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.cardio||50)>78,
+   text:({opp:{name}})=>`« Je n'ai jamais vu la lumière rouge du dernier round. » ${esc(name)} parle de rythme plus que de puissance.`},
+  {id:'pc_cardio_low',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.cardio||50)<32,
+   text:({opp:{name}})=>`On évoque son souffle en fin de combat. ${esc(name)} balaie le sujet : « ça ne dépassera pas le premier round ».`},
+  {id:'pc_chin_iron',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.chin||50)>80,
+   text:({opp:{name}})=>`« Personne ne m'a encore vu tomber. » ${esc(name)} le dit sans forfanterie, juste en constat.`},
+  {id:'pc_fightiq_high',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.fightIQ||50)>80,
+   text:({opp:{name}})=>`« Je lis un combat trois échanges à l'avance. » ${esc(name)} préfère parler de plan que de force brute.`},
+  {id:'pc_power_high',weight:1,req:ctx=>(ctx.opp.attrs&&ctx.opp.attrs.power||50)>82,
+   text:({opp:{name}})=>`« Un coup, une conversation qui s'arrête. » ${esc(name)} ne promet rien d'autre que ça.`},
+  {id:'pc_wrestler_focus',weight:1,req:ctx=>ctx.opp.style==='wrestler'||ctx.opp.style==='sambo',
+   text:({opp:{name}})=>`« Le combat se passe là où je décide de l'emmener. » ${esc(name)} ne cache pas son intention de coller au sol.`},
+  {id:'pc_bjj_focus',weight:1,req:ctx=>ctx.opp.style==='bjj',
+   text:({opp:{name}})=>`« Une seule erreur, et c'est terminé. » ${esc(name)} parle de patience, jamais de vitesse.`},
+  {id:'pc_muaythai_focus',weight:1,req:ctx=>ctx.opp.style==='muayThai',
+   text:({opp:{name}})=>`« Le corps avant la tête, toujours. » ${esc(name)} rappelle que le combat se gagne aussi dans les côtes.`},
+  {id:'pc_karate_focus',weight:1,req:ctx=>ctx.opp.style==='karate',
+   text:({opp:{name}})=>`« La distance, c'est toute la discipline. » ${esc(name)} explique le karaté sans jamais lever le ton.`},
+  {id:'pc_trilogy',weight:2,req:ctx=>(ctx.commonHistory||0)>=2,
+   text:({opp:{name}})=>`Troisième face-à-face avec ${esc(name)}. Les questions habituelles n'ont plus vraiment de sens entre vous deux.`},
+  {id:'pc_second_meeting',weight:1,req:ctx=>(ctx.commonHistory||0)===1,
+   text:({opp:{name}})=>`Un premier affrontement les a déjà opposés. ${esc(name)} sait précisément à quoi s'attendre cette fois.`},
+  {id:'pc_close_gap',weight:1,req:ctx=>Math.abs((ctx.opp.overall||50)-(ctx.f.overall||50))<=4,
+   text:({opp:{name}})=>`« Rien ne nous sépare sur le papier. » ${esc(name)} le reconnaît sans détour, presque avec plaisir.`},
+  {id:'pc_draws',weight:1,req:ctx=>(ctx.opp.D||0)>=1,
+   text:({opp:{name}})=>`On lui rappelle son ou ses matchs nuls. ${esc(name)} préfère parler de la revanche de ce soir.`},
+  {id:'pc_default_5',weight:1,text:({opp:{name}})=>`${esc(name)} regarde la salle plus que les journalistes, comme s'il s'adressait déjà au public.`},
+  {id:'pc_default_6',weight:1,text:({opp:{name}})=>`« Tout ce qu'il y a à dire se dira sous les projecteurs. » ${esc(name)} garde le reste pour lui.`},
+  {id:'pc_default_7',weight:1,text:({opp:{name}})=>`${esc(name)} répond à chaque question par une autre question, sans jamais vraiment se dévoiler.`},
+  {id:'pc_default_8',weight:1,text:({opp:{name}})=>`« Ce genre de moment ne se prépare pas en interview. » ${esc(name)} garde son énergie pour la cage.`},
+  {id:'pc_default_9',weight:1,text:({opp:{name}})=>`Un sourire, une poignée de main un peu trop appuyée : ${esc(name)} joue la carte du calme apparent.`},
+  {id:'pc_default_10',weight:1,text:({opp:{name}})=>`${esc(name)} détourne une question piège avec une blague, sans perdre son sérieux sous-jacent.`},
+  {id:'pc_default_11',weight:1,text:({opp:{name}})=>`« Je laisse les micros aux autres. » ${esc(name)} reste bref, presque expéditif.`},
+  {id:'pc_default_12',weight:1,text:({opp:{name}})=>`${esc(name)} fixe la caméra plus que le public, comme si le vrai message était ailleurs.`},
+  {id:'pc_default_13',weight:1,text:({opp:{name}})=>`« On en dira davantage après, croyez-moi. » ${esc(name)} laisse la phrase en suspens.`},
+  {id:'pc_default_14',weight:1,text:({opp:{name}})=>`${esc(name)} salue la salle avant même de répondre, comme s'il connaissait déjà l'issue.`},
+  {id:'pc_default_15',weight:1,text:({opp:{name}})=>`« Les mots ne pèsent rien face au combat. » ${esc(name)} le répète, presque par principe.`},
+  {id:'pc_default_16',weight:1,text:({opp:{name}})=>`${esc(name)} croise les bras et laisse le silence répondre à sa place, un instant de trop.`},
+  {id:'pc_default_17',weight:1,text:({opp:{name}})=>`« Vous verrez bien. » Trois mots, et ${esc(name)} cède le micro au suivant.`},
+  {id:'pc_default_18',weight:1,text:({opp:{name}})=>`${esc(name)} garde un ton égal du début à la fin, sans jamais monter en pression malgré les relances.`},
+  {id:'pc_default_19',weight:1,text:({opp:{name}})=>`« Chacun sa version, on tranchera dans la cage. » ${esc(name)} referme le sujet aussi vite qu'il l'a ouvert.`},
+  {id:'pc_default_20',weight:1,text:({opp:{name}})=>`${esc(name)} prend son temps pour répondre, comme si chaque mot était pesé à l'avance.`},
+  {id:'pc_default_21',weight:1,text:({opp:{name}})=>`« Je suis venu pour une raison précise, pas pour parler. » ${esc(name)} recentre chaque question.`},
+  {id:'pc_default_22',weight:1,text:({opp:{name}})=>`Un journaliste insiste. ${esc(name)} répond exactement la même chose, mot pour mot, la seconde fois.`},
+  {id:'pc_default_23',weight:1,text:({opp:{name}})=>`${esc(name)} regarde sa propre équipe avant chaque réponse, comme pour confirmer la ligne à tenir.`},
+  {id:'pc_default_24',weight:1,text:({opp:{name}})=>`« Il y a un micro entre nous, mais il n'y en aura plus demain. » ${esc(name)} laisse planer la menace.`},
+  {id:'pc_default_25',weight:1,text:({opp:{name}})=>`${esc(name)} enlève sa casquette pour répondre, un geste presque cérémonial avant chaque phrase.`},
+  {id:'pc_default_26',weight:1,text:({opp:{name}})=>`« Ce n'est qu'une formalité avant l'essentiel. » ${esc(name)} balaie la conférence d'un revers de main.`},
+  {id:'pc_default_27',weight:1,text:({opp:{name}})=>`${esc(name)} termine chaque phrase par un petit rire, difficile à interpréter avant le combat.`},
+  {id:'pc_default_28',weight:1,text:({opp:{name}})=>`« On juge un combattant à la sortie de la cage, jamais à l'entrée de la salle de presse. » ${esc(name)} s'y tient.`},
+  {id:'pc_default_29',weight:1,text:({opp:{name}})=>`${esc(name)} tapote la table du bout des doigts en écoutant la question, sans se presser d'y répondre.`},
+  {id:'pc_default_30',weight:1,text:({opp:{name}})=>`« Gardez vos questions pour après. » ${esc(name)} préfère parler résultats plutôt qu'intentions.`},
+  {id:'pc_default_31',weight:1,text:({opp:{name}})=>`${esc(name)} désigne la ceinture ou le classement d'un simple regard, sans avoir besoin d'un mot de plus.`},
 ];
 
 /* ==== [ANCRE: DATA_FAITH_CROWD_AMBIANCE_V3] — Plan V3 LOT 6 §P09 point 3 :
@@ -1007,16 +1123,16 @@ const FAITH_UPSET_WIN=[
    P19/LOT 6 diffère explicitement) — même choix assumé que les pools
    précédents. */
 const FAITH_TITLE_PROMO_REPLIES=[
-  {id:'tp_1',weight:1,text:ctx=>`« Une ceinture ne se prête pas, elle se prend. » ${esc(ctx.opp.name)} ne quitte pas la caméra des yeux en le disant.`},
+  {id:'tp_1',weight:1,text:({opp:{name}})=>`« Une ceinture ne se prête pas, elle se prend. » ${esc(name)} ne quitte pas la caméra des yeux en le disant.`},
   {id:'tp_2',weight:1,req:ctx=>!!ctx.opp.champion,
-   text:ctx=>`« Cette ceinture, je la porte depuis ${ctx.opp.defenses||0} défense(s). Elle ne va nulle part. » ${esc(ctx.opp.name)} pose la main dessus en le disant.`},
+   text:({opp:{name,defenses}})=>`« Je la porte depuis ${defenses||0} défense(s), et elle ne va nulle part. » ${esc(name)} pose la main dessus en le disant.`},
   {id:'tp_3',weight:1,req:ctx=>!ctx.opp.champion,
-   text:ctx=>`« Un champion, ça se juge une seule fois : le soir où on va le chercher. » ${esc(ctx.opp.name)} refuse tout autre sujet.`},
+   text:({opp:{name}})=>`« Un champion, ça se juge une seule fois : le soir où on va le chercher. » ${esc(name)} refuse tout autre sujet.`},
   {id:'tp_4',weight:1,req:ctx=>!!ctx.isNemesis,
-   text:ctx=>`« Cette histoire ne pouvait se terminer que pour un titre. » ${esc(ctx.opp.name)} le dit sans sourire.`},
+   text:({opp:{name}})=>`« Cette histoire ne pouvait se terminer que pour un titre. » ${esc(name)} le dit sans sourire.`},
   {id:'tp_5',weight:1,text:()=>`La salle de conférence est pleine ce soir — jusqu'aux journalistes qui ne suivent d'habitude que les autres catégories.`},
-  {id:'tp_6',weight:1,text:ctx=>`« Tout ce que j'ai fait jusqu'ici menait à ce podium. » ${esc(ctx.opp.name)} pèse la phrase comme si elle était préparée depuis longtemps.`},
-  {id:'tp_7',weight:1,text:ctx=>`« Après ce soir, un seul de nous deux repart avec la ceinture — et une place dans l'histoire de la maison. » ${esc(ctx.opp.name)} ne cherche plus à se montrer modeste.`},
+  {id:'tp_6',weight:1,text:({opp:{name}})=>`« Tout ce que j'ai fait jusqu'ici menait à ce podium. » ${esc(name)} pèse la phrase comme préparée depuis longtemps.`},
+  {id:'tp_7',weight:1,text:({opp:{name}})=>`« Un seul de nous deux repart avec la ceinture ce soir. » ${esc(name)} ne cherche plus à se montrer modeste.`},
   {id:'tp_8',weight:1,text:()=>`Les questions habituelles disparaissent — ce soir, la salle ne parle que du titre.`},
 ];
 /* ==== [FIN ANCRE] ==== */
@@ -1052,5 +1168,340 @@ const FAITH_TITLE_FINAL_LINES=[
    text:()=>`Face à lui, précisément, vous ne pouviez pas vous permettre le doute. Vous ne l'avez pas laissé passer.`},
   {id:'tf_defended_default',weight:1,req:ctx=>ctx.type==='defended',
    text:()=>`Défendre une ceinture, ce n'est jamais aussi bruyant que la gagner — et c'est pourtant ce qui construit une légende.`},
+];
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: DATA_FAITH_CUTTING_LINES_V4] — Plan V4 LOT 7 §C18 : les quatre
+   gabarits de cutting de scr_plan (ui-06, sans_effort/facile/normal/
+   complique) codaient chacun UNE SEULE phrase d'ambiance en dur, revue
+   identique à chaque combat d'une carrière qui en compte désormais deux
+   fois plus depuis le Lot 1. Migré vers TEXT_POOLS/txtPick (engine.js) :
+   `tier` porte le palier de coupe (réutilise le mécanisme de filtre
+   ctx.rankTier déjà prévu par le moteur pour autre chose que le rang),
+   `req(ctx)` couvre les quatre cas mesurés comme absents du contenu
+   existant — poids lourd sans plafond de catégorie (ctx.isHeavy), vétéran
+   dont la récupération ne suit plus (ctx.veteran, seuil aligné sur le tag
+   VETERAN existant, ui-03), troisième coupe compliquée d'affilée
+   (ctx.thirdComplique, lu sur les deux dernières entrées de f.history —
+   cutTier posé désormais par resolveFight(), ui-05) et changement RÉCENT
+   de catégorie vers le bas (ctx.divDescended, comparé à f.history[-1].div,
+   même enrichissement). Le HTML/les chiffres/les effets de scr_plan ne
+   bougent pas : seule la ligne "ambiance" (`div class="small muted"`)
+   change de source. 80 entrées, 15/20/25/20 sur les quatre paliers — la
+   répartition suit le volume réel observé (le tirage de weightCutInfo,
+   engine.js, centre autour de 9% donc retombe majoritairement en
+   facile/normal). */
+const FAITH_CUTTING_LINES=[
+  {id:'cw_se_01',tier:'sans_effort',weight:1,text:`Vous montez sur la balance sans même y penser vraiment — le chiffre n'a presque pas bougé depuis la semaine dernière.`},
+  {id:'cw_se_02',tier:'sans_effort',weight:1,text:`Petit-déjeuner complet la veille de la pesée. Pour une fois, personne ne compte les calories dans le vestiaire.`},
+  {id:'cw_se_03',tier:'sans_effort',weight:1,text:`Le sauna reste éteint cette semaine. Le corps n'a rien à négocier avec la balance.`},
+  {id:'cw_se_04',tier:'sans_effort',weight:1,text:`Vous buvez normalement jusqu'au bout — aucun sachet de thé, aucun bain brûlant à l'horizon.`},
+  {id:'cw_se_05',tier:'sans_effort',weight:1,text:`La limite de la catégorie n'a jamais été un adversaire cette fois. Le repas d'avant-combat ressemble à n'importe quel autre.`},
+  {id:'cw_se_06',tier:'sans_effort',weight:1,text:`Le nutritionniste de la salle regarde votre fiche et hausse les épaules : rien à ajuster.`},
+  {id:'cw_se_07',tier:'sans_effort',weight:1,text:`Huit heures de sommeil la nuit d'avant, sans réveil anxieux pour vérifier le poids sur le téléphone.`},
+  {id:'cw_se_08',tier:'sans_effort',weight:1,text:`Le seul effort de la semaine, c'est le sac de sport qu'il faut refaire pour le voyage.`},
+  {id:'cw_se_09',tier:'sans_effort',weight:1,text:`Le coach ne mentionne même pas le poids en briefing — il n'y a simplement rien à en dire.`},
+  {id:'cw_se_10',tier:'sans_effort',weight:1,text:`Vous montez sur scène la peau normale, sans les marques d'un sauna de la veille.`},
+  {id:'cw_se_11',tier:'sans_effort',weight:1,text:`Le régime des autres combattants de la carte fait sourire un peu — le vôtre s'appelle dîner normalement.`},
+  {id:'cw_se_12',tier:'sans_effort',weight:1,text:`Cette semaine, le mot "cutting" n'a même pas été prononcé une seule fois au camp.`},
+  {id:'cw_se_13',tier:'sans_effort',weight:1,text:`Un bol de pâtes la veille, comme n'importe quel soir. Le poids suivra tout seul.`},
+  {id:'cw_se_14',tier:'sans_effort',weight:2,req:ctx=>!!ctx.isHeavy,
+   text:`Chez les poids lourds, la balance n'a jamais fixé de plafond au-dessus de vous — vous mangez comme avant une longue journée de chantier.`},
+  {id:'cw_se_15',tier:'sans_effort',weight:2,req:ctx=>!!ctx.isHeavy,
+   text:`Aucune limite supérieure à respecter dans votre catégorie : le seul chiffre qui compte ce soir, c'est celui que vous infligerez à l'adversaire.`},
+  /* ==== [ANCRE: V4_C18_MESURE_FREQUENCE] — Plan V4 LOT 7 §C18 : mesure
+     réelle sur 10 carrières Faith simulées (harnais de test, clic
+     automatique) avant d'écrire ce contenu — cf. rapport livré avec ce lot.
+     ~31,5 combats/carrière, ~63 rendus de vestiaire (le double : scr_plan a
+     deux étapes, wcHtml n'est affiché qu'à l'étape 1 mais reconstruit à
+     chaque rendu). Répartition observée par palier : sans_effort ~16%,
+     facile ~32%, normal ~34%, complique ~15%, impossible (jamais affiché
+     ici, cf. CUTTING_5PALIERS) ~2,5%. Rapportée aux ~31,5 vrais combats/
+     carrière, facile et normal dépassent le plancher 20/25 donné par le
+     document au regard de la Loi 4 (>= 4x l'occurrence réelle/carrière,
+     ~10 et ~11 respectivement) : relevés à 30/35 ci-dessous plutôt que
+     laissés au plancher, sans toucher sans_effort/complique dont la mesure
+     confirme le plancher déjà suffisant. */
+  {id:'cw_fa_21',tier:'facile',weight:1,text:`Une pomme en dessert plutôt qu'une part de gâteau, sans plus de cérémonie.`},
+  {id:'cw_fa_22',tier:'facile',weight:1,text:`Le coach coche une case sur sa feuille et passe directement au sujet suivant.`},
+  {id:'cw_fa_23',tier:'facile',weight:1,text:`Un peu moins de sauce, un peu plus d'eau : l'ajustement passe presque inaperçu.`},
+  {id:'cw_fa_24',tier:'facile',weight:1,text:`Une séance de sauna courte suffit à finir le travail, sans drame ni chronomètre.`},
+  {id:'cw_fa_25',tier:'facile',weight:1,text:`Le kiné note juste une légère baisse de poids sur la fiche, rien d'alarmant.`},
+  {id:'cw_fa_26',tier:'facile',weight:1,text:`Deux jours sans grignotage entre les repas, et le compte y est déjà.`},
+  {id:'cw_fa_27',tier:'facile',weight:1,text:`Un peu de marche en plus après le dîner, pour finir de faire le poids sans effort.`},
+  {id:'cw_fa_28',tier:'facile',weight:1,text:`Le staff considère cette semaine comme un entraînement presque ordinaire.`},
+  {id:'cw_fa_29',tier:'facile',weight:1,text:`Une soupe claire remplace le plat du soir, sans que personne ne s'en inquiète.`},
+  {id:'cw_fa_30',tier:'facile',weight:1,text:`Le sauna se termine avant même que la sueur ne devienne inconfortable.`},
+  {id:'cw_fa_01',tier:'facile',weight:1,text:`Deux jours de sauna léger et un dessert en moins : rien qui perturbe vraiment la semaine.`},
+  {id:'cw_fa_02',tier:'facile',weight:1,text:`Le corps lâche l'eau sans drame, comme à chaque camp depuis des années.`},
+  {id:'cw_fa_03',tier:'facile',weight:1,text:`Une séance de vélo en survêtement l'après-midi, puis un repas normal le soir.`},
+  {id:'cw_fa_04',tier:'facile',weight:1,text:`Le coach retire le pain du plateau trois jours avant. Une routine, pas un sacrifice.`},
+  {id:'cw_fa_05',tier:'facile',weight:1,text:`Le sel disparaît des repas pendant 48 heures — le genre de détail que personne ne remarque à l'extérieur.`},
+  {id:'cw_fa_06',tier:'facile',weight:1,text:`Un dernier footing léger en coupe-vent, juste pour évacuer les derniers grammes superflus.`},
+  {id:'cw_fa_07',tier:'facile',weight:1,text:`La balance affiche un chiffre proche, sans jamais inquiéter qui que ce soit dans le vestiaire.`},
+  {id:'cw_fa_08',tier:'facile',weight:1,text:`Deux repas plus légers suffisent. Le staff médical ne juge même pas utile de passer voir comment ça va.`},
+  {id:'cw_fa_09',tier:'facile',weight:1,text:`Le bain chaud du soir dure vingt minutes, pas plus — juste assez pour finir le travail.`},
+  {id:'cw_fa_10',tier:'facile',weight:1,text:`Un chewing-gum à la place du grignotage habituel, et la marge nécessaire est déjà couverte.`},
+  {id:'cw_fa_11',tier:'facile',weight:1,text:`Rien d'extraordinaire cette semaine : un peu moins de féculents, un peu plus d'eau chaude au réveil.`},
+  {id:'cw_fa_12',tier:'facile',weight:1,text:`Le coach nutrition parle d'un petit ajustement de routine, jamais d'une vraie coupe de poids.`},
+  {id:'cw_fa_13',tier:'facile',weight:1,text:`Vous sautez le dessert deux soirs de suite. Le reste du plan de repas ne change pas.`},
+  {id:'cw_fa_14',tier:'facile',weight:1,text:`Une marche digestive après chaque repas, en plus du programme habituel — la seule concession de la semaine.`},
+  {id:'cw_fa_15',tier:'facile',weight:1,text:`Le sauna accueille votre passage sans drame, vingt minutes montre en main, pas une de plus.`},
+  {id:'cw_fa_16',tier:'facile',weight:1,text:`Moins de pain, plus d'eau : la routine standard d'avant-combat, sans surprise ni inquiétude.`},
+  {id:'cw_fa_17',tier:'facile',weight:1,text:`Le kiné surveille la peau et les articulations, pas le chiffre sur la balance — rien à signaler de ce côté.`},
+  {id:'cw_fa_18',tier:'facile',weight:1,text:`Une petite fenêtre de restriction hydrique la veille au soir, comme des dizaines de fois avant.`},
+  {id:'cw_fa_19',tier:'facile',weight:1,text:`L'équipe plaisante sur le poids en salle de sport — signe qu'il n'y a vraiment rien à craindre.`},
+  {id:'cw_fa_20',tier:'facile',weight:1,text:`Un jus vert amer remplace le café du matin. Le sacrifice s'arrête à peu près là.`},
+  {id:'cw_no_01',tier:'normal',weight:1,text:`Le sauna, le sac poubelle sous le survêtement, la routine complète du métier depuis des années.`},
+  {id:'cw_no_02',tier:'normal',weight:1,text:`Trois jours sans glucides, un dernier bain chaud la veille : le protocole classique, sans fioriture.`},
+  {id:'cw_no_03',tier:'normal',weight:1,text:`Le coach chronomètre chaque passage au sauna — dix minutes, pause, dix minutes de plus.`},
+  {id:'cw_no_04',tier:'normal',weight:1,text:`La faim s'installe dès le deuxième jour, familière, presque prévisible à ce stade de carrière.`},
+  {id:'cw_no_05',tier:'normal',weight:1,text:`Un sachet de thé glissé sous la langue pour tromper la soif, vieux truc de vestiaire.`},
+  {id:'cw_no_06',tier:'normal',weight:1,text:`Les crampes commencent en fin d'après-midi. Rien qui sorte de l'ordinaire pour ce genre de coupe.`},
+  {id:'cw_no_07',tier:'normal',weight:1,text:`Le kiné masse les mollets qui commencent à se raidir, symptôme classique de la déshydratation contrôlée.`},
+  {id:'cw_no_08',tier:'normal',weight:1,text:`Trois kilos à perdre en cinq jours : le calcul tourne en boucle dans la tête au réveil.`},
+  {id:'cw_no_09',tier:'normal',weight:1,text:`Le sel disparaît complètement de l'assiette depuis mardi. Jeudi, même l'eau a un goût différent.`},
+  {id:'cw_no_10',tier:'normal',weight:1,text:`Un bonnet et deux sweats pour courir en pleine chaleur — la panoplie habituelle de la semaine de pesée.`},
+  {id:'cw_no_11',tier:'normal',weight:1,text:`Le poids baisse lentement, presque à la même vitesse qu'à chaque camp précédent.`},
+  {id:'cw_no_12',tier:'normal',weight:1,text:`La tête tourne un peu en se levant du sauna, sans que ça inquiète personne dans le vestiaire.`},
+  {id:'cw_no_13',tier:'normal',weight:1,text:`Le coach nutrition ajuste les derniers grammes d'eau à coups de petites gorgées chronométrées.`},
+  {id:'cw_no_14',tier:'normal',weight:1,text:`Un dernier passage au sauna la veille au soir, puis plus rien jusqu'à la pesée du lendemain.`},
+  {id:'cw_no_15',tier:'normal',weight:1,text:`Les mains tremblent un peu en signant l'autorisation médicale d'avant-pesée — la déshydratation, encore.`},
+  {id:'cw_no_16',tier:'normal',weight:1,text:`Le protocole tient sur une feuille scotchée au mur du vestiaire, cochée jour après jour.`},
+  {id:'cw_no_17',tier:'normal',weight:1,text:`Manger un fruit sec pour tenir jusqu'au bain chaud — le seul luxe autorisé cette semaine-là.`},
+  {id:'cw_no_18',tier:'normal',weight:1,text:`Le sommeil devient difficile la nuit précédant la pesée, ventre vide et tête pleine de calculs.`},
+  {id:'cw_no_19',tier:'normal',weight:1,text:`L'odeur du sauna colle encore aux cheveux au moment de monter sur la balance.`},
+  {id:'cw_no_20',tier:'normal',weight:1,text:`Le corps proteste un peu, sans jamais franchir la ligne rouge que le staff surveille de près.`},
+  {id:'cw_no_21',tier:'normal',weight:2,req:ctx=>!!ctx.veteran,
+   text:`Le même protocole que d'habitude, mais le corps met plus longtemps à répondre qu'il y a dix ans.`},
+  {id:'cw_no_22',tier:'normal',weight:2,req:ctx=>!!ctx.veteran,
+   text:`Ce qui passait en deux jours à vingt-cinq ans en prend maintenant trois, sans que personne n'en parle à voix haute.`},
+  {id:'cw_no_23',tier:'normal',weight:2,req:ctx=>!!ctx.divDescended,
+   text:`La nouvelle catégorie demande un effort que l'ancienne ne réclamait jamais — le corps réapprend une limite plus basse.`},
+  {id:'cw_no_24',tier:'normal',weight:2,req:ctx=>!!ctx.divDescended,
+   text:`Descendre d'une catégorie n'était pas qu'une décision sur le papier : la balance le rappelle chaque matin cette semaine.`},
+  {id:'cw_no_25',tier:'normal',weight:2,req:ctx=>!!ctx.divDescended,
+   text:`Le poids de forme d'hier devient le poids à perdre aujourd'hui — la nouvelle catégorie ne pardonne rien de gratuit.`},
+  {id:'cw_no_26',tier:'normal',weight:1,text:`Le régime tient sur trois jours pile, ni plus ni moins, réglé comme une horloge.`},
+  {id:'cw_no_27',tier:'normal',weight:1,text:`Une soupe de légumes le soir, un fruit le matin — la routine de la semaine de pesée.`},
+  {id:'cw_no_28',tier:'normal',weight:1,text:`Le coach vérifie le poids deux fois par jour, sans commentaire particulier.`},
+  {id:'cw_no_29',tier:'normal',weight:1,text:`Les jambes sont un peu lourdes à l'entraînement léger du matin, rien d'inhabituel.`},
+  {id:'cw_no_30',tier:'normal',weight:1,text:`Le sauna devient une habitude de la semaine, ni redoutée ni banale.`},
+  {id:'cw_no_31',tier:'normal',weight:1,text:`Deux verres d'eau de moins par repas, méthodiquement, jusqu'au jour de la pesée.`},
+  {id:'cw_no_32',tier:'normal',weight:1,text:`Le miroir du vestiaire renvoie un visage un peu plus creusé que d'habitude.`},
+  {id:'cw_no_33',tier:'normal',weight:1,text:`La balance recule kilo après kilo, au rythme prévu par le staff.`},
+  {id:'cw_no_34',tier:'normal',weight:1,text:`Un dernier bol de riz blanc la veille, sans assaisonnement, pour finir la coupe en douceur.`},
+  {id:'cw_no_35',tier:'normal',weight:1,text:`Le préparateur physique surveille la fatigue plus que le poids lui-même, cette semaine-là.`},
+  {id:'cw_co_01',tier:'complique',weight:1,text:`Le sauna, le sac poubelle, six heures à cracher dans un gobelet : pitoyable, mais professionnel.`},
+  {id:'cw_co_02',tier:'complique',weight:1,text:`La vision se trouble par moments en fin de coupe — signal que le staff médical surveille de près.`},
+  {id:'cw_co_03',tier:'complique',weight:1,text:`Le dernier kilo refuse de partir. Chaque minute au sauna semble ne plus rien changer.`},
+  {id:'cw_co_04',tier:'complique',weight:1,text:`Le corps entier tremble en sortant du bain brûlant, jambes en coton jusqu'à la balance.`},
+  {id:'cw_co_05',tier:'complique',weight:1,text:`Les crampes arrivent aux mollets, puis aux mains — le prix habituel d'une coupe à ce niveau.`},
+  {id:'cw_co_06',tier:'complique',weight:1,text:`Le médecin de commission reste posté à côté du sauna, prêt à interrompre la séance.`},
+  {id:'cw_co_07',tier:'complique',weight:1,text:`Dormir devient presque impossible, le ventre creux et la bouche sèche jusqu'à l'os.`},
+  {id:'cw_co_08',tier:'complique',weight:1,text:`Le coach répète de ne pas parler pour économiser l'eau que le corps n'a plus.`},
+  {id:'cw_co_09',tier:'complique',weight:1,text:`La peau tire sur les os en se regardant dans le miroir du vestiaire, méconnaissable.`},
+  {id:'cw_co_10',tier:'complique',weight:1,text:`Le dernier passage au sauna se fait assis, parce que rester debout demande déjà trop d'énergie.`},
+  {id:'cw_co_11',tier:'complique',weight:2,req:ctx=>!!ctx.veteran,
+   text:`À cet âge, une coupe pareille ne se récupère plus en une nuit de sommeil — le corps réclamera son dû après le combat aussi.`},
+  {id:'cw_co_12',tier:'complique',weight:2,req:ctx=>!!ctx.veteran,
+   text:`Le staff médical insiste plus qu'avant pour ce genre de coupe. Le corps ne pardonne plus rien depuis quelques années.`},
+  {id:'cw_co_13',tier:'complique',weight:2,req:ctx=>!!ctx.veteran,
+   text:`Ce genre d'effort avait un coût plus léger, autrefois. Ce n'est plus le cas depuis un moment.`},
+  {id:'cw_co_14',tier:'complique',weight:3,req:ctx=>!!ctx.thirdComplique,
+   text:`Troisième coupe compliquée d'affilée. Le corps commence à ne plus vraiment récupérer entre deux camps.`},
+  {id:'cw_co_15',tier:'complique',weight:3,req:ctx=>!!ctx.thirdComplique,
+   text:`Le staff s'inquiète tout haut cette fois : enchaîner un troisième cutting difficile n'est plus tenable indéfiniment.`},
+  {id:'cw_co_16',tier:'complique',weight:3,req:ctx=>!!ctx.thirdComplique,
+   text:`Le corps garde la mémoire des deux dernières coupes compliquées — celle-ci s'annonce encore plus dure à encaisser.`},
+  {id:'cw_co_17',tier:'complique',weight:2,req:ctx=>!!ctx.divDescended,
+   text:`Descendre de catégorie ne devait être qu'un chiffre sur le contrat. Sur la balance, c'est une vraie guerre.`},
+  {id:'cw_co_18',tier:'complique',weight:2,req:ctx=>!!ctx.divDescended,
+   text:`Le nouveau poids de forme reste un objectif lointain — cette semaine ressemble à une négociation permanente avec le corps.`},
+  {id:'cw_co_19',tier:'complique',weight:2,req:ctx=>!!ctx.divDescended,
+   text:`La nouvelle catégorie exige un sacrifice que l'ancienne épargnait. Le staff se demande à voix basse si le choix était le bon.`},
+  {id:'cw_co_20',tier:'complique',weight:2,req:ctx=>!!ctx.divDescended,
+   text:`Changer de catégorie sur le papier était simple. L'imposer au corps, cette semaine, l'est beaucoup moins.`},
+];
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: DATA_FAITH_PRESSCONF_POSTURES_V4] — Plan V4 LOT 7 §C19 point 1 :
+   voir ANCRE V4_C19_PRESSCONF_POSTURES (ui-04) pour le mécanisme de tirage.
+   15 entrées, 5 par catégorie (`tier`='respect'/'provocation'/'silence' —
+   les TROIS BRANCHES MÉCANIQUES de faithPressConfPosture(), ui-08, jamais
+   modifiées par ce lot). `text` est un objet {label,hint} direct (pas une
+   fonction : aucune de ces accroches n'a besoin d'interpoler l'adversaire,
+   déjà nommé juste au-dessus sur l'écran) — txtPick() accepte cette forme
+   telle quelle (engine.js : `typeof chosen.text==='function'?...:chosen.
+   text`). req(ctx) lit f.personality et ctx.commonHistory (nombre de
+   face-à-face déjà disputés contre CET adversaire précis), les deux champs
+   demandés par le document. */
+const FAITH_PRESSCONF_POSTURES=[
+  {id:'pcp_respect_default',tier:'respect',weight:1,
+   text:{label:'Le respect',hint:'Une poignée de main. Tension basse, crédit auprès du directeur.'}},
+  {id:'pcp_respect_villain',tier:'respect',weight:2,req:ctx=>ctx.personality==='villain',
+   text:{label:'Le respect calculé',hint:'Vous jouez la carte du fair-play, pour une fois — ça change du personnage habituel.'}},
+  {id:'pcp_respect_humble',tier:'respect',weight:2,req:ctx=>ctx.personality==='humble',
+   text:{label:'Le respect sincère',hint:'Deux mots sur son parcours, sans calcul. Le genre de geste qu’on attend de vous.'}},
+  {id:'pcp_respect_showman',tier:'respect',weight:2,req:ctx=>ctx.personality==='showman',
+   text:{label:'Le respect mis en scène',hint:'Une accolade filmée sous tous les angles — sincère, mais jamais sans caméra.'}},
+  {id:'pcp_respect_rivalry',tier:'respect',weight:2,req:ctx=>(ctx.commonHistory||0)>=1,
+   text:{label:'Le respect de circonstance',hint:'Vous vous connaissez déjà trop bien pour rejouer la carte de la haine.'}},
+  {id:'pcp_provoc_default',tier:'provocation',weight:1,
+   text:{label:'La provocation',hint:'Un levier pour négocier — mais il n’arrivera pas dans le même état.'}},
+  {id:'pcp_provoc_villain',tier:'provocation',weight:2,req:ctx=>ctx.personality==='villain',
+   text:{label:'Le règlement de comptes',hint:'Vous ne retenez plus rien — la salle en redemande, le directeur grimace.'}},
+  {id:'pcp_provoc_humble',tier:'provocation',weight:2,req:ctx=>ctx.personality==='humble',
+   text:{label:'La provocation malgré vous',hint:'Ce n’est pas votre registre habituel, mais un mot de trop vous a échappé.'}},
+  {id:'pcp_provoc_showman',tier:'provocation',weight:2,req:ctx=>ctx.personality==='showman',
+   text:{label:'Le show avant le combat',hint:'Vous vendez l’affrontement comme un spectacle, quitte à en rajouter.'}},
+  {id:'pcp_provoc_rivalry',tier:'provocation',weight:2,req:ctx=>(ctx.commonHistory||0)>=1,
+   text:{label:'Vieux compte à régler',hint:'Cette fois, les politesses habituelles ne survivent pas à la troisième question.'}},
+  {id:'pcp_silence_default',tier:'silence',weight:1,
+   text:{label:'Le silence',hint:'Deux phrases, pas une de plus. Personne ne pourra vous citer.'}},
+  {id:'pcp_silence_villain',tier:'silence',weight:2,req:ctx=>ctx.personality==='villain',
+   text:{label:'Le mépris silencieux',hint:'Vous ne daignez même pas répondre — le silence, ici, est une insulte de plus.'}},
+  {id:'pcp_silence_humble',tier:'silence',weight:2,req:ctx=>ctx.personality==='humble',
+   text:{label:'Le silence naturel',hint:'Vous n’avez jamais eu grand-chose à prouver en dehors de la cage.'}},
+  {id:'pcp_silence_showman',tier:'silence',weight:2,req:ctx=>ctx.personality==='showman',
+   text:{label:'Le silence qui joue avec l’attente',hint:'Vous laissez le vide durer une seconde de trop, exprès, pour faire parler la salle.'}},
+  {id:'pcp_silence_rivalry',tier:'silence',weight:2,req:ctx=>(ctx.commonHistory||0)>=1,
+   text:{label:'Plus rien à dire',hint:'Vous vous êtes déjà tout dit la dernière fois. Le reste se réglera dans la cage.'}},
+];
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: DATA_FAITH_PESEE_SITUATIONS_V4] — Plan V4 LOT 7 §C19 point 3 :
+   la pesée n'avait aucun écran propre — un simple palier de coupe calculé
+   en silence (CUTTING_5PALIERS, ui-02/ui-08). scr_faith_pesee() (ui-04)
+   choisit un REGISTRE parmi cinq (calme/tendu/comique/menaçant/spectacle,
+   pondéré par f.personality — faithPeseeRegistre(), ui-04) puis tire une
+   mise en scène dans ce registre via `tier` (même mécanisme de filtre que
+   les postures ci-dessus). req(ctx)/text(ctx) lisent f.personality et le
+   trait de l'adversaire (ctx.trait = opp.bio.trait, déjà posé à la
+   création — engine.js FIGHTER_BIO_C14) : les deux champs demandés par le
+   document. 60 entrées, 12 par registre. Gating (fréquence d'apparition de
+   l'écran) : voir ANCRE V4_C19_PESEE_GATING, ui-08 — mêmes conditions que
+   la conférence de presse, jamais plus généreux. */
+const FAITH_PESEE_SITUATIONS=[
+  {id:'ps_calme_01',tier:'calme',weight:1,
+   text:({oppName,trait})=>`Les deux camps se saluent sans excès. ${esc(oppName)} monte sur la balance sans un mot de trop.`},
+  {id:'ps_calme_02',tier:'calme',weight:1,
+   text:()=>`Le protocole se déroule sans accroc, presque cérémonieux — une pesée comme le règlement les imagine.`},
+  {id:'ps_calme_03',tier:'calme',weight:1,req:ctx=>ctx.personality==='humble',
+   text:({oppName,trait})=>`Deux poignées de main, deux hochements de tête. ${esc(oppName)} semble presque soulagé de ne pas avoir à jouer un rôle.`},
+  {id:'ps_calme_04',tier:'calme',weight:1,req:ctx=>!!ctx.trait,
+   text:({oppName,trait})=>`${esc(oppName)} garde son rituel habituel : ${esc(trait)} Personne ne s'en formalise.`},
+  {id:'ps_calme_05',tier:'calme',weight:1,
+   text:()=>`Le photographe peine à sortir un cliché intéressant — la scène est trop paisible pour faire la une.`},
+  {id:'ps_calme_06',tier:'calme',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} félicite sobrement le camp adverse pour la préparation, sans jamais insister.`},
+  {id:'ps_calme_07',tier:'calme',weight:1,
+   text:()=>`La salle applaudit poliment. Rien ici ne ressemble à un règlement de comptes.`},
+  {id:'ps_calme_08',tier:'calme',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} redescend de la balance et va directement discuter avec son propre staff, sans un regard superflu.`},
+  {id:'ps_calme_09',tier:'calme',weight:1,
+   text:()=>`Le commissaire annonce les deux poids d'une voix neutre. La routine, purement.`},
+  {id:'ps_calme_10',tier:'calme',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} vous adresse un signe de tête avant de quitter la scène, sans chercher le contact prolongé.`},
+  {id:'ps_calme_11',tier:'calme',weight:1,
+   text:()=>`Rien à signaler pour la presse — le genre de pesée qui ne fera aucune image mémorable.`},
+  {id:'ps_calme_12',tier:'calme',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} enfile son peignoir et s'éloigne sans un mot de plus, la formalité terminée.`},
+  {id:'ps_tendu_01',tier:'tendu',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} refuse de vous regarder pendant l'annonce des poids. L'air se charge un peu.`},
+  {id:'ps_tendu_02',tier:'tendu',weight:1,
+   text:()=>`Les deux équipes se tiennent à distance, presque trop calculée pour être naturelle.`},
+  {id:'ps_tendu_03',tier:'tendu',weight:1,req:ctx=>!!ctx.trait,
+   text:({oppName,trait})=>`${esc(oppName)} garde une habitude connue de tous : ${esc(trait)} Ce soir, ça ressemble plutôt à de la nervosité.`},
+  {id:'ps_tendu_04',tier:'tendu',weight:1,
+   text:({oppName,trait})=>`La sécurité se rapproche discrètement en voyant ${esc(oppName)} et vous vous approcher un peu trop près.`},
+  {id:'ps_tendu_05',tier:'tendu',weight:1,
+   text:()=>`Un silence pesant s'installe sur la scène — personne ne veut être le premier à parler.`},
+  {id:'ps_tendu_06',tier:'tendu',weight:1,req:ctx=>ctx.personality==='humble',
+   text:({oppName,trait})=>`Vous ne dites rien, mais ${esc(oppName)} semble chercher la moindre réaction sur votre visage.`},
+  {id:'ps_tendu_07',tier:'tendu',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} serre la main un peu trop fort, un message plus qu'une politesse.`},
+  {id:'ps_tendu_08',tier:'tendu',weight:1,
+   text:()=>`Les photographes sentent que quelque chose peut déraper — les objectifs se braquent, prêts.`},
+  {id:'ps_tendu_09',tier:'tendu',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} reste immobile une seconde de trop face à vous, jusqu'à ce que le staff intervienne.`},
+  {id:'ps_tendu_10',tier:'tendu',weight:1,
+   text:()=>`L'organisation resserre le dispositif de sécurité entre les deux équipes, par précaution.`},
+  {id:'ps_tendu_11',tier:'tendu',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} marmonne quelque chose en quittant la balance, trop bas pour être entendu clairement.`},
+  {id:'ps_tendu_12',tier:'tendu',weight:1,
+   text:()=>`La tension redescend doucement une fois les deux poids annoncés, sans jamais vraiment disparaître.`},
+  {id:'ps_comique_01',tier:'comique',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} monte sur la balance déguisé, arrachant un rire général même chez votre propre équipe.`},
+  {id:'ps_comique_02',tier:'comique',weight:1,req:ctx=>!!ctx.trait,
+   text:({oppName,trait})=>`${esc(oppName)} sort son excentricité habituelle devant les caméras : ${esc(trait)} La salle rit franchement.`},
+  {id:'ps_comique_03',tier:'comique',weight:1,req:ctx=>ctx.personality==='showman',
+   text:({oppName,trait})=>`Vous improvisez une pose ridicule sur la balance. ${esc(oppName)} n'a d'autre choix que de sourire.`},
+  {id:'ps_comique_04',tier:'comique',weight:1,
+   text:()=>`Un journaliste trébuche sur son propre micro en pleine annonce des poids, désamorçant instantanément l'ambiance.`},
+  {id:'ps_comique_05',tier:'comique',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} fait mine de peser plus lourd en gonflant les joues, sous les rires de la salle.`},
+  {id:'ps_comique_06',tier:'comique',weight:1,
+   text:()=>`Le speaker se trompe deux fois de nom en annonçant les combattants, provoquant l'hilarité générale.`},
+  {id:'ps_comique_07',tier:'comique',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} vous propose une photo façon carte postale, bras autour des épaules, sourire figé.`},
+  {id:'ps_comique_08',tier:'comique',weight:1,
+   text:()=>`La mascotte de l'organisation s'incruste sur scène pendant la pesée, au grand amusement du public.`},
+  {id:'ps_comique_09',tier:'comique',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} imite votre garde de combat de façon volontairement grotesque, pour détendre l'atmosphère.`},
+  {id:'ps_comique_10',tier:'comique',weight:1,
+   text:()=>`Quelqu'un dans le public crie une blague potache — même l'arbitre a du mal à garder son sérieux.`},
+  {id:'ps_comique_11',tier:'comique',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} lance une petite pique bon enfant, suivie d'un clin d'œil qui désamorce tout.`},
+  {id:'ps_comique_12',tier:'comique',weight:1,
+   text:()=>`La musique d'entrée part avant l'heure par erreur technique, transformant la pesée en sketch improvisé.`},
+  {id:'ps_menacant_01',tier:'menacant',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} vous fixe sans ciller pendant l'intégralité du face-à-face, mâchoire serrée.`},
+  {id:'ps_menacant_02',tier:'menacant',weight:1,req:ctx=>ctx.personality==='villain',
+   text:({oppName,trait})=>`Vous refusez de baisser les yeux le premier. ${esc(oppName)} finit par reculer d'un pas, visiblement agacé.`},
+  {id:'ps_menacant_03',tier:'menacant',weight:1,req:ctx=>!!ctx.trait,
+   text:({oppName,trait})=>`${esc(oppName)} laisse tomber son habitude connue de tous — ${esc(trait)} — pour un silence beaucoup plus lourd que d'ordinaire.`},
+  {id:'ps_menacant_04',tier:'menacant',weight:1,
+   text:()=>`Les fronts se touchent presque pendant le face-à-face. Le staff des deux camps se prépare déjà à intervenir.`},
+  {id:'ps_menacant_05',tier:'menacant',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} murmure une menace assez basse pour que seul vous l'entendiez, puis s'éloigne sans un regard.`},
+  {id:'ps_menacant_06',tier:'menacant',weight:1,
+   text:()=>`La sécurité s'interpose physiquement entre les deux équipes avant même la fin de l'annonce des poids.`},
+  {id:'ps_menacant_07',tier:'menacant',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} pointe un doigt vers vous en articulant une promesse silencieuse, sans un mot audible.`},
+  {id:'ps_menacant_08',tier:'menacant',weight:1,
+   text:()=>`Un poussez-poussez éclate un instant entre les deux staffs avant d'être maîtrisé par la sécurité.`},
+  {id:'ps_menacant_09',tier:'menacant',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} arrache presque le drapeau des mains de l'organisateur en montant sur scène, mâchoires serrées.`},
+  {id:'ps_menacant_10',tier:'menacant',weight:1,
+   text:()=>`Le silence qui suit le face-à-face est plus lourd que n'importe quelle insulte échangée avant.`},
+  {id:'ps_menacant_11',tier:'menacant',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} vous bouscule légèrement l'épaule en descendant de la balance, comme un dernier mot silencieux.`},
+  {id:'ps_menacant_12',tier:'menacant',weight:1,
+   text:()=>`Le commissaire hausse le ton pour rétablir le calme, une première pour cette organisation depuis longtemps.`},
+  {id:'ps_spectacle_01',tier:'spectacle',weight:1,req:ctx=>ctx.personality==='showman',
+   text:({oppName,trait})=>`Vous arrivez sur scène dans une mise en scène digne d'un concert. ${esc(oppName)} peine à suivre le rythme.`},
+  {id:'ps_spectacle_02',tier:'spectacle',weight:1,
+   text:()=>`Les confettis tombent avant même l'annonce des poids — l'organisation n'a pas lésiné sur la mise en scène.`},
+  {id:'ps_spectacle_03',tier:'spectacle',weight:1,req:ctx=>!!ctx.trait,
+   text:({oppName,trait})=>`${esc(oppName)} transforme son habitude connue en numéro complet devant les caméras : ${esc(trait)}`},
+  {id:'ps_spectacle_04',tier:'spectacle',weight:1,
+   text:()=>`Les écrans géants diffusent un montage vidéo des meilleurs moments des deux carrières, sous un tonnerre d'applaudissements.`},
+  {id:'ps_spectacle_05',tier:'spectacle',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} enlève sa veste avec une lenteur théâtrale, jouant clairement pour les photographes.`},
+  {id:'ps_spectacle_06',tier:'spectacle',weight:1,
+   text:()=>`Le public scande déjà les deux noms en chœur, transformant la pesée en avant-goût de soirée de gala.`},
+  {id:'ps_spectacle_07',tier:'spectacle',weight:1,req:ctx=>ctx.personality==='showman',
+   text:({oppName,trait})=>`Vous répondez à chaque geste de ${esc(oppName)} par un geste encore plus grand, sous les rires ravis du public.`},
+  {id:'ps_spectacle_08',tier:'spectacle',weight:1,
+   text:()=>`Un feu d'artifice intérieur salue l'entrée des deux combattants, réglé au dixième de seconde par la production.`},
+  {id:'ps_spectacle_09',tier:'spectacle',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} pose longuement pour les photographes, changeant trois fois de posture avant de descendre de scène.`},
+  {id:'ps_spectacle_10',tier:'spectacle',weight:1,
+   text:()=>`La musique d'entrée résonne encore dans la salle bien après que les deux combattants ont quitté la balance.`},
+  {id:'ps_spectacle_11',tier:'spectacle',weight:1,
+   text:({oppName,trait})=>`${esc(oppName)} lance son t-shirt dans le public, comme si le combat avait déjà commencé.`},
+  {id:'ps_spectacle_12',tier:'spectacle',weight:1,
+   text:()=>`Les caméras multiplient les ralentis sur le face-à-face — l'organisation sait qu'elle tient une image qui tournera en boucle.`},
 ];
 /* ==== [FIN ANCRE] ==== */
