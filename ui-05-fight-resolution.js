@@ -525,9 +525,17 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // typique d'une dizaine de saisons, le delta (+0,5/saison) ajoute
   // l'équivalent de ~5 combats sans changer le rythme jeune prospect (déjà
   // dense) ni l'âge de retraite.
+  /* ==== [ANCRE: V3_HORLOGE_UNIQUE] — Plan V4 §2.1, cause racine de P21 point 4 :
+     en mode Faith le temps appartient au CALENDRIER (12 mois, FAITH_CALENDRIER)
+     et le vieillissement est déjà appliqué une fois par saison par
+     nextFaithYear() (ui-08:2301). Le compteur _fy ci-dessous est l'horloge du
+     mode Carrière, où le temps avance par combat. Les deux tournaient ensemble :
+     ~2 ans par saison, carrière de 10 saisons au lieu de 19. ==== */
   let endOfSeason=false;
+  const modeFaith=!!G.faith;
   const fightsPerYear=(G.f.age>=18&&G.f.age<=23)?RI(3,4):RI(1,4);
-  G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=fightsPerYear){ const declineLog=applyAging(G.f); G.f._fy=0; endOfSeason=true;
+  G.f._fy=(G.f._fy||0)+1;
+  if(!modeFaith && G.f._fy>=fightsPerYear){ const declineLog=applyAging(G.f); G.f._fy=0; endOfSeason=true;
     // ==== [ANCRE: NOTIF_DECLIN_VIEILLESSE] (suite, voir applyAging) — le
     // joueur doit être informé explicitement quand l'âge fait baisser un
     // attribut, plutôt que de le découvrir sans explication sur sa fiche.
