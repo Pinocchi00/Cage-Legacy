@@ -63,14 +63,21 @@
    haut) produit gratuitement une courbe de progression ressentie : le
    joueur constate son rythme ralentir en montant, sans qu'aucun texte n'ait
    à le dire. ==== */
+/* ==== [ANCRE: V4_RYTHME_HORLOGE_UNIQUE] — Plan V4 C1, recette §3 : une fois
+   l'horloge Faith unifiée (V3_HORLOGE_UNIQUE), la carrière dure ses 19
+   vraies saisons au lieu de 10 — aux anciens chiffres (jusqu'à 4
+   combats/an), le total grimpait à 43-61 combats sur 5 carrières simulées,
+   au-dessus de la cible 25-40. Rythme revu à la baisse, jamais la
+   vieillesse : mêmes paliers par organisation, environ moitié moins par
+   saison. ==== */
 function faithFightsPlanned(f){
   if(f.injury) return 0;
   if((f.form||100)<30) return 1;
-  if(f.champion) return 2;
-  if(f.org<=1) return 4;
-  if(f.org<=3) return 3;
-  if(f.org===4) return RI(2,3);
-  return 2;
+  if(f.champion) return 1;
+  if(f.org<=1) return 2;
+  if(f.org<=3) return 2;
+  if(f.org===4) return RI(1,2);
+  return 1;
 }
 /** Répartit n mois-combat sur un calendrier de 12, aussi régulièrement que
  * possible (jamais deux collés si évitable).
@@ -1190,7 +1197,11 @@ function scr_faith_oath(){
    ici en exposant le total réel (épilogue, fiche) plutôt qu'en modifiant
    le rythme de combat, qui n'est pas le problème. */
 function faithCareerTotalFights(f){
-  const ama=(f.amaRec&&(f.amaRec.W+f.amaRec.L))||0;
+  /* [ANCRE: V3_HISTORIQUE_PRESERVE] Plan V4 C2 : amaHistory (ui-05 turnPro)
+     est la source exacte du volet amateur depuis que l'historique est
+     déplacé plutôt que détruit ; amaRec.W+L reste le repli pour une
+     sauvegarde antérieure à ce correctif, où amaHistory n'existe pas. */
+  const ama=f.amaHistory?f.amaHistory.length:((f.amaRec&&(f.amaRec.W+f.amaRec.L))||0);
   return ama+((f.history||[]).length);
 }
 /* ==== [FIN ANCRE] ==== */
