@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,opponent_card:scr_opponent_card,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,faith_coach_choice:scr_faith_coach_choice,faith_sparring_detail:scr_faith_sparring_detail,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_pesee:scr_faith_pesee,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,faith_coach_choice:scr_faith_coach_choice,faith_sparring_detail:scr_faith_sparring_detail,
   faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,faith_archives:scr_faith_archives,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
@@ -2086,6 +2086,40 @@ const CL={
       G.screen='faith_press_conf'; save(); render();
       return;
     }
+    CL.faithProceedToPesee();
+  },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V4_C19_PESEE_GATING] — Plan V4 LOT 7 §C19 point 3 : "gating
+     obligatoire : même condition que pressConf (rang<=4, champion, ou
+     rival), deux temps forts maximum par carte." off.gala.pressConf EST
+     cette condition (faithGalaPosition, ui-04) — la réutiliser telle
+     quelle garantit que la pesée ne sort jamais sur plus de fights que la
+     conférence de presse. Les deux ne peuvent apparaître que sur la MÊME
+     carte (jamais l'une sans l'autre), ce qui plafonne à deux le nombre
+     de temps forts avant l'entrée en cage — sans ce plafond, on recrée
+     exactement le problème P15.1 (une interruption obligatoire à chaque
+     combat, cf. LOT 5). Fonction PARTAGÉE plutôt qu'un bloc dans
+     faithOfferSign() : faithPressConfPosture() (qui gère la conférence)
+     saute directement à CL.opp(0) une fois la posture choisie — sans ce
+     point d'entrée commun, la pesée ne sortirait JAMAIS sur les combats
+     qui passent par la conférence, exactement ceux qu'elle vise. */
+  faithProceedToPesee(){
+    const off=G.faith.pendingOffer; if(!off) return;
+    if(off.gala && off.gala.pressConf && !off.peseeDone){
+      off.peseeDone=true;
+      const registre=faithPeseeRegistre(G.f);
+      if(!TEXT_POOLS['faith_pesee_situation']) registerTextPool('faith_pesee_situation',FAITH_PESEE_SITUATIONS);
+      const o=off.opp.o;
+      const line=txtPick('faith_pesee_situation',{rankTier:registre,personality:G.f.personality,trait:(o.bio&&o.bio.trait)||'',oppName:o.name,F:G.f});
+      off.pesee={registre,line};
+      G.screen='faith_pesee'; save(); render();
+      return;
+    }
+    G.opps=[off.opp];
+    CL.opp(0);
+  },
+  faithPeseeContinue(){
+    const off=G.faith.pendingOffer; if(!off) return;
     G.opps=[off.opp];
     CL.opp(0);
   },
@@ -2141,8 +2175,7 @@ const CL={
       F.buildup.attente=Math.max(0,F.buildup.attente-1);
       G.f.morale=clamp((G.f.morale||60)+5,0,100);
     }
-    G.opps=[off.opp];
-    CL.opp(0);
+    CL.faithProceedToPesee();
   },
   /* ==== [CORRECTIF FA-13 / V2-20] — patience à 0 : l'agent négocie quand
      même (jamais de blocage dur), juste avec une réserve affichée — c'est

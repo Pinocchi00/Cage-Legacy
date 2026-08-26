@@ -500,25 +500,49 @@ function scr_camp(){ const f=G.f;
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
   const step=G.fight.planStep||1;
+  /* ==== [ANCRE: V4_C18_CUTTING_TEXTENGINE] — Plan V4 LOT 7 §C18 : les quatre
+     gabarits ci-dessous codaient chacun une seule phrase d'ambiance en dur,
+     revue identique à chaque combat. Migré vers txtPick/FAITH_CUTTING_LINES
+     (data-faith-content.js) — le HTML, les chiffres (poids/kg/%) et les
+     effets (bonus/malus) restent des littéraux inchangés juste en dessous,
+     seule la ligne d'ambiance change de source. ctx.thirdComplique/
+     ctx.divDescended sont lus sur f.history (cutTier/div posés par
+     resolveFight(), ui-05, ANCRE V4_C18_CUT_HISTORY) — jamais recalculés
+     ailleurs, jamais dupliqués. */
+  if(!TEXT_POOLS['faith_cutting_line']) registerTextPool('faith_cutting_line',FAITH_CUTTING_LINES);
+  const cutDivs=DIVISIONS[f.gender]||[];
+  const cutCurIdx=cutDivs.findIndex(d=>d.id===f.div);
+  const cutHist=f.history||[];
+  const cutLast=cutHist.length?cutHist[cutHist.length-1]:null;
+  const cutPrevIdx=(cutLast&&cutLast.div)?cutDivs.findIndex(d=>d.id===cutLast.div):-1;
+  const cutSecondLast=cutHist.length>=2?cutHist[cutHist.length-2]:null;
+  const cutLine=esc(txtPick('faith_cutting_line',{
+    rankTier:cr.tier,
+    isHeavy:(typeof isHeavy==='function')&&isHeavy(f),
+    veteran:f.age>=34,
+    thirdComplique:cr.tier==='complique'&&!!cutLast&&cutLast.cutTier==='complique'&&!!cutSecondLast&&cutSecondLast.cutTier==='complique',
+    divDescended:cutPrevIdx>=0&&cutCurIdx>=0&&cutCurIdx<cutPrevIdx,
+    F:f
+  }));
   const wcHtml={
     sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div>
       <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
-      <div class="small muted" style="margin-top:8px">Un moine bouddhiste au régime.</div>
+      <div class="small muted" style="margin-top:8px">${cutLine}</div>
       <div class="small" style="color:var(--sage);font-weight:bold;margin-top:4px">Bonus ce soir : cardio et solidité.</div></div>`,
     facile:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Cutting facile</div>
       <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
       <div class="mono small" style="margin-top:2px">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
-      <div class="small muted" style="margin-top:8px">Deux jours de sauna et un sandwich en moins, rien de dramatique.</div>
+      <div class="small muted" style="margin-top:8px">${cutLine}</div>
       <div class="small muted" style="margin-top:4px">Aucun impact ce soir.</div></div>`,
     normal:`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px"><div class="eyebrow gold mb">Cutting normal</div>
       <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
       <div class="mono small" style="margin-top:2px">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
-      <div class="small muted" style="margin-top:8px">Le sauna, le sac poubelle, la routine du métier.</div>
+      <div class="small muted" style="margin-top:8px">${cutLine}</div>
       <div class="small muted" style="margin-top:4px">Dans la norme du métier, aucun impact.</div></div>`,
     complique:`<div class="card mt glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding-left:14px"><div class="eyebrow mb" style="color:var(--loss)">Cutting compliqué</div>
       <div class="mono small" style="margin-top:6px;position:relative;z-index:2">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
       <div class="mono small" style="margin-top:2px;position:relative;z-index:2">À perdre : <b>${cr.kg}kg</b> <span class="muted">(${cr.effPct.toFixed(1)}%)</span></div>
-      <div class="small muted" style="margin-top:8px;position:relative;z-index:2">Tu vas cracher dans un gobelet pendant six heures et dormir dans un sac poubelle. Pitoyable, mais professionnel.</div>
+      <div class="small muted" style="margin-top:8px;position:relative;z-index:2">${cutLine}</div>
       <div class="small" style="color:var(--loss);font-weight:bold;margin-top:4px;position:relative;z-index:2">Malus ce soir : cardio, force, solidité et menton (déshydratation).</div></div>`,
   }[cr.tier]||'';
   let h=`<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
