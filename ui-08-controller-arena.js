@@ -17,7 +17,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
-  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,faith_coach_choice:scr_faith_coach_choice,
+  faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,faith_coach_choice:scr_faith_coach_choice,faith_sparring_detail:scr_faith_sparring_detail,
   faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   gauntlet_menu:scr_gauntlet_menu,bracket_view:scr_bracket_view,archetype_pantheon:scr_archetype_pantheon,boss_reveal:scr_boss_reveal,ascension_tower:scr_ascension_tower,coaching_round:scr_coaching_round,camp_identity_pick:scr_camp_identity_pick,consumable_preview:scr_consumable_preview,ach_preview:scr_ach_preview,shop_preview:scr_shop_preview};
@@ -87,10 +87,25 @@ function lockFaithNemesis(person){
    départ d'un partenaire) — jamais au rendu. Appelée après TOUTE
    modification de G.faith.gym qui pourrait invalider la référence
    actuelle (départ, arrivée) ; no-op si la référence est encore valide. */
+/* ==== [CORRECTIF C13] — Plan V4 LOT 5 : cette fonction est le SEUL endroit
+   qui peut faire changer G.faith.sparringPrimaryId — les écrans (ui-04) ne
+   font plus jamais de repli silencieux (`||gym[0]`) quand l'id référencé
+   est introuvable. Un appelant qui retire un partenaire (ex.
+   evt_frankenstein_betrayal) doit faire partir sa Person explicitement
+   (personDepart, avec la vraie raison) AVANT d'appeler cette fonction ;
+   si un appel futur l'omettait, le repli ci-dessous consigne quand même un
+   départ daté générique — jamais une identité qui glisse en silence
+   (Loi 3 : la perte doit être traçable). */
 function ensureSparringPrimary(){
   if(!G.faith) return;
   const gym=G.faith.gym||[];
   if(gym.some(p=>p.id===G.faith.sparringPrimaryId)) return;
+  if(G.faith.sparringPrimaryId!=null && G.people){
+    const key='sparring:'+G.faith.sparringPrimaryId;
+    const pid=G.people.byKey&&G.people.byKey[key];
+    const p=pid!=null?G.people.byId[pid]:null;
+    if(p && p.state.active) personDepart(p,'A quitté la salle, sans que la raison n’ait été enregistrée à temps.');
+  }
   const best=gym.slice().sort((a,b)=>b.overall-a.overall)[0];
   G.faith.sparringPrimaryId=best?best.id:null;
 }
@@ -1878,6 +1893,12 @@ const CL={
     if(ev.id==='evt_frankenstein_betrayal'){
       const monster=(G.faith.gym||[]).find(p=>p.id===ev.monsterId);
       if(monster){
+        /* ==== [CORRECTIF C13] — départ EXPLICITE et daté de la Person du
+           protégé, avant de le retirer de G.faith.gym : le repli générique
+           d'ensureSparringPrimary() (juste plus bas) ne doit jamais avoir à
+           deviner pourquoi — la vraie raison, la meilleure, est connue ici. */
+        const leaving=faithSparringPerson(monster);
+        if(leaving) personDepart(leaving,'A quitté la salle pour signer chez l’adversaire, après sa trahison.');
         monster.org=G.f.org; monster.stage='pro';
         monster.W=Math.max(0,G.f.W-2); monster.L=1;
         monster.orgWins=0;

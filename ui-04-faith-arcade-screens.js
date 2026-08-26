@@ -468,8 +468,9 @@ function scr_faith_hub(){
   /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
      stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
      rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
-     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
-  const topPartner=(G.faith.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). Repli `||gym[0]` supprimé
+     (CORRECTIF C13, cf. scr_faith_contacts plus bas — même raison). ==== */
+  const topPartner=(G.faith.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId);
   /* ==== [CORRECTIF FA-26] — « afficher son palmarès sur le hub, une
      ligne » : le combattant peut avoir quitté G.roster (retraite NPC) sans
      que f.faithNemesisId ne soit nettoyé nulle part — repli silencieux si
@@ -826,14 +827,47 @@ function faithCoachPerson(F){
   if(!F.coachId || !G.people || !G.people.byId[F.coachId]) F.coachId=personEnsure('coach',{slot:'main'}).id;
   return G.people.byId[F.coachId];
 }
+/* ==== [ANCRE: V3_SPARRING_PERSON_C13] — Plan V4 LOT 5 §C13 : le partenaire
+   de sparring principal reste un objet combattant (makeFighter(), engine.js
+   — il a besoin de vrais attributs pour le Syndrome de Frankenstein), mais
+   il lui manquait ce que le coach a déjà depuis LOT 2 : une Person avec
+   bio/rel.arc[]. faithSparringPerson() en construit une qui REND l'identité
+   déjà affichée (partner.first/last/nick), jamais une nouvelle générée par
+   makeName() (Loi 1 : une seule identité par personne) — dédoublonnée par
+   id de combattant ('sparring:<id>', personKeyFor), donc rappeler cette
+   fonction pour le même partenaire renvoie toujours la même Person. */
+function faithSparringPerson(partner){
+  if(!partner) return null;
+  const reg=ensurePeopleRegistry();
+  const key='sparring:'+partner.id;
+  if(reg.byKey[key]!=null && reg.byId[reg.byKey[key]]) return reg.byId[reg.byKey[key]];
+  const id=reg.nextId++;
+  const p={id,firstName:partner.first,lastName:partner.last||'',nickname:partner.nick||null,
+    flag:partner.flag||'',born:partner.countryKey||'',role:'sparring',
+    bio:{origin:partner.origin||'',past:partner.motivation||'',trait:pick(PERSON_TRAITS)},
+    rel:personDefaultRel(),state:{gymId:null,active:true,leftAt:null,leftReason:null},memory:[],
+    extra:{fighterId:partner.id}};
+  reg.byId[id]=p; reg.byKey[key]=p.id;
+  return p;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_contacts(){
   const f=G.f, F=G.faith;
   const dir=FAITH_DIRECTORS[f.org]||FAITH_DIRECTORS[0];
   /* ==== [ANCRE: V3_SPARRING_PRIMARY] — Plan V3 LOT 2 §P04/§P08 : référence
      stable (F.sparringPrimaryId, ui-08), plus un tri recalculé à chaque
      rendu — c'était la cause exacte du bug "Marcus est devenu Sean sans
-     raison" (cf. ANCRE PERSON_REGISTRY, state.js). ==== */
-  const topPartner=(F.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
+     raison" (cf. ANCRE PERSON_REGISTRY, state.js). */
+  /* ==== [CORRECTIF C13] — le repli `||(G.faith.gym||[])[0]` est supprimé :
+     c'est exactement le chemin par lequel le bug pouvait revenir (un id
+     introuvable retombait en silence sur le premier de la liste, sans
+     jamais dire pourquoi). ensureSparringPrimary() (ui-08) est désormais le
+     SEUL endroit qui peut faire "partir" un partenaire, et il le fait
+     traçable (personDepart) — plus jamais ici. Si topPartner est null, la
+     carte ne s'affiche simplement pas (cf. plus bas), ce qui n'arrive en
+     pratique jamais : l'écurie ne descend jamais sous 2 partenaires
+     (FAITH_ECURIE_RENOUVELEE, ui-08). ==== */
+  const topPartner=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId);
   const coach=faithCoachPerson(F);
   const agentPatience=F.agentPatience!=null?F.agentPatience:3;
   /* ==== [ANCRE: V3_AGENT_CONSEQUENTIEL] — Plan V3 §5.2.2 point 3 : l'humeur de
@@ -870,7 +904,7 @@ function scr_faith_contacts(){
        '« '+coach.bio.origin+' »',coachDetail,"CL.go('faith_coach_detail')")}
      ${topPartner?card('PARTENAIRE D’ENTRAÎNEMENT',topPartner.first,topPartner.styleLabel,
        (f.morale||60)>=70?'« Bonne ambiance à la salle en ce moment. »':'« L’ambiance est tendue depuis un moment. »',
-       faithProtegeLine(topPartner,f)):''}
+       faithProtegeLine(topPartner,f),"CL.go('faith_sparring_detail')"):''}
    </div>
    <button class="btn ghost mt" onclick="CL.go('faith_hub')">← Retour au hub</button>
   </div>`;
@@ -912,6 +946,49 @@ function scr_faith_coach_detail(){
    <button class="btn ghost mt" onclick="CL.go('faith_contacts')">← Retour aux contacts</button>
   </div>`;
 }
+/* ==== [ANCRE: V3_SPARRING_DETAIL_C13] — Plan V4 LOT 5 §C13 : même traitement
+   que le coach (scr_faith_coach_detail juste au-dessus) — historique daté
+   (rel.arc[]) + 1-2 informations contextuelles — pour le partenaire de
+   sparring principal, désormais lui aussi porté par une vraie Person
+   (faithSparringPerson). Les informations propres au combattant (style,
+   âge, familiarité) restent lues sur l'objet fighter (partner), la Person
+   ne portant que l'identité/relation (Loi de séparation, cf. bio/rel). */
+function scr_faith_sparring_detail(){
+  const F=G.faith, f=G.f;
+  const partner=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId);
+  if(!partner) return `<div class="scr center intro"><p class="lede">Aucun partenaire pour l’instant.</p><button class="btn ghost mt" onclick="CL.go('faith_contacts')">Retour</button></div>`;
+  const person=faithSparringPerson(partner);
+  const trust=person.rel.trust;
+  const trustLabel=trust>=70?'Une vraie confiance, construite dans la durée.':trust>=40?'Une relation correcte, sans plus.':'La confiance n’y est plus vraiment.';
+  const arc=(person.rel.arc||[]).slice().reverse();
+  return `<div class="scr" style="max-width:480px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Partenaire d’entraînement</span><span class="eyebrow x" onclick="CL.go('faith_contacts')">✕</span></div>
+   <h2 class="hero-name" style="font-size:26px;margin-top:8px">${esc(personName(person,{withNick:true}))}</h2>
+   <div class="muted small mt">${esc(partner.styleLabel||'')}, ${partner.age} ans</div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QU’IL A DÉJÀ FAIT</div>
+     <div class="small">${esc(person.firstName)} ${esc(person.bio.origin)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE POUSSE</div>
+     <div class="small">${esc(person.bio.past)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CONFIANCE</div>
+     <div class="small">${trustLabel}</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">SYNDROME DE FRANKENSTEIN</div>
+     ${faithProtegeLine(partner,f)}
+   </div>
+   ${arc.length?`<div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">HISTORIQUE</div>
+     ${arc.map(a=>`<div class="mono small muted" style="margin-top:4px">${a.year} · ${esc(a.text)}</div>`).join('')}
+   </div>`:''}
+   <button class="btn ghost mt" onclick="CL.go('faith_contacts')">← Retour aux contacts</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function specialtyLabel(key){
   return ({frappe:'Spécialiste frappe',lutte:'Spécialiste lutte',soumission:'Spécialiste soumission',
     cardio:'Préparateur physique',dur_au_mal:'Spécialiste encaissement',mental:'Préparateur mental'})[key]||'Coach';
