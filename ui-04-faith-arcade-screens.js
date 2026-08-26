@@ -1070,6 +1070,17 @@ function scr_faith_event(){
        <button class="btn primary" style="width:100%;height:56px;margin-top:32px;font-size:16px" onclick="CL.faithEventContinue()">CONTINUER</button>
       </div>`;
     }
+    /* ==== [ANCRE: V3_EFFETS_AVANT_CLIC] — Plan V3 Loi 6 / §5.2.3 point 3 (P10) :
+       un choix qui n'affiche pas ses effets est interdit. formatEventDelta()
+       existe déjà (jusqu'ici réservé à l'affichage après résolution) ; le
+       risque reste qualitatif (ancre FAITH_RISQUE_DECLARE) : on annonce qu'il
+       y a un risque, jamais sa probabilité. Vaut pour TOUS les événements de
+       cet écran (ce cas Frankenstein comme le rendu générique juste en
+       dessous), pas seulement l'un d'eux.
+       Exception à documenter : le choix de coach (LOT 5, C12) affiche le
+       palmarès du coach, PAS un delta d'attributs — un être humain ne se
+       choisit pas au calcul (arbitrage §4 contradiction 3). Ne pas
+       "corriger" cette incohérence apparente là-bas. ==== */
     return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
      <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
      <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
@@ -1077,6 +1088,8 @@ function scr_faith_event(){
      <div style="display:flex;flex-direction:column;gap:10px">
        ${ev.choices.map((c,i)=>`<div class="opp" style="padding:16px;min-height:72px;text-align:left" onclick="CL.chooseFaithEvent(${i})">
          <b style="font-size:15px">${esc(c.label)}</b>
+         ${c.d?`<div class="tagrow" style="margin-top:8px">${formatEventDelta(c.d)}</div>`:''}
+         ${c.risk?`<div class="mono small" style="margin-top:6px;color:var(--warn)">Ça peut mal tourner.</div>`:''}
        </div>`).join('')}
      </div>
     </div>`;
@@ -1111,7 +1124,7 @@ function scr_faith_event(){
        const risque=!!c.risk;
        return `<div class="glass${locked?'':' opp'}" style="padding:16px;min-height:72px;text-align:left;${risque?'border-left:3px solid var(--f-red-hi);':''}opacity:${locked?0.4:1};cursor:${locked?'not-allowed':'pointer'}" ${locked?'':`onclick="CL.chooseFaithEvent(${i})"`}>
          <b style="font-size:15px">${esc(c.label)}</b>${c.cost?`<span class="muted small" style="color:var(--loss)"> (-${c.cost}k$)</span>`:''}
-         <div class="tagrow" style="margin-top:10px">${formatRiskBadge(c)}</div>
+         <div class="tagrow" style="margin-top:10px">${c.d?formatEventDelta(c.d):''}${formatRiskBadge(c)}</div>
        </div>`;
      }).join('')}
    </div></div>`;
