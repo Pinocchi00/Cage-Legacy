@@ -902,6 +902,7 @@ const CL={
     // carrière précédente.
     G.titleHistory=[];
     G.f=f; G.roster=makeOrgRoster(f); G.ach=[]; G.season={year:1,fights:[]}; checkAch();
+    recordCareerStart(f);
     forceFightPaceForMode('career');
     G.screen='hub'; save(); render(); },
   fightSelect(){ startFightSelect(); },
@@ -1592,6 +1593,7 @@ const CL={
     }
     G.titleHistory=[];
     G.f=f; G.roster=makeOrgRoster(f);
+    recordCareerStart(f);
     // division/genre, qui progresseront en copiant les stats du joueur s'il
     // s'entraîne avec eux (voir CL.faithSparring).
     /* ==== [ANCRE: FAITH_ECURIE_DEPART] — un camp d'élite, ce sont d'abord des

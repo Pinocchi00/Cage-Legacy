@@ -581,6 +581,15 @@ function scr_codex(){
      const byRar={C:0,R:0,E:0,L:0,M:0};
      unlocked.forEach(id=>{ const s=SKILLS.find(x=>x.id===id); if(s) byRar[s.rar]=(byRar[s.rar]||0)+1; });
      const meta=loadMetaStats();
+     /* ==== [ANCRE: ANALYTICS_LOCALES_CODEX] — chantier 2 : le panneau existant
+        n'affichait que 2 chiffres (retraites, combats totaux). getAnalytics()
+        (state.js) réutilise le MÊME registre (META_STATS_KEY) enrichi par
+        recordCareerStart()/updateMetaStatsOnRetirement() — aucune 2e source de
+        vérité, juste plus de champs à afficher ici. 100% local, déjà agrégé
+        (aucune donnée personnelle au-delà de ce que le Codex montrait déjà). */
+     const an=getAnalytics();
+     const topDiv=Object.entries(an.divisions).sort((a,b)=>(b[1].careers||0)-(a[1].careers||0))[0];
+     const topDivName=topDiv?((divById(topDiv[0])||{}).name||topDiv[0]):null;
      return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:12px">
        <div class="eyebrow mb" style="color:var(--gold)">Codex Inter-carrières — statistiques cumulées</div>
        <div class="tagrow">
@@ -590,7 +599,10 @@ function scr_codex(){
          <span class="tag2" style="border-color:${RAR_COLORS.L};color:${RAR_COLORS.L}">${byRar.L} Légendaires</span>
          <span class="tag2" style="border-color:${RAR_COLORS.M};color:${RAR_COLORS.M}">${byRar.M} Mythiques</span>
        </div>
-       <div class="muted small mt">${meta.totalRetirements||0} carrière(s) retraitée(s) · ${meta.totalFights||0} combat(s) au total, toutes carrières confondues.</div>
+       <div class="muted small mt">${meta.totalRetirements||0} carrière(s) retraitée(s) sur ${an.careersStarted} commencée(s) · ${meta.totalFights||0} combat(s) au total, toutes carrières confondues.</div>
+       <div class="muted small mt">Bilan cumulé : ${an.totalWins}V - ${an.totalLosses}D - ${an.totalDraws}N · ${an.koPct}% KO, ${an.subPct}% soumission, ${an.decPct}% décision.</div>
+       <div class="muted small mt">Meilleure série : ${an.bestWinStreak} victoire(s) · Plus longue carrière : ${an.longestCareerFights} combat(s) · Record Overall : ${an.highestOverall} · Record Elo : ${an.highestElo}.</div>
+       ${topDivName?`<div class="muted small mt">Division favorite : ${esc(topDivName)} (${topDiv[1].careers} carrière(s)).</div>`:''}
      </div>`;
    })():''}
    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">

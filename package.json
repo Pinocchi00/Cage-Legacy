@@ -4,8 +4,8 @@
   "private": true,
   "description": "Outillage qualité pour Cage Legacy — suite de tests (exécute le vrai code du jeu dans un DOM virtuel) et linter (ESLint) pour détecter erreurs JS et incohérences avant mise en ligne.",
   "scripts": {
-    "test": "node --test tests/career.test.js tests/hallOfFame.test.js tests/champChamp.test.js tests/ranking.test.js tests/invariants.test.js tests/saveSystem.test.js",
-    "test:watch": "node --test --watch tests/career.test.js tests/hallOfFame.test.js tests/champChamp.test.js tests/ranking.test.js tests/invariants.test.js tests/saveSystem.test.js",
+    "test": "node --test tests/career.test.js tests/hallOfFame.test.js tests/champChamp.test.js tests/ranking.test.js tests/invariants.test.js tests/saveSystem.test.js tests/analytics.test.js",
+    "test:watch": "node --test --watch tests/career.test.js tests/hallOfFame.test.js tests/champChamp.test.js tests/ranking.test.js tests/invariants.test.js tests/saveSystem.test.js tests/analytics.test.js",
     "lint": "eslint .",
     "lint:content": "node tools/lint-content.js",
     "check": "npm run lint && npm test"

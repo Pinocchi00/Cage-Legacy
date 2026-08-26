@@ -299,6 +299,15 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   G.f.careerElo=Math.max(500,G.f.careerElo+Math.round(eloRes.deltaA*0.5)); opp.careerElo=Math.max(500,opp.careerElo+Math.round(eloRes.deltaB*0.5));
   G.f.inactivityCycles=0;
   // ==== [FIN ANCRE] ====
+  // ==== [ANCRE: ANALYTICS_LOCALES_PICS] — simple traçage de records personnels
+  // (jamais un bonus de jeu, juste des "plus haut jamais atteint" lus par
+  // updateMetaStatsOnRetirement à la retraite) : streak/overall/elo viennent
+  // d'être mis à jour par applyResult()/l'ELO ci-dessus, donc leur valeur ici
+  // est déjà celle du combat qui vient de se terminer.
+  G.f.peakStreak=Math.max(G.f.peakStreak||0,G.f.streak||0,0);
+  G.f.peakOverall=Math.max(G.f.peakOverall||0,G.f.overall||0);
+  G.f.peakElo=Math.max(G.f.peakElo||0,G.f.orgElo||0);
+  // ==== [FIN ANCRE] ====
   if(win){
     // ==== [ANCRE: CORRECTIF_CHAMPION_EASYFIGHTS] — divRank() donne le rang 0
     // au champion (il est exclu du pool des challengers). Une défense contre
