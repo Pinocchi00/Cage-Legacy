@@ -830,10 +830,17 @@ function scr_faith_contacts(){
   const topPartner=(F.gym||[]).find(p=>p.id===G.faith.sparringPrimaryId)||(G.faith.gym||[])[0];
   const coach=faithCoachPerson(F);
   const agentPatience=F.agentPatience!=null?F.agentPatience:3;
-  const agentMood=!F.agent?'sans agent cette année'
-    :agentPatience>=3?'il vous suit sans discuter'
-    :agentPatience>=1?'il commence à compter les faveurs'
-    :'il parle de repositionner sa liste de clients';
+  /* ==== [ANCRE: V3_AGENT_CONSEQUENTIEL] — Plan V3 §5.2.2 point 3 : l'humeur de
+     l'agent dit ce qu'il FERA à la prochaine offre, avec un chiffre ou un nom,
+     jamais un état d'âme. La dernière ligne était l'exemple de rejet du §1.3. */
+  const nextOpp=(F.pendingOffer&&F.pendingOffer.opp&&F.pendingOffer.opp.o)||null;
+  const agentMood=!F.agent
+    ?'Aucun agent : vous signez ce qu’on vous propose, sans négocier.'
+    :agentPatience>=3
+    ?`Il ira chercher la bourse${nextOpp?` sur le combat contre ${nextOpp.name}`:''} — vous pouvez encore refuser une fois.`
+    :agentPatience>=1
+    ?'Il négociera la bourse, mais ne demandera plus d’autre adversaire pour vous.'
+    :'Il prendra la prochaine offre telle quelle. Plus de négociation cette année.';
   const card=(who,name,role,mood,detail,onclick)=>`<div class="opp" style="padding:16px;text-align:left"${onclick?` onclick="${onclick}"`:''}>
     <div class="eyebrow" style="font-size:11px">${esc(who)}</div>
     <div class="hero-name" style="font-size:18px;margin-top:4px">${esc(name)}</div>
