@@ -498,6 +498,14 @@ const FAITH_BRANCH_EVENTS=[
      (ui-04) lit le ratio d'adversaires du roster ACTUEL déjà battus — pas
      juste un nombre de combats — pour ne se déclencher que quand "battu
      tout le monde dans un rayon de 300km" est vrai au sens du jeu. ==== */
+  /* ==== [ANCRE: V4_C16_TERRITOIRE_GALA] — Plan V4 LOT 6 C16 : "je veux que
+     l'univers du jeu change" — au-delà des deltas d'attributs ci-dessous,
+     chooseFaithEvent() (ui-08, ANCRE V3_REGIONAL_CEILING_WORLD) fait
+     réellement changer l'univers sur ces deux choix : nouvelle organisation
+     et nouveau bassin d'adversaires pour la première, statut visible pour
+     la seconde — et désormais aussi le pool de villes de gala (F.territoire,
+     faithGalaCity, ui-04) : jouer à l'étranger pour l'une, à domicile pour
+     l'autre. ==== */
   {id:'evt_br_regional_ceiling',req:f=>f._stable==='regional'&&faithRegionalCeilingEligible(f),title:'Le plafond régional',
    text:'Vous avez battu tout le monde dans un rayon de trois cents kilomètres. Il n’y a plus personne à affronter ici.',
    choices:[{label:'Aller chercher plus loin',d:[['confidence',6],['adaptability',5],['morale',-5]]},

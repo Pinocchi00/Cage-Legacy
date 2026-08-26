@@ -1434,6 +1434,21 @@ function rankPool(list){
    désynchroniser deux notions différentes du "niveau réel" d'un
    combattant. ==== */
 function standing(f){ return p4pScore(f); }
+/* ==== [ANCRE: V4_C17_P4P_RANG_MONDIAL] — Plan V4 LOT 6 C17 : p4pScore()
+   triait déjà les propositions et l'onglet P4P (scr_rankings, ui-06, ANCRE
+   V3_RANKINGS_P4P_TAB) mais n'était jamais montré au joueur comme SA
+   position. p4pRank() réutilise strictement le même tri (p4pScore pur,
+   sans l'exception "champion toujours premier" de rankPool) sur le même
+   pool que l'onglet P4P — la portée "mondiale" reste le roster de
+   l'organisation/division courante, aucun second système de classement.
+   Correctif d'affichage : p4pScore() lui-même n'est pas modifié. ==== */
+function p4pRank(f){
+  if(typeof G==='undefined'||!G||!Array.isArray(G.roster)) return null;
+  const sorted=G.roster.concat([f]).slice().sort((a,b)=>p4pScore(b)-p4pScore(a));
+  const idx=sorted.indexOf(f);
+  return idx>=0?idx+1:null;
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-39] — levier 2/3 des "+5 combats sur une carrière
    complète" : le pic avant déclin s'allonge d'environ un an (36/38 →
    37/39). Les leviers 1 (bande de combats/an élargie, RI(1,4) vétéran)

@@ -1086,6 +1086,12 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
           nulle part ailleurs — cf. faithCareerTotalFights, ui-04) affiché
           sur la fiche elle-même, pas seulement à l'épilogue Faith. ==== -->
      ${f.amaRec?`<div class="story" style="position:relative;z-index:2"><b>Combats au total.</b> ${f.amaRec.W+f.amaRec.L+f.W+f.L+(f.D||0)} (amateur + pro).</div>`:''}
+     <!-- ==== [ANCRE: V4_C17_P4P_RANG_MONDIAL] — Plan V4 LOT 6 C17 : p4pScore()
+          était calculé et déjà utilisé (tri des propositions, onglet P4P de
+          scr_rankings) mais jamais montré au joueur comme SA position. p4pRank()
+          (engine.js) réutilise le même tri, ici affiché à côté du rang de
+          division — absent tant qu'aucun combat n'a encore été disputé. ==== -->
+     ${((f.W||0)+(f.L||0)+(f.D||0))>0?`<div class="story" style="position:relative;z-index:2"><b>Classement.</b> #${divRank(f)} en division · #${p4pRank(f)} au P4P.</div>`:''}
      ${(G.faith)?faithCareerStatsGrid(f,G.faith):''}
      ${championBadgeCard(f)}
      ${signatureMoveCard(f)}
@@ -1113,6 +1119,10 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
    </div>
    ${grp('tech','Technique',g.tech,true)}
    <div style="display:flex;flex-direction:column;gap:16px">${grp('ment','Mental',g.ment,true)}${grp('phys','Physique',g.phys,true)}</div>
+   <!-- ==== [ANCRE: V4_C15_FAITH_ARCHIVES] — Plan V4 LOT 6 C15 : accessible
+        depuis toute fiche de combattant — celle du joueur ici. Absent hors
+        Faith : scr_history() (ui-07) reste l'Archives du mode Carrière. ==== -->
+   ${G.faith?`<button class="btn ghost" onclick="CL.viewFaithArchives()">Archives</button>`:''}
    <button class="btn ghost" onclick="G._profileReturn=null;CL.go('${backScreen}')">Retour</button></div>`; }
 
 /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — Plan V3 LOT 6 §5.6.3 point 1 : "un
