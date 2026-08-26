@@ -577,12 +577,23 @@ function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
   const potential=opt.potential!=null?opt.potential:gauss(87,4,80,95);   // caché
   const dynamic=0;                                                         // moral/forme caché ±
   const mot=pick(MOTIVATIONS); const origin=parseGender(generateContextualOrigin({attrs,phys,countryKey:ck,potential,morale:60}),gender);
+  const motivation=parseGender(mot.short,gender);
+  /* ==== [ANCRE: FIGHTER_BIO_C14] — Plan V4 LOT 5 §C14 : PERSON_TRAITS
+     (data-people.js) n'était lu que pour les coachs/agents/sparrings
+     (personMint(), state.js) — un combattant du roster n'avait aucun lore
+     lisible nulle part. Trois chaînes STABLES À VIE, posées une seule fois
+     ici, à la génération, jamais recalculées ensuite : `bio.origin`/`bio.
+     past` reprennent exactement `origin`/`motivation` déjà calculés
+     ci-dessus (une seule source, jamais deux versions différentes de la
+     même vie) ; `bio.trait` est nouveau, un détail concret et mémorable
+     (jamais une phrase générique — même exigence que pour les coachs). */
+  const bio={origin,past:motivation,trait:pick(PERSON_TRAITS)};
   const f={ id:uniqueFighterId(), gender, div:div.id, divName:div.name, style, styleLabel:styleLabel(style),
     first:nm.first,last:nm.last,name:nm.name,flag:nm.flag,countryKey:ck,
     phys, attrs, potential, dynamic, morale:60, form:55,
     stage:'amateur', org:0, orgWins:0, age:opt.age!=null?opt.age:RI(18,22),
     W:0,L:0,D:0,ko:0,sub:0,dec:0,koLoss:0,streak:0, champion:null, titles:0, defenses:0,
-    skills:[], history:[], origin, motivation:parseGender(mot.short,gender), drive:mot.drive, amaRec:null, amaTitle:false, nick:null, epithets:[] };
+    skills:[], history:[], origin, motivation, drive:mot.drive, bio, amaRec:null, amaTitle:false, nick:null, epithets:[] };
   f.overall=overall(f);
   f.orgElo=eloBaseline(0,f.overall); f.careerElo=eloBaseline(0,f.overall); f.inactivityCycles=0;
   // ==== [ANCRE: GENETIQUE] — jet unique à la création, jamais via rollSkill ====

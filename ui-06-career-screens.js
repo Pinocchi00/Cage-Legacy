@@ -1161,7 +1161,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
      <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:56px;text-align:right">P4P</div>
     </div>`;
     p4pSorted.forEach((o,i)=>{ const isPlayer=(o===f); const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
-      h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}">
+      h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` onclick="G._oppCardId='${o.id}';G._oppCardReturn='rankings';CL.go('opponent_card')"`}>
         <div class="mono" style="width:32px;font-size:15px">${i+1}</div>
         <div style="flex:1;display:flex;flex-direction:column">
           <span class="disp" style="font-size:17px;line-height:1.1">${esc(o.name)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}${o.champion?' <span class="mono gold" style="font-size:11px">C</span>':''}</span>
@@ -1192,7 +1192,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
     const fightsTot=o.W+o.L+(o.D||0);
     const statusStr=o.champion?'CHAMPION':(fightsTot===0?'NR':arrow);
     const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
-    h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}">
+    h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` onclick="G._oppCardId='${o.id}';G._oppCardReturn='rankings';CL.go('opponent_card')"`}>
       <div class="mono" style="width:32px;font-size:15px;${o.champion&&!isPlayer?'color:var(--gold)':''}">${o.champion?'C':rank}</div>
       <div style="flex:1;display:flex;flex-direction:column">
         <span class="disp" style="font-size:17px;line-height:1.1">${esc(o.name)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}</span>

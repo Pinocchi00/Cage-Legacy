@@ -611,6 +611,56 @@ function scr_faith_hub(){
    engine.js), gala et négociation appliqués, mais reste une ESTIMATION :
    la bourse définitive dépend aussi du résultat du combat (prime de
    victoire, finition), jamais connue avant. ==== */
+/* ==== [ANCRE: FIGHTER_BIO_C14] — Plan V4 LOT 5 §C14 : bio.origin/bio.past/
+   bio.trait existent maintenant sur tout combattant (posés une seule fois à
+   la génération, makeFighter()/engine.js) mais ne s'affichaient nulle
+   part. Trois surfaces : une seule ligne pertinente sur l'offre (ci-dessous,
+   jamais les trois à la fois — un adversaire ne se résume pas d'un coup),
+   la fiche complète sur la nouvelle "fiche adverse" (scr_opponent_card,
+   plus bas) et au classement (scr_rankings, ui-06, désormais tapable). */
+/** Choisit LA ligne de lore pertinente pour CE combat précis, jamais les
+ * trois à la fois (règle H.1-like : un adversaire ne se résume pas d'un
+ * coup) : une némésis mérite qu'on sache ce qui le définit, un vétéran
+ * connu se lit par ce qui le pousse encore, un inconnu se découvre par
+ * d'où il vient. @param {object} o @param {object} f @returns {?{label:string,text:string}} */
+function oppRelevantLore(o,f){
+  if(!o.bio) return null;
+  if(o.id===f.faithNemesisId) return {label:'CE QUI LE DÉFINIT',text:o.bio.trait};
+  const fights=(o.W||0)+(o.L||0)+(o.D||0);
+  if(fights>=15) return {label:'CE QUI LE POUSSE',text:o.bio.past};
+  return {label:'D’OÙ IL VIENT',text:o.bio.origin};
+}
+/** La "fiche adverse" : identité, palmarès et les trois lignes de lore
+ * d'un combattant du roster (opposant), jamais celles du joueur (déjà sur
+ * scr_profile). Cible dynamique (G._oppCardId, posé par l'appelant avant
+ * CL.go) — même convention que G._profileReturn (scr_profile, ui-06) pour
+ * un écran qui n'a pas de référence fixe unique dans SCREENS. */
+function scr_opponent_card(){
+  const o=(G.roster||[]).find(x=>x.id===G._oppCardId);
+  const back=G._oppCardReturn||'faith_hub';
+  if(!o) return `<div class="scr center intro"><p class="lede">Adversaire introuvable.</p><button class="btn ghost mt" onclick="CL.go('${back}')">Retour</button></div>`;
+  const rnk=divRank(o);
+  return `<div class="scr" style="max-width:480px;margin:0 auto">
+   <div class="bar"><span class="eyebrow">Fiche adverse</span><span class="eyebrow x" onclick="CL.go('${back}')">✕</span></div>
+   <h2 class="hero-name" style="font-size:26px;margin-top:8px">${esc(o.name)} ${o.flag||''}</h2>
+   <div class="muted small mt">${esc(o.styleLabel||'')}, ${o.age} ans</div>
+   <div class="mono small mt">${recordStr(o)} · ${o.champion?'CHAMPION':`#${rnk}`}</div>
+   ${o.bio?`<div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">D’OÙ IL VIENT</div>
+     <div class="small">${esc(o.name)} ${esc(o.bio.origin)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE POUSSE</div>
+     <div class="small">${esc(o.bio.past)}.</div>
+   </div>
+   <div class="card mt" style="padding:14px;background:var(--panel2);text-align:left">
+     <div class="eyebrow mb" style="font-size:11px">CE QUI LE DÉFINIT</div>
+     <div class="small">${esc(o.bio.trait)}</div>
+   </div>`:''}
+   <button class="btn ghost mt" onclick="CL.go('${back}')">← Retour</button>
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_faith_offer(){
   const f=G.f, F=G.faith, off=F.pendingOffer;
   if(!off) return `<div class="scr center intro"><p class="lede">Aucune offre en cours.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
@@ -674,6 +724,7 @@ function scr_faith_offer(){
        return `<div class="mono small" style="margin-top:8px;color:var(--f-red-hi)">NÉMÉSIS · ${esc(tier)} · ${bilan}</div>`;
      })():''}
      ${F.scoutKey?`<div class="mono small" style="margin-top:8px;color:var(--sage)">SPARRING · Vous savez qu’il est particulièrement dangereux en ${esc(oppTopAttrLabel(o))}.</div>`:''}
+     ${(()=>{ const lore=oppRelevantLore(o,f); return lore?`<div class="small muted" style="margin-top:8px">${esc(lore.label)} · ${esc(lore.text)}</div>`:''; })()}
    </div>
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
@@ -709,6 +760,7 @@ function scr_faith_offer(){
      }</div>
    </div>
    <div class="mono small" style="text-align:center;margin-top:14px"><span onclick="CL.viewFightCard()" style="color:var(--gold);cursor:pointer;text-decoration:underline">Voir la carte complète ▸</span></div>
+   <div class="mono small" style="text-align:center;margin-top:8px"><span onclick="G._oppCardId='${o.id}';G._oppCardReturn='faith_offer';CL.go('opponent_card')" style="color:var(--muted);cursor:pointer;text-decoration:underline">Voir la fiche adverse ▸</span></div>
   </div>`;
 }
 /* ==== [ANCRE: V2-22/V2-23] — "rien ne se passe entre l'annonce et la
@@ -835,7 +887,12 @@ function faithCoachPerson(F){
    déjà affichée (partner.first/last/nick), jamais une nouvelle générée par
    makeName() (Loi 1 : une seule identité par personne) — dédoublonnée par
    id de combattant ('sparring:<id>', personKeyFor), donc rappeler cette
-   fonction pour le même partenaire renvoie toujours la même Person. */
+   fonction pour le même partenaire renvoie toujours la même Person.
+   Depuis §C14, partner.bio (posé une seule fois à la génération par
+   makeFighter(), engine.js) EST déjà la source stable — la Person ne fait
+   que la reprendre, jamais un second tirage indépendant qui pourrait
+   diverger (repli sur PERSON_TRAITS seulement pour une sauvegarde
+   antérieure à C14, où partner.bio n'existe pas encore). */
 function faithSparringPerson(partner){
   if(!partner) return null;
   const reg=ensurePeopleRegistry();
@@ -844,7 +901,7 @@ function faithSparringPerson(partner){
   const id=reg.nextId++;
   const p={id,firstName:partner.first,lastName:partner.last||'',nickname:partner.nick||null,
     flag:partner.flag||'',born:partner.countryKey||'',role:'sparring',
-    bio:{origin:partner.origin||'',past:partner.motivation||'',trait:pick(PERSON_TRAITS)},
+    bio:partner.bio||{origin:partner.origin||'',past:partner.motivation||'',trait:pick(PERSON_TRAITS)},
     rel:personDefaultRel(),state:{gymId:null,active:true,leftAt:null,leftReason:null},memory:[],
     extra:{fighterId:partner.id}};
   reg.byId[id]=p; reg.byKey[key]=p.id;
