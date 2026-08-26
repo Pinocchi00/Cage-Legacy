@@ -160,6 +160,14 @@ function generateNPCNews(forceBatch){
       `${p1.name} provoque publiquement ${p2.name} sur les réseaux sociaux.`,
       `L\u2019équipe de ${p1.name} dénonce ouvertement l\u2019arbitrage de son dernier combat.`
     ];
+    /* ==== [ANCRE: NPC_NEWS_CONTEXTUALISEES] — chantier 3 : gabarits ajoutés
+       au pool SEULEMENT quand ils collent aux vraies stats du combattant tiré
+       (p.W/p.L/p.streak/p.age, déjà présents sur tout objet roster) — sinon
+       le pool générique ci-dessus reste utilisé tel quel, jamais de texte
+       inventé qui contredirait le vrai état du combattant. ==== */
+    if((p1.streak||0)>=3) events.push(`${p1.name} (${p1.W}-${p1.L}) aligne ${p1.streak} victoires d’affilée et réclame publiquement un choc contre ${p2.name}.`);
+    if((p2.streak||0)<=-2) events.push(`Sur une série de ${Math.abs(p2.streak)} défaites, ${p2.name} (${p2.W}-${p2.L}) est annoncé en sursis par son organisation.`);
+    if(typeof isDeclining==='function' && isDeclining(p1) && rnd()<0.5) events.push(`À ${p1.age} ans et sur un bilan de ${p1.W}-${p1.L}, des rumeurs de retraite surprise entourent ${p1.name}.`);
     G.divisionNews.unshift({year:(G.season&&G.season.year)||1,text:pick(events)});
   }
   if(G.divisionNews.length>20) G.divisionNews.length=20;
@@ -406,7 +414,54 @@ function executeCampTier(f,tierId,trainingOpt){
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: LOT8_RIVALITE_HYPE] — rivalités & prime hype ==== */
-function getRivalryPurseMultiplier(f,opp){ if(f.rivalId===opp.id){ return +(1.5+rnd()*0.5).toFixed(2); } return 1.0; }
+/* ==== [ANCRE: LOT8_RIVALITE_HEAT] — chantier 3 (génération procédurale
+   avancée) : rivalryHeat en RENFORT de f._rivalries (compteur d'animosité)
+   et f._allMeetings (compteur total de confrontations), tous deux déjà posés
+   par ui-05 (ANCRE: RIVALITE) — aucun nouveau champ persisté, juste une
+   lecture combinée des deux compteurs existants, donc aucune migration de
+   sauvegarde nécessaire. Paliers demandés par le plan : adversaire normal ->
+   rival potentiel -> rivalité -> rivalité majeure -> rivalité historique. */
+const RIVALRY_TIERS=[
+  {min:0,key:'normal',label:'Adversaire normal'},
+  {min:20,key:'potential',label:'Rival potentiel'},
+  {min:40,key:'rivalry',label:'Rivalité'},
+  {min:65,key:'major',label:'Rivalité majeure'},
+  {min:85,key:'historic',label:'Rivalité historique'}
+];
+/** Chaleur de rivalité 0-100 entre f et l'adversaire oppId, dérivée des
+ * compteurs déjà tenus par ui-05 (ANCRE: RIVALITE) : chaque confrontation
+ * pèse un peu, chaque épisode d'animosité (défaite ou décision serrée) pèse
+ * plus lourd.
+ * @param {Fighter} f @param {string|number} oppId @returns {number} */
+function rivalryHeat(f,oppId){
+  if(!f||oppId==null) return 0;
+  const meetings=(f._allMeetings&&f._allMeetings[oppId])||0;
+  const animosity=(f._rivalries&&f._rivalries[oppId])||0;
+  return clamp(Math.round(meetings*8+animosity*15),0,100);
+}
+/** Palier de rivalité correspondant à une chaleur donnée.
+ * @param {number} heat @returns {{min:number,key:string,label:string}} */
+function rivalryTier(heat){
+  let tier=RIVALRY_TIERS[0];
+  for(const t of RIVALRY_TIERS){ if(heat>=t.min) tier=t; }
+  return tier;
+}
+/* ==== [FIN ANCRE] ==== */
+function getRivalryPurseMultiplier(f,opp){
+  if(f.rivalId===opp.id){ return +(1.5+rnd()*0.5).toFixed(2); }
+  /* ==== [ANCRE: LOT8_RIVALITE_HEAT_BOURSE] — chantier 3, conséquence concrète
+     de la chaleur de rivalité : un adversaire pas encore déclaré rival
+     (f.rivalId, cas ci-dessus, INCHANGÉ — garde exactement son ancien calcul
+     1.5-2.0x) mais déjà "chaud" (heat>=20, paliers RIVALRY_TIERS) génère un
+     intérêt médiatique croissant et donc une bourse légèrement supérieure :
+     +0% à heat=20 (rival potentiel), jusqu'à +25% à heat=100 (compression
+     volontaire — un vrai rival déclaré doit toujours rapporter davantage que
+     ce cas intermédiaire). Strictement additif : avant ce chantier, ce
+     second cas renvoyait toujours 1.0 sans exception. */
+  const heat=rivalryHeat(f,opp.id);
+  if(heat>=20) return +(1+heat/400).toFixed(2);
+  return 1.0;
+}
 function triggerRivalPressConference(f,opp){
   if(f.rivalId!==opp.id||f._rivalryPressDone) return null;
   f._rivalryPressDone=true;
@@ -431,6 +486,81 @@ function triggerRivalPressConference(f,opp){
   }
   f.morale=clamp(f.morale+moraleGain,0,100);
   return {title:"Tension maximale en conférence",text,moraleEffect:moraleGain};
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT_ARCS_NARRATIFS] — chantier 3 : arcs après plusieurs
+   défaites (camp de rédemption) et plusieurs victoires (ascension/comeback),
+   demandés en renfort de f.streak (compteur déjà tenu par applyResult(),
+   engine.js) — aucun nouveau compteur de série créé. Un seul champ persisté,
+   f.narrativeArc, jamais un attribut/potentiel : juste de quoi savoir où on
+   en est dans l'arc en cours, pour ne raconter chaque palier qu'une seule
+   fois. Défaut tolérant (null) posé dans validateState() (state.js). */
+const NARRATIVE_ASCENSION_TIERS=[
+  {streak:3,tier:1,label:'Espoir qui monte'},
+  {streak:6,tier:2,label:'Contender légitime'},
+  {streak:9,tier:3,label:'Prétendant au titre'},
+  {streak:12,tier:4,label:'Superstar en devenir'}
+];
+/** Fait avancer l'arc narratif de f selon sa série en cours (f.streak, déjà à
+ * jour au moment de l'appel — applyResult() vient de tourner) et renvoie le
+ * "beat" franchi cette fois-ci (ou null si rien de nouveau), pour que
+ * generatePlayerContextualNews() puisse le raconter avec les vraies stats.
+ * Ne modifie jamais un attribut, un potentiel ni l'équilibrage du combat.
+ * @param {Fighter} f @returns {?object} */
+function checkNarrativeArc(f){
+  if(!f) return null;
+  const streak=f.streak||0;
+  let beat=null;
+  if(streak<=-2){
+    if(!f.narrativeArc||f.narrativeArc.type!=='redemption'){
+      f.narrativeArc={type:'redemption',stage:'camp'};
+      beat={kind:'redemption_start',streak};
+    }
+  } else if(f.narrativeArc && f.narrativeArc.type==='redemption' && f.narrativeArc.stage==='camp' && streak>=1){
+    f.narrativeArc.stage='comeback';
+    beat={kind:'redemption_comeback',streak};
+  } else if(f.narrativeArc && f.narrativeArc.type==='redemption' && f.narrativeArc.stage==='comeback'){
+    f.narrativeArc=null; // arc résolu, refermé silencieusement — prêt à en raconter un nouveau plus tard
+  } else if(streak>=3){
+    const eligible=NARRATIVE_ASCENSION_TIERS.filter(t=>streak>=t.streak);
+    const best=eligible[eligible.length-1];
+    if(best && (!f.narrativeArc||f.narrativeArc.type!=='ascension'||f.narrativeArc.tier<best.tier)){
+      f.narrativeArc={type:'ascension',tier:best.tier};
+      beat={kind:'ascension',tier:best.tier,label:best.label,streak};
+    }
+  } else if(streak<=0 && f.narrativeArc && f.narrativeArc.type==='ascension'){
+    f.narrativeArc=null;
+  }
+  return beat;
+}
+/** Actualité contextualisée à partir des VRAIES stats de ce combat (arc
+ * franchi, palier de rivalité franchi) — jamais du texte générique. Pousse
+ * dans le MÊME flux que generateNPCNews() (G.divisionNews), avec player:true
+ * pour le distinguer si un écran veut le mettre en avant, sans dupliquer le
+ * système d'actualités existant.
+ * @param {Fighter} f @param {Fighter} opp @param {object} res @param {?object} arcBeat */
+function generatePlayerContextualNews(f,opp,res,arcBeat){
+  if(!f) return;
+  if(!G.divisionNews) G.divisionNews=[];
+  const year=(G.season&&G.season.year)||1;
+  const lines=[];
+  if(arcBeat){
+    if(arcBeat.kind==='redemption_start') lines.push(`${f.name} encaisse sa ${Math.abs(arcBeat.streak)}e défaite d’affilée et rejoint un camp de rédemption pour relancer sa carrière.`);
+    else if(arcBeat.kind==='redemption_comeback') lines.push(`Après une traversée du désert, ${f.name} renoue avec la victoire et amorce un vrai comeback.`);
+    else if(arcBeat.kind==='ascension') lines.push(`${arcBeat.streak} victoires d’affilée : ${f.name} passe un cap et devient "${arcBeat.label}" aux yeux de la presse.`);
+  }
+  if(opp){
+    const heat=rivalryHeat(f,opp.id);
+    const tier=rivalryTier(heat);
+    if(tier.key!=='normal' && f._rivalryLastTier!==tier.key){
+      f._rivalryLastTier=tier.key;
+      const count=(f._allMeetings&&f._allMeetings[opp.id])||0;
+      lines.push(`${f.name} et ${opp.name} entrent dans une phase de "${tier.label.toLowerCase()}" après ${count} confrontation(s).`);
+    }
+  }
+  lines.forEach(text=>G.divisionNews.unshift({year,text,player:true}));
+  if(G.divisionNews.length>20) G.divisionNews.length=20;
 }
 /* ==== [FIN ANCRE] ==== */
 

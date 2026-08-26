@@ -1090,6 +1090,7 @@ function validateState(){
   if(typeof f.peakStreak!=='number'||isNaN(f.peakStreak)) f.peakStreak=Math.max(f.streak||0,0);
   if(typeof f.peakOverall!=='number'||isNaN(f.peakOverall)) f.peakOverall=f.overall||0;
   if(typeof f.peakElo!=='number'||isNaN(f.peakElo)) f.peakElo=f.orgElo||0;
+  if(typeof f.narrativeArc==='undefined') f.narrativeArc=null;
   if(typeof f.orgWins==='undefined') f.orgWins=0;
   if(typeof f.injury==='undefined') f.injury=null;
   if(!f._rivalries || typeof f._rivalries!=='object') f._rivalries={};

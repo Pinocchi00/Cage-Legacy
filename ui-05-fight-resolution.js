@@ -285,6 +285,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     G.f.biggestRival={name:opp.name,flag:opp.flag,count:G.f._allMeetings[opp.id],W:opp.W,L:opp.L,style:opp.styleLabel};
   }
   // ==== [FIN ANCRE] ====
+  // ==== [ANCRE: NARRATION_PROCEDURALE] — chantier 3 : renforce la rivalité
+  // (heat calculée sur _rivalries/_allMeetings ci-dessus, aucun nouveau
+  // compteur) avec des arcs narratifs et des actualités contextualisées à
+  // partir des VRAIES stats de ce combat, au même point de passage unique
+  // que le reste du bloc RIVALITE (carrière et Faith confondus).
+  if(typeof checkNarrativeArc==='function'){
+    const arcBeat=checkNarrativeArc(G.f);
+    if(typeof generatePlayerContextualNews==='function') generatePlayerContextualNews(G.f,opp,res,arcBeat);
+  }
+  // ==== [FIN ANCRE] ====
   // ==== [ANCRE: LEAPFROG_CUT] — traçage de la facilité des combats + bond de classement,
   // et sanction si le joueur enchaîne trop d'adversaires trop faciles. ====
   let forced=G.f.retired||false;
