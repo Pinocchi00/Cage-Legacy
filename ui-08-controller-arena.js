@@ -940,14 +940,17 @@ const CL={
         G.fight.malus=Object.assign({},G.fight.malus,penalty);
       }
       const wc=weightCutInfo(G.f);
-      let cutTier;
+      /* ==== [ANCRE: V4_C10_WEIGH_IN] — même règle que côté Carrière classique
+         (ui-02, ANCRE V4_C10_WEIGH_IN) : le tier `complique` peut échouer
+         (30%), `impossible` échoue toujours. ==== */
+      let cutTier, weighInPassed=true;
       if(G.faith.dietYear===G.faith.year){ cutTier='sans_effort'; }
       else if(wc.cutPct<=3) cutTier='sans_effort';
       else if(wc.cutPct<=8) cutTier='facile';
       else if(wc.cutPct<=13) cutTier='normal';
-      else if(wc.cutPct<=18) cutTier='complique';
-      else cutTier='impossible';
-      G.fight.cutResult={tier:cutTier,effPct:(G.faith.dietYear===G.faith.year)?0:wc.cutPct,kg:(G.faith.dietYear===G.faith.year)?0:wc.cutKg,walk:wc.walk,limit:wc.limit};
+      else if(wc.cutPct<=18){ cutTier='complique'; weighInPassed=rnd()>=0.3; }
+      else { cutTier='impossible'; weighInPassed=false; }
+      G.fight.cutResult={tier:cutTier,effPct:(G.faith.dietYear===G.faith.year)?0:wc.cutPct,kg:(G.faith.dietYear===G.faith.year)?0:wc.cutKg,walk:wc.walk,limit:wc.limit,weighInPassed};
       proceedToFight();
     } else { chooseOpponent(i); }
   },
@@ -3094,6 +3097,14 @@ const CL={
     render();
   },
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: V4_C9_FIGHT_BY_FIGHT] — une seule saison déroulée à la fois
+     (re-taper la même la referme) : le Parcours reste une liste, pas un
+     accordéon à plusieurs volets ouverts qui redeviendrait aussi long qu'une
+     prose. */
+  toggleFaithJourneyYear(year){
+    G.faithJourneyExpandedYear=(G.faithJourneyExpandedYear===year)?null:year;
+    render();
+  },
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }
