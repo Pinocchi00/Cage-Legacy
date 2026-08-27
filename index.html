@@ -485,6 +485,14 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="data-people.js"></script>
 <script src="data-faith-content.js"></script>
 <script src="engine.js"></script>
+<!-- ==== [ANCRE: ENGINE_COMBAT_SPLIT] — chantier 4 (refactorisation
+     progressive du moteur) : engine-combat.js extrait d'engine.js à
+     l'IDENTIQUE (STYLE_PROFILE, simulateFight, applyResult, catalogue des
+     finitions, winProbEstimate) — le bloc le plus interdépendant du moteur,
+     laissé en dernier comme prévu par le plan. Dépend des primitives
+     d'engine.js (rnd/pick/clamp/eff/overall/reachEdge...) donc chargé juste
+     après lui. ==== -->
+<script src="engine-combat.js"></script>
 <!-- ==== [ANCRE: ENGINE_PROGRESSION_SPLIT] — chantier 4 (refactorisation
      progressive du moteur) : engine-progression.js extrait d'engine.js à
      l'IDENTIQUE (vieillissement/déclin, blessures, fraîcheur, deltas
