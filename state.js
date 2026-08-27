@@ -1,18 +1,8 @@
 "use strict";
-/* CAGE LEGACY — js/state.js
-   État global G, sauvegarde/chargement, Panthéon persistant, migration.
-   Dépend de engine.js (epithets, appelé par enshrine). legacyTitle (dans ui.js,
-   appelé par enshrine) n'est résolu qu'à l'exécution : ui.js doit être chargé
-   avant toute partie jouée, jamais avant l'exécution de state.js lui-même.
-
-   Couche jouable v3 (sur moteur v2 : engine2.js concaténé) : lisible mobile,
-   thème sombre/clair, 3 adversaires + %estimé, camp = 3 choix liés au sport
-   avec deltas visibles et bornés, orgs, fiche /20, stats de combat, 5
-   derniers combats, surnom gagné, épithètes de fin. */
-/** @type {GameState} */
-let G=null;
+/* CAGE LEGACY — state.js (en cours d'extraction vers state/*.js)
+   Sauvegarde/chargement, Panthéon persistant, migration. G, esc et setTheme
+   vivent désormais dans state/state-core.js (chargé avant ce fichier). */
 const SAVE_KEY='cage-legacy-v3';
-const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
 /* ------------------------------ sauvegarde -------------------------------- */
 /* ==== [ANCRE: SAVE_GARDE_ARCADE] — bug trouvé : arcade et carrière partageaient
@@ -1115,4 +1105,3 @@ function validateState(){
   return true;
 }
 /* ==== [FIN ANCRE] ==== */
-function setTheme(t){ G.theme=t; try{ if(document.documentElement)document.documentElement.setAttribute('data-theme',t); }catch(e){} }
