@@ -30,12 +30,23 @@ const path = require('path');
 // Fichiers du jeu à scanner pour en extraire les déclarations globales.
 // Complète cette liste si de nouveaux fichiers ui-0X-*.js ou autres sont
 // ajoutés au projet (le glob ci-dessous couvre déjà data-*.js, engine.js,
-// state.js, ui-*.js et main.js automatiquement).
+// state/*.js, ui-*.js et main.js automatiquement — récursif d'un niveau
+// pour suivre state.js qui a été découpé en state/state-*.js, cf. refactor
+// "Cage-Legacy" : chaque state-*.js reste un <script> classique séparé,
+// chargé dans le même ordre qu'avant, juste rangé dans un sous-dossier).
 function findGameFiles(rootDir) {
-  return fs.readdirSync(rootDir)
-    .filter((f) => f.endsWith('.js'))
-    .filter((f) => !f.startsWith('eslint.config'))
-    .filter((f) => f !== 'extract_globals.js'); // scripts d'outillage, pas du code du jeu
+  const top = fs.readdirSync(rootDir, { withFileTypes: true });
+  const files = top
+    .filter((e) => e.isFile() && e.name.endsWith('.js'))
+    .filter((e) => !e.name.startsWith('eslint.config'))
+    .filter((e) => e.name !== 'extract_globals.js') // scripts d'outillage, pas du code du jeu
+    .map((e) => e.name);
+  for (const dir of top.filter((e) => e.isDirectory() && !['node_modules', 'tests', 'tools', '.git'].includes(e.name))) {
+    for (const f of fs.readdirSync(path.join(rootDir, dir.name))) {
+      if (f.endsWith('.js')) files.push(path.join(dir.name, f));
+    }
+  }
+  return files;
 }
 
 // Extrait les noms déclarés en position de premier niveau (jamais indentés,
