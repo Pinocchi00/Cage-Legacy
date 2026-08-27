@@ -21,14 +21,75 @@ const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])
    combattant du Gauntlet dans le hub de carrière. Une run Gauntlet ne doit
    jamais toucher au localStorage : il ne survit pas à une fermeture, exactement
    comme un roguelite classique — la vraie carrière reste intacte pendant ce temps. ==== */
-function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return; try{ localStorage.setItem(SAVE_KEY,JSON.stringify(G)); }catch(e){} }
+/* ==== [ANCRE: SAVE_BACKUP_RECOVERY] — audit "sécurité des sauvegardes" : la clé
+   SAVE_KEY était écrite en une seule copie, sans filet — une écriture interrompue
+   (fermeture d'onglet pendant le JSON.stringify, quota localStorage dépassé au
+   milieu de l'écriture) ou une corruption silencieuse du navigateur perdait la
+   carrière entière, sans recours. SAVE_BACKUP_KEY conserve toujours la DERNIÈRE
+   version connue-bonne : save() y recopie l'ancien contenu de SAVE_KEY avant
+   d'écrire le nouveau (jamais l'inverse — le backup a toujours un combat de
+   retard, jamais plus), et load() bascule dessus automatiquement si SAVE_KEY est
+   illisible ou ne passe pas validateSave(). Aucune suppression : une ancienne
+   sauvegarde invalide reste en place jusqu'à la prochaine écriture réussie,
+   restaurable manuellement au besoin. ==== */
+const SAVE_BACKUP_KEY=SAVE_KEY+'_backup';
+/** Vérification STRUCTURELLE, en lecture seule, d'une sauvegarde brute (juste
+ * parsée, avant migrate()/validateState() qui eux RÉPARENT en place). Ne
+ * mute jamais son argument — sert uniquement à décider si cette copie est
+ * assez saine pour être chargée, ou s'il faut basculer sur le backup.
+ * @param {*} raw @returns {boolean} */
+function validateSave(raw){
+  if(!raw||typeof raw!=='object') return false;
+  if(raw.version!==undefined && (typeof raw.version!=='number'||isNaN(raw.version)||raw.version<1)) return false;
+  const f=raw.f;
+  if(!f||typeof f!=='object') return false;
+  if(typeof f.name!=='string'||!f.name) return false;
+  for(const k of ['W','L']){ if(f[k]!==undefined && (typeof f[k]!=='number'||isNaN(f[k])||f[k]<0)) return false; }
+  if(f.D!==undefined && (typeof f.D!=='number'||isNaN(f.D)||f.D<0)) return false;
+  if(f.age!==undefined && (typeof f.age!=='number'||isNaN(f.age)||f.age<0||f.age>100)) return false;
+  if(f.history!==undefined && !Array.isArray(f.history)) return false;
+  if(f.div!==undefined && f.div!==null && typeof divById==='function' && !divById(f.div)) return false;
+  if(raw.season!==undefined && raw.season!==null){
+    if(typeof raw.season!=='object') return false;
+    if(raw.season.year!==undefined && (typeof raw.season.year!=='number'||isNaN(raw.season.year)||raw.season.year<0)) return false;
+  }
+  return true;
+}
+function parseAndValidate(raw){
+  if(!raw) return null;
+  try{ const parsed=JSON.parse(raw); return validateSave(parsed)?parsed:null; }catch(e){ return null; }
+}
+function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return;
+  try{
+    const previous=localStorage.getItem(SAVE_KEY);
+    if(previous) localStorage.setItem(SAVE_BACKUP_KEY,previous);
+    localStorage.setItem(SAVE_KEY,JSON.stringify(G));
+  }catch(e){}
+}
 /* ==== [FIN ANCRE] ==== */
-function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s){ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object'){ G=null; return false; } G=migrate(parsed); if(!validateState()){ console.error('Sauvegarde corrompue : état irrécupérable.'); G=null; return false; } return true; } }catch(e){ console.error('Sauvegarde illisible:',e); G=null; } return false; }
+function load(){
+  try{
+    const primary=parseAndValidate(localStorage.getItem(SAVE_KEY));
+    let parsed=primary, usedBackup=false;
+    if(!parsed){
+      parsed=parseAndValidate(localStorage.getItem(SAVE_BACKUP_KEY));
+      if(parsed) usedBackup=true;
+    }
+    if(!parsed){ G=null; return false; }
+    G=migrate(parsed);
+    if(!validateState()){ console.error('Sauvegarde corrompue : état irrécupérable.'); G=null; return false; }
+    if(usedBackup){ console.warn('Sauvegarde principale illisible ou invalide : restauration automatique depuis la copie de secours.'); save(); }
+    return true;
+  }catch(e){ console.error('Sauvegarde illisible:',e); G=null; }
+  return false;
+}
 function hasSave(mode){
   try{
-    const s=localStorage.getItem(SAVE_KEY);
-    if(s){
-      const p=JSON.parse(s);
+    let s=localStorage.getItem(SAVE_KEY);
+    let p=s?JSON.parse(s):null;
+    if(!validateSave(p)) p=null;
+    if(!p){ const b=localStorage.getItem(SAVE_BACKUP_KEY); if(b){ const bp=JSON.parse(b); if(validateSave(bp)) p=bp; } }
+    if(p){
       if(mode==='faith') return !!p.faith;
       if(mode==='career') return !p.faith;
       return true;
@@ -36,9 +97,9 @@ function hasSave(mode){
   }catch(e){}
   return false;
 }
-function wipe(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+function wipe(){ try{ localStorage.removeItem(SAVE_KEY); localStorage.removeItem(SAVE_BACKUP_KEY); }catch(e){} }
 /* ==== [ANCRE: PANTHEON] — hors wipe(), survit d'une carrière à l'autre ==== */
-const HOF_KEY='cage-legacy-hof', SAVE_VERSION=2;
+const HOF_KEY='cage-legacy-hof', SAVE_VERSION=3;
 function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY))||[]; }catch(e){ return []; } }
 function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catch(e){} }
 /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
@@ -202,11 +263,68 @@ const META_STATS_KEY='cage-legacy-metastats';
 const ACH_KEY='cage-legacy-achievements';
 function loadAch(){ try{ return JSON.parse(localStorage.getItem(ACH_KEY))||[]; }catch(e){ return []; } }
 function saveAch(ach){ try{ localStorage.setItem(ACH_KEY,JSON.stringify(ach)); }catch(e){} }
+function metaStatsDefaults(){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
+/* ==== [ANCRE: ANALYTICS_LOCALES] — chantier 2 : "analytics locales" demandé.
+   Renforce le registre EXISTANT (meta.total*, LOT13_REGISTRE_MONDIAL ci-dessus)
+   au lieu d'ouvrir une seconde clé localStorage parallèle — mêmes principes que
+   meta.gauntletBest : des compteurs de surface, jamais un attribut/potentiel.
+   migrateMetaStats() comble les champs manquants d'un meta plus ancien (même
+   discipline tolérante que repairFighter/validateState), sans jamais toucher
+   à un champ déjà présent. 100% local (META_STATS_KEY, localStorage) : aucun
+   appel réseau, aucune donnée personnelle — uniquement des compteurs agrégés
+   et des identifiants internes de division (divId, jamais un nom de joueur). */
+function migrateMetaStats(meta){
+  if(typeof meta.careersStarted!=='number'||isNaN(meta.careersStarted)) meta.careersStarted=0;
+  if(typeof meta.careersCompleted!=='number'||isNaN(meta.careersCompleted)) meta.careersCompleted=meta.totalRetirements||0;
+  if(typeof meta.totalWins!=='number'||isNaN(meta.totalWins)) meta.totalWins=0;
+  if(typeof meta.totalLosses!=='number'||isNaN(meta.totalLosses)) meta.totalLosses=0;
+  if(typeof meta.totalDraws!=='number'||isNaN(meta.totalDraws)) meta.totalDraws=0;
+  if(typeof meta.bestWinStreak!=='number'||isNaN(meta.bestWinStreak)) meta.bestWinStreak=0;
+  if(typeof meta.longestCareerFights!=='number'||isNaN(meta.longestCareerFights)) meta.longestCareerFights=0;
+  if(typeof meta.highestOverall!=='number'||isNaN(meta.highestOverall)) meta.highestOverall=0;
+  if(typeof meta.highestElo!=='number'||isNaN(meta.highestElo)) meta.highestElo=0;
+  if(!meta.divisions||typeof meta.divisions!=='object'||Array.isArray(meta.divisions)) meta.divisions={};
+  return meta;
+}
 function loadMetaStats(){
-  try{ return JSON.parse(localStorage.getItem(META_STATS_KEY))||{totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
-  catch(e){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
+  try{ return migrateMetaStats(JSON.parse(localStorage.getItem(META_STATS_KEY))||metaStatsDefaults()); }
+  catch(e){ return metaStatsDefaults(); }
 }
 function saveMetaStats(meta){ try{ localStorage.setItem(META_STATS_KEY,JSON.stringify(meta)); }catch(e){} }
+/** Compte le début d'une nouvelle carrière (mode carrière ou Faith) — appelé
+ * une seule fois, au moment exact où G.f est fixé sur le combattant fraîchement
+ * créé (ui-08 : CL.create() et CL.finalizeFaithDraft()), jamais à la reprise
+ * d'une partie existante (load()).
+ * @param {Fighter} f */
+function recordCareerStart(f){
+  const meta=loadMetaStats();
+  meta.careersStarted=(meta.careersStarted||0)+1;
+  if(f&&f.div){
+    if(!meta.divisions[f.div]) meta.divisions[f.div]={careers:0,fights:0,wins:0};
+    meta.divisions[f.div].careers++;
+  }
+  saveMetaStats(meta);
+}
+/** Vue en lecture seule des analytics cumulées — même donnée que loadMetaStats(),
+ * juste mise en forme (pourcentages par méthode de victoire compris) pour les
+ * écrans qui veulent l'afficher (ex. scr_codex, ui-07) sans recalculer chacun
+ * sa propre logique.
+ * @returns {object} */
+function getAnalytics(){
+  const meta=loadMetaStats();
+  const decided=(meta.totalKO||0)+(meta.totalSub||0)+(meta.totalDec||0);
+  const pct=n=>decided>0?Math.round(n/decided*100):0;
+  return {
+    careersStarted:meta.careersStarted||0, careersCompleted:meta.careersCompleted||0,
+    totalFights:meta.totalFights||0, totalWins:meta.totalWins||0, totalLosses:meta.totalLosses||0, totalDraws:meta.totalDraws||0,
+    totalKO:meta.totalKO||0, totalSub:meta.totalSub||0, totalDec:meta.totalDec||0,
+    koPct:pct(meta.totalKO||0), subPct:pct(meta.totalSub||0), decPct:pct(meta.totalDec||0),
+    bestWinStreak:meta.bestWinStreak||0, longestCareerFights:meta.longestCareerFights||0,
+    highestOverall:meta.highestOverall||0, highestElo:meta.highestElo||0,
+    divisions:meta.divisions||{}
+  };
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_RECORD_GAUNTLET] — meta.gauntletBest{bracket64,
    ladder_100,boss_run} : record persistant par format, lu au menu (ui-06) et
    à l'écran de fin de run (ui-04). Sémantique par format (plus haut = mieux
@@ -411,6 +529,23 @@ function updateMetaStatsOnRetirement(f){
   const fights=f.W+f.L+(f.D||0);
   meta.totalFights+=fights; meta.totalKO+=(f.ko||0); meta.totalSub+=(f.sub||0); meta.totalDec+=(f.dec||0);
   meta.totalMoney+=(f.earnings||0); meta.totalBelts+=(f.titles||0); meta.totalRetirements=(meta.totalRetirements||0)+1;
+  /* ==== [ANCRE: ANALYTICS_LOCALES_RETRAITE] — bilan de carrière ajouté au même
+     point que le reste de la mise à jour (une seule fois, à la retraite/enshrine)
+     — jamais recalculé à chaque combat, comme le reste de ce bloc. peakStreak/
+     peakOverall/peakElo sont mis à jour combat par combat (ui-05, ANCRE:
+     RIVALITE) ; ici on ne fait que les reporter dans le registre cumulé. ==== */
+  meta.careersCompleted=(meta.careersCompleted||0)+1;
+  meta.totalWins=(meta.totalWins||0)+(f.W||0); meta.totalLosses=(meta.totalLosses||0)+(f.L||0); meta.totalDraws=(meta.totalDraws||0)+(f.D||0);
+  meta.bestWinStreak=Math.max(meta.bestWinStreak||0,f.peakStreak||f.streak||0,0);
+  meta.longestCareerFights=Math.max(meta.longestCareerFights||0,fights);
+  meta.highestOverall=Math.max(meta.highestOverall||0,f.peakOverall||f.overall||0);
+  meta.highestElo=Math.max(meta.highestElo||0,f.peakElo||f.orgElo||0);
+  if(f.div){
+    if(!meta.divisions) meta.divisions={};
+    if(!meta.divisions[f.div]) meta.divisions[f.div]={careers:0,fights:0,wins:0};
+    meta.divisions[f.div].fights+=fights; meta.divisions[f.div].wins+=(f.W||0);
+  }
+  /* ==== [FIN ANCRE] ==== */
   saveMetaStats(meta);
 }
 function filterHallOfFame(criteria){
@@ -952,6 +1087,10 @@ function validateState(){
   if(typeof f.proOfferCooldown==='undefined') f.proOfferCooldown=0;
   if(typeof f.botchedWeightCuts==='undefined') f.botchedWeightCuts=0;
   if(typeof f.rankBoost==='undefined') f.rankBoost=0;
+  if(typeof f.peakStreak!=='number'||isNaN(f.peakStreak)) f.peakStreak=Math.max(f.streak||0,0);
+  if(typeof f.peakOverall!=='number'||isNaN(f.peakOverall)) f.peakOverall=f.overall||0;
+  if(typeof f.peakElo!=='number'||isNaN(f.peakElo)) f.peakElo=f.orgElo||0;
+  if(typeof f.narrativeArc==='undefined') f.narrativeArc=null;
   if(typeof f.orgWins==='undefined') f.orgWins=0;
   if(typeof f.injury==='undefined') f.injury=null;
   if(!f._rivalries || typeof f._rivalries!=='object') f._rivalries={};

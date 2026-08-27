@@ -285,6 +285,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     G.f.biggestRival={name:opp.name,flag:opp.flag,count:G.f._allMeetings[opp.id],W:opp.W,L:opp.L,style:opp.styleLabel};
   }
   // ==== [FIN ANCRE] ====
+  // ==== [ANCRE: NARRATION_PROCEDURALE] — chantier 3 : renforce la rivalité
+  // (heat calculée sur _rivalries/_allMeetings ci-dessus, aucun nouveau
+  // compteur) avec des arcs narratifs et des actualités contextualisées à
+  // partir des VRAIES stats de ce combat, au même point de passage unique
+  // que le reste du bloc RIVALITE (carrière et Faith confondus).
+  if(typeof checkNarrativeArc==='function'){
+    const arcBeat=checkNarrativeArc(G.f);
+    if(typeof generatePlayerContextualNews==='function') generatePlayerContextualNews(G.f,opp,res,arcBeat);
+  }
+  // ==== [FIN ANCRE] ====
   // ==== [ANCRE: LEAPFROG_CUT] — traçage de la facilité des combats + bond de classement,
   // et sanction si le joueur enchaîne trop d'adversaires trop faciles. ====
   let forced=G.f.retired||false;
@@ -298,6 +308,15 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   G.f.orgElo=Math.max(500,G.f.orgElo+eloRes.deltaA); opp.orgElo=Math.max(500,opp.orgElo+eloRes.deltaB);
   G.f.careerElo=Math.max(500,G.f.careerElo+Math.round(eloRes.deltaA*0.5)); opp.careerElo=Math.max(500,opp.careerElo+Math.round(eloRes.deltaB*0.5));
   G.f.inactivityCycles=0;
+  // ==== [FIN ANCRE] ====
+  // ==== [ANCRE: ANALYTICS_LOCALES_PICS] — simple traçage de records personnels
+  // (jamais un bonus de jeu, juste des "plus haut jamais atteint" lus par
+  // updateMetaStatsOnRetirement à la retraite) : streak/overall/elo viennent
+  // d'être mis à jour par applyResult()/l'ELO ci-dessus, donc leur valeur ici
+  // est déjà celle du combat qui vient de se terminer.
+  G.f.peakStreak=Math.max(G.f.peakStreak||0,G.f.streak||0,0);
+  G.f.peakOverall=Math.max(G.f.peakOverall||0,G.f.overall||0);
+  G.f.peakElo=Math.max(G.f.peakElo||0,G.f.orgElo||0);
   // ==== [FIN ANCRE] ====
   if(win){
     // ==== [ANCRE: CORRECTIF_CHAMPION_EASYFIGHTS] — divRank() donne le rang 0
