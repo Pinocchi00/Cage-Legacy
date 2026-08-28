@@ -590,7 +590,7 @@ function faithClaimMonth(){
   const key=G.faith.year+':'+G.faith.month;
   const now=Date.now();
   if(G.faith._monthClaimed===key) return false;
-  if(G.faith._monthClaimedAt!=null && (now-G.faith._monthClaimedAt)<15) return false;
+  if(G.faith._monthClaimedAt!=null && (now-G.faith._monthClaimedAt)<50) return false;
   G.faith._monthClaimed=key;
   G.faith._monthClaimedAt=now;
   return true;
