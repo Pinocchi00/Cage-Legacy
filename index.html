@@ -537,5 +537,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="ui-06-career-screens.js"></script>
 <script src="ui-07-contracts-legacy-screens.js"></script>
 <script src="ui-08-controller-arena.js"></script>
+<!-- ui-09-arena.js : second découpage, ultérieur au split en 8 fichiers ci-
+     dessus (F-07, hygiène technique) — isole le moteur de rendu Canvas 2D de
+     l'arène, extrait de ui-08. Chargé APRÈS ui-08 : plusieurs écrans qui le
+     pilotent (scr_arena, scr_fight_flash, scr_faith_fight_pending,
+     scr_consumable_preview) sont restés dans ui-08 car référencés par nom
+     dans son objet SCREENS, évalué dès le chargement du script. -->
+<script src="ui-09-arena.js"></script>
 <script src="main.js"></script>
 </body></html>
