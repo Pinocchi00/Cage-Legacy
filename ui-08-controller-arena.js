@@ -907,6 +907,17 @@ const CL={
     // dans le vestiaire avec un bouton de combat parfaitement cliquable —
     // pouvant enchaîner d'autres combats, dupliquer son entrée au Panthéon
     // et générer des points de Légende à volonté à chaque nouvelle "retraite".
+    /* ==== [ANCRE: CORRECTIF_COMBAT_ORPHELIN] — bug trouvé : choosePlan()
+       exécute resolveFight() PUIS save() avec G.screen='arena'. Le combat est
+       donc intégralement appliqué et persisté avant que le joueur n'ait rien
+       vu. cont() forçant le hub, un onglet tué pendant l'animation (banal sur
+       mobile) faisait perdre TOUT afterResult() : en Faith le mois n'était
+       jamais consommé et fightsThisYear jamais incrémenté ; en Gauntlet le
+       palier n'avançait pas et l'adversaire déjà battu était reproposé ; en
+       carrière une offre en attente était perdue. On reprend sur l'écran de
+       résultat tant que G.pending n'a pas été consommé (cf.
+       CORRECTIF_DOUBLE_AFTERRESULT). ==== */
+    if(G.f && !G.f.retired && G.pending && !G.pending._consumed){ G.screen='result'; render(); return; }
     G.screen=(G.f && G.f.retired)?'legacy':(G.faith?'faith_hub':'hub'); render(); } },
   draft(k,v){ G.draft[k]=v; if(k==='gender')G.draft.div=DIVISIONS[v][Math.min(3,DIVISIONS[v].length-1)].id; render(true); },
   draftIn(k,v){ G.draft[k]=v; },
@@ -1156,7 +1167,13 @@ const CL={
       if(f.classChosen && !f.class31Chosen && f.age>=31){ G.screen='class_choice_31'; save(); render(); return; }
     }
     save(); render(); },
-  choosePlan(idx){ const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
+  choosePlan(idx){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_RESOLUTION] — un double-tap sur la carte
+       de tactique appelait resolveFight() deux fois : W/L, bourse, Elo,
+       historique et dégâts crâniens appliqués deux fois pour UN combat. ==== */
+    if(G.fight && G.fight._resolved) return;
+    const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
+    G.fight._resolved=true;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
     resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
   /* ==== [ANCRE: V2-26/V2-27] — trois postures, toutes valables (règle
@@ -1193,6 +1210,14 @@ const CL={
   toResult(){ stopArena(); G.screen=G._arenaNext||'result'; G._arenaNext=null; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   afterResult(){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_AFTERRESULT] — même hasard matériel que
+       CORRECTIF_DOUBLE_ENSHRINE (double-tap tactile, délai de tap iOS), sur le
+       bouton le plus tapé du jeu. Sans verrou, un double-tap sur « Continuer »
+       consommait DEUX mois de calendrier Faith, ou créditait DEUX fois le
+       paiement de fin de run Gauntlet via finaliseGauntletRun(). Le drapeau
+       vit sur G.pending (remplacé à chaque nouveau combat par resolveFight),
+       donc il n'a jamais besoin d'être remis à zéro. ==== */
+    if(G.pending){ if(G.pending._consumed) return; G.pending._consumed=true; }
     if(G.pending && G.pending.isFantasy){
       if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; }
       G.fantasyActive=false; G.screen='fantasy_setup'; render(); return;
@@ -2822,8 +2847,16 @@ const CL={
     CL.retryArcade();
   },
   /* ==== [FIN ANCRE] ==== */
-  fightArcade(){ G.screen='arcade_plan'; save(); render(); },
+  /* ==== [ANCRE: CORRECTIF_DOUBLE_RESOLUTION_ARCADE] — voir
+     CORRECTIF_DOUBLE_RESOLUTION (choosePlan, carrière/Faith) : même risque de
+     double-tap ici, sur resolveArcadeFight(). Contrairement à G.fight
+     (recréé à chaque combat), G.arcade vit toute la run — le verrou doit
+     donc être remis à zéro explicitement, ici, au seul point d'entrée de
+     l'écran de tactique (fightArcade()), plutôt que de compter sur une
+     réinitialisation implicite. ==== */
+  fightArcade(){ G.arcade._resolved=false; G.screen='arcade_plan'; save(); render(); },
   chooseArcadePlan(idx){
+    if(G.arcade._resolved) return;
     /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — même ordre de composition
        QUE scr_arcade_plan (ui-04) : la tactique exclusive de l'archétype
        d'abord, sinon l'index cliqué ne correspondrait plus à la carte
@@ -2847,6 +2880,7 @@ const CL={
       G.screen='boss_reveal'; save(); render(); return;
     }
     /* ==== [FIN ANCRE] ==== */
+    G.arcade._resolved=true;
     resolveArcadeFight();
   },
   /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 : confirme le reveal
@@ -2855,6 +2889,8 @@ const CL={
      l'intérieur de resolveArcadeFight (ui-03), au même endroit que le reste
      de la logique de combat, pour ne pas dupliquer la restauration ici. ==== */
   confirmBossReveal(){ if(!G.arcade||G.arcade.mode!=='boss_run') return;
+    if(G.arcade._resolved) return;
+    G.arcade._resolved=true;
     G.arcade.revealed=true; resolveArcadeFight(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: REJOUABILITE_PACTE_TOGGLE] — Bracket 64 / Ladder 100

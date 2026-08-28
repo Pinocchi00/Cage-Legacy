@@ -967,7 +967,12 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    <div class="card"><div class="eyebrow mb">Déroulé</div>${fightLog(p.res)}</div>
    ${campHtml}
    ${p.newAch&&p.newAch.length?`<div class="card">${p.newAch.map(a=>`<div class="ach"><span class="ico">${a.ico}</span><b class="gold">${a.h}</b> <span class="muted small">${a.d}</span></div>`).join('')}</div>`:''}
-   ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt(f)} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
+   <!-- ==== [ANCRE: CORRECTIF_NARRATIVE_NON_SERIALISABLE] — p.narrative.txt
+        est désormais une chaîne déjà résolue (ui-05, au moment où G.pending
+        est construit), plus une fonction : JSON.stringify() (save()) omet
+        silencieusement les propriétés-fonctions, ce qui plantait ici après
+        un vrai rechargement (save()/load()) avec "txt is not a function". -->
+   ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
    ${ghostComparisonHtml()}
    <button class="btn primary" onclick="CL.${p.forced?'toLegacy':'afterResult'}()">${p.forced?'Voir mon palmarès':'Continuer'}</button></div>`; }
 /* ==== [ANCRE: GAUNTLET_FANTOME] — ajout #5 (24 ajouts, 12/08/2026) : compare

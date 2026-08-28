@@ -806,7 +806,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(dv) G.f.spectacle=clamp((G.f.spectacle==null?50:G.f.spectacle)+dv,0,100);
   }
   /* ==== [FIN ANCRE] ==== */
-  G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
+  /* ==== [ANCRE: CORRECTIF_NARRATIVE_NON_SERIALISABLE] — bug trouvé (en
+     testant CORRECTIF_COMBAT_ORPHELIN, ui-08) : `narrative.txt` est une
+     FONCTION (généré par generateNarrativeQuote()/les pools de citations,
+     ui-03) — JSON.stringify() l'ignore silencieusement à la sauvegarde.
+     Après un vrai rechargement (save() dans choosePlan() puis load() dans
+     cont()), scr_result() plantait sur `p.narrative.txt is not a function`.
+     Résolue ICI, une seule fois, en chaîne plutôt qu'en fonction : même
+     motif que last.narrative juste au-dessus (déjà une chaîne, jamais
+     touché par ce bug). ==== */
+  G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative:{src:narrative.src,txt:narrative.txt(G.f)},purseDetail:G.fight.purseDetail,classOffer,class31Offer,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome, upsetLine};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
