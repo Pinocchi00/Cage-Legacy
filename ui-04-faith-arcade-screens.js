@@ -192,8 +192,12 @@ function faithDemandMotif(f,o){
  * bourse, sa hype, et son effet. Le rang bas (débutant) tombe naturellement
  * dans "rang > 12" — pas besoin d'un second critère "peu de combats dans
  * l'org" pour l'attraper.
- * @param {object} f @returns {{tier:string,mult:number,hype:string,rounds:number}} */
-function faithGalaPosition(f){
+ * @param {object} f @param {object} [opponent] l'adversaire RÉELLEMENT
+ * proposé sur cette carte, quand il est déjà connu — absent (filtre
+ * préliminaire avant qu'un candidat ne soit choisi, ou simple aperçu
+ * d'affichage) : le statut de némésis n'entre alors pas en jeu.
+ * @returns {{tier:string,mult:number,hype:string,rounds:number}} */
+function faithGalaPosition(f,opponent){
   /* ==== [CORRECTIF V2-24 point 4] — le circuit amateur (org 0) n'a ni
      hype ni conférence de presse : un gala amateur à Lyon n'a pas de main
      event médiatisé, même si un rivalId ou un rang bas s'est déjà formé à
@@ -201,7 +205,16 @@ function faithGalaPosition(f){
      Verrouillé avant toute autre condition, pas juste en dernier recours. */
   if((f.org||0)===0) return {tier:'Circuit amateur',mult:0.6,hype:'nulle',rounds:3,pressConf:false};
   const rk=divRank(f);
-  if(rk<=4 || f.champion || f.rivalId) return {tier:'Main event',mult:2,hype:'forte',rounds:5,pressConf:true};
+  /* ==== [ANCRE: CORRECTIF_MAIN_EVENT_NEMESIS_PERMANENT] — bug trouvé :
+     `f.rivalId` (posé une seule fois par lockFaithNemesis() et jamais remis
+     à null tant que la némésis vit) était testé seul, sans jamais vérifier
+     que L'ADVERSAIRE DE CE COMBAT-CI est bien elle. Une fois une némésis
+     verrouillée, TOUTE la carrière restante passait en Main event (bourse
+     doublée à vie, 5 reprises, conférence de presse + pesée obligatoires
+     avant CHAQUE combat — contredisant frontalement le plafond de
+     V4_C19_PESEE_GATING). Comparé désormais à l'adversaire réel de cette
+     offre, quand il est connu. ==== */
+  if(rk<=4 || f.champion || (opponent && f.rivalId===opponent.id)) return {tier:'Main event',mult:2,hype:'forte',rounds:5,pressConf:true};
   if(rk<=12) return {tier:'Carte principale',mult:1,hype:'moyenne',rounds:3,pressConf:false};
   return {tier:'Préliminaires',mult:0.6,hype:'faible',rounds:3,pressConf:false};
 }

@@ -2,7 +2,8 @@
 /* CAGE LEGACY — js/ui-08-controller-arena.js
    ============================================================================
    Fichier 8/8 issu du découpage de l'ancien ui.js monolithique (~400 Ko).
-   Le registre des écrans (SCREENS), la boucle de rendu, et TOUT le contrôleur d'actions (CL) — c'est-à-dire chaque clic possible dans le jeu — ainsi que le rendu Canvas 2D de l'arène de combat.
+   Le registre des écrans (SCREENS), la boucle de rendu, et TOUT le contrôleur
+   d'actions (CL) — c'est-à-dire chaque clic possible dans le jeu.
 
    IMPORTANT : ce découpage préserve l'ORDRE EXACT du code d'origine — aucune
    fonction n'a été déplacée ou réordonnée, seules des frontières de fichier
@@ -11,6 +12,15 @@
    fichiers partagent la même portée globale que l'ancien ui.js (variables et
    fonctions visibles d'un fichier à l'autre, comme avant), il faut donc les
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
+
+   Le rendu Canvas 2D de l'arène de combat, autrefois en fin de ce fichier,
+   vit désormais dans ui-09-arena.js (F-07, hygiène technique — second
+   découpage, ultérieur à celui-ci, cf. l'en-tête de ce fichier). Ce qui reste
+   ici de ce côté-là (scr_arena, scr_fight_flash, scr_faith_fight_pending,
+   scr_consumable_preview, setArenaCosmeticTheme/getArenaTheme) y est resté
+   par nécessité : référencé par nom dans SCREENS ci-dessous, évalué au
+   chargement du script — voir l'ancre CORRECTIF_ARENA_MOTEUR_DEPLACE plus
+   loin dans ce fichier pour le détail.
    ============================================================================ */
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
@@ -33,7 +43,13 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
    eu besoin d'en poser un tant qu'aucun autre mode ne partageait son
    apparence. */
 function currentGameMode(){
-  if(G && G.arcade && G.arcade.active) return 'gauntlet';
+  /* ==== [ANCRE: CORRECTIF_MODE_FIN_DE_RUN] — bug trouvé : G.arcade.active
+     est posé à false par finaliseGauntletRun() AVANT que G.screen ne passe à
+     'gameover' — au moment même où le joueur voit l'écran de fin de run
+     (victoire, élimination, tour d'Ascension), currentGameMode() ne le
+     reconnaissait déjà plus comme Gauntlet et data-mode basculait sur
+     'career' : le climax du mode perdait sa palette. ==== */
+  if(G && G.arcade && (G.arcade.active || G.screen==='gameover' || G.screen==='ascension_tower')) return 'gauntlet';
   const sName=String((G&&G.screen)||'');
   if((G&&G.f&&G.f.gameMode==='faith') || sName.indexOf('faith')===0) return 'faith';
   return 'career';
@@ -252,7 +268,13 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
   /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(G&&G.screen==='faith_fight_pending') startFaithFightPending(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
-  if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
+  /* ==== [ANCRE: CORRECTIF_ORG_CHANGE_CALENDRIER] — bug trouvé : cette fonction
+     basculait sur prepareFaithYearEnd() dès qu'un changement d'organisation
+     survenait en Faith. Hérité de l'ère « 1 combat par an » (avant FA-11) : avec
+     un calendrier de 12 mois, renouveler un contrat au mois 3 supprimait 9 mois
+     de jeu et déclenchait un bilan annuel sur une saison tronquée. Le mode Faith
+     rejoint le flux normal du calendrier. ==== */
+  if(G.faith){ faithAdvanceMonth(); return; }
   G.screen='hub'; save(); render();
 }
 /* ==== [ANCRE: FAITH_CALENDRIER] — remplace le compteur `step` (1-5, temps
@@ -327,7 +349,12 @@ function faithEnsureOffer(){
       G.lastMsg="L’organisation n’a personne à vous proposer pour une affiche pareille ce mois-ci — et ça commence à se voir.";
       return false;
     }
-    opps=eligible;
+    /* ==== [ANCRE: CORRECTIF_POOL_ELIGIBLE_PARTAGE] — bug trouvé : le filtre
+       de la règle 5 (déroute + écart de rang) ne vivait que dans cette
+       variable locale. G.opps gardait la liste NON filtrée, et
+       faithOfferDemandBetter() la relisait pour proposer « un autre combat » —
+       servant exactement les adversaires que ce bloc venait d'exclure. ==== */
+    opps=eligible; G.opps=eligible;
   }
   if(!opps.length) return false;
   /* ==== [ANCRE: V3_REMATCH_GUARANTEE] — Plan V3 LOT 6 §5.6.1.b : clause de
@@ -346,6 +373,13 @@ function faithEnsureOffer(){
   /* ==== [FIN ANCRE] ==== */
   const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
   if(!chosen) chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
+  /* ==== [ANCRE: CORRECTIF_MAIN_EVENT_NEMESIS_PERMANENT] — la position de
+     carte calculée plus haut (avant que `chosen` ne soit connu, pour filtrer
+     le pool) ignorait forcément qui serait le véritable adversaire.
+     Recalculée maintenant qu'il l'est, pour que le statut de némésis
+     (faithGalaPosition, ui-04) ne s'applique QUE si `chosen` est bien la
+     némésis — jamais tant qu'une autre carte est en jeu. ==== */
+  Object.assign(gala,faithGalaPosition(G.f,chosen.o));
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
@@ -425,9 +459,16 @@ function finaliseGauntletRun(a,opts){
   const meta=loadMetaStats();
   a.maxPactStreak=Math.max(a.maxPactStreak||0,a.pactStreak||0);
   evalGauntletContract(a);
+  /* ==== [ANCRE: CORRECTIF_DECOTE_ENCAISSEMENT] — la décote décrite par l'ancre
+     REJOUABILITE_BANQUE_GAUNTLET est morte avec cashOutGauntlet(). Le nouveau
+     point d'entrée d'encaissement (acceptRingDoctor) tombait donc sur la table
+     PLEINE : sortir proprement rapportait deux fois une élimination au même
+     palier, sans aucun risque. ==== */
   const base=(opts.kind==='elimination')
     ? gauntletEliminationPayout(a.mode,opts.progress,opts.atRisk)
-    : gauntletPayout(a.mode,opts.progress);
+    : (opts.kind==='cashout')
+      ? Math.round(gauntletPayout(a.mode,opts.progress)*(a.mode==='boss_run'?0.6:0.7))
+      : gauntletPayout(a.mode,opts.progress);
   const preBonus=gauntletFinalPayout(a,base);
   /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
      bonus ×1.5 UNIQUEMENT sur une victoire réelle (opts.kind==='victory')
@@ -475,7 +516,12 @@ function finaliseGauntletRun(a,opts){
      mode disparaissent avec l'écran Profil qui les affichait ; le suivi du
      défi du jour disparaît avec le défi. ==== */
   saveMetaStats(meta);
-  a.earnedOnElimination=earned;
+  /* ==== [ANCRE: CORRECTIF_REENTRANCE_DIABLE] — buyDevilContinue() ressuscite une
+     run que cette fonction a déjà close. Le crédit s'accumule (voulu : la run a
+     réellement continué), mais l'écrasement de earnedOnElimination faisait
+     afficher le seul dernier segment sur l'écran de fin. ==== */
+  a.earnedOnElimination=(a.earnedOnElimination||0)+earned;
+  a.segments=(a.segments||0)+1;
   a.basePayout=base;
   a.runMultApplied=gauntletRunMult(a);
   a.active=false;
@@ -496,6 +542,16 @@ function routeAfterCareerPending(){
   else if(p&&p.champChampOfferReady) G.screen='champ_champ_offer';
   else if(p&&p.endOfSeason) G.screen='season';
   else G.screen='hub';
+}
+/* ==== [ANCRE: CORRECTIF_FOCUS_SAISIE] — bug trouvé : render() remplace
+   app.innerHTML, donc l'<input> focalisé est détruit puis recréé à chaque
+   frappe. render(true) préservait le scroll (comme annoncé) mais PAS le
+   focus : sur desktop il fallait recliquer entre chaque lettre, sur mobile
+   le clavier se refermait — les deux seuls champs texte du jeu (graine
+   Gauntlet, prise signature nommée) étaient inutilisables. ==== */
+function refocusInput(id){
+  try{ const el=/** @type {HTMLInputElement|null} */(document.getElementById(id));
+    if(el){ el.focus(); const n=el.value.length; el.setSelectionRange(n,n); } }catch(e){}
 }
 const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
@@ -544,8 +600,15 @@ const CL={
      texte replié sur place utilisé auparavant. Pas de fenêtre Canvas ici :
      un succès n'a pas d'effet à visualiser dans l'octogone, contrairement
      à un consommable (buff/veto/filet de sécurité). ==== */
-  viewAchPreview(achId){ G._achPreviewId=achId; G.screen='ach_preview'; render(); },
-  closeAchPreview(){ G.screen='ach'; render(true); },
+  /* ==== [ANCRE: CORRECTIF_RETOUR_ACH_PREVIEW] — bug trouvé : cette fenêtre
+     codait son écran de retour en dur ('ach'), contrairement aux deux autres
+     fenêtres du fichier (viewConsumablePreview/viewShopPreview ci-dessous),
+     qui suivent toutes deux le pattern G._returnScreen avec une ancre
+     expliquant précisément pourquoi coder l'écran en dur est à éviter. Sans
+     conséquence tant que la vitrine des exploits n'est atteignable que d'un
+     seul endroit — mais plus la seule des trois à ne pas suivre le pattern. ==== */
+  viewAchPreview(achId){ G._achPreviewId=achId; G._returnScreen=G.screen; G.screen='ach_preview'; render(); },
+  closeAchPreview(){ G.screen=G._returnScreen||'ach'; G._returnScreen=null; render(true); },
   /* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
      UNIQUEMENT en Gauntlet (G.arcade), sur scr_gameover (ui-04), bouton
      discret déjà caché côté UI si le joueur ne peut pas payer — garde-fou
@@ -686,13 +749,17 @@ const CL={
     try{ G.exportedLink=location.origin+location.pathname+'?legend='+encodeURIComponent(G.exportedCode); }catch(e){ G.exportedLink=null; }
     render();
   },
+  /* ==== [ANCRE: CORRECTIF_COPIE_PROMISE] — bug trouvé : navigator.clipboard.
+     writeText() renvoie une Promise — un refus de permission ou un contexte
+     non sécurisé produit un rejet ASYNCHRONE que ce try/catch synchrone ne
+     pouvait jamais attraper. "Lien copié !" s'affichait donc à tort, et le
+     message de repli (écrit, utile) restait inatteignable : le joueur
+     collait un presse-papier vide en croyant avoir le lien. ==== */
   copyExportedLink(){
     if(!G.exportedLink) return;
-    try{
-      navigator.clipboard.writeText(G.exportedLink);
-      G.lastMsg="Lien copié !";
-    }catch(e){ G.lastMsg="Copie automatique impossible — sélectionne le champ et copie-le manuellement."; }
-    render();
+    if(!navigator.clipboard){ G.lastMsg="Copie automatique impossible — sélectionne le champ et copie-le manuellement."; render(); return; }
+    navigator.clipboard.writeText(G.exportedLink).then(()=>{ G.lastMsg="Lien copié !"; render(); })
+      .catch(()=>{ G.lastMsg="Copie automatique impossible — sélectionne le champ et copie-le manuellement."; render(); });
   },
   clearExportedCode(){ G.exportedCode=null; G.exportedName=null; G.exportedLink=null; render(); },
   setArenaTheme(themeId){ setArenaCosmeticTheme(themeId); render(); },
@@ -724,10 +791,16 @@ const CL={
      else if(G.allstarsDraft.length<8) G.allstarsDraft.push(index);
      render();
   },
+  /* ==== [ANCRE: CORRECTIF_MELANGE_ALLSTARS] — bug trouvé : un comparateur
+     aléatoire dans .sort() ne produit pas une permutation uniforme (et V8
+     peut se comporter de façon incohérente sur un comparateur non
+     transitif). Remplacé par le Fisher-Yates déjà utilisé ailleurs dans ce
+     fichier (offerFaithOaths()), identique. ==== */
   launchAllStars(){
      if(!G.allstarsDraft || G.allstarsDraft.length!==8) return;
      const fullList=loadHOF();
-     const top8=G.allstarsDraft.map(idx=>reconstructLegend(fullList[idx])).sort(()=>0.5-Math.random());
+     const top8=G.allstarsDraft.map(idx=>reconstructLegend(fullList[idx]));
+     for(let i=top8.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [top8[i],top8[j]]=[top8[j],top8[i]]; }
      G.allstars={active:true,step:'Quarts de finale',roundNum:1,
        matches:[{a:top8[0],b:top8[1]},{a:top8[2],b:top8[3]},{a:top8[4],b:top8[5]},{a:top8[6],b:top8[7]}],
        history:[]};
@@ -805,7 +878,13 @@ const CL={
     G.f.champChampLastOfferDefenses=G.f.defenses;
     G.f.champChampOffer=null;
     G.lastMsg='Vous avez décliné le supercombat. Le président reviendra à la charge après deux défenses supplémentaires.';
-    G.screen=G.faith?'faith_hub':'hub'; save(); render();
+    /* ==== [ANCRE: CORRECTIF_CHAMPCHAMP_MOIS] — la branche Faith d'afterResult()
+       sort par `return` avant faithAdvanceMonth() quand une décision de
+       supercombat est en attente : c'est donc à ces handlers de reprendre le
+       calendrier, sinon le mois du combat qui vient d'avoir lieu n'est jamais
+       consommé (second combat gratuit dans le même mois). ==== */
+    if(G.faith){ save(); faithAdvanceMonth(); return; }
+    G.screen='hub'; save(); render();
   },
   chooseChampChampFocus(divId){
     // ==== [ANCRE: CORRECTIF_FOCUS_CHAMPCHAMP] — bug trouvé : le choix de
@@ -822,7 +901,13 @@ const CL={
       if(newDiv){ G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f); }
     }
     G.lastMsg=divId===G.f.div?'Vous restez concentré sur votre division d\u2019origine.':'Vous faites de votre nouvelle ceinture votre priorité.';
-    G.screen=G.faith?'faith_hub':'hub'; save(); render();
+    /* ==== [ANCRE: CORRECTIF_CHAMPCHAMP_MOIS] — la branche Faith d'afterResult()
+       sort par `return` avant faithAdvanceMonth() quand une décision de
+       supercombat est en attente : c'est donc à ces handlers de reprendre le
+       calendrier, sinon le mois du combat qui vient d'avoir lieu n'est jamais
+       consommé (second combat gratuit dans le même mois). ==== */
+    if(G.faith){ save(); faithAdvanceMonth(); return; }
+    G.screen='hub'; save(); render();
   },
   chooseMue(styleId){ const r=triggerMueMartiale(G.f,styleId); G.lastMsg=r.msg||G.lastMsg;
     G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
@@ -856,6 +941,17 @@ const CL={
     // dans le vestiaire avec un bouton de combat parfaitement cliquable —
     // pouvant enchaîner d'autres combats, dupliquer son entrée au Panthéon
     // et générer des points de Légende à volonté à chaque nouvelle "retraite".
+    /* ==== [ANCRE: CORRECTIF_COMBAT_ORPHELIN] — bug trouvé : choosePlan()
+       exécute resolveFight() PUIS save() avec G.screen='arena'. Le combat est
+       donc intégralement appliqué et persisté avant que le joueur n'ait rien
+       vu. cont() forçant le hub, un onglet tué pendant l'animation (banal sur
+       mobile) faisait perdre TOUT afterResult() : en Faith le mois n'était
+       jamais consommé et fightsThisYear jamais incrémenté ; en Gauntlet le
+       palier n'avançait pas et l'adversaire déjà battu était reproposé ; en
+       carrière une offre en attente était perdue. On reprend sur l'écran de
+       résultat tant que G.pending n'a pas été consommé (cf.
+       CORRECTIF_DOUBLE_AFTERRESULT). ==== */
+    if(G.f && !G.f.retired && G.pending && !G.pending._consumed){ G.screen='result'; render(); return; }
     G.screen=(G.f && G.f.retired)?'legacy':(G.faith?'faith_hub':'hub'); render(); } },
   draft(k,v){ G.draft[k]=v; if(k==='gender')G.draft.div=DIVISIONS[v][Math.min(3,DIVISIONS[v].length-1)].id; render(true); },
   draftIn(k,v){ G.draft[k]=v; },
@@ -979,7 +1075,10 @@ const CL={
     } else { chooseOpponent(i); }
   },
   train(i){ chooseTraining(i); },
-  setCampTier(tierId){ G.selectedCampTier=tierId; render(); },
+  /* ==== [ANCRE: CORRECTIF_PERSISTANCE_ETAT_RUN] — rejoint la même grappe
+     (ci-dessus dans ce fichier) : mutait G.selectedCampTier puis render()
+     sans save(), rendant le choix à un rechargement de page. ==== */
+  setCampTier(tierId){ G.selectedCampTier=tierId; save(); render(); },
   skipArena(){ CL.toResult(); },
   /* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — bouton "Passer" de
      scr_faith_fight_pending() : même logique que skipArena() ci-dessus,
@@ -1000,8 +1099,15 @@ const CL={
     const win=resolveBasculeOption(opt);
     ARENA.basculeCount=(ARENA.basculeCount||0)+1;
     if(win){
-      G.fight.pursePenalty=Math.min(1.15,(G.fight.pursePenalty||1)*1.05);
-      G.f.morale=clamp((G.f.morale||60)+2,0,100);
+      /* ==== [ANCRE: CORRECTIF_BASCULE_RECOMPENSE_MORTE] — bug trouvé : la
+         bonification de bourse posée ici sur G.fight.pursePenalty n'avait
+         AUCUN effet — pursePenalty est lu par resolveFight() (ui-05), déjà
+         exécuté par choosePlan() avant même que l'arène ne s'affiche. La
+         récompense passe sur des canaux encore ouverts à ce stade : moral, et
+         trace narrative dans le journal de l'année (Faith). ==== */
+      G.f.morale=clamp((G.f.morale||60)+4,0,100);
+      if(G.faith){ if(!G.faith.yearLog) G.faith.yearLog=[];
+        G.faith.yearLog.push({title:'Dans la cage',choice:opt.label,outcome:'réussi'}); }
     } else {
       G.f.morale=clamp((G.f.morale||60)-3,0,100);
     }
@@ -1098,13 +1204,26 @@ const CL={
       if(f.classChosen && !f.class31Chosen && f.age>=31){ G.screen='class_choice_31'; save(); render(); return; }
     }
     save(); render(); },
-  choosePlan(idx){ const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
+  choosePlan(idx){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_RESOLUTION] — un double-tap sur la carte
+       de tactique appelait resolveFight() deux fois : W/L, bourse, Elo,
+       historique et dégâts crâniens appliqués deux fois pour UN combat. ==== */
+    if(G.fight && G.fight._resolved) return;
+    const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
+    G.fight._resolved=true;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
     resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
   /* ==== [ANCRE: V2-26/V2-27] — trois postures, toutes valables (règle
      H.3). La provocation plante une promesse (G.promise, carrière —
      distincte de G.faith.promise) vérifiée à la résolution du combat
      (ui-05, même ancre que côté Faith). */
+  /* ==== [ANCRE: CORRECTIF_PERSISTANCE_ETAT_RUN] — bug trouvé : toute une famille
+     de méthodes mutait l'état de run (choix de camp, pacte, mise en jeu, refus du
+     médecin, soins d'infirmerie, analyse ciblée, second souffle) puis appelait
+     render() sans save(). La dernière sauvegarde datant de l'ENTRÉE dans l'écran,
+     un rechargement de page rendait le choix. Cas le plus grave : healGauntletZone
+     sauvegarde bien la dépense (saveMetaStats) mais pas le soin (sur G) — le joueur
+     perdait ses points ET gardait ses séquelles. ==== */
   chooseFaceoff(posture){
     G.fight.faceoffDone=true;
     const opp=G.fight.opp;
@@ -1116,7 +1235,7 @@ const CL={
     } else {
       G.f.morale=clamp((G.f.morale||60)+2,0,100);
     }
-    G.fight.planStep=2; render();
+    G.fight.planStep=2; save(); render();
   },
   /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
      l'arène (skipArena et la fin naturelle de l'animation passent tous les
@@ -1128,6 +1247,14 @@ const CL={
   toResult(){ stopArena(); G.screen=G._arenaNext||'result'; G._arenaNext=null; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   afterResult(){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_AFTERRESULT] — même hasard matériel que
+       CORRECTIF_DOUBLE_ENSHRINE (double-tap tactile, délai de tap iOS), sur le
+       bouton le plus tapé du jeu. Sans verrou, un double-tap sur « Continuer »
+       consommait DEUX mois de calendrier Faith, ou créditait DEUX fois le
+       paiement de fin de run Gauntlet via finaliseGauntletRun(). Le drapeau
+       vit sur G.pending (remplacé à chaque nouveau combat par resolveFight),
+       donc il n'a jamais besoin d'être remis à zéro. ==== */
+    if(G.pending){ if(G.pending._consumed) return; G.pending._consumed=true; }
     if(G.pending && G.pending.isFantasy){
       if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; }
       G.fantasyActive=false; G.screen='fantasy_setup'; render(); return;
@@ -1163,6 +1290,14 @@ const CL={
       if(p&&p.promoOffer){ G.screen='promo'; save(); render(); return; }
       if(p&&p.champChampDecision){ G.screen='champ_champ_decision'; save(); render(); return; }
       if(p&&p.champChampOfferReady){ G.screen='champ_champ_offer'; save(); render(); return; }
+      /* ==== [ANCRE: FAITH_PERK_LOBBYING] — même diagnostic que perks.judges :
+         G.faith.perks.forcePromo était posé par buyFaithPerk() (ui-08) et relu
+         par AUCUN code. Consommé ici, une seule fois, à la première victoire
+         qui suit son achat. ==== */
+      if(p && p.win && G.faith.perks && G.faith.perks.forcePromo && G.f.org<6){
+        G.faith.perks.forcePromo=false;
+        p.promoOffer=true; G.screen='promo'; save(); render(); return;
+      }
       /* ==== [CORRECTIF FA-10] — un combat ne menait plus qu'au bilan annuel
          direct : à 1 combat/an fixe, 18-36 ans de carrière ne produisaient
          jamais plus de 18 combats, et un contrat de 4 combats (engine.js:
@@ -1232,14 +1367,6 @@ const CL={
          épreuve d'endurance). La récup diminue avec la profondeur de la run —
          le dernier combat d'un Gauntlet doit se jouer sur un combattant usé.
          RI(−1,1) évite un palier trop lisible/mécanique. ==== */
-      /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — attritionHeal() faisait
-         remonter G.f.form d'un montant décroissant avec la profondeur de la
-         run. La forme n'ayant plus aucun effet mécanique en Gauntlet (cf.
-         eff(), engine.js) ni aucun affichage, la fonction devient un no-op :
-         la profondeur de la run se paie désormais uniquement en séquelles
-         d'attributs, dont la probabilité est déjà indexée sur les dégâts
-         réellement encaissés (rollGauntletInjuryChance, ui-03). ==== */
-      const attritionHeal=()=>{};
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — consommée à chaque combat, comme le
          pacte de finition juste au-dessus, qu'elle se déclenche ou non. Une
@@ -1271,13 +1398,14 @@ const CL={
       if((G.arcade.runInjuries||[]).length) G.arcade.injuredEver=true;
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — remplace les 3 appels à
-         attritionHeal() : la forme remonte comme avant, mais un combat
-         réellement encaissé (frappes significatives subies / knockdowns, lus
-         sur res.stats.B) peut laisser une séquelle d'attributs pour le reste
-         de la run. C'est le coût invisible de l'attrition rendu mécanique, et
-         l'argument principal en faveur de l'encaissement volontaire. ==== */
+         l'ancienne attritionHeal() (constante no-op depuis
+         GAUNTLET_SANS_MORAL_FORME, retirée — cf. F-03) : la forme remonte
+         comme avant, mais un combat réellement encaissé (frappes
+         significatives subies / knockdowns, lus sur res.stats.B) peut
+         laisser une séquelle d'attributs pour le reste de la run. C'est le
+         coût invisible de l'attrition rendu mécanique, et l'argument
+         principal en faveur de l'encaissement volontaire. ==== */
       const runAttrition=()=>{
-        attritionHeal();
         if(_res && rnd()<rollGauntletInjuryChance(_res)){
           const inj=rollGauntletRunInjury(G.f);
           G.arcade.runInjuries=(G.arcade.runInjuries||[]).concat([inj]);
@@ -1425,14 +1553,14 @@ const CL={
      volontaire d'un pool favorable), sinon aléatoire par défaut. La graine
      saisie via CL.setGauntletSeed() (G._pendingSeed) n'est consommée qu'une
      fois puis effacée, pour ne pas figer TOUS les runs suivants par erreur. ==== */
-  setGauntletSeed(v){ G._pendingSeed=(v!==undefined&&v!==null&&String(v).trim()!=='')?String(v).trim():null; render(true); },
+  setGauntletSeed(v){ G._pendingSeed=(v!==undefined&&v!==null&&String(v).trim()!=='')?String(v).trim():null; render(true); refocusInput('gauntlet-seed'); },
   /* ==== [ANCRE: PRISE_SIGNATURE_NOMMEE] — ajout #1 (24 ajouts, 12/08/2026).
      _draftSuffix vit sur f.signatureMove lui-même (pas sur G, comme
      G._pendingSeed) : la fiche peut être quittée et rouverte sans perdre la
      saisie en cours, tant qu'elle n'a pas été validée. render(true) même
      pattern que setGauntletSeed : préserve le scroll à chaque frappe. ==== */
   setSignatureSuffix(v){ const sm=G.f&&G.f.signatureMove; if(!sm||sm.locked) return;
-    sm._draftSuffix=(v!==undefined&&v!==null)?String(v).slice(0,24):''; render(true); },
+    sm._draftSuffix=(v!==undefined&&v!==null)?String(v).slice(0,24):''; render(true); refocusInput('sig-suffix'); },
   lockSignatureSuffix(){ const sm=G.f&&G.f.signatureMove; if(!sm||sm.locked) return;
     const val=(sm._draftSuffix||'').trim(); if(!val) return;
     sm.customSuffix=val; sm.locked=true; delete sm._draftSuffix; save(); render(); },
@@ -1610,7 +1738,7 @@ const CL={
     /* ==== [ANCRE: V2-11] \u2014 fra\u00eecheur de d\u00e9part : "pr\u00eat", pas "aff\u00fbt\u00e9" \u2014
        une carri\u00e8re commence en forme normale, pas au sommet absolu. */
     f.freshness=70;
-    G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
+    G.faith={year:2026,fightsThisYear:0,startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
       startOfYearChampion:false,startOfYearRank:divRank(f),startOfYearNemesisBeaten:false,gym:[p1,p2],
       agent:faithAgent,agentPatience:3};
     ensureSparringPrimary();
@@ -1783,13 +1911,17 @@ const CL={
     F.currentIntersaison=null;
     if(!F.yearLog) F.yearLog=[];
     if(entry.action==='rest'){ CL.faithRest(); return; }
+    /* ==== [ANCRE: CORRECTIF_SPARRING_TRI_RESIDUEL] — dernier site de tri au
+       rendu ayant survécu à V3_SPARRING_PRIMARY. Aligné sur ui-04 (l'écran lit
+       F.sparringPrimaryId pour NOMMER le partenaire) : l'action doit viser la
+       même personne que celle affichée. ==== */
     if(entry.action==='sparring_top'){
-      const tp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+      const tp=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId)||(F.gym||[])[0];
       if(tp) CL.faithSparring(tp.id); else CL.faithRest();
       return;
     }
     if(entry.action==='sparring_second'){
-      const sp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+      const sp=(F.gym||[]).find(p=>p.id!==F.sparringPrimaryId);
       if(sp) CL.faithSparring(sp.id); else CL.faithRest();
       return;
     }
@@ -1935,15 +2067,33 @@ const CL={
        jeu différents, pas deux +1." "Aller chercher plus loin" déplace
        réellement la carrière (nouvelle organisation, nouveau bassin
        d'adversaires — même mécanisme que acceptPromo()/free agency en
-       carrière, réduit aux champs qui comptent vraiment pour Faith,
-       contrat non touché : hors périmètre de ce lot). "Régner sur son
-       territoire" ouvre un statut permanent et VISIBLE (f.faithTraits,
-       déjà affiché sur le hub, ui-04) — pas un delta d'attribut de plus. */
+       carrière). "Régner sur son territoire" ouvre un statut permanent et
+       VISIBLE (f.faithTraits, déjà affiché sur le hub, ui-04) — pas un
+       delta d'attribut de plus. */
     if(ev.id==='evt_br_regional_ceiling'){
       if(i===0 && G.f.org<6){
-        G.f.org++; G.f.orgWins=0; G.f.rivalId=null; G.f.faithNemesisId=null; G.f.nemesisRecord=null;
+        /* ==== [ANCRE: CORRECTIF_PROMOTION_INCOMPLETE] — bug trouvé : ce
+           mouvement d'organisation dupliquait acceptPromo() sans trois de
+           ses réinitialisations. Un champion régional emportait sa ceinture
+           dans la nouvelle organisation (resolveFight() continuait d'en
+           compter les défenses, et faithGalaPosition le maintenait en Main
+           event via f.champion) ; le contrat de l'ancienne ligue restait
+           actif dans la nouvelle ; applyOrgAdvancementBoost() — appliqué par
+           tous les autres chemins de promotion — était sauté. La dissolution
+           silencieuse de la némésis (sans message ni entrée yearLog) est
+           également corrigée : même pattern que l'ancre V2-14 un peu plus
+           bas dans ce fichier, "dissoute, jamais annulée en silence". ==== */
+        G.f.org++; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0;
+        if(G.f.faithNemesisId){
+          if(!G.faith.yearLog) G.faith.yearLog=[];
+          G.faith.yearLog.push({title:'Rivalité dissoute',choice:'Changement d’organisation'});
+          G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+"Votre rivalité n'a plus de sens dans cette nouvelle organisation.";
+        }
+        G.f.rivalId=null; G.f.faithNemesisId=null; G.f.nemesisRecord=null;
         G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
         if(typeof ORG_FLAVORS!=='undefined' && ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
+        G.f.contract=generateContract(G.f,G.f.org,false);
+        applyOrgAdvancementBoost(G.f,G.f.org);
         G.roster=makeOrgRoster(G.f);
         /* ==== [ANCRE: V4_C16_TERRITOIRE_GALA] — Plan V4 LOT 6 C16 : au-delà
            du bassin d'adversaires (déjà changé ci-dessus), "aller chercher
@@ -2136,7 +2286,7 @@ const CL={
   faithTitleToggleRevengeClause(){
     const off=G.faith.pendingOffer; if(!off) return;
     G.faith.pendingRevengeClause=!G.faith.pendingRevengeClause;
-    render();
+    save(); render();
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: V2-23] — applique le choix (deux options, réponse
@@ -2240,8 +2390,23 @@ const CL={
       if(idx>0 && rnd()<0.8){ off.opp=opps[idx-1]; }
       else if(idx<opps.length-1){ off.opp=opps[idx+1]; G.lastMsg="Le Fidèle s’est trompé d’adversaire — trop tard pour revenir dessus."; }
     }
-    off.gala=faithGalaPosition(G.f); off.gala.label=faithGalaLabel(G.faith,G.f);
+    /* ==== [ANCRE: CORRECTIF_MAIN_EVENT_NEMESIS_PERMANENT] — voir la même
+       ancre dans faithEnsureOffer() : le statut de némésis (faithGalaPosition)
+       doit être vérifié contre l'adversaire RÉEL de cette offre (off.opp.o,
+       déjà mis à jour ci-dessus), jamais contre une simple présence de
+       f.rivalId quelque part sur la carrière. ==== */
+    off.gala=faithGalaPosition(G.f,off.opp.o); off.gala.label=faithGalaLabel(G.faith,G.f);
     if(!G.faith.agent) off.gala.mult*=0.75;
+    /* ==== [ANCRE: CORRECTIF_CARTE_ADVERSAIRE_ECHANGE] — bug trouvé :
+       G.faith.currentCard n'est écrite qu'à un seul endroit (faithEnsureOffer).
+       Échanger d'adversaire ici laissait la carte pointer sur l'ANCIEN :
+       (1) scr_faith_card affichait le mauvais nom ; (2) ui-05 teste
+       currentCard.oppId===opp.id pour poster playerResult — le test échouait,
+       donc le résultat du joueur n'était jamais inscrit et le lien
+       « Résultats de la dernière carte » (ui-04) ne réapparaissait plus ;
+       (3) le nouvel adversaire pouvait figurer en sous-carte avec un W/L déjà
+       appliqué par generateFightCard, sur l'affiche où il combat le joueur. ==== */
+    G.faith.currentCard=generateFightCard(off.gala,off.opp.o);
     save(); render();
   },
   /* ==== [CORRECTIF FA-12 / V2-21] — refuser coûte réellement quelque
@@ -2358,15 +2523,18 @@ const CL={
     // dépendait d'un compteur mort depuis le remplacement de l'entraînement par
     // les événements de vie — plus aucune compétence ne pouvait plus se
     // débloquer en Faith.
+    /* ==== [ANCRE: CORRECTIF_TRAININGTAGS_MORT] — G.faith.trainingTags n'était
+       alimenté nulle part (repo entier vérifié) : la branche de filtrage par
+       tag de style ci-dessous ne pouvait donc jamais s'activer
+       (tags.length>0 toujours faux). Retirée avec trainingTags/
+       trainingsThisYear (initialisation et remise à zéro annuelle) plutôt que
+       de garder trois sites morts pour une seule branche inatteignable. ==== */
     const nbRolls=((G.faith.yearLog||[]).length>=1)?1:0;
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS);
-    const tags=G.faith.trainingTags||[];
     for(let i=0;i<nbRolls;i++){
       if(pool.length===0) break;
-      let currentPool=pool;
-      if(tags.length>0 && rnd()<0.5){ const filtered=pool.filter(s=>s.fam==='style'&&s.key && tags.includes(s.key)); if(filtered.length>0) currentPool=filtered; }
-      const rar=tirerRarete(); const sk=getFallbackSkill(currentPool,rar);
+      const rar=tirerRarete(); const sk=getFallbackSkill(pool,rar);
       if(sk){ grantSkill(f,sk); newSkills.push(sk); pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS); }
     }
     /* ==== [ANCRE: V2-27] — G.faith.promiseOutcome (posé par resolveFight(),
@@ -2397,8 +2565,15 @@ const CL={
        G.faith.year n'a pas encore été incrémenté. ==== */
     if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
     /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: CORRECTIF_PED_VIEILLISSEMENT] — bug trouvé : le test
+       `pedActive !== G.faith.year` s'exécutait APRÈS `G.faith.year++`,
+       comparant donc l'année d'achat N à l'année N+1 — toujours différentes.
+       L'exemption de vieillissement, seule contrepartie du risque de
+       suspension à 15 %, n'a jamais pu se déclencher. Comparaison faite sur
+       l'année écoulée, comme le fait déjà correctement dietYear (CL.opp). ==== */
+    const _yearEnding=G.faith.year;
     G.faith.year++;
-    G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
+    G.faith.fightsThisYear=0; G.faith.yearLog=[];
     /* V2-21 : compteurs annuels de refus, remis à zéro comme le reste. */
     G.faith.refusalsThisYear=0; G.faith.medicalRefusalUsed=false;
     /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
@@ -2424,7 +2599,7 @@ const CL={
     G.faith.startOfYearNemesisBeaten=!!G.faith.nemesisBeaten;
     /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
-    if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
+    if(G.faith.pedActive!==_yearEnding) applyAging(G.f);
     /* ==== [ANCRE: WORLD_TICK_HOOK] — Plan V3 LOT 0 §4.3 : point d'appel
        principal de worldTick(), qui enveloppe advanceRoster() (inchangé) et
        archive le rang dans G.faith.rankHistory pour LOT 7 (P20). ==== */
@@ -2563,10 +2738,19 @@ const CL={
     const costMoney={hometown:15,catchweight:35,protect_title:50,ped:30,tiger:50,lobbying:100,diet:40};
     if(costMoney[perkId]||perkId==='judges'){
       let actualCost=costMoney[perkId];
-      if(perkId==='judges') actualCost=(f.earnings||0)*0.20;
+      /* ==== [ANCRE: CORRECTIF_JUGES_GRATUIT] — bug trouvé : le coût étant un
+         POURCENTAGE du patrimoine, le test `earnings < actualCost` était
+         toujours faux — et à 0 k$, le privilège était accordé gratuitement.
+         Plancher explicite. ==== */
+      if(perkId==='judges') actualCost=Math.max(20,Math.round((f.earnings||0)*0.20));
       if((f.earnings||0)<actualCost){ G.lastMsg="Fonds insuffisants."; render(); return; }
       f.earnings-=actualCost;
-      if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : Votre prochain combat sera à domicile."; }
+      /* ==== [ANCRE: CORRECTIF_HOMETOWN_LIEU_FANTOME] — bug trouvé : le
+         message promettait un lieu ("à domicile"), mais le lieu du gala est
+         piloté par G.faith.territoire (faithGalaCity, ui-04) — ce privilège
+         n'a jamais eu prise dessus, seulement sur moral/forme (CL.opp()).
+         Message reformulé pour ne promettre que ce qu'il fait réellement. ==== */
+      if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : accueil favorable, vous entrez porté par la salle."; }
       else if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
       else if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
       else if(perkId==='ped'){
@@ -2680,7 +2864,7 @@ const CL={
     if(_opt._heal){ G.arcade.runInjuries=[]; G.arcade.lastInjury=null; }
     G.arcade.upgradesChosen.train=true;
     if(G.arcade.mode==='ladder_100') G.arcade.targets=genWTUMMATargets();
-    CL.go('arcadehub'); },
+    save(); CL.go('arcadehub'); },
   /* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — choix du joueur parmi les
      cibles proposées par le hub (ui-04). Route direct vers le plan tactique,
      comme le faisait auparavant le bouton unique "DÉFIER". ==== */
@@ -2703,13 +2887,26 @@ const CL={
        entraînement (upgradesChosen.train posé à true d'emblée par
        generateBossRunUpgrade(), ui-03) : une fois la compétence choisie, la
        boucle est bouclée, direction le hub avec l'adversaire déjà généré. ==== */
-    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ CL.go('arcadehub'); return; }
+    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ save(); CL.go('arcadehub'); return; }
     /* ==== [FIN ANCRE] ==== */
-    render(); },
+    save(); render(); },
   retryArcade(){
+    /* ==== [ANCRE: CORRECTIF_RETRY_ASCENSION] — bug trouvé : startArcade/
+       startLadder100/startBossRun relisent tous G._pendingAsc pour fixer le
+       palier d'Ascension de la nouvelle run, mais retryArcade() ne le
+       repositionnait jamais — "rejouer" retombait donc systématiquement au
+       palier 0, symétrique au correctif déjà appliqué à retrySameSeed()
+       ci-dessous pour la graine. ==== */
+    G._pendingAsc=(G.arcade&&G.arcade.asc)||0;
+    /* ==== [ANCRE: CORRECTIF_RETRY_CAPSTONE] — bug trouvé, même famille que
+       CORRECTIF_RETRY_ASCENSION ci-dessus : "rejouer" un Boss Run Capstone
+       (débloqué par 5 rivaux historiques battus, startBossRunCapstone())
+       relançait un Boss Run ordinaire sans le dire — le palier retombait au
+       Boss Run standard. Drapeau conservé au même titre que G._pendingAsc. ==== */
+    const wasCapstone=G.arcade&&G.arcade.capstone;
     const prevMode=G.arcade&&G.arcade.mode;
     if(prevMode==='ladder_100') CL.startLadder100();
-    else if(prevMode==='boss_run') CL.startBossRun();
+    else if(prevMode==='boss_run'){ wasCapstone?CL.startBossRunCapstone():CL.startBossRun(); }
     else CL.startArcade();
   },
   /* ==== [ANCRE: REJOUABILITE_SEED_REJOUABLE] — bouton "REJOUER CETTE GRAINE"
@@ -2723,8 +2920,16 @@ const CL={
     CL.retryArcade();
   },
   /* ==== [FIN ANCRE] ==== */
-  fightArcade(){ G.screen='arcade_plan'; save(); render(); },
+  /* ==== [ANCRE: CORRECTIF_DOUBLE_RESOLUTION_ARCADE] — voir
+     CORRECTIF_DOUBLE_RESOLUTION (choosePlan, carrière/Faith) : même risque de
+     double-tap ici, sur resolveArcadeFight(). Contrairement à G.fight
+     (recréé à chaque combat), G.arcade vit toute la run — le verrou doit
+     donc être remis à zéro explicitement, ici, au seul point d'entrée de
+     l'écran de tactique (fightArcade()), plutôt que de compter sur une
+     réinitialisation implicite. ==== */
+  fightArcade(){ G.arcade._resolved=false; G.screen='arcade_plan'; save(); render(); },
   chooseArcadePlan(idx){
+    if(G.arcade._resolved) return;
     /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — même ordre de composition
        QUE scr_arcade_plan (ui-04) : la tactique exclusive de l'archétype
        d'abord, sinon l'index cliqué ne correspondrait plus à la carte
@@ -2748,6 +2953,7 @@ const CL={
       G.screen='boss_reveal'; save(); render(); return;
     }
     /* ==== [FIN ANCRE] ==== */
+    G.arcade._resolved=true;
     resolveArcadeFight();
   },
   /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 : confirme le reveal
@@ -2756,6 +2962,8 @@ const CL={
      l'intérieur de resolveArcadeFight (ui-03), au même endroit que le reste
      de la logique de combat, pour ne pas dupliquer la restauration ici. ==== */
   confirmBossReveal(){ if(!G.arcade||G.arcade.mode!=='boss_run') return;
+    if(G.arcade._resolved) return;
+    G.arcade._resolved=true;
     G.arcade.revealed=true; resolveArcadeFight(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: REJOUABILITE_PACTE_TOGGLE] — Bracket 64 / Ladder 100
@@ -2764,7 +2972,7 @@ const CL={
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
      12/08/2026) : le pacte forcé n'est plus lié au palier d'Ascension
      (asc>=3) mais au mutateur tiré pour cette run. ==== */
-  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; if(G.arcade.mutator&&G.arcade.mutator.id==='mut_pacte_force') return; G.arcade.pactActive=!G.arcade.pactActive; render(); },
+  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; if(G.arcade.mutator&&G.arcade.mutator.id==='mut_pacte_force') return; G.arcade.pactActive=!G.arcade.pactActive; save(); render(); },
   /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — filtres de scr_archetype_pantheon
      (ui-06), même pattern que setGauntletAsc (mémorisé sur G, jamais
      persisté — un filtre d'affichage, pas une donnée de progression). ==== */
@@ -2780,7 +2988,7 @@ const CL={
     if(!G.arcade||!G.arcade.active) return;
     const meta=loadMetaStats();
     const r=healGauntletZone(meta,G.arcade,zone);
-    G.lastMsg=r.msg; if(r.success) saveMetaStats(meta); render();
+    G.lastMsg=r.msg; if(r.success){ saveMetaStats(meta); save(); } render();
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: COACHING_OBLIGATOIRE] — toggleCoaching() retirée : le
@@ -2815,10 +3023,10 @@ const CL={
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: PREPARATION_CIBLEE] — ajout #23 (24 ajouts, 12/08/2026). ==== */
-  pierceRumor(){ if(!G.arcade) return; const r=pierceGauntletRumor(G.arcade); G.lastMsg=r.msg; render(); },
+  pierceRumor(){ if(!G.arcade) return; const r=pierceGauntletRumor(G.arcade); G.lastMsg=r.msg; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026). ==== */
-  acceptSecondSouffle(){ acceptGauntletSecondSouffle(); render(); },
+  acceptSecondSouffle(){ acceptGauntletSecondSouffle(); save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
      déclenché depuis le camp (scr_arcade_upgrades, ui-04) quand le
@@ -2837,7 +3045,7 @@ const CL={
     a.victory=false; a.cashedOut=true; a.eliminatedReason=null;
     G.screen='gameover'; save(); render();
   },
-  refuseRingDoctor(){ if(!G.arcade||!G.arcade.active) return; G.arcade.doctorRefused=true; render(); },
+  refuseRingDoctor(){ if(!G.arcade||!G.arcade.active) return; G.arcade.doctorRefused=true; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
@@ -2848,7 +3056,7 @@ const CL={
      alors rien à mettre en jeu et l'option n'aurait aucun coût. ==== */
   toggleAtRisk(){ if(!G.arcade||!G.arcade.active) return;
     if(!(G.arcade.banked>0) && !G.arcade.atRisk) return;
-    G.arcade.atRisk=!G.arcade.atRisk; render(); },
+    G.arcade.atRisk=!G.arcade.atRisk; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — consomme la phase compétence du camp
      comme pickArcadeSkill(), en appliquant EN PLUS les deltas négatifs du
@@ -2863,8 +3071,8 @@ const CL={
     G.arcade.curses=(G.arcade.curses||[]).concat([c.curseLabel]);
     G.arcade.upgradesChosen.skill=true;
     G.arcade.cursedOpt=null;
-    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ CL.go('arcadehub'); return; }
-    render(); },
+    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ save(); CL.go('arcadehub'); return; }
+    save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_BRACKET_VISIBLE] — les 63 autres combattants et TOUS
      les combats des autres branches sont déjà simulés par
@@ -2884,14 +3092,13 @@ const CL={
      eux, perdre ou décrocher soi-même a toujours rapporté pareil (aucune
      pénalité à modifier), seule l'option de sortir proprement manquait. ==== */
   /* ==== [ANCRE: CORRECTIF_CODE_MORT] — cashOutGauntlet() retirée : plus aucun
-     bouton n'y appelle (GAUNTLET_SORTIE_UNIQUE, ui-04). Les branches
-     `a.cashedOut` dans les 3 écrans de fin de run (gameover boss_run/
-     ladder_100/bracket64, ui-04) restent en l'état : a.cashedOut ne sera
-     plus jamais posé à true nulle part dans le code, ces branches sont donc
-     du texte mort mais inoffensif (jamais atteint). Les nettoyer implique de
-     retoucher 3 narrations distinctes sans rapport avec ce correctif — hors
-     du périmètre de cette passe, à faire si l'un de ces écrans est retouché
-     pour une autre raison. ==== */
+     bouton n'y appelle (GAUNTLET_SORTIE_UNIQUE, ui-04). CORRECTION (cf. ANCRE
+     ULTIMATUM_MEDECIN, CL.acceptRingDoctor ci-dessus) : `a.cashedOut` est de
+     nouveau posé à true, par ce nouveau point d'entrée d'encaissement — les
+     branches `a.cashedOut` dans les 3 écrans de fin de run (gameover
+     boss_run/ladder_100/bracket64, ui-04) sont donc bien vivantes et
+     atteignables. Ne PAS les supprimer sous prétexte que ce commentaire
+     (dans une version antérieure) les disait mortes. ==== */
   /* ==== [FIN ANCRE] ==== */
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
@@ -3092,7 +3299,15 @@ const CL={
     // statistiques cumulées affichées par le Codex Inter-carrières
     // (panneau tool_codex, scr_codex()). f._enshrined marque la carrière
     // comme déjà scellée et rend tout appel suivant sans effet.
-    if(G.f._enshrined){ G.screen='legacy'; render(); return; }
+    /* ==== [ANCRE: CORRECTIF_GARDE_ENSHRINE_DESTINATION] — bug trouvé : ce
+       garde protège bien l'état (pas de double enshrine()), mais imposait
+       toujours 'legacy' — alors que le premier appel, lui, termine sur
+       G.faith?'faith_epilogue':'legacy'. Un joueur Faith qui double-tapait
+       sur "Prendre sa retraite" perdait son épilogue, sa note finale, sa
+       comparaison au previousBest et les relances rapides
+       (faithRelaunchSame/faithRelaunchEdit) — renvoyé au lieu vers l'écran
+       de palmarès carrière classique. ==== */
+    if(G.f._enshrined){ G.screen=G.faith?'faith_epilogue':'legacy'; render(); return; }
     if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     // ==== [ANCRE: CORRECTIF_SAISON_PARTIELLE_RETRAITE] — bug remonté : le
     // bilan saison par saison (retireSeasonRecapHtml) totalisait moins de
@@ -3102,9 +3317,22 @@ const CL={
     // ses combats restaient comptés dans f.W/f.L mais disparaissaient du
     // récapitulatif. On archive donc cette saison en cours ici aussi, avant
     // de sceller la carrière.
+    /* ==== [ANCRE: CORRECTIF_SEASONRECAP_FAITH] — bug trouvé : G.season.year
+       reste figé à 1 pour toute une carrière Faith (nextFaithYear() vide
+       G.season.fights chaque année mais n'avance jamais G.season.year, qui
+       n'existe que pour le calendrier de la Carrière classique — nextSeason()
+       ne l'incrémente jamais pour Faith non plus). Ce bloc n'archivait donc
+       QUE la dernière année Faith (partielle), sous l'étiquette fausse
+       "année 1", et perdait silencieusement toutes les années précédentes —
+       déjà archivées correctement par ailleurs (faithArchiveYear/
+       G.faith.journey, lu par faithJourneyBlock, ui-04). f.seasonRecap /
+       retireSeasonRecapHtml sont spécifiques à la Carrière classique
+       (jamais affichés par l'épilogue Faith, ANCRE FAITH_EPILOGUE plus bas) :
+       ne plus y écrire de donnée fausse pour Faith plutôt que la corriger à
+       moitié. ==== */
     const sData=G.season||{year:1,fights:[]};
     let seasonEval=null;
-    if(sData.fights && sData.fights.length){
+    if(!G.faith && sData.fights && sData.fights.length){
       seasonEval=evaluateSeason(G.f,sData.fights);
       if(!G.f.seasonRecap) G.f.seasonRecap=[];
       G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
@@ -3233,71 +3461,34 @@ const CL={
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }
       document.body.removeChild(ta); }catch(e){ alert('Export impossible.'); } },
-  importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object') throw new Error('invalid'); G=migrate(parsed); if(!validateState()) throw new Error('corrupt'); setTheme(G.theme||'dark'); G.screen='hub'; save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
+  /* ==== [ANCRE: CORRECTIF_IMPORT_ROUTAGE] — bug trouvé : ce contrôleur
+     imposait toujours G.screen='hub', un copier-coller d'une ligne déjà
+     écrite (et depuis corrigée) 60 lignes plus haut dans cont(). Importer
+     une sauvegarde Faith déposait le joueur sur le hub CARRIÈRE avec un
+     combattant Faith ; importer une sauvegarde retraitée reproduisait
+     exactement le bug fantôme de l'ancre CORRECTIF_RETRAITE_FANTOME
+     (vestiaire avec bouton de combat cliquable, doublons possibles au
+     Panthéon) ; importer une sauvegarde figée en plein combat (G.pending
+     non consommé, cf. CORRECTIF_COMBAT_ORPHELIN) perdait le résultat.
+     Même routage que cont(), pas un second calcul divergent. ==== */
+  importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object') throw new Error('invalid'); G=migrate(parsed); if(!validateState()) throw new Error('corrupt'); setTheme(G.theme||'dark');
+    if(G.f && !G.f.retired && G.pending && !G.pending._consumed){ G.screen='result'; save(); render(); return; }
+    G.screen=(G.f && G.f.retired)?'legacy':(G.faith?'faith_hub':'hub'); save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
 };
 window.CL=CL;
-/* ============================ ARÈNE 2D & HYBRIDE ========================== */
-/* Rejoue le combat round par round à partir de res.log (maintenant granulaire :
-   plusieurs sous-événements textuels par round, momentum, dégâts par zone),
-   en cohérence stricte avec le résultat du moteur (même vainqueur, méthode,
-   round). Silhouettes dans la DA archive : oxblood = joueur, sage = adversaire.
-   res.rounds n'existe pas (le champ réel est res.round, singulier) — corrigé
-   ici par rapport au brouillon reçu. */
-let ARENA=null;
-/* ==== [ANCRE: V2-28] — BEAT_MS n'est plus une constante figée : le réglage
-   Rythme de combat (G.settings.fightPace, persisté) l'ajuste au lancement
-   de startArena() — Intégral prend plus de temps par beat pour tout
-   laisser lire, Rapide (défaut) garde le rythme d'origine. Instantané ne
-   passe jamais par ARENA du tout (cf. render(), scr_fight_flash). */
-let BEAT_MS=750; // ralenti pour laisser le temps de lire le flux narratif
-function makeNoisePattern(ctx){ try{
-  const n=64, c=document.createElement('canvas'); c.width=n; c.height=n;
-  const nctx=c.getContext('2d'); const id=nctx.createImageData(n,n);
-  for(let i=0;i<id.data.length;i+=4){ const v=Math.random()*255; id.data[i]=v; id.data[i+1]=v; id.data[i+2]=v; id.data[i+3]=16; }
-  nctx.putImageData(id,0,0); return ctx.createPattern(c,'repeat');
-}catch(e){ return null; } }
-/* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — paramètre midFight ajouté :
-   true quand cette timeline ne couvre qu'UN round joué en cours de coaching
-   Gauntlet (runCoachingRound, ui-03), pas l'issue finale du combat — sert
-   uniquement à choisir le texte de la cloche de fin (round vs combat).
-   N'affecte aucun appelant existant (career/arcade non coaché), tous
-   passent midFight=undefined, donc le texte "Fin du combat" d'origine. ==== */
-function buildTimeline(midFight){
-  const res=G.pending.res, you=G.f, opp=G.fight.opp, meWin=G.pending.win;
-  const log=(res.log&&res.log.length)?res.log:[];
-  const beats=log.map(L=>({phase:L.phase,by:L.by,round:L.r,finish:L.finish,method:L.method,
-    text:L.text,momentum:L.momentum,snapA:L.snapA,snapB:L.snapB}));
-  /* ==== [ANCRE: CORRECTIF_ROUND_CLOCHE] — bug remonté : le round de la
-     cloche de fin retombait toujours sur res.round||3 — res.round n'existe
-     QUE sur une finition (KO/Soumission), jamais sur une décision (la seule
-     branche où cette cloche s'ajoute), donc l'expression valait TOUJOURS 3
-     en pratique. Inoffensif tant qu'un seul round jusqu'au-boutiste
-     existait (toujours le round 3, en carrière) — devient faux dès qu'un
-     round 1 ou 2 de coaching Gauntlet se termine aux points : affichait
-     "ROUND 3" sur le Canvas au lieu du vrai round joué. Lit désormais le
-     round du dernier beat réel du log, cohérent quel que soit le contexte. ==== */
-  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:(beats.length?beats[beats.length-1].round:3),text:midFight?'[00:00] Fin du round.':'[00:00] Fin du combat. Décision des juges.'});
-  /* ==== [FIN ANCRE] ==== */
-  ARENA={beats,idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
-    stMe:100,stOp:100,
-    flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:res.method,meWin,
-    currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:res.zone||null,
-    nmeName:you.first,nopName:opp.first,meFlag:you.flag,opFlag:opp.flag,
-    /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop (gel bref à l'impact), zoom
-       caméra et secousse d'écran globale. camZoom/camShakeX/Y sont les
-       valeurs COURANTES (interpolées chaque frame vers leur repos), jamais
-       appliquées directement en un saut. ==== */
-    hitStopMs:0,hitStopStart:0,_lastNow:0,camZoom:1,camShakeMag:0,camFocusX:0.5,
-    /* ==== [ANCRE: JUICE_NIVEAU2] — pool de particules générique (étincelles
-       d'impact, poussière de takedown, confettis de victoire). _particles est
-       un tableau plat consommé/rempli par spawnParticles()/updateParticles()/
-       drawParticles(), tous génériques (le "kind" pilote le rendu). ==== */
-    _particles:[],_wasGrounded:false,
-    /* ==== [ANCRE: JUICE_NIVEAU4] — ralenti (slowMo*), chromatic aberration
-       au KO (_chromaKOActive) et réaction de foule (crowdPulse, 0=calme,
-       1=en délire). ==== */
-    slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
-}
+/* ==== [ANCRE: CORRECTIF_ARENA_MOTEUR_DEPLACE] — F-07, hygiène : le moteur de
+   rendu Canvas 2D autonome (état ARENA, boucle d'animation, particules,
+   silhouettes, aberration chromatique, moments de bascule) a déménagé dans
+   ui-09-arena.js, chargé juste après ce fichier. Restent ici : tout ce qui
+   est référencé PAR NOM dans l'objet SCREENS ci-dessus (évalué au chargement
+   du script, donc avant que ui-09 n'existe si l'ordre était inversé) — les
+   écrans scr_fight_flash/scr_faith_fight_pending/scr_arena/
+   scr_consumable_preview et, avec eux, tout ce qui leur est intimement lié
+   (FFP/startFaithFightPending/finishFaithFightPending, buildFightFlashLines,
+   les autres écrans du temps de titre Faith physiquement voisins dans
+   l'ancien fichier) — ainsi que setArenaCosmeticTheme()/getArenaTheme(),
+   gardés ici par choix explicite (cf. ANCRE CORRECTIF_ARENA_THEMES_DEPLACE
+   plus bas). ==== */
 /* ==== [ANCRE: V2-28] — résumé du Rythme "Instantané" : trois lignes
    (le meilleur moment, le tournant, la fin), tirées du log réel du
    combat déjà simulé — jamais un texte générique. "Meilleur moment" =
@@ -3324,467 +3515,10 @@ function buildFightFlashLines(res){
   return lines.filter((t,i)=>t && lines.indexOf(t)===i);
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : ouvrir une
-   "fenêtre" avec un aperçu de l'arène en plein rendu Canvas (les silhouettes
-   de combattants), un par effet du Marché noir, au lieu du simple texte
-   descriptif. Réutilise TEL QUEL le moteur de rendu déjà éprouvé du combat
-   réel (cacheArenaGfx/drawArena/fighter, tous inchangés) — seule différence :
-   une timeline VIDE (aucun beat, aucune boucle d'animation démarrée),
-   dessinée une seule fois en trame figée (drawArena(0,true), même mécanisme
-   que le gel final d'un vrai combat) pour montrer les deux combattants
-   debout dans l'octogone. ==== */
-function buildStaticPreviewArena(nameA,nameB,flagA,flagB){
-  ARENA={beats:[],idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
-    stMe:100,stOp:100,
-    flashMe:0,flashOp:0,shakeMe:0,shakeOp:0,lungeMe:0,lungeOp:0,fall:0,tap:0,method:'',meWin:false,
-    currentMomentum:50,snapA:{h:0,b:0,l:0},snapB:{h:0,b:0,l:0},finishZone:null,
-    nmeName:nameA,nopName:nameB,meFlag:flagA,opFlag:flagB,
-    hitStopMs:0,hitStopStart:0,_lastNow:0,camZoom:1,camShakeMag:0,camFocusX:0.5,
-    _particles:[],_wasGrounded:false,
-    slowMoFactor:1,slowMoUntil:0,_chromaKOActive:false,crowdPulse:0};
-}
-/* ==== [FIN ANCRE] ==== */
-function cacheArenaGfx(){
-  const A=ARENA, ctx=A.ctx, W=A.W, H=A.H;
-  const topY=H*0.30, topL=W*0.08, topR=W*0.92, botL=W*0.03, botR=W*0.97, gY=H-16, gY2=H-6;
-  A._geom={topY,topL,topR,botL,botR,gY,gY2,W,H};
-  const spot=ctx.createRadialGradient(W*0.5,topY*0.3,0,W*0.5,topY*0.3,W*0.7);
-  spot.addColorStop(0,'rgba(255,225,170,.34)'); spot.addColorStop(0.5,'rgba(255,225,170,.12)'); spot.addColorStop(1,'rgba(0,0,0,0)');
-  A._spotGrad=spot;
-  A._bleacherFill=[]; A._bleacherDots=[];
-  for(let r=0;r<6;r++){ A._bleacherFill.push(`rgba(58,49,38,${0.55+r*0.06})`); A._bleacherDots.push(`rgba(190,140,105,${0.35+r*0.05})`); }
-  /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — _themeOverride permet de rendre
-     l'octogone avec un thème qui n'est PAS celui équipé, pour montrer un
-     cosmétique avant achat. Absent partout ailleurs : le comportement normal
-     (thème équipé) est strictement inchangé. ==== */
-  A._theme=A._themeOverride||getArenaTheme();
-  A._floorGrad=ctx.createLinearGradient(0,topY,0,H);
-  A._floorGrad.addColorStop(0,A._theme.floorColors[0]); A._floorGrad.addColorStop(1,A._theme.floorColors[1]);
-  A._vignetteGrad=ctx.createRadialGradient(W/2,H*0.55,H*0.25,W/2,H*0.55,Math.max(W,H)*0.62);
-  A._vignetteGrad.addColorStop(0,'rgba(0,0,0,0)'); A._vignetteGrad.addColorStop(1,'rgba(0,0,0,.38)');
-  A._pads=[[botL,H],[botR,H],[W,gY2],[W,gY],[topL,topY],[topR,topY],[0,gY],[0,gY2]];
-  A._foMe={lunge:0,flash:false,shake:false,fallen:false,grounded:false,phase:null,top:false,tap:false};
-  A._foOp={lunge:0,flash:false,shake:false,fallen:false,grounded:false,phase:null,top:false,tap:false};
-}
-function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
-  /* ==== [ANCRE: V2-28] — Rythme de combat : Intégral prend son temps
-     (beat plus long, on voit tout), Rapide (défaut) garde le rythme
-     d'origine. Instantané ne passe jamais ici (cf. render()). */
-  BEAT_MS=(((G.settings&&G.settings.fightPace)||'rapide')==='integral')?1050:750;
-  // Cast JSDoc : getElementById() renvoie HTMLElement générique ; c'est bien
-  // un <canvas> dans le HTML réel (width/height/getContext lui sont propres).
-  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('arena-cv'));
-  if(!cv||!cv.getContext||typeof requestAnimationFrame==='undefined'){ ARENA.done=true; return; } // pas de canvas (test)
-  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=220;
-  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr; ARENA.t0=performance.now(); ARENA.pauseOffset=0; ARENA.roundPause=false;
-  ARENA.noise=makeNoisePattern(ctx);
-  cacheArenaGfx();
-  const total=ARENA.beats.length*BEAT_MS;
-  const loop=(now)=>{ if(ARENA.roundPause) return;
-    /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop : pendant le gel, on absorbe le
-       temps réel dans pauseOffset au lieu de laisser el avancer, donc la
-       frame reste identique sans jamais sauter de beat au dégel. */
-    if(ARENA.hitStopMs>0){
-      if(now-ARENA.hitStopStart<ARENA.hitStopMs){
-        ARENA.pauseOffset+=now-(ARENA._lastNow||now); ARENA._lastNow=now;
-        drawArena((ARENA._lastFrac||0),true); ARENA.raf=requestAnimationFrame(loop); return;
-      }
-      ARENA.hitStopMs=0; ARENA._chromaKOActive=false;
-    }
-    /* ==== [ANCRE: JUICE_NIVEAU4] — ralenti sur les finitions : même principe
-       que le hit-stop (absorber le temps réel dans pauseOffset), mais PARTIEL
-       (facteur slowMoFactor) au lieu de total — la frappe/chute se termine en
-       temps étiré au lieu de reprendre net à vitesse normale après le gel. */
-    if(ARENA.slowMoUntil && now<ARENA.slowMoUntil){
-      const dtReal=now-(ARENA._lastNow||now); const dtSlow=dtReal*(ARENA.slowMoFactor||1);
-      ARENA.pauseOffset+=dtReal-dtSlow; ARENA._lastNow=now;
-      const elS=now-ARENA.t0-ARENA.pauseOffset;
-      ARENA._lastFrac=(elS%BEAT_MS)/BEAT_MS;
-      drawArena(ARENA._lastFrac,false); paintBars();
-      ARENA.raf=requestAnimationFrame(loop); return;
-    }
-    ARENA.slowMoUntil=0;
-    ARENA._lastNow=now;
-    const el=now-ARENA.t0-ARENA.pauseOffset; const bi=Math.min(ARENA.beats.length-1,Math.floor(el/BEAT_MS));
-    if(bi!==ARENA.lastBeat){
-      // pause au changement de round (sauf le tout premier beat) — laisse le
-      // joueur enchaîner manuellement plutôt qu'un défilement continu.
-      // pauseHandledFor évite de redétecter EXACTEMENT le même changement de
-      // round à la reprise (sinon nextRound() retombe sur le même bi, revoit
-      // le même changement de round, et se re-bloque instantanément : le
-      // bouton semblait "ne rien faire").
-      const prevRound=ARENA.lastBeat>=0?(ARENA.beats[ARENA.lastBeat].round||1):null;
-      const newRound=ARENA.beats[bi].round||1;
-      if(prevRound!==null && newRound!==prevRound && !ARENA.beats[bi].finish && bi!==ARENA.pauseHandledFor){
-        ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; ARENA.pauseHandledFor=bi;
-        /* ==== [ANCRE: V2-29] — moment de bascule détecté sur la reprise qui
-           vient de se terminer, à partir de l'état RÉEL de la simulation
-           (momentum/phase des beats de cette reprise) — jamais à chaque
-           reprise (règle 6), plafonné à 3 par combat (ARENA.basculeCount). */
-        const moment=detectBascule(prevRound);
-        if(moment) ARENA.basculePending={kind:moment.kind};
-        renderArenaOverlay(); return;
-      }
-      ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]);
-    }
-    ARENA._lastFrac=(el%BEAT_MS)/BEAT_MS;
-    drawArena(ARENA._lastFrac); paintBars();
-    if(el>=total){ ARENA.done=true;
-      /* ==== [ANCRE: JUICE_NIVEAU2] — confettis de victoire : sans une courte
-         boucle dédiée après la fin du combat, drawArena(1,true) ne serait
-         appelé qu'UNE fois (gel plat) et les confettis n'auraient jamais la
-         moindre frame pour tomber avant la navigation vers l'écran de
-         résultat. */
-      if(ARENA.meWin) spawnParticles(ARENA,ARENA.W/2,-10,{count:44,xSpread:ARENA.W*0.9,
-        colors:['#E6B93A','#E8442F','#7FC488','#F5EFE0'],spreadX:2,spreadY:1,vy0:1.5,gravity:0.085,life:120,size:6,kind:'confetti'});
-      const outroStart=performance.now();
-      const outroLoop=(now2)=>{ updateParticles(ARENA); drawArena(1,true); paintBars();
-        if(now2-outroStart<1100){ ARENA.raf=requestAnimationFrame(outroLoop); }
-        else { ARENA.to=setTimeout(()=>CL.toResult(),200); } };
-      ARENA.raf=requestAnimationFrame(outroLoop); return;
-    }
-    ARENA.raf=requestAnimationFrame(loop); };
-  ARENA.loopFn=loop;
-  paintBars(); ARENA.raf=requestAnimationFrame(loop);
-}
-/* ==== [ANCRE: V2-29] — même mécanisme de reprise que "Round suivant"
-   (recalculer pauseOffset pour retomber pile sur pendingBeatIdx, relever
-   roundPause, relancer la boucle) : nextRound() ET continueAfterBascule()
-   partagent ce point unique plutôt que de dupliquer le calcul. */
-function resumeArenaPlayback(){
-  ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
-  ARENA.roundPause=false;
-  if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
-}
-function renderArenaOverlay(){ const el=document.getElementById('ar-log'); if(!el) return;
-  if(ARENA.basculePending){ renderBasculeOverlay(el); return; }
-  const finishedRound=ARENA.beats[ARENA.lastBeat]?(ARENA.beats[ARENA.lastBeat].round||1):1;
-  el.innerHTML=`<div style="text-align:center"><b class="gold">Fin du round ${finishedRound}</b><br><button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.nextRound()">Round suivant ▸</button></div>`;
-}
-/* ==== [ANCRE: V2-29] — les moments de bascule. Faute de flags dédiés dans
-   le log du moteur (pas de "sonné"/"coupure"/"dos à la cage" — cf. beat
-   shape réelle : phase/by/momentum/snapA/snapB seulement), les 4
-   situations ci-dessous sont dérivées de l'état RÉEL de la reprise qui
-   vient de se jouer (momentum de fin de round, domination en clinch) —
-   jamais fabriquées. Format imposé : une phrase de situation, 3 options,
-   aucun chiffre, conséquence en une phrase. */
-const BASCULE_MOMENTS={
-  sonne_lui:{situation:'Il recule, les jambes molles. La cage est derrière lui.',
-    options:[
-      {label:'Se jeter dessus',stat:'killer',oppStat:'chin',
-        successMsg:'Vous ne le laissez pas respirer — il craque un peu plus.',
-        failMsg:'Il vous accroche au passage : vous ralentissez, groggy vous aussi.'},
-      {label:'Rester structuré et le cueillir',stat:'composure',oppStat:'chin',
-        successMsg:'Vous le cueillez proprement, sans vous exposer.',
-        failMsg:'Il tient bon, et la reprise se referme sans rien de plus.'},
-      {label:'Le laisser revenir et garder le round',stat:'fightIQ',oppStat:'heart',
-        successMsg:'Vous gardez le contrôle de la reprise, sans risque inutile.',
-        failMsg:'Il revient dans le round : l’occasion est passée.'}
-    ]},
-  sonne_moi:{situation:'Vous encaissez, les jambes molles. Il sent l’occasion.',
-    options:[
-      {label:'Se réfugier au clinch',stat:'clinchStr',oppStat:'power',
-        successMsg:'Vous vous accrochez à lui, le temps que la tête se remette en place.',
-        failMsg:'Il vous décolle du clinch et continue d’appuyer.'},
-      {label:'Reculer et respirer',stat:'footSpeed',oppStat:'aggression',
-        successMsg:'Vous sortez de l’axe, il ne vous rattrape pas.',
-        failMsg:'Il coupe la cage et vous retrouve contre la grille.'},
-      {label:'Répondre pour le faire douter',stat:'heart',oppStat:'composure',
-        successMsg:'Votre réponse le fait hésiter une seconde de trop.',
-        failMsg:'Il encaisse sans broncher et continue d’avancer.'}
-    ]},
-  clinch:{situation:'Dos à la cage, il vous contrôle en clinch depuis un moment.',
-    options:[
-      {label:'Forcer la sortie tout de suite',stat:'strength',oppStat:'clinchStr',
-        successMsg:'Vous vous dégagez, retour au centre de la cage.',
-        failMsg:'Vous forcez pour rien : il vous replaque contre la grille.'},
-      {label:'Attendre l’ouverture pour sortir',stat:'fightIQ',oppStat:'topControl',
-        successMsg:'Vous sentez le bon moment et sortez proprement.',
-        failMsg:'L’ouverture ne vient jamais : la reprise se termine collé à la grille.'},
-      {label:'Accepter la position et encaisser au score',stat:'discipline',oppStat:'clinchStr',
-        successMsg:'Vous limitez les dégâts, sans paniquer.',
-        failMsg:'Il en profite pour accumuler les coups au corps.'}
-    ]},
-  serre:{situation:'Round qui se joue à rien, dans les dernières secondes.',
-    options:[
-      {label:'Se jeter dans un dernier échange',stat:'aggression',oppStat:'chin',
-        successMsg:'Vous prenez la reprise sur ce dernier coup d’éclat.',
-        failMsg:'L’échange tourne à votre désavantage sur la cloche.'},
-      {label:'Sécuriser ce qui est déjà fait',stat:'discipline',oppStat:'fightIQ',
-        successMsg:'Vous gérez la fin de round sans rien risquer.',
-        failMsg:'Trop passif : les juges retiennent surtout sa fin de round à lui.'},
-      {label:'Chercher l’amenée pour finir en contrôle',stat:'takedown',oppStat:'tdd',
-        successMsg:'L’amenée passe, vous terminez le round au-dessus.',
-        failMsg:'L’amenée échoue, vous perdez le peu de temps qu’il restait.'}
-    ]}
-};
-/** Dérive un éventuel moment de bascule de la reprise qui vient de se
- * jouer, jamais fabriqué : lu sur les beats réels de cette reprise.
- * @param {number} round @returns {{kind:string}|null} */
-function detectBascule(round){
-  // V2-44 : réglage Moments de bascule (activés par défaut), Réglages, ui-06.
-  if(G.settings && G.settings.basculeEnabled===false) return null;
-  if((ARENA.basculeCount||0)>=3) return null;
-  const roundBeats=ARENA.beats.filter(b=>b.round===round && b.phase!=='bell');
-  if(!roundBeats.length) return null;
-  const last=roundBeats[roundBeats.length-1];
-  const lastM=(last.momentum!=null)?last.momentum:50;
-  const clinchDom=roundBeats.filter(b=>b.phase==='clinch'&&b.by==='op').length>=3;
-  if(clinchDom && rnd()<0.6) return {kind:'clinch'};
-  if(lastM>=78 && rnd()<0.55) return {kind:'sonne_lui'};
-  if(lastM<=22 && rnd()<0.55) return {kind:'sonne_moi'};
-  if(Math.abs(lastM-50)<=8 && rnd()<0.35) return {kind:'serre'};
-  return null;
-}
-/** Chance de succès pondérée par l'attribut du joueur contre celui
- * de l'adversaire sur le point précis de l'option — jamais un tirage à
- * plat, jamais un chiffre affiché au joueur.
- * @param {object} opt @returns {boolean} */
-function resolveBasculeOption(opt){
-  const f=G.f, opp=(G.fight&&G.fight.opp)||{};
-  const my=(f.attrs&&f.attrs[opt.stat])!=null?f.attrs[opt.stat]:50;
-  const their=(opp.attrs&&opp.attrs[opt.oppStat])!=null?opp.attrs[opt.oppStat]:50;
-  const chance=clamp(50+(my-their)/2,10,90);
-  return rnd()*100<chance;
-}
-function renderBasculeOverlay(el){
-  const b=ARENA.basculePending, m=BASCULE_MOMENTS[b.kind]; if(!m) return;
-  if(b.resultMsg){
-    el.innerHTML=`<div style="text-align:center"><div class="small" style="color:var(--gold)">${esc(b.resultMsg)}</div>
-      <button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.continueAfterBascule()">Continuer ▸</button></div>`;
-    return;
-  }
-  el.innerHTML=`<div style="text-align:left">
-    <div class="small mb">${esc(m.situation)}</div>
-    ${m.options.map((o,i)=>`<button class="btn ghost" style="display:block;width:100%;margin-top:6px;padding:8px;text-align:left" onclick="CL.pickBascule(${i})">${esc(o.label)}</button>`).join('')}
-  </div>`;
-}
-function applyBeat(b){ const A=ARENA; if(!b)return;
-  if(b.phase==='bell'){ A.currentText=b.text; return; }
-  if(b.by==='me'){ A.flashOp=1; A.shakeOp=1; A.lungeMe=1; }
-  else { A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }
-  A.stMe=clamp(A.stMe-RI(2,5),12,100); A.stOp=clamp(A.stOp-RI(2,5),12,100);
-  /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop + secousse d'écran, magnitude
-     différenciée : un échange normal mérite un micro-gel discret, une
-     finition mérite un vrai temps d'arrêt. Le point de focus caméra suit le
-     combattant qui ENCAISSE (pas celui qui frappe) — c'est lui que l'œil
-     cherche instinctivement au moment de l'impact. ==== */
-  A.hitStopMs=b.finish?170:55; A.hitStopStart=performance.now();
-  A.camShakeMag=Math.min(1,(A.camShakeMag||0)+(b.finish?1:0.45));
-  A.camFocusX=b.by==='me'?0.68:0.32;
-  A.camZoomTarget=b.finish?1.22:1.08;
-  /* ==== [ANCRE: JUICE_NIVEAU2] — intention de burst d'impact, consommée une
-     seule fois dans drawArena dès que la position réelle du receveur (xOp/
-     xMe, qui dépend du momentum) est connue — applyBeat n'a pas cette info. */
-  A._fxSpawn={receiver:b.by==='me'?'op':'me',finish:!!b.finish};
-  /* ==== [ANCRE: JUICE_NIVEAU4] — ralenti + chromatic aberration + foule.
-     Le ralenti ne concerne QUE les finitions (un échange normal n'a pas
-     besoin de s'étirer). La chromatic aberration ne concerne QUE le KO —
-     une soumission n'a pas ce "choc caméra", elle a déjà sa propre tension
-     (halo TAP! existant). La foule réagit à TOUT coup, mais plus fort sur
-     une finition, et décroît ensuite (cf. drawArena). */
-  if(b.finish){ A.slowMoFactor=0.22; A.slowMoUntil=performance.now()+900; }
-  A._chromaKOActive=!!(b.finish && b.method && b.method.startsWith('KO'));
-  A.crowdPulse=Math.min(1,(A.crowdPulse||0)+(b.finish?1:0.35));
-  if(b.finish){ if(b.method&&b.method.startsWith('KO')){ if(A.meWin){A.fall=2;} else {A.fall=1;} }
-    else if(b.method&&b.method.startsWith('Soum')){ A.tap=A.meWin?2:1; }
-    if(A.finishZone){ const zoneLetter=A.finishZone==='tête'?'h':A.finishZone==='corps'?'b':'l';
-      const loserPrefix=A.meWin?'do':'dm'; A.flashZoneId=`${loserPrefix}-${zoneLetter}`; } }
-  A.curPhase=b.phase; A.curTop=(b.phase==='sol')?(b.by==='me'?'me':'op'):null;
-  A.currentText=b.text; A.currentMomentum=b.momentum;
-  if(b.snapA) A.snapA=b.snapA; if(b.snapB) A.snapB=b.snapB;
-}
-/* ==== [ANCRE: JUICE_NIVEAU2] — système de particules générique. Chaque
-   particule est un objet plat {x,y,vx,vy,g,life,maxLife,size,color,kind,rot}.
-   spawnParticles() en crée un lot, updateParticles() les fait vivre une
-   frame (gravité + décroissance de vie), drawParticles() les dessine selon
-   leur "kind". Pas de classe, pas de lib : cohérent avec le reste du fichier. ==== */
-function spawnParticles(A,x,y,opts){
-  if(!A._particles) A._particles=[];
-  const n=opts.count||6;
-  for(let i=0;i<n;i++){
-    const ox=opts.xSpread?( (Math.random()-0.5)*opts.xSpread ):0;
-    A._particles.push({
-      x:x+ox, y:y+(opts.ySpread?(Math.random()-0.5)*opts.ySpread:0),
-      vx:(Math.random()-0.5)*(opts.spreadX||4),
-      vy:(opts.vy0||0)-(Math.random()*(opts.spreadY||4)),
-      g:opts.gravity!=null?opts.gravity:0.32,
-      life:opts.life||24, maxLife:opts.life||24,
-      size:(opts.size||3)*(0.65+Math.random()*0.7),
-      color:opts.colors[Math.floor(Math.random()*opts.colors.length)],
-      kind:opts.kind||'spark', rot:Math.random()*Math.PI*2, rotSpeed:(Math.random()-0.5)*0.3
-    });
-  }
-}
-function updateParticles(A){
-  if(!A._particles||!A._particles.length) return;
-  A._particles=A._particles.filter(p=>{
-    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.life-=1; p.rot+=p.rotSpeed;
-    return p.life>0;
-  });
-}
-/* ==== [ANCRE: JUICE_NIVEAU4] — chromatic aberration au KO. Décale le canal
-   rouge vers la gauche et le bleu vers la droite (vert centré, inchangé) sur
-   quelques pixels — le "choc caméra" qu'on voit dans beaucoup de jeux de
-   combat modernes sur un gros impact. Volontairement réservé au KO (voir
-   _chromaKOActive posé dans applyBeat) : appelé une fois par frame gelée
-   pendant le hit-stop, jamais pendant le reste du combat — le coût O(pixels)
-   de getImageData/putImageData est négligeable sur une poignée de frames
-   rares, il serait déraisonnable à 60fps en continu. ==== */
-function applyChromaAberration(ctx,offsetPx){
-  try{
-    const cv=ctx.canvas; if(!cv||!cv.width||!cv.height) return;
-    const w=cv.width, h=cv.height;
-    const img=ctx.getImageData(0,0,w,h); const d=img.data;
-    const out=new Uint8ClampedArray(d.length);
-    for(let y=0;y<h;y++){ const rowBase=y*w;
-      for(let x=0;x<w;x++){ const i=(rowBase+x)*4;
-        const xr=x-offsetPx<0?0:(x-offsetPx); const xb=x+offsetPx>=w?w-1:(x+offsetPx);
-        const ir=(rowBase+xr)*4, ib=(rowBase+xb)*4;
-        out[i]=d[ir]; out[i+1]=d[i+1]; out[i+2]=d[ib+2]; out[i+3]=d[i+3];
-      }
-    }
-    img.data.set(out);
-    ctx.putImageData(img,0,0);
-  }catch(e){ /* getImageData peut échouer (canvas "tainted", environnement de test) — dégrade silencieusement */ }
-}
-function drawParticles(ctx,A){
-  if(!A._particles||!A._particles.length) return;
-  for(const p of A._particles){
-    const t=Math.max(0,p.life/p.maxLife);
-    ctx.save();
-    if(p.kind==='confetti'){
-      ctx.globalAlpha=t; ctx.fillStyle=p.color;
-      ctx.translate(p.x,p.y); ctx.rotate(p.rot);
-      ctx.fillRect(-p.size/2,-p.size/2*0.6,p.size,p.size*0.6);
-    } else if(p.kind==='dust'){
-      ctx.globalAlpha=t*0.5; ctx.fillStyle=p.color;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*(1.4-t*0.4),0,Math.PI*2); ctx.fill();
-    } else { // spark
-      ctx.globalAlpha=t; ctx.fillStyle=p.color;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*t,0,Math.PI*2); ctx.fill();
-    }
-    ctx.restore();
-  }
-  ctx.globalAlpha=1;
-}
-/* ==== [FIN ANCRE] ==== */
-function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,grounded,phase,top,tap}
-  ctx.save();
-  const sh=o.shake?((Math.random()-0.5)*4):0;
-  x+=face*(o.lunge*14)+sh;
-  const bob=Math.sin(performance.now()/240 + (face>0?0:1))*2;
-  /* ==== [ANCRE: JUICE_NIVEAU3] — ombre portée, ancrée au sol (groundY fixe,
-     jamais le bob vertical du buste — sinon elle "respirerait" avec lui,
-     ce qui casserait l'ancrage au sol). Légèrement plus large en pleine
-     extension : le poids se porte en avant. ==== */
-  ctx.save(); ctx.globalAlpha=0.30; ctx.fillStyle='#000';
-  ctx.beginPath(); ctx.ellipse(x, groundY-2, 14+o.lunge*3, 4.5, 0, 0, Math.PI*2); ctx.fill();
-  ctx.restore();
-  if(o.grounded){
-    if(!o.top){
-      // Sur le dos (garde) — buste allongé, tête décalée, jambes relevées
-      ctx.translate(x, groundY-5);
-      /* ==== [ANCRE: JUICE_NIVEAU3] — halo lumineux au lieu du blanc plat :
-         le combattant garde sa couleur, un glow diffus derrière souligne
-         l'impact sans effacer qui il est. */
-      if(o.flash){ ctx.save(); ctx.shadowColor='#fff'; ctx.shadowBlur=16; ctx.fillStyle='rgba(255,255,255,.8)';
-        ctx.beginPath(); ctx.ellipse(0,0,30,9,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
-      ctx.fillStyle=color; ctx.globalAlpha=.95;
-      ctx.beginPath(); ctx.ellipse(0,0,30,9,0,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(-face*25,-2,7,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle=color; ctx.lineWidth=5; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(0,-20); ctx.lineTo(-face*15,-15); ctx.stroke();
-    } else {
-      // Au-dessus (dominant) — buste vertical, bras qui contrôle/frappe
-      ctx.translate(x-face*8, groundY-22);
-      if(o.flash){ ctx.save(); ctx.shadowColor='#fff'; ctx.shadowBlur=16; ctx.fillStyle='rgba(255,255,255,.8)';
-        ctx.beginPath(); ctx.ellipse(0,-6,14,22,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
-      ctx.fillStyle=color; ctx.strokeStyle=color;
-      ctx.lineWidth=12; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(0,10); ctx.lineTo(0,-15); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0,-22,8,0,Math.PI*2); ctx.fill();
-      ctx.lineWidth=5;
-      ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(face*15,(o.lunge*15)); ctx.stroke();
-    }
-    if(o.tap){ // halo de danger de soumission, pulsant, sur le combattant en péril
-      const pulse=Math.abs(Math.sin(performance.now()/150))*5;
-      ctx.beginPath(); ctx.arc(0,-15,20+pulse,0,Math.PI*2);
-      ctx.fillStyle='rgba(232,68,47,0.3)'; ctx.fill();
-      ctx.strokeStyle='#E8442F'; ctx.lineWidth=2; ctx.stroke();
-    }
-    ctx.restore(); return;
-  }
-  ctx.translate(x, groundY-52+bob+(o.fallen?46:0));
-  if(o.fallen) ctx.rotate(face*1.3);
-  /* ==== [ANCRE: JUICE_NIVEAU3] — même halo pour la pose debout, dessiné
-     derrière avant tout le reste (jambes/buste/tête/bras gardent leur
-     couleur propre, plus de flip vers un blanc plat). */
-  if(o.flash){ ctx.save(); ctx.shadowColor='#fff'; ctx.shadowBlur=18; ctx.fillStyle='rgba(255,255,255,.85)';
-    ctx.beginPath(); ctx.ellipse(0,-5,17,32,0,0,Math.PI*2); ctx.fill(); ctx.restore(); }
-  const col=color;
-  const reach=o.lunge;
-  ctx.strokeStyle=col; ctx.lineWidth=6; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(-3,4); ctx.lineTo(-10,46); ctx.moveTo(4,4); ctx.lineTo(12,46); ctx.stroke();
-  ctx.save();
-  ctx.scale(1+reach*0.14, 1-reach*0.10);
-  ctx.lineWidth=15; ctx.beginPath(); ctx.moveTo(0,-6); ctx.lineTo(0,26); ctx.stroke();
-  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(0,-20,9,0,Math.PI*2); ctx.fill();
-  /* ==== [ANCRE: JUICE_NIVEAU3] — volume : surbrillance douce en haut à
-     gauche du buste/tête (lumière du projecteur, cohérent avec _spotGrad
-     déjà centré au-dessus de l'octogone), fondue via 'overlay' plutôt qu'un
-     dégradé de teinte calculé — un simple trait de couleur unie gagne un
-     semblant de relief sans ajouter de complexité de calcul de couleur. */
-  ctx.save(); ctx.globalCompositeOperation='overlay';
-  const hl=ctx.createRadialGradient(-3,-24,0,-3,-24,15);
-  hl.addColorStop(0,'rgba(255,255,255,.55)'); hl.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle=hl;
-  ctx.beginPath(); ctx.arc(0,-20,9,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(0,8,8,18,0,0,Math.PI*2); ctx.fill();
-  ctx.restore();
-  ctx.restore();
-  ctx.lineWidth=6;
-  // flou de mouvement — traînée du bras avant en pleine frappe
-  if(reach>0.1 && !o.fallen){
-    for(let i=1;i<=3;i++){
-      ctx.globalAlpha=0.25/i;
-      const offset=(reach*20)*(i*0.4);
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(face*(10+(reach*20)-offset), -8+(reach*4)); ctx.stroke();
-    }
-  }
-  ctx.globalAlpha=1;
-  ctx.beginPath(); ctx.moveTo(0,2); ctx.lineTo(-face*8,-10); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(face*(10+reach*20), -8+reach*4); ctx.stroke();
-  ctx.fillStyle=col; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,Math.PI*2); ctx.fill();
-  ctx.restore();
-}
-/* ==== [ANCRE: LOT12_COSMETIQUE_ARENE] — thèmes visuels de l'octogone. Adapté
-   pour s'intégrer à la géométrie réelle de drawArena (8 points, pas la version
-   simplifiée du brouillon) — seules les couleurs de sol/rails/poteaux changent,
-   la forme reste identique. ==== */
-const ARENA_THEMES=[
-  {id:'classic',name:'Toile Noire (Classique)',floorColors:['#1c1710','#241d14'],railColor:'#4a3c1f',padColor:'#5C4B2E'},
-  {id:'pride',name:'Toile Blanche & Bleue (Héritage)',floorColors:['#DCE2EB','#FFFFFF'],railColor:'#1A4D8F',padColor:'#B22222'},
-  {id:'gold',name:'Bâche Royale (Prestige)',floorColors:['#E6B93A','#8A6A1E'],railColor:'#241D13',padColor:'#14100B'},
-  {id:'neon',name:'Néons Cyberpunk',floorColors:['#0d0221','#26045c'],railColor:'#ff003c',padColor:'#00f0ff'},
-  {id:'underground',name:'Béton Clandestin',floorColors:['#2a2a2a','#1a1a1a'],railColor:'#555555',padColor:'#000000'},
-  {id:'crimson',name:'Arène Écarlate',floorColors:['#2a0a0a','#170505'],railColor:'#E8442F',padColor:'#1a0303'},
-  /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-     récompense exclusive de série de 7 jours (GAUNTLET_DAILY_STREAK_REWARD,
-     state.js) — checkLegendUnlock('cosmetic_renegade') la rend
-     sélectionnable ici sans jamais figurer dans LEGEND_UNLOCKABLES (donc
-     jamais achetable). ==== */
-  {id:'renegade',name:'Toile Braise du Renégat (exclusive)',floorColors:['#3a0e02','#1a0500'],railColor:'#ff5a1f',padColor:'#1a0500'},
-  /* ==== [ANCRE: CORRECTIF_BANNIERE_CENDREE] — bug remonté : excl_banner_ash
-     (GAUNTLET_EXCLUSIVE_OFFERS, state.js) était vendu comme "thème
-     d'octogone" mais n'avait aucune entrée ici, donc aucun moyen de le
-     sélectionner après achat. Id aligné sur celui de l'offre (banner_ash)
-     pour matcher le checkLegendUnlock('excl_'+t.id) ajouté ci-dessous
-     (ui-07-contracts-legacy-screens.js). ==== */
-  {id:'banner_ash',name:'Bannière Cendrée (exclusive)',floorColors:['#180404','#0c0202'],railColor:'#7a1f16',padColor:'#0c0202'}
-  /* ==== [FIN ANCRE] ==== */
-];
+/* ==== [ANCRE: CORRECTIF_ARENA_THEMES_DEPLACE] — F-05, hygiène : ARENA_THEMES
+   (donnée pure) a déménagé dans data-content.js (chargé avant ce fichier,
+   même ancre LOT12_COSMETIQUE_ARENE conservée là-bas). setArenaCosmeticTheme()
+   et getArenaTheme() restent ici : ce sont les seuls points d'accès. ==== */
 /* ==== [ANCRE: CORRECTIF_PERSISTANCE_SKIN_ARENE] — bug remonté : le skin
    actif vivait sur G (réinitialisé par newCareer(), voir CL.newCareer plus
    bas), donc perdu à chaque nouvelle carrière même si le déblocage
@@ -3794,160 +3528,6 @@ const ARENA_THEMES=[
 function setArenaCosmeticTheme(themeId){ const meta=loadMetaStats(); meta.arenaCosmetic=themeId; saveMetaStats(meta); }
 function getArenaTheme(){ const meta=loadMetaStats(); return ARENA_THEMES.find(t=>t.id===(meta.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [FIN ANCRE] ==== */
-function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)return; const {W,H,topY,topL,topR,botL,botR,gY,gY2}=A._geom;
-  ctx.clearRect(0,0,W,H);
-  /* ==== [ANCRE: JUICE_NIVEAU1] — caméra : zoom vers la cible (tenu, pas
-     assoupli, pendant le hit-stop) + secousse globale qui décroît en
-     exponentielle. focusX suit qui encaisse (posé par applyBeat) pour que le
-     zoom recentre naturellement sur l'action plutôt que sur le centre fixe. */
-  if(!freeze){
-    const zt=A.camZoomTarget||1; A.camZoom=(A.camZoom||1)+(zt-(A.camZoom||1))*0.22;
-    A.camZoomTarget=1+((A.camZoomTarget||1)-1)*0.86;
-    A.camShakeMag=Math.max(0,(A.camShakeMag||0)-0.09);
-  }
-  const shakeMag=(A.camShakeMag||0)*7;
-  const shakeX=shakeMag?(Math.random()-0.5)*shakeMag:0, shakeY=shakeMag?(Math.random()-0.5)*shakeMag*0.6:0;
-  const zoom=A.camZoom||1, focusX=W*(A.camFocusX!=null?A.camFocusX:0.5), focusY=H*0.62;
-  ctx.save();
-  ctx.translate(shakeX,shakeY);
-  if(zoom>1.002){ ctx.translate(focusX,focusY); ctx.scale(zoom,zoom); ctx.translate(-focusX,-focusY); }
-  ctx.fillStyle=A._spotGrad; ctx.fillRect(0,0,W,topY);
-  if(!freeze) A.crowdPulse=Math.max(0,(A.crowdPulse||0)-0.02);
-  const cp=A.crowdPulse||0;
-  const bleacherRows=6, rowH=topY/bleacherRows;
-  for(let r=0;r<bleacherRows;r++){ const ry=r*rowH, rh=rowH-1;
-    ctx.fillStyle=A._bleacherFill[r]; ctx.fillRect(0,ry,W,rh);
-    ctx.fillStyle=A._bleacherDots[r];
-    const dots=14+r*3;
-    for(let d=0;d<dots;d++){ const dx=(d/dots)*W+Math.sin(d+r)*3;
-      const jump=cp>0.02?Math.sin(performance.now()/80+d*1.7+r*2)*cp*3:0;
-      ctx.beginPath(); ctx.arc(dx,ry+rh*0.5-Math.abs(jump),1.6,0,Math.PI*2); ctx.fill(); }
-  }
-  ctx.beginPath();
-  ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.lineTo(W,gY2); ctx.lineTo(W,gY);
-  ctx.lineTo(topR,topY); ctx.lineTo(topL,topY); ctx.lineTo(0,gY); ctx.lineTo(0,gY2);
-  ctx.closePath();
-  const arenaTheme=A._theme;
-  ctx.fillStyle=A._floorGrad; ctx.fill();
-  if(A.noise){ ctx.save(); ctx.clip(); ctx.fillStyle=A.noise; ctx.fillRect(0,0,W,H); ctx.restore(); }
-  ctx.strokeStyle='#3a2f20'; ctx.lineWidth=1;
-  for(let i=0;i<=8;i++){ const x=i*W/8; ctx.globalAlpha=.5; ctx.beginPath(); ctx.moveTo(x,gY); ctx.lineTo(x*0.86+W*0.05,topY); ctx.stroke(); }
-  ctx.globalAlpha=1; ctx.strokeStyle=arenaTheme.railColor; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(botL,H); ctx.lineTo(botR,H); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(topL,topY); ctx.lineTo(topR,topY); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,gY); ctx.lineTo(0,gY2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W,gY); ctx.lineTo(W,gY2); ctx.stroke();
-  ctx.fillStyle=arenaTheme.padColor;
-  for(let i=0,p=A._pads;i<p.length;i++){ const px=p[i][0], py=p[i][1]; ctx.fillRect(px-2,py-10,4,20); }
-  const grounded=A.curPhase==='sol';
-  const mom=(A.currentMomentum!=null?A.currentMomentum:50);
-  const shift=grounded?0:clamp((mom-50)/50,-1,1)*(W*0.09);
-  let xOp=W*0.68+shift, xMe=W*0.32+shift;
-  if(grounded){ const center=W*0.5+shift; xOp=center+(A.curTop==='op'?12:-12); xMe=center+(A.curTop==='me'?-12:12); }
-  /* ==== [ANCRE: JUICE_NIVEAU2] — consommation des intentions de particules
-     posées plus tôt (applyBeat pour l'impact, transition de phase ici pour
-     le takedown) : c'est ICI que xOp/xMe/gY sont enfin connus. */
-  if(A._fxSpawn){
-    const s=A._fxSpawn; const px=s.receiver==='op'?xOp:xMe; const py=grounded?gY-15:gY-58;
-    spawnParticles(A,px,py,{count:s.finish?14:7,colors:['#F5EFE0','#E6B93A','#E8442F'],
-      spreadX:s.finish?7:4,spreadY:s.finish?6:3.5,gravity:0.32,life:s.finish?32:20,size:s.finish?3.2:2.2,kind:'spark'});
-    A._fxSpawn=null;
-  }
-  if(grounded && !A._wasGrounded){
-    spawnParticles(A,(xOp+xMe)/2,gY,{count:10,colors:['#4a3c1f','#3a2f20','#5C4B2E'],
-      spreadX:5,spreadY:2,gravity:0.05,life:34,size:5,kind:'dust'});
-  }
-  A._wasGrounded=grounded;
-  const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
-  const foOp=A._foOp, foMe=A._foMe;
-  foOp.lunge=A.lungeOp*(1-frac); foOp.flash=A.flashOp>0; foOp.shake=A.shakeOp>0; foOp.fallen=A.fall===2;
-  foOp.grounded=grounded; foOp.phase=A.curPhase; foOp.top=A.curTop==='op'; foOp.tap=isSubDanger&&A.curTop!=='op';
-  foMe.lunge=A.lungeMe*(1-frac); foMe.flash=A.flashMe>0; foMe.shake=A.shakeMe>0; foMe.fallen=A.fall===1;
-  foMe.grounded=grounded; foMe.phase=A.curPhase; foMe.top=A.curTop==='me'; foMe.tap=isSubDanger&&A.curTop!=='me';
-  fighter(ctx, xOp, gY, -1, '#6E8478', foOp);
-  fighter(ctx, xMe, gY, 1, '#B23B36', foMe);
-  if(isSubDanger && !A.done){ ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#E8442F'; ctx.font="700 12px 'Oswald'"; ctx.fillText('⚠ DANGER SOUMISSION',W/2,H*0.45); ctx.restore(); }
-  if(!freeze) updateParticles(A);
-  drawParticles(ctx,A);
-  if(!freeze){
-    A.flashMe=Math.max(0,A.flashMe-0.5); A.flashOp=Math.max(0,A.flashOp-0.5);
-    A.shakeMe=Math.max(0,A.shakeMe-0.5); A.shakeOp=Math.max(0,A.shakeOp-0.5);
-    A.lungeMe*=0.86; A.lungeOp*=0.86;
-  }
-  ctx.fillStyle=A._vignetteGrad; ctx.fillRect(0,0,W,H);
-  ctx.restore();
-  if(A._chromaKOActive) applyChromaAberration(ctx,Math.round(3*(A.dpr||1)));
-  ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
-  const rnd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
-  let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
-  if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
-  ctx.fillText(A.done?label:('ROUND '+rnd+' · '+label), W/2, 20);
-  if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }
-}
-function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='undefined')cancelAnimationFrame(ARENA.raf); if(ARENA.to)clearTimeout(ARENA.to); } }
-/* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — appelée par render() dès que
-   G.screen==='consumable_preview' (même schéma que startArena/G.screen==
-   'arena'). Un seul dessin figé (drawArena(0,true)), pas de boucle
-   requestAnimationFrame : rien à animer sur un aperçu statique. ==== */
-/* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — item demandé : "que chaque aperçu
-   (comme ceux du marché noir) soit disponible sur absolument chaque élément
-   de la boutique". Le catalogue n'avait qu'un repli texte pour la majorité
-   de ses articles, et un aperçu replié sur place pour les cosmétiques et
-   décorations. Même fenêtre dédiée que le Marché noir pour TOUS les
-   articles, avec le rendu le plus parlant selon ce qu'on achète :
-     - cosmétique d'octogone -> l'octogone réellement rendu dans ce thème
-       (Canvas, via ARENA._themeOverride) — on voit ce qu'on achète ;
-     - archétype de Gauntlet -> les deux silhouettes dans la cage, le
-       combattant mis en avant, plus ses points forts chiffrés ;
-     - décoration -> la fiche de légende telle qu'elle sera décorée ;
-     - mode, scénario, outil -> pas de rendu visuel possible (rien de
-       visuel n'existe avant l'achat) : la fenêtre explique ce que
-       l'article ajoute et OÙ le retrouver une fois acheté, ce qui manquait
-       le plus au catalogue.
-   Réutilise intégralement le pipeline de dessin du combat (buildStatic
-   PreviewArena / cacheArenaGfx / drawArena), aucun code de rendu nouveau. ==== */
-function startShopPreviewArena(){
-  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
-  if(!cv||!cv.getContext) return;
-  const id=G._shopPreviewId||'';
-  const arch=(typeof ARCADE_UNLOCKABLE_ARCHETYPES!=='undefined')
-    ? ARCADE_UNLOCKABLE_ARCHETYPES.find(a=>a.unlockId===id) : null;
-  buildStaticPreviewArena(arch?arch.nick:'Toi','Adversaire',arch?arch.flag:'','');
-  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
-  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
-  /* Thème forcé pour un cosmétique, thème équipé pour tout le reste. */
-  const themeId=id.indexOf('cosmetic_')===0?id.replace('cosmetic_',''):(id.indexOf('excl_')===0?id.replace('excl_',''):null);
-  ARENA._themeOverride=themeId?(ARENA_THEMES.find(t=>t.id===themeId)||null):null;
-  cacheArenaGfx();
-  if(arch) ARENA.flashMe=1;
-  drawArena(0,true);
-  ARENA._themeOverride=null;
-}
-function startConsumablePreviewArena(){
-  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
-  if(!cv||!cv.getContext) return;
-  const item=GAUNTLET_CONSUMABLES.find(i=>i.id===G._consumablePreviewId);
-  const you=G.f;
-  buildStaticPreviewArena(you?(you.nick||you.first||'Toi'):'Toi','Adversaire',you?(you.flag||''):'','');
-  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
-  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
-  cacheArenaGfx();
-  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_PAR_EFFET] — item demandé : "pour
-     chaque effet" — un indice visuel distinct par consommable, sur ce même
-     Canvas figé, sans nouveau code de dessin (le halo de flash existe déjà
-     dans fighter(), ui-08, pour le combat réel). "shake" est un tremblement
-     JOUÉ SUR PLUSIEURS FRAMES (jitter aléatoire à chaque appel) — invisible
-     sur une trame unique figée, donc écarté ici au profit du halo, qui SE
-     VOIT sur une image fixe. Droit de véto change l'ADVERSAIRE : c'est lui
-     qui brille. Tout le reste est un avantage direct pour le joueur
-     (banque, filet de sécurité, statistiques) : c'est lui qui brille. ==== */
-  if(item&&item.id==='cons_veto') ARENA.flashOp=1; else ARENA.flashMe=1;
-  /* ==== [FIN ANCRE] ==== */
-  drawArena(0,true);
-}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-28] — écran du Rythme "Instantané" : résultat direct,
    jamais d'animation canvas. ==== */
@@ -4127,7 +3707,13 @@ function scr_faith_title_negotiation(){
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow" style="color:var(--gold)">${isDefense?'DÉFENSE DU TITRE':'COMBAT DE TITRE'}</div>
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
-   <div class="mono small muted" style="margin-top:4px">5 reprises · registre spectacle · conférence et pesée obligatoires</div>
+   <!-- ==== [ANCRE: CORRECTIF_ROUNDS_TITRE_CODES_EN_DUR] — bug trouvé : "5
+        reprises" et "conférence et pesée obligatoires" étaient écrits en dur,
+        vrais aujourd'hui seulement parce qu'isTitleEligible (rang ≤ 4, ui-05)
+        coïncide avec le seuil Main event de faithGalaPosition (rk ≤ 4, ui-04)
+        — deux constantes indépendantes, dans deux fichiers, sans aucun test
+        qui les lie. Lu directement sur gala (déjà résolu ci-dessus). ==== -->
+   <div class="mono small muted" style="margin-top:4px">${gala.rounds} reprises · registre spectacle${gala.pressConf?' · conférence et pesée obligatoires':''}</div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
      <div class="hero-name" style="font-size:22px">${esc(o.name)} ${o.flag}</div>
      <div class="mono small" style="margin-top:4px">${recordStr(o)} · <span class="muted">#${divRank(o)}</span>${o.champion?' · Champion':''}</div>
@@ -4249,7 +3835,7 @@ function scr_arena(){ const A=ARENA||{};
      <div class="arena-bars sm" style="margin-top:6px"><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-me" style="background:var(--gold)"></div></div><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-op" style="background:var(--gold)"></div></div></div>
      <div id="ar-log" class="mono muted small" style="margin-top:20px;min-height:48px;display:flex;flex-direction:column;justify-content:flex-end;border-left:3px solid var(--gold);padding-left:12px;line-height:1.4;padding-bottom:4px"></div>
    </div>
-   <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Couper la transmission vidéo ▸</button>
+   <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Passer au verdict ▸</button>
   </div>`; }
 /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — "fenêtre" ouverte au clic sur une
    tuile du Marché noir (scr_legends, ui-07 : CL.viewConsumablePreview) —
@@ -4282,29 +3868,3 @@ function scr_consumable_preview(){
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
-// ==== [ANCRE: CORRECTIF_COULEUR_ZONES_DEGATS] — bug remonté : le rouge
-// (var(--blood)) était utilisé pour un simple seuil de dégâts CUMULÉS
-// (v>28), qui devient quasi systématique dès le round 2-3 puisque ces
-// valeurs ne redescendent jamais de tout le combat (contrairement à dmgA/
-// dmgB, la vraie jauge de risque KO, qui se résorbe chaque round via
-// RECUP_INTER_ROUND). Le rouge se confondait donc avec le flash de finition
-// réel (ARENA.flashZoneId, déclenché uniquement sur un KO effectif) — un
-// combattant "en rouge" en permanence sans jamais tomber. Sémantique
-// corrigée, alignée sur l'attente : sauge = indemne, or = touché/blessé ;
-// le rouge reste exclusivement réservé au flash de KO (flashZoneId
-// ci-dessous), jamais à un simple cumul de dégâts.
-const ARENA_ZONE_COLOR=v=>v>10?'var(--gold)':'var(--sage)';
-/* mise à jour des barres HTML (plus de HP globaux) + momentum + points de dégâts par zone + terminal texte, à chaque frame */
-function paintBars(){ if(!ARENA)return; const set=(id,v)=>{const e=document.getElementById(id); if(e)e.style.width=clamp(v,0,100)+'%';};
-  set('st-me',ARENA.stMe); set('st-op',ARENA.stOp);
-  if(ARENA.currentMomentum!==undefined) set('ar-momentum',ARENA.currentMomentum);
-  const setZone=(id,v)=>{ const e=document.getElementById(id); if(e)e.style.background=ARENA_ZONE_COLOR(v); };
-  if(ARENA.snapA){ setZone('dm-h',ARENA.snapA.h); setZone('dm-b',ARENA.snapA.b); setZone('dm-l',ARENA.snapA.l); }
-  if(ARENA.snapB){ setZone('do-h',ARENA.snapB.h); setZone('do-b',ARENA.snapB.b); setZone('do-l',ARENA.snapB.l); }
-  if(ARENA.flashZoneId){ const e=document.getElementById(ARENA.flashZoneId); if(e){ e.style.background='var(--blood)'; e.style.boxShadow='0 0 6px var(--blood)'; } }
-  const logEl=document.getElementById('ar-log');
-  if(logEl && ARENA.currentText && logEl.getAttribute('data-last')!==ARENA.currentText){
-    logEl.innerHTML=`<div style="animation:fade .3s ease;color:var(--text)">${ARENA.currentText}</div>`;
-    logEl.setAttribute('data-last',ARENA.currentText);
-  }
-}

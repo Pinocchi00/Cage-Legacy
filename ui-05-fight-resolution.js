@@ -77,7 +77,28 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const tacticalSavedOpp=(typeof applyTacticalMemory==='function')?applyTacticalMemory(opp,G.f):{};
   // ==== [FIN ANCRE] ====
   const adaptivePlanForOpp=(typeof getAdaptiveNPCTactics==='function')?getAdaptiveNPCTactics(opp,G.f):null;
-  const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m); const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
+  const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m);
+  /* ==== [ANCRE: FAITH_PERK_JUGES] — G.faith.perks.judges était posé par
+     buyFaithPerk() (ui-08) et relu par AUCUN code. Consommé ici, une seule
+     fois, sur une décision serrée (2 juges sur 3) uniquement : on retourne
+     le vote du juge le plus proche de basculer plutôt que d'écraser
+     res.winner seul, ce qui désynchroniserait l'affichage des cartes des
+     juges (res.judges, montré tel quel par scr_result/scr_faith_archives)
+     du verdict annoncé — exactement ce que l'ancre JUGES_10PT_VERDICT
+     (engine-combat.js) garantit déjà pour un combat normal. ==== */
+  if(G.faith && G.faith.perks && G.faith.perks.judges && isDecisionLike(res.method) && res.winner==='B'){
+    const cards=['j1','j2','j3'].map(k=>({k,a:res.judges[k][0],b:res.judges[k][1]}));
+    const forB=cards.filter(c=>c.b>c.a);
+    if(forB.length===2){
+      const flip=forB.sort((x,y)=>(x.b-x.a)-(y.b-y.a))[0];
+      G.faith.perks.judges=false;
+      res.judges[flip.k]=[flip.b,flip.a];
+      res.scoreA=res.judges.j1[0]+res.judges.j2[0]+res.judges.j3[0];
+      res.scoreB=res.judges.j1[1]+res.judges.j2[1]+res.judges.j3[1];
+      res.winner='A'; res.method='Décision partagée';
+    }
+  }
+  const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
   if(typeof checkIronManDeath==='function') checkIronManDeath(res,null);
   if(typeof evaluateSponsor==='function') evaluateSponsor(res);
   // ==== [ANCRE: NARRATIF_APPEL] — calculé ici (mêmes données réelles qu'avant),
@@ -785,7 +806,16 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(dv) G.f.spectacle=clamp((G.f.spectacle==null?50:G.f.spectacle)+dv,0,100);
   }
   /* ==== [FIN ANCRE] ==== */
-  G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative,purseDetail:G.fight.purseDetail,classOffer,class31Offer,
+  /* ==== [ANCRE: CORRECTIF_NARRATIVE_NON_SERIALISABLE] — bug trouvé (en
+     testant CORRECTIF_COMBAT_ORPHELIN, ui-08) : `narrative.txt` est une
+     FONCTION (généré par generateNarrativeQuote()/les pools de citations,
+     ui-03) — JSON.stringify() l'ignore silencieusement à la sauvegarde.
+     Après un vrai rechargement (save() dans choosePlan() puis load() dans
+     cont()), scr_result() plantait sur `p.narrative.txt is not a function`.
+     Résolue ICI, une seule fois, en chaîne plutôt qu'en fonction : même
+     motif que last.narrative juste au-dessus (déjà une chaîne, jamais
+     touché par ce bug). ==== */
+  G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative:{src:narrative.src,txt:narrative.txt(G.f)},purseDetail:G.fight.purseDetail,classOffer,class31Offer,
     opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome, upsetLine};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';

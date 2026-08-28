@@ -206,3 +206,32 @@ const TRAIN=[
  {t:['kickboxer','muayThai'],label:'Double-leg improvisé',hint:'Voler une jambe entre deux échanges pour casser le rythme d\u2019un pur frappeur.',d:[['takedown',2],['strength',1],['form',1]]},
  {t:['bjj'],label:'Frappe complémentaire',hint:'Ajouter crochet, coup de pied et clinch à un jeu jusque-là exclusivement au sol.',d:[['hook',2],['kick',1],['clinchStr',1],['form',1]]}
 ];
+/* ==== [ANCRE: LOT12_COSMETIQUE_ARENE] — thèmes visuels de l'octogone. Adapté
+   pour s'intégrer à la géométrie réelle de drawArena (8 points, pas la version
+   simplifiée du brouillon) — seules les couleurs de sol/rails/poteaux changent,
+   la forme reste identique. Déplacé depuis ui-08-controller-arena.js (F-05,
+   hygiène) : donnée pure, elle n'a jamais eu sa place au milieu du moteur de
+   rendu Canvas. setArenaCosmeticTheme()/getArenaTheme() (ui-08) restent les
+   seuls points d'accès en lecture/écriture. ==== */
+const ARENA_THEMES=[
+  {id:'classic',name:'Toile Noire (Classique)',floorColors:['#1c1710','#241d14'],railColor:'#4a3c1f',padColor:'#5C4B2E'},
+  {id:'pride',name:'Toile Blanche & Bleue (Héritage)',floorColors:['#DCE2EB','#FFFFFF'],railColor:'#1A4D8F',padColor:'#B22222'},
+  {id:'gold',name:'Bâche Royale (Prestige)',floorColors:['#E6B93A','#8A6A1E'],railColor:'#241D13',padColor:'#14100B'},
+  {id:'neon',name:'Néons Cyberpunk',floorColors:['#0d0221','#26045c'],railColor:'#ff003c',padColor:'#00f0ff'},
+  {id:'underground',name:'Béton Clandestin',floorColors:['#2a2a2a','#1a1a1a'],railColor:'#555555',padColor:'#000000'},
+  {id:'crimson',name:'Arène Écarlate',floorColors:['#2a0a0a','#170505'],railColor:'#E8442F',padColor:'#1a0303'},
+  /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
+     récompense exclusive de série de 7 jours (GAUNTLET_DAILY_STREAK_REWARD,
+     state.js) — checkLegendUnlock('cosmetic_renegade') la rend
+     sélectionnable ici sans jamais figurer dans LEGEND_UNLOCKABLES (donc
+     jamais achetable). ==== */
+  {id:'renegade',name:'Toile Braise du Renégat (exclusive)',floorColors:['#3a0e02','#1a0500'],railColor:'#ff5a1f',padColor:'#1a0500'},
+  /* ==== [ANCRE: CORRECTIF_BANNIERE_CENDREE] — bug remonté : excl_banner_ash
+     (GAUNTLET_EXCLUSIVE_OFFERS, state.js) était vendu comme "thème
+     d'octogone" mais n'avait aucune entrée ici, donc aucun moyen de le
+     sélectionner après achat. Id aligné sur celui de l'offre (banner_ash)
+     pour matcher le checkLegendUnlock('excl_'+t.id) ajouté ci-dessous
+     (ui-07-contracts-legacy-screens.js). ==== */
+  {id:'banner_ash',name:'Bannière Cendrée (exclusive)',floorColors:['#180404','#0c0202'],railColor:'#7a1f16',padColor:'#0c0202'}
+  /* ==== [FIN ANCRE] ==== */
+];

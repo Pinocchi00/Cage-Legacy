@@ -292,7 +292,7 @@ function scr_gauntlet_menu(){
    </div>
    <div class="fld" style="margin-top:24px">
      <label class="muted small">Graine de la run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer une run identique)</label>
-     <input maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
+     <input id="gauntlet-seed" maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
    </div>
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
   </div>`;
@@ -967,7 +967,12 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    <div class="card"><div class="eyebrow mb">Déroulé</div>${fightLog(p.res)}</div>
    ${campHtml}
    ${p.newAch&&p.newAch.length?`<div class="card">${p.newAch.map(a=>`<div class="ach"><span class="ico">${a.ico}</span><b class="gold">${a.h}</b> <span class="muted small">${a.d}</span></div>`).join('')}</div>`:''}
-   ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt(f)} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
+   <!-- ==== [ANCRE: CORRECTIF_NARRATIVE_NON_SERIALISABLE] — p.narrative.txt
+        est désormais une chaîne déjà résolue (ui-05, au moment où G.pending
+        est construit), plus une fonction : JSON.stringify() (save()) omet
+        silencieusement les propriétés-fonctions, ce qui plantait ici après
+        un vrai rechargement (save()/load()) avec "txt is not a function". -->
+   ${p.narrative?`<div class="card glass narr" style="background:var(--panel2);padding:16px"><blockquote>« ${p.narrative.txt} »</blockquote><cite>${p.narrative.src}</cite></div>`:''}
    ${ghostComparisonHtml()}
    <button class="btn primary" onclick="CL.${p.forced?'toLegacy':'afterResult'}()">${p.forced?'Voir mon palmarès':'Continuer'}</button></div>`; }
 /* ==== [ANCRE: GAUNTLET_FANTOME] — ajout #5 (24 ajouts, 12/08/2026) : compare
@@ -1050,7 +1055,7 @@ function signatureMoveCard(f){
   const namingHtml=sm.locked?'':`<div class="mt" style="text-align:left">
       <div class="muted small mb">Donne un nom complet à ta prise signature (le nom de base reste toujours affiché) :</div>
       <div class="mono" style="color:var(--gold);font-size:15px;margin-bottom:6px">Aperçu : ${esc(sm.name)}${sm._draftSuffix?' '+esc(sm._draftSuffix):''}</div>
-      <input maxlength="24" placeholder="ex. de Marseille, du Valhalla" value="${esc(sm._draftSuffix||'')}" oninput="CL.setSignatureSuffix(this.value)">
+      <input id="sig-suffix" maxlength="24" placeholder="ex. de Marseille, du Valhalla" value="${esc(sm._draftSuffix||'')}" oninput="CL.setSignatureSuffix(this.value)">
       <button class="btn primary" style="margin-top:8px;padding:8px 14px;font-size:13px" onclick="CL.lockSignatureSuffix()" ${sm._draftSuffix&&sm._draftSuffix.trim()?'':'disabled'}>Valider (définitif)</button>
     </div>`;
   return `<div class="card mt" style="position:relative;z-index:2;background:var(--panel2);border:1px solid var(--gold-d);padding:14px;text-align:left">
