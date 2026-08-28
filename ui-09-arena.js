@@ -56,8 +56,15 @@ function makeNoisePattern(ctx){ try{
 function buildTimeline(midFight){
   const res=G.pending.res, you=G.f, opp=G.fight.opp, meWin=G.pending.win;
   const log=(res.log&&res.log.length)?res.log:[];
+  /* ==== [ANCRE: CORRECTIF_SUB_NON_TRANSPORTE] — régression du correctif
+     CORRECTIF_SUB_FLAG (engine-combat.js pose `sub` sur chaque beat au sol,
+     applyBeat le lit via A.currentSub) : ce map recopie les beats champ par
+     champ avec une liste fermée où `sub` manquait. b.sub valait donc
+     toujours undefined ici — le halo pulsant et le bandeau « DANGER
+     SOUMISSION » étaient passés d'un détecteur imprécis (recherche de texte)
+     à un détecteur qui ne s'allumait plus jamais. ==== */
   const beats=log.map(L=>({phase:L.phase,by:L.by,round:L.r,finish:L.finish,method:L.method,
-    text:L.text,momentum:L.momentum,snapA:L.snapA,snapB:L.snapB}));
+    text:L.text,momentum:L.momentum,sub:L.sub,snapA:L.snapA,snapB:L.snapB}));
   /* ==== [ANCRE: CORRECTIF_ROUND_CLOCHE] — bug remonté : le round de la
      cloche de fin retombait toujours sur res.round||3 — res.round n'existe
      QUE sur une finition (KO/Soumission), jamais sur une décision (la seule
