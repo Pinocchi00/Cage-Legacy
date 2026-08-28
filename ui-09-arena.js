@@ -222,7 +222,16 @@ function resumeArenaPlayback(){
   ARENA.roundPause=false;
   if(ARENA.loopFn) ARENA.raf=requestAnimationFrame(ARENA.loopFn);
 }
+/* ==== [ANCRE: CORRECTIF_JOURNAL_DATA_LAST] — bug trouvé : paintBars()
+   n'écrit dans #ar-log que si son attribut data-last diffère du texte du
+   beat courant — mais cet overlay remplace le CONTENU de #ar-log
+   (el.innerHTML) sans jamais toucher l'attribut lui-même, posé sur l'élément
+   #ar-log en personne. Si le beat qui suit la reprise porte un texte
+   identique au dernier avant la pause (fréquent sur des phases de clinch
+   répétitives), paintBars() refusait de réécrire : le bouton "Round
+   suivant ▸" restait affiché à la place du journal pour tout le round. ==== */
 function renderArenaOverlay(){ const el=document.getElementById('ar-log'); if(!el) return;
+  el.removeAttribute('data-last');
   if(ARENA.basculePending){ renderBasculeOverlay(el); return; }
   const finishedRound=ARENA.beats[ARENA.lastBeat]?(ARENA.beats[ARENA.lastBeat].round||1):1;
   el.innerHTML=`<div style="text-align:center"><b class="gold">Fin du round ${finishedRound}</b><br><button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.nextRound()">Round suivant ▸</button></div>`;
@@ -619,16 +628,24 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
      pourtant pas pendant le gel, par construction) — la frame la plus importante
      du jeu, la plus coûteuse sur mobile. Appliqué une seule fois par gel. ==== */
   if(A._chromaKOActive && !A._chromaDone){ applyChromaAberration(ctx,Math.round(3*(A.dpr||1))); A._chromaDone=true; }
-  ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
-  /* ==== [ANCRE: CORRECTIF_OMBRE_RND] — bug trouvé : ce `const rnd` masquait
-     le RNG seedé global (rnd(), engine.js) sur toute la fonction via la TDZ —
-     tout ajout futur d'un appel à rnd() ailleurs dans drawArena() aurait levé
-     un ReferenceError en pleine boucle d'animation à 60 fps. Renommé en `rd`,
-     un simple numéro de round affiché, jamais un tirage aléatoire. ==== */
-  const rd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
-  let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
-  if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
-  ctx.fillText(A.done?label:('ROUND '+rd+' · '+label), W/2, 20);
+  /* ==== [ANCRE: CORRECTIF_LABEL_APERCU_STATIQUE] — bug trouvé :
+     buildStaticPreviewArena() (aperçus Canvas du Marché noir/de la
+     boutique) pose beats:[], lastBeat:-1, done:false — sans ce garde,
+     l'étiquette ci-dessous affichait "ROUND 1 · DEBOUT" au-dessus d'un
+     octogone vide, un artefact du moteur de combat qui n'a rien à faire
+     sur un aperçu de cosmétique. ==== */
+  if(A.beats.length>0){
+    ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
+    /* ==== [ANCRE: CORRECTIF_OMBRE_RND] — bug trouvé : ce `const rnd` masquait
+       le RNG seedé global (rnd(), engine.js) sur toute la fonction via la TDZ —
+       tout ajout futur d'un appel à rnd() ailleurs dans drawArena() aurait levé
+       un ReferenceError en pleine boucle d'animation à 60 fps. Renommé en `rd`,
+       un simple numéro de round affiché, jamais un tirage aléatoire. ==== */
+    const rd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
+    let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
+    if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
+    ctx.fillText(A.done?label:('ROUND '+rd+' · '+label), W/2, 20);
+  }
   if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }
 }
 function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='undefined')cancelAnimationFrame(ARENA.raf); if(ARENA.to)clearTimeout(ARENA.to); } }

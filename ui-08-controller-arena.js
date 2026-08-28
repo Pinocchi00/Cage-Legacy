@@ -600,8 +600,15 @@ const CL={
      texte replié sur place utilisé auparavant. Pas de fenêtre Canvas ici :
      un succès n'a pas d'effet à visualiser dans l'octogone, contrairement
      à un consommable (buff/veto/filet de sécurité). ==== */
-  viewAchPreview(achId){ G._achPreviewId=achId; G.screen='ach_preview'; render(); },
-  closeAchPreview(){ G.screen='ach'; render(true); },
+  /* ==== [ANCRE: CORRECTIF_RETOUR_ACH_PREVIEW] — bug trouvé : cette fenêtre
+     codait son écran de retour en dur ('ach'), contrairement aux deux autres
+     fenêtres du fichier (viewConsumablePreview/viewShopPreview ci-dessous),
+     qui suivent toutes deux le pattern G._returnScreen avec une ancre
+     expliquant précisément pourquoi coder l'écran en dur est à éviter. Sans
+     conséquence tant que la vitrine des exploits n'est atteignable que d'un
+     seul endroit — mais plus la seule des trois à ne pas suivre le pattern. ==== */
+  viewAchPreview(achId){ G._achPreviewId=achId; G._returnScreen=G.screen; G.screen='ach_preview'; render(); },
+  closeAchPreview(){ G.screen=G._returnScreen||'ach'; G._returnScreen=null; render(true); },
   /* ==== [ANCRE: RACHAT_RETRAITE_DIABLE] — ajout #12 (24 ajouts, 12/08/2026) :
      UNIQUEMENT en Gauntlet (G.arcade), sur scr_gameover (ui-04), bouton
      discret déjà caché côté UI si le joueur ne peut pas payer — garde-fou
@@ -742,13 +749,17 @@ const CL={
     try{ G.exportedLink=location.origin+location.pathname+'?legend='+encodeURIComponent(G.exportedCode); }catch(e){ G.exportedLink=null; }
     render();
   },
+  /* ==== [ANCRE: CORRECTIF_COPIE_PROMISE] — bug trouvé : navigator.clipboard.
+     writeText() renvoie une Promise — un refus de permission ou un contexte
+     non sécurisé produit un rejet ASYNCHRONE que ce try/catch synchrone ne
+     pouvait jamais attraper. "Lien copié !" s'affichait donc à tort, et le
+     message de repli (écrit, utile) restait inatteignable : le joueur
+     collait un presse-papier vide en croyant avoir le lien. ==== */
   copyExportedLink(){
     if(!G.exportedLink) return;
-    try{
-      navigator.clipboard.writeText(G.exportedLink);
-      G.lastMsg="Lien copié !";
-    }catch(e){ G.lastMsg="Copie automatique impossible — sélectionne le champ et copie-le manuellement."; }
-    render();
+    if(!navigator.clipboard){ G.lastMsg="Copie automatique impossible — sélectionne le champ et copie-le manuellement."; render(); return; }
+    navigator.clipboard.writeText(G.exportedLink).then(()=>{ G.lastMsg="Lien copié !"; render(); })
+      .catch(()=>{ G.lastMsg="Copie automatique impossible — sélectionne le champ et copie-le manuellement."; render(); });
   },
   clearExportedCode(){ G.exportedCode=null; G.exportedName=null; G.exportedLink=null; render(); },
   setArenaTheme(themeId){ setArenaCosmeticTheme(themeId); render(); },
@@ -780,10 +791,16 @@ const CL={
      else if(G.allstarsDraft.length<8) G.allstarsDraft.push(index);
      render();
   },
+  /* ==== [ANCRE: CORRECTIF_MELANGE_ALLSTARS] — bug trouvé : un comparateur
+     aléatoire dans .sort() ne produit pas une permutation uniforme (et V8
+     peut se comporter de façon incohérente sur un comparateur non
+     transitif). Remplacé par le Fisher-Yates déjà utilisé ailleurs dans ce
+     fichier (offerFaithOaths()), identique. ==== */
   launchAllStars(){
      if(!G.allstarsDraft || G.allstarsDraft.length!==8) return;
      const fullList=loadHOF();
-     const top8=G.allstarsDraft.map(idx=>reconstructLegend(fullList[idx])).sort(()=>0.5-Math.random());
+     const top8=G.allstarsDraft.map(idx=>reconstructLegend(fullList[idx]));
+     for(let i=top8.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [top8[i],top8[j]]=[top8[j],top8[i]]; }
      G.allstars={active:true,step:'Quarts de finale',roundNum:1,
        matches:[{a:top8[0],b:top8[1]},{a:top8[2],b:top8[3]},{a:top8[4],b:top8[5]},{a:top8[6],b:top8[7]}],
        history:[]};
@@ -1058,7 +1075,10 @@ const CL={
     } else { chooseOpponent(i); }
   },
   train(i){ chooseTraining(i); },
-  setCampTier(tierId){ G.selectedCampTier=tierId; render(); },
+  /* ==== [ANCRE: CORRECTIF_PERSISTANCE_ETAT_RUN] — rejoint la même grappe
+     (ci-dessus dans ce fichier) : mutait G.selectedCampTier puis render()
+     sans save(), rendant le choix à un rechargement de page. ==== */
+  setCampTier(tierId){ G.selectedCampTier=tierId; save(); render(); },
   skipArena(){ CL.toResult(); },
   /* ==== [ANCRE: V3_FAITH_FIGHT_PENDING] — bouton "Passer" de
      scr_faith_fight_pending() : même logique que skipArena() ci-dessus,
@@ -2878,9 +2898,15 @@ const CL={
        palier 0, symétrique au correctif déjà appliqué à retrySameSeed()
        ci-dessous pour la graine. ==== */
     G._pendingAsc=(G.arcade&&G.arcade.asc)||0;
+    /* ==== [ANCRE: CORRECTIF_RETRY_CAPSTONE] — bug trouvé, même famille que
+       CORRECTIF_RETRY_ASCENSION ci-dessus : "rejouer" un Boss Run Capstone
+       (débloqué par 5 rivaux historiques battus, startBossRunCapstone())
+       relançait un Boss Run ordinaire sans le dire — le palier retombait au
+       Boss Run standard. Drapeau conservé au même titre que G._pendingAsc. ==== */
+    const wasCapstone=G.arcade&&G.arcade.capstone;
     const prevMode=G.arcade&&G.arcade.mode;
     if(prevMode==='ladder_100') CL.startLadder100();
-    else if(prevMode==='boss_run') CL.startBossRun();
+    else if(prevMode==='boss_run'){ wasCapstone?CL.startBossRunCapstone():CL.startBossRun(); }
     else CL.startArcade();
   },
   /* ==== [ANCRE: REJOUABILITE_SEED_REJOUABLE] — bouton "REJOUER CETTE GRAINE"
@@ -3291,9 +3317,22 @@ const CL={
     // ses combats restaient comptés dans f.W/f.L mais disparaissaient du
     // récapitulatif. On archive donc cette saison en cours ici aussi, avant
     // de sceller la carrière.
+    /* ==== [ANCRE: CORRECTIF_SEASONRECAP_FAITH] — bug trouvé : G.season.year
+       reste figé à 1 pour toute une carrière Faith (nextFaithYear() vide
+       G.season.fights chaque année mais n'avance jamais G.season.year, qui
+       n'existe que pour le calendrier de la Carrière classique — nextSeason()
+       ne l'incrémente jamais pour Faith non plus). Ce bloc n'archivait donc
+       QUE la dernière année Faith (partielle), sous l'étiquette fausse
+       "année 1", et perdait silencieusement toutes les années précédentes —
+       déjà archivées correctement par ailleurs (faithArchiveYear/
+       G.faith.journey, lu par faithJourneyBlock, ui-04). f.seasonRecap /
+       retireSeasonRecapHtml sont spécifiques à la Carrière classique
+       (jamais affichés par l'épilogue Faith, ANCRE FAITH_EPILOGUE plus bas) :
+       ne plus y écrire de donnée fausse pour Faith plutôt que la corriger à
+       moitié. ==== */
     const sData=G.season||{year:1,fights:[]};
     let seasonEval=null;
-    if(sData.fights && sData.fights.length){
+    if(!G.faith && sData.fights && sData.fights.length){
       seasonEval=evaluateSeason(G.f,sData.fights);
       if(!G.f.seasonRecap) G.f.seasonRecap=[];
       G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
