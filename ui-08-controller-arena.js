@@ -558,6 +558,43 @@ function refocusInput(id){
   try{ const el=/** @type {HTMLInputElement|null} */(document.getElementById(id));
     if(el){ el.focus(); const n=el.value.length; el.setSelectionRange(n,n); } }catch(e){}
 }
+/* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — le LOT G a verrouillé les
+   trois boutons du combat (choosePlan / chooseArcadePlan / afterResult) contre
+   le double-tap tactile, mais toute la couche « action du mois » de Faith est
+   restée ouverte au même geste : chaque action consomme un mois et applique
+   ses effets, sans rien qui empêche un second appel de recommencer. Un
+   double-tap payait donc le stage deux fois, tirait le risque de blessure deux
+   fois, brûlait deux mois, ou — sur nextFaithYear — archivait l'année en
+   double et sautait deux millésimes.
+   Le témoin est le mois lui-même : une action du mois M ne peut, par
+   définition, se produire qu'une fois. Rien à remettre à zéro — la clé change
+   d'elle-même au mois suivant.
+   ==== [ANCRE: CORRECTIF_CLAIM_MOIS_SAUT_CALENDRIER] — bug trouvé en écrivant
+   l'invariant de non-régression (tests/invariants.test.js) : la seule clé
+   mois+année ne suffit PAS. faithLandOnMonth() (plus haut) saute en silence
+   tous les mois sans `.type` — la majorité d'une année Faith typique — donc
+   faithAdvanceMonth() fait presque toujours avancer G.faith.month de PLUS
+   D'UN cran en un seul appel. Un double-tap relit alors G.faith.month APRÈS
+   ce saut : la clé a déjà changé (elle ne correspond plus au mois consommé
+   par le premier appel), et le second appel se voit à tort comme une action
+   neuve pour le mois d'arrivée — la clé seule ne bloque donc jamais rien en
+   pratique, sauf pile en fin d'année (où G.faith.month plafonne à 12 sans
+   avancer davantage). Un second témoin, sur l'écart réel entre deux appels,
+   couvre le cas qui compte : les deux appels d'un même double-tap
+   s'enchaînent dans le même battement synchrone (quelques ms tout au plus,
+   y compris le rendu complet de l'écran) — bien en-deçà du temps qu'un
+   joueur ou qu'une action de jeu distincte suivante peut réellement prendre
+   (un mois entier de simulation sépare deux actions légitimes). ==== */
+function faithClaimMonth(){
+  if(!G.faith) return true;
+  const key=G.faith.year+':'+G.faith.month;
+  const now=Date.now();
+  if(G.faith._monthClaimed===key) return false;
+  if(G.faith._monthClaimedAt!=null && (now-G.faith._monthClaimedAt)<15) return false;
+  G.faith._monthClaimed=key;
+  G.faith._monthClaimedAt=now;
+  return true;
+}
 const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
@@ -1784,6 +1821,7 @@ const CL={
      consommé par nextFaithYear() qui fait alors progresser les partenaires
      un peu plus vite CETTE année-là (sans vous pour les canaliser). ==== */
   faithRest(){
+    if(!faithClaimMonth()) return;
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
     /* ==== [ANCRE: V2-11] — le repos est la seule action qui restaure
        vraiment la fraîcheur (le reste du temps ne fait que la grignoter
@@ -1809,6 +1847,7 @@ const CL={
      sommet. ==== */
   faithSparring(partnerId){
     const partner=(G.faith.gym||[]).find(p=>p.id===partnerId); if(!partner) return;
+    if(!faithClaimMonth()) return;
     G.f.form=clamp(G.f.form+15,0,100);
     G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)-10,0,100);
     const priorSessions=partner.sessions||0;
@@ -1871,6 +1910,7 @@ const CL={
       G.lastMsg="Votre coach refuse net : «Tu n’as plus rien à donner à un stage, là. Tu vas juste te faire mal.»";
       render(); return;
     }
+    if(!faithClaimMonth()) return;
     const F=G.faith;
     if(F.pendingIntersaisonEntry){
       if(!F.intersaisonCooldown) F.intersaisonCooldown={};
@@ -1941,6 +1981,7 @@ const CL={
       return;
     }
     if(entry.action==='scout_video'){
+      if(!faithClaimMonth()) return;
       f.freshness=clamp((f.freshness==null?70:f.freshness)-3,0,100);
       F.scoutKey=true;
       applyDeltas(f,[['fightIQ',1]]);
@@ -1949,6 +1990,7 @@ const CL={
       faithAdvanceMonth(); return;
     }
     if(entry.action==='sponsor'){
+      if(!faithClaimMonth()) return;
       f.earnings=(f.earnings||0)+15; f.morale=clamp(f.morale+5,0,100);
       G.lastMsg='Un partenariat modeste, mais qui tombe bien.';
       F.yearLog.push({title:'Intersaison',choice:'Rencontre sponsor'});
@@ -1995,6 +2037,13 @@ const CL={
   },
   chooseFaithEvent(i){
     const ev=G.faith.currentEvent; if(!ev) return;
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — voir faithClaimMonth().
+       Ici le témoin est eventResolved (posé en fin de fonction, lu par
+       scr_faith_event pour la vue « résolue ») : un double-tap débitait c.cost
+       deux fois, appliquait les deltas deux fois, et incrémentait hiddenTraits
+       deux fois — un trait permanent se cristallisait en 2 choix au lieu des
+       3 annoncés. ==== */
+    if(G.faith.eventResolved) return;
     const c=ev.choices[i]; if(!c) return;
     /* ==== [CORRECTIF C12] — Plan V4 LOT 5 : "Chercher un préparateur
        au-dessus" n'applique plus de delta d'attributs — l'effet réel est un
@@ -2183,6 +2232,7 @@ const CL={
      directement le mois plutôt que de repasser par la vue "résolue" d'un
      événement de vie ordinaire. */
   chooseFaithCoach(coachId){
+    if(!faithClaimMonth()) return;
     const F=G.faith;
     const old=faithCoachPerson(F);
     const hired=faithHireCoach(coachId,`Vous avez quitté ${personName(old,{withNick:true})} pour un préparateur au-dessus.`);
@@ -2241,6 +2291,13 @@ const CL={
      ne jamais se rejouer si l'écran est réaffiché sans avoir progressé. */
   faithOfferSign(){
     const off=G.faith.pendingOffer; if(!off) return;
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — cette fonction est une
+       machine à états avancée par les clics (build-up -> conférence -> pesée).
+       Sans verrou, un double-tap sur SIGNER franchissait DEUX étapes : le
+       build-up était tiré (currentBuildupEvent posé) puis jamais affiché, et
+       la scène sautait directement à la conférence. ==== */
+    if(off._signStep===G.screen) return;
+    off._signStep=G.screen;
     if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
     if(!off.buildupDone){
       off.buildupDone=true;
@@ -2441,6 +2498,7 @@ const CL={
      déclaratif — cf. f.injury, déjà suivi). refusalsThisYear/
      medicalRefusalUsed repartent à zéro chaque année (nextFaithYear). ==== */
   faithOfferRefuse(){
+    if(!faithClaimMonth()) return;
     const medical=!!G.f.injury && !G.faith.medicalRefusalUsed;
     G.faith.refusalsThisYear=(G.faith.refusalsThisYear||0)+1;
     if(medical){ G.faith.medicalRefusalUsed=true; }
@@ -2582,12 +2640,20 @@ const CL={
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — le cas le plus lourd :
+       yearStats n'est jamais purgé après archivage, donc un double-tap
+       archivait l'année DEUX FOIS dans le Parcours, incrémentait le millésime
+       deux fois (2026 -> 2028), appliquait applyAging() et worldTick() deux
+       fois, et vieillissait l'écurie de deux ans. Cet écran est le seul point
+       d'entrée, et la fonction en sort toujours. ==== */
+    if(G.screen!=='faith_year_end') return;
     /* ==== [ANCRE: FAITH_PARCOURS] — archive AVANT la purge de yearLog
        quelques lignes plus bas : G.faith.yearStats (posé par
        prepareFaithYearEnd() pour l'écran de bilan qu'on quitte tout juste)
        porte encore les données de l'année qui vient de se terminer, et
        G.faith.year n'a pas encore été incrémenté. ==== */
     if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
+    G.faith.yearStats=null;
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: CORRECTIF_PED_VIEILLISSEMENT] — bug trouvé : le test
        `pedActive !== G.faith.year` s'exécutait APRÈS `G.faith.year++`,
@@ -2817,7 +2883,14 @@ const CL={
      ui-04). Un seul profil déplié à la fois (toggle simple, pas de Set). ==== */
   toggleDraftPreview(i){ G._draftPreview=G._draftPreview===i?null:i; render(); },
   /* ==== [FIN ANCRE] ==== */
-  selectDraft(i){ G.f=G.arcade.pool[i];
+  selectDraft(i){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — même geste côté
+       Gauntlet : applyPendingGauntletConsumable() est déjà idempotente (elle
+       purge le drapeau meta), mais le malus de run 'mut_depart_affaibli'
+       s'appliquait DEUX fois — -20 Puissance/Cardio au lieu de -10. ==== */
+    if(G.arcade && G.arcade._drafted) return;
+    if(G.arcade) G.arcade._drafted=true;
+    G.f=G.arcade.pool[i];
     G._draftPreview=null;
     /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
        point unique, commun aux 3 modes : G.f est déjà le combattant réel de
