@@ -1023,8 +1023,15 @@ const CL={
     const win=resolveBasculeOption(opt);
     ARENA.basculeCount=(ARENA.basculeCount||0)+1;
     if(win){
-      G.fight.pursePenalty=Math.min(1.15,(G.fight.pursePenalty||1)*1.05);
-      G.f.morale=clamp((G.f.morale||60)+2,0,100);
+      /* ==== [ANCRE: CORRECTIF_BASCULE_RECOMPENSE_MORTE] — bug trouvé : la
+         bonification de bourse posée ici sur G.fight.pursePenalty n'avait
+         AUCUN effet — pursePenalty est lu par resolveFight() (ui-05), déjà
+         exécuté par choosePlan() avant même que l'arène ne s'affiche. La
+         récompense passe sur des canaux encore ouverts à ce stade : moral, et
+         trace narrative dans le journal de l'année (Faith). ==== */
+      G.f.morale=clamp((G.f.morale||60)+4,0,100);
+      if(G.faith){ if(!G.faith.yearLog) G.faith.yearLog=[];
+        G.faith.yearLog.push({title:'Dans la cage',choice:opt.label,outcome:'réussi'}); }
     } else {
       G.f.morale=clamp((G.f.morale||60)-3,0,100);
     }
