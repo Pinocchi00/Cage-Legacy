@@ -3365,9 +3365,15 @@ const CL={
        ne plus y écrire de donnée fausse pour Faith plutôt que la corriger à
        moitié. ==== */
     const sData=G.season||{year:1,fights:[]};
-    let seasonEval=null;
-    if(!G.faith && sData.fights && sData.fights.length){
-      seasonEval=evaluateSeason(G.f,sData.fights);
+    /* ==== [ANCRE: CORRECTIF_SEASONEVAL_FAITH_NUL] — régression introduite par
+       CORRECTIF_SEASONRECAP_FAITH : le garde `!G.faith` a été posé sur le
+       CALCUL de seasonEval alors qu'il ne devait porter que sur l'écriture
+       dans f.seasonRecap (spécifique à la Carrière classique). Le bloc Faith
+       plus bas lit encore seasonEval pour archiver la dernière année dans le
+       Parcours — il recevait donc toujours null, et la dernière année de
+       chaque carrière Faith, souvent la plus chargée, s'inscrivait à 0-0. ==== */
+    const seasonEval=(sData.fights && sData.fights.length)?evaluateSeason(G.f,sData.fights):null;
+    if(!G.faith && seasonEval){
       if(!G.f.seasonRecap) G.f.seasonRecap=[];
       G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
         koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
