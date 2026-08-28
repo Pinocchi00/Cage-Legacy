@@ -252,7 +252,13 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
   /* ==== [FIN ANCRE] ==== */
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(G&&G.screen==='consumable_preview') startConsumablePreviewArena(); if(G&&G.screen==='shop_preview') startShopPreviewArena(); if(G&&G.screen==='faith_fight_pending') startFaithFightPending(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
-  if(G.faith){ if(typeof CL.prepareFaithYearEnd==='function') CL.prepareFaithYearEnd(); return; }
+  /* ==== [ANCRE: CORRECTIF_ORG_CHANGE_CALENDRIER] — bug trouvé : cette fonction
+     basculait sur prepareFaithYearEnd() dès qu'un changement d'organisation
+     survenait en Faith. Hérité de l'ère « 1 combat par an » (avant FA-11) : avec
+     un calendrier de 12 mois, renouveler un contrat au mois 3 supprimait 9 mois
+     de jeu et déclenchait un bilan annuel sur une saison tronquée. Le mode Faith
+     rejoint le flux normal du calendrier. ==== */
+  if(G.faith){ faithAdvanceMonth(); return; }
   G.screen='hub'; save(); render();
 }
 /* ==== [ANCRE: FAITH_CALENDRIER] — remplace le compteur `step` (1-5, temps
