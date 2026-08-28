@@ -333,7 +333,12 @@ function faithEnsureOffer(){
       G.lastMsg="L’organisation n’a personne à vous proposer pour une affiche pareille ce mois-ci — et ça commence à se voir.";
       return false;
     }
-    opps=eligible;
+    /* ==== [ANCRE: CORRECTIF_POOL_ELIGIBLE_PARTAGE] — bug trouvé : le filtre
+       de la règle 5 (déroute + écart de rang) ne vivait que dans cette
+       variable locale. G.opps gardait la liste NON filtrée, et
+       faithOfferDemandBetter() la relisait pour proposer « un autre combat » —
+       servant exactement les adversaires que ce bloc venait d'exclure. ==== */
+    opps=eligible; G.opps=eligible;
   }
   if(!opps.length) return false;
   /* ==== [ANCRE: V3_REMATCH_GUARANTEE] — Plan V3 LOT 6 §5.6.1.b : clause de
@@ -2260,6 +2265,16 @@ const CL={
     }
     off.gala=faithGalaPosition(G.f); off.gala.label=faithGalaLabel(G.faith,G.f);
     if(!G.faith.agent) off.gala.mult*=0.75;
+    /* ==== [ANCRE: CORRECTIF_CARTE_ADVERSAIRE_ECHANGE] — bug trouvé :
+       G.faith.currentCard n'est écrite qu'à un seul endroit (faithEnsureOffer).
+       Échanger d'adversaire ici laissait la carte pointer sur l'ANCIEN :
+       (1) scr_faith_card affichait le mauvais nom ; (2) ui-05 teste
+       currentCard.oppId===opp.id pour poster playerResult — le test échouait,
+       donc le résultat du joueur n'était jamais inscrit et le lien
+       « Résultats de la dernière carte » (ui-04) ne réapparaissait plus ;
+       (3) le nouvel adversaire pouvait figurer en sous-carte avec un W/L déjà
+       appliqué par generateFightCard, sur l'affiche où il combat le joueur. ==== */
+    G.faith.currentCard=generateFightCard(off.gala,off.opp.o);
     save(); render();
   },
   /* ==== [CORRECTIF FA-12 / V2-21] — refuser coûte réellement quelque
