@@ -349,12 +349,17 @@ function faithEnsureOffer(){
       G.lastMsg="L’organisation n’a personne à vous proposer pour une affiche pareille ce mois-ci — et ça commence à se voir.";
       return false;
     }
-    /* ==== [ANCRE: CORRECTIF_POOL_ELIGIBLE_PARTAGE] — bug trouvé : le filtre
-       de la règle 5 (déroute + écart de rang) ne vivait que dans cette
-       variable locale. G.opps gardait la liste NON filtrée, et
-       faithOfferDemandBetter() la relisait pour proposer « un autre combat » —
-       servant exactement les adversaires que ce bloc venait d'exclure. ==== */
-    opps=eligible; G.opps=eligible;
+    /* ==== [ANCRE: CORRECTIF_POOL_OFFRE_SEPARE] — bug trouvé : le correctif
+       précédent (CORRECTIF_POOL_ELIGIBLE_PARTAGE) posait ce filtre dans
+       G.opps lui-même — mais G.opps est le CACHE PARTAGÉ des candidats
+       (ensureOpponentsCached, ui-02), régénéré seulement quand le palmarès
+       change (W+L+D), jamais à chaque nouvelle offre. Un mois creux ou un
+       refus (nouvelle offre, même palmarès) relisait ce cache déjà réduit et
+       le filtrait ENCORE — la vraie liste de candidats rétrécissait un peu
+       plus à chaque offre, jusqu'à ne plus contenir personne. Le filtre vit
+       désormais dans G.faith.offerPool, propre à CETTE offre, sans jamais
+       toucher au cache partagé. ==== */
+    opps=eligible; G.faith.offerPool=eligible;
   }
   if(!opps.length) return false;
   /* ==== [ANCRE: V3_REMATCH_GUARANTEE] — Plan V3 LOT 6 §5.6.1.b : clause de
@@ -1045,6 +1050,11 @@ const CL={
            système de bourse. ==== */
         if(off.finishBonus) G.fight.finishBonusMult=2;
         G.faith.pendingOffer=null;
+        /* ==== [ANCRE: CORRECTIF_POOL_OFFRE_SEPARE] — le pool propre à cette
+           offre (posé par faithEnsureOffer()) ne doit jamais survivre à
+           l'offre elle-même, sinon la prochaine offre le relirait comme si
+           c'était le sien. ==== */
+        G.faith.offerPool=null;
         // clé de repérage (V2-08) : consommée à l'entrée dans la cage, qu'elle
         // ait servi ou non — jamais transférable au combat suivant.
         G.faith.scoutKey=false;
@@ -1614,7 +1624,12 @@ const CL={
      le test `if(G.faith)` passe AVANT `if(G.arcade && G.arcade.active)` dans
      afterResult() — de la chance, pas une garantie. Même ménage explicite
      que newCareer(). ==== */
-  startFaith(){ G.arcade=null; G.pending=null; G.opps=null;
+  /* ==== [ANCRE: CORRECTIF_POOL_OFFRE_SEPARE] — le pool d'une éventuelle
+     carrière Faith précédente (G.faith, pas encore réinitialisé ici — ça
+     n'arrive qu'à finalizeFaithDraft()) ne doit pas fuiter jusqu'à la
+     première offre de la nouvelle carrière. Gardé (G.faith peut être
+     absent au tout premier lancement). ==== */
+  startFaith(){ G.arcade=null; G.pending=null; G.opps=null; if(G.faith) G.faith.offerPool=null;
     G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
   /* ==== [ANCRE: V2-43] — "confirmation explicite si une carrière est en
      cours (une carrière Faith perdue par erreur est une session
@@ -2377,7 +2392,12 @@ const CL={
     const off=G.faith.pendingOffer; if(!off) return;
     if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; }
     else { G.faith.agentPatience--; }
-    const opps=G.opps||[]; const idx=opps.indexOf(off.opp);
+    /* ==== [ANCRE: CORRECTIF_POOL_OFFRE_SEPARE] — lit désormais le pool propre
+       à cette offre (G.faith.offerPool, posé par faithEnsureOffer() quand la
+       règle 5 a filtré des candidats) plutôt que le cache partagé G.opps —
+       jamais rétréci lui-même. Repli sur G.opps quand aucun filtre n'a
+       tourné (offre en Préliminaires, par exemple). ==== */
+    const opps=G.faith.offerPool||G.opps||[]; const idx=opps.indexOf(off.opp);
     const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
     if(agentId==='requin'){
       if(idx>0) off.opp=opps[idx-1];
@@ -2438,6 +2458,10 @@ const CL={
       G.lastMsg="Votre agent vous prévient : à ce rythme de refus, il ne pourra bientôt plus vous représenter.";
     }
     G.faith.pendingOffer=null;
+    /* ==== [ANCRE: CORRECTIF_POOL_OFFRE_SEPARE] — même raison qu'à l'entrée
+       en cage (CL.opp()) : refuser clôt cette offre, le pool qui lui était
+       propre ne doit pas survivre jusqu'à la suivante. ==== */
+    G.faith.offerPool=null;
     if(!G.faith.yearLog) G.faith.yearLog=[];
     G.faith.yearLog.push({title:'Combat refusé',choice:medical?'Refus médical':'Combat refusé'});
     faithAdvanceMonth();
@@ -2927,7 +2951,7 @@ const CL={
      donc être remis à zéro explicitement, ici, au seul point d'entrée de
      l'écran de tactique (fightArcade()), plutôt que de compter sur une
      réinitialisation implicite. ==== */
-  fightArcade(){ G.arcade._resolved=false; G.screen='arcade_plan'; save(); render(); },
+  fightArcade(){ G.arcade._resolved=false; G.arcade._planLocked=false; G.screen='arcade_plan'; save(); render(); },
   chooseArcadePlan(idx){
     if(G.arcade._resolved) return;
     /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — même ordre de composition
@@ -2947,7 +2971,17 @@ const CL={
        (ALL_ATTR, engine.js) : le Gauntlet n'a pas de forme/moral (juste le
        flag interne formBroken), donc on retient des stats mécaniquement
        réelles plutôt que "forme/moral" au sens littéral du document source. ==== */
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_RESOLUTION_BOSSREVEAL] — bug trouvé :
+       G.arcade._resolved (CORRECTIF_DOUBLE_RESOLUTION_ARCADE) ne protège que
+       resolveArcadeFight() — jamais appelé sur CETTE branche, qui bascule
+       plutôt vers l'écran de reveal. Un double-tap sur la carte tactique en
+       Boss Run tirait donc deux fois le handicap (ALL_ATTR pris au hasard),
+       le second tirage écrasant silencieusement le premier avant même que
+       le joueur ne voie l'écran de révélation. Verrou dédié, remis à zéro
+       au même endroit que _resolved (CL.fightArcade()). ==== */
     if(G.arcade.mode==='boss_run' && !G.arcade.revealed){
+      if(G.arcade._planLocked) return;
+      G.arcade._planLocked=true;
       const pick_=ALL_ATTR[Math.floor(rnd()*ALL_ATTR.length)];
       G.arcade.bossMalus={key:pick_[0],label:pick_[1],amount:-RI(6,14)};
       G.screen='boss_reveal'; save(); render(); return;
