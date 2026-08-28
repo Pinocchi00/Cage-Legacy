@@ -688,6 +688,15 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026). ==== */
   purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(true); },
+  /* ==== [ANCRE: CORRECTIF_ACHAT_CONSOMMABLE_DOUBLE_RENDU] — scr_consumable_
+     preview enchaînait CL.purchaseConsumable(id);CL.closeConsumablePreview()
+     sur le même onclick : deux appels séparés à render() coup sur coup pour
+     un seul clic. Fusionnés en une méthode unique, un seul render(). ==== */
+  buyAndCloseConsumable(itemId){
+    const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId);
+    G.lastMsg=r.msg; saveMetaStats(meta);
+    G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true);
+  },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : clic sur une
      tuile du Marché noir -> "fenêtre" dédiée (scr_consumable_preview)
@@ -882,6 +891,12 @@ const CL={
        const list=loadHOF();
        const lA=list[G.vsFriendSelA||0];
        const lB=G.importedFriendLegend||list[G.vsFriendSelB!==undefined?G.vsFriendSelB:1];
+       /* ==== [ANCRE: CORRECTIF_VSFRIEND_PANTHEON_UNIQUE] — bug trouvé : si le
+          Panthéon ne contient qu'une seule légende (et aucun code ami importé),
+          list[1] vaut undefined et reconstructLegend(undefined) plante. Son
+          cousin launchFantasyFight() gère déjà ce cas (repli sur list[0]),
+          pas celui-ci. ==== */
+       if(!lB){ G.lastMsg="Il faut deux légendes (ou un code ami) pour lancer un duel."; render(); return; }
        G.vsFriendLegendA=reconstructLegend(lA);
        G.vsFriendLegendB=reconstructLegend(lB);
        G.vsFriendLegendB.champion='monde'; G.vsFriendLegendB.flag=G.vsFriendLegendB.flag||'🏴\u200d☠️';
@@ -892,12 +907,23 @@ const CL={
      // instantanément sans jamais demander de consigne tactique. On route
      // maintenant vers un choix de tactique (comme en carrière) avant de
      // lancer réellement la simulation, via chooseVsFriendPlan().
+     /* ==== [ANCRE: CORRECTIF_DOUBLE_VSFRIEND_PLAN] — voir chooseVsFriendPlan() :
+        même verrou que choosePlan() (CORRECTIF_DOUBLE_RESOLUTION), réarmé à
+        chaque nouvelle manche puisque c'est ce point d'entrée qui affiche à
+        nouveau l'écran de tactique. ==== */
+     G.vsFriendScore._resolved=false;
      G.screen='vs_friend_plan'; save(); render();
   },
   chooseVsFriendPlan(idx){
+     /* ==== [ANCRE: CORRECTIF_DOUBLE_VSFRIEND_PLAN] — même verrou que
+        choosePlan() (CORRECTIF_DOUBLE_RESOLUTION) : sans lui, un double-tap
+        sur la carte de tactique incrémentait G.vsFriendScore.round deux fois
+        pour une seule manche réellement jouée. ==== */
+     if(G.vsFriendScore && G.vsFriendScore._resolved) return;
      const A=G.vsFriendLegendA, B=G.vsFriendLegendB;
      const combined=getExclusiveTactics(A).concat(TACTICS[A.style]||[]);
      const planObj=combined[idx]; if(!planObj) return;
+     G.vsFriendScore._resolved=true;
      G.vsFriendScore.round++;
      const isDecider=G.vsFriendScore.A===1 && G.vsFriendScore.B===1;
      const rounds=isDecider?5:3;
@@ -1232,7 +1258,15 @@ const CL={
       G.fight.malus=Object.assign({},G.fight.malus,{confidence:8,aggression:10,composure:-10});
       G.lastMsg='L\u2019adrénaline monte avant même d\u2019entrer dans la cage (+ Agressivité/Confiance, - Sang-froid).';
       proceedToFight();
-    } else { proceedToFight(); }
+    } else {
+      /* ==== [ANCRE: CORRECTIF_HANDLEEVENT_ATTRAPE_TOUT] — bug trouvé :
+         l'attrape-tout final lançait proceedToFight() pour N'IMPORTE QUEL
+         actionId inconnu, même hors de tout contexte de combat (G.fight
+         absent). Un identifiant d'action mal formé ou une régression
+         ailleurs se traduisait par un combat lancé sans adversaire. ==== */
+      if(!G.fight){ G.screen='hub'; save(); render(); return; }
+      proceedToFight();
+    }
   },
   recoverInjury(){ const f=G.f; if(!f.injury)return;
     f.injury.left-=1; f.morale=clamp(f.morale+5,0,100); f.form=clamp(f.form+15,0,100);
@@ -2640,7 +2674,15 @@ const CL={
        (tags.length>0 toujours faux). Retirée avec trainingTags/
        trainingsThisYear (initialisation et remise à zéro annuelle) plutôt que
        de garder trois sites morts pour une seule branche inatteignable. ==== */
-    const nbRolls=((G.faith.yearLog||[]).length>=1)?1:0;
+    /* ==== [ANCRE: CORRECTIF_NBROLLS_1_COMBAT_PAR_AN] — le plafond « 1 roll
+       max par an » date de l'époque où Faith imposait 1 combat/an (avant
+       FA-11) ; le calendrier à 12 mois permet depuis plusieurs combats par
+       an, mais ce plafond n'avait jamais suivi : une carrière de 18 ans
+       plafonnait à 18 compétences quel que soit le nombre de combats
+       livrés. Indexé sur les combats réellement livrés cette année
+       (fightsThisYear), plafonné par le même MAX_CAREER_SKILLS que le pool
+       lui-même. ==== */
+    const nbRolls=Math.min(1+Math.floor((G.faith.fightsThisYear||0)/3),SKILL_CONSTANTS.MAX_CAREER_SKILLS);
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS);
     for(let i=0;i<nbRolls;i++){
@@ -4012,15 +4054,15 @@ function scr_consumable_preview(){
     return `${shown>0?'+':''}${shown} ${attrLabel(k)}`;
   }).join(', '):'';
   return `<div class="scr"><div class="bar"><span class="eyebrow">Marché noir — aperçu</span><span class="eyebrow x" onclick="CL.closeConsumablePreview()">✕</span></div>
-   <h2 class="disp gold" style="font-size:20px">${item.name}</h2>
+   <h2 class="disp gold" style="font-size:20px">${esc(item.name)}</h2>
    <div class="card glass raise" style="padding:12px;border-color:var(--blood-d);background:var(--panel2)">
      <canvas id="shop-preview-cv" style="width:100%;height:180px;display:block;border:1px solid var(--line);background:var(--bg)"></canvas>
    </div>
    <div class="card mt" style="background:var(--panel2);padding:14px">
-     <div class="muted small">${item.desc}</div>
+     <div class="muted small">${esc(item.desc)}</div>
      ${fxTxt?`<div class="mono small gold mt">${fxTxt} (actif pour toute la run)</div>`:''}
    </div>
-   <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.purchaseConsumable('${item.id}');CL.closeConsumablePreview();" ${canAfford?'':'disabled'}>${owned?'Déjà un consommable en attente':`Acheter — ${item.cost} pts`}</button>
+   <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.buyAndCloseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${owned?'Déjà un consommable en attente':`Acheter — ${item.cost} pts`}</button>
    <button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button>
   </div>`;
 }

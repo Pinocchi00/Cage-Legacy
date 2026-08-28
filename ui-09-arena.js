@@ -296,6 +296,18 @@ const BASCULE_MOMENTS={
 /** Dérive un éventuel moment de bascule de la reprise qui vient de se
  * jouer, jamais fabriqué : lu sur les beats réels de cette reprise.
  * @param {number} round @returns {{kind:string}|null} */
+/* ==== [ANCRE: CORRECTIF_BASCULE_HORS_SEED] — bug trouvé : detectBascule()
+   et resolveBasculeOption() puisaient dans rnd(), le générateur SEEDÉ de la
+   run (le même que la simulation du combat elle-même). Ces deux fonctions
+   ne simulent rien : ce sont des tirages de MISE EN SCÈNE post-résolution
+   (le combat est déjà entièrement joué — ARENA.beats existe — au moment où
+   elles s'exécutent), déclenchés uniquement si le joueur regarde l'animation
+   se dérouler. Un joueur qui regarde chaque bascule et un joueur qui appuie
+   sur "Passer" ne consomment donc pas le même nombre de tirages sur rnd() :
+   la même graine produisait des adversaires différents dès qu'un moment de
+   bascule apparaissait, et le bouton "REJOUER CETTE GRAINE" ne tenait plus
+   sa promesse. Math.random() : hors du flux seedé, comme il se doit pour de
+   la mise en scène. ==== */
 function detectBascule(round){
   // V2-44 : réglage Moments de bascule (activés par défaut), Réglages, ui-06.
   if(G.settings && G.settings.basculeEnabled===false) return null;
@@ -305,10 +317,10 @@ function detectBascule(round){
   const last=roundBeats[roundBeats.length-1];
   const lastM=(last.momentum!=null)?last.momentum:50;
   const clinchDom=roundBeats.filter(b=>b.phase==='clinch'&&b.by==='op').length>=3;
-  if(clinchDom && rnd()<0.6) return {kind:'clinch'};
-  if(lastM>=78 && rnd()<0.55) return {kind:'sonne_lui'};
-  if(lastM<=22 && rnd()<0.55) return {kind:'sonne_moi'};
-  if(Math.abs(lastM-50)<=8 && rnd()<0.35) return {kind:'serre'};
+  if(clinchDom && Math.random()<0.6) return {kind:'clinch'};
+  if(lastM>=78 && Math.random()<0.55) return {kind:'sonne_lui'};
+  if(lastM<=22 && Math.random()<0.55) return {kind:'sonne_moi'};
+  if(Math.abs(lastM-50)<=8 && Math.random()<0.35) return {kind:'serre'};
   return null;
 }
 /** Chance de succès pondérée par l'attribut du joueur contre celui
@@ -320,7 +332,7 @@ function resolveBasculeOption(opt){
   const my=(f.attrs&&f.attrs[opt.stat])!=null?f.attrs[opt.stat]:50;
   const their=(opp.attrs&&opp.attrs[opt.oppStat])!=null?opp.attrs[opt.oppStat]:50;
   const chance=clamp(50+(my-their)/2,10,90);
-  return rnd()*100<chance;
+  return Math.random()*100<chance;
 }
 function renderBasculeOverlay(el){
   const b=ARENA.basculePending, m=BASCULE_MOMENTS[b.kind]; if(!m) return;
