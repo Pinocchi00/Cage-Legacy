@@ -811,7 +811,13 @@ const CL={
     G.f.champChampLastOfferDefenses=G.f.defenses;
     G.f.champChampOffer=null;
     G.lastMsg='Vous avez décliné le supercombat. Le président reviendra à la charge après deux défenses supplémentaires.';
-    G.screen=G.faith?'faith_hub':'hub'; save(); render();
+    /* ==== [ANCRE: CORRECTIF_CHAMPCHAMP_MOIS] — la branche Faith d'afterResult()
+       sort par `return` avant faithAdvanceMonth() quand une décision de
+       supercombat est en attente : c'est donc à ces handlers de reprendre le
+       calendrier, sinon le mois du combat qui vient d'avoir lieu n'est jamais
+       consommé (second combat gratuit dans le même mois). ==== */
+    if(G.faith){ save(); faithAdvanceMonth(); return; }
+    G.screen='hub'; save(); render();
   },
   chooseChampChampFocus(divId){
     // ==== [ANCRE: CORRECTIF_FOCUS_CHAMPCHAMP] — bug trouvé : le choix de
@@ -828,7 +834,13 @@ const CL={
       if(newDiv){ G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f); }
     }
     G.lastMsg=divId===G.f.div?'Vous restez concentré sur votre division d\u2019origine.':'Vous faites de votre nouvelle ceinture votre priorité.';
-    G.screen=G.faith?'faith_hub':'hub'; save(); render();
+    /* ==== [ANCRE: CORRECTIF_CHAMPCHAMP_MOIS] — la branche Faith d'afterResult()
+       sort par `return` avant faithAdvanceMonth() quand une décision de
+       supercombat est en attente : c'est donc à ces handlers de reprendre le
+       calendrier, sinon le mois du combat qui vient d'avoir lieu n'est jamais
+       consommé (second combat gratuit dans le même mois). ==== */
+    if(G.faith){ save(); faithAdvanceMonth(); return; }
+    G.screen='hub'; save(); render();
   },
   chooseMue(styleId){ const r=triggerMueMartiale(G.f,styleId); G.lastMsg=r.msg||G.lastMsg;
     G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
