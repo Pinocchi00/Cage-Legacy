@@ -296,6 +296,18 @@ const BASCULE_MOMENTS={
 /** Dérive un éventuel moment de bascule de la reprise qui vient de se
  * jouer, jamais fabriqué : lu sur les beats réels de cette reprise.
  * @param {number} round @returns {{kind:string}|null} */
+/* ==== [ANCRE: CORRECTIF_BASCULE_HORS_SEED] — bug trouvé : detectBascule()
+   et resolveBasculeOption() puisaient dans rnd(), le générateur SEEDÉ de la
+   run (le même que la simulation du combat elle-même). Ces deux fonctions
+   ne simulent rien : ce sont des tirages de MISE EN SCÈNE post-résolution
+   (le combat est déjà entièrement joué — ARENA.beats existe — au moment où
+   elles s'exécutent), déclenchés uniquement si le joueur regarde l'animation
+   se dérouler. Un joueur qui regarde chaque bascule et un joueur qui appuie
+   sur "Passer" ne consomment donc pas le même nombre de tirages sur rnd() :
+   la même graine produisait des adversaires différents dès qu'un moment de
+   bascule apparaissait, et le bouton "REJOUER CETTE GRAINE" ne tenait plus
+   sa promesse. Math.random() : hors du flux seedé, comme il se doit pour de
+   la mise en scène. ==== */
 function detectBascule(round){
   // V2-44 : réglage Moments de bascule (activés par défaut), Réglages, ui-06.
   if(G.settings && G.settings.basculeEnabled===false) return null;
@@ -305,10 +317,10 @@ function detectBascule(round){
   const last=roundBeats[roundBeats.length-1];
   const lastM=(last.momentum!=null)?last.momentum:50;
   const clinchDom=roundBeats.filter(b=>b.phase==='clinch'&&b.by==='op').length>=3;
-  if(clinchDom && rnd()<0.6) return {kind:'clinch'};
-  if(lastM>=78 && rnd()<0.55) return {kind:'sonne_lui'};
-  if(lastM<=22 && rnd()<0.55) return {kind:'sonne_moi'};
-  if(Math.abs(lastM-50)<=8 && rnd()<0.35) return {kind:'serre'};
+  if(clinchDom && Math.random()<0.6) return {kind:'clinch'};
+  if(lastM>=78 && Math.random()<0.55) return {kind:'sonne_lui'};
+  if(lastM<=22 && Math.random()<0.55) return {kind:'sonne_moi'};
+  if(Math.abs(lastM-50)<=8 && Math.random()<0.35) return {kind:'serre'};
   return null;
 }
 /** Chance de succès pondérée par l'attribut du joueur contre celui
@@ -320,7 +332,7 @@ function resolveBasculeOption(opt){
   const my=(f.attrs&&f.attrs[opt.stat])!=null?f.attrs[opt.stat]:50;
   const their=(opp.attrs&&opp.attrs[opt.oppStat])!=null?opp.attrs[opt.oppStat]:50;
   const chance=clamp(50+(my-their)/2,10,90);
-  return rnd()*100<chance;
+  return Math.random()*100<chance;
 }
 function renderBasculeOverlay(el){
   const b=ARENA.basculePending, m=BASCULE_MOMENTS[b.kind]; if(!m) return;
@@ -365,7 +377,7 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
     if(A.finishZone){ const zoneLetter=A.finishZone==='tête'?'h':A.finishZone==='corps'?'b':'l';
       const loserPrefix=A.meWin?'do':'dm'; A.flashZoneId=`${loserPrefix}-${zoneLetter}`; } }
   A.curPhase=b.phase; A.curTop=(b.phase==='sol')?(b.by==='me'?'me':'op'):null;
-  A.currentText=b.text; A.currentMomentum=b.momentum;
+  A.currentText=b.text; A.currentMomentum=b.momentum; A.currentSub=!!b.sub;
   if(b.snapA) A.snapA=b.snapA; if(b.snapB) A.snapB=b.snapB;
   /* ==== [ANCRE: CORRECTIF_CARDIO_FICTIF] — bug trouvé : les deux barres
      étiquetées CARDIO dans scr_arena descendaient par RI(2,5) des DEUX côtés à
@@ -604,7 +616,13 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
       spreadX:5,spreadY:2,gravity:0.05,life:34,size:5,kind:'dust'});
   }
   A._wasGrounded=grounded;
-  const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
+  /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — voir engine-combat.js,
+     simulateFight() (b.sub) : le danger de soumission était détecté en
+     cherchant des bouts de mots français dans le texte narratif — toute
+     réécriture de texte éteignait silencieusement le halo et l'alerte.
+     Lit désormais le drapeau posé par le moteur, sur la vraie chance
+     mécanique de soumission de ce beat. ==== */
+  const isSubDanger=grounded && A.currentSub;
   const foOp=A._foOp, foMe=A._foMe;
   foOp.lunge=A.lungeOp*(1-frac); foOp.flash=A.flashOp>0; foOp.shake=A.shakeOp>0; foOp.fallen=A.fall===2;
   foOp.grounded=grounded; foOp.phase=A.curPhase; foOp.top=A.curTop==='op'; foOp.tap=isSubDanger&&A.curTop!=='op';

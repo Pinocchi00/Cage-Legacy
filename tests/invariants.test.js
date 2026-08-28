@@ -295,3 +295,109 @@ test('INV-07 — aucune chaîne visible tirée deux fois dans une fenêtre de 8 
   `);
   assert.equal(violations, 0, `INV-07 violé ${violations} fois sur 40 tirages`);
 });
+
+/* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — verrouille tout le LOT M
+   d'un coup (voir ui-08-controller-arena.js, faithClaimMonth()) : un second
+   appel consécutif à n'importe quelle action du mois Faith doit laisser
+   l'état EXACTEMENT identique au premier appel — même G.faith.month, même
+   G.faith.year, même G.f.earnings. Chaque action est testée sur sa PROPRE
+   carrière fraîchement amenée au hub Faith, pour ne jamais laisser le
+   calendrier dérivé par une action précédente influencer la suivante
+   (notamment franchir la fin d'année en cours de séquence). */
+function reachFaithHub(first){
+  const win = newGameWindow({ runMain: true });
+  makeFaithCareer(win, first);
+  clickThrough(win, { maxSteps: 400, stopWhen: w => w.G.screen === 'faith_hub' });
+  return win;
+}
+
+test('CORRECTIF_DOUBLE_TAP_ACTION_FAITH — faithRest() : un second appel n’avance pas le calendrier deux fois', () => {
+  const win = reachFaithHub('Rest');
+  const before = { month: win.G.faith.month, year: win.G.faith.year, form: win.G.f.form };
+  win.CL.faithRest();
+  const after1 = { month: win.G.faith.month, year: win.G.faith.year, form: win.G.f.form };
+  assert.notDeepEqual(after1, before, 'faithRest() doit avoir un effet au premier appel');
+  win.CL.faithRest();
+  assert.deepEqual({ month: win.G.faith.month, year: win.G.faith.year, form: win.G.f.form }, after1,
+    'un second faithRest() ne doit rien changer de plus');
+});
+
+test('CORRECTIF_DOUBLE_TAP_ACTION_FAITH — faithSparring() : un second appel ne double pas la séance', () => {
+  const win = reachFaithHub('Sparring');
+  const partnerId = win.G.faith.gym[0].id;
+  const before = { month: win.G.faith.month, year: win.G.faith.year, sessions: win.G.faith.gym[0].sessions||0 };
+  win.CL.faithSparring(partnerId);
+  const after1 = { month: win.G.faith.month, year: win.G.faith.year, sessions: win.G.faith.gym.find(p=>p.id===partnerId).sessions };
+  assert.notDeepEqual(after1, before, 'faithSparring() doit avoir un effet au premier appel');
+  win.CL.faithSparring(partnerId);
+  assert.deepEqual({ month: win.G.faith.month, year: win.G.faith.year, sessions: win.G.faith.gym.find(p=>p.id===partnerId).sessions }, after1,
+    'un second faithSparring() ne doit rien changer de plus');
+});
+
+test('CORRECTIF_DOUBLE_TAP_ACTION_FAITH — faithCampChoose() : un second appel ne paie pas le stage deux fois', () => {
+  const win = reachFaithHub('Camp');
+  win.G.f.earnings = 100000; // écarte "Fonds insuffisants"
+  win.G.f.freshness = 90;    // écarte le refus du coach
+  const campId = win.eval("(typeof FAITH_GYMS!=='undefined'?FAITH_GYMS:[])[0].id");
+  const before = { month: win.G.faith.month, year: win.G.faith.year, earnings: win.G.f.earnings };
+  win.CL.faithCampChoose(campId);
+  const after1 = { month: win.G.faith.month, year: win.G.faith.year, earnings: win.G.f.earnings };
+  assert.notDeepEqual(after1, before, 'faithCampChoose() doit avoir un effet au premier appel');
+  win.CL.faithCampChoose(campId);
+  assert.deepEqual({ month: win.G.faith.month, year: win.G.faith.year, earnings: win.G.f.earnings }, after1,
+    'un second faithCampChoose() ne doit rien changer de plus (le stage n’est pas payé deux fois)');
+});
+
+test('CORRECTIF_DOUBLE_TAP_ACTION_FAITH — chooseFaithCoach() : un second appel n’embauche pas deux fois', () => {
+  const win = reachFaithHub('Coach');
+  const coachId = win.eval('FAITH_COACHES[0].id');
+  const before = { month: win.G.faith.month, year: win.G.faith.year };
+  win.CL.chooseFaithCoach(coachId);
+  const after1 = { month: win.G.faith.month, year: win.G.faith.year, coachId: win.G.faith.coachId };
+  assert.notDeepEqual({ month: win.G.faith.month, year: win.G.faith.year }, before, 'chooseFaithCoach() doit avoir un effet au premier appel');
+  win.CL.chooseFaithCoach(coachId);
+  assert.deepEqual({ month: win.G.faith.month, year: win.G.faith.year, coachId: win.G.faith.coachId }, after1,
+    'un second chooseFaithCoach() ne doit rien changer de plus');
+});
+
+test('CORRECTIF_DOUBLE_TAP_ACTION_FAITH — faithOfferRefuse() : un second appel ne pénalise pas deux fois', () => {
+  const win = reachFaithHub('Refuse');
+  const before = { month: win.G.faith.month, year: win.G.faith.year, refusals: win.G.faith.refusalsThisYear||0 };
+  win.CL.faithOfferRefuse();
+  const after1 = { month: win.G.faith.month, year: win.G.faith.year, refusals: win.G.faith.refusalsThisYear||0 };
+  assert.notDeepEqual(after1, before, 'faithOfferRefuse() doit avoir un effet au premier appel');
+  win.CL.faithOfferRefuse();
+  assert.deepEqual({ month: win.G.faith.month, year: win.G.faith.year, refusals: win.G.faith.refusalsThisYear||0 }, after1,
+    'un second faithOfferRefuse() ne doit rien changer de plus');
+});
+
+test('CORRECTIF_DOUBLE_TAP_ACTION_FAITH — chooseFaithEvent() : un second appel ne redébite pas le coût ni ne recompte le trait', () => {
+  const win = reachFaithHub('Event');
+  win.G.f.earnings = 100;
+  win.G.faith.currentEvent = { id:'test_evt_double_tap', title:'Test', choices:[
+    { label:'Choix', cost:10, d:[], traitTag:'rebel' }
+  ]};
+  win.G.faith.eventResolved = null;
+  win.G.faith.yearLog = [];
+  win.G.f.hiddenTraits = {};
+  const earningsBefore = win.G.f.earnings;
+  win.CL.chooseFaithEvent(0);
+  const after1 = { earnings: win.G.f.earnings, yearLogLen: win.G.faith.yearLog.length, trait: win.G.f.hiddenTraits.rebel };
+  assert.equal(after1.earnings, earningsBefore-10, 'chooseFaithEvent() doit débiter le coût au premier appel');
+  win.CL.chooseFaithEvent(0);
+  assert.deepEqual({ earnings: win.G.f.earnings, yearLogLen: win.G.faith.yearLog.length, trait: win.G.f.hiddenTraits.rebel }, after1,
+    'un second chooseFaithEvent() ne doit rien changer de plus');
+});
+
+test('CORRECTIF_DOUBLE_TAP_ACTION_FAITH — nextFaithYear() : un second appel n’incrémente pas le millésime deux fois', () => {
+  const win = reachFaithHub('Year');
+  win.G.faith.yearStats = { fights:0, wins:0, losses:0, eloDelta:0, earningsDelta:0, rank:1,
+    dmgHead:0, newSkills:[], yearLog:[], sequelle:null, promiseOutcome:null, finitions:[], rankStart:1 };
+  win.G.screen = 'faith_year_end';
+  const yearBefore = win.G.faith.year;
+  win.CL.nextFaithYear();
+  const yearAfter1 = win.G.faith.year;
+  assert.notEqual(yearAfter1, yearBefore, 'nextFaithYear() doit faire passer au millésime suivant au premier appel');
+  win.CL.nextFaithYear();
+  assert.equal(win.G.faith.year, yearAfter1, 'un second nextFaithYear() ne doit pas ré-incrémenter le millésime');
+});

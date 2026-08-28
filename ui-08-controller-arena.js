@@ -558,6 +558,43 @@ function refocusInput(id){
   try{ const el=/** @type {HTMLInputElement|null} */(document.getElementById(id));
     if(el){ el.focus(); const n=el.value.length; el.setSelectionRange(n,n); } }catch(e){}
 }
+/* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — le LOT G a verrouillé les
+   trois boutons du combat (choosePlan / chooseArcadePlan / afterResult) contre
+   le double-tap tactile, mais toute la couche « action du mois » de Faith est
+   restée ouverte au même geste : chaque action consomme un mois et applique
+   ses effets, sans rien qui empêche un second appel de recommencer. Un
+   double-tap payait donc le stage deux fois, tirait le risque de blessure deux
+   fois, brûlait deux mois, ou — sur nextFaithYear — archivait l'année en
+   double et sautait deux millésimes.
+   Le témoin est le mois lui-même : une action du mois M ne peut, par
+   définition, se produire qu'une fois. Rien à remettre à zéro — la clé change
+   d'elle-même au mois suivant.
+   ==== [ANCRE: CORRECTIF_CLAIM_MOIS_SAUT_CALENDRIER] — bug trouvé en écrivant
+   l'invariant de non-régression (tests/invariants.test.js) : la seule clé
+   mois+année ne suffit PAS. faithLandOnMonth() (plus haut) saute en silence
+   tous les mois sans `.type` — la majorité d'une année Faith typique — donc
+   faithAdvanceMonth() fait presque toujours avancer G.faith.month de PLUS
+   D'UN cran en un seul appel. Un double-tap relit alors G.faith.month APRÈS
+   ce saut : la clé a déjà changé (elle ne correspond plus au mois consommé
+   par le premier appel), et le second appel se voit à tort comme une action
+   neuve pour le mois d'arrivée — la clé seule ne bloque donc jamais rien en
+   pratique, sauf pile en fin d'année (où G.faith.month plafonne à 12 sans
+   avancer davantage). Un second témoin, sur l'écart réel entre deux appels,
+   couvre le cas qui compte : les deux appels d'un même double-tap
+   s'enchaînent dans le même battement synchrone (quelques ms tout au plus,
+   y compris le rendu complet de l'écran) — bien en-deçà du temps qu'un
+   joueur ou qu'une action de jeu distincte suivante peut réellement prendre
+   (un mois entier de simulation sépare deux actions légitimes). ==== */
+function faithClaimMonth(){
+  if(!G.faith) return true;
+  const key=G.faith.year+':'+G.faith.month;
+  const now=Date.now();
+  if(G.faith._monthClaimed===key) return false;
+  if(G.faith._monthClaimedAt!=null && (now-G.faith._monthClaimedAt)<50) return false;
+  G.faith._monthClaimed=key;
+  G.faith._monthClaimedAt=now;
+  return true;
+}
 const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
@@ -651,6 +688,15 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026). ==== */
   purchaseConsumable(itemId){ const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId); G.lastMsg=r.msg; saveMetaStats(meta); render(true); },
+  /* ==== [ANCRE: CORRECTIF_ACHAT_CONSOMMABLE_DOUBLE_RENDU] — scr_consumable_
+     preview enchaînait CL.purchaseConsumable(id);CL.closeConsumablePreview()
+     sur le même onclick : deux appels séparés à render() coup sur coup pour
+     un seul clic. Fusionnés en une méthode unique, un seul render(). ==== */
+  buyAndCloseConsumable(itemId){
+    const meta=loadMetaStats(); const r=purchaseGauntletConsumable(meta,itemId);
+    G.lastMsg=r.msg; saveMetaStats(meta);
+    G.screen=G._returnScreen||'legends'; G._returnScreen=null; render(true);
+  },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — item demandé : clic sur une
      tuile du Marché noir -> "fenêtre" dédiée (scr_consumable_preview)
@@ -845,6 +891,12 @@ const CL={
        const list=loadHOF();
        const lA=list[G.vsFriendSelA||0];
        const lB=G.importedFriendLegend||list[G.vsFriendSelB!==undefined?G.vsFriendSelB:1];
+       /* ==== [ANCRE: CORRECTIF_VSFRIEND_PANTHEON_UNIQUE] — bug trouvé : si le
+          Panthéon ne contient qu'une seule légende (et aucun code ami importé),
+          list[1] vaut undefined et reconstructLegend(undefined) plante. Son
+          cousin launchFantasyFight() gère déjà ce cas (repli sur list[0]),
+          pas celui-ci. ==== */
+       if(!lB){ G.lastMsg="Il faut deux légendes (ou un code ami) pour lancer un duel."; render(); return; }
        G.vsFriendLegendA=reconstructLegend(lA);
        G.vsFriendLegendB=reconstructLegend(lB);
        G.vsFriendLegendB.champion='monde'; G.vsFriendLegendB.flag=G.vsFriendLegendB.flag||'🏴\u200d☠️';
@@ -855,12 +907,23 @@ const CL={
      // instantanément sans jamais demander de consigne tactique. On route
      // maintenant vers un choix de tactique (comme en carrière) avant de
      // lancer réellement la simulation, via chooseVsFriendPlan().
+     /* ==== [ANCRE: CORRECTIF_DOUBLE_VSFRIEND_PLAN] — voir chooseVsFriendPlan() :
+        même verrou que choosePlan() (CORRECTIF_DOUBLE_RESOLUTION), réarmé à
+        chaque nouvelle manche puisque c'est ce point d'entrée qui affiche à
+        nouveau l'écran de tactique. ==== */
+     G.vsFriendScore._resolved=false;
      G.screen='vs_friend_plan'; save(); render();
   },
   chooseVsFriendPlan(idx){
+     /* ==== [ANCRE: CORRECTIF_DOUBLE_VSFRIEND_PLAN] — même verrou que
+        choosePlan() (CORRECTIF_DOUBLE_RESOLUTION) : sans lui, un double-tap
+        sur la carte de tactique incrémentait G.vsFriendScore.round deux fois
+        pour une seule manche réellement jouée. ==== */
+     if(G.vsFriendScore && G.vsFriendScore._resolved) return;
      const A=G.vsFriendLegendA, B=G.vsFriendLegendB;
      const combined=getExclusiveTactics(A).concat(TACTICS[A.style]||[]);
      const planObj=combined[idx]; if(!planObj) return;
+     G.vsFriendScore._resolved=true;
      G.vsFriendScore.round++;
      const isDecider=G.vsFriendScore.A===1 && G.vsFriendScore.B===1;
      const rounds=isDecider?5:3;
@@ -1195,7 +1258,15 @@ const CL={
       G.fight.malus=Object.assign({},G.fight.malus,{confidence:8,aggression:10,composure:-10});
       G.lastMsg='L\u2019adrénaline monte avant même d\u2019entrer dans la cage (+ Agressivité/Confiance, - Sang-froid).';
       proceedToFight();
-    } else { proceedToFight(); }
+    } else {
+      /* ==== [ANCRE: CORRECTIF_HANDLEEVENT_ATTRAPE_TOUT] — bug trouvé :
+         l'attrape-tout final lançait proceedToFight() pour N'IMPORTE QUEL
+         actionId inconnu, même hors de tout contexte de combat (G.fight
+         absent). Un identifiant d'action mal formé ou une régression
+         ailleurs se traduisait par un combat lancé sans adversaire. ==== */
+      if(!G.fight){ G.screen='hub'; save(); render(); return; }
+      proceedToFight();
+    }
   },
   recoverInjury(){ const f=G.f; if(!f.injury)return;
     f.injury.left-=1; f.morale=clamp(f.morale+5,0,100); f.form=clamp(f.form+15,0,100);
@@ -1368,6 +1439,10 @@ const CL={
          (ui-03) pour hausser encore le plancher de rareté au-delà du simple
          pactBonus booléen d'origine. ==== */
       const pactFulfilled=pactWasActive && win && !pactFail;
+      /* ==== [ANCRE: CORRECTIF_FILET_RESTITUTION] — capturé AVANT la remise à
+         zéro qui suit (voir l'ancre complète plus bas, où ces deux valeurs
+         sont restituées par les trois filets de sécurité). ==== */
+      const _pactStreakBefore=G.arcade.pactStreak||0;
       G.arcade.pactStreak=pactFulfilled?((G.arcade.pactStreak||0)+1):0;
       /* ==== [FIN ANCRE] ==== */
       /* ==== [FIN ANCRE] ==== */
@@ -1399,6 +1474,20 @@ const CL={
       /* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — drapeaux de run lus par les
          contrats ct_nopact et ct_intact. Posés ici, jamais remis à zéro :
          un contrat de type « ne jamais » se casse définitivement. ==== */
+      /* ==== [ANCRE: CORRECTIF_FILET_RESTITUTION] — bug trouvé : le pacte, la
+         mise en jeu et la série de pactes sont consommés en tête d'afterResult,
+         AVANT les branches de mode. Les trois filets de sécurité annoncent
+         pourtant « le combat n'a jamais eu lieu » : le joueur perdait quand
+         même sa mise, son pacte et sa série — et surtout pactTakenEver était
+         posé DÉFINITIVEMENT, cassant le contrat de run « ne jamais prendre de
+         pacte » pour un combat qui n'existe officiellement pas. ==== */
+      const _pactTakenEverBefore=!!G.arcade.pactTakenEver;
+      const _restoreOnSafetynet=()=>{
+        G.arcade.pactActive=pactWasActive && !pactForcedByAscension;
+        G.arcade.atRisk=atRiskWasActive;
+        G.arcade.pactStreak=_pactStreakBefore;
+        G.arcade.pactTakenEver=_pactTakenEverBefore;
+      };
       if(pactWasActive) G.arcade.pactTakenEver=true;
       G.arcade.maxPactStreak=Math.max(G.arcade.maxPactStreak||0,G.arcade.pactStreak||0);
       /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — remplace `if(G.f.form<60)
@@ -1445,6 +1534,7 @@ const CL={
             G.arcade.consumableSafetynet=false;
             G.arcade.opponent=genBossOpponent(0);
             G.arcade.revealed=false; G.arcade.bossMalus=null;
+            _restoreOnSafetynet();
             G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. Un nouvel adversaire t\u2019attend.';
             save(); render(); return;
           }
@@ -1495,6 +1585,7 @@ const CL={
           if(!win && (G.arcade.fightsDone||0)===0 && G.arcade.consumableSafetynet){
             G.arcade.consumableSafetynet=false;
             G.arcade.targets=genWTUMMATargets();
+            _restoreOnSafetynet();
             G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. De nouvelles cibles te sont proposées.';
             save(); render(); return;
           }
@@ -1535,6 +1626,7 @@ const CL={
           G.arcade.tournament=buildWTUMMABracket(G.f);
           const rematch=G.arcade.tournament.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
           G.arcade.opponent=rematch.a.id===G.f.id?rematch.b:rematch.a;
+          _restoreOnSafetynet();
           G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. Un nouveau tableau t\u2019attend.';
           save(); render(); return;
         }
@@ -1784,6 +1876,7 @@ const CL={
      consommé par nextFaithYear() qui fait alors progresser les partenaires
      un peu plus vite CETTE année-là (sans vous pour les canaliser). ==== */
   faithRest(){
+    if(!faithClaimMonth()) return;
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
     /* ==== [ANCRE: V2-11] — le repos est la seule action qui restaure
        vraiment la fraîcheur (le reste du temps ne fait que la grignoter
@@ -1809,6 +1902,7 @@ const CL={
      sommet. ==== */
   faithSparring(partnerId){
     const partner=(G.faith.gym||[]).find(p=>p.id===partnerId); if(!partner) return;
+    if(!faithClaimMonth()) return;
     G.f.form=clamp(G.f.form+15,0,100);
     G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)-10,0,100);
     const priorSessions=partner.sessions||0;
@@ -1871,6 +1965,7 @@ const CL={
       G.lastMsg="Votre coach refuse net : «Tu n’as plus rien à donner à un stage, là. Tu vas juste te faire mal.»";
       render(); return;
     }
+    if(!faithClaimMonth()) return;
     const F=G.faith;
     if(F.pendingIntersaisonEntry){
       if(!F.intersaisonCooldown) F.intersaisonCooldown={};
@@ -1941,6 +2036,7 @@ const CL={
       return;
     }
     if(entry.action==='scout_video'){
+      if(!faithClaimMonth()) return;
       f.freshness=clamp((f.freshness==null?70:f.freshness)-3,0,100);
       F.scoutKey=true;
       applyDeltas(f,[['fightIQ',1]]);
@@ -1949,6 +2045,7 @@ const CL={
       faithAdvanceMonth(); return;
     }
     if(entry.action==='sponsor'){
+      if(!faithClaimMonth()) return;
       f.earnings=(f.earnings||0)+15; f.morale=clamp(f.morale+5,0,100);
       G.lastMsg='Un partenariat modeste, mais qui tombe bien.';
       F.yearLog.push({title:'Intersaison',choice:'Rencontre sponsor'});
@@ -1995,6 +2092,13 @@ const CL={
   },
   chooseFaithEvent(i){
     const ev=G.faith.currentEvent; if(!ev) return;
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — voir faithClaimMonth().
+       Ici le témoin est eventResolved (posé en fin de fonction, lu par
+       scr_faith_event pour la vue « résolue ») : un double-tap débitait c.cost
+       deux fois, appliquait les deltas deux fois, et incrémentait hiddenTraits
+       deux fois — un trait permanent se cristallisait en 2 choix au lieu des
+       3 annoncés. ==== */
+    if(G.faith.eventResolved) return;
     const c=ev.choices[i]; if(!c) return;
     /* ==== [CORRECTIF C12] — Plan V4 LOT 5 : "Chercher un préparateur
        au-dessus" n'applique plus de delta d'attributs — l'effet réel est un
@@ -2032,6 +2136,15 @@ const CL={
        Champ déclaratif : aucune logique par serment n'est câblée ici. ==== */
     if(c.oathBreak && G.faith.oath && G.faith.oath.id===c.oathBreak) G.faith.oath.broken=true;
     if(c.perk){
+      /* ==== [ANCRE: CORRECTIF_PERK_ACHAT_RATE] — buyFaithPerk() peut sortir
+         sur « Fonds insuffisants » sans rien acheter ; le mois était pourtant
+         consommé, et le journal de l'année avait déjà enregistré le choix
+         comme accompli. On ne l'inscrit qu'après confirmation de l'achat. ==== */
+      const _avant=G.f.earnings||0;
+      CL.buyFaithPerk(c.perk);
+      if((G.f.earnings||0)===_avant && String(G.lastMsg||'').indexOf('Fonds insuffisants')===0){
+        G.faith.currentEvent=ev; return;
+      }
       if(!G.faith.yearLog) G.faith.yearLog=[];
       G.faith.yearLog.push({title:ev.title,choice:c.label});
       if(!G.faith.seenEvents) G.faith.seenEvents=[];
@@ -2040,7 +2153,6 @@ const CL={
       /* buyFaithPerk('ped') peut clore l'année elle-même (suspension) et a
          déjà changé G.screen dans ce cas : ne PAS avancer le mois par-dessus
          un bilan déjà affiché. */
-      CL.buyFaithPerk(c.perk);
       if(G.screen!=='faith_year_end') faithAdvanceMonth();
       return;
     }
@@ -2183,6 +2295,7 @@ const CL={
      directement le mois plutôt que de repasser par la vue "résolue" d'un
      événement de vie ordinaire. */
   chooseFaithCoach(coachId){
+    if(!faithClaimMonth()) return;
     const F=G.faith;
     const old=faithCoachPerson(F);
     const hired=faithHireCoach(coachId,`Vous avez quitté ${personName(old,{withNick:true})} pour un préparateur au-dessus.`);
@@ -2241,6 +2354,13 @@ const CL={
      ne jamais se rejouer si l'écran est réaffiché sans avoir progressé. */
   faithOfferSign(){
     const off=G.faith.pendingOffer; if(!off) return;
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — cette fonction est une
+       machine à états avancée par les clics (build-up -> conférence -> pesée).
+       Sans verrou, un double-tap sur SIGNER franchissait DEUX étapes : le
+       build-up était tiré (currentBuildupEvent posé) puis jamais affiché, et
+       la scène sautait directement à la conférence. ==== */
+    if(off._signStep===G.screen) return;
+    off._signStep=G.screen;
     if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
     if(!off.buildupDone){
       off.buildupDone=true;
@@ -2441,6 +2561,7 @@ const CL={
      déclaratif — cf. f.injury, déjà suivi). refusalsThisYear/
      medicalRefusalUsed repartent à zéro chaque année (nextFaithYear). ==== */
   faithOfferRefuse(){
+    if(!faithClaimMonth()) return;
     const medical=!!G.f.injury && !G.faith.medicalRefusalUsed;
     G.faith.refusalsThisYear=(G.faith.refusalsThisYear||0)+1;
     if(medical){ G.faith.medicalRefusalUsed=true; }
@@ -2553,7 +2674,15 @@ const CL={
        (tags.length>0 toujours faux). Retirée avec trainingTags/
        trainingsThisYear (initialisation et remise à zéro annuelle) plutôt que
        de garder trois sites morts pour une seule branche inatteignable. ==== */
-    const nbRolls=((G.faith.yearLog||[]).length>=1)?1:0;
+    /* ==== [ANCRE: CORRECTIF_NBROLLS_1_COMBAT_PAR_AN] — le plafond « 1 roll
+       max par an » date de l'époque où Faith imposait 1 combat/an (avant
+       FA-11) ; le calendrier à 12 mois permet depuis plusieurs combats par
+       an, mais ce plafond n'avait jamais suivi : une carrière de 18 ans
+       plafonnait à 18 compétences quel que soit le nombre de combats
+       livrés. Indexé sur les combats réellement livrés cette année
+       (fightsThisYear), plafonné par le même MAX_CAREER_SKILLS que le pool
+       lui-même. ==== */
+    const nbRolls=Math.min(1+Math.floor((G.faith.fightsThisYear||0)/3),SKILL_CONSTANTS.MAX_CAREER_SKILLS);
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS);
     for(let i=0;i<nbRolls;i++){
@@ -2582,12 +2711,20 @@ const CL={
     G.screen='faith_year_end'; save(); render();
   },
   nextFaithYear(){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — le cas le plus lourd :
+       yearStats n'est jamais purgé après archivage, donc un double-tap
+       archivait l'année DEUX FOIS dans le Parcours, incrémentait le millésime
+       deux fois (2026 -> 2028), appliquait applyAging() et worldTick() deux
+       fois, et vieillissait l'écurie de deux ans. Cet écran est le seul point
+       d'entrée, et la fonction en sort toujours. ==== */
+    if(G.screen!=='faith_year_end') return;
     /* ==== [ANCRE: FAITH_PARCOURS] — archive AVANT la purge de yearLog
        quelques lignes plus bas : G.faith.yearStats (posé par
        prepareFaithYearEnd() pour l'écran de bilan qu'on quitte tout juste)
        porte encore les données de l'année qui vient de se terminer, et
        G.faith.year n'a pas encore été incrémenté. ==== */
     if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
+    G.faith.yearStats=null;
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: CORRECTIF_PED_VIEILLISSEMENT] — bug trouvé : le test
        `pedActive !== G.faith.year` s'exécutait APRÈS `G.faith.year++`,
@@ -2640,17 +2777,27 @@ const CL={
        verrouille la némésis, si aucune n'est déjà posée. G.faith.rankWatch
        persiste sur toute la carrière — jamais réinitialisé ici, contraire
        à l'esprit "portée sur toute la carrière" du correctif. ==== */
+    /* ==== [ANCRE: CORRECTIF_NEMESIS_FRANCHISSEMENT] — bug trouvé : l'ancre
+       FAITH_NEMESIS_PERMANENTE décrit un combattant qui « FRANCHIT le rang du
+       joueur deux années différentes », mais le code ne testait qu'une
+       POSITION (divRank(o)<monRang). Un combattant durablement au-dessus
+       accumulait donc ses deux points sans que rien ne se passe — et comme
+       G.roster est trié par rang, la boucle tombait toujours d'abord sur le
+       mieux classé : la némésis était presque systématiquement le n°1 de la
+       division, dès la 2e année, sans aucun récit derrière. On mémorise le
+       rang de l'an dernier pour ne compter que les vrais franchissements. ==== */
+    if(!G.faith.rankPrev) G.faith.rankPrev={};
+    const monRangPrev=(G.faith.rankPrev._me!=null)?G.faith.rankPrev._me:divRank(G.f);
     if(!G.f.faithNemesisId){
       if(!G.faith.rankWatch) G.faith.rankWatch={};
       const monRang=divRank(G.f);
       for(const o of G.roster){
         if(o.champion || o.isGymPartner) continue;
-        if(divRank(o)<monRang){
+        const prev=G.faith.rankPrev[o.id];
+        const aFranchi=(prev!=null) && prev>monRangPrev && divRank(o)<monRang;
+        if(aFranchi){
           G.faith.rankWatch[o.id]=(G.faith.rankWatch[o.id]||0)+1;
-          if(G.faith.rankWatch[o.id]>=2){
-            lockFaithNemesis(o);
-            break;
-          }
+          if(G.faith.rankWatch[o.id]>=2){ lockFaithNemesis(o); break; }
         }
       }
     }
@@ -2746,6 +2893,11 @@ const CL={
     G.faith.currentIntersaison=null; G.faith.pendingIntersaisonEntry=null;
     G.faith.month=0; G.faith.calendar=faithGenerateCalendar(G.f);
     faithLandOnMonth();
+    /* ==== [ANCRE: CORRECTIF_NEMESIS_FRANCHISSEMENT] — photo de fin d'année,
+       lue l'an prochain par le bloc plus haut pour ne compter que les vrais
+       franchissements de rang. ==== */
+    G.faith.rankPrev={_me:divRank(G.f)};
+    (G.roster||[]).forEach(o=>{ G.faith.rankPrev[o.id]=divRank(o); });
     if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
     /* ==== [FIN ANCRE] ==== */
     G.screen='faith_hub'; save(); render();
@@ -2817,7 +2969,14 @@ const CL={
      ui-04). Un seul profil déplié à la fois (toggle simple, pas de Set). ==== */
   toggleDraftPreview(i){ G._draftPreview=G._draftPreview===i?null:i; render(); },
   /* ==== [FIN ANCRE] ==== */
-  selectDraft(i){ G.f=G.arcade.pool[i];
+  selectDraft(i){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — même geste côté
+       Gauntlet : applyPendingGauntletConsumable() est déjà idempotente (elle
+       purge le drapeau meta), mais le malus de run 'mut_depart_affaibli'
+       s'appliquait DEUX fois — -20 Puissance/Cardio au lieu de -10. ==== */
+    if(G.arcade && G.arcade._drafted) return;
+    if(G.arcade) G.arcade._drafted=true;
+    G.f=G.arcade.pool[i];
     G._draftPreview=null;
     /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
        point unique, commun aux 3 modes : G.f est déjà le combattant réel de
@@ -3365,9 +3524,15 @@ const CL={
        ne plus y écrire de donnée fausse pour Faith plutôt que la corriger à
        moitié. ==== */
     const sData=G.season||{year:1,fights:[]};
-    let seasonEval=null;
-    if(!G.faith && sData.fights && sData.fights.length){
-      seasonEval=evaluateSeason(G.f,sData.fights);
+    /* ==== [ANCRE: CORRECTIF_SEASONEVAL_FAITH_NUL] — régression introduite par
+       CORRECTIF_SEASONRECAP_FAITH : le garde `!G.faith` a été posé sur le
+       CALCUL de seasonEval alors qu'il ne devait porter que sur l'écriture
+       dans f.seasonRecap (spécifique à la Carrière classique). Le bloc Faith
+       plus bas lit encore seasonEval pour archiver la dernière année dans le
+       Parcours — il recevait donc toujours null, et la dernière année de
+       chaque carrière Faith, souvent la plus chargée, s'inscrivait à 0-0. ==== */
+    const seasonEval=(sData.fights && sData.fights.length)?evaluateSeason(G.f,sData.fights):null;
+    if(!G.faith && seasonEval){
       if(!G.f.seasonRecap) G.f.seasonRecap=[];
       G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
         koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
@@ -3889,15 +4054,15 @@ function scr_consumable_preview(){
     return `${shown>0?'+':''}${shown} ${attrLabel(k)}`;
   }).join(', '):'';
   return `<div class="scr"><div class="bar"><span class="eyebrow">Marché noir — aperçu</span><span class="eyebrow x" onclick="CL.closeConsumablePreview()">✕</span></div>
-   <h2 class="disp gold" style="font-size:20px">${item.name}</h2>
+   <h2 class="disp gold" style="font-size:20px">${esc(item.name)}</h2>
    <div class="card glass raise" style="padding:12px;border-color:var(--blood-d);background:var(--panel2)">
      <canvas id="shop-preview-cv" style="width:100%;height:180px;display:block;border:1px solid var(--line);background:var(--bg)"></canvas>
    </div>
    <div class="card mt" style="background:var(--panel2);padding:14px">
-     <div class="muted small">${item.desc}</div>
+     <div class="muted small">${esc(item.desc)}</div>
      ${fxTxt?`<div class="mono small gold mt">${fxTxt} (actif pour toute la run)</div>`:''}
    </div>
-   <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.purchaseConsumable('${item.id}');CL.closeConsumablePreview();" ${canAfford?'':'disabled'}>${owned?'Déjà un consommable en attente':`Acheter — ${item.cost} pts`}</button>
+   <button class="btn ghost mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.buyAndCloseConsumable('${item.id}')" ${canAfford?'':'disabled'}>${owned?'Déjà un consommable en attente':`Acheter — ${item.cost} pts`}</button>
    <button class="btn ghost mt" onclick="CL.closeConsumablePreview()">Fermer</button>
   </div>`;
 }
