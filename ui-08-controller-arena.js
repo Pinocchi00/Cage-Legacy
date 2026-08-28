@@ -1806,13 +1806,17 @@ const CL={
     F.currentIntersaison=null;
     if(!F.yearLog) F.yearLog=[];
     if(entry.action==='rest'){ CL.faithRest(); return; }
+    /* ==== [ANCRE: CORRECTIF_SPARRING_TRI_RESIDUEL] — dernier site de tri au
+       rendu ayant survécu à V3_SPARRING_PRIMARY. Aligné sur ui-04 (l'écran lit
+       F.sparringPrimaryId pour NOMMER le partenaire) : l'action doit viser la
+       même personne que celle affichée. ==== */
     if(entry.action==='sparring_top'){
-      const tp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[0];
+      const tp=(F.gym||[]).find(p=>p.id===F.sparringPrimaryId)||(F.gym||[])[0];
       if(tp) CL.faithSparring(tp.id); else CL.faithRest();
       return;
     }
     if(entry.action==='sparring_second'){
-      const sp=(F.gym||[]).slice().sort((a,b)=>b.overall-a.overall)[1];
+      const sp=(F.gym||[]).find(p=>p.id!==F.sparringPrimaryId);
       if(sp) CL.faithSparring(sp.id); else CL.faithRest();
       return;
     }
