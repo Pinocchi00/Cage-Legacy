@@ -3625,14 +3625,13 @@ function renderBasculeOverlay(el){
   }
   el.innerHTML=`<div style="text-align:left">
     <div class="small mb">${esc(m.situation)}</div>
-    ${m.options.map((o,i)=>`<button class="btn ghost" style="display:block;width:100%;margin-top:6px;padding:8px;text-align:left" onclick="CL.pickBascule(${i})">${esc(o.label)}</button>`).join('')}
+    ${m.options.map((o,i)=>`<button class="btn ghost" style="display:block;width:100%;margin-top:6px;padding:8px;text-align:left" onclick="CL.pickBascule(${i})">${esc(o.label)}<div class="small muted" style="margin-top:2px">${esc(attrLabel(o.stat))}</div></button>`).join('')}
   </div>`;
 }
 function applyBeat(b){ const A=ARENA; if(!b)return;
   if(b.phase==='bell'){ A.currentText=b.text; return; }
   if(b.by==='me'){ A.flashOp=1; A.shakeOp=1; A.lungeMe=1; }
   else { A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }
-  A.stMe=clamp(A.stMe-RI(2,5),12,100); A.stOp=clamp(A.stOp-RI(2,5),12,100);
   /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop + secousse d'écran, magnitude
      différenciée : un échange normal mérite un micro-gel discret, une
      finition mérite un vrai temps d'arrêt. Le point de focus caméra suit le
@@ -3653,7 +3652,7 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
      (halo TAP! existant). La foule réagit à TOUT coup, mais plus fort sur
      une finition, et décroît ensuite (cf. drawArena). */
   if(b.finish){ A.slowMoFactor=0.22; A.slowMoUntil=performance.now()+900; }
-  A._chromaKOActive=!!(b.finish && b.method && b.method.startsWith('KO'));
+  A._chromaKOActive=!!(b.finish && b.method && b.method.startsWith('KO')); A._chromaDone=false;
   A.crowdPulse=Math.min(1,(A.crowdPulse||0)+(b.finish?1:0.35));
   if(b.finish){ if(b.method&&b.method.startsWith('KO')){ if(A.meWin){A.fall=2;} else {A.fall=1;} }
     else if(b.method&&b.method.startsWith('Soum')){ A.tap=A.meWin?2:1; }
@@ -3662,6 +3661,14 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
   A.curPhase=b.phase; A.curTop=(b.phase==='sol')?(b.by==='me'?'me':'op'):null;
   A.currentText=b.text; A.currentMomentum=b.momentum;
   if(b.snapA) A.snapA=b.snapA; if(b.snapB) A.snapB=b.snapB;
+  /* ==== [ANCRE: CORRECTIF_CARDIO_FICTIF] — bug trouvé : les deux barres
+     étiquetées CARDIO dans scr_arena descendaient par RI(2,5) des DEUX côtés à
+     chaque beat, sans aucune lecture du combat réel. Dérivées désormais des
+     dégâts cumulés par zone du log (snapA/snapB, déjà transportés par chaque
+     beat) : la barre du combattant qui encaisse descend, celle de l'autre non. ==== */
+  const _dmgA=(A.snapA.h||0)+(A.snapA.b||0)+(A.snapA.l||0);
+  const _dmgB=(A.snapB.h||0)+(A.snapB.b||0)+(A.snapB.l||0);
+  A.stMe=clamp(100-_dmgA*1.2,12,100); A.stOp=clamp(100-_dmgB*1.2,12,100);
 }
 /* ==== [ANCRE: JUICE_NIVEAU2] — système de particules générique. Chaque
    particule est un objet plat {x,y,vx,vy,g,life,maxLife,size,color,kind,rot}.
@@ -3945,7 +3952,12 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
   }
   ctx.fillStyle=A._vignetteGrad; ctx.fillRect(0,0,W,H);
   ctx.restore();
-  if(A._chromaKOActive) applyChromaAberration(ctx,Math.round(3*(A.dpr||1)));
+  /* ==== [ANCRE: CORRECTIF_CHROMA_GEL_REPETE] — bug trouvé : applyChromaAberration()
+     fait un getImageData + boucle par pixel + putImageData sur ~316 000 pixels,
+     rejoué ~10 fois pendant les 170 ms de hit-stop d'un KO (la frame ne change
+     pourtant pas pendant le gel, par construction) — la frame la plus importante
+     du jeu, la plus coûteuse sur mobile. Appliqué une seule fois par gel. ==== */
+  if(A._chromaKOActive && !A._chromaDone){ applyChromaAberration(ctx,Math.round(3*(A.dpr||1))); A._chromaDone=true; }
   ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
   const rnd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
   let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
@@ -4317,7 +4329,7 @@ function scr_arena(){ const A=ARENA||{};
      <div class="arena-bars sm" style="margin-top:6px"><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-me" style="background:var(--gold)"></div></div><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-op" style="background:var(--gold)"></div></div></div>
      <div id="ar-log" class="mono muted small" style="margin-top:20px;min-height:48px;display:flex;flex-direction:column;justify-content:flex-end;border-left:3px solid var(--gold);padding-left:12px;line-height:1.4;padding-bottom:4px"></div>
    </div>
-   <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Couper la transmission vidéo ▸</button>
+   <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Passer au verdict ▸</button>
   </div>`; }
 /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_CANVA] — "fenêtre" ouverte au clic sur une
    tuile du Marché noir (scr_legends, ui-07 : CL.viewConsumablePreview) —
@@ -4361,7 +4373,7 @@ function scr_consumable_preview(){
 // corrigée, alignée sur l'attente : sauge = indemne, or = touché/blessé ;
 // le rouge reste exclusivement réservé au flash de KO (flashZoneId
 // ci-dessous), jamais à un simple cumul de dégâts.
-const ARENA_ZONE_COLOR=v=>v>10?'var(--gold)':'var(--sage)';
+const ARENA_ZONE_COLOR=v=>v>28?'var(--blood-d)':v>18?'var(--gold)':v>8?'var(--gold-d)':'var(--sage)';
 /* mise à jour des barres HTML (plus de HP globaux) + momentum + points de dégâts par zone + terminal texte, à chaque frame */
 function paintBars(){ if(!ARENA)return; const set=(id,v)=>{const e=document.getElementById(id); if(e)e.style.width=clamp(v,0,100)+'%';};
   set('st-me',ARENA.stMe); set('st-op',ARENA.stOp);
