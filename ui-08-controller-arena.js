@@ -436,9 +436,16 @@ function finaliseGauntletRun(a,opts){
   const meta=loadMetaStats();
   a.maxPactStreak=Math.max(a.maxPactStreak||0,a.pactStreak||0);
   evalGauntletContract(a);
+  /* ==== [ANCRE: CORRECTIF_DECOTE_ENCAISSEMENT] — la décote décrite par l'ancre
+     REJOUABILITE_BANQUE_GAUNTLET est morte avec cashOutGauntlet(). Le nouveau
+     point d'entrée d'encaissement (acceptRingDoctor) tombait donc sur la table
+     PLEINE : sortir proprement rapportait deux fois une élimination au même
+     palier, sans aucun risque. ==== */
   const base=(opts.kind==='elimination')
     ? gauntletEliminationPayout(a.mode,opts.progress,opts.atRisk)
-    : gauntletPayout(a.mode,opts.progress);
+    : (opts.kind==='cashout')
+      ? Math.round(gauntletPayout(a.mode,opts.progress)*(a.mode==='boss_run'?0.6:0.7))
+      : gauntletPayout(a.mode,opts.progress);
   const preBonus=gauntletFinalPayout(a,base);
   /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
      bonus ×1.5 UNIQUEMENT sur une victoire réelle (opts.kind==='victory')
@@ -486,7 +493,12 @@ function finaliseGauntletRun(a,opts){
      mode disparaissent avec l'écran Profil qui les affichait ; le suivi du
      défi du jour disparaît avec le défi. ==== */
   saveMetaStats(meta);
-  a.earnedOnElimination=earned;
+  /* ==== [ANCRE: CORRECTIF_REENTRANCE_DIABLE] — buyDevilContinue() ressuscite une
+     run que cette fonction a déjà close. Le crédit s'accumule (voulu : la run a
+     réellement continué), mais l'écrasement de earnedOnElimination faisait
+     afficher le seul dernier segment sur l'écran de fin. ==== */
+  a.earnedOnElimination=(a.earnedOnElimination||0)+earned;
+  a.segments=(a.segments||0)+1;
   a.basePayout=base;
   a.runMultApplied=gauntletRunMult(a);
   a.active=false;
@@ -2775,6 +2787,13 @@ const CL={
     /* ==== [FIN ANCRE] ==== */
     save(); render(); },
   retryArcade(){
+    /* ==== [ANCRE: CORRECTIF_RETRY_ASCENSION] — bug trouvé : startArcade/
+       startLadder100/startBossRun relisent tous G._pendingAsc pour fixer le
+       palier d'Ascension de la nouvelle run, mais retryArcade() ne le
+       repositionnait jamais — "rejouer" retombait donc systématiquement au
+       palier 0, symétrique au correctif déjà appliqué à retrySameSeed()
+       ci-dessous pour la graine. ==== */
+    G._pendingAsc=(G.arcade&&G.arcade.asc)||0;
     const prevMode=G.arcade&&G.arcade.mode;
     if(prevMode==='ladder_100') CL.startLadder100();
     else if(prevMode==='boss_run') CL.startBossRun();
@@ -2952,14 +2971,13 @@ const CL={
      eux, perdre ou décrocher soi-même a toujours rapporté pareil (aucune
      pénalité à modifier), seule l'option de sortir proprement manquait. ==== */
   /* ==== [ANCRE: CORRECTIF_CODE_MORT] — cashOutGauntlet() retirée : plus aucun
-     bouton n'y appelle (GAUNTLET_SORTIE_UNIQUE, ui-04). Les branches
-     `a.cashedOut` dans les 3 écrans de fin de run (gameover boss_run/
-     ladder_100/bracket64, ui-04) restent en l'état : a.cashedOut ne sera
-     plus jamais posé à true nulle part dans le code, ces branches sont donc
-     du texte mort mais inoffensif (jamais atteint). Les nettoyer implique de
-     retoucher 3 narrations distinctes sans rapport avec ce correctif — hors
-     du périmètre de cette passe, à faire si l'un de ces écrans est retouché
-     pour une autre raison. ==== */
+     bouton n'y appelle (GAUNTLET_SORTIE_UNIQUE, ui-04). CORRECTION (cf. ANCRE
+     ULTIMATUM_MEDECIN, CL.acceptRingDoctor ci-dessus) : `a.cashedOut` est de
+     nouveau posé à true, par ce nouveau point d'entrée d'encaissement — les
+     branches `a.cashedOut` dans les 3 écrans de fin de run (gameover
+     boss_run/ladder_100/bracket64, ui-04) sont donc bien vivantes et
+     atteignables. Ne PAS les supprimer sous prétexte que ce commentaire
+     (dans une version antérieure) les disait mortes. ==== */
   /* ==== [FIN ANCRE] ==== */
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
