@@ -979,7 +979,11 @@ const CL={
     // resolveFight() incrémentait aveuglément le compteur de défenses de
     // l'ancienne ceinture. On bascule désormais réellement de division
     // quand ce choix est fait, avec régénération du roster correspondant.
-    G.f.champChampFocus=divId;
+    // ==== [ANCRE: CORRECTIF_CHAMPCHAMPFOCUS_MORT] — la ligne qui écrivait
+    // G.f.champChampFocus=divId juste ici a été retirée : l'ancre juste
+    // au-dessus dit elle-même que cette variable n'est relue nulle part, et
+    // le vrai correctif (basculer G.f.div/divName/roster) l'a rendue
+    // définitivement inutile.
     if(divId!==G.f.div){
       const newDiv=divById(divId);
       if(newDiv){ G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f); }
@@ -2246,9 +2250,10 @@ const CL={
       } else if(i===1){
         if(!G.f.faithTraits) G.f.faithTraits=[];
         if(!G.f.faithTraits.includes('Patron régional')) G.f.faithTraits.push('Patron régional');
-        G.faith.regionalPatron=true;
         // "Régner sur son territoire" : même mécanisme, en sens inverse —
         // les galas ne se tiennent plus que dans le pays du combattant.
+        // (G.faith.regionalPatron, écrit ici auparavant, n'était lu nulle
+        // part : l'effet réel passe entièrement par faithTraits/territoire.)
         G.faith.territoire='regional';
       }
     }
@@ -2697,8 +2702,17 @@ const CL={
        plafonnait à 18 compétences quel que soit le nombre de combats
        livrés. Indexé sur les combats réellement livrés cette année
        (fightsThisYear), plafonné par le même MAX_CAREER_SKILLS que le pool
-       lui-même. ==== */
-    const nbRolls=Math.min(1+Math.floor((G.faith.fightsThisYear||0)/3),SKILL_CONSTANTS.MAX_CAREER_SKILLS);
+       lui-même.
+       ==== [ANCRE: CORRECTIF_NBROLLS_ANNEE_VIDE] — bug trouvé : ce correctif
+       avait perdu le garde-fou de la formule d'origine
+       ((yearLog.length>=1)?1:0) — une année entièrement vide (calendrier
+       sans mois occupé, aucun événement de vie résolu, aucun combat) offrait
+       désormais quand même 1 compétence gratuite (Math.floor(0/3)+1=1). Le
+       plancher ne s'applique plus que si l'année a réellement produit
+       quelque chose. ==== */
+    const nbRolls=((G.faith.yearLog||[]).length>=1 || (G.faith.fightsThisYear||0)>0)
+      ? Math.min(1+Math.floor((G.faith.fightsThisYear||0)/3),SKILL_CONSTANTS.MAX_CAREER_SKILLS)
+      : 0;
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS);
     for(let i=0;i<nbRolls;i++){
