@@ -2102,6 +2102,15 @@ const CL={
        Champ déclaratif : aucune logique par serment n'est câblée ici. ==== */
     if(c.oathBreak && G.faith.oath && G.faith.oath.id===c.oathBreak) G.faith.oath.broken=true;
     if(c.perk){
+      /* ==== [ANCRE: CORRECTIF_PERK_ACHAT_RATE] — buyFaithPerk() peut sortir
+         sur « Fonds insuffisants » sans rien acheter ; le mois était pourtant
+         consommé, et le journal de l'année avait déjà enregistré le choix
+         comme accompli. On ne l'inscrit qu'après confirmation de l'achat. ==== */
+      const _avant=G.f.earnings||0;
+      CL.buyFaithPerk(c.perk);
+      if((G.f.earnings||0)===_avant && String(G.lastMsg||'').indexOf('Fonds insuffisants')===0){
+        G.faith.currentEvent=ev; return;
+      }
       if(!G.faith.yearLog) G.faith.yearLog=[];
       G.faith.yearLog.push({title:ev.title,choice:c.label});
       if(!G.faith.seenEvents) G.faith.seenEvents=[];
@@ -2110,7 +2119,6 @@ const CL={
       /* buyFaithPerk('ped') peut clore l'année elle-même (suspension) et a
          déjà changé G.screen dans ce cas : ne PAS avancer le mois par-dessus
          un bilan déjà affiché. */
-      CL.buyFaithPerk(c.perk);
       if(G.screen!=='faith_year_end') faithAdvanceMonth();
       return;
     }
