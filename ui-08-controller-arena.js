@@ -373,6 +373,13 @@ function faithEnsureOffer(){
   /* ==== [FIN ANCRE] ==== */
   const agentId=(G.faith.agent&&G.faith.agent.id)||'fidele';
   if(!chosen) chosen=agentId==='requin'?opps[0]:agentId==='fidele'?opps[opps.length-1]:opps[Math.floor(opps.length/2)];
+  /* ==== [ANCRE: CORRECTIF_MAIN_EVENT_NEMESIS_PERMANENT] — la position de
+     carte calculée plus haut (avant que `chosen` ne soit connu, pour filtrer
+     le pool) ignorait forcément qui serait le véritable adversaire.
+     Recalculée maintenant qu'il l'est, pour que le statut de némésis
+     (faithGalaPosition, ui-04) ne s'applique QUE si `chosen` est bien la
+     némésis — jamais tant qu'une autre carte est en jeu. ==== */
+  Object.assign(gala,faithGalaPosition(G.f,chosen.o));
   /* Sans agent (perdu, cf. nextFaithYear) : bourses -25% jusqu'à ce qu'un
      nouveau se présente l'année suivante. */
   if(!G.faith.agent) gala.mult*=0.75;
@@ -2040,15 +2047,33 @@ const CL={
        jeu différents, pas deux +1." "Aller chercher plus loin" déplace
        réellement la carrière (nouvelle organisation, nouveau bassin
        d'adversaires — même mécanisme que acceptPromo()/free agency en
-       carrière, réduit aux champs qui comptent vraiment pour Faith,
-       contrat non touché : hors périmètre de ce lot). "Régner sur son
-       territoire" ouvre un statut permanent et VISIBLE (f.faithTraits,
-       déjà affiché sur le hub, ui-04) — pas un delta d'attribut de plus. */
+       carrière). "Régner sur son territoire" ouvre un statut permanent et
+       VISIBLE (f.faithTraits, déjà affiché sur le hub, ui-04) — pas un
+       delta d'attribut de plus. */
     if(ev.id==='evt_br_regional_ceiling'){
       if(i===0 && G.f.org<6){
-        G.f.org++; G.f.orgWins=0; G.f.rivalId=null; G.f.faithNemesisId=null; G.f.nemesisRecord=null;
+        /* ==== [ANCRE: CORRECTIF_PROMOTION_INCOMPLETE] — bug trouvé : ce
+           mouvement d'organisation dupliquait acceptPromo() sans trois de
+           ses réinitialisations. Un champion régional emportait sa ceinture
+           dans la nouvelle organisation (resolveFight() continuait d'en
+           compter les défenses, et faithGalaPosition le maintenait en Main
+           event via f.champion) ; le contrat de l'ancienne ligue restait
+           actif dans la nouvelle ; applyOrgAdvancementBoost() — appliqué par
+           tous les autres chemins de promotion — était sauté. La dissolution
+           silencieuse de la némésis (sans message ni entrée yearLog) est
+           également corrigée : même pattern que l'ancre V2-14 un peu plus
+           bas dans ce fichier, "dissoute, jamais annulée en silence". ==== */
+        G.f.org++; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0;
+        if(G.f.faithNemesisId){
+          if(!G.faith.yearLog) G.faith.yearLog=[];
+          G.faith.yearLog.push({title:'Rivalité dissoute',choice:'Changement d’organisation'});
+          G.lastMsg=(G.lastMsg?G.lastMsg+' ':'')+"Votre rivalité n'a plus de sens dans cette nouvelle organisation.";
+        }
+        G.f.rivalId=null; G.f.faithNemesisId=null; G.f.nemesisRecord=null;
         G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
         if(typeof ORG_FLAVORS!=='undefined' && ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
+        G.f.contract=generateContract(G.f,G.f.org,false);
+        applyOrgAdvancementBoost(G.f,G.f.org);
         G.roster=makeOrgRoster(G.f);
         /* ==== [ANCRE: V4_C16_TERRITOIRE_GALA] — Plan V4 LOT 6 C16 : au-delà
            du bassin d'adversaires (déjà changé ci-dessus), "aller chercher
@@ -2345,7 +2370,12 @@ const CL={
       if(idx>0 && rnd()<0.8){ off.opp=opps[idx-1]; }
       else if(idx<opps.length-1){ off.opp=opps[idx+1]; G.lastMsg="Le Fidèle s’est trompé d’adversaire — trop tard pour revenir dessus."; }
     }
-    off.gala=faithGalaPosition(G.f); off.gala.label=faithGalaLabel(G.faith,G.f);
+    /* ==== [ANCRE: CORRECTIF_MAIN_EVENT_NEMESIS_PERMANENT] — voir la même
+       ancre dans faithEnsureOffer() : le statut de némésis (faithGalaPosition)
+       doit être vérifié contre l'adversaire RÉEL de cette offre (off.opp.o,
+       déjà mis à jour ci-dessus), jamais contre une simple présence de
+       f.rivalId quelque part sur la carrière. ==== */
+    off.gala=faithGalaPosition(G.f,off.opp.o); off.gala.label=faithGalaLabel(G.faith,G.f);
     if(!G.faith.agent) off.gala.mult*=0.75;
     /* ==== [ANCRE: CORRECTIF_CARTE_ADVERSAIRE_ECHANGE] — bug trouvé :
        G.faith.currentCard n'est écrite qu'à un seul endroit (faithEnsureOffer).
@@ -3243,7 +3273,15 @@ const CL={
     // statistiques cumulées affichées par le Codex Inter-carrières
     // (panneau tool_codex, scr_codex()). f._enshrined marque la carrière
     // comme déjà scellée et rend tout appel suivant sans effet.
-    if(G.f._enshrined){ G.screen='legacy'; render(); return; }
+    /* ==== [ANCRE: CORRECTIF_GARDE_ENSHRINE_DESTINATION] — bug trouvé : ce
+       garde protège bien l'état (pas de double enshrine()), mais imposait
+       toujours 'legacy' — alors que le premier appel, lui, termine sur
+       G.faith?'faith_epilogue':'legacy'. Un joueur Faith qui double-tapait
+       sur "Prendre sa retraite" perdait son épilogue, sa note finale, sa
+       comparaison au previousBest et les relances rapides
+       (faithRelaunchSame/faithRelaunchEdit) — renvoyé au lieu vers l'écran
+       de palmarès carrière classique. ==== */
+    if(G.f._enshrined){ G.screen=G.faith?'faith_epilogue':'legacy'; render(); return; }
     if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     // ==== [ANCRE: CORRECTIF_SAISON_PARTIELLE_RETRAITE] — bug remonté : le
     // bilan saison par saison (retireSeasonRecapHtml) totalisait moins de
@@ -3384,7 +3422,19 @@ const CL={
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }
       document.body.removeChild(ta); }catch(e){ alert('Export impossible.'); } },
-  importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object') throw new Error('invalid'); G=migrate(parsed); if(!validateState()) throw new Error('corrupt'); setTheme(G.theme||'dark'); G.screen='hub'; save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
+  /* ==== [ANCRE: CORRECTIF_IMPORT_ROUTAGE] — bug trouvé : ce contrôleur
+     imposait toujours G.screen='hub', un copier-coller d'une ligne déjà
+     écrite (et depuis corrigée) 60 lignes plus haut dans cont(). Importer
+     une sauvegarde Faith déposait le joueur sur le hub CARRIÈRE avec un
+     combattant Faith ; importer une sauvegarde retraitée reproduisait
+     exactement le bug fantôme de l'ancre CORRECTIF_RETRAITE_FANTOME
+     (vestiaire avec bouton de combat cliquable, doublons possibles au
+     Panthéon) ; importer une sauvegarde figée en plein combat (G.pending
+     non consommé, cf. CORRECTIF_COMBAT_ORPHELIN) perdait le résultat.
+     Même routage que cont(), pas un second calcul divergent. ==== */
+  importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object') throw new Error('invalid'); G=migrate(parsed); if(!validateState()) throw new Error('corrupt'); setTheme(G.theme||'dark');
+    if(G.f && !G.f.retired && G.pending && !G.pending._consumed){ G.screen='result'; save(); render(); return; }
+    G.screen=(G.f && G.f.retired)?'legacy':(G.faith?'faith_hub':'hub'); save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
 };
 window.CL=CL;
 /* ==== [ANCRE: CORRECTIF_ARENA_MOTEUR_DEPLACE] — F-07, hygiène : le moteur de
