@@ -536,6 +536,16 @@ function routeAfterCareerPending(){
   else if(p&&p.endOfSeason) G.screen='season';
   else G.screen='hub';
 }
+/* ==== [ANCRE: CORRECTIF_FOCUS_SAISIE] — bug trouvé : render() remplace
+   app.innerHTML, donc l'<input> focalisé est détruit puis recréé à chaque
+   frappe. render(true) préservait le scroll (comme annoncé) mais PAS le
+   focus : sur desktop il fallait recliquer entre chaque lettre, sur mobile
+   le clavier se refermait — les deux seuls champs texte du jeu (graine
+   Gauntlet, prise signature nommée) étaient inutilisables. ==== */
+function refocusInput(id){
+  try{ const el=/** @type {HTMLInputElement|null} */(document.getElementById(id));
+    if(el){ el.focus(); const n=el.value.length; el.setSelectionRange(n,n); } }catch(e){}
+}
 const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
@@ -1516,14 +1526,14 @@ const CL={
      volontaire d'un pool favorable), sinon aléatoire par défaut. La graine
      saisie via CL.setGauntletSeed() (G._pendingSeed) n'est consommée qu'une
      fois puis effacée, pour ne pas figer TOUS les runs suivants par erreur. ==== */
-  setGauntletSeed(v){ G._pendingSeed=(v!==undefined&&v!==null&&String(v).trim()!=='')?String(v).trim():null; render(true); },
+  setGauntletSeed(v){ G._pendingSeed=(v!==undefined&&v!==null&&String(v).trim()!=='')?String(v).trim():null; render(true); refocusInput('gauntlet-seed'); },
   /* ==== [ANCRE: PRISE_SIGNATURE_NOMMEE] — ajout #1 (24 ajouts, 12/08/2026).
      _draftSuffix vit sur f.signatureMove lui-même (pas sur G, comme
      G._pendingSeed) : la fiche peut être quittée et rouverte sans perdre la
      saisie en cours, tant qu'elle n'a pas été validée. render(true) même
      pattern que setGauntletSeed : préserve le scroll à chaque frappe. ==== */
   setSignatureSuffix(v){ const sm=G.f&&G.f.signatureMove; if(!sm||sm.locked) return;
-    sm._draftSuffix=(v!==undefined&&v!==null)?String(v).slice(0,24):''; render(true); },
+    sm._draftSuffix=(v!==undefined&&v!==null)?String(v).slice(0,24):''; render(true); refocusInput('sig-suffix'); },
   lockSignatureSuffix(){ const sm=G.f&&G.f.signatureMove; if(!sm||sm.locked) return;
     const val=(sm._draftSuffix||'').trim(); if(!val) return;
     sm.customSuffix=val; sm.locked=true; delete sm._draftSuffix; save(); render(); },
