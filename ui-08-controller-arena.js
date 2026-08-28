@@ -33,7 +33,13 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
    eu besoin d'en poser un tant qu'aucun autre mode ne partageait son
    apparence. */
 function currentGameMode(){
-  if(G && G.arcade && G.arcade.active) return 'gauntlet';
+  /* ==== [ANCRE: CORRECTIF_MODE_FIN_DE_RUN] — bug trouvé : G.arcade.active
+     est posé à false par finaliseGauntletRun() AVANT que G.screen ne passe à
+     'gameover' — au moment même où le joueur voit l'écran de fin de run
+     (victoire, élimination, tour d'Ascension), currentGameMode() ne le
+     reconnaissait déjà plus comme Gauntlet et data-mode basculait sur
+     'career' : le climax du mode perdait sa palette. ==== */
+  if(G && G.arcade && (G.arcade.active || G.screen==='gameover' || G.screen==='ascension_tower')) return 'gauntlet';
   const sName=String((G&&G.screen)||'');
   if((G&&G.f&&G.f.gameMode==='faith') || sName.indexOf('faith')===0) return 'faith';
   return 'career';
@@ -1289,14 +1295,6 @@ const CL={
          épreuve d'endurance). La récup diminue avec la profondeur de la run —
          le dernier combat d'un Gauntlet doit se jouer sur un combattant usé.
          RI(−1,1) évite un palier trop lisible/mécanique. ==== */
-      /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — attritionHeal() faisait
-         remonter G.f.form d'un montant décroissant avec la profondeur de la
-         run. La forme n'ayant plus aucun effet mécanique en Gauntlet (cf.
-         eff(), engine.js) ni aucun affichage, la fonction devient un no-op :
-         la profondeur de la run se paie désormais uniquement en séquelles
-         d'attributs, dont la probabilité est déjà indexée sur les dégâts
-         réellement encaissés (rollGauntletInjuryChance, ui-03). ==== */
-      const attritionHeal=()=>{};
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — consommée à chaque combat, comme le
          pacte de finition juste au-dessus, qu'elle se déclenche ou non. Une
@@ -1328,13 +1326,14 @@ const CL={
       if((G.arcade.runInjuries||[]).length) G.arcade.injuredEver=true;
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — remplace les 3 appels à
-         attritionHeal() : la forme remonte comme avant, mais un combat
-         réellement encaissé (frappes significatives subies / knockdowns, lus
-         sur res.stats.B) peut laisser une séquelle d'attributs pour le reste
-         de la run. C'est le coût invisible de l'attrition rendu mécanique, et
-         l'argument principal en faveur de l'encaissement volontaire. ==== */
+         l'ancienne attritionHeal() (constante no-op depuis
+         GAUNTLET_SANS_MORAL_FORME, retirée — cf. F-03) : la forme remonte
+         comme avant, mais un combat réellement encaissé (frappes
+         significatives subies / knockdowns, lus sur res.stats.B) peut
+         laisser une séquelle d'attributs pour le reste de la run. C'est le
+         coût invisible de l'attrition rendu mécanique, et l'argument
+         principal en faveur de l'encaissement volontaire. ==== */
       const runAttrition=()=>{
-        attritionHeal();
         if(_res && rnd()<rollGauntletInjuryChance(_res)){
           const inj=rollGauntletRunInjury(G.f);
           G.arcade.runInjuries=(G.arcade.runInjuries||[]).concat([inj]);
@@ -1667,7 +1666,7 @@ const CL={
     /* ==== [ANCRE: V2-11] \u2014 fra\u00eecheur de d\u00e9part : "pr\u00eat", pas "aff\u00fbt\u00e9" \u2014
        une carri\u00e8re commence en forme normale, pas au sommet absolu. */
     f.freshness=70;
-    G.faith={year:2026,fightsThisYear:0,trainingsThisYear:0,trainingTags:[],startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
+    G.faith={year:2026,fightsThisYear:0,startOfYearElo:f.careerElo,startOfYearEarnings:f.earnings||0,
       startOfYearChampion:false,startOfYearRank:divRank(f),startOfYearNemesisBeaten:false,gym:[p1,p2],
       agent:faithAgent,agentPatience:3};
     ensureSparringPrimary();
@@ -2429,15 +2428,18 @@ const CL={
     // dépendait d'un compteur mort depuis le remplacement de l'entraînement par
     // les événements de vie — plus aucune compétence ne pouvait plus se
     // débloquer en Faith.
+    /* ==== [ANCRE: CORRECTIF_TRAININGTAGS_MORT] — G.faith.trainingTags n'était
+       alimenté nulle part (repo entier vérifié) : la branche de filtrage par
+       tag de style ci-dessous ne pouvait donc jamais s'activer
+       (tags.length>0 toujours faux). Retirée avec trainingTags/
+       trainingsThisYear (initialisation et remise à zéro annuelle) plutôt que
+       de garder trois sites morts pour une seule branche inatteignable. ==== */
     const nbRolls=((G.faith.yearLog||[]).length>=1)?1:0;
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS);
-    const tags=G.faith.trainingTags||[];
     for(let i=0;i<nbRolls;i++){
       if(pool.length===0) break;
-      let currentPool=pool;
-      if(tags.length>0 && rnd()<0.5){ const filtered=pool.filter(s=>s.fam==='style'&&s.key && tags.includes(s.key)); if(filtered.length>0) currentPool=filtered; }
-      const rar=tirerRarete(); const sk=getFallbackSkill(currentPool,rar);
+      const rar=tirerRarete(); const sk=getFallbackSkill(pool,rar);
       if(sk){ grantSkill(f,sk); newSkills.push(sk); pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS); }
     }
     /* ==== [ANCRE: V2-27] — G.faith.promiseOutcome (posé par resolveFight(),
@@ -2469,7 +2471,7 @@ const CL={
     if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
     /* ==== [FIN ANCRE] ==== */
     G.faith.year++;
-    G.faith.fightsThisYear=0; G.faith.trainingsThisYear=0; G.faith.trainingTags=[]; G.faith.yearLog=[];
+    G.faith.fightsThisYear=0; G.faith.yearLog=[];
     /* V2-21 : compteurs annuels de refus, remis à zéro comme le reste. */
     G.faith.refusalsThisYear=0; G.faith.medicalRefusalUsed=false;
     /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — l'année blanche ne dure
@@ -3852,32 +3854,10 @@ function fighter(ctx,x,groundY,face,color,o){ // o: {lunge,flash,shake,fallen,gr
   ctx.fillStyle=col; ctx.beginPath(); ctx.arc(face*(10+reach*20),-8+reach*4,4.5,0,Math.PI*2); ctx.fill();
   ctx.restore();
 }
-/* ==== [ANCRE: LOT12_COSMETIQUE_ARENE] — thèmes visuels de l'octogone. Adapté
-   pour s'intégrer à la géométrie réelle de drawArena (8 points, pas la version
-   simplifiée du brouillon) — seules les couleurs de sol/rails/poteaux changent,
-   la forme reste identique. ==== */
-const ARENA_THEMES=[
-  {id:'classic',name:'Toile Noire (Classique)',floorColors:['#1c1710','#241d14'],railColor:'#4a3c1f',padColor:'#5C4B2E'},
-  {id:'pride',name:'Toile Blanche & Bleue (Héritage)',floorColors:['#DCE2EB','#FFFFFF'],railColor:'#1A4D8F',padColor:'#B22222'},
-  {id:'gold',name:'Bâche Royale (Prestige)',floorColors:['#E6B93A','#8A6A1E'],railColor:'#241D13',padColor:'#14100B'},
-  {id:'neon',name:'Néons Cyberpunk',floorColors:['#0d0221','#26045c'],railColor:'#ff003c',padColor:'#00f0ff'},
-  {id:'underground',name:'Béton Clandestin',floorColors:['#2a2a2a','#1a1a1a'],railColor:'#555555',padColor:'#000000'},
-  {id:'crimson',name:'Arène Écarlate',floorColors:['#2a0a0a','#170505'],railColor:'#E8442F',padColor:'#1a0303'},
-  /* ==== [ANCRE: GAUNTLET_DEFI_JOUR_V2] — ajout #2 (24 ajouts, 12/08/2026) :
-     récompense exclusive de série de 7 jours (GAUNTLET_DAILY_STREAK_REWARD,
-     state.js) — checkLegendUnlock('cosmetic_renegade') la rend
-     sélectionnable ici sans jamais figurer dans LEGEND_UNLOCKABLES (donc
-     jamais achetable). ==== */
-  {id:'renegade',name:'Toile Braise du Renégat (exclusive)',floorColors:['#3a0e02','#1a0500'],railColor:'#ff5a1f',padColor:'#1a0500'},
-  /* ==== [ANCRE: CORRECTIF_BANNIERE_CENDREE] — bug remonté : excl_banner_ash
-     (GAUNTLET_EXCLUSIVE_OFFERS, state.js) était vendu comme "thème
-     d'octogone" mais n'avait aucune entrée ici, donc aucun moyen de le
-     sélectionner après achat. Id aligné sur celui de l'offre (banner_ash)
-     pour matcher le checkLegendUnlock('excl_'+t.id) ajouté ci-dessous
-     (ui-07-contracts-legacy-screens.js). ==== */
-  {id:'banner_ash',name:'Bannière Cendrée (exclusive)',floorColors:['#180404','#0c0202'],railColor:'#7a1f16',padColor:'#0c0202'}
-  /* ==== [FIN ANCRE] ==== */
-];
+/* ==== [ANCRE: CORRECTIF_ARENA_THEMES_DEPLACE] — F-05, hygiène : ARENA_THEMES
+   (donnée pure) a déménagé dans data-content.js (chargé avant ce fichier,
+   même ancre LOT12_COSMETIQUE_ARENE conservée là-bas). setArenaCosmeticTheme()
+   et getArenaTheme() restent ici : ce sont les seuls points d'accès. ==== */
 /* ==== [ANCRE: CORRECTIF_PERSISTANCE_SKIN_ARENE] — bug remonté : le skin
    actif vivait sur G (réinitialisé par newCareer(), voir CL.newCareer plus
    bas), donc perdu à chaque nouvelle carrière même si le déblocage
@@ -3977,10 +3957,15 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
      du jeu, la plus coûteuse sur mobile. Appliqué une seule fois par gel. ==== */
   if(A._chromaKOActive && !A._chromaDone){ applyChromaAberration(ctx,Math.round(3*(A.dpr||1))); A._chromaDone=true; }
   ctx.font="600 11px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillStyle='#9A8F7C';
-  const rnd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
+  /* ==== [ANCRE: CORRECTIF_OMBRE_RND] — bug trouvé : ce `const rnd` masquait
+     le RNG seedé global (rnd(), engine.js) sur toute la fonction via la TDZ —
+     tout ajout futur d'un appel à rnd() ailleurs dans drawArena() aurait levé
+     un ReferenceError en pleine boucle d'animation à 60 fps. Renommé en `rd`,
+     un simple numéro de round affiché, jamais un tirage aléatoire. ==== */
+  const rd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
   let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
   if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
-  ctx.fillText(A.done?label:('ROUND '+rnd+' · '+label), W/2, 20);
+  ctx.fillText(A.done?label:('ROUND '+rd+' · '+label), W/2, 20);
   if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }
 }
 function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='undefined')cancelAnimationFrame(ARENA.raf); if(ARENA.to)clearTimeout(ARENA.to); } }
@@ -4225,7 +4210,13 @@ function scr_faith_title_negotiation(){
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow" style="color:var(--gold)">${isDefense?'DÉFENSE DU TITRE':'COMBAT DE TITRE'}</div>
    <h2 class="hero-name" style="font-size:26px;line-height:1.1">${esc(gala.label)}</h2>
-   <div class="mono small muted" style="margin-top:4px">5 reprises · registre spectacle · conférence et pesée obligatoires</div>
+   <!-- ==== [ANCRE: CORRECTIF_ROUNDS_TITRE_CODES_EN_DUR] — bug trouvé : "5
+        reprises" et "conférence et pesée obligatoires" étaient écrits en dur,
+        vrais aujourd'hui seulement parce qu'isTitleEligible (rang ≤ 4, ui-05)
+        coïncide avec le seuil Main event de faithGalaPosition (rk ≤ 4, ui-04)
+        — deux constantes indépendantes, dans deux fichiers, sans aucun test
+        qui les lie. Lu directement sur gala (déjà résolu ci-dessus). ==== -->
+   <div class="mono small muted" style="margin-top:4px">${gala.rounds} reprises · registre spectacle${gala.pressConf?' · conférence et pesée obligatoires':''}</div>
    <div class="opp" style="padding:16px;text-align:left;margin-top:20px">
      <div class="hero-name" style="font-size:22px">${esc(o.name)} ${o.flag}</div>
      <div class="mono small" style="margin-top:4px">${recordStr(o)} · <span class="muted">#${divRank(o)}</span>${o.champion?' · Champion':''}</div>
