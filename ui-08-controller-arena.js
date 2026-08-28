@@ -2515,6 +2515,13 @@ const CL={
        G.faith.year n'a pas encore été incrémenté. ==== */
     if(G.faith.yearStats) faithArchiveYear(G.faith.year,G.faith.yearStats,G.f,G.faith);
     /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: CORRECTIF_PED_VIEILLISSEMENT] — bug trouvé : le test
+       `pedActive !== G.faith.year` s'exécutait APRÈS `G.faith.year++`,
+       comparant donc l'année d'achat N à l'année N+1 — toujours différentes.
+       L'exemption de vieillissement, seule contrepartie du risque de
+       suspension à 15 %, n'a jamais pu se déclencher. Comparaison faite sur
+       l'année écoulée, comme le fait déjà correctement dietYear (CL.opp). ==== */
+    const _yearEnding=G.faith.year;
     G.faith.year++;
     G.faith.fightsThisYear=0; G.faith.yearLog=[];
     /* V2-21 : compteurs annuels de refus, remis à zéro comme le reste. */
@@ -2542,7 +2549,7 @@ const CL={
     G.faith.startOfYearNemesisBeaten=!!G.faith.nemesisBeaten;
     /* ==== [FIN ANCRE] ==== */
     G.season.fights=[];
-    if(G.faith.pedActive!==G.faith.year) applyAging(G.f);
+    if(G.faith.pedActive!==_yearEnding) applyAging(G.f);
     /* ==== [ANCRE: WORLD_TICK_HOOK] — Plan V3 LOT 0 §4.3 : point d'appel
        principal de worldTick(), qui enveloppe advanceRoster() (inchangé) et
        archive le rang dans G.faith.rankHistory pour LOT 7 (P20). ==== */
