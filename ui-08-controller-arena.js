@@ -1135,6 +1135,13 @@ const CL={
      H.3). La provocation plante une promesse (G.promise, carrière —
      distincte de G.faith.promise) vérifiée à la résolution du combat
      (ui-05, même ancre que côté Faith). */
+  /* ==== [ANCRE: CORRECTIF_PERSISTANCE_ETAT_RUN] — bug trouvé : toute une famille
+     de méthodes mutait l'état de run (choix de camp, pacte, mise en jeu, refus du
+     médecin, soins d'infirmerie, analyse ciblée, second souffle) puis appelait
+     render() sans save(). La dernière sauvegarde datant de l'ENTRÉE dans l'écran,
+     un rechargement de page rendait le choix. Cas le plus grave : healGauntletZone
+     sauvegarde bien la dépense (saveMetaStats) mais pas le soin (sur G) — le joueur
+     perdait ses points ET gardait ses séquelles. ==== */
   chooseFaceoff(posture){
     G.fight.faceoffDone=true;
     const opp=G.fight.opp;
@@ -1146,7 +1153,7 @@ const CL={
     } else {
       G.f.morale=clamp((G.f.morale||60)+2,0,100);
     }
-    G.fight.planStep=2; render();
+    G.fight.planStep=2; save(); render();
   },
   /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
      l'arène (skipArena et la fin naturelle de l'animation passent tous les
@@ -2170,7 +2177,7 @@ const CL={
   faithTitleToggleRevengeClause(){
     const off=G.faith.pendingOffer; if(!off) return;
     G.faith.pendingRevengeClause=!G.faith.pendingRevengeClause;
-    render();
+    save(); render();
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: V2-23] — applique le choix (deux options, réponse
@@ -2724,7 +2731,7 @@ const CL={
     if(_opt._heal){ G.arcade.runInjuries=[]; G.arcade.lastInjury=null; }
     G.arcade.upgradesChosen.train=true;
     if(G.arcade.mode==='ladder_100') G.arcade.targets=genWTUMMATargets();
-    CL.go('arcadehub'); },
+    save(); CL.go('arcadehub'); },
   /* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — choix du joueur parmi les
      cibles proposées par le hub (ui-04). Route direct vers le plan tactique,
      comme le faisait auparavant le bouton unique "DÉFIER". ==== */
@@ -2747,9 +2754,9 @@ const CL={
        entraînement (upgradesChosen.train posé à true d'emblée par
        generateBossRunUpgrade(), ui-03) : une fois la compétence choisie, la
        boucle est bouclée, direction le hub avec l'adversaire déjà généré. ==== */
-    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ CL.go('arcadehub'); return; }
+    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ save(); CL.go('arcadehub'); return; }
     /* ==== [FIN ANCRE] ==== */
-    render(); },
+    save(); render(); },
   retryArcade(){
     const prevMode=G.arcade&&G.arcade.mode;
     if(prevMode==='ladder_100') CL.startLadder100();
@@ -2808,7 +2815,7 @@ const CL={
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
      12/08/2026) : le pacte forcé n'est plus lié au palier d'Ascension
      (asc>=3) mais au mutateur tiré pour cette run. ==== */
-  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; if(G.arcade.mutator&&G.arcade.mutator.id==='mut_pacte_force') return; G.arcade.pactActive=!G.arcade.pactActive; render(); },
+  togglePact(){ if(!G.arcade||!G.arcade.active) return; if(G.arcade.mode==='boss_run') return; if(G.arcade.mutator&&G.arcade.mutator.id==='mut_pacte_force') return; G.arcade.pactActive=!G.arcade.pactActive; save(); render(); },
   /* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — filtres de scr_archetype_pantheon
      (ui-06), même pattern que setGauntletAsc (mémorisé sur G, jamais
      persisté — un filtre d'affichage, pas une donnée de progression). ==== */
@@ -2824,7 +2831,7 @@ const CL={
     if(!G.arcade||!G.arcade.active) return;
     const meta=loadMetaStats();
     const r=healGauntletZone(meta,G.arcade,zone);
-    G.lastMsg=r.msg; if(r.success) saveMetaStats(meta); render();
+    G.lastMsg=r.msg; if(r.success){ saveMetaStats(meta); save(); } render();
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: COACHING_OBLIGATOIRE] — toggleCoaching() retirée : le
@@ -2859,10 +2866,10 @@ const CL={
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: PREPARATION_CIBLEE] — ajout #23 (24 ajouts, 12/08/2026). ==== */
-  pierceRumor(){ if(!G.arcade) return; const r=pierceGauntletRumor(G.arcade); G.lastMsg=r.msg; render(); },
+  pierceRumor(){ if(!G.arcade) return; const r=pierceGauntletRumor(G.arcade); G.lastMsg=r.msg; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026). ==== */
-  acceptSecondSouffle(){ acceptGauntletSecondSouffle(); render(); },
+  acceptSecondSouffle(){ acceptGauntletSecondSouffle(); save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
      déclenché depuis le camp (scr_arcade_upgrades, ui-04) quand le
@@ -2881,7 +2888,7 @@ const CL={
     a.victory=false; a.cashedOut=true; a.eliminatedReason=null;
     G.screen='gameover'; save(); render();
   },
-  refuseRingDoctor(){ if(!G.arcade||!G.arcade.active) return; G.arcade.doctorRefused=true; render(); },
+  refuseRingDoctor(){ if(!G.arcade||!G.arcade.active) return; G.arcade.doctorRefused=true; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
@@ -2892,7 +2899,7 @@ const CL={
      alors rien à mettre en jeu et l'option n'aurait aucun coût. ==== */
   toggleAtRisk(){ if(!G.arcade||!G.arcade.active) return;
     if(!(G.arcade.banked>0) && !G.arcade.atRisk) return;
-    G.arcade.atRisk=!G.arcade.atRisk; render(); },
+    G.arcade.atRisk=!G.arcade.atRisk; save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — consomme la phase compétence du camp
      comme pickArcadeSkill(), en appliquant EN PLUS les deltas négatifs du
@@ -2907,8 +2914,8 @@ const CL={
     G.arcade.curses=(G.arcade.curses||[]).concat([c.curseLabel]);
     G.arcade.upgradesChosen.skill=true;
     G.arcade.cursedOpt=null;
-    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ CL.go('arcadehub'); return; }
-    render(); },
+    if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ save(); CL.go('arcadehub'); return; }
+    save(); render(); },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_BRACKET_VISIBLE] — les 63 autres combattants et TOUS
      les combats des autres branches sont déjà simulés par
