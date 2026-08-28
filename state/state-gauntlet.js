@@ -188,9 +188,16 @@ function recordGauntletGhostLog(meta,mode,asc,archetypeNick,fights){
    valeurs fx sont exprimées ici en échelle BRUTE 1-100 (déjà converties
    depuis l'échelle affichée /20 de la spec : facteur ×5, cf. d20() dans
    engine.js — ex. "+3 Cardio" /20 devient fx.cardio:+15). ==== */
+/* ==== [ANCRE: CORRECTIF_AUTOBANK_MORT] — bug trouvé : cons_shelter ('Mise à
+   l'abri automatique', 60 points) posait a.consumableAutobank=true à l'achat,
+   mais aucun code (afterResult, ui-08, ni ailleurs) ne le consultait jamais —
+   contrairement à consumableVeto (lu par selectDraft) et consumableSafetynet
+   (lu par afterResult), les deux autres drapeaux de la même famille. Retiré
+   plutôt qu'inventé : la « petite somme » promise n'a aucune source de
+   vérité dans le barème économique existant (contrairement au filet de
+   sécurité, qui réutilise gauntletEliminationPayout tel quel). ==== */
 const GAUNTLET_CONSUMABLES=[
   {id:'cons_veto',name:'Droit de véto',cost:70,kind:'veto',desc:'Annule le 1er adversaire généré de la prochaine run, un autre est tiré à sa place.'},
-  {id:'cons_shelter',name:'Mise à l\u2019abri automatique',cost:60,kind:'autobank',desc:'Sécurise automatiquement une petite somme dès le 1er combat gagné de la run.'},
   {id:'cons_safetynet',name:'Filet de sécurité',cost:90,kind:'safetynet',desc:'Offre une 2e chance si tu perds le 1er combat de la run — l\u2019adversaire est retiré sans mettre fin à la run.'},
   {id:'cons_strength',name:'Potion de force',cost:50,kind:'buff',fx:{power:15},desc:'Boost temporaire de Puissance (+3), actif pour toute la run.'},
   {id:'cons_dope',name:'Dopage légal',cost:65,kind:'buff',fx:{cardio:15,power:20,durability:-5},desc:'+3 Cardio, +4 Puissance, -1 Résistance, actif pour toute la run.'},
@@ -207,9 +214,9 @@ function purchaseGauntletConsumable(meta,itemId){
 /* Appelée UNE SEULE FOIS à la création de G.arcade (startArcade/startBossRun/
    startLadder100, ui-03/ui-08) : consomme le consommable en attente (plus de
    réserve après ça) et pose les drapeaux/effets correspondants sur la run
-   qui démarre. Les effets 'veto'/'autobank'/'safetynet' sont de simples
-   drapeaux lus/consommés ailleurs (selectDraft pour veto, afterResult pour
-   autobank et safetynet, ui-08) — 'buff' est appliqué immédiatement ici,
+   qui démarre. Les effets 'veto'/'safetynet' sont de simples drapeaux
+   lus/consommés ailleurs (selectDraft pour veto, afterResult pour
+   safetynet, ui-08) — 'buff' est appliqué immédiatement ici,
    directement sur G.f.attrs (permanent pour la durée de la run, même
    principe que les deltas de camp d'entraînement). */
 function applyPendingGauntletConsumable(a){
@@ -223,7 +230,6 @@ function applyPendingGauntletConsumable(a){
   if(item.kind==='buff' && typeof G!=='undefined' && G && G.f){
     Object.entries(item.fx).forEach(([k,v])=>{ G.f.attrs[k]=clamp((G.f.attrs[k]||50)+v,1,100); });
   } else if(item.kind==='veto'){ a.consumableVeto=true; }
-  else if(item.kind==='autobank'){ a.consumableAutobank=true; }
   else if(item.kind==='safetynet'){ a.consumableSafetynet=true; }
 }
 /* ==== [FIN ANCRE] ==== */

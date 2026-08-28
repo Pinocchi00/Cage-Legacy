@@ -260,6 +260,12 @@ const FAITH_INTERSAISON_POOL=[
    title:'S’éloigner un peu de tout',text:'Le moral ne suit plus. Une pause, sans rien d’autre en tête.',action:'rest'},
 ];
 
+/* ==== [ANCRE: CORRECTIF_PROTECT_TITLE_MORT] — bug trouvé : evt_offer_protect
+   (perk 'protect_title', 50k$) promettait de réinitialiser un « compteur
+   d'inactivité » qui n'existe nulle part dans le dépôt — G.f.champChampInactivity
+   n'était écrit que par buyFaithPerk() et lu par aucun code. Retiré plutôt
+   qu'inventé : aucune mécanique de ceinture retirée pour inactivité n'existe
+   ailleurs dans le jeu à brancher dessus. ==== */
 const FAITH_PERK_OFFERS=[
   {id:'evt_offer_hometown',title:'Un promoteur du coin',req:f=>(f.earnings||0)>=15&&f.org>0,
    text:'Il connaît votre nom, votre salle, le nom de votre première victime amateur. Il peut faire venir le prochain combat ici, chez vous. Ça se paie.',
@@ -269,10 +275,6 @@ const FAITH_PERK_OFFERS=[
    text:'Votre manager a une idée : négocier un poids intermédiaire. L’adversaire acceptera — et arrivera vidé, à sec, sans jambes.',
    choices:[{label:'Faire signer le catchweight',perk:'catchweight'},
             {label:'Le prendre à son poids',d:[['confidence',4]],traitTag:'ascetic'}]},
-  {id:'evt_offer_protect',title:'La ceinture dort',req:f=>(f.earnings||0)>=50&&!!f.champion,
-   text:'La fédération s’agace de votre inactivité. Un versement au bon service, et le compteur repart à zéro.',
-   choices:[{label:'Payer pour sanctuariser le titre',perk:'protect_title'},
-            {label:'Laisser courir',d:[['composure',3]]}]},
   {id:'evt_offer_ped',title:'Un homme vous attend sur le parking',req:f=>(f.earnings||0)>=30,
    text:'Il ne se présente pas. Il parle de récupération, de cellule hyperbare, de « protocoles » que tout le monde utilise et que personne ne nomme. Il laisse une carte.',
    choices:[{label:'Écouter ce qu’il propose',perk:'ped',tone:'gamble'},

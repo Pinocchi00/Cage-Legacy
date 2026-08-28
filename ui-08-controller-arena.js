@@ -2927,7 +2927,7 @@ const CL={
        && ['ped','judges','lobbying','catchweight'].includes(perkId)){
       G.faith.oath.broken=true;
     }
-    const costMoney={hometown:15,catchweight:35,protect_title:50,ped:30,tiger:50,lobbying:100,diet:40};
+    const costMoney={hometown:15,catchweight:35,ped:30,tiger:50,lobbying:100,diet:40};
     if(costMoney[perkId]||perkId==='judges'){
       let actualCost=costMoney[perkId];
       /* ==== [ANCRE: CORRECTIF_JUGES_GRATUIT] — bug trouvé : le coût étant un
@@ -2944,7 +2944,6 @@ const CL={
          Message reformulé pour ne promettre que ce qu'il fait réellement. ==== */
       if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : accueil favorable, vous entrez porté par la salle."; }
       else if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
-      else if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
       else if(perkId==='ped'){
         /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — la branche positive
            écrivait G.faith.month et G.faith.pa : deux champs qu'aucun code du
@@ -3011,7 +3010,7 @@ const CL={
        malus permanent-pour-la-run sur G.f, mêmes conventions d'échelle que
        les consommables buff (state.js : ×5 pour passer de /20 à 1-100). ==== */
     const mutId=G.arcade.mutator&&G.arcade.mutator.id;
-    if(mutId==='mut_sans_filet'){ G.arcade.consumableSafetynet=false; G.arcade.consumableAutobank=false; }
+    if(mutId==='mut_sans_filet'){ G.arcade.consumableSafetynet=false; }
     if(mutId==='mut_depart_affaibli'){
       G.f.attrs.power=clamp((G.f.attrs.power||50)-10,1,100);
       G.f.attrs.cardio=clamp((G.f.attrs.cardio||50)-10,1,100);
