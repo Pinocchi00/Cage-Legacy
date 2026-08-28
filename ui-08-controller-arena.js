@@ -2727,17 +2727,27 @@ const CL={
        verrouille la némésis, si aucune n'est déjà posée. G.faith.rankWatch
        persiste sur toute la carrière — jamais réinitialisé ici, contraire
        à l'esprit "portée sur toute la carrière" du correctif. ==== */
+    /* ==== [ANCRE: CORRECTIF_NEMESIS_FRANCHISSEMENT] — bug trouvé : l'ancre
+       FAITH_NEMESIS_PERMANENTE décrit un combattant qui « FRANCHIT le rang du
+       joueur deux années différentes », mais le code ne testait qu'une
+       POSITION (divRank(o)<monRang). Un combattant durablement au-dessus
+       accumulait donc ses deux points sans que rien ne se passe — et comme
+       G.roster est trié par rang, la boucle tombait toujours d'abord sur le
+       mieux classé : la némésis était presque systématiquement le n°1 de la
+       division, dès la 2e année, sans aucun récit derrière. On mémorise le
+       rang de l'an dernier pour ne compter que les vrais franchissements. ==== */
+    if(!G.faith.rankPrev) G.faith.rankPrev={};
+    const monRangPrev=(G.faith.rankPrev._me!=null)?G.faith.rankPrev._me:divRank(G.f);
     if(!G.f.faithNemesisId){
       if(!G.faith.rankWatch) G.faith.rankWatch={};
       const monRang=divRank(G.f);
       for(const o of G.roster){
         if(o.champion || o.isGymPartner) continue;
-        if(divRank(o)<monRang){
+        const prev=G.faith.rankPrev[o.id];
+        const aFranchi=(prev!=null) && prev>monRangPrev && divRank(o)<monRang;
+        if(aFranchi){
           G.faith.rankWatch[o.id]=(G.faith.rankWatch[o.id]||0)+1;
-          if(G.faith.rankWatch[o.id]>=2){
-            lockFaithNemesis(o);
-            break;
-          }
+          if(G.faith.rankWatch[o.id]>=2){ lockFaithNemesis(o); break; }
         }
       }
     }
@@ -2833,6 +2843,11 @@ const CL={
     G.faith.currentIntersaison=null; G.faith.pendingIntersaisonEntry=null;
     G.faith.month=0; G.faith.calendar=faithGenerateCalendar(G.f);
     faithLandOnMonth();
+    /* ==== [ANCRE: CORRECTIF_NEMESIS_FRANCHISSEMENT] — photo de fin d'année,
+       lue l'an prochain par le bloc plus haut pour ne compter que les vrais
+       franchissements de rang. ==== */
+    G.faith.rankPrev={_me:divRank(G.f)};
+    (G.roster||[]).forEach(o=>{ G.faith.rankPrev[o.id]=divRank(o); });
     if(G.faith.month>=12) return; // prepareFaithYearEnd() a déjà pris la main
     /* ==== [FIN ANCRE] ==== */
     G.screen='faith_hub'; save(); render();
