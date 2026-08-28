@@ -1200,6 +1200,14 @@ const CL={
       if(p&&p.promoOffer){ G.screen='promo'; save(); render(); return; }
       if(p&&p.champChampDecision){ G.screen='champ_champ_decision'; save(); render(); return; }
       if(p&&p.champChampOfferReady){ G.screen='champ_champ_offer'; save(); render(); return; }
+      /* ==== [ANCRE: FAITH_PERK_LOBBYING] — même diagnostic que perks.judges :
+         G.faith.perks.forcePromo était posé par buyFaithPerk() (ui-08) et relu
+         par AUCUN code. Consommé ici, une seule fois, à la première victoire
+         qui suit son achat. ==== */
+      if(p && p.win && G.faith.perks && G.faith.perks.forcePromo && G.f.org<6){
+        G.faith.perks.forcePromo=false;
+        p.promoOffer=true; G.screen='promo'; save(); render(); return;
+      }
       /* ==== [CORRECTIF FA-10] — un combat ne menait plus qu'au bilan annuel
          direct : à 1 combat/an fixe, 18-36 ans de carrière ne produisaient
          jamais plus de 18 combats, et un contrat de 4 combats (engine.js:
@@ -2614,10 +2622,19 @@ const CL={
     const costMoney={hometown:15,catchweight:35,protect_title:50,ped:30,tiger:50,lobbying:100,diet:40};
     if(costMoney[perkId]||perkId==='judges'){
       let actualCost=costMoney[perkId];
-      if(perkId==='judges') actualCost=(f.earnings||0)*0.20;
+      /* ==== [ANCRE: CORRECTIF_JUGES_GRATUIT] — bug trouvé : le coût étant un
+         POURCENTAGE du patrimoine, le test `earnings < actualCost` était
+         toujours faux — et à 0 k$, le privilège était accordé gratuitement.
+         Plancher explicite. ==== */
+      if(perkId==='judges') actualCost=Math.max(20,Math.round((f.earnings||0)*0.20));
       if((f.earnings||0)<actualCost){ G.lastMsg="Fonds insuffisants."; render(); return; }
       f.earnings-=actualCost;
-      if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : Votre prochain combat sera à domicile."; }
+      /* ==== [ANCRE: CORRECTIF_HOMETOWN_LIEU_FANTOME] — bug trouvé : le
+         message promettait un lieu ("à domicile"), mais le lieu du gala est
+         piloté par G.faith.territoire (faithGalaCity, ui-04) — ce privilège
+         n'a jamais eu prise dessus, seulement sur moral/forme (CL.opp()).
+         Message reformulé pour ne promettre que ce qu'il fait réellement. ==== */
+      if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : accueil favorable, vous entrez porté par la salle."; }
       else if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
       else if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
       else if(perkId==='ped'){

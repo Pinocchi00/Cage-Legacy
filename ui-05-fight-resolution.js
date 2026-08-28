@@ -77,7 +77,28 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const tacticalSavedOpp=(typeof applyTacticalMemory==='function')?applyTacticalMemory(opp,G.f):{};
   // ==== [FIN ANCRE] ====
   const adaptivePlanForOpp=(typeof getAdaptiveNPCTactics==='function')?getAdaptiveNPCTactics(opp,G.f):null;
-  const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m); const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
+  const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m);
+  /* ==== [ANCRE: FAITH_PERK_JUGES] — G.faith.perks.judges était posé par
+     buyFaithPerk() (ui-08) et relu par AUCUN code. Consommé ici, une seule
+     fois, sur une décision serrée (2 juges sur 3) uniquement : on retourne
+     le vote du juge le plus proche de basculer plutôt que d'écraser
+     res.winner seul, ce qui désynchroniserait l'affichage des cartes des
+     juges (res.judges, montré tel quel par scr_result/scr_faith_archives)
+     du verdict annoncé — exactement ce que l'ancre JUGES_10PT_VERDICT
+     (engine-combat.js) garantit déjà pour un combat normal. ==== */
+  if(G.faith && G.faith.perks && G.faith.perks.judges && isDecisionLike(res.method) && res.winner==='B'){
+    const cards=['j1','j2','j3'].map(k=>({k,a:res.judges[k][0],b:res.judges[k][1]}));
+    const forB=cards.filter(c=>c.b>c.a);
+    if(forB.length===2){
+      const flip=forB.sort((x,y)=>(x.b-x.a)-(y.b-y.a))[0];
+      G.faith.perks.judges=false;
+      res.judges[flip.k]=[flip.b,flip.a];
+      res.scoreA=res.judges.j1[0]+res.judges.j2[0]+res.judges.j3[0];
+      res.scoreB=res.judges.j1[1]+res.judges.j2[1]+res.judges.j3[1];
+      res.winner='A'; res.method='Décision partagée';
+    }
+  }
+  const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
   if(typeof checkIronManDeath==='function') checkIronManDeath(res,null);
   if(typeof evaluateSponsor==='function') evaluateSponsor(res);
   // ==== [ANCRE: NARRATIF_APPEL] — calculé ici (mêmes données réelles qu'avant),
