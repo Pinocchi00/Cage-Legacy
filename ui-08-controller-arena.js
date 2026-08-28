@@ -1405,6 +1405,10 @@ const CL={
          (ui-03) pour hausser encore le plancher de rareté au-delà du simple
          pactBonus booléen d'origine. ==== */
       const pactFulfilled=pactWasActive && win && !pactFail;
+      /* ==== [ANCRE: CORRECTIF_FILET_RESTITUTION] — capturé AVANT la remise à
+         zéro qui suit (voir l'ancre complète plus bas, où ces deux valeurs
+         sont restituées par les trois filets de sécurité). ==== */
+      const _pactStreakBefore=G.arcade.pactStreak||0;
       G.arcade.pactStreak=pactFulfilled?((G.arcade.pactStreak||0)+1):0;
       /* ==== [FIN ANCRE] ==== */
       /* ==== [FIN ANCRE] ==== */
@@ -1436,6 +1440,20 @@ const CL={
       /* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — drapeaux de run lus par les
          contrats ct_nopact et ct_intact. Posés ici, jamais remis à zéro :
          un contrat de type « ne jamais » se casse définitivement. ==== */
+      /* ==== [ANCRE: CORRECTIF_FILET_RESTITUTION] — bug trouvé : le pacte, la
+         mise en jeu et la série de pactes sont consommés en tête d'afterResult,
+         AVANT les branches de mode. Les trois filets de sécurité annoncent
+         pourtant « le combat n'a jamais eu lieu » : le joueur perdait quand
+         même sa mise, son pacte et sa série — et surtout pactTakenEver était
+         posé DÉFINITIVEMENT, cassant le contrat de run « ne jamais prendre de
+         pacte » pour un combat qui n'existe officiellement pas. ==== */
+      const _pactTakenEverBefore=!!G.arcade.pactTakenEver;
+      const _restoreOnSafetynet=()=>{
+        G.arcade.pactActive=pactWasActive && !pactForcedByAscension;
+        G.arcade.atRisk=atRiskWasActive;
+        G.arcade.pactStreak=_pactStreakBefore;
+        G.arcade.pactTakenEver=_pactTakenEverBefore;
+      };
       if(pactWasActive) G.arcade.pactTakenEver=true;
       G.arcade.maxPactStreak=Math.max(G.arcade.maxPactStreak||0,G.arcade.pactStreak||0);
       /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — remplace `if(G.f.form<60)
@@ -1482,6 +1500,7 @@ const CL={
             G.arcade.consumableSafetynet=false;
             G.arcade.opponent=genBossOpponent(0);
             G.arcade.revealed=false; G.arcade.bossMalus=null;
+            _restoreOnSafetynet();
             G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. Un nouvel adversaire t\u2019attend.';
             save(); render(); return;
           }
@@ -1532,6 +1551,7 @@ const CL={
           if(!win && (G.arcade.fightsDone||0)===0 && G.arcade.consumableSafetynet){
             G.arcade.consumableSafetynet=false;
             G.arcade.targets=genWTUMMATargets();
+            _restoreOnSafetynet();
             G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. De nouvelles cibles te sont proposées.';
             save(); render(); return;
           }
@@ -1572,6 +1592,7 @@ const CL={
           G.arcade.tournament=buildWTUMMABracket(G.f);
           const rematch=G.arcade.tournament.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
           G.arcade.opponent=rematch.a.id===G.f.id?rematch.b:rematch.a;
+          _restoreOnSafetynet();
           G.lastMsg='Filet de sécurité : le combat n\u2019a jamais eu lieu. Un nouveau tableau t\u2019attend.';
           save(); render(); return;
         }
