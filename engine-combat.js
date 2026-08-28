@@ -164,7 +164,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         if(botFat>15 || bot.cardio<40){
           txtPool.push(`Écrasé sous le poids adverse, ${def.name} cherche de l\u2019oxygène qui n\u2019existe plus.`);
         }
-        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,6)}] `+getUniqueLog(txtPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — bug trouvé (ui-09,
+           isSubDanger) : l'écran de combat détectait le danger de soumission
+           en cherchant des bouts de mots français ('soum','clé','étrangl')
+           dans le texte narratif du beat — toute réécriture de texte éteint
+           silencieusement le halo et l'alerte. subChT/subChB (juste
+           au-dessus) sont déjà la vraie chance mécanique de soumission de ce
+           beat, pour le combattant du dessus comme pour celui du dessous :
+           poser le drapeau dessus plutôt que sur le texte. ==== */
+        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,6)}] `+getUniqueLog(txtPool),momentum,sub:(subChT>0.03||subChB>0.03),snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
           last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
         else {

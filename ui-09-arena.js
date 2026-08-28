@@ -377,7 +377,7 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
     if(A.finishZone){ const zoneLetter=A.finishZone==='tête'?'h':A.finishZone==='corps'?'b':'l';
       const loserPrefix=A.meWin?'do':'dm'; A.flashZoneId=`${loserPrefix}-${zoneLetter}`; } }
   A.curPhase=b.phase; A.curTop=(b.phase==='sol')?(b.by==='me'?'me':'op'):null;
-  A.currentText=b.text; A.currentMomentum=b.momentum;
+  A.currentText=b.text; A.currentMomentum=b.momentum; A.currentSub=!!b.sub;
   if(b.snapA) A.snapA=b.snapA; if(b.snapB) A.snapB=b.snapB;
   /* ==== [ANCRE: CORRECTIF_CARDIO_FICTIF] — bug trouvé : les deux barres
      étiquetées CARDIO dans scr_arena descendaient par RI(2,5) des DEUX côtés à
@@ -616,7 +616,13 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
       spreadX:5,spreadY:2,gravity:0.05,life:34,size:5,kind:'dust'});
   }
   A._wasGrounded=grounded;
-  const isSubDanger=grounded && A.currentText && (A.currentText.includes('soum')||A.currentText.includes('clé')||A.currentText.includes('étrangl'));
+  /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — voir engine-combat.js,
+     simulateFight() (b.sub) : le danger de soumission était détecté en
+     cherchant des bouts de mots français dans le texte narratif — toute
+     réécriture de texte éteignait silencieusement le halo et l'alerte.
+     Lit désormais le drapeau posé par le moteur, sur la vraie chance
+     mécanique de soumission de ce beat. ==== */
+  const isSubDanger=grounded && A.currentSub;
   const foOp=A._foOp, foMe=A._foMe;
   foOp.lunge=A.lungeOp*(1-frac); foOp.flash=A.flashOp>0; foOp.shake=A.shakeOp>0; foOp.fallen=A.fall===2;
   foOp.grounded=grounded; foOp.phase=A.curPhase; foOp.top=A.curTop==='op'; foOp.tap=isSubDanger&&A.curTop!=='op';
