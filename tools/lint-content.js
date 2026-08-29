@@ -159,10 +159,143 @@ function lintTextPools(){
   return { skipped: false, poolCount: poolIds.length, sizeFindings, reqFindings, contextFindings };
 }
 
+/* ---- 4) Champs G.f. / G.faith. / G.arcade. écrits mais jamais relus ----
+   Ajout Passe 5 : sur les cinq dernières passes de relecture, la famille de
+   bugs la plus récurrente du projet n'était pas une logique fausse mais un
+   champ d'état écrit quelque part et lu nulle part — un privilège payant qui
+   ne fait rien (protect_title/champChampInactivity), un consommable payant
+   pareillement mort (cons_shelter/consumableAutobank), une variable laissée
+   après un correctif qui l'a rendue inutile (champChampFocus,
+   regionalPatron). Quatre trouvés en une seule relecture manuelle : ce que
+   ce script automatise.
+   Regex volontairement simple (même philosophie que lintSentenceLength
+   ci-dessus, pas un vrai parseur JS) : une ÉCRITURE est G.f./G.faith./
+   G.arcade. suivi d'un nom de champ puis d'un opérateur d'affectation
+   (jamais ==/===, jamais une simple lecture de comparaison). Une LECTURE est
+   ensuite recherchée comme n'IMPORTE QUELLE autre occurrence de ce nom de
+   champ dans les fichiers scannés — y compris via un alias local
+   (`const f=G.f; f.champ`, très courant dans ce code), pas seulement via le
+   préfixe G.f./G.faith./G.arcade. lui-même : restreindre la lecture au même
+   préfixe raterait la plupart des vraies lectures.
+   SIGNALEMENT humain, comme le reste de ce fichier : un nom de champ très
+   commun (ex. un champ générique réutilisé par coïncidence ailleurs sous un
+   autre alias non reconnu par ce scan) peut ne pas remonter, ou remonter à
+   tort si tous ses usages passent par un alias que le scan ne reconnaît pas
+   comme une lecture distincte de l'écriture elle-même. À trier par lecture
+   humaine, pas à corriger aveuglément. ---- */
+const STATE_SCAN_FILES = fs.readdirSync(ROOT)
+  .filter(f => /\.js$/.test(f) && f !== 'eslint.config.js')
+  .concat(
+    fs.existsSync(path.join(ROOT,'state'))
+      ? fs.readdirSync(path.join(ROOT,'state')).filter(f => /\.js$/.test(f)).map(f => 'state/'+f)
+      : []
+  );
+/** Repère l'accolade fermante d'une interpolation `${…}` en respectant les
+ * guillemets/gabarits imbriqués (un `}` à l'intérieur d'une chaîne ne doit
+ * pas compter) — nécessaire car ce dépôt rend presque tout son HTML via
+ * d'énormes template literals où `${G.arcade.champ}` EST la lecture réelle
+ * qu'on cherche, pas du texte à ignorer. Renvoie l'index de ce `}`.
+ * @param {string} src @param {number} start index juste après `${`
+ * @returns {number} */
+function matchInterpolationEnd(src, start){
+  let i = start, depth = 1; const n = src.length;
+  while(i < n && depth > 0){
+    const c = src[i];
+    if(c === '{'){ depth++; i++; continue; }
+    if(c === '}'){ depth--; if(depth === 0) break; i++; continue; }
+    if(c === "'" || c === '"' || c === '`'){
+      const q = c; i++;
+      while(i < n && src[i] !== q){ if(src[i] === '\\') i++; i++; }
+      i++; continue;
+    }
+    i++;
+  }
+  return i;
+}
+/** Efface le CONTENU des commentaires et chaînes littérales (en préservant
+ * les retours à la ligne, pour que les numéros de ligne restent exacts) —
+ * sans ça, une ancre qui CITE le nom d'un champ retiré (exactement ce que ce
+ * correctif lui-même vient de faire, cf. CORRECTIF_CHAMPCHAMPFOCUS_MORT)
+ * se ferait passer pour une écriture ou une lecture réelle. Le texte d'une
+ * interpolation `${…}` de template literal, lui, reste du VRAI CODE (voir
+ * matchInterpolationEnd ci-dessus) : seule sa partie littérale est effacée. */
+function stripCommentsAndStrings(src){
+  let out = ''; let i = 0; const n = src.length; let inBlock = false;
+  while(i < n){
+    const c = src[i], c2 = src[i+1];
+    if(inBlock){
+      if(c === '*' && c2 === '/'){ inBlock = false; out += '  '; i += 2; continue; }
+      out += (c === '\n') ? '\n' : ' '; i++; continue;
+    }
+    if(c === '/' && c2 === '/'){ while(i < n && src[i] !== '\n'){ out += ' '; i++; } continue; }
+    if(c === '/' && c2 === '*'){ inBlock = true; out += '  '; i += 2; continue; }
+    if(c === '`'){
+      out += ' '; i++;
+      while(i < n && src[i] !== '`'){
+        if(src[i] === '\\'){ out += '  '; i += 2; continue; }
+        if(src[i] === '$' && src[i+1] === '{'){
+          const exprEnd = matchInterpolationEnd(src, i+2);
+          out += '  ' + src.slice(i+2, exprEnd) + ' ';
+          i = Math.min(exprEnd+1, n); continue;
+        }
+        out += (src[i] === '\n') ? '\n' : ' '; i++;
+      }
+      if(i < n){ out += ' '; i++; }
+      continue;
+    }
+    if(c === '"' || c === "'"){
+      const quote = c; out += ' '; i++;
+      while(i < n && src[i] !== quote){
+        if(src[i] === '\\'){ out += '  '; i += 2; continue; }
+        out += (src[i] === '\n') ? '\n' : ' '; i++;
+      }
+      if(i < n){ out += ' '; i++; }
+      continue;
+    }
+    out += c; i++;
+  }
+  return out;
+}
+function lintDeadStateFields(){
+  const writeRe = /\b(G\.f|G\.faith|G\.arcade)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=(?!=)|\+=|-=|\*=|\/=|\|\|=|&&=|\?\?=)/g;
+  const sources = {};
+  for(const file of STATE_SCAN_FILES){
+    const fp = path.join(ROOT, file);
+    if(!fs.existsSync(fp)) continue;
+    sources[file] = stripCommentsAndStrings(fs.readFileSync(fp, 'utf8'));
+  }
+  const writes = new Map(); // nom de champ -> [{file,line,namespace}]
+  for(const [file, src] of Object.entries(sources)){
+    const lines = src.split('\n');
+    lines.forEach((line, i) => {
+      let m; writeRe.lastIndex = 0;
+      while((m = writeRe.exec(line))){
+        const field = m[2];
+        if(!writes.has(field)) writes.set(field, []);
+        writes.get(field).push({ file, line: i+1, namespace: m[1] });
+      }
+    });
+  }
+  const findings = [];
+  for(const [field, occs] of writes){
+    const fieldRe = new RegExp(`\\.${field}\\b`, 'g');
+    let totalUses = 0;
+    for(const src of Object.values(sources)){
+      const m = src.match(fieldRe);
+      if(m) totalUses += m.length;
+    }
+    if(totalUses <= occs.length) findings.push({ field, writeCount: occs.length, at: occs[0] });
+  }
+  findings.sort((a,b) => a.field.localeCompare(b.field));
+  return findings;
+}
+/* ==== [FIN ANCRE] ==== */
+
 function main(){
   const angl = lintAnglicisms();
   const sentences = lintSentenceLength();
   const pools = lintTextPools();
+  const deadFields = lintDeadStateFields();
 
   console.log(`=== ANGLICISMES (${angl.length}) ===`);
   angl.forEach(f => console.log(`  ${f.file}:${f.line} — "${f.term}" — ${f.note}\n    ${f.text}`));
@@ -182,8 +315,11 @@ function main(){
     pools.contextFindings.forEach(f => console.log(`  [jeton de contexte manquant] pool "${f.poolId}", entrée "${f.entryId}"`));
   }
 
+  console.log(`\n=== CHAMPS G.f./G.faith./G.arcade. écrits mais jamais relus (${deadFields.length}) ===`);
+  deadFields.forEach(f => console.log(`  ${f.at.namespace}.${f.field} — écrit ${f.at.file}:${f.at.line}${f.writeCount>1?` (et ${f.writeCount-1} autre(s) site(s))`:''}, jamais relu ailleurs`));
+
   const totalBlocking = pools.skipped ? 0 : (pools.sizeFindings.length + pools.reqFindings.length + pools.contextFindings.length);
-  const total = angl.length + sentences.length + totalBlocking;
+  const total = angl.length + sentences.length + totalBlocking + deadFields.length;
   console.log(`\n${total} signalement(s) au total.`);
   if(STRICT && total > 0){ process.exitCode = 1; }
 }

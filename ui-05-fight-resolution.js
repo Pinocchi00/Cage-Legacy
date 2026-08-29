@@ -38,7 +38,14 @@ function isTitleEligible(f){
 function fightKind(){ const f=G.f; if(f.champion) return 'defense'; if(isTitleEligible(f)) return 'title'; return 'normal'; }
 
 function resolveFight(){ const {opp,rounds,kind}=G.fight;
-  G.f.lastOpponentId=opp.id;
+  /* ==== [ANCRE: CORRECTIF_LASTOPPONENTID_MORT] — bug trouvé (tools/
+     lint-content.js, passe automatisée des champs écrits/jamais relus) :
+     G.f.lastOpponentId=opp.id était l'ANCIEN filtre anti-répétition à 1 seul
+     adversaire, explicitement remplacé par recentOpps (fenêtre de 4, cf.
+     ANCRE juste en dessous et genOpponents(), ui-02) — le commentaire de
+     genOpponents() le dit lui-même ("l'ancien filtre... lastOpponentId").
+     Personne n'a supprimé l'écriture de l'ancien champ en migrant vers le
+     nouveau. ==== */
   G.f.recentOpps=G.f.recentOpps||[];
   G.f.recentOpps.unshift(opp.id);
   if(G.f.recentOpps.length>4) G.f.recentOpps.length=4;

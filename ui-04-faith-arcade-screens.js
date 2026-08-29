@@ -2515,7 +2515,24 @@ function gauntletStatusBlock(a,live){
        est perdu. ==== */
     rows.push(`<div class="mono small"><span class="muted">Cagnotte : </span><b class="gold">${banked} pts</b><span class="muted"> · si le prochain combat est perdu : </span><b class="gold">${elim} pts</b></div>`);
   }
-  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)"><b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`));
+  /* ==== [ANCRE: CORRECTIF_LASTBOUNTY_SILENCIEUX] — bug trouvé : la prime de
+     vengeance (afterResult, ui-08) crédite bien a.lastBounty au moment où un
+     némésis historique tombe, mais rien n'affichait le MONTANT — seul le
+     COMPTE total apparaît sur l'écran de fin de run (runDebriefBlock, "N
+     némésis vaincue(s)"), sans jamais dire combien ça a rapporté. lastBounty
+     est réévalué à chaque combat (0 s'il ne s'applique pas), donc l'afficher
+     ici, sur le premier écran affiché après la victoire, suffit à annoncer
+     le gain au bon moment sans avoir besoin de le faire suivre plus loin. ==== */
+  if((a.lastBounty||0)>0) rows.push(`<div class="mono small" style="color:var(--blood)"><b>⚔ Prime de vengeance encaissée</b> <span class="gold">+${a.lastBounty} pts</span></div>`);
+  /* ==== [ANCRE: CORRECTIF_LASTINJURY_SILENCIEUX] — bug trouvé : une séquelle
+     de run (runAttrition, ui-08) est stockée à la fois dans runInjuries
+     (déjà affiché ci-dessous) ET dans lastInjury, mais rien ne distinguait
+     la séquelle qui vient de tomber des précédentes : le joueur ne pouvait
+     pas savoir SI le combat qu'il vient de jouer en est la cause sans
+     comparer mentalement la liste à ce qu'il avait avant. lastInjury pointe
+     vers le MÊME objet que l'entrée fraîchement ajoutée à runInjuries (===) :
+     comparer les références suffit, sans dupliquer l'affichage. ==== */
+  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`));
   const m=gauntletRunMult(a);
   if(m>1){
     const parts=[];

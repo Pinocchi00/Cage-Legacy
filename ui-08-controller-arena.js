@@ -580,19 +580,35 @@ function refocusInput(id){
    neuve pour le mois d'arrivée — la clé seule ne bloque donc jamais rien en
    pratique, sauf pile en fin d'année (où G.faith.month plafonne à 12 sans
    avancer davantage). Un second témoin, sur l'écart réel entre deux appels,
-   couvre le cas qui compte : les deux appels d'un même double-tap
-   s'enchaînent dans le même battement synchrone (quelques ms tout au plus,
-   y compris le rendu complet de l'écran) — bien en-deçà du temps qu'un
-   joueur ou qu'une action de jeu distincte suivante peut réellement prendre
-   (un mois entier de simulation sépare deux actions légitimes). ==== */
-function faithClaimMonth(){
+   couvre le cas qui compte.
+   ==== [ANCRE: CORRECTIF_SEUIL_DOUBLE_TAP] — les 50 ms d'origine mesuraient
+   le temps d'EXÉCUTION du premier appel (le "battement synchrone"), pas
+   l'intervalle entre les deux doigts d'un double-tap — qui est humain (100 à
+   300 ms ; le délai historique d'iOS, déjà cité ailleurs dans ce fichier
+   pour la même famille de bug, est justement de 300 ms). Le garde était donc
+   en place sans bloquer un vrai double-tap. 400 ms couvre le seuil de
+   double-clic des navigateurs, tout en restant très en-deçà du temps que
+   prend une action de jeu distincte suivante (un mois entier de simulation
+   et un écran à lire séparent deux actions légitimes).
+   ==== [ANCRE: CORRECTIF_CLAIM_PORTEE_ACTION] — bug trouvé en élargissant la
+   fenêtre à 400 ms : le témoin de délai était PARTAGÉ par toutes les actions
+   du mois (une seule paire _monthClaimed/_monthClaimedAt sur G.faith), donc
+   deux actions RÉELLEMENT DIFFÉRENTES (repos puis stage le mois suivant, par
+   exemple) tombant à moins de 400 ms l'une de l'autre se bloquaient l'une
+   l'autre — observé sur INV-06 (longueur de carrière médiane écrasée à 14
+   contre une cible de 25-40, des mois entiers silencieusement ignorés).
+   `tag` isole chaque site d'appel (nom de l'action, éventuellement suffixé
+   de son argument) : seul un VRAI doublon — même action, mêmes arguments,
+   moins de 400 ms d'écart — est désormais bloqué. ==== */
+function faithClaimMonth(tag){
   if(!G.faith) return true;
   const key=G.faith.year+':'+G.faith.month;
   const now=Date.now();
-  if(G.faith._monthClaimed===key) return false;
-  if(G.faith._monthClaimedAt!=null && (now-G.faith._monthClaimedAt)<50) return false;
-  G.faith._monthClaimed=key;
-  G.faith._monthClaimedAt=now;
+  if(!G.faith._monthClaims) G.faith._monthClaims={};
+  const prev=G.faith._monthClaims[tag];
+  if(prev && prev.key===key) return false;
+  if(prev && (now-prev.at)<400) return false;
+  G.faith._monthClaims[tag]={key,at:now};
   return true;
 }
 const CL={
@@ -963,7 +979,11 @@ const CL={
     // resolveFight() incrémentait aveuglément le compteur de défenses de
     // l'ancienne ceinture. On bascule désormais réellement de division
     // quand ce choix est fait, avec régénération du roster correspondant.
-    G.f.champChampFocus=divId;
+    // ==== [ANCRE: CORRECTIF_CHAMPCHAMPFOCUS_MORT] — la ligne qui écrivait
+    // G.f.champChampFocus=divId juste ici a été retirée : l'ancre juste
+    // au-dessus dit elle-même que cette variable n'est relue nulle part, et
+    // le vrai correctif (basculer G.f.div/divName/roster) l'a rendue
+    // définitivement inutile.
     if(divId!==G.f.div){
       const newDiv=divById(divId);
       if(newDiv){ G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f); }
@@ -1876,7 +1896,7 @@ const CL={
      consommé par nextFaithYear() qui fait alors progresser les partenaires
      un peu plus vite CETTE année-là (sans vous pour les canaliser). ==== */
   faithRest(){
-    if(!faithClaimMonth()) return;
+    if(!faithClaimMonth('rest')) return;
     G.f.form=clamp(G.f.form+25,0,100); G.f.morale=clamp(G.f.morale+10,0,100);
     /* ==== [ANCRE: V2-11] — le repos est la seule action qui restaure
        vraiment la fraîcheur (le reste du temps ne fait que la grignoter
@@ -1902,7 +1922,7 @@ const CL={
      sommet. ==== */
   faithSparring(partnerId){
     const partner=(G.faith.gym||[]).find(p=>p.id===partnerId); if(!partner) return;
-    if(!faithClaimMonth()) return;
+    if(!faithClaimMonth('sparring:'+partnerId)) return;
     G.f.form=clamp(G.f.form+15,0,100);
     G.f.freshness=clamp((G.f.freshness==null?70:G.f.freshness)-10,0,100);
     const priorSessions=partner.sessions||0;
@@ -1965,7 +1985,7 @@ const CL={
       G.lastMsg="Votre coach refuse net : «Tu n’as plus rien à donner à un stage, là. Tu vas juste te faire mal.»";
       render(); return;
     }
-    if(!faithClaimMonth()) return;
+    if(!faithClaimMonth('camp:'+campId)) return;
     const F=G.faith;
     if(F.pendingIntersaisonEntry){
       if(!F.intersaisonCooldown) F.intersaisonCooldown={};
@@ -2036,7 +2056,7 @@ const CL={
       return;
     }
     if(entry.action==='scout_video'){
-      if(!faithClaimMonth()) return;
+      if(!faithClaimMonth('scout_video')) return;
       f.freshness=clamp((f.freshness==null?70:f.freshness)-3,0,100);
       F.scoutKey=true;
       applyDeltas(f,[['fightIQ',1]]);
@@ -2045,7 +2065,7 @@ const CL={
       faithAdvanceMonth(); return;
     }
     if(entry.action==='sponsor'){
-      if(!faithClaimMonth()) return;
+      if(!faithClaimMonth('sponsor')) return;
       f.earnings=(f.earnings||0)+15; f.morale=clamp(f.morale+5,0,100);
       G.lastMsg='Un partenariat modeste, mais qui tombe bien.';
       F.yearLog.push({title:'Intersaison',choice:'Rencontre sponsor'});
@@ -2230,9 +2250,10 @@ const CL={
       } else if(i===1){
         if(!G.f.faithTraits) G.f.faithTraits=[];
         if(!G.f.faithTraits.includes('Patron régional')) G.f.faithTraits.push('Patron régional');
-        G.faith.regionalPatron=true;
         // "Régner sur son territoire" : même mécanisme, en sens inverse —
         // les galas ne se tiennent plus que dans le pays du combattant.
+        // (G.faith.regionalPatron, écrit ici auparavant, n'était lu nulle
+        // part : l'effet réel passe entièrement par faithTraits/territoire.)
         G.faith.territoire='regional';
       }
     }
@@ -2295,7 +2316,7 @@ const CL={
      directement le mois plutôt que de repasser par la vue "résolue" d'un
      événement de vie ordinaire. */
   chooseFaithCoach(coachId){
-    if(!faithClaimMonth()) return;
+    if(!faithClaimMonth('coach:'+coachId)) return;
     const F=G.faith;
     const old=faithCoachPerson(F);
     const hired=faithHireCoach(coachId,`Vous avez quitté ${personName(old,{withNick:true})} pour un préparateur au-dessus.`);
@@ -2561,7 +2582,7 @@ const CL={
      déclaratif — cf. f.injury, déjà suivi). refusalsThisYear/
      medicalRefusalUsed repartent à zéro chaque année (nextFaithYear). ==== */
   faithOfferRefuse(){
-    if(!faithClaimMonth()) return;
+    if(!faithClaimMonth('offer_refuse')) return;
     const medical=!!G.f.injury && !G.faith.medicalRefusalUsed;
     G.faith.refusalsThisYear=(G.faith.refusalsThisYear||0)+1;
     if(medical){ G.faith.medicalRefusalUsed=true; }
@@ -2681,8 +2702,17 @@ const CL={
        plafonnait à 18 compétences quel que soit le nombre de combats
        livrés. Indexé sur les combats réellement livrés cette année
        (fightsThisYear), plafonné par le même MAX_CAREER_SKILLS que le pool
-       lui-même. ==== */
-    const nbRolls=Math.min(1+Math.floor((G.faith.fightsThisYear||0)/3),SKILL_CONSTANTS.MAX_CAREER_SKILLS);
+       lui-même.
+       ==== [ANCRE: CORRECTIF_NBROLLS_ANNEE_VIDE] — bug trouvé : ce correctif
+       avait perdu le garde-fou de la formule d'origine
+       ((yearLog.length>=1)?1:0) — une année entièrement vide (calendrier
+       sans mois occupé, aucun événement de vie résolu, aucun combat) offrait
+       désormais quand même 1 compétence gratuite (Math.floor(0/3)+1=1). Le
+       plancher ne s'applique plus que si l'année a réellement produit
+       quelque chose. ==== */
+    const nbRolls=((G.faith.yearLog||[]).length>=1 || (G.faith.fightsThisYear||0)>0)
+      ? Math.min(1+Math.floor((G.faith.fightsThisYear||0)/3),SKILL_CONSTANTS.MAX_CAREER_SKILLS)
+      : 0;
     const newSkills=[];
     let pool=poolEligible(f,f.age>=34,f.skills.length>=SKILL_CONSTANTS.MAX_CAREER_SKILLS);
     for(let i=0;i<nbRolls;i++){
@@ -2911,7 +2941,7 @@ const CL={
        && ['ped','judges','lobbying','catchweight'].includes(perkId)){
       G.faith.oath.broken=true;
     }
-    const costMoney={hometown:15,catchweight:35,protect_title:50,ped:30,tiger:50,lobbying:100,diet:40};
+    const costMoney={hometown:15,catchweight:35,ped:30,tiger:50,lobbying:100,diet:40};
     if(costMoney[perkId]||perkId==='judges'){
       let actualCost=costMoney[perkId];
       /* ==== [ANCRE: CORRECTIF_JUGES_GRATUIT] — bug trouvé : le coût étant un
@@ -2928,7 +2958,6 @@ const CL={
          Message reformulé pour ne promettre que ce qu'il fait réellement. ==== */
       if(perkId==='hometown'){ G.faith.perks.hometown=true; G.lastMsg="Privilège acquis : accueil favorable, vous entrez porté par la salle."; }
       else if(perkId==='catchweight'){ G.faith.perks.catchweight=true; G.lastMsg="Privilège acquis : Le prochain adversaire subira un lourd malus de déshydratation."; }
-      else if(perkId==='protect_title'){ G.f.champChampInactivity=0; G.lastMsg="Privilège acquis : L\u2019inactivité est réinitialisée. Ceinture sanctuarisée."; }
       else if(perkId==='ped'){
         /* ==== [ANCRE: FAITH_CORRECTIF_SUSPENSION_PED] — la branche positive
            écrivait G.faith.month et G.faith.pa : deux champs qu'aucun code du
@@ -2995,7 +3024,7 @@ const CL={
        malus permanent-pour-la-run sur G.f, mêmes conventions d'échelle que
        les consommables buff (state.js : ×5 pour passer de /20 à 1-100). ==== */
     const mutId=G.arcade.mutator&&G.arcade.mutator.id;
-    if(mutId==='mut_sans_filet'){ G.arcade.consumableSafetynet=false; G.arcade.consumableAutobank=false; }
+    if(mutId==='mut_sans_filet'){ G.arcade.consumableSafetynet=false; }
     if(mutId==='mut_depart_affaibli'){
       G.f.attrs.power=clamp((G.f.attrs.power||50)-10,1,100);
       G.f.attrs.cardio=clamp((G.f.attrs.cardio||50)-10,1,100);
