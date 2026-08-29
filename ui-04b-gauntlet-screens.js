@@ -346,6 +346,15 @@ function gauntletStatusBlock(a){
      eux correctement convertis en /20 par campFxLabel (ui-03). Réutilise
      désormais campFxLabel pour la même échelle d'affichage partout. ==== */
   (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${i.attrs.map(x=>campFxLabel({[x[0]]:x[1]})).join(' · ')}</span></div>`));
+  /* ==== [ANCRE: CORRECTIF_MALEDICTION_VISIBLE] — bug remonté (B18) : les
+     malus de Camp Maudit (generateCursedOption, ui-03) sont un système
+     d'usure PARALLÈLE aux séquelles de combat, avec des règles opposées
+     (permanent, non soignable) sans jamais rien afficher — le joueur ne
+     pouvait pas distinguer une baisse d'attribut réversible d'une baisse
+     définitive. Affiché ici séparément, marqué IRRÉVERSIBLE sans bouton de
+     soin, à la même échelle /20 que le reste (campFxLabel). ==== */
+  (a.curses||[]).forEach(c=>rows.push(`<div class="mono small" style="color:var(--blood)"><b>${c.name}</b> <span class="muted">${c.attrs.map(x=>campFxLabel({[x[0]]:x[1]})).join(' · ')} — irréversible</span></div>`));
+  /* ==== [FIN ANCRE] ==== */
   const m=gauntletRunMult(a);
   if(m>1){
     const parts=[];
