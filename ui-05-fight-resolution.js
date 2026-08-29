@@ -693,6 +693,20 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // (Continentale) où elle bascule vers le dilemme Pacific Championship/Ultimate Rim.
   // Au-delà (org 5 ou 6), canPromote n'est plus jamais appelée : ligue terminale.
   let proOffer=null, topTierOffer=false, promoOffer=false;
+  /* ==== [ANCRE: CORRECTIF_DOUBLE_TIRAGE_OFFRE] — bug remonté (B10) :
+     evaluateProOffer() contient un rnd()<0.05 (fast-track surprise) et n'est
+     donc PAS idempotente, alors qu'elle pouvait être appelée deux fois dans
+     le même résultat de combat — une fois en finale de tournoi amateur remporté
+     (ligne ci-dessous, `proOffer=evaluateProOffer(...)`), puis à nouveau plus
+     bas (`proOffer=proOffer||evaluateProOffer(...)`) SEULEMENT si le premier
+     appel avait renvoyé null (le `||` ne protège que contre un second appel
+     quand le premier a réussi). Un second appel indépendant consomme un rnd()
+     supplémentaire dans le flux seedé, décalant tous les tirages qui suivent
+     dans ce même résultat de combat. proOfferEvaluated mémorise qu'un premier
+     appel a déjà eu lieu (peu importe son résultat) pour garantir UN SEUL
+     appel par résultat. ==== */
+  let proOfferEvaluated=false;
+  /* ==== [FIN ANCRE] ==== */
   if(G.f.org===0){
     if((G.f.proOfferCooldown||0)>0) G.f.proOfferCooldown--;
     const warThisFight=(res.stats.A.sig+res.stats.B.sig>60) || (res.stats.A.kd+res.stats.B.kd>=2);
@@ -731,7 +745,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
           G.f.rankBoost=(G.f.rankBoost||0)+100;
           milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.medal} Ceinture ${t.cfg.label} remportée !</span>`;
           recordTitleChange(0, t.cfg.name, G.f.name, opp.name, orgDisplayName(G.f));
-          proOffer=evaluateProOffer(G.f,res,oppRankBefore);
+          proOffer=evaluateProOffer(G.f,res,oppRankBefore); proOfferEvaluated=true;
         }
       } else {
         milestone=`Éliminé en ${t.step} du ${t.cfg.label}.`;
@@ -743,7 +757,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       if(newCfg && !G.tournament){ G.tournament=generateTournament(G.f,newCfg); milestone=milestone||`${newCfg.label} : qualifié dans le Top 8 pour le tournoi !`; }
     }
     // ==== [FIN ANCRE] ====
-    if(win || G.f.age>=26){ proOffer=proOffer||evaluateProOffer(G.f,res,oppRankBefore); }
+    if(!proOfferEvaluated && (win || G.f.age>=26)){ proOffer=evaluateProOffer(G.f,res,oppRankBefore); }
   } else if(G.f.org<5){
     if(!G.f.champion && canPromote(G.f) && (!G.f.promoCooldown || G.f.promoCooldown<=0)){
       if(G.f.org===4){ topTierOffer=true; }

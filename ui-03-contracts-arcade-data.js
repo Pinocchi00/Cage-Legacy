@@ -127,6 +127,18 @@ const NARRATIVES=[
   { tags:['LOSS','VETERAN'], src:'Interview Octogone', txt:f=>`"Je n'ai pas de regrets, j'ai tout donné. Le corps a ses limites, mais l'esprit, lui, n'a pas bougé."` },
   { tags:['LOSS','VETERAN'], src:'Tweet d\u2019un fan', txt:f=>`"Dur à voir ce soir. ${esc(f.name)} reste une légende pour moi, peu importe le résultat."` },
   { tags:['WIN','UPSET'], src:'Commentateur', txt:f=>`"INCROYABLE ! Personne ne lui donnait la moindre chance ! ${esc(f.name)} vient de choquer le monde entier !"` },
+  /* ==== [ANCRE: CORRECTIF_TAG_DEC] — bug remonté (A6) : le tag 'DEC' était
+     poussé par generateNarrativeQuote (isDecisionLike(p.method)) sans qu'aucune
+     entrée de NARRATIVES ne le combine à WIN/LOSS — un combat aux points ne
+     pouvait donc jamais matcher le pool spécifique, seulement retomber sur le
+     pool générique WIN/LOSS à tag unique. Ajouté ici (tags.length>1, avant le
+     pool générique) pour que le filtre "citation la plus précise" de
+     generateNarrativeQuote puisse réellement les choisir. ==== */
+  { tags:['WIN','DEC'], src:'Commentateur', txt:f=>`"Score sans appel pour les trois juges. ${esc(f.name)} n'a rien laissé au hasard sur la durée du combat."` },
+  { tags:['WIN','DEC'], src:'Le Coin (Coach)', txt:f=>`"Trois rounds, un plan tenu du début à la fin. Les juges n'ont eu aucun doute à trancher."` },
+  { tags:['LOSS','DEC'], src:'Tweet Analyste', txt:f=>`"Décision logique ce soir. ${esc(f.name)} a perdu les échanges qui comptaient, pas le cœur au combat."` },
+  { tags:['LOSS','DEC'], src:'Interview Octogone', txt:f=>`"Je pensais avoir fait le nécessaire. Les cartes ont dit l'inverse, il faudra l'accepter et corriger."` },
+  /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: CORRECTIF_REPETITION_CITATIONS] (suite) — la majorité des
   // combats (victoire/défaite "normale", sans KO spectaculaire, sans guerre,
   // sans rivalité) ne portait AUCUN tag spécifique et retombait donc
@@ -201,15 +213,32 @@ function generateNarrativeQuote(f,p){
    Centralisés ici comme SEULE source de vérité, consommés par ui-08 et
    ui-04. gauntletPayout(mode,progress) retourne le montant PLEIN TARIF pour
    une progression donnée (roundStep / rang / streak selon le mode) — c'est
-   le montant d'un ENCAISSEMENT volontaire. gauntletEliminationRatio(mode)
-   donne la décote appliquée à ce même montant en cas d'élimination (mort ou
-   défaite) : l'encaissement volontaire doit TOUJOURS rapporter strictement
-   plus qu'une élimination au même palier, pour que "sortir proprement" soit
-   un vrai choix de prudence et non un simple raccourci sans coût. ==== */
-const BRACKET64_POINTS={1:2,2:6,3:14,4:28,5:50,6:100,7:100};
+   le montant d'un ENCAISSEMENT volontaire. La constante GAUNTLET_ELIMINATION_
+   RATIO (A10 : le texte renvoyait par erreur vers une fonction
+   gauntletEliminationRatio(mode) qui n'existe pas — c'est bien une constante,
+   uniforme sur les 3 formats) donne la décote appliquée à ce même montant en
+   cas d'élimination (mort ou défaite) : l'encaissement volontaire doit
+   TOUJOURS rapporter strictement plus qu'une élimination au même palier, pour
+   que "sortir proprement" soit un vrai choix de prudence et non un simple
+   raccourci sans coût. ==== */
+/* ==== [ANCRE: CORRECTIF_FINALE_BRACKET] — bug remonté (A8) :
+   BRACKET64_POINTS[6]===BRACKET64_POINTS[7]===100, donc gagner la finale
+   (roundStep 7, "Victoire") n'ajoutait aucun point de base par rapport au
+   simple fait d'ATTEINDRE la finale (roundStep 6) — la victoire elle-même,
+   payée progress:7 (ui-08), ne rapportait rien de plus que d'y être éliminé
+   au palier précédent. [7] relevé à 200. ==== */
+const BRACKET64_POINTS={1:2,2:6,3:14,4:28,5:50,6:100,7:200};
 const LADDER100_POINTS=rank=>Math.max(2,Math.round((101-rank)*0.8));
 const BOSSRUN_POINTS={0:0,1:5,2:15,3:35,4:70,5:150};
 const GAUNTLET_ELIMINATION_RATIO=0.5; // uniforme sur les 3 formats depuis la refonte
+/* ==== [ANCRE: GAUNTLET_CASHOUT_RATIO] — bug remonté (A9) : la décote
+   d'encaissement volontaire (distincte de GAUNTLET_ELIMINATION_RATIO
+   ci-dessus, qui ne couvre que l'élimination) vivait en dur ailleurs, dans
+   finaliseGauntletRun (ui-08), *(a.mode==='boss_run'?0.6:0.7) — la duplication
+   que cette ANCRE REJOUABILITE_PAYOUT_TABLES prétend justement éviter.
+   Extraite ici, ui-08 la lit désormais depuis cette constante. ==== */
+const GAUNTLET_CASHOUT_RATIO={boss_run:0.6,default:0.7};
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_ASCENSION] — facteur de récompense indexé sur le
    palier d'Ascension de la run (G.arcade.asc, 0 par défaut). Passé en 3e
    argument OPTIONNEL de gauntletPayout() pour que les ~10 appels existants
@@ -223,7 +252,12 @@ function gauntletPayout(mode,progress,asc){
   let base;
   if(mode==='boss_run') base=BOSSRUN_POINTS[progress]||0;
   else if(mode==='ladder_100') base=LADDER100_POINTS(progress);
-  else base=BRACKET64_POINTS[progress]||2;
+  /* ==== [ANCRE: CORRECTIF_SILENCE_ERREUR] — repli silencieux (A15) : tout mode
+     inconnu était facturé au tarif Bracket sans le moindre signal. Les 3
+     appelants passent aujourd'hui les bonnes clés (ui-08), mais un futur mode
+     mal branché resterait invisible sans cet avertissement. ==== */
+  else { if(mode!=='bracket64') console.warn('[Gauntlet] gauntletPayout: mode inconnu, repli sur le tarif Bracket 64',mode); base=BRACKET64_POINTS[progress]||2; }
+  /* ==== [FIN ANCRE] ==== */
   return Math.round(base*gauntletAscPayoutMod(lvl));
 }
 /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — 3e argument atRisk : quand le joueur a
@@ -256,14 +290,17 @@ function gauntletRunMult(a){
 }
 function gauntletFinalPayout(a,base){ return Math.round((base||0)*gauntletRunMult(a)); }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — genWTUMMAOpponent() ne proposait
-   QU'UNE cible imposée (leapfrog auto -10/-15, saut direct au #1 sous la
-   barre des 15) : aucune décision de risque à chaque palier. Remplacé par
-   genWTUMMATargets(), qui propose 2-3 cibles simultanées à des profondeurs
-   de saut différentes (sûre / médiane / agressive), le #1 étant toujours
-   proposé une fois sous la barre des 15 comme avant. genWTUMMAOpponent()
-   reste présente (compat retryArcade()/tests) mais n'est plus appelée dans
-   le flux normal du Ladder. ==== */
+/* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — l'ancienne genWTUMMAOpponent() ne
+   proposait QU'UNE cible imposée (leapfrog auto -10/-15, saut direct au #1
+   sous la barre des 15) : aucune décision de risque à chaque palier.
+   Remplacée par genWTUMMATargets() ci-dessous, qui propose 2-3 cibles
+   simultanées à des profondeurs de saut différentes (sûre / médiane /
+   agressive), le #1 étant toujours proposé une fois sous la barre des 15
+   comme avant.
+   ==== [ANCRE: CORRECTIF_CODE_MORT] — A2 : genWTUMMAOpponent() a été retirée
+   (code mort, zéro appelant) — l'ancienne justification de compatibilité
+   retryArcade()/tests était fausse : CL.retryArcade() (ui-08) ne l'appelle
+   pas, et aucun fichier de tests/ ne la référence. ==== */
 /* ==== [ANCRE: GAUNTLET_CIBLE_PERISSABLE] — les 3 cibles étaient regénérées à
    l'identique en profondeur à chaque camp : ne pas prendre la cible agressive
    ne coûtait rien, elle repassait au tour suivant. G.arcade.aggroCooldown
@@ -293,17 +330,24 @@ function genWTUMMATargets(){
    grandeur cette fois réellement lue par le moteur. La carte est masquée quand
    il n'y a rien à soigner : proposer un soin à un combattant intact serait un
    choix nul, pas un arbitrage. ==== */
+/* ==== [ANCRE: CORRECTIF_SOIN_EXACT] — bug remonté (B8) : +12 forfaitaire par
+   attribut touché, quel que soit le malus réel de la séquelle — un barème
+   désynchronisé de healGauntletZone() (L526 environ), qui restitue lui le
+   montant exact. Corrigé : les deltas agrégés (par clé, toutes séquelles
+   confondues) sont désormais lus directement sur G.arcade.runInjuries et
+   inversés — la carte ne rend jamais plus qu'elle n'a retiré. ==== */
 function runInjuryHealOption(){
   const inj=(G.arcade&&G.arcade.runInjuries)||[];
   if(!inj.length) return null;
-  const keys=[]; inj.forEach(i=>(i.attrs||[]).forEach(p=>{ if(!keys.includes(p[0])) keys.push(p[0]); }));
+  const agg={};
+  inj.forEach(i=>(i.attrs||[]).forEach(p=>{ agg[p[0]]=(agg[p[0]]||0)+p[1]; }));
+  const keys=Object.keys(agg);
   if(!keys.length) return null;
-  const labels=keys.map(attrLabel).join(', ');
   return {label:'Table de soins',
     hint:`Sauter le sparring dur pour faire traiter les séquelles de la run (${inj.length}). Rien à gagner ailleurs, tout sur la remise en état.`,
-    d:keys.map(k=>[k,12]), _heal:true, _healLabels:labels};
+    d:keys.map(k=>[k,-agg[k]]), _heal:true};
 }
-function recoveryTrainOption(){ return runInjuryHealOption(); }
+/* ==== [FIN ANCRE] ==== */
 function deriveArcadeMods(f){
   const a=f.attrs, base=STYLE_PROFILE[f.style]||STYLE_PROFILE.mma;
   const strikeScore=(num(a.jab)+num(a.cross)+num(a.hook)+num(a.kick))/4;
@@ -380,6 +424,14 @@ function gauntletBountyFor(snap){
    entrées atteintes. ==== */
 function getGauntletRivalsDefeated(meta){ return meta.gauntletRivalsDefeated||[]; }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORRECTIF_VENGEANCE_DEDUP] — bug remonté (B11) : defeated.push()
+   sans déduplication. Un rival qui vous rebat est réinjecté dans
+   meta.gauntletRivals par recordGauntletRival() (sans être retiré de
+   gauntletRivalsDefeated), puis repoussé à la vengeance suivante — le seuil
+   de 5 entrées qui débloque le capstone (scr_gauntlet_menu, ui-06) devenait
+   farmable avec un seul adversaire récurrent, et genBossOpponent() servait
+   alors 5 fois le même combattant. Un même name+div n'est plus ajouté deux
+   fois. ==== */
 function claimGauntletBounty(opp){
   if(!opp||!opp._isRival) return 0;
   const meta=loadMetaStats();
@@ -388,7 +440,13 @@ function claimGauntletBounty(opp){
   if(idx<0) return 0;
   const bounty=gauntletBountyFor(rivals[idx]);
   const defeated=getGauntletRivalsDefeated(meta);
-  defeated.push(rivals[idx]);
+  if(!defeated.some(d=>d.name===rivals[idx].name && d.div===rivals[idx].div)) defeated.push(rivals[idx]);
+  /* ==== [ANCRE: CORRECTIF_CAPSTONE_PURGE] — A19 : jamais purgé, chaque entrée
+     sérialise attrs+skills — croissance non bornée du localStorage sur le
+     long terme. Plafonné à 20 entrées (bien au-delà du seuil de 5 qui
+     débloque le capstone), en retirant les plus anciennes en premier. ==== */
+  if(defeated.length>20) defeated.shift();
+  /* ==== [FIN ANCRE] ==== */
   meta.gauntletRivalsDefeated=defeated;
   rivals.splice(idx,1);
   meta.gauntletRivals=rivals;
@@ -396,6 +454,7 @@ function claimGauntletBounty(opp){
   saveMetaStats(meta);
   return bounty;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_CONTRAT_RUN] — objectif global tiré AU DRAFT, valable
    sur tout la run, payé en multiplicateur final (cf. gauntletRunMult). Les
@@ -407,21 +466,35 @@ function claimGauntletBounty(opp){
    Les closures `check` ne posent aucun problème de sérialisation : une run
    Gauntlet n'est JAMAIS écrit en localStorage (save() sort immédiatement si
    G.arcade.active, cf. state.js ANCRE SAVE_GARDE_ARCADE). ==== */
+/* ==== [ANCRE: GAUNTLET_CONTRATS_FILTRE_MODE] — bug remonté (B5/B6) : le tirage
+   était uniforme sans conscience du mode/mutateur de la run, laissant certains
+   contrats mathématiquement impossibles (ct_champs : .champion n'est JAMAIS
+   posé par buildWTUMMABracket/buildWTUMMALadder, seul boss_run le pose sur
+   genBossOpponent) ou trivialement acquis dès le tirage (ct_nodec en boss_run,
+   déjà KO-only par condition de mode ; ct_nodec sous mut_pacte_force, même
+   raison ; ct_nopact en boss_run, où CL.togglePact sort immédiatement — le
+   pacte n'est jamais pris, donc jamais "refusé" au sens du contrat). Chaque
+   entrée porte désormais ses propres exclusions ; drawGauntletContract() les
+   applique en fonction du mode ET du mutateur réellement tirés pour cette
+   run, au lieu d'un simple pick() uniforme sur les 6. ==== */
 const GAUNTLET_CONTRACTS=[
   {id:'ct_nodec',label:'Aucune victoire aux points',mult:1.5,
    hint:'Toutes vos victoires de la run doivent être des finitions — KO/TKO ou soumission.',
+   excludeModes:['boss_run'], excludeMutators:['mut_pacte_force'],
    check:(f)=>{ const wins=f.history.filter(h=>h.res==='win'); return wins.length>0 && wins.every(h=>!isDecisionLike(h.method)); }},
   {id:'ct_r1',label:'Trois éclairs',mult:1.6,
    hint:'Terminer trois combats de la run dès le 1er round.',
    check:(f)=>f.history.filter(h=>h.res==='win'&&h.round===1&&!isDecisionLike(h.method)).length>=3},
   {id:'ct_champs',label:'Bourreau de champions',mult:1.45,
    hint:'Battre deux adversaires qui portaient déjà une ceinture.',
+   excludeModes:['bracket64','ladder_100'],
    check:(f)=>f.history.filter(h=>h.res==='win'&&h.oppWasChamp).length>=2},
   {id:'ct_sub',label:'Le fil de soie',mult:1.5,
    hint:'Gagner deux combats par soumission dans la run.',
    check:(f)=>f.history.filter(h=>h.res==='win'&&h.method&&h.method.startsWith('Soum')).length>=2},
   {id:'ct_nopact',label:'Sans filet',mult:1.3,
    hint:'Terminer la run sans jamais prendre le pacte de finition.',
+   excludeModes:['boss_run'],
    check:(f,a)=>!a.pactTakenEver},
   {id:'ct_intact',label:'Corps intact',mult:1.4,
    /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — ct_intact reposait sur la forme
@@ -437,12 +510,16 @@ const GAUNTLET_CONTRACTS=[
 ];
 /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) : "trop
    endommagé" faute de forme/moral en Gauntlet (cf. GAUNTLET_SANS_MORAL_FORME)
-   est ici défini par le cumul de séquelles ACTIVES (runInjuries.length>=2,
-   même seuil que ct_intact.check juste au-dessus, pour rester cohérent avec
-   ce que le jeu considère déjà comme "une run qui a souffert"). Ne se
-   déclenche plus une fois refusé — G.arcade.doctorRefused n'est jamais remis
-   à false (le bonus ×1.5 doit tenir pour TOUTE la run après un refus, pas
-   seulement jusqu'au prochain déclenchement). ==== */
+   est ici défini par le cumul de séquelles ACTIVES (runInjuries.length>=2).
+   ==== [ANCRE: CORRECTIF_ANCRE_TEXTE] — A11 : le texte affirmait par erreur
+   "même seuil que ct_intact.check" — faux, ct_intact (cf. GAUNTLET_CONTRACTS)
+   exige ZÉRO séquelle, l'ultimatum du médecin s'active à partir de DEUX. Les
+   deux mécaniques réagissent au même symptôme (les séquelles de run) mais
+   pas au même seuil : ct_intact récompense l'absence totale, le médecin
+   s'inquiète dès que ça s'accumule.
+   Ne se déclenche plus une fois refusé — G.arcade.doctorRefused n'est jamais
+   remis à false (le bonus ×1.5 doit tenir pour TOUTE la run après un refus,
+   pas seulement jusqu'au prochain déclenchement). ==== */
 function ringDoctorUltimatumActive(a){
   return (a.runInjuries||[]).length>=2 && !a.doctorRefused;
 }
@@ -450,10 +527,20 @@ function ringDoctorUltimatumActive(a){
 /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
    12/08/2026) : ct_nopact devient injouable quand le mutateur tiré pour
    CETTE run est 'mut_pacte_force' (remplace l'ancienne condition
-   asc>=3, désormais sans rapport avec le pacte forcé). ==== */
-function drawGauntletContract(asc,mutatorId){
-  const pool=mutatorId==='mut_pacte_force'?GAUNTLET_CONTRACTS.filter(c=>c.id!=='ct_nopact'):GAUNTLET_CONTRACTS;
-  const c=pick(pool);
+   asc>=3, désormais sans rapport avec le pacte forcé).
+   ==== [ANCRE: GAUNTLET_CONTRATS_FILTRE_MODE] — signature (mode,mutatorId) au
+   lieu de (asc,mutatorId) : `asc` (palier d'Ascension) n'était de toute façon
+   jamais lu par la fonction (résidu de l'ancienne condition asc>=3, cf. A3) —
+   ce dont le tirage a réellement besoin, c'est du MODE de la run, pour
+   exclure les contrats impossibles/triviaux via excludeModes/excludeMutators
+   posés sur chaque entrée de GAUNTLET_CONTRACTS ci-dessus. Les 3 appelants
+   (startBossRun ici, CL.startArcade/CL.startLadder100 dans ui-08) passent
+   désormais leur mode littéral au lieu de `asc`. ==== */
+function drawGauntletContract(mode,mutatorId){
+  const pool=GAUNTLET_CONTRACTS.filter(c=>
+    !(c.excludeModes && c.excludeModes.includes(mode)) &&
+    !(c.excludeMutators && mutatorId && c.excludeMutators.includes(mutatorId)));
+  const c=pick(pool.length?pool:GAUNTLET_CONTRACTS);
   return {id:c.id,label:c.label,hint:c.hint,mult:c.mult,done:false};
 }
 /* ==== [FIN ANCRE] ==== */
@@ -462,7 +549,10 @@ function evalGauntletContract(a){
   const spec=GAUNTLET_CONTRACTS.find(x=>x.id===a.contract.id);
   if(!spec||!G.f||!G.f.history){ a.contract.done=false; return false; }
   let ok=false;
-  try{ ok=!!spec.check(G.f,a); }catch(e){ ok=false; }
+  /* ==== [ANCRE: CORRECTIF_SILENCE_ERREUR] — un check() cassé rendait le
+     contrat éternellement non rempli sans le moindre signal (A16). ==== */
+  try{ ok=!!spec.check(G.f,a); }catch(e){ console.warn('[Gauntlet] evalGauntletContract check() a levé une exception',spec.id,e); ok=false; }
+  /* ==== [FIN ANCRE] ==== */
   a.contract.done=ok;
   return ok;
 }
@@ -500,16 +590,23 @@ const GAUNTLET_RUN_INJURIES=[
   {name:'Cheville foulée',zone:'jambes',attrs:[['footSpeed',-7],['explosiveness',-6]]}
 ];
 const GAUNTLET_ZONE_LABEL={tete:'Tête',corps:'Corps',jambes:'Jambes'};
+/* ==== [ANCRE: CORRECTIF_SEQUELLE_DELTA_REEL] — bug remonté (B4) : applied.push
+   enregistrait le delta NOMINAL de la séquelle, pas celui effectivement
+   appliqué après clamp(...,1,100) — healGauntletZone() rendait donc PLUS que
+   ce qui avait été pris quand l'attribut était déjà proche du plancher (gain
+   net d'attribut en soignant). Le delta réel (après clamp) est désormais
+   enregistré. ==== */
 function rollGauntletRunInjury(f){
   const inj=pick(GAUNTLET_RUN_INJURIES);
   const applied=[];
   inj.attrs.forEach(pair=>{
     const k=pair[0], v=pair[1];
-    if(typeof f.attrs[k]==='number'){ f.attrs[k]=clamp(f.attrs[k]+v,1,100); applied.push([k,v]); }
+    if(typeof f.attrs[k]==='number'){ const before=f.attrs[k]; f.attrs[k]=clamp(before+v,1,100); applied.push([k,f.attrs[k]-before]); }
   });
   f.overall=overall(f);
   return {name:inj.name,zone:inj.zone,attrs:applied};
 }
+/* ==== [FIN ANCRE] ==== */
 /* Coût fixe par blessure soignée dans la zone visée (pas un coût unique par
    zone) : soigner une zone qui cumule 2 séquelles coûte logiquement plus
    cher que n'en soigner qu'une seule. */
@@ -633,13 +730,14 @@ function injectExtendedArchetypes(){
    faisait pas : le format le plus punitif du Gauntlet tirait dans un pool
    plus pauvre que les deux autres, sans raison. ==== */
 /* ==== [ANCRE: CORRECTIF_SEED_BOSSRUN] — bug trouvé : CL.startBossRun() (ui-08)
-   faisait `startBossRun(); G.arcade.seed=seed;` alors que cette fonction
-   appelle render() AVANT le retour — l'écran de draft affichait donc
-   « Graine de la run : undefined » sur le seul format qui ne recevait pas sa
-   graine à temps. La graine (et le palier d'Ascension) sont désormais passés
-   en argument et présents dans le littéral G.arcade, comme dans
-   CL.startArcade()/CL.startLadder100(). Arguments optionnels : un appel
-   startBossRun() sans argument reste valide (compat tests). ==== */
+   faisait `startBossRun(); G.arcade.seed=seed;`, donc écrivait la graine
+   APRÈS que G.arcade ait déjà été (re)construit par cette fonction —
+   l'écran de draft affichait donc « Graine de la run : undefined » sur le
+   seul format qui ne recevait pas sa graine à temps. La graine (et le
+   palier d'Ascension) sont désormais passés en argument et présents dans le
+   littéral G.arcade, comme dans CL.startArcade()/CL.startLadder100().
+   Arguments optionnels : un appel startBossRun() sans argument reste valide
+   (compat tests). ==== */
 /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — capstone (4e argument, optionnel)
    active le pool spécial de genBossOpponent() ci-dessous, débloqué depuis
    scr_gauntlet_menu (ui-06) une fois meta.gauntletRivalsDefeated à 5
@@ -654,7 +752,7 @@ function startBossRun(seed,asc,capstone){
      G.f : peut donc être tiré dès la création de la run pour les 3 modes. ==== */
   const mutator=rollGauntletMutator(asc,'boss_run');
   G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'boss_run',condition:'ko_only',banked:0,
-    seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),capstone:!!capstone,mutator};
+    seed,asc:asc||0,riskMult:1,maxPactStreak:0,contract:drawGauntletContract('boss_run',mutator&&mutator.id),capstone:!!capstone,mutator};
   /* ==== [FIN ANCRE] ==== */
   forceFightPaceForMode('gauntlet');
   /* ==== [ANCRE: MARCHE_NOIR_CONSOMMABLES] — ajout #8 (24 ajouts, 12/08/2026) :
@@ -663,8 +761,14 @@ function startBossRun(seed,asc,capstone){
      via selectDraft), donc un éventuel effet 'buff' ne peut pas encore
      s'appliquer ici pour le Boss Run : appliqué à la place juste après le
      choix d'archétype, dans CL.selectDraft (ui-08), qui appelle cette même
-     fonction pour les 3 modes. ==== */
-  G.screen='draft'; save(); render();
+     fonction pour les 3 modes.
+     ==== [ANCRE: CORRECTIF_DOUBLE_RENDU] — save()/render() retirés d'ici (A20/
+     A7) : save() était un no-op silencieux (G.arcade.active est déjà à true,
+     cf. state.js save()) et render() causait un double rendu — les deux seuls
+     appelants (CL.startBossRun/CL.startBossRunCapstone, ui-08) appellent déjà
+     render(true) juste après. Le routage (screen + rendu) reste sous la seule
+     responsabilité de l'appelant, comme pour les 2 autres formats. ==== */
+  G.screen='draft';
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_DIFFICULTE_BOSSRUN] — même principe que pour le
@@ -742,6 +846,10 @@ function rollGauntletMutator(asc,mode){
    diffère de la lettre du texte source. Carrière INCHANGÉE : ce chemin
    n'est emprunté que depuis resolveArcadeFight() (Gauntlet uniquement),
    jamais depuis resolveFight() (carrière, ui-05). ==== */
+/** Cumule un delta ADDITIF à annuler dans une table de restauration coaching
+ * (jamais une affectation absolue — cf. ANCRE CORRECTIF_RESTAURATION_DELTAS).
+ * @param {Record<string,number>} tbl @param {string} key @param {number} delta */
+function gauntletAddRestore(tbl,key,delta){ tbl[key]=(tbl[key]||0)+delta; }
 function startCoachingFight(){
   const blankStats=()=>({sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0});
   /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — les effets de malus/mutateur qui,
@@ -752,24 +860,43 @@ function startCoachingFight(){
      perdus dès le round 2 (3 appels simulateFight distincts, chacun partant
      de G.f.attrs tel quel à cet instant). ==== */
   const opp=G.arcade.opponent;
-  let bossMalusSaved=null;
+  /* ==== [ANCRE: GAUNTLET_FATIGUE_CARDIO] — capture le cardio de départ de la
+     run UNE SEULE FOIS (avant tout malus/mutateur), pour servir de référence
+     au plancher de dérive de fatigue appliqué dans runCoachingRound (cf. cette
+     ANCRE plus bas). ==== */
+  if(G.arcade.runStartCardio===undefined) G.arcade.runStartCardio=G.f.attrs.cardio;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_RESTAURATION_DELTAS] — bug remonté (mut_sans_repit
+     rendait le joueur MEILLEUR qu'une run sans mutateur) : bossMalus/mutateurs/
+     passifs de camp étaient chacun sauvegardés en valeur ABSOLUE ("before") puis
+     restaurés par AFFECTATION en fin de combat — deux problèmes distincts : (1)
+     une affectation écrase tout ce qui s'est passé entre-temps sur cette même
+     clé (la fatigue de cardio accumulée round par round, cf. runCoachingRound),
+     donc restaurer mutSelfSaved.before effaçait la fatigue du combat entier ;
+     (2) Second Souffle (c.secondSouffleSaved, plus bas) écrivait sur les MÊMES
+     clés (cardio notamment) sans le savoir, et le dernier `=` exécuté gagnait,
+     rendant le malus du mutateur permanent ou l'inverse selon l'ordre.
+     Remplacé par UNE table de deltas ADDITIFS (c._restore.self/.opp), chaque
+     effet n'annule QUE son propre delta (+15 pour compenser un -15, jamais une
+     réaffectation absolue) — la fatigue accumulée par ailleurs sur la même clé
+     n'est jamais touchée, et deux effets sur la même clé se cumulent au lieu de
+     s'écraser. acceptGauntletSecondSouffle() (plus bas) écrit dans cette même
+     table au lieu d'un objet séparé. ==== */
+  const restoreSelf={}, restoreOpp={};
   if(G.arcade.mode==='boss_run' && G.arcade.bossMalus){
     const bm=G.arcade.bossMalus;
-    bossMalusSaved={key:bm.key,before:G.f.attrs[bm.key]};
     G.f.attrs[bm.key]=clamp(G.f.attrs[bm.key]+bm.amount,1,100);
+    gauntletAddRestore(restoreSelf,bm.key,-bm.amount);
   }
   const mutId=G.arcade.mutator&&G.arcade.mutator.id;
-  let mutOppSaved=null, mutSelfSaved=null;
-  if(mutId==='mut_violent'){ mutOppSaved={before:opp.attrs.power}; opp.attrs.power=clamp(opp.attrs.power+15,1,100); }
-  if(mutId==='mut_sans_repit'){ mutSelfSaved={before:G.f.attrs.cardio}; G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); }
+  if(mutId==='mut_violent'){ opp.attrs.power=clamp(opp.attrs.power+15,1,100); gauntletAddRestore(restoreOpp,'power',-15); }
+  if(mutId==='mut_sans_repit'){ G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); gauntletAddRestore(restoreSelf,'cardio',15); }
   /* ==== [ANCRE: PASSIF_IDENTITE_DE_CAMP] — passif 'oppPermanent' (Mercenaire,
      Universitaire) : même pattern que bossMalus/mutateurs ci-dessus, mais
      générique sur plusieurs clés à la fois (fx peut avoir 1 ou 2 stats). ==== */
-  let campPassiveOppSaved=null;
   const campPassive=G.arcade.campIdentity&&G.arcade.campIdentity.passive;
   if(campPassive&&campPassive.type==='oppPermanent'){
-    campPassiveOppSaved={};
-    Object.entries(campPassive.fx).forEach(([k,v])=>{ campPassiveOppSaved[k]=opp.attrs[k]; opp.attrs[k]=clamp(opp.attrs[k]+v,1,100); });
+    Object.entries(campPassive.fx).forEach(([k,v])=>{ opp.attrs[k]=clamp(opp.attrs[k]+v,1,100); gauntletAddRestore(restoreOpp,k,-v); });
   }
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_JUGES_CUMUL_COACHING] — bug remonté : seul le total
@@ -781,7 +908,7 @@ function startCoachingFight(){
      n'affichait le détail par juge pendant le coaching — mais ça faussait
      déjà l'écran de résultat final (scr_result, ui-06) pour tout combat
      Gauntlet coaché allant aux points. ==== */
-  G.arcade.coaching={round:1,scoreA:0,scoreB:0,judges:{j1:[0,0],j2:[0,0],j3:[0,0]},roundStats:[],stats:{A:blankStats(),B:blankStats()},_restore:{bossMalusSaved,mutOppSaved,mutSelfSaved,campPassiveOppSaved}};
+  G.arcade.coaching={round:1,scoreA:0,scoreB:0,judges:{j1:[0,0],j2:[0,0],j3:[0,0]},roundStats:[],stats:{A:blankStats(),B:blankStats()},_restore:{self:restoreSelf,opp:restoreOpp}};
   /* ==== [FIN ANCRE] ==== */
   runCoachingRound(G.arcade.plan||null);
 }
@@ -820,18 +947,16 @@ function runCoachingRound(plan){
   const mergeStats=(dst,src)=>{ Object.keys(dst).forEach(k=>dst[k]=(dst[k]||0)+(src[k]||0)); };
   if(finished || c.round>=3){
     /* ==== [ANCRE: COACHING_ENTRE_ROUNDS] — restauration symétrique de
-       startCoachingFight(), au tout dernier moment avant finalisation. ==== */
-    const rst=c._restore||{};
-    if(rst.bossMalusSaved) G.f.attrs[rst.bossMalusSaved.key]=rst.bossMalusSaved.before;
-    if(rst.mutOppSaved) opp.attrs.power=rst.mutOppSaved.before;
-    if(rst.mutSelfSaved) G.f.attrs.cardio=rst.mutSelfSaved.before;
-    if(rst.campPassiveOppSaved) Object.entries(rst.campPassiveOppSaved).forEach(([k,v])=>{ opp.attrs[k]=v; });
-    /* ==== [FIN ANCRE] ==== */
-    /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) :
-       restauration du boost temporaire (voir plus bas, offre proposée sur
-       scr_coaching_round) — "jusqu'à la fin du combat en cours", donc
-       retiré ici, exactement au moment où ce combat se termine réellement. ==== */
-    if(c.secondSouffleSaved){ Object.entries(c.secondSouffleSaved).forEach(([k,v])=>{ G.f.attrs[k]=v; }); c.secondSouffleSaved=null; }
+       startCoachingFight(), au tout dernier moment avant finalisation.
+       ==== [ANCRE: CORRECTIF_RESTAURATION_DELTAS] — table UNIQUE de deltas
+       additifs (self/opp), fusionnant l'ancien _restore de startCoachingFight
+       et l'ancien c.secondSouffleSaved (cf. acceptGauntletSecondSouffle plus
+       bas, qui écrit désormais directement dans c._restore.self) : chaque
+       effet annule EXACTEMENT son propre delta, sans jamais écraser la
+       fatigue accumulée entre-temps sur la même clé (cardio notamment). ==== */
+    const rst=c._restore||{self:{},opp:{}};
+    Object.entries(rst.self).forEach(([k,v])=>{ G.f.attrs[k]=clamp(G.f.attrs[k]+v,1,100); });
+    Object.entries(rst.opp).forEach(([k,v])=>{ opp.attrs[k]=clamp(opp.attrs[k]+v,1,100); });
     /* ==== [FIN ANCRE] ==== */
     let finalRes=res;
     if(!finished){
@@ -906,8 +1031,25 @@ function runCoachingRound(plan){
   });
   /* ==== [FIN ANCRE] ==== */
   mergeStats(c.stats.A,res.stats.A); mergeStats(c.stats.B,res.stats.B);
-  G.f.attrs.cardio=clamp(G.f.attrs.cardio-Math.round((res.stats.A.dmgHead+res.stats.A.dmgBody+res.stats.A.dmgLegs)*0.4),1,100);
+  /* ==== [ANCRE: GAUNTLET_FATIGUE_CARDIO] — décision tranchée pour B3 : la
+     fatigue de cardio du joueur N'EST PAS restaurée en fin de combat (elle
+     dérive volontairement d'un combat à l'autre dans la même run — un vrai
+     Gauntlet doit user), mais cette dérive est désormais BORNÉE à 60 % du
+     cardio de départ de la run (G.arcade.runStartCardio, posé une seule fois
+     par startCoachingFight) au lieu de pouvoir descendre jusqu'à 1. C'est une
+     EXCEPTION documentée à part entière, distincte des séquelles permanentes
+     de GAUNTLET_BLESSURE_RUN (celles-ci n'ont aucun plancher et ne se
+     résorbent jamais sans l'Infirmerie de fortune).
+     L'adversaire (opp), lui, EST restauré : en Ladder/Bracket c'est un objet
+     du pool réutilisé ailleurs (classement, revanches) — une fatigue qui
+     fuiterait dans son état permanent serait un bug à part entière, pas une
+     mécanique de run. ==== */
+  const cardioFloor=Math.max(1,Math.round((G.arcade.runStartCardio||G.f.attrs.cardio)*0.6));
+  G.f.attrs.cardio=clamp(G.f.attrs.cardio-Math.round((res.stats.A.dmgHead+res.stats.A.dmgBody+res.stats.A.dmgLegs)*0.4),cardioFloor,100);
+  const oppCardioBefore=opp.attrs.cardio;
   opp.attrs.cardio=clamp(opp.attrs.cardio-Math.round((res.stats.B.dmgHead+res.stats.B.dmgBody+res.stats.B.dmgLegs)*0.4),1,100);
+  gauntletAddRestore(c._restore.opp,'cardio',oppCardioBefore-opp.attrs.cardio);
+  /* ==== [FIN ANCRE] ==== */
   c.lastRoundRes=res; c.round++;
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) :
      "peut se déclencher en perdant les 2 premiers rounds selon l'estimation
@@ -947,7 +1089,7 @@ function runCoachingRound(plan){
   G.fight={kind:'arcade',opp,rounds:3,plan,planLabel:G.arcade.planLabel||null};
   G.pending={res,win:false,method:res.method,finish:false,opp:{name:opp.name,flag:opp.flag},planLabel:G.arcade.planLabel||null,newAch:[]};
   G._arenaNext='coaching_round';
-  buildTimeline(true); G.screen='arena'; save(); render();
+  buildTimeline(true); G.screen='arena'; render(); // save() retiré (A7) : no-op tant que G.arcade.active
   /* ==== [FIN ANCRE] ==== */
 }
 /* ==== [FIN ANCRE] ==== */
@@ -960,9 +1102,9 @@ function runCoachingRound(plan){
 function acceptGauntletSecondSouffle(){
   const c=G.arcade&&G.arcade.coaching; if(!c||!c.secondSouffleAvailable||c.secondSouffleUsed) return;
   const keys=['composure','cardio','power','chin'];
-  const saved={};
-  keys.forEach(k=>{ saved[k]=G.f.attrs[k]; G.f.attrs[k]=clamp((G.f.attrs[k]||50)+10,1,100); });
-  c.secondSouffleSaved=saved; c.secondSouffleUsed=true;
+  c._restore=c._restore||{self:{},opp:{}};
+  keys.forEach(k=>{ G.f.attrs[k]=clamp((G.f.attrs[k]||50)+10,1,100); gauntletAddRestore(c._restore.self,k,-10); });
+  c.secondSouffleUsed=true;
 }
 /* ==== [FIN ANCRE] ==== */
 function genBossOpponent(streak){
@@ -1095,10 +1237,12 @@ const ARCADE_ARCHETYPES=[
    mêmes bornes de puissance que le reste du pool TACTICS (~1.2-2.3), aucun
    nouveau système. Chaque entrée est dérivée du profil réel de l'archétype
    (son couple de stats extrêmes) et de son .perk déjà existant, pas d'un
-   thème générique plaqué dessus. Couvre les 23 archétypes de base ET les 7
-   archétypes de LOT11_GAUNTLET_ETENDU (3 étendus + 4 débloquables, injectés
-   dans ARCADE_ARCHETYPES par injectExtendedArchetypes() plus bas) — la table
-   est indexée par nick, donc indépendante de l'ordre/moment d'injection. ==== */
+   thème générique plaqué dessus. Couvre les 23 archétypes de base ET les 8
+   archétypes de LOT11_GAUNTLET_ETENDU (3 étendus + 5 débloquables, dont Le
+   Phénix Cendré — arch_lottery_phoenix, exclusif à la Caisse Mystère —,
+   injectés dans ARCADE_ARCHETYPES par injectExtendedArchetypes() plus bas) —
+   la table est indexée par nick, donc indépendante de l'ordre/moment
+   d'injection. ==== */
 const ARCADE_EXCLUSIVE_TACTICS={
   'Le Bûcheron':{id:'aex_bucheron',lbl:'La Hache Nucléaire',desc:'Une bûche, une droite, un adversaire au sol. Le plan tient en une phrase — le cardio de toute façon n\u2019en permettrait pas une deuxième.',m:{ko:2.1,str:1.1,def:0.3}},
   'L\u2019Anaconda':{id:'aex_anaconda',lbl:'L\u2019Étreinte Fatale',desc:'Chaque échange rapproché est une invitation à l\u2019étouffement. Le combat debout n\u2019est qu\u2019une formalité avant l\u2019inévitable.',m:{sub:2.0,td:1.3,str:0.3}},
@@ -1130,6 +1274,14 @@ const ARCADE_EXCLUSIVE_TACTICS={
   'Le Shinobi':{id:'aex_shinobi',lbl:'Invisible Jusqu\u2019à L\u2019étranglement',desc:'Aucun angle d\u2019attaque prévisible. Il n\u2019est nulle part, puis il est accroché à un cou et c\u2019est déjà fini.',m:{sub:1.9,def:1.3,str:0.4}},
   'Le Roi de la Rue':{id:'aex_roirue',lbl:'La Bagarre De Pub',desc:'Refuse catégoriquement d\u2019aller au sol. Le combat se règle debout, au corps à corps, jusqu\u2019à ce qu\u2019un des deux tombe.',m:{str:1.6,tdd:1.5,ko:1.1}},
   'Le Sniper':{id:'aex_sniper',lbl:'Jamais À Portée',desc:'La distance est la seule arme qui compte. Démonter au tibia depuis l\u2019extérieur, sans jamais laisser l\u2019adversaire entrer.',m:{str:1.5,def:1.5,ko:0.6}},
+  /* ==== [ANCRE: CORRECTIF_TACTIQUE_PHENIX] — bug remonté (B12) : 31 archétypes
+     déclarés (23 de base + 8 de LOT11_GAUNTLET_ETENDU), 30 tactiques — Le
+     Phénix Cendré (arch_lottery_phoenix, exclusif à 1 % de la Caisse Mystère)
+     était le seul sans entrée, CL.pickCoachingTactic (ui-08) retombait
+     silencieusement sur []. Dérivée de son profil réel (heart:99,
+     recovery:95, composure:92) comme les 30 autres entrées de cette table. ==== */
+  'Le Phénix Cendré':{id:'aex_phenix',lbl:'Renaît De Chaque Round',desc:'Chaque coup encaissé nourrit sa résistance plutôt que de l\u2019épuiser. Plus le combat s\u2019éternise, plus il devient dangereux.',m:{def:1.4,ctrl:1.3,ko:0.8}},
+  /* ==== [FIN ANCRE] ==== */
 };
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_DRAFT_SHUFFLE] — .sort(()=>0.5-rnd()) est un
@@ -1222,7 +1374,10 @@ function coachScoreLine(a,c){
  * @param {object} a @param {object} c @param {object} r dernier round
  * @param {object} f le combattant @returns {string} */
 function coachAdviceLine(a,c,r,f){
-  const opp=a.opponent||c.opp||{}, oa=opp.attrs||{}, fa=(f&&f.attrs)||{};
+  /* ==== [ANCRE: CORRECTIF_BRANCHE_MORTE] — A17 : `c.opp` n'est jamais posé sur
+     l'objet coaching (G.arcade.coaching, cf. startCoachingFight) — branche
+     inatteignable, retirée. ==== */
+  const opp=a.opponent||{}, oa=opp.attrs||{}, fa=(f&&f.attrs)||{};
   const encaisse=r&&r.stats?(r.stats.A.dmgHead+r.stats.A.dmgBody+r.stats.A.dmgLegs):0;
   const inflige=r&&r.stats?(r.stats.B.dmgHead+r.stats.B.dmgBody+r.stats.B.dmgLegs):0;
   const dernier=c.round>=3;
@@ -1273,9 +1428,17 @@ function buildArcadePool(){
 /* ==== [ANCRE: REJOUABILITE_PLAN_ARCADE_RESOLVE] — G.arcade.plan (posé par
    CL.chooseArcadePlan(), ui-08, depuis scr_arcade_plan) était jusqu'ici
    ignoré : simulateFight() était toujours appelée sans 4e paramètre, quel
-   que soit le choix fait à l'écran. G.fight.plan reflète maintenant le même
-   choix, pour que l'affichage du combat (qui lit G.fight.planLabel comme en
-   carrière) reste cohérent. ==== */
+   que soit le choix fait à l'écran. G.fight.plan reflète le même choix, pour
+   que l'affichage du combat (qui lit G.fight.planLabel comme en carrière)
+   reste cohérent.
+   ==== [ANCRE: CORRECTIF_ANCRE_DEPLACEE] — A12 : cette ANCRE décrivait un bloc
+   qui vivait ici avant l'ajout du coaching obligatoire (cf. ANCRE
+   COACHING_OBLIGATOIRE juste en dessous) — resolveArcadeFight() n'est plus
+   qu'une délégation d'une ligne. Le fil décrit (G.arcade.plan → simulateFight)
+   vit désormais dans startCoachingFight()/runCoachingRound() plus haut dans
+   ce fichier : c'est `runCoachingRound(plan)` qui transmet `plan` à
+   `simulateFight(G.f,opp,1,plan,...)`, et G.fight.plan y est posé au même
+   endroit (finalizeArcadeCombatResult, plus haut). ==== */
 function resolveArcadeFight(){
   /* ==== [ANCRE: COACHING_OBLIGATOIRE] — item demandé : le coaching entre les
      rounds n'est plus un toggle optionnel (coachingToggleBlock ne fait plus
@@ -1329,7 +1492,7 @@ function finalizeArcadeCombatResult(res,plan){
   /* ==== [FIN ANCRE] ==== */
   G.pending={res,win,method:res.method,finish:!isDecisionLike(res.method),opp:{name:opp.name,flag:opp.flag},planLabel:G.fight.planLabel,newAch};
   G.arcade.plan=null; G.arcade.planLabel=null;
-  buildTimeline(); G.screen='arena'; save(); render();
+  buildTimeline(); G.screen='arena'; render(); // save() retiré (A7) : no-op tant que G.arcade.active
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: WTUMMA_BRACKET64] — refonte du Gauntlet en tournoi à
@@ -1342,8 +1505,15 @@ function finalizeArcadeCombatResult(res,plan){
    départ plus clémente pour un même OVR (diviseur 2 → 1.3) et plafond de
    niveau adverse abaissé (95/99 → 88/93). Réversible en un chiffre si ça se
    révèle trop généreux à l'usage. ==== */
+/* ==== [ANCRE: CORRECTIF_PSEED_BORNE] — bug remonté (A13) : un commentaire
+   annonçait un décalage anti-doublon Némésis ("on décale d'un cran pour
+   éviter le doublon") qui n'était jamais implémenté — retiré. En pratique le
+   cas qu'il décrivait ne peut pas se produire : pSeed ne descend jamais sous
+   19 pour un overall≤99 (64-Math.floor(59/1.3)=19), la borne basse du clamp
+   (1) était donc inatteignable et mentait sur ce qui peut réellement arriver.
+   Resserrée à 19 pour que la borne dise la vérité. ==== */
 function buildWTUMMABracket(player){
-  const pSeed=clamp(64-Math.floor((player.overall-40)/1.3),1,64);
+  const pSeed=clamp(64-Math.floor((player.overall-40)/1.3),19,64);
   const pool=[];
   const rival=pickGauntletRival(player.div);
   for(let i=1;i<=64;i++){
@@ -1358,10 +1528,10 @@ function buildWTUMMABracket(player){
       pool.push(o);
     }
   }
-  // Si la Némésis a déjà été placée en pSeed par coïncidence (rare), on décale d'un cran pour éviter le doublon
   let matches=[]; for(let i=0;i<32;i++){ matches.push({a:pool[i],b:pool[63-i]}); }
   return {active:true,roundStep:1,stepName:'Top 64 (32èmes)',matches,playerSeed:pSeed};
 }
+/* ==== [FIN ANCRE] ==== */
 function advanceWTUMMABracket(){
   const t=G.arcade.tournament; const survivors=[];
   t.matches.forEach(m=>{
@@ -1375,6 +1545,11 @@ function advanceWTUMMABracket(){
   const newMatches=[]; for(let i=0;i<survivors.length;i+=2){ newMatches.push({a:survivors[i],b:survivors[i+1]}); }
   t.matches=newMatches;
   const playerMatch=t.matches.find(m=>m.a.id===G.f.id||m.b.id===G.f.id);
+  /* ==== [ANCRE: CORRECTIF_GARDE_NULLE] — A18 : playerMatch était déréférencé
+     sans garde nulle, contrairement au reste du fichier. Sûr aujourd'hui (le
+     joueur est toujours poussé dans survivors ci-dessus), explicité pour ne
+     pas dépendre silencieusement de cette invariante. ==== */
+  if(!playerMatch) return false;
   G.arcade.opponent=playerMatch.a.id===G.f.id?playerMatch.b:playerMatch.a;
   return false;
 }
@@ -1435,7 +1610,15 @@ function generateArcadeUpgrades(pactBonus){
   const stripDyn=d=>d.filter(delta=>delta[0]!=='morale' && delta[0]!=='form');
   G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:stripDyn(opt.d).map(delta=>[delta[0],delta[1]*4])}))
                              .filter(opt=>opt.d.length>0);
-  const _heal=recoveryTrainOption(); if(_heal) G.arcade.trainOpts.push(_heal);
+  const _heal=runInjuryHealOption(); if(_heal) G.arcade.trainOpts.push(_heal);
+  /* ==== [ANCRE: CORRECTIF_CAMP_REDUIT_SOIN] — bug remonté (B7) : la carte de
+     soin était poussée APRÈS la coupe à 2 options de mut_camp_reduit,
+     ramenant le camp à 3 options exactement quand le joueur est blessé —
+     c'est-à-dire quand le mutateur devrait mordre le plus. Le plafond de 2
+     est désormais réappliqué après le push, sans exception pour le soin :
+     sous ce mutateur, soigner une séquelle coûte réellement une option de
+     camp, comme prévu. ==== */
+  if(mutId==='mut_camp_reduit') G.arcade.trainOpts.length=2;
   /* ==== [FIN ANCRE] ==== */
   G.arcade.skillOpts=[];
   const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
@@ -1544,12 +1727,6 @@ function buildWTUMMALadder(division){
   }
   return ladder;
 }
-function genWTUMMAOpponent(){
-  const currentRank=G.arcade.rank; let targetRank;
-  if(currentRank<=15){ targetRank=1; }
-  else { targetRank=Math.max(2,currentRank-RI(10,15)); }
-  return G.arcade.ladder.find(o=>o.ladderRank===targetRank)||G.arcade.ladder[0];
-}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BRUIT_DU_MILIEU] — sur les combats à fort enjeu
    (Boss Run entier, 2 derniers tours du Bracket 64), la fiche technique
@@ -1607,11 +1784,19 @@ const GAUNTLET_RUMOR_TEMPLATES={
     'La rumeur : un profil complet, sans angle d\u2019attaque évident.',
     'On ne lui connaît pas de point faible exploitable — méfiance de partout.']
 };
+/* ==== [ANCRE: CORRECTIF_RUMEUR_FUITE] — bug remonté (B9) : le segment
+   affichait opp.styleLabel, la VRAIE discipline (posée par makeFighter,
+   engine.js), juste à côté d'une rumeur fausse 30 % du temps — le joueur
+   pouvait réfuter la rumeur sans jamais payer L'Analyse (pierceGauntletRumor),
+   neutralisant tout le canal de tromperie. Segment retiré : la ligne ne porte
+   plus que la catégorie annoncée par la rumeur elle-même (fiable ou non),
+   jamais le profil réel. ==== */
 function gauntletRumorText(opp){
   const cat=gauntletRumorCategory(opp);
   const line=pickStable(GAUNTLET_RUMOR_TEMPLATES[cat],String(opp.id)+'rumorLine');
-  return `Bruit de vestiaire (${opp.styleLabel||'style inconnu'}) : ${line}`;
+  return `Bruit de vestiaire : ${line}`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PREPARATION_CIBLEE] — ajout #23 (24 ajouts, 12/08/2026) :
    "L'Analyse" — perce le Bruit du Milieu pour CE combat uniquement, contre

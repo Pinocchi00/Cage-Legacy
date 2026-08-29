@@ -486,7 +486,7 @@ function finaliseGauntletRun(a,opts){
   const base=(opts.kind==='elimination')
     ? gauntletEliminationPayout(a.mode,opts.progress,opts.atRisk)
     : (opts.kind==='cashout')
-      ? Math.round(gauntletPayout(a.mode,opts.progress)*(a.mode==='boss_run'?0.6:0.7))
+      ? Math.round(gauntletPayout(a.mode,opts.progress)*(GAUNTLET_CASHOUT_RATIO[a.mode]||GAUNTLET_CASHOUT_RATIO.default))
       : gauntletPayout(a.mode,opts.progress);
   const preBonus=gauntletFinalPayout(a,base);
   /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
@@ -1732,12 +1732,15 @@ const CL={
     /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts, 12/08/2026). ==== */
     const mutator=rollGauntletMutator(asc);
     G.arcade={active:true,streak:0,target:5,pool:buildArcadePool(),mode:'bracket64',seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract('bracket64',mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
     forceFightPaceForMode('gauntlet');
     G.screen='draft'; save(); render(); },
+  /* ==== [ANCRE: CORRECTIF_DOUBLE_RENDU] — startBossRun() (ui-03) ne rend plus
+     elle-même (A20) : le seul render(true) de ce chemin est désormais ici. ==== */
   startBossRun(){ const asc=CL._rollGauntletAsc('boss_run'); const seed=CL._rollGauntletSeed();
     startBossRun(seed,asc); render(true); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — variante Boss Run débloquée
      depuis scr_gauntlet_menu (ui-06) une fois 5 rivaux historiques battus.
      Pas de défi du jour sur cette entrée (G._dailyPending non consommé ici,
@@ -1750,7 +1753,7 @@ const CL={
     /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts, 12/08/2026). ==== */
     const mutator=rollGauntletMutator(asc);
     G.arcade={active:true,mode:'ladder_100',rank:100,victory:false,fightsDone:0,pool:buildArcadePool(),seed,asc,
-      riskMult:1,maxPactStreak:0,contract:drawGauntletContract(asc,mutator&&mutator.id),mutator};
+      riskMult:1,maxPactStreak:0,contract:drawGauntletContract('ladder_100',mutator&&mutator.id),mutator};
     /* ==== [FIN ANCRE] ==== */
     forceFightPaceForMode('gauntlet');
     G.screen='draft'; save(); render(); },
