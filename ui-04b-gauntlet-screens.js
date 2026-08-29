@@ -340,7 +340,12 @@ function gauntletStatusBlock(a){
      comparer mentalement la liste à ce qu'il avait avant. lastInjury pointe
      vers le MÊME objet que l'entrée fraîchement ajoutée à runInjuries (===) :
      comparer les références suffit, sans dupliquer l'affichage. ==== */
-  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${i.attrs.map(x=>`${attrLabel(x[0])} ${x[1]}`).join(' · ')}</span></div>`));
+  /* ==== [ANCRE: CORRECTIF_ECHELLE_SEQUELLE] — bug remonté (A14) : les
+     séquelles sont définies en échelle /100 (GAUNTLET_RUN_INJURIES, ui-03) et
+     s'affichaient BRUTES ("Menton -12") juste à côté des passifs de camp,
+     eux correctement convertis en /20 par campFxLabel (ui-03). Réutilise
+     désormais campFxLabel pour la même échelle d'affichage partout. ==== */
+  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${i.attrs.map(x=>campFxLabel({[x[0]]:x[1]})).join(' · ')}</span></div>`));
   const m=gauntletRunMult(a);
   if(m>1){
     const parts=[];

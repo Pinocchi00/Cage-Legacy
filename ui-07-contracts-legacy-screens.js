@@ -173,6 +173,10 @@ function scr_promo(){
        <div class="mono small gold mt">${contractPayLine(previewStd)}</div>
        <div class="mono small muted">Contrat de ${previewStd.fightsLeft} combats</div>
        <p class="muted small mt">${offer.msg}</p>
+       <!-- ==== [ANCRE: CORRECTIF_PHRASE_CONTRAT] — A1 : phrase1 était calculée
+            (CONTRACT_PHRASES, ui-03) mais jamais lue nulle part — affichée ici
+            en note de flavor sous le message principal, purement additif. ==== -->
+       ${offer.phrase1?`<p class="muted small mt" style="font-style:italic">${offer.phrase1}</p>`:''}
        <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">Signer avec ${offer.orgFlavor1}</button>
      </div>
      ${offer.fastTrack?(()=>{ const previewFast=generateContract(f,offer.fastTier||3,false); return `<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
@@ -180,6 +184,7 @@ function scr_promo(){
        <div class="mono small gold mt">${contractPayLine(previewFast)}</div>
        <div class="mono small muted">Contrat de ${previewFast.fightsLeft} combats</div>
        <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
+       ${offer.phrase3?`<p class="muted small mt" style="font-style:italic">${offer.phrase3}</p>`:''}
        <button class="btn mt" style="background:var(--gold-d);color:#fff;border-color:var(--gold-d);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">Signer avec ${offer.orgFlavor3}</button>
      </div>`; })():''}
      ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus en amateur</button>`:''}
