@@ -334,8 +334,17 @@ function txtPick(poolId,ctx){
   let elig=pool.filter(e=>(!e.req||e.req(ctx)) && (!e.tier||!ctx.rankTier||e.tier===ctx.rankTier));
   if(!elig.length) elig=pool.filter(e=>!e.req); // repli : au moins les entrées sans condition, jamais un pool vide
   if(!elig.length) elig=pool; // dernier repli : mieux vaut une redite qu'une chaîne vide
+  /* ==== [CORRECTIF V2-32ter] — ledgerKey optionnel (repli sur poolId) :
+     un même pool tiré plusieurs fois par écran pour des sous-catégories
+     disjointes (ex. faith_pressconf_posture, une entrée par tier) partageait
+     une seule fenêtre anti-répétition pour les trois tiers — au bout de deux
+     conférences les 5 entrées d'un tier pouvaient toutes être "récentes" et
+     le repli ci-dessous annulait tout l'effet. Un ledgerKey par tier isole
+     la fenêtre de chaque sous-catégorie sans toucher au comportement des
+     appelants qui ne le fournissent pas. ==== */
+  const ledgerKey=ctx.ledgerKey||poolId;
   const ledger=ctx.F?ensureTextLedger(ctx.F):null;
-  const recent=ledger&&ledger[poolId]?ledger[poolId]:[];
+  const recent=ledger&&ledger[ledgerKey]?ledger[ledgerKey]:[];
   const window=Math.min(8,Math.max(1,Math.floor(pool.length/3)));
   let candidates=elig.filter(e=>!recent.includes(e.id));
   if(!candidates.length) candidates=elig; // tout le pool éligible a déjà été vu récemment : on retire quand même plutôt que de bloquer
@@ -343,9 +352,9 @@ function txtPick(poolId,ctx){
   let roll=rnd()*totalWeight, chosen=candidates[0];
   for(const e of candidates){ roll-=(e.weight||1); if(roll<=0){ chosen=e; break; } }
   if(ledger){
-    if(!ledger[poolId]) ledger[poolId]=[];
-    ledger[poolId].push(chosen.id);
-    while(ledger[poolId].length>window) ledger[poolId].shift();
+    if(!ledger[ledgerKey]) ledger[ledgerKey]=[];
+    ledger[ledgerKey].push(chosen.id);
+    while(ledger[ledgerKey].length>window) ledger[ledgerKey].shift();
   }
   /* ==== [ANCRE: TEXT_ENGINE_INTERPOLATION] — Plan V3 LOT 5 : "toute phrase
      fréquente doit consommer >=1 jeton de contexte" (§4.2). `text` peut

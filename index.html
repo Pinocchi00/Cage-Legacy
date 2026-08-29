@@ -183,6 +183,13 @@ details[open]>summary span[style*="font-size:18px"]{transform:rotate(90deg);disp
 .scr{padding:16px 15px 40px;animation:fade .32s cubic-bezier(.2,.9,.25,1.15)}
 @keyframes fade{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.scr{animation:none}}
+/* ==== [ANCRE: SCR_RUPTURE] — gabarit "Frankenstein" (ui-04, Faith), écrans
+   qui rompent volontairement avec le layout par défaut de .scr (résolue/
+   non-résolue du même écran + la coupure de presse annuelle). Une seule
+   classe pour les trois occurrences plutôt que la même chaîne de style
+   recopiée : l'invariant "seules ces occurrences cassent le gabarit"
+   devient comptable (grep -c 'scr-rupture'). ==== */
+.scr-rupture{max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)}
 /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 (24 ajouts, 12/08/2026) :
    animation d'entrée intimidante pour le reveal du boss (scr_boss_reveal,
    ui-04) — zoom d'impact + flash oxblood, se substitue à l'animation .fade

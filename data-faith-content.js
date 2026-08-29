@@ -480,7 +480,7 @@ const FAITH_BRANCH_EVENTS=[
             {label:'Lever le pied cette saison',d:[['morale',10],['form',6],['aggression',-6]]}]},
   {id:'evt_br_agent_offer',req:f=>f._circle==='agent',title:'Le transfert',
    text:'Une écurie concurrente propose à votre agent de vous racheter. Il vous en parle après avoir dit oui.',
-   choices:[{label:'Accepter le mouvement',d:[['adaptability',6],['fightIQ',4],['morale',-6]]},
+   choices:[{label:'Accepter le mouvement',d:[['adaptability',6],['fightIQ',4],['morale',-6]],oathBreak:'homegrown'},
             {label:'Bloquer le transfert',d:[['confidence',7],['morale',-8]],traitTag:'rebel'}]},
   {id:'evt_br_squad_business',req:f=>f._circle==='squad',title:'Le projet des potes',
    text:'La bande veut monter une marque de vêtements à votre nom. Personne dans le groupe n’a jamais géré une entreprise.',

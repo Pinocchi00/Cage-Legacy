@@ -71,10 +71,9 @@
    vieillesse : mêmes paliers par organisation, environ moitié moins par
    saison. ==== */
 function faithFightsPlanned(f){
-  if(f.injury) return 0;
+  if(f.injury) return 1;
   if((f.form||100)<30) return 1;
   if(f.champion) return 1;
-  if(f.org<=1) return 2;
   if(f.org<=3) return 2;
   if(f.org===4) return RI(1,2);
   return 1;
@@ -463,7 +462,7 @@ function faithSaveSummary(){
     const f=p.f, F=p.faith;
     const monthEntry=(F.calendar&&F.calendar[F.month])||{type:null};
     const next=f.injury?'Infirmerie'
-      :monthEntry.type==='combat'?'Un combat approche'
+      :monthEntry.type==='fight'?'Un combat approche'
       :monthEntry.type==='intersaison'?'Intersaison'
       :monthEntry.type==='vie'?'Un événement de vie'
       :'Calme, pour l’instant';
@@ -487,7 +486,7 @@ function scr_faith_home(){
        <b style="font-size:16px">Nouvelle carrière</b>
        <div class="muted small mt">${sum?'Remplace définitivement la carrière en cours.':'Créer un combattant et commencer.'}</div>
      </div>
-     <div class="opp" style="padding:16px" onclick="CL.go('faith_legends')">
+     <div class="opp" style="padding:16px" onclick="G._legendsReturn='faith_home';CL.go('faith_legends')">
        <b style="font-size:16px">Le Panthéon Faith</b>
        <div class="muted small mt">Les carrières terminées et leurs scores.</div>
      </div>
@@ -520,23 +519,19 @@ function scr_faith_hub(){
   const nemesis=f.faithNemesisId?(G.roster||[]).find(o=>o.id===f.faithNemesisId):null;
   let actionsHtml='';
   if(f.injury){
-    /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — f.injury ne peut être posé que
-       par un mécanisme qui touche vraiment le mode Faith (aucun aujourd'hui
-       ne le fait — toute la chaîne blessure du mode carrière passe par
-       chooseTraining()/finishTrainingFlow(), que CL.opp() court-circuite
-       entièrement pour G.faith). Le champ existe malgré tout sur le
-       combattant (repairFighter() le garantit, state.js), et le condamner
-       à ne jamais s'afficher ici serait fragile au premier futur mécanisme
-       qui le poserait (stage violent, sparring qui tourne mal...). Prime
-       sur tout, quel que soit le mois : un combattant blessé ne voit plus
-       d'adversaire pressenti ni de vie de salle, seule l'Infirmerie,
-       jusqu'à guérison. ==== */
+    /* ==== [ANCRE: FAITH_BOUTON_BLESSURE] — f.injury peut être posé par
+       faithCampChoose() (stage à risque, ui-08). Prime sur tout, quel que
+       soit le mois : un combattant blessé ne voit plus d'adversaire
+       pressenti ni de vie de salle, seule l'Infirmerie, jusqu'à guérison.
+       Décompte en MOIS (CL.faithRecoverInjury, ui-08), pas en combats —
+       CL.recoverInjury() est le handler du mode carrière, il n'avance
+       jamais G.faith.month. ==== */
     actionsHtml=`<div class="opp" style="padding:16px;text-align:left;margin-bottom:16px;border-left:3px solid var(--loss)">
       <div class="eyebrow" style="font-size:11px;color:var(--loss)">INFIRMERIE</div>
       <div class="hero-name" style="font-size:20px;margin-top:6px">${esc(f.injury.name)}</div>
-      <div class="mono small muted" style="margin-top:4px">${f.injury.left} combat${f.injury.left>1?'s':''} avant guérison complète</div>
+      <div class="mono small muted" style="margin-top:4px">${f.injury.left} mois avant guérison complète</div>
     </div>
-    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.recoverInjury()">LAISSER LE CORPS RÉCUPÉRER</button>`;
+    <button class="btn primary" style="width:100%;height:56px;font-size:16px" onclick="CL.faithRecoverInjury()">LAISSER LE CORPS RÉCUPÉRER</button>`;
   } else if(monthEntry.type==='vie'){
     const quoi=((G.faith.month||0)%2===0)?'Ce qui arrive à la salle':'Ce qui arrive dehors';
     actionsHtml=`<p class="lede small">${quoi}.</p>
@@ -726,8 +721,9 @@ function scr_faith_offer(){
      ressembler visuellement. Bordure/fond suivent gala.hype (déjà la
      mesure d'enjeu existante), jamais un second barème. ==== */
   const venueInfo=faithGalaVenueInfo(F,f,gala);
-  if(!TEXT_POOLS['faith_crowd_ambiance']) registerTextPool('faith_crowd_ambiance',FAITH_CROWD_AMBIANCE);
-  const crowdLine=txtPick('faith_crowd_ambiance',{city:venueInfo.city,venue:venueInfo.venue,home:venueInfo.home,hype:gala.hype});
+  /* ==== [ANCRE: V2-32ter] — crowdLine figée par faithEnsureOffer() (ui-08)
+     à la génération de l'offre, jamais retirée à chaque rendu. ==== */
+  const crowdLine=off.crowdLine||'';
   const bandeauStrong=(gala.hype==='forte');
   return `<div class="scr" style="max-width:560px;margin:0 auto">
    <div class="eyebrow">${esc(F.agent?faithAgentDisplayName():'Sans agent')}</div>
@@ -822,15 +818,19 @@ function scr_faith_offer(){
    ferme cet écart. Douze entrées minimum (règle 6 : la rareté fait la
    saillance — inutile d'en avoir plus si elles ne sont vues qu'une fois
    par combat). Chacune stocke sa cause dans F.buildup.causes[]. ==== */
-/** Tire et applique un événement de build-up (V2-23), sans écran séparé
- * pour la sélection de choix — deux options, réponse immédiate (règle 6 :
- * un choix par combat, pas un menu). @returns {{title:string,text:string,
+/** Tire un événement de build-up (V2-23), sans écran séparé pour la
+ * sélection de choix — deux options, réponse immédiate (règle 6 : un choix
+ * par combat, pas un menu). @returns {{title:string,text:string,
  * chosen:string}|null} */
-function faithBuildupPick(f,F){
+function faithBuildupPick(F){
   if(!F.buildup) F.buildup={attente:0,tension:0,causes:[]};
   const seen=F.buildupSeen||(F.buildupSeen=[]);
   let pool=FAITH_BUILDUP_EVENTS.filter(e=>!seen.includes(e.id));
-  if(!pool.length){ seen.length=0; pool=FAITH_BUILDUP_EVENTS; }
+  if(!pool.length){
+    const last=seen[seen.length-1];
+    seen.length=0;
+    pool=FAITH_BUILDUP_EVENTS.filter(e=>e.id!==last);
+  }
   const ev=pick(pool);
   seen.push(ev.id);
   return ev;
@@ -890,31 +890,27 @@ function faithOppReplies(o,f,F,ctxExtra){
 function faithPressConfPostureOptions(f,o){
   if(!TEXT_POOLS['faith_pressconf_posture']) registerTextPool('faith_pressconf_posture',FAITH_PRESSCONF_POSTURES);
   const commonHistory=(f.history||[]).filter(h=>h.oppId===o.id).length;
-  const base={personality:f.personality,commonHistory,F:f};
+  /* ==== [CORRECTIF V2-32ter] — F:f envoyait le ledger anti-répétition sur
+     le combattant (f.textLedger) au lieu de G.faith.textLedger, où
+     faithOppReplies() (juste au-dessus) écrit déjà les siens : deux ledgers
+     concurrents sur le même écran, l'un réinitialisé par faithRelaunchSame
+     et pas l'autre. ==== */
+  const base={personality:f.personality,commonHistory,F:G.faith};
   return ['respect','provocation','silence'].map(type=>{
-    const picked=txtPick('faith_pressconf_posture',Object.assign({},base,{rankTier:type}));
+    const picked=txtPick('faith_pressconf_posture',Object.assign({},base,{rankTier:type,ledgerKey:'faith_pressconf_posture:'+type}));
     return Object.assign({type},picked&&typeof picked==='object'?picked:{label:type,hint:''});
   });
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_press_conf(){
-  const f=G.f, F=G.faith, off=F.pendingOffer;
+  const F=G.faith, off=F.pendingOffer;
   if(!off) return `<div class="scr center intro"><p class="lede">Rien à signaler.</p><button class="btn ghost mt" onclick="CL.go('faith_hub')">Retour</button></div>`;
   const o=off.opp.o;
-  if(!TEXT_POOLS['faith_pressconf_reply']) registerTextPool('faith_pressconf_reply',FAITH_PRESSCONF_REPLIES);
-  /* ==== [CORRECTIF V3_TITLE_PROMO_EXCLUSIF] — Plan V3 LOT 6 §5.6.1 : isTitle
-     lisait le NIVEAU de carte (gala.tier==='Main event', LOT 5), donc
-     confondait "grosse affiche" (rang <=4, ou rivalId) et "vrai combat de
-     titre". Depuis ce lot, un combat de titre a son propre écran de
-     négociation (scr_faith_title_negotiation) — le signal exact existe
-     déjà (fightKind()==='title'/'defense', ui-05) : plus besoin d'un
-     proxy. Les répliques exclusives (FAITH_TITLE_PROMO_REPLIES) ne sortent
-     donc plus jamais pour un simple Main event non-titré. */
-  const fk=fightKind();
-  const venueInfo=faithGalaVenueInfo(F,f,off.gala);
-  const commonHistory=(f.history||[]).filter(h=>h.oppId===o.id).length;
-  const replies=faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:(fk==='title'||fk==='defense'),favorite:divRank(o)<divRank(f),home:venueInfo.home,commonHistory});
-  const postures=faithPressConfPostureOptions(f,o);
+  /* ==== [ANCRE: V2-32ter] — répliques et postures figées par
+     faithOfferSign() (ui-08) à l'entrée de la conférence, jamais retirées à
+     chaque rendu (même motif que off.pesee, ANCRE V4_C19_PESEE). ==== */
+  const replies=(off.pressConf&&off.pressConf.replies)||['',''];
+  const postures=(off.pressConf&&off.pressConf.postures)||[];
   return `<div class="scr center intro">
    <div class="eyebrow blood">Conférence de presse</div>
    <h2 class="disp">${esc(o.name)} face à vous</h2>
@@ -1239,11 +1235,16 @@ function scr_faith_camps(){
  * @param {object} f @param {object} F @returns {object[]} */
 function faithIntersaisonDraw(f,F){
   const cooldowns=F.intersaisonCooldown||{};
+  /* ==== [CORRECTIF V2-09bis] — `e.req` absent (entrées sans condition) levait
+     un TypeError, admis par le catch : ça marchait par accident. Le jour où
+     une `req` réelle plante sur une donnée manquante, elle sera admise au
+     lieu d'être signalée. `!e.req ||` traite l'absence de condition
+     explicitement, le try ne reste que pour les vraies erreurs. ==== */
   let pool=FAITH_INTERSAISON_POOL.filter(e=>{
     if((cooldowns[e.id]||0)>0) return false;
-    try{ return e.req(f,F); }catch(err){ return true; }
+    try{ return !e.req || e.req(f,F); }catch(err){ return true; }
   });
-  if(pool.length<3) pool=FAITH_INTERSAISON_POOL.filter(e=>{ try{ return e.req(f,F); }catch(err){ return true; } });
+  if(pool.length<3) pool=FAITH_INTERSAISON_POOL.filter(e=>{ try{ return !e.req || e.req(f,F); }catch(err){ return true; } });
   const weighted=[]; for(const e of pool) for(let i=0;i<(e.weight||1);i++) weighted.push(e);
   let attempt=0, picked=[];
   do{
@@ -1294,6 +1295,11 @@ function formatEventDelta(d){
   return d.map(([k,v])=>{
     const lbl=k==='morale'?'Moral':k==='form'?'Forme':attrLabel(k);
     if(v===0) return '';
+    /* /5 suppose la MÊME échelle 0-100 pour les attributs et pour
+       morale/form — vrai aujourd'hui (les deux sont bornés 0-100 dans tout
+       le fichier), mais rien ici ne le vérifie ni ne le documente ailleurs
+       que ce commentaire : une future échelle différente pour l'un des deux
+       casserait ce calcul en silence. */
     const shown=Math.sign(v)*Math.max(1,Math.round(Math.abs(v)/5)); // jamais 0 pour un vrai effet, toujours au moins ±1
     return `<span class="tag2" style="border-color:${shown>=0?'var(--win)':'var(--loss)'};color:${shown>=0?'var(--win)':'var(--loss)'}">${shown>=0?'+':''}${shown} ${lbl}</span>`;
   }).join('');
@@ -1343,7 +1349,7 @@ function scr_faith_event(){
   if(ev.id==='evt_frankenstein_betrayal'){
     if(resolved){
       const c=ev.choices[resolved.idx];
-      return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
+      return `<div class="scr scr-rupture">
        <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
        <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
        <p style="font-size:15px;line-height:1.55">${esc(ev.text)}</p>
@@ -1375,7 +1381,7 @@ function scr_faith_event(){
        la fidélité à un coach ne se pèse pas non plus en chiffres, le
        joueur la découvre dans la vue résolue (formatEventDelta(resolved.
        deltas) plus bas, jamais retiré). ==== */
-    return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
+    return `<div class="scr scr-rupture">
      <div class="eyebrow" style="color:var(--gold)">Ce que vous avez construit</div>
      <h2 class="hero-name" style="font-size:34px;line-height:1.06">${esc(ev.title)}</h2>
      <p style="font-size:15px;line-height:1.55">${esc(ev.text)}</p>
@@ -1442,7 +1448,7 @@ function faithOathFulfilled(oath,f,F){
   const titres=((typeof G!=='undefined'&&G&&G.titleHistory)||[]).filter(r=>r.champion===f.name).length;
   switch(oath.id){
     case 'no_shortcut': return true;              /* purement négatif : tenu tant que non rompu */
-    case 'homegrown':   return true;
+    case 'homegrown':   return true;              /* purement négatif aussi : rompu par oathBreak:'homegrown' (data-faith-content.js — évt du transfert accepté, camp d'élite, préparateur externe), lu par ui-08 */
     case 'old_lion':    return !!F.beltAfter34;
     case 'undefeated':  return titres>0 && (f.L||0)===0;
     case 'blood_master':return !!F.nemesisBeaten;
@@ -1603,7 +1609,11 @@ function faithScoreRow(label,val,max,delay){
  * @param {object} sub computeLegendScore() @param {number[]} delays */
 function faithScoreRows(sub,delays){
   const d=delays||[0,0,0];
-  if(sub.pic!=null) return `${faithScoreRow('Pic',sub.pic,40,d[0])}${faithScoreRow('Palmarès',sub.palmares,40,d[1])}${faithScoreRow('Trace',sub.trace,20,d[2])}`;
+  /* ==== [CORRECTIF FA-27ter] — plafond réel de sub.trace (computeLegendScore,
+     ci-dessus) : longevite(10)+hype(4)+oathTenu(3) = 17, jamais 20. La barre
+     ne pouvait donc jamais dépasser 85% de son rail, quoi que fasse le
+     joueur. ==== */
+  if(sub.pic!=null) return `${faithScoreRow('Pic',sub.pic,40,d[0])}${faithScoreRow('Palmarès',sub.palmares,40,d[1])}${faithScoreRow('Trace',sub.trace,17,d[2])}`;
   return `${faithScoreRow('Palmarès',sub.palmares||0,32,d[0])}${faithScoreRow('Sommet',sub.sommet||0,26,d[1])}${faithScoreRow('Intégrité',sub.longevite||0,18,d[2])}${faithScoreRow('Empreinte',sub.empreinte||0,14,d[2])}${faithScoreRow('Fortune',sub.fortune||0,10,d[2])}`;
 }
 /* ==== [ANCRE: V3_CAREER_STATS_GRID] — Plan V3 LOT 7 §5.7.2 point 2 : "sous
@@ -1629,13 +1639,19 @@ function faithCareerStatsGrid(f,F){
     cell(f.sub||0,'Soumissions'),
     cell(f.dec||0,'Décisions'),
     cell(f.careerSig||0,'Coups mis'),
-    cell((F&&F.dmgHeadTotal)||0,'Coups encaissés'),
+    cell((F&&F.dmgHeadTotal)||0,'Dégâts encaissés (tête)'),
     cell(f.careerCtrl||0,'Temps de contrôle (s)'),
     cell(Math.max((F&&F.bestStreak)||0,f.streak||0,0),'Meilleure série'),
     cell((F&&F.peakRank!=null)?`#${F.peakRank}`:'—','Meilleur classement'),
     cell(formatArgent((F&&F.peakEarnings)||f.earnings||0),'Plus grosse bourse'),
     cell(titles,'Titres'),
-    cell(`${faithWeighInsPassed(f)}/${totalFights}`,'Pesées réussies'),
+    /* ==== [CORRECTIF FA-27ter] — même base que le numérateur
+       (faithWeighInsPassed) plutôt que totalFights (faithCareerTotalFights,
+       qui retombe sur amaRec.W+L pour une sauvegarde antérieure à
+       l'historique amateur préservé) : sur une telle sauvegarde, le
+       numérateur ne comptait que le volet pro quand le dénominateur comptait
+       les deux, affichant par exemple "17/31". ==== */
+    cell(`${faithWeighInsPassed(f)}/${(f.amaHistory||[]).concat(f.history||[]).length}`,'Pesées réussies'),
   ];
   return `<div class="mt"><div class="eyebrow mb" style="font-size:11px">En chiffres</div>
    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${cells.join('')}</div></div>`;
@@ -1739,19 +1755,25 @@ function scr_faith_epilogue(){
      <div style="text-align:center;padding:12px 0">
        <div class="hero-name" style="font-size:40px">${total}<span class="mono small">/100</span></div>
      </div>
+     <!-- ==== [CORRECTIF FA-27ter] — la mention du multiplicateur de serment
+          était sous les barres de décomposition, avec pour seul lien un bloc
+          de style identique. La somme des barres (sc, non multiplié) ne
+          correspond au grand chiffre ci-dessus que si le serment est tenu —
+          remontée ici, entre le total et sa décomposition, pour que la
+          réconciliation ne repose plus sur le lecteur. ==== -->
+     ${serment?`<div class="mono" style="font-size:11px;text-align:center;margin-bottom:12px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
      <div style="margin-bottom:12px">
        ${faithScoreRows(sc,[0,180,360])}
      </div>
      <div class="mono" style="font-size:12px;color:${compare.color};margin-bottom:12px">${compare.text}</div>
      ${faithCareerStatsGrid(f,G.faith)}
      ${faithJourneyBlock(G.faith)}
-     ${serment?`<div class="mono" style="font-size:11px;color:${tenu?'var(--gold)':'var(--muted)'};${tenu?'':'text-decoration:line-through'}">${tenu?'✦ Serment tenu — score ×1,15':'Serment non tenu'} · ${esc(serment.label)}</div>`:''}
    </div>
    ${faithNemesisEpilogueBlock(f)}
    <button class="btn primary" style="width:100%;height:56px;margin-top:40px;font-size:16px" onclick="CL.faithRelaunchSame()">REPRENDRE LE MÊME CHEMIN</button>
    <button class="btn ghost" style="width:100%;margin-top:12px" onclick="CL.faithRelaunchEdit()">Changer une chose</button>
    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="CL.newFaithCareer()">Repartir de zéro</button>
-   <button class="btn ghost" style="width:100%;margin-top:8px" onclick="CL.go('faith_legends')">Voir les Légendes à battre</button>
+   <button class="btn ghost" style="width:100%;margin-top:8px" onclick="G._legendsReturn='faith_epilogue';CL.go('faith_legends')">Voir les Légendes à battre</button>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -1806,6 +1828,12 @@ function faithLegendCompareCol(e){
    été TENU comptent pour un record par serment : un serment rompu n'est
    pas une carrière à battre pour ce serment-là. ==== */
 function scr_faith_legends(){
+  /* ==== [CORRECTIF FA-27bis] — même motif que G._oppCardReturn (l.685) et
+     G._archivesReturn (l.2114) : cet écran a deux portes d'entrée (le hub,
+     avant même qu'une carrière soit scellée, et l'épilogue) — un retour en
+     dur vers l'épilogue éjectait un joueur venu du hub sur une carrière pas
+     encore la sienne. ==== */
+  const back=G._legendsReturn||'faith_home';
   const meta=loadMetaStats();
   const list=(meta.faithLegends||[]);
   const filtreId=G.faithLegendsFilterOath||null;
@@ -1817,10 +1845,10 @@ function scr_faith_legends(){
     <span class="pill ${!filtreId?'on':''}" onclick="CL.setFaithLegendsFilter('')">Tous</span>
     ${FAITH_OATHS.map(o=>`<span class="pill ${filtreId===o.id?'on':''}" onclick="CL.setFaithLegendsFilter('${o.id}')">${esc(o.label)}</span>`).join('')}
   </div>`;
-  const record=filtre?(filtered.length?`Meilleure carrière avec « ${esc(filtre.label)} » : ${filtered[0].score}.`
+  const record=filtre?(filtered.length?`Meilleure carrière avec « ${esc(filtre.label)} » : ${Math.max(...filtered.map(e=>e.score))}.`
     :`Aucune carrière n’a encore tenu ce serment jusqu’au bout.`):null;
   return `<div class="scr" style="max-width:560px;margin:0 auto">
-   <div class="bar"><span class="eyebrow">Légendes à battre</span><span class="eyebrow x" onclick="CL.go('faith_epilogue')">✕</span></div>
+   <div class="bar"><span class="eyebrow">Légendes à battre</span><span class="eyebrow x" onclick="CL.go('${back}')">✕</span></div>
    ${list.length?`<p class="lede small">Les meilleures carrières jamais écrites. Touche deux cartes pour les comparer.</p>
    ${pills}
    ${record?`<p class="mono small" style="color:var(--gold);margin-bottom:12px">${record}</p>`:''}
@@ -2041,8 +2069,14 @@ function faithArchiveYear(year,ys,f,F){
   const notables=rate.concat(reste).slice(0,2).map(l=>l.title);
   const scandalsDelta=(F.scandals||0)-(F.startOfYearScandals||0);
   const oathJustBroken=!F.startOfYearOathBroken && !!(F.oath&&F.oath.broken);
+  /* ==== [ANCRE: V2-32bis] — réutilise l'article déjà figé et lu par le
+     joueur sur scr_faith_year_end (F.currentArticle) plutôt que d'en tirer
+     un second qui filtrerait le titre que celui-ci vient d'enregistrer dans
+     F.usedHeadlines. Repli sur un tirage frais pour le seul appelant qui ne
+     passe jamais par cet écran : la retraite en cours d'année (CL.opp). */
+  const titre=(F.currentArticle&&F.currentArticle.year===year)?F.currentArticle.art.titre:faithPresseArticle(ys,f,F).titre;
   F.journey.push({year,W:ys.wins||0,L:ys.losses||0,rank:ys.rank,
-    title:faithPresseArticle(ys,f,F).titre,age:f.age,notables,
+    title:titre,age:f.age,notables,
     rupture:scandalsDelta>0||oathJustBroken});
 }
 /** Une ligne du Parcours, hauteur fixe (40px) : le regard descend la liste
@@ -2145,7 +2179,14 @@ function scr_faith_archives(){
 /* ==== [FIN ANCRE] ==== */
 function scr_faith_year_end(){
   const ys=G.faith.yearStats, f=G.f, F=G.faith;
-  const art=faithPresseArticle(ys,f,F);
+  /* ==== [ANCRE: V2-32bis] — même motif que faithEnsureOffer/
+     faithEnsureIntersaisonDraw/off.pesee : l'article est figé une fois par
+     saison, jamais retiré à chaque rendu. Sans ça, faithArchiveYear()
+     (nextFaithYear(), ui-08) retirait un second titre après que celui-ci ait
+     déjà consommé F.usedHeadlines, archivant dans le Parcours un gros titre
+     que le joueur n'avait jamais lu. ==== */
+  if(!F.currentArticle || F.currentArticle.year!==F.year) F.currentArticle={year:F.year,art:faithPresseArticle(ys,f,F)};
+  const art=F.currentArticle.art;
   /* ==== [ANCRE: V2-33/V2-34] — le journaliste nommé remplace le média
      anonyme tiré par year%length ; son verdict (place dans la division,
      ton selon son sentiment envers vous) remplace l'ancien
@@ -2199,10 +2240,11 @@ function scr_faith_year_end(){
    utilisée par applyAging() pour dater le début du déclin : 36 ans, 38
    chez les lourds) sert de seuil de déclenchement — pas un âge inventé,
    le même repère que le jeu utilise déjà pour dire "le corps commence à
-   flancher". Casse le gabarit exactement comme evt_frankenstein_betrayal
-   (seules les deux occurrences de min-height:90vh dans tout le fichier) :
-   une troisième aurait annulé l'effet de seuil des deux premières. Le
-   soupçon sur l'état du corps (dmgHeadTotal, déjà suivi par ailleurs)
+   flancher". Casse le gabarit exactement comme evt_frankenstein_betrayal,
+   via la même classe .scr-rupture (index.html) — l'invariant "seuls ces
+   écrans cassent le gabarit" est comptable (grep -c 'scr-rupture'), pas
+   recopié une quatrième fois sans que personne ne le voie. Le soupçon sur
+   l'état du corps (dmgHeadTotal, déjà suivi par ailleurs)
    reste qualitatif — jamais un nombre ni une probabilité : même règle
    que FAITH_RISQUE_DECLARE, aucune espérance de gain affichée. ==== */
 function scr_faith_retire(){
@@ -2211,7 +2253,7 @@ function scr_faith_retire(){
   const risque=dmg>400?'Le corps a beaucoup donné. Une année de trop commence à se voir, sur la durée.'
     :dmg>150?'Les coups laissent des traces. Rien d’alarmant, mais rien qui s’efface tout à fait non plus.'
     :'Le corps encaisse encore bien.';
-  return `<div class="scr" style="max-width:560px;margin:0 auto;min-height:90vh;display:flex;flex-direction:column;justify-content:center;background:var(--panel2)">
+  return `<div class="scr scr-rupture">
    <div class="eyebrow" style="color:var(--gold)">${f.age} ans</div>
    <h2 class="hero-name" style="font-size:34px;line-height:1.06">Continuer ?</h2>
    <p style="font-size:15px;line-height:1.55">${risque}</p>

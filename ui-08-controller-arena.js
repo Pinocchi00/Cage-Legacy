@@ -399,6 +399,15 @@ function faithEnsureOffer(){
   G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
   G.faith.pendingRevengeClause=false; // nouvelle offre : la clause d'une offre précédente ne survit jamais
   G.faith.currentCard=generateFightCard(gala,chosen.o);
+  /* ==== [ANCRE: V2-32ter] — crowdLine figée à la génération de l'offre, pas
+     à chaque rendu de scr_faith_offer() : sans F dans le ctx de txtPick(),
+     aucun ledger anti-répétition n'était tenu, et un rnd() frais à chaque
+     render faisait changer la phrase d'ambiance au moment précis où le
+     joueur négocie (faithOfferDemandMoney() reste sur l'écran, save()+
+     render()). Même motif que off.pesee (ANCRE V4_C19_PESEE). ==== */
+  const venueInfo=faithGalaVenueInfo(G.faith,G.f,gala);
+  if(!TEXT_POOLS['faith_crowd_ambiance']) registerTextPool('faith_crowd_ambiance',FAITH_CROWD_AMBIANCE);
+  G.faith.pendingOffer.crowdLine=txtPick('faith_crowd_ambiance',{F:G.faith,city:venueInfo.city,venue:venueInfo.venue,home:venueInfo.home,hype:gala.hype});
   return true;
 }
 /* ==== [ANCRE: V3_FIGHT_CARD] — Plan V3 LOT 6 §5.6.1.b : "remplacer la
@@ -1305,6 +1314,19 @@ const CL={
       if(f.classChosen && !f.class31Chosen && f.age>=31){ G.screen='class_choice_31'; save(); render(); return; }
     }
     save(); render(); },
+  /* ==== [ANCRE: FAITH_RECOVER_INJURY] — pendant du recoverInjury() carrière,
+     mais décrémenté en MOIS (f.injury.left posé par faithCampChoose()) et
+     routé par faithAdvanceMonth() plutôt que par un simple render(). Ne
+     rappelle ni applyAging() ni advanceRoster() : le mode Faith les
+     applique déjà une fois par an dans prepareFaithYearEnd(). ==== */
+  faithRecoverInjury(){
+    const f=G.f; if(!f.injury) return;
+    f.injury.left-=1;
+    f.morale=clamp(f.morale+5,0,100);
+    f.form=clamp(f.form+15,0,100);
+    if(f.injury.left<=0) f.injury=null;
+    faithAdvanceMonth();
+  },
   choosePlan(idx){
     /* ==== [ANCRE: CORRECTIF_DOUBLE_RESOLUTION] — un double-tap sur la carte
        de tactique appelait resolveFight() deux fois : W/L, bourse, Elo,
@@ -2385,12 +2407,25 @@ const CL={
     if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
     if(!off.buildupDone){
       off.buildupDone=true;
-      G.faith.currentBuildupEvent=faithBuildupPick(G.f,G.faith);
+      G.faith.currentBuildupEvent=faithBuildupPick(G.faith);
       G.screen='faith_buildup'; save(); render();
       return;
     }
     if(off.gala && off.gala.pressConf && !off.pressConfDone){
       off.pressConfDone=true;
+      /* ==== [ANCRE: V2-32ter] — répliques et postures figées ici, exactement
+         comme off.pesee (ANCRE V4_C19_PESEE) : sans ça, scr_faith_press_conf()
+         (une fonction de rendu) retirait de nouvelles répliques et postures à
+         chaque réaffichage de l'écran. */
+      const f=G.f, F=G.faith, o=off.opp.o;
+      if(!TEXT_POOLS['faith_pressconf_reply']) registerTextPool('faith_pressconf_reply',FAITH_PRESSCONF_REPLIES);
+      const fk=fightKind();
+      const venueInfo=faithGalaVenueInfo(F,f,off.gala);
+      const commonHistory=(f.history||[]).filter(h=>h.oppId===o.id).length;
+      off.pressConf={
+        replies:faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:(fk==='title'||fk==='defense'),favorite:divRank(o)<divRank(f),home:venueInfo.home,commonHistory}),
+        postures:faithPressConfPostureOptions(f,o)
+      };
       G.screen='faith_press_conf'; save(); render();
       return;
     }
