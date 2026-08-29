@@ -424,6 +424,12 @@ function runDebriefBlock(a){
   if((a.riskMult||1)>1) parts.push(`mise en jeu ×${a.riskMult}`);
   if((a.maxPactStreak||0)>0) parts.push(`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`);
   if(a.contract&&a.contract.done) parts.push(`contrat rempli ×${a.contract.mult}`);
+  /* ==== [CORRECTIF B4_ULTIMATUM_HORS_MULT] — le bonus ×1.5 d'un ultimatum du
+     médecin refusé (ui-08, ULTIMATUM_MEDECIN) est appliqué directement sur le
+     payout, EN DEHORS de gauntletRunMult() (ui-03) : displayMult ne le reflète
+     donc jamais. Signalé ici en toutes lettres, sinon l'écart entre
+     "base × mult" et le total réellement versé serait muet. ==== */
+  if(a.doctorRefused&&a.victory) parts.push('ultimatum refusé ×1.5');
   const displayMult=Math.round(mult*100)/100;
   const contractLine=a.contract
     ? `<div class="mono small" style="color:${a.contract.done?'var(--sage)':'var(--muted)'}">${a.contract.done?'✓':'✗'} Contrat : ${a.contract.label}</div>`
@@ -431,9 +437,21 @@ function runDebriefBlock(a){
   const bounty=(a.bounties||0)>0?`<div class="mono small" style="color:var(--blood)">⚔ ${a.bounties} némésis vaincue(s) — primes déjà versées</div>`:'';
   const inj=(a.runInjuries||[]).length?`<div class="mono small muted">${a.runInjuries.length} séquelle(s) encaissée(s) : ${a.runInjuries.map(i=>i.name).join(', ')}</div>`:'';
   const curses=(a.cursedTaken||0)>0?`<div class="mono small muted">${a.cursedTaken} pacte(s) de camp maudit accepté(s)</div>`:'';
-  const multLine=(displayMult>1)
-    ? `<div class="mono small gold"><b>${base} pts</b> × <b>${displayMult}</b> = <b>${a.earnedOnElimination||0} pts</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`
-    : '';
+  /* ==== [CORRECTIF B4_DEBRIEF_RACHAT_DIABLE] — un rachat au Diable
+     (buyDevilContinue, ui-08) fait continuer une run déjà close par
+     finaliseGauntletRun : a.earnedOnElimination CUMULE sur chaque segment
+     (ui-08 L543), mais a.basePayout/a.runMultApplied sont ÉCRASÉS par le
+     dernier segment seul (ui-08 L545-546). "base × mult = earned" mentait
+     donc dès le 2e segment : le produit affiché ne portait que sur le
+     dernier bout de run, jamais sur le total réellement encaissé.
+     a.segments (posé à côté, jamais relu jusqu'ici) distingue les deux cas :
+     au-delà d'un segment, on affiche le cumul honnêtement plutôt qu'une
+     égalité arithmétique fausse. ==== */
+  const multLine=(a.segments||1)>1
+    ? `<div class="mono small gold">${a.segments} segments de run (rachat${a.segments>2?'s':''} au Diable inclus) → <b>${a.earnedOnElimination||0} pts</b> au total${parts.length?` <span class="muted">(dernier segment : ${parts.join(' · ')})</span>`:''}</div>`
+    : (displayMult>1
+      ? `<div class="mono small gold"><b>${base} pts</b> × <b>${displayMult}</b> = <b>${a.earnedOnElimination||0} pts</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`
+      : '');
   const ach=(a.newAch||[]).length?`<div class="mono small gold mt">🏅 ${a.newAch.map(x=>x.h).join(' · ')}</div>`:'';
   if(!multLine && !contractLine && !bounty && !inj && !curses && !ach) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:20px">
@@ -689,7 +707,9 @@ function scr_arcade_plan(){
      ce choix de tactique), le joueur choisit sa consigne À L'AVEUGLE — ni le
      nom de l'adversaire ni l'analyse tactique (qui exposerait ses stats
      réelles) ne doivent transparaître ici. ==== */
-  const isBossBlind=(G.arcade.mode==='boss_run' && !G.arcade.revealed)||(G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu');
+  const bossBlind=(G.arcade.mode==='boss_run' && !G.arcade.revealed);
+  let mutBlind=!!(G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu');
+  mutBlind=mutBlind&&!G.arcade.analysisPierced;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — la tactique exclusive de
      l'archétype (ARCADE_EXCLUSIVE_TACTICS, ui-03) passe en tête de liste,
@@ -697,7 +717,7 @@ function scr_arcade_plan(){
      les 3 options de style partagées — c'est la plus spécifique au
      combattant, elle doit être la première chose vue. ==== */
   const archTactic=ARCADE_EXCLUSIVE_TACTICS[f.nick];
-  const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(f)).concat(plans);
+  const combined=(archTactic?[archTactic]:[]).concat(plans);
   /* ==== [ANCRE: GAUNTLET_BRUIT_DU_MILIEU] — sur les combats à fort enjeu
      (cf. gauntletRumorActive, ui-03), l'analyse tactique VÉRIDIQUE
      (tacticalRead) est remplacée par une rumeur — parfois fausse, jamais
@@ -706,13 +726,33 @@ function scr_arcade_plan(){
   /* ==== [ANCRE: PREPARATION_CIBLEE] — ajout #23 (24 ajouts, 12/08/2026) :
      rumorActive ET percée (G.arcade.analysisPierced) -> analyse véridique
      malgré le fort enjeu. Le bouton de percée n'apparaît que si la rumeur
-     est active, pas encore percée, et l'adversaire n'est pas déjà masqué
-     par ailleurs (isBossBlind) — inutile de payer pour percer une rumeur
-     qu'on ne peut de toute façon pas encore voir. ==== */
+     est active, pas encore percée, et l'adversaire n'est pas masqué par le
+     Boss Run non révélé (bossBlind) — inutile de payer pour percer une
+     rumeur qu'on ne peut de toute façon pas encore voir avant le reveal.
+     ==== [CORRECTIF B2_PIERCE_JAMAIS_RENDU] — bossBlind (Boss Run non
+     révélé) et mutBlind (mutateur Mise à nu) étaient fusionnés en un seul
+     isBossBlind, utilisé aussi bien pour masquer l'identité que pour
+     bloquer ce bouton : sous Mise à nu (Ladder/Bracket), rumorActive était
+     pourtant vrai (cf. CORRECTIF_RUMEUR_LADDER_MISE_A_NU, ui-03) mais le
+     bouton restait invisible faute de distinguer les deux masques, et
+     mutBlind ne retombait jamais après une percée réussie — payer -2
+     Intelligence tactique ne changeait donc rien à l'écran. Scindés : seul
+     bossBlind bloque encore le bouton (le Boss Run reste aveugle jusqu'au
+     reveal, aucune rumeur à percer avant), et mutBlind s'éteint dès que
+     G.arcade.analysisPierced passe à vrai, laissant apparaître l'analyse
+     véridique payée. ==== */
   const rumorActive=gauntletRumorActive(G.arcade) && !G.arcade.analysisPierced;
-  const analysis=isBossBlind?'Adversaire non identifié — tu choisis ta consigne à l\u2019aveugle, sans scouting possible avant ce combat.':(rumorActive?gauntletRumorText(opp):tacticalRead(f,opp));
-  const analysisLabel=isBossBlind?'Inconnu':(rumorActive?'Rumeur':(gauntletRumorActive(G.arcade)?'Analyse (percée)':'Analyse'));
-  const pierceButton=(!isBossBlind && rumorActive)?`<div class="mono small mt"><span onclick="CL.pierceRumor()" style="cursor:pointer;color:var(--gold);text-decoration:underline dotted">🔍 L\u2019Analyse — percer la rumeur pour ce combat (-2 Intelligence tactique)</span></div>`:'';
+  const analysis=(bossBlind||mutBlind)?'Adversaire non identifié — tu choisis ta consigne à l\u2019aveugle, sans scouting possible avant ce combat.':(rumorActive?gauntletRumorText(opp):tacticalRead(f,opp));
+  const analysisLabel=(bossBlind||mutBlind)?'Inconnu':(rumorActive?'Rumeur':(gauntletRumorActive(G.arcade)?'Analyse (percée)':'Analyse'));
+  const pierceButton=(!bossBlind && rumorActive)?`<div class="mono small mt"><span onclick="CL.pierceRumor()" style="cursor:pointer;color:var(--gold);text-decoration:underline dotted">🔍 L\u2019Analyse — percer la rumeur pour ce combat (-2 Intelligence tactique)</span></div>`:'';
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [CORRECTIF B10_LASTMSG_MUET] — CL.pierceRumor (ui-08) pose
+     G.lastMsg (coût de -2 Intelligence tactique, ou échec "Rien à percer
+     ici.") puis re-rend cet écran, mais rien ici ne l'affichait jusqu'ici —
+     même bloc auto-consommé que scr_hub (ui-06) : lu puis effacé dans le
+     même render, pour ne jamais réapparaître sur l'écran suivant. ==== */
+  const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
+  if(G.lastMsg) G.lastMsg=null;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_ANALYSE_COLLEE] — bug remonté : .hero-name a un
      interlignage très serré (line-height:.92) sans marge basse, et cette
@@ -722,7 +762,8 @@ function scr_arcade_plan(){
      passe inaperçu car renderFightPoster (l'affiche de combat, absente
      ici en Gauntlet) apporte déjà 24px de marge basse. ==== */
   return `<div class="scr"><div class="bar"><span class="eyebrow">Gauntlet · Plan de combat</span></div>
-   <div class="hero-name" style="text-align:center;font-size:20px">${esc(f.nick||f.name)} <span class="muted">vs</span> ${isBossBlind?'<span style="color:var(--muted)">???</span>':esc(opp.name)}</div>
+   ${lastMsgHtml}
+   <div class="hero-name" style="text-align:center;font-size:20px">${esc(f.nick||f.name)} <span class="muted">vs</span> ${(bossBlind||mutBlind)?'<span style="color:var(--muted)">???</span>':esc(opp.name)}</div>
    <div class="card mt" style="border-color:transparent;padding:14px 0 16px 0">
      <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>${analysisLabel} :</b> ${analysis}</div>
      ${pierceButton}
@@ -861,7 +902,15 @@ function scr_arcade_upgrades(){
   const stepName=a.tournament?a.tournament.stepName:'Ascension';
   const grp=(key,title,avg)=>`<div class="card"><div class="grp-h"><span class="disp" style="font-size:17px">${title}</span><span class="gold mono">${d20(avg)}/20</span></div>
      ${ATTR[key].map(att=>`<div class="attr"><span class="attr-l">${att[1]}</span>${gauge(f.attrs[att[0]])}<span class="attr-v">${d20(f.attrs[att[0]])}</span></div>`).join('')}</div>`;
-  let h=`<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // AMÉLIORATIONS</span></div>`;
+  /* ==== [CORRECTIF B10_LASTMSG_MUET] — CL.healGauntletZone (ui-08) pose
+     G.lastMsg (soin réussi ou échec faute de points de Légende) puis
+     re-rend cet écran, mais rien ici ne l'affichait jusqu'ici — même bloc
+     auto-consommé que scr_hub (ui-06) : lu puis effacé dans le même
+     render, pour ne jamais réapparaître sur l'écran suivant. ==== */
+  const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
+  if(G.lastMsg) G.lastMsg=null;
+  /* ==== [FIN ANCRE] ==== */
+  let h=`<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // AMÉLIORATIONS</span></div>${lastMsgHtml}`;
   if(!a.upgradesChosen.skill){
     h+=`<p class="lede small">L\u2019étau se resserre. Sélectionnez une nouvelle compétence pour la suite du parcours.</p>
         <div class="eyebrow mt mb" style="color:var(--gold)">1. NOUVELLE COMPÉTENCE (${stepName})</div>`;
@@ -1052,7 +1101,7 @@ function scr_coaching_round(){
   if(!c||!c.lastRoundRes) return `<div class="scr center intro"><p class="lede">Rien à ajuster pour l’instant.</p><button class="btn ghost mt" onclick="CL.go('arcadehub')">Retour</button></div>`;
   const r=c.lastRoundRes;
   const archTactic=ARCADE_EXCLUSIVE_TACTICS[f.nick];
-  const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(f)).concat(TACTICS[f.style]||[]);
+  const combined=(archTactic?[archTactic]:[]).concat(TACTICS[f.style]||[]);
   /* ==== [ANCRE: REFONTE_ECRAN_COACHING] — item demandé : refonte visuelle de
      cet écran uniquement (pas la transition ni le rendu de combat). Le
      "total combiné" (c.scoreA/c.scoreB, somme des 3 juges, jusqu'à 90 sur 3
