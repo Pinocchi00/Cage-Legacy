@@ -301,7 +301,12 @@ function gauntletFinalPayout(a,base){ return Math.round((base||0)*gauntletRunMul
 function runMultParts(a,verbose){
   const parts=[];
   if((a.riskMult||1)>1) parts.push(verbose?`mise en jeu ×${a.riskMult}`:`mise ×${a.riskMult}`);
-  if((a.maxPactStreak||0)>0) parts.push(verbose?`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`:`pactes +${Math.round((a.maxPactStreak||0)*10)} %`);
+  /* ==== [CORRECTIF A7_SERIE_VS_RECORD] — a.maxPactStreak est le PIC jamais
+     atteint sur la run (ui-08, Math.max cumulatif), pas la série en cours
+     (a.pactStreak, affichée séparément par pactToggleBlock, ui-04) : les
+     deux nombres peuvent coexister sur le même écran sans distinction.
+     Libellé précisé pour ne pas laisser croire que c'est la série active. */
+  if((a.maxPactStreak||0)>0) parts.push(verbose?`record de ${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`:`pactes (record) +${Math.round((a.maxPactStreak||0)*10)} %`);
   if(a.contract&&a.contract.done) parts.push(verbose?`contrat rempli ×${a.contract.mult}`:`contrat ×${a.contract.mult}`);
   if(verbose && a.doctorRefused&&a.victory) parts.push('ultimatum refusé ×1.5');
   return parts;

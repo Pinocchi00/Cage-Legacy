@@ -20,6 +20,15 @@
    l'ordre indiqué dans index.html : 01, 02, 03, 04a, 04b, 05... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: FONCTIONS_RETIREES, A17] — condense les tombeaux individuels
+   (jusqu'ici 64 lignes) de 6 fonctions retirées au fil des correctifs :
+   contractBlock() (repère d'une ligne au draft, LISIBILITE_CONTRAT_PASSIF) ;
+   gauntletBankLine(), runInjuryBlock(), runMultBlock() (fusionnées dans
+   gauntletStatusBlock(), GAUNTLET_STATUT_CONSOLIDE) ; le badge "✓ Coaching"
+   (coaching devenu permanent, plus rien à basculer) ; cashOutPreview()
+   ("Encaisser et sortir" retiré, GAUNTLET_SORTIE_UNIQUE). Aucun appelant
+   restant pour aucune des 6 — vérifié par grep avant condensation. ==== */
+
 /* ==== [ANCRE: REJOUABILITE_PERK_BADGE] — traduit f._styleProfileOverride
    (dérivé mécaniquement par deriveArcadeMods(), ui-03) en un badge lisible
    au draft. Sans ça, l'effet mécanique du perk resterait invisible pour le
@@ -233,23 +242,9 @@ function gauntletBestLine(mode){
     : `<div class="mono small gold" style="text-align:center;margin-bottom:12px">🏆 Record personnel (Ascension ${asc}) : ${label}</div>`)+archLine;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: CORRECTIF_CODE_MORT] — contractBlock() retirée : son unique
-   appelant restant (scr_draft) a été remplacé par un repère d'une ligne
-   (LISIBILITE_CONTRAT_PASSIF ci-dessus) pour ne plus doubler ce que
-   gauntletStatusBlock affiche déjà sur l'écran suivant immédiat (arcadehub,
-   atteint sans aucun combat entre les deux). L'ancre GAUNTLET_CONTRAT_RUN
-   d'origine visait « draft, hub ET camp » : les appels hub/camp avaient déjà
-   disparu au profit de gauntletStatusBlock lors de GAUNTLET_STATUT_CONSOLIDE
-   sans que ce commentaire ait été mis à jour ; seul l'appel draft restait,
-   désormais retiré à son tour. ==== */
-/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] — la cagnotte + ce qu'une
    élimination laisserait, ligne identique aux 3 formats (le Boss Run avait
    déjà la sienne en dur dans son hub, les 2 autres n'en avaient aucune). ==== */
-/* ==== [ANCRE: CORRECTIF_CODE_MORT] — gauntletBankLine() retirée : sa logique
-   vit désormais dans gauntletStatusBlock() (voir ANCRE GAUNTLET_STATUT_
-   CONSOLIDE), plus aucun appelant. ==== */
-/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_MISE_EN_JEU] — la bascule n'a de sens que si la
    cagnotte est non nulle : sinon il n'y a rien à perdre et l'affichage
    mentirait sur l'enjeu. Le montant réellement mis en jeu est affiché en
@@ -279,24 +274,10 @@ function atRiskToggleBlock(a){
    rounds n'est plus un choix (toggle togglable via CL.toggleCoaching()) mais
    une pièce systématique du Gauntlet, sur les 3 formats — resolveArcadeFight()
    (ui-03) ne passe plus que par startCoachingFight(). */
-/* ==== [ANCRE: CORRECTIF_BADGE_COACHING_PERMANENT] — bug remonté : le badge
-   "✓ Coaching" avait bien été rendu non cliquable au moment où le coaching
-   est devenu permanent (ANCRE ci-dessus), mais continuait de prendre une
-   place entière dans la rangée de pastilles des 3 hubs Gauntlet — pour une
-   mécanique qui ne se désactive plus jamais, ce n'est plus une information
-   utile à afficher à chaque écran, juste de l'espace perdu. Fonction et ses
-   3 appels retirés (aucun autre appelant, cf. grep). ==== */
-/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_BLESSURE_RUN] — les séquelles doivent être lisibles au
    hub, sinon la baisse d'attributs est vécue comme un bug de simulation. ==== */
-/* ==== [ANCRE: CORRECTIF_CODE_MORT] — runInjuryBlock() retirée : sa logique
-   vit désormais dans gauntletStatusBlock(), plus aucun appelant. ==== */
-/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_RUN_MULT] — le multiplicateur cumulé doit être visible
    AVANT la décision suivante, pas seulement au game over. ==== */
-/* ==== [ANCRE: CORRECTIF_CODE_MORT] — runMultBlock() retirée : sa logique
-   vit désormais dans gauntletStatusBlock(), plus aucun appelant. ==== */
-/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_STATUT_CONSOLIDE] — regroupe l'état PASSIF de la run
    (contrat, cagnotte, séquelles, multiplicateur) dans une seule carte au lieu
    de 4 empilées : sur les 3 hubs, contractBlock + gauntletBankLine +
@@ -567,12 +548,19 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
     // victoire qui ne comptait pas car pas obtenue par KO/TKO (mode KO
     // uniquement) — les deux affichaient auparavant le même "R.I.P." muet.
     const noKo=a.eliminatedReason==='no_ko';
-    const title=isVictory?'CHAMPION ARCADE':cashedOut?'RUN ENCAISSÉ':(noKo?'VICTOIRE INVALIDÉE':'R.I.P.');
-    const subtitle=isVictory?'Survivant du Gauntlet':cashedOut?`Sorti au palier ${a.streak}/${a.target}, mise en sécurité`:(noKo?'Pas de KO/TKO — la série s\u2019arrête':'Fin de la run');
+    /* ==== [CORRECTIF A8_CASHEDOUT_ULTIMATUM] — bug remonté : ce texte
+       parlait encore d'une sortie VOLONTAIRE ("Encaisser et sortir"),
+       fonctionnalité retirée (cf. ANCRE GAUNTLET_SORTIE_UNIQUE plus haut) —
+       le seul écrivain restant de a.cashedOut est CL.acceptRingDoctor
+       (ui-08, ULTIMATUM_MEDECIN) : "encaisser" signifie maintenant accepter
+       l'ultimatum du médecin de ring faute de tenir avec les séquelles
+       accumulées, jamais un choix stratégique de sortie en pleine forme. */
+    const title=isVictory?'CHAMPION ARCADE':cashedOut?'ARRÊT MÉDICAL':(noKo?'VICTOIRE INVALIDÉE':'R.I.P.');
+    const subtitle=isVictory?'Survivant du Gauntlet':cashedOut?`Ultimatum du médecin accepté au palier ${a.streak}/${a.target}`:(noKo?'Pas de KO/TKO — la série s\u2019arrête':'Fin de la run');
     const narrative=isVictory
       ?`« Contre toute attente, il a marché sur l\u2019algorithme. 5 cadavres laissés dans la cage. Le contrat est rempli. »`
       :cashedOut
-        ?`« Pas de gloire, mais les points sont en banque. Certains soirs, la sagesse vaut mieux que le prochain KO. »`
+        ?`« Le médecin de ring a tranché : le corps n’encaisse plus. Pas de gloire ce soir, mais les points sont en banque et les os le resteront pour la prochaine run. »`
         :noKo
           ?`« Le combat est gagné aux points, mais le Boss Run n\u2019accepte que les KO et TKO. Une victoire à la décision ou par soumission ne compte pas ici — la série s\u2019arrête malgré la main levée. »`
           :`« Le combat de trop. L\u2019ascension s\u2019arrête net sur la toile de l\u2019octogone. Les lumières s\u2019éteignent. »`;
@@ -606,7 +594,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
        ui-08:1653 exactement là où a.victory=true est écrit) sur les
        données brutes plutôt que de lire le flag fiable. Uniformisé. ==== */
     const isVictory=a.victory;
-    const cashedOut=!!a.cashedOut;
+    const cashedOut=!!a.cashedOut; // cf. CORRECTIF A8_CASHEDOUT_ULTIMATUM (branche boss_run ci-dessus) : ultimatum du médecin, plus une sortie volontaire.
     const isPact=a.eliminatedReason==='pact';
     /* ==== [CORRECTIF GAUNTLET_JUDGES_RAISON_ELIMINATION] — même classe de bug
        que CORRECTIF_BOSSRUN_RAISON_ELIMINATION pour 'no_ko' : judgesFail
@@ -624,7 +612,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
     const earned=a.earnedOnElimination||0;
     return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    ${glassOpen({padding:20,align:'center',margin:'margin-bottom:24px'})}
-     <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'R.I.P.'}<em style="color:var(--muted)">${isVictory?'Vous êtes le #1 mondial':cashedOut?`Sorti au rang #${a.rank}, mise en sécurité`:isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':'Éliminé au rang #'+a.rank}</em></div>
+     <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'ARRÊT MÉDICAL':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'R.I.P.'}<em style="color:var(--muted)">${isVictory?'Vous êtes le #1 mondial':cashedOut?`Ultimatum du médecin accepté au rang #${a.rank}`:isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':'Éliminé au rang #'+a.rank}</em></div>
    </div>
    ${gauntletBestLine('ladder_100')}
    ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
@@ -638,7 +626,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
        <div><span class="stat-big gold">+${earned}</span><span class="stat-lbl">Points de salle gagnés</span></div>
      </div>
    </div>
-   <div class="narr"><blockquote>${isVictory?`« 99 cadavres en contrebas. L\u2019ascension est terminée, le trône vous appartient. »`:cashedOut?`« Pas de trône, mais la chute est évitée et les points sont en poche. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:isJudges?`« Une décision qui ne convainc personne. Sous des juges aussi sévères, gagner aux points ne suffisait pas — il fallait finir le travail. »`:`« Une erreur et c\u2019est la chute libre. Le sommet restera hors de portée. »`}</blockquote></div>
+   <div class="narr"><blockquote>${isVictory?`« 99 cadavres en contrebas. L\u2019ascension est terminée, le trône vous appartient. »`:cashedOut?`« Le médecin de ring a refusé de vous laisser remonter. Pas de trône ce soir, mais le corps tiendra pour la prochaine ascension. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:isJudges?`« Une décision qui ne convainc personne. Sous des juges aussi sévères, gagner aux points ne suffisait pas — il fallait finir le travail. »`:`« Une erreur et c\u2019est la chute libre. Le sommet restera hors de portée. »`}</blockquote></div>
    ${seedReplayBlock(a)}
    ${devilBuybackBlock(a,isVictory,cashedOut)}
    <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVELLE RUN</button>
@@ -646,7 +634,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
    </div>`;
   }
   const isVictory=a.victory;
-  const cashedOut=!!a.cashedOut;
+  const cashedOut=!!a.cashedOut; // cf. CORRECTIF A8_CASHEDOUT_ULTIMATUM (branche boss_run ci-dessus) : ultimatum du médecin, plus une sortie volontaire.
   const isPact=a.eliminatedReason==='pact';
   /* ==== [CORRECTIF GAUNTLET_JUDGES_RAISON_ELIMINATION] — même classe de bug
      que CORRECTIF_BOSSRUN_RAISON_ELIMINATION pour 'no_ko' : judgesFail
@@ -658,7 +646,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
   const earned=a.earnedOnElimination||0;
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
    ${glassOpen({padding:20,align:'center',margin:'margin-bottom:24px'})}
-     <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'ÉLIMINÉ'}<em style="color:var(--muted)">${cashedOut?'Sortie volontaire':isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':a.tournament.stepName}</em></div>
+     <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'ARRÊT MÉDICAL':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'ÉLIMINÉ'}<em style="color:var(--muted)">${cashedOut?'Ultimatum du médecin de ring accepté':isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':a.tournament.stepName}</em></div>
    </div>
    ${gauntletBestLine('bracket64')}
    ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
@@ -669,7 +657,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
      <div class="stat-band"><div><span class="stat-big hot">+${earned}</span><span class="stat-lbl">WT Points gagnés</span></div></div>
    </div>
-   <div class="narr"><blockquote>${isVictory?`« 63 combattants laissés sur le carreau. L\u2019octogone vous appartient, jusqu\u2019à ce qu\u2019un nouveau challenger se présente. »`:cashedOut?`« Se retirer au bon moment est aussi un art. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:isJudges?`« Une décision qui ne convainc personne. Sous des juges aussi sévères, gagner aux points ne suffisait pas — il fallait finir le travail. »`:`« Le bracket est impitoyable. Une seule erreur et c\u2019est le vol de retour. »`}</blockquote></div>
+   <div class="narr"><blockquote>${isVictory?`« 63 combattants laissés sur le carreau. L\u2019octogone vous appartient, jusqu\u2019à ce qu\u2019un nouveau challenger se présente. »`:cashedOut?`« Le médecin de ring a eu le dernier mot : mieux vaut sortir sur ses jambes que sur une civière. »`:isPact?`« Le pacte promettait tout ou rien. Ce sera rien : gagné aux points ne suffisait pas. »`:isJudges?`« Une décision qui ne convainc personne. Sous des juges aussi sévères, gagner aux points ne suffisait pas — il fallait finir le travail. »`:`« Le bracket est impitoyable. Une seule erreur et c\u2019est le vol de retour. »`}</blockquote></div>
    ${seedReplayBlock(a)}
    ${devilBuybackBlock(a,isVictory,cashedOut)}
    <button class="btn mt" style="padding:20px;font-size:18px;border-color:var(--text)" onclick="CL.retryArcade()">NOUVELLE RUN</button>
@@ -727,16 +715,10 @@ function rivalBadge(opp){
    annoncerait le tarif de base et verserait le tarif multiplié, exactement le
    type d'écart qui avait produit le bug ×10 du Ladder. Le contrat est évalué
    en direct pour que son ×mult apparaisse dès qu'il est rempli. ==== */
-/* ==== [ANCRE: CORRECTIF_CODE_MORT] — cashOutPreview() retirée : item demandé,
-   « Encaisser et sortir » n'a plus aucun appelant sur les 3 hubs (bracket64,
-   ladder_100, boss_run — cf. GAUNTLET_SORTIE_UNIQUE ci-dessus). L'option
-   n'avait pas de bug — les chiffres étaient sains, l'encaissement rapportait
-   toujours strictement plus qu'une élimination au même palier — mais elle
-   n'était en pratique jamais choisie : sortir d'une run en cours va contre
-   l'intérêt du joueur tant que la cagnotte suivante reste accessible via
-   « Abandonner ». eliminationPreview() reste seule active : elle sert
-   toujours à gauntletStatusBlock() pour annoncer ce que rapporterait une
-   défaite sur le combat suivant.
+/* ==== [ANCRE: CORRECTIF_A1_ELIMINATIONPREVIEW] — eliminationPreview() reste
+   seule active (cashOutPreview() figure au tombeau condensé, en tête de
+   fichier — FONCTIONS_RETIREES) : elle sert toujours à gauntletStatusBlock()
+   pour annoncer ce que rapporterait une défaite sur le combat suivant.
    ==== [CORRECTIF A1_CONTRAT_DOUBLE_EVAL] — evalGauntletContract(a) était
    réévaluée ici à chaque appel, alors que gauntletStatusBlock() (seul
    appelant) l'a déjà fait en tête de fonction avant d'atteindre celui-ci —
@@ -755,9 +737,17 @@ function eliminationPreview(a){
    12/08/2026) : le badge non cliquable n'apparaît plus dès Ascension 3,
    mais uniquement quand le mutateur tiré pour cette run est
    'mut_pacte_force'. ==== */
+/* ==== [CORRECTIF A7_SERIE_VS_RECORD] — bug remonté : cette carte affiche
+   a.pactStreak (la série EN COURS, remise à zéro au premier combat sans
+   pacte) sous le libellé "Série", pendant que gauntletStatusBlock (même
+   écran, via runMultParts, ui-03) affiche a.maxPactStreak (le PIC jamais
+   atteint sur la run, qui seul détermine le bonus permanent — ui-08) sans
+   distinction de libellé : les deux nombres pouvaient coexister à l'écran
+   sans que rien n'indique lequel est la série active et lequel est le
+   record déjà acquis. "Série" -> "Série en cours". ==== */
 function pactToggleBlock(a){
   const streak=a.pactStreak||0;
-  const streakLine=streak>0?`<br><b class="gold">🔥 Série : ${streak}${streak>=3?' — Légendaire garantie au prochain camp !':''}</b>`:'';
+  const streakLine=streak>0?`<br><b class="gold">🔥 Série en cours : ${streak}${streak>=3?' — Légendaire garantie au prochain camp !':''}</b>`:'';
   if(a.mutator&&a.mutator.id==='mut_pacte_force'){
     return `<div style="flex:1;min-width:0">
      <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid var(--blood);color:var(--blood);font-weight:bold">⚠ Pacte obligatoire</div>
@@ -795,9 +785,13 @@ function scr_arcade_plan(){
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — la tactique exclusive de
      l'archétype (ARCADE_EXCLUSIVE_TACTICS, ui-03) passe en tête de liste,
-     avant les tactiques exclusives génériques (allonge/densité, engine.js) et
-     les 3 options de style partagées — c'est la plus spécifique au
-     combattant, elle doit être la première chose vue. ==== */
+     avant les 3 options de style partagées (TACTICS, ui-01) — c'est la plus
+     spécifique au combattant, elle doit être la première chose vue.
+     ==== [ANCRE PÉRIMÉE RETIRÉE, A16] — cette liste mentionnait aussi "les
+     tactiques exclusives génériques (allonge/densité, engine.js)" :
+     getExclusiveTactics() ne renvoie plus que [] (mort, engine-events.js) et
+     son appel a été retiré ici même (cf. CORRECTIF A2, LOT 2) — plus rien de
+     tel n'entre dans `combined`. ==== */
   const archTactic=ARCADE_EXCLUSIVE_TACTICS[f.nick];
   const combined=(archTactic?[archTactic]:[]).concat(plans);
   /* ==== [ANCRE: GAUNTLET_BRUIT_DU_MILIEU] — sur les combats à fort enjeu
@@ -1083,11 +1077,17 @@ function scr_arcade_upgrades(){
     });
   } else {
     /* ==== [CORRECTIF ARCADE_UPGRADES_IMPASSE] — upgradesChosen.skill ET
-       .train déjà vrais tous les deux (sauvegarde rechargée pile entre la
-       dernière écriture d'état et le CL.go('arcadehub') qui suit
-       normalement) : aucune des deux branches ci-dessus ne rend quoi que ce
-       soit, et l'écran restait sans bouton de sortie. Repli "Continuer",
-       même geste que pickArcadeSkill(-1) plus haut. ==== */
+       .train déjà vrais tous les deux : aucune des deux branches ci-dessus ne
+       rendrait quoi que ce soit, et l'écran resterait sans bouton de sortie.
+       ==== [ANCRE PÉRIMÉE CORRIGÉE, A16] — la justification d'origine (une
+       sauvegarde rechargée pile entre la dernière écriture d'état et le
+       CL.go('arcadehub') qui suit normalement) est en fait IMPOSSIBLE :
+       save() (state-save.js) sort sans rien écrire tant que G.arcade.active
+       est vrai, donc aucun rechargement ne peut jamais surprendre cet écran
+       dans cet état précis en cours de run. Cette branche reste un repli
+       purement défensif — sain à garder, mais inatteignable en pratique tant
+       que le seul chemin normal (pickArcadeTrain puis CL.go('arcadehub'))
+       reste correct. ==== */
     h+=`<p class="lede small">Rien de plus à choisir ici.</p>
         <button class="btn ghost mt" onclick="CL.go('arcadehub')">Continuer</button>`;
   }
@@ -1204,11 +1204,6 @@ function scr_coaching_round(){
      pour que la tendance mi-combat ressemble visuellement au scorecard final
      — même langage, deux moments différents. ==== */
   const roundJustEnded=c.round-1;
-  /* ==== [ANCRE: ESTIMATION_JUGES_COACHING] — affichage de l'ESTIMATION
-     (c.judgesEstimate, calculée dans runCoachingRound), jamais du vrai
-     score (c.judges) — repli sur c.judges seulement si une sauvegarde
-     antérieure à ce correctif n'a pas encore ce champ. ==== */
-
   /* ==== [ANCRE: COACH_DU_COIN] — item demandé : la fin de round ressemblait
      à une fin de COMBAT (grand "FIN DU ROUND", scorecard des juges façon
      décision finale), alors que c'est une pause : le combat reprend juste
@@ -1263,7 +1258,3 @@ function scr_coaching_round(){
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: TITLE_ELIGIBLE] — condition UNIQUE, partagée par genOpponents()
-   et fightKind(). Avant : les deux vérifiaient des choses différentes
-   (streak vs orgWins), ce qui permettait de battre le vrai champion sans que
-   le combat soit jamais reconnu comme un combat de titre. ==== */
