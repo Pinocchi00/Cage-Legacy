@@ -361,7 +361,12 @@ function faithEnsureOffer(){
        toucher au cache partagé. ==== */
     opps=eligible; G.faith.offerPool=eligible;
   }
-  if(!opps.length) return false;
+  /* ==== [CORRECTIF FAITH_HUB_ADVERSAIRE_bis] — même raison affichée que le
+     repli du filtre Main event ci-dessus : sans G.lastMsg posé ici, le hub
+     (scr_faith_hub, ui-04) n'avait aucun moyen de dire pourquoi il n'y a pas
+     d'offre ce mois-ci — seulement "Tout est en place.", un vide qui ne dit
+     rien. ==== */
+  if(!opps.length){ G.lastMsg="Personne à proposer ce mois-ci : l’organisation n’a plus de candidat disponible à votre niveau."; return false; }
   /* ==== [ANCRE: V3_REMATCH_GUARANTEE] — Plan V3 LOT 6 §5.6.1.b : clause de
      revanche posée à la négociation de titre (scr_faith_title_negotiation)
      et consommée à la défaite (ui-05, ANCRE V3_TITLE_LOSS_CLAUSE) — la
@@ -2011,6 +2016,13 @@ const CL={
     const F=G.faith;
     if(F.pendingIntersaisonEntry){
       if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+      /* ==== [CORRECTIF V2-09bis] — décrément déplacé depuis
+         faithEnsureIntersaisonDraw() (ui-04) : une fonction de préparation
+         d'écran n'a pas à écrire la méta-progression des cooldowns — cette
+         écriture vit désormais au même endroit que la pose du cooldown
+         choisi, juste en dessous. Une fois par intersaison RÉELLEMENT
+         résolue, jamais au fil des rendus. ==== */
+      for(const k in F.intersaisonCooldown) F.intersaisonCooldown[k]=Math.max(0,F.intersaisonCooldown[k]-1);
       F.intersaisonCooldown[F.pendingIntersaisonEntry]=3;
       F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
       F.currentIntersaison=null;
@@ -2058,6 +2070,10 @@ const CL={
       CL.faithCamp(); return;
     }
     if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+    /* ==== [CORRECTIF V2-09bis] — même décrément relocalisé que
+       faithCampChoose() ci-dessus, ici pour toutes les entrées SAUF camp
+       (qui résout et décrémente elle-même à sa propre résolution). ==== */
+    for(const k in F.intersaisonCooldown) F.intersaisonCooldown[k]=Math.max(0,F.intersaisonCooldown[k]-1);
     F.intersaisonCooldown[entryId]=3;
     F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
     F.currentIntersaison=null;
@@ -3983,6 +3999,11 @@ function scr_faith_title_negotiation(){
      <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
    </div>
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
+   <!-- ==== [CORRECTIF V2-20bis] — même bug que scr_faith_offer (ui-04) : les
+        deux offres partagent off (V3_TITLE_NEGOTIATION_ROUTE) et le même
+        CL.faithOfferDemandMoney(), dont off.finishBonus ne se reflétait
+        jamais dans bourseEst. ==== -->
+   ${off.finishBonus?`<div class="mono small" style="color:var(--gold);margin-top:4px">Prime de finition doublée sur ce combat.</div>`:''}
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
      <button class="btn primary" style="height:56px;font-size:16px" onclick="CL.faithOfferSign()">SIGNER</button>
      ${faithLeverage(f,F)>0?`<div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">

@@ -39,7 +39,7 @@ const ANGLICISMS = [
   { term: 'BOUT', re: /\bBOUT\b/, note: 'terme anglais non traduit — "POIDS LOURDS · 3 REPRISES" ou "· 3 ROUNDS" (Plan V3 LOT 6/P09, ui-01:654 déjà identifié).' },
   { term: 'MAIN EVENT', re: /\bMAIN EVENT\b/i, note: 'à remplacer par une carte complète de 5-8 combats (Plan V3 LOT 6/P18).' },
 ];
-const ANGLICISM_FILES = ['ui-01-roster-matchmaking.js','ui-04-faith-arcade-screens.js','data-faith-content.js','data-people.js','ui-07-contracts-legacy-screens.js'];
+const ANGLICISM_FILES = ['ui-01-roster-matchmaking.js','ui-04a-faith-screens.js','ui-04b-gauntlet-screens.js','data-faith-content.js','data-people.js','ui-07-contracts-legacy-screens.js'];
 
 function lintAnglicisms(){
   const findings = [];

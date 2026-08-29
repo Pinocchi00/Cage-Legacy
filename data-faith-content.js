@@ -3,9 +3,10 @@
    ============================================================================
    Corpus texte du mode MMA Faith — données pures, AUCUNE fonction d'écran
    ici. Dépend de rien (juste des littéraux JS), doit charger avant
-   ui-04-faith-arcade-screens.js qui consomme ces constantes par leur nom
-   d'origine, INCHANGÉ (déplacement mécanique, cf. ANCRE ci-dessous — pas
-   une réécriture).
+   ui-04a-faith-screens.js/ui-04b-gauntlet-screens.js (scindés depuis
+   l'ancien ui-04-faith-arcade-screens.js, cf. leur en-tête) qui consomment
+   ces constantes par leur nom d'origine, INCHANGÉ (déplacement mécanique,
+   cf. ANCRE ci-dessous — pas une réécriture).
 
    ==== [ANCRE: DATA_FAITH_CONTENT_V3] — créé pour le Plan V3 « L'Humanité »,
    LOT 0 §0.2/§4.2. Contenu déplacé tel quel depuis

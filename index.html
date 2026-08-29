@@ -539,7 +539,13 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="ui-01-roster-matchmaking.js"></script>
 <script src="ui-02-fight-prep-events.js"></script>
 <script src="ui-03-contracts-arcade-data.js"></script>
-<script src="ui-04-faith-arcade-screens.js"></script>
+<!-- ui-04-faith-arcade-screens.js scindé en ui-04a/ui-04b (second découpage,
+     ultérieur au split en 8 fichiers ci-dessus, même logique que ui-09-arena.js
+     plus bas) : zéro symbole partagé entre la moitié Faith et la moitié
+     Gauntlet — coupure nette à la frontière, sans toucher une ligne de code
+     (voir le commentaire d'en-tête de chacun des deux fichiers). -->
+<script src="ui-04a-faith-screens.js"></script>
+<script src="ui-04b-gauntlet-screens.js"></script>
 <script src="ui-05-fight-resolution.js"></script>
 <script src="ui-06-career-screens.js"></script>
 <script src="ui-07-contracts-legacy-screens.js"></script>
