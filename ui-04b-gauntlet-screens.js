@@ -69,6 +69,33 @@ function arcadePerkBadge(p){
   return `<div class="mono small mt" style="position:relative;z-index:2">${tags.map(x=>`<span style="display:inline-block;border:1px solid ${x.c};color:${x.c};padding:2px 8px;margin:0 6px 6px 0;border-radius:2px">${x.t}</span>`).join('')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [CORRECTIF A9_GLASS_CARD_DUPLIQUE] — bug remonté : la balise
+   d'ouverture des cartes "glass" (fond panel2, position relative) était
+   copiée-collée telle quelle à 15 endroits de ce fichier, avec seulement
+   la couleur de bordure, le padding, l'alignement et la marge qui
+   variaient — toute future retouche du fond commun aurait dû être répétée
+   15 fois. glassOpen() ne fabrique QUE la balise d'ouverture (pas le
+   contenu ni la fermeture, laissés tels quels à chaque appelant) : risque
+   de régression minimal, aucun changement de rendu. ==== */
+/** Balise d'ouverture d'une carte "glass" standard du Gauntlet.
+ * @param {object} [o]
+ * @param {string} [o.cls='glass mwash'] classes CSS
+ * @param {string} [o.border='var(--line)'] couleur de la bordure pleine
+ * @param {string} [o.borderLeft] si fourni, ajoute une bordure gauche 3px de cette couleur
+ * @param {number} [o.padding=16] padding en px
+ * @param {string} [o.align] text-align
+ * @param {string} [o.margin] règle(s) de marge brute(s) (ex. 'margin-bottom:20px')
+ * @returns {string} la balise `<div ...>` ouvrante, à fermer par l'appelant */
+function glassOpen(o){
+  o=o||{};
+  const cls=o.cls||'glass mwash';
+  const border=o.border||'var(--line)';
+  const borderLeft=o.borderLeft?`;border-left:3px solid ${o.borderLeft}`:'';
+  const padding=o.padding!=null?o.padding:16;
+  const align=o.align?`;text-align:${o.align}`:'';
+  const margin=o.margin?`;${o.margin}`:'';
+  return `<div class="${cls}" style="position:relative;background:var(--panel2);border:1px solid ${border}${borderLeft};padding:${padding}px${align}${margin}">`;
+}
 function scr_draft(){ const pool=G.arcade.pool;
   if(!pool) return `<div class="scr center intro"><p class="lede">Aucun profil disponible.</p><button class="btn ghost mt" onclick="CL.go('title')">Retour</button></div>`;
   const isBoss=G.arcade.mode==='boss_run'; const isLadder=G.arcade.mode==='ladder_100';
@@ -130,9 +157,9 @@ function scr_draft(){ const pool=G.arcade.pool;
         ${ATTR[key].map(a=>`<div class="attr" style="font-size:12px"><span class="attr-l">${a[1]}</span>${gauge(p.attrs[a[0]])}<span class="attr-v">${d20(p.attrs[a[0]])}</span></div>`).join('')}
       </div>`).join(''):'';
     /* ==== [FIN ANCRE] ==== */
-    h+=`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
+    h+=`${glassOpen({margin:'margin-bottom:20px'})}
       <div class="meta-strip"><div><span>Style</span><b>${p.styleLabel}</b></div></div>
-      <div class="hero-name">${p.nick} ${p.flag}</div>
+      <div class="hero-name">${esc(p.nick)} ${p.flag}</div>
       <div class="narr" style="margin:10px 0 0;position:relative;z-index:2"><blockquote style="font-size:14px">« ${p._perk||''} »</blockquote></div>
       ${arcadePerkBadge(p)}
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;position:relative;z-index:2" class="mono">
@@ -164,7 +191,7 @@ function nearMissBlock(a){
   const rows=[s.judges.j1,s.judges.j2,s.judges.j3].map(([ja,jb])=>`<span class="mono small">${ja}-${jb}</span>`).join(' · ');
   const margin=Math.abs(s.scoreA-s.scoreB);
   const tightness=margin<=3?'Cartes très serrées — un round différent et la run continuait.':margin<=8?'Un écart net mais pas écrasant sur les cartes.':'Décision sans appel des 3 juges.';
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:24px">
+  return `${glassOpen({padding:12,align:'left',borderLeft:'var(--gold)',margin:'margin-bottom:24px'})}
      <div class="eyebrow mb" style="font-size:11px">Cartes des juges (${s.method})</div>
      <div>${rows}</div>
      <div class="muted small mt">${tightness}</div>
@@ -288,6 +315,15 @@ function gauntletIdentityRow(f){
   return `<div class="mono small" style="color:var(--gold)"><b>🥊 Tu joues ${esc(arch)}</b><span class="muted">${esc(temper+disc)}</span></div>`;
 }
 function gauntletStatusBlock(a){
+  /* ==== [CORRECTIF A1_CONTRAT_DOUBLE_EVAL] — evalGauntletContract (ui-03)
+     était appelée deux fois par render de ce bloc : une fois ici pour la
+     ligne de contrat (ok), une seconde fois à l'intérieur d'eliminationPreview
+     (banked>0 plus bas), elle-même appelée depuis ce même bloc. Idempotente
+     mais redondante : évaluée une seule fois ici, le booléen est réutilisé
+     partout où le bloc en a besoin (ligne de contrat, part du multiplicateur),
+     et l'appel a été retiré d'eliminationPreview (seul appelant restant, ce
+     bloc l'invoque toujours APRÈS cette ligne). ==== */
+  const contractOk=evalGauntletContract(a);
   const rows=[];
   /* ==== [ANCRE: IDENTITE_TOUJOURS_VISIBLE] — item demandé : "préciser quel
      archétype on a choisi et quel style, le but est que tout soit toujours à
@@ -316,7 +352,7 @@ function gauntletStatusBlock(a){
      complète ne prend de la place que si le joueur la demande. ==== */
   if(a.mutator){
     const open=G._runStatusPreview==='mutator';
-    rows.push(`<div class="mono small" style="color:var(--blood)" onclick="CL.toggleRunStatusPreview('mutator')"><b>☣ Mutateur : ${a.mutator.label}</b> <span class="muted" style="text-decoration:underline dotted;cursor:pointer">${open?'▲ Fermer':'▼ Détail'}</span>${open?`<div class="muted" style="margin-top:2px">${a.mutator.desc}</div>`:''}</div>`);
+    rows.push(`<div class="mono small" style="color:var(--blood)" onclick="CL.toggleRunStatusPreview('mutator')"><b>☣ Mutateur : ${esc(a.mutator.label)}</b> <span class="muted" style="text-decoration:underline dotted;cursor:pointer">${open?'▲ Fermer':'▼ Détail'}</span>${open?`<div class="muted" style="margin-top:2px">${esc(a.mutator.desc)}</div>`:''}</div>`);
   }
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: IDENTITE_DE_CAMP] — ajout #22 (24 ajouts, 12/08/2026). ==== */
@@ -328,7 +364,7 @@ function gauntletStatusBlock(a){
      texte redondant gonflait un bloc déjà chargé (GAUNTLET_STATUT_CONSOLIDE)
      pour rien. Ne garde que le nom (identification rapide) et le passif
      (seule info encore utile en cours de run), sur une seule ligne. ==== */
-  if(a.campIdentity) rows.push(`<div class="mono small sage"><b>🏕 ${a.campIdentity.name}</b>${a.campIdentity.passive?` <span class="gold">— ⚡ ${a.campIdentity.passive.label}</span>`:''}</div>`);
+  if(a.campIdentity) rows.push(`<div class="mono small sage"><b>🏕 ${esc(a.campIdentity.name)}</b>${a.campIdentity.passive?` <span class="gold">— ⚡ ${esc(a.campIdentity.passive.label)}</span>`:''}</div>`);
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_CONTRAT_INDICATEUR] — bug remonté : ☐ est un
@@ -340,9 +376,11 @@ function gauntletStatusBlock(a){
   if(a.contract){
     /* ==== [CORRECTIF GAUNTLETSTATUSBLOCK_LIVE_MORT] — le paramètre `live`
        valait `true` aux 4 appels (ci-dessous) : la branche `:!!c.done` était
-       inatteignable. evalGauntletContract(a) est désormais l'unique source. */
-    const c=a.contract, ok=evalGauntletContract(a), open=G._runStatusPreview==='contract';
-    rows.push(`<div class="mono small" style="color:${ok?'var(--sage)':'var(--gold)'}"><b>${SVG.pact} ${ok?'✓':'○'} ${c.label}</b> <span class="muted">(×${c.mult}) </span><span class="muted" style="text-decoration:underline dotted;cursor:pointer" onclick="CL.toggleRunStatusPreview('contract')">${open?'▲ Fermer':'▼ Détail'}</span>${open?`<div class="muted" style="margin-top:2px">${c.hint}</div>`:''}</div>`);
+       inatteignable. evalGauntletContract(a) est désormais l'unique source
+       (évaluée une seule fois en tête de fonction, cf. CORRECTIF
+       A1_CONTRAT_DOUBLE_EVAL ci-dessus). */
+    const c=a.contract, ok=contractOk, open=G._runStatusPreview==='contract';
+    rows.push(`<div class="mono small" style="color:${ok?'var(--sage)':'var(--gold)'}"><b>${SVG.pact} ${ok?'✓':'○'} ${esc(c.label)}</b> <span class="muted">(×${c.mult}) </span><span class="muted" style="text-decoration:underline dotted;cursor:pointer" onclick="CL.toggleRunStatusPreview('contract')">${open?'▲ Fermer':'▼ Détail'}</span>${open?`<div class="muted" style="margin-top:2px">${esc(c.hint)}</div>`:''}</div>`);
   }
   /* ==== [FIN ANCRE] ==== */
   const banked=a.banked||0;
@@ -378,7 +416,13 @@ function gauntletStatusBlock(a){
      s'affichaient BRUTES ("Menton -12") juste à côté des passifs de camp,
      eux correctement convertis en /20 par campFxLabel (ui-03). Réutilise
      désormais campFxLabel pour la même échelle d'affichage partout. ==== */
-  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${i.attrs.map(x=>campFxLabel({[x[0]]:x[1]})).join(' · ')}</span></div>`));
+  /* ==== [CORRECTIF A15_CAMPFXLABEL_JOINT_DEUX_FOIS] — bug remonté :
+     campFxLabel (ui-03) accepte déjà un objet multi-clés et joint le
+     résultat en interne (Object.entries(fx).map(...).join(', ')) — cet
+     appel le rappelait une fois PAR paire attribut/delta avec un objet à
+     une seule clé, pour rejoindre les résultats à la main ensuite. Objet
+     complet passé en un seul appel, la fonction fait déjà le travail. ==== */
+  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${campFxLabel(Object.fromEntries(i.attrs))}</span></div>`));
   /* ==== [ANCRE: CORRECTIF_MALEDICTION_VISIBLE] — bug remonté (B18) : les
      malus de Camp Maudit (generateCursedOption, ui-03) sont un système
      d'usure PARALLÈLE aux séquelles de combat, avec des règles opposées
@@ -386,14 +430,11 @@ function gauntletStatusBlock(a){
      pouvait pas distinguer une baisse d'attribut réversible d'une baisse
      définitive. Affiché ici séparément, marqué IRRÉVERSIBLE sans bouton de
      soin, à la même échelle /20 que le reste (campFxLabel). ==== */
-  (a.curses||[]).forEach(c=>rows.push(`<div class="mono small" style="color:var(--blood)"><b>${c.name}</b> <span class="muted">${c.attrs.map(x=>campFxLabel({[x[0]]:x[1]})).join(' · ')} — irréversible</span></div>`));
+  (a.curses||[]).forEach(c=>rows.push(`<div class="mono small" style="color:var(--blood)"><b>${c.name}</b> <span class="muted">${campFxLabel(Object.fromEntries(c.attrs))} — irréversible</span></div>`));
   /* ==== [FIN ANCRE] ==== */
   const m=gauntletRunMult(a);
   if(m>1){
-    const parts=[];
-    if((a.riskMult||1)>1) parts.push(`mise ×${a.riskMult}`);
-    if((a.maxPactStreak||0)>0) parts.push(`pactes +${Math.round((a.maxPactStreak||0)*10)} %`);
-    if(a.contract&&a.contract.done) parts.push(`contrat ×${a.contract.mult}`);
+    const parts=runMultParts(a,false);
     rows.push(`<div class="mono small gold">Multiplicateur de la run : <b>×${m}</b>${parts.length?` <span class="muted">(${parts.join(' · ')})</span>`:''}</div>`);
   }
   if(!rows.length) return '';
@@ -403,7 +444,7 @@ function gauntletStatusBlock(a){
      bloc déjà chargé rendu encore plus difficile à lire. Chaque ligne
      existante est enveloppée ici (aucun des appels rows.push() ci-dessus
      n'a besoin de changer) avec une petite marge haute, sauf la première. ==== */
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:left;margin-top:12px">
+  return `${glassOpen({padding:12,align:'left',margin:'margin-top:12px'})}
      <div class="eyebrow mb" style="font-size:11px">État de la run</div>
      ${rows.map((r,i)=>`<div${i>0?' style="margin-top:6px"':''}>${r}</div>`).join('')}
    </div>`;
@@ -418,9 +459,16 @@ function scr_bracket_view(){
   const a=G.arcade;
   if(!a||!a.tournament) return `<div class="scr"><p class="lede">Aucun tableau en cours.</p><button class="btn ghost mt" onclick="CL.go('arcadehub')">Retour</button></div>`;
   const t=a.tournament;
-  const rivalAlive=t.matches.some(m=>(m.a&&m.a._isRival)||(m.b&&m.b._isRival));
+  /* ==== [CORRECTIF A11_GARDES_SUPERFLUES] — bug remonté : m.a&&/m.b&& ici
+     protégeaient contre un match incomplet qui n'existe pas — buildWTUMMA
+     Bracket (ui-03) ne pousse que des paires pleines (les deux cas où un
+     seul côté serait rempli, la BYE/interruption, sont gérés en amont) —
+     et label()/side() juste en dessous accèdent déjà à x.id/x.flag/x._isRival
+     SANS aucune garde. Retirées plutôt que complétées ailleurs, pour que le
+     code reflète la garantie réelle plutôt que de la doubler à moitié. ==== */
+  const rivalAlive=t.matches.some(m=>m.a._isRival||m.b._isRival);
   const row=(m,i)=>{
-    const mine=(m.a&&m.a.id===G.f.id)||(m.b&&m.b.id===G.f.id);
+    const mine=m.a.id===G.f.id||m.b.id===G.f.id;
     /* ==== [ANCRE: CORRECTIF_SURNOM_TABLEAU] — bug remonté : le joueur figurait
        dans le tableau sous le patronyme généré par makeFighter() (ex. « Bruno
        Hughes »), alors que TOUS les autres écrans du Gauntlet l'identifient par
@@ -453,22 +501,19 @@ function scr_bracket_view(){
 function runDebriefBlock(a){
   const mult=a.runMultApplied||1;
   const base=a.basePayout||0;
-  const parts=[];
-  if((a.riskMult||1)>1) parts.push(`mise en jeu ×${a.riskMult}`);
-  if((a.maxPactStreak||0)>0) parts.push(`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`);
-  if(a.contract&&a.contract.done) parts.push(`contrat rempli ×${a.contract.mult}`);
   /* ==== [CORRECTIF B4_ULTIMATUM_HORS_MULT] — le bonus ×1.5 d'un ultimatum du
      médecin refusé (ui-08, ULTIMATUM_MEDECIN) est appliqué directement sur le
      payout, EN DEHORS de gauntletRunMult() (ui-03) : displayMult ne le reflète
-     donc jamais. Signalé ici en toutes lettres, sinon l'écart entre
-     "base × mult" et le total réellement versé serait muet. ==== */
-  if(a.doctorRefused&&a.victory) parts.push('ultimatum refusé ×1.5');
+     donc jamais. Signalé ici en toutes lettres (runMultParts, ui-03, verbose),
+     sinon l'écart entre "base × mult" et le total réellement versé serait
+     muet. ==== */
+  const parts=runMultParts(a,true);
   const displayMult=Math.round(mult*100)/100;
   const contractLine=a.contract
-    ? `<div class="mono small" style="color:${a.contract.done?'var(--sage)':'var(--muted)'}">${a.contract.done?'✓':'✗'} Contrat : ${a.contract.label}</div>`
+    ? `<div class="mono small" style="color:${a.contract.done?'var(--sage)':'var(--muted)'}">${a.contract.done?'✓':'✗'} Contrat : ${esc(a.contract.label)}</div>`
     : '';
   const bounty=(a.bounties||0)>0?`<div class="mono small" style="color:var(--blood)">⚔ ${a.bounties} némésis vaincue(s) — primes déjà versées</div>`:'';
-  const inj=(a.runInjuries||[]).length?`<div class="mono small muted">${a.runInjuries.length} séquelle(s) encaissée(s) : ${a.runInjuries.map(i=>i.name).join(', ')}</div>`:'';
+  const inj=(a.runInjuries||[]).length?`<div class="mono small muted">${a.runInjuries.length} séquelle(s) encaissée(s) : ${a.runInjuries.map(i=>esc(i.name)).join(', ')}</div>`:'';
   const curses=(a.cursedTaken||0)>0?`<div class="mono small muted">${a.cursedTaken} pacte(s) de camp maudit accepté(s)</div>`:'';
   /* ==== [CORRECTIF B4_DEBRIEF_RACHAT_DIABLE] — un rachat au Diable
      (buyDevilContinue, ui-08) fait continuer une run déjà close par
@@ -487,7 +532,7 @@ function runDebriefBlock(a){
       : '');
   const ach=(a.newAch||[]).length?`<div class="mono small gold mt">🏅 ${a.newAch.map(x=>x.h).join(' · ')}</div>`:'';
   if(!multLine && !contractLine && !bounty && !inj && !curses && !ach) return '';
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold);padding:12px;text-align:left;margin-bottom:20px">
+  return `${glassOpen({padding:12,align:'left',borderLeft:'var(--gold)',margin:'margin-bottom:20px'})}
      <div class="eyebrow mb" style="font-size:11px">Bilan de la run</div>
      ${multLine}${contractLine}${bounty}${inj}${curses}${ach}
    </div>`;
@@ -504,7 +549,7 @@ function runDebriefBlock(a){
    run commencée avant ce changement. ==== */
 function ascensionUnlockBlock(a){
   if(!a.ascJustUnlocked) return '';
-  return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--gold);padding:12px;text-align:center;margin-bottom:20px">
+  return `${glassOpen({padding:12,align:'center',border:'var(--gold)',margin:'margin-bottom:20px'})}
      <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${a.ascJustUnlocked} DÉBLOQUÉE</div>
      <div class="muted small mt">Adversaires plus forts, mais points gagnés multipliés par ${gauntletAscPayoutMod(a.ascJustUnlocked)}. Choisis ce palier au menu du Gauntlet.</div>
    </div>`;
@@ -532,14 +577,14 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
           ?`« Le combat est gagné aux points, mais le Boss Run n\u2019accepte que les KO et TKO. Une victoire à la décision ou par soumission ne compte pas ici — la série s\u2019arrête malgré la main levée. »`
           :`« Le combat de trop. L\u2019ascension s\u2019arrête net sur la toile de l\u2019octogone. Les lumières s\u2019éteignent. »`;
     return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
+   ${glassOpen({padding:20,align:'center',margin:'margin-bottom:24px'})}
      <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${title}<em style="color:var(--muted)">${subtitle}</em></div>
    </div>
    ${gauntletBestLine('boss_run')}
    ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
    ${ascensionUnlockBlock(a)}
    ${runDebriefBlock(a)}
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
+   ${glassOpen({cls:'glass',padding:16,borderLeft:isVictory?'var(--gold)':'var(--loss)',margin:'margin-bottom:24px'})}
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
      <div class="stat-band">
@@ -578,14 +623,14 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
     // désormais la seule source de vérité, écrite au moment du paiement. ====
     const earned=a.earnedOnElimination||0;
     return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
+   ${glassOpen({padding:20,align:'center',margin:'margin-bottom:24px'})}
      <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'R.I.P.'}<em style="color:var(--muted)">${isVictory?'Vous êtes le #1 mondial':cashedOut?`Sorti au rang #${a.rank}, mise en sécurité`:isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':'Éliminé au rang #'+a.rank}</em></div>
    </div>
    ${gauntletBestLine('ladder_100')}
    ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
    ${ascensionUnlockBlock(a)}
    ${runDebriefBlock(a)}
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
+   ${glassOpen({cls:'glass',padding:16,borderLeft:isVictory?'var(--gold)':'var(--loss)',margin:'margin-bottom:24px'})}
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
      <div class="stat-band">
@@ -612,14 +657,14 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
   const isJudges=a.eliminatedReason==='judges';
   const earned=a.earnedOnElimination||0;
   return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:20px;margin-bottom:24px;text-align:center">
+   ${glassOpen({padding:20,align:'center',margin:'margin-bottom:24px'})}
      <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'ÉLIMINÉ'}<em style="color:var(--muted)">${cashedOut?'Sortie volontaire':isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':a.tournament.stepName}</em></div>
    </div>
    ${gauntletBestLine('bracket64')}
    ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
    ${ascensionUnlockBlock(a)}
    ${runDebriefBlock(a)}
-   <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
+   ${glassOpen({cls:'glass',padding:16,borderLeft:isVictory?'var(--gold)':'var(--loss)',margin:'margin-bottom:24px'})}
      <div class="meta-strip"><div><span>Profil</span><b>${(f.styleLabel||'').toUpperCase()}</b></div></div>
      <div class="hero-name" style="font-size:clamp(24px,7vw,32px)">${esc(f.nick||f.name)} ${f.flag}</div>
      <div class="stat-band"><div><span class="stat-big hot">+${earned}</span><span class="stat-lbl">WT Points gagnés</span></div></div>
@@ -691,9 +736,13 @@ function rivalBadge(opp){
    l'intérêt du joueur tant que la cagnotte suivante reste accessible via
    « Abandonner ». eliminationPreview() reste seule active : elle sert
    toujours à gauntletStatusBlock() pour annoncer ce que rapporterait une
-   défaite sur le combat suivant. ==== */
+   défaite sur le combat suivant.
+   ==== [CORRECTIF A1_CONTRAT_DOUBLE_EVAL] — evalGauntletContract(a) était
+   réévaluée ici à chaque appel, alors que gauntletStatusBlock() (seul
+   appelant) l'a déjà fait en tête de fonction avant d'atteindre celui-ci —
+   a.contract.done est donc déjà à jour au moment où gauntletFinalPayout
+   (plus bas) le lit. ==== */
 function eliminationPreview(a){
-  evalGauntletContract(a);
   if(a.mode==='boss_run') return gauntletFinalPayout(a,gauntletEliminationPayout('boss_run',a.streak,a.atRisk));
   if(a.mode==='ladder_100') return gauntletFinalPayout(a,gauntletEliminationPayout('ladder_100',a.rank,a.atRisk));
   return gauntletFinalPayout(a,gauntletEliminationPayout('bracket64',(a.tournament&&a.tournament.roundStep)||1,a.atRisk));
@@ -852,10 +901,10 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
        doit être LISIBLE, pas seulement calculée en coulisses. ==== */
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
    <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur cette run</em></div>
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:12px;text-align:center;margin-top:12px;border-left:3px solid var(--gold)">
+   ${glassOpen({padding:12,align:'center',borderLeft:'var(--gold)',margin:'margin-top:12px'})}
      <div class="mono small gold" style="font-weight:bold">⚠ SEULE UNE FINITION COMPTE — une victoire aux points arrête la série.</div>
    </div>
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:12px">
+   ${glassOpen({padding:16,align:'left',margin:'margin-top:12px'})}
      <div class="eyebrow mb">Prochain adversaire</div>
      ${a.revealed?`${rivalBadge(a.opponent)}
      <div class="hero-name" style="font-size:clamp(22px,6vw,28px)">${esc(a.opponent.name)} ${a.opponent.flag}</div>
@@ -925,7 +974,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
   if(!a.tournament) return `<div class="scr center intro"><p class="lede">Aucun tableau en cours.</p><button class="btn ghost mt" onclick="CL.go('title')">Retour</button></div>`;
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
    <div class="hero-name" style="text-align:center">CLASSÉ #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;text-align:left;margin-top:20px">
+   ${glassOpen({padding:16,align:'left',margin:'margin-top:20px'})}
      <div class="eyebrow mb">Prochain adversaire${mutBlindBr?'':` : classé #${a.opponent.seed}`}</div>
      ${mutBlindBr?`<div class="hero-name" style="font-size:clamp(22px,6vw,28px);color:var(--muted)">??? <span style="filter:blur(4px)">████████</span></div>
      <div class="muted small mt">Identité inconnue — Mise à nu.</div>`:`${rivalBadge(a.opponent)}
@@ -960,8 +1009,8 @@ function scr_arcade_upgrades(){
     a.skillOpts.forEach((s,i)=>{
       const color=RAR_COLORS[s.rar]||'var(--gold)';
       h+=`<div class="opp" style="border-left:3px solid ${color}" onclick="CL.pickArcadeSkill(${i})">
-            <b style="color:${color}">${s.name}</b> <span class="muted small">(${s.rar})</span>
-            <div class="muted small mt">${s.desc||s.blurb||''}</div>
+            <b style="color:${color}">${esc(s.name)}</b> <span class="muted small">(${s.rar})</span>
+            <div class="muted small mt">${esc(s.desc||s.blurb||'')}</div>
             ${s.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(s.fx,f)}</div>`:''}</div>`;
     });
     /* ==== [ANCRE: GAUNTLET_CAMP_MAUDIT] — 4e carte, visuellement séparée des 3
@@ -988,10 +1037,10 @@ function scr_arcade_upgrades(){
          personne ne la choisissait. ==== */
       h+=`<div class="eyebrow mt mb" style="color:var(--blood)">PACTE DU CAMP — OPTION MAUDITE</div>
           <div class="opp" style="border-left:3px solid var(--blood)" onclick="CL.pickCursedSkill()">
-            <b style="color:${RAR_COLORS[cs.skill.rar]||'var(--gold)'}">${cs.skill.name}</b> <span class="muted small">(${cs.skill.rar}) — garantie</span>
-            <div class="muted small mt">${cs.skill.desc||cs.skill.blurb||''}</div>
+            <b style="color:${RAR_COLORS[cs.skill.rar]||'var(--gold)'}">${esc(cs.skill.name)}</b> <span class="muted small">(${cs.skill.rar}) — garantie</span>
+            <div class="muted small mt">${esc(cs.skill.desc||cs.skill.blurb||'')}</div>
             ${cs.skill.fx?`<div class="mono small mt" style="color:var(--win)">${formatSkillFx(cs.skill.fx,f)}</div>`:''}
-            <div class="mono small mt" style="color:var(--blood)"><b>${cs.curseLabel}</b> — séquelle permanente sur cette run</div>
+            <div class="mono small mt" style="color:var(--blood)"><b>${esc(cs.curseLabel)}</b> — séquelle permanente sur cette run</div>
             <div class="dlts">${deltasTxt}</div>
           </div>`;
       /* ==== [FIN ANCRE] ==== */
@@ -1082,11 +1131,11 @@ function scr_camp_identity_pick(){
         être explicite au moment du choix, pas découvert en cours de run.
         Ligne distincte du delta de stats (fxTxt), absente pour Camp du
         Silence (passive:null, aucun passif). ==== */
-     const passiveTxt=c.passive?`<div class="mono small mt gold">⚡ ${c.passive.label}</div>`:'';
+     const passiveTxt=c.passive?`<div class="mono small mt gold">⚡ ${esc(c.passive.label)}</div>`:'';
      /* ==== [FIN ANCRE] ==== */
      return `<div class="opp" onclick="CL.pickCampIdentity(${i})">
-       <div class="opp-top"><span class="opp-nm gold">${c.name}</span></div>
-       <div class="opp-read" style="margin-top:4px;opacity:1">${c.desc}</div>
+       <div class="opp-top"><span class="opp-nm gold">${esc(c.name)}</span></div>
+       <div class="opp-read" style="margin-top:4px;opacity:1">${esc(c.desc)}</div>
        <div class="dlts mt">${fxTxt}</div>
        ${passiveTxt}
      </div>`;
@@ -1102,7 +1151,7 @@ function gauntletInfirmaryBlock(a){
   const zones=['tete','corps','jambes'].filter(z=>(a.runInjuries||[]).some(i=>i.zone===z));
   if(!zones.length) return '';
   const meta=loadMetaStats(); const pts=meta.legendPoints||0;
-  return `<div class="glass mwash mt" style="position:relative;background:var(--panel2);border:1px solid var(--loss);padding:12px;text-align:left">
+  return `${glassOpen({cls:'glass mwash mt',padding:12,align:'left',border:'var(--loss)'})}
      <div class="eyebrow mb" style="color:var(--loss)">🩹 Infirmerie de fortune</div>
      <div class="muted small mb">Soigne UNE zone anatomique contre des points de Légende — les autres séquelles restent actives.</div>
      ${zones.map(z=>{
@@ -1122,7 +1171,7 @@ function gauntletInfirmaryBlock(a){
    franches, aucune ambiguïté sur ce que chacune implique. ==== */
 function ringDoctorUltimatumBlock(a){
   if(!ringDoctorUltimatumActive(a)) return '';
-  return `<div class="glass mwash mt" style="position:relative;background:var(--panel2);border:1px solid var(--blood);padding:14px;text-align:left">
+  return `${glassOpen({cls:'glass mwash mt',padding:14,align:'left',border:'var(--blood)'})}
      <div class="eyebrow mb" style="color:var(--blood)">🩺 Ultimatum du médecin de ring</div>
      <div class="muted small mb">Le combattant encaisse trop de séquelles pour continuer sereinement. Le médecin exige une décision.</div>
      <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1176,7 +1225,7 @@ function scr_coaching_round(){
   /* ==== [ANCRE: SECOND_SOUFFLE] — ajout #24 (24 ajouts, 12/08/2026) : offre
      rare, affichée une seule fois (avant le round 3, si l'offre a été tirée
      favorable côté runCoachingRound) — disparaît dès qu'utilisée. ==== */
-  const secondSouffleBlock=(c.secondSouffleAvailable && !c.secondSouffleUsed)?`<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--gold);padding:14px;text-align:left;margin-bottom:12px">
+  const secondSouffleBlock=(c.secondSouffleAvailable && !c.secondSouffleUsed)?`${glassOpen({padding:14,align:'left',border:'var(--gold)',margin:'margin-bottom:12px'})}
      <div class="eyebrow mb" style="color:var(--gold)">✨ Second Souffle</div>
      <div class="muted small">Mené sur les cartes après 2 rounds — une dernière réserve, pour ce round uniquement (+2 Sang-froid, +2 Cardio, +2 Puissance, +2 Menton).</div>
      <button class="btn ghost mt" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto" onclick="CL.acceptSecondSouffle()">Puiser dans les réserves</button>

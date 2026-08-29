@@ -289,6 +289,23 @@ function gauntletRunMult(a){
   return Math.round(m*100)/100;
 }
 function gauntletFinalPayout(a,base){ return Math.round((base||0)*gauntletRunMult(a)); }
+/* ==== [CORRECTIF A6_RUNMULT_PARTS_PARTAGE] — bug remonté : gauntletStatusBlock
+   (mid-run) et runDebriefBlock (fin de run, ui-04) décomposaient chacune le
+   même multiplicateur (mêmes 3 canaux + le bonus d'ultimatum refusé, cf.
+   B4) dans deux blocs de code séparés, avec des libellés légèrement
+   différents ("mise ×N" vs "mise en jeu ×N", etc.). Même décomposition,
+   extraite ici une seule fois ; `verbose` sélectionne le jeu de libellés
+   (compact pour l'état de run affiché à chaque écran, complet pour le
+   bilan de fin de run) sans changer le texte affiché par l'un ou l'autre
+   appelant. ==== */
+function runMultParts(a,verbose){
+  const parts=[];
+  if((a.riskMult||1)>1) parts.push(verbose?`mise en jeu ×${a.riskMult}`:`mise ×${a.riskMult}`);
+  if((a.maxPactStreak||0)>0) parts.push(verbose?`${a.maxPactStreak} pacte(s) enchaîné(s) +${Math.round((a.maxPactStreak||0)*10)} %`:`pactes +${Math.round((a.maxPactStreak||0)*10)} %`);
+  if(a.contract&&a.contract.done) parts.push(verbose?`contrat rempli ×${a.contract.mult}`:`contrat ×${a.contract.mult}`);
+  if(verbose && a.doctorRefused&&a.victory) parts.push('ultimatum refusé ×1.5');
+  return parts;
+}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_LADDER_CIBLES] — l'ancienne genWTUMMAOpponent() ne
    proposait QU'UNE cible imposée (leapfrog auto -10/-15, saut direct au #1
