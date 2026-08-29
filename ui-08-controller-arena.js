@@ -361,7 +361,12 @@ function faithEnsureOffer(){
        toucher au cache partagé. ==== */
     opps=eligible; G.faith.offerPool=eligible;
   }
-  if(!opps.length) return false;
+  /* ==== [CORRECTIF FAITH_HUB_ADVERSAIRE_bis] — même raison affichée que le
+     repli du filtre Main event ci-dessus : sans G.lastMsg posé ici, le hub
+     (scr_faith_hub, ui-04) n'avait aucun moyen de dire pourquoi il n'y a pas
+     d'offre ce mois-ci — seulement "Tout est en place.", un vide qui ne dit
+     rien. ==== */
+  if(!opps.length){ G.lastMsg="Personne à proposer ce mois-ci : l’organisation n’a plus de candidat disponible à votre niveau."; return false; }
   /* ==== [ANCRE: V3_REMATCH_GUARANTEE] — Plan V3 LOT 6 §5.6.1.b : clause de
      revanche posée à la négociation de titre (scr_faith_title_negotiation)
      et consommée à la défaite (ui-05, ANCRE V3_TITLE_LOSS_CLAUSE) — la
@@ -399,6 +404,15 @@ function faithEnsureOffer(){
   G.faith.pendingOffer={opp:chosen,gala,bonusMult:1};
   G.faith.pendingRevengeClause=false; // nouvelle offre : la clause d'une offre précédente ne survit jamais
   G.faith.currentCard=generateFightCard(gala,chosen.o);
+  /* ==== [ANCRE: V2-32ter] — crowdLine figée à la génération de l'offre, pas
+     à chaque rendu de scr_faith_offer() : sans F dans le ctx de txtPick(),
+     aucun ledger anti-répétition n'était tenu, et un rnd() frais à chaque
+     render faisait changer la phrase d'ambiance au moment précis où le
+     joueur négocie (faithOfferDemandMoney() reste sur l'écran, save()+
+     render()). Même motif que off.pesee (ANCRE V4_C19_PESEE). ==== */
+  const venueInfo=faithGalaVenueInfo(G.faith,G.f,gala);
+  if(!TEXT_POOLS['faith_crowd_ambiance']) registerTextPool('faith_crowd_ambiance',FAITH_CROWD_AMBIANCE);
+  G.faith.pendingOffer.crowdLine=txtPick('faith_crowd_ambiance',{F:G.faith,city:venueInfo.city,venue:venueInfo.venue,home:venueInfo.home,hype:gala.hype});
   return true;
 }
 /* ==== [ANCRE: V3_FIGHT_CARD] — Plan V3 LOT 6 §5.6.1.b : "remplacer la
@@ -1305,6 +1319,19 @@ const CL={
       if(f.classChosen && !f.class31Chosen && f.age>=31){ G.screen='class_choice_31'; save(); render(); return; }
     }
     save(); render(); },
+  /* ==== [ANCRE: FAITH_RECOVER_INJURY] — pendant du recoverInjury() carrière,
+     mais décrémenté en MOIS (f.injury.left posé par faithCampChoose()) et
+     routé par faithAdvanceMonth() plutôt que par un simple render(). Ne
+     rappelle ni applyAging() ni advanceRoster() : le mode Faith les
+     applique déjà une fois par an dans prepareFaithYearEnd(). ==== */
+  faithRecoverInjury(){
+    const f=G.f; if(!f.injury) return;
+    f.injury.left-=1;
+    f.morale=clamp(f.morale+5,0,100);
+    f.form=clamp(f.form+15,0,100);
+    if(f.injury.left<=0) f.injury=null;
+    faithAdvanceMonth();
+  },
   choosePlan(idx){
     /* ==== [ANCRE: CORRECTIF_DOUBLE_RESOLUTION] — un double-tap sur la carte
        de tactique appelait resolveFight() deux fois : W/L, bourse, Elo,
@@ -1989,6 +2016,13 @@ const CL={
     const F=G.faith;
     if(F.pendingIntersaisonEntry){
       if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+      /* ==== [CORRECTIF V2-09bis] — décrément déplacé depuis
+         faithEnsureIntersaisonDraw() (ui-04) : une fonction de préparation
+         d'écran n'a pas à écrire la méta-progression des cooldowns — cette
+         écriture vit désormais au même endroit que la pose du cooldown
+         choisi, juste en dessous. Une fois par intersaison RÉELLEMENT
+         résolue, jamais au fil des rendus. ==== */
+      for(const k in F.intersaisonCooldown) F.intersaisonCooldown[k]=Math.max(0,F.intersaisonCooldown[k]-1);
       F.intersaisonCooldown[F.pendingIntersaisonEntry]=3;
       F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
       F.currentIntersaison=null;
@@ -2036,6 +2070,10 @@ const CL={
       CL.faithCamp(); return;
     }
     if(!F.intersaisonCooldown) F.intersaisonCooldown={};
+    /* ==== [CORRECTIF V2-09bis] — même décrément relocalisé que
+       faithCampChoose() ci-dessus, ici pour toutes les entrées SAUF camp
+       (qui résout et décrémente elle-même à sa propre résolution). ==== */
+    for(const k in F.intersaisonCooldown) F.intersaisonCooldown[k]=Math.max(0,F.intersaisonCooldown[k]-1);
     F.intersaisonCooldown[entryId]=3;
     F.lastTrio=(F.currentIntersaison&&F.currentIntersaison.picks)||F.lastTrio;
     F.currentIntersaison=null;
@@ -2385,12 +2423,25 @@ const CL={
     if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
     if(!off.buildupDone){
       off.buildupDone=true;
-      G.faith.currentBuildupEvent=faithBuildupPick(G.f,G.faith);
+      G.faith.currentBuildupEvent=faithBuildupPick(G.faith);
       G.screen='faith_buildup'; save(); render();
       return;
     }
     if(off.gala && off.gala.pressConf && !off.pressConfDone){
       off.pressConfDone=true;
+      /* ==== [ANCRE: V2-32ter] — répliques et postures figées ici, exactement
+         comme off.pesee (ANCRE V4_C19_PESEE) : sans ça, scr_faith_press_conf()
+         (une fonction de rendu) retirait de nouvelles répliques et postures à
+         chaque réaffichage de l'écran. */
+      const f=G.f, F=G.faith, o=off.opp.o;
+      if(!TEXT_POOLS['faith_pressconf_reply']) registerTextPool('faith_pressconf_reply',FAITH_PRESSCONF_REPLIES);
+      const fk=fightKind();
+      const venueInfo=faithGalaVenueInfo(F,f,off.gala);
+      const commonHistory=(f.history||[]).filter(h=>h.oppId===o.id).length;
+      off.pressConf={
+        replies:faithOppReplies(o,f,F,{isNemesis:o.id===f.faithNemesisId,isTitle:(fk==='title'||fk==='defense'),favorite:divRank(o)<divRank(f),home:venueInfo.home,commonHistory}),
+        postures:faithPressConfPostureOptions(f,o)
+      };
       G.screen='faith_press_conf'; save(); render();
       return;
     }
@@ -3948,6 +3999,11 @@ function scr_faith_title_negotiation(){
      <div class="small muted" style="margin-top:8px">${esc(off.opp.read)}</div>
    </div>
    <div class="mono" style="margin-top:16px;font-size:15px">Bourse estimée : <b>${bourseEst}k$</b></div>
+   <!-- ==== [CORRECTIF V2-20bis] — même bug que scr_faith_offer (ui-04) : les
+        deux offres partagent off (V3_TITLE_NEGOTIATION_ROUTE) et le même
+        CL.faithOfferDemandMoney(), dont off.finishBonus ne se reflétait
+        jamais dans bourseEst. ==== -->
+   ${off.finishBonus?`<div class="mono small" style="color:var(--gold);margin-top:4px">Prime de finition doublée sur ce combat.</div>`:''}
    <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
      <button class="btn primary" style="height:56px;font-size:16px" onclick="CL.faithOfferSign()">SIGNER</button>
      ${faithLeverage(f,F)>0?`<div class="opp" style="padding:14px" onclick="CL.faithOfferDemandMoney()">
