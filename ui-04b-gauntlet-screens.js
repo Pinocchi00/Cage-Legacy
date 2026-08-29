@@ -32,14 +32,31 @@
    seuils existants (ce qui aurait dilué leur sens pour les autres) : un 6e
    badge neutre ÉQUILIBRÉ, affiché seulement quand aucun des 5 traits marqués
    ne s'applique. ==== */
+/* ==== [CORRECTIF B5_BADGES_SEUILS_ABSOLUS] — bug remonté : les seuils
+   testaient m[k] (base STYLE_PROFILE[style][k] × facteur 0.55-1.55,
+   deriveArcadeMods ci-dessus, ui-03) en valeur ABSOLUE, alors que la base
+   varie déjà fortement d'un style à l'autre (koMod karate 1.52 vs mma
+   1.05). Conséquence vérifiée : les 5 archétypes style:'mma' sur 23
+   n'atteignaient AUCUN seuil (koMod max 1.31 < 1.35, sigVol max 1.21 <
+   1.25, gnpDmg max 1.15 < 1.2) ; à l'inverse karate déclenchait FINISSEUR
+   KO dès power>=34 (1.52 de base suffit à passer 1.35 même à facteur < 1,
+   donc en dessous de la moyenne DE SON PROPRE style). Comparé désormais au
+   RATIO m[k]/STYLE_PROFILE[p.style][k] — qui vaut exactement le facteur
+   0.55-1.55 lui-même, indépendant de la base — donc à seuils communs à
+   tous les styles : koMod/subMod (mêmes bornes 0.55-1.55, marge la plus
+   large) 1.15 haut / 0.85 bas pour koMod, 1.25 pour subMod ; sigVol/gnpDmg
+   (bornes plus resserrées 0.75-1.15) au plafond réellement atteignable de
+   leur facteur, 1.15. ==== */
 function arcadePerkBadge(p){
   const m=p._styleProfileOverride; if(!m) return '';
+  const base=STYLE_PROFILE[p.style]||STYLE_PROFILE.mma;
+  const r=k=>m[k]/base[k];
   const tags=[];
-  if(m.koMod>=1.35) tags.push({t:'FINISSEUR KO',c:'var(--gold)'});
-  else if(m.koMod<=0.85) tags.push({t:'PEU DE PUISSANCE',c:'var(--muted)'});
-  if(m.subMod>=1.3) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
-  if(m.sigVol>=1.25) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
-  if(m.gnpDmg>=1.2) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
+  if(r('koMod')>=1.15) tags.push({t:'FINISSEUR KO',c:'var(--gold)'});
+  else if(r('koMod')<=0.85) tags.push({t:'PEU DE PUISSANCE',c:'var(--muted)'});
+  if(r('subMod')>=1.25) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
+  if(r('sigVol')>=1.15) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
+  if(r('gnpDmg')>=1.15) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
   if(!tags.length) tags.push({t:'ÉQUILIBRÉ',c:'var(--muted)'});
   /* ==== [ANCRE: CORRECTIF_BADGES_EMPILEMENT] — bug remonté : sur un
      archétype à 2 badges (ex. Le Surfer : PEU DE PUISSANCE + FINISSEUR
@@ -80,24 +97,30 @@ function scr_draft(){ const pool=G.arcade.pool;
        ressort en rouge (var(--loss), même code couleur que les malus
        ailleurs dans le Gauntlet) — sur ces 4 agrégats seulement, pas sur les
        20 attributs bruts, pour rester lisible dans une grille à 4 cases. */
-    const _stk=Math.round((p.attrs.jab+p.attrs.cross+p.attrs.hook)/3);
+    const _stk=Math.round((p.attrs.jab+p.attrs.cross+p.attrs.hook+p.attrs.kick)/4);
     const _grp=Math.round((p.attrs.takedown+p.attrs.submission+p.attrs.topControl)/3);
     const _pui=p.attrs.power, _crd=p.attrs.cardio;
-    const _max=Math.max(_stk,_grp,_pui,_crd), _min=Math.min(_stk,_grp,_pui,_crd);
     /* ==== [CORRECTIF ITEM_VITRINE_STAT_DYNAMIQUE_bis] — à égalité, la
        comparaison sur les valeurs brutes mettait plusieurs cases en or (ou
        les 4, sur un profil parfaitement plat où _max===_min) — contraire à
        l'intention "la case ressort" (une seule mise en avant). Une seule
        case dorée, une seule rouge (le premier agrégat qui atteint le max/min,
        ordre STRK/GRAP/PUIS/CARDIO), et aucune des deux si le profil est plat. */
-    const _agg=[['stk',_stk],['grp',_grp],['pui',_pui],['crd',_crd]];
+    /* ==== [CORRECTIF A4_MAXMIN_ECHELLE_AFFICHEE] — bug remonté : _max/_min
+       comparaient les valeurs BRUTES /100 alors que la case affiche le d20()
+       arrondi — d20 n'étant pas injectif (plusieurs bruts distincts tombent
+       sur le même /20), deux cases pouvaient afficher exactement le même
+       nombre à l'écran sans que la seconde soit dorée, ce qui semblait
+       arbitraire pour le joueur qui ne voit jamais les valeurs brutes.
+       _agg (et donc _max/_min) construit désormais sur les valeurs d20(),
+       la même échelle que ce qui est réellement affiché. ==== */
+    const _agg=[['stk',d20(_stk)],['grp',d20(_grp)],['pui',d20(_pui)],['crd',d20(_crd)]];
+    const _max=Math.max(..._agg.map(v=>v[1])), _min=Math.min(..._agg.map(v=>v[1]));
     const _goldKey=_max!==_min?_agg.find(v=>v[1]===_max)[0]:null;
     const _lossKey=_max!==_min?_agg.find(v=>v[1]===_min)[0]:null;
     /* ==== [ANCRE: APERCU_STATS_DRAFT] — item demandé : la grille 4-cases
        affichait des moyennes brutes /100 (ex. 82), incohérentes avec le
-       reste de l'UI qui affiche toujours /20 (d20()) — corrigé, sans
-       toucher à _max/_min (comparaisons sur les valeurs brutes, d20 étant
-       monotone le résultat du max/min est identique converti ou non).
+       reste de l'UI qui affiche toujours /20 (d20()) — corrigé.
        Ajout d'un aperçu dépliable des 20 attributs complets (Technique/
        Mental/Physique en /20), même rendu que scr_profile (ATTR/gauge/d20),
        pour choisir un profil sans se fier uniquement aux 4 agrégats. ==== */
@@ -207,11 +230,21 @@ function gauntletBestLine(mode){
 function atRiskToggleBlock(a){
   const banked=a.banked||0;
   if(banked<=0) return '';
-  const next=Math.min(8,(a.riskMult||1)*2);
+  const cur=a.riskMult||1;
+  const next=Math.min(8,cur*2);
+  /* ==== [CORRECTIF A5_PLAFOND_MISE_EN_JEU] — bug remonté : au plafond
+     riskMult=8 (ui-08, même formule Math.min(8,riskMult*2)), next valait
+     déjà 8 — la carte promettait quand même "porte le multiplicateur à
+     ×8", comme si une victoire allait encore le faire monter, alors qu'il
+     est déjà à son maximum et qu'une victoire ne changera plus rien.
+     gauntletEliminationPayout (ui-03) renvoie de toute façon 0 sous mise
+     en jeu quel que soit le riskMult : la moitié perte de la phrase reste
+     vraie, seule la moitié "montée" mentait au plafond. ==== */
+  const atCap=cur>=8;
   const on=!!a.atRisk;
   return `<div class="toggle-card" style="flex:1;min-width:0" onclick="CL.toggleAtRisk()">
      <div class="mono small" style="display:inline-block;padding:7px 12px;border-radius:20px;border:1px solid ${on?'var(--blood)':'var(--line)'};color:${on?'var(--blood)':'var(--muted)'};font-weight:bold">${on?'✓ ':'☐ '}Mise en jeu</div>
-     ${on?`<div class="muted small mt">Une victoire porte le multiplicateur de la run à <b class="gold">×${next}</b>. Une élimination sur ce combat ne rapporte <b style="color:var(--loss)">absolument rien</b> — les ${banked} pts de cagnotte partent avec.</div>`:''}
+     ${on?`<div class="muted small mt">${atCap?`Multiplicateur déjà au plafond (<b class="gold">×8</b>) — une victoire ne l’augmentera plus.`:`Une victoire porte le multiplicateur de la run à <b class="gold">×${next}</b>.`} Une élimination sur ce combat ne rapporte <b style="color:var(--loss)">absolument rien</b> — les ${banked} pts de cagnotte partent avec.</div>`:''}
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -849,8 +882,18 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
     const targets=a.targets||[];
     const targetCard=t=>{
       const gap=a.rank-t.ladderRank;
-      const riskLabel=gap>=18?'AGRESSIF':gap>=10?'MÉDIAN':'SÛR';
-      const riskColor=gap>=18?'var(--blood)':gap>=10?'var(--gold)':'var(--sage)';
+      /* ==== [CORRECTIF B6_RANG1_SOUS_ETIQUETE] — bug remonté : riskLabel ne
+         regardait que l'écart de rang, alors que le rang #1 (buildWTUMMALadder,
+         ui-03) est TOUJOURS le combattant le plus fort du classement (lv~99,
+         et un némésis historique une run sur deux via fighterFromRivalSnapshot,
+         qui pose t._isRival) — dès currentRank<=15 (ui-03), le #1 devient une
+         cible proposable et s'affichait "SÛR" à partir du rang 2, comme
+         n'importe quelle cible à faible écart. isBoss couvre les deux cas
+         (rang 1 toujours, et _isRival en filet de sécurité si le flag venait
+         à apparaître ailleurs) : étiquette CHAMPION dédiée, jamais "SÛR". ==== */
+      const isBoss=t.ladderRank===1||t._isRival;
+      const riskLabel=isBoss?'CHAMPION':gap>=18?'AGRESSIF':gap>=10?'MÉDIAN':'SÛR';
+      const riskColor=isBoss?'var(--blood)':gap>=18?'var(--blood)':gap>=10?'var(--gold)':'var(--sage)';
       if(mutBlind){
         return `<div class="opp" style="border-left:3px solid ${riskColor};cursor:pointer" onclick="CL.pickLadderTarget(${t.ladderRank})">
         <div class="mono small" style="color:${riskColor};font-weight:bold">${riskLabel} · +${gap} rang${gap>1?'s':''}</div>
