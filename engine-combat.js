@@ -38,6 +38,7 @@ const STYLE_PROFILE={
   muayThai:{sigVol:0.88,koMod:1.25,subMod:0.30,clinchDmg:1.25,gnpDmg:1.0},
   karate:{sigVol:1.26,koMod:1.52,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
   wrestler:{sigVol:0.98,koMod:1.10,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
+  // ==== [ANCRE: CORRECTIF_GUARDPULL_MORT] — signalé par A22 (ui-03) : guardPull n'est lu NULLE PART dans ce moteur — donnée morte, conservée telle quelle (pas de risque à la retirer, mais pas de bénéfice non plus tant qu'aucune mécanique ne la consomme).
   bjj:{sigVol:0.95,koMod:0.75,subMod:1.98,clinchDmg:0.9,gnpDmg:0.9,guardPull:0.35},
   sambo:{sigVol:0.85,koMod:1.20,subMod:1.30,clinchDmg:1.2,gnpDmg:1.15},
   mma:{sigVol:1.05,koMod:1.05,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}

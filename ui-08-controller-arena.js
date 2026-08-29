@@ -486,7 +486,8 @@ function finaliseGauntletRun(a,opts){
   const base=(opts.kind==='elimination')
     ? gauntletEliminationPayout(a.mode,opts.progress,opts.atRisk)
     : (opts.kind==='cashout')
-      ? Math.round(gauntletPayout(a.mode,opts.progress)*(GAUNTLET_CASHOUT_RATIO[a.mode]||GAUNTLET_CASHOUT_RATIO.default))
+      // ==== [ANCRE: CORRECTIF_RATIO_ZERO] — A28 : `||` retomberait sur .default si un ratio de mode valait 0 ; `??` ne retombe que sur undefined/null.
+      ? Math.round(gauntletPayout(a.mode,opts.progress)*(GAUNTLET_CASHOUT_RATIO[a.mode]??GAUNTLET_CASHOUT_RATIO.default))
       : gauntletPayout(a.mode,opts.progress);
   const preBonus=gauntletFinalPayout(a,base);
   /* ==== [ANCRE: ULTIMATUM_MEDECIN] — ajout #24 (24 ajouts, 12/08/2026) :
@@ -1552,11 +1553,10 @@ const CL={
          coût invisible de l'attrition rendu mécanique, et l'argument
          principal en faveur de l'encaissement volontaire. ==== */
       const runAttrition=()=>{
-        if(_res && rnd()<rollGauntletInjuryChance(_res)){
-          const inj=rollGauntletRunInjury(G.f);
-          G.arcade.runInjuries=(G.arcade.runInjuries||[]).concat([inj]);
-          G.arcade.lastInjury=inj;
-        } else { G.arcade.lastInjury=null; }
+        // ==== [ANCRE: CORRECTIF_SEQUELLE_NULLE] — A27 : rollGauntletRunInjury renvoie null quand aucun attribut n'a réellement bougé (déjà au plancher) — rien à enregistrer dans ce cas.
+        const inj=(_res && rnd()<rollGauntletInjuryChance(_res))?rollGauntletRunInjury(G.f):null;
+        if(inj) G.arcade.runInjuries=(G.arcade.runInjuries||[]).concat([inj]);
+        G.arcade.lastInjury=inj;
       };
       /* ==== [FIN ANCRE] ==== */
       if(G.arcade.mode==='boss_run'){
@@ -1607,10 +1607,17 @@ const CL={
         /* ==== [ANCRE: REJOUABILITE_BANQUE_BOSSRUN] — champ `banked` (posé à 0
            dans startBossRun(), ui-03) n'était jusqu'ici jamais réécrit : mort.
            Reflète désormais le montant RÉELLEMENT versé si le joueur encaisse
-           maintenant (même table que gauntletPayout), affiché en cagnotte
-           visible au hub (ui-04) pour matérialiser ce qui est mis en jeu à
-           chaque KO suivant. ==== */
-        G.arcade.banked=gauntletFinalPayout(G.arcade,gauntletPayout('boss_run',G.arcade.streak));
+           maintenant, affiché en cagnotte visible au hub (ui-04) pour
+           matérialiser ce qui est mis en jeu à chaque KO suivant.
+           ==== [ANCRE: CORRECTIF_BANQUE_DECOTE] — bug remonté (B17) : calculé
+           au PLEIN TARIF (gauntletPayout seul) alors qu'aucune sortie ne paie
+           ce montant à ce palier — un encaissement volontaire paie
+           ×GAUNTLET_CASHOUT_RATIO (0.6/0.7), une élimination paie encore
+           moins (×GAUNTLET_ELIMINATION_RATIO, 0.5). Le bandeau surévaluait
+           donc la cagnotte de 30 à 50 % en permanence. Appliqué au ratio
+           d'encaissement (le plus favorable des deux, celui qu'annonce
+           littéralement ce commentaire : "si le joueur encaisse maintenant"). ==== */
+        G.arcade.banked=gauntletFinalPayout(G.arcade,Math.round(gauntletPayout('boss_run',G.arcade.streak)*(GAUNTLET_CASHOUT_RATIO['boss_run']??GAUNTLET_CASHOUT_RATIO.default)));
         /* ==== [FIN ANCRE] ==== */
         G.arcade.opponent=genBossOpponent(G.arcade.streak);
         /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 : nouveau boss
@@ -1654,7 +1661,8 @@ const CL={
         const oldRank=G.arcade.rank;
         G.arcade.rank=G.arcade.opponent.ladderRank; // le joueur prend la place du vaincu
         G.arcade.opponent.ladderRank=oldRank;
-        G.arcade.banked=gauntletFinalPayout(G.arcade,gauntletPayout('ladder_100',G.arcade.rank));
+        // ==== [ANCRE: CORRECTIF_BANQUE_DECOTE] — B17, cf. la même ANCRE en Boss Run plus haut : décote d'encaissement appliquée.
+        G.arcade.banked=gauntletFinalPayout(G.arcade,Math.round(gauntletPayout('ladder_100',G.arcade.rank)*(GAUNTLET_CASHOUT_RATIO['ladder_100']??GAUNTLET_CASHOUT_RATIO.default)));
         if(G.arcade.rank===1){
           finaliseGauntletRun(G.arcade,{kind:'victory',progress:1});
           G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
@@ -1683,8 +1691,9 @@ const CL={
         G.arcade.eliminatedReason=pactFail?'pact':judgesFail?'judges':'loss'; G.screen='gameover'; save(); render(); return;
       }
       const wonTournament=advanceWTUMMABracket();
-      /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] ==== */
-      if(G.arcade.tournament) G.arcade.banked=gauntletFinalPayout(G.arcade,gauntletPayout('bracket64',G.arcade.tournament.roundStep));
+      /* ==== [ANCRE: GAUNTLET_BANQUE_TOUS_FORMATS] ====
+         ==== [ANCRE: CORRECTIF_BANQUE_DECOTE] — B17, cf. la même ANCRE en Boss Run plus haut : décote d'encaissement appliquée. ==== */
+      if(G.arcade.tournament) G.arcade.banked=gauntletFinalPayout(G.arcade,Math.round(gauntletPayout('bracket64',G.arcade.tournament.roundStep)*(GAUNTLET_CASHOUT_RATIO['bracket64']??GAUNTLET_CASHOUT_RATIO.default)));
       if(wonTournament){
         finaliseGauntletRun(G.arcade,{kind:'victory',progress:7});
         G.arcade.victory=true; G.screen='gameover'; save(); render(); return;
@@ -3344,7 +3353,15 @@ const CL={
     grantSkill(G.f,c.skill);
     applyDeltas(G.f,c.d);
     G.arcade.cursedTaken=(G.arcade.cursedTaken||0)+1;
-    G.arcade.curses=(G.arcade.curses||[]).concat([c.curseLabel]);
+    /* ==== [ANCRE: CORRECTIF_MALEDICTION_VISIBLE] — bug remonté (B18) : la
+       malédiction de camp n'était inscrite nulle part de façon exploitable —
+       G.arcade.curses ne stockait qu'un libellé texte jamais relu ensuite
+       (donnée morte). Reste délibérément IRRÉVERSIBLE (hors du système
+       runInjuries/Table de soins/Infirmerie de fortune/ct_intact/ultimatum du
+       médecin — c'est un coût de camp accepté volontairement, pas une
+       séquelle de combat), mais désormais stockée avec ses vrais deltas pour
+       être affichée en toutes lettres par gauntletStatusBlock (ui-04b). ==== */
+    G.arcade.curses=(G.arcade.curses||[]).concat([{name:c.curseLabel,attrs:c.d}]);
     G.arcade.upgradesChosen.skill=true;
     G.arcade.cursedOpt=null;
     if(G.arcade.mode==='boss_run' && G.arcade.upgradesChosen.train){ save(); CL.go('arcadehub'); return; }

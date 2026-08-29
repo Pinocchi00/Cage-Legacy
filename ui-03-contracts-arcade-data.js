@@ -348,19 +348,38 @@ function runInjuryHealOption(){
     d:keys.map(k=>[k,-agg[k]]), _heal:true};
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORRECTIF_BORNES_FILET] — bug remonté (A21) : vérifié contre
+   STYLE_PROFILE (engine-combat) — 4 des 5 bornes sont partiellement ou
+   totalement inatteignables aux extrêmes du jeu de valeurs réel (sigVol
+   [0.6,1.6] réel [0.637,1.449] ; koMod haute 2.1 réel 1.90 ; clinchDmg
+   [0.5,1.6] réel [0.525,1.438] ; gnpDmg [0.5,1.6] réel [0.525,1.495]). Seul
+   subMod mord réellement des deux côtés (base bjj 1.98 × facteur haut 1.55 =
+   3.07, très au-dessus de 2.3 ; base boxer 0.10 × facteur bas 0.55 = 0.055,
+   en dessous de 0.15). Conservées TELLES QUELLES plutôt que resserrées : ce
+   sont des bornes de SÉCURITÉ (un filet contre une combinaison archétype/
+   attrs imprévue), pas un calibrage réel — les resserrer sur les valeurs
+   observées aujourd'hui figerait un filet qui ne protège plus rien dès
+   qu'un futur archétype ou une future clé d'attrs déplace ces bornes. ==== */
 function deriveArcadeMods(f){
   const a=f.attrs, base=STYLE_PROFILE[f.style]||STYLE_PROFILE.mma;
   const strikeScore=(num(a.jab)+num(a.cross)+num(a.hook)+num(a.kick))/4;
   const subScore=num(a.submission), powerScore=num(a.power), clinchScore=num(a.clinchStr,40);
   const gnpScore=num(a.topControl,40);
-  return {
+  /* ==== [ANCRE: CORRECTIF_GUARDPULL_PERDU] — bug remonté (A22) : l'objet
+     était reconstruit à plat, perdant guardPull (STYLE_PROFILE.bjj) pour les
+     archétypes BJJ. Sans effet aujourd'hui (guardPull n'est lu nulle part
+     dans le moteur — donnée déjà morte côté engine-combat, signalée là-bas),
+     mais fragile : Object.assign préserve tout champ de style non recalculé
+     ici plutôt que de silencieusement l'égarer si le moteur venait à le lire. ==== */
+  return Object.assign({},base,{
     sigVol:clamp(base.sigVol*(0.75+strikeScore/100*0.4),0.6,1.6),
     koMod:clamp(base.koMod*(0.7+powerScore/100*0.55),0.55,2.1),
     subMod:clamp(base.subMod*(0.55+subScore/100*1.0),0.15,2.3),
     clinchDmg:clamp(base.clinchDmg*(0.75+clinchScore/100*0.4),0.5,1.6),
     gnpDmg:clamp(base.gnpDmg*(0.75+gnpScore/100*0.4),0.5,1.6),
-  };
+  });
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: REJOUABILITE_NEMESIS_MULTI] — meta.wtNemesis était un slot
    UNIQUE écrasé à chaque victoire de Bracket 64, gated sur div===player.div,
@@ -368,10 +387,21 @@ function deriveArcadeMods(f){
    meta.gauntletRivals (jusqu'à 3, alimenté par les 3 formats), avec
    migration transparente de l'ancien wtNemesis au premier accès — aucune
    perte de le némésis déjà en sauvegarde. Consommé par les 3 formats. ==== */
+/* ==== [ANCRE: CORRECTIF_MIGRATION_PERSISTEE] — bug remonté (A24) : la
+   migration wtNemesis → gauntletRivals mutait `meta` en mémoire mais
+   n'appelait jamais saveMetaStats() elle-même — pickGauntletRival() (plus
+   bas), qui charge meta et ne fait jamais que LIRE, rejouait donc cette
+   migration à chaque appel (chaque génération d'adversaire de run), contraire
+   à ce que promet l'ANCRE REJOUABILITE_NEMESIS_MULTI ("migration
+   transparente ... au premier accès"). Sauvegardée ici, au point unique où la
+   mutation a lieu, pour que TOUS les appelants en profitent (les deux autres,
+   recordGauntletRival/claimGauntletBounty, se sauvegardaient déjà eux-mêmes
+   ensuite — cet appel y est inoffensif, juste redondant une seule fois). ==== */
 function getGauntletRivals(meta){
-  if(!meta.gauntletRivals){ meta.gauntletRivals=meta.wtNemesis?[meta.wtNemesis]:[]; }
+  if(!meta.gauntletRivals){ meta.gauntletRivals=meta.wtNemesis?[meta.wtNemesis]:[]; saveMetaStats(meta); }
   return meta.gauntletRivals;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: GAUNTLET_PRIME_VENGEANCE] — le snapshot ne mémorisait PAS à
    quel palier le némésis vous avait tué : impossible de calibrer une prime
    sur ce qu'elle vous a réellement coûté. killedAt (progression au moment de
@@ -494,7 +524,13 @@ const GAUNTLET_CONTRACTS=[
    check:(f)=>f.history.filter(h=>h.res==='win'&&h.method&&h.method.startsWith('Soum')).length>=2},
   {id:'ct_nopact',label:'Sans filet',mult:1.3,
    hint:'Terminer la run sans jamais prendre le pacte de finition.',
-   excludeModes:['boss_run'],
+   /* ==== [ANCRE: CORRECTIF_NOPACT_IMPOSSIBLE] — bug remonté (R1) : l'exclusion
+      mut_pacte_force avait été déplacée sur ct_nodec au lieu d'être AJOUTÉE ici
+      lors du correctif B5/B6. Sous ce mutateur, ui-08 pose pactWasActive=true
+      dès le 1er combat (le pacte est forcé, jamais optionnel), donc
+      pactTakenEver devient définitivement true — le contrat "ne jamais prendre
+      le pacte" passe de trivial à IMPOSSIBLE. ==== */
+   excludeModes:['boss_run'], excludeMutators:['mut_pacte_force'],
    check:(f,a)=>!a.pactTakenEver},
   {id:'ct_intact',label:'Corps intact',mult:1.4,
    /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — ct_intact reposait sur la forme
@@ -596,16 +632,27 @@ const GAUNTLET_ZONE_LABEL={tete:'Tête',corps:'Corps',jambes:'Jambes'};
    ce qui avait été pris quand l'attribut était déjà proche du plancher (gain
    net d'attribut en soignant). Le delta réel (après clamp) est désormais
    enregistré. ==== */
+/* ==== [ANCRE: CORRECTIF_SEQUELLE_NULLE] — bug remonté (A27) : depuis le
+   correctif B4 (delta réel après clamp), un attribut déjà à 1 produit un
+   delta réel de 0 — la séquelle était quand même enregistrée avec ce delta
+   nul, affichée ("0 Menton"), facturée 40 pts à l'infirmerie et comptée par
+   ct_intact/ringDoctorUltimatumActive, pour un effet mécanique inexistant.
+   Seuls les attributs RÉELLEMENT bougés sont désormais poussés dans
+   `applied` ; si aucun attribut n'a bougé, la fonction renvoie null plutôt
+   qu'une séquelle vide — à charge pour l'appelant (runAttrition, ui-08) de
+   ne rien enregistrer dans ce cas. ==== */
 function rollGauntletRunInjury(f){
   const inj=pick(GAUNTLET_RUN_INJURIES);
   const applied=[];
   inj.attrs.forEach(pair=>{
     const k=pair[0], v=pair[1];
-    if(typeof f.attrs[k]==='number'){ const before=f.attrs[k]; f.attrs[k]=clamp(before+v,1,100); applied.push([k,f.attrs[k]-before]); }
+    if(typeof f.attrs[k]==='number'){ const before=f.attrs[k]; f.attrs[k]=clamp(before+v,1,100); if(f.attrs[k]!==before) applied.push([k,f.attrs[k]-before]); }
   });
   f.overall=overall(f);
+  if(!applied.length) return null;
   return {name:inj.name,zone:inj.zone,attrs:applied};
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* Coût fixe par blessure soignée dans la zone visée (pas un coût unique par
    zone) : soigner une zone qui cumule 2 séquelles coûte logiquement plus
@@ -1044,8 +1091,20 @@ function runCoachingRound(plan){
      du pool réutilisé ailleurs (classement, revanches) — une fatigue qui
      fuiterait dans son état permanent serait un bug à part entière, pas une
      mécanique de run. ==== */
+  /* ==== [ANCRE: CORRECTIF_PLANCHER_REMONTE] — bug remonté (R3) : le plancher
+     était appliqué comme borne basse du clamp sur la valeur ABSOLUE, donc
+     quand un malus externe (mut_sans_repit, camp maudit "Surentraînement",
+     etc.) faisait déjà passer le cardio SOUS ce plancher, le clamp le
+     REMONTAIT gratuitement — annulant une partie du malus au lieu de le
+     laisser filer. Le plancher ne borne plus désormais que la FATIGUE
+     soustraite (`room`, la marge disponible au-dessus du plancher) : un
+     cardio déjà sous le plancher n'est plus jamais remonté par ce mécanisme,
+     seul le plancher [1,100] du clamp reste une garde-fou absolue. ==== */
   const cardioFloor=Math.max(1,Math.round((G.arcade.runStartCardio||G.f.attrs.cardio)*0.6));
-  G.f.attrs.cardio=clamp(G.f.attrs.cardio-Math.round((res.stats.A.dmgHead+res.stats.A.dmgBody+res.stats.A.dmgLegs)*0.4),cardioFloor,100);
+  const cardioFatigue=Math.round((res.stats.A.dmgHead+res.stats.A.dmgBody+res.stats.A.dmgLegs)*0.4);
+  const cardioRoom=Math.max(0,G.f.attrs.cardio-cardioFloor);
+  G.f.attrs.cardio=clamp(G.f.attrs.cardio-Math.min(cardioFatigue,cardioRoom),1,100);
+  /* ==== [FIN ANCRE] ==== */
   const oppCardioBefore=opp.attrs.cardio;
   opp.attrs.cardio=clamp(opp.attrs.cardio-Math.round((res.stats.B.dmgHead+res.stats.B.dmgBody+res.stats.B.dmgLegs)*0.4),1,100);
   gauntletAddRestore(c._restore.opp,'cardio',oppCardioBefore-opp.attrs.cardio);
@@ -1107,6 +1166,25 @@ function acceptGauntletSecondSouffle(){
   c.secondSouffleUsed=true;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORRECTIF_PALMARES_UNIFIE] — bug remonté (A23) : trois
+   générateurs d'adversaires de run (genBossOpponent, buildWTUMMABracket +
+   regenerateBracketOpponent, buildWTUMMALadder) posaient chacun leur propre
+   palmarès à la main, avec trois niveaux de complétude différents (W/L/ko/sub
+   pour le Boss Run et les némésis, W/L/ko pour le Ladder, W/L seul pour le
+   Bracket) — et aucun ne posait `dec`, alors que W=ko+sub+dec est
+   l'invariant lu ailleurs dans le jeu (fiches de combattant, etc.). Une seule
+   fonction, appelée aux 7 points d'appel réels (3 dans genBossOpponent, 2
+   dans le Bracket, 2 dans le Ladder), pose désormais un palmarès toujours
+   complet et cohérent. `koFloor` reprend le plancher de finitions déjà
+   présent à certains endroits (némésis/Boss Run : 10 — adversaires
+   d'élite) et absent ailleurs (0 par défaut). */
+function stampGauntletRecord(o,wMin,wMax,lMin,lMax,koFloor){
+  o.W=RI(wMin,wMax); o.L=RI(lMin,lMax);
+  o.ko=RI(koFloor||0,o.W);
+  o.sub=RI(0,o.W-o.ko);
+  o.dec=o.W-o.ko-o.sub;
+}
+/* ==== [FIN ANCRE] ==== */
 function genBossOpponent(streak){
   const div=G.f.div;
   const am=ascensionCurveMod(G.arcade&&G.arcade.asc);
@@ -1121,11 +1199,21 @@ function genBossOpponent(streak){
      Fallback sur la génération normale si le tableau est plus court que
      prévu (garde-fou, ne devrait jamais arriver vu la condition de
      déblocage). ==== */
+  /* ==== [ANCRE: CORRECTIF_CAPSTONE_DIVISION] — bug remonté (B16) : le pool
+     capstone n'était pas filtré par division, contrairement à
+     pickGauntletRival(div) plus bas — fighterFromRivalSnapshot crée
+     l'adversaire avec div:snap.div, donc un poids plume pouvait se retrouver
+     à affronter 5 poids lourds d'affilée (et koWeightMult, engine-combat,
+     s'appliquait alors sur la mauvaise division). Filtré sur `div` avant le
+     tri ; si le pool filtré est plus court que 5, le fallback existant
+     juste en dessous (pick5 falsy) prend le relais sans changement
+     supplémentaire — le déblocage du capstone (ui-06) reste compté toutes
+     divisions confondues, un pool plus court est accepté comme cas normal. ==== */
   if(G.arcade&&G.arcade.capstone){
     const meta=loadMetaStats();
-    const worst=getGauntletRivalsDefeated(meta).slice().sort((a,b)=>(b.overall||0)-(a.overall||0)).slice(0,5);
+    const worst=getGauntletRivalsDefeated(meta).filter(r=>r.div===div).slice().sort((a,b)=>(b.overall||0)-(a.overall||0)).slice(0,5);
     const pick5=worst[streak];
-    if(pick5){ const o=fighterFromRivalSnapshot(pick5,lv,'CAPSTONE — '+(pick5.nick||'')); o.champion='monde'; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W); o.sub=RI(0,o.W-o.ko); return o; }
+    if(pick5){ const o=fighterFromRivalSnapshot(pick5,lv,'CAPSTONE — '+(pick5.nick||'')); o.champion='monde'; stampGauntletRecord(o,18,30,0,2,10); return o; }
   }
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: REJOUABILITE_NEMESIS_BOSSRUN] — à partir du 3e combat,
@@ -1137,11 +1225,11 @@ function genBossOpponent(streak){
      dépasser 93 si le combattant qui l'a créé était très fort. ==== */
   if(streak>=2 && rnd()<0.25+streak*0.08){
     const rival=pickGauntletRival(div);
-    if(rival){ const o=fighterFromRivalSnapshot(rival,lv,'REVANCHE — '+(rival.nick||'')); o.champion='monde'; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W); o.sub=RI(0,o.W-o.ko); return o; }
+    if(rival){ const o=fighterFromRivalSnapshot(rival,lv,'REVANCHE — '+(rival.nick||'')); o.champion='monde'; stampGauntletRecord(o,18,30,0,2,10); return o; }
   }
   /* ==== [FIN ANCRE] ==== */
   const o=makeFighter({gender:G.f.gender,div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(26,33)});
-  o.stage='pro'; o.org=6; o.champion='monde'; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W); o.sub=RI(0,o.W-o.ko);
+  o.stage='pro'; o.org=6; o.champion='monde'; stampGauntletRecord(o,18,30,0,2,10);
   o.nick=pick(['Le Tyran','Le Cauchemar','L\u2019Intouchable','Le Destructeur']);
   return o;
 }
@@ -1516,18 +1604,27 @@ function buildWTUMMABracket(player){
   const pSeed=clamp(64-Math.floor((player.overall-40)/1.3),19,64);
   const pool=[];
   const rival=pickGauntletRival(player.div);
+  /* ==== [ANCRE: CORRECTIF_CHAMPION_ASCENSION] — bug remonté (B13) : le
+     champion en titre (tête de série #1, rival ou anonyme) était créé à un
+     niveau 88 EN DUR, sans ascensionCurveMod — extrait une seule fois ici
+     (au lieu d'être recalculé à chaque itération de la boucle, où seul le
+     `else` en avait besoin) et appliqué au champion comme aux 62 autres PNJ.
+     À Ascension 3 le boss final du Bracket devenait le combattant le plus
+     FAIBLE du top 8, alors que le Ladder cale déjà correctement son rang #1
+     sur la même courbe. ==== */
+  const _am=ascensionCurveMod(G.arcade&&G.arcade.asc);
   for(let i=1;i<=64;i++){
     if(i===pSeed){ player.seed=i; pool.push(player); }
     else if(i===1 && rival){
-      const boss=fighterFromRivalSnapshot(rival,88,'LE CHAMPION EN TITRE'); boss.seed=1; pool.push(boss);
+      const boss=fighterFromRivalSnapshot(rival,clamp(88+_am.lv,25,93+_am.cap),'LE CHAMPION EN TITRE'); boss.seed=1; pool.push(boss);
     } else {
-      const _am=ascensionCurveMod(G.arcade&&G.arcade.asc);
       const lv=clamp(88-Math.floor(i/1.6)+RI(-3,3)+_am.lv,25,93+_am.cap);
       const o=makeFighter({gender:player.gender,div:player.div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
-      o.stage='pro'; o.org=6; o.seed=i; o.W=RI(15,35); o.L=RI(0,4);
+      o.stage='pro'; o.org=6; o.seed=i; stampGauntletRecord(o,15,35,0,4);
       pool.push(o);
     }
   }
+  /* ==== [FIN ANCRE] ==== */
   let matches=[]; for(let i=0;i<32;i++){ matches.push({a:pool[i],b:pool[63-i]}); }
   return {active:true,roundStep:1,stepName:'Top 64 (32èmes)',matches,playerSeed:pSeed};
 }
@@ -1548,8 +1645,16 @@ function advanceWTUMMABracket(){
   /* ==== [ANCRE: CORRECTIF_GARDE_NULLE] — A18 : playerMatch était déréférencé
      sans garde nulle, contrairement au reste du fichier. Sûr aujourd'hui (le
      joueur est toujours poussé dans survivors ci-dessus), explicité pour ne
-     pas dépendre silencieusement de cette invariante. ==== */
-  if(!playerMatch) return false;
+     pas dépendre silencieusement de cette invariante.
+     ==== [ANCRE: CORRECTIF_REPLI_SILENCIEUX] — bug remonté (R4) : le repli
+     introduit par A18 renvoyait `false` ("tournoi non gagné") sans toucher
+     G.arcade.opponent, qui reste alors pointé sur l'adversaire DÉJÀ BATTU du
+     tour précédent — la run continuait silencieusement contre un mort au lieu
+     de signaler l'état incohérent. Avertit puis termine la run (`true`,
+     traité comme une victoire par l'appelant) plutôt que de laisser jouer un
+     combat fantôme : c'est le choix le moins mauvais d'un cas qui ne devrait
+     jamais se produire. ==== */
+  if(!playerMatch){ console.warn('[Gauntlet] advanceWTUMMABracket: joueur absent du bracket après avancement, run interrompue'); return true; }
   G.arcade.opponent=playerMatch.a.id===G.f.id?playerMatch.b:playerMatch.a;
   return false;
 }
@@ -1557,16 +1662,26 @@ function advanceWTUMMABracket(){
    remplace UNIQUEMENT l'adversaire du match courant du joueur (roundStep
    inchangé, arbre du tournoi intact pour tout le reste) — la profondeur
    déjà atteinte n'est jamais perdue, seul l'adversaire qui vient d'éliminer
-   le joueur est effacé. Formule de niveau identique à celle de
-   buildWTUMMABracket() (ci-dessus) pour rester cohérente avec la difficulté
-   attendue à ce palier, avec le même modificateur d'Ascension. ==== */
+   le joueur est effacé.
+   ==== [ANCRE: CORRECTIF_ANCRE_NIVEAU_RACHAT] — bug remonté (B14) : cette
+   ANCRE affirmait une formule "identique à celle de buildWTUMMABracket()",
+   ce qui était faux — l'ancienne formule indexait sur roundStep
+   (88-roundStep*3, jusqu'à 70 en finale) alors que buildWTUMMABracket()
+   indexe sur la TÊTE DE SÉRIE (88-floor(i/1.6), ~85-88 pour un finaliste) :
+   le rachat du Diable devenait d'autant plus généreux qu'on était allé loin
+   dans le tournoi. Le niveau du remplaçant est désormais calé sur celui de
+   l'adversaire qu'il remplace (celui qui vient d'éliminer le joueur, encore
+   sur le match au moment de l'appel) plutôt que sur une formule dupliquée et
+   désynchronisée — c'est la difficulté RÉELLEMENT rencontrée à ce point du
+   tournoi, peu importe comment elle a été générée à l'origine. ==== */
 function regenerateBracketOpponent(){
   const t=G.arcade.tournament; if(!t) return;
   const am=ascensionCurveMod(G.arcade&&G.arcade.asc);
-  const lv=clamp(88-Math.floor((t.roundStep||1)*3)+RI(-3,3)+am.lv,25,93+am.cap);
-  const o=makeFighter({gender:G.f.gender,div:G.f.div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
-  o.stage='pro'; o.org=6; o.seed=0; o.W=RI(15,35); o.L=RI(0,4);
   const m=t.matches.find(mm=>mm.a.id===G.f.id||mm.b.id===G.f.id);
+  const prevOpp=m?(m.a.id===G.f.id?m.b:m.a):null;
+  const lv=clamp((prevOpp?prevOpp.overall:88)+RI(-3,3),25,93+am.cap);
+  const o=makeFighter({gender:G.f.gender,div:G.f.div,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
+  o.stage='pro'; o.org=6; o.seed=0; stampGauntletRecord(o,15,35,0,4);
   if(m){ if(m.a.id===G.f.id) m.b=o; else m.a=o; }
   G.arcade.opponent=o;
 }
@@ -1595,7 +1710,18 @@ function regenerateBracketOpponent(){
    quel que soit le palier). ==== */
 function generateArcadeUpgrades(pactBonus){
   const mutId=G.arcade&&G.arcade.mutator&&G.arcade.mutator.id;
-  const baseOpts=trainingOptions(G.f).slice(0,mutId==='mut_camp_reduit'?2:3);
+  /* ==== [ANCRE: CORRECTIF_CAMP_REDUIT_SOIN] — bug remonté (R2, régression sur
+     B7) : `G.arcade.trainOpts.length=2` s'appliquait APRÈS le push de la Table
+     de soins, qui est toujours le DERNIER élément du tableau — c'est donc elle
+     qui se faisait retirer par la troncature, jamais une option d'entraînement,
+     à l'exact inverse de ce que prétendait cette ANCRE. Corrigé à la source :
+     _heal est calculé AVANT de décider du nombre d'options d'ENTRAÎNEMENT à
+     tirer (1 seule si un soin existe sous mut_camp_reduit, pour que le total
+     reste bien à 2 ; 2 sinon ; 3 hors mutateur, soin toujours additif dans ce
+     cas). Le soin n'est plus jamais tronqué après coup. ==== */
+  const _heal=runInjuryHealOption();
+  const cap=mutId==='mut_camp_reduit'?(_heal?1:2):3;
+  const baseOpts=trainingOptions(G.f).slice(0,cap);
   /* ==== [FIN ANCRE] ==== */
   // Bonus x4 : le format court (Bracket 64 / Ladder 100) rend les bonus
   // habituels de carrière (sur 100) quasi invisibles sur un parcours de
@@ -1610,16 +1736,7 @@ function generateArcadeUpgrades(pactBonus){
   const stripDyn=d=>d.filter(delta=>delta[0]!=='morale' && delta[0]!=='form');
   G.arcade.trainOpts=baseOpts.map(opt=>({...opt,d:stripDyn(opt.d).map(delta=>[delta[0],delta[1]*4])}))
                              .filter(opt=>opt.d.length>0);
-  const _heal=runInjuryHealOption(); if(_heal) G.arcade.trainOpts.push(_heal);
-  /* ==== [ANCRE: CORRECTIF_CAMP_REDUIT_SOIN] — bug remonté (B7) : la carte de
-     soin était poussée APRÈS la coupe à 2 options de mut_camp_reduit,
-     ramenant le camp à 3 options exactement quand le joueur est blessé —
-     c'est-à-dire quand le mutateur devrait mordre le plus. Le plafond de 2
-     est désormais réappliqué après le push, sans exception pour le soin :
-     sous ce mutateur, soigner une séquelle coûte réellement une option de
-     camp, comme prévu. ==== */
-  if(mutId==='mut_camp_reduit') G.arcade.trainOpts.length=2;
-  /* ==== [FIN ANCRE] ==== */
+  if(_heal) G.arcade.trainOpts.push(_heal);
   G.arcade.skillOpts=[];
   const rStep=G.arcade.tournament?G.arcade.tournament.roundStep:1; // sécurité : absent en mode Ladder 100
   let validPool=poolEligible(G.f,false,false);
@@ -1675,12 +1792,21 @@ function generateCursedOption(){
    camp entre les KO (contrairement à Bracket 64 / Ladder 100), alors que
    scr_arcade_upgrades()/pickArcadeSkill() (ui-04/ui-08) le permettent déjà
    pour peu qu'on leur fournisse skillOpts. Format allégé : 1 seule
-   compétence (pas d'entraînement — le format est un sprint de 5 combats,
-   pas d'écart d'attributs à combler), rareté indexée sur le streak déjà
-   atteint. upgradesChosen.train est posé à true D'EMBLÉE pour que
-   scr_arcade_upgrades saute directement à la section compétence. ==== */
+   compétence (pas d'entraînement — le format est un sprint de 5 combats),
+   rareté indexée sur le streak déjà atteint.
+   ==== [ANCRE: CORRECTIF_SOIN_BOSSRUN] — bug remonté (A26) : "pas d'écart
+   d'attributs à combler" ne tient plus depuis GAUNTLET_BLESSURE_RUN — le Boss
+   Run est le format le plus punitif ET le seul où l'ultimatum du médecin se
+   déclenche, et c'était pourtant le seul mode SANS accès à la Table de soins.
+   upgradesChosen.train n'est plus posé à true d'emblée QUE lorsqu'il n'y a
+   rien à soigner (comportement inchangé dans ce cas — le camp reste allégé à
+   la seule compétence) ; s'il existe une séquelle, trainOpts porte la Table
+   de soins comme unique option et le joueur doit explicitly la choisir
+   (pickArcadeTrain, ui-08, générique et déjà compatible avec les 3 modes)
+   avant de rejoindre le hub. ==== */
 function generateBossRunUpgrade(streak){
-  G.arcade.trainOpts=[];
+  const _heal=runInjuryHealOption();
+  G.arcade.trainOpts=_heal?[_heal]:[];
   G.arcade.skillOpts=[];
   let validPool=poolEligible(G.f,false,false);
   if(streak>=3) validPool=validPool.filter(s=>s.rar!=='C');
@@ -1693,7 +1819,7 @@ function generateBossRunUpgrade(streak){
      compétence, pas d'entraînement) : l'option maudite y est le SEUL arbitrage
      réel du camp, donc à plus forte raison présente. ==== */
   generateCursedOption();
-  G.arcade.upgradesChosen={train:true,skill:false};
+  G.arcade.upgradesChosen={train:!_heal,skill:false};
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -1711,17 +1837,32 @@ function buildWTUMMALadder(division){
      Bracket 64 et Boss Run ont été assouplis, pas le Ladder). ==== */
   const rival=(rnd()<0.5)?pickGauntletRival(division):null;
   const _amL=ascensionCurveMod(G.arcade&&G.arcade.asc);
+  /* ==== [ANCRE: CORRECTIF_PLAFOND_LADDER_ASCENSION] — bug remonté (B15) : la
+     borne haute du clamp était FIXE à 99, ignorant _amL.cap — contrairement au
+     Bracket (93+_am.cap) et au Boss Run (93+am.cap). À Ascension 3 les rangs 1
+     à 16 sortaient tous à 99 (plafond atteint dès un delta de courbe plus
+     faible), aplatissant la courbe : le rang #1 n'était pas plus dur qu'au
+     palier 0, contredisant l'ANCRE GAUNTLET_ASCENSION qui prétend couvrir les
+     3 courbes de façon uniforme. La borne fixe (99) était en prime plus haute
+     que celle des deux autres modes au palier 0 (93) — resserrée à la même
+     base. ==== */
   for(let i=1;i<=100;i++){
-    const lv=clamp(100-Math.floor(i*0.66)+RI(-2,3)+_amL.lv,30,99);
+    const lv=clamp(100-Math.floor(i*0.66)+RI(-2,3)+_amL.lv,30,93+_amL.cap);
     if(i===1 && rival){
       const o=fighterFromRivalSnapshot(rival,lv,'LE CHAMPION EN TITRE — '+(rival.nick||''));
-      o.ladderRank=1; o.W=RI(18,30); o.L=RI(0,2); o.ko=RI(10,o.W);
+      o.ladderRank=1; stampGauntletRecord(o,18,30,0,2,10);
       ladder.push(o); continue;
     }
     /* ==== [FIN ANCRE] ==== */
-    const o=makeFighter({gender:'H',div:division,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
+    /* ==== [ANCRE: CORRECTIF_GENDER_LADDER] — bug remonté (A29) : gender:'H'
+       en dur ici, alors que buildWTUMMABracket() utilise player.gender — sans
+       effet aujourd'hui (makeArcadeArchetype impose déjà 'H' à tout
+       combattant arcade), mais les deux générateurs se contredisaient. Aligné
+       sur G.f.gender (pas de paramètre `player` disponible dans cette
+       fonction, appelée avec seulement `division`). ==== */
+    const o=makeFighter({gender:G.f.gender,div:division,style:pick(STYLE_KEYS),level:lv,potential:99,age:RI(20,35)});
     o.stage='pro'; o.org=6; o.ladderRank=i;
-    o.W=RI(10,40); o.L=RI(0,5); o.ko=RI(0,o.W);
+    stampGauntletRecord(o,10,40,0,5);
     if(i<=5) o.nick=pick(['Le Tyran','Le Cauchemar','L\u2019Intouchable','Le Destructeur','L\u2019Empereur']);
     ladder.push(o);
   }
@@ -1750,7 +1891,16 @@ function gauntletRumorActive(a){
   if(!a) return false;
   if(a.mode==='boss_run') return true;
   if(a.mode==='bracket64') return !!(a.tournament && a.tournament.roundStep>=5); // Demi-finale + Finale
-  return false; // jamais en Ladder 100 (progression continue, pas de "gros combat" isolé)
+  /* ==== [ANCRE: CORRECTIF_RUMEUR_LADDER_MISE_A_NU] — bug remonté (A25) : le
+     Ladder 100 refusait toujours la rumeur ("Rien à percer ici.",
+     pierceGauntletRumor plus bas), y compris sous mut_mise_a_nu — qui masque
+     pourtant identité ET stats de l'adversaire comme un Boss Run permanent
+     (mutBlind, ui-04b). Sous ce mutateur précis, le joueur du Ladder n'avait
+     donc AUCUNE information et AUCUN recours payant, contrairement aux deux
+     autres formats. Activée dans ce seul cas ; la progression continue du
+     Ladder reste sans rumeur en dehors de ce mutateur. ==== */
+  if(a.mode==='ladder_100') return !!(a.mutator && a.mutator.id==='mut_mise_a_nu');
+  return false; // jamais en Ladder 100 hors mut_mise_a_nu (progression continue, pas de "gros combat" isolé)
 }
 function gauntletRumorTrueCategory(opp){
   const e=eff(opp);
