@@ -452,18 +452,16 @@ function runDebriefBlock(a){
    sans que rien ne le lui dise. L'ancienne condition sert de repli pour une
    run commencée avant ce changement. ==== */
 function ascensionUnlockBlock(a){
-  const meta=loadMetaStats();
-  const lvl=gauntletAscLevel(meta,a.mode);
-  if(!a.ascJustUnlocked && !a.victory) return '';
-  if(lvl<=(a.asc||0)) return '';
+  if(!a.ascJustUnlocked) return '';
   return `<div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--gold);padding:12px;text-align:center;margin-bottom:20px">
-     <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${lvl} DÉBLOQUÉE</div>
-     <div class="muted small mt">Adversaires plus forts, mais points gagnés multipliés par ${gauntletAscPayoutMod(lvl)}. Choisis ce palier au menu du Gauntlet.</div>
+     <div class="mono small gold" style="font-weight:bold">⬆ ASCENSION ${a.ascJustUnlocked} DÉBLOQUÉE</div>
+     <div class="muted small mt">Adversaires plus forts, mais points gagnés multipliés par ${gauntletAscPayoutMod(a.ascJustUnlocked)}. Choisis ce palier au menu du Gauntlet.</div>
    </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 function scr_gameover(){ const a=G.arcade, f=G.f;
+  if(!a||!f) return `<div class="scr center intro"><p class="lede">Rien à afficher pour l’instant.</p><button class="btn ghost mt" onclick="CL.go('title')">Retour</button></div>`;
   if(a.mode==='boss_run'){
     const isVictory=!!a.victory;
     const cashedOut=!!a.cashedOut;
@@ -487,7 +485,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
      <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${title}<em style="color:var(--muted)">${subtitle}</em></div>
    </div>
    ${gauntletBestLine('boss_run')}
-   ${(!isVictory&&!cashedOut)?nearMissBlock(a):''}
+   ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
    ${ascensionUnlockBlock(a)}
    ${runDebriefBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
@@ -533,7 +531,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
      <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'R.I.P.'}<em style="color:var(--muted)">${isVictory?'Vous êtes le #1 mondial':cashedOut?`Sorti au rang #${a.rank}, mise en sécurité`:isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':'Éliminé au rang #'+a.rank}</em></div>
    </div>
    ${gauntletBestLine('ladder_100')}
-   ${(!isVictory&&!cashedOut)?nearMissBlock(a):''}
+   ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
    ${ascensionUnlockBlock(a)}
    ${runDebriefBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
@@ -567,7 +565,7 @@ function scr_gameover(){ const a=G.arcade, f=G.f;
      <div class="hero-name" style="color:${isVictory?'var(--gold)':cashedOut?'var(--sage)':'var(--loss)'}">${isVictory?'CHAMPION WTUMMA':cashedOut?'RUN ENCAISSÉ':isPact?'PACTE ROMPU':isJudges?'DÉCISION CONTESTÉE':'ÉLIMINÉ'}<em style="color:var(--muted)">${cashedOut?'Sortie volontaire':isPact?'Victoire aux points — le pacte de finition l\u2019a invalidée':isJudges?'Victoire aux points trop serrée — les juges sévères l\u2019ont invalidée':a.tournament.stepName}</em></div>
    </div>
    ${gauntletBestLine('bracket64')}
-   ${(!isVictory&&!cashedOut)?nearMissBlock(a):''}
+   ${(a.eliminatedReason==='loss')?nearMissBlock(a):''}
    ${ascensionUnlockBlock(a)}
    ${runDebriefBlock(a)}
    <div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--line);border-left:3px solid ${isVictory?'var(--gold)':'var(--loss)'};padding:16px;margin-bottom:24px">
@@ -756,7 +754,7 @@ function scr_boss_reveal(){
    ${rivalBadge(opp)}
    <div class="card glass mt" style="background:var(--panel2);border:1px solid var(--blood);padding:14px;text-align:center">
      <div class="eyebrow mb" style="color:var(--blood)">Le boss impose son terme</div>
-     <div class="mono" style="color:var(--blood);font-weight:bold">${Math.sign(m.amount)>=0?'+':''}${Math.sign(m.amount)*Math.max(1,Math.round(Math.abs(m.amount)/5))} ${m.label} <span class="muted small">(ce combat uniquement)</span></div>
+     <div class="mono" style="color:var(--blood);font-weight:bold">-${Math.max(1,Math.round(Math.abs(m.amount)/5))} ${m.label} <span class="muted small">(ce combat uniquement)</span></div>
      <div class="muted small mt">Tiré au hasard à chaque reveal — jamais toujours la même stat visée.</div>
    </div>
    <button class="btn primary mt" style="font-size:20px;padding:18px;background:var(--blood);border-color:var(--blood)" onclick="CL.confirmBossReveal()">ENTRER DANS LA CAGE</button>
@@ -814,13 +812,13 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
       const riskColor=gap>=18?'var(--blood)':gap>=10?'var(--gold)':'var(--sage)';
       if(mutBlind){
         return `<div class="opp" style="border-left:3px solid ${riskColor};cursor:pointer" onclick="CL.pickLadderTarget(${t.ladderRank})">
-        <div class="mono small" style="color:${riskColor};font-weight:bold">${riskLabel} · +${gap} rangs</div>
+        <div class="mono small" style="color:${riskColor};font-weight:bold">${riskLabel} · +${gap} rang${gap>1?'s':''}</div>
         <div class="opp-top"><span class="opp-nm gold">Rang #${t.ladderRank} — ??? <span style="filter:blur(3px)">████</span></span></div>
         <div class="muted small mt">Identité inconnue — Mise à nu.</div>
       </div>`;
       }
       return `<div class="opp" style="border-left:3px solid ${riskColor};cursor:pointer" onclick="CL.pickLadderTarget(${t.ladderRank})">
-        <div class="mono small" style="color:${riskColor};font-weight:bold">${riskLabel} · +${gap} rangs</div>
+        <div class="mono small" style="color:${riskColor};font-weight:bold">${riskLabel} · +${gap} rang${gap>1?'s':''}</div>
         ${rivalBadge(t)}
         <div class="opp-top"><span class="opp-nm gold">Rang #${t.ladderRank} — ${esc(t.name)} ${t.flag}</span></div>
         <div class="muted small mt">${t.styleLabel} · OVR ${t.overall}</div>
@@ -830,7 +828,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
    <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${f.nick} ${f.flag} — Objectif #1</em></div>
    <p class="lede small mt">Choisissez votre cible — plus le saut de rang est grand, plus l\u2019adversaire est fort.</p>
    ${targets.map(targetCard).join('')}
-   ${(a.aggroCooldown>0)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
+   ${(a.aggroCooldown>0 && a.rank>15)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
    ${gauntletStatusBlock(a)}
    <div style="display:flex;gap:10px;margin-top:12px">${pactToggleBlock(a)}${atRiskToggleBlock(a)}</div>
    <button class="btn ghost" onclick="CL.go('title')">Abandonner la run (0 pt)</button></div>`;
@@ -977,7 +975,9 @@ function scr_arcade_upgrades(){
    sont montrés directement en /20 (division par 5) pour rester cohérent
    avec l'échelle affichée partout ailleurs dans l'UI. ==== */
 function scr_camp_identity_pick(){
+  if(!G.arcade||!G.f) return `<div class="scr center intro"><p class="lede">Rien à choisir pour l’instant.</p><button class="btn ghost mt" onclick="CL.go('arcadehub')">Retour</button></div>`;
   const opts=G.arcade.campIdentityOptions||[];
+  if(!opts.length) return `<div class="scr center intro"><p class="lede">Rien à choisir pour l’instant.</p><button class="btn ghost mt" onclick="CL.go('arcadehub')">Retour</button></div>`;
   return `<div class="scr center intro"><div class="eyebrow sage">Avant le premier combat</div>
    <h2 class="disp big">IDENTITÉ DE CAMP</h2>
    <p class="lede">Un choix définitif, pour toute la durée de cette run.</p>
@@ -1075,7 +1075,7 @@ function scr_coaching_round(){
      et à quoi sert cet arrêt, et l'estimation chiffrée des juges — du
      jargon de scorecard — est REMPLACÉE par ce que dit le coach, avec des
      mots : plus aucun chiffre de juge sur cet écran. ==== */
-  const totalRounds=(G.fight&&G.fight.rounds)||3;
+  const totalRounds=G.fight.rounds;
   const restants=Math.max(0,totalRounds-roundJustEnded);
   const verdict=coachScoreLine(a,c);
   const conseil=coachAdviceLine(a,c,r,f);
