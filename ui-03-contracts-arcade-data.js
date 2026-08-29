@@ -697,10 +697,37 @@ function pickGauntletRival(div){
    d'attrs brute pour rester visible en combat sans fausser l'affichage
    des stats du profil adverse. boss._killedCount est reporté pour que
    rivalBadge() (ui-04) puisse l'afficher. ==== */
+/* ==== [ANCRE: CORRECTIF_RECALAGE_NEMESIS] — bug remonté (N1, vérifié en
+   exécution) : `levelHint` était totalement INERTE. Il ne servait qu'à
+   construire `boss` via makeFighter(), dont les attrs/overall générés
+   étaient aussitôt écrasés par `boss.attrs=JSON.parse(JSON.stringify(
+   snap.attrs))` et `boss.overall=snap.overall` deux lignes plus bas — le
+   niveau demandé par les 4 appelants (Bracket, Ladder, capstone, revanche
+   Boss Run), pourtant calculé avec soin à partir de la courbe de difficulté
+   ET du palier d'Ascension courant, n'avait donc STRICTEMENT AUCUN effet.
+   Le boss de fin de run était une pure loterie sur l'ancienneté du
+   snapshot : aussi faible que ce que le rival valait au moment où il a
+   éliminé le joueur (parfois très tôt dans une run précédente, donc très
+   loin de la difficulté attendue au palier actuel), ou au contraire écrasant
+   s'il avait été enregistré tard. Toutes les ANCREs qui promettaient un
+   "recalage sur la courbe de difficulté" (REJOUABILITE_NEMESIS_BOSSRUN,
+   REJOUABILITE_NEMESIS_LADDER, GAUNTLET_CAPSTONE_NEMESIS) mentaient.
+   Corrigé en mettant `levelHint` réellement au travail : les attrs du
+   snapshot sont mises à l'échelle PROPORTIONNELLEMENT (même forme relative,
+   donc le rival reste reconnaissable — un cogneur reste un cogneur) pour que
+   l'overall obtenu corresponde à ce que ce niveau produit normalement pour
+   ce style (le fighter généré par makeFighter() ci-dessus sert justement de
+   référence pour cette conversion niveau→overall, avant d'être écrasé). ==== */
 function fighterFromRivalSnapshot(snap,levelHint,nick){
-  const boss=makeFighter({gender:'H',div:snap.div,style:snap.style,level:levelHint||90});
-  boss.attrs=JSON.parse(JSON.stringify(snap.attrs));
-  boss.skills=[...snap.skills]; boss.overall=snap.overall;
+  const lvl=levelHint||90;
+  const boss=makeFighter({gender:'H',div:snap.div,style:snap.style,level:lvl});
+  const targetOverall=boss.overall;
+  const snapOverall=snap.overall||overall({attrs:snap.attrs});
+  const ratio=snapOverall>0?targetOverall/snapOverall:1;
+  const attrs={};
+  for(const k in snap.attrs) attrs[k]=clamp(Math.round(snap.attrs[k]*ratio),1,100);
+  boss.attrs=attrs;
+  boss.skills=[...snap.skills]; boss.overall=overall(boss);
   boss.name=snap.name; boss.flag=snap.flag; boss.nick=nick||snap.nick||'REVANCHE';
   boss.stage='pro'; boss.org=6; boss._isRival=true; boss._rivalSource=snap.source;
   boss._killedCount=snap.killedCount||0;
@@ -710,6 +737,7 @@ function fighterFromRivalSnapshot(snap,levelHint,nick){
   }
   return boss;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 function makeArcadeArchetype(spec){
