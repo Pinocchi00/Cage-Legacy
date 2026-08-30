@@ -3201,8 +3201,14 @@ const CL={
      (recréé à chaque combat), G.arcade vit toute la run — le verrou doit
      donc être remis à zéro explicitement, ici, au seul point d'entrée de
      l'écran de tactique (fightArcade()), plutôt que de compter sur une
-     réinitialisation implicite. ==== */
-  fightArcade(){ G.arcade._resolved=false; G.arcade._planLocked=false; G.screen='arcade_plan'; save(); render(); },
+     réinitialisation implicite.
+     ==== [CORRECTIF B10_LASTMSG_MUET] — G.lastMsg (posé par pierceRumor ou
+     healGauntletZone sur l'écran précédent) est effacé dès l'affichage qui
+     le montre, mais une double-frappe rapide peut naviguer vers l'écran
+     suivant avant ce render — le message resterait alors accroché jusqu'à
+     resurgir, hors contexte, sur un tout autre écran plus tard. Effacé ici
+     par sécurité, au seul point d'entrée vers le combat suivant. ==== */
+  fightArcade(){ G.arcade._resolved=false; G.arcade._planLocked=false; G.screen='arcade_plan'; G.lastMsg=null; save(); render(); },
   chooseArcadePlan(idx){
     if(G.arcade._resolved) return;
     /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — même ordre de composition
@@ -3210,7 +3216,7 @@ const CL={
        d'abord, sinon l'index cliqué ne correspondrait plus à la carte
        réellement affichée. ==== */
     const archTactic=ARCADE_EXCLUSIVE_TACTICS[G.f.nick];
-    const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(G.f)).concat(TACTICS[G.f.style]||[]);
+    const combined=(archTactic?[archTactic]:[]).concat(TACTICS[G.f.style]||[]);
     const planObj=idx>=0?combined[idx]:null;
     G.arcade.plan=planObj?planObj.m:null; G.arcade.planLabel=planObj?planObj.lbl:null;
     /* ==== [ANCRE: BOSSRUN_MISE_EN_SCENE] — ajout #3 (24 ajouts, 12/08/2026) :
@@ -3290,7 +3296,7 @@ const CL={
   pickCoachingTactic(idx){
     if(!G.arcade||!G.arcade.coaching) return;
     const archTactic=ARCADE_EXCLUSIVE_TACTICS[G.f.nick];
-    const combined=(archTactic?[archTactic]:[]).concat(getExclusiveTactics(G.f)).concat(TACTICS[G.f.style]||[]);
+    const combined=(archTactic?[archTactic]:[]).concat(TACTICS[G.f.style]||[]);
     const planObj=idx>=0?combined[idx]:null;
     const plan=planObj?planObj.m:null;
     G.arcade.plan=plan; G.arcade.planLabel=planObj?planObj.lbl:null;
