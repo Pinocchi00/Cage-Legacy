@@ -79,13 +79,15 @@ function arcadePerkBadge(p){
   if(declares(['topControl']) && a.topControl>=78) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
   if(!tags.length) tags.push({t:'ÉQUILIBRÉ',c:'var(--muted)'});
   /* ==== [ANCRE: CORRECTIF_BADGES_EMPILEMENT] — bug remonté : sur un
-     archétype à 2 badges (ex. Le Surfer : PEU DE PUISSANCE + FINISSEUR
-     SOUMISSION), l'absence de marge verticale entre les <span> faisait
-     visuellement se toucher/chevaucher les badges quand ils passaient à la
-     ligne (aucun flex-wrap avec gap, juste des spans inline avec
-     margin-right seul). Ajout de margin-bottom sur chaque badge : suffisant
-     pour créer un espacement propre au retour à la ligne, sans toucher au
-     conteneur ni au CSS global. ==== */
+     archétype à plusieurs badges (ex. L'Anaconda, bjj pur : PEU DE PUISSANCE
+     + FINISSEUR SOUMISSION + SOL DANGEREUX, cf. CORRECTIF R1_BADGES_RATIO_
+     INATTEIGNABLE ci-dessus — l'exemple d'origine, Le Surfer, ne cumule plus
+     que FINISSEUR SOUMISSION depuis ce correctif), l'absence de marge
+     verticale entre les <span> faisait visuellement se toucher/chevaucher
+     les badges quand ils passaient à la ligne (aucun flex-wrap avec gap,
+     juste des spans inline avec margin-right seul). Ajout de margin-bottom
+     sur chaque badge : suffisant pour créer un espacement propre au retour
+     à la ligne, sans toucher au conteneur ni au CSS global. ==== */
   return `<div class="mono small mt" style="position:relative;z-index:2">${tags.map(x=>`<span style="display:inline-block;border:1px solid ${x.c};color:${x.c};padding:2px 8px;margin:0 6px 6px 0;border-radius:2px">${x.t}</span>`).join('')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -1127,11 +1129,15 @@ function scr_arcade_upgrades(){
     h+=`<p class="lede small">Rien de plus à choisir ici.</p>
         <button class="btn ghost mt" onclick="CL.go('arcadehub')">Continuer</button>`;
   }
-  /* ==== [ANCRE: REJOUABILITE_CAMP_RECUPERATION] — la forme (attritionHeal(),
-     ui-08) décroît réellement avec la profondeur de la run mais restait
-     invisible sur cet écran, rendant l'option "Récupération active"
-     (ui-03) illisible faute de référence. Jauge affichée juste avant les
-     groupes d'attributs, même style que le reste de l'écran. ==== */
+  /* ==== [CORRECTIF P4_ANCRE_ATTRITIONHEAL_PERIMEE, A16-like] — l'ancre
+     REJOUABILITE_CAMP_RECUPERATION qui précédait ici citait attritionHeal()
+     comme source de la forme affichée par une jauge dédiée — cette fonction
+     n'existe plus (retirée, remplacée par runAttrition(), cf. ui-08 ANCRE
+     GAUNTLET_BLESSURE_RUN L1547-1554) et la jauge elle-même a été retirée
+     par le correctif ci-dessous (GAUNTLET_SANS_MORAL_FORME) : l'ancre ne
+     documentait donc plus ni la fonction, ni le bloc de rendu, les deux
+     ayant disparu. Retirée à son tour plutôt que corrigée : son contenu est
+     déjà entièrement repris par l'ancre suivante. ==== */
   /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — le bloc jauge « Forme /
      Récupération de la run » est retiré : la valeur n'est plus lue par eff()
      en arcade et n'a donc plus rien à communiquer. L'état passif de la run
