@@ -835,11 +835,16 @@ function scr_arcade_plan(){
   /* ==== [FIN ANCRE] ==== */
   /* ==== [CORRECTIF B10_LASTMSG_MUET] — CL.pierceRumor (ui-08) pose
      G.lastMsg (coût de -2 Intelligence tactique, ou échec "Rien à percer
-     ici.") puis re-rend cet écran, mais rien ici ne l'affichait jusqu'ici —
-     même bloc auto-consommé que scr_hub (ui-06) : lu puis effacé dans le
-     même render, pour ne jamais réapparaître sur l'écran suivant. ==== */
+     ici.") puis re-rend cet écran, mais rien ici ne l'affichait jusqu'ici.
+     ==== [CORRECTIF R3_LASTMSG_MUTATION_RENDU] — bug remonté : la mutation
+     `if(G.lastMsg) G.lastMsg=null` ici était le même anti-pattern (état
+     modifié depuis une fonction de RENDU) que celui retiré d'
+     eliminationPreview par A1 dans le lot précédent — et redondante :
+     CL.fightArcade() (ui-08, seul point d'entrée vers cet écran) fait déjà
+     G.lastMsg=null avant chaque nouveau combat. Le nettoyage se fait
+     désormais uniquement côté handler ; ce bloc ne fait plus que LIRE
+     G.lastMsg pour l'afficher. ==== */
   const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
-  if(G.lastMsg) G.lastMsg=null;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_ANALYSE_COLLEE] — bug remonté : .hero-name a un
      interlignage très serré (line-height:.92) sans marge basse, et cette
@@ -899,12 +904,24 @@ function scr_boss_reveal(){
    dominait donc systématiquement l'encaissement. Un seul point de sortie
    reste : « Abandonner la run » (0 pt, déjà présent partout). ==== */
 function scr_arcadehub(){ const f=G.f, a=G.arcade;
+  /* ==== [CORRECTIF R2_ARCADEHUB_LASTMSG_MUET] — bug remonté : buyDevilContinue
+     (ui-08) et le filet de sécurité (consumableSafetynet, ui-08) posent tous
+     deux G.lastMsg puis atterrissent sur cet écran (retryArcade → arcadehub,
+     ou directement ici pour le filet de sécurité), mais aucune des 3 branches
+     ci-dessous ne l'affichait — depuis que CL.fightArcade() (ui-08) fait
+     G.lastMsg=null au moment de lancer le combat suivant, ces deux messages
+     étaient détruits avant d'avoir jamais pu s'afficher, dont une transaction
+     payante (le coût en points de Légende du Diable). Même bloc que
+     scr_arcade_plan/scr_arcade_upgrades, calculé une seule fois ici et
+     injecté dans les 3 branches. ==== */
+  const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
   if(a.mode==='boss_run'){
     /* ==== [ANCRE: REJOUABILITE_BANQUE_BOSSRUN] — a.banked (ui-08) affiché
        comme cagnotte visible, avec ce qui est en jeu si le KO suivant échoue
        (eliminationPreview) juste en-dessous : la tension risque/récompense
        doit être LISIBLE, pas seulement calculée en coulisses. ==== */
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
+   ${lastMsgHtml}
    <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur cette run</em></div>
    ${glassOpen({padding:12,align:'center',borderLeft:'var(--gold)',margin:'margin-top:12px'})}
      <div class="mono small gold" style="font-weight:bold">⚠ SEULE UNE FINITION COMPTE — une victoire aux points arrête la série.</div>
@@ -963,6 +980,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
       </div>`;
     };
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--sage)">WTUMMA // ASCENSION</div>
+   ${lastMsgHtml}
    <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${f.nick} ${f.flag} — Objectif #1</em></div>
    <p class="lede small mt">Choisissez votre cible — plus le saut de rang est grand, plus l\u2019adversaire est fort.</p>
    ${targets.map(targetCard).join('')}
@@ -978,6 +996,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
   /* ==== [FIN ANCRE] ==== */
   if(!a.tournament) return `<div class="scr center intro"><p class="lede">Aucun tableau en cours.</p><button class="btn ghost mt" onclick="CL.go('title')">Retour</button></div>`;
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
+   ${lastMsgHtml}
    <div class="hero-name" style="text-align:center">CLASSÉ #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
    ${glassOpen({padding:16,align:'left',margin:'margin-top:20px'})}
      <div class="eyebrow mb">Prochain adversaire${mutBlindBr?'':` : classé #${a.opponent.seed}`}</div>
@@ -1001,11 +1020,17 @@ function scr_arcade_upgrades(){
      ${ATTR[key].map(att=>`<div class="attr"><span class="attr-l">${att[1]}</span>${gauge(f.attrs[att[0]])}<span class="attr-v">${d20(f.attrs[att[0]])}</span></div>`).join('')}</div>`;
   /* ==== [CORRECTIF B10_LASTMSG_MUET] — CL.healGauntletZone (ui-08) pose
      G.lastMsg (soin réussi ou échec faute de points de Légende) puis
-     re-rend cet écran, mais rien ici ne l'affichait jusqu'ici — même bloc
-     auto-consommé que scr_hub (ui-06) : lu puis effacé dans le même
-     render, pour ne jamais réapparaître sur l'écran suivant. ==== */
+     re-rend cet écran, mais rien ici ne l'affichait jusqu'ici.
+     ==== [CORRECTIF R3_LASTMSG_MUTATION_RENDU] — bug remonté : la mutation
+     `if(G.lastMsg) G.lastMsg=null` ici était le même anti-pattern (état
+     modifié depuis une fonction de RENDU) que celui retiré d'
+     eliminationPreview par A1 dans le lot précédent. Nettoyage laissé au
+     seul handler qui le fait déjà, CL.fightArcade() (ui-08), au point
+     d'entrée du combat suivant — ce bloc ne fait plus que LIRE G.lastMsg
+     pour l'afficher, le message reste visible tant que le joueur n'a pas
+     relancé un combat (y compris sur le hub suivant, cf. CORRECTIF
+     R2_ARCADEHUB_LASTMSG_MUET). ==== */
   const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
-  if(G.lastMsg) G.lastMsg=null;
   /* ==== [FIN ANCRE] ==== */
   let h=`<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // AMÉLIORATIONS</span></div>${lastMsgHtml}`;
   if(!a.upgradesChosen.skill){
