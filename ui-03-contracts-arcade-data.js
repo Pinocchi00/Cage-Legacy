@@ -769,6 +769,13 @@ function makeArcadeArchetype(spec){
   f.nick=spec.nick; f._perk=spec.perk; f.styleLabel=spec.styleLabel;
   if(spec.flag) f.flag=spec.flag; // drapeau de flavor, découplé du pays réel utilisé pour le patronyme
   f._styleProfileOverride=deriveArcadeMods(f);
+  /* ==== [CORRECTIF R1_BADGES_CANAL_DECLARE] — arcadePerkBadge (ui-04b) ne
+     doit tester que les canaux explicitement voulus par la spec de
+     l'archétype (spec.attrs), jamais un attribut laissé au tirage aléatoire
+     de makeFighter — sans quoi un style dont l'attribut n'est jamais
+     spécifié (ex. submission chez un boxeur) peut franchir un seuil par pur
+     hasard de génération, aussi souvent qu'il ne le franchit pas. ==== */
+  f._specAttrs=Object.keys(spec.attrs);
   return f;
 }
 /* 23 archétypes (audit "Draft Rapide"). Styles fictifs de Gemini (Sumo, Point
@@ -1952,6 +1959,18 @@ function gauntletRumorActive(a){
   if(a.mode==='ladder_100') return !!(a.mutator && a.mutator.id==='mut_mise_a_nu');
   return false; // jamais en Ladder 100 hors mut_mise_a_nu (progression continue, pas de "gros combat" isolé)
 }
+/* ==== [CORRECTIF P2_MUTBLIND_TRIPLE] — bug remonté : le prédicat
+   `mutator&&mutator.id==='mut_mise_a_nu'` était recopié à 3 endroits de
+   ui-04b (scr_arcade_plan, scr_arcadehub ×2) — l'un d'eux (scr_arcade_plan)
+   a depuis été amendé par le correctif B2 (`&&!analysisPierced`, pour que
+   percer la rumeur lève aussi le masque), sans que les 2 autres copies ne
+   soient touchées : le MÊME nom de variable (mutBlind) portait donc deux
+   sémantiques différentes selon l'écran. gauntletMutBlind(a) factorise le
+   prédicat DE BASE (mutateur actif, avant tout ajustement) ; scr_arcade_plan
+   compose dessus sa propre nuance liée à la percée, propre à cet écran (rien
+   à percer avant d'avoir choisi un adversaire, donc non pertinent aux 2 hubs
+   qui précèdent toujours ce choix). ==== */
+function gauntletMutBlind(a){ return !!(a&&a.mutator&&a.mutator.id==='mut_mise_a_nu'); }
 function gauntletRumorTrueCategory(opp){
   const e=eff(opp);
   const scores={frappeur:e.striking,lutteur:e.takedown,soumission:e.submission};

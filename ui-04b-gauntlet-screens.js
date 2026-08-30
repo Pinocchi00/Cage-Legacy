@@ -41,40 +41,53 @@
    seuils existants (ce qui aurait dilué leur sens pour les autres) : un 6e
    badge neutre ÉQUILIBRÉ, affiché seulement quand aucun des 5 traits marqués
    ne s'applique. ==== */
-/* ==== [CORRECTIF B5_BADGES_SEUILS_ABSOLUS] — bug remonté : les seuils
-   testaient m[k] (base STYLE_PROFILE[style][k] × facteur 0.55-1.55,
-   deriveArcadeMods ci-dessus, ui-03) en valeur ABSOLUE, alors que la base
-   varie déjà fortement d'un style à l'autre (koMod karate 1.52 vs mma
-   1.05). Conséquence vérifiée : les 5 archétypes style:'mma' sur 23
-   n'atteignaient AUCUN seuil (koMod max 1.31 < 1.35, sigVol max 1.21 <
-   1.25, gnpDmg max 1.15 < 1.2) ; à l'inverse karate déclenchait FINISSEUR
-   KO dès power>=34 (1.52 de base suffit à passer 1.35 même à facteur < 1,
-   donc en dessous de la moyenne DE SON PROPRE style). Comparé désormais au
-   RATIO m[k]/STYLE_PROFILE[p.style][k] — qui vaut exactement le facteur
-   0.55-1.55 lui-même, indépendant de la base — donc à seuils communs à
-   tous les styles : koMod/subMod (mêmes bornes 0.55-1.55, marge la plus
-   large) 1.15 haut / 0.85 bas pour koMod, 1.25 pour subMod ; sigVol/gnpDmg
-   (bornes plus resserrées 0.75-1.15) au plafond réellement atteignable de
-   leur facteur, 1.15. ==== */
+/* ==== [CORRECTIF R1_BADGES_RATIO_INATTEIGNABLE] — bug remonté sur le
+   correctif B5 (ratio m[k]/STYLE_PROFILE[style][k]) : (a) le clamp de
+   deriveArcadeMods (ui-03) borne sigVol/gnpDmg à un facteur max de 1.6,
+   mais la formule elle-même (0.75+strikeScore/100*0.4) ne peut jamais
+   dépasser ~1.14 même à strikeScore=100 (et baseAttrs, engine.js, plafonne
+   les attributs générés à 96) — GROS VOLUME et SOL DANGEREUX (seuil 1.15)
+   étaient donc MORTS pour tous les archétypes, pas seulement mma ; (b) le
+   clamp haut de subMod (2.3) est plus bas que base bjj (1.98) × facteur
+   max (1.55) = 3.07 : la valeur plafonne à 2.3, ratio 2.3/1.98=1.16 < 1.25
+   — FINISSEUR SOUMISSION devenait inatteignable pour les archétypes bjj,
+   pourtant les plus légitimes à le recevoir ; (c) à l'inverse, le clamp
+   BAS (0.15) domine un style à base minuscule (boxer subMod=0.10) dès que
+   submission (non spécifiée par la plupart des specs boxeur, tirée au
+   hasard par makeFighter ≈ gauss(70,9)) dépasse ~64 — ratio 0.15/0.10=1.5,
+   un boxeur franchit alors FINISSEUR SOUMISSION une fois sur deux sans
+   qu'aucune valeur de submission n'ait été voulue par la spec. Au global,
+   les badges dépendaient d'attributs tirés au hasard à la création du
+   combattant : ils pouvaient changer d'une run à l'autre pour le MÊME
+   archétype (pool régénéré à chaque draft).
+   Corrigé en lisant p.attrs BRUT (les mêmes chiffres que la grille 4 cases
+   juste au-dessus sur cette carte, scr_draft) contre des seuils absolus
+   communs à tous les styles, et en ne testant un canal que si la spec de
+   l'archétype le déclare explicitement (f._specAttrs, posé dans
+   makeArcadeArchetype, ui-03) — jamais un attribut laissé au hasard. ==== */
 function arcadePerkBadge(p){
-  const m=p._styleProfileOverride; if(!m) return '';
-  const base=STYLE_PROFILE[p.style]||STYLE_PROFILE.mma;
-  const r=k=>m[k]/base[k];
+  const spec=p._specAttrs; if(!spec) return '';
+  const a=p.attrs;
+  const declares=keys=>keys.some(k=>spec.includes(k));
   const tags=[];
-  if(r('koMod')>=1.15) tags.push({t:'FINISSEUR KO',c:'var(--gold)'});
-  else if(r('koMod')<=0.85) tags.push({t:'PEU DE PUISSANCE',c:'var(--muted)'});
-  if(r('subMod')>=1.25) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
-  if(r('sigVol')>=1.15) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
-  if(r('gnpDmg')>=1.15) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
+  if(declares(['power'])){
+    if(a.power>=85) tags.push({t:'FINISSEUR KO',c:'var(--gold)'});
+    else if(a.power<=35) tags.push({t:'PEU DE PUISSANCE',c:'var(--muted)'});
+  }
+  if(declares(['submission']) && a.submission>=80) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
+  if(declares(['jab','cross','hook','kick']) && Math.round((a.jab+a.cross+a.hook+a.kick)/4)>=76) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
+  if(declares(['topControl']) && a.topControl>=78) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
   if(!tags.length) tags.push({t:'ÉQUILIBRÉ',c:'var(--muted)'});
   /* ==== [ANCRE: CORRECTIF_BADGES_EMPILEMENT] — bug remonté : sur un
-     archétype à 2 badges (ex. Le Surfer : PEU DE PUISSANCE + FINISSEUR
-     SOUMISSION), l'absence de marge verticale entre les <span> faisait
-     visuellement se toucher/chevaucher les badges quand ils passaient à la
-     ligne (aucun flex-wrap avec gap, juste des spans inline avec
-     margin-right seul). Ajout de margin-bottom sur chaque badge : suffisant
-     pour créer un espacement propre au retour à la ligne, sans toucher au
-     conteneur ni au CSS global. ==== */
+     archétype à plusieurs badges (ex. L'Anaconda, bjj pur : PEU DE PUISSANCE
+     + FINISSEUR SOUMISSION + SOL DANGEREUX, cf. CORRECTIF R1_BADGES_RATIO_
+     INATTEIGNABLE ci-dessus — l'exemple d'origine, Le Surfer, ne cumule plus
+     que FINISSEUR SOUMISSION depuis ce correctif), l'absence de marge
+     verticale entre les <span> faisait visuellement se toucher/chevaucher
+     les badges quand ils passaient à la ligne (aucun flex-wrap avec gap,
+     juste des spans inline avec margin-right seul). Ajout de margin-bottom
+     sur chaque badge : suffisant pour créer un espacement propre au retour
+     à la ligne, sans toucher au conteneur ni au CSS global. ==== */
   return `<div class="mono small mt" style="position:relative;z-index:2">${tags.map(x=>`<span style="display:inline-block;border:1px solid ${x.c};color:${x.c};padding:2px 8px;margin:0 6px 6px 0;border-radius:2px">${x.t}</span>`).join('')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -403,7 +416,7 @@ function gauntletStatusBlock(a){
      appel le rappelait une fois PAR paire attribut/delta avec un objet à
      une seule clé, pour rejoindre les résultats à la main ensuite. Objet
      complet passé en un seul appel, la fonction fait déjà le travail. ==== */
-  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${campFxLabel(Object.fromEntries(i.attrs))}</span></div>`));
+  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${esc(i.name)}</b> <span class="muted">${campFxLabel(Object.fromEntries(i.attrs))}</span></div>`));
   /* ==== [ANCRE: CORRECTIF_MALEDICTION_VISIBLE] — bug remonté (B18) : les
      malus de Camp Maudit (generateCursedOption, ui-03) sont un système
      d'usure PARALLÈLE aux séquelles de combat, avec des règles opposées
@@ -411,7 +424,7 @@ function gauntletStatusBlock(a){
      pouvait pas distinguer une baisse d'attribut réversible d'une baisse
      définitive. Affiché ici séparément, marqué IRRÉVERSIBLE sans bouton de
      soin, à la même échelle /20 que le reste (campFxLabel). ==== */
-  (a.curses||[]).forEach(c=>rows.push(`<div class="mono small" style="color:var(--blood)"><b>${c.name}</b> <span class="muted">${campFxLabel(Object.fromEntries(c.attrs))} — irréversible</span></div>`));
+  (a.curses||[]).forEach(c=>rows.push(`<div class="mono small" style="color:var(--blood)"><b>${esc(c.name)}</b> <span class="muted">${campFxLabel(Object.fromEntries(c.attrs))} — irréversible</span></div>`));
   /* ==== [FIN ANCRE] ==== */
   const m=gauntletRunMult(a);
   if(m>1){
@@ -780,7 +793,7 @@ function scr_arcade_plan(){
      nom de l'adversaire ni l'analyse tactique (qui exposerait ses stats
      réelles) ne doivent transparaître ici. ==== */
   const bossBlind=(G.arcade.mode==='boss_run' && !G.arcade.revealed);
-  let mutBlind=!!(G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu');
+  let mutBlind=gauntletMutBlind(G.arcade);
   mutBlind=mutBlind&&!G.arcade.analysisPierced;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — la tactique exclusive de
@@ -824,11 +837,16 @@ function scr_arcade_plan(){
   /* ==== [FIN ANCRE] ==== */
   /* ==== [CORRECTIF B10_LASTMSG_MUET] — CL.pierceRumor (ui-08) pose
      G.lastMsg (coût de -2 Intelligence tactique, ou échec "Rien à percer
-     ici.") puis re-rend cet écran, mais rien ici ne l'affichait jusqu'ici —
-     même bloc auto-consommé que scr_hub (ui-06) : lu puis effacé dans le
-     même render, pour ne jamais réapparaître sur l'écran suivant. ==== */
+     ici.") puis re-rend cet écran, mais rien ici ne l'affichait jusqu'ici.
+     ==== [CORRECTIF R3_LASTMSG_MUTATION_RENDU] — bug remonté : la mutation
+     `if(G.lastMsg) G.lastMsg=null` ici était le même anti-pattern (état
+     modifié depuis une fonction de RENDU) que celui retiré d'
+     eliminationPreview par A1 dans le lot précédent — et redondante :
+     CL.fightArcade() (ui-08, seul point d'entrée vers cet écran) fait déjà
+     G.lastMsg=null avant chaque nouveau combat. Le nettoyage se fait
+     désormais uniquement côté handler ; ce bloc ne fait plus que LIRE
+     G.lastMsg pour l'afficher. ==== */
   const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
-  if(G.lastMsg) G.lastMsg=null;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_ANALYSE_COLLEE] — bug remonté : .hero-name a un
      interlignage très serré (line-height:.92) sans marge basse, et cette
@@ -846,8 +864,8 @@ function scr_arcade_plan(){
    </div>
    <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ?</p>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.chooseArcadePlan(${i})">
-     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+     <div class="opp-top"><span class="opp-nm gold">${esc(p.lbl)}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${esc(p.desc)}</div></div>`).join('')}
    <button class="btn ghost mt" onclick="CL.chooseArcadePlan(-1)">Aucune consigne particulière</button>
   </div>`;
 }
@@ -871,7 +889,7 @@ function scr_boss_reveal(){
    ${rivalBadge(opp)}
    <div class="card glass mt" style="background:var(--panel2);border:1px solid var(--blood);padding:14px;text-align:center">
      <div class="eyebrow mb" style="color:var(--blood)">Le boss impose son terme</div>
-     <div class="mono" style="color:var(--blood);font-weight:bold">-${Math.max(1,Math.round(Math.abs(m.amount)/5))} ${m.label} <span class="muted small">(ce combat uniquement)</span></div>
+     <div class="mono" style="color:var(--blood);font-weight:bold">-${Math.max(1,Math.round(Math.abs(m.amount)/5))} ${esc(m.label)} <span class="muted small">(ce combat uniquement)</span></div>
      <div class="muted small mt">Tiré au hasard à chaque reveal — jamais toujours la même stat visée.</div>
    </div>
    <button class="btn primary mt" style="font-size:20px;padding:18px;background:var(--blood);border-color:var(--blood)" onclick="CL.confirmBossReveal()">ENTRER DANS LA CAGE</button>
@@ -888,13 +906,25 @@ function scr_boss_reveal(){
    dominait donc systématiquement l'encaissement. Un seul point de sortie
    reste : « Abandonner la run » (0 pt, déjà présent partout). ==== */
 function scr_arcadehub(){ const f=G.f, a=G.arcade;
+  /* ==== [CORRECTIF R2_ARCADEHUB_LASTMSG_MUET] — bug remonté : buyDevilContinue
+     (ui-08) et le filet de sécurité (consumableSafetynet, ui-08) posent tous
+     deux G.lastMsg puis atterrissent sur cet écran (retryArcade → arcadehub,
+     ou directement ici pour le filet de sécurité), mais aucune des 3 branches
+     ci-dessous ne l'affichait — depuis que CL.fightArcade() (ui-08) fait
+     G.lastMsg=null au moment de lancer le combat suivant, ces deux messages
+     étaient détruits avant d'avoir jamais pu s'afficher, dont une transaction
+     payante (le coût en points de Légende du Diable). Même bloc que
+     scr_arcade_plan/scr_arcade_upgrades, calculé une seule fois ici et
+     injecté dans les 3 branches. ==== */
+  const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
   if(a.mode==='boss_run'){
     /* ==== [ANCRE: REJOUABILITE_BANQUE_BOSSRUN] — a.banked (ui-08) affiché
        comme cagnotte visible, avec ce qui est en jeu si le KO suivant échoue
        (eliminationPreview) juste en-dessous : la tension risque/récompense
        doit être LISIBLE, pas seulement calculée en coulisses. ==== */
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
-   <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur cette run</em></div>
+   ${lastMsgHtml}
+   <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${esc(f.nick)} ${f.flag} — ${recordStr(f)} sur cette run</em></div>
    ${glassOpen({padding:12,align:'center',borderLeft:'var(--gold)',margin:'margin-top:12px'})}
      <div class="mono small gold" style="font-weight:bold">⚠ SEULE UNE FINITION COMPTE — une victoire aux points arrête la série.</div>
    </div>
@@ -920,7 +950,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
        12/08/2026) : "Mise à nu" masque aussi les cibles du Ladder 100 — le
        gap de rang (signal de risque principal) reste visible, seule
        l'identité/le profil sont cachés. ==== */
-    const mutBlind=G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu';
+    const mutBlind=gauntletMutBlind(G.arcade);
     /* ==== [FIN ANCRE] ==== */
     const targets=a.targets||[];
     const targetCard=t=>{
@@ -952,7 +982,8 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
       </div>`;
     };
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--sage)">WTUMMA // ASCENSION</div>
-   <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${f.nick} ${f.flag} — Objectif #1</em></div>
+   ${lastMsgHtml}
+   <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${esc(f.nick)} ${f.flag} — Objectif #1</em></div>
    <p class="lede small mt">Choisissez votre cible — plus le saut de rang est grand, plus l\u2019adversaire est fort.</p>
    ${targets.map(targetCard).join('')}
    ${(a.aggroCooldown>0 && a.rank>15)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
@@ -963,11 +994,12 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
      12/08/2026) : "Mise à nu" masque aussi le prochain adversaire du
      Bracket 64. ==== */
-  const mutBlindBr=G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu';
+  const mutBlindBr=gauntletMutBlind(G.arcade);
   /* ==== [FIN ANCRE] ==== */
   if(!a.tournament) return `<div class="scr center intro"><p class="lede">Aucun tableau en cours.</p><button class="btn ghost mt" onclick="CL.go('title')">Retour</button></div>`;
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
-   <div class="hero-name" style="text-align:center">CLASSÉ #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
+   ${lastMsgHtml}
+   <div class="hero-name" style="text-align:center">CLASSÉ #${f.seed}<em style="color:var(--muted)">${esc(f.nick)} ${f.flag}</em></div>
    ${glassOpen({padding:16,align:'left',margin:'margin-top:20px'})}
      <div class="eyebrow mb">Prochain adversaire${mutBlindBr?'':` : classé #${a.opponent.seed}`}</div>
      ${mutBlindBr?`<div class="hero-name" style="font-size:clamp(22px,6vw,28px);color:var(--muted)">??? <span style="filter:blur(4px)">████████</span></div>
@@ -990,11 +1022,17 @@ function scr_arcade_upgrades(){
      ${ATTR[key].map(att=>`<div class="attr"><span class="attr-l">${att[1]}</span>${gauge(f.attrs[att[0]])}<span class="attr-v">${d20(f.attrs[att[0]])}</span></div>`).join('')}</div>`;
   /* ==== [CORRECTIF B10_LASTMSG_MUET] — CL.healGauntletZone (ui-08) pose
      G.lastMsg (soin réussi ou échec faute de points de Légende) puis
-     re-rend cet écran, mais rien ici ne l'affichait jusqu'ici — même bloc
-     auto-consommé que scr_hub (ui-06) : lu puis effacé dans le même
-     render, pour ne jamais réapparaître sur l'écran suivant. ==== */
+     re-rend cet écran, mais rien ici ne l'affichait jusqu'ici.
+     ==== [CORRECTIF R3_LASTMSG_MUTATION_RENDU] — bug remonté : la mutation
+     `if(G.lastMsg) G.lastMsg=null` ici était le même anti-pattern (état
+     modifié depuis une fonction de RENDU) que celui retiré d'
+     eliminationPreview par A1 dans le lot précédent. Nettoyage laissé au
+     seul handler qui le fait déjà, CL.fightArcade() (ui-08), au point
+     d'entrée du combat suivant — ce bloc ne fait plus que LIRE G.lastMsg
+     pour l'afficher, le message reste visible tant que le joueur n'a pas
+     relancé un combat (y compris sur le hub suivant, cf. CORRECTIF
+     R2_ARCADEHUB_LASTMSG_MUET). ==== */
   const lastMsgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2)"><div class="small" style="color:var(--gold)">${esc(G.lastMsg)}</div></div>`:'';
-  if(G.lastMsg) G.lastMsg=null;
   /* ==== [FIN ANCRE] ==== */
   let h=`<div class="scr"><div class="bar"><span class="eyebrow">WTUMMA // AMÉLIORATIONS</span></div>${lastMsgHtml}`;
   if(!a.upgradesChosen.skill){
@@ -1072,8 +1110,8 @@ function scr_arcade_upgrades(){
         if(v>=0 && d20(before)===d20(after)) return '';
         return `<span class="dlt ${v>=0?'up':'dn'}">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).filter(Boolean).join('')
         || `<span class="dlt">Progression légère</span>`;
-      h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
-            <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
+      h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${esc(t.label)}</span></div>
+            <div class="opp-mid">${esc(t.hint)}</div><div class="dlts">${deltas}</div></div>`;
     });
   } else {
     /* ==== [CORRECTIF ARCADE_UPGRADES_IMPASSE] — upgradesChosen.skill ET
@@ -1091,11 +1129,15 @@ function scr_arcade_upgrades(){
     h+=`<p class="lede small">Rien de plus à choisir ici.</p>
         <button class="btn ghost mt" onclick="CL.go('arcadehub')">Continuer</button>`;
   }
-  /* ==== [ANCRE: REJOUABILITE_CAMP_RECUPERATION] — la forme (attritionHeal(),
-     ui-08) décroît réellement avec la profondeur de la run mais restait
-     invisible sur cet écran, rendant l'option "Récupération active"
-     (ui-03) illisible faute de référence. Jauge affichée juste avant les
-     groupes d'attributs, même style que le reste de l'écran. ==== */
+  /* ==== [CORRECTIF P4_ANCRE_ATTRITIONHEAL_PERIMEE, A16-like] — l'ancre
+     REJOUABILITE_CAMP_RECUPERATION qui précédait ici citait attritionHeal()
+     comme source de la forme affichée par une jauge dédiée — cette fonction
+     n'existe plus (retirée, remplacée par runAttrition(), cf. ui-08 ANCRE
+     GAUNTLET_BLESSURE_RUN L1547-1554) et la jauge elle-même a été retirée
+     par le correctif ci-dessous (GAUNTLET_SANS_MORAL_FORME) : l'ancre ne
+     documentait donc plus ni la fonction, ni le bloc de rendu, les deux
+     ayant disparu. Retirée à son tour plutôt que corrigée : son contenu est
+     déjà entièrement repris par l'ancre suivante. ==== */
   /* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — le bloc jauge « Forme /
      Récupération de la run » est retiré : la valeur n'est plus lue par eff()
      en arcade et n'a donc plus rien à communiquer. L'état passif de la run
@@ -1211,7 +1253,14 @@ function scr_coaching_round(){
      et à quoi sert cet arrêt, et l'estimation chiffrée des juges — du
      jargon de scorecard — est REMPLACÉE par ce que dit le coach, avec des
      mots : plus aucun chiffre de juge sur cet écran. ==== */
-  const totalRounds=G.fight.rounds;
+  /* ==== [CORRECTIF P3_ROUNDS_GARDE_RESTITUEE] — bug remonté : le correctif
+     A13 (lot précédent) avait retiré le repli `||3` au motif que G.fight.rounds
+     vaut toujours 3 en arcade — vrai sur le chemin normal, mais G.fight peut
+     être absent/périmé sur un chemin de reprise (rechargement de sauvegarde,
+     état de coaching orphelin) que ce correctif n'avait pas vérifié : sans
+     garde, `G.fight.rounds` plante au lieu de se replier proprement. Repli
+     restitué — sans gain à le retirer, un risque réel à le laisser absent. ==== */
+  const totalRounds=(G.fight&&G.fight.rounds)||3;
   const restants=Math.max(0,totalRounds-roundJustEnded);
   const verdict=coachScoreLine(a,c);
   const conseil=coachAdviceLine(a,c,r,f);
@@ -1250,8 +1299,8 @@ function scr_coaching_round(){
         la discipline du combattant, autant la rappeler juste au-dessus. -->
    <div class="mb">${gauntletIdentityRow(f)}</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">
-     <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+     <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${esc(p.lbl)}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${esc(p.desc)}</div></div>`).join('')}
    <button class="btn ghost mt" onclick="CL.pickCoachingTactic(-1)">Garder la même consigne</button>
   </div>`;
 }
