@@ -414,7 +414,7 @@ function gauntletStatusBlock(a){
      appel le rappelait une fois PAR paire attribut/delta avec un objet à
      une seule clé, pour rejoindre les résultats à la main ensuite. Objet
      complet passé en un seul appel, la fonction fait déjà le travail. ==== */
-  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${i.name}</b> <span class="muted">${campFxLabel(Object.fromEntries(i.attrs))}</span></div>`));
+  (a.runInjuries||[]).forEach(i=>rows.push(`<div class="mono small" style="color:var(--loss)">${i===a.lastInjury?'<b class="gold">NOUVEAU — </b>':''}<b>${esc(i.name)}</b> <span class="muted">${campFxLabel(Object.fromEntries(i.attrs))}</span></div>`));
   /* ==== [ANCRE: CORRECTIF_MALEDICTION_VISIBLE] — bug remonté (B18) : les
      malus de Camp Maudit (generateCursedOption, ui-03) sont un système
      d'usure PARALLÈLE aux séquelles de combat, avec des règles opposées
@@ -422,7 +422,7 @@ function gauntletStatusBlock(a){
      pouvait pas distinguer une baisse d'attribut réversible d'une baisse
      définitive. Affiché ici séparément, marqué IRRÉVERSIBLE sans bouton de
      soin, à la même échelle /20 que le reste (campFxLabel). ==== */
-  (a.curses||[]).forEach(c=>rows.push(`<div class="mono small" style="color:var(--blood)"><b>${c.name}</b> <span class="muted">${campFxLabel(Object.fromEntries(c.attrs))} — irréversible</span></div>`));
+  (a.curses||[]).forEach(c=>rows.push(`<div class="mono small" style="color:var(--blood)"><b>${esc(c.name)}</b> <span class="muted">${campFxLabel(Object.fromEntries(c.attrs))} — irréversible</span></div>`));
   /* ==== [FIN ANCRE] ==== */
   const m=gauntletRunMult(a);
   if(m>1){
@@ -791,7 +791,7 @@ function scr_arcade_plan(){
      nom de l'adversaire ni l'analyse tactique (qui exposerait ses stats
      réelles) ne doivent transparaître ici. ==== */
   const bossBlind=(G.arcade.mode==='boss_run' && !G.arcade.revealed);
-  let mutBlind=!!(G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu');
+  let mutBlind=gauntletMutBlind(G.arcade);
   mutBlind=mutBlind&&!G.arcade.analysisPierced;
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: ITEM_TACTIQUE_PAR_ARCHETYPE] — la tactique exclusive de
@@ -862,8 +862,8 @@ function scr_arcade_plan(){
    </div>
    <p class="lede small mt">Quelle est ta consigne tactique pour ce combat ?</p>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.chooseArcadePlan(${i})">
-     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+     <div class="opp-top"><span class="opp-nm gold">${esc(p.lbl)}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${esc(p.desc)}</div></div>`).join('')}
    <button class="btn ghost mt" onclick="CL.chooseArcadePlan(-1)">Aucune consigne particulière</button>
   </div>`;
 }
@@ -887,7 +887,7 @@ function scr_boss_reveal(){
    ${rivalBadge(opp)}
    <div class="card glass mt" style="background:var(--panel2);border:1px solid var(--blood);padding:14px;text-align:center">
      <div class="eyebrow mb" style="color:var(--blood)">Le boss impose son terme</div>
-     <div class="mono" style="color:var(--blood);font-weight:bold">-${Math.max(1,Math.round(Math.abs(m.amount)/5))} ${m.label} <span class="muted small">(ce combat uniquement)</span></div>
+     <div class="mono" style="color:var(--blood);font-weight:bold">-${Math.max(1,Math.round(Math.abs(m.amount)/5))} ${esc(m.label)} <span class="muted small">(ce combat uniquement)</span></div>
      <div class="muted small mt">Tiré au hasard à chaque reveal — jamais toujours la même stat visée.</div>
    </div>
    <button class="btn primary mt" style="font-size:20px;padding:18px;background:var(--blood);border-color:var(--blood)" onclick="CL.confirmBossReveal()">ENTRER DANS LA CAGE</button>
@@ -922,7 +922,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
        doit être LISIBLE, pas seulement calculée en coulisses. ==== */
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">GAUNTLET // RUN EN COURS</div>
    ${lastMsgHtml}
-   <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${f.nick} ${f.flag} — ${recordStr(f)} sur cette run</em></div>
+   <div class="hero-name" style="text-align:center">${a.streak} / ${a.target}<em style="color:var(--muted)">${esc(f.nick)} ${f.flag} — ${recordStr(f)} sur cette run</em></div>
    ${glassOpen({padding:12,align:'center',borderLeft:'var(--gold)',margin:'margin-top:12px'})}
      <div class="mono small gold" style="font-weight:bold">⚠ SEULE UNE FINITION COMPTE — une victoire aux points arrête la série.</div>
    </div>
@@ -948,7 +948,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
        12/08/2026) : "Mise à nu" masque aussi les cibles du Ladder 100 — le
        gap de rang (signal de risque principal) reste visible, seule
        l'identité/le profil sont cachés. ==== */
-    const mutBlind=G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu';
+    const mutBlind=gauntletMutBlind(G.arcade);
     /* ==== [FIN ANCRE] ==== */
     const targets=a.targets||[];
     const targetCard=t=>{
@@ -981,7 +981,7 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
     };
     return `<div class="scr center intro"><div class="eyebrow" style="color:var(--sage)">WTUMMA // ASCENSION</div>
    ${lastMsgHtml}
-   <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${f.nick} ${f.flag} — Objectif #1</em></div>
+   <div class="hero-name" style="text-align:center">RANG #${a.rank}<em style="color:var(--muted)">${esc(f.nick)} ${f.flag} — Objectif #1</em></div>
    <p class="lede small mt">Choisissez votre cible — plus le saut de rang est grand, plus l\u2019adversaire est fort.</p>
    ${targets.map(targetCard).join('')}
    ${(a.aggroCooldown>0 && a.rank>15)?`<div class="mono small muted" style="text-align:center;margin-top:8px">Fenêtre de tir agressive fermée — encore ${a.aggroCooldown} palier(s).</div>`:''}
@@ -992,12 +992,12 @@ function scr_arcadehub(){ const f=G.f, a=G.arcade;
   /* ==== [ANCRE: GAUNTLET_MUTATEURS_ALEATOIRES] — ajout #4 (24 ajouts,
      12/08/2026) : "Mise à nu" masque aussi le prochain adversaire du
      Bracket 64. ==== */
-  const mutBlindBr=G.arcade.mutator&&G.arcade.mutator.id==='mut_mise_a_nu';
+  const mutBlindBr=gauntletMutBlind(G.arcade);
   /* ==== [FIN ANCRE] ==== */
   if(!a.tournament) return `<div class="scr center intro"><p class="lede">Aucun tableau en cours.</p><button class="btn ghost mt" onclick="CL.go('title')">Retour</button></div>`;
   return `<div class="scr center intro"><div class="eyebrow" style="color:var(--blood)">WTUMMA // ${a.tournament.stepName.toUpperCase()}</div>
    ${lastMsgHtml}
-   <div class="hero-name" style="text-align:center">CLASSÉ #${f.seed}<em style="color:var(--muted)">${f.nick} ${f.flag}</em></div>
+   <div class="hero-name" style="text-align:center">CLASSÉ #${f.seed}<em style="color:var(--muted)">${esc(f.nick)} ${f.flag}</em></div>
    ${glassOpen({padding:16,align:'left',margin:'margin-top:20px'})}
      <div class="eyebrow mb">Prochain adversaire${mutBlindBr?'':` : classé #${a.opponent.seed}`}</div>
      ${mutBlindBr?`<div class="hero-name" style="font-size:clamp(22px,6vw,28px);color:var(--muted)">??? <span style="filter:blur(4px)">████████</span></div>
@@ -1108,8 +1108,8 @@ function scr_arcade_upgrades(){
         if(v>=0 && d20(before)===d20(after)) return '';
         return `<span class="dlt ${v>=0?'up':'dn'}">${lbl} ${d20(before)} → ${d20(after)}</span>`; }).filter(Boolean).join('')
         || `<span class="dlt">Progression légère</span>`;
-      h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${t.label}</span></div>
-            <div class="opp-mid">${t.hint}</div><div class="dlts">${deltas}</div></div>`;
+      h+=`<div class="opp" onclick="CL.pickArcadeTrain(${i})"><div class="opp-top"><span class="opp-nm">${esc(t.label)}</span></div>
+            <div class="opp-mid">${esc(t.hint)}</div><div class="dlts">${deltas}</div></div>`;
     });
   } else {
     /* ==== [CORRECTIF ARCADE_UPGRADES_IMPASSE] — upgradesChosen.skill ET
@@ -1247,7 +1247,14 @@ function scr_coaching_round(){
      et à quoi sert cet arrêt, et l'estimation chiffrée des juges — du
      jargon de scorecard — est REMPLACÉE par ce que dit le coach, avec des
      mots : plus aucun chiffre de juge sur cet écran. ==== */
-  const totalRounds=G.fight.rounds;
+  /* ==== [CORRECTIF P3_ROUNDS_GARDE_RESTITUEE] — bug remonté : le correctif
+     A13 (lot précédent) avait retiré le repli `||3` au motif que G.fight.rounds
+     vaut toujours 3 en arcade — vrai sur le chemin normal, mais G.fight peut
+     être absent/périmé sur un chemin de reprise (rechargement de sauvegarde,
+     état de coaching orphelin) que ce correctif n'avait pas vérifié : sans
+     garde, `G.fight.rounds` plante au lieu de se replier proprement. Repli
+     restitué — sans gain à le retirer, un risque réel à le laisser absent. ==== */
+  const totalRounds=(G.fight&&G.fight.rounds)||3;
   const restants=Math.max(0,totalRounds-roundJustEnded);
   const verdict=coachScoreLine(a,c);
   const conseil=coachAdviceLine(a,c,r,f);
@@ -1286,8 +1293,8 @@ function scr_coaching_round(){
         la discipline du combattant, autant la rappeler juste au-dessus. -->
    <div class="mb">${gauntletIdentityRow(f)}</div>
    ${combined.map((p,i)=>`<div class="opp" onclick="CL.pickCoachingTactic(${i})">
-     <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
+     <div class="opp-top"><span class="opp-nm gold" style="font-size:17px">${esc(p.lbl)}</span></div>
+     <div class="opp-read" style="margin-top:4px;opacity:1">${esc(p.desc)}</div></div>`).join('')}
    <button class="btn ghost mt" onclick="CL.pickCoachingTactic(-1)">Garder la même consigne</button>
   </div>`;
 }
