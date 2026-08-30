@@ -41,31 +41,42 @@
    seuils existants (ce qui aurait dilué leur sens pour les autres) : un 6e
    badge neutre ÉQUILIBRÉ, affiché seulement quand aucun des 5 traits marqués
    ne s'applique. ==== */
-/* ==== [CORRECTIF B5_BADGES_SEUILS_ABSOLUS] — bug remonté : les seuils
-   testaient m[k] (base STYLE_PROFILE[style][k] × facteur 0.55-1.55,
-   deriveArcadeMods ci-dessus, ui-03) en valeur ABSOLUE, alors que la base
-   varie déjà fortement d'un style à l'autre (koMod karate 1.52 vs mma
-   1.05). Conséquence vérifiée : les 5 archétypes style:'mma' sur 23
-   n'atteignaient AUCUN seuil (koMod max 1.31 < 1.35, sigVol max 1.21 <
-   1.25, gnpDmg max 1.15 < 1.2) ; à l'inverse karate déclenchait FINISSEUR
-   KO dès power>=34 (1.52 de base suffit à passer 1.35 même à facteur < 1,
-   donc en dessous de la moyenne DE SON PROPRE style). Comparé désormais au
-   RATIO m[k]/STYLE_PROFILE[p.style][k] — qui vaut exactement le facteur
-   0.55-1.55 lui-même, indépendant de la base — donc à seuils communs à
-   tous les styles : koMod/subMod (mêmes bornes 0.55-1.55, marge la plus
-   large) 1.15 haut / 0.85 bas pour koMod, 1.25 pour subMod ; sigVol/gnpDmg
-   (bornes plus resserrées 0.75-1.15) au plafond réellement atteignable de
-   leur facteur, 1.15. ==== */
+/* ==== [CORRECTIF R1_BADGES_RATIO_INATTEIGNABLE] — bug remonté sur le
+   correctif B5 (ratio m[k]/STYLE_PROFILE[style][k]) : (a) le clamp de
+   deriveArcadeMods (ui-03) borne sigVol/gnpDmg à un facteur max de 1.6,
+   mais la formule elle-même (0.75+strikeScore/100*0.4) ne peut jamais
+   dépasser ~1.14 même à strikeScore=100 (et baseAttrs, engine.js, plafonne
+   les attributs générés à 96) — GROS VOLUME et SOL DANGEREUX (seuil 1.15)
+   étaient donc MORTS pour tous les archétypes, pas seulement mma ; (b) le
+   clamp haut de subMod (2.3) est plus bas que base bjj (1.98) × facteur
+   max (1.55) = 3.07 : la valeur plafonne à 2.3, ratio 2.3/1.98=1.16 < 1.25
+   — FINISSEUR SOUMISSION devenait inatteignable pour les archétypes bjj,
+   pourtant les plus légitimes à le recevoir ; (c) à l'inverse, le clamp
+   BAS (0.15) domine un style à base minuscule (boxer subMod=0.10) dès que
+   submission (non spécifiée par la plupart des specs boxeur, tirée au
+   hasard par makeFighter ≈ gauss(70,9)) dépasse ~64 — ratio 0.15/0.10=1.5,
+   un boxeur franchit alors FINISSEUR SOUMISSION une fois sur deux sans
+   qu'aucune valeur de submission n'ait été voulue par la spec. Au global,
+   les badges dépendaient d'attributs tirés au hasard à la création du
+   combattant : ils pouvaient changer d'une run à l'autre pour le MÊME
+   archétype (pool régénéré à chaque draft).
+   Corrigé en lisant p.attrs BRUT (les mêmes chiffres que la grille 4 cases
+   juste au-dessus sur cette carte, scr_draft) contre des seuils absolus
+   communs à tous les styles, et en ne testant un canal que si la spec de
+   l'archétype le déclare explicitement (f._specAttrs, posé dans
+   makeArcadeArchetype, ui-03) — jamais un attribut laissé au hasard. ==== */
 function arcadePerkBadge(p){
-  const m=p._styleProfileOverride; if(!m) return '';
-  const base=STYLE_PROFILE[p.style]||STYLE_PROFILE.mma;
-  const r=k=>m[k]/base[k];
+  const spec=p._specAttrs; if(!spec) return '';
+  const a=p.attrs;
+  const declares=keys=>keys.some(k=>spec.includes(k));
   const tags=[];
-  if(r('koMod')>=1.15) tags.push({t:'FINISSEUR KO',c:'var(--gold)'});
-  else if(r('koMod')<=0.85) tags.push({t:'PEU DE PUISSANCE',c:'var(--muted)'});
-  if(r('subMod')>=1.25) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
-  if(r('sigVol')>=1.15) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
-  if(r('gnpDmg')>=1.15) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
+  if(declares(['power'])){
+    if(a.power>=85) tags.push({t:'FINISSEUR KO',c:'var(--gold)'});
+    else if(a.power<=35) tags.push({t:'PEU DE PUISSANCE',c:'var(--muted)'});
+  }
+  if(declares(['submission']) && a.submission>=80) tags.push({t:'FINISSEUR SOUMISSION',c:'var(--sage)'});
+  if(declares(['jab','cross','hook','kick']) && Math.round((a.jab+a.cross+a.hook+a.kick)/4)>=76) tags.push({t:'GROS VOLUME',c:'var(--gold)'});
+  if(declares(['topControl']) && a.topControl>=78) tags.push({t:'SOL DANGEREUX',c:'var(--sage)'});
   if(!tags.length) tags.push({t:'ÉQUILIBRÉ',c:'var(--muted)'});
   /* ==== [ANCRE: CORRECTIF_BADGES_EMPILEMENT] — bug remonté : sur un
      archétype à 2 badges (ex. Le Surfer : PEU DE PUISSANCE + FINISSEUR

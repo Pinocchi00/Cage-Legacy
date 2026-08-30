@@ -769,6 +769,13 @@ function makeArcadeArchetype(spec){
   f.nick=spec.nick; f._perk=spec.perk; f.styleLabel=spec.styleLabel;
   if(spec.flag) f.flag=spec.flag; // drapeau de flavor, découplé du pays réel utilisé pour le patronyme
   f._styleProfileOverride=deriveArcadeMods(f);
+  /* ==== [CORRECTIF R1_BADGES_CANAL_DECLARE] — arcadePerkBadge (ui-04b) ne
+     doit tester que les canaux explicitement voulus par la spec de
+     l'archétype (spec.attrs), jamais un attribut laissé au tirage aléatoire
+     de makeFighter — sans quoi un style dont l'attribut n'est jamais
+     spécifié (ex. submission chez un boxeur) peut franchir un seuil par pur
+     hasard de génération, aussi souvent qu'il ne le franchit pas. ==== */
+  f._specAttrs=Object.keys(spec.attrs);
   return f;
 }
 /* 23 archétypes (audit "Draft Rapide"). Styles fictifs de Gemini (Sumo, Point
