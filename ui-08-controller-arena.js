@@ -442,6 +442,22 @@ function generateFightCard(gala,opponent){
   }
   return {label:gala.label,tier:gala.tier,oppId:opponent.id,oppName:opponent.name,fights,playerResult:null};
 }
+/* ==== [ANCRE: CORRECTIF_CARTE_ADVERSAIRE_ECHANGE_REASSIGN] — bug trouvé :
+   faithOfferDemandBetter() rappelait generateFightCard() en entier pour
+   pointer la carte sur le nouvel adversaire, ce qui rejouait et réappliquait
+   (simulateFight+applyResult) 4 à 7 combats de complément supplémentaires au
+   roster à CHAQUE échange — en violation directe de la garantie V3_FIGHT_CARD
+   ("généré UNE FOIS par offre"). Les combats de complément sont déjà simulés
+   et appliqués une bonne fois par faithEnsureOffer() ; un échange d'adversaire
+   ne doit que RETARGETER la carte déjà générée, jamais la resimuler. Retire
+   aussi du sous-programme tout combat impliquant le nouvel adversaire (il ne
+   peut pas apparaître à la fois en sous-carte ET en combat principal). */
+function reassignFightCardOpponent(card,gala,opponent){
+  card.label=gala.label; card.tier=gala.tier;
+  card.oppId=opponent.id; card.oppName=opponent.name;
+  card.fights=card.fights.filter(fi=>fi.aId!==opponent.id && fi.bId!==opponent.id);
+  return card;
+}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V3_TITLE_NEGOTIATION_ROUTE] — Plan V3 LOT 6 §5.6.1, temps 3 :
    "offre distincte de scr_faith_offer(), avec ses propres leviers" — un
@@ -1774,14 +1790,21 @@ const CL={
      finalizeFaithDraft() écrase une partie de G. Ça ne tenait que parce que
      le test `if(G.faith)` passe AVANT `if(G.arcade && G.arcade.active)` dans
      afterResult() — de la chance, pas une garantie. Même ménage explicite
-     que newCareer(). ==== */
-  /* ==== [ANCRE: CORRECTIF_POOL_OFFRE_SEPARE] — le pool d'une éventuelle
-     carrière Faith précédente (G.faith, pas encore réinitialisé ici — ça
-     n'arrive qu'à finalizeFaithDraft()) ne doit pas fuiter jusqu'à la
-     première offre de la nouvelle carrière. Gardé (G.faith peut être
-     absent au tout premier lancement). ==== */
-  startFaith(){ G.arcade=null; G.pending=null; G.opps=null; if(G.faith) G.faith.offerPool=null;
-    G.faithDraft={origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}; G.screen='faith_draft'; save(); render(); },
+     que newCareer() : bug trouvé, G.f/G.faith n'étaient JAMAIS réinitialisés
+     et wipe() n'était jamais appelé — après save(), l'ancienne carrière
+     survivait en localStorage avec G.opps/G.pending remis à null autour
+     d'elle, un état incohérent réinjecté au prochain "Reprendre". wipe() ne
+     touche que SAVE_KEY/SAVE_BACKUP_KEY (state-save.js) : le Panthéon, les
+     points de Légende et les cosmétiques (HOF_KEY, META_STATS_KEY, clés
+     séparées) survivent intacts. Écraser G perd aussi tout état d'affichage
+     transitoire (G.hofFilter, G._archivesReturn, G.codexFilter, G.lastMsg...)
+     — acceptable, exactement ce que newCareer() sacrifie déjà pour le mode
+     carrière. faithHomeNewCareer() lit hasSave('faith') AVANT cet appel,
+     directement sur localStorage : son confirm() voit encore l'ancienne
+     sauvegarde et n'est pas dupliqué ici. ==== */
+  startFaith(){ wipe(); const t=G.theme;
+    G={theme:t,faithDraft:{origin:'',style:'',lifestyle:'',circle:'',personality:'',first:'',country:COUNTRY_KEYS[0]}};
+    setTheme(t); G.screen='faith_draft'; save(); render(); },
   /* ==== [ANCRE: V2-43] — "confirmation explicite si une carrière est en
      cours (une carrière Faith perdue par erreur est une session
      détruite)" : startFaith() écrase la sauvegarde dès son premier
@@ -2629,8 +2652,13 @@ const CL={
        donc le résultat du joueur n'était jamais inscrit et le lien
        « Résultats de la dernière carte » (ui-04) ne réapparaissait plus ;
        (3) le nouvel adversaire pouvait figurer en sous-carte avec un W/L déjà
-       appliqué par generateFightCard, sur l'affiche où il combat le joueur. ==== */
-    G.faith.currentCard=generateFightCard(off.gala,off.opp.o);
+       appliqué par generateFightCard, sur l'affiche où il combat le joueur.
+       Retargete la carte déjà générée (cf. ANCRE
+       CORRECTIF_CARTE_ADVERSAIRE_ECHANGE_REASSIGN) au lieu de rappeler
+       generateFightCard() : les combats de complément restent simulés UNE
+       SEULE fois par offre (V3_FIGHT_CARD), un échange ne fait plus gonfler
+       artificiellement les bilans du roster. ==== */
+    reassignFightCardOpponent(G.faith.currentCard,off.gala,off.opp.o);
     save(); render();
   },
   /* ==== [CORRECTIF FA-12 / V2-21] — refuser coûte réellement quelque
