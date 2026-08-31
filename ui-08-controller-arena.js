@@ -2379,6 +2379,26 @@ const CL={
      la conséquence lue ; elle avance désormais le CALENDRIER (FA-11) plutôt
      que le compteur `step` à 5 temps fixes. ==== */
   faithEventContinue(){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_EVENT_CONTINUE] — bug trouvé : ce
+       bouton consomme un mois (faithAdvanceMonth()) sans aucune garde. Un
+       double-tap appelait faithAdvanceMonth() deux fois : le joueur perdait
+       un mois de carrière en silence.
+       faithClaimMonth() (motif déjà en place pour le reste de la couche
+       « action du mois », CORRECTIF_DOUBLE_TAP_ACTION_FAITH) NE convient PAS
+       ici : son repli de 400 ms suppose une seule invocation par tour de
+       jeu, vrai pour repos/stage/sponsor/etc. mais pas pour ce bouton — des
+       événements de vie peuvent s'enchaîner sur plusieurs mois consécutifs
+       (chacun sans autre décision que CONTINUER), donc CE tag peut être
+       légitimement réclamé plusieurs fois en quelques millisecondes (vérifié
+       en instrumentant une carrière simulée : bloquait à tort le second
+       événement enchaîné, carrière figée). Le témoin correct est l'état
+       lui-même plutôt qu'une fenêtre de temps : G.faith.eventResolved n'est
+       posé QUE pendant que la vue « résolue » de CET événement est affichée
+       (scr_faith_event) et ce handler est le SEUL point qui l'efface — un
+       second appel le trouve déjà à null et s'arrête, même motif que
+       choosePlan()/G.fight._resolved (vérifier avant d'agir, pas mesurer un
+       délai). ==== */
+    if(!G.faith.eventResolved) return;
     G.faith.currentEvent=null;
     G.faith.eventResolved=null;
     faithAdvanceMonth();
@@ -2557,6 +2577,19 @@ const CL={
      la coupure de presse annuelle si elle a été tenue ou trahie. */
   faithPressConfPosture(posture){
     const off=G.faith.pendingOffer; if(!off) return;
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_PRESSCONF_POSTURE] — bug trouvé :
+       aucun verrou sur cette étape de la machine à états de l'offre
+       (build-up -> conférence -> pesée), contrairement aux étapes voisines
+       déjà gardées par un drapeau "Done" sur `off` (buildupDone,
+       pressConfDone, ANCRE V2-23/faithOfferSign ; peseeDone, ANCRE
+       V4_C19_PESEE/faithProceedToPesee juste en dessous). Un second tap
+       réappliquait la posture (double effet moral/tension, double promesse
+       de finition) puis, trouvant déjà off.peseeDone=true, sautait
+       intégralement l'écran de pesée. Même motif que ses voisins : un
+       drapeau sur `off` plutôt qu'une garde d'écran, puisque c'est l'ÉTAPE
+       de l'offre qui ne doit jouer qu'une fois, pas seulement l'écran. ==== */
+    if(off.postureDone) return;
+    off.postureDone=true;
     if(!G.faith.buildup) G.faith.buildup={attente:0,tension:0,causes:[]};
     const F=G.faith;
     if(posture==='respect'){
@@ -3324,6 +3357,17 @@ const CL={
      scr_coaching_round (ui-04) et scr_arcade_plan : archétype exclusif
      d'abord, sinon l'index cliqué ne correspond plus à la carte affichée. ==== */
   pickCoachingTactic(idx){
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_COACHING_ROUND] — bug trouvé : aucune
+       garde ici. Le premier appel bascule G.screen sur 'arena' avant même que
+       le second tap (carte déjà détachée du DOM par render(), mais dont le
+       gestionnaire onclick reste lié au nœud) ne s'exécute — G.arcade.coaching
+       existe toujours (round non conclu), donc runCoachingRound() repartait
+       une deuxième fois sur le round déjà en cours : numéro de round
+       incrémenté deux fois, animation du premier tap écrasée. Un seul écran
+       affiche cette carte (scr_coaching_round, ui-04b) et le premier appel
+       en sort systématiquement avant qu'un second clic ne puisse être traité
+       (JS mono-thread) : une garde d'écran suffit, sans drapeau à réarmer. ==== */
+    if(G.screen!=='coaching_round') return;
     if(!G.arcade||!G.arcade.coaching) return;
     const archTactic=ARCADE_EXCLUSIVE_TACTICS[G.f.nick];
     const combined=(archTactic?[archTactic]:[]).concat(TACTICS[G.f.style]||[]);
