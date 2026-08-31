@@ -2634,9 +2634,25 @@ const CL={
     const off=G.faith.pendingOffer; if(!off) return;
     const leverage=faithLeverage(G.f,G.faith);
     if(leverage<=0){ G.lastMsg="Vous n’avez rien à négocier : personne ne parle de ce combat."; render(); return; }
+    const alreadyExhausted=!!G.faith.agentPatienceHitZero;
     if(G.faith.agentPatience<=0){ G.faith.agentPatienceHitZero=true; }
     else { G.faith.agentPatience--; }
     const dir=FAITH_DIRECTORS[G.f.org]||FAITH_DIRECTORS[0];
+    /* ==== [CORRECTIF CUMUL_NEGOCIATION_SPAM] — bug trouvé : une fois la
+       patience épuisée, le drapeau agentPatienceHitZero était posé mais la
+       fonction continuait sur les branches normales ci-dessous — la branche
+       favorable pouvait alors composer off.bonusMult À CHAQUE clic
+       supplémentaire, sans aucune limite (négociation infinie). Le
+       franchissement du seuil (CE clic-ci, où alreadyExhausted vaut encore
+       false puisque capturé AVANT la ligne juste au-dessus) continue de
+       s'exécuter normalement, conformément à l'ANCRE FA-13/V2-20 juste plus
+       haut ("jamais de blocage dur") — seuls les clics SUIVANTS, une fois la
+       patience déjà à plat, sont neutralisés : l'agent répond toujours
+       (pas de blocage dur de l'écran), mais sans plus aucun gain mécanique. ==== */
+    if(alreadyExhausted){
+      G.lastMsg=`${dir.name} : « On a déjà fait le tour de la question. »`;
+      save(); render(); return;
+    }
     const trust=(G.faith.directors&&G.faith.directors[G.f.org]&&G.faith.directors[G.f.org].trust)||0;
     const favorable=faithDirectorFavorable(dir,G.f);
     if(dir.archetype==='requin' && rnd()<0.6){

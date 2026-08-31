@@ -569,6 +569,16 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
        faithOfferSign()) — un second face-à-face ici doublonnerait le
        même moment plutôt que le remplacer. */
     const faceoffEligible=!G.faith && (G.fight.kind==='title'||G.fight.kind==='defense'||f.rivalId===opp.id);
+    /* ==== [ANCRE: CORRECTIF_LASTMSG_FACEOFF] — bug trouvé : l'affichage (et
+       le nettoyage) de G.lastMsg vivait uniquement dans la branche `else`
+       ci-dessous — quand un face-à-face était éligible et pas encore fait,
+       le message du tour n'était ni montré ni consommé sur cet écran.
+       Sorti des deux branches pour être rendu dans tous les cas. ==== */
+    if(G.lastMsg){
+      h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
+       <div class="small">${esc(G.lastMsg)}</div></div>`;
+      G.lastMsg=null;
+    }
     if(faceoffEligible && !G.fight.faceoffDone){
       h+=`<div class="card mt glass" style="border-left:3px solid var(--blood);padding-left:14px;background:var(--panel2)">
        <div class="eyebrow mb" style="color:var(--blood)">Face-à-face</div>
@@ -582,11 +592,6 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
            <b style="font-size:15px">Tourner la tête le premier</b></div>
        </div>`;
     } else {
-      if(G.lastMsg){
-        h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
-         <div class="small">${esc(G.lastMsg)}</div></div>`;
-        G.lastMsg=null;
-      }
       h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
     }
   } else {

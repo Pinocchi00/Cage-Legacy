@@ -12,5 +12,13 @@
    derniers combats, surnom gagné, épithètes de fin. */
 /** @type {GameState} */
 let G=null;
-const esc=s=>(''+s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+/* ==== [ANCRE: CORRECTIF_ESC_GUILLEMETS] — bug trouvé : les guillemets
+   simples et doubles n'étaient pas échappés. Plusieurs appelants insèrent
+   esc() dans un attribut HTML plutôt qu'un nœud texte (title=, value=,
+   onclick='...${esc(...)}...' — noms de combattant/surnom/prise signature/
+   graine Gauntlet saisis par le joueur) : une valeur contenant un guillemet
+   peut en sortir. Vérifié : aucun appelant ne réutilise le résultat de esc()
+   comme clé de recherche ou pour une comparaison de chaînes — toujours du
+   rendu HTML direct. ==== */
+const esc=s=>(''+s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[c]));
 function setTheme(t){ G.theme=t; try{ if(document.documentElement)document.documentElement.setAttribute('data-theme',t); }catch(e){} }

@@ -283,7 +283,16 @@ function trainingOptions(f){ const gen=TRAIN.filter(x=>x.t.includes('all'));
    regénérer une liste différente entre l'aperçu et l'écran réel. ==== */
 function ensureOpponentsCached(f){
   const curFights=(f.W||0)+(f.L||0)+(f.D||0);
-  if(!G.opps || G.oppsFightCount!==curFights){ G.opps=genOpponents(f); G.oppsFightCount=curFights; }
+  /* ==== [ANCRE: CORRECTIF_CACHE_OPPS_DIV_ORG] — bug trouvé : la clé de cache
+     ne portait que sur le nombre de combats. Un changement de division ou
+     d'organisation (montée, rétrogradation, champ-champ) sans qu'un combat
+     n'ait eu lieu entretemps laissait donc en place des adversaires générés
+     pour l'ancienne division/organisation — aucun autre point du code ne
+     régénère G.opps à ces changements (vérifié : promotions/rétrogradations/
+     chooseChampChampFocus touchent toutes f.div/f.org sans y toucher). f.div
+     et f.org rejoignent donc le nombre de combats dans la clé d'invalidation. ==== */
+  const curKey=curFights+':'+f.div+':'+f.org;
+  if(!G.opps || G.oppsFightCount!==curKey){ G.opps=genOpponents(f); G.oppsFightCount=curKey; }
   return G.opps;
 }
 function startFightSelect(){ if(G.f.injury) return;

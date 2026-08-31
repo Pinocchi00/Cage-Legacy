@@ -191,3 +191,228 @@ test('CORRECTIF_RESTAURATION_DELTAS — un attribut à 95 boosté de +15 puis re
 
   assert.equal(opp.attrs.power, 95, 'le +15 de mut_violent doit être intégralement restauré (95 -> 100 clampé -> 95), jamais 85');
 });
+
+/* ============================================================================
+   Lot d'audit "13 findings" (rapport revérifié contre HEAD, groupes 2 à 4 —
+   G1-1/G1-2/G3-1 étaient des arbitrages traités séparément : G1-1 et G1-2 se
+   sont avérés être des faux positifs, G3-1 a été patché après vérification
+   que le score de référence sans rankBoost n'était pas un garde-fou
+   documenté). Chaque test ci-dessous couvre UN SEUL correctif de ce lot.
+   ============================================================================ */
+
+/* ==== [ANCRE: TEST_CORRECTIF_CACHE_OPPS_DIV_ORG] — G2-1, ui-02
+   ensureOpponentsCached() : un changement de division doit invalider le
+   cache d'adversaires même sans nouveau combat comptabilisé. ==== */
+test('CORRECTIF_CACHE_OPPS_DIV_ORG — un changement de division invalide le cache d’adversaires', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const opps1 = win.ensureOpponentsCached(win.G.f);
+  win.G.f.div = win.eval("DIVISIONS.H[0].id");
+  win.G.f.divName = win.eval("DIVISIONS.H[0].name");
+  win.G.roster = win.makeOrgRoster(win.G.f);
+  const opps2 = win.ensureOpponentsCached(win.G.f);
+  assert.notEqual(opps2, opps1, 'un changement de division (sans nouveau combat) doit régénérer G.opps');
+  const opps3 = win.ensureOpponentsCached(win.G.f);
+  assert.equal(opps3, opps2, 'sans changement de div/org/nombre de combats, le cache doit rester stable (pas de régénération à chaque appel)');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_OVERALL_CONSOMMABLE_GAUNTLET] — G2-3,
+   state-gauntlet.js applyPendingGauntletConsumable() : un consommable
+   'buff' doit recalculer overall() immédiatement (lu directement par le
+   moteur de combat, engine-combat.js). ==== */
+test('CORRECTIF_OVERALL_CONSOMMABLE_GAUNTLET — un buff Gauntlet recalcule immédiatement overall()', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const overallBefore = win.G.f.overall;
+  const meta = win.loadMetaStats();
+  meta.gauntletPendingConsumable = 'cons_strength'; // +15 power
+  win.saveMetaStats(meta);
+  win.applyPendingGauntletConsumable({});
+  assert.ok(win.G.f.overall > overallBefore, 'overall() doit augmenter dès l’application du buff, pas seulement au prochain recalcul externe');
+  assert.equal(win.G.f.overall, win.overall(win.G.f), 'G.f.overall doit être synchronisé avec les attrs déjà buffés');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_OFFRE_PRO_RETRAITE] — G3-2, ui-05
+   resolveFight() : un combattant déjà retraité en entrant dans ce combat ne
+   doit recevoir ni offre pro ni offre de promotion, même dans les
+   conditions qui les déclencheraient normalement (org 0, victoire, âge
+   ≥ 26 ans). ==== */
+test('CORRECTIF_OFFRE_PRO_RETRAITE — un combattant retraité ne reçoit plus d’offre pro/promo', () => {
+  const win = newGameWindow({ runMain: true });
+  /* setSeed() AVANT la création : sinon makeFighter() (via CL.create())
+     pioche ses attrs de départ dans Math.random() non seedé, et laisse le
+     test dépendre d'attributs non maîtrisés (flaky selon l'exécution). */
+  win.setSeed(1);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  win.G.f.age = 27; // seul suffit normalement à garantir evaluateProOffer()
+  win.G.f.retired = true; // déjà retraité en entrant dans ce combat
+  const opp = win.G.roster[0];
+  Object.assign(win.G.f.attrs, { takedown: 100, strength: 100, explosiveness: 100, tdd: 100, topControl: 100, gnp: 100, power: 100, submission: 1, guardWork: 1, flexibility: 1, fightIQ: 100, composure: 100, adaptability: 100, killer: 100 });
+  Object.assign(opp.attrs, { tdd: 1, strength: 1, flexibility: 1, guardWork: 100, submission: 1, topControl: 1, chin: 1, durability: 1, fightIQ: 1, composure: 1, adaptability: 1, heart: 1, cardio: 1, recovery: 1 });
+  win.setSeed(1);
+  win.rnd = () => 0;
+  win.G.fight = { opp, rounds: 1, kind: 'normal', planLabel: null };
+  win.resolveFight();
+  assert.equal(win.G.pending.win, true, 'le combat construit doit bien se solder par une victoire (pour tester le déclencheur normalement garanti)');
+  assert.equal(win.G.pending.forced, true, 'forced doit refléter la retraite déjà actée');
+  assert.equal(win.G.pending.proOffer, null, 'aucune offre pro ne doit être générée pour un combattant retraité');
+  assert.equal(win.G.pending.promoOffer, false, 'aucune offre de promotion ne doit être générée pour un combattant retraité');
+  assert.equal(win.G.pending.topTierOffer, false, 'aucune offre top-tier ne doit être générée pour un combattant retraité');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_RANK_CRASH_SCORE_REEL] — G3-1, ui-05
+   RANK_CRASH : la correction doit se baser sur le score RÉEL (rankBoost
+   courant inclus), pas sur le score sans boost — sinon un rankBoost déjà
+   accumulé laisse le joueur "insubmersible" après une défaite, exactement
+   le symptôme que cette ancre existe pour corriger. ==== */
+test('CORRECTIF_RANK_CRASH_SCORE_REEL — une défaite en tête de classement fait vraiment chuter le score réel (rankBoost inclus)', () => {
+  const win = newGameWindow({ runMain: true });
+  /* setSeed() AVANT la création : sinon makeFighter() (via CL.create())
+     pioche ses attrs de départ dans Math.random() non seedé, et laisse le
+     test dépendre d'attributs non maîtrisés (flaky selon l'exécution). */
+  win.setSeed(1);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  win.G.f.W = 20; win.G.f.L = 0; win.G.f.D = 0;
+  win.G.f.careerElo = 3000; win.G.f.orgElo = 3000;
+  win.G.f.rankBoost = 500; // "capital de victoires" déjà accumulé
+  const opp = win.G.roster[0];
+  // Attrs du joueur volontairement faibles : le classement (Elo/palmarès/
+  // rankBoost) ne dépend jamais des attrs de combat, seule l'issue du
+  // combat lui-même doit être forcée en défaite.
+  Object.assign(win.G.f.attrs, { chin: 1, durability: 1, fightIQ: 1, composure: 1, adaptability: 1, heart: 1, cardio: 1, recovery: 1, tdd: 1, strength: 1, guardWork: 100, submission: 1, topControl: 1, flexibility: 1 });
+  Object.assign(opp.attrs, { takedown: 100, strength: 100, explosiveness: 100, tdd: 100, topControl: 100, gnp: 100, power: 100, submission: 1, guardWork: 1, flexibility: 1, fightIQ: 100, composure: 100, adaptability: 100, killer: 100 });
+
+  const sortedNow = win.G.roster.filter(o => !o.champion).slice().sort((a, b) => win.p4pScore(b) - win.p4pScore(a));
+  const targetScore = win.p4pScore(sortedNow[3]);
+  assert.ok(win.divRank(win.G.f) <= 3, 'le combattant doit être classé top-3 avant le combat, pour que RANK_CRASH s’applique');
+
+  win.setSeed(1);
+  win.rnd = () => 0;
+  win.G.fight = { opp, rounds: 1, kind: 'normal', planLabel: null };
+  win.resolveFight();
+
+  assert.equal(win.G.pending.win, false, 'le combat construit doit bien se solder par une défaite');
+  const scoreAfter = win.p4pScore(win.G.f);
+  assert.ok(scoreAfter <= targetScore * 1.1, `le score réel après la chute doit retomber près du 4e (cible ${targetScore}), pas rester gonflé par l’ancien rankBoost (obtenu : ${scoreAfter})`);
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_CUMUL_NEGOCIATION_SPAM] — G3-3, ui-08
+   faithOfferDemandMoney() : une fois la patience de l'agent déjà épuisée
+   (hors du clic qui la fait franchir 0, laissé intact), aucun clic
+   supplémentaire ne doit plus faire progresser off.bonusMult. ==== */
+test('CORRECTIF_CUMUL_NEGOCIATION_SPAM — une patience déjà épuisée bloque tout gain supplémentaire de négociation', () => {
+  const win = newGameWindow({ runMain: true });
+  win.CL.startFaith();
+  const d = win.G.faithDraft;
+  Object.assign(d, {
+    first: 'Neg', div: win.eval("DIVISIONS.H[0].id"), origin: 'traditional',
+    style: win.eval("Object.keys(STYLES)[0]"), lifestyle: 'pro', circle: 'family',
+    agent: win.eval("Object.keys(FAITH_AGENTS)[0]"), personality: 'villain', stable: 'regional',
+  });
+  win.CL.finalizeFaithDraft();
+  win.G.f.streak = 5; // garantit faithLeverage(f,F) > 0
+  win.G.faith.agentPatience = 0;
+  win.G.faith.agentPatienceHitZero = true; // déjà épuisée AVANT ce test (pas le clic de franchissement)
+  const opp = win.makeFighter({ gender: 'H', div: win.G.f.div, first: 'Opp' });
+  win.G.faith.pendingOffer = { opp: { o: opp, id: opp.id }, gala: {}, bonusMult: 1 };
+  win.G.faith.directors = win.G.faith.directors || {};
+  win.G.faith.directors[win.G.f.org] = { trust: 5 }; // favorise la branche qui composait bonusMult
+
+  win.CL.faithOfferDemandMoney();
+  const afterFirst = win.G.faith.pendingOffer.bonusMult;
+  assert.equal(afterFirst, 1, 'un clic alors que la patience est déjà à plat ne doit apporter aucun gain');
+  win.CL.faithOfferDemandMoney();
+  assert.equal(win.G.faith.pendingOffer.bonusMult, afterFirst, 'un second clic ne doit pas non plus faire progresser bonusMult (négociation infinie corrigée)');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_DROUGHT_ATTRIBUTION_CONFIRMEE] — G3-4,
+   engine-progression.js rollSkill() : la disette ne doit être remise à
+   zéro qu'après une attribution CONFIRMÉE — pas dès que le jet de
+   déblocage réussit, si le plafond de compétences de carrière empêche
+   ensuite toute attribution réelle. ==== */
+test('CORRECTIF_DROUGHT_ATTRIBUTION_CONFIRMEE — un jet réussi sans attribution réelle ne remet pas la disette à zéro', () => {
+  const win = newGameWindow();
+  win.setSeed(1);
+  const f = win.makeFighter({ gender: 'H', div: 'H-heavy', style: 'boxer', first: 'Drought' });
+  f.age = 20; // sous AGE_META : pas fin de carrière
+  f._drought = 7;
+  const SKILLS = win.eval('SKILLS');
+  const styleSkills = SKILLS.filter(s => s.fam === 'style' && s.key === f.style).slice(0, 10);
+  f.skills = styleSkills.map(s => s.id); // 10 compétences de style déjà acquises -> isCapped
+  let calls = 0;
+  win.rnd = () => { calls++; return calls === 1 ? 0.5 : 0.05; }; // jet mythique raté, jet de déblocage réussi
+  const result = win.rollSkill(f);
+  assert.equal(result, null, 'aucune compétence ne doit être accordée une fois le plafond de carrière atteint');
+  assert.equal(f._drought, 7, 'la disette accumulée ne doit pas être perdue quand le jet réussit sans qu’aucune compétence ne soit réellement accordée');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_COACH_REEMBAUCHE] — G3-5, state-faith.js
+   faithHireCoach() : réembaucher un coach déjà employé par le passé (même
+   coachId) doit restaurer la Person existante (relation/historique
+   conservés), pas en reminer une nouvelle. ==== */
+test('CORRECTIF_COACH_REEMBAUCHE — réembaucher un ancien coach reprend la relation existante', () => {
+  const win = newGameWindow({ runMain: true });
+  win.CL.startFaith();
+  const d = win.G.faithDraft;
+  Object.assign(d, {
+    first: 'Coach', div: win.eval("DIVISIONS.H[0].id"), origin: 'traditional',
+    style: win.eval("Object.keys(STYLES)[0]"), lifestyle: 'pro', circle: 'family',
+    agent: win.eval("Object.keys(FAITH_AGENTS)[0]"), personality: 'taiseux', stable: 'regional',
+  });
+  win.CL.finalizeFaithDraft();
+
+  const p1 = win.faithHireCoach('co_belhadj', 'Embauche initiale (test)');
+  p1.rel.trust = 90;
+  const firstId = p1.id;
+  win.faithHireCoach('co_nakamura', 'Remplacé pour le test'); // p1 part
+  assert.equal(win.G.people.byId[firstId].state.active, false, 'l’ancien coach doit être marqué parti (personDepart)');
+  const p3 = win.faithHireCoach('co_belhadj', 'Réembauche (test)');
+  assert.equal(p3.id, firstId, 'réembaucher le même coachId doit renvoyer la MÊME Person, jamais une identité neuve');
+  assert.equal(p3.rel.trust, 90, 'la relation (confiance) construite lors de la première embauche doit être conservée');
+  assert.equal(p3.state.active, true, 'le coach réembauché doit redevenir actif');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_LASTMSG_FACEOFF] — G4-2, ui-06 scr_plan() :
+   G.lastMsg doit être rendu (et consommé) même quand un face-à-face est
+   éligible et pas encore fait, pas seulement dans la branche sans
+   face-à-face. ==== */
+test('CORRECTIF_LASTMSG_FACEOFF — G.lastMsg s’affiche même quand un face-à-face est proposé', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  win.G.f.champion = 'local'; // kind==='defense' -> faceoffEligible
+  const opp = win.G.roster[0];
+  win.G.fight = { opp, rounds: 3, kind: 'defense', planStep: 1, faceoffDone: false };
+  win.G.lastMsg = 'MESSAGE_DE_TOUR_UNIQUE';
+  const html = win.scr_plan();
+  assert.ok(html.includes('Face-à-face'), 'le combat est éligible au face-à-face, la carte doit apparaître');
+  assert.ok(html.includes('MESSAGE_DE_TOUR_UNIQUE'), 'G.lastMsg doit malgré tout être rendu sur cet écran');
+  assert.equal(win.G.lastMsg, null, 'G.lastMsg doit être consommé (mis à null) une fois rendu, comme dans la branche sans face-à-face');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_ESC_GUILLEMETS] — G4-3, state-core.js esc() :
+   les guillemets simples ET doubles doivent être échappés (attributs HTML
+   title=/value=, noms de combattants saisis par le joueur). ==== */
+test('CORRECTIF_ESC_GUILLEMETS — esc() échappe aussi les guillemets simples et doubles', () => {
+  const win = newGameWindow();
+  // esc() est un `const` de premier niveau (state-core.js) : comme `G`,
+  // jamais une propriété de window — seul win.eval() y a directement accès.
+  const out = win.eval(`esc('<script>"\\'&</script>')`);
+  assert.ok(!out.includes('"'), 'un guillemet double brut ne doit plus apparaître dans la sortie de esc()');
+  assert.ok(!out.includes('\''), 'un guillemet simple brut ne doit plus apparaître dans la sortie de esc()');
+  assert.equal(out, '&lt;script&gt;&quot;&#39;&amp;&lt;/script&gt;');
+});

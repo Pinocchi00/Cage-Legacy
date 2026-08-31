@@ -284,12 +284,18 @@ function rollSkill(f){
   if(pool.length===0) return null;
   const unlockChance=SKILL_CONSTANTS.BASE_RATE + (f._drought*SKILL_CONSTANTS.DROUGHT_INC);
   if(rnd()>unlockChance){ f._drought++; return null; }
-  f._drought=0;
+  /* ==== [ANCRE: CORRECTIF_DROUGHT_ATTRIBUTION_CONFIRMEE] — bug trouvé : la
+     disette était remise à zéro dès que ce jet réussissait, avant même de
+     savoir si une compétence serait réellement accordée. isCapped (plafond
+     de compétences de carrière atteint) ou un pool sans skill correspondant
+     à la rareté tirée (finalSkill null) pouvaient donc consommer toute la
+     disette accumulée sans jamais rien accorder au joueur. Remise à zéro
+     déplacée juste avant chaque retour de grantSkill() réussi. ==== */
   if(isEndOfCareer){ const metaPool=pool.filter(s=>s.fam==='meta');
-    if(metaPool.length>0 && rnd()<0.25) return grantSkill(f, metaPool[Math.floor(rnd()*metaPool.length)]); }
+    if(metaPool.length>0 && rnd()<0.25){ f._drought=0; return grantSkill(f, metaPool[Math.floor(rnd()*metaPool.length)]); } }
   if(isCapped) return null;
   const rarityDrawn=tirerRarete(); const finalSkill=getFallbackSkill(pool, rarityDrawn);
-  if(finalSkill) return grantSkill(f, finalSkill);
+  if(finalSkill){ f._drought=0; return grantSkill(f, finalSkill); }
   return null;
 }
 /* ==== [FIN ANCRE] ==== */

@@ -229,6 +229,14 @@ function applyPendingGauntletConsumable(a){
   a.activeConsumable=itemId;
   if(item.kind==='buff' && typeof G!=='undefined' && G && G.f){
     Object.entries(item.fx).forEach(([k,v])=>{ G.f.attrs[k]=clamp((G.f.attrs[k]||50)+v,1,100); });
+    /* ==== [ANCRE: CORRECTIF_OVERALL_CONSOMMABLE_GAUNTLET] — bug trouvé :
+       les attributs étaient modifiés directement sans rappeler overall(),
+       qui reste figé sur les anciennes valeurs (même défaut que déjà
+       corrigé pour les perks PED/Tiger Muay Thai, ui-08) — or overall()
+       est lu directement par le moteur de combat (engine-combat.js), donc
+       le buff n'y avait aucun effet réel tant qu'un autre recalcul n'avait
+       pas lieu par ailleurs. ==== */
+    G.f.overall=overall(G.f);
   } else if(item.kind==='veto'){ a.consumableVeto=true; }
   else if(item.kind==='safetynet'){ a.consumableSafetynet=true; }
 }
