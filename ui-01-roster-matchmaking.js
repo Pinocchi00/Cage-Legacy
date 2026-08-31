@@ -644,11 +644,13 @@ function reconstructLegend(l){
 function getCardSlot(f,opp,kind){
   if(f.org===0) return "CARTE AMATEUR";
   if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "TÊTE D'AFFICHE";
-  const rnkF=divRank(f);
-  // Sécurité : divRank() renvoie 0 si l'adversaire n'est pas trouvé dans le
+  // Sécurité : divRank() renvoie 0 si le combattant n'est pas trouvé dans le
   // roster de l'organisation courante (combat spécial, invité hors roster,
-  // adversaire d'une autre org) — dans ce cas on ignore son rang plutôt que
-  // de mal interpréter 0 comme "meilleur combattant du monde".
+  // adversaire d'une autre org, ou champion exclu de son propre pool de rang)
+  // — dans ce cas on ignore son rang plutôt que de mal interpréter 0 comme
+  // "meilleur combattant du monde".
+  const rnkFRaw=divRank(f);
+  const rnkF=rnkFRaw>0?rnkFRaw:999;
   const rnkOppRaw=(opp && opp.org===f.org)?divRank(opp):0;
   const rnkOpp=rnkOppRaw>0?rnkOppRaw:999;
   if(rnkF<=15 && rnkOpp<=15){
