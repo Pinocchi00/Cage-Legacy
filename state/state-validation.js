@@ -64,6 +64,12 @@ function repairFighter(f){
   if(typeof f.L!=='number'||isNaN(f.L)) f.L=0;
   if(typeof f.D!=='number'||isNaN(f.D)) f.D=0;
   if(typeof f.org!=='number'||isNaN(f.org)) f.org=0;
+  if(typeof f.age!=='number'||isNaN(f.age)) f.age=20;
+  if(typeof f.potential!=='number'||isNaN(f.potential)) f.potential=85;
+  if(typeof f.ko!=='number'||isNaN(f.ko)) f.ko=0;
+  if(typeof f.sub!=='number'||isNaN(f.sub)) f.sub=0;
+  if(typeof f.streak!=='number'||isNaN(f.streak)) f.streak=0;
+  if(typeof f.defenses!=='number'||isNaN(f.defenses)) f.defenses=0;
   if(!Array.isArray(f.skills)) f.skills=[];
   if(!Array.isArray(f.history)) f.history=[];
   if(!Array.isArray(f.seasonRecap)) f.seasonRecap=[];

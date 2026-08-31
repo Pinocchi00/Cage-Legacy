@@ -214,8 +214,8 @@ function p4pScore(f){ const fights=f.W+f.L+f.D;
   // classement P4P. La reconnaissance du titre se fait désormais uniquement
   // via un badge dédié dans la fiche complète (scr_profile), pas via un
   // avantage chiffré caché dans le classement.
-  if(f.org===0) return Math.max(1, f.careerElo+f.defenses*30+leapfrog+recordBonus);
-  let score=f.orgElo*0.8+f.careerElo*0.2+f.defenses*30+leapfrog+recordBonus;
+  if(f.org===0) return Math.max(1, f.careerElo+(f.defenses||0)*30+leapfrog+recordBonus);
+  let score=f.orgElo*0.8+f.careerElo*0.2+(f.defenses||0)*30+leapfrog+recordBonus;
   if(f.org===6) score*=1.4;
   return Math.max(1, score);
 }

@@ -84,7 +84,8 @@ function applyTacticalMemory(npc,player){
   if(pastFights.length>=1){
     const lastFight=pastFights[pastFights.length-1];
     if(lastFight.res==='win'){
-      const keys=(lastFight.method.startsWith('Soum'))?['tdd','fightIQ']:(lastFight.method.startsWith('KO')?['footSpeed','chin']:[]);
+      const method=lastFight.method||'';
+      const keys=(method.startsWith('Soum'))?['tdd','fightIQ']:(method.startsWith('KO')?['footSpeed','chin']:[]);
       keys.forEach(k=>{ if(npc.attrs[k]!==undefined){ saved[k]=npc.attrs[k]; npc.attrs[k]=clamp(npc.attrs[k]+(k==='fightIQ'?5:15),1,100); } });
     }
   }
@@ -371,12 +372,13 @@ function triggerRivalPressConference(f,opp){
   let text=`La conférence de presse contre ${opp.name} a failli tourner à la bagarre générale. L\u2019animosité est à son comble.`;
   let moraleGain=rnd()<0.5?15:-15;
   if(lastEncounter){
-    if(isDecisionLike(lastEncounter.method)){
+    const method=lastEncounter.method||'';
+    if(isDecisionLike(method)){
       text=`Les journalistes ressortent la décision controversée de votre dernier affrontement contre ${opp.name}. Il promet de ne pas laisser les juges s\u2019en mêler cette fois.`;
-    } else if(lastEncounter.res==='loss' && lastEncounter.method.startsWith('KO')){
+    } else if(lastEncounter.res==='loss' && method.startsWith('KO')){
       text=`${opp.name} mime votre dernier KO en pleine conférence. Humiliation publique.`;
       moraleGain=-20;
-    } else if(lastEncounter.res==='win' && lastEncounter.method.startsWith('Soum')){
+    } else if(lastEncounter.res==='win' && method.startsWith('Soum')){
       text=`${opp.name} refuse de reparler de sa dernière soumission. Vous en rajoutez une couche devant les caméras.`;
       moraleGain=18;
     }
