@@ -247,8 +247,9 @@ function baseAttrs(style,level,predis,tightSpread){ const o={}; const bias=(STYL
   return /** @type {FighterAttrs} */ (o);
 }
 /** @returns {Fighter} */
-function makeFighter(opt={}){ const gender=opt.gender||pick(['H','F']);
-  const div=divById(opt.div)|| (gender==='H'?pick(DIVISIONS.H):pick(DIVISIONS.F));
+function makeFighter(opt={}){ const optDiv=divById(opt.div);
+  const gender=opt.gender||(optDiv?optDiv.gender:pick(['H','F']));
+  const div=optDiv|| (gender==='H'?pick(DIVISIONS.H):pick(DIVISIONS.F));
   const style=opt.style||pick(STYLE_KEYS); const ck=opt.countryKey||pick(COUNTRY_KEYS);
   const nm=makeName(gender,ck,opt.first);
   const phys=makePhysical(div);
