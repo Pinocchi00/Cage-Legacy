@@ -989,18 +989,19 @@ function startCoachingFight(){
   const restoreSelf={}, restoreOpp={};
   if(G.arcade.mode==='boss_run' && G.arcade.bossMalus){
     const bm=G.arcade.bossMalus;
+    const bossMalusBefore=G.f.attrs[bm.key];
     G.f.attrs[bm.key]=clamp(G.f.attrs[bm.key]+bm.amount,1,100);
-    gauntletAddRestore(restoreSelf,bm.key,-bm.amount);
+    gauntletAddRestore(restoreSelf,bm.key,bossMalusBefore-G.f.attrs[bm.key]);
   }
   const mutId=G.arcade.mutator&&G.arcade.mutator.id;
-  if(mutId==='mut_violent'){ opp.attrs.power=clamp(opp.attrs.power+15,1,100); gauntletAddRestore(restoreOpp,'power',-15); }
-  if(mutId==='mut_sans_repit'){ G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); gauntletAddRestore(restoreSelf,'cardio',15); }
+  if(mutId==='mut_violent'){ const powerBefore=opp.attrs.power; opp.attrs.power=clamp(opp.attrs.power+15,1,100); gauntletAddRestore(restoreOpp,'power',powerBefore-opp.attrs.power); }
+  if(mutId==='mut_sans_repit'){ const cardioBefore=G.f.attrs.cardio; G.f.attrs.cardio=clamp(G.f.attrs.cardio-15,1,100); gauntletAddRestore(restoreSelf,'cardio',cardioBefore-G.f.attrs.cardio); }
   /* ==== [ANCRE: PASSIF_IDENTITE_DE_CAMP] — passif 'oppPermanent' (Mercenaire,
      Universitaire) : même pattern que bossMalus/mutateurs ci-dessus, mais
      générique sur plusieurs clés à la fois (fx peut avoir 1 ou 2 stats). ==== */
   const campPassive=G.arcade.campIdentity&&G.arcade.campIdentity.passive;
   if(campPassive&&campPassive.type==='oppPermanent'){
-    Object.entries(campPassive.fx).forEach(([k,v])=>{ opp.attrs[k]=clamp(opp.attrs[k]+v,1,100); gauntletAddRestore(restoreOpp,k,-v); });
+    Object.entries(campPassive.fx).forEach(([k,v])=>{ const before=opp.attrs[k]; opp.attrs[k]=clamp(opp.attrs[k]+v,1,100); gauntletAddRestore(restoreOpp,k,before-opp.attrs[k]); });
   }
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_JUGES_CUMUL_COACHING] — bug remonté : seul le total
@@ -1219,7 +1220,7 @@ function acceptGauntletSecondSouffle(){
   const c=G.arcade&&G.arcade.coaching; if(!c||!c.secondSouffleAvailable||c.secondSouffleUsed) return;
   const keys=['composure','cardio','power','chin'];
   c._restore=c._restore||{self:{},opp:{}};
-  keys.forEach(k=>{ G.f.attrs[k]=clamp((G.f.attrs[k]||50)+10,1,100); gauntletAddRestore(c._restore.self,k,-10); });
+  keys.forEach(k=>{ const before=G.f.attrs[k]||50; G.f.attrs[k]=clamp(before+10,1,100); gauntletAddRestore(c._restore.self,k,before-G.f.attrs[k]); });
   c.secondSouffleUsed=true;
 }
 /* ==== [FIN ANCRE] ==== */
