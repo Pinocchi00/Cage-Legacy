@@ -77,8 +77,8 @@ function getAnalytics(){
 function updateMetaStatsOnRetirement(f){
   const meta=loadMetaStats();
   const fights=f.W+f.L+(f.D||0);
-  meta.totalFights+=fights; meta.totalKO+=(f.ko||0); meta.totalSub+=(f.sub||0); meta.totalDec+=(f.dec||0);
-  meta.totalMoney+=(f.earnings||0); meta.totalBelts+=(f.titles||0); meta.totalRetirements=(meta.totalRetirements||0)+1;
+  meta.totalFights=(meta.totalFights||0)+fights; meta.totalKO=(meta.totalKO||0)+(f.ko||0); meta.totalSub=(meta.totalSub||0)+(f.sub||0); meta.totalDec=(meta.totalDec||0)+(f.dec||0);
+  meta.totalMoney=(meta.totalMoney||0)+(f.earnings||0); meta.totalBelts=(meta.totalBelts||0)+(f.titles||0); meta.totalRetirements=(meta.totalRetirements||0)+1;
   /* ==== [ANCRE: ANALYTICS_LOCALES_RETRAITE] — bilan de carrière ajouté au même
      point que le reste de la mise à jour (une seule fois, à la retraite/enshrine)
      — jamais recalculé à chaque combat, comme le reste de ce bloc. peakStreak/
