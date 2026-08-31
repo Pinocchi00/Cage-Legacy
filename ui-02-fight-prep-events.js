@@ -574,7 +574,7 @@ function generateRandomEvent(){ const f=G.f;
   if(type==='minor_injury'){
     title='Pépin physique';
     text='Mauvaise torsion du genou lors du dernier sparring. Rien qui n\u2019empêche de combattre, mais vous allez le sentir dans l\u2019octogone.';
-    G.fight.malus={footSpeed:-15,explosiveness:-12}; fx={malus:{footSpeed:-15,explosiveness:-12}};
+    G.fight.malus=Object.assign({},G.fight.malus,{footSpeed:-15,explosiveness:-12}); fx={malus:{footSpeed:-15,explosiveness:-12}};
   } else if(type==='major_injury'){
     title='Déchirure !';
     text='Sur un appui anodin à l\u2019entraînement, un claquement sourd. Le médecin est catégorique : combat annulé, et plusieurs mois de rééducation.';
@@ -582,11 +582,11 @@ function generateRandomEvent(){ const f=G.f;
   } else if(type==='training_partner_hurt'){
     title='Partenaire d\u2019entraînement blessé';
     text='Ton partenaire de sparring principal se blesse à dix jours du combat. Impossible de reproduire son style à temps, la préparation en pâtit.';
-    G.fight.malus={fightIQ:-10,adaptability:-8}; fx={malus:{fightIQ:-10,adaptability:-8}};
+    G.fight.malus=Object.assign({},G.fight.malus,{fightIQ:-10,adaptability:-8}); fx={malus:{fightIQ:-10,adaptability:-8}};
   } else if(type==='old_injury_flareup'){
     title='Vieille blessure qui se réveille';
     text='Cette épaule que tu t\u2019es abîmée il y a des années recommence à te lâcher pendant les derniers rounds de sparring. Rien de cassé, mais la confiance en prend un coup.';
-    G.fight.malus={durability:-10,confidence:-8}; fx={malus:{durability:-10,confidence:-8}};
+    G.fight.malus=Object.assign({},G.fight.malus,{durability:-10,confidence:-8}); fx={malus:{durability:-10,confidence:-8}};
   } else if(type==='hometown_crowd'){
     title='Retour au pays';
     text='Le combat se tient près de chez toi. Ta famille, tes potes de toujours, la salle qui t\u2019a vu débuter : tout le monde sera là ce soir.';
@@ -608,7 +608,7 @@ function generateRandomEvent(){ const f=G.f;
   } else if(type==='rival_trashtalk'){
     title='Provocation publique';
     text='Ton adversaire multiplie les déclarations mordantes en conférence de presse. Ça te met dans un état d\u2019esprit combatif, mais un peu trop nerveux pour ce soir.';
-    G.fight.malus={composure:-10}; f.morale=clamp(f.morale+8,0,100);
+    G.fight.malus=Object.assign({},G.fight.malus,{composure:-10}); f.morale=clamp(f.morale+8,0,100);
     fx={malus:{composure:-10},moraleDelta:8};
   } else if(type==='motivational_speech'){
     title='Discours du coach';
@@ -623,7 +623,7 @@ function generateRandomEvent(){ const f=G.f;
   } else if(type==='media_chaos'){
     title='Conférence de presse chaotique';
     text='La conférence de presse dégénère en foire d\u2019empoigne verbale avec ton adversaire. Les caméras adorent ça, ton mental un peu moins.';
-    G.fight.malus={composure:-15};
+    G.fight.malus=Object.assign({},G.fight.malus,{composure:-15});
     f.morale=clamp(f.morale+10,0,100);
     fx={malus:{composure:-15},moraleDelta:10};
   } else if(type==='social_media_storm'){
@@ -634,7 +634,7 @@ function generateRandomEvent(){ const f=G.f;
   } else if(type==='coaching_change'){
     title='Changement de coach';
     text='Ton entraîneur principal part accompagner un autre combattant à dix jours du combat. Tu dois t\u2019adapter à une nouvelle voix dans le coin.';
-    G.fight.malus={adaptability:-12,composure:-8}; fx={malus:{adaptability:-12,composure:-8}};
+    G.fight.malus=Object.assign({},G.fight.malus,{adaptability:-12,composure:-8}); fx={malus:{adaptability:-12,composure:-8}};
   } else if(type==='streaming_deal'){
     title='Contrat de streaming exclusif';
     text='Une plateforme de streaming te propose un salaire supplémentaire pour une exclusivité média, contre un calendrier de déplacements épuisant avant le combat.';
@@ -690,7 +690,7 @@ function generateRandomEvent(){ const f=G.f;
     title='Combat Arrangé ?';
     text='Un bookmaker véreux vous offre une forte somme pour perdre le premier round volontairement avant de reprendre le combat. Accepter vous draine mentalement et ruine votre concentration.';
     f.earnings=(f.earnings||0)+200;
-    G.fight.malus={composure:-20};
+    G.fight.malus=Object.assign({},G.fight.malus,{composure:-20});
     f.morale=clamp(f.morale-15,0,100);
     fx={malus:{composure:-20},moraleDelta:-15,money:200};
   }
