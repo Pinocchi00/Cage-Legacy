@@ -428,7 +428,13 @@ function checkAmaChampionship(f){
    sur G.season.year (G.year n'existe nulle part dans l'état du jeu). ==== */
 function recordTitleChange(org,divName,champion,dethroned,orgFlavor){
   if(!G.titleHistory) G.titleHistory=[];
-  G.titleHistory.unshift({org,divName,champion,year:(G.season&&G.season.year)||1,defenses:0,dethroned:dethroned||'Aucun',orgFlavor:orgFlavor||null});
+  /* ==== [ANCRE: CORRECTIF_TITLEHISTORY_ANNEE_FAITH] — bug trouvé : le temps
+     est tracé par G.faith.year en mode Faith, pas G.season.year (qui reste
+     figé à 1 pour toute une carrière Faith, cf. CORRECTIF_SEASONRECAP_FAITH,
+     ui-08). Toutes les ceintures gagnées en Faith étaient donc datées
+     "année 1" indéfiniment dans le registre. Priorité à G.faith.year quand
+     il existe, comme le fait déjà state-faith.js. ==== */
+  G.titleHistory.unshift({org,divName,champion,year:(G.faith?G.faith.year:((G.season&&G.season.year)||1)),defenses:0,dethroned:dethroned||'Aucun',orgFlavor:orgFlavor||null});
   if(G.titleHistory.length>200) G.titleHistory.length=200;
 }
 function recordTitleDefense(org,divName,champion){

@@ -1019,7 +1019,19 @@ const CL={
     // définitivement inutile.
     if(divId!==G.f.div){
       const newDiv=divById(divId);
-      if(newDiv){ G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f); }
+      if(newDiv){
+        /* ==== [ANCRE: CORRECTIF_CHAMPCHAMPFOCUS_DEFENSES] — bug trouvé : les
+           défenses accumulées sur la ceinture qu'on quitte se reportaient
+           telles quelles sur la nouvelle (G.f.defenses n'était ni sauvegardé
+           ni échangé). champChampDefenses{} existe déjà pour ça (posé au
+           gain du supercombat, ui-05) : on y range le compte de la ceinture
+           quittée puis on restaure celui de la ceinture visée (0 si jamais
+           défendue depuis qu'elle a été gagnée). ==== */
+        if(!G.f.champChampDefenses) G.f.champChampDefenses={};
+        G.f.champChampDefenses[G.f.div]=G.f.defenses;
+        G.f.defenses=G.f.champChampDefenses[newDiv.id]||0;
+        G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f);
+      }
     }
     G.lastMsg=divId===G.f.div?'Vous restez concentré sur votre division d\u2019origine.':'Vous faites de votre nouvelle ceinture votre priorité.';
     /* ==== [ANCRE: CORRECTIF_CHAMPCHAMP_MOIS] — la branche Faith d'afterResult()
@@ -3113,7 +3125,25 @@ const CL={
         if(rnd()<0.50){ G.lastMsg="L\u2019argent a disparu dans les poches des promoteurs. Aucun effet."; }
         else { G.faith.perks.forcePromo=true; G.lastMsg="Lobbying réussi : Une offre de promotion sera forcée après votre prochain combat."; }
       } else if(perkId==='judges'){
-        if(rnd()<0.10){ G.lastMsg="SCANDALE : Corruption découverte. L\u2019organisation coupe votre contrat !"; G.faith.scandals=(G.faith.scandals||0)+1; if(f.org>1) f.org--; G.roster=makeOrgRoster(f); }
+        /* ==== [ANCRE: CORRECTIF_JUGES_SCANDALE_RETROGRADATION] — bug trouvé :
+           en cas de scandale, cette branche se contentait de décrémenter
+           f.org et régénérer le roster, en gardant titre/contrat/Elo de
+           l'ancienne organisation — alors que le message annonce une
+           coupure de contrat. Alignée sur la rétrogradation normale
+           (CORRECTIF_CONTRAT_RETROGRADATION, ui-05 ligne 453) : même reset
+           de ceinture/double-ceinture/Elo/rankBoost et régénération du
+           contrat pour la nouvelle organisation. ==== */
+        if(rnd()<0.10){
+          G.lastMsg="SCANDALE : Corruption découverte. L\u2019organisation coupe votre contrat !";
+          G.faith.scandals=(G.faith.scandals||0)+1;
+          if(f.org>1){
+            f.org--; f.champion=null; f.champChampBelt=null; f.champChampBeltDivId=null;
+            f.champChampOffer=null; f.champChampDefenses=null;
+            f.orgElo=eloBaseline(f.org,f.overall); f.rankBoost=0;
+            f.contract=generateContract(f,f.org,false);
+            G.roster=makeOrgRoster(f);
+          }
+        }
         else { G.faith.perks.judges=true; G.lastMsg="Les juges ont été 'informés'. Vous bénéficierez d\u2019une grande clémence en cas de décision."; }
       } else if(perkId==='diet'){ G.faith.dietYear=G.faith.year; G.lastMsg="Diététicien Élite engagé pour l\u2019année. Les pesées seront une formalité."; }
     }
