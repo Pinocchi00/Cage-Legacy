@@ -495,6 +495,13 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.faith) G.faith.pendingTitleConsecration={type:'won',oppId:opp.id,titleAttemptsBefore,wasNemesis:opp.id===G.f.faithNemesisId};
   }
   else if(win && kind==='defense'){ G.f.defenses++;
+    /* ==== [ANCRE: CORRECTIF_CHAMPCHAMPDEFENSES_SYNC] — champChampDefenses{}
+       (posé au moment du gain du supercombat, plus bas) doit rester à jour
+       pour la ceinture actuellement défendue, sinon chooseChampChampFocus()
+       (ui-08) restaurerait un compte de défenses périmé à la prochaine
+       bascule de focus. Ne s'exécute que si la map existe déjà (double
+       champion) — aucune allocation pour un champion simple. ==== */
+    if(G.f.champChampDefenses) G.f.champChampDefenses[G.f.div]=G.f.defenses;
     // Un défenseur qui est déjà double champion doit le voir rappelé ici
     // (item #14 : le statut de double champion n'était visible nulle part
     // sur l'écran de résultat d'une défense ordinaire).
