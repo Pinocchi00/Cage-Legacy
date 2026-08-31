@@ -298,6 +298,13 @@ const CAMP_TIERS=[
   {id:'premium',name:'Camp Premium',cost:15,risk:0.0,buff:{morale:5,form:5},oppDebuff:null},
   {id:'sparring',name:'Sparring Sur-Mesure',cost:35,risk:0.0,buff:{form:5},oppDebuff:{adaptability:-15,fightIQ:-10}}
 ];
+/* ==== [ANCRE: CAMPTIER_CODE_MORT] — audit : aucun appel à executeCampTier()
+   nulle part dans le repo (engine, state, fichiers ui, index.html, onclick
+   inline grepés), alors que finishTrainingFlow() (ui-02-fight-prep-events.js) gère
+   déjà tout le flux d'entraînement réel. Fonction exposée publiquement mais
+   inutilisée — contient un TypeError latent (G.fight.oppMalus si G.fight
+   n'existe pas encore) qui ne se déclenche jamais faute d'appelant. Laissée
+   en place telle quelle : ni patchée, ni supprimée sans confirmation. ==== */
 function executeCampTier(f,tierId,trainingOpt){
   const tier=CAMP_TIERS.find(t=>t.id===tierId);
   if(!tier) return {success:false,msg:"Tier invalide."};

@@ -55,12 +55,14 @@ function load(){
   }catch(e){ console.error('Sauvegarde illisible:',e); G=null; }
   return false;
 }
+/* ==== [ANCRE: HASSAVE_PARSE_ISOLE] — bug trouvé : les deux JSON.parse (primary
+   puis backup) partageaient un seul try/catch. Un SAVE_KEY corrompu levait une
+   SyntaxError qui sautait directement au catch, sans jamais tenter le backup —
+   contrairement à load(), qui isole déjà chaque parse via parseAndValidate(). ==== */
 function hasSave(mode){
   try{
-    let s=localStorage.getItem(SAVE_KEY);
-    let p=s?JSON.parse(s):null;
-    if(!validateSave(p)) p=null;
-    if(!p){ const b=localStorage.getItem(SAVE_BACKUP_KEY); if(b){ const bp=JSON.parse(b); if(validateSave(bp)) p=bp; } }
+    let p=parseAndValidate(localStorage.getItem(SAVE_KEY));
+    if(!p) p=parseAndValidate(localStorage.getItem(SAVE_BACKUP_KEY));
     if(p){
       if(mode==='faith') return !!p.faith;
       if(mode==='career') return !p.faith;

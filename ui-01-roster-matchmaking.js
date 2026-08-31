@@ -689,6 +689,8 @@ function scr_fantasySetup(){
   }
   let selA=G.fantasyA!==undefined?G.fantasyA:0;
   let selB=G.fantasyB!==undefined?G.fantasyB:(list.length>1?1:0);
+  selA=Math.max(0,Math.min(selA,list.length-1));
+  selB=Math.max(0,Math.min(selB,list.length-1));
   const lA=list[selA], lB=list[selB];
   return `<div class="scr center intro">
     <div class="eyebrow gold">Sandbox</div>
@@ -785,6 +787,8 @@ function scr_vs_friend(){
   }
   let selA=G.vsFriendSelA!==undefined?G.vsFriendSelA:0;
   let selB=G.vsFriendSelB!==undefined?G.vsFriendSelB:(list.length>1?1:0);
+  selA=Math.max(0,Math.min(selA,list.length-1));
+  selB=Math.max(0,Math.min(selB,list.length-1));
   const lA=list[selA];
   const lB=imported||list[selB];
   return `<div class="scr center intro">

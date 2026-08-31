@@ -865,15 +865,17 @@ const CL={
   leaveAllStars(){ G.allstars=null; CL.go('legends'); },
   setFantasy(side,dir){
      const max=loadHOF().length-1;
-     if(side===0){ let n=(G.fantasyA||0)+dir; if(n<0)n=max; if(n>max)n=0;
-       if(n===(G.fantasyB!==undefined?G.fantasyB:1)){ n+=dir; if(n<0)n=max; if(n>max)n=0; } G.fantasyA=n;
-     } else { let n=(G.fantasyB!==undefined?G.fantasyB:1)+dir; if(n<0)n=max; if(n>max)n=0;
-       if(n===(G.fantasyA||0)){ n+=dir; if(n<0)n=max; if(n>max)n=0; } G.fantasyB=n; }
+     if(side===0){ let n=Math.min(G.fantasyA||0,max)+dir; if(n<0)n=max; if(n>max)n=0;
+       if(n===Math.min(G.fantasyB!==undefined?G.fantasyB:1,max)){ n+=dir; if(n<0)n=max; if(n>max)n=0; } G.fantasyA=n;
+     } else { let n=Math.min(G.fantasyB!==undefined?G.fantasyB:1,max)+dir; if(n<0)n=max; if(n>max)n=0;
+       if(n===Math.min(G.fantasyA||0,max)){ n+=dir; if(n<0)n=max; if(n>max)n=0; } G.fantasyB=n; }
      render();
   },
   launchFantasyFight(){
      const list=loadHOF();
-     const lA=list[G.fantasyA||0], lB=list[G.fantasyB!==undefined?G.fantasyB:(list.length>1?1:0)];
+     const idxA=Math.max(0,Math.min(G.fantasyA||0,list.length-1));
+     const idxB=Math.max(0,Math.min(G.fantasyB!==undefined?G.fantasyB:(list.length>1?1:0),list.length-1));
+     const lA=list[idxA], lB=list[idxB];
      const A=reconstructLegend(lA), B=reconstructLegend(lB);
      neutralizeWeightGap(A,B);
      if(!G._backupF){ G._backupF=G.f; G._backupFight=G.fight; }
@@ -936,8 +938,8 @@ const CL={
   launchVsFriend(){
      if(!G.vsFriendScore){
        const list=loadHOF();
-       const lA=list[G.vsFriendSelA||0];
-       const lB=G.importedFriendLegend||list[G.vsFriendSelB!==undefined?G.vsFriendSelB:1];
+       const lA=list[Math.max(0,Math.min(G.vsFriendSelA||0,list.length-1))];
+       const lB=G.importedFriendLegend||list[Math.max(0,Math.min(G.vsFriendSelB!==undefined?G.vsFriendSelB:1,list.length-1))];
        /* ==== [ANCRE: CORRECTIF_VSFRIEND_PANTHEON_UNIQUE] — bug trouvé : si le
           Panthéon ne contient qu'une seule légende (et aucun code ami importé),
           list[1] vaut undefined et reconstructLegend(undefined) plante. Son
