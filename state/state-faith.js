@@ -339,7 +339,19 @@ function faithHireCoach(coachId,reason){
   const F=G.faith, reg=ensurePeopleRegistry();
   const old=F.coachId?reg.byId[F.coachId]:null;
   if(old) personDepart(old,reason);
-  const p=personMint('coach',{coachId,slot:'main'});
+  /* ==== [ANCRE: CORRECTIF_COACH_REEMBAUCHE] — bug trouvé : personMint()
+     était appelé inconditionnellement, créant une identité neuve à chaque
+     embauche — y compris pour un coachId déjà minté par le passé (parti,
+     jamais supprimé du registre, Loi 3) — au lieu de reprendre la relation
+     existante (rel.trust/respect/resentment/arc). 'coach:main' (utilisé par
+     personEnsure/faithCoachPerson ailleurs) est une clé de SLOT — toujours
+     réattribuable au coach courant, jamais un identifiant stable par
+     personne — donc impropre à retrouver un ancien coach par coachId ; on
+     cherche ici directement dans le registre une Person 'coach' déjà mintée
+     pour ce coachId précis avant d'en fabriquer une nouvelle. ==== */
+  const rehired=Object.values(reg.byId).find(p=>p.role==='coach' && p.extra && p.extra.coachId===coachId);
+  const p=rehired||personMint('coach',{coachId,slot:'main'});
+  if(rehired) rehired.state.active=true;
   reg.byId[p.id]=p;
   reg.byKey['coach:main']=p.id;
   F.coachId=p.id;

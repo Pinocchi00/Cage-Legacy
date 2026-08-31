@@ -399,8 +399,20 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       const sortedNow=G.roster.filter(o=>!o.champion).slice().sort((a,b)=>p4pScore(b)-p4pScore(a));
       const fallback={W:0,L:0,D:0,ko:0,sub:0,koLoss:0,streak:0,org:G.f.org,defenses:0,champion:null,orgWins:0};
       const targetScore=p4pScore(sortedNow[3]||sortedNow[sortedNow.length-1]||fallback);
-      const scoreNoBoost=p4pScore(Object.assign({},G.f,{rankBoost:0}));
-      if(scoreNoBoost>targetScore){ G.f.rankBoost=(G.f.rankBoost||0)-Math.round((scoreNoBoost-targetScore)*1.05); }
+      /* ==== [CORRECTIF RANK_CRASH_SCORE_REEL] — bug trouvé : la correction se
+         basait sur le score SANS rankBoost (scoreNoBoost) au lieu du score
+         RÉEL déjà en vigueur (qui inclut le rankBoost courant, seul chiffre
+         que le classement affiché prenne en compte). Avec un rankBoost
+         positif déjà accumulé (le cas courant qu'un vrai "capital de
+         victoires" produit, cf. LEAPFROG_PROPORTIONNEL plus haut), la
+         correction sous-dimensionnait la chute — exactement le symptôme que
+         cette ancre dit corriger ("un gros capital de victoires rendait le
+         joueur insubmersible après une seule défaite"). Le garde
+         `scoreNow>targetScore` reste auto-limitant (aucun risque
+         d'emballement : une fois le score réel sous la cible, plus aucune
+         correction n'est appliquée). ==== */
+      const scoreNow=p4pScore(G.f);
+      if(scoreNow>targetScore){ G.f.rankBoost=(G.f.rankBoost||0)-Math.round((scoreNow-targetScore)*1.05); }
     }
     // ==== [FIN ANCRE] ====
     // ==== [ANCRE: CREDIBILITE_PRODIGE] — item demandé : les rôles de
@@ -714,6 +726,22 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      appel par résultat. ==== */
   let proOfferEvaluated=false;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: CORRECTIF_OFFRE_PRO_RETRAITE] — bug trouvé : ce bloc
+     (tournoi amateur, offre pro, promotion/Free Agency) ne testait jamais
+     `forced` (déjà vrai ici si une retraite — série de défaites plus haut,
+     ou limite d'âge médicale ci-dessous — vient d'être actée sur CE même
+     combat) : un combattant qui vient de raccrocher les gants pouvait
+     recevoir une qualification de tournoi ou une offre de contrat/
+     promotion, routée juste après par routeAfterCareerPending() qui ne
+     vérifie pas non plus le statut retraité. Autres déclencheurs de
+     progression du fichier qui ont le même oubli, listés sans être
+     corrigés ici (hors périmètre de ce correctif) : champChampOfferReady
+     (offre de supercombat, ligne ~556) et le bilan de contrat/non-
+     renouvellement (BILAN_CONTRAT, ligne ~230) — tous deux s'exécutent
+     avant que la retraite liée à l'âge ne soit tranchée plus bas dans
+     cette même fonction, donc `forced` n'y reflète de toute façon pas
+     encore cette retraite-là au moment où ils s'exécutent. ==== */
+  if(!forced){
   if(G.f.org===0){
     if((G.f.proOfferCooldown||0)>0) G.f.proOfferCooldown--;
     const warThisFight=(res.stats.A.sig+res.stats.B.sig>60) || (res.stats.A.kd+res.stats.B.kd>=2);
@@ -775,6 +803,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
       if(G.f.org===4){ topTierOffer=true; }
       else { promoOffer=true; } // réutilise l'écran de promo, adapté pour signaler le transfert
     }
+  }
   }
   // (org>=5 : plus de rétrogradation immédiate en pleine série de défaites —
   // remplacée par le risque de non-renouvellement à l'échéance du contrat,
