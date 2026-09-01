@@ -416,3 +416,71 @@ test('CORRECTIF_ESC_GUILLEMETS — esc() échappe aussi les guillemets simples e
   assert.ok(!out.includes('\''), 'un guillemet simple brut ne doit plus apparaître dans la sortie de esc()');
   assert.equal(out, '&lt;script&gt;&quot;&#39;&amp;&lt;/script&gt;');
 });
+
+/* ==== [ANCRE: TEST_CORRECTIF_ROSTER_ENTREES_NULLES] — F1, state/state-validation.js
+   validateState() : une entrée null/undefined dans G.roster (sauvegarde
+   corrompue) ne doit plus jamais lever de TypeError, et le correctif filtre
+   désormais uniquement les entrées invalides (G.roster.map(repairFighter)
+   .filter(Boolean)) au lieu de régénérer tout le roster — les fighters sains
+   qu'il contenait déjà doivent survivre à l'appel. ==== */
+test('CORRECTIF_ROSTER_ENTREES_NULLES — validateState() filtre les entrées nulles de G.roster sans planter ni régénérer tout le roster', () => {
+  const win = newGameWindow();
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Rost'} };
+    CL.create();
+  `);
+  const survivor = win.G.roster[0];
+  const survivorId = survivor.id;
+  win.G.roster = [null, survivor, undefined];
+
+  let threw = false, ok;
+  try { ok = win.validateState(); } catch (e) { threw = true; }
+
+  assert.equal(threw, false, 'validateState() ne doit jamais lever d’exception sur un roster contenant des entrées nulles');
+  assert.equal(ok, true, 'validateState() doit réussir malgré la corruption partielle du roster');
+  assert.equal(win.G.roster.length, 1, 'les entrées null/undefined doivent être filtrées, pas laissées dans le tableau');
+  assert.equal(win.G.roster[0].id, survivorId, 'le fighter valide restant doit être conservé (pas de régénération totale via makeOrgRoster)');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_FAITH_LEVERAGE_F_INERTE] — F2,
+   ui-04a-faith-screens.js faithLeverage(f,F) : vérifié que l'ancre
+   FAITH_AGENT ne prévoit aucun effet de l'agent sur le levier de
+   négociation (seulement une commission et un style de matchmaking) — F
+   reste un paramètre non exploité, documenté comme tel plutôt que retiré
+   (signature conservée). Ce test fige ce comportement : si un futur
+   correctif fait lire F.agent sans mettre à jour l'ancre/la doc, il doit
+   échouer ici pour forcer une revue explicite. ==== */
+test('CORRECTIF_FAITH_LEVERAGE_F_INERTE — faithLeverage(f,F) ignore F.agent, comme documenté (ancre FAITH_NEGOCIATION)', () => {
+  const win = newGameWindow();
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Lev'} };
+    CL.create();
+  `);
+  win.G.f.streak = 5; win.G.f.hypeBonus = 2; win.G.f.personality = 'villain';
+  const scoreNoAgent = win.faithLeverage(win.G.f, {});
+  const scoreShark = win.faithLeverage(win.G.f, { agent: win.eval('FAITH_AGENTS.requin') });
+  const scoreLoyal = win.faithLeverage(win.G.f, { agent: win.eval('FAITH_AGENTS.fidele') });
+  assert.equal(scoreShark, scoreNoAgent, 'un agent Requin ne doit modifier aucun point de levier (F non lu par faithLeverage)');
+  assert.equal(scoreLoyal, scoreNoAgent, 'un agent Fidèle ne doit pas non plus modifier le score, à F identique par ailleurs');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_EQEQEQ_VENGEANCE_RIVAL_ID] — F3,
+   ui-05-fight-resolution.js ACH 'vengeance_ultime' : vérifié que tout id de
+   combattant du jeu (uniqueFighterId(), engine.js, seule source d'id de
+   production) est toujours une chaîne — Object.keys() aussi — donc `===`
+   est équivalent à l'ancien `==` sans en perdre le comportement. ==== */
+test('CORRECTIF_EQEQEQ_VENGEANCE_RIVAL_ID — vengeance_ultime détecte la revanche avec des ids toujours en chaîne (=== suffit)', () => {
+  const win = newGameWindow();
+  const oppId = win.makeFighter({ gender: 'H', div: 'H-heavy' }).id;
+  assert.equal(typeof oppId, 'string', 'uniqueFighterId() doit toujours produire une chaîne, jamais un nombre');
+
+  const f = {
+    history: [
+      { oppId, res: 'loss', method: 'Décision' },
+      { oppId, res: 'win', method: 'KO (test)' },
+    ],
+    _rivalries: { [oppId]: 2 },
+  };
+  const ach = win.eval("ACH.find(a=>a.id==='vengeance_ultime')");
+  assert.equal(ach.t(f), true, 'une revanche par KO contre un rival (ids en chaîne, comme en jeu) doit déclencher le succès avec ===');
+});

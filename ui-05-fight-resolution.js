@@ -1014,11 +1014,16 @@ const ACH=[
  // ==== [ANCRE: LOT8_VENGEANCE] ====
  {id:'vengeance_ultime',cat:'Finitions & Séries',ico:SVG.target,h:'Vengeance Ultime',d:'Finir par KO ou Soumission un rival qui vous a battu lors de votre première rencontre.',
    t:f=>{ if(!f.history) return false; const rivalIds=Object.keys(f._rivalries||{});
-     // `==` volontaire (pas une erreur) : Object.keys() renvoie toujours des
-     // chaînes, alors que h.oppId peut être un nombre pour d'anciennes
-     // sauvegardes (avant le passage à un identifiant unique en chaîne). Le
-     // remplacer par === casserait la comparaison pour ces anciennes données.
-     for(const rId of rivalIds){ const encounters=f.history.filter(h=>h.oppId==rId);
+     // `===` (pas `==`) : vérifié que h.oppId et rId sont toujours des
+     // chaînes ici. Tout opp/fighter du jeu tire son id de
+     // uniqueFighterId() (engine.js, via makeFighter()) qui renvoie
+     // toujours une chaîne — aucun chemin de production n'assigne d'id
+     // numérique à un combattant. Object.keys() renvoie lui aussi toujours
+     // des chaînes. L'ancien commentaire évoquait des sauvegardes
+     // antérieures à "un identifiant unique en chaîne" : uniqueFighterId()
+     // existe depuis le tout premier commit de ce dépôt, aucune ère à id
+     // numérique n'y est constatée.
+     for(const rId of rivalIds){ const encounters=f.history.filter(h=>h.oppId===rId);
        if(encounters.length>=2){ const first=encounters[0], last=encounters[encounters.length-1];
          if(first.res==='loss' && last.res==='win' && (last.method.startsWith('KO')||last.method.startsWith('Soum'))) return true; } }
      return false; }},

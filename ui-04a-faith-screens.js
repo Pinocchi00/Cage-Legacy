@@ -314,6 +314,20 @@ function faithGalaVenueInfo(F,f,gala){
    reliquat d'un combat précédent, avec un score++ qui finissait par se
    figer en permanence dès qu'attente franchissait 2 une fois dans la
    carrière. ==== */
+/* ==== [ANCRE: FAITH_NEGOCIATION] — vérifié avant correctif : l'ancre
+   FAITH_AGENT (ligne ~65) ne prête à l'agent qu'un rôle de commission (cut)
+   et de style de matchmaking, jamais un effet sur le score de négociation ;
+   l'ancre FAITH_NEGOCIATION/V2-20 juste au-dessus énumère explicitement les
+   4 sources du score (série, rang, hype, personnalité) sans l'agent, et
+   précise que faithLeverage() "ne perd rien de ce qu'avait
+   faithNegotiationPower" — une omission délibérée, pas un oubli. F (l'objet
+   G.faith, dont F.agent) n'est donc pas exploité ici : paramètre conservé
+   pour ne pas changer la signature (tous les appelants passent déjà F),
+   documenté comme inutilisé plutôt que retiré ou "complété" par une règle
+   inventée.
+   @param {Fighter} f
+   @param {object} F - G.faith ; non utilisé actuellement (voir note ci-dessus)
+   @returns {number} */
 function faithLeverage(f,F){
   let score=0;
   if((f.streak||0)>=2) score++;
