@@ -108,7 +108,15 @@ function validateState(){
   if(!Array.isArray(f.amateurRivals)) f.amateurRivals=[];
   if(!G.season || typeof G.season!=='object' || !Array.isArray(G.season.fights)) G.season={year:(G.season&&G.season.year)||1,fights:[]};
   if(!Array.isArray(G.roster)) G.roster=makeOrgRoster(f);
-  else G.roster.forEach(o=>repairFighter(o));
+  /* ==== [ANCRE: VALIDATE_STATE] — repairFighter(o) rend déjà null pour une
+     entrée invalide (garde ligne 39) : pas de TypeError, mais un null
+     RESTAIT dans G.roster si on se contentait d'un forEach. Un roster amputé
+     de ses seules entrées corrompues (filter+map ci-dessous) est préférable
+     à une régénération totale (branche if juste au-dessus) : cette dernière
+     ne s'applique qu'à un G.roster structurellement absent (pas un tableau),
+     pas à un tableau valide contenant quelques trous — sinon on perdrait
+     aussi les fighters sains qu'il contient déjà. ==== */
+  else G.roster=G.roster.map(o=>repairFighter(o)).filter(Boolean);
   if(G.fight && typeof G.fight==='object'){
     if(G.fight.opp) repairFighter(G.fight.opp);
     else if(['plan','arena','result','event'].includes(G.screen)) G.screen='hub';
