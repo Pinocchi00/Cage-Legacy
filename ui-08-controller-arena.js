@@ -93,59 +93,6 @@ function refocusInput(id){
   try{ const el=/** @type {HTMLInputElement|null} */(document.getElementById(id));
     if(el){ el.focus(); const n=el.value.length; el.setSelectionRange(n,n); } }catch(e){}
 }
-/* ==== [ANCRE: CORRECTIF_DOUBLE_TAP_ACTION_FAITH] — le LOT G a verrouillé les
-   trois boutons du combat (choosePlan / chooseArcadePlan / afterResult) contre
-   le double-tap tactile, mais toute la couche « action du mois » de Faith est
-   restée ouverte au même geste : chaque action consomme un mois et applique
-   ses effets, sans rien qui empêche un second appel de recommencer. Un
-   double-tap payait donc le stage deux fois, tirait le risque de blessure deux
-   fois, brûlait deux mois, ou — sur nextFaithYear — archivait l'année en
-   double et sautait deux millésimes.
-   Le témoin est le mois lui-même : une action du mois M ne peut, par
-   définition, se produire qu'une fois. Rien à remettre à zéro — la clé change
-   d'elle-même au mois suivant.
-   ==== [ANCRE: CORRECTIF_CLAIM_MOIS_SAUT_CALENDRIER] — bug trouvé en écrivant
-   l'invariant de non-régression (tests/invariants.test.js) : la seule clé
-   mois+année ne suffit PAS. faithLandOnMonth() (plus haut) saute en silence
-   tous les mois sans `.type` — la majorité d'une année Faith typique — donc
-   faithAdvanceMonth() fait presque toujours avancer G.faith.month de PLUS
-   D'UN cran en un seul appel. Un double-tap relit alors G.faith.month APRÈS
-   ce saut : la clé a déjà changé (elle ne correspond plus au mois consommé
-   par le premier appel), et le second appel se voit à tort comme une action
-   neuve pour le mois d'arrivée — la clé seule ne bloque donc jamais rien en
-   pratique, sauf pile en fin d'année (où G.faith.month plafonne à 12 sans
-   avancer davantage). Un second témoin, sur l'écart réel entre deux appels,
-   couvre le cas qui compte.
-   ==== [ANCRE: CORRECTIF_SEUIL_DOUBLE_TAP] — les 50 ms d'origine mesuraient
-   le temps d'EXÉCUTION du premier appel (le "battement synchrone"), pas
-   l'intervalle entre les deux doigts d'un double-tap — qui est humain (100 à
-   300 ms ; le délai historique d'iOS, déjà cité ailleurs dans ce fichier
-   pour la même famille de bug, est justement de 300 ms). Le garde était donc
-   en place sans bloquer un vrai double-tap. 400 ms couvre le seuil de
-   double-clic des navigateurs, tout en restant très en-deçà du temps que
-   prend une action de jeu distincte suivante (un mois entier de simulation
-   et un écran à lire séparent deux actions légitimes).
-   ==== [ANCRE: CORRECTIF_CLAIM_PORTEE_ACTION] — bug trouvé en élargissant la
-   fenêtre à 400 ms : le témoin de délai était PARTAGÉ par toutes les actions
-   du mois (une seule paire _monthClaimed/_monthClaimedAt sur G.faith), donc
-   deux actions RÉELLEMENT DIFFÉRENTES (repos puis stage le mois suivant, par
-   exemple) tombant à moins de 400 ms l'une de l'autre se bloquaient l'une
-   l'autre — observé sur INV-06 (longueur de carrière médiane écrasée à 14
-   contre une cible de 25-40, des mois entiers silencieusement ignorés).
-   `tag` isole chaque site d'appel (nom de l'action, éventuellement suffixé
-   de son argument) : seul un VRAI doublon — même action, mêmes arguments,
-   moins de 400 ms d'écart — est désormais bloqué. ==== */
-function faithClaimMonth(tag){
-  if(!G.faith) return true;
-  const key=G.faith.year+':'+G.faith.month;
-  const now=Date.now();
-  if(!G.faith._monthClaims) G.faith._monthClaims={};
-  const prev=G.faith._monthClaims[tag];
-  if(prev && prev.key===key) return false;
-  if(prev && (now-prev.at)<400) return false;
-  G.faith._monthClaims[tag]={key,at:now};
-  return true;
-}
 const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
   /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
@@ -463,7 +410,7 @@ const CL={
        résultat tant que G.pending n'a pas été consommé (cf.
        CORRECTIF_DOUBLE_AFTERRESULT). ==== */
     if(G.f && !G.f.retired && G.pending && !G.pending._consumed){ G.screen='result'; render(); return; }
-    G.screen=(G.f && G.f.retired)?'legacy':(G.faith?'faith_hub':'hub'); render(); } },
+    G.screen=(G.f && G.f.retired)?'legacy':'hub'; render(); } },
   draft(k,v){ G.draft[k]=v; if(k==='gender')G.draft.div=DIVISIONS[v][Math.min(3,DIVISIONS[v].length-1)].id; render(true); },
   draftIn(k,v){ G.draft[k]=v; },
   create(){ const d=G.draft; const f=makeFighter({gender:d.gender,div:d.div,style:d.style,countryKey:d.country,first:(d.first||'').trim()||undefined,age:RI(15,16),potential:RI(80,95),freshPlayer:true});
@@ -603,15 +550,6 @@ const CL={
       G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
       advanceRoster();
       G.screen='hub'; save(); render();
-    } else if(id==='faceoff_smile' || id==='faceoff_ignore'){
-      G.fight.malus=Object.assign({},G.fight.malus,{composure:8,focus:5,aggression:-5});
-      G.f.morale=clamp(G.f.morale+5,0,100);
-      G.lastMsg='Vous avez remporté la guerre psychologique de la pesée (+ Sang-froid/Moral).';
-      proceedToFight();
-    } else if(id==='faceoff_shove' || id==='faceoff_talkback'){
-      G.fight.malus=Object.assign({},G.fight.malus,{confidence:8,aggression:10,composure:-10});
-      G.lastMsg='L\u2019adrénaline monte avant même d\u2019entrer dans la cage (+ Agressivité/Confiance, - Sang-froid).';
-      proceedToFight();
     } else {
       /* ==== [ANCRE: CORRECTIF_HANDLEEVENT_ATTRAPE_TOUT] — bug trouvé :
          l'attrape-tout final lançait proceedToFight() pour N'IMPORTE QUEL
@@ -943,7 +881,7 @@ const CL={
      Même routage que cont(), pas un second calcul divergent. ==== */
   importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object') throw new Error('invalid'); G=migrate(parsed); if(!validateState()) throw new Error('corrupt'); setTheme(G.theme||'dark');
     if(G.f && !G.f.retired && G.pending && !G.pending._consumed){ G.screen='result'; save(); render(); return; }
-    G.screen=(G.f && G.f.retired)?'legacy':(G.faith?'faith_hub':'hub'); save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
+    G.screen=(G.f && G.f.retired)?'legacy':'hub'; save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
 };
 window.CL=CL;
 /* ==== [ANCRE: CORRECTIF_ARENA_MOTEUR_DEPLACE] — F-07, hygiène : le moteur de

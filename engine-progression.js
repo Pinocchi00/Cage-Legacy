@@ -87,17 +87,6 @@ function freshnessTier(f){
   if(v>=12) return {tier:'vide',label:'Vidé'};
   return {tier:'about',label:'À bout'};
 }
-/* ==== [ANCRE: V2-08] — clé de repérage : "tourner avec" un partenaire
-   (catégorie précision, cf. faithSparring() ui-08) révèle l'attribut où le
-   prochain adversaire est le plus dangereux, lue une fois sur l'écran
-   d'offre (scr_faith_offer, ui-04) puis consommée à l'entrée dans la cage
-   (CL.opp, ui-08) — jamais un simple bonus chiffré. */
-function oppTopAttrLabel(o){
-  if(!o || !o.attrs) return '';
-  let best=null, bv=-1;
-  for(const k of ATTR_KEYS){ const v=o.attrs[k]||0; if(v>bv){ bv=v; best=k; } }
-  return best?attrLabel(best):'';
-}
 /* progression BORNÉE : un choix applique un delta net d'attributs ( up/down),
    plafonné par le potentiel — pas d'amélioration infinie. */
 /* ==== [ANCRE: V2-36] — règle 7 (jamais de récompense nulle) : un gain

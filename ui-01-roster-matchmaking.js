@@ -428,13 +428,7 @@ function checkAmaChampionship(f){
    sur G.season.year (G.year n'existe nulle part dans l'état du jeu). ==== */
 function recordTitleChange(org,divName,champion,dethroned,orgFlavor){
   if(!G.titleHistory) G.titleHistory=[];
-  /* ==== [ANCRE: CORRECTIF_TITLEHISTORY_ANNEE_FAITH] — bug trouvé : le temps
-     est tracé par G.faith.year en mode Faith, pas G.season.year (qui reste
-     figé à 1 pour toute une carrière Faith, cf. CORRECTIF_SEASONRECAP_FAITH,
-     ui-08). Toutes les ceintures gagnées en Faith étaient donc datées
-     "année 1" indéfiniment dans le registre. Priorité à G.faith.year quand
-     il existe, comme le fait déjà state-faith.js. ==== */
-  G.titleHistory.unshift({org,divName,champion,year:(G.faith?G.faith.year:((G.season&&G.season.year)||1)),defenses:0,dethroned:dethroned||'Aucun',orgFlavor:orgFlavor||null});
+  G.titleHistory.unshift({org,divName,champion,year:(G.season&&G.season.year)||1,defenses:0,dethroned:dethroned||'Aucun',orgFlavor:orgFlavor||null});
   if(G.titleHistory.length>200) G.titleHistory.length=200;
 }
 function recordTitleDefense(org,divName,champion){
@@ -566,11 +560,10 @@ function advanceRoster(){
   G.roster.forEach(o=>{
     if(o.champion){ freshR.push(o); return; } // un champion ne part jamais sur un tirage aléatoire
     if(rnd()<0.15) o.age=(o.age||20)+1;
-    const isNemesis=G.faith && o.id===G.f.faithNemesisId; // vieillit normalement, mais ne peut jamais être remplacée par un nouveau prospect
-    const isTooOld=!isNemesis && (o.age>=39 && rnd()<0.5);
-    const isWashedUp=!isNemesis && ((o.streak||0)<=-4);
+    const isTooOld=(o.age>=39 && rnd()<0.5);
+    const isWashedUp=((o.streak||0)<=-4);
     const totalOF=o.W+o.L;
-    const isGatekeeper=!isNemesis && (totalOF>=15 && o.L>o.W+4);
+    const isGatekeeper=(totalOF>=15 && o.L>o.W+4);
     if(isTooOld||isWashedUp||isGatekeeper){
       const lv=clamp(orgLevel(G.f.org)+RI(-8,15),20,97);
       const prospect=makeFighter({gender:o.gender,div:o.div,level:lv,potential:lv+RI(3,14),age:RI(20,23)});

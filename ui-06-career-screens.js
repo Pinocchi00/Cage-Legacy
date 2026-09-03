@@ -336,11 +336,7 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
        step 2, déjà utile, la remplace). G.lastMsg continue d'exister
        pour les autres textes de passage (sponsor, etc.), juste plus sous
        ce titre trompeur. ==== */
-    /* !G.faith : Faith a déjà son propre passage obligé entre l'annonce et
-       la cage (build-up + conférence de presse, V2-23/V2-25, ui-08
-       faithOfferSign()) — un second face-à-face ici doublonnerait le
-       même moment plutôt que le remplacer. */
-    const faceoffEligible=!G.faith && (G.fight.kind==='title'||G.fight.kind==='defense'||f.rivalId===opp.id);
+    const faceoffEligible=(G.fight.kind==='title'||G.fight.kind==='defense'||f.rivalId===opp.id);
     /* ==== [ANCRE: CORRECTIF_LASTMSG_FACEOFF] — bug trouvé : l'affichage (et
        le nettoyage) de G.lastMsg vivait uniquement dans la branche `else`
        ci-dessous — quand un face-à-face était éligible et pas encore fait,
@@ -374,11 +370,9 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
        entrées par style ; .slice(0,3) plafonne pour de bon même quand
        getExclusiveTactics() en ajoute une 4e (règle H.3, pas respectée
        jusqu'ici sur les rares tags physiques exclusifs). 3) La clé — un
-       seul détail exploitable, gagné hors combat (scoutKey, V2-08 côté
-       Faith) ou son absence assumée en toutes lettres, jamais une case
-       vide. ==== */
+       seul détail exploitable, gagné hors combat, ou son absence assumée
+       en toutes lettres, jamais une case vide. ==== */
     const combinedTactics=getExclusiveTactics(f).concat(plans).slice(0,3);
-    const hasKey=!!(G.faith && G.faith.scoutKey);
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
      <div class="eyebrow gold mb" style="letter-spacing:0.2em">CE QU’ON SAIT DE LUI</div>
      <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px">${tacticalRead(f,opp)}</div>
@@ -388,9 +382,9 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
    ${combinedTactics.map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
      <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
      <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
-   <div class="card mt" style="border-left:3px solid ${hasKey?'var(--sage)':'var(--line)'};padding-left:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="color:${hasKey?'var(--sage)':'var(--muted)'}">LA CLÉ</div>
-     <div class="small">${hasKey?`Grâce au sparring, vous savez qu’${esc(opp.name)} est particulièrement dangereux en ${esc(oppTopAttrLabel(opp))}.`:'Vous entrez sans rien de plus que ce que tout le monde sait de lui.'}</div>
+   <div class="card mt" style="border-left:3px solid var(--line);padding-left:14px;background:var(--panel2)">
+     <div class="eyebrow mb" style="color:var(--muted)">LA CLÉ</div>
+     <div class="small">Vous entrez sans rien de plus que ce que tout le monde sait de lui.</div>
    </div>`;
   }
   h+=`</div>`;
@@ -816,7 +810,7 @@ function signatureMoveCard(f){
    écrasait donc la cible et renvoyait au hub au lieu de class_choice/
    class_choice_31 — sortie latérale sur un choix bloquant non résolu. Le
    nullage est déplacé sur les deux points de sortie réels (✕ et Retour). ==== */
-function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._profileReturn||(G.faith?'faith_hub':'hub');
+function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._profileReturn||'hub';
   /* ==== [ANCRE: LISIBILITE_FICHE_TECHNIQUE] — item demandé : la jauge .gauge
      (flex:1, cf. index.html) n'avait quasi aucune largeur disponible dans le
      layout Mental/Physique côte à côte (2 colonnes de ~150px sur mobile,
@@ -889,10 +883,6 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
    </div>
    ${grp('tech','Technique',g.tech,true)}
    <div style="display:flex;flex-direction:column;gap:16px">${grp('ment','Mental',g.ment,true)}${grp('phys','Physique',g.phys,true)}</div>
-   <!-- ==== [ANCRE: V4_C15_FAITH_ARCHIVES] — Plan V4 LOT 6 C15 : accessible
-        depuis toute fiche de combattant — celle du joueur ici. Absent hors
-        Faith : scr_history() (ui-07) reste l'Archives du mode Carrière. ==== -->
-   ${G.faith?`<button class="btn ghost" onclick="CL.viewFaithArchives()">Archives</button>`:''}
    <button class="btn ghost" onclick="G._profileReturn=null;CL.go('${backScreen}')">Retour</button></div>`; }
 
 /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — Plan V3 LOT 6 §5.6.3 point 1 : "un
@@ -919,23 +909,6 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
      <span class="pill ${tab==='p4p'?'on':''}" onclick="CL.setRankingsTab('p4p')">P4P</span>
    </div>`;
   if(tab==='p4p'){
-    /* ==== [ANCRE: V3_RANK_HISTORY_DELTA] — Plan V3 LOT 6 §5.6.3 point 2 :
-       F.rankHistory[] (worldTick, engine.js) donne un delta réel de rang
-       et de score P4P depuis la dernière année jouée — Faith uniquement
-       (seul mode où worldTick() tourne). Granularité annuelle, pas "par
-       combat ET par saison" comme le demande le texte intégral : la
-       version par-combat demanderait un second point d'écriture dans
-       resolveFight() en plus de worldTick(), différé pour ce lot. */
-    const hist=(G.faith && Array.isArray(G.faith.rankHistory))?G.faith.rankHistory:null;
-    if(hist && hist.length>=2){
-      const cur=hist[hist.length-1], prev=hist[hist.length-2];
-      const rankDelta=prev.rank-cur.rank, p4pDelta=cur.p4p-prev.p4p;
-      h+=`<div class="card mt" style="padding:12px;background:var(--panel2);margin-bottom:12px">
-        <div class="eyebrow" style="font-size:10px">DEPUIS LA SAISON ${prev.year}</div>
-        <div class="mono small mt">Rang : #${prev.rank} → #${cur.rank} (${rankDelta>0?'+':''}${rankDelta})</div>
-        <div class="mono small">Score P4P : ${prev.p4p} → ${cur.p4p} (${p4pDelta>=0?'+':''}${p4pDelta})</div>
-      </div>`;
-    }
     const p4pSorted=dr.slice().sort((a,b)=>p4pScore(b)-p4pScore(a)).slice(0,15);
     h+=`<div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
      <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:56px;text-align:right">P4P</div>
@@ -951,7 +924,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
         <div class="mono" style="width:56px;text-align:right;font-size:14px">${Math.round(p4pScore(o))}</div>
       </div>`;
     });
-    h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.faith?'faith_hub':'hub'}')">← Revenir au hub</button></div>`;
+    h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`;
     return h;
   }
   h+=`<div style="display:flex;border-bottom:1px solid var(--text);padding-bottom:4px;margin-bottom:8px;font-size:11px;color:var(--muted)" class="mono">
@@ -982,7 +955,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
       <div class="mono" style="width:70px;text-align:right;font-size:10.5px;opacity:.7;${!o.champion?('color:'+arrowColor):''}">${statusStr}</div>
     </div>`;
   });
-  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.faith?'faith_hub':'hub'}')">← Revenir au hub</button></div>`;
+  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`;
   return h;
 }
 
