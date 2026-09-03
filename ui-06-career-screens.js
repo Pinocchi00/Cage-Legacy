@@ -329,6 +329,32 @@ function scr_create(){ const d=G.draft, divs=DIVISIONS[d.gender];
    <button class="btn primary" onclick="CL.create()">Débuter la carrière</button>
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 
+function scr_pro_nickname(){
+  const f=G.f;
+  if(!G._proNickDraft) G._proNickDraft = f.nick || earnNickname(f);
+  const s1 = earnNickname(f), s2 = earnNickname(f), s3 = earnNickname(f);
+  const uniqueSugg = [...new Set([s1, s2, s3])].filter(Boolean).slice(0, 3);
+  return `<div class="scr center intro">
+    <div class="eyebrow gold">Passage Professionnel // Surnom</div>
+    <h2 class="disp" style="font-size:clamp(22px,6vw,30px);margin-top:4px">C'est le moment de choisir ton surnom</h2>
+    <p class="lede mt">Le speaker a besoin de quelque chose à crier au micro avant que le combat commence.</p>
+    <div class="card" style="text-align:left;background:var(--panel2);border:1px solid var(--line);padding:16px;margin:20px 0">
+      <div class="fld" style="margin-bottom:12px">
+        <label class="eyebrow" style="display:block;margin-bottom:6px">Ton Surnom</label>
+        <input id="pro-nick-input" type="text" maxlength="25" value="${esc(G._proNickDraft||'')}" style="width:100%;box-sizing:border-box;background:#14100B;border:1px solid var(--line);color:#FFF;padding:12px;font-family:'Fraunces',serif;font-style:italic;font-size:16px" oninput="G._proNickDraft=this.value"/>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="eyebrow" style="font-size:10px">Idées :</span>
+        <button class="tag2" style="background:#241B10;border-color:var(--gold);color:var(--gold);cursor:pointer;padding:6px 12px" onclick="G._proNickDraft=rollRandomNickname();render();">🎲 Aléatoire</button>
+      </div>
+      <div class="tagrow" style="margin:0">
+        ${uniqueSugg.map(s=>`<button class="tag2" style="cursor:pointer" onclick="G._proNickDraft='${esc(s)}';render();">« ${esc(s)} »</button>`).join('')}
+      </div>
+    </div>
+    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.confirmProNickname(G._proNickDraft)">Valider & Entrer chez les Pros</button>
+  </div>`;
+}
+
 function scr_hub(){ const f=G.f; const champ=f.champion;
   // ==== [ANCRE: CORRECTIF_COULEUR_MESSAGE] — bug trouvé : un seul message
   // ("sponsor validé") était reconnu comme positif ; TOUS les autres

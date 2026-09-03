@@ -891,31 +891,30 @@ function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   // registre des combats de la saison en cours est remis à zéro.
   G.season={year:G.season.year,fights:[]};
   f.nick=earnNickname(f); }
+const NICKNAMES_WITTY=['No Highlights','Le Dentiste','Mâchoire de Merde','Ficello','Gros bras','Mur Solide Beaucoup','AKA','Pistolet à eau','Garfield','Pinocchio','Pause Déjeuner','Zéro Technique','Le Stagiaire','Mauvaise Idée','Jambe de Bois','Wi-Fi Public','Dos Cassé','Pas de Cardio','Couscous Boulette','K-Way','Le Facteur','Tête de Pioche','Pas Content','Mode Avion'];
+const NICKNAMES_MMA=['Money','Flash','The Problem','Trouble','Low-Kick','The Leech','Pain','The Damage','One Shot','Cold','Bad News','Big Sleep','Panic','Short Fuse','50-45','The Taxman','Overtime','Showtime','Red Light','The Boss'];
+const NICKNAMES_GRITTY=['Le Boucher','Le Casseur','L\u2019Enclume','La Pince','Le Ferrailleur','Le Pitbull','Bourrin','Le Nettoyeur','La Menace','Le Marteau-Piqueur','Le Bulldozer','Tête Brûlée'];
+const NICKNAMES_ALL=[...NICKNAMES_WITTY,...NICKNAMES_MMA,...NICKNAMES_GRITTY];
+
+function rollRandomNickname(){
+  return pick(NICKNAMES_ALL);
+}
+
 function earnNickname(f,excludeGrappler,excludeInvincible){ const a=f.attrs;
-  const striker=['le Sniper','le Marteau','la Foudre','le Bourreau','Mains de Pierre','le Cogneur','le Fossoyeur','l\u2019Exécuteur','le Dynamiteur','Poings de Fer','le Chasseur','la Tempête','le Fauve','Double Détonation','le Dévastateur','l\u2019Incendiaire'];
-  const grappler=['l\u2019Anaconda','le Python','le Boa','l\u2019Étau','le Nœud Coulant','le Suffocateur','la Pieuvre','le Verrou','l\u2019Étrangleur','le Chirurgien du Sol','la Tenaille','le Croc','l\u2019Ancre','le Serpent','le Cadenas'];
-  const pressure=['le Bulldozer','le Rouleau','Cœur de Lion','la Machine','l\u2019Ouragan','le Métronome Infernal','l\u2019Increvable','le Marathonien','la Locomotive','le Mur','l\u2019Inébranlable','la Digue'];
-  const tech=['le Chirurgien','le Professeur','l\u2019Horloger','l\u2019Architecte','le Stratège','l\u2019Échiquier','le Calculateur','le Précis','le Tacticien','le Fantôme','l\u2019Illusionniste'];
-  // Surnoms liés au vrai parcours amateur — pas seulement aux attributs bruts
-  const invincible=['l\u2019Invaincu','le Phénomène','la Prophétie','l\u2019Élu','le Miracle'];
-  const gritty=['le Survivant','le Cœur Brisé','l\u2019Increvable du Ring','le Guerrier','le Cicatrisé','l\u2019Increvable'];
+  const striker=['Le Boucher','Le Marteau-Piqueur','One Shot','Low-Kick','The Damage','Bourrin','Le Casseur','Tête Brûlée','Flash','Red Light'];
+  const grappler=['La Pince','The Leech','L\u2019Enclume','Ficello','Le Ferrailleur','Gros bras'];
+  const pressure=['Mur Solide Beaucoup','Le Bulldozer','Pas Content','The Problem','Trouble','Pain','Panic','Short Fuse'];
+  const tech=['Le Dentiste','The Taxman','50-45','AKA','Showtime','Overtime','No Highlights','Money'];
+  const gritty=['Mâchoire de Merde','Dos Cassé','Pas de Cardio','Wi-Fi Public','Le Stagiaire','Pause Déjeuner','K-Way','Le Facteur','Mauvaise Idée'];
   const amaW=(f.amaRec&&f.amaRec.W)||0, amaL=(f.amaRec&&f.amaRec.L)||0, amaTotal=amaW+amaL;
-  if(!excludeInvincible && amaTotal>=5 && amaL===0) return pick(invincible);
-  if(amaTotal>=6 && amaL>=amaW) return pick(gritty);
-  // ==== [ANCRE: CORRECTIF_SURNOM_GRAPPLER] — bug remonté ("l'Étau" attribué à
-  // tort) : l'ancienne condition ne comparait QUE la soumission à deux stats
-  // de frappe isolées (power, jab), ignorant takedown/contrôle au sol/ground
-  // and pound — l'identité réelle d'un grappler — tout en ignorant crochet/
-  // low kick/direct côté frappe. Un combattant pouvait ainsi hériter d'un
-  // surnom de soumission avec un profil de frappeur pur, ou l'inverse. On
-  // compare désormais deux scores agrégés représentatifs de chaque identité.
+  if(amaTotal>=5 && amaL>=amaW) return pick(gritty);
   const grappleScore=((a.submission||0)+(a.takedown||0)+(a.topControl||0)+(a.gnp||0)+(a.clinchStr||0))/5;
   const strikeScore=((a.power||0)+(a.jab||0)+(a.cross||0)+(a.hook||0)+(a.kick||0))/5;
   if(!excludeGrappler && grappleScore>=strikeScore && grappleScore>=55) return pick(grappler);
   if(a.power>=70 || a.killer>=70) return pick(striker);
   if(a.fightIQ>=70 || a.adaptability>=70) return pick(tech);
   if(a.heart>=70 || a.cardio>=70) return pick(pressure);
-  return pick(striker.concat(tech));
+  return pick(NICKNAMES_ALL);
 }
 // ==== [ANCRE: EVOLUTION_SURNOM] — item demandé : dans de rares cas, le
 // surnom doit évoluer pour rester cohérent avec le parcours réel (positif OU

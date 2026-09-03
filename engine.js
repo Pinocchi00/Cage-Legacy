@@ -147,20 +147,20 @@ const styleLabel=s=>(STYLES[s]||{label:s}).label;
 
 /* ------------------------------ NOMS -------------------------------------- */
 const COUNTRIES={
- FR:{name:'France',flag:'🇫🇷',last:['Moreau','Lefevre','Dubois','Girard','Faure','Roussel','Blanc','Mercier','Garnier','Leroy','Roux','Dupont','Bernard','Petit','Durand','Leroux']},
- BR:{name:'Brésil',flag:'🇧🇷',last:['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha','Carvalho','Gomes','Martins','Araujo','Ribeiro','Melo','Cardoso','Dias']},
- US:{name:'États-Unis',flag:'🇺🇸',last:['Johnson','Williams','Brown','Miller','Davis','Wilson','Carter','Reed','Smith','Jones','Taylor','Moore','Jackson','Martin','Lee','Thompson']},
- DAG:{name:'Daghestan',flag:'🏔️',last:['Nurmagomedov','Aliev','Magomedov','Gadzhiev','Ramazanov','Shamilov','Umarov','Makhachev','Gasanov','Kurbanov','Omarov','Isaev']},
- JP:{name:'Japon',flag:'🇯🇵',last:['Sato','Suzuki','Takahashi','Tanaka','Watanabe','Kobayashi','Nakamura','Ito','Yamamoto','Saito','Yoshida','Yamada','Sasaki','Yamaguchi']},
- NG:{name:'Nigéria',flag:'🇳🇬',last:['Adeyemi','Okafor','Balogun','Eze','Okoye','Abubakar','Nwosu','Ibrahim','Musa','Bello','Olawale','Abdullahi','Chukwu','Onyeka']},
- GB:{name:'Royaume-Uni',flag:'🇬🇧',last:['Smith','Taylor','Walker','Wright','Hughes','Ward','Bennett','Jones','Williams','Brown','Davies','Evans','Thomas','Roberts']},
- RU:{name:'Russie',flag:'🇷🇺',last:['Volkov','Petrov','Sokolov','Ivanov','Popov','Kozlov','Orlov','Smirnov','Kuznetsov','Lebedev','Novikov','Morozov','Makarov']},
- MX:{name:'Mexique',flag:'🇲🇽',last:['Hernández','García','Martínez','López','Ramírez','Torres','Flores','Pérez','Rodriguez','Sanchez','Cruz','Gomez','Morales','Reyes']},
- IE:{name:'Irlande',flag:'🇮🇪',last:['Murphy','Kelly','OBrien','Byrne','Ryan','Walsh','McCarthy','OSullivan','OConnor','Doyle','Gallagher','Kennedy','Lynch','Murray']},
- TH:{name:'Thaïlande',flag:'🇹🇭',last:['Sittichai','Petchyindee','Kiatmoo','Sor','Rungravee','Saenchai','Banchamek','Srisaket','Tawanchai','Pramuk','Khamsing']},
- KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon']},
- CM:{name:'Cameroun',flag:'🇨🇲',last:['Ngannou','Mbappe','Etoo','Nkemdirim','Fotso','Biya','Kamga','Takam','Ndi','Abate','Tchakoute','Ndong']},
- GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze']},
+ FR:{name:'France',flag:'🇫🇷',last:['Boulanger','Charpentier','Meunier','Tavernier','Marchand','Vasseur','Tisserand','Pelletier','Maréchal','Mercier','Legrand','Lebon','Leroux','Petitjean','Belhomme','Cassegrain','Beauvisage','Courtois','Boileau','Sanson','De La Tour','Beaulieu','Rochefort','Montmirail','De Saint-Gilles','Castel','Dupré','Le Gall','Quéméneur','Guivarc\'h','Bazin','Papon','Da Silva','Belkacem','Diallo','Camara','Fernandez']},
+ BR:{name:'Brésil',flag:'🇧🇷',last:['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha','Carvalho','Gomes','Martins','Araujo','Ribeiro','Melo','Cardoso','Dias','Barbosa','Nascimento','Dos Santos','Guimaraes','Barboza','Teixeira','Magalhaes','Nogueira','Faria','Castilho','Moreira','Fontes','Ramos','Peixoto']},
+ US:{name:'États-Unis',flag:'🇺🇸',last:['Miller','Davis','Wilson','Carter','Reed','Smith','Jones','Taylor','Jackson','Thompson','Henderson','Holloway','Covington','Gaethje','Strickland','Ferguson','Dillashaw','Edgar','Swanson','Woodley','Sterling','Faber','Griffin','Lawler','Guida','Maynard','Koscheck','Fitch','Lamas','Pettis']},
+ DAG:{name:'Daghestan',flag:'🏔️',last:['Nurmagomedov','Aliev','Magomedov','Gadzhiev','Ramazanov','Shamilov','Umarov','Makhachev','Gasanov','Kurbanov','Omarov','Isaev','Ankalaev','Evloev','Chimaev','Tsarnaev','Tukhugov','Salikhov','Rasulov','Gamzatov','Dzhabrailov','Idrisov','Askerov','Muradov','Batirov']},
+ JP:{name:'Japon',flag:'🇯🇵',last:['Sato','Suzuki','Takahashi','Tanaka','Watanabe','Kobayashi','Nakamura','Ito','Yamamoto','Saito','Yoshida','Yamada','Sasaki','Yamaguchi','Sakuraba','Gomi','Horiguchi','Aoki','Miura','Okami','Uno','Kawajiri','Ishii','Asakura','Kanehara','Funaki','Kondo']},
+ NG:{name:'Nigéria',flag:'🇳🇬',last:['Adeyemi','Okafor','Balogun','Eze','Okoye','Abubakar','Nwosu','Ibrahim','Musa','Bello','Olawale','Abdullahi','Chukwu','Onyeka','Adesanya','Usman','Onwuka','Nnamdi','Oladipo','Chimezie','Ekwueme','Babangida','Yobo','Kanu','Okocha']},
+ GB:{name:'Royaume-Uni',flag:'🇬🇧',last:['Wright','Hughes','Ward','Bennett','Davies','Evans','Thomas','Roberts','Bisping','Hardy','Till','Aspinall','Edwards','Pimblett','Allen','Shore','McCann','Wood','Gallagher','Daley','Pearson','Pickett','Craig','Page','Hatton']},
+ RU:{name:'Russie',flag:'🇷🇺',last:['Volkov','Petrov','Sokolov','Ivanov','Popov','Kozlov','Orlov','Smirnov','Kuznetsov','Lebedev','Novikov','Morozov','Makarov','Fedorov','Emelianenko','Kharitonov','Pavlovich','Yan','Shlemenko','Vasilevsky','Sarnavskiy','Tokov','Kopylov','Nemkov','Moldavsky']},
+ MX:{name:'Mexique',flag:'🇲🇽',last:['Hernández','García','Martínez','López','Ramírez','Torres','Flores','Pérez','Rodriguez','Sanchez','Cruz','Gomez','Morales','Reyes','Moreno','Grasso','Aldana','Velasquez','Cejudo','Chavez','Canelo','Barrera','Marquez','Saldivar','Castaneda']},
+ IE:{name:'Irlande',flag:'🇮🇪',last:['Murphy','Kelly','OBrien','Byrne','Ryan','Walsh','McCarthy','OSullivan','OConnor','Doyle','Gallagher','Kennedy','Lynch','Murray','McGregor','Kavanagh','Ward','Fields','Pendred','Holohan','Queally','Hughes','Dunphy','Carroll','Hoolahan']},
+ TH:{name:'Thaïlande',flag:'🇹🇭',last:['Sittichai','Petchyindee','Kiatmoo','Sor','Rungravee','Saenchai','Banchamek','Srisaket','Tawanchai','Pramuk','Khamsing','Rodtang','Superlek','NongO','Capitan','Stamp','Petchmorakot','Sangmanee','Panpayak','Kulabdam','Muangthai']},
+ KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon','DongHyun','ChanSung','DooHo','DaUn','SiWoo','MyungHo','SungBin','JinSoo','KyungHo']},
+ CM:{name:'Cameroun',flag:'🇨🇲',last:['Fotso','Biya','Kamga','Takam','Ndi','Abate','Tchakoute','Ndong','Nkemdirim','Milla','Song','Nkono','Emana','Bassong','Matip','Choupo','Anguissa','Toko','Aboubakar','Moukandjo','Kalla','Wome','Ndiefi','Tchato','Oyongo']},
+ GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze','Topuria','Guram','Amiran','Ilia','Roman','Merab','Giga','Lasha','Shota','Revaz','Zurab']},
 };
 const COUNTRY_KEYS=Object.keys(COUNTRIES);
 /* ==== [ANCRE: COUNTRY_MMA_PREFIX] — 1re lettre du nom FR, 2 lettres si collision

@@ -25,7 +25,7 @@
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,opponent_card:scr_opponent_card,
-  draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
+  draft:scr_draft,arcadehub:scr_arcadehub,arcade_plan:scr_arcade_plan,gameover:scr_gameover,history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,pro_nickname:scr_pro_nickname,codex:scr_codex,legends:scr_legends,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,arcade_upgrades:scr_arcade_upgrades,
   faith_draft:scr_faith_draft,faith_hub:scr_faith_hub,faith_event:scr_faith_event,faith_year_end:scr_faith_year_end,faith_epilogue:scr_faith_epilogue,faith_oath:scr_faith_oath,faith_retire:scr_faith_retire,faith_legends:scr_faith_legends,faith_offer:scr_faith_offer,faith_contacts:scr_faith_contacts,faith_press_conf:scr_faith_press_conf,faith_pesee:scr_faith_pesee,faith_buildup:scr_faith_buildup,faith_camps:scr_faith_camps,faith_home:scr_faith_home,faith_fight_pending:scr_faith_fight_pending,faith_nemesis_consecration:scr_faith_nemesis_consecration,faith_coach_detail:scr_faith_coach_detail,faith_coach_choice:scr_faith_coach_choice,faith_sparring_detail:scr_faith_sparring_detail,
   faith_title_merit:scr_faith_title_merit,faith_title_negotiation:scr_faith_title_negotiation,faith_title_consecration:scr_faith_title_consecration,faith_card:scr_faith_card,faith_archives:scr_faith_archives,
@@ -3553,7 +3553,11 @@ const CL={
     routeAfterOrgChange(); },
   acceptPro(orgIdx,flavorName){ turnPro(); G.f.org=orgIdx||1; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=flavorName||(ORG_FLAVORS[G.f.org]?pick(ORG_FLAVORS[G.f.org]):null);
     G.f.contract=generateContract(G.f,G.f.org,false);
-    applyOrgAdvancementBoost(G.f,G.f.org); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null; routeAfterOrgChange(); },
+    applyOrgAdvancementBoost(G.f,G.f.org); G.roster=makeOrgRoster(G.f,'PRO_TRANSITION'); if(G.pending)G.pending.proOffer=null;
+    G.screen='pro_nickname'; save(); render(); },
+  confirmProNickname(nick){
+    const clean=(nick||'').trim()||(typeof earnNickname==='function'?earnNickname(G.f):'Le Guerrier');
+    G.f.nick=clean; G._proNickDraft=null; routeAfterOrgChange(); },
   declinePro(){ G.f.proOfferCooldown=G.f._mentorFastTrack?2:3;
     if(G.pending && G.pending.proOffer) G.f.priorPromoInterest=Math.max(G.f.priorPromoInterest||0,G.pending.proOffer.baseTier||1);
     if(G.pending)G.pending.proOffer=null; routeAfterOrgChange(); },

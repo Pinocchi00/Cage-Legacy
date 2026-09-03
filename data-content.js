@@ -4,81 +4,75 @@
    Chargé après data-skills.js, avant engine.js. */
 /* ----------------------- BACKSTORY & MOTIVATION --------------------------- */
 const ORIGINS=[
- // Tes idées adaptées à l'âge (15/16 ans)
- 'a fugué de sa campagne pour la capitale, tombant dans le piège d\u2019un réseau de combats clandestins pour survivre, et y a pris goût',
- 'possède une carrure si effrayante pour son âge qu\u2019un manager véreux a forcé sa sortie du lycée pour en faire une machine à cash',
-
- // Délinquance, foyers et rue
- 'a accumulé les renvois de quatre collèges différents pour bagarre avant qu\u2019un éducateur n\u2019impose une salle de sport',
- 'a grandi dans les foyers de l\u2019État, où savoir frapper en premier était la seule règle pour ne pas se faire écraser',
- 'a passé son adolescence à organiser des combats à mains nues dans des parkings abandonnés pour impressionner son grand frère',
- 'a trouvé refuge dans les sports de combat pour canaliser une hyperactivité sévère qui menaçait de mener droit en prison',
- 'a simulé son âge avec de faux papiers pour pouvoir entrer dans le circuit des combats adultes dès ses quinze ans',
- 'a attiré l\u2019attention d\u2019un coach par hasard en assommant trois racketteurs à la sortie du lycée',
- 'a refusé l\u2019emprise des gangs de son quartier en s\u2019enfermant quatorze heures par jour à la salle pour ne penser qu\u2019à la frappe',
-
- // Famille, prodiges et environnement
- 'enfant prodige sous l\u2019emprise d\u2019un père tyrannique qui impose un entraînement de soldat spartiate depuis le plus jeune âge',
- 'vient d\u2019une famille déchirée par les dettes et a compris très tôt que son corps était sa seule véritable porte de sortie',
- 'enfant de diplomates, a fugué de sa pension dorée par rejet viscéral du confort et de l\u2019hypocrisie bourgeoise',
- 'a grandi dans l\u2019ombre d\u2019un père ancien combattant tombé dans l\u2019oubli, jurant très jeune de laver le nom de sa famille',
- 'a commencé le combat par pure nécessité de survie face à la solitude de la rue à l\u2019âge de quatorze ans',
- 'Victime de brutalité pendant toute son enfance à cause d\u2019un bégaiement, a fini par découvrir que la violence n\u2019avait pas besoin de mots',
- 'passait ses nuits à regarder des cassettes de combats clandestins dans sa chambre d\u2019ado en rêvant de brutalité, jusqu\u2019à franchir le pas',
- 'n\u2019a jamais rien réussi à l\u2019école et voit la cage comme la seule et unique alternative au chômage de longue durée'
+  'geek persuadé{e/} que la vraie vie est un RPG en réalité augmentée : {il/elle} est juste là pour monter ses stats de force brute',
+  'moqué{e/} à l\u2019école pour sa dyslexie : sur le ring, pas besoin de faire de longues phrases pour éteindre des types égocentriques',
+  'très bon{ne/} élève au lycée, promis{e/} à de grandes études, qui a juste préféré la mauvaise route et les arcades ouvertes',
+  'adore les balades en forêt, le chant des oiseaux et cueillir des champignons... mais préfère encore plus faire saigner des gens en cage. Pourquoi pas ?',
+  '{fils/fille} de deux grands avocats d\u2019affaires réputés : n\u2019a clairement pas choisi la même méthode pour régler ses litiges',
+  'a fait toute sa scolarité par correspondance sur ordinateur, en profitant pour passer six heures par jour à la salle au lieu d\u2019écouter les cours',
+  'a passé son adolescence sur des jeux de combat à enchaîner les combos dans sa chambre : aujourd\u2019hui dans l\u2019octogone, les jeux vidéo c\u2019est mal',
+  's\u2019est inscrit{e/} aux sports de combat uniquement pour impressionner son crush du lycée : le crush est parti, les crochets du gauche sont restés',
+  '{ancien livreur/ancienne livreuse} de pizzas en scooter sous la grêle : esquiver des SUV parisiens pendant deux ans donne des réflexes hors du commun',
+  'incapable de garder un travail de bureau plus de trois semaines sans avoir envie d\u2019envoyer son manager à travers une baie vitrée',
+  'a commencé le combat clandestin pour rembourser un pari complètement idiot sur un match de foot un soir de fête',
+  'végétarien{ne/} convaincu{e/} qui milite pour le bien-être animal, mais n\u2019a aucun problème moral à déboîter le genou d\u2019un adversaire consentant',
+  'trop grand{e/} et maladroit{e/} dans la vie quotidienne, fait tomber des verres au restaurant, mais étrangement gracieux{se/} quand il s\u2019agit de mettre un K.O.',
+  'viré{e/} de trois clubs de foot consécutifs pour tacles à la gorge : le coach lui a conseillé de changer de sport avant la prison',
+  'vient d\u2019une fratrie de cinq énervés : à la maison, le dernier qui finissait son assiette devait défendre son steak en lutte libre',
+  'a commencé le muay-thaï après s\u2019être fait voler son vélo trois fois dans la même semaine : le vélo a disparu, la rancune est éternelle',
+  '{ancien serveur/ancienne serveuse} de bar de nuit qui a appris l\u2019esquive de verres brisés et le placage d\u2019ivrognes sans jamais renverser le plateau',
+  'avait la flemme de trouver un vrai métier d\u2019adulte : frapper des gens en short de bain semblait être la reconversion la plus honnête',
+  'insomniaque chronique qui s\u2019est dit que prendre des coups sur la mâchoire à 22h était encore la méthode la plus rapide pour trouver le sommeil',
+  'banni{e/} de tous les karts et laser games de la région pour excès d\u2019agressivité injustifiée : l\u2019octogone était son ultime refuge légal',
+  'a grandi dans un garage auto miteux : pour {lui/elle}, un coude dans la tempe fait le même bruit net qu\u2019un boulon de 12 qui se desserre',
+  'adorait les débats houleux sur les réseaux sociaux, avant de réaliser que c\u2019est quand même beaucoup plus satisfaisant de régler ça en face à face',
+  '{ancien joueur/ancienne joueuse} d\u2019échecs frustré{e/} par la lenteur des parties, a décidé d\u2019appliquer la stratégie matérialiste avec des coups de genou sautés',
+  'a découvert son punch surpuissant en voulant écraser un moustique contre un mur en placo : le mur s\u2019est effondré, la vocation est née'
 ];
 
-// Origine contextuelle : lit les vraies anomalies statistiques du combattant
-// (gabarit, durabilité/QI, pays, potentiel/moral) avant de retomber sur le
-// pool ORIGINS ci-dessus si rien de statistiquement notable ne ressort.
 function generateContextualOrigin(f){
   const a=f.attrs;
   if(f.phys && f.phys.tags && f.phys.tags.includes('gabarit hors-norme pour la division')){
-    return 'a reçu une offre à la sortie d\u2019un club de rugby universitaire uniquement pour sa capacité à terrifier les videurs';
+    return 'a été expulsé{e/} d\u2019une équipe de rugby pour brutalité excessive, son gabarit anormal terrifiant les adversaires comme ses coéquipiers';
   }
   if(a.durability>85 && a.fightIQ<40){
-    return 'a servi de cobaye pour des tests de casques de moto : aucune technique, mais ne ressent plus la douleur physique';
+    return 'a servi d\u2019homme-cible et de sac de frappe humain pendant des années : aucune stratégie, mais une boîte crânienne qui semble taillée dans le granit';
   }
   if(a.takedown>85 && f.countryKey==='DAG'){
-    return 'a passé son enfance à lutter contre du bétail dans les montagnes avant de découvrir qu\u2019on pouvait être payé pour le faire sur des humains';
+    return 'a passé chaque hiver de son enfance à s\u2019empoigner contre des moutons et des cousins dans la boue avant de découvrir que ce calvaire s\u2019appelait le sport de haut niveau';
   }
   if(a.submission>85 && a.power<30){
-    return 'est incapable de briser une vitre d\u2019un coup de poing, mais connaît quarante façons de luxer un genou humain';
+    return 'incapable d\u2019enfoncer une porte d\u2019un coup d\u2019épaule, mais connaît avec une précision diabolique cinquante manières de faire plier une hanche ou une cheville';
+  }
+  if(a.power>85 && a.handSpeed>80){
+    return 'possède des mains d\u2019une densité anormale qui ont cassé plusieurs sacs de frappe au club avant même son seizième anniversaire';
+  }
+  if(a.cardio>85 && a.heart>85){
+    return 'ancien{ne/} coureur{se/} de fond en altitude qui a dérivé vers le combat : son cœur bat à quarante pulsations par minute et refuse viscéralement la panique';
   }
   if(f.potential>90 && f.morale<40){
-    return 'prodige absolu qui déteste profondément ce sport, sous l\u2019emprise d\u2019un manager tyrannique qui impose la cage';
+    return 'un génie brut et tourmenté qui méprise la célébrité de la cage, maintenu dans le circuit par la pression écrasante d\u2019un entourage avide d\u2019argent';
   }
   return pick(ORIGINS);
 }
 
 const MOTIVATIONS=[
- // Tes ajouts
- {short:'Cherche à détruire ses adversaires avec violence pour combler un profond complexe d\u2019infériorité',drive:'killer'},
- {short:'C\u2019était soit le lycée général, soit la cage. Le choix a été vite fait',drive:'confidence'},
-
- // Motivations de jeunesse (Adolescence / Preuve de soi)
- {short:'Prouver à ses parents que l\u2019étiquette de "bon à rien" qu\u2019ils ont toujours imposée est fausse',drive:'aggression'},
- {short:'Sortir sa famille de la misère avant même d\u2019avoir l\u2019âge légal pour passer le permis de conduire',drive:'heart'},
- {short:'Gagner assez d\u2019argent pour payer les frais médicaux et protéger son petit frère',drive:'composure'},
- {short:'Une soif de reconnaissance maladive, nourrie par la quête du buzz sur les réseaux sociaux',drive:'focus'},
- {short:'Refuse l\u2019avenir d\u2019employé de bureau qu\u2019on lui promettait et veut marquer l\u2019Histoire jeune',drive:'confidence'},
- {short:'Canaliser une rage sourde et inexpliquée qui donne envie de tout casser depuis l\u2019enfance',drive:'aggression'},
- {short:'Rembourser ses avocats et se sortir d\u2019un dossier judiciaire lourd qui pèse sur sa jeunesse',drive:'discipline'},
- {short:'Détruire méthodiquement l\u2019ego des adultes arrogants qui prennent de haut à cause de l\u2019âge',drive:'killer'},
- {short:'Besoin pathologique de ressentir la douleur physique pour se sentir vivant et ancré dans le réel',drive:'heart'},
-
- // Motivations martiales et tactiques (Génériques à tous les styles)
- {short:'Suivre à la lettre les enseignements d\u2019un vieux coach qui est sa seule véritable figure paternelle',drive:'discipline'},
- {short:'Analyser la peur dans les yeux de ses adversaires pour essayer de comprendre ses propres démons',drive:'fightIQ'},
- {short:'Échapper à son quartier : l\u2019octogone est littéralement son seul et unique ticket de sortie',drive:'adaptability'},
- {short:'Cherche l\u2019immortalité précoce : devenir la plus jeune star de l\u2019histoire pour marquer les mémoires',drive:'focus'},
- {short:'Racheter les erreurs de son adolescence en prouvant sa capacité à respecter des règles strictes',drive:'composure'},
- {short:'Approche la bagarre comme un jeu d\u2019échecs macabre où chaque mouvement de l\u2019adversaire est calculé avec froideur',drive:'fightIQ'},
- {short:'Simplement pour l\u2019argent de poche, car détruire des gens dans une cage paie infiniment mieux que de faire la plonge',drive:'adaptability'},
- {short:'Une haine viscérale de la défaite : aller jusqu\u2019à se laisser casser un membre plutôt que d\u2019abandonner',drive:'heart'}
+  {short:'Prouver à son prof de maths de 3ème qu\u2019on peut très bien réussir sa vie sans connaître le théorème de Pythagore',drive:'confidence'},
+  {short:'Payer ses amendes de stationnement impayées et son abonnement à la salle sans avoir à faire un prêt bancaire',drive:'discipline'},
+  {short:'Faire regretter à son ex d\u2019avoir rompu par message en devenant champion{ne/} du monde sous les projecteurs',drive:'aggression'},
+  {short:'Aime beaucoup trop la sensation d\u2019entendre le speaker hurler son nom devant dix mille personnes en furie',drive:'focus'},
+  {short:'Absolument terrifié{e/} à l\u2019idée de devoir un jour remettre un costume étriqué et faire des réunions Zoom de 9h à 18h',drive:'heart'},
+  {short:'Vouloir s\u2019acheter une voiture de sport ridiculement bruyante et trop basse pour les dos d\u2019âne de son quartier',drive:'confidence'},
+  {short:'La satisfaction pure et saine d\u2019éteindre la lumière chez des types prétentieux qui se prennent pour des influenceurs',drive:'killer'},
+  {short:'Rembourser la caution de l\u2019appartement que son colocataire a détruite lors d\u2019une fête étudiante',drive:'discipline'},
+  {short:'Montrer à ses cousins arrogants qui est le vrai chef de famille lors du prochain barbecue du dimanche',drive:'aggression'},
+  {short:'Accumuler assez de victoires pour que plus personne n\u2019ose lui couper la parole dans une file d\u2019attente à la poste',drive:'composure'},
+  {short:'Juste là pour la prime du combat de la soirée : le reste, c\u2019est de la politique pour les journalistes',drive:'killer'},
+  {short:'Le frisson d\u2019avoir survécu à quinze minutes de guerre sans avoir cédé d\u2019un millimètre : le meilleur antidépresseur au monde',drive:'heart'},
+  {short:'Convaincre son banquier qu\u2019un nez cassé reste un investissement bien plus rentable qu\u2019un livret A à 3%',drive:'confidence'},
+  {short:'Une phobie maladive de la défaite : préfère encore sortir sur une civière que de devoir expliquer une défaite à son coach',drive:'heart'}
 ];
-/* --------------------- camp : 3 choix liés au sport ----------------------- */
-/* chaque choix = un paquet de deltas VISIBLES et bornés par le potentiel. */
+
 /* --------------------- camp : 3 choix liés au sport ----------------------- */
 /* chaque choix = un paquet de deltas VISIBLES et bornés par le potentiel. 
    Équilibrage parfait : Chaque style a accès à exactement 18 entraînements. */
