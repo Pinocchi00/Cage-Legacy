@@ -286,8 +286,8 @@ const CL={
   },
   clearExportedCode(){ G.exportedCode=null; G.exportedName=null; G.exportedLink=null; render(); },
   setArenaTheme(themeId){ setArenaCosmeticTheme(themeId); render(); },
-  leaveSandbox(){ if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; } G.fantasyActive=false; G.vsFriendActive=false; CL.go('legends'); },
-  leaveAllStars(){ G.allstars=null; CL.go('legends'); },
+  leaveSandbox(){ if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; } G.fantasyActive=false; G.vsFriendActive=false; CL.go('hof'); },
+  leaveAllStars(){ G.allstars=null; CL.go('hof'); },
   setFantasy(side,dir){
      const max=loadHOF().length-1;
      if(side===0){ let n=Math.min(G.fantasyA||0,max)+dir; if(n<0)n=max; if(n>max)n=0;

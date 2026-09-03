@@ -488,7 +488,6 @@ function scr_hof(){
       '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>';
    })()}</div>
    <div class="tagrow mb">
-     <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
      <button class="btn ghost" style="width:auto;padding:8px 12px" onclick="CL.go('codex')">Codex des compétences</button>
    </div>
    <button class="btn ghost" onclick="CL.go('${backDest}')">← Revenir au ${backDest==='hub'?'vestiaire':'menu principal'}</button></div>`; }

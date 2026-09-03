@@ -738,7 +738,7 @@ function scr_allstars(){
           <div class="disp" style="font-size:42px;margin:16px 0">${esc(t.champion.name).toUpperCase()} ${t.champion.flag}</div>
           <p class="muted small">${getFighterBlurb(t.champion)}</p>
         </div>
-        <button class="btn ghost mt" onclick="CL.leaveAllStars()">Retour à la Salle des Légendes</button>`;
+        <button class="btn ghost mt" onclick="CL.leaveAllStars()">Retour au Panthéon</button>`;
   } else {
     h+=`<div class="eyebrow mb" style="color:var(--text);border-bottom:1px solid var(--line);padding-bottom:8px">${t.step.toUpperCase()}</div>
         <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">`;

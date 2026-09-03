@@ -527,7 +527,7 @@ function retireLegendPointsHtml(f){
   return `<div class="card mt glass" style="border-left:3px solid var(--gold);background:var(--panel2)">
     <div class="eyebrow mb" style="color:var(--gold)">Points de Légende gagnés</div>
     <div class="stat-big gold" style="font-size:30px">+${earned}</div>
-    <div class="muted small mt">Score d\u2019héritage : ${hofScore(f)||0} (défenses, victoires, titres, finitions). Utilisables dans la Salle des Légendes pour débloquer modes, archétypes et cosmétiques.</div>
+    <div class="muted small mt">Score d\u2019héritage : ${hofScore(f)||0} (défenses, victoires, titres, finitions).</div>
   </div>`;
 }
 
