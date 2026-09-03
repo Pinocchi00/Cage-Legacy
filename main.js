@@ -28,6 +28,15 @@ function validateSkills(){
 }
 validateSkills();
 /* ==== [FIN ANCRE] ==== */
+// Remise à zéro complète pour tous les comptes (transition Carrière pure, purge Gauntlet & Faith)
+const RESET_KEY = 'cage-legacy-reset-zero-v1';
+try {
+  if (typeof localStorage !== 'undefined' && !localStorage.getItem(RESET_KEY)) {
+    localStorage.clear();
+    localStorage.setItem(RESET_KEY, '1');
+  }
+} catch(e) {}
+
 if(document.getElementById('app')){
   G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}};
   setTheme('dark');

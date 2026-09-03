@@ -9,7 +9,7 @@
    du combattant actif, comme le Panthéon lui-même). ==== */
 const META_STATS_KEY='cage-legacy-metastats';
 const ACH_KEY='cage-legacy-achievements';
-function loadAch(){ try{ return JSON.parse(localStorage.getItem(ACH_KEY))||[]; }catch(e){ return []; } }
+function loadAch(){ try{ const raw=JSON.parse(localStorage.getItem(ACH_KEY))||[]; const valid=(typeof ACH!=='undefined'?ACH:[]).map(a=>a.id); return valid.length?raw.filter(id=>valid.includes(id)):raw; }catch(e){ return []; } }
 function saveAch(ach){ try{ localStorage.setItem(ACH_KEY,JSON.stringify(ach)); }catch(e){} }
 function metaStatsDefaults(){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
 /* ==== [ANCRE: ANALYTICS_LOCALES] — chantier 2 : "analytics locales" demandé.

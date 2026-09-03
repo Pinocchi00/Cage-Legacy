@@ -331,9 +331,9 @@ function scr_beltLineage(){
    catégorie Gauntlet manquante à l'affichage, l'en-tête ✕/.disp aligné
    sur Boutique/Panthéon, et la progression X/Y — tous trois toujours
    présents ici, réintégrés dans une structure en rails. ==== */
-const ACH_CAT_COLOR={'Carrière & Titres':'var(--gold)','Finitions & Séries':'var(--blood)','Technique & Héritage':'var(--sage)','Gauntlet':'#4DA6FF'};
+const ACH_CAT_COLOR={'Carrière & Titres':'var(--gold)','Finitions & Séries':'var(--blood)','Technique & Héritage':'var(--sage)'};
 function scr_ach(){ if(!G.ach) G.ach=loadAch();
-  const cats=['Carrière & Titres','Finitions & Séries','Technique & Héritage','Gauntlet'];
+  const cats=['Carrière & Titres','Finitions & Séries','Technique & Héritage'];
   let h=`<div class="scr">
    <div class="bar"><span class="eyebrow">Palmarès</span><span class="eyebrow x" onclick="CL.go('${G.f?'hub':'title'}')">✕</span></div>
    <h2 class="disp">${G.ach.length} / ${ACH.length} exploits</h2>`;
