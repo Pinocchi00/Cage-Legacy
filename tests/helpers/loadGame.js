@@ -28,7 +28,7 @@ function readScriptOrder(){
   const re = /<script src="([^"]+)"><\/script>/g;
   const files = [];
   let m;
-  while((m = re.exec(html))){ files.push(m[1]); }
+  while((m = re.exec(html))){ files.push(m[1].split('?')[0]); }
   if(!files.length) throw new Error('Aucun <script src> trouvé dans index.html — le harnais ne peut pas déterminer l\'ordre de chargement réel.');
   return files;
 }
