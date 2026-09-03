@@ -2,7 +2,11 @@
 /* CAGE LEGACY — js/ui-03-contracts-arcade-data.js
    ============================================================================
    Fichier 3/8 issu du découpage de l'ancien ui.js monolithique (~400 Ko).
-   Offres de contrat/passage pro, citations médiatiques, et toutes les données du mode Arcade (archétypes, Boss Run, Bracket 64, Ladder 100).
+   Offres de contrat/passage pro et citations médiatiques (narration des
+   combats). Les données du mode Arcade (archétypes, Boss Run, Bracket 64,
+   Ladder 100) qui vivaient aussi ici ont été retirées avec la suppression
+   du mode Gauntlet — le nom de fichier garde une trace de cette histoire,
+   pas de son contenu actuel.
 
    IMPORTANT : ce découpage préserve l'ORDRE EXACT du code d'origine — aucune
    fonction n'a été déplacée ou réordonnée, seules des frontières de fichier
