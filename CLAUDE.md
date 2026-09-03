@@ -4,19 +4,10 @@
 
 Cage Legacy est un jeu de gestion de carrière de MMA en vanilla JavaScript,
 jouable directement dans le navigateur (`index.html`), sans build ni backend.
-Trois modes de jeu, tous accessibles depuis l'écran-titre :
+Le mode de jeu disponible est :
 
 - **Carrière Complète** — le mode historique : amateur → pro → retraite,
   classements, contrats, Panthéon.
-- **Faith** — un mode narratif dédié, avec son propre tirage de personnage
-  (`G.faithDraft`), sa propre progression (`G.f`) et ses propres écrans
-  (`ui-04a-faith-screens.js`).
-- **Gauntlet** — un mode arcade en runs courtes (Ladder 100, Bracket 64,
-  Boss Run), piloté par `G.arcade` et distinct de `gameMode` (voir
-  `detectMode()` dans `ui-08-controller-arena.js`).
-
-Le mode actif se déduit à l'exécution (`G.arcade.active`, `G.f.gameMode`),
-il n'y a pas de séparation en sous-dossiers par mode.
 
 ## 2. Contraintes non négociables
 
@@ -39,39 +30,31 @@ la liste ci-dessous est indicative et peut se périmer à la prochaine
 modification d'`index.html`. Vérifie toujours les balises `<script>` avant
 d'ajouter ou déplacer un fichier.
 
-Ordre lu dans `index.html` (nombre de lignes de chaque fichier entre
-parenthèses) :
+Ordre lu dans `index.html` :
 
-1. `data-skills.js` (649) — données de compétences
-2. `data-content.js` (231) — textes/contenus génériques
-3. `data-people.js` (268) — noms, pays, personnages
-4. `data-faith-content.js` (1510) — contenus narratifs du mode Faith
-5. `engine.js` (372) — cœur du moteur, types partagés
-6. `engine-combat.js` (559) — résolution des combats
-7. `engine-progression.js` (375) — XP, attributs, évolution du combattant
-8. `engine-career.js` (260) — déroulé de carrière, calendrier
-9. `engine-events.js` (503) — génération d'événements/actualités
-10. `state/state-core.js` (24) — état global `G`, `esc()`, helpers de base
-11. `state/state-analytics.js` (101) — analytics locales
-12. `state/state-save.js` (74) — `SAVE_KEY`, sauvegarde/chargement
-13. `state/state-migration.js` (40) — `SAVE_VERSION`, migrations
-14. `state/state-validation.js` (129) — validation de sauvegarde
-15. `state/state-hof.js` (179) — Panthéon (Hall of Fame)
-16. `state/state-shop.js` (87) — boutique/consommables
-17. `state/state-gauntlet.js` (261) — état du mode Gauntlet
-18. `state/state-faith.js` (362) — état du mode Faith
-19. `ui-01-roster-matchmaking.js` (834) — roster, matchmaking
-20. `ui-02-fight-prep-events.js` (870) — préparation de combat, événements
-21. `ui-03-contracts-arcade-data.js` (2043) — contrats, données arcade
-22. `ui-04a-faith-screens.js` (2349) — écrans du mode Faith
-23. `ui-04b-gauntlet-screens.js` (1309) — écrans du mode Gauntlet
-24. `ui-05-fight-resolution.js` (1110) — écran de résultat de combat
-25. `ui-06-career-screens.js` (1309) — écrans de carrière
-26. `ui-07-contracts-legacy-screens.js` (1003) — contrats/legacy
-27. `ui-08-controller-arena.js` (4304) — routeur d'écrans (`CL`), rendu Canvas
-    de l'arène
-28. `ui-09-arena.js` (765) — effets visuels de l'arène (particules, juice)
-29. `main.js` (57) — bootstrap, initialisation de `G`
+1. `data-skills.js` — données de compétences
+2. `data-content.js` — textes/contenus génériques
+3. `data-people.js` — noms, pays, traits
+4. `engine.js` — cœur du moteur, types partagés
+5. `engine-combat.js` — résolution des combats
+6. `engine-progression.js` — XP, attributs, évolution du combattant
+7. `engine-career.js` — déroulé de carrière, calendrier
+8. `engine-events.js` — génération d'événements/actualités
+9. `state/state-core.js` — état global `G`, `esc()`, helpers de base
+10. `state/state-analytics.js` — analytics locales
+11. `state/state-save.js` — `SAVE_KEY`, sauvegarde/chargement
+12. `state/state-migration.js` — `SAVE_VERSION`, migrations
+13. `state/state-validation.js` — validation de sauvegarde
+14. `state/state-hof.js` — Panthéon (Hall of Fame)
+15. `ui-01-roster-matchmaking.js` — roster, matchmaking
+16. `ui-02-fight-prep-events.js` — préparation de combat, événements
+17. `ui-03-contracts-arcade-data.js` — contrats et récits de combat
+18. `ui-05-fight-resolution.js` — écran de résultat de combat, succès
+19. `ui-06-career-screens.js` — écrans de carrière
+20. `ui-07-contracts-legacy-screens.js` — contrats/legacy
+21. `ui-08-controller-arena.js` — routeur d'écrans (`CL`), boucle de jeu
+22. `ui-09-arena.js` — arène et animation Canvas 2D
+23. `main.js` — bootstrap, initialisation de `G`
 
 ## 4. Globaux structurants
 

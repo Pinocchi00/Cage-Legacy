@@ -31,7 +31,7 @@ function parseAndValidate(raw){
   if(!raw) return null;
   try{ const parsed=JSON.parse(raw); return validateSave(parsed)?parsed:null; }catch(e){ return null; }
 }
-function save(){ if(G&&((G.arcade&&G.arcade.active)||G.fantasyActive||G.vsFriendActive||['draft','arcadehub','gameover','fantasy_setup','allstars','vs_friend'].includes(G.screen))) return;
+function save(){ if(G&&(G.fantasyActive||G.vsFriendActive||['fantasy_setup','allstars','vs_friend'].includes(G.screen))) return;
   try{
     const previous=localStorage.getItem(SAVE_KEY);
     if(previous) localStorage.setItem(SAVE_BACKUP_KEY,previous);
@@ -59,15 +59,11 @@ function load(){
    puis backup) partageaient un seul try/catch. Un SAVE_KEY corrompu levait une
    SyntaxError qui sautait directement au catch, sans jamais tenter le backup —
    contrairement à load(), qui isole déjà chaque parse via parseAndValidate(). ==== */
-function hasSave(mode){
+function hasSave(){
   try{
     let p=parseAndValidate(localStorage.getItem(SAVE_KEY));
     if(!p) p=parseAndValidate(localStorage.getItem(SAVE_BACKUP_KEY));
-    if(p){
-      if(mode==='faith') return !!p.faith;
-      if(mode==='career') return !p.faith;
-      return true;
-    }
+    if(p) return true;
   }catch(e){}
   return false;
 }

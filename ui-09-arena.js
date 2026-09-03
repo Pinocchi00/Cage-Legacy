@@ -695,47 +695,6 @@ function stopArena(){ if(ARENA){ if(ARENA.raf&&typeof cancelAnimationFrame!=='un
        le plus au catalogue.
    Réutilise intégralement le pipeline de dessin du combat (buildStatic
    PreviewArena / cacheArenaGfx / drawArena), aucun code de rendu nouveau. ==== */
-function startShopPreviewArena(){
-  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
-  if(!cv||!cv.getContext) return;
-  const id=G._shopPreviewId||'';
-  const arch=(typeof ARCADE_UNLOCKABLE_ARCHETYPES!=='undefined')
-    ? ARCADE_UNLOCKABLE_ARCHETYPES.find(a=>a.unlockId===id) : null;
-  buildStaticPreviewArena(arch?arch.nick:'Toi','Adversaire',arch?arch.flag:'','');
-  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
-  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
-  /* Thème forcé pour un cosmétique, thème équipé pour tout le reste. */
-  const themeId=id.indexOf('cosmetic_')===0?id.replace('cosmetic_',''):(id.indexOf('excl_')===0?id.replace('excl_',''):null);
-  ARENA._themeOverride=themeId?(ARENA_THEMES.find(t=>t.id===themeId)||null):null;
-  cacheArenaGfx();
-  if(arch) ARENA.flashMe=1;
-  drawArena(0,true);
-  ARENA._themeOverride=null;
-}
-function startConsumablePreviewArena(){
-  const cv=/** @type {HTMLCanvasElement|null} */ (document.getElementById('shop-preview-cv'));
-  if(!cv||!cv.getContext) return;
-  const item=GAUNTLET_CONSUMABLES.find(i=>i.id===G._consumablePreviewId);
-  const you=G.f;
-  buildStaticPreviewArena(you?(you.nick||you.first||'Toi'):'Toi','Adversaire',you?(you.flag||''):'','');
-  const dpr=Math.min(window.devicePixelRatio||1,2); const W=cv.clientWidth||360, H=180;
-  cv.width=W*dpr; cv.height=H*dpr; const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
-  ARENA.W=W; ARENA.H=H; ARENA.ctx=ctx; ARENA.dpr=dpr;
-  cacheArenaGfx();
-  /* ==== [ANCRE: PREVIEW_MARCHE_NOIR_PAR_EFFET] — item demandé : "pour
-     chaque effet" — un indice visuel distinct par consommable, sur ce même
-     Canvas figé, sans nouveau code de dessin (le halo de flash existe déjà
-     dans fighter(), ui-08, pour le combat réel). "shake" est un tremblement
-     JOUÉ SUR PLUSIEURS FRAMES (jitter aléatoire à chaque appel) — invisible
-     sur une trame unique figée, donc écarté ici au profit du halo, qui SE
-     VOIT sur une image fixe. Droit de véto change l'ADVERSAIRE : c'est lui
-     qui brille. Tout le reste est un avantage direct pour le joueur
-     (banque, filet de sécurité, statistiques) : c'est lui qui brille. ==== */
-  if(item&&item.id==='cons_veto') ARENA.flashOp=1; else ARENA.flashMe=1;
-  /* ==== [FIN ANCRE] ==== */
-  drawArena(0,true);
-}
 /* ==== [FIN ANCRE] ==== */
 // ==== [ANCRE: CORRECTIF_COULEUR_ZONES_DEGATS] — bug remonté : le rouge
 // (var(--blood)) était utilisé pour un simple seuil de dégâts CUMULÉS

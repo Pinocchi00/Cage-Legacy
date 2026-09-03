@@ -164,7 +164,7 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
   const nonFavs=list.filter(x=>!x.favorite).sort((a,b)=>b.score-a.score);
   const keepNonFavs=nonFavs.slice(0,Math.max(0,20-favs.length));
   saveHOF(favs.concat(keepNonFavs).sort((a,b)=>b.score-a.score));
-  updateMetaStatsOnRetirement(f); awardLegendPoints(f); }
+  updateMetaStatsOnRetirement(f); }
 /* ==== [FIN ANCRE] ==== */
 function filterHallOfFame(criteria){
   const list=loadHOF();

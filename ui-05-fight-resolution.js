@@ -270,31 +270,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     G.f._rivalries[opp.id]=(G.f._rivalries[opp.id]||0)+1;
     if(G.f._rivalries[opp.id]>=2) G.f.rivalId=opp.id;
   }
-  // Némésis Faith : verrouillée dès la première vraie rivalité, ne change plus
-  // jamais ensuite (contrairement à f.rivalId qui peut glisser vers l'animosité
-  // la plus récente) — c'est le fil rouge narratif de toute la carrière.
-  if(G.faith && !G.f.faithNemesisId && G.f.rivalId){
-    const rival=(G.roster||[]).find(o=>o.id===G.f.rivalId);
-    if(rival) lockFaithNemesis(rival);
-  }
-  /* ==== [ANCRE: FA-19_SHOWMAN] — le showman vend le spectacle avant de le
-     livrer (personality créée dans finalizeFaithDraft, ui-08) : une victoire
-     aux points, sans finish, est par définition le résultat qu'il n'a pas
-     vendu au public. ==== */
-  if(G.faith && win && isDecisionLike(res.method) && G.f.personality==='showman'){
-    G.f.morale=clamp(G.f.morale-8,0,100);
-  }
-  /* ==== [ANCRE: V2-27] — boucle ouverte, fermée ici : une promesse faite
-     en conférence (faithPressConfPosture('provocation'), ui-08) et
-     jamais rappelée n'aurait jamais existé. Vérifiée uniquement contre
-     l'adversaire CONCERNÉ (oppId) — une promesse ne se transfère pas au
-     combat suivant. Toujours consommée (G.faith.promise=null), tenue ou
-     non : elle ne doit jamais persister au-delà du combat qu'elle visait. */
-  if(G.faith && G.faith.promise && opp && opp.id===G.faith.promise.oppId){
-    const tenue=win && !isDecisionLike(res.method);
-    G.faith.promiseOutcome={tenue,oppName:G.faith.promise.oppName};
-    G.faith.promise=null;
-  }
+
   /* ==== [ANCRE: V2-27 carrière] — même principe côté mode carrière
      (G.promise, posé par CL.chooseFaceoff('provocation'), ui-08/scr_plan
      V2-26) : consommé immédiatement, lu par scr_result (ui-06). */
@@ -589,26 +565,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      l'« empreinte » du Score de Légende. Le drapeau se pose ICI, seul endroit
      où l'adversaire du combat est connu : season.fights ne retient pas son
      identité, et le roster peut avoir changé quand le bilan se calcule. ==== */
-  if(G.faith && win && opp && opp.id && opp.id===G.f.faithNemesisId) G.faith.nemesisBeaten=true;
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: FA-26] — palmarès tête-à-tête affiché en une ligne sur le
-     hub (scr_faith_hub, ui-04). Remis à zéro quand la némésis change
-     (trahison du protégé, ui-08) — il ne porte que sur la rivalité EN
-     COURS. */
-  if(G.faith && opp && opp.id && opp.id===G.f.faithNemesisId){
-    if(!G.f.nemesisRecord) G.f.nemesisRecord={w:0,l:0};
-    if(win) G.f.nemesisRecord.w++; else G.f.nemesisRecord.l++;
-    /* ==== [ANCRE: V3_NEMESIS_MEMOIRE] — Plan V3 LOT 3 §P03/§P16 : mémoire[]
-       d'un combattant du roster — ici la némésis, seul combattant du
-       roster dont le joueur suit chaque confrontation individuellement,
-       les autres passent par le résumé agrégé du worldTick (advanceRoster,
-       ui-01). Plafonné comme f.history (engine.js) pour rester borné sur
-       une très longue carrière. */
-    if(!opp.memory) opp.memory=[];
-    const tierNow=nemesisTierLabel(G.f.nemesisRecord.w+G.f.nemesisRecord.l-1);
-    opp.memory.push({year:G.faith.year,text:win?`Battu par vous (${tierNow}).`:`Vous a battu (${tierNow}).`});
-    if(opp.memory.length>20) opp.memory=opp.memory.slice(-20);
-  }
+
   /* ==== [FIN ANCRE] ==== */
   // ==== [FIN ANCRE] ====
   // vieillissement (1 an = N combats). Entre 18 et 23 ans (jeune prospect en
@@ -834,35 +791,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      déjà utilisée partout ailleurs dans le fichier, ex. V3_GALA_VENUE_INFO)
      pour rester "objectivement supérieur", pas juste "un peu favori". */
   let upsetLine=null;
-  if(win && G.faith && !G.faith.upsetCelebrated && ((opp.overall||0)-(G.f.overall||0))>=10){
-    G.faith.upsetCelebrated=true;
-    if(!TEXT_POOLS['faith_upset_win']) registerTextPool('faith_upset_win',FAITH_UPSET_WIN);
-    upsetLine=txtPick('faith_upset_win',{});
-  }
-  if(G.faith && G.faith.pendingTitleConsecration) G.faith.pendingTitleConsecration.wasUnderdog=!!upsetLine;
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: V3_FIGHT_CARD_RESULT] — Plan V3 LOT 6 §5.6.1.b : "le joueur
-     doit pouvoir revenir après et voir qui a gagné" — complète la carte
-     générée à l'offre (generateFightCard, ui-08) avec le résultat du
-     combat du joueur lui-même, une fois qu'il est connu. */
-  if(G.faith && G.faith.currentCard && G.faith.currentCard.oppId===opp.id){
-    G.faith.currentCard.playerResult={win,method:res.method};
-  }
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: V3_SPECTACLE_UPDATE] — Plan V3 LOT 7 §5.7.1 point 5 : une
-     victoire par finition fait vivre le public, une victoire aux points
-     l'endort ; une défaite par finition coûte plus cher qu'une défaite aux
-     points, qui elle-même reste un combat regardé jusqu'au bout. Jamais
-     affiché en chiffre (règle H.1) — seule sa lecture qualitative
-     (ANCRE V3_SPECTACLE_HYPE, ui-08) transparaît. */
-  if(G.faith){
-    const finish=!isDecisionLike(res.method);
-    let dv=0;
-    if(win) dv=finish?5:-2;
-    else if(res.winner!=='D') dv=finish?-3:0;
-    if(dv) G.f.spectacle=clamp((G.f.spectacle==null?50:G.f.spectacle)+dv,0,100);
-  }
-  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_NARRATIVE_NON_SERIALISABLE] — bug trouvé (en
      testant CORRECTIF_COMBAT_ORPHELIN, ui-08) : `narrative.txt` est une
      FONCTION (généré par generateNarrativeQuote()/les pools de citations,
@@ -1027,48 +955,6 @@ const ACH=[
          if(first.res==='loss' && last.res==='win' && (last.method.startsWith('KO')||last.method.startsWith('Soum'))) return true; } }
      return false; }},
  // ==== [FIN ANCRE] ====
- // ==== [ANCRE: FAITH_ACHIEVEMENTS] — Lot 3 du mode MMA Faith ====
- {id:'f_phenix',cat:'Carrière & Titres',ico:SVG.phoenix,h:'Phénix',d:'Remonter d\u2019une série de 3 défaites pour devenir champion.',
-   t:f=>f.champion && f.history && f.history.length>5 && f.history.slice(-4).filter(x=>x.res==='loss').length>=3},
- {id:'f_murdutemps',cat:'Carrière & Titres',ico:SVG.hourglass,h:'Le Mur du Temps',d:'Rester invaincu professionnellement jusqu\u2019à l\u2019âge de 35 ans.',
-   t:f=>f.L===0 && f.age>=35 && f.stage==='pro'},
- {id:'f_doublemonarque',cat:'Carrière & Titres',ico:SVG.infinity,h:'Double Monarque',d:'Remporter le supercombat et devenir double champion de deux catégories différentes.',
-   t:f=>!!f.champChampBelt},
- {id:'f_cyborg',cat:'Technique & Héritage',ico:SVG.gem,h:'Cyborg',d:'Subir moins de 50 dégâts crâniens sur une série de 10 combats.',
-   t:f=>G.season && G.season.fights && G.season.fights.length>=10 && G.season.fights.slice(-10).reduce((acc,fight)=>acc+((fight.st&&fight.st.Me&&fight.st.Me.dmgHead)||0),0)<50},
- {id:'f_ruine',cat:'Carrière & Titres',ico:SVG.compass,h:'Hémorragie Financière',d:'Se retrouver ruiné (gains négatifs) après un événement ou investissement payant.',
-   t:f=>(f.earnings||0)<0},
- {id:'f_bourreau',cat:'Technique & Héritage',ico:SVG.veteran,h:'Bourreau des Légendes',d:'Battre 3 adversaires distincts ayant un Elo supérieur à 1800.',
-   t:f=>f.history && [...new Set(f.history.filter(h=>h.res==='win' && h.oppElo>1800).map(h=>h.oppId))].length>=3},
- {id:'f_plafondverre',cat:'Finitions & Séries',ico:SVG.star,h:'Plafond de Verre Percé',d:'Gagner par KO alors que votre puissance brute est inférieure à 40.',
-   t:f=>f.attrs && f.attrs.power<40 && f.history && f.history.length>0 && f.history[f.history.length-1].method.startsWith('KO') && f.history[f.history.length-1].res==='win'},
- // ==== [FIN ANCRE] ====
- /* ==== [ANCRE: GAUNTLET_SUCCES] — checkAch() tournait DÉJÀ en arcade (cf.
-    ANCRE REJOUABILITE_ACH_ARCADE, ui-03) mais aucune des 29 entrées n'était
-    atteignable autrement qu'en carrière : plusieurs conditions (champion,
-    defenses, retraite) ne peuvent structurellement jamais se produire dans un
-    run. Ces entrées lisent l'état de la run sur le global G.arcade — même style
-    que les succès Faith existants qui lisent déjà G.season. La garde
-    `G.arcade &&` est obligatoire : ACH est parcouru intégralement à CHAQUE
-    combat de carrière, où G.arcade vaut null. checkAch() est appelé deux fois
-    en arcade — pendant le combat (resolveArcadeFight) et en fin de run
-    (finaliseGauntletRun, ui-08) — donc les conditions de fin de run sont bien
-    évaluées avant que G.arcade.active ne soit remis à false ailleurs. ==== */
- {id:'g_mise',cat:'Gauntlet',ico:SVG.fire,h:'Tout ou Rien',d:'Atteindre un multiplicateur de mise ×4 dans une run du Gauntlet.',
-   t:()=>!!(G.arcade && (G.arcade.riskMult||1)>=4)},
- {id:'g_contrat',cat:'Gauntlet',ico:SVG.medal,h:'Parole Tenue',d:'Terminer une run du Gauntlet en ayant rempli son contrat de run.',
-   t:()=>!!(G.arcade && G.arcade.contract && G.arcade.contract.done)},
- {id:'g_ascension',cat:'Gauntlet',ico:SVG.crown,h:'Vertige',d:'Terminer une run lancé en Ascension 3 ou plus.',
-   t:()=>!!(G.arcade && (G.arcade.asc||0)>=3)},
- {id:'g_vengeance',cat:'Gauntlet',ico:SVG.hammer,h:'Dossier Clos',d:'Battre un némésis qui vous avait éliminé lors d’un run précédent.',
-   t:()=>!!(G.arcade && (G.arcade.bounties||0)>=1)},
- {id:'g_maudit',cat:'Gauntlet',ico:SVG.skull,h:'Le Prix du Pouvoir',d:'Accepter deux pactes de camp maudits dans une même run.',
-   t:()=>!!(G.arcade && (G.arcade.cursedTaken||0)>=2)},
- {id:'g_estropie',cat:'Gauntlet',ico:SVG.shield,h:'Sur les Rotules',d:'Encaisser 3 séquelles dans une même run et continuer malgré tout.',
-   t:()=>!!(G.arcade && (G.arcade.runInjuries||[]).length>=3)},
- {id:'g_intact',cat:'Gauntlet',ico:SVG.diamond,h:'Sans une Égratignure',d:'Remporter une run du Gauntlet sans la moindre séquelle.',
-   t:()=>!!(G.arcade && G.arcade.victory && !(G.arcade.runInjuries||[]).length)}
- /* ==== [FIN ANCRE] ==== */
 ];
 /* ==== [FIN ANCRE] ==== */
 function checkAch(){

@@ -5,21 +5,17 @@ vanilla JavaScript, sans build, sans backend, 100 % offline une fois chargé.
 
 **Jouer en ligne : https://pinocchi00.github.io/Cage-Legacy/**
 
-## Les trois modes
+## Mode de jeu
 
-| Mode | Description |
-|---|---|
-| **Carrière Complète** | Le mode historique : amateur → pro → retraite, classements, contrats, Panthéon des légendes. |
-| **Faith** | Mode narratif dédié, avec son propre tirage de personnage et sa propre progression, centré sur les choix d'histoire de carrière. |
-| **Gauntlet** | Mode arcade en runs courtes — Ladder 100, Bracket 64, Boss Run. |
+**Carrière Complète** : amateur → pro → retraite, gestion physique et financière, camps d'entraînement, classements, contrats, et Panthéon des légendes.
 
 ## Arborescence
 
 ```
 index.html                        point d'entrée, ordre de chargement des scripts
-data-*.js                         données pures (compétences, contenus, personnages, contenus Faith)
+data-*.js                         données pures (compétences, contenus, personnages)
 engine.js, engine-*.js            moteur de simulation (combat, carrière, progression, événements)
-state/                            état de jeu et logique métier, par domaine (sauvegarde, analytics, Faith, Gauntlet, Panthéon...)
+state/                            état de jeu et logique métier, par domaine (sauvegarde, analytics, Panthéon...)
 ui-01…ui-09*.js                   rendu Canvas 2D et écrans, un fichier par zone fonctionnelle
 main.js                           bootstrap au chargement de la page
 tests/                            suite de tests (node --test) sur le vrai code du jeu, chargé dans un DOM virtuel

@@ -78,12 +78,6 @@ function repairFighter(f){
 function validateState(){
   if(!G||typeof G!=='object') return false;
   if(!G.settings||typeof G.settings!=='object') G.settings={};
-  G.settings.faithAmbiance='nuit'; // [V3_DARK_ONLY] P02 : plus un réglage, une constante
-  /* ==== [ANCRE: MIGRATION_PERSON_REGISTRY] — Plan V3 LOT 0 §4.1 : bloc de
-     migration additif, même motif que G.settings ci-dessus — une sauvegarde
-     antérieure au registre reçoit un G.people vide et fonctionnel, aucune
-     donnée existante n'est réécrite. ==== */
-  ensurePeopleRegistry();
   if(!G.f||typeof G.f!=='object') return false;
   repairFighter(G.f);
   const f=G.f;
@@ -124,6 +118,5 @@ function validateState(){
   if(typeof G.screen!=='string') G.screen='hub';
   if(!Array.isArray(G.ach)) G.ach=[];
   if(!Array.isArray(G.titleHistory)) G.titleHistory=[];
-  if(G.arcade && !G.arcade.active) G.arcade=null; // état arcade incomplet ou terminé -> repli sûr, jamais 'actif' par erreur
   return true;
 }

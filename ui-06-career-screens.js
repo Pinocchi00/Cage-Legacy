@@ -19,12 +19,7 @@
    lui-même dès la première terminée (nextObjective() renvoie null au-delà).
    Format resserré : une ligne de titre, une d'explication, un bouton. ==== */
 function nextObjectiveBlock(){
-  const o=nextObjective(); if(!o) return '';
-  return `<div class="card glass mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 12px;text-align:left">
-    <b style="font-size:13px">${o.titre}</b>
-    <div class="muted small" style="font-size:11px;margin-top:2px">${o.detail}</div>
-    <button class="btn ghost" style="border-color:var(--gold);color:var(--gold);padding:6px 10px;width:auto;font-size:12px;margin-top:8px" onclick="${o.cta.onclick}">${o.cta.label}</button>
-  </div>`;
+  return "";
 }
 /* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — accueil d'origine restauré tel
    quel (la refonte par durée/hiérarchie n'a pas convenu). Seul correctif
@@ -62,245 +57,16 @@ function scr_title(){
         citait même un jeu concurrent ("Destiny-like", jargon qui suppose
         que le joueur le connaît, contraire à la Loi 6). Chacune tient en
         moins de 12 mots. ==== -->
-   <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.go('faith_home')">1. MMA FAITH
-     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Une vie de combattant, du premier pas au dernier souvenir</span></button>
-   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--text)" onclick="CL.go('intro')">2. CARRIÈRE COMPLÈTE
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Montez les échelons, un combat à la fois</span></button>
-   <button class="btn" style="font-size:20px;padding:24px;margin-top:16px;border-color:var(--sage);color:var(--sage)" onclick="CL.go('gauntlet_menu')">3. GAUNTLET
-     <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Un seul combattant. Une chute, et tout s’arrête</span></button>
-   <div class="hr" style="margin:24px 0"></div>
-   <button class="btn ghost" style="font-size:16px;padding:16px;border:1px dashed var(--gold);background:var(--panel2);color:var(--gold)" onclick="CL.go('legends')">BOUTIQUE : SALLE DES LÉGENDES
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Dépensez vos points de salle pour débloquer du contenu</span></button>
-   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>
-   <!-- ==== [ANCRE: FAITH_LEGENDES_A_BATTRE] — l'épilogue Faith pointait vers
-        "Voir le Panthéon" ; ce bouton a été repris par l'écran faith_legends
-        (galerie + face-à-face), plus pertinent en sortie de carrière Faith.
-        Le Panthéon reste accessible en un clic depuis le menu principal,
-        seul endroit qui n'appartient à aucun mode en particulier — sans ce
-        bouton, un joueur qui ne joue qu'en Faith n'aurait plus eu AUCUN
-        chemin vers le Panthéon. ==== -->
-   <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('hof')">VOIR LE PANTHÉON
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Toutes les légendes retraitées, tous modes confondus</span></button>
-   </div>`;
-}
-/* ==== [ANCRE: SOUS_MENU_GAUNTLET] — regroupe les 3 formats du Gauntlet
-   (Bracket 64, Classement des 100, Boss Run), auparavant tous au même niveau
-   que les modes principaux sur l'écran titre. ==== */
-/* ==== [ANCRE: REJOUABILITE_RECORD_GAUNTLET] — meta.gauntletBest (state.js),
-   affiché sous chaque bouton de format pour donner un objectif de retour au
-   menu, avant même de lancer une run. ==== */
-/* ==== [ANCRE: GAUNTLET_ASCENSION] — le record affiché est celui du palier
-   SÉLECTIONNÉ (G._pendingAsc, borné au palier débloqué pour ce format), pas
-   un record global qui mélangerait des difficultés incomparables. ==== */
-function gauntletSelectedAsc(mode){
-  const meta=loadMetaStats();
-  return clamp(parseInt(G._pendingAsc,10)||0,0,gauntletAscLevel(meta,mode));
-}
-function gauntletMenuBestTag(mode){
-  const meta=loadMetaStats();
-  const asc=gauntletSelectedAsc(mode);
-  const best=gauntletBestGet(meta,mode,asc);
-  if(best===undefined) return `<span class="mono" style="display:block;font-size:11px;margin-top:4px;opacity:.6">Ascension ${asc} — aucun record</span>`;
-  const label=mode==='boss_run'?`Record : ${best}/5`:mode==='ladder_100'?`Record : rang #${best}`:(best>=7?'Record : Tournoi remporté':`Record : palier ${best}`);
-  return `<span class="mono" style="display:block;font-size:11px;margin-top:4px;opacity:.8">Ascension ${asc} · ${label}</span>`;
-}
-/* ==== [ANCRE: GAUNTLET_ASCENSION] — sélecteur de palier. Rendu uniquement si
-   au moins un palier est débloqué sur ce format : un joueur qui n'a jamais
-   gagné le format ne voit aucune option supplémentaire, l'écran reste
-   identique à avant pour lui. ==== */
-function gauntletAscPicker(mode){
-  const meta=loadMetaStats();
-  const max=gauntletAscLevel(meta,mode);
-  if(max<=0) return '';
-  const cur=gauntletSelectedAsc(mode);
-  let btns='';
-  for(let i=0;i<=max;i++){
-    btns+=`<span onclick="CL.setGauntletAsc('${mode}',${i})" style="display:inline-block;cursor:pointer;border:1px solid ${i===cur?'var(--gold)':'var(--line)'};color:${i===cur?'var(--gold)':'var(--muted)'};padding:3px 10px;margin:0 4px 4px 0;border-radius:2px;font-size:11px" class="mono">A${i}</span>`;
-  }
-  return `<div class="mono small" style="margin-top:6px;text-align:left">${btns}<span class="muted" style="font-size:11px;display:block;margin-top:2px">Ascension : adversaires +${3*cur} niveau(x), gains ×${gauntletAscPayoutMod(cur)}</span>
-   <span onclick="CL.viewAscensionTower('${mode}')" style="display:inline-block;cursor:pointer;margin-top:4px;color:var(--gold);text-decoration:underline dotted;font-size:11px">🗼 Voir la Tour d\u2019Ascension</span></div>`;
-}
-/* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: TOUR_ASCENSION_VISUELLE] — ajout #6 (24 ajouts, 12/08/2026) :
-   écran de progression dédié, 5 paliers empilés visuellement du bas (palier
-   0, base) vers le haut (palier 5, sommet). Réutilise gauntletAscLevel/
-   gauntletBestGet/gauntletAscPayoutMod déjà existants — aucune nouvelle
-   donnée de progression, uniquement une nouvelle façon de la montrer.
-   ⚠️ Scope assumé : la spec demande une "silhouette joueur statique
-   réutilisée du canvas de l'arène" — la fonction de rendu du combattant
-   dans ARENA (drawArena, ui-08) est étroitement couplée à l'état d'un combat
-   EN COURS (positions, hit-stop, caméra...), l'extraire proprement pour un
-   usage statique hors combat dépasse une passe sûre. Remplacé par une
-   silhouette SVG autonome, simple et thématiquement cohérente, plutôt que
-   de risquer de casser le rendu de combat en tirant dessus depuis un écran
-   qui n'a rien à voir. ==== */
-/** Une carte de palier de la Tour. Extraite de scr_ascension_tower pour
- * garder les deux fonctions courtes et lisibles.
- * @param {number} i palier @param {object} ctx {mode,unlocked,meta}
- * @returns {string} HTML de la carte */
-function ascensionTierCard(i,ctx){
-  const {mode,unlocked,meta}=ctx;
-  const isUnlocked=i<=unlocked, isCurrent=(i===unlocked);
-  const best=gauntletBestGet(meta,mode,i);
-  const bestLabel=best===undefined?'Aucun record'
-    :(mode==='boss_run'?`Meilleur : ${best} boss sur 5`
-    :mode==='ladder_100'?`Meilleur : rang #${best}`
-    :(best>=7?'Tournoi remporté':`Meilleur : ${['','32es','16es','8es','quarts','demies','finale'][best]||('palier '+best)}`));
-  /* Descriptions en clair : "+15 niveau(x) · Gains ×2.75 · un mutateur
-     aléatoire" supposait de connaître le mot « mutateur » et de deviner ce
-     que multiplient les gains. Une ligne par effet, en français simple. */
-  const effets=i===0
-    ? `<div class="muted small mt">Difficulté normale, gains normaux. C\u2019est le palier de départ.</div>`
-    : `<div class="muted small mt">Adversaires plus forts : +${3*i} niveaux.</div>
-       <div class="muted small">Points gagnés multipliés par ${gauntletAscPayoutMod(i)}.</div>
-       <div class="muted small">Une règle spéciale, tirée au hasard au début de chaque run.</div>`;
-  const etat=isCurrent?'<span class="mono small" style="color:var(--sage)">★ PALIER ACTUEL</span>'
-    :!isUnlocked?'<span class="mono small muted">🔒 Verrouillé</span>'
-    :'<span class="mono small muted">✓ Franchi</span>';
-  const pied=isUnlocked
-    ? `<div class="mono small mt" style="color:var(--gold)">${bestLabel}</div>`
-    : `<div class="mono small mt">Pour l\u2019ouvrir : ${gauntletAscUnlockGoal(mode)} au palier ${i-1}.</div>`;
-  return `<div class="glass" style="position:relative;background:${isUnlocked?'var(--panel2)':'var(--panel)'};border:1px solid ${isCurrent?'var(--gold)':'var(--line)'};border-left:4px solid ${isUnlocked?'var(--gold)':'var(--line)'};padding:12px;margin-bottom:6px;opacity:${isUnlocked?1:0.5}">
-     <div style="display:flex;justify-content:space-between;align-items:center">
-       <b style="font-size:15px;color:${isUnlocked?'var(--gold)':'var(--muted)'}">${i===0?'Palier 0 — Base':`Ascension ${i}`}</b>
-       ${etat}
-     </div>${effets}${pied}
-   </div>`;
-}
-/* ==== [ANCRE: TOUR_ASCENSION_LISIBLE] — items demandés : (1) la silhouette
-   en bâton en tête d'écran est retirée ; (2) les paliers étaient listés du
-   plus haut au plus bas, donc l'écran s'ouvrait sur cinq cartes
-   VERROUILLÉES et le seul palier jouable — celui du joueur — se retrouvait
-   tout en bas, hors écran. Ordre inversé : on lit la tour du bas vers le
-   haut, comme on la gravit, le palier actuel est visible d'emblée ; (3) les
-   descriptions passent du jargon ("un mutateur aléatoire par run") à une
-   ligne par effet en français simple, et chaque palier verrouillé affiche
-   la performance exacte qui l'ouvre (cf. state.js, seuils mesurés). ==== */
-function scr_ascension_tower(){
-  const meta=loadMetaStats();
-  const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
-  const modeAide={bracket64:'Un tournoi à 64 combattants : six victoires d\u2019affilée pour le remporter.',
-    ladder_100:'Un classement de 100 combattants : tu pars 100e et tu défies plus fort que toi pour remonter.',
-    boss_run:'Cinq adversaires d\u2019élite à enchaîner, sans reprendre son souffle.'};
-  const mode=G._towerMode||'bracket64';
-  const unlocked=gauntletAscLevel(meta,mode);
-  const modeTabs=Object.keys(modeLabel).map(m=>`<span class="pill ${mode===m?'on':''}" onclick="CL.setTowerMode('${m}')">${modeLabel[m]}</span>`).join('');
-  const ctx={mode,unlocked,meta};
-  const tiers=[];
-  for(let i=0;i<=GAUNTLET_ASC_MAX;i++) tiers.push(ascensionTierCard(i,ctx));
-  return `<div class="scr"><div class="bar"><span class="eyebrow">🗼 Tour d\u2019Ascension — ${modeLabel[mode]}</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
-   <p class="lede small mt" style="text-align:center">Chaque palier franchi ouvre le suivant : les adversaires deviennent plus forts, mais rapportent plus.</p>
-   <div class="pills mb" style="justify-content:center">${modeTabs}</div>
-   <div class="card mb" style="background:var(--panel2);padding:10px 12px"><span class="muted small">${modeAide[mode]}</span></div>
-   ${tiers.join('')}
-   <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
-  </div>`;
-}
-/* ==== [FIN ANCRE] ==== */
-/* ==== [FIN ANCRE] ==== */
-/* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_CAPSTONE_NEMESIS] — n'apparaît qu'une fois 5 rivaux
-   historiques battus (meta.gauntletRivalsDefeated, jamais purgé, alimenté
-   par claimGauntletBounty() en ui-03). Condition indépendante de
-   checkLegendUnlock('mode_boss') : les deux se cumulent naturellement
-   puisqu'il faut déjà avoir débloqué et joué le Boss Run normal pour
-   accumuler 5 rivaux vaincus dedans, mais rien ne l'impose techniquement. ==== */
-function gauntletCapstoneEntry(){
-  const meta=loadMetaStats();
-  const n=(meta.gauntletRivalsDefeated||[]).length;
-  if(n<5) return '';
-  return `<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--blood);color:var(--blood)" onclick="CL.startBossRunCapstone()">BOSS RUN — LES ANCIENS BOURREAUX
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Vos 5 pires némésis historiques, régénérées pour la revanche finale</span></button>`;
-}
-/* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_RECORDS_ARCHETYPE] — écran dédié, sur le modèle
-   visuel du Panthéon carrière (scr_hof, eyebrow+bar+liste), mais SANS
-   persistance de combattant individuel : uniquement les scores lus dans
-   meta.gauntletBestByArchetype (state.js), cohérent avec le principe déjà
-   documenté ailleurs que les combattants arcade sont jetables et non
-   persistés. injectExtendedArchetypes() garantit que les archétypes
-   légendes/achetés débloqués apparaissent dans la grille, pas seulement les
-   23 de base. ==== */
-function scr_archetype_pantheon(){
-  injectExtendedArchetypes();
-  const meta=loadMetaStats();
-  const modeLabel={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
-  const mode=G._archPantheonMode||'bracket64';
-  const maxAsc=gauntletAscLevel(meta,mode);
-  const asc=clamp(parseInt(G._archPantheonAsc,10)||0,0,maxAsc);
-  const rows=ARCADE_ARCHETYPES.map(a=>{
-    const val=gauntletBestByArchetypeGet(meta,mode,asc,a.nick);
-    const label=val===undefined?'—':(mode==='boss_run'?`${val}/5`:mode==='ladder_100'?`#${val}`:(val>=7?'Tournoi remporté':`Palier ${val}`));
-    return `<div class="mono small" style="display:flex;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--line)">
-      <span>${a.flag||''} ${esc(a.nick)}</span>
-      <span style="color:${val===undefined?'var(--muted)':'var(--gold)'};font-weight:${val===undefined?'normal':'bold'}">${label}</span>
+    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.go('intro')">CARRIÈRE COMPLÈTE
+      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Montez les échelons, un combat à la fois</span></button>
+    <div class="hr" style="margin:24px 0"></div>
+    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
+      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>
+    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('hof')">VOIR LE PANTHÉON
+      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Toutes les légendes retraitées</span></button>
     </div>`;
-  }).join('');
-  const modeTabs=Object.keys(modeLabel).map(m=>`<span class="pill ${mode===m?'on':''}" onclick="CL.setArchPantheonMode('${m}')">${modeLabel[m]}</span>`).join('');
-  let ascTabs='';
-  if(maxAsc>0){
-    let btns='';
-    for(let i=0;i<=maxAsc;i++) btns+=`<span onclick="CL.setArchPantheonAsc(${i})" style="display:inline-block;cursor:pointer;border:1px solid ${i===asc?'var(--gold)':'var(--line)'};color:${i===asc?'var(--gold)':'var(--muted)'};padding:3px 10px;margin:0 4px 4px 0;border-radius:2px;font-size:11px" class="mono">A${i}</span>`;
-    ascTabs=`<div style="margin:8px 0">${btns}</div>`;
-  }
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon des archétypes — ${modeLabel[mode]}</span><span class="eyebrow x" onclick="CL.go('gauntlet_menu')">✕</span></div>
-   <h2 class="disp">Meilleur run par archétype</h2>
-   <p class="lede small">Chaque archétype garde son propre record — battre l\u2019un ne touche jamais celui d\u2019un autre. Uniquement des scores : les combattants arcade sont jetables et non persistés.</p>
-   <div class="pills mb">${modeTabs}</div>
-   ${ascTabs}
-   <div class="glass" style="background:var(--panel2);border:1px solid var(--line);margin-top:8px">${rows}</div>
-   <button class="btn ghost mt" onclick="CL.go('gauntlet_menu')">← Retour au Gauntlet</button>
-  </div>`;
 }
-/* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: GAUNTLET_MENU_HIERARCHIE] — le bloc du défi du jour (retiré)
-   (ajout #2, ancre GAUNTLET_DEFI_JOUR_V2 plus haut) remplace celle-ci —
-   ancienne version retirée pour éviter une redéclaration de fonction (la
-   dernière définition l'aurait de toute façon emporté silencieusement en
-   JS, mais garder les deux aurait été trompeur à la lecture). ==== */
-/* ==== [ANCRE: CORRECTIF_MENU_GAUNTLET_COMPACT] — bug remonté (10d élargi à
-   cet écran) : 4 liens secondaires (Panthéon, Tour d'Ascension, Profil,
-   Boutique) empilaient chacun un bouton pleine largeur, précédés d'un
-   en-tête "c) BOUTIQUE" séparé rien que pour le dernier — Boutique n'a rien
-   d'une nature différente des 3 autres (tous des raccourcis annexes, aucun
-   n'est un format de jeu). Regroupés en grille 2×2 (.leg-grid, déjà
-   utilisée pour le Panthéon carrière) sous un seul en-tête, sans le
-   numérotage "a)/b)/c)" qui n'apportait rien à la lecture. ==== */
-function scr_gauntlet_menu(){
-  return `<div class="scr center intro">
-   <div class="eyebrow sage">Mode Arcade</div>
-   <h2 class="disp big">GAUNTLET</h2>
-   <p class="lede">Sélectionnez le format de l\u2019épreuve.</p>
-   ${nextObjectiveBlock()}
-   <div class="eyebrow mb mt" style="color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px">MODES DE JEU CLASSIQUES</div>
-   <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.startArcade()">BRACKET 64 (CLASSIQUE)
-     <span class="mono" style="display:block;font-size:11px;margin-top:6px">Tournoi à élimination directe</span>${gauntletMenuBestTag('bracket64')}</button>
-   ${gauntletAscPicker('bracket64')}
-   <button class="btn" style="font-size:18px;padding:16px;margin-top:12px;border-color:var(--sage);color:var(--sage)" onclick="CL.startLadder100()">CLASSEMENT MONDIAL DES 100
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Grimpez du rang #100 jusqu\u2019au sommet</span>${gauntletMenuBestTag('ladder_100')}</button>
-   ${gauntletAscPicker('ladder_100')}
-   ${checkLegendUnlock('mode_boss')?`<button class="btn ghost" style="font-size:16px;padding:16px;margin-top:12px;border-color:var(--gold);color:var(--gold)" onclick="CL.startBossRun()">BOSS RUN
-     <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">5 champions d\u2019affilée, finitions uniquement</span>${gauntletMenuBestTag('boss_run')}</button>
-   ${gauntletAscPicker('boss_run')}`:''}
-   ${gauntletCapstoneEntry()}
-   <div class="eyebrow mb mt" style="color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px">Autres accès</div>
-   <div class="leg-grid">
-     <button class="btn ghost" style="margin:0;border:1px dashed var(--line);padding:12px 8px;font-size:12px" onclick="CL.go('archetype_pantheon')">🏛️ Panthéon des archétypes</button>
-     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);padding:12px 8px;font-size:12px" onclick="CL.viewAscensionTower('bracket64')">🗼 Tour d\u2019Ascension</button>
-     <button class="btn ghost" style="margin:0;border:1px dashed var(--gold);color:var(--gold);padding:12px 8px;font-size:12px" onclick="CL.goShopGauntlet()">🛒 Boutique</button>
-   </div>
-   <div class="fld" style="margin-top:24px">
-     <label class="muted small">Graine de la run (optionnel — laissez vide pour aléatoire, ressaisissez la même pour rejouer une run identique)</label>
-     <input id="gauntlet-seed" maxlength="24" placeholder="ex. 20260809" value="${esc(G._pendingSeed||'')}" oninput="CL.setGauntletSeed(this.value)">
-   </div>
-   <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button>
-  </div>`;
-}
-/* ==== [FIN ANCRE] ==== */
-/* ==== [FIN ANCRE] ==== */
-const GAUNTLET_RELIC_MODE_LABEL={bracket64:'Bracket 64',ladder_100:'Ladder 100',boss_run:'Boss Run'};
-/* ==== [FIN ANCRE] ==== */
+
 function scr_intro(){ const c=hasSave('career');
   return `<div class="scr center intro">
    <div class="eyebrow">Simulateur de gestion MMA</div>
@@ -535,21 +301,7 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
      ctx.divDescended sont lus sur f.history (cutTier/div posés par
      resolveFight(), ui-05, ANCRE V4_C18_CUT_HISTORY) — jamais recalculés
      ailleurs, jamais dupliqués. */
-  if(!TEXT_POOLS['faith_cutting_line']) registerTextPool('faith_cutting_line',FAITH_CUTTING_LINES);
-  const cutDivs=DIVISIONS[f.gender]||[];
-  const cutCurIdx=cutDivs.findIndex(d=>d.id===f.div);
-  const cutHist=f.history||[];
-  const cutLast=cutHist.length?cutHist[cutHist.length-1]:null;
-  const cutPrevIdx=(cutLast&&cutLast.div)?cutDivs.findIndex(d=>d.id===cutLast.div):-1;
-  const cutSecondLast=cutHist.length>=2?cutHist[cutHist.length-2]:null;
-  const cutLine=esc(txtPick('faith_cutting_line',{
-    rankTier:cr.tier,
-    isHeavy:(typeof isHeavy==='function')&&isHeavy(f),
-    veteran:f.age>=34,
-    thirdComplique:cr.tier==='complique'&&!!cutLast&&cutLast.cutTier==='complique'&&!!cutSecondLast&&cutSecondLast.cutTier==='complique',
-    divDescended:cutPrevIdx>=0&&cutCurIdx>=0&&cutCurIdx<cutPrevIdx,
-    F:f
-  }));
+  const cutLine = (cr.tier === 'sans_effort') ? "La balance valide le poids sans une goutte de sueur." : (cr.tier === 'facile') ? "Un cutting propre, l'énergie est intacte." : (cr.tier === 'normal') ? "La routine habituelle des pesées." : "Le corps a souffert pour faire le poids.";
   const wcHtml={
     sans_effort:`<div class="card mt" style="border-left:3px solid var(--sage);padding-left:14px"><div class="eyebrow mb" style="color:var(--sage)">Pesée sans effort</div>
       <div class="mono small" style="margin-top:6px">Poids actuel : <b>${cr.walk.toFixed(1)}kg</b> <span class="muted">(limite ${cr.limit}kg)</span></div>
@@ -763,21 +515,7 @@ function scr_legend_detail(){
      jumelle dans state.js : excl_mask_oni/excl_gloves_relic figurent
      désormais directement dans LEGEND_UNLOCKABLES (l'offre du jour a été
      retirée), donc ce panneau les voit sans traitement particulier. ==== */
-  const ownedDecorations=LEGEND_UNLOCKABLES.filter(i=>i.cat==='Décorations du Panthéon'&&checkLegendUnlock(i.id));
-  /* ==== [FIN ANCRE] ==== */
-  const decorationPanel=ownedDecorations.length?`<div class="card mb"><div class="eyebrow mb">Décorations (${decorations.length}/3)</div>
-     <div class="muted small mb" style="font-size:10.5px">Un déblocage de compte : la même décoration peut être portée par plusieurs combattants à la fois.</div>
-     ${ownedDecorations.map(item=>{
-       const equippedHere=decorations.includes(item.id);
-       const canEquip=!equippedHere&&decorations.length<3;
-       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line)">
-         <b class="small">${item.name}</b>
-         ${equippedHere?`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;border-color:var(--blood);color:var(--blood);flex:0 0 auto" onclick="CL.unequipDecoration('${f.id}','${item.id}')">Retirer</button>`
-           :`<button class="btn ghost" style="padding:5px 10px;width:auto;font-size:11px;flex:0 0 auto" onclick="CL.equipDecoration('${f.id}','${item.id}')" ${canEquip?'':'disabled'}>Équiper</button>`}
-       </div>`;
-     }).join('')}
-   </div>`:'';
-  /* ==== [FIN ANCRE] ==== */
+  const decorationPanel = '';
   return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    ${G._decoMsg?(()=>{ const m=G._decoMsg; G._decoMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
@@ -1014,26 +752,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
    ou rien) reste seul visible, comme demandé. Même habillage visuel
    (.card.glass.narr) que le bloc de citation d'ambiance juste au-dessus,
    pour rester dans le même bloc visuel de bas d'écran. ==== */
-function ghostComparisonHtml(){
-  if(!G.arcade || !G.arcade.active) return '';
-  const meta=loadMetaStats();
-  const ghostLog=gauntletGhostLogGet(meta,G.arcade.mode,G.arcade.asc||0,G.f.nick);
-  if(!ghostLog || !ghostLog.length) return '';
-  const pos=(G.arcade.ghostFights||[]).length;
-  const ghost=ghostLog[pos-1];
-  const cur=G.arcade.ghostFights&&G.arcade.ghostFights[pos-1];
-  if(!ghost || !cur) return '';
-  const curDmg=cur.dmgHead+cur.dmgBody+cur.dmgLegs, ghostDmg=ghost.dmgHead+ghost.dmgBody+ghost.dmgLegs;
-  const lines=[];
-  if(curDmg!==ghostDmg) lines.push(`${curDmg<ghostDmg?'Moins':'Plus'} de dégâts encaissés qu\u2019à ce stade de ta meilleure run (${curDmg} contre ${ghostDmg}).`);
-  if(cur.td!==ghost.td) lines.push(`${cur.td>ghost.td?'Plus':'Moins'} d\u2019amenées au sol qu\u2019à ce stade de ta meilleure run (${cur.td} contre ${ghost.td}).`);
-  if(cur.kd!==ghost.kd) lines.push(`${cur.kd>ghost.kd?'Plus':'Moins'} de knockdowns qu\u2019à ce stade de ta meilleure run (${cur.kd} contre ${ghost.kd}).`);
-  if(!lines.length) lines.push('Exactement le même rythme qu\u2019à ce stade de ta meilleure run.');
-  return `<div class="card glass narr" style="background:var(--panel2);padding:16px;border-left:3px solid var(--gold-d)">
-    <div class="eyebrow gold mb">${SVG.star} Le Fantôme — combat ${pos}</div>
-    ${lines.map(l=>`<div class="small muted" style="padding:2px 0">${l}</div>`).join('')}
-  </div>`;
-}
+function ghostComparisonHtml(){ return ''; }
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: CARTE_MOUVEMENT_SIGNATURE] — met en avant le geste devenu
@@ -1152,7 +871,6 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
           (engine.js) réutilise le même tri, ici affiché à côté du rang de
           division — absent tant qu'aucun combat n'a encore été disputé. ==== -->
      ${((f.W||0)+(f.L||0)+(f.D||0))>0?`<div class="story" style="position:relative;z-index:2"><b>Classement.</b> #${divRank(f)} en division · #${p4pRank(f)} au P4P.</div>`:''}
-     ${(G.faith)?faithCareerStatsGrid(f,G.faith):''}
      ${championBadgeCard(f)}
      ${signatureMoveCard(f)}
      ${f.skills.length?(()=>{
