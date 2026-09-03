@@ -1,14 +1,7 @@
 "use strict";
 /* CAGE LEGACY — state/state-hof.js
    Panthéon (Hall of Fame) persistant (localStorage HOF_KEY), hors wipe() de
-   la carrière courante. enshrine() appelle updateMetaStatsOnRetirement()
-   (state-analytics.js) et awardLegendPoints() (state-shop.js) ;
-   equipPantheonDecoration() appelle checkLegendUnlock() (state-shop.js) ;
-   awardLegendPoints() (state-shop.js) appelle hofScore() (ici). Dépendance
-   croisée réelle avec state-shop.js, signalée en Phase 1 : aucun ordre
-   linéaire ne satisfait les deux sens à la fois, mais résolution à
-   l'exécution (scripts classiques) donc sans effet sur le fonctionnement —
-   il suffit que les deux fichiers soient chargés avant tout appel réel. */
+   la carrière courante. */
 /* ==== [ANCRE: PANTHEON] — hors wipe(), survit d'une carrière à l'autre ==== */
 const HOF_KEY='cage-legacy-hof';
 function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY))||[]; }catch(e){ return []; } }
@@ -21,19 +14,6 @@ function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catc
    décoration reste possédée (meta.unlockedItems, jamais touché ici) donc
    immédiatement rééquipable ailleurs — pas de code de "recyclage" séparé
    nécessaire. */
-/* ==== [ANCRE: CORRECTIF_DECORATION_UNIQUE_PANTHEON] — bug remonté : une
-   décoration achetée est un déblocage de COMPTE, permanent (comme tout
-   LEGEND_UNLOCKABLES) — mais l'équiper ne pouvait s'appliquer qu'à UN SEUL
-   combattant à la fois dans tout le Panthéon (la boucle ci-dessous la
-   retirait silencieusement de tout autre porteur). Résultat concret : dès
-   qu'on possède 2-3 types de décoration, on finit par tout concentrer sur
-   une seule légende "favorite", et équiper une décoration déjà portée
-   ailleurs revient à la voler sans prévenir — ressenti comme "je ne peux
-   personnaliser qu'un seul combattant". Chaque combattant a toujours son
-   propre plafond de 3 décorations SIMULTANÉES (ligne juste au-dessus,
-   inchangée), mais un même type de décoration peut désormais être porté par
-   plusieurs légendes en même temps — c'est un déblocage de compte, pas un
-   objet physique unique. ==== */
 /* ==== [ANCRE: ALBUM_LEGEND_STYLE] — refonte demandée : le Panthéon adopte
    le langage "carte à collectionner" de L'Album (déjà choisi en Boutique
    pour la Vitrine ; ici son équivalent Panthéon). Deux fonctions PARTAGÉES,
@@ -81,24 +61,6 @@ function legendDecoStyle(decorations){
     recordCss:hasDiamond?'background:linear-gradient(135deg,#b9f2ff,#ffffff,#8ec9d8);-webkit-background-clip:text;background-clip:text;color:transparent':'',
     stickers
   };
-}
-/* ==== [FIN ANCRE] ==== */
-function equipPantheonDecoration(hofId,decId){
-  if(!checkLegendUnlock(decId)) return {success:false,msg:'Décoration non possédée.'};
-  const list=loadHOF(); const f=list.find(x=>String(x.id)===String(hofId));
-  if(!f) return {success:false,msg:'Combattant introuvable.'};
-  f.decorations=f.decorations||[];
-  if(f.decorations.includes(decId)) return {success:false,msg:'Déjà équipée sur ce combattant.'};
-  if(f.decorations.length>=3) return {success:false,msg:'Maximum 3 décorations par combattant.'};
-  f.decorations.push(decId); saveHOF(list);
-  return {success:true,msg:'Décoration équipée.'};
-}
-/* ==== [FIN ANCRE] ==== */
-function unequipPantheonDecoration(hofId,decId){
-  const list=loadHOF(); const f=list.find(x=>String(x.id)===String(hofId));
-  if(!f||!f.decorations) return {success:false,msg:'Rien à retirer.'};
-  f.decorations=f.decorations.filter(d=>d!==decId); saveHOF(list);
-  return {success:true,msg:'Décoration retirée.'};
 }
 /* ==== [FIN ANCRE] ==== */
 // Bonus double champion (+150, cf. ANCRE: BONUS_DOUBLE_CHAMPION dans engine.js) :

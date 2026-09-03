@@ -114,7 +114,7 @@ npm test             # suite de tests (node --test), 9 fichiers
 npm run check        # lint + test — DOIT être vert avant toute livraison
 ```
 
-Au moment de la rédaction : **62 tests**, répartis sur 9 fichiers dans
+Au moment de la rédaction : **39 tests**, répartis sur 9 fichiers dans
 `tests/` (`analytics.test.js`, `career.test.js`, `champChamp.test.js`,
 `hallOfFame.test.js`, `invariants.test.js`, `proceduralNarrative.test.js`,
 `ranking.test.js`, `regressionFixes.test.js`, `saveSystem.test.js`), tous
@@ -122,7 +122,7 @@ passants (`npm run check` vert).
 
 **Règle** : aucune livraison sans `npm run check` vert. Un bug corrigé =
 un test ajouté dans `tests/regressionFixes.test.js` (déjà le fichier le
-plus fourni : 18 tests au moment de la rédaction, un par correctif).
+plus fourni : 8 tests au moment de la rédaction, un par correctif).
 
 ## 8. Règles de modification
 
@@ -144,20 +144,27 @@ plus fourni : 18 tests au moment de la rédaction, un par correctif).
 
 ## 9. Dette connue
 
-- **`ui-08-controller-arena.js` fait 4304 lignes** — de loin le plus gros
-  fichier du dépôt (le suivant, `ui-04a-faith-screens.js`, en fait 2349). Il
+- **Les modes Faith et Gauntlet (avec la boutique associée) ont été
+  entièrement retirés du jeu**, y compris leurs 6 fichiers dédiés
+  (`data-faith-content.js`, `state-faith.js`, `ui-04a-faith-screens.js`,
+  `state-gauntlet.js`, `ui-04b-gauntlet-screens.js`, `state-shop.js`) —
+  seul le mode Carrière Complète reste jouable. Une purge complète du code
+  et de la documentation résiduels a été faite après coup (fonctions
+  orphelines, branches mortes conditionnées par `G.faith`/`G.gauntlet`/
+  `G.arcade`, sauvegardes historiques purgées par `migrate()`) ; si une
+  ancre ou un commentaire mentionne encore ces modes ailleurs dans le
+  dépôt, il s'agit de documentation historique volontairement conservée
+  (rationale d'un correctif passé) ou de données légitimes d'anciennes
+  légendes du Panthéon (`f.gameMode`, `f.faithNemesisId`, `f.faithTraits`),
+  jamais de code vivant.
+- **`ui-08-controller-arena.js` fait ~994 lignes** — le plus gros fichier
+  du dépôt, de très peu devant `ui-06-career-screens.js` (~992). Il
   concentre le routeur d'écrans (`CL`) et une bonne partie du rendu Canvas
   de l'arène ; un candidat naturel à un futur découpage, non entrepris à ce
   jour.
-- **Déséquilibre de couverture des tests.** Aucun fichier de test dédié au
-  mode Faith ni au mode Gauntlet — ils n'apparaissent que ponctuellement
-  dans `invariants.test.js`, `regressionFixes.test.js` et
-  `saveSystem.test.js` (Faith), et `regressionFixes.test.js` (Gauntlet).
-  Ce sont pourtant les fichiers les plus modifiés dans l'historique récent
-  (`ui-04b-gauntlet-screens.js`, `ui-03-contracts-arcade-data.js`,
-  `ui-08-controller-arena.js` en tête).
-- **`npm run lint:content` signale 27 points** au moment de la rédaction :
-  10 anglicismes, 17 phrases visibles jugées trop longues (LOI 6). Ce
+- **`npm run lint:content` signale 1 point** au moment de la rédaction :
+  1 anglicisme (« BOUT », ui-01), 0 phrase visible jugée trop longue
+  (LOI 6), 0 champ `G.f./G.faith./G.arcade.` écrit mais jamais relu. Ce
   linter est informatif — il n'est pas inclus dans `npm run check` et ne
   bloque pas une livraison à lui seul, mais ses signalements sont à
   regarder avant de merger du contenu narratif.

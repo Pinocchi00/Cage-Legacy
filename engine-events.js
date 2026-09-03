@@ -420,29 +420,3 @@ function generatePlayerContextualNews(f,opp,res,arcBeat){
 /* ==== [FIN ANCRE] ==== */
 
 
-/* ==== [ANCRE: WORLD_TICK] — Plan V3 LOT 0 §4.3. Simulation de fond annuelle,
-   silencieuse et synchrone. Ne réinvente pas advanceRoster() (ui-01) qui
-   simule déjà les combats PNJ-vs-PNJ, applique un vrai delta Elo et fait
-   vieillir/partir en retraite le roster — c'est déjà la mécanique visée par
-   « les records doivent progresser de façon plausible » (corrige P16 :
-   0-1 à 25-4 en 4 combats n'était PAS un défaut d'advanceRoster() mais du
-   classement qui se recalculait entièrement au lieu d'incrémenter, déjà vrai
-   ici via applyResult()). worldTick() enveloppe advanceRoster() et y ajoute
-   la mémoire de classement inter-saison (F.rankHistory) que P20/LOT 7
-   liront pour afficher un delta de rang réel. La progression indépendante
-   des sparring-partners (Person) et la composition de carte (undercard)
-   sont explicitement DIFFÉRÉES à LOT 2 et LOT 6 — ce sont leurs propres
-   items (P01/P18), pas une omission ici. Budget : <50ms pour un roster
-   complet (mesuré en dev, jamais laissé en production — pas de
-   console.time ici, cf. §6.4). */
-function worldTick(year){
-  advanceRoster();
-  const F=G.faith;
-  if(F && G.f){
-    if(!Array.isArray(F.rankHistory)) F.rankHistory=[];
-    F.rankHistory.push({year:year!=null?year:F.year,rank:divRank(G.f),p4p:Math.round(p4pScore(G.f))});
-    const MAX_HISTORY=60; // ~carrière la plus longue plausible (§6.2 INV-06 vise 25-40 combats, marge large)
-    while(F.rankHistory.length>MAX_HISTORY) F.rankHistory.shift();
-  }
-}
-/* ==== [FIN ANCRE] ==== */

@@ -402,7 +402,7 @@ function finishTrainingFlow(pendingOppMalus){
         G.lastMsg=`Suite à de nombreuses coupes de poids compliquées, vous passez en ${G.f.divName}. Vos stats physiques se sont adaptées à votre nouveau gabarit.`;
       }
       else G.lastMsg='Pesée ratée. Le combat est annulé.';
-      G.screen=G.faith?'faith_hub':'hub'; save(); render(); return; // 3e coupe ratée : conséquence déjà tranchée plus haut
+      G.screen='hub'; save(); render(); return; // 3e coupe ratée : conséquence déjà tranchée plus haut
     }
     // ==== [ANCRE: CORRECTIF_CATCHWEIGHT_PLAFOND] — item demandé : plafond
     // strict à 1,3kg (3lbs) — au-delà, l'organisation refuse systématiquement
@@ -463,29 +463,6 @@ function finishTrainingFlow(pendingOppMalus){
   else { proceedToFight(); }
 }
 function proceedToFight(){
-  const opp=G.fight.opp, kind=G.fight.kind;
-  // Face-à-face / pesée (Faith uniquement — la Carrière Complète a déjà son
-  // propre événement de pesée ratée dans chooseOpponent(), pas besoin d'un
-  // deuxième rituel de pesée qui ferait doublon).
-  if(G.faith && !G.fight._faceoffDone){
-    G.fight._faceoffDone=true;
-    const isRanked=divRank(opp)<=15 && (opp.W+opp.L+(opp.D||0))>0;
-    if(kind==='title' || kind==='defense' || (isRanked && rnd()<0.40)){
-      const scenarios=[
-        {title:'Pesée : le coup de pression',
-         text:`Sous les flashs des journalistes, ${esc(opp.name)} s\u2019approche front contre front et vous pousse violemment au niveau du torse. L\u2019arène retient son souffle.`,
-         btn:'Sourire avec un sang-froid glacial',actionId:'faceoff_smile',
-         btn2:'Le repousser avec agressivité',actionId2:'faceoff_shove'},
-        {title:'Pesée : guerre verbale',
-         text:`Lors du face-à-face, ${esc(opp.name)} commence à vous insulter à voix basse, ciblant directement votre entourage et votre dernier camp d\u2019entraînement.`,
-         btn:'L\u2019ignorer royalement',actionId:'faceoff_ignore',
-         btn2:'Répondre du tac au tac',actionId2:'faceoff_talkback'}
-      ];
-      G.activeEvent=pick(scenarios);
-      G.screen='event'; save(); render();
-      return;
-    }
-  }
   G.screen='plan'; save(); render();
 }
 /* ==== [ANCRE: RENDU_EFFETS_EVENEMENT] — affichage uniforme des effets d'un

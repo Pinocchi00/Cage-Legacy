@@ -85,26 +85,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // ==== [FIN ANCRE] ====
   const adaptivePlanForOpp=(typeof getAdaptiveNPCTactics==='function')?getAdaptiveNPCTactics(opp,G.f):null;
   const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m);
-  /* ==== [ANCRE: FAITH_PERK_JUGES] — G.faith.perks.judges était posé par
-     buyFaithPerk() (ui-08) et relu par AUCUN code. Consommé ici, une seule
-     fois, sur une décision serrée (2 juges sur 3) uniquement : on retourne
-     le vote du juge le plus proche de basculer plutôt que d'écraser
-     res.winner seul, ce qui désynchroniserait l'affichage des cartes des
-     juges (res.judges, montré tel quel par scr_result/scr_faith_archives)
-     du verdict annoncé — exactement ce que l'ancre JUGES_10PT_VERDICT
-     (engine-combat.js) garantit déjà pour un combat normal. ==== */
-  if(G.faith && G.faith.perks && G.faith.perks.judges && isDecisionLike(res.method) && res.winner==='B'){
-    const cards=['j1','j2','j3'].map(k=>({k,a:res.judges[k][0],b:res.judges[k][1]}));
-    const forB=cards.filter(c=>c.b>c.a);
-    if(forB.length===2){
-      const flip=forB.sort((x,y)=>(x.b-x.a)-(y.b-y.a))[0];
-      G.faith.perks.judges=false;
-      res.judges[flip.k]=[flip.b,flip.a];
-      res.scoreA=res.judges.j1[0]+res.judges.j2[0]+res.judges.j3[0];
-      res.scoreB=res.judges.j1[1]+res.judges.j2[1]+res.judges.j3[1];
-      res.winner='A'; res.method='Décision partagée';
-    }
-  }
   const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
   if(typeof evaluateSponsor==='function') evaluateSponsor(res);
   // ==== [ANCRE: NARRATIF_APPEL] — calculé ici (mêmes données réelles qu'avant),
@@ -120,16 +100,9 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // vérifié par simulation (harnais jsdom) : chaque entrée de f.history porte
   // bien oppRank, y compris en carrière Faith, où oppRankBefore vient du même
   // divRank(opp) que côté Carrière classique. ====
-  /* ==== [ANCRE: V4_C9_SEASON_FAITH] — `season` lisait G.season.year, l'horloge
-     du mode Carrière classique — jamais avancée en Faith (qui a la sienne,
-     G.faith.year, FAITH_CALENDRIER). Toute entrée de f.history posée en
-     carrière Faith portait donc `season:1`, quelle que soit l'année réelle du
-     combat : faithJourneyBlock() (C9) ne peut pas relier un combat à la ligne
-     de saison qui l'archive (faithArchiveYear, `journey[].year`) sans cette
-     donnée juste. ==== */
   { const last=G.f.history[G.f.history.length-1];
     if(last){ last.oppName=opp.name; last.oppFlag=opp.flag; last.oppRank=oppRankBefore;
-      last.season=G.faith?(G.faith.year||1):((G.season&&G.season.year)||1);
+      last.season=(G.season&&G.season.year)||1;
       last.weighInPassed=(G.fight.cutResult&&typeof G.fight.cutResult.weighInPassed==='boolean')?G.fight.cutResult.weighInPassed:true;
       /* ==== [ANCRE: V4_C18_CUT_HISTORY] — Plan V4 LOT 7 §C18 : `cutTier`/`div`
          n'existaient sur aucune entrée d'historique — purement informatif
@@ -466,20 +439,11 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     else { G.f.bossUnimpressed--; G.f.rankBoost=(G.f.rankBoost||0)-10; }
   }
   let champChampDecision=false;
-  /* ==== [ANCRE: V3_TITLE_ATTEMPTS] — Plan V3 LOT 6 §P18 : "la ligne finale
-     […] doit varier selon le chemin parcouru, pas selon le résultat seul".
-     Compte les tentatives de titre Faith AVANT ce combat-ci (capturé avant
-     l'incrément, cf. titleAttemptsBefore transmis à G.pending plus bas) —
-     un premier essai réussi et une ceinture arrachée après 3 échecs ne
-     méritent pas la même ligne de consécration. ==== */
-  const titleAttemptsBefore=(G.faith&&G.faith.titleAttempts)||0;
-  if(G.faith && (kind==='title'||kind==='defense')) G.faith.titleAttempts=titleAttemptsBefore+1;
   // titre
   if(win && kind==='title'){
     G.f.champion=(G.f.org>=5?'monde':G.f.org===4?'europe':G.f.org===3?'national':G.f.org===2?'regional':'local'); G.f.titles++; G.roster.forEach(o=>o.champion=null);
     milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.medal} CEINTURE ${orgDisplayName(G.f).toUpperCase()}</span>`;
     recordTitleChange(G.f.org,G.f.divName,G.f.name,opp.name,orgDisplayName(G.f));
-    if(G.faith) G.faith.pendingTitleConsecration={type:'won',oppId:opp.id,titleAttemptsBefore,wasNemesis:opp.id===G.f.faithNemesisId};
   }
   else if(win && kind==='defense'){ G.f.defenses++;
     /* ==== [ANCRE: CORRECTIF_CHAMPCHAMPDEFENSES_SYNC] — champChampDefenses{}
@@ -494,20 +458,8 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // sur l'écran de résultat d'une défense ordinaire).
     milestone=G.f.champChampBelt?`Titre défendu (${G.f.defenses}) — toujours Double Champion (${G.f.divName} + ${G.f.champChampBelt})`:'Titre défendu ('+G.f.defenses+')';
     recordTitleDefense(G.f.org,G.f.divName,G.f.name);
-    if(G.faith) G.faith.pendingTitleConsecration={type:'defended',oppId:opp.id,titleAttemptsBefore};
   }
   else if(kind==='defense' && res.winner==='D'){ milestone='Titre conservé (match nul)'; }
-  /* ==== [ANCRE: V3_TITLE_LOSS_CLAUSE] — Plan V3 LOT 6 §5.6.1.b : la clause
-     de revanche posée à la négociation (scr_faith_title_negotiation, ui-08)
-     ne sert QUE si le titre est perdu — elle garantit que la PROCHAINE
-     offre (faithEnsureOffer, ui-08) proposera le même adversaire, au lieu
-     d'un tirage normal par l'agent. Consommée ici, au moment précis où
-     "perdre" devient un fait acquis, jamais avant. */
-  else if(!win && res.winner!=='D' && kind==='title' && G.faith && G.faith.pendingRevengeClause){
-    G.faith.guaranteedRematchId=opp.id;
-    G.faith.pendingRevengeClause=false;
-  }
-  /* ==== [FIN ANCRE] ==== */
   else if(win && kind==='champchamp_title'){
     // Supercombat pour la double ceinture : gagné. Ceinture stockée à part —
     // f.champion (ceinture d'origine) n'est jamais touché ici.
@@ -576,17 +528,10 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // typique d'une dizaine de saisons, le delta (+0,5/saison) ajoute
   // l'équivalent de ~5 combats sans changer le rythme jeune prospect (déjà
   // dense) ni l'âge de retraite.
-  /* ==== [ANCRE: V3_HORLOGE_UNIQUE] — Plan V4 §2.1, cause racine de P21 point 4 :
-     en mode Faith le temps appartient au CALENDRIER (12 mois, FAITH_CALENDRIER)
-     et le vieillissement est déjà appliqué une fois par saison par
-     nextFaithYear() (ui-08:2301). Le compteur _fy ci-dessous est l'horloge du
-     mode Carrière, où le temps avance par combat. Les deux tournaient ensemble :
-     ~2 ans par saison, carrière de 10 saisons au lieu de 19. ==== */
   let endOfSeason=false;
-  const modeFaith=!!G.faith;
   const fightsPerYear=(G.f.age>=18&&G.f.age<=23)?RI(3,4):RI(1,4);
   G.f._fy=(G.f._fy||0)+1;
-  if(!modeFaith && G.f._fy>=fightsPerYear){ const declineLog=applyAging(G.f); G.f._fy=0; endOfSeason=true;
+  if(G.f._fy>=fightsPerYear){ const declineLog=applyAging(G.f); G.f._fy=0; endOfSeason=true;
     // ==== [ANCRE: NOTIF_DECLIN_VIEILLESSE] (suite, voir applyAging) — le
     // joueur doit être informé explicitement quand l'âge fait baisser un
     // attribut, plutôt que de le découvrir sans explication sur sa fiche.

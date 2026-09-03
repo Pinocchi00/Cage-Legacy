@@ -291,20 +291,8 @@ function makeFighter(opt={}){ const optDiv=divById(opt.div);
 }
 
 /* ------------------- canaux de combat dérivés des 30 attributs ------------ */
-/* ==== [ANCRE: GAUNTLET_SANS_MORAL_FORME] — item demandé : le Gauntlet ne
-   connaît plus ni moral ni forme. Neutralisation à la SOURCE plutôt qu'au
-   niveau de l'affichage : masquer les deux jauges en laissant `dyn` actif
-   aurait produit une mécanique invisible (±10 sur tous les canaux) — exactement
-   le travers que l'ancre GAUNTLET_BLESSURE_RUN cherchait à éviter. Le test porte
-   sur G.arcade.active, donc il coupe le canal SYMÉTRIQUEMENT pour le joueur et
-   pour l'adversaire : aucun des deux camps n'y gagne. La carrière et le mode
-   Faith sont strictement inchangés — c'est le seul point du moteur où moral et
-   forme entrent dans le calcul de combat. L'usure d'une run passe désormais
-   exclusivement par les séquelles d'attributs (GAUNTLET_BLESSURE_RUN), qui sont
-   lisibles, arbitrables et déjà en place. ==== */
 function eff(f){ const a=f.attrs||{};
-  const _arcade=(typeof G!=='undefined' && G && G.arcade && G.arcade.active);
-  const dyn=_arcade?0:((num(f.morale)-50)*0.10+(num(f.form)-50)*0.10); // moral/forme -> ± (carrière uniquement)
+  const dyn=(num(f.morale)-50)*0.10+(num(f.form)-50)*0.10; // moral/forme -> ± (carrière uniquement)
   const ch={
     striking: num(a.jab)*0.24+num(a.cross)*0.24+num(a.hook)*0.2+num(a.kick)*0.18+num(a.clinchStr)*0.14+num(a.fightIQ)*0.06,
     power:    num(a.power)+num(a.strength)*0.12,
