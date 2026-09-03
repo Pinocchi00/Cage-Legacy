@@ -3,8 +3,8 @@
    Extrait d'engine.js (chantier 4 : refactorisation progressive du moteur).
    Regroupe les responsabilites "evenements & narration" du moteur : eres
    MMA, actualites (NPC + joueur, contextualisees aux vraies stats),
-   memoire tactique, objectifs sponsor, personnalite, modes alternatifs
-   (scenarios, Iron Man), tactiques/entrainements exclusifs, Mue Martiale,
+   memoire tactique, objectifs sponsor, personnalite,
+   tactiques/entrainements exclusifs, Mue Martiale,
    synergies de competences, IA adaptative, tension economique de
    l'entrainement (camps), rivalites & hype (dont rivalryHeat/arcs
    narratifs, chantier 3), et le tick de simulation de fond (worldTick).
@@ -130,62 +130,7 @@ function setPersonality(alignment){
 }
 /* ==== [FIN ANCRE] ==== */
 
-/* ==== [ANCRE: LOT2_MODES] — modes de jeu alternatifs ==== */
-/* ==== [ANCRE: REFONTE_SCENARIOS] — item demandé : 5 scénarios fonctionnels,
-   dont 2 réservés (verrouillés) à la Salle des Légendes via le champ
-   `legendUnlock` (même mécanisme que checkLegendUnlock('mode_boss') déjà
-   utilisé pour le Boss Run). Chaque checkWin/checkLoss a été vérifié pour ne
-   dépendre que de champs simples et toujours présents sur f (org, champion en
-   string, defenses, dec, W/L, retired) — aucun état complexe non initialisé
-   qui pourrait planter en cours de scénario.
-   ⚠ IMPORTANT — dépendance non résolue : LEGEND_UNLOCKABLES,
-   checkLegendUnlock(), purchaseLegendUnlock() et loadMetaStats() ne sont
-   présents dans AUCUN des fichiers fournis (engine.js, data-content.js,
-   ui-01 à ui-08) alors qu'ils sont appelés depuis ui-06/07/08 — ils vivent
-   forcément dans un fichier non uploadé. Le verrouillage ci-dessous appelle
-   checkLegendUnlock(id) comme le fait déjà le Boss Run (donc ça fonctionnera
-   tel quel une fois chargé avec le reste du jeu), mais je n'ai PAS pu ajouter
-   les entrées correspondantes dans LEGEND_UNLOCKABLES (coût en points,
-   catégorie, description) puisque je n'ai pas ce fichier — sans lui, les
-   deux scénarios resteront verrouillés pour toujours, aucun bouton d'achat
-   n'existera. Envoie-moi ce fichier pour terminer le câblage. ==== */
-const SCENARIOS=[
-  {id:'scen_sauveur',name:"Le Sauveur de la Ligue",
-    desc:"Vétéran de 35 ans sur une série de 3 défaites doit remporter le titre avant sa retraite forcée.",
-    init:(f)=>{ f.age=35; f.streak=-3; f.org=3; f.W=15; f.L=8; f.stage='pro'; },
-    checkWin:(f)=>!!f.champion, checkLoss:(f)=>f.retired||f.streak<=-5},
-  {id:'scen_undersized',name:"L\u2019Undersized Heavyweight",
-    desc:"Poids Moyen tentant la catégorie Poids Lourds. Doit devenir champion d\u2019une des deux organisations mondiales.",
-    init:(f)=>{ f.div='H-heavy'; f.phys.height=184; f.phys.reach=189; f.org=2; },
-    checkWin:(f)=>f.org>=5 && !!f.champion, checkLoss:(f)=>f.retired},
-  {id:'scen_invasion',name:"L\u2019Invasion de l\u2019Est",
-    desc:"Sambo/Lutte, champion mondial sans concéder un seul takedown.",
-    init:(f)=>{ f.style='sambo'; f.org=4; f.W=10; f.L=0; f.tdConceded=0; },
-    checkWin:(f)=>f.org>=5 && !!f.champion && f.tdConceded===0, checkLoss:(f)=>f.tdConceded>0||f.retired},
-  {id:'scen_finisseur',name:"Le Finisseur",legendUnlock:'scenario_finisseur',
-    desc:"Aucune décision autorisée : chaque combat doit finir en KO ou soumission jusqu\u2019au titre mondial.",
-    init:(f)=>{ f.org=3; f.W=0; f.L=0; f.dec=0; },
-    checkWin:(f)=>f.org>=5 && !!f.champion && f.dec===0, checkLoss:(f)=>f.dec>0||f.retired},
-  {id:'scen_regne',name:"Le Règne Sans Faille",legendUnlock:'scenario_regne',
-    desc:"Déjà champion continental, doit enchaîner 5 défenses de titre sans jamais perdre la ceinture.",
-    init:(f)=>{ f.org=4; f.champion='europe'; f.defenses=0; f.W=20; f.L=5; f.titles=1; },
-    checkWin:(f)=>(f.defenses||0)>=5 && !!f.champion, checkLoss:(f)=>!f.champion||f.retired}
-];
-function checkScenarioState(res){
-  if(!G.activeScenario) return;
-  const scen=SCENARIOS.find(s=>s.id===G.activeScenario);
-  if(!scen) return;
-  if(scen.id==='scen_invasion' && res && res.stats && res.stats.B.td>0){ G.f.tdConceded=(G.f.tdConceded||0)+res.stats.B.td; }
-  if(scen.checkWin(G.f)){ G.lastMsg=`Scénario accompli : ${scen.name} !`; G.activeScenario=null; }
-  else if(scen.checkLoss(G.f)){ G.lastMsg=`Échec du scénario : ${scen.name}. Retraite forcée.`; G.f.retired=true; G.activeScenario=null; }
-}
-function checkIronManDeath(res,injury){
-  if(!G.ironMan) return;
-  const isLoss=res && res.winner!=='A' && res.winner!=='D';
-  const isGraveInjury=injury && injury.fights>=3;
-  if(isLoss||isGraveInjury){ G.f.retired=true; G.lastMsg="MODE IRON MAN : défaite ou blessure grave. Fin définitive de la carrière."; }
-}
-/* ==== [FIN ANCRE] ==== */
+
 
 /* ==== [ANCRE: V2-42, lecture (a)] — "un combattant porteur d'une anomalie
    n'affiche plus d'étiquette tactique générique : son anomalie EST sa

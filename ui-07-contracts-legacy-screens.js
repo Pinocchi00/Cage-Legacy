@@ -657,19 +657,7 @@ function scr_mueChoice(){
 }
 /* ==== [FIN ANCRE] ==== */
 
-/* ==== [ANCRE: LOT2_ECRAN_SCENARIOS] ==== */
-function scr_scenarios(){
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Scénarios</span><span class="eyebrow x" onclick="CL.go('title')">✕</span></div>
-   <h2 class="disp">Défis courts prédéfinis</h2>
-   <p class="lede small">3 à 5 ans de jeu, un point de départ imposé, un objectif clair.</p>
-   ${SCENARIOS.map(s=>{
-     return `<div class="opp" onclick="CL.pickScenario('${s.id}')">
-     <div class="opp-top"><span class="opp-nm gold">${s.name}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${s.desc}</div></div>`;
-   }).join('')}
-   <button class="btn ghost mt" onclick="CL.go('title')">Retour</button></div>`;
-}
-/* ==== [FIN ANCRE] ==== */
+
 
 /* ==== [ANCRE: LOGIQUE_ALLSTARS] ==== */
 function getStyleEmoji(styleLabel){

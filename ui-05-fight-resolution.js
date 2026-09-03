@@ -106,7 +106,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     }
   }
   const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
-  if(typeof checkIronManDeath==='function') checkIronManDeath(res,null);
   if(typeof evaluateSponsor==='function') evaluateSponsor(res);
   // ==== [ANCRE: NARRATIF_APPEL] — calculé ici (mêmes données réelles qu'avant),
   // pour pouvoir à la fois l'afficher sur l'écran de résultat ET l'archiver
@@ -768,11 +767,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   if(G.f.promoCooldown>0) G.f.promoCooldown--;
   // ==== [FIN ANCRE] ====
   const newAch=checkAch();
-  if(typeof checkScenarioState==='function'){
-    checkScenarioState(res);
-    if(G.lastMsg && G.lastMsg.includes('Scénario')){ milestone=G.lastMsg; G.lastMsg=null; }
-    if(G.f.retired) forced=true;
-  }
   /* ==== [ANCRE: V2-15 point 4] — "après chaque combat : une ligne de
      mouvement de rang dans le résumé (#11 -> #7)". myRankBefore (capturé
      en tout début de fonction) reste valable, mais un second divRank(G.f)

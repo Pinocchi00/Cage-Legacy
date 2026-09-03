@@ -86,12 +86,6 @@ function scr_create(){ const d=G.draft, divs=DIVISIONS[d.gender];
    <div class="fld"><label>Division</label><div class="pills">${divs.map(x=>`<span class="pill ${d.div===x.id?'on':''}" onclick="CL.draft('div','${x.id}')">${x.name}</span>`).join('')}</div></div>
    <div class="fld"><label>Discipline de base <span class="muted">(toutes équilibrées)</span></label><div class="pills">${STYLE_KEYS.map(s=>`<span class="pill ${d.style===s?'on':''}" onclick="CL.draft('style','${s}')">${styleLabel(s)}</span>`).join('')}</div></div>
    <div class="note small">Ton <b>origine</b>, ta <b>motivation</b> et ton <b>surnom</b> (au passage pro) se révéleront en jeu.</div>
-   <div class="fld"><label>Mode <span class="muted">(optionnel)</span></label><div class="pills">
-     <span class="pill ${d.ironMan?'on':''}" onclick="CL.draft('ironMan',${!d.ironMan})">Iron Man — une défaite ou blessure grave = fin définitive</span>
-   </div></div>
-   <div class="fld"><label>Défis prédéfinis <span class="muted">(Scénarios)</span></label>
-     <button class="btn ghost" style="border:1px solid var(--line);margin:0;padding:12px" onclick="CL.go('scenarios')">Parcourir les scénarios</button>
-   </div>
    <button class="btn primary" onclick="CL.create()">Débuter la carrière</button>
    <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
 

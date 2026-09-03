@@ -25,7 +25,7 @@
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
-  history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,pro_nickname:scr_pro_nickname,codex:scr_codex,mueChoice:scr_mueChoice,scenarios:scr_scenarios,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
+  history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,pro_nickname:scr_pro_nickname,codex:scr_codex,mueChoice:scr_mueChoice,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   ach_preview:scr_ach_preview};
@@ -458,26 +458,6 @@ const CL={
   chooseMue(styleId){ const r=triggerMueMartiale(G.f,styleId); G.lastMsg=r.msg||G.lastMsg;
     G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
     advanceRoster(); G.screen='hub'; save(); render(); },
-  pickScenario(scenId){
-    const scen=SCENARIOS.find(s=>s.id===scenId); if(!scen) return;
-    // Sécurité : un scénario verrouillé ne doit jamais pouvoir démarrer, même
-    // via un appel direct (ex. ancien lien, manipulation console).
-        wipe();
-    G={theme:(G&&G.theme)||'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}};
-    setTheme(G.theme);
-    CL.create();
-    G.activeScenario=scen.id;
-    scen.init(G.f);
-    // Recalcul critique : create() a fixé l'overall/Elo au niveau amateur, mais
-    // scen.init() vient de changer radicalement l'organisation et le palmarès —
-    // sans ce recalcul, le combattant restait à ~800 pts Elo pour toujours,
-    // gelant son classement quel que soit son parcours réel.
-    G.f.overall=overall(G.f);
-    const bias=Math.round(((G.f.W||0)-(G.f.L||0))*18);
-    G.f.orgElo=eloBaseline(G.f.org,G.f.overall)+bias;
-    G.f.careerElo=eloBaseline(G.f.org,G.f.overall)+Math.round(bias*0.6);
-    G.roster=makeOrgRoster(G.f);
-    G.screen='hub'; save(); render(); },
   cont(){ if(load()){ setTheme(G.theme||'dark');
     // ==== [ANCRE: CORRECTIF_RETRAITE_FANTOME] — bug trouvé : cont() forçait
     // TOUJOURS l'écran 'hub' au chargement, sans jamais vérifier f.retired.
@@ -506,7 +486,6 @@ const CL={
       if(d.personality==='villain'){ f.hypeBonus=1.3; f.morale=clamp(f.morale-10,0,100); }
       else if(d.personality==='humble'){ f.hypeBonus=1.0; f.morale=clamp(f.morale+15,0,100); f.attrs.focus=clamp((f.attrs.focus||50)+10,1,100); }
     }
-    G.ironMan=!!d.ironMan;
     // ==== [ANCRE: META02] — mentorat en 3 piliers, consommé une seule fois à la
     // création : (1) bonus d'archétype selon le style du mentor, (2) faveur des
     // promoteurs (cooldown d'offre pro réduit de 50%), (3) bonus de camp
@@ -612,12 +591,6 @@ const CL={
       f._fy=(f._fy||0)+1; if(f._fy>=RI(1,3)){ applyAging(f); f._fy=0; }
       const inj=rollInjury(); f.injury={name:inj.name,left:inj.fights};
       f.form=clamp(f.form-20,0,100); f.morale=clamp(f.morale-15,0,100);
-      if(typeof checkIronManDeath==='function') checkIronManDeath(null,inj);
-      // ==== [ANCRE: CORRECTIF_IRONMAN_INFIRMERIE] — même correctif que pour
-      // les blessures d'entraînement : router vers la retraite si le mode
-      // Iron Man vient de déclencher G.f.retired, plutôt que de renvoyer
-      // sans condition au vestiaire.
-      if(G.f.retired){ CL.toLegacy(); return; }
       advanceRoster(); G.screen='hub'; save(); render();
     } else if(id==='botched_weight_accept'){
       G.fight.malus=Object.assign({},G.fight.malus,{cardio:-20,durability:-15,strength:-10});

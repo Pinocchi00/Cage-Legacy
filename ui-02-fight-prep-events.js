@@ -331,12 +331,6 @@ function chooseTraining(i){ const opt=G.train[i];
   if(!lowRisk && rnd()<0.03){
     const inj=rollInjury(); G.f.injury={name:inj.name,left:inj.fights};
     G.f.form=clamp(G.f.form-15,0,100); G.f.morale=clamp(G.f.morale-10,0,100);
-    if(typeof checkIronManDeath==='function') checkIronManDeath(null,inj);
-    // ==== [ANCRE: CORRECTIF_IRONMAN_INFIRMERIE] — bug trouvé : une blessure
-    // grave hors combat pouvait déclencher G.f.retired=true (mode Iron Man)
-    // sans que l'écran ne route jamais vers la retraite — le joueur atterrissait
-    // simplement au vestiaire, où rien ne bloquait la reprise des combats.
-    if(G.f.retired){ CL.toLegacy(); return; }
     G.screen='hub'; save(); render(); return;
   }
   return finishTrainingFlow(null);
