@@ -120,6 +120,24 @@ test('CORRECTIF_ESC_GUILLEMETS — esc() échappe aussi les guillemets simples e
   assert.equal(out, '&lt;script&gt;&quot;&#39;&amp;&lt;/script&gt;');
 });
 
+/* ==== [ANCRE: TEST_MIGRATION_PURGE_MODES_SUPPRIMES] ==== */
+test('migrate() purge G.faith/G.gauntlet/G.arcade hérités d’une sauvegarde antérieure à leur suppression', () => {
+  const win = newGameWindow();
+  const legacySave = {
+    version: 2,
+    f: { name: 'Ancien', W: 5, L: 1 },
+    faith: { year: 3, month: 7, perks: { judges: true } },
+    gauntlet: { seed: 'xyz' },
+    arcade: { active: true },
+  };
+  const migrated = win.migrate(legacySave);
+  assert.equal(migrated.faith, undefined, 'G.faith doit être purgé par migrate()');
+  assert.equal(migrated.gauntlet, undefined, 'G.gauntlet doit être purgé par migrate()');
+  assert.equal(migrated.arcade, undefined, 'G.arcade doit être purgé par migrate()');
+  assert.equal(migrated.version, 3, 'la version doit toujours être remontée au passage');
+  assert.equal(migrated.f.name, 'Ancien', 'les champs légitimes de la sauvegarde ne doivent pas être touchés');
+});
+
 /* ==== [ANCRE: TEST_CORRECTIF_ROSTER_ENTREES_NULLES] ==== */
 test('CORRECTIF_ROSTER_ENTREES_NULLES — validateState() filtre les entrées nulles de G.roster sans planter ni régénérer tout le roster', () => {
   const win = newGameWindow();
