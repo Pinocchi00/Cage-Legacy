@@ -1,0 +1,96 @@
+# Cage Legacy
+
+Jeu de gestion de carrière de MMA, jouable directement dans le navigateur —
+vanilla JavaScript, sans build, sans backend, 100 % offline une fois chargé.
+
+**Jouer en ligne : https://pinocchi00.github.io/Cage-Legacy/**
+
+## Les trois modes
+
+| Mode | Description |
+|---|---|
+| **Carrière Complète** | Le mode historique : amateur → pro → retraite, classements, contrats, Panthéon des légendes. |
+| **Faith** | Mode narratif dédié, avec son propre tirage de personnage et sa propre progression, centré sur les choix d'histoire de carrière. |
+| **Gauntlet** | Mode arcade en runs courtes — Ladder 100, Bracket 64, Boss Run. |
+
+## Arborescence
+
+```
+index.html                        point d'entrée, ordre de chargement des scripts
+data-*.js                         données pures (compétences, contenus, personnages, contenus Faith)
+engine.js, engine-*.js            moteur de simulation (combat, carrière, progression, événements)
+state/                            état de jeu et logique métier, par domaine (sauvegarde, analytics, Faith, Gauntlet, Panthéon...)
+ui-01…ui-09*.js                   rendu Canvas 2D et écrans, un fichier par zone fonctionnelle
+main.js                           bootstrap au chargement de la page
+tests/                            suite de tests (node --test) sur le vrai code du jeu, chargé dans un DOM virtuel
+tools/lint-content.js             linter de contenu narratif (anglicismes, longueur des phrases, etc.)
+eslint.config.js                  configuration ESLint
+```
+
+Pour le détail de l'ordre de chargement réel, des globaux structurants et
+des règles d'architecture, voir [`CLAUDE.md`](./CLAUDE.md).
+
+## Développement
+
+Aucun build. Pour jouer/modifier en local, ouvrir `index.html` dans un
+navigateur suffit.
+
+Pour valider une modification :
+
+```bash
+npm install     # une seule fois
+npm run check    # lint + suite de tests — doit être vert avant toute livraison
+```
+
+## Suite de tests
+
+La suite exécute le **vrai code du jeu** dans un DOM virtuel (`jsdom`) pour
+détecter les erreurs qui ne surviennent que dans des situations précises
+(carrière longue, cas limites de classement, sauvegardes corrompues...) et
+les incohérences d'état.
+
+```bash
+npm test          # lance la suite complète
+npm run test:watch # idem, en mode watch
+```
+
+9 fichiers de test, 62 tests au total au moment de la rédaction :
+
+```
+tests/
+  helpers/
+    loadGame.js            charge le jeu dans un DOM virtuel
+    playthrough.js          un "joueur automatique" qui enchaîne des actions de jeu
+  analytics.test.js          analytics locales
+  career.test.js              simulations de carrière complètes
+  champChamp.test.js           supercombat double champion
+  hallOfFame.test.js            Panthéon (ajout, suppression, favoris, export)
+  invariants.test.js            invariants d'état (classement, cohérence des données)
+  proceduralNarrative.test.js    génération procédurale (rivalités, arcs narratifs)
+  ranking.test.js                classement (rang #1, pénalités du champion)
+  regressionFixes.test.js         un test par bug corrigé — le fichier le plus fourni
+  saveSystem.test.js              sauvegarde, migration, récupération automatique
+```
+
+**Un bug corrigé = un test ajouté dans `tests/regressionFixes.test.js`.**
+
+Modèle minimal pour un nouveau test (dans un fichier `*.test.js` existant
+ou nouveau) :
+
+```js
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { newGameWindow } = require('./helpers/loadGame');
+
+test('description claire de ce qui est vérifié', () => {
+  const win = newGameWindow();
+  // ... mettre le jeu dans la situation à tester (win.G, win.CL, etc.) ...
+  assert.equal(resultatObtenu, resultatAttendu, 'message si ça échoue');
+});
+```
+
+## Confidentialité
+
+Tout est local. Le jeu ne fait aucun appel réseau au runtime : la
+sauvegarde vit uniquement dans le `localStorage` du navigateur, rien n'est
+transmis à un serveur.
