@@ -402,14 +402,14 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .log-r{flex:0 0 28px;color:var(--muted)}
 </style></head>
 <body><div id="app"></div>
-<script src="data-skills.js?v=career2"></script>
-<script src="data-content.js?v=career2"></script>
+<script src="data-skills.js?v=career3"></script>
+<script src="data-content.js?v=career3"></script>
 <!-- ==== [ANCRE: DATA_FAITH_SPLIT_V3] — Plan V3 LOT 0 §0.2 : ui-04 dépassait
      3300 lignes en mélangeant écrans ET corpus. Deux fichiers de données
      pures, aucune fonction d'écran dedans, chargés avant engine.js (aucune
      de leurs constantes n'a besoin d'autre chose que des littéraux JS). ==== -->
-<script src="data-people.js?v=career2"></script>
-<script src="engine.js?v=career2"></script>
+<script src="data-people.js?v=career3"></script>
+<script src="engine.js?v=career3"></script>
 <!-- ==== [ANCRE: ENGINE_COMBAT_SPLIT] — chantier 4 (refactorisation
      progressive du moteur) : engine-combat.js extrait d'engine.js à
      l'IDENTIQUE (STYLE_PROFILE, simulateFight, applyResult, catalogue des
@@ -417,7 +417,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      laissé en dernier comme prévu par le plan. Dépend des primitives
      d'engine.js (rnd/pick/clamp/eff/overall/reachEdge...) donc chargé juste
      après lui. ==== -->
-<script src="engine-combat.js?v=career2"></script>
+<script src="engine-combat.js?v=career3"></script>
 <!-- ==== [ANCRE: ENGINE_PROGRESSION_SPLIT] — chantier 4 (refactorisation
      progressive du moteur) : engine-progression.js extrait d'engine.js à
      l'IDENTIQUE (vieillissement/déclin, blessures, fraîcheur, deltas
@@ -425,13 +425,13 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      texte contextuel). applyOrgAdvancementBoost (engine-career.js) et
      executeCampTier (engine-events.js) appellent applyDeltas() d'ici, donc
      chargé avant les deux. ==== -->
-<script src="engine-progression.js?v=career2"></script>
+<script src="engine-progression.js?v=career3"></script>
 <!-- ==== [ANCRE: ENGINE_CAREER_SPLIT] — chantier 4 (refactorisation progressive
      du moteur) : engine-career.js extrait d'engine.js à l'IDENTIQUE (échelle
      d'organisations, cachets/contrats, Elo, classement P4P). Dépend des
      primitives d'engine.js (num/clamp/eff/reachEdge/overall/applyDeltas...)
      donc chargé juste après lui. ==== -->
-<script src="engine-career.js?v=career2"></script>
+<script src="engine-career.js?v=career3"></script>
 <!-- ==== [ANCRE: ENGINE_EVENTS_SPLIT] — chantier 4 (refactorisation progressive
      du moteur) : engine-events.js extrait d'engine.js à l'IDENTIQUE (eras MMA,
      actualités, mémoire tactique, sponsor, personnalité, modes alternatifs,
@@ -440,29 +440,29 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      engine-career.js). Dépend des primitives d'engine.js (rnd/pick/clamp/
      DIVISIONS/STYLES/ATTR_KEYS...) donc chargé juste après lui, jamais avant,
      et toujours avant state.js/ui-*.js qui appellent ces fonctions. ==== -->
-<script src="engine-events.js?v=career2"></script>
-<script src="state/state-core.js?v=career2"></script>
-<script src="state/state-analytics.js?v=career2"></script>
-<script src="state/state-save.js?v=career2"></script>
-<script src="state/state-migration.js?v=career2"></script>
-<script src="state/state-validation.js?v=career2"></script>
-<script src="state/state-hof.js?v=career2"></script>
+<script src="engine-events.js?v=career3"></script>
+<script src="state/state-core.js?v=career3"></script>
+<script src="state/state-analytics.js?v=career3"></script>
+<script src="state/state-save.js?v=career3"></script>
+<script src="state/state-migration.js?v=career3"></script>
+<script src="state/state-validation.js?v=career3"></script>
+<script src="state/state-hof.js?v=career3"></script>
 <!-- ui.js a été découpé en 8 fichiers plus petits (refactor du __/2026) pour
      rester lisible et maintenable — l'ORDRE de chargement ci-dessous est
      important et ne doit jamais être changé (voir le commentaire d'en-tête
      de chaque fichier ui-0X-*.js pour le détail). -->
-<script src="ui-01-roster-matchmaking.js?v=career2"></script>
-<script src="ui-02-fight-prep-events.js?v=career2"></script>
-<script src="ui-03-contracts-arcade-data.js?v=career2"></script>
-<script src="ui-05-fight-resolution.js?v=career2"></script>
-<script src="ui-06-career-screens.js?v=career2"></script>
-<script src="ui-07-contracts-legacy-screens.js?v=career2"></script>
-<script src="ui-08-controller-arena.js?v=career2"></script>
+<script src="ui-01-roster-matchmaking.js?v=career3"></script>
+<script src="ui-02-fight-prep-events.js?v=career3"></script>
+<script src="ui-03-contracts-arcade-data.js?v=career3"></script>
+<script src="ui-05-fight-resolution.js?v=career3"></script>
+<script src="ui-06-career-screens.js?v=career3"></script>
+<script src="ui-07-contracts-legacy-screens.js?v=career3"></script>
+<script src="ui-08-controller-arena.js?v=career3"></script>
 <!-- ui-09-arena.js : second découpage, ultérieur au split en 8 fichiers ci-
      dessus (F-07, hygiène technique) — isole le moteur de rendu Canvas 2D de
      l'arène, extrait de ui-08. Chargé APRÈS ui-08 : plusieurs écrans qui le
      pilotent (scr_arena, scr_fight_flash, scr_fight_flash) sont restés dans ui-08 car référencés par nom
      dans son objet SCREENS, évalué dès le chargement du script. -->
-<script src="ui-09-arena.js?v=career2"></script>
-<script src="main.js?v=career2"></script>
+<script src="ui-09-arena.js?v=career3"></script>
+<script src="main.js?v=career3"></script>
 </body></html>

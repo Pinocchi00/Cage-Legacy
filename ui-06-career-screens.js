@@ -176,7 +176,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
    ${fightBtnHtml}
    <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
    <div class="g2"><button class="btn ghost" onclick="CL.go('ach')">Palmarès</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
-   <button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Registre des ceintures</button>
+   <div class="g2"><button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Ceintures</button><button class="btn ghost" onclick="CL.go('hof')">🏛 Panthéon</button></div>
    ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--blood)">Double Champion</div>
      <div class="small">Vous détenez également la ceinture ${f.champChampBelt}.</div>
@@ -437,9 +437,10 @@ function scr_hof(){
   const styles=Object.values(STYLES).map(s=>s.label);
   const divisions=[...new Set(DIVISIONS.F.concat(DIVISIONS.H).map(d=>d.name))];
   const modes=[...new Set(fullList.map(f=>f.gameMode||'career'))];
-  const modeLabels={career:'Carrière Complète',faith:'MMA Faith'};
+  const modeLabels={career:'Carrière Complète'};
   const showFilters=!!G.showHofFilters;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon · ${list.length}/${fullList.length} légende(s)</span><span class="eyebrow x" onclick="CL.go('intro')">✕</span></div>
+  const backDest=(G.f && !G.f.retired)?'hub':'title';
+  return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon · ${list.length}/${fullList.length} légende(s)</span><span class="eyebrow x" onclick="CL.go('${backDest}')">✕</span></div>
    <h2 class="disp">Tes anciens combattants</h2>
    <button class="btn ghost mb" style="border:1px solid var(--line);width:auto;padding:8px 16px" onclick="CL.toggleHofFilters()">Filtres ${showFilters?'−':'+'}</button>
    ${showFilters?`<div style="background:var(--panel2);padding:12px;border:1px solid var(--line);margin-bottom:16px">
@@ -489,9 +490,8 @@ function scr_hof(){
    <div class="tagrow mb">
      <button class="btn ghost" style="border:1px solid var(--loss);color:var(--loss);width:auto;padding:8px 16px;margin-left:8px" onclick="CL.resetHof()">Tout purger (sauf favoris)</button>
      <button class="btn ghost" style="width:auto;padding:8px 12px" onclick="CL.go('codex')">Codex des compétences</button>
-     <button class="btn ghost" style="width:auto;padding:8px 12px;border-color:var(--gold);color:var(--gold)" onclick="CL.go('legends')">Salle des Légendes</button>
    </div>
-   <button class="btn ghost" onclick="CL.go('intro')">Retour</button></div>`; }
+   <button class="btn ghost" onclick="CL.go('${backDest}')">← Revenir au ${backDest==='hub'?'vestiaire':'menu principal'}</button></div>`; }
 // ==== [ANCRE: ECRAN_DETAIL_LEGENDE] (rendu) — bug bloquant corrigé : le
 // routeur (ui-08-controller-arena.js) référence scr_legend_detail comme
 // gestionnaire de l'écran 'legend_detail' (déclenché par CL.viewLegend()),
