@@ -511,7 +511,6 @@ function scr_legend_detail(){
   const decorationPanel = '';
   return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
    ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
-   ${G._decoMsg?(()=>{ const m=G._decoMsg; G._decoMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    <div class="leg-hero-card" style="${deco.borderCss}">
      <div class="tier-corner-lg"></div>
      ${deco.holoCss?`<div class="holo" style="${deco.holoCss}"></div>`:''}

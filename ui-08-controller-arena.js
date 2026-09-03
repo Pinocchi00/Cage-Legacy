@@ -181,20 +181,6 @@ const CL={
      seul endroit — mais plus la seule des trois à ne pas suivre le pattern. ==== */
   viewAchPreview(achId){ G._achPreviewId=achId; G._returnScreen=G.screen; G.screen='ach_preview'; render(); },
   closeAchPreview(){ G.screen=G._returnScreen||'ach'; G._returnScreen=null; render(true); },
-  /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026). ==== */
-  /* ==== [ANCRE: CORRECTIF_LASTMSG_DECORATION] — bug remonté : G.lastMsg est un
-     canal GLOBAL relu par plusieurs écrans (hub ui-01, ui-06, ui-07, et même
-     scr_legend_detail) — un message posé ici pouvait donc réapparaître hors
-     contexte (ex. sur le menu principal) si un render() intermédiaire ne
-     l'avait pas déjà consommé. Équiper/retirer une décoration est une action
-     cosmétique dont le retour visuel est déjà immédiat (bordure/halo sur la
-     carte) : le message texte est déplacé sur G._decoMsg, lu UNIQUEMENT par
-     scr_legend_detail (seul écran où cette action est possible), donc jamais
-     susceptible de fuiter ailleurs. ==== */
-  equipDecoration(hofId,decId){ const r=equipPantheonDecoration(hofId,decId); G._decoMsg=r.msg; render(); },
-  unequipDecoration(hofId,decId){ const r=unequipPantheonDecoration(hofId,decId); G._decoMsg=r.msg; render(); },
-  /* ==== [FIN ANCRE] ==== */
-  /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   /* ==== [FIN ANCRE] ==== */
   viewLegend(id){ G.viewingLegendId=id; G.screen='legend_detail'; render(); },
