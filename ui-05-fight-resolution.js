@@ -223,12 +223,40 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     const decisionWins=rec.filter(r=>r.res==='win' && isDecisionLike(r.method)).length;
     let nonRenewChance;
     if(losses===0) nonRenewChance=0; // invaincu sur ce contrat : jamais de risque
-    else if(wins>=losses) nonRenewChance=Math.min(0.15, decisionWins*0.03); // bilan gagnant/nul : ennui mineur seulement, plafonné à 15%
+    else if(wins>=losses){
+      nonRenewChance=Math.min(0.15, decisionWins*0.03); // bilan gagnant/nul : ennui mineur seulement, plafonné à 15%
+      /* ==== [ANCRE: CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT] —
+         Lot C01/2026 §C06 : retour joueur #6 — un 3-1 avec 3 décisions
+         donnait 9% de risque de non-renouvellement, ressenti comme une
+         punition pour avoir gagné. Pondéré désormais par le PALMARÈS
+         GLOBAL du combattant (pas seulement le bilan de ce contrat) :
+         champion en titre → jamais de risque ; top 5/top 15 de division et
+         série de victoires ≥5 réduisent le risque, cumulables, plancher à
+         0. La branche "bilan réellement perdant" ci-dessous n'est PAS
+         concernée par cette pondération — c'est la seule qui doit faire
+         peur. ==== */
+      if(G.f.champion || G.f.champChampBelt) nonRenewChance=0;
+      else {
+        let mult=1;
+        const rk=divRank(G.f);
+        if(rk>0 && rk<=5) mult*=0.25; else if(rk>0 && rk<=15) mult*=0.5;
+        if((G.f.streak||0)>=5) mult*=0.5;
+        nonRenewChance=Math.max(0, nonRenewChance*mult);
+      }
+    }
     else nonRenewChance=Math.min(0.9, losses*0.25 + decisionWins*0.05); // bilan réellement perdant
     if(rnd()<nonRenewChance){
       contractNonRenewed=true;
       G.f.contractNonRenewed=true;
-      G.f.contractNonRenewalReason=`${losses} défaite(s) et ${decisionWins} victoire(s) aux points sur les ${rec.length} derniers combats du contrat`;
+      /* ==== [ANCRE: CORRECTIF_TEXTE_NONRENOUVELLEMENT] — Lot C01/2026 §C06 :
+         énumérer des victoires comme grief ("1 défaite(s) et 3 victoire(s)
+         aux points") se lisait comme une punition pour avoir gagné. Un
+         bilan réellement perdant (losses>wins) reste honnêtement décrit ;
+         le cas restant (bilan gagnant mais trop de décisions) est
+         reformulé sur le STYLE du combattant, jamais sur son bilan. ==== */
+      G.f.contractNonRenewalReason=(losses>wins)
+        ?`${losses} défaite(s) et ${decisionWins} victoire(s) aux points sur les ${rec.length} derniers combats du contrat`
+        :`l’organisation cherche des finisseurs pour ses têtes d’affiche${G.f.styleLabel?` — trop de victoires en ${G.f.styleLabel} jugées aux points`:''}`;
     } else {
       G.f.contractNonRenewed=false;
     }

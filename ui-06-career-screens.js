@@ -946,7 +946,12 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
           <span class="mono" style="font-size:10.5px;opacity:.7">${(o.styleLabel||'').toUpperCase()}</span>
         </div>
         <div class="mono" style="width:82px;text-align:right;font-size:14px;white-space:nowrap">${o.W}-${o.L}${o.D?'-'+o.D:''}</div>
-        <div class="mono" style="width:56px;text-align:right;font-size:14px">${Math.round(p4pScore(o))}</div>
+        <!-- ==== [ANCRE: CORRECTIF_P4P_SCORE_BRUT] — Lot C01/2026 §C15a :
+             Math.round(p4pScore(o)) affichait un nombre à quatre chiffres
+             illisible, un score brut jamais montré au joueur nulle part
+             ailleurs — remplacé par le rang, cohérent avec la fiche (qui
+             affiche déjà correctement p4pRank(f), ui-06 scr_profile). ==== -->
+        <div class="mono" style="width:56px;text-align:right;font-size:14px">#${i+1}</div>
       </div>`;
     });
     h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`;

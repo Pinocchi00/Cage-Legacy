@@ -505,3 +505,156 @@ test('CORRECTIF_CLASSEMENT_EXPLIQUE — la variation de rang est expliquée par 
     assert.ok(html.includes(String(win.G.pending.opp.rank)) || html.includes(win.G.pending.opp.name), 'la phrase de cause doit citer l\'adversaire ou son rang réel');
   }
 });
+
+/* ==== [ANCRE: TEST_CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT] — Lot C01/2026 §C06 ==== */
+function setupNonRenewFight(win, extra){
+  win.setSeed(1);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const f = win.G.f;
+  f.org = 3;
+  // Bilan de contrat pré-existant : 1 défaite, 3 victoires aux points —
+  // avec la victoire de ce combat (aussi aux points), la branche
+  // "gagnant" (wins>=losses) est atteinte avec une chance de base non
+  // nulle (decisionWins*0.03), sans dépendre du hasard de la simulation.
+  f.contract = { fightsLeft: 1, record: [
+    { res: 'loss', method: 'KO' },
+    { res: 'win', method: 'Décision' },
+    { res: 'win', method: 'Décision' },
+    { res: 'win', method: 'Décision' },
+  ] };
+  Object.assign(f, extra);
+  const opp = win.G.roster[0];
+  // Décision garantie : les deux combattants encaissent sans jamais finir,
+  // seul le score aux cartes tranche (win="A" par construction du moteur
+  // avec des stats dominantes côté A mais sans finition).
+  Object.assign(f.attrs, { fightIQ: 100, composure: 100, adaptability: 100, chin: 100, durability: 100, cardio: 100, recovery: 100, heart: 100, killer: 1, power: 1, submission: 1 });
+  Object.assign(opp.attrs, { fightIQ: 1, composure: 1, adaptability: 1, chin: 100, durability: 100, cardio: 100, recovery: 100, heart: 1, killer: 1, power: 1, submission: 1 });
+  return { f, opp };
+}
+test('CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT — un champion en titre ne perd jamais son contrat', () => {
+  const win = newGameWindow({ runMain: true });
+  const { f, opp } = setupNonRenewFight(win, { champion: 'local' });
+  win.setSeed(1);
+  win.rnd = () => 0.05; // sous la chance de base (0.12) sans protection
+  win.G.fight = { opp, rounds: 3, kind: 'normal', planLabel: null };
+  win.resolveFight();
+  assert.equal(win.G.f.contractNonRenewed, false, 'un champion en titre ne doit jamais risquer le non-renouvellement, quel que soit le tirage');
+});
+test('CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT — sans le statut de champion, un tirage assez bas déclenche toujours le non-renouvellement', () => {
+  const win = newGameWindow({ runMain: true });
+  const { f, opp } = setupNonRenewFight(win, { champion: null, champChampBelt: null, streak: 0 });
+  win.setSeed(1);
+  // Volontairement bien EN DESSOUS du pire cas protégé possible ici (top 5
+  // ET série ≥5 cumulés : base 0.15 × 0.25 × 0.5 = 0.01875) : ce tirage
+  // déclenche le non-renouvellement quel que soit le classement réel du
+  // combattant à l'issue du combat — seul le statut de champion (testé à
+  // part ci-dessus, où il ramène la chance à exactement 0) peut encore
+  // l'empêcher.
+  win.rnd = () => 0.005;
+  win.G.fight = { opp, rounds: 3, kind: 'normal', planLabel: null };
+  win.resolveFight();
+  assert.equal(win.G.f.contractNonRenewed, true, 'sans le statut de champion, ce tirage doit déclencher le non-renouvellement');
+  assert.ok(!/défaite/.test(win.G.f.contractNonRenewalReason), 'la raison ne doit plus énumérer de victoires/défaites pour un bilan gagnant');
+  assert.ok(/finisseurs/.test(win.G.f.contractNonRenewalReason), 'la raison doit être reformulée sur le style, ex. "finisseurs"');
+});
+test('CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT — la branche bilan réellement perdant reste intacte, même pour un champion', () => {
+  const win = newGameWindow({ runMain: true });
+  win.setSeed(1);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const f = win.G.f;
+  f.org = 3; f.champion = 'local';
+  // Bilan réellement perdant sur ce contrat (3 défaites, 1 victoire) : la
+  // protection "champion" ne s'applique qu'à la branche gagnant/nul.
+  f.contract = { fightsLeft: 1, record: [
+    { res: 'loss', method: 'KO' },
+    { res: 'loss', method: 'KO' },
+    { res: 'loss', method: 'KO' },
+    { res: 'win', method: 'Décision' },
+  ] };
+  const opp = win.G.roster[0];
+  Object.assign(f.attrs, { fightIQ: 100, composure: 100, adaptability: 100, chin: 100, durability: 100, cardio: 100, recovery: 100, heart: 100, killer: 1, power: 1, submission: 1 });
+  Object.assign(opp.attrs, { fightIQ: 1, composure: 1, adaptability: 1, chin: 100, durability: 100, cardio: 100, recovery: 100, heart: 1, killer: 1, power: 1, submission: 1 });
+  win.setSeed(1);
+  win.rnd = () => 0.3; // sous la chance "réellement perdant" (>=0.75 ici), au-dessus de tout ce que la branche gagnant produirait
+  win.G.fight = { opp, rounds: 3, kind: 'normal', planLabel: null };
+  win.resolveFight();
+  assert.equal(win.G.f.contractNonRenewed, true, 'un bilan réellement perdant doit rester risqué même pour un champion en titre');
+  assert.ok(/défaite/.test(win.G.f.contractNonRenewalReason), 'un bilan réellement perdant garde une raison honnête (défaites), ce n\'est pas une punition pour avoir gagné');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_PALMARES_CORRELE_NIVEAU] — Lot C01/2026 §C14b ==== */
+function pearsonCorrelation(xs, ys){
+  const n = xs.length;
+  const meanX = xs.reduce((a, b) => a + b, 0) / n;
+  const meanY = ys.reduce((a, b) => a + b, 0) / n;
+  let num = 0, denX = 0, denY = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xs[i] - meanX, dy = ys[i] - meanY;
+    num += dx * dy; denX += dx * dx; denY += dy * dy;
+  }
+  return num / Math.sqrt(denX * denY);
+}
+test('CORRECTIF_PALMARES_CORRELE_NIVEAU — le palmarès généré des PNJ est corrélé à leur niveau (overall)', () => {
+  const win = newGameWindow();
+  win.setSeed(11);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const npcs = [];
+  for (let org = 1; org <= 6; org++) {
+    for (let batch = 0; batch < 4; batch++) {
+      const f = Object.assign({}, win.G.f, { org });
+      const roster = win.makeOrgRoster(f);
+      roster.forEach(o => npcs.push(o));
+    }
+  }
+  assert.ok(npcs.length >= 200, `au moins 200 PNJ générés pour l'échantillon (obtenu : ${npcs.length})`);
+
+  const overalls = npcs.map(o => o.overall);
+  const winRatios = npcs.map(o => o.W / Math.max(1, o.W + o.L));
+  const corr = pearsonCorrelation(overalls, winRatios);
+  assert.ok(corr > 0.6, `corrélation overall/ratio de victoires attendue > 0,6, obtenue : ${corr.toFixed(3)}`);
+
+  // aucun PNJ classé top 5 (par overall, repère simple et stable en dehors
+  // d'un vrai classement Elo complet) n'affiche un bilan perdant (L>W).
+  const top5 = npcs.slice().sort((a, b) => b.overall - a.overall).slice(0, 5);
+  assert.ok(top5.every(o => o.L <= o.W), 'aucun PNJ classé top 5 par niveau ne doit afficher un bilan perdant');
+
+  // amaRec doit suivre la même corrélation que le palmarès pro.
+  const withAma = npcs.filter(o => o.amaRec);
+  assert.ok(withAma.length > 0, 'les PNJ pro doivent porter un amaRec');
+  const amaRatios = withAma.map(o => o.amaRec.W / Math.max(1, o.amaRec.W + o.amaRec.L));
+  const amaOveralls = withAma.map(o => o.overall);
+  const amaCorr = pearsonCorrelation(amaOveralls, amaRatios);
+  assert.ok(amaCorr > 0.4, `amaRec doit aussi être corrélé au niveau (obtenu : ${amaCorr.toFixed(3)})`);
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_P4P_SCORE_BRUT] — Lot C01/2026 §C15a ==== */
+test('CORRECTIF_P4P_SCORE_BRUT — l\'onglet P4P n\'affiche plus aucun score brut, seulement des rangs', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  win.G.f.org = 3;
+  win.G._rankingsTab = 'p4p';
+  const html = win.scr_rankings();
+  // Les scores p4pScore() bruts sont des nombres à 3-4 chiffres (centaines
+  // à milliers) ; un score brut resterait visible tel quel dans le HTML.
+  // On vérifie plutôt que la colonne P4P n'affiche que des rangs "#N".
+  const rankCells = html.match(/font-size:14px">#(\d+)<\/div>/g) || [];
+  assert.ok(rankCells.length > 0, 'la colonne P4P doit afficher des rangs au format "#N"');
+  // Cohérence avec la fiche (p4pRank(f), déjà correcte) : le rang du
+  // joueur dans l'onglet doit correspondre à p4pRank(G.f).
+  const expectedPlayerRank = win.p4pRank(win.G.f);
+  if (expectedPlayerRank != null && expectedPlayerRank <= 15) {
+    assert.ok(html.includes(`#${expectedPlayerRank}`), 'le rang affiché pour le joueur doit correspondre à p4pRank(f)');
+  }
+});

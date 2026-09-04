@@ -451,6 +451,23 @@ function recordTitleDefense(org,divName,champion){
 // jusqu'au bout. Premier passage de tuning raisonné, à valider via l'audit
 // Monte Carlo existant (8000 combats / 300 carrières) avant tuning fin.
 function orgLevel(org){ return [42,46,51,57,63,71,80][org]||40; }
+/* ==== [ANCRE: CORRECTIF_PALMARES_CORRELE_NIVEAU] — Lot C01/2026 §C14b : bug
+   de génération confirmé (retour joueur #14) — o.W/o.L étaient tirés
+   INDÉPENDAMMENT de lv (le niveau du PNJ) : un combattant à 92 d'overall
+   pouvait sortir 7-8 et un à 45 sortir 24-1, alors que le biais Elo
+   (bias=(o.W-o.L)*18) ne fait que propager cette incohérence dans le
+   classement. Le ratio de victoires cible croît maintenant avec lv (0,45
+   à lv=20, jusqu'à 0,88 à lv=97), avec un bruit borné (±0,07) pour éviter
+   des rosters trop lisses ; le nombre total de combats reste tiré
+   indépendamment. Utilisé pour le palmarès pro/amateur ET pour amaRec
+   (même corrélation). */
+function correlatedRecord(lv,totalFights){
+  const t=clamp((lv-20)/77,0,1);
+  const targetRatio=clamp(0.45+t*(0.88-0.45)+(rnd()*2-1)*0.07,0.05,0.95);
+  const W=clamp(Math.round(totalFights*targetRatio),0,totalFights);
+  return {W,L:totalFights-W};
+}
+/* ==== [FIN ANCRE] ==== */
 function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const pool=[];
   const isAmateur=(f.org===0);
   const needed=isAmateur?100:30; // pro : 1 champion + 15 contenders classés + 14 non classés
@@ -484,10 +501,11 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     const age=isAmateur?RI(17,24):RI(22,35);
     const o=makeFighter({gender:f.gender,div:f.div,level:lv,potential:lv+RI(2,12),age});
     o.org=f.org; // bug confirmé et corrigé : restait à 0 par défaut, faussant le x1.4 Pacific Championship
-    o.W=isAmateur?RI(0,15):RI(6,24); o.L=isAmateur?RI(0,6):RI(1,8);
+    const rec=correlatedRecord(lv,isAmateur?RI(3,20):RI(8,30));
+    o.W=rec.W; o.L=rec.L;
     o.ko=RI(0,o.W);
     o.streak=(o.L===0)?o.W:RI(-2,Math.min(5,o.W));
-    if(!isAmateur) o.amaRec={W:RI(2,12),L:RI(0,4)};
+    if(!isAmateur){ const amaRec=correlatedRecord(lv,RI(3,20)); o.amaRec={W:amaRec.W,L:amaRec.L}; }
     if(f.org>=3){ // durcissement de l'IA en ligue haute — évite les victoires faciles par spam
       o.attrs.tdd=clamp(o.attrs.tdd+RI(8,16),1,100);
       o.attrs.fightIQ=clamp(o.attrs.fightIQ+RI(6,12),1,100);
