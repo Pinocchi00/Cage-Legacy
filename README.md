@@ -85,6 +85,33 @@ test('description claire de ce qui est vérifié', () => {
 });
 ```
 
+## Harnais Monte-Carlo (équilibrage)
+
+`tools/monte-carlo.js` charge le vrai jeu dans un DOM virtuel (même principe
+que `tests/helpers/loadGame.js`, mais un fichier autonome — `tools/` ne
+dépend pas de `tests/`) et simule N carrières complètes (amateur → pro →
+retraite), pilotées par une politique déterministe et seedée (le premier
+choix disponible à chaque écran, hasard exclusivement via `rnd()`/`setSeed()`
+— jamais `Math.random()`). Sert à mesurer l'équilibrage (forme/moral,
+progression des attributs, durée de carrière, méthodes de fin de combat...)
+sur un grand nombre de carrières plutôt qu'à l'œil sur une seule partie.
+
+```bash
+node tools/monte-carlo.js                       # 30 carrières, seed 1 (par défaut)
+node tools/monte-carlo.js --runs=200 --seed=1    # run de référence pour un diagnostic
+node tools/monte-carlo.js --runs=200 --seed=1 --maxFights=70 --quiet
+```
+
+Options : `--runs=N` (nombre de carrières), `--seed=S` (seed de base — la
+carrière *i* utilise `seed+i`, donc un run est intégralement reproductible),
+`--maxFights=N` (plafond de sécurité par carrière, pas une vraie fin de
+carrière), `--quiet` (masque la progression sur stderr).
+
+Écrit un rapport texte + JSON dans `tools/reports/` (ignoré par git — ce sont
+des mesures locales, jamais un livrable versionné) : `monte-carlo-<horodatage>.
+{txt,json}` et une copie `latest.{txt,json}` toujours à jour, pour differ
+deux runs facilement.
+
 ## Confidentialité
 
 Tout est local. Le jeu ne fait aucun appel réseau au runtime : la
