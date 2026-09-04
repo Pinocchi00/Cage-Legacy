@@ -49,9 +49,16 @@ function restoreSnapshot(f,saved){ for(const k in saved){ f.attrs[k]=saved[k]; }
 
 /* ==== [ANCRE: NPC_NEWS_CONTEXTUALISEES] — Lot C01/2026 §C05 : generateNPCNews()
    retirée avec la carte « Actualités de la division » du hub (ui-06), son seul
-   affichage. G.divisionNews reste alimenté par generatePlayerContextualNews()
-   (chantier 3, narration procédurale — ANCRE NARRATION_PROCEDURALE), système
-   distinct hors périmètre de ce correctif. ==== */
+   affichage. G.divisionNews restait alimenté par generatePlayerContextualNews()
+   (chantier 3, narration procédurale), jugé hors périmètre à l'époque.
+   Lot P3/2026 (sous-menus Combat/Dossier du hub) revérifie : aucun écran ne
+   consommait G.divisionNews (grep sur tout le dépôt), la carte d'actualités
+   du hub n'ayant jamais été réintroduite ailleurs — generatePlayerContextualNews()
+   et G.divisionNews sont donc retirés à leur tour, plutôt que de laisser du
+   code mort qui n'écrit que dans le vide. checkNarrativeArc() (juste plus
+   bas) reste en place : f.narrativeArc est un champ persisté et validé
+   (state-validation.js) distinct de G.divisionNews, hors périmètre de ce
+   nettoyage précis. ==== */
 
 // Mémoire tactique de rematch : boost temporaire ciblé sur l'adversaire (attributs
 // bruts, restaurer après le combat) selon la méthode de la victoire du joueur au
@@ -315,9 +322,8 @@ const NARRATIVE_ASCENSION_TIERS=[
 ];
 /** Fait avancer l'arc narratif de f selon sa série en cours (f.streak, déjà à
  * jour au moment de l'appel — applyResult() vient de tourner) et renvoie le
- * "beat" franchi cette fois-ci (ou null si rien de nouveau), pour que
- * generatePlayerContextualNews() puisse le raconter avec les vraies stats.
- * Ne modifie jamais un attribut, un potentiel ni l'équilibrage du combat.
+ * "beat" franchi cette fois-ci (ou null si rien de nouveau). Ne modifie
+ * jamais un attribut, un potentiel ni l'équilibrage du combat.
  * @param {Fighter} f @returns {?object} */
 function checkNarrativeArc(f){
   if(!f) return null;
@@ -344,34 +350,6 @@ function checkNarrativeArc(f){
     f.narrativeArc=null;
   }
   return beat;
-}
-/** Actualité contextualisée à partir des VRAIES stats de ce combat (arc
- * franchi, palier de rivalité franchi) — jamais du texte générique. Pousse
- * dans le MÊME flux que generateNPCNews() (G.divisionNews), avec player:true
- * pour le distinguer si un écran veut le mettre en avant, sans dupliquer le
- * système d'actualités existant.
- * @param {Fighter} f @param {Fighter} opp @param {object} res @param {?object} arcBeat */
-function generatePlayerContextualNews(f,opp,res,arcBeat){
-  if(!f) return;
-  if(!G.divisionNews) G.divisionNews=[];
-  const year=(G.season&&G.season.year)||1;
-  const lines=[];
-  if(arcBeat){
-    if(arcBeat.kind==='redemption_start') lines.push(`${f.name} encaisse sa ${Math.abs(arcBeat.streak)}e défaite d’affilée et rejoint un camp de rédemption pour relancer sa carrière.`);
-    else if(arcBeat.kind==='redemption_comeback') lines.push(`Après une traversée du désert, ${f.name} renoue avec la victoire et amorce un vrai comeback.`);
-    else if(arcBeat.kind==='ascension') lines.push(`${arcBeat.streak} victoires d’affilée : ${f.name} passe un cap et devient "${arcBeat.label}" aux yeux de la presse.`);
-  }
-  if(opp){
-    const heat=rivalryHeat(f,opp.id);
-    const tier=rivalryTier(heat);
-    if(tier.key!=='normal' && f._rivalryLastTier!==tier.key){
-      f._rivalryLastTier=tier.key;
-      const count=(f._allMeetings&&f._allMeetings[opp.id])||0;
-      lines.push(`${f.name} et ${opp.name} entrent dans une phase de "${tier.label.toLowerCase()}" après ${count} confrontation(s).`);
-    }
-  }
-  lines.forEach(text=>G.divisionNews.unshift({year,text,player:true}));
-  if(G.divisionNews.length>20) G.divisionNews.length=20;
 }
 /* ==== [FIN ANCRE] ==== */
 

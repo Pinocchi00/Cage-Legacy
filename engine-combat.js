@@ -21,8 +21,8 @@
    isDecisionLike/ATTR_KEYS/DIVISIONS/STYLES/eff/overall/reachEdge/
    weightFactor/makeFighter...) donc CHARGE JUSTE APRES engine.js. Utilise
    aussi des fonctions d'engine-progression.js (grantSkill, epithets,
-   txtPick) et d'engine-events.js (getRivalryPurseMultiplier,
-   generatePlayerContextualNews...) au runtime — l'ordre exact entre
+   txtPick) et d'engine-events.js (getRivalryPurseMultiplier...) au
+   runtime — l'ordre exact entre
    fichiers freres n'a pas d'importance tant que tous chargent avant que
    la partie ne demarre reellement (aucun appel au niveau racine d'un
    fichier vers un autre). */
@@ -385,8 +385,23 @@ function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!
   // détaillé (vérifié : aucun affichage ne lit jamais l'historique d'un PNJ, seuls
   // last5()/scr_history()/l'succès a4 lisent G.f.history spécifiquement).
   if(G.f && F.id===G.f.id){
+    /* ==== [ANCRE: HUB_COMBAT_HISTORY_FIELDS] — Lot P3/2026 : le sous-menu
+       Combat du hub (ui-06 scr_hub) affiche le surnom et le rang de
+       l'adversaire au moment du combat, absents jusqu'ici. oppNick est pris
+       directement sur l'objet opp (jamais recherché via oppId dans le
+       roster ensuite : le roster est régénéré et l'objet d'origine
+       disparaît). oppRank réutilise divRank(), la fonction de classement
+       déjà en place — ui-05 (resolveFight, ANCRE HISTORIQUE_ENRICHI)
+       écrase cette valeur juste après avec le rang capturé AVANT le combat
+       (oppRankBefore), plus correct pour l'affichage joueur ; ce calcul ici
+       ne sert donc de valeur par défaut que pour un futur appel de
+       applyResult() sur G.f qui ne passerait pas par ce chemin d'écran.
+       Aucun horodatage de fin de round n'existe nulle part dans la boucle
+       de simulation (simulateFight/resolveFight) — un champ `time` n'est
+       donc pas ajouté ici plutôt que d'en fabriquer un plausible. ==== */
     F.history.push({res:isDraw?'draw':(win?'win':'loss'),method:m,round:res.round||null,oppId:opp&&opp.id,
-      oppName:opp&&opp.name,oppFlag:opp&&opp.flag,oppWasChamp:!!(opp&&opp.champion),oppRecord:opp?`${opp.W}-${opp.L}`:null,oppElo:opp&&opp.orgElo});
+      oppName:opp&&opp.name,oppFlag:opp&&opp.flag,oppNick:opp&&opp.nick,oppWasChamp:!!(opp&&opp.champion),oppRecord:opp?`${opp.W}-${opp.L}`:null,oppElo:opp&&opp.orgElo,
+      oppRank:opp?divRank(opp):null});
     if(F.history.length>60)F.history=F.history.slice(-60);
   }
   return win;

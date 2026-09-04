@@ -282,13 +282,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: NARRATION_PROCEDURALE] — chantier 3 : renforce la rivalité
   // (heat calculée sur _rivalries/_allMeetings ci-dessus, aucun nouveau
-  // compteur) avec des arcs narratifs et des actualités contextualisées à
-  // partir des VRAIES stats de ce combat, au même point de passage unique
-  // que le reste du bloc RIVALITE (carrière et Faith confondus).
-  if(typeof checkNarrativeArc==='function'){
-    const arcBeat=checkNarrativeArc(G.f);
-    if(typeof generatePlayerContextualNews==='function') generatePlayerContextualNews(G.f,opp,res,arcBeat);
-  }
+  // compteur) avec des arcs narratifs (f.narrativeArc), au même point de
+  // passage unique que le reste du bloc RIVALITE (carrière et Faith
+  // confondus). Lot P3/2026 : generatePlayerContextualNews() (actualités
+  // contextualisées, G.divisionNews) retiré comme code mort — aucun écran
+  // ne l'affichait plus, cf. engine-events.js ANCRE NPC_NEWS_CONTEXTUALISEES.
+  if(typeof checkNarrativeArc==='function') checkNarrativeArc(G.f);
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: LEAPFROG_CUT] — traçage de la facilité des combats + bond de classement,
   // et sanction si le joueur enchaîne trop d'adversaires trop faciles. ====
