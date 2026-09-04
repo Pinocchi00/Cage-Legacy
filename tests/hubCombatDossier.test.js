@@ -75,7 +75,17 @@ test('hubCombatHtml() — décision unanime/partagée et égalité : pas de roun
   assert.ok(!/undefined/.test(html));
 });
 
-test('applyResult() — pousse oppNick et oppRank sur f.history pour le joueur, sans fabriquer de champ time', () => {
+/* ==== [ANCRE: TEST_HORLOGE_CONTINUE_HISTORY_TIME] — Lot P6/2026 : avant ce
+   lot, aucune horloge continue n'existait dans simulateFight() et `time`
+   n'était donc JAMAIS ajouté à f.history (seul un `res` sans finishTimeStr
+   pouvait exister). Depuis l'horloge continue (roundLen/dt, cf.
+   engine-combat.js ANCRE HORLOGE_CONTINUE), une finition porte un
+   horodatage réel (res.finishTimeStr) qu'applyResult() propage désormais
+   dans `time` — mais seulement pour une VRAIE finition : une décision
+   (pas de res.finishTimeStr) doit toujours donner `time:null`, jamais un
+   horodatage fabriqué de toutes pièces. Les deux sous-tests ci-dessous
+   remplacent l'ancien test qui figeait "time n'existe nulle part". ==== */
+test('applyResult() — pousse oppNick et oppRank sur f.history pour le joueur, sans fabriquer de temps pour une décision', () => {
   const win = newGameWindow({ runMain: true });
   win.setSeed(3);
   win.eval(`
@@ -89,7 +99,21 @@ test('applyResult() — pousse oppNick et oppRank sur f.history pour le joueur, 
   const last = win.G.f.history[win.G.f.history.length - 1];
   assert.equal(last.oppNick, 'Le Marteau');
   assert.equal(typeof last.oppRank, 'number');
-  assert.ok(!('time' in last), 'aucun horodatage fabriqué : le champ time n’existe nulle part dans la simulation');
+  assert.equal(last.time, null, 'une décision (pas de res.finishTimeStr) ne doit jamais fabriquer un horodatage');
+});
+
+test('applyResult() — propage l’horodatage réel de la simulation (res.finishTimeStr) pour une finition', () => {
+  const win = newGameWindow({ runMain: true });
+  win.setSeed(3);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const opp = win.G.roster[0];
+  const res = { winner: 'A', method: 'KO/TKO', round: 2, scoreA: 20, scoreB: 18, finishTime: 145, finishTimeStr: '2:35' };
+  win.applyResult(win.G.f, opp, res, 'A');
+  const last = win.G.f.history[win.G.f.history.length - 1];
+  assert.equal(last.time, '2:35', 'le temps de finition réel de la simulation doit être propagé tel quel');
 });
 
 test('hubDossierHtml() — six boutons vers les mêmes écrans qu’avant, en grille 2 colonnes', () => {
