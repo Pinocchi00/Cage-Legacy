@@ -124,7 +124,16 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     lastTemplates.push(tpl); if(lastTemplates.length>2) lastTemplates.shift();
     return txt; };
   // ==== [FIN ANCRE] ====
-  const formatTime=(k,tot)=>{ let sec=300-Math.floor((k/tot)*300); let m=Math.floor(sec/60); let s=sec%60; return `${m<10?'0':''}${m}:${s<10?'0':''}${s}`; };
+  /* ==== [ANCRE: HORLOGE_CONTINUE] — Lot P6/2026 : roundLen/dt sont les
+     DEUX SEULES constantes qui pilotent la granularité de simulation —
+     tout ajustement du pas se fait UNIQUEMENT ici. dt doit rester impair
+     et non multiple de 5 (calibrage tools/monte-carlo-combat.js) si
+     jamais 3 s'avère trop lent. formatTime prend désormais des secondes
+     écoulées dans le round (plus un index de micro-séquence) et rend le
+     temps RESTANT au format mm:ss, comme avant. ==== */
+  const roundLen=300, dt=3;
+  const formatTime=(sec)=>{ const rem=Math.max(0,roundLen-sec); const m=Math.floor(rem/60); const s=Math.floor(rem%60); return `${m<10?'0':''}${m}:${s<10?'0':''}${s}`; };
+  /* ==== [FIN ANCRE] ==== */
   const getTags=f=>(f.skills||[]).map(id=>{ const s=SKILLS.find(x=>x.id===id); return s?(s.tags||[]):[]; }).flat();
   const tagsA=getTags(A), tagsB=getTags(B);
   for(let r=1;r<=rounds && !finish;r++){
@@ -139,15 +148,39 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     const _headA0=st.A.sigHead||0, _headB0=st.B.sigHead||0, _bodyA0=st.A.sigBody||0, _bodyB0=st.B.sigBody||0, _legA0=st.A.sigLeg||0, _legB0=st.B.sigLeg||0;
     const _pwrA0=st.A.powerStrikes||0, _pwrB0=st.B.powerStrikes||0, _wobA0=st.A.wobbled||0, _wobB0=st.B.wobbled||0;
     // ==== [FIN ANCRE] ====
-    // ==== [ANCRE: MICRO_SEQUENCES] — chaque round de 5 minutes est découpé en 6
-    // micro-séquences de 50 secondes. La phase (debout/clinch/sol) persiste
-    // d'une séquence à l'autre DANS le même round, mais repart toujours de
-    // 'debout' à la cloche — permet de vrais retournements de situation dans
-    // un même round (domination debout, takedown, puis sol, par exemple). ====
+    // ==== [ANCRE: HORLOGE_CONTINUE] — Lot P6/2026, remplace l'ancienne
+    // découpe fixe en 6 micro-séquences de 50 secondes (ancre historique
+    // MICRO_SEQUENCES) par une horloge continue de roundLen/dt=100 ticks
+    // de dt=3s : t (secondes écoulées dans le round) est désormais la
+    // SEULE source de vérité temporelle, plus aucun horodatage n'est
+    // dérivé d'un index d'itération. La phase (debout/clinch/sol) persiste
+    // d'un tick à l'autre DANS le même round, mais repart toujours de
+    // 'debout' à la cloche — inchangé.
+    // Rescaling : toute grandeur accumulée dans un compteur persistant
+    // (points, dégâts, frappes, amenées, contrôle...) est multipliée par
+    // (dt/50) au moment où elle rejoint ce compteur — jamais en dur,
+    // toujours écrit dt/50, pour que le pas reste ajustable au seul
+    // endroit ci-dessus (roundLen/dt). Les probabilités qui décident SI un
+    // événement discret survient CE tick (tentative d'amenée, transition
+    // de phase, KO/finition) sont elles aussi multipliées par (dt/50), pour
+    // que leur taux réel par seconde reste inchangé malgré les ~17x plus
+    // de ticks ; les probabilités "en cascade" évaluées SACHANT qu'un tel
+    // événement vient de survenir (réussite d'amenée sachant une tentative,
+    // arrêt de l'arbitre sachant un knockdown) ne le sont PAS : elles
+    // décrivent une distribution conditionnelle liée aux attributs, pas un
+    // taux temporel. Piège de l'arrondi : aucun Math.round/Math.floor ne
+    // doit porter sur un compteur cumulatif À L'INTÉRIEUR de la boucle
+    // (Math.round(gnp*0.4) vaudrait systématiquement 0 une fois ramené à
+    // ~1/17e) — l'accumulation reste fractionnaire, l'arrondi n'intervient
+    // qu'en figeant roundStats (fin de round) et res.stats (fin de combat).
     let currentPhase='debout', topIsA=false;
     const cardioFactorA=(a.cardio<60)?0.09:0.06, cardioFactorB=(b.cardio<60)?0.09:0.06;
     const roundPenalty=(r>=4)?1.3:1.0;
-    for(let k=0;k<6 && !finish;k++){
+    for(let t=0;t<roundLen && !finish;t+=dt){
+      // décalage aléatoire intra-tick : partagé par tous les horodatages
+      // affichés ce tick (beats narratifs comme finitions), pour que les
+      // instants montrés au joueur ne soient jamais des multiples de dt.
+      const beatT=t+RI(0,dt-1);
       const outA=st.A.sig+st.A.tdAtt*0.6, outB=st.B.sig+st.B.tdAtt*0.6;
       // Résistance à la fatigue via durabilité et second souffle (cœur)
       const heartResistA=(r>=3||dmgA>30)?clamp(((a.heart||50)-50)*0.003,-0.04,0.18):0;
@@ -166,39 +199,59 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod*0.2;
         const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35)*botProf.subMod*0.2;
         const topPts=1.2+control*0.5+gnp*0.46+subTop*0.22; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.032+0.6;
-        const gHits=Math.round(gnp*0.4);
-        if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=0.2;st.A.sig+=gHits;} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=0.2;st.B.sig+=gHits;}
+        const gHits=gnp*0.4;
+        /* ==== [ANCRE: HORLOGE_CONTINUE_CTRLSEC] — beatGroundSec est la même
+           heuristique qu'avant ce lot (une fraction du tick, jamais le tick
+           entier : un contrôle au sol connaît des relances/scrambles même
+           quand la phase persiste), simplement rescalée par (dt/50) comme
+           tout le reste. `stTop.ctrlSec+=dt` (tout le tick) donnait un
+           temps de contrôle ~3x trop élevé au Monte Carlo — confirmé en
+           comparant tools/monte-carlo-combat.js avant/après ce lot. ==== */
+        const beatGroundSec=clamp(22+clamp(top.topControl-bot.guard,-15,25)*0.35,14,46);
+        if(topIsA){sa+=topPts*(dt/50);sb+=botPts*(dt/50);dmgB+=gnp*0.32*(dt/50);st.A.ctrl+=dt*(0.2/50);st.A.sig+=gHits*(dt/50);} else {sb+=topPts*(dt/50);sa+=botPts*(dt/50);dmgA+=gnp*0.32*(dt/50);st.B.ctrl+=dt*(0.2/50);st.B.sig+=gHits*(dt/50);}
+        stTop.ctrlSec+=beatGroundSec*(dt/50); stTop.groundCtrlSec+=beatGroundSec*(dt/50);
         // Enrichissement stats sol (frappes au sol, tentatives, temps de contrôle continu)
-        const gAtt=gHits+Math.max(1,Math.round(1+((top.aggression||50)-50)*0.03));
-        stTop.sigAtt+=gAtt; stTop.groundStrikes+=gHits; stTop.groundAtt+=gAtt;
-        const totGHits=gHits+Math.max(1,Math.round(1+(top.gnp||50)*0.02));
-        stTop.total+=totGHits; stTop.totalAtt+=gAtt+2;
-        const gHead=Math.round(gHits*0.75), gBody=gHits-gHead;
-        stTop.sigHead+=gHead; stTop.headAtt+=Math.round(gAtt*0.75);
-        stTop.sigBody+=gBody; stTop.bodyAtt+=Math.round(gAtt*0.25);
-        if(gHits>=2 && (top.power||50)>60) stTop.powerStrikes+=Math.round(gHits*0.5);
-        const beatGroundSec=clamp(Math.round(22+clamp(top.topControl-bot.guard,-15,25)*0.35),14,46);
-        stTop.ctrlSec+=beatGroundSec; stTop.groundCtrlSec+=beatGroundSec;
-        if(top.topControl>bot.guard+12 && rnd()<0.25) stTop.guardPasses++;
-        if(gHits>=3 && (top.gnp||50)>70 && rnd()<0.2) stBot.cuts++;
-        if(subTop>2.5) stTop.subAtt++;
-        if(subBot>2.5) stBot.subAtt++;
+        const gAtt=gHits+Math.max(1,1+((top.aggression||50)-50)*0.03);
+        stTop.sigAtt+=gAtt*(dt/50); stTop.groundStrikes+=gHits*(dt/50); stTop.groundAtt+=gAtt*(dt/50);
+        const totGHits=gHits+Math.max(1,1+(top.gnp||50)*0.02);
+        stTop.total+=totGHits*(dt/50); stTop.totalAtt+=(gAtt+2)*(dt/50);
+        const gHead=gHits*0.75, gBody=gHits-gHead;
+        stTop.sigHead+=gHead*(dt/50); stTop.headAtt+=(gAtt*0.75)*(dt/50);
+        stTop.sigBody+=gBody*(dt/50); stTop.bodyAtt+=(gAtt*0.25)*(dt/50);
+        if(gHits>=2 && (top.power||50)>60) stTop.powerStrikes+=(gHits*0.5)*(dt/50);
+        if(top.topControl>bot.guard+12 && rnd()<0.25*(dt/50)) stTop.guardPasses++;
+        if(gHits>=3 && (top.gnp||50)>70 && rnd()<0.2*(dt/50)) stBot.cuts++;
+        if(subTop>2.5) stTop.subAtt+=(dt/50);
+        if(subBot>2.5) stBot.subAtt+=(dt/50);
 
         const heartR=1-(bot.heart*0.0016);
         const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.32;
         const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult;
         const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult;
-        if(rnd()<subChT && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
-        else if(rnd()<koGnp && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++; stBot.wobbled++;}
-        else if(rnd()<subChB && !(immuneA&&topF===A)){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
+        if(rnd()<subChT*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
+        else if(rnd()<koGnp*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++; stBot.wobbled++;}
+        else if(rnd()<subChB*(dt/50) && !(immuneA&&topF===A)){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
         else {
-          if(subChT>0.03) stBot.subEscapes++;
-          if(subChB>0.03) stTop.subEscapes++;
-          if(koGnp>0.15) stBot.wobbled++;
+          if(subChT>0.03) stBot.subEscapes+=(dt/50);
+          if(subChB>0.03) stTop.subEscapes+=(dt/50);
+          if(koGnp>0.15) stBot.wobbled+=(dt/50);
         }
         const isMe=topIsA; momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
         const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
-        tgt.dmgBody+=RI(0,2); tgt.dmgHead+=RI(0,1);
+        tgt.dmgBody+=RI(0,2)*(dt/50); tgt.dmgHead+=RI(0,1)*(dt/50);
+        /* ==== [ANCRE: HORLOGE_CONTINUE_DENSITE_LOG] — avec 100 ticks/round au
+           lieu de 6, journaliser chaque tick donnerait ~100 lignes/round
+           (illisible, et ui-09-arena.js consomme ces beats pour son rythme
+           d'animation). Les moments qui comptent (finition, tentative de
+           soumission) sont toujours journalisés ; les échanges de routine
+           sont échantillonnés à un taux qui, multiplié par le nombre de
+           ticks du round, redonne un nombre de beats de routine quasi
+           indépendant de dt (roundLen/dt * dt/90 = roundLen/90 ≈ 3,3),
+           auquel s'ajoutent les moments notables ci-dessus pour retomber
+           dans la fourchette visée de 4 à 8 beats/round — la densité
+           narrative reste ainsi découplée de la fréquence de simulation. ==== */
+        const solNotable=!!finish || subTop>2.5 || subBot>2.5;
+        if(solNotable || rnd()<dt/90){
         let txtPool=[`${atk.name} consolide son contrôle.`,`${atk.name} maintient une lourde pression.`,`Lutte de position : ${atk.name} prend l\u2019avantage.`,`${atk.name} verrouille les hanches de son adversaire.`];
         if(tgs.includes('GNP')) txtPool.push(`${atk.name} fait pleuvoir un lourd Ground & Pound.`);
         if(tgs.includes('Soumission')) txtPool.push(`${atk.name} cherche l\u2019ouverture pour soumettre.`);
@@ -210,12 +263,37 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           txtPool.push(`Écrasé sous le poids adverse, ${def.name} cherche de l\u2019oxygène qui n\u2019existe plus.`);
         }
         /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — voir ui-09 ==== */
-        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,6)}] `+getUniqueLog(txtPool),momentum,sub:(subChT>0.03||subChB>0.03),snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(beatT)}] `+getUniqueLog(txtPool),momentum,sub:(subChT>0.03||subChB>0.03),snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
-          last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
-        else {
+          finish.time=beatT;
+          last.text=`[${formatTime(beatT)}] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
+        }
+        /* ==== [ANCRE: HORLOGE_CONTINUE_CTRLSEC_SOL_RESIDU] — investigation
+           post-lot (relecture Monte Carlo) : le temps de contrôle au sol
+           ressort ~5-9% au-dessus de la valeur d'avant ce lot (le clinch,
+           lui, ne bouge quasi pas : <2%). Racine trouvée par instrumentation
+           directe (compteurs de ticks/entrées/sorties de phase, pas de
+           conjecture) : evadeCh (formule ci-dessous, inchangée depuis
+           avant ce lot) tourne quasiment toujours à son plafond (0.28,
+           topFat y contribue pour ~0.02 en moyenne — négligeable), donc ce
+           n'est PAS une dérive de fatigue mal rescalée. La vraie cause est
+           un artefact de quantification de L'ANCIEN modèle à 6
+           micro-séquences : une amenée réussie sur la toute dernière
+           micro-séquence d'un round (1 chance sur 6) tombait à une
+           position au sol de durée quasi nulle avant la cloche, ce qui
+           tirait sa moyenne mesurée vers le bas ; à 100 ticks/round, ce
+           même effet de bord ne touche plus qu'1 tick sur 100. La suite
+           continue (dt=3s) n'a donc pas de biais propre à corriger ici —
+           c'est la référence à 6 micro-séquences qui sous-estimait
+           légèrement le temps de contrôle réel par cet artefact, et rien
+           dans ce fichier ne le reproduit plus. Conservé en écart connu
+           (juste au-dessus de la tolérance ±5% sur certains tirages,
+           dans la tolérance sur d'autres — cf. rapport de livraison),
+           plutôt que "corrigé" par un facteur artificiel qui ferait
+           exprès de réintroduire ce biais de l'ancien modèle. ==== */
+        if(!finish){
           const evadeCh=clamp((bot.footwork+bot.fightIQ-topFat*0.5)/280,0.06,0.28);
-          if(rnd()<evadeCh){
+          if(rnd()<evadeCh*(dt/50)){
             if(rnd()<0.5){ topIsA=!topIsA; stBot.reversals++; }
             else { currentPhase='debout'; stBot.standups++; }
           }
@@ -227,54 +305,80 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         if(Math.abs(diff)>8){
           const domIsA=diff>0; const dom=domIsA?A:B;
           const stDom=domIsA?st.A:st.B, stDef=domIsA?st.B:st.A;
-          const hits=RI(0,4); (domIsA?st.A:st.B).sig+=hits; if(domIsA) dmgB+=hits*1.8; else dmgA+=hits*1.8;
-          (domIsA?st.B:st.A).dmgBody+=RI(0,2);
+          const hits=RI(0,4); (domIsA?st.A:st.B).sig+=hits*(dt/50); if(domIsA) dmgB+=hits*1.8*(dt/50); else dmgA+=hits*1.8*(dt/50);
+          (domIsA?st.B:st.A).dmgBody+=RI(0,2)*(dt/50);
           // Frappes en clinch et contrôle
           const attHits=hits+RI(1,2);
-          stDom.sigAtt+=attHits; stDom.clinchStrikes+=hits; stDom.clinchAtt+=attHits;
-          stDom.total+=hits+RI(1,2); stDom.totalAtt+=attHits+RI(2,3);
-          const bodyHits=Math.round(hits*0.65), headHits=hits-bodyHits;
-          stDom.sigBody+=bodyHits; stDom.bodyAtt+=Math.round(attHits*0.65);
-          stDom.sigHead+=headHits; stDom.headAtt+=Math.round(attHits*0.35);
-          if(hits>=2 && (domIsA?a.power:b.power)>65) stDom.powerStrikes+=1;
-          const clSec=clamp(Math.round(14+Math.abs(diff)*0.25),10,32);
-          stDom.ctrl+=0.1; stDom.ctrlSec+=clSec; stDom.clinchCtrlSec+=clSec;
+          stDom.sigAtt+=attHits*(dt/50); stDom.clinchStrikes+=hits*(dt/50); stDom.clinchAtt+=attHits*(dt/50);
+          stDom.total+=(hits+RI(1,2))*(dt/50); stDom.totalAtt+=(attHits+RI(2,3))*(dt/50);
+          const bodyHits=hits*0.65, headHits=hits-bodyHits;
+          stDom.sigBody+=bodyHits*(dt/50); stDom.bodyAtt+=(attHits*0.65)*(dt/50);
+          stDom.sigHead+=headHits*(dt/50); stDom.headAtt+=(attHits*0.35)*(dt/50);
+          if(hits>=2 && (domIsA?a.power:b.power)>65) stDom.powerStrikes+=(dt/50);
+          const clSec=clamp(14+Math.abs(diff)*0.25,10,32);
+          stDom.ctrl+=dt*(0.1/50); stDom.ctrlSec+=clSec*(dt/50); stDom.clinchCtrlSec+=clSec*(dt/50);
           momentum=clamp(momentum+(domIsA?RI(3,7):-RI(3,7)),5,95);
-          if(rnd()<0.28){ currentPhase='sol'; topIsA=domIsA; (domIsA?st.A:st.B).td++; stDom.tdAtt++;
-            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          if(rnd()<0.28*(dt/50)){ currentPhase='sol'; topIsA=domIsA; (domIsA?st.A:st.B).td++; stDom.tdAtt++;
+            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
-            if(rnd()<0.35){ stDom.tdAtt++; stDef.tdDef++; }
+            if(rnd()<0.35*(dt/50)){ stDom.tdAtt++; stDef.tdDef++; }
+            if(rnd()<dt/90){
             const clinchTxt=getUniqueLog([
               `${dom.name} étouffe son adversaire contre le grillage.`,
-              `Lutte rugueuse le long de la cage à l\u2019avantage de ${dom.name}.`,
+              `Lutte rugueuse le long de la cage à l’avantage de ${dom.name}.`,
               `${dom.name} pèse de tout son poids et place de petits coups vicieux.`,
-              `Le clinch s\u2019éternise, ${dom.name} grignote l\u2019énergie adverse.`,
-              `${dom.name} domine contre la cage avec ${hits} coups courts.`
+              `Le clinch s’éternise, ${dom.name} grignote l’énergie adverse.`,
+              `${dom.name} domine contre la cage avec ${Math.round(hits)} coups courts.`
             ]);
-            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${clinchTxt}`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${clinchTxt}`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            }
           }
         } else {
           currentPhase='debout';
-          log.push({r,phase:'clinch',by:'me',text:`[${formatTime(k,6)}] Séparation, le combat reprend au centre de la cage.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          log.push({r,phase:'clinch',by:'me',text:`[${formatTime(beatT)}] Séparation, le combat reprend au centre de la cage.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         }
       } else { // debout
         const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
         let handled=false;
-        if(attA>0.14 && rnd()<0.18){ st.A.tdAtt++; handled=true;
+        /* ==== [ANCRE: HORLOGE_CONTINUE_TD_ATTEMPT_GATE] — bug trouvé pendant
+           la validation Monte Carlo de ce lot : `rnd()<0.18*(dt/50)` faisait
+           chuter la fraction de ticks « occupés » par une tentative
+           d'amenée de ~20% (ancien moteur, mesuré) à ~1,3% (nouveau), ce
+           qui livrait mécaniquement ~24% de ticks de frappe debout en plus
+           à la branche striking — largement suffisant pour expliquer le
+           dépassement de +18-19% observé sur les frappes significatives. Le
+           partage de temps striking/lutte debout (`handled` vs frappe) est
+           une fraction du round, PAS un compteur cumulatif : elle ne doit
+           donc PAS être rescalée par (dt/50), sous peine de redistribuer
+           les probabilités de tout le moteur (contraire à la consigne du
+           lot). Le taux réel de TENTATIVES reste donc celui d'origine
+           (0.18, inchangé), et c'est la réussite SACHANT une tentative qui
+           est rescalée (dt/50) pour que le taux d'amenées RÉUSSIES par
+           seconde — et donc le temps réellement passé au sol — reste
+           inchangé malgré des tentatives ~17x plus nombreuses en compte
+           brut. tdAtt/tdDef (comptes purs, jamais lus par seuil ailleurs)
+           accumulent alors en valeur fractionnaire comme tout compteur de
+           ce lot ; td (succès) reste un simple ++, sa fréquence étant déjà
+           correctement rescalée par la réussite. Une tentative RATÉE est
+           encore ~17x plus fréquente en compte brut qu'avant : elle
+           n'est donc journalisée qu'en échantillon (densité de routine),
+           jamais systématiquement — une réussite (rare, notable) reste
+           toujours journalisée. ==== */
+        if(attA>0.14 && rnd()<0.18){ st.A.tdAtt+=(dt/50); handled=true;
           const tdChanceA=sigmoid((a.takedown-b.tdd)/15)*attA;
-          if(rnd()<clamp(tdChanceA,0.05,0.85)){ st.A.td++; currentPhase='sol'; topIsA=true;
-            log.push({r,phase:'debout',by:'me',text:`[${formatTime(k,6)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          if(rnd()<clamp(tdChanceA,0.05,0.85)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true;
+            log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
-            st.B.tdDef++;
-            log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Bonne défense de ${B.name} sur la tentative d\u2019amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            st.B.tdDef+=(dt/50);
+            if(rnd()<dt/90) log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Bonne défense de ${B.name} sur la tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
-        } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt++; handled=true;
+        } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt+=(dt/50); handled=true;
           const tdChanceB=sigmoid((b.takedown-a.tdd)/15)*attB;
-          if(rnd()<clamp(tdChanceB,0.05,0.85)){ st.B.td++; currentPhase='sol'; topIsA=false;
-            log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          if(rnd()<clamp(tdChanceB,0.05,0.85)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false;
+            log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
-            st.A.tdDef++;
-            log.push({r,phase:'debout',by:'me',text:`[${formatTime(k,6)}] ${A.name} repousse une tentative d\u2019amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            st.A.tdDef+=(dt/50);
+            if(rnd()<dt/90) log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] ${A.name} repousse une tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
         }
         if(!handled && currentPhase==='debout'){
@@ -282,87 +386,95 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           const offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
           const noiseAmt=Math.round(6*noiseWeightMult);
           const pA=clamp(offA*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20), pB=clamp(offB*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20);
-          sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22*0.22,0,6);dmgB+=clamp(offA*0.22*0.22,0,6);
-          const landedA=clamp(Math.round(pA*0.5),0,10);
-          const landedB=clamp(Math.round(pB*0.5),0,10);
-          st.A.sig+=landedA; st.B.sig+=landedB;
+          sa+=pA*(dt/50);sb+=pB*(dt/50);dmgA+=clamp(offB*0.22*0.22,0,6)*(dt/50);dmgB+=clamp(offA*0.22*0.22,0,6)*(dt/50);
+          const landedA=clamp(pA*0.5,0,10);
+          const landedB=clamp(pB*0.5,0,10);
+          st.A.sig+=landedA*(dt/50); st.B.sig+=landedB*(dt/50);
 
           // Tentatives et frappes debout pour A
           const accRateA=clamp(0.42+((a.handSpeed||50)*0.08+(a.discipline||50)*0.06-(b.footSpeed||50)*0.10-(b.footwork||50)*0.06)*0.003,0.30,0.65);
-          const attA=Math.max(landedA,Math.round(landedA/accRateA)+((a.aggression||50)>60?RI(1,3):RI(0,1)));
-          st.A.sigAtt+=attA; st.A.distStrikes+=landedA; st.A.distAtt+=attA;
-          st.A.total+=landedA+RI(1,3); st.A.totalAtt+=attA+RI(2,4);
+          const attA=Math.max(landedA,landedA/accRateA+((a.aggression||50)>60?RI(1,3):RI(0,1)));
+          st.A.sigAtt+=attA*(dt/50); st.A.distStrikes+=landedA*(dt/50); st.A.distAtt+=attA*(dt/50);
+          st.A.total+=(landedA+RI(1,3))*(dt/50); st.A.totalAtt+=(attA+RI(2,4))*(dt/50);
           const kickRatioA=clamp(((a.kick||50)/150)*0.45,0.10,0.45);
-          const legA=Math.round(landedA*kickRatioA*0.7);
-          const bodyA=Math.round(landedA*(0.22+((a.hook||50)>65?0.08:0)));
+          const legA=landedA*kickRatioA*0.7;
+          const bodyA=landedA*(0.22+((a.hook||50)>65?0.08:0));
           const headA=Math.max(0,landedA-legA-bodyA);
-          st.A.sigHead+=headA; st.A.headAtt+=Math.round(attA*0.60);
-          st.A.sigBody+=bodyA; st.A.bodyAtt+=Math.round(attA*0.22);
-          st.A.sigLeg+=legA; st.A.legAtt+=Math.round(attA*0.18);
+          st.A.sigHead+=headA*(dt/50); st.A.headAtt+=(attA*0.60)*(dt/50);
+          st.A.sigBody+=bodyA*(dt/50); st.A.bodyAtt+=(attA*0.22)*(dt/50);
+          st.A.sigLeg+=legA*(dt/50); st.A.legAtt+=(attA*0.18)*(dt/50);
           const pwrPctA=clamp(((a.power||50)*0.5+(a.cross||50)*0.25+(a.hook||50)*0.25)/100,0.15,0.65);
-          st.A.powerStrikes+=Math.round(landedA*pwrPctA);
+          st.A.powerStrikes+=(landedA*pwrPctA)*(dt/50);
 
           // Tentatives et frappes debout pour B
           const accRateB=clamp(0.42+((b.handSpeed||50)*0.08+(b.discipline||50)*0.06-(a.footSpeed||50)*0.10-(a.footwork||50)*0.06)*0.003,0.30,0.65);
-          const attB=Math.max(landedB,Math.round(landedB/accRateB)+((b.aggression||50)>60?RI(1,3):RI(0,1)));
-          st.B.sigAtt+=attB; st.B.distStrikes+=landedB; st.B.distAtt+=attB;
-          st.B.total+=landedB+RI(1,3); st.B.totalAtt+=attB+RI(2,4);
+          const attB=Math.max(landedB,landedB/accRateB+((b.aggression||50)>60?RI(1,3):RI(0,1)));
+          st.B.sigAtt+=attB*(dt/50); st.B.distStrikes+=landedB*(dt/50); st.B.distAtt+=attB*(dt/50);
+          st.B.total+=(landedB+RI(1,3))*(dt/50); st.B.totalAtt+=(attB+RI(2,4))*(dt/50);
           const kickRatioB=clamp(((b.kick||50)/150)*0.45,0.10,0.45);
-          const legB=Math.round(landedB*kickRatioB*0.7);
-          const bodyB=Math.round(landedB*(0.22+((b.hook||50)>65?0.08:0)));
+          const legB=landedB*kickRatioB*0.7;
+          const bodyB=landedB*(0.22+((b.hook||50)>65?0.08:0));
           const headB=Math.max(0,landedB-legB-bodyB);
-          st.B.sigHead+=headB; st.B.headAtt+=Math.round(attB*0.60);
-          st.B.sigBody+=bodyB; st.B.bodyAtt+=Math.round(attB*0.22);
-          st.B.sigLeg+=legB; st.B.legAtt+=Math.round(attB*0.18);
+          st.B.sigHead+=headB*(dt/50); st.B.headAtt+=(attB*0.60)*(dt/50);
+          st.B.sigBody+=bodyB*(dt/50); st.B.bodyAtt+=(attB*0.22)*(dt/50);
+          st.B.sigLeg+=legB*(dt/50); st.B.legAtt+=(attB*0.18)*(dt/50);
           const pwrPctB=clamp(((b.power||50)*0.5+(b.cross||50)*0.25+(b.hook||50)*0.25)/100,0.15,0.65);
-          st.B.powerStrikes+=Math.round(landedB*pwrPctB);
+          st.B.powerStrikes+=(landedB*pwrPctB)*(dt/50);
 
           // Impact des dégâts reçus (altération des déplacements et coupures)
           if(st.B.dmgLegs>15) b.footwork=Math.max(10,b.footwork*0.98);
           if(st.A.dmgLegs>15) a.footwork=Math.max(10,a.footwork*0.98);
-          if(headA>=3 && ((a.cross||50)>75||(a.hook||50)>75) && rnd()<0.2) st.B.cuts++;
-          if(headB>=3 && ((b.cross||50)>75||(b.hook||50)>75) && rnd()<0.2) st.A.cuts++;
-          if(pA>=8 && rnd()<0.25) st.B.wobbled++;
-          if(pB>=8 && rnd()<0.25) st.A.wobbled++;
+          if(headA>=3 && ((a.cross||50)>75||(a.hook||50)>75) && rnd()<0.2*(dt/50)) st.B.cuts++;
+          if(headB>=3 && ((b.cross||50)>75||(b.hook||50)>75) && rnd()<0.2*(dt/50)) st.A.cuts++;
+          if(pA>=8 && rnd()<0.25*(dt/50)) st.B.wobbled++;
+          if(pB>=8 && rnd()<0.25*(dt/50)) st.A.wobbled++;
 
           const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016)*profA.koMod*0.22;
           const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016)*profB.koMod*0.22;
-          const isKdA=rnd()<koA*1.5, isKdB=!isKdA&&rnd()<koB*1.5;
+          const isKdA=rnd()<koA*1.5*(dt/50), isKdB=!isKdA&&rnd()<koB*1.5*(dt/50);
           let kdText=null;
           if(isKdA){
             st.A.kd++; st.B.wobbled++;
             const finishChanceA=clamp(0.60*(1+((a.killer||50)-50)*0.003)*(1-((b.composure||50)-50)*0.003)*(1-((b.heart||50)-50)*0.002),0.25,0.85);
             if(rnd()<finishChanceA){ finish={by:A,loser:B,method:'KO/TKO',round:r}; }
-            else kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`};
+            else kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l’arbitre laisse le combat continuer !`};
           }
           else if(isKdB){
             st.B.kd++; st.A.wobbled++;
             const finishChanceB=clamp(0.60*(1+((b.killer||50)-50)*0.003)*(1-((a.composure||50)-50)*0.003)*(1-((a.heart||50)-50)*0.002),0.25,0.85);
             if(!immuneA && rnd()<finishChanceB){ finish={by:B,loser:A,method:'KO/TKO',round:r}; }
-            else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`};
+            else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l’arbitre laisse le combat continuer !`};
           }
           const isMe=rnd()<(offA/(offA+offB+1));
           momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
           const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
-          const rDmg=rnd(); if(rDmg<0.4) tgt.dmgHead+=RI(1,3); else if(rDmg<0.7) tgt.dmgBody+=RI(1,3); else tgt.dmgLegs+=RI(1,3);
+          const rDmg=rnd(); if(rDmg<0.4) tgt.dmgHead+=RI(1,3)*(dt/50); else if(rDmg<0.7) tgt.dmgBody+=RI(1,3)*(dt/50); else tgt.dmgLegs+=RI(1,3)*(dt/50);
+          /* ==== [ANCRE: HORLOGE_CONTINUE_DENSITE_LOG_DEBOUT] — même logique
+             de densité qu'en phase sol : un knockdown ou une finition sont
+             toujours journalisés, un échange ordinaire est échantillonné à
+             (dt/50) pour retomber sur ~6 beats/round en moyenne quel que soit
+             dt (voir ANCRE HORLOGE_CONTINUE_DENSITE_LOG ci-dessus). ==== */
+          if(kdText || finish || rnd()<dt/90){
           let satirePool=[];
           if(atk.attrs.fightIQ>def.attrs.fightIQ+20){
             satirePool.push(`${atk.name} donne une leçon de géométrie à un adversaire qui ne sait pas lire les angles.`,`${atk.name} feinte le jab, ${def.name} réagit avec deux secondes de retard.`);
           }
           if(atk.attrs.power>85 && def.attrs.chin<50){
-            satirePool.push(`La droite de ${atk.name} teste la validité de l\u2019assurance santé de ${def.name}.`,`Chaque impact de ${atk.name} entame sérieusement le capital neuronal de ${def.name}.`);
+            satirePool.push(`La droite de ${atk.name} teste la validité de l’assurance santé de ${def.name}.`,`Chaque impact de ${atk.name} entame sérieusement le capital neuronal de ${def.name}.`);
           }
           if(atk.style==='karate'){
             satirePool.push(`${atk.name} fait des bonds de kangourou et claque un kick insaisissable.`,`Garde au niveau des genoux, arrogance au maximum, ${atk.name} touche en premier.`);
           }
           if(satirePool.length===0){
-            satirePool=[`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l\u2019ouverture en striking.`,`Superbe échange remporté par ${atk.name}.`,`Le bras arrière de ${atk.name} fait mouche.`,`${atk.name} casse la distance et punit.`,`${tgs.includes('Kick')?atk.name+' claque un lourd kick.':atk.name+' place une combinaison nette.'}`];
+            satirePool=[`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l’ouverture en striking.`,`Superbe échange remporté par ${atk.name}.`,`Le bras arrière de ${atk.name} fait mouche.`,`${atk.name} casse la distance et punit.`,`${tgs.includes('Kick')?atk.name+' claque un lourd kick.':atk.name+' place une combinaison nette.'}`];
           }
           let txt=kdText?kdText.txt:getUniqueLog(satirePool);
-          log.push({r,phase:'debout',by:kdText?kdText.by:(isMe?'me':'op'),text:`[${formatTime(k,6)}] `+txt,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          log.push({r,phase:'debout',by:kdText?kdText.by:(isMe?'me':'op'),text:`[${formatTime(beatT)}] `+txt,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
-            last.text=`[00:00] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
-          else if(rnd()<0.15){ currentPhase='clinch'; }
+            finish.time=beatT;
+            last.text=`[${formatTime(beatT)}] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
+          }
+          if(!finish && rnd()<0.15*(dt/50)){ currentPhase='clinch'; }
         }
       }
     }
@@ -405,23 +517,29 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     if(rnd()<dissent2) j2=dissentJudge();
     if(rnd()<dissent3) j3=dissentJudge();
     j1A+=j1[0];j1B+=j1[1];j2A+=j2[0];j2B+=j2[1];j3A+=j3[0];j3B+=j3[1];
+    /* ==== [ANCRE: HORLOGE_CONTINUE_ARRONDI] — les compteurs de st.A/st.B
+       s'accumulent en valeur fractionnaire pendant toute la boucle de ticks
+       (voir ANCRE HORLOGE_CONTINUE) : c'est ici, en figeant les totaux du
+       round pour l'affichage des cartes de juges, que l'arrondi intervient
+       pour la première fois — jamais avant. `ctrl` (utilisé par
+       formatCtrl()) reste volontairement en valeur fractionnaire. ==== */
     roundStats.push({
       r,j1,j2,j3,
-      sigA:st.A.sig-_sigA0, sigB:st.B.sig-_sigB0,
-      sigAttA:st.A.sigAtt-_sigAttA0, sigAttB:st.B.sigAtt-_sigAttB0,
-      totalA:st.A.total-_totalA0, totalB:st.B.total-_totalB0,
-      totalAttA:st.A.totalAtt-_totalAttA0, totalAttB:st.B.totalAtt-_totalAttB0,
-      tdA:st.A.td-_tdA0, tdB:st.B.td-_tdB0,
-      tdAttA:st.A.tdAtt-_tdAttA0, tdAttB:st.B.tdAtt-_tdAttB0,
-      tdDefA:st.A.tdDef-_tdDefA0, tdDefB:st.B.tdDef-_tdDefB0,
-      kdA:st.A.kd-_kdA0, kdB:st.B.kd-_kdB0,
+      sigA:Math.round(st.A.sig-_sigA0), sigB:Math.round(st.B.sig-_sigB0),
+      sigAttA:Math.round(st.A.sigAtt-_sigAttA0), sigAttB:Math.round(st.B.sigAtt-_sigAttB0),
+      totalA:Math.round(st.A.total-_totalA0), totalB:Math.round(st.B.total-_totalB0),
+      totalAttA:Math.round(st.A.totalAtt-_totalAttA0), totalAttB:Math.round(st.B.totalAtt-_totalAttB0),
+      tdA:Math.round(st.A.td-_tdA0), tdB:Math.round(st.B.td-_tdB0),
+      tdAttA:Math.round(st.A.tdAtt-_tdAttA0), tdAttB:Math.round(st.B.tdAtt-_tdAttB0),
+      tdDefA:Math.round(st.A.tdDef-_tdDefA0), tdDefB:Math.round(st.B.tdDef-_tdDefB0),
+      kdA:Math.round(st.A.kd-_kdA0), kdB:Math.round(st.B.kd-_kdB0),
       ctrlA:st.A.ctrl-_ctrlA0, ctrlB:st.B.ctrl-_ctrlB0,
       ctrlSecA:st.A.ctrlSec-_ctrlSecA0, ctrlSecB:st.B.ctrlSec-_ctrlSecB0,
-      subAttA:st.A.subAtt-_subAttA0, subAttB:st.B.subAtt-_subAttB0,
-      headA:st.A.sigHead-_headA0, headB:st.B.sigHead-_headB0,
-      bodyA:st.A.sigBody-_bodyA0, bodyB:st.B.sigBody-_bodyB0,
-      legA:st.A.sigLeg-_legA0, legB:st.B.sigLeg-_legB0,
-      pwrA:st.A.powerStrikes-_pwrA0, pwrB:st.B.powerStrikes-_pwrB0
+      subAttA:Math.round(st.A.subAtt-_subAttA0), subAttB:Math.round(st.B.subAtt-_subAttB0),
+      headA:Math.round(st.A.sigHead-_headA0), headB:Math.round(st.B.sigHead-_headB0),
+      bodyA:Math.round(st.A.sigBody-_bodyA0), bodyB:Math.round(st.B.sigBody-_bodyB0),
+      legA:Math.round(st.A.sigLeg-_legA0), legB:Math.round(st.B.sigLeg-_legB0),
+      pwrA:Math.round(st.A.powerStrikes-_pwrA0), pwrB:Math.round(st.B.powerStrikes-_pwrB0)
     });
     // Adaptation tactique de fin de round
     if(sA<sB){
@@ -452,7 +570,16 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
        geste joué (finishMove.moveZone), pas celle des dégâts cumulés. Repli sur
        finishZone si le geste n'est référencé dans aucune table. ==== */
     const shownZone=finishMove.moveZone||finishZone;
-    res={winner:finish.by===A?'A':'B',method:finish.method,round:finish.round,detail:finish.detail||'',moveName:finish.moveName,moveFlavor:finish.moveFlavor,zone:shownZone}; }
+    res={winner:finish.by===A?'A':'B',method:finish.method,round:finish.round,detail:finish.detail||'',moveName:finish.moveName,moveFlavor:finish.moveFlavor,zone:shownZone};
+    /* ==== [ANCRE: HORLOGE_CONTINUE_FINISH_TIME] — Lot P6/2026 : finish.time
+       (secondes écoulées dans le round de finition, tirées uniformément dans
+       le tick via t+RI(0,dt-1), cf. ANCRE HORLOGE_CONTINUE) est désormais un
+       horodatage réel — voir applyResult() plus bas pour sa propagation dans
+       f.history. finishTime est exposé en secondes écoulées, finishTimeStr
+       au format mm:ss (temps restant, même convention que les logs). ==== */
+    if(typeof finish.time==='number'){ res.finishTime=finish.time; res.finishTimeStr=formatTime(finish.time); }
+    /* ==== [FIN ANCRE] ==== */
+  }
   else {
     // ==== [ANCRE: JUGES_10PT_VERDICT] — le vainqueur vient du vote MAJORITAIRE des
     // juges (pas d'un total sa/sb caché), pour que les cartes affichées soient
@@ -466,14 +593,26 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   }
   res.scoreA=j1A+j2A+j3A; res.scoreB=j1B+j2B+j3B;
   res.judges={j1:[j1A,j1B],j2:[j2A,j2B],j3:[j3A,j3B]}; res.roundStats=roundStats;
+  /* ==== [ANCRE: HORLOGE_CONTINUE_ARRONDI_FIN_COMBAT] — dernier point
+     d'arrondi (voir ANCRE HORLOGE_CONTINUE_ARRONDI plus haut, pour les
+     rounds) : les compteurs discrets de res.stats sont fractionnaires tout
+     au long du combat, arrondis une seule fois ici. `ctrl` (utilisé par
+     formatCtrl()) et ctrlSec/groundCtrlSec/clinchCtrlSec (déjà des entiers,
+     accumulés par pas de dt) sont exclus. ==== */
+  const INT_ROUND_FIELDS=['sig','sigAtt','total','totalAtt','sigHead','headAtt','sigBody','bodyAtt',
+    'sigLeg','legAtt','distStrikes','distAtt','clinchStrikes','clinchAtt','groundStrikes','groundAtt',
+    'powerStrikes','td','tdAtt','tdDef','reversals','standups','guardPasses','subAtt','subEscapes',
+    'dmgHead','dmgBody','dmgLegs','kd','wobbled','cuts','sub'];
   ['A', 'B'].forEach(side => {
     const s = st[side];
+    INT_ROUND_FIELDS.forEach(k=>{ s[k]=Math.round(s[k]); });
     s.sigAtt = Math.max(s.sigAtt, s.sig);
     s.total = Math.max(s.total, s.sig);
     s.totalAtt = Math.max(s.totalAtt, s.sigAtt, s.total);
     s.tdAtt = Math.max(s.tdAtt, s.td);
     s.ctrlSec = Math.max(0, s.ctrlSec);
   });
+  /* ==== [FIN ANCRE] ==== */
   res.log=log; res.stats=st;
   return res;
 }
@@ -536,10 +675,14 @@ function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!
        (oppRankBefore), plus correct pour l'affichage joueur ; ce calcul ici
        ne sert donc de valeur par défaut que pour un futur appel de
        applyResult() sur G.f qui ne passerait pas par ce chemin d'écran.
-       Aucun horodatage de fin de round n'existe nulle part dans la boucle
-       de simulation (simulateFight/resolveFight) — un champ `time` n'est
-       donc pas ajouté ici plutôt que d'en fabriquer un plausible. ==== */
-    F.history.push({res:isDraw?'draw':(win?'win':'loss'),method:m,round:res.round||null,oppId:opp&&opp.id,
+       Mise à jour Lot P6/2026 (horloge continue) : la simulation dispose
+       désormais d'un horodatage réel de finition (res.finishTimeStr, cf.
+       ANCRE HORLOGE_CONTINUE_FINISH_TIME dans simulateFight) — `time` est
+       donc bien ajouté ici (null pour une décision, faute de finition à
+       horodater — jamais fabriqué ; comme pour toute entrée d'historique
+       antérieure à ce lot, où le champ est simplement absent, hubCombatHtml
+       en ui-06-career-screens.js sait déjà omettre les deux cas proprement). ==== */
+    F.history.push({res:isDraw?'draw':(win?'win':'loss'),method:m,round:res.round||null,time:res.finishTimeStr||null,oppId:opp&&opp.id,
       oppName:opp&&opp.name,oppFlag:opp&&opp.flag,oppNick:opp&&opp.nick,oppWasChamp:!!(opp&&opp.champion),oppRecord:opp?`${opp.W}-${opp.L}`:null,oppElo:opp&&opp.orgElo,
       oppRank:opp?divRank(opp):null});
     if(F.history.length>60)F.history=F.history.slice(-60);

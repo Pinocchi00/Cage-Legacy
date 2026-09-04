@@ -742,6 +742,19 @@ test('MOTEUR_COMBAT_IMPACT_30_ATTRIBUTS — les attributs influencent directemen
   const agro = win.makeFighter({ div: 'H-middle', style: 'mma' });
   agro.attrs.aggression = 95; agro.attrs.handSpeed = 85;
   const passive = win.makeFighter({ div: 'H-middle', style: 'mma' });
+  /* ==== [ANCRE: TEST_HORLOGE_CONTINUE_AGGRO_CONTROLE] — Lot P6/2026 :
+     `passive` était généré avec ses propres attributs aléatoires (seul
+     `aggression`/`handSpeed` étaient forcés), donc le test comparait deux
+     combattants qui pouvaient aussi différer sur striking/footwork/power
+     etc. Sous l'ancien moteur (6 micro-séquences), le seed 99 faisait
+     tomber ce bruit dans le bon sens par coïncidence ; sous l'horloge
+     continue (bien plus de tirages aléatoires par combat), ce n'est plus
+     le cas — le combat n'est pas moins correct, seul le tirage change (cf.
+     P6 §5). On isole désormais réellement la variable testée en copiant
+     TOUS les attributs de `agro` sur `passive` avant de ne faire varier
+     que l'agressivité, plutôt que de rejouer avec un seed qui retomberait
+     par chance dans le bon sens. ==== */
+  Object.assign(passive.attrs, agro.attrs);
   passive.attrs.aggression = 15; passive.attrs.handSpeed = 85;
 
   let agroAttempts = 0, passiveAttempts = 0;
