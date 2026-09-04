@@ -594,3 +594,64 @@ test('CORRECTIF_P4P_SCORE_BRUT — l\'onglet P4P n\'affiche plus aucun score bru
     assert.ok(html.includes(`#${expectedPlayerRank}`), 'le rang affiché pour le joueur doit correspondre à p4pRank(f)');
   }
 });
+
+/* ==== [ANCRE: TEST_P1_FORME_MORAL_REEQUILIBRAGE] — Lot P1/2026, chantier
+   d'équilibrage forme/moral (diagnostic chiffré sur 200 carrières via
+   tools/monte-carlo.js : forme >=95 dans 71.9% des combats avant ce
+   correctif, affichage /20 changeant seulement 43.1% du temps). Couvre les
+   deux mécanismes ajoutés/modifiés : regressToBaseline() (engine-
+   progression.js) et le coût de forme/moral à l'issue d'un combat
+   (applyResult(), engine-combat.js). ==== */
+test('P1_FORME_MORAL_REEQUILIBRAGE — regressToBaseline() ramène forme et moral vers la ligne de base, dans les deux sens', () => {
+  const win = newGameWindow();
+  const BASELINE = win.eval('FORME_MORAL_BASELINE'); // const de haut niveau, jamais une propriété de window (cf. TESTS_LOADGAME_G_BRIDGE)
+  const high = { form: 100, morale: 100 };
+  win.regressToBaseline(high);
+  assert.ok(high.form < 100 && high.morale < 100, 'un combattant au sommet doit redescendre vers la ligne de base');
+  assert.ok(high.form >= BASELINE && high.morale >= BASELINE, 'la baisse ne doit jamais dépasser la ligne de base en un seul appel');
+
+  const low = { form: 0, morale: 0 };
+  win.regressToBaseline(low);
+  assert.ok(low.form > 0 && low.morale > 0, 'un combattant épuisé doit remonter vers la ligne de base (le camp RÉCUPÈRE, jamais un pur plafond)');
+  assert.ok(low.form <= BASELINE && low.morale <= BASELINE, 'la hausse ne doit jamais dépasser la ligne de base en un seul appel');
+
+  const atBaseline = { form: BASELINE, morale: BASELINE };
+  win.regressToBaseline(atBaseline);
+  assert.equal(atBaseline.form, BASELINE, 'déjà à la ligne de base, regressToBaseline() ne doit rien changer');
+  assert.equal(atBaseline.morale, BASELINE, 'déjà à la ligne de base, regressToBaseline() ne doit rien changer');
+});
+
+test('P1_FORME_MORAL_REEQUILIBRAGE — une victoire ne fait plus jamais gagner de forme, un match nul non plus (« le corps encaisse »)', () => {
+  const win = newGameWindow();
+  win.setSeed(3);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const A = win.G.f;
+  const B = win.makeFighter({ gender: 'H', style: 'boxer', div: 'H-lheavy', first: 'B' });
+  for (let i = 0; i < 25; i++) {
+    A.form = 80; A.morale = 80;
+    const res = { winner: 'A', method: 'Décision', round: 3 };
+    win.applyResult(A, B, res, 'A');
+    assert.ok(A.form <= 80, `une victoire ne doit jamais faire monter la forme (avant 80, après ${A.form})`);
+  }
+});
+
+test('P1_FORME_MORAL_REEQUILIBRAGE — chooseTraining() applique la régression vers la ligne de base avant le delta de l’option choisie', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  win.G.f.form = 100; win.G.f.morale = 100;
+  win.startFightSelect();
+  win.chooseOpponent(0);
+  // Option d'entraînement synthétique sans aucun delta de forme/moral, pour
+  // isoler l'effet de regressToBaseline() de celui (variable, dépendant du
+  // style tiré) du delta propre à l'option réellement proposée.
+  win.G.train = [{ label: 'Test isolation', hint: '', d: [['cardio', 1]] }];
+  const before = win.G.f.form;
+  win.chooseTraining(0);
+  assert.ok(win.G.f.form < before, 'à 100, avec une option qui ne touche pas la forme, seule la régression vers la ligne de base doit s\'appliquer et donc la faire baisser');
+});

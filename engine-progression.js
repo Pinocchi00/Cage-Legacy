@@ -160,6 +160,30 @@ function softCapDelta(before,dv,ceiling){
    avant application, pour qu'un franchissement de palier /20 affiché soit
    la norme et non l'exception — appliqué ici, au point d'entrée unique,
    jamais dans chaque appelant (camps, événements). ==== */
+/* ==== [ANCRE: P1_FORME_MORAL_LIGNE_DE_BASE] — Lot P1/2026, chantier
+   d'équilibrage forme/moral (diagnostic chiffré via tools/monte-carlo.js,
+   200 carrières) : avant ce correctif, rien ne ramenait jamais forme/moral
+   vers une valeur de repos — seuls des gains (victoires, camps) ou des
+   pertes (défaites, blessures) les faisaient bouger, et le clamp(0,100)
+   finissait toujours par les arrêter au plafond (forme >=95 dans 71.9% des
+   combats simulés). Appelée une fois par camp d'entraînement
+   (chooseTraining, ui-02 — donc une fois par combat, comme le veut le
+   rythme du jeu), regressToBaseline() ramène forme ET moral d'une fraction
+   fixe de l'écart vers FORME_MORAL_BASELINE : un combattant épuisé ou au
+   moral bas RÉCUPÈRE (l'écart se comble vers le haut), un combattant au
+   sommet depuis plusieurs combats REDESCEND doucement (l'écart se comble
+   vers le bas) — jamais un plafond entretenu artificiellement par le
+   simple passage du temps. S'applique AVANT les deltas propres au choix
+   d'entraînement (juste en dessous) : le repos/la popote du camp est un
+   fond commun à toute la semaine, la compétence choisie s'y ajoute.
+   @param {Fighter} f */
+const FORME_MORAL_BASELINE = 65;
+const FORME_MORAL_BASELINE_PULL = 0.20;
+function regressToBaseline(f){
+  f.form = Math.round(f.form + (FORME_MORAL_BASELINE - f.form) * FORME_MORAL_BASELINE_PULL);
+  f.morale = Math.round(f.morale + (FORME_MORAL_BASELINE - f.morale) * FORME_MORAL_BASELINE_PULL);
+}
+/* ==== [FIN ANCRE] ==== */
 function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv0] of deltas){
     const dv=(k==='morale'||k==='form')&&dv0!==0 ? Math.sign(dv0)*Math.max(5,Math.round(Math.abs(dv0)/5)*5) : dv0;
     if(k==='morale'){ const before=f.morale; f.morale=clamp(before+dv,0,100); const real=Math.round(f.morale-before);

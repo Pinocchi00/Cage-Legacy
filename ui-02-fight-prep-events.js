@@ -304,6 +304,10 @@ function chooseOpponent(i){ G.sel=G.opps[i]; G.train=trainingOptions(G.f);
   G.f._rivalryPressDone=false; G.pressConf=(typeof triggerRivalPressConference==='function')?triggerRivalPressConference(G.f,G.sel.o):null;
   G.screen=G.pressConf?'press_conf':'camp'; save(); render(); }
 function chooseTraining(i){ const opt=G.train[i];
+  // Lot P1/2026 (ANCRE P1_FORME_MORAL_LIGNE_DE_BASE, engine-progression.js) :
+  // le repos/la popote du camp, commun à tout choix d'entraînement, avant le
+  // delta propre à la compétence choisie ci-dessous.
+  regressToBaseline(G.f);
   const tierId=G.selectedCampTier||'gratuit';
   const tier=CAMP_TIERS.find(t=>t.id===tierId)||CAMP_TIERS[0];
   let pendingOppMalus=null;

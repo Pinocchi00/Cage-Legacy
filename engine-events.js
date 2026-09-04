@@ -201,10 +201,18 @@ function getAdaptiveNPCTactics(npc,player){
    QU'AU JOUEUR jusqu'ici — jamais à l'adversaire. G.fight.oppMalus est un
    nouveau champ, l'application à opp.attrs + sa restauration doivent être
    ajoutées dans resolveFight() (ui.js), au même endroit que G.fight.malus. ==== */
+/* ==== [ANCRE: P1_FORME_MORAL_CAMPS_PAYANTS] — Lot P1/2026, même chantier
+   d'équilibrage que P1_FORME_MORAL_LIGNE_DE_BASE (engine-progression.js) :
+   les paliers payants restent un vrai avantage (zéro risque de blessure,
+   toujours un bonus net), mais un bonus fixe de +5/+5 systématique, combiné
+   à regressToBaseline() ET au gain de moral à la victoire, entretenait
+   encore un plafond quasi permanent pour un joueur qui pouvait se les
+   offrir. Bonus réduits de 5 à 3 points — avant/après mesurés sur 200
+   carrières via tools/monte-carlo.js (cf. commit). ==== */
 const CAMP_TIERS=[
   {id:'gratuit',name:'Camp local (Gratuit)',cost:0,risk:0.05,buff:null,oppDebuff:null},
-  {id:'premium',name:'Camp Premium',cost:15,risk:0.0,buff:{morale:5,form:5},oppDebuff:null},
-  {id:'sparring',name:'Sparring Sur-Mesure',cost:35,risk:0.0,buff:{form:5},oppDebuff:{adaptability:-15,fightIQ:-10}}
+  {id:'premium',name:'Camp Premium',cost:15,risk:0.0,buff:{morale:3,form:3},oppDebuff:null},
+  {id:'sparring',name:'Sparring Sur-Mesure',cost:35,risk:0.0,buff:{form:3},oppDebuff:{adaptability:-15,fightIQ:-10}}
 ];
 /* ==== [ANCRE: CAMPTIER_CODE_MORT] — audit : aucun appel à executeCampTier()
    nulle part dans le repo (engine, state, fichiers ui, index.html, onclick

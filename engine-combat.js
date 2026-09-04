@@ -358,9 +358,20 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   res.log=log; res.stats=st;
   return res;
 }
+/* ==== [ANCRE: P1_FORME_MORAL_COUT_COMBAT] — Lot P1/2026, chantier
+   d'équilibrage (harnais tools/monte-carlo.js) : diagnostic sur 200
+   carrières avant ce correctif — forme >=95 dans 71.9% des combats
+   (moral : 32.4%), gain moyen théorique de moral à la victoire RI(6,12)
+   quasi entièrement absorbé par le clamp dès que le moral dépassait 90
+   (delta réel observé +2.3 au lieu de +9.0 théorique). Le gain de moral à
+   la victoire est réduit (RI(6,12) -> RI(2,7)) : une victoire reste
+   toujours un gain net, jamais un coût, mais n'entretient plus à elle
+   seule un plafond permanent — voir aussi P1_FORME_MORAL_COUT_FORME
+   juste en dessous (le coût de forme, lui, touche aussi les victoires :
+   "le corps encaisse" même en gagnant). ==== */
 function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!isDraw&&res.winner===side; const m=res.method;
   if(isDraw){ F.D=(F.D||0)+1; F.morale=clamp(F.morale+RI(-2,2),0,100); }
-  else if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(m.startsWith('KO'))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(6,12),0,100); }
+  else if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(m.startsWith('KO'))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(2,7),0,100); }
   else { F.L++; F.streak=Math.min(-1,F.streak-1); if(m.startsWith('KO'))F.koLoss++; F.morale=clamp(F.morale-RI(8,16),0,100); }
   /* ==== [ANCRE: V2-38] — "bilan maison" par organisation, en plus du
      palmarès pro global (F.W/F.L, qui ne se remet jamais à zéro après le
@@ -374,7 +385,17 @@ function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!
     const rec=F.orgRecords[F.org]||(F.orgRecords[F.org]={W:0,L:0,D:0});
     if(isDraw) rec.D=(rec.D||0)+1; else if(win) rec.W++; else rec.L++;
   }
-  F.form=clamp(F.form+(win?RI(3,8):isDraw?0:-RI(5,12)),0,100);
+  /* ==== [ANCRE: P1_FORME_MORAL_COUT_FORME] — même lot que P1_FORME_MORAL_
+     COUT_COMBAT ci-dessus. Avant ce correctif, la forme montait à la
+     victoire (+RI(3,8)) exactement comme un attribut entraîné — aucun
+     combat, gagné ou perdu, ne coûtait jamais rien au corps, seul le
+     clamp(0,100) finissait par arrêter la hausse. "Le corps encaisse"
+     (item demandé) : une victoire coûte désormais un peu de forme (encaisser
+     des coups reste un combat, même gagné), une défaite en coûte
+     nettement plus, un match nul un peu — jamais un gain net pour la
+     forme à l'issue d'un combat, seul un entraînement/repos peut la
+     faire remonter (cf. regressToBaseline(), engine-progression.js). ==== */
+  F.form=clamp(F.form-(win?RI(1,4):isDraw?RI(1,3):RI(5,12)),0,100);
   // ==== [ANCRE: META04_06] — planchers de moral. Le jeu n'a pas de système de
   // popularité distinct : ces deux compétences sont adaptées sur `morale`,
   // le champ existant le plus proche (au lieu d'un f.pop qui n'existe pas). ====
