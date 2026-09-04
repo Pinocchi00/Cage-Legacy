@@ -744,7 +744,11 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      motif que last.narrative juste au-dessus (déjà une chaîne, jamais
      touché par ce bug). ==== */
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative:{src:narrative.src,txt:narrative.txt(G.f)},purseDetail:G.fight.purseDetail,classOffer,class31Offer,
-    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, upsetLine};
+    // rank:oppRankBefore — Lot C01/2026 §C02 : rang de l'adversaire au moment
+    // du combat, nécessaire à la phrase de cause de la carte "Classement"
+    // (rankChangeReasonHtml, ui-06). Déjà calculé plus haut (myRankBefore/
+    // oppRankBefore), jamais recalculé ici.
+    opp:{name:opp.name,flag:opp.flag,rank:oppRankBefore}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, upsetLine};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   /* ==== [ANCRE: V3_HISTORIQUE_PRESERVE] — Plan V4 §2.2 : les compteurs pro

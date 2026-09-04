@@ -35,7 +35,11 @@ function scr_toptier(){
      <p class="muted small mt">${o.desc}</p>
      <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.signTopTier(${o.org})">Signer avec ${o.flavor}</button>
    </div>`).join('')}
-   <button class="btn ghost mt" onclick="CL.declineTopTier()">Ne rien signer — rester en Continentale</button>
+   <!-- ==== [ANCRE: CORRECTIF_BOUTON_DECLINE_PALIER] — Lot C01/2026 §C04b :
+        "Continentale" était le libellé de palier interne (ORGS), pas une
+        vraie organisation — même grief que §C04a. Aligné sur le libellé
+        déjà correct de declinePromo() juste plus bas. ==== -->
+   <button class="btn ghost mt" onclick="CL.declineTopTier()">Ne rien signer — rester ici</button>
    </div>`; }
 /* ==== [FIN ANCRE] ==== */
 
@@ -174,11 +178,16 @@ function scr_promo(){
        ${offer.phrase1?`<p class="muted small mt" style="font-style:italic">${offer.phrase1}</p>`:''}
        <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">Signer avec ${offer.orgFlavor1}</button>
      </div>
+     <!-- ==== [ANCRE: CORRECTIF_SUPPRESSION_LABEL_FASTTRACK] — Lot C01/2026
+          §C04c : l'étiquetage spécifique de cette seconde offre a été
+          retiré (retour joueur #4). [ARBITRAGE] l'offre elle-même est
+          conservée (c'est un vrai choix de carrière), seul son étiquetage
+          disparaît ; offer.fastTrack reste le champ interne qui pilote
+          l'affichage de cette carte. ==== -->
      ${offer.fastTrack?(()=>{ const previewFast=generateContract(f,offer.fastTier||3,false); return `<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
-       <div class="hero-name" style="font-size:20px">${offer.orgFlavor3}<em style="color:var(--muted)">${orgLevelTag(offer.fastTier||3)} — Fast-Track</em></div>
+       <div class="hero-name" style="font-size:20px">${offer.orgFlavor3}<em style="color:var(--muted)">${orgLevelTag(offer.fastTier||3)}</em></div>
        <div class="mono small gold mt">${contractPayLine(previewFast)}</div>
        <div class="mono small muted">Contrat de ${previewFast.fightsLeft} combats</div>
-       <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
        ${offer.phrase3?`<p class="muted small mt" style="font-style:italic">${offer.phrase3}</p>`:''}
        <button class="btn mt" style="background:var(--gold-d);color:#fff;border-color:var(--gold-d);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">Signer avec ${offer.orgFlavor3}</button>
      </div>`; })():''}

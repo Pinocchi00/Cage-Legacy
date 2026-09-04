@@ -147,9 +147,25 @@ function softCapDelta(before,dv,ceiling){
   return before+dv*factor;
 }
 /* ==== [FIN ANCRE] ==== */
-function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv] of deltas){
-    if(k==='morale'){ f.morale=clamp(f.morale+dv,0,100); applied.push(['Moral',dv]); continue; }
-    if(k==='form'){ f.form=clamp(f.form+dv,0,100); applied.push(['Forme',dv]); continue; }
+/* ==== [ANCRE: CORRECTIF_FORME_MORAL_FORMAT_OBJET] — Lot C01/2026 §C03 :
+   moral et forme sortaient en format tableau (['Moral',dv]/['Forme',dv]),
+   rendu par l'UI en "+1 Forme" (mise à l'échelle /5, minimum 1) — une
+   convention d'affichage différente de celle des attributs ("Forme : 14 ➔
+   15" via d20()), qui masquait aussi tout gain ne franchissant pas de
+   palier /20. Les deux sortent désormais dans le MÊME format objet que les
+   attributs : {key,label,delta,before,after} — avant/après en valeur
+   brute 0-100, exactement comme f.attrs[k]. [ARBITRAGE] amplitude par
+   défaut : tout delta de forme/moral non nul est arrondi à un multiple de
+   5 dans le sens du signe (Math.sign(dv)*Math.max(5,Math.round(|dv|/5)*5))
+   avant application, pour qu'un franchissement de palier /20 affiché soit
+   la norme et non l'exception — appliqué ici, au point d'entrée unique,
+   jamais dans chaque appelant (camps, événements). ==== */
+function applyDeltas(f,deltas){ const applied=[]; for(const [k,dv0] of deltas){
+    const dv=(k==='morale'||k==='form')&&dv0!==0 ? Math.sign(dv0)*Math.max(5,Math.round(Math.abs(dv0)/5)*5) : dv0;
+    if(k==='morale'){ const before=f.morale; f.morale=clamp(before+dv,0,100); const real=Math.round(f.morale-before);
+      if(real!==0) applied.push({key:'morale',label:'Moral',delta:real,before,after:f.morale}); continue; }
+    if(k==='form'){ const before=f.form; f.form=clamp(before+dv,0,100); const real=Math.round(f.form-before);
+      if(real!==0) applied.push({key:'form',label:'Forme',delta:real,before,after:f.form}); continue; }
     const before=f.attrs[k]; let after=before+dv;
     // Rendement décroissant au-delà du seuil de potentiel (V3_DIMINISHING_RETURNS
     // ci-dessus) — plus de mur dur : la valeur déjà acquise n'est jamais reprise,

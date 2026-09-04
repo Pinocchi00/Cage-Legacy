@@ -297,3 +297,211 @@ test('CORRECTIF_RETRAITE_FANTOME_PURGE — les retours ach/beltLineage après re
   assert.ok(beltHtml.includes(`CL.go('title')`), 'scr_beltLineage() doit proposer un retour vers title après une retraite');
   assert.ok(!beltHtml.includes(`CL.go('hub')`), 'scr_beltLineage() ne doit jamais proposer de retour vers le vestiaire après une retraite');
 });
+
+/* ==== [ANCRE: TEST_CORRECTIF_FORME_MORAL_FORMAT_OBJET] — Lot C01/2026 §C03 ==== */
+test('CORRECTIF_FORME_MORAL_FORMAT_OBJET — applyDeltas() sort moral/forme au même format objet que les attributs', () => {
+  const win = newGameWindow();
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const f = win.G.f;
+  f.morale = 50; f.form = 50;
+  const applied = win.applyDeltas(f, [['morale', 12], ['form', -12]]);
+  assert.equal(applied.length, 2);
+  const moraleEntry = applied.find(d => d.key === 'morale');
+  const formEntry = applied.find(d => d.key === 'form');
+  assert.ok(moraleEntry && !Array.isArray(moraleEntry), 'moral doit sortir en objet, jamais en tableau [\'Moral\',dv]');
+  assert.equal(moraleEntry.label, 'Moral');
+  assert.ok(typeof moraleEntry.before === 'number' && typeof moraleEntry.after === 'number' && typeof moraleEntry.delta === 'number');
+  assert.ok(formEntry && !Array.isArray(formEntry), 'forme doit sortir en objet, jamais en tableau [\'Forme\',dv]');
+  assert.equal(formEntry.label, 'Forme');
+});
+test('CORRECTIF_FORME_MORAL_FORMAT_OBJET — [ARBITRAGE] tout delta non nul de moral/forme est arrondi à un multiple de 5', () => {
+  const win = newGameWindow();
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const f = win.G.f;
+  f.morale = 50;
+  const applied = win.applyDeltas(f, [['morale', 1]]);
+  assert.equal(applied.length, 1, 'un delta non nul, même minuscule, doit produire un changement visible (jamais invisible)');
+  assert.equal(applied[0].delta, 5, 'un delta de 1 doit être arrondi au minimum de 5 (Math.sign(dv)*Math.max(5,...))');
+  f.morale = 50;
+  const appliedNeg = win.applyDeltas(f, [['morale', -1]]);
+  assert.equal(appliedNeg[0].delta, -5, 'le sens du delta doit être préservé par l\'arrondi');
+});
+test('CORRECTIF_FORME_MORAL_FORMAT_OBJET — un gain de moral/forme qui ne change rien réellement (plafond) ne produit aucune entrée', () => {
+  const win = newGameWindow();
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const f = win.G.f;
+  f.morale = 100;
+  const applied = win.applyDeltas(f, [['morale', 5]]);
+  assert.equal(applied.length, 0, 'déjà au plafond : aucune entrée ne doit être poussée (rien à annoncer)');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_FICHE_LEGENDE] — Lot C01/2026 §C13 ==== */
+test('CORRECTIF_FICHE_LEGENDE — origine capturée par enshrine() et affichée, classLabel retiré du nom, ceintures en badges', () => {
+  const win = newGameWindow({ runMain: true });
+  win.CL.newCareer();
+  win.G.draft.first = 'Garfield';
+  win.CL.create();
+  const f = win.G.f;
+  f.nick = 'Garfield';
+  f.classLabel = 'Le Mur Défensif';
+  f.class31Label = 'La Forteresse';
+  assert.ok(typeof f.origin === 'string' && f.origin.length > 0, 'un combattant généré doit toujours porter une origine (engine.js)');
+  win.G.titleHistory = [{org:2, divName:f.divName, champion:f.name, year:3, defenses:1, dethroned:'Aucun', orgFlavor:'Octogone MMA'}];
+  win.eval('enshrine(G.f)');
+  const hofList = win.loadHOF();
+  const entry = hofList.find(x => String(x.id) === String(f.id));
+  assert.ok(entry, 'entrée introuvable au Panthéon');
+  assert.equal(entry.origin, f.origin, 'enshrine() doit capturer f.origin dans l\'entrée du Panthéon');
+  assert.ok(entry.beltHistory && entry.beltHistory.length === 1, 'la ceinture pro enregistrée dans G.titleHistory doit être reprise dans beltHistory');
+
+  win.G.viewingLegendId = entry.id;
+  const html = win.scr_legend_detail();
+  assert.ok(html.includes('« Garfield » — '), 'le surnom doit rester affiché dans le hero-name');
+  assert.ok(!html.includes('Le Mur Défensif'), 'classLabel ne doit plus apparaître dans le hero-name (se lisait comme un second surnom)');
+  assert.ok(!html.includes('La Forteresse'), 'class31Label ne doit plus apparaître dans le hero-name');
+  assert.ok(html.includes('Venait de.'), 'l\'origine doit être affichée au-dessus de la motivation');
+  win.G._testOrigin = f.origin;
+  const escapedOrigin = win.eval('esc(G._testOrigin)');
+  assert.ok(html.includes(escapedOrigin), 'le texte d\'origine réel doit apparaître sur la fiche');
+  assert.ok(html.includes('Octogone MMA') && html.includes('Année 3'), 'la ceinture pro doit apparaître au format "ORG (Division) — Année N"');
+  assert.ok(html.includes('tag2 hot'), 'la ceinture doit utiliser le même composant de badge que les titres amateurs');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_SURNOM_MATCHMAKING] — Lot C01/2026 §C14a ==== */
+test('CORRECTIF_SURNOM_MATCHMAKING — le surnom des adversaires est visible en matchmaking et au classement', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  win.G.f.org = 3;
+  win.CL.fightSelect();
+  const opp = win.G.opps[0].o;
+  opp.nick = 'Le Marteau';
+  const selectHtml = win.scr_select();
+  assert.ok(selectHtml.includes('« Le Marteau » — '), 'le surnom d\'un adversaire doit apparaître sur sa carte de matchmaking');
+
+  // Le classement n'affiche que les 15 mieux classés (division) : on force
+  // le nick sur un combattant du roster garanti d'y figurer plutôt que sur
+  // opp (issu de G.opps, sans lien garanti avec le haut du classement).
+  const topRanked = win.rankPool(win.G.roster)[0];
+  topRanked.nick = 'Le Marteau';
+  win.G._rankingsTab = 'division';
+  const rankHtml = win.scr_rankings();
+  assert.ok(rankHtml.includes(`« ${topRanked.nick} »`), 'le surnom doit apparaître au classement (onglet Division)');
+  win.G._rankingsTab = 'p4p';
+  const rankP4pHtml = win.scr_rankings();
+  assert.ok(rankP4pHtml.includes(`« ${topRanked.nick} »`), 'le surnom doit apparaître au classement (onglet P4P)');
+
+  // repli propre quand nick est absent
+  const noNick = win.G.roster.find(o => !o.nick);
+  if (noNick) assert.ok(!win.scr_rankings().includes('« undefined »'), 'aucun surnom vide ne doit jamais apparaître');
+});
+test('CORRECTIF_AMAREC_RIVAUX_AMATEURS — un rival amateur promu au niveau pro porte un palmarès amateur affichable', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const rival = win.G.roster[0];
+  rival.W = 5; rival.L = 1;
+  win.G.f.amateurRivals = [rival];
+  const proRoster = win.makeOrgRoster(Object.assign({}, win.G.f, { org: 1 }), 'PRO_TRANSITION');
+  const promoted = proRoster.find(o => o.id === rival.id);
+  assert.ok(promoted, 'le rival amateur doit être repris dans le roster pro');
+  assert.ok(promoted.amaRec && typeof promoted.amaRec.W === 'number' && typeof promoted.amaRec.L === 'number', 'un rival amateur promu doit porter un amaRec, comme tout PNJ généré directement au niveau pro');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_LIBELLES_ANGLAIS_ROUNDS] — Lot C01/2026 §C10c ==== */
+test('CORRECTIF_LIBELLES_ANGLAIS_ROUNDS — libellés de carte en anglais, rounds au lieu de reprises', () => {
+  const win = newGameWindow({ runMain: true });
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const f = win.G.f; f.org = 3;
+  const opp = win.G.roster[0];
+  assert.equal(win.getCardSlot(f, opp, 'title'), 'MAIN EVENT');
+  const amateurF = Object.assign({}, f, { org: 0 });
+  assert.equal(win.getCardSlot(amateurF, opp, 'normal'), 'AMATEUR CARD');
+  const posterHtml = win.renderFightPoster(f, opp, 'normal');
+  assert.ok(/\d ROUNDS/.test(posterHtml), 'l\'affiche de combat doit annoncer "N ROUNDS"');
+  assert.ok(!/REPRISE/i.test(posterHtml), 'aucun libellé de l\'affiche ne doit contenir "reprise"');
+  assert.ok(!/VEDETTE/i.test(posterHtml), 'aucun libellé de l\'affiche ne doit contenir "vedette"');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_NIVEAU_ORGA_SANS_CIRCUIT] — Lot C01/2026 §C04 ==== */
+test('CORRECTIF_NIVEAU_ORGA_SANS_CIRCUIT — orgLevelTag() ne renvoie que le niveau, plus de nom de palier ni Fast-Track', () => {
+  const win = newGameWindow();
+  const tag = win.eval(`orgLevelTag(3)`);
+  assert.equal(tag, 'Niveau 4/7');
+  assert.ok(!/Circuit|Continentale|Ultimate Rim|Pacific/i.test(tag), 'orgLevelTag() ne doit plus jamais citer le nom du palier interne');
+  const orgs = win.eval('ORGS');
+  assert.ok(Array.isArray(orgs) && orgs.length === 7, 'ORGS lui-même doit rester intact (clé interne / repli du registre des ceintures)');
+
+  const win2 = newGameWindow({ runMain: true });
+  win2.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  const f = win2.G.f;
+  // Conditions qui déclenchent à coup sûr l'offre fast-track (upset:
+  // victoire contre un Top 10 par autre chose qu'une décision) plutôt que
+  // de compter sur le hasard des seuils de hype.
+  f.age = 22; f.stage = 'amateur'; f.org = 0; f.ko = 4; f.sub = 0; f.W = 6; f.L = 0; f.D = 0; f.streak = 0;
+  const offer = win2.eval(`evaluateProOffer(G.f, {method:'KO'}, 5)`);
+  assert.ok(offer && offer.fastTrack, 'l\'offre fast-track doit être générée dans ces conditions');
+  win2.G.pending = { proOffer: offer };
+  const html = win2.eval(`scr_promo()`);
+  // Vérifie le libellé visible de la 2e carte (hero-name), pas le HTML
+  // entier : celui-ci porte encore, en commentaire invisible côté joueur,
+  // la documentation historique d'un tout autre correctif (V2-38) qui cite
+  // "Fast-Track" par coïncidence de vocabulaire — hors périmètre ici.
+  const secondCardName = html.match(/<div class="hero-name"[^>]*>[^<]*<em[^>]*>([^<]*)<\/em>/g) || [];
+  assert.ok(!secondCardName.some(s => /Fast-Track/i.test(s)), 'le libellé visible d\'aucune carte ne doit plus mentionner "Fast-Track"');
+  assert.ok(!html.includes('parcours fulgurant'), 'la phrase "parcours fulgurant" doit avoir disparu');
+});
+test('CORRECTIF_SUPPRESSION_PHRASE_RECRUTEUR — la phrase "recruteur" a disparu de CONTRACT_PHRASES', () => {
+  const win = newGameWindow();
+  const phrases = win.eval(`CONTRACT_PHRASES.map(p => p('TestOrg'))`);
+  assert.equal(phrases.length, 4, '4 phrases restantes (5 - 1 retirée)');
+  assert.ok(!phrases.some(p => /recruteur/i.test(p)), 'aucune phrase ne doit plus mentionner un recruteur déplacé');
+});
+
+/* ==== [ANCRE: TEST_CORRECTIF_CLASSEMENT_EXPLIQUE] — Lot C01/2026 §C02 ==== */
+test('CORRECTIF_CLASSEMENT_EXPLIQUE — la variation de rang est expliquée par une carte dédiée, avec une vraie cause', () => {
+  const win = newGameWindow({ runMain: true });
+  win.setSeed(1);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
+    CL.create();
+  `);
+  win.G.f.streak = 4;
+  const opp = win.G.roster[0];
+  Object.assign(win.G.f.attrs, { takedown: 100, strength: 100, explosiveness: 100, tdd: 100, topControl: 100, gnp: 100, power: 100, submission: 1, guardWork: 1, flexibility: 1, fightIQ: 100, composure: 100, adaptability: 100, killer: 100 });
+  Object.assign(opp.attrs, { tdd: 1, strength: 1, flexibility: 1, guardWork: 100, submission: 1, topControl: 1, chin: 1, durability: 1, fightIQ: 1, composure: 1, adaptability: 1, heart: 1, cardio: 1, recovery: 1 });
+  win.setSeed(1);
+  win.rnd = () => 0;
+  win.G.fight = { opp, rounds: 1, kind: 'normal', planLabel: null };
+  win.resolveFight();
+  assert.equal(win.G.pending.win, true);
+  assert.ok(win.G.pending.opp.rank > 0, 'le rang de l\'adversaire au moment du combat doit être capturé (p.opp.rank)');
+
+  if (win.G.pending.rankBefore !== win.G.pending.rankAfter) {
+    const html = win.scr_result();
+    assert.ok(html.includes('Classement'), 'une carte "Classement" doit apparaître quand le rang change');
+    assert.ok(html.includes(`#${win.G.pending.rankBefore} ➔ #${win.G.pending.rankAfter}`), 'la variation doit être affichée en gros');
+    // La phrase de cause doit citer des données réelles du combat (ici :
+    // le rang de l'adversaire réellement battu), jamais un texte générique.
+    assert.ok(html.includes(String(win.G.pending.opp.rank)) || html.includes(win.G.pending.opp.name), 'la phrase de cause doit citer l\'adversaire ou son rang réel');
+  }
+});

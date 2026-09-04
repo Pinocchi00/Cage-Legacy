@@ -467,7 +467,16 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     // fraîchement généré (eloBaseline(f.org,...) ≈ 1000+). Ces rivaux
     // s'effondraient au fond de tout classement trié par Elo et devenaient
     // structurellement injoignables par le matchmaking de proximité.
-    f.amateurRivals.forEach(r=>{ r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; r.orgWins=RI(0,2);
+    f.amateurRivals.forEach(r=>{
+      /* ==== [ANCRE: CORRECTIF_AMAREC_RIVAUX_AMATEURS] — Lot C01/2026 §C14a :
+         o.amaRec n'est posé qu'ici-bas pour les PNJ générés directement au
+         niveau pro (!isAmateur) — ces rivaux amateurs promus dans le roster
+         pro n'y passaient jamais et n'avaient donc aucun palmarès amateur
+         affichable (scr_select, "Amateur : W-L"). r.W/r.L reflètent encore
+         leur vrai bilan amateur à cet instant précis (pas encore repris
+         comme bilan pro par la suite) : capturé ici avant toute mutation. ==== */
+      if(!r.amaRec) r.amaRec={W:r.W,L:r.L};
+      r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; r.orgWins=RI(0,2);
       r.orgElo=eloBaseline(r.org,r.overall); r.careerElo=eloBaseline(r.org,r.overall); pool.push(r); });
   }
   const toGenerate=needed-pool.length;
@@ -644,16 +653,18 @@ function reconstructLegend(l){
    (le combattant le mieux classé "tire" le combat vers le haut de l'affiche),
    comme en pratique réelle où l'affiche se construit autour du nom le plus
    fort, pas du statut de celui qu'on suit. ==== */
-/* ==== [ANCRE: V3_ANGLICISMES_CARTE] — Plan V3 LOT 6 §P09 : "chercher et
-   corriger tous les anglicismes du même type" — ces libellés de position sur
-   la carte (poster vestiaire, mode carrière) étaient du vocabulaire anglais
-   brut inséré tel quel dans une interface française, même défaut que BOUT
-   ci-dessus. Les clés internes restent en anglais (comparaisons ailleurs
-   dans le fichier, ex. slotColors juste en dessous) — seuls les LIBELLÉS
-   affichés changent. ==== */
+/* ==== [ANCRE: V3_ANGLICISMES_CARTE] — Lot C01/2026 §C10c : retour #10, les
+   termes français substitués par le Plan V3 LOT 6 §P09 ("chercher et
+   corriger tous les anglicismes") sonnaient artificiels pour ce vocabulaire
+   précis — Main Event/Co-Main/Main Card/Prelims/Early Prelims sont les
+   termes RÉELLEMENT utilisés dans le milieu MMA, y compris par les médias
+   francophones, à l'inverse d'un anglicisme évitable. Retour aux libellés
+   anglais d'origine. Les clés internes restent en anglais (comparaisons
+   ailleurs dans le fichier, ex. slotColors juste en dessous) — seuls les
+   LIBELLÉS affichés changent. ==== */
 function getCardSlot(f,opp,kind){
-  if(f.org===0) return "CARTE AMATEUR";
-  if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "TÊTE D'AFFICHE";
+  if(f.org===0) return "AMATEUR CARD";
+  if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "MAIN EVENT";
   // Sécurité : divRank() renvoie 0 si le combattant n'est pas trouvé dans le
   // roster de l'organisation courante (combat spécial, invité hors roster,
   // adversaire d'une autre org, ou champion exclu de son propre pool de rang)
@@ -665,17 +676,17 @@ function getCardSlot(f,opp,kind){
   const rnkOpp=rnkOppRaw>0?rnkOppRaw:999;
   if(rnkF<=15 && rnkOpp<=15){
     const rnk=Math.min(rnkF,rnkOpp);
-    if(rnk<=3) return "CO-VEDETTE";
-    if(rnk<=10) return "CARTE PRINCIPALE";
-    return "PRÉLIMINAIRES";
+    if(rnk<=3) return "CO-MAIN";
+    if(rnk<=10) return "MAIN CARD";
+    return "PRELIMS";
   }
-  if(rnkF<=15 || rnkOpp<=15) return "PRÉLIMINAIRES";
-  return "PREMIÈRES PRÉLIMINAIRES";
+  if(rnkF<=15 || rnkOpp<=15) return "PRELIMS";
+  return "EARLY PRELIMS";
 }
 /* ==== [FIN ANCRE] ==== */
 function renderFightPoster(f,opp,kind){
   const slot=getCardSlot(f,opp,kind);
-  const slotColors={'CARTE AMATEUR':'var(--muted)','PREMIÈRES PRÉLIMINAIRES':'var(--line)','PRÉLIMINAIRES':'#4DA6FF','CARTE PRINCIPALE':'var(--sage)','CO-VEDETTE':'var(--blood)',"TÊTE D'AFFICHE":'var(--gold)'};
+  const slotColors={'AMATEUR CARD':'var(--muted)','EARLY PRELIMS':'var(--line)','PRELIMS':'#4DA6FF','MAIN CARD':'var(--sage)','CO-MAIN':'var(--blood)','MAIN EVENT':'var(--gold)'};
   const borderColor=slotColors[slot]||'var(--gold-d)';
   const orgName=orgDisplayName(f).toUpperCase();
   const fLast=esc(f.last||f.name).toUpperCase();
@@ -688,7 +699,7 @@ function renderFightPoster(f,opp,kind){
       <span class="muted" style="font-size:18px;display:inline-block;margin:8px 0;font-family:'JetBrains Mono'">VS</span><br>
       <span style="color:var(--sage)">${oppLast}</span>
     </div>
-    <div class="mono small muted mt" style="position:relative;z-index:2;border-top:1px solid var(--line);padding-top:12px">${(f.divName||'').toUpperCase()} · ${(kind==='title'||kind==='defense')?'5 REPRISES':'3 REPRISES'}</div>
+    <div class="mono small muted mt" style="position:relative;z-index:2;border-top:1px solid var(--line);padding-top:12px">${(f.divName||'').toUpperCase()} · ${(kind==='title'||kind==='defense')?'5 ROUNDS':'3 ROUNDS'}</div>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */
