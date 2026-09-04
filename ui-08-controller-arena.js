@@ -362,6 +362,13 @@ const CL={
     G.screen='hub'; save(); render();
   },
   chooseChampChampFocus(divId){
+    /* ==== [ANCRE: CORRECTIF_MESSAGE_FOCUS_INVERSE] — Lot C01/2026 §C09a :
+       bug trouvé (retour joueur #9) : G.f.div était réassigné à newDiv.id
+       PLUS BAS avant que G.lastMsg ne compare divId===G.f.div — la
+       comparaison était donc toujours vraie et le message affichait
+       systématiquement "division d'origine", même en choisissant la
+       nouvelle ceinture. originDivId capturé ici, avant toute mutation. ==== */
+    const originDivId=G.f.div;
     // ==== [ANCRE: CORRECTIF_FOCUS_CHAMPCHAMP] — bug trouvé : le choix de
     // focus n'était enregistré que dans champChampFocus, une variable jamais
     // relue ailleurs. G.f.div, G.f.divName et G.roster n'étaient JAMAIS mis
@@ -391,7 +398,7 @@ const CL={
         G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f);
       }
     }
-    G.lastMsg=divId===G.f.div?'Vous restez concentré sur votre division d\u2019origine.':'Vous faites de votre nouvelle ceinture votre priorité.';
+    G.lastMsg=divId===originDivId?'Vous restez concentré sur votre division d\u2019origine.':'Vous faites de votre nouvelle ceinture votre priorité.';
     G.screen='hub'; save(); render();
   },
   chooseMue(styleId){ const r=triggerMueMartiale(G.f,styleId); G.lastMsg=r.msg||G.lastMsg;
@@ -854,6 +861,19 @@ const CL={
     G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
     G.screen='legacy'; save(); render();
   },
+  /* ==== [ANCRE: CORRECTIF_RETRAITE_FANTOME_PURGE] — Lot C01/2026 §C12 :
+     quitter définitivement l'écran de retraite ("Retour au menu") laissait
+     la sauvegarde de carrière (retired:true, _enshrined:true) intacte dans
+     localStorage. go('title') seul ne persiste rien (pas de save()), mais
+     tout rechargement ou "Reprendre le dossier" (cont(), qui appelle
+     load()) relisait cette même sauvegarde figée en fin de carrière — le
+     joueur retombait sur l'écran de retraite qu'il venait de quitter.
+     L'entrée au Panthéon (enshrine(), HOF_KEY) est déjà persistée à part,
+     hors de portée de wipe() (voir state/state-hof.js) : purger la
+     sauvegarde de carrière ici est donc sans risque pour elle. Après
+     purge, hasSave() renvoie faux et cont() ne peut plus jamais router
+     vers 'legacy'. ==== */
+  exitLegacy(){ wipe(); const t=G.theme; G={theme:t,screen:'title'}; setTheme(t); render(); },
   newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }

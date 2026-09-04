@@ -495,7 +495,19 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     else { o.careerElo=eloBaseline(0,o.overall)+bias+RI(-20,20); }
     pool.push(o); }
   const ranked=rankPool(pool);
-  if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgElo=Math.max(ranked[0].orgElo||0,eloBaseline(f.org,ranked[0].overall)+RI(150,300)); }
+  /* ==== [ANCRE: CORRECTIF_CHAMPION_ROSTER_DOUBLE_COURONNE] — Lot C01/2026
+     §C09c : bug trouvé (retour joueur #9) — ranked[0].champion était posé
+     SYSTÉMATIQUEMENT dès que f.org>=1, y compris quand le joueur (f) tient
+     déjà la ceinture de la division en cours de génération (f.champion
+     vrai pour f.div, y compris après un changement de focus en double
+     couronne, cf. CORRECTIF_MESSAGE_FOCUS_INVERSE). Un PNJ se retrouvait
+     alors étiqueté CHAMPION en même temps que le joueur. f.champion reflète
+     toujours la ceinture de f.div pour tout appel avec le vrai G.f (mis à
+     null avant tout changement d'organisation/division qui en prive le
+     joueur) ; le seul appel avec un f de substitution (offre de
+     supercombat, ui-05) neutralise explicitement champion:null puisque
+     cette division n'est justement pas celle du joueur. ==== */
+  if(f.org>=1 && !f.champion){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgElo=Math.max(ranked[0].orgElo||0,eloBaseline(f.org,ranked[0].overall)+RI(150,300)); }
   return ranked;
 }
 // ==== [ANCRE: CORRECTIF_DOUBLE_RANG_1] — bug trouvé : divRank(x) ajoutait

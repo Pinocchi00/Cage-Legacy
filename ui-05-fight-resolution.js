@@ -444,10 +444,18 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
        bascule de focus. Ne s'exécute que si la map existe déjà (double
        champion) — aucune allocation pour un champion simple. ==== */
     if(G.f.champChampDefenses) G.f.champChampDefenses[G.f.div]=G.f.defenses;
-    // Un défenseur qui est déjà double champion doit le voir rappelé ici
-    // (item #14 : le statut de double champion n'était visible nulle part
-    // sur l'écran de résultat d'une défense ordinaire).
-    milestone=G.f.champChampBelt?`Titre défendu (${G.f.defenses}) — toujours Double Champion (${G.f.divName} + ${G.f.champChampBelt})`:'Titre défendu ('+G.f.defenses+')';
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_CHAMPION_DIVISION_FAUSSE] — Lot C01/2026
+       §C09b : bug trouvé (retour joueur #9) — G.f.champChampBelt est posé
+       UNE FOIS, au gain du supercombat (targetDivName), et jamais remis à
+       jour par chooseChampChampFocus() quand le focus bascule. Une fois le
+       focus sur la nouvelle ceinture, G.f.divName désigne cette MÊME
+       division que champChampBelt : l'ancien libellé énumérait alors deux
+       fois la même division ("Poids plume + Poids plume"). On n'annonce
+       plus que la ceinture réellement défendue CE soir (G.f.divName, à
+       jour via chooseChampChampFocus) ; le statut de double champion reste
+       signalé par des tags séparés ailleurs (hub, profil), jamais ici en
+       énumérant deux divisions dont une peut être fausse. ==== */
+    milestone=`Titre défendu (${G.f.defenses}) — ${G.f.divName}`;
     recordTitleDefense(G.f.org,G.f.divName,G.f.name);
   }
   else if(kind==='defense' && res.winner==='D'){ milestone='Titre conservé (match nul)'; }
@@ -488,7 +496,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     const divs=DIVISIONS[G.f.gender]||DIVISIONS.H; const idx=divs.findIndex(d=>d.id===G.f.div);
     const targetDiv=divs[idx+1]||divs[idx-1];
     if(targetDiv){
-      const targetRoster=makeOrgRoster(Object.assign({},G.f,{div:targetDiv.id,divName:targetDiv.name}));
+      // champion:null — Lot C01/2026 §C09c : ce roster de substitution simule la
+      // division CIBLE, que le joueur ne détient pas encore ; sans cette
+      // neutralisation explicite, le champion:true hérité de G.f (vrai pour
+      // f.div, pas pour targetDiv) empêcherait makeOrgRoster() d'y désigner un
+      // champion rival à défier.
+      const targetRoster=makeOrgRoster(Object.assign({},G.f,{div:targetDiv.id,divName:targetDiv.name,champion:null}));
       const targetChamp=targetRoster.find(o=>o.champion)||targetRoster[0];
       if(targetChamp){ targetChamp.champion=targetChamp.champion||'monde';
         G.f.champChampOffer={targetDivId:targetDiv.id,targetDivName:targetDiv.name,champion:targetChamp};

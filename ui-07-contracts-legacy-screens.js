@@ -276,12 +276,18 @@ function scr_history(){ const f=G.f; const history=(f.history||[]).slice().rever
 }
 /* ==== [ANCRE: LINEAGE_UI] — registre mondial des ceintures (Phase 6) ==== */
 function scr_beltLineage(){
+  /* ==== [ANCRE: CORRECTIF_RETOUR_BELTLINEAGE_RETRAITE] — Lot C01/2026
+     §C12 : retour codé en dur vers 'hub', y compris depuis une carrière
+     retraitée (G.f existe toujours après retraite, seul f.retired change)
+     — un des chemins qui ramenait sur le vestiaire fantôme après une
+     retraite. Même garde que scr_hof (backDest). ==== */
+  const backDest=(G.f && !G.f.retired)?'hub':'title';
   const groups={};
   (G.titleHistory||[]).forEach(r=>{ const key=r.org+'|'+r.divName; (groups[key]=groups[key]||[]).push(r); });
   let h=`<div class="scr">
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:16px;padding-bottom:8px">
      <span class="eyebrow mono">ARCHIVES MONDIALES</span>
-     <span class="eyebrow x" onclick="CL.go('hub')" style="cursor:pointer">✕</span>
+     <span class="eyebrow x" onclick="CL.go('${backDest}')" style="cursor:pointer">✕</span>
    </div>
    <h3 class="disp" style="font-size:22px;margin-bottom:8px">${SVG.belt} Registre des ceintures</h3>
    <p class="lede small">L\u2019historique des règnes, des passations de pouvoir et du nombre de défenses.</p>`;
@@ -310,7 +316,7 @@ function scr_beltLineage(){
       h+=`</div>`;
     });
   }
-  h+=`<button class="btn ghost mt" onclick="CL.go('hub')">← Retour au bureau</button></div>`;
+  h+=`<button class="btn ghost mt" onclick="CL.go('${backDest}')">← Retour au ${backDest==='hub'?'bureau':'menu principal'}</button></div>`;
   return h;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -328,9 +334,14 @@ function scr_beltLineage(){
    présents ici, réintégrés dans une structure en rails. ==== */
 const ACH_CAT_COLOR={'Carrière & Titres':'var(--gold)','Finitions & Séries':'var(--blood)','Technique & Héritage':'var(--sage)'};
 function scr_ach(){ if(!G.ach) G.ach=loadAch();
+  /* ==== [ANCRE: CORRECTIF_RETOUR_ACH_RETRAITE] — Lot C01/2026 §C12 : la
+     condition testait G.f seul, toujours vrai après une retraite (G.f
+     existe encore, seul f.retired change) — le retour ramenait donc sur le
+     vestiaire fantôme. Même garde que scr_hof (backDest). ==== */
+  const backDest=(G.f && !G.f.retired)?'hub':'title';
   const cats=['Carrière & Titres','Finitions & Séries','Technique & Héritage'];
   let h=`<div class="scr">
-   <div class="bar"><span class="eyebrow">Palmarès</span><span class="eyebrow x" onclick="CL.go('${G.f?'hub':'title'}')">✕</span></div>
+   <div class="bar"><span class="eyebrow">Palmarès</span><span class="eyebrow x" onclick="CL.go('${backDest}')">✕</span></div>
    <h2 class="disp">${G.ach.length} / ${ACH.length} exploits</h2>`;
 
   cats.forEach(c=>{
@@ -361,7 +372,7 @@ function scr_ach(){ if(!G.ach) G.ach=loadAch();
     }).join('')}</div>`;
   });
   h+=`<div class="mono small muted" style="text-align:center;margin-top:24px;opacity:.6">Un jeu développé par Pinocchio et testé par Garfield</div>`;
-  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.f?'hub':'title'}')">← Revenir au ${G.f?'hub':'menu principal'}</button></div>`;
+  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${backDest}')">← Revenir au ${backDest==='hub'?'hub':'menu principal'}</button></div>`;
   return h; }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PREVIEW_SUCCES_ECRAN_DEDIE] — item demandé : même principe que
@@ -467,7 +478,7 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
    ${retireSeasonRecapHtml(f)}
    ${retireAchievementsHtml(f)}
    <button class="btn primary mt" onclick="CL.newCareer()">Nouvelle carrière</button>
-   <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button></div>`; }
+   <button class="btn ghost mt" onclick="CL.exitLegacy()">Retour au menu</button></div>`; }
 /* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — deux blocs ajoutés à l'écran de
    retraite : bilan saison par saison et succès débloqués pendant CETTE
    carrière. Un troisième bloc, « Points de Légende », a été retiré — Lot
