@@ -170,14 +170,80 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
      <div><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>FORME</span><b class="mono" style="color:var(--text);font-size:12px">${d20(f.form)}</b></span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--sage)"></span></div></div>
    </div>
    ${fightBtnHtml}
-   <!-- ==== [ANCRE: HUB_GRILLE] — Lot C01/2026 §C05 : Palmarès et Panthéon
-        retirés (déjà atteignables depuis l'écran titre, boutons « VOIR LES
-        SUCCÈS »/« VOIR LE PANTHÉON »), grille réorganisée à deux rangées
-        pleines plutôt qu'un bouton orphelin sur demi-largeur. ==== -->
-   <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
-   <div class="g2"><button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Ceintures</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
+   <!-- ==== [ANCRE: HUB_SOUS_MENUS] — Lot P3/2026 : remplacement de la
+        grille à six boutons (Bilan technique, Classements, Palmarès,
+        Archives, Ceintures, Panthéon) et du bloc « Actualités de la
+        division » par deux sous-menus (Combat / Dossier) sous le bouton de
+        matchmaking, pour désencombrer le hub. ==== -->
+   ${hubTabsHtml()}
+   <div style="border-top:2px solid var(--line);margin-top:16px;padding-top:14px">
+     ${G.hubTab==='dossier'?hubDossierHtml():hubCombatHtml(f)}
+   </div>
    <button class="btn ghost" style="color:var(--loss);margin-top:16px;border-top:1px dashed var(--line);padding-top:16px" onclick="CL.go('retire')">Déclarer la retraite (Définitif)</button>
    </div>`; }
+/* ==== [ANCRE: HUB_SOUS_MENUS_HELPERS] — helpers de rendu du même lot que
+   l'ANCRE HUB_SOUS_MENUS ci-dessus. Boutons d'onglet Combat/Dossier : actif
+   = bordure/texte dorés sur fond var(--panel2), inactif = bordure
+   var(--line)/texte var(--muted) sur fond transparent — mêmes tokens que le
+   reste du jeu, aucune couleur en dur, aucun dégradé/ombre/coin arrondi
+   (charte plate demandée explicitement). ==== */
+function hubTabsHtml(){
+  const tabStyle=on=>`padding:12px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:14px;letter-spacing:.06em;font-family:'Oswald',sans-serif;${on?'border:1px solid var(--gold);color:var(--gold);background:var(--panel2)':'border:1px solid var(--line);color:var(--muted);background:transparent'}`;
+  return `<div class="g2">
+    <button style="${tabStyle(G.hubTab!=='dossier')}" onclick="CL.setHubTab('combat')">Combat</button>
+    <button style="${tabStyle(G.hubTab==='dossier')}" onclick="CL.setHubTab('dossier')">Dossier</button>
+  </div>`;
+}
+/** Sous-menu Combat du hub : les 5 derniers combats de f.history, du plus
+ * récent au plus ancien, un par ligne (pas de carte). Une sauvegarde
+ * ancienne peut porter des entrées sans oppNick/oppRank/time (ajoutés au
+ * Lot P3/2026, cf. engine-combat.js applyResult()) : chaque champ absent
+ * disparaît de l'affichage plutôt que d'imprimer "undefined".
+ * @param {Fighter} f @returns {string} */
+function hubCombatHtml(f){
+  const h=(f.history||[]).slice(-5).reverse();
+  if(!h.length) return `<div class="eyebrow" style="margin-bottom:10px">Derniers combats</div><span class="small muted">Pas encore de combat.</span>`;
+  const rows=h.map((e,i)=>{
+    const resLabel=e.res==='win'?'Victoire':e.res==='loss'?'Défaite':'Nul';
+    const resColor=e.res==='win'?'var(--pos)':e.res==='loss'?'var(--neg)':'var(--muted)';
+    const method=e.method||'';
+    let methodLine=method;
+    if(!isDecisionLike(method) && method){
+      methodLine=method;
+      if(e.round) methodLine+=` · R${e.round}`;
+      if(e.time) methodLine+=` · ${e.time}`;
+    } else if(method==='Décision'){
+      methodLine='Décision unanime';
+    }
+    const nickHtml=e.oppNick?`<span style="font-family:'Fraunces',serif;font-style:italic;font-size:13.5px;color:var(--gold)">« ${esc(e.oppNick)} »</span>`:'';
+    const rankHtml=e.oppRank?`<span class="tag" style="margin-top:7px;display:inline-block">RANG #${e.oppRank}</span>`:'';
+    const last=i===h.length-1;
+    return `<div style="${last?'':'border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px'}">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+        <span style="font-family:'Oswald',sans-serif;font-size:19px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:${resColor}">${resLabel}</span>
+        <span style="font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;text-transform:uppercase;color:var(--text)">${esc(e.oppName||'')} <span style="font-size:13px">${e.oppFlag||''}</span></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:3px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted)">${methodLine}</span>
+        ${nickHtml}
+      </div>
+      ${rankHtml}
+    </div>`;
+  }).join('');
+  return `<div class="eyebrow" style="margin-bottom:10px">Derniers combats</div>${rows}`;
+}
+/** Sous-menu Dossier du hub : les six écrans annexes de carrière, en grille
+ * 2 colonnes. Mêmes cibles de navigation que l'ancienne grille à six
+ * boutons (ANCRE HUB_GRILLE, retirée). @returns {string} */
+function hubDossierHtml(){
+  const tile=(label,target)=>`<button class="btn" style="margin:0;border:1px solid var(--line);color:var(--text);padding:14px 8px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:13px;letter-spacing:.05em;line-height:1.3" onclick="CL.go('${target}')">${label}</button>`;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    ${tile('Bilan technique','profile')}${tile('Classements','rankings')}
+    ${tile('Palmarès','ach')}${tile('Archives','history')}
+    ${tile('Ceintures','beltLineage')}${tile('Panthéon','hof')}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 
 function scr_select(){ const f=G.f;
   let h=`<div class="scr">

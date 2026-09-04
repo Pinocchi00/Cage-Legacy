@@ -2,8 +2,10 @@
 /* CAGE LEGACY — tests/proceduralNarrative.test.js
    Couvre le chantier 3 : rivalryHeat (renfort de f._rivalries/f._allMeetings,
    déjà posés par ui-05), arcs narratifs (redemption/ascension sur f.streak,
-   déjà tenu par applyResult()), actualités contextualisées à partir des
-   vraies stats — jamais un nouveau système parallèle. */
+   déjà tenu par applyResult()) — jamais un nouveau système parallèle.
+   generatePlayerContextualNews()/G.divisionNews (actualités contextualisées)
+   retirés comme code mort au Lot P3/2026 (plus aucun écran ne les affichait,
+   cf. engine-events.js ANCRE NPC_NEWS_CONTEXTUALISEES) — leur test a suivi. */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
@@ -53,21 +55,4 @@ test('checkNarrativeArc() franchit les paliers d’ascension une seule fois chac
   assert.equal(repeat, null, 'même palier, même série : pas de re-déclenchement');
   const nextTier = win.eval(`(function(){ const f={streak:6,narrativeArc:{type:'ascension',tier:1}}; return checkNarrativeArc(f); })()`);
   assert.equal(nextTier.tier, 2, 'un palier supérieur est bien franchi');
-});
-
-test('generatePlayerContextualNews() pousse dans G.divisionNews des textes qui citent les vraies stats, jamais du générique', () => {
-  const win = newGameWindow();
-  win.eval(`
-    G={season:{year:5},divisionNews:[]};
-    const f={name:'Ana Ruiz',streak:6,_allMeetings:{3:4},_rivalries:{3:2}};
-    const opp={id:3,name:'Vera Kane'};
-    const beat={kind:'ascension',tier:2,label:'Contender légitime',streak:6};
-    generatePlayerContextualNews(f,opp,{},beat);
-  `);
-  const news = win.eval(`G.divisionNews`);
-  assert.ok(news.length >= 1, 'au moins une actualité générée');
-  const joined = news.map(n => n.text).join(' | ');
-  assert.ok(joined.includes('Ana Ruiz'), 'cite le vrai nom du joueur');
-  assert.ok(joined.includes('6'), 'cite la vraie série en cours');
-  assert.ok(news.every(n => n.player === true), 'toutes marquées player:true');
 });

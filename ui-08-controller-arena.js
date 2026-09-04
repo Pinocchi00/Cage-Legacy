@@ -58,6 +58,16 @@ function fighterDisplayName(o,withNick){
 /* ==== [FIN ANCRE] ==== */
 
 /* ============================== RENDER + CL =============================== */
+/* ==== [ANCRE: HUB_SOUS_MENUS_RESET] — Lot P3/2026 : sous-menu Combat/Dossier
+   du hub (G.hubTab, scr_hub()/ui-06) réinitialisé sur 'combat' à CHAQUE
+   ENTRÉE dans le hub, jamais seulement à la création de partie. G.screen
+   est réassigné à 'hub' directement (pas via CL.go) depuis une dizaine
+   d'endroits du contrôleur, donc la détection se fait ici, au seul point de
+   passage commun à tout changement d'écran effectivement affiché — une
+   variable de module (pas sur G : purement une trace de rendu, jamais
+   persistée par save(), qui sérialise G tel quel). */
+let _lastRenderedScreen=null;
+/* ==== [FIN ANCRE] ==== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
   if(G && G.screen==='arena' && G.pending && !G.pending._flashShown
      && (((G.settings&&G.settings.fightPace)||'rapide')==='instantane')){
@@ -65,6 +75,8 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
     G.pending.flashLines=buildFightFlashLines(G.pending.res);
     G.screen='fight_flash';
   }
+  if(G && G.screen==='hub' && _lastRenderedScreen!=='hub') G.hubTab='combat';
+  _lastRenderedScreen=G&&G.screen;
   const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   G.screen='hub'; save(); render();
@@ -97,6 +109,16 @@ const CL={
   /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
      (ui-06), cf. son ancre pour le détail. */
   setRankingsTab(tab){ G._rankingsTab=tab; render(); },
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: HUB_SOUS_MENUS] — bascule d'onglet Combat/Dossier sur
+     scr_hub() (ui-06), cf. son ancre pour le détail. Contrairement à
+     _rankingsTab, la remise à zéro sur 'combat' à chaque ENTRÉE dans le hub
+     est gérée dans render() (ci-dessous), pas ici : G.screen passe à 'hub'
+     depuis une dizaine de points d'appel différents du contrôleur (fin de
+     combat, retour de blessure, refus de contrat...), presque jamais via
+     CL.go('hub') seul — un reset posé ici serait contourné par tous les
+     autres. ==== */
+  setHubTab(tab){ G.hubTab=tab; render(); },
   /* ==== [FIN ANCRE] ==== */
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — CL.toggleShopPreview (aperçu
