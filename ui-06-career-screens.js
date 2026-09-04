@@ -680,6 +680,115 @@ function rankChangeReasonHtml(p,f){
   return p.win?`Victoire ${finishTxt} face ${oppTxt}, pas de quoi devancer le reste de la division.`:`Défaite face ${oppTxt} — le classement recule.`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: STATS_COMBAT_PANEL_ENRICHI] — affichage complet des statistiques de combat ==== */
+function renderCombatStatsCard(st, f, opp){
+  const sigA=st.A.sig||0, sigB=st.B.sig||0;
+  const sigAttA=st.A.sigAtt||sigA, sigAttB=st.B.sigAtt||sigB;
+  const pctSigA=Math.round((sigA/Math.max(1,sigAttA))*100);
+  const pctSigB=Math.round((sigB/Math.max(1,sigAttB))*100);
+
+  const totA=st.A.total||sigA, totB=st.B.total||sigB;
+  const totAttA=st.A.totalAtt||sigAttA, totAttB=st.B.totalAtt||sigAttB;
+
+  const defA=Math.round(((Math.max(0,sigAttB-sigB))/Math.max(1,sigAttB))*100);
+  const defB=Math.round(((Math.max(0,sigAttA-sigA))/Math.max(1,sigAttA))*100);
+
+  const tdA=st.A.td||0, tdB=st.B.td||0;
+  const tdAttA=st.A.tdAtt||tdA, tdAttB=st.B.tdAtt||tdB;
+  const pctTdA=Math.round((tdA/Math.max(1,tdAttA))*100);
+  const pctTdB=Math.round((tdB/Math.max(1,tdAttB))*100);
+
+  const tdDefA=st.A.tdDef||0, tdDefB=st.B.tdDef||0;
+  const pctTdDefA=Math.round((tdDefA/Math.max(1,tdDefA+tdB))*100);
+  const pctTdDefB=Math.round((tdDefB/Math.max(1,tdDefB+tdA))*100);
+
+  const ctrlAStr=formatCtrl(st.A.ctrl||0);
+  const ctrlBStr=formatCtrl(st.B.ctrl||0);
+
+  const dmgA=(st.A.dmgHead||0)+(st.A.dmgBody||0)+(st.A.dmgLegs||0);
+  const dmgB=(st.B.dmgHead||0)+(st.B.dmgBody||0)+(st.B.dmgLegs||0);
+
+  return `<div class="card stats-card">
+    <div class="eyebrow mb">Statistiques du combat</div>
+    <div class="st-row" style="border-bottom:1px solid var(--gold-d);padding-bottom:6px;font-weight:700">
+      <span style="font-family:'Oswald';font-size:13.5px">${esc(f?f.name:'Combattant A')}</span>
+      <span class="st-l" style="color:var(--gold)">VS</span>
+      <span style="font-family:'Oswald';font-size:13.5px">${esc(opp?opp.name:'Combattant B')}</span>
+    </div>
+    <div class="st-row">
+      <span><b>${sigA}</b>/${sigAttA} <small class="muted">(${pctSigA}%)</small></span>
+      <span class="st-l">Frappes sig.</span>
+      <span><b>${sigB}</b>/${sigAttB} <small class="muted">(${pctSigB}%)</small></span>
+    </div>
+    <div class="st-row">
+      <span>${totA}/${totAttA}</span>
+      <span class="st-l">Total frappes</span>
+      <span>${totB}/${totAttB}</span>
+    </div>
+    <div class="st-row">
+      <span>${st.A.powerStrikes||0}</span>
+      <span class="st-l">Frappes puissantes</span>
+      <span>${st.B.powerStrikes||0}</span>
+    </div>
+    <div class="st-row">
+      <span>${defA}%</span>
+      <span class="st-l">Défense frappes</span>
+      <span>${defB}%</span>
+    </div>
+    <div class="st-row">
+      <span>${st.A.kd||0}</span>
+      <span class="st-l">Knockdowns</span>
+      <span>${st.B.kd||0}</span>
+    </div>
+    <div class="st-row" style="font-size:11.5px;opacity:.95">
+      <span>${st.A.sigHead||0} tête · ${st.A.sigBody||0} corps · ${st.A.sigLeg||0} jambe</span>
+      <span class="st-l">Par cible</span>
+      <span>${st.B.sigHead||0} tête · ${st.B.sigBody||0} corps · ${st.B.sigLeg||0} jambe</span>
+    </div>
+    <div class="st-row" style="font-size:11.5px;opacity:.95">
+      <span>${st.A.distStrikes||0} dist · ${st.A.clinchStrikes||0} clinch · ${st.A.groundStrikes||0} sol</span>
+      <span class="st-l">Par position</span>
+      <span>${st.B.distStrikes||0} dist · ${st.B.clinchStrikes||0} clinch · ${st.B.groundStrikes||0} sol</span>
+    </div>
+    <div class="st-row">
+      <span><b>${tdA}</b>/${tdAttA} <small class="muted">(${pctTdA}%)</small></span>
+      <span class="st-l">Amenées</span>
+      <span><b>${tdB}</b>/${tdAttB} <small class="muted">(${pctTdB}%)</small></span>
+    </div>
+    <div class="st-row">
+      <span>${pctTdDefA}% <small class="muted">(${tdDefA}/${tdDefA+tdB})</small></span>
+      <span class="st-l">Défense lutte</span>
+      <span>${pctTdDefB}% <small class="muted">(${tdDefB}/${tdDefB+tdA})</small></span>
+    </div>
+    <div class="st-row">
+      <span>${ctrlAStr}</span>
+      <span class="st-l">Temps de contrôle</span>
+      <span>${ctrlBStr}</span>
+    </div>
+    <div class="st-row">
+      <span>${st.A.subAtt||0} tent.${st.A.subEscapes?` · ${st.A.subEscapes} éch.`:''}</span>
+      <span class="st-l">Soumissions</span>
+      <span>${st.B.subAtt||0} tent.${st.B.subEscapes?` · ${st.B.subEscapes} éch.`:''}</span>
+    </div>
+    <div class="st-row" style="font-size:11.5px;opacity:.95">
+      <span>${st.A.guardPasses||0} pass. · ${st.A.reversals||0} renv. · ${st.A.standups||0} rel.</span>
+      <span class="st-l">Lutte au sol</span>
+      <span>${st.B.guardPasses||0} pass. · ${st.B.reversals||0} renv. · ${st.B.standups||0} rel.</span>
+    </div>
+    <div class="st-row">
+      <span>${dmgB} pts</span>
+      <span class="st-l">Dégâts infligés</span>
+      <span>${dmgA} pts</span>
+    </div>
+    ${(st.A.wobbled||st.B.wobbled||st.A.cuts||st.B.cuts)?`
+    <div class="st-row" style="font-size:11.5px;color:var(--gold)">
+      <span>${st.B.wobbled||0} sonné${(st.B.wobbled||0)>1?'s':''}${st.B.cuts?` · ${st.B.cuts} coupure${st.B.cuts>1?'s':''}`:''}</span>
+      <span class="st-l">Impact critique</span>
+      <span>${st.A.wobbled||0} sonné${(st.A.wobbled||0)>1?'s':''}${st.A.cuts?` · ${st.A.cuts} coupure${st.A.cuts>1?'s':''}`:''}</span>
+    </div>`:''}
+  </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   let judgesHtml='';
   if(isDecisionLike(p.method) && !p.res.judges && p.res.scoreA!==undefined){
@@ -696,8 +805,13 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
       <div class="hr"></div>
       <div class="mono small muted" style="text-align:left;font-size:11px">
         <div style="display:flex;justify-content:space-between;color:var(--text);margin-bottom:4px"><span>RND</span><span>J1</span><span>J2</span><span>J3</span><span>SIG</span><span>TD</span><span>KD</span></div>
-        ${(p.res.roundStats||[]).map(rs=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--line)">
-          <span style="color:var(--gold)">R${rs.r}</span><span>${rs.j1[0]}-${rs.j1[1]}</span><span>${rs.j2[0]}-${rs.j2[1]}</span><span>${rs.j3[0]}-${rs.j3[1]}</span><span>${rs.sigA}-${rs.sigB}</span><span>${rs.tdA}-${rs.tdB}</span><span>${rs.kdA}-${rs.kdB}</span>
+        ${(p.res.roundStats||[]).map(rs=>`<div style="padding:3px 0;border-bottom:1px solid var(--line)">
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:var(--gold)">R${rs.r}</span><span>${rs.j1[0]}-${rs.j1[1]}</span><span>${rs.j2[0]}-${rs.j2[1]}</span><span>${rs.j3[0]}-${rs.j3[1]}</span><span>${rs.sigA}-${rs.sigB}</span><span>${rs.tdA}-${rs.tdB}</span><span>${rs.kdA}-${rs.kdB}</span>
+          </div>
+          ${(rs.sigAttA!=null||rs.ctrlSecA!=null)?`<div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:2px">
+            <span>Détail</span><span>${rs.sigA}/${rs.sigAttA||rs.sigA} (${rs.sigAttA?Math.round(rs.sigA/Math.max(1,rs.sigAttA)*100):0}%)</span><span>vs</span><span>${rs.sigB}/${rs.sigAttB||rs.sigB} (${rs.sigAttB?Math.round(rs.sigB/Math.max(1,rs.sigAttB)*100):0}%)</span><span>Ctrl: ${formatCtrl(rs.ctrlA||0)}-${formatCtrl(rs.ctrlB||0)}</span>
+          </div>`:''}
         </div>`).join('')}
       </div></div>`;
   }
@@ -792,11 +906,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
       l'âge, qui ne concerne pas cet affichage. ==== */
    if(noVisibleGain) return '';
    return `<div style="color:var(--win)">${before} → ${after} ${label}</div>`;}).filter(Boolean).join('')}</div>`:''}</div></div>`:''}
-   <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
-     <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
-     <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
-     <div class="st-row"><span>${formatCtrl(st.A.ctrl||0)}</span><span class="st-l">Temps de contrôle</span><span>${formatCtrl(st.B.ctrl||0)}</span></div>
-     <div class="st-row"><span>${st.A.kd}</span><span class="st-l">Knockdowns</span><span>${st.B.kd}</span></div></div>
+    ${renderCombatStatsCard(st, f, p.opp)}
    ${p.purseDetail?`<div class="card"><div class="eyebrow mb">Bourse</div>
      <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Bourse brute</span><span>${formatArgent(p.purseDetail.gross)}</span></div>
      <div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Frais de camp (manager, coach, salle)</span><span style="color:var(--loss)">-${formatArgent(p.purseDetail.fee)}</span></div>

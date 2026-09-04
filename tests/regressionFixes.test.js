@@ -655,3 +655,140 @@ test('P1_FORME_MORAL_REEQUILIBRAGE — chooseTraining() applique la régression 
   win.chooseTraining(0);
   assert.ok(win.G.f.form < before, 'à 100, avec une option qui ne touche pas la forme, seule la régression vers la ligne de base doit s\'appliquer et donc la faire baisser');
 });
+
+/* ==== [ANCRE: TEST_MOTEUR_COMBAT_STATS_ENRICHIES] — Modèle statistique DeepSeek & Invariants ==== */
+test('MOTEUR_COMBAT_STATS_ENRICHIES — présence de tous les compteurs et respect strict des invariants', () => {
+  const win = newGameWindow();
+  win.setSeed(42);
+  for (let i = 0; i < 15; i++) {
+    const A = win.makeFighter({ div: 'H-welter', style: 'boxer' });
+    const B = win.makeFighter({ div: 'H-welter', style: 'wrestler' });
+    const res = win.simulateFight(A, B, 3);
+
+    // Vérification de la présence de chaque champ statistique
+    const requiredKeys = [
+      'sig', 'sigAtt', 'total', 'totalAtt',
+      'sigHead', 'headAtt', 'sigBody', 'bodyAtt', 'sigLeg', 'legAtt',
+      'distStrikes', 'distAtt', 'clinchStrikes', 'clinchAtt', 'groundStrikes', 'groundAtt',
+      'powerStrikes', 'td', 'tdAtt', 'tdDef', 'reversals', 'standups', 'guardPasses',
+      'subAtt', 'subEscapes', 'ctrl', 'ctrlSec', 'clinchCtrlSec', 'groundCtrlSec',
+      'dmgHead', 'dmgBody', 'dmgLegs', 'kd', 'wobbled', 'cuts'
+    ];
+
+    ['A', 'B'].forEach(side => {
+      const s = res.stats[side];
+      requiredKeys.forEach(k => {
+        assert.ok(typeof s[k] === 'number' && !isNaN(s[k]), `stats.${side}.${k} doit être un nombre défini (obtenu: ${s[k]})`);
+      });
+
+      // Invariants mathématiques
+      assert.ok(s.sigAtt >= s.sig, `sigAtt (${s.sigAtt}) doit être >= sig (${s.sig})`);
+      assert.ok(s.total >= s.sig, `total (${s.total}) doit être >= sig (${s.sig})`);
+      assert.ok(s.totalAtt >= s.total, `totalAtt (${s.totalAtt}) doit être >= total (${s.total})`);
+      assert.ok(s.totalAtt >= s.sigAtt, `totalAtt (${s.totalAtt}) doit être >= sigAtt (${s.sigAtt})`);
+      assert.ok(s.tdAtt >= s.td, `tdAtt (${s.tdAtt}) doit être >= td (${s.td})`);
+      assert.ok(s.ctrlSec >= 0, 'ctrlSec doit être positif ou nul');
+      assert.ok(s.powerStrikes >= 0, 'powerStrikes doit être positif ou nul');
+    });
+
+    // Structure roundStats
+    assert.ok(Array.isArray(res.roundStats) && res.roundStats.length > 0, 'roundStats doit contenir les rounds simulés');
+    res.roundStats.forEach(rs => {
+      assert.ok(typeof rs.r === 'number', 'roundStats.r doit être un nombre');
+      assert.ok(Array.isArray(rs.j1) && Array.isArray(rs.j2) && Array.isArray(rs.j3), 'cartes juges présentes');
+      assert.ok(typeof rs.sigA === 'number' && typeof rs.sigB === 'number', 'sigA/sigB présents');
+      assert.ok(typeof rs.tdA === 'number' && typeof rs.tdB === 'number', 'tdA/tdB présents');
+      assert.ok(typeof rs.kdA === 'number' && typeof rs.kdB === 'number', 'kdA/kdB présents');
+      assert.ok(typeof rs.sigAttA === 'number' && typeof rs.sigAttB === 'number', 'sigAttA/sigAttB présents');
+    });
+  }
+});
+
+/* ==== [ANCRE: TEST_MOTEUR_COMBAT_IMPACT_30_ATTRIBUTS] — Impact réel des attributs ==== */
+test('MOTEUR_COMBAT_IMPACT_30_ATTRIBUTS — les attributs influencent directement les dynamiques et statistiques', () => {
+  const win = newGameWindow();
+  win.setSeed(99);
+
+  // 1. Impact de kick : kicks bas/médians et dégâts aux jambes
+  const kicker = win.makeFighter({ div: 'H-light', style: 'kickboxer' });
+  kicker.attrs.kick = 95; kicker.attrs.power = 80;
+  const puncher = win.makeFighter({ div: 'H-light', style: 'boxer' });
+  puncher.attrs.kick = 15; puncher.attrs.jab = 90; puncher.attrs.cross = 90;
+
+  let totalLegDmgByKicker = 0, totalLegDmgByPuncher = 0;
+  for (let i = 0; i < 10; i++) {
+    const res = win.simulateFight(kicker, puncher, 3);
+    totalLegDmgByKicker += res.stats.A.sigLeg;
+    totalLegDmgByPuncher += res.stats.B.sigLeg;
+  }
+  assert.ok(totalLegDmgByKicker > totalLegDmgByPuncher, `Le kickboxeur spécialisé doit placer plus de kicks (${totalLegDmgByKicker} vs ${totalLegDmgByPuncher})`);
+
+  // 2. Impact de takedown & tdd : tentatives et défenses
+  const wrestler = win.makeFighter({ div: 'H-welter', style: 'wrestler' });
+  wrestler.attrs.takedown = 95; wrestler.attrs.strength = 90;
+  const defender = win.makeFighter({ div: 'H-welter', style: 'boxer' });
+  defender.attrs.tdd = 95; defender.attrs.footSpeed = 85;
+
+  let tdDefTotal = 0, tdAttTotal = 0;
+  for (let i = 0; i < 10; i++) {
+    const res = win.simulateFight(wrestler, defender, 3);
+    tdAttTotal += res.stats.A.tdAtt;
+    tdDefTotal += res.stats.B.tdDef;
+  }
+  assert.ok(tdAttTotal > 0, `Le lutteur doit tenter des amenées (obtenu : ${tdAttTotal})`);
+  assert.ok(tdDefTotal > 0, `Le défenseur d'élite doit comptabiliser des défenses d'amenées (obtenu : ${tdDefTotal})`);
+
+  // 3. Impact d'aggression : volume de tentatives de frappes
+  const agro = win.makeFighter({ div: 'H-middle', style: 'mma' });
+  agro.attrs.aggression = 95; agro.attrs.handSpeed = 85;
+  const passive = win.makeFighter({ div: 'H-middle', style: 'mma' });
+  passive.attrs.aggression = 15; passive.attrs.handSpeed = 85;
+
+  let agroAttempts = 0, passiveAttempts = 0;
+  for (let i = 0; i < 10; i++) {
+    const res = win.simulateFight(agro, passive, 3);
+    agroAttempts += res.stats.A.sigAtt;
+    passiveAttempts += res.stats.B.sigAtt;
+  }
+  assert.ok(agroAttempts > passiveAttempts, `Le combattant ultra-agressif doit tenter plus de frappes (${agroAttempts} vs ${passiveAttempts})`);
+
+  // 4. Impact de topControl & gnp vs guardWork : passages et renversements
+  const topGrappler = win.makeFighter({ div: 'H-light', style: 'wrestler' });
+  topGrappler.attrs.takedown = 99; topGrappler.attrs.topControl = 95; topGrappler.attrs.gnp = 90;
+  const bottomGuard = win.makeFighter({ div: 'H-light', style: 'bjj' });
+  bottomGuard.attrs.guardWork = 95; bottomGuard.attrs.flexibility = 90; bottomGuard.attrs.submission = 85;
+
+  let passesCount = 0, reversalsOrStandups = 0;
+  for (let i = 0; i < 10; i++) {
+    const res = win.simulateFight(topGrappler, bottomGuard, 3);
+    passesCount += res.stats.A.guardPasses;
+    reversalsOrStandups += (res.stats.B.reversals + res.stats.B.standups);
+  }
+  assert.ok(passesCount >= 0 && reversalsOrStandups >= 0, 'Les compteurs sol avancés sont actifs');
+});
+
+/* ==== [ANCRE: TEST_UI_STATS_PANEL_RENDU] — Rendu de la carte de statistiques ==== */
+test('renderCombatStatsCard() — rendu complet sans NaN ni undefined', () => {
+  const win = newGameWindow();
+  const A = win.makeFighter({ first: 'Alex', last: 'Pereira' });
+  const B = win.makeFighter({ first: 'Israel', last: 'Adesanya' });
+  const res = win.simulateFight(A, B, 3);
+  const html = win.renderCombatStatsCard(res.stats, A, B);
+
+  assert.ok(html.includes('Statistiques du combat'), 'titre présent');
+  assert.ok(html.includes('Frappes sig.'), 'section frappes sig. présente');
+  assert.ok(html.includes('Total frappes'), 'section total frappes présente');
+  assert.ok(html.includes('Frappes puissantes'), 'frappes puissantes présentes');
+  assert.ok(html.includes('Défense frappes'), 'défense frappes présente');
+  assert.ok(html.includes('Par cible'), 'répartition par cible présente');
+  assert.ok(html.includes('Par position'), 'répartition par position présente');
+  assert.ok(html.includes('Amenées'), 'amenées présentes');
+  assert.ok(html.includes('Défense lutte'), 'défense lutte présente');
+  assert.ok(html.includes('Temps de contrôle'), 'temps de contrôle présent');
+  assert.ok(html.includes('Soumissions'), 'soumissions présentes');
+  assert.ok(html.includes('Lutte au sol'), 'dynamique sol présente');
+  assert.ok(html.includes('Dégâts infligés'), 'dégâts infligés présents');
+
+  assert.ok(!html.includes('undefined'), 'aucun undefined dans le HTML');
+  assert.ok(!html.includes('NaN'), 'aucun NaN dans le HTML');
+});

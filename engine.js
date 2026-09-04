@@ -309,6 +309,15 @@ function eff(f){ const a=f.attrs||{};
     chin:     num(a.chin)*0.72+num(a.durability)*0.28,
     fightIQ:  num(a.fightIQ)*0.7+num(a.composure)*0.18+num(a.adaptability)*0.12,
     killer:   num(a.killer), heart:num(a.heart), aggression:num(a.aggression),
+    /* ==== [ANCRE: CANAUX_30_ATTRIBUTS] — exposition directe des 30 attributs dans eff() ==== */
+    jab: num(a.jab), cross: num(a.cross), hook: num(a.hook), kick: num(a.kick), clinchStr: num(a.clinchStr),
+    guardWork: num(a.guardWork), gnp: num(a.gnp),
+    composure: num(a.composure), discipline: num(a.discipline), adaptability: num(a.adaptability),
+    focus: num(a.focus), confidence: num(a.confidence),
+    strength: num(a.strength), handSpeedRaw: num(a.handSpeed), footSpeed: num(a.footSpeed),
+    recovery: num(a.recovery), explosiveness: num(a.explosiveness), flexibility: num(a.flexibility),
+    durability: num(a.durability),
+    /* ==== [FIN ANCRE] ==== */
   };
   for(const k in ch){ if(k!=='chin'&&k!=='killer'&&k!=='heart'&&k!=='aggression') ch[k]=clamp(ch[k]+dyn,1,100); }
   return ch;

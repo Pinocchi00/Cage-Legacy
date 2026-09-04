@@ -101,9 +101,17 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   // sans que le joueur en soit jamais informé. ====
   let chinVulnA=0, chinVulnB=0;
   // ==== [FIN ANCRE] ====
-  const st={ // statistiques de combat (dmgHead/Body/Legs : purement narratif, additif)
-    A:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0},
-    B:{sig:0,td:0,tdAtt:0,ctrl:0,sub:0,kd:0,dmgHead:0,dmgBody:0,dmgLegs:0} };
+  // ==== [ANCRE: MOTEUR_COMBAT_STATS_ENRICHIES] — modèle statistique complet selon spécification DeepSeek ====
+  const makeFighterStats=()=>({
+    sig:0, td:0, tdAtt:0, ctrl:0, sub:0, kd:0, dmgHead:0, dmgBody:0, dmgLegs:0,
+    sigAtt:0, total:0, totalAtt:0,
+    sigHead:0, headAtt:0, sigBody:0, bodyAtt:0, sigLeg:0, legAtt:0,
+    distStrikes:0, distAtt:0, clinchStrikes:0, clinchAtt:0, groundStrikes:0, groundAtt:0,
+    powerStrikes:0, tdDef:0, reversals:0, standups:0, guardPasses:0,
+    subAtt:0, subEscapes:0, ctrlSec:0, clinchCtrlSec:0, groundCtrlSec:0,
+    wobbled:0, cuts:0
+  });
+  const st={ A:makeFighterStats(), B:makeFighterStats() };
   let momentum=50; // jauge narrative (50=neutre), n'influence aucun calcul de combat
   // ==== [ANCRE: JUGES_10PT] — vrai 10-point must, round par round, 3 juges ====
   const roundStats=[]; let j1A=0,j1B=0,j2A=0,j2B=0,j3A=0,j3B=0;
@@ -121,7 +129,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   const tagsA=getTags(A), tagsB=getTags(B);
   for(let r=1;r<=rounds && !finish;r++){
     // ==== [ANCRE: JUGES_10PT_SNAP] ====
-    const _startSa=sa, _startSb=sb, _kdA0=st.A.kd, _kdB0=st.B.kd, _sigA0=st.A.sig, _sigB0=st.B.sig, _tdA0=st.A.td, _tdB0=st.B.td, _ctrlA0=st.A.ctrl||0, _ctrlB0=st.B.ctrl||0;
+    const _startSa=sa, _startSb=sb;
+    const _kdA0=st.A.kd, _kdB0=st.B.kd, _sigA0=st.A.sig, _sigB0=st.B.sig, _tdA0=st.A.td, _tdB0=st.B.td, _ctrlA0=st.A.ctrl||0, _ctrlB0=st.B.ctrl||0;
+    const _sigAttA0=st.A.sigAtt||0, _sigAttB0=st.B.sigAtt||0;
+    const _totalA0=st.A.total||0, _totalB0=st.B.total||0, _totalAttA0=st.A.totalAtt||0, _totalAttB0=st.B.totalAtt||0;
+    const _tdAttA0=st.A.tdAtt||0, _tdAttB0=st.B.tdAtt||0, _tdDefA0=st.A.tdDef||0, _tdDefB0=st.B.tdDef||0;
+    const _ctrlSecA0=st.A.ctrlSec||0, _ctrlSecB0=st.B.ctrlSec||0;
+    const _subAttA0=st.A.subAtt||0, _subAttB0=st.B.subAtt||0;
+    const _headA0=st.A.sigHead||0, _headB0=st.B.sigHead||0, _bodyA0=st.A.sigBody||0, _bodyB0=st.B.sigBody||0, _legA0=st.A.sigLeg||0, _legB0=st.B.sigLeg||0;
+    const _pwrA0=st.A.powerStrikes||0, _pwrB0=st.B.powerStrikes||0, _wobA0=st.A.wobbled||0, _wobB0=st.B.wobbled||0;
     // ==== [FIN ANCRE] ====
     // ==== [ANCRE: MICRO_SEQUENCES] — chaque round de 5 minutes est découpé en 6
     // micro-séquences de 50 secondes. La phase (debout/clinch/sol) persiste
@@ -133,25 +149,53 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     const roundPenalty=(r>=4)?1.3:1.0;
     for(let k=0;k<6 && !finish;k++){
       const outA=st.A.sig+st.A.tdAtt*0.6, outB=st.B.sig+st.B.tdAtt*0.6;
-      const fatA=clamp(((dmgA+outA*0.2)-a.cardio)*cardioFactorA*roundPenalty,0,28);
-      const fatB=clamp(((dmgB+outB*0.2)-b.cardio)*cardioFactorB*roundPenalty,0,28);
+      // Résistance à la fatigue via durabilité et second souffle (cœur)
+      const heartResistA=(r>=3||dmgA>30)?clamp(((a.heart||50)-50)*0.003,-0.04,0.18):0;
+      const durResistA=clamp(((a.durability||50)-50)*0.002,-0.04,0.14);
+      const heartResistB=(r>=3||dmgB>30)?clamp(((b.heart||50)-50)*0.003,-0.04,0.18):0;
+      const durResistB=clamp(((b.durability||50)-50)*0.002,-0.04,0.14);
+      const fatA=clamp(((dmgA+outA*0.2)-a.cardio)*cardioFactorA*roundPenalty*(1-heartResistA-durResistA),0,28);
+      const fatB=clamp(((dmgB+outB*0.2)-b.cardio)*cardioFactorB*roundPenalty*(1-heartResistB-durResistB),0,28);
 
       if(currentPhase==='sol'){
         const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
         const topProf=topIsA?profA:profB, botProf=topIsA?profB:profA;
+        const stTop=topIsA?st.A:st.B, stBot=topIsA?st.B:st.A;
         const control=clamp((top.topControl-bot.guard)*0.32,0,11)*0.2;
         const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45)*topProf.gnpDmg*0.2;
         const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod*0.2;
         const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35)*botProf.subMod*0.2;
         const topPts=1.2+control*0.5+gnp*0.46+subTop*0.22; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.032+0.6;
-        if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=0.2;st.A.sig+=Math.round(gnp*0.4);} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=0.2;st.B.sig+=Math.round(gnp*0.4);}
+        const gHits=Math.round(gnp*0.4);
+        if(topIsA){sa+=topPts;sb+=botPts;dmgB+=gnp*0.32;st.A.ctrl+=0.2;st.A.sig+=gHits;} else {sb+=topPts;sa+=botPts;dmgA+=gnp*0.32;st.B.ctrl+=0.2;st.B.sig+=gHits;}
+        // Enrichissement stats sol (frappes au sol, tentatives, temps de contrôle continu)
+        const gAtt=gHits+Math.max(1,Math.round(1+((top.aggression||50)-50)*0.03));
+        stTop.sigAtt+=gAtt; stTop.groundStrikes+=gHits; stTop.groundAtt+=gAtt;
+        const totGHits=gHits+Math.max(1,Math.round(1+(top.gnp||50)*0.02));
+        stTop.total+=totGHits; stTop.totalAtt+=gAtt+2;
+        const gHead=Math.round(gHits*0.75), gBody=gHits-gHead;
+        stTop.sigHead+=gHead; stTop.headAtt+=Math.round(gAtt*0.75);
+        stTop.sigBody+=gBody; stTop.bodyAtt+=Math.round(gAtt*0.25);
+        if(gHits>=2 && (top.power||50)>60) stTop.powerStrikes+=Math.round(gHits*0.5);
+        const beatGroundSec=clamp(Math.round(22+clamp(top.topControl-bot.guard,-15,25)*0.35),14,46);
+        stTop.ctrlSec+=beatGroundSec; stTop.groundCtrlSec+=beatGroundSec;
+        if(top.topControl>bot.guard+12 && rnd()<0.25) stTop.guardPasses++;
+        if(gHits>=3 && (top.gnp||50)>70 && rnd()<0.2) stBot.cuts++;
+        if(subTop>2.5) stTop.subAtt++;
+        if(subBot>2.5) stBot.subAtt++;
+
         const heartR=1-(bot.heart*0.0016);
         const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.32;
         const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult;
         const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult;
         if(rnd()<subChT && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
-        else if(rnd()<koGnp && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++;}
+        else if(rnd()<koGnp && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++; stBot.wobbled++;}
         else if(rnd()<subChB && !(immuneA&&topF===A)){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
+        else {
+          if(subChT>0.03) stBot.subEscapes++;
+          if(subChB>0.03) stTop.subEscapes++;
+          if(koGnp>0.15) stBot.wobbled++;
+        }
         const isMe=topIsA; momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
         const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
         tgt.dmgBody+=RI(0,2); tgt.dmgHead+=RI(0,1);
@@ -165,20 +209,16 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         if(botFat>15 || bot.cardio<40){
           txtPool.push(`Écrasé sous le poids adverse, ${def.name} cherche de l\u2019oxygène qui n\u2019existe plus.`);
         }
-        /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — bug trouvé (ui-09,
-           isSubDanger) : l'écran de combat détectait le danger de soumission
-           en cherchant des bouts de mots français ('soum','clé','étrangl')
-           dans le texte narratif du beat — toute réécriture de texte éteint
-           silencieusement le halo et l'alerte. subChT/subChB (juste
-           au-dessus) sont déjà la vraie chance mécanique de soumission de ce
-           beat, pour le combattant du dessus comme pour celui du dessous :
-           poser le drapeau dessus plutôt que sur le texte. ==== */
+        /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — voir ui-09 ==== */
         log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(k,6)}] `+getUniqueLog(txtPool),momentum,sub:(subChT>0.03||subChB>0.03),snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
           last.text=`[00:00] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
         else {
           const evadeCh=clamp((bot.footwork+bot.fightIQ-topFat*0.5)/280,0.06,0.28);
-          if(rnd()<evadeCh){ if(rnd()<0.5){ topIsA=!topIsA; } else { currentPhase='debout'; } }
+          if(rnd()<evadeCh){
+            if(rnd()<0.5){ topIsA=!topIsA; stBot.reversals++; }
+            else { currentPhase='debout'; stBot.standups++; }
+          }
         }
       } else if(currentPhase==='clinch'){
         const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA;
@@ -186,12 +226,24 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         const diff=clinchA-clinchB;
         if(Math.abs(diff)>8){
           const domIsA=diff>0; const dom=domIsA?A:B;
+          const stDom=domIsA?st.A:st.B, stDef=domIsA?st.B:st.A;
           const hits=RI(0,4); (domIsA?st.A:st.B).sig+=hits; if(domIsA) dmgB+=hits*1.8; else dmgA+=hits*1.8;
           (domIsA?st.B:st.A).dmgBody+=RI(0,2);
+          // Frappes en clinch et contrôle
+          const attHits=hits+RI(1,2);
+          stDom.sigAtt+=attHits; stDom.clinchStrikes+=hits; stDom.clinchAtt+=attHits;
+          stDom.total+=hits+RI(1,2); stDom.totalAtt+=attHits+RI(2,3);
+          const bodyHits=Math.round(hits*0.65), headHits=hits-bodyHits;
+          stDom.sigBody+=bodyHits; stDom.bodyAtt+=Math.round(attHits*0.65);
+          stDom.sigHead+=headHits; stDom.headAtt+=Math.round(attHits*0.35);
+          if(hits>=2 && (domIsA?a.power:b.power)>65) stDom.powerStrikes+=1;
+          const clSec=clamp(Math.round(14+Math.abs(diff)*0.25),10,32);
+          stDom.ctrl+=0.1; stDom.ctrlSec+=clSec; stDom.clinchCtrlSec+=clSec;
           momentum=clamp(momentum+(domIsA?RI(3,7):-RI(3,7)),5,95);
-          if(rnd()<0.28){ currentPhase='sol'; topIsA=domIsA; (domIsA?st.A:st.B).td++;
+          if(rnd()<0.28){ currentPhase='sol'; topIsA=domIsA; (domIsA?st.A:st.B).td++; stDom.tdAtt++;
             log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(k,6)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
+            if(rnd()<0.35){ stDom.tdAtt++; stDef.tdDef++; }
             const clinchTxt=getUniqueLog([
               `${dom.name} étouffe son adversaire contre le grillage.`,
               `Lutte rugueuse le long de la cage à l\u2019avantage de ${dom.name}.`,
@@ -213,6 +265,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           if(rnd()<clamp(tdChanceA,0.05,0.85)){ st.A.td++; currentPhase='sol'; topIsA=true;
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(k,6)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
+            st.B.tdDef++;
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Bonne défense de ${B.name} sur la tentative d\u2019amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
         } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt++; handled=true;
@@ -220,6 +273,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           if(rnd()<clamp(tdChanceB,0.05,0.85)){ st.B.td++; currentPhase='sol'; topIsA=false;
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(k,6)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
+            st.A.tdDef++;
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(k,6)}] ${A.name} repousse une tentative d\u2019amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
         }
@@ -229,13 +283,64 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           const noiseAmt=Math.round(6*noiseWeightMult);
           const pA=clamp(offA*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20), pB=clamp(offB*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20);
           sa+=pA;sb+=pB;dmgA+=clamp(offB*0.22*0.22,0,6);dmgB+=clamp(offA*0.22*0.22,0,6);
-          st.A.sig+=clamp(Math.round(pA*0.5),0,10); st.B.sig+=clamp(Math.round(pB*0.5),0,10);
+          const landedA=clamp(Math.round(pA*0.5),0,10);
+          const landedB=clamp(Math.round(pB*0.5),0,10);
+          st.A.sig+=landedA; st.B.sig+=landedB;
+
+          // Tentatives et frappes debout pour A
+          const accRateA=clamp(0.42+((a.handSpeed||50)*0.08+(a.discipline||50)*0.06-(b.footSpeed||50)*0.10-(b.footwork||50)*0.06)*0.003,0.30,0.65);
+          const attA=Math.max(landedA,Math.round(landedA/accRateA)+((a.aggression||50)>60?RI(1,3):RI(0,1)));
+          st.A.sigAtt+=attA; st.A.distStrikes+=landedA; st.A.distAtt+=attA;
+          st.A.total+=landedA+RI(1,3); st.A.totalAtt+=attA+RI(2,4);
+          const kickRatioA=clamp(((a.kick||50)/150)*0.45,0.10,0.45);
+          const legA=Math.round(landedA*kickRatioA*0.7);
+          const bodyA=Math.round(landedA*(0.22+((a.hook||50)>65?0.08:0)));
+          const headA=Math.max(0,landedA-legA-bodyA);
+          st.A.sigHead+=headA; st.A.headAtt+=Math.round(attA*0.60);
+          st.A.sigBody+=bodyA; st.A.bodyAtt+=Math.round(attA*0.22);
+          st.A.sigLeg+=legA; st.A.legAtt+=Math.round(attA*0.18);
+          const pwrPctA=clamp(((a.power||50)*0.5+(a.cross||50)*0.25+(a.hook||50)*0.25)/100,0.15,0.65);
+          st.A.powerStrikes+=Math.round(landedA*pwrPctA);
+
+          // Tentatives et frappes debout pour B
+          const accRateB=clamp(0.42+((b.handSpeed||50)*0.08+(b.discipline||50)*0.06-(a.footSpeed||50)*0.10-(a.footwork||50)*0.06)*0.003,0.30,0.65);
+          const attB=Math.max(landedB,Math.round(landedB/accRateB)+((b.aggression||50)>60?RI(1,3):RI(0,1)));
+          st.B.sigAtt+=attB; st.B.distStrikes+=landedB; st.B.distAtt+=attB;
+          st.B.total+=landedB+RI(1,3); st.B.totalAtt+=attB+RI(2,4);
+          const kickRatioB=clamp(((b.kick||50)/150)*0.45,0.10,0.45);
+          const legB=Math.round(landedB*kickRatioB*0.7);
+          const bodyB=Math.round(landedB*(0.22+((b.hook||50)>65?0.08:0)));
+          const headB=Math.max(0,landedB-legB-bodyB);
+          st.B.sigHead+=headB; st.B.headAtt+=Math.round(attB*0.60);
+          st.B.sigBody+=bodyB; st.B.bodyAtt+=Math.round(attB*0.22);
+          st.B.sigLeg+=legB; st.B.legAtt+=Math.round(attB*0.18);
+          const pwrPctB=clamp(((b.power||50)*0.5+(b.cross||50)*0.25+(b.hook||50)*0.25)/100,0.15,0.65);
+          st.B.powerStrikes+=Math.round(landedB*pwrPctB);
+
+          // Impact des dégâts reçus (altération des déplacements et coupures)
+          if(st.B.dmgLegs>15) b.footwork=Math.max(10,b.footwork*0.98);
+          if(st.A.dmgLegs>15) a.footwork=Math.max(10,a.footwork*0.98);
+          if(headA>=3 && ((a.cross||50)>75||(a.hook||50)>75) && rnd()<0.2) st.B.cuts++;
+          if(headB>=3 && ((b.cross||50)>75||(b.hook||50)>75) && rnd()<0.2) st.A.cuts++;
+          if(pA>=8 && rnd()<0.25) st.B.wobbled++;
+          if(pB>=8 && rnd()<0.25) st.A.wobbled++;
+
           const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016)*profA.koMod*0.22;
           const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016)*profB.koMod*0.22;
           const isKdA=rnd()<koA*1.5, isKdB=!isKdA&&rnd()<koB*1.5;
           let kdText=null;
-          if(isKdA){ st.A.kd++; if(rnd()<0.6){ finish={by:A,loser:B,method:'KO/TKO',round:r}; } else kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
-          else if(isKdB){ st.B.kd++; if(!immuneA && rnd()<0.6){ finish={by:B,loser:A,method:'KO/TKO',round:r}; } else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`}; }
+          if(isKdA){
+            st.A.kd++; st.B.wobbled++;
+            const finishChanceA=clamp(0.60*(1+((a.killer||50)-50)*0.003)*(1-((b.composure||50)-50)*0.003)*(1-((b.heart||50)-50)*0.002),0.25,0.85);
+            if(rnd()<finishChanceA){ finish={by:A,loser:B,method:'KO/TKO',round:r}; }
+            else kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`};
+          }
+          else if(isKdB){
+            st.B.kd++; st.A.wobbled++;
+            const finishChanceB=clamp(0.60*(1+((b.killer||50)-50)*0.003)*(1-((a.composure||50)-50)*0.003)*(1-((a.heart||50)-50)*0.002),0.25,0.85);
+            if(!immuneA && rnd()<finishChanceB){ finish={by:B,loser:A,method:'KO/TKO',round:r}; }
+            else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l\u2019arbitre laisse le combat continuer !`};
+          }
           const isMe=rnd()<(offA/(offA+offB+1));
           momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
           const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
@@ -269,9 +374,13 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     const rTdA=st.A.td-_tdA0, rTdB=st.B.td-_tdB0;
     const rCtrlA=(st.A.ctrl||0)-_ctrlA0, rCtrlB=(st.B.ctrl||0)-_ctrlB0;
     const kdDiff=(st.A.kd-_kdA0)-(st.B.kd-_kdB0);
-    // Règles unifiées MMA : le dommage prime sur le contrôle positionnel.
+    const rPwrDiff=(st.A.powerStrikes-_pwrA0)-(st.B.powerStrikes-_pwrB0);
+    const rSubDiff=(st.A.subAtt-_subAttA0)-(st.B.subAtt-_subAttB0);
+    const rWobDiff=(st.B.wobbled-_wobB0)-(st.A.wobbled-_wobA0);
+    const aggDiff=((a.aggression||50)-(b.aggression||50))*0.04;
+    // Règles unifiées MMA : le dommage effectif (KD, sonné, frappes lourdes) prime.
     // 1 amenée = 1.5 frappe sig, 1 round complet de contrôle (1.2) = ~3.6 pts (critère secondaire)
-    const rDiff=(rSigA-rSigB)+(rTdA-rTdB)*1.5+(rCtrlA-rCtrlB)*3;
+    const rDiff=(rSigA-rSigB)+rPwrDiff*0.5+(rTdA-rTdB)*1.5+rSubDiff*1.2+rWobDiff*1.8+(rCtrlA-rCtrlB)*3+aggDiff;
     let sA=10,sB=10;
     if((rDiff>44&&kdDiff>=0)||kdDiff>=3){ sA=10;sB=7; }
     else if((rDiff>32&&kdDiff>=0)||kdDiff>=2){ sA=10;sB=8; }
@@ -283,34 +392,9 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     else if(rDiff<0){ sA=9;sB=10; } // bande serrée mais B garde un léger avantage réel
     else { if(rnd()<0.5){sA=10;sB=9;} else {sA=9;sB=10;} } // égalité mathématique exacte, rarissime
     let j1=[sA,sB], j2=[sA,sB], j3=[sA,sB];
-    // Dissidence des juges : la probabilité baisse avec l'écart du round mais
-    // n'atteint jamais 0% — même un round net (10-7/10-8) peut voir un juge
-    // s'écarter d'un point. Avant, la dissidence n'était possible QUE sur les
-    // rounds ultra-serrés (|rDiff|<=6), rendant l'unanimité totale obligatoire
-    // sur tout round net — confirmé irréaliste (3 juges identiques à chaque
-    // round d'un combat entier n'arrive jamais en vrai MMA).
     const margin=Math.max(Math.abs(rDiff),Math.abs(kdDiff)*20);
     const dissent2=clamp(0.35-margin*0.004,0.04,0.35);
     const dissent3=clamp(0.15-margin*0.002,0.02,0.15);
-    // ==== [ANCRE: CORRECTIF_DISSIDENCE_NOOP] — bug remonté ("les juges scorent
-    // toujours de manière identique") : l'ancienne formule
-    // [sB===10?9:10, sA===10?9:10] retombait EXACTEMENT sur [sA,sB] pour le cas
-    // le plus fréquent de tous (round serré 10-9/9-10) — vérifié : sA=10,sB=9
-    // donnait [10,9], identique à la majorité. Le tirage dissent2/dissent3
-    // réussissait donc régulièrement sans jamais rien changer à l'affichage.
-    // Nouvelle règle, conforme au commentaire d'intention ci-dessus : sur un
-    // round déjà serré (10-9), le seul écart réaliste pour un juge est de
-    // basculer le round à l'adversaire (9-10) — pas de palier intermédiaire
-    // possible. Sur un round net (10-7/10-8), le juge dissident adoucit d'un
-    // point sans changer de vainqueur (10-8/10-9), comme décrit plus haut.
-    // ==== [ANCRE: CORRECTIF_DISSIDENCE_LANDSLIDE] — bug remonté : un round
-    // classé 10-9 ("serré") pouvait être intégralement inversé par un juge
-    // dissident même quand rDiff montrait déjà une domination nette (ex.
-    // 18-3 en frappes significatives), simplement parce que ce rDiff restait
-    // sous le seuil >32 requis pour basculer en 10-8. Un round proche de ce
-    // palier (|rDiff|>20, plus de la moitié du chemin vers 10-8) n'est plus
-    // assez "serré" pour justifier un renversement complet du vainqueur —
-    // seuls les rounds vraiment courus (|rDiff|<=20) restent inversables.
     const dissentJudge=()=>{
       if(sA===10 && sB===9) return (Math.abs(rDiff)>20 ? [sA,sB] : [9,10]);
       if(sB===10 && sA===9) return (Math.abs(rDiff)>20 ? [sA,sB] : [10,9]);
@@ -321,7 +405,34 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     if(rnd()<dissent2) j2=dissentJudge();
     if(rnd()<dissent3) j3=dissentJudge();
     j1A+=j1[0];j1B+=j1[1];j2A+=j2[0];j2B+=j2[1];j3A+=j3[0];j3B+=j3[1];
-    roundStats.push({r,j1,j2,j3,sigA:st.A.sig-_sigA0,sigB:st.B.sig-_sigB0,tdA:st.A.td-_tdA0,tdB:st.B.td-_tdB0,kdA:st.A.kd-_kdA0,kdB:st.B.kd-_kdB0});
+    roundStats.push({
+      r,j1,j2,j3,
+      sigA:st.A.sig-_sigA0, sigB:st.B.sig-_sigB0,
+      sigAttA:st.A.sigAtt-_sigAttA0, sigAttB:st.B.sigAtt-_sigAttB0,
+      totalA:st.A.total-_totalA0, totalB:st.B.total-_totalB0,
+      totalAttA:st.A.totalAtt-_totalAttA0, totalAttB:st.B.totalAtt-_totalAttB0,
+      tdA:st.A.td-_tdA0, tdB:st.B.td-_tdB0,
+      tdAttA:st.A.tdAtt-_tdAttA0, tdAttB:st.B.tdAtt-_tdAttB0,
+      tdDefA:st.A.tdDef-_tdDefA0, tdDefB:st.B.tdDef-_tdDefB0,
+      kdA:st.A.kd-_kdA0, kdB:st.B.kd-_kdB0,
+      ctrlA:st.A.ctrl-_ctrlA0, ctrlB:st.B.ctrl-_ctrlB0,
+      ctrlSecA:st.A.ctrlSec-_ctrlSecA0, ctrlSecB:st.B.ctrlSec-_ctrlSecB0,
+      subAttA:st.A.subAtt-_subAttA0, subAttB:st.B.subAtt-_subAttB0,
+      headA:st.A.sigHead-_headA0, headB:st.B.sigHead-_headB0,
+      bodyA:st.A.sigBody-_bodyA0, bodyB:st.B.sigBody-_bodyB0,
+      legA:st.A.sigLeg-_legA0, legB:st.B.sigLeg-_legB0,
+      pwrA:st.A.powerStrikes-_pwrA0, pwrB:st.B.powerStrikes-_pwrB0
+    });
+    // Adaptation tactique de fin de round
+    if(sA<sB){
+      const adaptA=clamp(((a.adaptability||50)-50)*0.08,0,4);
+      a.fightIQ=clamp(a.fightIQ+adaptA,1,150);
+      a.footwork=clamp(a.footwork+adaptA*0.5,1,150);
+    } else if(sB<sA){
+      const adaptB=clamp(((b.adaptability||50)-50)*0.08,0,4);
+      b.fightIQ=clamp(b.fightIQ+adaptB,1,150);
+      b.footwork=clamp(b.footwork+adaptB*0.5,1,150);
+    }
     // ==== [ANCRE: RECUP_INTER_ROUND] — la minute de repos entre rounds allège
     // une partie des dégâts accumulés, proportionnellement à la vraie stat de
     // récupération (pas la fatigue/cardio, qui reste dérivée à chaque round). ====
@@ -355,6 +466,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   }
   res.scoreA=j1A+j2A+j3A; res.scoreB=j1B+j2B+j3B;
   res.judges={j1:[j1A,j1B],j2:[j2A,j2B],j3:[j3A,j3B]}; res.roundStats=roundStats;
+  ['A', 'B'].forEach(side => {
+    const s = st[side];
+    s.sigAtt = Math.max(s.sigAtt, s.sig);
+    s.total = Math.max(s.total, s.sig);
+    s.totalAtt = Math.max(s.totalAtt, s.sigAtt, s.total);
+    s.tdAtt = Math.max(s.tdAtt, s.td);
+    s.ctrlSec = Math.max(0, s.ctrlSec);
+  });
   res.log=log; res.stats=st;
   return res;
 }
