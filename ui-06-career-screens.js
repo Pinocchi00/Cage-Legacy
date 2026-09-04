@@ -141,7 +141,7 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   const fightBtnHtml=(f.injury||f.retired)
     ?`<button class="btn ghost" style="font-size:20px;padding:18px;opacity:.5;cursor:not-allowed" disabled>${f.retired?'Carrière terminée':'Athlète inapte'}</button>`
     :`<button class="btn primary" style="font-size:20px;padding:18px" onclick="CL.fightSelect()">Évaluer les contrats (Matchmaking)</button>`;
-  const rankTag=f.champChampBelt?`<span class="tag2 hot" style="border-color:var(--blood);color:var(--blood)">DOUBLE CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:(champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`));
+  const rankTag=champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`);
   const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
   const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
   const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">${contractFightsLeftLabel(f.contract)}</span>`:'';
@@ -176,10 +176,6 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
         pleines plutôt qu'un bouton orphelin sur demi-largeur. ==== -->
    <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
    <div class="g2"><button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Ceintures</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
-   ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
-     <div class="eyebrow mb" style="color:var(--blood)">Double Champion</div>
-     <div class="small">Vous détenez également la ceinture ${f.champChampBelt}.</div>
-   </div>`:''}
    <button class="btn ghost" style="color:var(--loss);margin-top:16px;border-top:1px dashed var(--line);padding-top:16px" onclick="CL.go('retire')">Déclarer la retraite (Définitif)</button>
    </div>`; }
 
@@ -514,7 +510,6 @@ function scr_legend_detail(){
         composant de badge désormais, un par ceinture, dans une tagrow
         homogène juste sous le badge amateur : "ORG (Division) — Année N". ==== -->
    ${(f.beltHistory&&f.beltHistory.length)?`<div class="tagrow mb">${f.beltHistory.map(b=>`<span class="tag2 hot">${SVG.medal} ${esc(b.orgName)} (${esc(b.divName)}) — Année ${b.year}</span>`).join('')}</div>`:''}
-   ${f.champChampBelt?`<div class="card mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><span class="mono small" style="color:var(--gold)">${SVG.crown} Double Champion — ${esc(f.champChampBelt)}</span></div>`:''}
    ${decorationPanel}
    ${f.biggestRival?`<div class="card mb"><div class="eyebrow mb">⚔ Plus grand rival</div><div class="small" style="color:var(--blood)">${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div></div>`:''}
    ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
@@ -781,10 +776,7 @@ function championBadgeCard(f){
   if(f.champion){
     badges.push({label:`Champion ${orgDisplayName(f)} — ${f.divName}`,status:'Titre actuel',current:true});
   }
-  if(f.champChampBelt){
-    badges.push({label:`Champion ${orgDisplayName(f)} — ${f.champChampBelt}`,status:'Titre actuel (double couronne)',current:true});
-  }
-  if(!f.champion && !f.champChampBelt && (f.titles||0)>0){
+  if(!f.champion && (f.titles||0)>0){
     badges.push({label:`${f.titles} règne(s) de champion à son actif`,status:'Titre(s) ancien(s) — ceinture perdue ou abandonnée',current:false});
   }
   if(!badges.length) return '';

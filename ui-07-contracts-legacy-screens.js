@@ -126,7 +126,7 @@ function scr_champ_champ_offer(){
   const waveIdx=Math.min(2,Math.floor((f.champChampLastOfferDefenses||0)/2));
   return `<div class="scr center intro">
     <div class="eyebrow gold">Proposition du Président</div>
-    <h2 class="disp">Supercombat — Double Ceinture</h2>
+    <h2 class="disp">Supercombat — Changement de Division</h2>
     <p class="lede">${texts[waveIdx]}</p>
     <div class="glass card mb" style="background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:16px">
       <div class="hero-name" style="font-size:20px">${esc(offer.champion.name)} ${offer.champion.flag}<em>${offer.champion.styleLabel}, ${offer.champion.age} ans</em></div>
@@ -139,9 +139,13 @@ function scr_champ_champ_offer(){
 }
 /* ==== [ANCRE: CORRECTIF_SUPPRESSION_CHAMPCHAMP_DECISION] — Lot C01/2026
    §C10a : scr_champ_champ_decision() (« Où concentrer vos efforts ? »)
-   retiré — le focus bascule désormais automatiquement sur la nouvelle
-   ceinture, sans écran intermédiaire (CL.chooseChampChampFocus appelé
-   depuis routeAfterCareerPending(), ui-08). ==== */
+   retiré — le focus bascule automatiquement sur la nouvelle ceinture, sans
+   écran intermédiaire. [ANCRE: SUPPRESSION_DOUBLE_CHAMPION] — P2 : ce
+   basculement automatique n'appelle plus CL.chooseChampChampFocus() (méthode
+   supprimée, ui-08) : resolveFight() (ui-05) bascule directement f.div/
+   f.divName/f.roster dès le gain du supercombat, l'ancienne ceinture étant
+   déclarée vacante dans la foulée — plus aucun statut de double champion à
+   arbitrer après coup. ==== */
 /* ==== [FIN ANCRE] ==== */
 function scr_promo(){
   const f=G.f; const isChamp=!!f.champion;

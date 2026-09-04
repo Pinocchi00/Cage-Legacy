@@ -136,7 +136,7 @@ test('migrate() purge G.faith/G.gauntlet/G.arcade hérités d’une sauvegarde a
   assert.equal(migrated.faith, undefined, 'G.faith doit être purgé par migrate()');
   assert.equal(migrated.gauntlet, undefined, 'G.gauntlet doit être purgé par migrate()');
   assert.equal(migrated.arcade, undefined, 'G.arcade doit être purgé par migrate()');
-  assert.equal(migrated.version, 3, 'la version doit toujours être remontée au passage');
+  assert.equal(migrated.version, 4, 'la version doit toujours être remontée au passage');
   assert.equal(migrated.f.name, 'Ancien', 'les champs légitimes de la sauvegarde ne doivent pas être touchés');
 });
 
@@ -160,71 +160,6 @@ test('CORRECTIF_ROSTER_ENTREES_NULLES — validateState() filtre les entrées nu
   assert.equal(win.G.roster[0].id, survivorId);
 });
 
-/* ==== [ANCRE: TEST_CORRECTIF_MESSAGE_FOCUS_INVERSE] — Lot C01/2026 §C09a ==== */
-function makeFreshChamp(win){
-  win.CL.newCareer();
-  win.G.draft.first = 'Champ';
-  win.CL.create();
-  const f = win.G.f;
-  f.champion = f.div; f.org = 3;
-  return f;
-}
-test('CORRECTIF_MESSAGE_FOCUS_INVERSE — choisir la nouvelle ceinture annonce la nouvelle ceinture, pas la division d\'origine', () => {
-  const win = newGameWindow({ runMain: true });
-  const f = makeFreshChamp(win);
-  const otherDiv = win.eval('DIVISIONS.H.find(d=>d.id!==G.f.div)');
-  // chooseChampChampFocus() appelle render() en interne, qui consomme
-  // immédiatement G.lastMsg (scr_hub le remet à null après l'avoir lu) —
-  // on vérifie donc le texte affiché dans le DOM, pas G.lastMsg après coup.
-  // Avant le correctif, G.f.div était réassigné AVANT la comparaison :
-  // le message affichait toujours "division d'origine", même ici.
-  win.CL.chooseChampChampFocus(otherDiv.id);
-  assert.equal(win.G.f.div, otherDiv.id, 'choisir la nouvelle ceinture doit réellement basculer f.div');
-  const appHtml = win.document.getElementById('app').innerHTML;
-  assert.ok(appHtml.includes('Vous faites de votre nouvelle ceinture votre priorité.'), 'le message affiché doit annoncer la nouvelle ceinture');
-  assert.ok(!appHtml.includes('Vous restez concentré'), 'le message inverse ne doit pas apparaître ici');
-});
-test('CORRECTIF_MESSAGE_FOCUS_INVERSE — rester sur la ceinture d\'origine annonce bien la division d\'origine', () => {
-  const win = newGameWindow({ runMain: true });
-  const f = makeFreshChamp(win);
-  const originDivId = f.div;
-  win.CL.chooseChampChampFocus(originDivId);
-  assert.equal(win.G.f.div, originDivId, 'rester sur la ceinture d\'origine ne doit pas changer f.div');
-  const appHtml = win.document.getElementById('app').innerHTML;
-  assert.ok(appHtml.includes('Vous restez concentré sur votre division d’origine.'), 'le message affiché doit annoncer la division d’origine');
-  assert.ok(!appHtml.includes('Vous faites de votre nouvelle ceinture'), 'le message inverse ne doit pas apparaître ici');
-});
-
-/* ==== [ANCRE: TEST_CORRECTIF_DOUBLE_CHAMPION_DIVISION_FAUSSE] — Lot C01/2026 §C09b ==== */
-test('CORRECTIF_DOUBLE_CHAMPION_DIVISION_FAUSSE — le milestone de défense n\'énumère jamais deux fois la même division', () => {
-  const win = newGameWindow({ runMain: true });
-  win.setSeed(1);
-  win.eval(`
-    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
-    CL.create();
-  `);
-  // Reproduit l'état buggé : le focus a basculé sur la nouvelle ceinture,
-  // donc G.f.divName vaut déjà le nom de cette division — exactement
-  // comme champChampBelt (jamais mis à jour par chooseChampChampFocus).
-  win.G.f.champion = win.G.f.div;
-  win.G.f.champChampBelt = win.G.f.divName;
-  win.G.f.champChampBeltDivId = win.G.f.div;
-  win.G.f.defenses = 2;
-  const opp = win.G.roster[0];
-  Object.assign(win.G.f.attrs, { takedown: 100, strength: 100, explosiveness: 100, tdd: 100, topControl: 100, gnp: 100, power: 100, submission: 1, guardWork: 1, flexibility: 1, fightIQ: 100, composure: 100, adaptability: 100, killer: 100 });
-  Object.assign(opp.attrs, { tdd: 1, strength: 1, flexibility: 1, guardWork: 100, submission: 1, topControl: 1, chin: 1, durability: 1, fightIQ: 1, composure: 1, adaptability: 1, heart: 1, cardio: 1, recovery: 1 });
-  win.setSeed(1);
-  win.rnd = () => 0;
-  win.G.fight = { opp, rounds: 1, kind: 'defense', planLabel: null };
-  win.resolveFight();
-  assert.equal(win.G.pending.win, true);
-  const milestone = win.G.pending.milestone;
-  const divName = win.G.f.divName;
-  const occurrences = milestone.split(divName).length - 1;
-  assert.equal(occurrences, 1, `le nom de division ne doit apparaître qu'une seule fois dans le milestone, reçu : "${milestone}"`);
-  assert.ok(!milestone.includes(`${divName} + ${divName}`), 'jamais "X + X" dans le libellé de défense de titre');
-});
-
 /* ==== [ANCRE: TEST_CORRECTIF_CHAMPION_ROSTER_DOUBLE_COURONNE] — Lot C01/2026 §C09c ==== */
 test('CORRECTIF_CHAMPION_ROSTER_DOUBLE_COURONNE — aucun PNJ n\'est étiqueté champion quand le joueur détient déjà la ceinture de cette division', () => {
   const win = newGameWindow({ runMain: true });
@@ -234,8 +169,9 @@ test('CORRECTIF_CHAMPION_ROSTER_DOUBLE_COURONNE — aucun PNJ n\'est étiqueté 
     CL.create();
   `);
   win.G.f.org = 3;
-  // Simule le focus basculé sur la ceinture nouvellement gagnée en supercombat
-  // (double champion) : f.champion reste vrai, et concerne désormais f.div.
+  // Simule la division nouvellement gagnée en supercombat (P2 : bascule
+  // immédiate et définitive, resolveFight()/ui-05) : f.champion reste vrai,
+  // et concerne désormais f.div.
   win.G.f.champion = 'national';
   const roster = win.makeOrgRoster(win.G.f);
   assert.ok(roster.length > 0);
@@ -545,7 +481,7 @@ test('CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT — un champion en titre 
 });
 test('CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT — sans le statut de champion, un tirage assez bas déclenche toujours le non-renouvellement', () => {
   const win = newGameWindow({ runMain: true });
-  const { f, opp } = setupNonRenewFight(win, { champion: null, champChampBelt: null, streak: 0 });
+  const { f, opp } = setupNonRenewFight(win, { champion: null, streak: 0 });
   win.setSeed(1);
   // Volontairement bien EN DESSOUS du pire cas protégé possible ici (top 5
   // ET série ≥5 cumulés : base 0.15 × 0.25 × 0.5 = 0.01875) : ce tirage
