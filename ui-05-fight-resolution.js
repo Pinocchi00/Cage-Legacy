@@ -86,7 +86,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const adaptivePlanForOpp=(typeof getAdaptiveNPCTactics==='function')?getAdaptiveNPCTactics(opp,G.f):null;
   const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m);
   const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
-  if(typeof evaluateSponsor==='function') evaluateSponsor(res);
   // ==== [ANCRE: NARRATIF_APPEL] — calculé ici (mêmes données réelles qu'avant),
   // pour pouvoir à la fois l'afficher sur l'écran de résultat ET l'archiver
   // durablement dans f.history (Phase 6) — un seul générateur, pas de doublon. ====
@@ -224,12 +223,40 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     const decisionWins=rec.filter(r=>r.res==='win' && isDecisionLike(r.method)).length;
     let nonRenewChance;
     if(losses===0) nonRenewChance=0; // invaincu sur ce contrat : jamais de risque
-    else if(wins>=losses) nonRenewChance=Math.min(0.15, decisionWins*0.03); // bilan gagnant/nul : ennui mineur seulement, plafonné à 15%
+    else if(wins>=losses){
+      nonRenewChance=Math.min(0.15, decisionWins*0.03); // bilan gagnant/nul : ennui mineur seulement, plafonné à 15%
+      /* ==== [ANCRE: CORRECTIF_PONDERATION_PALMARES_NONRENOUVELLEMENT] —
+         Lot C01/2026 §C06 : retour joueur #6 — un 3-1 avec 3 décisions
+         donnait 9% de risque de non-renouvellement, ressenti comme une
+         punition pour avoir gagné. Pondéré désormais par le PALMARÈS
+         GLOBAL du combattant (pas seulement le bilan de ce contrat) :
+         champion en titre → jamais de risque ; top 5/top 15 de division et
+         série de victoires ≥5 réduisent le risque, cumulables, plancher à
+         0. La branche "bilan réellement perdant" ci-dessous n'est PAS
+         concernée par cette pondération — c'est la seule qui doit faire
+         peur. ==== */
+      if(G.f.champion || G.f.champChampBelt) nonRenewChance=0;
+      else {
+        let mult=1;
+        const rk=divRank(G.f);
+        if(rk>0 && rk<=5) mult*=0.25; else if(rk>0 && rk<=15) mult*=0.5;
+        if((G.f.streak||0)>=5) mult*=0.5;
+        nonRenewChance=Math.max(0, nonRenewChance*mult);
+      }
+    }
     else nonRenewChance=Math.min(0.9, losses*0.25 + decisionWins*0.05); // bilan réellement perdant
     if(rnd()<nonRenewChance){
       contractNonRenewed=true;
       G.f.contractNonRenewed=true;
-      G.f.contractNonRenewalReason=`${losses} défaite(s) et ${decisionWins} victoire(s) aux points sur les ${rec.length} derniers combats du contrat`;
+      /* ==== [ANCRE: CORRECTIF_TEXTE_NONRENOUVELLEMENT] — Lot C01/2026 §C06 :
+         énumérer des victoires comme grief ("1 défaite(s) et 3 victoire(s)
+         aux points") se lisait comme une punition pour avoir gagné. Un
+         bilan réellement perdant (losses>wins) reste honnêtement décrit ;
+         le cas restant (bilan gagnant mais trop de décisions) est
+         reformulé sur le STYLE du combattant, jamais sur son bilan. ==== */
+      G.f.contractNonRenewalReason=(losses>wins)
+        ?`${losses} défaite(s) et ${decisionWins} victoire(s) aux points sur les ${rec.length} derniers combats du contrat`
+        :`l’organisation cherche des finisseurs pour ses têtes d’affiche${G.f.styleLabel?` — trop de victoires en ${G.f.styleLabel} jugées aux points`:''}`;
     } else {
       G.f.contractNonRenewed=false;
     }
@@ -243,14 +270,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.f._rivalries[opp.id]>=2) G.f.rivalId=opp.id;
   }
 
-  /* ==== [ANCRE: V2-27 carrière] — même principe côté mode carrière
-     (G.promise, posé par CL.chooseFaceoff('provocation'), ui-08/scr_plan
-     V2-26) : consommé immédiatement, lu par scr_result (ui-06). */
-  let promiseOutcome=null;
-  if(G.promise && opp && opp.id===G.promise.oppId){
-    promiseOutcome={tenue:win && !isDecisionLike(res.method),oppName:G.promise.oppName};
-    G.promise=null;
-  }
   // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
   // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
   // donc un adversaire battu 15 fois de façon décisive n'était presque jamais
@@ -453,10 +472,18 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
        bascule de focus. Ne s'exécute que si la map existe déjà (double
        champion) — aucune allocation pour un champion simple. ==== */
     if(G.f.champChampDefenses) G.f.champChampDefenses[G.f.div]=G.f.defenses;
-    // Un défenseur qui est déjà double champion doit le voir rappelé ici
-    // (item #14 : le statut de double champion n'était visible nulle part
-    // sur l'écran de résultat d'une défense ordinaire).
-    milestone=G.f.champChampBelt?`Titre défendu (${G.f.defenses}) — toujours Double Champion (${G.f.divName} + ${G.f.champChampBelt})`:'Titre défendu ('+G.f.defenses+')';
+    /* ==== [ANCRE: CORRECTIF_DOUBLE_CHAMPION_DIVISION_FAUSSE] — Lot C01/2026
+       §C09b : bug trouvé (retour joueur #9) — G.f.champChampBelt est posé
+       UNE FOIS, au gain du supercombat (targetDivName), et jamais remis à
+       jour par chooseChampChampFocus() quand le focus bascule. Une fois le
+       focus sur la nouvelle ceinture, G.f.divName désigne cette MÊME
+       division que champChampBelt : l'ancien libellé énumérait alors deux
+       fois la même division ("Poids plume + Poids plume"). On n'annonce
+       plus que la ceinture réellement défendue CE soir (G.f.divName, à
+       jour via chooseChampChampFocus) ; le statut de double champion reste
+       signalé par des tags séparés ailleurs (hub, profil), jamais ici en
+       énumérant deux divisions dont une peut être fausse. ==== */
+    milestone=`Titre défendu (${G.f.defenses}) — ${G.f.divName}`;
     recordTitleDefense(G.f.org,G.f.divName,G.f.name);
   }
   else if(kind==='defense' && res.winner==='D'){ milestone='Titre conservé (match nul)'; }
@@ -469,7 +496,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.crown} DOUBLE CHAMPION — ${orgDisplayName(G.f).toUpperCase()}</span>`;
     recordTitleChange(G.f.org,G.f.champChampOffer.targetDivName,G.f.name,opp.name,orgDisplayName(G.f));
     G.f.champChampOffer=null;
-    champChampDecision=true; // déclenche l'écran de choix de division après le résultat
+    champChampDecision=true; // Lot C01/2026 §C10a : déclenche le basculement AUTOMATIQUE de focus vers la nouvelle ceinture (routeAfterCareerPending, ui-08), plus d'écran de choix
   }
   else if(!win && res.winner!=='D' && kind==='champchamp_title'){
     // Supercombat perdu : on ne gagne pas la 2e ceinture, mais on garde la première.
@@ -497,7 +524,12 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     const divs=DIVISIONS[G.f.gender]||DIVISIONS.H; const idx=divs.findIndex(d=>d.id===G.f.div);
     const targetDiv=divs[idx+1]||divs[idx-1];
     if(targetDiv){
-      const targetRoster=makeOrgRoster(Object.assign({},G.f,{div:targetDiv.id,divName:targetDiv.name}));
+      // champion:null — Lot C01/2026 §C09c : ce roster de substitution simule la
+      // division CIBLE, que le joueur ne détient pas encore ; sans cette
+      // neutralisation explicite, le champion:true hérité de G.f (vrai pour
+      // f.div, pas pour targetDiv) empêcherait makeOrgRoster() d'y désigner un
+      // champion rival à défier.
+      const targetRoster=makeOrgRoster(Object.assign({},G.f,{div:targetDiv.id,divName:targetDiv.name,champion:null}));
       const targetChamp=targetRoster.find(o=>o.champion)||targetRoster[0];
       if(targetChamp){ targetChamp.champion=targetChamp.champion||'monde';
         G.f.champChampOffer={targetDivId:targetDiv.id,targetDivName:targetDiv.name,champion:targetChamp};
@@ -740,7 +772,11 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      motif que last.narrative juste au-dessus (déjà une chaîne, jamais
      touché par ce bug). ==== */
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative:{src:narrative.src,txt:narrative.txt(G.f)},purseDetail:G.fight.purseDetail,classOffer,class31Offer,
-    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome, upsetLine};
+    // rank:oppRankBefore — Lot C01/2026 §C02 : rang de l'adversaire au moment
+    // du combat, nécessaire à la phrase de cause de la carte "Classement"
+    // (rankChangeReasonHtml, ui-06). Déjà calculé plus haut (myRankBefore/
+    // oppRankBefore), jamais recalculé ici.
+    opp:{name:opp.name,flag:opp.flag,rank:oppRankBefore}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, upsetLine};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   /* ==== [ANCRE: V3_HISTORIQUE_PRESERVE] — Plan V4 §2.2 : les compteurs pro

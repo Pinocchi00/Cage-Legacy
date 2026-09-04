@@ -258,9 +258,9 @@ const BASCULE_MOMENTS={
         failMsg:'Il vous accroche au passage : vous ralentissez, groggy vous aussi.'},
       {label:'Rester structuré et le cueillir',stat:'composure',oppStat:'chin',
         successMsg:'Vous le cueillez proprement, sans vous exposer.',
-        failMsg:'Il tient bon, et la reprise se referme sans rien de plus.'},
+        failMsg:'Il tient bon, et le round se referme sans rien de plus.'},
       {label:'Le laisser revenir et garder le round',stat:'fightIQ',oppStat:'heart',
-        successMsg:'Vous gardez le contrôle de la reprise, sans risque inutile.',
+        successMsg:'Vous gardez le contrôle du round, sans risque inutile.',
         failMsg:'Il revient dans le round : l’occasion est passée.'}
     ]},
   sonne_moi:{situation:'Vous encaissez, les jambes molles. Il sent l’occasion.',
@@ -282,7 +282,7 @@ const BASCULE_MOMENTS={
         failMsg:'Vous forcez pour rien : il vous replaque contre la grille.'},
       {label:'Attendre l’ouverture pour sortir',stat:'fightIQ',oppStat:'topControl',
         successMsg:'Vous sentez le bon moment et sortez proprement.',
-        failMsg:'L’ouverture ne vient jamais : la reprise se termine collé à la grille.'},
+        failMsg:'L’ouverture ne vient jamais : le round se termine collé à la grille.'},
       {label:'Accepter la position et encaisser au score',stat:'discipline',oppStat:'clinchStr',
         successMsg:'Vous limitez les dégâts, sans paniquer.',
         failMsg:'Il en profite pour accumuler les coups au corps.'}
@@ -290,7 +290,7 @@ const BASCULE_MOMENTS={
   serre:{situation:'Round qui se joue à rien, dans les dernières secondes.',
     options:[
       {label:'Se jeter dans un dernier échange',stat:'aggression',oppStat:'chin',
-        successMsg:'Vous prenez la reprise sur ce dernier coup d’éclat.',
+        successMsg:'Vous prenez le round sur ce dernier coup d’éclat.',
         failMsg:'L’échange tourne à votre désavantage sur la cloche.'},
       {label:'Sécuriser ce qui est déjà fait',stat:'discipline',oppStat:'fightIQ',
         successMsg:'Vous gérez la fin de round sans rien risquer.',

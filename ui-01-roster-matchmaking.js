@@ -451,6 +451,23 @@ function recordTitleDefense(org,divName,champion){
 // jusqu'au bout. Premier passage de tuning raisonné, à valider via l'audit
 // Monte Carlo existant (8000 combats / 300 carrières) avant tuning fin.
 function orgLevel(org){ return [42,46,51,57,63,71,80][org]||40; }
+/* ==== [ANCRE: CORRECTIF_PALMARES_CORRELE_NIVEAU] — Lot C01/2026 §C14b : bug
+   de génération confirmé (retour joueur #14) — o.W/o.L étaient tirés
+   INDÉPENDAMMENT de lv (le niveau du PNJ) : un combattant à 92 d'overall
+   pouvait sortir 7-8 et un à 45 sortir 24-1, alors que le biais Elo
+   (bias=(o.W-o.L)*18) ne fait que propager cette incohérence dans le
+   classement. Le ratio de victoires cible croît maintenant avec lv (0,45
+   à lv=20, jusqu'à 0,88 à lv=97), avec un bruit borné (±0,07) pour éviter
+   des rosters trop lisses ; le nombre total de combats reste tiré
+   indépendamment. Utilisé pour le palmarès pro/amateur ET pour amaRec
+   (même corrélation). */
+function correlatedRecord(lv,totalFights){
+  const t=clamp((lv-20)/77,0,1);
+  const targetRatio=clamp(0.45+t*(0.88-0.45)+(rnd()*2-1)*0.07,0.05,0.95);
+  const W=clamp(Math.round(totalFights*targetRatio),0,totalFights);
+  return {W,L:totalFights-W};
+}
+/* ==== [FIN ANCRE] ==== */
 function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const pool=[];
   const isAmateur=(f.org===0);
   const needed=isAmateur?100:30; // pro : 1 champion + 15 contenders classés + 14 non classés
@@ -467,7 +484,16 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     // fraîchement généré (eloBaseline(f.org,...) ≈ 1000+). Ces rivaux
     // s'effondraient au fond de tout classement trié par Elo et devenaient
     // structurellement injoignables par le matchmaking de proximité.
-    f.amateurRivals.forEach(r=>{ r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; r.orgWins=RI(0,2);
+    f.amateurRivals.forEach(r=>{
+      /* ==== [ANCRE: CORRECTIF_AMAREC_RIVAUX_AMATEURS] — Lot C01/2026 §C14a :
+         o.amaRec n'est posé qu'ici-bas pour les PNJ générés directement au
+         niveau pro (!isAmateur) — ces rivaux amateurs promus dans le roster
+         pro n'y passaient jamais et n'avaient donc aucun palmarès amateur
+         affichable (scr_select, "Amateur : W-L"). r.W/r.L reflètent encore
+         leur vrai bilan amateur à cet instant précis (pas encore repris
+         comme bilan pro par la suite) : capturé ici avant toute mutation. ==== */
+      if(!r.amaRec) r.amaRec={W:r.W,L:r.L};
+      r.org=f.org; r.overall=clamp(r.overall+RI(5,12),35,95); r.isAmateurRival=true; r.orgWins=RI(0,2);
       r.orgElo=eloBaseline(r.org,r.overall); r.careerElo=eloBaseline(r.org,r.overall); pool.push(r); });
   }
   const toGenerate=needed-pool.length;
@@ -475,10 +501,11 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     const age=isAmateur?RI(17,24):RI(22,35);
     const o=makeFighter({gender:f.gender,div:f.div,level:lv,potential:lv+RI(2,12),age});
     o.org=f.org; // bug confirmé et corrigé : restait à 0 par défaut, faussant le x1.4 Pacific Championship
-    o.W=isAmateur?RI(0,15):RI(6,24); o.L=isAmateur?RI(0,6):RI(1,8);
+    const rec=correlatedRecord(lv,isAmateur?RI(3,20):RI(8,30));
+    o.W=rec.W; o.L=rec.L;
     o.ko=RI(0,o.W);
     o.streak=(o.L===0)?o.W:RI(-2,Math.min(5,o.W));
-    if(!isAmateur) o.amaRec={W:RI(2,12),L:RI(0,4)};
+    if(!isAmateur){ const amaRec=correlatedRecord(lv,RI(3,20)); o.amaRec={W:amaRec.W,L:amaRec.L}; }
     if(f.org>=3){ // durcissement de l'IA en ligue haute — évite les victoires faciles par spam
       o.attrs.tdd=clamp(o.attrs.tdd+RI(8,16),1,100);
       o.attrs.fightIQ=clamp(o.attrs.fightIQ+RI(6,12),1,100);
@@ -495,7 +522,19 @@ function makeOrgRoster(f, oldRoster=null){ const base=orgLevel(f.org); const poo
     else { o.careerElo=eloBaseline(0,o.overall)+bias+RI(-20,20); }
     pool.push(o); }
   const ranked=rankPool(pool);
-  if(f.org>=1){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgElo=Math.max(ranked[0].orgElo||0,eloBaseline(f.org,ranked[0].overall)+RI(150,300)); }
+  /* ==== [ANCRE: CORRECTIF_CHAMPION_ROSTER_DOUBLE_COURONNE] — Lot C01/2026
+     §C09c : bug trouvé (retour joueur #9) — ranked[0].champion était posé
+     SYSTÉMATIQUEMENT dès que f.org>=1, y compris quand le joueur (f) tient
+     déjà la ceinture de la division en cours de génération (f.champion
+     vrai pour f.div, y compris après un changement de focus en double
+     couronne, cf. CORRECTIF_MESSAGE_FOCUS_INVERSE). Un PNJ se retrouvait
+     alors étiqueté CHAMPION en même temps que le joueur. f.champion reflète
+     toujours la ceinture de f.div pour tout appel avec le vrai G.f (mis à
+     null avant tout changement d'organisation/division qui en prive le
+     joueur) ; le seul appel avec un f de substitution (offre de
+     supercombat, ui-05) neutralise explicitement champion:null puisque
+     cette division n'est justement pas celle du joueur. ==== */
+  if(f.org>=1 && !f.champion){ ranked[0].champion=(f.org>=5?'monde':f.org===4?'europe':f.org===3?'national':f.org===2?'regional':'local'); ranked[0].defenses=RI(0,4); ranked[0].orgElo=Math.max(ranked[0].orgElo||0,eloBaseline(f.org,ranked[0].overall)+RI(150,300)); }
   return ranked;
 }
 // ==== [ANCRE: CORRECTIF_DOUBLE_RANG_1] — bug trouvé : divRank(x) ajoutait
@@ -512,7 +551,6 @@ function divRank(target){
   return pool.findIndex(o=>o===target)+1;
 }
 function advanceRoster(){
-  if(typeof generateNPCNews==='function') generateNPCNews();
   const allFighters=G.roster.concat(G.f.champion?[]:[G.f]);
   const oldRanks={}; rankPool(allFighters).forEach((o,i)=>oldRanks[o.id]=i);
   const r=G.roster.filter(o=>!o.champion);
@@ -633,16 +671,18 @@ function reconstructLegend(l){
    (le combattant le mieux classé "tire" le combat vers le haut de l'affiche),
    comme en pratique réelle où l'affiche se construit autour du nom le plus
    fort, pas du statut de celui qu'on suit. ==== */
-/* ==== [ANCRE: V3_ANGLICISMES_CARTE] — Plan V3 LOT 6 §P09 : "chercher et
-   corriger tous les anglicismes du même type" — ces libellés de position sur
-   la carte (poster vestiaire, mode carrière) étaient du vocabulaire anglais
-   brut inséré tel quel dans une interface française, même défaut que BOUT
-   ci-dessus. Les clés internes restent en anglais (comparaisons ailleurs
-   dans le fichier, ex. slotColors juste en dessous) — seuls les LIBELLÉS
-   affichés changent. ==== */
+/* ==== [ANCRE: V3_ANGLICISMES_CARTE] — Lot C01/2026 §C10c : retour #10, les
+   termes français substitués par le Plan V3 LOT 6 §P09 ("chercher et
+   corriger tous les anglicismes") sonnaient artificiels pour ce vocabulaire
+   précis — Main Event/Co-Main/Main Card/Prelims/Early Prelims sont les
+   termes RÉELLEMENT utilisés dans le milieu MMA, y compris par les médias
+   francophones, à l'inverse d'un anglicisme évitable. Retour aux libellés
+   anglais d'origine. Les clés internes restent en anglais (comparaisons
+   ailleurs dans le fichier, ex. slotColors juste en dessous) — seuls les
+   LIBELLÉS affichés changent. ==== */
 function getCardSlot(f,opp,kind){
-  if(f.org===0) return "CARTE AMATEUR";
-  if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "TÊTE D'AFFICHE";
+  if(f.org===0) return "AMATEUR CARD";
+  if(kind==='title'||kind==='defense'||kind==='champchamp_title') return "MAIN EVENT";
   // Sécurité : divRank() renvoie 0 si le combattant n'est pas trouvé dans le
   // roster de l'organisation courante (combat spécial, invité hors roster,
   // adversaire d'une autre org, ou champion exclu de son propre pool de rang)
@@ -654,17 +694,17 @@ function getCardSlot(f,opp,kind){
   const rnkOpp=rnkOppRaw>0?rnkOppRaw:999;
   if(rnkF<=15 && rnkOpp<=15){
     const rnk=Math.min(rnkF,rnkOpp);
-    if(rnk<=3) return "CO-VEDETTE";
-    if(rnk<=10) return "CARTE PRINCIPALE";
-    return "PRÉLIMINAIRES";
+    if(rnk<=3) return "CO-MAIN";
+    if(rnk<=10) return "MAIN CARD";
+    return "PRELIMS";
   }
-  if(rnkF<=15 || rnkOpp<=15) return "PRÉLIMINAIRES";
-  return "PREMIÈRES PRÉLIMINAIRES";
+  if(rnkF<=15 || rnkOpp<=15) return "PRELIMS";
+  return "EARLY PRELIMS";
 }
 /* ==== [FIN ANCRE] ==== */
 function renderFightPoster(f,opp,kind){
   const slot=getCardSlot(f,opp,kind);
-  const slotColors={'CARTE AMATEUR':'var(--muted)','PREMIÈRES PRÉLIMINAIRES':'var(--line)','PRÉLIMINAIRES':'#4DA6FF','CARTE PRINCIPALE':'var(--sage)','CO-VEDETTE':'var(--blood)',"TÊTE D'AFFICHE":'var(--gold)'};
+  const slotColors={'AMATEUR CARD':'var(--muted)','EARLY PRELIMS':'var(--line)','PRELIMS':'#4DA6FF','MAIN CARD':'var(--sage)','CO-MAIN':'var(--blood)','MAIN EVENT':'var(--gold)'};
   const borderColor=slotColors[slot]||'var(--gold-d)';
   const orgName=orgDisplayName(f).toUpperCase();
   const fLast=esc(f.last||f.name).toUpperCase();
@@ -677,7 +717,7 @@ function renderFightPoster(f,opp,kind){
       <span class="muted" style="font-size:18px;display:inline-block;margin:8px 0;font-family:'JetBrains Mono'">VS</span><br>
       <span style="color:var(--sage)">${oppLast}</span>
     </div>
-    <div class="mono small muted mt" style="position:relative;z-index:2;border-top:1px solid var(--line);padding-top:12px">${(f.divName||'').toUpperCase()} · ${(kind==='title'||kind==='defense')?'5 REPRISES':'3 REPRISES'}</div>
+    <div class="mono small muted mt" style="position:relative;z-index:2;border-top:1px solid var(--line);padding-top:12px">${(f.divName||'').toUpperCase()} · ${(kind==='title'||kind==='defense')?'5 ROUNDS':'3 ROUNDS'}</div>
   </div>`;
 }
 /* ==== [FIN ANCRE] ==== */

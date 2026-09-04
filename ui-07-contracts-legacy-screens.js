@@ -35,7 +35,11 @@ function scr_toptier(){
      <p class="muted small mt">${o.desc}</p>
      <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.signTopTier(${o.org})">Signer avec ${o.flavor}</button>
    </div>`).join('')}
-   <button class="btn ghost mt" onclick="CL.declineTopTier()">Ne rien signer — rester en Continentale</button>
+   <!-- ==== [ANCRE: CORRECTIF_BOUTON_DECLINE_PALIER] — Lot C01/2026 §C04b :
+        "Continentale" était le libellé de palier interne (ORGS), pas une
+        vraie organisation — même grief que §C04a. Aligné sur le libellé
+        déjà correct de declinePromo() juste plus bas. ==== -->
+   <button class="btn ghost mt" onclick="CL.declineTopTier()">Ne rien signer — rester ici</button>
    </div>`; }
 /* ==== [FIN ANCRE] ==== */
 
@@ -133,16 +137,11 @@ function scr_champ_champ_offer(){
     <button class="btn ghost mt" onclick="CL.declineChampChampOffer()">Décliner pour l\u2019instant</button>
   </div>`;
 }
-function scr_champ_champ_decision(){
-  const f=G.f;
-  return `<div class="scr center intro">
-    <div class="eyebrow blood">Double Champion</div>
-    <h2 class="disp">Où concentrer vos efforts ?</h2>
-    <p class="lede">Vous détenez désormais deux ceintures. Sur laquelle voulez-vous porter votre attention prioritaire pour les prochaines défenses ?</p>
-    <button class="btn primary mt" onclick="CL.chooseChampChampFocus('${f.div}')">${f.divName} (ceinture d\u2019origine)</button>
-    <button class="btn mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.chooseChampChampFocus('${f.champChampBeltDivId||''}')">${f.champChampBelt} (nouvelle ceinture)</button>
-  </div>`;
-}
+/* ==== [ANCRE: CORRECTIF_SUPPRESSION_CHAMPCHAMP_DECISION] — Lot C01/2026
+   §C10a : scr_champ_champ_decision() (« Où concentrer vos efforts ? »)
+   retiré — le focus bascule désormais automatiquement sur la nouvelle
+   ceinture, sans écran intermédiaire (CL.chooseChampChampFocus appelé
+   depuis routeAfterCareerPending(), ui-08). ==== */
 /* ==== [FIN ANCRE] ==== */
 function scr_promo(){
   const f=G.f; const isChamp=!!f.champion;
@@ -179,11 +178,16 @@ function scr_promo(){
        ${offer.phrase1?`<p class="muted small mt" style="font-style:italic">${offer.phrase1}</p>`:''}
        <button class="btn primary mt" style="position:relative;z-index:2" onclick="CL.acceptPro(${offer.baseTier||1},'${offer.orgFlavor1}')">Signer avec ${offer.orgFlavor1}</button>
      </div>
+     <!-- ==== [ANCRE: CORRECTIF_SUPPRESSION_LABEL_FASTTRACK] — Lot C01/2026
+          §C04c : l'étiquetage spécifique de cette seconde offre a été
+          retiré (retour joueur #4). [ARBITRAGE] l'offre elle-même est
+          conservée (c'est un vrai choix de carrière), seul son étiquetage
+          disparaît ; offer.fastTrack reste le champ interne qui pilote
+          l'affichage de cette carte. ==== -->
      ${offer.fastTrack?(()=>{ const previewFast=generateContract(f,offer.fastTier||3,false); return `<div class="glass" style="position:relative;background:var(--panel2);border:1px solid var(--gold-d);text-align:left;padding:16px;margin-top:15px">
-       <div class="hero-name" style="font-size:20px">${offer.orgFlavor3}<em style="color:var(--muted)">${orgLevelTag(offer.fastTier||3)} — Fast-Track</em></div>
+       <div class="hero-name" style="font-size:20px">${offer.orgFlavor3}<em style="color:var(--muted)">${orgLevelTag(offer.fastTier||3)}</em></div>
        <div class="mono small gold mt">${contractPayLine(previewFast)}</div>
        <div class="mono small muted">Contrat de ${previewFast.fightsLeft} combats</div>
-       <p class="muted small mt">Ton parcours fulgurant te permet de griller les étapes.</p>
        ${offer.phrase3?`<p class="muted small mt" style="font-style:italic">${offer.phrase3}</p>`:''}
        <button class="btn mt" style="background:var(--gold-d);color:#fff;border-color:var(--gold-d);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">Signer avec ${offer.orgFlavor3}</button>
      </div>`; })():''}
@@ -281,12 +285,18 @@ function scr_history(){ const f=G.f; const history=(f.history||[]).slice().rever
 }
 /* ==== [ANCRE: LINEAGE_UI] — registre mondial des ceintures (Phase 6) ==== */
 function scr_beltLineage(){
+  /* ==== [ANCRE: CORRECTIF_RETOUR_BELTLINEAGE_RETRAITE] — Lot C01/2026
+     §C12 : retour codé en dur vers 'hub', y compris depuis une carrière
+     retraitée (G.f existe toujours après retraite, seul f.retired change)
+     — un des chemins qui ramenait sur le vestiaire fantôme après une
+     retraite. Même garde que scr_hof (backDest). ==== */
+  const backDest=(G.f && !G.f.retired)?'hub':'title';
   const groups={};
   (G.titleHistory||[]).forEach(r=>{ const key=r.org+'|'+r.divName; (groups[key]=groups[key]||[]).push(r); });
   let h=`<div class="scr">
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:16px;padding-bottom:8px">
      <span class="eyebrow mono">ARCHIVES MONDIALES</span>
-     <span class="eyebrow x" onclick="CL.go('hub')" style="cursor:pointer">✕</span>
+     <span class="eyebrow x" onclick="CL.go('${backDest}')" style="cursor:pointer">✕</span>
    </div>
    <h3 class="disp" style="font-size:22px;margin-bottom:8px">${SVG.belt} Registre des ceintures</h3>
    <p class="lede small">L\u2019historique des règnes, des passations de pouvoir et du nombre de défenses.</p>`;
@@ -315,7 +325,7 @@ function scr_beltLineage(){
       h+=`</div>`;
     });
   }
-  h+=`<button class="btn ghost mt" onclick="CL.go('hub')">← Retour au bureau</button></div>`;
+  h+=`<button class="btn ghost mt" onclick="CL.go('${backDest}')">← Retour au ${backDest==='hub'?'bureau':'menu principal'}</button></div>`;
   return h;
 }
 /* ==== [FIN ANCRE] ==== */
@@ -333,9 +343,14 @@ function scr_beltLineage(){
    présents ici, réintégrés dans une structure en rails. ==== */
 const ACH_CAT_COLOR={'Carrière & Titres':'var(--gold)','Finitions & Séries':'var(--blood)','Technique & Héritage':'var(--sage)'};
 function scr_ach(){ if(!G.ach) G.ach=loadAch();
+  /* ==== [ANCRE: CORRECTIF_RETOUR_ACH_RETRAITE] — Lot C01/2026 §C12 : la
+     condition testait G.f seul, toujours vrai après une retraite (G.f
+     existe encore, seul f.retired change) — le retour ramenait donc sur le
+     vestiaire fantôme. Même garde que scr_hof (backDest). ==== */
+  const backDest=(G.f && !G.f.retired)?'hub':'title';
   const cats=['Carrière & Titres','Finitions & Séries','Technique & Héritage'];
   let h=`<div class="scr">
-   <div class="bar"><span class="eyebrow">Palmarès</span><span class="eyebrow x" onclick="CL.go('${G.f?'hub':'title'}')">✕</span></div>
+   <div class="bar"><span class="eyebrow">Palmarès</span><span class="eyebrow x" onclick="CL.go('${backDest}')">✕</span></div>
    <h2 class="disp">${G.ach.length} / ${ACH.length} exploits</h2>`;
 
   cats.forEach(c=>{
@@ -366,7 +381,7 @@ function scr_ach(){ if(!G.ach) G.ach=loadAch();
     }).join('')}</div>`;
   });
   h+=`<div class="mono small muted" style="text-align:center;margin-top:24px;opacity:.6">Un jeu développé par Pinocchio et testé par Garfield</div>`;
-  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${G.f?'hub':'title'}')">← Revenir au ${G.f?'hub':'menu principal'}</button></div>`;
+  h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('${backDest}')">← Revenir au ${backDest==='hub'?'hub':'menu principal'}</button></div>`;
   return h; }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PREVIEW_SUCCES_ECRAN_DEDIE] — item demandé : même principe que
@@ -471,12 +486,13 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
    ${f.beltHistory && f.beltHistory.length ? `<div class="card mt"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — Année ${b.year} — ${b.defenses} défense(s)</span></div>`).join('')}</div>` : ''}
    ${retireSeasonRecapHtml(f)}
    ${retireAchievementsHtml(f)}
-   ${retireLegendPointsHtml(f)}
    <button class="btn primary mt" onclick="CL.newCareer()">Nouvelle carrière</button>
-   <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button></div>`; }
-/* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — trois blocs ajoutés à l'écran de
-   retraite : bilan saison par saison, succès débloqués pendant CETTE
-   carrière, et points de légende gagnés grâce à elle.
+   <button class="btn ghost mt" onclick="CL.exitLegacy()">Retour au menu</button></div>`; }
+/* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — deux blocs ajoutés à l'écran de
+   retraite : bilan saison par saison et succès débloqués pendant CETTE
+   carrière. Un troisième bloc, « Points de Légende », a été retiré — Lot
+   C01/2026 §C11 : metaStats.legendPoints n'était ni crédité ni dépensé
+   nulle part ailleurs, la carte n'affichait qu'un nombre sans usage.
    ==== [ANCRE: LISIBILITE_RETRAITE] — item demandé : l'écran devenait un mur
    ininterrompu de texte sur une longue carrière (15+ saisons, 20+ succès).
    Corrections : bouton "Nouvelle carrière" dupliqué en haut (plus besoin de
@@ -522,15 +538,6 @@ function retireAchievementsHtml(f){
     <div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
   </div>`;
 }
-function retireLegendPointsHtml(f){
-  const earned=Math.max(0,Math.round((hofScore(f)||0)/10));
-  return `<div class="card mt glass" style="border-left:3px solid var(--gold);background:var(--panel2)">
-    <div class="eyebrow mb" style="color:var(--gold)">Points de Légende gagnés</div>
-    <div class="stat-big gold" style="font-size:30px">+${earned}</div>
-    <div class="muted small mt">Score d\u2019héritage : ${hofScore(f)||0} (défenses, victoires, titres, finitions).</div>
-  </div>`;
-}
-
 /* ==== [ANCRE: LOT9_ECRAN_CODEX] ==== */
 function formatSkillFx(fx, f){
   if(!fx) return '';

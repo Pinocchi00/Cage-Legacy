@@ -121,8 +121,10 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   // messages, y compris clairement positifs (ex. "Contrat renouvelé"),
   // s'affichaient donc en rouge par défaut. Classification élargie par
   // mots-clés, avec un ton neutre (doré) par défaut plutôt que négatif.
+  // « sponsor validé » retiré de la liste — Lot C01/2026 §C10b :
+  // l'objectif sponsor qui produisait ce message a été supprimé.
   const msgLower=(G.lastMsg||'').toLowerCase();
-  const POSITIVE_HINTS=['sponsor validé','renouvelé','copié','remporté','accepté','testamentaire actif','débloqué avec succès','victoire','succès','signé'];
+  const POSITIVE_HINTS=['renouvelé','copié','remporté','accepté','testamentaire actif','débloqué avec succès','victoire','succès','signé'];
   const NEGATIVE_HINTS=['refus','annulé','insuffisant','invalide','corrompu','impossible','ratée','échec','mauvaise impression','interdit','critique'];
   const isGoodMsg=POSITIVE_HINTS.some(k=>msgLower.includes(k));
   const isBadMsg=!isGoodMsg && NEGATIVE_HINTS.some(k=>msgLower.includes(k));
@@ -168,16 +170,15 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
      <div><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>FORME</span><b class="mono" style="color:var(--text);font-size:12px">${d20(f.form)}</b></span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--sage)"></span></div></div>
    </div>
    ${fightBtnHtml}
+   <!-- ==== [ANCRE: HUB_GRILLE] — Lot C01/2026 §C05 : Palmarès et Panthéon
+        retirés (déjà atteignables depuis l'écran titre, boutons « VOIR LES
+        SUCCÈS »/« VOIR LE PANTHÉON »), grille réorganisée à deux rangées
+        pleines plutôt qu'un bouton orphelin sur demi-largeur. ==== -->
    <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
-   <div class="g2"><button class="btn ghost" onclick="CL.go('ach')">Palmarès</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
-   <div class="g2"><button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Ceintures</button><button class="btn ghost" onclick="CL.go('hof')">🏛 Panthéon</button></div>
+   <div class="g2"><button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Ceintures</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
    ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--blood)">Double Champion</div>
      <div class="small">Vous détenez également la ceinture ${f.champChampBelt}.</div>
-   </div>`:''}
-   ${(G.divisionNews&&G.divisionNews.length)?`<div class="card mt" style="background:var(--panel2);padding:12px">
-     <div class="eyebrow mb">Actualités de la division</div>
-     ${G.divisionNews.slice(0,3).map(n=>`<div class="mono small muted" style="margin-top:4px">S${n.year} — ${n.text}</div>`).join('')}
    </div>`:''}
    <button class="btn ghost" style="color:var(--loss);margin-top:16px;border-top:1px dashed var(--line);padding-top:16px" onclick="CL.go('retire')">Déclarer la retraite (Définitif)</button>
    </div>`; }
@@ -212,7 +213,10 @@ function scr_select(){ const f=G.f;
          <div class="mono small muted" style="margin-top:4px">${mmReward}</div>
       </div>
       <div class="meta-strip"><div><span>Record</span><b style="white-space:nowrap">${recordStr(o)}</b></div>${o.amaRec?`<div><span>Amateur</span><b style="white-space:nowrap">${o.amaRec.W}-${o.amaRec.L}</b></div>`:''}<div><span>Mensurations</span><b style="white-space:nowrap">${o.phys.height}cm / ${o.phys.reach}cm</b></div></div>
-      <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.styleLabel}, ${o.age} ans</em></div>
+      <!-- ==== [ANCRE: CORRECTIF_SURNOM_MATCHMAKING] — Lot C01/2026 §C14a :
+           surnom inséré comme sur la fiche joueur (scr_hub), absent ici
+           jusqu'à présent. ==== -->
+      <div class="hero-name" style="${isRival?'color:var(--blood)':''}">${esc(o.name)} ${o.flag}<em>${o.nick?`« ${esc(o.nick)} » — `:''}${o.styleLabel}, ${o.age} ans</em></div>
       <div class="tagrow">
         ${e.context?`<span class="tag2 hot gold-fill">${e.context}</span>`:''}
         ${isRival?'<span class="tag2" style="color:var(--bg);background:var(--blood);border-color:var(--blood)">RIVALITÉ ACTIVE</span>':''}
@@ -318,60 +322,37 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
       <div class="small" style="color:var(--loss);font-weight:bold;margin-top:4px;position:relative;z-index:2">Malus ce soir : cardio, force, solidité et menton (déshydratation).</div></div>`,
   }[cr.tier]||'';
   let h=`<div class="scr"><div class="bar"><span class="eyebrow">Vestiaire · Plan de combat</span></div>
-   ${G.fight.isStarFight?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px"><span class="mono small gold">★ COMBAT VEDETTE — ta popularité t\u2019offre 5 rounds sous les projecteurs ce soir.</span></div>`:''}
+   <!-- ==== [ANCRE: CORRECTIF_LIBELLE_COMBAT_PHARE] — Lot C01/2026 §C10c :
+        "vedette" retiré des libellés joueur (retour #10, même grief que
+        "reprise"). ==== -->
+   ${G.fight.isStarFight?`<div class="card mb" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px"><span class="mono small gold">★ COMBAT PHARE — ta popularité t\u2019offre 5 rounds sous les projecteurs ce soir.</span></div>`:''}
    ${renderFightPoster(f,opp,G.fight.kind)}`;
   if(step===1){
     h+=wcHtml;
-    if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
-     <div class="mono small">${G.activeSponsor.text}</div></div>`;
-    /* ==== [CORRECTIF V2-26] — "Bilan du face-à-face" n'était qu'un
-       intitulé posé sur G.lastMsg (le texte affiché venait d'ailleurs,
-       sans rapport garanti avec un vrai face-à-face) : un titre qui
-       promettait une scène et ne livrait qu'un texte de passage, sur
-       lequel aucune décision ne se prenait. Remplacé par une vraie scène
-       à décision unique pour les combats qui la méritent (titre, défense,
-       rivalité) — la comparaison d'attributs qui ne débouchait sur rien
-       reste RETIRÉE (elle n'apportait rien ici ; l'analyse tactique du
-       step 2, déjà utile, la remplace). G.lastMsg continue d'exister
-       pour les autres textes de passage (sponsor, etc.), juste plus sous
-       ce titre trompeur. ==== */
-    const faceoffEligible=(G.fight.kind==='title'||G.fight.kind==='defense'||f.rivalId===opp.id);
-    /* ==== [ANCRE: CORRECTIF_LASTMSG_FACEOFF] — bug trouvé : l'affichage (et
-       le nettoyage) de G.lastMsg vivait uniquement dans la branche `else`
-       ci-dessous — quand un face-à-face était éligible et pas encore fait,
-       le message du tour n'était ni montré ni consommé sur cet écran.
-       Sorti des deux branches pour être rendu dans tous les cas. ==== */
+    /* ==== [ANCRE: CORRECTIF_LASTMSG_FACEOFF] — Lot C01/2026 §C07 : le
+       face-à-face (V2-26/V2-27, trois postures avant le combat) est
+       retiré — écran sans conséquence lisible pour le joueur. G.lastMsg
+       reste affiché ici pour les autres textes de passage du step 1
+       (aucun aujourd'hui après la suppression de l'objectif sponsor,
+       §C10b — le bloc reste au cas où un futur texte de passage
+       l'utilise, comme documenté à l'origine). ==== */
     if(G.lastMsg){
       h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
        <div class="small">${esc(G.lastMsg)}</div></div>`;
       G.lastMsg=null;
     }
-    if(faceoffEligible && !G.fight.faceoffDone){
-      h+=`<div class="card mt glass" style="border-left:3px solid var(--blood);padding-left:14px;background:var(--panel2)">
-       <div class="eyebrow mb" style="color:var(--blood)">Face-à-face</div>
-       <p class="small" style="margin:0">Nez à nez, dix secondes. Les photographes attendent.</p></div>
-       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('respect')">
-           <b style="font-size:15px">Soutenir le regard sans rien dire</b></div>
-         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('provocation')">
-           <b style="font-size:15px">Lui dire une phrase que vous seuls comprendrez</b></div>
-         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('silence')">
-           <b style="font-size:15px">Tourner la tête le premier</b></div>
-       </div>`;
-    } else {
-      h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
-    }
+    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
   } else {
-    /* ==== [ANCRE: V2-30] — "le plan de combat, un seul écran" : les trois
-       parties demandées par le document, dans l'ordre. 1) Ce qu'on sait de
-       lui (tacticalRead(), déjà réel — arme/faille de l'adversaire, jamais
-       un texte générique). 2) Le plan — TACTICS[f.style] est déjà à 3
-       entrées par style ; .slice(0,3) plafonne pour de bon même quand
-       getExclusiveTactics() en ajoute une 4e (règle H.3, pas respectée
-       jusqu'ici sur les rares tags physiques exclusifs). 3) La clé — un
-       seul détail exploitable, gagné hors combat, ou son absence assumée
-       en toutes lettres, jamais une case vide. ==== */
+    /* ==== [ANCRE: V2-30] — "le plan de combat, un seul écran" : les deux
+       parties utiles, dans l'ordre. 1) Ce qu'on sait de lui (tacticalRead(),
+       déjà réel — arme/faille de l'adversaire, jamais un texte générique).
+       2) Le plan — TACTICS[f.style] est déjà à 3 entrées par style ;
+       .slice(0,3) plafonne pour de bon même quand getExclusiveTactics() en
+       ajoute une 4e (règle H.3, pas respectée jusqu'ici sur les rares tags
+       physiques exclusifs). La troisième partie « La clé » (un détail
+       exploitable gagné hors combat, quasi toujours absent) a été retirée
+       — Lot C01/2026 §C01 : elle n'affichait jamais qu'une case vide, sans
+       jamais être alimentée par une mécanique de jeu réelle. ==== */
     const combinedTactics=getExclusiveTactics(f).concat(plans).slice(0,3);
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
      <div class="eyebrow gold mb" style="letter-spacing:0.2em">CE QU’ON SAIT DE LUI</div>
@@ -381,11 +362,7 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
    <p class="lede small">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
    ${combinedTactics.map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
      <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
-   <div class="card mt" style="border-left:3px solid var(--line);padding-left:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="color:var(--muted)">LA CLÉ</div>
-     <div class="small">Vous entrez sans rien de plus que ce que tout le monde sait de lui.</div>
-   </div>`;
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}`;
   }
   h+=`</div>`;
   return h;
@@ -509,7 +486,18 @@ function scr_legend_detail(){
      <div class="tier-corner-lg"></div>
      ${deco.holoCss?`<div class="holo" style="${deco.holoCss}"></div>`:''}
      <div class="tier-lbl-lg">${f.ico} ${f.rank}</div>
-     <div class="hero-name" style="position:relative;z-index:1;${deco.nameCss}">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}${f.classLabel?` · ${f.classLabel}`:''}${f.class31Label?` · ${f.class31Label}`:''}</em></div>
+     <!-- ==== [ANCRE: CORRECTIF_SURNOMS_PARASITES] — Lot C01/2026 §C13a :
+          f.classLabel/f.class31Label (libellés de classe interne, ex. "Le
+          Mur Défensif") se lisaient comme des surnoms et entraient en
+          conflit avec f.nick — retirés de cette ligne, qui se limite
+          désormais à « nick » — style · division. ==== -->
+     <div class="hero-name" style="position:relative;z-index:1;${deco.nameCss}">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}</em></div>
+     <!-- ==== [ANCRE: CORRECTIF_ORIGINE_MANQUANTE] — Lot C01/2026 §C13b :
+          f.origin existe depuis la génération (engine.js) mais n'était
+          affiché nulle part sur la fiche — capturé dans l'entrée du
+          Panthéon (state-hof.js, CORRECTIF_ORIGINE_PANTHEON) et affiché
+          ici, au-dessus de la motivation qu'il précède naturellement. ==== -->
+     ${f.origin?`<div class="story" style="position:relative;z-index:1"><b>Venait de.</b> ${esc(f.origin)}</div>`:''}
      ${f.motivation?`<div class="story" style="position:relative;z-index:1"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
      <div class="epis mt" style="position:relative;z-index:1">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
      ${deco.stickers.length?`<div class="stickers-lg mt">${deco.stickers.map(s=>`<span>${s}</span>`).join('')}</div>`:''}
@@ -520,9 +508,14 @@ function scr_legend_detail(){
      ${f.amaRec?`<div class="mono small muted mt" style="position:relative;z-index:1">Amateur : ${f.amaRec.W}-${f.amaRec.L}</div>`:''}
    </div>
    ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mb">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
+   <!-- ==== [ANCRE: CORRECTIF_CEINTURES_BADGES] — Lot C01/2026 §C13c :
+        f.beltHistory était rendu en liste de texte, un format différent du
+        badge WMA (tag2 hot) des titres amateurs juste au-dessus — même
+        composant de badge désormais, un par ceinture, dans une tagrow
+        homogène juste sous le badge amateur : "ORG (Division) — Année N". ==== -->
+   ${(f.beltHistory&&f.beltHistory.length)?`<div class="tagrow mb">${f.beltHistory.map(b=>`<span class="tag2 hot">${SVG.medal} ${esc(b.orgName)} (${esc(b.divName)}) — Année ${b.year}</span>`).join('')}</div>`:''}
    ${f.champChampBelt?`<div class="card mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)"><span class="mono small" style="color:var(--gold)">${SVG.crown} Double Champion — ${esc(f.champChampBelt)}</span></div>`:''}
    ${decorationPanel}
-   ${f.beltHistory&&f.beltHistory.length?`<div class="card mb"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — Année ${b.year} — ${b.defenses} défense(s)</span></div>`).join('')}</div>`:''}
    ${f.biggestRival?`<div class="card mb"><div class="eyebrow mb">⚔ Plus grand rival</div><div class="small" style="color:var(--blood)">${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div></div>`:''}
    ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
    ${f.nicknameHistory&&f.nicknameHistory.length?`<div class="card mb"><div class="eyebrow mb">Historique des surnoms</div>${f.nicknameHistory.map(n=>`<div class="small muted" style="padding:4px 0">« ${esc(n)} »</div>`).join('')}</div>`:''}
@@ -599,6 +592,26 @@ function scr_class_choice_31(){
    <button class="btn ghost mt" onclick="G._profileReturn='class_choice_31';CL.go('profile')">Voir la fiche complète du combattant</button>
   </div>`;
 }
+/* ==== [ANCRE: CORRECTIF_CLASSEMENT_EXPLIQUE] — Lot C01/2026 §C02 : la
+   variation de rang (#101 -> #85) était affichée en petit texte mono,
+   coincée entre le tableau des juges et la promesse de face-à-face
+   (retirée §C07), sans jamais expliquer À QUOI elle était due. Phrase de
+   cause construite à partir de données réelles du combat (rang de
+   l'adversaire au moment du combat, méthode de victoire, série en cours),
+   jamais un texte générique. */
+function rankChangeReasonHtml(p,f){
+  const improved=p.rankAfter<p.rankBefore;
+  const oppRank=p.opp&&p.opp.rank;
+  // "au #N de la division" / "à Nom" — contraction à+le=au gérée ici plutôt
+  // que de coller "à" devant "le #N" (accord fautif).
+  const oppTxt=(oppRank>0&&oppRank<999)?`au #${oppRank} de la division`:`à ${esc(p.opp.name)}`;
+  const finishTxt=p.method.startsWith('KO')?'par KO/TKO':p.method.startsWith('Soum')?'par soumission':isDecisionLike(p.method)?'aux points':`par ${esc(p.method)}`;
+  const streakTxt=(improved&&(f.streak||0)>=3)?` — ${f.streak}e victoire d’affilée`:'';
+  if(p.res&&p.res.winner==='D') return `Match nul face ${oppTxt} : le classement bouge malgré tout.`;
+  if(improved) return `Victoire ${finishTxt} face ${oppTxt}${streakTxt}.`;
+  return p.win?`Victoire ${finishTxt} face ${oppTxt}, pas de quoi devancer le reste de la division.`:`Défaite face ${oppTxt} — le classement recule.`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   let judgesHtml='';
   if(isDecisionLike(p.method) && !p.res.judges && p.res.scoreA!==undefined){
@@ -635,8 +648,19 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
           un gain demandé était totalement plafonné — ont leur propre
           rendu : elles doivent toujours s'afficher, y compris quand la
           conversion elle-même ne franchit pas de palier /20. ==== */
+    /* ==== [ANCRE: CORRECTIF_GAIN_INVISIBLE_MASQUE] — Lot C01/2026 §C03 :
+       règle inversée par rapport à CORRECTIF_GAIN_MASQUE_ARRONDI (retirée) —
+       un gain réel qui ne franchit aucun palier /20 ne s'annonce plus du
+       tout ("gain interne minime"/"gain minime"), il disparaît simplement
+       de la liste (retour '', éliminé par le .filter(Boolean) déjà en
+       place) plutôt que d'afficher une ligne sans information utile pour
+       le joueur. Les entrées converted() sans palier franchi restent
+       affichées SANS suffixe (règle 7 : jamais de récompense nulle sans
+       explication — la conversion elle-même EST l'information). Toutes les
+       entrées de p.camp.deltas sont désormais au format objet uniforme
+       (morale/forme inclus, cf. applyDeltas()) : plus de format tableau à
+       gérer ici. ==== */
     const rows=p.camp.deltas.map(d=>{
-      if(Array.isArray(d)){ const scaled=Math.sign(d[1])*Math.max(1,Math.round(Math.abs(d[1])/5)); return `<span class="dlt ${d[1]>=0?'up':'dn'}">${scaled>0?'+':''}${scaled} ${d[0]}</span>`; }
       /* ==== [ANCRE: V3_PLAFOND_INVISIBLE] P17.2 : le joueur ne lit jamais
          qu'il a atteint une limite — il n'y en a plus (V3_DIMINISHING_RETURNS,
          engine.js) que le déclin par l'âge. La conversion elle-même reste
@@ -647,10 +671,9 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
       }
       const b20=d20(d.before), a20=d20(d.after);
       if(d.converted){
-        const suffix=b20===a20?' (gain minime)':'';
-        return `<span class="dlt up">${d.fromLabel} reporté sur ${d.label}${suffix}</span>`;
+        return `<span class="dlt up">${d.fromLabel} reporté sur ${d.label}</span>`;
       }
-      if(b20===a20) return `<span class="dlt ${d.delta>=0?'up':'dn'}">${d.label} <span class="muted">(gain interne minime)</span></span>`;
+      if(b20===a20) return '';
       return `<span class="dlt ${a20>=b20?'up':'dn'}">${d.label} : ${b20} ➔ ${a20}</span>`;
     }).filter(Boolean);
     if(rows.length) campHtml=`<div class="card"><div class="eyebrow mb">Évolution (sur 20)</div><div class="dlts">${rows.join('')}</div></div>`;
@@ -683,32 +706,24 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      ${p.nickEvoHtml?`<div class="small mt" style="font-style:italic">${p.nickEvoHtml}</div>`:''}
    </div>
    ${judgesHtml}
-   <!-- ==== [CORRECTIF V2-15 point 4] — mouvement de rang affiché en une
-        ligne après chaque combat (#11 -> #7), pas seulement visible en
-        creusant jusqu'à l'écran Classement. Silencieux si le rang n'a pas
-        bougé (ex-æquo, ou combattant encore non classé des deux côtés) :
-        une ligne "#7 -> #7" n'apporterait rien. ==== -->
-   ${(p.rankBefore!=null && p.rankAfter!=null && p.rankBefore!==p.rankAfter)?`<div class="mono small" style="text-align:center;color:${p.rankAfter<p.rankBefore?'var(--pos)':'var(--neg)'}">#${p.rankBefore} → #${p.rankAfter}</div>`:''}
-   <!-- ==== [CORRECTIF V2-27] — la promesse du face-à-face (V2-26,
-        CL.chooseFaceoff) rappelée ici : une boucle ouverte doit se
-        refermer au moment même où le joueur peut encore s'en souvenir. -->
-   ${p.promiseOutcome?`<div class="mono small" style="text-align:center;color:${p.promiseOutcome.tenue?'var(--pos)':'var(--neg)'}">${p.promiseOutcome.tenue?`Promesse tenue face à ${esc(p.promiseOutcome.oppName)}.`:`Promesse non tenue face à ${esc(p.promiseOutcome.oppName)}.`}</div>`:''}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
    ${p.upsetLine?`<div class="card" style="text-align:center;background:var(--panel2);border-left:3px solid var(--gold)"><p class="lede small" style="margin:0;font-style:italic">${esc(p.upsetLine)}</p></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);
-   /* ==== [ANCRE: CORRECTIF_GAIN_MASQUE_ARRONDI] — bug remonté : d20()
-      arrondit /100->/20 (Math.round(v/5)), donc un petit gain interne réel
-      peut ne franchir aucun palier affiché et ressortir "17 -> 17", identique
-      à un gain nul (clamp au plafond), sans que le joueur puisse distinguer
-      les deux cas. On annote explicitement quand un gain a bien eu lieu mais
-      ne se voit pas sur l'échelle affichée. ==== */
+   /* ==== [ANCRE: CORRECTIF_GAIN_INVISIBLE_MASQUE] — Lot C01/2026 §C03 :
+      règle inversée par rapport à CORRECTIF_GAIN_MASQUE_ARRONDI (retirée) —
+      d20() arrondit /100->/20, donc un petit gain interne réel peut ne
+      franchir aucun palier affiché et ressortir "17 -> 17", identique à un
+      gain nul. Plutôt que d'annoter ce cas ("gain interne minime"), la
+      ligne ne s'affiche plus du tout : un gain invisible sur l'échelle /20
+      n'apporte rien au joueur, avec ou sans annotation. ==== */
    const noVisibleGain=before===after && f.attrs[k]>realBefore;
    /* ==== [ANCRE: V3_PLAFOND_INVISIBLE] P17.2 : le joueur ne lit jamais qu'il
       a atteint une limite. Un gain qui ne franchit aucun palier /20 reste nul
       à l'écran ("10 -> 10" nu), il n'est plus commenté par un plafond — il
       n'y en a plus (V3_DIMINISHING_RETURNS, engine.js) hormis le déclin par
       l'âge, qui ne concerne pas cet affichage. ==== */
-   return `<div style="color:var(--win)">${before} → ${after} ${label}${noVisibleGain?' <span class="muted" style="font-size:11px">(gain interne minime)</span>':''}</div>`;}).join('')}</div>`:''}</div></div>`:''}
+   if(noVisibleGain) return '';
+   return `<div style="color:var(--win)">${before} → ${after} ${label}</div>`;}).filter(Boolean).join('')}</div>`:''}</div></div>`:''}
    <div class="card stats-card"><div class="eyebrow mb">Statistiques du combat</div>
      <div class="st-row"><span>${st.A.sig}</span><span class="st-l">Frappes sig.</span><span>${st.B.sig}</span></div>
      <div class="st-row"><span>${st.A.td}</span><span class="st-l">Amenées</span><span>${st.B.td}</span></div>
@@ -720,6 +735,10 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      ${p.purseDetail.agentFee?`<div class="mono small" style="display:flex;justify-content:space-between"><span class="muted">Part de l\u2019agent (${Math.round((f.agentCut||0)*100)}%)</span><span style="color:var(--loss)">-${formatArgent(p.purseDetail.agentFee)}</span></div>`:''}
      <div class="mono small" style="display:flex;justify-content:space-between;margin-top:4px"><b>Net perçu</b><b class="gold">${formatArgent(p.purseDetail.net)}</b></div></div>`:''}
    <div class="card"><div class="eyebrow mb">Déroulé</div>${fightLog(p.res)}</div>
+   ${(p.rankBefore!=null && p.rankAfter!=null && p.rankBefore!==p.rankAfter)?`<div class="card"><div class="eyebrow mb">Classement</div>
+     <div class="disp" style="font-size:24px;color:${p.rankAfter<p.rankBefore?'var(--pos)':'var(--neg)'}">#${p.rankBefore} ➔ #${p.rankAfter}</div>
+     <div class="muted small mt">${rankChangeReasonHtml(p,f)}</div>
+   </div>`:''}
    ${campHtml}
    ${p.newAch&&p.newAch.length?`<div class="card">${p.newAch.map(a=>`<div class="ach"><span class="ico">${a.ico}</span><b class="gold">${a.h}</b> <span class="muted small">${a.d}</span></div>`).join('')}</div>`:''}
    <!-- ==== [ANCRE: CORRECTIF_NARRATIVE_NON_SERIALISABLE] — p.narrative.txt
@@ -900,6 +919,12 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
    prétendant en pleine bourre peut dépasser un champion qui ronronne. */
 function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
   const tab=(G._rankingsTab==='p4p')?'p4p':'division';
+  /* ==== [ANCRE: CORRECTIF_SURNOM_CLASSEMENT] — Lot C01/2026 §C14a : colonne
+     IDENTITÉ des deux onglets (Division et P4P), surnom absent jusqu'ici.
+     Format "Prénom « Surnom » Nom", repli propre sur le nom complet quand
+     nick est absent ; troncature une seule ligne (text-overflow:ellipsis)
+     côté rendu pour ne jamais casser la mise en page mobile. ==== */
+  const rankIdentityName=o=>o.nick?`${esc(o.first||'')} « ${esc(o.nick)} » ${esc(o.last||'')}`.replace(/\s+/g,' ').trim():esc(o.name);
   let h=`<div class="scr">
    <div class="bar" style="border-bottom:2px solid var(--line);margin-bottom:12px;padding-bottom:8px">
      <span class="eyebrow mono" style="letter-spacing:.1em">BASE DE DONNÉES // ${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
@@ -916,12 +941,17 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
     p4pSorted.forEach((o,i)=>{ const isPlayer=(o===f); const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
       h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` onclick="G._oppCardId='${o.id}';G._oppCardReturn='rankings';CL.go('opponent_card')"`}>
         <div class="mono" style="width:32px;font-size:15px">${i+1}</div>
-        <div style="flex:1;display:flex;flex-direction:column">
-          <span class="disp" style="font-size:17px;line-height:1.1">${esc(o.name)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}${o.champion?' <span class="mono gold" style="font-size:11px">C</span>':''}</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+          <span class="disp" style="font-size:17px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rankIdentityName(o)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}${o.champion?' <span class="mono gold" style="font-size:11px">C</span>':''}</span>
           <span class="mono" style="font-size:10.5px;opacity:.7">${(o.styleLabel||'').toUpperCase()}</span>
         </div>
         <div class="mono" style="width:82px;text-align:right;font-size:14px;white-space:nowrap">${o.W}-${o.L}${o.D?'-'+o.D:''}</div>
-        <div class="mono" style="width:56px;text-align:right;font-size:14px">${Math.round(p4pScore(o))}</div>
+        <!-- ==== [ANCRE: CORRECTIF_P4P_SCORE_BRUT] — Lot C01/2026 §C15a :
+             Math.round(p4pScore(o)) affichait un nombre à quatre chiffres
+             illisible, un score brut jamais montré au joueur nulle part
+             ailleurs — remplacé par le rang, cohérent avec la fiche (qui
+             affiche déjà correctement p4pRank(f), ui-06 scr_profile). ==== -->
+        <div class="mono" style="width:56px;text-align:right;font-size:14px">#${i+1}</div>
       </div>`;
     });
     h+=`<button class="btn ghost mt" style="border:none" onclick="CL.go('hub')">← Revenir au hub</button></div>`;
@@ -947,8 +977,8 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
     const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
     h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` onclick="G._oppCardId='${o.id}';G._oppCardReturn='rankings';CL.go('opponent_card')"`}>
       <div class="mono" style="width:32px;font-size:15px;${o.champion&&!isPlayer?'color:var(--gold)':''}">${o.champion?'C':rank}</div>
-      <div style="flex:1;display:flex;flex-direction:column">
-        <span class="disp" style="font-size:17px;line-height:1.1">${esc(o.name)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}</span>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <span class="disp" style="font-size:17px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rankIdentityName(o)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}</span>
         <span class="mono" style="font-size:10.5px;opacity:.7">${(o.styleLabel||'').toUpperCase()}</span>
       </div>
       <div class="mono" style="width:82px;text-align:right;font-size:14px;white-space:nowrap">${o.W}-${o.L}${o.D?'-'+o.D:''}</div>

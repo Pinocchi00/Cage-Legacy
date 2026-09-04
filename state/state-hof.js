@@ -106,6 +106,11 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
     beltHistory,champChampBelt:f.champChampBelt||null,
     class:f.class||null,classLabel:f.classLabel||null,
     class31:f.class31||null,class31Label:f.class31Label||null,
+    /* ==== [ANCRE: CORRECTIF_ORIGINE_PANTHEON] — Lot C01/2026 §C13 : f.origin
+       existe depuis la génération (engine.js, makeFighter) mais n'était
+       jamais capturé dans l'entrée du Panthéon — la fiche de légende ne
+       pouvait donc pas l'afficher, quel que soit le rendu côté UI. ==== */
+    origin:f.origin||null,
     motivation:f.motivation||null,
     seasonRecap:(f.seasonRecap||[]).slice(),
     notableWins:(f.history||[]).filter(h=>h.res==='win'&&h.oppWasChamp&&h.oppName).slice(-6).reverse(),

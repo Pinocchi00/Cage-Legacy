@@ -17,11 +17,14 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: CORRECTIF_SUPPRESSION_PHRASE_RECRUTEUR] — Lot C01/2026 §C04d :
+   l'entrée "Un recruteur de ${o} s'est déplacé pour vous voir combattre."
+   retirée — retour joueur #4 (le seul cité par le joueur parmi les cinq).
+   [ARBITRAGE] les quatre autres phrases sont conservées. ==== */
 const CONTRACT_PHRASES=[
  o=>`${o} vous veut.`,
  o=>`Vous avez tapé dans l\u2019œil de ${o}.`,
  o=>`${o} a suivi votre parcours de près.`,
- o=>`Un recruteur de ${o} s\u2019est déplacé pour vous voir combattre.`,
  o=>`${o} vous propose un contrat, séduit par vos performances.`,
 ];
 /* ==== [FIN ANCRE] ==== */
