@@ -321,8 +321,8 @@ function scr_camp(){ const f=G.f;
   const activeTier=CAMP_TIERS.find(t=>t.id===curTier)||CAMP_TIERS[0];
   let tierDesc='';
   if(activeTier.id==='gratuit') tierDesc='Aucun coût financier. <span style="color:var(--loss)">Risque de blessure de 5%</span> (-15% Forme, -10% Moral).';
-  else if(activeTier.id==='premium') tierDesc='Coût : 15k$. <span style="color:var(--win)">Zéro risque de blessure. Bonus garanti : +5% Forme, +5% Moral.</span>';
-  else if(activeTier.id==='sparring') tierDesc='Coût : 35k$. <span style="color:var(--win)">Zéro risque. Bonus : +5% Forme.</span> L\u2019adversaire subira un malus tactique (-3 Adapt., -2 QI).';
+  else if(activeTier.id==='premium') tierDesc='Coût : 15k$. <span style="color:var(--win)">Zéro risque de blessure. Bonus garanti : +3% Forme, +3% Moral.</span>';
+  else if(activeTier.id==='sparring') tierDesc='Coût : 35k$. <span style="color:var(--win)">Zéro risque. Bonus : +3% Forme.</span> L\u2019adversaire subira un malus tactique (-3 Adapt., -2 QI).';
   const tierTags=CAMP_TIERS.map(t=>{
     const canAfford=(f.earnings||0)>=t.cost;
     const style=`cursor:${canAfford?'pointer':'not-allowed'};opacity:${canAfford?1:0.35}`;

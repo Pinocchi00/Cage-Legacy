@@ -231,15 +231,18 @@ function recordCampResult(win, ctx, acc){
 /* --------------------------- 5) mesures : combats --------------------------- */
 const FIGHT_DELTA_RANGES = {
   /* Bornes RI(a,b) lues telles quelles dans engine-combat.js#applyResult au
-     moment de la rédaction (win: RI(6,12) moral / RI(3,8) forme ; loss:
-     -RI(8,16) moral / -RI(5,12) forme ; draw: RI(-2,2) moral / forme
-     inchangée) — sert uniquement à afficher l'espérance THÉORIQUE non
-     écrêtée en regard du delta réellement observé (mesure statistique, cf.
-     README/rapport ; pas une lecture directe des tirages réels, impossible
-     depuis l'extérieur sans intercepter rnd() — cf. tools/monte-carlo.js
-     en-tête de fichier / rapport §méthodologie). */
-  morale: { win: [6, 12], loss: [-16, -8], draw: [-2, 2] },
-  form: { win: [3, 8], loss: [-12, -5], draw: [0, 0] },
+     moment de la rédaction — MISES À JOUR par le correctif Lot P1/2026
+     (ANCRE P1_FORME_MORAL_COUT_COMBAT / P1_FORME_MORAL_COUT_FORME) : win
+     RI(2,7) moral (était RI(6,12)) / -RI(1,4) forme (était +RI(3,8), la
+     forme COÛTE désormais aussi à la victoire) ; loss -RI(8,16) moral
+     (inchangé) / -RI(5,12) forme (inchangé) ; draw RI(-2,2) moral
+     (inchangé) / -RI(1,3) forme (était 0, un match nul coûte aussi un peu).
+     Sert uniquement à afficher l'espérance THÉORIQUE non écrêtée en regard
+     du delta réellement observé (mesure statistique, cf. rapport
+     §méthodologie ; pas une lecture directe des tirages réels, impossible
+     depuis l'extérieur sans intercepter rnd()). */
+  morale: { win: [2, 7], loss: [-16, -8], draw: [-2, 2] },
+  form: { win: [-4, -1], loss: [-12, -5], draw: [-3, -1] },
 };
 function methodBucket(method, res){
   if(res === 'draw') return 'DRAW';
