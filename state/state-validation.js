@@ -22,6 +22,12 @@ function validateSave(raw){
   if(f.age!==undefined && (typeof f.age!=='number'||isNaN(f.age)||f.age<0||f.age>100)) return false;
   if(f.history!==undefined && !Array.isArray(f.history)) return false;
   if(f.div!==undefined && f.div!==null && typeof divById==='function' && !divById(f.div)) return false;
+  // ==== [ANCRE: SUPPRESSION_DOUBLE_CHAMPION] — P2 : une sauvegarde antérieure
+  // au retrait du statut de double champion peut encore porter
+  // f.champChampBelt/BeltDivId/Defenses — délibérément non vérifiés ici : ce
+  // sont des champs morts, purgés par migrate() (migrateDoubleChampion,
+  // state-migration.js), jamais une raison de rejeter une sauvegarde par
+  // ailleurs saine. ====
   if(raw.season!==undefined && raw.season!==null){
     if(typeof raw.season!=='object') return false;
     if(raw.season.year!==undefined && (typeof raw.season.year!=='number'||isNaN(raw.season.year)||raw.season.year<0)) return false;

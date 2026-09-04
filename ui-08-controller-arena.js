@@ -78,13 +78,6 @@ function routeAfterCareerPending(){
   else if(p&&p.proOffer) G.screen='promo';
   else if(p&&p.topTierOffer) G.screen='toptier';
   else if(p&&p.promoOffer) G.screen='promo';
-  /* ==== [ANCRE: CORRECTIF_AUTO_CHAMPCHAMP_FOCUS] — Lot C01/2026 §C10a :
-     l'écran « Où concentrer vos efforts ? » est retiré. [ARBITRAGE] valeur
-     par défaut : la nouvelle ceinture (champChampBeltDivId), conformément
-     au retour joueur #9. Le focus bascule automatiquement dans le même
-     appel qui aurait auparavant affiché l'écran de choix, avant de router
-     vers hub — zéro clic supplémentaire pour le joueur. ==== */
-  else if(p&&p.champChampDecision){ CL.chooseChampChampFocus(G.f.champChampBeltDivId); return; }
   else if(p&&p.champChampOfferReady) G.screen='champ_champ_offer';
   else if(p&&p.endOfSeason) G.screen='season';
   else G.screen='hub';
@@ -351,7 +344,7 @@ const CL={
   acceptChampChampOffer(){
     const offer=G.f.champChampOffer; if(!offer) return;
     G.fight={kind:'champchamp_title',opp:offer.champion,rounds:5,malus:null,oppMalus:null};
-    G.sel={o:offer.champion,read:'Combat historique pour la double couronne.',context:'CHAMP-CHAMP'};
+    G.sel={o:offer.champion,read:'Combat historique pour une seconde couronne.',context:'CHAMP-CHAMP'};
     G.train=trainingOptions(G.f);
     G.screen='camp'; save(); render();
   },
@@ -359,46 +352,6 @@ const CL={
     G.f.champChampLastOfferDefenses=G.f.defenses;
     G.f.champChampOffer=null;
     G.lastMsg='Vous avez décliné le supercombat. Le président reviendra à la charge après deux défenses supplémentaires.';
-    G.screen='hub'; save(); render();
-  },
-  chooseChampChampFocus(divId){
-    /* ==== [ANCRE: CORRECTIF_MESSAGE_FOCUS_INVERSE] — Lot C01/2026 §C09a :
-       bug trouvé (retour joueur #9) : G.f.div était réassigné à newDiv.id
-       PLUS BAS avant que G.lastMsg ne compare divId===G.f.div — la
-       comparaison était donc toujours vraie et le message affichait
-       systématiquement "division d'origine", même en choisissant la
-       nouvelle ceinture. originDivId capturé ici, avant toute mutation. ==== */
-    const originDivId=G.f.div;
-    // ==== [ANCRE: CORRECTIF_FOCUS_CHAMPCHAMP] — bug trouvé : le choix de
-    // focus n'était enregistré que dans champChampFocus, une variable jamais
-    // relue ailleurs. G.f.div, G.f.divName et G.roster n'étaient JAMAIS mis
-    // à jour : même en choisissant "nouvelle ceinture", le joueur restait
-    // coincé à combattre dans son ancienne division pour toujours, et
-    // resolveFight() incrémentait aveuglément le compteur de défenses de
-    // l'ancienne ceinture. On bascule désormais réellement de division
-    // quand ce choix est fait, avec régénération du roster correspondant.
-    // ==== [ANCRE: CORRECTIF_CHAMPCHAMPFOCUS_MORT] — la ligne qui écrivait
-    // G.f.champChampFocus=divId juste ici a été retirée : l'ancre juste
-    // au-dessus dit elle-même que cette variable n'est relue nulle part, et
-    // le vrai correctif (basculer G.f.div/divName/roster) l'a rendue
-    // définitivement inutile.
-    if(divId!==G.f.div){
-      const newDiv=divById(divId);
-      if(newDiv){
-        /* ==== [ANCRE: CORRECTIF_CHAMPCHAMPFOCUS_DEFENSES] — bug trouvé : les
-           défenses accumulées sur la ceinture qu'on quitte se reportaient
-           telles quelles sur la nouvelle (G.f.defenses n'était ni sauvegardé
-           ni échangé). champChampDefenses{} existe déjà pour ça (posé au
-           gain du supercombat, ui-05) : on y range le compte de la ceinture
-           quittée puis on restaure celui de la ceinture visée (0 si jamais
-           défendue depuis qu'elle a été gagnée). ==== */
-        if(!G.f.champChampDefenses) G.f.champChampDefenses={};
-        G.f.champChampDefenses[G.f.div]=G.f.defenses;
-        G.f.defenses=G.f.champChampDefenses[newDiv.id]||0;
-        G.f.div=newDiv.id; G.f.divName=newDiv.name; G.roster=makeOrgRoster(G.f);
-      }
-    }
-    G.lastMsg=divId===originDivId?'Vous restez concentré sur votre division d\u2019origine.':'Vous faites de votre nouvelle ceinture votre priorité.';
     G.screen='hub'; save(); render();
   },
   chooseMue(styleId){ const r=triggerMueMartiale(G.f,styleId); G.lastMsg=r.msg||G.lastMsg;
@@ -660,7 +613,7 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
   acceptPromo(targetOrg){
     G.f.org=targetOrg||(G.f.org+1); G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0;
-    G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null;
+    G.f.champChampOffer=null;
     if(ORG_FLAVORS[G.f.org]) G.f.orgFlavor=pick(ORG_FLAVORS[G.f.org]);
     G.f.contract=generateContract(G.f,G.f.org,false);
     applyOrgAdvancementBoost(G.f,G.f.org);
@@ -684,7 +637,7 @@ const CL={
     routeAfterOrgChange();
   },
   signTopTier(orgId){ G.f.org=orgId; G.f.orgWins=0; G.f.champion=null; G.f.rivalId=null; G.f.orgElo=eloBaseline(orgId,G.f.overall); G.f.rankBoost=0; if(G.pending)G.pending.topTierOffer=false;
-    G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null; G.f.defenses=0;
+    G.f.champChampOffer=null; G.f.defenses=0;
     G.f.contract=generateContract(G.f,orgId,false);
     applyOrgAdvancementBoost(G.f,orgId);
     G.roster=makeOrgRoster(G.f);
@@ -813,7 +766,7 @@ const CL={
     G.f.contract=offer.contract;
     if(isNewOrg){
       G.f.org=offer.org; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
-      G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null;
+      G.f.champChampOffer=null;
       G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.orgFlavor=offer.flavor;
       applyOrgAdvancementBoost(G.f,G.f.org);
       G.roster=makeOrgRoster(G.f);

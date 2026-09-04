@@ -63,9 +63,14 @@ function legendDecoStyle(decorations){
   };
 }
 /* ==== [FIN ANCRE] ==== */
-// Bonus double champion (+150, cf. ANCRE: BONUS_DOUBLE_CHAMPION dans engine.js) :
-// une double ceinture doit peser sur le score d'héritage et les points de Légende.
-function hofScore(f){ return (f._world?300:0)+(f._euro?120:0)+(f.champChampBelt?150:0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2; }
+/* ==== [ANCRE: SUPPRESSION_DOUBLE_CHAMPION] — P2 : le statut permanent de
+   double champion (f.champChampBelt) est retiré, mais le bonus d'héritage
+   qu'il donnait au score de Légende reste : f.champChampGloryBonus est posé
+   UNE FOIS par resolveFight() (ui-05) au moment même où la 2e ceinture est
+   gagnée (+150, jamais recalculé ensuite), donc les légendes déjà au
+   Panthéon — dont le score est figé à l'intronisation — ne sont pas
+   dévalorisées rétroactivement par ce changement de formule. ==== */
+function hofScore(f){ return (f._world?300:0)+(f._euro?120:0)+(f.champChampGloryBonus||0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2; }
 function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
   // ==== [ANCRE: CORRECTIF_CEINTURES_PANTHEON] — bug remonté : seules les
   // ceintures amateur (WMA/DMMA, via amaTitles) étaient visibles dans le
@@ -103,7 +108,7 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
     // ==== [ANCRE: ECRAN_DETAIL_LEGENDE] — item demandé : fiche complète
     // consultable depuis le Panthéon (clic sur une carte), reprenant le même
     // esprit que l'écran de retraite. Champs additionnels capturés ici.
-    beltHistory,champChampBelt:f.champChampBelt||null,
+    beltHistory,
     class:f.class||null,classLabel:f.classLabel||null,
     class31:f.class31||null,class31Label:f.class31Label||null,
     /* ==== [ANCRE: CORRECTIF_ORIGINE_PANTHEON] — Lot C01/2026 §C13 : f.origin

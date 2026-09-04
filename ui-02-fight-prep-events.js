@@ -100,7 +100,7 @@ function matchmakingRole(f,o,e){
   const isVeteran=(o.age>=34 && o.L>=3);
   const isGatekeeper=(o.attrs.durability>75 || o.attrs.tdd>75) && o.L>o.W/2;
   let role='logique', label='Opposition Logique', reward='Niveau équivalent, progression saine au classement.', color='var(--text)';
-  if(e.context==='CHAMP-CHAMP'){ role='champchamp'; label='Défi Historique'; reward='Devenir double monarque. La consécration ultime.'; color='var(--gold)'; }
+  if(e.context==='CHAMP-CHAMP'){ role='champchamp'; label='Défi Historique'; reward='Conquérir une seconde division. La consécration ultime.'; color='var(--gold)'; }
   else if(e.context && e.context.includes('TOURNOI')){ role='tournoi'; label='Combat de Bracket'; reward='Avancer dans le tournoi amateur.'; color='var(--sage)'; }
   else if(o.champion || e.context==='COMBAT DE TITRE'){ role='titre'; label='Le Champion en Titre'; reward='Risque immense. Récompense absolue : la Ceinture.'; color='var(--gold)'; }
   else if(f.champion){ role='challenger'; label='Challenger Légitime'; reward='Défense de titre. Confirme votre statut de roi de la division.'; color='var(--sage)'; }
@@ -289,8 +289,9 @@ function ensureOpponentsCached(f){
      n'ait eu lieu entretemps laissait donc en place des adversaires générés
      pour l'ancienne division/organisation — aucun autre point du code ne
      régénère G.opps à ces changements (vérifié : promotions/rétrogradations/
-     chooseChampChampFocus touchent toutes f.div/f.org sans y toucher). f.div
-     et f.org rejoignent donc le nombre de combats dans la clé d'invalidation. ==== */
+     gain du supercombat (resolveFight, ui-05) touchent toutes f.div/f.org
+     sans y toucher). f.div et f.org rejoignent donc le nombre de combats
+     dans la clé d'invalidation. ==== */
   const curKey=curFights+':'+f.div+':'+f.org;
   if(!G.opps || G.oppsFightCount!==curKey){ G.opps=genOpponents(f); G.oppsFightCount=curKey; }
   return G.opps;
@@ -389,7 +390,7 @@ function finishTrainingFlow(pendingOppMalus){
         G.f.rivalId=null; G.f._rivalries={};
         if(G.f.gameMode==='faith') G.f.faithNemesisId=null;
         G.f.recentOpps=[];
-        G.f.champChampOffer=null; G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampLastOfferDefenses=null;
+        G.f.champChampOffer=null; G.f.champChampLastOfferDefenses=null;
         // Ajustement biomécanique naturel : plus lourd, plus fort, plus résistant,
         // mais moins véloce — cohérent avec le changement de gabarit.
         G.f.attrs.strength=clamp((G.f.attrs.strength||50)+6,1,100);

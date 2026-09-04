@@ -235,7 +235,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
          0. La branche "bilan réellement perdant" ci-dessous n'est PAS
          concernée par cette pondération — c'est la seule qui doit faire
          peur. ==== */
-      if(G.f.champion || G.f.champChampBelt) nonRenewChance=0;
+      if(G.f.champion) nonRenewChance=0;
       else {
         let mult=1;
         const rk=divRank(G.f);
@@ -411,7 +411,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.f.org===1){
       if(!G.f.org1Warned){
         G.f.org1Warned=true; G.f.orgWins=0; G.f.champion=null; G.f.defenses=0; G.f.rivalId=null;
-        G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null;
+        G.f.champChampOffer=null;
         G.f.orgElo=eloBaseline(1,G.f.overall); G.f.rankBoost=0;
         milestone='Dernier avertissement du circuit pro. Une nouvelle série de défaites mettra fin à ton contrat.';
       } else {
@@ -429,7 +429,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     // combattant rétrogradé en Continentale continuait de toucher le cachet
     // de l'Ultimate Rim. Le contrat est désormais régénéré pour coller à la
     // nouvelle organisation, comme pour toute autre signature.
-    if(G.f.org>1){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.champChampBelt=null; G.f.champChampBeltDivId=null; G.f.champChampOffer=null; G.f.champChampDefenses=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.contract=generateContract(G.f,G.f.org,false); milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
+    if(G.f.org>1){ G.f.org--; G.f.easyFights=0; G.f.champion=null; G.f.champChampOffer=null; G.f.orgElo=eloBaseline(G.f.org,G.f.overall); G.f.rankBoost=0; G.f.contract=generateContract(G.f,G.f.org,false); milestone='Rétrogradé d\u2019organisation : refus des défis.'; G.roster=makeOrgRoster(G.f); }
     else if(G.f.org===1){
       if(!G.f.org1Warned){ G.f.org1Warned=true; G.f.easyFights=0; milestone='Dernier avertissement pour refus de combattre.'; }
       else { G.f.retired=true; forced=true; milestone='Contrat pro coupé pour refus de combattre. Retraite forcée.'; }
@@ -457,7 +457,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(finish){ G.f.bossUnimpressed=0; G.f.rankBoost=(G.f.rankBoost||0)+15; }
     else { G.f.bossUnimpressed--; G.f.rankBoost=(G.f.rankBoost||0)-10; }
   }
-  let champChampDecision=false;
   // titre
   if(win && kind==='title'){
     G.f.champion=(G.f.org>=5?'monde':G.f.org===4?'europe':G.f.org===3?'national':G.f.org===2?'regional':'local'); G.f.titles++; G.roster.forEach(o=>o.champion=null);
@@ -465,38 +464,42 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     recordTitleChange(G.f.org,G.f.divName,G.f.name,opp.name,orgDisplayName(G.f));
   }
   else if(win && kind==='defense'){ G.f.defenses++;
-    /* ==== [ANCRE: CORRECTIF_CHAMPCHAMPDEFENSES_SYNC] — champChampDefenses{}
-       (posé au moment du gain du supercombat, plus bas) doit rester à jour
-       pour la ceinture actuellement défendue, sinon chooseChampChampFocus()
-       (ui-08) restaurerait un compte de défenses périmé à la prochaine
-       bascule de focus. Ne s'exécute que si la map existe déjà (double
-       champion) — aucune allocation pour un champion simple. ==== */
-    if(G.f.champChampDefenses) G.f.champChampDefenses[G.f.div]=G.f.defenses;
-    /* ==== [ANCRE: CORRECTIF_DOUBLE_CHAMPION_DIVISION_FAUSSE] — Lot C01/2026
-       §C09b : bug trouvé (retour joueur #9) — G.f.champChampBelt est posé
-       UNE FOIS, au gain du supercombat (targetDivName), et jamais remis à
-       jour par chooseChampChampFocus() quand le focus bascule. Une fois le
-       focus sur la nouvelle ceinture, G.f.divName désigne cette MÊME
-       division que champChampBelt : l'ancien libellé énumérait alors deux
-       fois la même division ("Poids plume + Poids plume"). On n'annonce
-       plus que la ceinture réellement défendue CE soir (G.f.divName, à
-       jour via chooseChampChampFocus) ; le statut de double champion reste
-       signalé par des tags séparés ailleurs (hub, profil), jamais ici en
-       énumérant deux divisions dont une peut être fausse. ==== */
     milestone=`Titre défendu (${G.f.defenses}) — ${G.f.divName}`;
     recordTitleDefense(G.f.org,G.f.divName,G.f.name);
   }
   else if(kind==='defense' && res.winner==='D'){ milestone='Titre conservé (match nul)'; }
   else if(win && kind==='champchamp_title'){
-    // Supercombat pour la double ceinture : gagné. Ceinture stockée à part —
-    // f.champion (ceinture d'origine) n'est jamais touché ici.
-    G.f.champChampBelt=G.f.champChampOffer.targetDivName; G.f.champChampBeltDivId=G.f.champChampOffer.targetDivId; G.f.titles++;
-    if(!G.f.champChampDefenses) G.f.champChampDefenses={};
-    G.f.champChampDefenses[G.f.div]=G.f.defenses; G.f.champChampDefenses[G.f.champChampOffer.targetDivId]=0;
-    milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.crown} DOUBLE CHAMPION — ${orgDisplayName(G.f).toUpperCase()}</span>`;
-    recordTitleChange(G.f.org,G.f.champChampOffer.targetDivName,G.f.name,opp.name,orgDisplayName(G.f));
+    /* ==== [ANCRE: SUPPRESSION_DOUBLE_CHAMPION] — P2 : le statut permanent de
+       double champion (f.champChampBelt/BeltDivId/Defenses et l'écran/le choix
+       de focus chooseChampChampFocus(), ui-08) est retiré. Gagner le
+       supercombat fait désormais basculer IMMÉDIATEMENT et DÉFINITIVEMENT le
+       joueur dans la nouvelle division (aucun retour possible ensuite vers
+       l'ancienne, donc aucun écran de choix à afficher). L'ancienne ceinture
+       est déclarée vacante sur-le-champ plutôt qu'après un délai de grâce :
+       un délai aurait exigé de recréer exactement le genre de compteur
+       parallèle par division (champChampDefenses) que ce lot supprime,
+       contraire à la règle « jamais de système parallèle » (CLAUDE.md §8) —
+       la vacance immédiate suit aussi l'usage réel du MMA (une commission
+       retire le titre dès que son détenteur change de catégorie). ==== */
+    const oldDivId=G.f.div, oldDivName=G.f.divName, orgFlavorNow=orgDisplayName(G.f);
+    const targetDivId=G.f.champChampOffer.targetDivId, targetDivName=G.f.champChampOffer.targetDivName;
+    G.f.titles++;
+    recordTitleChange(G.f.org,targetDivName,G.f.name,opp.name,orgFlavorNow);
+    G.f.div=targetDivId; G.f.divName=targetDivName; G.f.defenses=0;
+    G.roster=makeOrgRoster(G.f);
+    // Vacance narrative : un PNJ de l'ancienne division hérite du titre —
+    // roster jetable (le joueur ne revient jamais dans cette division), seul
+    // le nom sert à l'événement et au registre des ceintures (recordTitleChange).
+    const vacantRoster=makeOrgRoster(Object.assign({},G.f,{div:oldDivId,divName:oldDivName,champion:null}));
+    const newChampName=(vacantRoster.find(o=>o.champion)||vacantRoster[0]||{}).name||'Un prétendant inconnu';
+    recordTitleChange(G.f.org,oldDivName,newChampName,G.f.name,orgFlavorNow);
+    // Bonus d'héritage équivalent à l'ancien +150 hofScore('champChampBelt') —
+    // accordé une seule fois, ICI, au moment du gain (jamais recalculé plus
+    // tard), pour ne pas dévaluer rétroactivement les légendes déjà au
+    // Panthéon dont le score a été figé sous l'ancienne formule.
+    G.f.champChampGloryBonus=(G.f.champChampGloryBonus||0)+150;
+    milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.crown} NOUVELLE CEINTURE — ${esc(targetDivName)}, ${orgDisplayName(G.f).toUpperCase()}</span><div class="small muted mt">La ceinture ${esc(oldDivName)} est déclarée vacante. ${esc(newChampName)} devient le nouveau champion.</div>`;
     G.f.champChampOffer=null;
-    champChampDecision=true; // Lot C01/2026 §C10a : déclenche le basculement AUTOMATIQUE de focus vers la nouvelle ceinture (routeAfterCareerPending, ui-08), plus d'écran de choix
   }
   else if(!win && res.winner!=='D' && kind==='champchamp_title'){
     // Supercombat perdu : on ne gagne pas la 2e ceinture, mais on garde la première.
@@ -519,7 +522,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   // puis tous les 2 défenses supplémentaires si refusé — jamais déclenché par
   // le joueur, jamais un adversaire tiré au hasard (verrouillé à l'offre).
   let champChampOfferReady=false;
-  if(G.f.champion && !G.f.champChampBelt && !G.f.champChampOffer && (G.f.defenses||0)>=3
+  if(G.f.champion && !G.f.champChampOffer && (G.f.defenses||0)>=3
      && (G.f.champChampLastOfferDefenses==null || G.f.defenses>=G.f.champChampLastOfferDefenses+2)){
     const divs=DIVISIONS[G.f.gender]||DIVISIONS.H; const idx=divs.findIndex(d=>d.id===G.f.div);
     const targetDiv=divs[idx+1]||divs[idx-1];
@@ -771,7 +774,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      Résolue ICI, une seule fois, en chaîne plutôt qu'en fonction : même
      motif que last.narrative juste au-dessus (déjà une chaîne, jamais
      touché par ce bug). ==== */
-  G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative:{src:narrative.src,txt:narrative.txt(G.f)},purseDetail:G.fight.purseDetail,classOffer,class31Offer,
+  G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampOfferReady,narrative:{src:narrative.src,txt:narrative.txt(G.f)},purseDetail:G.fight.purseDetail,classOffer,class31Offer,
     // rank:oppRankBefore — Lot C01/2026 §C02 : rang de l'adversaire au moment
     // du combat, nécessaire à la phrase de cause de la carte "Classement"
     // (rankChangeReasonHtml, ui-06). Déjà calculé plus haut (myRankBefore/

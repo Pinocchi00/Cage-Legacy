@@ -79,9 +79,9 @@ test('wipe() efface la sauvegarde principale et son backup, jamais le Panthéon 
   assert.equal(win.eval(`loadMetaStats().totalFights`), 7, 'les méta-statistiques doivent survivre à wipe()');
 });
 
-test('SAVE_VERSION est bien à 3 et migrate() amène toute sauvegarde à cette version', () => {
+test('SAVE_VERSION est bien à 4 et migrate() amène toute sauvegarde à cette version', () => {
   const win = newGameWindow();
-  assert.equal(win.eval(`SAVE_VERSION`), 3);
+  assert.equal(win.eval(`SAVE_VERSION`), 4);
   const migrated = win.eval(`migrate({version:1,f:{name:'X',W:0,L:0}})`);
-  assert.equal(migrated.version, 3);
+  assert.equal(migrated.version, 4);
 });
