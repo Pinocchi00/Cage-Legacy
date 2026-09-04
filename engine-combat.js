@@ -268,6 +268,29 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           finish.time=beatT;
           last.text=`[${formatTime(beatT)}] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
         }
+        /* ==== [ANCRE: HORLOGE_CONTINUE_CTRLSEC_SOL_RESIDU] — investigation
+           post-lot (relecture Monte Carlo) : le temps de contrôle au sol
+           ressort ~5-9% au-dessus de la valeur d'avant ce lot (le clinch,
+           lui, ne bouge quasi pas : <2%). Racine trouvée par instrumentation
+           directe (compteurs de ticks/entrées/sorties de phase, pas de
+           conjecture) : evadeCh (formule ci-dessous, inchangée depuis
+           avant ce lot) tourne quasiment toujours à son plafond (0.28,
+           topFat y contribue pour ~0.02 en moyenne — négligeable), donc ce
+           n'est PAS une dérive de fatigue mal rescalée. La vraie cause est
+           un artefact de quantification de L'ANCIEN modèle à 6
+           micro-séquences : une amenée réussie sur la toute dernière
+           micro-séquence d'un round (1 chance sur 6) tombait à une
+           position au sol de durée quasi nulle avant la cloche, ce qui
+           tirait sa moyenne mesurée vers le bas ; à 100 ticks/round, ce
+           même effet de bord ne touche plus qu'1 tick sur 100. La suite
+           continue (dt=3s) n'a donc pas de biais propre à corriger ici —
+           c'est la référence à 6 micro-séquences qui sous-estimait
+           légèrement le temps de contrôle réel par cet artefact, et rien
+           dans ce fichier ne le reproduit plus. Conservé en écart connu
+           (juste au-dessus de la tolérance ±5% sur certains tirages,
+           dans la tolérance sur d'autres — cf. rapport de livraison),
+           plutôt que "corrigé" par un facteur artificiel qui ferait
+           exprès de réintroduire ce biais de l'ancien modèle. ==== */
         if(!finish){
           const evadeCh=clamp((bot.footwork+bot.fightIQ-topFat*0.5)/280,0.06,0.28);
           if(rnd()<evadeCh*(dt/50)){

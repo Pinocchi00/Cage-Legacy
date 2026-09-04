@@ -21,6 +21,26 @@ const DIVS_H = (win.DIVISIONS && win.DIVISIONS.H) ? win.DIVISIONS.H.map(d => d.i
 const DIVS_F = (win.DIVISIONS && win.DIVISIONS.F) ? win.DIVISIONS.F.map(d => d.id) : ['F-straw'];
 const ALL_DIVS = [...DIVS_H, ...DIVS_F];
 
+/** Moyenne, écart-type (échantillon, n-1) et p90 (rang le plus proche) d'un
+ * tableau de valeurs numériques — sert à détecter un changement de FORME de
+ * distribution (variance, queue longue) qu'une simple comparaison de
+ * moyennes avant/après ne peut pas voir.
+ * @param {number[]} arr @returns {{mean:number, sd:number, p90:number}} */
+function computeStats(arr) {
+  const n = arr.length;
+  if (!n) return { mean: 0, sd: 0, p90: 0 };
+  const mean = arr.reduce((a, b) => a + b, 0) / n;
+  const variance = n > 1 ? arr.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (n - 1) : 0;
+  const sd = Math.sqrt(variance);
+  const sorted = [...arr].sort((a, b) => a - b);
+  const p90 = sorted[Math.min(n - 1, Math.ceil(0.9 * n) - 1)];
+  return { mean, sd, p90 };
+}
+/** Formate {mean,sd,p90} comme "12.3 (σ 4.1, p90 18)" pour les logs. */
+function fmtStats(s, digits = 1) {
+  return `${s.mean.toFixed(digits)} (σ ${s.sd.toFixed(digits)}, p90 ${s.p90.toFixed(digits)})`;
+}
+
 /* =============================================================================
    PARTIE 1 : SIMULATION MONTE CARLO DU MOTEUR DE COMBAT (10 000 COMBATS)
    ============================================================================= */
@@ -51,6 +71,22 @@ let totalCtrlSec = 0, totalClinchCtrlSec = 0, totalGroundCtrlSec = 0;
 let totalDmgHead = 0, totalDmgBody = 0, totalDmgLegs = 0;
 let totalKDs = 0, totalWobbled = 0, totalCuts = 0;
 let brokenInvariants = 0;
+
+/* ==== [ANCRE: MC_DISTRIBUTION_STATS] — les totaux ci-dessus ne donnaient
+   que des moyennes : deux distributions peuvent avoir la même moyenne et
+   une forme complètement différente (variance qui explose, une queue
+   longue de combats à 150 frappes) sans qu'aucune comparaison avant/après
+   ne le détecte. Les tableaux ci-dessous gardent la valeur PAR
+   COMBATTANT (une entrée par côté A/B de chaque combat, comme les
+   moyennes existantes) pour calculer écart-type et p90 en plus de la
+   moyenne — cf. computeStats() et son usage en RAPPORT STATISTIQUE. ==== */
+const samples = {
+  sigLanded: [], sigAtt: [], strikesLanded: [], strikesAtt: [],
+  powerStrikes: [], takedowns: [], takedownsAtt: [],
+  ctrlSec: [], clinchCtrlSec: [], groundCtrlSec: [],
+  kd: [], wobbled: []
+};
+/* ==== [FIN ANCRE] ==== */
 
 const t0 = Date.now();
 
@@ -136,6 +172,13 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
     totalKDs += s.kd;
     totalWobbled += s.wobbled;
     totalCuts += s.cuts;
+
+    samples.sigLanded.push(s.sig); samples.sigAtt.push(s.sigAtt);
+    samples.strikesLanded.push(s.total); samples.strikesAtt.push(s.totalAtt);
+    samples.powerStrikes.push(s.powerStrikes);
+    samples.takedowns.push(s.td); samples.takedownsAtt.push(s.tdAtt);
+    samples.ctrlSec.push(s.ctrlSec); samples.clinchCtrlSec.push(s.clinchCtrlSec); samples.groundCtrlSec.push(s.groundCtrlSec);
+    samples.kd.push(s.kd); samples.wobbled.push(s.wobbled);
   });
 }
 
@@ -284,17 +327,35 @@ console.log(`  Allés aux cartes     : ${roundFinishes.dec} (${((roundFinishes.d
 
 console.log("\n--- 2. MOYENNES PAR COMBAT (PAR COMBATTANT) ---");
 const N = FIGHT_COUNT * 2;
-console.log(`  Frappes significatives: ${(totalSigLanded / N).toFixed(1)} / ${(totalSigAtt / N).toFixed(1)} (${((totalSigLanded / totalSigAtt) * 100).toFixed(1)}% précision)`);
-console.log(`  Total des frappes     : ${(totalStrikesLanded / N).toFixed(1)} / ${(totalStrikesAtt / N).toFixed(1)}`);
+/* ==== [ANCRE: MC_DISTRIBUTION_STATS] — chaque ligne porte désormais
+   moyenne / écart-type (σ) / p90 en plus du total brut : deux runs qui ont
+   la même moyenne mais un σ ou un p90 différent signalent un changement de
+   forme de distribution (variance, queue longue) qu'une comparaison de
+   moyennes seules laisserait passer — voir computeStats() plus haut. ==== */
+const statSigLanded = computeStats(samples.sigLanded);
+const statSigAtt = computeStats(samples.sigAtt);
+const statStrikesLanded = computeStats(samples.strikesLanded);
+const statStrikesAtt = computeStats(samples.strikesAtt);
+const statPowerStrikes = computeStats(samples.powerStrikes);
+const statTakedowns = computeStats(samples.takedowns);
+const statTakedownsAtt = computeStats(samples.takedownsAtt);
+const statCtrlSec = computeStats(samples.ctrlSec);
+const statClinchCtrlSec = computeStats(samples.clinchCtrlSec);
+const statGroundCtrlSec = computeStats(samples.groundCtrlSec);
+const statKD = computeStats(samples.kd);
+const statWobbled = computeStats(samples.wobbled);
+
+console.log(`  Frappes significatives: ${fmtStats(statSigLanded)} / ${fmtStats(statSigAtt)} (${((totalSigLanded / totalSigAtt) * 100).toFixed(1)}% précision)`);
+console.log(`  Total des frappes     : ${fmtStats(statStrikesLanded)} / ${fmtStats(statStrikesAtt)}`);
 console.log(`  Répartition cibles    : Tête ${((totalHeadLanded / totalSigLanded) * 100).toFixed(1)}% | Corps ${((totalBodyLanded / totalSigLanded) * 100).toFixed(1)}% | Jambes ${((totalLegLanded / totalSigLanded) * 100).toFixed(1)}%`);
 console.log(`  Répartition positions : Distance ${((totalDistLanded / totalSigLanded) * 100).toFixed(1)}% | Clinch ${((totalClinchLanded / totalSigLanded) * 100).toFixed(1)}% | Sol ${((totalGroundLanded / totalSigLanded) * 100).toFixed(1)}%`);
-console.log(`  Frappes puissantes    : ${(totalPowerStrikes / N).toFixed(1)} par combat`);
-console.log(`  Amenées (Takedowns)   : ${(totalTakedowns / N).toFixed(1)} / ${(totalTakedownsAtt / N).toFixed(1)} (${((totalTakedowns / totalTakedownsAtt) * 100).toFixed(1)}% réussite)`);
+console.log(`  Frappes puissantes    : ${fmtStats(statPowerStrikes)} par combat`);
+console.log(`  Amenées (Takedowns)   : ${fmtStats(statTakedowns)} / ${fmtStats(statTakedownsAtt)} (${((totalTakedowns / totalTakedownsAtt) * 100).toFixed(1)}% réussite)`);
 console.log(`  Défense de lutte      : ${(totalTakedownsDef / N).toFixed(1)} défendues`);
 console.log(`  Sol (Passes/Renv/Rel) : ${(totalGuardPasses / N).toFixed(1)} passes | ${(totalReversals / N).toFixed(1)} renv. | ${(totalStandups / N).toFixed(1)} relevés`);
 console.log(`  Soumissions           : ${(totalSubAtt / N).toFixed(1)} tent. | ${(totalSubEscapes / N).toFixed(1)} échappées`);
-console.log(`  Contrôle moyen        : ${Math.round(totalCtrlSec / N)}s total (${Math.round(totalClinchCtrlSec / N)}s clinch, ${Math.round(totalGroundCtrlSec / N)}s sol)`);
-console.log(`  Knockdowns / Sonnés   : ${(totalKDs / N).toFixed(2)} KD | ${(totalWobbled / N).toFixed(2)} sonné(s)`);
+console.log(`  Contrôle moyen        : ${fmtStats(statCtrlSec, 0)}s total (${fmtStats(statClinchCtrlSec, 0)}s clinch, ${fmtStats(statGroundCtrlSec, 0)}s sol)`);
+console.log(`  Knockdowns / Sonnés   : ${fmtStats(statKD, 2)} KD | ${fmtStats(statWobbled, 2)} sonné(s)`);
 console.log(`  Invariants mathém.    : ${brokenInvariants} violation(s) (100% cohérent)`);
 
 console.log("\n--- 3. TAUX DE VICTOIRE PAR STYLE (ÉQUILIBRE GLOBAL) ---");
