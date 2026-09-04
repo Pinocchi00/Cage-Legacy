@@ -520,6 +520,13 @@ function scr_legend_detail(){
    ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
    ${f.nicknameHistory&&f.nicknameHistory.length?`<div class="card mb"><div class="eyebrow mb">Historique des surnoms</div>${f.nicknameHistory.map(n=>`<div class="small muted" style="padding:4px 0">« ${esc(n)} »</div>`).join('')}</div>`:''}
    ${f.signatureMove?`<div class="card mb" style="border-left:3px solid var(--gold-d)"><div class="eyebrow gold mb">${SVG.star} Mouvement Signature</div><b style="color:var(--gold)">${esc(f.signatureMove.customSuffix?`${f.signatureMove.name} ${f.signatureMove.customSuffix}`:f.signatureMove.name)}</b></div>`:''}
+   <!-- ==== [ANCRE: PANTHEON_RECAP_SAISON] — item demandé (P5a) : seasonRecap
+        est capturé par enshrine() (state-hof.js) mais n'était jamais rendu
+        sur la fiche de légende, seulement sur l'écran de retraite (scr_legacy,
+        via retireSeasonRecapHtml, ui-07). Même fonction partagée, appelée ici
+        avec l'entrée HOF (qui porte f.seasonRecap au même format) — la fiche
+        Panthéon doit contenir tout ce que contenait l'écran de retraite. ==== -->
+   ${retireSeasonRecapHtml(f)}
    ${f.earnedAchievements&&f.earnedAchievements.length?`<div class="card mb"><div class="eyebrow mb">Succès obtenus (${f.earnedAchievements.length}/${ACH.length})</div>${f.earnedAchievements.map(id=>{const a=ACH.find(x=>x.id===id); return a?`<div class="ach"><span class="ico" style="display:flex;align-items:center;color:var(--gold)">${a.ico}</span><span><b class="gold">${a.h}</b><div class="muted small">${a.d}</div></span></div>`:'';}).join('')}</div>`:''}
    <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
    <button class="btn ghost" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
