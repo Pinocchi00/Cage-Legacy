@@ -299,7 +299,7 @@ function startFightSelect(){ if(G.f.injury) return;
   ensureOpponentsCached(G.f);
   G.screen='select'; save(); render(); }
 /* ==== [FIN ANCRE] ==== */
-function chooseOpponent(i){ G.sel=G.opps[i]; G.train=trainingOptions(G.f); generateSponsorObjective(G.f);
+function chooseOpponent(i){ G.sel=G.opps[i]; G.train=trainingOptions(G.f);
   G.f._rivalryPressDone=false; G.pressConf=(typeof triggerRivalPressConference==='function')?triggerRivalPressConference(G.f,G.sel.o):null;
   G.screen=G.pressConf?'press_conf':'camp'; save(); render(); }
 function chooseTraining(i){ const opt=G.train[i];

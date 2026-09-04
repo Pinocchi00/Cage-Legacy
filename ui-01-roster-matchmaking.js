@@ -512,7 +512,6 @@ function divRank(target){
   return pool.findIndex(o=>o===target)+1;
 }
 function advanceRoster(){
-  if(typeof generateNPCNews==='function') generateNPCNews();
   const allFighters=G.roster.concat(G.f.champion?[]:[G.f]);
   const oldRanks={}; rankPool(allFighters).forEach((o,i)=>oldRanks[o.id]=i);
   const r=G.roster.filter(o=>!o.champion);

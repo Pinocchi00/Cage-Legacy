@@ -121,8 +121,10 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   // messages, y compris clairement positifs (ex. "Contrat renouvelé"),
   // s'affichaient donc en rouge par défaut. Classification élargie par
   // mots-clés, avec un ton neutre (doré) par défaut plutôt que négatif.
+  // « sponsor validé » retiré de la liste — Lot C01/2026 §C10b :
+  // l'objectif sponsor qui produisait ce message a été supprimé.
   const msgLower=(G.lastMsg||'').toLowerCase();
-  const POSITIVE_HINTS=['sponsor validé','renouvelé','copié','remporté','accepté','testamentaire actif','débloqué avec succès','victoire','succès','signé'];
+  const POSITIVE_HINTS=['renouvelé','copié','remporté','accepté','testamentaire actif','débloqué avec succès','victoire','succès','signé'];
   const NEGATIVE_HINTS=['refus','annulé','insuffisant','invalide','corrompu','impossible','ratée','échec','mauvaise impression','interdit','critique'];
   const isGoodMsg=POSITIVE_HINTS.some(k=>msgLower.includes(k));
   const isBadMsg=!isGoodMsg && NEGATIVE_HINTS.some(k=>msgLower.includes(k));
@@ -168,16 +170,15 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
      <div><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>FORME</span><b class="mono" style="color:var(--text);font-size:12px">${d20(f.form)}</b></span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--sage)"></span></div></div>
    </div>
    ${fightBtnHtml}
+   <!-- ==== [ANCRE: HUB_GRILLE] — Lot C01/2026 §C05 : Palmarès et Panthéon
+        retirés (déjà atteignables depuis l'écran titre, boutons « VOIR LES
+        SUCCÈS »/« VOIR LE PANTHÉON »), grille réorganisée à deux rangées
+        pleines plutôt qu'un bouton orphelin sur demi-largeur. ==== -->
    <div class="g2"><button class="btn" onclick="CL.go('profile')">Bilan technique complet</button><button class="btn" onclick="CL.go('rankings')">Classements</button></div>
-   <div class="g2"><button class="btn ghost" onclick="CL.go('ach')">Palmarès</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
-   <div class="g2"><button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Ceintures</button><button class="btn ghost" onclick="CL.go('hof')">🏛 Panthéon</button></div>
+   <div class="g2"><button class="btn ghost" onclick="CL.go('beltLineage')">🌍 Ceintures</button><button class="btn ghost" onclick="CL.go('history')">Archives</button></div>
    ${f.champChampBelt?`<div class="card mt" style="border-left:3px solid var(--blood);background:var(--panel2);padding:12px">
      <div class="eyebrow mb" style="color:var(--blood)">Double Champion</div>
      <div class="small">Vous détenez également la ceinture ${f.champChampBelt}.</div>
-   </div>`:''}
-   ${(G.divisionNews&&G.divisionNews.length)?`<div class="card mt" style="background:var(--panel2);padding:12px">
-     <div class="eyebrow mb">Actualités de la division</div>
-     ${G.divisionNews.slice(0,3).map(n=>`<div class="mono small muted" style="margin-top:4px">S${n.year} — ${n.text}</div>`).join('')}
    </div>`:''}
    <button class="btn ghost" style="color:var(--loss);margin-top:16px;border-top:1px dashed var(--line);padding-top:16px" onclick="CL.go('retire')">Déclarer la retraite (Définitif)</button>
    </div>`; }
@@ -322,56 +323,30 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
    ${renderFightPoster(f,opp,G.fight.kind)}`;
   if(step===1){
     h+=wcHtml;
-    if(G.activeSponsor) h+=`<div class="card mt" style="border-left:3px solid var(--gold);padding-left:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="color:var(--gold)">Objectif sponsor</div>
-     <div class="mono small">${G.activeSponsor.text}</div></div>`;
-    /* ==== [CORRECTIF V2-26] — "Bilan du face-à-face" n'était qu'un
-       intitulé posé sur G.lastMsg (le texte affiché venait d'ailleurs,
-       sans rapport garanti avec un vrai face-à-face) : un titre qui
-       promettait une scène et ne livrait qu'un texte de passage, sur
-       lequel aucune décision ne se prenait. Remplacé par une vraie scène
-       à décision unique pour les combats qui la méritent (titre, défense,
-       rivalité) — la comparaison d'attributs qui ne débouchait sur rien
-       reste RETIRÉE (elle n'apportait rien ici ; l'analyse tactique du
-       step 2, déjà utile, la remplace). G.lastMsg continue d'exister
-       pour les autres textes de passage (sponsor, etc.), juste plus sous
-       ce titre trompeur. ==== */
-    const faceoffEligible=(G.fight.kind==='title'||G.fight.kind==='defense'||f.rivalId===opp.id);
-    /* ==== [ANCRE: CORRECTIF_LASTMSG_FACEOFF] — bug trouvé : l'affichage (et
-       le nettoyage) de G.lastMsg vivait uniquement dans la branche `else`
-       ci-dessous — quand un face-à-face était éligible et pas encore fait,
-       le message du tour n'était ni montré ni consommé sur cet écran.
-       Sorti des deux branches pour être rendu dans tous les cas. ==== */
+    /* ==== [ANCRE: CORRECTIF_LASTMSG_FACEOFF] — Lot C01/2026 §C07 : le
+       face-à-face (V2-26/V2-27, trois postures avant le combat) est
+       retiré — écran sans conséquence lisible pour le joueur. G.lastMsg
+       reste affiché ici pour les autres textes de passage du step 1
+       (aucun aujourd'hui après la suppression de l'objectif sponsor,
+       §C10b — le bloc reste au cas où un futur texte de passage
+       l'utilise, comme documenté à l'origine). ==== */
     if(G.lastMsg){
       h+=`<div class="card mt glass" style="border-left:3px solid var(--text);padding-left:14px;background:var(--panel2)">
        <div class="small">${esc(G.lastMsg)}</div></div>`;
       G.lastMsg=null;
     }
-    if(faceoffEligible && !G.fight.faceoffDone){
-      h+=`<div class="card mt glass" style="border-left:3px solid var(--blood);padding-left:14px;background:var(--panel2)">
-       <div class="eyebrow mb" style="color:var(--blood)">Face-à-face</div>
-       <p class="small" style="margin:0">Nez à nez, dix secondes. Les photographes attendent.</p></div>
-       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
-         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('respect')">
-           <b style="font-size:15px">Soutenir le regard sans rien dire</b></div>
-         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('provocation')">
-           <b style="font-size:15px">Lui dire une phrase que vous seuls comprendrez</b></div>
-         <div class="opp" style="padding:14px;text-align:left" onclick="CL.chooseFaceoff('silence')">
-           <b style="font-size:15px">Tourner la tête le premier</b></div>
-       </div>`;
-    } else {
-      h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
-    }
+    h+=`<button class="btn primary mt" style="padding:16px;font-size:18px" onclick="G.fight.planStep=2; render();">SUIVANT</button>`;
   } else {
-    /* ==== [ANCRE: V2-30] — "le plan de combat, un seul écran" : les trois
-       parties demandées par le document, dans l'ordre. 1) Ce qu'on sait de
-       lui (tacticalRead(), déjà réel — arme/faille de l'adversaire, jamais
-       un texte générique). 2) Le plan — TACTICS[f.style] est déjà à 3
-       entrées par style ; .slice(0,3) plafonne pour de bon même quand
-       getExclusiveTactics() en ajoute une 4e (règle H.3, pas respectée
-       jusqu'ici sur les rares tags physiques exclusifs). 3) La clé — un
-       seul détail exploitable, gagné hors combat, ou son absence assumée
-       en toutes lettres, jamais une case vide. ==== */
+    /* ==== [ANCRE: V2-30] — "le plan de combat, un seul écran" : les deux
+       parties utiles, dans l'ordre. 1) Ce qu'on sait de lui (tacticalRead(),
+       déjà réel — arme/faille de l'adversaire, jamais un texte générique).
+       2) Le plan — TACTICS[f.style] est déjà à 3 entrées par style ;
+       .slice(0,3) plafonne pour de bon même quand getExclusiveTactics() en
+       ajoute une 4e (règle H.3, pas respectée jusqu'ici sur les rares tags
+       physiques exclusifs). La troisième partie « La clé » (un détail
+       exploitable gagné hors combat, quasi toujours absent) a été retirée
+       — Lot C01/2026 §C01 : elle n'affichait jamais qu'une case vide, sans
+       jamais être alimentée par une mécanique de jeu réelle. ==== */
     const combinedTactics=getExclusiveTactics(f).concat(plans).slice(0,3);
     h+=`<div class="card" style="border-color:transparent;padding:0 0 16px 0">
      <div class="eyebrow gold mb" style="letter-spacing:0.2em">CE QU’ON SAIT DE LUI</div>
@@ -381,11 +356,7 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
    <p class="lede small">Quelle est ta consigne tactique pour ce combat ? Cela modifiera radicalement ton comportement dans la cage.</p>
    ${combinedTactics.map((p,i)=>`<div class="opp" onclick="CL.choosePlan(${i})">
      <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
-   <div class="card mt" style="border-left:3px solid var(--line);padding-left:14px;background:var(--panel2)">
-     <div class="eyebrow mb" style="color:var(--muted)">LA CLÉ</div>
-     <div class="small">Vous entrez sans rien de plus que ce que tout le monde sait de lui.</div>
-   </div>`;
+     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}`;
   }
   h+=`</div>`;
   return h;
@@ -689,10 +660,6 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
         bougé (ex-æquo, ou combattant encore non classé des deux côtés) :
         une ligne "#7 -> #7" n'apporterait rien. ==== -->
    ${(p.rankBefore!=null && p.rankAfter!=null && p.rankBefore!==p.rankAfter)?`<div class="mono small" style="text-align:center;color:${p.rankAfter<p.rankBefore?'var(--pos)':'var(--neg)'}">#${p.rankBefore} → #${p.rankAfter}</div>`:''}
-   <!-- ==== [CORRECTIF V2-27] — la promesse du face-à-face (V2-26,
-        CL.chooseFaceoff) rappelée ici : une boucle ouverte doit se
-        refermer au moment même où le joueur peut encore s'en souvenir. -->
-   ${p.promiseOutcome?`<div class="mono small" style="text-align:center;color:${p.promiseOutcome.tenue?'var(--pos)':'var(--neg)'}">${p.promiseOutcome.tenue?`Promesse tenue face à ${esc(p.promiseOutcome.oppName)}.`:`Promesse non tenue face à ${esc(p.promiseOutcome.oppName)}.`}</div>`:''}
    ${p.milestone?`<div class="card gold-b"><div class="disp" style="font-size:19px">${p.milestone}</div></div>`:''}
    ${p.upsetLine?`<div class="card" style="text-align:center;background:var(--panel2);border-left:3px solid var(--gold)"><p class="lede small" style="margin:0;font-style:italic">${esc(p.upsetLine)}</p></div>`:''}
    ${p.skill?`<div class="card"><div class="skill-unlock">✨ Compétence débloquée : <b style="color:${RAR_COLORS[p.skill.rar]||'var(--gold)'}">${p.skill.name}</b><div class="muted small">${p.skill.desc||p.skill.blurb||''}</div>${p.skill.fx?`<div class="mono small mt">${Object.entries(p.skill.fx).map(([k,v])=>{const label=(ALL_ATTR.find(a=>a[0]===k)||[k,k])[1]; const after=d20(f.attrs[k]); const realBefore=p.skill._realBefore&&p.skill._realBefore[k]!==undefined?p.skill._realBefore[k]:(f.attrs[k]-v); const before=d20(realBefore);

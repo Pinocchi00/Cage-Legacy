@@ -133,16 +133,11 @@ function scr_champ_champ_offer(){
     <button class="btn ghost mt" onclick="CL.declineChampChampOffer()">Décliner pour l\u2019instant</button>
   </div>`;
 }
-function scr_champ_champ_decision(){
-  const f=G.f;
-  return `<div class="scr center intro">
-    <div class="eyebrow blood">Double Champion</div>
-    <h2 class="disp">Où concentrer vos efforts ?</h2>
-    <p class="lede">Vous détenez désormais deux ceintures. Sur laquelle voulez-vous porter votre attention prioritaire pour les prochaines défenses ?</p>
-    <button class="btn primary mt" onclick="CL.chooseChampChampFocus('${f.div}')">${f.divName} (ceinture d\u2019origine)</button>
-    <button class="btn mt" style="border-color:var(--blood);color:var(--blood)" onclick="CL.chooseChampChampFocus('${f.champChampBeltDivId||''}')">${f.champChampBelt} (nouvelle ceinture)</button>
-  </div>`;
-}
+/* ==== [ANCRE: CORRECTIF_SUPPRESSION_CHAMPCHAMP_DECISION] — Lot C01/2026
+   §C10a : scr_champ_champ_decision() (« Où concentrer vos efforts ? »)
+   retiré — le focus bascule désormais automatiquement sur la nouvelle
+   ceinture, sans écran intermédiaire (CL.chooseChampChampFocus appelé
+   depuis routeAfterCareerPending(), ui-08). ==== */
 /* ==== [FIN ANCRE] ==== */
 function scr_promo(){
   const f=G.f; const isChamp=!!f.champion;
@@ -471,12 +466,13 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
    ${f.beltHistory && f.beltHistory.length ? `<div class="card mt"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — Année ${b.year} — ${b.defenses} défense(s)</span></div>`).join('')}</div>` : ''}
    ${retireSeasonRecapHtml(f)}
    ${retireAchievementsHtml(f)}
-   ${retireLegendPointsHtml(f)}
    <button class="btn primary mt" onclick="CL.newCareer()">Nouvelle carrière</button>
    <button class="btn ghost mt" onclick="CL.go('title')">Retour au menu</button></div>`; }
-/* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — trois blocs ajoutés à l'écran de
-   retraite : bilan saison par saison, succès débloqués pendant CETTE
-   carrière, et points de légende gagnés grâce à elle.
+/* ==== [ANCRE: ECRAN_RETRAITE_DETAILLE] — deux blocs ajoutés à l'écran de
+   retraite : bilan saison par saison et succès débloqués pendant CETTE
+   carrière. Un troisième bloc, « Points de Légende », a été retiré — Lot
+   C01/2026 §C11 : metaStats.legendPoints n'était ni crédité ni dépensé
+   nulle part ailleurs, la carte n'affichait qu'un nombre sans usage.
    ==== [ANCRE: LISIBILITE_RETRAITE] — item demandé : l'écran devenait un mur
    ininterrompu de texte sur une longue carrière (15+ saisons, 20+ succès).
    Corrections : bouton "Nouvelle carrière" dupliqué en haut (plus besoin de
@@ -522,15 +518,6 @@ function retireAchievementsHtml(f){
     <div style="display:flex;flex-wrap:wrap;gap:8px">${chips}</div>
   </div>`;
 }
-function retireLegendPointsHtml(f){
-  const earned=Math.max(0,Math.round((hofScore(f)||0)/10));
-  return `<div class="card mt glass" style="border-left:3px solid var(--gold);background:var(--panel2)">
-    <div class="eyebrow mb" style="color:var(--gold)">Points de Légende gagnés</div>
-    <div class="stat-big gold" style="font-size:30px">+${earned}</div>
-    <div class="muted small mt">Score d\u2019héritage : ${hofScore(f)||0} (défenses, victoires, titres, finitions).</div>
-  </div>`;
-}
-
 /* ==== [ANCRE: LOT9_ECRAN_CODEX] ==== */
 function formatSkillFx(fx, f){
   if(!fx) return '';

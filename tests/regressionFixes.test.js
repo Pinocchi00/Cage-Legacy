@@ -94,8 +94,10 @@ test('CORRECTIF_RANK_CRASH_SCORE_REEL — une défaite en tête de classement fa
   assert.ok(scoreAfter <= targetScore * 1.1);
 });
 
-/* ==== [ANCRE: TEST_CORRECTIF_LASTMSG_FACEOFF] ==== */
-test('CORRECTIF_LASTMSG_FACEOFF — G.lastMsg s’affiche même quand un face-à-face est proposé', () => {
+/* ==== [ANCRE: TEST_CORRECTIF_LASTMSG_FACEOFF] — Lot C01/2026 §C07 : le
+   face-à-face est retiré, le test ne couvre plus que le comportement
+   restant (G.lastMsg toujours affiché puis consommé en step 1). ==== */
+test('CORRECTIF_LASTMSG_FACEOFF — G.lastMsg s’affiche et se consomme au step 1 du plan', () => {
   const win = newGameWindow({ runMain: true });
   win.eval(`
     G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Test'} };
@@ -103,10 +105,10 @@ test('CORRECTIF_LASTMSG_FACEOFF — G.lastMsg s’affiche même quand un face-à
   `);
   win.G.f.champion = 'local';
   const opp = win.G.roster[0];
-  win.G.fight = { opp, rounds: 3, kind: 'defense', planStep: 1, faceoffDone: false };
+  win.G.fight = { opp, rounds: 3, kind: 'defense', planStep: 1 };
   win.G.lastMsg = 'MESSAGE_DE_TOUR_UNIQUE';
   const html = win.scr_plan();
-  assert.ok(html.includes('Face-à-face'));
+  assert.ok(!html.includes('Face-à-face'));
   assert.ok(html.includes('MESSAGE_DE_TOUR_UNIQUE'));
   assert.equal(win.G.lastMsg, null);
 });

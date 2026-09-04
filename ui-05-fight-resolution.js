@@ -86,7 +86,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
   const adaptivePlanForOpp=(typeof getAdaptiveNPCTactics==='function')?getAdaptiveNPCTactics(opp,G.f):null;
   const res=simulateFight(G.f,opp,rounds,G.fight.plan,adaptivePlanForOpp&&adaptivePlanForOpp.m);
   const win=applyResult(G.f,opp,res,'A'); applyResult(opp,G.f,res,'B');
-  if(typeof evaluateSponsor==='function') evaluateSponsor(res);
   // ==== [ANCRE: NARRATIF_APPEL] — calculé ici (mêmes données réelles qu'avant),
   // pour pouvoir à la fois l'afficher sur l'écran de résultat ET l'archiver
   // durablement dans f.history (Phase 6) — un seul générateur, pas de doublon. ====
@@ -243,14 +242,6 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     if(G.f._rivalries[opp.id]>=2) G.f.rivalId=opp.id;
   }
 
-  /* ==== [ANCRE: V2-27 carrière] — même principe côté mode carrière
-     (G.promise, posé par CL.chooseFaceoff('provocation'), ui-08/scr_plan
-     V2-26) : consommé immédiatement, lu par scr_result (ui-06). */
-  let promiseOutcome=null;
-  if(G.promise && opp && opp.id===G.promise.oppId){
-    promiseOutcome={tenue:win && !isDecisionLike(res.method),oppName:G.promise.oppName};
-    G.promise=null;
-  }
   // Le "plus grand rival" compte TOUTES les confrontations (peu importe le
   // résultat) — avant, seule l'animosité (défaite/décision serrée) comptait,
   // donc un adversaire battu 15 fois de façon décisive n'était presque jamais
@@ -469,7 +460,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
     milestone=`<span class="gold" style="display:inline-flex;align-items:center;gap:4px">${SVG.crown} DOUBLE CHAMPION — ${orgDisplayName(G.f).toUpperCase()}</span>`;
     recordTitleChange(G.f.org,G.f.champChampOffer.targetDivName,G.f.name,opp.name,orgDisplayName(G.f));
     G.f.champChampOffer=null;
-    champChampDecision=true; // déclenche l'écran de choix de division après le résultat
+    champChampDecision=true; // Lot C01/2026 §C10a : déclenche le basculement AUTOMATIQUE de focus vers la nouvelle ceinture (routeAfterCareerPending, ui-08), plus d'écran de choix
   }
   else if(!win && res.winner!=='D' && kind==='champchamp_title'){
     // Supercombat perdu : on ne gagne pas la 2e ceinture, mais on garde la première.
@@ -740,7 +731,7 @@ function resolveFight(){ const {opp,rounds,kind}=G.fight;
      motif que last.narrative juste au-dessus (déjà une chaîne, jamais
      touché par ce bug). ==== */
   G.pending={res,win,method:res.method,finish,milestone,nickEvoHtml,skill,newAch,forced,planLabel:G.fight.planLabel,endOfSeason,proOffer,topTierOffer,promoOffer,contractExpiry,contractNonRenewed,champChampDecision,champChampOfferReady,narrative:{src:narrative.src,txt:narrative.txt(G.f)},purseDetail:G.fight.purseDetail,classOffer,class31Offer,
-    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, promiseOutcome, upsetLine};
+    opp:{name:opp.name,flag:opp.flag}, camp:G.campApplied, rankBefore:myRankBefore, rankAfter:myRankAfter, upsetLine};
 }
 function turnPro(){ const f=G.f; f.amaRec={W:f.W,L:f.L}; f.stage='pro';
   /* ==== [ANCRE: V3_HISTORIQUE_PRESERVE] — Plan V4 §2.2 : les compteurs pro

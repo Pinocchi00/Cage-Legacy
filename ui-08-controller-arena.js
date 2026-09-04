@@ -27,7 +27,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,pro_nickname:scr_pro_nickname,codex:scr_codex,mueChoice:scr_mueChoice,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,
-  contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,champ_champ_decision:scr_champ_champ_decision,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
+  contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
   ach_preview:scr_ach_preview};
 
 function currentGameMode(){
@@ -78,7 +78,13 @@ function routeAfterCareerPending(){
   else if(p&&p.proOffer) G.screen='promo';
   else if(p&&p.topTierOffer) G.screen='toptier';
   else if(p&&p.promoOffer) G.screen='promo';
-  else if(p&&p.champChampDecision) G.screen='champ_champ_decision';
+  /* ==== [ANCRE: CORRECTIF_AUTO_CHAMPCHAMP_FOCUS] — Lot C01/2026 §C10a :
+     l'écran « Où concentrer vos efforts ? » est retiré. [ARBITRAGE] valeur
+     par défaut : la nouvelle ceinture (champChampBeltDivId), conformément
+     au retour joueur #9. Le focus bascule automatiquement dans le même
+     appel qui aurait auparavant affiché l'écran de choix, avant de router
+     vers hub — zéro clic supplémentaire pour le joueur. ==== */
+  else if(p&&p.champChampDecision){ CL.chooseChampChampFocus(G.f.champChampBeltDivId); return; }
   else if(p&&p.champChampOfferReady) G.screen='champ_champ_offer';
   else if(p&&p.endOfSeason) G.screen='season';
   else G.screen='hub';
@@ -591,10 +597,6 @@ const CL={
     G.fight._resolved=true;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
     resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
-  /* ==== [ANCRE: V2-26/V2-27] — trois postures, toutes valables (règle
-     H.3). La provocation plante une promesse (G.promise, carrière —
-     distincte de G.faith.promise) vérifiée à la résolution du combat
-     (ui-05, même ancre que côté Faith). */
   /* ==== [ANCRE: CORRECTIF_PERSISTANCE_ETAT_RUN] — bug trouvé : toute une famille
      de méthodes mutait l'état de run (choix de camp, pacte, mise en jeu, refus du
      médecin, soins d'infirmerie, analyse ciblée, second souffle) puis appelait
@@ -602,19 +604,6 @@ const CL={
      un rechargement de page rendait le choix. Cas le plus grave : healGauntletZone
      sauvegarde bien la dépense (saveMetaStats) mais pas le soin (sur G) — le joueur
      perdait ses points ET gardait ses séquelles. ==== */
-  chooseFaceoff(posture){
-    G.fight.faceoffDone=true;
-    const opp=G.fight.opp;
-    if(posture==='respect'){
-      G.f.morale=clamp((G.f.morale||60)+5,0,100);
-    } else if(posture==='provocation'){
-      G.promise={type:'finish',oppId:opp.id,oppName:opp.name};
-      G.lastMsg="Vous avez promis de le finir — il ne l’a pas oublié en montant sur la balance.";
-    } else {
-      G.f.morale=clamp((G.f.morale||60)+2,0,100);
-    }
-    G.fight.planStep=2; save(); render();
-  },
   /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
      l'arène (skipArena et la fin naturelle de l'animation passent tous les
      deux par ici) : généralisé pour pouvoir router ailleurs qu'au résultat
@@ -849,7 +838,7 @@ const CL={
         koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
         trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
     }
-    G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; if(typeof generateNPCNews==='function') generateNPCNews(true); G.screen='hub'; save(); render(); },
+    G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; G.screen='hub'; save(); render(); },
   toLegacy(){
     if(G.f._enshrined){ G.screen='legacy'; render(); return; }
     if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }

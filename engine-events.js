@@ -47,32 +47,11 @@ function eraBuffSnapshot(f){
 }
 function restoreSnapshot(f,saved){ for(const k in saved){ f.attrs[k]=saved[k]; } }
 
-function generateNPCNews(forceBatch){
-  if(!G.divisionNews) G.divisionNews=[];
-  const top15=G.roster.filter(o=>!o.champion).slice(0,15);
-  if(top15.length<2) return;
-  const numNews=forceBatch?3:(rnd()<0.12?1:0);
-  for(let i=0;i<numNews;i++){
-    const p1=pick(top15); let p2=pick(top15); while(p1.id===p2.id) p2=pick(top15);
-    const events=[
-      `Altercation en coulisses entre ${p1.name} et ${p2.name}. La tension monte.`,
-      `${p1.name} a subi une grave blessure à l\u2019entraînement.`,
-      `${p2.name} évoque une montée de catégorie imminente.`,
-      `${p1.name} provoque publiquement ${p2.name} sur les réseaux sociaux.`,
-      `L\u2019équipe de ${p1.name} dénonce ouvertement l\u2019arbitrage de son dernier combat.`
-    ];
-    /* ==== [ANCRE: NPC_NEWS_CONTEXTUALISEES] — chantier 3 : gabarits ajoutés
-       au pool SEULEMENT quand ils collent aux vraies stats du combattant tiré
-       (p.W/p.L/p.streak/p.age, déjà présents sur tout objet roster) — sinon
-       le pool générique ci-dessus reste utilisé tel quel, jamais de texte
-       inventé qui contredirait le vrai état du combattant. ==== */
-    if((p1.streak||0)>=3) events.push(`${p1.name} (${p1.W}-${p1.L}) aligne ${p1.streak} victoires d’affilée et réclame publiquement un choc contre ${p2.name}.`);
-    if((p2.streak||0)<=-2) events.push(`Sur une série de ${Math.abs(p2.streak)} défaites, ${p2.name} (${p2.W}-${p2.L}) est annoncé en sursis par son organisation.`);
-    if(typeof isDeclining==='function' && isDeclining(p1) && rnd()<0.5) events.push(`À ${p1.age} ans et sur un bilan de ${p1.W}-${p1.L}, des rumeurs de retraite surprise entourent ${p1.name}.`);
-    G.divisionNews.unshift({year:(G.season&&G.season.year)||1,text:pick(events)});
-  }
-  if(G.divisionNews.length>20) G.divisionNews.length=20;
-}
+/* ==== [ANCRE: NPC_NEWS_CONTEXTUALISEES] — Lot C01/2026 §C05 : generateNPCNews()
+   retirée avec la carte « Actualités de la division » du hub (ui-06), son seul
+   affichage. G.divisionNews reste alimenté par generatePlayerContextualNews()
+   (chantier 3, narration procédurale — ANCRE NARRATION_PROCEDURALE), système
+   distinct hors périmètre de ce correctif. ==== */
 
 // Mémoire tactique de rematch : boost temporaire ciblé sur l'adversaire (attributs
 // bruts, restaurer après le combat) selon la méthode de la victoire du joueur au
@@ -92,35 +71,12 @@ function applyTacticalMemory(npc,player){
   return saved;
 }
 
-const SPONSOR_OBJECTIVES=[
-  // Général — accessible à tous les styles
-  {id:'win_ko',text:f=>`+15 000$ si victoire par KO (une obligation pour le style ${f.styleLabel})`,reward:15,styles:['all'],check:(st,res)=>res.method.startsWith('KO')&&res.winner==='A'},
-  {id:'win_sub',text:f=>`+15 000$ si victoire par Soumission (la spécialité maison en ${f.styleLabel})`,reward:15,styles:['all'],check:(st,res)=>res.method.startsWith('Soum')&&res.winner==='A'},
-  {id:'no_damage',text:f=>`+20 000$ si moins de 15 frappes subies (défense digne du Rang #${divRank(f)||'NR'})`,reward:20,styles:['all'],check:(st)=>st.B.sig<15},
-  {id:'ko_r1',text:f=>`+30 000$ si victoire par KO au Round 1 (expéditif comme un Rang #${divRank(f)||'NR'})`,reward:30,styles:['all'],check:(st,res)=>res.method.startsWith('KO')&&res.round===1&&res.winner==='A'},
-  // Striking — boxe, kickboxing, muay-thaï, karaté, MMA complet
-  {id:'sig_60',text:f=>`+20 000$ si plus de 60 frappes significatives (le minimum syndical en ${f.styleLabel})`,reward:20,styles:['boxer','kickboxer','muayThai','karate','mma'],check:(st)=>st.A.sig>=60},
-  {id:'kd_2',text:f=>`+25 000$ si au moins 2 knockdowns infligés (prouve que le ${f.styleLabel} n\u2019est pas qu\u2019un sport de contact léger)`,reward:25,styles:['boxer','kickboxer','muayThai','karate','mma'],check:(st)=>st.A.kd>=2},
-  {id:'no_td',text:f=>`+10 000$ si 0 takedown subi (défends la réputation du ${f.styleLabel} face aux lutteurs)`,reward:10,styles:['boxer','kickboxer','muayThai','karate'],check:(st)=>st.B.td===0},
-  // Grappling — lutte, sambo, jiu-jitsu, MMA complet
-  {id:'td_4',text:f=>`+15 000$ si 4 takedowns réussis (routine pour un ${f.styleLabel} classé #${divRank(f)||'NR'})`,reward:15,styles:['wrestler','sambo','bjj','mma'],check:(st)=>st.A.td>=4},
-  {id:'ctrl_3m',text:f=>`+20 000$ si plus de 3 minutes de contrôle (le ${f.styleLabel} vit pour ça)`,reward:20,styles:['wrestler','sambo','bjj','mma'],check:(st)=>st.A.ctrl>=1.8},
-  {id:'sub_r1',text:f=>`+30 000$ si victoire par Soumission au Round 1 (une signature attendue en ${f.styleLabel})`,reward:30,styles:['bjj','sambo','mma'],check:(st,res)=>res.method.startsWith('Soum')&&res.round===1&&res.winner==='A'}
-];
-function generateSponsorObjective(f){
-  if(f.org>0 && rnd()<0.35){
-    const valid=SPONSOR_OBJECTIVES.filter(s=>s.styles.includes('all')||s.styles.includes(f.style));
-    const picked=pick(valid);
-    G.activeSponsor=Object.assign({},picked,{text:picked.text(f)});
-  } else { G.activeSponsor=null; }
-}
-function evaluateSponsor(res){
-  if(G.activeSponsor && G.activeSponsor.check(res.stats,res)){
-    G.f.earnings=(G.f.earnings||0)+G.activeSponsor.reward;
-    G.lastMsg=`Objectif sponsor validé : +${G.activeSponsor.reward}k$.`;
-  }
-  G.activeSponsor=null;
-}
+/* ==== [ANCRE: CORRECTIF_SUPPRESSION_OBJECTIF_SPONSOR] — Lot C01/2026
+   §C10b : SPONSOR_OBJECTIVES, generateSponsorObjective() et
+   evaluateSponsor() retirés — plus de promesse de gain chiffré liée à un
+   sponsor avant combat. L'événement narratif sponsor_clash (pesée,
+   ui-02-fight-prep-events.js) est conservé : sans rapport avec cet
+   objectif chiffré, purement narratif. ==== */
 
 
 function setPersonality(alignment){
