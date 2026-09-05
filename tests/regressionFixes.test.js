@@ -1904,3 +1904,197 @@ test('P8_L9_RYTHME_ROUND — neutraliser le rythme fait redescendre la part de f
   assert.ok(shareWith > shareWithout, `la part de frappes des 30 dernières secondes (${(shareWith * 100).toFixed(2)}%) doit dépasser la version sans rythme (${(shareWithout * 100).toFixed(2)}%)`);
 });
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L10_ADAPTABILITE_FENETRE] — Lot 10/P8 §10.2 : adaptClosure()/
+   closeStructuralGap()/adaptGroundDisadvantage() sont des fonctions PURES
+   (comme judgesVerdict()/takedownSigmoidSteep()/paceMultiplier() dans les
+   lots précédents), testées directement plutôt que déduites d'un Monte
+   Carlo bruité. Quatre règles non négociables du §10.2, chacune isolée. ==== */
+test('P8_L10_ADAPTABILITE_FENETRE — adaptClosure() : fermeture nulle au round 1, croissante ensuite, plafonnée, jamais totale', () => {
+  const win = newGameWindow();
+  // Round 1 : fermeture nulle quelle que soit l'adaptabilité (§10.2, "personne
+  // ne résout un mauvais matchup dans les 30 premières secondes").
+  assert.equal(win.adaptClosure(1, 10, 0.55), 0, 'round 1, faible adaptabilité -> fermeture nulle');
+  assert.equal(win.adaptClosure(1, 100, 0.55), 0, 'round 1, adaptabilité maximale -> fermeture nulle malgré tout');
+  // Croissante avec le round, à adaptabilité fixe.
+  const r2 = win.adaptClosure(2, 80, 0.55), r3 = win.adaptClosure(3, 80, 0.55), r5 = win.adaptClosure(5, 80, 0.55);
+  assert.ok(r2 > 0, 'round 2, adaptabilité élevée -> fermeture déjà non nulle');
+  assert.ok(r3 > r2 && r5 > r3, `la fermeture doit croître round après round (r2=${r2}, r3=${r3}, r5=${r5})`);
+  // Croissante avec l'adaptabilité, à round fixe.
+  const lowAdapt = win.adaptClosure(5, 10, 0.55), highAdapt = win.adaptClosure(5, 100, 0.55);
+  assert.ok(highAdapt > lowAdapt, `une adaptabilité élevée doit fermer plus qu'une adaptabilité faible au même round (faible=${lowAdapt}, élevée=${highAdapt})`);
+  // Plafonnée, jamais totale (§10.2 : "une adaptabilité à 100 ne doit pas
+  // annuler un mauvais matchup, seulement le rendre survivable").
+  assert.ok(win.adaptClosure(5, 100, 0.55) <= 0.55, 'la fermeture ne doit jamais dépasser son plafond');
+  assert.ok(win.adaptClosure(5, 100, 0.55) < 1, 'la fermeture ne doit jamais être totale, même à adaptabilité maximale et en fin de combat');
+  // Sur un combat en cinq rounds, l'adaptabilité doit accumuler nettement
+  // plus de fermeture qu'un combat en trois rounds (§10.2, dernier paragraphe).
+  const closureAt3Rounds = win.adaptClosure(3, 70, 0.55);
+  const closureAt5Rounds = win.adaptClosure(5, 70, 0.55);
+  assert.ok(closureAt5Rounds > closureAt3Rounds, `un combat en 5 rounds doit accumuler plus de fermeture (${closureAt5Rounds}) qu'un combat en 3 rounds (${closureAt3Rounds})`);
+});
+
+test('P8_L10_ADAPTABILITE_FENETRE — closeStructuralGap() : nulle sur un écart nul (matchup neutre), refermée selon l’adaptabilité du DÉSAVANTAGÉ uniquement', () => {
+  const win = newGameWindow();
+  // §10 : "aucun effet mesurable sur un affrontement neutre" -> vrai PAR
+  // CONSTRUCTION dès que l'écart structurel lui-même est nul, quels que
+  // soient le round et les deux adaptabilités.
+  for (const round of [1, 2, 3, 5]) {
+    for (const adaptA of [1, 50, 100]) {
+      for (const adaptB of [1, 50, 100]) {
+        assert.equal(win.closeStructuralGap(0, round, adaptA, adaptB, 0.55), 0,
+          `écart nul -> fermeture nulle (round=${round}, adaptA=${adaptA}, adaptB=${adaptB})`);
+      }
+    }
+  }
+  // Un écart positif favorise A (convention rEdge/bEdge) : c'est donc B qui
+  // est désavantagé, et seule L'ADAPTABILITÉ DE B doit gouverner la fermeture
+  // — celle d'A (l'avantagé) ne doit avoir AUCUN effet (§10.1 : "et rien
+  // d'autre").
+  const gapFavorsA = 5;
+  const bAdaptableAFaible = win.closeStructuralGap(gapFavorsA, 4, 10, 95, 0.55);
+  const bAdaptableAEleve = win.closeStructuralGap(gapFavorsA, 4, 95, 95, 0.55);
+  assert.equal(bAdaptableAFaible, bAdaptableAEleve,
+    'l’adaptabilité du combattant AVANTAGÉ (A) ne doit avoir aucun effet sur la fermeture');
+  const bPeuAdaptable = win.closeStructuralGap(gapFavorsA, 4, 50, 10, 0.55);
+  const bTresAdaptable = win.closeStructuralGap(gapFavorsA, 4, 50, 95, 0.55);
+  assert.ok(bTresAdaptable < bPeuAdaptable,
+    `un B très adaptable doit refermer davantage l'écart qui le désavantage (peu adaptable=${bPeuAdaptable}, très adaptable=${bTresAdaptable})`);
+  assert.ok(bTresAdaptable > 0, 'la magnitude refermée reste positive (même signe que l’écart d’origine), jamais inversée');
+  // Symétrique : un écart négatif favorise B, donc c'est l'adaptabilité de A
+  // qui doit gouverner la fermeture.
+  const gapFavorsB = -5;
+  const aTresAdaptable = win.closeStructuralGap(gapFavorsB, 4, 95, 50, 0.55);
+  const aPeuAdaptable = win.closeStructuralGap(gapFavorsB, 4, 10, 50, 0.55);
+  assert.ok(Math.abs(aTresAdaptable) < Math.abs(aPeuAdaptable),
+    'symétriquement, un A très adaptable doit refermer davantage un écart qui le désavantage');
+});
+
+test('P8_L10_ADAPTABILITE_FENETRE — adaptGroundDisadvantage() : neutre sur closedGuard, referme mount/backControl vers closedGuard selon l’adaptabilité du dessous, ne touche jamais standupOk', () => {
+  const win = newGameWindow();
+  // Réutilise les objets réels de GROUND_POS (même realm jsdom que la
+  // fonction testée) : comparer un littéral tapé côté Node à un objet
+  // reconstruit côté jsdom ferait échouer une égalité stricte sur un simple
+  // écart de prototype entre les deux realms, sans rapport avec le
+  // comportement réel testé ici — cf. TEST_P8_L10_ADAPTABILITE_NEUTRE.
+  const closedGuard = win.eval('GROUND_POS.closedGuard'), mount = win.eval('GROUND_POS.mount');
+  const fieldsEqual = (a, b) => ['dominance', 'ctrlMult', 'gnpMult', 'topSubMult', 'botSubMult', 'standupOk'].every(k => a[k] === b[k]);
+  // Neutre par construction sur closedGuard elle-même (se rapprocher de
+  // soi-même ne change rien) — round et adaptabilité n'y changent rien.
+  assert.ok(fieldsEqual(win.adaptGroundDisadvantage(closedGuard, 5, 100), closedGuard),
+    'closedGuard est déjà la position la moins punitive pour le dessous : rien à refermer');
+  // Round 1 : profil inchangé quelle que soit l'adaptabilité du dessous.
+  assert.ok(fieldsEqual(win.adaptGroundDisadvantage(mount, 1, 100), mount), 'round 1 -> profil de position inchangé');
+  // Rounds suivants : chaque multiplicateur se rapproche de closedGuard,
+  // d'autant plus qu'un dessous adaptable dure longtemps dans le combat.
+  const mountR1 = win.adaptGroundDisadvantage(mount, 1, 90);
+  const mountR5LowAdapt = win.adaptGroundDisadvantage(mount, 5, 30); // "faible" mais pas nulle : adaptability<=10 ferme exactement 0 par construction (adaptClosure), cf. plancher de skill
+  const mountR5HighAdapt = win.adaptGroundDisadvantage(mount, 5, 90);
+  assert.ok(mountR5HighAdapt.gnpMult < mountR5LowAdapt.gnpMult && mountR5LowAdapt.gnpMult < mountR1.gnpMult,
+    `gnpMult doit décroître avec l'adaptabilité du dessous (round1=${mountR1.gnpMult}, r5 faible=${mountR5LowAdapt.gnpMult}, r5 élevée=${mountR5HighAdapt.gnpMult})`);
+  assert.ok(mountR5HighAdapt.botSubMult > mountR5LowAdapt.botSubMult,
+    'botSubMult (menace de soumission du dessous) doit AUGMENTER — se rapprocher de closedGuard, plus haut sur cet axe');
+  assert.ok(mountR5HighAdapt.gnpMult > closedGuard.gnpMult,
+    'la fermeture reste PARTIELLE : même à adaptabilité maximale et en fin de combat, mount ne redevient jamais aussi doux que closedGuard');
+  // standupOk n'est JAMAIS modifié : ce mécanisme n'aide jamais à se relever,
+  // seulement à moins souffrir en restant en dessous (§10.3, note du code).
+  assert.equal(mountR5HighAdapt.standupOk, false, 'standupOk ne doit jamais être altéré par ce mécanisme');
+});
+
+/* ==== [ANCRE: TEST_P8_L10_ADAPTABILITE_NEUTRE] — Lot 10/P8 §10, "premier
+   test à écrire" : sur un affrontement neutre (même style, même allonge,
+   même gabarit, même garde), le MÉCANISME DE FENÊTRE introduit par ce lot
+   n'ajoute AUCUN effet mesurable — au-delà de la lecture continue existante
+   d'adaptability via eff().fightIQ, déjà établie et testée par le lot 6
+   (P8_L6_ADAPTABILITY_TOUJOURS_LU_EN_COMBAT) et volontairement INCHANGÉE
+   par ce lot (CLAUDE.md §8 : additif, jamais un second système parallèle).
+   Isole la contribution du mécanisme lui-même en le neutralisant (identité)
+   d'un côté, actif de l'autre, sur un combat identique (même seed, même
+   rnd() figé à une valeur qui ne déclenche jamais de transition
+   probabiliste — clinch/amenée/coup lourd/blessure — pour que la comparaison
+   ne porte que sur la frappe à distance, où vivent les trois axes physiques
+   fixes du combat : allonge/gabarit/garde). ==== */
+test('P8_L10_ADAPTABILITE_NEUTRE — sur un affrontement neutre en allonge/gabarit/garde, le mécanisme de fenêtre n’a AUCUN effet mesurable', () => {
+  const buildNeutralPair = (win) => {
+    const A = win.makeFighter({ style: 'mma', level: 60 });
+    const B = win.makeFighter({ style: 'mma', level: 60 });
+    B.attrs = Object.assign({}, A.attrs); // mêmes attributs des deux côtés
+    B.phys = Object.assign({}, A.phys, { tags: (A.phys.tags || []).slice() }); // même allonge/gabarit/garde
+    A.attrs.adaptability = 15; B.attrs.adaptability = 92; // adaptabilités très asymétriques malgré tout
+    return [A, B];
+  };
+  // Même fenêtre jsdom (`win`) pour les deux tirs : comparer des objets issus
+  // de deux realms `newGameWindow()` différents ferait échouer deepEqual sur
+  // un simple écart de prototype (Object global distinct par realm), sans
+  // rapport avec le comportement réel testé ici.
+  const win = newGameWindow();
+  const origCloseStructuralGap = win.closeStructuralGap, origAdaptGroundDisadvantage = win.adaptGroundDisadvantage;
+  const runFight = (l10Active) => {
+    win.setSeed(20261010);
+    win.rnd = () => 0.999; // ne déclenche jamais un `rnd()<p` (clinch/amenée/coup lourd/blessure/faute) — reste en 'debout' tout le combat
+    win.closeStructuralGap = l10Active ? origCloseStructuralGap : (edgeValue) => edgeValue || 0; // identité : comportement PRÉ-lot 10
+    win.adaptGroundDisadvantage = l10Active ? origAdaptGroundDisadvantage : (posProf) => posProf;  // identité : comportement PRÉ-lot 10
+    const [A, B] = buildNeutralPair(win);
+    return win.simulateFight(A, B, 5);
+  };
+  const withL10 = runFight(true);
+  const withoutL10 = runFight(false);
+  assert.deepEqual(withL10.stats, withoutL10.stats,
+    'sur un matchup neutre en allonge/gabarit/garde, activer ou neutraliser le mécanisme de fenêtre L10 ne doit RIEN changer aux statistiques du combat');
+  assert.equal(withL10.winner, withoutL10.winner, 'ni le vainqueur');
+  assert.equal(withL10.method, withoutL10.method, 'ni la méthode de victoire');
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L10_ADAPTABILITE_MATCHUP] — Lot 10/P8 §10.2/§10.3 :
+   sur un affrontement PHYSIQUEMENT DÉSÉQUILIBRÉ (écart d'allonge marqué),
+   une adaptabilité élevée côté désavantagé doit mesurablement réduire
+   l'écart de taux de frappes reçues/portées par rapport à une adaptabilité
+   faible — sans jamais l'annuler (§10.2, plafond partiel) — et cet effet
+   doit être plus marqué sur un format 5 rounds que 3 rounds (§10.2, dernier
+   paragraphe). Intégration sur simulateFight() plutôt que sur la fonction
+   pure seule : c'est l'effet bout-en-bout que le critère d'acceptation du
+   lot demande ("l'amplitude, cellule par cellule"). ==== */
+test('P8_L10_ADAPTABILITE_MATCHUP — un désavantage d’allonge marqué se referme davantage pour un combattant très adaptable, et plus encore sur 5 rounds que sur 3', () => {
+  const win = newGameWindow();
+  const N = 600;
+  /** Différence PAIRÉE (même seed, donc mêmes attributs de base des deux
+   * côtés — seule l'adaptabilité de A change) de frappes significatives
+   * reçues par A (le combattant à l'allonge courte) entre une adaptabilité
+   * faible et élevée, moyennée sur N combats. Le pairage par seed élimine le
+   * bruit dominant (variance de finition/KO d'un combat à l'autre, bien plus
+   * grande que l'effet mesuré ici) sans quoi l'effet — réel mais modeste,
+   * cf. rapport de livraison — est noyé à un N raisonnable pour un test
+   * unitaire ; une comparaison de deux moyennes indépendantes a été tentée
+   * et abandonnée pour cette raison. */
+  const pairedReduction = (rounds) => {
+    let diffSum = 0;
+    for (let i = 0; i < N; i++) {
+      win.setSeed(900000 + i);
+      const ALow = win.makeFighter({ style: 'boxer', level: 55 });
+      const BLow = win.makeFighter({ style: 'boxer', level: 55 });
+      ALow.phys.reach = BLow.phys.reach - 25; // A nettement désavantagé en allonge
+      ALow.attrs.adaptability = 10; BLow.attrs.adaptability = 50;
+      const resLow = win.simulateFight(ALow, BLow, rounds);
+
+      win.setSeed(900000 + i); // même seed -> mêmes tirages d'attributs de base pour A/B
+      const AHigh = win.makeFighter({ style: 'boxer', level: 55 });
+      const BHigh = win.makeFighter({ style: 'boxer', level: 55 });
+      AHigh.phys.reach = BHigh.phys.reach - 25;
+      AHigh.attrs.adaptability = 95; BHigh.attrs.adaptability = 50;
+      const resHigh = win.simulateFight(AHigh, BHigh, rounds);
+
+      // B est l'attaquant : ses frappes landées SONT celles reçues par A.
+      diffSum += (resLow.stats.B.sig - resHigh.stats.B.sig);
+    }
+    return diffSum / N;
+  };
+  const reduction3 = pairedReduction(3), reduction5 = pairedReduction(5);
+  assert.ok(reduction3 > 0,
+    `sur 3 rounds, une adaptabilité élevée doit réduire (en moyenne pairée) les frappes significatives encaissées par le désavantagé — obtenu ${reduction3.toFixed(3)}`);
+  assert.ok(reduction5 > 0,
+    `sur 5 rounds, une adaptabilité élevée doit réduire (en moyenne pairée) les frappes significatives encaissées par le désavantagé — obtenu ${reduction5.toFixed(3)}`);
+  assert.ok(reduction5 > reduction3,
+    `l'adaptabilité doit valoir nettement plus sur 5 rounds (réduction pairée ${reduction5.toFixed(3)}) que sur 3 rounds (réduction pairée ${reduction3.toFixed(3)})`);
+});
+/* ==== [FIN ANCRE] ==== */

@@ -546,6 +546,75 @@ function ringsideExamStopChance(cuts,hasInjury){
   return clamp((cuts||0)*0.035+(hasInjury?0.09:0),0,0.5);
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L10_ADAPTABILITE_FENETRE] — Lot 10/P8 §10.1-§10.3 : le lot
+   6 a retiré le seul effet en combat d'`adaptability` (le coin entre les
+   rounds) ; ce lot le lui redonne, mais SOUS UNE FORME NOUVELLE et exclusive
+   ("elle ne doit avoir aucun effet sur un affrontement neutre", §10.1) —
+   jamais un retour du coin, jamais un second mécanisme parallèle à
+   `eff().fightIQ` (déjà lu en continu, cf. `baseline-P8.md` §5).
+   §10.2 impose une forme TEMPORELLE, pas proportionnelle : "l'adaptabilité
+   ne réduit pas le désavantage, elle en raccourcit la durée". `adaptClosure`
+   traduit ça en trois règles non négociables : (1) round 1 => fermeture
+   nulle, quelle que soit l'adaptabilité — personne ne résout un mauvais
+   matchup dans les 30 premières secondes ; (2) la fermeture croît avec le
+   round ET avec l'adaptabilité du combattant DÉSAVANTAGÉ par CE désavantage
+   précis (jamais celle de l'avantagé, §10.1 "et rien d'autre") ; (3) un
+   plafond `cap` toujours < 1 — "une adaptabilité à 100 ne doit pas annuler
+   un mauvais matchup, seulement le rendre survivable". La progression étant
+   linéaire en (round-1), un combat en 5 rounds accumule mécaniquement plus
+   de fermeture qu'un combat en 3 rounds sans code dédié au format — l'écart
+   demandé par §10.2 ("l'adaptabilité vaut nettement plus sur cinq rounds")
+   est une CONSÉQUENCE de cette forme, pas un cas particulier codé à part.
+   @returns {number} fraction de fermeture, 0..cap */
+const ADAPT_CLOSURE_CAP_PHYSICAL=0.55;  // allonge/gabarit/garde (§10.3) : fermeture max, jamais totale
+const ADAPT_CLOSURE_CAP_GROUND=0.25;    // infériorité positionnelle au sol (§10.3, "le cas échéant") : plafond plus bas,
+                                         // voir adaptGroundDisadvantage() ci-dessous pour la justification
+const ADAPT_CLOSURE_PER_ROUND=0.16;     // vitesse de fermeture par round au-delà du round 1, mise à l'échelle par l'adaptabilité du désavantagé
+function adaptClosure(round,adaptability,cap){
+  if(round<=1) return 0;
+  const skill=clamp(((adaptability||50)-10)/90,0,1); // 10 -> ~0 (ferme quasi rien de tout le combat), 100 -> 1 (vitesse de fermeture maximale)
+  return Math.min(cap, ADAPT_CLOSURE_PER_ROUND*(round-1)*skill);
+}
+/** Referme partiellement un écart structurel SIGNÉ (positif favorise A,
+ * négatif favorise B — même convention que rEdge/bEdge) en fonction du round
+ * courant et de l'adaptabilité du combattant DÉSAVANTAGÉ PAR CE SIGNE
+ * PRÉCIS, jamais celle de l'avantagé. Sur un affrontement neutre
+ * (edgeValue=0, ex. même allonge/gabarit/garde), renvoie toujours 0 quels
+ * que soient round/adaptA/adaptB : le critère §10 "aucun effet mesurable sur
+ * un affrontement neutre" est vrai PAR CONSTRUCTION, pas simplement mesuré.
+ * @returns {number} edgeValue de même signe, magnitude réduite (ou nulle) */
+function closeStructuralGap(edgeValue,round,adaptA,adaptB,cap){
+  if(!edgeValue) return 0;
+  const closure=edgeValue>0 ? adaptClosure(round,adaptB,cap) : adaptClosure(round,adaptA,cap);
+  return edgeValue*(1-closure);
+}
+/** §10.3 "le cas échéant l'infériorité positionnelle au sol" : referme
+ * partiellement le profil GROUND_POS pour le combattant du DESSOUS, selon
+ * SON adaptabilité, en rapprochant chaque multiplicateur de la position la
+ * plus douce pour le dessous — `closedGuard`, déjà la référence la moins
+ * punitive de la table (dominance/ctrlMult/gnpMult/topSubMult les plus bas,
+ * botSubMult le plus haut) — jamais un cinquième profil inventé en parallèle
+ * de GROUND_POS (CLAUDE.md §8). Neutre par construction sur closedGuard
+ * elle-même (se rapprocher de soi-même ne change rien) : un combattant déjà
+ * dans la position la moins punitive n'a rien à "refermer". Plafond
+ * volontairement plus bas que les axes physiques
+ * (ADAPT_CLOSURE_CAP_GROUND < ADAPT_CLOSURE_CAP_PHYSICAL) : la hiérarchie de
+ * positions du Lot 3/P7 et les cellules 8x8 encore fragiles signalées par
+ * `baseline-P8.md` §2.2 (muayThai/bjj vs wrestler) reposent largement sur ce
+ * mécanisme — ce lot ne doit pas les rouvrir en rendant le sol trop
+ * confortable pour le dessous. `standupOk` n'est jamais modifié : cette
+ * fonction n'aide jamais à SE RELEVER (déjà gouverné par
+ * groundStandupChance/l'arbitre, Lot 3/P7 et Lot 7/P8), seulement à moins
+ * souffrir en restant en dessous. @returns {object} profil GROUND_POS ajusté */
+function adaptGroundDisadvantage(posProf,round,botAdaptability){
+  const closure=adaptClosure(round,botAdaptability,ADAPT_CLOSURE_CAP_GROUND);
+  if(closure<=0) return posProf;
+  const neutral=GROUND_POS.closedGuard;
+  const blend=k=>posProf[k]+(neutral[k]-posProf[k])*closure;
+  return {dominance:blend('dominance'),ctrlMult:blend('ctrlMult'),gnpMult:blend('gnpMult'),
+    topSubMult:blend('topSubMult'),botSubMult:blend('botSubMult'),standupOk:posProf.standupOk};
+}
+/* ==== [FIN ANCRE] ==== */
 function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff(A),b=eff(B);
   /* ==== [ANCRE: IMMUNITE_FINITION_CAMP] — item demandé : passifs de camp
      "impossible à finir" (Familial round 1, Ascétique round 3). Purement
@@ -818,6 +887,60 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
        lire qui est mené ne change pas dans la seconde. ==== */
     const roundLaggingA=r>1 && (j1A+j2A+j3A)<(j1B+j2B+j3B-4), roundLaggingB=r>1 && (j1B+j2B+j3B)<(j1A+j2A+j3A-4);
     /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: P8_L10_ADAPTABILITE_FENETRE] — recalculé une seule fois
+       par round (jamais par tick : ni le round ni `a.adaptability`/
+       `b.adaptability`, fixes pour tout le combat, ne changent entre deux
+       ticks d'un même round) — voir closeStructuralGap() plus haut. Les
+       trois axes physiques fixés une fois pour tout le combat (allonge,
+       gabarit, garde — §10.3) referment leur désavantage round après round
+       selon l'adaptabilité du combattant qu'ils pénalisent CE round-ci.
+       `rEdgeStrikeAdj` couvre l'allonge en frappe à distance ET la taxe
+       d'entrée en clinch (ANCRE P8_L8_ALLONGE_FERMETURE plus bas, même axe,
+       même signe que rEdge) ; `rEdgeClinchAdj`/`bEdgeClinchAdj` couvrent
+       l'allonge et le gabarit une fois AU clinch, où le signe de l'allonge
+       s'inverse (ANCRE P8_L8_ALLONGE_CLINCH) — deux fermetures distinctes
+       de la MÊME allonge selon le contexte, jamais la même variable
+       réutilisée à tort d'un contexte à l'autre. ==== */
+    const rEdgeStrikeAdj=closeStructuralGap(rEdge,r,a.adaptability,b.adaptability,ADAPT_CLOSURE_CAP_PHYSICAL);
+    const rEdgeClinchAdj=closeStructuralGap(-rEdge,r,a.adaptability,b.adaptability,ADAPT_CLOSURE_CAP_PHYSICAL);
+    const bEdgeClinchAdj=closeStructuralGap(bEdge,r,a.adaptability,b.adaptability,ADAPT_CLOSURE_CAP_PHYSICAL);
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: P8_L10_ADAPTABILITE_LOG] — Lot 10/P8 §10.4 : "le joueur
+       doit pouvoir constater l'effet sans lire le code... une ligne de log
+       au passage du round, du même registre que les autres beats, sans
+       chiffre affiché". Un seul beat, au tout début du round (jamais un par
+       tick), et seulement quand il y a réellement quelque chose à raconter :
+       un axe physique (allonge ou garde — le gabarit reste volontairement
+       hors de ce beat, son effet est trop discret pour mériter une ligne
+       dédiée, cf. lot8-allonge-gabarit-garde.md §3.2) est en train de se
+       refermer CE round-ci (donc jamais au round 1, par construction de
+       closeStructuralGap) pour un combattant dont l'adaptabilité dépasse
+       nettement la moyenne — un combattant moyen ne justifie pas une ligne à
+       chaque round. Priorité à l'allonge (axe le plus lisible en jeu, §8.1)
+       sur la garde. ==== */
+    if(r>=2){
+      const ADAPT_LOG_THRESHOLD=65;
+      let adaptBeatName=null, adaptBeatText=null;
+      const reachClosing=Math.abs(rEdge)-Math.abs(rEdgeStrikeAdj);
+      if(reachClosing>0.15){
+        if(rEdge>0 && b.adaptability>=ADAPT_LOG_THRESHOLD){ adaptBeatName=B.name; adaptBeatText=`${B.name} commence à trouver la bonne distance malgré l’allonge adverse.`; }
+        else if(rEdge<0 && a.adaptability>=ADAPT_LOG_THRESHOLD){ adaptBeatName=A.name; adaptBeatText=`${A.name} commence à trouver la bonne distance malgré l’allonge adverse.`; }
+      }
+      if(!adaptBeatName && openStance){
+        const stFootEdgeStart=clamp((a.footwork-b.footwork)*0.04,-1.2,1.2);
+        const stFootEdgeStartAdj=closeStructuralGap(stFootEdgeStart,r,a.adaptability,b.adaptability,ADAPT_CLOSURE_CAP_PHYSICAL);
+        const stanceClosing=Math.abs(stFootEdgeStart)-Math.abs(stFootEdgeStartAdj);
+        if(stanceClosing>0.05){
+          if(stFootEdgeStart>0 && b.adaptability>=ADAPT_LOG_THRESHOLD){ adaptBeatName=B.name; adaptBeatText=`${B.name} s’habitue peu à peu à la garde inversée d’en face.`; }
+          else if(stFootEdgeStart<0 && a.adaptability>=ADAPT_LOG_THRESHOLD){ adaptBeatName=A.name; adaptBeatText=`${A.name} s’habitue peu à peu à la garde inversée d’en face.`; }
+        }
+      }
+      if(adaptBeatText){
+        log.push({r,phase:'debout',by:adaptBeatName===A.name?'me':'op',text:`[${formatTime(0)}] ${adaptBeatText}`,momentum,
+          snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
     // ==== [ANCRE: HORLOGE_CONTINUE] — Lot P6/2026, remplace l'ancienne
     // découpe fixe en 6 micro-séquences de 50 secondes (ancre historique
     // MICRO_SEQUENCES) par une horloge continue de roundLen/dt=100 ticks
@@ -978,7 +1101,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            occupee, pas seulement de l'ecart d'attributs brut. groundPos est
            fixe a l'entree au sol (initialGroundPos(), takedown/clinch) et
            evolue via les transitions plus bas (ANCRE P7_L3_SOL_TRANSITIONS). ==== */
-        const posProf=GROUND_POS[groundPos]||GROUND_POS.closedGuard;
+        /* ==== [ANCRE: P8_L10_ADAPTABILITE_FENETRE] — §10.3 "le cas échéant
+           l'infériorité positionnelle au sol" : posProf brut est refermé
+           pour le combattant du DESSOUS selon SA propre adaptabilité — voir
+           adaptGroundDisadvantage() plus haut pour le choix d'un plafond
+           réduit sur cet axe. ==== */
+        const botAdaptForGround=topIsA?b.adaptability:a.adaptability;
+        const posProf=adaptGroundDisadvantage(GROUND_POS[groundPos]||GROUND_POS.closedGuard,r,botAdaptForGround);
+        /* ==== [FIN ANCRE] ==== */
         const control=clamp((top.topControl-bot.guard)*0.32,0,11)*0.2*posProf.ctrlMult;
         const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45)*topProf.gnpDmg*0.2*posProf.gnpMult;
         const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod*0.2*posProf.topSubMult;
@@ -1216,8 +1346,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            Poids volontairement plus faibles qu'en frappe distance (0.85) :
            le clinch reste avant tout gouverné par clinch/striking/power,
            l'allonge/le gabarit n'y sont qu'un facteur secondaire. ==== */
-        const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA-rEdge*0.45+bEdge*0.35;
-        const clinchB=(b.clinch*0.6+b.striking*0.25+b.power*0.15)*profB.clinchDmg-fatB+rEdge*0.45-bEdge*0.35;
+        /* ==== [ANCRE: P8_L10_ADAPTABILITE_FENETRE] — rEdgeClinchAdj/
+           bEdgeClinchAdj (calculés une fois par round plus haut) remplacent
+           ici -rEdge*0.45/+bEdge*0.35 bruts : au round 1 (closure=0) les deux
+           valent exactement -rEdge/bEdge, donc cette ligne reste identique à
+           avant ce lot pour le tout premier round — seuls les rounds
+           suivants voient le désavantage se refermer. ==== */
+        const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA+rEdgeClinchAdj*0.45+bEdgeClinchAdj*0.35;
+        const clinchB=(b.clinch*0.6+b.striking*0.25+b.power*0.15)*profB.clinchDmg-fatB-rEdgeClinchAdj*0.45-bEdgeClinchAdj*0.35;
+        /* ==== [FIN ANCRE] ==== */
         /* ==== [FIN ANCRE] ==== */
         const diff=clinchA-clinchB;
         if(Math.abs(diff)>8){
@@ -1384,8 +1521,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              (ANCRE P8_L8_ALLONGE_FERMETURE, transition vers le clinch plus
              bas) et garde ouverte (ANCRE P8_L8_GARDE_STANCE ci-dessous)
              s'ajoutent à cette base inchangée. ==== */
-          let offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
-          let offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
+          /* ==== [ANCRE: P8_L10_ADAPTABILITE_FENETRE] — rEdgeStrikeAdj
+             (calculé une fois par round plus haut) remplace ici rEdge brut :
+             au round 1 (closure=0) il vaut exactement rEdge, comportement
+             inchangé ; les rounds suivants referment partiellement l'écart
+             pour le combattant qu'il désavantage, selon son adaptabilité. ==== */
+          let offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdgeStrikeAdj*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
+          let offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdgeStrikeAdj*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
+          /* ==== [FIN ANCRE] ==== */
           /* ==== [ANCRE: P8_L8_GARDE_STANCE] — Lot 8/P8 §8.2 : "un
              affrontement de gardes opposées change la géométrie... avantage
              au pied avant". Actif UNIQUEMENT quand openStance est vrai
@@ -1397,8 +1540,18 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              identiques (l'écrasante majorité des combats), donc sans effet
              sur la matrice 8x8 existante. ==== */
           if(openStance){
-            const stFootEdge=clamp((a.footwork-b.footwork)*0.04,-1.2,1.2);
+            /* ==== [ANCRE: P8_L10_ADAPTABILITE_FENETRE] — troisième axe
+               physique (§10.3, garde) : recalculé par TICK (contrairement à
+               rEdgeStrikeAdj/bEdgeClinchAdj plus haut) car footwork lui-même
+               varie par tick (dégâts aux jambes, blessure au genou — ANCREs
+               P7_L2_DEGATS_PROGRESSIFS/P8_L9_BLESSURES) ; seuls le round et
+               l'adaptabilité, eux fixes pour tout le combat, gouvernent la
+               fermeture — closeStructuralGap() reste néanmoins bon marché
+               (aucun état, aucun tirage). ==== */
+            const stFootEdgeRaw=clamp((a.footwork-b.footwork)*0.04,-1.2,1.2);
+            const stFootEdge=closeStructuralGap(stFootEdgeRaw,r,a.adaptability,b.adaptability,ADAPT_CLOSURE_CAP_PHYSICAL);
             offA+=stFootEdge; offB-=stFootEdge;
+            /* ==== [FIN ANCRE] ==== */
           }
           /* ==== [FIN ANCRE] ==== */
           /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 : "initiative"
@@ -1721,8 +1874,12 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
                devant l'usure/les coups lourds accumulés sur un round entier,
                ANCRE P7_L2_USURE) — un coût réel mais qui ne doit pas, à lui
                seul, décider un combat. ==== */
-            if(Math.abs(rEdge)>=1){
-              const shortIsA=rEdge<0, entryTax=clamp(Math.abs(rEdge)*0.6,0,4)*0.3;
+            /* ==== [ANCRE: P8_L10_ADAPTABILITE_FENETRE] — même axe allonge
+               que rEdgeStrikeAdj plus haut (fermeture du désavantage pour le
+               combattant à l'allonge la plus courte) : réutilise la même
+               variable, pas une seconde fermeture indépendante du même écart. ==== */
+            if(Math.abs(rEdgeStrikeAdj)>=1){
+              const shortIsA=rEdgeStrikeAdj<0, entryTax=clamp(Math.abs(rEdgeStrikeAdj)*0.6,0,4)*0.3;
               if(shortIsA){ dmgA+=entryTax; applyZoneDamage(st.A,entryTax,0.6,0.3,0.1); }
               else { dmgB+=entryTax; applyZoneDamage(st.B,entryTax,0.6,0.3,0.1); }
             }
