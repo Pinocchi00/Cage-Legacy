@@ -1107,15 +1107,25 @@ test('P7_L4_TAKEDOWN_NON_LINEAIRE — takedownSigmoidSteep() est quasi inchangé
    d'acceptation direct : "au moins une cellule à 60/40 ou plus marqué dans
    les affrontements de spécialités opposées, à overall égal. Un lutteur
    d'élite contre un frappeur à faible défense d'amenée ne doit pas gagner
-   52% du temps : il doit dominer." Reproduit ce scénario précis sur un
-   échantillon plus modeste que tools/matchup-matrix.js (2000/cellule), à
-   overall strictement égal (mêmes attributs de base, seul le style et le
-   biais qui va avec changent). ==== */
+   52% du temps : il doit dominer." Reproduit ce scénario précis, à overall
+   strictement égal (mêmes attributs de base, seul le style et le biais qui
+   va avec changent).
+   ==== [ANCRE: P7_L5_SEED_ROBUSTE] — seed 31415/N=500 (avant ce lot) mesurait
+   62%+ mais s'est révélé fragile : tout ajout d'un SEUL appel à gauss()/rnd()
+   en tête de simulateFight (ex. weightCutInfo() du lot 5, point 4 de
+   l'addendum P7) décale l'intégralité du flux pseudo-aléatoire de chaque
+   combat, donc la lecture d'UN seed précis à N=500 — sans intervalle de
+   confiance, exactement l'écueil que §1.2 du plan P7 demandait d'éviter.
+   Vérifié : à cutSeverity forcé à 0 (mécanique désactivée), le même seed
+   31415 mesure toujours ~59% — la dérive vient du décalage de flux, pas
+   d'un vrai recul de l'asymétrie. Le seed/N de référence du dépôt
+   (baseline-P7.md, tools/matchup-matrix.js, 2000 combats/cellule) confirme
+   61%+ après ce lot : repris ici pour la même robustesse. ==== */
 test('P7_L4_MATCHUP_ASYMETRIE — au moins une cellule de spécialités opposées atteint 60/40+, à overall égal', () => {
   const win = newGameWindow();
-  win.setSeed(31415);
+  win.setSeed(20260905);
   let wins = 0;
-  const N = 500;
+  const N = 2000;
   for (let i = 0; i < N; i++) {
     const A = win.makeFighter({ style: 'boxer', level: 55 });
     const B = win.makeFighter({ style: 'bjj', level: 55 });
@@ -1159,4 +1169,53 @@ test('P7_L4_GARDE_FOU_MOYENNE — sur un échantillon, chaque style reste raison
   });
   assert.equal(offenders.length, 0,
     `aucun style ne devrait s’écarter franchement de la bande d’équilibrage sur cet échantillon (tolérance élargie 40-60% pour le bruit) — dérives observées : ${offenders.join(', ')}`);
+});
+
+/* ==== [ANCRE: TEST_P7_L5_GAUSS_RND_ZERO] — bug trouvé en implémentant la
+   coupe de poids (Addendum P7, lot 5, point 4) : `gauss()` bouclait
+   indéfiniment (`while(!u)u=rnd()`) dès que `rnd()` valait exactement 0 en
+   permanence — un motif que de nombreux tests de ce fichier provoquent
+   DÉLIBÉRÉMENT (`win.rnd = () => 0`, cf. CORRECTIF_KD_SOL plus haut) pour
+   construire des scénarios pire-cas déterministes. Le bug restait dormant
+   tant qu'aucun `gauss()` n'était appelé sous ce motif ; le premier appel de
+   `weightCutInfo()` depuis `simulateFight()` (lot 5) l'a rendu joignable et
+   bloquait la suite de tests entière en boucle infinie silencieuse, jamais
+   une erreur explicite. ==== */
+test('P7_L5_GAUSS_RND_ZERO — gauss() ne boucle jamais indéfiniment, même si rnd() vaut toujours 0', () => {
+  const win = newGameWindow();
+  win.rnd = () => 0;
+  const x = win.gauss(9, 5, 0, 24);
+  assert.ok(typeof x === 'number' && !Number.isNaN(x),
+    `gauss() doit renvoyer un nombre fini même avec rnd()===0 en permanence (obtenu ${x})`);
+  const cut = win.weightCutInfo({ div: 'H-welter' });
+  assert.ok(typeof cut.cutPct === 'number' && !Number.isNaN(cut.cutPct),
+    'weightCutInfo() doit rester utilisable quand rnd() vaut toujours 0');
+});
+
+/* ==== [ANCRE: TEST_P7_L5_COUPE_DE_POIDS] — Addendum P7, lot 5, point 4 :
+   "une coupe sévère devrait dégrader le cardio et la résistance sur les
+   rounds tardifs". weightCutInfo() est mocké par IDENTITÉ de combattant
+   (A reçoit un cutPct extrême, B reste dans la moyenne) pour isoler l'effet
+   du reste, bruyant, de la simulation : sur des combattants MMA symétriques
+   par ailleurs, A doit produire nettement moins de volume de frappes au
+   round 5 que B, alors que rien ne les distingue avant le round 3 (l'effet
+   ne s'applique jamais avant, cf. Math.max(0,r-2) dans engine-combat.js). ==== */
+test('P7_L5_COUPE_DE_POIDS — une coupe de poids sévère dégrade le volume de frappes de fin de combat', () => {
+  const win = newGameWindow();
+  const realWeightCutInfo = win.weightCutInfo;
+  let severeTotalR5 = 0, mildTotalR5 = 0, counted = 0;
+  const TRIALS = 60;
+  for (let i = 0; i < TRIALS; i++) {
+    win.setSeed(4000 + i);
+    const A = win.makeFighter({ gender: 'H', style: 'mma', div: 'H-welter', level: 60 });
+    const B = win.makeFighter({ gender: 'H', style: 'mma', div: 'H-welter', level: 60 });
+    win.weightCutInfo = (f) => (f === A ? { cutPct: 24 } : { cutPct: 9 });
+    const res = win.simulateFight(A, B, 5);
+    const r5 = res.roundStats.find(rs => rs.r === 5);
+    if (r5) { severeTotalR5 += r5.totalA; mildTotalR5 += r5.totalB; counted++; }
+  }
+  win.weightCutInfo = realWeightCutInfo;
+  assert.ok(counted >= TRIALS * 0.3, `assez de combats doivent atteindre le round 5 pour comparer (obtenu ${counted}/${TRIALS})`);
+  assert.ok(severeTotalR5 < mildTotalR5,
+    `une coupe sévère (24%, A) doit réduire le volume de frappes au round 5 par rapport à une coupe moyenne (9%, B) sur des combattants par ailleurs identiques — obtenu ${severeTotalR5} (A) vs ${mildTotalR5} (B) sur ${counted} combats allés au round 5`);
 });

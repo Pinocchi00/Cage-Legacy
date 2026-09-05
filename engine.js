@@ -25,7 +25,19 @@ const pick=a=>a[Math.floor(rnd()*a.length)];
 function pickStable(pool,seed){ if(!pool||!pool.length) return ''; let h=0; const s=String(seed); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return pool[h%pool.length]; }
 const clamp=(v,lo=1,hi=100)=>v<lo?lo:v>hi?hi:v;
 const num=(v,d=50)=>typeof v==='number'&&!isNaN(v)?v:d;
-function gauss(m,sd,lo,hi){ let u=0,v=0; while(!u)u=rnd(); while(!v)v=rnd(); let g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); let x=Math.round(m+g*sd); if(lo!=null)x=Math.max(lo,x); if(hi!=null)x=Math.min(hi,x); return x; }
+/* ==== [ANCRE: P7_L5_GAUSS_RND_ZERO] — bug trouvé en implémentant la coupe de
+   poids (Addendum P7 point 4) : `while(!u)u=rnd()` tourne indéfiniment dès
+   que `rnd()` vaut exactement 0, un cas normalement quasi impossible mais
+   que de nombreux tests de ce fichier provoquent DÉLIBÉRÉMENT (`win.rnd =
+   () => 0`, motif utilisé partout pour construire des scénarios pire-cas
+   déterministes). Tant qu'aucun `gauss()` n'était appelé sous ce motif, le
+   bug restait dormant ; le premier appel de `weightCutInfo()` DEPUIS
+   `simulateFight()` l'a rendu joignable et bloquait la suite de tests
+   entière (boucle infinie, jamais une erreur). Un plancher epsilon règle la
+   cause réelle sans jamais biaiser une distribution normale de `rnd()`, où
+   tomber exactement sur 0 a une probabilité de 1/2^32 par appel. ==== */
+function gauss(m,sd,lo,hi){ const u=Math.max(rnd(),1e-9), v=Math.max(rnd(),1e-9); let g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); let x=Math.round(m+g*sd); if(lo!=null)x=Math.max(lo,x); if(hi!=null)x=Math.min(hi,x); return x; }
+/* ==== [FIN ANCRE] ==== */
 const sigmoid=x=>1/(1+Math.exp(-x));
 const d20=v=>Math.max(1,Math.min(20,Math.round(v/5)));   // /100 -> /20 affiché
 // Accord de genre (#1) : remplace {forme masculine/forme féminine} selon
