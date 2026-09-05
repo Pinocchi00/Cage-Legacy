@@ -195,7 +195,13 @@ function calculateEloDelta(ratingA,ratingB,winnerSide,method,round){
   const expectedA=1/(1+Math.pow(10,(ratingB-ratingA)/400)); const expectedB=1-expectedA;
   const scoreA=winnerSide==='A'?1:(winnerSide==='D'?0.5:0), scoreB=winnerSide==='B'?1:(winnerSide==='D'?0.5:0);
   let kFactor=32;
-  if(isKOMethod(method)) kFactor=48; else if(method&&method.startsWith('Soum')) kFactor=44; else if(method==='Décision partagée') kFactor=24;
+  /* ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — 'Décision majoritaire'
+     (2-0-1, engine-combat.js ANCRE P8_L7_VOCABULAIRE_DECISIONS) est, comme
+     'Décision partagée', une victoire moins nette qu'une décision unanime —
+     étendu au même kFactor réduit plutôt que de laisser retomber sur le
+     défaut (32), qui aurait traité un 2-0-1 à peine plus consensuel qu'un
+     2-1 comme si l'écart de lecture entre juges n'existait pas. ==== */
+  if(isKOMethod(method)) kFactor=48; else if(method&&method.startsWith('Soum')) kFactor=44; else if(method==='Décision partagée'||method==='Décision majoritaire') kFactor=24;
   if(round===1) kFactor*=1.25;
   const rawDeltaA=kFactor*(scoreA-expectedA), rawDeltaB=kFactor*(scoreB-expectedB);
   return {deltaA:Math.round(rawDeltaA<0?rawDeltaA*1.5:rawDeltaA), deltaB:Math.round(rawDeltaB<0?rawDeltaB*1.5:rawDeltaB)};

@@ -69,7 +69,16 @@ function fmtStats(s, digits = 1) {
 console.log(">>> [1/3] Lancement de la simulation Monte Carlo du Moteur de Combat (12 000 combats)...");
 const FIGHT_COUNT = 12000;
 
-const methodCounts = { 'KO/TKO': 0, 'Soumission': 0, 'Décision': 0, 'Décision partagée': 0, 'Égalité': 0 };
+/* ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — Lot 7/P8 §7.3 : le panel de
+   juges rend désormais six libellés de décision/nul (au lieu de deux) plus
+   la disqualification (§7.1) comme méthode de victoire à part entière —
+   voir engine-combat.js, ANCRE P8_L7_VOCABULAIRE_DECISIONS et
+   P8_L7_ARBITRE_FAUTES. ==== */
+const methodCounts = { 'KO/TKO': 0, 'Soumission': 0, 'Disqualification': 0,
+  'Décision unanime': 0, 'Décision majoritaire': 0, 'Décision partagée': 0,
+  'Nul unanime': 0, 'Nul majoritaire': 0, 'Nul partagé': 0 };
+/* ==== [FIN ANCRE] ==== */
+let refStandups = 0, pointDeductions = 0, pointDeductionReversals = 0;
 const roundFinishes = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, dec: 0 };
 const styleStats = {};
 /* ==== [ANCRE: P7_L1_STYLE_FINGERPRINT] — LOT 1/P7 §1.4 : "empreinte
@@ -148,9 +157,28 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
   const m = res.method;
   if (win.isKOMethod(m)) methodCounts['KO/TKO']++;
   else if (m.startsWith('Soum')) methodCounts['Soumission']++;
-  else if (m === 'Décision partagée') methodCounts['Décision partagée']++;
-  else if (m === 'Égalité') methodCounts['Égalité']++;
-  else methodCounts['Décision']++;
+  else if (m === 'Disqualification') methodCounts['Disqualification']++;
+  else if (Object.prototype.hasOwnProperty.call(methodCounts, m)) methodCounts[m]++;
+  else methodCounts['Décision unanime']++; // repli défensif, ne devrait jamais survenir
+
+  /* ==== [ANCRE: P8_L7_ARBITRE_ETAT] — Lot 7/P8, critères d'acceptation §7 :
+     fréquence des relances debout, des retraits de point, et détection d'au
+     moins un renversement de décision par retrait de point (recalcule le
+     verdict 6-libellés SANS l'effet du/des retrait(s), voir classifyVerdict
+     plus haut — même logique que ANCRE P8_L7_VOCABULAIRE_DECISIONS,
+     engine-combat.js, réappliquée aux cartes hypothétiques). ==== */
+  refStandups += res.refStandups || 0;
+  const fpA = res.foulPointsA || 0, fpB = res.foulPointsB || 0;
+  pointDeductions += fpA + fpB;
+  if (win.isDecisionLike(m) && (fpA > 0 || fpB > 0) && res.judges) {
+    const hypo = win.judgesVerdict(
+      res.judges.j1[0] + fpA, res.judges.j1[1] + fpB,
+      res.judges.j2[0] + fpA, res.judges.j2[1] + fpB,
+      res.judges.j3[0] + fpA, res.judges.j3[1] + fpB
+    );
+    if (hypo.winner !== res.winner) pointDeductionReversals++;
+  }
+  /* ==== [FIN ANCRE] ==== */
 
   // Round de fin
   if (res.round) roundFinishes[res.round] = (roundFinishes[res.round] || 0) + 1;
@@ -387,11 +415,39 @@ console.log(`  Finition R4/R5       : ${(roundFinishes[4] || 0) + (roundFinishes
 console.log(`  Allés aux cartes     : ${roundFinishes.dec} (${((roundFinishes.dec / FIGHT_COUNT) * 100).toFixed(1)}%)`);
 /* ==== [ANCRE: P7_L1_SPLIT_DEC_SHARE] — LOT 1/P7, "État des lieux mesuré" et
    cible L3 §3.3 : la part des décisions PARTAGÉES rapportée à l'ensemble
-   des DÉCISIONS (Décision + Décision partagée + Égalité) — pas à
-   l'ensemble des combats — est la métrique que L3 doit ramener sous 15%. ==== */
-const totalDecisions = methodCounts['Décision'] + methodCounts['Décision partagée'] + methodCounts['Égalité'];
+   des DÉCISIONS (tous les combats allant aux cartes, gagnés ou nuls) — pas à
+   l'ensemble des combats — est la métrique que L3 doit ramener sous 15%.
+   ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — Lot 7/P8 §7.3 : la "décision
+   partagée" ne recouvre plus tout ce qui n'est pas unanime (il existe
+   désormais aussi la décision MAJORITAIRE, 2-0-1, moins nette qu'une
+   unanime mais plus consensuelle qu'une 2-1 réelle) — totalDecisions inclut
+   les six libellés (3 décisions + 3 nuls), splitDecShare ne compte que les
+   décisions partagées PROPREMENT DITES (2-1, l'ancien seuil L3 continue de
+   s'y appliquer), et le critère de répartition des six libellés du Lot 7
+   (§7, "décisions partagées toujours sous 15% du total des décisions") est
+   rapporté séparément juste en dessous. ==== */
+const totalDecisions = methodCounts['Décision unanime'] + methodCounts['Décision majoritaire'] + methodCounts['Décision partagée']
+  + methodCounts['Nul unanime'] + methodCounts['Nul majoritaire'] + methodCounts['Nul partagé'];
 const splitDecShare = totalDecisions ? (methodCounts['Décision partagée'] / totalDecisions) * 100 : 0;
 console.log(`  Décisions partagées  : ${splitDecShare.toFixed(1)}% de l'ensemble des décisions (cible L3 : < 15%)`);
+/* ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — critère d'acceptation Lot 7/P8
+   §7 : "répartition des six libellés de décision produite dans le rapport,
+   avec les décisions partagées toujours sous 15% du total des décisions". ==== */
+console.log(`\n  --- Répartition des six libellés de décision/nul (Lot 7/P8 §7.3) ---`);
+['Décision unanime', 'Décision majoritaire', 'Décision partagée', 'Nul unanime', 'Nul majoritaire', 'Nul partagé'].forEach(k => {
+  const pct = totalDecisions ? (methodCounts[k] / totalDecisions) * 100 : 0;
+  console.log(`  ${k.padEnd(20)} : ${methodCounts[k].toString().padStart(5)} (${pct.toFixed(1)}% des décisions/nuls)`);
+});
+/* ==== [ANCRE: P8_L7_ARBITRE_ETAT] — critères d'acceptation Lot 7/P8 §7 :
+   fréquence de la relance debout sur inactivité, au moins une
+   disqualification et au moins un renversement de décision par retrait de
+   point sur l'échantillon. ==== */
+console.log(`\n  --- Arbitre (Lot 7/P8 §7.1) ---`);
+console.log(`  Relances debout (arbitre) : ${refStandups} sur ${FIGHT_COUNT} combats (${(refStandups / FIGHT_COUNT).toFixed(3)} par combat en moyenne)`);
+console.log(`  Retraits de point         : ${pointDeductions} au total`);
+console.log(`  Renversements par retrait : ${pointDeductionReversals}`);
+console.log(`  Disqualifications         : ${methodCounts['Disqualification']} (${((methodCounts['Disqualification'] / FIGHT_COUNT) * 100).toFixed(3)}%)`);
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 console.log("\n--- 2. MOYENNES PAR COMBAT (PAR COMBATTANT) ---");

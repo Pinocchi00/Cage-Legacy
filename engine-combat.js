@@ -356,6 +356,93 @@ function submissionDefenseMult(def){
   return clamp(1-((def.flexibility+def.composure+def.strength)/300-0.5)*0.7,0.5,1.3);
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L7_ARBITRE_RELANCE] — Lot 7/P8 §7.1 : "un temps de
+   contrôle sans progression... au-delà d'un seuil déclenche le retour
+   debout... le seuil doit dépendre de la position". Seuils en SECONDES
+   d'horloge réelle (roundLen/dt, ANCRE HORLOGE_CONTINUE) avant qu'une
+   position sans progression ne soit relancée par l'arbitre — appliqué
+   INDÉPENDAMMENT de GROUND_POS[pos].standupOk (qui ne gouverne que le
+   relevé COMPÉTITIF du dessous, cf. groundStandupChance) : c'est
+   exactement ce qui corrige la régression signalée par l'état des lieux du
+   plan ("le contrôle au sol est rentable depuis le Lot 3 : sideControl et
+   mount ont standupOk:false, le seul relevé possible vient du dessous
+   depuis la garde, un contrôle stérile n'est donc jamais sanctionné").
+   backControl est délibérément le seuil le plus haut ("presque
+   indéfiniment", §7.1) : la position la plus dominante du jeu
+   (GROUND_POS.backControl.dominance=4.2) ne doit pas être vidée de son
+   intérêt par une relance systématique — seul un immobilisme VRAIMENT
+   prolongé y met fin. ==== */
+/* ==== [ANCRE: P8_L7_ARBITRE_RELANCE_CALIBRAGE] — première mesure (Monte
+   Carlo 12 000 combats, seed 20260905) avec des seuils 42/42/55/60/75/130 :
+   seulement 777 relances sur 12 000 combats (6.5%) et un temps de contrôle
+   moyen des lutteurs INCHANGÉ contre baseline-P8.md (52.3s vs 52.4s,
+   négligeable) — la plupart des séquences de contrôle sont déjà interrompues
+   par une transition normale (passage de garde, tentative de soumission...)
+   bien avant ces seuils, donc le mécanisme corrigeait le cas extrême sans
+   toucher au gros du contrôle "actif" que Lot 3/P7 a construit. Seuils
+   resserrés (environ -35 à -40%) pour que la relance intervienne aussi sur
+   des séquences sensiblement plus courtes, sans pour autant punir une
+   position tenue activement (un GNP ou une menace de soumission réels
+   continuent de remettre l'horloge à zéro, cf. ANCRE P8_L7_ARBITRE_RELANCE
+   ci-dessus) — backControl reste délibérément le seuil le plus haut. ==== */
+const REF_STANDUP_THRESHOLD={closedGuard:26,openGuard:26,halfGuard:34,sideControl:37,mount:46,backControl:85};
+/* ==== [FIN ANCRE] ==== */
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L7_CAGE_POSITION] — Lot 7/P8 §7.2 : "ajoute l'adossement
+   comme position, dans la même structure que GROUND_POS — pas un système
+   parallèle". Le clinch n'était jusqu'ici qu'un état binaire (clinché ou
+   non) sans lieu — CLINCH_POS distingue désormais le clinch au CENTRE de la
+   cage du clinch CONTRE LA CAGE, avec son propre profil de contrôle
+   (ctrlMult), de volume de frappe (volMult), de propension à nourrir une
+   amenée (tdMult — "porte d'entrée naturelle des amenées et de la lutte de
+   cage", §7.2 : la cage est structurellement plus propice à une amenée que
+   le centre, cf. tout lutteur qui pousse son adversaire contre le grillage
+   en MMA réel) et de facilité à s'en dégager vers l'autre position
+   (breakMult, lu par les transitions ci-dessous, ANCRE
+   P8_L7_CAGE_TRANSITIONS). ==== */
+const CLINCH_POS={
+  center:{ctrlMult:0.85, volMult:0.88, tdMult:0.80, breakMult:1.25},
+  cage:  {ctrlMult:1.20, volMult:1.12, tdMult:1.30, breakMult:0.70}
+};
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L7_ARBITRE_FAUTES] — Lot 7/P8 §7.1 : "la probabilité
+   dépend d'attributs déjà présents (aggression, composure, fightIQ) —
+   n'invente pas d'attribut nouveau". Neutre (~0.32% par tick à stats
+   moyennes 50/50/50, avant mise à l'échelle dt/50) : un combattant agressif
+   et impulsif (aggression haute, composure/fightIQ basses) commet
+   sensiblement plus de fautes qu'un technicien discipliné, sans jamais
+   dépasser un plafond raisonnable (0.03/tick, clampé). @returns {number} */
+function foulChance(f){ return clamp((f.aggression-50)*0.00035-(f.composure-50)*0.00022-(f.fightIQ-50)*0.00018+0.0032,0.0006,0.03); }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — Lot 7/P8 §7.3 : fonction PURE
+   (comme contextualGrapplingMult/takedownSigmoidSteep ci-dessus — exposée
+   pour être testée directement plutôt que déduite d'un Monte Carlo bruité,
+   cf. leur ANCRE respective), qui classe le verdict final des trois juges
+   parmi les six libellés réels du sport. Remplace le vote binaire
+   votesA/votesB (qui traitait une égalité de juge comme un simple non-vote
+   et pouvait déclarer une "Décision" à un combattant n'ayant recueilli
+   qu'UN SEUL juge décisif contre deux égalités — un vrai panel MMA rend ça
+   un NUL majoritaire, jamais une victoire) par la classification complète
+   des 10 répartitions possibles de trois votes de juge (A/B/égalité chacun).
+   Reprise telle quelle par tools/monte-carlo-combat.js (win.judgesVerdict)
+   pour recalculer un verdict hypothétique sans l'effet d'un retrait de
+   point — un seul point de vérité, jamais une logique dupliquée qui
+   pourrait diverger. @returns {{winner:string, method:string,
+   judgeVerdicts:string[]}} */
+function judgesVerdict(j1A,j1B,j2A,j2B,j3A,j3B){
+  const judgeVerdict=(x,y)=>x>y?'A':x<y?'B':'D';
+  const judgeVerdicts=[judgeVerdict(j1A,j1B),judgeVerdict(j2A,j2B),judgeVerdict(j3A,j3B)];
+  const nA=judgeVerdicts.filter(v=>v==='A').length, nB=judgeVerdicts.filter(v=>v==='B').length, nD=judgeVerdicts.filter(v=>v==='D').length;
+  if(nA===3||nB===3) return {winner:nA===3?'A':'B',method:'Décision unanime',judgeVerdicts};
+  if(nD===3) return {winner:'D',method:'Nul unanime',judgeVerdicts};
+  if(nA===2&&nD===1) return {winner:'A',method:'Décision majoritaire',judgeVerdicts};
+  if(nB===2&&nD===1) return {winner:'B',method:'Décision majoritaire',judgeVerdicts};
+  if(nA===2&&nB===1) return {winner:'A',method:'Décision partagée',judgeVerdicts};
+  if(nB===2&&nA===1) return {winner:'B',method:'Décision partagée',judgeVerdicts};
+  if(nD===2) return {winner:'D',method:'Nul majoritaire',judgeVerdicts};
+  return {winner:'D',method:'Nul partagé',judgeVerdicts}; // 1-1-1, la seule combinaison restante
+}
+/* ==== [FIN ANCRE] ==== */
 function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff(A),b=eff(B);
   /* ==== [ANCRE: IMMUNITE_FINITION_CAMP] — item demandé : passifs de camp
      "impossible à finir" (Familial round 1, Ascétique round 3). Purement
@@ -462,6 +549,23 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
      les dégâts cumulés par zone, qui ne sont eux jamais réduits. ==== */
   let dangerA=0, dangerB=0;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P8_L7_ARBITRE_ETAT] — compteur de relances debout sur
+     inactivité (ANCRE P8_L7_ARBITRE_RELANCE), exposé en fin de combat via
+     res.refStandups — sert au harnais Monte Carlo (tools/monte-carlo-combat.js)
+     pour mesurer "part des combats se terminant par..." et, plus largement,
+     la fréquence de la relance sans avoir à parser le log narratif. ==== */
+  let refStandupCount=0;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P8_L7_ARBITRE_ETAT] — Lot 7/P8 §7.1 : état de l'arbitre,
+     persistant sur TOUTE la durée du combat (jamais remis à zéro par la
+     cloche, comme un vrai arbitre qui se souvient des fautes déjà
+     sanctionnées) — foulPointsX compte les retraits de point déjà infligés
+     à ce combattant (un deuxième déclenche la disqualification automatique,
+     règle simplifiée) ; foulWarnX les avertissements, jamais lus par une
+     mécanique, uniquement pour trace/narration. Voir ANCRE
+     P8_L7_ARBITRE_FAUTES plus bas pour le jet lui-même. ==== */
+  let foulPointsA=0, foulPointsB=0, foulWarnA=0, foulWarnB=0;
+  /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: MOTEUR_COMBAT_STATS_ENRICHIES] — modèle statistique complet selon spécification DeepSeek ====
   const makeFighterStats=()=>({
     sig:0, td:0, tdAtt:0, ctrl:0, sub:0, kd:0, dmgHead:0, dmgBody:0, dmgLegs:0,
@@ -535,6 +639,25 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     // ~1/17e) — l'accumulation reste fractionnaire, l'arrondi n'intervient
     // qu'en figeant roundStats (fin de round) et res.stats (fin de combat).
     let currentPhase='debout', topIsA=false, groundPos=null;
+    /* ==== [ANCRE: P8_L7_ARBITRE_RELANCE] — remis à zéro à chaque round : la
+       position au sol elle-même repart toujours de zéro à la cloche
+       (currentPhase='debout' ci-dessus, inchangé), donc l'horloge
+       d'inactivité qui lui est associée n'a pas de sens au-delà d'un round.
+       ==== */
+    let groundInactivity=0;
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: P8_L7_CAGE_POSITION] — position du clinch courant (voir
+       déclaration de CLINCH_POS plus haut), fixée à l'entrée en clinch,
+       nulle hors clinch. ==== */
+    let clinchPos=null;
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: P8_L7_ARBITRE_FAUTES] — retraits de point infligés PENDANT
+       CE ROUND SEULEMENT (contrairement à foulPointsA/B, cumulatifs sur tout
+       le combat) : c'est ce compteur qui est soustrait du score de CE round
+       pour les trois juges (§7.1, "le retrait de point doit traverser la
+       notation"), une seule fois, au moment où roundStats fige le round. ==== */
+    let roundFoulPtsA=0, roundFoulPtsB=0;
+    /* ==== [FIN ANCRE] ==== */
     const cardioFactorA=(a.cardio<60)?0.09:0.06, cardioFactorB=(b.cardio<60)?0.09:0.06;
     const roundPenalty=(r>=4)?1.3:1.0;
     for(let t=0;t<roundLen && !finish;t+=dt){
@@ -760,8 +883,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            menace de soumission (subBot>2.5) risque de se faire progresser
            (garde passée pendant qu'il attaquait), et un dessus trop engagé
            dans sa propre tentative (subTop>2.5) risque de perdre du terrain. ==== */
+        /* ==== [ANCRE: P8_L7_ARBITRE_RELANCE] — `transitioned` est hissé hors
+           du `if(!finish)` ci-dessous (au lieu d'être déclaré dedans avec
+           `let`) pour rester lisible par le contrôle d'inactivité de
+           l'arbitre juste après ce bloc, y compris sur un tick où `finish`
+           est déjà vrai (transitions sautées, `transitioned` reste false —
+           un combat qui vient de se terminer n'a pas besoin d'être relancé
+           debout). ==== */
+        let transitioned=false;
         if(!finish){
-          let transitioned=false;
           if(groundPos==='backControl'){
             if(rnd()<groundBackEscapeChance(top,bot)*(dt/50)){ groundPos='halfGuard'; stBot.reversals++; transitioned=true; }
           } else if(groundPos==='mount'){
@@ -793,14 +923,46 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           }
         }
         /* ==== [FIN ANCRE] ==== */
+        /* ==== [ANCRE: P8_L7_ARBITRE_RELANCE] — §7.1 : relance debout sur
+           inactivité, INDÉPENDANTE de posProf.standupOk (voir déclaration de
+           REF_STANDUP_THRESHOLD plus haut) — c'est ce qui corrige la
+           régression du Lot 3/P7 (sideControl/mount rentables : aucune
+           sanction possible tant que le dessous ne se relève pas via
+           groundStandupChance, qui n'existe même pas depuis ces positions).
+           "Progression" = changement de position (transitioned, y compris
+           un simple ajustement de garde), frappe significative au sol
+           (gHits, seuil choisi au-dessus du bruit de fond du calcul de
+           `gHits=gnp*0.4`) ou menace de soumission réelle des DEUX côtés
+           (subTop/subBot>2.5, même seuil que celui qui déclenche déjà
+           subAtt++ plus haut) — tant que l'une de ces trois conditions est
+           vraie ce tick, l'horloge est remise à zéro plutôt qu'incrémentée. ==== */
+        if(!finish && currentPhase==='sol'){
+          if(transitioned || gHits>1.0 || subTop>2.5 || subBot>2.5){ groundInactivity=0; }
+          else {
+            groundInactivity+=dt;
+            if(groundInactivity>=(REF_STANDUP_THRESHOLD[groundPos]||55)){
+              currentPhase='debout'; groundInactivity=0; stBot.standups++; refStandupCount++;
+              log.push({r,phase:'sol',top:topIsA?'A':'B',pos:groundPos,by:'me',
+                text:`[${formatTime(beatT)}] L’arbitre relance les combattants debout : plus aucune progression au sol.`,
+                momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            }
+          }
+        }
+        /* ==== [FIN ANCRE] ==== */
       } else if(currentPhase==='clinch'){
+        /* ==== [ANCRE: P8_L7_CAGE_POSITION] — voir déclaration de CLINCH_POS
+           plus haut : `cp` module le contrôle (ctrlMult), le volume de
+           frappe (volMult) et la propension à nourrir une amenée (tdMult)
+           de tout ce bloc, exactement comme `posProf` (GROUND_POS) module
+           déjà la phase 'sol'. ==== */
+        const cp=CLINCH_POS[clinchPos]||CLINCH_POS.center;
         const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA;
         const clinchB=(b.clinch*0.6+b.striking*0.25+b.power*0.15)*profB.clinchDmg-fatB;
         const diff=clinchA-clinchB;
         if(Math.abs(diff)>8){
           const domIsA=diff>0; const dom=domIsA?A:B;
           const stDom=domIsA?st.A:st.B, stDef=domIsA?st.B:st.A;
-          const hits=RI(0,4); (domIsA?st.A:st.B).sig+=hits*(dt/50);
+          const hits=RI(0,4)*cp.volMult; (domIsA?st.A:st.B).sig+=hits*(dt/50);
           /* ==== [ANCRE: P7_L2_USURE_CLINCH] — même principe qu'en debout/sol
              (ANCRE P7_L2_USURE) : `clinchWear` alimente à la fois le pool de
              fatigue (dmgA/dmgB, inchangé) et le pool de dégâts par zone,
@@ -821,7 +983,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           stDom.sigBody+=bodyHits*(dt/50); stDom.bodyAtt+=(attHits*0.65)*(dt/50);
           stDom.sigHead+=headHits*(dt/50); stDom.headAtt+=(attHits*0.35)*(dt/50);
           if(hits>=2 && (domIsA?a.power:b.power)>65) stDom.powerStrikes+=(dt/50);
-          const clSec=clamp(14+Math.abs(diff)*0.25,10,32);
+          const clSec=clamp(14+Math.abs(diff)*0.25,10,32)*cp.ctrlMult;
           stDom.ctrl+=dt*(0.1/50); stDom.ctrlSec+=clSec*(dt/50); stDom.clinchCtrlSec+=clSec*(dt/50);
           momentum=clamp(momentum+(domIsA?RI(3,7):-RI(3,7)),5,95);
           /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 "propension au
@@ -831,24 +993,47 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              (giA/giB, déjà utilisés pour les tentatives d'amenée debout),
              au lieu d'un taux fixe identique pour un boxeur et un lutteur
              qui domineraient tous deux le clinch. ==== */
-          const clinchGroundChance=clamp(0.28*(0.55+(domIsA?giA:giB)*1.15),0.08,0.55);
-          if(rnd()<clinchGroundChance*(dt/50)){ currentPhase='sol'; topIsA=domIsA; groundPos=initialGroundPos(domIsA?a:b,domIsA?b:a); (domIsA?st.A:st.B).td++; stDom.tdAtt++;
-            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          /* ==== [ANCRE: P8_L7_CAGE_POSITION] — §7.2 "porte d'entrée
+             naturelle des amenées" : `cp.tdMult` (1.30 contre la cage, 0.80
+             au centre) est le levier qui rend ça vrai — une amenée sortie
+             du clinch de cage est nettement plus probable qu'une amenée
+             sortie d'un clinch de centre, à propension au grappling égale. ==== */
+          const clinchGroundChance=clamp(0.28*(0.55+(domIsA?giA:giB)*1.15)*cp.tdMult,0.06,0.65);
+          if(rnd()<clinchGroundChance*(dt/50)){ currentPhase='sol'; topIsA=domIsA; groundPos=initialGroundPos(domIsA?a:b,domIsA?b:a); groundInactivity=0; (domIsA?st.A:st.B).td++; stDom.tdAtt++;
+            log.push({r,phase:'clinch',pos:clinchPos,by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             if(rnd()<0.35*(dt/50)){ stDom.tdAtt++; stDef.tdDef++; }
+            /* ==== [ANCRE: P8_L7_CAGE_TRANSITIONS] — §7.2 "son propre profil
+               de... transitions" : le dominant pousse plus souvent vers la
+               cage (0.18/tick) que le dessous ne s'en dégage vers le centre
+               (0.10/tick) — cohérent avec le MMA réel, où un clinch fini
+               généralement contre le grillage plutôt qu'au centre. ==== */
+            if(clinchPos==='center'){ if(rnd()<0.18*(dt/50)) clinchPos='cage'; }
+            else { if(rnd()<0.10*(dt/50)) clinchPos='center'; }
+            /* ==== [FIN ANCRE] ==== */
             if(rnd()<dt/90){
-            const clinchTxt=getUniqueLog([
+            /* ==== [ANCRE: P8_L7_CAGE_POSITION] — "le clinch au centre et le
+               clinch contre la cage ne sont pas la même chose" : deux pools
+               de texte distincts plutôt qu'un seul générique déjà orienté
+               cage (l'ancien pool ne parlait QUE de grillage/cage, même
+               quand rien ne le justifiait mécaniquement avant ce lot). ==== */
+            const clinchTxt=getUniqueLog(clinchPos==='cage'?[
               `${dom.name} étouffe son adversaire contre le grillage.`,
               `Lutte rugueuse le long de la cage à l’avantage de ${dom.name}.`,
-              `${dom.name} pèse de tout son poids et place de petits coups vicieux.`,
-              `Le clinch s’éternise, ${dom.name} grignote l’énergie adverse.`,
+              `${dom.name} pèse de tout son poids et écrase son adversaire contre la cage.`,
+              `Plaqué contre le grillage, l’adversaire de ${dom.name} cherche une échappatoire.`,
               `${dom.name} domine contre la cage avec ${Math.round(hits)} coups courts.`
+            ]:[
+              `${dom.name} contrôle le clinch au centre de l’octogone.`,
+              `Lutte debout au centre, à l’avantage net de ${dom.name}.`,
+              `${dom.name} place de petits coups vicieux au centre de la cage.`,
+              `Le clinch s’éternise au centre, ${dom.name} grignote l’énergie adverse.`
             ]);
-            log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${clinchTxt}`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            log.push({r,phase:'clinch',pos:clinchPos,by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${clinchTxt}`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
             }
           }
         } else {
-          currentPhase='debout';
+          currentPhase='debout'; clinchPos=null;
           log.push({r,phase:'clinch',by:'me',text:`[${formatTime(beatT)}] Séparation, le combat reprend au centre de la cage.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         }
       } else { // debout
@@ -892,7 +1077,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              plafond relevé 0.85->0.95 (sinon un écart devenu "quasi
              certain" par la steepening restait artificiellement bridé). ==== */
           const tdChanceA=takedownSigmoidSteep(a.takedown-b.tdd)*attA;
-          if(rnd()<clamp(tdChanceA,0.05,0.95)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true; groundPos=initialGroundPos(a,b);
+          if(rnd()<clamp(tdChanceA,0.05,0.95)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true; groundPos=initialGroundPos(a,b); groundInactivity=0;
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.B.tdDef+=(dt/50);
@@ -901,7 +1086,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt+=(dt/50); handled=true;
           /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — voir ci-dessus, côté B. ==== */
           const tdChanceB=takedownSigmoidSteep(b.takedown-a.tdd)*attB;
-          if(rnd()<clamp(tdChanceB,0.05,0.95)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a);
+          if(rnd()<clamp(tdChanceB,0.05,0.95)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a); groundInactivity=0;
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.A.tdDef+=(dt/50);
@@ -1137,9 +1322,86 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           let clinchChance=0.15*((clinchAffinity(policyA)+clinchAffinity(policyB))/2);
           if(policyA.dangerReaction==='clinch' && dangerA>0) clinchChance*=1.6;
           if(policyB.dangerReaction==='clinch' && dangerB>0) clinchChance*=1.6;
-          if(!finish && rnd()<clinchChance*(dt/50)){ currentPhase='clinch'; }
+          /* ==== [ANCRE: P8_L7_CAGE_POSITION] — position initiale du clinch à
+             l'entrée depuis le debout : biaisée vers la cage quand l'un des
+             deux combattants a une forte propension au grappling (giA/giB,
+             déjà utilisés pour les tentatives d'amenée) — un lutteur/
+             sambiste qui ferme la distance cherche typiquement la cage
+             d'entrée, pas le centre. Simplification assumée : la propension
+             au grappling la PLUS FORTE des deux pilote seule ce biais,
+             qu'elle appartienne à A ou B (peu importe qui initie le
+             clinch — ce n'est pas modélisé ici). ==== */
+          if(!finish && rnd()<clinchChance*(dt/50)){ currentPhase='clinch'; clinchPos=rnd()<(0.35+0.3*Math.max(giA,giB))?'cage':'center'; }
         }
       }
+    /* ==== [ANCRE: P8_L7_ARBITRE_FAUTES] — Lot 7/P8 §7.1 : jet de faute
+       PHASE-AGNOSTIQUE (debout/clinch/sol), placé en fin de tick pour ne
+       jamais interférer avec une finition déjà tirée CE tick par la phase
+       ci-dessus (`!finish` gate) — un knockdown et une disqualification ne
+       peuvent jamais se disputer la même seconde. Sévérité en cascade,
+       classée du PLUS probable au MOINS probable (70% avertissement, ~22%
+       temps mort de récupération pour la victime, ~7.7% retrait de point,
+       0.3% faute flagrante et disqualification immédiate) : cet ORDRE
+       ascendant est délibéré, pas cosmétique — de nombreux tests de ce
+       fichier forcent `win.rnd=()=>0` pour construire un scénario pire-cas
+       déterministe (cf. ANCRE P7_L5_GAUSS_RND_ZERO, engine.js), ce qui rend
+       CHAQUE comparaison `rnd()<seuil positif` vraie ; classer la branche
+       la MOINS perturbatrice (avertissement, aucun effet sur `finish`/le
+       score) en premier garantit qu'un flux dégénéré tombe systématiquement
+       dessus plutôt que sur la disqualification immédiate — sans quoi
+       n'importe quel test préexistant construit autour d'un KO/une
+       soumission au round 1 se retrouverait court-circuité par une
+       disqualification parasite avant même que son scénario ne s'exécute
+       (constaté : CORRECTIF_KD_SOL, tests/regressionFixes.test.js, cassait
+       exactement ainsi avant cette réorganisation). Un avertissement ne
+       journalise rien (compteur seul, foulWarnX) pour ne pas noyer le log
+       d'un combat construit avec un flux dégénéré de centaines de ticks —
+       les issues avec un effet réel (temps mort, retrait de point,
+       disqualification) restent, elles, toujours journalisées. `roundFoulPtsX`
+       traverse la notation du round courant (ANCRE JUGES_10PT_SCORE plus
+       bas) et un DEUXIÈME retrait contre le même combattant déclenche la
+       disqualification automatique ; les deux issues de disqualification
+       remontent `finish` exactement comme un KO/une soumission (méthode
+       'Disqualification', §7.1 "comme l'a été l'arrêt médical"). ==== */
+    if(!finish && rnd()<foulChance(a)*(dt/50)){
+      const sevRoll=rnd();
+      if(sevRoll<0.70){
+        foulWarnA++;
+      } else if(sevRoll<0.92){
+        dmgB=Math.max(0,dmgB-4);
+        log.push({r,phase:currentPhase,by:'op',text:`[${formatTime(beatT)}] Temps mort : ${B.name} récupère après une faute de ${A.name}.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      } else if(sevRoll<0.997){
+        foulPointsA++; roundFoulPtsA++;
+        log.push({r,phase:currentPhase,by:'op',text:`[${formatTime(beatT)}] L’arbitre retire un point à ${A.name} pour une faute.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        if(foulPointsA>=2){
+          finish={by:B,loser:A,method:'Disqualification',round:r,detail:'deuxième retrait de point',time:beatT};
+          log.push({r,phase:currentPhase,by:'op',finish:true,method:'Disqualification',text:`[${formatTime(beatT)}] [CRITIQUE] Deuxième retrait de point : ${A.name} est disqualifié.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        }
+      } else {
+        finish={by:B,loser:A,method:'Disqualification',round:r,detail:'faute grave et intentionnelle',time:beatT};
+        log.push({r,phase:currentPhase,by:'op',finish:true,method:'Disqualification',text:`[${formatTime(beatT)}] [CRITIQUE] Faute grave de ${A.name} : l’arbitre disqualifie sur-le-champ.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      }
+    }
+    if(!finish && rnd()<foulChance(b)*(dt/50)){
+      const sevRoll=rnd();
+      if(sevRoll<0.70){
+        foulWarnB++;
+      } else if(sevRoll<0.92){
+        dmgA=Math.max(0,dmgA-4);
+        log.push({r,phase:currentPhase,by:'me',text:`[${formatTime(beatT)}] Temps mort : ${A.name} récupère après une faute de ${B.name}.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      } else if(sevRoll<0.997){
+        foulPointsB++; roundFoulPtsB++;
+        log.push({r,phase:currentPhase,by:'me',text:`[${formatTime(beatT)}] L’arbitre retire un point à ${B.name} pour une faute.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        if(foulPointsB>=2){
+          finish={by:A,loser:B,method:'Disqualification',round:r,detail:'deuxième retrait de point',time:beatT};
+          log.push({r,phase:currentPhase,by:'me',finish:true,method:'Disqualification',text:`[${formatTime(beatT)}] [CRITIQUE] Deuxième retrait de point : ${B.name} est disqualifié.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        }
+      } else {
+        finish={by:A,loser:B,method:'Disqualification',round:r,detail:'faute grave et intentionnelle',time:beatT};
+        log.push({r,phase:currentPhase,by:'me',finish:true,method:'Disqualification',text:`[${formatTime(beatT)}] [CRITIQUE] Faute grave de ${B.name} : l’arbitre disqualifie sur-le-champ.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
     }
     // ==== [FIN ANCRE] ====
     if(dmgA>45&&rnd()<.4)chinVulnA+=8;
@@ -1187,9 +1449,20 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       return rnd()<0.5?[10,9]:[9,10]; // égalité mathématique exacte, rarissime
     };
     const judgeDiffs=JUDGE_WEIGHTS.map(judgeRDiff);
-    const [sA,sB]=scoreFromDiff(judgeDiffs[0]);
-    const [s2A,s2B]=scoreFromDiff(judgeDiffs[1]);
-    const [s3A,s3B]=scoreFromDiff(judgeDiffs[2]);
+    let [sA,sB]=scoreFromDiff(judgeDiffs[0]);
+    let [s2A,s2B]=scoreFromDiff(judgeDiffs[1]);
+    let [s3A,s3B]=scoreFromDiff(judgeDiffs[2]);
+    /* ==== [ANCRE: P8_L7_ARBITRE_FAUTES] — §7.1 "le retrait de point doit
+       traverser la notation : une victoire aux points peut s'inverser sur
+       un point retiré". roundFoulPtsA/B (remis à zéro à chaque round,
+       déclaré au début de la boucle des rounds) sont soustraits IDENTIQUEMENT
+       des TROIS cartes pour ce round — une décision de l'arbitre est
+       objective, elle ne varie pas d'un juge à l'autre, contrairement au
+       bruit inter-juges de JUDGE_WEIGHTS ci-dessus. Plancher à 6 pour éviter
+       un round dégénéré (un round reste un round, jamais négatif ni nul). ==== */
+    if(roundFoulPtsA>0){ sA=Math.max(6,sA-roundFoulPtsA); s2A=Math.max(6,s2A-roundFoulPtsA); s3A=Math.max(6,s3A-roundFoulPtsA); }
+    if(roundFoulPtsB>0){ sB=Math.max(6,sB-roundFoulPtsB); s2B=Math.max(6,s2B-roundFoulPtsB); s3B=Math.max(6,s3B-roundFoulPtsB); }
+    /* ==== [FIN ANCRE] ==== */
     let j1=[sA,sB], j2=[s2A,s2B], j3=[s3A,s3B];
     j1A+=j1[0];j1B+=j1[1];j2A+=j2[0];j2B+=j2[1];j3A+=j3[0];j3B+=j3[1];
     /* ==== [FIN ANCRE] ==== */
@@ -1263,6 +1536,20 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
        en urgence.') aurait pu s'afficher au mot près pour un KO ordinaire ET
        pour un arrêt médical réel, les rendant indiscernables à l'écran. ==== */
     if(finish.method==='Arrêt médical') finish.moveFlavor='La coupure est trop profonde : le médecin de la commission met fin au combat.';
+    /* ==== [ANCRE: P8_L7_ARBITRE_FAUTES] — même repli que l'arrêt médical
+       ci-dessus (ANCRE P7_L2_FLAVOR_ARRET_MEDICAL) : pickFinishMove() ne
+       connaît que 'sub'/'ko', donc une disqualification aurait hérité d'un
+       nom de prise de KO totalement hors-sujet (et affiché comme tel par
+       les écrans, cf. ui-06-career-screens.js — `moveName` vidé empêche
+       l'étiquette "KO/TKO (…)"/"Soumission (…)" de s'afficher pour une
+       méthode qui n'est ni l'un ni l'autre). ==== */
+    if(finish.method==='Disqualification'){
+      finish.moveName='';
+      finish.moveFlavor=finish.detail==='deuxième retrait de point'
+        ?'Deuxième retrait de point : l’arbitre met fin au combat et disqualifie le fautif.'
+        :'Faute grave et intentionnelle : l’arbitre disqualifie sur-le-champ.';
+    }
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: CORRECTIF_ZONE_AFFICHEE] — zone anatomique NARRÉE = celle du
        geste joué (finishMove.moveZone), pas celle des dégâts cumulés. Repli sur
@@ -1282,13 +1569,30 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     // ==== [ANCRE: JUGES_10PT_VERDICT] — le vainqueur vient du vote MAJORITAIRE des
     // juges (pas d'un total sa/sb caché), pour que les cartes affichées soient
     // toujours cohérentes avec le résultat annoncé. ====
-    const votesA=[j1A>j1B,j2A>j2B,j3A>j3B].filter(Boolean).length;
-    const votesB=[j1A<j1B,j2A<j2B,j3A<j3B].filter(Boolean).length;
-    if(votesA===votesB){ res={winner:'D',method:'Égalité'}; }
-    else { const winnerSide=votesA>votesB?'A':'B'; const unanimous=votesA===3||votesB===3;
-      res={winner:winnerSide,method:unanimous?'Décision':'Décision partagée'}; }
+    /* ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — Lot 7/P8 §7.3 : remplace le
+       vote binaire ci-dessus (votesA/votesB traitait une égalité de juge
+       comme un simple non-vote — un combattant qui ne recueillait qu'UN
+       SEUL juge décisif contre deux égalités aurait été déclaré vainqueur
+       par "Décision", alors qu'un vrai panel MMA rend ça un NUL majoritaire)
+       par judgesVerdict() (fonction pure, déclarée plus haut, testée
+       directement) — les scores j1A/j1B/j2A/j2B/j3A/j3B lus ici sont les
+       totaux du combat entier, déjà accumulés round par round juste
+       au-dessus, retraits de point de l'arbitre compris (ANCRE
+       P8_L7_ARBITRE_FAUTES : "le retrait de point doit traverser la
+       notation"). Les libellés existants ('Décision', 'Décision partagée',
+       'Égalité') ne sont jamais réécrits en base — seuls les COMBATS
+       SIMULÉS APRÈS ce lot émettent le nouveau vocabulaire complet (§8,
+       compatibilité des sauvegardes). ==== */
+    res=judgesVerdict(j1A,j1B,j2A,j2B,j3A,j3B);
     // ==== [FIN ANCRE] ====
   }
+  /* ==== [ANCRE: P8_L7_ARBITRE_ETAT] — exposé pour le harnais/les tests :
+     nombre de relances debout sur inactivité et retraits de point cumulés
+     par combattant sur l'ensemble du combat, indépendamment de la méthode
+     de victoire (une disqualification directe par faute flagrante n'a par
+     exemple jamais touché à foulPointsA/B). ==== */
+  res.refStandups=refStandupCount; res.foulPointsA=foulPointsA; res.foulPointsB=foulPointsB;
+  /* ==== [FIN ANCRE] ==== */
   res.scoreA=j1A+j2A+j3A; res.scoreB=j1B+j2B+j3B;
   res.judges={j1:[j1A,j1B],j2:[j2A,j2B],j3:[j3A,j3B]}; res.roundStats=roundStats;
   /* ==== [ANCRE: HORLOGE_CONTINUE_ARRONDI_FIN_COMBAT] — dernier point

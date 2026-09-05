@@ -62,7 +62,15 @@ function evaluateProOffer(f, res, oppRank){
   if(totalFights<5) return null;
   const finishes=f.ko+f.sub;
   const hypeScore=(f.ko*3.5)+(f.sub*2.5)+f.W-(f.L*0.5);
-  const upset=oppRank<=10 && res.method!=='Décision';
+  /* ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — 'Décision' (l'ancien libellé
+     unique de décision unanime) est devenu 'Décision unanime' (engine-combat.js,
+     ANCRE P8_L7_VOCABULAIRE_DECISIONS) : une comparaison exacte à 'Décision'
+     ne matchait plus AUCUN nouveau combat, faisant compter une décision
+     unanime propre comme un "upset" au même titre qu'une décision partagée
+     ou majoritaire — contraire à l'intention d'origine (une victoire nette
+     et incontestée sur un adversaire classé n'est pas la surprise qu'est une
+     victoire arrachée aux points). ==== */
+  const upset=oppRank<=10 && res.method!=='Décision unanime';
   let threshold=35; if(f.age<=20) threshold=55; if(f.age>=23) threshold=25;
   if(hypeScore>=threshold || upset || (rnd()<0.05 && hypeScore>15)){
     // Seuil abaissé (8→4 finitions) et ajout d'une série de victoires comme

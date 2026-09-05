@@ -570,7 +570,19 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
        sur le texte brut. Sans ce cas explicite, un 'Arrêt médical' (méthode
        distincte du KO, cf. engine-combat.js ANCRE P7_L2_ARRET_MEDICAL) se
        serait affiché "SOUMISSION" dans l'arène — faux et trompeur. ==== */
-    if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method==='Arrêt médical'?'ARRÊT MÉDICAL':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION')); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
+    /* ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — ce ternaire ne connaissait
+       qu'un seul libellé de nul ('Égalité', comparaison exacte) et n'avait
+       aucun repli pour une disqualification (méthode distincte du KO/TKO et
+       de la soumission, §7.1) — sans ce cas explicite, un nul rendu sous un
+       des trois nouveaux libellés ('Nul unanime'/'majoritaire'/'partagé',
+       engine-combat.js ANCRE P8_L7_VOCABULAIRE_DECISIONS) serait tombé dans
+       la branche isDecisionLike() générique ("AUX POINTS", faux pour un
+       nul), et une disqualification dans le repli SOUMISSION par défaut
+       (faux aussi). isDecisionLike() reconnaît déjà 'Nul...'/'Égalité'
+       (engine.js) — on ne le réutilise PAS ici pour distinguer nul/décision,
+       d'où le test `startsWith('Nul')` explicite en plus du cas historique. */
+    if(A.done){ label = (A.method==='Égalité'||A.method.startsWith('Nul'))?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method==='Arrêt médical'?'ARRÊT MÉDICAL':(A.method==='Disqualification'?'DISQUALIFICATION':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'))); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [FIN ANCRE] ==== */
     ctx.fillText(A.done?label:('ROUND '+rd+' · '+label), W/2, 20);
   }
