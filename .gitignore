@@ -1,4 +1,14 @@
 node_modules/
 .DS_Store
 .vscode/
-tools/reports/
+# ==== [ANCRE: P7_L1_BASELINE_VERSIONNE] — LOT 1/P7 §1.5 : le rapport de
+# référence baseline-P7.md est le seul rapport de tools/reports/ à rester
+# versionné (contrairement aux sorties ad hoc des harnais Monte Carlo,
+# régénérées à volonté) — chaque lot suivant du plan P7 le compare tel
+# quel, il doit donc survivre dans l'historique git. Un dossier exclu avec
+# un `/` final (l'ancien `tools/reports/`) ne peut PAS être ré-inclus
+# fichier par fichier (Git n'inspecte jamais le contenu d'un dossier
+# exclu) — `tools/reports/*` exclut le CONTENU sans exclure le dossier
+# lui-même, ce qui rend la négation ci-dessous effective.
+tools/reports/*
+!tools/reports/baseline-P7.md
