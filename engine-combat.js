@@ -104,6 +104,115 @@ function applyZoneDamage(st,amount,headW,bodyW,legW){
   st.dmgLegs+=amount*(legW/total);
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P7_L3_HIERARCHIE_POSITIONS] — Lot 3/P7 §3.1 : remplace le
+   booléen unique `topIsA` (deux états seulement : sol-A-dessus / sol-B-dessus,
+   jamais de position) par une position NOMMÉE parmi six — garde fermée,
+   garde ouverte, demi-garde, contrôle latéral, montée, contrôle du dos —
+   plus la position debout et le clinch (inchangés). Mesuré par le plan
+   (baseline-P7.md §1, §6) : 0.1 passe/0.1 renversement/0.1 relevé par
+   combat, le sol ne représentant que 5.3% des frappes significatives — le
+   jeu ne connaissait AUCUNE hiérarchie de position, une soumission sortait
+   d'un tirage isolé (`subTop>2.5`) sans lien avec quoi que ce soit de
+   construit. `topIsA` est conservé tel quel (qui est en position dominante),
+   `groundPos` s'y ajoute — jamais un système parallèle : les mêmes variables
+   dmgA/dmgB/st.X.* de toujours reçoivent les mêmes flux, seule la
+   PROPORTION de contrôle/frappe/soumission qu'ils reçoivent chaque tick
+   dépend désormais de la position courante (GROUND_POS[pos].*). ====
+   Chaque position définit : qui contrôle et combien (ctrlMult, lu par les
+   juges via posProf.dominance — §3.3, cohérence panneau/cartes), le volume/
+   dangerosité des frappes possibles (gnpMult), les soumissions accessibles
+   depuis cette position ET son inverse (topSubMult/botSubMult — le dessous
+   n'est jamais passif : garde fermée/ouverte offre triangle/armbar/guillotine,
+   contrôle du dos est la position la plus dangereuse du jeu pour le DESSUS
+   qui l'occupe, topSubMult le plus haut du tableau), et si le dessous peut
+   se relever complètement (standupOk — uniquement depuis la garde, jamais
+   depuis demi-garde/latéral/montée/dos, où se relever tout court n'est pas
+   une option réaliste sans d'abord récupérer une garde). */
+const GROUND_POS_ORDER=['closedGuard','openGuard','halfGuard','sideControl','mount','backControl'];
+const GROUND_POS={
+  closedGuard:{dominance:1.0, ctrlMult:0.55, gnpMult:0.75, topSubMult:0.55, botSubMult:2.30, standupOk:true},
+  openGuard:  {dominance:1.1, ctrlMult:0.40, gnpMult:0.85, topSubMult:0.50, botSubMult:2.60, standupOk:true},
+  halfGuard:  {dominance:2.0, ctrlMult:0.85, gnpMult:1.25, topSubMult:1.10, botSubMult:1.05, standupOk:false},
+  sideControl:{dominance:3.0, ctrlMult:1.05, gnpMult:1.75, topSubMult:1.60, botSubMult:0.35, standupOk:false},
+  mount:      {dominance:4.0, ctrlMult:1.25, gnpMult:2.20, topSubMult:2.40, botSubMult:0.14, standupOk:false},
+  backControl:{dominance:4.2, ctrlMult:1.20, gnpMult:1.25, topSubMult:3.40, botSubMult:0.00, standupOk:false}
+};
+/** Chance par seconde réelle (avant mise à l'échelle dt/50) que le dessus fasse
+ * progresser la position (passage de garde, avancée vers le dos) — §3.1,
+ * gouvernée par topControl/strength/explosiveness du dessus contre le jeu de
+ * garde (`guard`, canal dérivé de guardWork+flexibility) et la souplesse du
+ * dessous. @returns {number} */
+function groundPassChance(top,bot){
+  const off=top.topControl*0.55+top.strength*0.30+top.explosiveness*0.15;
+  const def=bot.guard*0.6+bot.flexibility*0.25+bot.strength*0.15;
+  return clamp((off-def)/78+0.18,0.06,0.82);
+}
+/** Chance que le dessous récupère une position moins défavorable (demi-garde
+ * plutôt que latéral, garde plutôt que demi-garde) sans renverser le combat —
+ * gouvernée par guardWork/flexibility/explosiveness/strength du dessous
+ * contre topControl du dessus. @returns {number} */
+function groundRecoverChance(top,bot){
+  const off=bot.guard*0.45+bot.flexibility*0.25+bot.explosiveness*0.15+bot.strength*0.15;
+  const def=top.topControl*0.75+top.strength*0.15;
+  return clamp((off-def)/150+0.07,0.015,0.45);
+}
+/** Chance d'un renversement complet (le dessous devient dessus) — plus rare
+ * qu'une simple récupération de position, uniquement depuis garde/demi-garde
+ * (§3.1 : "garde fermée offre balayages et soumissions"). @returns {number} */
+function groundSweepChance(top,bot){
+  const off=bot.guard*0.4+bot.explosiveness*0.3+bot.strength*0.3;
+  const def=top.topControl*0.85+top.strength*0.2;
+  return clamp((off-def)/220+0.02,0.004,0.18);
+}
+/** Chance que le dessous se relève complètement (retour debout) — uniquement
+ * depuis garde fermée/ouverte, cf. GROUND_POS[pos].standupOk. @returns {number} */
+function groundStandupChance(top,bot,topFat){
+  return clamp((bot.guardWork*0.35+bot.explosiveness*0.25+bot.footwork*0.25-top.topControl*0.35-topFat*0.4)/180,0.01,0.28);
+}
+/** Chance que le dessus saute une étape et prenne directement le dos, depuis
+ * contrôle latéral ou montée — rare, gouvernée par topControl/submission/
+ * explosivité du dessus contre le jeu de garde/souplesse du dessous. @returns {number} */
+function groundBackTakeChance(top,bot){
+  const off=top.topControl*0.4+top.submission*0.25+top.explosiveness*0.2;
+  const def=bot.guard*0.5+bot.flexibility*0.3;
+  return clamp((off-def)/150+0.025,0.006,0.21);
+}
+/** Chance que le dessous s'échappe du contrôle du dos (seule sortie possible
+ * depuis cette position, vers la demi-garde) — gouvernée par flexibility/
+ * strength/explosiveness du dessous contre topControl/strength du dessus.
+ * @returns {number} */
+function groundBackEscapeChance(top,bot){
+  const off=bot.flexibility*0.35+bot.strength*0.3+bot.explosiveness*0.35;
+  const def=top.topControl*0.7+top.strength*0.2;
+  return clamp((off-def)/200+0.02,0.006,0.16);
+}
+/** La garde fermée s'ouvre (plus dynamique, plus de menace de soumission/
+ * balayage pour le dessous, moins de contrôle pour le dessus) quand le
+ * dessous a le jeu de garde/l'explosivité pour la maintenir active.
+ * @returns {number} */
+function groundGuardOpenChance(bot){ return clamp((bot.guardWork+bot.explosiveness)/1400+0.05,0.03,0.14); }
+/** La garde ouverte se referme (repli défensif du dessous). @returns {number} */
+function groundGuardCloseChance(bot){ return clamp(bot.guardWork/900+0.03,0.02,0.10); }
+/** Position au sol par défaut après une amenée réussie — la plupart
+ * atterrissent en garde fermée (majorité des amenées MMA réelles), mais une
+ * amenée nettement dominante (grand écart takedown+strength+explosiveness du
+ * preneur contre guard+flexibility du défenseur) a une chance de passer
+ * directement en demi-garde, voire contrôle latéral (double jambe explosif
+ * qui passe la garde dans le même geste). @returns {string} */
+function initialGroundPos(top,bot){
+  const dom=(top.takedown+top.strength*0.3+top.explosiveness*0.3)-(bot.guard+bot.flexibility*0.3);
+  if(dom>34) return rnd()<0.35?'sideControl':'halfGuard';
+  if(dom>16) return rnd()<0.3?'halfGuard':'closedGuard';
+  return 'closedGuard';
+}
+/** Multiplicateur de défense contre une soumission — §3.2 : "elle se
+ * défend (flexibility, composure, strength)". Neutre (1) pour un défenseur
+ * aux stats moyennes (50 chacune), plus dur à finir au-dessus, plus facile
+ * en dessous. @returns {number} */
+function submissionDefenseMult(def){
+  return clamp(1-((def.flexibility+def.composure+def.strength)/300-0.5)*0.7,0.5,1.3);
+}
+/* ==== [FIN ANCRE] ==== */
 function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff(A),b=eff(B);
   /* ==== [ANCRE: IMMUNITE_FINITION_CAMP] — item demandé : passifs de camp
      "impossible à finir" (Familial round 1, Ascétique round 3). Purement
@@ -261,7 +370,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     // (Math.round(gnp*0.4) vaudrait systématiquement 0 une fois ramené à
     // ~1/17e) — l'accumulation reste fractionnaire, l'arrondi n'intervient
     // qu'en figeant roundStats (fin de round) et res.stats (fin de combat).
-    let currentPhase='debout', topIsA=false;
+    let currentPhase='debout', topIsA=false, groundPos=null;
     const cardioFactorA=(a.cardio<60)?0.09:0.06, cardioFactorB=(b.cardio<60)?0.09:0.06;
     const roundPenalty=(r>=4)?1.3:1.0;
     for(let t=0;t<roundLen && !finish;t+=dt){
@@ -321,11 +430,21 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
         const topProf=topIsA?profA:profB, botProf=topIsA?profB:profA;
         const stTop=topIsA?st.A:st.B, stBot=topIsA?st.B:st.A;
-        const control=clamp((top.topControl-bot.guard)*0.32,0,11)*0.2;
-        const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45)*topProf.gnpDmg*0.2;
-        const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod*0.2;
-        const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35)*botProf.subMod*0.2;
-        const topPts=1.2+control*0.5+gnp*0.46+subTop*0.22; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.032+0.6;
+        /* ==== [ANCRE: P7_L3_SOL_POSITION] — Lot 3/P7 sec.3.1 : chaque grandeur
+           qui ne dependait avant ce lot que de (topControl-guard) est
+           desormais aussi mise a l'echelle par posProf (GROUND_POS[groundPos],
+           voir declaration en tete de fichier) : controle, volume de GNP et
+           intensite des deux menaces de soumission (dessus ET dessous, sec.3.1
+           "le dessous n'est pas passif") dependent de la position REELLEMENT
+           occupee, pas seulement de l'ecart d'attributs brut. groundPos est
+           fixe a l'entree au sol (initialGroundPos(), takedown/clinch) et
+           evolue via les transitions plus bas (ANCRE P7_L3_SOL_TRANSITIONS). ==== */
+        const posProf=GROUND_POS[groundPos]||GROUND_POS.closedGuard;
+        const control=clamp((top.topControl-bot.guard)*0.32,0,11)*0.2*posProf.ctrlMult;
+        const gnp=clamp((top.ground*0.5+top.power*0.45)-bot.guard*0.55-topFat,0,45)*topProf.gnpDmg*0.2*posProf.gnpMult;
+        const subTop=clamp(top.submission-bot.guard*0.85,0,45)*(1+top.killer*0.004)*topProf.subMod*0.2*posProf.topSubMult;
+        const subBot=clamp(bot.submission-top.topControl*0.7-top.ground*0.4,0,35)*botProf.subMod*0.2*posProf.botSubMult;
+        const topPts=1.2+control*0.5+gnp*0.46+subTop*0.22+(posProf.dominance-1)*0.5; const botPts=subBot*0.9+clamp(bot.guard-top.topControl,0,22)*0.032+0.6;
         const gHits=gnp*0.4;
         /* ==== [ANCRE: HORLOGE_CONTINUE_CTRLSEC] — beatGroundSec est la même
            heuristique qu'avant ce lot (une fraction du tick, jamais le tick
@@ -334,7 +453,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            tout le reste. `stTop.ctrlSec+=dt` (tout le tick) donnait un
            temps de contrôle ~3x trop élevé au Monte Carlo — confirmé en
            comparant tools/monte-carlo-combat.js avant/après ce lot. ==== */
-        const beatGroundSec=clamp(22+clamp(top.topControl-bot.guard,-15,25)*0.35,14,46);
+        const beatGroundSec=clamp((22+clamp(top.topControl-bot.guard,-15,25)*0.35)*posProf.ctrlMult,10,55);
         /* ==== [ANCRE: P7_L2_USURE_SOL] — même principe qu'en phase debout
            (ANCRE P7_L2_USURE) : `groundWear` alimente à la fois le pool de
            fatigue (dmgA/dmgB, inchangé) et le pool de dégâts par zone
@@ -354,15 +473,21 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         stTop.sigHead+=gHead*(dt/50); stTop.headAtt+=(gAtt*0.75)*(dt/50);
         stTop.sigBody+=gBody*(dt/50); stTop.bodyAtt+=(gAtt*0.25)*(dt/50);
         if(gHits>=2 && (top.power||50)>60) stTop.powerStrikes+=(gHits*0.5)*(dt/50);
-        if(top.topControl>bot.guard+12 && rnd()<0.25*(dt/50)) stTop.guardPasses++;
         if(gHits>=3 && (top.gnp||50)>70 && rnd()<0.2*(dt/50)) stBot.cuts++;
         if(subTop>2.5) stTop.subAtt+=(dt/50);
         if(subBot>2.5) stBot.subAtt+=(dt/50);
 
         const heartR=1-(bot.heart*0.0016);
-        const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.32;
-        const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult;
-        const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult;
+        const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.40*posProf.gnpMult;
+        /* ==== [ANCRE: P7_L3_SUBMISSION_DEFENSE] — Lot 3/P7 sec.3.2 : "elle se
+           defend (flexibility, composure, strength)" -- submissionDefenseMult()
+           applique cette defense a la CHANCE DE FINITION (subChT/subChB), pas
+           a l'intensite d'attaque (subTop/subBot ci-dessus, qui pilote toujours
+           subAtt) : un defenseur souple/calme/fort rend la finition plus dure
+           sans changer combien de fois l'attaquant a reellement tente. ==== */
+        const subChT=clamp((top.submission-bot.guard)/7,0,0.95)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult*posProf.topSubMult*submissionDefenseMult(bot);
+        const subChB=clamp((bot.submission-top.submission)/10,0,0.88)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult*posProf.botSubMult*submissionDefenseMult(top);
+        /* ==== [FIN ANCRE] ==== */
         if(rnd()<subChT*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
         else if(rnd()<koGnp*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++; stBot.wobbled++;
           // cf. ANCRE P7_L2_COUP_FINITION (phase debout) : même garde-fou, un
@@ -396,15 +521,20 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         let txtPool=[`${atk.name} consolide son contrôle.`,`${atk.name} maintient une lourde pression.`,`Lutte de position : ${atk.name} prend l\u2019avantage.`,`${atk.name} verrouille les hanches de son adversaire.`];
         if(tgs.includes('GNP')) txtPool.push(`${atk.name} fait pleuvoir un lourd Ground & Pound.`);
         if(tgs.includes('Soumission')) txtPool.push(`${atk.name} cherche l\u2019ouverture pour soumettre.`);
-        if(top.topControl>bot.guard+20){
+        if(posProf.dominance>=3){
           txtPool.push(`${atk.name} plie ${def.name} au sol comme un vulgaire origami. L\u2019écart technique est embarrassant.`);
+        }
+        if(groundPos==='backControl'){
+          txtPool.push(`${atk.name} verrouille le dos, hameçons plantés : ${def.name} n\u2019a plus d\u2019issue.`);
+        } else if(groundPos==='mount'){
+          txtPool.push(`${atk.name} s\u2019installe en montée, la position la plus dominante du sol.`);
         }
         const botFat=topIsA?fatB:fatA;
         if(botFat>15 || bot.cardio<40){
           txtPool.push(`Écrasé sous le poids adverse, ${def.name} cherche de l\u2019oxygène qui n\u2019existe plus.`);
         }
         /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — voir ui-09 ==== */
-        log.push({r,phase:'sol',top:topIsA?'A':'B',by:isMe?'me':'op',text:`[${formatTime(beatT)}] `+getUniqueLog(txtPool),momentum,sub:(subChT>0.03||subChB>0.03),snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        log.push({r,phase:'sol',top:topIsA?'A':'B',pos:groundPos,by:isMe?'me':'op',text:`[${formatTime(beatT)}] `+getUniqueLog(txtPool),momentum,sub:(subChT>0.03||subChB>0.03),snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
           finish.time=beatT;
           last.text=`[${formatTime(beatT)}] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
@@ -414,31 +544,68 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            ressort ~5-9% au-dessus de la valeur d'avant ce lot (le clinch,
            lui, ne bouge quasi pas : <2%). Racine trouvée par instrumentation
            directe (compteurs de ticks/entrées/sorties de phase, pas de
-           conjecture) : evadeCh (formule ci-dessous, inchangée depuis
-           avant ce lot) tourne quasiment toujours à son plafond (0.28,
-           topFat y contribue pour ~0.02 en moyenne — négligeable), donc ce
-           n'est PAS une dérive de fatigue mal rescalée. La vraie cause est
-           un artefact de quantification de L'ANCIEN modèle à 6
-           micro-séquences : une amenée réussie sur la toute dernière
-           micro-séquence d'un round (1 chance sur 6) tombait à une
-           position au sol de durée quasi nulle avant la cloche, ce qui
-           tirait sa moyenne mesurée vers le bas ; à 100 ticks/round, ce
-           même effet de bord ne touche plus qu'1 tick sur 100. La suite
-           continue (dt=3s) n'a donc pas de biais propre à corriger ici —
-           c'est la référence à 6 micro-séquences qui sous-estimait
-           légèrement le temps de contrôle réel par cet artefact, et rien
-           dans ce fichier ne le reproduit plus. Conservé en écart connu
-           (juste au-dessus de la tolérance ±5% sur certains tirages,
-           dans la tolérance sur d'autres — cf. rapport de livraison),
-           plutôt que "corrigé" par un facteur artificiel qui ferait
-           exprès de réintroduire ce biais de l'ancien modèle. ==== */
+           conjecture) : un artefact de quantification de L'ANCIEN modèle à 6
+           micro-séquences (une amenée réussie sur la toute dernière
+           micro-séquence d'un round tombait à une position au sol de durée
+           quasi nulle avant la cloche, ce qui tirait sa moyenne mesurée vers
+           le bas) — la suite continue (dt=3s) n'a pas ce biais. Conservé en
+           écart connu (rapport de livraison), plutôt que "corrigé" par un
+           facteur artificiel qui réintroduirait ce biais de l'ancien modèle.
+           Le mécanisme unique `evadeCh` référencé ici avant Lot 3/P7 est
+           remplacé ci-dessous par le graphe de transitions par position (voir
+           ANCRE P7_L3_SOL_TRANSITIONS) : ce commentaire historique reste pour
+           la traçabilité de l'investigation, mais ne décrit plus le code qui
+           suit. ==== */
+        /* ==== [ANCRE: P7_L3_SOL_TRANSITIONS] — Lot 3/P7 sec.3.1 : remplace
+           l'unique mécanisme `evadeCh` (un seul jet, moitié renversement/
+           moitié relevé, quelle que soit la position — même chance de se
+           relever depuis une montée que depuis une garde fermée) par un
+           graphe de transitions propre à chaque position : passage de garde
+           (groundPassChance), récupération d'une position moins défavorable
+           (groundRecoverChance), renversement complet (groundSweepChance,
+           uniquement depuis garde/demi-garde — sec.3.1 "garde fermée offre
+           balayages"), relevé complet (groundStandupChance, uniquement si
+           posProf.standupOk), prise de dos directe (groundBackTakeChance,
+           depuis latéral/montée) et échappée du dos (groundBackEscapeChance,
+           seule sortie possible depuis le contrôle du dos). Sec.3.2 : "une
+           tentative ratée coûte souvent la position" — si aucune transition
+           "normale" n'a eu lieu ce tick, un dessous engagé dans une vraie
+           menace de soumission (subBot>2.5) risque de se faire progresser
+           (garde passée pendant qu'il attaquait), et un dessus trop engagé
+           dans sa propre tentative (subTop>2.5) risque de perdre du terrain. ==== */
         if(!finish){
-          const evadeCh=clamp((bot.footwork+bot.fightIQ-topFat*0.5)/280,0.06,0.28);
-          if(rnd()<evadeCh*(dt/50)){
-            if(rnd()<0.5){ topIsA=!topIsA; stBot.reversals++; }
-            else { currentPhase='debout'; stBot.standups++; }
+          let transitioned=false;
+          if(groundPos==='backControl'){
+            if(rnd()<groundBackEscapeChance(top,bot)*(dt/50)){ groundPos='halfGuard'; stBot.reversals++; transitioned=true; }
+          } else if(groundPos==='mount'){
+            if(rnd()<groundBackTakeChance(top,bot)*(dt/50)){ groundPos='backControl'; stTop.guardPasses++; transitioned=true; }
+            else if(rnd()<groundRecoverChance(top,bot)*(dt/50)){ groundPos='halfGuard'; stBot.reversals++; transitioned=true; }
+          } else if(groundPos==='sideControl'){
+            if(rnd()<groundBackTakeChance(top,bot)*0.6*(dt/50)){ groundPos='backControl'; stTop.guardPasses++; transitioned=true; }
+            else if(rnd()<groundPassChance(top,bot)*(dt/50)){ groundPos='mount'; stTop.guardPasses++; transitioned=true; }
+            else if(rnd()<groundRecoverChance(top,bot)*(dt/50)){ groundPos='halfGuard'; stBot.reversals++; transitioned=true; }
+          } else if(groundPos==='halfGuard'){
+            if(rnd()<groundPassChance(top,bot)*(dt/50)){ groundPos='sideControl'; stTop.guardPasses++; transitioned=true; }
+            else if(rnd()<groundSweepChance(top,bot)*(dt/50)){ topIsA=!topIsA; stBot.reversals++; transitioned=true; }
+            else if(rnd()<groundRecoverChance(top,bot)*(dt/50)){ groundPos='closedGuard'; stBot.reversals++; transitioned=true; }
+          } else if(groundPos==='openGuard'){
+            if(rnd()<groundPassChance(top,bot)*(dt/50)){ groundPos='halfGuard'; stTop.guardPasses++; transitioned=true; }
+            else if(rnd()<groundSweepChance(top,bot)*(dt/50)){ topIsA=!topIsA; stBot.reversals++; transitioned=true; }
+            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
+            else if(rnd()<groundGuardCloseChance(bot)*(dt/50)){ groundPos='closedGuard'; transitioned=true; }
+          } else { // closedGuard
+            if(rnd()<groundPassChance(top,bot)*0.7*(dt/50)){ groundPos='halfGuard'; stTop.guardPasses++; transitioned=true; }
+            else if(rnd()<groundSweepChance(top,bot)*(dt/50)){ topIsA=!topIsA; stBot.reversals++; transitioned=true; }
+            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
+            else if(rnd()<groundGuardOpenChance(bot)*(dt/50)){ groundPos='openGuard'; transitioned=true; }
+          }
+          if(!transitioned){
+            const idx=GROUND_POS_ORDER.indexOf(groundPos);
+            if(subBot>2.5 && idx<GROUND_POS_ORDER.length-1 && rnd()<0.05*(dt/50)){ groundPos=GROUND_POS_ORDER[idx+1]; stTop.guardPasses++; }
+            else if(subTop>2.5 && idx>0 && rnd()<0.05*(dt/50)){ groundPos=GROUND_POS_ORDER[idx-1]; stBot.reversals++; }
           }
         }
+        /* ==== [FIN ANCRE] ==== */
       } else if(currentPhase==='clinch'){
         const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA;
         const clinchB=(b.clinch*0.6+b.striking*0.25+b.power*0.15)*profB.clinchDmg-fatB;
@@ -470,7 +637,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           const clSec=clamp(14+Math.abs(diff)*0.25,10,32);
           stDom.ctrl+=dt*(0.1/50); stDom.ctrlSec+=clSec*(dt/50); stDom.clinchCtrlSec+=clSec*(dt/50);
           momentum=clamp(momentum+(domIsA?RI(3,7):-RI(3,7)),5,95);
-          if(rnd()<0.28*(dt/50)){ currentPhase='sol'; topIsA=domIsA; (domIsA?st.A:st.B).td++; stDom.tdAtt++;
+          if(rnd()<0.28*(dt/50)){ currentPhase='sol'; topIsA=domIsA; groundPos=initialGroundPos(domIsA?a:b,domIsA?b:a); (domIsA?st.A:st.B).td++; stDom.tdAtt++;
             log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             if(rnd()<0.35*(dt/50)){ stDom.tdAtt++; stDef.tdDef++; }
@@ -518,7 +685,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            toujours journalisée. ==== */
         if(attA>0.14 && rnd()<0.18){ st.A.tdAtt+=(dt/50); handled=true;
           const tdChanceA=sigmoid((a.takedown-b.tdd)/15)*attA;
-          if(rnd()<clamp(tdChanceA,0.05,0.85)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true;
+          if(rnd()<clamp(tdChanceA,0.05,0.85)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true; groundPos=initialGroundPos(a,b);
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.B.tdDef+=(dt/50);
@@ -526,7 +693,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           }
         } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt+=(dt/50); handled=true;
           const tdChanceB=sigmoid((b.takedown-a.tdd)/15)*attB;
-          if(rnd()<clamp(tdChanceB,0.05,0.85)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false;
+          if(rnd()<clamp(tdChanceB,0.05,0.85)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a);
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.A.tdDef+=(dt/50);
@@ -748,33 +915,46 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     const rSubDiff=(st.A.subAtt-_subAttA0)-(st.B.subAtt-_subAttB0);
     const rWobDiff=(st.B.wobbled-_wobB0)-(st.A.wobbled-_wobA0);
     const aggDiff=((a.aggression||50)-(b.aggression||50))*0.04;
-    // Règles unifiées MMA : le dommage effectif (KD, sonné, frappes lourdes) prime.
-    // 1 amenée = 1.5 frappe sig, 1 round complet de contrôle (1.2) = ~3.6 pts (critère secondaire)
-    const rDiff=(rSigA-rSigB)+rPwrDiff*0.5+(rTdA-rTdB)*1.5+rSubDiff*1.2+rWobDiff*1.8+(rCtrlA-rCtrlB)*3+aggDiff;
-    let sA=10,sB=10;
-    if((rDiff>44&&kdDiff>=0)||kdDiff>=3){ sA=10;sB=7; }
-    else if((rDiff>32&&kdDiff>=0)||kdDiff>=2){ sA=10;sB=8; }
-    else if((rDiff>3&&kdDiff>=0)||kdDiff===1){ sA=10;sB=9; }
-    else if((rDiff<-44&&kdDiff<=0)||kdDiff<=-3){ sA=7;sB=10; }
-    else if((rDiff<-32&&kdDiff<=0)||kdDiff<=-2){ sA=8;sB=10; }
-    else if((rDiff<-3&&kdDiff<=0)||kdDiff===-1){ sA=9;sB=10; }
-    else if(rDiff>0){ sA=10;sB=9; } // bande serrée mais A garde un léger avantage réel
-    else if(rDiff<0){ sA=9;sB=10; } // bande serrée mais B garde un léger avantage réel
-    else { if(rnd()<0.5){sA=10;sB=9;} else {sA=9;sB=10;} } // égalité mathématique exacte, rarissime
-    let j1=[sA,sB], j2=[sA,sB], j3=[sA,sB];
-    const margin=Math.max(Math.abs(rDiff),Math.abs(kdDiff)*20);
-    const dissent2=clamp(0.35-margin*0.004,0.04,0.35);
-    const dissent3=clamp(0.15-margin*0.002,0.02,0.15);
-    const dissentJudge=()=>{
-      if(sA===10 && sB===9) return (Math.abs(rDiff)>20 ? [sA,sB] : [9,10]);
-      if(sB===10 && sA===9) return (Math.abs(rDiff)>20 ? [sA,sB] : [10,9]);
-      if(sA===10 && sB<9) return [10,sB+1];
-      if(sB===10 && sA<9) return [sA+1,10];
-      return [sA,sB];
+    /* ==== [ANCRE: P7_L3_JUGES_SENSIBILITES] — Lot 3/P7 sec.3.3 : remplace le
+       bruit inter-juges INDÉPENDANT (dissentJudge(), qui pouvait donner la
+       TOTALITÉ d'un round à l'autre combattant dès que |rDiff|<=20 — la
+       quasi-totalité des rounds 10-9, cf. baseline-P7.md, mesuré 38-40% de
+       décisions partagées, cible <15%) par trois lectures CORRÉLÉES du même
+       round : les trois juges partent des MÊMES composantes objectives
+       (frappes, amenées, contrôle, KD...) mais pondèrent différemment — sec.
+       3.3, "ils doivent partager une lecture commune du round et ne diverger
+       qu'à la marge, avec des sensibilités différentes" (juge 2 : plus
+       sensible au contrôle/amenées ; juge 3 : plus sensible aux dégâts/
+       sonnés). Un round nettement dominé selon TOUTES les pondérations reste
+       nettement dominé pour les trois juges — jamais donné à l'autre ; seul
+       un round réellement limite peut basculer sous une pondération
+       différente. Cohérence panneau/cartes (sec.3.3 dernier point) : chaque
+       composante pondérée est exposée en clair (judgeDiffs, ci-dessous dans
+       roundStats) pour rester inspectable par le harnais. ==== */
+    const judgeRDiff=w=>(rSigA-rSigB)*w.sig+rPwrDiff*w.pwr+(rTdA-rTdB)*w.td+rSubDiff*w.sub+rWobDiff*w.wob+(rCtrlA-rCtrlB)*w.ctrl+aggDiff*w.agg;
+    const JUDGE_WEIGHTS=[
+      {sig:1.0, pwr:0.5, td:1.5, sub:1.2, wob:1.8, ctrl:3.0, agg:1.0}, // juge 1 : lecture de référence (formule pré-L3, inchangée)
+      {sig:0.9, pwr:0.3, td:2.0, sub:1.3, wob:1.6, ctrl:4.2, agg:0.8}, // juge 2 : plus sensible au contrôle/amenées
+      {sig:1.1, pwr:0.9, td:1.1, sub:1.1, wob:2.3, ctrl:2.0, agg:1.1}, // juge 3 : plus sensible aux dégâts/sonnés
+    ];
+    const scoreFromDiff=rDiff=>{
+      if((rDiff>44&&kdDiff>=0)||kdDiff>=3) return [10,7];
+      if((rDiff>32&&kdDiff>=0)||kdDiff>=2) return [10,8];
+      if((rDiff>3&&kdDiff>=0)||kdDiff===1) return [10,9];
+      if((rDiff<-44&&kdDiff<=0)||kdDiff<=-3) return [7,10];
+      if((rDiff<-32&&kdDiff<=0)||kdDiff<=-2) return [8,10];
+      if((rDiff<-3&&kdDiff<=0)||kdDiff===-1) return [9,10];
+      if(rDiff>0) return [10,9]; // bande serrée mais A garde un léger avantage réel
+      if(rDiff<0) return [9,10]; // bande serrée mais B garde un léger avantage réel
+      return rnd()<0.5?[10,9]:[9,10]; // égalité mathématique exacte, rarissime
     };
-    if(rnd()<dissent2) j2=dissentJudge();
-    if(rnd()<dissent3) j3=dissentJudge();
+    const judgeDiffs=JUDGE_WEIGHTS.map(judgeRDiff);
+    const [sA,sB]=scoreFromDiff(judgeDiffs[0]);
+    const [s2A,s2B]=scoreFromDiff(judgeDiffs[1]);
+    const [s3A,s3B]=scoreFromDiff(judgeDiffs[2]);
+    let j1=[sA,sB], j2=[s2A,s2B], j3=[s3A,s3B];
     j1A+=j1[0];j1B+=j1[1];j2A+=j2[0];j2B+=j2[1];j3A+=j3[0];j3B+=j3[1];
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: HORLOGE_CONTINUE_ARRONDI] — les compteurs de st.A/st.B
        s'accumulent en valeur fractionnaire pendant toute la boucle de ticks
        (voir ANCRE HORLOGE_CONTINUE) : c'est ici, en figeant les totaux du
@@ -782,7 +962,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
        pour la première fois — jamais avant. `ctrl` (utilisé par
        formatCtrl()) reste volontairement en valeur fractionnaire. ==== */
     roundStats.push({
-      r,j1,j2,j3,
+      r,j1,j2,j3,judgeDiffs,kdDiff,
       sigA:Math.round(st.A.sig-_sigA0), sigB:Math.round(st.B.sig-_sigB0),
       sigAttA:Math.round(st.A.sigAtt-_sigAttA0), sigAttB:Math.round(st.B.sigAtt-_sigAttB0),
       totalA:Math.round(st.A.total-_totalA0), totalB:Math.round(st.B.total-_totalB0),
