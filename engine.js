@@ -161,6 +161,47 @@ const STYLES={
 const STYLE_KEYS=Object.keys(STYLES);
 const styleLabel=s=>(STYLES[s]||{label:s}).label;
 
+/* ==== [ANCRE: P7_L4_STYLE_POLICY] — Lot 4/P7 §4.1 : le style ne se réduit
+   plus au sac de bonus STYLES[].b + au scalaire `grap` — il porte en plus
+   une POLITIQUE DE COMBAT, lue par engine-combat.js (simulateFight) pour
+   transformer ces cinq axes en décisions CONTEXTUELLES pendant le combat
+   (jamais un second sac de bonus, jamais un système parallèle à `grap` qui
+   reste la seule source de la propension de base au grappling — la
+   politique la MODULE selon le contexte, ne la remplace pas) :
+   - `distance` ('range'|'close') : distance préférée, lue par
+     clinchAffinity() pour la fréquence de fermeture de distance debout->
+     clinch, et par contextualGrapplingMult() ("un frappeur en retard aux
+     points ne tente pas une amenée").
+   - `initiative` ('lead'|'counter') : lu par initiativeMult() — mener
+     (bonus lié à sa propre agressivité) ou contrer (bonus lié à
+     l'agressivité adverse, qui ouvre des angles à punir).
+   - `pace` ('volume'|'burst') : lu par burstFactor() — volume constant, ou
+     salves périodiques (karaté) qui font varier l'intensité de
+     frappe dans le temps sans changer la moyenne sur un combat complet.
+   - `dangerReaction` ('retreat'|'clinch'|'takedown'|'counter') : réaction
+     du combattant EN DANGER (dangerA/dangerB>0, cf. engine-combat.js) —
+     reculer (volume réduit), clincher (chance de fermer la distance
+     augmentée), chercher l'amenée (contextualGrapplingMult), ou répondre
+     (volume augmenté, quitte à prendre des risques).
+   - `dominanceReaction` ('finish'|'manage') : réaction du combattant qui
+     DOMINE (l'adversaire est en danger) — chercher la finition
+     (dominanceReactionMult() amplifie le boost de volume déjà existant,
+     ANCRE P7_L2_FENETRE_FINITION_VOLUME) ou gérer l'avantage (l'atténue,
+     cohérent avec un lutteur/MMAiste qui préfère contrôler que se jeter
+     dans l'échange). ==== */
+const STYLE_POLICY={
+  boxer:     {distance:'range', initiative:'lead',    pace:'volume', dangerReaction:'counter',  dominanceReaction:'finish'},
+  kickboxer: {distance:'range', initiative:'lead',    pace:'volume', dangerReaction:'retreat',  dominanceReaction:'finish'},
+  muayThai:  {distance:'close', initiative:'lead',    pace:'volume', dangerReaction:'clinch',   dominanceReaction:'finish'},
+  karate:    {distance:'range', initiative:'counter', pace:'burst',  dangerReaction:'retreat',  dominanceReaction:'finish'},
+  wrestler:  {distance:'close', initiative:'lead',    pace:'volume', dangerReaction:'takedown', dominanceReaction:'manage'},
+  bjj:       {distance:'close', initiative:'counter', pace:'volume', dangerReaction:'takedown', dominanceReaction:'finish'},
+  sambo:     {distance:'close', initiative:'lead',    pace:'volume', dangerReaction:'takedown', dominanceReaction:'manage'},
+  mma:       {distance:'range', initiative:'lead',    pace:'volume', dangerReaction:'counter',  dominanceReaction:'finish'},
+};
+const policyOf=f=>STYLE_POLICY[f&&f.style]||STYLE_POLICY.mma;
+/* ==== [FIN ANCRE] ==== */
+
 /* ------------------------------ NOMS -------------------------------------- */
 const COUNTRIES={
  FR:{name:'France',flag:'🇫🇷',last:['Boulanger','Charpentier','Meunier','Tavernier','Marchand','Vasseur','Tisserand','Pelletier','Maréchal','Mercier','Legrand','Lebon','Leroux','Petitjean','Belhomme','Cassegrain','Beauvisage','Courtois','Boileau','Sanson','De La Tour','Beaulieu','Rochefort','Montmirail','De Saint-Gilles','Castel','Dupré','Le Gall','Quéméneur','Guivarc\'h','Bazin','Papon','Da Silva','Belkacem','Diallo','Camara','Fernandez']},
