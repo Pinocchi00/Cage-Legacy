@@ -71,7 +71,7 @@ function applyTacticalMemory(npc,player){
     const lastFight=pastFights[pastFights.length-1];
     if(lastFight.res==='win'){
       const method=lastFight.method||'';
-      const keys=(method.startsWith('Soum'))?['tdd','fightIQ']:(method.startsWith('KO')?['footSpeed','chin']:[]);
+      const keys=(method.startsWith('Soum'))?['tdd','fightIQ']:(isKOMethod(method)?['footSpeed','chin']:[]);
       keys.forEach(k=>{ if(npc.attrs[k]!==undefined){ saved[k]=npc.attrs[k]; npc.attrs[k]=clamp(npc.attrs[k]+(k==='fightIQ'?5:15),1,100); } });
     }
   }
@@ -179,13 +179,13 @@ function getAdaptiveNPCTactics(npc,player){
     if(method.startsWith('Soum')||method.includes('sol')||method.includes('Décision')){
       const antiLutteTactic=npcStyleTactics.find(t=>t.m&&(t.m.tdd>1.1||t.m.def>1.1));
       if(antiLutteTactic) return antiLutteTactic;
-    } else if(method.startsWith('KO')){
+    } else if(isKOMethod(method)){
       const defensiveTactic=npcStyleTactics.find(t=>t.m&&(t.m.def>1.2||t.m.td>1.1));
       if(defensiveTactic) return defensiveTactic;
     }
   } else if(lastEncounter.res==='loss'){
     const method=lastEncounter.method||'';
-    if(method.startsWith('KO')){
+    if(isKOMethod(method)){
       const aggressiveTactic=npcStyleTactics.find(t=>t.m&&t.m.str>1.1);
       if(aggressiveTactic) return aggressiveTactic;
     }
@@ -298,7 +298,7 @@ function triggerRivalPressConference(f,opp){
     const method=lastEncounter.method||'';
     if(isDecisionLike(method)){
       text=`Les journalistes ressortent la décision controversée de votre dernier affrontement contre ${opp.name}. Il promet de ne pas laisser les juges s\u2019en mêler cette fois.`;
-    } else if(lastEncounter.res==='loss' && method.startsWith('KO')){
+    } else if(lastEncounter.res==='loss' && isKOMethod(method)){
       text=`${opp.name} mime votre dernier KO en pleine conférence. Humiliation publique.`;
       moraleGain=-20;
     } else if(lastEncounter.res==='win' && method.startsWith('Soum')){

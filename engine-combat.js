@@ -44,6 +44,66 @@ const STYLE_PROFILE={
   mma:{sigVol:1.05,koMod:1.05,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
 };
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P7_L2_DEGATS_USURE_COUPS_LOURDS] — Lot 2/P7 §2.1 : remplace le
+   flux unique borné par tick (`dmgA+=clamp(offB*0.22*0.22,0,6)*(dt/50)`,
+   mesuré par le plan à moyenne 11,35/σ 6,23/p90 19/max 35 sur 24 000 relevés
+   — cf. tools/reports/baseline-P7.md) par deux composantes : une usure
+   continue de faible amplitude (WEAR_*), et des coups lourds rares à queue
+   épaisse (HEAVY_*) dont le plafond porte sur UN coup, jamais sur la somme
+   d'un tick ou d'un round. Unifie au passage deux pools de dégâts qui
+   vivaient chacun leur vie sans le moindre lien : dmgA/dmgB (fatigue,
+   jamais remis à zéro par la cloche que pour SA part fatigue, ANCRE
+   RECUP_INTER_ROUND) d'une part, et st.X.dmgHead/dmgBody/dmgLegs — la
+   métrique "dégâts cumulés" mesurée par le plan et par
+   tools/monte-carlo-combat.js (samples.dmgTotal) — de l'autre, cette
+   dernière étant jusqu'ici alimentée par un tirage aléatoire (`rDmg`,
+   40%/30%/30% tête/corps/jambes) totalement DÉCONNECTÉ de la frappe
+   réellement portée ce tick (headA/bodyA/legA). Les deux composantes
+   alimentent désormais les deux pools À LA FOIS, avec la même répartition
+   de zone que la frappe qui les a produites — un seul mécanisme de dégâts,
+   deux composantes, jamais un système parallèle (CLAUDE.md §8). ==== */
+const WEAR_PER_LANDED=0.16;      // usure : fond continu, faible, proportionnel au volume réellement touché
+const HEAVY_BASE_CHANCE=0.030;   // proba de base qu'un coup PARTICULIER de ce tick soit un coup lourd
+const HEAVY_TAIL_ALPHA=1.5;      // pente de la queue de Pareto (plus petit = queue plus épaisse)
+const HEAVY_TAIL_CAP=6;          // plafond du facteur de queue tiré, avant mise à l'échelle puissance/menton
+const HEAVY_BASE_AMP=3.0;        // amplitude de base d'un coup lourd "moyen"
+const HEAVY_MIN_AMP=2.5;         // en dessous, ce n'est qu'une frappe parmi d'autres (déjà couverte par l'usure)
+const HEAVY_MAX_AMP=38;          // plafond par ÉVÉNEMENT (jamais par tick ni par round, cf. §2.1)
+const HEAVY_WOBBLE_AMP=9;        // amplitude à partir de laquelle un coup lourd sonne son destinataire
+const DANGER_TICKS_KD=15;        // fenêtre de danger (secondes d'horloge) ouverte par un knockdown non conclu
+const DANGER_TICKS_HEAVY=9;      // ouverte par un coup lourd qui sonne sans mettre à terre
+const DANGER_TICKS_WOBBLE=6;     // ouverte par l'ancien seuil "sonné" (pA/pB>=8)
+const CUT_SEVERE_THRESHOLD=3;    // nombre d'ouvertures avant qu'une coupure devienne matière à arrêt médical
+/** Probabilité qu'un coup PARTICULIER touche lourd ce tick, sachant les canaux
+ * eff() de l'attaquant, la fatigue courante du défenseur et s'il traverse déjà
+ * une fenêtre de danger (vulnérabilité du moment, §2.1). @returns {number} */
+function heavyShotChance(att,defFat,defInDanger){
+  const offense=clamp((att.power*0.38+att.cross*0.22+att.hook*0.18+att.killer*0.12+att.handSpeedRaw*0.10)/70,0.35,1.9);
+  const vuln=1+clamp(defFat,0,28)*0.045+(defInDanger?0.9:0);
+  return clamp(HEAVY_BASE_CHANCE*offense*vuln,0,0.12);
+}
+/** Amplitude d'un coup lourd qui vient de toucher — tirage à queue épaisse
+ * (type Pareto), mis à l'échelle par la puissance de l'attaquant et le
+ * menton/résistance du défenseur (§2.1 : "l'amplitude dépend de power et du
+ * chin/durability de celui qui encaisse"). @returns {number} */
+function heavyShotAmplitude(att,def){
+  const powerFactor=clamp(att.power/72,0.5,1.7);
+  const chinFactor=clamp(120/((def.chin*0.6+def.durability*0.4)+50),0.55,1.6);
+  const tail=Math.min(HEAVY_TAIL_CAP,1/Math.pow(1-Math.min(rnd(),0.992),1/HEAVY_TAIL_ALPHA));
+  return clamp(HEAVY_BASE_AMP*powerFactor*chinFactor*tail,HEAVY_MIN_AMP,HEAVY_MAX_AMP);
+}
+/** Répartit un montant de dégâts entre tête/corps/jambes selon les MÊMES
+ * proportions que la frappe qui vient de le produire (headW/bodyW/legW),
+ * au lieu d'un tirage uniforme déconnecté — voir ANCRE ci-dessus. */
+function applyZoneDamage(st,amount,headW,bodyW,legW){
+  if(amount<=0) return;
+  const total=headW+bodyW+legW;
+  if(total<=0){ st.dmgHead+=amount; return; } // repli tête, cohérent avec l'ancien biais 40%
+  st.dmgHead+=amount*(headW/total);
+  st.dmgBody+=amount*(bodyW/total);
+  st.dmgLegs+=amount*(legW/total);
+}
+/* ==== [FIN ANCRE] ==== */
 function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff(A),b=eff(B);
   /* ==== [ANCRE: IMMUNITE_FINITION_CAMP] — item demandé : passifs de camp
      "impossible à finir" (Familial round 1, Ascétique round 3). Purement
@@ -95,12 +155,40 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   // ==== [FIN ANCRE] ====
   const giA=myGi, giB=(STYLES[B.style]||STYLES.mma).grap; const rEdge=reachEdge(A,B);
   let sa=0,sb=0,dmgA=0,dmgB=0,finish=null; const log=[];
+  /* ==== [ANCRE: P7_L2_DEGATS_PROGRESSIFS_BASELINE] — Lot 2/P7 §2.2 : valeurs
+     de référence des canaux dégradés PROGRESSIVEMENT par les dégâts cumulés
+     par zone (recalculées chaque tick à partir de CETTE référence fixe et de
+     l'état courant de st.X.dmgLegs/dmgBody/dmgHead — jamais par decay
+     multiplicatif répété, qui compounderait de façon incontrôlable sur les
+     ~100 ticks d'un round). Capturées ici, APRÈS le plan tactique (qui a déjà
+     ajusté a/b), donc chaque dégradation ci-dessous s'ajoute au plan de
+     coaching plutôt que de l'écraser. ==== */
+  const baseFootworkA=a.footwork, baseFootworkB=b.footwork;
+  const baseKickA=a.kick, baseKickB=b.kick;
+  const baseTddA=a.tdd, baseTddB=b.tdd;
+  const baseCardioA=a.cardio, baseCardioB=b.cardio;
+  const baseChinA=a.chin, baseChinB=b.chin;
+  const baseComposureA=a.composure, baseComposureB=b.composure;
+  /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: CHIN_TEMPORAIRE] — un round brutal fragilise le menton pour LE
   // RESTE DE CE COMBAT uniquement (variable locale), jamais l'attribut permanent
   // du combattant : encaisser un round dur ne doit pas user le menton à vie,
   // sans que le joueur en soit jamais informé. ====
   let chinVulnA=0, chinVulnB=0;
   // ==== [FIN ANCRE] ====
+  /* ==== [ANCRE: P7_L2_FENETRE_FINITION] — Lot 2/P7 §2.3 : `wobbled` n'était
+     qu'un COMPTEUR (nombre de fois où pA/pB>=8 ou un KD est survenu), jamais
+     un ÉTAT consulté par la suite du combat — un combattant tout juste sonné
+     se battait exactement comme la seconde d'avant. dangerA/dangerB portent
+     désormais un vrai état temporisé (secondes d'horloge RÉELLES restantes,
+     décrémentées de dt à chaque tick quelle que soit la phase — voir ANCRE
+     P7_L2_FENETRE_FINITION_DECAY plus bas) : tant que dangerX>0, l'attaquant
+     voit son volume augmenter et une finition devient nettement plus
+     probable (phase 'debout'), et la cloche n'en efface qu'une partie
+     proportionnelle à `recovery` (ANCRE RECUP_INTER_ROUND, §2.5) — jamais
+     les dégâts cumulés par zone, qui ne sont eux jamais réduits. ==== */
+  let dangerA=0, dangerB=0;
+  /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: MOTEUR_COMBAT_STATS_ENRICHIES] — modèle statistique complet selon spécification DeepSeek ====
   const makeFighterStats=()=>({
     sig:0, td:0, tdAtt:0, ctrl:0, sub:0, kd:0, dmgHead:0, dmgBody:0, dmgLegs:0,
@@ -181,6 +269,45 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       // affichés ce tick (beats narratifs comme finitions), pour que les
       // instants montrés au joueur ne soient jamais des multiples de dt.
       const beatT=t+RI(0,dt-1);
+      /* ==== [ANCRE: P7_L2_FENETRE_FINITION_DECAY] — la fenêtre de danger
+         s'épuise avec le temps réel qui passe, quelle que soit la phase
+         courante (un combattant sonné qui se fait clincher reste sonné) —
+         voir déclaration de dangerA/dangerB plus haut. §2.3 : "le défenseur
+         récupère en fonction de composure, heart, recovery et chin" — ces
+         quatre attributs accélèrent la décroissance plutôt que d'agir sur un
+         jet séparé, pour qu'un combattant solide sur ces plans traverse la
+         tempête plus vite sans qu'un tirage chanceux isolé ne l'en sorte
+         d'un coup. ==== */
+      if(dangerA>0){ const surviveMultA=1+clamp(((a.composure||50)+(a.heart||50)+(a.recovery||50)+(a.chin||50)-200)/500,0,1.2); dangerA=Math.max(0,dangerA-dt*surviveMultA); }
+      if(dangerB>0){ const surviveMultB=1+clamp(((b.composure||50)+(b.heart||50)+(b.recovery||50)+(b.chin||50)-200)/500,0,1.2); dangerB=Math.max(0,dangerB-dt*surviveMultB); }
+      /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: P7_L2_DEGATS_PROGRESSIFS] — Lot 2/P7 §2.2 : les dégâts
+         cumulés par zone rétroagissent désormais sur le combat, de façon
+         PROGRESSIVE et continue (fonction de st.X.dmgLegs/dmgBody/dmgHead,
+         jamais une marche binaire) plutôt que d'être de simples compteurs
+         d'affichage : jambes -> mobilité + volume de kicks, et au-delà d'un
+         second seuil, vulnérabilité aux amenées (tdd) ; corps -> cardio, qui
+         accélère lui-même la fatigue (fatA/fatB juste en dessous la lisent
+         déjà chaque tick) et réduit donc mécaniquement le volume de fin de
+         combat sans code supplémentaire ; tête -> menton et sang-froid, qui
+         rendent chaque coup lourd suivant plus dangereux (koA/koB plus bas
+         lisent déjà chin) — la cascade de finitions décrite par le plan.
+         Recalculé depuis la référence fixe (ANCRE ...BASELINE) à chaque
+         tick : jamais de decay multiplicatif répété qui compounderait de
+         façon incontrôlable sur tout un round. ==== */
+      a.footwork=Math.max(10, baseFootworkA-clamp(st.A.dmgLegs-14,0,50)*0.55);
+      b.footwork=Math.max(10, baseFootworkB-clamp(st.B.dmgLegs-14,0,50)*0.55);
+      a.kick=Math.max(8, baseKickA-clamp(st.A.dmgLegs-10,0,55)*0.5);
+      b.kick=Math.max(8, baseKickB-clamp(st.B.dmgLegs-10,0,55)*0.5);
+      a.tdd=Math.max(8, baseTddA-clamp(st.A.dmgLegs-24,0,45)*0.45);
+      b.tdd=Math.max(8, baseTddB-clamp(st.B.dmgLegs-24,0,45)*0.45);
+      a.cardio=Math.max(12, baseCardioA-clamp(st.A.dmgBody-12,0,55)*0.5);
+      b.cardio=Math.max(12, baseCardioB-clamp(st.B.dmgBody-12,0,55)*0.5);
+      a.chin=Math.max(10, baseChinA-clamp(st.A.dmgHead-14,0,55)*0.5);
+      b.chin=Math.max(10, baseChinB-clamp(st.B.dmgHead-14,0,55)*0.5);
+      a.composure=Math.max(10, baseComposureA-clamp(st.A.dmgHead-14,0,55)*0.4);
+      b.composure=Math.max(10, baseComposureB-clamp(st.B.dmgHead-14,0,55)*0.4);
+      /* ==== [FIN ANCRE] ==== */
       const outA=st.A.sig+st.A.tdAtt*0.6, outB=st.B.sig+st.B.tdAtt*0.6;
       // Résistance à la fatigue via durabilité et second souffle (cœur)
       const heartResistA=(r>=3||dmgA>30)?clamp(((a.heart||50)-50)*0.003,-0.04,0.18):0;
@@ -208,7 +335,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            temps de contrôle ~3x trop élevé au Monte Carlo — confirmé en
            comparant tools/monte-carlo-combat.js avant/après ce lot. ==== */
         const beatGroundSec=clamp(22+clamp(top.topControl-bot.guard,-15,25)*0.35,14,46);
-        if(topIsA){sa+=topPts*(dt/50);sb+=botPts*(dt/50);dmgB+=gnp*0.32*(dt/50);st.A.ctrl+=dt*(0.2/50);st.A.sig+=gHits*(dt/50);} else {sb+=topPts*(dt/50);sa+=botPts*(dt/50);dmgA+=gnp*0.32*(dt/50);st.B.ctrl+=dt*(0.2/50);st.B.sig+=gHits*(dt/50);}
+        /* ==== [ANCRE: P7_L2_USURE_SOL] — même principe qu'en phase debout
+           (ANCRE P7_L2_USURE) : `groundWear` alimente à la fois le pool de
+           fatigue (dmgA/dmgB, inchangé) et le pool de dégâts par zone
+           (st.X.dmgHead/dmgBody/dmgLegs, cf. plus bas), réparti selon la
+           MÊME proportion tête/corps que le Ground & Pound qui vient d'être
+           porté (gHead/gBody), au lieu de l'ancien roll RI(0,2)/RI(0,1)
+           totalement déconnecté. ==== */
+        const groundWear=gnp*0.32*(dt/50);
+        if(topIsA){sa+=topPts*(dt/50);sb+=botPts*(dt/50);dmgB+=groundWear;st.A.ctrl+=dt*(0.2/50);st.A.sig+=gHits*(dt/50);} else {sb+=topPts*(dt/50);sa+=botPts*(dt/50);dmgA+=groundWear;st.B.ctrl+=dt*(0.2/50);st.B.sig+=gHits*(dt/50);}
         stTop.ctrlSec+=beatGroundSec*(dt/50); stTop.groundCtrlSec+=beatGroundSec*(dt/50);
         // Enrichissement stats sol (frappes au sol, tentatives, temps de contrôle continu)
         const gAtt=gHits+Math.max(1,1+((top.aggression||50)-50)*0.03);
@@ -229,7 +364,12 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         const subChT=clamp((top.submission-bot.guard)/17,0,.84)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult;
         const subChB=clamp((bot.submission-top.submission)/42,0,.7)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult;
         if(rnd()<subChT*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
-        else if(rnd()<koGnp*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++; stBot.wobbled++;}
+        else if(rnd()<koGnp*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'KO/TKO',round:r,detail:'coups au sol'};(topIsA?st.A:st.B).kd++; stBot.wobbled++;
+          // cf. ANCRE P7_L2_COUP_FINITION (phase debout) : même garde-fou, un
+          // KO au sol déclenché avant toute usure notable ne doit pas laisser
+          // le perdant à 0 dégât arrondi.
+          applyZoneDamage(stBot,clamp(gnp*0.32,3,8),gHead,gBody,0);
+        }
         else if(rnd()<subChB*(dt/50) && !(immuneA&&topF===A)){finish={by:botF,loser:topF,method:'Soumission',round:r,detail:'par le bas'};(topIsA?st.B:st.A).sub++;}
         else {
           if(subChT>0.03) stBot.subEscapes+=(dt/50);
@@ -237,8 +377,9 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           if(koGnp>0.15) stBot.wobbled+=(dt/50);
         }
         const isMe=topIsA; momentum=clamp(momentum+(isMe?RI(3,8):-RI(3,8)),5,95);
-        const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
-        tgt.dmgBody+=RI(0,2)*(dt/50); tgt.dmgHead+=RI(0,1)*(dt/50);
+        const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB;
+        applyZoneDamage(stBot,groundWear,gHead,gBody,0);
+        /* ==== [FIN ANCRE] ==== */
         /* ==== [ANCRE: HORLOGE_CONTINUE_DENSITE_LOG] — avec 100 ticks/round au
            lieu de 6, journaliser chaque tick donnerait ~100 lignes/round
            (illisible, et ui-09-arena.js consomme ces beats pour son rythme
@@ -305,8 +446,19 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         if(Math.abs(diff)>8){
           const domIsA=diff>0; const dom=domIsA?A:B;
           const stDom=domIsA?st.A:st.B, stDef=domIsA?st.B:st.A;
-          const hits=RI(0,4); (domIsA?st.A:st.B).sig+=hits*(dt/50); if(domIsA) dmgB+=hits*1.8*(dt/50); else dmgA+=hits*1.8*(dt/50);
-          (domIsA?st.B:st.A).dmgBody+=RI(0,2)*(dt/50);
+          const hits=RI(0,4); (domIsA?st.A:st.B).sig+=hits*(dt/50);
+          /* ==== [ANCRE: P7_L2_USURE_CLINCH] — même principe qu'en debout/sol
+             (ANCRE P7_L2_USURE) : `clinchWear` alimente à la fois le pool de
+             fatigue (dmgA/dmgB, inchangé) et le pool de dégâts par zone,
+             réparti selon la MÊME proportion tête/corps que les coups en
+             clinch qui viennent d'être portés (bodyHits/headHits, calculés
+             juste en dessous avec le ratio 0.65/0.35 repris ici), au lieu de
+             l'ancien roll RI(0,2) totalement déconnecté (et qui n'alimentait
+             que dmgBody, jamais dmgHead). ==== */
+          const clinchWear=hits*1.8*(dt/50);
+          if(domIsA) dmgB+=clinchWear; else dmgA+=clinchWear;
+          applyZoneDamage(domIsA?st.B:st.A,clinchWear,0.35,0.65,0);
+          /* ==== [FIN ANCRE] ==== */
           // Frappes en clinch et contrôle
           const attHits=hits+RI(1,2);
           stDom.sigAtt+=attHits*(dt/50); stDom.clinchStrikes+=hits*(dt/50); stDom.clinchAtt+=attHits*(dt/50);
@@ -382,11 +534,23 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           }
         }
         if(!handled && currentPhase==='debout'){
-          const offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
-          const offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
+          let offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
+          let offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
+          /* ==== [ANCRE: P7_L2_FENETRE_FINITION_VOLUME] — Lot 2/P7 §2.3 :
+             "l'attaquant augmente son volume en fonction de killer et
+             d'aggression" pendant que son adversaire traverse une fenêtre de
+             danger (dangerA/dangerB, cf. déclaration plus haut). Multiplie
+             offA/offB en place plutôt que d'introduire des variables offAEff/
+             offBEff : chaque usage en aval (points juges, KO, log, dégâts)
+             profite ainsi de la même valeur boostée, sans devoir être
+             réécrit un par un. ==== */
+          const dangerBoostA=dangerB>0?(1+clamp(((a.killer||50)+(a.aggression||50)-100)/140,0,0.55)):1;
+          const dangerBoostB=dangerA>0?(1+clamp(((b.killer||50)+(b.aggression||50)-100)/140,0,0.55)):1;
+          offA*=dangerBoostA; offB*=dangerBoostB;
+          /* ==== [FIN ANCRE] ==== */
           const noiseAmt=Math.round(6*noiseWeightMult);
           const pA=clamp(offA*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20), pB=clamp(offB*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20);
-          sa+=pA*(dt/50);sb+=pB*(dt/50);dmgA+=clamp(offB*0.22*0.22,0,6)*(dt/50);dmgB+=clamp(offA*0.22*0.22,0,6)*(dt/50);
+          sa+=pA*(dt/50);sb+=pB*(dt/50);
           const landedA=clamp(pA*0.5,0,10);
           const landedB=clamp(pB*0.5,0,10);
           st.A.sig+=landedA*(dt/50); st.B.sig+=landedB*(dt/50);
@@ -421,40 +585,117 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           const pwrPctB=clamp(((b.power||50)*0.5+(b.cross||50)*0.25+(b.hook||50)*0.25)/100,0.15,0.65);
           st.B.powerStrikes+=(landedB*pwrPctB)*(dt/50);
 
-          // Impact des dégâts reçus (altération des déplacements et coupures)
-          if(st.B.dmgLegs>15) b.footwork=Math.max(10,b.footwork*0.98);
-          if(st.A.dmgLegs>15) a.footwork=Math.max(10,a.footwork*0.98);
+          /* ==== [ANCRE: P7_L2_USURE] — composante "usure" (§2.1) : fond
+             continu, faible amplitude, réparti selon la MÊME zone que la
+             frappe qui vient d'être portée (headX/bodyX/legX ci-dessus),
+             au lieu de l'ancien roll uniforme déconnecté (voir ANCRE
+             P7_L2_DEGATS_USURE_COUPS_LOURDS pour le détail). dmgA/dmgB
+             (pool de fatigue) et st.X.dmgHead/dmgBody/dmgLegs (pool de
+             dégâts par zone, jamais remis à zéro par la cloche, §2.5)
+             reçoivent le même montant — un seul mécanisme, deux lectures. ==== */
+          const wearOnA=landedB*WEAR_PER_LANDED*(dt/50), wearOnB=landedA*WEAR_PER_LANDED*(dt/50);
+          dmgA+=wearOnA; dmgB+=wearOnB;
+          applyZoneDamage(st.A,wearOnA,headB,bodyB,legB);
+          applyZoneDamage(st.B,wearOnB,headA,bodyA,legA);
+          /* ==== [FIN ANCRE] ==== */
+
+          // Impact des dégâts reçus (altération des déplacements, cf. ANCRE
+          // P7_L2_DEGATS_PROGRESSIFS en tête de boucle pour la mobilité/
+          // cardio/menton — recalculés chaque tick, pas ici)
           if(headA>=3 && ((a.cross||50)>75||(a.hook||50)>75) && rnd()<0.2*(dt/50)) st.B.cuts++;
           if(headB>=3 && ((b.cross||50)>75||(b.hook||50)>75) && rnd()<0.2*(dt/50)) st.A.cuts++;
-          if(pA>=8 && rnd()<0.25*(dt/50)) st.B.wobbled++;
-          if(pB>=8 && rnd()<0.25*(dt/50)) st.A.wobbled++;
+          if(pA>=8 && rnd()<0.25*(dt/50)){ st.B.wobbled++; dangerB=Math.max(dangerB,DANGER_TICKS_WOBBLE); }
+          if(pB>=8 && rnd()<0.25*(dt/50)){ st.A.wobbled++; dangerA=Math.max(dangerA,DANGER_TICKS_WOBBLE); }
 
-          const koA=clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016)*profA.koMod*0.22;
-          const koB=clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016)*profB.koMod*0.22;
+          /* ==== [ANCRE: P7_L2_COUP_LOURD] — composante "coup lourd" (§2.1) :
+             événement rare et indépendant de pA/pB (les points juges), à
+             amplitude à queue épaisse (heavyShotAmplitude), dont la
+             fréquence dépend de l'attaquant (power/cross/hook/killer/
+             handSpeed, cf. heavyShotChance) et de la vulnérabilité du
+             défenseur (fatigue courante, déjà en pleine fenêtre de danger).
+             Un coup lourd qui sonne (amplitude >= HEAVY_WOBBLE_AMP) ouvre à
+             son tour une fenêtre de danger — cf. §2.3 — et peut aggraver une
+             coupure déjà ouverte (§2.4). ==== */
+          let heavyLandedThisTick=false;
+          if(rnd()<heavyShotChance(a,fatB,dangerB>0)*(dt/50)){
+            const amp=heavyShotAmplitude(a,b);
+            dmgB+=amp; applyZoneDamage(st.B,amp,headA*1.4+0.6,bodyA+0.4,legA*0.4); heavyLandedThisTick=true;
+            if(amp>=HEAVY_WOBBLE_AMP){ st.B.wobbled++; dangerB=Math.max(dangerB,DANGER_TICKS_HEAVY); if(rnd()<0.12) st.B.cuts++; }
+          }
+          if(rnd()<heavyShotChance(b,fatA,dangerA>0)*(dt/50)){
+            const amp=heavyShotAmplitude(b,a);
+            dmgA+=amp; applyZoneDamage(st.A,amp,headB*1.4+0.6,bodyB+0.4,legB*0.4); heavyLandedThisTick=true;
+            if(amp>=HEAVY_WOBBLE_AMP){ st.A.wobbled++; dangerA=Math.max(dangerA,DANGER_TICKS_HEAVY); if(rnd()<0.12) st.A.cuts++; }
+          }
+          /* ==== [FIN ANCRE] ==== */
+
+          /* ==== [ANCRE: P7_L2_ARRET_MEDICAL] — Lot 2/P7 §2.4 : `cuts`
+             existait déjà comme COMPTEUR (incrémenté ci-dessus) mais n'était
+             jamais exploité. Une coupure devient sévère à partir de
+             CUT_SEVERE_THRESHOLD ouvertures ; chaque tick suivant où le
+             combattant coupé continue d'encaisser du volume à la tête peut
+             déclencher un arrêt médical — méthode de victoire DISTINCTE du
+             KO/TKO (voir engine.js, isKOMethod). ==== */
+          if(st.B.cuts>=CUT_SEVERE_THRESHOLD && headA>0.5){
+            const medStopChance=clamp((st.B.cuts-CUT_SEVERE_THRESHOLD+1)*0.05*headA,0,0.35)*(dt/50);
+            if(rnd()<medStopChance){ finish={by:A,loser:B,method:'Arrêt médical',round:r,detail:'coupure trop profonde pour continuer'}; }
+          }
+          if(!finish && st.A.cuts>=CUT_SEVERE_THRESHOLD && headB>0.5 && !immuneA){
+            const medStopChance=clamp((st.A.cuts-CUT_SEVERE_THRESHOLD+1)*0.05*headB,0,0.35)*(dt/50);
+            if(rnd()<medStopChance){ finish={by:B,loser:A,method:'Arrêt médical',round:r,detail:'coupure trop profonde pour continuer'}; }
+          }
+          /* ==== [FIN ANCRE] ==== */
+
+          const koA=finish?0:clamp((a.power-(b.chin-chinVulnB))/62,0,.93)*clamp((offA-offB)/62+0.46,0,1)*0.6*koWeightMult*(1-b.fightIQ*0.0022)*(1+a.killer*0.003)*(1-b.heart*0.0016)*profA.koMod*0.22;
+          const koB=finish?0:clamp((b.power-(a.chin-chinVulnA))/62,0,.93)*clamp((offB-offA)/62+0.46,0,1)*0.6*koWeightMult*(1-a.fightIQ*0.0022)*(1+b.killer*0.003)*(1-a.heart*0.0016)*profB.koMod*0.22;
           const isKdA=rnd()<koA*1.5*(dt/50), isKdB=!isKdA&&rnd()<koB*1.5*(dt/50);
           let kdText=null;
+          /* ==== [ANCRE: P7_L2_COUP_FINITION] — bug évité : sur un KO/TKO
+             déclenché dès les tout premiers échanges (avant toute usure
+             accumulée), le perdant pouvait finir la simulation avec
+             dmgHead=dmgBody=dmgLegs=0 arrondis (les fractions d'usure du
+             tick, réparties sur 3 zones, tombent sous 0,5 chacune) — un
+             knockout sans le moindre dégât enregistré, incohérent. Le coup
+             qui termine réellement le combat compte désormais toujours,
+             indépendamment du tirage "coup lourd" indépendant ci-dessus. ==== */
           if(isKdA){
-            st.A.kd++; st.B.wobbled++;
+            st.A.kd++; st.B.wobbled++; chinVulnB+=6;
             const finishChanceA=clamp(0.60*(1+((a.killer||50)-50)*0.003)*(1-((b.composure||50)-50)*0.003)*(1-((b.heart||50)-50)*0.002),0.25,0.85);
-            if(rnd()<finishChanceA){ finish={by:A,loser:B,method:'KO/TKO',round:r}; }
-            else kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l’arbitre laisse le combat continuer !`};
+            if(rnd()<finishChanceA){ finish={by:A,loser:B,method:'KO/TKO',round:r}; applyZoneDamage(st.B,clamp(heavyShotAmplitude(a,b)*0.25,3,8),headA*1.4+0.6,bodyA+0.4,legA*0.4); }
+            else { kdText={by:'me',txt:`${A.name} envoie ${B.name} au tapis, mais l’arbitre laisse le combat continuer !`}; dangerB=Math.max(dangerB,DANGER_TICKS_KD); applyZoneDamage(st.B,clamp(heavyShotAmplitude(a,b)*0.18,2,5),headA*1.4+0.6,bodyA+0.4,legA*0.4); }
           }
           else if(isKdB){
-            st.B.kd++; st.A.wobbled++;
+            st.B.kd++; st.A.wobbled++; chinVulnA+=6;
             const finishChanceB=clamp(0.60*(1+((b.killer||50)-50)*0.003)*(1-((a.composure||50)-50)*0.003)*(1-((a.heart||50)-50)*0.002),0.25,0.85);
-            if(!immuneA && rnd()<finishChanceB){ finish={by:B,loser:A,method:'KO/TKO',round:r}; }
-            else kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l’arbitre laisse le combat continuer !`};
+            if(!immuneA && rnd()<finishChanceB){ finish={by:B,loser:A,method:'KO/TKO',round:r}; applyZoneDamage(st.A,clamp(heavyShotAmplitude(b,a)*0.25,3,8),headB*1.4+0.6,bodyB+0.4,legB*0.4); }
+            else { kdText={by:'op',txt:`${B.name} envoie ${A.name} au tapis, mais l’arbitre laisse le combat continuer !`}; dangerA=Math.max(dangerA,DANGER_TICKS_KD); applyZoneDamage(st.A,clamp(heavyShotAmplitude(b,a)*0.18,2,5),headB*1.4+0.6,bodyB+0.4,legB*0.4); }
           }
+          /* ==== [FIN ANCRE] ==== */
+          /* ==== [ANCRE: P7_L2_FENETRE_FINITION_ROLL] — Lot 2/P7 §2.3 : "une
+             finition devient nettement probable, sans être automatique"
+             pendant la fenêtre de danger — un jet SUPPLÉMENTAIRE, distinct du
+             jet de knockdown ci-dessus, actif uniquement tant que
+             dangerA/dangerB>0 (donc nul le reste du combat, purement additif).
+             dangerBoostA/B valent 1 hors fenêtre : (dangerBoostX-1) est donc
+             nul hors fenêtre et proportionnel au boost de volume dedans. ==== */
+          if(!finish && dangerB>0){
+            const stormFinishA=clamp((dangerBoostA-1)*0.85+((a.killer||50)-50)*0.003,0,0.45)*(1-((b.composure||50)-50)*0.003)*(dt/50);
+            if(rnd()<stormFinishA){ finish={by:A,loser:B,method:'KO/TKO',round:r,detail:'enchaînement dans la tempête'}; applyZoneDamage(st.B,clamp(heavyShotAmplitude(a,b)*0.25,3,8),headA*1.4+0.6,bodyA+0.4,legA*0.4); }
+          }
+          if(!finish && dangerA>0 && !immuneA){
+            const stormFinishB=clamp((dangerBoostB-1)*0.85+((b.killer||50)-50)*0.003,0,0.45)*(1-((a.composure||50)-50)*0.003)*(dt/50);
+            if(rnd()<stormFinishB){ finish={by:B,loser:A,method:'KO/TKO',round:r,detail:'enchaînement dans la tempête'}; applyZoneDamage(st.A,clamp(heavyShotAmplitude(b,a)*0.25,3,8),headB*1.4+0.6,bodyB+0.4,legB*0.4); }
+          }
+          /* ==== [FIN ANCRE] ==== */
           const isMe=rnd()<(offA/(offA+offB+1));
           momentum=clamp(momentum+(isMe?RI(4,9):-RI(4,9)),5,95);
-          const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB, tgt=isMe?st.B:st.A;
-          const rDmg=rnd(); if(rDmg<0.4) tgt.dmgHead+=RI(1,3)*(dt/50); else if(rDmg<0.7) tgt.dmgBody+=RI(1,3)*(dt/50); else tgt.dmgLegs+=RI(1,3)*(dt/50);
+          const atk=isMe?A:B, def=isMe?B:A, tgs=isMe?tagsA:tagsB;
           /* ==== [ANCRE: HORLOGE_CONTINUE_DENSITE_LOG_DEBOUT] — même logique
              de densité qu'en phase sol : un knockdown ou une finition sont
              toujours journalisés, un échange ordinaire est échantillonné à
              (dt/50) pour retomber sur ~6 beats/round en moyenne quel que soit
              dt (voir ANCRE HORLOGE_CONTINUE_DENSITE_LOG ci-dessus). ==== */
-          if(kdText || finish || rnd()<dt/90){
+          if(kdText || finish || heavyLandedThisTick || rnd()<dt/90){
           let satirePool=[];
           if(atk.attrs.fightIQ>def.attrs.fightIQ+20){
             satirePool.push(`${atk.name} donne une leçon de géométrie à un adversaire qui ne sait pas lire les angles.`,`${atk.name} feinte le jab, ${def.name} réagit avec deux secondes de retard.`);
@@ -465,14 +706,31 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           if(atk.style==='karate'){
             satirePool.push(`${atk.name} fait des bonds de kangourou et claque un kick insaisissable.`,`Garde au niveau des genoux, arrogance au maximum, ${atk.name} touche en premier.`);
           }
+          /* ==== [ANCRE: P7_L2_LOG_COUP_LOURD] — §2.3 : "une victoire par KO
+             doit se lire dans le déroulé : un coup lourd, un knockdown, un
+             enchaînement, l'arrêt" — un coup lourd qui vient de toucher (sans
+             forcément de KD) obtient désormais ses propres lignes, plutôt que
+             de se fondre dans les échanges ordinaires. ==== */
+          if(!kdText && heavyLandedThisTick){
+            satirePool=[`${atk.name} place un coup lourd, ${def.name} accuse le coup.`,`Sérieuse alerte pour ${def.name} : ${atk.name} vient de placer un coup qui compte.`,`${atk.name} touche fort, ${def.name} recule pour se remettre les idées en place.`];
+          }
+          /* ==== [FIN ANCRE] ==== */
           if(satirePool.length===0){
             satirePool=[`${atk.name} touche avec une belle combinaison.`,`${atk.name} trouve l’ouverture en striking.`,`Superbe échange remporté par ${atk.name}.`,`Le bras arrière de ${atk.name} fait mouche.`,`${atk.name} casse la distance et punit.`,`${tgs.includes('Kick')?atk.name+' claque un lourd kick.':atk.name+' place une combinaison nette.'}`];
           }
           let txt=kdText?kdText.txt:getUniqueLog(satirePool);
           log.push({r,phase:'debout',by:kdText?kdText.by:(isMe?'me':'op'),text:`[${formatTime(beatT)}] `+txt,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+          /* ==== [ANCRE: P7_L2_LOG_ARRET_MEDICAL] — bug évité : ce texte de
+             clôture était hardcodé "KO foudroyant", qui aurait été affiché
+             tel quel même pour un arrêt médical (méthode distincte, §2.4) —
+             contrairement à la phase 'sol' (ANCRE juste au-dessus dans ce
+             fichier) déjà générique ("Victoire par ${finish.method}"). ==== */
           if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
             finish.time=beatT;
-            last.text=`[${formatTime(beatT)}] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
+            last.text=finish.method==='Arrêt médical'
+              ?`[${formatTime(beatT)}] [CRITIQUE] Le médecin de la commission arrête le combat : coupure trop sévère pour continuer.`
+              :`[${formatTime(beatT)}] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
+          /* ==== [FIN ANCRE] ==== */
           }
           if(!finish && rnd()<0.15*(dt/50)){ currentPhase='clinch'; }
         }
@@ -556,6 +814,17 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     // récupération (pas la fatigue/cardio, qui reste dérivée à chaque round). ====
     dmgA=Math.max(0,dmgA-(A.attrs.recovery||50)*0.15);
     dmgB=Math.max(0,dmgB-(B.attrs.recovery||50)*0.15);
+    /* ==== [ANCRE: P7_L2_RECUP_DANGER] — Lot 2/P7 §2.5 : "recovery doit
+       gouverner ce que la cloche efface : une partie de la fatigue (juste
+       au-dessus, inchangé), une partie de l'état wobbled, JAMAIS les dégâts
+       cumulés aux jambes et au corps." La cloche allège donc aussi la
+       fenêtre de danger encore active — st.X.dmgHead/dmgBody/dmgLegs, eux,
+       ne sont touchés NULLE PART dans ce bloc (ni ailleurs dans ce fichier) :
+       un combattant qui a pris quarante low kicks au round 2 ne repart pas
+       neuf au round 3. ==== */
+    dangerA=Math.max(0,dangerA-(A.attrs.recovery||50)*0.08);
+    dangerB=Math.max(0,dangerB-(B.attrs.recovery||50)*0.08);
+    /* ==== [FIN ANCRE] ==== */
     // ==== [FIN ANCRE] ====
   }
   let res;
@@ -566,6 +835,13 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     finish.zone=finishZone;
     const finishMove=pickFinishMove(finish.by, finish.method==='Soumission'?'sub':'ko', finishZone, st, finish.round);
     finish.moveName=finishMove.name; finish.moveFlavor=finishMove.flavor;
+    /* ==== [ANCRE: P7_L2_FLAVOR_ARRET_MEDICAL] — pickFinishMove() ne connaît
+       que 'sub'/'ko' (jamais 'Arrêt médical', §2.4) : sans ce repli, le
+       flavor "bloodbath" générique ('La commission médicale doit intervenir
+       en urgence.') aurait pu s'afficher au mot près pour un KO ordinaire ET
+       pour un arrêt médical réel, les rendant indiscernables à l'écran. ==== */
+    if(finish.method==='Arrêt médical') finish.moveFlavor='La coupure est trop profonde : le médecin de la commission met fin au combat.';
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: CORRECTIF_ZONE_AFFICHEE] — zone anatomique NARRÉE = celle du
        geste joué (finishMove.moveZone), pas celle des dégâts cumulés. Repli sur
        finishZone si le geste n'est référencé dans aucune table. ==== */
@@ -629,8 +905,8 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
    "le corps encaisse" même en gagnant). ==== */
 function applyResult(F,opp,res,side){ const isDraw=res.winner==='D'; const win=!isDraw&&res.winner===side; const m=res.method;
   if(isDraw){ F.D=(F.D||0)+1; F.morale=clamp(F.morale+RI(-2,2),0,100); }
-  else if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(m.startsWith('KO'))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(2,7),0,100); }
-  else { F.L++; F.streak=Math.min(-1,F.streak-1); if(m.startsWith('KO'))F.koLoss++; F.morale=clamp(F.morale-RI(8,16),0,100); }
+  else if(win){ F.W++; F.streak=Math.max(1,F.streak+1); if(isKOMethod(m))F.ko++; else if(m.startsWith('Soum'))F.sub++; else F.dec++; F.morale=clamp(F.morale+RI(2,7),0,100); }
+  else { F.L++; F.streak=Math.min(-1,F.streak-1); if(isKOMethod(m))F.koLoss++; F.morale=clamp(F.morale-RI(8,16),0,100); }
   /* ==== [ANCRE: V2-38] — "bilan maison" par organisation, en plus du
      palmarès pro global (F.W/F.L, qui ne se remet jamais à zéro après le
      seul passage amateur→pro, turnPro()) : un nouvel objectif de

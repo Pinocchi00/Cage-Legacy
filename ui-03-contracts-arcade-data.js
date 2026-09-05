@@ -166,7 +166,7 @@ function generateNarrativeQuote(f,p){
   const totalSig=(st.A.sig||0)+(st.B.sig||0);
   const oppSig=p.win?st.B.sig:st.A.sig;
   tags.push(p.win?'WIN':'LOSS');
-  if(p.method.startsWith('KO')) tags.push('KO');
+  if(isKOMethod(p.method)) tags.push('KO');
   if(p.method.startsWith('Soum')) tags.push('SUB');
   if(isDecisionLike(p.method)) tags.push('DEC');
   if(totalSig>120 || st.A.kd+st.B.kd>=2) tags.push('WAR');

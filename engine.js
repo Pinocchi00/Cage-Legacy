@@ -42,6 +42,22 @@ function parseGender(txt,gender){
    cassées par l'ajout du Draw ('Égalité' ne commence pas par 'Déc'). ==== */
 function isDecisionLike(m){ return !!m && (m.startsWith('Déc')||m==='Égalité'); }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P7_L2_IS_KO_METHOD] — Lot 2/P7 §2.4 : l'arrêt médical (coupure)
+   est une MÉTHODE DE VICTOIRE DISTINCTE du KO/TKO ('Arrêt médical', jamais
+   'KO/TKO...') pour l'affichage — voir engine-combat.js, ANCRE
+   P7_L2_ARRET_MEDICAL. Mais pour toute CLASSIFICATION statistique (palmarès
+   F.ko, K-factor Elo, achievements "victoires par KO", narration de
+   rivalité...), un arrêt médical se range avec le KO/TKO, exactement comme
+   dans le vrai MMA où un arrêt du médecin compte comme une victoire par TKO
+   au palmarès. Point de vérité unique (même logique que isDecisionLike
+   ci-dessus) plutôt que de dupliquer `m==='Arrêt médical'` dans chacun des
+   ~15 points d'appel concernés — un seul endroit à corriger si la règle
+   change. N'UTILISE PAS ce helper pour un LABEL AFFICHÉ tel quel (le texte
+   "Arrêt médical" doit rester visible tel quel à l'écran ; seuls les points
+   qui décident bêtement "KO ou Soumission ?" sans repli générique doivent
+   distinguer les deux cas explicitement, cf. ui-09-arena.js). ==== */
+function isKOMethod(m){ return !!m && (m.startsWith('KO')||m==='Arrêt médical'); }
+/* ==== [FIN ANCRE] ==== */
 
 /* --------------------------- 30 ATTRIBUTS --------------------------------- */
 const ATTR={

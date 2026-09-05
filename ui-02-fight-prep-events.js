@@ -696,7 +696,7 @@ function compileSeasonStats(f, fights){
     biggestUpset:0, highestOppRank:999, titleWins:0, r1KOs:0, closeFights:0, wars:0, flawless:0 };
   fights.forEach(ft=>{
     if(ft.win){ s.W++;
-      if(ft.method.startsWith('KO')){ s.koW++; if(ft.round===1)s.r1KOs++; }
+      if(isKOMethod(ft.method)){ s.koW++; if(ft.round===1)s.r1KOs++; }
       else if(ft.method.startsWith('Soum')) s.subW++;
       else s.decW++;
       if(ft.oppRank<s.highestOppRank) s.highestOppRank=ft.oppRank;
@@ -704,7 +704,7 @@ function compileSeasonStats(f, fights){
       if(ft.isTitle) s.titleWins++;
       if(ft.st.Op.sig===0 && ft.st.Op.td===0) s.flawless++;
     } else { s.L++;
-      if(ft.method.startsWith('KO')) s.koL++;
+      if(isKOMethod(ft.method)) s.koL++;
       else if(ft.method.startsWith('Soum')) s.subL++;
       else s.decL++;
     }
