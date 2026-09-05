@@ -888,3 +888,129 @@ test('P7_L2_RECUP_JAMAIS_DEGATS_ZONE — la récupération entre rounds n’effa
   }
   assert.ok(checked > 100, `assez de beats journalisés pour que ce test soit significatif (obtenu ${checked})`);
 });
+
+/* ==== [ANCRE: TEST_P7_L3_HIERARCHIE_POSITIONS] — Lot 3/P7 §3.1 : avant ce
+   lot, le sol ne connaissait que `topIsA` (deux états) — aucune position
+   nommée ne pouvait être observée dans le journal de combat. Vérifie que le
+   graphe de transitions (ANCRE P7_L3_SOL_TRANSITIONS, engine-combat.js)
+   fait réellement progresser la position au-delà de la garde fermée
+   d'entrée (initialGroundPos), et que guardPasses (compteur crédité par les
+   transitions réelles depuis ce lot, plus par le tirage ad hoc d'avant) est
+   bien actif sur un échantillon dominé positionnellement. ==== */
+test('P7_L3_HIERARCHIE_POSITIONS — la position au sol progresse au-delà de la garde fermée (passage de garde, montée, dos observés)', () => {
+  const win = newGameWindow();
+  win.setSeed(2026);
+  const posSeen = new Set();
+  let totalGuardPasses = 0;
+  for (let i = 0; i < 200; i++) {
+    const A = win.makeFighter({ style: 'wrestler', first: 'Top' });
+    Object.assign(A.attrs, { takedown: 100, strength: 95, explosiveness: 90, tdd: 90, topControl: 95, gnp: 85, power: 70, submission: 80, killer: 70 });
+    const B = win.makeFighter({ style: 'boxer', first: 'Bottom' });
+    Object.assign(B.attrs, { guardWork: 5, flexibility: 5, strength: 5, tdd: 5, topControl: 5, chin: 60, durability: 60, composure: 60, heart: 60, cardio: 60 });
+    const res = win.simulateFight(A, B, 5);
+    res.log.forEach(entry => { if (entry.phase === 'sol' && entry.pos) posSeen.add(entry.pos); });
+    totalGuardPasses += res.stats.A.guardPasses;
+  }
+  assert.ok(posSeen.has('closedGuard'), 'la garde fermée (position d\'entrée par défaut) doit apparaître dans le journal');
+  const advancedPositions = ['halfGuard', 'sideControl', 'mount', 'backControl'].filter(p => posSeen.has(p));
+  assert.ok(advancedPositions.length > 0,
+    `sur un dominant positionnel net (topControl/strength/explosiveness 90-100 vs guard/flexibility/strength 5), au moins une position avancée doit apparaître sur 200 combats — obtenu positions vues: ${[...posSeen].join(', ')}`);
+  assert.ok(totalGuardPasses > 0, `guardPasses doit être crédité par les transitions réelles sur cet échantillon dominé (obtenu ${totalGuardPasses})`);
+});
+
+/* ==== [ANCRE: TEST_P7_L3_SUBMISSION_DEFENSE] — Lot 3/P7 §3.2 : "elle se
+   défend (flexibility, composure, strength)" — submissionDefenseMult()
+   (engine-combat.js) doit réellement réduire le taux de soumissions subies
+   par un défenseur souple/calme/fort par rapport à un défenseur démuni sur
+   ces trois plans, toutes choses égales par ailleurs (même attaquant, même
+   niveau de soumission/contrôle en face). ==== */
+test('P7_L3_SUBMISSION_DEFENSE — un défenseur souple/calme/fort subit nettement moins de soumissions qu’un défenseur démuni', () => {
+  const win = newGameWindow();
+  const N = 300;
+  const buildAttacker = () => {
+    const A = win.makeFighter({ style: 'bjj', first: 'Attaquant' });
+    Object.assign(A.attrs, { submission: 95, killer: 80, topControl: 85, strength: 75, explosiveness: 75, gnp: 65, takedown: 85, tdd: 50, guardWork: 50 });
+    return A;
+  };
+  const buildDefender = (level) => {
+    const B = win.makeFighter({ style: 'boxer', first: 'Defenseur' });
+    Object.assign(B.attrs, { flexibility: level, composure: level, strength: level, guardWork: 50, topControl: 50, tdd: 50, chin: 50, durability: 50, fightIQ: 50 });
+    return B;
+  };
+  win.setSeed(4041);
+  let lowDefSubLosses = 0;
+  for (let i = 0; i < N; i++) {
+    const res = win.simulateFight(buildAttacker(), buildDefender(1), 5);
+    if (res.winner === 'A' && res.method === 'Soumission') lowDefSubLosses++;
+  }
+  win.setSeed(4041);
+  let highDefSubLosses = 0;
+  for (let i = 0; i < N; i++) {
+    const res = win.simulateFight(buildAttacker(), buildDefender(99), 5);
+    if (res.winner === 'A' && res.method === 'Soumission') highDefSubLosses++;
+  }
+  assert.ok(lowDefSubLosses > highDefSubLosses,
+    `un défenseur démuni (flexibility/composure/strength=1) doit subir plus de soumissions qu'un défenseur souple/calme/fort (=99), même seed, même attaquant — obtenu ${lowDefSubLosses} vs ${highDefSubLosses} sur ${N} combats`);
+});
+
+/* ==== [ANCRE: TEST_P7_L3_JUGES_COHERENCE] — Lot 3/P7 §3.3, dernier point :
+   "un round où le panneau montre une domination nette ne doit pas pouvoir
+   être donné à l'autre" — cohérence panneau/cartes. judgeDiffs (roundStats,
+   engine-combat.js ANCRE P7_L3_JUGES_SENSIBILITES) expose les trois lectures
+   pondérées du même round : quand les TROIS pondérations s'accordent sur une
+   domination nette (même signe, |valeur|>20), les trois juges doivent
+   obligatoirement attribuer le round au même combattant — jamais de round
+   donné à l'adversaire dans ce cas, contrairement à l'ancien dissentJudge()
+   qui pouvait retourner l'intégralité d'un round 10-9 dès que |rDiff|<=20. ==== */
+test('P7_L3_JUGES_COHERENCE — un round nettement dominé selon les trois pondérations n’est jamais donné à l’adversaire', () => {
+  const win = newGameWindow();
+  win.setSeed(777);
+  let checkedRounds = 0;
+  for (let i = 0; i < 300; i++) {
+    const A = win.makeFighter({});
+    const B = win.makeFighter({});
+    const res = win.simulateFight(A, B, 5);
+    (res.roundStats || []).forEach(rs => {
+      if (!rs.judgeDiffs) return;
+      const [d1, d2, d3] = rs.judgeDiffs;
+      const allDominantA = d1 > 20 && d2 > 20 && d3 > 20;
+      const allDominantB = d1 < -20 && d2 < -20 && d3 < -20;
+      if (!allDominantA && !allDominantB) return;
+      checkedRounds++;
+      const winnerOf = j => j[0] > j[1] ? 'A' : (j[1] > j[0] ? 'B' : 'tie');
+      const expected = allDominantA ? 'A' : 'B';
+      assert.equal(winnerOf(rs.j1), expected, `juge 1 doit donner ce round dominé à ${expected} (j1=${JSON.stringify(rs.j1)}, judgeDiffs=${JSON.stringify(rs.judgeDiffs)})`);
+      assert.equal(winnerOf(rs.j2), expected, `juge 2 doit donner ce round dominé à ${expected} (j2=${JSON.stringify(rs.j2)}, judgeDiffs=${JSON.stringify(rs.judgeDiffs)})`);
+      assert.equal(winnerOf(rs.j3), expected, `juge 3 doit donner ce round dominé à ${expected} (j3=${JSON.stringify(rs.j3)}, judgeDiffs=${JSON.stringify(rs.judgeDiffs)})`);
+    });
+  }
+  assert.ok(checkedRounds > 20, `assez de rounds nettement dominés observés pour que ce test soit significatif (obtenu ${checkedRounds})`);
+});
+
+/* ==== [ANCRE: TEST_P7_L3_DECISIONS_PARTAGEES] — Lot 3/P7 §3.3, cible :
+   "décisions partagées ramenées sous 15% de l'ensemble des décisions". Ce
+   test tourne sur un échantillon plus modeste que le harnais Monte Carlo de
+   référence (tools/monte-carlo-combat.js, 12 000 combats, cf.
+   tools/reports/) pour rester rapide ; la tolérance (25%) est volontairement
+   plus large que la cible officielle pour absorber le bruit d'échantillonnage
+   à cette taille, tout en détectant une régression franche vers l'ancien
+   régime (38-40% mesuré avant ce lot, cf. baseline-P7.md). ==== */
+test('P7_L3_DECISIONS_PARTAGEES — sur un échantillon, la part de décisions partagées reste loin du régime pré-Lot 3 (38-40%)', () => {
+  const win = newGameWindow();
+  win.setSeed(2468);
+  const STYLES = win.STYLE_KEYS || ['boxer', 'kickboxer', 'muayThai', 'karate', 'wrestler', 'bjj', 'sambo', 'mma'];
+  const pick = arr => arr[Math.floor(win.rnd() * arr.length)];
+  let decisions = 0, splitDecisions = 0;
+  const N = 1500;
+  for (let i = 0; i < N; i++) {
+    const A = win.makeFighter({ style: pick(STYLES) });
+    const B = win.makeFighter({ style: pick(STYLES) });
+    const res = win.simulateFight(A, B, (i % 5 === 0) ? 5 : 3);
+    if (win.isDecisionLike(res.method)) {
+      decisions++;
+      if (res.method === 'Décision partagée') splitDecisions++;
+    }
+  }
+  const share = (splitDecisions / decisions) * 100;
+  assert.ok(share < 25, `part de décisions partagées attendue loin sous le régime pré-Lot 3 (38-40%, cf. baseline-P7.md) — obtenu ${share.toFixed(1)}% sur ${decisions} décisions`);
+});
