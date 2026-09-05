@@ -146,7 +146,7 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
 
   // Méthode de victoire
   const m = res.method;
-  if (m.startsWith('KO')) methodCounts['KO/TKO']++;
+  if (win.isKOMethod(m)) methodCounts['KO/TKO']++;
   else if (m.startsWith('Soum')) methodCounts['Soumission']++;
   else if (m === 'Décision partagée') methodCounts['Décision partagée']++;
   else if (m === 'Égalité') methodCounts['Égalité']++;
@@ -165,13 +165,13 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
   if (res.winner === 'A') {
     styleStats[styleA].wins++;
     matrix[styleA][styleB].wins++;
-    if (m.startsWith('KO')) styleStats[styleA].koWins++;
+    if (win.isKOMethod(m)) styleStats[styleA].koWins++;
     else if (m.startsWith('Soum')) styleStats[styleA].subWins++;
     else styleStats[styleA].decWins++;
   } else if (res.winner === 'B') {
     styleStats[styleB].wins++;
     matrix[styleB][styleA].wins++;
-    if (m.startsWith('KO')) styleStats[styleB].koWins++;
+    if (win.isKOMethod(m)) styleStats[styleB].koWins++;
     else if (m.startsWith('Soum')) styleStats[styleB].subWins++;
     else styleStats[styleB].decWins++;
   }

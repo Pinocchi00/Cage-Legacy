@@ -244,9 +244,9 @@ const FIGHT_DELTA_RANGES = {
   morale: { win: [2, 7], loss: [-16, -8], draw: [-2, 2] },
   form: { win: [-4, -1], loss: [-12, -5], draw: [-3, -1] },
 };
-function methodBucket(method, res){
+function methodBucket(win, method, res){
   if(res === 'draw') return 'DRAW';
-  if(method && method.startsWith('KO')) return 'KO';
+  if(method && win.isKOMethod(method)) return 'KO';
   if(method && method.startsWith('Soum')) return 'SUB';
   return 'DEC';
 }
@@ -274,7 +274,7 @@ function recordFightResult(win, formBefore, moraleBefore, acc){
   }
   acc._lastD20Form = d20Form; acc._lastD20Morale = d20Morale;
 
-  const mb = methodBucket(last.method, res);
+  const mb = methodBucket(win, last.method, res);
   acc.methodCounts[mb] = (acc.methodCounts[mb] || 0) + 1;
 
   if(!acc.orgFightCounts[org]) acc.orgFightCounts[org] = { w: 0, l: 0, d: 0 };

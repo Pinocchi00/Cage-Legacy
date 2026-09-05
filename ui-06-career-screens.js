@@ -866,7 +866,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
      <div class="hero-name" style="color:${p.isFantasy||p.isVsFriend?(p.res.winner==='D'?'var(--gold)':(p.win?'var(--blood)':'#4DA6FF')):(p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)'))}">${(p.isFantasy||p.isVsFriend)?(p.res.winner==='D'?'ÉGALITÉ':`${esc(p.win?f.name:p.opp.name)} gagne par ${p.method}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${(p.isFantasy||p.isVsFriend)?'':p.method}${p.res.round?' · Round '+p.res.round:''}${(p.res.finishTimeStr && !isDecisionLike(p.method))?' · '+p.res.finishTimeStr:''}</em></div>
      <div class="tagrow" style="justify-content:center">
        ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
-         const typeStr=p.method.startsWith('KO')?'KO/TKO':'Soumission';
+         const typeStr=isKOMethod(p.method)?'KO/TKO':'Soumission';
          // ==== [ANCRE: DETECTION_ZONE_REDONDANTE] — élargie aux synonymes
          // anatomiques (ex. "plexus"/"menton" pour la zone "corps"/"tête") :
          // avant, seule une correspondance texte EXACTE du mot de zone

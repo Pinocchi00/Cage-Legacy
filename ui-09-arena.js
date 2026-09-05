@@ -377,9 +377,9 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
      (halo TAP! existant). La foule réagit à TOUT coup, mais plus fort sur
      une finition, et décroît ensuite (cf. drawArena). */
   if(b.finish){ A.slowMoFactor=0.22; A.slowMoUntil=performance.now()+900; }
-  A._chromaKOActive=!!(b.finish && b.method && b.method.startsWith('KO')); A._chromaDone=false;
+  A._chromaKOActive=!!(b.finish && isKOMethod(b.method)); A._chromaDone=false;
   A.crowdPulse=Math.min(1,(A.crowdPulse||0)+(b.finish?1:0.35));
-  if(b.finish){ if(b.method&&b.method.startsWith('KO')){ if(A.meWin){A.fall=2;} else {A.fall=1;} }
+  if(b.finish){ if(isKOMethod(b.method)){ if(A.meWin){A.fall=2;} else {A.fall=1;} }
     else if(b.method&&b.method.startsWith('Soum')){ A.tap=A.meWin?2:1; }
     if(A.finishZone){ const zoneLetter=A.finishZone==='tête'?'h':A.finishZone==='corps'?'b':'l';
       const loserPrefix=A.meWin?'do':'dm'; A.flashZoneId=`${loserPrefix}-${zoneLetter}`; } }
@@ -668,7 +668,14 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
        un simple numéro de round affiché, jamais un tirage aléatoire. ==== */
     const rd=A.beats[A.lastBeat]?A.beats[A.lastBeat].round:1;
     let label = A.curPhase==='sol'?'SOL':(A.curPhase==='clinch'?'CLINCH':'DEBOUT');
-    if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
+    /* ==== [ANCRE: P7_L2_LABEL_ARRET_MEDICAL] — bug évité : ce ternaire n'avait
+       que deux issues possibles (KO/TKO ou SOUMISSION), sans repli générique —
+       contrairement à ui-06 (finishTxt, `par ${method}`) qui retombe proprement
+       sur le texte brut. Sans ce cas explicite, un 'Arrêt médical' (méthode
+       distincte du KO, cf. engine-combat.js ANCRE P7_L2_ARRET_MEDICAL) se
+       serait affiché "SOUMISSION" dans l'arène — faux et trompeur. ==== */
+    if(A.done){ label = A.method==='Égalité'?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method==='Arrêt médical'?'ARRÊT MÉDICAL':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION')); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
+    /* ==== [FIN ANCRE] ==== */
     ctx.fillText(A.done?label:('ROUND '+rd+' · '+label), W/2, 20);
   }
   if(A.tap){ ctx.fillStyle='#C6A15B'; ctx.font="700 13px 'Oswald'"; ctx.fillText('TAP !', A.tap===1?W*0.34:W*0.66, gY-70); }

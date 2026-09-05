@@ -929,7 +929,7 @@ const ACH=[
      // numérique n'y est constatée.
      for(const rId of rivalIds){ const encounters=f.history.filter(h=>h.oppId===rId);
        if(encounters.length>=2){ const first=encounters[0], last=encounters[encounters.length-1];
-         if(first.res==='loss' && last.res==='win' && (last.method.startsWith('KO')||last.method.startsWith('Soum'))) return true; } }
+         if(first.res==='loss' && last.res==='win' && (isKOMethod(last.method)||last.method.startsWith('Soum'))) return true; } }
      return false; }},
  // ==== [FIN ANCRE] ====
 ];
@@ -946,7 +946,7 @@ function checkAch(){
 
 /* ============================== ÉCRANS ==================================== */
 function last5(f){ const h=f.history.slice(-5); if(!h.length)return '<span class="muted small">Pas encore de combat</span>';
-  return '<div class="l5">'+h.map(x=>{ const ko=x.method&&x.method.startsWith('KO'),sub=x.method&&x.method.startsWith('Soum');
+  return '<div class="l5">'+h.map(x=>{ const ko=isKOMethod(x.method),sub=x.method&&x.method.startsWith('Soum');
     const letter=x.res==='win'?'V':(x.res==='draw'?'N':'D'); const cls=x.res==='win'?'w':(x.res==='draw'?'d':'l');
     return `<span class="p ${cls}" title="${x.method||''}">${letter}<i>${ko?'KO':sub?'SUB':'DÉC'}</i></span>`; }).join('')+'</div>'; }
 function formatCtrl(v){ const totalSec=Math.round((v||0)*100); const m=Math.floor(totalSec/60), s=totalSec%60; return `${m}:${s<10?'0':''}${s}`; }

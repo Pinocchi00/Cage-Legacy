@@ -805,3 +805,86 @@ test('renderCombatStatsCard() — rendu complet sans NaN ni undefined', () => {
   assert.ok(!html.includes('undefined'), 'aucun undefined dans le HTML');
   assert.ok(!html.includes('NaN'), 'aucun NaN dans le HTML');
 });
+
+/* ==== [ANCRE: TEST_P7_L2_COUP_LOURD] — Lot 2/P7 §2.1 : avant ce lot, le flux
+   de dégâts était borné par un `clamp(...,0,6)` PAR TICK (donc, mécaniquement,
+   par round) — aucun combat sur 24 000 relevés mesurés en LOT 1 ne dépassait
+   37 points de dégâts cumulés (tête+corps+jambes). Le nouveau modèle
+   introduit des coups lourds à distribution à queue épaisse, dont
+   l'amplitude est plafonnée par ÉVÉNEMENT (HEAVY_MAX_AMP), jamais par tick :
+   un pic isolé bien au-delà de l'ancien plafond doit donc pouvoir survenir. ==== */
+test('P7_L2_COUP_LOURD — le modèle de dégâts en deux composantes produit des pics dépassant nettement l’ancien plafond par tick', () => {
+  const win = newGameWindow();
+  win.setSeed(5);
+  let maxDmg = 0;
+  for (let i = 0; i < 300; i++) {
+    const A = win.makeFighter({ style: 'boxer' });
+    const B = win.makeFighter({ style: 'boxer' });
+    const res = win.simulateFight(A, B, 3);
+    const dmgA = res.stats.A.dmgHead + res.stats.A.dmgBody + res.stats.A.dmgLegs;
+    const dmgB = res.stats.B.dmgHead + res.stats.B.dmgBody + res.stats.B.dmgLegs;
+    maxDmg = Math.max(maxDmg, dmgA, dmgB);
+  }
+  assert.ok(maxDmg > 40,
+    `un coup lourd doit pouvoir produire un pic de dégâts cumulés bien au-delà de l'ancien maximum mesuré (37 sur 24 000 relevés, cf. baseline-P7.md) — obtenu max=${maxDmg}`);
+});
+
+/* ==== [ANCRE: TEST_P7_L2_ARRET_MEDICAL] — Lot 2/P7 §2.4 : `cuts` existait
+   déjà comme compteur mais n'était jamais exploité — aucune coupure ne
+   pouvait jamais arrêter un combat. isKOMethod() (engine.js) doit aussi
+   classer 'Arrêt médical' comme un KO/TKO pour le palmarès (F.ko, K-factor
+   Elo, achievements), tout en restant un LIBELLÉ distinct affiché tel quel
+   à l'écran (jamais confondu avec 'Soumission' ou une décision). ==== */
+test('P7_L2_ARRET_MEDICAL — une coupure aggravée peut déclencher un arrêt médical, classé comme un KO/TKO pour le palmarès', () => {
+  const win = newGameWindow();
+  win.setSeed(3);
+  let sawMedical = false;
+  for (let i = 0; i < 500 && !sawMedical; i++) {
+    const A = win.makeFighter({ style: 'karate' });
+    Object.assign(A.attrs, { cross: 100, hook: 100, power: 100, killer: 100 });
+    const B = win.makeFighter({ style: 'karate' });
+    Object.assign(B.attrs, { chin: 1, durability: 1, composure: 1, heart: 1, fightIQ: 1 });
+    const res = win.simulateFight(A, B, 5);
+    if (res.method === 'Arrêt médical') sawMedical = true;
+  }
+  assert.ok(sawMedical, 'un arrêt médical doit pouvoir survenir sur assez de combats avec une coupure aggravée (cross/hook/power/killer 100 vs chin/durability/composure/heart/fightIQ 1)');
+  assert.equal(win.isKOMethod('Arrêt médical'), true, 'isKOMethod doit classer un arrêt médical comme un KO/TKO pour le palmarès');
+  assert.equal(win.isKOMethod('KO/TKO'), true);
+  assert.equal(win.isKOMethod('Soumission'), false, 'isKOMethod ne doit jamais confondre un arrêt médical avec une soumission');
+  assert.equal(win.isKOMethod('Décision'), false);
+  assert.equal(win.isKOMethod('Décision partagée'), false);
+  assert.equal(win.isKOMethod('Égalité'), false);
+  assert.equal(win.isKOMethod(null), false);
+});
+
+/* ==== [ANCRE: TEST_P7_L2_RECUP_JAMAIS_DEGATS_ZONE] — Lot 2/P7 §2.5 :
+   "recovery doit gouverner ce que la cloche efface : une partie de la
+   fatigue, une partie de l'état wobbled, JAMAIS les dégâts cumulés aux
+   jambes et au corps." Vérifié directement sur les snapshots par beat du
+   journal de combat (snapA/snapB, déjà exposés à ui-09-arena.js) : les
+   dégâts cumulés par zone ne doivent jamais reculer, y compris au passage
+   d'un round à l'autre (la seule fenêtre où `recovery` agit). ==== */
+test('P7_L2_RECUP_JAMAIS_DEGATS_ZONE — la récupération entre rounds n’efface jamais les dégâts cumulés par zone (tête/corps/jambes)', () => {
+  const win = newGameWindow();
+  win.setSeed(17);
+  let checked = 0;
+  for (let i = 0; i < 40; i++) {
+    const A = win.makeFighter({ style: 'muayThai' });
+    Object.assign(A.attrs, { recovery: 99 });
+    const B = win.makeFighter({ style: 'wrestler' });
+    Object.assign(B.attrs, { recovery: 99 });
+    const res = win.simulateFight(A, B, 5);
+    let prevA = { h: 0, b: 0, l: 0 }, prevB = { h: 0, b: 0, l: 0 };
+    for (const entry of res.log) {
+      if (!entry.snapA || !entry.snapB) continue;
+      checked++;
+      const EPS = 1e-9;
+      assert.ok(entry.snapA.h >= prevA.h - EPS && entry.snapA.b >= prevA.b - EPS && entry.snapA.l >= prevA.l - EPS,
+        `dégâts cumulés de A ne doivent jamais reculer (combat ${i}) : ${JSON.stringify(prevA)} -> ${JSON.stringify(entry.snapA)}`);
+      assert.ok(entry.snapB.h >= prevB.h - EPS && entry.snapB.b >= prevB.b - EPS && entry.snapB.l >= prevB.l - EPS,
+        `dégâts cumulés de B ne doivent jamais reculer (combat ${i}) : ${JSON.stringify(prevB)} -> ${JSON.stringify(entry.snapB)}`);
+      prevA = entry.snapA; prevB = entry.snapB;
+    }
+  }
+  assert.ok(checked > 100, `assez de beats journalisés pour que ce test soit significatif (obtenu ${checked})`);
+});
