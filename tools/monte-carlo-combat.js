@@ -1,9 +1,14 @@
 "use strict";
 /* CAGE LEGACY — tools/monte-carlo-combat.js
    Simulation Monte Carlo complète sur l'ensemble du jeu :
-   1. 10 000 combats simulés (répartition des victoires, styles, rounds, stats complètes, invariants mathématiques).
+   1. 12 000 combats simulés (répartition des victoires, styles, rounds, stats complètes, invariants mathématiques).
    2. Audit de sensibilité des 30 attributs.
-   3. 25 carrières complètes simulées (amateur -> pro -> retraite). */
+   3. 25 carrières complètes simulées (amateur -> pro -> retraite).
+
+   ==== [ANCRE: P7_L1_12000] — LOT 1/P7, règle commune #2 : "avant/après sur
+   12 000 combats à chaque lot". Repris ici (au lieu des 10 000 précédents)
+   pour que ce harnais serve directement de référence aux lots 2/3/4
+   suivants sans qu'ils aient à ajuster ce nombre. ==== */
 
 const { newGameWindow } = require('../tests/helpers/loadGame');
 
@@ -12,7 +17,16 @@ console.log("           CAGE LEGACY — SIMULATION MONTE CARLO COMPLÈTE DU JEU 
 console.log("===============================================================================\n");
 
 const win = newGameWindow({ runMain: true });
-win.setSeed(Date.now());
+/* ==== [ANCRE: P7_L1_SEED_CLI] — LOT 1/P7 §1.5 : le rapport de référence
+   (tools/reports/baseline-P7.md) doit rester reproductible à l'identique
+   (règle commune #5, "le déterminisme seedé est non négociable"). Un seed
+   optionnel en argument CLI permet de figer la seed utilisée pour générer
+   ce rapport précis, sans changer le comportement par défaut (Date.now(),
+   inchangé) des lancements ad hoc de ce harnais. ==== */
+const seed = process.argv[2] ? Number(process.argv[2]) : Date.now();
+win.setSeed(seed);
+console.log(`Seed utilisée : ${seed}\n`);
+/* ==== [FIN ANCRE] ==== */
 
 const pick = a => a[Math.floor(win.rnd() * a.length)];
 
@@ -21,38 +35,60 @@ const DIVS_H = (win.DIVISIONS && win.DIVISIONS.H) ? win.DIVISIONS.H.map(d => d.i
 const DIVS_F = (win.DIVISIONS && win.DIVISIONS.F) ? win.DIVISIONS.F.map(d => d.id) : ['F-straw'];
 const ALL_DIVS = [...DIVS_H, ...DIVS_F];
 
-/** Moyenne, écart-type (échantillon, n-1) et p90 (rang le plus proche) d'un
- * tableau de valeurs numériques — sert à détecter un changement de FORME de
- * distribution (variance, queue longue) qu'une simple comparaison de
- * moyennes avant/après ne peut pas voir.
- * @param {number[]} arr @returns {{mean:number, sd:number, p90:number}} */
+/* ==== [ANCRE: P7_L1_QUANTILES] — LOT 1/P7 §1.1 : p90 seul ne voit pas la
+   queue de distribution que ce plan cherche justement à mesurer (dégâts par
+   pics en L2, décisions serrées en L3...). p50 (médiane, moins sensible aux
+   valeurs extrêmes que la moyenne), p99 et le maximum brut s'ajoutent à
+   côté de p90 — sans le retirer, tout code qui lisait déjà s.p90 continue
+   de fonctionner à l'identique. ==== */
+/** Moyenne, écart-type (échantillon, n-1), p50/p90/p99 (rang le plus proche)
+ * et maximum d'un tableau de valeurs numériques — sert à détecter un
+ * changement de FORME de distribution (variance, queue longue, valeur
+ * extrême) qu'une simple comparaison de moyennes avant/après ne peut pas
+ * voir.
+ * @param {number[]} arr @returns {{mean:number, sd:number, p50:number, p90:number, p99:number, max:number}} */
 function computeStats(arr) {
   const n = arr.length;
-  if (!n) return { mean: 0, sd: 0, p90: 0 };
+  if (!n) return { mean: 0, sd: 0, p50: 0, p90: 0, p99: 0, max: 0 };
   const mean = arr.reduce((a, b) => a + b, 0) / n;
   const variance = n > 1 ? arr.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (n - 1) : 0;
   const sd = Math.sqrt(variance);
   const sorted = [...arr].sort((a, b) => a - b);
-  const p90 = sorted[Math.min(n - 1, Math.ceil(0.9 * n) - 1)];
-  return { mean, sd, p90 };
+  const quantile = q => sorted[Math.min(n - 1, Math.ceil(q * n) - 1)];
+  return { mean, sd, p50: quantile(0.5), p90: quantile(0.9), p99: quantile(0.99), max: sorted[n - 1] };
 }
-/** Formate {mean,sd,p90} comme "12.3 (σ 4.1, p90 18)" pour les logs. */
+/** Formate {mean,sd,p50,p90,p99,max} comme "12.3 (σ 4.1, p50 11, p90 18, p99 27, max 35)". */
 function fmtStats(s, digits = 1) {
-  return `${s.mean.toFixed(digits)} (σ ${s.sd.toFixed(digits)}, p90 ${s.p90.toFixed(digits)})`;
+  return `${s.mean.toFixed(digits)} (σ ${s.sd.toFixed(digits)}, p50 ${s.p50.toFixed(digits)}, p90 ${s.p90.toFixed(digits)}, p99 ${s.p99.toFixed(digits)}, max ${s.max.toFixed(digits)})`;
 }
+/* ==== [FIN ANCRE] ==== */
 
 /* =============================================================================
    PARTIE 1 : SIMULATION MONTE CARLO DU MOTEUR DE COMBAT (10 000 COMBATS)
    ============================================================================= */
-console.log(">>> [1/3] Lancement de la simulation Monte Carlo du Moteur de Combat (10 000 combats)...");
-const FIGHT_COUNT = 10000;
+console.log(">>> [1/3] Lancement de la simulation Monte Carlo du Moteur de Combat (12 000 combats)...");
+const FIGHT_COUNT = 12000;
 
 const methodCounts = { 'KO/TKO': 0, 'Soumission': 0, 'Décision': 0, 'Décision partagée': 0, 'Égalité': 0 };
 const roundFinishes = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, dec: 0 };
 const styleStats = {};
+/* ==== [ANCRE: P7_L1_STYLE_FINGERPRINT] — LOT 1/P7 §1.4 : "empreinte
+   statistique par style" — carte d'identité que L4 (§4.3) devra rendre
+   reconnaissable. Purement additif à styleStats (fights/wins/koWins/...
+   inchangés) : cible/position/contrôle/soumission/cartes, cumulés par
+   style des DEUX côtés (A et B) de chaque combat, pas seulement du
+   vainqueur — un style se reconnaît à SA façon de combattre, gagnante ou
+   perdante. ==== */
 STYLES.forEach(s => {
-  styleStats[s] = { fights: 0, wins: 0, koWins: 0, subWins: 0, decWins: 0 };
+  styleStats[s] = {
+    fights: 0, wins: 0, koWins: 0, subWins: 0, decWins: 0,
+    sigLanded: 0, headLanded: 0, bodyLanded: 0, legLanded: 0,
+    distLanded: 0, clinchLanded: 0, groundLanded: 0,
+    ctrlSec: 0, clinchCtrlSec: 0, groundCtrlSec: 0,
+    subAtt: 0, cardsCount: 0
+  };
 });
+/* ==== [FIN ANCRE] ==== */
 
 const matrix = {};
 STYLES.forEach(s1 => {
@@ -84,7 +120,13 @@ const samples = {
   sigLanded: [], sigAtt: [], strikesLanded: [], strikesAtt: [],
   powerStrikes: [], takedowns: [], takedownsAtt: [],
   ctrlSec: [], clinchCtrlSec: [], groundCtrlSec: [],
-  kd: [], wobbled: []
+  kd: [], wobbled: [],
+  /* ==== [ANCRE: P7_L1_DMG_TOTAL] — LOT 1/P7 §"État des lieux mesuré" :
+     les dégâts CUMULÉS (dmgHead+dmgBody+dmgLegs) par combattant, pas
+     encore suivis par ce harnais alors que c'est la métrique même que
+     L2 doit faire bouger (queue de distribution des dégâts). ==== */
+  dmgTotal: []
+  /* ==== [FIN ANCRE] ==== */
 };
 /* ==== [FIN ANCRE] ==== */
 
@@ -134,7 +176,15 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
     else styleStats[styleB].decWins++;
   }
 
+  /* ==== [ANCRE: P7_L1_STYLE_FINGERPRINT_CARDS] — LOT 1/P7 §1.4 : part des
+     combats allant aux cartes, par style (décision, décision partagée ou
+     égalité — les trois méthodes qui ne viennent pas d'une finition). ==== */
+  const wentToCards = !res.round;
+  if (wentToCards) { styleStats[styleA].cardsCount++; styleStats[styleB].cardsCount++; }
+  /* ==== [FIN ANCRE] ==== */
+
   // Vérification des invariants mathématiques
+  const sideStyle = { A: styleA, B: styleB };
   ['A', 'B'].forEach(side => {
     const s = res.stats[side];
     if (s.sigAtt < s.sig) brokenInvariants++;
@@ -179,11 +229,22 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
     samples.takedowns.push(s.td); samples.takedownsAtt.push(s.tdAtt);
     samples.ctrlSec.push(s.ctrlSec); samples.clinchCtrlSec.push(s.clinchCtrlSec); samples.groundCtrlSec.push(s.groundCtrlSec);
     samples.kd.push(s.kd); samples.wobbled.push(s.wobbled);
+    samples.dmgTotal.push(s.dmgHead + s.dmgBody + s.dmgLegs);
+
+    /* ==== [ANCRE: P7_L1_STYLE_FINGERPRINT] — voir déclaration de styleStats
+       plus haut : accumulation par style, des DEUX côtés du combat. ==== */
+    const st = styleStats[sideStyle[side]];
+    st.sigLanded += s.sig;
+    st.headLanded += s.sigHead; st.bodyLanded += s.sigBody; st.legLanded += s.sigLeg;
+    st.distLanded += s.distStrikes; st.clinchLanded += s.clinchStrikes; st.groundLanded += s.groundStrikes;
+    st.ctrlSec += s.ctrlSec; st.clinchCtrlSec += s.clinchCtrlSec; st.groundCtrlSec += s.groundCtrlSec;
+    st.subAtt += s.subAtt;
+    /* ==== [FIN ANCRE] ==== */
   });
 }
 
 const t1 = Date.now();
-console.log(`✓ 10 000 combats simulés avec succès en ${(t1 - t0) / 1000}s !\n`);
+console.log(`✓ 12 000 combats simulés avec succès en ${(t1 - t0) / 1000}s !\n`);
 
 /* =============================================================================
    PARTIE 2 : ANALYSE DE SENSIBILITÉ DES 30 ATTRIBUTS (500 COMBATS PAR TEST)
@@ -315,7 +376,7 @@ console.log("===================================================================
 console.log("                           RAPPORT STATISTIQUE GLOBAL                          ");
 console.log("===============================================================================\n");
 
-console.log("--- 1. DISTRIBUTION DES FINITIONS SUR 10 000 COMBATS ---");
+console.log("--- 1. DISTRIBUTION DES FINITIONS SUR 12 000 COMBATS ---");
 for (const [m, cnt] of Object.entries(methodCounts)) {
   console.log(`  ${m.padEnd(20)} : ${cnt.toString().padStart(5)} (${((cnt / FIGHT_COUNT) * 100).toFixed(1)}%)`);
 }
@@ -324,6 +385,14 @@ console.log(`  Finition R2          : ${roundFinishes[2]} (${((roundFinishes[2] 
 console.log(`  Finition R3          : ${roundFinishes[3]} (${((roundFinishes[3] / FIGHT_COUNT) * 100).toFixed(1)}%)`);
 console.log(`  Finition R4/R5       : ${(roundFinishes[4] || 0) + (roundFinishes[5] || 0)} (${((((roundFinishes[4] || 0) + (roundFinishes[5] || 0)) / FIGHT_COUNT) * 100).toFixed(1)}%)`);
 console.log(`  Allés aux cartes     : ${roundFinishes.dec} (${((roundFinishes.dec / FIGHT_COUNT) * 100).toFixed(1)}%)`);
+/* ==== [ANCRE: P7_L1_SPLIT_DEC_SHARE] — LOT 1/P7, "État des lieux mesuré" et
+   cible L3 §3.3 : la part des décisions PARTAGÉES rapportée à l'ensemble
+   des DÉCISIONS (Décision + Décision partagée + Égalité) — pas à
+   l'ensemble des combats — est la métrique que L3 doit ramener sous 15%. ==== */
+const totalDecisions = methodCounts['Décision'] + methodCounts['Décision partagée'] + methodCounts['Égalité'];
+const splitDecShare = totalDecisions ? (methodCounts['Décision partagée'] / totalDecisions) * 100 : 0;
+console.log(`  Décisions partagées  : ${splitDecShare.toFixed(1)}% de l'ensemble des décisions (cible L3 : < 15%)`);
+/* ==== [FIN ANCRE] ==== */
 
 console.log("\n--- 2. MOYENNES PAR COMBAT (PAR COMBATTANT) ---");
 const N = FIGHT_COUNT * 2;
@@ -344,6 +413,7 @@ const statClinchCtrlSec = computeStats(samples.clinchCtrlSec);
 const statGroundCtrlSec = computeStats(samples.groundCtrlSec);
 const statKD = computeStats(samples.kd);
 const statWobbled = computeStats(samples.wobbled);
+const statDmgTotal = computeStats(samples.dmgTotal);
 
 console.log(`  Frappes significatives: ${fmtStats(statSigLanded)} / ${fmtStats(statSigAtt)} (${((totalSigLanded / totalSigAtt) * 100).toFixed(1)}% précision)`);
 console.log(`  Total des frappes     : ${fmtStats(statStrikesLanded)} / ${fmtStats(statStrikesAtt)}`);
@@ -356,6 +426,13 @@ console.log(`  Sol (Passes/Renv/Rel) : ${(totalGuardPasses / N).toFixed(1)} pass
 console.log(`  Soumissions           : ${(totalSubAtt / N).toFixed(1)} tent. | ${(totalSubEscapes / N).toFixed(1)} échappées`);
 console.log(`  Contrôle moyen        : ${fmtStats(statCtrlSec, 0)}s total (${fmtStats(statClinchCtrlSec, 0)}s clinch, ${fmtStats(statGroundCtrlSec, 0)}s sol)`);
 console.log(`  Knockdowns / Sonnés   : ${fmtStats(statKD, 2)} KD | ${fmtStats(statWobbled, 2)} sonné(s)`);
+/* ==== [ANCRE: P7_L1_DMG_TOTAL] — voir déclaration de samples.dmgTotal plus
+   haut : reprend exactement la métrique citée par le plan P7 ("dégâts
+   cumulés moyens 11,35, écart-type 6,23, p90 19, maximum 35 sur 24 000
+   relevés") — sert de point de comparaison direct pour L2 §"Critères
+   d'acceptation" (écart-type +40% minimum, moyenne stable ±10%). ==== */
+console.log(`  Dégâts cumulés        : ${fmtStats(statDmgTotal)} (référence L2)`);
+/* ==== [FIN ANCRE] ==== */
 console.log(`  Invariants mathém.    : ${brokenInvariants} violation(s) (100% cohérent)`);
 
 console.log("\n--- 3. TAUX DE VICTOIRE PAR STYLE (ÉQUILIBRE GLOBAL) ---");
@@ -367,6 +444,23 @@ for (const s of STYLES) {
   const decPct = ((st.decWins / Math.max(1, st.wins)) * 100).toFixed(1);
   console.log(`  ${s.padEnd(12)} : ${winRate}% victoires (KO: ${koPct}%, SUB: ${subPct}%, DÉC: ${decPct}%) [sur ${st.fights} combats]`);
 }
+
+/* ==== [ANCRE: P7_L1_STYLE_FINGERPRINT] — LOT 1/P7 §1.4 : "carte d'identité"
+   par style — répartition des frappes par cible/position, contrôle,
+   tentatives de soumission, part des combats allant aux cartes. Référence
+   que L4 §4.3 devra rendre plus tranchée (empreintes "reconnaissables à
+   l'aveugle"). ==== */
+console.log("\n--- 3b. EMPREINTE STATISTIQUE PAR STYLE (RÉFÉRENCE L4) ---");
+for (const s of STYLES) {
+  const st = styleStats[s];
+  const n = st.fights || 1;
+  const sig = st.sigLanded || 1;
+  const headPct = (st.headLanded / sig) * 100, bodyPct = (st.bodyLanded / sig) * 100, legPct = (st.legLanded / sig) * 100;
+  const distPct = (st.distLanded / sig) * 100, clinchPct = (st.clinchLanded / sig) * 100, groundPct = (st.groundLanded / sig) * 100;
+  const cardsPct = (st.cardsCount / n) * 100;
+  console.log(`  ${s.padEnd(12)} : cible Tête ${headPct.toFixed(0)}%/Corps ${bodyPct.toFixed(0)}%/Jambes ${legPct.toFixed(0)}% | position Distance ${distPct.toFixed(0)}%/Clinch ${clinchPct.toFixed(0)}%/Sol ${groundPct.toFixed(0)}% | contrôle ${(st.ctrlSec / n).toFixed(1)}s | sub ${(st.subAtt / n).toFixed(2)} tent. | cartes ${cardsPct.toFixed(1)}%`);
+}
+/* ==== [FIN ANCRE] ==== */
 
 console.log("\n--- 4. SENSIBILITÉ DES ATTRIBUTS ---");
 console.log(`  Impact Kick 95 vs 15   : Kicks jambes réussis = ${testKickLegLandedA} vs ${testKickLegLandedB} (écart x${(testKickLegLandedA / Math.max(1, testKickLegLandedB)).toFixed(1)})`);
