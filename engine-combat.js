@@ -33,16 +33,159 @@
 // (boxeur 0.15 vs lutteur 0.77, écart ×5) — l'ajouter aurait fait ×48, une
 // surcorrection qui aurait quasiment supprimé la lutte chez les boxeurs. ====
 const STYLE_PROFILE={
-  boxer:{sigVol:1.18,koMod:1.15,subMod:0.10,clinchDmg:0.8,gnpDmg:0.8},
+  /* ==== [ANCRE: P7_L4_GARDE_FOU_EQUILIBRAGE] — Lot 4/P7 §4.4 : "après
+     réglage, à overall égal, aucun style ne dépasse 53% ni ne descend sous
+     47%". La boxe dépassait déjà cette bande AVANT tout changement de ce
+     lot (baseline-P7.md §2.2 : 55.0% en EQUAL-OVERALL) — sa concentration
+     de biais (STYLES.boxer.b) sur trois sous-composantes du canal
+     `striking` les plus pondérées (jab/cross/hook) en est la cause
+     structurelle, pas la politique de combat ajoutée ici. koMod ramené de
+     1.15 à 1.05 et sigVol de 1.18 à 1.12 (les deux restent au-dessus de la
+     moyenne du jeu, cohérent avec un style connu pour son punch et son
+     volume) pour rentrer dans la bande sans écraser l'avantage de matchup
+     mesuré en §4.2 (boxer vs bjj/mma). ==== */
+  boxer:{sigVol:1.12,koMod:1.10,subMod:0.10,clinchDmg:0.8,gnpDmg:0.8},
   kickboxer:{sigVol:1.05,koMod:1.20,subMod:0.20,clinchDmg:0.9,gnpDmg:0.8},
-  muayThai:{sigVol:0.88,koMod:1.25,subMod:0.30,clinchDmg:1.25,gnpDmg:1.0},
-  karate:{sigVol:1.26,koMod:1.52,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
-  wrestler:{sigVol:0.98,koMod:1.10,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
+  /* ==== [ANCRE: P7_L4_MATCHUP_MUAYTHAI_CLINCH] — Lot 4/P7 §4.2 : mesuré à
+     59.2% contre le lutteur (matrice EQUAL-OVERALL, 2000 combats/cellule) —
+     à 0.8 point du seuil 60/40 visé, sans qu'aucun autre style clinch-heavy
+     n'entre en jeu dans cette cellule. `clinchDmg` relevé de 1.25 à 1.35 :
+     cohérent avec le vrai MMA (le clinch de plat-ventre du muay-thaï est
+     historiquement ce qui étouffe une amenée de lutte) et un levier ciblé
+     — la plupart des autres adversaires du muay-thaï (boxe, karaté) passent
+     moins de 1% de leurs frappes en clinch (cf. empreinte statistique
+     §4.3), donc quasiment sans effet sur ces matchups-là ni sur la moyenne
+     globale du style. ==== */
+  muayThai:{sigVol:0.88,koMod:1.25,subMod:0.30,clinchDmg:1.35,gnpDmg:1.0},
+  /* ==== [ANCRE: P7_L4_KARATE_SIGVOL] — Lot 4/P7 §4.3 : "karaté : volume
+     plus faible, précision et puissance par salves". Mesuré par
+     baseline-P7.md (§2.2, tableau des cellules marquées) : `sigVol:1.26`
+     était le PLUS HAUT volume du jeu, à l'exact opposé de l'identité que ce
+     lot doit rendre reconnaissable — un artefact de calibrage du Lot 2
+     (avant que l'identité par style ne soit spécifiée). Ramené doucement
+     (1.15, pas sous la moyenne) : offA pilote À LA FOIS le
+     volume ET, via son écart à offB, la chance de KO (`koA`,
+     `clamp((offA-offB)/62+0.46,0,1)`) — un sigVol nettement sous la moyenne
+     s'est avéré dévastateur en Monte Carlo (karaté descendu à 37% de
+     victoires, largement hors bande 47-53%), l'écart négatif y écrasant le
+     KO en cascade plutôt que de seulement réduire le volume narré. Écart
+     documenté en §7 du rapport de livraison plutôt que forcé par un
+     sigVol qui casserait l'équilibrage (règle commune P7 #3) ; `koMod`
+     (déjà le plus haut du jeu, 1.52) et le rythme par salves
+     (STYLE_POLICY.karate.pace='burst', engine.js) portent l'essentiel de
+     "moins souvent mais plus fort". ==== */
+  karate:{sigVol:1.15,koMod:1.52,subMod:0.20,clinchDmg:0.7,gnpDmg:0.7},
+  /* ==== [ANCRE: P7_L4_MATCHUP_WRESTLER_BOXER] — Lot 4/P7 §4.2, exemple
+     explicitement cité par le plan : "un lutteur d'élite contre un
+     frappeur à faible défense d'amenée ne doit pas gagner 52% du temps :
+     il doit dominer". Mesuré à 59.2% (matrice EQUAL-OVERALL, 2000
+     combats/cellule) — à 0.8 point du seuil, l'IC95% [57.0–61.3] chevauche
+     déjà 60%. `koMod` relevé de 1.10 à 1.18 : une fois au sol (déjà
+     largement acquis via `grap`/`topControl`/`gnp`, inchangés ici), un
+     boxeur droit debout n'a plus grand-chose pour se défendre du Ground &
+     Pound — ce levier finit ce que l'amenée a déjà gagné, sans toucher au
+     mécanisme d'amenée lui-même. ==== */
+  wrestler:{sigVol:0.98,koMod:1.18,subMod:0.40,clinchDmg:1.1,gnpDmg:1.30},
   // ==== [ANCRE: CORRECTIF_GUARDPULL_MORT] — signalé par A22 (ui-03) : guardPull n'est lu NULLE PART dans ce moteur — donnée morte, conservée telle quelle (pas de risque à la retirer, mais pas de bénéfice non plus tant qu'aucune mécanique ne la consomme).
   bjj:{sigVol:0.95,koMod:0.75,subMod:1.98,clinchDmg:0.9,gnpDmg:0.9,guardPull:0.35},
-  sambo:{sigVol:0.85,koMod:1.20,subMod:1.30,clinchDmg:1.2,gnpDmg:1.15},
-  mma:{sigVol:1.05,koMod:1.05,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
+  /* ==== [ANCRE: P7_L4_GARDE_FOU_EQUILIBRAGE] — voir boxer ci-dessus,
+     même critère §4.4 : sambo dépassait la bande une fois la propension
+     contextuelle au grappling ajoutée (§4.1, contextualGrapplingMult) sans
+     que sa politique de danger/domination (déjà atténuée à 'manage', voir
+     STYLE_POLICY.sambo, qui a aussi perdu son rythme 'burst' au passage —
+     redondant avec la propension au grappling déjà explosive de ce style,
+     et qui compoundait avec elle) suffise seule à rentrer dans la bande.
+     koMod ramené de 1.20 à 0.95, subMod de 1.30 à 1.15, gnpDmg de 1.15 à
+     1.05. ==== */
+  sambo:{sigVol:0.85,koMod:0.95,subMod:1.15,clinchDmg:1.2,gnpDmg:1.05},
+  /* ==== [ANCRE: P7_L4_GARDE_FOU_EQUILIBRAGE] — voir boxer/sambo ci-dessus,
+     même critère §4.4, sens inverse : le MMA complet, seul style sans aucun
+     biais d'attribut dominant (STYLES.mma.b est le plus étalé des huit,
+     cf. engine.js), passait sous la bande une fois les autres styles
+     recalibrés. koMod relevé de 1.05 à 1.15 (encore dans la moyenne basse
+     du jeu, cohérent avec un profil "équilibré" plutôt que finisseur). ==== */
+  mma:{sigVol:1.05,koMod:1.15,subMod:1.00,clinchDmg:1.0,gnpDmg:1.0}
 };
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — Lot 4/P7 §4.1 : traduit
+   STYLE_POLICY (engine.js) en décisions CONTEXTUELLES lues par
+   simulateFight — jamais un second sac de bonus statique, jamais un
+   remplacement de STYLES[].grap (contextualGrapplingMult le MODULE, ne le
+   remplace pas). Chaque fonction lit un contexte de combat déjà présent
+   dans simulateFight (score courant sa/sb, dégâts cumulés dmgA/dmgB,
+   fenêtre de danger dangerA/dangerB, agressivité eff()) — aucun état
+   nouveau à faire persister. ==== */
+/** §4.1 "un frappeur en retard aux points ne tente pas une amenée, un
+ * lutteur qui se fait toucher y va plus tôt" — multiplie la fraction de
+ * tentative d'amenée (attA/attB) selon le score courant et les dégâts déjà
+ * encaissés, PAS selon le style brut (déjà couvert par `grap`). @returns {number} */
+function contextualGrapplingMult(policy,ownScore,oppScore,ownDamage,ownDanger){
+  if(policy.distance==='range') return ownScore<oppScore-4 ? 0.45 : 1;
+  // distance==='close' : les deux circonstances ("touché" et "en danger, y
+  // va plus tôt") récompensent la même intention, jamais cumulées entre
+  // elles (sinon un lutteur/sambiste à la fois touché ET en danger — le cas
+  // le plus fréquent, l'un entraînant l'autre — recevait un double bonus
+  // artificiel, cf. investigation Monte Carlo de ce lot).
+  let mult=1;
+  if(ownDamage>14) mult=Math.max(mult,1.5);
+  if(policy.dangerReaction==='takedown' && ownDanger>0) mult=Math.max(mult,1.6);
+  return clamp(mult,0.25,2.0);
+}
+/** §4.1 "réaction quand il est en danger" côté OFFENSE PROPRE du combattant
+ * en danger (dangerX>0) : reculer réduit son propre volume, répondre
+ * l'augmente. Neutre hors fenêtre de danger et pour clinch/takedown (déjà
+ * couverts par clinchAffinity/contextualGrapplingMult). @returns {number} */
+function dangerReactionOffenseMult(policy,inDanger){
+  if(!inDanger) return 1;
+  if(policy.dangerReaction==='retreat') return 0.6;
+  if(policy.dangerReaction==='counter') return 1.10;
+  return 1;
+}
+/** §4.1 "réaction quand il domine" : amplifie (finition) ou atténue
+ * (gestion) le boost de volume déjà accordé à l'attaquant dont l'adversaire
+ * traverse une fenêtre de danger (ANCRE P7_L2_FENETRE_FINITION_VOLUME) —
+ * neutre (1) hors de cette fenêtre, cette fonction ne modifie donc jamais
+ * le combat en dehors d'une domination réelle déjà détectée ailleurs.
+ * @returns {number} */
+function dominanceReactionMult(policy){ return policy.dominanceReaction==='finish'?1.15:0.85; }
+/** §4.1 "initiative : mener ou contrer" — mener récompense sa propre
+ * agressivité, contrer récompense l'agressivité adverse (les angles
+ * qu'elle ouvre). Effet volontairement modeste (±12% max) : c'est la
+ * politique de combat dans son ensemble, pas ce seul levier, qui doit
+ * créer les matchups (§4.1, dernier paragraphe). @returns {number} */
+function initiativeMult(policy,ownAggression,oppAggression){
+  return policy.initiative==='lead'
+    ? 1+clamp(((ownAggression||50)-50)*0.0015,0,0.09)
+    : 1+clamp(((oppAggression||50)-50)*0.002,0,0.12);
+}
+/** §4.1 "rythme : volume constant, ou par salves" — une oscillation
+ * périodique de l'intensité de frappe pour les styles à salves (karaté,
+ * sambo), neutre (facteur 1, jamais lu) pour les styles à volume constant.
+ * Moyenne proche de 1 sur un round complet (sinusoïde) : ne gonfle pas le
+ * volume total, en redistribue l'intensité dans le temps — cohérent avec
+ * la contrainte "moyenne stable" des critères d'acceptation P7. `phase`
+ * (différente pour A et B) évite que les deux salves soient toujours
+ * synchronisées entre deux combattants à salves. @returns {number} */
+function burstFactor(policy,t,phase){ return policy.pace==='burst' ? 1+0.22*Math.sin((t+phase)/17) : 1; }
+/** §4.1 "distance préférée et volonté de la maintenir ou de la fermer" —
+ * lu par la transition debout->clinch : un style qui préfère fermer la
+ * distance (close) la ferme plus souvent qu'un style qui préfère la
+ * garder (range). @returns {number} */
+function clinchAffinity(policy){ return policy.distance==='close'?1.35:0.75; }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — Lot 4/P7 §4.2 : "l'écart
+   takedown contre tdd passe aujourd'hui par une sigmoid de pente douce...
+   à écart élevé, l'issue doit devenir quasi certaine". Ajoute un terme
+   cubique, nul pour un petit écart (à diff=20, +0.005 seulement — matchup
+   quasi inchangé) mais qui pousse fortement vers les bornes à écart élevé
+   (à diff=40, +0.044 ; à diff>=60, la borne haute clamp(...,0.02,0.98) est
+   déjà atteinte) — remplace sigmoid((a.takedown-b.tdd)/15) telle quelle,
+   jamais un second mécanisme parallèle. @returns {number} */
+function takedownSigmoidSteep(diff){
+  const base=sigmoid(diff/15);
+  const extreme=Math.sign(diff)*Math.pow(clamp(Math.abs(diff),0,80)/80,3)*0.35;
+  return clamp(base+extreme,0.02,0.98);
+}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_L2_DEGATS_USURE_COUPS_LOURDS] — Lot 2/P7 §2.1 : remplace le
    flux unique borné par tick (`dmgA+=clamp(offB*0.22*0.22,0,6)*(dt/50)`,
@@ -223,6 +366,11 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   const immuneA=!!(opts&&opts.immuneA);
   /* ==== [FIN ANCRE] ==== */
   const profA=A._styleProfileOverride||STYLE_PROFILE[A.style]||STYLE_PROFILE.mma, profB=B._styleProfileOverride||STYLE_PROFILE[B.style]||STYLE_PROFILE.mma;
+  /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — politique de combat des deux
+     combattants (STYLE_POLICY, engine.js), lue tout au long de la boucle
+     de combat ci-dessous. ==== */
+  const policyA=policyOf(A), policyB=policyOf(B);
+  /* ==== [FIN ANCRE] ==== */
   const wf=weightFactor(A);
   const koWeightMult=1+(wf-0.5)*0.8;
   const subWeightMult=1+(0.5-Math.abs(wf-0.5))*0.7; // pic d'efficacité au poids moyen (wf≈0.5)
@@ -637,7 +785,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           const clSec=clamp(14+Math.abs(diff)*0.25,10,32);
           stDom.ctrl+=dt*(0.1/50); stDom.ctrlSec+=clSec*(dt/50); stDom.clinchCtrlSec+=clSec*(dt/50);
           momentum=clamp(momentum+(domIsA?RI(3,7):-RI(3,7)),5,95);
-          if(rnd()<0.28*(dt/50)){ currentPhase='sol'; topIsA=domIsA; groundPos=initialGroundPos(domIsA?a:b,domIsA?b:a); (domIsA?st.A:st.B).td++; stDom.tdAtt++;
+          /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 "propension au
+             grappling... doit devenir une décision contextuelle" : la
+             décision d'amener au sol depuis le clinch dépend désormais de
+             la propension au grappling RÉELLE du dominant du clinch
+             (giA/giB, déjà utilisés pour les tentatives d'amenée debout),
+             au lieu d'un taux fixe identique pour un boxeur et un lutteur
+             qui domineraient tous deux le clinch. ==== */
+          const clinchGroundChance=clamp(0.28*(0.55+(domIsA?giA:giB)*1.15),0.08,0.55);
+          if(rnd()<clinchGroundChance*(dt/50)){ currentPhase='sol'; topIsA=domIsA; groundPos=initialGroundPos(domIsA?a:b,domIsA?b:a); (domIsA?st.A:st.B).td++; stDom.tdAtt++;
             log.push({r,phase:'clinch',by:domIsA?'me':'op',text:`[${formatTime(beatT)}] ${dom.name} utilise son contrôle en clinch pour amener au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             if(rnd()<0.35*(dt/50)){ stDom.tdAtt++; stDef.tdDef++; }
@@ -657,7 +813,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           log.push({r,phase:'clinch',by:'me',text:`[${formatTime(beatT)}] Séparation, le combat reprend au centre de la cage.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         }
       } else { // debout
-        const attA=giA*(0.55+rnd()*0.45), attB=giB*(0.55+rnd()*0.45);
+        /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 : la propension au
+           grappling (attA/attB, dérivée de STYLES[].grap comme avant ce
+           lot) devient CONTEXTUELLE — contextualGrapplingMult() la module
+           selon le score courant (sa/sb) et les dégâts déjà encaissés
+           (dmgA/dmgB) ou la fenêtre de danger (dangerA/dangerB), tous déjà
+           en portée dans cette boucle. ==== */
+        const attA=giA*(0.55+rnd()*0.45)*contextualGrapplingMult(policyA,sa,sb,dmgA,dangerA),
+              attB=giB*(0.55+rnd()*0.45)*contextualGrapplingMult(policyB,sb,sa,dmgB,dangerB);
+        /* ==== [FIN ANCRE] ==== */
         let handled=false;
         /* ==== [ANCRE: HORLOGE_CONTINUE_TD_ATTEMPT_GATE] — bug trouvé pendant
            la validation Monte Carlo de ce lot : `rnd()<0.18*(dt/50)` faisait
@@ -684,16 +848,21 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            jamais systématiquement — une réussite (rare, notable) reste
            toujours journalisée. ==== */
         if(attA>0.14 && rnd()<0.18){ st.A.tdAtt+=(dt/50); handled=true;
-          const tdChanceA=sigmoid((a.takedown-b.tdd)/15)*attA;
-          if(rnd()<clamp(tdChanceA,0.05,0.85)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true; groundPos=initialGroundPos(a,b);
+          /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — §4.2, remplace
+             sigmoid((...)/15) telle quelle par takedownSigmoidSteep(),
+             plafond relevé 0.85->0.95 (sinon un écart devenu "quasi
+             certain" par la steepening restait artificiellement bridé). ==== */
+          const tdChanceA=takedownSigmoidSteep(a.takedown-b.tdd)*attA;
+          if(rnd()<clamp(tdChanceA,0.05,0.95)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true; groundPos=initialGroundPos(a,b);
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.B.tdDef+=(dt/50);
             if(rnd()<dt/90) log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Bonne défense de ${B.name} sur la tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
         } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt+=(dt/50); handled=true;
-          const tdChanceB=sigmoid((b.takedown-a.tdd)/15)*attB;
-          if(rnd()<clamp(tdChanceB,0.05,0.85)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a);
+          /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — voir ci-dessus, côté B. ==== */
+          const tdChanceB=takedownSigmoidSteep(b.takedown-a.tdd)*attB;
+          if(rnd()<clamp(tdChanceB,0.05,0.95)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a);
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.A.tdDef+=(dt/50);
@@ -703,6 +872,18 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         if(!handled && currentPhase==='debout'){
           let offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
           let offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
+          /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 : "initiative"
+             (mener/contrer) et "rythme" (volume/salves) modulent le volume
+             de frappe indépendamment de la fenêtre de danger ci-dessous —
+             effet permanent de la politique de combat, pas seulement en
+             situation de danger/domination. "réaction quand il est en
+             danger" (reculer/répondre) est appliquée séparément ici même,
+             sur le volume PROPRE du combattant qui traverse SA fenêtre de
+             danger (dangerA/dangerB), à distinguer de dangerBoostA/B
+             ci-dessous qui récompense l'ADVERSAIRE qui en profite. ==== */
+          offA*=initiativeMult(policyA,a.aggression,b.aggression)*burstFactor(policyA,t,0)*dangerReactionOffenseMult(policyA,dangerA>0);
+          offB*=initiativeMult(policyB,b.aggression,a.aggression)*burstFactor(policyB,t,9)*dangerReactionOffenseMult(policyB,dangerB>0);
+          /* ==== [FIN ANCRE] ==== */
           /* ==== [ANCRE: P7_L2_FENETRE_FINITION_VOLUME] — Lot 2/P7 §2.3 :
              "l'attaquant augmente son volume en fonction de killer et
              d'aggression" pendant que son adversaire traverse une fenêtre de
@@ -711,8 +892,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              offBEff : chaque usage en aval (points juges, KO, log, dégâts)
              profite ainsi de la même valeur boostée, sans devoir être
              réécrit un par un. ==== */
-          const dangerBoostA=dangerB>0?(1+clamp(((a.killer||50)+(a.aggression||50)-100)/140,0,0.55)):1;
-          const dangerBoostB=dangerA>0?(1+clamp(((b.killer||50)+(b.aggression||50)-100)/140,0,0.55)):1;
+          /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 "réaction quand
+             il domine" : dominanceReactionMult() amplifie (finition) ou
+             atténue (gestion) ce boost — multiplie le terme variable
+             (clamp(...)), jamais la base 1 hors fenêtre de danger, pour
+             rester strictement neutre quand l'adversaire n'est pas en
+             danger (comportement inchangé hors domination réelle). ==== */
+          const dangerBoostA=dangerB>0?(1+clamp(((a.killer||50)+(a.aggression||50)-100)/140,0,0.55)*dominanceReactionMult(policyA)):1;
+          const dangerBoostB=dangerA>0?(1+clamp(((b.killer||50)+(b.aggression||50)-100)/140,0,0.55)*dominanceReactionMult(policyB)):1;
+          /* ==== [FIN ANCRE] ==== */
           offA*=dangerBoostA; offB*=dangerBoostB;
           /* ==== [FIN ANCRE] ==== */
           const noiseAmt=Math.round(6*noiseWeightMult);
@@ -899,7 +1087,18 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
               :`[${formatTime(beatT)}] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
           /* ==== [FIN ANCRE] ==== */
           }
-          if(!finish && rnd()<0.15*(dt/50)){ currentPhase='clinch'; }
+          /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 "distance
+             préférée et volonté de la maintenir ou de la fermer" : la
+             fréquence de fermeture de distance dépend de clinchAffinity()
+             des DEUX combattants (un style 'close' la ferme plus souvent
+             qu'un style 'range', quel que soit l'adversaire), amplifiée si
+             l'un des deux réagit au danger en cherchant le clinch
+             (dangerReaction:'clinch', §4.1 "réaction quand il est en
+             danger"). ==== */
+          let clinchChance=0.15*((clinchAffinity(policyA)+clinchAffinity(policyB))/2);
+          if(policyA.dangerReaction==='clinch' && dangerA>0) clinchChance*=1.6;
+          if(policyB.dangerReaction==='clinch' && dangerB>0) clinchChance*=1.6;
+          if(!finish && rnd()<clinchChance*(dt/50)){ currentPhase='clinch'; }
         }
       }
     }
