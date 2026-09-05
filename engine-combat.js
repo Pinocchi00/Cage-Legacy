@@ -426,6 +426,22 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   const baseCardioA=a.cardio, baseCardioB=b.cardio;
   const baseChinA=a.chin, baseChinB=b.chin;
   const baseComposureA=a.composure, baseComposureB=b.composure;
+  const baseDurabilityA=a.durability, baseDurabilityB=b.durability;
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P7_L5_COUPE_DE_POIDS] — Addendum P7 point 4 : weightCutInfo()
+     existe côté carrière (avertissements de pesée, ui-02) mais n'atteignait
+     jamais engine-combat.js (`weightCut` : zéro occurrence avant ce lot) —
+     un système déjà écrit qui ne servait à rien. Tiré une fois par
+     combattant ici (jamais par tick, sous peine de désynchroniser le
+     déterminisme seedé round après round), comme un poids de forme mesuré
+     à la pesée. `cutPct` suit gauss(9,5,0,24) : sévérité nulle pour une
+     coupe dans la moyenne (~9%, la norme du milieu), montant vers 1 pour
+     les coupes extrêmes (24%) — voir application round par round plus bas
+     (durability, ANCRE P7_L2_DEGATS_PROGRESSIFS, et fatigue additive,
+     ANCRE P7_L5_COUPE_DE_POIDS sur fatA/fatB), jamais dès le round 1 :
+     l'eau perdue au pesage est déjà largement reprise en début de combat. ==== */
+  const cutSeverityA=clamp((weightCutInfo(A).cutPct-9)/15,0,1);
+  const cutSeverityB=clamp((weightCutInfo(B).cutPct-9)/15,0,1);
   /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: CHIN_TEMPORAIRE] — un round brutal fragilise le menton pour LE
   // RESTE DE CE COMBAT uniquement (variable locale), jamais l'attribut permanent
@@ -565,14 +581,37 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       a.composure=Math.max(10, baseComposureA-clamp(st.A.dmgHead-14,0,55)*0.4);
       b.composure=Math.max(10, baseComposureB-clamp(st.B.dmgHead-14,0,55)*0.4);
       /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: P7_L5_COUPE_DE_POIDS] — la résistance (`durability`)
+         dégrade à partir du round 3, ce qui aggrave l'encaissement
+         (chinFactor, ligne ~234, lit déjà durability comme un multiplicateur
+         direct — un canal toujours actif, contrairement à celui choisi
+         initialement pour le cardio, voir note ci-dessous). ==== */
+      a.durability=Math.max(10, baseDurabilityA-cutSeverityA*Math.max(0,r-2)*6);
+      b.durability=Math.max(10, baseDurabilityB-cutSeverityB*Math.max(0,r-2)*6);
+      /* ==== [FIN ANCRE] ==== */
       const outA=st.A.sig+st.A.tdAtt*0.6, outB=st.B.sig+st.B.tdAtt*0.6;
       // Résistance à la fatigue via durabilité et second souffle (cœur)
       const heartResistA=(r>=3||dmgA>30)?clamp(((a.heart||50)-50)*0.003,-0.04,0.18):0;
       const durResistA=clamp(((a.durability||50)-50)*0.002,-0.04,0.14);
       const heartResistB=(r>=3||dmgB>30)?clamp(((b.heart||50)-50)*0.003,-0.04,0.18):0;
       const durResistB=clamp(((b.durability||50)-50)*0.002,-0.04,0.14);
-      const fatA=clamp(((dmgA+outA*0.2)-a.cardio)*cardioFactorA*roundPenalty*(1-heartResistA-durResistA),0,28);
-      const fatB=clamp(((dmgB+outB*0.2)-b.cardio)*cardioFactorB*roundPenalty*(1-heartResistB-durResistB),0,28);
+      /* ==== [ANCRE: P7_L5_COUPE_DE_POIDS] — première tentative : router la
+         coupe de poids par la MÊME référence fixe que le reste de cette
+         ANCRE (baseCardioA-pénalité) échouait silencieusement — `fatA` est
+         `clamp(...,0,28)` et son argument était déjà négatif (cardio de base
+         très supérieur à dmgA+outA*0.2 tant que le combat reste d'intensité
+         normale) dans la quasi-totalité des combats mesurés : une pénalité
+         de cardio, même extrême (jusqu'à -24 testé), ne faisait alors JAMAIS
+         franchir le seuil et restait invisible à `fatA`. Terme additif
+         directement sur `fatA`/`fatB` à la place : garanti actif dès que
+         `cutSeverity>0` et le round >=3, quelle que soit l'intensité du
+         combat par ailleurs — jusqu'à 9 points sur les 28 possibles pour une
+         coupe extrême au round 5, soit un peu moins d'un tiers de la
+         fatigue maximale, jamais de quoi l'écraser à elle seule. ==== */
+      const cutFatA=cutSeverityA*Math.max(0,r-2)*3, cutFatB=cutSeverityB*Math.max(0,r-2)*3;
+      const fatA=clamp(((dmgA+outA*0.2)-a.cardio)*cardioFactorA*roundPenalty*(1-heartResistA-durResistA)+cutFatA,0,28);
+      const fatB=clamp(((dmgB+outB*0.2)-b.cardio)*cardioFactorB*roundPenalty*(1-heartResistB-durResistB)+cutFatB,0,28);
+      /* ==== [FIN ANCRE] ==== */
 
       if(currentPhase==='sol'){
         const top=topIsA?a:b, bot=topIsA?b:a, topF=topIsA?A:B, botF=topIsA?B:A, topFat=topIsA?fatA:fatB;
@@ -1179,15 +1218,42 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       pwrA:Math.round(st.A.powerStrikes-_pwrA0), pwrB:Math.round(st.B.powerStrikes-_pwrB0)
     });
     // Adaptation tactique de fin de round
+    /* ==== [ANCRE: P7_L5_COIN_ENTRE_LES_ROUNDS] — Addendum P7 point 8 :
+       l'ajustement pilote par `adaptability` existait deja (ci-dessous,
+       inchange), mais restait invisible du joueur — "sans coin, l'attribut
+       n'a pas de support narratif". Ajoute la seule piece manquante : un
+       beat de log phase:'bell', deja gere par applyBeat() cote arene
+       (ui-09-arena.js:357, `if(b.phase==='bell'){ A.currentText=b.text;
+       return; }`) sans jamais avoir ete emis par le moteur jusqu'ici — pas
+       de flash/secousse/hit-stop, juste le texte affiche, exactement ce
+       qu'une consigne de coin doit etre. Uniquement s'il reste un round a
+       jouer et si le combat n'est pas deja termine ce round-la. ==== */
     if(sA<sB){
       const adaptA=clamp(((a.adaptability||50)-50)*0.08,0,4);
       a.fightIQ=clamp(a.fightIQ+adaptA,1,150);
       a.footwork=clamp(a.footwork+adaptA*0.5,1,150);
+      if(r<rounds && !finish){
+        const cornerPool=[
+          `Le coin de ${A.name} recadre la stratégie : plus de mouvement, moins de temps dans la ligne droite.`,
+          `Consignes claires dans le coin de ${A.name} : reprendre l'initiative, ne pas subir le round suivant.`,
+          `${A.name} écoute son coin entre les rounds et ajuste son plan de jeu.`
+        ];
+        log.push({r,phase:'bell',by:'me',text:`[${formatTime(roundLen)}] `+getUniqueLog(cornerPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      }
     } else if(sB<sA){
       const adaptB=clamp(((b.adaptability||50)-50)*0.08,0,4);
       b.fightIQ=clamp(b.fightIQ+adaptB,1,150);
       b.footwork=clamp(b.footwork+adaptB*0.5,1,150);
+      if(r<rounds && !finish){
+        const cornerPool=[
+          `Le coin de ${B.name} recadre la stratégie : plus de mouvement, moins de temps dans la ligne droite.`,
+          `Consignes claires dans le coin de ${B.name} : reprendre l'initiative, ne pas subir le round suivant.`,
+          `${B.name} écoute son coin entre les rounds et ajuste son plan de jeu.`
+        ];
+        log.push({r,phase:'bell',by:'op',text:`[${formatTime(roundLen)}] `+getUniqueLog(cornerPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+      }
     }
+    /* ==== [FIN ANCRE] ==== */
     // ==== [ANCRE: RECUP_INTER_ROUND] — la minute de repos entre rounds allège
     // une partie des dégâts accumulés, proportionnellement à la vraie stat de
     // récupération (pas la fatigue/cardio, qui reste dérivée à chaque round). ====
