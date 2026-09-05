@@ -251,6 +251,17 @@ function applyBeat(b){ const A=ARENA; if(!b)return;
      uniquement pour rejouer sans erreur le log d'une sauvegarde antérieure
      à ce lot qui en contiendrait encore. Ne pas supprimer. ==== */
   if(b.phase==='bell'){ A.currentText=b.text; return; }
+  /* ==== [ANCRE: P8_L9_EXAMEN_MEDICAL] — Lot 9/P8 §9.3 : un examen médical
+     entre les rounds qui laisse le combat continuer n'est pas un échange
+     (aucun coup n'est porté) — sans ce repli, il aurait déclenché les
+     mêmes flash/secousse/lunge d'impact qu'une frappe réellement portée,
+     comme si un coup venait d'atterrir entre les rounds. Un examen qui MET
+     FIN au combat (b.finish) continue en revanche vers le traitement
+     normal ci-dessous (chute/tap, label affiché par A.method — voir ANCRE
+     P8_L9_BLESSURES plus bas) : la présentation de fin de combat ne dépend
+     pas de savoir quel beat précis l'a déclenchée. ==== */
+  if(b.phase==='exam' && !b.finish){ A.currentText=b.text; A.currentMomentum=b.momentum; return; }
+  /* ==== [FIN ANCRE] ==== */
   if(b.by==='me'){ A.flashOp=1; A.shakeOp=1; A.lungeMe=1; }
   else { A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }
   /* ==== [ANCRE: JUICE_NIVEAU1] — hit-stop + secousse d'écran, magnitude
@@ -581,7 +592,12 @@ function drawArena(frac,freeze){ const A=ARENA, ctx=A.ctx; if(!ctx||!A._geom)ret
        (faux aussi). isDecisionLike() reconnaît déjà 'Nul...'/'Égalité'
        (engine.js) — on ne le réutilise PAS ici pour distinguer nul/décision,
        d'où le test `startsWith('Nul')` explicite en plus du cas historique. */
-    if(A.done){ label = (A.method==='Égalité'||A.method.startsWith('Nul'))?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method==='Arrêt médical'?'ARRÊT MÉDICAL':(A.method==='Disqualification'?'DISQUALIFICATION':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION'))); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
+    /* ==== [ANCRE: P8_L9_BLESSURES] — même repli qu'Arrêt médical/
+       Disqualification ci-dessus (ANCRE P7_L2_LABEL_ARRET_MEDICAL /
+       P8_L7_VOCABULAIRE_DECISIONS) : sans ce cas explicite, une victoire par
+       'Blessure' (engine-combat.js, §9.2) serait tombée dans le repli
+       SOUMISSION par défaut, faux et trompeur. ==== */
+    if(A.done){ label = (A.method==='Égalité'||A.method.startsWith('Nul'))?'ÉGALITÉ':isDecisionLike(A.method)?'AUX POINTS':(A.method==='Arrêt médical'?'ARRÊT MÉDICAL':(A.method==='Disqualification'?'DISQUALIFICATION':(A.method==='Blessure'?'BLESSURE':(A.method.startsWith('KO')?'KO / TKO':'SOUMISSION')))); ctx.fillStyle='#C6A15B'; ctx.font="700 14px 'Oswald'"; }
     /* ==== [FIN ANCRE] ==== */
     /* ==== [FIN ANCRE] ==== */
     ctx.fillText(A.done?label:('ROUND '+rd+' · '+label), W/2, 20);

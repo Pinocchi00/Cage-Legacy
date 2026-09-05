@@ -114,7 +114,7 @@ npm test             # suite de tests (node --test), 10 fichiers
 npm run check        # lint + test — DOIT être vert avant toute livraison
 ```
 
-Au moment de la rédaction : **101 tests**, répartis sur 10 fichiers dans
+Au moment de la rédaction : **111 tests**, répartis sur 10 fichiers dans
 `tests/` (`analytics.test.js`, `career.test.js`, `champChamp.test.js`,
 `hallOfFame.test.js`, `hubCombatDossier.test.js`, `invariants.test.js`,
 `proceduralNarrative.test.js`, `ranking.test.js`, `regressionFixes.test.js`,
@@ -122,7 +122,7 @@ Au moment de la rédaction : **101 tests**, répartis sur 10 fichiers dans
 
 **Règle** : aucune livraison sans `npm run check` vert. Un bug corrigé =
 un test ajouté dans `tests/regressionFixes.test.js` (déjà le fichier le
-plus fourni, et de loin : 60 tests au moment de la rédaction).
+plus fourni, et de loin : 70 tests au moment de la rédaction).
 
 ## 8. Règles de modification
 
@@ -157,13 +157,21 @@ plus fourni, et de loin : 60 tests au moment de la rédaction).
   (rationale d'un correctif passé) ou de données légitimes d'anciennes
   légendes du Panthéon (`f.gameMode`, `f.faithNemesisId`, `f.faithTraits`),
   jamais de code vivant.
-- **`ui-06-career-screens.js` fait ~1199 lignes** — le plus gros fichier du
-  dépôt depuis le Lot 6/P8 (retrait des moments de bascule et du coin entre
-  les rounds, qui a fait reculer `ui-08-controller-arena.js` à ~946 et
-  `ui-09-arena.js` à ~627). `ui-08-controller-arena.js` concentre le routeur
-  d'écrans (`CL`) et une bonne partie du rendu Canvas de l'arène ; les deux
-  fichiers restent des candidats naturels à un futur découpage, non
-  entrepris à ce jour.
+- **`engine-combat.js` fait ~2340 lignes** (déjà ~1943 avant le Lot 9/P8,
+  qui y a ajouté la taxonomie de frappes, les blessures, l'examen médical
+  et le rythme par round — §9.1 à §9.4 de `P8-Arbitrage-Allonge-Suppressions.md`)
+  — de très loin le plus gros fichier du dépôt, tous fichiers confondus.
+  **Écart avec une mention historique de ce document** : une version
+  antérieure de cette section désignait `ui-06-career-screens.js` (~1199
+  lignes) comme « le plus gros fichier du dépôt » — déjà inexact avant le
+  Lot 9 (`engine-combat.js` faisait alors 1943 lignes), corrigé ici.
+  `ui-06-career-screens.js` reste le plus gros fichier **côté UI**
+  (`ui-08-controller-arena.js` ~946 lignes, `ui-09-arena.js` ~655 lignes
+  depuis le Lot 6/P8, retrait des moments de bascule et du coin entre les
+  rounds). `ui-08-controller-arena.js` concentre le routeur d'écrans (`CL`)
+  et une bonne partie du rendu Canvas de l'arène ; `engine-combat.js` et
+  `ui-06-career-screens.js` restent des candidats naturels à un futur
+  découpage, non entrepris à ce jour.
 - **`npm run lint:content` signale 3 points** au moment de la rédaction :
   3 occurrences de l'anglicisme « MAIN EVENT » (`ui-01-roster-matchmaking.js`,
   hors périmètre du Lot 6/P8), 0 phrase visible jugée trop longue (LOI 6),
