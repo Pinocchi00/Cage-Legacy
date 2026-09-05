@@ -1,3 +1,7 @@
+> **Plan exécuté.** Consommé aux exceptions listées dans `P8-Arbitrage-Allonge-Suppressions.md`
+> (§ « État des lieux vérifié sur `main` ») : points 1, 2, 3, 5, 6, 7, 9, 10, 11 de cet
+> addendum, répartis sur les lots 6 à 10 de ce document de suivi.
+
 # P7 — Addendum : audit de réalisme
 
 Audit du moteur tel qu'il est sur `main` (`a86db43`, P6 inclus, `dt=3`). Tout ce qui suit a été vérifié dans le code, pas déduit.

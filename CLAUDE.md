@@ -60,11 +60,11 @@ Ordre lu dans `index.html` :
 
 | Global | Défini dans | Rôle |
 |---|---|---|
-| `G` | déclaré `let G=null;` dans `state/state-core.js:14`, initialisé dans `main.js` (`G={screen:'title',...}`) et réassigné à chaque nouvelle partie/écran (`newCareer()`, `newFaithCareer()`, etc. dans `ui-08-controller-arena.js`) | État de jeu courant (donnée brute, jamais figée dans un objet séparé) |
-| `CL` | `ui-08-controller-arena.js:645`, exposé via `window.CL=CL;` en fin de fichier | Contrôleur de navigation/actions (`CL.go(screen)`, etc.) |
+| `G` | déclaré `let G=null;` dans `state/state-core.js:14`, initialisé dans `main.js` (`G={screen:'title',...}`) et réassigné à chaque nouvelle partie/écran (`newCareer()`, `exitLegacy()`, etc. dans `ui-08-controller-arena.js`) | État de jeu courant (donnée brute, jamais figée dans un objet séparé) |
+| `CL` | `ui-08-controller-arena.js:102`, exposé via `window.CL=CL;` en fin de fichier | Contrôleur de navigation/actions (`CL.go(screen)`, etc.) |
 | `esc()` | `state/state-core.js:23` | Échappement HTML pour tout texte injecté dans le DOM (noms de combattant, surnoms, légendes importées) |
 | `SAVE_KEY` | `state/state-save.js:28` (`'cage-legacy-v3'`) | Clé `localStorage` de la sauvegarde principale |
-| `SAVE_VERSION` | `state/state-migration.js:4` (`3` au moment de la rédaction) | Version de schéma de sauvegarde, utilisée par `migrate()` |
+| `SAVE_VERSION` | `state/state-migration.js:4` (`4` au moment de la rédaction) | Version de schéma de sauvegarde, utilisée par `migrate()` |
 
 ## 5. Séparation des responsabilités
 
@@ -110,19 +110,19 @@ npm run lint:content # linter de contenu narratif (anglicismes, longueur
                      # des phrases visibles, TEXT_POOLS, champs G.f./
                      # G.faith./G.arcade. jamais relus) — pas inclus dans
                      # `check`, à lancer séparément sur le contenu narratif
-npm test             # suite de tests (node --test), 9 fichiers
+npm test             # suite de tests (node --test), 10 fichiers
 npm run check        # lint + test — DOIT être vert avant toute livraison
 ```
 
-Au moment de la rédaction : **39 tests**, répartis sur 9 fichiers dans
+Au moment de la rédaction : **91 tests**, répartis sur 10 fichiers dans
 `tests/` (`analytics.test.js`, `career.test.js`, `champChamp.test.js`,
-`hallOfFame.test.js`, `invariants.test.js`, `proceduralNarrative.test.js`,
-`ranking.test.js`, `regressionFixes.test.js`, `saveSystem.test.js`), tous
-passants (`npm run check` vert).
+`hallOfFame.test.js`, `hubCombatDossier.test.js`, `invariants.test.js`,
+`proceduralNarrative.test.js`, `ranking.test.js`, `regressionFixes.test.js`,
+`saveSystem.test.js`), tous passants (`npm run check` vert).
 
 **Règle** : aucune livraison sans `npm run check` vert. Un bug corrigé =
 un test ajouté dans `tests/regressionFixes.test.js` (déjà le fichier le
-plus fourni : 8 tests au moment de la rédaction, un par correctif).
+plus fourni, et de loin : 50 tests au moment de la rédaction).
 
 ## 8. Règles de modification
 
@@ -157,17 +157,20 @@ plus fourni : 8 tests au moment de la rédaction, un par correctif).
   (rationale d'un correctif passé) ou de données légitimes d'anciennes
   légendes du Panthéon (`f.gameMode`, `f.faithNemesisId`, `f.faithTraits`),
   jamais de code vivant.
-- **`ui-08-controller-arena.js` fait ~994 lignes** — le plus gros fichier
-  du dépôt, de très peu devant `ui-06-career-screens.js` (~992). Il
-  concentre le routeur d'écrans (`CL`) et une bonne partie du rendu Canvas
-  de l'arène ; un candidat naturel à un futur découpage, non entrepris à ce
-  jour.
-- **`npm run lint:content` signale 1 point** au moment de la rédaction :
-  1 anglicisme (« BOUT », ui-01), 0 phrase visible jugée trop longue
-  (LOI 6), 0 champ `G.f./G.faith./G.arcade.` écrit mais jamais relu. Ce
-  linter est informatif — il n'est pas inclus dans `npm run check` et ne
-  bloque pas une livraison à lui seul, mais ses signalements sont à
-  regarder avant de merger du contenu narratif.
+- **`ui-06-career-screens.js` fait ~1199 lignes** — le plus gros fichier du
+  dépôt depuis le Lot 6/P8 (retrait des moments de bascule et du coin entre
+  les rounds, qui a fait reculer `ui-08-controller-arena.js` à ~946 et
+  `ui-09-arena.js` à ~627). `ui-08-controller-arena.js` concentre le routeur
+  d'écrans (`CL`) et une bonne partie du rendu Canvas de l'arène ; les deux
+  fichiers restent des candidats naturels à un futur découpage, non
+  entrepris à ce jour.
+- **`npm run lint:content` signale 3 points** au moment de la rédaction :
+  3 occurrences de l'anglicisme « MAIN EVENT » (`ui-01-roster-matchmaking.js`,
+  hors périmètre du Lot 6/P8), 0 phrase visible jugée trop longue (LOI 6),
+  0 champ `G.f./G.faith./G.arcade.` écrit mais jamais relu. Ce linter est
+  informatif — il n'est pas inclus dans `npm run check` et ne bloque pas
+  une livraison à lui seul, mais ses signalements sont à regarder avant de
+  merger du contenu narratif.
 
 ## 10. Livrables attendus en fin de session
 

@@ -3,8 +3,12 @@
    ============================================================================
    Moteur de rendu Canvas 2D de l'arène : état ARENA, boucle d'animation par
    beat (démarrage/pause/reprise), système de particules générique, silhouette
-   des combattants, aberration chromatique au KO, moments de bascule et leur
-   résolution, prévisualisations Canvas du Marché noir/de la boutique.
+   des combattants, aberration chromatique au KO, prévisualisations Canvas du
+   Marché noir/de la boutique.
+   Les "moments de bascule" (choix proposés au joueur pendant un combat) ont
+   été retirés en entier au Lot 6/P8 (ancre P8_L6_BASCULE_SUPPRIMEE) : plus
+   aucun choix ne survient pendant un combat, seul le plan tactique
+   d'avant-combat (scr_plan, TACTICS) subsiste.
 
    Extrait de ui-08-controller-arena.js (F-07, passe d'hygiène technique) :
    ce fichier n'appartient PAS au découpage d'origine de l'ancien ui.js
@@ -47,13 +51,7 @@ function makeNoisePattern(ctx){ try{
   for(let i=0;i<id.data.length;i+=4){ const v=Math.random()*255; id.data[i]=v; id.data[i+1]=v; id.data[i+2]=v; id.data[i+3]=16; }
   nctx.putImageData(id,0,0); return ctx.createPattern(c,'repeat');
 }catch(e){ return null; } }
-/* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — paramètre midFight ajouté :
-   true quand cette timeline ne couvre qu'UN round joué en cours de coaching
-   Gauntlet (runCoachingRound, ui-03), pas l'issue finale du combat — sert
-   uniquement à choisir le texte de la cloche de fin (round vs combat).
-   N'affecte aucun appelant existant (career/arcade non coaché), tous
-   passent midFight=undefined, donc le texte "Fin du combat" d'origine. ==== */
-function buildTimeline(midFight){
+function buildTimeline(){
   const res=G.pending.res, you=G.f, opp=G.fight.opp, meWin=G.pending.win;
   const log=(res.log&&res.log.length)?res.log:[];
   /* ==== [ANCRE: CORRECTIF_SUB_NON_TRANSPORTE] — régression du correctif
@@ -74,7 +72,7 @@ function buildTimeline(midFight){
      round 1 ou 2 de coaching Gauntlet se termine aux points : affichait
      "ROUND 3" sur le Canvas au lieu du vrai round joué. Lit désormais le
      round du dernier beat réel du log, cohérent quel que soit le contexte. ==== */
-  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:(beats.length?beats[beats.length-1].round:3),text:midFight?'[00:00] Fin du round.':'[00:00] Fin du combat. Décision des juges.'});
+  if(isDecisionLike(res.method)) beats.push({phase:'bell',finish:true,method:res.method,round:(beats.length?beats[beats.length-1].round:3),text:'[00:00] Fin du combat. Décision des juges.'});
   /* ==== [FIN ANCRE] ==== */
   ARENA={beats,idx:-1,started:false,done:false,raf:0,to:0,t0:0,lastBeat:-1,
     stMe:100,stOp:100,
@@ -190,12 +188,6 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
       const newRound=ARENA.beats[bi].round||1;
       if(prevRound!==null && newRound!==prevRound && !ARENA.beats[bi].finish && bi!==ARENA.pauseHandledFor){
         ARENA.roundPause=true; ARENA.pendingBeatIdx=bi; ARENA.pauseHandledFor=bi;
-        /* ==== [ANCRE: V2-29] — moment de bascule détecté sur la reprise qui
-           vient de se terminer, à partir de l'état RÉEL de la simulation
-           (momentum/phase des beats de cette reprise) — jamais à chaque
-           reprise (règle 6), plafonné à 3 par combat (ARENA.basculeCount). */
-        const moment=detectBascule(prevRound);
-        if(moment) ARENA.basculePending={kind:moment.kind};
         renderArenaOverlay(); return;
       }
       ARENA.lastBeat=bi; applyBeat(ARENA.beats[bi]);
@@ -220,10 +212,10 @@ function startArena(){ if(!ARENA||ARENA.started)return; ARENA.started=true;
   ARENA.loopFn=loop;
   paintBars(); ARENA.raf=requestAnimationFrame(loop);
 }
-/* ==== [ANCRE: V2-29] — même mécanisme de reprise que "Round suivant"
-   (recalculer pauseOffset pour retomber pile sur pendingBeatIdx, relever
-   roundPause, relancer la boucle) : nextRound() ET continueAfterBascule()
-   partagent ce point unique plutôt que de dupliquer le calcul. */
+// Recalcule pauseOffset pour retomber pile sur pendingBeatIdx, relève
+// roundPause et relance la boucle : seul point de reprise après la pause de
+// fin de round (CL.nextRound()) depuis le retrait des moments de bascule
+// (Lot 6/P8, ancre P8_L6_BASCULE_SUPPRIMEE) — continueAfterBascule() n'existe plus.
 function resumeArenaPlayback(){
   ARENA.pauseOffset=performance.now()-ARENA.t0-(ARENA.pendingBeatIdx||0)*BEAT_MS;
   ARENA.roundPause=false;
@@ -239,121 +231,25 @@ function resumeArenaPlayback(){
    suivant ▸" restait affiché à la place du journal pour tout le round. ==== */
 function renderArenaOverlay(){ const el=document.getElementById('ar-log'); if(!el) return;
   el.removeAttribute('data-last');
-  if(ARENA.basculePending){ renderBasculeOverlay(el); return; }
   const finishedRound=ARENA.beats[ARENA.lastBeat]?(ARENA.beats[ARENA.lastBeat].round||1):1;
   el.innerHTML=`<div style="text-align:center"><b class="gold">Fin du round ${finishedRound}</b><br><button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.nextRound()">Round suivant ▸</button></div>`;
 }
-/* ==== [ANCRE: V2-29] — les moments de bascule. Faute de flags dédiés dans
-   le log du moteur (pas de "sonné"/"coupure"/"dos à la cage" — cf. beat
-   shape réelle : phase/by/momentum/snapA/snapB seulement), les 4
-   situations ci-dessous sont dérivées de l'état RÉEL de la reprise qui
-   vient de se jouer (momentum de fin de round, domination en clinch) —
-   jamais fabriquées. Format imposé : une phrase de situation, 3 options,
-   aucun chiffre, conséquence en une phrase. */
-const BASCULE_MOMENTS={
-  sonne_lui:{situation:'Il recule, les jambes molles. La cage est derrière lui.',
-    options:[
-      {label:'Se jeter dessus',stat:'killer',oppStat:'chin',
-        successMsg:'Vous ne le laissez pas respirer — il craque un peu plus.',
-        failMsg:'Il vous accroche au passage : vous ralentissez, groggy vous aussi.'},
-      {label:'Rester structuré et le cueillir',stat:'composure',oppStat:'chin',
-        successMsg:'Vous le cueillez proprement, sans vous exposer.',
-        failMsg:'Il tient bon, et le round se referme sans rien de plus.'},
-      {label:'Le laisser revenir et garder le round',stat:'fightIQ',oppStat:'heart',
-        successMsg:'Vous gardez le contrôle du round, sans risque inutile.',
-        failMsg:'Il revient dans le round : l’occasion est passée.'}
-    ]},
-  sonne_moi:{situation:'Vous encaissez, les jambes molles. Il sent l’occasion.',
-    options:[
-      {label:'Se réfugier au clinch',stat:'clinchStr',oppStat:'power',
-        successMsg:'Vous vous accrochez à lui, le temps que la tête se remette en place.',
-        failMsg:'Il vous décolle du clinch et continue d’appuyer.'},
-      {label:'Reculer et respirer',stat:'footSpeed',oppStat:'aggression',
-        successMsg:'Vous sortez de l’axe, il ne vous rattrape pas.',
-        failMsg:'Il coupe la cage et vous retrouve contre la grille.'},
-      {label:'Répondre pour le faire douter',stat:'heart',oppStat:'composure',
-        successMsg:'Votre réponse le fait hésiter une seconde de trop.',
-        failMsg:'Il encaisse sans broncher et continue d’avancer.'}
-    ]},
-  clinch:{situation:'Dos à la cage, il vous contrôle en clinch depuis un moment.',
-    options:[
-      {label:'Forcer la sortie tout de suite',stat:'strength',oppStat:'clinchStr',
-        successMsg:'Vous vous dégagez, retour au centre de la cage.',
-        failMsg:'Vous forcez pour rien : il vous replaque contre la grille.'},
-      {label:'Attendre l’ouverture pour sortir',stat:'fightIQ',oppStat:'topControl',
-        successMsg:'Vous sentez le bon moment et sortez proprement.',
-        failMsg:'L’ouverture ne vient jamais : le round se termine collé à la grille.'},
-      {label:'Accepter la position et encaisser au score',stat:'discipline',oppStat:'clinchStr',
-        successMsg:'Vous limitez les dégâts, sans paniquer.',
-        failMsg:'Il en profite pour accumuler les coups au corps.'}
-    ]},
-  serre:{situation:'Round qui se joue à rien, dans les dernières secondes.',
-    options:[
-      {label:'Se jeter dans un dernier échange',stat:'aggression',oppStat:'chin',
-        successMsg:'Vous prenez le round sur ce dernier coup d’éclat.',
-        failMsg:'L’échange tourne à votre désavantage sur la cloche.'},
-      {label:'Sécuriser ce qui est déjà fait',stat:'discipline',oppStat:'fightIQ',
-        successMsg:'Vous gérez la fin de round sans rien risquer.',
-        failMsg:'Trop passif : les juges retiennent surtout sa fin de round à lui.'},
-      {label:'Chercher l’amenée pour finir en contrôle',stat:'takedown',oppStat:'tdd',
-        successMsg:'L’amenée passe, vous terminez le round au-dessus.',
-        failMsg:'L’amenée échoue, vous perdez le peu de temps qu’il restait.'}
-    ]}
-};
-/** Dérive un éventuel moment de bascule de la reprise qui vient de se
- * jouer, jamais fabriqué : lu sur les beats réels de cette reprise.
- * @param {number} round @returns {{kind:string}|null} */
-/* ==== [ANCRE: CORRECTIF_BASCULE_HORS_SEED] — bug trouvé : detectBascule()
-   et resolveBasculeOption() puisaient dans rnd(), le générateur SEEDÉ de la
-   run (le même que la simulation du combat elle-même). Ces deux fonctions
-   ne simulent rien : ce sont des tirages de MISE EN SCÈNE post-résolution
-   (le combat est déjà entièrement joué — ARENA.beats existe — au moment où
-   elles s'exécutent), déclenchés uniquement si le joueur regarde l'animation
-   se dérouler. Un joueur qui regarde chaque bascule et un joueur qui appuie
-   sur "Passer" ne consomment donc pas le même nombre de tirages sur rnd() :
-   la même graine produisait des adversaires différents dès qu'un moment de
-   bascule apparaissait, et le bouton "REJOUER CETTE GRAINE" ne tenait plus
-   sa promesse. Math.random() : hors du flux seedé, comme il se doit pour de
-   la mise en scène. ==== */
-function detectBascule(round){
-  // V2-44 : réglage Moments de bascule (activés par défaut), Réglages, ui-06.
-  if(G.settings && G.settings.basculeEnabled===false) return null;
-  if((ARENA.basculeCount||0)>=3) return null;
-  const roundBeats=ARENA.beats.filter(b=>b.round===round && b.phase!=='bell');
-  if(!roundBeats.length) return null;
-  const last=roundBeats[roundBeats.length-1];
-  const lastM=(last.momentum!=null)?last.momentum:50;
-  const clinchDom=roundBeats.filter(b=>b.phase==='clinch'&&b.by==='op').length>=3;
-  if(clinchDom && Math.random()<0.6) return {kind:'clinch'};
-  if(lastM>=78 && Math.random()<0.55) return {kind:'sonne_lui'};
-  if(lastM<=22 && Math.random()<0.55) return {kind:'sonne_moi'};
-  if(Math.abs(lastM-50)<=8 && Math.random()<0.35) return {kind:'serre'};
-  return null;
-}
-/** Chance de succès pondérée par l'attribut du joueur contre celui
- * de l'adversaire sur le point précis de l'option — jamais un tirage à
- * plat, jamais un chiffre affiché au joueur.
- * @param {object} opt @returns {boolean} */
-function resolveBasculeOption(opt){
-  const f=G.f, opp=(G.fight&&G.fight.opp)||{};
-  const my=(f.attrs&&f.attrs[opt.stat])!=null?f.attrs[opt.stat]:50;
-  const their=(opp.attrs&&opp.attrs[opt.oppStat])!=null?opp.attrs[opt.oppStat]:50;
-  const chance=clamp(50+(my-their)/2,10,90);
-  return Math.random()*100<chance;
-}
-function renderBasculeOverlay(el){
-  const b=ARENA.basculePending, m=BASCULE_MOMENTS[b.kind]; if(!m) return;
-  if(b.resultMsg){
-    el.innerHTML=`<div style="text-align:center"><div class="small" style="color:var(--gold)">${esc(b.resultMsg)}</div>
-      <button class="btn primary" style="margin-top:8px;padding:8px" onclick="CL.continueAfterBascule()">Continuer ▸</button></div>`;
-    return;
-  }
-  el.innerHTML=`<div style="text-align:left">
-    <div class="small mb">${esc(m.situation)}</div>
-    ${m.options.map((o,i)=>`<button class="btn ghost" style="display:block;width:100%;margin-top:6px;padding:8px;text-align:left" onclick="CL.pickBascule(${i})">${esc(o.label)}<div class="small muted" style="margin-top:2px">${esc(attrLabel(o.stat))}</div></button>`).join('')}
-  </div>`;
-}
+/* ==== [ANCRE: P8_L6_BASCULE_SUPPRIMEE] — Lot 6/P8 §6.2 : les "moments de
+   bascule" (ancre V2-29 d'origine) sont retirés en entier — BASCULE_MOMENTS,
+   detectBascule(), resolveBasculeOption(), renderBasculeOverlay() et la
+   détection en fin de round qui les déclenchait. Il n'y a donc plus aucun
+   choix demandé au joueur PENDANT un combat ; le plan tactique d'AVANT le
+   combat (scr_plan, TACTICS, ui-06/ui-08) n'est pas concerné et reste
+   intact. La pause de fin de round elle-même (roundPause/pauseOffset/
+   resumeArenaPlayback(), CL.nextRound()) n'est pas ce système : elle reste
+   en place inchangée, c'est le rythme de lecture de l'arène. attrLabel()
+   (engine.js) reste utilisée ailleurs ; seul son usage ici disparaît. ==== */
 function applyBeat(b){ const A=ARENA; if(!b)return;
+  /* ==== [ANCRE: P8_L6_BELL_COMPAT] — Lot 6/P8 §6.1 : le moteur n'émet plus
+     aucun beat phase:'bell' depuis la suppression du coin entre les rounds
+     (engine-combat.js, ancre P8_L6_COIN_SUPPRIME). Ce cas reste géré ici
+     uniquement pour rejouer sans erreur le log d'une sauvegarde antérieure
+     à ce lot qui en contiendrait encore. Ne pas supprimer. ==== */
   if(b.phase==='bell'){ A.currentText=b.text; return; }
   if(b.by==='me'){ A.flashOp=1; A.shakeOp=1; A.lungeMe=1; }
   else { A.flashMe=1; A.shakeMe=1; A.lungeOp=1; }

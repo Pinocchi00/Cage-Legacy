@@ -1,3 +1,7 @@
+> **Plan exécuté.** Les quatre lots (L1 → L4) sont livrés (ancres `P7_L1_*` à
+> `P7_L4_*`). Les points restants de son propre addendum de suivi sont repris dans
+> `P7-Addendum-Realisme.md`, eux-mêmes suivis dans `P8-Arbitrage-Allonge-Suppressions.md`.
+
 # P7 — Dégâts, fidélité MMA, identité des styles
 
 Plan en **quatre lots séquentiels**. Chacun devient un prompt distinct envoyé dans une session neuve. Ne les fusionne pas : chaque lot modifie le comportement du moteur, et si deux changements arrivent ensemble tu ne pourras plus attribuer une dérive de distribution à l'un ou à l'autre.
