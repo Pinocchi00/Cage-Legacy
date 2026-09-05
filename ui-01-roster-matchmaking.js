@@ -31,12 +31,13 @@
    dépassent largement. ==== */
 /* ==== [ANCRE: CORRECTIF_TACTIQUE_ROUND_FIGE] — bug remonté : la description
    de 'bx2' (seule entrée de TACTICS à référencer un round précis, cf.
-   grep "premier round") promettait "ça passe au premier round" — vrai
-   avant le tout premier round d'un combat, mais devenu absurde une fois
-   affichée entre deux rounds de coaching Gauntlet (scr_coaching_round,
-   ui-04, réutilise exactement les mêmes TACTICS) : le round 1 est déjà
-   joué à ce moment. Reformulée sans référence à un round précis — reste
-   valable qu'elle soit lue avant le combat ou entre deux rounds. ==== */
+   grep "premier round") promettait "ça passe au premier round" — vrai avant
+   le tout premier round d'un combat, mais devenu absurde dès que TACTICS
+   était lu ailleurs qu'en tout début de combat (l'écran de coaching
+   round-par-round du mode Gauntlet, depuis entièrement retiré du jeu — voir
+   CLAUDE.md §9, était l'un de ces cas). Reformulée sans référence à un round
+   précis, ce qui reste correct pour l'unique lecture actuelle : le plan
+   tactique d'avant-combat (scr_plan). ==== */
 const TACTICS = {
   boxer: [
     { id: 'bx1', lbl: 'Sac de Frappe Ambulant', desc: 'Le plan : envoyer 200 coups significatifs et noyer l\u2019adversaire sous le volume. Le combat est long, ennuyeux à mourir, mais la victoire aux points est garantie.', m: { str: 2.2, ko: 0.25 } },

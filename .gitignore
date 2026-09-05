@@ -10,5 +10,8 @@ node_modules/
 # fichier par fichier (Git n'inspecte jamais le contenu d'un dossier
 # exclu) — `tools/reports/*` exclut le CONTENU sans exclure le dossier
 # lui-même, ce qui rend la négation ci-dessous effective.
+# Lot 6/P8 §6.5 : même principe pour baseline-P8.md, référence des lots
+# 7 à 9 du plan P8.
 tools/reports/*
 !tools/reports/baseline-P7.md
+!tools/reports/baseline-P8.md

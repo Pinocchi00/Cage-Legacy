@@ -1217,43 +1217,20 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       legA:Math.round(st.A.sigLeg-_legA0), legB:Math.round(st.B.sigLeg-_legB0),
       pwrA:Math.round(st.A.powerStrikes-_pwrA0), pwrB:Math.round(st.B.powerStrikes-_pwrB0)
     });
-    // Adaptation tactique de fin de round
-    /* ==== [ANCRE: P7_L5_COIN_ENTRE_LES_ROUNDS] — Addendum P7 point 8 :
-       l'ajustement pilote par `adaptability` existait deja (ci-dessous,
-       inchange), mais restait invisible du joueur — "sans coin, l'attribut
-       n'a pas de support narratif". Ajoute la seule piece manquante : un
-       beat de log phase:'bell', deja gere par applyBeat() cote arene
-       (ui-09-arena.js:357, `if(b.phase==='bell'){ A.currentText=b.text;
-       return; }`) sans jamais avoir ete emis par le moteur jusqu'ici — pas
-       de flash/secousse/hit-stop, juste le texte affiche, exactement ce
-       qu'une consigne de coin doit etre. Uniquement s'il reste un round a
-       jouer et si le combat n'est pas deja termine ce round-la. ==== */
-    if(sA<sB){
-      const adaptA=clamp(((a.adaptability||50)-50)*0.08,0,4);
-      a.fightIQ=clamp(a.fightIQ+adaptA,1,150);
-      a.footwork=clamp(a.footwork+adaptA*0.5,1,150);
-      if(r<rounds && !finish){
-        const cornerPool=[
-          `Le coin de ${A.name} recadre la stratégie : plus de mouvement, moins de temps dans la ligne droite.`,
-          `Consignes claires dans le coin de ${A.name} : reprendre l'initiative, ne pas subir le round suivant.`,
-          `${A.name} écoute son coin entre les rounds et ajuste son plan de jeu.`
-        ];
-        log.push({r,phase:'bell',by:'me',text:`[${formatTime(roundLen)}] `+getUniqueLog(cornerPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
-      }
-    } else if(sB<sA){
-      const adaptB=clamp(((b.adaptability||50)-50)*0.08,0,4);
-      b.fightIQ=clamp(b.fightIQ+adaptB,1,150);
-      b.footwork=clamp(b.footwork+adaptB*0.5,1,150);
-      if(r<rounds && !finish){
-        const cornerPool=[
-          `Le coin de ${B.name} recadre la stratégie : plus de mouvement, moins de temps dans la ligne droite.`,
-          `Consignes claires dans le coin de ${B.name} : reprendre l'initiative, ne pas subir le round suivant.`,
-          `${B.name} écoute son coin entre les rounds et ajuste son plan de jeu.`
-        ];
-        log.push({r,phase:'bell',by:'op',text:`[${formatTime(roundLen)}] `+getUniqueLog(cornerPool),momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
-      }
-    }
-    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: P8_L6_COIN_SUPPRIME] — Lot 6/P8 §6.1 : le coin entre les
+       rounds (ex-ancre P7_L5_COIN_ENTRE_LES_ROUNDS) est retiré en entier,
+       beats phase:'bell' et ajustement d'attributs (`a.fightIQ+=adaptA`,
+       `a.footwork+=adaptA*0.5`) compris. Il n'y a donc plus aucun coin,
+       visible ou invisible. `adaptability` n'est pas devenu un attribut
+       muet pour autant : il reste lu à chaque échange via eff().fightIQ
+       (engine.js:379, poids 0.12), qui alimente offA/offB, les chances de
+       KO/soumission/GNP et le multiplicateur `plan.def` — voir la réponse
+       "adaptability en combat" du rapport de lot 6. Seul l'à-coup
+       supplémentaire de fin de round (le "second souffle" quand on perd
+       le round) disparaît. Le handler `phase==='bell'` d'applyBeat()
+       (ui-09-arena.js) est conservé pour rejouer sans erreur les logs de
+       sauvegardes antérieures à ce lot, mais aucun combat simulé après ce
+       lot n'émettra plus ce beat. ==== */
     // ==== [ANCRE: RECUP_INTER_ROUND] — la minute de repos entre rounds allège
     // une partie des dégâts accumulés, proportionnellement à la vraie stat de
     // récupération (pas la fatigue/cardio, qui reste dérivée à chaque round). ====

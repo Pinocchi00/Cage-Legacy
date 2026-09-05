@@ -342,13 +342,15 @@ function scr_camp(){ const f=G.f;
    l'écran Réglages (V2-44) et son bloc Rythme de combat (V2-28,
    combatPaceToggleBlock(), qui vivait aussi ici dans scr_plan) sont
    supprimés du menu. Le rythme n'est plus un réglage joueur : il est forcé
-   par le mode à l'entrée (forceFightPaceForMode(), ui-08) — Gauntlet en
-   intégral, Carrière en rapide, Faith ne passe plus jamais par l'arène
-   (scr_faith_fight_pending() la remplace). "Moments de bascule"
-   (basculeEnabled) perd son seul point d'accès et reste à sa valeur par
-   défaut (activé) — G.settings.* est conservé pour la compatibilité des
-   sauvegardes existantes (state.js/validateState()), seule l'édition par
-   le joueur disparaît. ==== */
+   à l'entrée de la carrière (forceFightPaceForMode(), ui-08-controller-
+   arena.js — toujours 'rapide', seul le mode Carrière Complète existe).
+   Mise à jour Lot 6/P8 §6.3 : les moments de bascule (basculeEnabled), qui
+   avaient déjà perdu leur seul point d'accès joueur ici, ont depuis été
+   retirés du jeu en entier (ancre P8_L6_BASCULE_SUPPRIMEE, ui-09-arena.js) —
+   `G.settings.basculeEnabled` n'est plus lu nulle part, mais la clé reste
+   tolérée telle quelle par `validateState()` (state/state-validation.js)
+   pour ne jamais faire échouer le chargement d'une sauvegarde qui la
+   contiendrait encore. ==== */
 function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]||[];
   const cr=G.fight.cutResult||{tier:'normal',effPct:0,kg:0,walk:(divById(G.f.div)?divById(G.f.div).kg:70),limit:(divById(G.f.div)?divById(G.f.div).kg:70)};
   const step=G.fight.planStep||1;

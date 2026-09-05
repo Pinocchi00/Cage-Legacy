@@ -33,22 +33,17 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
 function currentGameMode(){
   return 'career';
 }
-/* Rythme de combat forcé par le mode (arbitrage A4, §3) : Gauntlet en
-   intégral (round par round complet, BEAT_MS=1050 — c'est le format
-   spectacle du jeu), Carrière en rapide (round par round, BEAT_MS=750).
-   Faith ne lit plus fightPace pour décider de l'arène : elle ne l'atteint
-   simplement jamais (scr_faith_fight_pending() la remplace, cf. plus bas),
-   mais la valeur est quand même posée à 'instantane' par cohérence, pour
-   qu'un futur code qui lirait G.settings.fightPace sans connaître le mode
-   ne tombe jamais sur une valeur incohérente avec ce que Faith fait
-   réellement (jamais d'arène round par round). Appelée UNE FOIS à l'entrée
-   de chaque mode (finalizeFaithDraft/newCareer/startArcade et variantes),
-   jamais reproposée au joueur ensuite. */
+/* Rythme de combat de l'arène (round par round, BEAT_MS=750) : seul le mode
+   Carrière Complète existe désormais (§9 CLAUDE.md), donc toujours 'rapide'.
+   Le paramètre `mode` ne sert plus qu'à documenter l'appelant (newCareer()
+   passe 'career') ; il ne pilote plus aucune branche. Appelée UNE FOIS à
+   l'entrée de la carrière, jamais reproposée au joueur ensuite (l'écran
+   Réglages correspondant a déjà été retiré, cf. ancre V3_REGLAGES_SUPPRIMES
+   dans ui-06-career-screens.js). */
 function forceFightPaceForMode(mode){
   if(!G.settings||typeof G.settings!=='object') G.settings={};
   G.settings.fightPace='rapide';
 }
-/* ==== [FIN ANCRE] ==== */
 
 function fighterDisplayName(o,withNick){
   if(!o) return '';
@@ -454,35 +449,14 @@ const CL={
      sans save(), rendant le choix à un rechargement de page. ==== */
   setCampTier(tierId){ G.selectedCampTier=tierId; save(); render(); },
   skipArena(){ CL.toResult(); },
-  nextRound(){ if(!ARENA||!ARENA.roundPause||ARENA.basculePending) return; resumeArenaPlayback(); },
-  /* ==== [ANCRE: V2-29] — une option choisie ne rend pas le même verdict
-     pour deux joueurs : le succès est pondéré par l'attribut du joueur
-     contre celui de l'adversaire sur ce point précis (resolveBasculeOption),
-     jamais un simple tirage à plat. La conséquence est immédiate (une
-     phrase) puis reste affichée jusqu'au tap suivant, qui reprend la
-     lecture — jamais de second tap requis pour ça (règle V2-31 point 3,
-     même esprit ici). */
-  pickBascule(i){
-    if(!ARENA||!ARENA.basculePending||ARENA.basculePending.resultMsg) return;
-    const m=BASCULE_MOMENTS[ARENA.basculePending.kind]; const opt=m&&m.options[i]; if(!opt) return;
-    const win=resolveBasculeOption(opt);
-    ARENA.basculeCount=(ARENA.basculeCount||0)+1;
-    if(win){
-      /* ==== [ANCRE: CORRECTIF_BASCULE_RECOMPENSE_MORTE] — bug trouvé : la
-         bonification de bourse posée ici sur G.fight.pursePenalty n'avait
-         AUCUN effet — pursePenalty est lu par resolveFight() (ui-05), déjà
-         exécuté par choosePlan() avant même que l'arène ne s'affiche. La
-         récompense passe sur des canaux encore ouverts à ce stade : moral, et
-         trace narrative dans le journal de l'année (Faith). ==== */
-      G.f.morale=clamp((G.f.morale||60)+4,0,100);
-      
-    } else {
-      G.f.morale=clamp((G.f.morale||60)-3,0,100);
-    }
-    ARENA.basculePending.resultMsg=win?opt.successMsg:opt.failMsg;
-    renderArenaOverlay();
-  },
-  continueAfterBascule(){ if(!ARENA||!ARENA.basculePending) return; ARENA.basculePending=null; resumeArenaPlayback(); },
+  /* ==== [ANCRE: P8_L6_BASCULE_SUPPRIMEE] — Lot 6/P8 §6.2 : CL.pickBascule()
+     et CL.continueAfterBascule() sont retirées avec le reste du système de
+     moments de bascule (ancre V2-29 d'origine, voir ui-09-arena.js). La
+     bonification de moral (+4/-3) qu'elles posaient sur un choix disparaît
+     avec elles ; l'ancienne ancre CORRECTIF_BASCULE_RECOMPENSE_MORTE (bug de
+     bourse jamais réellement payée) documentait un correctif sur du code
+     aujourd'hui entièrement supprimé. ==== */
+  nextRound(){ if(!ARENA||!ARENA.roundPause) return; resumeArenaPlayback(); },
   handleEvent(actionId){ const ev=G.activeEvent; const id=actionId||(ev&&ev.actionId);
     if(id==='short_notice_accept'){
       const newOpp=G._pendingShortNoticeOpp;
@@ -586,15 +560,9 @@ const CL={
      un rechargement de page rendait le choix. Cas le plus grave : healGauntletZone
      sauvegarde bien la dépense (saveMetaStats) mais pas le soin (sur G) — le joueur
      perdait ses points ET gardait ses séquelles. ==== */
-  /* ==== [ANCRE: CORRECTIF_RENDU_ROUND_PAR_ROUND] — seul point de sortie de
-     l'arène (skipArena et la fin naturelle de l'animation passent tous les
-     deux par ici) : généralisé pour pouvoir router ailleurs qu'au résultat
-     final. G._arenaNext (posé par runCoachingRound, ui-03, avant un round
-     intermédiaire de coaching Gauntlet) redirige vers l'écran de coaching
-     au lieu du résultat ; undefined partout ailleurs préserve exactement
-     le comportement d'origine ('result'). ==== */
-  toResult(){ stopArena(); G.screen=G._arenaNext||'result'; G._arenaNext=null; save(); render(); },
-  /* ==== [FIN ANCRE] ==== */
+  // Seul point de sortie de l'arène : skipArena et la fin naturelle de
+  // l'animation passent tous les deux par ici, direction l'écran de résultat.
+  toResult(){ stopArena(); G.screen='result'; save(); render(); },
   afterResult(){
     /* ==== [ANCRE: CORRECTIF_DOUBLE_AFTERRESULT] — même hasard matériel que
        CORRECTIF_DOUBLE_ENSHRINE (double-tap tactile, délai de tap iOS), sur le
