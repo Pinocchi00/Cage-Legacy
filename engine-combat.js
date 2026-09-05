@@ -18,7 +18,7 @@
 
    Scope global classique (pas d'import/export) : depend des primitives
    d'engine.js (rnd/pick/clamp/num/RI/gauss/sigmoid/d20/parseGender/
-   isDecisionLike/ATTR_KEYS/DIVISIONS/STYLES/eff/overall/reachEdge/
+   isDecisionLike/ATTR_KEYS/DIVISIONS/STYLES/eff/overall/reachEdge/buildEdge/
    weightFactor/makeFighter...) donc CHARGE JUSTE APRES engine.js. Utilise
    aussi des fonctions d'engine-progression.js (grantSkill, epithets,
    txtPick) et d'engine-events.js (getRivalryPurseMultiplier...) au
@@ -498,6 +498,19 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   }
   // ==== [FIN ANCRE] ====
   const giA=myGi, giB=(STYLES[B.style]||STYLES.mma).grap; const rEdge=reachEdge(A,B);
+  /* ==== [ANCRE: P8_L8_GABARIT] — bEdge, calculé une fois par combat comme
+     rEdge ci-dessus (aucun des deux ne varie avec la fatigue/les dégâts en
+     cours de combat) : cf. buildEdge() (engine.js) pour la distinction avec
+     rEdge — taille+densité contre allonge pure. ==== */
+  const bEdge=buildEdge(A,B);
+  /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P8_L8_GARDE_STANCE] — Lot 8/P8 §8.2 : calculé une fois par
+     combat (la stance ne change jamais en cours de combat) — vrai seulement
+     quand les deux combattants ont des gardes opposées (un orthodoxe pied
+     avant droit contre un gaucher pied avant gauche, la vraie définition
+     d'un "open stance matchup"), jamais entre deux mêmes gardes. ==== */
+  const openStance=(((A.phys&&A.phys.stance)||'orthodox')!==((B.phys&&B.phys.stance)||'orthodox'));
+  /* ==== [FIN ANCRE] ==== */
   let sa=0,sb=0,dmgA=0,dmgB=0,finish=null; const log=[];
   /* ==== [ANCRE: P7_L2_DEGATS_PROGRESSIFS_BASELINE] — Lot 2/P7 §2.2 : valeurs
      de référence des canaux dégradés PROGRESSIVEMENT par les dégâts cumulés
@@ -956,8 +969,20 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            de tout ce bloc, exactement comme `posProf` (GROUND_POS) module
            déjà la phase 'sol'. ==== */
         const cp=CLINCH_POS[clinchPos]||CLINCH_POS.center;
-        const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA;
-        const clinchB=(b.clinch*0.6+b.striking*0.25+b.power*0.15)*profB.clinchDmg-fatB;
+        /* ==== [ANCRE: P8_L8_ALLONGE_CLINCH] — Lot 8/P8 §8.1 : "l'avantage
+           [d'allonge] s'inverse au clinch et au corps à corps, où l'allonge
+           devient une gêne" — signe opposé à son usage en frappe à distance
+           (ANCRE P8_L8_ALLONGE_ECHANGES ci-dessous, +rEdge*0.85 pour A) :
+           ici -rEdge*0.45 pour A, un bras long gêne à cette distance plutôt
+           qu'il n'aide. Le gabarit fait l'inverse (+bEdge*0.35 pour A) —
+           un combattant plus grand/dense génère plus de force et se
+           déséquilibre moins en corps à corps, cf. buildEdge (engine.js).
+           Poids volontairement plus faibles qu'en frappe distance (0.85) :
+           le clinch reste avant tout gouverné par clinch/striking/power,
+           l'allonge/le gabarit n'y sont qu'un facteur secondaire. ==== */
+        const clinchA=(a.clinch*0.6+a.striking*0.25+a.power*0.15)*profA.clinchDmg-fatA-rEdge*0.45+bEdge*0.35;
+        const clinchB=(b.clinch*0.6+b.striking*0.25+b.power*0.15)*profB.clinchDmg-fatB+rEdge*0.45-bEdge*0.35;
+        /* ==== [FIN ANCRE] ==== */
         const diff=clinchA-clinchB;
         if(Math.abs(diff)>8){
           const domIsA=diff>0; const dom=domIsA?A:B;
@@ -1094,8 +1119,36 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           }
         }
         if(!handled && currentPhase==='debout'){
+          /* ==== [ANCRE: P8_L8_ALLONGE_ECHANGES] — Lot 8/P8 §8.1 : "celui qui
+             a l'allonge touche plus souvent à distance longue et se fait
+             toucher moins". rEdge*0.85 existait déjà ici avant ce lot (offA
+             gagne quand A a l'allonge, offB perd symétriquement) : c'est le
+             seul point de l'addendum où reachEdge() était déjà branché dans
+             la frappe elle-même — l'état des lieux du plan sous-estimait cet
+             appel en ne comptant que les CALLS de reachEdge() (500 et le
+             départage final), pas la variable rEdge qu'ils alimentent. Ce
+             lot en fait le pivot d'une vraie mécanique : inversion en clinch
+             (ANCRE P8_L8_ALLONGE_CLINCH), coût de fermeture de distance
+             (ANCRE P8_L8_ALLONGE_FERMETURE, transition vers le clinch plus
+             bas) et garde ouverte (ANCRE P8_L8_GARDE_STANCE ci-dessous)
+             s'ajoutent à cette base inchangée. ==== */
           let offA=(a.striking*0.72+a.power*0.35+a.handSpeed*0.22+a.footwork*0.14+a.clinch*0.14*profA.clinchDmg+rEdge*0.85-b.footwork*0.2-b.fightIQ*0.14-fatA)*profA.sigVol;
           let offB=(b.striking*0.72+b.power*0.35+b.handSpeed*0.22+b.footwork*0.14+b.clinch*0.14*profB.clinchDmg-rEdge*0.85-a.footwork*0.2-a.fightIQ*0.14-fatB)*profB.sigVol;
+          /* ==== [ANCRE: P8_L8_GARDE_STANCE] — Lot 8/P8 §8.2 : "un
+             affrontement de gardes opposées change la géométrie... avantage
+             au pied avant". Actif UNIQUEMENT quand openStance est vrai
+             (gardes différentes, cf. déclaration en tête de simulateFight) :
+             un petit swing (borné ±1.2) en faveur de celui des deux dont le
+             footwork est meilleur — modélise le contrôle de l'angle extérieur
+             par le pied avant, sans introduire de nouvel attribut (footwork
+             existe déjà). Nul par construction sur un affrontement de gardes
+             identiques (l'écrasante majorité des combats), donc sans effet
+             sur la matrice 8x8 existante. ==== */
+          if(openStance){
+            const stFootEdge=clamp((a.footwork-b.footwork)*0.04,-1.2,1.2);
+            offA+=stFootEdge; offB-=stFootEdge;
+          }
+          /* ==== [FIN ANCRE] ==== */
           /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 : "initiative"
              (mener/contrer) et "rythme" (volume/salves) modulent le volume
              de frappe indépendamment de la fenêtre de danger ci-dessous —
@@ -1139,7 +1192,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           const attA=Math.max(landedA,landedA/accRateA+((a.aggression||50)>60?RI(1,3):RI(0,1)));
           st.A.sigAtt+=attA*(dt/50); st.A.distStrikes+=landedA*(dt/50); st.A.distAtt+=attA*(dt/50);
           st.A.total+=(landedA+RI(1,3))*(dt/50); st.A.totalAtt+=(attA+RI(2,4))*(dt/50);
-          const kickRatioA=clamp(((a.kick||50)/150)*0.45,0.10,0.45);
+          /* ==== [ANCRE: P8_L8_GARDE_STANCE] — §8.2 "low kick extérieur plus
+             disponible" en garde ouverte : la jambe avant exposée d'un
+             gaucher face à un orthodoxe (et inversement) rend le low kick
+             extérieur structurellement plus accessible — traduit ici par un
+             ratio de coups de pied relevé de 15% quand openStance est vrai,
+             plafonné comme avant (0.10-0.45) pour ne pas dépasser la borne
+             existante ailleurs dans le moteur. ==== */
+          const kickRatioA=clamp(((a.kick||50)/150)*0.45*(openStance?1.15:1),0.10,0.45);
           const legA=landedA*kickRatioA*0.7;
           const bodyA=landedA*(0.22+((a.hook||50)>65?0.08:0));
           const headA=Math.max(0,landedA-legA-bodyA);
@@ -1154,7 +1214,9 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           const attB=Math.max(landedB,landedB/accRateB+((b.aggression||50)>60?RI(1,3):RI(0,1)));
           st.B.sigAtt+=attB*(dt/50); st.B.distStrikes+=landedB*(dt/50); st.B.distAtt+=attB*(dt/50);
           st.B.total+=(landedB+RI(1,3))*(dt/50); st.B.totalAtt+=(attB+RI(2,4))*(dt/50);
-          const kickRatioB=clamp(((b.kick||50)/150)*0.45,0.10,0.45);
+          /* ==== [ANCRE: P8_L8_GARDE_STANCE] — symétrique de kickRatioA
+             ci-dessus, côté B. ==== */
+          const kickRatioB=clamp(((b.kick||50)/150)*0.45*(openStance?1.15:1),0.10,0.45);
           const legB=landedB*kickRatioB*0.7;
           const bodyB=landedB*(0.22+((b.hook||50)>65?0.08:0));
           const headB=Math.max(0,landedB-legB-bodyB);
@@ -1331,7 +1393,29 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              au grappling la PLUS FORTE des deux pilote seule ce biais,
              qu'elle appartienne à A ou B (peu importe qui initie le
              clinch — ce n'est pas modélisé ici). ==== */
-          if(!finish && rnd()<clinchChance*(dt/50)){ currentPhase='clinch'; clinchPos=rnd()<(0.35+0.3*Math.max(giA,giB))?'cage':'center'; }
+          if(!finish && rnd()<clinchChance*(dt/50)){
+            currentPhase='clinch'; clinchPos=rnd()<(0.35+0.3*Math.max(giA,giB))?'cage':'center';
+            /* ==== [ANCRE: P8_L8_ALLONGE_FERMETURE] — Lot 8/P8 §8.1 :
+               "fermer la distance contre une allonge supérieure a un coût —
+               passage sous les coups, exposition à l'entrée". Le moteur ne
+               modélise pas QUI initie le clinch (aucune des deux jauges de
+               grappling ci-dessus n'est directionnelle) ; hypothèse assumée
+               ici, cohérente avec le MMA réel : c'est structurellement le
+               combattant qui a l'allonge la plus COURTE qui est motivé à
+               fermer la distance contre un adversaire plus long. "Taxe
+               d'entrée" ponctuelle (un seul tick, au moment même de la
+               transition vers le clinch), proportionnelle à l'écart
+               d'allonge, plafonnée à 1.2 point de dégâts (négligeable
+               devant l'usure/les coups lourds accumulés sur un round entier,
+               ANCRE P7_L2_USURE) — un coût réel mais qui ne doit pas, à lui
+               seul, décider un combat. ==== */
+            if(Math.abs(rEdge)>=1){
+              const shortIsA=rEdge<0, entryTax=clamp(Math.abs(rEdge)*0.6,0,4)*0.3;
+              if(shortIsA){ dmgA+=entryTax; applyZoneDamage(st.A,entryTax,0.6,0.3,0.1); }
+              else { dmgB+=entryTax; applyZoneDamage(st.B,entryTax,0.6,0.3,0.1); }
+            }
+            /* ==== [FIN ANCRE] ==== */
+          }
         }
       }
     /* ==== [ANCRE: P8_L7_ARBITRE_FAUTES] — Lot 7/P8 §7.1 : jet de faute
