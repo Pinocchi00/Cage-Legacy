@@ -52,6 +52,22 @@ test('CORRECTIF_OFFRE_PRO_RETRAITE — un combattant retraité ne reçoit plus d
   win.G.f.age = 27;
   win.G.f.retired = true;
   const opp = win.G.roster[0];
+  /* ==== [ANCRE: P8_L8_TEST_NEUTRALISATION_MATCHUP] — Lot 8/P8 §8.1/§8.2 :
+     ce test isole la logique "retraité => pas d'offre pro" et n'a jamais eu
+     vocation à dépendre du style/gabarit aléatoire de roster[0]. Avant ce
+     lot, ce style/gabarit tombait par coïncidence sur une configuration où
+     l'écrasante domination d'attributs (100 contre 1) suffisait toujours à
+     gagner ; l'ajout d'un nouveau tirage aléatoire par combattant (phys.
+     stance, ANCRE P8_L8_GARDE_STANCE) décale la position de roster[0] dans
+     le flux rnd() seedé et peut désormais faire tomber un style différent
+     (ex. bjj) avec un sous/subMod que même un écart d'attributs de 100
+     contre 1 ne surmonte pas de façon fiable sous rnd()=>0 (régime
+     dégénéré : chaque probabilité devient une certitude). Neutralisé
+     explicitement plutôt que de dépendre implicitement de la position dans
+     le flux — ce que ce test mesure n'a jamais été le style/gabarit. ==== */
+  opp.style = 'boxer';
+  opp.phys = { height: win.G.f.phys.height, reach: win.G.f.phys.reach, stance: win.G.f.phys.stance, tags: [] };
+  /* ==== [FIN ANCRE] ==== */
   Object.assign(win.G.f.attrs, { takedown: 100, strength: 100, explosiveness: 100, tdd: 100, topControl: 100, gnp: 100, power: 100, submission: 1, guardWork: 1, flexibility: 1, fightIQ: 100, composure: 100, adaptability: 100, killer: 100 });
   Object.assign(opp.attrs, { tdd: 1, strength: 1, flexibility: 1, guardWork: 100, submission: 1, topControl: 1, chin: 1, durability: 1, fightIQ: 1, composure: 1, adaptability: 1, heart: 1, cardio: 1, recovery: 1 });
   win.setSeed(1);
@@ -423,6 +439,12 @@ test('CORRECTIF_CLASSEMENT_EXPLIQUE — la variation de rang est expliquée par 
   `);
   win.G.f.streak = 4;
   const opp = win.G.roster[0];
+  /* ==== [ANCRE: P8_L8_TEST_NEUTRALISATION_MATCHUP] — voir la même ancre
+     dans CORRECTIF_OFFRE_PRO_RETRAITE ci-dessus : ce test isole la carte
+     "Classement" du résultat, pas le matchup style/gabarit de roster[0]. ==== */
+  opp.style = 'boxer';
+  opp.phys = { height: win.G.f.phys.height, reach: win.G.f.phys.reach, stance: win.G.f.phys.stance, tags: [] };
+  /* ==== [FIN ANCRE] ==== */
   Object.assign(win.G.f.attrs, { takedown: 100, strength: 100, explosiveness: 100, tdd: 100, topControl: 100, gnp: 100, power: 100, submission: 1, guardWork: 1, flexibility: 1, fightIQ: 100, composure: 100, adaptability: 100, killer: 100 });
   Object.assign(opp.attrs, { tdd: 1, strength: 1, flexibility: 1, guardWork: 100, submission: 1, topControl: 1, chin: 1, durability: 1, fightIQ: 1, composure: 1, adaptability: 1, heart: 1, cardio: 1, recovery: 1 });
   win.setSeed(1);
@@ -1234,7 +1256,23 @@ test('P7_L5_COUPE_DE_POIDS — une coupe de poids sévère dégrade le volume de
   const win = newGameWindow();
   const realWeightCutInfo = win.weightCutInfo;
   let severeTotalR5 = 0, mildTotalR5 = 0, counted = 0;
-  const TRIALS = 60;
+  /* ==== [ANCRE: P8_L8_TEST_ROBUSTESSE_ECHANTILLON] — Lot 8/P8 : ce test
+     compare deux totaux cumulés sur seulement les combats qui atteignent le
+     round 5 (~45-50% des essais, cf. `counted`) — à TRIALS=60 l'échantillon
+     utile tombait à ~29 combats, déjà marginal AVANT ce lot (606 vs 674,
+     ~10% d'écart sur un total à deux chiffres de combats). L'ajout d'un
+     nouveau tirage aléatoire par combattant (phys.stance, ANCRE
+     P8_L8_GARDE_STANCE) décale tout le flux rnd() seedé en aval — chaque
+     essai tire des attributs individuels différents de avant ce lot, sans
+     biais directionnel (la stance/l'allonge/le gabarit sont symétriquement
+     aléatoires pour A et B ici, tous deux 'mma' par ailleurs identiques) —
+     et suffisait à faire passer ce petit échantillon sous le bruit (629 vs
+     596, sens inversé). Relevé à 300 essais (~135 comptabilisés, vérifié
+     manuellement : 2785 vs 2933, sens correct restauré) pour que le vrai
+     effet de la coupe de poids (Addendum P7 §4, toujours en place et
+     inchangé par ce lot) domine le bruit plutôt que de dépendre de la
+     position exacte dans le flux rnd(). ==== */
+  const TRIALS = 300;
   for (let i = 0; i < TRIALS; i++) {
     win.setSeed(4000 + i);
     const A = win.makeFighter({ gender: 'H', style: 'mma', div: 'H-welter', level: 60 });
@@ -1505,5 +1543,143 @@ test('P8_L7_CAGE_POSITION — le clinch distingue réellement centre et cage, et
   const rateCage = tdFromCage / clinchTicksCage, rateCenter = tdFromCenter / clinchTicksCenter;
   assert.ok(rateCage > rateCenter,
     `le taux d'amenée depuis un clinch de cage (${(rateCage * 100).toFixed(2)}%) doit dépasser celui depuis un clinch de centre (${(rateCenter * 100).toFixed(2)}%)`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L8_GABARIT] — Lot 8/P8 §8.1 : buildEdge() est une
+   fonction pure (comme reachEdge()), déclarée dans engine.js, exposée sur
+   `window` (déclaration `function`, cf. TESTS_LOADGAME_G_BRIDGE). Vérifie
+   qu'elle lit bien deux entrées disjointes de reachEdge (taille + tag de
+   densité, jamais l'allonge) et reste bornée [-6,6] comme reachEdge. ==== */
+test('P8_L8_GABARIT — buildEdge() est distincte de reachEdge() (taille+densité, jamais l’allonge) et bornée', () => {
+  const win = newGameWindow();
+  win.setSeed(2026);
+  const A = win.makeFighter({ level: 50 });
+  const B = win.makeFighter({ level: 50 });
+  A.phys = { height: 190, reach: 175, tags: [] };
+  B.phys = { height: 170, reach: 175, tags: [] };
+  assert.equal(win.reachEdge(A, B), 0, 'même allonge (175/175) => reachEdge nul, quelle que soit la taille');
+  assert.ok(win.buildEdge(A, B) > 0, 'A nettement plus grand (190 vs 170) doit avoir un gabarit favorable même à allonge égale');
+
+  const C = win.makeFighter({ level: 50 });
+  const D = win.makeFighter({ level: 50 });
+  C.phys = { height: 180, reach: 180, tags: ['densité rare (type Ngannou)'] };
+  D.phys = { height: 180, reach: 180, tags: [] };
+  assert.ok(win.buildEdge(C, D) > 0, 'le tag de densité rare doit à lui seul faire pencher buildEdge, à taille/allonge identiques');
+  assert.equal(win.reachEdge(C, D), 0, 'le tag de densité ne doit jamais influencer reachEdge (axes disjoints)');
+
+  const E = win.makeFighter({ level: 50 });
+  const F = win.makeFighter({ level: 50 });
+  E.phys = { height: 260, reach: 260, tags: [] }; // écart extrême, hors de toute plausibilité réelle
+  F.phys = { height: 120, reach: 120, tags: [] };
+  assert.ok(win.buildEdge(E, F) <= 6 && win.buildEdge(E, F) >= -6, 'buildEdge doit rester bornée [-6,6] même sur un écart extrême');
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L8_GARDE_STANCE] — Lot 8/P8 §8.2 : "distribuée de
+   façon plausible (les gauchers sont minoritaires...)". Vérifie sur un grand
+   échantillon que la garde gauchère reste minoritaire mais non négligeable —
+   bande large exprès (10%-25%) pour ne pas coupler le test à la valeur
+   interne exacte de STANCE_SOUTHPAW_RATE (const, jamais exposée sur
+   `window`), seulement au comportement observable qu'exige le plan. ==== */
+test('P8_L8_GARDE_STANCE — la garde gauchère est générée comme minorité plausible, jamais 0% ni majoritaire', () => {
+  const win = newGameWindow();
+  win.setSeed(555);
+  const N = 4000;
+  let southpaw = 0;
+  for (let i = 0; i < N; i++) {
+    const f = win.makeFighter({ level: 50 });
+    assert.ok(f.phys.stance === 'orthodox' || f.phys.stance === 'southpaw', `stance invalide: ${f.phys.stance}`);
+    if (f.phys.stance === 'southpaw') southpaw++;
+  }
+  const rate = southpaw / N;
+  assert.ok(rate > 0.10 && rate < 0.25, `taux de gaucher (${(rate * 100).toFixed(1)}%) hors de la bande plausible 10-25%`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L8_GARDE_STANCE_OPEN] — Lot 8/P8 §8.2 : "low kick
+   extérieur plus disponible" en garde ouverte. Deux combats strictement
+   identiques (mêmes attrs des deux côtés) sauf la stance de B — même garde
+   que A, puis garde opposée — répétés sur un échantillon pour lisser le
+   bruit ; la part de frappes aux jambes doit être significativement plus
+   haute quand les gardes sont opposées. ==== */
+test('P8_L8_GARDE_STANCE_OPEN — un affrontement de gardes opposées élève la part de frappes aux jambes', () => {
+  const win = newGameWindow();
+  const N = 250;
+  let legShareSame = 0, legShareOpen = 0;
+  for (let i = 0; i < N; i++) {
+    win.setSeed(90000 + i);
+    const A1 = win.makeFighter({ style: 'karate', level: 60 });
+    const B1 = win.makeFighter({ style: 'karate', level: 60 });
+    A1.phys.stance = 'orthodox'; B1.phys.stance = 'orthodox';
+    const r1 = win.simulateFight(A1, B1, 3);
+    const legA1 = r1.stats.A.sigLeg + r1.stats.B.sigLeg, totA1 = r1.stats.A.sig + r1.stats.B.sig;
+    if (totA1 > 0) legShareSame += legA1 / totA1;
+
+    win.setSeed(90000 + i);
+    const A2 = win.makeFighter({ style: 'karate', level: 60 });
+    const B2 = win.makeFighter({ style: 'karate', level: 60 });
+    A2.phys.stance = 'orthodox'; B2.phys.stance = 'southpaw';
+    const r2 = win.simulateFight(A2, B2, 3);
+    const legA2 = r2.stats.A.sigLeg + r2.stats.B.sigLeg, totA2 = r2.stats.A.sig + r2.stats.B.sig;
+    if (totA2 > 0) legShareOpen += legA2 / totA2;
+  }
+  assert.ok(legShareOpen > legShareSame,
+    `part de frappes aux jambes en gardes opposées (${(legShareOpen / N * 100).toFixed(2)}%) doit dépasser la même garde (${(legShareSame / N * 100).toFixed(2)}%)`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L8_ALLONGE_CLINCH] — Lot 8/P8 §8.1 : "l'avantage
+   s'inverse au clinch". Deux lutteurs à statistiques de clinch identiques,
+   seule l'allonge de A change de signe d'un groupe à l'autre (+30cm puis
+   -30cm contre le même B) — le style wrestler garantit des entrées en
+   clinch fréquentes. Le temps de contrôle en clinch cumulé par A doit être
+   PLUS BAS quand A est le plus long des deux : c'est l'inverse exact de
+   l'effet en frappe à distance (ANCRE P8_L8_ALLONGE_ECHANGES). ==== */
+test('P8_L8_ALLONGE_CLINCH — l’allonge devient un désavantage en clinch, à l’inverse de la frappe à distance', () => {
+  const win = newGameWindow();
+  const N = 200;
+  let ctrlLongA = 0, ctrlShortA = 0;
+  const clinchAttrs = { clinchStr: 85, strength: 85, striking: 60, power: 55, takedown: 60, tdd: 60 };
+  for (let i = 0; i < N; i++) {
+    win.setSeed(70000 + i);
+    const ALong = win.makeFighter({ style: 'wrestler', level: 55 });
+    const B1 = win.makeFighter({ style: 'wrestler', level: 55 });
+    Object.assign(ALong.attrs, clinchAttrs); Object.assign(B1.attrs, clinchAttrs);
+    ALong.phys.reach = B1.phys.reach + 30;
+    const r1 = win.simulateFight(ALong, B1, 3);
+    ctrlLongA += r1.stats.A.clinchCtrlSec || 0;
+
+    win.setSeed(70000 + i);
+    const AShort = win.makeFighter({ style: 'wrestler', level: 55 });
+    const B2 = win.makeFighter({ style: 'wrestler', level: 55 });
+    Object.assign(AShort.attrs, clinchAttrs); Object.assign(B2.attrs, clinchAttrs);
+    AShort.phys.reach = B2.phys.reach - 30;
+    const r2 = win.simulateFight(AShort, B2, 3);
+    ctrlShortA += r2.stats.A.clinchCtrlSec || 0;
+  }
+  assert.ok(ctrlShortA > ctrlLongA,
+    `contrôle en clinch cumulé de A allonge courte (${ctrlShortA}s) doit dépasser A allonge longue (${ctrlLongA}s)`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L8_REPAIR_STANCE] — comme height/reach/tags déjà
+   couverts par repairFighter (state-validation.js) : une sauvegarde
+   antérieure à ce lot n'a pas f.phys.stance — repairFighter() doit poser un
+   défaut valide plutôt que laisser passer une valeur absente/corrompue vers
+   simulateFight (qui lirait alors 'orthodox' par le fallback ||'orthodox',
+   mais l'objet lui-même resterait incohérent pour l'UI/l'export Panthéon). */
+test('P8_L8_REPAIR_STANCE — repairFighter() pose un défaut orthodoxe sur une sauvegarde antérieure au lot 8', () => {
+  const win = newGameWindow();
+  win.setSeed(3);
+  const f = win.makeFighter({ level: 50 });
+  delete f.phys.stance; // simule une sauvegarde écrite avant ce lot
+  const repaired = win.repairFighter(f);
+  assert.ok(repaired.phys.stance === 'orthodox' || repaired.phys.stance === 'southpaw', 'stance doit être réparée à une valeur valide');
+  assert.equal(repaired.phys.stance, 'orthodox', 'le défaut de réparation doit être orthodoxe (garde majoritaire)');
+
+  f.phys.stance = 'gaucher-invalide';
+  const repaired2 = win.repairFighter(f);
+  assert.equal(repaired2.phys.stance, 'orthodox', 'une valeur de stance corrompue doit retomber sur orthodoxe');
 });
 /* ==== [FIN ANCRE] ==== */

@@ -62,6 +62,13 @@ function repairFighter(f){
     f.phys.height=num(f.phys.height,175);
     f.phys.reach=num(f.phys.reach,f.phys.height+2);
     if(!Array.isArray(f.phys.tags)) f.phys.tags=[];
+    /* ==== [ANCRE: P8_L8_GARDE_STANCE] — Lot 8/P8 §8.2 : phys.stance est un
+       champ nouveau (makePhysical, engine.js) — une sauvegarde antérieure à
+       ce lot ne le porte pas. Défaut 'orthodox' (garde majoritaire), même
+       principe tolérant que height/reach/tags juste au-dessus : jamais faire
+       planter le chargement d'une sauvegarde ancienne. ==== */
+    if(f.phys.stance!=='orthodox' && f.phys.stance!=='southpaw') f.phys.stance='orthodox';
+    /* ==== [FIN ANCRE] ==== */
   }
   if(typeof f.overall!=='number'||isNaN(f.overall)) f.overall=overall(f);
   if(typeof f.orgElo!=='number'||isNaN(f.orgElo)) f.orgElo=eloBaseline(f.org||0,f.overall);

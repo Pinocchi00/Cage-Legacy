@@ -271,6 +271,17 @@ function uniqueFighterId(){ _idCounter++; return Date.now().toString(36)+'_'+_id
    sans ce garde-fou, réduire la fréquence de chaque tirage individuel
    n'empêchait pas leur cumul (deux tirages à faible probabilité restent
    indépendants). */
+/* ==== [ANCRE: P8_L8_GARDE_STANCE] — Lot 8/P8 §8.2 : "ajoute une stance par
+   combattant, distribuée de façon plausible (les gauchers sont minoritaires
+   et surreprésentés en MMA — dis quel chiffre tu retiens et sur quelle
+   base)". Base retenue : ~10% de gauchers dans la population générale,
+   contre une fourchette de 15-20% couramment citée chez les frappeurs élite
+   (boxe/MMA) du fait de l'avantage tactique de la garde inversée face à des
+   adversaires très majoritairement orthodoxes. Valeur retenue : 17%, le
+   point médian de cette fourchette de surreprésentation — décision de
+   design assumée, pas une statistique externe vérifiable depuis ce dépôt. ==== */
+const STANCE_SOUTHPAW_RATE=0.17;
+/* ==== [FIN ANCRE] ==== */
 function makePhysical(div){ const D=div||pick(allDivisions());
   let height=gauss(D.h,4,D.h-9,D.h+11);
   const tags=[];
@@ -284,7 +295,10 @@ function makePhysical(div){ const D=div||pick(allDivisions());
   if(apeIndex>=7 && !tags.includes('allonge démesurée'))tags.push('allonge hors-norme');
   if(!hasAnomaly && rnd()<0.008){ tags.push('densité rare (type Ngannou)'); hasAnomaly=true; }
   if(!hasAnomaly && rnd()<0.008){ tags.push('explosivité rare (type Cormier)'); hasAnomaly=true; }
-  return {height,reach,tags};
+  /* ==== [ANCRE: P8_L8_GARDE_STANCE] — cf. STANCE_SOUTHPAW_RATE ci-dessus. ==== */
+  const stance=rnd()<STANCE_SOUTHPAW_RATE?'southpaw':'orthodox';
+  /* ==== [FIN ANCRE] ==== */
+  return {height,reach,stance,tags};
 }
 /* ------------------ CUTTING — trait VARIABLE, retiré à chaque combat (pas un
    poids de forme figé à la création) : reflète les fluctuations naturelles
@@ -428,6 +442,26 @@ function getMenace(f){ const a=f.attrs||{};
 
 /* ------------------------------- COMBAT ----------------------------------- */
 function reachEdge(A,B){ const rA=(A.phys&&A.phys.reach)||175, rB=(B.phys&&B.phys.reach)||175; return clamp((rA-rB)*0.14,-6,6); }
+/* ==== [ANCRE: P8_L8_GABARIT] — Lot 8/P8 §8.1 : "le gabarit (taille,
+   densité) doit entrer dans la même mécanique, distinctement de l'allonge :
+   engine.js découple déjà l'allonge de la taille via l'indice de singe...
+   ces tags doivent enfin avoir un effet". reachEdge() ne lit QUE phys.reach
+   (l'allonge, découplée de la taille par makePhysical) ; buildEdge() lit la
+   TAILLE (phys.height) et le tag rare de densité (phys.tags, "densité rare
+   (type Ngannou)") — deux entrées disjointes de reachEdge, jamais recalculées
+   l'une à partir de l'autre. Même forme que reachEdge (borné ±6, poids
+   0.10/cm) pour rester du même ordre de grandeur ; la densité (tag binaire
+   rare) vaut à elle seule l'équivalent de ~40cm d'écart de taille — un
+   combattant "type Ngannou" a un gabarit qui compte, pas un simple flavor
+   text. @returns {number} borné [-6,6], positif si A a le plus gros gabarit. */
+function buildEdge(A,B){
+  const hA=(A.phys&&A.phys.height)||175, hB=(B.phys&&B.phys.height)||175;
+  const tagsA=(A.phys&&A.phys.tags)||[], tagsB=(B.phys&&B.phys.tags)||[];
+  const denseA=tagsA.includes('densité rare (type Ngannou)')?1:0;
+  const denseB=tagsB.includes('densité rare (type Ngannou)')?1:0;
+  return clamp((hA-hB)*0.10+(denseA-denseB)*4,-6,6);
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: EQUILIBRAGE_MC] - recalibrage Monte-Carlo (audit d'equilibrage).
    Mesure avant/apres sur 10000+ combats simules : victoire ecrasante a 97%
    des un ecart de niveau modere, soumissions quasi jamais declenchees (4%).

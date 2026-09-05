@@ -114,7 +114,7 @@ npm test             # suite de tests (node --test), 10 fichiers
 npm run check        # lint + test — DOIT être vert avant toute livraison
 ```
 
-Au moment de la rédaction : **96 tests**, répartis sur 10 fichiers dans
+Au moment de la rédaction : **101 tests**, répartis sur 10 fichiers dans
 `tests/` (`analytics.test.js`, `career.test.js`, `champChamp.test.js`,
 `hallOfFame.test.js`, `hubCombatDossier.test.js`, `invariants.test.js`,
 `proceduralNarrative.test.js`, `ranking.test.js`, `regressionFixes.test.js`,
@@ -122,7 +122,7 @@ Au moment de la rédaction : **96 tests**, répartis sur 10 fichiers dans
 
 **Règle** : aucune livraison sans `npm run check` vert. Un bug corrigé =
 un test ajouté dans `tests/regressionFixes.test.js` (déjà le fichier le
-plus fourni, et de loin : 55 tests au moment de la rédaction).
+plus fourni, et de loin : 60 tests au moment de la rédaction).
 
 ## 8. Règles de modification
 
