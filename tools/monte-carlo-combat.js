@@ -94,9 +94,23 @@ STYLES.forEach(s => {
     sigLanded: 0, headLanded: 0, bodyLanded: 0, legLanded: 0,
     distLanded: 0, clinchLanded: 0, groundLanded: 0,
     ctrlSec: 0, clinchCtrlSec: 0, groundCtrlSec: 0,
-    subAtt: 0, cardsCount: 0
+    subAtt: 0, cardsCount: 0,
+    /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — Lot 9/P8 §9.1 : empreinte
+       de frappe par TYPE, en plus de la répartition zone/position déjà
+       suivie ci-dessus — critère "cohérente avec l'empreinte de chaque
+       style : le muay-thaï doit être le premier utilisateur de genoux, la
+       boxe quasi exclusivement aux poings". ==== */
+    byType:{jab:0,cross:0,hook:0,uppercut:0,elbow:0,knee:0,legKick:0,bodyKick:0,headKick:0,spinning:0,frontKick:0,groundPunch:0}
+    /* ==== [FIN ANCRE] ==== */
   };
 });
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — Lot 9/P8 §9 : accumulateurs
+   globaux pour les quatre sous-lots (taxonomie, blessures, examen médical,
+   rythme) — même schéma additif que les totaux ci-dessus. ==== */
+let totalCutElbow = 0, totalCutClash = 0, totalCutHeavy = 0;
+let totalInjuries = 0, totalInjuryEndedFights = 0, totalExams = 0, totalExamStops = 0;
+let totalLateSig = 0;
 /* ==== [FIN ANCRE] ==== */
 
 const matrix = {};
@@ -211,6 +225,16 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
   if (wentToCards) { styleStats[styleA].cardsCount++; styleStats[styleB].cardsCount++; }
   /* ==== [FIN ANCRE] ==== */
 
+  /* ==== [ANCRE: P8_L9_BLESSURES] — Lot 9/P8 §9 : fréquence des blessures,
+     part qui termine le combat, et fréquence de l'examen médical entre les
+     rounds — mêmes critères d'acceptation que refStandups/pointDeductions
+     ci-dessus (Lot 7/P8), même schéma de mesure. ==== */
+  totalInjuries += (res.injuriesA || []).length + (res.injuriesB || []).length;
+  if (m === 'Blessure') totalInjuryEndedFights++;
+  totalExams += res.examCount || 0;
+  if (m === 'Blessure' || m === 'Arrêt médical') totalExamStops++;
+  /* ==== [FIN ANCRE] ==== */
+
   // Vérification des invariants mathématiques
   const sideStyle = { A: styleA, B: styleB };
   ['A', 'B'].forEach(side => {
@@ -267,6 +291,14 @@ for (let i = 0; i < FIGHT_COUNT; i++) {
     st.distLanded += s.distStrikes; st.clinchLanded += s.clinchStrikes; st.groundLanded += s.groundStrikes;
     st.ctrlSec += s.ctrlSec; st.clinchCtrlSec += s.clinchCtrlSec; st.groundCtrlSec += s.groundCtrlSec;
     st.subAtt += s.subAtt;
+    /* ==== [FIN ANCRE] ==== */
+    /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — répartition par type (empreinte
+       de style, §9.1) et sources de coupure (§9.1 "coudes, chocs de têtes,
+       coups lourds, dans cet ordre") — mêmes compteurs que ci-dessus,
+       simplement étendus. ==== */
+    if (s.byType) { Object.keys(s.byType).forEach(k => { st.byType[k] = (st.byType[k] || 0) + s.byType[k]; }); }
+    if (s.cutSrc) { totalCutElbow += s.cutSrc.elbow || 0; totalCutClash += s.cutSrc.clash || 0; totalCutHeavy += s.cutSrc.heavy || 0; }
+    totalLateSig += s.lateSig || 0;
     /* ==== [FIN ANCRE] ==== */
   });
 }
@@ -518,6 +550,20 @@ for (const s of STYLES) {
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — Lot 9/P8 §9.1, critère
+   d'acceptation : "répartition des frappes par type... cohérente avec
+   l'empreinte de chaque style : le muay-thaï doit être le premier
+   utilisateur de genoux, la boxe quasi exclusivement aux poings". ==== */
+console.log("\n--- 3c. RÉPARTITION DES FRAPPES PAR TYPE (LOT 9/P8 §9.1) ---");
+for (const s of STYLES) {
+  const st = styleStats[s];
+  const total = Object.values(st.byType).reduce((a, b) => a + b, 0) || 1;
+  const pct = k => ((st.byType[k] || 0) / total * 100).toFixed(1);
+  const punchPct = (['jab', 'cross', 'hook', 'uppercut'].reduce((a, k) => a + (st.byType[k] || 0), 0) / total * 100).toFixed(1);
+  console.log(`  ${s.padEnd(12)} : poings ${punchPct}% | coude ${pct('elbow')}% | genou ${pct('knee')}% | kick jambe ${pct('legKick')}%/corps ${pct('bodyKick')}%/tête ${pct('headKick')}% | tournant ${pct('spinning')}% | front kick ${pct('frontKick')}% | GNP ${pct('groundPunch')}%`);
+}
+/* ==== [FIN ANCRE] ==== */
+
 console.log("\n--- 4. SENSIBILITÉ DES ATTRIBUTS ---");
 console.log(`  Impact Kick 95 vs 15   : Kicks jambes réussis = ${testKickLegLandedA} vs ${testKickLegLandedB} (écart x${(testKickLegLandedA / Math.max(1, testKickLegLandedB)).toFixed(1)})`);
 console.log(`  Impact Takedown vs TDD : ${wrestlerTdSuccess} amenées réussies face à ${defenderStuffs} défenses`);
@@ -539,3 +585,18 @@ console.log(`  Pic d'overall moyen         : ${avgPeakOvr}`);
 console.log(`  Champions titrés            : ${((champsCount / CAREER_COUNT) * 100).toFixed(1)}%`);
 console.log(`  Champions du monde ultimes  : ${((worldChampsCount / CAREER_COUNT) * 100).toFixed(1)}%`);
 console.log("===============================================================================");
+
+/* ==== [ANCRE: P8_L9_BLESSURES] — Lot 9/P8 §9, critères d'acceptation :
+   coupures ouvertes majoritairement par coudes/chocs de têtes/coups lourds
+   DANS CET ORDRE, taux de blessure crédible et documenté avec la part qui
+   termine le combat, fréquence de l'examen médical entre les rounds. ==== */
+console.log("\n--- 6. LOT 9/P8 : BLESSURES, EXAMEN MÉDICAL, RYTHME ---");
+const totalCutsAll = totalCutElbow + totalCutClash + totalCutHeavy;
+console.log(`  Sources de coupure    : coude ${totalCutElbow} (${(totalCutElbow / Math.max(1, totalCutsAll) * 100).toFixed(1)}%) | choc de tête ${totalCutClash} (${(totalCutClash / Math.max(1, totalCutsAll) * 100).toFixed(1)}%) | coup lourd ${totalCutHeavy} (${(totalCutHeavy / Math.max(1, totalCutsAll) * 100).toFixed(1)}%)`);
+console.log(`  Ordre attendu (coude > choc de tête > coup lourd) : ${(totalCutElbow > totalCutClash && totalCutClash > totalCutHeavy) ? 'RESPECTÉ' : 'NON RESPECTÉ'}`);
+console.log(`  Blessures (combattants touchés) : ${totalInjuries} sur ${FIGHT_COUNT} combats (${(totalInjuries / FIGHT_COUNT).toFixed(3)} par combat en moyenne, ${(totalInjuries / N * 100).toFixed(2)}% des côtés combattant/combat)`);
+console.log(`  Combats terminés par blessure    : ${totalInjuryEndedFights} (${(totalInjuryEndedFights / FIGHT_COUNT * 100).toFixed(3)}%) — part des blessures qui terminent le combat : ${(totalInjuryEndedFights / Math.max(1, totalInjuries) * 100).toFixed(1)}%`);
+console.log(`  Examens médicaux entre les rounds : ${totalExams} sur ${FIGHT_COUNT} combats (${(totalExams / FIGHT_COUNT).toFixed(3)} par combat)`);
+console.log(`  Arrêts (coupure/blessure, mi-round + entre les rounds confondus) : ${totalExamStops} (${(totalExamStops / FIGHT_COUNT * 100).toFixed(2)}%) — majorité des examens laissent donc continuer`);
+console.log(`  Part des frappes significatives dans les 30 dernières secondes de round : ${(totalLateSig / totalSigLanded * 100).toFixed(2)}% (voir rapport de lot pour la comparaison A/B rythme actif/neutralisé)`);
+/* ==== [FIN ANCRE] ==== */

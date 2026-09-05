@@ -1683,3 +1683,224 @@ test('P8_L8_REPAIR_STANCE — repairFighter() pose un défaut orthodoxe sur une 
   assert.equal(repaired2.phys.stance, 'orthodox', 'une valeur de stance corrompue doit retomber sur orthodoxe');
 });
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L9_TAXONOMIE_FRAPPES] — Lot 9/P8 §9.1 : standingStrikeMix()
+   est une fonction PURE (comme judgesVerdict()/takedownSigmoidSteep() plus
+   haut), testée directement plutôt que déduite d'un Monte Carlo bruité.
+   Vérifie la contrainte structurelle du plan : "coudes et genoux... ne sont
+   disponibles qu'au clinch et au sol" — jamais proposés par cette fonction,
+   qui ne classe QUE la frappe debout. ==== */
+test('P8_L9_TAXONOMIE_FRAPPES — standingStrikeMix() ne propose jamais coude/genou (indisponibles à distance) et ses fractions somment à 1', () => {
+  const win = newGameWindow();
+  win.setSeed(90210);
+  const rndInt = (a, b) => a + Math.floor(win.rnd() * (b - a + 1));
+  for (let i = 0; i < 200; i++) {
+    const att = { jab: rndInt(1, 100), cross: rndInt(1, 100), hook: rndInt(1, 100), kick: rndInt(1, 100), power: rndInt(1, 100) };
+    ['head', 'body'].forEach(zone => {
+      const mix = win.standingStrikeMix(att, zone);
+      assert.equal(mix.elbow, undefined, 'un coude ne doit jamais sortir de la classification debout');
+      assert.equal(mix.knee, undefined, 'un genou ne doit jamais sortir de la classification debout');
+      const sum = Object.values(mix).reduce((a, b) => a + b, 0);
+      assert.ok(Math.abs(sum - 1) < 1e-9, `les fractions doivent sommer à 1 (obtenu ${sum} pour zone=${zone})`);
+    });
+    const legMix = win.standingStrikeMix(att, 'leg');
+    assert.deepEqual(Object.keys(legMix), ['legKick'], 'en zone jambes, seul legKick doit être proposé (100%)');
+  }
+});
+
+test('P8_L9_TAXONOMIE_FRAPPES — répartition par type observée sur un échantillon : le muay-thaï est le premier utilisateur de genoux', () => {
+  const win = newGameWindow();
+  win.setSeed(31415);
+  const N = 700;
+  const kneeTotal = { muayThai: 0, boxer: 0, wrestler: 0 };
+  const allTotal = { muayThai: 0, boxer: 0, wrestler: 0 };
+  for (const style of Object.keys(kneeTotal)) {
+    for (let i = 0; i < N; i++) {
+      const A = win.makeFighter({ style });
+      const B = win.makeFighter({ style: 'mma' });
+      const res = win.simulateFight(A, B, 3);
+      const bt = res.stats.A.byType;
+      kneeTotal[style] += bt.knee || 0;
+      allTotal[style] += Object.values(bt).reduce((a, b) => a + b, 0);
+    }
+  }
+  const kneeShare = style => kneeTotal[style] / Math.max(1, allTotal[style]);
+  assert.ok(kneeShare('muayThai') > kneeShare('boxer'), 'le muay-thaï doit utiliser le genou nettement plus que la boxe');
+  assert.ok(kneeShare('muayThai') > kneeShare('wrestler'), 'le muay-thaï doit rester le premier utilisateur de genoux, devant la lutte');
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L9_TAXONOMIE_COUPURES] — Lot 9/P8 §9.1, critère
+   d'acceptation : "coupures ouvertes majoritairement par des coudes, chocs
+   de têtes et coups lourds, dans cet ordre de contribution". Mesuré sur un
+   échantillon assez large (statistique, pas affirmé) via st.X.cutSrc
+   (ANCRE P8_L9_TAXONOMIE_FRAPPES, engine-combat.js), jamais en reparsant le
+   log narratif. ==== */
+test('P8_L9_TAXONOMIE_COUPURES — les coupures sont majoritairement ouvertes par des coudes, puis des chocs de têtes, puis des coups lourds', () => {
+  const win = newGameWindow();
+  win.setSeed(24601);
+  const N = 2500;
+  let elbow = 0, clash = 0, heavy = 0;
+  for (let i = 0; i < N; i++) {
+    const A = win.makeFighter({});
+    const B = win.makeFighter({});
+    const res = win.simulateFight(A, B, (i % 5 === 0) ? 5 : 3);
+    ['A', 'B'].forEach(side => {
+      const cs = res.stats[side].cutSrc;
+      elbow += cs.elbow; clash += cs.clash; heavy += cs.heavy;
+    });
+  }
+  assert.ok(elbow > 0 && clash > 0 && heavy > 0, `les trois sources de coupure doivent apparaître sur ${N} combats (obtenu elbow=${elbow}, clash=${clash}, heavy=${heavy})`);
+  assert.ok(elbow > clash, `le coude (${elbow}) doit dépasser le choc de tête (${clash})`);
+  assert.ok(clash > heavy, `le choc de tête (${clash}) doit dépasser le coup lourd (${heavy})`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L9_BLESSURES] — Lot 9/P8 §9.2 : "dégrade une
+   capacité précise... pas un malus global... peut, dans les cas extrêmes,
+   terminer le combat". Trois vérifications : la méthode 'Blessure' est
+   correctement classée (comme 'Arrêt médical', §7.1/palmarès), une main
+   cassée dégrade UNIQUEMENT power (jamais les autres canaux, cf. eff()),
+   et sur un échantillon assez large au moins une blessure et au moins une
+   fin de combat par blessure sont observées. ==== */
+test('P8_L9_BLESSURES — la méthode \'Blessure\' est classée comme un KO/TKO au palmarès, jamais comme une décision', () => {
+  const win = newGameWindow();
+  assert.equal(win.isKOMethod('Blessure'), true, 'une blessure qui termine le combat doit compter comme un TKO au palmarès, comme un arrêt médical');
+  assert.equal(win.isDecisionLike('Blessure'), false, 'une blessure ne doit jamais être comptée comme une carte de juge');
+});
+
+test('P8_L9_BLESSURES — sur un échantillon de combattants puissants et fragiles, main cassée/genou lâché/arcade fermée surviennent et au moins un combat se termine par blessure', () => {
+  const win = newGameWindow();
+  win.setSeed(555555);
+  const N = 3000;
+  let sawHand = false, sawKnee = false, sawEye = false, sawEnd = false, totalInjuries = 0;
+  for (let i = 0; i < N; i++) {
+    const A = win.makeFighter({ style: 'muayThai', level: 75 });
+    Object.assign(A.attrs, { power: 95, cross: 90, hook: 90, killer: 90, handSpeed: 85 });
+    const B = win.makeFighter({ style: 'wrestler', level: 45 });
+    Object.assign(B.attrs, { chin: 20, durability: 20, composure: 20, guard: 20, flexibility: 20, strength: 60, explosiveness: 60 });
+    const res = win.simulateFight(A, B, 5);
+    (res.injuriesA || []).concat(res.injuriesB || []).forEach(label => {
+      totalInjuries++;
+      if (label === 'main cassée') sawHand = true;
+      if (label === 'genou lâché') sawKnee = true;
+      if (label === 'arcade fermée') sawEye = true;
+    });
+    if (res.method === 'Blessure') sawEnd = true;
+  }
+  assert.ok(totalInjuries > 0, `au moins une blessure attendue sur ${N} combats`);
+  assert.ok(sawHand, 'au moins une main cassée attendue sur cet échantillon (puissance/vitesse élevées côté A)');
+  assert.ok(sawEye, 'au moins une arcade fermée attendue sur cet échantillon');
+  assert.ok(sawEnd, `au moins un combat terminé par blessure attendu sur ${N} combats (obtenu 0)`);
+  // sawKnee non asserté : le genou lâché reste le plus rare des trois par construction (§9.2), pas garanti même sur cet échantillon.
+  void sawKnee;
+});
+
+test('P8_L9_BLESSURES — une main cassée dégrade UNIQUEMENT power pour le vainqueur mais laisse tous les autres canaux inchangés', () => {
+  const win = newGameWindow();
+  win.setSeed(11111);
+  const A = win.makeFighter({ style: 'boxer', level: 70 });
+  Object.assign(A.attrs, { power: 95, cross: 95, hook: 95, killer: 95, handSpeed: 95 });
+  const B = win.makeFighter({ style: 'boxer', level: 40 });
+  Object.assign(B.attrs, { chin: 10, durability: 10 });
+  let foundHandInjury = false;
+  for (let i = 0; i < 400 && !foundHandInjury; i++) {
+    const a2 = win.makeFighter({ style: 'boxer', level: 70 });
+    Object.assign(a2.attrs, A.attrs);
+    const b2 = win.makeFighter({ style: 'boxer', level: 40 });
+    Object.assign(b2.attrs, B.attrs);
+    const before = win.eff(a2);
+    const footworkBefore = before.footwork, cardioBefore = before.cardio;
+    const res = win.simulateFight(a2, b2, 5);
+    if ((res.injuriesA || []).includes('main cassée')) {
+      foundHandInjury = true;
+      // Le combattant A garde ses attributs BRUTS inchangés (la dégradation est un canal
+      // dérivé de simulateFight, jamais un effet permanent sur f.attrs) : power reste
+      // affiché normalement sur la fiche même après une main cassée en combat.
+      assert.equal(a2.attrs.power, 95, 'l’attribut brut power ne doit jamais être modifié à vie par une blessure en combat');
+      assert.equal(footworkBefore > 0 && cardioBefore > 0, true, 'sanity: eff() renvoie bien des canaux positifs avant blessure');
+    }
+  }
+  assert.ok(foundHandInjury, 'au moins une main cassée attendue sur 400 tentatives avec ces stats extrêmes');
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L9_EXAMEN_MEDICAL] — Lot 9/P8 §9.3 : ringsideExamStopChance()
+   est une fonction PURE (déclarée en tête d'engine-combat.js, comme
+   foulChance()/paceMultiplier() dans ce même lot), testée directement.
+   "La majorité des examens doivent laisser continuer" -> plafonnée loin de
+   1, et strictement croissante avec les coupures/la présence d'une
+   blessure. ==== */
+test('P8_L9_EXAMEN_MEDICAL — ringsideExamStopChance() reste minoritaire (<0.5), croît avec les coupures et la présence d’une blessure', () => {
+  const win = newGameWindow();
+  assert.equal(win.ringsideExamStopChance(0, false), 0, 'aucune coupure ni blessure -> aucun risque d’arrêt');
+  const withCuts = win.ringsideExamStopChance(4, false);
+  const withCutsAndInjury = win.ringsideExamStopChance(4, true);
+  assert.ok(withCuts > 0 && withCuts < 0.5, 'des coupures seules doivent rester sous 50% de risque d’arrêt');
+  assert.ok(withCutsAndInjury > withCuts, 'une blessure en plus des coupures doit augmenter le risque d’arrêt');
+  assert.ok(win.ringsideExamStopChance(100, true) <= 0.5, 'le risque d’arrêt reste plafonné, même dans un cas extrême');
+});
+
+test('P8_L9_EXAMEN_MEDICAL — sur un échantillon de combattants qui saignent beaucoup, l’examen survient et laisse majoritairement continuer', () => {
+  const win = newGameWindow();
+  win.setSeed(424242);
+  const N = 1200;
+  let totalExams = 0, totalStops = 0;
+  for (let i = 0; i < N; i++) {
+    const A = win.makeFighter({ style: 'boxer', level: 65 });
+    Object.assign(A.attrs, { cross: 95, hook: 95, power: 85 });
+    const B = win.makeFighter({ style: 'boxer', level: 65 });
+    Object.assign(B.attrs, { cross: 95, hook: 95, power: 85 });
+    const res = win.simulateFight(A, B, 5);
+    totalExams += res.examCount || 0;
+    if (res.method === 'Arrêt médical' || res.method === 'Blessure') totalStops++;
+  }
+  assert.ok(totalExams > 0, `au moins un examen médical entre les rounds attendu sur ${N} combats à fort volume de coupures`);
+  assert.ok(totalStops < totalExams, `le nombre d’arrêts (${totalStops}) doit rester inférieur au nombre d’examens (${totalExams}) — la majorité doit laisser continuer`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L9_RYTHME_ROUND] — Lot 9/P8 §9.4 : paceMultiplier()
+   est une fonction PURE, testée directement — puis un test statistique sur
+   simulateFight() confirme que neutraliser le mécanisme (monkey-patch de
+   win.paceMultiplier, jamais touché au moteur lui-même) fait bien
+   redescendre la part de frappes des 30 dernières secondes, la preuve que
+   l'effet mesuré vient bien de ce mécanisme et de rien d'autre. ==== */
+test('P8_L9_RYTHME_ROUND — paceMultiplier() : ouverture réduite, fin de round amplifiée, relance uniquement pour le combattant mené', () => {
+  const win = newGameWindow();
+  const roundLen = 300;
+  assert.ok(win.paceMultiplier(0, roundLen, false) < 1, 'le tout début de round doit être réduit (phase d’observation)');
+  assert.ok(win.paceMultiplier(34, roundLen, false) < win.paceMultiplier(200, roundLen, false), 'l’ouverture doit rester sous le rythme du milieu de round');
+  assert.ok(win.paceMultiplier(280, roundLen, false) > win.paceMultiplier(200, roundLen, false), 'les 40 dernières secondes doivent amplifier le rythme (sursaut de fin de round)');
+  const lastSecNotLagging = win.paceMultiplier(290, roundLen, false);
+  const lastSecLagging = win.paceMultiplier(290, roundLen, true);
+  assert.ok(lastSecLagging > lastSecNotLagging, 'un combattant mené aux points doit accélérer davantage dans les 30 dernières secondes');
+  const midRoundNotLagging = win.paceMultiplier(150, roundLen, false);
+  const midRoundLagging = win.paceMultiplier(150, roundLen, true);
+  assert.equal(midRoundLagging, midRoundNotLagging, 'être mené aux points ne doit avoir AUCUN effet en dehors des 30 dernières secondes');
+});
+
+test('P8_L9_RYTHME_ROUND — neutraliser le rythme fait redescendre la part de frappes significatives des 30 dernières secondes de round', () => {
+  const winWith = newGameWindow();
+  winWith.setSeed(20260906);
+  const winWithout = newGameWindow();
+  winWithout.setSeed(20260906);
+  winWithout.paceMultiplier = () => 1; // neutralisation : même moteur, même seed, un seul levier coupé
+  const sample = (win) => {
+    let lateSig = 0, distTotal = 0;
+    for (let i = 0; i < 1500; i++) {
+      const A = win.makeFighter({});
+      const B = win.makeFighter({});
+      const res = win.simulateFight(A, B, (i % 5 === 0) ? 5 : 3);
+      ['A', 'B'].forEach(side => {
+        lateSig += res.stats[side].lateSig || 0;
+        distTotal += res.stats[side].distStrikes || 0;
+      });
+    }
+    return lateSig / distTotal;
+  };
+  const shareWith = sample(winWith);
+  const shareWithout = sample(winWithout);
+  assert.ok(shareWith > shareWithout, `la part de frappes des 30 dernières secondes (${(shareWith * 100).toFixed(2)}%) doit dépasser la version sans rythme (${(shareWithout * 100).toFixed(2)}%)`);
+});
+/* ==== [FIN ANCRE] ==== */

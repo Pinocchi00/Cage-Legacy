@@ -443,6 +443,109 @@ function judgesVerdict(j1A,j1B,j2A,j2B,j3A,j3B){
   return {winner:'D',method:'Nul partagé',judgeVerdicts}; // 1-1-1, la seule combinaison restante
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — Lot 9/P8 §9.1 : "la frappe est
+   aujourd'hui un scalaire réparti a posteriori sur une zone. Ajoute des
+   TYPES de frappe... les noms de prises signature doivent être branchés
+   sur cette taxonomie plutôt que tirés indépendamment". Les montants de
+   zone (headA/bodyA/legA en debout, headHits/bodyHits en clinch, gHits au
+   sol) restent calculés EXACTEMENT comme avant ce lot — aucune ligne de
+   dégâts/points/score n'est modifiée, jamais un second système de dégâts
+   (CLAUDE.md §8). Cette classification est une couche PUREMENT ADDITIVE
+   par-dessus un montant déjà décidé : elle alimente st.X.byType
+   (répartition par type, rapport §9 "cohérente avec l'empreinte de chaque
+   style") et la propension à ouvrir une coupure (STRIKE_CUT_MULT, coude
+   très supérieur au reste — §9.1 "les coudes sont l'ouvreur principal de
+   coupures"), jamais l'issue du combat elle-même. Coudes et genoux restent
+   indisponibles à distance (§9.1 : coude "disponible qu'au clinch et au
+   sol", genou "arme du clinch") — standingStrikeMix() ne les propose donc
+   JAMAIS, ils n'apparaissent que dans les blocs clinch/sol ci-dessous. ==== */
+const STRIKE_CUT_MULT={jab:0.5,cross:1.3,hook:1.5,uppercut:1.1,elbow:4.5,knee:0.9,legKick:0.1,bodyKick:0.6,headKick:1.8,spinning:1.6,frontKick:0.4,groundPunch:1.0};
+/** Répartit un volume de frappes significatives DÉJÀ décidé pour une zone
+ * ('head'|'body'|'leg') en phase debout entre les familles poing/kick/
+ * tournant, selon les attributs PROPRES de l'attaquant (jab/cross/hook/kick,
+ * déjà lus ailleurs dans ce fichier) — jamais un second jet qui changerait
+ * le volume total atterri. @returns {Object<string,number>} fractions qui
+ * somment à 1. */
+function standingStrikeMix(att,zone){
+  if(zone==='leg') return {legKick:1};
+  const kickBias=clamp(((att.kick||50)-35)/115,0.04,0.5);
+  const kickShare=zone==='body'?kickBias*0.55:kickBias*0.30;
+  const frontKickShare=zone==='body'?Math.min(0.06,kickBias*0.12):0;
+  const spinShare=zone==='head'?Math.min(0.05,kickBias*0.10):0;
+  /* ==== [ANCRE: CORRECTIF_TAXONOMIE_MIX_SOMME] — bug trouvé par le test
+     dédié (regressionFixes.test.js) : `spinShare` est déjà PRÉLEVÉ SUR
+     `kickShare` (headKick=kickShare-spinShare ci-dessous, jamais une part
+     séparée qui s'ajouterait à kickShare) — le soustraire une SECONDE fois
+     ici faisait retomber la somme des fractions à `1-spinShare` au lieu de
+     1 (jusqu'à 5% de frappes "perdues", jamais classées nulle part). Ne
+     jamais soustraire spinShare deux fois : une seule fois, au moment où
+     il est effectivement prélevé (headKick). ==== */
+  const punchShare=Math.max(0,1-kickShare-frontKickShare);
+  /* ==== [FIN ANCRE] ==== */
+  const wJab=Math.max(1,(att.jab||50)+15), wCross=Math.max(1,(att.cross||50)+5),
+        wHook=Math.max(1,(att.hook||50)), wUpper=Math.max(1,((att.hook||50)+(att.power||50))*0.35);
+  const wSum=wJab+wCross+wHook+wUpper;
+  return {
+    jab:punchShare*wJab/wSum, cross:punchShare*wCross/wSum, hook:punchShare*wHook/wSum, uppercut:punchShare*wUpper/wSum,
+    bodyKick:zone==='body'?kickShare:0, headKick:zone==='head'?kickShare-spinShare:0, spinning:spinShare, frontKick:frontKickShare
+  };
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L9_RYTHME_ROUND] — Lot 9/P8 §9.4 : "le round 1 se joue
+   aujourd'hui exactement comme le round 5. Ajoute un profil temporel :
+   phase d'observation en ouverture, sursaut de fin de round, accélération
+   des dernières secondes chez celui qui se sait mené aux points" — sur la
+   lecture de score déjà disponible côté juges (§9.4, "pas une variable
+   nouvelle") : `lagging` est calculé une seule fois par round dans
+   simulateFight à partir des totaux j1/j2/j3 déjà accumulés AVANT ce round
+   (nuls au round 1, ce qui exclut naturellement ce round de la relance —
+   exactement le symptôme décrit : "personne ne sait encore qu'il est
+   mené"). Fonction PURE, symétrique par construction pour l'ouverture/le
+   sursaut (ne dépend que de `t`, identique pour A et B) — seule `lagging`
+   introduit une asymétrie, et uniquement dans les 30 dernières secondes.
+   Comme burstFactor() plus haut : redistribue l'intensité dans le temps,
+   ne gonfle jamais le volume moyen d'un round complet (la baisse
+   d'ouverture compense la hausse de clôture) — pas de régression attendue
+   sur la matrice 8x8 à overall égal (critère du lot). @returns {number} */
+function paceMultiplier(t,roundLen,lagging){
+  let mult=1;
+  if(t<35) mult*=0.80+0.20*(t/35);
+  if(t>roundLen-40) mult*=1.18;
+  if(lagging && t>roundLen-30) mult*=1.22;
+  return mult;
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L9_BLESSURES] — Lot 9/P8 §9.2 : "main cassée, genou
+   lâché, arcade fermée... dégrade une capacité précise pour le reste du
+   combat — pas un malus global — et peut, dans les cas extrêmes, terminer
+   le combat". Constantes calibrées par Monte Carlo (voir rapport de lot) :
+   volontairement rares (une poignée de combats sur 12 000), la majorité
+   dégradant sans jamais terminer le combat — voir §7 du rapport pour les
+   chiffres mesurés. ==== */
+const INJURY_HAND_AMP_THRESHOLD=15;   // amplitude d'un coup lourd à partir de laquelle SON AUTEUR risque sa propre main
+const INJURY_HAND_CHANCE=0.60;        // proba par tick qu'un tel coup blesse la main de son auteur (avant mise à l'échelle dt/50)
+const INJURY_HAND_POWER_MULT=0.55;    // dégradation de power pour le reste du combat (canal précis, jamais un malus global)
+const INJURY_HAND_END_CHANCE=0.10;    // proba que la blessure mette fin au combat sur le coup (cas extrême, §9.2)
+const INJURY_KNEE_CHANCE=0.010;       // proba par tick de scramble au sol qu'un genou lâche (avant dt/50)
+const INJURY_KNEE_MULT=0.55;          // dégradation takedown/footwork pour le reste du combat
+const INJURY_KNEE_END_CHANCE=0.12;
+const INJURY_EYE_CUTS_THRESHOLD=2;    // nombre de coupures déjà ouvertes avant qu'une arcade puisse "fermer" pour de bon
+const INJURY_EYE_CHANCE=0.16;         // proba, une fois ce seuil de coupures atteint, que ça devienne une vraie blessure
+const INJURY_EYE_MULT=0.85;           // dégradation composure/footwork (vision troublée), jamais un malus global
+const HEAD_CLASH_CHANCE=0.032;       // proba par tick en clinch/sol d'un choc de tête accidentel (ouvre une coupure, §9.1 "chocs de têtes")
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: P8_L9_EXAMEN_MEDICAL] — Lot 9/P8 §9.3 : "distinct de l'arrêt
+   médical déjà implémenté... la majorité des examens doivent laisser
+   continuer". Fonction PURE : calcule la probabilité d'arrêt À L'ISSUE d'un
+   examen ENTRE LES ROUNDS, à partir des mêmes compteurs déjà accumulés
+   (coupures, blessures) — jamais un second système de gravité en parallèle
+   de CUT_SEVERE_THRESHOLD/l'arrêt médical mi-round (CLAUDE.md §8). Plafonnée
+   à 0.5 : un examen reste un examen, jamais une sentence automatique.
+   @returns {number} */
+function ringsideExamStopChance(cuts,hasInjury){
+  return clamp((cuts||0)*0.035+(hasInjury?0.09:0),0,0.5);
+}
+/* ==== [FIN ANCRE] ==== */
 function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff(A),b=eff(B);
   /* ==== [ANCRE: IMMUNITE_FINITION_CAMP] — item demandé : passifs de camp
      "impossible à finir" (Familial round 1, Ascétique round 3). Purement
@@ -528,6 +631,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   const baseComposureA=a.composure, baseComposureB=b.composure;
   const baseDurabilityA=a.durability, baseDurabilityB=b.durability;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P8_L9_BLESSURES] — mêmes références fixes que ci-dessus,
+     capturées APRÈS le plan tactique : `power`/`takedown` ne sont sinon
+     jamais recalculés à chaque tick (contrairement à footwork/kick/tdd/
+     cardio/chin/composure/durability ci-dessus) — une blessure doit
+     pourtant pouvoir les dégrader pour le reste du combat sans écraser
+     l'ajustement du plan de coaching. ==== */
+  const basePowerA=a.power, basePowerB=b.power;
+  const baseTakedownA=a.takedown, baseTakedownB=b.takedown;
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: P7_L5_COUPE_DE_POIDS] — Addendum P7 point 4 : weightCutInfo()
      existe côté carrière (avertissements de pesée, ui-02) mais n'atteignait
      jamais engine-combat.js (`weightCut` : zéro occurrence avant ce lot) —
@@ -569,6 +681,12 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
      la fréquence de la relance sans avoir à parser le log narratif. ==== */
   let refStandupCount=0;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P8_L9_EXAMEN_MEDICAL] — compteur d'examens entre les
+     rounds, exposé en fin de combat via res.examCount — même rôle que
+     refStandupCount ci-dessus pour le harnais Monte Carlo (mesurer la
+     fréquence sans reparser le log). ==== */
+  let examCount=0;
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: P8_L7_ARBITRE_ETAT] — Lot 7/P8 §7.1 : état de l'arbitre,
      persistant sur TOUTE la durée du combat (jamais remis à zéro par la
      cloche, comme un vrai arbitre qui se souvient des fautes déjà
@@ -579,6 +697,17 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
      P8_L7_ARBITRE_FAUTES plus bas pour le jet lui-même. ==== */
   let foulPointsA=0, foulPointsB=0, foulWarnA=0, foulWarnB=0;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P8_L9_BLESSURES] — état des blessures, persistant sur TOUTE
+     la durée du combat (jamais remis à zéro par la cloche — une main
+     cassée au round 2 reste cassée au round 4) : au plus UNE blessure par
+     TYPE et par combattant (une main ne se casse pas deux fois), jamais un
+     malus global — chaque multiplicateur ne dégrade qu'un canal précis
+     (power pour la main, takedown/footwork pour le genou, composure/
+     footwork pour l'œil), recombiné avec les autres dégradations
+     (dégâts cumulés, ANCRE P7_L2_DEGATS_PROGRESSIFS) à chaque tick. ==== */
+  let injHandMultA=1, injHandMultB=1, injKneeMultA=1, injKneeMultB=1, injEyeMultA=1, injEyeMultB=1;
+  let injuredHandA=false, injuredHandB=false, injuredKneeA=false, injuredKneeB=false, injuredEyeA=false, injuredEyeB=false;
+  /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: MOTEUR_COMBAT_STATS_ENRICHIES] — modèle statistique complet selon spécification DeepSeek ====
   const makeFighterStats=()=>({
     sig:0, td:0, tdAtt:0, ctrl:0, sub:0, kd:0, dmgHead:0, dmgBody:0, dmgLegs:0,
@@ -587,7 +716,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     distStrikes:0, distAtt:0, clinchStrikes:0, clinchAtt:0, groundStrikes:0, groundAtt:0,
     powerStrikes:0, tdDef:0, reversals:0, standups:0, guardPasses:0,
     subAtt:0, subEscapes:0, ctrlSec:0, clinchCtrlSec:0, groundCtrlSec:0,
-    wobbled:0, cuts:0
+    wobbled:0, cuts:0, lateSig:0,
+    /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — répartition des frappes
+       significatives par TYPE (§9.1) et des coupures par SOURCE (§9.1
+       "coudes, chocs de têtes, coups lourds, dans cet ordre") — purement
+       additif, alimenté sans toucher aux compteurs ci-dessus. ==== */
+    byType:{jab:0,cross:0,hook:0,uppercut:0,elbow:0,knee:0,legKick:0,bodyKick:0,headKick:0,spinning:0,frontKick:0,groundPunch:0},
+    cutSrc:{elbow:0,clash:0,heavy:0}
+    /* ==== [FIN ANCRE] ==== */
   });
   const st={ A:makeFighterStats(), B:makeFighterStats() };
   let momentum=50; // jauge narrative (50=neutre), n'influence aucun calcul de combat
@@ -602,6 +738,51 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     lastTemplates.push(tpl); if(lastTemplates.length>2) lastTemplates.shift();
     return txt; };
   // ==== [FIN ANCRE] ====
+  /* ==== [ANCRE: P8_L9_BLESSURES] — trois fermetures partagées par tous les
+     points d'appel de blessure de ce combat (debout/clinch/sol) : jamais
+     dupliquées à chaque site de déclenchement. `r`/`beatT`/`phase`/`mom`
+     sont passés en paramètres (pas capturés par fermeture) car ce sont des
+     bindings redéclarés À CHAQUE ROUND/TICK (dont `r`, scopé au `for(let
+     r=...)` plus bas — inaccessible par fermeture depuis une fonction
+     déclarée avant cette boucle), contrairement à `log`/`st`/A/B, qui eux
+     sont stables sur tout le combat et peuvent être fermés dessus. */
+  /** Coupure accumulée -> arcade qui "ferme" pour de bon (§9.2) : dégrade
+   * composure/footwork (vision troublée), jamais un malus global, au plus
+   * une fois par combattant et par combat. */
+  const tryEyeInjury=(sideIsA,r,beatT,phase,mom)=>{
+    const already=sideIsA?injuredEyeA:injuredEyeB, cuts=(sideIsA?st.A:st.B).cuts;
+    if(already || cuts<INJURY_EYE_CUTS_THRESHOLD || rnd()>=INJURY_EYE_CHANCE) return;
+    const f=sideIsA?A:B;
+    if(sideIsA){ injuredEyeA=true; injEyeMultA=INJURY_EYE_MULT; } else { injuredEyeB=true; injEyeMultB=INJURY_EYE_MULT; }
+    log.push({r,phase,by:sideIsA?'me':'op',text:`[${formatTime(beatT)}] L’arcade de ${f.name} s’ouvre pour de bon, la vision se trouble.`,momentum:mom,
+      snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+  };
+  /** Coup lourd porté -> risque pour la main de SON AUTEUR (§9.2 "main
+   * cassée"), jamais pour sa cible. Retourne true si la blessure met fin au
+   * combat sur le coup (cas extrême, §9.2) — l'appelant doit alors poser
+   * `finish` lui-même (cette fermeture ne connaît pas `finish`). */
+  const tryHandFracture=(sideIsA,amp,r,beatT,phase,mom)=>{
+    const already=sideIsA?injuredHandA:injuredHandB;
+    if(already || amp<INJURY_HAND_AMP_THRESHOLD || rnd()>=INJURY_HAND_CHANCE*(dt/50)) return false;
+    const f=sideIsA?A:B;
+    if(sideIsA){ injuredHandA=true; injHandMultA=INJURY_HAND_POWER_MULT; } else { injuredHandB=true; injHandMultB=INJURY_HAND_POWER_MULT; }
+    log.push({r,phase,by:sideIsA?'me':'op',text:`[${formatTime(beatT)}] ${f.name} touche fort, mais grimace aussitôt : sa main a morflé sur l’impact.`,momentum:mom,
+      snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+    return rnd()<INJURY_HAND_END_CHANCE;
+  };
+  /** Scramble au sol -> risque de genou qui lâche (§9.2 "genou lâché"),
+   * indépendant de qui est dessus/dessous (les deux prennent des appuis
+   * dans un scramble). Même contrat de retour que tryHandFracture. */
+  const tryKneeInjury=(sideIsA,r,beatT,phase,mom)=>{
+    const already=sideIsA?injuredKneeA:injuredKneeB;
+    if(already || rnd()>=INJURY_KNEE_CHANCE*(dt/50)) return false;
+    const f=sideIsA?A:B;
+    if(sideIsA){ injuredKneeA=true; injKneeMultA=INJURY_KNEE_MULT; } else { injuredKneeB=true; injKneeMultB=INJURY_KNEE_MULT; }
+    log.push({r,phase,by:sideIsA?'me':'op',text:`[${formatTime(beatT)}] Le genou de ${f.name} lâche dans le scramble, visiblement affecté.`,momentum:mom,
+      snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+    return rnd()<INJURY_KNEE_END_CHANCE;
+  };
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: HORLOGE_CONTINUE] — Lot P6/2026 : roundLen/dt sont les
      DEUX SEULES constantes qui pilotent la granularité de simulation —
      tout ajustement du pas se fait UNIQUEMENT ici. dt doit rester impair
@@ -626,6 +807,17 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     const _headA0=st.A.sigHead||0, _headB0=st.B.sigHead||0, _bodyA0=st.A.sigBody||0, _bodyB0=st.B.sigBody||0, _legA0=st.A.sigLeg||0, _legB0=st.B.sigLeg||0;
     const _pwrA0=st.A.powerStrikes||0, _pwrB0=st.B.powerStrikes||0, _wobA0=st.A.wobbled||0, _wobB0=st.B.wobbled||0;
     // ==== [FIN ANCRE] ====
+    /* ==== [ANCRE: P8_L9_RYTHME_ROUND] — "accélération... chez celui qui se
+       sait mené aux points" sur la lecture de score DÉJÀ DISPONIBLE côté
+       juges (§9.4) : j1A/j1B/j2A/j2B/j3A/j3B ne portent encore, à cet
+       instant de la boucle, que les totaux des rounds PRÉCÉDENTS (l'ajout
+       du round courant n'a lieu qu'en fin de round, ANCRE JUGES_10PT_SCORE
+       plus bas) — au round 1 les deux valent 0, donc personne n'est encore
+       "mené", ce qui exclut naturellement ce round de la relance, exactement
+       le symptôme du plan. Calculé une seule fois par round (pas par tick) :
+       lire qui est mené ne change pas dans la seconde. ==== */
+    const roundLaggingA=r>1 && (j1A+j2A+j3A)<(j1B+j2B+j3B-4), roundLaggingB=r>1 && (j1B+j2B+j3B)<(j1A+j2A+j3A-4);
+    /* ==== [FIN ANCRE] ==== */
     // ==== [ANCRE: HORLOGE_CONTINUE] — Lot P6/2026, remplace l'ancienne
     // découpe fixe en 6 micro-séquences de 50 secondes (ancre historique
     // MICRO_SEQUENCES) par une horloge continue de roundLen/dt=100 ticks
@@ -678,6 +870,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       // affichés ce tick (beats narratifs comme finitions), pour que les
       // instants montrés au joueur ne soient jamais des multiples de dt.
       const beatT=t+RI(0,dt-1);
+      /* ==== [ANCRE: P8_L9_RYTHME_ROUND] — multiplicateur de rythme du tick
+         courant (voir paceMultiplier() plus haut) — calculé une fois par
+         tick, lu par le volume de frappe debout uniquement (ANCRE
+         P8_L9_RYTHME_ROUND_APPLICATION plus bas), jamais par le sol/clinch
+         (hors périmètre du §9.4, qui ne parle que du "rythme du round" au
+         sens frappe, pas de la lutte). ==== */
+      const paceA=paceMultiplier(t,roundLen,roundLaggingA), paceB=paceMultiplier(t,roundLen,roundLaggingB);
+      /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: P7_L2_FENETRE_FINITION_DECAY] — la fenêtre de danger
          s'épuise avec le temps réel qui passe, quelle que soit la phase
          courante (un combattant sonné qui se fait clincher reste sonné) —
@@ -716,6 +916,22 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       b.chin=Math.max(10, baseChinB-clamp(st.B.dmgHead-14,0,55)*0.5);
       a.composure=Math.max(10, baseComposureA-clamp(st.A.dmgHead-14,0,55)*0.4);
       b.composure=Math.max(10, baseComposureB-clamp(st.B.dmgHead-14,0,55)*0.4);
+      /* ==== [FIN ANCRE] ==== */
+      /* ==== [ANCRE: P8_L9_BLESSURES] — Lot 9/P8 §9.2 : "dégrade une
+         capacité précise... pas un malus global". Appliqué APRÈS la
+         dégradation par dégâts cumulés ci-dessus (jamais en remplacement) :
+         `power`/`takedown` ne sont recalculés QUE par ce bloc (aucune autre
+         ANCRE ne les touche par tick, cf. captures basePowerA/baseTakedownA
+         plus haut), `footwork`/`composure` reçoivent un multiplicateur
+         SUPPLÉMENTAIRE en plus de leur propre dégradation par dégâts. Les
+         trois multiplicateurs valent 1 tant qu'aucune blessure de ce type
+         n'est survenue (immense majorité des combats) : comportement
+         strictement inchangé dans ce cas, aucune régression possible sur
+         les critères des lots précédents. ==== */
+      a.power=Math.max(5, basePowerA*injHandMultA); b.power=Math.max(5, basePowerB*injHandMultB);
+      a.takedown=Math.max(5, baseTakedownA*injKneeMultA); b.takedown=Math.max(5, baseTakedownB*injKneeMultB);
+      a.footwork*=injKneeMultA; b.footwork*=injKneeMultB;
+      a.composure*=injEyeMultA; b.composure*=injEyeMultB;
       /* ==== [FIN ANCRE] ==== */
       /* ==== [ANCRE: P7_L5_COUPE_DE_POIDS] — la résistance (`durability`)
          dégrade à partir du round 3, ce qui aggrave l'encaissement
@@ -796,7 +1012,17 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         stTop.sigHead+=gHead*(dt/50); stTop.headAtt+=(gAtt*0.75)*(dt/50);
         stTop.sigBody+=gBody*(dt/50); stTop.bodyAtt+=(gAtt*0.25)*(dt/50);
         if(gHits>=2 && (top.power||50)>60) stTop.powerStrikes+=(gHits*0.5)*(dt/50);
-        if(gHits>=3 && (top.gnp||50)>70 && rnd()<0.2*(dt/50)) stBot.cuts++;
+        /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — §9.1 "les coudes sont
+           l'ouvreur principal de coupures et ne sont disponibles qu'au
+           clinch et au sol" : une part du Ground & Pound (gHead, jamais le
+           volume total gHits) est classée coude plutôt que poing au sol —
+           c'est CE mécanisme de coupure existant (inchangé dans son seuil
+           et sa probabilité) qui est désormais attribué à la bonne source. ==== */
+        const elbowShareGround=clamp(0.30+((topProf.gnpDmg||1)-1)*0.15,0.15,0.55);
+        const gElbow=gHead*elbowShareGround, gPunchGround=gHits-gElbow;
+        stTop.byType.elbow+=gElbow*(dt/50); stTop.byType.groundPunch+=gPunchGround*(dt/50);
+        if(gHits>=3 && (top.gnp||50)>70 && rnd()<0.2*(dt/50)){ stBot.cuts++; stBot.cutSrc.elbow++; tryEyeInjury(!topIsA,r,beatT,'sol',momentum); }
+        /* ==== [FIN ANCRE] ==== */
         if(subTop>2.5) stTop.subAtt+=(dt/50);
         if(subBot>2.5) stBot.subAtt+=(dt/50);
 
@@ -934,6 +1160,16 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
             if(subBot>2.5 && idx<GROUND_POS_ORDER.length-1 && rnd()<0.05*(dt/50)){ groundPos=GROUND_POS_ORDER[idx+1]; stTop.guardPasses++; }
             else if(subTop>2.5 && idx>0 && rnd()<0.05*(dt/50)){ groundPos=GROUND_POS_ORDER[idx-1]; stBot.reversals++; }
           }
+          /* ==== [ANCRE: P8_L9_BLESSURES] — §9.2 "genou lâché" : un scramble
+             réel (`transitioned`, un changement de position vient de se
+             produire CE tick) risque un genou, pour QUI QUE CE SOIT des deux
+             combattants (un scramble met les deux à l'épreuve) — jamais lié
+             à qui est dessus/dessous. ==== */
+          if(transitioned){
+            if(tryKneeInjury(true,r,beatT,'sol',momentum)){ finish={by:B,loser:A,method:'Blessure',round:r,detail:'genou lâché',time:beatT}; }
+            else if(!finish && tryKneeInjury(false,r,beatT,'sol',momentum)){ finish={by:A,loser:B,method:'Blessure',round:r,detail:'genou lâché',time:beatT}; }
+          }
+          /* ==== [FIN ANCRE] ==== */
         }
         /* ==== [FIN ANCRE] ==== */
         /* ==== [ANCRE: P8_L7_ARBITRE_RELANCE] — §7.1 : relance debout sur
@@ -1008,6 +1244,22 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           stDom.sigBody+=bodyHits*(dt/50); stDom.bodyAtt+=(attHits*0.65)*(dt/50);
           stDom.sigHead+=headHits*(dt/50); stDom.headAtt+=(attHits*0.35)*(dt/50);
           if(hits>=2 && (domIsA?a.power:b.power)>65) stDom.powerStrikes+=(dt/50);
+          /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — §9.1 "les genoux au
+             corps sont l'arme du clinch" / "les coudes... disponibles au
+             clinch et au sol" : une part de bodyHits/headHits (déjà décidés
+             ci-dessus, montant inchangé) est classée genou/coude plutôt que
+             poing générique, pondérée par clinchDmg du profil dominant
+             (STYLE_PROFILE — muay-thaï/lutte, historiquement clinch-heavy,
+             en reçoivent naturellement plus, sans second sac de bonus). Un
+             coude qui touche à cette distance ouvre une coupure nettement
+             plus souvent qu'un poing (STRIKE_CUT_MULT.elbow), §9.1 "les
+             coudes sont l'ouvreur principal de coupures". ==== */
+          const profDom=domIsA?profA:profB;
+          const kneeShareClinch=clamp(0.32*profDom.clinchDmg,0.12,0.55), elbowShareClinch=clamp(0.16*profDom.clinchDmg,0.06,0.36);
+          const kneeHits=bodyHits*kneeShareClinch, elbowHits=headHits*elbowShareClinch;
+          stDom.byType.knee+=kneeHits*(dt/50); stDom.byType.hook+=(bodyHits-kneeHits+headHits-elbowHits)*(dt/50); stDom.byType.elbow+=elbowHits*(dt/50);
+          if(elbowHits>0.15 && rnd()<0.085*STRIKE_CUT_MULT.elbow*(dt/50)){ stDef.cuts++; stDef.cutSrc.elbow++; tryEyeInjury(!domIsA,r,beatT,'clinch',momentum); }
+          /* ==== [FIN ANCRE] ==== */
           const clSec=clamp(14+Math.abs(diff)*0.25,10,32)*cp.ctrlMult;
           stDom.ctrl+=dt*(0.1/50); stDom.ctrlSec+=clSec*(dt/50); stDom.clinchCtrlSec+=clSec*(dt/50);
           momentum=clamp(momentum+(domIsA?RI(3,7):-RI(3,7)),5,95);
@@ -1180,12 +1432,28 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           /* ==== [FIN ANCRE] ==== */
           offA*=dangerBoostA; offB*=dangerBoostB;
           /* ==== [FIN ANCRE] ==== */
+          /* ==== [ANCRE: P8_L9_RYTHME_ROUND_APPLICATION] — §9.4 : seul point
+             d'application de paceA/paceB (voir paceMultiplier() et son
+             calcul par tick plus haut) — après tous les multiplicateurs de
+             politique de combat/fenêtre de danger ci-dessus, sur le volume
+             final avant bruit, pour que la redistribution temporelle
+             s'applique de façon identique quel que soit le contexte tactique
+             du tick. ==== */
+          offA*=paceA; offB*=paceB;
+          /* ==== [FIN ANCRE] ==== */
           const noiseAmt=Math.round(6*noiseWeightMult);
           const pA=clamp(offA*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20), pB=clamp(offB*0.42*0.22+RI(-noiseAmt,noiseAmt),0,20);
           sa+=pA*(dt/50);sb+=pB*(dt/50);
           const landedA=clamp(pA*0.5,0,10);
           const landedB=clamp(pB*0.5,0,10);
           st.A.sig+=landedA*(dt/50); st.B.sig+=landedB*(dt/50);
+          /* ==== [ANCRE: P8_L9_RYTHME_ROUND] — "part des frappes
+             significatives dans les trente dernières secondes de round"
+             (critère d'acceptation §9) : compteur dédié, purement additif,
+             pour que le harnais Monte Carlo puisse la mesurer directement
+             sans reparser le log narratif. ==== */
+          if(t>roundLen-30){ st.A.lateSig+=landedA*(dt/50); st.B.lateSig+=landedB*(dt/50); }
+          /* ==== [FIN ANCRE] ==== */
 
           // Tentatives et frappes debout pour A
           const accRateA=clamp(0.42+((a.handSpeed||50)*0.08+(a.discipline||50)*0.06-(b.footSpeed||50)*0.10-(b.footwork||50)*0.06)*0.003,0.30,0.65);
@@ -1208,6 +1476,26 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           st.A.sigLeg+=legA*(dt/50); st.A.legAtt+=(attA*0.18)*(dt/50);
           const pwrPctA=clamp(((a.power||50)*0.5+(a.cross||50)*0.25+(a.hook||50)*0.25)/100,0.15,0.65);
           st.A.powerStrikes+=(landedA*pwrPctA)*(dt/50);
+          /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — classification par type
+             des montants de zone headA/bodyA/legA CI-DESSUS, inchangés
+             (standingStrikeMix() ne fait que répartir ce qui est déjà
+             décidé, cf. sa déclaration en tête de fichier). ==== */
+          const mixHeadA=standingStrikeMix(a,'head'), mixBodyA=standingStrikeMix(a,'body');
+          for(const k in mixHeadA) st.A.byType[k]+=headA*mixHeadA[k]*(dt/50);
+          for(const k in mixBodyA) st.A.byType[k]+=bodyA*mixBodyA[k]*(dt/50);
+          st.A.byType.legKick+=legA*(dt/50);
+          /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — un high kick qui touche
+             franchement peut ouvrir une coupure au tibia/à l'arcade, un
+             mécanisme réel mais additif (jamais à la place du check cross/
+             hook existant juste plus bas) — utilise STRIKE_CUT_MULT.headKick
+             plutôt qu'une constante isolée, pour que la table déclarée en
+             tête de fichier gouverne réellement un comportement. Classé
+             "coup lourd" dans le rapport (§9.1 : les trois sources listées
+             sont coude/choc de tête/coup lourd, un kick lourd relève de ce
+             dernier registre). ==== */
+          const headKickAmtA=headA*mixHeadA.headKick;
+          if(headKickAmtA>1.5 && rnd()<0.05*STRIKE_CUT_MULT.headKick*(dt/50)){ st.B.cuts++; st.B.cutSrc.heavy++; tryEyeInjury(false,r,beatT,'debout',momentum); }
+          /* ==== [FIN ANCRE] ==== */
 
           // Tentatives et frappes debout pour B
           const accRateB=clamp(0.42+((b.handSpeed||50)*0.08+(b.discipline||50)*0.06-(a.footSpeed||50)*0.10-(a.footwork||50)*0.06)*0.003,0.30,0.65);
@@ -1225,6 +1513,16 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           st.B.sigLeg+=legB*(dt/50); st.B.legAtt+=(attB*0.18)*(dt/50);
           const pwrPctB=clamp(((b.power||50)*0.5+(b.cross||50)*0.25+(b.hook||50)*0.25)/100,0.15,0.65);
           st.B.powerStrikes+=(landedB*pwrPctB)*(dt/50);
+          /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — symétrique côté B. ==== */
+          const mixHeadB=standingStrikeMix(b,'head'), mixBodyB=standingStrikeMix(b,'body');
+          for(const k in mixHeadB) st.B.byType[k]+=headB*mixHeadB[k]*(dt/50);
+          for(const k in mixBodyB) st.B.byType[k]+=bodyB*mixBodyB[k]*(dt/50);
+          st.B.byType.legKick+=legB*(dt/50);
+          /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — symétrique côté B, voir
+             le commentaire complet côté A ci-dessus. ==== */
+          const headKickAmtB=headB*mixHeadB.headKick;
+          if(headKickAmtB>1.5 && rnd()<0.05*STRIKE_CUT_MULT.headKick*(dt/50)){ st.A.cuts++; st.A.cutSrc.heavy++; tryEyeInjury(true,r,beatT,'debout',momentum); }
+          /* ==== [FIN ANCRE] ==== */
 
           /* ==== [ANCRE: P7_L2_USURE] — composante "usure" (§2.1) : fond
              continu, faible amplitude, réparti selon la MÊME zone que la
@@ -1243,8 +1541,13 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           // Impact des dégâts reçus (altération des déplacements, cf. ANCRE
           // P7_L2_DEGATS_PROGRESSIFS en tête de boucle pour la mobilité/
           // cardio/menton — recalculés chaque tick, pas ici)
-          if(headA>=3 && ((a.cross||50)>75||(a.hook||50)>75) && rnd()<0.2*(dt/50)) st.B.cuts++;
-          if(headB>=3 && ((b.cross||50)>75||(b.hook||50)>75) && rnd()<0.2*(dt/50)) st.A.cuts++;
+          /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — ce mécanisme est basé sur
+             cross/hook (des poings puissants), pas des coudes : classé dans
+             le bucket "coups lourds" du rapport §9.1, pas "coudes" (les
+             coudes sont indisponibles à distance, cf. standingStrikeMix()). ==== */
+          if(headA>=3 && ((a.cross||50)>75||(a.hook||50)>75) && rnd()<0.2*(dt/50)){ st.B.cuts++; st.B.cutSrc.heavy++; tryEyeInjury(false,r,beatT,'debout',momentum); }
+          if(headB>=3 && ((b.cross||50)>75||(b.hook||50)>75) && rnd()<0.2*(dt/50)){ st.A.cuts++; st.A.cutSrc.heavy++; tryEyeInjury(true,r,beatT,'debout',momentum); }
+          /* ==== [FIN ANCRE] ==== */
           if(pA>=8 && rnd()<0.25*(dt/50)){ st.B.wobbled++; dangerB=Math.max(dangerB,DANGER_TICKS_WOBBLE); }
           if(pB>=8 && rnd()<0.25*(dt/50)){ st.A.wobbled++; dangerA=Math.max(dangerA,DANGER_TICKS_WOBBLE); }
 
@@ -1261,12 +1564,21 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           if(rnd()<heavyShotChance(a,fatB,dangerB>0)*(dt/50)){
             const amp=heavyShotAmplitude(a,b);
             dmgB+=amp; applyZoneDamage(st.B,amp,headA*1.4+0.6,bodyA+0.4,legA*0.4); heavyLandedThisTick=true;
-            if(amp>=HEAVY_WOBBLE_AMP){ st.B.wobbled++; dangerB=Math.max(dangerB,DANGER_TICKS_HEAVY); if(rnd()<0.12) st.B.cuts++; }
+            if(amp>=HEAVY_WOBBLE_AMP){ st.B.wobbled++; dangerB=Math.max(dangerB,DANGER_TICKS_HEAVY); if(rnd()<0.12){ st.B.cuts++; st.B.cutSrc.heavy++; tryEyeInjury(false,r,beatT,'debout',momentum); } }
+            /* ==== [ANCRE: P8_L9_BLESSURES] — un coup lourd de CET ordre de
+               grandeur (amp>=INJURY_HAND_AMP_THRESHOLD, bien au-dessus du
+               seuil "sonné") risque la main de son AUTEUR (A ici), jamais
+               celle de sa cible — §9.2. ==== */
+            if(!finish && tryHandFracture(true,amp,r,beatT,'debout',momentum)){ finish={by:B,loser:A,method:'Blessure',round:r,detail:'main cassée',time:beatT}; }
+            /* ==== [FIN ANCRE] ==== */
           }
-          if(rnd()<heavyShotChance(b,fatA,dangerA>0)*(dt/50)){
+          if(!finish && rnd()<heavyShotChance(b,fatA,dangerA>0)*(dt/50)){
             const amp=heavyShotAmplitude(b,a);
             dmgA+=amp; applyZoneDamage(st.A,amp,headB*1.4+0.6,bodyB+0.4,legB*0.4); heavyLandedThisTick=true;
-            if(amp>=HEAVY_WOBBLE_AMP){ st.A.wobbled++; dangerA=Math.max(dangerA,DANGER_TICKS_HEAVY); if(rnd()<0.12) st.A.cuts++; }
+            if(amp>=HEAVY_WOBBLE_AMP){ st.A.wobbled++; dangerA=Math.max(dangerA,DANGER_TICKS_HEAVY); if(rnd()<0.12){ st.A.cuts++; st.A.cutSrc.heavy++; tryEyeInjury(true,r,beatT,'debout',momentum); } }
+            /* ==== [ANCRE: P8_L9_BLESSURES] — symétrique côté B (attaquant). ==== */
+            if(!finish && tryHandFracture(false,amp,r,beatT,'debout',momentum)){ finish={by:A,loser:B,method:'Blessure',round:r,detail:'main cassée',time:beatT}; }
+            /* ==== [FIN ANCRE] ==== */
           }
           /* ==== [FIN ANCRE] ==== */
 
@@ -1418,6 +1730,21 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           }
         }
       }
+    /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — §9.1 "chocs de têtes" : la
+       deuxième source de coupures, indépendante des frappes elles-mêmes —
+       un choc accidentel de crânes en clinch ou au sol (scramble, entrée en
+       clinch serrée), PHASE-AGNOSTIQUE comme le jet de faute ci-dessous,
+       placé ici pour la même raison (jamais après une finition déjà tirée
+       ce tick). Touche un seul des deux combattants (tirage 50/50) — un
+       choc de tête réel abîme parfois les deux, mais un modèle plus simple
+       suffit ici : ce n'est jamais lui qui décide un combat, seulement une
+       source de coupure à isoler dans le rapport. ==== */
+    if(!finish && (currentPhase==='clinch'||currentPhase==='sol') && rnd()<HEAD_CLASH_CHANCE*(dt/50)){
+      const victimIsA=rnd()<0.5;
+      if(victimIsA){ st.A.cuts++; st.A.cutSrc.clash++; tryEyeInjury(true,r,beatT,currentPhase,momentum); }
+      else { st.B.cuts++; st.B.cutSrc.clash++; tryEyeInjury(false,r,beatT,currentPhase,momentum); }
+    }
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: P8_L7_ARBITRE_FAUTES] — Lot 7/P8 §7.1 : jet de faute
        PHASE-AGNOSTIQUE (debout/clinch/sol), placé en fin de tick pour ne
        jamais interférer avec une finition déjà tirée CE tick par la phase
@@ -1574,6 +1901,49 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       legA:Math.round(st.A.sigLeg-_legA0), legB:Math.round(st.B.sigLeg-_legB0),
       pwrA:Math.round(st.A.powerStrikes-_pwrA0), pwrB:Math.round(st.B.powerStrikes-_pwrB0)
     });
+    /* ==== [ANCRE: P8_L9_EXAMEN_MEDICAL] — Lot 9/P8 §9.3 : "distinct de
+       l'arrêt médical déjà implémenté [mi-round]... le médecin monte,
+       examine une coupure ou une blessure, et laisse continuer ou arrête.
+       La majorité des examens doivent laisser continuer." Nouveau POINT DE
+       CONTRÔLE (entre les rounds, jamais mi-round — ce dernier reste
+       intégralement géré par l'ANCRE P7_L2_ARRET_MEDICAL, plus haut), pas
+       un second système de gravité : ringsideExamStopChance() lit les
+       mêmes compteurs déjà accumulés (cuts, blessures). Réutilise les
+       méthodes de victoire EXISTANTES ('Arrêt médical' pour une coupure,
+       'Blessure' pour une blessure sans coupure sévère associée) plutôt que
+       d'en inventer une troisième — CLAUDE.md §8 "ne jamais créer de
+       système parallèle". Pas d'examen après le dernier round (`r<rounds`) :
+       le combat est de toute façon terminé. ==== */
+    if(!finish && r<rounds){
+      const hasInjuryA=injuredHandA||injuredKneeA||injuredEyeA, hasInjuryB=injuredHandB||injuredKneeB||injuredEyeB;
+      if(st.A.cuts>=1 || hasInjuryA){
+        examCount++;
+        if(rnd()<ringsideExamStopChance(st.A.cuts,hasInjuryA)){
+          const injuryDriven=hasInjuryA && st.A.cuts<CUT_SEVERE_THRESHOLD;
+          finish={by:B,loser:A,method:injuryDriven?'Blessure':'Arrêt médical',round:r,
+            detail:injuryDriven?'blessure jugée trop sévère pour continuer':'coupure jugée trop sévère pour continuer'};
+          log.push({r,phase:'exam',by:'op',finish:true,method:finish.method,text:`[00:00] Le médecin monte entre les rounds : ${A.name} ne peut pas continuer.`,momentum,
+            snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        } else {
+          log.push({r,phase:'exam',by:'me',text:`[00:00] Le médecin monte entre les rounds examiner ${A.name} : le combat continue.`,momentum,
+            snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        }
+      }
+      if(!finish && (st.B.cuts>=1 || hasInjuryB)){
+        examCount++;
+        if(rnd()<ringsideExamStopChance(st.B.cuts,hasInjuryB)){
+          const injuryDriven=hasInjuryB && st.B.cuts<CUT_SEVERE_THRESHOLD;
+          finish={by:A,loser:B,method:injuryDriven?'Blessure':'Arrêt médical',round:r,
+            detail:injuryDriven?'blessure jugée trop sévère pour continuer':'coupure jugée trop sévère pour continuer'};
+          log.push({r,phase:'exam',by:'me',finish:true,method:finish.method,text:`[00:00] Le médecin monte entre les rounds : ${B.name} ne peut pas continuer.`,momentum,
+            snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        } else {
+          log.push({r,phase:'exam',by:'op',text:`[00:00] Le médecin monte entre les rounds examiner ${B.name} : le combat continue.`,momentum,
+            snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        }
+      }
+    }
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: P8_L6_COIN_SUPPRIME] — Lot 6/P8 §6.1 : le coin entre les
        rounds (ex-ancre P7_L5_COIN_ENTRE_LES_ROUNDS) est retiré en entier,
        beats phase:'bell' et ajustement d'attributs (`a.fightIQ+=adaptA`,
@@ -1633,6 +2003,16 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         ?'Deuxième retrait de point : l’arbitre met fin au combat et disqualifie le fautif.'
         :'Faute grave et intentionnelle : l’arbitre disqualifie sur-le-champ.';
     }
+    /* ==== [ANCRE: P8_L9_BLESSURES] — même repli que l'arrêt médical/la
+       disqualification ci-dessus : pickFinishMove() ne connaît que 'sub'/
+       'ko', donc une blessure (main cassée, genou lâché) aurait hérité d'un
+       nom de prise de KO totalement hors-sujet. `moveName` vidé, comme pour
+       la disqualification. ==== */
+    if(finish.method==='Blessure'){
+      finish.moveName='';
+      finish.moveFlavor=`${finish.detail?finish.detail.charAt(0).toUpperCase()+finish.detail.slice(1):'Blessure'} : le combat ne peut pas continuer.`;
+    }
+    /* ==== [FIN ANCRE] ==== */
     /* ==== [FIN ANCRE] ==== */
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: CORRECTIF_ZONE_AFFICHEE] — zone anatomique NARRÉE = celle du
@@ -1677,6 +2057,15 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
      exemple jamais touché à foulPointsA/B). ==== */
   res.refStandups=refStandupCount; res.foulPointsA=foulPointsA; res.foulPointsB=foulPointsB;
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: P8_L9_BLESSURES] — exposé pour le harnais/les tests, même
+     schéma que refStandups ci-dessus : nombre d'examens médicaux entre les
+     rounds, et liste des blessures réellement survenues par combattant sur
+     l'ensemble du combat (jamais un booléen unique — un combattant peut, en
+     théorie, cumuler les trois types). ==== */
+  res.examCount=examCount;
+  res.injuriesA=[injuredHandA&&'main cassée',injuredKneeA&&'genou lâché',injuredEyeA&&'arcade fermée'].filter(Boolean);
+  res.injuriesB=[injuredHandB&&'main cassée',injuredKneeB&&'genou lâché',injuredEyeB&&'arcade fermée'].filter(Boolean);
+  /* ==== [FIN ANCRE] ==== */
   res.scoreA=j1A+j2A+j3A; res.scoreB=j1B+j2B+j3B;
   res.judges={j1:[j1A,j1B],j2:[j2A,j2B],j3:[j3A,j3B]}; res.roundStats=roundStats;
   /* ==== [ANCRE: HORLOGE_CONTINUE_ARRONDI_FIN_COMBAT] — dernier point
@@ -1688,7 +2077,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   const INT_ROUND_FIELDS=['sig','sigAtt','total','totalAtt','sigHead','headAtt','sigBody','bodyAtt',
     'sigLeg','legAtt','distStrikes','distAtt','clinchStrikes','clinchAtt','groundStrikes','groundAtt',
     'powerStrikes','td','tdAtt','tdDef','reversals','standups','guardPasses','subAtt','subEscapes',
-    'dmgHead','dmgBody','dmgLegs','kd','wobbled','cuts','sub'];
+    'dmgHead','dmgBody','dmgLegs','kd','wobbled','cuts','sub','lateSig'];
   ['A', 'B'].forEach(side => {
     const s = st[side];
     INT_ROUND_FIELDS.forEach(k=>{ s[k]=Math.round(s[k]); });
@@ -1697,6 +2086,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     s.totalAtt = Math.max(s.totalAtt, s.sigAtt, s.total);
     s.tdAtt = Math.max(s.tdAtt, s.td);
     s.ctrlSec = Math.max(0, s.ctrlSec);
+    /* ==== [ANCRE: P8_L9_TAXONOMIE_FRAPPES] — mêmes règles d'arrondi que
+       ci-dessus pour les deux structures imbriquées (byType/cutSrc, ANCRE
+       P8_L9_TAXONOMIE_FRAPPES plus haut) : Object.keys() plutôt qu'une
+       liste plate, jamais touchées par INT_ROUND_FIELDS (qui ne sait
+       arrondir que des champs scalaires). ==== */
+    Object.keys(s.byType).forEach(k=>{ s.byType[k]=Math.round(s.byType[k]); });
+    Object.keys(s.cutSrc).forEach(k=>{ s.cutSrc[k]=Math.round(s.cutSrc[k]); });
+    /* ==== [FIN ANCRE] ==== */
   });
   /* ==== [FIN ANCRE] ==== */
   res.log=log; res.stats=st;

@@ -76,8 +76,14 @@ function isDecisionLike(m){ return !!m && (m.startsWith('Déc')||m.startsWith('N
    change. N'UTILISE PAS ce helper pour un LABEL AFFICHÉ tel quel (le texte
    "Arrêt médical" doit rester visible tel quel à l'écran ; seuls les points
    qui décident bêtement "KO ou Soumission ?" sans repli générique doivent
-   distinguer les deux cas explicitement, cf. ui-09-arena.js). ==== */
-function isKOMethod(m){ return !!m && (m.startsWith('KO')||m==='Arrêt médical'); }
+   distinguer les deux cas explicitement, cf. ui-09-arena.js).
+   ==== [ANCRE: P8_L9_BLESSURES] — Lot 9/P8 §9.2 : une blessure qui met fin
+   au combat sur le coup ('Blessure', engine-combat.js) suit exactement la
+   même règle qu'un arrêt médical — au vrai MMA, une blessure (main cassée,
+   genou lâché) qui force l'arrêt compte au palmarès comme un TKO, jamais
+   comme un troisième cas à distinguer dans chacun des ~15 points d'appel
+   qui utilisent déjà ce helper. ==== */
+function isKOMethod(m){ return !!m && (m.startsWith('KO')||m==='Arrêt médical'||m==='Blessure'); }
 /* ==== [FIN ANCRE] ==== */
 
 /* --------------------------- 30 ATTRIBUTS --------------------------------- */
