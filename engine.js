@@ -51,8 +51,17 @@ function parseGender(txt,gender){
 /* ==== [ANCRE: IS_DECISION_LIKE] — un seul point de vérité pour "ce combat s'est
    terminé aux cartes des juges" (Décision, Décision partagée, OU Égalité).
    Avant : 13 vérifications startsWith('Déc') éparpillées dans le code, toutes
-   cassées par l'ajout du Draw ('Égalité' ne commence pas par 'Déc'). ==== */
-function isDecisionLike(m){ return !!m && (m.startsWith('Déc')||m==='Égalité'); }
+   cassées par l'ajout du Draw ('Égalité' ne commence pas par 'Déc'). ====
+   ==== [ANCRE: P8_L7_VOCABULAIRE_DECISIONS] — Lot 7/P8 §7.3 : le panel de
+   juges rend désormais six libellés (décision unanime/majoritaire/partagée,
+   nul unanime/majoritaire/partagé — voir engine-combat.js, ANCRE
+   P8_L7_VOCABULAIRE_DECISIONS) au lieu de deux. Les trois libellés de
+   décision commencent tous par 'Déc' (couverts sans changement) ; les trois
+   libellés de nul commencent par 'Nul' (nouveau) — 'Égalité' reste accepté
+   tel quel pour qu'une sauvegarde antérieure à ce lot continue de s'afficher
+   correctement (§8, compatibilité des sauvegardes : jamais renommer une
+   valeur existante en base). ==== */
+function isDecisionLike(m){ return !!m && (m.startsWith('Déc')||m.startsWith('Nul')||m==='Égalité'); }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: P7_L2_IS_KO_METHOD] — Lot 2/P7 §2.4 : l'arrêt médical (coupure)
    est une MÉTHODE DE VICTOIRE DISTINCTE du KO/TKO ('Arrêt médical', jamais

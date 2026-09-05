@@ -1355,3 +1355,155 @@ test('P8_L6_ARENA_PAUSE_SANS_BASCULE — CL.nextRound() relève la pause de fin 
   assert.equal(win.ARENA.roundPause, false, 'la pause doit être levée');
   assert.equal(rafCalledWith, loopFn, 'resumeArenaPlayback() doit relancer exactement la même boucle (loopFn)');
 });
+
+/* ==== [ANCRE: TEST_P8_L7_VOCABULAIRE_DECISIONS] — Lot 7/P8 §7.3 : couvre les
+   10 répartitions possibles de trois votes de juge (A/B/égalité chacun) vers
+   les six libellés réels du sport, en testant judgesVerdict() (fonction pure,
+   engine-combat.js) directement plutôt qu'en essayant de forcer un panel de
+   juges précis via un Monte Carlo bruité. ==== */
+test('P8_L7_VOCABULAIRE_DECISIONS — judgesVerdict() classe les 10 répartitions de votes vers les 6 libellés réels', () => {
+  const win = newGameWindow();
+  /* judgesVerdict() tourne dans le realm jsdom de `win` : ses objets/tableaux
+     de retour sont des instances de l'Object/Array DE CE REALM, jamais
+     reference-egal aux littéraux Node de ce fichier de test — assert.deepEqual
+     (alias strict de deepStrictEqual) échoue dessus avec "same structure but
+     not reference-equal" même quand le contenu est identique. On compare donc
+     champ par champ (valeurs primitives, insensibles au realm) plutôt qu'en
+     bloc. */
+  const check = (j1A, j1B, j2A, j2B, j3A, j3B, winner, method, judgeVerdicts) => {
+    const v = win.judgesVerdict(j1A, j1B, j2A, j2B, j3A, j3B);
+    assert.equal(v.winner, winner, `winner attendu ${winner} pour ${JSON.stringify([j1A, j1B, j2A, j2B, j3A, j3B])}`);
+    assert.equal(v.method, method, `method attendue ${method} pour ${JSON.stringify([j1A, j1B, j2A, j2B, j3A, j3B])}`);
+    assert.equal(Array.prototype.join.call(v.judgeVerdicts, ','), judgeVerdicts.join(','), 'judgeVerdicts attendus');
+  };
+  // Unanime (3-0)
+  check(30, 27, 30, 27, 30, 27, 'A', 'Décision unanime', ['A', 'A', 'A']);
+  check(27, 30, 27, 30, 27, 30, 'B', 'Décision unanime', ['B', 'B', 'B']);
+  // Nul unanime (égalité chez les trois juges)
+  check(29, 29, 28, 28, 30, 30, 'D', 'Nul unanime', ['D', 'D', 'D']);
+  // Majoritaire (2-0-1 : deux juges décisifs pour le même camp, un juge à égalité)
+  check(30, 27, 30, 27, 29, 29, 'A', 'Décision majoritaire', ['A', 'A', 'D']);
+  check(27, 30, 27, 30, 29, 29, 'B', 'Décision majoritaire', ['B', 'B', 'D']);
+  // Partagée (2-1 : trois juges décisifs, majorité pour un camp)
+  check(30, 27, 30, 27, 27, 30, 'A', 'Décision partagée', ['A', 'A', 'B']);
+  check(27, 30, 27, 30, 30, 27, 'B', 'Décision partagée', ['B', 'B', 'A']);
+  // Nul majoritaire (deux juges à égalité, un juge décisif)
+  check(29, 29, 29, 29, 30, 27, 'D', 'Nul majoritaire', ['D', 'D', 'A']);
+  check(29, 29, 29, 29, 27, 30, 'D', 'Nul majoritaire', ['D', 'D', 'B']);
+  // Nul partagé (1-1-1 : un juge pour chaque issue)
+  check(30, 27, 27, 30, 29, 29, 'D', 'Nul partagé', ['A', 'B', 'D']);
+});
+
+test('P8_L7_VOCABULAIRE_DECISIONS — isDecisionLike()/isKOMethod() couvrent les six nouveaux libellés sans casser les anciens', () => {
+  const win = newGameWindow();
+  ['Décision unanime', 'Décision majoritaire', 'Décision partagée', 'Nul unanime', 'Nul majoritaire', 'Nul partagé', 'Égalité', 'Décision'].forEach(m => {
+    assert.equal(win.isDecisionLike(m), true, `isDecisionLike('${m}') doit être vrai`);
+    assert.equal(win.isKOMethod(m), false, `isKOMethod('${m}') doit être faux`);
+  });
+  ['KO/TKO', 'Soumission', 'Arrêt médical', 'Disqualification'].forEach(m => {
+    assert.equal(win.isDecisionLike(m), false, `isDecisionLike('${m}') doit être faux — ce n'est jamais une carte de juge`);
+  });
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L7_ARBITRE_FAUTES] — Lot 7/P8 §7.1 : deux combattants
+   construits pour maximiser foulChance() (aggression au plafond, composure
+   et fightIQ au plancher — les trois seuls attributs qui la pilotent,
+   aucun attribut inventé) sur un échantillon assez large pour observer, de
+   façon statistique et non affirmée, les trois événements que le plan exige
+   traçables : au moins une disqualification, au moins un retrait de point,
+   au moins un renversement de décision par retrait de point. ==== */
+test('P8_L7_ARBITRE_FAUTES — sur un échantillon de combattants très fautifs, disqualification et retrait de point surviennent et restent correctement classés', () => {
+  const win = newGameWindow();
+  win.setSeed(70707);
+  const N = 1500;
+  let sawDQ = false, sawPointDeduction = false, sawReversal = false;
+  for (let i = 0; i < N; i++) {
+    const A = win.makeFighter({ style: 'mma', level: 60 });
+    const B = win.makeFighter({ style: 'mma', level: 60 });
+    Object.assign(A.attrs, { aggression: 100, composure: 1, fightIQ: 1 });
+    Object.assign(B.attrs, { aggression: 100, composure: 1, fightIQ: 1 });
+    const res = win.simulateFight(A, B, 5);
+    if (res.method === 'Disqualification') {
+      sawDQ = true;
+      assert.equal(win.isDecisionLike(res.method), false, 'une disqualification ne doit jamais être comptée comme une carte de juge');
+      assert.equal(win.isKOMethod(res.method), false, 'une disqualification ne doit jamais être comptée comme un KO/TKO');
+      assert.ok(res.winner === 'A' || res.winner === 'B', 'une disqualification a toujours un vainqueur net, jamais un nul');
+    }
+    const fpA = res.foulPointsA || 0, fpB = res.foulPointsB || 0;
+    if (fpA > 0 || fpB > 0) sawPointDeduction = true;
+    if (win.isDecisionLike(res.method) && (fpA > 0 || fpB > 0) && res.judges) {
+      const hypo = win.judgesVerdict(
+        res.judges.j1[0] + fpA, res.judges.j1[1] + fpB,
+        res.judges.j2[0] + fpA, res.judges.j2[1] + fpB,
+        res.judges.j3[0] + fpA, res.judges.j3[1] + fpB
+      );
+      if (hypo.winner !== res.winner) sawReversal = true;
+    }
+  }
+  assert.ok(sawDQ, `au moins une disqualification attendue sur ${N} combats de combattants très fautifs`);
+  assert.ok(sawPointDeduction, `au moins un retrait de point attendu sur ${N} combats de combattants très fautifs`);
+  assert.ok(sawReversal, `au moins un renversement de décision par retrait de point attendu sur ${N} combats`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L7_ARBITRE_RELANCE] — Lot 7/P8 §7.1 : régression
+   directe de "le contrôle au sol est rentable depuis le Lot 3 : sideControl
+   et mount ont standupOk:false, un contrôle stérile n'est donc jamais
+   sanctionné" (état des lieux du plan). Un combattant qui écrase au sol
+   sans la moindre menace de frappe/soumission (gnp/submission au plancher)
+   doit malgré tout, en moyenne, se faire relancer debout par l'arbitre. ==== */
+test('P8_L7_ARBITRE_RELANCE — un contrôle au sol stérile (sans frappe ni soumission) finit par être relancé debout par l’arbitre', () => {
+  const win = newGameWindow();
+  win.setSeed(13131);
+  const N = 300;
+  let totalStandups = 0;
+  for (let i = 0; i < N; i++) {
+    const A = win.makeFighter({ style: 'wrestler', level: 60 });
+    const B = win.makeFighter({ style: 'wrestler', level: 30 });
+    Object.assign(A.attrs, { takedown: 100, strength: 100, explosiveness: 90, topControl: 100, tdd: 100 });
+    Object.assign(A.attrs, { gnp: 1, submission: 1, power: 1, killer: 1 }); // contrôle pur, sans la moindre menace
+    Object.assign(B.attrs, { tdd: 1, guardWork: 1, flexibility: 1, strength: 1, submission: 1 });
+    const res = win.simulateFight(A, B, 5);
+    totalStandups += res.refStandups || 0;
+  }
+  assert.ok(totalStandups > 0, `au moins une relance debout sur inactivité attendue sur ${N} combats à contrôle stérile (obtenu ${totalStandups})`);
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_P8_L7_CAGE_POSITION] — Lot 7/P8 §7.2 : comme
+   P7_L3_HIERARCHIE_POSITIONS ci-dessus pour GROUND_POS (const de haut
+   niveau, jamais exposée sur `win` — seul son EFFET observable via le log
+   l'est), CLINCH_POS n'est pas accédée directement : on observe les deux
+   valeurs de `pos` ('center'/'cage') apparaître réellement dans le journal
+   d'un clinch, et on vérifie l'effet demandé par le plan — la cage nourrit
+   davantage les amenées que le centre ("porte d'entrée naturelle des
+   amenées", §7.2) — en comparant le taux d'entrée au sol DEPUIS le clinch
+   selon la position au moment de la transition. ==== */
+test('P8_L7_CAGE_POSITION — le clinch distingue réellement centre et cage, et la cage nourrit davantage les amenées', () => {
+  const win = newGameWindow();
+  win.setSeed(24681);
+  const N = 400;
+  const posSeen = new Set();
+  let tdFromCage = 0, tdFromCenter = 0, clinchTicksCage = 0, clinchTicksCenter = 0;
+  for (let i = 0; i < N; i++) {
+    const A = win.makeFighter({ style: 'wrestler', first: 'Top' });
+    Object.assign(A.attrs, { clinchStr: 90, strength: 90, striking: 70, power: 60, takedown: 85 });
+    const B = win.makeFighter({ style: 'boxer', first: 'Bottom' });
+    Object.assign(B.attrs, { clinchStr: 20, strength: 20, tdd: 30 });
+    const res = win.simulateFight(A, B, 5);
+    res.log.forEach(entry => {
+      if (entry.phase !== 'clinch' || !entry.pos) return;
+      posSeen.add(entry.pos);
+      if (entry.pos === 'cage') { clinchTicksCage++; if (/amener au sol/.test(entry.text)) tdFromCage++; }
+      else { clinchTicksCenter++; if (/amener au sol/.test(entry.text)) tdFromCenter++; }
+    });
+  }
+  assert.ok(posSeen.has('center') && posSeen.has('cage'),
+    `les deux positions de clinch doivent apparaître sur ${N} combats — obtenu: ${[...posSeen].join(', ')}`);
+  assert.ok(clinchTicksCage > 0 && clinchTicksCenter > 0, 'les deux positions doivent être réellement occupées, pas seulement de passage');
+  const rateCage = tdFromCage / clinchTicksCage, rateCenter = tdFromCenter / clinchTicksCenter;
+  assert.ok(rateCage > rateCenter,
+    `le taux d'amenée depuis un clinch de cage (${(rateCage * 100).toFixed(2)}%) doit dépasser celui depuis un clinch de centre (${(rateCenter * 100).toFixed(2)}%)`);
+});
+/* ==== [FIN ANCRE] ==== */
