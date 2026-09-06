@@ -4,8 +4,45 @@
    la carrière courante. */
 /* ==== [ANCRE: PANTHEON] — hors wipe(), survit d'une carrière à l'autre ==== */
 const HOF_KEY='cage-legacy-hof';
-function loadHOF(){ try{ return JSON.parse(localStorage.getItem(HOF_KEY))||[]; }catch(e){ return []; } }
-function saveHOF(l){ try{ localStorage.setItem(HOF_KEY,JSON.stringify(l)); }catch(e){} }
+/* ==== [ANCRE: FIX_B05_PANTHEON_PROTEGE] — JSON valide ne signifie pas
+   registre valide. Filtrer les seules légendes mal formées pour garder les
+   autres consultables, mais bloquer l'écriture pour préserver l'original. ==== */
+function validHofEntry(f){
+  if(!isSaveObject(f)||typeof f.name!=='string'||!f.name.trim()||
+    !((typeof f.id==='string'&&f.id.length>0)||Number.isSafeInteger(f.id))||!hasFiniteSaveNumbers(f)||!validFighterNumbers(f)) return false;
+  for(const k of ['decorations','epithets','amaTitles','skills','earnedAchievements','nicknameHistory']){
+    if(f[k]!==undefined && (!Array.isArray(f[k])||!f[k].every(v=>typeof v==='string'))) return false;
+  }
+  for(const k of ['beltHistory','notableWins','seasonRecap']){
+    if(f[k]!==undefined && (!Array.isArray(f[k])||!f[k].every(isSaveObject))) return false;
+  }
+  if(f.seasonRecap && f.seasonRecap.some(s=>!Array.isArray(s.trophies)||!s.trophies.every(x=>typeof x==='string'))) return false;
+  for(const k of ['attrs','phys','amaRec','biggestRival','signatureMove']){
+    if(f[k]!=null && !isSaveObject(f[k])) return false;
+  }
+  if(f.score!==undefined && !Number.isFinite(f.score)) return false;
+  return true;
+}
+function decodeHOF(raw){
+  if(!Array.isArray(raw)) return {value:[],ok:false};
+  const ids=new Set();
+  const value=raw.filter(f=>{
+    if(!validHofEntry(f)||ids.has(String(f.id))) return false;
+    ids.add(String(f.id)); return true;
+  });
+  return {value,ok:value.length===raw.length};
+}
+function loadHOF(){ return readRegistry(HOF_KEY,decodeHOF,()=>[]).value; }
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: FIX_R01_ECRITURE_CONFIRMEE] — résultat explicite et relecture
+   de l'archive écrite : l'intronisation ne peut plus ignorer un quota. ==== */
+function saveHOF(l){ return writeRegistry(HOF_KEY,l,decodeHOF,()=>[]); }
+function hasArchivedFighter(f){
+  return !!f && loadHOF().some(entry=>String(entry.id)===String(f.id) &&
+    ['name','W','L','ko','sub','div','age','overall'].every(k=>entry[k]===f[k]) &&
+    ['attrs','phys','skills','seasonRecap','beltHistory'].every(k=>JSON.stringify(entry[k]||[])===JSON.stringify(f[k]||[])));
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: ENNOBLISSEMENT_PANTHEON] — ajout #10 (24 ajouts, 12/08/2026) :
    f.decorations (array d'ids LEGEND_UNLOCKABLES, cat 'Décorations du
    Panthéon') vit directement sur l'entrée HOF — au même titre que
@@ -72,6 +109,11 @@ function legendDecoStyle(decorations){
    dévalorisées rétroactivement par ce changement de formule. ==== */
 function hofScore(f){ return (f._world?300:0)+(f._euro?120:0)+(f.champChampGloryBonus||0)+f.defenses*30+f.W*3-f.L*4+f.ko*2+f.sub*2; }
 function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
+  /* ==== [ANCRE: FIX_R01_CANDIDAT_ARCHIVE] — même un appel direct ne doit
+     pas modifier le combattant avant confirmation du stockage. ==== */
+  const original=f;
+  f=JSON.parse(JSON.stringify(f));
+  /* ==== [FIN ANCRE] ==== */
   // ==== [ANCRE: CORRECTIF_CEINTURES_PANTHEON] — bug remonté : seules les
   // ceintures amateur (WMA/DMMA, via amaTitles) étaient visibles dans le
   // Panthéon — aucune trace des ceintures pro gagnées dans les organisations
@@ -135,8 +177,37 @@ function enshrine(f){ const [ico,rank]=legacyTitle(f); const list=loadHOF();
   const favs=list.filter(x=>x.favorite);
   const nonFavs=list.filter(x=>!x.favorite).sort((a,b)=>b.score-a.score);
   const keepNonFavs=nonFavs.slice(0,Math.max(0,20-favs.length));
-  saveHOF(favs.concat(keepNonFavs).sort((a,b)=>b.score-a.score));
-  updateMetaStatsOnRetirement(f); }
+  /* ==== [ANCRE: FIX_R01_INTRONISATION_VERIFIEE] — le plafond peut exclure
+     la nouvelle légende ; dans ce cas, aucune écriture et aucune retraite
+     scellée. Après écriture, vérifier l'entrée complète avant de continuer. ==== */
+  const entry=list[list.length-1];
+  const existing=list.slice(0,-1).find(x=>String(x.id)===String(f.id));
+  if(existing){
+    // Reprise après fermeture entre l'écriture HOF et la sauvegarde carrière.
+    // Favori/décorations peuvent avoir changé depuis : ne jamais les effacer.
+    const comparable={...entry,favorite:existing.favorite};
+    if(existing.decorations!==undefined) comparable.decorations=existing.decorations;
+    if(JSON.stringify({...existing,favorite:undefined,decorations:undefined})===JSON.stringify({...comparable,favorite:undefined,decorations:undefined})){
+      original.beltHistory=beltHistory; return true;
+    }
+    alert('Une archive différente existe déjà pour cette carrière. Les deux données sont conservées ; vérifie le Panthéon avant de réessayer.');
+    return false;
+  }
+  const kept=favs.concat(keepNonFavs).sort((a,b)=>b.score-a.score);
+  if(!kept.includes(entry)){
+    alert('Le Panthéon est plein et cette légende ne passe pas son classement. Ta carrière est conservée ; libère une place puis réessaie.');
+    return false;
+  }
+  if(!saveHOF(kept)) return false;
+  const archived=loadHOF().find(x=>String(x.id)===String(f.id));
+  if(!archived || JSON.stringify(archived)!==JSON.stringify(entry)){
+    alert('Intronisation non confirmée. Ta carrière est conservée ; réessaie.'); return false;
+  }
+  updateMetaStatsOnRetirement(f);
+  original.beltHistory=beltHistory;
+  return true;
+  /* ==== [FIN ANCRE] ==== */
+}
 /* ==== [FIN ANCRE] ==== */
 function filterHallOfFame(criteria){
   const list=loadHOF();

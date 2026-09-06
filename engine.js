@@ -163,11 +163,17 @@ const divById=id=>allDivisions().find(d=>d.id===id);
 /* ==== [ANCRE: LOT9_CODEX] — codex interactif des compétences (logique pure —
    la construction de l'écran UI va dans ui.js) ==== */
 const CODEX_KEY='cage-legacy-codex';
-function loadCodex(){ try{ return JSON.parse(localStorage.getItem(CODEX_KEY))||[]; }catch(e){ return []; } }
+/* ==== [ANCRE: FIX_B05_CODEX_PROTEGE] — même lecture filtrée et protection
+   de l'original que les autres registres ; les helpers state-analytics
+   sont résolus à l'appel, après le chargement des scripts d'index.html. ==== */
+function decodeCodex(raw){ return decodeIdRegistry(raw,SKILLS.map(s=>s.id)); }
+function loadCodex(){ return readRegistry(CODEX_KEY,decodeCodex,()=>[]).value; }
 function saveToCodex(skillId){
   const unlocked=loadCodex();
-  if(!unlocked.includes(skillId)){ unlocked.push(skillId); try{ localStorage.setItem(CODEX_KEY,JSON.stringify(unlocked)); }catch(e){} }
+  if(!unlocked.includes(skillId)){ unlocked.push(skillId); return writeRegistry(CODEX_KEY,unlocked,decodeCodex,()=>[]); }
+  return true;
 }
+/* ==== [FIN ANCRE] ==== */
 function syncPlayerSkillsToCodex(f){ if(!f||!f.skills) return; f.skills.forEach(skillId=>saveToCodex(skillId)); }
 /* ==== [FIN ANCRE] ==== */
 
