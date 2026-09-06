@@ -74,6 +74,16 @@ function newGameWindow(opts){
   window.confirm = () => true;
   window.alert = () => {};
   window.prompt = () => null;
+  /* ==== [ANCRE: DUEL_CODEC] — LOT DUEL-01 : jsdom ne fournit pas
+     TextEncoder/TextDecoder sur `window` (contrairement à un vrai
+     navigateur, où ils sont globaux) — duel-codec.js s'en sert pour un
+     encodage UTF-8 sûr des noms/surnoms accentués avant base64. Repli sur
+     l'implémentation Node (`util`), qui a le même comportement observable. */
+  if(typeof window.TextEncoder === 'undefined'){
+    const { TextEncoder, TextDecoder } = require('util');
+    window.TextEncoder = TextEncoder;
+    window.TextDecoder = TextDecoder;
+  }
   // localStorage minimal (jsdom ne fournit pas de storage réel sans
   // configuration réseau supplémentaire) — un Map suffit, le jeu ne lit
   // jamais que getItem/setItem/removeItem.

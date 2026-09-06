@@ -235,14 +235,22 @@ function hubCombatHtml(f){
 /** Sous-menu Dossier du hub : les six écrans annexes de carrière, en grille
  * 2 colonnes. Mêmes cibles de navigation que l'ancienne grille à six
  * boutons (ANCRE HUB_GRILLE, retirée). @returns {string} */
+/* ==== [ANCRE: DUEL_CODEC] — LOT DUEL-01 : entrée du menu Carrière Complète
+   vers le Duel entre amis (combattant EN COURS, pas une légende du
+   Panthéon — à ne pas confondre avec Défi Multijoueur, accessible depuis le
+   Panthéon). Route sur CL.duelEnter() (ui-10-duel.js), pas tile()/CL.go() :
+   duelEnter() réinitialise aussi l'état transitoire de l'écran (message,
+   erreur, série en cours) avant d'y entrer. ==== */
 function hubDossierHtml(){
   const tile=(label,target)=>`<button class="btn" style="margin:0;border:1px solid var(--line);color:var(--text);padding:14px 8px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:13px;letter-spacing:.05em;line-height:1.3" onclick="CL.go('${target}')">${label}</button>`;
   return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     ${tile('Bilan technique','profile')}${tile('Classements','rankings')}
     ${tile('Palmarès','ach')}${tile('Archives','history')}
     ${tile('Ceintures','beltLineage')}${tile('Panthéon','hof')}
+    <button class="btn" style="margin:0;border:1px solid var(--line);color:var(--text);padding:14px 8px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:13px;letter-spacing:.05em;line-height:1.3;grid-column:1 / -1" onclick="CL.duelEnter()">Duel entre amis</button>
   </div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 function scr_select(){ const f=G.f;
