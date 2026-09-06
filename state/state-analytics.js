@@ -9,8 +9,55 @@
    du combattant actif, comme le Panthéon lui-même). ==== */
 const META_STATS_KEY='cage-legacy-metastats';
 const ACH_KEY='cage-legacy-achievements';
-function loadAch(){ try{ const raw=JSON.parse(localStorage.getItem(ACH_KEY))||[]; const valid=(typeof ACH!=='undefined'?ACH:[]).map(a=>a.id); return valid.length?raw.filter(id=>valid.includes(id)):raw; }catch(e){ return []; } }
-function saveAch(ach){ try{ localStorage.setItem(ACH_KEY,JSON.stringify(ach)); }catch(e){} }
+/* ==== [ANCRE: FIX_B05_REGISTRES_PROTEGES] — la vue peut exclure des entrées
+   invalides, mais ne devient jamais une autorisation d'effacer l'original.
+   Chaque écriture relit et valide le stockage courant (même après reload).
+   Une alerte par problème évite un écran vide inexpliqué et les répétitions
+   à chaque rendu ; aucun registre supplémentaire ni migration. ==== */
+const registryWarnings=new Map();
+function warnRegistry(key,message){
+  if(registryWarnings.get(key)===message) return;
+  registryWarnings.set(key,message);
+  console.warn(key+': '+message); alert(message);
+}
+function registryLabel(key){
+  return ({'cage-legacy-hof':'Panthéon','cage-legacy-metastats':'Statistiques','cage-legacy-achievements':'Succès','cage-legacy-codex':'Codex'})[key]||'Archive';
+}
+function readRegistry(key,decode,fallback){
+  try{
+    const raw=localStorage.getItem(key);
+    if(raw===null){ registryWarnings.delete(key); return {value:fallback(),ok:true}; }
+    const result=decode(JSON.parse(raw));
+    if(result.ok) registryWarnings.delete(key);
+    else warnRegistry(key,registryLabel(key)+' : données endommagées. Seules les données lisibles sont affichées. L’original est conservé et les modifications sont bloquées ; conserve une copie avant toute réparation.');
+    return result;
+  }catch(e){
+    warnRegistry(key,registryLabel(key)+' : lecture impossible. Les données existantes sont conservées et les modifications sont bloquées.');
+    return {value:fallback(),ok:false};
+  }
+}
+function writeRegistry(key,value,decode,fallback){
+  if(!readRegistry(key,decode,fallback).ok) return false;
+  try{
+    if(!decode(value).ok) throw new Error('Données invalides');
+    const raw=JSON.stringify(value);
+    localStorage.setItem(key,raw);
+    if(localStorage.getItem(key)!==raw) throw new Error('Écriture non confirmée');
+    return true;
+  }catch(e){
+    warnRegistry(key,registryLabel(key)+' : enregistrement impossible ou non confirmé. Vérifie l’espace de stockage disponible puis réessaie.');
+    return false;
+  }
+}
+function decodeIdRegistry(raw,ids){
+  if(!Array.isArray(raw)) return {value:[],ok:false};
+  const value=raw.filter(id=>typeof id==='string' && ids.includes(id));
+  return {value,ok:value.length===raw.length};
+}
+function decodeAchievements(raw){ return decodeIdRegistry(raw,ACH.map(a=>a.id)); }
+function loadAch(){ return readRegistry(ACH_KEY,decodeAchievements,()=>[]).value; }
+function saveAch(ach){ return writeRegistry(ACH_KEY,ach,decodeAchievements,()=>[]); }
+/* ==== [FIN ANCRE] ==== */
 function metaStatsDefaults(){ return {totalFights:0,totalKO:0,totalSub:0,totalDec:0,totalMoney:0,totalBelts:0,totalRetirements:0,legendPoints:0,unlockedItems:[]}; }
 /* ==== [ANCRE: ANALYTICS_LOCALES] — chantier 2 : "analytics locales" demandé.
    Renforce le registre EXISTANT (meta.total*, LOT13_REGISTRE_MONDIAL ci-dessus)
@@ -35,10 +82,42 @@ function migrateMetaStats(meta){
   return meta;
 }
 function loadMetaStats(){
-  try{ return migrateMetaStats(JSON.parse(localStorage.getItem(META_STATS_KEY))||metaStatsDefaults()); }
-  catch(e){ return metaStatsDefaults(); }
+  return readRegistry(META_STATS_KEY,decodeMetaStats,()=>migrateMetaStats(metaStatsDefaults())).value;
 }
-function saveMetaStats(meta){ try{ localStorage.setItem(META_STATS_KEY,JSON.stringify(meta)); }catch(e){} }
+/* ==== [ANCRE: FIX_B05_SCHEMA_STATISTIQUES] — conserver les compteurs et
+   divisions sains sans propager chaînes, Infinity ou tableaux aux calculs.
+   Les champs absents reçoivent seulement un défaut de lecture ; un objet
+   vide ou un champ présent invalide bloque toute réécriture de l'archive. ==== */
+function decodeMetaStats(raw){
+  const value=migrateMetaStats(metaStatsDefaults());
+  if(!isSaveObject(raw)) return {value,ok:false};
+  let ok=Object.keys(value).some(k=>Object.hasOwn(raw,k));
+  for(const [k,v] of Object.entries(raw)){
+    if(k==='divisions'){
+      if(!isSaveObject(v)){ ok=false; continue; }
+      for(const [div,stats] of Object.entries(v)){
+        if(!divById(div)||!isSaveObject(stats)||!['careers','fights','wins'].every(n=>isSaveCounter(stats[n]))){ ok=false; continue; }
+        value.divisions[div]={...stats};
+      }
+    }else if(k==='unlockedItems'){
+      if(!Array.isArray(v)){ ok=false; continue; }
+      value[k]=v.filter(id=>typeof id==='string');
+      if(value[k].length!==v.length) ok=false;
+    }else if(typeof value[k]==='number'){
+      const valid=['totalMoney','highestOverall','highestElo','legendPoints'].includes(k)
+        ?Number.isFinite(v)&&v>=0&&v<=Number.MAX_SAFE_INTEGER:isSaveCounter(v);
+      if(valid) value[k]=v; else ok=false;
+    }else if(k==='arenaCosmetic'){
+      if(typeof v==='string') value[k]=v; else ok=false;
+    }else{
+      if(!hasFiniteSaveNumbers(v)){ ok=false; continue; }
+      Object.defineProperty(value,k,{value:v,enumerable:true,writable:true,configurable:true});
+    }
+  }
+  return {value,ok};
+}
+function saveMetaStats(meta){ return writeRegistry(META_STATS_KEY,meta,decodeMetaStats,()=>migrateMetaStats(metaStatsDefaults())); }
+/* ==== [FIN ANCRE] ==== */
 /** Compte le début d'une nouvelle carrière (mode carrière ou Faith) — appelé
  * une seule fois, au moment exact où G.f est fixé sur le combattant fraîchement
  * créé (ui-08 : CL.create() et CL.finalizeFaithDraft()), jamais à la reprise

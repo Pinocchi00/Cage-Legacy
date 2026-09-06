@@ -46,26 +46,36 @@ function save(){ if(G&&(G.fantasyActive||G.duelActive||['fantasy_setup','allstar
     if(G && typeof SAVE_VERSION !== 'undefined') G.version = SAVE_VERSION;
     /* ==== [FIN ANCRE] ==== */
     const previous=localStorage.getItem(SAVE_KEY);
-    if(previous) localStorage.setItem(SAVE_BACKUP_KEY,previous);
+    /* ==== [ANCRE: FIX_B02_SECOURS_SAIN] — une principale corrompue ne doit
+       jamais remplacer le dernier secours chargeable. ==== */
+    if(parseAndValidate(previous)) localStorage.setItem(SAVE_BACKUP_KEY,previous);
+    /* ==== [FIN ANCRE] ==== */
     localStorage.setItem(SAVE_KEY,JSON.stringify(G));
   }catch(e){}
 }
 /* ==== [FIN ANCRE] ==== */
 function load(){
+  /* ==== [ANCRE: FIX_B02_RESTAURATION_SANS_ROTATION] — valider hors de G,
+     puis restaurer uniquement la principale. Un quota ne doit ni détruire
+     le secours, ni annuler une récupération déjà réussie en mémoire. ==== */
   try{
-    const primary=parseAndValidate(localStorage.getItem(SAVE_KEY));
-    let parsed=primary, usedBackup=false;
-    if(!parsed){
-      parsed=parseAndValidate(localStorage.getItem(SAVE_BACKUP_KEY));
-      if(parsed) usedBackup=true;
+    for(const key of [SAVE_KEY,SAVE_BACKUP_KEY]){
+      let candidate;
+      try{
+        candidate=migrate(parseAndValidate(localStorage.getItem(key)));
+        if(!candidate || !validateState(candidate)) continue;
+      }catch(e){ continue; }
+      G=candidate;
+      if(key===SAVE_BACKUP_KEY){
+        console.warn('Sauvegarde principale illisible ou invalide : restauration automatique depuis la copie de secours.');
+        try{ localStorage.setItem(SAVE_KEY,JSON.stringify(candidate)); }
+        catch(e){ alert('Carrière récupérée depuis le secours. Impossible de réécrire la sauvegarde principale : libère de l’espace puis sauvegarde à nouveau.'); }
+      }
+      return true;
     }
-    if(!parsed){ G=null; return false; }
-    G=migrate(parsed);
-    if(!validateState()){ console.error('Sauvegarde corrompue : état irrécupérable.'); G=null; return false; }
-    if(usedBackup){ console.warn('Sauvegarde principale illisible ou invalide : restauration automatique depuis la copie de secours.'); save(); }
-    return true;
-  }catch(e){ console.error('Sauvegarde illisible:',e); G=null; }
+  }catch(e){ console.error('Sauvegarde illisible:',e); }
   return false;
+  /* ==== [FIN ANCRE] ==== */
 }
 /* ==== [ANCRE: HASSAVE_PARSE_ISOLE] — bug trouvé : les deux JSON.parse (primary
    puis backup) partageaient un seul try/catch. Un SAVE_KEY corrompu levait une

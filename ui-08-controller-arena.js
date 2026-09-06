@@ -701,21 +701,29 @@ const CL={
         trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
     }
     G.season.year++; G.season.fights=[]; if(G.pending) G.pending.endOfSeason=false; G.screen='hub'; save(); render(); },
+  /* ==== [ANCRE: FIX_R01_RETRAITE_ATOMIQUE] — préparer le récap et l'archive
+     sur un clone ; publier retired/_enshrined et vider la saison seulement
+     après confirmation de l'entrée. Un nouvel essai ne double pas le récap. ==== */
   toLegacy(){
-    if(G.f._enshrined){ G.screen='legacy'; render(); return; }
-    if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
+    if(G.f._enshrined && hasArchivedFighter(G.f)){ G.screen='legacy'; render(); return; }
+    const candidate=JSON.parse(JSON.stringify(G.f));
     const sData=G.season||{year:1,fights:[]};
     const seasonEval=(sData.fights && sData.fights.length)?evaluateSeason(G.f,sData.fights):null;
     if(seasonEval){
-      if(!G.f.seasonRecap) G.f.seasonRecap=[];
-      G.f.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
+      if(!candidate.seasonRecap) candidate.seasonRecap=[];
+      candidate.seasonRecap.push({year:sData.year, W:seasonEval.stats.W, L:seasonEval.stats.L,
         koW:seasonEval.stats.koW, subW:seasonEval.stats.subW, decW:seasonEval.stats.decW,
         trophies:seasonEval.trophies.map(t=>t.lbl), age:G.f.age, org:G.f.org, divName:G.f.divName});
-      G.season.fights=[];
     }
-    G.f.retired=true; enshrine(G.f); syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
+    candidate.retired=true;
+    if(!enshrine(candidate)) return;
+    G.f=candidate;
+    if(seasonEval) G.season.fights=[];
+    syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
+    if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     G.screen='legacy'; save(); render();
   },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_RETRAITE_FANTOME_PURGE] — Lot C01/2026 §C12 :
      quitter définitivement l'écran de retraite ("Retour au menu") laissait
      la sauvegarde de carrière (retired:true, _enshrined:true) intacte dans
@@ -728,8 +736,12 @@ const CL={
      sauvegarde de carrière ici est donc sans risque pour elle. Après
      purge, hasSave() renvoie faux et cont() ne peut plus jamais router
      vers 'legacy'. ==== */
-  exitLegacy(){ wipe(); const t=G.theme; G={theme:t,screen:'title'}; setTheme(t); render(); },
-  newCareer(){ wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
+  /* ==== [ANCRE: FIX_R01_PURGE_APRES_RELECTURE] — vérifier encore l'archive
+     au départ définitif : une disparition entre intronisation et sortie
+     ne doit pas supprimer la dernière copie de la carrière. ==== */
+  exitLegacy(){ if(!G.f || !G.f._enshrined || !hasArchivedFighter(G.f)){ alert('Archive du Panthéon non confirmée. Ta carrière est conservée ; réessaie l’intronisation.'); return; } wipe(); const t=G.theme; G={theme:t,screen:'title'}; setTheme(t); render(); },
+  /* ==== [FIN ANCRE] ==== */
+  newCareer(){ if(G.f && G.f.retired && (!G.f._enshrined || !hasArchivedFighter(G.f))){ alert('Archive du Panthéon non confirmée. Ta carrière est conservée ; réessaie l’intronisation.'); return; } wipe(); const t=G.theme; G={theme:t,draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}}; setTheme(t); CL.go('create'); },
   exportSave(){ try{ const blob=JSON.stringify(G); const ta=document.createElement('textarea'); ta.value=blob; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy'); alert('Sauvegarde copiée — colle-la dans un fichier texte pour la garder.'); }catch(e){ prompt('Copie ce texte :',blob); }
       document.body.removeChild(ta); }catch(e){ alert('Export impossible.'); } },
@@ -743,9 +755,33 @@ const CL={
      Panthéon) ; importer une sauvegarde figée en plein combat (G.pending
      non consommé, cf. CORRECTIF_COMBAT_ORPHELIN) perdait le résultat.
      Même routage que cont(), pas un second calcul divergent. ==== */
-  importSave(){ const s=prompt('Colle ta sauvegarde ici :'); if(!s)return; try{ const parsed=JSON.parse(s); if(!parsed||typeof parsed!=='object') throw new Error('invalid'); G=migrate(parsed); if(!validateState()) throw new Error('corrupt'); setTheme(G.theme||'dark');
-    if(G.f && !G.f.retired && G.pending && !G.pending._consumed){ G.screen='result'; save(); render(); return; }
-    G.screen=(G.f && G.f.retired)?'legacy':'hub'; save(); render(); }catch(e){ alert('Sauvegarde invalide ou corrompue.'); } },
+  /* ==== [ANCRE: FIX_B03_IMPORT_ATOMIQUE] — toutes les étapes susceptibles
+     de rejeter le fichier portent sur un candidat. L'état, l'écran et le
+     thème vivants ne sont publiés qu'après succès complet. ==== */
+  importSave(){
+    const s=prompt('Colle ta sauvegarde ici :'); if(!s)return;
+    let candidate;
+    try{
+      const parsed=JSON.parse(s);
+      if(!validateSave(parsed)) throw new Error('invalid');
+      candidate=migrate(parsed);
+      if(!candidate || !validateState(candidate)) throw new Error('corrupt');
+    }catch(e){ alert('Sauvegarde invalide ou corrompue.'); return; }
+    const previous=G, app=document.getElementById('app'), nodes=Array.from(app.childNodes);
+    try{
+      G=candidate; setTheme(G.theme||'dark');
+      G.screen=G.f.retired?'legacy':(G.pending&&!G.pending._consumed?'result':'hub');
+      // Le premier rendu peut encore révéler une structure imbriquée invalide.
+      // Ne rien persister tant que cet écran n'a pas été construit.
+      render();
+    }catch(e){
+      G=previous; setTheme((previous&&previous.theme)||'dark');
+      app.replaceChildren(...nodes);
+      alert('Sauvegarde invalide ou corrompue.'); return;
+    }
+    save();
+  },
+  /* ==== [FIN ANCRE] ==== */
 };
 window.CL=CL;
 /* ==== [ANCRE: CORRECTIF_ARENA_MOTEUR_DEPLACE] — F-07, hygiène : le moteur de

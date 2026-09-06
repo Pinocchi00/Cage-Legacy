@@ -24,7 +24,7 @@ test('validateSave() rejette une sauvegarde structurellement impossible', () => 
   assert.equal(win.eval(`validateSave({f:{name:'X',W:NaN,L:0}})`), false, 'NaN = invalide');
   assert.equal(win.eval(`validateSave({f:{name:'X',W:1,L:0,history:'pas un tableau'}})`), false, 'history doit être un tableau');
   assert.equal(win.eval(`validateSave({f:{name:'X',W:1,L:0,div:'div-inexistant'}})`), false, 'division inconnue = invalide');
-  assert.equal(win.eval(`validateSave({version:2,f:{name:'X',W:3,L:1,D:0,history:[]}})`), true, 'sauvegarde plausible acceptée');
+  assert.equal(win.eval(`validateSave({version:SAVE_VERSION,f:{name:'X',W:3,L:1,D:0,history:[]}})`), true, 'sauvegarde plausible acceptée');
 });
 
 test('save() copie systématiquement la sauvegarde précédente dans la clé de secours', () => {
