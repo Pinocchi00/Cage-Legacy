@@ -123,4 +123,5 @@ test('hubDossierHtml() — six boutons vers les mêmes écrans qu’avant, en gr
     assert.ok(html.includes(`CL.go('${target}')`), `bouton vers l’écran '${target}' présent`);
   });
   assert.ok(!/undefined/.test(html));
+  assert.ok(!html.includes('CL.duelEnter()'), 'LOT DUEL-02 : le Duel entre amis a quitté le sous-menu Dossier du hub');
 });

@@ -320,3 +320,67 @@ test('resolveDuelTie — départage explicite : plus de finitions, puis plus de 
   ];
   assert.equal(win.resolveDuelTie(manchesFlat, true), 'friend');
 });
+
+/* --------------------- LOT DUEL-02 : entrée sur scr_intro --------------------- */
+
+test('scr_intro() — aucune entrée Duel entre amis quand hasSave(\'career\') est faux', () => {
+  const win = newGameWindow();
+  win.eval(`G = {};`);
+  const html = win.scr_intro();
+  assert.ok(!html.includes('CL.duelEnterFromIntro'), 'sans sauvegarde de carrière, un duel n’a aucun sens : pas de bouton du tout');
+});
+
+test('scr_intro() — l’entrée Duel entre amis apparaît dès qu’une sauvegarde de carrière existe', () => {
+  const win = newGameWindow();
+  win.setSeed(70);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Intro'} };
+    CL.create();
+  `);
+  const html = win.scr_intro();
+  assert.ok(html.includes('CL.duelEnterFromIntro()'), 'le bouton doit router sur duelEnterFromIntro(), pas sur duelEnter() (G.f pas encore chargé sur cet écran)');
+});
+
+test('duelEnterFromIntro() — sur une sauvegarde valide, charge la carrière puis entre dans l’écran de duel avec G.f renseigné', () => {
+  const win = newGameWindow();
+  win.setSeed(71);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Duelliste'} };
+    CL.create();
+  `);
+  const savedName = win.G.f.name;
+  win.G = null; // simule un rechargement de page : scr_intro() s'affiche avant tout CL.cont()
+  win.CL.duelEnterFromIntro();
+  assert.equal(win.G.screen, 'duel_home');
+  assert.ok(win.G.f, 'G.f doit être renseigné après duelEnterFromIntro()');
+  assert.equal(win.G.f.name, savedName);
+});
+
+test('duelEnterFromIntro() — reste sur l’écran d’accueil avec un message lisible si le chargement échoue', () => {
+  const win = newGameWindow();
+  win.eval(`G = { screen:'intro' };`);
+  // Pas de sauvegarde du tout : load() doit échouer proprement (jamais de throw).
+  assert.doesNotThrow(() => win.CL.duelEnterFromIntro());
+  assert.equal(win.G.screen, 'intro', 'reste sur l’écran d’accueil, jamais sur duel_home, si load() échoue');
+  // render() a déjà consommé G._introDuelError en l'affichant (même patron que
+  // G.lastMsg/G.bootMsg) : on vérifie le message dans le HTML rendu, pas sur G.
+  const rendered = win.document.getElementById('app').innerHTML;
+  assert.ok(/impossible|échec|réessaie/i.test(rendered), 'un message d’erreur lisible doit être affiché sur l’écran d’accueil');
+});
+
+test('duelEnterFromIntro() — aucune écriture localStorage sur tout ce chemin (exhibition pure)', () => {
+  const win = newGameWindow();
+  win.setSeed(72);
+  win.eval(`
+    G = { theme:'dark', draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:'Pure'} };
+    CL.create();
+  `);
+  win.G = null;
+  const before = win.localStorage.getItem('cage-legacy-v3');
+  let writes = 0;
+  const origSetItem = win.localStorage.setItem.bind(win.localStorage);
+  win.localStorage.setItem = (...args) => { writes++; return origSetItem(...args); };
+  win.CL.duelEnterFromIntro();
+  assert.equal(writes, 0, 'duelEnterFromIntro() ne doit jamais écrire dans localStorage (ni save(), ni auto-réparation de load())');
+  assert.equal(win.localStorage.getItem('cage-legacy-v3'), before);
+});
