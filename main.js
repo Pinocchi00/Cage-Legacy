@@ -40,20 +40,35 @@ try {
 if(document.getElementById('app')){
   G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}};
   setTheme('dark');
+  /* ==== [ANCRE: DUEL_LIEN_PARTAGE] — LOT DUEL-03 : ?legend=CODE (nom de
+     paramètre conservé — des liens sont peut-être déjà partagés) décode
+     désormais via le codec du Duel entre amis (duel-codec.js, chargé avant
+     ce fichier) et route directement vers l'écran de sélection du duel
+     (duel_home, ui-10-duel.js) avec la légende de l'ami pré-remplie —
+     jamais vers l'ancien écran vs_friend, retiré. ==== */
   try{
     const params=new URLSearchParams(location.search);
     const code=params.get('legend');
     if(code){
-      const legend=decodeLegendCode(code);
-      if(legend){ G.importedFriendLegend=legend; G.screen='vs_friend'; }
-      else{
+      const check=decodeDuelCode(code);
+      if(check.ok){
+        CL.duelEnter();
+        G._duelFriendFiche=check.fighter;
+        G._duelFriendCode=code.trim();
+        G._duelMsg="Légende de ton ami importée depuis le lien.";
+      } else {
         // ==== [ANCRE: FEEDBACK_LIEN_AMI] — avant : un lien corrompu ou
         // tronqué (partage SMS/WhatsApp notamment) échouait EN SILENCE — le
         // joueur atterrissait sur le titre sans le moindre message, laissant
         // penser que "le lien ne marche pas" sans aucune piste. Un message
-        // clair est maintenant affiché sur l'écran d'accueil.
+        // clair est maintenant affiché sur l'écran d'accueil. Un code d'une
+        // version précédente du codec (ancien CLD1, ou ancien export "Vs
+        // Ami" — fonctionnalité retirée) reçoit son propre message, jamais
+        // confondu avec "invalide".
         G.screen='title';
-        G.bootMsg="Le lien reçu est corrompu ou incomplet (souvent tronqué par l'appli de messagerie utilisée pour le partager). Demande à ton ami de te renvoyer le bouton \u00abExporter\u00bb depuis son Panthéon, ou de te l'envoyer par un autre moyen (copier-coller direct plutôt qu'un lien cliquable).";
+        G.bootMsg=check.reason==='version_precedente'
+          ? "Ce lien vient d'une version précédente du jeu — demande à ton ami de t'en renvoyer un nouveau depuis son Panthéon (bouton \u00abExporter\u00bb)."
+          : "Le lien reçu est corrompu ou incomplet (souvent tronqué par l'appli de messagerie utilisée pour le partager). Demande à ton ami de te renvoyer le bouton \u00abExporter\u00bb depuis son Panthéon, ou de te l'envoyer par un autre moyen (copier-coller direct plutôt qu'un lien cliquable).";
       }
       // Nettoie l'URL pour éviter de ré-importer en boucle à chaque rechargement/partage accidentel
       history.replaceState(null,'',location.pathname);

@@ -633,22 +633,6 @@ function neutralizeWeightGap(A,B){
   if(A.phys) A.phys.reach=avgReach;
   if(B.phys) B.phys.reach=avgReach;
 }
-// Export/import d'une légende sous forme de code texte copiable — permet à un
-// ami de partager une légende de SON Panthéon (stocké uniquement sur son
-// appareil, il n'y a pas de serveur) pour l'affronter dans Vs Ami. Le code
-// encode exactement la même forme d'objet que les entrées du Panthéon
-// (voir enshrine() dans state.js), donc reconstructLegend() les traite de
-// façon identique, qu'elles viennent de ton Panthéon ou d'un import.
-function encodeLegendCode(l){
-  try{ return btoa(unescape(encodeURIComponent(JSON.stringify(l)))); }catch(e){ return null; }
-}
-function decodeLegendCode(code){
-  try{
-    const obj=JSON.parse(decodeURIComponent(escape(atob((code||'').trim()))));
-    if(!obj || !obj.name || !obj.attrs) return null;
-    return obj;
-  }catch(e){ return null; }
-}
 function reconstructLegend(l){
   const f=makeFighter({gender:'H',div:l.div||'H-welter',style:l.styleKey||'mma',first:l.name,age:l.age||35});
   if(l.attrs) f.attrs=JSON.parse(JSON.stringify(l.attrs));
@@ -796,73 +780,13 @@ function scr_allstars(){
 }
 /* ==== [FIN ANCRE] ==== */
 
-/* ==== [ANCRE: ECRAN_VS_FRIEND] ==== */
-/* ==== [ANCRE: VSFRIEND_SERIE] — écran relais entre les manches d'une série
-   Best-of-3 (5 rounds décisifs en cas d'égalité 1-1). ==== */
-function scr_vs_friend_next(){
-  const s=G.vsFriendScore, A=G.vsFriendLegendA, B=G.vsFriendLegendB;
-  if(!s||!A||!B) return `<div class="scr center intro"><p class="lede">Série interrompue.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
-  return `<div class="scr center intro">
-    <div class="eyebrow gold">Défi Multijoueur — Série</div>
-    <h2 class="disp">${esc(A.name)} ${s.A} - ${s.B} ${esc(B.name)}</h2>
-    <p class="lede">${s.A===1&&s.B===1?'Égalité. La manche décisive se jouera en 5 rounds.':`Manche ${s.round+1} sur 3 maximum.`}</p>
-    <button class="btn primary mt" onclick="CL.launchVsFriend()">MANCHE SUIVANTE</button>
-  </div>`;
-}
-/* ==== [FIN ANCRE] ==== */
-function scr_vs_friend(){
-  const list=loadHOF();
-  const imported=G.importedFriendLegend;
-  if(list.length===0){
-    return `<div class="scr center intro"><div class="eyebrow gold">Défi Multijoueur</div><h2 class="disp">Panthéon vide</h2><p class="lede">${imported?`La légende de ${esc(imported.name)} a bien été importée, mais il te faut aussi au moins 1 légende dans TON propre Panthéon pour te représenter.`:'Il te faut au moins 1 légende au Panthéon pour défier un ami.'}</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
-  }
-  if(list.length<2 && !imported){
-    return `<div class="scr center intro">
-      <div class="eyebrow gold">Défi Multijoueur</div>
-      <h2 class="disp">Combattant d\u2019un ami</h2>
-      <p class="lede small">Colle ici le LIEN ou le code que ton ami t\u2019a envoyé (généré depuis son Panthéon, bouton "Exporter"). Sans ça, il te faut au moins 2 légendes dans ton propre Panthéon.</p>
-      ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:10px 14px;margin-top:12px"><span class="small">${esc(m)}</span></div>`; })():''}
-      <textarea id="friend_code" placeholder="Colle ici le lien ou le code que ton ami t\u2019a envoyé..." style="width:100%;min-height:80px;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:10px;font-family:'JetBrains Mono';font-size:12px;margin-top:16px"></textarea>
-      <button class="btn primary mt" onclick="CL.importFriendCode()">IMPORTER LE CODE</button>
-      <button class="btn ghost mt" onclick="CL.leaveSandbox()">Retour à la salle</button>
-    </div>`;
-  }
-  let selA=G.vsFriendSelA!==undefined?G.vsFriendSelA:0;
-  let selB=G.vsFriendSelB!==undefined?G.vsFriendSelB:(list.length>1?1:0);
-  selA=Math.max(0,Math.min(selA,list.length-1));
-  selB=Math.max(0,Math.min(selB,list.length-1));
-  const lA=list[selA];
-  const lB=imported||list[selB];
-  return `<div class="scr center intro">
-    <div class="eyebrow gold">Défi Multijoueur</div>
-    <h2 class="disp">Combattant d\u2019un ami</h2>
-    <p class="lede small">Choisis ta légende. ${imported?'La légende de ton ami a été importée.':'Choisis la légende de ton Panthéon que ton ami incarne, ou importe son lien/code ci-dessous.'} Le combat se déroule dans ta catégorie de poids.</p>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:32px 0;gap:16px">
-      <div style="flex:1;text-align:center">
-         <div class="eyebrow mb">Ta légende</div>
-         <div class="hero-name" style="font-size:22px;color:var(--blood)">${esc(lA.name)}</div>
-         <div class="muted small mb">${lA.style} · OVR ${lA.overall||'?'}</div>
-         <div><button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(0,-1)">◀</button>
-         <button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(0,1)">▶</button></div>
-      </div>
-      <div class="disp gold" style="font-size:24px;padding-top:20px">VS</div>
-      <div style="flex:1;text-align:center">
-         <div class="eyebrow mb">${imported?'Légende importée de l\u2019ami':'Légende de l\u2019ami'}</div>
-         <div class="hero-name" style="font-size:22px;color:var(--sage)">${esc(lB.name)}</div>
-         <div class="muted small mb">${lB.style} · OVR ${lB.overall||'?'}</div>
-         ${imported?`<button class="btn ghost" style="width:auto;padding:8px" onclick="CL.clearImportedFriend()">Retirer l\u2019import</button>`:
-           `<div><button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,-1)">◀</button>
-           <button class="btn ghost" style="display:inline-block;width:auto;padding:8px" onclick="CL.setVsFriendPlayer(1,1)">▶</button></div>`}
-      </div>
-    </div>
-    ${!imported?`<div class="glass card mb" style="background:var(--panel2);padding:12px;text-align:left">
-      <div class="eyebrow mb">Importer une vraie légende d\u2019ami</div>
-      <textarea id="friend_code" placeholder="Colle ici le lien ou le code de ton ami..." style="width:100%;min-height:60px;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px"></textarea>
-      <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.importFriendCode()">Importer</button>
-    </div>`:''}
-    <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.launchVsFriend()">LANCER LE DÉFI</button>
-    <button class="btn ghost mt" onclick="CL.leaveSandbox()">Retour à la salle</button>
-  </div>`;
-}
-/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: ECRAN_VS_FRIEND] — LOT DUEL-03 : le mode vs_friend («Défi
+   Multijoueur») est entièrement supprimé (scr_vs_friend, scr_vs_friend_next,
+   scr_vs_friend_plan de ui-06, launchVsFriend/chooseVsFriendPlan de ui-08,
+   les champs G.vsFriendSelA/SelB/Score/LegendA/LegendB/Active) — remplacé
+   par le Duel entre amis (duel-codec.js, ui-10-duel.js), qui joue entre deux
+   légendes du Panthéon via un code déterministe plutôt qu'un import de lien
+   local au vestiaire. reconstructLegend()/neutralizeWeightGap() ci-dessus
+   restent utilisées par Fantasy Fight/All-Stars ET par le Duel entre amis
+   (duel-codec.js) — jamais retirées. ==== */
 
