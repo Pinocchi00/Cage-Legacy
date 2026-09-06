@@ -145,6 +145,23 @@ Object.assign(CL,{
     G._duelBusy=false; G._duelError=null; G._duelMsg=null; G._duelSeries=null; G._duelMancheIdx=0;
     G.screen='duel_home'; render();
   },
+  /** Point d'entrée du Duel entre amis depuis scr_intro() (LOT DUEL-02,
+   * ANCRE DUEL_ENTREE_INTRO de ui-06-career-screens.js) : contrairement à
+   * duelEnter(), appelable avant que load() n'ait tourné (G.f est encore
+   * null sur cet écran). Recharge la sauvegarde par le MÊME chemin que
+   * CL.cont() (load()+setTheme(), jamais dupliqué ici) puis délègue à
+   * duelEnter() — n'appelle jamais save(), l'exhibition reste pure. */
+  duelEnterFromIntro(){
+    const priorTheme=(G&&G.theme)||'dark';
+    if(load()){ setTheme(G.theme||'dark'); CL.duelEnter(); return; }
+    // load() met G à null en cas d'échec (state-save.js) : on reconstruit un
+    // G minimal plutôt que de laisser planter la suite sur un G null, sur le
+    // même modèle que newCareer()/exitLegacy() (ui-08) qui réinitialisent G
+    // après wipe().
+    G={screen:'intro',theme:priorTheme,_introDuelError:"Chargement du dossier impossible — réessaie."};
+    setTheme(priorTheme);
+    render();
+  },
   duelShareMyCode(){
     const code=encodeDuelCode(G.f);
     if(!code){ G._duelMsg="Impossible de générer ton code."; render(); return; }

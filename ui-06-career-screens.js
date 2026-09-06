@@ -67,13 +67,37 @@ function scr_title(){
     </div>`;
 }
 
+/* ==== [ANCRE: DUEL_ENTREE_INTRO] — LOT DUEL-02 : l'entrée du Duel entre
+   amis quitte le sous-menu Dossier du hub (ancienne ANCRE DUEL_CODEC de
+   hubDossierHtml(), retirée) pour l'écran d'accueil de Carrière Complète —
+   personne ne la trouvait dans Dossier. scr_intro() s'affiche AVANT que
+   load() ait tourné : G.f est encore null tant que CL.cont()/CL.create()
+   n'a pas été appelé, donc le bouton ne peut pas router sur CL.duelEnter()
+   (qui suppose G.f déjà chargé, cf. scr_duelHome()). Sans sauvegarde de
+   carrière, un duel n'a aucun sens : le bouton ne s'affiche tout simplement
+   pas (ni grisé, ni caché derrière une garde) plutôt que de router vers
+   CL.duelEnterFromIntro() (ui-10-duel.js), qui charge la sauvegarde par le
+   même chemin que CL.cont() avant de déléguer à CL.duelEnter(). ==== */
+function introDuelEntryHtml(hasCareer){
+  if(!hasCareer) return '';
+  return `<button class="btn" style="min-height:44px" onclick="CL.duelEnterFromIntro()">Duel entre amis
+    <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Affronte le combattant d'un ami avec un code</span></button>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 function scr_intro(){ const c=hasSave('career');
+  const introErrHtml=(()=>{ if(!G._introDuelError) return '';
+    const m=G._introDuelError; G._introDuelError=null;
+    return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
+  })();
   return `<div class="scr center intro">
    <div class="eyebrow">Simulateur de gestion MMA</div>
    <h1 class="disp big">CAGE<br>LEGACY</h1>
    <p class="lede">Capital physique limité. Chaque camp d\u2019entraînement laisse des traces.</p>
+   ${introErrHtml}
    ${c?`<button class="btn gold" onclick="CL.cont()">Reprendre le dossier</button>`:''}
    <button class="btn primary" onclick="CL.go('create')">${c?'Nouveau prospect':'Jouer une future légende'}</button>
+   ${introDuelEntryHtml(c)}
    <button class="btn ghost" onclick="CL.go('hof')">🏛️ Archives</button>
    <button class="btn ghost" onclick="CL.go('title')">← Retour au menu</button></div>`; }
 
@@ -235,22 +259,14 @@ function hubCombatHtml(f){
 /** Sous-menu Dossier du hub : les six écrans annexes de carrière, en grille
  * 2 colonnes. Mêmes cibles de navigation que l'ancienne grille à six
  * boutons (ANCRE HUB_GRILLE, retirée). @returns {string} */
-/* ==== [ANCRE: DUEL_CODEC] — LOT DUEL-01 : entrée du menu Carrière Complète
-   vers le Duel entre amis (combattant EN COURS, pas une légende du
-   Panthéon — à ne pas confondre avec Défi Multijoueur, accessible depuis le
-   Panthéon). Route sur CL.duelEnter() (ui-10-duel.js), pas tile()/CL.go() :
-   duelEnter() réinitialise aussi l'état transitoire de l'écran (message,
-   erreur, série en cours) avant d'y entrer. ==== */
 function hubDossierHtml(){
   const tile=(label,target)=>`<button class="btn" style="margin:0;border:1px solid var(--line);color:var(--text);padding:14px 8px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:13px;letter-spacing:.05em;line-height:1.3" onclick="CL.go('${target}')">${label}</button>`;
   return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     ${tile('Bilan technique','profile')}${tile('Classements','rankings')}
     ${tile('Palmarès','ach')}${tile('Archives','history')}
     ${tile('Ceintures','beltLineage')}${tile('Panthéon','hof')}
-    <button class="btn" style="margin:0;border:1px solid var(--line);color:var(--text);padding:14px 8px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:13px;letter-spacing:.05em;line-height:1.3;grid-column:1 / -1" onclick="CL.duelEnter()">Duel entre amis</button>
   </div>`;
 }
-/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 function scr_select(){ const f=G.f;
