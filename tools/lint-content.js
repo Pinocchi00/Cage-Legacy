@@ -39,13 +39,31 @@ const ANGLICISMS = [
   { term: 'BOUT', re: /\bBOUT\b/, note: 'terme anglais non traduit — "POIDS LOURDS · 3 REPRISES" ou "· 3 ROUNDS" (Plan V3 LOT 6/P09, ui-01:654 déjà identifié).' },
   { term: 'MAIN EVENT', re: /\bMAIN EVENT\b/i, note: 'à remplacer par une carte complète de 5-8 combats (Plan V3 LOT 6/P18).' },
 ];
-const ANGLICISM_FILES = ['ui-01-roster-matchmaking.js','ui-04a-faith-screens.js','ui-04b-gauntlet-screens.js','data-faith-content.js','data-people.js','ui-07-contracts-legacy-screens.js'];
+const ANGLICISM_FILES = ['ui-01-roster-matchmaking.js','data-people.js','ui-07-contracts-legacy-screens.js'];
+
+/* ==== [ANCRE: FIX_LOT0_LINT_CONTENT_GARDE_FOU] — si un fichier listé est
+   absent du disque, l'outil sort en erreur plutôt que de rapporter silencieusement
+   un faux verdict. ==== */
+function assertFilesExist(list, category){
+  for(const file of list){
+    const fp = path.join(ROOT, file);
+    if(!fs.existsSync(fp)){
+      console.error(`[lint-content] ERREUR : fichier listé dans ${category} introuvable sur le disque : "${file}"`);
+      process.exit(1);
+    }
+  }
+}
+assertFilesExist(ANGLICISM_FILES, 'ANGLICISM_FILES');
+/* ==== [FIN ANCRE] ==== */
 
 function lintAnglicisms(){
   const findings = [];
   for(const file of ANGLICISM_FILES){
     const fp = path.join(ROOT, file);
-    if(!fs.existsSync(fp)) continue;
+    if(!fs.existsSync(fp)){
+      console.error(`[lint-content] ERREUR : fichier introuvable : ${file}`);
+      process.exit(1);
+    }
     const lines = fs.readFileSync(fp,'utf8').split('\n');
     lines.forEach((line, i) => {
       for(const a of ANGLICISMS){
@@ -61,7 +79,8 @@ function lintAnglicisms(){
 // chaîne littérale '...'/"..."/`...` de plus de 40 caractères est candidate.
 // Les gabarits HTML (contiennent '<') sont exclus — ce sont des fragments de
 // mise en page, pas des phrases lues d'un bloc par le joueur.
-const SENTENCE_FILES = ['data-faith-content.js','data-people.js'];
+const SENTENCE_FILES = ['data-people.js'];
+assertFilesExist(SENTENCE_FILES, 'SENTENCE_FILES');
 /** Tokenizer minimal (pas un vrai parseur JS, mais respecte les
  * commentaires /* *​/ et //, contrairement à une regex naïve sur les
  * guillemets) : sans ça, une apostrophe dans un commentaire en français
@@ -106,7 +125,10 @@ function lintSentenceLength(){
   const findings = [];
   for(const file of SENTENCE_FILES){
     const fp = path.join(ROOT, file);
-    if(!fs.existsSync(fp)) continue;
+    if(!fs.existsSync(fp)){
+      console.error(`[lint-content] ERREUR : fichier introuvable : ${file}`);
+      process.exit(1);
+    }
     const src = fs.readFileSync(fp,'utf8');
     for(const lit of extractStringLiterals(src)){
       const t = lit.text;
@@ -257,7 +279,10 @@ function stripCommentsAndStrings(src){
   return out;
 }
 function lintDeadStateFields(){
-  const writeRe = /\b(G\.f|G\.faith|G\.arcade)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=(?!=)|\+=|-=|\*=|\/=|\|\|=|&&=|\?\?=)/g;
+  /* ==== [ANCRE: FIX_LOT0_LINT_DEAD_FIELDS_REGEX] — scanne uniquement G.f
+     puisque G.faith et G.arcade ont été retirés du jeu. ==== */
+  const writeRe = /\b(G\.f)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:=(?!=)|\+=|-=|\*=|\/=|\|\|=|&&=|\?\?=)/g;
+  /* ==== [FIN ANCRE] ==== */
   const sources = {};
   for(const file of STATE_SCAN_FILES){
     const fp = path.join(ROOT, file);
@@ -315,7 +340,7 @@ function main(){
     pools.contextFindings.forEach(f => console.log(`  [jeton de contexte manquant] pool "${f.poolId}", entrée "${f.entryId}"`));
   }
 
-  console.log(`\n=== CHAMPS G.f./G.faith./G.arcade. écrits mais jamais relus (${deadFields.length}) ===`);
+  console.log(`\n=== CHAMPS G.f. écrits mais jamais relus (${deadFields.length}) ===`);
   deadFields.forEach(f => console.log(`  ${f.at.namespace}.${f.field} — écrit ${f.at.file}:${f.at.line}${f.writeCount>1?` (et ${f.writeCount-1} autre(s) site(s))`:''}, jamais relu ailleurs`));
 
   const totalBlocking = pools.skipped ? 0 : (pools.sizeFindings.length + pools.reqFindings.length + pools.contextFindings.length);

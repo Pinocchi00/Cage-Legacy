@@ -79,9 +79,47 @@ test('wipe() efface la sauvegarde principale et son backup, jamais le Panthéon 
   assert.equal(win.eval(`loadMetaStats().totalFights`), 7, 'les méta-statistiques doivent survivre à wipe()');
 });
 
-test('SAVE_VERSION est bien à 4 et migrate() amène toute sauvegarde à cette version', () => {
+/* ==== [ANCRE: TEST_SAVE_VERSION_5_ET_RESET_V2] — Lot 0 TÂCHE 0.3 et 0.4 :
+   SAVE_VERSION est à 5, les versions < 5 sont refusées sans effet de bord,
+   et le reset ciblé v2 n'efface que les clés du jeu. ==== */
+test('SAVE_VERSION est bien à 5 et migrate() refuse proprement une sauvegarde de version inférieure', () => {
   const win = newGameWindow();
-  assert.equal(win.eval(`SAVE_VERSION`), 4);
-  const migrated = win.eval(`migrate({version:1,f:{name:'X',W:0,L:0}})`);
-  assert.equal(migrated.version, 4);
+  assert.equal(win.eval(`SAVE_VERSION`), 5);
+  const saveV1 = {version:1, f:{name:'X',W:0,L:0}};
+  const deepCopy = JSON.parse(JSON.stringify(saveV1));
+  const migrated = win.eval(`migrate(${JSON.stringify(saveV1)})`);
+  assert.equal(migrated, null, 'une sauvegarde de version < 5 doit être refusée');
+  assert.deepEqual(saveV1, deepCopy, 'aucune mutation sur la sauvegarde refusée');
 });
+
+test('RESET_KEY_V2 efface les 8 clés du jeu sans toucher aux clés d’autres applications', () => {
+  const win = newGameWindow();
+  win.localStorage.setItem('autre-app', 'preserve_me');
+  win.localStorage.setItem('cage-legacy-v3', '{"f":{}}');
+  win.localStorage.setItem('cage-legacy-hof', '[]');
+  win.localStorage.removeItem('cage-legacy-reset-v2');
+
+  // Exécute le bloc reset de main.js
+  const CAGE_LEGACY_KEYS = [
+    'cage-legacy-v3',
+    'cage-legacy-v3_backup',
+    'cage-legacy-hof',
+    'cage-legacy-metastats',
+    'cage-legacy-achievements',
+    'cage-legacy-codex',
+    'cage-legacy-mentor-bonus',
+    'cage-legacy-reset-zero-v1'
+  ];
+  if (!win.localStorage.getItem('cage-legacy-reset-v2')) {
+    for (const k of CAGE_LEGACY_KEYS) {
+      win.localStorage.removeItem(k);
+    }
+    win.localStorage.setItem('cage-legacy-reset-v2', '1');
+  }
+
+  assert.equal(win.localStorage.getItem('autre-app'), 'preserve_me', 'la clé externe doit survivre');
+  assert.equal(win.localStorage.getItem('cage-legacy-v3'), null, 'la clé du jeu doit être purgée');
+  assert.equal(win.localStorage.getItem('cage-legacy-hof'), null, 'le Panthéon initial doit être purgé au reset v2');
+  assert.equal(win.localStorage.getItem('cage-legacy-reset-v2'), '1');
+});
+/* ==== [FIN ANCRE] ==== */

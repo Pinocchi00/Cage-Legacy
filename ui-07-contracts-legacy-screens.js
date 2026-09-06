@@ -449,28 +449,9 @@ function legacyTitle(f){ const s=hofScore(f);
 /* ==== [FIN ANCRE] ==== */
 function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=epithets(f);
   const notableWins=(f.history||[]).filter(h=>h.res==='win'&&h.oppWasChamp&&h.oppName).slice(-6).reverse();
-  let nemesisHtml='';
-  if(f.gameMode==='faith' && f.faithNemesisId){
-    const nemesis=G.roster.find(o=>o.id===f.faithNemesisId);
-    if(nemesis){
-      const diffW=f.W-nemesis.W;
-      nemesisHtml=`<div class="card mt glass" style="border-left:3px solid var(--blood);background:var(--panel2);padding:16px;text-align:left">
-        <div class="eyebrow mb" style="color:var(--blood)">L\u2019ultime face-à-face (Némésis)</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div style="flex:1;text-align:center">
-            <b style="font-size:18px">${esc(f.name)}</b>
-            <div class="mono small muted mt">${f.W}-${f.L} · ${f.titles||0} Titre(s)</div>
-          </div>
-          <div class="disp gold" style="font-size:24px;padding:0 16px">VS</div>
-          <div style="flex:1;text-align:center">
-            <b style="font-size:18px">${esc(fighterDisplayName(nemesis))}</b>
-            <div class="mono small muted mt">${nemesis.W}-${nemesis.L} · ${nemesis.titles||0} Titre(s)</div>
-          </div>
-        </div>
-        <div class="muted small" style="font-style:italic">« ${diffW>=0?`L\u2019histoire retiendra que vous avez surpassé ${esc(fighterDisplayName(nemesis))}. Vous avez remporté cette guerre d\u2019usure.`:`Malgré tous vos efforts, le palmarès de ${esc(fighterDisplayName(nemesis))} restera une ombre sur votre héritage.`} »</div>
-      </div>`;
-    }
-  }
+/* ==== [ANCRE: FIX_LOT0_PURGE_NEMESIS_HTML_UI07] — suppression du bloc Némésis
+   issu du mode Faith retiré. ==== */
+/* ==== [FIN ANCRE] ==== */
   return `<div class="scr center"><div class="eyebrow">Palmarès scellé</div>
    <div style="font-size:60px">${ico}</div>
    <div class="hero-name" style="text-align:center;color:var(--gold)">${rank}<em style="color:var(--muted)">${esc(f.name)}${f.nick?' « '+f.nick+' »':''}</em></div>
@@ -485,7 +466,6 @@ function scr_legacy(){ const f=G.f; const [ico,rank]=legacyTitle(f); const ep=ep
      </div>
      <div class="muted small mt" style="position:relative;z-index:2">${f.motivation}</div>
      ${f.biggestRival?`<div class="mono small mt" style="color:var(--blood);position:relative;z-index:2">⚔ Plus grand rival : ${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div>`:''}</div>
-   ${nemesisHtml}
    ${notableWins.length?`<div class="card mt"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
    ${f.beltHistory && f.beltHistory.length ? `<div class="card mt"><div class="eyebrow mb">👑 Ceintures remportées</div>${f.beltHistory.map(b=>`<div class="small muted" style="padding:4px 0">${esc(b.orgName)} <span class="mono" style="opacity:.7">(${esc(b.divName)}) — Année ${b.year} — ${b.defenses} défense(s)</span></div>`).join('')}</div>` : ''}
    ${retireSeasonRecapHtml(f)}

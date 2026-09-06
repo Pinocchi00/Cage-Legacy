@@ -28,14 +28,32 @@ function validateSkills(){
 }
 validateSkills();
 /* ==== [FIN ANCRE] ==== */
-// Remise à zéro complète pour tous les comptes (transition Carrière pure, purge Gauntlet & Faith)
-const RESET_KEY = 'cage-legacy-reset-zero-v1';
+/* ==== [ANCRE: RESET_FINAL_CIBLE] — Remise à zéro ciblée (Lot 0) : remplace
+   l'ancien localStorage.clear() par une suppression limitée aux seules clés
+   du jeu, évitant d'effacer les données d'autres applications servies sur le
+   même domaine (GitHub Pages partagé).
+   ATTENTION : ce bloc est TEMPORAIRE et devra être retiré une fois que les
+   deux joueurs auront rechargé le jeu. ==== */
+const RESET_KEY_V2 = 'cage-legacy-reset-v2';
+const CAGE_LEGACY_KEYS = [
+  'cage-legacy-v3',
+  'cage-legacy-v3_backup',
+  'cage-legacy-hof',
+  'cage-legacy-metastats',
+  'cage-legacy-achievements',
+  'cage-legacy-codex',
+  'cage-legacy-mentor-bonus',
+  'cage-legacy-reset-zero-v1'
+];
 try {
-  if (typeof localStorage !== 'undefined' && !localStorage.getItem(RESET_KEY)) {
-    localStorage.clear();
-    localStorage.setItem(RESET_KEY, '1');
+  if (typeof localStorage !== 'undefined' && !localStorage.getItem(RESET_KEY_V2)) {
+    for (const k of CAGE_LEGACY_KEYS) {
+      localStorage.removeItem(k);
+    }
+    localStorage.setItem(RESET_KEY_V2, '1');
   }
 } catch(e) {}
+/* ==== [FIN ANCRE] ==== */
 
 if(document.getElementById('app')){
   G={screen:'title',theme:'dark',draft:{gender:'H',style:'boxer',country:COUNTRY_KEYS[0],div:DIVISIONS.H[3].id,first:''}};

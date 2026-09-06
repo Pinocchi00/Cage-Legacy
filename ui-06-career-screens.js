@@ -1017,9 +1017,11 @@ function scr_profile(){ const f=G.f; const g=groupAvg(f); const backScreen=G._pr
      <div class="meta-strip"><div><span>Division</span><b>${f.divName}</b></div><div><span>Taille</span><b>${f.phys.height}cm</b></div><div><span>Allonge</span><b>${f.phys.reach}cm</b></div><div><span>Garde</span><b>${f.phys.stance==='southpaw'?'Gauchère':'Orthodoxe'}</b></div></div>
      <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
      <div class="story" style="position:relative;z-index:2;margin-top:10px"><b>Origine.</b> ${f.origin}.</div>
-     <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
-     ${(f.faithTraits && f.faithTraits.length)?`<div class="story" style="position:relative;z-index:2;color:var(--blood)"><b>Traits de caractère.</b> ${f.faithTraits.join(', ')}.</div>`:''}
-     <!-- ==== [ANCRE: V2-38] — bilan maison : le palmarès global (f.W/f.L,
+      <div class="story" style="position:relative;z-index:2"><b>Se bat pour.</b> ${f.motivation}.</div>
+      <!-- ==== [ANCRE: FIX_LOT0_PURGE_FAITH_TRAITS_UI06] — suppression de l'affichage
+           mort de f.faithTraits issu du mode Faith retiré. ==== -->
+      <!-- ==== [FIN ANCRE] ==== -->
+      <!-- ==== [ANCRE: V2-38] — bilan maison : le palmarès global (f.W/f.L,
           jamais réinitialisé après le seul passage amateur→pro) reste la
           référence affichée partout ailleurs ; cette ligne ajoute le détail
           par organisation (f.orgRecords, engine.js applyResult()), un

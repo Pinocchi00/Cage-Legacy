@@ -1,13 +1,26 @@
 "use strict";
 /* CAGE LEGACY — state/state-migration.js
    Migration d'une sauvegarde ancienne vers la version courante. */
-const SAVE_VERSION=4;
+const SAVE_VERSION=5;
 /* ==== [ANCRE: MIGRATION] — on empile les blocs, on n'en modifie jamais un livré ==== */
-function migrate(g){ if(!g)return g; g.version=g.version||1;
-  if(g.version<SAVE_VERSION){ g.version=SAVE_VERSION; }
-  g=purgeRemovedModes(g);
-  g=migrateDoubleChampion(g);
-  return g; }
+/* ==== [ANCRE: SAVE_VERSION_5_SANS_CONVERSION] — Lot 0 TÂCHE 0.4 : passage à
+   SAVE_VERSION 5 sans chaîne de migration. Une sauvegarde < 5 ou absente est
+   proprement refusée avec message d'avertissement, sans mutation ni écriture.
+   Une sauvegarde > 5 est également refusée. Seule la version 5 est chargée. ==== */
+function migrate(g){
+  if(!g || typeof g !== 'object') return null;
+  const v = g.version;
+  if(typeof v !== 'number' || isNaN(v) || v < SAVE_VERSION){
+    console.warn("Cette sauvegarde vient d'une version antérieure du jeu et n'est plus lisible.");
+    return null;
+  }
+  if(v > SAVE_VERSION){
+    console.warn("Cette sauvegarde vient d'une version plus récente.");
+    return null;
+  }
+  g = migrateDoubleChampion(g);
+  return g;
+}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MIGRATION_PURGE_MODES_SUPPRIMES] — les modes Faith et Gauntlet
    (avec la boutique associée) ont été retirés du jeu (commit f7f2592) : plus
@@ -19,11 +32,9 @@ function migrate(g){ if(!g)return g; g.version=g.version||1;
    par erreur. G.f (le combattant) et le Panthéon (HOF_KEY, hors save())
    ne sont jamais concernés : leurs champs historiques (f.gameMode,
    f.faithNemesisId, f.faithTraits...) restent lisibles tels quels. ==== */
-function purgeRemovedModes(g){
-  if(!g||typeof g!=='object') return g;
-  delete g.faith; delete g.gauntlet; delete g.arcade;
-  return g;
-}
+/* ==== [ANCRE: PURGE_MODES_RETIRES_LOT0] — purgeRemovedModes() et son appel
+   dans migrate() sont supprimés au Lot 0 : après le reset final v2 et le passage
+   à SAVE_VERSION 5, plus aucune sauvegarde vivante ne peut porter ces clés. ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: SUPPRESSION_DOUBLE_CHAMPION] — P2 : le statut permanent de
    double champion (f.champChampBelt/BeltDivId/Defenses) est retiré du jeu.
