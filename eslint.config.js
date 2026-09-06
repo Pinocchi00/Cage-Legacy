@@ -109,6 +109,7 @@ const browserGlobals = {
   URL: 'readonly', URLSearchParams: 'readonly',
   Image: 'readonly', Audio: 'readonly', performance: 'readonly',
   btoa: 'readonly', atob: 'readonly',
+  TextEncoder: 'readonly', TextDecoder: 'readonly',
 };
 
 module.exports = [
