@@ -114,7 +114,7 @@ npm test             # suite de tests (node --test), 10 fichiers
 npm run check        # lint + test — DOIT être vert avant toute livraison
 ```
 
-Au moment de la rédaction : **111 tests**, répartis sur 10 fichiers dans
+Au moment de la rédaction : **116 tests**, répartis sur 10 fichiers dans
 `tests/` (`analytics.test.js`, `career.test.js`, `champChamp.test.js`,
 `hallOfFame.test.js`, `hubCombatDossier.test.js`, `invariants.test.js`,
 `proceduralNarrative.test.js`, `ranking.test.js`, `regressionFixes.test.js`,
@@ -122,7 +122,7 @@ Au moment de la rédaction : **111 tests**, répartis sur 10 fichiers dans
 
 **Règle** : aucune livraison sans `npm run check` vert. Un bug corrigé =
 un test ajouté dans `tests/regressionFixes.test.js` (déjà le fichier le
-plus fourni, et de loin : 70 tests au moment de la rédaction).
+plus fourni, et de loin : 75 tests au moment de la rédaction).
 
 ## 8. Règles de modification
 
@@ -157,9 +157,11 @@ plus fourni, et de loin : 70 tests au moment de la rédaction).
   (rationale d'un correctif passé) ou de données légitimes d'anciennes
   légendes du Panthéon (`f.gameMode`, `f.faithNemesisId`, `f.faithTraits`),
   jamais de code vivant.
-- **`engine-combat.js` fait ~2340 lignes** (déjà ~1943 avant le Lot 9/P8,
-  qui y a ajouté la taxonomie de frappes, les blessures, l'examen médical
-  et le rythme par round — §9.1 à §9.4 de `P8-Arbitrage-Allonge-Suppressions.md`)
+- **`engine-combat.js` fait ~2500 lignes** (déjà ~2340 avant le Lot 10/P8,
+  qui y a ajouté la fenêtre d'adaptabilité — §10 de
+  `P8-Arbitrage-Allonge-Suppressions.md`, désormais le dernier lot du plan
+  P8 — et ~1943 avant le Lot 9/P8, qui y avait ajouté la taxonomie de
+  frappes, les blessures, l'examen médical et le rythme par round)
   — de très loin le plus gros fichier du dépôt, tous fichiers confondus.
   **Écart avec une mention historique de ce document** : une version
   antérieure de cette section désignait `ui-06-career-screens.js` (~1199
@@ -172,6 +174,14 @@ plus fourni, et de loin : 70 tests au moment de la rédaction).
   et une bonne partie du rendu Canvas de l'arène ; `engine-combat.js` et
   `ui-06-career-screens.js` restent des candidats naturels à un futur
   découpage, non entrepris à ce jour.
+- **Le plan P8 (`P8-Arbitrage-Allonge-Suppressions.md`) est désormais
+  intégralement livré** (lots 6 à 10). Le lot 10 redonne à `adaptability`
+  un effet en combat — une fenêtre temporelle qui referme partiellement un
+  mauvais matchup (allonge, gabarit, garde, position au sol) round après
+  round, jamais au round 1, jamais totalement — sans toucher au canal
+  `eff().fightIQ` déjà établi par le Lot 6. Voir
+  `tools/reports/lot10-adaptabilite-fenetre.md` pour le détail et les
+  mesures.
 - **`npm run lint:content` signale 3 points** au moment de la rédaction :
   3 occurrences de l'anglicisme « MAIN EVENT » (`ui-01-roster-matchmaking.js`,
   hors périmètre du Lot 6/P8), 0 phrase visible jugée trop longue (LOI 6),

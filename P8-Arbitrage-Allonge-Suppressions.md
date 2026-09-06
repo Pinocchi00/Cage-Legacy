@@ -1,6 +1,17 @@
 # P8 — Solde de l'addendum P7, suppressions, et rôle de l'adaptabilité
 
-**Statut : LOT 6 livré** (suppressions, cf. `tools/reports/baseline-P8.md` pour la nouvelle référence chiffrée). Lots 7 à 10 restants, non commencés.
+**Statut : plan intégralement livré (lots 6 à 10).** Lot 6 (suppressions,
+`tools/reports/baseline-P8.md`), lot 7 (arbitre/cage/cartes,
+`tools/reports/lot7-arbitre-cage-cartes.md`), lot 8 (allonge/gabarit/garde,
+`tools/reports/lot8-allonge-gabarit-garde.md`), lot 9 (taxonomie de
+frappes/blessures/médecin/rythme,
+`tools/reports/lot9-taxonomie-blessures-medecin-rythme.md`), lot 10
+(fenêtre d'adaptabilité contre les mauvais matchups,
+`tools/reports/lot10-adaptabilite-fenetre.md`) — chacun avec son rapport
+versionné. Ce document reste la référence historique du plan ; les écarts
+constatés en cours de route (dérive du critère « six cellules à 60/40 »
+de P7 L4, notamment) sont documentés dans les rapports de lot successifs,
+pas réécrits ici.
 
 Plan en **cinq lots séquentiels**. Chacun devient un prompt distinct dans une session neuve. Ne les fusionne pas : les règles communes de P7 (§ « Règles communes aux quatre lots ») s'appliquent intégralement ici — une PR par lot, ancre systématique, avant/après sur 12 000 combats, `npm run check` vert, déterminisme seedé non négociable.
 
