@@ -40,6 +40,11 @@ function parseAndValidate(raw){
    Multijoueur", retiré au LOT DUEL-03) a disparu de cette garde. ==== */
 function save(){ if(G&&(G.fantasyActive||G.duelActive||['fantasy_setup','allstars'].includes(G.screen))) return;
   try{
+    /* ==== [ANCRE: SAVE_VERSION_PERSISTEE] — Lot 0 TÂCHE 0.4 : garantit que
+       la sauvegarde persistée porte SAVE_VERSION (version 5), évitant qu'une
+       nouvelle partie soit traitée comme ancienne à la relecture. ==== */
+    if(G && typeof SAVE_VERSION !== 'undefined') G.version = SAVE_VERSION;
+    /* ==== [FIN ANCRE] ==== */
     const previous=localStorage.getItem(SAVE_KEY);
     if(previous) localStorage.setItem(SAVE_BACKUP_KEY,previous);
     localStorage.setItem(SAVE_KEY,JSON.stringify(G));

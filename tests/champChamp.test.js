@@ -131,7 +131,7 @@ test('migrate() convertit une sauvegarde double champion en champion simple, san
   win.CL.create();
   const liveDiv = win.G.f.div, liveDivName = win.G.f.divName;
   const oldSave = {
-    version: 3,
+    version: 5,
     f: Object.assign({}, win.G.f, {
       champion: 'national', org: 3, div: liveDiv, divName: liveDivName,
       champChampBelt: 'Poids Coq', champChampBeltDivId: 'H-bantam',

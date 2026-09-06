@@ -139,22 +139,38 @@ test('CORRECTIF_ESC_GUILLEMETS — esc() échappe aussi les guillemets simples e
 });
 
 /* ==== [ANCRE: TEST_MIGRATION_PURGE_MODES_SUPPRIMES] ==== */
-test('migrate() purge G.faith/G.gauntlet/G.arcade hérités d’une sauvegarde antérieure à leur suppression', () => {
+/* ==== [ANCRE: TEST_MIGRATION_REFUS_VERSION_4_SANS_EFFET_DE_BORD] — Lot 0 TÂCHE 0.5 :
+   une sauvegarde de version 4 (ou antérieure) est refusée proprement sans mutation ni écriture. ==== */
+test('migrate() refuse une sauvegarde de version 4 sans effet de bord', () => {
   const win = newGameWindow();
   const legacySave = {
-    version: 2,
+    version: 4,
     f: { name: 'Ancien', W: 5, L: 1 },
     faith: { year: 3, month: 7, perks: { judges: true } },
     gauntlet: { seed: 'xyz' },
     arcade: { active: true },
   };
+  const deepCopy = JSON.parse(JSON.stringify(legacySave));
   const migrated = win.migrate(legacySave);
-  assert.equal(migrated.faith, undefined, 'G.faith doit être purgé par migrate()');
-  assert.equal(migrated.gauntlet, undefined, 'G.gauntlet doit être purgé par migrate()');
-  assert.equal(migrated.arcade, undefined, 'G.arcade doit être purgé par migrate()');
-  assert.equal(migrated.version, 4, 'la version doit toujours être remontée au passage');
-  assert.equal(migrated.f.name, 'Ancien', 'les champs légitimes de la sauvegarde ne doivent pas être touchés');
+  assert.equal(migrated, null, 'une sauvegarde de version 4 doit être refusée proprement (renvoie null)');
+  assert.deepEqual(legacySave, deepCopy, 'aucune mutation sur la sauvegarde refusée');
+
+  // Sauvegarde sans version
+  const noVersionSave = { f: { name: 'SansVersion', W: 0, L: 0 } };
+  assert.equal(win.migrate(noVersionSave), null, 'une sauvegarde sans version doit être refusée');
+
+  // Sauvegarde de version future (> 5)
+  const futureSave = { version: 6, f: { name: 'Futur', W: 0, L: 0 } };
+  assert.equal(win.migrate(futureSave), null, 'une sauvegarde de version future (> 5) doit être refusée');
+
+  // Sauvegarde de version 5 courante : chargement normal
+  const validSave = { version: 5, f: { name: 'Valide', W: 3, L: 0 } };
+  const loaded = win.migrate(validSave);
+  assert.notEqual(loaded, null, 'une sauvegarde de version 5 doit être acceptée');
+  assert.equal(loaded.version, 5);
+  assert.equal(loaded.f.name, 'Valide');
 });
+/* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: TEST_CORRECTIF_ROSTER_ENTREES_NULLES] ==== */
 test('CORRECTIF_ROSTER_ENTREES_NULLES — validateState() filtre les entrées nulles de G.roster sans planter ni régénérer tout le roster', () => {

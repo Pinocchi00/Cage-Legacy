@@ -3,9 +3,7 @@
    Validation/réparation d'une sauvegarde : validateSave() (structurelle, sur
    le JSON brut, utilisée par state-save.js), repairFighter() et
    validateState() (réparation en place de l'état vivant G, utilisée par
-   state-save.js/load()). validateState() appelle ensurePeopleRegistry()
-   (state-faith.js) : couplage croisé signalé en Phase 1, non résolu par ce
-   découpage — résolu à l'exécution, ordre de chargement non bloquant. */
+   state-save.js/load()). */
 /** Vérification STRUCTURELLE, en lecture seule, d'une sauvegarde brute (juste
  * parsée, avant migrate()/validateState() qui eux RÉPARENT en place). Ne
  * mute jamais son argument — sert uniquement à décider si cette copie est

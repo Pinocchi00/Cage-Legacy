@@ -392,7 +392,9 @@ function finishTrainingFlow(pendingOppMalus){
         // division, c'est un nouveau roster, les rivalités de l'ancienne n'ont
         // plus de sens.
         G.f.rivalId=null; G.f._rivalries={};
-        if(G.f.gameMode==='faith') G.f.faithNemesisId=null;
+        /* ==== [ANCRE: FIX_LOT0_PURGE_FAITH_NEMESIS_UI02] — suppression du code mort
+           issu du mode Faith retiré : G.f.faithNemesisId n'a plus lieu d'exister. ==== */
+        /* ==== [FIN ANCRE] ==== */
         G.f.recentOpps=[];
         G.f.champChampOffer=null; G.f.champChampLastOfferDefenses=null;
         // Ajustement biomécanique naturel : plus lourd, plus fort, plus résistant,

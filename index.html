@@ -15,7 +15,7 @@ window.onerror = function(msg, url, line) {
       if (document.body) document.body.appendChild(b);
       else window.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(b); });
     }
-    b.innerHTML = '<b style="font-size:16px">Erreur de chargement</b><p style="margin:8px 0;font-size:12px;font-family:monospace">' + (msg || 'Erreur') + '<br>' + (url ? url.split('/').pop() : '') + ':' + line + '</p><button onclick="try{localStorage.clear();}catch(e){}location.reload(true);" style="padding:8px 12px;background:#F5EFE0;color:#14100B;border:none;font-weight:bold;cursor:pointer">Vider le cache et recharger</button>';
+    b.innerHTML = '<b style="font-size:16px">Erreur de chargement</b><p style="margin:8px 0;font-size:12px;font-family:monospace">' + (msg || 'Erreur') + '<br>' + (url ? url.split('/').pop() : '') + ':' + line + '</p><button onclick="if(confirm(\'Réinitialiser la carrière en cours ? Le Panthéon sera conservé.\')){try{if(typeof wipe===\'function\'){wipe();}else{localStorage.removeItem(\'cage-legacy-v3\');localStorage.removeItem(\'cage-legacy-v3_backup\');}}catch(e){}location.reload(true);}" style="padding:8px 12px;background:#F5EFE0;color:#14100B;border:none;font-weight:bold;cursor:pointer">Réinitialiser ma carrière</button>';
   } catch(e) {}
 };
 </script>
