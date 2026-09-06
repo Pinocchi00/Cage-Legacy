@@ -31,13 +31,14 @@ function parseAndValidate(raw){
   if(!raw) return null;
   try{ const parsed=JSON.parse(raw); return validateSave(parsed)?parsed:null; }catch(e){ return null; }
 }
-/* ==== [ANCRE: DUEL_CODEC] — LOT DUEL-01 : G.duelActive suit exactement le
-   même patron que G.fantasyActive/G.vsFriendActive ci-dessus — le temps
-   d'une manche de Duel entre amis, G.f/G.fight portent un clone de
-   combattant reconstruit depuis un code, jamais la vraie carrière ; le
+/* ==== [ANCRE: DUEL_CODEC] — LOT DUEL-01, révisé LOT DUEL-03 : G.duelActive
+   suit exactement le même patron que G.fantasyActive ci-dessus — le temps
+   d'une manche de Duel entre amis, G.f/G.fight portent un clone de légende
+   du Panthéon reconstruit depuis un code, jamais la vraie carrière ; le
    contrat d'exhibition pure exige qu'aucune écriture localStorage ne
-   puisse capturer cet état transitoire. ==== */
-function save(){ if(G&&(G.fantasyActive||G.vsFriendActive||G.duelActive||['fantasy_setup','allstars','vs_friend'].includes(G.screen))) return;
+   puisse capturer cet état transitoire. G.vsFriendActive (ancien mode "Défi
+   Multijoueur", retiré au LOT DUEL-03) a disparu de cette garde. ==== */
+function save(){ if(G&&(G.fantasyActive||G.duelActive||['fantasy_setup','allstars'].includes(G.screen))) return;
   try{
     const previous=localStorage.getItem(SAVE_KEY);
     if(previous) localStorage.setItem(SAVE_BACKUP_KEY,previous);

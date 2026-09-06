@@ -67,37 +67,14 @@ function scr_title(){
     </div>`;
 }
 
-/* ==== [ANCRE: DUEL_ENTREE_INTRO] — LOT DUEL-02 : l'entrée du Duel entre
-   amis quitte le sous-menu Dossier du hub (ancienne ANCRE DUEL_CODEC de
-   hubDossierHtml(), retirée) pour l'écran d'accueil de Carrière Complète —
-   personne ne la trouvait dans Dossier. scr_intro() s'affiche AVANT que
-   load() ait tourné : G.f est encore null tant que CL.cont()/CL.create()
-   n'a pas été appelé, donc le bouton ne peut pas router sur CL.duelEnter()
-   (qui suppose G.f déjà chargé, cf. scr_duelHome()). Sans sauvegarde de
-   carrière, un duel n'a aucun sens : le bouton ne s'affiche tout simplement
-   pas (ni grisé, ni caché derrière une garde) plutôt que de router vers
-   CL.duelEnterFromIntro() (ui-10-duel.js), qui charge la sauvegarde par le
-   même chemin que CL.cont() avant de déléguer à CL.duelEnter(). ==== */
-function introDuelEntryHtml(hasCareer){
-  if(!hasCareer) return '';
-  return `<button class="btn" style="min-height:44px" onclick="CL.duelEnterFromIntro()">Duel entre amis
-    <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Affronte le combattant d'un ami avec un code</span></button>`;
-}
-/* ==== [FIN ANCRE] ==== */
 
 function scr_intro(){ const c=hasSave('career');
-  const introErrHtml=(()=>{ if(!G._introDuelError) return '';
-    const m=G._introDuelError; G._introDuelError=null;
-    return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
-  })();
   return `<div class="scr center intro">
    <div class="eyebrow">Simulateur de gestion MMA</div>
    <h1 class="disp big">CAGE<br>LEGACY</h1>
    <p class="lede">Capital physique limité. Chaque camp d\u2019entraînement laisse des traces.</p>
-   ${introErrHtml}
    ${c?`<button class="btn gold" onclick="CL.cont()">Reprendre le dossier</button>`:''}
    <button class="btn primary" onclick="CL.go('create')">${c?'Nouveau prospect':'Jouer une future légende'}</button>
-   ${introDuelEntryHtml(c)}
    <button class="btn ghost" onclick="CL.go('hof')">🏛️ Archives</button>
    <button class="btn ghost" onclick="CL.go('title')">← Retour au menu</button></div>`; }
 
@@ -456,27 +433,6 @@ function scr_plan(){ const f=G.f, opp=G.fight.opp; const plans=TACTICS[f.style]|
   return h;
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: PLAN_VS_AMI] — choix tactique dédié au Défi Multijoueur,
-   même logique que le vestiaire de carrière (scr_plan) mais simplifié (pas
-   de coupe de poids, ces deux légendes sont déjà reconstruites telles
-   quelles). ==== */
-function scr_vs_friend_plan(){
-  const A=G.vsFriendLegendA, B=G.vsFriendLegendB;
-  if(!A||!B) return `<div class="scr center intro"><p class="lede">Série interrompue.</p><button class="btn ghost mt" onclick="CL.go('legends')">Retour</button></div>`;
-  const plans=TACTICS[A.style]||[];
-  const s=G.vsFriendScore;
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Défi Multijoueur · Plan de combat</span></div>
-   <div class="hero-name" style="text-align:center;font-size:20px">${esc(A.name)} <span class="muted">${s.A} - ${s.B}</span> ${esc(B.name)}</div>
-   <div class="card mt" style="border-color:transparent;padding:0 0 16px 0">
-     <div class="muted small" style="border-left:2px solid var(--gold);padding-left:10px"><b>Analyse :</b> ${tacticalRead(A,B)}</div>
-   </div>
-   <p class="lede small mt">Quelle est ta consigne tactique pour cette manche ?</p>
-   ${getExclusiveTactics(A).concat(plans).map((p,i)=>`<div class="opp" onclick="CL.chooseVsFriendPlan(${i})">
-     <div class="opp-top"><span class="opp-nm gold">${p.lbl}</span></div>
-     <div class="opp-read" style="margin-top:4px;opacity:1">${p.desc}</div></div>`).join('')}
-  </div>`;
-}
-/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: NARRATION] — log texte à partir de res.log/res.stats, déjà calculés ==== */
 function fightLog(res){ if(!res.log||!res.log.length)return '<span class="muted small">Décision aux cartes.</span>';
   const rows=res.log.map(L=>`<div class="log-row ${L.finish?'gold':''}"><span class="log-r">R${L.r}</span><span style="flex:1">${L.text||(L.phase==='sol'?'échanges au sol':'échanges debout')}</span></div>`);
@@ -496,6 +452,12 @@ function scr_hof(){
   return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon · ${list.length}/${fullList.length} légende(s)</span><span class="eyebrow x" onclick="CL.go('${backDest}')">✕</span></div>
    <h2 class="disp">Tes anciens combattants</h2>
    <button class="btn ghost mb" style="border:1px solid var(--line);width:auto;padding:8px 16px" onclick="CL.toggleHofFilters()">Filtres ${showFilters?'−':'+'}</button>
+   <!-- ==== [ANCRE: DUEL_ENTREE_PANTHEON] — LOT DUEL-03 : le Duel entre amis
+        entre désormais par le Panthéon (le LOT DUEL-02, qui l'avait déplacé
+        vers scr_intro(), est annulé) — c'est ici, et nulle part ailleurs,
+        que se choisissent les deux légendes du duel. ==== -->
+   <button class="btn" style="min-height:44px" onclick="CL.duelEnter()">Duel entre amis
+     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Affronte deux légendes de ton Panthéon</span></button>
    ${showFilters?`<div style="background:var(--panel2);padding:12px;border:1px solid var(--line);margin-bottom:16px">
    ${modes.length>1?`<div class="eyebrow mb">Mode</div><div class="tagrow mb"><span class="tag2 ${!filt.gameMode?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','')">Tous</span>${modes.map(m=>`<span class="tag2 ${filt.gameMode===m?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','${m}')">${modeLabels[m]||m}</span>`).join('')}</div>`:''}
    ${styles.length>1?`<div class="eyebrow mb mt">Styles</div><div class="tagrow mb"><span class="tag2 ${!filt.style?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','')">Tous</span>${styles.map(s=>`<span class="tag2 ${filt.style===s?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','${esc(s)}')">${esc(s)}</span>`).join('')}</div>`:''}

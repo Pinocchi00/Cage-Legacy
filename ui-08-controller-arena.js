@@ -26,8 +26,8 @@
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
   result:scr_result,profile:scr_profile,rankings:scr_rankings,ach:scr_ach,retire:scr_retire,legacy:scr_legacy,hof:scr_hof,event:scr_event,plan:scr_plan,season:scr_season,toptier:scr_toptier,
   history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,pro_nickname:scr_pro_nickname,codex:scr_codex,mueChoice:scr_mueChoice,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
-  fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,vs_friend:scr_vs_friend,vs_friend_plan:scr_vs_friend_plan,
-  contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,vs_friend_next:scr_vs_friend_next,press_conf:scr_press_conf,
+  fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,
+  contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,press_conf:scr_press_conf,
   ach_preview:scr_ach_preview};
 
 function currentGameMode(){
@@ -203,21 +203,20 @@ const CL={
     if(!confirm('Effacer tout le Panthéon, sauf les favoris ?')) return;
     let list=loadHOF(); list=list.filter(x=>x.favorite); saveHOF(list); render();
   },
+  /* ==== [ANCRE: CORRECTIF_LIEN_AMI] — bug trouvé (historique) : l'ancien
+     export du Panthéon embarquait le record COMPLET (icône SVG entière,
+     épithètes narratives, score, rang, historique amateur, rival...),
+     produisant des liens de ~1900+ caractères sur une carrière longue et
+     décorée — assez pour être tronqués/rejetés en silence par SMS/WhatsApp/
+     Messenger, laissant croire que "le lien ne marche pas" sans aucun
+     message d'erreur. LOT DUEL-03 : exportLegend() route désormais vers le
+     codec du Duel entre amis (duel-codec.js, encodeDuelCode) — buildDuelFiche()
+     y applique le même principe (champs strictement nécessaires, code sous
+     400 caractères), sans qu'un second système de "fiche allégée" ne soit
+     recréé ici. ==== */
   exportLegend(id){
     const l=loadHOF().find(x=>String(x.id)===String(id)); if(!l) return;
-    // ==== [ANCRE: CORRECTIF_LIEN_AMI] — bug trouvé : le code exportait le
-    // record COMPLET du Panthéon (icône SVG entière, épithètes narratives,
-    // score, rang, historique amateur, rival...), aucun de ces champs n'étant
-    // utilisé par reconstructLegend() ni par le duel lui-même. Sur une
-    // carrière longue et décorée, ça produisait des liens de ~1900+
-    // caractères — largement suffisant pour être tronqués ou rejetés en
-    // silence par SMS/WhatsApp/Messenger lors du partage, ce qui donnait
-    // l'impression que "le lien ne marche pas" sans aucun message d'erreur.
-    // Le payload est réduit aux seuls champs réellement nécessaires.
-    const slim={id:l.id,name:l.name,nick:l.nick,flag:l.flag,style:l.style,styleKey:l.styleKey,
-      div:l.div,divName:l.divName,W:l.W,L:l.L,ko:l.ko,sub:l.sub,
-      attrs:l.attrs,skills:l.skills,phys:l.phys,overall:l.overall};
-    G.exportedCode=encodeLegendCode(slim); G.exportedName=l.name;
+    G.exportedCode=encodeDuelCode(l); G.exportedName=l.name;
     try{ G.exportedLink=location.origin+location.pathname+'?legend='+encodeURIComponent(G.exportedCode); }catch(e){ G.exportedLink=null; }
     render();
   },
@@ -235,7 +234,7 @@ const CL={
   },
   clearExportedCode(){ G.exportedCode=null; G.exportedName=null; G.exportedLink=null; render(); },
   setArenaTheme(themeId){ setArenaCosmeticTheme(themeId); render(); },
-  leaveSandbox(){ if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; } G.fantasyActive=false; G.vsFriendActive=false; CL.go('hof'); },
+  leaveSandbox(){ if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; } G.fantasyActive=false; CL.go('hof'); },
   leaveAllStars(){ G.allstars=null; CL.go('hof'); },
   setFantasy(side,dir){
      const max=loadHOF().length-1;
@@ -281,81 +280,6 @@ const CL={
      G.screen='allstars'; render();
   },
   advanceAllStars(){ advanceAllStarsTournament(); render(); },
-  setVsFriendPlayer(side,dir){
-     const max=loadHOF().length-1;
-     if(side===0){ let n=(G.vsFriendSelA||0)+dir; if(n<0)n=max; if(n>max)n=0; G.vsFriendSelA=n; }
-     else { let n=(G.vsFriendSelB!==undefined?G.vsFriendSelB:1)+dir; if(n<0)n=max; if(n>max)n=0; G.vsFriendSelB=n; }
-     render();
-  },
-  importFriendCode(){
-     // Cast JSDoc : getElementById() renvoie HTMLElement générique, qui n'a
-     // pas .value — ce champ est bien une <textarea> dans le HTML réel.
-     const el=/** @type {HTMLTextAreaElement|null} */ (document.getElementById('friend_code'));
-     let raw=(el&&el.value||'').trim();
-     // ==== [ANCRE: IMPORT_LIEN_AMI] — le champ acceptait uniquement le code
-     // brut ; on accepte désormais aussi le lien complet collé tel quel
-     // (ex. https://.../?legend=XXXX), en extrayant le paramètre 'legend'.
-     if(raw.includes('legend=')){
-       try{
-         const url=new URL(raw);
-         raw=url.searchParams.get('legend')||raw;
-       }catch(e){
-         const m=raw.match(/legend=([^&\s]+)/);
-         if(m) raw=decodeURIComponent(m[1]);
-       }
-     }
-     const legend=decodeLegendCode(raw);
-     if(!legend){ G.lastMsg="Code ou lien invalide/corrompu."; render(); return; }
-     G.importedFriendLegend=legend; render();
-  },
-  clearImportedFriend(){ G.importedFriendLegend=null; render(); },
-  launchVsFriend(){
-     if(!G.vsFriendScore){
-       const list=loadHOF();
-       const lA=list[Math.max(0,Math.min(G.vsFriendSelA||0,list.length-1))];
-       const lB=G.importedFriendLegend||list[Math.max(0,Math.min(G.vsFriendSelB!==undefined?G.vsFriendSelB:1,list.length-1))];
-       /* ==== [ANCRE: CORRECTIF_VSFRIEND_PANTHEON_UNIQUE] — bug trouvé : si le
-          Panthéon ne contient qu'une seule légende (et aucun code ami importé),
-          list[1] vaut undefined et reconstructLegend(undefined) plante. Son
-          cousin launchFantasyFight() gère déjà ce cas (repli sur list[0]),
-          pas celui-ci. ==== */
-       if(!lB){ G.lastMsg="Il faut deux légendes (ou un code ami) pour lancer un duel."; render(); return; }
-       G.vsFriendLegendA=reconstructLegend(lA);
-       G.vsFriendLegendB=reconstructLegend(lB);
-       G.vsFriendLegendB.champion='monde'; G.vsFriendLegendB.flag=G.vsFriendLegendB.flag||'🏴\u200d☠️';
-       neutralizeWeightGap(G.vsFriendLegendA,G.vsFriendLegendB);
-       G.vsFriendScore={A:0,B:0,round:0};
-     }
-     // ==== [ANCRE: TACTIQUE_VS_AMI] — avant : la manche était simulée
-     // instantanément sans jamais demander de consigne tactique. On route
-     // maintenant vers un choix de tactique (comme en carrière) avant de
-     // lancer réellement la simulation, via chooseVsFriendPlan().
-     /* ==== [ANCRE: CORRECTIF_DOUBLE_VSFRIEND_PLAN] — voir chooseVsFriendPlan() :
-        même verrou que choosePlan() (CORRECTIF_DOUBLE_RESOLUTION), réarmé à
-        chaque nouvelle manche puisque c'est ce point d'entrée qui affiche à
-        nouveau l'écran de tactique. ==== */
-     G.vsFriendScore._resolved=false;
-     G.screen='vs_friend_plan'; save(); render();
-  },
-  chooseVsFriendPlan(idx){
-     /* ==== [ANCRE: CORRECTIF_DOUBLE_VSFRIEND_PLAN] — même verrou que
-        choosePlan() (CORRECTIF_DOUBLE_RESOLUTION) : sans lui, un double-tap
-        sur la carte de tactique incrémentait G.vsFriendScore.round deux fois
-        pour une seule manche réellement jouée. ==== */
-     if(G.vsFriendScore && G.vsFriendScore._resolved) return;
-     const A=G.vsFriendLegendA, B=G.vsFriendLegendB;
-     const combined=getExclusiveTactics(A).concat(TACTICS[A.style]||[]);
-     const planObj=combined[idx]; if(!planObj) return;
-     G.vsFriendScore._resolved=true;
-     G.vsFriendScore.round++;
-     const isDecider=G.vsFriendScore.A===1 && G.vsFriendScore.B===1;
-     const rounds=isDecider?5:3;
-     if(!G._backupF){ G._backupF=G.f; G._backupFight=G.fight; }
-     G.f=A; G.fight={kind:'fantasy',opp:B,rounds,plan:planObj.m,planLabel:planObj.lbl}; G.vsFriendActive=true;
-     const res=simulateFight(A,B,rounds,planObj.m);
-     G.pending={res,win:res.winner==='A',method:res.method,finish:!isDecisionLike(res.method),opp:{name:B.name,flag:B.flag},isVsFriend:true,isDecider};
-     buildTimeline(); G.screen='arena'; render();
-  },
   filterHof(key,val){ if(!G.hofFilter) G.hofFilter={}; if(val===''||val===0) delete G.hofFilter[key]; else G.hofFilter[key]=val; render(); },
   toggleHofFilters(){ G.showHofFilters=!G.showHofFilters; render(); },
   acceptChampChampOffer(){
@@ -575,18 +499,6 @@ const CL={
     if(G.pending && G.pending.isFantasy){
       if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; }
       G.fantasyActive=false; G.screen='fantasy_setup'; render(); return;
-    }
-    if(G.pending && G.pending.isVsFriend){
-      const s=G.vsFriendScore;
-      if(G.pending.win) s.A++; else if(G.pending.res.winner==='B') s.B++;
-      if(s.A>=2 || s.B>=2){
-        G.lastMsg=`Série terminée : ${s.A>=2?esc(G.vsFriendLegendA.name):esc(G.vsFriendLegendB.name)} remporte la série ${Math.max(s.A,s.B)}-${Math.min(s.A,s.B)}.`;
-        if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; }
-        G.vsFriendActive=false; G.vsFriendScore=null; G.vsFriendLegendA=null; G.vsFriendLegendB=null;
-        G.screen='vs_friend'; render(); return;
-      }
-      G.lastMsg=`Manche ${s.round} terminée. Score de la série : ${s.A} - ${s.B}.${s.A===1&&s.B===1?' Manche décisive : 5 rounds.':''}`;
-      G.screen='vs_friend_next'; render(); return;
     }
     routeAfterCareerPending();
     save(); render(); },
