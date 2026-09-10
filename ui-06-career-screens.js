@@ -59,6 +59,11 @@ function scr_title(){
         moins de 12 mots. ==== -->
     <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.go('intro')">CARRIÈRE COMPLÈTE
       <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Montez les échelons, un combat à la fois</span></button>
+    <!-- ==== [ANCRE: MGMT_LOT1_ENTREE] — Lot 1 mode management : entrée du
+         bureau depuis l'écran titre (Split, matchmaker). ==== -->
+    <button class="btn" style="font-size:20px;padding:24px" onclick="CL.mgmtEnter()">MODE MANAGEMENT
+      <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Split — le bureau du matchmaker</span></button>
+    <!-- ==== [FIN ANCRE] ==== -->
     <div class="hr" style="margin:24px 0"></div>
     <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
       <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>

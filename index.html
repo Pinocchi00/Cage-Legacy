@@ -81,8 +81,11 @@ window.onerror = function(msg, url, line) {
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);overscroll-behavior-y:none}
 body{color:var(--text);font-family:'Fraunces',Georgia,serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
- /* dégradé rouge -> jaune, sombre et moody (pas un fond clair délavé) */
- background:linear-gradient(135deg,#661814 0%,#2A120A 35%,#34220A 65%,#66460F 100%);
+ /* ==== [ANCRE: MGMT_LOT1B_CHARTE] — Lot 1b : fond plat var(--bg) (#14100B).
+    Le dégradé orange précédent n'appartient pas à la palette (charte :
+    --bg #14100B, --panel2 #241D13). ==== */
+ background:var(--bg);
+ /* ==== [FIN ANCRE] ==== */
  background-attachment:fixed;transition:background .22s,color .22s;position:relative;min-height:100vh}
 /* grain fin résiduel — discret, le Glass fait le gros du travail visuel */
 body::after{
@@ -400,6 +403,25 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .log-row{display:flex;gap:10px;padding:5px 0;border-bottom:1px dotted var(--line);font-family:'JetBrains Mono',monospace;font-size:12.5px}
 .log-row.gold{color:var(--gold)}
 .log-r{flex:0 0 28px;color:var(--muted)}
+/* ==== [ANCRE: MGMT_LOT1B_BUREAU] — Lot 1b (remplace MGMT_LOT1_STYLE) : la page
+   ne défile pas — trois colonnes à hauteur de fenêtre, défilement
+   indépendant, en-tête fixe par construction flex (jamais de sticky). Une
+   affaire = une ligne de titre + une ligne de sujet (~64px, ellipse propre
+   sur une ligne, jamais de troncature haute). Le texte des colonnes
+   s'enroule (débordement colonne de droite corrigé). Sous 1280px, retour au
+   défilement de page, colonnes empilées. ==== */
+#app.mgmt{max-width:1400px}
+.mgmt-wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding:16px 15px 16px}
+.mgmt-head{flex:0 0 auto}
+.mgmt-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr) 360px;gap:16px;margin-top:12px}
+.mgmt-col{min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;background:var(--panel2);border:1px solid var(--line);padding:14px;min-width:0;overflow-wrap:break-word}
+.mgmt-aff{padding:6px 10px;margin:0 0 5px;min-height:0}
+.mgmt-aff .opp-nm{font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mgmt-aff .opp-mid{font-size:12.5px;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mgmt-say{font-family:'Fraunces',serif;font-style:italic;font-size:16px;line-height:1.5;margin:12px 0;padding-left:12px;border-left:2px solid var(--gold);overflow-wrap:break-word}
+.mgmt-kind{margin:4px 0 8px}
+@media(max-width:1279px){.mgmt-wrap{height:auto;overflow:visible}.mgmt-cols{grid-template-columns:1fr}.mgmt-col{max-height:none;overflow:visible}}
+/* ==== [FIN ANCRE] ==== */
 </style></head>
 <body><div id="app"></div>
 <script src="data-skills.js?v=career7"></script>
@@ -472,5 +494,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      chargé juste après, toujours avant main.js. ==== -->
 <script src="duel-codec.js?v=career7"></script>
 <script src="ui-10-duel.js?v=career7"></script>
+<!-- ==== [ANCRE: MGMT_LOT1_SCRIPTS] — Lot 1 mode management : données (pures,
+     sans dépendance), logique du bureau (runtime : engine.js, ui-01 pour
+     makeName/correlatedRecord, state), écrans (SCREENS/CL posés par ui-08
+     et étendus via Object.assign). Toujours avant main.js. ==== -->
+<script src="mgmt-data.js?v=mgmt1b"></script>
+<script src="mgmt-bureau.js?v=mgmt1b"></script>
+<script src="mgmt-screens.js?v=mgmt1b"></script>
 <script src="main.js?v=career7"></script>
 </body></html>

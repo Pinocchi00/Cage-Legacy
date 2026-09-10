@@ -39,5 +39,3 @@ laisses un emplacement vide et tu le signales. Une réplique générique est pir
 - `docs/CDC-MODE-MANAGEMENT.md` — cahier des charges du mode en cours. Fait foi.
 - `docs/ETAT-DES-LIEUX.md` — fichiers concernés, à garder, à jeter.
 - `docs/QUESTIONS-OUVERTES.md` — ce qui n'est pas tranché. N'y réponds pas seul.
-- `docs/ARCHIVE-LOTS-1-12.md` — production précédente, **rejetée**. Historique uniquement,
-  jamais une référence de design.
