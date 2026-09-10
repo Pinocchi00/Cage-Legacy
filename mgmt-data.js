@@ -19,6 +19,10 @@
 /* ==== [ANCRE: MGMT_LOT1_DONNEES] — Lot 1 mode management : socle de données
    du bureau (voix, échanges, raisons, déclencheurs, cadrage). ==== */
 const MGMT_ORG='Split';
+/* Cadrage de la pile complète (CDC §9 : 8 à 15 affaires par cycle, toutes
+   voix confondues). Au lot 1e, seule Leïla propose (0 à 2 par cycle,
+   mgmtNewPile) : ces bornes ne s'appliquent pas encore, elles sont
+   conservées pour les lots suivants. */
 const MGMT_PILE_MIN=8;
 const MGMT_PILE_MAX=15;
 const MGMT_ROSTER_MIN=40;
@@ -56,11 +60,15 @@ const MGMT_SPEAKERS={
   leila:{id:'leila',name:'Leïla Malika',role:'Adjointe matchmaker'},
 };
 
+const MGMT_LEVEL_LABELS={1:'Nom',2:'Dossier',3:'Attaché'};
+
 /* Format d'un échange (CDC §6) : des lignes d'une seule voix, puis deux à
    quatre réponses. Les réponses du joueur sont des choses qu'il dirait :
-   elles appartiennent à l'auteur. En Lot 1, chaque réponse porte une
-   `action` mécanique (bouton d'interface neutre, pas une réplique) et un
-   `text` nul avec un emplacement marqué. */
+   elles appartiennent à l'auteur. Chaque réponse porte une `action`
+   mécanique (bouton d'interface neutre, pas une réplique) et, tant que
+   l'auteur ne l'a pas écrite, un `text` nul avec un emplacement marqué.
+   Même règle pour les lignes de la voix : une entrée `{empty}` marque une
+   réplique en attente, jamais affichée telle quelle. */
 const MGMT_EXCHANGES={
   leila_propose:{
     speaker:'leila',
@@ -82,6 +90,49 @@ const MGMT_EXCHANGES={
     ],
   },
 };
+
+/* ==== [ANCRE: MGMT_LOT2_DONNEES] — Lot 2 la sous-carte : carte de 4 places
+   (validé lot 2), proposition en bloc et réactions. Sept textes d'auteur
+   (remplissage validé) : proposer en bloc, la remarque d'avertissement,
+   réagir à un échange, réagir à un écrasement, et les trois réponses du
+   joueur (valider, échanger, écraser). Les fermetures de réaction restent
+   purement mécaniques (pas de texte) : elles ne comptent pas comme
+   répliques. ==== */
+const MGMT_CARD_SIZE=4;
+
+Object.assign(MGMT_EXCHANGES,{
+  leila_bulk:{
+    speaker:'leila',
+    lines:[
+      "Voilà j'ai enfin préparé la carte préliminaire, il y a de quoi faire un beau spectacle enfin j'espère, hâte de voir la carte principale !",
+    ],
+    warning:"Patron, il y a un combat, je ne sais pas, je ne le sens pas du tout, ça m'a tracassé tout hier soir, je pense qu'il faudrait le changer, j'espère que ça ne te dérange pas.",
+    replies:[
+      {id:'validate',action:'validate',text:"Parfait, c'est du très bon travail Leïla, la carte à l'air incroyable on garde tout !"},
+      {id:'swap',action:'swap',text:"Leïla la carte est vraiment bien, je l'apprécie mais je préfère ajouter ce combat à la place."},
+      {id:'crush',action:'crush',text:"Leïla tu m'avais déjà habitué à un meilleur travail, cette carte n'est pas à la hauteur de mes attentes."},
+    ],
+  },
+  leila_react_swap:{
+    speaker:'leila',
+    lines:[
+      "J'ai vu que vous m'avez échangé un combat, je comprends mais ses deux combattants doivent combattre aussi, j'espère que je pourrais les replacer vite..",
+    ],
+    replies:[
+      {id:'close',action:'close'},
+    ],
+  },
+  leila_react_crush:{
+    speaker:'leila',
+    lines:[
+      "Je sais que j'ai pas forcément mon mot à dire, mais j'aimerais bien que vous me prévenez en avance la fois d'après que je ne passe pas ma semaine à l'organiser",
+    ],
+    replies:[
+      {id:'close',action:'close'},
+    ],
+  },
+});
+/* ==== [FIN ANCRE] ==== */
 
 /* Les cinq raisons de se battre (docs/LES-SIX-VOIX-v1.1.md + complément
    SPLIT-CONTEXTE-DEPART.md §9). Attribuées à la création d'un dossier (§3,
