@@ -35,6 +35,15 @@ function mgmtFirstSingle(win){
   return win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id`);
 }
 
+/* « Continuer » jusqu'à la réouverture du bureau : soirée, puis lendemain
+   s'il y a des touchés (lot 3a §7 : séquence imposée et courte). Les tests
+   clickent les deux écrans quand ils existent ; sans touché, la soirée
+   enchaîne directement sur le cycle suivant. */
+function mgmtFinishEvent(win){
+  win.eval(`CL.mgmtSoireeNext()`);
+  if(win.eval(`G.screen`)==='mgmt_lendemain') win.eval(`CL.mgmtLendemainNext()`);
+}
+
 test('MGMT entrée — roster de 40 à 60 noms, singles 0-2 + bloc, cycle 1', () => {
   const win = newGameWindow();
   enterMgmt(win,11);
@@ -154,7 +163,10 @@ test('MGMT refuser — affaire de réaction créée, texte verbatim, fait mémor
 test('MGMT ignorer — clôt sans réaction, fait mémorisé, ne revient jamais', () => {
   const win = newGameWindow();
   enterMgmtFull(win,18);
-  const o = JSON.parse(win.eval(`JSON.stringify({id:G.mgmt.pile[0].id,a:G.mgmt.pile[0].a,b:G.mgmt.pile[0].b})`));
+  /* Lot 3a §5 : la tête de pile peut être la proposition en bloc, qui ne
+     s'ignore plus tant que la carte est incomplète — viser une single. */
+  win.eval(`for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_propose');c++) mgmtNewPile(G.mgmt); render();`);
+  const o = JSON.parse(win.eval(`JSON.stringify((()=>{ const a=G.mgmt.pile.find(x=>x.status==='open'&&x.kind==='leila_propose'); return {id:a.id,a:a.a,b:a.b}; })())`));
   win.eval(`CL.mgmtIgnore('${o.id}')`);
   assert.ok(!win.eval(`G.mgmt.pile.some(a=>a.after==='${o.id}')`), 'ignorer ne crée aucune affaire');
   const last = JSON.parse(win.eval(`JSON.stringify(G.mgmt.facts[G.mgmt.facts.length-1])`));
@@ -178,17 +190,16 @@ test('MGMT attaché — trois bookings du même combattant, niveau 3', () => {
   assert.equal(lv, 3, 'trois interactions = attaché');
 });
 
-test('MGMT nouveau cycle — compteur +1, pile fraîche de 0 à 2', () => {
+test('MGMT nouveau cycle — pile vidée et carte incomplète : Leïla propose à nouveau, le cycle ne se ferme pas', () => {
   const win = newGameWindow();
   enterMgmt(win,20);
   win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';}); CL.mgmtNextCycle();`);
-  assert.equal(win.eval(`G.mgmt.cycle`), 2);
-  const st2 = JSON.parse(win.eval(`JSON.stringify({
-    singles:G.mgmt.pile.filter(a=>a.kind==='leila_propose').length,
-    bulk:G.mgmt.pile.filter(a=>a.kind==='leila_bulk').length})`));
-  assert.ok(st2.singles>=0&&st2.singles<=2, `nouvelle pile singles 0-2, vue ${st2.singles}`);
-  assert.ok(st2.bulk<=1, 'au plus une proposition en bloc');
-  assert.ok(win.eval(`G.mgmt.pile.every(a=>a.status==='open')`), 'pile fraîche entièrement ouverte');
+  /* Lot 3a §5 : tant que la carte est incomplète, pas de cycle suivant —
+     une nouvelle proposition en bloc arrive en tête de pile. */
+  assert.equal(win.eval(`G.mgmt.cycle`), 1, 'carte incomplète : le cycle ne se ferme pas');
+  assert.equal(win.eval(`G.mgmt.pile[0].kind`), 'leila_bulk', 'nouvelle proposition de Leïla en tête de pile');
+  assert.equal(win.eval(`G.mgmt.pile[0].status`), 'open', 'proposition ouverte');
+  assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile[0].id`), 'sélectionnée d’office');
 });
 
 test('MGMT persistance — roundtrip et repli sur secours', () => {
@@ -582,8 +593,11 @@ test('MGMT clavier chiffres — joue la réponse visible du même rang', () => {
   win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'2',bubbles:true}))`);
   assert.equal(win.eval(`G.mgmt.facts.length`), 1, 'chiffre 2 : la proposition est refusée');
   assert.equal(win.eval(`G.mgmt.facts[0].k`), 'refused');
+  /* R4 : la troisième réponse visible est Ignorer — le clavier la joue. */
+  win.eval(`G.mgmt.pile.push({id:'k3',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:G.mgmt.roster[0].id,b:G.mgmt.roster[1].id,status:'open',decision:null,title:'t'}); CL.mgmtOpen('k3');`);
   win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'3',bubbles:true}))`);
-  assert.equal(win.eval(`G.mgmt.facts.length`), 1, 'chiffre 3 sans troisième réponse : ignoré, sans plantage');
+  assert.equal(win.eval(`G.mgmt.facts[G.mgmt.facts.length-1].k`), 'ignored', 'chiffre 3 : ignore comme le bouton');
+  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='k3').status`), 'closed', 'affaire clôturée au clavier');
 });
 
 test('MGMT focus suivante — l\u2019affaire traitée passe la main, cycle auto si vide', () => {
@@ -671,26 +685,227 @@ test('MGMT fond — valeurs prescrites sur les bonnes règles', () => {
   }
 });
 
-/* ==== [ANCRE: MGMT_LOT1G] — Lot 1g : auto-cycle, bouton discret, mémoire Leïla. ==== */
-test('MGMT auto-cycle — vider la pile ouvre le cycle suivant sans permission', () => {
+/* ==== [ANCRE: MGMT_LOT1G] — Lot 1g : auto-cycle, bouton discret, mémoire
+   Leïla. Réécrit au lot 3a (§5, décisions du 10/09/2026) : « pile vide » ne
+   vaut plus « cycle suivant ». Carte complète : la soirée s'ouvre d'abord ;
+   carte incomplète : Leïla repropose en tête de pile et le cycle ne se
+   ferme pas ; même à court de propositions, le déclencheur manuel fait
+   toujours avancer le cycle (aucun blocage définitif). Les deux tests
+   d'origine décrivaient l'ancienne règle et ont été réécrits sur la
+   nouvelle règle du §5 du lot 3a — jamais sur le comportement observé. ==== */
+test('MGMT auto-cycle — pile vidée avec carte complète : la soirée s\u2019ouvre d\u2019abord, le cycle avance après', () => {
   const win = newGameWindow();
   enterMgmtFull(win,35);
   const c0 = win.eval(`G.mgmt.cycle`);
-  win.eval(`(function(){ let g=0; while(mgmtOpenCount(G.mgmt)>0&&g<10){ g++; const a=G.mgmt.pile.find(x=>x.status==='open'); CL.mgmtReply(a.id,MGMT_EXCHANGES[a.exchange].replies[0].id); } })()`);
-  assert.ok(win.eval(`G.mgmt.cycle`)>=c0+1, 'le cycle suivant s\u2019ouvre tout seul');
+  assert.equal(c0, 1, 'le premier cycle est 1');
+  win.eval(`(function(){ let g=0; while(mgmtOpenCount(G.mgmt)>0&&g<40){ g++; const a=G.mgmt.pile.find(x=>x.status==='open'); CL.mgmtReply(a.id,MGMT_EXCHANGES[a.exchange].replies[0].id); } })()`);
+  /* Lot 3a §5 : pile vide et carte complète, la soirée s'ouvre — pas le
+     cycle suivant. Le cycle vaut encore 1 à ce moment. */
+  assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'la soirée s\u2019ouvre d\u2019abord');
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, 'le cycle vaut encore 1 au moment de la soirée');
+  assert.ok(win.eval(`G.mgmt.lastEvent`), 'la soirée est calculée en une fois (anti-rechargement)');
+  assert.equal(win.eval(`G.mgmt.lastEvent.cycle`), c0, 'la soirée est rattachée au cycle joué');
+  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'la carte est vidée après la soirée');
+  /* « Continuer » soirée puis, s'il y a des touchés, lendemain. */
+  mgmtFinishEvent(win);
+  assert.equal(win.eval(`G.mgmt.cycle`), c0+1, 'après la soirée puis le lendemain, le cycle vaut 2');
+  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le bureau rouvre');
   assert.ok(win.eval(`G.mgmt.pile.every(a=>a.status==='open')`), 'nouvelle pile fraîche');
 });
 
-test('MGMT bouton discret — pile née vide : texte et liseré, sans aplat', () => {
+test('MGMT bouton discret — carte incomplète (0/4) : « Cycle suivant » repropose, il n\u2019avance pas', () => {
   const win = newGameWindow();
   enterMgmt(win,36);
   win.eval(`G.mgmt.pile=[]; G.mgmt.open=null; render();`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Cycle suivant'), 'déclencheur manuel présent');
   assert.ok(!html.includes('btn gold'), 'plus aucun aplat or criard');
+  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'carte incomplète (0/4)');
   const c0 = win.eval(`G.mgmt.cycle`);
   win.eval(`CL.mgmtNextCycle()`);
-  assert.equal(win.eval(`G.mgmt.cycle`), c0+1, 'le déclencheur discret avance');
+  /* Lot 3a §5 : tant que la carte n'est pas complète, le cycle ne se ferme
+     pas — Leïla fait d'abord une nouvelle proposition en bloc, en tête de
+     pile, ouverte et sélectionnée d'office. */
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, '« Cycle suivant » ne fait pas avancer le cycle');
+  assert.equal(win.eval(`G.mgmt.pile[0].kind`), 'leila_bulk', 'un bloc est reproposé en tête de pile');
+  assert.equal(win.eval(`G.mgmt.pile[0].status`), 'open', 'proposition ouverte');
+  assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile[0].id`), 'sélectionnée d\u2019office');
+});
+
+test('MGMT cycle suivant — carte complète : le déclencheur manuel fait avancer le cycle', () => {
+  const win = newGameWindow();
+  win.eval(`setSeed(45); CL.mgmtEnter(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_bulk');c++) mgmtNewPile(G.mgmt); render();`);
+  const id = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
+  win.eval(`CL.mgmtReply('${id}','validate')`);
+  assert.equal(win.eval(`G.mgmt.card.fights.length`), 4, 'carte complète');
+  /* On isole le déclencheur : le reste de la pile est clos sans décision
+     (le comportement des décisions est couvert par d'autres tests). */
+  win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';}); G.mgmt.open=null; render();`);
+  assert.equal(win.eval(`mgmtOpenCount(G.mgmt)`), 0, 'pile vidée');
+  assert.ok(win.document.getElementById('app').innerHTML.includes('Cycle suivant'), 'déclencheur visible');
+  const c0 = win.eval(`G.mgmt.cycle`);
+  win.eval(`CL.mgmtNextCycle()`);
+  /* Carte complète : le même déclencheur que le test précédent ouvre la
+     soirée, puis le cycle avance. */
+  assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'carte complète : la soirée se joue');
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, 'le cycle n\u2019avance qu\u2019après la soirée');
+  mgmtFinishEvent(win);
+  assert.equal(win.eval(`G.mgmt.cycle`), c0+1, '« Cycle suivant » fait bien avancer le cycle');
+});
+
+test('MGMT sortie de carte incomplète — la reproposition validée complète la carte, le cycle avance normalement', () => {
+  const win = newGameWindow();
+  win.eval(`setSeed(46); CL.mgmtEnter();`);
+  win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';}); G.mgmt.open=null; render();`);
+  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'carte incomplète (0/4)');
+  win.eval(`CL.mgmtNextCycle()`);
+  assert.equal(win.eval(`G.mgmt.cycle`), 1, 'le cycle ne se ferme pas tant que la carte est incomplète');
+  const id = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
+  win.eval(`CL.mgmtReply('${id}','validate')`);
+  /* Le bloc validé était bien la sortie : la carte est passée de 0/4 à 4/4
+     et la soirée s'est ouverte d'elle-même (la preuve en est lastEvent,
+     calculé sur les quatre combats, puis la carte vidée — lot 3a §5). */
+  assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'carte complétée : la soirée s\u2019ouvre d\u2019elle-même');
+  assert.equal(win.eval(`G.mgmt.lastEvent.fights.length`), 4, 'la soirée a bien joué les quatre combats de la carte');
+  assert.equal(win.eval(`G.mgmt.lastEvent.cycle`), 1, 'soirée rattachée au cycle en cours');
+  /* Après complétion, le cycle avance normalement (soirée → lendemain). */
+  mgmtFinishEvent(win);
+  assert.equal(win.eval(`G.mgmt.cycle`), 2, 'après complétion, le cycle avance normalement');
+  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le bureau rouvre');
+});
+
+/* Sorties du §5 complétant la carte autrement que par la reproposition de
+   Leïla. Aucune n'existe encore dans le code : ni implémentation, ni
+   simulation — chaque test reste marqué skip tant que le comportement
+   n'est pas écrit, et chacun a son entrée dans docs/QUESTIONS-OUVERTES.md.
+   Toute réplique éventuelle de ces écrans est [EMPLACEMENT AUTEUR]. */
+test('MGMT sortie carte incomplète — remonter un combat des préliminaires', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
+  /* À écrire quand la fonctionnalité existera : depuis une carte incomplète,
+     une proposition en bloc validée peut placer un combat en début de carte
+     en remontant un combat déjà proposé des préliminaires — puis la carte
+     complète, le cycle avance normalement (soirée → lendemain → cycle 2). */
+});
+
+test('MGMT sortie carte incomplète — short notice : combattant de Split ou d\u2019une autre organisation', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
+  /* À écrire quand la fonctionnalité existera : engager en short notice un
+     combattant du roster de Split, puis un combattant d'une autre
+     organisation, complète la carte ; après complétion, le cycle avance
+     normalement. Aucun libellé d'interface : [EMPLACEMENT AUTEUR]. */
+});
+
+test('MGMT sortie carte incomplète — combattant libre de contrat', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
+  /* À écrire quand la fonctionnalité existera : engager un combattant libre
+     de contrat complète la carte ; après complétion, le cycle avance
+     normalement. Aucun libellé d'interface : [EMPLACEMENT AUTEUR]. */
+});
+
+test('MGMT absence de blocage — même à court de propositions, le cycle avance toujours', () => {
+  const win = newGameWindow();
+  const r = win.eval(`
+    (function(){
+      setSeed(55);
+      const m=mgmtDefault();
+      /* Pot volontairement épuisé : deux combattants, une seule paire
+         possible — le bloc exige quatre combats distincts, strict comme
+         assoupli échoue (mgmtRefillBulk → shortfall, 'stuck'). */
+      m.roster=[
+        {id:'a',name:'A Boxeur',first:'A',last:'Boxeur',W:5,L:2,D:0,age:25,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+        {id:'b',name:'B Lutteur',first:'B',last:'Lutteur',W:4,L:3,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+      ];
+      if(!G) G={theme:'dark'};
+      G.mgmt=m;
+      const c0=m.cycle;
+      CL.mgmtNextCycle();
+      return JSON.stringify({c0,c1:m.cycle});
+    })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.c0, 0, 'état initial : cycle 0');
+  assert.equal(s.c1, s.c0+1, 'aucun état ne laisse le joueur incapable de faire avancer le cycle');
+});
+
+/* Économie du short notice (règle du découvert). Rien de tout cela
+   n'existe encore : ni recette, ni trésorerie, ni plafond dans l'état du
+   bureau — ni implémentation, ni simulation, tests marqués skip, chacun
+   avec son entrée dans docs/QUESTIONS-OUVERTES.md. */
+test('MGMT économie — short notice payable à découvert dans la limite du plafond', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
+  /* À écrire quand la fonctionnalité existera : le découvert est payable
+     jusqu'à un plafond égal à la recette nette de la dernière soirée
+     (moyenne des deux dernières si elles existent, plancher fixe si aucune
+     soirée n'a eu lieu). */
+});
+
+test('MGMT économie — remboursement du découvert sur la recette suivante', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
+  /* À écrire quand la fonctionnalité existera : le découvert se rembourse
+     sur la recette de la soirée suivante, avant tout bénéfice. */
+});
+
+test('MGMT économie — au-delà du plafond : plus de short notice, soirée en carte réduite avec pénalité', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
+  /* À écrire quand la fonctionnalité existera : au-delà du plafond, l'option
+     short notice n'est plus proposée et la soirée en carte réduite devient
+     disponible avec pénalité. Aucun libellé d'interface : [EMPLACEMENT AUTEUR]. */
+});
+
+/* Les deux tests du contrat LOT-3A-TESTS (docs/LOT-3A-TESTS-CONTRAT.md §5),
+   règles du §5 du lot 3a qui existent dans le code : la proposition en bloc
+   non ignorable, et l'absence de tout remplissage d'office. */
+test('MGMT bloc non ignorable — carte incomplète : seuls valider, échanger, écraser restent', () => {
+  const win = newGameWindow();
+  win.eval(`setSeed(60); CL.mgmtEnter(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_bulk');c++) mgmtNewPile(G.mgmt); render();`);
+  const id = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
+  win.eval(`CL.mgmtOpen('${id}')`);
+  /* Lot 3a §5 : tant que la carte est incomplète, ignorer le bloc est
+     interdit — ce serait une nouvelle proposition gratuite, sans le coût
+     de l'écrasement. */
+  assert.equal(win.eval(`mgmtIgnore(G.mgmt,'${id}')`), false, 'ignorer le bloc est refusé tant que la carte est incomplète');
+  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').status`), 'open', 'l\u2019affaire reste ouverte');
+  const html = win.document.getElementById('app').innerHTML;
+  assert.ok(!html.includes(`CL.mgmtIgnore('${id}')`), 'l\u2019interface ne propose pas Ignorer sur le bloc incomplet');
+  /* Carte complète (posée d\u2019office pour viser la garde elle-même) : la
+     règle bascule, Ignorer redevient une réponse disponible. */
+  win.eval(`(function(){ const a=G.mgmt.pile.find(x=>x.id==='${id}'); G.mgmt.card.fights=a.fights.map(f=>({a:f.a,b:f.b,cycle:G.mgmt.cycle})); })()`);
+  assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), true, 'carte complète');
+  assert.equal(win.eval(`mgmtIgnore(G.mgmt,'${id}')`), true, 'carte complète : ignorer redevient possible');
+  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'ignored', 'clôturée comme les autres affaires');
+});
+
+test('MGMT aucun remplissage d\u2019office — rien n\u2019entre en carte sans valider ou échanger', () => {
+  const win = newGameWindow();
+  win.eval(`setSeed(61); CL.mgmtEnter();`);
+  /* Toutes les décisions réelles sauf valider : écraser les blocs, accepter
+     ou ignorer les singles, fermer les réactions. La carte est revérifiée
+     après CHAQUE action : un remplissage d'office (à la reproposition, à la
+     fermeture de cycle) serait vu à l'instant même où il se produirait. */
+  const drained = win.eval(`
+    (function(){
+      let g=0, crushed=0, refills=0;
+      while(mgmtOpenCount(G.mgmt)>0&&g<40){
+        g++;
+        const a=G.mgmt.pile.find(x=>x.status==='open');
+        const act=a.kind==='leila_bulk'?'crush':MGMT_EXCHANGES[a.exchange].replies[0].id;
+        if(act==='crush') crushed++;
+        CL.mgmtReply(a.id,act);
+        if(G.mgmt.card.fights.length!==0) throw new Error('rempli d\u2019office à l\u2019action '+g);
+        if(G.mgmt.pile.some(x=>x.kind==='leila_bulk'&&x.status==='open')) refills++;
+      }
+      return JSON.stringify({g,crushed,refills});
+    })()`);
+  const s = JSON.parse(drained);
+  assert.ok(s.crushed>=1, 'au moins une proposition en bloc a été écrasée');
+  assert.ok(s.refills>=1, 'Leïla a reproposé au moins un bloc après écrasement');
+  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'aucun combat n\u2019est entré en carte sans une action du joueur');
+  /* Et même à court de paires ('stuck') : le cycle avance, rien n\u2019est
+     rempli d\u2019office. */
+  win.eval(`
+    (function(){
+      G.mgmt.roster=[
+        {id:'a',name:'A Boxeur',first:'A',last:'Boxeur',W:5,L:2,D:0,age:25,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+        {id:'b',name:'B Lutteur',first:'B',last:'Lutteur',W:4,L:3,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+      ];
+      G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';});
+      G.mgmt.open=null;
+      CL.mgmtNextCycle();
+    })()`);
+  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'à court de paires, rien n\u2019est rempli d\u2019office');
 });
 
 test('MGMT mémoire — formes singulier, pluriel et suites', () => {
@@ -707,5 +922,76 @@ test('MGMT mémoire — formes singulier, pluriel et suites', () => {
   assert.deepEqual(JSON.parse(t()), ['Leïla — tu as échangé un de ses combats.']);
   win.eval(`G.mgmt.facts=[{c:1,k:'swapped',a:'x',b:'y'},{c:2,k:'swapped',a:'x',b:'y'}];`);
   assert.deepEqual(JSON.parse(t()), ['Leïla — tu as échangé 2 de ses combats.']);
+});
+
+/* ==== [ANCRE: MGMT_LOT2REVUE] — revue lot 1 : frontières carrière/bureau.
+   La sauvegarde dédiée est la seule référence ; la carrière n'embarque plus
+   le bureau, le chargement et l'import l'écartent, les identifiants ont un
+   format strict. ==== */
+test('MGMT L1-R1 — reprendre une carrière préserve le bureau récent', () => {
+  const win = newGameWindow();
+  win.eval(`setSeed(11); CL.mgmtEnter();`);
+  win.eval(`CL.mgmtOpen(G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id)`);
+  const id = win.eval(`G.mgmt.open`);
+  win.eval(`CL.mgmtReply('${id}','accept')`);
+  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'accepted');
+  /* La sauvegarde carrière n'embarque plus le bureau. */
+  win.eval(`G.f=makeFighter({}); G.season={year:1,fights:[]}; G.ach=[]; G.titleHistory=[]; G.screen='hub'; save();`);
+  assert.equal(win.eval(`'mgmt' in JSON.parse(localStorage.getItem('cage-legacy-v3'))`), false, 'save() ne persiste plus G.mgmt');
+  /* Une copie embarquée ancienne (sauvegardes d'avant) est écartée au chargement. */
+  win.eval(`(function(){ const raw=JSON.parse(localStorage.getItem('cage-legacy-v3'));
+    raw.mgmt=JSON.parse(JSON.stringify(G.mgmt));
+    const stale=raw.mgmt.pile.find(a=>a.id==='${id}');
+    stale.decision=null; stale.status='open';
+    localStorage.setItem('cage-legacy-v3',JSON.stringify(raw)); })()`);
+  win.eval(`CL.cont()`);
+  assert.equal(win.eval(`G.mgmt`), undefined, 'aucune copie embarquée ne survit au chargement');
+  win.eval(`CL.go('title'); CL.mgmtEnter();`);
+  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'accepted', 'le bureau dédié gagne sur la copie embarquée');
+  /* Traiter une autre affaire persiste sans écraser la décision. */
+  win.eval(`G.mgmt.pile.push({id:'k-r1',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:G.mgmt.roster[0].id,b:G.mgmt.roster[1].id,status:'open',decision:null,title:'t'}); CL.mgmtIgnore('k-r1');`);
+  const after = JSON.parse(win.eval(`localStorage.getItem('cage-legacy-mgmt')`));
+  assert.equal(after.pile.find(a=>a.id===`${id}`).decision, 'accepted', 'décision toujours persistée après reprise et action suivante');
+});
+
+test('MGMT L1-R2 — un identifiant importé reste une donnée', () => {
+  const win = newGameWindow();
+  /* Format strict : guillemets, chevrons et ponctuation rejetés. */
+  for(const evil of ["x');window.__m=1;//",'a"b','a<b','c;d','e`f']){
+    assert.equal(win.eval(`mgmtValidAffair({id:${JSON.stringify(evil)},kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:'p',b:'q',status:'open'})`), false, 'id piégé rejeté : '+evil);
+  }
+  for(const ok of ['mg12','t0','k-propose','a','mg1']){
+    assert.equal(win.eval(`mgmtValidAffair({id:'${ok}',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:'p',b:'q',status:'open'})`), true, 'id interne accepté : '+ok);
+  }
+  /* Bout en bout : import piégé, clic réel, aucun code exécuté. */
+  win.eval(`setSeed(11); CL.mgmtEnter();`);
+  win.eval(`G.f=makeFighter({}); G.season={year:1,fights:[]}; G.ach=[]; G.titleHistory=[]; G.screen='hub'; save();`);
+  const data = win.eval(`JSON.stringify((()=>{ const raw=JSON.parse(localStorage.getItem('cage-legacy-v3'));
+    raw.mgmt=JSON.parse(localStorage.getItem('cage-legacy-mgmt'));
+    raw.mgmt.pile[0].id="x');window.__lot1ReviewMarker=1;//"; raw.mgmt.open=raw.mgmt.pile[0].id;
+    return JSON.stringify(raw); })())`);
+  win.prompt = () => data;
+  win.eval(`CL.importSave()`);
+  win.eval(`CL.go('title'); CL.mgmtEnter();`);
+  const row = win.document.querySelector('.mgmt-aff');
+  assert.ok(row, 'une affaire saine est affichée');
+  row.click();
+  assert.equal(win.eval(`typeof window.__lot1ReviewMarker`), 'undefined', 'le clic n\u2019a exécuté aucun code importé');
+  assert.ok(!win.eval(`JSON.stringify(G.mgmt)`).includes('__lot1ReviewMarker'), 'la charge piégée n\u2019est jamais entrée dans l\u2019état');
+});
+
+test('MGMT L1-R3 — un champ mgmt importé invalide ne bloque pas le bureau sain', () => {
+  const win = newGameWindow();
+  win.eval(`setSeed(11); CL.mgmtEnter();`);
+  const before = win.eval(`JSON.stringify(G.mgmt.pile.map(a=>a.id))`);
+  win.eval(`G.f=makeFighter({}); G.season={year:1,fights:[]}; G.ach=[]; G.titleHistory=[]; G.screen='hub'; save();`);
+  const data = win.eval(`JSON.stringify((()=>{ const raw=JSON.parse(localStorage.getItem('cage-legacy-v3'));
+    raw.mgmt={}; return JSON.stringify(raw); })())`);
+  win.prompt = () => data;
+  win.eval(`CL.importSave()`);
+  win.eval(`CL.go('title')`);
+  assert.doesNotThrow(() => win.eval(`CL.mgmtEnter()`), 'ouverture sans exception');
+  assert.equal(win.eval(`validateMgmt(G.mgmt)`), true, 'état rendu valide');
+  assert.equal(win.eval(`JSON.stringify(G.mgmt.pile.map(a=>a.id))`), before, 'bureau sain conservé');
 });
 /* ==== [FIN ANCRE] ==== */

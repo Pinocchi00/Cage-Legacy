@@ -134,6 +134,18 @@ Object.assign(MGMT_EXCHANGES,{
 });
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MGMT_LOT3A_DONNEES] — Lot 3a le corps et la soirée : seuil
+   d'usure (caché, sert au calibrage et au lot 3b), durée d'un cycle en
+   semaines (provisoire, le diffuseur la fixera — addendum §16), libellés
+   mécaniques du lendemain (même style que MGMT_ACTION_LABELS : des boutons
+   d'interface neutres, jamais des répliques) et familles de méthodes pour
+   l'écran de soirée. Aucune réplique, aucune voix. ==== */
+const MGMT_BODY_THRESHOLD=60;
+const MGMT_EVENT_WEEKS=5;
+const MGMT_FAMILY_LABELS={ko:'KO',stop:'Arrêt',sub:'Soumission',dec:'Décision',draw:'Nul'};
+const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',susp:'Suspension médicale'};
+/* ==== [FIN ANCRE] ==== */
+
 /* Les cinq raisons de se battre (docs/LES-SIX-VOIX-v1.1.md + complément
    SPLIT-CONTEXTE-DEPART.md §9). Attribuées à la création d'un dossier (§3,
    niveau 2 du CDC). Textes et effets repris du document, sans réécriture. */

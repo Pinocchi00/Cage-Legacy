@@ -96,6 +96,14 @@ test('MGMT valider — toute la carte entre en construction', () => {
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').status`), 'closed', 'proposition clôturée');
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'validated');
   assert.equal(win.eval(`G.mgmt.facts[G.mgmt.facts.length-1].k`), 'booked', 'fait mémorisé');
+  /* R1 : les huit bookings comptent comme interactions (dossiers + raisons). */
+  const promo = win.eval(`JSON.stringify(G.mgmt.pile.find(a=>a.id==='${id}').fights.flatMap(f=>[f.a,f.b]).map(x=>{
+    const o=mgmtFighterById(G.mgmt,x); return {level:o.level,interactions:o.interactions,raison:o.raison}; }))`);
+  const ps = JSON.parse(promo);
+  assert.equal(ps.length, 8);
+  for(const f of ps){
+    assert.ok(f.level>=2&&f.interactions===1&&f.raison!==null, 'booking validé = dossier');
+  }
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Carte 4/4'), 'carte visible sur la ligne du cycle, compacte');
   assert.ok(!html.includes('Place vide'), 'plus aucun bloc de places');
@@ -115,6 +123,8 @@ test('MGMT échanger — un combat remplacé, pas un écrasement', () => {
   assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'la carte n\u2019a pas bougé');
   const r = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile[G.mgmt.pile.length-1])`));
   assert.equal(r.kind, 'leila_react_swap', 'Leïla réagit dans une affaire à part');
+  /* R3 : la réaction vise la paire retirée, pas les remplaçants. */
+  assert.deepEqual([r.a,r.b], before[2], 'réaction rattachée aux retirés');
 });
 
 test('MGMT écraser — carte intacte, coût horodaté, réaction', () => {
@@ -308,6 +318,25 @@ test('MGMT aucun homonyme dans un combat — Rosa contre Rosa interdit', () => {
   assert.equal(bad, 0, '300 piles : jamais deux fois le même prénom dans un combat');
 });
 
+test('MGMT dossier suit le marqué — R2, pas les champs figés', () => {
+  const win = newGameWindow();
+  enterMgmtBulk(win,122);
+  const id = mgmtBulkId(win);
+  const names = i => win.eval(`JSON.stringify((()=>{ const a=G.mgmt.pile.find(x=>x.id==='${id}');
+    return [a.fights[${i}].a,a.fights[${i}].b].map(x=>mgmtFighterById(G.mgmt,x).name); })())`);
+  win.eval(`CL.mgmtOpen('${id}'); CL.mgmtMark('${id}',2);`);
+  let html = win.document.getElementById('app').innerHTML;
+  const pair2 = JSON.parse(names(2));
+  assert.ok(html.includes(pair2[0])&&html.includes(pair2[1]), 'dossier sur le marqué');
+  win.eval(`CL.mgmtReply('${id}','swap')`);
+  const pair2b = JSON.parse(names(2));
+  assert.notDeepEqual(pair2b, pair2, 'remplacement effectif');
+  html = win.document.getElementById('app').innerHTML;
+  const dossier = html.split('>Dossier</div>')[1].split('Mémoire')[0];
+  assert.ok(dossier.includes(pair2b[0])&&dossier.includes(pair2b[1]), 'dossier suit le remplacement');
+  assert.ok(!dossier.includes(pair2[0]), 'plus aucune trace du retiré au dossier');
+});
+
 test('MGMT avertissement affiché — avec les combats, sans désigner, puis silence', () => {
   const win = newGameWindow();
   enterMgmtBulk(win,112);
@@ -417,6 +446,29 @@ test('MGMT titres — tiennent dans la colonne sans ellipse', () => {
   const rule = src.slice(i, src.indexOf('}', i));
   assert.ok(rule.includes('white-space:normal'), 'titres enroulés, pas tronqués');
   assert.ok(!rule.includes('ellipsis'), 'aucune ellipse sur les titres');
+});
+
+test('MGMT arbitrage genre — aucun appariement mixte hommes/femmes', () => {
+  const win = newGameWindow();
+  const bad = win.eval(`(function(){
+    let bad=0;
+    for(let s=1;s<=200;s++){
+      setSeed(s);
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      m.leila={crushes:[2,3,4]};
+      mgmtNewPile(m);
+      const gap=o=>{ const d=divById(o.div); return d?d.gender:null; };
+      for(const a of m.pile){
+        const fights=a.kind==='leila_bulk'?a.fights:[a];
+        for(const f of fights){
+          const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
+          if(fa&&fb&&gap(fa)!==gap(fb)) bad++;
+        }
+      }
+    }
+    return bad;
+  })()`);
+  assert.equal(bad, 0, '200 piles : dégradés et replis restent dans leur genre');
 });
 
 test('MGMT validation — bloc bien formé accepté, malformé rejeté', () => {
