@@ -50,7 +50,14 @@ function save(){ if(G&&(G.fantasyActive||G.duelActive||['fantasy_setup','allstar
        jamais remplacer le dernier secours chargeable. ==== */
     if(parseAndValidate(previous)) localStorage.setItem(SAVE_BACKUP_KEY,previous);
     /* ==== [FIN ANCRE] ==== */
-    localStorage.setItem(SAVE_KEY,JSON.stringify(G));
+    /* ==== [ANCRE: MGMT_LOT2REV_SAVE_SANS_BUREAU] — revue lot 1 (L1-R1) : le
+       bureau a sa sauvegarde dédiée (cage-legacy-mgmt), seule référence. La
+       sauvegarde carrière ne l'embarque plus : une copie ancienne restaurée
+       avec une carrière écraserait sinon la progression management récente.
+       G.mgmt vivant n'est pas touché, seule la copie persistée. ==== */
+    const data=Object.assign({},G);
+    delete data.mgmt;
+    localStorage.setItem(SAVE_KEY,JSON.stringify(data));
   }catch(e){}
 }
 /* ==== [FIN ANCRE] ==== */
@@ -66,6 +73,11 @@ function load(){
         if(!candidate || !validateState(candidate)) continue;
       }catch(e){ continue; }
       G=candidate;
+      /* ==== [ANCRE: MGMT_LOT2REV_LOAD_SANS_BUREAU] — revue lot 1 (L1-R1) :
+         une sauvegarde carrière antérieure peut encore embarquer une copie
+         du bureau : elle est écartée ici, jamais publiée. Le bureau dédié
+         reste la seule référence et sera rechargé à l'entrée du bureau. ==== */
+      delete G.mgmt;
       if(key===SAVE_BACKUP_KEY){
         console.warn('Sauvegarde principale illisible ou invalide : restauration automatique depuis la copie de secours.');
         try{ localStorage.setItem(SAVE_KEY,JSON.stringify(candidate)); }

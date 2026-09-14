@@ -766,6 +766,13 @@ const CL={
       if(!validateSave(parsed)) throw new Error('invalid');
       candidate=migrate(parsed);
       if(!candidate || !validateState(candidate)) throw new Error('corrupt');
+      /* ==== [ANCRE: MGMT_LOT2REV_IMPORT_BUREAU] — revue lot 1 (L1-R2, L1-R3) :
+         le champ management importé ne rejoint jamais l'état vivant, valide
+         ou non : la sauvegarde dédiée est la seule référence du bureau, et
+         un import carrière ne touche jamais au bureau (même règle qu'au
+         chargement). Ainsi aucune donnée importée — y compris un identifiant
+         piégé — n'atteint le rendu. ==== */
+      if(candidate.mgmt!==undefined) delete candidate.mgmt;
     }catch(e){ alert('Sauvegarde invalide ou corrompue.'); return; }
     const previous=G, app=document.getElementById('app'), nodes=Array.from(app.childNodes);
     try{

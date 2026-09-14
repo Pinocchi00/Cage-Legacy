@@ -24,7 +24,8 @@
 /* ==== [ANCRE: MGMT_LOT1_ECRAN] — Lot 1 mode management : écran du bureau,
    trois colonnes, voix Leïla, actions neutres. ==== */
 const MGMT_ACTION_LABELS={accept:'Accepter le combat',refuse:'Refuser',close:'Fermer',
-  validate:'Tout valider',swap:'Échanger le combat',crush:'Écraser la carte'};
+  validate:'Tout valider',swap:'Échanger le combat',crush:'Écraser la carte',
+  __ignore:"Ignorer l'affaire"};
 
 function mgmtLineCard(f){
   if(!f) return '';
@@ -59,16 +60,30 @@ function mgmtKeyMark(dir){
   render();
 }
 
+/** Réponses réellement affichées pour une affaire (lots 1e-7, 2c-R4, 3a) : les
+ *  répliques de l'échange, plus Ignorer sur les propositions simples — et sur
+ *  la proposition en bloc seulement quand la carte est complète (lot 3a §5 :
+ *  tant qu'elle ne l'est pas, ignorer serait une nouvelle proposition
+ *  gratuite). Source unique pour la souris et le clavier : ce qui se voit
+ *  se joue. */
+function mgmtVisibleReplies(m,sel){
+  const ex=sel&&MGMT_EXCHANGES[sel.exchange];
+  const reps=(ex?ex.replies:[]).filter(r=>MGMT_ACTION_LABELS[r.action]).slice();
+  if(sel&&sel.kind==='leila_propose') reps.push({id:'__ignore',action:'__ignore'});
+  else if(sel&&sel.kind==='leila_bulk'&&m&&mgmtCardFull(m)) reps.push({id:'__ignore',action:'__ignore'});
+  return reps;
+}
+
 /** Joue la réponse visible numéro idx de l'échange courant (lot 1e-7, 1-3). */
 function mgmtKeyReply(idx){
   if(!G||!G.mgmt) return;
   const m=G.mgmt;
   const sel=m.pile.find(a=>a.id===m.open&&a.status==='open');
   if(!sel) return;
-  const ex=MGMT_EXCHANGES[sel.exchange];
-  const reps=(ex?ex.replies:[]).filter(r=>MGMT_ACTION_LABELS[r.action]);
+  const reps=mgmtVisibleReplies(m,sel);
   if(idx<0||idx>=reps.length) return;
-  CL.mgmtReply(sel.id,reps[idx].id);
+  if(reps[idx].action==='__ignore') CL.mgmtIgnore(sel.id);
+  else CL.mgmtReply(sel.id,reps[idx].id);
 }
 
 /** Libellé du compteur, accordé (lot 1e-3) : la pile du lot 1 est petite,
@@ -194,20 +209,20 @@ function scr_mgmt_bureau(){
        générique, ni marqueur visible — les boutons neutres portent l'action
        en attendant les répliques de l'auteur. */
     const lines=(ex?ex.lines:[]).filter(t=>typeof t==='string').map(t=>`<div class="mgmt-say">${esc(t)}</div>`).join('');
-    /* Réponses en paroles (lots 1e-6, 1f-2/3), pas en boutons : la réplique
-       écrite quand elle existe, le libellé neutre en repli sur le vide —
-       jamais de réplique générique. Ignorer est la troisième réponse : même
-       niveau, même traitement, sans capitales ni cadre. */
-    let btns=(ex?ex.replies:[])
-      .filter(r=>MGMT_ACTION_LABELS[r.action])
+    /* Réponses en paroles (lots 1e-6, 1f-2/3, 2c-R4), pas en boutons : la
+       réplique écrite quand elle existe, le libellé neutre en repli sur le
+       vide — jamais de réplique générique. Ignorer est la troisième réponse
+       des propositions : même niveau, même traitement, sans capitales ni
+       cadre. Souris et clavier partagent mgmtVisibleReplies. */
+    let btns=mgmtVisibleReplies(m,selOpen)
       .map(r=>{
         const label=r.text||MGMT_ACTION_LABELS[r.action];
-        return `<button class="mgmt-rep" onclick="CL.mgmtReply('${selOpen.id}','${r.id}')">${esc(label)}</button>`;
+        const go=r.action==='__ignore'
+          ?`CL.mgmtIgnore('${selOpen.id}')`
+          :`CL.mgmtReply('${selOpen.id}','${r.id}')`;
+        return `<button class="mgmt-rep" onclick="${go}">${esc(label)}</button>`;
       })
       .join('');
-    if(selOpen.kind==='leila_propose'){
-      btns+=`<button class="mgmt-rep" onclick="CL.mgmtIgnore('${selOpen.id}')">Ignorer l'affaire</button>`;
-    }
     /* Lot 2 : la proposition en bloc affiche ses combats marquables avant
        les trois réponses. Les autres échanges gardent voix + réponses. */
     talkHtml=(selOpen.kind==='leila_bulk')
@@ -217,11 +232,15 @@ function scr_mgmt_bureau(){
       +lines+`<div class="mgmt-reps">${btns}</div>`;
   }
 
-  /* Lot 1g-3 : la colonne ne montre que les deux combattants concernés par
-     l'affaire sélectionnée, et rien d'autre. La ligne de statistiques
-     internes est supprimée. */
+  /* Lot 2 R2 : le dossier suit le combat courant de la proposition (le
+     marqué, premier par défaut), pas les champs a/b figés à la création. */
   let fileHtml;
-  if(sel){
+  if(sel&&sel.kind==='leila_bulk'&&Array.isArray(sel.fights)){
+    const fi=(Number.isSafeInteger(sel.marked)&&sel.marked>=0&&sel.marked<sel.fights.length)?sel.marked:0;
+    const fa=mgmtFighterById(m,sel.fights[fi].a), fb=mgmtFighterById(m,sel.fights[fi].b);
+    fileHtml=`<div class="opp" style="cursor:default">${mgmtLineCard(fa)}</div>`
+      +`<div class="opp" style="cursor:default">${mgmtLineCard(fb)}</div>`;
+  }else if(sel){
     const fa=mgmtFighterById(m,sel.a), fb=mgmtFighterById(m,sel.b);
     fileHtml=`<div class="opp" style="cursor:default">${mgmtLineCard(fa)}</div>`
       +`<div class="opp" style="cursor:default">${mgmtLineCard(fb)}</div>`;
@@ -246,9 +265,77 @@ function scr_mgmt_bureau(){
     +`</div></div>`;
 }
 
+/* ==== [ANCRE: MGMT_LOT3A_SOIREE] — Lot 3a le corps et la soirée : un seul
+   écran de soirée (quatre lignes — deux noms, vainqueur, famille, round ;
+   ni res.detail, ni statistiques, ni note, ni étiquette — addendum 2 §6) lu
+   dans m.lastEvent calculé en une fois (recharger ne rejoue rien), puis le
+   lendemain (une carte par combattant touché, du plus grave au moins grave,
+   avec l'emplacement vide de Clara — aucune réplique générique pour
+   combler, personne touché : pas de lendemain). Le traumatisme ne paraît
+   dans aucun DOM. Souris et clavier (ui-11-keys.js, jamais exclusif). ==== */
+function scr_mgmt_soiree(){
+  const m=G&&G.mgmt;
+  if(!m||!m.lastEvent||!Array.isArray(m.lastEvent.fights)||m.lastEvent.fights.length===0){
+    return scr_mgmt_bureau();
+  }
+  const rows=m.lastEvent.fights.map(x=>{
+    const fa=mgmtFighterById(m,x.a), fb=mgmtFighterById(m,x.b);
+    const na=fa?fa.name:'?', nb=fb?fb.name:'?';
+    const w=x.winner==='D'?'Nul':(x.winner==='A'?na:nb);
+    const fam=MGMT_FAMILY_LABELS[x.family]||x.family;
+    return `<div class="opp mgmt-fight" style="cursor:default">`
+      +`<span class="opp-nm">${esc(na)} contre ${esc(nb)}</span>`
+      +`<div class="mgmt-meta">${esc(w)} · ${esc(fam)} · Round ${esc(x.round)}</div></div>`;
+  }).join('');
+  return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
+    +`<div><div class="eyebrow gold">Split — Management</div>`
+    +`<h2 class="disp">La soirée</h2></div></div>`
+    +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr)">`
+    +`<div class="mgmt-col">${rows}`
+    +`<button class="mgmt-next" onclick="CL.mgmtSoireeNext()">Continuer</button></div>`
+    +`</div></div>`;
+}
+
+/** Une carte du lendemain : le nom, le fait (libellé neutre), et la place de
+ *  la parole de Clara — emplacement vide, convention du lot 1. */
+function mgmtTouchedCard(m,t){
+  const f=mgmtFighterById(m,t.id);
+  const nm=f?f.name:'?';
+  let fact;
+  if(t.retired) fact=MGMT_FACT_LABELS.retired;
+  else if(t.injury&&t.days>0) fact=t.injury+' — '+t.days+' jours';
+  else if(t.injury) fact=t.injury;
+  else fact=MGMT_FACT_LABELS.susp+' — '+t.days+' jours';
+  const empty=t.retired
+    ?'[RÉPLIQUE MANQUANTE — Clara : annonce une fin de carrière]'
+    :(t.injury
+      ?'[RÉPLIQUE MANQUANTE — Clara : annonce une blessure]'
+      :'[RÉPLIQUE MANQUANTE — Clara : annonce une suspension]');
+  return `<div class="opp" style="cursor:default"><span class="opp-nm">${esc(nm)}</span>`
+    +`<div class="mgmt-meta">${esc(fact)}</div>`
+    +`<div class="mgmt-say">${esc(empty)}</div></div>`;
+}
+
+function scr_mgmt_lendemain(){
+  const m=G&&G.mgmt;
+  const touched=m&&m.lastEvent&&Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
+  if(!m||touched.length===0){
+    return scr_mgmt_bureau();
+  }
+  const cards=touched.map(t=>mgmtTouchedCard(m,t)).join('');
+  return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
+    +`<div><div class="eyebrow gold">Split — Management</div>`
+    +`<h2 class="disp">Le lendemain</h2></div></div>`
+    +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr)">`
+    +`<div class="mgmt-col">${cards}`
+    +`<button class="mgmt-next" onclick="CL.mgmtLendemainNext()">Continuer</button></div>`
+    +`</div></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MGMT_LOT1_CONTROLEUR] — actions du bureau : jamais d'édition
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js). ==== */
-Object.assign(SCREENS,{mgmt_bureau:scr_mgmt_bureau});
+Object.assign(SCREENS,{mgmt_bureau:scr_mgmt_bureau,mgmt_soiree:scr_mgmt_soiree,mgmt_lendemain:scr_mgmt_lendemain});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -264,6 +351,19 @@ keysRegister('mgmt_bureau',{
   '3'(){ mgmtKeyReply(2); },
   Escape(){ CL.mgmtLeave(); },
 });
+/* ==== [ANCRE: MGMT_LOT3A_CLAVIER] — Lot 3a : la soirée et le lendemain ne
+   demandent qu'à continuer — une touche suffit, comme la souris. ==== */
+keysRegister('mgmt_soiree',{
+  '1'(){ CL.mgmtSoireeNext(); },
+  Enter(){ CL.mgmtSoireeNext(); },
+  Escape(){ CL.mgmtSoireeNext(); },
+});
+keysRegister('mgmt_lendemain',{
+  '1'(){ CL.mgmtLendemainNext(); },
+  Enter(){ CL.mgmtLendemainNext(); },
+  Escape(){ CL.mgmtLendemainNext(); },
+});
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 Object.assign(CL,{
@@ -276,9 +376,15 @@ Object.assign(CL,{
       const app=document.getElementById('app'); if(app&&app.classList) app.classList.add('mgmt');
       if(document.body&&document.body.classList) document.body.classList.add('mgmt');
     }catch(e){}
+    /* Revue lot 1 (L1-R3) : la simple présence de G.mgmt ne court-circuite
+       jamais la validation — un champ invalide (import, bidouille) est
+       écarté, la sauvegarde dédiée (ou un bureau neuf) prend le relais. */
+    if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
       G.mgmt=mgmtDefault();
       if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); saveMgmt(); }
+    }else{
+      mgmtRepair(G.mgmt);
     }
     CL.go('mgmt_bureau');
   },
@@ -317,30 +423,67 @@ Object.assign(CL,{
       render();
       return;
     }
-    /* Lot 1g-1 : un bureau se remplit tout seul — la pile vidée par une
-       décision rouvre aussitôt un cycle, sans demander la permission. */
+    /* Lot 1g-1 : un bureau se remplit tout seul — sauf fin de cycle (lot 3a
+       §5) : pile vide et carte complète, c'est la soirée ; pile vide et
+       carte incomplète, Leïla propose à nouveau au lieu de fermer le cycle.
+       Le jeu ne choisit jamais un combat à la place du joueur. */
     if(mgmtDecide(G.mgmt,affairId,replyId)){
-      if(mgmtOpenCount(G.mgmt)===0) mgmtNewPile(G.mgmt);
-      saveMgmt();
+      const r=mgmtClosePile(G.mgmt);
+      if(r==='event'){
+        if(mgmtRunEvent(G.mgmt)){ CL.go('mgmt_soiree'); return; }
+      }else{
+        saveMgmt();
+      }
     }
     render();
   },
   mgmtIgnore(affairId){
     if(!G||!G.mgmt) return;
     if(mgmtIgnore(G.mgmt,affairId)){
-      if(mgmtOpenCount(G.mgmt)===0) mgmtNewPile(G.mgmt);
-      saveMgmt();
+      const r=mgmtClosePile(G.mgmt);
+      if(r==='event'){
+        if(mgmtRunEvent(G.mgmt)){ CL.go('mgmt_soiree'); return; }
+      }else{
+        saveMgmt();
+      }
     }
     render();
   },
   /* Déclencheur manuel discret (lot 1g-1) : uniquement pour une pile née
      vide, qui ne se videra jamais toute seule. Texte et liseré, sans
-     aplat ni ombre. */
+     aplat ni ombre. Lot 3a §5 : si la pile est vide pour de bon (cycle non
+     fermé, carte incomplète), il propose d'abord à nouveau — seul un pot
+     vraiment épuisé avance le cycle à la main. */
   mgmtNextCycle(){
     if(!G||!G.mgmt) return;
+    const r=mgmtClosePile(G.mgmt);
+    if(r==='event'){
+      if(mgmtRunEvent(G.mgmt)){ CL.go('mgmt_soiree'); return; }
+    }else if(r==='refill'){
+      saveMgmt();
+      render();
+      return;
+    }
     mgmtNewPile(G.mgmt);
     saveMgmt();
     render();
+  },
+  /* Lot 3a §5/§7 : après la soirée, le lendemain s'il y a des touchés, sinon
+     le cycle suivant rouvre aussitôt le bureau. */
+  mgmtSoireeNext(){
+    if(!G||!G.mgmt) return;
+    const m=G.mgmt;
+    const touched=m.lastEvent&&Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
+    if(touched.length>0){ CL.go('mgmt_lendemain'); return; }
+    mgmtNewPile(m);
+    saveMgmt();
+    CL.go('mgmt_bureau');
+  },
+  mgmtLendemainNext(){
+    if(!G||!G.mgmt) return;
+    mgmtNewPile(G.mgmt);
+    saveMgmt();
+    CL.go('mgmt_bureau');
   },
 });
 /* ==== [FIN ANCRE] ==== */
