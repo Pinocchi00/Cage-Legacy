@@ -40,4 +40,5 @@ laisses un emplacement vide et tu le signales. Une réplique générique est pir
 
 - `docs/CDC-MODE-MANAGEMENT.md` — cahier des charges du mode en cours. Fait foi.
 - `docs/ETAT-DES-LIEUX.md` — fichiers concernés, à garder, à jeter.
+- `docs/CHARTE-INTERFACE-MANAGEMENT.md` — règles d'interface du management (humanité, réalisme, simplicité, lisibilité mesurable). Tout écran management la respecte.
 - `docs/QUESTIONS-OUVERTES.md` — ce qui n'est pas tranché. N'y réponds pas seul.

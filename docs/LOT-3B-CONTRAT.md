@@ -255,7 +255,7 @@ par Claude avant la tranche suivante.
   recharger après la soirée ne recompte pas la recette.
 - **Aucune réplique, aucun affichage** dans cette tranche.
 
-### T2 — La carte en 4 + 4 *(débloquée)*
+### T2 — La carte en 4 + 4 *(après validation de la maquette de composition, charte §3)*
 - Structure `{main, prelims}` : `MGMT_SAVE_VERSION` 4 → 5, la carte en cours devient
   les prélims, la main card démarre vide, `lastCycle` absent toléré.
 - Classement dérivé par catégorie et `lastCycle` sur la ligne (§2).
@@ -324,6 +324,10 @@ par Claude avant la tranche suivante.
 
 ## 4. Interdits pour OpenCode (toutes tranches)
 
+- **Interface : `docs/CHARTE-INTERFACE-MANAGEMENT.md` s'applique à tout écran touché.** Un
+  nouvel écran ou un geste nouveau n'est codé qu'après validation de sa maquette par
+  Anthony (charte §3). Tranches concernées : T2, T6, T7 et l'argent au lendemain.
+
 - Aucune réplique inventée, retouchée ou « corrigée ». Les 14 répliques du LOT-3B §G
   sont intégrées **mot pour mot, fautes et ponctuation comprises** (D1 : ne pas
   corriger « .. »). Tout texte manquant : `[EMPLACEMENT AUTEUR]`, signalé.
@@ -343,6 +347,8 @@ par Claude avant la tranche suivante.
 - `npm run check` vert sur la version intégrée, relancé par Claude.
 - Sauvegarde v3 existante chargée sans perte ; recharger ne rejoue ni soirée, ni
   recette, ni tirage de retrait.
+- Vérification d'interface de la charte §3 faite à chaque tranche qui touche un écran
+  (captures 1280/1440/1920, mesures L2/L3, souris puis clavier), et verdict d'Anthony.
 - Parcours jouable préparé pour Anthony : une partie seedée qui mène directement à un
   retrait, puis à chacune des trois sorties.
 - Rapport de lot : `docs/lots/LOT-3B-RAPPORT.md` (réalisé, vérifié, non vérifié,
