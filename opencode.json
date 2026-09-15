@@ -16,6 +16,8 @@
       "npm run lint": "allow",
       "npm run lint:content": "allow",
       "npm run check": "allow",
+      "node tools/*": "allow",
+      "node --test*": "allow",
       "npm ci": "allow",
 
       "git status": "allow",
