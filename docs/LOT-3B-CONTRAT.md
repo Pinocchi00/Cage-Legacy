@@ -270,6 +270,19 @@ par Claude avant la tranche suivante.
 - Tests ajoutés : classement déterministe et non stocké ; aucun combattant de main
   card dans les prélims ; repos respecté en mode strict ; suspendus non
   sélectionnables ; migration de la carte v3.
+- **Recalibrage de l'argent sur le déroulé réel (relecture T1, 15/09).** Le calibrage
+  T1 mesure un profil « propre » = les 8 meilleures paires possibles, donc une borne
+  haute, pas une carte moyenne. Et tant que T2 n'est pas livrée, le jeu joue 4 combats
+  payés au prorata 4/8 : mesuré par Claude sur 240 soirées réelles (40 parties × 6
+  soirées, propositions de Leïla validées), **0 % de soirées rentables, R moyen
+  −7,8 k$**. À la fin de T2, `tools/monte-carlo-economie.js` doit jouer le vrai
+  déroulé : main card choisie par un joueur-type (proxy documenté), prélims issus de
+  la vraie proposition de Leïla (`mgmtNewBulkAffair`), soirée par `mgmtRunEvent`.
+  Cibles T1 revérifiées sur ce déroulé, constantes recalibrées si besoin. Ajouter un
+  test qui échoue si, sur une graine fixe, les soirées réelles non écrasées ne sont
+  jamais rentables.
+- **Ne pas fusionner `lot-3b` dans `main` avant la fin de T2** : entre T1 et T2,
+  l'économie en jeu est toujours perdante.
 
 ### T3 — Le dernier mois et le retrait *(après T2)*
 - Phase entre verrouillage de la carte et soirée. Tirages de retrait selon §1

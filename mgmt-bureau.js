@@ -29,12 +29,20 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    le corps (trauma/susp/retired sur la ligne) et la soirée (m.lastEvent).
    Migration 2 → 3 sans perte (mgmtMigrate) : les champs absents sont valides,
    rien n'est réinitialisé. Une v1 reste refusée, comme avant. ==== */
-const MGMT_SAVE_VERSION=3;
+/* ==== [ANCRE: MGMT_LOT3B_VERSION] — Lot 3b T1 l'argent de l'organisation :
+   v4 ajoute la trésorerie (m.treasury, entier k$), les deux dernières
+   recettes nettes (m.recettes), l'historique d'audience (m.audiences) et le
+   nombre de soirées jouées (m.eventsPlayed). Migration séquentielle
+   (mgmtMigrate) : une v3 reçoit les champs d'argent par défaut, une v2
+   migre d'abord en v3 puis en v4, une v1 reste refusée — sans perte, sans
+   reset (contrat LOT-3B §3 T1). ==== */
+const MGMT_SAVE_VERSION=4;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
   return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,
-    card:{size:MGMT_CARD_SIZE,fights:[]},leila:{crushes:[]},lastEvent:null};
+    card:{size:MGMT_CARD_SIZE,fights:[]},leila:{crushes:[]},lastEvent:null,
+    treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0};
 }
 
 /** Identifiant stable et déterministe (compteur de partie, pas de hasard). */
@@ -776,19 +784,39 @@ function mgmtApplyFight(m,f,opp,res,side){
 
 /** Joue la soirée : les combats de la carte se règlent en une seule fois
  *  par simulateFight(A,B,3) — sans applyResult(), le bilan est mis à jour
- *  à la main — avec toutes leurs conséquences (§6). Stocké dans
- *  m.lastEvent puis sauvegardé avant tout affichage : recharger la page ne
- *  rejoue rien. La carte est vidée. Ne remplit jamais rien d'office : carte
- *  incomplète ou paire introuvable, on ne joue pas (null).
+ *  à la main — avec toutes leurs conséquences (§6). Lot 3b T1 (QO-5) : le
+ *  même calcul unique porte la finance — attrait et cachets lus sur les
+ *  lignes d'avant combat, spectacle observé sur les combats joués, recette
+ *  nette R = billetterie + droits − cachets ajoutée au solde unique
+ *  (remboursement automatique : tant que T < 0, rien n'est bénéfice),
+ *  audience, historiques et E1 (patron : T < 0 avant la soirée et R > 0).
+ *  Stocké dans m.lastEvent puis sauvegardé avant tout affichage : recharger
+ *  la page ne rejoue rien. La carte est vidée. Ne remplit jamais rien
+ *  d'office : carte incomplète ou paire introuvable, on ne joue pas (null),
+ *  avant toute mutation.
  *  @returns {object|null} m.lastEvent. */
 function mgmtRunEvent(m){
   if(!m||!m.card||!Array.isArray(m.card.fights)) return null;
   if(!mgmtCardFull(m)) return null;
-  const fights=[];
-  const touched=[];
-  for(const cf of m.card.fights){
+  /* Lot 3b T1 : la carte {main,prelims} n'existe pas encore en jeu (T2) —
+     les combats actuels comptent comme prélims. */
+  const slotted={main:[],prelims:[]};
+  for(const cf of m.card.fights){ slotted.prelims.push({a:cf.a,b:cf.b,slot:'prelim'}); }
+  const booked=slotted.main.concat(slotted.prelims);
+  /* Disponibilités vérifiées d'abord : une paire introuvable n'applique
+     aucune conséquence — la soirée n'a pas commencé. */
+  for(const cf of booked){
     const fa=mgmtFighterById(m,cf.a), fb=mgmtFighterById(m,cf.b);
     if(!fa||!fb||!mgmtAvailable(m,fa)||!mgmtAvailable(m,fb)) return null;
+  }
+  /* Cachets et attrait : la carte d'avant la soirée — le bilan et le corps
+     d'avant combat, jamais d'après (les combats mutent les lignes). */
+  const attraction=mgmtCardAttraction(m,booked);
+  const purses=mgmtPurses(m,booked);
+  const fights=[];
+  const touched=[];
+  for(const cf of booked){
+    const fa=mgmtFighterById(m,cf.a), fb=mgmtFighterById(m,cf.b);
     const res=simulateFight(mgmtFightReady(fa),mgmtFightReady(fb),3);
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:mgmtMethodFamily(res.method,res.winner),
       round:Number.isSafeInteger(res.round)?res.round:3});
@@ -798,7 +826,19 @@ function mgmtRunEvent(m){
     if(tb) touched.push(tb);
   }
   touched.sort((x,y)=>mgmtTouchedRank(y)-mgmtTouchedRank(x));
-  m.lastEvent={cycle:m.cycle,fights:fights,touched:touched};
+  const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length);
+  /* Un seul solde (QO-5) : T ← T + R. Remboursement « avant tout bénéfice »
+     automatique — tant que T < 0, rien n'est bénéfice. E1 si et seulement
+     si T < 0 avant la soirée et R > 0. */
+  const debtBefore=Number.isSafeInteger(m.treasury)&&m.treasury<0;
+  m.treasury=(Number.isSafeInteger(m.treasury)?m.treasury:MGMT_TREASURY_START)+finance.recette;
+  if(!Array.isArray(m.recettes)) m.recettes=[];
+  m.recettes.push(finance.recette);
+  while(m.recettes.length>2) m.recettes.shift();
+  if(!Array.isArray(m.audiences)) m.audiences=[];
+  m.audiences.push(finance.audience);
+  m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
+  m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   m.card.fights=[];
   saveMgmt();
   return m.lastEvent;
@@ -850,6 +890,198 @@ function mgmtClosePile(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MGMT_LOT3B_T1_ECONOMIE] — Lot 3b T1 l'argent de
+   l'organisation (contrat LOT-3B §3 T1, décisions QO-5 et QO-7 §1) : un seul
+   solde — le découvert est T sous zéro, jamais un compteur séparé — cachets
+   dérivés de la ligne (jamais stockés, règle du bureau CDC §3), recette
+   nette R = billetterie + droits du diffuseur − cachets, plafond de
+   découvert, audience et sa référence pour D4. Fonctions pures, aucun
+   rnd(), aucune réplique, aucun affichage dans cette tranche : la
+   trésorerie s'affichera à la T6 (CDC §7) ; la réplique E1 du patron existe
+   (texte d'auteur, LOT-3B §E1) et sera branchée à une tranche ultérieure —
+   T1 ne stocke que la condition, dans m.lastEvent.e1. Les calculs sont
+   écrits pour une carte {main,prelims} ; la structure en jeu ne change pas
+   encore (T2) : mgmtRunEvent compte les combats actuels comme prélims.
+   Constantes calibrées par tools/monte-carlo-economie.js —
+   docs/lots/LOT-3B-T1-CALIBRAGE.md. ==== */
+/* Trésorerie au premier jour (k$). Ordre de grandeur de l'exemple QO-5
+   (T=50 : un short notice à 60 est refusé avant la première soirée, P=0). */
+const MGMT_TREASURY_START=50;
+/* Nom d'une ligne (valeur de scène, 0..1) : activité (bilan total) pondérée
+   par le bilan et le niveau dérivé du bilan — mgmtLevelForRecord clampe à
+   MGMT_STAR_LVL_MIN..MGMT_STAR_LVL_MAX. Pur, jamais stocké. */
+const MGMT_STAR_FIGHTS=8;
+const MGMT_STAR_W_RATIO=0.35;
+const MGMT_STAR_W_LVL=0.65;
+const MGMT_STAR_LVL_MIN=40;
+const MGMT_STAR_LVL_MAX=80;
+/* Cachet (k$) d'un combattant : plancher + nom, pondéré par l'emplacement —
+   un combat de main card coûte plus qu'un prélim (poids nommés, §3 T1). */
+const MGMT_PURSE_BASE=1;
+const MGMT_PURSE_PER_STAR=4;
+const MGMT_PURSE_PRELIM_W=1;
+const MGMT_PURSE_MAIN_W=2.5;
+/* Attrait : poids d'emplacement d'un combat dans la carte — un combat de
+   main card rapporte plus qu'un prélim — mordu par l'écart de nom entre les
+   deux lignes (un combat déséquilibré ne se vend pas). */
+const MGMT_ATTR_PRELIM_W=1;
+const MGMT_ATTR_MAIN_W=2.5;
+const MGMT_ATTR_GAP=0.6;
+/* Billetterie (k$) par point d'attrait de la carte. */
+const MGMT_TICKET_PER_DRAW=7;
+/* Audience, en écrans entiers : attrait × mix de spectacle. L'audience est
+   décidée surtout avant la soirée — MGMT_AUD_BASE est acquise d'avance, la
+   part de finitions observée ne pèse que sur le reste. Une soirée sans
+   finition garde donc une audience non nulle. */
+const MGMT_AUD_BASE=0.7;
+const MGMT_AUD_PER_DRAW=1000;
+/* Droits du diffuseur (k$) pour MGMT_TV_ECRANS écrans, payés au prorata du
+   nombre de combats joués par rapport à la carte contractuelle (addendum
+   §16 : c'est le contrat du diffuseur). */
+const MGMT_TV_PER_AUD=6;
+const MGMT_TV_ECRANS=1000;
+const MGMT_CARD_CONTRACT=8;
+/* Références D4 (QO-7) : attrait d'un combat moyen et spectacle (part de
+   finitions) d'une carte complète d'attrait moyen, mesurés par Monte Carlo
+   (graine 20260915, 4000 soirées — docs/lots/LOT-3B-T1-CALIBRAGE.md).
+   mgmtAudienceRef sans historique redonne ainsi l'audience moyenne mesurée
+   d'une carte complète. */
+const MGMT_DRAW_AVG=0.62;
+const MGMT_SPECTACLE_REF=0.64;
+
+/** Nom d'une ligne (0..1) : valeur de scène dérivée du bilan — activité,
+ *  ratio de victoires, niveau dérivé du bilan. Pur et déterministe, jamais
+ *  stocké sur la ligne (règle du bureau, CDC §3).
+ *  @returns {number} 0 à 1. */
+function mgmtStar(f){
+  if(!f) return 0;
+  const W=Number.isSafeInteger(f.W)?f.W:0, L=Number.isSafeInteger(f.L)?f.L:0, D=Number.isSafeInteger(f.D)?f.D:0;
+  const t=W+L+D;
+  const ratio=t>0?(W+0.5*D)/t:0.5;
+  const lvl=mgmtLevelForRecord(W,L);
+  const fame=1-Math.exp(-t/MGMT_STAR_FIGHTS);
+  return clamp(fame*(MGMT_STAR_W_RATIO*ratio+MGMT_STAR_W_LVL*((lvl-MGMT_STAR_LVL_MIN)/(MGMT_STAR_LVL_MAX-MGMT_STAR_LVL_MIN))),0,1);
+}
+
+/** Cachet (k$) d'un combattant pour un emplacement ('main'|'prelim') :
+ *  plancher + nom, pondéré par l'emplacement. Pur, jamais stocké sur la
+ *  ligne — il est payé avant la soirée et n'existe que dans le calcul de
+ *  l'événement (anti-rechargement).
+ *  @returns {number} entier k$ > 0. */
+function mgmtPurse(f,slot){
+  const star=mgmtStar(f);
+  const w=slot==='main'?MGMT_PURSE_MAIN_W:MGMT_PURSE_PRELIM_W;
+  return Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*star)*w);
+}
+
+/** Attrait d'un combat (0..1) : la valeur de scène des deux lignes, mordue
+ *  par l'écart entre elles — un combat déséquilibré ne se vend pas. Pur.
+ *  @returns {number} 0 à 1. */
+function mgmtFightDraw(fa,fb){
+  const sa=mgmtStar(fa), sb=mgmtStar(fb);
+  return clamp((sa+sb)/2*(1-MGMT_ATTR_GAP*Math.abs(sa-sb)),0,1);
+}
+
+/** Attrait total d'une carte slottée, avant la soirée : Σ poids
+ *  d'emplacement × attrait du combat. slotted = [{a,b,slot}] — des
+ *  identifiants du roster ; une ligne introuvable ne compte pas. Pur.
+ *  @returns {number} ≥ 0. */
+function mgmtCardAttraction(m,slotted){
+  if(!Array.isArray(slotted)) return 0;
+  let s=0;
+  for(const f of slotted){
+    if(!f||typeof f.a!=='string'||typeof f.b!=='string') continue;
+    const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
+    if(!fa||!fb) continue;
+    s+=(f.slot==='main'?MGMT_ATTR_MAIN_W:MGMT_ATTR_PRELIM_W)*mgmtFightDraw(fa,fb);
+  }
+  return s;
+}
+
+/** Total des cachets (k$) d'une carte slottée, payés avant la soirée.
+ *  Pur. @returns {number} entier ≥ 0. */
+function mgmtPurses(m,slotted){
+  if(!Array.isArray(slotted)) return 0;
+  let p=0;
+  for(const f of slotted){
+    if(!f||typeof f.a!=='string'||typeof f.b!=='string') continue;
+    const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
+    if(!fa||!fb) continue;
+    p+=mgmtPurse(fa,f.slot)+mgmtPurse(fb,f.slot);
+  }
+  return p;
+}
+
+/** Spectacle observé d'une soirée : part de finitions (KO et soumission —
+ *  l'arrêt médical est une intervention, pas un spectacle). Pur.
+ *  @returns {number} 0 à 1. */
+function mgmtSpectacle(fights){
+  if(!Array.isArray(fights)||fights.length===0) return 0;
+  let fin=0;
+  for(const f of fights){ if(f&&(f.family==='ko'||f.family==='sub')) fin++; }
+  return fin/fights.length;
+}
+
+/** Recette d'une soirée, en une seule fois (QO-5) : billetterie (attrait de
+ *  la carte avant la soirée) + droits du diffuseur (audience en écrans =
+ *  attrait × mix de spectacle, décidée surtout avant la soirée ; droits au
+ *  prorata des combats joués sur la carte contractuelle de 8 — addendum
+ *  §16) − cachets. Pure : attraction et cachets sont calculés sur les
+ *  lignes d'avant combat par l'appelant, spectacle et nombre de combats sur
+ *  les combats joués. Tout est entier (k$, écrans) ; R peut être négative.
+ *  @returns {{attraction,spectacle,audience,ticketing,tv,purses,recette}} */
+function mgmtEventRecette(attraction,spectacle,purses,nFights){
+  const a=Math.max(0,num(attraction)), s=clamp(num(spectacle),0,1), p=Math.max(0,Math.round(num(purses)));
+  /* L'audience est décidée surtout avant la soirée : la base est acquise,
+     le spectacle observé (part de finitions) ne porte que le reste. */
+  const mix=MGMT_AUD_BASE+(1-MGMT_AUD_BASE)*s;
+  const audience=Math.round(MGMT_AUD_PER_DRAW*a*mix);
+  const ticketing=Math.round(MGMT_TICKET_PER_DRAW*a);
+  /* Droits au prorata des combats joués sur la carte contractuelle. */
+  const n=(typeof nFights==='number'&&Number.isFinite(nFights))?Math.max(0,nFights):MGMT_CARD_CONTRACT;
+  const tv=Math.round(MGMT_TV_PER_AUD*audience*n/(MGMT_TV_ECRANS*MGMT_CARD_CONTRACT));
+  return {attraction:Math.round(a*1000)/1000,spectacle:Math.round(s*1000)/1000,
+    audience,ticketing,tv,purses:p,recette:ticketing+tv-p};
+}
+
+/** Plafond de découvert P (QO-5) : 0 avant la première soirée, la dernière
+ *  recette ensuite, puis la moyenne arrondie des deux dernières — lissée,
+ *  jamais négative : une soirée perdante n'ouvre aucun crédit. Pure.
+ *  @returns {number} entier ≥ 0. */
+function mgmtOverdraftCap(m){
+  if(!m||!Number.isSafeInteger(m.eventsPlayed)||m.eventsPlayed<1) return 0;
+  if(!Array.isArray(m.recettes)||m.recettes.length<1) return 0;
+  const last=Number.isSafeInteger(m.recettes[m.recettes.length-1])?m.recettes[m.recettes.length-1]:0;
+  if(m.eventsPlayed<2||m.recettes.length<2) return Math.max(0,last);
+  const prev=Number.isSafeInteger(m.recettes[m.recettes.length-2])?m.recettes[m.recettes.length-2]:0;
+  return Math.max(0,Math.round((last+prev)/2));
+}
+
+/** Court préavis payable ? QO-5 : si et seulement si T − coût ≥ −P. Un seul
+ *  solde. Pure. @returns {boolean} */
+function mgmtCanAfford(m,cost){
+  if(!m||!Number.isSafeInteger(m.treasury)) return false;
+  const c=(typeof cost==='number'&&Number.isFinite(cost))?Math.max(0,Math.round(cost)):0;
+  return m.treasury-c>=-mgmtOverdraftCap(m);
+}
+
+/** Audience de référence pour D4 (QO-7) : la moyenne d'audience (en écrans)
+ *  des soirées précédentes — ou, avant toute soirée, l'audience qu'aurait
+ *  eue une carte complète d'attrait moyen (4 + 4 combats, spectacle de
+ *  référence). Pure.
+ *  @returns {number} entier ≥ 0. */
+function mgmtAudienceRef(m){
+  if(m&&Array.isArray(m.audiences)){
+    let s=0,n=0;
+    for(const a of m.audiences){ if(Number.isSafeInteger(a)&&a>=0){ s+=a; n++; } }
+    if(n>0) return Math.round(s/n);
+  }
+  const refAttraction=MGMT_CARD_SIZE*MGMT_DRAW_AVG*(MGMT_ATTR_MAIN_W+MGMT_ATTR_PRELIM_W);
+  const refMix=MGMT_AUD_BASE+(1-MGMT_AUD_BASE)*MGMT_SPECTACLE_REF;
+  return Math.round(MGMT_AUD_PER_DRAW*refAttraction*refMix);
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* --------------------------- persistance -------------------------------- */
 function mgmtValidLine(o){
   if(!o||typeof o!=='object'||Array.isArray(o)) return false;
@@ -894,7 +1126,11 @@ function mgmtValidAffair(a){
 
 /** Structure de la soirée calculée en une fois (lot 3a §5, anti-rechargement) :
  *  combats (identifiants, vainqueur A/B/D, famille, round) et cartes du
- *  lendemain (combattant, fin de carrière, blessure, jours de suspension). */
+ *  lendemain (combattant, fin de carrière, blessure, jours de suspension).
+ *  Lot 3b T1 : la finance (attrait, spectacle, audience, billetterie,
+ *  droits, cachets, recette nette) et le flag E1 du patron s'ajoutent —
+ *  absents d'une soirée d'avant la v4 (migration sans perte) et contrôlés
+ *  quand ils sont là. */
 function mgmtValidEvent(e){
   if(!e||typeof e!=='object'||Array.isArray(e)) return false;
   if(!Number.isSafeInteger(e.cycle)||e.cycle<0) return false;
@@ -911,10 +1147,26 @@ function mgmtValidEvent(e){
     if(t.injury!==null&&(typeof t.injury!=='string'||!t.injury)) return false;
     if(!Number.isSafeInteger(t.days)||t.days<0) return false;
   }
+  if(e.e1!==undefined&&typeof e.e1!=='boolean') return false;
+  if(e.finance!==undefined){
+    const f=e.finance;
+    if(!f||typeof f!=='object'||Array.isArray(f)) return false;
+    for(const k of ['attraction','spectacle']){
+      if(typeof f[k]!=='number'||!Number.isFinite(f[k])||f[k]<0) return false;
+    }
+    if(f.spectacle>1) return false;
+    for(const k of ['audience','ticketing','tv','purses']){
+      if(!Number.isSafeInteger(f[k])||f[k]<0) return false;
+    }
+    if(!Number.isSafeInteger(f.recette)) return false;
+  }
   return true;
 }
 
-/** Validation structurelle d'une sauvegarde du bureau, en lecture seule. */
+/** Validation structurelle d'une sauvegarde du bureau, en lecture seule.
+ *  Lot 3b T1 : l'argent s'ajoute — trésorerie entière (le découvert est
+ *  permis, c'est T sous zéro), les deux dernières recettes, l'audience
+ *  d'historique et le nombre de soirées jouées. */
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
@@ -924,6 +1176,12 @@ function validateMgmt(raw){
   if(!Array.isArray(raw.roster)||!Array.isArray(raw.pile)||!Array.isArray(raw.facts)) return false;
   if(raw.open!==null&&typeof raw.open!=='string') return false;
   if(raw.shortfall!==undefined&&typeof raw.shortfall!=='boolean') return false;
+  if(!Number.isSafeInteger(raw.treasury)) return false;
+  if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
+  for(const r of raw.recettes){ if(!Number.isSafeInteger(r)) return false; }
+  if(!Array.isArray(raw.audiences)) return false;
+  for(const a of raw.audiences){ if(!Number.isSafeInteger(a)||a<0) return false; }
+  if(!Number.isSafeInteger(raw.eventsPlayed)||raw.eventsPlayed<0) return false;
   if(raw.card!==undefined){
     if(!raw.card||typeof raw.card!=='object'||Array.isArray(raw.card)) return false;
     if(!Number.isSafeInteger(raw.card.size)||raw.card.size<1) return false;
@@ -944,15 +1202,27 @@ function validateMgmt(raw){
   return true;
 }
 
-/** Migration 2 → 3 (lot 3a §9) : les champs du corps et la soirée sont
- *  absents d'une v2 et valides absents — on ne fait que tamponner la version,
- *  sans perte et sans reset. Toute autre version que 2 ou 3 est refusée. */
+/** Migration séquentielle (AGENTS.md : migrate() séquentiel). 2 → 3 (lot 3a
+ *  §9) : les champs du corps et la soirée sont absents d'une v2 et valides
+ *  absents — tampon de version seulement. 3 → 4 (lot 3b T1, QO-5) : la
+ *  trésorerie démarre à MGMT_TREASURY_START, aucune recette, aucune
+ *  audience, aucune soirée jouée — l'organisation commence au premier jour.
+ *  Sans perte, sans reset : une v1 reste refusée, comme avant. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
   if(raw.v===MGMT_SAVE_VERSION) return raw;
-  if(raw.v!==2) return null;
-  raw.v=MGMT_SAVE_VERSION;
-  if(raw.lastEvent===undefined) raw.lastEvent=null;
+  if(raw.v===2){
+    raw.v=3;
+    if(raw.lastEvent===undefined) raw.lastEvent=null;
+  }
+  if(raw.v===3){
+    raw.v=4;
+    if(!Number.isSafeInteger(raw.treasury)) raw.treasury=MGMT_TREASURY_START;
+    if(!Array.isArray(raw.recettes)) raw.recettes=[];
+    if(!Array.isArray(raw.audiences)) raw.audiences=[];
+    if(!Number.isSafeInteger(raw.eventsPlayed)) raw.eventsPlayed=0;
+  }
+  if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
 
@@ -978,6 +1248,15 @@ function mgmtRepair(m){
     }
   }
   if(typeof m.shortfall!=='boolean') m.shortfall=false;
+  /* Lot 3b T1 : l'argent se recadre comme le reste — une recette au-delà de
+     deux est écartée (on ne garde que les deux dernières, QO-5), une
+     audience négative n'existe pas, le compte de soirées ne descend pas. */
+  if(!Number.isSafeInteger(m.treasury)) m.treasury=MGMT_TREASURY_START;
+  if(!Array.isArray(m.recettes)) m.recettes=[];
+  m.recettes=m.recettes.filter(r=>Number.isSafeInteger(r)).slice(-2);
+  if(!Array.isArray(m.audiences)) m.audiences=[];
+  m.audiences=m.audiences.filter(a=>Number.isSafeInteger(a)&&a>=0);
+  if(!Number.isSafeInteger(m.eventsPlayed)||m.eventsPlayed<0) m.eventsPlayed=0;
   if(!m.card||typeof m.card!=='object'||Array.isArray(m.card)) m.card={size:MGMT_CARD_SIZE,fights:[]};
   if(!Number.isSafeInteger(m.card.size)||m.card.size<1) m.card.size=MGMT_CARD_SIZE;
   if(!Array.isArray(m.card.fights)) m.card.fights=[];

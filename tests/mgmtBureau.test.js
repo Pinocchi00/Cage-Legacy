@@ -823,20 +823,62 @@ test('MGMT absence de blocage — même à court de propositions, le cycle avanc
   assert.equal(s.c1, s.c0+1, 'aucun état ne laisse le joueur incapable de faire avancer le cycle');
 });
 
-/* Économie du short notice (règle du découvert). Rien de tout cela
-   n'existe encore : ni recette, ni trésorerie, ni plafond dans l'état du
-   bureau — ni implémentation, ni simulation, tests marqués skip, chacun
-   avec son entrée dans docs/QUESTIONS-OUVERTES.md. */
-test('MGMT économie — short notice payable à découvert dans la limite du plafond', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : le découvert est payable
-     jusqu'à un plafond égal à la recette nette de la dernière soirée
-     (moyenne des deux dernières si elles existent, plancher fixe si aucune
-     soirée n'a eu lieu). */
+/* Économie du short notice (règle du découvert, QO-5). Lot 3b T1
+   (docs/LOT-3B-CONTRAT.md §3 T1) pose l'argent : trésorerie, recette nette,
+   plafond — les deux premiers tests sont activés à cette occasion ; le
+   troisième (au-delà du plafond : carte réduite) reste skip, la soirée en
+   carte réduite est la T7. */
+test('MGMT économie — short notice payable à découvert dans la limite du plafond', () => {
+  const win = newGameWindow();
+  /* QO-5 : le short notice est autorisé si et seulement si T − coût ≥ −P,
+     avec P = 0 avant la première soirée, P = max(0, R₁) après une, puis
+     P = max(0, arrondi((R₁ + R₂) / 2)). */
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=50; return mgmtCanAfford(m,60); })()`), false,
+    'avant la 1ʳᵉ soirée (exemple QO-5) : T=50 refuse un coût de 60, P=0');
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=50; return mgmtCanAfford(m,50); })()`), true,
+    'la limite exacte passe : T − coût = −0 ≥ −0');
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,100); })()`), true,
+    'exemple QO-5 : R₁=120, T=30 accepte un coût de 100 (−70 ≥ −120)');
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,151); })()`), false,
+    'au-delà du plafond : refusé');
+  /* Palier 2, mesuré sur deux vraies soirées : le plafond est la moyenne
+     arrondie des deux dernières recettes, pas un compteur séparé. */
+  const r = win.eval(`
+    (function(){
+      setSeed(66);
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      for(let e=0;e<2;e++){
+        let bulk=null;
+        for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
+        if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return null;
+        if(!mgmtRunEvent(m)) return null;
+      }
+      const P=mgmtOverdraftCap(m);
+      const attendu=Math.max(0,Math.round((m.recettes[0]+m.recettes[1])/2));
+      return JSON.stringify({P,attendu,R1:m.recettes[0],R2:m.recettes[1]});
+    })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.P, s.attendu, `plafond lissé sur les deux dernières recettes (R2=${s.R2}, R1=${s.R1})`);
 });
 
-test('MGMT économie — remboursement du découvert sur la recette suivante', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : le découvert se rembourse
-     sur la recette de la soirée suivante, avant tout bénéfice. */
+test('MGMT économie — remboursement du découvert sur la recette suivante', () => {
+  const win = newGameWindow();
+  const r = win.eval(`
+    (function(){
+      setSeed(64);
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      let bulk=null;
+      for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
+      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return null;
+      m.treasury=-70;
+      const ev=mgmtRunEvent(m);
+      if(!ev) return null;
+      return JSON.stringify({R:ev.finance.recette,T:m.treasury,e1:ev.e1});
+    })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.T, -70+s.R, 'remboursement automatique : T ← T + R, avant tout bénéfice');
+  assert.equal(s.e1, s.R>0, 'E1 si et seulement si une dette a effectivement été déduite');
+  if(s.R<70) assert.ok(s.T<0, 'le reste de la dette est reporté (T reste négatif)');
 });
 
 test('MGMT économie — au-delà du plafond : plus de short notice, soirée en carte réduite avec pénalité', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
