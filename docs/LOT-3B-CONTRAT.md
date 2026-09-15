@@ -129,7 +129,7 @@ Conséquences :
   prélims**. Valider / échanger / écraser et le coût de l'écrasement (lot 2) restent
   identiques, appliqués aux prélims.
 - La main card est une **action nouvelle du joueur**, posée avant les prélims (voir §2 et T2).
-- Migration v3 → v4 : les combats d'une carte v3 en cours deviennent les prélims ; la
+- Migration de la structure (T2, v4 → v5) : les combats d’une carte en cours deviennent les prélims ; la
   main card démarre vide. Aucun combat n'est perdu, aucun n'est ajouté d'office.
 - « Remonter un prélim » (B1/B2) = déplacer un combat des prélims vers un trou de la
   main card. Le trou laissé en prélims est comblé par la reproposition de Leïla, déjà
@@ -256,7 +256,8 @@ par Claude avant la tranche suivante.
 - **Aucune réplique, aucun affichage** dans cette tranche.
 
 ### T2 — La carte en 4 + 4 *(débloquée)*
-- Structure `{main, prelims}`, migration de la carte en cours (combats v3 → prélims).
+- Structure `{main, prelims}` : `MGMT_SAVE_VERSION` 4 → 5, la carte en cours devient
+  les prélims, la main card démarre vide, `lastCycle` absent toléré.
 - Classement dérivé par catégorie et `lastCycle` sur la ligne (§2).
 - Main card composée par le joueur dans la liste des combattants (§2), souris et
   clavier, `esc()` sur les noms.
