@@ -92,6 +92,11 @@ l'état du bureau : `mgmtDefault()` ne porte aucun champ d'argent, et `m.lastEve
 fixe applicable avant la première soirée n'a pas de valeur arrêtée côté code
 (LOT-3B §E dit « plancher fixe » sans le chiffrer).
 
+**Décision du 15/09/2026 (Anthony).** Aucun découvert possible avant la première
+soirée : plancher fixe = 0. Le reste du calcul est délégué ; formalisation dans
+`docs/LOT-3B-CONTRAT.md` §1 (un seul solde, plafond `max(0, …)`), en attente de
+validation du contrat.
+
 **Où.** État du bureau : `mgmt-bureau.js` (`mgmtDefault`, `mgmtRunEvent`, ancre
 `MGMT_LOT3A_CORPS`) ; validation : `validateMgmt` (nouveaux champs à couvrir). Test
 marqué skip : `tests/mgmtBureau.test.js:830`.
@@ -125,6 +130,12 @@ avant ». **Reste ouvert de design : la nature exacte de la pénalité mécaniqu
 LOT-3B décrit la pénalité ressentie (répliques du patron et du diffuseur) mais ne
 chiffre aucun effet (audience, recette, réputations) ; les répliques d'auteur
 existent, la mécanique qu'elles accompagnent n'est pas définie.
+
+**Décision du 15/09/2026 (Anthony).** La recette baisse ; l'audience dépend de la
+qualité de la carte ; la relation « promoteur » varie selon l'ambiance ; la relation
+du patron baisse le temps d'une soirée. Restent ouverts : l'identité du « promoteur »
+(Tarpit ou Delatour) et le caractère conditionnel de D4 — `docs/LOT-3B-CONTRAT.md`
+§2, Q1 et Q2.
 
 **Où.** Garde actuelle : `mgmt-bureau.js` (`mgmtRunEvent`, `mgmtCardFull`) ;
 déclencheur à modifier : `mgmt-screens.js` (`mgmtNextCycle`, `mgmtClosePile`). Test
