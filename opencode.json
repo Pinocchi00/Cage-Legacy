@@ -31,7 +31,7 @@
       "rg*": "allow",
 
       "rm*": "deny",
-      "git push*": "deny",
+      "git push*": "ask",
       "git reset*": "deny",
       "git clean*": "deny",
       "npm install*": "ask",

@@ -15,6 +15,8 @@ modules ES, pas de bundler, pas de framework, 100 % offline.**
 - **Aucun `Math.random()` dans la simulation.** RNG à graine, déterministe, injectée.
 - L'ordre des `<script>` dans `index.html` est fragile : le harnais de test le lit
   directement. **Vérifie-le, ne le suppose jamais.**
+Aucun modèle marqué « entraînement : utilisé » ou « rétention : aucun accord » n'a accès au dépôt.
+Vérifier la table de politique de données de Go avant tout changement de modèle.
 
 ## Avant de livrer
 
