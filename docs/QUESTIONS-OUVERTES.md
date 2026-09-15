@@ -133,9 +133,11 @@ existent, la mécanique qu'elles accompagnent n'est pas définie.
 
 **Décision du 15/09/2026 (Anthony).** La recette baisse ; l'audience dépend de la
 qualité de la carte ; la relation « promoteur » varie selon l'ambiance ; la relation
-du patron baisse le temps d'une soirée. Restent ouverts : l'identité du « promoteur »
-(Tarpit ou Delatour) et le caractère conditionnel de D4 — `docs/LOT-3B-CONTRAT.md`
-§2, Q1 et Q2.
+du patron baisse le temps d'une soirée. Le promoteur est Stephen Tarpit ; D4 ne se
+déclenche que si l'audience a réellement baissé. Carte de 8 combats : 4 main card
+choisis par le joueur, 4 prélims proposés par Leïla. Retraits : toutes causes
+réelles, taux proche du réel. Détail et reste ouvert (geste de composition de la
+main card) : `docs/LOT-3B-CONTRAT.md` §1 et §2.
 
 **Où.** Garde actuelle : `mgmt-bureau.js` (`mgmtRunEvent`, `mgmtCardFull`) ;
 déclencheur à modifier : `mgmt-screens.js` (`mgmtNextCycle`, `mgmtClosePile`). Test
