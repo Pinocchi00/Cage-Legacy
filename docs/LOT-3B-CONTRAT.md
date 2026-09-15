@@ -1,6 +1,6 @@
 # LOT 3B — Contrat de lot : carte incomplète
 
-**Date :** 15/09/2026 (révision 2 — réponses d'Anthony aux questions Q1 à Q4)
+**Date :** 15/09/2026 (révision 3 — réponses d’Anthony aux questions Q1 à Q5)
 **Statut :** brouillon — **à valider par Anthony avant toute ligne de code**
 **Rédigé par :** Claude (orchestration). **Implémentation :** OpenCode, GLM 5.3.
 **Sources qui font foi :** `docs/LOT-3B-CARTE-INCOMPLETE.md` (textes et décisions
@@ -128,7 +128,7 @@ Conséquences :
 - La proposition en bloc actuelle de Leïla (4 combats) **devient la proposition des
   prélims**. Valider / échanger / écraser et le coût de l'écrasement (lot 2) restent
   identiques, appliqués aux prélims.
-- La main card est une **action nouvelle du joueur** (voir T2).
+- La main card est une **action nouvelle du joueur**, posée avant les prélims (voir §2 et T2).
 - Migration v3 → v4 : les combats d'une carte v3 en cours deviennent les prélims ; la
   main card démarre vide. Aucun combat n'est perdu, aucun n'est ajouté d'office.
 - « Remonter un prélim » (B1/B2) = déplacer un combat des prélims vers un trou de la
@@ -174,14 +174,49 @@ sourcées) :
 
 ---
 
-## 2. Question restante
+## 2. Composer la carte (Q5, réponse d'Anthony du 15/09/2026)
 
-- **Q5 — Comment le joueur compose sa main card ?** Le CDC dit qu'il la choisit, sans
-  décrire le geste. Proposition conforme au principe du LOT-3B (« l'interface rend
-  l'action possible, sous-options dans la liste des combattants ») : dans la liste des
-  combattants, choisir un combattant disponible, puis son adversaire dans la même
-  catégorie ; le combat entre dans le premier trou de la main card. Aucun score, aucune
-  recommandation affichée. → bloque T2.
+> On sélectionne d'abord les combattants qu'on veut, avec leur classement et leur
+> poids ; ensuite Leïla propose sa carte préliminaire, logique et réelle, en fonction
+> des combattants restants, de leur dernier combat, etc.
+
+**Ordre du cycle.** 1) Le joueur compose la main card. 2) Une fois les 4 combats de
+main card posés, Leïla propose les prélims. Sa proposition en bloc n'arrive donc plus
+en début de pile mais **après la main card**. Les autres affaires de la pile ne
+changent pas.
+
+**Main card — le geste.** Dans la liste des combattants : choisir un combattant
+disponible, puis son adversaire ; le combat entre dans le premier trou de la main card.
+La liste montre pour chaque combattant sa **catégorie de poids** et son **rang dans la
+catégorie**. Aucune note, aucune recommandation, aucun pronostic.
+
+**Le classement n'existe pas en management** (hors périmètre du lot 3a ; le registre
+de classement de la carrière porte sur un autre monde). Il est ajouté ici, **dérivé,
+jamais stocké** (règle du bureau) :
+- par catégorie, à partir de la ligne existante : victoires − défaites, puis
+  victoires, puis ancienneté du dernier combat (le plus actif devant) ;
+- recalculé à la lecture, fonction pure `mgmtDivisionRank(m, f)` ;
+- suspendus visibles avec leur rang, mais non sélectionnables ; retraités médicaux
+  hors classement.
+Formule proposée par Claude, réglable par Anthony après avoir joué.
+
+**Dernier combat.** Un combattant qui a combattu reçoit `lastCycle` sur sa ligne, écrit
+avec le traumatisme (le lot 3a écrit déjà la ligne à cet instant ; un niveau 1 qui n'a
+jamais combattu n'a toujours rien de stocké). Migration : absent = jamais combattu
+sous Split.
+
+**Prélims de Leïla — « logique et réel ».** Extension de `mgmtPickBulkPair` existant,
+pas une nouvelle fonction concurrente. Parmi les combattants disponibles **hors main
+card** :
+- même catégorie, rangs proches (écart de rang borné, constante nommée) ;
+- **repos** : pas de combattant ayant combattu à la soirée précédente
+  (`lastCycle ≥ cycle − 1`), sauf en mode assoupli ;
+- priorité aux combattants inactifs depuis le plus longtemps ;
+- pas de revanche immédiate d'un combat de la soirée précédente ;
+- le coût de l'écrasement (lot 2 : propositions bâclées, avertissements qui se
+  taisent) et les règles d'assouplissement du lot 3a §5 restent en place.
+Les critères du mode « bâclé » (catégories croisées, gros écart) sont conservés : un
+écrasement continue de produire des prélims moins logiques.
 
 ---
 
@@ -220,13 +255,20 @@ par Claude avant la tranche suivante.
   recharger après la soirée ne recompte pas la recette.
 - **Aucune réplique, aucun affichage** dans cette tranche.
 
-### T2 — La carte en 4 + 4 *(après Q5)*
+### T2 — La carte en 4 + 4 *(débloquée)*
 - Structure `{main, prelims}`, migration de la carte en cours (combats v3 → prélims).
-- Proposition en bloc de Leïla appliquée aux prélims, règles du lot 2 et du lot 3a
-  inchangées. Main card composée par le joueur (geste de Q5).
+- Classement dérivé par catégorie et `lastCycle` sur la ligne (§2).
+- Main card composée par le joueur dans la liste des combattants (§2), souris et
+  clavier, `esc()` sur les noms.
+- Proposition en bloc de Leïla : n'arrive qu'une fois la main card complète,
+  appliquée aux prélims avec les critères du §2.
 - Carte complète = 4 + 4 ; la soirée joue les 8 combats.
-- Tests existants de la carte : réécrits **uniquement** là où la décision Q3 change le
-  comportement, en citant ce contrat.
+- Tests existants de la carte et du bureau : réécrits **uniquement** là où les
+  décisions Q3/Q5 changent le comportement (notamment la proposition en bloc en début
+  de pile), en citant ce contrat.
+- Tests ajoutés : classement déterministe et non stocké ; aucun combattant de main
+  card dans les prélims ; repos respecté en mode strict ; suspendus non
+  sélectionnables ; migration de la carte v3.
 
 ### T3 — Le dernier mois et le retrait *(après T2)*
 - Phase entre verrouillage de la carte et soirée. Tirages de retrait selon §1
