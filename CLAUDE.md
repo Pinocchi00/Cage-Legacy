@@ -1,9 +1,15 @@
 # Cage Legacy — guide d'architecture
 
-Relevé du 15/09/2026 (après merge du lot 3a, `35ca7de`). Les chiffres (lignes,
-tests, versions) sont des **observations datées** : revérifie-les avant de
-t'appuyer dessus. `AGENTS.md` porte les règles communes à tous les assistants ;
-ce fichier-ci ajoute ce qui est propre au travail de Claude.
+Relevé du 17/09/2026 (vérifié sur la branche `lot-3b`, après merge du lot 3a).
+**Numérotation des lots : depuis le 17/09/2026, les lots 0 à 5 (documents, style
+stable, carte principale, arène, peau du jeu, monde qui parle — voir
+`docs/AUDIT-17-09.md` §8) sont la référence en cours. Les numérotations
+précédentes (P8 lots 1 à 10, lots DUEL, lots 1 à 3B du management) restent
+valables comme historique : les ancres et documents qui les citent ne sont pas
+à réécrire.** Les chiffres (lignes, tests, versions) sont des **observations
+datées** : revérifie-les avant de t'appuyer dessus. `AGENTS.md` porte les règles
+communes à tous les assistants ; ce fichier-ci ajoute ce qui est propre au
+travail de Claude.
 
 ## 0. Rôle de Claude sur ce dépôt
 
@@ -24,15 +30,18 @@ ce fichier-ci ajoute ce qui est propre au travail de Claude.
 ## 1. Nature du projet
 
 Cage Legacy est un jeu de MMA en vanilla JavaScript, jouable dans le navigateur
-(`index.html`), sans build ni backend. Deux modes coexistent :
+(`index.html`), sans build ni backend. **Deux modes jouables**, accessibles dès
+l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 
 - **Carrière Complète** — mode historique : amateur → pro → retraite, classements,
-  contrats, Panthéon, duel entre légendes (`duel-codec.js`, `ui-10-duel.js`).
-  Stabilisé ; hors périmètre des lots management.
-- **Mode management** — **mode en cours de développement.** Le joueur est le
-  matchmaker d'une organisation (Split), pas son patron. Cahier des charges :
-  `docs/CDC-MODE-MANAGEMENT.md` (fait foi), ses addendums et les six voix.
-  Code : `mgmt-data.js`, `mgmt-bureau.js`, `mgmt-screens.js`.
+  contrats, Panthéon, et l'exhibition « Duel entre amis » (`duel-codec.js`,
+  `ui-10-duel.js`, entrée depuis le Panthéon). Stabilisé ; hors périmètre des
+  lots 0 à 5.
+- **Mode management** — **mode jouable, en développement actif** (lots 0 à 5).
+  Le joueur est le matchmaker d'une organisation (Split), pas son patron.
+  Document qui prime : `docs/VISION-MODE-MANAGEMENT.md` ; cahier des charges :
+  `docs/CDC-MODE-MANAGEMENT.md` (sections périmées marquées), ses addendums et
+  les six voix. Code : `mgmt-data.js`, `mgmt-bureau.js`, `mgmt-screens.js`.
 
 ## 2. Contraintes non négociables
 
@@ -43,17 +52,17 @@ Cage Legacy est un jeu de MMA en vanilla JavaScript, jouable dans le navigateur
 - **100 % offline** une fois chargé (déploiement GitHub Pages).
 - **Aucun `Math.random()` dans la simulation** : RNG à graine (`setSeed`/`rnd`,
   `engine.js`).
-- **Cible d'interface selon le mode** :
-  - Carrière : mobile-first, tactile, gabarit 560px.
-  - Management : **PC** — mise en page 1440px, lisible dès 1280, extensible à
-    1920, trois colonnes, souris d'abord, clavier en accélérateur
-    (addendum §24-25, `ui-11-keys.js`). Ne pas appliquer la règle mobile au
-    management, ni la règle PC à la carrière.
+- **Cible : PC.** Jeu pensé pour le PC (vision du 17/09/2026 : 1920×1080).
+  Mode management : mise en page 1440px, lisible dès 1280, extensible à 1920,
+  trois colonnes, souris d'abord, clavier en accélérateur (charte §L1,
+  addendum §24-25, `ui-11-keys.js`). Le gabarit mobile 560px ne décrit plus la
+  cible ; il ne subsiste que comme héritage CSS de la carrière.
 
 ## 3. Ordre de chargement
 
 **`index.html` est la seule source de vérité** ; le harnais de test
-(`tests/helpers/loadGame.js`) le lit directement. Ordre relevé le 15/09/2026 :
+(`tests/helpers/loadGame.js`) le lit directement. Ordre relevé le 17/09/2026
+(identique à celui du 15/09, recontrôlé point par point contre `index.html`) :
 
 1. `data-skills.js`, `data-content.js`, `data-people.js` — données
 2. `engine.js` — RNG à graine, primitives partagées
@@ -78,7 +87,7 @@ Cage Legacy est un jeu de MMA en vanilla JavaScript, jouable dans le navigateur
 | `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
 | `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
 | `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) | Sauvegarde management + secours, circuit séparé de la carrière |
-| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **3** | Management : migration 2 → 3 sans perte (`mgmtMigrate`), v1 refusée |
+| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **4** | Management : migration séquentielle 2 → 3 → 4 sans perte (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent), v1 refusée |
 
 ## 5. Séparation des responsabilités
 
@@ -109,15 +118,18 @@ Cage Legacy est un jeu de MMA en vanilla JavaScript, jouable dans le navigateur
 npm install          # une seule fois (jsdom, eslint)
 npm run lint         # ESLint
 npm test             # node --test sur la liste de package.json
-npm run check        # lint + test — DOIT être vert avant toute livraison
-npm run lint:content # linter de contenu narratif — NON inclus dans check
+npm run check        # lint + lint:content + test — DOIT être vert avant toute livraison
+npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 15/09/2026 : **241 tests, 235 passants, 0 échec, 6 skip** (les 6 skip
-sont les tests du lot 3B, comportement absent du code — voir
-`docs/QUESTIONS-OUVERTES.md`). 14 fichiers dans `tests/`, dont
-`mgmtBureau.test.js` (53) et `mgmtCard.test.js` (23) pour le management,
-`regressionFixes.test.js` (75) pour la carrière. Durée : ~110 s.
+État au 17/09/2026 : **254 tests, 250 passants, 0 échec, 4 skip**. Les 4 skip
+sont dans `mgmtBureau.test.js` : trois sorties de carte incomplète (remonter un
+prélim, short notice, combattant libre) et une pénalité économie au-delà du
+plafond de découvert — comportements décidés mais absents du code (voir
+`docs/QUESTIONS-OUVERTES.md`). **15 fichiers dans `tests/`**, dont
+`mgmtBureau.test.js` (53), `mgmtCard.test.js` (23) et `mgmtEconomie.test.js`
+(13) pour le management, `regressionFixes.test.js` (75) et `duel.test.js` (28)
+pour la carrière. Durée : ~90 s.
 
 **La liste des tests est écrite à la main dans `package.json`** (scripts `test`
 et `test:watch`) : un nouveau fichier de test doit y être ajouté, sinon il ne
@@ -144,27 +156,30 @@ sans citer la décision qui change le comportement attendu.
 
 | Document | Rôle |
 |---|---|
-| `docs/CDC-MODE-MANAGEMENT.md` | Cahier des charges du management. Fait foi. |
-| `docs/CDC-MODE-MANAGEMENT-ADDENDUM.md`, `docs/CDC-ADDENDUM-2-LES-SIX-REGARDS.md` | Décisions complémentaires |
+| `docs/VISION-MODE-MANAGEMENT.md` | Vision du mode management (16-17/09/2026). **Prime en cas de contradiction avec tout autre document.** |
+| `docs/AUDIT-17-09.md` | Audit du mode management (17/09/2026) : constats X/C/D/B/G/M/T, ordre des lots 0 à 5. Chaque constat attend la décision d'Anthony. |
+| `docs/CDC-MODE-MANAGEMENT.md` | Cahier des charges du management — fait foi sauf contradiction avec la vision ; sections périmées marquées en tête. |
+| `docs/CDC-MODE-MANAGEMENT-ADDENDUM.md`, `docs/CDC-ADDENDUM-2-LES-SIX-REGARDS.md` | Décisions complémentaires (mêmes marques sur les sections périmées) |
 | `docs/LES-SIX-VOIX-v1.1.md`, `docs/LES-CINQ-LEGENDES-v1.1.md` | Voix et personnages — contenu d'auteur |
 | `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md`, `docs/LOT-3A-TESTS-CONTRAT.md` | Lot 3a — livré et mergé (PR 61) |
-| `docs/LOT-3B-CARTE-INCOMPLETE.md` | Lot 3B — textes d'auteur complets, **code non démarré** |
+| `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré, T2 (carte principale) contracté mais non codé |
 | `docs/CHARTE-INTERFACE-MANAGEMENT.md` | Charte d'interface du management (15/09/2026) : priorité d'Anthony. Vérification UI obligatoire à chaque tranche qui touche un écran (§3). |
 | `docs/QUESTIONS-OUVERTES.md` | QO-1 à QO-7 : ce qui manque côté code ou design. N'y répondre qu'avec une décision d'Anthony. |
-| `docs/ETAT-DES-LIEUX.md` | Inventaire du 08/09/2026 (fichiers à garder / à jeter) |
+| `docs/ETAT-DES-LIEUX.md` | Inventaire du 08/09/2026 (fichiers à garder / à jeter) — le sort du mode Duel y est en attente de la décision d'Anthony (T5). |
 | `docs/STRATEGIE-IA-CAGE-LEGACY-2026-09.md` | Proposition de méthode de production avec les IA (pas une spécification du jeu) |
-| `docs/ETAT-14-09.md` | Historique : deux tests rouges du 14/09, résolus par `efa1ea6` |
+| `docs/ETAT-14-09.md` | **Périmé (17/09/2026)** : historique des deux tests rouges du 14/09, réécrits depuis. Ne plus s'y fier. |
+| `maquettes/`, `prototypes/` | Maquettes des dix écrans et prototype d'arène validés le 17/09/2026 (vision §Direction artistique) |
 
 ## 10. Dette connue
 
 - **`engine-combat.js` fait ~2500 lignes**, le plus gros fichier du dépôt.
   `ui-06-career-screens.js` (~1190) est le plus gros côté UI, `mgmt-bureau.js`
-  (~1050) le plus gros du management et porte plusieurs responsabilités
-  (bureau, carte, corps, soirée, sauvegarde). Aucun découpage entrepris.
-- **Contradiction de commande** : `AGENTS.md` décrit `npm run check` comme
-  lint + lint:content + tests ; `package.json` n'exécute que lint + tests.
+  (~1300, grossi par le lot 3B T1) le plus gros du management et porte plusieurs
+  responsabilités (bureau, carte, argent, corps, soirée, sauvegarde). Aucun
+  découpage entrepris.
 - **`npm run lint:content`** : 3 signalements « MAIN EVENT » dans
-  `ui-01-roster-matchmaking.js` (carrière, dont un dans un commentaire). Sa
+  `ui-01-roster-matchmaking.js` (carrière, dont un dans un commentaire). Il sort
+  avec le code 0 : inclus dans `check`, il ne bloque pas la livraison. Sa
   vérification de longueur ne couvre que `data-people.js` : il ne garantit rien
   sur le contenu management.
 - **Hasard hors graine** : `uniqueFighterId()` (`engine.js`) utilise `Date.now()`

@@ -8,7 +8,7 @@
     "test:watch": "node --test --watch tests/career.test.js tests/hallOfFame.test.js tests/champChamp.test.js tests/ranking.test.js tests/invariants.test.js tests/saveSystem.test.js tests/analytics.test.js tests/proceduralNarrative.test.js tests/regressionFixes.test.js tests/hubCombatDossier.test.js tests/duel.test.js tests/lot1Integrity.test.js tests/mgmtBureau.test.js tests/mgmtCard.test.js tests/mgmtEconomie.test.js",
     "lint": "eslint .",
     "lint:content": "node tools/lint-content.js",
-    "check": "npm run lint && npm test"
+    "check": "npm run lint && npm run lint:content && npm test"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",

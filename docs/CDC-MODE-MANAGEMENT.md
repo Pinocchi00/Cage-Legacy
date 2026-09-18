@@ -45,6 +45,8 @@ décision inutile — supprime-la.
 
 ## 3. LA RÈGLE DU BUREAU (validée)
 
+> ⚠️ **Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026.**
+
 C'est la réponse au problème « des centaines de combattants, mais on est débordé ».
 Le monde est peuplé. Le bureau est petit.
 
@@ -73,6 +75,9 @@ l'attachement se forme dans la vraie vie, et c'est ce qui rend la mémoire tenab
 Un événement toutes les 4 à 6 semaines. Entre deux événements :
 
 ### 4.1 Le bureau
+> ⚠️ **Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026** (la pile d'affaires
+> n'est plus l'écran principal ; le bureau n'est plus le centre du jeu).
+
 L'écran principal est une **pile d'affaires** : appels, demandes, problèmes. Huit à
 quinze par cycle. Chaque affaire est une personne, jamais un menu.
 
@@ -80,7 +85,9 @@ Tu ne peux pas tout traiter. **Ignorer est une décision** : le combattant que t
 jamais rappelé s'en souvient, et le jeu ne te préviendra pas.
 
 ### 4.2 La carte
-- **Main event et co-main : tu les choisis toi.** Ce sont les seuls combats sur lesquels le
+- **Main event et co-main : tu les choisis toi.** *(Remplacé par
+  VISION-MODE-MANAGEMENT.md le 17/09/2026 : le joueur ne se limite plus au main
+  event et au co-main — il gère la carte principale.)* Ce sont les seuls combats sur lesquels le
   jeu te laisse t'attarder. Ils doivent être douloureux à trancher.
 - **Le reste de la carte : ton adjoint te la propose.** Tu valides d'un geste, tu échanges
   un combat, ou tu écrases tout. Écraser coûte — voir §5.
@@ -88,6 +95,8 @@ jamais rappelé s'en souvient, et le jeu ne te préviendra pas.
   qui exige une décision personnelle.
 
 Total : **trois à cinq décisions réelles par événement.** Pas trente.
+*(Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 : le quota de décisions
+est abandonné — un vrai travail, sans quota.)*
 
 ### 4.3 La soirée
 Elle se déroule, tu regardes. Le moteur de combat existant fait le travail.
@@ -177,6 +186,7 @@ de défaite. Le joueur doit pouvoir être rentable et fini.
 - Monde total : quelques centaines de noms (niveau 1), classements et promotions rivales.
 - Événements : un toutes les 4 à 6 semaines.
 - Décisions réelles par événement : 3 à 5.
+  *(Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 : quota abandonné.)*
 - Affaires au bureau par cycle : 8 à 15.
 - Personnages récurrents : 6.
 - Dossiers accumulés par le joueur sur une saison : 10 à 20.

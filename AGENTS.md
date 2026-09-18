@@ -38,7 +38,11 @@ laisses un emplacement vide et tu le signales. Une réplique générique est pir
 
 ## Documents de référence
 
-- `docs/CDC-MODE-MANAGEMENT.md` — cahier des charges du mode en cours. Fait foi.
+- `docs/VISION-MODE-MANAGEMENT.md` — vision du mode management. **Prime en cas de
+  contradiction avec tout autre document, y compris le cahier des charges.**
+- `docs/CDC-MODE-MANAGEMENT.md` — cahier des charges du mode en cours, et ses deux
+  addendums. Fait foi sauf contradiction avec la vision ; ses sections périmées
+  portent en tête la mention « remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 ».
 - `docs/ETAT-DES-LIEUX.md` — fichiers concernés, à garder, à jeter.
 - `docs/CHARTE-INTERFACE-MANAGEMENT.md` — règles d'interface du management (humanité, réalisme, simplicité, lisibilité mesurable). Tout écran management la respecte.
 - `docs/QUESTIONS-OUVERTES.md` — ce qui n'est pas tranché. N'y réponds pas seul.

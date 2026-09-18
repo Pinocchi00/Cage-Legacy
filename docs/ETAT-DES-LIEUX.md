@@ -58,6 +58,14 @@ cite le point de contact factuel, sans en déduire de conception.
 
 ## 3. À JETER — exhibitions et résidus des lots rejetés
 
+> ⚠️ **Sort du mode Duel : en attente de la décision d'Anthony.** Le Duel entre
+> amis (`duel-codec.js`, `ui-10-duel.js`, l'amorce `?legend=` de `main.js`,
+> `tests/duel.test.js` et les gardes d'exhibition associées) avait été **gardé**
+> le 06/09, mais est classé « à jeter » ci-dessous depuis ce relevé du 08/09
+> (constat T5 de l'audit du 17/09). **Personne ne supprime ni ne modifie ces
+> éléments tant qu'Anthony n'a pas tranché.** La décision ci-dessous qui les
+> concerne est donc suspendue.
+
 Rien de cette section n'appartient au moteur de combat ni au mode carrière.
 Aucun fichier `engine-*.js` ni `state/*.js` n'y figure.
 

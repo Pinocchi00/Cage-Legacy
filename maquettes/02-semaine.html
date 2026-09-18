@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cage Legacy — semaine</title>
+<style>html,body{margin:0;background:#211B1E;display:flex;justify-content:center}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,500;0,600;0,700;1,700;1,800&amp;family=Saira:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #2B2327; color: #FFF8EE; font-family: 'Saira', 'Segoe UI', sans-serif; }
+    a { color: #FFC83D; text-decoration: none; } a:hover { color: #FFE08A; }
+    .cond { font-family: 'Saira Condensed', 'Arial Narrow', sans-serif; }
+    button, select { font-family: 'Saira Condensed', sans-serif; cursor: pointer; }
+    .oct { clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+    .cut { clip-path: polygon(0 0, 94% 0, 100% 18%, 100% 100%, 0 100%); }
+  </style>
+</head>
+<body>
+<div style="width: 1920px; height: 1080px; box-sizing: border-box; padding: 40px 64px 48px; display: flex; flex-direction: column; gap: 26px; background: radial-gradient(ellipse 900px 600px at 50% 0%, rgba(255, 200, 61, .16), rgba(255, 200, 61, 0) 70%), linear-gradient(180deg, #3B2F33, #2B2327 55%, #211B1E);">
+  <header style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 248, 238, .16); padding-bottom: 18px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="01-accueil.html" class="oct" style="width: 34px; height: 34px; background: #FFC83D; display: block;"></a>
+      <span class="cond" style="font-size: 28px; font-weight: 700; letter-spacing: .12em;">LA SEMAINE</span>
+    </div>
+    <nav class="cond" style="display: flex; gap: 40px; font-size: 21px; font-weight: 600; letter-spacing: .08em;">
+      <a href="03-fiche-combattant.html" style="color: #D9CCC0;">COMBATTANTS</a>
+      <a href="07-classements.html" style="color: #D9CCC0;">CLASSEMENTS</a>
+      <a href="08-organisation.html" style="color: #D9CCC0;">ORGANISATION</a>
+      <a href="09-pantheon.html" style="color: #D9CCC0;">PANTHÉON</a>
+    </nav>
+    <div style="display: flex; align-items: baseline; gap: 14px;">
+      <span class="cond" style="font-size: 21px; font-weight: 600; color: #D9CCC0;">SPLIT 14</span>
+      <span class="cond" style="font-size: 40px; font-weight: 800; font-style: italic; color: #FFC83D;">J-21</span>
+    </div>
+  </header>
+
+  <div style="display: grid; grid-template-columns: 620px minmax(0, 1fr) 420px; gap: 52px; flex-grow: 1; min-height: 0;">
+    <section style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="cond" style="font-size: 20px; font-weight: 700; letter-spacing: .2em; color: #FFC83D;">TA CARTE PRINCIPALE</div>
+      <div style="font-size: 17px; color: #D9CCC0; font-weight: 300;">3 combats bookés sur 5. Leïla a bouclé les préliminaires.</div>
+      <div style="background: rgba(255, 248, 238, .07); padding: 18px 24px; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 15px; color: #D9CCC0;">Combat principal, 5 rounds</span>
+        <span class="cond" style="font-size: 34px; font-weight: 700;">MONTAGNÉ <span style="font-size: 20px; color: #D9CCC0;">contre</span> CHADALER</span>
+        <span style="font-size: 16px; color: #D9CCC0; font-weight: 300;">Poids léger, 13e contre 14e</span>
+      </div>
+      <div style="border: 2px solid #FFC83D; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 15px; color: #FFC83D;">Co-main, 3 rounds</span>
+          <span class="cond" style="font-size: 30px; font-weight: 700;">SWAT <span style="font-size: 19px; color: #D9CCC0;">contre qui ?</span></span>
+        </div>
+        <a href="04-booker-un-combat.html" class="cond" style="background: #FFC83D; color: #1F1A1D; font-size: 19px; font-weight: 700; padding: 12px 22px; transform: skewX(-12deg); white-space: nowrap;">CHOISIR</a>
+      </div>
+      <div style="background: rgba(255, 248, 238, .07); padding: 14px 24px;"><span class="cond" style="font-size: 26px; font-weight: 600;">SANCHEZ <span style="font-size: 17px; color: #D9CCC0;">contre</span> BEKO</span></div>
+      <div style="background: rgba(255, 248, 238, .07); padding: 14px 24px;"><span class="cond" style="font-size: 26px; font-weight: 600;">CHROME <span style="font-size: 17px; color: #D9CCC0;">contre</span> SAINT-MORAND</span></div>
+      <button style="background: transparent; border: 1px dashed rgba(255, 248, 238, .4); color: #D9CCC0; font-size: 19px; padding: 18px 24px; text-align: left; letter-spacing: .06em;">PLACE LIBRE — BOOKER UN COMBAT</button>
+      <div style="margin-top: auto; border-top: 1px solid rgba(255, 248, 238, .16); padding-top: 16px; display: flex; flex-direction: column; gap: 6px;">
+        <span class="cond" style="font-size: 18px; font-weight: 700; letter-spacing: .16em; color: #FFC83D;">LEÏLA</span>
+        <p style="margin: 0; font-size: 18px; line-height: 1.5; font-weight: 300; font-style: italic;">« Voilà j'ai enfin préparé la carte préliminaire, il y a de quoi faire un beau spectacle enfin j'espère, hâte de voir la carte principale ! »</p>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 14px; min-width: 0;">
+      <div class="cond" style="font-size: 20px; font-weight: 700; letter-spacing: .2em; color: #FFC83D;">CE QUI SE DIT</div>
+      <article style="padding: 16px 0; border-bottom: 1px solid rgba(255, 248, 238, .16); display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 15px; color: #D9CCC0;">Saygur Damagaev sur les réseaux, il y a 2 heures</span>
+        <p style="margin: 0; font-size: 22px; line-height: 1.45; font-weight: 400;">« Swat touche de loin parce que personne ne va le chercher. Moi, j'irai. »</p>
+        <a href="04-booker-un-combat.html" class="cond" style="font-size: 17px; font-weight: 700; letter-spacing: .06em;">ENVISAGER CE COMBAT</a>
+      </article>
+      <article style="padding: 16px 0; border-bottom: 1px solid rgba(255, 248, 238, .16); display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 15px; color: #D9CCC0;">Cage Hebdo, ce matin</span>
+        <p style="margin: 0; font-size: 19px; line-height: 1.5; font-weight: 300;">Swat cherche un adversaire qui avance. Face à un pressureur, ce serait une guerre. Face à un attentiste, une partie d'échecs.</p>
+      </article>
+      <article style="padding: 16px 0; border-bottom: 1px solid rgba(255, 248, 238, .16); display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 15px; color: #D9CCC0;">Hors de Split, highlights qui circulent</span>
+        <p style="margin: 0; font-size: 19px; line-height: 1.5; font-weight: 300;">Adilet Abdyldaev, 9-0, champion au Kirghizistan. Ses amenées au sol tournent en boucle.</p>
+        <a href="#" class="cond" style="font-size: 17px; font-weight: 700; letter-spacing: .06em;">CONTACTER SON AGENT</a>
+      </article>
+      <article style="padding: 16px 0; display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 15px; color: #D9CCC0;">Nils Keller, sans combat depuis 7 mois</span>
+        <p style="margin: 0; font-size: 19px; line-height: 1.5; font-weight: 300;">« Split m'a oublié. »</p>
+        <a href="#" class="cond" style="font-size: 17px; font-weight: 700; letter-spacing: .06em;">LUI TROUVER UN COMBAT</a>
+      </article>
+    </section>
+
+    <aside style="display: flex; flex-direction: column; gap: 26px;">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="cond" style="font-size: 20px; font-weight: 700; letter-spacing: .2em; color: #FFC83D;">POIDS LÉGER</div>
+        <div style="display: flex; justify-content: space-between; font-size: 18px; padding: 8px 0; border-bottom: 1px solid rgba(255, 248, 238, .16);"><span>12&nbsp;&nbsp;Idris Vannier</span><span style="color: #D9CCC0;">Pacific</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 18px; padding: 8px 0; border-bottom: 1px solid rgba(255, 248, 238, .16);"><span>13&nbsp;&nbsp;Guy Montagné</span><span style="color: #FFC83D;">Split</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 18px; padding: 8px 0; border-bottom: 1px solid rgba(255, 248, 238, .16);"><span>14&nbsp;&nbsp;Dustin Chadaler</span><span style="color: #FFC83D;">Split</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 18px; padding: 8px 0;"><span>15&nbsp;&nbsp;Hugo Larrieu</span><span style="color: #D9CCC0;">Ultimate Rim</span></div>
+        <a href="07-classements.html" class="cond" style="font-size: 17px; font-weight: 700; letter-spacing: .06em;">TOUS LES CLASSEMENTS</a>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="cond" style="font-size: 20px; font-weight: 700; letter-spacing: .2em; color: #FFC83D;">L'ORGANISATION</div>
+        <div style="font-size: 18px; font-weight: 300; line-height: 1.6; color: #FFF8EE;">Objectif de saison du patron : deux combattants dans le top 10 mondial.<br>4 contrats arrivent à terme après Split 14.</div>
+        <a href="08-organisation.html" class="cond" style="font-size: 17px; font-weight: 700; letter-spacing: .06em;">VOIR L'ORGANISATION</a>
+      </div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>
