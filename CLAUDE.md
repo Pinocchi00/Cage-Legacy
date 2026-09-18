@@ -1,6 +1,7 @@
 # Cage Legacy — guide d'architecture
 
-Relevé du 17/09/2026 (vérifié sur la branche `lot-3b`, après merge du lot 3a).
+Relevé du 17/09/2026 (livré sur la branche `lot-0-documents`, basée sur `lot-3b`,
+après merge du lot 3a).
 **Numérotation des lots : depuis le 17/09/2026, les lots 0 à 5 (documents, style
 stable, carte principale, arène, peau du jeu, monde qui parle — voir
 `docs/AUDIT-17-09.md` §8) sont la référence en cours. Les numérotations
@@ -72,7 +73,7 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 6. `state/state-analytics.js`, `state/state-save.js`, `state/state-migration.js`,
    `state/state-validation.js`, `state/state-hof.js`
 7. `ui-01-roster-matchmaking.js` à `ui-09-arena.js` (pas de `ui-04`)
-8. `duel-codec.js`, `ui-10-duel.js` — duel entre légendes
+8. `duel-codec.js`, `ui-10-duel.js` — exhibition « Duel entre amis »
 9. `ui-11-keys.js` — navigation clavier globale (`keysRegister`)
 10. `mgmt-data.js`, `mgmt-bureau.js`, `mgmt-screens.js` — mode management
 11. `main.js` — bootstrap

@@ -20,6 +20,10 @@ hype de ville, demande, taille d'événement, salle.
 
 **Cage Legacy cache des chiffres derrière des gens.**
 
+> *(Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 : le jeu raconte les
+> moments clés — décision T3 du 17/09. La règle devient « ni note, ni barème,
+> ni jauge ».)*
+
 > Ce n'est pas de la narration. La conséquence n'est pas une histoire, c'est une décision :
 > tu bookes ou tu ne bookes pas, tu te trompes ou tu as raison. Les six voix ne racontent
 > rien — elles informent, avec du bruit. C'est un brouillard de guerre qui a un visage.
