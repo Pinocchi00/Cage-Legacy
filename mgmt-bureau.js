@@ -626,6 +626,13 @@ function mgmtCombatProfile(f){
   const saved=SEED;
   let p;
   try{
+    /* ==== [ANCRE: MGMT_LOT1_STYLE_STABLE] — Lot 1 le style stable (audit
+       X2, §3.2 du lot 3a) : la graine du profil est le hachage de l'id de
+       la ligne. Sans ce setSeed, chaque appel consommait le flux courant
+       restauré à l'identique : tous les combattants générés au même
+       instant recevaient le même style, et un même combattant changeait de
+       style d'une soirée à l'autre. ==== */
+    setSeed(mgmtHashId(f.id));
     const d=divById(f.div);
     p=makeFighter({div:f.div,gender:d?d.gender:'H',level:mgmtLevelForRecord(f.W,f.L),age:f.age});
   }finally{
