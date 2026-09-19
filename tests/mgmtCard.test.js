@@ -688,3 +688,340 @@ test('MGMT T1 soirée — les 9 combats se jouent, carte principale d\u2019abord
   assert.ok(s.lastCycles.every(c=>c===0), 'lastCycle est écrit sur chaque combattant ayant combattu (§T1)');
 });
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_LOT2_T2_TESTS] — Lot 2 T2 le joueur compose sa carte
+   principale (docs/LOT-2-CARTE-PRINCIPALE.md §T2, geste LOT-3B §2) : le
+   geste à la souris (choisir un combattant disponible, puis son adversaire —
+   le combat entre dans le premier emplacement libre, slot:'main') et au
+   clavier (flèches + entrée, chiffres 1 à 5, échap). Non sélectionnables :
+   suspendus (visibles, avec leur rang), tout combattant déjà engagé sur la
+   carte — carte principale comme préliminaires ; retraités médicaux
+   absents de la liste. Le retrait d'un combat libère l'emplacement. La
+   carte principale ne dépasse jamais 5 combats. Le compteur de carte
+   (mgmtCardLabel) s'affiche à nouveau et reflète les deux parties —
+   régression réparée : il lisait m.card.fights, disparu à la T1. esc() sur
+   tout nom affiché. ==== */
+
+function enterMgmt(win,seed){
+  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+}
+
+/* Roster contrôlé : six légers (quatre disponibles, un suspendu, un
+   retraité médical), quatre plumes, deux légers de plus pour la capacité —
+   la composition devient déterministe, sans dépendre du tirage du roster.
+   Préfixe « x » : jamais de collision avec les identifiants « mg » +
+   compteur du roster généré (ni avec ceux des préliminaires de Leïla). */
+function ctlRoster(win){
+  win.eval(`(function(){
+    const m=G.mgmt;
+    m.roster=[];
+    const mk=(id,first,div,divName,W,L,extra)=>Object.assign({id:id,name:first+' Test',first:first,last:'Test',W:W,L:L,D:0,age:27,div:div,divName:divName,org:'Split',level:1,raison:null,interactions:0},extra||{});
+    m.roster.push(mk('x1','Alain','H-light','Poids léger',10,2));
+    m.roster.push(mk('x2','Bruno','H-light','Poids léger',8,4));
+    m.roster.push(mk('x3','César','H-light','Poids léger',6,6));
+    m.roster.push(mk('x4','Dorian','H-light','Poids léger',4,8));
+    m.roster.push(mk('x5','Enzo','H-light','Poids léger',2,10,{susp:99}));
+    m.roster.push(mk('x6','Farid','H-light','Poids léger',0,12,{retired:'medical'}));
+    m.roster.push(mk('x7','Gabin','H-feather','Poids plume',9,1));
+    m.roster.push(mk('x8','Hugo','H-feather','Poids plume',7,3));
+    m.roster.push(mk('x9','Ivan','H-feather','Poids plume',5,5));
+    m.roster.push(mk('x10','Jules','H-feather','Poids plume',3,7));
+    m.roster.push(mk('x11','Karl','H-light','Poids léger',5,0));
+    m.roster.push(mk('x12','Luc','H-light','Poids léger',3,2));
+  })()`);
+}
+
+/* Une paire sélectionnable de la liste contrôlée : les deux premiers
+   disponibles de la même catégorie. */
+function ctlPair(win){
+  return JSON.parse(win.eval(`JSON.stringify((()=>{
+    const m=G.mgmt, rows=mgmtCartRows(m);
+    const a=rows.find(f=>mgmtSelectable(m,f,null));
+    const b=rows.find(f=>f.id!==a.id&&f.div===a.div&&mgmtSelectable(m,f,a.id));
+    if(!a||!b) return ['no-a','no-b'];
+    return [a.id,b.id];
+  })())`));
+}
+
+test('MGMT T2 geste — choisir puis adversaire : premier emplacement libre, slot main, dossier compté', () => {
+  const win = newGameWindow();
+  enterMgmt(win,301);
+  ctlRoster(win);
+  const [a,b] = ctlPair(win);
+  const rosterAvant = win.eval(`JSON.stringify(G.mgmt.roster)`);
+  win.eval(`CL.mgmtCarte();`);
+  assert.equal(win.eval(`G.screen`), 'mgmt_carte', 'l\u2019écran de composition s\u2019ouvre');
+  /* Pur : la liste dérivée ne touche jamais une ligne. */
+  win.eval(`mgmtCartRows(G.mgmt)`);
+  assert.equal(win.eval(`JSON.stringify(G.mgmt.roster)`), rosterAvant, 'la liste dérivée n\u2019écrit jamais sur une ligne');
+  win.eval(`CL.mgmtPick('${a}')`);
+  assert.equal(win.eval(`MGMT_CART.pick`), a, 'le premier choix est posé');
+  let html = win.document.getElementById('app').innerHTML;
+  const divName = win.eval(`mgmtFighterById(G.mgmt,'${a}').divName`);
+  assert.ok(html.includes(`Adversaires — ${divName}`), 'la liste se filtre sur la catégorie du choisi');
+  assert.ok(!html.includes('Choisissez un combattant, puis son adversaire.'), 'l\u2019invite du geste cède la place aux adversaires');
+  win.eval(`CL.mgmtPick('${b}')`);
+  const f = JSON.parse(win.eval(`JSON.stringify(G.mgmt.card.main[0])`));
+  assert.deepEqual([f.a,f.b], [a,b], 'le combat porte les deux choisis');
+  assert.equal(f.slot, 'main', 'slot:\u2019main\u2019 — c\u2019est un combat de carte principale');
+  assert.equal(f.cycle, win.eval(`G.mgmt.cycle`), 'posé au cycle courant');
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'le choix est effacé après la pose');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 1, 'premier emplacement libre : la carte était vide');
+  const saved = JSON.parse(win.localStorage.getItem('cage-legacy-mgmt'));
+  assert.equal(saved.card.main.length, 1, 'le combat posé persiste');
+  /* R1 (addendum 1 §5) : le booker compte — un booking est une interaction. */
+  for(const id of [a,b]){
+    const o = JSON.parse(win.eval(`JSON.stringify(mgmtFighterById(G.mgmt,'${id}'))`));
+    assert.ok(o.level>=2&&o.interactions===1&&o.raison!==null, 'booking = dossier : '+id);
+  }
+  /* Le deuxième combat se pose à la suite, jamais à la place. */
+  const [c,d] = ctlPair(win);
+  win.eval(`CL.mgmtPick('${c}'); CL.mgmtPick('${d}');`);
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 2, 'deuxième emplacement utilisé');
+  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify([G.mgmt.card.main[1].a,G.mgmt.card.main[1].b])`)), [c,d], 'append, jamais en tête');
+});
+
+test('MGMT T2 non sélectionnables — suspendu visible et muet, engagé muet, retraité médical absent', () => {
+  const win = newGameWindow();
+  enterMgmt(win,302);
+  ctlRoster(win);
+  const susp = win.eval(`mgmtFighterById(G.mgmt,'x5').name`);
+  const ret = win.eval(`mgmtFighterById(G.mgmt,'x6').name`);
+  win.eval(`CL.mgmtCarte(); render();`);
+  let html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes(susp), 'le suspendu reste visible');
+  assert.ok(html.includes('suspendu'), 'la suspension se dit en toutes lettres');
+  assert.ok(!html.includes(ret), 'le retraité médical est absent de la liste (§T2)');
+  /* Le suspendu garde son rang dans sa catégorie : classé malgré sa
+     suspension (T1). */
+  const rk = win.eval(`mgmtRankLabel(mgmtDivisionRank(G.mgmt,mgmtFighterById(G.mgmt,'x5')))`);
+  assert.notEqual(rk, '', 'le suspendu garde un rang');
+  /* Déjà engagé en carte principale (posé par le joueur, fixture) : muet. */
+  win.eval(`mgmtBookMain(G.mgmt,'x1','x2')`);
+  win.eval(`render()`);
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes('en carte'), 'l\u2019engagement se dit en toutes lettres');
+  win.eval(`CL.mgmtPick('x1')`);
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'un combattant déjà engagé ne peut pas être sélectionné');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 1, 'aucun combat de plus posé');
+  win.eval(`CL.mgmtPick('x5')`);
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'un suspendu ne peut pas être sélectionné');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 1);
+  /* Les préliminaires engagent aussi : un combattant des prélims est muet. */
+  win.eval(`G.mgmt.card.prelims.push({a:'x7',b:'x8',cycle:1,slot:'prelim'}); render();`);
+  win.eval(`CL.mgmtPick('x7')`);
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'engagé en préliminaires : muet aussi');
+});
+
+test('MGMT T2 retrait — l\u2019emplacement est libéré, les deux redeviennent sélectionnables, le suivant se pose à la suite', () => {
+  const win = newGameWindow();
+  enterMgmt(win,303);
+  ctlRoster(win);
+  win.eval(`CL.mgmtCarte()`);
+  const [a,b] = ctlPair(win);
+  win.eval(`CL.mgmtPick('${a}'); CL.mgmtPick('${b}');`);
+  const [c,d] = ctlPair(win);
+  win.eval(`CL.mgmtPick('${c}'); CL.mgmtPick('${d}');`);
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 2);
+  let html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes(`CL.mgmtUnbook(0)`), 'le combat posé porte son bouton de retrait');
+  win.eval(`CL.mgmtUnbook(0)`);
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 1, 'l\u2019emplacement est libéré');
+  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify([G.mgmt.card.main[0].a,G.mgmt.card.main[0].b])`)), [c,d], 'les combats restants se tassent');
+  for(const id of [a,b]){
+    assert.equal(win.eval(`mgmtSelectable(G.mgmt,mgmtFighterById(G.mgmt,'${id}'),null)`), true, `redevient sélectionnable : ${id}`);
+  }
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes(`CL.mgmtPick('${a}')`)&&html.includes(`CL.mgmtPick('${b}')`), 'les deux lignes redeviennent cliquables');
+  /* Le combat suivant entre dans le premier emplacement libre : à la suite. */
+  const [e,f2] = ctlPair(win);
+  win.eval(`CL.mgmtPick('${e}'); CL.mgmtPick('${f2}');`);
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 2, 'l\u2019emplacement libéré se remplit à son tour');
+  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify([G.mgmt.card.main[1].a,G.mgmt.card.main[1].b])`)), [e,f2], 'à la suite, jamais au milieu');
+});
+
+test('MGMT T2 capacité — la carte principale ne dépasse jamais 5 combats', () => {
+  const win = newGameWindow();
+  enterMgmt(win,304);
+  ctlRoster(win);
+  win.eval(`CL.mgmtCarte()`);
+  const n = win.eval(`(function(){
+    let booked=0;
+    for(let k=0;k<8;k++){
+      const m=G.mgmt, rows=mgmtCartRows(m);
+      const a=rows.find(f=>mgmtSelectable(m,f,null));
+      if(!a) break;
+      const b=rows.find(f=>f.id!==a.id&&f.div===a.div&&mgmtSelectable(m,f,a.id));
+      if(!b) break;
+      if(!mgmtBookMain(m,a.id,b.id)) break;
+    }
+    return G.mgmt.card.main.length;
+  })()`);
+  assert.equal(n, 5, 'le roster contrôlé permet de remplir les cinq places');
+  const guard = win.eval(`mgmtBookMain(G.mgmt,'x11','x12')`);
+  assert.equal(guard, null, 'au-delà de cinq : la pose est refusée');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 5, 'jamais plus de cinq combats');
+  /* La liste ne pose plus rien non plus : elle ne sert qu\u2019à consulter. */
+  win.eval(`CL.mgmtPick('x11')`);
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'carte complète : aucun premier choix');
+  let html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes('Carte principale complète.'), 'l\u2019état se dit en toutes lettres');
+  /* Le clavier ne passe pas non plus : Entrée ne pose rien. */
+  win.eval(`MGMT_CART.cursor=0`);
+  win.eval(`mgmtKeyCartAct()`);
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 5);
+});
+
+test('MGMT T2 mgmtBookMain — les gardes : catégorie, disponibilité, engagement, identité', () => {
+  const win = newGameWindow();
+  freshState(win,311);
+  const r = win.eval(`(function(){
+    const m=G.mgmt;
+    m.cycle=2;
+    m.roster=[
+      {id:'x1',name:'Alain Test',first:'Alain',last:'Test',W:10,L:2,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+      {id:'x2',name:'Bruno Test',first:'Bruno',last:'Test',W:8,L:4,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+      {id:'x3',name:'César Test',first:'César',last:'Test',W:6,L:6,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+      {id:'x4',name:'Dorian Test',first:'Dorian',last:'Test',W:4,L:8,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
+      {id:'x5',name:'Enzo Test',first:'Enzo',last:'Test',W:2,L:10,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0,susp:5},
+      {id:'x6',name:'Farid Test',first:'Farid',last:'Test',W:0,L:12,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0,retired:'medical'},
+      {id:'x7',name:'Gabin Test',first:'Gabin',last:'Test',W:9,L:1,D:0,age:27,div:'H-feather',divName:'Poids plume',org:'Split',level:1,raison:null,interactions:0},
+      {id:'x8',name:'Hugo Test',first:'Hugo',last:'Test',W:7,L:3,D:0,age:27,div:'H-feather',divName:'Poids plume',org:'Split',level:1,raison:null,interactions:0},
+    ];
+    const res={};
+    res.cross=!!mgmtBookMain(m,'x1','x7');             /* catégories différentes */
+    res.suspect=!!mgmtBookMain(m,'x2','x5');           /* suspendu */
+    res.retraite=!!mgmtBookMain(m,'x2','x6');          /* retraité médical */
+    res.inconnu=!!mgmtBookMain(m,'x2','inconnu');      /* ligne absente du roster */
+    res.memeLigne=!!mgmtBookMain(m,'x2','x2');         /* un homme contre lui-même */
+    res.premier=!!mgmtBookMain(m,'x1','x2');           /* la pose légitime */
+    res.reengagéA=!!mgmtBookMain(m,'x1','x3');
+    res.reengagéB=!!mgmtBookMain(m,'x4','x1');
+    /* Les préliminaires engagent aussi. */
+    m.card.prelims.push({a:'x3',b:'x4',cycle:1,slot:'prelim'});
+    res.prelim=!!mgmtBookMain(m,'x2','x3');
+    const fight=mgmtBookMain(m,'x2','x4');             /* légitime */
+    res.pose=fight&&fight.slot==='main'&&fight.cycle===2&&fight.a==='x2'&&fight.b==='x4';
+    res.deux=mgmtEngaged(m,mgmtFighterById(m,'x2'));
+    return JSON.stringify(res);
+  })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.cross, false, 'jamais deux catégories dans un combat du joueur');
+  assert.equal(s.suspect, false, 'suspendu refusé');
+  assert.equal(s.retraite, false, 'retraité médical refusé');
+  assert.equal(s.inconnu, false, 'identifiant hors roster refusé');
+  assert.equal(s.memeLigne, false, 'même ligne refusée');
+  assert.equal(s.premier, true, 'la pose légitime renvoie le combat');
+  assert.equal(s.reengagéA, false, 'déjà engagé en carte principale : refusé');
+  assert.equal(s.reengagéB, false, 'déjà engagé : refusé, quel que soit le côté');
+  assert.equal(s.prelim, false, 'déjà engagé en préliminaires : refusé');
+  assert.equal(s.deux, true, 'mgmtEngaged lit les deux emplacements');
+});
+
+test('MGMT T2 compteur — la ligne du bureau montre les deux parties de la carte', () => {
+  const win = newGameWindow();
+  enterMgmtBulk(win,308);
+  let html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes('Carte principale 0/5 · préliminaires 0/4'), 'le compteur s\u2019affiche à nouveau, les deux parties');
+  const id = mgmtBulkId(win);
+  win.eval(`CL.mgmtReply('${id}','validate')`);
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 4);
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes('Carte principale 0/5 · préliminaires 4/4'), 'les préliminaires de Leïla se voient');
+  /* La carte principale se compose à l\u2019écran (contrôlé), jusqu\u2019à 5/5. */
+  ctlRoster(win);
+  win.eval(`CL.mgmtCarte()`);
+  win.eval(`(function(){
+    for(let k=0;k<6;k++){
+      const m=G.mgmt, rows=mgmtCartRows(m);
+      const a=rows.find(f=>mgmtSelectable(m,f,null));
+      if(!a) break;
+      const b=rows.find(f=>f.id!==a.id&&f.div===a.div&&mgmtSelectable(m,f,a.id));
+      if(!b) break;
+      if(!mgmtBookMain(m,a.id,b.id)) break;
+    }
+  })()`);
+  win.eval(`CL.go('mgmt_bureau'); render();`);
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes('Carte principale 5/5 · préliminaires 4/4'), 'la carte complète se lit d\u2019un regard');
+  /* L\u2019écran carte affiche le même état sur sa propre ligne de cycle. */
+  win.eval(`CL.mgmtCarte()`);
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes('Carte principale 5/5 · préliminaires 4/4'), 'même compteur sur l\u2019écran de composition');
+});
+
+test('MGMT T2 clavier — flèches et entrée composent, chiffre retire, échap revient', () => {
+  const win = newGameWindow();
+  enterMgmt(win,307);
+  ctlRoster(win);
+  win.eval(`CL.mgmtCarte()`);
+  const key = k => win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'${k}',bubbles:true}))`);
+  const [a,b] = ctlPair(win);
+  assert.equal(win.eval(`mgmtCartRows(G.mgmt)[0].id`), a, 'la liste rangée commence par sa première ligne');
+  key('Enter');
+  assert.equal(win.eval(`MGMT_CART.pick`), a, 'entrée : premier choix posé');
+  key('ArrowDown');
+  assert.equal(win.eval(`MGMT_CART.cursor`), 1, 'flèche : la ligne suivante');
+  key('Enter');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 1, 'entrée : le combat est posé');
+  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify([G.mgmt.card.main[0].a,G.mgmt.card.main[0].b,G.mgmt.card.main[0].slot])`)), [a,b,'main']);
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'le choix est effacé après la pose');
+  key('1');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 0, 'chiffre 1 : le combat posé est retiré');
+  key('ArrowUp');
+  assert.equal(win.eval(`MGMT_CART.cursor`), win.eval(`mgmtCartRows(G.mgmt).length-1`), 'rebouclage : la dernière ligne par le haut');
+  key('ArrowDown');
+  assert.equal(win.eval(`MGMT_CART.cursor`), 0, 'rebouclage : retour en tête');
+  key('Escape');
+  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'échap : retour au bureau');
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'la trace de composition ne survit pas au retour');
+});
+
+test('MGMT T2 esc() — un nom hostile de l\u2019écran carte s\u2019affiche échappé partout, jamais injecté', () => {
+  const win = newGameWindow();
+  enterMgmt(win,309);
+  ctlRoster(win);
+  /* Le nom hostile porte sur la première ligne de la liste rangée (x7) :
+     il traverse la liste, le dossier puis la carte posée. */
+  win.eval(`(function(){
+    const m=G.mgmt;
+    const t=mgmtFighterById(m,'x7');
+    t.name='<img src=x onerror=alert(1)>"b';
+    t.first='<img src=x onerror=alert(1)>"b';
+    t.last='X';
+  })()`);
+  win.eval(`CL.mgmtCarte(); render();`);
+  let html = win.document.getElementById('app').innerHTML;
+  assert.ok(!html.includes('<img src=x'), 'le HTML brut ne doit jamais contenir le nom injecté');
+  assert.ok(html.includes('&lt;img'), 'le chevron est échappé dans la liste');
+  assert.ok(win.document.getElementById('app').textContent.includes('"b'), 'le guillemet s\u2019affiche comme du texte, jamais un attribut');
+  const [a,b] = ctlPair(win);
+  assert.equal(a, 'x7', 'le nom hostile est la première ligne sélectionnable');
+  win.eval(`CL.mgmtPick('${a}');`);
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(!html.includes('<img src=x'), 'le dossier ne fuit pas non plus');
+  assert.ok(html.includes('&lt;img'), 'le nom hostile apparaît échappé au dossier');
+  win.eval(`CL.mgmtPick('${b}');`);
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(!html.includes('<img src=x'), 'la carte posée ne fuit pas');
+  assert.ok(html.includes('&lt;img'), 'le nom hostile apparaît échappé sur la carte');
+});
+
+/* Intégration : l\u2019écran rend le vrai roster généré (40 à 60 noms) sans
+   erreur, avec ses rangs dérivés et ses lignes cliquables. */
+test('MGMT T2 intégration — l\u2019écran carte rend le roster généré', () => {
+  const win = newGameWindow();
+  enterMgmt(win,312);
+  win.eval(`CL.mgmtCarte(); render();`);
+  const html = win.document.getElementById('app').innerHTML;
+  const st = JSON.parse(win.eval(`JSON.stringify({
+    roster:G.mgmt.roster.length,
+    rows:mgmtCartRows(G.mgmt).length,
+    slots:(document.getElementById('app').innerHTML.match(/Place libre/g)||[]).length,
+    clickable:(document.getElementById('app').innerHTML.match(/CL\\.mgmtPick\\(/g)||[]).length})`));
+  assert.ok(st.roster>=40&&st.roster<=60, 'roster réel 40 à 60');
+  assert.equal(st.rows, st.roster - win.eval(`G.mgmt.roster.filter(o=>o.retired==='medical').length`), 'seuls les retraités médicaux sont absents');
+  assert.equal(st.slots, 5, 'cinq emplacements de carte principale');
+  assert.equal(st.clickable, st.rows, 'roster frais : tout le monde est sélectionnable (ni suspendu, ni engagé)');
+});
+/* ==== [FIN ANCRE] ==== */

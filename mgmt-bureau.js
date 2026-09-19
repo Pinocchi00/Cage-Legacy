@@ -348,6 +348,104 @@ function mgmtSwapFight(m,affairId){
   return true;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT2_COMPOSITION] — Lot 2 T2 le joueur compose sa carte
+   principale (docs/LOT-2-CARTE-PRINCIPALE.md §T2, geste LOT-3B §2) : logique
+   pure de composition — aucun DOM (le rendu vit dans mgmt-screens.js).
+   Le combat posé entre dans le premier emplacement libre de la carte
+   principale (slot:'main') ; il peut être retiré. Non sélectionnables :
+   suspendus, tout combattant déjà engagé sur la carte (principale comme
+   préliminaires) ; retraités médicaux déjà hors de la liste (mgmtAvailable).
+   Les adversaires restent dans la catégorie du premier choix — le geste de
+   référence est maquettes/04-booker-un-combat.html (adversaires de la
+   catégorie). Tout booking compte comme interaction (addendum 1 §5 : le
+   booker compte) ; un retrait n'efface rien. ==== */
+
+/** Combattant déjà engagé sur la carte en cours : carte principale comme
+ *  préliminaires (§T2). Pur. @returns {boolean} */
+function mgmtEngaged(m,f){
+  if(!m||!m.card||!f||!f.id) return false;
+  const on=(list)=>Array.isArray(list)&&list.some(x=>x&&(x.a===f.id||x.b===f.id));
+  return on(m.card.main)||on(m.card.prelims);
+}
+
+/**
+ * Pose un combat du joueur en carte principale : premier emplacement libre
+ * (append — les places se remplissent dans l'ordre), slot:'main', cycle
+ * courant. Garde complète : les deux lignes existent et sont distinctes,
+ * même catégorie (le geste de référence est maquettes/04-booker-un-combat.
+ * html : adversaires de la catégorie), disponibles (mgmtAvailable : ni
+ * suspendus, ni retraités médicaux), pas déjà engagés sur la carte,
+ * capacité respectée. Un booking compte comme interaction (mgmtPromote,
+ * addendum 1 §5). Aucun fait mémorisé : composer est le comportement
+ * normal (lot 2c). Ne lance jamais la soirée : la carte complète ne fait
+ * rien d'office (lot 3a §5).
+ * @returns {object|null} le combat posé, ou null si refusé.
+ */
+function mgmtBookMain(m,aid,bid){
+  if(!m||!m.card||!Array.isArray(m.card.main)) return null;
+  if(!Number.isSafeInteger(m.card.sizeMain)) return null;
+  if(m.card.main.length>=m.card.sizeMain) return null;
+  if(!mgmtValidId(aid)||!mgmtValidId(bid)||aid===bid) return null;
+  const fa=mgmtFighterById(m,aid), fb=mgmtFighterById(m,bid);
+  if(!fa||!fb||fa===fb) return null;
+  if(fa.div!==fb.div) return null;
+  if(!mgmtAvailable(m,fa)||!mgmtAvailable(m,fb)) return null;
+  if(mgmtEngaged(m,fa)||mgmtEngaged(m,fb)) return null;
+  const fight={a:fa.id,b:fb.id,cycle:m.cycle,slot:'main'};
+  m.card.main.push(fight);
+  mgmtPromote(m,fa); mgmtPromote(m,fb);
+  return fight;
+}
+
+/** Retire un combat posé de la carte principale (index dans m.card.main) :
+ *  l'emplacement est libéré, les deux combattants redeviennent
+ *  sélectionnables. Pur côté lignes (aucune ligne écrite). @returns {boolean} */
+function mgmtRemoveMain(m,idx){
+  if(!m||!m.card||!Array.isArray(m.card.main)) return false;
+  if(!Number.isSafeInteger(idx)||idx<0||idx>=m.card.main.length) return false;
+  m.card.main.splice(idx,1);
+  return true;
+}
+
+/** Sélectionnable dans la liste de composition (§T2) : disponible (ni
+ *  suspendu, ni retraité médical), pas déjà engagé sur la carte ; avec un
+ *  premier choix posé, dans la même catégorie que lui — sauf le choisi
+ *  lui-même, re-cliquer doit pouvoir annuler. Pur. @returns {boolean} */
+function mgmtSelectable(m,f,pick){
+  if(!m||!f) return false;
+  if(!mgmtAvailable(m,f)) return false;
+  if(mgmtEngaged(m,f)) return false;
+  if(pick){
+    const a=mgmtFighterById(m,pick);
+    if(!a) return false;
+    if(f.id===a.id) return true;
+    if(a.div!==f.div) return false;
+  }
+  return true;
+}
+
+/**
+ * Les lignes de la liste de composition : le roster sans les retraités
+ * médicaux (§T2 : absents), groupé par catégorie dans l'ordre canonique
+ * (DIVISIONS), rangs dérivés (mgmtDivisionRank, T1) au sein de chaque
+ * catégorie. Pur : ne trie que des copies, n'écrit jamais sur une ligne,
+ * ne consomme pas rnd().
+ * @returns {Array} */
+function mgmtCartRows(m){
+  if(!m||!Array.isArray(m.roster)) return [];
+  const rows=m.roster.filter(o=>o&&o.retired!=='medical');
+  const order=allDivisions().map(d=>d.id);
+  const dx=o=>{ const i=order.indexOf(o.div); return i<0?order.length:i; };
+  rows.sort((x,y)=>{
+    const a=dx(x), b=dx(y);
+    if(a!==b) return a-b;
+    const rx=mgmtDivisionRank(m,x)||0, ry=mgmtDivisionRank(m,y)||0;
+    if(rx!==ry) return rx-ry;
+    return x.id<y.id?-1:1;
+  });
+  return rows;
+}
+/* ==== [FIN ANCRE] ==== */
 /** Catégorie d'une affaire : la division commune du combat, ou celle du
  *  premier combattant pour les paires inter-divisions (repli). */
 function mgmtAffairDiv(m,a){
