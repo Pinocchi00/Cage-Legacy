@@ -230,6 +230,7 @@ test('MGMT corps — fin de carrière médicale définitive : jamais reproposé,
   })()`);
   const s=JSON.parse(r);
   assert.equal(s.ok,true,'sur 40 cycles complets, le retraité médical ne revient dans aucune proposition');
+  assert.ok(s.proposé>=2,'les 40 cycles ont bien produit des propositions pour les autres combattants (au moins deux vus)');
   assert.equal(s.refus,true,'posé en carte malgré la retraite : mgmtRunEvent refuse de jouer');
   assert.equal(s.intact,true,'le refus de jouer ne change rien (anti-mutation avant disponibilité)');
 });

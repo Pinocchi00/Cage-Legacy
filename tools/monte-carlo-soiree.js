@@ -383,14 +383,15 @@ function newGameWindow(){
     const per=A.perScen;
     const ratio=a.nSain?(a.koSain>0?Math.round(1000*(a.koUse/a.koSain))/1000:(a.koUse>0?'∞ (taux sain nul)':'—')):'—';
     L.push(['| '+(A.divNames[dId]||dId)+' | '+dId+' | '
-      +(a.nSain?pct(a.koSain,a.nSain)+' %':'—')+' | '
+      +(a.nSain?a.nSain:'—')+' | '
       +(a.nLeger?pct(a.fin30,a.nLeger)+' %':'—')+' | '
       +(a.nUse?pct(a.susp90,a.nUse)+' %':'—')+' | '
       +(a.nUse?pct(a.fin60,a.nUse)+' %':'—')+' | '
       +(a.nUseSain?pct(a.koUse,a.nUseSain)+' %':'—')+' | '
+      +(a.nSain?pct(a.koSain,a.nSain)+' %':'—')+' | '
       +ratio+' |'].join(''));
   }
-  L.push(['| **Toutes catégories** | ',
+  L.push(['| **Toutes catégories** | | ',
     (g.nSain?g.nSain.n+' sain, ':'')+(g.nLeger?g.nLeger.n+' léger, ':'')+(g.nUse?g.nUse.n+' usé, ':'')
       +(g.nUseSain?g.nUseSain.n+' usé-vs-sain':'')+' | '
       +(gFin30===null?'—':('**'+gFin30+' %**'))+' | '

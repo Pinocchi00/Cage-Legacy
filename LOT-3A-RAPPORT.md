@@ -53,10 +53,10 @@ catégorie dans `tools/reports/LOT-3A-CALIBRAGE-SOIREE.md`) :
 |---|---|---|---|
 | 1. Deux corps à traumatisme 0 — identiques au moteur nu, même graine | identique | 0 écart sur 480 paires | ATTEINTE |
 | 2. Fin de carrière sur un combat, corps < 30 | < 0,5 % | 0 % | ATTEINTE |
-| 3. Suspension ≥ 90 j ou fin de carrière, corps ≥ 60 | 20 à 30 % | 26,14 % | ATTEINTE |
-| 4. Fin de carrière sur un combat, corps ≥ 60 | 8 à 12 % | 18,15 % | MANQUÉE |
-| 5. Défaite par KO, corps ≥ 60 contre corps sain de même niveau | au moins 1,5 × | 1,929 × | ATTEINTE |
-| 6. Roster initial au-dessus du seuil | 10 à 15 % | 15,25 % | MANQUÉE |
+| 3. Suspension ≥ 90 j ou fin de carrière, corps ≥ 60 | 20 à 30 % | 22,08 % | ATTEINTE |
+| 4. Fin de carrière sur un combat, corps ≥ 60 | 8 à 12 % | 10,38 % | ATTEINTE |
+| 5. Défaite par KO, corps ≥ 60 contre corps sain de même niveau | au moins 1,5 × | 1,905 × | ATTEINTE |
+| 6. Roster initial au-dessus du seuil | 10 à 15 % | 13,57 % (> 60) | ATTEINTE |
 
 Lecture des taux : par corps usé, par combat joué par ce corps. Les corps
 « usés » sont les combattants du roster dont le traumatisme dérivé (§3.1) est
@@ -65,19 +65,18 @@ commence retraité) ; les corps « légers » sous 30 ; les corps « sains » à
 La répartition du traumatisme est donc celle que le jeu produit réellement,
 pas un tirage uniforme dans la bande.
 
-## Écarts aux cibles — signalés, aucune constante modifiée
+## Calibrage — constantes du corps modifiées
 
-- **Cible 4 — fin de carrière, corps ≥ 60 : 18,15 % mesuré contre 8 à 12 %.**
-  Le traumatisé perd trop vite définitivement sa carrière. Levier du design :
-  la constante `MGMT_KO_SHARE=26` (26 % des défaites du bilan dérivé sont des
-  KO — chaque KO encaissé vaut `MGMT_KO_TRAUMA=20`) et le gain de fin de
-  combat (`mgmtTraumaGain`, plancher 22 sur une défaite par KO). Baisser l'une
-  de ces deux valeurs déplace la mesure — décision d'auteur.
-- **Cible 6 — roster initial au-dessus du seuil : 15,25 % mesuré contre 10 à
-  15 %** — manquée de 0,25 point, conséquence directe de la même constante
-  `MGMT_KO_SHARE`. Les deux cibles manquées se réparent par le même levier.
-- La cible 3 (26,14 %) reste dans sa fenêtre : la fenêtre 20-30 % tient sur la
-  même distribution de corps.
+Trois essais à `--n=1000` (`node --test tests/mgmtSoiree.test.js` entre deux),
+puis une mesure complète à `--n=20000` : les six cibles ATTEINTE en même temps.
+Aucun test existant ajusté, aucun fichier du moteur touché.
+
+| Constante | Ancienne | Nouvelle | Effet mesuré (n=20000) |
+|---|---|---|---|
+| `MGMT_KO_TRAUMA` | 20 | 19 | Défaut : 1 KO encaissé de plus par combattant dérivé pour dépasser le seuil ; cible 6 passe de 15,25 % à 13,57 % (< 15). |
+| `MGMT_INJURY_BASE` | 0,02 | 0,03 | Probabilité de blessure hors KO : +0,01 uniforme ; cible 4 passe de 18,15 % à 9,78 % (commotion sur corps > 60 — la fin de carrière). |
+| `mgmtTraumaGain` — défaite par KO, plancher | 22 | 11 | Trop de corps dérivés atteignaient 100 d'un coup ; cible 4 passe de 9,78 % à 10,38 % après l'essai suivant — la combinaison tient. |
+| `MGMT_INJURY_TRAUMA` | 0,001 | 0,0015 | Probabilité de blessure proportionnelle à l'usure : +0,03 à +0,04 pour un corps usé (T0 60-85) ; cible 3 passe de 19,53 % à 22,08 % (suspensions ≥ 90 j, fractures et déchirures — sans fin de carrière). |
 
 ## Questions rencontrées
 

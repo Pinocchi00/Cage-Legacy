@@ -571,14 +571,14 @@ function mgmtIgnore(m,affairId){
 const MGMT_TRAUMA_MAX=100;
 const MGMT_TRAUMA_START_CAP=85;
 const MGMT_KO_SHARE=26;
-const MGMT_KO_TRAUMA=20;
+const MGMT_KO_TRAUMA=19;
 const MGMT_CHIN_WEAR=0.55;
 const MGMT_CHIN_FLOOR=0.35;
 const MGMT_GAIN_CAP=45;
 const MGMT_HEAD_SUSP=30;
-const MGMT_INJURY_BASE=0.02;
+const MGMT_INJURY_BASE=0.03;
 const MGMT_INJURY_HEAD=0.004;
-const MGMT_INJURY_TRAUMA=0.001;
+const MGMT_INJURY_TRAUMA=0.0015;
 const MGMT_INJURY_KD=0.05;
 
 /** Hachage stable FNV-1a 32 bits d'une chaîne : pur, ne consomme jamais
@@ -687,7 +687,7 @@ function mgmtTraumaGain(method,fam,issue,H,K){
   const h=Math.max(0,Math.round(num(H))), k=Math.max(0,Math.round(num(K)));
   let g;
   if(issue==='loss'){
-    if(fam==='ko') g=22+k*3+Math.floor(h/15);
+    if(fam==='ko') g=11+k*3+Math.floor(h/15);
     else if(fam==='sub'||fam==='stop') g=(fam==='sub'?10:13)+k*3+Math.floor(h/15);
     else g=3+Math.min(3,Math.floor(h/12))+k*3;
   }else if(issue==='win'){
