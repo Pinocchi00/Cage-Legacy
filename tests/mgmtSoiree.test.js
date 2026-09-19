@@ -219,13 +219,22 @@ test('MGMT corps — fin de carrière médicale définitive : jamais reproposé,
       const bulk=m.pile.find(x=>x.kind==='leila_bulk'&&x.status==='open');
       if(bulk&&mgmtDecide(m,bulk.id,'validate')) mgmtRunEvent(m);
     }
-    /* Le garde direct : un retraité posé en carte ne joue pas, et rien ne
+    /* Le garde direct : un retraité posé en carte (fixture §T1 — carte
+       complète 5+4, le retraité dans chaque combat) ne joue pas, et rien ne
        bouge (ni bilan, ni corps, ni trésorerie, ni carte). */
     m.pile=[]; m.open=null;
-    m.card.fights=[{a:f.id,b:m.roster[1].id,cycle:1},{a:f.id,b:m.roster[2].id,cycle:1},{a:f.id,b:m.roster[1].id,cycle:1},{a:f.id,b:m.roster[2].id,cycle:1}];
-    const avant=JSON.stringify({W:f.W,L:f.L,trauma:f.trauma,T:m.treasury,cardLen:m.card.fights.length,ev:m.lastEvent});
+    m.card.main=[]; m.card.prelims=[];
+    for(let i=0;i<5;i++){
+      const b=i%2?m.roster[1]:m.roster[2];
+      m.card.main.push({a:f.id,b:b.id,cycle:1,slot:'main'});
+    }
+    for(let i=0;i<4;i++){
+      const b=i%2?m.roster[2]:m.roster[1];
+      m.card.prelims.push({a:f.id,b:b.id,cycle:1,slot:'prelim'});
+    }
+    const avant=JSON.stringify({W:f.W,L:f.L,trauma:f.trauma,T:m.treasury,cardLen:m.card.main.length+m.card.prelims.length,ev:m.lastEvent});
     const joue=mgmtRunEvent(m);
-    const apres=JSON.stringify({W:f.W,L:f.L,trauma:f.trauma,T:m.treasury,cardLen:m.card.fights.length,ev:m.lastEvent});
+    const apres=JSON.stringify({W:f.W,L:f.L,trauma:f.trauma,T:m.treasury,cardLen:m.card.main.length+m.card.prelims.length,ev:m.lastEvent});
     return JSON.stringify({ok:!vu.has(f.id),proposé:vu.size,refus:joue===null,intact:avant===apres});
   })()`);
   const s=JSON.parse(r);
@@ -273,12 +282,19 @@ test('MGMT soirée — calculée une seule fois : recharger après la soirée ne
     let bulk=null;
     for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
     if(!bulk||!mgmtDecide(m,bulk.id,'validate')) throw new Error('pas de proposition en bloc');
+    /* §T1 : la carte principale est posée en fixture (composition = T2),
+       sur des combattants disponibles hors du bloc de Leïla. */
+    const bulkIds=new Set(bulk.fights.flatMap(f=>[f.a,f.b]));
+    const dispo=m.roster.filter(o=>!bulkIds.has(o.id)&&mgmtAvailable(m,o));
+    if(dispo.length<10) throw new Error('roster trop court');
+    m.card.main=[];
+    for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
     G={theme:'dark',mgmt:m};
     if(!mgmtRunEvent(G.mgmt)) throw new Error('soirée non jouée');
   })()`);
   const snap=`JSON.stringify({ev:G.mgmt.lastEvent,
     lignes:G.mgmt.roster.map(o=>({W:o.W,L:o.L,D:o.D,trauma:o.trauma,susp:o.susp,retired:o.retired})),
-    T:G.mgmt.treasury,e:G.mgmt.eventsPlayed,card:G.mgmt.card.fights.length})`;
+    T:G.mgmt.treasury,e:G.mgmt.eventsPlayed,card:{main:G.mgmt.card.main.length,prelims:G.mgmt.card.prelims.length}})`;
   const before = JSON.parse(win.eval(snap));
   win.eval(`G.mgmt=null; loadMgmt();`);
   const after = JSON.parse(win.eval(snap));

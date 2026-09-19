@@ -156,7 +156,8 @@ famille de la méthode (KO, arrêt, soumission, décision, nul) et le round.
 Interdits (addendum 2 §6) : `res.detail`, les statistiques, toute note, toute étiquette
 descriptive (« finition au corps », etc.). Continuer à la souris et au clavier (`ui-11-keys.js`).
 
-Après la soirée : `m.card.fights = []`, puis le lendemain, puis `mgmtNewPile()`.
+Après la soirée : la carte est vidée (`m.card.main = []`, `m.card.prelims = []` —
+structure {main,prelims} depuis le lot 2 T1), puis le lendemain, puis `mgmtNewPile()`.
 
 ---
 

@@ -1,11 +1,21 @@
 "use strict";
 /* CAGE LEGACY — tests/mgmtCard.test.js
    ============================================================================
-   LOT 2 LA SOUS-CARTE — carte en construction (4 places), proposition en
-   bloc, trois réponses (valider, échanger, écraser), coût de l'écrasement
-   (addendum §12 : qualité dégradée, avertissements éteints, jamais
-   annoncés), mémoire des écrasements. Six emplacements vides et marqués,
-   aucun texte rédigé, aucune réplique existante réutilisée.
+   LOT 2 LA SOUS-CARTE — carte en construction, proposition en bloc, trois
+   réponses (valider, échanger, écraser), coût de l'écrasement (addendum
+   §12 : qualité dégradée, avertissements éteints, jamais annoncés),
+   mémoire des écrasements. Six emplacements vides et marqués, aucun texte
+   rédigé, aucune réplique existante réutilisée.
+   LOT 2 T1 LA CARTE PRINCIPALE (docs/LOT-2-CARTE-PRINCIPALE.md §T1) —
+   réécrits en citant le contrat : la carte devient {sizeMain:5,
+   sizePrelims:4, main:[], prelims:[]} ; la proposition en bloc de Leïla
+   reste sa carte préliminaire (4 combats, jamais la carte principale —
+   sa composition revient au joueur à la T2) ; chaque combat porte
+   slot:'main'|'prelim' ; valider place les combats dans leur emplacement ;
+   la carte n'est complète qu'à 5 + 4 ; la soirée joue les 9 combats,
+   carte principale d'abord. Ajoutés à cette occasion : la migration
+   4 → 5 (séquentielle 2 → 3 → 4 → 5), le classement dérivé
+   mgmtDivisionRank et le dernier combat (lastCycle).
    ============================================================================ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -22,15 +32,27 @@ function mgmtBulkId(win){
   return win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
 }
 
-/* ==== [ANCRE: MGMT_LOT2_TESTS] — Lot 2 la sous-carte. ==== */
-test('MGMT carte — 4 places, une seule proposition en bloc par cycle, carte vide', () => {
+/* État management neuf avec roster généré par le vrai mgmtNewRoster, sans
+   passer par l'écran : pour les tests qui ne regardent que la logique. */
+function freshState(win,seed){
+  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefault(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
+}
+
+/* ==== [ANCRE: MGMT_LOT2_TESTS] — Lot 2 la sous-carte. Réécrit au lot 2 T1
+   en citant docs/LOT-2-CARTE-PRINCIPALE.md §T1 : la carte de 4 places
+   (décision du 15/09) devient la carte 5 + 4 du 19/09 — la proposition en
+   bloc est la carte préliminaire, la carte principale attend le geste du
+   joueur (T2). ==== */
+test('MGMT carte T1 — 5 + 4 places, une seule proposition en bloc par cycle, carte vide', () => {
   const win = newGameWindow();
   enterMgmtBulk(win,101);
-  assert.equal(win.eval(`G.mgmt.card.size`), 4, 'quatre places, validé lot 2');
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'carte vide au départ');
+  assert.equal(win.eval(`G.mgmt.card.sizeMain`), 5, 'cinq places en carte principale, décision du 19/09 (§T1)');
+  assert.equal(win.eval(`G.mgmt.card.sizePrelims`), 4, 'quatre places en préliminaires');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 0, 'carte principale vide au départ (T2 : le joueur compose)');
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 0, 'préliminaires vides au départ');
   assert.equal(win.eval(`G.mgmt.pile.filter(a=>a.kind==='leila_bulk').length`), 1, 'une seule affaire en bloc');
   const n = win.eval(`G.mgmt.pile.find(a=>a.kind==='leila_bulk').fights.length`);
-  assert.equal(n, 4, 'le bloc propose tout l\u2019ensemble');
+  assert.equal(n, 4, 'le bloc propose les quatre préliminaires, jamais la carte principale (§T1)');
 });
 
 test('MGMT bloc lisible — chaque combat : combattants, catégorie, bilan', () => {
@@ -87,12 +109,14 @@ test('MGMT sept textes — auteur verbatim, aucun marqueur restant', () => {
   assert.ok(fresh.indexOf(known.slice(0,20))<0, 'aucune réplique existante réutilisée');
 });
 
-test('MGMT valider — toute la carte entre en construction', () => {
+test('MGMT valider — le bloc entre en préliminaires, la carte principale attend le joueur', () => {
   const win = newGameWindow();
   enterMgmtBulk(win,104);
   const id = mgmtBulkId(win);
   win.eval(`CL.mgmtReply('${id}','validate')`);
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 4, 'quatre combats en carte');
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 4, 'quatre combats en préliminaires (§T1 : le bloc est la carte préliminaire)');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 0, 'la carte principale reste vide — le joueur la compose (T2)');
+  assert.equal(win.eval(`G.mgmt.card.prelims.every(f=>f.slot==='prelim'&&Number.isSafeInteger(f.cycle))`), true, 'chaque combat porte son emplacement');
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').status`), 'closed', 'proposition clôturée');
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'validated');
   assert.equal(win.eval(`G.mgmt.facts[G.mgmt.facts.length-1].k`), 'booked', 'fait mémorisé');
@@ -104,8 +128,9 @@ test('MGMT valider — toute la carte entre en construction', () => {
   for(const f of ps){
     assert.ok(f.level>=2&&f.interactions===1&&f.raison!==null, 'booking validé = dossier');
   }
+  /* §T1 : le compteur compact de la ligne du bureau (mgmt-screens.js) reste
+     gelé pendant T1 — aucun écran touché ; la structure, elle, est posée. */
   const html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('Carte 4/4'), 'carte visible sur la ligne du cycle, compacte');
   assert.ok(!html.includes('Place vide'), 'plus aucun bloc de places');
 });
 
@@ -120,7 +145,7 @@ test('MGMT échanger — un combat remplacé, pas un écrasement', () => {
   assert.deepEqual([after[0],after[1],after[3]], [before[0],before[1],before[3]], 'seul le marqué change');
   assert.notDeepEqual(after[2], before[2], 'le marqué est remplacé');
   assert.equal(win.eval(`G.mgmt.leila.crushes.length`), 0, 'échanger n\u2019est pas écraser');
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'la carte n\u2019a pas bougé');
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 0, 'la carte n\u2019a pas bougé');
   const r = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile[G.mgmt.pile.length-1])`));
   assert.equal(r.kind, 'leila_react_swap', 'Leïla réagit dans une affaire à part');
   /* R3 : la réaction vise la paire retirée, pas les remplaçants. */
@@ -133,7 +158,7 @@ test('MGMT écraser — carte intacte, coût horodaté, réaction', () => {
   const id = mgmtBulkId(win);
   const c0 = win.eval(`G.mgmt.cycle`);
   win.eval(`CL.mgmtReply('${id}','crush')`);
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'carte intacte');
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 0, 'carte intacte');
   assert.deepEqual(JSON.parse(win.eval(`JSON.stringify(G.mgmt.leila.crushes)`)), [c0], 'écrasement horodaté au cycle');
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'crushed');
   const r = JSON.parse(win.eval(`JSON.stringify(G.mgmt.pile[G.mgmt.pile.length-1])`));
@@ -278,14 +303,29 @@ test('MGMT déroulé — un seul combat ouvert à la fois', () => {
   }
 });
 
-test('MGMT carte pleine — plus de proposition en bloc', () => {
+/* §T1 : la carte n'est complète qu'à 5 + 4 — la carte principale est posée
+   ici en fixture (sa composition arrive à la T2), la validation du bloc
+   complète les préliminaires. Carte complète : plus de proposition en bloc. */
+test('MGMT carte complète — plus de proposition en bloc', () => {
   const win = newGameWindow();
   enterMgmtBulk(win,109);
   const id = mgmtBulkId(win);
+  win.eval(`(function(){
+    const m=G.mgmt;
+    /* Fixture : cinq combats principaux (dix combattants distincts) —
+       la composition par le joueur est le geste de la T2. */
+    if(m.roster.length<10) throw new Error('fixture : roster trop court');
+    m.card.main=[];
+    for(let i=0;i<5;i++){
+      m.card.main.push({a:m.roster[2*i].id,b:m.roster[2*i+1].id,cycle:m.cycle,slot:'main'});
+    }
+  })()`);
   win.eval(`CL.mgmtReply('${id}','validate')`);
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 4, 'carte pleine');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 5, 'cinq combats principaux posés en fixture');
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 4, 'quatre préliminaires validés');
+  assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), true, 'carte complète à 5 + 4 (§T1)');
   win.eval(`CL.mgmtNextCycle()`);
-  assert.equal(win.eval(`G.mgmt.pile.filter(a=>a.kind==='leila_bulk').length`), 0, 'carte pleine : pas de nouvelle proposition');
+  assert.equal(win.eval(`G.mgmt.pile.filter(a=>a.kind==='leila_bulk').length`), 0, 'carte complète : pas de nouvelle proposition');
 });
 
 test('MGMT déterminisme — même graine, même bloc', () => {
@@ -408,7 +448,7 @@ test('MGMT carte sanctuarisée — aucun appariement booké n\u2019est repropos�
       mgmtDecide(m,bulk.id,'validate');
       for(let c=0;c<5;c++){
         mgmtNewPile(m);
-        const keys=new Set(m.card.fights.map(f=>[f.a,f.b].sort().join('|')));
+        const keys=new Set(mgmtCardFights(m).map(f=>[f.a,f.b].sort().join('|')));
         for(const a of m.pile){
           if(a.kind==='leila_bulk'){ for(const f of a.fights){ if(keys.has([f.a,f.b].sort().join('|'))) bad++; } }
           else if(a.status==='open'){ if(keys.has([a.a,a.b].sort().join('|'))) bad++; }
@@ -420,19 +460,21 @@ test('MGMT carte sanctuarisée — aucun appariement booké n\u2019est repropos�
   assert.equal(bad, 0, 'ni singles ni blocs ne reprennent une paire bookée');
 });
 
-test('MGMT swap sous carte pleine — le remplaçant évite aussi les paires bookées', () => {
+/* §T1 : le bloc validé entre en préliminaires — l'échange évite aussi les
+   paires déjà bookées de la carte en cours. */
+test('MGMT swap avec carte en prélims — le remplaçant évite aussi les paires bookées', () => {
   const win = newGameWindow();
   const ok = win.eval(`(function(){
     setSeed(121);
     const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
     const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
     if(!bulk) return 'no-bulk';
-    m.card.fights=bulk.fights.slice(0,2).map(f=>({a:f.a,b:f.b,cycle:1}));
+    m.card.prelims=bulk.fights.slice(0,2).map(f=>({a:f.a,b:f.b,cycle:1,slot:'prelim'}));
     const old0=[bulk.fights[0].a,bulk.fights[0].b].sort().join('|');
     if(!mgmtSwapFight(m,bulk.id)) return 'no-swap';
     const now0=[bulk.fights[0].a,bulk.fights[0].b].sort().join('|');
     if(now0===old0) return 'same';
-    const keys=new Set(m.card.fights.map(f=>[f.a,f.b].sort().join('|')));
+    const keys=new Set(mgmtCardFights(m).map(f=>[f.a,f.b].sort().join('|')));
     if(keys.has(now0)) return 'dup';
     return 'ok';
   })()`);
@@ -479,8 +521,170 @@ test('MGMT validation — bloc bien formé accepté, malformé rejeté', () => {
   assert.equal(win.eval(`mgmtValidAffair(G.mgmt.pile.find(a=>a.kind==='leila_bulk'))`), true, 'bloc bien formé accepté');
   assert.equal(win.eval(`mgmtValidAffair({id:'x',kind:'leila_bulk',exchange:'leila_bulk',speaker:'leila',a:'p',b:'q',status:'open',marked:0})`), false, 'bloc sans combats rejeté');
   assert.equal(win.eval(`mgmtValidAffair({id:'x',kind:'leila_bulk',exchange:'leila_bulk',speaker:'leila',a:'p',b:'q',status:'open',marked:0,fights:[{a:'p',b:'q',sloppy:'oui',warned:false}]})`), false, 'drapeau non booléen rejeté');
-  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,card:{size:4,fights:[{a:'p',b:'q',cycle:2}]},leila:{crushes:[2,3]}}))`), true, 'carte et historique bien formés acceptés');
-  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,card:{size:0,fights:[]}}))`), false, 'taille de carte impossible rejetée');
+  assert.equal(win.eval(`mgmtValidAffair({id:'x',kind:'leila_bulk',exchange:'leila_bulk',speaker:'leila',a:'p',b:'q',status:'open',marked:0,fights:[{a:'p',b:'q',slot:'coin',sloppy:false,warned:false}]})`), false, 'emplacement inconnu rejeté');
+  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,card:{sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:2,slot:'main'}],prelims:[{a:'p',b:'q',cycle:2,slot:'prelim'}]},leila:{crushes:[2,3]}}))`), true, 'carte et historique bien formés acceptés');
+  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,card:{sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:1,slot:'prelim'}],prelims:[]}}))`), false, 'emplacement incohérent avec sa liste rejeté');
   assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,leila:{crushes:[-1]}}))`), false, 'horodatage négatif rejeté');
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_LOT2_T1_TESTS] — Lot 2 T1 la carte principale
+   (docs/LOT-2-CARTE-PRINCIPALE.md §T1) : structure {sizeMain,sizePrelims,
+   main,prelims} avec slot par combat, migration séquentielle 2 → 3 → 4 → 5
+   sans perte (une v1 reste refusée), classement par catégorie dérivé
+   (mgmtDivisionRank, jamais stocké), carte complète à 5 + 4 pas avant,
+   soirée qui joue les 9 combats carte principale d'abord, dernier combat
+   (lastCycle) écrit où le lot 3a écrit le traumatisme. ==== */
+const MGMT_V4_BASE={org:'Split',v:4,cycle:2,seq:5,
+  roster:[{id:'mg1',name:'A Boxeur',first:'A',last:'Boxeur',W:5,L:2,D:0,age:25,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0}],
+  pile:[],facts:[{c:1,k:'booked',a:'mg1',b:'mg1'}],open:null,shortfall:false,
+  card:{size:4,fights:[{a:'mg1',b:'mg1',cycle:2},{a:'mg1',b:'mg1',cycle:1}]},leila:{crushes:[1]},lastEvent:null,
+  treasury:120,recettes:[60],audiences:[3000],eventsPlayed:1};
+
+test('MGMT T1 migration — v4 → v5 sans perte : les combats d\u2019une carte en cours deviennent des préliminaires', () => {
+  const win = newGameWindow();
+  const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(MGMT_V4_BASE)}))))`));
+  assert.equal(mig.v, 5, 'tampon v5');
+  assert.equal(mig.card.sizeMain, 5, 'cinq places en carte principale');
+  assert.equal(mig.card.sizePrelims, 4, 'quatre places en préliminaires');
+  assert.equal(mig.card.main.length, 0, 'la carte principale démarre vide — aucun combat ajouté d\u2019office');
+  assert.equal(mig.card.prelims.length, 2, 'aucun combat perdu : les deux combats deviennent des préliminaires');
+  assert.equal(mig.card.prelims.every(f=>f.slot==='prelim'), true, 'chaque combat migré porte slot:\u2019prelim\u2019');
+  assert.deepEqual(mig.card.prelims.map(f=>f.cycle), [2,1], 'les cycles posés sont conservés');
+  assert.equal(mig.roster.length, 1, 'roster intact');
+  assert.equal(mig.leila.crushes.length, 1, 'mémoire intacte');
+  assert.equal(mig.facts.length, 1, 'faits intacts');
+  assert.equal(mig.treasury, 120, 'argent d\u2019une v4 conservé');
+  assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`), true, 'la v4 migrée passe la porte v5');
+  /* La même v4 se charge depuis le stockage dédié. */
+  win.localStorage.setItem('cage-legacy-mgmt', JSON.stringify(MGMT_V4_BASE));
+  win.eval(`G={theme:'dark'}; loadMgmt();`);
+  assert.equal(win.eval(`G.mgmt&&G.mgmt.v`), 5, 'une v4 se charge en v5');
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 2, 'les combats de la carte en cours sont des préliminaires');
+});
+
+test('MGMT T1 migration — v2 et v3 migrent en chaîne 2 → 3 → 4 → 5', () => {
+  const win = newGameWindow();
+  const v3 = {org:'Split',v:3,cycle:1,seq:2,
+    roster:[{id:'mg1',name:'A Boxeur',first:'A',last:'Boxeur',W:5,L:2,D:0,age:25,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0}],
+    pile:[],facts:[],open:null,shortfall:false,
+    card:{size:4,fights:[{a:'mg1',b:'mg1',cycle:1}]},leila:{crushes:[]},lastEvent:null};
+  const mig3 = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v3)}))))`));
+  assert.equal(mig3.v, 5, 'migration séquentielle 3 → 4 → 5');
+  assert.equal(mig3.treasury, win.eval(`MGMT_TREASURY_START`), 'champs d\u2019argent par défaut');
+  assert.equal(mig3.card.prelims.length, 1, 'le combat de la carte en cours devient un préliminaire');
+  assert.equal(mig3.card.main.length, 0, 'carte principale vide');
+  assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig3)})`), true, 'la v3 migrée passe la porte v5');
+  const v2 = {org:'Split',v:2,cycle:1,seq:2,roster:[],pile:[],facts:[],open:null,shortfall:false,
+    card:{size:4,fights:[{a:'mg1',b:'mg1',cycle:1}]},leila:{crushes:[]},lastEvent:null};
+  const mig2 = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v2)}))))`));
+  assert.equal(mig2.v, 5, 'migration séquentielle 2 → 3 → 4 → 5');
+  assert.equal(mig2.card.prelims.length, 1, 'aucun combat perdu dans la chaîne complète');
+  assert.equal(mig2.treasury, win.eval(`MGMT_TREASURY_START`));
+  assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig2)})`), true, 'la v2 migrée passe la porte v5');
+  /* Une v1 reste refusée, comme avant (ancre MGMT_LOT1F_VERSION). */
+  const v1 = {org:'Split',cycle:3,seq:9,roster:[],pile:[],facts:[],open:null,shortfall:false,card:{size:4,fights:[{a:'mg1',b:'mg1'}]}};
+  assert.equal(win.eval(`mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v1)})))`), null, 'v1 sans version : refusée');
+});
+
+test('MGMT T1 classement — mgmtDivisionRank : dérivé, pur, retraité hors classement, suspendu classé', () => {
+  const win = newGameWindow();
+  const r = win.eval(`(function(){
+    const m=mgmtDefault();
+    const mk=(id,first,div,W,L,extra)=>Object.assign({id:id,name:first+' Test',first:first,last:'Test',W:W,L:L,D:0,age:27,div:div,divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},extra||{});
+    m.roster=[
+      mk('mg1','Alain','H-light',10,2),            /* +8, 10 victoires */
+      mk('mg2','Bruno','H-light',10,4),            /* +6 */
+      mk('mg3','César','H-light',12,4),            /* +8, plus de victoires qu'Alain */
+      mk('mg4','Dorian','H-light',8,0,{lastCycle:3}),  /* +8, le plus actif */
+      mk('mg5','Enzo','H-light',8,0),              /* +8, jamais combattu sous Split */
+      mk('mg6','Farid','H-light',12,0,{susp:5}),   /* suspendu : classé */
+      mk('mg7','Gabin','H-light',20,0,{retired:'medical'}), /* retraité : hors classement */
+      mk('mg8','Hugo','H-feather',30,0),           /* autre catégorie : hors du classement léger */
+    ];
+    const avant=JSON.stringify(m.roster);
+    const ranks=[0,1,2,3,4,5].map(i=>mgmtDivisionRank(m,m.roster[i]));
+    const entreAppels=JSON.stringify([0,1,2,3,4,5].map(i=>mgmtDivisionRank(m,m.roster[i])));
+    const apres=JSON.stringify(m.roster);
+    return JSON.stringify({ranks,entreAppels,avant,apres,
+      retire:mgmtDivisionRank(m,m.roster[6]),
+      absent:mgmtDivisionRank(m,{id:'inconnu',div:'H-light',W:0,L:0}),
+      plume:mgmtDivisionRank(m,m.roster[7])});
+  })()`);
+  const s = JSON.parse(r);
+  /* Farid 12-0 (suspendu) en tête ; César (12-4) devant Alain (10-2) ;
+     Dorian (8-0, dernier combat cycle 3) devant Enzo (8-0, jamais combattu) ;
+     Bruno (10-4) ferme la marche. */
+  assert.deepEqual(s.ranks, [3,6,2,4,5,1], 'ordre : bilan, puis victoires, puis dernier combat (le plus actif devant)');
+  assert.equal(s.entreAppels, JSON.stringify(s.ranks), 'déterministe : identique d\u2019un appel à l\u2019autre');
+  assert.equal(s.avant, s.apres, 'jamais écrit sur la ligne (pur)');
+  assert.equal(s.retire, null, 'le retraité médical est hors classement');
+  assert.equal(s.plume, 1, 'le classement se fait dans sa propre catégorie : la ligne plume est 1ʳᵉ des plumes, jamais dans le classement léger');
+  assert.equal(s.absent, null, 'une ligne hors roster n\u2019a pas de rang');
+  assert.equal(s.ranks[5], 1, 'le suspendu (12-0) est en tête : classé malgré sa suspension');
+});
+
+test('MGMT T1 carte — complète à 5 + 4, pas avant', () => {
+  const win = newGameWindow();
+  const st = win.eval(`(function(){
+    const m=mgmtDefault();
+    const res={};
+    res.vide=mgmtCardFull(m);
+    m.card.main=[{a:'mg1',b:'mg2',cycle:1,slot:'main'}];
+    res.unMain=mgmtCardFull(m);
+    m.card.main=[]; for(let i=0;i<4;i++) m.card.main.push({a:'mg'+i,b:'mg'+(i+1),cycle:1,slot:'main'});
+    res.quatreMain=mgmtCardFull(m);
+    m.card.main.push({a:'mg5',b:'mg6',cycle:1,slot:'main'});
+    res.cinqMain=mgmtCardFull(m);
+    m.card.prelims=[{a:'mg7',b:'mg8',cycle:1,slot:'prelim'},{a:'mg9',b:'mg10',cycle:1,slot:'prelim'},{a:'mg11',b:'mg12',cycle:1,slot:'prelim'}];
+    res.cinqQuatreMoins=mgmtCardFull(m);
+    m.card.prelims.push({a:'mg13',b:'mg14',cycle:1,slot:'prelim'});
+    res.complete=mgmtCardFull(m);
+    res.total=mgmtCardFights(m).length;
+    return JSON.stringify(res);
+  })()`);
+  const s = JSON.parse(st);
+  assert.equal(s.vide, false, 'carte vide : pas complète');
+  assert.equal(s.unMain, false, 'un combat principal : pas complète');
+  assert.equal(s.quatreMain, false, '4 combats principaux : pas complète (§T1 : 5 + 4, pas avant)');
+  assert.equal(s.cinqMain, false, '5 principaux mais aucun prélim : pas complète');
+  assert.equal(s.cinqQuatreMoins, false, '5 principaux mais 3 prélims : pas complète');
+  assert.equal(s.complete, true, '5 + 4 : complète');
+  assert.equal(s.total, 9, 'neuf combats posés');
+});
+
+test('MGMT T1 soirée — les 9 combats se jouent, carte principale d\u2019abord', () => {
+  const win = newGameWindow();
+  freshState(win,213);
+  const r = win.eval(`(function(){
+    const m=G.mgmt;
+    const pris=m.roster.slice(0,18);
+    if(pris.length<18) return 'null';
+    m.card.main=[]; m.card.prelims=[];
+    const ordreMain=[], ordrePrelim=[];
+    for(let i=0;i<5;i++){
+      const a=pris[2*i].id, b=pris[2*i+1].id;
+      m.card.main.push({a:a,b:b,cycle:0,slot:'main'});
+      ordreMain.push([a,b].join('|'));
+    }
+    for(let i=0;i<4;i++){
+      const a=pris[10+2*i].id, b=pris[11+2*i].id;
+      m.card.prelims.push({a:a,b:b,cycle:0,slot:'prelim'});
+      ordrePrelim.push([a,b].join('|'));
+    }
+    const ev=mgmtRunEvent(m);
+    if(!ev) return 'null';
+    const joué=ev.fights.map(x=>[x.a,x.b].join('|'));
+    return JSON.stringify({n:ev.fights.length,ordre:ordreMain.concat(ordrePrelim),joué,
+      cardMain:m.card.main.length,cardPrelim:m.card.prelims.length,
+      lastCycles:m.roster.filter(o=>pris.some(p=>p.id===o.id)).map(o=>o.lastCycle)});
+  })()`);
+  assert.notEqual(r,'null','une carte 5+4 complète se joue');
+  const s = JSON.parse(r);
+  assert.equal(s.n, 9, 'les 9 combats de la soirée sont joués');
+  assert.deepEqual(s.joué, s.ordre, 'carte principale d\u2019abord, préliminaires ensuite (§T1)');
+  assert.equal(s.cardMain, 0, 'la carte principale est vidée après la soirée');
+  assert.equal(s.cardPrelim, 0, 'les préliminaires sont vidés après la soirée');
+  assert.ok(s.lastCycles.every(c=>c===0), 'lastCycle est écrit sur chaque combattant ayant combattu (§T1)');
 });
 /* ==== [FIN ANCRE] ==== */

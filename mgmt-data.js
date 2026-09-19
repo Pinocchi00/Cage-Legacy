@@ -91,14 +91,19 @@ const MGMT_EXCHANGES={
   },
 };
 
-/* ==== [ANCRE: MGMT_LOT2_DONNEES] — Lot 2 la sous-carte : carte de 4 places
-   (validé lot 2), proposition en bloc et réactions. Sept textes d'auteur
-   (remplissage validé) : proposer en bloc, la remarque d'avertissement,
-   réagir à un échange, réagir à un écrasement, et les trois réponses du
-   joueur (valider, échanger, écraser). Les fermetures de réaction restent
-   purement mécaniques (pas de texte) : elles ne comptent pas comme
-   répliques. ==== */
-const MGMT_CARD_SIZE=4;
+/* ==== [ANCRE: MGMT_LOT2_DONNEES] — Lot 2 la sous-carte : proposition en bloc
+   et réactions. Sept textes d'auteur (remplissage validé) : proposer en
+   bloc, la remarque d'avertissement, réagir à un échange, réagir à un
+   écrasement, et les trois réponses du joueur (valider, échanger,
+   écraser). Les fermetures de réaction restent purement mécaniques (pas de
+   texte) : elles ne comptent pas comme répliques.
+   Lot 2 la carte principale (T1, docs/LOT-2-CARTE-PRINCIPALE.md §0) : la
+   carte fait 9 combats — 5 en carte principale (composée par le joueur,
+   T2), 4 en préliminaires (proposés par Leïla). Cette décision remplace le
+   « 4 + 4 » du 15/09 (LOT-3B-CONTRAT.md §1, Q3) : MGMT_CARD_SIZE est
+   remplacé par MGMT_MAIN_SIZE et MGMT_PRELIM_SIZE. ==== */
+const MGMT_MAIN_SIZE=5;
+const MGMT_PRELIM_SIZE=4;
 
 Object.assign(MGMT_EXCHANGES,{
   leila_bulk:{

@@ -30,18 +30,25 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    Migration 2 → 3 sans perte (mgmtMigrate) : les champs absents sont valides,
    rien n'est réinitialisé. Une v1 reste refusée, comme avant. ==== */
 /* ==== [ANCRE: MGMT_LOT3B_VERSION] — Lot 3b T1 l'argent de l'organisation :
-   v4 ajoute la trésorerie (m.treasury, entier k$), les deux dernières
-   recettes nettes (m.recettes), l'historique d'audience (m.audiences) et le
-   nombre de soirées jouées (m.eventsPlayed). Migration séquentielle
-   (mgmtMigrate) : une v3 reçoit les champs d'argent par défaut, une v2
-   migre d'abord en v3 puis en v4, une v1 reste refusée — sans perte, sans
-   reset (contrat LOT-3B §3 T1). ==== */
-const MGMT_SAVE_VERSION=4;
+    v4 ajoute la trésorerie (m.treasury, entier k$), les deux dernières
+    recettes nettes (m.recettes), l'historique d'audience (m.audiences) et le
+    nombre de soirées jouées (m.eventsPlayed). Migration séquentielle
+    (mgmtMigrate) : une v3 reçoit les champs d'argent par défaut, une v2
+    migre d'abord en v3 puis en v4, une v1 reste refusée — sans perte, sans
+    reset (contrat LOT-3B §3 T1). ==== */
+/* ==== [ANCRE: MGMT_LOT2_VERSION] — Lot 2 T1 la carte principale
+   (docs/LOT-2-CARTE-PRINCIPALE.md §T1) : v5 pose la structure de carte
+   {sizeMain:5, sizePrelims:4, main:[], prelims[]} — chaque combat porte
+   slot:'main'|'prelim'. Migration 4 → 5 sans perte : les combats d'une
+   carte en cours deviennent des préliminaires (slot 'prelim'), la carte
+   principale démarre vide — aucun combat perdu, aucun ajouté d'office.
+   Une v1 reste refusée. ==== */
+const MGMT_SAVE_VERSION=5;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
   return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,
-    card:{size:MGMT_CARD_SIZE,fights:[]},leila:{crushes:[]},lastEvent:null,
+    card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
     treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0};
 }
 
@@ -150,7 +157,13 @@ function mgmtMoveSelection(m,dir){
    proposition en bloc, échange, écrasement et son coût (addendum §12),
    mémoire des écrasements. Logique pure, aucun DOM. Même RNG seedée, mêmes
    conventions que le lot 1 (identifiants au compteur, tirages seedés).
-   Le lot 1 (propositions simples, refus, ignore) est inchangé ci-dessous. ==== */
+   Le lot 1 (propositions simples, refus, ignore) est inchangé ci-dessous.
+   Lot 2 T1 la carte principale (docs/LOT-2-CARTE-PRINCIPALE.md §T1) : la
+   carte devient {sizeMain, sizePrelims, main, prelims} — la proposition en
+   bloc de Leïla reste sa carte préliminaire (4 combats, décision du
+   19/09 : le bloc ne couvre jamais la carte principale, dont la composition
+   revient au joueur à la T2) ; chaque combat porte slot, valider place les
+   combats dans leur emplacement sans jamais rien perdre. ==== */
 /* ==== [ANCRE: MGMT_LOT2REV_ID_STRICT] — revue lot 1 (L1-R2) : les
    identifiants sont interpolés dans des gestionnaires onclick — traités
    comme du code s'ils contiennent un guillemet. Format interne strict à
@@ -164,9 +177,19 @@ function mgmtValidId(id){ return typeof id==='string'&&MGMT_ID_RE.test(id); }
    joué au lot 2 — ce qu'il avertit viendra plus tard. */
 const MGMT_SLOPPY_GAP=8;
 
-/** Carte pleine ? */
+/** Combats posés sur la carte, carte principale d'abord (ordre de la
+ *  soirée). Pur. @returns {Array} */
+function mgmtCardFights(m){
+  if(!m||!m.card) return [];
+  return (Array.isArray(m.card.main)?m.card.main:[]).concat(Array.isArray(m.card.prelims)?m.card.prelims:[]);
+}
+
+/** Carte complète ? Les deux emplacements : la carte principale ET les
+ *  préliminaires (docs/LOT-2-CARTE-PRINCIPALE.md §T1). */
 function mgmtCardFull(m){
-  return !!(m&&m.card&&Array.isArray(m.card.fights)&&Number.isSafeInteger(m.card.size)&&m.card.fights.length>=m.card.size);
+  return !!(m&&m.card&&Array.isArray(m.card.main)&&Array.isArray(m.card.prelims)
+    &&Number.isSafeInteger(m.card.sizeMain)&&Number.isSafeInteger(m.card.sizePrelims)
+    &&m.card.main.length>=m.card.sizeMain&&m.card.prelims.length>=m.card.sizePrelims);
 }
 
 /** Historique des écrasements : total et série en cours (cycles consécutifs).
@@ -248,16 +271,23 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
 }
 
 /**
- * Construit l'affaire de proposition en bloc (MGMT_CARD_SIZE combats), ou
- * null : carte déjà pleine, ou pot insuffisant pour l'ensemble (filet :
- * l'appelant signale shortfall — jamais une carte incomplète).
+ * Construit l'affaire de proposition en bloc : la carte préliminaire de
+ * Leïla (docs/LOT-2-CARTE-PRINCIPALE.md §T1, décision du 19/09 — la
+ * proposition en bloc ne couvre jamais la carte principale : sa composition
+ * revient au joueur, T2). Elle propose les préliminaires manquants — au plus
+ * MGMT_PRELIM_SIZE combats, chacun porté slot:'prelim' — ou null : carte
+ * déjà complète, préliminaires complets (le reste de la carte ne lui
+ * appartient pas), ou pot insuffisant pour l'ensemble (filet : l'appelant
+ * signale shortfall — jamais une carte incomplète).
  * Lot 3a §5 : relaxed=true assouplit la variété (prénoms, paires déjà
  * proposées, séries) pour le remplissage de fin de cycle — jamais la carte
  * (sanctuarisée) ni deux fois la même paire dans le bloc.
  * @returns {object|null} */
 function mgmtNewBulkAffair(m,used,seen,relaxed){
   if(mgmtCardFull(m)) return null;
-  const n=(m.card&&Number.isSafeInteger(m.card.size)&&m.card.size>0)?m.card.size:MGMT_CARD_SIZE;
+  if(!m||!m.card||!Array.isArray(m.card.prelims)) return null;
+  const n=(Number.isSafeInteger(m.card.sizePrelims)?m.card.sizePrelims:MGMT_PRELIM_SIZE)-m.card.prelims.length;
+  if(n<=0) return null;
   const stats=mgmtCrushStats(m);
   const fights=[];
   let lastDiv=null, run=0;
@@ -267,7 +297,7 @@ function mgmtNewBulkAffair(m,used,seen,relaxed){
     used.add(p.a.first); used.add(p.b.first);
     seen.add([p.a.id,p.b.id].sort().join('|'));
     run=(p.div===lastDiv)?run+1:1; lastDiv=p.div;
-    fights.push({a:p.a.id,b:p.b.id,sloppy:p.sloppy,warned:p.warned});
+    fights.push({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned});
   }
   const aff={
     id:mgmtNextId(m),kind:'leila_bulk',exchange:'leila_bulk',
@@ -303,7 +333,7 @@ function mgmtSwapFight(m,affairId){
   const stats=mgmtCrushStats(m);
   const p=mgmtPickBulkPair(m,used,seen,null,0,stats);
   if(!p) return false;
-  aff.fights[idx]={a:p.a.id,b:p.b.id,sloppy:p.sloppy,warned:p.warned};
+  aff.fights[idx]={a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned};
   /* R3 : la réaction concerne les combattants retirés (old), ceux que le
      texte dit devoir replacer — jamais les remplaçants. Le fait garde les
      deux paires explicitement. */
@@ -380,10 +410,8 @@ function mgmtNewPile(m){
   /* Lot 2c : un combat déjà en carte n'est jamais reproposé — même combat
      dupliqué ou deuxième affaire sur le même appariement, les deux sont
      faux. Les combattants, eux, continuent leur carrière. */
-  if(m.card&&Array.isArray(m.card.fights)){
-    for(const f of m.card.fights){
-      if(f&&typeof f.a==='string'&&typeof f.b==='string') seen.add([f.a,f.b].sort().join('|'));
-    }
+  for(const f of mgmtCardFights(m)){
+    if(f&&typeof f.a==='string'&&typeof f.b==='string') seen.add([f.a,f.b].sort().join('|'));
   }
   let lastDiv=null, run=0;
   while(m.pile.length<n){
@@ -511,12 +539,21 @@ function mgmtDecide(m,affairId,replyId){
     fact={c:m.cycle,k:'reaction_seen',a:aff.a,b:aff.b};
   }else if(rep.action==='validate'){
     if(aff.kind!=='leila_bulk'||!Array.isArray(aff.fights)) return false;
-    if(!m.card||!Array.isArray(m.card.fights)) return false;
+    if(!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return false;
     /* R1 : chaque booking compte comme interaction (addendum 1 §5) — les
-       huit combattants progressent comme après une acceptation individuelle,
+       combattants progressent comme après une acceptation individuelle,
        une seule fois par validation (statut open refusé ci-dessus). */
     for(const f of aff.fights){ mgmtPromote(m,mgmtFighterById(m,f.a)); mgmtPromote(m,mgmtFighterById(m,f.b)); }
-    m.card.fights=aff.fights.map(f=>({a:f.a,b:f.b,cycle:m.cycle}));
+    /* Lot 2 T1 : chaque combat entre dans son emplacement (slot), sans
+       jamais déborder la capacité — aucun combat perdu, aucun ajouté. */
+    for(const f of aff.fights){
+      const slot=f.slot==='main'?'main':'prelim';
+      const key=slot==='main'?'main':'prelims';
+      const cap=slot==='main'?m.card.sizeMain:m.card.sizePrelims;
+      if(Number.isSafeInteger(cap)&&m.card[key].length<cap){
+        m.card[key].push({a:f.a,b:f.b,cycle:m.cycle,slot});
+      }
+    }
     aff.status='closed'; aff.decision='validated';
     fact={c:m.cycle,k:'booked',bulk:true,a:aff.fights[0].a,b:aff.fights[0].b};
   }else if(rep.action==='crush'){
@@ -718,6 +755,35 @@ function mgmtAvailable(m,f){
   return true;
 }
 
+/* ==== [ANCRE: MGMT_LOT2_CLASSEMENT] — Lot 2 T1 la carte principale
+   (docs/LOT-2-CARTE-PRINCIPALE.md §T1) : classement par catégorie, dérivé
+   de l'état courant, jamais stocké sur la ligne (règle du bureau, CDC §3).
+   Ordre : victoires − défaites, puis victoires, puis dernier combat sous
+   Split (le plus actif devant). Les suspendus gardent leur rang, les
+   retraités médicaux sortent du classement. ==== */
+/** Rang d'une ligne dans sa catégorie (1..n). Pur : ne trie que des copies,
+ *  n'écrit jamais sur la ligne, ne consomme pas rnd() (comparaison de
+ *  champs entiers seulement). Retraité médical : hors classement (null).
+ *  @returns {number|null} */
+function mgmtDivisionRank(m,f){
+  if(!m||!f||!Array.isArray(m.roster)) return null;
+  if(f.retired==='medical') return null;
+  const cands=m.roster.filter(o=>o&&o.div===f.div&&o.retired!=='medical');
+  const key=o=>({
+    d:(Number.isSafeInteger(o.W)?o.W:0)-(Number.isSafeInteger(o.L)?o.L:0),
+    w:Number.isSafeInteger(o.W)?o.W:0,
+    c:Number.isSafeInteger(o.lastCycle)?o.lastCycle:-1});
+  cands.sort((x,y)=>{
+    const a=key(x), b=key(y);
+    if(a.d!==b.d) return b.d-a.d;
+    if(a.w!==b.w) return b.w-a.w;
+    return b.c-a.c;
+  });
+  const i=cands.findIndex(o=>o.id===f.id);
+  return i>=0?i+1:null;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Dossier sans interaction comptée (addendum §5 : ce n'est pas un choix du
  *  joueur) : la raison est attribuée, le compteur d'interactions ne bouge
  *  pas — ni vers le niveau 3, ni ailleurs. level 3 sur fin de carrière
@@ -754,6 +820,9 @@ function mgmtApplyFight(m,f,opp,res,side){
   const T0=mgmtTrauma(f);
   const T1=Math.min(MGMT_TRAUMA_MAX,T0+mgmtTraumaGain(res.method,fam,issue,H,K));
   f.trauma=Math.max(T0,T1);
+  /* Lot 2 T1 : dernier combat sous Split, écrit ici où le lot 3a écrit déjà
+     le traumatisme. Absent = n'a jamais combattu sous Split. */
+  f.lastCycle=m.cycle;
   if(issue==='win') f.W++;
   else if(issue==='loss') f.L++;
   else f.D++;
@@ -803,13 +872,11 @@ function mgmtApplyFight(m,f,opp,res,side){
  *  avant toute mutation.
  *  @returns {object|null} m.lastEvent. */
 function mgmtRunEvent(m){
-  if(!m||!m.card||!Array.isArray(m.card.fights)) return null;
+  if(!m||!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return null;
   if(!mgmtCardFull(m)) return null;
-  /* Lot 3b T1 : la carte {main,prelims} n'existe pas encore en jeu (T2) —
-     les combats actuels comptent comme prélims. */
-  const slotted={main:[],prelims:[]};
-  for(const cf of m.card.fights){ slotted.prelims.push({a:cf.a,b:cf.b,slot:'prelim'}); }
-  const booked=slotted.main.concat(slotted.prelims);
+  /* Lot 2 T1 : chaque combat porte son emplacement (slot:'main'|'prelim')
+     et la soirée joue la carte principale d'abord, puis les préliminaires. */
+  const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim'}));
   /* Disponibilités vérifiées d'abord : une paire introuvable n'applique
      aucune conséquence — la soirée n'a pas commencé. */
   for(const cf of booked){
@@ -846,7 +913,8 @@ function mgmtRunEvent(m){
   m.audiences.push(finance.audience);
   m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
-  m.card.fights=[];
+  m.card.main=[];
+  m.card.prelims=[];
   saveMgmt();
   return m.lastEvent;
 }
@@ -871,13 +939,8 @@ function mgmtRefillBulk(m){
       seen.add([x.a,x.b].sort().join('|'));
     }
   }
-  if(m.card&&Array.isArray(m.card.fights)){
-    for(const x of m.card.fights){ seen.add([x.a,x.b].sort().join('|')); }
-  }
   const cardPairs=new Set();
-  if(m.card&&Array.isArray(m.card.fights)){
-    for(const x of m.card.fights){ cardPairs.add([x.a,x.b].sort().join('|')); }
-  }
+  for(const x of mgmtCardFights(m)){ seen.add([x.a,x.b].sort().join('|')); cardPairs.add([x.a,x.b].sort().join('|')); }
   const bulk=mgmtNewBulkAffair(m,used,seen,false)||mgmtNewBulkAffair(m,new Set(),cardPairs,true);
   if(!bulk){ m.shortfall=true; return false; }
   m.pile.unshift(bulk);
@@ -906,11 +969,12 @@ function mgmtClosePile(m){
    rnd(), aucune réplique, aucun affichage dans cette tranche : la
    trésorerie s'affichera à la T6 (CDC §7) ; la réplique E1 du patron existe
    (texte d'auteur, LOT-3B §E1) et sera branchée à une tranche ultérieure —
-   T1 ne stocke que la condition, dans m.lastEvent.e1. Les calculs sont
-   écrits pour une carte {main,prelims} ; la structure en jeu ne change pas
-   encore (T2) : mgmtRunEvent compte les combats actuels comme prélims.
-   Constantes calibrées par tools/monte-carlo-economie.js —
-   docs/lots/LOT-3B-T1-CALIBRAGE.md. ==== */
+   T1 ne stocke que la condition, dans m.lastEvent.e1. Lot 2 T1 : la carte
+   {main,prelims} existe en jeu (docs/LOT-2-CARTE-PRINCIPALE.md §T1) —
+   cachets et attrait lisent l'emplacement porté par chaque combat.
+   Constantes calibrées par tools/monte-carlo-economie.js sur des cartes de
+   4 + 4 combats (docs/lots/LOT-3B-T1-CALIBRAGE.md) — recalibrées sur le
+   déroulé réel à la T4 du lot 2. ==== */
 /* Trésorerie au premier jour (k$). Ordre de grandeur de l'exemple QO-5
    (T=50 : un short notice à 60 est refusé avant la première soirée, P=0). */
 const MGMT_TREASURY_START=50;
@@ -944,10 +1008,12 @@ const MGMT_AUD_BASE=0.7;
 const MGMT_AUD_PER_DRAW=1000;
 /* Droits du diffuseur (k$) pour MGMT_TV_ECRANS écrans, payés au prorata du
    nombre de combats joués par rapport à la carte contractuelle (addendum
-   §16 : c'est le contrat du diffuseur). */
+   §16 : c'est le contrat du diffuseur). Carte contractuelle = la carte
+   complète du lot 2 (décision du 19/09 : 9 combats — 5 en carte principale,
+   4 en préliminaires). */
 const MGMT_TV_PER_AUD=6;
 const MGMT_TV_ECRANS=1000;
-const MGMT_CARD_CONTRACT=8;
+const MGMT_CARD_CONTRACT=MGMT_MAIN_SIZE+MGMT_PRELIM_SIZE;
 /* Références D4 (QO-7) : attrait d'un combat moyen et spectacle (part de
    finitions) d'une carte complète d'attrait moyen, mesurés par Monte Carlo
    (graine 20260915, 4000 soirées — docs/lots/LOT-3B-T1-CALIBRAGE.md).
@@ -1074,8 +1140,8 @@ function mgmtCanAfford(m,cost){
 
 /** Audience de référence pour D4 (QO-7) : la moyenne d'audience (en écrans)
  *  des soirées précédentes — ou, avant toute soirée, l'audience qu'aurait
- *  eue une carte complète d'attrait moyen (4 + 4 combats, spectacle de
- *  référence). Pure.
+ *  eue une carte complète d'attrait moyen (5 combats de carte principale +
+ *  4 préliminaires, spectacle de référence — lot 2 T1). Pure.
  *  @returns {number} entier ≥ 0. */
 function mgmtAudienceRef(m){
   if(m&&Array.isArray(m.audiences)){
@@ -1083,7 +1149,7 @@ function mgmtAudienceRef(m){
     for(const a of m.audiences){ if(Number.isSafeInteger(a)&&a>=0){ s+=a; n++; } }
     if(n>0) return Math.round(s/n);
   }
-  const refAttraction=MGMT_CARD_SIZE*MGMT_DRAW_AVG*(MGMT_ATTR_MAIN_W+MGMT_ATTR_PRELIM_W);
+  const refAttraction=MGMT_DRAW_AVG*(MGMT_MAIN_SIZE*MGMT_ATTR_MAIN_W+MGMT_PRELIM_SIZE*MGMT_ATTR_PRELIM_W);
   const refMix=MGMT_AUD_BASE+(1-MGMT_AUD_BASE)*MGMT_SPECTACLE_REF;
   return Math.round(MGMT_AUD_PER_DRAW*refAttraction*refMix);
 }
@@ -1107,6 +1173,9 @@ function mgmtValidLine(o){
   if(o.trauma!==undefined&&(!Number.isFinite(o.trauma)||o.trauma<0||o.trauma>MGMT_TRAUMA_MAX)) return false;
   if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) return false;
   if(o.retired!==undefined&&o.retired!=='medical') return false;
+  /* Lot 2 T1 : dernier combat sous Split — absent (jamais combattu) ou
+     entier positif. */
+  if(o.lastCycle!==undefined&&(!Number.isSafeInteger(o.lastCycle)||o.lastCycle<0)) return false;
   return true;
 }
 
@@ -1125,6 +1194,10 @@ function mgmtValidAffair(a){
     for(const f of a.fights){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(typeof f.sloppy!=='boolean'||typeof f.warned!=='boolean') return false;
+      /* Lot 2 T1 : l'emplacement d'un combat de proposition est 'main' ou
+         'prelim' quand il est porté (les blocs de Leïla proposent des
+         préliminaires) — absent toléré pour une affaire d'avant la v5. */
+      if(f.slot!==undefined&&f.slot!=='main'&&f.slot!=='prelim') return false;
     }
     if(a.marked!==null&&(!Number.isSafeInteger(a.marked)||a.marked<0)) return false;
   }
@@ -1191,11 +1264,16 @@ function validateMgmt(raw){
   if(!Number.isSafeInteger(raw.eventsPlayed)||raw.eventsPlayed<0) return false;
   if(raw.card!==undefined){
     if(!raw.card||typeof raw.card!=='object'||Array.isArray(raw.card)) return false;
-    if(!Number.isSafeInteger(raw.card.size)||raw.card.size<1) return false;
-    if(!Array.isArray(raw.card.fights)) return false;
-    for(const f of raw.card.fights){
+    if(!Number.isSafeInteger(raw.card.sizeMain)||raw.card.sizeMain<1) return false;
+    if(!Number.isSafeInteger(raw.card.sizePrelims)||raw.card.sizePrelims<1) return false;
+    if(!Array.isArray(raw.card.main)||!Array.isArray(raw.card.prelims)) return false;
+    /* Lot 2 T1 : chaque combat de la carte porte son emplacement, cohérent
+       avec la liste qui le porte. */
+    for(const f of raw.card.main.concat(raw.card.prelims)){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
+      if(f.slot!=='main'&&f.slot!=='prelim') return false;
     }
+    if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
   if(raw.leila!==undefined){
     if(!raw.leila||typeof raw.leila!=='object'||Array.isArray(raw.leila)) return false;
@@ -1214,7 +1292,12 @@ function validateMgmt(raw){
  *  absents — tampon de version seulement. 3 → 4 (lot 3b T1, QO-5) : la
  *  trésorerie démarre à MGMT_TREASURY_START, aucune recette, aucune
  *  audience, aucune soirée jouée — l'organisation commence au premier jour.
- *  Sans perte, sans reset : une v1 reste refusée, comme avant. */
+ *  4 → 5 (lot 2 T1, docs/LOT-2-CARTE-PRINCIPALE.md §T1) : la carte plate
+ *  {size,fights} devient {sizeMain,sizePrelims,main,prelims} — les combats
+ *  d'une carte en cours deviennent des préliminaires (slot 'prelim', cycle
+ *  conservé), la carte principale démarre vide : aucun combat perdu, aucun
+ *  ajouté d'office. Sans perte, sans reset : une v1 reste refusée, comme
+ *  avant. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
   if(raw.v===MGMT_SAVE_VERSION) return raw;
@@ -1228,6 +1311,12 @@ function mgmtMigrate(raw){
     if(!Array.isArray(raw.recettes)) raw.recettes=[];
     if(!Array.isArray(raw.audiences)) raw.audiences=[];
     if(!Number.isSafeInteger(raw.eventsPlayed)) raw.eventsPlayed=0;
+  }
+  if(raw.v===4){
+    raw.v=5;
+    const old=(raw.card&&Array.isArray(raw.card.fights))?raw.card.fights:[];
+    raw.card={sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],
+      prelims:old.map(f=>({a:f.a,b:f.b,cycle:f.cycle,slot:'prelim'}))};
   }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
@@ -1251,6 +1340,7 @@ function mgmtRepair(m){
         if(o.trauma!==undefined&&(!Number.isFinite(o.trauma)||o.trauma<0||o.trauma>MGMT_TRAUMA_MAX)) delete o.trauma;
         if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) delete o.susp;
         if(o.retired!==undefined&&o.retired!=='medical') delete o.retired;
+        if(o.lastCycle!==undefined&&(!Number.isSafeInteger(o.lastCycle)||o.lastCycle<0)) delete o.lastCycle;
       }
     }
   }
@@ -1264,16 +1354,28 @@ function mgmtRepair(m){
   if(!Array.isArray(m.audiences)) m.audiences=[];
   m.audiences=m.audiences.filter(a=>Number.isSafeInteger(a)&&a>=0);
   if(!Number.isSafeInteger(m.eventsPlayed)||m.eventsPlayed<0) m.eventsPlayed=0;
-  if(!m.card||typeof m.card!=='object'||Array.isArray(m.card)) m.card={size:MGMT_CARD_SIZE,fights:[]};
-  if(!Number.isSafeInteger(m.card.size)||m.card.size<1) m.card.size=MGMT_CARD_SIZE;
-  if(!Array.isArray(m.card.fights)) m.card.fights=[];
+  /* Lot 2 T1 : la carte {sizeMain,sizePrelims,main,prelims} se recadre — les
+     deux capacités et les deux listes existent toujours, un combat qui ne
+     pointe plus vers le roster est retiré de son emplacement. */
+  if(!m.card||typeof m.card!=='object'||Array.isArray(m.card)){
+    m.card={sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]};
+  }
+  if(!Number.isSafeInteger(m.card.sizeMain)||m.card.sizeMain<1) m.card.sizeMain=MGMT_MAIN_SIZE;
+  if(!Number.isSafeInteger(m.card.sizePrelims)||m.card.sizePrelims<1) m.card.sizePrelims=MGMT_PRELIM_SIZE;
+  if(!Array.isArray(m.card.main)) m.card.main=[];
+  if(!Array.isArray(m.card.prelims)) m.card.prelims=[];
+  for(const slot of ['main','prelims']){
+    if(Array.isArray(m.card[slot])) m.card[slot]=m.card[slot].filter(x=>x&&typeof x.a==='string'&&typeof x.b==='string');
+  }
   if(!m.leila||typeof m.leila!=='object'||Array.isArray(m.leila)) m.leila={crushes:[]};
   if(!Array.isArray(m.leila.crushes)) m.leila.crushes=[];
   m.leila.crushes=m.leila.crushes.filter(c=>Number.isSafeInteger(c)&&c>=0);
   if(m.lastEvent!==undefined&&m.lastEvent!==null&&!mgmtValidEvent(m.lastEvent)) m.lastEvent=null;
-  if(m.card&&Array.isArray(m.card.fights)&&Array.isArray(m.roster)){
+  if(Array.isArray(m.card.main)&&Array.isArray(m.roster)){
     const ids=new Set(m.roster.map(o=>o&&o.id));
-    m.card.fights=m.card.fights.filter(x=>x&&ids.has(x.a)&&ids.has(x.b));
+    for(const slot of ['main','prelims']){
+      m.card[slot]=m.card[slot].filter(x=>ids.has(x.a)&&ids.has(x.b));
+    }
   }
   if(Array.isArray(m.pile)){
     for(const a of m.pile){

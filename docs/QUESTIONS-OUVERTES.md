@@ -19,13 +19,14 @@ explicite.
 **Statut.** Design arrêté (LOT-3B §B : Leïla ne mentionne que les prélims, première
 fois seulement ; interface porte l'action). **Code absent.**
 
-**Ce qui manque côté code.** La carte du bureau est une liste plate de 4 combats
-(`m.card.fights`, `MGMT_CARD_SIZE = 4`) : il n'existe aucune structure
-préliminaires/carte principale à laquelle « remonter » un combat ferait référence.
-Aucune fonction, aucune donnée, aucune entrée d'interface.
+**Ce qui manque côté code.** La structure existe désormais — carte
+`{sizeMain,sizePrelims,main,prelims}` avec `MGMT_MAIN_SIZE=5` et
+`MGMT_PRELIM_SIZE=4` (lot 2 T1, `docs/LOT-2-CARTE-PRINCIPALE.md` §T1). Il n'existe
+toujours aucun geste « remonter » un combat des préliminaires vers un trou de la
+carte principale : aucune fonction, aucune entrée d'interface.
 
 **Où.** Structure de la carte : `mgmt-bureau.js` (`mgmtCardFull`, `mgmtNewBulkAffair`,
-ancre `MGMT_LOT3A_CORPS`) ; rendu : `mgmt-screens.js` (`mgmtBulkFightHtml`,
+ancre `MGMT_LOT2_CARTE`) ; rendu : `mgmt-screens.js` (`mgmtBulkFightHtml`,
 `scr_mgmt_bureau`). Le test qui attend ce comportement est marqué skip :
 `tests/mgmtBureau.test.js:782` (« remonter un combat des préliminaires »).
 
