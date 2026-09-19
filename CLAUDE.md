@@ -123,14 +123,15 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 17/09/2026 : **254 tests, 250 passants, 0 échec, 4 skip**. Les 4 skip
-sont dans `mgmtBureau.test.js` : trois sorties de carte incomplète (remonter un
-prélim, short notice, combattant libre) et une pénalité économie au-delà du
-plafond de découvert — comportements décidés mais absents du code (voir
-`docs/QUESTIONS-OUVERTES.md`). **15 fichiers dans `tests/`**, dont
-`mgmtBureau.test.js` (53), `mgmtCard.test.js` (23) et `mgmtEconomie.test.js`
-(13) pour le management, `regressionFixes.test.js` (75) et `duel.test.js` (28)
-pour la carrière. Durée : ~90 s.
+État au 19/09/2026 (branche `lot-1-style-stable`) : **265 tests, 261 passants,
+0 échec, 4 skip**. Les 4 skip sont dans `mgmtBureau.test.js` : trois sorties de
+carte incomplète (remonter un prélim, short notice, combattant libre) et une
+pénalité économie au-delà du plafond de découvert — comportements décidés mais
+absents du code (voir `docs/QUESTIONS-OUVERTES.md`). **16 fichiers dans
+`tests/`**, dont `mgmtBureau.test.js` (53), `mgmtCard.test.js` (23),
+`mgmtEconomie.test.js` (13) et `mgmtSoiree.test.js` (11) pour le management,
+`regressionFixes.test.js` (75) et `duel.test.js` (28) pour la carrière.
+Durée : ~90 s.
 
 **La liste des tests est écrite à la main dans `package.json`** (scripts `test`
 et `test:watch`) : un nouveau fichier de test doit y être ajouté, sinon il ne

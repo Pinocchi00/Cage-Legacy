@@ -188,6 +188,9 @@ de défaite. Le joueur doit pouvoir être rentable et fini.
 - Décisions réelles par événement : 3 à 5.
   *(Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 : quota abandonné.)*
 - Affaires au bureau par cycle : 8 à 15.
+  *(Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 : la pile d'affaires
+  n'est plus l'écran principal — voir §4.1 — et son volume par cycle n'est plus
+  un chiffre de cadrage.)*
 - Personnages récurrents : 6.
 - Dossiers accumulés par le joueur sur une saison : 10 à 20.
 
