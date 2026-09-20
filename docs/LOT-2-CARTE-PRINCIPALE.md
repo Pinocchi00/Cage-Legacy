@@ -146,6 +146,54 @@ Exigé par `LOT-3B-CONTRAT.md` §T2, et condition de la fusion dans `main`.
 - Essais de mesure avec `--n=1000` ; une seule mesure complète en fin de tranche.
 - Entre deux essais, seulement le fichier de test concerné (`node --test tests/…`).
 - `npm run check` une fois, à la fin de la tranche.
+- `tools/monte-carlo-soiree.js` tourne sur les douze cœurs depuis le 20/09
+  (`--jobs=N`, `--serial` pour l'ancien comportement) : mesure complète en 1 min 54
+  au lieu de 9 min, chiffres identiques à la version sur un seul cœur.
+
+## 4 bis. Relectures — état au 20/09/2026
+
+**T1, T2 et T3 sont livrées, relues contre ce contrat et vérifiées dans le jeu réel**
+(`npm run check` relancé par Claude : 287 tests, 283 passants, 0 échec, 4 skip).
+Vérifié manette en main pour T2 et T3 : le geste de composition, le clavier, le
+compteur de carte, l'apparition de la proposition de Leïla à la cinquième place
+posée, l'absence de combattant de carte principale dans les préliminaires, le repos
+et l'absence de revanche sur un second cycle joué, et C1 (accepter booke vraiment,
+la réponse disparaît quand la carte est pleine).
+
+### Réserves d'interface, ouvertes
+
+1. **Contraste au survol (charte L2).** `.opp:hover` (`index.html:100`, hérité de
+   l'interface de carrière) éclaircit le fond ; le texte de 13 px tombe alors à
+   **3,54:1**, sous le 4,5:1 de la charte. Touche déjà tous les écrans du
+   management, pas seulement la carte. À traiter au **lot 4** (la peau du jeu).
+2. **Une ligne non cliquable s'allume au survol** : un suspendu ou un combattant
+   déjà en carte réagit comme s'il était choisissable. Le mot dit le refus, le
+   survol le contredit.
+3. **À 1920, seule la colonne du milieu s'élargit** (320 / 658 / 360) : la place
+   supplémentaire va à la liste, pas à la carte. À regarder en jouant.
+
+### Questions de règle, à trancher par Anthony
+
+4. **Le calendrier peut avancer sans soirée.** Carte principale incomplète et pile
+   vide, « Cycle suivant » fait avancer le cycle : vérifié en jeu, trois clics
+   passent du cycle 6 au cycle 9 avec un seul combat posé et aucune soirée jouée.
+   La carte en cours est conservée. Contredit le lot 3a §10 (« le calendrier impose
+   une soirée à la fin de chaque cycle »). Deux options : le calendrier attend le
+   joueur, ou une soirée manquée coûte quelque chose (relève alors du lot 3B T3).
+   **À trancher avant de clore le lot 2.**
+5. **Le joueur ne peut composer qu'à l'intérieur d'une catégorie de poids**
+   (`mgmtBookMain` refuse le croisement). Choix fait par OpenCode, conforme à la
+   maquette ; mais Leïla, elle, croise les catégories quand le joueur écrase ses
+   cartes.
+6. **`mgmtClosePile` renvoie `'stuck'` dans deux situations différentes** : le pot
+   de combattants est épuisé, ou la carte principale n'est pas composée (état
+   normal). Le déclencheur manuel les traite pareil.
+
+### État de l'économie
+
+Une soirée réelle jouée le 20/09 (9 combats, carte composée par le joueur,
+préliminaires de Leïla validés) donne **R = −6 k$** : la trésorerie passe de 50 à
+44. C'est l'objet de la T4, et la raison de l'interdiction de fusionner.
 
 ## 5. Terminé pour le lot
 
