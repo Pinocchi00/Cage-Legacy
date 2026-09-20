@@ -65,10 +65,15 @@ function mgmtKeyMark(dir){
  *  la proposition en bloc seulement quand la carte est complète (lot 3a §5 :
  *  tant qu'elle ne l'est pas, ignorer serait une nouvelle proposition
  *  gratuite). Source unique pour la souris et le clavier : ce qui se voit
- *  se joue. */
+ *  se joue.
+ *  Lot 2 T3, C1 (docs/LOT-2-CARTE-PRINCIPALE.md §T3) : accepter booke dans
+ *  la carte principale — la réponse n'existe que quand un emplacement est
+ *  libre et que la paire se pose (mgmtAcceptable) ; une réponse impossible
+ *  n'est pas affichée en grisé, elle n'est simplement pas là (charte R4). */
 function mgmtVisibleReplies(m,sel){
   const ex=sel&&MGMT_EXCHANGES[sel.exchange];
-  const reps=(ex?ex.replies:[]).filter(r=>MGMT_ACTION_LABELS[r.action]).slice();
+  let reps=(ex?ex.replies:[]).filter(r=>MGMT_ACTION_LABELS[r.action]).slice();
+  if(sel&&sel.kind==='leila_propose'&&!mgmtAcceptable(m,sel)) reps=reps.filter(r=>r.action!=='accept');
   if(sel&&sel.kind==='leila_propose') reps.push({id:'__ignore',action:'__ignore'});
   else if(sel&&sel.kind==='leila_bulk'&&m&&mgmtCardFull(m)) reps.push({id:'__ignore',action:'__ignore'});
   return reps;

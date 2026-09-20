@@ -163,7 +163,16 @@ function mgmtMoveSelection(m,dir){
    bloc de Leïla reste sa carte préliminaire (4 combats, décision du
    19/09 : le bloc ne couvre jamais la carte principale, dont la composition
    revient au joueur à la T2) ; chaque combat porte slot, valider place les
-   combats dans leur emplacement sans jamais rien perdre. ==== */
+   combats dans leur emplacement sans jamais rien perdre.
+   Lot 2 T3 Leïla et les préliminaires (docs/LOT-2-CARTE-PRINCIPALE.md §T3 ;
+   LOT-3B §2, décision d'Anthony du 15/09/2026) : la proposition en bloc
+   n'arrive qu'une fois la carte principale complète (cinq combats posés par
+   le joueur, T2) et part après les autres affaires, jamais en tête —
+   mgmtOfferBulk pousse, mgmtBookMain déclenche à la cinquième place ;
+   mgmtPickBulkPair élargit ses candidats aux combattants disponibles hors
+   carte principale (même catégorie, rangs proches, repos, priorité aux plus
+   inactifs, pas de revanche immédiate). C1 : accepter une demande de Leïla
+   booke vraiment (mgmtDecide → mgmtBookMain). ==== */
 /* ==== [ANCRE: MGMT_LOT2REV_ID_STRICT] — revue lot 1 (L1-R2) : les
    identifiants sont interpolés dans des gestionnaires onclick — traités
    comme du code s'ils contiennent un guillemet. Format interne strict à
@@ -176,6 +185,17 @@ function mgmtValidId(id){ return typeof id==='string'&&MGMT_ID_RE.test(id); }
    visible dans la proposition (catégorie et bilan lisibles), sans effet
    joué au lot 2 — ce qu'il avertit viendra plus tard. */
 const MGMT_SLOPPY_GAP=8;
+/* ==== [ANCRE: MGMT_LOT2_T3_PRELIMS] — Lot 2 T3 Leïla et les préliminaires
+   (docs/LOT-2-CARTE-PRINCIPALE.md §T3 ; LOT-3B §2, décision d'Anthony du
+   15/09/2026) : écart de rang dans une même catégorie qui fait un mauvais
+   appariement — au-delà, la paire est bâclée, comme le cross-division et le
+   gros écart de bilan (le coût de l'écrasement, lot 3a §5, est conservé :
+   un écrasement continue de produire des prélims moins logiques). Le rang
+   vient de mgmtDivisionRank (T1), dérivé, jamais stocké. Constante à 3 :
+   dans une catégorie du roster (quatre à cinq combattants), un écart de
+   trois rangs reste un combat de même niveau visible ; un #1 contre un #5
+   ne l'est pas. Réglable par Anthony après avoir joué. ==== */
+const MGMT_RANK_GAP=3;
 
 /** Combats posés sur la carte, carte principale d'abord (ordre de la
  *  soirée). Pur. @returns {Array} */
@@ -220,15 +240,32 @@ function mgmtWarnProb(total){
 function mgmtRecGap(A,B){ return Math.abs((A.W+A.L)-(B.W+B.L)); }
 
 /**
- * Tire une paire pour la sous-carte : mode 'clean' (même division, écart
- * resserré) ou 'sloppy' (cross-division ou gros écart). Le mode vient du
- * coût des écrasements ; à défaut de candidates dans le mode, l'autre, puis
- * abandon (filet : shortfall). La nature bâclée ou non est celle de la paire
- * retenue, pas l'intention — un repli malchanceux reste signalable.
- * Lot 3a §6.5 : suspendus et retraités médicaux exclus, en mode strict comme
- * assoupli. Le mode assoupli (lot 3a §5) relâche les contraintes de variété
- * (prénoms déjà vus, paires déjà proposées, séries de catégories) — jamais
- * la sécurité (genre, homonymes, disponibilités, paires déjà en carte).
+ * Tire une paire pour la sous-carte : mode 'clean' (même catégorie,
+ * rangs proches) ou 'sloppy' (cross-division, gros écart de rang ou de
+ * bilan). Le mode vient du coût des écrasements ; à défaut de candidates
+ * dans le mode, l'autre, puis abandon (filet : shortfall). La nature
+ * bâclée ou non est celle de la paire retenue, pas l'intention — un repli
+ * malchanceux reste signalable.
+ * Lot 3a §6.5 : suspendus et retraités médicaux exclus, en mode strict
+ * comme assoupli. Le mode assoupli (lot 3a §5) relâche les contraintes de
+ * variété (prénoms déjà vus, paires déjà proposées, séries de catégories)
+ * et le repos — jamais la sécurité (genre, homonymes, disponibilités,
+ * combattants en carte, paires déjà en carte).
+ * Lot 2 T3 (docs/LOT-2-CARTE-PRINCIPALE.md §T3 ; LOT-3B §2, décision
+ * d'Anthony du 15/09/2026 — extension de la fonction, jamais une
+ * concurrente). Parmi les combattants disponibles HORS CARTE PRINCIPALE
+ * (mgmtEngaged — la carte principale est composée par le joueur, T2) :
+ * - même catégorie, rangs proches : écart de rang borné par
+ *   MGMT_RANK_GAP, lu sur mgmtDivisionRank (T1) — au-delà, la paire est
+ *   bâclée, comme le cross-division et le gros écart de bilan ;
+ * - repos : pas de combattant ayant combattu à la soirée précédente
+ *   (lastCycle >= cycle - 1), sauf en mode assoupli ;
+ * - pas de revanche immédiate d'un combat de la soirée précédente
+ *   (m.lastEvent) ;
+ * - priorité aux combattants inactifs depuis le plus longtemps : la paire
+ *   retenue est prise parmi celles qui cumulent la plus longue inactivité
+ *   (jamais combattu sous Split = le plus inactif) ; à égalité, le tirage
+ *   seedé garde la variété.
  * @returns {{a,b,sloppy,warned,div}|null} */
 function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
   const totals=stats||{total:0,streak:0};
@@ -238,6 +275,22 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
      catégorie hommes/femmes — le dégradé joue sur la division et l'écart de
      bilan, jamais sur le genre. */
   const genderOf=o=>{ const d=divById(o.div); return d?d.gender:null; };
+  /* Rangs (§T3) : mgmtDivisionRank (T1) appelé au plus une fois par
+     combattant et par tirage — jamais par paire candidate. */
+  const rankCache=new Map();
+  const rankOf=f=>{ let v=rankCache.get(f.id); if(v===undefined){ v=mgmtDivisionRank(m,f); rankCache.set(f.id,v); } return v; };
+  /* Repos (§T3) : a combattu à la soirée précédente. */
+  const repos=f=>Number.isSafeInteger(f.lastCycle)&&f.lastCycle>=m.cycle-1;
+  /* Inactivité (§T3) : cycles depuis le dernier combat ; jamais combattu
+     sous Split = le plus inactif. */
+  const inact=f=>m.cycle-(Number.isSafeInteger(f.lastCycle)?f.lastCycle:-1);
+  /* Revanche immédiate (§T3) : les paires de la soirée précédente. */
+  const rematch=new Set();
+  if(m.lastEvent&&Array.isArray(m.lastEvent.fights)){
+    for(const f of m.lastEvent.fights){
+      if(f&&typeof f.a==='string'&&typeof f.b==='string') rematch.add([f.a,f.b].sort().join('|'));
+    }
+  }
   const collect=mode=>{
     const out=[];
     for(let i=0;i<r.length;i++){
@@ -246,18 +299,29 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
       if(A.first===B.first) continue;
       if(genderOf(A)!==genderOf(B)) continue;
       if(!mgmtAvailable(m,A)||!mgmtAvailable(m,B)) continue;
+      /* §T3 : les prélims se construisent hors carte principale — un
+         combattant déjà engagé (principale comme prélims) n'est jamais
+         candidat. */
+      if(mgmtEngaged(m,A)||mgmtEngaged(m,B)) continue;
       const key=[A.id,B.id].sort().join('|');
       if(seen.has(key)) continue;
+      if(rematch.has(key)) continue;
       if(!relaxed){
+        /* §T3 : repos sauf en mode assoupli. */
+        if(repos(A)||repos(B)) continue;
         if(used.has(A.first)||used.has(B.first)) continue;
         const d0=A.div===B.div?A.div:A.div;
         if(d0===lastDiv&&run>=2) continue;
       }
         const d=A.div===B.div?A.div:A.div;
-        const sloppy=(A.div!==B.div)||mgmtRecGap(A,B)>=MGMT_SLOPPY_GAP;
+        const ra=rankOf(A), rb=rankOf(B);
+        /* Rangs comparés dans la même catégorie seulement ; cross-division,
+           la paire est bâclée sans comparaison de rang. */
+        const rankGap=(A.div===B.div&&ra!==null&&rb!==null)?Math.abs(ra-rb):MGMT_RANK_GAP+1;
+        const sloppy=(A.div!==B.div)||rankGap>MGMT_RANK_GAP||mgmtRecGap(A,B)>=MGMT_SLOPPY_GAP;
         if(mode==='clean'&&sloppy) continue;
         if(mode==='sloppy'&&!sloppy) continue;
-        out.push({A,B,sloppy,div:d});
+        out.push({A,B,sloppy,div:d,inact:inact(A)+inact(B)});
       }
     }
     return out;
@@ -265,7 +329,13 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
   let cands=collect(wantSloppy?'sloppy':'clean');
   if(cands.length===0) cands=collect(wantSloppy?'clean':'sloppy');
   if(cands.length===0) return null;
-  const c=pick(cands);
+  /* Priorité (§T3) : les combattants inactifs depuis le plus longtemps —
+     la paire retenue est prise parmi celles qui cumulent la plus longue
+     inactivité ; à égalité, le tirage seedé garde la variété. */
+  let best=-1;
+  for(const c of cands){ if(c.inact>best) best=c.inact; }
+  const top=cands.filter(c=>c.inact===best);
+  const c=pick(top);
   const warned=c.sloppy&&rnd()<mgmtWarnProb(totals.total);
   return {a:c.A,b:c.B,sloppy:c.sloppy,warned,div:c.div};
 }
@@ -274,23 +344,33 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
  * Construit l'affaire de proposition en bloc : la carte préliminaire de
  * Leïla (docs/LOT-2-CARTE-PRINCIPALE.md §T1, décision du 19/09 — la
  * proposition en bloc ne couvre jamais la carte principale : sa composition
- * revient au joueur, T2). Elle propose les préliminaires manquants — au plus
+ * revient au joueur, T2). Lot 2 T3 (§T3 ; LOT-3B §2, décision du 15/09) :
+ * elle n'arrive QU'UNE FOIS la carte principale complète — cinq combats
+ * posés par le joueur. Elle propose les préliminaires manquants — au plus
  * MGMT_PRELIM_SIZE combats, chacun porté slot:'prelim' — ou null : carte
- * déjà complète, préliminaires complets (le reste de la carte ne lui
- * appartient pas), ou pot insuffisant pour l'ensemble (filet : l'appelant
- * signale shortfall — jamais une carte incomplète).
+ * déjà complète, préliminaires complets, carte principale incomplète (le
+ * joueur la compose — Leïla n'a rien à proposer), ou pot insuffisant pour
+ * l'ensemble (filet : l'appelant signale shortfall — jamais une carte
+ * incomplète).
  * Lot 3a §5 : relaxed=true assouplit la variété (prénoms, paires déjà
- * proposées, séries) pour le remplissage de fin de cycle — jamais la carte
- * (sanctuarisée) ni deux fois la même paire dans le bloc.
+ * proposées, séries) et le repos pour le remplissage de fin de cycle —
+ * jamais la carte (sanctuarisée) ni deux fois la même paire dans le bloc.
  * @returns {object|null} */
 function mgmtNewBulkAffair(m,used,seen,relaxed){
   if(mgmtCardFull(m)) return null;
-  if(!m||!m.card||!Array.isArray(m.card.prelims)) return null;
+  if(!m||!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return null;
+  /* §T3 : la carte principale est complète — la proposition des
+     préliminaires attend la composition du joueur. */
+  if(!Number.isSafeInteger(m.card.sizeMain)||m.card.main.length<m.card.sizeMain) return null;
   const n=(Number.isSafeInteger(m.card.sizePrelims)?m.card.sizePrelims:MGMT_PRELIM_SIZE)-m.card.prelims.length;
   if(n<=0) return null;
   const stats=mgmtCrushStats(m);
   const fights=[];
   let lastDiv=null, run=0;
+  /* §T3 : la proposition est un tout — Leïla propose les préliminaires
+     MANQUANTS, jamais une carte partielle ; si un combat de la carte est
+     introuvable, l'appelant signale le shortfall et on ne remplit rien
+     (lot 3a §5). */
   for(let i=0;i<n;i++){
     const p=mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed);
     if(!p) return null;
@@ -394,6 +474,11 @@ function mgmtBookMain(m,aid,bid){
   const fight={a:fa.id,b:fb.id,cycle:m.cycle,slot:'main'};
   m.card.main.push(fight);
   mgmtPromote(m,fa); mgmtPromote(m,fb);
+  /* §T3 : une fois la cinquième place posée, Leïla propose aussitôt les
+     préliminaires — en fin de pile, jamais avant la carte principale
+     complète (mgmtOfferBulk garde tout elle-même : no-op tant que la carte
+     principale est incomplète). */
+  mgmtOfferBulk(m,false);
   return fight;
 }
 
@@ -477,6 +562,9 @@ function mgmtEligiblePairs(m,usedFirsts,seen,lastDiv,run){
       if(seen.has(key)) continue;
       const d=A.div===B.div?A.div:A.div;
       if(d===lastDiv&&run>=2) continue;
+      /* Lot 2 T3, C1 : accepter booke dans la carte principale — un
+         combattant déjà engagé n'est jamais proposé. */
+      if(mgmtEngaged(m,A)||mgmtEngaged(m,B)) continue;
       (A.div===B.div?outSame:outAny).push([A,B]);
     }
   }
@@ -530,14 +618,16 @@ function mgmtNewPile(m){
     m.pile.push(aff);
   }
   if(m.pile.length<n) m.shortfall=true;
-  /* Lot 2 : la proposition en bloc part en tête de pile quand la carte a des
-     places vides. Mêmes règles de variété (prénoms frais, combats inédits),
-     partagées avec les propositions simples du cycle. */
-  if(!mgmtCardFull(m)){
-    /* Mêmes ensembles que les singles (paires de la carte incluses) : ni
-       doublon avec la carte, ni doublon avec les singles du cycle. */
+  /* Lot 2 T3 : la proposition en bloc n'arrive qu'une fois la carte
+     principale complète (docs/LOT-2-CARTE-PRINCIPALE.md §T3, décision du
+     19/09 ; LOT-3B §2 : le joueur compose d'abord la main card) — et elle
+     part après les autres affaires, jamais en tête. Mêmes ensembles que
+     les singles (paires de la carte incluses) : ni doublon avec la carte,
+     ni doublon avec les singles du cycle. */
+  if(Array.isArray(m.card.main)&&Number.isSafeInteger(m.card.sizeMain)&&m.card.main.length>=m.card.sizeMain
+    &&Array.isArray(m.card.prelims)&&Number.isSafeInteger(m.card.sizePrelims)&&m.card.prelims.length<m.card.sizePrelims){
     const bulk=mgmtNewBulkAffair(m,usedFirsts,seen);
-    if(bulk) m.pile.unshift(bulk);
+    if(bulk) m.pile.push(bulk);
     else if(m.pile.length===0) m.shortfall=true;
   }
   if(m.pile.length>0) m.open=m.pile[0].id;
@@ -600,6 +690,24 @@ function mgmtMemoryLines(m){
 }
 
 /**
+ * Accepter une demande de Leïla est-il possible (lot 2 T3, C1 —
+ * docs/LOT-2-CARTE-PRINCIPALE.md §T3) : oui si et seulement si mgmtBookMain
+ * poserait le combat — un emplacement libre en carte principale et une
+ * paire posable (même catégorie, disponibles, pas déjà engagées). L'interface
+ * lit la même porte pour ne jamais proposer une réponse impossible
+ * (charte R4) ; mgmtDecide la re-vérifie au moment de la décision.
+ * Pur. @returns {boolean} */
+function mgmtAcceptable(m,aff){
+  if(!m||!m.card||!Array.isArray(m.card.main)||!aff) return false;
+  if(!Number.isSafeInteger(m.card.sizeMain)||m.card.main.length>=m.card.sizeMain) return false;
+  const a=mgmtFighterById(m,aff.a), b=mgmtFighterById(m,aff.b);
+  if(!a||!b||a===b||a.div!==b.div) return false;
+  if(!mgmtAvailable(m,a)||!mgmtAvailable(m,b)) return false;
+  if(mgmtEngaged(m,a)||mgmtEngaged(m,b)) return false;
+  return true;
+}
+
+/**
  * Joue la réponse choisie sur une affaire ouverte. Lot 1 (inchangé) :
  * accepter book, refuser fait naître une réaction, clore acte la réaction.
  * Lot 2 : valider fait entrer toute la carte en construction ; écraser la
@@ -616,10 +724,16 @@ function mgmtDecide(m,affairId,replyId){
   if(!ex) return false;
   const rep=(ex.replies||[]).find(r=>r.id===replyId);
   if(!rep) return false;
-  const a=mgmtFighterById(m,aff.a), b=mgmtFighterById(m,aff.b);
   let fact=null;
   if(rep.action==='accept'){
-    mgmtPromote(m,a); mgmtPromote(m,b);
+    /* Lot 2 T3, C1 (docs/LOT-2-CARTE-PRINCIPALE.md §T3) : accepter une
+       demande de Leïla booke vraiment — le combat entre dans la carte
+       principale (mgmtBookMain : même catégorie, disponibles, pas déjà
+       engagés, emplacement libre). S'il n'y a plus d'emplacement libre ou
+       que la paire ne se pose pas, l'action n'est pas proposée
+       (mgmtVisibleReplies) et la décision est refusée ici — garde double,
+       souris comme clavier. */
+    if(!mgmtBookMain(m,aff.a,aff.b)) return false;
     aff.status='closed'; aff.decision='accepted';
     fact={c:m.cycle,k:'booked',a:aff.a,b:aff.b};
   }else if(rep.action==='refuse'){
@@ -1017,15 +1131,32 @@ function mgmtRunEvent(m){
   return m.lastEvent;
 }
 
-/** Nouvelle proposition en bloc en tête de pile quand le cycle ne se ferme
- *  pas (carte incomplète, §5) : mêmes interdits que partout (indisponibles
- *  exclus), coût de l'écrasement conservé (proposition plus bâclée). Si les
- *  contraintes de variété coincent, on les assouplit (prénoms déjà vus,
- *  paires déjà proposées) — jamais un combat d'office : impossible même
- *  assoupli, on signale (shortfall) et on ne remplit rien.
- *  @returns {boolean} vrai si une proposition est arrivée en tête de pile. */
-function mgmtRefillBulk(m){
+/**
+ * Pousse la proposition en bloc de Leïla en fin de pile quand la carte
+ * principale est complète et que les préliminaires manquent (lot 2 T3,
+ * docs/LOT-2-CARTE-PRINCIPALE.md §T3 ; LOT-3B §2, décision du 15/09 :
+ * le joueur compose d'abord la main card, Leïla propose ensuite).
+ * Mêmes interdits que partout (indisponibles exclus), coût de l'écrasement
+ * conservé (proposition plus bâclée). Si les contraintes de variété
+ * coincent, on les assouplit (prénoms déjà vus, paires déjà proposées,
+ * repos) — jamais un combat d'office : impossible même assoupli, on
+ * signale (shortfall) et on ne remplit rien.
+ * Carte principale incomplète : Leïla n'a rien à proposer (la proposition
+ * des préliminaires attend la composition du joueur, §T3) — pas de
+ * shortfall : ce n'est pas le pot qui manque. Le déclencheur manuel fait
+ * avancer le cycle (lot 1g, aucun blocage).
+ * selectWhenIdle : la proposition vole le focus d'office (pile vidée,
+ * appel du §5) ; à faux, elle ne déloge pas une affaire déjà ouverte — le
+ * booking de la cinquième place arrive parfois au milieu de la pile.
+ * @returns {boolean} vrai si une proposition est arrivée en fin de pile. */
+function mgmtOfferBulk(m,selectWhenIdle){
   if(!m||!Array.isArray(m.pile)) return false;
+  if(!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return false;
+  /* §T3 : la carte principale est complète, les préliminaires manquent. */
+  if(!Number.isSafeInteger(m.card.sizeMain)||m.card.main.length<m.card.sizeMain) return false;
+  if(Number.isSafeInteger(m.card.sizePrelims)&&m.card.prelims.length>=m.card.sizePrelims) return false;
+  /* Pas de doublon : une proposition déjà ouverte suffit. */
+  if(m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')) return false;
   const used=new Set(), seen=new Set();
   for(const a of m.pile){
     if(a.kind!=='leila_propose'&&a.kind!=='leila_bulk') continue;
@@ -1041,15 +1172,27 @@ function mgmtRefillBulk(m){
   for(const x of mgmtCardFights(m)){ seen.add([x.a,x.b].sort().join('|')); cardPairs.add([x.a,x.b].sort().join('|')); }
   const bulk=mgmtNewBulkAffair(m,used,seen,false)||mgmtNewBulkAffair(m,new Set(),cardPairs,true);
   if(!bulk){ m.shortfall=true; return false; }
-  m.pile.unshift(bulk);
-  m.open=bulk.id;
+  m.pile.push(bulk);
+  /* Le focus suit la proposition d'office quand rien n'est ouvert — jamais
+     au détriment d'une affaire que le joueur regarde. */
+  if(selectWhenIdle||!m.pile.some(a=>a.id===m.open&&a.status==='open')) m.open=bulk.id;
   return true;
+}
+
+/** Fin de pile (§5) : la reproposition de Leïla quand le cycle ne se ferme
+ *  pas — la proposition des préliminaires attend la carte principale
+ *  complète (§T3). @returns {boolean} */
+function mgmtRefillBulk(m){
+  return mgmtOfferBulk(m,true);
 }
 
 /** Fin de pile (§5) : plus aucune affaire ouverte. Carte complète : la
  *  soirée ('event'). Carte incomplète : le cycle ne se ferme pas, Leïla
- *  propose à nouveau ('refill') — ou 'stuck' si même assoupli elle ne peut
- *  plus (rien d'office). Pile encore ouverte : 'none'.
+ *  propose à nouveau ('refill') — ou 'stuck' si elle n'a rien à proposer
+ *  (carte principale incomplète, §T3 — la proposition des préliminaires
+ *  attend la composition du joueur, sans signal de pot épuisé — ou même
+ *  assoupli elle ne peut plus : rien d'office, shortfall signalé). Pile
+ *  encore ouverte : 'none'.
  *  @returns {string} 'none'|'event'|'refill'|'stuck'. */
 function mgmtClosePile(m){
   if(!m||mgmtOpenCount(m)>0) return 'none';

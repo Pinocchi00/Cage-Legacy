@@ -206,12 +206,20 @@ test('MGMT corps — fin de carrière médicale définitive : jamais reproposé,
   const r = win.eval(`(function(){
     const m=G.mgmt;
     const mk=(id,first)=>({id:id,name:first+' Test',first:first,last:'Test',W:9,L:7,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0});
-    m.roster=[mk('mgA','Alain'),mk('mgB','Bruno'),mk('mgC','César')];
+    m.roster=[mk('mgA','Alain'),mk('mgB','Bruno'),mk('mgC','César'),mk('mgD','Dorian'),mk('mgE','Enzo'),mk('mgF','Farid'),mk('mgG','Gabin'),mk('mgH','Hugo'),mk('mgI','Ivan'),mk('mgJ','Jules'),mk('mgK','Karl'),mk('mgL','Luc'),mk('mgM','Marc'),mk('mgN','Noël'),mk('mgO','Oscar'),mk('mgP','Paul'),mk('mgQ','Quentin'),mk('mgR','Raoul'),mk('mgS','Sacha')];
     const f=m.roster[0];
     f.trauma=100; f.retired='medical';
     const vu=new Set();
     for(let c=0;c<40;c++){
       mgmtNewPile(m);
+      /* §T3 : le bloc attend la carte principale complète — posée en
+         fixture pour faire entrer la proposition dans le contrôle. */
+      const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+      if(dispo.length>=10){
+        for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+        m.pile=[]; m.open=null;
+        mgmtClosePile(m);
+      }
       for(const a of m.pile){
         const list=(a.kind==='leila_bulk'&&Array.isArray(a.fights))?a.fights:[a];
         for(const x of list){ vu.add(x.a); vu.add(x.b); }
@@ -250,12 +258,21 @@ test('MGMT corps — suspendu : exclu de toutes les propositions jusqu’à la f
   const r = win.eval(`(function(){
     const m=G.mgmt;
     const mk=(id,first)=>({id:id,name:first+' Test',first:first,last:'Test',W:9,L:7,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0});
-    m.roster=[mk('mgA','Alain'),mk('mgB','Bruno'),mk('mgC','César')];
+    m.roster=[mk('mgA','Alain'),mk('mgB','Bruno'),mk('mgC','César'),mk('mgD','Dorian'),mk('mgE','Enzo'),mk('mgF','Farid'),mk('mgG','Gabin'),mk('mgH','Hugo'),mk('mgI','Ivan'),mk('mgJ','Jules'),mk('mgK','Karl'),mk('mgL','Luc'),mk('mgM','Marc'),mk('mgN','Noël'),mk('mgO','Oscar'),mk('mgP','Paul'),mk('mgQ','Quentin'),mk('mgR','Raoul'),mk('mgS','Sacha')];
     const f=m.roster[0];
     f.susp=2; /* indisponible jusqu'au cycle 2 inclus, cycles arrondis au supérieur */
     const pendant=[],apres=[];
     for(let c=0;c<25;c++){
       mgmtNewPile(m);
+      /* §T3 : le bloc attend la carte principale complète — posée en
+         fixture (le suspendu en est exclu) pour que les propositions
+         de Leïla passent le contrôle. */
+      const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+      if(dispo.length>=10){
+        for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+        m.pile=[]; m.open=null;
+        mgmtClosePile(m);
+      }
       for(const a of m.pile){
         const list=(a.kind==='leila_bulk'&&Array.isArray(a.fights))?a.fights:[a];
         for(const x of list){ if(x.a===f.id||x.b===f.id) (m.cycle<=f.susp?pendant:apres).push(m.cycle); }
@@ -279,16 +296,17 @@ test('MGMT soirée — calculée une seule fois : recharger après la soirée ne
   win.eval(`(function(){
     setSeed(210);
     const m=mgmtDefault(); mgmtNewRoster(m);
-    let bulk=null;
-    for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
-    if(!bulk||!mgmtDecide(m,bulk.id,'validate')) throw new Error('pas de proposition en bloc');
-    /* §T1 : la carte principale est posée en fixture (composition = T2),
-       sur des combattants disponibles hors du bloc de Leïla. */
-    const bulkIds=new Set(bulk.fights.flatMap(f=>[f.a,f.b]));
-    const dispo=m.roster.filter(o=>!bulkIds.has(o.id)&&mgmtAvailable(m,o));
-    if(dispo.length<10) throw new Error('roster trop court');
+    /* §T3 (docs/LOT-2-CARTE-PRINCIPALE.md ; LOT-3B §2) : la carte
+       principale d'abord en fixture (composition = T2), la proposition de
+       Leïla ensuite, sur des combattants disponibles hors carte. */
     m.card.main=[];
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    if(dispo.length<10) throw new Error('roster trop court');
     for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+    m.pile=[]; m.open=null;
+    if(mgmtClosePile(m)!=='refill') throw new Error('pas de proposition en bloc');
+    const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+    if(!bulk||!mgmtDecide(m,bulk.id,'validate')) throw new Error('pas de proposition en bloc');
     G={theme:'dark',mgmt:m};
     if(!mgmtRunEvent(G.mgmt)) throw new Error('soirée non jouée');
   })()`);

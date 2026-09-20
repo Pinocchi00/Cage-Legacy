@@ -15,15 +15,20 @@
    LOT 2 T1 (docs/LOT-2-CARTE-PRINCIPALE.md) : carte 5 + 4 — les tests de
    soirées réelles posent la carte principale en fixture (composition =
    T2) et la migration est réécrite en citant §T1.
+   LOT 2 T3 (docs/LOT-2-CARTE-PRINCIPALE.md §T3 ; LOT-3B §2, décision
+   d'Anthony du 15/09/2026) : la carte principale d'abord, la proposition
+   de Leïla ensuite — les soirées réelles posent la carte principale en
+   fixture, puis tirent les préliminaires sur ce qui reste (refill).
    ============================================================================ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
 
-/* Soirées réelles : roster généré, proposition en bloc de Leïla validée
-   (les quatre préliminaires — §T1 : le bloc de Leïla est la carte
-   préliminaire), carte principale posée en fixture (§T1 : sa composition
-   est le geste du joueur, T2), carte complète (5 + 4 = 9 combats),
+/* Soirées réelles : la carte principale est posée en fixture D'ABORD
+   (§T3, docs/LOT-2-CARTE-PRINCIPALE.md : la composition est le geste du
+   joueur, T2 — Leïla ne propose les préliminaires qu'une fois la carte
+   principale complète), la proposition en bloc de Leïla validée (les
+   quatre préliminaires), carte complète (5 + 4 = 9 combats),
    mgmtRunEvent. tBefore force la trésorerie avant la première soirée
    (test du découvert). */
 function runEvenings(win,seed,n,tBefore){
@@ -32,17 +37,16 @@ function runEvenings(win,seed,n,tBefore){
     setSeed(${seed});
     const m=mgmtDefault(); mgmtNewRoster(m);
     for(let e=0;e<${n};e++){
-      let bulk=null;
-      for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
-      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return 'null';
-      ${force}
-      /* §T1 : la carte principale est posée en fixture (composition = T2),
-         sur des combattants disponibles (une suspension d'une soirée à
-         l'autre est réelle). */
+      /* §T3 : la carte principale d'abord, la proposition de Leïla ensuite. */
       m.card.main=[];
-      const dispo=m.roster.filter(o=>mgmtAvailable(m,o));
+      const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
       if(dispo.length<10) return 'null';
       for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+      m.pile=[]; m.open=null;
+      if(mgmtClosePile(m)!=='refill') return 'null';
+      const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return 'null';
+      ${force}
       if(!mgmtRunEvent(m)) return 'null';
     }
     return JSON.stringify(m);
@@ -57,15 +61,17 @@ function oneEveningMeasured(win,seed,tBefore){
   return JSON.parse(win.eval(`(function(){
     setSeed(${seed});
     const m=mgmtDefault(); mgmtNewRoster(m);
-    let bulk=null;
-    for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
-    if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return 'null';
-    ${force}
-    /* §T1 : la carte principale est posée en fixture (composition = T2). */
+    /* §T3 : la carte principale d'abord (fixture), la proposition de
+       Leïla ensuite. */
     m.card.main=[];
-    const dispo=m.roster.filter(o=>mgmtAvailable(m,o));
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
     if(dispo.length<10) return 'null';
     for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+    m.pile=[]; m.open=null;
+    if(mgmtClosePile(m)!=='refill') return 'null';
+    const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+    if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return 'null';
+    ${force}
     const slotted=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot}));
     const attraction=mgmtCardAttraction(m,slotted);
     const purses=mgmtPurses(m,slotted);
@@ -147,15 +153,16 @@ test('MGMT économie T1 — E1 seulement si une dette a été déduite', () => {
     const uneSoiree=(seed,t)=>{
       setSeed(seed);
       const m=mgmtDefault(); mgmtNewRoster(m);
-      let bulk=null;
-      for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
-      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return null;
-      /* §T1 : la carte principale est posée en fixture (composition = T2),
-         sur des combattants disponibles. */
+      /* §T3 : la carte principale d'abord (fixture), la proposition de
+         Leïla ensuite, sur des combattants disponibles. */
       m.card.main=[];
-      const dispo=m.roster.filter(o=>mgmtAvailable(m,o));
+      const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
       if(dispo.length<10) return null;
       for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+      m.pile=[]; m.open=null;
+      if(mgmtClosePile(m)!=='refill') return null;
+      const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return null;
       m.treasury=t;
       return mgmtRunEvent(m);
     };
@@ -256,15 +263,16 @@ test('MGMT économie T1 — recharger après la soirée ne recompte pas la recet
   win.eval(`(function(){
     setSeed(80);
     const m=mgmtDefault(); mgmtNewRoster(m);
-    let bulk=null;
-    for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
-    if(!bulk||!mgmtDecide(m,bulk.id,'validate')) throw new Error('pas de proposition en bloc');
-    /* §T1 : la carte principale est posée en fixture (composition = T2),
-       sur des combattants disponibles. */
+    /* §T3 : la carte principale d'abord (fixture), la proposition de
+       Leïla ensuite, sur des combattants disponibles. */
     m.card.main=[];
-    const dispo=m.roster.filter(o=>mgmtAvailable(m,o));
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
     if(dispo.length<10) throw new Error('roster trop court');
     for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+    m.pile=[]; m.open=null;
+    if(mgmtClosePile(m)!=='refill') throw new Error('pas de proposition en bloc');
+    const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+    if(!bulk||!mgmtDecide(m,bulk.id,'validate')) throw new Error('pas de proposition en bloc');
     G={mgmt:m};
     if(!mgmtRunEvent(G.mgmt)) throw new Error('soirée non jouée');
   })()`);
@@ -335,8 +343,15 @@ test('MGMT économie T1 — dernier combat indisponible : la soirée est annulé
   const s = JSON.parse(win.eval(`(function(){
     setSeed(85);
     const m=mgmtDefault(); mgmtNewRoster(m);
-    let bulk=null;
-    for(let c=0;c<30&&!bulk;c++){ mgmtNewPile(m); bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); }
+    /* §T3 : la carte principale d'abord (fixture), la proposition de
+       Leïla ensuite. */
+    m.card.main=[];
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    if(dispo.length<10) return 'null';
+    for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+    m.pile=[]; m.open=null;
+    if(mgmtClosePile(m)!=='refill') return 'null';
+    const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
     if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return 'null';
     /* Un combattant du DERNIER combat de la carte devient indisponible
        (dernier prélim : les préliminaires clôturent la soirée, §T1). */
