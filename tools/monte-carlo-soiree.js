@@ -50,26 +50,44 @@
    setSeed(base + 100000 + lot*97) — un run est intégralement
    reproductible pour un même --seed/--n.
 
+   Parallélisme (lot 2, outillage) : les douze catégories sont indépendantes
+   — chacune tire ses combats sous ses propres graines. Le parent répartit
+   les catégories sur des processus enfants (un par cœur, au plus 12) et
+   n'agrège que des compteurs entiers : les chiffres sont EXACTEMENT ceux
+   d'une exécution sur un seul cœur. L'identité au moteur nu (cible 1) et la
+   mesure du roster initial (cible 6) sont globales : elles sont calculées
+   par le premier enfant seulement, sur les mêmes graines.
+
    Usage :
      node tools/monte-carlo-soiree.js [--seed=S] [--n=N] [--out=CHEMIN] [--quiet]
+                                      [--jobs=N] [--serial]
    ============================================================================ */
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const { fork } = require('child_process');
 const { JSDOM } = require('jsdom');
 
 const ROOT = path.join(__dirname, '..');
 
 /* --------------------------- 1) CLI --------------------------------------- */
 function parseArgs(argv){
-  const out = { seed: 20260917, n: 20000, out: 'tools/reports/LOT-3A-CALIBRAGE-SOIREE.md', quiet: false };
+  const out = { seed: 20260917, n: 20000, out: 'tools/reports/LOT-3A-CALIBRAGE-SOIREE.md', quiet: false,
+    jobs: Math.max(1, Math.min(12, os.cpus().length)), divs: null, doGlobal: true, worker: false };
   for(const arg of argv){
     if(arg === '--quiet'){ out.quiet = true; continue; }
+    if(arg === '--serial'){ out.jobs = 1; continue; }
     const m = /^--([a-zA-Z]+)=(.+)$/.exec(arg);
     if(!m) continue;
     const key=m[1], val=m[2];
     if(key === 'seed') out.seed = parseInt(val, 10) || out.seed;
     else if(key === 'n') out.n = Math.max(4, parseInt(val, 10) || out.n);
     else if(key === 'out') out.out = val;
+    else if(key === 'jobs') out.jobs = Math.max(1, Math.min(12, parseInt(val, 10) || out.jobs));
+    /* Mode enfant (interne) : la liste des index de catégories à mesurer, et
+       si cet enfant porte les mesures globales (identité, roster). */
+    else if(key === 'divs'){ out.worker = true; out.divs = val.split(',').map(x=>parseInt(x,10)).filter(x=>x>=0); }
+    else if(key === 'global') out.doGlobal = val === '1';
   }
   /* Le chemin de sortie est relatif à la racine du dépôt, sauf s'il est
      déjà absolu (path.join renvoie l'absolu tel quel). */
@@ -142,15 +160,19 @@ function newGameWindow(){
   return window;
 }
 
-/* ------------------------------ 3) main ------------------------------------ */
-(function main(){
-  const cfg = parseArgs(process.argv.slice(2));
+/* --------------------- 3) mesure (un processus) ---------------------------- */
+/** Mesure les catégories demandées (cfg.divs, ou toutes) dans une fenêtre
+ *  neuve. Les graines ne dépendent que de la catégorie et du combat : le
+ *  découpage ne change aucun chiffre.
+ *  @returns {string} JSON des compteurs. */
+function measure(cfg){
   const win = newGameWindow();
   /* Toute la boucle vit côté fenêtre (accès direct aux fonctions du jeu,
      aucun aller-retour d'évaluation par combat) ; les agrégats reviennent
      en JSON. */
   const agg = win.eval(`(function(){
     const N=${cfg.n}, BASE=${cfg.seed};
+    const DIVS=${cfg.divs?JSON.stringify(cfg.divs):'null'}, DO_GLOBAL=${cfg.doGlobal?'true':'false'};
     const POOL_MIN=60, BATCH_MAX=400;
 
     /* ---- 1) Pools par catégorie : rosters générés comme celui de Split ---- */
@@ -203,7 +225,7 @@ function newGameWindow(){
     /* ---- 4) Mesure 1 : corps à 0 = moteur nu, même graine (480 paires) ---- */
     let identN=0, identEcart=0;
     const dIds=Object.keys(pools);
-    for(let k=0;k<480;k++){
+    for(let k=0;DO_GLOBAL&&k<480;k++){
       const pool=pools[dIds[k%dIds.length]];
       if(pool.length<2) continue;
       setSeed(BASE+900000+k);
@@ -222,11 +244,12 @@ function newGameWindow(){
     /* ---- 5) Scénarios par catégorie : N combats par catégorie, quatre
        scénarios de N/4 — chaque combat part de sa propre graine. ---- */
     const divs=allDivisions();
-    const acc={};
+    const acc={}, idx={};
     for(let di=0;di<divs.length;di++){
+      if(DIVS&&DIVS.indexOf(di)<0) continue;
       const dId=divs[di].id;
       const a={n:0,fin30:0,susp90:0,fin60:0,koUse:0,koSain:0,nLeger:0,nUse:0};
-      acc[dId]=a;
+      acc[dId]=a; idx[dId]=di;
       const m={cycle:0,facts:[],roster:pools[dId]||[]};
       const per=Math.floor(N/4);
       /* Scénario « sain » : deux corps à 0, même niveau. */
@@ -291,12 +314,63 @@ function newGameWindow(){
       if(x.trauma>=MGMT_BODY_THRESHOLD) rGe++;
     }
 
-    return JSON.stringify({acc,divNames,
+    return JSON.stringify({acc,divNames,idx,
       ident:{n:identN,ecart:identEcart},
       roster:{n:rN,gt:rGt,ge:rGe},
       seuil:MGMT_BODY_THRESHOLD,perScen:Math.floor(N/4)});
   })()`);
-  const A=JSON.parse(agg);
+  return agg;
+}
+
+/* --------------------- 4) répartition sur les cœurs ------------------------ */
+/** Fusionne les mesures des enfants dans l'ordre canonique des catégories :
+ *  les compteurs sont des entiers par catégorie, rien ne se recalcule.
+ *  @returns {object} */
+function mergeParts(parts){
+  const acc={}, divNames={}, idx={};
+  let ident=null, roster=null, seuil=null, perScen=null;
+  for(const p of parts){
+    Object.assign(divNames,p.divNames);
+    Object.assign(idx,p.idx);
+    for(const dId of Object.keys(p.acc)) acc[dId]=p.acc[dId];
+    if(p.ident&&p.ident.n>0) ident=p.ident;
+    if(p.roster&&p.roster.n>0&&!roster) roster=p.roster;
+    if(seuil===null) seuil=p.seuil;
+    if(perScen===null) perScen=p.perScen;
+  }
+  const ordered={};
+  for(const dId of Object.keys(acc).sort((x,y)=>idx[x]-idx[y])) ordered[dId]=acc[dId];
+  return {acc:ordered,divNames,ident:ident||{n:0,ecart:0},roster:roster||{n:0,gt:0,ge:0},seuil,perScen};
+}
+
+/** Lance un enfant par paquet de catégories et rend les mesures fusionnées.
+ *  Le premier paquet porte les mesures globales (identité, roster). */
+function measureParallel(cfg,done){
+  const nDiv=12;
+  const jobs=Math.min(cfg.jobs,nDiv);
+  const packs=[];
+  for(let i=0;i<jobs;i++) packs.push([]);
+  for(let di=0;di<nDiv;di++) packs[di%jobs].push(di);
+  const parts=[];
+  let left=packs.length, failed=false;
+  packs.forEach((pack,i)=>{
+    const args=['--divs='+pack.join(','),'--global='+(i===0?'1':'0'),
+      '--seed='+cfg.seed,'--n='+cfg.n];
+    const child=fork(__filename,args,{stdio:['ignore','pipe','inherit','ipc']});
+    let buf='';
+    child.stdout.on('data',d=>{ buf+=d.toString(); });
+    child.on('close',code=>{
+      if(failed) return;
+      if(code!==0){ failed=true; done(new Error('Un processus de mesure a échoué (code '+code+').')); return; }
+      try{ parts.push(JSON.parse(buf)); }
+      catch(e){ failed=true; done(new Error('Mesure illisible d\'un processus : '+e.message)); return; }
+      if(--left===0) done(null,mergeParts(parts));
+    });
+  });
+}
+
+/* ------------------------------ 5) rapport --------------------------------- */
+function report(A,cfg){
   const pct=(x,n)=>n>0?Math.round(10000*x/n)/100:0;
 
   /* Agrégats par scénario, toutes catégories confondues. */
@@ -439,4 +513,16 @@ function newGameWindow(){
     console.log(L.join('\n'));
     console.log('\nRapport écrit : '+cfg.out);
   }
+}
+
+/* ------------------------------ 6) main ------------------------------------ */
+(function main(){
+  const cfg = parseArgs(process.argv.slice(2));
+  /* Enfant : mesure son paquet de catégories et rend ses compteurs. */
+  if(cfg.worker){ process.stdout.write(measure(cfg)); return; }
+  if(cfg.jobs<=1){ report(JSON.parse(measure(cfg)),cfg); return; }
+  measureParallel(cfg,(err,A)=>{
+    if(err){ console.error(err.message); process.exitCode=1; return; }
+    report(A,cfg);
+  });
 })();
