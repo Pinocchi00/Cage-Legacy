@@ -19,6 +19,12 @@
    d'Anthony du 15/09/2026) : la carte principale d'abord, la proposition
    de Leïla ensuite — les soirées réelles posent la carte principale en
    fixture, puis tirent les préliminaires sur ce qui reste (refill).
+   LOT 2 T4 (docs/LOT-2-CARTE-PRINCIPALE.md §T4) : l'argent se mesure sur
+   le VRAI déroulé (carte principale composée par le joueur-type,
+   préliminaires issus de la vraie proposition de Leïla, soirée par
+   mgmtRunEvent) — le test des soirées rentables rejoue l'heuristique
+   documentée en tête de tools/monte-carlo-economie.js et échoue si, sur
+   une graine fixe, aucune soirée réelle non écrasée n'est rentable.
    ============================================================================ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -52,6 +58,72 @@ function runEvenings(win,seed,n,tBefore){
     return JSON.stringify(m);
   })()`));
 }
+
+/* Lot 2 T4 (docs/LOT-2-CARTE-PRINCIPALE.md §T4) : le VRAI déroulé, tel que
+   le mesure tools/monte-carlo-economie.js — heuristique du joueur-type
+   propre documentée en tête de l'outil : cinq meilleures paires disjointes
+   de même catégorie disponibles, par attrait décroissant, posées par le
+   vrai geste mgmtBookMain ; préliminaires issus de la vraie proposition de
+   Leïla (mgmtOfferBulk déclenché par la cinquième place, validée) ;
+   soirée par mgmtRunEvent. Les propositions simples de Leïla sont ignorées
+   (ignorer est une décision, addendum §9) — la pile se résout avant la
+   composition, sinon elle bloque la fin de pile (mgmtClosePile). */
+function runRealEveningsT4(win,seed,n){
+  return JSON.parse(win.eval(`(function(){
+    setSeed(${seed});
+    let jouees=0, rentables=0;
+    for(let e=0;e<${n};e++){
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      mgmtNewPile(m);
+      for(const a of m.pile.slice()){ if(a.status==='open'&&a.kind==='leila_propose') mgmtIgnore(m,a.id); }
+      let pose=true;
+      for(let k=0;k<MGMT_MAIN_SIZE;k++){
+        let best=null;
+        const r=m.roster;
+        for(let i=0;i<r.length;i++){
+          const A=r[i];
+          if(!mgmtAvailable(m,A)||mgmtEngaged(m,A)) continue;
+          for(let j=i+1;j<r.length;j++){
+            const B=r[j];
+            if(B.div!==A.div||A.first===B.first) continue;
+            if(!mgmtAvailable(m,B)||mgmtEngaged(m,B)) continue;
+            const d=mgmtFightDraw(A,B);
+            if(!best||d>best.d) best={a:A.id,b:B.id,d:d};
+          }
+        }
+        if(!best||!mgmtBookMain(m,best.a,best.b)){ pose=false; break; }
+      }
+      if(!pose) continue;
+      const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) continue;
+      G={mgmt:m};
+      const ev=mgmtRunEvent(m);
+      if(!ev) continue;
+      jouees++;
+      if(ev.finance.recette>0) rentables++;
+    }
+    return JSON.stringify({jouees,rentables});
+  })()`));
+}
+
+test('MGMT économie T4 — sur une graine fixe, des soirées réelles non écrasées sont rentables', () => {
+  const win = newGameWindow();
+  const seeds=[20260919,20260920,20260921];
+  let total=0, totalRentables=0;
+  for(const seed of seeds){
+    const s = runRealEveningsT4(win,seed,10);
+    assert.ok(s.jouees>=8, 'les soirées réelles se jouent (graine '+seed+')');
+    assert.ok(s.rentables>0,
+      'au moins une soirée réelle non écrasée est rentable (graine '+seed+')');
+    total+=s.jouees;
+    totalRentables+=s.rentables;
+  }
+  /* Garde du calibrage (lot 2 T4 : 70 à 80 % mesurés sur 4000 soirées —
+     plancher volontairement large, le test doit échouer si l'économie
+     cesse de produire des soirées rentables). */
+  assert.ok(totalRentables/total>=0.25,
+    'la part de soirées réelles rentables ne s\u2019effondre pas');
+});
 
 /* Une seule soirée, avec l'attrait et les cachets mesurés sur la carte
    d'avant le calcul — pour vérifier que la finance stockée est bien celle

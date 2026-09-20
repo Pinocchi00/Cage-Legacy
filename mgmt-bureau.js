@@ -1214,8 +1214,10 @@ function mgmtClosePile(m){
    {main,prelims} existe en jeu (docs/LOT-2-CARTE-PRINCIPALE.md §T1) —
    cachets et attrait lisent l'emplacement porté par chaque combat.
    Constantes calibrées par tools/monte-carlo-economie.js sur des cartes de
-   4 + 4 combats (docs/lots/LOT-3B-T1-CALIBRAGE.md) — recalibrées sur le
-   déroulé réel à la T4 du lot 2. ==== */
+   4 + 4 combats (docs/lots/LOT-3B-T1-CALIBRAGE.md), revérifiées sur le VRAI
+   déroulé à la T4 du lot 2 (docs/LOT-2-CARTE-PRINCIPALE.md §T4 —
+   tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md) : les poids d'argent sont
+   inchangés, seules les références D4 suivent la mesure réelle. ==== */
 /* Trésorerie au premier jour (k$). Ordre de grandeur de l'exemple QO-5
    (T=50 : un short notice à 60 est refusé avant la première soirée, P=0). */
 const MGMT_TREASURY_START=50;
@@ -1257,11 +1259,13 @@ const MGMT_TV_ECRANS=1000;
 const MGMT_CARD_CONTRACT=MGMT_MAIN_SIZE+MGMT_PRELIM_SIZE;
 /* Références D4 (QO-7) : attrait d'un combat moyen et spectacle (part de
    finitions) d'une carte complète d'attrait moyen, mesurés par Monte Carlo
-   (graine 20260915, 4000 soirées — docs/lots/LOT-3B-T1-CALIBRAGE.md).
+   sur le déroulé réel (graine 20260919, 4000 soirées — lot 2 T4,
+   tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md ; l'ancien déroulé
+   synthétique 4 + 4 mesurait 0.616 et 0.638, docs/lots/LOT-3B-T1-CALIBRAGE.md).
    mgmtAudienceRef sans historique redonne ainsi l'audience moyenne mesurée
    d'une carte complète. */
-const MGMT_DRAW_AVG=0.62;
-const MGMT_SPECTACLE_REF=0.64;
+const MGMT_DRAW_AVG=0.59;
+const MGMT_SPECTACLE_REF=0.67;
 
 /** Nom d'une ligne (0..1) : valeur de scène dérivée du bilan — activité,
  *  ratio de victoires, niveau dérivé du bilan. Pur et déterministe, jamais
