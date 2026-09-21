@@ -33,3 +33,9 @@ tools/reports/*
 # mesure du monde extérieur dérivé (les deux cibles de réalisme) est le
 # livrable T1, versionné.
 !tools/reports/LOT-2B-T1-MONDE-EXTERIEUR.md
+# Lot 3 T2 (docs/LOT-3-L-ARENE.md §3 T2) : même principe — la mesure de la
+# cible 1 (cohérence image/déroulé) est le livrable T2, versionné.
+!tools/reports/LOT-3-T2-CIBLE-1-ARENE.md
+# Lot 3 T2 : même principe — le relevé DOM automatisé de la vérification
+# d'interface (charte §3) est le livrable T6 de la tranche, versionné.
+!tools/reports/LOT-3-T2-VERIF-INTERFACE.md
