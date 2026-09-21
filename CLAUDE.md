@@ -172,7 +172,7 @@ sans citer la décision qui change le comportement attendu.
 | `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
 | `tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md` | Calibrage de l'économie sur le déroulé réel (21/09/2026) : les quatre profils de joueur, les trois cibles, et le tableau des six soirées enchaînées qui a révélé QO-8 |
 | `docs/CHARTE-INTERFACE-MANAGEMENT.md` | Charte d'interface du management (15/09/2026) : priorité d'Anthony. Vérification UI obligatoire à chaque tranche qui touche un écran (§3). |
-| `docs/QUESTIONS-OUVERTES.md` | QO-1 à QO-8. **Attention au titre : QO-1 à QO-7 sont toutes « design arrêté » — ce qui manque est le code, pas une décision.** QO-5 et QO-6 sont livrées. Seule QO-8 (le vivier qui ne se renouvelle pas, défaut reconnu le 21/09) attend encore un cadrage d'auteur. N'y répondre qu'avec une décision d'Anthony. |
+| `docs/QUESTIONS-OUVERTES.md` | QO-1 à QO-10. **Attention au titre : QO-1 à QO-7 sont toutes « design arrêté » — ce qui manque est le code, pas une décision.** QO-5 et QO-6 sont livrées. QO-8 (le vivier), QO-9 (la mémoire des faits) et QO-10 (Leïla parle trop) portent les décisions d'Anthony du 21/09 : tranchées, pas encore codées. N'y répondre qu'avec une décision d'Anthony. |
 | `docs/ETAT-DES-LIEUX.md` | Inventaire du 08/09/2026 (fichiers à garder / à jeter) — le sort du mode Duel y est en attente de la décision d'Anthony (T5). |
 | `docs/STRATEGIE-IA-CAGE-LEGACY-2026-09.md` | Proposition de méthode de production avec les IA (pas une spécification du jeu) |
 | `docs/ETAT-14-09.md` | **Périmé (17/09/2026)** : historique des deux tests rouges du 14/09, réécrits depuis. Ne plus s'y fier. |
@@ -194,8 +194,10 @@ sans citer la décision qui change le comportement attendu.
 - **Hasard hors graine** : `uniqueFighterId()` (`engine.js`) utilise `Date.now()`
   et `Math.random()`. Le périmètre exact de reproductibilité n'est pas défini.
 - **Mémoire des faits** : `mgmtAddFact()` supprime les faits au-delà de
-  `MGMT_FACTS_MAX=10`, alors que l'addendum §2 dit « le fait ne disparaît
-  jamais ». Arbitrage d'auteur non rendu.
+  `MGMT_FACTS_MAX=10` (`mgmt-data.js:30`), alors que l'addendum §2 dit « le fait
+  ne disparaît jamais ». **Arbitrage rendu le 21/09/2026 (QO-9) : les faits ne
+  disparaissent jamais, le plafond saute, et l'interface les range et les trie.**
+  Décidé, pas encore codé — les deux moitiés vont ensemble.
 - **Modes Faith, Gauntlet et boutique retirés** avec leurs fichiers. Toute mention
   restante est de la documentation historique ou une donnée d'ancienne légende du
   Panthéon (`f.gameMode`, `f.faithNemesisId`, `f.faithTraits`), jamais du code

@@ -145,8 +145,9 @@ déclenche que si l'audience a réellement baissé. ~~Carte de 8 combats : 4 mai
 choisis par le joueur, 4 prélims proposés par Leïla.~~ **Prémisse périmée
 (21/09/2026) : la carte fait 9 combats, 5 en carte principale et 4 en
 préliminaires, depuis la décision du 19/09 (`docs/LOT-2-CARTE-PRINCIPALE.md` §0),
-livrée au lot 2 T1. Le fond de la décision tient ; la carte a changé sous elle. À
-relire au moment de coder la carte réduite, pas avant.** Retraits : toutes causes
+livrée au lot 2 T1. **Confirmé par Anthony le 21/09/2026 : la carte fait bien 9
+combats.** Le fond de la décision tient ; seule la taille de la carte change sous
+elle. La carte réduite se lira donc sur 9, pas sur 8.** Retraits : toutes causes
 réelles, taux proche du réel. Détail et reste ouvert (geste de composition de la
 main card) : `docs/LOT-3B-CONTRAT.md` §1 et §2.
 
@@ -190,32 +191,97 @@ de `docs/LOT-3B-CONTRAT.md` le porte — écrit, pas codé. Il répond au short 
 reste à décider s'il répond aussi au **recrutement ordinaire**, c'est-à-dire si une
 organisation recrute entre deux soirées.
 
-**Décision d'Anthony, 21/09/2026.** Les questions 2 et 3 sont tranchées : **le
-déclin du vivier est un défaut, pas une pression de jeu voulue.** Une organisation
-est censée se renouveler — des combattants arrivent. La cible « rentable dans 70 à
-80 % des soirées » se lit donc sur la **durée de vie** de l'organisation, et non
-sur sa seule première soirée : une fois le renouvellement en place, le calibrage
-du lot 2 T4 sera à revérifier sur plusieurs soirées enchaînées
+**Décision d'Anthony, 21/09/2026.** Le déclin du vivier est un **défaut**, pas une
+pression de jeu voulue. Une organisation est censée se renouveler. La cible
+« rentable dans 70 à 80 % des soirées » se lit donc sur la **durée de vie** de
+l'organisation, et non sur sa seule première soirée : une fois le renouvellement en
+place, le calibrage du lot 2 T4 sera à revérifier sur plusieurs soirées enchaînées
 (`node tools/monte-carlo-economie.js --soirees=K`, l'outil sait déjà le mesurer).
 
-**Ce qui reste à cadrer** (aucune de ces questions n'est tranchée — elles sont du
-ressort de l'auteur, et feront l'objet d'un contrat de lot) :
-1. **D'où viennent les nouveaux ?** Le vivier extérieur de [QO-2] et [QO-3]
-   (combattants d'une autre organisation, libres de contrat) sert déjà le short
-   notice : il peut servir le recrutement ordinaire, ou bien le recrutement suit
-   un autre chemin — des débutants qui entrent en amateur, par exemple.
-2. **À quel rythme, et déclenché par quoi ?** Un flux régulier par cycle, ou une
-   réaction au manque (le vivier descend sous un seuil) ? Le joueur décide-t-il de
-   recruter, ou Leïla le lui apporte-t-elle comme une affaire ?
-3. **Qui l'annonce ?** Si un combattant arrive, quelqu'un le dit — c'est une
-   réplique, donc un texte d'auteur. Aucun n'est écrit.
-4. **Que deviennent les partants ?** Les retraités médicaux sortent du classement
-   (lot 2 T1) ; rien ne dit s'ils quittent la ligne, ni si le joueur l'apprend.
+**Les quatre « comment », tranchés le 21/09/2026 :**
+
+1. **D'où viennent les nouveaux.** Ils sont **régénérés**, sur le modèle des
+   *newgens* de Football Manager : une génération de combattants naît, puis
+   **combat en amateur et dans d'autres organisations** avant que Split ne les
+   voie. Ils arrivent donc avec un passé, pas vierges.
+2. **Rythme et recrutement.** Un **flux régulier** de combattants recrutables —
+   mais **le joueur recrute, et lui seul**. Rien n'entre dans le vivier sans son
+   geste. Le jeu ne signe jamais à sa place (règle du bureau, CDC §3).
+3. **Annonce.** L'arrivée d'un combattant **n'est pas un événement** : personne ne
+   l'annonce, aucune réplique ne se déclenche. En revanche **son premier combat
+   sous Split peut porter du récit** — c'est là que l'histoire se raconte, pas à la
+   signature.
+4. **Les partants.** Ils **partent à la retraite**, simplement. Aucune autre sortie
+   à inventer.
+
+**Ce qui reste à cadrer, et qui est mécanique, pas d'auteur.** « Ils combattent en
+amateur et dans d'autres organisations » peut se coder de deux façons, et le choix
+décide du coût :
+
+- **monde simulé** : les combattants extérieurs livrent de vrais combats
+  (`simulateFight`) cycle après cycle. Fidèle, cher — c'est une deuxième
+  simulation qui tourne en permanence à côté de Split.
+- **monde dérivé** : ils naissent avec un bilan plausible et le font progresser par
+  une abstraction légère, sans passer par le moteur. Bien moins cher, et
+  indiscernable pour le joueur, qui ne voit qu'une ligne et un bilan.
+
+À trancher au moment du contrat de lot. Le lien avec [QO-2] et [QO-3] est direct :
+le vivier extérieur qu'elles décrivent est **le même monde** que celui des
+nouveaux — il ne doit pas en exister deux (règle : jamais un système parallèle à
+un système existant).
 
 **Où.** `mgmt-bureau.js` (`mgmtNewRoster`, `mgmtAvailable`, `mgmtApplyFight`),
 `docs/LOT-3B-CONTRAT.md` §T5. Aucun test skip associé : le comportement mesuré est
 celui du code actuel. Il est désormais **reconnu comme un défaut à corriger**, et
 attend son contrat de lot.
+
+---
+
+## QO-9 — La mémoire des faits : rien ne s'efface
+
+**Statut. Décision d'Anthony du 21/09/2026.** Tranchée, pas encore codée.
+
+**Le conflit.** L'addendum §2 dit « le fait ne disparaît jamais ». Le code dit le
+contraire : `mgmtAddFact` coupe au-delà de `MGMT_FACTS_MAX = 10`
+(`mgmt-data.js:30`, appliqué en `mgmt-bureau.js:662` et `:1623`). L'arbitrage
+n'avait jamais été rendu ; il figurait dans la dette du `CLAUDE.md`.
+
+**Décision.** **Les faits ne disparaissent jamais.** Le plafond saute. En
+contrepartie, **l'interface les range et les trie** — c'est l'affichage qui rend
+une mémoire longue lisible, pas l'oubli.
+
+**Ce que cela implique.** Deux chantiers distincts : retirer le plafond côté
+données (et vérifier que la sauvegarde encaisse une liste qui grandit sans fin —
+`validateMgmt`, `mgmtRepair`), puis ranger et trier côté écran (lot 4, la peau du
+jeu). Le premier sans le second donnerait un mur de faits illisible : ils vont
+ensemble.
+
+---
+
+## QO-10 — Leïla parle trop
+
+**Statut. Direction donnée par Anthony le 21/09/2026.** Le principe est tranché ;
+la portée reste à cadrer.
+
+**Le constat d'Anthony.** « Leïla parle trop, tout le temps, ce n'est pas
+réaliste. Le jeu, l'interface doit expliquer tout ça. »
+
+**Décision immédiate.** Là où le lot 2 T5 laissait un manque — l'écran du bureau,
+pile vide et carte principale à composer, ne dit pas au joueur ce qu'on attend de
+lui — **la réponse n'est pas une réplique de Leïla. C'est l'interface qui
+l'explique.** Aucun `[EMPLACEMENT AUTEUR]` n'est donc dû à cet endroit ; c'est une
+tâche de lot 4 (la peau du jeu), pas une tâche d'auteur.
+
+**Règle qui s'en dégage.** Une voix de personnage sert à porter une intention, une
+relation ou un désaccord — jamais à expliquer une règle du jeu ni à commenter un
+état d'écran. Ce qui relève de l'état se lit ; ce qui relève de l'humain se dit.
+
+**Ce qui reste à cadrer.** La portée : s'agit-il seulement de **ne pas en
+ajouter** — ce qui est acquis — ou faut-il aussi **alléger l'existant** ? Le mode
+management est aujourd'hui construit sur la pile d'affaires de Leïla : toucher à
+sa densité toucherait le cœur du bureau. Question ouverte, à rouvrir au lot 5 (le
+monde qui parle), quand les autres voix arriveront et que sa part relative
+baissera peut-être d'elle-même.
 
 ---
 
