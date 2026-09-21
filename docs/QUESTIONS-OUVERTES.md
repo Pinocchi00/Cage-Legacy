@@ -146,6 +146,54 @@ marqué skip : `tests/mgmtBureau.test.js:842`.
 
 ---
 
+## QO-8 — L'organisation s'use : le vivier fond, la soirée cesse d'être rentable
+
+**Statut.** Mesure faite, design non arrêté. **Ouvert — attend une décision
+d'Anthony.**
+
+**Le constat.** Relevé le 21/09/2026 par le calibrage du lot 2 T4
+(`tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md`, 4000 organisations, six soirées
+chacune, joueur d'écran). L'économie est calibrée sur la **première** soirée d'une
+organisation neuve, où elle atteint sa cible. Elle se dégrade ensuite, soirée après
+soirée :
+
+| Soirée | % de soirées rentables | R moyen | Combattants disponibles | Suspensions en cours |
+|---|---|---|---|---|
+| 1 | 77,4 % | +5,3 k$ | 48,6 | 0 |
+| 2 | 56,5 % | +1,6 k$ | 41,6 | 6,9 |
+| 3 | 47,3 % | +0,3 k$ | 34,6 | 13,9 |
+| 4 | 37,3 % | −1,5 k$ | 27,9 | 20,6 |
+| 5 | 31,0 % | −2,6 k$ | 25,1 | 23,3 |
+| 6 | 25,5 % | −3,7 k$ | 23,5 | 24,8 |
+
+**Ce qui manque côté code.** Rien n'entre dans le vivier. `mgmtNewRoster()` le
+peuple une fois ; les suspensions médicales et les retraits en sortent des
+combattants, et aucun ne les remplace. À la sixième soirée, la moitié du vivier est
+indisponible et le joueur compose ses cinq combats avec ce qui reste — d'où la chute
+de l'attrait, de l'audience et de la recette. Ce n'est pas un défaut de calibrage :
+aucun poids d'argent ne compense un vivier qui fond.
+
+**Ce qui est déjà décidé ailleurs.** Le vivier extérieur (combattants d'une autre
+organisation, libres de contrat) est le sujet de [QO-2] et [QO-3], et la tranche T5
+de `docs/LOT-3B-CONTRAT.md` le porte — écrit, pas codé. Il répond au short notice ;
+reste à décider s'il répond aussi au **recrutement ordinaire**, c'est-à-dire si une
+organisation recrute entre deux soirées.
+
+**Ce qui reste à trancher.** Trois questions distinctes, aucune tranchée :
+1. Une organisation recrute-t-elle d'elle-même, et à quel rythme ?
+2. Le déclin du vivier est-il un **problème à corriger** ou une **pression de jeu
+   voulue** — la jeunesse de l'organisation comme âge d'or, le joueur devant gérer
+   l'usure ?
+3. Si c'est une pression voulue, la cible « rentable dans 70 à 80 % des soirées »
+   se lit-elle sur la première soirée (lecture actuelle) ou sur la durée de vie de
+   l'organisation ?
+
+**Où.** `mgmt-bureau.js` (`mgmtNewRoster`, `mgmtAvailable`, `mgmtApplyFight`),
+`docs/LOT-3B-CONTRAT.md` §T5. Aucun test skip associé : le comportement mesuré est
+celui du code actuel, il n'est pas en attente d'implémentation.
+
+---
+
 ## Résumé des tests skip concernés
 
 | Test (tests/mgmtBureau.test.js) | Ligne | Entrée liée |

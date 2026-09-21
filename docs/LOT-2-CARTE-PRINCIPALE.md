@@ -139,7 +139,8 @@ Exigé par `LOT-3B-CONTRAT.md` §T2, et condition de la fusion dans `main`.
   comportement attendu. Les tests qui verrouillent l'ancienne carte (4 places,
   proposition en bloc en début de pile) se réécrivent en citant **ce contrat** ; les
   autres ne bougent pas.
-- **Aucune fusion dans `main`** avant la fin de T4.
+- **Aucune fusion dans `main`** avant la fin de T4 puis T5 (décision du 20/09,
+  §4 bis « Ordre de fusion ») : une seule PR, la branche étant linéaire.
 
 ## 4. Règles de vitesse
 
@@ -172,28 +173,190 @@ la réponse disparaît quand la carte est pleine).
 3. **À 1920, seule la colonne du milieu s'élargit** (320 / 658 / 360) : la place
    supplémentaire va à la liste, pas à la carte. À regarder en jouant.
 
-### Questions de règle, à trancher par Anthony
+### Questions de règle — tranchées par Anthony le 20/09/2026
 
-4. **Le calendrier peut avancer sans soirée.** Carte principale incomplète et pile
-   vide, « Cycle suivant » fait avancer le cycle : vérifié en jeu, trois clics
-   passent du cycle 6 au cycle 9 avec un seul combat posé et aucune soirée jouée.
-   La carte en cours est conservée. Contredit le lot 3a §10 (« le calendrier impose
-   une soirée à la fin de chaque cycle »). Deux options : le calendrier attend le
-   joueur, ou une soirée manquée coûte quelque chose (relève alors du lot 3B T3).
-   **À trancher avant de clore le lot 2.**
-5. **Le joueur ne peut composer qu'à l'intérieur d'une catégorie de poids**
-   (`mgmtBookMain` refuse le croisement). Choix fait par OpenCode, conforme à la
-   maquette ; mais Leïla, elle, croise les catégories quand le joueur écrase ses
-   cartes.
-6. **`mgmtClosePile` renvoie `'stuck'` dans deux situations différentes** : le pot
-   de combattants est épuisé, ou la carte principale n'est pas composée (état
-   normal). Le déclencheur manuel les traite pareil.
+4. **Le calendrier attend le joueur.** Carte principale incomplète et pile vide,
+   « Cycle suivant » faisait avancer le cycle : vérifié en jeu, trois clics
+   passaient du cycle 6 au cycle 9 avec un seul combat posé et aucune soirée
+   jouée, contre le lot 3a §10. **Décision : le calendrier attend le joueur** —
+   le cycle ne se ferme pas tant que la carte principale n'est pas composée.
+   L'autre option (une soirée manquée coûte quelque chose) demande une
+   conséquence, donc un texte d'auteur : elle reste au lot 3B T3 et n'est pas
+   écartée. Objet de la **T5** ci-dessous.
+5. **La composition reste enfermée dans une catégorie de poids.**
+   `mgmtBookMain` refuse le croisement (`mgmt-bureau.js`, `fa.div!==fb.div`) et
+   `mgmtSelectable` filtre déjà la liste dès qu'un combattant est choisi —
+   l'écran annonce « Adversaires — *catégorie* », le refus n'est pas muet.
+   **Décision : on garde.** Le croisement est la punition de la carte écrasée
+   par Leïla ; libre et sans coût côté joueur, il viderait cette punition de son
+   sens et le classement par catégorie posé en T1 avec elle. Le catchweight
+   assumé, avec son coût visible, relèvera du lot 5 (classements et ceintures).
+6. **`mgmtClosePile` renvoyait `'stuck'` dans deux situations différentes** : le
+   pot de combattants est épuisé, ou la carte principale n'est pas composée
+   (état normal). C'est la même ligne que la question 4 — depuis la T3,
+   `mgmtOfferBulk` refuse de proposer tant que la carte principale est
+   incomplète, donc `mgmtRefillBulk` rend faux, donc `'stuck'`, et
+   `CL.mgmtNextCycle` ferme le cycle. **Réglé par la T5, en même temps que la
+   question 4.**
+
+### Ordre de fusion — tranché par Anthony le 20/09/2026
+
+La branche `lot-2-carte-principale` est une **chaîne linéaire de 18 commits**
+au-dessus de `main`, qui porte dans l'ordre : lot 3B T1 (l'argent) → lot 0 →
+lot 1 → lot 2 T1/T2/T3. `lot-3b`, `lot-0-documents` et `lot-1-style-stable` sont
+tous ancêtres de `HEAD`. Le commit de l'économie étant **en bas** de la pile,
+aucune fusion partielle n'est possible sans cherry-pick : tout ce qui passe
+emporte l'économie perdante.
+
+**Décision : une seule fusion, une seule PR, après la T4 et la T5.** `main` ne
+contient ainsi jamais un état où jouer une soirée coûte de l'argent.
+
+### Relecture de la T4 (21/09/2026) — reprise demandée
+
+La T4 livrée (commit `933ce41`) rejoue un **vrai** déroulé : `mgmtNewPile`,
+composition par `mgmtBookMain`, proposition de Leïla par `mgmtOfferBulk`,
+validation par `mgmtDecide`, soirée par `mgmtRunEvent`. Cette partie est juste et
+se garde. Les interdits sont tenus : moteur, `state/`, `ui-*`, `index.html`,
+`mgmt-data.js` et `mgmt-screens.js` intacts, aucun `Math.random()`, aucune
+réplique. Les constantes d'argent ne sont pas touchées ; seules `MGMT_DRAW_AVG`
+et `MGMT_SPECTACLE_REF`, qui sont des mesures, suivent le déroulé réel.
+
+**Mais le joueur-type est un oracle.** `composeMainPropre` choisit ses cinq
+combats par `mgmtFightDraw` décroissant, c'est-à-dire en maximisant directement
+la grandeur qui produit la billetterie et les droits du diffuseur. C'est la
+quantité que l'écran ne montre pas : le joueur ne voit que la catégorie, le rang
+et le bilan (§T2 — aucune note, aucune jauge). Le test ajouté recopie la même
+heuristique et hérite du même biais.
+
+Mesure de contrôle faite par Claude le 21/09 : même outil, même graine, même
+déroulé, seule l'heuristique remplacée par un joueur qui n'utilise que
+`mgmtDivisionRank` et la catégorie (le mieux classé disponible, apparié au plus
+proche en rang) — 600 soirées par profil.
+
+| Joueur-type de la carte principale | R moyen | % rentables | Attrait de carte |
+|---|---|---|---|
+| oracle (`mgmtFightDraw` décroissant — la T4 livrée) | +3,6 k$ | **73,8 %** | 9,78 |
+| joueur d'écran (catégorie et rang seuls) | **−6,5 k$** | **9,5 %** | 7,95 |
+| bâclé (inchangé) | −14,4 k$ | 0,3 % | 6,39 |
+
+Le joueur d'écran retombe sur **R ≈ −6,5 k$**, c'est-à-dire exactement la soirée
+réelle jouée en jeu le 20/09 (R = −6, trésorerie 50 → 44). Le rapport de la T4
+explique cette soirée comme « un tirage sous le 5e centile » : c'est faux — elle
+est la **médiane** du joueur qui ne dispose que de l'écran. La cible « une carte
+complète moyenne est rentable dans 70 à 80 % des soirées » n'est donc pas
+atteinte ; elle l'est seulement pour un joueur qui voit ce que le jeu lui cache.
+
+*Réserve de méthode : la mesure de contrôle abandonne la soirée quand
+`mgmtBookMain` refuse une paire au lieu d'essayer la suivante — 412 soirées
+composées sur 600. C'est une sonde, pas un calibrage ; elle établit l'ordre de
+grandeur et la concordance avec le jeu réel, pas le chiffre définitif.*
+
+### Relecture de la T4 bis (21/09/2026) — acceptée
+
+Commit `400fc42`. Le défaut de la T4 est corrigé à la racine : `composeMainEcran`
+ne lit que `mgmtCartRows`, `mgmtSelectable`, `mgmtDivisionRank` et la catégorie —
+la liste telle que l'écran la montre. Aucun appel à `mgmtFightDraw`, `mgmtStar`,
+`mgmtPurse`, `mgmtCardAttraction` ni `mgmtEventRecette` pour **choisir** ; ces
+fonctions ne servent plus qu'à **mesurer**. Le refus de `mgmtBookMain` fait essayer
+le candidat suivant au lieu d'abandonner la soirée — la solution est meilleure que
+la sonde du 21/09, qui abandonnait. L'ancienne heuristique subsiste comme profil
+**oracle**, borne haute explicitement exclue des cibles. Le test reprend
+l'heuristique de l'écran à l'identique.
+
+Vérifications faites par Claude, pas reprises de la livraison :
+
+- **Le test mord** : `MGMT_TICKET_PER_DRAW` mise à 0 fait échouer
+  `tests/mgmtEconomie.test.js:130` (« au moins une soirée réelle non écrasée est
+  rentable ») ; constante restaurée.
+- **Le calibrage se reproduit** : `--n=600 --soirees=1` redonne 74,8 % de soirées
+  rentables pour le joueur d'écran (77,4 % à `--n=4000`), gradient oracle > écran
+  > bâclé tenu, les trois cibles atteintes.
+- **Interdits tenus** : `engine-*.js`, `state/`, `ui-*.js`, `index.html`,
+  `mgmt-data.js`, `mgmt-screens.js` inchangés entre `933ce41` et `400fc42`.
+- **Un seul poids d'argent touché** : `MGMT_PURSE_PER_STAR` 4 → 3.35. Les
+  références D4 (`MGMT_DRAW_AVG` 0.48, `MGMT_SPECTACLE_REF` 0.71) sont des mesures
+  reposées sur le joueur d'écran.
+
+**Réserve, sans conséquence sur l'acceptation.** Le test ne garde plus le plancher
+global de soirées rentables qu'il portait à la T4 (`>= 0.25`) : il vérifie qu'au
+moins une soirée par graine est rentable. C'est ce que le contrat demande, et
+c'est cohérent avec la consigne « aucun nombre du calibrage figé en dur ». Une
+garde plus solide serait de vérifier une **propriété** plutôt qu'un chiffre — que
+le joueur d'écran reste plus rentable que le joueur bâclé. À faire à la T5 si on
+veut, pas avant.
+
+**Ce que la mesure a révélé, et qui sort du lot 2** : l'économie tient à la
+première soirée d'une organisation neuve, puis se dégrade jusqu'à 25,5 % de
+soirées rentables à la sixième, parce que le vivier fond sans que rien n'y entre.
+Ce n'est pas un défaut de calibrage — aucun poids d'argent ne compense un vivier
+qui fond. Consigné en **QO-8** (`docs/QUESTIONS-OUVERTES.md`), en attente d'une
+décision d'Anthony.
+
+### Relecture de la T5 (21/09/2026) — acceptée
+
+`mgmtClosePile` sépare les deux anciens `'stuck'` : `'compose'` (carte principale
+incomplète et encore composable — le joueur a la main) et `'stuck'` (pot épuisé —
+le cycle avance, lot 1g). `CL.mgmtNextCycle` ne ferme plus le cycle sur
+`'compose'`, et le déclencheur « Cycle suivant » n'est plus proposé dans cet état.
+Aucun texte neuf, aucun `[EMPLACEMENT AUTEUR]` posé : OpenCode a pris la voie
+« ne pas proposer une action qui ne ferait rien » (charte S6).
+
+**Vérifié manette en main par Claude** (jeu réel, `http://localhost:8765`,
+partie neuve, cycle 1) :
+
+| État atteint en jeu | `mgmtClosePile` | « Cycle suivant » | Cycle |
+|---|---|---|---|
+| Pile vidée, carte 0/5 | `compose` | absent | ne bouge pas |
+| `CL.mgmtNextCycle()` appelé trois fois dans cet état | `compose` | — | **reste à 1, carte intacte** |
+| Carte 5/5 posée par le vrai geste | `none` puis `refill` | — | proposition de Leïla ouverte (T3 intacte) |
+| Proposition validée | `event` | — | soirée jouée, 9 combats |
+
+Le bug du 20/09 est éteint : trois déclenchements ne font plus passer le cycle de
+6 à 9. La soirée réelle jouée au passage donne **R = 0** (trésorerie 50 → 50) —
+un seul tirage, pas une mesure, mais à comparer au R = −6 d'avant le recalibrage.
+
+`npm run check` relancé par Claude : **293 tests, 289 passants, 0 échec, 4 skip**.
+
+**Écart accepté, et pourquoi.** OpenCode n'a pas appliqué la décision 4 à la
+lettre : il n'attend que si un combat est *encore composable*
+(`mgmtMainPosable`), sinon `'stuck'` avance le cycle. Pris au pied de la lettre,
+« le cycle ne se ferme pas tant que la carte n'est pas composée » enfermerait le
+joueur pour toujours quand le vivier fond (QO-8) — et contredirait le lot 1g
+(« aucun blocage »). La garde est juste ; elle raffine la décision 4 sans la
+trahir. Si Anthony veut l'attente sans garde, c'est une ligne — mais le blocage
+définitif devient possible.
+
+**Réserve d'interface, ouverte.** Dans l'état `compose`, l'écran du bureau
+affiche « La pile est vide. », le déclencheur a disparu, et rien n'invite le
+joueur à aller composer : seul le bouton « Carte principale » en tête de page
+mène quelque part. C'est correct et silencieux, mais c'est l'endroit où une
+phrase de Leïla manque — **texte d'auteur, à écrire par Anthony**. À traiter
+avec les réserves d'interface 1 à 3 (lot 4).
+
+**Réserve de contraste, ouverte.** La ligne du cycle (13 px) tombe à 4,31:1
+contre le haut du dégradé, sous le 4,5:1 de la charte L2. `index.html` étant
+interdit au lot 2, elle rejoint la réserve 1 au lot 4.
 
 ### État de l'économie
 
 Une soirée réelle jouée le 20/09 (9 combats, carte composée par le joueur,
 préliminaires de Leïla validés) donne **R = −6 k$** : la trésorerie passe de 50 à
 44. C'est l'objet de la T4, et la raison de l'interdiction de fusionner.
+
+### T5 — Le calendrier attend le joueur *(après T4, décision 4 du 20/09)*
+
+- **`mgmtClosePile` distingue les deux `'stuck'`** : un code propre pour « la
+  carte principale n'est pas composée, le joueur a la main » et un autre pour
+  « le pot de combattants est épuisé ». Fonction pure, jamais une fonction
+  concurrente ; la JSDoc dit les quatre issues.
+- **`CL.mgmtNextCycle` ne ferme plus le cycle** dans le premier cas : le bureau
+  reste ouvert, le joueur compose. Le pot épuisé continue d'avancer le cycle,
+  comme aujourd'hui (lot 1g : aucun blocage).
+- **Aucune réplique, aucun texte neuf.** Si l'écran doit dire pourquoi le cycle
+  n'avance pas, c'est `[EMPLACEMENT AUTEUR]` et c'est signalé.
+- **Tests** : carte principale incomplète et pile vide, le cycle ne bouge pas ;
+  pot épuisé, il bouge encore ; carte complète, c'est la soirée.
+- Vérification d'interface de la charte §3 si l'écran change.
 
 ## 5. Terminé pour le lot
 
