@@ -180,6 +180,7 @@ sans citer la décision qui change le comportement attendu.
 | `docs/LES-SIX-VOIX-v1.1.md`, `docs/LES-CINQ-LEGENDES-v1.1.md` | Voix et personnages — contenu d'auteur |
 | `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md`, `docs/LOT-3A-TESTS-CONTRAT.md` | Lot 3a — livré et mergé (PR 61) |
 | `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré. Sa T2 (carte principale) a été reprise et remplacée par le lot 2 ; ses T3 à T5 (retrait, remonter un prélim, short notice) restent à coder |
+| `docs/LOT-3-L-ARENE.md` | **Lot 3 — contrat écrit le 21/09, non commencé.** Répond à C2, C3, M3, M4. Son §2 porte l'obstacle central (l'arène de la carrière lit `G` en dur) et son §6 les deux décisions qu'Anthony doit rendre |
 | `docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` | **Lot 2B — contrat écrit le 21/09, non commencé.** Répond à QO-8. Son §5 liste les cinq points qu'Anthony doit trancher avant la T2 |
 | `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
 | `tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md` | Calibrage de l'économie sur le déroulé réel (21/09/2026) : les quatre profils de joueur, les trois cibles, et le tableau des six soirées enchaînées qui a révélé QO-8 |
