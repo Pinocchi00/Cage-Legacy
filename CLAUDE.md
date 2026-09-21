@@ -66,8 +66,8 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 ## 3. Ordre de chargement
 
 **`index.html` est la seule source de vérité** ; le harnais de test
-(`tests/helpers/loadGame.js`) le lit directement. Ordre relevé le 17/09/2026
-(identique à celui du 15/09, recontrôlé point par point contre `index.html`) :
+(`tests/helpers/loadGame.js`) le lit directement. Ordre relevé le 21/09/2026,
+après le découpage de `mgmt-bureau.js` :
 
 1. `data-skills.js`, `data-content.js`, `data-people.js` — données
 2. `engine.js` — RNG à graine, primitives partagées
@@ -79,7 +79,16 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 7. `ui-01-roster-matchmaking.js` à `ui-09-arena.js` (pas de `ui-04`)
 8. `duel-codec.js`, `ui-10-duel.js` — exhibition « Duel entre amis »
 9. `ui-11-keys.js` — navigation clavier globale (`keysRegister`)
-10. `mgmt-data.js`, `mgmt-bureau.js`, `mgmt-screens.js` — mode management
+10. **Mode management, huit fichiers depuis le découpage du 21/09/2026** :
+    `mgmt-data.js` (données pures) — `mgmt-bureau.js` (pile d'affaires,
+    décisions, Leïla) — `mgmt-carte.js` (sous-carte, composition, classement) —
+    `mgmt-corps.js` (corps, soirée) — `mgmt-argent.js` (économie) —
+    `mgmt-monde.js` (monde extérieur dérivé) — `mgmt-save.js` (persistance) —
+    `mgmt-screens.js` (rendu, dernier car il étend `CL`).
+    **Une seule dépendance de chargement inter-fichiers** dans tout le mode :
+    `MGMT_CARD_CONTRACT = MGMT_MAIN_SIZE + MGMT_PRELIM_SIZE` (`mgmt-argent.js`)
+    lit `mgmt-data.js`. Les cinq fichiers du milieu sont sinon libres d'ordre ;
+    celui retenu suit l'histoire des lots.
 11. `main.js` — bootstrap
 
 ## 4. Globaux structurants
@@ -91,13 +100,15 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 | `esc()` | `state/state-core.js` | Échappement HTML de toute donnée injectée dans le DOM. Aucune exception. |
 | `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
 | `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
-| `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) | Sauvegarde management + secours, circuit séparé de la carrière |
+| `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) ; lues par `saveMgmt`/`loadMgmt` dans `mgmt-save.js` | Sauvegarde management + secours, circuit séparé de la carrière |
 | `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **5** | Management : migration séquentielle 2 → 3 → 4 → 5 sans perte (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte `{main, prelims}`), v1 refusée |
 
 ## 5. Séparation des responsabilités
 
 - **`data-*.js`, `mgmt-data.js`** : données pures. Aucune logique, aucun DOM.
-- **`engine-*.js`, `state/*.js`, `mgmt-bureau.js`** : simulation et état. Aucun
+- **`engine-*.js`, `state/*.js`, `mgmt-bureau.js` et ses cinq compagnons
+  (`mgmt-carte.js`, `mgmt-corps.js`, `mgmt-argent.js`, `mgmt-monde.js`,
+  `mgmt-save.js`)** : simulation et état. Aucun
   accès DOM/Canvas, simulation 100 % synchrone.
 - **`ui-*.js`, `mgmt-screens.js`** : rendu et événements utilisateur. Pas de règle
   de simulation.
@@ -181,12 +192,13 @@ sans citer la décision qui change le comportement attendu.
 
 ## 10. Dette connue
 
-- **`engine-combat.js` fait ~2500 lignes**, le plus gros fichier du dépôt.
-  `ui-06-career-screens.js` (~1190) est le plus gros côté UI, `mgmt-bureau.js`
-  (**~1730**, grossi par le lot 3B T1 puis les lots 2 T1/T3/T5) le plus gros du
-  management et porte plusieurs responsabilités (bureau, carte, classement,
-  argent, corps, soirée, sauvegarde). Aucun découpage entrepris — c'est la dette
-  la plus visible du mode.
+- **`engine-combat.js` fait ~2500 lignes**, le plus gros fichier du dépôt, et
+  reste la dette la plus lourde. `ui-06-career-screens.js` (~1190) est le plus
+  gros côté UI.
+- **Le management est découpé depuis le 21/09/2026.** `mgmt-bureau.js` est passé
+  de 2017 à **469 lignes** ; le plus gros fichier du mode est désormais
+  `mgmt-carte.js` (~508). Déplacement pur, vérifié ligne à ligne : aucune ligne
+  de code perdue, aucun test modifié. Cette dette est réglée.
 - **`npm run lint:content`** : 3 signalements « MAIN EVENT » dans
   `ui-01-roster-matchmaking.js` (carrière, dont un dans un commentaire). Il sort
   avec le code 0 : inclus dans `check`, il ne bloque pas la livraison. Sa
