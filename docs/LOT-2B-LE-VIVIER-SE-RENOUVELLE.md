@@ -36,8 +36,8 @@ extérieur, textes d'auteur déjà écrits).
 5. **Flux régulier de recrutables, mais le joueur recrute et lui seul.** Le jeu
    ne signe jamais à sa place.
 6. **L'arrivée n'est pas un événement** : personne ne l'annonce, aucune réplique
-   ne se déclenche. C'est **son premier combat sous Split** qui peut porter du
-   récit.
+   ne se déclenche. C'est **son premier combat sous Split** qui porte le récit —
+   **par la presse**, donc au lot 5 (§5 bis B).
 7. **Les partants partent à la retraite**, simplement. Aucune autre sortie.
 8. **Un seul monde extérieur.** Celui de QO-2 et QO-3 (short notice, combattant
    libre de contrat) et celui des nouveaux sont **le même** — jamais deux
@@ -79,8 +79,10 @@ Une tranche à la fois, relue par Claude avant la suivante.
 
 ### T2 — Le recrutement *(interface — vérification charte §3 obligatoire)*
 
-- **Le flux** : à chaque cycle, un nombre borné de recrutables est visible. Ils
-  ne rejoignent Split que par le geste du joueur.
+- **Le flux** : des recrutables sont visibles cycle après cycle. **Aucun nombre
+  fixe** (décision 2) — combien s'en présentent dépend du monde extérieur
+  lui-même, comme le reste. Ils ne rejoignent Split que par le geste du joueur, et
+  **aucun plafond de vivier** ne le limite (décision 1).
 - **Ce que l'écran montre** : nom, catégorie, âge, bilan, et la trace de
   carrière du §T1 — d'où il vient et ce qu'il a fait. **Aucune note, aucune
   recommandation, aucun pronostic, aucune jauge** (vision, addendum 2 §6).
@@ -102,11 +104,18 @@ Une tranche à la fois, relue par Claude avant la suivante.
 - **Tests** : un retraité sort du vivier et du classement ; la migration charge
   une sauvegarde d'avant le lot sans perte.
 
-### T4 — L'économie sur la durée de vie *(après T3 — condition de fusion)*
+### T4 — Le salaire à la victoire, et l'économie sur la durée de vie *(après T3 — condition de fusion)*
 
+- **Le salaire par combat et par victoire** (décision 1) : le cachet existant
+  reste le salaire de combat ; un **bonus de victoire** s'y ajoute, calculé après
+  les combats et passé à `mgmtEventRecette`, qui ne le prend pas aujourd'hui.
+  Constantes nommées, comme tous les poids d'argent. Le commentaire de l'ancre
+  `MGMT_LOT3B_T1_ECONOMIE` (« payé avant la soirée ») est à corriger.
 - `tools/monte-carlo-economie.js` mesure désormais des organisations **qui se
   renouvellent**, sur `--soirees=K` avec K assez grand pour voir la dixième
   soirée.
+- **Mesure demandée (§5 c)** : recruter sans retenue est-il la stratégie
+  dominante ? Comparer un joueur qui recrute tout à un joueur qui recrute peu.
 - **La cible de QO-8** : le joueur d'écran reste dans la bande 70 à 80 % de
   soirées rentables **sur la durée de vie de l'organisation**, et non plus
   seulement à la première soirée. Les constantes d'économie sont recalibrées si
@@ -153,24 +162,53 @@ Un écart mesuré est un défaut de la tranche, pas une tolérance.
 
 ---
 
-## 5. Ce qui n'est pas tranché, et qu'Anthony doit décider avant la T2
+## 5. Décisions d'Anthony du 21/09/2026 (les cinq points du cadrage)
 
-Aucune de ces questions n'est comblée par une supposition.
+1. **Recruter ne coûte rien à la signature.** Les combattants ont un **salaire par
+   combat et par victoire** : le coût arrive quand ils combattent, pas quand ils
+   signent. **En théorie le joueur peut recruter autant qu'il veut** — aucun
+   plafond artificiel de vivier ; dans les faits, on ne recrute que les
+   intéressants.
+2. **Aucun nombre fixe de recrutables par cycle** : cela dépend des combattants
+   eux-mêmes, comme tout le reste du monde extérieur.
+3. **La retraite dépend du combattant** : l'âge, le corps (traumatisme du lot 3a)
+   et les résultats jouent tous, et pas de la même façon d'un homme à l'autre.
+   Aucune règle uniforme.
+4. **Le recrutement se fait sur un écran neuf.**
+5. **Le récit du premier combat, c'est la presse** — et la presse n'existe pas
+   encore (voir §5 bis).
 
-1. **Le recrutement coûte-t-il de l'argent ?** L'économie existe depuis le lot 3B
-   T1 (trésorerie, plafond de découvert). Signer pourrait coûter — ou ne rien
-   coûter et n'engager que des cachets futurs. Cela change le poids du geste.
-2. **Combien de recrutables par cycle ?** « Flux régulier » fixe l'intention, pas
-   le nombre. Trois par cycle et dix par cycle ne font pas le même jeu.
-3. **À quelles conditions un combattant prend-il sa retraite ?** L'âge seul ? Le
-   corps (traumatisme du lot 3a) ? Une série de défaites ? Le joueur l'apprend-il,
-   et comment — sachant que QO-10 dit que l'interface explique, pas une voix ?
-4. **Où recrute-t-on ?** Un écran neuf, ou une colonne de l'écran de la carte ?
-5. **Le récit du premier combat** (décision 6) : sous quelle forme ? Un marqueur
-   d'interface, ou un texte que tu écriras ? QO-10 penche pour l'interface, mais
-   c'est le seul endroit du lot où une voix aurait du sens.
+### 5 bis. Deux conséquences que ces décisions entraînent
 
----
+**A. Le salaire à la victoire n'existe pas dans le code.** Aujourd'hui
+`mgmtPurse(f, slot)` paie **un cachet par combat**, dérivé du nom et de
+l'emplacement, et le commentaire de l'ancre `MGMT_LOT3B_T1_ECONOMIE` pose en
+principe qu'il est « payé avant la soirée ». Un bonus de victoire ne se connaît
+qu'**après** : il faudra que `mgmtRunEvent` calcule les bonus une fois les combats
+joués et les passe à `mgmtEventRecette`, qui n'en prend pas aujourd'hui. Ce n'est
+pas difficile — `mgmtRunEvent` joue déjà les combats avant d'appeler la finance —
+mais c'est une **modification du modèle d'argent**, donc un recalibrage. Elle
+entre dans ce lot, à la **T4**.
+
+**B. La presse appartient au lot 5.** `docs/VISION-MODE-MANAGEMENT.md` en fait
+« la voix du monde » (§73) et dit déjà comment on découvre un combattant : « un
+14-0 avec 14 finish dans une orga inférieure dont on voit passer les highlights…
+la presse qui parle d'une pépite » (§49). Le récit du premier combat est donc
+**décidé et différé** : il se fera au lot 5, avec le reste de la voix du monde.
+**Le lot 2B n'invente aucune presse** — pas même un embryon : ce serait un second
+système à côté de celui que le lot 5 doit construire (interdit du §4). L'écran de
+recrutement de la T2 montre donc la trace de carrière, des faits ; la presse
+l'enrichira plus tard.
+
+### 5 c. Un point à surveiller, sans décision demandée
+
+Un vivier sans plafond et sans coût de détention rend le **stockage gratuit** :
+recruter tout le monde serait strictement avantageux, puisqu'un combattant non
+booké ne coûte rien et élargit le choix. Le contrepoids existe déjà et il est
+d'auteur — la raison de se battre `addiction` dit que « l'inactivité le détruit…
+ne rien proposer est le mauvais choix ». À mesurer à la T4 : si recruter sans
+retenue reste la stratégie dominante, le flux perd son sens. Aucune décision
+n'est demandée ici, seulement une mesure à produire.
 
 ## 6. Terminé pour le lot
 
@@ -181,4 +219,4 @@ Aucune de ces questions n'est comblée par une supposition.
 4. `npm run check` vert, aucun test existant assoupli sans décision citée.
 5. La vérification d'interface de la charte §3 est livrée pour T2.
 6. L'économie reste dans la bande 70 à 80 % **sur la durée de vie** de
-   l'organisation — la réponse mesurée à QO-8.
+   l'organisation — la réponse mesurée à QO-8 — salaire de victoire compris.
