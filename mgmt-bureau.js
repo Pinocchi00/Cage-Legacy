@@ -1216,8 +1216,16 @@ function mgmtClosePile(m){
    Constantes calibrées par tools/monte-carlo-economie.js sur des cartes de
    4 + 4 combats (docs/lots/LOT-3B-T1-CALIBRAGE.md), revérifiées sur le VRAI
    déroulé à la T4 du lot 2 (docs/LOT-2-CARTE-PRINCIPALE.md §T4 —
-   tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md) : les poids d'argent sont
-   inchangés, seules les références D4 suivent la mesure réelle. ==== */
+   tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md). REPRISE DU 21/09 (§4 bis
+   de ce contrat) : les cibles se jugent sur le JOUEUR D'ÉCRAN — le joueur
+   ordinaire, qui ne dispose que de ce que l'écran de composition affiche
+   (catégorie, rang, bilan) — jamais sur l'oracle (borne haute, ne sert à
+   aucune cible). Pour porter le joueur d'écran dans la bande 70-80 % de
+   soirées rentables, le cachet par point de nom passe de 4 à 3.35 (les
+   mieux classés sont les mieux payés : c'est lui qui encaisse la hausse
+   des cachets) ; les autres poids d'argent sont inchangés ; les références
+   D4 (MGMT_DRAW_AVG, MGMT_SPECTACLE_REF) suivent la mesure du joueur
+   d'écran. ==== */
 /* Trésorerie au premier jour (k$). Ordre de grandeur de l'exemple QO-5
    (T=50 : un short notice à 60 est refusé avant la première soirée, P=0). */
 const MGMT_TREASURY_START=50;
@@ -1230,9 +1238,13 @@ const MGMT_STAR_W_LVL=0.65;
 const MGMT_STAR_LVL_MIN=40;
 const MGMT_STAR_LVL_MAX=80;
 /* Cachet (k$) d'un combattant : plancher + nom, pondéré par l'emplacement —
-   un combat de main card coûte plus qu'un prélim (poids nommés, §3 T1). */
+   un combat de main card coûte plus qu'un prélim (poids nommés, §3 T1).
+   MGMT_PURSE_PER_STAR recalibré à la reprise T4 du 21/09 (4 → 3.35) :
+   le joueur d'écran book les mieux classés, donc les mieux payés — la
+   prime au nom subsiste, sa pente est moins raide (tools/reports/
+   LOT-2-T4-CALIBRAGE-ECONOMIE.md). */
 const MGMT_PURSE_BASE=1;
-const MGMT_PURSE_PER_STAR=4;
+const MGMT_PURSE_PER_STAR=3.35;
 const MGMT_PURSE_PRELIM_W=1;
 const MGMT_PURSE_MAIN_W=2.5;
 /* Attrait : poids d'emplacement d'un combat dans la carte — un combat de
@@ -1259,13 +1271,14 @@ const MGMT_TV_ECRANS=1000;
 const MGMT_CARD_CONTRACT=MGMT_MAIN_SIZE+MGMT_PRELIM_SIZE;
 /* Références D4 (QO-7) : attrait d'un combat moyen et spectacle (part de
    finitions) d'une carte complète d'attrait moyen, mesurés par Monte Carlo
-   sur le déroulé réel (graine 20260919, 4000 soirées — lot 2 T4,
-   tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md ; l'ancien déroulé
-   synthétique 4 + 4 mesurait 0.616 et 0.638, docs/lots/LOT-3B-T1-CALIBRAGE.md).
-   mgmtAudienceRef sans historique redonne ainsi l'audience moyenne mesurée
-   d'une carte complète. */
-const MGMT_DRAW_AVG=0.59;
-const MGMT_SPECTACLE_REF=0.67;
+   sur le VRAI déroulé, sur la carte du joueur d'écran (graine 20260919,
+   4000 carrières — reprise T4 du 21/09, tools/reports/
+   LOT-2-T4-CALIBRAGE-ECONOMIE.md ; l'ancien déroulé synthétique 4 + 4
+   mesurait 0.616 et 0.638, docs/lots/LOT-3B-T1-CALIBRAGE.md ; la T4 livrée
+   mesurait 0.59 et 0.67 sur l'oracle). mgmtAudienceRef sans historique
+   redonne ainsi l'audience moyenne mesurée de la carte du joueur d'écran. */
+const MGMT_DRAW_AVG=0.48;
+const MGMT_SPECTACLE_REF=0.71;
 
 /** Nom d'une ligne (0..1) : valeur de scène dérivée du bilan — activité,
  *  ratio de victoires, niveau dérivé du bilan. Pur et déterministe, jamais

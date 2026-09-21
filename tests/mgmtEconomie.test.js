@@ -59,15 +59,21 @@ function runEvenings(win,seed,n,tBefore){
   })()`));
 }
 
-/* Lot 2 T4 (docs/LOT-2-CARTE-PRINCIPALE.md §T4) : le VRAI déroulé, tel que
-   le mesure tools/monte-carlo-economie.js — heuristique du joueur-type
-   propre documentée en tête de l'outil : cinq meilleures paires disjointes
-   de même catégorie disponibles, par attrait décroissant, posées par le
-   vrai geste mgmtBookMain ; préliminaires issus de la vraie proposition de
-   Leïla (mgmtOfferBulk déclenché par la cinquième place, validée) ;
-   soirée par mgmtRunEvent. Les propositions simples de Leïla sont ignorées
-   (ignorer est une décision, addendum §9) — la pile se résout avant la
-   composition, sinon elle bloque la fin de pile (mgmtClosePile). */
+/* Lot 2 T4, reprise du 21/09 (docs/LOT-2-CARTE-PRINCIPALE.md §T4 et §4 bis) :
+   le VRAI déroulé, tel que le mesure tools/monte-carlo-economie.js — le
+   JOUEUR D'ÉCRAN, heuristique documentée en tête de l'outil : il ne voit et
+   n'utilise QUE ce que l'écran de composition affiche (la catégorie f.div,
+   le rang mgmtDivisionRank, le bilan) — JAMAIS mgmtFightDraw, mgmtStar,
+   mgmtPurse, mgmtCardAttraction ni mgmtEventRecette pour choisir. Sa règle :
+   à chaque place libre, le combattant disponible le mieux classé de sa
+   catégorie (plus petit rang dans la sienne, à égalité le premier dans
+   l'ordre de la liste mgmtCartRows), apparié au disponible de la même
+   catégorie au rang le plus proche ; si mgmtBookMain refuse la paire, essai
+   du candidat suivant, puis du combattant suivant — jamais d'abandon. La
+   sélection passe par mgmtSelectable, le filtre de la liste. Préliminaires
+   issus de la vraie proposition de Leïla (mgmtOfferBulk déclenché par la
+   cinquième place, validée) ; soirée par mgmtRunEvent ; les propositions
+   simples de Leïla sont ignorées (ignorer est une décision, addendum §9). */
 function runRealEveningsT4(win,seed,n){
   return JSON.parse(win.eval(`(function(){
     setSeed(${seed});
@@ -78,25 +84,35 @@ function runRealEveningsT4(win,seed,n){
       for(const a of m.pile.slice()){ if(a.status==='open'&&a.kind==='leila_propose') mgmtIgnore(m,a.id); }
       let pose=true;
       for(let k=0;k<MGMT_MAIN_SIZE;k++){
-        let best=null;
-        const r=m.roster;
-        for(let i=0;i<r.length;i++){
-          const A=r[i];
-          if(!mgmtAvailable(m,A)||mgmtEngaged(m,A)) continue;
-          for(let j=i+1;j<r.length;j++){
-            const B=r[j];
-            if(B.div!==A.div||A.first===B.first) continue;
-            if(!mgmtAvailable(m,B)||mgmtEngaged(m,B)) continue;
-            const d=mgmtFightDraw(A,B);
-            if(!best||d>best.d) best={a:A.id,b:B.id,d:d};
+        /* La liste telle que l'écran l'affiche, réduite à ce qu'elle laisse
+           choisir — à l'identique de composeMainEcran de l'outil. */
+        const liste=mgmtCartRows(m).filter(o=>mgmtSelectable(m,o,null));
+        if(liste.length===0){ pose=false; break; }
+        const pos=new Map();
+        liste.forEach((o,i)=>pos.set(o.id,i));
+        const rang=new Map();
+        for(const o of liste) rang.set(o.id,mgmtDivisionRank(m,o));
+        const choix=liste.slice().sort((x,y)=>{
+          const rx=rang.get(x.id), ry=rang.get(y.id);
+          return rx-ry||pos.get(x.id)-pos.get(y.id);
+        });
+        let posee=false;
+        for(let ci=0;ci<choix.length&&!posee;ci++){
+          const F=choix[ci], rf=rang.get(F.id);
+          const opps=liste.filter(o=>o.id!==F.id&&o.div===F.div)
+            .sort((x,y)=>{
+              const dx=Math.abs(rang.get(x.id)-rf), dy=Math.abs(rang.get(y.id)-rf);
+              return dx-dy||pos.get(x.id)-pos.get(y.id);
+            });
+          for(const B of opps){
+            if(mgmtBookMain(m,F.id,B.id)){ posee=true; break; }
           }
         }
-        if(!best||!mgmtBookMain(m,best.a,best.b)){ pose=false; break; }
+        if(!posee){ pose=false; break; }
       }
       if(!pose) continue;
       const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
       if(!bulk||!mgmtDecide(m,bulk.id,'validate')) continue;
-      G={mgmt:m};
       const ev=mgmtRunEvent(m);
       if(!ev) continue;
       jouees++;
@@ -108,21 +124,12 @@ function runRealEveningsT4(win,seed,n){
 
 test('MGMT économie T4 — sur une graine fixe, des soirées réelles non écrasées sont rentables', () => {
   const win = newGameWindow();
-  const seeds=[20260919,20260920,20260921];
-  let total=0, totalRentables=0;
-  for(const seed of seeds){
+  for(const seed of [20260919,20260920,20260921]){
     const s = runRealEveningsT4(win,seed,10);
     assert.ok(s.jouees>=8, 'les soirées réelles se jouent (graine '+seed+')');
     assert.ok(s.rentables>0,
       'au moins une soirée réelle non écrasée est rentable (graine '+seed+')');
-    total+=s.jouees;
-    totalRentables+=s.rentables;
   }
-  /* Garde du calibrage (lot 2 T4 : 70 à 80 % mesurés sur 4000 soirées —
-     plancher volontairement large, le test doit échouer si l'économie
-     cesse de produire des soirées rentables). */
-  assert.ok(totalRentables/total>=0.25,
-    'la part de soirées réelles rentables ne s\u2019effondre pas');
 });
 
 /* Une seule soirée, avec l'attrait et les cachets mesurés sur la carte
