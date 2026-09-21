@@ -148,8 +148,9 @@ marqué skip : `tests/mgmtBureau.test.js:842`.
 
 ## QO-8 — L'organisation s'use : le vivier fond, la soirée cesse d'être rentable
 
-**Statut.** Mesure faite, design non arrêté. **Ouvert — attend une décision
-d'Anthony.**
+**Statut.** Mesure faite. **Décision d'Anthony du 21/09/2026 : c'est un défaut du
+jeu. Le vivier est censé se renouveler.** Reste à écrire : le comment (voir
+« Ce qui reste à cadrer »).
 
 **Le constat.** Relevé le 21/09/2026 par le calibrage du lot 2 T4
 (`tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md`, 4000 organisations, six soirées
@@ -179,18 +180,32 @@ de `docs/LOT-3B-CONTRAT.md` le porte — écrit, pas codé. Il répond au short 
 reste à décider s'il répond aussi au **recrutement ordinaire**, c'est-à-dire si une
 organisation recrute entre deux soirées.
 
-**Ce qui reste à trancher.** Trois questions distinctes, aucune tranchée :
-1. Une organisation recrute-t-elle d'elle-même, et à quel rythme ?
-2. Le déclin du vivier est-il un **problème à corriger** ou une **pression de jeu
-   voulue** — la jeunesse de l'organisation comme âge d'or, le joueur devant gérer
-   l'usure ?
-3. Si c'est une pression voulue, la cible « rentable dans 70 à 80 % des soirées »
-   se lit-elle sur la première soirée (lecture actuelle) ou sur la durée de vie de
-   l'organisation ?
+**Décision d'Anthony, 21/09/2026.** Les questions 2 et 3 sont tranchées : **le
+déclin du vivier est un défaut, pas une pression de jeu voulue.** Une organisation
+est censée se renouveler — des combattants arrivent. La cible « rentable dans 70 à
+80 % des soirées » se lit donc sur la **durée de vie** de l'organisation, et non
+sur sa seule première soirée : une fois le renouvellement en place, le calibrage
+du lot 2 T4 sera à revérifier sur plusieurs soirées enchaînées
+(`node tools/monte-carlo-economie.js --soirees=K`, l'outil sait déjà le mesurer).
+
+**Ce qui reste à cadrer** (aucune de ces questions n'est tranchée — elles sont du
+ressort de l'auteur, et feront l'objet d'un contrat de lot) :
+1. **D'où viennent les nouveaux ?** Le vivier extérieur de [QO-2] et [QO-3]
+   (combattants d'une autre organisation, libres de contrat) sert déjà le short
+   notice : il peut servir le recrutement ordinaire, ou bien le recrutement suit
+   un autre chemin — des débutants qui entrent en amateur, par exemple.
+2. **À quel rythme, et déclenché par quoi ?** Un flux régulier par cycle, ou une
+   réaction au manque (le vivier descend sous un seuil) ? Le joueur décide-t-il de
+   recruter, ou Leïla le lui apporte-t-elle comme une affaire ?
+3. **Qui l'annonce ?** Si un combattant arrive, quelqu'un le dit — c'est une
+   réplique, donc un texte d'auteur. Aucun n'est écrit.
+4. **Que deviennent les partants ?** Les retraités médicaux sortent du classement
+   (lot 2 T1) ; rien ne dit s'ils quittent la ligne, ni si le joueur l'apprend.
 
 **Où.** `mgmt-bureau.js` (`mgmtNewRoster`, `mgmtAvailable`, `mgmtApplyFight`),
 `docs/LOT-3B-CONTRAT.md` §T5. Aucun test skip associé : le comportement mesuré est
-celui du code actuel, il n'est pas en attente d'implémentation.
+celui du code actuel. Il est désormais **reconnu comme un défaut à corriger**, et
+attend son contrat de lot.
 
 ---
 
