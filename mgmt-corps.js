@@ -5,8 +5,10 @@
    0-100, ne descend jamais), dérivation sans rnd pour les niveau 1, profil
    de combat régénéré à l'identique (SEED sauvegardé puis restauré),
    couplage au moteur sans le modifier (simulateFight appelé, jamais édité),
-   conséquences (blessures, suspensions, fin de carrière médicale) et soirée
-   calculée en une fois. Issu de mgmt-bureau.js, découpage de la dette
+   conséquences (blessures, suspensions, fin de carrière médicale), soirée
+   calculée en une fois et trace rejouable de chaque combat (lot 3 T1 :
+   l'instantané d'avant combat + l'état de la RNG, jamais le déroulé). Issu
+   de mgmt-bureau.js, découpage de la dette
    CLAUDE.md §10 (ancre MGMT_LOT3A_CORPS, avec MGMT_LOT1_STYLE_STABLE
    imbriquée où elle est). Aucune voix, aucune réplique. Aucun accès DOM :
    le rendu vit dans mgmt-screens.js.
@@ -123,6 +125,87 @@ function mgmtFightReady(f){
   }
   return c;
 }
+
+/* ==== [ANCRE: MGMT_LOT3_T1_TRACE] — Lot 3 T1 la trace (docs/LOT-3-L-ARENE.md
+   §3 T1 ; constat C3, docs/AUDIT-17-09.md) : chaque combat laisse de quoi
+   être REJOUÉ, pas le combat — garder le déroulé ferait enfler la sauvegarde
+   sans fin, le dépôt régénère au lieu de stocker (mgmtCombatProfile, monde
+   extérieur). Ce qu'un rejeu exige, et rien de plus :
+   - l'instantané d'AVANT COMBAT des deux lignes. Le piège (C3) : les lignes
+     changent après le combat — le bilan et le traumatisme avancent dans
+     mgmtApplyFight — donc rejouer sur les lignes d'aujourd'hui ne redonne
+     pas le combat d'hier. mgmtFightReady ne lit sur une ligne que l'id (qui
+     sème le profil régénéré et la dérivation du traumatisme), la catégorie,
+     l'âge, le bilan W/L/D, le traumatisme éventuel et les noms (cités par le
+     déroulé du moteur) — l'instantané capture exactement ces champs ;
+   - la valeur de SEED à l'instant de l'appel de simulateFight. Vérifié ligne
+     à ligne dans engine-combat.js (simulateFight :618-2258) : tous les
+     tirages passent par rnd() (pick/RI/gauss compris), G n'est lu que par
+     applyResult (:2281,:2306 — jamais appelé par mgmtRunEvent),
+     Date.now/Math.random ne sont consommés que par uniqueFighterId
+     (engine.js:276, id écrasé par mgmtCombatProfile :101), plan/planB/opts
+     sont null sur ce chemin — le déroulé d'un combat ne dépend donc que de
+     (les deux combattants prêts, le nombre de rounds, l'état de la RNG).
+   L'historique vit sur m.hist (append-only, chaque entrée auto-portante) :
+   m.lastEvent garde son rôle, la trace ne l'écrase pas, et rien ne
+   s'efface — la mémoire des combats ne disparaît pas (décision QO-9 du
+   21/09 pour les faits, même esprit ici : la décision de tronquer
+   appartient à l'auteur, pas au code). L'adversaire n'y figure que comme
+   référence copiée : une ligne disparue du roster ne casse rien. ==== */
+
+/** Instantané d'AVANT COMBAT d'une ligne : exactement les champs que
+ *  mgmtFightReady lit pour reconstruire le combattant prêt — l'identité
+ *  (l'id sème le profil régénéré et la dérivation du traumatisme ; les noms
+ *  sont cités dans le déroulé), la catégorie, l'âge, le bilan (niveau dérivé
+ *  et dérivation du traumatisme) et le traumatisme de l'instant. trauma:null
+ *  = champ absent à cet instant : la dérivation déterministe W/L/D/âge/id
+ *  reproduira la valeur d'alors. Pur, ne consomme jamais rnd().
+ *  @returns {object} */
+function mgmtTraceSide(f){
+  return {id:f.id,name:f.name,first:f.first,last:f.last,div:f.div,age:f.age,
+    W:f.W,L:f.L,D:f.D,
+    trauma:(typeof f.trauma==='number'&&Number.isFinite(f.trauma))?f.trauma:null};
+}
+
+/** Reconstitue la ligne d'avant combat depuis son instantané : l'état exact
+ *  que mgmtFightReady attend, le champ trauma absent quand la trace porte
+ *  null. Pur. @returns {object} */
+function mgmtTraceLine(t){
+  const f={id:t.id,name:t.name,first:t.first,last:t.last,div:t.div,age:t.age,W:t.W,L:t.L,D:t.D};
+  if(t.trauma!==null) f.trauma=t.trauma;
+  return f;
+}
+
+/** Rejoue un combat depuis sa trace : les deux combattants reconstruits à
+ *  l'identique d'avant combat (mgmtFightReady sur les instantanés), la RNG
+ *  restaurée à l'état capturé — le motif « SEED sauvegardé, opération, SEED
+ *  restauré » de mgmtCombatProfile — puis simulateFight appelé tel quel.
+ *  Le déroulé rendu est celui du combat joué : même vainqueur, même méthode,
+ *  même round, même log moment pour moment. La RNG de la partie ne bouge
+ *  pas d'un rejeu.
+ *  @returns {object} le résultat complet du moteur (log, stats, juges...). */
+function mgmtReplayFight(t){
+  if(!t||!t.a||!t.b) return null;
+  const saved=SEED;
+  let res;
+  try{
+    setSeed(t.seed);
+    res=simulateFight(mgmtFightReady(mgmtTraceLine(t.a)),mgmtFightReady(mgmtTraceLine(t.b)),t.rounds);
+  }finally{
+    setSeed(saved);
+  }
+  return res;
+}
+
+/** Les combats d'un combattant (M4) : contre qui, quand, l'issue, et de quoi
+ *  rejouer — lus sur la trace auto-portante, jamais sur le roster : une
+ *  ligne disparue (retraité, partie) ne casse pas l'historique de celui qui
+ *  reste. Pur. @returns {Array} */
+function mgmtFightHistory(m,f){
+  if(!m||!f||!Array.isArray(m.hist)) return [];
+  return m.hist.filter(x=>x&&(x.a.id===f.id||x.b.id===f.id));
+}
+/* ==== [FIN ANCRE] ==== */
 
 /** Famille d'une méthode pour l'écran de soirée (addendum 2 §6 : ni
  *  res.detail, ni statistiques, ni note). Blessure et disqualification sont
@@ -261,7 +344,10 @@ function mgmtApplyFight(m,f,opp,res,side){
  *  (remboursement automatique : tant que T < 0, rien n'est bénéfice),
  *  audience, historiques et E1 (patron : T < 0 avant la soirée et R > 0).
  *  Stocké dans m.lastEvent puis sauvegardé avant tout affichage : recharger
- *  la page ne rejoue rien. La carte est vidée. Ne remplit jamais rien
+ *  la page ne rejoue rien. Lot 3 T1 : chaque combat laisse aussi sa trace
+ *  dans m.hist (ancre MGMT_LOT3_T1_TRACE) — de quoi rejouer, jamais le
+ *  combat ; m.lastEvent garde son rôle, l'historique vient à côté.
+ *  La carte est vidée. Ne remplit jamais rien
  *  d'office : carte incomplète ou paire introuvable, on ne joue pas (null),
  *  avant toute mutation.
  *  @returns {object|null} m.lastEvent. */
@@ -283,11 +369,22 @@ function mgmtRunEvent(m){
   const purses=mgmtPurses(m,booked);
   const fights=[];
   const touched=[];
+  if(!Array.isArray(m.hist)) m.hist=[];
   for(const cf of booked){
     const fa=mgmtFighterById(m,cf.a), fb=mgmtFighterById(m,cf.b);
+    /* Lot 3 T1 : la trace se capture AVANT le combat — l'état de la RNG à
+       l'instant de l'appel et les deux lignes d'avant combat (mgmtApplyFight
+       avance bilan et traumatisme juste après). La capture lit SEED, ne le
+       déplace pas : les combats sont tirés exactement comme avant (motif
+       intact, aucun reseingage par combat). */
+    const traceA=mgmtTraceSide(fa), traceB=mgmtTraceSide(fb);
+    const seedFight=SEED;
     const res=simulateFight(mgmtFightReady(fa),mgmtFightReady(fb),3);
-    fights.push({a:fa.id,b:fb.id,winner:res.winner,family:mgmtMethodFamily(res.method,res.winner),
-      round:Number.isSafeInteger(res.round)?res.round:3});
+    const fam=mgmtMethodFamily(res.method,res.winner);
+    const roundF=Number.isSafeInteger(res.round)?res.round:3;
+    fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF});
+    m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:3,a:traceA,b:traceB,
+      winner:res.winner,family:fam,round:roundF});
     const ta=mgmtApplyFight(m,fa,fb,res,'A');
     const tb=mgmtApplyFight(m,fb,fa,res,'B');
     if(ta) touched.push(ta);

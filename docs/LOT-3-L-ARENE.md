@@ -136,6 +136,40 @@ Une tranche à la fois, relue par Claude avant la suivante.
   plusieurs soirées ; la migration charge une sauvegarde d'avant le lot sans
   perte.
 
+#### Relecture de la T1 (21/09/2026) — acceptée
+
+Vérifications faites par Claude sur ses **propres graines**, et non reprises de
+la livraison :
+
+| Ce qui était en jeu | Comment | Résultat |
+|---|---|---|
+| `mgmtRunEvent` tire ses combats **exactement comme avant** (interdit dur) | Empreinte de 12 soirées sur 4 graines (5150, 90210, 271828, 1618) — appariements, vainqueurs, familles, rounds, recette, trésorerie — relevée avant et après la tranche | **identiques** |
+| Le rejeu redonne le combat **réellement joué** | 5 graines × 4 soirées = **180 combats**, rejoués longtemps après, les lignes ayant changé entre-temps | **180/180**, aucune anomalie |
+| Le rejeu est stable | Chaque combat rejoué deux fois, déroulés comparés | **180/180 identiques** |
+| Le rejeu ne déplace pas la RNG du jeu | `SEED` relevé avant et après l'historique entier | **intact** |
+| Interdits | `git diff` sur moteur, `state/`, `ui-*`, `index.html`, `mgmt-screens.js` | **vide** |
+| Coût de la sauvegarde | Outil relancé, graine 20260919 | **79,8 Ko après 20 soirées**, dont 61 Ko d'historique — ~3,1 Ko/soirée |
+| `npm run check` | Relancé par Claude | **312 tests, 308 passants, 0 échec, 4 skip** |
+
+**Tests réécrits, à juste titre.** Quatre assertions de `mgmtCard.test.js`
+figeaient `v5` en dur ; elles lisent désormais `MGMT_SAVE_VERSION`. C'est plus
+fort qu'avant — elles ne seront plus à réécrire à la prochaine migration — et
+rien n'est assoupli.
+
+**Limite inhérente, signalée par OpenCode et à traiter à la T2.** Le rejeu est
+fidèle *sous la version du moteur qui a produit la trace*. Si `engine-combat.js`
+évolue, un vieux combat rejoué pourra diverger. L'issue, elle, ne se perd pas :
+`winner`, `family` et `round` sont stockés et restent vrais.
+**Conséquence pour l'arène : avant d'afficher un rejeu, comparer son issue à
+celle qui est stockée, et refuser de montrer un rejeu divergent.** Une arène qui
+montre un combat finissant autrement que ce que l'historique annonce est un
+mensonge à l'écran — exactement ce que le §1 interdit. À inscrire dans la T2.
+
+**Corroboration de QO-8, au passage.** La mesure relève **31 retraités médicaux
+sur 48 lignes après 20 soirées**, et une autre graine n'a atteint que 18 soirées
+en 150 cycles faute de combattants. C'est le vivier qui fond, mesuré une seconde
+fois par un chemin indépendant.
+
 ### T2 — Le socle de l'arène neuve *(interface — vérification charte §3)*
 
 - Un fichier neuf, l'octogone en vue de trois quarts à l'échelle réelle, tapis

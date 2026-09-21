@@ -820,7 +820,9 @@ const MGMT_V4_BASE={org:'Split',v:4,cycle:2,seq:5,
 test('MGMT T1 migration — v4 → v5 sans perte : les combats d\u2019une carte en cours deviennent des préliminaires', () => {
   const win = newGameWindow();
   const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(MGMT_V4_BASE)}))))`));
-  assert.equal(mig.v, 5, 'tampon v5');
+  /* Version courante en symbole : le tampon suit les migrations (v6 = lot 3 T1
+     la trace, ancre MGMT_LOT3_T1_VERSION de mgmt-bureau.js). */
+  assert.equal(mig.v, win.eval(`MGMT_SAVE_VERSION`), 'tampon de la version courante');
   assert.equal(mig.card.sizeMain, 5, 'cinq places en carte principale');
   assert.equal(mig.card.sizePrelims, 4, 'quatre places en préliminaires');
   assert.equal(mig.card.main.length, 0, 'la carte principale démarre vide — aucun combat ajouté d\u2019office');
@@ -835,7 +837,7 @@ test('MGMT T1 migration — v4 → v5 sans perte : les combats d\u2019une carte 
   /* La même v4 se charge depuis le stockage dédié. */
   win.localStorage.setItem('cage-legacy-mgmt', JSON.stringify(MGMT_V4_BASE));
   win.eval(`G={theme:'dark'}; loadMgmt();`);
-  assert.equal(win.eval(`G.mgmt&&G.mgmt.v`), 5, 'une v4 se charge en v5');
+  assert.equal(win.eval(`G.mgmt&&G.mgmt.v`), win.eval(`MGMT_SAVE_VERSION`), 'une v4 se charge en version courante (v6, ancre MGMT_LOT3_T1_VERSION)');
   assert.equal(win.eval(`G.mgmt.card.prelims.length`), 2, 'les combats de la carte en cours sont des préliminaires');
 });
 
@@ -846,7 +848,7 @@ test('MGMT T1 migration — v2 et v3 migrent en chaîne 2 → 3 → 4 → 5', ()
     pile:[],facts:[],open:null,shortfall:false,
     card:{size:4,fights:[{a:'mg1',b:'mg1',cycle:1}]},leila:{crushes:[]},lastEvent:null};
   const mig3 = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v3)}))))`));
-  assert.equal(mig3.v, 5, 'migration séquentielle 3 → 4 → 5');
+  assert.equal(mig3.v, win.eval(`MGMT_SAVE_VERSION`), 'migration séquentielle 3 → 4 → 5 → 6');
   assert.equal(mig3.treasury, win.eval(`MGMT_TREASURY_START`), 'champs d\u2019argent par défaut');
   assert.equal(mig3.card.prelims.length, 1, 'le combat de la carte en cours devient un préliminaire');
   assert.equal(mig3.card.main.length, 0, 'carte principale vide');
@@ -854,7 +856,7 @@ test('MGMT T1 migration — v2 et v3 migrent en chaîne 2 → 3 → 4 → 5', ()
   const v2 = {org:'Split',v:2,cycle:1,seq:2,roster:[],pile:[],facts:[],open:null,shortfall:false,
     card:{size:4,fights:[{a:'mg1',b:'mg1',cycle:1}]},leila:{crushes:[]},lastEvent:null};
   const mig2 = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v2)}))))`));
-  assert.equal(mig2.v, 5, 'migration séquentielle 2 → 3 → 4 → 5');
+  assert.equal(mig2.v, win.eval(`MGMT_SAVE_VERSION`), 'migration séquentielle 2 → 3 → 4 → 5 → 6');
   assert.equal(mig2.card.prelims.length, 1, 'aucun combat perdu dans la chaîne complète');
   assert.equal(mig2.treasury, win.eval(`MGMT_TREASURY_START`));
   assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig2)})`), true, 'la v2 migrée passe la porte v5');

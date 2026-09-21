@@ -51,7 +51,16 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    carte en cours deviennent des préliminaires (slot 'prelim'), la carte
    principale démarre vide — aucun combat perdu, aucun ajouté d'office.
    Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=5;
+/* ==== [ANCRE: MGMT_LOT3_T1_VERSION] — Lot 3 T1 la trace
+   (docs/LOT-3-L-ARENE.md §3 T1, constat C3) : v6 ajoute m.hist, la liste
+   append-only des combats joués — chaque entrée porte l'instantané d'AVANT
+   COMBAT des deux lignes et l'état de la RNG à l'instant du combat, de quoi
+   REJOUER le combat à l'identique, jamais le combat lui-même (le déroulé se
+   régénère). Migration 5 → 6 sans perte : hist:[], les lignes du roster ne
+   changent pas (mgmtMigrate). Rien ne s'efface : la décision de tronquer
+   l'historique appartient à l'auteur (même esprit que la QO-9 du 21/09
+   pour les faits). Une v1 reste refusée. ==== */
+const MGMT_SAVE_VERSION=6;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
@@ -60,7 +69,7 @@ function mgmtDefault(){
      ne portera que son identité. */
   return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
-    treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
+    hist:[],treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
 }
 
 /** Identifiant stable et déterministe (compteur de partie, pas de hasard). */

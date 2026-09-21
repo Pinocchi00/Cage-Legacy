@@ -14,7 +14,8 @@
    Aucune constante évaluée au chargement. Les fonctions dépendent au
    runtime de mgmt-bureau.js (MGMT_KEY, MGMT_BACKUP_KEY, MGMT_SAVE_VERSION,
    mgmtValidId, mgmtAffairTitle), mgmt-data.js (MGMT_ORG, MGMT_MAIN_SIZE,
-   MGMT_PRELIM_SIZE), mgmt-monde.js (mgmtExteriorEnsure, mgmtValidExteriorLine)
+   MGMT_PRELIM_SIZE, MGMT_FAMILY_LABELS), mgmt-corps.js (MGMT_TRAUMA_MAX),
+   mgmt-monde.js (mgmtExteriorEnsure, mgmtValidExteriorLine)
    et state/state-core.js (G).
    ============================================================================ */
 
@@ -124,6 +125,53 @@ function mgmtValidExteriorLine(o){
   return true;
 }
 
+/* ==== [ANCRE: MGMT_LOT3_T1_SAVE] — Lot 3 T1 la trace (docs/LOT-3-L-ARENE.md
+   §3 T1) : la porte d'entrée de l'historique des combats (m.hist). Même
+   philosophie que mgmtValidExteriorLine : la clé exacte des champs, strict —
+   l'instantané d'une ligne ne porte que ce que mgmtFightReady lit (id,
+   noms, catégorie, âge, bilan, traumatisme éventuel), la trace d'un combat
+   ne porte que ce qui régénère le déroulé (instantanés, état de la RNG,
+   rounds) et l'issue résumée. Une entrée structurellement incomplète est
+   refusée à l'entrée et écartée en réparation — sa trace était illisible ;
+   une entrée complète n'est jamais coupée, la mémoire des combats ne
+   s'efface pas (QO-9, même esprit). ==== */
+
+/** Validation d'un instantané de ligne d'avant combat (lot 3 T1) : la clé
+ *  exacte des champs que mgmtFightReady lit, trauma null quand le champ
+ *  était absent à l'instant capturé. @returns {boolean} */
+function mgmtValidTraceSide(t){
+  if(!t||typeof t!=='object'||Array.isArray(t)) return false;
+  const clefs=Object.keys(t).sort().join(',');
+  if(clefs!=='D,L,W,age,div,first,id,last,name,trauma') return false;
+  if(!mgmtValidId(t.id)) return false;
+  for(const k of ['name','first','last']){ if(typeof t[k]!=='string'||!t[k]) return false; }
+  if(typeof t.div!=='string'||!divById(t.div)) return false;
+  if(typeof t.age!=='number'||!Number.isFinite(t.age)||t.age<0||t.age>100) return false;
+  for(const k of ['W','L','D']){ if(!Number.isSafeInteger(t[k])||t[k]<0) return false; }
+  if(t.trauma!==null&&(!Number.isFinite(t.trauma)||t.trauma<0||t.trauma>MGMT_TRAUMA_MAX)) return false;
+  return true;
+}
+
+/** Validation d'une trace de combat (lot 3 T1) : le cycle et l'emplacement
+ *  du soir, l'état de la RNG à l'instant de l'appel (entier 32 bits), le
+ *  nombre de rounds, les deux instantanés d'avant combat et l'issue résumée
+ *  (vainqueur A/B/D, famille, round). @returns {boolean} */
+function mgmtValidFightTrace(x){
+  if(!x||typeof x!=='object'||Array.isArray(x)) return false;
+  const clefs=Object.keys(x).sort().join(',');
+  if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
+  if(!Number.isSafeInteger(x.c)||x.c<0) return false;
+  if(x.slot!=='main'&&x.slot!=='prelim') return false;
+  if(!Number.isSafeInteger(x.seed)||x.seed<0||x.seed>0xFFFFFFFF) return false;
+  if(!Number.isSafeInteger(x.rounds)||x.rounds<1) return false;
+  if(!mgmtValidTraceSide(x.a)||!mgmtValidTraceSide(x.b)) return false;
+  if(x.winner!=='A'&&x.winner!=='B'&&x.winner!=='D') return false;
+  if(!MGMT_FAMILY_LABELS[x.family]) return false;
+  if(!Number.isSafeInteger(x.round)||x.round<1) return false;
+  return true;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Validation structurelle d'une sauvegarde du bureau, en lecture seule.
  *  Lot 3b T1 : l'argent s'ajoute — trésorerie entière (le découvert est
  *  permis, c'est T sous zéro), les deux dernières recettes, l'audience
@@ -163,11 +211,15 @@ function validateMgmt(raw){
   }
   for(const o of raw.roster){ if(!mgmtValidLine(o)) return false; }
   /* Lot 2B T1 : le vivier extérieur — toléré absent (sauvegardes d'avant le
-     lot), strict quand il est là : chaque ligne ne porte que son identité. */
+      lot), strict quand il est là : chaque ligne ne porte que son identité. */
   if(raw.exterieur!==undefined){
     if(!Array.isArray(raw.exterieur)) return false;
     for(const e of raw.exterieur){ if(!mgmtValidExteriorLine(e)) return false; }
   }
+  /* Lot 3 T1 : la trace des combats — toujours présente (la migration 5 → 6
+     la crée), chaque entrée structurellement complète, strict. */
+  if(!Array.isArray(raw.hist)) return false;
+  for(const x of raw.hist){ if(!mgmtValidFightTrace(x)) return false; }
   for(const a of raw.pile){ if(!mgmtValidAffair(a)) return false; }
   for(const f of raw.facts){ if(!f||typeof f!=='object') return false; }
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
@@ -183,8 +235,10 @@ function validateMgmt(raw){
  *  {size,fights} devient {sizeMain,sizePrelims,main,prelims} — les combats
  *  d'une carte en cours deviennent des préliminaires (slot 'prelim', cycle
  *  conservé), la carte principale démarre vide : aucun combat perdu, aucun
- *  ajouté d'office. Sans perte, sans reset : une v1 reste refusée, comme
- *  avant. */
+ *  ajouté d'office. 5 → 6 (lot 3 T1, docs/LOT-3-L-ARENE.md §3 T1) : m.hist
+ *  démarre vide — les combats d'avant le lot n'ont pas laissé de trace
+ *  (constat C3), rien à reconstruire, rien à perdre. Sans perte, sans
+ *  reset : une v1 reste refusée, comme avant. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
   if(raw.v===MGMT_SAVE_VERSION) return raw;
@@ -204,6 +258,10 @@ function mgmtMigrate(raw){
     const old=(raw.card&&Array.isArray(raw.card.fights))?raw.card.fights:[];
     raw.card={sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],
       prelims:old.map(f=>({a:f.a,b:f.b,cycle:f.cycle,slot:'prelim'}))};
+  }
+  if(raw.v===5){
+    raw.v=6;
+    if(!Array.isArray(raw.hist)) raw.hist=[];
   }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
@@ -247,6 +305,13 @@ function mgmtRepair(m){
   if(!Array.isArray(m.audiences)) m.audiences=[];
   m.audiences=m.audiences.filter(a=>Number.isSafeInteger(a)&&a>=0);
   if(!Number.isSafeInteger(m.eventsPlayed)||m.eventsPlayed<0) m.eventsPlayed=0;
+  /* Lot 3 T1 : la trace se recadre comme le reste — présente (la migration
+     la crée), et une entrée structurellement incomplète est écartée (sa
+     trace était illisible, rien ne la référençait) ; une entrée complète
+     n'est jamais coupée : la mémoire des combats ne s'efface pas (QO-9,
+     même esprit). */
+  if(!Array.isArray(m.hist)) m.hist=[];
+  else m.hist=m.hist.filter(x=>mgmtValidFightTrace(x));
   /* Lot 2 T1 : la carte {sizeMain,sizePrelims,main,prelims} se recadre — les
      deux capacités et les deux listes existent toujours, un combat qui ne
      pointe plus vers le roster est retiré de son emplacement. */
