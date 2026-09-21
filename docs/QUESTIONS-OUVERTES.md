@@ -225,7 +225,27 @@ décide du coût :
   une abstraction légère, sans passer par le moteur. Bien moins cher, et
   indiscernable pour le joueur, qui ne voit qu'une ligne et un bilan.
 
-À trancher au moment du contrat de lot. Le lien avec [QO-2] et [QO-3] est direct :
+**Tranché par Anthony le 21/09/2026 : le monde est DÉRIVÉ.** Avec deux exigences :
+il doit être **réaliste**, et les combattants doivent arriver avec une **histoire
+complète et construite**.
+
+Ce que « histoire complète et construite » veut dire, précisé le même jour : c'est
+**la trace de carrière**, pas une biographie écrite. Le passé du combattant est un
+fait complet et cohérent — bilan amateur, organisations traversées, manière dont
+ses combats se sont finis, âge et trajectoire —, **calculé à la lecture depuis son
+identité et jamais stocké**, exactement comme le classement par catégorie du lot 2
+T1. Sa **raison de se battre reste au niveau 2** (`MGMT_RAISONS`, CDC §3) : elle
+n'apparaît que lorsque le joueur s'intéresse à lui. La règle du bureau n'est pas
+touchée, et la découverte garde sa valeur.
+
+Ce que « réaliste » veut dire, et qui se mesure : le monde dérivé doit être
+**indiscernable d'un monde simulé sur les statistiques observables**. Un combattant
+donné pour 18-4 doit se comporter comme un 18-4 quand `simulateFight` le fait
+combattre, et la répartition de ses fins de combat (KO, soumission, décision) doit
+suivre celle que le moteur produit. C'est vérifiable par Monte Carlo avec
+l'outillage existant — ce n'est pas une intention, c'est une cible.
+
+À cadrer au contrat de lot. Le lien avec [QO-2] et [QO-3] est direct :
 le vivier extérieur qu'elles décrivent est **le même monde** que celui des
 nouveaux — il ne doit pas en exister deux (règle : jamais un système parallèle à
 un système existant).

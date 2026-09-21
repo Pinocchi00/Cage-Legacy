@@ -40,9 +40,9 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
   lots 0 à 5.
 - **Mode management** — **mode jouable, en développement actif**. Lots 0 (les
   documents), 1 (le style stable) et 2 (la carte principale) sont **livrés et
-  fusionnés dans `main` le 21/09/2026**. Restent les lots 3 (l'arène), 4 (la peau
-  du jeu) et 5 (le monde qui parle), plus un lot à cadrer sur le renouvellement du
-  vivier (QO-8).
+  fusionnés dans `main` le 21/09/2026**. Reste le **lot 2B** (le vivier se
+  renouvelle — contrat écrit, non commencé), puis les lots 3 (l'arène), 4 (la peau
+  du jeu) et 5 (le monde qui parle).
   Le joueur est le matchmaker d'une organisation (Split), pas son patron.
   Document qui prime : `docs/VISION-MODE-MANAGEMENT.md` ; cahier des charges :
   `docs/CDC-MODE-MANAGEMENT.md` (sections périmées marquées), ses addendums et
@@ -169,6 +169,7 @@ sans citer la décision qui change le comportement attendu.
 | `docs/LES-SIX-VOIX-v1.1.md`, `docs/LES-CINQ-LEGENDES-v1.1.md` | Voix et personnages — contenu d'auteur |
 | `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md`, `docs/LOT-3A-TESTS-CONTRAT.md` | Lot 3a — livré et mergé (PR 61) |
 | `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré. Sa T2 (carte principale) a été reprise et remplacée par le lot 2 ; ses T3 à T5 (retrait, remonter un prélim, short notice) restent à coder |
+| `docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` | **Lot 2B — contrat écrit le 21/09, non commencé.** Répond à QO-8. Son §5 liste les cinq points qu'Anthony doit trancher avant la T2 |
 | `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
 | `tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md` | Calibrage de l'économie sur le déroulé réel (21/09/2026) : les quatre profils de joueur, les trois cibles, et le tableau des six soirées enchaînées qui a révélé QO-8 |
 | `docs/CHARTE-INTERFACE-MANAGEMENT.md` | Charte d'interface du management (15/09/2026) : priorité d'Anthony. Vérification UI obligatoire à chaque tranche qui touche un écran (§3). |
