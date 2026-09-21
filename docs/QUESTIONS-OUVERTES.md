@@ -19,13 +19,14 @@ explicite.
 **Statut.** Design arrêté (LOT-3B §B : Leïla ne mentionne que les prélims, première
 fois seulement ; interface porte l'action). **Code absent.**
 
-**Ce qui manque côté code.** La carte du bureau est une liste plate de 4 combats
-(`m.card.fights`, `MGMT_CARD_SIZE = 4`) : il n'existe aucune structure
-préliminaires/carte principale à laquelle « remonter » un combat ferait référence.
-Aucune fonction, aucune donnée, aucune entrée d'interface.
+**Ce qui manque côté code.** La structure existe désormais — carte
+`{sizeMain,sizePrelims,main,prelims}` avec `MGMT_MAIN_SIZE=5` et
+`MGMT_PRELIM_SIZE=4` (lot 2 T1, `docs/LOT-2-CARTE-PRINCIPALE.md` §T1). Il n'existe
+toujours aucun geste « remonter » un combat des préliminaires vers un trou de la
+carte principale : aucune fonction, aucune entrée d'interface.
 
 **Où.** Structure de la carte : `mgmt-bureau.js` (`mgmtCardFull`, `mgmtNewBulkAffair`,
-ancre `MGMT_LOT3A_CORPS`) ; rendu : `mgmt-screens.js` (`mgmtBulkFightHtml`,
+ancre `MGMT_LOT2_CARTE`) ; rendu : `mgmt-screens.js` (`mgmtBulkFightHtml`,
 `scr_mgmt_bureau`). Le test qui attend ce comportement est marqué skip :
 `tests/mgmtBureau.test.js:782` (« remonter un combat des préliminaires »).
 
@@ -92,6 +93,11 @@ l'état du bureau : `mgmtDefault()` ne porte aucun champ d'argent, et `m.lastEve
 fixe applicable avant la première soirée n'a pas de valeur arrêtée côté code
 (LOT-3B §E dit « plancher fixe » sans le chiffrer).
 
+**Décision du 15/09/2026 (Anthony).** Aucun découvert possible avant la première
+soirée : plancher fixe = 0. Le reste du calcul est délégué ; formalisation dans
+`docs/LOT-3B-CONTRAT.md` §1 (un seul solde, plafond `max(0, …)`), en attente de
+validation du contrat.
+
 **Où.** État du bureau : `mgmt-bureau.js` (`mgmtDefault`, `mgmtRunEvent`, ancre
 `MGMT_LOT3A_CORPS`) ; validation : `validateMgmt` (nouveaux champs à couvrir). Test
 marqué skip : `tests/mgmtBureau.test.js:830`.
@@ -126,9 +132,65 @@ LOT-3B décrit la pénalité ressentie (répliques du patron et du diffuseur) ma
 chiffre aucun effet (audience, recette, réputations) ; les répliques d'auteur
 existent, la mécanique qu'elles accompagnent n'est pas définie.
 
+**Décision du 15/09/2026 (Anthony).** La recette baisse ; l'audience dépend de la
+qualité de la carte ; la relation « promoteur » varie selon l'ambiance ; la relation
+du patron baisse le temps d'une soirée. Le promoteur est Stephen Tarpit ; D4 ne se
+déclenche que si l'audience a réellement baissé. Carte de 8 combats : 4 main card
+choisis par le joueur, 4 prélims proposés par Leïla. Retraits : toutes causes
+réelles, taux proche du réel. Détail et reste ouvert (geste de composition de la
+main card) : `docs/LOT-3B-CONTRAT.md` §1 et §2.
+
 **Où.** Garde actuelle : `mgmt-bureau.js` (`mgmtRunEvent`, `mgmtCardFull`) ;
 déclencheur à modifier : `mgmt-screens.js` (`mgmtNextCycle`, `mgmtClosePile`). Test
 marqué skip : `tests/mgmtBureau.test.js:842`.
+
+---
+
+## QO-8 — L'organisation s'use : le vivier fond, la soirée cesse d'être rentable
+
+**Statut.** Mesure faite, design non arrêté. **Ouvert — attend une décision
+d'Anthony.**
+
+**Le constat.** Relevé le 21/09/2026 par le calibrage du lot 2 T4
+(`tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md`, 4000 organisations, six soirées
+chacune, joueur d'écran). L'économie est calibrée sur la **première** soirée d'une
+organisation neuve, où elle atteint sa cible. Elle se dégrade ensuite, soirée après
+soirée :
+
+| Soirée | % de soirées rentables | R moyen | Combattants disponibles | Suspensions en cours |
+|---|---|---|---|---|
+| 1 | 77,4 % | +5,3 k$ | 48,6 | 0 |
+| 2 | 56,5 % | +1,6 k$ | 41,6 | 6,9 |
+| 3 | 47,3 % | +0,3 k$ | 34,6 | 13,9 |
+| 4 | 37,3 % | −1,5 k$ | 27,9 | 20,6 |
+| 5 | 31,0 % | −2,6 k$ | 25,1 | 23,3 |
+| 6 | 25,5 % | −3,7 k$ | 23,5 | 24,8 |
+
+**Ce qui manque côté code.** Rien n'entre dans le vivier. `mgmtNewRoster()` le
+peuple une fois ; les suspensions médicales et les retraits en sortent des
+combattants, et aucun ne les remplace. À la sixième soirée, la moitié du vivier est
+indisponible et le joueur compose ses cinq combats avec ce qui reste — d'où la chute
+de l'attrait, de l'audience et de la recette. Ce n'est pas un défaut de calibrage :
+aucun poids d'argent ne compense un vivier qui fond.
+
+**Ce qui est déjà décidé ailleurs.** Le vivier extérieur (combattants d'une autre
+organisation, libres de contrat) est le sujet de [QO-2] et [QO-3], et la tranche T5
+de `docs/LOT-3B-CONTRAT.md` le porte — écrit, pas codé. Il répond au short notice ;
+reste à décider s'il répond aussi au **recrutement ordinaire**, c'est-à-dire si une
+organisation recrute entre deux soirées.
+
+**Ce qui reste à trancher.** Trois questions distinctes, aucune tranchée :
+1. Une organisation recrute-t-elle d'elle-même, et à quel rythme ?
+2. Le déclin du vivier est-il un **problème à corriger** ou une **pression de jeu
+   voulue** — la jeunesse de l'organisation comme âge d'or, le joueur devant gérer
+   l'usure ?
+3. Si c'est une pression voulue, la cible « rentable dans 70 à 80 % des soirées »
+   se lit-elle sur la première soirée (lecture actuelle) ou sur la durée de vie de
+   l'organisation ?
+
+**Où.** `mgmt-bureau.js` (`mgmtNewRoster`, `mgmtAvailable`, `mgmtApplyFight`),
+`docs/LOT-3B-CONTRAT.md` §T5. Aucun test skip associé : le comportement mesuré est
+celui du code actuel, il n'est pas en attente d'implémentation.
 
 ---
 

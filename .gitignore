@@ -23,3 +23,9 @@ tools/reports/*
 !tools/reports/lot8-allonge-gabarit-garde.md
 !tools/reports/lot9-taxonomie-blessures-medecin-rythme.md
 !tools/reports/lot10-adaptabilite-fenetre.md
+# Lot 3a §8 (livré au lot 1 le style stable) : même principe — le rapport de
+# calibrage du corps et de la soirée est le livrable §8, versionné.
+!tools/reports/LOT-3A-CALIBRAGE-SOIREE.md
+# Lot 2 §T4 (docs/LOT-2-CARTE-PRINCIPALE.md) : même principe — le rapport de
+# calibrage de l'argent sur le déroulé réel est le livrable T4, versionné.
+!tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cage Legacy — booker un combat</title>
+<style>html,body{margin:0;background:#211B1E;display:flex;justify-content:center}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,500;0,600;0,700;1,700;1,800&amp;family=Saira:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #2B2327; color: #FFF8EE; font-family: 'Saira', 'Segoe UI', sans-serif; }
+    a { color: #FFC83D; text-decoration: none; } a:hover { color: #FFE08A; }
+    .cond { font-family: 'Saira Condensed', 'Arial Narrow', sans-serif; }
+    button, select { font-family: 'Saira Condensed', sans-serif; cursor: pointer; }
+    .oct { clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+    .cut { clip-path: polygon(0 0, 94% 0, 100% 18%, 100% 100%, 0 100%); }
+  </style>
+</head>
+<body>
+<div style="width: 1920px; height: 1080px; box-sizing: border-box; padding: 40px 64px 44px; display: flex; flex-direction: column; gap: 22px; background: radial-gradient(ellipse 700px 700px at 20% 20%, rgba(255, 200, 61, .18), rgba(255, 200, 61, 0) 70%), radial-gradient(ellipse 700px 700px at 80% 20%, rgba(229, 50, 45, .2), rgba(229, 50, 45, 0) 70%), linear-gradient(180deg, #3B2F33, #2B2327 55%, #211B1E);">
+  <header style="display: flex; align-items: center; justify-content: space-between;">
+    <a href="02-semaine.html" class="cond" style="font-size: 19px; font-weight: 600; letter-spacing: .1em; color: #D9CCC0;">RETOUR À LA CARTE</a>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <label for="place" class="cond" style="font-size: 18px; letter-spacing: .12em; color: #D9CCC0;">PLACE</label>
+      <select id="place" class="cond" style="background: rgba(255, 248, 238, .08); color: #FFF8EE; border: 1px solid rgba(255, 248, 238, .3); font-size: 19px; padding: 10px 16px;">
+        <option>Co-main, 3 rounds</option><option>Combat principal, 5 rounds</option>
+      </select>
+    </div>
+  </header>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 300px minmax(0, 1fr); align-items: start; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="cond" style="font-size: 72px; font-weight: 800; font-style: italic; line-height: .92;">YOUSSEF<br>SWAT</div>
+      <div class="cond" style="font-size: 22px; font-weight: 600; color: #FFC83D; letter-spacing: .06em;">11-2&nbsp;&nbsp;·&nbsp;&nbsp;1,88 M&nbsp;&nbsp;·&nbsp;&nbsp;ALLONGE 1,98 M&nbsp;&nbsp;·&nbsp;&nbsp;ORTHODOXE</div>
+      <p style="margin: 6px 0 0; font-size: 19px; line-height: 1.5; font-weight: 300; max-width: 560px;">Contreur à distance. Tape peu, attend l'erreur, touche en sortant. Perd ses moyens contre le grillage.</p>
+      <div style="font-size: 16px; color: #D9CCC0; font-weight: 300;">Trois derniers : KO, décision partagée, défaite à la décision</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 20px;">
+      <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+        <polygon points="68,8 152,8 212,68 212,152 152,212 68,212 8,152 8,68" fill="none" stroke="rgba(255,248,238,.3)" stroke-width="2"></polygon>
+        <polygon points="78,32 142,32 188,78 188,142 142,188 78,188 32,142 32,78" fill="none" stroke="rgba(255,200,61,.4)" stroke-width="1"></polygon>
+      </svg>
+      <div class="cond" style="font-size: 96px; font-weight: 800; font-style: italic; color: #FFC83D; line-height: .8; margin-top: -150px;">VS</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end; text-align: right;">
+      <div class="cond" style="font-size: 72px; font-weight: 800; font-style: italic; line-height: .92;">SAYGUR<br>DAMAGAEV</div>
+      <div class="cond" style="font-size: 22px; font-weight: 600; color: #E5322D; letter-spacing: .06em;">ORTHODOXE&nbsp;&nbsp;·&nbsp;&nbsp;ALLONGE 1,78 M&nbsp;&nbsp;·&nbsp;&nbsp;1,74 M&nbsp;&nbsp;·&nbsp;&nbsp;15-3</div>
+      <p style="margin: 6px 0 0; font-size: 19px; line-height: 1.5; font-weight: 300; max-width: 560px;">Pressureur. Avance sans arrêt, coupe la cage, accepte d'encaisser pour frapper au corps. Jamais arrêté.</p>
+      <div style="font-size: 16px; color: #D9CCC0; font-weight: 300;">Trois derniers : 3 victoires, dont 2 avant la limite</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 56px; flex-grow: 1; min-height: 0; border-top: 1px solid rgba(255, 248, 238, .16); padding-top: 24px;">
+    <section style="display: flex; flex-direction: column; gap: 18px;">
+      <div class="cond" style="font-size: 20px; font-weight: 700; letter-spacing: .2em; color: #FFC83D;">CE QUE CE COMBAT RACONTE</div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;">
+        <div><div style="font-size: 15px; color: #D9CCC0; margin-bottom: 4px;">LE MATCHUP</div><p style="margin: 0; font-size: 18px; line-height: 1.5; font-weight: 300;">La meilleure allonge de la division contre le meilleur coupeur de cage. Si Damagaev entre, Swat revit sa défaite contre Chadaler.</p></div>
+        <div><div style="font-size: 15px; color: #D9CCC0; margin-bottom: 4px;">LE PUBLIC</div><p style="margin: 0; font-size: 18px; line-height: 1.5; font-weight: 300;">Damagaev l'a appelé publiquement. Les fans réclament ce combat depuis deux jours.</p></div>
+        <div><div style="font-size: 15px; color: #D9CCC0; margin-bottom: 4px;">LEÏLA</div><p style="margin: 0; font-size: 18px; line-height: 1.5; font-weight: 300; font-style: italic;">« [Remarque de Leïla, à écrire] »</p></div>
+      </div>
+      <div style="display: flex; gap: 16px; margin-top: auto;">
+        <a href="05-la-soiree.html" class="cond" style="background: #FFC83D; color: #1F1A1D; font-size: 26px; font-weight: 800; letter-spacing: .1em; padding: 16px 46px; transform: skewX(-12deg);">BOOKER</a>
+        <button class="cond" style="background: transparent; border: 1px solid rgba(255, 248, 238, .3); color: #FFF8EE; font-size: 20px; padding: 16px 28px; letter-spacing: .06em;">PASSER PAR SON AGENT</button>
+      </div>
+    </section>
+
+    <aside style="display: flex; flex-direction: column;">
+      <div class="cond" style="font-size: 20px; font-weight: 700; letter-spacing: .2em; color: #FFC83D; margin-bottom: 4px;">AUTRES ADVERSAIRES</div>
+      <div style="font-size: 15px; color: #D9CCC0; font-weight: 300; margin-bottom: 8px;">Disponibles pour le 11 octobre, poids léger</div>
+      <button style="display: flex; flex-direction: column; gap: 2px; text-align: left; background: transparent; border: none; border-bottom: 1px solid rgba(255, 248, 238, .16); color: #FFF8EE; padding: 14px 0;">
+        <span class="cond" style="font-size: 22px; font-weight: 700;">DUSTIN CHADALER</span><span style="font-size: 16px; color: #D9CCC0; font-weight: 300;">L'a déjà battu, déjà booké en combat principal</span></button>
+      <button style="display: flex; flex-direction: column; gap: 2px; text-align: left; background: transparent; border: none; border-bottom: 1px solid rgba(255, 248, 238, .16); color: #FFF8EE; padding: 14px 0;">
+        <span class="cond" style="font-size: 22px; font-weight: 700;">IDRIS VANNIER</span><span style="font-size: 16px; color: #D9CCC0; font-weight: 300;">12e, sous contrat chez Pacific, à négocier</span></button>
+      <button style="display: flex; flex-direction: column; gap: 2px; text-align: left; background: transparent; border: none; border-bottom: 1px solid rgba(255, 248, 238, .16); color: #FFF8EE; padding: 14px 0;">
+        <span class="cond" style="font-size: 22px; font-weight: 700;">NILS KELLER</span><span style="font-size: 16px; color: #D9CCC0; font-weight: 300;">Attend depuis 7 mois, attentiste, combat lent</span></button>
+      <button style="display: flex; flex-direction: column; gap: 2px; text-align: left; background: transparent; border: none; color: #FFF8EE; padding: 14px 0;">
+        <span class="cond" style="font-size: 22px; font-weight: 700;">CHERCHER UN COMBATTANT LIBRE</span><span style="font-size: 16px; color: #D9CCC0; font-weight: 300;">Sans contrat, court délai possible</span></button>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

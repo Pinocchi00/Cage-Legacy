@@ -1,201 +1,207 @@
 # Cage Legacy — guide d'architecture
 
+Relevé du 17/09/2026 (livré sur la branche `lot-0-documents`, basée sur `lot-3b`,
+après merge du lot 3a).
+**Numérotation des lots : depuis le 17/09/2026, les lots 0 à 5 (documents, style
+stable, carte principale, arène, peau du jeu, monde qui parle — voir
+`docs/AUDIT-17-09.md` §8) sont la référence en cours. Les numérotations
+précédentes (P8 lots 1 à 10, lots DUEL, lots 1 à 3B du management) restent
+valables comme historique : les ancres et documents qui les citent ne sont pas
+à réécrire.** Les chiffres (lignes, tests, versions) sont des **observations
+datées** : revérifie-les avant de t'appuyer dessus. `AGENTS.md` porte les règles
+communes à tous les assistants ; ce fichier-ci ajoute ce qui est propre au
+travail de Claude.
+
+## 0. Rôle de Claude sur ce dépôt
+
+- **Le code est écrit par OpenCode (modèle GLM 5.3, offre Go).** Claude
+  **supervise et orchestre** : il prépare les contrats de lot, découpe en tranches,
+  rédige les consignes envoyées à OpenCode, relit les diffs produits, lance les
+  vérifications et rend compte à Anthony.
+- Claude n'implémente pas lui-même un lot confié à OpenCode, sauf demande
+  explicite d'Anthony. Il peut corriger la documentation et l'outillage quand on
+  le lui demande.
+- Une tranche livrée par OpenCode n'est acceptée qu'après : relecture du diff
+  contre le contrat, `npm run check` relancé par Claude sur l'état réel, et
+  vérification qu'aucun test n'a été assoupli sans décision citée.
+- **Contenu d'auteur** : dialogues, voix, noms et motivations de personnages sont
+  écrits par Anthony. Ni Claude ni OpenCode n'en inventent. Un texte manquant
+  reste `[EMPLACEMENT AUTEUR]` et il est signalé.
+
 ## 1. Nature du projet
 
-Cage Legacy est un jeu de gestion de carrière de MMA en vanilla JavaScript,
-jouable directement dans le navigateur (`index.html`), sans build ni backend.
-Le mode de jeu disponible est :
+Cage Legacy est un jeu de MMA en vanilla JavaScript, jouable dans le navigateur
+(`index.html`), sans build ni backend. **Deux modes jouables**, accessibles dès
+l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 
-- **Carrière Complète** — le mode historique : amateur → pro → retraite,
-  classements, contrats, Panthéon.
+- **Carrière Complète** — mode historique : amateur → pro → retraite, classements,
+  contrats, Panthéon, et l'exhibition « Duel entre amis » (`duel-codec.js`,
+  `ui-10-duel.js`, entrée depuis le Panthéon). Stabilisé ; hors périmètre des
+  lots 0 à 5.
+- **Mode management** — **mode jouable, en développement actif** (lots 0 à 5).
+  Le joueur est le matchmaker d'une organisation (Split), pas son patron.
+  Document qui prime : `docs/VISION-MODE-MANAGEMENT.md` ; cahier des charges :
+  `docs/CDC-MODE-MANAGEMENT.md` (sections périmées marquées), ses addendums et
+  les six voix. Code : `mgmt-data.js`, `mgmt-bureau.js`, `mgmt-screens.js`.
 
 ## 2. Contraintes non négociables
 
-- **Vanilla JS (ES6+), zéro dépendance runtime.** Aucun framework, aucun
-  bundler.
-- **Jamais `import`/`export`.** Tous les fichiers sont chargés via des
-  balises `<script>` classiques et partagent un scope global. Toute
-  extraction de fichier doit rester chargée de cette façon.
+- **Vanilla JS (ES6+), zéro dépendance runtime.** Aucun framework, aucun bundler.
+- **Jamais `import`/`export`.** Scripts classiques, scope global partagé.
 - **`"use strict";` en première ligne de chaque fichier `.js` du jeu.**
-- **Persistance `localStorage` uniquement**, via `SAVE_KEY` (voir §4).
-  Aucun backend, aucun compte, aucune synchronisation.
-- **100 % offline.** Le jeu doit fonctionner sans connexion réseau une fois
-  chargé (déploiement GitHub Pages).
-- **Mobile-first.** Écrans tactiles, pas de dépendance à un clavier/souris.
+- **Persistance `localStorage` uniquement.** Aucun backend, aucun compte.
+- **100 % offline** une fois chargé (déploiement GitHub Pages).
+- **Aucun `Math.random()` dans la simulation** : RNG à graine (`setSeed`/`rnd`,
+  `engine.js`).
+- **Cible : PC.** Jeu pensé pour le PC (vision du 17/09/2026 : 1920×1080).
+  Mode management : mise en page 1440px, lisible dès 1280, extensible à 1920,
+  trois colonnes, souris d'abord, clavier en accélérateur (charte §L1,
+  addendum §24-25, `ui-11-keys.js`). Le gabarit mobile 560px ne décrit plus la
+  cible ; il ne subsiste que comme héritage CSS de la carrière.
 
-## 3. Ordre de chargement réel
+## 3. Ordre de chargement
 
-**`index.html` est la seule source de vérité** pour l'ordre de chargement —
-la liste ci-dessous est indicative et peut se périmer à la prochaine
-modification d'`index.html`. Vérifie toujours les balises `<script>` avant
-d'ajouter ou déplacer un fichier.
+**`index.html` est la seule source de vérité** ; le harnais de test
+(`tests/helpers/loadGame.js`) le lit directement. Ordre relevé le 17/09/2026
+(identique à celui du 15/09, recontrôlé point par point contre `index.html`) :
 
-Ordre lu dans `index.html` :
-
-1. `data-skills.js` — données de compétences
-2. `data-content.js` — textes/contenus génériques
-3. `data-people.js` — noms, pays, traits
-4. `engine.js` — cœur du moteur, types partagés
-5. `engine-combat.js` — résolution des combats
-6. `engine-progression.js` — XP, attributs, évolution du combattant
-7. `engine-career.js` — déroulé de carrière, calendrier
-8. `engine-events.js` — génération d'événements/actualités
-9. `state/state-core.js` — état global `G`, `esc()`, helpers de base
-10. `state/state-analytics.js` — analytics locales
-11. `state/state-save.js` — `SAVE_KEY`, sauvegarde/chargement
-12. `state/state-migration.js` — `SAVE_VERSION`, migrations
-13. `state/state-validation.js` — validation de sauvegarde
-14. `state/state-hof.js` — Panthéon (Hall of Fame)
-15. `ui-01-roster-matchmaking.js` — roster, matchmaking
-16. `ui-02-fight-prep-events.js` — préparation de combat, événements
-17. `ui-03-contracts-arcade-data.js` — contrats et récits de combat
-18. `ui-05-fight-resolution.js` — écran de résultat de combat, succès
-19. `ui-06-career-screens.js` — écrans de carrière
-20. `ui-07-contracts-legacy-screens.js` — contrats/legacy
-21. `ui-08-controller-arena.js` — routeur d'écrans (`CL`), boucle de jeu
-22. `ui-09-arena.js` — arène et animation Canvas 2D
-23. `main.js` — bootstrap, initialisation de `G`
+1. `data-skills.js`, `data-content.js`, `data-people.js` — données
+2. `engine.js` — RNG à graine, primitives partagées
+3. `engine-combat.js` — moteur de combat (`simulateFight`)
+4. `engine-progression.js`, `engine-career.js`, `engine-events.js`
+5. `state/state-core.js` — `G`, `esc()`
+6. `state/state-analytics.js`, `state/state-save.js`, `state/state-migration.js`,
+   `state/state-validation.js`, `state/state-hof.js`
+7. `ui-01-roster-matchmaking.js` à `ui-09-arena.js` (pas de `ui-04`)
+8. `duel-codec.js`, `ui-10-duel.js` — exhibition « Duel entre amis »
+9. `ui-11-keys.js` — navigation clavier globale (`keysRegister`)
+10. `mgmt-data.js`, `mgmt-bureau.js`, `mgmt-screens.js` — mode management
+11. `main.js` — bootstrap
 
 ## 4. Globaux structurants
 
 | Global | Défini dans | Rôle |
 |---|---|---|
-| `G` | déclaré `let G=null;` dans `state/state-core.js:14`, initialisé dans `main.js` (`G={screen:'title',...}`) et réassigné à chaque nouvelle partie/écran (`newCareer()`, `exitLegacy()`, etc. dans `ui-08-controller-arena.js`) | État de jeu courant (donnée brute, jamais figée dans un objet séparé) |
-| `CL` | `ui-08-controller-arena.js:102`, exposé via `window.CL=CL;` en fin de fichier | Contrôleur de navigation/actions (`CL.go(screen)`, etc.) |
-| `esc()` | `state/state-core.js:23` | Échappement HTML pour tout texte injecté dans le DOM (noms de combattant, surnoms, légendes importées) |
-| `SAVE_KEY` | `state/state-save.js:28` (`'cage-legacy-v3'`) | Clé `localStorage` de la sauvegarde principale |
-| `SAVE_VERSION` | `state/state-migration.js:4` (`4` au moment de la rédaction) | Version de schéma de sauvegarde, utilisée par `migrate()` |
+| `G` | `let G=null;` dans `state/state-core.js`, initialisé dans `main.js` | État de jeu courant. Le management vit dans `G.mgmt`. |
+| `CL` | `ui-08-controller-arena.js`, exposé via `window.CL` ; étendu par `Object.assign` dans `mgmt-screens.js` et `ui-10-duel.js` | Contrôleur de navigation/actions |
+| `esc()` | `state/state-core.js` | Échappement HTML de toute donnée injectée dans le DOM. Aucune exception. |
+| `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
+| `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
+| `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) | Sauvegarde management + secours, circuit séparé de la carrière |
+| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **4** | Management : migration séquentielle 2 → 3 → 4 sans perte (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent), v1 refusée |
 
 ## 5. Séparation des responsabilités
 
-- **`data-*.js`** : données pures (tables, textes, constantes). Aucune
-  logique de jeu, aucun accès DOM/Canvas.
-- **`engine-*.js` et `state/*.js`** : logique de simulation et état.
-  **Aucun accès DOM ni Canvas direct.** La simulation doit rester
-  100 % synchrone (pas de `Promise`, `setTimeout` de logique de jeu, etc.).
-- **`ui-0X.js`** : rendu Canvas 2D et gestion des événements utilisateur
-  uniquement. Ne porte pas de règles de simulation qui devraient vivre dans
-  `engine-*.js`/`state/*.js`.
+- **`data-*.js`, `mgmt-data.js`** : données pures. Aucune logique, aucun DOM.
+- **`engine-*.js`, `state/*.js`, `mgmt-bureau.js`** : simulation et état. Aucun
+  accès DOM/Canvas, simulation 100 % synchrone.
+- **`ui-*.js`, `mgmt-screens.js`** : rendu et événements utilisateur. Pas de règle
+  de simulation.
+- Le mode management **réutilise** le moteur existant (`simulateFight`,
+  `makeName`, `rollInjury`…) sans le modifier. Ne jamais créer un second système
+  à côté d'un système existant.
 
 ## 6. Conventions de code
 
-- **Ancres** : tout bloc de code lié à un correctif ou un lot de travail
-  identifiable est encadré par `/* ==== [ANCRE: NOM] ==== */`. Si le code
-  ancré est déplacé vers un autre fichier, l'ancre et la référence au lot
-  d'origine sont conservées telles quelles (ne pas les réécrire ni les
-  supprimer).
-- **Taille des fonctions** : toute fonction dépassant ~40 lignes doit être
-  découpée.
-- **JSDoc** : les fonctions complexes (logique de simulation non triviale,
-  signatures ambiguës) portent un commentaire JSDoc (`@param`, `@returns`,
-  `@type`). Voir `engine.js` et `state/state-core.js` pour des exemples.
-- **Scope global** : le code n'utilise pas de modules — un appelant orphelin
-  après suppression d'une fonction ne casse qu'à l'exécution, jamais à la
-  compilation. Avant de supprimer ou renommer une fonction dans
-  `state/*.js` ou `engine-*.js`, vérifier tous ses appelants dans `ui-*.js`.
-- **Performance Canvas 2D** : dans les boucles `requestAnimationFrame`
-  (arène, `ui-09-arena.js`), réutiliser les objets plutôt qu'allouer
-  (`new Array()`, littéraux d'objet) à chaque frame. Le pool de particules
-  de `ui-09-arena.js` (ancre `JUICE_NIVEAU2`) est le patron à suivre pour
-  tout nouvel effet visuel.
+- **Ancres** : `/* ==== [ANCRE: NOM] ==== */` avec la référence du lot. Déplacée
+  avec son code, jamais réécrite ni supprimée.
+- **Taille des fonctions** : au-delà de ~40 lignes, envisager un découpage — sans
+  extraction mécanique qui nuirait à la lecture.
+- **JSDoc** sur les fonctions de simulation non triviales.
+- **Scope global** : un appelant orphelin ne casse qu'à l'exécution. Avant de
+  supprimer ou renommer une fonction, chercher tous ses appelants.
+- **Canvas 2D** : dans les boucles `requestAnimationFrame`, réutiliser les objets
+  (patron : pool de particules de `ui-09-arena.js`, ancre `JUICE_NIVEAU2`).
 
 ## 7. Validation
 
-Commandes réelles (`package.json`) :
-
 ```bash
-npm install        # une seule fois — installe jsdom et eslint
-npm run lint        # ESLint sur tout le dépôt
-npm run lint:content # linter de contenu narratif (anglicismes, longueur
-                     # des phrases visibles, TEXT_POOLS, champs G.f./
-                     # G.faith./G.arcade. jamais relus) — pas inclus dans
-                     # `check`, à lancer séparément sur le contenu narratif
-npm test             # suite de tests (node --test), 10 fichiers
-npm run check        # lint + test — DOIT être vert avant toute livraison
+npm install          # une seule fois (jsdom, eslint)
+npm run lint         # ESLint
+npm test             # node --test sur la liste de package.json
+npm run check        # lint + lint:content + test — DOIT être vert avant toute livraison
+npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-Au moment de la rédaction : **116 tests**, répartis sur 10 fichiers dans
-`tests/` (`analytics.test.js`, `career.test.js`, `champChamp.test.js`,
-`hallOfFame.test.js`, `hubCombatDossier.test.js`, `invariants.test.js`,
-`proceduralNarrative.test.js`, `ranking.test.js`, `regressionFixes.test.js`,
-`saveSystem.test.js`), tous passants (`npm run check` vert).
+État au 19/09/2026 (branche `lot-1-style-stable`) : **265 tests, 261 passants,
+0 échec, 4 skip**. Les 4 skip sont dans `mgmtBureau.test.js` : trois sorties de
+carte incomplète (remonter un prélim, short notice, combattant libre) et une
+pénalité économie au-delà du plafond de découvert — comportements décidés mais
+absents du code (voir `docs/QUESTIONS-OUVERTES.md`). **16 fichiers dans
+`tests/`**, dont `mgmtBureau.test.js` (53), `mgmtCard.test.js` (23),
+`mgmtEconomie.test.js` (13) et `mgmtSoiree.test.js` (11) pour le management,
+`regressionFixes.test.js` (75) et `duel.test.js` (28) pour la carrière.
+Durée : ~90 s.
 
-**Règle** : aucune livraison sans `npm run check` vert. Un bug corrigé =
-un test ajouté dans `tests/regressionFixes.test.js` (déjà le fichier le
-plus fourni, et de loin : 75 tests au moment de la rédaction).
+**La liste des tests est écrite à la main dans `package.json`** (scripts `test`
+et `test:watch`) : un nouveau fichier de test doit y être ajouté, sinon il ne
+tourne jamais.
+
+**Règle** : aucune livraison sans `npm run check` vert. Un bug corrigé = un test
+ajouté (`tests/regressionFixes.test.js` pour la carrière, le fichier `mgmt*`
+concerné pour le management). Un test n'est jamais réécrit pour retrouver du vert
+sans citer la décision qui change le comportement attendu.
 
 ## 8. Règles de modification
 
-- **Additif par défaut.** Ne pas retirer une fonctionnalité existante pour
-  en simplifier une nouvelle.
-- **Compatibilité des sauvegardes.** Toute évolution du format de
-  sauvegarde passe par `migrate()` (`state/state-migration.js`) avec des
-  valeurs par défaut tolérantes pour les champs absents d'une sauvegarde
-  plus ancienne (ex. `if (save.fighter.morale === undefined) save.fighter.morale = 50;`).
-  Ne jamais faire planter le chargement d'une sauvegarde ancienne ou
-  légèrement corrompue.
-- **Ne jamais créer un système parallèle** à un système existant
-  (ex. un second mécanisme de rivalités à côté de `rivalryHeat`, un second
-  registre de classement à côté de celui déjà en place). Étendre l'existant.
-- **À préserver dans toute modification** : le fonctionnement offline, la
-  compatibilité mobile, le partage de légendes (import/export), le
-  Panthéon, les classements, les ères MMA, la génération de news, la
-  mémoire tactique.
+- **Additif par défaut.** Ne pas retirer une fonctionnalité pour en simplifier une
+  autre.
+- **Sauvegardes** : toute évolution du format passe par la migration du circuit
+  concerné (`migrate()` carrière, `mgmtMigrate()` management) et par sa
+  validation (`validateSave()`, `validateMgmt()`). Jamais de plantage au
+  chargement ; jamais de contamination entre carrière et management.
+- **Ne jamais créer un système parallèle** à un système existant.
+- **À préserver** : offline, sauvegarde principale + secours, Panthéon,
+  classements, ères MMA, news, mémoire tactique, duel, partage de légendes.
 
-## 9. Dette connue
+## 9. Documents de référence
 
-- **Les modes Faith et Gauntlet (avec la boutique associée) ont été
-  entièrement retirés du jeu**, y compris leurs 6 fichiers dédiés
-  (`data-faith-content.js`, `state-faith.js`, `ui-04a-faith-screens.js`,
-  `state-gauntlet.js`, `ui-04b-gauntlet-screens.js`, `state-shop.js`) —
-  seul le mode Carrière Complète reste jouable. Une purge complète du code
-  et de la documentation résiduels a été faite après coup (fonctions
-  orphelines, branches mortes conditionnées par `G.faith`/`G.gauntlet`/
-  `G.arcade`, sauvegardes historiques purgées par `migrate()`) ; si une
-  ancre ou un commentaire mentionne encore ces modes ailleurs dans le
-  dépôt, il s'agit de documentation historique volontairement conservée
-  (rationale d'un correctif passé) ou de données légitimes d'anciennes
-  légendes du Panthéon (`f.gameMode`, `f.faithNemesisId`, `f.faithTraits`),
-  jamais de code vivant.
-- **`engine-combat.js` fait ~2500 lignes** (déjà ~2340 avant le Lot 10/P8,
-  qui y a ajouté la fenêtre d'adaptabilité — §10 de
-  `P8-Arbitrage-Allonge-Suppressions.md`, désormais le dernier lot du plan
-  P8 — et ~1943 avant le Lot 9/P8, qui y avait ajouté la taxonomie de
-  frappes, les blessures, l'examen médical et le rythme par round)
-  — de très loin le plus gros fichier du dépôt, tous fichiers confondus.
-  **Écart avec une mention historique de ce document** : une version
-  antérieure de cette section désignait `ui-06-career-screens.js` (~1199
-  lignes) comme « le plus gros fichier du dépôt » — déjà inexact avant le
-  Lot 9 (`engine-combat.js` faisait alors 1943 lignes), corrigé ici.
-  `ui-06-career-screens.js` reste le plus gros fichier **côté UI**
-  (`ui-08-controller-arena.js` ~946 lignes, `ui-09-arena.js` ~655 lignes
-  depuis le Lot 6/P8, retrait des moments de bascule et du coin entre les
-  rounds). `ui-08-controller-arena.js` concentre le routeur d'écrans (`CL`)
-  et une bonne partie du rendu Canvas de l'arène ; `engine-combat.js` et
-  `ui-06-career-screens.js` restent des candidats naturels à un futur
-  découpage, non entrepris à ce jour.
-- **Le plan P8 (`P8-Arbitrage-Allonge-Suppressions.md`) est désormais
-  intégralement livré** (lots 6 à 10). Le lot 10 redonne à `adaptability`
-  un effet en combat — une fenêtre temporelle qui referme partiellement un
-  mauvais matchup (allonge, gabarit, garde, position au sol) round après
-  round, jamais au round 1, jamais totalement — sans toucher au canal
-  `eff().fightIQ` déjà établi par le Lot 6. Voir
-  `tools/reports/lot10-adaptabilite-fenetre.md` pour le détail et les
-  mesures.
-- **`npm run lint:content` signale 3 points** au moment de la rédaction :
-  3 occurrences de l'anglicisme « MAIN EVENT » (`ui-01-roster-matchmaking.js`,
-  hors périmètre du Lot 6/P8), 0 phrase visible jugée trop longue (LOI 6),
-  0 champ `G.f./G.faith./G.arcade.` écrit mais jamais relu. Ce linter est
-  informatif — il n'est pas inclus dans `npm run check` et ne bloque pas
-  une livraison à lui seul, mais ses signalements sont à regarder avant de
-  merger du contenu narratif.
+| Document | Rôle |
+|---|---|
+| `docs/VISION-MODE-MANAGEMENT.md` | Vision du mode management (16-17/09/2026). **Prime en cas de contradiction avec tout autre document.** |
+| `docs/AUDIT-17-09.md` | Audit du mode management (17/09/2026) : constats X/C/D/B/G/M/T, ordre des lots 0 à 5. Chaque constat attend la décision d'Anthony. |
+| `docs/CDC-MODE-MANAGEMENT.md` | Cahier des charges du management — fait foi sauf contradiction avec la vision ; sections périmées marquées en tête. |
+| `docs/CDC-MODE-MANAGEMENT-ADDENDUM.md`, `docs/CDC-ADDENDUM-2-LES-SIX-REGARDS.md` | Décisions complémentaires (mêmes marques sur les sections périmées) |
+| `docs/LES-SIX-VOIX-v1.1.md`, `docs/LES-CINQ-LEGENDES-v1.1.md` | Voix et personnages — contenu d'auteur |
+| `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md`, `docs/LOT-3A-TESTS-CONTRAT.md` | Lot 3a — livré et mergé (PR 61) |
+| `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré, T2 (carte principale) contracté mais non codé |
+| `docs/CHARTE-INTERFACE-MANAGEMENT.md` | Charte d'interface du management (15/09/2026) : priorité d'Anthony. Vérification UI obligatoire à chaque tranche qui touche un écran (§3). |
+| `docs/QUESTIONS-OUVERTES.md` | QO-1 à QO-7 : ce qui manque côté code ou design. N'y répondre qu'avec une décision d'Anthony. |
+| `docs/ETAT-DES-LIEUX.md` | Inventaire du 08/09/2026 (fichiers à garder / à jeter) — le sort du mode Duel y est en attente de la décision d'Anthony (T5). |
+| `docs/STRATEGIE-IA-CAGE-LEGACY-2026-09.md` | Proposition de méthode de production avec les IA (pas une spécification du jeu) |
+| `docs/ETAT-14-09.md` | **Périmé (17/09/2026)** : historique des deux tests rouges du 14/09, réécrits depuis. Ne plus s'y fier. |
+| `maquettes/`, `prototypes/` | Maquettes des dix écrans et prototype d'arène validés le 17/09/2026 (vision §Direction artistique) |
 
-## 10. Livrables attendus en fin de session
+## 10. Dette connue
+
+- **`engine-combat.js` fait ~2500 lignes**, le plus gros fichier du dépôt.
+  `ui-06-career-screens.js` (~1190) est le plus gros côté UI, `mgmt-bureau.js`
+  (~1300, grossi par le lot 3B T1) le plus gros du management et porte plusieurs
+  responsabilités (bureau, carte, argent, corps, soirée, sauvegarde). Aucun
+  découpage entrepris.
+- **`npm run lint:content`** : 3 signalements « MAIN EVENT » dans
+  `ui-01-roster-matchmaking.js` (carrière, dont un dans un commentaire). Il sort
+  avec le code 0 : inclus dans `check`, il ne bloque pas la livraison. Sa
+  vérification de longueur ne couvre que `data-people.js` : il ne garantit rien
+  sur le contenu management.
+- **Hasard hors graine** : `uniqueFighterId()` (`engine.js`) utilise `Date.now()`
+  et `Math.random()`. Le périmètre exact de reproductibilité n'est pas défini.
+- **Mémoire des faits** : `mgmtAddFact()` supprime les faits au-delà de
+  `MGMT_FACTS_MAX=10`, alors que l'addendum §2 dit « le fait ne disparaît
+  jamais ». Arbitrage d'auteur non rendu.
+- **Modes Faith, Gauntlet et boutique retirés** avec leurs fichiers. Toute mention
+  restante est de la documentation historique ou une donnée d'ancienne légende du
+  Panthéon (`f.gameMode`, `f.faithNemesisId`, `f.faithTraits`), jamais du code
+  vivant.
+- **Plan P8 carrière** : intégralement livré (lots 6 à 10), rapports dans
+  `tools/reports/`.
+
+## 11. Livrables attendus en fin de session
 
 1. Fichiers modifiés/créés, avec leur rôle.
-2. `npm run check` vert (coller la sortie finale : `# pass N`, `# fail 0`).
-3. Pour tout correctif de bug : le test ajouté dans
-   `tests/regressionFixes.test.js` et son intitulé.
-4. Pour toute modification du format de sauvegarde : le chemin de migration
-   avant/après.
-5. Écarts constatés entre ce document et l'état réel du dépôt, s'il y en a.
+2. `npm run check` vert (sortie finale : `# pass N`, `# fail 0`).
+3. Pour tout correctif : le test ajouté et son intitulé.
+4. Pour toute modification d'un format de sauvegarde : le chemin de migration.
+5. Pour une tranche OpenCode : diff relu, écarts au contrat, décision
+   d'acceptation ou de reprise.
+6. Écarts constatés entre ce document et l'état réel du dépôt.

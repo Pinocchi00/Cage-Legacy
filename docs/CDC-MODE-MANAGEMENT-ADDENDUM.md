@@ -35,6 +35,9 @@ Si le jeu produit un jour un score global de la soirée, le mode est raté.
 ## Bureau et combattants
 
 **4. La liste des croisements est-elle exhaustive ?**
+> ⚠️ **Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026** (la règle du bureau
+> et ses déclencheurs sont abandonnés avec elle).
+
 **Exhaustive en v1.** Cinq déclencheurs, pas un de plus : tu lui proposes un combat, il
 refuse une de tes propositions, il te demande quelque chose, il se blesse sur ta carte,
 son agent t'appelle à son sujet.
@@ -71,6 +74,9 @@ Leur conséquence, elle, réapparaît plus tard sous forme d'une affaire nouvell
 qui a signé ailleurs, la rancune de celui qu'on n'a jamais rappelé.
 
 **10. Main et co-main : roster ou monde ?**
+> ⚠️ **Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026** (le joueur gère la
+> carte principale ; il n'est plus limité à deux combats).
+
 **Roster sous contrat uniquement.** Faire venir un nom de l'extérieur est une affaire à
 part entière, qui passe par un agent.
 

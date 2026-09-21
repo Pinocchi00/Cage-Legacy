@@ -2,10 +2,12 @@
   "$schema": "https://opencode.ai/config.json",
 
   "instructions": [
+    "docs/VISION-MODE-MANAGEMENT.md",
     "docs/CDC-MODE-MANAGEMENT.md",
     "docs/CDC-MODE-MANAGEMENT-ADDENDUM.md",
     "docs/CDC-ADDENDUM-2-LES-SIX-REGARDS.md",
-    "docs/LES-SIX-VOIX-v1.1.md"
+    "docs/LES-SIX-VOIX-v1.1.md",
+    "docs/CHARTE-INTERFACE-MANAGEMENT.md"
   ],
 
   "permission": {
@@ -16,6 +18,8 @@
       "npm run lint": "allow",
       "npm run lint:content": "allow",
       "npm run check": "allow",
+      "node tools/*": "allow",
+      "node --test*": "allow",
       "npm ci": "allow",
 
       "git status": "allow",
@@ -31,7 +35,7 @@
       "rg*": "allow",
 
       "rm*": "deny",
-      "git push*": "deny",
+      "git push*": "ask",
       "git reset*": "deny",
       "git clean*": "deny",
       "npm install*": "ask",

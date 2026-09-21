@@ -6,6 +6,17 @@
    les deux types d'affaires Leïla (proposition, réaction au refus),
    mémoire des faits, cycles, persistance dédiée, échappement HTML et
    déterminisme seedé. Ajouté avec le lot lui-même.
+   LOT 2 T3 LEÏLA ET LES PRÉLIMINAIRES (docs/LOT-2-CARTE-PRINCIPALE.md
+   §T3 ; LOT-3B §2, décision d'Anthony du 15/09/2026) — réécrits en
+   citant le contrat : la proposition en bloc n'arrive qu'une fois la
+   carte principale complète (déclenchée par le booking de la cinquième
+   place, mgmtBookMain, et par le refill du §5) et part après les autres
+   affaires ; C1 : accepter une demande de Leïla booke dans la carte
+   principale, carte pleine, la réponse n'est plus proposée.
+   LOT 2 T5 LE CALENDRIER ATTEND LE JOUEUR (§T5 ; §4 bis, décisions 4 et
+   6 du 20/09/2026) — réécrits en citant la décision : carte principale
+   incomplète et composable, le calendrier attend ('compose') ; seul le
+   pot épuisé fait avancer le cycle ('stuck', lot 1g).
    ============================================================================ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -27,7 +38,8 @@ function enterMgmtFull(win,seed){
 }
 
 /* Entrée avec au moins une proposition simple ouverte (les tests lot 1
-   ciblent les singles ; la proposition en bloc part en tête de pile). */
+   ciblent les singles ; la proposition en bloc n'arrive qu'une fois la
+   carte principale complète, §T3). */
 function enterMgmtSingles(win,seed){
   win.eval(`setSeed(${seed}); CL.mgmtEnter(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_propose');c++) mgmtNewPile(G.mgmt); render();`);
 }
@@ -44,7 +56,36 @@ function mgmtFinishEvent(win){
   if(win.eval(`G.screen`)==='mgmt_lendemain') win.eval(`CL.mgmtLendemainNext()`);
 }
 
-test('MGMT entrée — roster de 40 à 60 noms, singles 0-2 + bloc, cycle 1', () => {
+/* §T1 (docs/LOT-2-CARTE-PRINCIPALE.md) : la carte principale est composée
+   par le joueur — geste T2. Les tests de flux la posent en fixture : cinq
+   combats, dix combattants distincts et disponibles du roster. */
+function poseMainCard(win){
+  win.eval(`(function(){
+    const m=G.mgmt;
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    if(dispo.length<10) throw new Error('fixture : roster trop court');
+    m.card.main=[];
+    for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+  })()`);
+}
+
+/* §T3 : la proposition en bloc de Leïla n'arrive qu'une fois la carte
+   principale complète — la pile est vidée, la carte posée en fixture, puis
+   Leïla propose en fin de pile (refill du §5). Pile non vide garantie :
+   la proposition en bloc est ouverte. */
+function enterMgmtWithBulk(win,seed){
+  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+  win.eval(`(function(){ let g=0; while(mgmtOpenCount(G.mgmt)>0&&g<40){ g++; const a=G.mgmt.pile.find(x=>x.status==='open'); CL.mgmtReply(a.id,a.exchange==='leila_propose'?'refuse':MGMT_EXCHANGES[a.exchange].replies[0].id); } })()`);
+  poseMainCard(win);
+  win.eval(`CL.mgmtNextCycle(); render();`);
+  /* Garde de fixture : la proposition en bloc est bien là (§T3). */
+  win.eval(`(function(){ const b=G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk'); if(!b) throw new Error('fixture : pas de proposition en bloc'); })()`);
+}
+function mgmtBulkId(win){
+  return win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
+}
+
+test('MGMT entrée — roster de 40 à 60 noms, singles 0-2 sans bloc tant que la carte principale attend, cycle 1', () => {
   const win = newGameWindow();
   enterMgmt(win,11);
   const n = win.eval(`G.mgmt.roster.length`);
@@ -55,11 +96,12 @@ test('MGMT entrée — roster de 40 à 60 noms, singles 0-2 + bloc, cycle 1', ()
     open:G.mgmt.pile.filter(a=>a.status==='open').length,
     total:G.mgmt.pile.length})`));
   assert.ok(st.singles>=0&&st.singles<=2, `singles entre 0 et 2, vus ${st.singles}`);
-  assert.equal(st.bulk, 1, 'une seule proposition en bloc par cycle, carte vide');
+  assert.equal(st.bulk, 0, '§T3 : la proposition en bloc n\u2019arrive qu\u2019une fois la carte principale complète — carte vide, rien');
   assert.equal(st.open, st.total, 'pile fraîche entièrement ouverte');
   assert.equal(win.eval(`G.mgmt.cycle`), 1);
   assert.equal(win.eval(`G.mgmt.org`), 'Split');
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'carte vide au départ');
+  /* §T1 : carte {main,prelims} vide au départ — aucun combat posé. */
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 0, 'carte vide au départ');
 });
 
 test('MGMT niveau 1 — une ligne nom/bilan/âge/catégorie/organisation, rien d\u2019autre', () => {
@@ -177,29 +219,55 @@ test('MGMT ignorer — clôt sans réaction, fait mémorisé, ne revient jamais'
 test('MGMT attaché — trois bookings du même combattant, niveau 3', () => {
   const win = newGameWindow();
   enterMgmt(win,19);
-  const target = win.eval(`G.mgmt.roster[0].id`);
+  /* C1 (§T3) : accepter booke dans la carte principale — le même
+     combattant ne peut pas être engagé deux fois ; un retrait libère
+     l'emplacement sans rien effacer (addendum 1 §5), le rebooking compte
+     une nouvelle interaction. */
   for(let i=0;i<3;i++){
     win.eval(`
       (function(){
         const m=G.mgmt;
-        m.pile.push({id:'t'+${i},kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:'${target}',b:m.roster[1].id,status:'open',decision:null});
+        const d=m.roster.filter(o=>o.div===m.roster[0].div&&mgmtAvailable(m,o)).slice(0,2);
+        if(d.length<2) throw new Error('fixture : pas assez de combattants de la catégorie');
+        m.pile.push({id:'t'+${i},kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:d[0].id,b:d[1].id,status:'open',decision:null});
         mgmtDecide(m,'t'+${i},'accept');
+        mgmtRemoveMain(m,0);
       })()`);
   }
-  const lv = win.eval(`G.mgmt.roster.find(o=>o.id==='${target}').level`);
+  const lv = win.eval(`G.mgmt.roster[0].level`);
   assert.equal(lv, 3, 'trois interactions = attaché');
 });
 
-test('MGMT nouveau cycle — pile vidée et carte incomplète : Leïla propose à nouveau, le cycle ne se ferme pas', () => {
+test('MGMT nouveau cycle — carte principale complète : Leïla repropose en fin de pile, le cycle ne se ferme pas', () => {
   const win = newGameWindow();
   enterMgmt(win,20);
-  win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';}); CL.mgmtNextCycle();`);
-  /* Lot 3a §5 : tant que la carte est incomplète, pas de cycle suivant —
-     une nouvelle proposition en bloc arrive en tête de pile. */
-  assert.equal(win.eval(`G.mgmt.cycle`), 1, 'carte incomplète : le cycle ne se ferme pas');
-  assert.equal(win.eval(`G.mgmt.pile[0].kind`), 'leila_bulk', 'nouvelle proposition de Leïla en tête de pile');
-  assert.equal(win.eval(`G.mgmt.pile[0].status`), 'open', 'proposition ouverte');
-  assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile[0].id`), 'sélectionnée d’office');
+  win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';});`);
+  poseMainCard(win);
+  win.eval(`CL.mgmtNextCycle();`);
+  /* Lot 3a §5 + §T3 : la carte principale est complète, les préliminaires
+     manquent — Leïla repropose, en fin de pile (après les autres
+     affaires), et le cycle ne se ferme pas. */
+  assert.equal(win.eval(`G.mgmt.cycle`), 1, 'préliminaires manquants : le cycle ne se ferme pas');
+  assert.equal(win.eval(`G.mgmt.pile[G.mgmt.pile.length-1].kind`), 'leila_bulk', 'nouvelle proposition de Leïla en fin de pile (§T3)');
+  assert.equal(win.eval(`G.mgmt.pile[G.mgmt.pile.length-1].status`), 'open', 'proposition ouverte');
+  assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile[G.mgmt.pile.length-1].id`), 'sélectionnée d\u2019office');
+});
+
+test('MGMT nouveau cycle — carte principale incomplète : le calendrier attend le joueur, le cycle ne se ferme pas', () => {
+  const win = newGameWindow();
+  enterMgmt(win,20);
+  win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';});`);
+  const c0 = win.eval(`G.mgmt.cycle`);
+  const card0 = win.eval(`JSON.stringify(G.mgmt.card)`);
+  win.eval(`CL.mgmtNextCycle();`);
+  /* §4 bis, décision 4 d'Anthony du 20/09/2026 (docs/LOT-2-CARTE-
+     PRINCIPALE.md) : carte principale incomplète, le joueur a la main —
+     le calendrier attend, le cycle ne se ferme pas, la carte en cours est
+     conservée. Le lot 1g (aucun blocage) ne joue que sur un pot épuisé. */
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, 'carte principale incomplète : le cycle ne bouge pas');
+  assert.equal(win.eval(`JSON.stringify(G.mgmt.card)`), card0, 'la carte en cours est conservée intacte');
+  assert.equal(win.eval(`G.mgmt.pile.filter(a=>a.kind==='leila_bulk').length`), 0, 'aucune proposition en bloc avant la carte principale complète');
+  assert.equal(win.eval(`G.mgmt.shortfall`), false, 'ce n\u2019est pas le pot qui manque : aucun shortfall signalé');
 });
 
 test('MGMT persistance — roundtrip et repli sur secours', () => {
@@ -325,7 +393,22 @@ test('MGMT réparation — une sauvegarde sans titres se recharge, titres recalc
 test('MGMT hiérarchie — une affaire non sélectionnée n\u2019affiche que A contre B', () => {
   const win = newGameWindow();
   enterMgmt(win,26);
-  win.eval(`for(let c=0;c<20&&G.mgmt.pile.length===0;c++) mgmtNewPile(G.mgmt); render();`);
+  /* §T3 : la proposition en bloc part après la carte principale — la
+     cinquième place posée (gesture T2) fait arriver Leïla pendant que les
+     singles sont encore ouverts : la pile montre les uns et l'autre. */
+  win.eval(`(function(){
+    for(let k=0;k<5;k++){
+      const m=G.mgmt, rows=mgmtCartRows(m);
+      let booked=false;
+      for(const f of rows){
+        if(!mgmtSelectable(m,f,null)) continue;
+        const b=rows.find(x=>x.id!==f.id&&x.div===f.div&&mgmtSelectable(m,x,f.id));
+        if(b){ mgmtBookMain(m,f.id,b.id); booked=true; break; }
+      }
+      if(!booked) break;
+    }
+  })()`);
+  win.eval(`render();`);
   const names = win.eval(`JSON.stringify(G.mgmt.pile.filter(a=>a.kind!=='leila_bulk').map(a=>{
     const fa=G.mgmt.roster.find(o=>o.id===a.a), fb=G.mgmt.roster.find(o=>o.id===a.b);
     return fa.name+' contre '+fb.name;
@@ -380,6 +463,14 @@ test('MGMT variété — prénoms uniques par pile, run max 2, singles 0-2 + blo
       for(let s=1;s<=200;s++){
         setSeed(s);
         const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
+        /* §T3 : le bloc attend la carte principale complète — posée en
+           fixture, la proposition de Leïla est tirée par le refill,
+           après les singles du cycle. */
+        const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+        if(dispo.length>=10){
+          for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+          mgmtRefillBulk(m);
+        }
         const singles=m.pile.filter(a=>a.kind==='leila_propose');
         const bulks=m.pile.filter(a=>a.kind==='leila_bulk');
         if(singles.length<0||singles.length>2) bad++;
@@ -506,7 +597,12 @@ test('MGMT compteur accordé — zéro, un et plusieurs', () => {
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Aucune affaire ouverte'), 'pile vide : compteur accordé');
   assert.ok(html.includes('La pile est vide.'), 'pile vide : colonne d\u2019échange explicite');
-  assert.ok(html.includes('Cycle suivant'), 'pile vide : déclencheur discret');
+  /* §4 bis, décision 4 du 20/09/2026 + charte S6 (docs/CHARTE-INTERFACE-
+     MANAGEMENT.md) : carte principale incomplète et composable, le
+     déclencheur ne ferait rien — il n'est pas proposé ; l'état de la carte
+     se lit sur la ligne du cycle (charte S4, mgmtCardLabel). */
+  assert.ok(!html.includes('Cycle suivant'), 'carte principale incomplète : pas de déclencheur qui ne ferait rien');
+  assert.ok(html.includes('Carte principale 0/5'), 'l\u2019état de la carte reste lisible sur la ligne du cycle');
   assert.ok(!html.includes('btn gold'), 'plus aucun aplat or criard');
 });
 
@@ -589,31 +685,60 @@ test('MGMT clavier bureau — flèches, Échap en vrai dispatch', () => {
 test('MGMT clavier chiffres — joue la réponse visible du même rang', () => {
   const win = newGameWindow();
   enterMgmtSingles(win,33);
-  win.eval(`CL.mgmtOpen(G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id)`);
+  /* C1 (§T3) : accepter n'est visible que si le combat se pose — le test
+     garde une paire posable (même catégorie) pour figer les rangs. */
+  win.eval(`(function(){
+    const m=G.mgmt;
+    m.pile=[]; m.open=null;
+    const d=m.roster.filter(o=>o.div===m.roster[0].div&&mgmtAvailable(m,o)).slice(0,2);
+    if(d.length<2) throw new Error('fixture : pas assez de combattants');
+    m.pile.push({id:'k1',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:d[0].id,b:d[1].id,status:'open',decision:null,title:'t'});
+  })()`);
+  win.eval(`CL.mgmtOpen('k1')`);
   win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'2',bubbles:true}))`);
   assert.equal(win.eval(`G.mgmt.facts.length`), 1, 'chiffre 2 : la proposition est refusée');
   assert.equal(win.eval(`G.mgmt.facts[0].k`), 'refused');
   /* R4 : la troisième réponse visible est Ignorer — le clavier la joue. */
-  win.eval(`G.mgmt.pile.push({id:'k3',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:G.mgmt.roster[0].id,b:G.mgmt.roster[1].id,status:'open',decision:null,title:'t'}); CL.mgmtOpen('k3');`);
+  win.eval(`(function(){
+    const m=G.mgmt;
+    const d=m.roster.filter(o=>o.div===m.roster[0].div&&mgmtAvailable(m,o)).slice(2,4);
+    if(d.length<2) throw new Error('fixture : pas assez de combattants');
+    m.pile.push({id:'k3',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:d[0].id,b:d[1].id,status:'open',decision:null,title:'t'});
+    CL.mgmtOpen('k3');
+  })()`);
   win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'3',bubbles:true}))`);
   assert.equal(win.eval(`G.mgmt.facts[G.mgmt.facts.length-1].k`), 'ignored', 'chiffre 3 : ignore comme le bouton');
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='k3').status`), 'closed', 'affaire clôturée au clavier');
 });
 
-test('MGMT focus suivante — l\u2019affaire traitée passe la main, cycle auto si vide', () => {
+test('MGMT focus suivante — l\u2019affaire traitée passe la main, la pile vidée attend le joueur', () => {
   const win = newGameWindow();
   enterMgmtSingles(win,34);
-  const first = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id`);
-  win.eval(`CL.mgmtOpen('${first}')`);
+  /* Deux affaires ouvertes garanties, paires posables (même catégorie) :
+     le focus passe la main. */
+  win.eval(`(function(){
+    const m=G.mgmt;
+    m.pile=[]; m.open=null;
+    const byDiv={};
+    for(const o of m.roster){ if(!mgmtAvailable(m,o)) continue; (byDiv[o.div]=byDiv[o.div]||[]).push(o); }
+    const d=allDivisions().map(x=>byDiv[x.id]||[]).find(p=>p.length>=4);
+    if(!d) throw new Error('fixture : pas assez de combattants');
+    m.pile.push({id:'k1',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:d[0].id,b:d[1].id,status:'open',decision:null,title:'t'});
+    m.pile.push({id:'k2',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:d[2].id,b:d[3].id,status:'open',decision:null,title:'t'});
+  })()`);
+  win.eval(`CL.mgmtOpen('k1')`);
   const c0 = win.eval(`G.mgmt.cycle`);
-  win.eval(`CL.mgmtReply('${first}','accept')`);
-  if(win.eval(`G.mgmt.cycle`)===c0){
-    assert.notEqual(win.eval(`G.mgmt.open`), first, 'le focus a quitté l\u2019affaire traitée');
-    assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id===G.mgmt.open).status`), 'open', 'le focus est sur une affaire ouverte');
-  }else{
-    assert.equal(win.eval(`G.mgmt.cycle`), c0+1, 'pile vidée : cycle auto-ouvert, sans permission');
-    assert.ok(win.eval(`mgmtOpenCount(G.mgmt)`)>=0, 'nouvelle pile en place');
-  }
+  win.eval(`CL.mgmtReply('k1','accept')`);
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, 'le cycle ne s\u2019ouvre pas tout seul');
+  assert.notEqual(win.eval(`G.mgmt.open`), 'k1', 'le focus a quitté l\u2019affaire traitée');
+  assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id===G.mgmt.open).status`), 'open', 'le focus est sur une affaire ouverte');
+  /* §T3 : la pile vidée n'ouvre aucun cycle — la carte principale est
+     incomplète, Leïla n'a rien à proposer ; le déclencheur manuel fait
+     avancer le cycle (lot 1g). */
+  win.eval(`CL.mgmtReply('k2','accept')`);
+  assert.equal(win.eval(`mgmtOpenCount(G.mgmt)`), 0, 'pile vidée');
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, 'aucun cycle auto-ouvert');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 2, 'les deux accepts sont entrés en carte principale (C1)');
 });
 
 /* ==== [ANCRE: MGMT_LOT1F] — Lot 1f : version de sauvegarde, mémoire en
@@ -687,25 +812,40 @@ test('MGMT fond — valeurs prescrites sur les bonnes règles', () => {
 
 /* ==== [ANCRE: MGMT_LOT1G] — Lot 1g : auto-cycle, bouton discret, mémoire
    Leïla. Réécrit au lot 3a (§5, décisions du 10/09/2026) : « pile vide » ne
-   vaut plus « cycle suivant ». Carte complète : la soirée s'ouvre d'abord ;
-   carte incomplète : Leïla repropose en tête de pile et le cycle ne se
-   ferme pas ; même à court de propositions, le déclencheur manuel fait
-   toujours avancer le cycle (aucun blocage définitif). Les deux tests
-   d'origine décrivaient l'ancienne règle et ont été réécrits sur la
-   nouvelle règle du §5 du lot 3a — jamais sur le comportement observé. ==== */
+   vaut plus « cycle suivant ». Carte complète : la soirée s'ouvre d'abord.
+   Réécrit au lot 2 T3 (docs/LOT-2-CARTE-PRINCIPALE.md §T3 ; LOT-3B §2,
+   décision du 15/09/2026) : la carte principale est composée d'abord (C1 :
+   les singles acceptés y entrent, le reste posé en fixture), puis Leïla
+   propose les préliminaires en fin de pile ; carte principale incomplète,
+   elle n'a rien à proposer et le déclencheur manuel avance le cycle
+   (aucun blocage définitif). ==== */
 test('MGMT auto-cycle — pile vidée avec carte complète : la soirée s\u2019ouvre d\u2019abord, le cycle avance après', () => {
   const win = newGameWindow();
   enterMgmtFull(win,35);
   const c0 = win.eval(`G.mgmt.cycle`);
   assert.equal(c0, 1, 'le premier cycle est 1');
-  win.eval(`(function(){ let g=0; while(mgmtOpenCount(G.mgmt)>0&&g<40){ g++; const a=G.mgmt.pile.find(x=>x.status==='open'); CL.mgmtReply(a.id,MGMT_EXCHANGES[a.exchange].replies[0].id); } })()`);
+  /* §T3 : la carte principale est composée d'abord — les singles acceptés
+     y entrent (C1), le reste posé en fixture (composition = T2). */
+  win.eval(`(function(){ let g=0; while(mgmtOpenCount(G.mgmt)>0&&g<40){ g++; const a=G.mgmt.pile.find(x=>x.status==='open'); CL.mgmtReply(a.id,a.exchange==='leila_propose'?'refuse':MGMT_EXCHANGES[a.exchange].replies[0].id); } })()`);
+  win.eval(`(function(){
+    const m=G.mgmt;
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    if(dispo.length<10) throw new Error('fixture : roster trop court');
+    m.card.main=[];
+    for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+  })()`);
+  /* §T3 : la carte principale complète fait arriver la proposition des
+     préliminaires (refill du §5) — validée, la carte passe à 5+4. */
+  win.eval(`CL.mgmtNextCycle()`);
+  const id = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
+  win.eval(`CL.mgmtReply('${id}','validate')`);
   /* Lot 3a §5 : pile vide et carte complète, la soirée s'ouvre — pas le
      cycle suivant. Le cycle vaut encore 1 à ce moment. */
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'la soirée s\u2019ouvre d\u2019abord');
   assert.equal(win.eval(`G.mgmt.cycle`), c0, 'le cycle vaut encore 1 au moment de la soirée');
   assert.ok(win.eval(`G.mgmt.lastEvent`), 'la soirée est calculée en une fois (anti-rechargement)');
   assert.equal(win.eval(`G.mgmt.lastEvent.cycle`), c0, 'la soirée est rattachée au cycle joué');
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'la carte est vidée après la soirée');
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 0, 'la carte est vidée après la soirée');
   /* « Continuer » soirée puis, s'il y a des touchés, lendemain. */
   mgmtFinishEvent(win);
   assert.equal(win.eval(`G.mgmt.cycle`), c0+1, 'après la soirée puis le lendemain, le cycle vaut 2');
@@ -713,40 +853,65 @@ test('MGMT auto-cycle — pile vidée avec carte complète : la soirée s\u2019o
   assert.ok(win.eval(`G.mgmt.pile.every(a=>a.status==='open')`), 'nouvelle pile fraîche');
 });
 
-test('MGMT bouton discret — carte incomplète (0/4) : « Cycle suivant » repropose, il n\u2019avance pas', () => {
+test('MGMT bouton discret — carte principale incomplète : le déclencheur n\u2019est pas proposé, le calendrier attend', () => {
   const win = newGameWindow();
   enterMgmt(win,36);
   win.eval(`G.mgmt.pile=[]; G.mgmt.open=null; render();`);
-  const html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('Cycle suivant'), 'déclencheur manuel présent');
+  let html = win.document.getElementById('app').innerHTML;
+  /* §4 bis, décision 4 d'Anthony du 20/09/2026 + charte S6 : carte
+     principale incomplète et composable, « Cycle suivant » ne ferait
+     rien — il n'est pas proposé ; l'état de la carte se lit d'un regard
+     (charte S4). */
+  assert.ok(!html.includes('Cycle suivant'), 'carte principale incomplète : pas de d\u00e9clencheur qui ne ferait rien');
+  assert.ok(html.includes('Carte principale 0/5'), 'l\u2019état de la carte se lit sur la ligne du cycle (S4)');
   assert.ok(!html.includes('btn gold'), 'plus aucun aplat or criard');
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'carte incomplète (0/4)');
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 0, 'carte incomplète (0/9)');
   const c0 = win.eval(`G.mgmt.cycle`);
+  const card0 = win.eval(`JSON.stringify(G.mgmt.card)`);
   win.eval(`CL.mgmtNextCycle()`);
-  /* Lot 3a §5 : tant que la carte n'est pas complète, le cycle ne se ferme
-     pas — Leïla fait d'abord une nouvelle proposition en bloc, en tête de
-     pile, ouverte et sélectionnée d'office. */
-  assert.equal(win.eval(`G.mgmt.cycle`), c0, '« Cycle suivant » ne fait pas avancer le cycle');
-  assert.equal(win.eval(`G.mgmt.pile[0].kind`), 'leila_bulk', 'un bloc est reproposé en tête de pile');
-  assert.equal(win.eval(`G.mgmt.pile[0].status`), 'open', 'proposition ouverte');
-  assert.equal(win.eval(`G.mgmt.open`), win.eval(`G.mgmt.pile[0].id`), 'sélectionnée d\u2019office');
+  /* Le calendrier attend le joueur : le cycle ne bouge pas, la carte en
+     cours est conservée (le déclencheur n'est d'ailleurs plus affiché
+     dans cet état). */
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, 'le cycle ne bouge pas tant que la carte principale n\u2019est pas composée');
+  assert.equal(win.eval(`JSON.stringify(G.mgmt.card)`), card0, 'la carte en cours est conservée intacte');
+  assert.equal(win.eval(`G.mgmt.pile.filter(a=>a.kind==='leila_bulk').length`), 0, 'aucune proposition en bloc avant la carte principale complète');
+  /* Carte principale complète (fixture — composition = T2) : le
+     déclencheur redevient proposé, il a de nouveau un effet. */
+  poseMainCard(win);
+  win.eval(`render();`);
+  html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes('Cycle suivant'), 'carte principale complète : le déclencheur est proposé à nouveau');
 });
 
-test('MGMT cycle suivant — carte complète : le déclencheur manuel fait avancer le cycle', () => {
+test('MGMT cycle suivant — carte complète : le déclencheur manuel ouvre la soirée et fait avancer le cycle', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(45); CL.mgmtEnter(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_bulk');c++) mgmtNewPile(G.mgmt); render();`);
-  const id = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
+  enterMgmtWithBulk(win,45);
+  const id = mgmtBulkId(win);
+  /* §T3 : la carte principale est complète (fixture = composition T2) ; le
+     bloc validé complète les préliminaires. Une place est d'abord libérée
+     (retrait, geste réel) : la validation ne déclenche pas la soirée et
+     le déclencheur manuel reste le seul chemin d'ouverture. */
+  win.eval(`mgmtRemoveMain(G.mgmt,4)`);
   win.eval(`CL.mgmtReply('${id}','validate')`);
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 4, 'carte complète');
-  /* On isole le déclencheur : le reste de la pile est clos sans décision
-     (le comportement des décisions est couvert par d'autres tests). */
-  win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';}); G.mgmt.open=null; render();`);
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 4, 'quatre préliminaires');
+  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'carte incomplète : pas de soirée d\u2019office');
+  /* La cinquième place se re-pose à l'écran (geste T2) — la carte devient
+     complète, la pile est vidée. La pose passe par mgmtBookMain direct
+     (hors contrôleur) : le rendu suit, comme après le vrai geste. */
+  win.eval(`(function(){
+    const m=G.mgmt, rows=mgmtCartRows(m);
+    const a=rows.find(f=>mgmtSelectable(m,f,null));
+    const b=rows.find(f=>f.id!==a.id&&f.div===a.div&&mgmtSelectable(m,f,a.id));
+    if(!a||!b||!mgmtBookMain(m,a.id,b.id)) throw new Error('fixture : pose impossible');
+    render();
+  })()`);
+  assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), true, 'carte complète à 5 + 4');
   assert.equal(win.eval(`mgmtOpenCount(G.mgmt)`), 0, 'pile vidée');
   assert.ok(win.document.getElementById('app').innerHTML.includes('Cycle suivant'), 'déclencheur visible');
   const c0 = win.eval(`G.mgmt.cycle`);
   win.eval(`CL.mgmtNextCycle()`);
-  /* Carte complète : le même déclencheur que le test précédent ouvre la
-     soirée, puis le cycle avance. */
+  /* Carte complète : le déclencheur manuel ouvre la soirée, puis le cycle
+     avance. */
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'carte complète : la soirée se joue');
   assert.equal(win.eval(`G.mgmt.cycle`), c0, 'le cycle n\u2019avance qu\u2019après la soirée');
   mgmtFinishEvent(win);
@@ -756,17 +921,21 @@ test('MGMT cycle suivant — carte complète : le déclencheur manuel fait avanc
 test('MGMT sortie de carte incomplète — la reproposition validée complète la carte, le cycle avance normalement', () => {
   const win = newGameWindow();
   win.eval(`setSeed(46); CL.mgmtEnter();`);
+  /* §T1 : la carte principale est posée en fixture (composition = T2) ; le
+     bloc reproposé complète les préliminaires — 5 + 4, la soirée s'ouvre. */
+  poseMainCard(win);
   win.eval(`G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';}); G.mgmt.open=null; render();`);
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'carte incomplète (0/4)');
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 5, 'carte incomplète (5/9, sans prélims)');
   win.eval(`CL.mgmtNextCycle()`);
   assert.equal(win.eval(`G.mgmt.cycle`), 1, 'le cycle ne se ferme pas tant que la carte est incomplète');
   const id = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
   win.eval(`CL.mgmtReply('${id}','validate')`);
-  /* Le bloc validé était bien la sortie : la carte est passée de 0/4 à 4/4
-     et la soirée s'est ouverte d'elle-même (la preuve en est lastEvent,
-     calculé sur les quatre combats, puis la carte vidée — lot 3a §5). */
+  /* Le bloc validé était bien la sortie : les préliminaires sont passés de
+     0/4 à 4/4, la carte est passée de 5/9 à 9/9 et la soirée s'est ouverte
+     d'elle-même (la preuve en est lastEvent, calculé sur les neuf combats,
+     puis la carte vidée — §T1, lot 3a §5). */
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'carte complétée : la soirée s\u2019ouvre d\u2019elle-même');
-  assert.equal(win.eval(`G.mgmt.lastEvent.fights.length`), 4, 'la soirée a bien joué les quatre combats de la carte');
+  assert.equal(win.eval(`G.mgmt.lastEvent.fights.length`), 9, 'la soirée a bien joué les neuf combats de la carte');
   assert.equal(win.eval(`G.mgmt.lastEvent.cycle`), 1, 'soirée rattachée au cycle en cours');
   /* Après complétion, le cycle avance normalement (soirée → lendemain). */
   mgmtFinishEvent(win);
@@ -799,44 +968,220 @@ test('MGMT sortie carte incomplète — combattant libre de contrat', {skip:'com
      normalement. Aucun libellé d'interface : [EMPLACEMENT AUTEUR]. */
 });
 
-test('MGMT absence de blocage — même à court de propositions, le cycle avance toujours', () => {
+test('MGMT absence de blocage — pot épuisé, le cycle avance toujours', () => {
   const win = newGameWindow();
   const r = win.eval(`
     (function(){
       setSeed(55);
-      const m=mgmtDefault();
-      /* Pot volontairement épuisé : deux combattants, une seule paire
-         possible — le bloc exige quatre combats distincts, strict comme
-         assoupli échoue (mgmtRefillBulk → shortfall, 'stuck'). */
-      m.roster=[
-        {id:'a',name:'A Boxeur',first:'A',last:'Boxeur',W:5,L:2,D:0,age:25,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
-        {id:'b',name:'B Lutteur',first:'B',last:'Lutteur',W:4,L:3,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
-      ];
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      /* §4 bis, décision 4 d'Anthony du 20/09/2026 : le pot est épuisé
+         quand plus rien n'est composable ni proposable — ici la carte
+         principale complète (fixture, composition = T2) engage les dix
+         combattants disponibles et personne ne reste pour les
+         préliminaires, même assoupli (mgmtRefillBulk → shortfall). */
+      const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+      if(dispo.length<10) return null;
+      m.roster=dispo.slice(0,10);
+      m.card.main=[];
+      for(let i=0;i<5;i++) m.card.main.push({a:m.roster[2*i].id,b:m.roster[2*i+1].id,cycle:m.cycle,slot:'main'});
+      m.pile=[]; m.open=null;
       if(!G) G={theme:'dark'};
       G.mgmt=m;
       const c0=m.cycle;
       CL.mgmtNextCycle();
-      return JSON.stringify({c0,c1:m.cycle});
+      return JSON.stringify({c0,c1:m.cycle,card:m.card.main.length+':'+m.card.prelims.length});
     })()`);
   const s = JSON.parse(r);
   assert.equal(s.c0, 0, 'état initial : cycle 0');
-  assert.equal(s.c1, s.c0+1, 'aucun état ne laisse le joueur incapable de faire avancer le cycle');
+  assert.equal(s.c1, s.c0+1, 'aucun état ne laisse le joueur incapable de faire avancer le cycle (lot 1g)');
+  assert.equal(s.card, '5:0', 'pot épuisé : rien n\u2019est rempli d\u2019office (carte intacte)');
 });
 
-/* Économie du short notice (règle du découvert). Rien de tout cela
-   n'existe encore : ni recette, ni trésorerie, ni plafond dans l'état du
-   bureau — ni implémentation, ni simulation, tests marqués skip, chacun
-   avec son entrée dans docs/QUESTIONS-OUVERTES.md. */
-test('MGMT économie — short notice payable à découvert dans la limite du plafond', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : le découvert est payable
-     jusqu'à un plafond égal à la recette nette de la dernière soirée
-     (moyenne des deux dernières si elles existent, plancher fixe si aucune
-     soirée n'a eu lieu). */
+/* ==== [ANCRE: MGMT_LOT2_T5_TESTS] — Lot 2 T5 le calendrier attend le
+   joueur (docs/LOT-2-CARTE-PRINCIPALE.md §T5 ; §4 bis « Questions de
+   règle — tranchées par Anthony le 20/09/2026 », décisions 4 et 6) :
+   mgmtClosePile sépare les deux anciens 'stuck' — 'compose' (carte
+   principale incomplète et composable : le joueur a la main, le
+   calendrier attend) et 'stuck' (pot de combattants épuisé : le cycle
+   avance, lot 1g). Tests dirigés : les quatre issues de la fin de pile,
+   puis le calendrier par le vrai geste CL.mgmtNextCycle sur les trois
+   cas du contrat. ==== */
+
+test('MGMT T5 fin de pile — les quatre issues de mgmtClosePile', () => {
+  const win = newGameWindow();
+  const r = win.eval(`
+    (function(){
+      const dispo=(m,n)=>m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o)).slice(0,n);
+      const etat=()=>{ setSeed(70); const m=mgmtDefault(); mgmtNewRoster(m); return m; };
+      /* Carte principale complète (fixture — composition = T2) : les dix
+         premiers disponibles y sont posés, ils sortent du pot. */
+      const poseMain=m=>{ const d=dispo(m,10);
+        m.card.main=[];
+        for(let i=0;i<5;i++) m.card.main.push({a:d[2*i].id,b:d[2*i+1].id,cycle:m.cycle,slot:'main'});
+        return d; };
+      const out={};
+      /* 'compose' : carte principale incomplète et composable. */
+      let m=etat(); m.pile=[]; m.open=null;
+      out.compose=mgmtClosePile(m);
+      /* 'event' : carte complète 5 + 4. */
+      m=etat(); poseMain(m); m.card.prelims=[];
+      const d=dispo(m,8);
+      for(let i=0;i<4;i++) m.card.prelims.push({a:d[2*i].id,b:d[2*i+1].id,cycle:m.cycle,slot:'prelim'});
+      m.pile=[]; m.open=null;
+      out.event=mgmtClosePile(m);
+      /* 'refill' : carte principale complète, préliminaires manquants,
+         Leïla a encore quoi proposer — la proposition est poussée (§5). */
+      m=etat(); poseMain(m); m.pile=[]; m.open=null;
+      out.refill=mgmtClosePile(m);
+      out.refillBulk=!!m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+      /* 'stuck' : la carte principale engage les dix disponibles,
+         personne ne reste pour les préliminaires — pot épuisé. */
+      m=etat(); const d10=poseMain(m); m.roster=d10; m.pile=[]; m.open=null;
+      out.stuck=mgmtClosePile(m);
+      /* 'none' : la pile est encore ouverte. */
+      m=etat();
+      m.pile=[{id:'k-x',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:m.roster[0].id,b:m.roster[1].id,status:'open',decision:null}];
+      out.none=mgmtClosePile(m);
+      return JSON.stringify(out);
+    })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.compose, 'compose', 'carte principale incomplète et composable : le joueur a la main');
+  assert.equal(s.event, 'event', 'carte complète : la soirée');
+  assert.equal(s.refill, 'refill', 'préliminaires manquants, pot disponible : Leïla repropose');
+  assert.equal(s.refillBulk, true, 'la reproposition du §5 est poussée en fin de pile');
+  assert.equal(s.stuck, 'stuck', 'pot épuisé : personne ne reste, même assoupli');
+  assert.equal(s.none, 'none', 'pile encore ouverte : rien à fermer');
 });
 
-test('MGMT économie — remboursement du découvert sur la recette suivante', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : le découvert se rembourse
-     sur la recette de la soirée suivante, avant tout bénéfice. */
+test('MGMT T5 calendrier — carte principale incomplète et pile vide : le cycle ne bouge pas, la carte en cours est conservée intacte', () => {
+  const win = newGameWindow();
+  enterMgmt(win,71);
+  win.eval(`(function(){
+    const m=G.mgmt;
+    const d=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    m.card.main=[{a:d[0].id,b:d[1].id,cycle:m.cycle,slot:'main'}];
+    m.pile.forEach(a=>{a.status='closed';a.decision='ignored';});
+    m.open=null;
+  })()`);
+  const before = win.eval(`JSON.stringify({c:G.mgmt.cycle,card:G.mgmt.card,pile:G.mgmt.pile.map(a=>a.id)})`);
+  win.eval(`CL.mgmtNextCycle();`);
+  /* §4 bis, décision 4 du 20/09/2026 : le calendrier attend — le cycle,
+     la carte en cours et la pile restent exactement ce qu'ils étaient. */
+  assert.equal(win.eval(`JSON.stringify({c:G.mgmt.cycle,card:G.mgmt.card,pile:G.mgmt.pile.map(a=>a.id)})`), before,
+    'le cycle ne bouge pas, la carte et la pile sont conservées intactes');
+  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le bureau reste ouvert : le joueur compose');
+});
+
+test('MGMT T5 calendrier — pot épuisé : le cycle avance encore', () => {
+  const win = newGameWindow();
+  const r = win.eval(`
+    (function(){
+      setSeed(72);
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      const d=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o)).slice(0,10);
+      m.roster=d;
+      for(let i=0;i<5;i++) m.card.main.push({a:d[2*i].id,b:d[2*i+1].id,cycle:m.cycle,slot:'main'});
+      m.pile=[]; m.open=null;
+      if(!G) G={theme:'dark'};
+      G.mgmt=m;
+      const c0=m.cycle;
+      const r1=mgmtClosePile(m);
+      CL.mgmtNextCycle();
+      return JSON.stringify({c0,c1:m.cycle,r1});
+    })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.r1, 'stuck', 'carte principale complète, personne hors carte : le pot est épuisé');
+  assert.equal(s.c1, s.c0+1, 'le pot épuisé fait encore avancer le cycle (lot 1g, aucun blocage)');
+});
+
+test('MGMT T5 calendrier — carte complète et pile vide : c\u2019est la soirée', () => {
+  const win = newGameWindow();
+  enterMgmt(win,73);
+  win.eval(`(function(){
+    const m=G.mgmt;
+    const d=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    m.card.main=[]; m.card.prelims=[];
+    for(let i=0;i<5;i++) m.card.main.push({a:d[2*i].id,b:d[2*i+1].id,cycle:m.cycle,slot:'main'});
+    for(let i=0;i<4;i++) m.card.prelims.push({a:d[10+2*i].id,b:d[11+2*i].id,cycle:m.cycle,slot:'prelim'});
+    m.pile=[]; m.open=null;
+  })()`);
+  const c0 = win.eval(`G.mgmt.cycle`);
+  win.eval(`CL.mgmtNextCycle()`);
+  assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'pile vide et carte complète : la soirée s\u2019ouvre');
+  assert.equal(win.eval(`G.mgmt.lastEvent.fights.length`), 9, 'les neuf combats de la carte sont joués');
+  assert.equal(win.eval(`G.mgmt.cycle`), c0, 'le cycle n\u2019avance qu\u2019après la soirée');
+});
+
+/* Économie du short notice (règle du découvert, QO-5). Lot 3b T1
+   (docs/LOT-3B-CONTRAT.md §3 T1) pose l'argent : trésorerie, recette nette,
+   plafond — les deux premiers tests sont activés à cette occasion ; le
+   troisième (au-delà du plafond : carte réduite) reste skip, la soirée en
+   carte réduite est la T7. */
+test('MGMT économie — short notice payable à découvert dans la limite du plafond', () => {
+  const win = newGameWindow();
+  /* QO-5 : le short notice est autorisé si et seulement si T − coût ≥ −P,
+     avec P = 0 avant la première soirée, P = max(0, R₁) après une, puis
+     P = max(0, arrondi((R₁ + R₂) / 2)). */
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=50; return mgmtCanAfford(m,60); })()`), false,
+    'avant la 1ʳᵉ soirée (exemple QO-5) : T=50 refuse un coût de 60, P=0');
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=50; return mgmtCanAfford(m,50); })()`), true,
+    'la limite exacte passe : T − coût = −0 ≥ −0');
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,100); })()`), true,
+    'exemple QO-5 : R₁=120, T=30 accepte un coût de 100 (−70 ≥ −120)');
+  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,151); })()`), false,
+    'au-delà du plafond : refusé');
+  /* Palier 2, mesuré sur deux vraies soirées : le plafond est la moyenne
+     arrondie des deux dernières recettes, pas un compteur séparé. */
+  const r = win.eval(`
+    (function(){
+      setSeed(66);
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      for(let e=0;e<2;e++){
+        /* §T3 : la carte principale est posée d'abord en fixture
+           (composition = T2), Leïla propose les prélims ensuite. */
+        m.card.main=[];
+        const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+        if(dispo.length<10) return null;
+        for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+        m.pile=[]; m.open=null;
+        mgmtClosePile(m);
+        const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+        if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return null;
+        if(!mgmtRunEvent(m)) return null;
+      }
+      const P=mgmtOverdraftCap(m);
+      const attendu=Math.max(0,Math.round((m.recettes[0]+m.recettes[1])/2));
+      return JSON.stringify({P,attendu,R1:m.recettes[0],R2:m.recettes[1]});
+    })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.P, s.attendu, `plafond lissé sur les deux dernières recettes (R2=${s.R2}, R1=${s.R1})`);
+});
+
+test('MGMT économie — remboursement du découvert sur la recette suivante', () => {
+  const win = newGameWindow();
+  const r = win.eval(`
+    (function(){
+      setSeed(64);
+      const m=mgmtDefault(); mgmtNewRoster(m);
+      /* §T3 : la carte principale est posée d'abord en fixture
+         (composition = T2), Leïla propose les prélims ensuite. */
+      m.card.main=[];
+      const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+      if(dispo.length<10) return null;
+      for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+      m.pile=[]; m.open=null;
+      mgmtClosePile(m);
+      const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return null;
+      m.treasury=-70;
+      const ev=mgmtRunEvent(m);
+      if(!ev) return null;
+      return JSON.stringify({R:ev.finance.recette,T:m.treasury,e1:ev.e1});
+    })()`);
+  const s = JSON.parse(r);
+  assert.equal(s.T, -70+s.R, 'remboursement automatique : T ← T + R, avant tout bénéfice');
+  assert.equal(s.e1, s.R>0, 'E1 si et seulement si une dette a effectivement été déduite');
+  if(s.R<70) assert.ok(s.T<0, 'le reste de la dette est reporté (T reste négatif)');
 });
 
 test('MGMT économie — au-delà du plafond : plus de short notice, soirée en carte réduite avec pénalité', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
@@ -847,11 +1192,13 @@ test('MGMT économie — au-delà du plafond : plus de short notice, soirée en 
 
 /* Les deux tests du contrat LOT-3A-TESTS (docs/LOT-3A-TESTS-CONTRAT.md §5),
    règles du §5 du lot 3a qui existent dans le code : la proposition en bloc
-   non ignorable, et l'absence de tout remplissage d'office. */
+   non ignorable, et l'absence de tout remplissage d'office. §T3 : la
+   proposition en bloc attend la carte principale complète — posée en
+   fixture (composition = T2), Leïla propose les prélims ensuite. */
 test('MGMT bloc non ignorable — carte incomplète : seuls valider, échanger, écraser restent', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(60); CL.mgmtEnter(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_bulk');c++) mgmtNewPile(G.mgmt); render();`);
-  const id = win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_bulk').id`);
+  enterMgmtWithBulk(win,60);
+  const id = mgmtBulkId(win);
   win.eval(`CL.mgmtOpen('${id}')`);
   /* Lot 3a §5 : tant que la carte est incomplète, ignorer le bloc est
      interdit — ce serait une nouvelle proposition gratuite, sans le coût
@@ -860,52 +1207,74 @@ test('MGMT bloc non ignorable — carte incomplète : seuls valider, échanger, 
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').status`), 'open', 'l\u2019affaire reste ouverte');
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(!html.includes(`CL.mgmtIgnore('${id}')`), 'l\u2019interface ne propose pas Ignorer sur le bloc incomplet');
-  /* Carte complète (posée d\u2019office pour viser la garde elle-même) : la
-     règle bascule, Ignorer redevient une réponse disponible. */
-  win.eval(`(function(){ const a=G.mgmt.pile.find(x=>x.id==='${id}'); G.mgmt.card.fights=a.fights.map(f=>({a:f.a,b:f.b,cycle:G.mgmt.cycle})); })()`);
+  /* Carte complète (posée en fixture — §T1 : la carte principale est posée
+     d'office pour viser la garde elle-même ; le bloc validé complète les
+     préliminaires) : la règle bascule, Ignorer redevient une réponse
+     disponible. */
+  win.eval(`(function(){
+    const a=G.mgmt.pile.find(x=>x.id==='${id}');
+    const m=G.mgmt;
+    m.card.main=[];
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    if(dispo.length<10) throw new Error('fixture : roster trop court');
+    for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+    m.card.prelims=a.fights.map(f=>({a:f.a,b:f.b,cycle:m.cycle,slot:'prelim'}));
+  })()`);
   assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), true, 'carte complète');
   assert.equal(win.eval(`mgmtIgnore(G.mgmt,'${id}')`), true, 'carte complète : ignorer redevient possible');
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'ignored', 'clôturée comme les autres affaires');
 });
 
-test('MGMT aucun remplissage d\u2019office — rien n\u2019entre en carte sans valider ou échanger', () => {
+test('MGMT aucun remplissage d\u2019office — rien n\u2019entre en carte sans une décision du joueur', () => {
   const win = newGameWindow();
   win.eval(`setSeed(61); CL.mgmtEnter();`);
-  /* Toutes les décisions réelles sauf valider : écraser les blocs, accepter
-     ou ignorer les singles, fermer les réactions. La carte est revérifiée
-     après CHAQUE action : un remplissage d'office (à la reproposition, à la
-     fermeture de cycle) serait vu à l'instant même où il se produirait. */
+  /* §T3 : la carte principale est posée d'abord en fixture (composition =
+     T2), puis Leïla propose les prélims — écrasés sans validation. Les
+     singles sont refusés : les accepter entrerait en carte, et c'est une
+     décision du joueur (C1), jamais un remplissage d'office. La carte est
+     revérifiée après CHAQUE action : un remplissage d'office (à la
+     reproposition, à la fermeture de cycle) serait vu à l'instant même où
+     il se produirait. */
+  poseMainCard(win);
+  /* §T3 : Leïla propose dès la carte principale complète (refill du §5,
+     le même appel que le booking de la cinquième place) — la pile de
+     départ est parfois née vide (aucun single ce cycle). */
+  win.eval(`mgmtRefillBulk(G.mgmt)`);
   const drained = win.eval(`
     (function(){
       let g=0, crushed=0, refills=0;
+      const nb=()=>G.mgmt.card.main.length+G.mgmt.card.prelims.length;
       while(mgmtOpenCount(G.mgmt)>0&&g<40){
         g++;
         const a=G.mgmt.pile.find(x=>x.status==='open');
-        const act=a.kind==='leila_bulk'?'crush':MGMT_EXCHANGES[a.exchange].replies[0].id;
+        const act=a.kind==='leila_bulk'?'crush':(a.exchange==='leila_propose'?'refuse':MGMT_EXCHANGES[a.exchange].replies[0].id);
         if(act==='crush') crushed++;
         CL.mgmtReply(a.id,act);
-        if(G.mgmt.card.fights.length!==0) throw new Error('rempli d\u2019office à l\u2019action '+g);
+        if(G.mgmt.card.prelims.length!==0) throw new Error('prélims remplis d\u2019office à l\u2019action '+g);
+        if(G.mgmt.card.main.length!==5) throw new Error('carte principale modifiée d\u2019office à l\u2019action '+g);
         if(G.mgmt.pile.some(x=>x.kind==='leila_bulk'&&x.status==='open')) refills++;
       }
       return JSON.stringify({g,crushed,refills});
     })()`);
   const s = JSON.parse(drained);
   assert.ok(s.crushed>=1, 'au moins une proposition en bloc a été écrasée');
-  assert.ok(s.refills>=1, 'Leïla a reproposé au moins un bloc après écrasement');
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'aucun combat n\u2019est entré en carte sans une action du joueur');
-  /* Et même à court de paires ('stuck') : le cycle avance, rien n\u2019est
-     rempli d\u2019office. */
+  assert.ok(s.refills>=1, 'Leïla a reproposé au moins un bloc après écrasement (§T3 : après la carte principale)');
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 5, 'aucun combat n\u2019est entré en carte sans une action du joueur');
+  /* Et avec une carte principale incomplète et composable ('compose') :
+     le calendrier attend le joueur — rien n'est rempli d'office (§4 bis,
+     décision 4 du 20/09/2026). */
   win.eval(`
     (function(){
       G.mgmt.roster=[
         {id:'a',name:'A Boxeur',first:'A',last:'Boxeur',W:5,L:2,D:0,age:25,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
         {id:'b',name:'B Lutteur',first:'B',last:'Lutteur',W:4,L:3,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
       ];
+      G.mgmt.card.main=[]; G.mgmt.card.prelims=[];
       G.mgmt.pile.forEach(a=>{a.status='closed';a.decision='ignored';});
       G.mgmt.open=null;
       CL.mgmtNextCycle();
     })()`);
-  assert.equal(win.eval(`G.mgmt.card.fights.length`), 0, 'à court de paires, rien n\u2019est rempli d\u2019office');
+  assert.equal(win.eval(`G.mgmt.card.main.length+G.mgmt.card.prelims.length`), 0, 'rien n\u2019est rempli d\u2019office : le calendrier attend');
 });
 
 test('MGMT mémoire — formes singulier, pluriel et suites', () => {

@@ -20,6 +20,10 @@ hype de ville, demande, taille d'événement, salle.
 
 **Cage Legacy cache des chiffres derrière des gens.**
 
+> *(Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 : le jeu raconte les
+> moments clés — décision T3 du 17/09. La règle devient « ni note, ni barème,
+> ni jauge ».)*
+
 > Ce n'est pas de la narration. La conséquence n'est pas une histoire, c'est une décision :
 > tu bookes ou tu ne bookes pas, tu te trompes ou tu as raison. Les six voix ne racontent
 > rien — elles informent, avec du bruit. C'est un brouillard de guerre qui a un visage.
@@ -118,9 +122,13 @@ sims contre les plus riches.
 # 6. CE QU'ON NE REPREND PAS À LA CONCURRENCE
 
 - ❌ **Aucune note de combat, aucune note de carte, aucun barème.** Ni avant, ni après.
-- ❌ **Aucune étiquette descriptive après coup** du type « finition au corps » ou
-  « beaucoup de soumissions ». C'est de l'information sur le spectacle. Après un combat, ce
-  que le joueur reçoit, c'est **Clara qui appelle, ou Komma qui ne dit rien.**
+- ❌ *(Remplacé par VISION-MODE-MANAGEMENT.md le 17/09/2026 : l'interdiction de
+  toute étiquette descriptive est levée — décision T3 du 17/09, le jeu nomme les
+  coups, les phases et les positions, et raconte les moments clés. La règle
+  devient « ni note, ni barème, ni jauge ».)* **Aucune étiquette descriptive après
+  coup** du type « finition au corps » ou « beaucoup de soumissions ». C'est de
+  l'information sur le spectacle. Après un combat, ce que le joueur reçoit, c'est
+  **Clara qui appelle, ou Komma qui ne dit rien.**
 - ❌ Aucun indicateur chiffré de qualité d'appariement, aucune jauge, aucune étoile.
 
 ---
