@@ -73,7 +73,16 @@ après le découpage de `mgmt-bureau.js` :
 
 1. `data-skills.js`, `data-content.js`, `data-people.js` — données
 2. `engine.js` — RNG à graine, primitives partagées
-3. `engine-combat.js` — moteur de combat (`simulateFight`)
+3. **Moteur de combat, six fichiers depuis le découpage du 21/09/2026** :
+   `engine-combat-tactics.js` (profils de style, politiques, rythme,
+   adaptabilité) — `engine-combat-striking.js` (usure, coups lourds, taxonomie,
+   blessures) — `engine-combat-grappling.js` (sol et clinch) —
+   `engine-combat-officials.js` (arbitre, juges, examen médical) —
+   `engine-combat.js` (**`simulateFight` seule, 1641 lignes d'un bloc**) —
+   `engine-combat-outcomes.js` (`applyResult`, finitions, estimation).
+   Aucune dépendance de chargement entre eux : les 36 constantes de premier
+   niveau sont toutes littérales. Les aides précèdent `simulateFight` par
+   lisibilité, les résultats la suivent comme dans le fichier d'origine.
 4. `engine-progression.js`, `engine-career.js`, `engine-events.js`
 5. `state/state-core.js` — `G`, `esc()`
 6. `state/state-analytics.js`, `state/state-save.js`, `state/state-migration.js`,
@@ -195,9 +204,14 @@ sans citer la décision qui change le comportement attendu.
 
 ## 10. Dette connue
 
-- **`engine-combat.js` fait ~2500 lignes**, le plus gros fichier du dépôt, et
-  reste la dette la plus lourde. `ui-06-career-screens.js` (~1190) est le plus
-  gros côté UI.
+- **Le moteur de combat est découpé depuis le 21/09/2026** : `engine-combat.js`
+  est passé de 2497 à **1670 lignes**. Déplacement pur, vérifié ligne à ligne.
+  **La dette qui reste est `simulateFight` elle-même : 1641 lignes d'un seul
+  tenant**, qui ne se découpent pas par déplacement — il faudrait extraire des
+  sous-fonctions, donc refactoriser la partie la plus calibrée du dépôt. Aucune
+  raison de s'y attaquer sans besoin précis.
+- **`ui-06-career-screens.js` (~1190 lignes)** est désormais le plus gros
+  fichier après lui, et le plus gros côté UI. Jamais découpé.
 - **Le management est découpé depuis le 21/09/2026.** `mgmt-bureau.js` est passé
   de 2017 à **469 lignes** ; le plus gros fichier du mode est désormais
   `mgmt-carte.js` (~508). Déplacement pur, vérifié ligne à ligne : aucune ligne
