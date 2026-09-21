@@ -36,8 +36,10 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 
 - **Carrière Complète** — mode historique : amateur → pro → retraite, classements,
   contrats, Panthéon, et l'exhibition « Duel entre amis » (`duel-codec.js`,
-  `ui-10-duel.js`, entrée depuis le Panthéon). Stabilisé ; hors périmètre des
-  lots 0 à 5.
+  `ui-10-duel.js`, entrée depuis le Panthéon). Stabilisé, et hors périmètre des
+  lots 0 à 5 **sauf sur un point depuis le 21/09/2026** : le lot 3 refait l'arène
+  à neuf pour les deux modes et retire `ui-09-arena.js`, dont la carrière se
+  sert.
 - **Mode management** — **mode jouable, en développement actif**. Lots 0 (les
   documents), 1 (le style stable) et 2 (la carte principale) sont **livrés et
   fusionnés dans `main` le 21/09/2026**. Reste le **lot 2B** (le vivier se
@@ -180,7 +182,7 @@ sans citer la décision qui change le comportement attendu.
 | `docs/LES-SIX-VOIX-v1.1.md`, `docs/LES-CINQ-LEGENDES-v1.1.md` | Voix et personnages — contenu d'auteur |
 | `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md`, `docs/LOT-3A-TESTS-CONTRAT.md` | Lot 3a — livré et mergé (PR 61) |
 | `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré. Sa T2 (carte principale) a été reprise et remplacée par le lot 2 ; ses T3 à T5 (retrait, remonter un prélim, short notice) restent à coder |
-| `docs/LOT-3-L-ARENE.md` | **Lot 3 — contrat écrit le 21/09, non commencé.** Répond à C2, C3, M3, M4. Son §2 porte l'obstacle central (l'arène de la carrière lit `G` en dur) et son §6 les deux décisions qu'Anthony doit rendre |
+| `docs/LOT-3-L-ARENE.md` | **Lot 3 — contrat écrit le 21/09, non commencé.** Répond à C2, C3, M3, M4. **L'arène est refaite à neuf et sert les deux modes ; `ui-09-arena.js` est retirée** (décision d'Anthony du 21/09). Son §1 porte le principe fondateur — le moteur décide, l'arène met en scène — et son §2 les quatre cibles mesurables du réalisme |
 | `docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` | **Lot 2B — contrat écrit le 21/09, non commencé.** Répond à QO-8. Son §5 liste les cinq points qu'Anthony doit trancher avant la T2 |
 | `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
 | `tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md` | Calibrage de l'économie sur le déroulé réel (21/09/2026) : les quatre profils de joueur, les trois cibles, et le tableau des six soirées enchaînées qui a révélé QO-8 |
