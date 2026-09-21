@@ -77,7 +77,7 @@ function runEvenings(win,seed,n,tBefore){
 function runRealEveningsT4(win,seed,n){
   return JSON.parse(win.eval(`(function(){
     setSeed(${seed});
-    let jouees=0, rentables=0;
+    let jouees=0, rentables=0, somme=0;
     for(let e=0;e<${n};e++){
       const m=mgmtDefault(); mgmtNewRoster(m);
       mgmtNewPile(m);
@@ -117,8 +117,9 @@ function runRealEveningsT4(win,seed,n){
       if(!ev) continue;
       jouees++;
       if(ev.finance.recette>0) rentables++;
+      somme+=ev.finance.recette;
     }
-    return JSON.stringify({jouees,rentables});
+    return JSON.stringify({jouees,rentables,somme});
   })()`));
 }
 
@@ -130,6 +131,85 @@ test('MGMT économie T4 — sur une graine fixe, des soirées réelles non écra
     assert.ok(s.rentables>0,
       'au moins une soirée réelle non écrasée est rentable (graine '+seed+')');
   }
+});
+
+/* Lot 2 T5, garde de propriété (docs/LOT-2-CARTE-PRINCIPALE.md §4 bis
+   « Relecture de la T4 bis », réserve du 21/09) : sur une graine fixe, le
+   JOUEUR D'ÉCRAN est plus rentable que le joueur bâclé — une propriété,
+   jamais un nombre de calibrage figé. Le joueur bâclé rejoue l'heuristique
+   documentée en tête de tools/monte-carlo-economie.js : ses cinq combats
+   sont tirés au hasard seedé parmi les paires de même catégorie
+   disponibles bâclées au sens du jeu (écart de bilan ≥ MGMT_SLOPPY_GAP ou
+   écart de rang > MGMT_RANK_GAP, à défaut au hasard), puis il ÉCRASE cinq
+   propositions de Leïla avant de valider la sixième. */
+function runEveningsBatcle(win,seed,n){
+  return JSON.parse(win.eval(`(function(){
+    setSeed(${seed});
+    let jouees=0, somme=0;
+    for(let e=0;e<${n};e++){
+      const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
+      for(const a of m.pile.slice()){ if(a.status==='open'&&a.kind==='leila_propose') mgmtIgnore(m,a.id); }
+      /* composeMainBatcle de l'outil, à l'identique. */
+      const r=m.roster;
+      const rankCache=new Map();
+      const rankOf=f=>{ let v=rankCache.get(f.id); if(v===undefined){ v=mgmtDivisionRank(m,f); rankCache.set(f.id,v); } return v; };
+      const slob=[], any=[];
+      for(let i=0;i<r.length;i++){
+        for(let j=i+1;j<r.length;j++){
+          const A=r[i], B=r[j];
+          if(A.div!==B.div||A.first===B.first) continue;
+          if(!mgmtAvailable(m,A)||!mgmtAvailable(m,B)) continue;
+          const ra=rankOf(A), rb=rankOf(B);
+          const gap=(ra!==null&&rb!==null)?Math.abs(ra-rb):MGMT_RANK_GAP+1;
+          if(mgmtRecGap(A,B)>=MGMT_SLOPPY_GAP||gap>MGMT_RANK_GAP) slob.push([A,B]);
+          any.push([A,B]);
+        }
+      }
+      const taken=new Set();
+      let posee=true;
+      for(let k=0;k<MGMT_MAIN_SIZE&&posee;k++){
+        let pot=slob.filter(p=>!taken.has(p[0].id)&&!taken.has(p[1].id));
+        if(pot.length===0) pot=any.filter(p=>!taken.has(p[0].id)&&!taken.has(p[1].id));
+        if(pot.length===0){ posee=false; break; }
+        const p=pot[Math.floor(rnd()*pot.length)];
+        taken.add(p[0].id); taken.add(p[1].id);
+        if(!mgmtBookMain(m,p[0].id,p[1].id)) posee=false;
+      }
+      if(!posee) continue;
+      /* prelimsBatcle de l'outil : cinq écrasements, la sixième validée. */
+      let bulk=null, ok=true;
+      for(let c=0;c<5&&ok;c++){
+        bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+        if(!bulk||!mgmtDecide(m,bulk.id,'crush')){ ok=false; break; }
+        const react=m.pile.find(a=>a.kind==='leila_react_crush'&&a.status==='open');
+        if(react) mgmtIgnore(m,react.id);
+        if(mgmtClosePile(m)!=='refill'){ ok=false; break; }
+      }
+      if(!ok) continue;
+      bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+      if(!bulk||!mgmtDecide(m,bulk.id,'validate')) continue;
+      const ev=mgmtRunEvent(m);
+      if(!ev) continue;
+      jouees++; somme+=ev.finance.recette;
+    }
+    return JSON.stringify({jouees,somme});
+  })()`));
+}
+
+test('MGMT économie T5 — sur une graine fixe, le joueur d\u2019écran est plus rentable que le joueur bâclé', () => {
+  const win = newGameWindow();
+  let ecran=0, ecranN=0, batcle=0, batcleN=0;
+  for(const seed of [20260919,20260920,20260921]){
+    const e = runRealEveningsT4(win,seed,10);
+    const b = runEveningsBatcle(win,seed,10);
+    assert.ok(e.jouees>0, 'le joueur d\u2019écran joue ses soirées (graine '+seed+')');
+    assert.ok(b.jouees>0, 'le joueur bâclé joue ses soirées (graine '+seed+')');
+    ecran+=e.somme; batcle+=b.somme;
+    ecranN+=e.jouees; batcleN+=b.jouees;
+  }
+  const moyenneEcran=ecran/ecranN, moyenneBatcle=batcle/batcleN;
+  assert.ok(moyenneEcran>moyenneBatcle,
+    `propriété : R moyen joueur d\u2019écran (${moyenneEcran.toFixed(1)} k$) > R moyen joueur bâclé (${moyenneBatcle.toFixed(1)} k$) — aucune cible chiffrée, la comparaison seule tranche`);
 });
 
 /* Une seule soirée, avec l'attrait et les cachets mesurés sur la carte

@@ -359,7 +359,13 @@ test('MGMT T3 carte complète — plus de proposition en bloc, la soirée s\u201
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'carte complète : la soirée s\u2019ouvre, pas une nouvelle proposition');
   assert.equal(win.eval(`G.mgmt.lastEvent.fights.length`), 9, 'la soirée a joué les neuf combats');
   win.eval(`CL.mgmtNextCycle()`);
-  assert.equal(win.eval(`G.mgmt.pile.filter(a=>a.kind==='leila_bulk').length`), 0, 'au cycle suivant, aucune proposition en bloc');
+  /* §4 bis, décision 4 d'Anthony du 20/09/2026 : après la soirée, la
+     carte est vide — le calendrier attend le joueur ('compose'), la pile
+     n'est plus réinitialisée d'office. Le bloc d'avant-soirée reste en
+     pile comme affaire close ; aucune proposition en bloc n'est ouverte :
+     Leïla n'a plus rien à proposer tant que la carte n'est pas recomposée. */
+  assert.equal(win.eval(`G.mgmt.pile.filter(a=>a.kind==='leila_bulk'&&a.status==='open').length`), 0, 'après la soirée, aucune proposition en bloc ouverte');
+  assert.equal(win.eval(`mgmtClosePile(G.mgmt)`), 'compose', 'carte vide après soirée : le calendrier attend le joueur');
 });
 
 test('MGMT déterminisme — même graine, même bloc', () => {

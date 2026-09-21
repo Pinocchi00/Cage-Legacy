@@ -1143,8 +1143,9 @@ function mgmtRunEvent(m){
  * signale (shortfall) et on ne remplit rien.
  * Carte principale incomplète : Leïla n'a rien à proposer (la proposition
  * des préliminaires attend la composition du joueur, §T3) — pas de
- * shortfall : ce n'est pas le pot qui manque. Le déclencheur manuel fait
- * avancer le cycle (lot 1g, aucun blocage).
+ * shortfall : ce n'est pas le pot qui manque. Le calendrier attend le
+ * joueur (T5, décision 4 du 20/09 — mgmtClosePile rend 'compose') ; seul
+ * un pot épuisé avance le cycle à la main (lot 1g).
  * selectWhenIdle : la proposition vole le focus d'office (pile vidée,
  * appel du §5) ; à faux, elle ne déloge pas une affaire déjà ouverte — le
  * booking de la cinquième place arrive parfois au milieu de la pile.
@@ -1186,17 +1187,49 @@ function mgmtRefillBulk(m){
   return mgmtOfferBulk(m,true);
 }
 
-/** Fin de pile (§5) : plus aucune affaire ouverte. Carte complète : la
- *  soirée ('event'). Carte incomplète : le cycle ne se ferme pas, Leïla
- *  propose à nouveau ('refill') — ou 'stuck' si elle n'a rien à proposer
- *  (carte principale incomplète, §T3 — la proposition des préliminaires
- *  attend la composition du joueur, sans signal de pot épuisé — ou même
- *  assoupli elle ne peut plus : rien d'office, shortfall signalé). Pile
- *  encore ouverte : 'none'.
- *  @returns {string} 'none'|'event'|'refill'|'stuck'. */
+/** Une place de carte principale est-elle encore composable ? (T5) : un
+ *  emplacement libre et une paire posable — deux combattants disponibles
+ *  (mgmtAvailable : ni suspendus, ni retraités médicaux), pas déjà engagés
+ *  sur la carte (mgmtEngaged), de la même catégorie (mgmtBookMain refuse le
+ *  croisement, §T2). C'est exactement ce que le geste du joueur peut encore
+ *  poser. Pur. @returns {boolean} */
+function mgmtMainPosable(m){
+  if(!m||!m.card||!Array.isArray(m.card.main)||!Number.isSafeInteger(m.card.sizeMain)) return false;
+  if(m.card.main.length>=m.card.sizeMain) return false;
+  if(!Array.isArray(m.roster)) return false;
+  const parDiv=new Map();
+  for(const o of m.roster){
+    if(!mgmtAvailable(m,o)||mgmtEngaged(m,o)) continue;
+    const n=(parDiv.get(o.div)||0)+1;
+    if(n>=2) return true;
+    parDiv.set(o.div,n);
+  }
+  return false;
+}
+
+/** Fin de pile (§5) : plus aucune affaire ouverte. Lot 2 T5 (§4 bis,
+ *  décision 4 d'Anthony du 20/09/2026 : le calendrier attend le joueur) —
+ *  les quatre issues d'une pile vidée, chacune sa condition :
+ *  - 'event'   : carte complète (principale ET préliminaires) — la soirée.
+ *  - 'compose' : carte principale incomplète et encore composable — état
+ *                normal, le joueur a la main, le calendrier attend (avant
+ *                la T5, ce cas renvoyait 'stuck' et fermait le cycle).
+ *  - 'refill'  : carte principale complète, préliminaires manquants — Leïla
+ *                propose à nouveau (la proposition est poussée en fin de
+ *                pile, effet conservé du §5).
+ *  - 'stuck'   : le pot de combattants est épuisé — carte principale
+ *                complète que même assoupli Leïla ne peut plus compléter,
+ *                ou carte principale incomplète sans aucune paire encore
+ *                composable : seul cas qui avance le cycle (lot 1g, aucun
+ *                blocage). Pile encore ouverte : 'none'.
+ *  @returns {string} 'none'|'event'|'compose'|'refill'|'stuck'. */
 function mgmtClosePile(m){
   if(!m||mgmtOpenCount(m)>0) return 'none';
   if(mgmtCardFull(m)) return 'event';
+  if(m.card&&Array.isArray(m.card.main)&&Number.isSafeInteger(m.card.sizeMain)
+    &&m.card.main.length<m.card.sizeMain){
+    return mgmtMainPosable(m)?'compose':'stuck';
+  }
   return mgmtRefillBulk(m)?'refill':'stuck';
 }
 /* ==== [FIN ANCRE] ==== */

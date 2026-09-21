@@ -204,8 +204,13 @@ function scr_mgmt_bureau(){
   }).join('');
   /* Lot 1g-1 : le cycle suivant ne se demande pas — mais une pile née vide
      (pas de proposition ce cycle) ne se videra jamais toute seule : le
-     déclencheur manuel discret reste pour ce cas, sans aplat ni ombre. */
-  if(mgmtOpenCount(m)===0){
+     déclencheur manuel discret reste pour ce cas, sans aplat ni ombre.
+     Lot 2 T5 (§4 bis, décision 4 du 20/09) : carte principale incomplète
+     et encore composable, le déclencheur ne ferait rien — il n'est pas
+     proposé (charte S6 : chaque action a un retour visible) ; l'état de la
+     carte se lit d'un regard sur la ligne du cycle (charte S4, R1). Le pot
+     épuisé ('stuck', lot 1g) et la carte complète ('event') le gardent. */
+  if(mgmtOpenCount(m)===0&&!mgmtMainPosable(m)){
     pileHtml+=`<button class="mgmt-next" onclick="CL.mgmtNextCycle()">Cycle suivant</button>`;
   }
 
@@ -695,8 +700,10 @@ Object.assign(CL,{
     }
     /* Lot 1g-1 : un bureau se remplit tout seul — sauf fin de cycle (lot 3a
        §5) : pile vide et carte complète, c'est la soirée ; pile vide et
-       carte incomplète, Leïla propose à nouveau au lieu de fermer le cycle.
-       Le jeu ne choisit jamais un combat à la place du joueur. */
+       carte incomplète, Leïla propose à nouveau ou le joueur compose (T5,
+       'compose') au lieu de fermer le cycle. Le jeu ne choisit jamais un
+       combat à la place du joueur — 'compose' et 'stuck' restent sur ce
+       chemin, seul 'event' ouvre la soirée. */
     if(mgmtDecide(G.mgmt,affairId,replyId)){
       const r=mgmtClosePile(G.mgmt);
       if(r==='event'){
@@ -721,15 +728,17 @@ Object.assign(CL,{
   },
   /* Déclencheur manuel discret (lot 1g-1) : uniquement pour une pile née
      vide, qui ne se videra jamais toute seule. Texte et liseré, sans
-     aplat ni ombre. Lot 3a §5 : si la pile est vide pour de bon (cycle non
-     fermé, carte incomplète), il propose d'abord à nouveau — seul un pot
-     vraiment épuisé avance le cycle à la main. */
+     aplat ni ombre. Lot 2 T5 (§4 bis, décision 4 du 20/09) : 'compose'
+     (carte principale incomplète et composable) ne ferme pas le cycle —
+     le bureau reste ouvert, le joueur compose ; 'refill' et 'compose'
+     font le même retour, seul 'stuck' (pot épuisé) avance le cycle à la
+     main (lot 1g : aucun blocage). */
   mgmtNextCycle(){
     if(!G||!G.mgmt) return;
     const r=mgmtClosePile(G.mgmt);
     if(r==='event'){
       if(mgmtRunEvent(G.mgmt)){ CL.go('mgmt_soiree'); return; }
-    }else if(r==='refill'){
+    }else if(r==='refill'||r==='compose'){
       saveMgmt();
       render();
       return;
