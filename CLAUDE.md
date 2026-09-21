@@ -1,7 +1,7 @@
 # Cage Legacy — guide d'architecture
 
-Relevé du 17/09/2026 (livré sur la branche `lot-0-documents`, basée sur `lot-3b`,
-après merge du lot 3a).
+Relevé du 21/09/2026, sur `main`, après la fusion du **lot 2** (PR 62 : lot 3B T1
+→ lot 0 → lot 1 → lot 2 T1-T5, chaîne linéaire de 24 commits).
 **Numérotation des lots : depuis le 17/09/2026, les lots 0 à 5 (documents, style
 stable, carte principale, arène, peau du jeu, monde qui parle — voir
 `docs/AUDIT-17-09.md` §8) sont la référence en cours. Les numérotations
@@ -38,7 +38,11 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
   contrats, Panthéon, et l'exhibition « Duel entre amis » (`duel-codec.js`,
   `ui-10-duel.js`, entrée depuis le Panthéon). Stabilisé ; hors périmètre des
   lots 0 à 5.
-- **Mode management** — **mode jouable, en développement actif** (lots 0 à 5).
+- **Mode management** — **mode jouable, en développement actif**. Lots 0 (les
+  documents), 1 (le style stable) et 2 (la carte principale) sont **livrés et
+  fusionnés dans `main` le 21/09/2026**. Restent les lots 3 (l'arène), 4 (la peau
+  du jeu) et 5 (le monde qui parle), plus un lot à cadrer sur le renouvellement du
+  vivier (QO-8).
   Le joueur est le matchmaker d'une organisation (Split), pas son patron.
   Document qui prime : `docs/VISION-MODE-MANAGEMENT.md` ; cahier des charges :
   `docs/CDC-MODE-MANAGEMENT.md` (sections périmées marquées), ses addendums et
@@ -88,7 +92,7 @@ l'écran titre (`ui-06-career-screens.js`, `scr_title`) :
 | `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
 | `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
 | `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) | Sauvegarde management + secours, circuit séparé de la carrière |
-| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **4** | Management : migration séquentielle 2 → 3 → 4 sans perte (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent), v1 refusée |
+| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **5** | Management : migration séquentielle 2 → 3 → 4 → 5 sans perte (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte `{main, prelims}`), v1 refusée |
 
 ## 5. Séparation des responsabilités
 
@@ -123,15 +127,15 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 19/09/2026 (branche `lot-1-style-stable`) : **265 tests, 261 passants,
+État au 21/09/2026 (`main`, après la fusion du lot 2) : **293 tests, 289 passants,
 0 échec, 4 skip**. Les 4 skip sont dans `mgmtBureau.test.js` : trois sorties de
 carte incomplète (remonter un prélim, short notice, combattant libre) et une
 pénalité économie au-delà du plafond de découvert — comportements décidés mais
 absents du code (voir `docs/QUESTIONS-OUVERTES.md`). **16 fichiers dans
-`tests/`**, dont `mgmtBureau.test.js` (53), `mgmtCard.test.js` (23),
-`mgmtEconomie.test.js` (13) et `mgmtSoiree.test.js` (11) pour le management,
+`tests/`**, dont `mgmtBureau.test.js` (58), `mgmtCard.test.js` (44),
+`mgmtEconomie.test.js` (15) et `mgmtSoiree.test.js` (11) pour le management,
 `regressionFixes.test.js` (75) et `duel.test.js` (28) pour la carrière.
-Durée : ~90 s.
+Durée : ~95 s.
 
 **La liste des tests est écrite à la main dans `package.json`** (scripts `test`
 et `test:watch`) : un nouveau fichier de test doit y être ajouté, sinon il ne
@@ -164,9 +168,11 @@ sans citer la décision qui change le comportement attendu.
 | `docs/CDC-MODE-MANAGEMENT-ADDENDUM.md`, `docs/CDC-ADDENDUM-2-LES-SIX-REGARDS.md` | Décisions complémentaires (mêmes marques sur les sections périmées) |
 | `docs/LES-SIX-VOIX-v1.1.md`, `docs/LES-CINQ-LEGENDES-v1.1.md` | Voix et personnages — contenu d'auteur |
 | `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md`, `docs/LOT-3A-TESTS-CONTRAT.md` | Lot 3a — livré et mergé (PR 61) |
-| `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré, T2 (carte principale) contracté mais non codé |
+| `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré. Sa T2 (carte principale) a été reprise et remplacée par le lot 2 ; ses T3 à T5 (retrait, remonter un prélim, short notice) restent à coder |
+| `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
+| `tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md` | Calibrage de l'économie sur le déroulé réel (21/09/2026) : les quatre profils de joueur, les trois cibles, et le tableau des six soirées enchaînées qui a révélé QO-8 |
 | `docs/CHARTE-INTERFACE-MANAGEMENT.md` | Charte d'interface du management (15/09/2026) : priorité d'Anthony. Vérification UI obligatoire à chaque tranche qui touche un écran (§3). |
-| `docs/QUESTIONS-OUVERTES.md` | QO-1 à QO-7 : ce qui manque côté code ou design. N'y répondre qu'avec une décision d'Anthony. |
+| `docs/QUESTIONS-OUVERTES.md` | QO-1 à QO-8. **Attention au titre : QO-1 à QO-7 sont toutes « design arrêté » — ce qui manque est le code, pas une décision.** QO-5 et QO-6 sont livrées. Seule QO-8 (le vivier qui ne se renouvelle pas, défaut reconnu le 21/09) attend encore un cadrage d'auteur. N'y répondre qu'avec une décision d'Anthony. |
 | `docs/ETAT-DES-LIEUX.md` | Inventaire du 08/09/2026 (fichiers à garder / à jeter) — le sort du mode Duel y est en attente de la décision d'Anthony (T5). |
 | `docs/STRATEGIE-IA-CAGE-LEGACY-2026-09.md` | Proposition de méthode de production avec les IA (pas une spécification du jeu) |
 | `docs/ETAT-14-09.md` | **Périmé (17/09/2026)** : historique des deux tests rouges du 14/09, réécrits depuis. Ne plus s'y fier. |
@@ -176,9 +182,10 @@ sans citer la décision qui change le comportement attendu.
 
 - **`engine-combat.js` fait ~2500 lignes**, le plus gros fichier du dépôt.
   `ui-06-career-screens.js` (~1190) est le plus gros côté UI, `mgmt-bureau.js`
-  (~1300, grossi par le lot 3B T1) le plus gros du management et porte plusieurs
-  responsabilités (bureau, carte, argent, corps, soirée, sauvegarde). Aucun
-  découpage entrepris.
+  (**~1730**, grossi par le lot 3B T1 puis les lots 2 T1/T3/T5) le plus gros du
+  management et porte plusieurs responsabilités (bureau, carte, classement,
+  argent, corps, soirée, sauvegarde). Aucun découpage entrepris — c'est la dette
+  la plus visible du mode.
 - **`npm run lint:content`** : 3 signalements « MAIN EVENT » dans
   `ui-01-roster-matchmaking.js` (carrière, dont un dans un commentaire). Il sort
   avec le code 0 : inclus dans `check`, il ne bloque pas la livraison. Sa

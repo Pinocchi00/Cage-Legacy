@@ -83,7 +83,10 @@ l'auteur — les quatorze du registre LOT-3B §G font foi ; rien n'est à invent
 
 ## QO-5 — Plafond de découvert du short notice
 
-**Statut.** Design arrêté (LOT-3B §E et décision F-4 : plancher fixe avant toute
+**Statut. LIVRÉ au lot 3B T1 (11/09/2026 ; relu et fusionné dans `main` le
+21/09).** `mgmtOverdraftCap` et `mgmtCanAfford` existent, leurs deux tests sont
+dé-skippés. L'entrée reste ici comme trace de la décision. Design arrêté (LOT-3B
+§E et décision F-4 : plancher fixe avant toute
 soirée, puis recette nette de la dernière, puis moyenne des deux dernières ; la
 dette est portée par l'organisation, F-5). **Code absent.**
 
@@ -106,7 +109,10 @@ marqué skip : `tests/mgmtBureau.test.js:830`.
 
 ## QO-6 — Remboursement du découvert sur la recette suivante
 
-**Statut.** Design arrêté (LOT-3B §E : remboursement avant tout bénéfice ;
+**Statut. LIVRÉ au lot 3B T1 (11/09/2026 ; relu et fusionné dans `main` le
+21/09).** Le remboursement est automatique — un seul solde, `T ← T + R` dans
+`mgmtRunEvent` — et son test est dé-skippé. L'entrée reste ici comme trace de la
+décision. Design arrêté (LOT-3B §E : remboursement avant tout bénéfice ;
 réplique patron E1, conditionnée à une dette effectivement déduite). **Code absent.**
 
 **Ce qui manque côté code.** Dépend de QO-5 : aucune comptabilité n'existe entre deux
@@ -135,8 +141,12 @@ existent, la mécanique qu'elles accompagnent n'est pas définie.
 **Décision du 15/09/2026 (Anthony).** La recette baisse ; l'audience dépend de la
 qualité de la carte ; la relation « promoteur » varie selon l'ambiance ; la relation
 du patron baisse le temps d'une soirée. Le promoteur est Stephen Tarpit ; D4 ne se
-déclenche que si l'audience a réellement baissé. Carte de 8 combats : 4 main card
-choisis par le joueur, 4 prélims proposés par Leïla. Retraits : toutes causes
+déclenche que si l'audience a réellement baissé. ~~Carte de 8 combats : 4 main card
+choisis par le joueur, 4 prélims proposés par Leïla.~~ **Prémisse périmée
+(21/09/2026) : la carte fait 9 combats, 5 en carte principale et 4 en
+préliminaires, depuis la décision du 19/09 (`docs/LOT-2-CARTE-PRINCIPALE.md` §0),
+livrée au lot 2 T1. Le fond de la décision tient ; la carte a changé sous elle. À
+relire au moment de coder la carte réduite, pas avant.** Retraits : toutes causes
 réelles, taux proche du réel. Détail et reste ouvert (geste de composition de la
 main card) : `docs/LOT-3B-CONTRAT.md` §1 et §2.
 
@@ -211,17 +221,26 @@ attend son contrat de lot.
 
 ## Résumé des tests skip concernés
 
+Relevé sur l'état réel du dépôt le 21/09/2026 (après la fusion du lot 2, PR 62).
+**Quatre skips**, tous dans `tests/mgmtBureau.test.js` — les deux tests de QO-5 et
+QO-6 ont été dé-skippés par le lot 3B T1 et ne figurent plus ici.
+
 | Test (tests/mgmtBureau.test.js) | Ligne | Entrée liée |
 |---|---|---|
-| MGMT sortie carte incomplète — remonter un combat des préliminaires | 782 | QO-1, QO-4 |
-| MGMT sortie carte incomplète — short notice (Split ou autre organisation) | 789 | QO-2, QO-4 |
-| MGMT sortie carte incomplète — combattant libre de contrat | 796 | QO-3, QO-4 |
-| MGMT économie — short notice payable à découvert dans la limite du plafond | 830 | QO-5 |
-| MGMT économie — remboursement du découvert sur la recette suivante | 837 | QO-6 |
-| MGMT économie — au-delà du plafond : carte réduite avec pénalité | 842 | QO-7, QO-4 |
+| MGMT sortie carte incomplète — remonter un combat des préliminaires | 951 | QO-1, QO-4 |
+| MGMT sortie carte incomplète — short notice (Split ou autre organisation) | 958 | QO-2, QO-4 |
+| MGMT sortie carte incomplète — combattant libre de contrat | 965 | QO-3, QO-4 |
+| MGMT économie — au-delà du plafond : carte réduite avec pénalité | 1187 | QO-7, QO-4 |
 
 Chacun de ces tests porte la mention « comportement absent du code — voir
 docs/QUESTIONS-OUVERTES.md ». Ils ne sont ni implémentés ni simulés : un
 emplacement vide vaut mieux qu'un comportement simulé. Là où un texte serait
 nécessaire un jour : les répliques existent déjà (LOT-3B, écrit par l'auteur),
 seule la mécanique manque.
+
+**QO-8 n'a aucun test skip** : le déclin du vivier est le comportement du code
+actuel, mesuré, désormais reconnu comme un défaut — il attend un contrat de lot,
+pas une implémentation déjà spécifiée.
+
+**Les numéros de ligne bougent à chaque tranche.** Avant de t'y fier, relance
+`grep -n "skip:" tests/*.js`.
