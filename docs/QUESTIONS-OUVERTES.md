@@ -83,7 +83,10 @@ l'auteur — les quatorze du registre LOT-3B §G font foi ; rien n'est à invent
 
 ## QO-5 — Plafond de découvert du short notice
 
-**Statut.** Design arrêté (LOT-3B §E et décision F-4 : plancher fixe avant toute
+**Statut. LIVRÉ au lot 3B T1 (11/09/2026 ; relu et fusionné dans `main` le
+21/09).** `mgmtOverdraftCap` et `mgmtCanAfford` existent, leurs deux tests sont
+dé-skippés. L'entrée reste ici comme trace de la décision. Design arrêté (LOT-3B
+§E et décision F-4 : plancher fixe avant toute
 soirée, puis recette nette de la dernière, puis moyenne des deux dernières ; la
 dette est portée par l'organisation, F-5). **Code absent.**
 
@@ -106,7 +109,10 @@ marqué skip : `tests/mgmtBureau.test.js:830`.
 
 ## QO-6 — Remboursement du découvert sur la recette suivante
 
-**Statut.** Design arrêté (LOT-3B §E : remboursement avant tout bénéfice ;
+**Statut. LIVRÉ au lot 3B T1 (11/09/2026 ; relu et fusionné dans `main` le
+21/09).** Le remboursement est automatique — un seul solde, `T ← T + R` dans
+`mgmtRunEvent` — et son test est dé-skippé. L'entrée reste ici comme trace de la
+décision. Design arrêté (LOT-3B §E : remboursement avant tout bénéfice ;
 réplique patron E1, conditionnée à une dette effectivement déduite). **Code absent.**
 
 **Ce qui manque côté code.** Dépend de QO-5 : aucune comptabilité n'existe entre deux
@@ -135,8 +141,13 @@ existent, la mécanique qu'elles accompagnent n'est pas définie.
 **Décision du 15/09/2026 (Anthony).** La recette baisse ; l'audience dépend de la
 qualité de la carte ; la relation « promoteur » varie selon l'ambiance ; la relation
 du patron baisse le temps d'une soirée. Le promoteur est Stephen Tarpit ; D4 ne se
-déclenche que si l'audience a réellement baissé. Carte de 8 combats : 4 main card
-choisis par le joueur, 4 prélims proposés par Leïla. Retraits : toutes causes
+déclenche que si l'audience a réellement baissé. ~~Carte de 8 combats : 4 main card
+choisis par le joueur, 4 prélims proposés par Leïla.~~ **Prémisse périmée
+(21/09/2026) : la carte fait 9 combats, 5 en carte principale et 4 en
+préliminaires, depuis la décision du 19/09 (`docs/LOT-2-CARTE-PRINCIPALE.md` §0),
+livrée au lot 2 T1. **Confirmé par Anthony le 21/09/2026 : la carte fait bien 9
+combats.** Le fond de la décision tient ; seule la taille de la carte change sous
+elle. La carte réduite se lira donc sur 9, pas sur 8.** Retraits : toutes causes
 réelles, taux proche du réel. Détail et reste ouvert (geste de composition de la
 main card) : `docs/LOT-3B-CONTRAT.md` §1 et §2.
 
@@ -148,8 +159,9 @@ marqué skip : `tests/mgmtBureau.test.js:842`.
 
 ## QO-8 — L'organisation s'use : le vivier fond, la soirée cesse d'être rentable
 
-**Statut.** Mesure faite, design non arrêté. **Ouvert — attend une décision
-d'Anthony.**
+**Statut.** Mesure faite. **Décision d'Anthony du 21/09/2026 : c'est un défaut du
+jeu. Le vivier est censé se renouveler.** Reste à écrire : le comment (voir
+« Ce qui reste à cadrer »).
 
 **Le constat.** Relevé le 21/09/2026 par le calibrage du lot 2 T4
 (`tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md`, 4000 organisations, six soirées
@@ -179,34 +191,142 @@ de `docs/LOT-3B-CONTRAT.md` le porte — écrit, pas codé. Il répond au short 
 reste à décider s'il répond aussi au **recrutement ordinaire**, c'est-à-dire si une
 organisation recrute entre deux soirées.
 
-**Ce qui reste à trancher.** Trois questions distinctes, aucune tranchée :
-1. Une organisation recrute-t-elle d'elle-même, et à quel rythme ?
-2. Le déclin du vivier est-il un **problème à corriger** ou une **pression de jeu
-   voulue** — la jeunesse de l'organisation comme âge d'or, le joueur devant gérer
-   l'usure ?
-3. Si c'est une pression voulue, la cible « rentable dans 70 à 80 % des soirées »
-   se lit-elle sur la première soirée (lecture actuelle) ou sur la durée de vie de
-   l'organisation ?
+**Décision d'Anthony, 21/09/2026.** Le déclin du vivier est un **défaut**, pas une
+pression de jeu voulue. Une organisation est censée se renouveler. La cible
+« rentable dans 70 à 80 % des soirées » se lit donc sur la **durée de vie** de
+l'organisation, et non sur sa seule première soirée : une fois le renouvellement en
+place, le calibrage du lot 2 T4 sera à revérifier sur plusieurs soirées enchaînées
+(`node tools/monte-carlo-economie.js --soirees=K`, l'outil sait déjà le mesurer).
+
+**Les quatre « comment », tranchés le 21/09/2026 :**
+
+1. **D'où viennent les nouveaux.** Ils sont **régénérés**, sur le modèle des
+   *newgens* de Football Manager : une génération de combattants naît, puis
+   **combat en amateur et dans d'autres organisations** avant que Split ne les
+   voie. Ils arrivent donc avec un passé, pas vierges.
+2. **Rythme et recrutement.** Un **flux régulier** de combattants recrutables —
+   mais **le joueur recrute, et lui seul**. Rien n'entre dans le vivier sans son
+   geste. Le jeu ne signe jamais à sa place (règle du bureau, CDC §3).
+3. **Annonce.** L'arrivée d'un combattant **n'est pas un événement** : personne ne
+   l'annonce, aucune réplique ne se déclenche. En revanche **son premier combat
+   sous Split peut porter du récit** — c'est là que l'histoire se raconte, pas à la
+   signature.
+4. **Les partants.** Ils **partent à la retraite**, simplement. Aucune autre sortie
+   à inventer.
+
+**Ce qui reste à cadrer, et qui est mécanique, pas d'auteur.** « Ils combattent en
+amateur et dans d'autres organisations » peut se coder de deux façons, et le choix
+décide du coût :
+
+- **monde simulé** : les combattants extérieurs livrent de vrais combats
+  (`simulateFight`) cycle après cycle. Fidèle, cher — c'est une deuxième
+  simulation qui tourne en permanence à côté de Split.
+- **monde dérivé** : ils naissent avec un bilan plausible et le font progresser par
+  une abstraction légère, sans passer par le moteur. Bien moins cher, et
+  indiscernable pour le joueur, qui ne voit qu'une ligne et un bilan.
+
+**Tranché par Anthony le 21/09/2026 : le monde est DÉRIVÉ.** Avec deux exigences :
+il doit être **réaliste**, et les combattants doivent arriver avec une **histoire
+complète et construite**.
+
+Ce que « histoire complète et construite » veut dire, précisé le même jour : c'est
+**la trace de carrière**, pas une biographie écrite. Le passé du combattant est un
+fait complet et cohérent — bilan amateur, organisations traversées, manière dont
+ses combats se sont finis, âge et trajectoire —, **calculé à la lecture depuis son
+identité et jamais stocké**, exactement comme le classement par catégorie du lot 2
+T1. Sa **raison de se battre reste au niveau 2** (`MGMT_RAISONS`, CDC §3) : elle
+n'apparaît que lorsque le joueur s'intéresse à lui. La règle du bureau n'est pas
+touchée, et la découverte garde sa valeur.
+
+Ce que « réaliste » veut dire, et qui se mesure : le monde dérivé doit être
+**indiscernable d'un monde simulé sur les statistiques observables**. Un combattant
+donné pour 18-4 doit se comporter comme un 18-4 quand `simulateFight` le fait
+combattre, et la répartition de ses fins de combat (KO, soumission, décision) doit
+suivre celle que le moteur produit. C'est vérifiable par Monte Carlo avec
+l'outillage existant — ce n'est pas une intention, c'est une cible.
+
+À cadrer au contrat de lot. Le lien avec [QO-2] et [QO-3] est direct :
+le vivier extérieur qu'elles décrivent est **le même monde** que celui des
+nouveaux — il ne doit pas en exister deux (règle : jamais un système parallèle à
+un système existant).
 
 **Où.** `mgmt-bureau.js` (`mgmtNewRoster`, `mgmtAvailable`, `mgmtApplyFight`),
 `docs/LOT-3B-CONTRAT.md` §T5. Aucun test skip associé : le comportement mesuré est
-celui du code actuel, il n'est pas en attente d'implémentation.
+celui du code actuel. Il est désormais **reconnu comme un défaut à corriger**, et
+attend son contrat de lot.
+
+---
+
+## QO-9 — La mémoire des faits : rien ne s'efface
+
+**Statut. Décision d'Anthony du 21/09/2026.** Tranchée, pas encore codée.
+
+**Le conflit.** L'addendum §2 dit « le fait ne disparaît jamais ». Le code dit le
+contraire : `mgmtAddFact` coupe au-delà de `MGMT_FACTS_MAX = 10`
+(`mgmt-data.js:30`, appliqué en `mgmt-bureau.js:662` et `:1623`). L'arbitrage
+n'avait jamais été rendu ; il figurait dans la dette du `CLAUDE.md`.
+
+**Décision.** **Les faits ne disparaissent jamais.** Le plafond saute. En
+contrepartie, **l'interface les range et les trie** — c'est l'affichage qui rend
+une mémoire longue lisible, pas l'oubli.
+
+**Ce que cela implique.** Deux chantiers distincts : retirer le plafond côté
+données (et vérifier que la sauvegarde encaisse une liste qui grandit sans fin —
+`validateMgmt`, `mgmtRepair`), puis ranger et trier côté écran (lot 4, la peau du
+jeu). Le premier sans le second donnerait un mur de faits illisible : ils vont
+ensemble.
+
+---
+
+## QO-10 — Leïla parle trop
+
+**Statut. Direction donnée par Anthony le 21/09/2026.** Le principe est tranché ;
+la portée reste à cadrer.
+
+**Le constat d'Anthony.** « Leïla parle trop, tout le temps, ce n'est pas
+réaliste. Le jeu, l'interface doit expliquer tout ça. »
+
+**Décision immédiate.** Là où le lot 2 T5 laissait un manque — l'écran du bureau,
+pile vide et carte principale à composer, ne dit pas au joueur ce qu'on attend de
+lui — **la réponse n'est pas une réplique de Leïla. C'est l'interface qui
+l'explique.** Aucun `[EMPLACEMENT AUTEUR]` n'est donc dû à cet endroit ; c'est une
+tâche de lot 4 (la peau du jeu), pas une tâche d'auteur.
+
+**Règle qui s'en dégage.** Une voix de personnage sert à porter une intention, une
+relation ou un désaccord — jamais à expliquer une règle du jeu ni à commenter un
+état d'écran. Ce qui relève de l'état se lit ; ce qui relève de l'humain se dit.
+
+**Ce qui reste à cadrer.** La portée : s'agit-il seulement de **ne pas en
+ajouter** — ce qui est acquis — ou faut-il aussi **alléger l'existant** ? Le mode
+management est aujourd'hui construit sur la pile d'affaires de Leïla : toucher à
+sa densité toucherait le cœur du bureau. Question ouverte, à rouvrir au lot 5 (le
+monde qui parle), quand les autres voix arriveront et que sa part relative
+baissera peut-être d'elle-même.
 
 ---
 
 ## Résumé des tests skip concernés
 
+Relevé sur l'état réel du dépôt le 21/09/2026 (après la fusion du lot 2, PR 62).
+**Quatre skips**, tous dans `tests/mgmtBureau.test.js` — les deux tests de QO-5 et
+QO-6 ont été dé-skippés par le lot 3B T1 et ne figurent plus ici.
+
 | Test (tests/mgmtBureau.test.js) | Ligne | Entrée liée |
 |---|---|---|
-| MGMT sortie carte incomplète — remonter un combat des préliminaires | 782 | QO-1, QO-4 |
-| MGMT sortie carte incomplète — short notice (Split ou autre organisation) | 789 | QO-2, QO-4 |
-| MGMT sortie carte incomplète — combattant libre de contrat | 796 | QO-3, QO-4 |
-| MGMT économie — short notice payable à découvert dans la limite du plafond | 830 | QO-5 |
-| MGMT économie — remboursement du découvert sur la recette suivante | 837 | QO-6 |
-| MGMT économie — au-delà du plafond : carte réduite avec pénalité | 842 | QO-7, QO-4 |
+| MGMT sortie carte incomplète — remonter un combat des préliminaires | 951 | QO-1, QO-4 |
+| MGMT sortie carte incomplète — short notice (Split ou autre organisation) | 958 | QO-2, QO-4 |
+| MGMT sortie carte incomplète — combattant libre de contrat | 965 | QO-3, QO-4 |
+| MGMT économie — au-delà du plafond : carte réduite avec pénalité | 1187 | QO-7, QO-4 |
 
 Chacun de ces tests porte la mention « comportement absent du code — voir
 docs/QUESTIONS-OUVERTES.md ». Ils ne sont ni implémentés ni simulés : un
 emplacement vide vaut mieux qu'un comportement simulé. Là où un texte serait
 nécessaire un jour : les répliques existent déjà (LOT-3B, écrit par l'auteur),
 seule la mécanique manque.
+
+**QO-8 n'a aucun test skip** : le déclin du vivier est le comportement du code
+actuel, mesuré, désormais reconnu comme un défaut — il attend un contrat de lot,
+pas une implémentation déjà spécifiée.
+
+**Les numéros de ligne bougent à chaque tranche.** Avant de t'y fier, relance
+`grep -n "skip:" tests/*.js`.
