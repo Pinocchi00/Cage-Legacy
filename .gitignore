@@ -29,3 +29,7 @@ tools/reports/*
 # Lot 2 §T4 (docs/LOT-2-CARTE-PRINCIPALE.md) : même principe — le rapport de
 # calibrage de l'argent sur le déroulé réel est le livrable T4, versionné.
 !tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md
+# Lot 2B §T1 (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §3) : même principe — la
+# mesure du monde extérieur dérivé (les deux cibles de réalisme) est le
+# livrable T1, versionné.
+!tools/reports/LOT-2B-T1-MONDE-EXTERIEUR.md

@@ -210,6 +210,59 @@ ne rien proposer est le mauvais choix ». À mesurer à la T4 : si recruter sans
 retenue reste la stratégie dominante, le flux perd son sens. Aucune décision
 n'est demandée ici, seulement une mesure à produire.
 
+## 5 d. Relecture de la T1 (21/09/2026) — acceptée
+
+Branche `lot-2b-t1-monde-exterieur`. Vérifications faites par Claude sur l'état
+réel, et non reprises de la livraison :
+
+| Ce qui était en jeu | Comment je l'ai vérifié | Résultat |
+|---|---|---|
+| La dérivation ne consomme aucun tirage de la RNG du jeu | Suite de `rnd()` relevée après `setSeed(4242)`, puis 114 lectures de trace, puis la même suite | **Identique** |
+| Deux lectures donnent la même trace | Deux appels d'affilée, comparaison sérialisée | **Identiques** |
+| Rien n'est écrit sur la ligne | Clés de la ligne après lecture | `born,ck,div,id,seed` — les cinq, rien de plus |
+| Le bilan ne régresse jamais | 38 lignes × 120 cycles = **4 560 lectures** | **0 régression** |
+| Les chiffres s'additionnent | Bilan = combats, fins = combats, sur les mêmes 4 560 lectures | **0 incohérence** |
+| Les deux cibles de réalisme | Mesure relancée à `--n=1000` | r_roster 0,733 / r_ext 0,615 ; fins Δ +0,016 / −0,005 / −0,011 — **les deux atteintes** |
+| Les interdits | `git diff main` sur `engine-*.js`, `state/`, `index.html`, `mgmt-screens.js`, `ui-*.js` | **vide** |
+| `npm run check` | Relancé par Claude | **305 tests, 301 passants, 0 échec, 4 skip** |
+
+*Note de méthode : ma première sonde appelait `mgmtExteriorTrace(m, ligne, cycle)`
+alors que la signature est `(ligne, cycle)` — elle recevait `null` et ne vérifiait
+rien. Refaite avec la bonne signature avant de conclure.*
+
+**Écart accepté : la loi de bilan est réécrite, pas réutilisée.** Le contrat
+demandait de réutiliser `correlatedRecord`. OpenCode l'utilise pour le bilan
+amateur (phase close, tirage en bloc) mais dérive le bilan professionnel combat
+par combat, sous constantes `MGMT_EXT_RATIO_*` qui reprennent exactement la loi de
+`correlatedRecord` (`ui-01-roster-matchmaking.js:465`). La raison est juste :
+`correlatedRecord` rend un bilan entier d'un coup et consomme `rnd()` — appelé à
+chaque cycle, il re-mélangerait tout le passé et le bilan régresserait, ce que le
+contrat interdit durement. La propriété de préfixe ne s'obtient pas autrement.
+
+**Réserve qui en découle, à traiter.** Les deux lois sont aujourd'hui identiques
+mais rien ne les tient ensemble : modifier `correlatedRecord` les ferait diverger
+en silence. Un test de non-dérive est peu coûteux — vérifier que le ratio moyen de
+`correlatedRecord` à un niveau donné reste `MGMT_EXT_RATIO_BASE + t ×
+MGMT_EXT_RATIO_SPAN`. À ajouter au découpage de `mgmt-bureau.js`, ou plus tôt.
+
+**Réserve mineure.** Les bandes d'acceptation des deux cibles — `[0,7× ; 1,3×]`
+pour la corrélation, `±0,04` pour les fins — ont été posées par OpenCode, pas par
+le contrat, qui disait « du même ordre ». Elles sont raisonnables et ont été
+fixées avant la mesure, ce qui est la bonne méthode. Elles sont désormais **la
+référence du lot** : les tranches suivantes les reprennent au lieu d'en inventer
+d'autres.
+
+**Sauvegarde : le report du numéro de version est sans risque.** `m.exterieur` est
+ajouté sans faire passer `MGMT_SAVE_VERSION` de 5 à 6, le bump étant prévu en T3.
+Vérifié : le code de `main` accepte une sauvegarde portant `exterieur` — aucune
+partie ne se retrouve illisible entre les deux états.
+
+**Ce qui attend Anthony.** `MGMT_EXT_ORGS` contient quatre `null` :
+**[EMPLACEMENT AUTEUR]**, les noms des organisations extérieures. La trace rend
+déjà le nombre, les périodes et les combats par organisation. Ces noms deviennent
+visibles à la **T2**, quand l'écran de recrutement les affichera — ils ne sont pas
+nécessaires avant.
+
 ## 6. Terminé pour le lot
 
 1. Des combattants inconnus arrivent régulièrement, avec une trace de carrière

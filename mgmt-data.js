@@ -151,6 +151,100 @@ const MGMT_FAMILY_LABELS={ko:'KO',stop:'Arrêt',sub:'Soumission',dec:'Décision'
 const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',susp:'Suspension médicale'};
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MGMT_LOT2B_EXTERIEUR_DONNEES] — Lot 2B T1 le monde extérieur
+   dérivé (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T1, QO-8) : constantes du
+   vivier hors Split. Un combattant extérieur ne stocke que son identité
+   (graine, catégorie, pays, cycle d'entrée dans le monde) ; tout le reste se
+   dérive à la lecture (mgmt-bureau.js, ancre MGMT_LOT2B_EXTERIEUR). Ces
+   constantes sont des données de cadrage, jamais du récit ; aucune réplique,
+   aucun nom de personnage. ==== */
+
+/* Les organisations extérieures où combattent les combattants hors Split,
+   en ordre de prestige croissant (la première est la petite orga de départ,
+   la suivante est un cran au-dessus). [EMPLACEMENT AUTEUR] : aucun nom
+   d'organisation n'existe dans mgmt-data.js, et aucun nom n'est inventé ici
+   — les emplacements restent vides (null) tant que l'auteur ne les a pas
+   écrits ; la trace dérivée porte alors la donnée (combien, quand, combien
+   de combats) sans le nom. SPLIT-CONTEXTE-DEPART.md laisse les deux
+   premières organisations mondiales à écrire. */
+const MGMT_EXT_ORGS=[null,null,null,null];
+
+/* Calendrier du monde extérieur : une année sportive compte MGMT_EXT_YEAR_WEEKS
+   semaines ; un cycle du bureau dure MGMT_EVENT_WEEKS semaines (lot 3a) —
+   l'âge courant avance donc de MGMT_EVENT_WEEKS semaines par cycle. */
+const MGMT_EXT_YEAR_WEEKS=52;
+
+/* Population du monde à l'ouverture du bureau : la cohorte initiale (les
+   combattants qui existent déjà hors Split au premier jour). Le flux des
+   cycles suivants n'a PAS de nombre fixe (décision 2 du 21/09) : il se
+   dérive cycle par cycle. */
+const MGMT_EXT_INIT_MIN=28;
+const MGMT_EXT_INIT_SPREAD=8;
+
+/* Âge à l'entrée dans le monde (MGMT_EXT_AGE_MIN à MIN+SPREAD-1) et âge de
+   début de carrière amateur (les débuts, à 18-21 ans). */
+const MGMT_EXT_AGE_MIN=20;
+const MGMT_EXT_AGE_SPREAD=11;
+const MGMT_EXT_AGE_START_MIN=18;
+const MGMT_EXT_AGE_START_SPREAD=4;
+
+/* Phase amateur : de 1 à 3 ans, combats comptés dans la bande du générateur
+   existant (RI(3,20), ui-01-roster-matchmaking.js makeOrgRoster). */
+const MGMT_EXT_AMA_YEARS_MIN=1;
+const MGMT_EXT_AMA_YEARS_SPREAD=3;
+const MGMT_EXT_AMA_FIGHTS_MIN=3;
+const MGMT_EXT_AMA_FIGHTS_SPREAD=18;
+
+/* Rythme professionnel : un combat toutes les MGMT_EXT_GAP_MIN à
+   MIN+SPREAD-1 cycles (2 à 3,5 combats par an — le rythme réel hors grande
+   organisation). */
+const MGMT_EXT_GAP_MIN=3;
+const MGMT_EXT_GAP_SPREAD=4;
+
+/* Trajectoire de niveau (cachée — le joueur ne lit que des bilans) : niveau
+   au passage pro, puis progression annuelle dérivée (0 à MGMT_EXT_RATE_MAX),
+   plafonnée comme le pont bilan→niveau existant (mgmtLevelForRecord,
+   40-80) ; après MGMT_EXT_DECLINE_AGE ans, déclin annuel. */
+const MGMT_EXT_LVL_START_MIN=40;
+const MGMT_EXT_LVL_START_SPREAD=16;
+const MGMT_EXT_LVL_FLOOR=40;
+const MGMT_EXT_LVL_CAP=80;
+const MGMT_EXT_RATE_MAX=2;
+const MGMT_EXT_DECLINE_AGE=33;
+const MGMT_EXT_DECLINE_PER_YEAR=1;
+
+/* La loi bilan↔résultat est celle du générateur existant
+   correlatedRecord (ui-01-roster-matchmaking.js:465) : ratio de victoires
+   cible = BASE + t*SPAN où t=(niveau-LVL_FLOOR_SRC)/LVL_SPAN_SRC. Les combats
+   professionnels dérivés sont joués coup par coup sous cette même loi (le
+   bilan doit avancer par préfixe, ce qu'un tirage en bloc ne permet pas) —
+   une seule loi de corrélation, jamais un second générateur de bilans. */
+const MGMT_EXT_RATIO_BASE=0.45;
+const MGMT_EXT_RATIO_SPAN=0.43;
+const MGMT_EXT_LVL_SRC_FLOOR=20;
+const MGMT_EXT_LVL_SRC_SPAN=77;
+const MGMT_EXT_RATIO_FLOOR=0.05;
+const MGMT_EXT_RATIO_CAP=0.95;
+
+/* Répartition des fins de combat du monde dérivé (KO, soumission, décision),
+   calibrée sur le moteur réel — cible mesurée :
+   tools/reports/LOT-2B-T1-MONDE-EXTERIEUR.md (référence moteur :
+   tools/reports/LOT-3A-CALIBRAGE-SOIREE.md). La décision prend le reste.
+   KO porté de 0,47 à 0,52 au calibrage T1 : le moteur mesurait 50,5 % de
+   KO (arrêt médical compris) contre 45,7 % dérivés — l'écart était un
+   défaut de la dérivation, corrigé ici. */
+const MGMT_EXT_FIN_KO=0.52;
+const MGMT_EXT_FIN_SUB=0.22;
+
+/* Organisations traversées : un combattant change d'organisation après
+   MGMT_EXT_ORG_MIN_FIGHTS combats au moins, sur une série de victoires (au
+   moins deux sur les trois derniers), avec une ambition propre dérivée
+   (MGMT_EXT_ORG_MOVE_MIN à MIN+SPREAD). L'échelle est MGMT_EXT_ORGS. */
+const MGMT_EXT_ORG_MIN_FIGHTS=3;
+const MGMT_EXT_ORG_MOVE_MIN=0.2;
+const MGMT_EXT_ORG_MOVE_SPREAD=0.3;
+/* ==== [FIN ANCRE] ==== */
+
 /* Les cinq raisons de se battre (docs/LES-SIX-VOIX-v1.1.md + complément
    SPLIT-CONTEXTE-DEPART.md §9). Attribuées à la création d'un dossier (§3,
    niveau 2 du CDC). Textes et effets repris du document, sans réécriture. */
