@@ -286,11 +286,46 @@ pas un rhabillage. Le lot 4 accueillait déjà le rangement et le tri des faits
 (QO-9) ; il accueille maintenant cette fenêtre. À porter dans le contrat du
 lot 4 quand il sera écrit — il ne l'est pas encore.
 
-**Ce que la décision ne dit pas**, et qui reste ouvert pour le contrat du
-lot 4 : quelle forme prend cette fenêtre (un écran à part, ou une lecture
-greffée sur une fiche de combattant), et si elle montre le monde entier ou
-seulement la trace du combattant regardé. La règle du bureau s'applique
-quoi qu'il arrive : la trace est **dérivée à la lecture**, jamais stockée.
+**La forme de la fenêtre, tranchée le 22/09.** Deux endroits, et deux seulement.
+
+1. **Le monde se lit toujours à travers un combattant.** La trace s'affiche sur
+   la fiche du combattant qu'on regarde — d'où il vient, ce qu'il a fait, dans
+   quelles organisations. Jamais une liste du monde pour elle-même. La raison
+   d'Anthony est la bonne : *« sinon on verrait des noms que personne ne
+   connaîtrait »*. Un nom d'organisation ne veut rien dire tant qu'il n'est pas
+   accroché à quelqu'un dont le joueur a une raison de s'occuper.
+2. **Trois à cinq informations sur le hub d'accueil.** Pas un résumé du monde :
+   **les plus pertinentes, et en lien avec Split.** Le critère de pertinence est
+   donc *« est-ce que ça concerne mon organisation ? »*, pas *« est-ce que c'est
+   gros ? »*. C'est le point le plus difficile du futur contrat, et il se mesure :
+   une information qui ne change rien à une décision du joueur n'a rien à faire
+   sur le hub.
+
+La règle du bureau s'applique aux deux : la trace est **dérivée à la lecture**,
+jamais stockée — `mgmtExteriorTrace(line, cycle)` est déjà écrite ainsi.
+
+**Les quatre noms d'organisations, écrits par Anthony le 22/09.** `MGMT_EXT_ORGS`
+attendait quatre `[EMPLACEMENT AUTEUR]` ; les voici :
+
+- **MMA Korner**
+- **Ultimate Rim**
+- **Fighting Pacific Championship**
+- **Garden of Blood**
+
+Avec Split, le monde compte donc **cinq organisations** — ce qui recoupe
+exactement l'objectif du patron dans `SPLIT-CONTEXTE-DEPART.md` §8 (« entrer
+dans le top 5 des organisations », puis « passer top 3 ») et la place de Split,
+« au milieu, ni la plus grosse ni la plus mauvaise ».
+
+**Ce qui reste à trancher : l'ordre.** `MGMT_EXT_ORGS` est une **échelle de
+prestige croissant** — la première est la petite organisation de départ, un
+combattant y monte les échelons après trois combats et une série de victoires
+(`MGMT_EXT_ORG_MIN_FIGHTS`, `MGMT_EXT_ORG_MOVE_MIN`). L'ordre n'est donc pas
+cosmétique : il décide de ce que « il arrive de Garden of Blood avec huit
+combats » raconte au joueur. Les noms sont posés, leur rang ne l'est pas. Tant
+qu'il ne l'est pas, `MGMT_EXT_ORGS` reste `[null,null,null,null]` : la trace
+dérivée porte déjà le nombre, les périodes et les combats par organisation sans
+le nom, et rien ne casse.
 
 ## 6. Terminé pour le lot
 
