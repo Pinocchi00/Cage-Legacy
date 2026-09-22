@@ -234,12 +234,44 @@ c'est la T3. Elle rend l'âge réel ; la T3 en tire une sortie. Dans cet ordre,
 parce qu'une retraite d'âge dans un monde où personne ne vieillit ne se
 déclencherait jamais.
 
-**Ce qui attend Anthony, et qui n'est pas une question technique.** À quel âge
-un combattant décline, et à quel âge il s'arrête ? La carrière porte déjà une
-réponse (`applyAging` : déclin progressif, menton après 38 ans) — **la reprendre
-telle quelle est la proposition par défaut**, pour n'avoir qu'une seule
-vérité sur le vieillissement dans tout le jeu. Anthony tranche s'il en veut une
-autre.
+**Décision d'Anthony du 22/09 : on reprend tout, déclin et menton.** La loi de
+la carrière (`applyAging`, `engine-progression.js:33`) devient celle du
+management, sans variante. Le jeu n'a qu'une seule vérité sur le
+vieillissement. Elle dit exactement ceci :
+
+| | Loi de la carrière, adoptée telle quelle |
+|---|---|
+| Pic stable | de 27 ans à l'entrée en déclin — rien ne bouge |
+| Entrée en déclin | **37 ans**, et **39 ans** pour `H-heavy` et `H-lheavy` (`isDeclining`/`isHeavy`) |
+| Attributs qui baissent | `footSpeed`, `handSpeed`, `cardio`, `explosiveness` ; **plus `power` et `recovery` à partir de 39 ans** |
+| Rythme | `RI(0,1)` par an les **trois premières** années de déclin, `RI(0,2)` ensuite (ancre V2-39 : « déclin plus progressif ») |
+| Menton | baisse à partir de **38 ans**, au même rythme |
+| Moral | une chance sur trois de perdre 5 points l'année où l'on décline |
+
+**Deux adaptations obligatoires, et elles ne changent pas la courbe.**
+
+1. **Le tirage devient une dérivation.** `applyAging` consomme `rnd()` (les
+   `RI(0,cap)` et le jet de moral). Le management dérive sans toucher à la RNG
+   de la partie : le déclin d'un combattant se calcule de façon **déterministe
+   à partir de son identifiant et de son âge**, patron `duelFnv1a32` +
+   `mulberry32` déjà en place, ou motif « SEED sauvegardé / restauré ». Même
+   courbe, même ampleur, aucun tirage consommé.
+2. **`agedCeilings` ne se transpose pas, et n'a pas à l'être.** En carrière, ce
+   champ fige le plafond atteint pour qu'une compétence ne fasse pas remonter un
+   attribut décliné. Le management ne stocke aucun attribut : il régénère le
+   combattant à chaque lecture, à l'âge courant. Le plafond est donc automatique
+   — un homme de 40 ans est toujours dérivé comme un homme de 40 ans. La règle
+   du bureau rend le mécanisme inutile.
+
+**Ce que cette décision ne règle pas, et qu'il ne faut pas croire réglé.** Le
+déclin commence à 37 ans. Le roster de départ va de 22 à 35 ans (moyenne 28,2) :
+**personne n'y est en déclin**, et sur les deux ans que font 20 soirées, seuls
+les plus vieux atteindront 37. Faire vieillir le vivier **ne réduira donc pas
+les retraites médicales** — ça ajoute une seconde sortie, plus lente, à côté de
+la première. Les 31 départs sur 48 en deux ans (QO-8) restent un problème
+**de calibrage du traumatisme**, distinct de l'âge. La mesure de fin de tranche
+(sorties par cause) est ce qui permettra de le traiter ensuite, sur des chiffres
+au lieu d'une impression.
 
 **Tests** : l'âge avance d'un an tous les ~10,4 cycles et jamais plus vite ; un
 combattant de 38 ans régénéré est mesurablement moins bon que le même à 26 ans,
