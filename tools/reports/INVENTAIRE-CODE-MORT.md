@@ -184,7 +184,9 @@ Les treize « douteux » sont des fonctions vivantes pour les tests et jamais
 appelées par le jeu : du travail livré, couvert, et jamais branché. Le cas net
 est `mgmtExteriorTrace` (`mgmt-monde.js:247`) — le monde extérieur dérivé du
 lot 2B T1, couvert par dix-sept appels de tests, qu'aucun écran ne montre.
-À trancher par Anthony, lot par lot.
+**Tranché le 22/09/2026 : il prend un écran au lot 4** (décision d'Anthony,
+`docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` §5 e). Les douze autres restent à
+trancher, lot par lot.
 
 **Écarts `CLAUDE.md` : aucun.** Le compte rendu de livraison en signalait trois.
 Sur `main` — l'état que `CLAUDE.md` déclare décrire — `MGMT_SAVE_VERSION` vaut

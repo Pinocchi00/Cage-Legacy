@@ -263,6 +263,35 @@ déjà le nombre, les périodes et les combats par organisation. Ces noms devien
 visibles à la **T2**, quand l'écran de recrutement les affichera — ils ne sont pas
 nécessaires avant.
 
+### 5 e. Décision d'Anthony du 22/09/2026 — le monde dérivé prend un écran au lot 4
+
+**Le monde extérieur dérivé par la T1 est affiché au lot 4 (la peau du jeu).**
+
+Ce que la décision règle. La T1 est livrée, couverte par dix-sept appels de
+tests, et `mgmtExteriorTrace` (`mgmt-monde.js:247`) n'est appelée par aucun
+chemin du jeu — l'inventaire du code mort du 21/09 la classe « vivante pour
+les tests seuls » (`tools/reports/INVENTAIRE-CODE-MORT.md` §5). Ce n'est pas
+du code mort : c'est du travail fini que personne ne voit. Le lot 4 lui donne
+sa fenêtre, sans attendre la T2.
+
+**Conséquence sur ce qu'Anthony doit écrire, et quand.** Le §5 d disait que les
+quatre noms de `MGMT_EXT_ORGS` — **[EMPLACEMENT AUTEUR]** — deviendraient
+visibles à la T2. Ils le deviennent désormais **au lot 4**, qui vient avant.
+Ces quatre noms sont donc dus plus tôt que prévu.
+
+**Conséquence sur le périmètre du lot 4.** L'audit du 17/09 (§8) définit le
+lot 4 comme le remplacement de l'habillage par les écrans maquettés, et place
+le recrutement au lot 5. Un écran du monde extérieur y est un écran **neuf**,
+pas un rhabillage. Le lot 4 accueillait déjà le rangement et le tri des faits
+(QO-9) ; il accueille maintenant cette fenêtre. À porter dans le contrat du
+lot 4 quand il sera écrit — il ne l'est pas encore.
+
+**Ce que la décision ne dit pas**, et qui reste ouvert pour le contrat du
+lot 4 : quelle forme prend cette fenêtre (un écran à part, ou une lecture
+greffée sur une fiche de combattant), et si elle montre le monde entier ou
+seulement la trace du combattant regardé. La règle du bureau s'applique
+quoi qu'il arrive : la trace est **dérivée à la lecture**, jamais stockée.
+
 ## 6. Terminé pour le lot
 
 1. Des combattants inconnus arrivent régulièrement, avec une trace de carrière
