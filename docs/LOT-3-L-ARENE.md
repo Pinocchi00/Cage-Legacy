@@ -80,12 +80,57 @@ distance. Mesure : échantillonner l'état de l'arène à intervalles réguliers
 un grand nombre de combats et comparer à la phase du déroulé. **Aucun écart
 toléré : la cible est 100 %.**
 
-**Cible 2 — Continuité : personne ne se téléporte.**
-L'octogone est à l'échelle réelle (vision § L'affichage du combat). Le
-déplacement d'un pion entre deux images reste sous une vitesse humaine plausible,
-en mètres par seconde. Mesure : le déplacement maximal observé sur un grand
-nombre de combats, rapporté à l'échelle de la cage. **Un seul saut au-dessus du
-seuil est un défaut.**
+*Décision d'Anthony du 23/09/2026 — la fenêtre de transition devient physique.*
+Quand le moteur change de phase, les corps ont besoin de temps pour suivre : si
+le déroulé dit « clinch » alors que les deux hommes sont à 3 m, il leur faut
+environ une seconde pour se rejoindre. Cette approche n'est pas un mensonge de
+l'image, c'est ce qu'on verrait dans une vraie cage. **Après chaque changement
+de phase, la cible 1 tolère le temps qu'il faut pour franchir l'écart à une
+vitesse humaine, au plus 1,5 s.** Hors de ces fenêtres, la cible reste 100 %.
+La mesure publie la distribution de ces fenêtres : une fenêtre qui atteint
+souvent son plafond de 1,5 s signale des pions mal placés avant la transition.
+
+**Cible 2 — Continuité : personne ne se téléporte, et personne ne glisse.**
+*Réécrite le 22/09/2026 après le constat d'Anthony sur le socle de la T2 : « les
+combattants bougent si lentement ». La cible n'avait qu'un plafond et aucun
+chiffre ; il lui manquait un plancher, et la mesure du socle ne la regardait
+pas.*
+
+L'octogone est à l'échelle réelle (vision § L'affichage du combat), donc une
+vitesse se lit en mètres par seconde et se compare à un homme. **Trop lent est
+un défaut au même titre que trop rapide** : un pion qui dérive glisse, il ne
+combat pas.
+
+Ce qui a été mesuré sur le socle de la T2, un combat réel de 553 s :
+
+| | Mesuré | Référence humaine |
+|---|---|---|
+| Vitesse moyenne d'un pion | **0,08 m/s** | un homme qui marche : 1,4 m/s |
+| Distance parcourue sur 9 min de combat | 44 m | — |
+| Vitesse de pointe | **11,9 m/s** | sprint olympique : ~12 m/s |
+
+Dix-sept fois trop lent en moyenne, et un saut à vitesse de sprinteur. Le
+déplacement du socle est donc **figé, puis téléporté** — le pire des deux.
+
+**Les bornes, posées avant la mesure de la T3 :**
+
+- **En phase debout**, la vitesse instantanée d'un pion tient dans
+  **[0,8 ; 2,0] m/s** l'essentiel du temps — l'ordre de grandeur d'un combattant
+  qui se déplace en garde, entre le pas d'ajustement et l'entrée franche.
+- **Aucune pointe au-dessus de 6 m/s**, jamais, dans aucune phase. Un homme de
+  MMA qui explose vers l'avant ne dépasse pas cet ordre de grandeur.
+- **Au sol et au clinch**, la contrainte porte sur la paire, pas sur le pion :
+  les deux centres ne se séparent pas plus vite que les bornes ci-dessus.
+
+**Et la mesure n'exclut plus la fenêtre de réarrangement.** La mesure de la
+cible 1 livrée à la T2 l'excluait (`ARENE_MORPH_S`, 0,6 s après un changement de
+phase) : c'est défendable pour juger d'une *phase*, et c'est exactement là que
+vit la téléportation. **La cible 2 mesure toutes les images, sans exception.**
+Un réarrangement est un déplacement comme un autre : un homme qu'on amène au sol
+met un temps à tomber, il ne traverse pas la cage.
+
+**Un seul saut au-dessus de 6 m/s est un défaut**, et une moyenne debout
+en dehors de la fourchette aussi.
 
 **Cible 3 — Ils ne tournent pas en rond.**
 La vision l'exige mot pour mot. `prototypes/arene.html`, validé le 17/09, **est
@@ -95,6 +140,10 @@ celle du prototype — part de mouvement latéral contre avant-arrière, fréque
 des entrées et sorties, temps passé au centre contre le long du grillage. La
 bande d'acceptation se pose **avant** de mesurer, et se publie.
 
+*23/09/2026 : tenue par construction, sans campagne de mesure.* La T3 porte le
+déplacement du prototype au lieu d'en inventer un (§3 T3). Même code de pas, même
+signature. Aucune mesure statistique n'est exigée ; l'œil d'Anthony tranche.
+
 **Cible 4 — On reconnaît un style au déplacement seul.**
 « Le pressureur coupe la cage, le contreur recule et se fait enfermer. » Le
 dépôt sait déjà prouver ce genre de chose : `tools/style-fingerprint-classify.js`
@@ -103,6 +152,12 @@ vérifie qu'on reconnaît le style d'un combattant à ses seules statistiques
 le temps passé à couper la cage et le sens des déplacements doivent séparer un
 pressureur d'un contreur **nettement mieux que le hasard**. Le seuil se pose
 avant la mesure.
+
+*23/09/2026 : la mesure est reportée, l'exigence demeure.* Le prototype règle
+déjà son déplacement sur le style (`plan.aggr`, `plan.range`, `plan.angle`) :
+le portage de la T3 l'obtient presque gratuitement, à condition de nourrir ces
+paramètres. La campagne de classification ne se fera que si l'œil d'Anthony
+ne reconnaît pas les styles.
 
 **Ce que la mesure ne fera pas.** Elle attrape les défauts, elle ne crée pas la
 beauté. Le timing, les accélérations, le poids d'un coup, le silence avant un
@@ -184,13 +239,98 @@ fois par un chemin indépendant.
 
 ### T3 — Le déplacement *(le cœur du réalisme)*
 
-- Les combattants tiennent leur distance, feintent, entrent, ressortent, et ne
-  prennent un angle que pour une raison. Ils changent de plan en cours de combat.
-- **Cibles 2, 3 et 4 atteintes et publiées**, rapport dans `tools/reports/`.
+**Troisième cadrage, 23/09/2026 : on porte le déplacement du prototype, on ne
+l'invente plus.** À lire avant tout le reste de cette section.
+
+*Pourquoi.* La première tentative a duré douze heures sans commit. Elle a
+construit un déplacement par images-clés — des segments interpolés puis
+raccordés — et ce modèle produit des sauts à ses raccords par nature : 74,6 m/s
+mesurés à l'entrée d'un clinch, pire que les 11,9 m/s du socle. Deux causes,
+et la première est de la supervision : **le contrat que l'outil avait dans son
+répertoire ne contenait pas la cible 2 réécrite** (base `f29edac`, antérieure
+à la réécriture) ; la seconde est que la tranche demandait d'*inventer* un
+modèle qui existait déjà. Le travail est archivé hors dépôt ; l'arbitre y
+était réglé (1,75 m/s de pointe), l'idée se refait en dix lignes.
+
+*Ce que la tranche fait.* `prototypes/arene.html` — validé par Anthony le 17/09
+— contient un déplacement complet : `moveStanding` (l. 176) et `escape`
+(l. 200). Pas à durée (0,16 à 0,3 s) et vitesse propres, distance préférée,
+recul, échappée vers le côté ouvert quand on est plaqué, miroir latéral à
+courte distance. **Il fonctionne par la physique** : la position intègre une
+vitesse, la vitesse est lissée — **une téléportation y est impossible par
+construction.** La T3 porte ces deux fonctions dans l'arène neuve, et les
+nourrit avec ce que dit le déroulé du moteur :
+
+- **la cible de chaque instant** vient de la phase du moteur : distance de
+  travail debout (1,5 à 2,5 m, variable), contact au clinch, grillage si le
+  clinch est porté `pos:cage`, position nommée au sol ;
+- **les paramètres de style** du prototype (`plan.aggr`, `plan.range`,
+  `plan.angle`, vitesse) se dérivent de ce que chaque combattant **a fait** selon
+  le résultat (`res.stats` : part des frappes à distance, au clinch, tentatives
+  d'amenée) — jamais de `G`, l'entrée de l'arène reste `(res, noms)` ;
+- **sonné, au tapis** viennent des moments du déroulé qui le déclarent.
+
+*Ce que le prototype fait et que l'arène ne doit PAS reprendre* : `thinkStanding`
+et tout ce qui choisit un coup, un résultat ou un moment. Le prototype était un
+simulateur ; seule sa **marche** est reprise (§1). Son `rng()` devient le tirage
+local à graine de l'arène (`areneAlea`), jamais `Math.random()`.
+
+*L'arbitre* suit la même physique, du côté le plus ouvert, et **mémorise son
+côté** : il n'en change que si l'autre devient nettement plus ouvert (marge de
+l'ordre de 0,9 m, valeur de la première tentative).
+
+*Ce qui remplace la T3 bis.* Il n'y a plus de T3 bis : la cible 3 est tenue par
+construction et la mesure de la cible 4 est reportée (§2). La T3 publie les
+cibles 1 et 2, rien d'autre.
+
+*Le cadrage du 22/09 ci-dessous reste valable pour le constat* (la glisse, la
+distance debout, l'arbitre) ; c'est la méthode qui change.
+
+
+*Recadrée le 22/09/2026 : Anthony a regardé le socle de la T2 et a relevé deux
+choses — « les combattants bougent si lentement » et « l'arbitre fait des
+va-et-vient ». Les deux sont vérifiées, localisées, et deviennent le cœur de la
+tranche.*
+
+**Le défaut à corriger, précisément.** `arene-etat.js` (fonction `areneMoment`)
+remplit l'intervalle entre deux moments du moteur par **une seule interpolation
+lissée**, de la position de départ vers la position d'arrivée, étalée sur tout
+le segment. Il n'y a ni pas, ni appui, ni retour : il y a une translation. D'où
+les 0,08 m/s mesurés, et l'impression de glisse. La « respiration latérale »
+(±5 cm sinusoïdaux) ne compense rien — elle ajoute du flottement, pas du
+déplacement.
+
+- Les combattants **tiennent leur distance, feintent, entrent, ressortent**, et
+  ne prennent un angle que pour une raison. Ils changent de plan en cours de
+  combat. Un pas est un pas : il a une longueur, un début et une fin.
+- **La distance debout est une distance de frappe, pas un contact.**
+  `ARENE_DEBOUT_MIN` vaut 0,85 m dans une cage de 8,6 m : à l'œil, les deux pions
+  se touchent presque pendant que le bandeau annonce « À DISTANCE ». La distance
+  de travail réelle tient plutôt entre **1,5 et 2,5 m**, et elle **varie** —
+  c'est sa variation qui fait lire l'échange.
+- **L'arbitre cesse de faire des va-et-vient.** Le défaut est dans
+  `areneRefAvance` (`arene-etat.js`) : l'arbitre vise un point à 2,3 m
+  perpendiculairement à l'axe des deux combattants, et **choisit son côté à
+  chaque image** par `areneBordDist(c1) > areneBordDist(c2)`. Sans hystérésis :
+  quand les deux côtés se valent, le choix alterne et la cible saute de 4,6 m en
+  travers de la cage ; et quand les combattants pivotent l'un par rapport à
+  l'autre, la perpendiculaire change de signe et les deux côtés s'échangent. Il
+  faut **mémoriser le côté choisi et n'en changer que s'il devient nettement
+  moins bon**. Un arbitre se déplace aussi comme un homme : les bornes de la
+  cible 2 s'appliquent à lui.
+- **Cibles 1 et 2 atteintes et publiées** (23/09 : la 3 est tenue par
+  construction, la mesure de la 4 est reportée), rapport dans `tools/reports/`.
+  La cible 2 porte un plancher autant qu'un plafond et **se mesure sur toutes les
+  images, sans exception** (§2) ; la cible 1 tolère la fenêtre de transition
+  physique décidée le 23/09.
 - Le juice suit l'importance : petit éclat pour une touche, secousse et ralenti
   pour un gros coup, anneau pointillé pour un combattant sonné.
 - **Ni note, ni barème, ni jauge.** L'état d'un combattant se lit à son pion et
   à ce qu'il fait.
+- **Le moteur décide toujours tout** (§1). Un déplacement plus riche ne donne
+  aucune décision à l'arène : qui touche, qui gagne et quand restent au déroulé.
+  Si la T3 a besoin de savoir quelque chose que le déroulé ne dit pas, elle
+  l'invente **pour l'œil**, jamais pour le résultat.
 - **Se joue devant Anthony avant d'être acceptée.**
 
 ### T4 — Les deux modes basculent, l'ancienne arène est retirée
@@ -232,6 +372,14 @@ fois par un chemin indépendant.
   attendu ; et aucune garde de régression supprimée sans équivalent (T4).
 - `index.html` : uniquement les lignes `<script src>` qu'exigent l'arrivée de la
   nouvelle arène et le retrait de l'ancienne.
+- **Règle d'arrêt** *(23/09/2026, décision d'Anthony après douze heures sans
+  commit)*. Si la cible de la tranche n'est pas atteinte au bout de **deux heures
+  de travail**, l'outil s'arrête : il commite son état sur sa branche avec un
+  message qui le dit, et rapporte ce qui marche, ce qui bloque et ce qu'il a
+  essayé. On décide ensuite à deux, au lieu de s'enfoncer.
+- **Les sondes de débogage restent hors du dépôt.** Seul l'outil de mesure livré
+  entre dans `tools/` ; les scripts d'exploration vivent ailleurs et ne sont
+  jamais commités.
 
 ---
 
