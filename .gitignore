@@ -35,6 +35,8 @@ tools/reports/*
 !tools/reports/LOT-2B-T1-MONDE-EXTERIEUR.md
 # Lot 2B T1 ter : mesure versionnee du corps sur vingt soirees.
 !tools/reports/LOT-2B-T1-TER-CORPS-DUREE.md
+# Lot 2B T2 bis : mesure versionnee du temps sur vingt soirees.
+!tools/reports/LOT-2B-T2-BIS-LE-TEMPS-PASSE.md
 # Audit du code mort (21/09/2026) : l'inventaire des declarations que rien
 # n'atteint est un etat des lieux durable, pas une mesure de tranche — il se
 # relit et se compare a chaque passe. Versionne.

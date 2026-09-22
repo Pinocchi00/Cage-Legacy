@@ -109,7 +109,7 @@ test('MGMT corps — mgmtTrauma et mgmtCombatProfile n’ont aucun effet sur la 
     setSeed(4242);
     const avant=[rnd(),rnd(),rnd(),rnd(),rnd()];
     setSeed(4242);
-    const f={id:'mgProbe',name:'Probe Test',first:'Probe',last:'Test',W:12,L:9,D:2,age:31,div:'H-welter',divName:'Poids mi-moyen',org:'Split',level:1,raison:null,interactions:0};
+    const f={id:'mgProbe',name:'Probe Test',first:'Probe',last:'Test',W:12,L:9,D:2,age:42,div:'H-welter',divName:'Poids mi-moyen',org:'Split',level:1,raison:null,interactions:0};
     mgmtTrauma(f);
     mgmtCombatProfile(f);
     const apres=[rnd(),rnd(),rnd(),rnd(),rnd()];
@@ -118,6 +118,59 @@ test('MGMT corps — mgmtTrauma et mgmtCombatProfile n’ont aucun effet sur la 
   const s=JSON.parse(r);
   assert.deepEqual(s.apres,s.avant,
     'les dérivations du corps et du profil sont pures : elles ne déplacent pas la suite des tirages');
+});
+
+test('MGMT lot 2B T2 bis — le déclin dérivé reprend la courbe carrière et reste distinct du traumatisme', () => {
+  const win = newGameWindow();
+  const s = JSON.parse(win.eval(`(function(){
+    const mk=(age,div)=>({id:'aging-proof-1',name:'Probe Test',first:'Probe',last:'Test',W:18,L:6,D:0,
+      age:age,div:div,divName:'Test',org:MGMT_ORG,level:1,raison:null,interactions:0});
+    const young=mk(26,'H-welter'), old=mk(38,'H-welter');
+    const lineBefore=JSON.stringify(old);
+    const py=mgmtCombatProfile(young), po=mgmtCombatProfile(old);
+    const wear=mgmtAgingWear(old);
+    const lineUnchanged=lineBefore===JSON.stringify(old);
+    const allowed=['footSpeed','handSpeed','cardio','explosiveness'];
+    const changed=ATTR_KEYS.filter(k=>py.attrs[k]!==po.attrs[k]);
+    const youngAffected=allowed.reduce((n,k)=>n+py.attrs[k],0);
+    const oldAffected=allowed.reduce((n,k)=>n+po.attrs[k],0);
+    const heavyYoung=mgmtCombatProfile(mk(26,'H-heavy'));
+    const heavy38=mgmtCombatProfile(mk(38,'H-heavy'));
+    const wear39=mgmtAgingWear(mk(39,'H-welter'));
+    const wear40=mgmtAgingWear(mk(40,'H-welter'));
+    const wear41=mgmtAgingWear(mk(41,'H-welter'));
+    const heavy39=mgmtAgingWear(mk(39,'H-heavy'));
+    const heavy40=mgmtAgingWear(mk(40,'H-heavy'));
+    const keys39=Object.keys(wear39.attrs), keys40=Object.keys(wear40.attrs);
+    const annual39=Object.keys(wear40.attrs).map(k=>(wear40.attrs[k]||0)-(wear39.attrs[k]||0));
+    const annual40=Object.keys(wear41.attrs).map(k=>(wear41.attrs[k]||0)-(wear40.attrs[k]||0));
+    old.trauma=80; old.traumaFloor=40; old.lastCycle=0;
+    const beforeTrauma=mgmtCombatProfile(old), ready=mgmtFightReady(old,0);
+    return JSON.stringify({lineUnchanged,
+      changed,youngAffected,oldAffected,wear,
+      heavyStable:JSON.stringify(heavyYoung.attrs)===JSON.stringify(heavy38.attrs)&&heavyYoung.morale===heavy38.morale,
+      chinAt38:keys39.includes('chin')&&!keys39.includes('power')&&!keys39.includes('recovery'),
+      powerAt39:keys40.includes('power')&&keys40.includes('recovery'),
+      caps:annual39.every(n=>n>=0&&n<=1)&&annual40.every(n=>n>=0&&n<=2),
+      heavyCurve:Object.keys(heavy39.attrs).length===0&&Object.keys(heavy40.attrs).length===7,
+      noCeilings:po.agedCeilings===undefined,
+      sameWear:JSON.stringify(mgmtAgingWear(old))===JSON.stringify(wear),
+      traumaSame:mgmtInitialTrauma(young)===mgmtInitialTrauma(old),
+      traumaAddsWear:ready.attrs.chin<beforeTrauma.attrs.chin&&ready.attrs.durability<beforeTrauma.attrs.durability});
+  })()`));
+  assert.ok(s.changed.length>0,'à 38 ans, le combattant témoin est mesurablement moins bon qu’à 26 ans');
+  assert.ok(s.changed.every(k=>['footSpeed','handSpeed','cardio','explosiveness'].includes(k)),
+    'la première année de déclin ne touche que les quatre attributs prévus');
+  assert.ok(s.oldAffected<s.youngAffected,'la somme des attributs touchés baisse à niveau et bilan égaux');
+  assert.ok(s.lineUnchanged,'la dérivation n’écrit rien sur la ligne persistée');
+  assert.ok(s.heavyStable,'un poids lourd reste au pic à 38 ans : son déclin commence à 39 ans');
+  assert.ok(s.chinAt38,'le menton entre dans la dérivation à l’année commencée à 38 ans');
+  assert.ok(s.powerAt39,'puissance et récupération entrent à l’année commencée à 39 ans');
+  assert.ok(s.caps,'les trois premières années restent bornées à RI(0,1), puis à RI(0,2)');
+  assert.ok(s.heavyCurve,'les lourds commencent la même courbe deux ans plus tard, à 39 ans');
+  assert.ok(s.noCeilings,'aucun agedCeilings n’est transposé sur le clone régénéré');
+  assert.ok(s.sameWear&&s.traumaSame,'âge et traumatisme restent deux causes indépendantes');
+  assert.ok(s.traumaAddsWear,'le traumatisme s’ajoute après le déclin sur le clone prêt à combattre');
 });
 
 /* Seuil de la régression X2 : cinq styles distincts au moins. Avec le

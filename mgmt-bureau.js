@@ -62,15 +62,17 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    pour les faits). Lot 2B T1 ter : v7 ajoute au corps la part acquise
    (traumaFloor) et complète les instantanés de trace avec traumaFloor et
    lastCycle pour que la récupération temporelle reste rejouable. Migration
-   6 → 7 sans perte. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=7;
+    6 → 7 sans perte. Lot 2B T2 bis : v8 ajoute le reste de semaines du
+    calendrier d'âge à la racine de la sauvegarde. Les âges existants restent
+    leur âge courant et le calendrier repart de là. Une v1 reste refusée. ==== */
+const MGMT_SAVE_VERSION=8;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
   /* Lot 2B T1 : le vivier extérieur démarre vide — la cohorte initiale se
      crée à l'ouverture du premier cycle (mgmtExteriorEnsure), chaque ligne
      ne portera que son identité. */
-  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,
+  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
     hist:[],treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
 }
@@ -126,6 +128,28 @@ function mgmtNewRoster(m){
   }
   return m.roster;
 }
+
+/* ==== [ANCRE: MGMT_LOT2B_T2BIS_TEMPS] — Lot 2B T2 bis le temps passe
+   (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T2 bis) : Split suit le même
+   calendrier que le monde extérieur. Un cycle ajoute MGMT_EVENT_WEEKS au
+   reste global ; chaque année complète de MGMT_EXT_YEAR_WEEKS vieillit le
+   roster d'un an. Le reste vit à la racine, jamais sur une ligne : aucun
+   attribut ni overall n'est stocké. ==== */
+/** Avance l'âge du roster d'un cycle de calendrier. @returns {number} années franchies. */
+function mgmtAdvanceRosterAges(m){
+  if(!m||typeof m!=='object') return 0;
+  const previous=Number.isSafeInteger(m.ageWeeks)&&m.ageWeeks>=0?m.ageWeeks:0;
+  const elapsed=previous+MGMT_EVENT_WEEKS;
+  const years=Math.floor(elapsed/MGMT_EXT_YEAR_WEEKS);
+  m.ageWeeks=elapsed%MGMT_EXT_YEAR_WEEKS;
+  if(years>0&&Array.isArray(m.roster)){
+    for(const f of m.roster){
+      if(f&&typeof f.age==='number'&&Number.isFinite(f.age)) f.age=Math.min(100,f.age+years);
+    }
+  }
+  return years;
+}
+/* ==== [FIN ANCRE] ==== */
 
 /** Retrouve un combattant du roster par son id. */
 function mgmtFighterById(m,id){
@@ -256,6 +280,7 @@ function mgmtNewPile(m){
      ainsi exactement les mêmes lignes qu'une partie continuée. */
   mgmtExteriorEnsure(m);
   m.cycle++;
+  mgmtAdvanceRosterAges(m);
   mgmtExteriorArrive(m);
   m.pile=[];
   m.open=null;

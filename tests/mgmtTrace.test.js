@@ -15,7 +15,7 @@
    - un adversaire disparu du roster ne casse pas l'historique de celui qui
      reste : l'adversaire est une référence copiée dans la trace, jamais une
      garantie ;
-   - les migrations 5 → 6 et 6 → 7 : une sauvegarde antérieure se charge sans perte ;
+   - les migrations 5 → 6, 6 → 7 et 7 → 8 : une sauvegarde antérieure se charge sans perte ;
    - validateMgmt refuse un historique structurellement faux, mgmtRepair
      écarte une entrée illisible sans bloquer le chargement.
 
@@ -215,14 +215,15 @@ test('MGMT trace — migration 5 → 6 sans perte : une sauvegarde d\u2019avant 
   const win = newGameWindow();
   freshMgmt(win,20260925);
   assert.ok(joueSoiree(win),'une soirée a été jouée (l\u2019état porte une trace)');
-  /* L'état d'avant le lot : la même sauvegarde, ramenée en v5 sans trace. */
+  /* L'état d'avant les lots : la même sauvegarde, ramenée en v5 sans trace
+     ni calendrier d'âge, ajouté seulement par la décision T2 bis. */
   const v5Raw = JSON.parse(win.eval(`(function(){
     const raw=JSON.parse(JSON.stringify(G.mgmt));
-    raw.v=5; delete raw.hist;
+    raw.v=5; delete raw.hist; delete raw.ageWeeks;
     return JSON.stringify(raw);
   })()`));
   const sansVersionEtTrace = x => {
-    const c=JSON.parse(JSON.stringify(x)); delete c.v; delete c.hist; return c;
+    const c=JSON.parse(JSON.stringify(x)); delete c.v; delete c.hist; delete c.ageWeeks; return c;
   };
   const etatV5 = JSON.stringify(sansVersionEtTrace(v5Raw));
   const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v5Raw)}))))`));
@@ -235,13 +236,15 @@ test('MGMT trace — migration 5 → 6 sans perte : une sauvegarde d\u2019avant 
   const apres = JSON.parse(win.eval(`(function(){
     const m=G.mgmt;
     return JSON.stringify({v:m.v,hist:m.hist,etat:JSON.stringify((function(){
-      const c=JSON.parse(JSON.stringify(m)); delete c.v; delete c.hist; return c;
+      const c=JSON.parse(JSON.stringify(m)); delete c.v; delete c.hist; delete c.ageWeeks; return c;
     })())});
   })()`));
   /* Sans perte : tout ce que la v5 portait est intact, à la version et à la
      trace près (vide par construction). */
   assert.equal(apres.v, win.eval(`MGMT_SAVE_VERSION`), 'la v5 se charge en version courante');
   assert.deepEqual(apres.hist, [], 'hist:[] au chargement');
+  assert.equal(JSON.parse(win.eval(`JSON.stringify(G.mgmt.ageWeeks)`)),0,
+    'décision Anthony 22/09 : le calendrier d’âge d’une sauvegarde antérieure repart de zéro');
   assert.equal(apres.etat, etatV5, 'roster, carte, argent, affaires, soirée : tout ce que la v5 portait est intact');
 });
 
@@ -265,6 +268,29 @@ test('MGMT corps — migration 6 → 7 : décision Anthony 22/09, part acquise e
     'chaque corps existant reçoit une part acquise bornée par son total');
   assert.ok(mig.hist.every(x=>x.a.traumaFloor===null&&x.a.lastCycle===null&&x.b.traumaFloor===null&&x.b.lastCycle===null),
     'les anciennes traces signalent explicitement les deux informations absentes');
+});
+
+test('MGMT lot 2B T2 bis — migration 7 → 8 : les âges restent courants et le calendrier repart de là', () => {
+  const win = newGameWindow();
+  freshMgmt(win,20260928);
+  const v7 = JSON.parse(win.eval(`(function(){
+    const raw=JSON.parse(JSON.stringify(G.mgmt));
+    raw.v=7; delete raw.ageWeeks; raw.cycle=37;
+    raw.roster.forEach((o,i)=>{ o.age=24+(i%13); });
+    return JSON.stringify(raw);
+  })()`));
+  const ages=v7.roster.map(o=>o.age);
+  const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v7)}))))`));
+  assert.equal(mig.v,win.eval(`MGMT_SAVE_VERSION`),'la v7 atteint la version courante');
+  assert.deepEqual(mig.roster.map(o=>o.age),ages,'chaque âge existant reste son âge courant');
+  assert.equal(mig.cycle,37,'le cycle de la partie est conservé');
+  assert.equal(mig.ageWeeks,0,'le calendrier d’âge repart de la migration');
+  assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`),true,'la v7 migrée passe validateMgmt');
+  win.localStorage.setItem('cage-legacy-mgmt',JSON.stringify(v7));
+  win.eval(`G.mgmt=null; loadMgmt(); mgmtNewPile(G.mgmt);`);
+  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify(G.mgmt.roster.map(o=>o.age))`)),ages,
+    'un premier cycle de cinq semaines après migration ne déclenche pas un anniversaire');
+  assert.equal(win.eval(`G.mgmt.ageWeeks`),5,'les cinq premières semaines sont conservées pour la suite');
 });
 
 /* ---- Tâche 5 : validateMgmt refuse un historique structurellement faux --- */

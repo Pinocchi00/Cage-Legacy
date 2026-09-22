@@ -112,6 +112,37 @@ test('MGMT niveau 1 — une ligne nom/bilan/âge/catégorie/organisation, rien d
   assert.equal(win.eval(`G.mgmt.roster.every(o=>o.level===1&&o.raison===null)`), true);
 });
 
+test('MGMT lot 2B T2 bis — l’âge suit les semaines du calendrier, jamais une année par soirée', () => {
+  const win = newGameWindow();
+  const s = JSON.parse(win.eval(`(function(){
+    setSeed(20260922);
+    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const ages0=m.roster.map(o=>o.age);
+    const ext=m.exterieur[0];
+    const ext0=mgmtExteriorTrace(ext,0).age;
+    const increments=[];
+    let previous=m.roster[0].age;
+    for(let c=1;c<=104;c++){
+      mgmtNewPile(m);
+      increments.push(m.roster[0].age-previous);
+      previous=m.roster[0].age;
+    }
+    return JSON.stringify({cycle:m.cycle,ageWeeks:m.ageWeeks,
+      deltas:m.roster.map((o,i)=>o.age-ages0[i]),increments,
+      extDelta:mgmtExteriorTrace(ext,m.cycle).age-ext0,
+      lineKeys:Object.keys(m.roster[0]).sort()});
+  })()`));
+  assert.equal(s.cycle,104,'104 cycles de cinq semaines ont passé');
+  assert.equal(s.ageWeeks,0,'520 semaines font exactement dix années sans reste');
+  assert.ok(s.deltas.every(n=>n===10),'chaque ligne de Split a pris dix ans en dix années');
+  assert.ok(s.increments.every(n=>n===0||n===1),'aucun cycle de cinq semaines ne fait prendre plus d’un an');
+  assert.equal(s.increments.slice(0,10).reduce((a,b)=>a+b,0),0,'dix soirées ne valent pas encore une année');
+  assert.equal(s.increments[10],1,'la première année tombe au onzième cycle, après 55 semaines');
+  assert.equal(s.extDelta,10,'Split et le monde extérieur vieillissent au même rythme');
+  assert.ok(!s.lineKeys.includes('attrs')&&!s.lineKeys.includes('overall'),
+    'vieillir n’ajoute ni attributs ni overall à la ligne niveau 1');
+});
+
 test('MGMT déterminisme — même graine, même roster et même pile', () => {
   const a = newGameWindow(), b = newGameWindow();
   enterMgmt(a,7); enterMgmt(b,7);

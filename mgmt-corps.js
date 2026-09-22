@@ -2,8 +2,9 @@
 /* CAGE LEGACY — mgmt-corps.js
    ============================================================================
    MODE MANAGEMENT — le corps et la soirée : état physique caché (traumatisme
-   0-100, récupération lente au repos avec une part acquise), dérivation sans rnd pour les niveau 1, profil
-   de combat régénéré à l'identique (SEED sauvegardé puis restauré),
+    0-100, récupération lente au repos avec une part acquise), vieillissement
+    dérivé séparément, sans rnd pour les niveau 1, profil de combat régénéré à
+    l'identique (SEED sauvegardé puis restauré),
    couplage au moteur sans le modifier (simulateFight appelé, jamais édité),
    conséquences (blessures, suspensions, fin de carrière médicale), soirée
    calculée en une fois et trace rejouable de chaque combat (lot 3 T1 :
@@ -109,6 +110,50 @@ function mgmtLevelForRecord(W,L){
   return clamp(Math.round(20+clamp((t-0.45)/0.43,0,1)*77),40,80);
 }
 
+/* ==== [ANCRE: MGMT_LOT2B_T2BIS_DECLIN] — Lot 2B T2 bis le temps passe
+   (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T2 bis) : même courbe que
+   applyAging (engine-progression.js, ancre V2-39), mais dérivée depuis l'id
+   et chaque âge annuel par duelFnv1a32 + mulberry32. Aucun rnd() de la partie,
+   aucune mutation de la ligne, aucun agedCeilings : le profil est régénéré à
+   l'âge courant. Le résultat reste distinct du traumatisme. ==== */
+/** Usure cumulée pour atteindre l'âge courant, selon l'ordre de tirage exact
+ *  d'applyAging. Un profil âgé de 38 ans a subi l'année commencée à 37 ans.
+ *  @returns {{attrs:Object,morale:number}} */
+function mgmtAgingWear(f){
+  const losses={};
+  let morale=0;
+  if(!f||!Number.isFinite(f.age)) return {attrs:losses,morale};
+  const heavy=f.div==='H-heavy'||f.div==='H-lheavy';
+  const declineAge=heavy?39:37;
+  const endAge=Math.floor(f.age);
+  const dec=(r,key,cap)=>{ losses[key]=(losses[key]||0)+Math.floor(r()*(cap+1)); };
+  for(let age=declineAge;age<endAge;age++){
+    const r=mulberry32(duelFnv1a32('mgmt-aging|'+String(f.id)+'|'+age));
+    const cap=age-declineAge<3?1:2;
+    dec(r,'footSpeed',cap);
+    dec(r,'handSpeed',cap);
+    dec(r,'cardio',cap);
+    dec(r,'explosiveness',cap);
+    if(age>=39){ dec(r,'power',cap); dec(r,'recovery',cap); }
+    if(age>=38) dec(r,'chin',cap);
+    if(r()<0.3) morale+=5;
+  }
+  return {attrs:losses,morale};
+}
+
+/** Applique le déclin dérivé au clone régénéré, jamais à la ligne persistée. */
+function mgmtApplyAgingWear(p,f){
+  const wear=mgmtAgingWear(f);
+  if(!p||!p.attrs) return wear;
+  for(const key of Object.keys(wear.attrs)){
+    p.attrs[key]=clamp(num(p.attrs[key])-wear.attrs[key],1,100);
+  }
+  p.morale=clamp(num(p.morale)-wear.morale,0,100);
+  p.overall=overall(p);
+  return wear;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Profil de combat d'une ligne : régénéré à chaque appel, jamais stocké.
  *  SEED sauvegardé, tirage sous hachage de l'id, SEED restauré — le même
  *  combattant donne exactement le même profil sans avancer la suite des
@@ -132,6 +177,7 @@ function mgmtCombatProfile(f){
   }
   p.id=f.id; p.name=f.name; p.first=f.first; p.last=f.last; p.age=f.age;
   p.W=f.W; p.L=f.L; p.D=f.D;
+  mgmtApplyAgingWear(p,f);
   return p;
 }
 
@@ -143,9 +189,10 @@ function mgmtTraumaFactor(t){
   return Math.max(MGMT_CHIN_FLOOR,1-(t/MGMT_TRAUMA_MAX)*MGMT_CHIN_WEAR);
 }
 
-/** Clone prêt à combattre : profil régénéré, copié en profondeur, attributs
- *  attrs.chin (engine.js:97, eff() en :413) et attrs.durability (engine.js:97,
- *  eff() en :423) réduits selon le traumatisme. À 0, le clone est inchangé. */
+/** Clone prêt à combattre : profil régénéré avec son déclin d'âge, puis copié
+ *  en profondeur. Le traumatisme réduit ensuite attrs.chin (engine.js:97,
+ *  eff() en :413) et attrs.durability (engine.js:97, eff() en :423). Les deux
+ *  causes restent séparées ; à traumatisme 0, le clone est inchangé. */
 function mgmtFightReady(f,cycle){
   const c=JSON.parse(JSON.stringify(mgmtCombatProfile(f)));
   const k=mgmtTraumaFactor(mgmtTrauma(f,cycle));

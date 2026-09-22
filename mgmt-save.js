@@ -188,6 +188,7 @@ function validateMgmt(raw){
   if(raw.v!==MGMT_SAVE_VERSION) return false;
   if(raw.org!==MGMT_ORG) return false;
   if(!Number.isSafeInteger(raw.cycle)||raw.cycle<0) return false;
+  if(!Number.isSafeInteger(raw.ageWeeks)||raw.ageWeeks<0||raw.ageWeeks>=MGMT_EXT_YEAR_WEEKS) return false;
   if(!Number.isSafeInteger(raw.seq)||raw.seq<1) return false;
   if(!Array.isArray(raw.roster)||!Array.isArray(raw.pile)||!Array.isArray(raw.facts)) return false;
   if(raw.open!==null&&typeof raw.open!=='string') return false;
@@ -248,7 +249,9 @@ function validateMgmt(raw){
  *  décision d'Anthony du 22/09/2026) : chaque corps déjà écrit reçoit un
  *  plancher dérivé borné par son total ; les anciennes traces reçoivent les
  *  deux champs absents à null et rejouent donc sans récupération ajoutée.
- *  Sans perte, sans
+  *  7 → 8 (lot 2B T2 bis, décision d'Anthony du 22/09/2026) : les âges des
+  *  lignes restent leurs âges courants et ageWeeks démarre à 0 ; le calendrier
+  *  annuel repart de là. Sans perte, sans
  *  reset : une v1 reste refusée, comme avant. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
@@ -295,6 +298,10 @@ function mgmtMigrate(raw){
       }
     }
   }
+  if(raw.v===7){
+    raw.v=8;
+    raw.ageWeeks=0;
+  }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
@@ -305,6 +312,7 @@ function mgmtMigrate(raw){
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
+  if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(!Array.isArray(m.facts)) m.facts=[];
   while(m.facts.length>MGMT_FACTS_MAX) m.facts.shift();
   /* Lot 2B T1 bis : le vivier extérieur se recadre comme le reste — épuré
