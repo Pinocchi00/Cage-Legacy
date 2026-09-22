@@ -77,7 +77,54 @@ Une tranche à la fois, relue par Claude avant la suivante.
   écrite sur la ligne ; un bilan qui ne régresse jamais ; deux combattants de
   graines différentes ne produisent pas la même trace.
 
-### T2 — Le recrutement *(interface — vérification charte §3 obligatoire)*
+### T1 bis — Le monde à l'échelle *(aucune interface — avant la T2)*
+
+*Ajoutée le 22/09/2026. Elle naît de QO-11 bis : le monde dérivé de la T1 est
+trop petit et trop mal réparti pour porter un classement. Elle précède la T2
+parce que le recrutement se feuillette autrement dans un vivier de 35 et dans un
+vivier de 330 — construit sur le petit, l'écran serait à refaire.*
+
+- **Le monde se peuple par catégorie, pas en vrac.** Aujourd'hui
+  `mgmtExteriorEnsure` / `mgmtExteriorArrive` tirent un effectif global que le
+  hasard répartit entre les 12 catégories (`DIVISIONS`, `engine.js:150`) : au
+  cycle 12, `H-fly` se retrouve à 0 extérieur et `H-lheavy` à 5. Le quota
+  devient **par catégorie** — « au moins N vivants dans chacune ». C'est la
+  seule forme qui garantisse un classement partout.
+- **La cible : 25 à 30 vivants par catégorie**, soit ~330 dans le monde — de
+  quoi remplir un top 15 et laisser une dizaine de prétendants crédibles en
+  dessous. *À confirmer par Anthony ; c'est le seul chiffre de la tranche.*
+- **Le coût est mesuré et négligeable** : une ligne pèse 66 octets, une carrière
+  se dérive en 0,036 ms. 330 lignes = ~22 Ko de sauvegarde et 13 ms pour tout
+  dériver, contre ~80 Ko déjà pris par l'historique après 20 soirées. **Aucune
+  optimisation n'est à inventer** : si la tranche en réclame une, c'est que la
+  règle du bureau a été enfreinte quelque part.
+- **La règle du bureau tient, sans exception.** Une ligne ne gagne aucun champ.
+  Le rang, le bilan, les organisations traversées restent **dérivés à la
+  lecture** (`mgmtExteriorTrace(line, cycle)`). Un monde plus grand ne justifie
+  aucun cache : le coût mesuré ci-dessus est la preuve qu'il n'en faut pas.
+- **Le classement devient mondial.** `mgmtDivisionRank` (`mgmt-carte.js:389`) ne
+  trie aujourd'hui que `m.roster` — 4 combattants par catégorie. Il doit trier
+  **Split et l'extérieur ensemble**, sur la même loi (écart W−L, puis victoires,
+  puis récence). Un seul classement dans le dépôt, jamais un second à côté
+  (CLAUDE.md §5). Les prétendants ne sont pas une notion séparée : ce sont les
+  rangs 16 et suivants de cette même liste.
+- **Le combattant recruté ne change pas de rang en changeant de maison.** Signer
+  quelqu'un le fait entrer chez Split, pas monter au classement — sinon le
+  classement récompenserait le recrutement au lieu des résultats.
+- **Compatibilité des sauvegardes** : une partie enregistrée avec l'ancien monde
+  doit se charger. Le quota par catégorie complète les catégories creuses au
+  chargement plutôt que de refuser la partie ; `validateMgmt` / `mgmtRepair`
+  restent la porte d'entrée.
+- **Tests** : chaque catégorie atteint son quota à l'ouverture et le tient après
+  N cycles ; le classement mondial contient bien Split **et** l'extérieur ; un
+  recrutement ne déplace pas le rang ; une sauvegarde d'avant la tranche se
+  charge et se complète ; la trace reste déterministe et rien n'est écrit sur la
+  ligne.
+- **Mesure attendue** : la répartition par catégorie à l'ouverture et après
+  20 cycles, le poids réel de la sauvegarde, et le temps de dérivation complet.
+  Une seule mesure, en fin de tranche.
+
+### T2 — Le recrutement *(interface — après T1 bis — vérification charte §3 obligatoire)*
 
 - **Le flux** : des recrutables sont visibles cycle après cycle. **Aucun nombre
   fixe** (décision 2) — combien s'en présentent dépend du monde extérieur
