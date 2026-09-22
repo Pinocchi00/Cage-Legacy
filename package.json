@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "jsdom": "^24.1.3",
-    "eslint": "^10.8.0"
+    "eslint": "^10.8.0",
+    "espree": "^11.2.0"
   }
 }

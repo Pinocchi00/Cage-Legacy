@@ -33,3 +33,7 @@ tools/reports/*
 # mesure du monde extérieur dérivé (les deux cibles de réalisme) est le
 # livrable T1, versionné.
 !tools/reports/LOT-2B-T1-MONDE-EXTERIEUR.md
+# Audit du code mort (21/09/2026) : l'inventaire des declarations que rien
+# n'atteint est un etat des lieux durable, pas une mesure de tranche — il se
+# relit et se compare a chaque passe. Versionne.
+!tools/reports/INVENTAIRE-CODE-MORT.md
