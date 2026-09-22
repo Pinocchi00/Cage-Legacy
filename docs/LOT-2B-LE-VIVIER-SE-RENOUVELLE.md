@@ -421,6 +421,17 @@ l'infirmerie.
   retraité médical de Split (QO-9 — le passé du monde ne disparaît pas). Elle
   cesse simplement de compter parmi les vivants.
 
+- **⚠ Les anniversaires ne tombent pas tous le même jour.** *Ajouté le
+  22/09/2026, relecture de la T2 bis.* La T2 bis fait vieillir le roster par un
+  **compteur global** (`m.ageWeeks`) : toutes les 52 semaines, les 48
+  combattants prennent un an à la même soirée — mesuré, +1,00 an pile sur vingt
+  soirées. C'était sans conséquence tant que rien ne dépendait de l'âge. **La
+  retraite d'âge de cette tranche en dépendra** : avec un anniversaire commun,
+  toute une classe d'âge franchirait son seuil ensemble et partirait à la même
+  soirée. La T3 donne donc à chaque combattant **sa propre date dans l'année,
+  dérivée de son identifiant** (aucun champ ajouté à la ligne), comme le monde
+  extérieur dérive déjà l'âge de chacun depuis son propre `born`. Un combattant
+  recruté de l'extérieur ne doit pas changer d'âge en changeant de maison.
 - **Cible mesurable ajoutée** : à 240 cycles (23 ans), **l'âge médian du monde
   extérieur reste dans la même décennie qu'à l'ouverture** — un monde vivant
   renouvelle sa population, il ne vieillit pas en bloc. Et à tout cycle, il
