@@ -35,6 +35,8 @@ function mgmtValidLine(o){
   /* Lot 3a §9 : le corps accompagne le bilan — absent (jamais combattu sur
      la carte), ou contrôlé. */
   if(o.trauma!==undefined&&(!Number.isFinite(o.trauma)||o.trauma<0||o.trauma>MGMT_TRAUMA_MAX)) return false;
+  if(o.traumaFloor!==undefined&&(!Number.isFinite(o.traumaFloor)||o.traumaFloor<0||
+    o.traumaFloor>MGMT_TRAUMA_MAX||o.trauma===undefined||o.traumaFloor>o.trauma)) return false;
   if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) return false;
   if(o.retired!==undefined&&o.retired!=='medical') return false;
   /* Lot 2B T1 bis : dernier combat connu — absent (jamais combattu), cycle
@@ -130,7 +132,8 @@ function mgmtValidExteriorLine(o){
    §3 T1) : la porte d'entrée de l'historique des combats (m.hist). Même
    philosophie que mgmtValidExteriorLine : la clé exacte des champs, strict —
    l'instantané d'une ligne ne porte que ce que mgmtFightReady lit (id,
-   noms, catégorie, âge, bilan, traumatisme éventuel), la trace d'un combat
+   noms, catégorie, âge, bilan, traumatisme éventuel, part acquise et cycle
+   du dernier combat), la trace d'un combat
    ne porte que ce qui régénère le déroulé (instantanés, état de la RNG,
    rounds) et l'issue résumée. Une entrée structurellement incomplète est
    refusée à l'entrée et écartée en réparation — sa trace était illisible ;
@@ -143,13 +146,16 @@ function mgmtValidExteriorLine(o){
 function mgmtValidTraceSide(t){
   if(!t||typeof t!=='object'||Array.isArray(t)) return false;
   const clefs=Object.keys(t).sort().join(',');
-  if(clefs!=='D,L,W,age,div,first,id,last,name,trauma') return false;
+  if(clefs!=='D,L,W,age,div,first,id,last,lastCycle,name,trauma,traumaFloor') return false;
   if(!mgmtValidId(t.id)) return false;
   for(const k of ['name','first','last']){ if(typeof t[k]!=='string'||!t[k]) return false; }
   if(typeof t.div!=='string'||!divById(t.div)) return false;
   if(typeof t.age!=='number'||!Number.isFinite(t.age)||t.age<0||t.age>100) return false;
   for(const k of ['W','L','D']){ if(!Number.isSafeInteger(t[k])||t[k]<0) return false; }
   if(t.trauma!==null&&(!Number.isFinite(t.trauma)||t.trauma<0||t.trauma>MGMT_TRAUMA_MAX)) return false;
+  if(t.traumaFloor!==null&&(!Number.isFinite(t.traumaFloor)||t.traumaFloor<0||
+    t.traumaFloor>MGMT_TRAUMA_MAX||t.trauma===null||t.traumaFloor>t.trauma)) return false;
+  if(t.lastCycle!==null&&!Number.isSafeInteger(t.lastCycle)) return false;
   return true;
 }
 
@@ -238,7 +244,11 @@ function validateMgmt(raw){
  *  conservé), la carte principale démarre vide : aucun combat perdu, aucun
  *  ajouté d'office. 5 → 6 (lot 3 T1, docs/LOT-3-L-ARENE.md §3 T1) : m.hist
  *  démarre vide — les combats d'avant le lot n'ont pas laissé de trace
- *  (constat C3), rien à reconstruire, rien à perdre. Sans perte, sans
+ *  (constat C3), rien à reconstruire, rien à perdre. 6 → 7 (lot 2B T1 ter,
+ *  décision d'Anthony du 22/09/2026) : chaque corps déjà écrit reçoit un
+ *  plancher dérivé borné par son total ; les anciennes traces reçoivent les
+ *  deux champs absents à null et rejouent donc sans récupération ajoutée.
+ *  Sans perte, sans
  *  reset : une v1 reste refusée, comme avant. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
@@ -263,6 +273,27 @@ function mgmtMigrate(raw){
   if(raw.v===5){
     raw.v=6;
     if(!Array.isArray(raw.hist)) raw.hist=[];
+  }
+  if(raw.v===6){
+    raw.v=7;
+    if(Array.isArray(raw.roster)){
+      for(const o of raw.roster){
+        if(o&&Number.isFinite(o.trauma)&&o.traumaFloor===undefined){
+          o.traumaFloor=Math.min(clamp(o.trauma,0,MGMT_TRAUMA_MAX),mgmtInitialTrauma(o));
+        }
+      }
+    }
+    if(Array.isArray(raw.hist)){
+      for(const x of raw.hist){
+        if(!x||typeof x!=='object') continue;
+        for(const side of ['a','b']){
+          const t=x[side];
+          if(!t||typeof t!=='object') continue;
+          if(t.traumaFloor===undefined) t.traumaFloor=null;
+          if(t.lastCycle===undefined) t.lastCycle=null;
+        }
+      }
+    }
   }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
@@ -291,6 +322,8 @@ function mgmtRepair(m){
     for(const o of m.roster){
       if(o&&typeof o==='object'){
         if(o.trauma!==undefined&&(!Number.isFinite(o.trauma)||o.trauma<0||o.trauma>MGMT_TRAUMA_MAX)) delete o.trauma;
+        if(o.traumaFloor!==undefined&&(!Number.isFinite(o.traumaFloor)||o.traumaFloor<0||
+          o.traumaFloor>MGMT_TRAUMA_MAX||o.trauma===undefined||o.traumaFloor>o.trauma)) delete o.traumaFloor;
         if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) delete o.susp;
         if(o.retired!==undefined&&o.retired!=='medical') delete o.retired;
         if(o.lastCycle!==undefined&&!Number.isSafeInteger(o.lastCycle)) delete o.lastCycle;

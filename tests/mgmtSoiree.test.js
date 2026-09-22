@@ -12,8 +12,8 @@
      consomment jamais rnd(), §3.1) ;
    - le couplage au moteur (§4) : à traumatisme 0, combat strictement
      identique au moteur nu, même graine ;
-   - le corps après la soirée (§6) : traumatisme monotone borné, fin de
-     carrière médicale définitive, suspensions respectées ;
+   - le corps après la soirée (§6) : traumatisme borné, récupération lente
+      avec part acquise, fin de carrière médicale définitive, suspensions ;
    - l'anti-rechargement (§5) : la soirée est calculée une seule fois ;
    - l'absence de toute valeur de traumatisme dans le DOM (§3).
    ============================================================================ */
@@ -159,39 +159,69 @@ test('MGMT corps — traumatisme 0 : combat strictement identique au moteur nu, 
     'à traumatisme 0, le facteur vaut exactement 1 : le combat préparé est celui du moteur nu');
 });
 
-test('MGMT corps — le traumatisme ne descend jamais et reste dans [0,100]', () => {
+test('MGMT corps — décision Anthony 22/09 : récupération bornée, part acquise et aucun combat ne baisse le total', () => {
   const win = newGameWindow();
   freshState(win,207);
   const r = win.eval(`(function(){
     const m=G.mgmt;
+    const jeune={id:'jeune-propre',W:10,L:1,D:0,age:22};
+    const initial=mgmtTrauma(jeune,0);
+    const repos={id:'repos',W:12,L:5,D:0,age:29,trauma:80,traumaFloor:50,lastCycle:1};
+    const avantRepos=mgmtTrauma(repos,1);
+    const apresDixCycles=mgmtTrauma(repos,11);
+    const apresLongRepos=mgmtTrauma(repos,200);
+    const floorAvant=repos.traumaFloor;
+    const courantAvantCombat=mgmtTrauma(repos,20);
+    m.cycle=20;
+    const sansDegat={winner:'A',method:'Décision',round:3,
+      stats:{A:{dmgHead:0,wobbled:0},B:{dmgHead:12,wobbled:0}}};
+    mgmtApplyFight(m,repos,m.roster[0],sansDegat,'A');
+    const courantApresCombat=mgmtTrauma(repos,20);
+    const floorApres=repos.traumaFloor;
+
     const methods=['KO/TKO','Décision','Soumission','Arrêt médical','Blessure','Décision partagée'];
     let bad=0,n=0,capAtteint=false;
     for(let i=0;i<600;i++){
       const f=m.roster[i%m.roster.length];
-      const t0=mgmtTrauma(f);
+      const t0=mgmtTrauma(f,m.cycle);
       const side=(i%2)?'A':'B';
       const res={winner:(i%17===0)?'D':side,method:methods[i%methods.length],round:1+(i%3),
         stats:{A:{dmgHead:RI(0,80),wobbled:RI(0,3)},B:{dmgHead:RI(0,80),wobbled:RI(0,3)}}};
       mgmtApplyFight(m,f,m.roster[(i+1)%m.roster.length],res,side);
-      const t1=mgmtTrauma(f);
+      const t1=mgmtTrauma(f,m.cycle);
       if(!(t1>=t0)||t1<0||t1>100) bad++;
+      if(!(mgmtTraumaFloor(f)>=0)||mgmtTraumaFloor(f)>t1) bad++;
       if(t1===100) capAtteint=true;
       n++;
     }
     /* Cas dirigé : un corps à 99 qui perd par KO atteint le plafond. */
     const f=m.roster[0];
     f.trauma=99; f.W=0; f.L=0; f.D=0;
+    f.traumaFloor=70; f.lastCycle=m.cycle;
     const res={winner:'B',method:'KO/TKO',round:2,stats:{A:{dmgHead:40,wobbled:2},B:{dmgHead:0,wobbled:0}}};
     mgmtApplyFight(m,f,m.roster[1],res,'A');
-    if(mgmtTrauma(f)!==100) bad++;
+    if(mgmtTrauma(f,m.cycle)!==100) bad++;
     else capAtteint=true;
     n++;
-    return JSON.stringify({n,bad,capAtteint});
+    const parfait={id:'invaincu',name:'Invaincu Test',first:'Invaincu',last:'Test',W:0,L:0,D:0,
+      age:22,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0};
+    for(let i=0;i<60;i++) mgmtApplyFight(m,parfait,m.roster[1],sansDegat,'A');
+    return JSON.stringify({n,bad,capAtteint,initial,avantRepos,apresDixCycles,apresLongRepos,
+      floorAvant,floorApres,courantAvantCombat,courantApresCombat,
+      parfaitTrauma:mgmtTrauma(parfait,m.cycle),parfaitRetired:parfait.retired||null});
   })()`);
   const s=JSON.parse(r);
   assert.equal(s.n,601,'les 600 combats dirigés plus le cas dirigé ont été appliqués');
-  assert.equal(s.bad,0,'jamais une descente, jamais hors [0,100]');
+  assert.equal(s.bad,0,'un combat ne baisse jamais le total, qui reste dans [0,100] avec un plancher valide');
   assert.equal(s.capAtteint,true,'le plafond 100 (fin de carrière médicale) est bien atteint');
+  assert.ok(s.initial<5,'un combattant de 22 ans au palmarès propre arrive sous 5');
+  assert.equal(s.avantRepos,80,'sans temps écoulé, le total stocké est intact');
+  assert.equal(s.apresDixCycles,50,'le repos récupère lentement la part récente sans franchir la part acquise');
+  assert.equal(s.apresLongRepos,50,'la récupération s’arrête sur la part acquise');
+  assert.equal(s.floorApres,s.floorAvant,'un combat sans dégât ne réduit jamais la part acquise');
+  assert.equal(s.courantApresCombat,s.courantAvantCombat,'gagner sans encaisser ne coûte rien et ne baisse pas le total courant');
+  assert.equal(s.parfaitTrauma,0,'soixante victoires sans dégât ne créent aucun traumatisme');
+  assert.equal(s.parfaitRetired,null,'un combattant qui gagne sans encaisser ne prend pas sa retraite médicale');
 });
 
 /* Roster réduit au pot minimal : les paires légales sont (A,B),(A,C),(B,C). */
@@ -289,6 +319,20 @@ test('MGMT corps — suspendu : exclu de toutes les propositions jusqu’à la f
   assert.equal(s.pendantPaires,false,'mgmtEligiblePairs ne propose jamais un suspendu');
   assert.ok(s.apres>0,'après la fin de la suspension, il revient dans les propositions');
   assert.equal(s.apresPaires,true,'mgmtEligiblePairs le repropose après la fin de la suspension');
+});
+
+test('MGMT corps — suspension en jours : jamais une soirée de trop', () => {
+  const win = newGameWindow();
+  const r = JSON.parse(win.eval(`JSON.stringify([30,60,90,180].map(days=>({
+    days:days,until:mgmtSuspensionUntil(10,days),
+    absences:[11,12,13,14,15,16].filter(c=>c<=mgmtSuspensionUntil(10,days))
+  })))`));
+  assert.deepEqual(r,[
+    {days:30,until:10,absences:[]},
+    {days:60,until:11,absences:[11]},
+    {days:90,until:12,absences:[11,12]},
+    {days:180,until:15,absences:[11,12,13,14,15]},
+  ],'les échéances 30/60/90/180 jours sont comparées aux soirées à J+35 sans cycle inclus de trop');
 });
 
 test('MGMT soirée — calculée une seule fois : recharger après la soirée ne change aucun résultat', () => {

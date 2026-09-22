@@ -15,7 +15,7 @@
    - un adversaire disparu du roster ne casse pas l'historique de celui qui
      reste : l'adversaire est une référence copiée dans la trace, jamais une
      garantie ;
-   - la migration 5 → 6 : une sauvegarde d'avant le lot se charge sans perte ;
+   - les migrations 5 → 6 et 6 → 7 : une sauvegarde antérieure se charge sans perte ;
    - validateMgmt refuse un historique structurellement faux, mgmtRepair
      écarte une entrée illisible sans bloquer le chargement.
 
@@ -226,9 +226,9 @@ test('MGMT trace — migration 5 → 6 sans perte : une sauvegarde d\u2019avant 
   };
   const etatV5 = JSON.stringify(sansVersionEtTrace(v5Raw));
   const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v5Raw)}))))`));
-  assert.equal(mig.v, win.eval(`MGMT_SAVE_VERSION`), 'tampon de la version courante (v6)');
+  assert.equal(mig.v, win.eval(`MGMT_SAVE_VERSION`), 'tampon de la version courante');
   assert.deepEqual(mig.hist, [], 'la trace démarre vide : les combats d\u2019avant le lot n\u2019ont rien laissé à migrer (C3)');
-  assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`), true, 'la v5 migrée passe la porte v6');
+  assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`), true, 'la v5 migrée passe la porte courante');
   /* La même v5 se charge depuis le stockage dédié. */
   win.localStorage.setItem('cage-legacy-mgmt', JSON.stringify(v5Raw));
   win.eval(`G.mgmt=null; loadMgmt();`);
@@ -240,9 +240,31 @@ test('MGMT trace — migration 5 → 6 sans perte : une sauvegarde d\u2019avant 
   })()`));
   /* Sans perte : tout ce que la v5 portait est intact, à la version et à la
      trace près (vide par construction). */
-  assert.equal(apres.v, win.eval(`MGMT_SAVE_VERSION`), 'la v5 se charge en v6');
+  assert.equal(apres.v, win.eval(`MGMT_SAVE_VERSION`), 'la v5 se charge en version courante');
   assert.deepEqual(apres.hist, [], 'hist:[] au chargement');
   assert.equal(apres.etat, etatV5, 'roster, carte, argent, affaires, soirée : tout ce que la v5 portait est intact');
+});
+
+test('MGMT corps — migration 6 → 7 : décision Anthony 22/09, part acquise et temps complètent les traces', () => {
+  const win = newGameWindow();
+  freshMgmt(win,20260927);
+  assert.ok(joueSoiree(win),'une soirée a été jouée pour produire corps et traces');
+  const v6 = JSON.parse(win.eval(`(function(){
+    const raw=JSON.parse(JSON.stringify(G.mgmt));
+    raw.v=6;
+    for(const o of raw.roster) delete o.traumaFloor;
+    for(const x of raw.hist){
+      for(const t of [x.a,x.b]){ delete t.traumaFloor; delete t.lastCycle; }
+    }
+    return JSON.stringify(raw);
+  })()`));
+  const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v6)}))))`));
+  assert.equal(mig.v,win.eval(`MGMT_SAVE_VERSION`),'la v6 atteint la version courante');
+  assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`),true,'la v6 complétée passe validateMgmt');
+  assert.ok(mig.roster.filter(o=>o.trauma!==undefined).every(o=>Number.isFinite(o.traumaFloor)&&o.traumaFloor<=o.trauma),
+    'chaque corps existant reçoit une part acquise bornée par son total');
+  assert.ok(mig.hist.every(x=>x.a.traumaFloor===null&&x.a.lastCycle===null&&x.b.traumaFloor===null&&x.b.lastCycle===null),
+    'les anciennes traces signalent explicitement les deux informations absentes');
 });
 
 /* ---- Tâche 5 : validateMgmt refuse un historique structurellement faux --- */
@@ -270,6 +292,8 @@ test('MGMT trace — validateMgmt refuse un historique structurellement faux, mg
     ['instantané A sans nom', x => { delete x.a.name; }],
     ['instantané A sans id', x => { delete x.a.id; }],
     ['instantané A traumatisme hors bornes', x => { x.a.trauma=101; }],
+    ['instantané A part acquise hors bornes', x => { x.a.traumaFloor=101; }],
+    ['instantané A dernier cycle invalide', x => { x.a.lastCycle='hier'; }],
     ['instantané A bilan négatif', x => { x.a.W=-1; }],
     ['instantané A catégorie inconnue', x => { x.a.div='Z-nulle'; }],
     ['instantané B absent', x => { delete x.b; }],

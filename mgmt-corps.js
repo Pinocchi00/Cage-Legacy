@@ -2,7 +2,7 @@
 /* CAGE LEGACY — mgmt-corps.js
    ============================================================================
    MODE MANAGEMENT — le corps et la soirée : état physique caché (traumatisme
-   0-100, ne descend jamais), dérivation sans rnd pour les niveau 1, profil
+   0-100, récupération lente au repos avec une part acquise), dérivation sans rnd pour les niveau 1, profil
    de combat régénéré à l'identique (SEED sauvegardé puis restauré),
    couplage au moteur sans le modifier (simulateFight appelé, jamais édité),
    conséquences (blessures, suspensions, fin de carrière médicale), soirée
@@ -23,8 +23,9 @@
    ============================================================================ */
 
 /* ==== [ANCRE: MGMT_LOT3A_CORPS] — Lot 3a le corps et la soirée : état
-   physique caché (traumatisme 0-100, ne descend jamais), dérivation sans
-   rnd pour les niveau 1, profil de combat régénéré à l'identique (SEED
+   physique caché (traumatisme 0-100, récupération lente au repos avec une
+   part acquise), dérivation sans rnd pour les niveau 1, profil de combat
+   régénéré à l'identique (SEED
    sauvegardé puis restauré), couplage au moteur sans le modifier
    (simulateFight appelé, jamais édité), conséquences (blessures,
    suspensions, fin de carrière médicale) et soirée calculée en une fois.
@@ -33,7 +34,9 @@
 const MGMT_TRAUMA_MAX=100;
 const MGMT_TRAUMA_START_CAP=85;
 const MGMT_KO_SHARE=26;
-const MGMT_KO_TRAUMA=19;
+const MGMT_KO_TRAUMA=2;
+const MGMT_TRAUMA_PERMANENT_SHARE=0.51;
+const MGMT_TRAUMA_RECOVERY_PER_CYCLE=5;
 const MGMT_CHIN_WEAR=0.55;
 const MGMT_CHIN_FLOOR=0.35;
 const MGMT_GAIN_CAP=45;
@@ -53,22 +56,49 @@ function mgmtHashId(s){
   return h>>>0;
 }
 
-/** Traumatisme d'une ligne (CDC §3, niveau 1 sans combat : rien n'est
- *  stocké). Si la ligne porte un champ trauma (déjà combattu sur la carte),
- *  le renvoyer ; sinon le dériver du bilan, de l'âge, du nombre de combats
- *  et d'un hachage de l'id — défaites par KO estimées, puis usure.
+/** Traumatisme initial d'une ligne (CDC §3, niveau 1 sans combat : rien
+ *  n'est stocké). Il est dérivé du bilan et d'un hachage de l'id : les KO
+ *  passés restent estimés, mais leur trace cicatrisée ne vaut plus une
+ *  blessure fraîche entière. L'âge relève du déclin, pas du traumatisme.
  *  Plafonné à 85 : personne ne commence retraité. Pur et déterministe.
  *  @returns {number} 0 à 100. */
-function mgmtTrauma(f){
+function mgmtInitialTrauma(f){
   if(!f) return 0;
-  if(typeof f.trauma==='number'&&Number.isFinite(f.trauma)) return clamp(f.trauma,0,MGMT_TRAUMA_MAX);
   const W=Number.isSafeInteger(f.W)?f.W:0, L=Number.isSafeInteger(f.L)?f.L:0, D=Number.isSafeInteger(f.D)?f.D:0;
   const fights=W+L+D;
-  const age=(typeof f.age==='number'&&Number.isFinite(f.age))?Math.floor(f.age):25;
   let ko=0;
   for(let i=0;i<L;i++){ if(mgmtHashId(f.id+'#'+i)%100<MGMT_KO_SHARE) ko++; }
-  const wear=Math.floor(Math.max(0,fights)/6)+Math.max(0,age-30);
+  const wear=Math.floor(Math.max(0,fights)/12);
   return Math.min(MGMT_TRAUMA_START_CAP,ko*MGMT_KO_TRAUMA+wear);
+}
+
+/** Part définitivement acquise. Les sauvegardes antérieures à la T1 ter
+ *  n'en portent pas : leur dérivation initiale devient alors le plancher,
+ *  borné par le total stocké. Pur. @returns {number} 0 à 100. */
+function mgmtTraumaFloor(f){
+  if(!f) return 0;
+  const initial=mgmtInitialTrauma(f);
+  if(typeof f.traumaFloor==='number'&&Number.isFinite(f.traumaFloor)){
+    return clamp(f.traumaFloor,0,MGMT_TRAUMA_MAX);
+  }
+  if(typeof f.trauma==='number'&&Number.isFinite(f.trauma)){
+    return Math.min(clamp(f.trauma,0,MGMT_TRAUMA_MAX),initial);
+  }
+  return initial;
+}
+
+/** Traumatisme courant. Après un combat, le total et sa part acquise sont
+ *  écrits une fois ; au repos, seule la lecture dérive la récupération du
+ *  nombre de cycles écoulés. Aucun cycle n'écrit la ligne. Pur et
+ *  déterministe. @returns {number} 0 à 100. */
+function mgmtTrauma(f,cycle){
+  if(!f) return 0;
+  if(typeof f.trauma!=='number'||!Number.isFinite(f.trauma)) return mgmtInitialTrauma(f);
+  const total=clamp(f.trauma,0,MGMT_TRAUMA_MAX);
+  const floor=Math.min(total,mgmtTraumaFloor(f));
+  if(!Number.isSafeInteger(cycle)||!Number.isSafeInteger(f.lastCycle)||cycle<=f.lastCycle) return total;
+  const recovered=(cycle-f.lastCycle)*MGMT_TRAUMA_RECOVERY_PER_CYCLE;
+  return clamp(Math.max(floor,total-recovered),0,MGMT_TRAUMA_MAX);
 }
 
 /** Retrouve un niveau makeFighter en inversant correlatedRecord()
@@ -116,9 +146,9 @@ function mgmtTraumaFactor(t){
 /** Clone prêt à combattre : profil régénéré, copié en profondeur, attributs
  *  attrs.chin (engine.js:97, eff() en :413) et attrs.durability (engine.js:97,
  *  eff() en :423) réduits selon le traumatisme. À 0, le clone est inchangé. */
-function mgmtFightReady(f){
+function mgmtFightReady(f,cycle){
   const c=JSON.parse(JSON.stringify(mgmtCombatProfile(f)));
-  const k=mgmtTraumaFactor(mgmtTrauma(f));
+  const k=mgmtTraumaFactor(mgmtTrauma(f,cycle));
   if(k!==1&&c&&c.attrs){
     c.attrs.chin=Math.max(1,Math.round(num(c.attrs.chin)*k));
     c.attrs.durability=Math.max(1,Math.round(num(c.attrs.durability)*k));
@@ -136,8 +166,9 @@ function mgmtFightReady(f){
      mgmtApplyFight — donc rejouer sur les lignes d'aujourd'hui ne redonne
      pas le combat d'hier. mgmtFightReady ne lit sur une ligne que l'id (qui
      sème le profil régénéré et la dérivation du traumatisme), la catégorie,
-     l'âge, le bilan W/L/D, le traumatisme éventuel et les noms (cités par le
-     déroulé du moteur) — l'instantané capture exactement ces champs ;
+      l'âge, le bilan W/L/D, le traumatisme éventuel, sa part acquise, le
+      cycle du dernier combat et les noms (cités par le déroulé du moteur) —
+      l'instantané capture exactement ces champs ;
    - la valeur de SEED à l'instant de l'appel de simulateFight. Vérifié ligne
      à ligne dans engine-combat.js (simulateFight :618-2258) : tous les
      tirages passent par rnd() (pick/RI/gauss compris), G n'est lu que par
@@ -157,14 +188,16 @@ function mgmtFightReady(f){
  *  mgmtFightReady lit pour reconstruire le combattant prêt — l'identité
  *  (l'id sème le profil régénéré et la dérivation du traumatisme ; les noms
  *  sont cités dans le déroulé), la catégorie, l'âge, le bilan (niveau dérivé
- *  et dérivation du traumatisme) et le traumatisme de l'instant. trauma:null
- *  = champ absent à cet instant : la dérivation déterministe W/L/D/âge/id
- *  reproduira la valeur d'alors. Pur, ne consomme jamais rnd().
+ *  et dérivation du traumatisme), le traumatisme de l'instant, sa part
+ *  acquise et le cycle du dernier combat. null = champ absent à cet instant.
+ *  Pur, ne consomme jamais rnd().
  *  @returns {object} */
 function mgmtTraceSide(f){
   return {id:f.id,name:f.name,first:f.first,last:f.last,div:f.div,age:f.age,
     W:f.W,L:f.L,D:f.D,
-    trauma:(typeof f.trauma==='number'&&Number.isFinite(f.trauma))?f.trauma:null};
+    trauma:(typeof f.trauma==='number'&&Number.isFinite(f.trauma))?f.trauma:null,
+    traumaFloor:(typeof f.traumaFloor==='number'&&Number.isFinite(f.traumaFloor))?f.traumaFloor:null,
+    lastCycle:Number.isSafeInteger(f.lastCycle)?f.lastCycle:null};
 }
 
 /** Reconstitue la ligne d'avant combat depuis son instantané : l'état exact
@@ -173,6 +206,8 @@ function mgmtTraceSide(f){
 function mgmtTraceLine(t){
   const f={id:t.id,name:t.name,first:t.first,last:t.last,div:t.div,age:t.age,W:t.W,L:t.L,D:t.D};
   if(t.trauma!==null) f.trauma=t.trauma;
+  if(t.traumaFloor!==null) f.traumaFloor=t.traumaFloor;
+  if(t.lastCycle!==null) f.lastCycle=t.lastCycle;
   return f;
 }
 
@@ -190,7 +225,7 @@ function mgmtReplayFight(t){
   let res;
   try{
     setSeed(t.seed);
-    res=simulateFight(mgmtFightReady(mgmtTraceLine(t.a)),mgmtFightReady(mgmtTraceLine(t.b)),t.rounds);
+    res=simulateFight(mgmtFightReady(mgmtTraceLine(t.a),t.c),mgmtFightReady(mgmtTraceLine(t.b),t.c),t.rounds);
   }finally{
     setSeed(saved);
   }
@@ -225,9 +260,10 @@ function mgmtMethodFamily(method,winner){
  *  encaissé, engine-combat.js:1690-1691,1730), K les knockdowns encaissés
  *  (res.stats[side].wobbled — res.stats[side].kd compte ceux qu'il a
  *  infligés, engine-combat.js:1768,1774). Déterministe, borné, jamais
- *  négatif : le traumatisme ne descend jamais. */
+ *  négatif : un combat ne fait jamais descendre le total courant. */
 function mgmtTraumaGain(method,fam,issue,H,K){
   const h=Math.max(0,Math.round(num(H))), k=Math.max(0,Math.round(num(K)));
+  if(issue==='win'&&h===0&&k===0) return 0;
   let g;
   if(issue==='loss'){
     if(fam==='ko') g=11+k*3+Math.floor(h/15);
@@ -251,6 +287,14 @@ function mgmtInjuryDays(name){
   if(name.indexOf('Fracture')>=0) return 90;
   if(name.indexOf('Entorse')>=0) return 60;
   return 0;
+}
+
+/** Dernier cycle où une suspension est encore active. Une soirée est
+ *  espacée de MGMT_EVENT_WEEKS : si l'échéance en jours tombe avant la
+ *  soirée suivante, le combattant y est disponible. Pur. */
+function mgmtSuspensionUntil(cycle,days){
+  const spans=Math.max(1,Math.ceil(Math.max(0,days)/(MGMT_EVENT_WEEKS*7)));
+  return cycle+spans-1;
 }
 
 /** Disponibilité pour une proposition : ni retraité médical, ni suspendu
@@ -294,9 +338,13 @@ function mgmtApplyFight(m,f,opp,res,side){
   const K=st?Math.max(0,Math.round(num(st.wobbled))):0;
   const fam=mgmtMethodFamily(res.method,res.winner);
   const issue=res.winner==='D'?'draw':(res.winner===side?'win':'loss');
-  const T0=mgmtTrauma(f);
-  const T1=Math.min(MGMT_TRAUMA_MAX,T0+mgmtTraumaGain(res.method,fam,issue,H,K));
+  const T0=mgmtTrauma(f,m.cycle);
+  const gain=mgmtTraumaGain(res.method,fam,issue,H,K);
+  const T1=Math.min(MGMT_TRAUMA_MAX,T0+gain);
+  const floor0=mgmtTraumaFloor(f);
   f.trauma=Math.max(T0,T1);
+  f.traumaFloor=Math.min(f.trauma,Math.min(MGMT_TRAUMA_MAX,
+    floor0+gain*MGMT_TRAUMA_PERMANENT_SHARE));
   /* Lot 2 T1 : dernier combat sous Split, écrit ici où le lot 3a écrit déjà
      le traumatisme. Absent = n'a jamais combattu sous Split. */
   f.lastCycle=m.cycle;
@@ -317,7 +365,7 @@ function mgmtApplyFight(m,f,opp,res,side){
   if(issue==='loss'&&res.method==='Arrêt médical') days=Math.max(days,30);
   if(fam==='dec'&&H>=MGMT_HEAD_SUSP) days=Math.max(days,30);
   if(days>0){
-    const until=m.cycle+Math.max(1,Math.ceil(days/(MGMT_EVENT_WEEKS*7)));
+    const until=mgmtSuspensionUntil(m.cycle,days);
     f.susp=Math.max(Number.isSafeInteger(f.susp)?f.susp:0,until);
   }
   let retired=false;
@@ -379,7 +427,7 @@ function mgmtRunEvent(m){
        intact, aucun reseingage par combat). */
     const traceA=mgmtTraceSide(fa), traceB=mgmtTraceSide(fb);
     const seedFight=SEED;
-    const res=simulateFight(mgmtFightReady(fa),mgmtFightReady(fb),3);
+    const res=simulateFight(mgmtFightReady(fa,m.cycle),mgmtFightReady(fb,m.cycle),3);
     const fam=mgmtMethodFamily(res.method,res.winner);
     const roundF=Number.isSafeInteger(res.round)?res.round:3;
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF});

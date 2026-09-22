@@ -59,8 +59,11 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    régénère). Migration 5 → 6 sans perte : hist:[], les lignes du roster ne
    changent pas (mgmtMigrate). Rien ne s'efface : la décision de tronquer
    l'historique appartient à l'auteur (même esprit que la QO-9 du 21/09
-   pour les faits). Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=6;
+   pour les faits). Lot 2B T1 ter : v7 ajoute au corps la part acquise
+   (traumaFloor) et complète les instantanés de trace avec traumaFloor et
+   lastCycle pour que la récupération temporelle reste rejouable. Migration
+   6 → 7 sans perte. Une v1 reste refusée. ==== */
+const MGMT_SAVE_VERSION=7;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
