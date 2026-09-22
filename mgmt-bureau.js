@@ -248,9 +248,9 @@ function mgmtEligiblePairs(m,usedFirsts,seen,lastDiv,run){
  */
 function mgmtNewPile(m){
   if(!Array.isArray(m.roster)||m.roster.length<2) mgmtNewRoster(m);
-  /* Lot 2B T1 : le monde extérieur existe dès l'ouverture du bureau, et un
-     flux dérivé de nouveaux combattants entre à chaque cycle — sans
-     consommer un seul tirage de la RNG du jeu (ancre MGMT_LOT2B_EXTERIEUR). */
+  /* Lot 2B T1 bis : la cohorte et les remplaçants complètent le cycle
+     courant avant son incrément. Le même état réparé au chargement produit
+     ainsi exactement les mêmes lignes qu'une partie continuée. */
   mgmtExteriorEnsure(m);
   m.cycle++;
   mgmtExteriorArrive(m);

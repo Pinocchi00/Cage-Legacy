@@ -381,25 +381,62 @@ function mgmtCartRows(m){
    de l'état courant, jamais stocké sur la ligne (règle du bureau, CDC §3).
    Ordre : victoires − défaites, puis victoires, puis dernier combat sous
    Split (le plus actif devant). Les suspendus gardent leur rang, les
-   retraités médicaux sortent du classement. ==== */
+   retraités médicaux sortent du classement.
+   Lot 2B T1 bis : la même loi dessert deux portées — organisation (roster
+   seul, portée historique par défaut) et monde (roster + extérieur). Le
+   bilan et la récence extérieurs sont dérivés à la lecture, jamais écrits
+   sur leur ligne. ==== */
+
+/** L'unique loi de classement : écart W-L, victoires, récence. */
+function mgmtRankingCompare(x,y){
+  const xd=(Number.isSafeInteger(x.W)?x.W:0)-(Number.isSafeInteger(x.L)?x.L:0);
+  const yd=(Number.isSafeInteger(y.W)?y.W:0)-(Number.isSafeInteger(y.L)?y.L:0);
+  if(xd!==yd) return yd-xd;
+  const xw=Number.isSafeInteger(x.W)?x.W:0, yw=Number.isSafeInteger(y.W)?y.W:0;
+  if(xw!==yw) return yw-xw;
+  const xc=Number.isSafeInteger(x.lastCycle)?x.lastCycle:-1;
+  const yc=Number.isSafeInteger(y.lastCycle)?y.lastCycle:-1;
+  if(xc!==yc) return yc-xc;
+  /* Une égalité parfaite doit garder des rangs positionnels stables quand
+     une ligne passe de l'extérieur au roster. L'id ne départage jamais deux
+     bilans ou récences différents. */
+  const xi=String(x.id), yi=String(y.id);
+  return xi<yi?-1:(xi>yi?1:0);
+}
+
+/** Population classée d'une catégorie. La portée `organization` ne lit que
+ *  Split ; `world` y ajoute des vues éphémères des lignes extérieures.
+ *  @returns {Array} */
+function mgmtDivisionRanking(m,divId,scope){
+  if(!m||!Array.isArray(m.roster)||!divById(divId)) return [];
+  if(scope!=='organization'&&scope!=='world') return [];
+  const cands=m.roster.filter(o=>o&&o.div===divId&&o.retired!=='medical');
+  if(scope==='world'&&Array.isArray(m.exterieur)){
+    const rosterIds=new Set(cands.map(o=>o.id));
+    for(const line of m.exterieur){
+      if(!line||line.div!==divId||rosterIds.has(line.id)) continue;
+      const trace=mgmtExteriorTrace(line,m.cycle);
+      if(!trace) continue;
+      const last=trace.orgs.length>0?trace.orgs[trace.orgs.length-1].to:null;
+      cands.push({id:line.id,div:line.div,W:trace.pro.W,L:trace.pro.L,
+        lastCycle:Number.isSafeInteger(last)?last:-1});
+    }
+  }
+  cands.sort(mgmtRankingCompare);
+  return cands;
+}
+
 /** Rang d'une ligne dans sa catégorie (1..n). Pur : ne trie que des copies,
  *  n'écrit jamais sur la ligne, ne consomme pas rnd() (comparaison de
  *  champs entiers seulement). Retraité médical : hors classement (null).
+ *  Portée omise : classement de l'organisation, comportement historique.
+ *  Portée `world` : classement mondial, Split et extérieur ensemble.
  *  @returns {number|null} */
-function mgmtDivisionRank(m,f){
+function mgmtDivisionRank(m,f,scope){
   if(!m||!f||!Array.isArray(m.roster)) return null;
   if(f.retired==='medical') return null;
-  const cands=m.roster.filter(o=>o&&o.div===f.div&&o.retired!=='medical');
-  const key=o=>({
-    d:(Number.isSafeInteger(o.W)?o.W:0)-(Number.isSafeInteger(o.L)?o.L:0),
-    w:Number.isSafeInteger(o.W)?o.W:0,
-    c:Number.isSafeInteger(o.lastCycle)?o.lastCycle:-1});
-  cands.sort((x,y)=>{
-    const a=key(x), b=key(y);
-    if(a.d!==b.d) return b.d-a.d;
-    if(a.w!==b.w) return b.w-a.w;
-    return b.c-a.c;
-  });
+  const resolved=scope===undefined?'organization':scope;
+  const cands=mgmtDivisionRanking(m,f.div,resolved);
   const i=cands.findIndex(o=>o.id===f.id);
   return i>=0?i+1:null;
 }

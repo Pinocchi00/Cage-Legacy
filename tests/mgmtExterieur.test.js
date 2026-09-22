@@ -16,8 +16,11 @@
    - deux graines différentes ne donnent pas la même trace ;
    - les chiffres s'additionnent : victoires + défaites = combats, fins de
      combats = combats, combats des organisations = combats ;
-   - le flux : cohorte initiale au premier jour, entrants dérivés à chaque
-     cycle (aucun nombre fixe), sans un seul tirage de la RNG du jeu ;
+   - T1 bis : 30 vivants par catégorie, Split compris, à l'ouverture et
+      après 20 cycles, sans un seul tirage de la RNG du jeu ;
+   - les classements organisation et monde partagent la même loi ;
+   - recrutement, retraite médicale et anciennes sauvegardes maintiennent
+      le quota sans ajouter un champ aux lignes ;
    - persistance : validateMgmt / mgmtRepair sur le champ exterieur.
    ============================================================================ */
 const { test } = require('node:test');
@@ -28,11 +31,8 @@ const { newGameWindow } = require('./helpers/loadGame');
    droit de porter (ancre MGMT_LOT2B_EXTERIEUR). */
 const CLEFS_IDENTITE=['born','ck','div','id','seed'];
 
-/* Bande de la cohorte initiale (constantes du jeu, lues dans la fenêtre) :
-   MGMT_EXT_INIT_MIN à MIN+SPREAD-1 (mgmt-data.js, ancre
-   MGMT_LOT2B_EXTERIEUR_DONNEES). */
-function bornesCohorte(win){
-  return win.eval('({min:MGMT_EXT_INIT_MIN,spread:MGMT_EXT_INIT_SPREAD})');
+function quotaParCategorie(win){
+  return win.eval('MGMT_EXT_LIVE_PER_DIVISION');
 }
 
 /* Un état frais avec son monde : cohorte initiale + entrants jusqu'au cycle
@@ -46,41 +46,53 @@ function mondeFrais(win,cycles){
   })()`);
 }
 
-test('MGMT lot 2B T1 — cohorte initiale et flux : le monde existe au premier jour, entrants dérivés cycle par cycle', () => {
+test('MGMT lot 2B T1 bis — 30 vivants par catégorie à l’ouverture et après 20 cycles', () => {
   const win=newGameWindow();
-  const B=bornesCohorte(win);
+  const quota=quotaParCategorie(win);
   const r=win.eval(`(function(){
     setSeed(9001);
     const m=mgmtDefault();
     mgmtNewRoster(m);
     const seqAvant=m.seq;
     mgmtExteriorEnsure(m);
-    const cohorte=JSON.parse(JSON.stringify(m.exterieur));
+    const ouverture=allDivisions().map(d=>({id:d.id,vivants:mgmtWorldLivingCount(m,d.id),
+      split:m.roster.filter(o=>o.div===d.id&&o.retired!=='medical').length,
+      ext:m.exterieur.filter(o=>o.div===d.id).length}));
+    const clefs=m.exterieur.map(l=>Object.keys(l).sort().join(','));
     const seqApresCohorte=m.seq;
-    m.cycle=7; mgmtExteriorArrive(m);
-    m.cycle=8; mgmtExteriorArrive(m);
-    return {cohorte:cohorte,seqApresCohorte:seqApresCohorte,seqAvant:seqAvant,
-      apres:JSON.parse(JSON.stringify(m.exterieur.slice(cohorte.length))),
-      total:m.exterieur.length};
+    for(let c=1;c<=20;c++){ m.cycle=c; mgmtExteriorArrive(m); }
+    const apres20=allDivisions().map(d=>mgmtWorldLivingCount(m,d.id));
+    return {ouverture:ouverture,apres20:apres20,clefs:clefs,
+      seqApresCohorte:seqApresCohorte,seqAvant:seqAvant,total:m.roster.length+m.exterieur.length};
   })()`);
-  assert.ok(r.cohorte.length>=B.min&&r.cohorte.length<B.min+B.spread,
-    `la cohorte initiale est dans la bande ${B.min}..+${B.spread} (mesuré : ${r.cohorte.length})`);
-  for(const l of r.cohorte){ assert.deepEqual(Object.keys(l).sort(),CLEFS_IDENTITE,'une ligne ne porte que son identité'); assert.equal(l.born,0,'la cohorte initiale entre au cycle 0'); }
-  assert.equal(r.seqApresCohorte,r.seqAvant+r.cohorte.length,'les identifiants viennent du compteur de la partie');
-  assert.ok(r.total>=r.cohorte.length&&r.total<=r.cohorte.length+2*3,'le flux ajoute 0 à 3 entrants par cycle (aucun nombre fixe)');
-  for(const l of r.apres){ assert.deepEqual(Object.keys(l).sort(),CLEFS_IDENTITE,'une ligne d\'entrant ne porte que son identité'); assert.ok(l.born===7||l.born===8,'un entrant porte le cycle où il entre dans le monde'); }
+  assert.equal(r.ouverture.length,12,'les douze catégories sont couvertes');
+  for(const d of r.ouverture){
+    assert.equal(d.vivants,quota,`${d.id} : quota mondial exact à l’ouverture`);
+    assert.equal(d.split+d.ext,quota,`${d.id} : Split et extérieur s’additionnent`);
+  }
+  assert.ok(r.apres20.every(n=>n===quota),'les douze catégories tiennent le quota après 20 cycles');
+  assert.ok(r.clefs.every(k=>k===CLEFS_IDENTITE.join(',')),'chaque ligne extérieure ne porte que son identité');
+  assert.equal(r.seqApresCohorte-r.seqAvant,r.ouverture.reduce((n,d)=>n+d.ext,0),'les identifiants viennent du compteur de la partie');
+  assert.equal(r.total,quota*12,'à effectif vivant inchangé, 360 lignes mondiales suffisent');
 });
 
-test('MGMT lot 2B T1 — le flux ne dépend pas de la RNG du jeu : même cycle, même entrants, seedés ou non', () => {
+test('MGMT lot 2B T1 bis — compléter une catégorie ne dépend pas de la RNG du jeu', () => {
   const win=newGameWindow();
-  const a=win.eval(`(function(){ setSeed(11); const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=5; mgmtExteriorArrive(m); return {n:m.exterieur.length,ids:m.exterieur.map(l=>l.id),borns:m.exterieur.map(l=>l.born)}; })()`);
-  const b=win.eval(`(function(){ setSeed(999999); const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=5; mgmtExteriorArrive(m); return {n:m.exterieur.length,ids:m.exterieur.map(l=>l.id),borns:m.exterieur.map(l=>l.born)}; })()`);
-  /* Les entrants d'un cycle sont dérivés du cycle (jamais d'un quota, jamais
-     de la RNG du jeu) : seuls les identifiants — issus du compteur de la
-     partie, donc de la taille du roster généré avant eux — peuvent différer
-     d'une graine à l'autre ; le COMPTE et les cycles d'entrée non. */
-  assert.equal(a.n,b.n,'même cycle → même nombre d\'entrants');
-  assert.deepEqual(a.borns,b.borns,'même cycle → mêmes cycles d\'entrée');
+  const r=win.eval(`(function(){
+    setSeed(11);
+    const base=mgmtDefault(); mgmtNewRoster(base); mgmtExteriorEnsure(base);
+    const retire=base.roster.find(o=>o.retired!=='medical'); retire.retired='medical'; base.cycle=5;
+    const a=JSON.parse(JSON.stringify(base)), b=JSON.parse(JSON.stringify(base));
+    setSeed(123); const rngA=rnd(); setSeed(123); mgmtExteriorArrive(a); const apresA=rnd();
+    setSeed(999999); mgmtExteriorArrive(b);
+    return {a:JSON.stringify(a.exterieur),b:JSON.stringify(b.exterieur),rng:rngA===apresA,
+      born:a.exterieur[a.exterieur.length-1].born,div:retire.div,
+      vivants:mgmtWorldLivingCount(a,retire.div)};
+  })()`);
+  assert.equal(r.a,r.b,'même état du monde → mêmes entrants malgré deux états de RNG différents');
+  assert.ok(r.rng,'le remplissage ne consomme aucun tirage de la RNG du jeu');
+  assert.equal(r.born,5,'le remplaçant porte le cycle où il entre dans le monde');
+  assert.equal(r.vivants,quotaParCategorie(win),`${r.div} revient à 30 vivants`);
 });
 
 test('MGMT lot 2B T1 — la trace est déterministe : deux lectures d\'affilée donnent exactement la même chose', () => {
@@ -239,6 +251,144 @@ test('MGMT lot 2B T1 — trajectoire lisible : la trace raconte des carrières d
   assert.ok(typeof ex.age==='number'&&ex.age>=bornes.ageMin,'l\'âge courant est dérivé, pas stocké');
 });
 
+test('MGMT lot 2B T1 bis — deux classements, une seule loi : organisation et monde', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    const mk=(id,W,L,lastCycle)=>({id:id,name:id,first:id,last:'Test',W:W,L:L,D:0,age:27,
+      div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0,lastCycle:lastCycle});
+    const m=mgmtDefault();
+    m.roster=[mk('split-a',14,2,4),mk('split-b',12,3,8),mk('split-c',14,2,4)];
+    m.seq=100; m.cycle=10; mgmtExteriorEnsure(m);
+    const ext=m.exterieur.find(o=>o.div==='H-light');
+    const avant=JSON.stringify({roster:m.roster,exterieur:m.exterieur});
+    const orgA=mgmtDivisionRank(m,m.roster[0]);
+    const orgB=mgmtDivisionRank(m,m.roster[1]);
+    const worldA=mgmtDivisionRank(m,m.roster[0],'world');
+    const worldB=mgmtDivisionRank(m,m.roster[1],'world');
+    const orgC=mgmtDivisionRank(m,m.roster[2]);
+    const worldC=mgmtDivisionRank(m,m.roster[2],'world');
+    const worldExt=mgmtDivisionRank(m,ext,'world');
+    const orgExt=mgmtDivisionRank(m,ext);
+    return {orgA:orgA,orgB:orgB,orgC:orgC,worldA:worldA,worldB:worldB,worldC:worldC,worldExt:worldExt,orgExt:orgExt,
+      orgN:mgmtDivisionRanking(m,'H-light','organization').length,
+      worldN:mgmtDivisionRanking(m,'H-light','world').length,
+      intact:avant===JSON.stringify({roster:m.roster,exterieur:m.exterieur})};
+  })()`);
+  assert.equal(r.orgN,3,'le classement de l’organisation ne contient que Split');
+  assert.equal(r.worldN,quotaParCategorie(win),'le classement mondial contient Split et l’extérieur');
+  assert.ok(r.orgA<r.orgB&&r.worldA<r.worldB,'deux combattants de Split gardent le même ordre relatif dans les deux portées');
+  assert.notEqual(r.orgA,r.orgC,'une égalité parfaite garde deux rangs positionnels distincts dans Split');
+  assert.notEqual(r.worldA,r.worldC,'une égalité parfaite garde deux rangs positionnels distincts dans le monde');
+  assert.ok(Number.isSafeInteger(r.worldExt),'une ligne extérieure reçoit un rang mondial dérivé');
+  assert.equal(r.orgExt,null,'une ligne extérieure n’entre pas au classement de Split');
+  assert.ok(r.intact,'calculer les deux classements n’écrit sur aucune ligne');
+});
+
+test('MGMT lot 2B T1 bis — recruter ne déplace pas le rang mondial et ne vide pas la catégorie', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    setSeed(20260922);
+    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=1; mgmtExteriorEnsure(m);
+    let choisi=null, trace=null, last=-1;
+    for(const line of m.exterieur){
+      const t=mgmtExteriorTrace(line,m.cycle);
+      const lc=t.orgs.length?t.orgs[t.orgs.length-1].to:-1;
+      if(Number.isSafeInteger(lc)&&lc<0){ choisi=line; trace=t; last=lc; break; }
+    }
+    if(!choisi) return {erreur:'aucune récence extérieure négative'};
+    const avant=mgmtDivisionRank(m,choisi,'world');
+    const totalAvant=mgmtWorldLivingCount(m,choisi.div);
+    const extAvant=m.exterieur.filter(o=>o.div===choisi.div).length;
+    m.exterieur=m.exterieur.filter(o=>o.id!==choisi.id);
+    const recrute={id:choisi.id,name:trace.name,first:trace.first,last:trace.last,
+      W:trace.pro.W,L:trace.pro.L,D:0,age:trace.age,div:choisi.div,
+      divName:divById(choisi.div).name,org:MGMT_ORG,level:1,raison:null,interactions:0,lastCycle:last};
+    m.roster.push(recrute);
+    mgmtExteriorArrive(m);
+    return {avant:avant,apres:mgmtDivisionRank(m,recrute,'world'),
+      totalAvant:totalAvant,totalApres:mgmtWorldLivingCount(m,choisi.div),
+      extAvant:extAvant,extApres:m.exterieur.filter(o=>o.div===choisi.div).length,
+      last:last,valide:validateMgmt(m),
+      clefs:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,id,seed')};
+  })()`);
+  assert.equal(r.erreur,undefined,'la fixture couvre un dernier combat antérieur au cycle 0');
+  assert.equal(r.apres,r.avant,'changer de maison ne change pas le rang mondial');
+  assert.ok(r.last<0,'la récence extérieure négative reste exacte');
+  assert.ok(r.valide,'la recrue et sa récence passent la porte de sauvegarde');
+  assert.equal(r.totalAvant,quotaParCategorie(win));
+  assert.equal(r.totalApres,quotaParCategorie(win),'la catégorie reste pleine, Split compris');
+  assert.equal(r.extApres,r.extAvant-1,'l’extérieur cède une ligne à Split sans recréer un doublon');
+  assert.ok(r.clefs,'aucune ligne extérieure ne gagne un champ pendant le recrutement');
+});
+
+test('MGMT lot 2B T1 bis — un retraité médical sort des deux classements et du quota', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    setSeed(444);
+    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=7; mgmtExteriorEnsure(m);
+    const f=m.roster.find(o=>mgmtDivisionRank(m,o)!==null);
+    const extAvant=m.exterieur.length;
+    f.retired='medical';
+    const creux=mgmtWorldLivingCount(m,f.div);
+    mgmtExteriorArrive(m);
+    return {org:mgmtDivisionRank(m,f),world:mgmtDivisionRank(m,f,'world'),creux:creux,
+      plein:mgmtWorldLivingCount(m,f.div),ajouts:m.exterieur.length-extAvant,
+      born:m.exterieur[m.exterieur.length-1].born};
+  })()`);
+  assert.equal(r.org,null,'le retraité sort du classement de Split');
+  assert.equal(r.world,null,'le retraité sort du classement mondial');
+  assert.equal(r.creux,quotaParCategorie(win)-1,'le retraité ne compte plus parmi les vivants');
+  assert.equal(r.plein,quotaParCategorie(win),'l’extérieur complète la place libérée');
+  assert.equal(r.ajouts,1,'une ligne nouvelle, aucune ligne morte supprimée');
+  assert.equal(r.born,7,'la nouvelle ligne porte le cycle courant');
+});
+
+test('MGMT lot 2B T1 bis — après une retraite, continuer ou recharger crée le même remplaçant', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    setSeed(445);
+    const base=mgmtDefault(); mgmtNewRoster(base); base.cycle=6; mgmtExteriorEnsure(base);
+    base.roster[0].retired='medical';
+    const continuee=JSON.parse(JSON.stringify(base));
+    mgmtExteriorEnsure(continuee);
+    localStorage.setItem(MGMT_KEY,JSON.stringify(base));
+    G={theme:'dark'};
+    const charge=loadMgmt();
+    return {charge:charge,
+      continuee:JSON.stringify(continuee.exterieur),
+      rechargee:JSON.stringify(G.mgmt.exterieur),
+      seqContinuee:continuee.seq,seqRechargee:G.mgmt.seq};
+  })()`);
+  assert.ok(r.charge,'la sauvegarde creusée par la retraite se charge');
+  assert.equal(r.rechargee,r.continuee,'la réparation et la continuation dérivent la même identité');
+  assert.equal(r.seqRechargee,r.seqContinuee,'le compteur avance de façon identique');
+});
+
+test('MGMT lot 2B T1 bis — une soirée rétablit le quota avant de sauvegarder ses retraites', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    setSeed(446);
+    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=4; mgmtExteriorEnsure(m);
+    G={theme:'dark',mgmt:m};
+    const pris=m.roster.slice(0,18);
+    for(const f of pris) f.trauma=MGMT_TRAUMA_MAX;
+    m.card.main=[]; m.card.prelims=[];
+    for(let i=0;i<5;i++) m.card.main.push({a:pris[i*2].id,b:pris[i*2+1].id,cycle:m.cycle,slot:'main'});
+    for(let i=5;i<9;i++) m.card.prelims.push({a:pris[i*2].id,b:pris[i*2+1].id,cycle:m.cycle,slot:'prelim'});
+    const event=mgmtRunEvent(m);
+    const saved=JSON.parse(localStorage.getItem(MGMT_KEY));
+    return {event:!!event,retraites:m.roster.filter(o=>o.retired==='medical').length,
+      memoire:allDivisions().map(d=>mgmtWorldLivingCount(m,d.id)),
+      disque:allDivisions().map(d=>mgmtWorldLivingCount(saved,d.id))};
+  })()`);
+  assert.ok(r.event,'la soirée complète est jouée');
+  assert.ok(r.retraites>0,'la fixture produit des retraites médicales');
+  assert.ok(r.memoire.every(n=>n===quotaParCategorie(win)),
+    `le monde en mémoire est complet dès la fin de soirée (${r.memoire.join(',')})`);
+  assert.ok(r.disque.every(n=>n===quotaParCategorie(win)),
+    `la sauvegarde de la soirée est déjà complète (${r.disque.join(',')})`);
+});
+
 test('MGMT lot 2B T1 — persistance : validateMgmt accepte le vivier, refuse une ligne qui porterait plus que son identité', () => {
   const win=newGameWindow();
   const ok=win.eval(`(function(){
@@ -265,9 +415,9 @@ test('MGMT lot 2B T1 — persistance : validateMgmt accepte le vivier, refuse un
   assert.equal(ok.absente,true,'le champ est toléré absent (sauvegardes d\'avant le lot 2B)');
 });
 
-test('MGMT lot 2B T1 — mgmtRepair : le vivier se recadre, créé s\'il manque, épuré d\'une ligne illisible', () => {
+test('MGMT lot 2B T1 bis — mgmtRepair filtre puis complète les anciennes sauvegardes', () => {
   const win=newGameWindow();
-  const B2=bornesCohorte(win);
+  const quota=quotaParCategorie(win);
   const r=win.eval(`(function(){
     setSeed(88);
     const m=mgmtDefault(); mgmtNewRoster(m);
@@ -276,34 +426,47 @@ test('MGMT lot 2B T1 — mgmtRepair : le vivier se recadre, créé s\'il manque,
     m.exterieur[0].div='inconnu';
     const repare=mgmtRepair(m);
     const epure=repare.exterieur.length;
-    /* Sauvegarde d'avant le lot : pas de champ exterieur du tout. */
-    const ancienne=mgmtDefault(); ancienne.exterieur=undefined;
+    /* Sauvegarde d'avant la tranche : petit monde global et catégories
+       creuses, mais lignes T1 valides. */
+    const ancienne=mgmtDefault();
     mgmtNewRoster(ancienne);
-    mgmtRepair(ancienne);
-    return {avant:avant,epure:epure,recree:ancienne.exterieur?ancienne.exterieur.length:0,
+    mgmtExteriorEnsure(ancienne); ancienne.exterieur=ancienne.exterieur.slice(0,35);
+    const idsAvant=ancienne.exterieur.map(o=>o.id);
+    const valideAvant=validateMgmt(ancienne);
+    localStorage.setItem(MGMT_KEY,JSON.stringify(ancienne));
+    G={theme:'dark'};
+    const charge=loadMgmt();
+    return {avant:avant,epure:epure,valideAvant:valideAvant,charge:charge,
+      quotas:allDivisions().map(d=>mgmtWorldLivingCount(G.mgmt,d.id)),
+      conserve:idsAvant.every(id=>G.mgmt.exterieur.some(o=>o.id===id)),
       identite:repare.exterieur.every(l=>Object.keys(l).sort().join(',')==='born,ck,div,id,seed')};
   })()`);
-  assert.equal(r.epure,r.avant-1,'la ligne illisible est écartée, les autres restent');
-  assert.ok(r.recree>=B2.min,'une sauvegarde d\'avant le lot reçoit sa cohorte initiale');
+  assert.equal(r.epure,r.avant,'la ligne illisible est remplacée après filtrage pour tenir le quota');
+  assert.ok(r.valideAvant,'l’ancien petit monde passe validateMgmt avant réparation');
+  assert.ok(r.charge,'l’ancienne sauvegarde se charge par la porte normale');
+  assert.ok(r.quotas.every(n=>n===quota),'les catégories creuses sont complétées au chargement');
+  assert.ok(r.conserve,'aucune ligne valide de l’ancien monde n’est perdue');
   assert.ok(r.identite,'les lignes réparées ne portent toujours que leur identité');
 });
 
-test('MGMT lot 2B T1 — le bureau ouvre avec son monde : mgmtNewPile crée la cohorte et fait entrer le flux du cycle', () => {
+test('MGMT lot 2B T1 bis — le bureau ouvre à 30 par catégorie et remplace une retraite au cycle suivant', () => {
   const win=newGameWindow();
-  const B3=bornesCohorte(win);
+  const quota=quotaParCategorie(win);
   win.eval(`setSeed(66); CL.mgmtEnter();`);
   const r=win.eval(`(function(){
-    /* CL.mgmtEnter ouvre le premier cycle : le monde porte la cohorte
-       initiale (cycle 0) et les entrants de ce premier cycle. */
-    const cohortes=G.mgmt.exterieur.filter(l=>l.born===0).length;
-    const apresEntree=G.mgmt.exterieur.length;
-    const bornsEntree=G.mgmt.exterieur.map(l=>l.born);
+    const ouverture=allDivisions().map(d=>mgmtWorldLivingCount(G.mgmt,d.id));
+    const f=G.mgmt.roster.find(o=>o.retired!=='medical');
+    f.retired='medical';
+    const avant=G.mgmt.exterieur.length;
     mgmtNewPile(G.mgmt);
-    const entrantsCycle=G.mgmt.exterieur.filter(l=>l.born===G.mgmt.cycle).length;
-    return {cohortes:cohortes,apresEntree:apresEntree,bornsEntree:bornsEntree,
-      entrantsCycle:entrantsCycle,cycle:G.mgmt.cycle};
+    const cycleEntree=G.mgmt.cycle-1;
+    const entrantsCycle=G.mgmt.exterieur.filter(l=>l.born===cycleEntree).length;
+    return {ouverture:ouverture,ajouts:G.mgmt.exterieur.length-avant,
+      entrantsCycle:entrantsCycle,cycleEntree:cycleEntree,cycle:G.mgmt.cycle,
+      plein:mgmtWorldLivingCount(G.mgmt,f.div)};
   })()`);
-  assert.ok(r.cohortes>=B3.min,'la cohorte initiale existe à l\'ouverture du bureau');
-  assert.ok(r.bornsEntree.every(b=>b>=0&&b<=r.cycle),'chaque ligne porte un cycle d\'entrée cohérent (cohorte au 0, entrants aux cycles suivis)');
-  assert.ok(r.entrantsCycle>0,'les entrants du cycle portent le cycle courant comme entrée dans le monde');
+  assert.ok(r.ouverture.every(n=>n===quota),'le bureau ouvre avec douze catégories pleines');
+  assert.equal(r.ajouts,1,'la retraite crée exactement une place extérieure');
+  assert.equal(r.entrantsCycle,1,'le remplaçant porte le cycle de la retraite avant l’ouverture suivante');
+  assert.equal(r.plein,quota,'la catégorie est de nouveau pleine');
 });

@@ -181,12 +181,11 @@ const MGMT_EXT_ORGS=['Garden of Blood','MMA Korner','Ultimate Rim','Fighting Pac
    l'âge courant avance donc de MGMT_EVENT_WEEKS semaines par cycle. */
 const MGMT_EXT_YEAR_WEEKS=52;
 
-/* Population du monde à l'ouverture du bureau : la cohorte initiale (les
-   combattants qui existent déjà hors Split au premier jour). Le flux des
-   cycles suivants n'a PAS de nombre fixe (décision 2 du 21/09) : il se
-   dérive cycle par cycle. */
-const MGMT_EXT_INIT_MIN=28;
-const MGMT_EXT_INIT_SPREAD=8;
+/* Lot 2B T1 bis : le monde entier tient 30 combattants vivants dans chacune
+   des douze catégories, roster de Split compris. L'extérieur ne porte donc
+   pas un effectif propre : il complète exactement ce que Split ne fournit
+   pas dans la catégorie. */
+const MGMT_EXT_LIVE_PER_DIVISION=30;
 
 /* Âge à l'entrée dans le monde (MGMT_EXT_AGE_MIN à MIN+SPREAD-1) et âge de
    début de carrière amateur (les débuts, à 18-21 ans). */

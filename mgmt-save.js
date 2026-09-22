@@ -37,9 +37,10 @@ function mgmtValidLine(o){
   if(o.trauma!==undefined&&(!Number.isFinite(o.trauma)||o.trauma<0||o.trauma>MGMT_TRAUMA_MAX)) return false;
   if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) return false;
   if(o.retired!==undefined&&o.retired!=='medical') return false;
-  /* Lot 2 T1 : dernier combat sous Split — absent (jamais combattu) ou
-     entier positif. */
-  if(o.lastCycle!==undefined&&(!Number.isSafeInteger(o.lastCycle)||o.lastCycle<0)) return false;
+  /* Lot 2B T1 bis : dernier combat connu — absent (jamais combattu), cycle
+     Split positif, ou cycle extérieur négatif pour une recrue dont le
+     dernier combat précède l'ouverture de la partie. */
+  if(o.lastCycle!==undefined&&!Number.isSafeInteger(o.lastCycle)) return false;
   return true;
 }
 
@@ -275,12 +276,13 @@ function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(!Array.isArray(m.facts)) m.facts=[];
   while(m.facts.length>MGMT_FACTS_MAX) m.facts.shift();
-  /* Lot 2B T1 : le vivier extérieur se recadre comme le reste — créé s'il
-     manque (cohorte initiale, sauvegardes d'avant le lot), épuré des lignes
-     dont l'identité n'est pas valide. Une ligne écartée disparaît du monde :
-     sa trace était illisible, rien d'autre ne la référencait. */
+  /* Lot 2B T1 bis : le vivier extérieur se recadre comme le reste — épuré
+     d'abord des identités illisibles, puis complété jusqu'à 30 vivants dans
+     chaque catégorie, roster compris. Une sauvegarde d'avant la tranche est
+     donc réparée à la lecture, jamais refusée pour ses catégories creuses. */
+  if(!Array.isArray(m.exterieur)) m.exterieur=[];
+  else m.exterieur=m.exterieur.filter(e=>mgmtValidExteriorLine(e));
   mgmtExteriorEnsure(m);
-  if(Array.isArray(m.exterieur)) m.exterieur=m.exterieur.filter(e=>mgmtValidExteriorLine(e));
   /* Lot 3a §9 : le corps invalide ne bloque pas le chargement — on l'écarte
      (le traumatisme se re-dérive, la suspension et la retraite tombent) ; une
      soirée illisible est écartée (recharger ne rejoue rien d'invalide) ; un
@@ -291,7 +293,7 @@ function mgmtRepair(m){
         if(o.trauma!==undefined&&(!Number.isFinite(o.trauma)||o.trauma<0||o.trauma>MGMT_TRAUMA_MAX)) delete o.trauma;
         if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) delete o.susp;
         if(o.retired!==undefined&&o.retired!=='medical') delete o.retired;
-        if(o.lastCycle!==undefined&&(!Number.isSafeInteger(o.lastCycle)||o.lastCycle<0)) delete o.lastCycle;
+        if(o.lastCycle!==undefined&&!Number.isSafeInteger(o.lastCycle)) delete o.lastCycle;
       }
     }
   }
@@ -365,6 +367,10 @@ function mgmtParseAndValidate(raw){
 function saveMgmt(){
   if(!G||!G.mgmt) return;
   try{
+    /* Lot 2B T1 bis : les retraites de la soirée ont déjà été appliquées
+       quand elle se sauvegarde. Le quota est rétabli dans l'état vivant
+       avant sa sérialisation, jamais seulement dans la copie disque. */
+    mgmtExteriorEnsure(G.mgmt);
     const previous=localStorage.getItem(MGMT_KEY);
     if(mgmtParseAndValidate(previous)) localStorage.setItem(MGMT_BACKUP_KEY,previous);
     localStorage.setItem(MGMT_KEY,JSON.stringify(G.mgmt));
