@@ -317,15 +317,26 @@ exactement l'objectif du patron dans `SPLIT-CONTEXTE-DEPART.md` §8 (« entrer
 dans le top 5 des organisations », puis « passer top 3 ») et la place de Split,
 « au milieu, ni la plus grosse ni la plus mauvaise ».
 
-**Ce qui reste à trancher : l'ordre.** `MGMT_EXT_ORGS` est une **échelle de
-prestige croissant** — la première est la petite organisation de départ, un
-combattant y monte les échelons après trois combats et une série de victoires
-(`MGMT_EXT_ORG_MIN_FIGHTS`, `MGMT_EXT_ORG_MOVE_MIN`). L'ordre n'est donc pas
-cosmétique : il décide de ce que « il arrive de Garden of Blood avec huit
-combats » raconte au joueur. Les noms sont posés, leur rang ne l'est pas. Tant
-qu'il ne l'est pas, `MGMT_EXT_ORGS` reste `[null,null,null,null]` : la trace
-dérivée porte déjà le nombre, les périodes et les combats par organisation sans
-le nom, et rien ne casse.
+**L'ordre, tranché le 22/09.** `MGMT_EXT_ORGS` est une échelle de prestige
+**croissant** — un combattant y monte après `MGMT_EXT_ORG_MIN_FIGHTS` combats,
+sur une série de victoires. L'ordre d'Anthony :
+
+| Rang | Organisation | Ce qu'elle dit d'un combattant qui en vient |
+|---|---|---|
+| 1 | **Garden of Blood** | il a commencé en bas, sans filet |
+| 2 | **MMA Korner** | il a trouvé un cadre |
+| 3 | **Ultimate Rim** | il a percé |
+| 4 | **Fighting Pacific Championship** | le sommet extérieur — celui que Split rivalise sans le dépasser |
+
+Mesuré sur trente-cinq lignes du monde dérivé (graine 20260922, cycle 12) : 35
+passent par Garden of Blood, 24 atteignent MMA Korner, 15 Ultimate Rim, 8 le
+Fighting Pacific. La pyramide se resserre à chaque échelon — c'est ce qu'on
+attend d'une échelle de prestige, et ça ne demande aucun réglage.
+
+**Un point pour le lot 4.** La trace peut porter une organisation à **zéro
+combat** (un combattant qui vient d'y monter et n'a pas encore combattu). «
+Ultimate Rim × 0 » se lirait mal sur un écran. À traiter à l'affichage, pas
+dans la dérivation — la donnée est juste.
 
 ## 6. Terminé pour le lot
 

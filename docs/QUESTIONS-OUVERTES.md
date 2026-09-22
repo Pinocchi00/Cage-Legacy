@@ -305,6 +305,53 @@ baissera peut-être d'elle-même.
 
 ---
 
+## QO-11 — « Entrer dans le top 5 », dans un monde qui compte cinq organisations
+
+**Statut. Incohérence trouvée le 22/09/2026, aucune décision demandée dans
+l'immédiat** — rien de ce qui est codé n'en dépend encore.
+
+**Le constat.** `SPLIT-CONTEXTE-DEPART.md` §8 fixe les objectifs du patron :
+« entrer dans le top 5 des organisations » les deux premières années, puis
+« passer top 3 ». Or le monde écrit compte aujourd'hui **cinq organisations** :
+les quatre de `MGMT_EXT_ORGS` (Garden of Blood, MMA Korner, Ultimate Rim,
+Fighting Pacific Championship) et Split. Si ce sont les mêmes cinq, **l'objectif
+de la première année est acquis avant la première soirée** : on ne peut pas
+être hors du top 5 de cinq.
+
+**C'est Anthony qui l'a vu** (« bah donc il faut 10 noms d'orgas ? »), en
+réponse à un recoupement que Claude avait présenté comme élégant et qui ne
+l'est pas.
+
+**Ce qui n'est pas le problème.** Les deux listes ne sont pas la même chose, et
+il ne faut pas les confondre :
+
+| | Ce que c'est | Combien | État |
+|---|---|---|---|
+| `MGMT_EXT_ORGS` | les échelons qu'un **combattant** gravit hors Split | 4 | codé, nommé, mesuré |
+| Le classement des organisations | les rivales de **Split**, où le patron veut un top 5 | indéterminé | **pas codé du tout** |
+
+Le classement n'existe nulle part dans le code. `SPLIT-CONTEXTE-DEPART.md` §8 le
+signale lui-même comme une « question de périmètre à trancher avant
+implémentation », avec une « version légère à privilégier — un classement qui
+bouge en fonction des départs, des signatures et des soirées, sans simuler leurs
+cartes ».
+
+**Les deux sorties possibles, à trancher quand le classement sera écrit** (lot 5,
+le monde qui parle) :
+
+1. **Le classement compte plus d'organisations que l'échelle du combattant.** Il
+   faudra alors d'autres noms — contenu d'auteur, dû à ce moment-là et pas
+   avant. C'est la lecture qui préserve l'objectif tel qu'il est écrit.
+2. **Le monde reste à cinq, et l'objectif du patron se reformule** — par exemple
+   sur le top 3 puis la première place, ou sur autre chose que le rang.
+
+**Ne pas trancher à l'avance.** Le nombre d'organisations décide de la forme du
+classement, et le classement décide de ce que le patron peut exiger. Les trois
+questions se tiennent ; les séparer produirait un objectif qui ne veut rien dire,
+ce qui est exactement le défaut relevé ici.
+
+---
+
 ## Résumé des tests skip concernés
 
 Relevé sur l'état réel du dépôt le 21/09/2026 (après la fusion du lot 2, PR 62).

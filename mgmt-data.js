@@ -160,14 +160,21 @@ const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',s
    aucun nom de personnage. ==== */
 
 /* Les organisations extérieures où combattent les combattants hors Split,
-   en ordre de prestige croissant (la première est la petite orga de départ,
-   la suivante est un cran au-dessus). [EMPLACEMENT AUTEUR] : aucun nom
-   d'organisation n'existe dans mgmt-data.js, et aucun nom n'est inventé ici
-   — les emplacements restent vides (null) tant que l'auteur ne les a pas
-   écrits ; la trace dérivée porte alors la donnée (combien, quand, combien
-   de combats) sans le nom. SPLIT-CONTEXTE-DEPART.md laisse les deux
-   premières organisations mondiales à écrire. */
-const MGMT_EXT_ORGS=[null,null,null,null];
+   en ordre de prestige CROISSANT : la première est celle où l'on commence
+   quand on n'a rien, la dernière est celle que Split peut rivaliser sans la
+   dépasser. Un combattant y monte les échelons après MGMT_EXT_ORG_MIN_FIGHTS
+   combats, sur une série de victoires.
+
+   Noms et ordre écrits par Anthony le 22/09/2026 (contenu d'auteur — voir
+   docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §5 e). Ils remplacent les quatre
+   [EMPLACEMENT AUTEUR] du lot 2B T1.
+
+   Attention : cette échelle n'est PAS le classement des organisations rivales
+   de Split (SPLIT-CONTEXTE-DEPART.md §8, « entrer dans le top 5 »), qui
+   n'existe pas encore dans le code et compte plus de cinq organisations —
+   sinon l'objectif du patron serait acquis d'avance. Ne pas confondre les
+   deux listes. */
+const MGMT_EXT_ORGS=['Garden of Blood','MMA Korner','Ultimate Rim','Fighting Pacific Championship'];
 
 /* Calendrier du monde extérieur : une année sportive compte MGMT_EXT_YEAR_WEEKS
    semaines ; un cycle du bureau dure MGMT_EVENT_WEEKS semaines (lot 3a) —
