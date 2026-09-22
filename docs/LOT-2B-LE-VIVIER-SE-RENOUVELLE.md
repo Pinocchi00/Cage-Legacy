@@ -391,8 +391,45 @@ l'infirmerie.
 - **Sauvegarde** : évolution du format par la migration du circuit management
   (`mgmtMigrate`) et sa validation (`validateMgmt`, `mgmtRepair`). Jamais de
   plantage au chargement, jamais de contamination avec la carrière.
+- **⚠ Le monde extérieur doit partir lui aussi.** *Ajouté le 22/09/2026, après
+  la relecture de la T1 bis.* La T3 ne parlait que du roster de Split. Mesuré
+  sur la T1 bis livrée (graine 20260922, quota de 30 vivants par catégorie) :
+
+  | Cycle | Années | Lignes extérieures | Âge médian | Plus de 45 ans |
+  |---|---|---|---|---|
+  | 0 | 0 | 312 | 25 | 0 |
+  | 60 | 5,8 | 312 | 30 | 0 |
+  | 120 | 11,5 | 312 | 36 | 0 |
+  | **240** | **23** | **312** | **48** | **264** |
+
+  Les **mêmes 312 lignes**, vieillissant en bloc, indéfiniment. À vingt-trois ans
+  de jeu, le joueur recrute des hommes de 48 ans à 85 combats professionnels.
+
+  **Et le quota aggrave le défaut au lieu de le révéler.** Il maintient 30
+  vivants par catégorie ; comme personne ne s'arrête dehors, le quota est
+  toujours satisfait, donc **aucun jeune n'entre jamais**. Le monde devient une
+  cohorte fermée — l'inverse exact du titre de ce lot.
+
+  Ce n'est **pas un défaut de la T1 bis** : son contrat portait sur le quota et
+  les classements, et les deux sont justes. C'est un trou **entre** les tranches.
+  La T3 le comble : **une ligne extérieure a une fin de carrière**, dérivée
+  comme le reste de sa trace, sous la même loi de vieillissement que le roster
+  (T2 bis — déclin à 37 ans, 39 pour les lourds). Un partant libère sa place
+  dans le quota, et **c'est ce départ qui fait entrer un jeune**.
+
+  **Rien ne se supprime** : la ligne du partant est conservée, comme celle d'un
+  retraité médical de Split (QO-9 — le passé du monde ne disparaît pas). Elle
+  cesse simplement de compter parmi les vivants.
+
+- **Cible mesurable ajoutée** : à 240 cycles (23 ans), **l'âge médian du monde
+  extérieur reste dans la même décennie qu'à l'ouverture** — un monde vivant
+  renouvelle sa population, il ne vieillit pas en bloc. Et à tout cycle, il
+  existe des combattants de moins de 25 ans dans chaque catégorie.
 - **Tests** : un retraité sort du vivier et du classement ; la migration charge
-  une sauvegarde d'avant le lot sans perte.
+  une sauvegarde d'avant le lot sans perte ; **une ligne extérieure en fin de
+  carrière sort des vivants sans être supprimée, et sa sortie déclenche un
+  remplacement par le quota** ; après 240 cycles, chaque catégorie contient
+  encore des combattants de moins de 25 ans.
 
 ### T4 — Le salaire à la victoire, et l'économie sur la durée de vie *(après T3 — condition de fusion)*
 
