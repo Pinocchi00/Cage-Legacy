@@ -25,8 +25,11 @@
 
    Portée globale classique ; SCREENS/CL étendus via Object.assign (jamais
    d'édition directe de ui-08, motif mgmt-screens.js). esc() sur tout nom
-   injecté en HTML. Dépend au chargement de ui-08 (SCREENS, CL), ui-11
-   (keysRegister), arene-etat.js et arene-vue.js.
+   injecté en HTML. Entrée d'écran : classe `arene` posée sur #app
+   (areneEcranDemarrer) ; sortie : classe retirée et vue détruite
+   (areneEcranNettoyer via CL.areneSocleQuitter) — rien ne survit. Dépend au
+   chargement de ui-08 (SCREENS, CL), ui-11 (keysRegister), arene-etat.js et
+   arene-vue.js.
    ============================================================================ */
 
 /* ==== [ANCRE: ARENE_T2_ECRAN] — Lot 3 T2 le socle de l'arène neuve :
@@ -70,7 +73,9 @@ function areneEcranCharger(res,noms,trace){
   ARENE_ECRAN.session=session;
   ARENE_ECRAN.d=0; ARENE_ECRAN.offset=0; ARENE_ECRAN.t0=0;
   ARENE_ECRAN.vitesse=1; ARENE_ECRAN.pause=false; ARENE_ECRAN.fini=false;
-  ARENE_ECRAN.vue=null;
+  /* Une vue existante (combat précédent) est détruite avant la nouvelle :
+     son écouteur de redimensionnement ne survit jamais (correctif T2). */
+  if(ARENE_ECRAN.vue){ areneVueDetruire(ARENE_ECRAN.vue); ARENE_ECRAN.vue=null; }
   return true;
 }
 
@@ -107,7 +112,7 @@ function areneResultatTxt(session){
 
 function scr_arene_socle(){
   const ec=ARENE_ECRAN;
-  const retour=`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.go('title')">← Retour au titre</button>`;
+  const retour=`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocleQuitter()">← Retour au titre</button>`;
   if(ec&&ec.refuse){
     /* Garde-fou du rejeu (ancre ARENE_T2_GARDE_REJEU) : issue divergente,
        RIEN n'est montré — ni arène, ni combat. Ce que l'écran dit alors est
@@ -158,9 +163,31 @@ function scr_arene_socle(){
 }
 
 /* ---- Boucle de lecture (le temps d'affichage traverse le montage) --------- */
+/** Pose la classe `arene` sur #app (motif mgmtEnter, index.html ancre
+ *  ARENE_T2_APP) : #app est déplafonné à 1100px — l'arène n'est pas un
+ *  écran de bureau et ne porte jamais le dégradé brun de .mgmt. */
+function areneEcranAppPoser(){
+  try{
+    const app=document.getElementById('app');
+    if(app&&app.classList) app.classList.add('arene');
+  }catch(e){}
+}
+/** Retire la classe `arene` de #app et débranche l'écouteur de la vue
+ *  (areneVueDetruire) : rien ne survit à la sortie de l'écran. */
+function areneEcranNettoyer(){
+  try{
+    const app=document.getElementById('app');
+    if(app&&app.classList) app.classList.remove('arene');
+  }catch(e){}
+  const ec=ARENE_ECRAN;
+  if(ec&&ec.vue){ areneVueDetruire(ec.vue); ec.vue=null; }
+  if(ec&&ec.raf&&typeof cancelAnimationFrame!=='undefined'){ cancelAnimationFrame(ec.raf); }
+  if(ec) ec.raf=0;
+}
 function areneEcranDemarrer(){
   const ec=ARENE_ECRAN;
   if(!ec||!ec.session||ec.refuse) return;
+  areneEcranAppPoser();
   if(ec.raf&&typeof cancelAnimationFrame!=='undefined') cancelAnimationFrame(ec.raf);
   ec.raf=0;
   const cv=document.getElementById('arene-socle-cv');
@@ -168,9 +195,9 @@ function areneEcranDemarrer(){
   ec.t0=(typeof performance!=='undefined'&&performance.now)?performance.now():0;
   ec.offset=ec.d||0;
   if(ec.vue&&typeof requestAnimationFrame!=='undefined') ec.raf=requestAnimationFrame(areneEcranBoucle);
-  areneEcranHud(ar2EtatInit(ec));
+  areneEcranHud(areneEtatInit(ec));
 }
-function ar2EtatInit(ec){
+function areneEtatInit(ec){
   return areneInstant(ec.session,ec.d||0);
 }
 function areneEcranBoucle(now){
@@ -219,7 +246,7 @@ keysRegister('arene_socle',{
   'n'(){ CL.areneSocleSuivant(); },
   '1'(){ CL.areneSocleVitesse(1); },
   '2'(){ CL.areneSocleVitesse(2); },
-  Escape(){ CL.go('title'); },
+  Escape(){ CL.areneSocleQuitter(); },
 });
 
 Object.assign(CL,{
@@ -227,6 +254,13 @@ Object.assign(CL,{
     areneEcranCombatFrais();
     CL.go('arene_socle');
     areneEcranDemarrer();
+  },
+  /* Sortie de l'écran (bouton retour, Escape) : la classe `arene` est
+     retirée de #app et l'écouteur de la vue débranché — rien ne survit
+     (motif mgmtLeave). */
+  areneSocleQuitter(){
+    areneEcranNettoyer();
+    CL.go('title');
   },
   areneSocleBascule(){
     const ec=ARENE_ECRAN;

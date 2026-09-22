@@ -20,7 +20,9 @@
 
    Sans canvas (harnais de test) : areneVueCreer rend null et
    areneVueDessiner ne fait rien — l'état, lui, se calcule quand même.
-   Portée globale classique, préfixe arene distinct de l'ancienne arène.
+   areneVueDetruire débranche l'écouteur de redimensionnement (départ
+   d'écran). Portée globale classique, préfixe arene distinct de l'ancienne
+   arène.
    ============================================================================ */
 
 /* ==== [ANCRE: ARENE_T2_VUE] — Lot 3 T2 le socle de l'arène neuve : le
@@ -29,6 +31,22 @@
 const ARENE_TILT=0.6;   // aplatissement vertical de la vue de trois quarts
 const ARENE_ZF=0.78;    // poids de la hauteur z (semi-3D)
 const ARENE_CAGE_H=1.8; // hauteur du grillage (m, échelle réelle)
+
+/* Correctif T2 (reprise) : areneVueDimensionner n'était appelé qu'à la
+   création. Si le canvas mesure moins de 10px à ce moment (affichage pas
+   encore fait, #app encore plafonné...), la fonction sort tôt, vue.W reste
+   à 0 et areneVueDessiner ne dessine plus JAMAIS rien. La vue écoute donc
+   le redimensionnement d'elle-même tant qu'elle vit ; l'écouteur est
+   débranché par areneVueDetruire, appelé en quittant l'écran — jamais
+   d'écouteur qui survit à la sortie. */
+
+/** Détache la vue : débranche l'écouteur de redimensionnement. Sans
+ *  effet sur une vue fantôme (harnais). */
+function areneVueDetruire(vue){
+  if(!vue||!vue._onResize||typeof window==='undefined'||typeof window.removeEventListener!=='function') return;
+  window.removeEventListener('resize',vue._onResize);
+  vue._onResize=null;
+}
 
 /** Crée la vue d'un canvas. Sans canvas vrai, rend null : rien ne plante.
  *  @returns {object|null} */
@@ -41,6 +59,18 @@ function areneVueCreer(cv){
     _fx:[],_lastActionId:null,_dernierNow:0};
   for(let i=0;i<80;i++) vue._fx.push({actif:false});
   areneVueDimensionner(vue);
+  /* La vue se redimensionne après coup (correctif T2) : une première mesure
+     nulle (canvas encore invisible) ou un changement de fenêtre relancent
+     le cadrage. Débranchée par areneVueDetruire à la sortie de l'écran. */
+  if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
+    vue._onResize=function(){ areneVueDimensionner(vue); };
+    window.addEventListener('resize',vue._onResize);
+  }
+  /* Première mesure nulle : retenter une fois la mise en page faite — le
+     canvas vient d'être inséré, clientWidth peut encore être à 0 ici. */
+  if(!(vue.W>=10)&&typeof requestAnimationFrame!=='undefined'){
+    requestAnimationFrame(function(){ if(vue._onResize) areneVueDimensionner(vue); });
+  }
   return vue;
 }
 /** Recadre la vue sur la taille CSS du canvas (fond reconstruit). */

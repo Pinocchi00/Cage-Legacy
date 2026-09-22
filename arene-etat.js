@@ -32,7 +32,9 @@
 
    Portée globale classique (pas de module). Préfixe ARENE_/arene, distinct
    de l'ancienne arène (ARENA, startArena, buildTimeline, drawArena...) qui
-   vit encore — ui-09-arena.js reste inchangée jusqu'à la T4.
+   vit encore — ui-09-arena.js reste inchangée jusqu'à la T4. Toute fonction
+   de premier niveau porte le préfixe arene : pas de global anonyme qui
+   échappe à la portée partagée.
 
    Dépendance runtime : areneVerdictFidele lit mgmtMethodFamily
    (mgmt-corps.js) — le classificateur de famille unique du dépôt, jamais une
@@ -336,7 +338,7 @@ function areneConstruire(res,noms){
        pris), ils regagnent sa géométrie en fenêtre de réarrangement. */
     if(nouvelleRonde||(phase==='exam'&&!examVu)){
       if(phase==='exam') examVu=true;
-      arr={A:{x:posA0().x,y:posA0().y},B:{x:posB0().x,y:posB0().y}};
+      arr={A:{x:arenePosA0().x,y:arenePosA0().y},B:{x:arenePosB0().x,y:arenePosB0().y}};
       prev.A={x:arr.A.x,y:arr.A.y}; prev.B={x:arr.B.x,y:arr.B.y};
       if(phase==='debout'||phase==='exam'){
         fin=(phase==='exam')?{A:{x:arr.A.x,y:arr.A.y},B:{x:arr.B.x,y:arr.B.y}}
@@ -451,8 +453,8 @@ function areneConstruire(res,noms){
   S.dureeAffichage=Math.max(0.1,d);
   return S;
 }
-function posA0(){ return areneCoinA(); }
-function posB0(){ return areneCoinB(); }
+function arenePosA0(){ return areneCoinA(); }
+function arenePosB0(){ return areneCoinB(); }
 
 /** Segment portant l'instant t (dichotomie — les segments sont triés).
  *  @returns {object} */

@@ -410,6 +410,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    gardés. Dégradé vertical #423521 en haut vers #120E08 en bas, sur toute la
    hauteur. Périmètre bureau uniquement (#app.mgmt). ==== */
 #app.mgmt{max-width:1400px;background:linear-gradient(180deg,#423521 0%,#120E08 100%)}
+/* ==== [ANCRE: ARENE_T2_APP] — Lot 3 T2 (reprise, correctifs d'affichage) :
+   l'arène n'est pas un écran de bureau — #app est déplafonné à la largeur
+   que l'écran demande (1100px) et ne porte PAS le dégradé brun du
+   management (#app.mgmt). Classe posée à l'entrée de l'écran
+   (areneEcranDemarrer), retirée à la sortie (areneEcranNettoyer). ==== */
+#app.arene{max-width:1100px}
 .mgmt-wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding:16px 15px 16px}
 .mgmt-head{flex:0 0 auto}
 .mgmt-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr) 360px;gap:16px;margin-top:12px}
