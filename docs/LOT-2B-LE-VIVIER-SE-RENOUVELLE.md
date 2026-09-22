@@ -163,6 +163,106 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
   sauvegarde, et le temps de dérivation complet. Une seule mesure, en fin de
   tranche.
 
+### T1 ter — Le corps tient la durée *(aucune interface — après T1 bis, avant T2 bis)*
+
+*Ajoutée le 22/09/2026. Constat d'Anthony : « les traumas ne sont pas du tout
+réalistes ». Mesuré, il a raison, et le défaut n'est pas où on l'attendait.*
+
+**Ce qui a été mesuré** (graine 20260922, vingt soirées jouées par le vrai
+déroulé : `mgmtNewPile`, `mgmtBookMain`, `mgmtDecide`, `mgmtRunEvent`).
+
+Le roster **arrive déjà abîmé**, avant le premier combat sous Split :
+
+| | Valeur |
+|---|---|
+| Traumatisme moyen | **33,6 / 100** |
+| Le plus atteint | **83 / 100** |
+| Déjà au-dessus de 60 (seuil de retraite sur commotion) | **6 sur 48** |
+
+Et le vivier s'effondre :
+
+| Soirée | Disponibles | Suspendus | Retraités | Traumatisme moyen |
+|---|---|---|---|---|
+| 1 | 44 | 4 | 0 | 33,6 |
+| 5 | 24 | **23** | 1 | 46,7 |
+| 10 | 18 | 22 | 8 | 58,8 |
+| 15 | **13** | 12 | **23** | 58,6 |
+
+**À la seizième soirée, aucune carte n'est composable : la partie s'arrête.**
+Le mode est injouable au-delà d'un an et demi de temps de jeu.
+
+**Ce qui n'est PAS le défaut.** Le gain par combat est défendable : 2 à 3 pour
+une victoire, 3,6 pour une défaite aux points, 10,1 par soumission, **14,8 par
+KO** — soit 24 combats en moyenne pour finir une carrière, l'ordre de grandeur
+d'une vraie. **Ne pas y toucher en premier.**
+
+**Les trois défauts, et les décisions d'Anthony du 22/09 :**
+
+1. **La dérivation de départ charge tout d'avance.** `mgmtTrauma` estime que
+   26 % des défaites passées étaient des KO (`MGMT_KO_SHARE`) et compte
+   **19 points par KO estimé** (`MGMT_KO_TRAUMA`) : cinq KO au palmarès et le
+   combattant arrive à 95, retraité d'avance. **Décision : un combattant jeune
+   au palmarès propre arrive à un traumatisme quasi nul.** C'est le premier
+   levier à regarder, avant tout autre.
+
+2. **Le traumatisme ne redescend jamais — et cela change.** **Décision : il
+   récupère, partiellement et lentement.** Le temps passé sans combattre efface
+   une part des dégâts récents, **jamais la totalité** : une part reste
+   définitivement acquise, sinon une carrière n'a plus de fin. C'est ce qui rend
+   une longue carrière possible, et c'est physiologiquement juste.
+
+   ⚠ **Cette décision renverse un invariant écrit, et un test le garde.**
+   « Le traumatisme ne descend jamais » figure à quatre endroits :
+   `mgmt-corps.js` (en-tête ligne 5, en-tête ligne 26, commentaire de
+   `mgmtTraumaGain` ligne 228) et `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md:294`.
+   **Et le test `tests/mgmtSoiree.test.js:162` — « MGMT corps : le traumatisme
+   ne descend jamais et reste dans [0,100] » — passera au rouge.**
+
+   C'est le cas prévu par `CLAUDE.md` §7 : un test ne se réécrit jamais pour
+   retrouver du vert **sans citer la décision qui change le comportement
+   attendu**. La tranche réécrit ce test en citant cette décision du 22/09, et
+   le nouveau test garde ce qui reste vrai : le traumatisme reste borné à
+   [0,100], **une part acquise ne se récupère jamais**, et un combat n'en fait
+   jamais descendre le total. Un test qui disparaît sans être remplacé est un
+   motif de refus de la tranche.
+
+3. **Gagner coûte 2 à 3 points.** Un combattant invaincu qui n'a jamais été
+   touché dérive vers la retraite forcée en 43 combats. **Décision : ça ne doit
+   pas exister.** Une victoire sans dégâts encaissés ne coûte rien ; ce sont les
+   coups reçus qui comptent, pas le fait d'avoir combattu.
+
+**Les suspensions sont un chantier distinct, et peut-être le vrai coupable.**
+23 suspendus sur 48 dès la cinquième soirée — bien avant que les retraites ne
+pèsent. **La tranche les mesure séparément avant de toucher à quoi que ce soit**
+et rapporte le partage : combien d'indisponibilités viennent d'une suspension,
+combien d'une retraite. On ne règle pas les deux à l'aveugle en même temps.
+
+**Cibles mesurables, posées avant la mesure :**
+
+- **À la vingtième soirée, la partie se joue encore** — une carte complète reste
+  composable, et **au moins 30 des 48 lignes sont disponibles**. Aujourd'hui :
+  injouable à la seizième, 13 disponibles à la quinzième.
+- **Un combattant qui gagne tout ne prend jamais sa retraite médicale.**
+- **Un combattant de 22 ans au palmarès propre arrive sous 5 de traumatisme.**
+- **La carrière médiane avant retraite médicale reste dans l'ordre de 20 à 30
+  combats** — la cible n'est pas d'abolir la retraite médicale, mais qu'elle
+  frappe une minorité, tard.
+
+**Ce qui ne bouge pas.** Dérivation pure et déterministe, aucun tirage consommé
+(`mgmtTrauma` est pure aujourd'hui, elle le reste) ; règle du bureau — la
+récupération se **dérive du temps écoulé**, elle ne s'écrit pas cycle par cycle
+sur la ligne ; le traumatisme reste **caché** au joueur (CDC : ni note, ni jauge).
+
+**Effet de bord à signaler.** Moins de suspensions et de retraites, c'est plus
+de combattants disponibles, donc des cartes différentes et une recette
+différente : le calibrage de l'économie (`tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md`)
+sera à refaire après cette tranche. Le signaler, ne pas le corriger ici.
+
+**Mesure attendue** : le tableau ci-dessus rejoué à l'identique (même graine,
+vingt soirées), plus le partage suspension/retraite, la distribution du
+traumatisme de départ, et la longueur de carrière médiane. Une seule mesure, en
+fin de tranche.
+
 ### T2 — Le recrutement *(interface — après T1 bis — vérification charte §3 obligatoire)*
 
 - **Le flux** : des recrutables sont visibles cycle après cycle. **Aucun nombre
@@ -180,7 +280,7 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
 - **Livrable de vérification** : la capture ou le relevé DOM exigé par la
   charte §3.
 
-### T2 bis — Le temps passe *(aucune interface — avant la T3)*
+### T2 bis — Le temps passe *(aucune interface — après T1 ter, avant la T3)*
 
 *Ajoutée le 22/09/2026. Constat d'Anthony en regardant une partie : « les
 combattants n'ont pas l'âge pour partir autant à la retraite ». Il a raison, et
