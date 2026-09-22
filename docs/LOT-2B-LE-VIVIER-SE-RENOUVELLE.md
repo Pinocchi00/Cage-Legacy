@@ -180,7 +180,79 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
 - **Livrable de vérification** : la capture ou le relevé DOM exigé par la
   charte §3.
 
-### T3 — Les départs *(après T2)*
+### T2 bis — Le temps passe *(aucune interface — avant la T3)*
+
+*Ajoutée le 22/09/2026. Constat d'Anthony en regardant une partie : « les
+combattants n'ont pas l'âge pour partir autant à la retraite ». Il a raison, et
+la cause est plus profonde que le réglage.*
+
+**Ce qui a été vérifié, et qui n'était écrit nulle part :**
+
+| Constat | Preuve |
+|---|---|
+| `f.age` n'est **jamais écrit** dans tout le mode | lu et recopié 4 fois, incrémenté 0 fois |
+| **Aucune retraite d'âge n'existe** | `f.retired='medical'` (`mgmt-corps.js:327`) est le seul endroit du mode qui retire quelqu'un |
+| L'âge ne pèse **rien** sur un combattant régénéré | à niveau égal, `makeFighter` rend un overall de 15,7 à 22 ans **comme à 42 ans** |
+| Le monde extérieur, lui, **vieillit** | `mgmtExteriorCareer` dérive l'âge du cycle courant |
+| 20 soirées = **1 an 11 mois** | `MGMT_EVENT_WEEKS = 5` |
+
+Roster de départ mesuré (graine 20260922) : 48 combattants de 22 à 35 ans,
+moyenne 28,2, **20 d'entre eux sous 27 ans**, tous à traumatisme 0. Sur ces deux
+ans, QO-8 a mesuré **31 retraites médicales sur 48** — et pas un combattant n'a
+vieilli d'un jour. Le monde d'à côté prend de l'âge pendant que la maison du
+joueur est figée, et la seule porte de sortie est l'infirmerie.
+
+**Ce que la tranche fait.**
+
+- **L'âge avance avec le calendrier.** Un cycle dure 5 semaines : un anniversaire
+  tombe tous les ~10,4 cycles, pas à chaque soirée. La loi est celle du monde
+  extérieur (`MGMT_EXT_YEAR_WEEKS`), **pas une seconde loi** — le roster et
+  l'extérieur vieillissent au même rythme, comme les deux classements trient
+  sous la même loi (T1 bis).
+- **L'âge pèse sur la dérivation, exactement comme le traumatisme.** Le patron
+  existe déjà et ne se double pas : `mgmtTrauma` → `mgmtChinWear` → attributs
+  réduits sur le clone régénéré (`mgmt-corps.js`). L'âge suit ce chemin. **Rien
+  n'est stocké sur la ligne** : pas d'`attrs`, pas d'overall figé — règle du
+  bureau, CDC §3.
+- **Attention au piège de `applyAging`.** `engine-progression.js:33` porte déjà la
+  loi de déclin de la carrière (attributs, menton après 38 ans, `f.age++`). Elle
+  **ne se réutilise pas telle quelle ici** : elle mute un combattant persistant
+  qui porte ses `attrs`, alors que le management n'en garde aucun, et elle
+  consomme `rnd()`. La tranche reprend **sa courbe**, pas son mécanisme — et si
+  elle touche à la RNG, c'est sous le motif « SEED sauvegardé / restauré ».
+  Deux lois de déclin différentes entre les deux modes seraient un défaut.
+- **Vieillir n'est pas se blessér.** Le traumatisme monte avec les coups reçus,
+  le déclin vient de l'âge. Les deux s'additionnent sur le clone mais restent
+  **deux causes distinctes**, lisibles séparément — sinon on ne saura jamais
+  lequel des deux a vidé le vivier.
+- **Sauvegarde** : `MGMT_SAVE_VERSION` monte, `mgmtMigrate` complète les parties
+  d'avant la tranche (l'âge d'une ligne existante est son âge actuel, le
+  calendrier repart de là), `validateMgmt` / `mgmtRepair` restent la porte.
+
+**Ce que la tranche ne fait pas.** Elle **ne code pas la retraite d'âge** —
+c'est la T3. Elle rend l'âge réel ; la T3 en tire une sortie. Dans cet ordre,
+parce qu'une retraite d'âge dans un monde où personne ne vieillit ne se
+déclencherait jamais.
+
+**Ce qui attend Anthony, et qui n'est pas une question technique.** À quel âge
+un combattant décline, et à quel âge il s'arrête ? La carrière porte déjà une
+réponse (`applyAging` : déclin progressif, menton après 38 ans) — **la reprendre
+telle quelle est la proposition par défaut**, pour n'avoir qu'une seule
+vérité sur le vieillissement dans tout le jeu. Anthony tranche s'il en veut une
+autre.
+
+**Tests** : l'âge avance d'un an tous les ~10,4 cycles et jamais plus vite ; un
+combattant de 38 ans régénéré est mesurablement moins bon que le même à 26 ans,
+niveau et bilan égaux ; aucune ligne ne gagne d'`attrs` ni d'overall ; le roster
+et l'extérieur vieillissent au même rythme ; une sauvegarde d'avant la tranche se
+charge ; traumatisme et déclin restent distinguables.
+
+**Mesure attendue** : sur 20 soirées, la pyramide des âges du roster au début et
+à la fin, et la répartition des sorties **par cause** — retraite médicale contre
+déclin d'âge. C'est le chiffre qui dira si le vivier cesse enfin de se vider par
+l'infirmerie.
+
+### T3 — Les départs *(après T2 bis)*
 
 - **La retraite**, seule sortie ordinaire. Elle retire le combattant du vivier
   et des classements, sans drame et sans réplique (décision 6).
