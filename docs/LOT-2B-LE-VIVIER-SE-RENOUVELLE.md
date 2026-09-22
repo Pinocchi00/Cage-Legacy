@@ -163,6 +163,106 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
   sauvegarde, et le temps de dérivation complet. Une seule mesure, en fin de
   tranche.
 
+### T1 ter — Le corps tient la durée *(aucune interface — après T1 bis, avant T2 bis)*
+
+*Ajoutée le 22/09/2026. Constat d'Anthony : « les traumas ne sont pas du tout
+réalistes ». Mesuré, il a raison, et le défaut n'est pas où on l'attendait.*
+
+**Ce qui a été mesuré** (graine 20260922, vingt soirées jouées par le vrai
+déroulé : `mgmtNewPile`, `mgmtBookMain`, `mgmtDecide`, `mgmtRunEvent`).
+
+Le roster **arrive déjà abîmé**, avant le premier combat sous Split :
+
+| | Valeur |
+|---|---|
+| Traumatisme moyen | **33,6 / 100** |
+| Le plus atteint | **83 / 100** |
+| Déjà au-dessus de 60 (seuil de retraite sur commotion) | **6 sur 48** |
+
+Et le vivier s'effondre :
+
+| Soirée | Disponibles | Suspendus | Retraités | Traumatisme moyen |
+|---|---|---|---|---|
+| 1 | 44 | 4 | 0 | 33,6 |
+| 5 | 24 | **23** | 1 | 46,7 |
+| 10 | 18 | 22 | 8 | 58,8 |
+| 15 | **13** | 12 | **23** | 58,6 |
+
+**À la seizième soirée, aucune carte n'est composable : la partie s'arrête.**
+Le mode est injouable au-delà d'un an et demi de temps de jeu.
+
+**Ce qui n'est PAS le défaut.** Le gain par combat est défendable : 2 à 3 pour
+une victoire, 3,6 pour une défaite aux points, 10,1 par soumission, **14,8 par
+KO** — soit 24 combats en moyenne pour finir une carrière, l'ordre de grandeur
+d'une vraie. **Ne pas y toucher en premier.**
+
+**Les trois défauts, et les décisions d'Anthony du 22/09 :**
+
+1. **La dérivation de départ charge tout d'avance.** `mgmtTrauma` estime que
+   26 % des défaites passées étaient des KO (`MGMT_KO_SHARE`) et compte
+   **19 points par KO estimé** (`MGMT_KO_TRAUMA`) : cinq KO au palmarès et le
+   combattant arrive à 95, retraité d'avance. **Décision : un combattant jeune
+   au palmarès propre arrive à un traumatisme quasi nul.** C'est le premier
+   levier à regarder, avant tout autre.
+
+2. **Le traumatisme ne redescend jamais — et cela change.** **Décision : il
+   récupère, partiellement et lentement.** Le temps passé sans combattre efface
+   une part des dégâts récents, **jamais la totalité** : une part reste
+   définitivement acquise, sinon une carrière n'a plus de fin. C'est ce qui rend
+   une longue carrière possible, et c'est physiologiquement juste.
+
+   ⚠ **Cette décision renverse un invariant écrit, et un test le garde.**
+   « Le traumatisme ne descend jamais » figure à quatre endroits :
+   `mgmt-corps.js` (en-tête ligne 5, en-tête ligne 26, commentaire de
+   `mgmtTraumaGain` ligne 228) et `docs/LOT-3A-LE-CORPS-ET-LA-SOIREE.md:294`.
+   **Et le test `tests/mgmtSoiree.test.js:162` — « MGMT corps : le traumatisme
+   ne descend jamais et reste dans [0,100] » — passera au rouge.**
+
+   C'est le cas prévu par `CLAUDE.md` §7 : un test ne se réécrit jamais pour
+   retrouver du vert **sans citer la décision qui change le comportement
+   attendu**. La tranche réécrit ce test en citant cette décision du 22/09, et
+   le nouveau test garde ce qui reste vrai : le traumatisme reste borné à
+   [0,100], **une part acquise ne se récupère jamais**, et un combat n'en fait
+   jamais descendre le total. Un test qui disparaît sans être remplacé est un
+   motif de refus de la tranche.
+
+3. **Gagner coûte 2 à 3 points.** Un combattant invaincu qui n'a jamais été
+   touché dérive vers la retraite forcée en 43 combats. **Décision : ça ne doit
+   pas exister.** Une victoire sans dégâts encaissés ne coûte rien ; ce sont les
+   coups reçus qui comptent, pas le fait d'avoir combattu.
+
+**Les suspensions sont un chantier distinct, et peut-être le vrai coupable.**
+23 suspendus sur 48 dès la cinquième soirée — bien avant que les retraites ne
+pèsent. **La tranche les mesure séparément avant de toucher à quoi que ce soit**
+et rapporte le partage : combien d'indisponibilités viennent d'une suspension,
+combien d'une retraite. On ne règle pas les deux à l'aveugle en même temps.
+
+**Cibles mesurables, posées avant la mesure :**
+
+- **À la vingtième soirée, la partie se joue encore** — une carte complète reste
+  composable, et **au moins 30 des 48 lignes sont disponibles**. Aujourd'hui :
+  injouable à la seizième, 13 disponibles à la quinzième.
+- **Un combattant qui gagne tout ne prend jamais sa retraite médicale.**
+- **Un combattant de 22 ans au palmarès propre arrive sous 5 de traumatisme.**
+- **La carrière médiane avant retraite médicale reste dans l'ordre de 20 à 30
+  combats** — la cible n'est pas d'abolir la retraite médicale, mais qu'elle
+  frappe une minorité, tard.
+
+**Ce qui ne bouge pas.** Dérivation pure et déterministe, aucun tirage consommé
+(`mgmtTrauma` est pure aujourd'hui, elle le reste) ; règle du bureau — la
+récupération se **dérive du temps écoulé**, elle ne s'écrit pas cycle par cycle
+sur la ligne ; le traumatisme reste **caché** au joueur (CDC : ni note, ni jauge).
+
+**Effet de bord à signaler.** Moins de suspensions et de retraites, c'est plus
+de combattants disponibles, donc des cartes différentes et une recette
+différente : le calibrage de l'économie (`tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md`)
+sera à refaire après cette tranche. Le signaler, ne pas le corriger ici.
+
+**Mesure attendue** : le tableau ci-dessus rejoué à l'identique (même graine,
+vingt soirées), plus le partage suspension/retraite, la distribution du
+traumatisme de départ, et la longueur de carrière médiane. Une seule mesure, en
+fin de tranche.
+
 ### T2 — Le recrutement *(interface — après T1 bis — vérification charte §3 obligatoire)*
 
 - **Le flux** : des recrutables sont visibles cycle après cycle. **Aucun nombre
@@ -180,15 +280,156 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
 - **Livrable de vérification** : la capture ou le relevé DOM exigé par la
   charte §3.
 
-### T3 — Les départs *(après T2)*
+### T2 bis — Le temps passe *(aucune interface — après T1 ter, avant la T3)*
+
+*Ajoutée le 22/09/2026. Constat d'Anthony en regardant une partie : « les
+combattants n'ont pas l'âge pour partir autant à la retraite ». Il a raison, et
+la cause est plus profonde que le réglage.*
+
+**Ce qui a été vérifié, et qui n'était écrit nulle part :**
+
+| Constat | Preuve |
+|---|---|
+| `f.age` n'est **jamais écrit** dans tout le mode | lu et recopié 4 fois, incrémenté 0 fois |
+| **Aucune retraite d'âge n'existe** | `f.retired='medical'` (`mgmt-corps.js:327`) est le seul endroit du mode qui retire quelqu'un |
+| L'âge ne pèse **rien** sur un combattant régénéré | à niveau égal, `makeFighter` rend un overall de 15,7 à 22 ans **comme à 42 ans** |
+| Le monde extérieur, lui, **vieillit** | `mgmtExteriorCareer` dérive l'âge du cycle courant |
+| 20 soirées = **1 an 11 mois** | `MGMT_EVENT_WEEKS = 5` |
+
+Roster de départ mesuré (graine 20260922) : 48 combattants de 22 à 35 ans,
+moyenne 28,2, **20 d'entre eux sous 27 ans**, tous à traumatisme 0. Sur ces deux
+ans, QO-8 a mesuré **31 retraites médicales sur 48** — et pas un combattant n'a
+vieilli d'un jour. Le monde d'à côté prend de l'âge pendant que la maison du
+joueur est figée, et la seule porte de sortie est l'infirmerie.
+
+**Ce que la tranche fait.**
+
+- **L'âge avance avec le calendrier.** Un cycle dure 5 semaines : un anniversaire
+  tombe tous les ~10,4 cycles, pas à chaque soirée. La loi est celle du monde
+  extérieur (`MGMT_EXT_YEAR_WEEKS`), **pas une seconde loi** — le roster et
+  l'extérieur vieillissent au même rythme, comme les deux classements trient
+  sous la même loi (T1 bis).
+- **L'âge pèse sur la dérivation, exactement comme le traumatisme.** Le patron
+  existe déjà et ne se double pas : `mgmtTrauma` → `mgmtChinWear` → attributs
+  réduits sur le clone régénéré (`mgmt-corps.js`). L'âge suit ce chemin. **Rien
+  n'est stocké sur la ligne** : pas d'`attrs`, pas d'overall figé — règle du
+  bureau, CDC §3.
+- **Attention au piège de `applyAging`.** `engine-progression.js:33` porte déjà la
+  loi de déclin de la carrière (attributs, menton après 38 ans, `f.age++`). Elle
+  **ne se réutilise pas telle quelle ici** : elle mute un combattant persistant
+  qui porte ses `attrs`, alors que le management n'en garde aucun, et elle
+  consomme `rnd()`. La tranche reprend **sa courbe**, pas son mécanisme — et si
+  elle touche à la RNG, c'est sous le motif « SEED sauvegardé / restauré ».
+  Deux lois de déclin différentes entre les deux modes seraient un défaut.
+- **Vieillir n'est pas se blessér.** Le traumatisme monte avec les coups reçus,
+  le déclin vient de l'âge. Les deux s'additionnent sur le clone mais restent
+  **deux causes distinctes**, lisibles séparément — sinon on ne saura jamais
+  lequel des deux a vidé le vivier.
+- **Sauvegarde** : `MGMT_SAVE_VERSION` monte, `mgmtMigrate` complète les parties
+  d'avant la tranche (l'âge d'une ligne existante est son âge actuel, le
+  calendrier repart de là), `validateMgmt` / `mgmtRepair` restent la porte.
+
+**Ce que la tranche ne fait pas.** Elle **ne code pas la retraite d'âge** —
+c'est la T3. Elle rend l'âge réel ; la T3 en tire une sortie. Dans cet ordre,
+parce qu'une retraite d'âge dans un monde où personne ne vieillit ne se
+déclencherait jamais.
+
+**Décision d'Anthony du 22/09 : on reprend tout, déclin et menton.** La loi de
+la carrière (`applyAging`, `engine-progression.js:33`) devient celle du
+management, sans variante. Le jeu n'a qu'une seule vérité sur le
+vieillissement. Elle dit exactement ceci :
+
+| | Loi de la carrière, adoptée telle quelle |
+|---|---|
+| Pic stable | de 27 ans à l'entrée en déclin — rien ne bouge |
+| Entrée en déclin | **37 ans**, et **39 ans** pour `H-heavy` et `H-lheavy` (`isDeclining`/`isHeavy`) |
+| Attributs qui baissent | `footSpeed`, `handSpeed`, `cardio`, `explosiveness` ; **plus `power` et `recovery` à partir de 39 ans** |
+| Rythme | `RI(0,1)` par an les **trois premières** années de déclin, `RI(0,2)` ensuite (ancre V2-39 : « déclin plus progressif ») |
+| Menton | baisse à partir de **38 ans**, au même rythme |
+| Moral | une chance sur trois de perdre 5 points l'année où l'on décline |
+
+**Deux adaptations obligatoires, et elles ne changent pas la courbe.**
+
+1. **Le tirage devient une dérivation.** `applyAging` consomme `rnd()` (les
+   `RI(0,cap)` et le jet de moral). Le management dérive sans toucher à la RNG
+   de la partie : le déclin d'un combattant se calcule de façon **déterministe
+   à partir de son identifiant et de son âge**, patron `duelFnv1a32` +
+   `mulberry32` déjà en place, ou motif « SEED sauvegardé / restauré ». Même
+   courbe, même ampleur, aucun tirage consommé.
+2. **`agedCeilings` ne se transpose pas, et n'a pas à l'être.** En carrière, ce
+   champ fige le plafond atteint pour qu'une compétence ne fasse pas remonter un
+   attribut décliné. Le management ne stocke aucun attribut : il régénère le
+   combattant à chaque lecture, à l'âge courant. Le plafond est donc automatique
+   — un homme de 40 ans est toujours dérivé comme un homme de 40 ans. La règle
+   du bureau rend le mécanisme inutile.
+
+**Ce que cette décision ne règle pas, et qu'il ne faut pas croire réglé.** Le
+déclin commence à 37 ans. Le roster de départ va de 22 à 35 ans (moyenne 28,2) :
+**personne n'y est en déclin**, et sur les deux ans que font 20 soirées, seuls
+les plus vieux atteindront 37. Faire vieillir le vivier **ne réduira donc pas
+les retraites médicales** — ça ajoute une seconde sortie, plus lente, à côté de
+la première. Les 31 départs sur 48 en deux ans (QO-8) restent un problème
+**de calibrage du traumatisme**, distinct de l'âge. La mesure de fin de tranche
+(sorties par cause) est ce qui permettra de le traiter ensuite, sur des chiffres
+au lieu d'une impression.
+
+**Tests** : l'âge avance d'un an tous les ~10,4 cycles et jamais plus vite ; un
+combattant de 38 ans régénéré est mesurablement moins bon que le même à 26 ans,
+niveau et bilan égaux ; aucune ligne ne gagne d'`attrs` ni d'overall ; le roster
+et l'extérieur vieillissent au même rythme ; une sauvegarde d'avant la tranche se
+charge ; traumatisme et déclin restent distinguables.
+
+**Mesure attendue** : sur 20 soirées, la pyramide des âges du roster au début et
+à la fin, et la répartition des sorties **par cause** — retraite médicale contre
+déclin d'âge. C'est le chiffre qui dira si le vivier cesse enfin de se vider par
+l'infirmerie.
+
+### T3 — Les départs *(après T2 bis)*
 
 - **La retraite**, seule sortie ordinaire. Elle retire le combattant du vivier
   et des classements, sans drame et sans réplique (décision 6).
 - **Sauvegarde** : évolution du format par la migration du circuit management
   (`mgmtMigrate`) et sa validation (`validateMgmt`, `mgmtRepair`). Jamais de
   plantage au chargement, jamais de contamination avec la carrière.
+- **⚠ Le monde extérieur doit partir lui aussi.** *Ajouté le 22/09/2026, après
+  la relecture de la T1 bis.* La T3 ne parlait que du roster de Split. Mesuré
+  sur la T1 bis livrée (graine 20260922, quota de 30 vivants par catégorie) :
+
+  | Cycle | Années | Lignes extérieures | Âge médian | Plus de 45 ans |
+  |---|---|---|---|---|
+  | 0 | 0 | 312 | 25 | 0 |
+  | 60 | 5,8 | 312 | 30 | 0 |
+  | 120 | 11,5 | 312 | 36 | 0 |
+  | **240** | **23** | **312** | **48** | **264** |
+
+  Les **mêmes 312 lignes**, vieillissant en bloc, indéfiniment. À vingt-trois ans
+  de jeu, le joueur recrute des hommes de 48 ans à 85 combats professionnels.
+
+  **Et le quota aggrave le défaut au lieu de le révéler.** Il maintient 30
+  vivants par catégorie ; comme personne ne s'arrête dehors, le quota est
+  toujours satisfait, donc **aucun jeune n'entre jamais**. Le monde devient une
+  cohorte fermée — l'inverse exact du titre de ce lot.
+
+  Ce n'est **pas un défaut de la T1 bis** : son contrat portait sur le quota et
+  les classements, et les deux sont justes. C'est un trou **entre** les tranches.
+  La T3 le comble : **une ligne extérieure a une fin de carrière**, dérivée
+  comme le reste de sa trace, sous la même loi de vieillissement que le roster
+  (T2 bis — déclin à 37 ans, 39 pour les lourds). Un partant libère sa place
+  dans le quota, et **c'est ce départ qui fait entrer un jeune**.
+
+  **Rien ne se supprime** : la ligne du partant est conservée, comme celle d'un
+  retraité médical de Split (QO-9 — le passé du monde ne disparaît pas). Elle
+  cesse simplement de compter parmi les vivants.
+
+- **Cible mesurable ajoutée** : à 240 cycles (23 ans), **l'âge médian du monde
+  extérieur reste dans la même décennie qu'à l'ouverture** — un monde vivant
+  renouvelle sa population, il ne vieillit pas en bloc. Et à tout cycle, il
+  existe des combattants de moins de 25 ans dans chaque catégorie.
 - **Tests** : un retraité sort du vivier et du classement ; la migration charge
-  une sauvegarde d'avant le lot sans perte.
+  une sauvegarde d'avant le lot sans perte ; **une ligne extérieure en fin de
+  carrière sort des vivants sans être supprimée, et sa sortie déclenche un
+  remplacement par le quota** ; après 240 cycles, chaque catégorie contient
+  encore des combattants de moins de 25 ans.
 
 ### T4 — Le salaire à la victoire, et l'économie sur la durée de vie *(après T3 — condition de fusion)*
 

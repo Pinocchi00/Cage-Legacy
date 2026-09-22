@@ -80,12 +80,47 @@ distance. Mesure : échantillonner l'état de l'arène à intervalles réguliers
 un grand nombre de combats et comparer à la phase du déroulé. **Aucun écart
 toléré : la cible est 100 %.**
 
-**Cible 2 — Continuité : personne ne se téléporte.**
-L'octogone est à l'échelle réelle (vision § L'affichage du combat). Le
-déplacement d'un pion entre deux images reste sous une vitesse humaine plausible,
-en mètres par seconde. Mesure : le déplacement maximal observé sur un grand
-nombre de combats, rapporté à l'échelle de la cage. **Un seul saut au-dessus du
-seuil est un défaut.**
+**Cible 2 — Continuité : personne ne se téléporte, et personne ne glisse.**
+*Réécrite le 22/09/2026 après le constat d'Anthony sur le socle de la T2 : « les
+combattants bougent si lentement ». La cible n'avait qu'un plafond et aucun
+chiffre ; il lui manquait un plancher, et la mesure du socle ne la regardait
+pas.*
+
+L'octogone est à l'échelle réelle (vision § L'affichage du combat), donc une
+vitesse se lit en mètres par seconde et se compare à un homme. **Trop lent est
+un défaut au même titre que trop rapide** : un pion qui dérive glisse, il ne
+combat pas.
+
+Ce qui a été mesuré sur le socle de la T2, un combat réel de 553 s :
+
+| | Mesuré | Référence humaine |
+|---|---|---|
+| Vitesse moyenne d'un pion | **0,08 m/s** | un homme qui marche : 1,4 m/s |
+| Distance parcourue sur 9 min de combat | 44 m | — |
+| Vitesse de pointe | **11,9 m/s** | sprint olympique : ~12 m/s |
+
+Dix-sept fois trop lent en moyenne, et un saut à vitesse de sprinteur. Le
+déplacement du socle est donc **figé, puis téléporté** — le pire des deux.
+
+**Les bornes, posées avant la mesure de la T3 :**
+
+- **En phase debout**, la vitesse instantanée d'un pion tient dans
+  **[0,8 ; 2,0] m/s** l'essentiel du temps — l'ordre de grandeur d'un combattant
+  qui se déplace en garde, entre le pas d'ajustement et l'entrée franche.
+- **Aucune pointe au-dessus de 6 m/s**, jamais, dans aucune phase. Un homme de
+  MMA qui explose vers l'avant ne dépasse pas cet ordre de grandeur.
+- **Au sol et au clinch**, la contrainte porte sur la paire, pas sur le pion :
+  les deux centres ne se séparent pas plus vite que les bornes ci-dessus.
+
+**Et la mesure n'exclut plus la fenêtre de réarrangement.** La mesure de la
+cible 1 livrée à la T2 l'excluait (`ARENE_MORPH_S`, 0,6 s après un changement de
+phase) : c'est défendable pour juger d'une *phase*, et c'est exactement là que
+vit la téléportation. **La cible 2 mesure toutes les images, sans exception.**
+Un réarrangement est un déplacement comme un autre : un homme qu'on amène au sol
+met un temps à tomber, il ne traverse pas la cage.
+
+**Un seul saut au-dessus de 6 m/s est un défaut**, et une moyenne debout
+en dehors de la fourchette aussi.
 
 **Cible 3 — Ils ne tournent pas en rond.**
 La vision l'exige mot pour mot. `prototypes/arene.html`, validé le 17/09, **est
@@ -184,13 +219,48 @@ fois par un chemin indépendant.
 
 ### T3 — Le déplacement *(le cœur du réalisme)*
 
-- Les combattants tiennent leur distance, feintent, entrent, ressortent, et ne
-  prennent un angle que pour une raison. Ils changent de plan en cours de combat.
-- **Cibles 2, 3 et 4 atteintes et publiées**, rapport dans `tools/reports/`.
+*Recadrée le 22/09/2026 : Anthony a regardé le socle de la T2 et a relevé deux
+choses — « les combattants bougent si lentement » et « l'arbitre fait des
+va-et-vient ». Les deux sont vérifiées, localisées, et deviennent le cœur de la
+tranche.*
+
+**Le défaut à corriger, précisément.** `arene-etat.js` (fonction `areneMoment`)
+remplit l'intervalle entre deux moments du moteur par **une seule interpolation
+lissée**, de la position de départ vers la position d'arrivée, étalée sur tout
+le segment. Il n'y a ni pas, ni appui, ni retour : il y a une translation. D'où
+les 0,08 m/s mesurés, et l'impression de glisse. La « respiration latérale »
+(±5 cm sinusoïdaux) ne compense rien — elle ajoute du flottement, pas du
+déplacement.
+
+- Les combattants **tiennent leur distance, feintent, entrent, ressortent**, et
+  ne prennent un angle que pour une raison. Ils changent de plan en cours de
+  combat. Un pas est un pas : il a une longueur, un début et une fin.
+- **La distance debout est une distance de frappe, pas un contact.**
+  `ARENE_DEBOUT_MIN` vaut 0,85 m dans une cage de 8,6 m : à l'œil, les deux pions
+  se touchent presque pendant que le bandeau annonce « À DISTANCE ». La distance
+  de travail réelle tient plutôt entre **1,5 et 2,5 m**, et elle **varie** —
+  c'est sa variation qui fait lire l'échange.
+- **L'arbitre cesse de faire des va-et-vient.** Le défaut est dans
+  `areneRefAvance` (`arene-etat.js`) : l'arbitre vise un point à 2,3 m
+  perpendiculairement à l'axe des deux combattants, et **choisit son côté à
+  chaque image** par `areneBordDist(c1) > areneBordDist(c2)`. Sans hystérésis :
+  quand les deux côtés se valent, le choix alterne et la cible saute de 4,6 m en
+  travers de la cage ; et quand les combattants pivotent l'un par rapport à
+  l'autre, la perpendiculaire change de signe et les deux côtés s'échangent. Il
+  faut **mémoriser le côté choisi et n'en changer que s'il devient nettement
+  moins bon**. Un arbitre se déplace aussi comme un homme : les bornes de la
+  cible 2 s'appliquent à lui.
+- **Cibles 2, 3 et 4 atteintes et publiées**, rapport dans `tools/reports/`. La
+  cible 2 porte désormais un plancher autant qu'un plafond, et **se mesure sur
+  toutes les images, fenêtre de réarrangement comprise** (§2).
 - Le juice suit l'importance : petit éclat pour une touche, secousse et ralenti
   pour un gros coup, anneau pointillé pour un combattant sonné.
 - **Ni note, ni barème, ni jauge.** L'état d'un combattant se lit à son pion et
   à ce qu'il fait.
+- **Le moteur décide toujours tout** (§1). Un déplacement plus riche ne donne
+  aucune décision à l'arène : qui touche, qui gagne et quand restent au déroulé.
+  Si la T3 a besoin de savoir quelque chose que le déroulé ne dit pas, elle
+  l'invente **pour l'œil**, jamais pour le résultat.
 - **Se joue devant Anthony avant d'être acceptée.**
 
 ### T4 — Les deux modes basculent, l'ancienne arène est retirée
