@@ -90,9 +90,16 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
   cycle 12, `H-fly` se retrouve à 0 extérieur et `H-lheavy` à 5. Le quota
   devient **par catégorie** — « au moins N vivants dans chacune ». C'est la
   seule forme qui garantisse un classement partout.
-- **La cible : 25 à 30 vivants par catégorie**, soit ~330 dans le monde — de
-  quoi remplir un top 15 et laisser une dizaine de prétendants crédibles en
-  dessous. *À confirmer par Anthony ; c'est le seul chiffre de la tranche.*
+- **La cible, fixée par Anthony le 22/09 : 30 vivants par catégorie**, soit
+  **360 dans le monde** — un top 15 plein et quinze prétendants derrière lui.
+  Le quota porte sur le monde **entier**, Split compris : l'extérieur complète
+  ce que le roster ne fournit pas dans cette catégorie, et se réajuste quand un
+  combattant est recruté, prend sa retraite ou meurt sportivement. Un
+  recrutement ne doit donc pas vider le monde de l'un pour remplir l'autre.
+- **Compter les vivants, pas les lignes.** Un retraité médical ne compte pas
+  dans le quota (`mgmtDivisionRank` l'exclut déjà) — sans quoi le monde se
+  remplirait de combattants qui ne combattent plus, ce qui est exactement le
+  défaut QO-8 transposé à l'extérieur.
 - **Le coût est mesuré et négligeable** : une ligne pèse 66 octets, une carrière
   se dérive en 0,036 ms. 330 lignes = ~22 Ko de sauvegarde et 13 ms pour tout
   dériver, contre ~80 Ko déjà pris par l'historique après 20 soirées. **Aucune
@@ -102,12 +109,30 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
   Le rang, le bilan, les organisations traversées restent **dérivés à la
   lecture** (`mgmtExteriorTrace(line, cycle)`). Un monde plus grand ne justifie
   aucun cache : le coût mesuré ci-dessus est la preuve qu'il n'en faut pas.
-- **Le classement devient mondial.** `mgmtDivisionRank` (`mgmt-carte.js:389`) ne
-  trie aujourd'hui que `m.roster` — 4 combattants par catégorie. Il doit trier
-  **Split et l'extérieur ensemble**, sur la même loi (écart W−L, puis victoires,
-  puis récence). Un seul classement dans le dépôt, jamais un second à côté
-  (CLAUDE.md §5). Les prétendants ne sont pas une notion séparée : ce sont les
-  rangs 16 et suivants de cette même liste.
+- **Deux classements, une seule loi** (décision d'Anthony du 22/09). Le mode en
+  porte deux, et ils ne disent pas la même chose :
+
+  | Classement | Population triée | Ce qu'il décide |
+  |---|---|---|
+  | **Mondial** | Split **et** l'extérieur | ce que vaut un combattant — son prestige, ce qu'il coûte, ce que son arrivée rapporte |
+  | **De l'organisation** | le roster de Split seul | qui est le prochain pour la ceinture, qui mérite la carte principale |
+
+  **Ce n'est pas un second système au sens de CLAUDE.md §5** — c'est **une seule
+  fonction de tri** (écart W−L, puis victoires, puis récence) appliquée à deux
+  populations. Une seule loi, deux portées. Si la tranche produit deux lois de
+  tri distinctes, elle est refusée : les deux classements doivent diverger par
+  qui ils contiennent, jamais par comment ils trient.
+
+  `mgmtDivisionRank` (`mgmt-carte.js:389`) **est déjà le classement de
+  l'organisation** : il trie `m.roster` et rien d'autre. Il ne disparaît pas, il
+  ne change pas de loi — la tranche lui ajoute une portée mondiale à côté.
+
+- **Les prétendants ne sont pas une notion séparée** : ce sont les rangs 16 et
+  suivants de la liste mondiale. Rien à construire, rien à stocker.
+- **Un combattant porte donc deux rangs à la fois**, et l'écart entre les deux
+  raconte quelque chose : 3e chez Split et 24e mondial, ce n'est pas la même
+  histoire que 3e chez Split et 4e mondial. C'est de la matière pour le lot 4 ;
+  la tranche se contente de rendre les deux nombres justes.
 - **Le combattant recruté ne change pas de rang en changeant de maison.** Signer
   quelqu'un le fait entrer chez Split, pas monter au classement — sinon le
   classement récompenserait le recrutement au lieu des résultats.
@@ -115,14 +140,28 @@ vivier de 330 — construit sur le petit, l'écran serait à refaire.*
   doit se charger. Le quota par catégorie complète les catégories creuses au
   chargement plutôt que de refuser la partie ; `validateMgmt` / `mgmtRepair`
   restent la porte d'entrée.
-- **Tests** : chaque catégorie atteint son quota à l'ouverture et le tient après
-  N cycles ; le classement mondial contient bien Split **et** l'extérieur ; un
-  recrutement ne déplace pas le rang ; une sauvegarde d'avant la tranche se
-  charge et se complète ; la trace reste déterministe et rien n'est écrit sur la
-  ligne.
+- **Tests** : chaque catégorie atteint 30 vivants à l'ouverture et les tient
+  après 20 cycles ; le classement mondial contient bien Split **et**
+  l'extérieur ; le classement de l'organisation ne contient que Split ; les deux
+  rendent le même ordre relatif sur deux combattants de Split (preuve qu'il n'y
+  a qu'une loi) ; recruter quelqu'un ne déplace pas son rang mondial et ne vide
+  pas sa catégorie ; un retraité médical sort des deux classements et du quota ;
+  une sauvegarde d'avant la tranche se charge et se complète ; la trace reste
+  déterministe et rien n'est écrit sur la ligne.
+- **Le sort des lignes mortes, à mesurer avant de trancher.** Le quota porte sur
+  les **vivants** ; les lignes, elles, s'accumulent. QO-8 a montré qu'à
+  l'intérieur de Split, 31 combattants sur 48 se retrouvent retraités médicaux
+  après 20 soirées. Si l'extérieur suit un rythme comparable, tenir 360 vivants
+  sur 20 cycles peut demander deux à trois fois plus de lignes — 800 à 1000,
+  soit 55 à 66 Ko, sur une sauvegarde qui en pèse déjà 80. **La tranche mesure
+  ce chiffre et le rapporte ; elle ne décide pas seule d'élaguer.** Jeter les
+  lignes mortes ferait disparaître le passé du monde, ce qui contredirait QO-9
+  (« le fait ne disparaît jamais ») ; les garder fait grossir le fichier. Le
+  choix revient à Anthony, une fois le nombre connu.
 - **Mesure attendue** : la répartition par catégorie à l'ouverture et après
-  20 cycles, le poids réel de la sauvegarde, et le temps de dérivation complet.
-  Une seule mesure, en fin de tranche.
+  20 cycles, le nombre de lignes **vivantes et totales**, le poids réel de la
+  sauvegarde, et le temps de dérivation complet. Une seule mesure, en fin de
+  tranche.
 
 ### T2 — Le recrutement *(interface — après T1 bis — vérification charte §3 obligatoire)*
 
