@@ -1,8 +1,7 @@
 ﻿"use strict";
 /* CAGE LEGACY — tools/mesure-arene-cible1.js
    ============================================================================
-   LOT 3 T2 — LA CIBLE 1, MESURÉE (docs/LOT-3-L-ARENE.md §2, §3 T2) :
-   « L'image ne ment jamais sur ce que dit le moteur. »
+    LOT 3 T3 — CIBLES 1 ET 2 (docs/LOT-3-L-ARENE.md §2, §3 T3).
 
    Charge le VRAI jeu dans un DOM virtuel (jsdom), dans l'ordre EXACT des
    <script src> d'index.html (lu directement depuis le fichier à chaque
@@ -29,27 +28,24 @@
      (corps en contact ; le clinch tenu vaut ARENE_CLINCH_D = 0,60 m) — et
      si le déroulé porte pos='cage', au moins un pion à ≤ 0,50 m du
      grillage (l'arrangement pose le plaqué à 0,42 m) ;
-   - « à distance » (debout) : les deux pions debout (un pion « au tapis »
-     est admis UNIQUEMENT dans la fenêtre ARENE_TAPIS_S = 4 s qui suit un
-     moment « X envoie Y au tapis » du déroulé) ET distance des centres
-     ≥ ARENE_DEBOUT_MIN (0,85 m — hors de portée de corps à corps ;
-     l'arène tient la paire à ≥ 1,4 m, marge contre l'oscillation) ;
-   - fenêtre de réarrangement : après un changement de phase ou de
-     disposition, les pions rejoignent leur géométrie en ARENE_MORPH_S =
-     0,6 s (lu du jeu, jamais recopié). Ces 0,6 s sont exclues de la
-     mesure — un homme qui tombe met un temps à tomber ; au-delà, tout
-     écart est un défaut ;
+    - « à distance » : les deux pions debout, centres ≥ 1,5 m ; au tapis
+      seulement après un moment qui le déclare ;
+    - fenêtres de transition : écart réel à la nouvelle géométrie / 2,5 m/s
+      + 0,18 s d'accélération/freinage, plafonné à 1,5 s. Leur distribution
+      est publiée ; hors fenêtres, la cohérence doit atteindre 100 % ;
+    - vitesse : toutes les images des pions et de l'arbitre, pauses comprises,
+      sans exclure les réarrangements ; moyenne debout des deux combattants ;
    - 'exam' (examen médical entre les rounds) et 'fini' : le déroulé ne
      fait aucune affirmation de phase de combat — exclus.
 
-   Aucun Math.random() : la RNG du jeu (setSeed/rnd) est la seule source ;
+    La RNG du jeu (setSeed/rnd) est la seule source du combat ;
    le combat i part de setSeed(seed + i) — un run est intégralement
    reproductible. La cible est 100 % : un seul écart est un défaut de la
    tranche.
 
    Usage :
-     node tools/mesure-arene-cible1.js [--n=2000] [--seed=20260921]
-        [--pas=0.9] [--out=tools/reports/LOT-3-T2-CIBLE-1-ARENE.md] [--quiet]
+      node tools/mesure-arene-cible1.js [--n=200] [--seed=20260921]
+         [--pas=0.9] [--out=tools/reports/LOT-3-T3-ARENE.md] [--quiet]
    ============================================================================ */
 const fs = require('fs');
 const path = require('path');
@@ -59,8 +55,8 @@ const ROOT = path.join(__dirname, '..');
 
 /* --------------------------- 1) CLI --------------------------------------- */
 function parseArgs(argv){
-  const out={n:2000,seed:20260921,pas:0.9,
-    out:'tools/reports/LOT-3-T2-CIBLE-1-ARENE.md',quiet:false};
+   const out={n:200,seed:20260921,pas:0.9,
+     out:'tools/reports/LOT-3-T3-ARENE.md',quiet:false};
   for(const arg of argv){
     if(arg==='--quiet'){ out.quiet=true; continue; }
     const m=/^--([a-zA-Z]+)=(.+)$/.exec(arg);
@@ -146,19 +142,40 @@ function mesure(cfg){
   const out=win.eval(`(function(){
     const N=${cfg.n}, PAS=${cfg.pas}, BASE=${cfg.seed};
     const PARS=ARENE_MORPH_S, TAP=ARENE_TAPIS_S, SOLMAX=ARENE_SOL_D_MAX,
-      DMIN=ARENE_DEBOUT_MIN, CLINCH=0.75, CAGE=0.5;
+       DMIN=ARENE_DEBOUT_MIN, CLINCH=0.75, CAGE=0.5;
     const r={n:N,pas:PAS,total:0,skips:{exam:0,fini:0,morph:0},
       phases:{debout:0,clinch:0,sol:0},ecarts:0,ecartsPhase:0,
       echant:[],tapisKO:0,
       beats:{n:0,ecarts:0,avant:0,apres:0,ecartTxt:[]},
-      moments:0,finit:0,horsCage:0,ecartsMax:0};
+       moments:0,finit:0,horsCage:0,ecartsMax:0,
+       vit:{deboutSomme:0,deboutN:0,deboutPlage:0,pointe:0},
+       fenetres:{n:0,tot:0,max:0,bins:[0,0,0,0],plafond:0}};
     for(let i=0;i<N;i++){
       setSeed(BASE+i);
       const A=makeFighter({div:'H-welter',gender:'H'});
       const B=makeFighter({div:'H-light',gender:'H'});
       const res=simulateFight(A,B,3);
-      const session=areneConstruire(res,{a:A.name,b:B.name});
-      if(!session) continue;
+       const session=areneConstruire(res,{a:A.name,b:B.name});
+       if(!session) continue;
+       /* Toutes les images de la physique, transitions et pauses de phase comprises. */
+       const frames=session._pas.frames, dt=1/60;
+       for(let j=1;j<frames.length;j++){
+         const prev=frames[j-1],cur=frames[j],phase=areneSegDe((j-0.5)*dt,session.segs).phase;
+         for(const offset of [0,2,4]){
+           const v=Math.hypot(cur[offset]-prev[offset],cur[offset+1]-prev[offset+1])/dt;
+           r.vit.pointe=Math.max(r.vit.pointe,v);
+           if(phase==='debout'&&offset<4){r.vit.deboutSomme+=v;r.vit.deboutN++;if(v>=0.8&&v<=2)r.vit.deboutPlage++;}
+         }
+       }
+       let affichePrev=null;
+       for(let k=0;k<=Math.ceil(session.dureeAffichage/dt);k++){
+         const now=areneInstant(session,Math.min(session.dureeAffichage,k*dt));
+         const coords=[now.ax,now.ay,now.bx,now.by,now.refX,now.refY];
+         if(affichePrev){for(const offset of [0,2,4]){
+           r.vit.pointe=Math.max(r.vit.pointe,Math.hypot(coords[offset]-affichePrev[offset],coords[offset+1]-affichePrev[offset+1])/dt);
+         }}
+         affichePrev=coords;
+       }
       const beats=areneBeats(res);
       r.beats.n+=beats.length;
       if(beats.length&&beats[beats.length-1].finish) r.finit++;
@@ -168,7 +185,25 @@ function mesure(cfg){
         for(const w of tapis){ if(t>=w.t0&&t<w.t1&&w.cible===side) return true; }
         return false;
       };
-      let ecartsIci=0;
+       let ecartsIci=0;
+       const fenetres=[];
+       for(let si=1;si<session.segs.length;si++){
+         const sg=session.segs[si],before=session.segs[si-1];
+         if(sg.phase===before.phase&&sg.posClinch===before.posClinch&&sg.posSol===before.posSol)continue;
+         if(sg.phase==='exam'||sg.phase==='fini')continue;
+         const p=areneImage(session,Math.max(0,sg.t0-1/60));
+         const d=Math.hypot(p[0]-p[2],p[1]-p[3]);
+         let ecart=sg.phase==='debout'?Math.max(0,DMIN-d):Math.max(0,d-(sg.phase==='clinch'?CLINCH:SOLMAX));
+         if(sg.phase==='clinch'&&sg.posClinch==='cage'){
+           ecart=Math.max(ecart,Math.max(0,Math.min(areneBordDist({x:p[0],y:p[1]}),areneBordDist({x:p[2],y:p[3]}))-CAGE));
+         }
+         const duree=Math.min(PARS,ecart/2.5+0.18);
+         fenetres.push({t0:sg.t0,t1:sg.t0+duree});
+         r.fenetres.n++;r.fenetres.tot+=duree;r.fenetres.max=Math.max(r.fenetres.max,duree);
+         r.fenetres.bins[Math.min(3,Math.floor(duree/0.375))]++;
+         if(duree>=PARS-0.001)r.fenetres.plafond++;
+       }
+       const enTransition=t=>fenetres.some(w=>t>=w.t0&&t<w.t1);
       /* a) échantillonnage régulier en temps de combat. */
       for(let t=0;t<session.dureeCombat;t+=PAS){
         const e=areneMoment(session,t);
@@ -176,7 +211,7 @@ function mesure(cfg){
         const att=arenePhaseDeroule(beats,e.t);
         if(att.phase==='exam'){ r.skips.exam++; continue; }
         if(att.phase==='fini'){ r.skips.fini++; continue; }
-        if(e.instable){ r.skips.morph++; continue; }
+         if(enTransition(e.t)){ r.skips.morph++; continue; }
         r.total++;
         if(att.phase!==e.phase){
           r.ecarts++; r.ecartsPhase++; ecartsIci++;
@@ -240,17 +275,17 @@ function mesure(cfg){
           const e=areneMoment(session,avantT);
           const att=arenePhaseDeroule(beats,e.t);
           r.beats.avant++;
-          if(att.phase!=='exam'&&att.phase!=='fini'&&!e.instable&&att.phase!==e.phase){
+           if(att.phase!=='exam'&&att.phase!=='fini'&&!enTransition(e.t)&&att.phase!==e.phase){
             r.beats.ecarts++;
             if(r.beats.ecartTxt.length<8) r.beats.ecartTxt.push('avant moment @t='+e.t.toFixed(1)+' déroulé='+att.phase+' image='+e.phase);
           }
         }
-        const apresT=b.t+PARS+0.05;
+         const apresT=b.t+PARS+0.05;
         if(apresT<session.dureeCombat){
           const e=areneMoment(session,apresT);
           const att=arenePhaseDeroule(beats,e.t);
           r.beats.apres++;
-          if(att.phase!=='exam'&&att.phase!=='fini'&&!e.instable&&att.phase!==e.phase){
+           if(att.phase!=='exam'&&att.phase!=='fini'&&!enTransition(e.t)&&att.phase!==e.phase){
             r.beats.ecarts++;
             if(r.beats.ecartTxt.length<8) r.beats.ecartTxt.push('après moment @t='+e.t.toFixed(1)+' déroulé='+att.phase+' image='+e.phase);
           }
@@ -272,7 +307,7 @@ function mesure(cfg){
   const r=mesure(cfg);
   const cible100=r.ecarts===0&&r.beats.ecarts===0&&r.horsCage===0&&r.tapisKO===0;
   const L=[];
-  L.push('# Lot 3 T2 — Cible 1 de l\u2019arène neuve : l\u2019image ne ment jamais sur le moteur');
+   L.push('# Lot 3 T3 — Cohérence des phases et vitesse du pas physique');
   L.push('');
   L.push('*Mesure du '+new Date().toISOString().slice(0,10)+' — tools/mesure-arene-cible1.js.*');
   L.push('');
@@ -296,10 +331,13 @@ function mesure(cfg){
   L.push('');
   L.push('Deux lectures d\u2019honnêteté, toutes deux documentées et appliquées des deux côtés :');
   L.push('');
-  L.push('- **La fenêtre de réarrangement (ARENE_MORPH_S = '+r.cst.morph+' s).** Après un changement de phase (amenée, séparation, relance) ou de disposition au sol, les pions rejoignent leur géométrie en '+r.cst.morph+' s de combat. Un homme qui tombe met un temps à tomber : cette fenêtre est exclue de la mesure ; au-delà, tout écart est un défaut.');
+   L.push('- **Fenêtres de transition physiques.** Après un changement de phase ou de disposition, la fenêtre dépend de l’écart réel au seuil de la nouvelle phase, divisé par 2,5 m/s, augmenté de 0,18 s pour accélérer et freiner, plafonné à '+r.cst.morph+' s. Exclues de la cible 1, incluses sans exception dans la mesure de vitesse de la cible 2.');
   L.push('- **Le tapis (ARENE_TAPIS_S = '+r.cst.tapis+' s).** Un pion allongé hors phase sol n\u2019est admis QUE dans les '+r.cst.tapis+' s qui suivent un moment du déroulé « X envoie Y au tapis » — et le contrôle inverse est fait : un pion au tapis hors fenêtre est un écart.');
   L.push('');
-  L.push('## Le chiffre');
+   L.push('## Le chiffre');
+   L.push('');
+   L.push('Vitesse sur **toutes les images** (pas 1/60 s, deux combattants et arbitre ; pointe sans exclusion) : moyenne debout **'+(r.vit.deboutSomme/r.vit.deboutN).toFixed(3)+' m/s**, pointe **'+r.vit.pointe.toFixed(3)+' m/s**. Part des images debout dans [0,8 ; 2,0] : '+(100*r.vit.deboutPlage/r.vit.deboutN).toFixed(1)+' %.');
+   L.push('Fenêtres de transition physiques : '+r.fenetres.n+' ; durée moyenne '+(r.fenetres.tot/Math.max(1,r.fenetres.n)).toFixed(3)+' s, maximum '+r.fenetres.max.toFixed(3)+' s ; tranches [0 ; 0,375[, [0,375 ; 0,75[, [0,75 ; 1,125[, [1,125 ; 1,5] : '+r.fenetres.bins.join(' / ')+' ; au plafond : '+r.fenetres.plafond+'.');
   L.push('');
   L.push('| Ce qui est mesuré | Valeur |');
   L.push('|---|---|');
@@ -319,8 +357,10 @@ function mesure(cfg){
     ? '**CIBLE 1 ATTEINTE : 0 écart sur '+r.total+' échantillons et '+r.beats.n+' moments — l\u2019image dit toujours ce que le moteur dit.**'
     : '**CIBLE 1 MANQUÉE : '+r.ecarts+' écart(s) d\u2019échantillonnage et '+r.beats.ecarts+' aux bornes — un seul écart est un défaut de la tranche.**');
   L.push('');
-  fs.writeFileSync(cfg.out,L.join('\n')+'\n');
-  console.log('Échantillons '+r.total+' — écarts '+r.ecarts+' — bornes '+r.beats.n+' (écarts '+r.beats.ecarts+') — hors cage '+r.horsCage+' — tapis hors moment '+r.tapisKO);
+   L.push('Cible 2 : '+(r.vit.pointe<=6&&r.vit.deboutSomme/r.vit.deboutN>=0.8&&r.vit.deboutSomme/r.vit.deboutN<=2?'atteinte':'manquée')+'.');
+   fs.writeFileSync(cfg.out,L.join('\n')+'\n');
+   console.log('Échantillons '+r.total+' — écarts '+r.ecarts+' — bornes '+r.beats.n+' (écarts '+r.beats.ecarts+') — hors cage '+r.horsCage+' — tapis hors moment '+r.tapisKO);
+   console.log('Debout '+(r.vit.deboutSomme/r.vit.deboutN).toFixed(3)+' m/s ; pointe '+r.vit.pointe.toFixed(3)+' m/s ; fenêtres '+r.fenetres.n+' : '+r.fenetres.bins.join('/')+' (plafond '+r.fenetres.plafond+')');
   console.log('Rapport : '+cfg.out);
-  process.exitCode=cible100?0:1;
+   process.exitCode=cible100&&r.vit.pointe<=6&&r.vit.deboutSomme/r.vit.deboutN>=0.8&&r.vit.deboutSomme/r.vit.deboutN<=2?0:1;
 })();

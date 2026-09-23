@@ -18,7 +18,7 @@
    'center'), by ('me' = combattant A, 'op' = combattant B), text, momentum,
    snapA, snapB. L'arène consomme les moments (phase, transition, amenée,
    tapis, menace de soumission, texte) et REMPLIT LES TROUS entre eux d'un
-   déplacement SIMPLE (T3 apportera le réalisme) : les pions tiennent la
+    déplacement physique du prototype (T3) : les pions tiennent la
    géométrie de leur phase — à distance, au clinch, contre le grillage, au
    sol avec la position nommée. Elle ne décide RIEN de ce que le moteur
    décide : qui touche, qui gagne, quand — tout vient du déroulé.
@@ -65,7 +65,7 @@ const ARENE_COUL_B='#E5322D';
 const ARENE_ROUND_LEN=300;           // secondes de combat par round (moteur)
 
 /* ---- Réglages de mise en scène (présentation, jamais des résultats) ---- */
-const ARENE_MORPH_S=0.6;             // fenêtre de réarrangement des pions après un changement de phase
+const ARENE_MORPH_S=1.5;             // plafond physique des transitions de phase (lot 3 T3)
 const ARENE_ACTION_S=1.4;            // durée affichée d'une signature de frappe
 const ARENE_TEXTE_S=2.5;             // durée d'affichage d'une ligne de texte du moteur
 const ARENE_TAPIS_S=4;               // durée au tapis d'un knockdown non conclu
@@ -73,7 +73,7 @@ const ARENE_FIN_S=1.2;               // temps de combat tenu sur l'image finale 
 const ARENE_FLASH_S=0.35;            // durée de l'éclat d'impact
 const ARENE_PAUSE_S=1.4;             // temps d'AFFICHAGE d'une pause entre les rounds (temps morts défilent vite)
 const ARENE_CLINCH_D=0.6;            // distance des deux pions au clinch (m)
-const ARENE_DEBOUT_MIN=0.85;         // distance minimale debout tenue (m) — « à distance » se lit à l'œil
+const ARENE_DEBOUT_MIN=1.5;          // distance de travail debout (lot 3 T3)
 const ARENE_SOL_D_MAX=0.8;           // distance maximale entre deux pions au sol (m)
 const ARENE_CAGE_CLINCH_BORD=0.42;   // écart au grillage du pion plaqué (m)
 /* Écartement du dessus par position au sol (m, présentation) — l'ordre de
@@ -94,6 +94,8 @@ function areneTourne(v,ang){ const c=Math.cos(ang),s=Math.sin(ang); return {x:v.
 function areneLisse(u){ return u*u*(3-2*u); }
 function areneMilieu(A,B){ return {x:(A.x+B.x)/2,y:(A.y+B.y)/2}; }
 function areneDist(A,B){ return Math.hypot(A.x-B.x,A.y-B.y); }
+function areneBorne(x,a,b){ return Math.max(a,Math.min(b,x)); }
+function areneRayon(p,v){ let t=1e9; for(const n of ARENE_NORMALS){ const d=n.x*v.x+n.y*v.y; if(d>1e-6)t=Math.min(t,(ARENE_RS-n.x*p.x-n.y*p.y)/d); } return t; }
 function areneCoinA(){ return areneVert(ARENE_COIN_A,ARENE_RV*0.8); }
 function areneCoinB(){ return areneVert(ARENE_COIN_B,ARENE_RV*0.8); }
 function areneAngleSemee(idx,sel){ const a=areneAlea(idx*97+(sel||1))()*Math.PI*2; return {x:Math.cos(a),y:Math.sin(a)}; }
@@ -149,6 +151,122 @@ function areneTransitionBeat(b){
 function areneBeatTapis(b){
   if(!b||typeof b.text!=='string'||b.text.indexOf('au tapis')<0) return null;
   return b.by==='me'?'B':'A';
+}
+
+/* ==== [ANCRE: ARENE_T3_PAS] — Lot 3 T3 : moveStanding et escape du prototype
+   validé, alimentés par les seuls faits de res.stats et par le déroulé. ==== */
+function areneProfil(stats){
+  const s=stats||{}, dist=s.distAtt||s.distStrikes||0, close=s.clinchAtt||s.clinchStrikes||0;
+  const td=s.tdAtt||0, total=dist+close+td*2+1;
+  const part=dist/total, grap=(close+td*2)/total;
+  return {a:{speed:areneBorne(0.45+part*0.35+grap*0.15,0.45,0.8),iq:areneBorne(0.45+part*0.3,0.45,0.8),grappling:grap},
+    plan:{range:grap>0.4?'close':part>0.68?'long':'mid',aggr:areneBorne(0.4+(s.sigAtt||0)/Math.max(1,total)*0.35+grap*0.2,0.4,0.9),angle:areneBorne(part*0.55,0.1,0.5)}};
+}
+function areneMobile(pos,profil){ return {pos:{x:pos.x,y:pos.y},vel:{x:0,y:0},step:null,escapeCD:0,pinnedT:0,
+  a:profil.a,plan:profil.plan,leg:0,stam:1,stun:0,down:0,busy:0,pref:2}; }
+function areneEscape(f,o,u,lat,rng){
+  f.escapeCD=1.3+rng()*1.1;
+  const p=areneBorne(0.12+1.3*f.plan.angle*f.a.iq,0.08,0.92);
+  if(rng()<p){
+    const side=areneRayon(f.pos,lat)>areneRayon(f.pos,{x:-lat.x,y:-lat.y})?1:-1;
+    f.step={v:areneNorm({x:lat.x*side-u.x*0.3,y:lat.y*side-u.y*0.3}),speed:1.55,t:0.35+rng()*0.15};
+  }
+}
+function areneMoveStanding(f,o,dt,rng){
+  const to={x:o.pos.x-f.pos.x,y:o.pos.y-f.pos.y},d=Math.hypot(to.x,to.y)||0.01;
+  const u={x:to.x/d,y:to.y/d},lat={x:-u.y,y:u.x};
+  const spd=(0.55+0.9*f.a.speed)*areneBorne(1-f.leg*0.07,0.5,1)*(0.55+0.45*f.stam)*(f.stun>0?0.45:1);
+  let want={x:0,y:0};
+  if(f.down>0){f.vel.x*=0.8;f.vel.y*=0.8;return;}
+  if(f.step){want={x:f.step.v.x*f.step.speed*spd,y:f.step.v.y*f.step.speed*spd};f.step.t-=dt;if(f.step.t<=0)f.step=null;}
+  else if(f.busy<=0){
+    const pref=f.pref,e=d-pref;
+    if(f.stun>0&&f.a.grappling<0.4){if(areneRayon(f.pos,{x:-u.x,y:-u.y})>0.8)want={x:-u.x*0.6*spd,y:-u.y*0.6*spd};}
+    else if(e>0.15){
+      if(rng()<dt*(1+2.6*f.plan.aggr))f.step={v:u,speed:1.25,t:0.16+rng()*0.14};
+      else want={x:u.x*1.5*spd,y:u.y*1.5*spd};
+    }else if(e< -0.15){
+      const back=areneRayon(f.pos,{x:-u.x,y:-u.y});
+      if(back<1.05){if(f.escapeCD<=0)areneEscape(f,o,u,lat,rng);}
+      else if(rng()<dt*(2.2+2*f.a.speed))f.step={v:{x:-u.x,y:-u.y},speed:1.15,t:0.16+rng()*0.12};
+      else want={x:-u.x*1.5*spd,y:-u.y*1.5*spd};
+    }
+    if(f.plan.range==='close'){const ol=o.vel.x*lat.x+o.vel.y*lat.y;want.x+=lat.x*ol*0.85;want.y+=lat.y*ol*0.85;}
+    if(Math.abs(e)<0.3&&areneBordDist(f.pos)<1.4&&f.plan.range!=='close'){
+      const inward=areneNorm(f.pos);want.x-=inward.x*0.3*spd;want.y-=inward.y*0.3*spd;
+    }
+  }
+  f.vel.x+=(want.x-f.vel.x)*Math.min(1,dt*8);f.vel.y+=(want.y-f.vel.y)*Math.min(1,dt*8);
+  f.escapeCD-=dt;
+  if(f.plan.range!=='close'&&areneRayon(f.pos,{x:-u.x,y:-u.y})<0.75&&d<f.pref)f.pinnedT+=dt;
+}
+function areneVers(f,target,dt,max){
+  const dx=target.x-f.pos.x,dy=target.y-f.pos.y,l=Math.hypot(dx,dy);
+  const speed=Math.min(max,l*9), wx=l>0.01?dx/l*speed:0,wy=l>0.01?dy/l*speed:0;
+  f.vel.x+=(wx-f.vel.x)*Math.min(1,dt*12);
+  f.vel.y+=(wy-f.vel.y)*Math.min(1,dt*12);
+}
+function arenePasRef(sim,phase,dt){
+  const A=sim.A.pos,B=sim.B.pos,ref=sim.ref;
+  const M=areneMilieu(A,B),u=areneNorm({x:B.x-A.x,y:B.y-A.y}),perp={x:-u.y,y:u.x};
+  const base=phase==='sol'?B:M,offset=phase==='debout'?2.3:1.8;
+  const c1=areneDedans({x:base.x+perp.x*offset,y:base.y+perp.y*offset},0.6);
+  const c2=areneDedans({x:base.x-perp.x*offset,y:base.y-perp.y*offset},0.6);
+  /* Le signe de la perpendiculaire peut s'inverser : mémoriser le côté physique. */
+  const same=areneDist(ref.side,c1)<=areneDist(ref.side,c2)?c1:c2;
+  const other=same===c1?c2:c1;
+  if(areneBordDist(other)>areneBordDist(same)+0.9)ref.side=other;
+  else ref.side=same;
+  areneVers(ref,phase==='exam'?{x:0,y:-0.4}:ref.side,dt,1.6);
+  const p=areneDedans({x:ref.pos.x+ref.vel.x*dt,y:ref.pos.y+ref.vel.y*dt},0.45);
+  ref.pos=p;
+}
+function arenePas(session,dt,t){
+  const sim=session._pas,sg=areneSegDe(t,session.segs),rng=sim.rng;
+  const A=sim.A,B=sim.B;
+  A.down=0; B.down=0; A.stun=0; B.stun=0;
+  for(const w of session.tapis){
+    if(t>=w.t0&&t<w.t1){
+      const f=w.cible==='A'?A:B; f.down=1; f.stun=1;
+    }
+  }
+  if(sg.phase==='debout'){
+    if(sim.prefAt==null||t>=sim.prefAt){
+      sim.prefAt=t+0.4+rng()*0.2;
+      A.pref=1.5+rng(); B.pref=1.5+rng();
+    }
+    areneMoveStanding(A,B,dt,rng); areneMoveStanding(B,A,dt,rng);
+    const d=areneDist(A.pos,B.pos);
+    if(d<1.65){
+      const u=areneNorm({x:B.pos.x-A.pos.x,y:B.pos.y-A.pos.y});
+      areneVers(A,{x:A.pos.x-u.x*(1.8-d),y:A.pos.y-u.y*(1.8-d)},dt,3.3);
+      areneVers(B,{x:B.pos.x+u.x*(1.8-d),y:B.pos.y+u.y*(1.8-d)},dt,3.3);
+    }
+  }else{
+    const prev={A:A.pos,B:B.pos};let target;
+    if(sg.phase==='clinch')target=areneArrangementClinch(prev,sg.beat&&sg.beat.by==='op'?'B':'A',sg.posClinch,sg.i);
+    else if(sg.phase==='sol')target=areneArrangementSol(prev,sg.top,sg.posSol,sg.i);
+    else target=prev;
+    /* Le point de cage est fixé à l'entrée du segment, pas recalculé à chaque image. */
+    if(sim.segment!==sg){sim.segment=sg;sim.target=target;}
+    areneVers(A,sim.target.A,dt,sg.phase==='clinch'?4.2:2.8);
+    areneVers(B,sim.target.B,dt,sg.phase==='clinch'?4.2:2.8);
+  }
+  for(const f of [A,B]){
+    const v=Math.hypot(f.vel.x,f.vel.y),k=Math.min(1,5.5/(v||1));f.vel.x*=k;f.vel.y*=k;
+    f.pos=areneDedans({x:f.pos.x+f.vel.x*dt,y:f.pos.y+f.vel.y*dt},ARENE_CORPS+0.08);
+  }
+  arenePasRef(sim,sg.phase,dt);
+  return [A.pos.x,A.pos.y,B.pos.x,B.pos.y,sim.ref.pos.x,sim.ref.pos.y];
+}
+function areneImage(session,t){
+  const sim=session._pas,step=1/60,idx=Math.floor(t/step);
+  while(sim.frames.length<=idx+1){
+    const n=sim.frames.length;
+    sim.frames.push(arenePas(session,step,n*step));
+  }
+  const a=sim.frames[idx],b=sim.frames[idx+1],k=t/step-idx;
+  return a.map((v,i)=>v+(b[i]-v)*k);
 }
 
 /** La phase du DÉROULÉ à l'instant t de combat — la source de vérité de la
@@ -280,7 +398,7 @@ function areneNomCourt(c){ const p=String(c||'?').trim().split(/\s+/); return p.
 /** Construit la session d'arène depuis un résultat du moteur et les deux
  *  noms. Aucune décision : tout ce que la session montrera vient de
  *  res.log ; les positions des pions (ce que le moteur ne dit pas) sont
- *  remplies simplement, segment par segment.
+  *  parcourues à vitesse lissée et intégrées par pas fixes.
  *  @param {object} res résultat de simulateFight (ou de mgmtReplayFight).
  *  @param {{a:string,b:string}} noms noms complets des deux combattants
  *    (a = combattant A du résultat, b = B).
@@ -291,7 +409,7 @@ function areneConstruire(res,noms){
   const nb=(noms&&typeof noms.b==='string'&&noms.b)?noms.b:'B';
   const S={res:res,noms:{a:{complet:na,court:areneNomCourt(na),coul:ARENE_COUL_A},
       b:{complet:nb,court:areneNomCourt(nb),coul:ARENE_COUL_B}},
-    _etat:{},_etatAff:{},_ref:{x:0,y:-0.4},_dernierT:-1,tapis:[]};
+     _etat:{},_etatAff:{},tapis:[]};
   const vainqueur=(res.winner==='A'||res.winner==='B')?res.winner:'D';
   S.vainqueur=vainqueur;
   S.methode=typeof res.method==='string'?res.method:'';
@@ -428,6 +546,13 @@ function areneConstruire(res,noms){
   }
   S.segs=segs;
   S.dureeCombat=Math.max(0.1,finT);
+  const seed=(beatsOr.length*7919+Math.floor(finT*37)+
+    (res.stats&&res.stats.A?Math.floor((res.stats.A.sigAtt||0)*101):0))>>>0;
+  const departA=areneCoinA(),departB=areneCoinB();
+  S._pas={A:areneMobile(departA,areneProfil(res.stats&&res.stats.A)),
+    B:areneMobile(departB,areneProfil(res.stats&&res.stats.B)),
+    ref:{pos:{x:0,y:-0.4},vel:{x:0,y:0},side:{x:0,y:-2.3}},rng:areneAlea(seed),segment:null,target:null,
+    frames:[[departA.x,departA.y,departB.x,departB.y,0,-0.4]]};
   /* Montage d'affichage : le temps de combat 1:1, une pause d'affichage
      (les pions regagnent leur coin) avant chaque round nouveau et avant la
      première pause médicale. Les pauses n'occupent AUCUN temps de combat. */
@@ -439,10 +564,11 @@ function areneConstruire(res,noms){
     const pauseAvantExam=sg.phase==='exam'&&!examVu;
     if(pauseAvantRonde||pauseAvantExam){
       if(pauseAvantExam) examVu=true;
-      const depuisA=(i>0)?segs[i-1].fin.A:areneCoinA();
-      const depuisB=(i>0)?segs[i-1].fin.B:areneCoinB();
-      montage.push({genre:'pause',d0:d,d1:d+ARENE_PAUSE_S,rNext:sg.r,
-        fromA:{x:depuisA.x,y:depuisA.y},fromB:{x:depuisB.x,y:depuisB.y}});
+       const image=areneImage(S,sg.t0);
+       const depuisA={x:image[0],y:image[1]};
+       const depuisB={x:image[2],y:image[3]};
+       montage.push({genre:'pause',d0:d,d1:d+ARENE_PAUSE_S,rNext:sg.r,
+         fromA:depuisA,fromB:depuisB,refX:image[4],refY:image[5]});
       d+=ARENE_PAUSE_S;
     }
     montage.push({genre:'combat',d0:d,d1:d+(sg.t1-sg.t0),t0:sg.t0,t1:sg.t1});
@@ -451,6 +577,8 @@ function areneConstruire(res,noms){
   if(montage.length===0) montage.push({genre:'combat',d0:0,d1:S.dureeCombat,t0:0,t1:S.dureeCombat});
   S.montage=montage;
   S.dureeAffichage=Math.max(0.1,d);
+  /* Le rejeu et les sauts dans la chronologie relisent les mêmes images. */
+  areneImage(S,S.dureeCombat);
   return S;
 }
 function arenePosA0(){ return areneCoinA(); }
@@ -480,35 +608,8 @@ function areneMoment(session,t){
   e.t=tt; e.seg=sg.i;
   e.r=sg.r; e.phase=sg.phase; e.top=sg.top; e.posSol=sg.posSol; e.posClinch=sg.posClinch;
   e.fini=tt>=session.dureeCombat-1e-9||sg.phase==='fini';
-  /* Positions : réarrangement (morph) puis dérive vers la cible du segment,
-     avec une respiration latérale (présentation, déterministe). */
-  const dtSeg=sg.t1-sg.t0;
-  let A,B;
-  if(sg.morph&&dtSeg<=ARENE_MORPH_S+0.01){
-    const k=areneLisse(Math.min(1,Math.max(0,(tt-sg.t0)/Math.max(0.01,dtSeg))));
-    A={x:sg.prev.A.x+(sg.fin.A.x-sg.prev.A.x)*k,y:sg.prev.A.y+(sg.fin.A.y-sg.prev.A.y)*k};
-    B={x:sg.prev.B.x+(sg.fin.B.x-sg.prev.B.x)*k,y:sg.prev.B.y+(sg.fin.B.y-sg.prev.B.y)*k};
-  }else if(sg.morph&&tt-sg.t0<ARENE_MORPH_S){
-    const k=areneLisse((tt-sg.t0)/ARENE_MORPH_S);
-    A={x:sg.prev.A.x+(sg.arr.A.x-sg.prev.A.x)*k,y:sg.prev.A.y+(sg.arr.A.y-sg.prev.A.y)*k};
-    B={x:sg.prev.B.x+(sg.arr.B.x-sg.prev.B.x)*k,y:sg.prev.B.y+(sg.arr.B.y-sg.prev.B.y)*k};
-  }else{
-    const base=sg.morph?sg.arr:sg.prev;
-    const t0Eff=sg.morph?sg.t0+ARENE_MORPH_S:sg.t0;
-    const k=areneLisse(Math.min(1,Math.max(0,(tt-t0Eff)/Math.max(0.01,sg.t1-t0Eff))));
-    A={x:base.A.x+(sg.fin.A.x-base.A.x)*k,y:base.A.y+(sg.fin.A.y-base.A.y)*k};
-    B={x:base.B.x+(sg.fin.B.x-base.B.x)*k,y:base.B.y+(sg.fin.B.y-base.B.y)*k};
-  }
-  const uPerpBrut={x:B.x-A.x,y:B.y-A.y};
-  const lPerp=Math.hypot(uPerpBrut.x,uPerpBrut.y);
-  if(lPerp>0.05){
-    const uPerp={x:-uPerpBrut.y/lPerp,y:uPerpBrut.x/lPerp};
-    const wA=Math.sin(tt*1.9+1.3)*0.05, wB=Math.sin(tt*1.6+4.1)*0.05;
-    A={x:A.x+uPerp.x*wA,y:A.y+uPerp.y*wA};
-    B={x:B.x-uPerp.x*wB,y:B.y-uPerp.y*wB};
-  }
-  A=areneDedans(A,ARENE_CORPS+0.08);
-  B=areneDedans(B,ARENE_CORPS+0.08);
+  const image=areneImage(session,tt);
+  const A={x:image[0],y:image[1]},B={x:image[2],y:image[3]};
   e.ax=A.x; e.ay=A.y; e.bx=B.x; e.by=B.y;
   e.d=areneDist(A,B);
   /* Postures — lues sur la phase et les knockdowns du déroulé. */
@@ -544,39 +645,13 @@ function areneMoment(session,t){
   e.horloge=Math.min(ARENE_ROUND_LEN,Math.max(0,ARENE_ROUND_LEN-(tt-(sg.r-1)*ARENE_ROUND_LEN)));
   e.vainqueur=session.vainqueur; e.methode=session.methode;
   e.instable=!!(sg.morph&&tt-sg.t0<ARENE_MORPH_S);
-  areneRefAvance(session,e,tt);
+  e.refX=image[4]; e.refY=image[5];
   return e;
-}
-/** L'arbitre patrouille (vision : « l'arbitre est dans la cage ») : il suit
- *  l'action du côté le plus ouvert de la cage. */
-function areneRefAvance(session,e,tt){
-  const ref=session._ref;
-  let cible;
-  if(e.phase==='fini'||e.phase==='exam'){
-    cible={x:0,y:-0.4};
-  }else if(e.phase==='sol'){
-    cible={x:(e.top==='B')?e.bx:e.ax,y:(e.top==='B')?e.by:e.ay};
-  }else{
-    const M=areneMilieu({x:e.ax,y:e.ay},{x:e.bx,y:e.by});
-    const u=areneNorm({x:e.bx-e.ax,y:e.by-e.ay});
-    const perp={x:-u.y,y:u.x};
-    const c1=areneDedans({x:M.x+perp.x*2.3,y:M.y+perp.y*2.3},0.6);
-    const c2=areneDedans({x:M.x-perp.x*2.3,y:M.y-perp.y*2.3},0.6);
-    cible=areneBordDist(c1)>areneBordDist(c2)?c1:c2;
-  }
-  if(session._dernierT<0||tt<=session._dernierT){ ref.x=cible.x; ref.y=cible.y; }
-  else{
-    const dt=Math.min(0.12,Math.max(0.001,tt-session._dernierT));
-    const k=Math.min(1,dt*2.5);
-    ref.x+=(cible.x-ref.x)*k; ref.y+=(cible.y-ref.y)*k;
-  }
-  session._dernierT=tt;
-  e.refX=ref.x; e.refY=ref.y;
 }
 
 /** État à l'instant d'AFFICHAGE d (montage : combat + pauses entre rounds).
  *  Les pauses occupent un temps d'affichage, jamais de temps de combat :
- *  les pions regagnent leur coin, les temps morts défilent vite (vision).
+  *  les pions restent à leur position pour éviter toute rupture de vitesse.
  *  @returns {object} le même objet d'état d'affichage à chaque appel. */
 function areneInstant(session,d){
   const e=session._etatAff;
@@ -588,18 +663,15 @@ function areneInstant(session,d){
     else { ent=m; lo=mid+1; }
   }
   if(ent.genre==='pause'){
-    const u=areneLisse(Math.min(1,Math.max(0,(dd-ent.d0)/Math.max(0.01,ent.d1-ent.d0))));
-    const cA=areneCoinA(), cB=areneCoinB();
-    e.t=-1; e.phase='coins'; e.r=ent.rNext; e.top=null; e.posSol=null; e.posClinch=null;
-    e.ax=ent.fromA.x+(cA.x-ent.fromA.x)*u; e.ay=ent.fromA.y+(cA.y-ent.fromA.y)*u;
-    e.bx=ent.fromB.x+(cB.x-ent.fromB.x)*u; e.by=ent.fromB.y+(cB.y-ent.fromB.y)*u;
+     e.t=-1; e.phase='coins'; e.r=ent.rNext; e.top=null; e.posSol=null; e.posClinch=null;
+     e.ax=ent.fromA.x; e.ay=ent.fromA.y;
+     e.bx=ent.fromB.x; e.by=ent.fromB.y;
     e.d=areneDist({x:e.ax,y:e.ay},{x:e.bx,y:e.by});
     e.postureA='debout'; e.postureB='debout';
     e.action=null; e.actionProg=0; e.flashA=0; e.flashB=0; e.texte=null;
     e.horloge=60; e.fini=false; e.instable=false;
     e.vainqueur=session.vainqueur; e.methode=session.methode;
-    const ref=session._ref; ref.x+=(0-ref.x)*0.1; ref.y+=(-0.4-ref.y)*0.1;
-    e.refX=ref.x; e.refY=ref.y;
+     e.refX=ent.refX; e.refY=ent.refY;
     return e;
   }
   return areneMoment(session,ent.t0+(dd-ent.d0));
