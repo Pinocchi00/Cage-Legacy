@@ -72,49 +72,66 @@ function mgmtExteriorStream(salt,seed){
 
 /** Crée une ligne extérieure : SON IDENTITÉ, rien d'autre. L'identifiant
  *  vient du compteur de la partie (mgmtNextId), la graine du hachage de
- *  l'identifiant, la catégorie et le pays d'un flux propre au combattant —
- *  aucun tirage de la RNG du jeu. born : le cycle où il entre dans le
+ *  l'identifiant, le pays d'un flux propre au combattant, et la catégorie
+ *  demandée par le quota — aucun tirage de la RNG du jeu. born : le cycle où il entre dans le
  *  monde. @returns {object} */
-function mgmtExteriorCreate(m,born){
+function mgmtExteriorCreate(m,born,divId){
   if(!m||typeof m!=='object') return null;
+  if(!divById(divId)) return null;
   if(!Number.isSafeInteger(m.seq)||m.seq<1) m.seq=1;
   const id=mgmtNextId(m);
   const seed=mgmtExteriorSeedFor(id);
   const r=mgmtExteriorStream('ext-cree',seed);
-  const divs=allDivisions();
-  const div=divs[Math.floor(r()*divs.length)];
   const ck=COUNTRY_KEYS[Math.floor(r()*COUNTRY_KEYS.length)];
-  return {id,seed,div:div.id,ck,born};
+  return {id,seed,div:divId,ck,born};
 }
 
-/** Cohorte initiale du monde extérieur (constantes MGMT_EXT_INIT_*) :
- *  les combattants qui existent déjà hors Split au premier jour, nés au
- *  cycle 0. Idempotent : le monde est créé une fois, jamais renouvelé ici.
- *  Ne consomme aucun tirage de la RNG du jeu.
+/** Nombre de combattants vivants du monde dans une catégorie : Split et
+ *  extérieur ensemble, sans compter un retraité médical. Les doublons d'id
+ *  ne comptent qu'une fois pendant un éventuel transfert. Pur.
+ *  @returns {number} */
+function mgmtWorldLivingCount(m,divId){
+  if(!m||typeof m!=='object'||!divById(divId)) return 0;
+  const ids=new Set();
+  if(Array.isArray(m.roster)){
+    for(const o of m.roster){
+      if(o&&o.div===divId&&o.retired!=='medical'&&mgmtValidId(o.id)) ids.add(o.id);
+    }
+  }
+  if(Array.isArray(m.exterieur)){
+    for(const o of m.exterieur){
+      if(o&&o.div===divId&&mgmtValidExteriorLine(o)) ids.add(o.id);
+    }
+  }
+  return ids.size;
+}
+
+/** Maintient le quota mondial par catégorie. L'extérieur complète ce que
+ *  les vivants de Split ne fournissent pas, sans jamais retirer une ligne.
+ *  À l'ouverture born vaut 0 ; après une retraite, les remplaçants portent
+ *  le cycle où la catégorie a été complétée. Ne consomme aucun tirage de la
+ *  RNG du jeu.
  *  @returns {Array} le vivier extérieur. */
 function mgmtExteriorEnsure(m){
   if(!m||typeof m!=='object') return [];
   if(!Array.isArray(m.exterieur)) m.exterieur=[];
-  if(m.exterieur.length>0) return m.exterieur;
-  const r=mgmtExteriorStream('ext-cohorte',duelFnv1a32('ext-cohorte|init'));
-  const n=MGMT_EXT_INIT_MIN+Math.floor(r()*MGMT_EXT_INIT_SPREAD);
-  for(let i=0;i<n;i++) m.exterieur.push(mgmtExteriorCreate(m,0));
+  const born=Number.isSafeInteger(m.cycle)&&m.cycle>=0?m.cycle:0;
+  for(const div of allDivisions()){
+    while(mgmtWorldLivingCount(m,div.id)<MGMT_EXT_LIVE_PER_DIVISION){
+      m.exterieur.push(mgmtExteriorCreate(m,born,div.id));
+    }
+  }
   return m.exterieur;
 }
 
-/** Flux régulier du monde extérieur (QO-8, décision 2 : AUCUN nombre fixe —
- *  le compte du cycle se dérive du cycle lui-même, jamais d'un quota) :
- *  de nouveaux combattants entrent dans le monde au cycle courant (born =
- *  m.cycle). Appelé à l'ouverture de chaque cycle, après son incrémentation.
- *  Ne consomme aucun tirage de la RNG du jeu.
+/** Flux du monde extérieur : à l'ouverture de chaque cycle, après son
+ *  incrémentation, les catégories que les retraites ou recrutements ont
+ *  creusées sont ramenées à 30 vivants, Split compris. Le nombre d'arrivées
+ *  dépend donc de l'état du monde, jamais d'un tirage global.
  *  @returns {Array} le vivier extérieur. */
 function mgmtExteriorArrive(m){
   if(!m||typeof m!=='object'||!Number.isSafeInteger(m.cycle)||m.cycle<0) return [];
-  if(!Array.isArray(m.exterieur)) m.exterieur=[];
-  const r=mgmtExteriorStream('ext-arrivees',m.cycle);
-  const n=Math.floor(r()*4);
-  for(let i=0;i<n;i++) m.exterieur.push(mgmtExteriorCreate(m,m.cycle));
-  return m.exterieur;
+  return mgmtExteriorEnsure(m);
 }
 
 /** Nom dérivé d'une ligne extérieure : makeName (le générateur du jeu,

@@ -160,26 +160,32 @@ const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',s
    aucun nom de personnage. ==== */
 
 /* Les organisations extérieures où combattent les combattants hors Split,
-   en ordre de prestige croissant (la première est la petite orga de départ,
-   la suivante est un cran au-dessus). [EMPLACEMENT AUTEUR] : aucun nom
-   d'organisation n'existe dans mgmt-data.js, et aucun nom n'est inventé ici
-   — les emplacements restent vides (null) tant que l'auteur ne les a pas
-   écrits ; la trace dérivée porte alors la donnée (combien, quand, combien
-   de combats) sans le nom. SPLIT-CONTEXTE-DEPART.md laisse les deux
-   premières organisations mondiales à écrire. */
-const MGMT_EXT_ORGS=[null,null,null,null];
+   en ordre de prestige CROISSANT : la première est celle où l'on commence
+   quand on n'a rien, la dernière est celle que Split peut rivaliser sans la
+   dépasser. Un combattant y monte les échelons après MGMT_EXT_ORG_MIN_FIGHTS
+   combats, sur une série de victoires.
+
+   Noms et ordre écrits par Anthony le 22/09/2026 (contenu d'auteur — voir
+   docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §5 e). Ils remplacent les quatre
+   [EMPLACEMENT AUTEUR] du lot 2B T1.
+
+   Attention : cette échelle n'est PAS le classement des organisations rivales
+   de Split (SPLIT-CONTEXTE-DEPART.md §8, « entrer dans le top 5 »), qui
+   n'existe pas encore dans le code et compte plus de cinq organisations —
+   sinon l'objectif du patron serait acquis d'avance. Ne pas confondre les
+   deux listes. */
+const MGMT_EXT_ORGS=['Garden of Blood','MMA Korner','Ultimate Rim','Fighting Pacific Championship'];
 
 /* Calendrier du monde extérieur : une année sportive compte MGMT_EXT_YEAR_WEEKS
    semaines ; un cycle du bureau dure MGMT_EVENT_WEEKS semaines (lot 3a) —
    l'âge courant avance donc de MGMT_EVENT_WEEKS semaines par cycle. */
 const MGMT_EXT_YEAR_WEEKS=52;
 
-/* Population du monde à l'ouverture du bureau : la cohorte initiale (les
-   combattants qui existent déjà hors Split au premier jour). Le flux des
-   cycles suivants n'a PAS de nombre fixe (décision 2 du 21/09) : il se
-   dérive cycle par cycle. */
-const MGMT_EXT_INIT_MIN=28;
-const MGMT_EXT_INIT_SPREAD=8;
+/* Lot 2B T1 bis : le monde entier tient 30 combattants vivants dans chacune
+   des douze catégories, roster de Split compris. L'extérieur ne porte donc
+   pas un effectif propre : il complète exactement ce que Split ne fournit
+   pas dans la catégorie. */
+const MGMT_EXT_LIVE_PER_DIVISION=30;
 
 /* Âge à l'entrée dans le monde (MGMT_EXT_AGE_MIN à MIN+SPREAD-1) et âge de
    début de carrière amateur (les débuts, à 18-21 ans). */

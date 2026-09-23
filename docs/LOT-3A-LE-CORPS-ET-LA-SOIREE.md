@@ -55,7 +55,9 @@ arrive au lot 3b et lira ce que ce lot produit.
 Nombre caché, de 0 à 100. **Jamais affiché**, ni en chiffre, ni en jauge, ni en couleur, ni
 en libellé.
 
-- Il ne descend **jamais**. Il ne fait que monter ou rester.
+- **Décision d'Anthony du 22/09/2026 :** il récupère partiellement et lentement au repos ;
+  une part des dégâts de chaque combat reste définitivement acquise, et un combat ne fait
+  jamais descendre le total courant.
 - À 100 : fin de carrière médicale, définitive.
 - Constante `MGMT_BODY_THRESHOLD = 60` : le seuil au-delà duquel un corps est usé. Ce lot
   ne l'affiche nulle part ; il sert au calibrage et au lot 3b.
@@ -176,10 +178,12 @@ infligé ou encaissé, et prendre ce qu'il a encaissé. Cibles d'ordre de grande
 après le combat dont la probabilité croît avec les dégâts encaissés et le traumatisme. Le
 type vient de `rollInjury()`, inchangé.
 
-**6.3 Suspension médicale.** Non contournable (addendum §15). Durées en jours, converties
-en cycles **arrondis au supérieur** (`Math.ceil(jours / (MGMT_EVENT_WEEKS * 7))`) : une
-suspension n'est jamais plus courte que prévu. Avec 5 semaines par cycle : 30 j = 1,
-60 j = 2, 90 j = 3, 180 j = 6.
+**6.3 Suspension médicale.** Non contournable (addendum §15). Durées en jours. Le premier
+cycle jouable est celui dont la date tombe après l'échéance : avec 5 semaines entre deux
+soirées, une suspension de 30 jours n'écarte pas de la soirée à J+35 ; 60 jours écarte de
+J+35 mais pas de J+70 ; 90 jours écarte de J+35 et J+70 ; 180 jours écarte jusqu'à J+175,
+mais pas de J+210. **Correction T1 ter du 22/09/2026 :** l'ancien calcul gardait chaque
+suspension une soirée de trop.
 
 | Situation | Suspension |
 |---|---|
@@ -291,7 +295,8 @@ Ajouter tel quel à `docs/CDC-ADDENDUM-2-LES-SIX-REGARDS.md`, à la fin du §3 :
 - `mgmtTrauma` et `mgmtCombatProfile` : identiques d'un appel à l'autre, et sans effet sur
   la suite de `rnd()`.
 - Traumatisme 0 : combat identique au moteur nu, même graine.
-- Le traumatisme ne descend jamais et reste dans [0, 100].
+- **Décision d'Anthony du 22/09/2026 :** le traumatisme reste dans [0, 100], sa part
+  acquise ne se récupère jamais, et un combat ne fait jamais descendre le total courant.
 - Fin de carrière définitive : jamais reproposé, jamais remis en carte.
 - Suspendus exclus de toutes les propositions jusqu'à la fin de la suspension, puis de
   nouveau proposables.
