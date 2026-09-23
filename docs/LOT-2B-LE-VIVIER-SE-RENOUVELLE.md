@@ -681,6 +681,12 @@ sur une série de victoires. L'ordre d'Anthony :
 | 3 | **Ultimate Rim** | il a percé |
 | 4 | **Fighting Pacific Championship** | le sommet extérieur — celui que Split rivalise sans le dépasser |
 
+**Ordre maintenu en connaissance de cause (23/09/2026).** Dans le mode carrière,
+Ultimate Rim est la ligue de la gloire et Pacific Championship celle de
+l'argent (`engine-career.js`, ancre `PLAFOND_BOURSE_SOMMET`) ; ici le Fighting
+Pacific est au sommet du prestige. Signalé à Anthony, qui garde cet ordre : on
+n'y touche pas.
+
 Mesuré sur trente-cinq lignes du monde dérivé (graine 20260922, cycle 12) : 35
 passent par Garden of Blood, 24 atteignent MMA Korner, 15 Ultimate Rim, 8 le
 Fighting Pacific. La pyramide se resserre à chaque échelon — c'est ce qu'on
