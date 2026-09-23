@@ -335,6 +335,30 @@ déplacement.
 
 ### T4 — Les deux modes basculent, l'ancienne arène est retirée
 
+*Précisé le 23/09/2026, avant le lancement.*
+
+- **La référence visuelle est « la maquette vidéo » d'Anthony** :
+  `prototypes/arene.html` en mouvement, encadré par l'écran de la maquette
+  `maquettes/05-la-soiree.html` (1920×1080, octogone en grand, fil du combat sur
+  le côté — « R2 3:40 — Damagaev coupe la cage, Swat dos au grillage »). **Le
+  rendu se porte comme le déplacement s'est porté à la T3** : la section 11 du
+  prototype (`drawFence`, `drawToken`, `drawLabel`, `drawRef`, `drawCornermen`,
+  `drawFx`, `draw`, l. 693 à 844) remplace le dessin du socle là où il s'en
+  écarte. Défauts connus du socle à faire disparaître : les pions cachés sous
+  leurs étiquettes, le combat illisible quand il passe sur le logo.
+- **Ce que montre « tout simuler » et « simuler un par un »** : par défaut, le
+  résultat et les moments clés du déroulé (knockdowns, soumission serrée,
+  finition). *Décision d'auteur encore due par Anthony* ; ce défaut est posé pour
+  avancer et se règle sans toucher au reste.
+- **Un test garde la cible 2** : sur quelques combats à graine fixe, aucune image
+  ne dépasse 6 m/s (combattants et arbitre). Sans lui, seule la mesure verrait
+  revenir un saut.
+- **Côté management, seul `mgmt-screens.js` se modifie.** Les fonctions de la
+  soirée et du rejeu (`mgmtRunEvent`, `mgmtReplayFight`, `mgmtFightHistory`) se
+  lisent, elles ne se réécrivent pas : une autre tranche travaille en parallèle
+  dans `mgmt-corps.js`, `mgmt-monde.js`, `mgmt-data.js`, `mgmt-save.js`,
+  `mgmt-argent.js`.
+
 - La soirée du management se regarde (C2, M3), avec les **trois commandes**
   (décision 3) : voir un à un, tout simuler, simuler un par un.
 - La carrière bascule sur l'arène neuve.

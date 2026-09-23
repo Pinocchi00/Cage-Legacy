@@ -388,6 +388,13 @@ l'infirmerie.
 
 - **La retraite**, seule sortie ordinaire. Elle retire le combattant du vivier
   et des classements, sans drame et sans réplique (décision 6).
+- **La règle de la retraite est celle de la carrière**, une seule loi comme pour
+  le déclin (23/09) : `engine-career.js:161` — retraite obligatoire à **42 ans**,
+  avancée jusqu'à **39** selon la dégradation du menton
+  (`max(39, 42 − chinDegradationLevel)`). Le management n'a pas de
+  `chinDegradationLevel` : son équivalent se dérive du traumatisme acquis et du
+  déclin du menton (T1 ter, T2 bis). La correspondance retenue est écrite,
+  mesurée et publiée — pas choisie en silence.
 - **Sauvegarde** : évolution du format par la migration du circuit management
   (`mgmtMigrate`) et sa validation (`validateMgmt`, `mgmtRepair`). Jamais de
   plantage au chargement, jamais de contamination avec la carrière.
@@ -452,8 +459,16 @@ l'infirmerie.
 - `tools/monte-carlo-economie.js` mesure désormais des organisations **qui se
   renouvellent**, sur `--soirees=K` avec K assez grand pour voir la dixième
   soirée.
-- **Mesure demandée (§5 c)** : recruter sans retenue est-il la stratégie
-  dominante ? Comparer un joueur qui recrute tout à un joueur qui recrute peu.
+- **⚠ Ce qui attend le recrutement (23/09).** Le recrutement (T2) attend la
+  presse du lot 5. Sans lui, rien n'entre chez Split : après la T3, le roster ne
+  peut que fondre, et une mesure « sur la durée de vie » ne mesurerait que cette
+  fonte. Cette tranche fait donc **maintenant** le salaire à la victoire et le
+  recalibrage de l'économie **sur vingt soirées** (le calibrage du lot 2 T4 est
+  caduc depuis la T1 ter) ; **la cible sur la durée de vie et la mesure
+  ci-dessous passent avec la T2**, quand des combattants pourront arriver.
+- **Mesure demandée (§5 c), reportée avec la T2** : recruter sans retenue
+  est-il la stratégie dominante ? Comparer un joueur qui recrute tout à un
+  joueur qui recrute peu.
 - **La cible de QO-8** : le joueur d'écran reste dans la bande 70 à 80 % de
   soirées rentables **sur la durée de vie de l'organisation**, et non plus
   seulement à la première soirée. Les constantes d'économie sont recalibrées si
