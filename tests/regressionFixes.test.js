@@ -1347,67 +1347,43 @@ test('P8_L6_ADAPTABILITY_TOUJOURS_LU_EN_COMBAT — eff().fightIQ lit toujours ad
     `eff().fightIQ doit augmenter avec adaptability (tout le reste égal) — obtenu ${effLow.fightIQ} (adapt=10) vs ${effHigh.fightIQ} (adapt=90)`);
 });
 
-/* ==== [ANCRE: TEST_P8_L6_BELL_COMPAT] — Lot 6/P8 §6.1 : "une sauvegarde
-   antérieure peut contenir un log qui [contient un beat phase:'bell'], et
-   le rejeu ne doit pas casser dessus." Le moteur n'en émet plus (cf.
-   P8_L6_COIN_ABSENT ci-dessus), mais applyBeat() (ui-09-arena.js) doit
-   continuer à le comprendre sans exception pour rejouer une sauvegarde
-   d'avant ce lot — ancre P8_L6_BELL_COMPAT dans ui-09-arena.js. ==== */
-test('P8_L6_BELL_COMPAT — applyBeat() rejoue sans erreur un beat phase:\'bell\' hérité d’une sauvegarde antérieure au retrait du coin', () => {
+/* ==== [ANCRE: TEST_P8_L6_BELL_COMPAT] — Lot 3 T4, décision 1 du 21/09 :
+   la nouvelle arène remplace applyBeat ; un beat bell hérité garde son texte
+   dans le déroulé et n'empêche pas la construction du rejeu. ==== */
+test('P8_L6_BELL_COMPAT — un beat bell hérité conserve son texte dans le rejeu neuf', () => {
   const win = newGameWindow();
-  const bridge = win.document.createElement('script');
-  bridge.textContent = "Object.defineProperty(window,'ARENA',{configurable:true,get:function(){return ARENA;},set:function(v){ARENA=v;}});";
-  win.document.body.appendChild(bridge);
-  win.buildStaticPreviewArena('Moi', 'Adversaire', 'FR', 'US');
   const legacyText = '[02:15] Le coin de Moi recadre la stratégie : plus de mouvement, moins de temps dans la ligne droite.';
-  assert.doesNotThrow(() => win.applyBeat({ phase: 'bell', text: legacyText }),
-    'applyBeat() ne doit jamais planter sur un beat phase:\'bell\' hérité');
-  assert.equal(win.ARENA.currentText, legacyText, 'le texte du beat hérité doit toujours s\'afficher');
+  const result=JSON.parse(win.eval(`(function(){
+    const res={winner:'A',method:'Décision unanime',round:2,
+      log:[{r:1,phase:'bell',text:${JSON.stringify(legacyText)}},
+        {r:2,phase:'debout',text:'[04:30] Le combat reprend.'}]};
+    const s=areneConstruire(res,{a:'Moi',b:'Adversaire'});
+    return JSON.stringify({texte:areneMoment(s,165).texte,beats:areneBeats(res).length});
+  })()`));
+  assert.equal(result.beats,2);
+  assert.equal(result.texte,legacyText.replace(/^\[02:15\] /,''));
 });
 
-/* ==== [ANCRE: TEST_P8_L6_ARENA_PAUSE_SANS_BASCULE] — Lot 6/P8 §6.2, critère
-   d'acceptation direct : "l'arène se joue de bout en bout sans blocage : la
-   pause de fin de round et son bouton fonctionnent toujours, aucun combat
-   ne reste figé sur un overlay qui n'existe plus." ARENA (`let` de premier
-   niveau, ui-09-arena.js) n'est pas exposée sur `window` — un pont local,
-   même principe que le pont `G` de loadGame.js (ancre
-   TESTS_LOADGAME_G_BRIDGE), le rend inspectable/pilotable ici sans toucher
-   au harnais partagé pour un seul test. `requestAnimationFrame` est
-   remplacé par un simple enregistreur synchrone : le vrai rAF de jsdom
-   diffère l'appel (asynchrone), alors que ce test vérifie seulement QUE
-   `CL.nextRound()` en redemande un avec la bonne fonction, pas le
-   déroulé réel de l'animation. Construit un état "juste en pause après le
-   round 1" à la main (celui que la vraie boucle pose dans startArena()) au
-   lieu de faire tourner l'animation en temps réel (BEAT_MS=750ms/beat,
-   bien trop lent pour un test). ==== */
-test('P8_L6_ARENA_PAUSE_SANS_BASCULE — CL.nextRound() relève la pause de fin de round sans jamais passer par un overlay de bascule', () => {
+/* ==== [ANCRE: TEST_P8_L6_ARENA_PAUSE_SANS_BASCULE] — Lot 3 T4,
+   décision 1 du 21/09 : la pause est un segment d'affichage traversable
+   par Moment suivant, sans overlay ni blocage de la boucle. ==== */
+test('P8_L6_ARENA_PAUSE_SANS_BASCULE — Moment suivant traverse la pause entre rounds', () => {
   const win = newGameWindow();
-  const bridge = win.document.createElement('script');
-  bridge.textContent = "Object.defineProperty(window,'ARENA',{configurable:true,get:function(){return ARENA;},set:function(v){ARENA=v;}});";
-  win.document.body.appendChild(bridge);
-
-  win.buildStaticPreviewArena('Moi', 'Adversaire', 'FR', 'US');
-  assert.ok(win.ARENA, 'ARENA doit être initialisée par buildStaticPreviewArena()');
-
-  win.ARENA.beats = [{ phase: 'sol', by: 'me', round: 1, text: 'x' }, { phase: 'sol', by: 'op', round: 2, text: 'y' }];
-  win.ARENA.lastBeat = 0;
-  win.ARENA.roundPause = true;
-  win.ARENA.pendingBeatIdx = 1;
-  win.ARENA.t0 = win.performance.now() - 1000;
-  win.ARENA.pauseOffset = 0;
-  const loopFn = () => {};
-  win.ARENA.loopFn = loopFn;
-
-  const el = win.document.getElementById('ar-log') || win.document.body.appendChild(Object.assign(win.document.createElement('div'), { id: 'ar-log' }));
-  win.renderArenaOverlay();
-  assert.match(el.innerHTML, /Round suivant/, 'la pause de fin de round doit toujours afficher son bouton');
-  assert.doesNotMatch(el.innerHTML, /bascule/i, 'aucun overlay de bascule ne doit plus jamais être produit (retiré au Lot 6/P8)');
-
-  let rafCalledWith = null;
-  win.requestAnimationFrame = (fn) => { rafCalledWith = fn; return 999; };
-  assert.doesNotThrow(() => win.CL.nextRound(), 'CL.nextRound() ne doit jamais planter après le retrait de la garde ARENA.basculePending');
-  assert.equal(win.ARENA.roundPause, false, 'la pause doit être levée');
-  assert.equal(rafCalledWith, loopFn, 'resumeArenaPlayback() doit relancer exactement la même boucle (loopFn)');
+  const result=JSON.parse(win.eval(`(function(){
+    const res={winner:'A',method:'Décision unanime',round:2,
+      log:[{r:1,phase:'debout',text:'[04:20] Première action.'},
+        {r:2,phase:'debout',text:'[04:30] Deuxième action.'}]};
+    areneEcranCharger(res,{a:'Moi',b:'Adversaire'});
+    const ec=ARENE_ECRAN, pause=ec.session.montage.find(x=>x.genre==='pause');
+    ec.d=pause.d0+0.1;
+    const avant=areneInstant(ec.session,ec.d).phase;
+    CL.areneSocleSuivant();
+    return JSON.stringify({avant,apres:areneInstant(ec.session,ec.d).phase,
+      d:ec.d,fin:pause.d1});
+  })()`));
+  assert.equal(result.avant,'coins');
+  assert.ok(result.d>=result.fin,'le saut quitte la pause');
+  assert.notEqual(result.apres,'coins');
 });
 
 /* ==== [ANCRE: TEST_P8_L7_VOCABULAIRE_DECISIONS] — Lot 7/P8 §7.3 : couvre les

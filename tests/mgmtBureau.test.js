@@ -47,11 +47,13 @@ function mgmtFirstSingle(win){
   return win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id`);
 }
 
-/* « Continuer » jusqu'à la réouverture du bureau : soirée, puis lendemain
-   s'il y a des touchés (lot 3a §7 : séquence imposée et courte). Les tests
-   clickent les deux écrans quand ils existent ; sans touché, la soirée
-   enchaîne directement sur le cycle suivant. */
+/* Lot 3 T4, décision 3 du 21/09 : la soirée ne se saute plus par Continuer.
+   Traverser effectivement les neuf combats en mode « simuler un par un »
+   avant le lendemain, afin de protéger le cycle autant que les commandes. */
 function mgmtFinishEvent(win){
+  const n=win.eval(`G.mgmt.lastEvent.fights.length`);
+  for(let i=0;i<n;i++) win.eval(`CL.mgmtSoireeSimuler()`);
+  assert.equal(win.eval(`MGMT_SOIREE.index`),n,'tous les combats sont traversés');
   win.eval(`CL.mgmtSoireeNext()`);
   if(win.eval(`G.screen`)==='mgmt_lendemain') win.eval(`CL.mgmtLendemainNext()`);
 }

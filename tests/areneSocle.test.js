@@ -14,8 +14,8 @@
    - le garde-fou du rejeu (tâche 3, relecture de la T1) : une trace
      trafiquée dont l'issue diverge est refusée, rien n'est montré, et
      l'emplacement auteur du refus s'affiche ;
-   - la coexistence avec l'ancienne arène (interdit T2) : aucun nom global
-     repris, l'ancienne vit toujours.
+    - Lot 3 T4, décision 1 du 21/09 : l'arène unique sert la carrière et le
+      duel ; la cible 2 interdit tout déplacement au-delà de 6 m/s.
    ============================================================================ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -202,29 +202,66 @@ test('ARENE socle — sans canvas le dessin ne plante pas, et toute action clavi
     'chaque action clavier a son bouton (charte S5)');
 });
 
-/* ---- Tâche 1 : aucune collision avec l'ancienne arène ---------------------- */
-test('ARENE socle — les noms globaux de l\u2019arène neuve ne touchent pas à l\u2019ancienne', () => {
+/* ==== [ANCRE: TEST_ARENE_T4_UNIQUE] — Lot 3 T4, décision 1 du 21/09 :
+   l'ancienne arène est retirée et les deux modes partagent l'écran. ==== */
+test('ARENE T4 — une seule arène et la carrière la charge depuis le moteur', () => {
   const win = newGameWindow();
-  /* L'ancienne arène vit encore : son moteur de rendu répond toujours. */
-  const bridge = win.document.createElement('script');
-  bridge.textContent = "Object.defineProperty(window,'ARENA',{configurable:true,get:function(){return ARENA;},set:function(v){ARENA=v;}});";
-  win.document.body.appendChild(bridge);
-  win.buildStaticPreviewArena('Moi','Adversaire','FR','US');
-  assert.ok(win.ARENA,'l\u2019ancienne arène fonctionne toujours');
-  assert.equal(typeof win.applyBeat,'function','l\u2019ancienne arène garde ses fonctions');
-  /* L'arène neuve est là, sous son préfixe à elle. */
-  for(const nom of ['areneConstruire','areneMoment','areneInstant','areneVerdictFidele',
-    'areneVueCreer','areneVueDessiner','arenePhaseDeroule','scr_arene_socle']){
-    assert.equal(typeof win[nom],'function','global nouveau présent : '+nom);
-  }
-  /* Un combat frais passe par l'écran sans toucher à l'ancienne. */
   combatFrais(win,777401);
   const s = JSON.parse(win.eval(`(function(){
-    areneEcranCharger(window.__res,window.__noms,null);
-    const session=ARENE_ECRAN.session;
-    areneMoment(session,1.0);
-    return JSON.stringify({ok:!!session,arenaBeats:ARENA&&ARENA.beats.length});
+    G={theme:'dark',screen:'arena',f:{name:window.__noms.a},
+      pending:{res:window.__res,opp:{name:window.__noms.b}}};
+    render();
+    return JSON.stringify({ok:!!ARENE_ECRAN.session,canvas:!!document.getElementById('arene-socle-cv'),
+      old:typeof startArena});
   })()`));
   assert.equal(s.ok,true,'la session neuve se charge');
-  assert.equal(s.arenaBeats,0,'l\u2019ancienne arène est intacte et toujours en place');
+  assert.equal(s.canvas,true,'la carrière affiche le même canvas');
+  assert.equal(s.old,'undefined','l\u2019ancienne boucle n\u2019existe plus');
+});
+
+/* ==== [ANCRE: TEST_ARENE_T4_VITESSE] — Lot 3 T4, cible 2 : toutes les images
+   y compris les transitions, aucun pion ni arbitre au-dessus de 6 m/s. ==== */
+test('ARENE T4 — cible 2 : aucune image au-dessus de 6 m/s', () => {
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(function(){
+    let max=0,images=0;
+    for(const seed of [777501,777502,777503]){
+      setSeed(seed);
+      const A=makeFighter({div:'H-welter',gender:'H'});
+      const B=makeFighter({div:'H-welter',gender:'H'});
+      const s=areneConstruire(simulateFight(A,B,3),{a:A.name,b:B.name});
+      let prev=null;
+      for(let t=0;t<s.dureeCombat;t+=1/30){
+        const e=areneMoment(s,t);
+        if(prev){
+          for(const [x,y] of [[e.ax,e.ay],[e.bx,e.by],[e.refX,e.refY]]){
+            const p=prev.shift();
+            const v=Math.hypot(x-p[0],y-p[1])*30;
+            if(v>max)max=v;
+          }
+        }
+        prev=[[e.ax,e.ay],[e.bx,e.by],[e.refX,e.refY]];
+        images++;
+      }
+    }
+    return JSON.stringify({max,images});
+  })()`));
+  assert.ok(r.images>1000);
+  assert.ok(r.max<=6,'vitesse maximale mesurée '+r.max+' m/s');
+});
+
+/* ==== [ANCRE: TEST_ARENE_T4_HALO] — Lot 3 T4, décision 1 du 21/09 :
+   le halo de soumission vient du beat sub ou de la finition du moteur. ==== */
+test('ARENE T4 — halo de soumission sur menace et finition', () => {
+  const win=newGameWindow();
+  const events=JSON.parse(win.eval(`(function(){
+    const res={winner:'A',method:'Soumission',round:1,
+      log:[{r:1,phase:'sol',top:'A',pos:'closedGuard',sub:true,
+        text:'[04:00] Soumission serrée.'},
+        {r:1,phase:'sol',top:'A',finish:true,text:'[03:30] Soumission.'}]};
+    const s=areneConstruire(res,{a:'A',b:'B'});
+    return JSON.stringify([areneMoment(s,60.2).action.type,
+      areneMoment(s,90.2).action.type]);
+  })()`));
+  assert.deepEqual(events,['sub','sub']);
 });

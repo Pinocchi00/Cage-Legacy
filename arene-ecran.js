@@ -38,7 +38,7 @@
 
 /* Trace de rendu (jamais persistée, motif MGMT_CART) : la session courante
    et l'état de lecture. */
-let ARENE_ECRAN={compteur:0,session:null,refuse:false,trace:null,vue:null,
+let ARENE_ECRAN={compteur:0,session:null,refuse:false,trace:null,vue:null,retour:null,finRetour:null,
   d:0,offset:0,t0:0,vitesse:1,pause:false,fini:false,raf:0};
 const ARENE_ECRAN_BASE_SEED=20260921;
 
@@ -111,8 +111,9 @@ function areneResultatTxt(session){
 }
 
 function scr_arene_socle(){
-  const ec=ARENE_ECRAN;
-  const retour=`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocleQuitter()">← Retour au titre</button>`;
+   const ec=ARENE_ECRAN;
+   const mode=ec.retour?'La soirée':'L’arène';
+   const retour=`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocleQuitter()">← Retour</button>`;
   if(ec&&ec.refuse){
     /* Garde-fou du rejeu (ancre ARENE_T2_GARDE_REJEU) : issue divergente,
        RIEN n'est montré — ni arène, ni combat. Ce que l'écran dit alors est
@@ -135,10 +136,10 @@ function scr_arene_socle(){
   }
   const s=ec.session;
   const nomA=esc(s.noms.a.complet), nomB=esc(s.noms.b.complet);
-  return `<div class="scr" style="max-width:1100px;margin:0 auto;padding:20px 16px 40px">`
+   return `<div class="scr" style="max-width:1920px;margin:0 auto;padding:20px 32px 40px">`
     +`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">`
-    +`<div><div class="eyebrow gold">Arène — socle (lot 3, tranche 2)</div>`
-    +`<h2 class="disp" style="font-size:26px">L'arène</h2></div>${retour}</div>`
+     +`<div><div class="eyebrow gold">Cage Legacy</div>`
+     +`<h2 class="disp" style="font-size:26px">${mode}</h2></div>${retour}</div>`
     +`<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;gap:16px;margin:14px 0 8px">`
     +`<div style="min-width:0"><div style="width:min(320px,90%);height:5px;background:${ARENE_COUL_A};transform:skewX(-20deg)"></div>`
     +`<div style="font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:22px;line-height:1.1;color:var(--text)">${nomA}</div></div>`
@@ -150,7 +151,10 @@ function scr_arene_socle(){
     +`<div style="min-width:0;text-align:right"><div style="width:min(320px,90%);height:5px;background:${ARENE_COUL_B};transform:skewX(-20deg);margin-left:auto"></div>`
     +`<div style="font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:22px;line-height:1.1;color:var(--text)">${nomB}</div></div>`
     +`</div>`
-    +`<canvas id="arene-socle-cv" aria-label="Octogone vu de trois quarts" style="display:block;width:100%;border:1px solid var(--line)"></canvas>`
+     +`<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,22%);gap:24px;align-items:center">`
+     +`<canvas id="arene-socle-cv" aria-label="Octogone vu de trois quarts" style="display:block;width:100%;border:1px solid var(--line)"></canvas>`
+     +`<aside style="align-self:stretch;padding:24px 8px;overflow:auto;max-height:570px">`
+     +`<div class="eyebrow gold">Moments clés</div><div id="ar2-fil"></div></aside></div>`
     +`<div id="ar2-texte" style="min-height:56px;text-align:center;font-family:Fraunces,serif;font-style:italic;font-size:17px;line-height:1.4;color:var(--text);padding:12px 24px 0"></div>`
     +`<div id="ar2-resultat" style="display:none;text-align:center;font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:20px;color:var(--gold);padding:6px 0 0"></div>`
     +`<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px">`
@@ -158,7 +162,7 @@ function scr_arene_socle(){
     +`<button class="btn ghost" id="ar2-v1" aria-pressed="true" style="width:auto;padding:10px 16px" onclick="CL.areneSocleVitesse(1)">×1</button>`
     +`<button class="btn ghost" id="ar2-v2" aria-pressed="false" style="width:auto;padding:10px 16px" onclick="CL.areneSocleVitesse(2)">×2</button>`
     +`<button class="btn primary" style="width:auto;padding:10px 22px" onclick="CL.areneSocleSuivant()">Moment suivant</button>`
-    +`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocle()">Autre combat</button>`
+     +(ec.retour?'':`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocle()">Autre combat</button>`)
     +`</div></div>`;
 }
 
@@ -169,7 +173,7 @@ function scr_arene_socle(){
 function areneEcranAppPoser(){
   try{
     const app=document.getElementById('app');
-    if(app&&app.classList) app.classList.add('arene');
+     if(app&&app.classList){app.classList.add('arene');app.style.maxWidth='1920px';}
   }catch(e){}
 }
 /** Retire la classe `arene` de #app et débranche l'écouteur de la vue
@@ -177,7 +181,7 @@ function areneEcranAppPoser(){
 function areneEcranNettoyer(){
   try{
     const app=document.getElementById('app');
-    if(app&&app.classList) app.classList.remove('arene');
+     if(app&&app.classList){app.classList.remove('arene');app.style.maxWidth='';}
   }catch(e){}
   const ec=ARENE_ECRAN;
   if(ec&&ec.vue){ areneVueDetruire(ec.vue); ec.vue=null; }
@@ -194,7 +198,9 @@ function areneEcranDemarrer(){
   ec.vue=cv?areneVueCreer(cv):null;
   ec.t0=(typeof performance!=='undefined'&&performance.now)?performance.now():0;
   ec.offset=ec.d||0;
-  if(ec.vue&&typeof requestAnimationFrame!=='undefined') ec.raf=requestAnimationFrame(areneEcranBoucle);
+   /* jsdom et un canvas encore sans largeur ne possèdent aucune image à
+      animer ; le recadrage différé relance la lecture après le layout. */
+   if(ec.vue&&ec.vue.W>=10&&typeof requestAnimationFrame!=='undefined') ec.raf=requestAnimationFrame(areneEcranBoucle);
   areneEcranHud(areneEtatInit(ec));
 }
 function areneEtatInit(ec){
@@ -230,7 +236,22 @@ function areneEcranHud(etat){
   if(rond) rond.textContent=etat.phase==='coins'?'ENTRE LES ROUNDS':(etat.fini?'FIN DU COMBAT':'ROUND '+etat.r);
   if(temps) temps.textContent=areneHorlogeTxt(etat.horloge);
   if(phase) phase.textContent=arenePhaseLabel(etat);
-  if(texte) texte.textContent=etat.texte||'';
+   if(texte) texte.textContent=etat.texte||'';
+   const fil=document.getElementById('ar2-fil');
+   if(fil&&ec.session){
+     const moments=ec.session.segs.filter(s=>s.beat&&s.t0<=etat.t&&
+       (s.beat.finish||s.beat.sub||areneBeatTapis(s.beat)));
+     if(fil.dataset.count!==String(moments.length)){
+       fil.replaceChildren();
+       for(const moment of moments){
+         const p=document.createElement('p');
+         p.style.cssText='font-size:15px;line-height:1.45;color:var(--text);margin:14px 0';
+         p.textContent='R'+moment.r+' · '+moment.beat.text;
+         fil.appendChild(p);
+       }
+       fil.dataset.count=String(moments.length);
+     }
+   }
 }
 function areneEcranReancre(){
   const ec=ARENE_ECRAN;
@@ -248,9 +269,17 @@ keysRegister('arene_socle',{
   '2'(){ CL.areneSocleVitesse(2); },
   Escape(){ CL.areneSocleQuitter(); },
 });
+keysRegister('arena',{
+  ' '(){ CL.areneSocleBascule(); },
+  'n'(){ CL.areneSocleSuivant(); },
+  '1'(){ CL.areneSocleVitesse(1); },
+  '2'(){ CL.areneSocleVitesse(2); },
+  Escape(){ CL.toResult(); },
+});
 
 Object.assign(CL,{
   areneSocle(){
+    ARENE_ECRAN.retour=null; ARENE_ECRAN.finRetour=null;
     areneEcranCombatFrais();
     CL.go('arene_socle');
     areneEcranDemarrer();
@@ -259,8 +288,12 @@ Object.assign(CL,{
      retirée de #app et l'écouteur de la vue débranché — rien ne survit
      (motif mgmtLeave). */
   areneSocleQuitter(){
+    const retour=ARENE_ECRAN.retour, fin=ARENE_ECRAN.finRetour;
     areneEcranNettoyer();
-    CL.go('title');
+    ARENE_ECRAN.retour=null; ARENE_ECRAN.finRetour=null;
+    if(retour==='result'){ CL.toResult(); return; }
+    if(fin) fin();
+    CL.go(retour||'title');
   },
   areneSocleBascule(){
     const ec=ARENE_ECRAN;

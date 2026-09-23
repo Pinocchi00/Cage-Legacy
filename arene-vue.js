@@ -68,8 +68,14 @@ function areneVueCreer(cv){
   }
   /* Première mesure nulle : retenter une fois la mise en page faite — le
      canvas vient d'être inséré, clientWidth peut encore être à 0 ici. */
-  if(!(vue.W>=10)&&typeof requestAnimationFrame!=='undefined'){
-    requestAnimationFrame(function(){ if(vue._onResize) areneVueDimensionner(vue); });
+   if(!(vue.W>=10)&&typeof requestAnimationFrame!=='undefined'){
+     requestAnimationFrame(function(){
+       if(vue._onResize){
+         areneVueDimensionner(vue);
+         if(vue.W>=10&&typeof ARENE_ECRAN!=='undefined'&&ARENE_ECRAN.vue===vue&&!ARENE_ECRAN.raf)
+           ARENE_ECRAN.raf=requestAnimationFrame(areneEcranBoucle);
+       }
+     });
   }
   return vue;
 }
@@ -79,7 +85,10 @@ function areneVueDimensionner(vue){
   if(!(w>=10)) return;
   vue.dpr=(typeof window!=='undefined'&&window.devicePixelRatio)||1;
   vue.W=w;
-  vue.H=Math.round(w*(w<640?0.9:0.58));
+   /* T4 : réserver au HUD et aux commandes leur place dans la même vue
+      1920×1080 que la maquette. À largeur égale, seul le cadrage change. */
+   vue.H=Math.round(Math.min(w*(w<640?0.9:0.58),
+     Math.max(360,(typeof window!=='undefined'?window.innerHeight:1080)-340)));
   vue.cv.style.height=vue.H+'px';
   vue.cv.width=Math.round(vue.W*vue.dpr);
   vue.cv.height=Math.round(vue.H*vue.dpr);
@@ -150,16 +159,20 @@ function areneVueFond(vue){
   /* Marquages du centre (motif de la marque). */
   g.save(); g.translate(vue.CX,vue.CY); g.scale(1,ARENE_TILT);
   g.textAlign='center'; g.textBaseline='middle';
-  g.fillStyle='rgba(229,50,45,.85)';
-  g.font='800 italic '+Math.round(vue.SC*1.15)+"px Oswald, sans-serif";
+   /* Lot 3 T4 : le lettrage du prototype, atténué sur la zone de travail
+      pour que les deux pions restent lisibles au centre du tapis. */
+   g.fillStyle='rgba(229,50,45,.34)';
+   g.font='800 italic '+Math.round(vue.SC*1.15)+"px 'Saira Condensed', sans-serif";
   g.fillText('SPLIT',0,0);
   g.fillStyle='rgba(60,48,52,.28)';
-  g.font='700 '+Math.round(vue.SC*0.36)+"px Oswald, sans-serif";
+   g.font='700 '+Math.round(vue.SC*0.36)+"px 'Saira Condensed', sans-serif";
   g.fillText('SPLIT 14',0,-vue.SC*3.3);
   g.fillText('CAGE LEGACY',0,vue.SC*3.3);
   g.restore();
   vue.bg=bg;
 }
+/* ==== [ANCRE: ARENE_T4_RENDU] — Lot 3 T4, section 11 du prototype :
+   grillage, pions, étiquettes, arbitre, coins, signatures et ordre du dessin. ==== */
 /** Le grillage : huit panneaux, avant ou arrière, poteaux et coins colorés. */
 function areneGrillage(vue,avant){
   const ctx=vue.ctx;
@@ -167,8 +180,8 @@ function areneGrillage(vue,avant){
     const a=areneVert(k), b=areneVert(k+1);
     const my=(a.y+b.y)/2;
     if((my>0)!==avant) continue;
-    const a0=areneProj(vue,a.x,a.y,0,vue._p1), b0=areneProj(vue,b.x,b.y,0,vue._p1);
-    const a1=areneProj(vue,a.x,a.y,ARENE_CAGE_H,vue._p2), b1=areneProj(vue,b.x,b.y,ARENE_CAGE_H,vue._p2);
+     const a0=areneProj(vue,a.x,a.y,0,vue._p1), b0=areneProj(vue,b.x,b.y,0,vue._p2);
+     const a1=areneProj(vue,a.x,a.y,ARENE_CAGE_H,vue._p3), b1=areneProj(vue,b.x,b.y,ARENE_CAGE_H,vue._p4);
     ctx.beginPath();
     ctx.moveTo(a0.x,a0.y); ctx.lineTo(b0.x,b0.y); ctx.lineTo(b1.x,b1.y); ctx.lineTo(a1.x,a1.y);
     ctx.closePath();
@@ -177,8 +190,8 @@ function areneGrillage(vue,avant){
     ctx.strokeStyle=avant?'rgba(20,15,17,.16)':'rgba(20,15,17,.25)'; ctx.lineWidth=1;
     for(let i=1;i<10;i++){
       const t=i/10;
-      const p0=areneProj(vue,a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,0,vue._p3);
-      const p1=areneProj(vue,a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,ARENE_CAGE_H,vue._p3);
+       const p0=areneProj(vue,a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,0,vue._p3);
+       const p1=areneProj(vue,a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,ARENE_CAGE_H,vue._p4);
       ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke();
     }
     ctx.strokeStyle='#171214'; ctx.lineWidth=3;
@@ -189,7 +202,7 @@ function areneGrillage(vue,avant){
   for(let k=0;k<8;k++){
     const v=areneVert(k);
     if((v.y>0)!==avant) continue;
-    const p0=areneProj(vue,v.x,v.y,0,vue._p1), p1=areneProj(vue,v.x,v.y,ARENE_CAGE_H,vue._p1);
+     const p0=areneProj(vue,v.x,v.y,0,vue._p1), p1=areneProj(vue,v.x,v.y,ARENE_CAGE_H,vue._p2);
     ctx.strokeStyle='#171214'; ctx.lineWidth=Math.max(4,vue.SC*0.08);
     ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke();
     const coul=k===ARENE_COIN_A?ARENE_COUL_A:(k===ARENE_COIN_B?ARENE_COUL_B:'#171214');
@@ -207,7 +220,7 @@ function areneEllipse(vue,x,y,rx,ry,fill){
  *  plus ramassé), 'sol-dessous'/'tapis' (allongé). */
 function arenePion(vue,x,y,coul,posture,orient,flash){
   const ctx=vue.ctx;
-  const c={x:x,y:y};
+   const c={x:x,y:y,s:vue.SC};
   const rx=ARENE_CORPS*c.s, ry=rx*ARENE_TILT;
   const allonge=(posture==='sol-dessous'||posture==='tapis');
   areneEllipse(vue,c.x+rx*0.1,c.y+ry*0.22,rx*1.08,ry*1.1,'rgba(40,28,30,.18)');
@@ -222,14 +235,14 @@ function arenePion(vue,x,y,coul,posture,orient,flash){
   }else{
     areneEllipse(vue,c.x,c.y,rx,ry,'#1F1A1D');
     areneEllipse(vue,c.x,c.y,rx*0.78,ry*0.78,coul);
-    if(posture==='debout'&&orient){
+     if(posture==='debout'&&orient){
       const u=orient;
       const tip={x:c.x+(u.x*ARENE_CORPS*1.28)*c.s,y:c.y+(u.y*ARENE_CORPS*1.28)*c.s*ARENE_TILT};
       const l={x:c.x+(u.x*0.82-u.y*0.3)*ARENE_CORPS*c.s,y:c.y+(u.y*0.82+u.x*0.3)*ARENE_CORPS*c.s*ARENE_TILT};
       const r={x:c.x+(u.x*0.82+u.y*0.3)*ARENE_CORPS*c.s,y:c.y+(u.y*0.82-u.x*0.3)*ARENE_CORPS*c.s*ARENE_TILT};
       ctx.fillStyle='#1F1A1D';
       ctx.beginPath(); ctx.moveTo(tip.x,tip.y); ctx.lineTo(l.x,l.y); ctx.lineTo(r.x,r.y); ctx.closePath(); ctx.fill();
-    }
+     }
   }
   if(flash>0){
     ctx.globalAlpha=flash*0.7;
@@ -243,10 +256,12 @@ function areneEtiquette(vue,x,y,texte,coul){
   const ctx=vue.ctx;
   const ry=ARENE_CORPS*vue.SC*ARENE_TILT;
   const taille=Math.round(Math.min(19,Math.max(12,vue.SC*0.2)));
-  ctx.font='700 italic '+taille+"px Oswald, sans-serif";
+   ctx.font='700 italic '+taille+"px 'Saira Condensed', sans-serif";
   ctx.textAlign='center';
   const w=ctx.measureText(texte).width;
-  const yy=y-ry-taille*0.8;
+   /* Le texte est décalé vers le côté libre, à la manière de la maquette
+      vidéo : même en clinch, il ne recouvre pas le corps adverse. */
+   const yy=y-ry-taille*1.7;
   ctx.fillStyle='rgba(31,26,29,.82)';
   ctx.fillRect(x-w/2-6,yy-taille+2,w+12,taille+4);
   ctx.fillStyle=coul;
@@ -398,7 +413,7 @@ function areneVueDessiner(vue,session,etat,now){
   areneFxAvance(vue,dt);
   areneFxDessinerSol(vue);
   /* Entités triées par profondeur ; au sol, le dessous se dessine d'abord. */
-  const ents=[];
+   const ents=[];
   ents.push({y:etat.refY,genre:'ref'});
   const decA=(etat.postureA==='sol-dessous'||etat.postureA==='tapis')?-10:0;
   const decB=(etat.postureB==='sol-dessous'||etat.postureB==='tapis')?-10:0;
@@ -432,9 +447,9 @@ function areneVueDessiner(vue,session,etat,now){
   const pa=areneProj(vue,etat.ax,etat.ay,0,vue._p1);
   const pb=areneProj(vue,etat.bx,etat.by,0,vue._p2);
   const sol=(etat.phase==='sol');
-  if(!sol){
-    areneEtiquette(vue,pa.x,pa.y,session.noms.a.court.toUpperCase(),ARENE_COUL_A);
-    areneEtiquette(vue,pb.x,pb.y,session.noms.b.court.toUpperCase(),ARENE_COUL_B);
+   if(!sol){
+     areneEtiquette(vue,pa.x,pa.y,session.noms.a.court.toUpperCase(),ARENE_COUL_A);
+     areneEtiquette(vue,pb.x,pb.y,session.noms.b.court.toUpperCase(),ARENE_COUL_B);
   }else{
     const topP=(etat.top==='B')?pb:pa;
     const topC=(etat.top==='B')?ARENE_COUL_B:ARENE_COUL_A;
@@ -442,4 +457,5 @@ function areneVueDessiner(vue,session,etat,now){
     areneEtiquette(vue,topP.x,topP.y,topT.toUpperCase(),topC);
   }
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
