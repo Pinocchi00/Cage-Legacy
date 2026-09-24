@@ -178,6 +178,53 @@ test('MGMT trace — l\u2019historique survit aux soirées enchaînées : m.last
   assert.equal(s.dernierCycle,3,'m.lastEvent porte le cycle de la dernière soirée, comme avant');
 });
 
+/* ==== [ANCRE: TEST_MGMT_LOT3_T5_FICHE] — Lot 3 T5 : l'historique de la fiche
+   reste lisible après deux soirées, même sans adversaire dans le roster ;
+   le bouton ouvre le rejeu fidèle et revient à la même fiche. ==== */
+test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', () => {
+  const win=newGameWindow();
+  freshMgmt(win,20260925);
+  assert.ok(joueSoiree(win));
+  assert.ok(joueSoiree(win));
+  const id=win.eval(`G.mgmt.hist[0].a.id`);
+  win.eval(`G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(id)});`);
+  assert.equal(win.eval('G.screen'),'mgmt_fiche');
+  const m=win.G.mgmt, traces=m.hist.filter(t=>t.a.id===id||t.b.id===id);
+  const original=traces[0].a.id===id?traces[0].b.name:traces[0].a.name;
+  assert.ok(traces.length>=1);
+  const html=win.document.getElementById('app').innerHTML;
+  for(const t of traces){
+    const opp=t.a.id===id?t.b:t.a;
+    assert.ok(html.includes(opp.name),'adversaire du cycle '+t.c);
+    assert.ok(html.includes('Cycle '+t.c),'date disponible dans la trace');
+  }
+  /* Une ancienne trace peut contenir un nom hostile ; la fiche ne doit
+     jamais l'injecter en HTML, même si l'adversaire a quitté le roster. */
+  win.eval(`(function(){
+    const t=G.mgmt.hist[0], f=mgmtFighterById(G.mgmt,${JSON.stringify(id)});
+    (t.a.id===f.id?t.b:t.a).name='<img src=x onerror=alert(1)>';
+    render();
+  })()`);
+  const safe=win.document.getElementById('app');
+  assert.equal(safe.querySelector('img'),null,'aucune balise hostile insérée');
+  assert.ok(safe.innerHTML.includes('&lt;img'),'nom échappé');
+  /* Restaurer le nom de la trace pour conserver le rejeu fidèle. */
+  win.eval(`(function(){
+    const t=G.mgmt.hist[0], f=mgmtFighterById(G.mgmt,${JSON.stringify(id)});
+    (t.a.id===f.id?t.b:t.a).name=${JSON.stringify(original)};
+    render();
+  })()`);
+  win.document.querySelector('[onclick^="CL.mgmtHistoriqueRevoir"]').click();
+  assert.equal(win.eval('G.screen'),'arene_socle');
+  assert.ok(win.document.querySelector('canvas'));
+  win.CL.areneSocleQuitter();
+  assert.equal(win.eval('G.screen'),'mgmt_fiche','retour à la même fiche');
+  win.keysHandle({key:'ArrowDown',preventDefault(){}});
+  win.keysHandle({key:'Enter',preventDefault(){}});
+  assert.equal(win.eval('G.screen'),'arene_socle','Entrée accélère le même rejeu accessible à la souris');
+  win.CL.areneSocleQuitter();
+});
+
 /* ---- Un adversaire disparu du roster ne casse rien ----------------------- */
 test('MGMT trace — un adversaire disparu du roster ne casse pas l\u2019historique de celui qui reste', () => {
   const win = newGameWindow();

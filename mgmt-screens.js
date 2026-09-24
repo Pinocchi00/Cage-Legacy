@@ -253,12 +253,10 @@ function scr_mgmt_bureau(){
   if(sel&&sel.kind==='leila_bulk'&&Array.isArray(sel.fights)){
     const fi=(Number.isSafeInteger(sel.marked)&&sel.marked>=0&&sel.marked<sel.fights.length)?sel.marked:0;
     const fa=mgmtFighterById(m,sel.fights[fi].a), fb=mgmtFighterById(m,sel.fights[fi].b);
-    fileHtml=`<div class="opp" style="cursor:default">${mgmtLineCard(fa)}</div>`
-      +`<div class="opp" style="cursor:default">${mgmtLineCard(fb)}</div>`;
+     fileHtml=mgmtBureauFicheCard(m,fa)+mgmtBureauFicheCard(m,fb);
   }else if(sel){
     const fa=mgmtFighterById(m,sel.a), fb=mgmtFighterById(m,sel.b);
-    fileHtml=`<div class="opp" style="cursor:default">${mgmtLineCard(fa)}</div>`
-      +`<div class="opp" style="cursor:default">${mgmtLineCard(fb)}</div>`;
+     fileHtml=mgmtBureauFicheCard(m,fa)+mgmtBureauFicheCard(m,fb);
   }else{
     fileHtml='';
   }
@@ -455,15 +453,56 @@ function mgmtCartSlotHtml(m,i,f){
 /** Le dossier d'une ligne (niveau 2, un seul déroulé) : nom, bilan,
  *  catégorie, rang, âge — données factuelles (charte R1). Sans le libellé
  *  de niveau (« Nom » — jargon interne, charte S7, relevé du 15/09). */
-function mgmtCartFicheHtml(m,f){
+function mgmtCartFicheHtml(m,f,ouvrir=true){
   if(!f) return '';
   const rank=mgmtDivisionRank(m,f);
   const meta=`${f.divName} · ${mgmtRankLabel(rank)} · ${f.age} ans`;
   return `<div class="opp" style="cursor:default">`
     +`<div class="opp-top"><span class="mgmt-fname">${esc(f.name)}</span><span class="opp-rec">${esc(f.W)}-${esc(f.L)}-${esc(f.D)}</span></div>`
-    +`<div style="font-size:13px;color:var(--muted);margin-top:4px">${esc(meta)}</div>`
-    +`</div>`;
+     +`<div style="font-size:13px;color:var(--muted);margin-top:4px">${esc(meta)}</div>`
+     +(ouvrir?`<button class="mgmt-next" style="width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtFicheParIndex(${m.roster.indexOf(f)})">Voir la fiche</button>`:'')
+     +`</div>`;
 }
+
+/* ==== [ANCRE: MGMT_LOT3_T5_HISTORIQUE] — Lot 3 T5 : fiche consultable,
+   combats passés et rejeu à partir de leurs traces auto-portantes. ==== */
+let MGMT_FICHE={id:null,retour:'mgmt_carte',cursor:0};
+function mgmtBureauFicheCard(m,f){
+  if(!f) return '';
+  return `<div class="opp" style="cursor:default">${mgmtLineCard(f)}`
+    +`<button class="mgmt-next" style="width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtFicheParIndex(${m.roster.indexOf(f)})">Voir la fiche</button></div>`;
+}
+function mgmtHistoriqueHtml(m,f){
+  const history=mgmtFightHistory(m,f).slice().reverse();
+  if(!history.length) return `<div class="mgmt-meta">Aucun combat enregistré.</div>`;
+  return history.map((t,k)=>{
+    const i=m.hist.indexOf(t), side=t.a.id===f.id?'A':'B';
+    const adversaire=side==='A'?t.b:t.a;
+    const issue=t.winner==='D'?'Nul':(t.winner===side?'Victoire':'Défaite');
+    /* La trace ne garde que la famille ; le moteur reconstitue le libellé
+       exact. En cas de divergence après évolution du moteur, l'issue stockée
+       prévaut et aucun résultat rejoué contradictoire n'est affiché. */
+    const replay=mgmtReplayFight(t);
+    const methode=(replay&&areneVerdictFidele(t,replay))?replay.method:(MGMT_FAMILY_LABELS[t.family]||t.family);
+    return `<div class="opp" style="cursor:default${k===MGMT_FICHE.cursor?';border-color:var(--gold-d)':''}">`
+      +`<div class="opp-nm">${esc(issue)} · ${esc(adversaire.name)}</div>`
+      +`<div class="mgmt-meta">${esc(methode)} · Round ${esc(t.round)} · Cycle ${esc(t.c)}</div>`
+      +`<button class="mgmt-next" style="width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtHistoriqueRevoir(${i})">Revoir le combat</button>`
+      +`</div>`;
+  }).join('');
+}
+function scr_mgmt_fiche(){
+  const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+  if(!f) return scr_mgmt_bureau();
+  return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
+    +`<div><div class="eyebrow gold">Split — Management</div><h2 class="disp">${esc(f.name)}</h2></div>`
+    +`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.mgmtFicheRetour()">← Retour</button></div>`
+    +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr)">`
+    +`<div class="mgmt-col">${mgmtCartFicheHtml(m,f,false)}</div>`
+    +`<div class="mgmt-col"><div class="eyebrow">Combats</div>${mgmtHistoriqueHtml(m,f)}</div>`
+    +`</div></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 
 /** Un combat de préliminaires, lisible seul : Leïla les propose (T3) —
  *  ici, lecture seule. */
@@ -547,7 +586,7 @@ function scr_mgmt_carte(){
 
 /* ==== [ANCRE: MGMT_LOT1_CONTROLEUR] — actions du bureau : jamais d'édition
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js). ==== */
-Object.assign(SCREENS,{mgmt_bureau:scr_mgmt_bureau,mgmt_soiree:scr_mgmt_soiree,mgmt_lendemain:scr_mgmt_lendemain,mgmt_carte:scr_mgmt_carte});
+Object.assign(SCREENS,{mgmt_bureau:scr_mgmt_bureau,mgmt_soiree:scr_mgmt_soiree,mgmt_lendemain:scr_mgmt_lendemain,mgmt_carte:scr_mgmt_carte,mgmt_fiche:scr_mgmt_fiche});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -615,10 +654,54 @@ keysRegister('mgmt_carte',{
   '5'(){ CL.mgmtUnbook(4); },
   Escape(){ CL.mgmtCarteLeave(); },
 });
+keysRegister('mgmt_fiche',{
+  ArrowDown(){ CL.mgmtFicheDeplacer(1); },
+  ArrowUp(){ CL.mgmtFicheDeplacer(-1); },
+  Enter(){ CL.mgmtFicheRevoirSelection(); },
+  Escape(){ CL.mgmtFicheRetour(); },
+});
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 Object.assign(CL,{
+  mgmtFicheParIndex(i){
+    const m=G&&G.mgmt;
+    if(!m||!Number.isSafeInteger(i)||i<0||i>=m.roster.length) return;
+    CL.mgmtFiche(m.roster[i].id);
+  },
+  mgmtFiche(id){
+    if(!G||!G.mgmt||!mgmtFighterById(G.mgmt,id)) return;
+    MGMT_FICHE={id,retour:G.screen==='mgmt_bureau'?'mgmt_bureau':'mgmt_carte',cursor:0};
+    CL.go('mgmt_fiche');
+  },
+  mgmtFicheRetour(){ CL.go(MGMT_FICHE.retour); },
+  mgmtFicheDeplacer(dir){
+    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    if(!f) return;
+    const n=mgmtFightHistory(m,f).length;
+    if(n<1) return;
+    MGMT_FICHE.cursor=(MGMT_FICHE.cursor+dir+n)%n;
+    render();
+  },
+  mgmtFicheRevoirSelection(){
+    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    if(!f) return;
+    const history=mgmtFightHistory(m,f).slice().reverse();
+    const t=history[MGMT_FICHE.cursor];
+    if(t) CL.mgmtHistoriqueRevoir(m.hist.indexOf(t));
+  },
+  mgmtHistoriqueRevoir(i){
+    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    if(!f||!Number.isSafeInteger(i)||i<0||i>=m.hist.length) return;
+    const t=m.hist[i];
+    if(!mgmtFightHistory(m,f).includes(t)) return;
+    const res=mgmtReplayFight(t);
+    if(!res) return;
+    areneEcranCharger(res,{a:t.a.name,b:t.b.name},t);
+    ARENE_ECRAN.retour='mgmt_fiche'; ARENE_ECRAN.finRetour=null;
+    CL.go('arene_socle');
+    areneEcranDemarrer();
+  },
   mgmtEnter(){
     if(!G) G={theme:'dark'};
     /* Confinement (lot 1e-1) : le traitement du bureau vit sur #app.mgmt ET
