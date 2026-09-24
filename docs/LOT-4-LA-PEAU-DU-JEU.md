@@ -72,9 +72,9 @@ Une tranche à la fois par fichier ; deux outils peuvent travailler en parallèl
 
 ### T1 — Le socle : un fichier par écran, la direction artistique, la navigation
 
-- **Découpage de `mgmt-screens.js`** (768 lignes, quatre écrans) en un fichier
-  par écran — `mgmt-ecran-semaine.js`, `mgmt-ecran-carte.js`,
-  `mgmt-ecran-soiree.js`, `mgmt-ecran-lendemain.js` — plus ce qui reste commun
+- **Découpage de `mgmt-screens.js`** (904 lignes et cinq écrans au 24/09, après le lot 3) en un fichier
+  par écran — `mgmt-ecran-semaine.js` (l'actuel bureau), `mgmt-ecran-carte.js`,
+  `mgmt-ecran-soiree.js`, `mgmt-ecran-lendemain.js`, `mgmt-ecran-fiche.js` — plus ce qui reste commun
   (contrôleur, clavier). **Déplacement pur**, vérifié ligne à ligne comme les
   découpages du 21/09 : aucune ligne de code perdue, aucun test modifié, ancres
   déplacées avec leur code. `index.html` reste la seule source de l'ordre de
@@ -87,7 +87,7 @@ Une tranche à la fois par fichier ; deux outils peuvent travailler en parallèl
   encore n'apparaissent pas.
 - **Les réserves de contraste du lot 2** : le survol `.opp:hover` qui tombe à
   3,54:1 (réserve 1), la ligne du cycle à 4,31:1 contre le haut du dégradé.
-- **B1 — aucun texte de travail visible.** `mgmt-screens.js:327` affiche au
+- **B1 — aucun texte de travail visible.** `mgmt-screens.js:354-357` affiche au
   joueur `[RÉPLIQUE MANQUANTE — Clara : annonce une fin de carrière]`. Un
   emplacement d'auteur vide ne s'affiche jamais tel quel : il n'affiche rien.
   Un test le garde, sur tous les écrans.
