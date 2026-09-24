@@ -52,3 +52,6 @@ tools/reports/*
 # Lot 2B T3 : mesure versionnee des departs (la correspondance du niveau
 # de degradation du menton, le monde qui se renouvelle, la question posee).
 !tools/reports/LOT-2B-T3-LES-DEPARTS.md
+# Lot 2B T4 : mesure versionnee du salaire a la victoire et du recalibrage
+# de l'economie (le bonus de victoire, les deux leviers de revenu, les cibles).
+!tools/reports/LOT-2B-T4-CALIBRAGE-ECONOMIE.md

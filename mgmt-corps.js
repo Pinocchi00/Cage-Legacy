@@ -538,9 +538,11 @@ function mgmtApplyFight(m,f,opp,res,side){
  *  à la main — avec toutes leurs conséquences (§6). Lot 3b T1 (QO-5) : le
  *  même calcul unique porte la finance — attrait et cachets lus sur les
  *  lignes d'avant combat, spectacle observé sur les combats joués, recette
- *  nette R = billetterie + droits − cachets ajoutée au solde unique
- *  (remboursement automatique : tant que T < 0, rien n'est bénéfice),
- *  audience, historiques et E1 (patron : T < 0 avant la soirée et R > 0).
+ *  nette R = billetterie + droits − cachets − bonus de victoire ajoutée
+ *  au solde unique (remboursement automatique : tant que T < 0, rien n'est
+ *  bénéfice), audience, historiques et E1 (patron : T < 0 avant la
+ *  soirée et R > 0). Lot 2B T4 : le bonus de victoire se connaît APRÈS les
+ *  combats — le vainqueur touche son cachet une seconde fois.
  *  Stocké dans m.lastEvent puis sauvegardé avant tout affichage : recharger
  *  la page ne rejoue rien. Lot 3 T1 : chaque combat laisse aussi sa trace
  *  dans m.hist (ancre MGMT_LOT3_T1_TRACE) — de quoi rejouer, jamais le
@@ -589,7 +591,11 @@ function mgmtRunEvent(m){
     if(tb) touched.push(tb);
   }
   touched.sort((x,y)=>mgmtTouchedRank(y)-mgmtTouchedRank(x));
-  const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length);
+  /* Lot 2B T4 : le bonus de victoire se calcule après les combats — le
+     cachet reste le salaire de combat, le vainqueur touche le sien une
+     seconde fois, et la recette nette le déduit. */
+  const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length,
+    mgmtWinBonuses(m,booked,fights));
   /* Un seul solde (QO-5) : T ← T + R. Remboursement « avant tout bénéfice »
      automatique — tant que T < 0, rien n'est bénéfice. E1 si et seulement
      si T < 0 avant la soirée et R > 0. */

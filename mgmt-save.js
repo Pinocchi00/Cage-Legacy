@@ -79,7 +79,9 @@ function mgmtValidAffair(a){
  *  Lot 3b T1 : la finance (attrait, spectacle, audience, billetterie,
  *  droits, cachets, recette nette) et le flag E1 du patron s'ajoutent —
  *  absents d'une soirée d'avant la v4 (migration sans perte) et contrôlés
- *  quand ils sont là. */
+ *  quand ils sont là. Lot 2B T4 : le bonus de victoire voyage avec la
+ *  finance, toléré absent (soirée d'avant la tranche), strict quand il
+ *  est là. */
 function mgmtValidEvent(e){
   if(!e||typeof e!=='object'||Array.isArray(e)) return false;
   if(!Number.isSafeInteger(e.cycle)||e.cycle<0) return false;
@@ -107,6 +109,9 @@ function mgmtValidEvent(e){
     for(const k of ['audience','ticketing','tv','purses']){
       if(!Number.isSafeInteger(f[k])||f[k]<0) return false;
     }
+    /* Lot 2B T4 : le bonus de victoire voyage avec la finance — toléré
+       absent (soirée d'avant la tranche), strict quand il est là. */
+    if(f.bonuses!==undefined&&(!Number.isSafeInteger(f.bonuses)||f.bonuses<0)) return false;
     if(!Number.isSafeInteger(f.recette)) return false;
   }
   return true;
