@@ -354,15 +354,16 @@ function mgmtSelectable(m,f,pick){
 }
 
 /**
- * Les lignes de la liste de composition : le roster sans les retraités
- * médicaux (§T2 : absents), groupé par catégorie dans l'ordre canonique
+ * Les lignes de la liste de composition : le roster sans les retraités —
+ * médicaux comme d'âge (T3, test générique mgmtIsRetired ; §T2 : absents) —,
+ * groupé par catégorie dans l'ordre canonique
  * (DIVISIONS), rangs dérivés (mgmtDivisionRank, T1) au sein de chaque
  * catégorie. Pur : ne trie que des copies, n'écrit jamais sur une ligne,
  * ne consomme pas rnd().
  * @returns {Array} */
 function mgmtCartRows(m){
   if(!m||!Array.isArray(m.roster)) return [];
-  const rows=m.roster.filter(o=>o&&o.retired!=='medical');
+  const rows=m.roster.filter(o=>o&&!mgmtIsRetired(o));
   const order=allDivisions().map(d=>d.id);
   const dx=o=>{ const i=order.indexOf(o.div); return i<0?order.length:i; };
   rows.sort((x,y)=>{
@@ -381,7 +382,7 @@ function mgmtCartRows(m){
    de l'état courant, jamais stocké sur la ligne (règle du bureau, CDC §3).
    Ordre : victoires − défaites, puis victoires, puis dernier combat sous
    Split (le plus actif devant). Les suspendus gardent leur rang, les
-   retraités médicaux sortent du classement.
+   retraités — médicaux comme d'âge (T3) — sortent du classement.
    Lot 2B T1 bis : la même loi dessert deux portées — organisation (roster
    seul, portée historique par défaut) et monde (roster + extérieur). Le
    bilan et la récence extérieurs sont dérivés à la lecture, jamais écrits
@@ -410,11 +411,15 @@ function mgmtRankingCompare(x,y){
 function mgmtDivisionRanking(m,divId,scope){
   if(!m||!Array.isArray(m.roster)||!divById(divId)) return [];
   if(scope!=='organization'&&scope!=='world') return [];
-  const cands=m.roster.filter(o=>o&&o.div===divId&&o.retired!=='medical');
+  const cands=m.roster.filter(o=>o&&o.div===divId&&!mgmtIsRetired(o));
   if(scope==='world'&&Array.isArray(m.exterieur)){
     const rosterIds=new Set(cands.map(o=>o.id));
+    const cycle=Number.isSafeInteger(m.cycle)?m.cycle:0;
     for(const line of m.exterieur){
       if(!line||line.div!==divId||rosterIds.has(line.id)) continue;
+      /* T3 : une carrière extérieure parvenue à son terme sort du classement
+         mondial, comme un retraité de Split — sa ligne reste (QO-9). */
+      if(mgmtExteriorRetired(line,cycle)) continue;
       const trace=mgmtExteriorTrace(line,m.cycle);
       if(!trace) continue;
       const last=trace.orgs.length>0?trace.orgs[trace.orgs.length-1].to:null;
@@ -434,7 +439,7 @@ function mgmtDivisionRanking(m,divId,scope){
  *  @returns {number|null} */
 function mgmtDivisionRank(m,f,scope){
   if(!m||!f||!Array.isArray(m.roster)) return null;
-  if(f.retired==='medical') return null;
+  if(mgmtIsRetired(f)) return null;
   const resolved=scope===undefined?'organization':scope;
   const cands=mgmtDivisionRanking(m,f.div,resolved);
   const i=cands.findIndex(o=>o.id===f.id);

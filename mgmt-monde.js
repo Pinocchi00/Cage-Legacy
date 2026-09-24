@@ -87,38 +87,46 @@ function mgmtExteriorCreate(m,born,divId){
 }
 
 /** Nombre de combattants vivants du monde dans une catégorie : Split et
- *  extérieur ensemble, sans compter un retraité médical. Les doublons d'id
- *  ne comptent qu'une fois pendant un éventuel transfert. Pur.
+ *  extérieur ensemble, sans compter un retraité — médical (test générique)
+ *  ou, pour l'extérieur, une carrière dérivée parvenue à son terme (T3 :
+ *  le monde part sous la même loi que le roster). Les doublons d'id ne
+ *  comptent qu'une fois pendant un éventuel transfert. Pur.
  *  @returns {number} */
 function mgmtWorldLivingCount(m,divId){
   if(!m||typeof m!=='object'||!divById(divId)) return 0;
   const ids=new Set();
   if(Array.isArray(m.roster)){
     for(const o of m.roster){
-      if(o&&o.div===divId&&o.retired!=='medical'&&mgmtValidId(o.id)) ids.add(o.id);
+      if(o&&o.div===divId&&!mgmtIsRetired(o)&&mgmtValidId(o.id)) ids.add(o.id);
     }
   }
   if(Array.isArray(m.exterieur)){
+    const cycle=Number.isSafeInteger(m.cycle)?m.cycle:0;
     for(const o of m.exterieur){
-      if(o&&o.div===divId&&mgmtValidExteriorLine(o)) ids.add(o.id);
+      if(o&&o.div===divId&&mgmtValidExteriorLine(o)&&!mgmtExteriorRetired(o,cycle)) ids.add(o.id);
     }
   }
   return ids.size;
 }
 
 /** Maintient le quota mondial par catégorie. L'extérieur complète ce que
- *  les vivants de Split ne fournissent pas, sans jamais retirer une ligne.
- *  À l'ouverture born vaut 0 ; après une retraite, les remplaçants portent
- *  le cycle où la catégorie a été complétée. Ne consomme aucun tirage de la
- *  RNG du jeu.
+ *  les vivants de Split ne fournissent pas, sans jamais retirer une ligne
+ *  (QO-9 : le passé du monde ne disparaît pas — un partant cesse de
+ *  compter, sa ligne reste). À l'ouverture born vaut 0 ; après une
+ *  retraite, les remplaçants portent le cycle où la catégorie a été
+ *  complétée. Le compte est pris une fois par catégorie : les lignes
+ *  ajoutées sont vivantes par construction, inutile de re-dériver le
+ *  monde à chaque ajout. Ne consomme aucun tirage de la RNG du jeu.
  *  @returns {Array} le vivier extérieur. */
 function mgmtExteriorEnsure(m){
   if(!m||typeof m!=='object') return [];
   if(!Array.isArray(m.exterieur)) m.exterieur=[];
   const born=Number.isSafeInteger(m.cycle)&&m.cycle>=0?m.cycle:0;
   for(const div of allDivisions()){
-    while(mgmtWorldLivingCount(m,div.id)<MGMT_EXT_LIVE_PER_DIVISION){
+    let vivants=mgmtWorldLivingCount(m,div.id);
+    while(vivants<MGMT_EXT_LIVE_PER_DIVISION){
       m.exterieur.push(mgmtExteriorCreate(m,born,div.id));
+      vivants++;
     }
   }
   return m.exterieur;
@@ -182,6 +190,39 @@ function mgmtExteriorAmateur(seed){
   return out;
 }
 
+/** Chronologie d'une carrière extérieure : les deux premiers tirages du
+ *  flux de carrière (âge de début, âge au passage dans le monde), le départ
+ *  professionnel et la FIN DE CARRÉE — la retraite du T3, la même loi que
+ *  le roster (mgmtRetireAgeFor, engine-career.js:161 : max(39, 42 −
+ *  dégradation du menton)). Le niveau de dégradation du partant se dérive
+ *  de sa propre trace, dans un flux séparé ('ext-retraite') : les carrières
+ *  déjà dérivées ne bougent pas d'un tirage. Pur — consomme uniquement le
+ *  flux donné (pour mgmtExteriorCareer) ou des flux propres à la graine.
+ *  @returns {{ageStart,ageBorn,careerStart,retAge,retireCycle}} */
+function mgmtExteriorTimeline(r,seed,born){
+  const ageStart=MGMT_EXT_AGE_START_MIN+Math.floor(r()*MGMT_EXT_AGE_START_SPREAD);
+  const ageBorn=MGMT_EXT_AGE_MIN+Math.floor(r()*MGMT_EXT_AGE_SPREAD);
+  const cpy=MGMT_EXT_YEAR_WEEKS/MGMT_EVENT_WEEKS;
+  const bornC=Number.isSafeInteger(born)?born:0;
+  const careerStart=bornC-Math.round((ageBorn-ageStart)*cpy);
+  const rr=mgmtExteriorStream('ext-retraite',seed);
+  const retAge=mgmtRetireAgeFor(Math.floor(rr()*4));
+  return {ageStart,ageBorn,careerStart,retAge,
+    retireCycle:careerStart+Math.ceil((retAge-ageStart)*cpy)};
+}
+
+/** La ligne extérieure est-elle parvenue au terme de sa carrière dérivée ?
+ *  Pur — deux flux propres à la graine, aucun tirage de la RNG du jeu.
+ *  @returns {boolean} */
+function mgmtExteriorRetired(line,cycle){
+  if(!line||typeof line!=='object') return false;
+  const seed=(Number.isSafeInteger(line.seed)&&line.seed>=0)?line.seed>>>0:mgmtExteriorSeedFor(line.id);
+  const born=Number.isSafeInteger(line.born)?line.born:0;
+  const c=Math.floor(Number.isFinite(cycle)?cycle:born);
+  const tl=mgmtExteriorTimeline(mgmtExteriorStream('ext-carriere',seed),seed,born);
+  return c>=tl.retireCycle;
+}
+
 /** Carrière professionnelle hors Split, dérivée combat par combat du cycle
  *  de début de carrière jusqu'au cycle lu (propriété de préfixe : la
  *  carrière au cycle C2 prolonge exactement celle au cycle C1 — le bilan
@@ -192,21 +233,27 @@ function mgmtExteriorAmateur(seed){
  *  bilan→niveau existant, déclin après MGMT_EXT_DECLINE_AGE ans), se finit
  *  selon la distribution calibrée du monde dérivé, et peut faire changer
  *  d'organisation (série de victoires, ambition dérivée — l'échelle est
- *  MGMT_EXT_ORGS). Pur : un seul flux mulberry32 semé par la graine de la
- *  ligne, jamais la RNG du jeu.
- *  @returns {{age,W,L,fin:{ko,sub,dec},fights,streak,orgIdx,orgs:Array}} */
+ *  MGMT_EXT_ORGS). T3 : la carrière s'arrête à la retraite — la même loi
+ *  que le roster (mgmtRetireAgeFor, 39-42 ans) ; le bilan se fige, il ne
+ *  régresse jamais, et l'âge courant continue d'avancer (calendrier).
+ *  Pur : un seul flux mulberry32 semé par la graine de la ligne, jamais la
+ *  RNG du jeu.
+ *  @returns {{age,W,L,fin:{ko,sub,dec},fights,streak,orgIdx,orgs:Array,retAge,retireCycle}} */
 function mgmtExteriorCareer(seed,born,cycle){
   const r=mgmtExteriorStream('ext-carriere',seed);
   const cpy=MGMT_EXT_YEAR_WEEKS/MGMT_EVENT_WEEKS;
-  const ageStart=MGMT_EXT_AGE_START_MIN+Math.floor(r()*MGMT_EXT_AGE_START_SPREAD);
-  const ageBorn=MGMT_EXT_AGE_MIN+Math.floor(r()*MGMT_EXT_AGE_SPREAD);
+  const tl=mgmtExteriorTimeline(r,seed,born);
+  const ageStart=tl.ageStart;
+  /* La chronologie commune a consommé les deux premiers tirages du flux
+     (âge de début, âge au passage dans le monde) — la suite reprend dans
+     l'ordre exact d'avant la T3 : les carrières déjà dérivées ne bougent pas. */
   const amaYears=MGMT_EXT_AMA_YEARS_MIN+r()*MGMT_EXT_AMA_YEARS_SPREAD;
   const rate=Math.floor(r()*(MGMT_EXT_RATE_MAX+1));
   const ambition=MGMT_EXT_ORG_MOVE_MIN+r()*MGMT_EXT_ORG_MOVE_SPREAD;
   const lvStart=MGMT_EXT_LVL_START_MIN+Math.floor(r()*MGMT_EXT_LVL_START_SPREAD);
   const bornC=Number.isSafeInteger(born)?born:0;
   const c=Math.floor(Number.isFinite(cycle)?cycle:bornC);
-  const careerStart=bornC-Math.round((ageBorn-ageStart)*cpy);
+  const careerStart=tl.careerStart;
   const proStart=Math.round(amaYears*cpy);
   const tNow=c-careerStart;
   const fin={ko:0,sub:0,dec:0};
@@ -215,9 +262,10 @@ function mgmtExteriorCareer(seed,born,cycle){
   const orgMax=MGMT_EXT_ORGS.length;
   let s=proStart;
   for(;;){
-    /* Fin de carrière passée 60 ans : le bilan se stabilise (il ne
-       régresse jamais — il cesse seulement d'avancer). */
-    if(ageStart+s/cpy>=60) break;
+    /* Fin de carrière : la retraite (T3, même loi que le roster) fige le
+       bilan — il ne régresse jamais, il cesse d'avancer. La borne des 60
+       ans d'avant la T3 est absorbée par la loi de retraite (39-42 ans). */
+    if(ageStart+s/cpy>=tl.retAge) break;
     const gap=MGMT_EXT_GAP_MIN+Math.floor(r()*MGMT_EXT_GAP_SPREAD);
     s+=gap;
     if(s>tNow) break;
@@ -248,7 +296,8 @@ function mgmtExteriorCareer(seed,born,cycle){
     }
   }
   const age=Math.floor(ageStart+tNow/cpy);
-  return {age:age,W:W,L:L,fin:fin,fights:fights,streak:streak,orgIdx:orgIdx,orgs:orgs};
+  return {age:age,W:W,L:L,fin:fin,fights:fights,streak:streak,orgIdx:orgIdx,orgs:orgs,
+    retAge:tl.retAge,retireCycle:tl.retireCycle};
 }
 
 /** La trace de carrière d'une combattant extérieur : TOUT le passé, dérivé
@@ -259,7 +308,9 @@ function mgmtExteriorCareer(seed,born,cycle){
  *  qui avance, les organisations traversées (noms = MGMT_EXT_ORGS, null =
  *  [EMPLACEMENT AUTEUR]), l'âge courant, la série en cours. Les bornes
  *  d'organisation sont des cycles du monde — négatif : avant l'ouverture
- *  du monde.
+ *  du monde. T3 : l'âge de retraite et le cycle où la carrière s'est
+ *  close (ou se clora) voyagent avec la trace — un partant garde son
+ *  passé, il cesse seulement de compter parmi les vivants.
  *  @returns {object|null} null si la ligne est illisible. */
 function mgmtExteriorTrace(line,cycle){
   if(!line||typeof line!=='object') return null;
@@ -279,6 +330,7 @@ function mgmtExteriorTrace(line,cycle){
     streak:car.streak,
     org:car.orgIdx,
     orgs:car.orgs.map(o=>({i:o.i,name:MGMT_EXT_ORGS[o.i]||null,from:o.from,to:o.to,fights:o.fights})),
+    retAge:car.retAge,retireCycle:car.retireCycle,
   };
 }
 

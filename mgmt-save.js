@@ -38,7 +38,9 @@ function mgmtValidLine(o){
   if(o.traumaFloor!==undefined&&(!Number.isFinite(o.traumaFloor)||o.traumaFloor<0||
     o.traumaFloor>MGMT_TRAUMA_MAX||o.trauma===undefined||o.traumaFloor>o.trauma)) return false;
   if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) return false;
-  if(o.retired!==undefined&&o.retired!=='medical') return false;
+  /* Lot 2B T3 : la retraite d'âge existe — 'medical' (lot 3a) et 'age'
+     (T3) sont les deux valeurs valides, toute autre est refusée. */
+  if(o.retired!==undefined&&o.retired!=='medical'&&o.retired!=='age') return false;
   /* Lot 2B T1 bis : dernier combat connu — absent (jamais combattu), cycle
      Split positif, ou cycle extérieur négatif pour une recrue dont le
      dernier combat précède l'ouverture de la partie. */
@@ -77,7 +79,9 @@ function mgmtValidAffair(a){
  *  Lot 3b T1 : la finance (attrait, spectacle, audience, billetterie,
  *  droits, cachets, recette nette) et le flag E1 du patron s'ajoutent —
  *  absents d'une soirée d'avant la v4 (migration sans perte) et contrôlés
- *  quand ils sont là. */
+ *  quand ils sont là. Lot 2B T4 : le bonus de victoire voyage avec la
+ *  finance, toléré absent (soirée d'avant la tranche), strict quand il
+ *  est là. */
 function mgmtValidEvent(e){
   if(!e||typeof e!=='object'||Array.isArray(e)) return false;
   if(!Number.isSafeInteger(e.cycle)||e.cycle<0) return false;
@@ -105,6 +109,9 @@ function mgmtValidEvent(e){
     for(const k of ['audience','ticketing','tv','purses']){
       if(!Number.isSafeInteger(f[k])||f[k]<0) return false;
     }
+    /* Lot 2B T4 : le bonus de victoire voyage avec la finance — toléré
+       absent (soirée d'avant la tranche), strict quand il est là. */
+    if(f.bonuses!==undefined&&(!Number.isSafeInteger(f.bonuses)||f.bonuses<0)) return false;
     if(!Number.isSafeInteger(f.recette)) return false;
   }
   return true;
@@ -249,9 +256,12 @@ function validateMgmt(raw){
  *  décision d'Anthony du 22/09/2026) : chaque corps déjà écrit reçoit un
  *  plancher dérivé borné par son total ; les anciennes traces reçoivent les
  *  deux champs absents à null et rejouent donc sans récupération ajoutée.
-  *  7 → 8 (lot 2B T2 bis, décision d'Anthony du 22/09/2026) : les âges des
-  *  lignes restent leurs âges courants et ageWeeks démarre à 0 ; le calendrier
-  *  annuel repart de là. Sans perte, sans
+ *  7 → 8 (lot 2B T2 bis, décision d'Anthony du 22/09/2026) : les âges des
+ *  lignes restent leurs âges courants et ageWeeks démarre à 0 ; le
+ *  calendrier annuel repart de là. 8 → 9 (lot 2B T3 les départs, 23/09) :
+ *  la retraite d'âge existe (retired:'age' accepté, jamais effacé) — rien
+ *  à convertir sur une v8, la semaine d'anniversaire de chaque combattant
+ *  se dérive de son identifiant. Sans perte, sans
  *  reset : une v1 reste refusée, comme avant. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
@@ -302,6 +312,14 @@ function mgmtMigrate(raw){
     raw.v=8;
     raw.ageWeeks=0;
   }
+  /* 8 → 9 (lot 2B T3, docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T3) : la
+     retraite d'âge existe. Rien à convertir — aucune valeur 'age' ne peut
+     figurer sur une v8, les âges et le reste de semaines du calendrier
+     sont conservés, et la semaine d'anniversaire de chaque combattant se
+     dérive de son identifiant à la lecture. */
+  if(raw.v===8){
+    raw.v=9;
+  }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
@@ -333,7 +351,10 @@ function mgmtRepair(m){
         if(o.traumaFloor!==undefined&&(!Number.isFinite(o.traumaFloor)||o.traumaFloor<0||
           o.traumaFloor>MGMT_TRAUMA_MAX||o.trauma===undefined||o.traumaFloor>o.trauma)) delete o.traumaFloor;
         if(o.susp!==undefined&&(!Number.isSafeInteger(o.susp)||o.susp<0)) delete o.susp;
-        if(o.retired!==undefined&&o.retired!=='medical') delete o.retired;
+        /* Lot 2B T3 : une retraite d'âge se répare comme une médicale —
+           seule une valeur inconnue est effacée (le partant ne
+           ressuscite pas). */
+        if(o.retired!==undefined&&o.retired!=='medical'&&o.retired!=='age') delete o.retired;
         if(o.lastCycle!==undefined&&!Number.isSafeInteger(o.lastCycle)) delete o.lastCycle;
       }
     }

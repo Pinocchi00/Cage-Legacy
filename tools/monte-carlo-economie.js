@@ -355,7 +355,7 @@ function measure(cfg){
         const s8=slotted.filter(x=>x!==pre);
         const clones=s8.map(f=>({a:mgmtFightReady(mgmtFighterById(m,f.a)),b:mgmtFightReady(mgmtFighterById(m,f.b))}));
         const a8=mgmtCardAttraction(m,s8), p8=mgmtPurses(m,s8);
-        red={attraction8:a8,purses8:p8,slotted8:s8.length,clones};
+        red={attraction8:a8,purses8:p8,slotted8:s8,slotted8n:s8.length,clones};
       }
       const ev=mgmtRunEvent(m);
       if(!ev){ out.echecs[echec]++; return null; }
@@ -365,9 +365,13 @@ function measure(cfg){
         const res=simulateFight(c.a,c.b,3);
         fam.push({winner:res.winner,family:mgmtMethodFamily(res.method,res.winner)});
       }
-      const f8=mgmtEventRecette(red.attraction8,mgmtSpectacle(fam),red.purses8,red.slotted8);
+      /* Lot 2B T4 : la réduite porte elle aussi ses bonus de victoire —
+         les vainqueurs des huit combats rejoués, à leur emplacement. */
+      const fights8=red.slotted8.map((f,i)=>({a:f.a,b:f.b,winner:fam[i].winner}));
+      const b8=mgmtWinBonuses(m,red.slotted8,fights8);
+      const f8=mgmtEventRecette(red.attraction8,mgmtSpectacle(fam),red.purses8,red.slotted8n,b8);
       return {full:ev.finance,red:{attraction:f8.attraction,spectacle:f8.spectacle,audience:f8.audience,
-        ticketing:f8.ticketing,tv:f8.tv,purses:f8.purses,recette:f8.recette}};
+        ticketing:f8.ticketing,tv:f8.tv,purses:f8.purses,bonuses:f8.bonuses,recette:f8.recette}};
     }
 
     for(let i=FROM;i<TO;i++){
@@ -415,12 +419,12 @@ function measure(cfg){
     out.ref=mgmtAudienceRef(null);
     out.cst={TREASURY_START:MGMT_TREASURY_START,STAR_FIGHTS:MGMT_STAR_FIGHTS,STAR_W_RATIO:MGMT_STAR_W_RATIO,
       STAR_W_LVL:MGMT_STAR_W_LVL,PURSE_BASE:MGMT_PURSE_BASE,PURSE_PER_STAR:MGMT_PURSE_PER_STAR,
-      PURSE_PRELIM_W:MGMT_PURSE_PRELIM_W,PURSE_MAIN_W:MGMT_PURSE_MAIN_W,ATTR_PRELIM_W:MGMT_ATTR_PRELIM_W,
-      ATTR_MAIN_W:MGMT_ATTR_MAIN_W,ATTR_GAP:MGMT_ATTR_GAP,TICKET_PER_DRAW:MGMT_TICKET_PER_DRAW,
-      AUD_BASE:MGMT_AUD_BASE,AUD_PER_DRAW:MGMT_AUD_PER_DRAW,TV_PER_AUD:MGMT_TV_PER_AUD,
-      TV_ECRANS:MGMT_TV_ECRANS,CARD_CONTRACT:MGMT_CARD_CONTRACT,DRAW_AVG:MGMT_DRAW_AVG,
-      SPECTACLE_REF:MGMT_SPECTACLE_REF,SLOPPY_GAP:MGMT_SLOPPY_GAP,RANK_GAP:MGMT_RANK_GAP,
-      MAIN_SIZE:MGMT_MAIN_SIZE,PRELIM_SIZE:MGMT_PRELIM_SIZE};
+      PURSE_PRELIM_W:MGMT_PURSE_PRELIM_W,PURSE_MAIN_W:MGMT_PURSE_MAIN_W,WIN_BONUS_SHARE:MGMT_WIN_BONUS_SHARE,
+      ATTR_PRELIM_W:MGMT_ATTR_PRELIM_W,ATTR_MAIN_W:MGMT_ATTR_MAIN_W,ATTR_GAP:MGMT_ATTR_GAP,
+      TICKET_PER_DRAW:MGMT_TICKET_PER_DRAW,AUD_BASE:MGMT_AUD_BASE,AUD_PER_DRAW:MGMT_AUD_PER_DRAW,
+      TV_PER_AUD:MGMT_TV_PER_AUD,TV_ECRANS:MGMT_TV_ECRANS,CARD_CONTRACT:MGMT_CARD_CONTRACT,
+      DRAW_AVG:MGMT_DRAW_AVG,SPECTACLE_REF:MGMT_SPECTACLE_REF,SLOPPY_GAP:MGMT_SLOPPY_GAP,
+      RANK_GAP:MGMT_RANK_GAP,MAIN_SIZE:MGMT_MAIN_SIZE,PRELIM_SIZE:MGMT_PRELIM_SIZE};
     return JSON.stringify(out);
   })()`);
   return agg;
@@ -500,12 +504,13 @@ function report(A,cfg){
     const rec=stats(S.map(x=>x.recette));
     const rev=stats(S.map(x=>x.ticketing+x.tv));
     const pur=stats(S.map(x=>x.purses));
+    const bon=stats(S.map(x=>x.bonuses||0));
     const aud=stats(S.map(x=>x.audience));
     const atr=stats(S.map(x=>x.attraction));
     const spe=stats(S.map(x=>x.spectacle));
     const rent=Math.round(1000*S.filter(x=>x.recette>0).length/S.length)/10;
     return {name,n:rec.n,rent,rec_mean:r1(rec.mean),rec_sd:r1(rec.sd),rec_p5:rec.p5,rec_med:rec.p50,rec_p95:rec.p95,
-      rev:r1(rev.mean),pur:r1(pur.mean),atr:r2(atr.mean),spe:r3(spe.mean),aud:r1(aud.mean),aud_sd:r1(aud.sd),...extra};
+      rev:r1(rev.mean),pur:r1(pur.mean),bon:r1(bon.mean),atr:r2(atr.mean),spe:r3(spe.mean),aud:r1(aud.mean),aud_sd:r1(aud.sd),...extra};
   }
 
   const kept=A.reduite[0].filter(x=>x.audience>=A.ref).length;
@@ -518,31 +523,31 @@ function report(A,cfg){
     row('bâclée (5+4 écrasée, déroulé réel)',A.batcle[0],{sloppy:sloppyShare}),
   ];
 
-  /* Cibles du lot 3b T1 (docs/LOT-3B-CONTRAT.md §3 T1) — décisions
-     d'auteur, jamais revues ici, jugées sur le joueur d'écran SEUL. Le
-     seuil de la cible 3 est la lecture de l'outil : « part mesurable » =
-     au moins 10 %. AVANT : la sonde du 21/09 (Claude : joueur d'écran sans
-     la règle du réessai, 412 soirées composées sur 600 — R moyen −6,5 k$,
-     9,5 % de rentables) et la mesure de l'outil sur les constantes d'avant
-     recalibrage (essai --n=600 : R moyen −6,6 k$, médiane −7, 10,3 %,
-     600/600 composées avec la règle du réessai). La T4 livrée (933ce41)
-     jugeait ses chiffres sur l'oracle. */
-  const AVANT={ecranRent:10.3,ecranR:-6.6,ecranMed:-7,sondeRent:9.5,sondeR:-6.5,
-    batcleRent:0.3,reduiteOracle:43,reduiteEcran:1.8};
+  /* Cibles — décisions d'auteur, jamais revues ici, jugées sur le joueur
+     d'écran SEUL. Lot 2B T4 (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T4) :
+     la soirée 1 sert la bande 70-80 % (la lecture « durée de vie » attend
+     le recrutement, T2 — sans lui le roster ne peut que fondre et la
+     dégradation des soirées suivantes est la fonte mesurée, publiée dans
+     la table des soirées enchaînées). AVANT : la mesure 2B d'avant ce
+     recalibrage — le bonus de victoire en place (partage show/win),
+     revenus de la T4 du lot 2 non remontés (essai --n=200 --soirees=20 :
+     R moyen −49,4 k$, 0 % de rentables). Le seuil de la cible 3 est la
+     lecture de l'outil : « part mesurable » = au moins 10 %. */
+  const AVANT={ecranRent:0,ecranR:-49.4,ecranMed:-49,batcleRent:0,reduiteOracle:38};
   const verdicts=[
     {lib:'1. Le joueur d\u2019écran (carte complète moyenne) est rentable dans 70 à 80 % des soirées',
      cible:'70 à 80 %',
-     avant:AVANT.ecranRent+' % (joueur d\u2019écran, avant recalibrage — sonde du 21/09 : '+AVANT.sondeRent+' %)',
-     mesure:rows[1].rent+' % (joueur d\u2019écran)',
+     avant:AVANT.ecranRent+' % (joueur d\u2019écran, bonus de victoire sans remontée des revenus)',
+     mesure:rows[1].rent+' % (joueur d\u2019écran, soirée 1)',
      ok:rows[1].rent>=70&&rows[1].rent<=80},
     {lib:"2. Le joueur bâclé perd de l'argent plus souvent qu'il n'en gagne",
      cible:'moins de 50 % de rentables',
-     avant:AVANT.batcleRent+' % de rentables (T4 livrée — profil inchangé)',
-     mesure:rows[3].rent+' % (bâclé)',
+     avant:AVANT.batcleRent+' % de rentables (bonus sans remontée des revenus)',
+     mesure:rows[3].rent+' % (bâclé, soirée 1)',
      ok:rows[3].rent<50},
     {lib:"3. La carte réduite (du joueur d'écran) garde son audience de référence dans une part mesurable des cas",
      cible:'part mesurable (lecture de l\'outil : ≥ 10 %)',
-     avant:AVANT.reduiteEcran+' % (réduite du joueur d\u2019écran, avant recalibrage, réf de l\u2019ancien déroulé)',
+     avant:AVANT.reduiteOracle+' % (réduite du joueur d\u2019écran, bonus sans remontée des revenus)',
      mesure:audRefShare+' % (réduite, réf '+A.ref+' écrans)',
      ok:audRefShare>=10},
   ];
@@ -552,14 +557,19 @@ function report(A,cfg){
     &&rows[0].rent>rows[1].rent&&rows[1].rent>rows[3].rent;
 
   const L=[];
-  L.push('# Calibrage Monte Carlo — l\u2019argent sur le déroulé réel (lot 2 T4, reprise du 21/09)');
+  L.push('# Calibrage Monte Carlo — l\u2019argent sur le déroulé réel (lot 2B T4, le salaire à la victoire)');
   L.push('');
   L.push('Outil : `tools/monte-carlo-economie.js` — jeu réel (jsdom), VRAI déroulé : le joueur-type');
   L.push('compose sa carte principale par le geste du jeu (`mgmtBookMain`), Leïla propose les');
   L.push('préliminaires (`mgmtNewBulkAffair`), la soirée se joue par `mgmtRunEvent` — attrait et');
   L.push('cachets lus sur les lignes d\u2019avant combat, conséquences réelles (`mgmtApplyFight`).');
-  L.push('Reprise demandée par la relecture du 21/09 (docs/LOT-2-CARTE-PRINCIPALE.md §4 bis) :');
-  L.push('la T4 livrée (933ce41) calibrait sur un joueur qui voit ce que l\u2019écran lui cache.');
+  L.push('Lot 2B T4 (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T4, décision 1 du 21/09) : le cachet');
+  L.push('reste le salaire de combat et le VAINQUEUR touche un bonus — calculé après les combats,');
+  L.push('déduit de la recette. Le modèle d\u2019argent change, donc le calibrage de la T4 du lot 2');
+  L.push('(caduc depuis la T1 ter de toute façon) est refait ici. Les cibles se jugent sur la');
+  L.push('soirée 1 du joueur d\u2019écran ; la lecture « durée de vie » attend le recrutement (T2) —');
+  L.push('sans lui, le roster ne peut que fondre et la table des soirées enchaînées mesure cette');
+  L.push('fonte, pas un défaut de calibrage.');
   L.push('');
   L.push('- Graine de base : `'+cfg.seed+'`');
   L.push('- Carrières demandées par profil : '+cfg.cards+' (paquets contigus, au plus 12 processus)');
@@ -585,15 +595,16 @@ function report(A,cfg){
   L.push('');
   L.push('## Résultats (graine de base '+cfg.seed+', '+cfg.soirees+' soirée'+(cfg.soirees>1?'s':'')+' par organisation)');
   L.push('');
-  L.push('Valeurs en k$ (milliers), audience en écrans entiers. R = recette nette (revenus − cachets).');
+  L.push('Valeurs en k$ (milliers), audience en écrans entiers. R = recette nette (revenus − cachets');
+  L.push('− bonus de victoire).');
   L.push('Les cibles se jugent sur la ligne du joueur d\u2019écran, jamais sur l\u2019oracle.'
-    +(cfg.soirees>1?' À --soirees='+cfg.soirees+', la première soirée de chaque carrière repart d\u2019une organisation neuve : cette table est la soirée 1, exactement la mesure de --soirees=1 (mêmes graines de première soirée).':''));
+    +(cfg.soirees>1?' Cette table est la soirée 1 — la table des soirées enchaînées, plus bas, porte la suite.':''));
   L.push('');
-  L.push('| Profil | n | R moyen | R écart | R p5 | R méd | R p95 | % rentables | Revenus | Cachets | Attrait | Spectacle | Audience | Aud écart | Aud ≥ réf |');
-  L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+  L.push('| Profil | n | R moyen | R écart | R p5 | R méd | R p95 | % rentables | Revenus | Cachets | Bonus | Attrait | Spectacle | Audience | Aud écart | Aud ≥ réf |');
+  L.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
   for(const r of rows){
     L.push(['| '+r.name+' | '+r.n+' | '+r.rec_mean+' | '+r.rec_sd+' | '+r.rec_p5+' | '+r.rec_med+' | '+r.rec_p95
-      +' | '+r.rent+' | '+r.rev+' | '+r.pur+' | '+r.atr+' | '+r.spe+' | '+r.aud+' | '+r.aud_sd+' | '
+      +' | '+r.rent+' | '+r.rev+' | '+r.pur+' | '+r.bon+' | '+r.atr+' | '+r.spe+' | '+r.aud+' | '+r.aud_sd+' | '
       +(r.aud_ref!==undefined?r.aud_ref+' %':'—')+' |'].join(''));
   }
   L.push('');
@@ -613,34 +624,31 @@ function report(A,cfg){
     L.push('| '+x.lib+' | '+x.avant+' | '+x.mesure+' | '+(x.ok?'ATTEINTE':'MANQUÉE')+' |');
   }
   L.push('');
-  L.push('## Pourquoi la T4 livrée était fausse, et ce que cette reprise corrige');
+  L.push('## Ce que le bonus de victoire change, et ce que le recalibrage corrige');
   L.push('');
-  L.push('La T4 livrée (933ce41) mesurait un joueur qui choisissait par `mgmtFightDraw`');
-  L.push('décroissant — la grandeur qui produit la billetterie et les droits du diffuseur,');
-  L.push('invisible à l\u2019écran (§T2 : catégorie, rang, bilan — rien d\u2019autre). Un joueur qui');
-  L.push('voit ce que le jeu lui cache, pas un joueur. Le joueur d\u2019écran, lui, ne dispose que');
-  L.push('de la catégorie, du rang et du bilan : avant recalibrage, R moyen '+AVANT.ecranR+' k$');
-  L.push('(médiane '+AVANT.ecranMed+') pour '+AVANT.ecranRent+' % de rentables — **R = −6 k$ est l\u2019ordre de');
-  L.push('grandeur NORMAL d\u2019un joueur qui ne dispose que de l\u2019écran** : la sonde du 21/09 le');
-  L.push('mesurait à '+AVANT.sondeR+' k$ ('+AVANT.sondeRent+' % de rentables, soirées abandonnées au premier');
-  L.push('refus), l\u2019outil le mesure à '+AVANT.ecranR+' k$ ('+AVANT.ecranRent+' % de rentables, la règle du réessai');
-  L.push('composant toutes les soirées). C\u2019était la médiane de sa distribution, pas « un tirage');
-  L.push('sous le 5e centile » comme l\u2019expliquait à tort le rapport de la T4 livrée. C\u2019est ce');
-  L.push('que le recalibrage corrige : la soirée réelle jouée en jeu le 20/09 (R = −6,');
-  L.push('trésorerie 50 → 44) n\u2019était pas malchanceuse, elle était représentative. L\u2019écart');
-  L.push('oracle − joueur d\u2019écran ('+r1(rows[0].rec_mean-rows[1].rec_mean)+' k$ de R moyen) est le prix du joueur');
-  L.push('parfait : un joueur qui choisit exactement ce que le jeu vend.');
+  L.push('Le bonus de victoire (lot 2B T4) alourdit une soirée d\u2019environ la moitié de sa masse');
+  L.push('de cachets : le vainqueur de chacun des neuf combats touche son cachet une seconde');
+  L.push('fois (partage show/win du sport réel, `MGMT_WIN_BONUS_SHARE=1`). Avant remontée des');
+  L.push('revenus, le joueur d\u2019écran mesurait R moyen '+AVANT.ecranR+' k$ (médiane '+AVANT.ecranMed+')');
+  L.push('pour '+AVANT.ecranRent+' % de rentables — la soirée perdait ~50 k$ en moyenne. C\u2019est ce que le');
+  L.push('recalibrage corrige : les deux leviers de revenu (billetterie et droits du diffuseur)');
+  L.push('suivent le coût, dans leurs proportions d\u2019avant. L\u2019écart oracle − joueur d\u2019écran');
+  L.push('('+r1(rows[0].rec_mean-rows[1].rec_mean)+' k$ de R moyen) reste le prix du joueur parfait : un joueur qui choisit');
+  L.push('exactement ce que le jeu vend. Le bonus frappe aussi le joueur d\u2019écran plus fort que');
+  L.push('le bâclé — ses vainqueurs sont les mieux payés — et c\u2019est voulu : booker les bons');
+  L.push('numéros coûte leur salaire.');
   L.push('');
   L.push('## Ce qui reste hors déroulé réel (le profil réduite)');
   L.push('');
   L.push('La réduite (QO-7 : la carte moins son prélim d\u2019attrait le plus faible) n\u2019est PAS');
   L.push('jouée par `mgmtRunEvent` : le jeu refuse une carte incomplète (la carte contractuelle');
   L.push('est de 9 combats, 5 + 4). Elle se mesure sur les clones d\u2019avant combat (`mgmtFightReady`),');
-  L.push('avec la vraie finance (`mgmtEventRecette`, droits au prorata 8/9 des combats joués) —');
+  L.push('avec la vraie finance (`mgmtEventRecette`, droits au prorata 8/9 des combats joués,');
+  L.push('bonus de victoire des huit combats rejoués compris) —');
   L.push('l\u2019attrait et les cachets sont ceux de la carte du joueur d\u2019écran avant la soirée,');
-  L.push('le spectacle vient des huit combats rejoués sous une graine du même run. Elle est un');
-  L.push('proxy assumé, mesuré comme tel : c\u2019est la lecture de la cible 3, pas une soirée que');
-  L.push('le jeu peut produire.');
+  L.push('le spectacle et les vainqueurs viennent des huit combats rejoués sous une graine du');
+  L.push('même run. Elle est un proxy assumé, mesuré comme tel : c\u2019est la lecture de la cible 3,');
+  L.push('pas une soirée que le jeu peut produire.');
   L.push('');
   const manques=verdicts.filter(x=>!x.ok);
   if(manques.length===0){
@@ -703,27 +711,30 @@ function report(A,cfg){
     }
     L.push('');
   }
-  L.push('## Constantes recalibrées (ancre MGMT_LOT3B_T1_ECONOMIE, mgmt-bureau.js)');
+  L.push('## Constantes recalibrées (ancre MGMT_LOT3B_T1_ECONOMIE, mgmt-argent.js)');
   L.push('');
-  L.push('Les cibles du lot 3b T1 sont des décisions d\u2019auteur — jamais touchées. Ce sont les');
-  L.push('poids d\u2019argent qui ont bougé, pour porter le joueur d\u2019écran (le seul qui sert les');
-  L.push('cibles) dans la bande 70-80 %. Effets mesurés : comparaison des essais --n=600');
-  L.push('(avant recalibrage : ' + AVANT.ecranR + ' k$ / ' + AVANT.ecranRent + ' % ; après : ' + rows[1].rec_mean + ' k$ / ' + rows[1].rent + ' %).');
+  L.push('Les cibles sont des décisions d\u2019auteur — jamais touchées. Ce sont les poids d\u2019argent');
+  L.push('qui ont bougé, pour porter le joueur d\u2019écran (le seul qui sert les cibles) dans la');
+  L.push('bande 70-80 % malgré le bonus de victoire. Effets mesurés : comparaison des essais');
+  L.push('--n=200 --soirees=20 (avant recalibrage : ' + AVANT.ecranR + ' k$ / ' + AVANT.ecranRent + ' % ; après : '
+    + rows[1].rec_mean + ' k$ / ' + rows[1].rent + ' %, soirée 1).');
   L.push('');
   L.push('| Constante | Ancienne | Nouvelle | Effet mesuré |');
   L.push('|---|---|---|---|');
-  /* Les anciennes valeurs sont celles de l'état d'avant cette reprise
-     (T4 livrée + relecture : poids du lot 3b T1, D4 mesurée sur l'oracle).
-     ckeys : d'abord les leviers possibles, puis les définitions et les
-     mesures — chaque ligne dit CHANGÉE ou INCHANGÉE, jamais rien de plus. */
+  /* Les anciennes valeurs sont celles de l'état d'avant cette tranche
+     (T4 du lot 2 recalibrée + lot 2B T1 ter/T3 : le bonus de victoire
+     n'existait pas). ckeys : d'abord les leviers possibles, puis les
+     définitions et les mesures — chaque ligne dit CHANGÉE ou INCHANGÉE,
+     jamais rien de plus. */
   const ANCIENNES={TREASURY_START:50,STAR_FIGHTS:8,STAR_W_RATIO:0.35,STAR_W_LVL:0.65,
-    PURSE_BASE:1,PURSE_PER_STAR:4,PURSE_PRELIM_W:1,PURSE_MAIN_W:2.5,ATTR_PRELIM_W:1,
-    ATTR_MAIN_W:2.5,ATTR_GAP:0.6,TICKET_PER_DRAW:7,AUD_BASE:0.7,AUD_PER_DRAW:1000,
-    TV_PER_AUD:6,TV_ECRANS:1000,CARD_CONTRACT:9,DRAW_AVG:0.59,SPECTACLE_REF:0.67};
+    PURSE_BASE:1,PURSE_PER_STAR:3.35,PURSE_PRELIM_W:1,PURSE_MAIN_W:2.5,WIN_BONUS_SHARE:'— (nouveau)',
+    ATTR_PRELIM_W:1,ATTR_MAIN_W:2.5,ATTR_GAP:0.6,TICKET_PER_DRAW:7,AUD_BASE:0.7,AUD_PER_DRAW:1000,
+    TV_PER_AUD:6,TV_ECRANS:1000,CARD_CONTRACT:9,DRAW_AVG:0.48,SPECTACLE_REF:0.71};
   const EFFETS={
-    PURSE_PER_STAR:'cachet par point de nom — LE levier de cette reprise : le joueur d\u2019écran book les mieux classés, donc les bilans les plus lourds et les mieux payés ; cachets du joueur d\u2019écran 104.7 → 93.2 k$ (essais --n=600), R moyen '+AVANT.ecranR+' → '+rows[1].rec_mean+' k$, rentables '+AVANT.ecranRent+' % → '+rows[1].rent+' % — l\u2019écart de cachets entre un rang 1 et un reste-de-liste subsiste (prime au nom conservée)',
-    TICKET_PER_DRAW:'INCHANGÉ — billetterie (k$) par point d\u2019attrait',
-    TV_PER_AUD:'INCHANGÉ — droits du diffuseur (k$) pour 1000 écrans',
+    WIN_BONUS_SHARE:'NOUVEAU (lot 2B T4) — part du cachet reversée au vainqueur : 1, la pratique show/win du sport réel ; le vainqueur des neuf combats touche son cachet une seconde fois, le nul ne bonus personne',
+    TICKET_PER_DRAW:'billetterie (k$) par point d\u2019attrait — LE levier de revenu de ce recalibrage : le bonus de victoire alourdit le coût d\u2019une soirée de ~50 k$, la billetterie suit (7 → '+A.cst.TICKET_PER_DRAW+') ; R moyen '+AVANT.ecranR+' → '+rows[1].rec_mean+' k$, rentables '+AVANT.ecranRent+' % → '+rows[1].rent+' % (soirée 1)',
+    TV_PER_AUD:'droits du diffuseur (k$) pour 1000 écrans — second levier de revenu, monté dans ses proportions avec la billetterie (6 → '+A.cst.TV_PER_AUD+')',
+    PURSE_PER_STAR:'INCHANGÉ — cachet par point de nom (calibrage T4 du lot 2 : le joueur d\u2019écran book les mieux classés, la prime au nom subsiste)',
     PURSE_BASE:'INCHANGÉ — cachet plancher',
     PURSE_PRELIM_W:'INCHANGÉ — poids du cachet en prélim',
     PURSE_MAIN_W:'INCHANGÉ — poids du cachet en carte principale',
@@ -734,12 +745,12 @@ function report(A,cfg){
     AUD_PER_DRAW:'INCHANGÉ — écrans par point d\u2019attrait × mix de spectacle',
     DRAW_AVG:'MESURE reposée sur le joueur d\u2019écran — attrait moyen mesuré d\u2019un combat : '
       +r3(rows[1].atr/(A.cst.MAIN_SIZE*A.cst.ATTR_MAIN_W+A.cst.PRELIM_SIZE*A.cst.ATTR_PRELIM_W))
-      +' ; mgmtAudienceRef sans historique ('+A.ref+' écrans) reste l\u2019audience moyenne du joueur d\u2019écran (écart mesuré < 1 %, QO-7)',
+      +' ; mgmtAudienceRef sans historique ('+A.ref+' écrans) reste l\u2019audience moyenne du joueur d\u2019écran (QO-7)',
     SPECTACLE_REF:'MESURE reposée sur le joueur d\u2019écran — part de finitions mesurée : '+rows[1].spe,
     TREASURY_START:'INCHANGÉ — décision QO-5',
     TV_ECRANS:'INCHANGÉ — définition, pas un réglage',
     CARD_CONTRACT:'INCHANGÉ — la carte complète du lot 2 (5 + 4), définition'};
-  const ckeys=['PURSE_PER_STAR','TICKET_PER_DRAW','TV_PER_AUD','PURSE_BASE','PURSE_PRELIM_W',
+  const ckeys=['WIN_BONUS_SHARE','TICKET_PER_DRAW','TV_PER_AUD','PURSE_PER_STAR','PURSE_BASE','PURSE_PRELIM_W',
     'PURSE_MAIN_W','ATTR_PRELIM_W','ATTR_MAIN_W','ATTR_GAP','AUD_BASE','AUD_PER_DRAW',
     'DRAW_AVG','SPECTACLE_REF','TREASURY_START','TV_ECRANS','CARD_CONTRACT'];
   for(const k of ckeys){

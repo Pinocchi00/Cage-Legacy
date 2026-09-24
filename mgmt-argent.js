@@ -4,7 +4,8 @@
    MODE MANAGEMENT — l'argent de l'organisation : un seul solde (le
    découvert est la trésorerie sous zéro, jamais un compteur séparé),
    cachets dérivés de la ligne (jamais stockés, règle du bureau CDC §3),
-   recette nette R = billetterie + droits du diffuseur − cachets, plafond
+   bonus de victoire calculé après les combats (lot 2B T4), recette nette
+   R = billetterie + droits du diffuseur − cachets − bonus, plafond
    de découvert, audience et sa référence pour D4. Issu de mgmt-bureau.js,
    découpage de la dette CLAUDE.md §10 (ancre MGMT_LOT3B_T1_ECONOMIE).
    Fonctions pures, aucun rnd(), aucune réplique, aucun affichage :
@@ -41,7 +42,12 @@
    mieux classés sont les mieux payés : c'est lui qui encaisse la hausse
    des cachets) ; les autres poids d'argent sont inchangés ; les références
    D4 (MGMT_DRAW_AVG, MGMT_SPECTACLE_REF) suivent la mesure du joueur
-   d'écran. ==== */
+   d'écran. Lot 2B T4 le salaire à la victoire (docs/LOT-2B-LE-VIVIER-
+   SE-RENOUVELLE.md §T4, décision 1 du 21/09) : le cachet reste le SALAIRE
+   DE COMBAT, payé avec la soirée — et le VAINQUEUR touche un bonus,
+   calculé APRÈS les combats (on ne connaît le vainqueur qu'une fois la
+   soirée jouée) et passé à mgmtEventRecette, qui le déduit de la recette.
+   L'ancien « payé avant la soirée » est faux depuis cette décision. ==== */
 /* Trésorerie au premier jour (k$). Ordre de grandeur de l'exemple QO-5
    (T=50 : un short notice à 60 est refusé avant la première soirée, P=0). */
 const MGMT_TREASURY_START=50;
@@ -63,14 +69,23 @@ const MGMT_PURSE_BASE=1;
 const MGMT_PURSE_PER_STAR=3.35;
 const MGMT_PURSE_PRELIM_W=1;
 const MGMT_PURSE_MAIN_W=2.5;
+/* Lot 2B T4 — bonus de victoire : le vainqueur touche son cachet une
+   seconde fois (la pratique show/win du sport), le nul ne bonus personne.
+   La constante est la part du cachet reversée en bonus ; recalibrée avec
+   les autres poids d'argent, jamais la cible (tools/reports/
+   LOT-2B-T4-CALIBRAGE-ECONOMIE.md). */
+const MGMT_WIN_BONUS_SHARE=1;
 /* Attrait : poids d'emplacement d'un combat dans la carte — un combat de
    main card rapporte plus qu'un prélim — mordu par l'écart de nom entre les
    deux lignes (un combat déséquilibré ne se vend pas). */
 const MGMT_ATTR_PRELIM_W=1;
 const MGMT_ATTR_MAIN_W=2.5;
 const MGMT_ATTR_GAP=0.6;
-/* Billetterie (k$) par point d'attrait de la carte. */
-const MGMT_TICKET_PER_DRAW=7;
+/* Billetterie (k$) par point d'attrait de la carte. Lot 2B T4 : recalibrée
+   de 7 à 11.4 avec les droits du diffuseur — le bonus de victoire (partage
+   show/win) alourdit le coût d'une soirée de ~50 %, les deux leviers de
+   revenu suivent (tools/reports/LOT-2B-T4-CALIBRAGE-ECONOMIE.md). */
+const MGMT_TICKET_PER_DRAW=11.4;
 /* Audience, en écrans entiers : attrait × mix de spectacle. L'audience est
    décidée surtout avant la soirée — MGMT_AUD_BASE est acquise d'avance, la
    part de finitions observée ne pèse que sur le reste. Une soirée sans
@@ -82,7 +97,7 @@ const MGMT_AUD_PER_DRAW=1000;
    §16 : c'est le contrat du diffuseur). Carte contractuelle = la carte
    complète du lot 2 (décision du 19/09 : 9 combats — 5 en carte principale,
    4 en préliminaires). */
-const MGMT_TV_PER_AUD=6;
+const MGMT_TV_PER_AUD=9.2;
 const MGMT_TV_ECRANS=1000;
 const MGMT_CARD_CONTRACT=MGMT_MAIN_SIZE+MGMT_PRELIM_SIZE;
 /* Références D4 (QO-7) : attrait d'un combat moyen et spectacle (part de
@@ -91,10 +106,13 @@ const MGMT_CARD_CONTRACT=MGMT_MAIN_SIZE+MGMT_PRELIM_SIZE;
    4000 carrières — reprise T4 du 21/09, tools/reports/
    LOT-2-T4-CALIBRAGE-ECONOMIE.md ; l'ancien déroulé synthétique 4 + 4
    mesurait 0.616 et 0.638, docs/lots/LOT-3B-T1-CALIBRAGE.md ; la T4 livrée
-   mesurait 0.59 et 0.67 sur l'oracle). mgmtAudienceRef sans historique
-   redonne ainsi l'audience moyenne mesurée de la carte du joueur d'écran. */
-const MGMT_DRAW_AVG=0.48;
-const MGMT_SPECTACLE_REF=0.71;
+   mesurait 0.59 et 0.67 sur l'oracle). Lot 2B T4 : suivent la mesure du
+   joueur d'écran après la T1 ter et la T3 (0.491 et 0.637 —
+   tools/reports/LOT-2B-T4-CALIBRAGE-ECONOMIE.md). mgmtAudienceRef sans
+   historique redonne ainsi l'audience moyenne mesurée de la carte du
+   joueur d'écran. */
+const MGMT_DRAW_AVG=0.49;
+const MGMT_SPECTACLE_REF=0.64;
 
 /** Nom d'une ligne (0..1) : valeur de scène dérivée du bilan — activité,
  *  ratio de victoires, niveau dérivé du bilan. Pur et déterministe, jamais
@@ -111,14 +129,36 @@ function mgmtStar(f){
 }
 
 /** Cachet (k$) d'un combattant pour un emplacement ('main'|'prelim') :
- *  plancher + nom, pondéré par l'emplacement. Pur, jamais stocké sur la
- *  ligne — il est payé avant la soirée et n'existe que dans le calcul de
- *  l'événement (anti-rechargement).
+ *  plancher + nom, pondéré par l'emplacement. Le cachet est le SALAIRE DE
+ *  COMBAT (lot 2B T4) : il est payé avec la soirée, et le vainqueur y
+ *  ajoute son bonus de victoire (mgmtWinBonuses) — Pur, jamais stocké sur
+ *  la ligne, il n'existe que dans le calcul de l'événement
+ *  (anti-rechargement).
  *  @returns {number} entier k$ > 0. */
 function mgmtPurse(f,slot){
   const star=mgmtStar(f);
   const w=slot==='main'?MGMT_PURSE_MAIN_W:MGMT_PURSE_PRELIM_W;
   return Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*star)*w);
+}
+
+/** Bonus de victoire (k$) d'une soirée : le vainqueur de chaque combat
+ *  touche son cachet une seconde fois (MGMT_WIN_BONUS_SHARE), un nul ne
+ *  bonus personne. Se calcule APRÈS les combats — on ne connaît le
+ *  vainqueur qu'une fois la soirée jouée — et passe à mgmtEventRecette,
+ *  qui le déduit de la recette. Pur.
+ *  @returns {number} entier k$ ≥ 0. */
+function mgmtWinBonuses(m,slotted,fights){
+  if(!Array.isArray(slotted)||!Array.isArray(fights)||!(MGMT_WIN_BONUS_SHARE>0)) return 0;
+  let s=0;
+  for(const f of fights){
+    if(!f||(f.winner!=='A'&&f.winner!=='B')) continue;
+    const cf=slotted.find(x=>x&&((x.a===f.a&&x.b===f.b)||(x.a===f.b&&x.b===f.a)));
+    if(!cf) continue;
+    const w=mgmtFighterById(m,f.winner==='A'?f.a:f.b);
+    if(!w) continue;
+    s+=mgmtPurse(w,cf.slot);
+  }
+  return Math.round(s*MGMT_WIN_BONUS_SHARE);
 }
 
 /** Attrait d'un combat (0..1) : la valeur de scène des deux lignes, mordue
@@ -145,8 +185,9 @@ function mgmtCardAttraction(m,slotted){
   return s;
 }
 
-/** Total des cachets (k$) d'une carte slottée, payés avant la soirée.
- *  Pur. @returns {number} entier ≥ 0. */
+/** Total des cachets (k$) d'une carte slottée : le salaire de combat de
+ *  la carte (lot 2B T4 — le bonus de victoire s'y ajoute après coup,
+ *  mgmtWinBonuses). Pur. @returns {number} entier ≥ 0. */
 function mgmtPurses(m,slotted){
   if(!Array.isArray(slotted)) return 0;
   let p=0;
@@ -172,13 +213,16 @@ function mgmtSpectacle(fights){
 /** Recette d'une soirée, en une seule fois (QO-5) : billetterie (attrait de
  *  la carte avant la soirée) + droits du diffuseur (audience en écrans =
  *  attrait × mix de spectacle, décidée surtout avant la soirée ; droits au
- *  prorata des combats joués sur la carte contractuelle de 8 — addendum
- *  §16) − cachets. Pure : attraction et cachets sont calculés sur les
+ *  prorata des combats joués sur la carte contractuelle de 9 — addendum
+ *  §16) − cachets − bonus de victoire (lot 2B T4 : calculés après les
+ *  combats par l'appelant, mgmtWinBonuses — omis ou nul sur un appel qui
+ *  ne les connaît pas). Pure : attraction et cachets sont calculés sur les
  *  lignes d'avant combat par l'appelant, spectacle et nombre de combats sur
  *  les combats joués. Tout est entier (k$, écrans) ; R peut être négative.
- *  @returns {{attraction,spectacle,audience,ticketing,tv,purses,recette}} */
-function mgmtEventRecette(attraction,spectacle,purses,nFights){
+ *  @returns {{attraction,spectacle,audience,ticketing,tv,purses,bonuses,recette}} */
+function mgmtEventRecette(attraction,spectacle,purses,nFights,bonuses){
   const a=Math.max(0,num(attraction)), s=clamp(num(spectacle),0,1), p=Math.max(0,Math.round(num(purses)));
+  const b=(bonuses===undefined||bonuses===null)?0:Math.max(0,Math.round(num(bonuses)));
   /* L'audience est décidée surtout avant la soirée : la base est acquise,
      le spectacle observé (part de finitions) ne porte que le reste. */
   const mix=MGMT_AUD_BASE+(1-MGMT_AUD_BASE)*s;
@@ -188,7 +232,7 @@ function mgmtEventRecette(attraction,spectacle,purses,nFights){
   const n=(typeof nFights==='number'&&Number.isFinite(nFights))?Math.max(0,nFights):MGMT_CARD_CONTRACT;
   const tv=Math.round(MGMT_TV_PER_AUD*audience*n/(MGMT_TV_ECRANS*MGMT_CARD_CONTRACT));
   return {attraction:Math.round(a*1000)/1000,spectacle:Math.round(s*1000)/1000,
-    audience,ticketing,tv,purses:p,recette:ticketing+tv-p};
+    audience,ticketing,tv,purses:p,bonuses:b,recette:ticketing+tv-p-b};
 }
 
 /** Plafond de découvert P (QO-5) : 0 avant la première soirée, la dernière

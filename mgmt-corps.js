@@ -203,6 +203,109 @@ function mgmtFightReady(f,cycle){
   return c;
 }
 
+/* ==== [ANCRE: MGMT_LOT2B_T3_RETRAITE] — Lot 2B T3 les départs
+   (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T3) : la retraite d'âge, seconde
+   sortie ordinaire à côté de la retraite médicale. La loi est celle de la
+   carrière (engine-career.js:161) : retraite obligatoire à 42 ans, avancée
+   jusqu'à 39 selon la dégradation du menton — max(39, 42 −
+   chinDegradationLevel). Le bonus meta01 (+2 ans) n'existe pas ici : le
+   management n'a pas de compétences.
+
+   La correspondance publiée (le management n'a pas de
+   chinDegradationLevel) : le niveau se dérive des DEUX forces qui usent le
+   menton d'une ligne, exprimées en points d'attribut sur l'échelle 1-100
+   (MGMT_CHIN_LEVEL_POINTS points par niveau, borné à 3 niveaux — le
+   plancher de la loi) :
+   - le déclin d'âge : la perte de chin cumulée par mgmtAgingWear (T2 bis,
+     RI(0,cap) par an à partir de 38 ans) ;
+   - le traumatisme acquis : la perte que mgmtTraumaFactor (lot 3a) applique
+     au chin régénéré — lue sur le profil réel du combattant
+     (mgmtCombatProfile), pas sur une approximation.
+   Un combattant au corps propre arrive à 42 ans ; chaque tranche de dix
+   points de menton perdus avance la retraite d'un an, jusqu'à 39. La
+   correspondance est mesurée dans tools/reports/LOT-2B-T3-LES-DEPARTS.md.
+
+   Le test « est retiré » est GÉNÉRIQUE (mgmtIsRetired) : la retraite
+   médicale n'est plus la seule valeur de f.retired, et aucun filtre du mode
+   ne doit supposer le contraire (T3 étape 1). ==== */
+const MGMT_RET_AGE_BASE=42;
+const MGMT_RET_AGE_FLOOR=39;
+const MGMT_CHIN_LEVEL_POINTS=10;
+
+/** Test générique « est retiré » : toute valeur de f.retired (la retraite
+ *  médicale du lot 3a, la retraite d'âge de la T3) sort le combattant du
+ *  vivier, des classements et des propositions. Pur. @returns {boolean} */
+function mgmtIsRetired(f){
+  return !!(f&&f.retired);
+}
+
+/** La loi de la retraite, une seule (engine-career.js:161) : max(39,
+ *  42 − niveau de dégradation du menton). Utilisée par le roster (niveau
+ *  dérivé du corps) et par le monde extérieur (niveau dérivé de sa trace).
+ *  Pur. @returns {number} 39 à 42. */
+function mgmtRetireAgeFor(level){
+  return Math.max(MGMT_RET_AGE_FLOOR,MGMT_RET_AGE_BASE-Math.max(0,Math.floor(Number(level)||0)));
+}
+
+/** Niveau de dégradation du menton d'une ligne (0..3) : la correspondance
+ *  publiée de l'ancre — déclin d'âge (mgmtAgingWear) plus perte au
+ *  traumatisme (mgmtTraumaFactor sur le chin régénéré), dix points de
+ *  menton perdus par niveau. Pur et déterministe, ne consomme aucun tirage
+ *  de la RNG du jeu (profil régénéré sous SEED restauré).
+ *  @returns {number} 0 à 3. */
+function mgmtChinDegradationLevel(f,cycle){
+  if(!f) return 0;
+  const wear=mgmtAgingWear(f);
+  const agedLoss=(wear.attrs&&Number.isFinite(wear.attrs.chin))?wear.attrs.chin:0;
+  const p=mgmtCombatProfile(f);
+  const chin=(p&&p.attrs)?num(p.attrs.chin):0;
+  const eff=Math.max(1,Math.round(chin*mgmtTraumaFactor(mgmtTrauma(f,cycle))));
+  const loss=agedLoss+Math.max(0,chin-eff);
+  return clamp(Math.floor(loss/MGMT_CHIN_LEVEL_POINTS),0,3);
+}
+
+/** Âge de retraite d'une ligne : la loi de la carrière appliquée à son
+ *  niveau dérivé. Pur. @returns {number} 39 à 42. */
+function mgmtRetireAge(f,cycle){
+  if(!f) return MGMT_RET_AGE_BASE;
+  return mgmtRetireAgeFor(mgmtChinDegradationLevel(f,cycle));
+}
+
+/** La retraite d'âge, à l'ouverture du cycle (après mgmtAdvanceRosterAges) :
+ *  chaque ligne non retirée dont l'âge atteint sa retraite (loi de la
+ *  carrière, niveau dérivé du corps) prend f.retired='age' — sans drame et
+ *  sans réplique (décision 6, §T3). Elle sort du vivier et des classements
+ *  par le test générique ; sa place dans le quota est reprise par
+ *  l'extérieur au même cycle (mgmtExteriorArrive, appelé juste après). Un
+ *  partant retire aussi de la carte posée les combats qui le portaient —
+ *  même geste que mgmtRepair pour une ligne disparue : un retraité ne
+ *  combat pas, et la soirée ne doit pas se trouver bloquée par un combat
+ *  impossible. Aucun tirage de la RNG du jeu.
+ *  @returns {number} le nombre de départs du cycle. */
+function mgmtRetireRoster(m){
+  if(!m||!Array.isArray(m.roster)) return 0;
+  let n=0;
+  for(const f of m.roster){
+    if(!f||mgmtIsRetired(f)||!Number.isFinite(f.age)) continue;
+    if(f.age>=mgmtRetireAge(f,m.cycle)){
+      f.retired='age';
+      mgmtPromoteSilent(m,f,3);
+      mgmtAddFact(m,{c:m.cycle,k:'retired',a:f.id});
+      n++;
+    }
+  }
+  if(n>0&&m.card){
+    const partis=new Set(m.roster.filter(o=>mgmtIsRetired(o)).map(o=>o.id));
+    for(const slot of ['main','prelims']){
+      if(Array.isArray(m.card[slot])){
+        m.card[slot]=m.card[slot].filter(x=>x&&!partis.has(x.a)&&!partis.has(x.b));
+      }
+    }
+  }
+  return n;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MGMT_LOT3_T1_TRACE] — Lot 3 T1 la trace (docs/LOT-3-L-ARENE.md
    §3 T1 ; constat C3, docs/AUDIT-17-09.md) : chaque combat laisse de quoi
    être REJOUÉ, pas le combat — garder le déroulé ferait enfler la sauvegarde
@@ -435,9 +538,11 @@ function mgmtApplyFight(m,f,opp,res,side){
  *  à la main — avec toutes leurs conséquences (§6). Lot 3b T1 (QO-5) : le
  *  même calcul unique porte la finance — attrait et cachets lus sur les
  *  lignes d'avant combat, spectacle observé sur les combats joués, recette
- *  nette R = billetterie + droits − cachets ajoutée au solde unique
- *  (remboursement automatique : tant que T < 0, rien n'est bénéfice),
- *  audience, historiques et E1 (patron : T < 0 avant la soirée et R > 0).
+ *  nette R = billetterie + droits − cachets − bonus de victoire ajoutée
+ *  au solde unique (remboursement automatique : tant que T < 0, rien n'est
+ *  bénéfice), audience, historiques et E1 (patron : T < 0 avant la
+ *  soirée et R > 0). Lot 2B T4 : le bonus de victoire se connaît APRÈS les
+ *  combats — le vainqueur touche son cachet une seconde fois.
  *  Stocké dans m.lastEvent puis sauvegardé avant tout affichage : recharger
  *  la page ne rejoue rien. Lot 3 T1 : chaque combat laisse aussi sa trace
  *  dans m.hist (ancre MGMT_LOT3_T1_TRACE) — de quoi rejouer, jamais le
@@ -486,7 +591,11 @@ function mgmtRunEvent(m){
     if(tb) touched.push(tb);
   }
   touched.sort((x,y)=>mgmtTouchedRank(y)-mgmtTouchedRank(x));
-  const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length);
+  /* Lot 2B T4 : le bonus de victoire se calcule après les combats — le
+     cachet reste le salaire de combat, le vainqueur touche le sien une
+     seconde fois, et la recette nette le déduit. */
+  const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length,
+    mgmtWinBonuses(m,booked,fights));
   /* Un seul solde (QO-5) : T ← T + R. Remboursement « avant tout bénéfice »
      automatique — tant que T < 0, rien n'est bénéfice. E1 si et seulement
      si T < 0 avant la soirée et R > 0. */
