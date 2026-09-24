@@ -29,3 +29,29 @@ tools/reports/*
 # Lot 2 §T4 (docs/LOT-2-CARTE-PRINCIPALE.md) : même principe — le rapport de
 # calibrage de l'argent sur le déroulé réel est le livrable T4, versionné.
 !tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md
+# Lot 2B §T1 (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §3) : même principe — la
+# mesure du monde extérieur dérivé (les deux cibles de réalisme) est le
+# livrable T1, versionné.
+!tools/reports/LOT-2B-T1-MONDE-EXTERIEUR.md
+# Lot 3 T2 (docs/LOT-3-L-ARENE.md §3 T2) : même principe — la mesure de la
+# cible 1 (cohérence image/déroulé) est le livrable T2, versionné.
+!tools/reports/LOT-3-T2-CIBLE-1-ARENE.md
+# Lot 3 T2 : même principe — le relevé DOM automatisé de la vérification
+# d'interface (charte §3) est le livrable T6 de la tranche, versionné.
+!tools/reports/LOT-3-T2-VERIF-INTERFACE.md
+# Lot 3 T3 — vitesse sur toutes les images et fenêtres physiques de la cible 1.
+!tools/reports/LOT-3-T3-ARENE.md
+# Lot 2B T1 ter : mesure versionnee du corps sur vingt soirees.
+!tools/reports/LOT-2B-T1-TER-CORPS-DUREE.md
+# Lot 2B T2 bis : mesure versionnee du temps sur vingt soirees.
+!tools/reports/LOT-2B-T2-BIS-LE-TEMPS-PASSE.md
+# Audit du code mort (21/09/2026) : l'inventaire des declarations que rien
+# n'atteint est un etat des lieux durable, pas une mesure de tranche — il se
+# relit et se compare a chaque passe. Versionne.
+!tools/reports/INVENTAIRE-CODE-MORT.md
+# Lot 2B T3 : mesure versionnee des departs (la correspondance du niveau
+# de degradation du menton, le monde qui se renouvelle, la question posee).
+!tools/reports/LOT-2B-T3-LES-DEPARTS.md
+# Lot 2B T4 : mesure versionnee du salaire a la victoire et du recalibrage
+# de l'economie (le bonus de victoire, les deux leviers de revenu, les cibles).
+!tools/reports/LOT-2B-T4-CALIBRAGE-ECONOMIE.md

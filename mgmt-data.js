@@ -151,6 +151,106 @@ const MGMT_FAMILY_LABELS={ko:'KO',stop:'Arrêt',sub:'Soumission',dec:'Décision'
 const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',susp:'Suspension médicale'};
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MGMT_LOT2B_EXTERIEUR_DONNEES] — Lot 2B T1 le monde extérieur
+   dérivé (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T1, QO-8) : constantes du
+   vivier hors Split. Un combattant extérieur ne stocke que son identité
+   (graine, catégorie, pays, cycle d'entrée dans le monde) ; tout le reste se
+   dérive à la lecture (mgmt-bureau.js, ancre MGMT_LOT2B_EXTERIEUR). Ces
+   constantes sont des données de cadrage, jamais du récit ; aucune réplique,
+   aucun nom de personnage. ==== */
+
+/* Les organisations extérieures où combattent les combattants hors Split,
+   en ordre de prestige CROISSANT : la première est celle où l'on commence
+   quand on n'a rien, la dernière est celle que Split peut rivaliser sans la
+   dépasser. Un combattant y monte les échelons après MGMT_EXT_ORG_MIN_FIGHTS
+   combats, sur une série de victoires.
+
+   Noms et ordre écrits par Anthony le 22/09/2026 (contenu d'auteur — voir
+   docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §5 e). Ils remplacent les quatre
+   [EMPLACEMENT AUTEUR] du lot 2B T1.
+
+   Attention : cette échelle n'est PAS le classement des organisations rivales
+   de Split (SPLIT-CONTEXTE-DEPART.md §8, « entrer dans le top 5 »), qui
+   n'existe pas encore dans le code et compte plus de cinq organisations —
+   sinon l'objectif du patron serait acquis d'avance. Ne pas confondre les
+   deux listes. */
+const MGMT_EXT_ORGS=['Garden of Blood','MMA Korner','Ultimate Rim','Fighting Pacific Championship'];
+
+/* Calendrier du monde extérieur : une année sportive compte MGMT_EXT_YEAR_WEEKS
+   semaines ; un cycle du bureau dure MGMT_EVENT_WEEKS semaines (lot 3a) —
+   l'âge courant avance donc de MGMT_EVENT_WEEKS semaines par cycle. */
+const MGMT_EXT_YEAR_WEEKS=52;
+
+/* Lot 2B T1 bis : le monde entier tient 30 combattants vivants dans chacune
+   des douze catégories, roster de Split compris. L'extérieur ne porte donc
+   pas un effectif propre : il complète exactement ce que Split ne fournit
+   pas dans la catégorie. */
+const MGMT_EXT_LIVE_PER_DIVISION=30;
+
+/* Âge à l'entrée dans le monde (MGMT_EXT_AGE_MIN à MIN+SPREAD-1) et âge de
+   début de carrière amateur (les débuts, à 18-21 ans). */
+const MGMT_EXT_AGE_MIN=20;
+const MGMT_EXT_AGE_SPREAD=11;
+const MGMT_EXT_AGE_START_MIN=18;
+const MGMT_EXT_AGE_START_SPREAD=4;
+
+/* Phase amateur : de 1 à 3 ans, combats comptés dans la bande du générateur
+   existant (RI(3,20), ui-01-roster-matchmaking.js makeOrgRoster). */
+const MGMT_EXT_AMA_YEARS_MIN=1;
+const MGMT_EXT_AMA_YEARS_SPREAD=3;
+const MGMT_EXT_AMA_FIGHTS_MIN=3;
+const MGMT_EXT_AMA_FIGHTS_SPREAD=18;
+
+/* Rythme professionnel : un combat toutes les MGMT_EXT_GAP_MIN à
+   MIN+SPREAD-1 cycles (2 à 3,5 combats par an — le rythme réel hors grande
+   organisation). */
+const MGMT_EXT_GAP_MIN=3;
+const MGMT_EXT_GAP_SPREAD=4;
+
+/* Trajectoire de niveau (cachée — le joueur ne lit que des bilans) : niveau
+   au passage pro, puis progression annuelle dérivée (0 à MGMT_EXT_RATE_MAX),
+   plafonnée comme le pont bilan→niveau existant (mgmtLevelForRecord,
+   40-80) ; après MGMT_EXT_DECLINE_AGE ans, déclin annuel. */
+const MGMT_EXT_LVL_START_MIN=40;
+const MGMT_EXT_LVL_START_SPREAD=16;
+const MGMT_EXT_LVL_FLOOR=40;
+const MGMT_EXT_LVL_CAP=80;
+const MGMT_EXT_RATE_MAX=2;
+const MGMT_EXT_DECLINE_AGE=33;
+const MGMT_EXT_DECLINE_PER_YEAR=1;
+
+/* La loi bilan↔résultat est celle du générateur existant
+   correlatedRecord (ui-01-roster-matchmaking.js:465) : ratio de victoires
+   cible = BASE + t*SPAN où t=(niveau-LVL_FLOOR_SRC)/LVL_SPAN_SRC. Les combats
+   professionnels dérivés sont joués coup par coup sous cette même loi (le
+   bilan doit avancer par préfixe, ce qu'un tirage en bloc ne permet pas) —
+   une seule loi de corrélation, jamais un second générateur de bilans. */
+const MGMT_EXT_RATIO_BASE=0.45;
+const MGMT_EXT_RATIO_SPAN=0.43;
+const MGMT_EXT_LVL_SRC_FLOOR=20;
+const MGMT_EXT_LVL_SRC_SPAN=77;
+const MGMT_EXT_RATIO_FLOOR=0.05;
+const MGMT_EXT_RATIO_CAP=0.95;
+
+/* Répartition des fins de combat du monde dérivé (KO, soumission, décision),
+   calibrée sur le moteur réel — cible mesurée :
+   tools/reports/LOT-2B-T1-MONDE-EXTERIEUR.md (référence moteur :
+   tools/reports/LOT-3A-CALIBRAGE-SOIREE.md). La décision prend le reste.
+   KO porté de 0,47 à 0,52 au calibrage T1 : le moteur mesurait 50,5 % de
+   KO (arrêt médical compris) contre 45,7 % dérivés — l'écart était un
+   défaut de la dérivation, corrigé ici. */
+const MGMT_EXT_FIN_KO=0.52;
+const MGMT_EXT_FIN_SUB=0.22;
+
+/* Organisations traversées : un combattant change d'organisation après
+   MGMT_EXT_ORG_MIN_FIGHTS combats au moins, sur une série de victoires (au
+   moins deux sur les trois derniers), avec une ambition propre dérivée
+   (MGMT_EXT_ORG_MOVE_MIN à MIN+SPREAD). L'échelle est MGMT_EXT_ORGS. */
+const MGMT_EXT_ORG_MIN_FIGHTS=3;
+const MGMT_EXT_ORG_MOVE_MIN=0.2;
+const MGMT_EXT_ORG_MOVE_SPREAD=0.3;
+/* ==== [FIN ANCRE] ==== */
+
 /* Les cinq raisons de se battre (docs/LES-SIX-VOIX-v1.1.md + complément
    SPLIT-CONTEXTE-DEPART.md §9). Attribuées à la création d'un dossier (§3,
    niveau 2 du CDC). Textes et effets repris du document, sans réécriture. */

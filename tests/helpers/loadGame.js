@@ -99,7 +99,7 @@ function newGameWindow(opts){
   /* ==== [ANCRE: TESTS_LOADGAME_CANVAS_STUB] — jsdom ne rend pas de vrai
      Canvas 2D (nécessiterait le paquet natif `canvas`, absent ici) :
      `getContext('2d')` renvoie `null` par défaut, ce qui plante
-     startArena() (ui-08) dès `ctx.scale(...)`. Un Proxy générique qui
+      areneVueCreer() (arene-vue.js) dès les appels Canvas. Un Proxy générique qui
      répond à n'importe quel appel de méthode par un no-op (et par un
      objet du même type pour les méthodes qui renvoient normalement un
      objet chaînable, ex. createRadialGradient().addColorStop()) suffit :

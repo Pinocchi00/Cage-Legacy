@@ -13,14 +13,8 @@
    fonctions visibles d'un fichier à l'autre, comme avant), il faut donc les
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
 
-   Le rendu Canvas 2D de l'arène de combat, autrefois en fin de ce fichier,
-   vit désormais dans ui-09-arena.js (F-07, hygiène technique — second
-   découpage, ultérieur à celui-ci, cf. l'en-tête de ce fichier). Ce qui reste
-   ici de ce côté-là (scr_arena, scr_fight_flash, scr_faith_fight_pending,
-   scr_consumable_preview, setArenaCosmeticTheme/getArenaTheme) y est resté
-   par nécessité : référencé par nom dans SCREENS ci-dessous, évalué au
-   chargement du script — voir l'ancre CORRECTIF_ARENA_MOTEUR_DEPLACE plus
-   loin dans ce fichier pour le détail.
+   Lot 3 T4 : l'arène unique vit dans arene-etat/vue/ecran ; scr_arena
+   reste enregistré ici car SCREENS est évalué avant le chargement de celle-ci.
    ============================================================================ */
 
 const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,select:scr_select,camp:scr_camp,arena:scr_arena,fight_flash:scr_fight_flash,
@@ -72,7 +66,16 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
   }
   if(G && G.screen==='hub' && _lastRenderedScreen!=='hub') G.hubTab='combat';
   _lastRenderedScreen=G&&G.screen;
-  const fn=SCREENS[G&&G.screen]||scr_intro; app.innerHTML=fn(); if(G&&G.screen==='arena') startArena(); if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+   const fn=SCREENS[G&&G.screen]||scr_intro;
+   if(G&&G.screen==='arena'&&G.pending&&G.pending.res){
+     areneEcranCharger(G.pending.res,{a:G.f&&G.f.name,b:G.pending.opp&&G.pending.opp.name,
+       styleA:G.f&&G.f.styleLabel,styleB:G.fight&&G.fight.opp&&G.fight.opp.styleLabel},null);
+     ARENE_ECRAN.retour='result';
+     ARENE_ECRAN.finRetour=null;
+   }
+   app.innerHTML=fn();
+   if(G&&G.screen==='arena') areneEcranDemarrer();
+   if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
   G.screen='hub'; save(); render();
 }
@@ -233,7 +236,6 @@ const CL={
       .catch(()=>{ G.lastMsg="Copie automatique impossible — sélectionne le champ et copie-le manuellement."; render(); });
   },
   clearExportedCode(){ G.exportedCode=null; G.exportedName=null; G.exportedLink=null; render(); },
-  setArenaTheme(themeId){ setArenaCosmeticTheme(themeId); render(); },
   leaveSandbox(){ if(G._backupF){ G.f=G._backupF; G.fight=G._backupFight; delete G._backupF; delete G._backupFight; } G.fantasyActive=false; CL.go('hof'); },
   leaveAllStars(){ G.allstars=null; CL.go('hof'); },
   setFantasy(side,dir){
@@ -255,7 +257,7 @@ const CL={
      G.f=A; G.fight={kind:'fantasy',opp:B,rounds:5,plan:null}; G.fantasyActive=true;
      const res=simulateFight(A,B,5);
      G.pending={res,win:res.winner==='A',method:res.method,finish:!isDecisionLike(res.method),opp:{name:B.name,flag:B.flag},isFantasy:true};
-     buildTimeline(); G.screen='arena'; render();
+      G.screen='arena'; render();
   },
   initAllStars(){ initAllStarsTournament(); render(); },
   toggleAllStarsDraft(index){
@@ -380,7 +382,7 @@ const CL={
      avec elles ; l'ancienne ancre CORRECTIF_BASCULE_RECOMPENSE_MORTE (bug de
      bourse jamais réellement payée) documentait un correctif sur du code
      aujourd'hui entièrement supprimé. ==== */
-  nextRound(){ if(!ARENA||!ARENA.roundPause) return; resumeArenaPlayback(); },
+   nextRound(){ if(G&&G.screen==='arena') CL.areneSocleSuivant(); },
   handleEvent(actionId){ const ev=G.activeEvent; const id=actionId||(ev&&ev.actionId);
     if(id==='short_notice_accept'){
       const newOpp=G._pendingShortNoticeOpp;
@@ -476,7 +478,7 @@ const CL={
     const combined=getExclusiveTactics(G.f).concat(TACTICS[G.f.style]||[]); const planObj=combined[idx]; if(!planObj)return;
     G.fight._resolved=true;
     G.fight.plan=planObj.m; G.fight.planLabel=planObj.lbl;
-    resolveFight(); buildTimeline(); G.screen='arena'; save(); render(); },
+     resolveFight(); G.screen='arena'; save(); render(); },
   /* ==== [ANCRE: CORRECTIF_PERSISTANCE_ETAT_RUN] — bug trouvé : toute une famille
      de méthodes mutait l'état de run (choix de camp, pacte, mise en jeu, refus du
      médecin, soins d'infirmerie, analyse ciblée, second souffle) puis appelait
@@ -486,7 +488,7 @@ const CL={
      perdait ses points ET gardait ses séquelles. ==== */
   // Seul point de sortie de l'arène : skipArena et la fin naturelle de
   // l'animation passent tous les deux par ici, direction l'écran de résultat.
-  toResult(){ stopArena(); G.screen='result'; save(); render(); },
+   toResult(){ areneEcranNettoyer(); G.screen='result'; save(); render(); },
   afterResult(){
     /* ==== [ANCRE: CORRECTIF_DOUBLE_AFTERRESULT] — même hasard matériel que
        CORRECTIF_DOUBLE_ENSHRINE (double-tap tactile, délai de tap iOS), sur le
@@ -791,19 +793,9 @@ const CL={
   /* ==== [FIN ANCRE] ==== */
 };
 window.CL=CL;
-/* ==== [ANCRE: CORRECTIF_ARENA_MOTEUR_DEPLACE] — F-07, hygiène : le moteur de
-   rendu Canvas 2D autonome (état ARENA, boucle d'animation, particules,
-   silhouettes, aberration chromatique, moments de bascule) a déménagé dans
-   ui-09-arena.js, chargé juste après ce fichier. Restent ici : tout ce qui
-   est référencé PAR NOM dans l'objet SCREENS ci-dessus (évalué au chargement
-   du script, donc avant que ui-09 n'existe si l'ordre était inversé) — les
-   écrans scr_fight_flash/scr_faith_fight_pending/scr_arena/
-   scr_consumable_preview et, avec eux, tout ce qui leur est intimement lié
-   (FFP/startFaithFightPending/finishFaithFightPending, buildFightFlashLines,
-   les autres écrans du temps de titre Faith physiquement voisins dans
-   l'ancien fichier) — ainsi que setArenaCosmeticTheme()/getArenaTheme(),
-   gardés ici par choix explicite (cf. ANCRE CORRECTIF_ARENA_THEMES_DEPLACE
-   plus bas). ==== */
+/* ==== [ANCRE: CORRECTIF_ARENA_MOTEUR_DEPLACE] — Lot 3 T4, décision 1 du
+   21/09 : ui-09 retirée ; les écrans historiquement enregistrés ici restent
+   dans ce fichier, scr_arena délègue désormais à l'arène unique. ==== */
 /* ==== [ANCRE: V2-28] — résumé du Rythme "Instantané" : trois lignes
    (le meilleur moment, le tournant, la fin), tirées du log réel du
    combat déjà simulé — jamais un texte générique. "Meilleur moment" =
@@ -830,18 +822,12 @@ function buildFightFlashLines(res){
   return lines.filter((t,i)=>t && lines.indexOf(t)===i);
 }
 /* ==== [FIN ANCRE] ==== */
-/* ==== [ANCRE: CORRECTIF_ARENA_THEMES_DEPLACE] — F-05, hygiène : ARENA_THEMES
-   (donnée pure) a déménagé dans data-content.js (chargé avant ce fichier,
-   même ancre LOT12_COSMETIQUE_ARENE conservée là-bas). setArenaCosmeticTheme()
-   et getArenaTheme() restent ici : ce sont les seuls points d'accès. ==== */
-/* ==== [ANCRE: CORRECTIF_PERSISTANCE_SKIN_ARENE] — bug remonté : le skin
-   actif vivait sur G (réinitialisé par newCareer(), voir CL.newCareer plus
-   bas), donc perdu à chaque nouvelle carrière même si le déblocage
-   (meta.unlockedItems) survivait bien. Déplacé sur meta, comme tous les
-   autres déblocages achetés en points de Légende — jamais touché par
-   newCareer(). ==== */
-function setArenaCosmeticTheme(themeId){ const meta=loadMetaStats(); meta.arenaCosmetic=themeId; saveMetaStats(meta); }
-function getArenaTheme(){ const meta=loadMetaStats(); return ARENA_THEMES.find(t=>t.id===(meta.arenaCosmetic||'classic'))||ARENA_THEMES[0]; }
+/* ==== [ANCRE: CORRECTIF_ARENA_THEMES_DEPLACE] — Lot 3 T4, décision 1 du
+   21/09 : anciennes fonctions de thème non appelées retirées avec ui-09.
+   La donnée ARENA_THEMES reste dans data-content.js pour les sauvegardes. ==== */
+/* ==== [ANCRE: CORRECTIF_PERSISTANCE_SKIN_ARENE] — Lot 3 T4 : la donnée
+   persistée sur meta reste lisible ; aucun thème cosmétique n'est dessiné
+   par l'arène unique. ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: V2-28] — écran du Rythme "Instantané" : résultat direct,
@@ -858,44 +844,4 @@ function scr_fight_flash(){
   </div>`;
 }
 
-function scr_arena(){ const A=ARENA||{};
-  /* ==== [CORRECTIF V2-06] — la cage reste sombre dans les deux ambiances
-     (V2-01), mais son HUD (chrono/rounds/jauges — ici noms, zones de
-     dégâts, cardio) passe à un contraste renforcé, texte blanc pur plutôt
-     que var(--text)/var(--muted) : c'est un affichage lu en un coup d'œil
-     pendant l'action, pas du texte de lecture posée. Les jauges elles-
-     mêmes étaient déjà en aplats pleins (ARENA_ZONE_COLOR, plus bas),
-     jamais de dégradé — rien à corriger de ce côté. ==== */
-  return `<div class="scr">
-   <div class="eyebrow center" style="margin-bottom:12px;font-size:12px;color:#FFFFFF">${esc(A.nmeName||'')} ${A.meFlag||''} VS ${A.opFlag||''} ${esc(A.nopName||'')}</div>
-   <div class="card glass raise" style="padding:12px;border-color:var(--line);background:var(--panel2)">
-     <div class="eyebrow center" style="font-size:9px;margin-bottom:6px;color:#FFFFFF">DOMINATION TERRITORIALE</div>
-     <div style="height:6px;background:var(--sage);margin-bottom:20px;position:relative;overflow:hidden;border-radius:2px">
-       <div id="ar-momentum" style="height:100%;width:50%;background:var(--blood);transition:width .4s ease"></div>
-       <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--bg)"></div>
-     </div>
-     <div class="arena-hud" style="border-bottom:1px dashed var(--line);padding-bottom:16px;display:flex;justify-content:space-between">
-       <div style="display:flex;flex-direction:column;align-items:flex-start">
-         <span class="ah-name blood mono" style="font-size:13px">${esc(A.nmeName||'Toi')}</span>
-         <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Tête</span><div id="dm-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Corps</span><div id="dm-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
-           <div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px">Jambes</span><div id="dm-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div></div>
-         </div>
-       </div>
-       <div style="display:flex;flex-direction:column;align-items:flex-end">
-         <span class="ah-name sage mono" style="font-size:13px">${esc(A.nopName||'Adv.')}</span>
-         <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;align-items:flex-end">
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-h" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Tête</span></div>
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-b" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Corps</span></div>
-           <div style="display:flex;align-items:center;gap:6px"><div id="do-l" style="width:16px;height:4px;background:var(--sage);transition:background .3s"></div><span class="mono" style="font-size:11px;color:#FFFFFF;width:44px;text-align:right">Jambes</span></div>
-         </div>
-       </div>
-     </div>
-     <canvas id="arena-cv" style="width:100%;height:220px;display:block;margin-top:16px;border:1px solid var(--line);background:var(--bg)"></canvas>
-     <div class="arena-st" style="margin-top:16px"><div class="st-lbl" style="color:#FFFFFF">CARDIO</div><div class="st-lbl" style="text-align:right;color:#FFFFFF">CARDIO</div></div>
-     <div class="arena-bars sm" style="margin-top:6px"><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-me" style="background:var(--gold)"></div></div><div class="ab" style="background:var(--bg);border-color:var(--line)"><div class="ab-fill st" id="st-op" style="background:var(--gold)"></div></div></div>
-     <div id="ar-log" class="mono muted small" style="margin-top:20px;min-height:48px;display:flex;flex-direction:column;justify-content:flex-end;border-left:3px solid var(--gold);padding-left:12px;line-height:1.4;padding-bottom:4px"></div>
-   </div>
-   <button class="btn ghost mt" style="border:1px solid var(--line)" onclick="CL.skipArena()">Passer au verdict ▸</button>
-  </div>`; }
+function scr_arena(){ return scr_arene_socle(); }

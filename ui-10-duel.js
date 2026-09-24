@@ -324,7 +324,7 @@ Object.assign(CL,{
       isDuel:true, mancheIndex:m.index, totalManches:series.manches.length
     };
     G.duelActive=true;
-    buildTimeline(); G.screen='arena'; render();
+     G.screen='arena'; render();
   },
   /** Branche duel de l'écran de résultat partagé (scr_result) : avant chaque
    * manche suivante (y compris la 2e et la 3e), on repasse par l'écran de

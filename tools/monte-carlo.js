@@ -74,7 +74,7 @@ function readScriptOrder(){
  * copie parallèle des formules), exposés pour permettre au harnais de
  * recalculer *a posteriori* ce que le jeu a appliqué, jamais pour le piloter
  * ou le modifier. Reprend les stubs DOM/Canvas/localStorage de
- * tests/helpers/loadGame.js — nécessaires pour que render()/startArena() ne
+  * tests/helpers/loadGame.js — nécessaires pour que render()/areneEcranDemarrer() ne
  * plantent pas hors navigateur. @returns {import('jsdom').DOMWindow} */
 function newGameWindow(){
   const dom = new JSDOM('<!DOCTYPE html><html><body><div id="app"></div></body></html>', {

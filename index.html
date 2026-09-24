@@ -410,6 +410,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    gardés. Dégradé vertical #423521 en haut vers #120E08 en bas, sur toute la
    hauteur. Périmètre bureau uniquement (#app.mgmt). ==== */
 #app.mgmt{max-width:1400px;background:linear-gradient(180deg,#423521 0%,#120E08 100%)}
+/* ==== [ANCRE: ARENE_T2_APP] — Lot 3 T2 (reprise, correctifs d'affichage) :
+   l'arène n'est pas un écran de bureau — #app est déplafonné à la largeur
+   que l'écran demande (1100px) et ne porte PAS le dégradé brun du
+   management (#app.mgmt). Classe posée à l'entrée de l'écran
+   (areneEcranDemarrer), retirée à la sortie (areneEcranNettoyer). ==== */
+#app.arene{max-width:1100px}
 .mgmt-wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding:16px 15px 16px}
 .mgmt-head{flex:0 0 auto}
 .mgmt-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr) 360px;gap:16px;margin-top:12px}
@@ -483,7 +489,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      laissé en dernier comme prévu par le plan. Dépend des primitives
      d'engine.js (rnd/pick/clamp/eff/overall/reachEdge...) donc chargé juste
      après lui. ==== -->
+<script src="engine-combat-tactics.js?v=career7"></script>
+<script src="engine-combat-striking.js?v=career7"></script>
+<script src="engine-combat-grappling.js?v=career7"></script>
+<script src="engine-combat-officials.js?v=career7"></script>
 <script src="engine-combat.js?v=career7"></script>
+<script src="engine-combat-outcomes.js?v=career7"></script>
 <!-- ==== [ANCRE: ENGINE_PROGRESSION_SPLIT] — chantier 4 (refactorisation
      progressive du moteur) : engine-progression.js extrait d'engine.js à
      l'IDENTIQUE (vieillissement/déclin, blessures, fraîcheur, deltas
@@ -529,7 +540,6 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      l'arène, extrait de ui-08. Chargé APRÈS ui-08 : plusieurs écrans qui le
      pilotent (scr_arena, scr_fight_flash, scr_fight_flash) sont restés dans ui-08 car référencés par nom
      dans son objet SCREENS, évalué dès le chargement du script. -->
-<script src="ui-09-arena.js?v=career7"></script>
 <!-- ==== [ANCRE: DUEL_CODEC] — LOT DUEL-01 : "Duel entre amis" (Carrière
      Complète). duel-codec.js (codec/PRNG/série, zéro dépendance à G) doit
      être chargé après engine-combat.js (simulateFight) et data-skills.js
@@ -549,6 +559,14 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      et étendus via Object.assign). Toujours avant main.js. ==== -->
 <script src="mgmt-data.js?v=mgmt2c"></script>
 <script src="mgmt-bureau.js?v=mgmt2g"></script>
+<script src="mgmt-carte.js?v=mgmt2g"></script>
+<script src="mgmt-corps.js?v=mgmt2g"></script>
+<script src="mgmt-argent.js?v=mgmt2g"></script>
+<script src="mgmt-monde.js?v=mgmt2g"></script>
+<script src="mgmt-save.js?v=mgmt2g"></script>
 <script src="mgmt-screens.js?v=mgmt2f"></script>
+<script src="arene-etat.js?v=arene1"></script>
+<script src="arene-vue.js?v=arene1"></script>
+<script src="arene-ecran.js?v=arene1"></script>
 <script src="main.js?v=career7"></script>
 </body></html>

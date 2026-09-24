@@ -253,12 +253,10 @@ function scr_mgmt_bureau(){
   if(sel&&sel.kind==='leila_bulk'&&Array.isArray(sel.fights)){
     const fi=(Number.isSafeInteger(sel.marked)&&sel.marked>=0&&sel.marked<sel.fights.length)?sel.marked:0;
     const fa=mgmtFighterById(m,sel.fights[fi].a), fb=mgmtFighterById(m,sel.fights[fi].b);
-    fileHtml=`<div class="opp" style="cursor:default">${mgmtLineCard(fa)}</div>`
-      +`<div class="opp" style="cursor:default">${mgmtLineCard(fb)}</div>`;
+     fileHtml=mgmtBureauFicheCard(m,fa)+mgmtBureauFicheCard(m,fb);
   }else if(sel){
     const fa=mgmtFighterById(m,sel.a), fb=mgmtFighterById(m,sel.b);
-    fileHtml=`<div class="opp" style="cursor:default">${mgmtLineCard(fa)}</div>`
-      +`<div class="opp" style="cursor:default">${mgmtLineCard(fb)}</div>`;
+     fileHtml=mgmtBureauFicheCard(m,fa)+mgmtBureauFicheCard(m,fb);
   }else{
     fileHtml='';
   }
@@ -282,7 +280,8 @@ function scr_mgmt_bureau(){
     +`</div></div>`;
 }
 
-/* ==== [ANCRE: MGMT_LOT3A_SOIREE] — Lot 3a le corps et la soirée : un seul
+/* ==== [ANCRE: MGMT_LOT3A_SOIREE] — Lot 3a le corps et la soirée ;
+   Lot 3 T4 : lecture ou simulation des combats depuis leurs traces.
    écran de soirée (quatre lignes — deux noms, vainqueur, famille, round ;
    ni res.detail, ni statistiques, ni note, ni étiquette — addendum 2 §6) lu
    dans m.lastEvent calculé en une fois (recharger ne rejoue rien), puis le
@@ -290,28 +289,56 @@ function scr_mgmt_bureau(){
    avec l'emplacement vide de Clara — aucune réplique générique pour
    combler, personne touché : pas de lendemain). Le traumatisme ne paraît
    dans aucun DOM. Souris et clavier (ui-11-keys.js, jamais exclusif). ==== */
+/* ==== [ANCRE: MGMT_LOT3_T4_SOIREE] — Trois parcours de soirée, trace de
+   navigation non persistée ; le résultat appartient exclusivement au moteur. ==== */
+let MGMT_SOIREE={index:0};
+function mgmtSoireeTrace(m,i){
+  const e=m&&m.lastEvent, f=e&&e.fights[i];
+  if(!f||!Array.isArray(m.hist)) return null;
+  /* L'historique est append-only et conserve l'ordre de la soirée, y compris
+     lorsqu'une paire se retrouve plusieurs cycles plus tard. */
+  const traces=m.hist.filter(t=>t.c===e.cycle);
+  return traces[i]&&traces[i].a.id===f.a&&traces[i].b.id===f.b?traces[i]:null;
+}
+function mgmtSoireeResume(m,i){
+  const t=mgmtSoireeTrace(m,i);
+  if(!t) return '';
+  const res=mgmtReplayFight(t);
+  if(!res||!areneVerdictFidele(t,res)) return '';
+  return areneMomentsCles(res)
+    .map(l=>`<div class="mgmt-meta">${esc(areneTextePublic(l.text))}</div>`).join('');
+}
 function scr_mgmt_soiree(){
   const m=G&&G.mgmt;
   if(!m||!m.lastEvent||!Array.isArray(m.lastEvent.fights)||m.lastEvent.fights.length===0){
     return scr_mgmt_bureau();
   }
-  const rows=m.lastEvent.fights.map(x=>{
+   const rows=m.lastEvent.fights.map((x,i)=>{
     const fa=mgmtFighterById(m,x.a), fb=mgmtFighterById(m,x.b);
     const na=fa?fa.name:'?', nb=fb?fb.name:'?';
     const w=x.winner==='D'?'Nul':(x.winner==='A'?na:nb);
     const fam=MGMT_FAMILY_LABELS[x.family]||x.family;
-    return `<div class="opp mgmt-fight" style="cursor:default">`
-      +`<span class="opp-nm">${esc(na)} contre ${esc(nb)}</span>`
-      +`<div class="mgmt-meta">${esc(w)} · ${esc(fam)} · Round ${esc(x.round)}</div></div>`;
-  }).join('');
+     const vu=i<MGMT_SOIREE.index;
+     return `<div class="opp mgmt-fight" style="cursor:default">`
+       +`<span class="opp-nm">${esc(na)} contre ${esc(nb)}</span>`
+       +(vu?`<div class="mgmt-meta">${esc(w)} · ${esc(fam)} · Round ${esc(x.round)}</div>${mgmtSoireeResume(m,i)}`:'')
+       +`</div>`;
+   }).join('');
+   const total=m.lastEvent.fights.length, index=MGMT_SOIREE.index;
+   const actions=index<total
+     ?`<button class="mgmt-next" onclick="CL.mgmtSoireeVoir()">Voir ce combat</button>`
+       +`<button class="mgmt-next" onclick="CL.mgmtSoireeSimuler()">Simuler ce combat</button>`
+       +`<button class="mgmt-next" onclick="CL.mgmtSoireeToutSimuler()">Tout simuler</button>`
+     :`<button class="mgmt-next" onclick="CL.mgmtSoireeNext()">Continuer</button>`;
   return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
     +`<div><div class="eyebrow gold">Split — Management</div>`
     +`<h2 class="disp">La soirée</h2></div></div>`
     +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr)">`
     +`<div class="mgmt-col">${rows}`
-    +`<button class="mgmt-next" onclick="CL.mgmtSoireeNext()">Continuer</button></div>`
-    +`</div></div>`;
+     +actions+`</div>`
+     +`</div></div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 
 /** Une carte du lendemain : le nom, le fait (libellé neutre), et la place de
  *  la parole de Clara — emplacement vide, convention du lot 1. */
@@ -426,15 +453,56 @@ function mgmtCartSlotHtml(m,i,f){
 /** Le dossier d'une ligne (niveau 2, un seul déroulé) : nom, bilan,
  *  catégorie, rang, âge — données factuelles (charte R1). Sans le libellé
  *  de niveau (« Nom » — jargon interne, charte S7, relevé du 15/09). */
-function mgmtCartFicheHtml(m,f){
+function mgmtCartFicheHtml(m,f,ouvrir=true){
   if(!f) return '';
   const rank=mgmtDivisionRank(m,f);
   const meta=`${f.divName} · ${mgmtRankLabel(rank)} · ${f.age} ans`;
   return `<div class="opp" style="cursor:default">`
     +`<div class="opp-top"><span class="mgmt-fname">${esc(f.name)}</span><span class="opp-rec">${esc(f.W)}-${esc(f.L)}-${esc(f.D)}</span></div>`
-    +`<div style="font-size:13px;color:var(--muted);margin-top:4px">${esc(meta)}</div>`
-    +`</div>`;
+     +`<div style="font-size:13px;color:var(--muted);margin-top:4px">${esc(meta)}</div>`
+     +(ouvrir?`<button class="mgmt-next" style="width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtFicheParIndex(${m.roster.indexOf(f)})">Voir la fiche</button>`:'')
+     +`</div>`;
 }
+
+/* ==== [ANCRE: MGMT_LOT3_T5_HISTORIQUE] — Lot 3 T5 : fiche consultable,
+   combats passés et rejeu à partir de leurs traces auto-portantes. ==== */
+let MGMT_FICHE={id:null,retour:'mgmt_carte',cursor:0};
+function mgmtBureauFicheCard(m,f){
+  if(!f) return '';
+  return `<div class="opp" style="cursor:default">${mgmtLineCard(f)}`
+    +`<button class="mgmt-next" style="width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtFicheParIndex(${m.roster.indexOf(f)})">Voir la fiche</button></div>`;
+}
+function mgmtHistoriqueHtml(m,f){
+  const history=mgmtFightHistory(m,f).slice().reverse();
+  if(!history.length) return `<div class="mgmt-meta">Aucun combat enregistré.</div>`;
+  return history.map((t,k)=>{
+    const i=m.hist.indexOf(t), side=t.a.id===f.id?'A':'B';
+    const adversaire=side==='A'?t.b:t.a;
+    const issue=t.winner==='D'?'Nul':(t.winner===side?'Victoire':'Défaite');
+    /* La trace ne garde que la famille ; le moteur reconstitue le libellé
+       exact. En cas de divergence après évolution du moteur, l'issue stockée
+       prévaut et aucun résultat rejoué contradictoire n'est affiché. */
+    const replay=mgmtReplayFight(t);
+    const methode=(replay&&areneVerdictFidele(t,replay))?replay.method:(MGMT_FAMILY_LABELS[t.family]||t.family);
+    return `<div class="opp" style="cursor:default${k===MGMT_FICHE.cursor?';border-color:var(--gold-d)':''}">`
+      +`<div class="opp-nm">${esc(issue)} · ${esc(adversaire.name)}</div>`
+      +`<div class="mgmt-meta">${esc(methode)} · Round ${esc(t.round)} · Cycle ${esc(t.c)}</div>`
+      +`<button class="mgmt-next" style="width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtHistoriqueRevoir(${i})">Revoir le combat</button>`
+      +`</div>`;
+  }).join('');
+}
+function scr_mgmt_fiche(){
+  const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+  if(!f) return scr_mgmt_bureau();
+  return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
+    +`<div><div class="eyebrow gold">Split — Management</div><h2 class="disp">${esc(f.name)}</h2></div>`
+    +`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.mgmtFicheRetour()">← Retour</button></div>`
+    +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr)">`
+    +`<div class="mgmt-col">${mgmtCartFicheHtml(m,f,false)}</div>`
+    +`<div class="mgmt-col"><div class="eyebrow">Combats</div>${mgmtHistoriqueHtml(m,f)}</div>`
+    +`</div></div>`;
+}
+/* ==== [FIN ANCRE] ==== */
 
 /** Un combat de préliminaires, lisible seul : Leïla les propose (T3) —
  *  ici, lecture seule. */
@@ -518,7 +586,7 @@ function scr_mgmt_carte(){
 
 /* ==== [ANCRE: MGMT_LOT1_CONTROLEUR] — actions du bureau : jamais d'édition
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js). ==== */
-Object.assign(SCREENS,{mgmt_bureau:scr_mgmt_bureau,mgmt_soiree:scr_mgmt_soiree,mgmt_lendemain:scr_mgmt_lendemain,mgmt_carte:scr_mgmt_carte});
+Object.assign(SCREENS,{mgmt_bureau:scr_mgmt_bureau,mgmt_soiree:scr_mgmt_soiree,mgmt_lendemain:scr_mgmt_lendemain,mgmt_carte:scr_mgmt_carte,mgmt_fiche:scr_mgmt_fiche});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -537,9 +605,10 @@ keysRegister('mgmt_bureau',{
 /* ==== [ANCRE: MGMT_LOT3A_CLAVIER] — Lot 3a : la soirée et le lendemain ne
    demandent qu'à continuer — une touche suffit, comme la souris. ==== */
 keysRegister('mgmt_soiree',{
-  '1'(){ CL.mgmtSoireeNext(); },
-  Enter(){ CL.mgmtSoireeNext(); },
-  Escape(){ CL.mgmtSoireeNext(); },
+  '1'(){ CL.mgmtSoireeVoir(); },
+  '2'(){ CL.mgmtSoireeSimuler(); },
+  '3'(){ CL.mgmtSoireeToutSimuler(); },
+  Enter(){ if(MGMT_SOIREE.index>=G.mgmt.lastEvent.fights.length) CL.mgmtSoireeNext(); },
 });
 keysRegister('mgmt_lendemain',{
   '1'(){ CL.mgmtLendemainNext(); },
@@ -585,10 +654,54 @@ keysRegister('mgmt_carte',{
   '5'(){ CL.mgmtUnbook(4); },
   Escape(){ CL.mgmtCarteLeave(); },
 });
+keysRegister('mgmt_fiche',{
+  ArrowDown(){ CL.mgmtFicheDeplacer(1); },
+  ArrowUp(){ CL.mgmtFicheDeplacer(-1); },
+  Enter(){ CL.mgmtFicheRevoirSelection(); },
+  Escape(){ CL.mgmtFicheRetour(); },
+});
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 Object.assign(CL,{
+  mgmtFicheParIndex(i){
+    const m=G&&G.mgmt;
+    if(!m||!Number.isSafeInteger(i)||i<0||i>=m.roster.length) return;
+    CL.mgmtFiche(m.roster[i].id);
+  },
+  mgmtFiche(id){
+    if(!G||!G.mgmt||!mgmtFighterById(G.mgmt,id)) return;
+    MGMT_FICHE={id,retour:G.screen==='mgmt_bureau'?'mgmt_bureau':'mgmt_carte',cursor:0};
+    CL.go('mgmt_fiche');
+  },
+  mgmtFicheRetour(){ CL.go(MGMT_FICHE.retour); },
+  mgmtFicheDeplacer(dir){
+    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    if(!f) return;
+    const n=mgmtFightHistory(m,f).length;
+    if(n<1) return;
+    MGMT_FICHE.cursor=(MGMT_FICHE.cursor+dir+n)%n;
+    render();
+  },
+  mgmtFicheRevoirSelection(){
+    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    if(!f) return;
+    const history=mgmtFightHistory(m,f).slice().reverse();
+    const t=history[MGMT_FICHE.cursor];
+    if(t) CL.mgmtHistoriqueRevoir(m.hist.indexOf(t));
+  },
+  mgmtHistoriqueRevoir(i){
+    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    if(!f||!Number.isSafeInteger(i)||i<0||i>=m.hist.length) return;
+    const t=m.hist[i];
+    if(!mgmtFightHistory(m,f).includes(t)) return;
+    const res=mgmtReplayFight(t);
+    if(!res) return;
+    areneEcranCharger(res,{a:t.a.name,b:t.b.name},t);
+    ARENE_ECRAN.retour='mgmt_fiche'; ARENE_ECRAN.finRetour=null;
+    CL.go('arene_socle');
+    areneEcranDemarrer();
+  },
   mgmtEnter(){
     if(!G) G={theme:'dark'};
     /* Confinement (lot 1e-1) : le traitement du bureau vit sur #app.mgmt ET
@@ -707,7 +820,7 @@ Object.assign(CL,{
     if(mgmtDecide(G.mgmt,affairId,replyId)){
       const r=mgmtClosePile(G.mgmt);
       if(r==='event'){
-        if(mgmtRunEvent(G.mgmt)){ CL.go('mgmt_soiree'); return; }
+         if(mgmtRunEvent(G.mgmt)){ MGMT_SOIREE.index=0; CL.go('mgmt_soiree'); return; }
       }else{
         saveMgmt();
       }
@@ -719,7 +832,7 @@ Object.assign(CL,{
     if(mgmtIgnore(G.mgmt,affairId)){
       const r=mgmtClosePile(G.mgmt);
       if(r==='event'){
-        if(mgmtRunEvent(G.mgmt)){ CL.go('mgmt_soiree'); return; }
+         if(mgmtRunEvent(G.mgmt)){ MGMT_SOIREE.index=0; CL.go('mgmt_soiree'); return; }
       }else{
         saveMgmt();
       }
@@ -737,7 +850,7 @@ Object.assign(CL,{
     if(!G||!G.mgmt) return;
     const r=mgmtClosePile(G.mgmt);
     if(r==='event'){
-      if(mgmtRunEvent(G.mgmt)){ CL.go('mgmt_soiree'); return; }
+       if(mgmtRunEvent(G.mgmt)){ MGMT_SOIREE.index=0; CL.go('mgmt_soiree'); return; }
     }else if(r==='refill'||r==='compose'){
       saveMgmt();
       render();
@@ -751,12 +864,35 @@ Object.assign(CL,{
      le cycle suivant rouvre aussitôt le bureau. */
   mgmtSoireeNext(){
     if(!G||!G.mgmt) return;
+    if(MGMT_SOIREE.index<G.mgmt.lastEvent.fights.length) return;
     const m=G.mgmt;
     const touched=m.lastEvent&&Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
     if(touched.length>0){ CL.go('mgmt_lendemain'); return; }
     mgmtNewPile(m);
     saveMgmt();
     CL.go('mgmt_bureau');
+  },
+  mgmtSoireeVoir(){
+    if(!G||!G.mgmt||!G.mgmt.lastEvent) return;
+    const t=mgmtSoireeTrace(G.mgmt,MGMT_SOIREE.index);
+    if(!t) return;
+    const res=mgmtReplayFight(t);
+    if(!res) return;
+    areneEcranCharger(res,{a:t.a.name,b:t.b.name},t);
+    ARENE_ECRAN.retour='mgmt_soiree';
+    ARENE_ECRAN.finRetour=function(){ MGMT_SOIREE.index++; };
+    CL.go('arene_socle');
+    areneEcranDemarrer();
+  },
+  mgmtSoireeSimuler(){
+    if(!G||!G.mgmt||!G.mgmt.lastEvent) return;
+    MGMT_SOIREE.index=Math.min(G.mgmt.lastEvent.fights.length,MGMT_SOIREE.index+1);
+    render();
+  },
+  mgmtSoireeToutSimuler(){
+    if(!G||!G.mgmt||!G.mgmt.lastEvent) return;
+    MGMT_SOIREE.index=G.mgmt.lastEvent.fights.length;
+    render();
   },
   mgmtLendemainNext(){
     if(!G||!G.mgmt) return;

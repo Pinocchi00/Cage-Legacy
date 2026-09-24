@@ -305,6 +305,112 @@ baissera peut-être d'elle-même.
 
 ---
 
+## QO-11 — « Entrer dans le top 5 », dans un monde qui compte cinq organisations
+
+**Statut. Incohérence trouvée le 22/09/2026, aucune décision demandée dans
+l'immédiat** — rien de ce qui est codé n'en dépend encore.
+
+**Le constat.** `SPLIT-CONTEXTE-DEPART.md` §8 fixe les objectifs du patron :
+« entrer dans le top 5 des organisations » les deux premières années, puis
+« passer top 3 ». Or le monde écrit compte aujourd'hui **cinq organisations** :
+les quatre de `MGMT_EXT_ORGS` (Garden of Blood, MMA Korner, Ultimate Rim,
+Fighting Pacific Championship) et Split. Si ce sont les mêmes cinq, **l'objectif
+de la première année est acquis avant la première soirée** : on ne peut pas
+être hors du top 5 de cinq.
+
+**C'est Anthony qui l'a vu** (« bah donc il faut 10 noms d'orgas ? »), en
+réponse à un recoupement que Claude avait présenté comme élégant et qui ne
+l'est pas.
+
+**Ce qui n'est pas le problème.** Les deux listes ne sont pas la même chose, et
+il ne faut pas les confondre :
+
+| | Ce que c'est | Combien | État |
+|---|---|---|---|
+| `MGMT_EXT_ORGS` | les échelons qu'un **combattant** gravit hors Split | 4 | codé, nommé, mesuré |
+| Le classement des organisations | les rivales de **Split**, où le patron veut un top 5 | indéterminé | **pas codé du tout** |
+
+Le classement n'existe nulle part dans le code. `SPLIT-CONTEXTE-DEPART.md` §8 le
+signale lui-même comme une « question de périmètre à trancher avant
+implémentation », avec une « version légère à privilégier — un classement qui
+bouge en fonction des départs, des signatures et des soirées, sans simuler leurs
+cartes ».
+
+**Les deux sorties possibles, à trancher quand le classement sera écrit** (lot 5,
+le monde qui parle) :
+
+1. **Le classement compte plus d'organisations que l'échelle du combattant.** Il
+   faudra alors d'autres noms — contenu d'auteur, dû à ce moment-là et pas
+   avant. C'est la lecture qui préserve l'objectif tel qu'il est écrit.
+2. **Le monde reste à cinq, et l'objectif du patron se reformule** — par exemple
+   sur le top 3 puis la première place, ou sur autre chose que le rang.
+
+**Ne pas trancher à l'avance.** Le nombre d'organisations décide de la forme du
+classement, et le classement décide de ce que le patron peut exiger. Les trois
+questions se tiennent ; les séparer produirait un objectif qui ne veut rien dire,
+ce qui est exactement le défaut relevé ici.
+
+### QO-11 bis — la même question, posée sur les combattants (22/09/2026)
+
+**Le constat d'Anthony** : « on peut jouer avec autant de combattants par
+catégories, et les top 15, les prétendants au top 15 on fait comment ».
+
+**L'arithmétique.** Le jeu compte **12 catégories** (8 hommes, 4 femmes,
+`DIVISIONS` dans `engine.js:150`). Relevé réel à la graine 20260922, cycle 12 :
+
+| | Effectif | Par catégorie |
+|---|---|---|
+| Roster de Split | 48 | 4 |
+| Monde extérieur | 35 | 3 |
+| **Total** | **83** | **7** |
+
+Un top 15 par catégorie demande 15 classés **par catégorie**, soit 180
+combattants ; avec des prétendants crédibles en dessous, plutôt 25 à 30 par
+catégorie, soit **~330**. On en a 83. Et `mgmtDivisionRank` (`mgmt-carte.js:389`)
+ne trie que `m.roster` : le classement est **intra-Split**, 4 combattants par
+catégorie. Il ne peut pas porter un top 15.
+
+**Ce que ça ne coûte pas.** Mesuré : une ligne du monde extérieur pèse
+**66 octets**, une carrière complète se dérive en **0,036 ms** (700 dérivations
+en 25 ms). Monter le monde à 330 combattants coûte **~22 Ko de sauvegarde et
+13 ms** pour tout dériver — contre ~80 Ko déjà occupés par l'historique après
+20 soirées. **La taille du monde n'est pas une contrainte technique.** C'est la
+règle du bureau qui le permet : une ligne ne stocke presque rien, la carrière est
+recalculée à la lecture.
+
+**Ce qui est le vrai problème : la répartition.** Le monde est tiré globalement
+puis réparti au hasard entre 12 catégories. Au cycle 12 : `H-fly` a **0**
+extérieur, `H-middle` a **1** combattant chez Split, `H-lheavy` en a 8. Un top 15
+exige que **chaque** catégorie soit peuplée à 15+, ce qu'un tirage global ne
+garantit jamais, quelle que soit la taille totale.
+
+**Les trois conséquences, dans l'ordre où elles se tiennent :**
+
+1. **Le monde se génère par catégorie**, sur un quota (« au moins N vivants par
+   catégorie »), pas sur un nombre total — `mgmtExteriorEnsure` et
+   `mgmtExteriorArrive` sont à reprendre.
+2. **Le classement devient mondial**, Split et extérieur triés ensemble. C'est
+   aussi ce qui lui donne son sens : « il est 7e » veut dire quelque chose, et le
+   signer le fait entrer chez toi.
+3. **Les prétendants sont gratuits** : rangs 16 et suivants de la même liste
+   dérivée. Rien à construire.
+
+**Le point de séquencement, qui est la seule urgence.** Le **lot 2B T2** (le
+recrutement) parcourt ce vivier. Construit sur 35 combattants puis refait pour
+330, c'est le travail fait deux fois — et un vivier de 330 impose de toute façon
+l'écran filtré par catégorie et par rang, qui est celui qu'on veut. **Le
+redimensionnement doit donc précéder le lot 2B T2**, pas le suivre. Vérifié le
+22/09 : le lot 2B T2 n'est pas commencé (ce qui s'écrivait alors était le
+**lot 3** T2, l'arène — les deux lots actifs ont chacun une tranche numérotée 2,
+d'où la confusion : écrire toujours « lot 3 T2 » ou « lot 2B T2 », jamais
+« T2 » seul).
+
+**Ce qui reste à trancher par Anthony** : le nombre par catégorie (la proposition
+est 25 à 30, pour un top 15 plein et une dizaine de prétendants), et si le
+classement mondial arrive avec le redimensionnement ou plus tard.
+
+---
+
 ## Résumé des tests skip concernés
 
 Relevé sur l'état réel du dépôt le 21/09/2026 (après la fusion du lot 2, PR 62).

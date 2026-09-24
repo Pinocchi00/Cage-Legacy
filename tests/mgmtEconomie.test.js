@@ -264,10 +264,15 @@ test('MGMT économie T1 — la soirée calcule revenus, cachets, audience et R e
   assert.equal(s.treasury, win.eval(`MGMT_TREASURY_START`)+s.lastEvent.finance.recette,
     'un seul solde : T ← T + R');
   const f = s.lastEvent.finance;
-  for(const k of ['attraction','spectacle','audience','ticketing','tv','purses','recette']){
+  for(const k of ['attraction','spectacle','audience','ticketing','tv','purses','bonuses','recette']){
     assert.ok(k in f, `la finance stockée porte ${k}`);
   }
-  assert.equal(f.recette, f.ticketing+f.tv-f.purses, 'R = revenus − cachets, peut être négative');
+  /* Lot 2B T4 (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T4) : le bonus de
+     victoire part de la recette — l'ancienne égalité R = billetterie +
+     droits − cachets est remplacée par R = billetterie + droits − cachets
+     − bonus, le vainqueur touchant son cachet une seconde fois. */
+  assert.equal(f.recette, f.ticketing+f.tv-f.purses-f.bonuses,
+    'R = revenus − cachets − bonus de victoire, peut être négative');
   assert.ok(f.audience>=0&&Number.isSafeInteger(f.audience), 'audience entière');
   assert.ok(f.spectacle>=0&&f.spectacle<=1, 'spectacle : part de finitions, 0..1');
   assert.ok(f.attraction>0, 'une carte complète a un attrait positif');
@@ -491,11 +496,97 @@ test('MGMT économie T1 — audience décidée surtout avant la soirée, droits 
   assert.equal(s.pleine.tv, Math.round(Number(win.eval(`MGMT_TV_PER_AUD`))*s.pleine.audience/Number(win.eval(`MGMT_TV_ECRANS`))),
     'neuf combats joués sur neuf : les droits complets du diffuseur');
   assert.equal(s.trois.tv, Math.round(s.pleine.tv/3), 'trois combats joués : un tiers des droits');
-  assert.equal(s.huit.tv, Math.round(s.pleine.tv*8/9), 'huit combats joués : huit neuvièmes des droits');
+  /* Lot 2B T4 : MGMT_TV_PER_AUD recalibré à 9,2 (non entier) — le prorata
+     des droits reste celui du contrat (addendum §16), à l'arrondi k$ près. */
+  assert.ok(Math.abs(s.huit.tv-Math.round(s.pleine.tv*8/9))<=1,
+    'huit combats joués : huit neuvièmes des droits (à l\u2019arrondi près)');
   for(const x of [s.pleine,s.sansFinition,s.trois,s.huit]){
-    assert.equal(x.recette, x.ticketing+x.tv-x.purses, 'R = revenus − cachets, peut être négative');
+    assert.equal(x.recette, x.ticketing+x.tv-x.purses-x.bonuses,
+      'R = revenus − cachets − bonus (omis ici : nul), peut être négative');
+    assert.equal(x.bonuses, 0, 'un appel sans bonus ne bonus personne');
   }
 });
+
+/* ==== [ANCRE: MGMT_LOT2B_T4_TESTS] — Lot 2B T4 le salaire à la victoire :
+   le cachet reste le salaire de combat ; le vainqueur touche son cachet
+   une seconde fois (MGMT_WIN_BONUS_SHARE), calculé APRÈS les combats et
+   passé à mgmtEventRecette. ==== */
+test('MGMT T4 — le bonus de victoire se calcule après les combats : vainqueur payé deux fois, nul jamais', () => {
+  const win = newGameWindow();
+  const r = JSON.parse(win.eval(`(function(){
+    setSeed(20261003);
+    const m=mgmtDefault(); mgmtNewRoster(m);
+    const a=m.roster[0], b=m.roster[1];
+    const slotted=[{a:a.id,b:b.id,slot:'main'}];
+    const pa=mgmtPurse(a,'main'), pb=mgmtPurse(b,'main');
+    return JSON.stringify({
+      pa:pa,pb:pb,
+      victoireA:mgmtWinBonuses(m,slotted,[{a:a.id,b:b.id,winner:'A'}]),
+      victoireB:mgmtWinBonuses(m,slotted,[{a:a.id,b:b.id,winner:'B'}]),
+      ordreInverse:mgmtWinBonuses(m,slotted,[{a:b.id,b:a.id,winner:'A'}]),
+      nul:mgmtWinBonuses(m,slotted,[{a:a.id,b:b.id,winner:'D'}]),
+      combatInconnu:mgmtWinBonuses(m,slotted,[{a:'x9',b:'y9',winner:'A'}]),
+      sansCombats:mgmtWinBonuses(m,slotted,[])});
+  })()`));
+  assert.equal(r.victoireA,r.pa,'le vainqueur A touche son cachet en bonus');
+  assert.equal(r.victoireB,r.pb,'le vainqueur B touche son cachet en bonus');
+  assert.equal(r.ordreInverse,r.pb,'écrit à l\u2019envers, le combat paie celui qui a gagné (A du combat = second combattant)');
+  assert.equal(r.nul,0,'un nul ne bonus personne');
+  assert.equal(r.combatInconnu,0,'un combat hors carte ne bonus personne');
+  assert.equal(r.sansCombats,0,'aucun combat, aucun bonus');
+});
+
+test('MGMT T4 — une soirée réelle porte ses bonus : la somme des cachets des vainqueurs, déduite de la recette', () => {
+  const win = newGameWindow();
+  const s = JSON.parse(win.eval(`(function(){
+    setSeed(20261004);
+    const m=mgmtDefault(); mgmtNewRoster(m);
+    m.card.main=[];
+    const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
+    if(dispo.length<10) return 'null';
+    for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
+    m.pile=[]; m.open=null;
+    if(mgmtClosePile(m)!=='refill') return 'null';
+    const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+    if(!bulk||!mgmtDecide(m,bulk.id,'validate')) return 'null';
+    const ev=mgmtRunEvent(m);
+    if(!ev) return 'null';
+    /* La somme attendue, recalculée indépendamment sur la trace des
+       combats joués : chaque vainqueur touche son cachet à l'emplacement
+       du combat (la carte posée est vidée, la trace porte le slot). */
+    let attendu=0;
+    for(const h of m.hist){
+      if(h.winner==='D') continue;
+      const w=mgmtFighterById(m,h.winner==='A'?h.a.id:h.b.id);
+      attendu+=w?mgmtPurse(w,h.slot):0;
+    }
+    return JSON.stringify({finance:ev.finance,attendu:attendu,
+      touche:ev.fights.filter(f=>f.winner!=='D').length,nine:ev.fights.length});
+  })()`));
+  assert.ok(s, 'une soirée réelle a été jouée');
+  assert.equal(s.nine,9,'neuf combats joués');
+  assert.ok(s.touche>=8,'au moins huit combats ont un vainqueur');
+  assert.equal(s.finance.bonuses,s.attendu,
+    'les bonus de la soirée sont la somme des cachets des vainqueurs, à leur emplacement');
+  assert.equal(s.finance.recette,s.finance.ticketing+s.finance.tv-s.finance.purses-s.finance.bonuses,
+    'la recette déduit les bonus');
+  assert.ok(s.finance.bonuses>0,'les bonus sont réels (des cachets non nuls)');
+});
+
+test('MGMT T4 — validateMgmt : le bonus est toléré absent (soirée d\u2019avant la tranche), strict quand il est là', () => {
+  const win = newGameWindow();
+  const base = win.eval(`(function(){ return {cycle:1,fights:[{a:'mg1',b:'mg2',winner:'A',family:'ko',round:2}],touched:[],
+    finance:{attraction:6.5,spectacle:0.75,audience:10,ticketing:46,tv:50,purses:80,recette:16}}; })()`);
+  const avec = JSON.parse(JSON.stringify(base));
+  avec.finance.bonuses=20; avec.finance.recette=-4;
+  assert.equal(win.eval(`mgmtValidEvent(${JSON.stringify(base)})`), true,
+    'une finance sans bonus passe la porte (sauvegarde d\u2019avant la T4)');
+  assert.equal(win.eval(`mgmtValidEvent(${JSON.stringify(avec)})`), true, 'une finance avec bonus passe la porte');
+  const bad = v => win.eval(`mgmtValidEvent(${JSON.stringify(Object.assign({},avec,{finance:Object.assign({},avec.finance,{bonuses:v})}))})`);
+  assert.equal(bad(-1), false, 'un bonus négatif est refusé');
+  assert.equal(bad('x'), false, 'un bonus non entier est refusé');
+});
+/* ==== [FIN ANCRE] ==== */
 
 test('MGMT économie T1 — dernier combat indisponible : la soirée est annulée sans rien changer', () => {
   const win = newGameWindow();
