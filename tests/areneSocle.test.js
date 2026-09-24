@@ -265,3 +265,70 @@ test('ARENE T4 — halo de soumission sur menace et finition', () => {
   })()`));
   assert.deepEqual(events,['sub','sub']);
 });
+
+/* ==== [ANCRE: TEST_ARENE_T4_REPRISE_MOMENTS] — Lot 3 T4, reprise : le halo
+   moteur n'est pas un résumé. Septante lignes sub n'en produisent pas
+   septante moments ; fin toujours gardée, répétitions et marqueurs ôtés
+   uniquement à l'affichage (log source inchangé). ==== */
+test('ARENE T4 reprise — épisode sub unique, cinq moments maximum et finition préservée', () => {
+  const win=newGameWindow();
+  const sortie=JSON.parse(win.eval(`(function(){
+    const log=[];
+    for(let i=0;i<70;i++) log.push({r:1,phase:'sol',sub:true,by:'me',
+      text:'['+String(4-Math.floor(i/60)).padStart(2,'0')+':'+String(59-i%60).padStart(2,'0')+'] Soumission serrée.'});
+    for(let i=0;i<8;i++) log.push({r:2,phase:'debout',by:'me',
+      text:'[04:'+String(50-i).padStart(2,'0')+'] A envoie B au tapis.'});
+    log.push({r:2,phase:'sol',sub:true,by:'op',text:'[04:00] [ARBITRAGE] Seconde menace.'});
+    log.push({r:2,phase:'sol',finish:true,by:'me',text:'[03:30] [CRITIQUE] Soumission serrée.'});
+    const avant=JSON.stringify(log), moments=areneMomentsCles({log});
+    return JSON.stringify({n:moments.length,sub:moments.filter(b=>b.sub).length,
+      fin:moments[moments.length-1].finish,
+      textes:moments.map(b=>areneTextePublic(b.text)),intact:JSON.stringify(log)===avant,
+      vide:areneMomentsCles({log:[{r:1,phase:'debout',text:'[04:00] Aucun événement.'}]}).length});
+  })()`));
+  assert.ok(sortie.n<=5,'au plus cinq moments');
+  assert.ok(sortie.sub<=2,'deux épisodes de menace, pas soixante-dix tentatives');
+  assert.equal(sortie.fin,true,'finition toujours gardée');
+  assert.equal(sortie.vide,0,'décision sans événement : seulement le résultat');
+  assert.equal(sortie.intact,true,'déroulé du moteur non muté');
+  assert.equal(new Set(sortie.textes.map(x=>x.replace(/^\[\d{1,2}:\d{2}\]\s*/,''))).size,sortie.n,'aucune phrase répétée');
+  assert.ok(sortie.textes.every(x=>!x.includes('[CRITIQUE]')&&!x.includes('[ARBITRAGE]')));
+});
+
+test('ARENE T4 reprise — ni bandeau ni fil ne montrent les marqueurs du moteur', () => {
+  const win=newGameWindow();
+  const result=JSON.parse(win.eval(`(function(){
+    const text='[04:16] [CRITIQUE] A envoie B au tapis.';
+    const res={winner:'A',method:'KO',round:1,log:[{r:1,phase:'debout',by:'me',finish:true,text}]};
+    areneEcranCharger(res,{a:'A',b:'B'});
+    document.getElementById('app').innerHTML=scr_arene_socle();
+    areneEcranHud({r:1,horloge:256,phase:'debout',fini:false,texte:text,t:44});
+    return JSON.stringify({source:res.log[0].text,
+      bandeau:document.getElementById('ar2-texte').textContent,
+      journal:document.getElementById('ar2-fil').textContent});
+  })()`));
+  assert.ok(result.source.includes('[CRITIQUE]'),'source intacte');
+  assert.ok(!result.bandeau.includes('[CRITIQUE]')&&!result.journal.includes('[CRITIQUE]'));
+  assert.ok(result.bandeau.includes('A envoie B au tapis'));
+});
+
+test('ARENE T4 reprise — noms grands, styles fournis seulement, badge octogonal et fond restauré', () => {
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`(function(){
+    const res={winner:'D',method:'Nul',round:1,log:[{r:1,phase:'debout',text:'[04:00] Échange.'}]};
+    areneEcranCharger(res,{a:'Un <champion>',b:'Autre',styleA:'Contreur <long>'},null);
+    const html=scr_arene_socle();
+    document.body.style.background='rgb(1, 2, 3)';
+    areneEcranAppPoser();
+    const pendant=document.body.style.background;
+    areneEcranNettoyer();
+    return JSON.stringify({html,pendant,apres:document.body.style.background});
+  })()`));
+  assert.ok(r.html.includes('font-style:italic')&&r.html.includes('clip-path:polygon('));
+  assert.ok(r.html.includes('Contreur &lt;long&gt;'));
+  assert.ok(r.html.includes('Un &lt;champion&gt;'));
+  assert.ok(!r.html.includes('<champion>'));
+  assert.ok(!r.html.includes('Cage Legacy</div>')&&!r.html.includes('L’arène</h2>'));
+  assert.ok(r.pendant.includes('#3B2F33'),'fond prune pendant le combat');
+  assert.equal(r.apres,'rgb(1, 2, 3)','fond précédent restauré après sortie');
+});

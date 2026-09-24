@@ -68,7 +68,8 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
   _lastRenderedScreen=G&&G.screen;
    const fn=SCREENS[G&&G.screen]||scr_intro;
    if(G&&G.screen==='arena'&&G.pending&&G.pending.res){
-     areneEcranCharger(G.pending.res,{a:G.f&&G.f.name,b:G.pending.opp&&G.pending.opp.name},null);
+     areneEcranCharger(G.pending.res,{a:G.f&&G.f.name,b:G.pending.opp&&G.pending.opp.name,
+       styleA:G.f&&G.f.styleLabel,styleB:G.fight&&G.fight.opp&&G.fight.opp.styleLabel},null);
      ARENE_ECRAN.retour='result';
      ARENE_ECRAN.finRetour=null;
    }

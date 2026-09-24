@@ -225,6 +225,25 @@ test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', ()
   win.CL.areneSocleQuitter();
 });
 
+/* ==== [ANCRE: TEST_MGMT_T4_REPRISE_RESUME] — Lot 3 T4, reprise : le résumé
+   de chaque vrai combat est borné à cinq lignes et le moteur reste intact. ==== */
+test('MGMT T4 reprise — soirée réelle : zéro à cinq moments par combat, sans marqueurs', () => {
+  const win=newGameWindow();
+  freshMgmt(win,20260927);
+  assert.ok(joueSoiree(win));
+  const result=JSON.parse(win.eval(`(function(){
+    const m=G.mgmt, nombre=[];
+    for(let i=0;i<m.lastEvent.fights.length;i++){
+      const html=mgmtSoireeResume(m,i);
+      nombre.push((html.match(/class="mgmt-meta"/g)||[]).length);
+      if(/\\[(?:CRITIQUE|ARBITRAGE)\\]/.test(html)) throw new Error('marqueur interne visible');
+    }
+    return JSON.stringify(nombre);
+  })()`));
+  assert.equal(result.length,9,'tous les combats sont examinés');
+  assert.ok(result.every(n=>n<=5),'aucun résumé ne déborde : '+result.join(','));
+});
+
 /* ---- Un adversaire disparu du roster ne casse rien ----------------------- */
 test('MGMT trace — un adversaire disparu du roster ne casse pas l\u2019historique de celui qui reste', () => {
   const win = newGameWindow();

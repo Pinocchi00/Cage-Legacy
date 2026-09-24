@@ -305,8 +305,8 @@ function mgmtSoireeResume(m,i){
   if(!t) return '';
   const res=mgmtReplayFight(t);
   if(!res||!areneVerdictFidele(t,res)) return '';
-  return areneBeats(res).filter(l=>l.finish||areneBeatTapis(l)||l.sub)
-    .map(l=>`<div class="mgmt-meta">${esc(l.text||'')}</div>`).join('');
+  return areneMomentsCles(res)
+    .map(l=>`<div class="mgmt-meta">${esc(areneTextePublic(l.text))}</div>`).join('');
 }
 function scr_mgmt_soiree(){
   const m=G&&G.mgmt;

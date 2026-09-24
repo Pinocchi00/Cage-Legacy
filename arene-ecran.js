@@ -56,6 +56,38 @@ function areneHorlogeTxt(sec){
   return m+':'+(r<10?'0':'')+r;
 }
 
+/* ==== [ANCRE: ARENE_T4_REPRISE_MOMENTS] — Lot 3 T4, reprise : le drapeau
+   sub est un halo, pas une ligne de résumé ; les textes du moteur restent
+   intacts, ses marqueurs internes ne passent jamais dans le DOM. ==== */
+function areneTextePublic(text){
+  return String(text||'').replace(/\[(?:CRITIQUE|ARBITRAGE)\]\s*/g,'').trim();
+}
+/** Un épisode de sub contigu = un événement. Finition conservée même si
+ *  son texte répète une menace ; pas plus de cinq moments par combat. */
+function areneMomentsCles(res){
+  const candidats=[], vus=new Set();
+  let menace=false;
+  for(const b of areneBeats(res)){
+    const sub=b.sub&&!b.finish;
+    const important=b.finish||areneBeatTapis(b)||(sub&&!menace);
+    menace=sub;
+    if(!important) continue;
+    const texte=areneTextePublic(b.text);
+    const unique=texte.replace(/^\[\d{1,2}:\d{2}\]\s*/,'');
+    if(!unique) continue;
+    if(vus.has(unique)){
+      if(!b.finish) continue;
+      const precedent=candidats.findIndex(c=>areneTextePublic(c.text).replace(/^\[\d{1,2}:\d{2}\]\s*/,'')===unique);
+      if(precedent>=0) candidats.splice(precedent,1);
+    }
+    vus.add(unique);
+    candidats.push(b);
+  }
+  const fin=candidats.find(b=>b.finish);
+  return fin?candidats.filter(b=>!b.finish).slice(0,4).concat(fin):candidats.slice(0,5);
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Charge un combat dans l'écran. Avec une trace (rejeu), le garde-fou du
  *  rejeu s'applique : issue divergente, le refus est posé et RIEN n'est
  *  montré (ancre ARENE_T2_GARDE_REJEU). Sans trace (combat frais), rien à
@@ -70,6 +102,11 @@ function areneEcranCharger(res,noms,trace){
   }
   const session=areneConstruire(res,noms);
   if(!session) return false;
+  /* Le style n'est affiché que si l'appelant fournit son libellé. L'arène
+     ne déduit jamais une voix ou un style à partir des statistiques. */
+  session.noms.a.style=noms&&typeof noms.styleA==='string'?noms.styleA:'';
+  session.noms.b.style=noms&&typeof noms.styleB==='string'?noms.styleB:'';
+  session.momentsCles=areneMomentsCles(res);
   ARENE_ECRAN.session=session;
   ARENE_ECRAN.d=0; ARENE_ECRAN.offset=0; ARENE_ECRAN.t0=0;
   ARENE_ECRAN.vitesse=1; ARENE_ECRAN.pause=false; ARENE_ECRAN.fini=false;
@@ -86,18 +123,18 @@ function areneEcranCombatFrais(){
   const compteur=(ARENE_ECRAN&&ARENE_ECRAN.compteur)?ARENE_ECRAN.compteur:0;
   const graine=ARENE_ECRAN_BASE_SEED+compteur+1;
   const saved=SEED;
-  let res=null,na=null,nb=null;
+   let res=null,na=null,nb=null,styleA='',styleB='';
   try{
     setSeed(graine);
     const A=makeFighter({div:'H-welter',gender:'H'});
     const B=makeFighter({div:'H-welter',gender:'H'});
     res=simulateFight(A,B,3);
-    na=A.name; nb=B.name;
+     na=A.name; nb=B.name; styleA=A.styleLabel||''; styleB=B.styleLabel||'';
   }finally{
     setSeed(saved);
   }
   ARENE_ECRAN.compteur=compteur+1;
-  areneEcranCharger(res,{a:na,b:nb},null);
+   areneEcranCharger(res,{a:na,b:nb,styleA,styleB},null);
 }
 
 /** La ligne de résultat (factuel — R1) : vainqueur, méthode, round. */
@@ -112,7 +149,6 @@ function areneResultatTxt(session){
 
 function scr_arene_socle(){
    const ec=ARENE_ECRAN;
-   const mode=ec.retour?'La soirée':'L’arène';
    const retour=`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocleQuitter()">← Retour</button>`;
   if(ec&&ec.refuse){
     /* Garde-fou du rejeu (ancre ARENE_T2_GARDE_REJEU) : issue divergente,
@@ -136,21 +172,20 @@ function scr_arene_socle(){
   }
   const s=ec.session;
   const nomA=esc(s.noms.a.complet), nomB=esc(s.noms.b.complet);
-   return `<div class="scr" style="max-width:1920px;margin:0 auto;padding:20px 32px 40px">`
-    +`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">`
-     +`<div><div class="eyebrow gold">Cage Legacy</div>`
-     +`<h2 class="disp" style="font-size:26px">${mode}</h2></div>${retour}</div>`
-    +`<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;gap:16px;margin:14px 0 8px">`
-    +`<div style="min-width:0"><div style="width:min(320px,90%);height:5px;background:${ARENE_COUL_A};transform:skewX(-20deg)"></div>`
-    +`<div style="font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:22px;line-height:1.1;color:var(--text)">${nomA}</div></div>`
-    +`<div style="text-align:center">`
-    +`<div id="ar2-rond" style="font-family:Oswald,sans-serif;font-weight:600;font-size:13px;letter-spacing:.18em;color:var(--gold)">ROUND 1</div>`
-    +`<div id="ar2-temps" style="font-family:Oswald,sans-serif;font-weight:700;font-style:italic;font-size:34px;line-height:1;color:var(--text)">5:00</div>`
-    +`<div id="ar2-phase" style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.14em;color:var(--text);margin-top:3px">À DISTANCE</div>`
-    +`</div>`
-    +`<div style="min-width:0;text-align:right"><div style="width:min(320px,90%);height:5px;background:${ARENE_COUL_B};transform:skewX(-20deg);margin-left:auto"></div>`
-    +`<div style="font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:22px;line-height:1.1;color:var(--text)">${nomB}</div></div>`
-    +`</div>`
+   const police="'Saira Condensed','Arial Narrow',Oswald,sans-serif";
+   const styleA=s.noms.a.style?`<div style="font-size:14px;color:var(--muted);font-weight:300">${esc(s.noms.a.style)}</div>`:'';
+   const styleB=s.noms.b.style?`<div style="font-size:14px;color:var(--muted);font-weight:300">${esc(s.noms.b.style)}</div>`:'';
+   return `<div class="scr" style="--text:#FFF8EE;--muted:#D9CCC0;--gold:#FFC83D;--blood:#E5322D;--line:rgba(255,248,238,.18);max-width:1920px;margin:0 auto;padding:20px 32px 40px;font-family:'Saira','Segoe UI',sans-serif">`
+     +`<div style="display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;margin-bottom:6px">`
+     +`<div style="min-width:0"><div style="width:min(420px,100%);height:6px;background:${ARENE_COUL_A};transform:skewX(-20deg)"></div>`
+     +`<div style="font-family:${police};font-weight:800;font-style:italic;text-transform:uppercase;font-size:clamp(28px,3vw,40px);line-height:1;overflow-wrap:anywhere;color:var(--text)">${nomA}</div>${styleA}</div>`
+     +`<div style="background:rgba(33,27,30,.8);clip-path:polygon(20% 0,80% 0,100% 30%,100% 70%,80% 100%,20% 100%,0 70%,0 30%);padding:8px 34px;text-align:center;min-width:170px;font-family:${police}">`
+     +`<div id="ar2-rond" style="font-weight:700;font-size:14px;letter-spacing:.18em;color:var(--gold)">ROUND 1</div>`
+     +`<div id="ar2-temps" style="font-weight:800;font-style:italic;font-size:38px;line-height:1;color:var(--text)">5:00</div>`
+     +`<div id="ar2-phase" style="font-size:12px;letter-spacing:.14em;color:var(--muted);margin-top:2px;white-space:nowrap">À DISTANCE</div></div>`
+     +`<div style="min-width:0;text-align:right"><div style="width:min(420px,100%);height:6px;background:${ARENE_COUL_B};transform:skewX(-20deg);margin-left:auto"></div>`
+     +`<div style="font-family:${police};font-weight:800;font-style:italic;text-transform:uppercase;font-size:clamp(28px,3vw,40px);line-height:1;overflow-wrap:anywhere;color:var(--text)">${nomB}</div>${styleB}</div>`
+     +`</div>`
      +`<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,22%);gap:24px;align-items:center">`
      +`<canvas id="arene-socle-cv" aria-label="Octogone vu de trois quarts" style="display:block;width:100%;border:1px solid var(--line)"></canvas>`
      +`<aside style="align-self:stretch;padding:24px 8px;overflow:auto;max-height:570px">`
@@ -161,7 +196,7 @@ function scr_arene_socle(){
     +`<button class="btn ghost" id="ar2-pause" aria-pressed="false" style="width:auto;padding:10px 16px" onclick="CL.areneSocleBascule()">Pause</button>`
     +`<button class="btn ghost" id="ar2-v1" aria-pressed="true" style="width:auto;padding:10px 16px" onclick="CL.areneSocleVitesse(1)">×1</button>`
     +`<button class="btn ghost" id="ar2-v2" aria-pressed="false" style="width:auto;padding:10px 16px" onclick="CL.areneSocleVitesse(2)">×2</button>`
-    +`<button class="btn primary" style="width:auto;padding:10px 22px" onclick="CL.areneSocleSuivant()">Moment suivant</button>`
+     +`<button class="btn primary" style="width:auto;padding:10px 22px" onclick="CL.areneSocleSuivant()">Moment suivant</button>${retour}`
      +(ec.retour?'':`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocle()">Autre combat</button>`)
     +`</div></div>`;
 }
@@ -174,6 +209,10 @@ function areneEcranAppPoser(){
   try{
     const app=document.getElementById('app');
      if(app&&app.classList){app.classList.add('arene');app.style.maxWidth='1920px';}
+    if(document.body){
+      if(ARENE_ECRAN.fondPrecedent===undefined) ARENE_ECRAN.fondPrecedent=document.body.style.background;
+      document.body.style.background='radial-gradient(ellipse 1100px 700px at 50% 35%,rgba(255,200,61,.12),rgba(255,200,61,0) 70%),linear-gradient(180deg,#3B2F33,#2B2327 55%,#211B1E)';
+    }
   }catch(e){}
 }
 /** Retire la classe `arene` de #app et débranche l'écouteur de la vue
@@ -182,6 +221,10 @@ function areneEcranNettoyer(){
   try{
     const app=document.getElementById('app');
      if(app&&app.classList){app.classList.remove('arene');app.style.maxWidth='';}
+    if(document.body&&ARENE_ECRAN.fondPrecedent!==undefined){
+      document.body.style.background=ARENE_ECRAN.fondPrecedent;
+      delete ARENE_ECRAN.fondPrecedent;
+    }
   }catch(e){}
   const ec=ARENE_ECRAN;
   if(ec&&ec.vue){ areneVueDetruire(ec.vue); ec.vue=null; }
@@ -236,21 +279,22 @@ function areneEcranHud(etat){
   if(rond) rond.textContent=etat.phase==='coins'?'ENTRE LES ROUNDS':(etat.fini?'FIN DU COMBAT':'ROUND '+etat.r);
   if(temps) temps.textContent=areneHorlogeTxt(etat.horloge);
   if(phase) phase.textContent=arenePhaseLabel(etat);
-   if(texte) texte.textContent=etat.texte||'';
-   const fil=document.getElementById('ar2-fil');
-   if(fil&&ec.session){
-     const moments=ec.session.segs.filter(s=>s.beat&&s.t0<=etat.t&&
-       (s.beat.finish||s.beat.sub||areneBeatTapis(s.beat)));
-     if(fil.dataset.count!==String(moments.length)){
-       fil.replaceChildren();
-       for(const moment of moments){
-         const p=document.createElement('p');
-         p.style.cssText='font-size:15px;line-height:1.45;color:var(--text);margin:14px 0';
-         p.textContent='R'+moment.r+' · '+moment.beat.text;
-         fil.appendChild(p);
-       }
-       fil.dataset.count=String(moments.length);
-     }
+    if(texte) texte.textContent=areneTextePublic(etat.texte);
+    const fil=document.getElementById('ar2-fil');
+    if(fil&&ec.session){
+      const moments=ec.session.momentsCles.filter(b=>b.t<=etat.t);
+      const signature=moments.map(b=>b.i).join(',');
+      if(fil.dataset.moments!==signature){
+        fil.replaceChildren();
+        for(const moment of moments){
+          const p=document.createElement('p');
+          p.style.cssText='font-size:15px;line-height:1.45;color:var(--text);margin:14px 0';
+          if(moment.finish) p.style.color='#FFC83D';
+          p.textContent='R'+moment.r+' · '+areneTextePublic(moment.text);
+          fil.appendChild(p);
+        }
+        fil.dataset.moments=signature;
+      }
    }
 }
 function areneEcranReancre(){
