@@ -348,8 +348,7 @@ déplacement.
   leurs étiquettes, le combat illisible quand il passe sur le logo.
 - **Ce que montre « tout simuler » et « simuler un par un »** : par défaut, le
   résultat et les moments clés du déroulé (knockdowns, soumission serrée,
-  finition). *Décision d'auteur encore due par Anthony* ; ce défaut est posé pour
-  avancer et se règle sans toucher au reste.
+  finition). **Confirmé par Anthony le 23/09/2026.**
 - **Un test garde la cible 2** : sur quelques combats à graine fixe, aucune image
   ne dépasse 6 m/s (combattants et arbitre). Sans lui, seule la mesure verrait
   revenir un saut.
