@@ -62,10 +62,17 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    pour les faits). Lot 2B T1 ter : v7 ajoute au corps la part acquise
    (traumaFloor) et complète les instantanés de trace avec traumaFloor et
    lastCycle pour que la récupération temporelle reste rejouable. Migration
-    6 → 7 sans perte. Lot 2B T2 bis : v8 ajoute le reste de semaines du
-    calendrier d'âge à la racine de la sauvegarde. Les âges existants restent
-    leur âge courant et le calendrier repart de là. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=8;
+     6 → 7 sans perte. Lot 2B T2 bis : v8 ajoute le reste de semaines du
+     calendrier d'âge à la racine de la sauvegarde. Les âges existants restent
+     leur âge courant et le calendrier repart de là. Une v1 reste refusée.
+     Lot 2B T3 les départs (23/09) : v9 — la retraite d'âge existe, la ligne
+     porte retired:'age' à côté de retired:'medical' (validateMgmt l'accepte,
+     mgmtRepair ne l'efface plus). Rien à convertir sur une v8 : aucune
+     valeur 'age' ne peut y figurer, les âges et le reste de semaines du
+     calendrier sont conservés tels quels, et la semaine d'anniversaire de
+     chaque combattant se dérive de son identifiant à la lecture. Une v1
+     reste refusée. ==== */
+const MGMT_SAVE_VERSION=9;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
@@ -134,17 +141,44 @@ function mgmtNewRoster(m){
    calendrier que le monde extérieur. Un cycle ajoute MGMT_EVENT_WEEKS au
    reste global ; chaque année complète de MGMT_EXT_YEAR_WEEKS vieillit le
    roster d'un an. Le reste vit à la racine, jamais sur une ligne : aucun
-   attribut ni overall n'est stocké. ==== */
-/** Avance l'âge du roster d'un cycle de calendrier. @returns {number} années franchies. */
+   attribut ni overall n'est stocké.
+   Lot 2B T3 (ajout du 22/09, même ancre) : les anniversaires ne tombent
+   plus tous le même jour. La retraite d'âge (T3) dépend de l'âge exact ;
+   avec un anniversaire commun, toute une classe d'âge franchirait son
+   seuil à la même soirée. Chaque combattant porte donc sa semaine
+   d'anniversaire dans l'année (0..51), DÉRIVÉE de son identifiant par
+   duelFnv1a32 — aucun champ ajouté à la ligne (règle du bureau, CDC §3),
+   et un combattant recruté change de maison sans changer d'anniversaire.
+   Le vieillissement reste le même calendrier : l'année avance de
+   MGMT_EVENT_WEEKS semaines par cycle, et un combattant prend un an quand
+   le calendrier FRANCHIT sa semaine à lui — au plus une fois par cycle
+   (cinq semaines traversent au plus cinq semaines d'anniversaire), dix ans
+   exactement sur 520 semaines comme avant. ==== */
+/** Semaine d'anniversaire d'une ligne (0..51), dérivée de son identifiant.
+ *  Pur, ne consomme jamais rnd(). @returns {number} 0 à 51. */
+function mgmtBirthdayWeek(id){
+  return duelFnv1a32('mgmt-anniversaire|'+String(id))%MGMT_EXT_YEAR_WEEKS;
+}
+/** Avance l'âge du roster d'un cycle de calendrier, anniversaire par
+ *  combattant. @returns {number} années franchies (0 ou 1). */
 function mgmtAdvanceRosterAges(m){
   if(!m||typeof m!=='object') return 0;
   const previous=Number.isSafeInteger(m.ageWeeks)&&m.ageWeeks>=0?m.ageWeeks:0;
   const elapsed=previous+MGMT_EVENT_WEEKS;
   const years=Math.floor(elapsed/MGMT_EXT_YEAR_WEEKS);
   m.ageWeeks=elapsed%MGMT_EXT_YEAR_WEEKS;
-  if(years>0&&Array.isArray(m.roster)){
+  if(Array.isArray(m.roster)){
     for(const f of m.roster){
-      if(f&&typeof f.age==='number'&&Number.isFinite(f.age)) f.age=Math.min(100,f.age+years);
+      if(!f||typeof f.age!=='number'||!Number.isFinite(f.age)) continue;
+      const b=mgmtBirthdayWeek(f.id);
+      /* L'anniversaire tombe quand le calendrier franchit sa semaine :
+         intervalle (previous, ageWeeks] dans l'année, ou — quand l'année a
+         tourné — le reste de l'année précédente puis le début de la
+         nouvelle. La semaine 0 (fin d'année) ne tombe que sur un tour. */
+      const anniversaire=m.ageWeeks<previous
+        ?(b>previous||b<=m.ageWeeks)
+        :(b>previous&&b<=m.ageWeeks);
+      if(anniversaire) f.age=Math.min(100,f.age+1);
     }
   }
   return years;
@@ -281,6 +315,10 @@ function mgmtNewPile(m){
   mgmtExteriorEnsure(m);
   m.cycle++;
   mgmtAdvanceRosterAges(m);
+  /* Lot 2B T3 : les départs tombent à l'ouverture du cycle, après le
+     vieillissement et avant l'arrivée extérieure — la place libérée par un
+     partant est reprise par un jeune du monde au même cycle. */
+  mgmtRetireRoster(m);
   mgmtExteriorArrive(m);
   m.pile=[];
   m.open=null;

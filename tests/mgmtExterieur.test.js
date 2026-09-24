@@ -343,6 +343,90 @@ test('MGMT lot 2B T1 bis — un retraité médical sort des deux classements et 
   assert.equal(r.born,7,'la nouvelle ligne porte le cycle courant');
 });
 
+/* ==== [ANCRE: MGMT_LOT2B_T3_EXTERIEUR_TESTS] — Lot 2B T3 les départs :
+   le monde extérieur part sous la même loi que le roster. Une ligne en fin
+   de carrière sort des vivants SANS être supprimée, sa sortie libère une
+   place que le quota fait entrer à un jeune, et à 240 cycles chaque
+   catégorie contient encore des moins de 25 ans (le monde se renouvelle,
+   il ne vieillit pas en bloc). ==== */
+test('MGMT lot 2B T3 — une ligne extérieure en fin de carrière sort des vivants, sa ligne reste, le quota la remplace', () => {
+  const win = newGameWindow();
+  const r = win.eval(`(function(){
+    setSeed(20261001);
+    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    /* La frontière exacte d'une ligne : pas encore partie un cycle plus
+       tôt, partie à son cycle de retraite. */
+    const l=m.exterieur[0];
+    const tl0=mgmtExteriorTrace(l,0);
+    const fin=tl0.retireCycle;
+    const avantFin=mgmtExteriorRetired(l,fin-1);
+    const aFin=mgmtExteriorRetired(l,fin);
+    const gelaAvant=mgmtExteriorTrace(l,fin-1).fights;
+    const gelaApres=mgmtExteriorTrace(l,fin+60).fights;
+    const bilanAvant=mgmtExteriorTrace(l,fin-1).pro;
+    const bilanApres=mgmtExteriorTrace(l,fin+60).pro;
+    m.cycle=fin;
+    const vivantsAvant=mgmtWorldLivingCount(m,l.div);
+    const lignesAvant=m.exterieur.length;
+    const toujoursLa=m.exterieur.some(o=>o.id===l.id);
+    mgmtExteriorArrive(m);
+    const entrants=m.exterieur.filter(o=>o.born===fin);
+    const jeunes=entrants.filter(o=>mgmtExteriorTrace(o,fin).age<MGMT_EXT_AGE_MIN+MGMT_EXT_AGE_SPREAD);
+    const rangMonde=mgmtDivisionRank(m,l,'world');
+    return JSON.stringify({avantFin,aFin,vivantsAvant,vivantsApres:mgmtWorldLivingCount(m,l.div),
+      lignesAvant,lignesApres:m.exterieur.length,toujoursLa,entrants:entrants.length,
+      jeunes:jeunes.length,rangMonde,quota:MGMT_EXT_LIVE_PER_DIVISION,
+      gela:gelaApres>=gelaAvant,gelaConstant:mgmtExteriorTrace(l,fin+600).fights===gelaApres,
+      bilanOk:bilanApres.W>=bilanAvant.W&&bilanApres.L>=bilanAvant.L,
+      identite:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,id,seed')});
+  })()`);
+  const s=JSON.parse(r);
+  assert.equal(s.avantFin,false,'un cycle avant son terme, la ligne est encore vivante');
+  assert.equal(s.aFin,true,'à son cycle de retraite, la ligne ne compte plus parmi les vivants');
+  assert.ok(s.gela&&s.gelaConstant&&s.bilanOk,'après le terme, le bilan se fige sans jamais régresser');
+  assert.equal(s.vivantsApres,s.quota,'la place libérée ramène la catégorie au quota');
+  assert.ok(s.lignesApres>s.lignesAvant,'des lignes sont ajoutées');
+  assert.ok(s.toujoursLa,'la ligne du partant n\u2019est pas supprimée (QO-9 : le passé du monde ne disparaît pas)');
+  assert.ok(s.entrants>=1,'la sortie déclenche au moins un remplaçant');
+  assert.equal(s.jeunes,s.entrants,'chaque remplaçant est un jeune du monde');
+  assert.equal(s.rangMonde,null,'le partant sort du classement mondial');
+  assert.ok(s.identite,'aucune ligne n\u2019a gagné un champ : la retraite est dérivée, jamais stockée');
+});
+
+test('MGMT lot 2B T3 — après 240 cycles, le monde s’est renouvelé : plus aucune ligne fondatrice, des moins de 25 ans, médiane loin du bloc vieillissant', () => {
+  const win = newGameWindow();
+  const r = win.eval(`(function(){
+    setSeed(20261002);
+    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    for(let c=1;c<=240;c++){ m.cycle=c; mgmtExteriorArrive(m); }
+    const parCategorie=allDivisions().map(d=>{
+      const split=m.roster.filter(o=>o&&o.div===d.id&&!mgmtIsRetired(o)).length;
+      const vivants=m.exterieur.filter(o=>o.div===d.id&&!mgmtExteriorRetired(o,m.cycle));
+      const ages=vivants.map(o=>mgmtExteriorTrace(o,m.cycle).age);
+      return {div:d.id,vivants:split+vivants.length,moins25:ages.filter(a=>a<25).length,
+        median:ages.sort((x,y)=>x-y)[Math.floor(ages.length/2)]};
+    });
+    const ages=[];
+    for(const o of m.exterieur){ if(!mgmtExteriorRetired(o,m.cycle)) ages.push(mgmtExteriorTrace(o,m.cycle).age); }
+    ages.sort((a,b)=>a-b);
+    return JSON.stringify({cycle:m.cycle,lignes:m.exterieur.length,
+      fondatrices:m.exterieur.filter(o=>o.born===0&&!mgmtExteriorRetired(o,m.cycle)).length,
+      mondeMoins25:ages.filter(a=>a<25).length,mondeMin:ages[0],
+      mondeMedian:ages[Math.floor(ages.length/2)],parCategorie:parCategorie});
+  })()`);
+  const s=JSON.parse(r);
+  assert.equal(s.cycle,240,'240 cycles ont passé');
+  assert.equal(s.fondatrices,0,'plus aucune ligne fondatrice (born 0) ne vit encore : la cohorte d’ouverture a entièrement passé la main');
+  assert.ok(s.mondeMoins25>=10&&s.mondeMin<25,
+    'le monde contient une vraie jeunesse (mesuré : '+s.mondeMoins25+' lignes de moins de 25 ans, minimum '+s.mondeMin+')');
+  assert.ok(s.mondeMedian<40,'l’âge médian du monde ('+s.mondeMedian+') reste loin des 48 du monde sans départs (T1 bis) — voir le rapport pour la tension sur la décennie exacte');
+  for(const d of s.parCategorie){
+    assert.equal(d.vivants,quotaParCategorie(win),`${d.div} tient toujours le quota`);
+  }
+  assert.ok(s.lignes>s.parCategorie.length*quotaParCategorie(win),'les lignes s’accumulent sans jamais être supprimées');
+});
+/* ==== [FIN ANCRE] ==== */
+
 test('MGMT lot 2B T1 bis — après une retraite, continuer ou recharger crée le même remplaçant', () => {
   const win=newGameWindow();
   const r=win.eval(`(function(){

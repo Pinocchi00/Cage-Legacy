@@ -112,7 +112,7 @@ test('MGMT niveau 1 — une ligne nom/bilan/âge/catégorie/organisation, rien d
   assert.equal(win.eval(`G.mgmt.roster.every(o=>o.level===1&&o.raison===null)`), true);
 });
 
-test('MGMT lot 2B T2 bis — l’âge suit les semaines du calendrier, jamais une année par soirée', () => {
+test('MGMT lot 2B T2 bis + T3 — l’âge suit les semaines du calendrier, anniversaire par combattant', () => {
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(20260922);
@@ -127,21 +127,126 @@ test('MGMT lot 2B T2 bis — l’âge suit les semaines du calendrier, jamais un
       increments.push(m.roster[0].age-previous);
       previous=m.roster[0].age;
     }
+    /* T3 (ajout du 22/09, docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T3) :
+       chaque combattant porte sa semaine d'anniversaire dérivée de son id. */
+    const semaines=[...new Set(m.roster.map(o=>mgmtBirthdayWeek(o.id)))];
     return JSON.stringify({cycle:m.cycle,ageWeeks:m.ageWeeks,
       deltas:m.roster.map((o,i)=>o.age-ages0[i]),increments,
       extDelta:mgmtExteriorTrace(ext,m.cycle).age-ext0,
+      semaines:semaines.length,
       lineKeys:Object.keys(m.roster[0]).sort()});
   })()`));
   assert.equal(s.cycle,104,'104 cycles de cinq semaines ont passé');
   assert.equal(s.ageWeeks,0,'520 semaines font exactement dix années sans reste');
   assert.ok(s.deltas.every(n=>n===10),'chaque ligne de Split a pris dix ans en dix années');
   assert.ok(s.increments.every(n=>n===0||n===1),'aucun cycle de cinq semaines ne fait prendre plus d’un an');
-  assert.equal(s.increments.slice(0,10).reduce((a,b)=>a+b,0),0,'dix soirées ne valent pas encore une année');
-  assert.equal(s.increments[10],1,'la première année tombe au onzième cycle, après 55 semaines');
+  /* T3 : l'anniversaire de la première ligne (mg1) est la semaine 51 —
+     dérivée de son identifiant, pas un jour commun au roster. */
+  assert.equal(win.eval(`mgmtBirthdayWeek('mg1')`),51,'la semaine d’anniversaire de mg1 est dérivée de son id');
+  assert.equal(s.increments.slice(0,10).reduce((a,b)=>a+b,0),0,'dix soirées ne valent pas encore une année pour mg1');
+  assert.equal(s.increments[10],1,'la première année de mg1 tombe au onzième cycle, à sa semaine 51');
   assert.equal(s.extDelta,10,'Split et le monde extérieur vieillissent au même rythme');
+  assert.ok(s.semaines>1,'les anniversaires ne tombent pas tous le même jour (T3)');
   assert.ok(!s.lineKeys.includes('attrs')&&!s.lineKeys.includes('overall'),
     'vieillir n’ajoute ni attributs ni overall à la ligne niveau 1');
 });
+
+/* ==== [ANCRE: MGMT_LOT2B_T3_TESTS] — Lot 2B T3 les départs
+   (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T3) : la loi de retraite, le
+   départ à l'ouverture du cycle, la sortie du vivier et des classements,
+   et la survie du retraité d'âge à la sauvegarde. ==== */
+/* Fabrique de ligne niveau 1, injectée dans chaque fenêtre (l'eval ne voit
+   pas les variables du processus Node). */
+const T3_MK=`const t3mk=(id,first,age,W,L)=>({id:id,name:first+' Test',first:first,last:'Test',
+  W:W||0,L:L||0,D:0,age:age,div:'H-light',divName:'Poids léger',org:'Split',
+  level:1,raison:null,interactions:0});`;
+
+test('MGMT T3 — la loi de retraite est celle de la carrière : max(39, 42 − dégradation du menton)', () => {
+  const win = newGameWindow();
+  const r = JSON.parse(win.eval(`(function(){
+    ${T3_MK}
+    const propre=t3mk('mgP','Paul',26,8,2);
+    const use=t3mk('mgU','Ugo',44,20,18); use.trauma=95; use.traumaFloor=95; use.lastCycle=0;
+    return JSON.stringify({
+      n0:mgmtRetireAgeFor(0),n1:mgmtRetireAgeFor(1),n2:mgmtRetireAgeFor(2),
+      n3:mgmtRetireAgeFor(3),n5:mgmtRetireAgeFor(5),
+      propreNiveau:mgmtChinDegradationLevel(propre,0),
+      propreRetraite:mgmtRetireAge(propre,0),
+      useNiveau:mgmtChinDegradationLevel(use,0),
+      useRetraite:mgmtRetireAge(use,0)});
+  })()`));
+  assert.equal(r.n0,42,'corps intact : 42 ans');
+  assert.equal(r.n1,41,'un niveau de dégradation : 41 ans');
+  assert.equal(r.n2,40,'deux niveaux : 40 ans');
+  assert.equal(r.n3,39,'trois niveaux : 39 ans');
+  assert.equal(r.n5,39,'la loi plafonne à 39 ans');
+  assert.equal(r.propreNiveau,0,'un jeune au palmarès propre n’a perdu aucun menton');
+  assert.equal(r.propreRetraite,42,'il part à 42 ans');
+  assert.ok(r.useNiveau>=1&&r.useNiveau<=3,'le corps usé dérive un niveau de dégradation (mesuré : '+r.useNiveau+')');
+  assert.ok(r.useRetraite<r.propreRetraite,'le corps usé part plus tôt que le corps propre');
+});
+
+test('MGMT T3 — le départ tombe à l’ouverture du cycle, sans drame : hors carte, hors vivier, hors classement', () => {
+  const win = newGameWindow();
+  win.eval(`setSeed(20260929); G={theme:'dark',mgmt:mgmtDefault()};`);
+  const r = JSON.parse(win.eval(`(function(){
+    ${T3_MK}
+    const m=G.mgmt;
+    m.roster=[t3mk('mgA','Alain',99,10,2),t3mk('mgB','Bruno',27,10,2),
+      t3mk('mgC','César',28,9,3),t3mk('mgD','Dorian',29,8,4),t3mk('mgE','Enzo',30,7,5),
+      t3mk('mgF','Farid',31,6,6),t3mk('mgG','Gabin',32,5,7),t3mk('mgH','Hugo',33,4,8),
+      t3mk('mgI','Ivan',34,3,9),t3mk('mgJ','Jules',26,2,1),t3mk('mgK','Karl',25,1,2),
+      t3mk('mgL','Luc',24,1,3)];
+    const vieux=m.roster[0], jeune=m.roster[1];
+    const avant=mgmtRetireAge(vieux,0);
+    m.card.main=[{a:vieux.id,b:jeune.id,cycle:0,slot:'main'}];
+    mgmtNewPile(m);
+    const propose=m.pile.some(a=>(a.kind==='leila_bulk'&&Array.isArray(a.fights)?a.fights:[a])
+      .some(x=>x.a===vieux.id||x.b===vieux.id));
+    return JSON.stringify({avant:avant,retire:vieux.retired,reste:jeune.retired||null,
+      age:vieux.age,niveau:mgmtChinDegradationLevel(vieux,m.cycle-1),
+      horsCarte:m.card.main.length===0,
+      horsListe:!mgmtCartRows(m).some(o=>o.id===vieux.id),
+      horsClassement:mgmtDivisionRank(m,vieux)===null&&mgmtDivisionRank(m,jeune)!==null,
+      indisponible:!mgmtAvailable(m,vieux),
+      propose:propose,dispo:m.roster.filter(o=>mgmtAvailable(m,o)).length,
+      fait:m.facts.some(f=>f.k==='retired'&&f.a===vieux.id)});
+  })()`));
+  assert.ok(r.avant<=39,'un combattant de 99 ans a dépassé toute retraite dérivée (loi : '+r.avant+')');
+  assert.equal(r.retire,'age','le partant porte retired:\u2019age\u2019');
+  assert.equal(r.reste,null,'personne d\u2019autre ne part');
+  assert.ok(r.horsCarte,'son combat posé quitte la carte : la soirée ne se retrouve pas bloquée');
+  assert.ok(r.horsListe,'il sort de la liste de composition');
+  assert.ok(r.horsClassement,'il sort du classement, les autres gardent le leur');
+  assert.ok(r.indisponible,'il n\u2019est plus disponible');
+  assert.ok(!r.propose,'aucune proposition ne le porte');
+  assert.ok(r.dispo===11,'les onze autres restent disponibles');
+  assert.ok(r.fait,'le départ est un fait du bureau (QO-9 : le fait ne disparaît pas)');
+});
+
+test('MGMT T3 — un retraité d’âge survit à une sauvegarde puis un chargement (T3 étape 1)', () => {
+  const win = newGameWindow();
+  const r = JSON.parse(win.eval(`(function(){
+    setSeed(20260930);
+    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    m.roster[0].retired='age';
+    const valueOk=validateMgmt(m);
+    const repare=mgmtRepair(JSON.parse(JSON.stringify(m)));
+    const repareOk=repare.roster[0].retired;
+    localStorage.setItem(MGMT_KEY,JSON.stringify(m));
+    G={theme:'dark'};
+    const charge=loadMgmt();
+    return JSON.stringify({valueOk:valueOk,repareOk:repareOk,charge:charge,
+      apresChargement:G.mgmt.roster[0].retired,
+      valideApres:validateMgmt(G.mgmt)});
+  })()`));
+  assert.equal(r.valueOk,true,'retired:\u2019age\u2019 passe la porte de validateMgmt');
+  assert.equal(r.repareOk,'age','mgmtRepair n’efface pas la retraite d’âge : le partant ne ressuscite pas');
+  assert.equal(r.charge,true,'la sauvegarde se charge');
+  assert.equal(r.apresChargement,'age','le retraité d’âge est encore retraité après chargement');
+  assert.equal(r.valideApres,true,'et l’état rechargé repasse la porte');
+});
+/* ==== [FIN ANCRE] ==== */
 
 test('MGMT déterminisme — même graine, même roster et même pile', () => {
   const a = newGameWindow(), b = newGameWindow();

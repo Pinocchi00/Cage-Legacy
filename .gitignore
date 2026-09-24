@@ -49,3 +49,6 @@ tools/reports/*
 # n'atteint est un etat des lieux durable, pas une mesure de tranche — il se
 # relit et se compare a chaque passe. Versionne.
 !tools/reports/INVENTAIRE-CODE-MORT.md
+# Lot 2B T3 : mesure versionnee des departs (la correspondance du niveau
+# de degradation du menton, le monde qui se renouvelle, la question posee).
+!tools/reports/LOT-2B-T3-LES-DEPARTS.md

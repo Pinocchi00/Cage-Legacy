@@ -270,7 +270,18 @@ test('MGMT corps — migration 6 → 7 : décision Anthony 22/09, part acquise e
     'les anciennes traces signalent explicitement les deux informations absentes');
 });
 
-test('MGMT lot 2B T2 bis — migration 7 → 8 : les âges restent courants et le calendrier repart de là', () => {
+/* ---- Tâche 2 : migration 7 → 8 → 9, une sauvegarde d'avant le lot se charge --
+   Réécrit à la T3 (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T3, ajout du
+   22/09) : l'ancien test attendait qu'aucun anniversaire ne tombe au
+   premier cycle — c'était la loi du compteur GLOBAL (tout le roster
+   vieillissait à la même soirée), que la T3 remplace par une semaine
+   d'anniversaire propre à chaque combattant, dérivée de son identifiant.
+   Ce qui reste vrai est gardé : les âges restent courants à la migration,
+   le calendrier repart de là, cinq semaines sont conservées. Ce qui
+   change : au premier cycle vieillissent exactement les combattants dont
+   la semaine d'anniversaire dérivée tombe dans les cinq premières
+   semaines — chacun au plus d'un an. */
+test('MGMT lot 2B T2 bis + T3 — migration 7 → 9 : les âges restent courants, chaque anniversaire est propre à la ligne', () => {
   const win = newGameWindow();
   freshMgmt(win,20260928);
   const v7 = JSON.parse(win.eval(`(function(){
@@ -281,16 +292,28 @@ test('MGMT lot 2B T2 bis — migration 7 → 8 : les âges restent courants et l
   })()`));
   const ages=v7.roster.map(o=>o.age);
   const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v7)}))))`));
-  assert.equal(mig.v,win.eval(`MGMT_SAVE_VERSION`),'la v7 atteint la version courante');
+  assert.equal(mig.v,win.eval(`MGMT_SAVE_VERSION`),'la v7 atteint la version courante (8 puis 9)');
   assert.deepEqual(mig.roster.map(o=>o.age),ages,'chaque âge existant reste son âge courant');
   assert.equal(mig.cycle,37,'le cycle de la partie est conservé');
   assert.equal(mig.ageWeeks,0,'le calendrier d’âge repart de la migration');
   assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`),true,'la v7 migrée passe validateMgmt');
   win.localStorage.setItem('cage-legacy-mgmt',JSON.stringify(v7));
   win.eval(`G.mgmt=null; loadMgmt(); mgmtNewPile(G.mgmt);`);
-  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify(G.mgmt.roster.map(o=>o.age))`)),ages,
-    'un premier cycle de cinq semaines après migration ne déclenche pas un anniversaire');
+  /* T3 : le premier cycle franchit les semaines 1 à 5 — chaque ligne
+     vieillit d'exactement un an si et seulement si SA semaine
+     d'anniversaire dérivée y tombe. */
+  const agesApres=JSON.parse(win.eval(`JSON.stringify(G.mgmt.roster.map(o=>o.age))`));
   assert.equal(win.eval(`G.mgmt.ageWeeks`),5,'les cinq premières semaines sont conservées pour la suite');
+  let anniversaires=0;
+  for(let i=0;i<ages.length;i++){
+    const b=win.eval(`mgmtBirthdayWeek(${JSON.stringify(v7.roster[i].id)})`);
+    const attendu=ages[i]+((b>=1&&b<=5)?1:0);
+    if(b>=1&&b<=5) anniversaires++;
+    assert.equal(agesApres[i],attendu,
+      `semaine d'anniversaire ${b} : ${attendu===ages[i]?'pas d\'anniversaire au premier cycle':'+1 an au premier cycle'}`);
+  }
+  assert.ok(anniversaires>0&&anniversaires<ages.length,
+    'le premier cycle vieillit une minorité du roster, pas une classe d\'âge entière (mesuré : '+anniversaires+'/'+ages.length+')');
 });
 
 /* ---- Tâche 5 : validateMgmt refuse un historique structurellement faux --- */
