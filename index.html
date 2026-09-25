@@ -440,6 +440,9 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-nav button{font-family:var(--mgmt-font-display);font-style:italic;font-size:16px;color:var(--mgmt-plum-deep);background:var(--mgmt-yellow);padding:9px 24px;clip-path:var(--mgmt-octagon)}
 .mgmt-nav span{font-family:var(--mgmt-font-display);font-style:italic;font-size:16px;color:var(--mgmt-secondary);padding:9px 24px}
 .mgmt-nav button:hover{filter:brightness(1.1)}
+/* ==== [ANCRE: MGMT_LOT4_T5_FOCUS] — Lot 4 T5 : le clip octogonal ne
+   masque plus l'anneau de focus sorti du bouton. ==== */
+.mgmt-nav button:focus-visible{clip-path:none;outline:3px solid var(--mgmt-ink);outline-offset:2px}
 .mgmt-wrap .opp:hover{background:var(--mgmt-plum);color:var(--mgmt-ink)}
 .mgmt-aff{padding:6px 10px;margin:0 0 5px;min-height:0}
 .mgmt-fight{padding:6px 10px;margin:0 0 5px;min-height:0}
@@ -487,6 +490,35 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    (pile née vide uniquement). Texte et liseré, sans aplat ni ombre. ==== */
 .mgmt-next{display:block;width:100%;text-align:center;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:0;padding:12px;margin:9px 0;cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.08em;text-transform:uppercase}
 .mgmt-next:hover{color:var(--text);border-color:var(--faint)}
+/* ==== [ANCRE: MGMT_LOT4_T5_FICHE_CSS] — Lot 4 T5, maquette 03 :
+   faits, trajectoires et combats, trois colonnes à 1280–1920. ==== */
+.mgmt-fiche{gap:0}
+#app.mgmt:has(.mgmt-fiche){max-width:1920px}
+.mgmt-fiche{padding-left:clamp(15px,3vw,64px);padding-right:clamp(15px,3vw,64px)}
+.mgmt-fiche-retour{align-self:flex-start;background:none;border:0;color:var(--mgmt-secondary);font:600 18px var(--mgmt-font-display);cursor:pointer;padding:8px 4px}
+.mgmt-fiche-hero{display:flex;justify-content:space-between;align-items:end;gap:30px;border-bottom:1px solid var(--mgmt-edge);padding:8px 0 22px}
+.mgmt-fiche-hero>div:first-child{min-width:0}
+.mgmt-fiche-hero h2.disp{font-size:clamp(42px,5.6vw,86px);line-height:1.08;overflow-wrap:anywhere;margin:0}
+.mgmt-fiche-hero p{font-size:16px;line-height:1.5;color:var(--mgmt-secondary);margin:12px 0 0}
+.mgmt-fiche-attrs{display:flex;gap:24px;flex:0 0 auto;text-align:right}
+.mgmt-fiche-attrs div{display:flex;flex-direction:column}
+.mgmt-fiche-attrs strong{font:italic 700 30px var(--mgmt-font-display);color:var(--mgmt-ink)}
+.mgmt-fiche-attrs div:first-child strong{color:var(--mgmt-yellow)}
+.mgmt-fiche-attrs span{font:13px var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mgmt-fiche-cols{grid-template-columns:minmax(250px,1fr) minmax(360px,1.5fr) minmax(250px,.8fr);gap:clamp(18px,3vw,44px);margin-top:22px}
+.mgmt-fiche-cols>section,.mgmt-fiche-cols>aside{min-width:0;overflow:auto;padding:0 4px}
+.mgmt-fiche h3{font:700 19px var(--mgmt-font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--mgmt-yellow);margin:0 0 14px}
+.mgmt-fiche-map{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--mgmt-secondary);font-size:14px;line-height:1.5}
+.mgmt-fiche-map svg{width:min(200px,100%);flex:0 0 170px;max-width:100%}
+.mgmt-fiche-empty,.mgmt-fiche-detail{font-size:14px;color:var(--mgmt-secondary)}
+.mgmt-fiche .mgmt-meta{font-size:14px;color:var(--mgmt-secondary)}
+.mgmt-fiche-fight{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 2px;border-bottom:1px solid var(--mgmt-edge)}
+.mgmt-fiche-fight strong{font-size:17px;font-weight:500;overflow-wrap:anywhere}
+.mgmt-fiche-fight.selected{border-left:2px solid var(--mgmt-yellow);padding-left:10px}
+.mgmt-fiche-fight .mgmt-next{width:auto;white-space:nowrap;margin:0;padding:8px;font-size:14px}
+.mgmt-fiche-org{font-size:15px;padding:12px 0;border-bottom:1px solid var(--mgmt-edge);overflow-wrap:anywhere}
+.mgmt-fiche-org strong{font-weight:500}
+@media(max-width:1279px){.mgmt-fiche-cols{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}}
 @media(max-width:1279px){.mgmt-wrap{height:auto;overflow:visible}.mgmt-cols{grid-template-columns:1fr}.mgmt-col{max-height:none;overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
 </style></head>

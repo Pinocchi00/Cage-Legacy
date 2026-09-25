@@ -225,6 +225,56 @@ test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', ()
   win.CL.areneSocleQuitter();
 });
 
+/* ==== [ANCRE: TEST_MGMT_LOT4_T5_FICHE] — La fiche lit les deux classements,
+   les positions de l'arène et la trace extérieure sans stockage dérivé. ==== */
+test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par trace', () => {
+  const win=newGameWindow();
+  freshMgmt(win,20260925);
+  assert.ok(joueSoiree(win));
+  const id=win.eval('G.mgmt.hist[0].a.id');
+  win.eval(`(function(){ window.replays=0; const orig=mgmtReplayFight;
+    mgmtReplayFight=function(t){ window.replays++; return orig(t); };
+    G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(id)});
+  })()`);
+  const html=win.document.getElementById('app').innerHTML;
+  assert.match(html,/Où il combat/);
+  assert.match(html,/clip-path="url\(#mgmt-fiche-oct\)"/);
+  assert.match(html,/Taille/);
+  assert.match(html,/Allonge/);
+  assert.match(html,/garde (orthodoxe|gaucher)/);
+  assert.ok(!html.includes('Comment il combat')&&!html.includes('Son camp')&&!html.includes('Sa faille'));
+  const first=win.replays;
+  win.eval('render(); render(); CL.mgmtFicheDeplacer(1)');
+  assert.equal(win.replays,first,'un rendu et un déplacement clavier ne rejouent pas les combats');
+  assert.ok(first>0);
+});
+
+test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappement', () => {
+  const win=newGameWindow();
+  freshMgmt(win,1001);
+  win.eval('mgmtExteriorEnsure(G.mgmt)');
+  const line=win.G.mgmt.exterieur[0];
+  const keys=Object.keys(line).sort();
+  win.eval(`G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(line.id)})`);
+  assert.equal(win.G.screen,'mgmt_fiche');
+  const html=win.document.getElementById('app').innerHTML;
+  assert.match(html,/Sa trajectoire/);
+  assert.match(html,/Amateur/);
+  assert.match(html,/Professionnel/);
+  assert.ok(!html.includes('× 0')&&!html.includes('· 0 combat'));
+  assert.deepEqual(Object.keys(line).sort(),keys,'lecture sans champ stocké');
+  win.eval(`(function(){
+    const orig=mgmtExteriorTrace;
+    mgmtExteriorTrace=function(line,cycle){ const t=orig(line,cycle);
+      t.name='<img src=x onerror=alert(1)>'; t.orgs[0].name='<svg onload=alert(1)>';
+      return t; };
+    render();
+  })()`);
+  const doc=win.document.getElementById('app');
+  assert.equal(doc.querySelector('img,svg[onload]'),null);
+  assert.ok(doc.innerHTML.includes('&lt;img')&&doc.innerHTML.includes('&lt;svg'));
+});
+
 /* ==== [ANCRE: TEST_MGMT_T4_REPRISE_RESUME] — Lot 3 T4, reprise : le résumé
    de chaque vrai combat est borné à cinq lignes et le moteur reste intact. ==== */
 test('MGMT T4 reprise — soirée réelle : zéro à cinq moments par combat, sans marqueurs', () => {
