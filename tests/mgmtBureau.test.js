@@ -586,8 +586,8 @@ test('MGMT dossier — nom dominant, métadonnées discrètes, raison jamais aff
   assert.ok(!card2.includes('Raison de se battre'), 'le Dossier non plus : la raison appartient à la future fiche');
   assert.ok(win.eval(`MGMT_RAISONS.some(r=>r.id===G.mgmt.roster[0].raison)`), 'mais elle reste suivie en interne');
   assert.ok(win.eval(`G.mgmt.roster[0].level`)===2, 'et le niveau progresse normalement');
-  assert.ok(card2.includes('mgmt-lvl'), 'le repère de niveau est discret');
-  assert.ok(!card2.includes('class="dlt"'), 'le repère de niveau n\u2019est pas un bouton');
+  /* Lot 4 T1 / audit C7 : le niveau agit toujours mais ne s'affiche plus. */
+  assert.ok(!card2.includes('mgmt-lvl')&&!card2.includes('Dossier'), 'aucun niveau visible');
 });
 /* ==== [FIN ANCRE] ==== */
 
@@ -929,7 +929,7 @@ test('MGMT mémoire — un refus simple ne se retient plus', () => {
   assert.deepEqual(win.eval(`JSON.stringify(mgmtMemoryLines(G.mgmt))`), '[]', 'refuser n\u2019est pas notable');
 });
 
-test('MGMT fond — valeurs prescrites sur les bonnes règles', () => {
+test('MGMT lot 4 T1 — palette prune centralisée et appliquée aux panneaux', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   const rule = sel => {
     const i = src.indexOf(sel);
@@ -937,12 +937,12 @@ test('MGMT fond — valeurs prescrites sur les bonnes règles', () => {
     return src.slice(i, src.indexOf('}', i));
   };
   const app = rule('#app.mgmt{');
-  assert.ok(app.includes('#423521')&&app.includes('#120E08'), '#app.mgmt : zénithal prescrit');
+  assert.ok(app.includes('var(--mgmt-plum)')&&app.includes('var(--mgmt-plum-deep)'), '#app.mgmt : fond prune');
   const col = rule('.mgmt-col{');
-  assert.ok(col.includes('#3A2D1B'), '.mgmt-col : panneau prescrit');
-  assert.ok(col.includes('#75603E'), '.mgmt-col : bordures prescrites');
+  assert.ok(col.includes('var(--mgmt-panel)'), '.mgmt-col : panneau à jeton');
+  assert.ok(col.includes('var(--mgmt-edge)'), '.mgmt-col : bordures à jeton');
   assert.ok(col.includes('0 8px 24px rgba(0,0,0,.6)'), '.mgmt-col : relief prescrit');
-  assert.ok(src.includes('body.mgmt{background:#120E08}'), 'body.mgmt : confinement au ton du bas');
+  assert.ok(src.includes('body.mgmt{background:var(--mgmt-plum-deep)}'), 'body.mgmt : confinement au ton du bas');
   for(const old of ['#0A0704','#332818','#6B5636','#3A2E1C']){
     assert.ok(!src.includes(old), `aucune trace de l\u2019ancienne valeur ${old}`);
   }
