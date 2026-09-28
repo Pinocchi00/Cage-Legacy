@@ -6,9 +6,11 @@
      médicaux comme d'âge, test générique mgmtIsRetired : ils ont quitté
      le vivier), nombre de catégories représentées, et par catégorie le
      nombre de disponibles (mgmtAvailable : ni retraités, ni suspendus)
-     et le nombre de classés (classement de Split, portée
-     'organization' de mgmtDivisionRank — les retraités sont hors
-     classement, les suspendus gardent leur rang). Le constat factuel
+     et le nombre de combattants de Split dans le TOP 15 MONDIAL — lues
+     sur le classement mondial (portée 'world' de mgmtDivisionRanking,
+     les 15 premiers, filtrés sur le roster). Le classement de Split ne
+     dépasse jamais quinze combattants par catégorie : y lire « classés »
+     dirait toujours le même nombre que l'effectif. Le constat factuel
      « effectif trop mince » apparaît quand une catégorie ne permet plus
      de composer un combat — moins de deux disponibles. Tout se dérive à
      la lecture, rien n'est stocké (règle du bureau, CDC §3). Les tuiles
@@ -40,17 +42,19 @@ const MGMT_ORG_LABELS={
 };
 
 /** L'effectif de Split par catégorie, dérivé à la lecture. Pur.
- *  @returns {Array<{div,name,total,dispo,classes}>} */
+ *  @returns {Array<{div,name,total,dispo,top15}>} */
 function mgmtOrgEffectifRows(m){
   if(!m||!Array.isArray(m.roster)) return [];
   return allDivisions().map(d=>{
     const dans=m.roster.filter(o=>o&&o.div===d.id&&!mgmtIsRetired(o));
     const dispo=dans.filter(o=>mgmtAvailable(m,o)).length;
-    /* Nombre de classés : le classement de Split (portée « organization »
-       de mgmtDivisionRank, dérivé) — appelle la loi unique, jamais un
-       second compteur. */
-    const classes=mgmtDivisionRanking(m,d.id,'organization').length;
-    return {div:d,total:dans.length,dispo:dispo,classes:classes};
+    /* Combattants de Split dans le top 15 mondial (portée « world »),
+       à la lecture : les 15 premiers du classement mondial de la
+       catégorie, filtrés sur le roster. La loi unique, jamais un second
+       classement. */
+    const top15=mgmtDivisionRanking(m,d.id,'world').slice(0,15)
+      .filter(r=>dans.some(o=>o.id===r.id)).length;
+    return {div:d,total:dans.length,dispo:dispo,top15:top15};
   });
 }
 
@@ -61,7 +65,7 @@ function mgmtOrgGroupHtml(m,g,rows){
     const sub=r.total===0
       ?MGMT_ORG_LABELS.aucun
       :r.total+(r.total===1?' combattant, ':' combattants, ')
-        +r.classes+(r.classes===1?' classé, ':' classés, ')
+        +r.top15+' dans le top 15 mondial, '
         +(r.dispo<2?MGMT_ORG_LABELS.thin:r.dispo+(r.dispo===1?' disponible':' disponibles'));
     return `<div class="mgmt-org-cat${thin?' thin':''}"><div class="mgmt-org-nm">${esc(r.div.name)}</div>`
       +`<div class="mgmt-org-sub">${esc(sub)}</div></div>`;

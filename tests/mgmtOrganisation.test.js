@@ -8,10 +8,13 @@
    - aucun texte de travail ni aucun texte de maquette (§1) : aucun onglet
      Contrats ni Diffuseur, ni patron, ni objectifs de saison ;
    - l'effectif par catégorie se dérive à la lecture — le nombre de
-     classés (classement de Split, portée « organization » de
-     mgmtDivisionRank), le constat « effectif trop mince » quand une
-     catégorie tombe sous deux disponibles (mgmtAvailable), et deux
-     groupes titrés hommes/femmes (les divisions H et F d'engine.js) ;
+     combattants de Split dans le top 15 mondial (classement mondial,
+     portée « world » de mgmtDivisionRanking, les 15 premiers, filtrés
+     sur le roster — le classement de Split ne dépassant jamais quinze
+     combattants, y lire « classés » ne dirait que l'effectif), le
+     constat « effectif trop mince » quand une catégorie tombe sous deux
+     disponibles (mgmtAvailable), et deux groupes titrés hommes/femmes
+     (les divisions H et F d'engine.js) ;
    - la navigation distingue l'entrée courante (aria-current, contrastes
      ≥ 4,5:1 — charte L2).
    - les finances : la trésorerie (m.treasury) et les recettes des dernières
@@ -103,17 +106,24 @@ test('MGMT T7 — le constat « effectif trop mince » apparaît quand une caté
   assert.ok(!moyenne[0].thin&&!moyenne[0].sub.includes('effectif trop mince'),
     'une catégorie encore composable ne porte pas le constat');
   assert.ok(moyenne[0].sub.includes('disponibles'), 'la catégorie lisible dit ses disponibles');
-  /* Le nombre de classés, dérivé (classement de Split, portée
-     « organization »). Les suspendus gardent leur rang : « Poids léger »
-     compte autant de classés que de combattants, la fixture ne l'efface
-     pas du classement. Le non-derivable est vérifié contre la loi unique. */
-  const attendus=JSON.parse(win.eval(`JSON.stringify({
-    legere:mgmtDivisionRanking(G.mgmt,'H-light','organization').length,
-    moyenne:mgmtDivisionRanking(G.mgmt,'H-middle','organization').length})`));
-  assert.ok(moyenne[0].sub.includes(`${attendus.moyenne} classés`),
-    'le classement de Split se lit sur la tuile');
-  assert.ok(legere[0].sub.includes(`${attendus.legere} classés`),
-    'le classement de Split se lit aussi sur la catégorie mince (suspension ne retire pas le rang)');
+  /* Le nombre « dans le top 15 mondial », dérivé à la lecture — vérifié
+     contre la loi du classement, pas contre le rendu : les 15 premiers du
+     classement mondial (portée « world »), filtrés sur le roster. */
+  const attendus=JSON.parse(win.eval(`JSON.stringify((function(){
+    const m=G.mgmt;
+    const dedansH=new Set(m.roster.filter(o=>o&&o.div==='H-light'&&!mgmtIsRetired(o)).map(o=>o.id));
+    const dedansM=new Set(m.roster.filter(o=>o&&o.div==='H-middle'&&!mgmtIsRetired(o)).map(o=>o.id));
+    return {
+      legere:mgmtDivisionRanking(G.mgmt,'H-light','world').slice(0,15)
+        .filter(r=>dedansH.has(r.id)).length,
+      moyenne:mgmtDivisionRanking(G.mgmt,'H-middle','world').slice(0,15)
+        .filter(r=>dedansM.has(r.id)).length,
+    };
+  })())`));
+  assert.ok(moyenne[0].sub.includes(`${attendus.moyenne} dans le top 15 mondial`),
+    'le top 15 mondial se lit sur la tuile');
+  assert.ok(legere[0].sub.includes(`${attendus.legere} dans le top 15 mondial`),
+    'le top 15 mondial se lit aussi sur la catégorie mince (la suspension ne retire pas du classement)');
   /* Deux groupes titrés : hommes (8 catégories) puis femmes (4). */
   assert.equal((html.match(/mgmt-org-hd/g)||[]).length, 2, 'deux titres de groupe');
   assert.ok(html.indexOf('Hommes')>=0&&html.indexOf('Femmes')>=0, 'les groupes hommes et femmes sont titrés');
