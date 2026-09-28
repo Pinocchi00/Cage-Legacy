@@ -572,8 +572,40 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-fiche-org{font-size:15px;padding:12px 0;border-bottom:1px solid var(--mgmt-edge);overflow-wrap:anywhere}
 .mgmt-fiche-org strong{font-weight:500}
 @media(max-width:1279px){.mgmt-fiche-cols{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}}
+/* ==== [ANCRE: MGMT_LOT4_T7_ORGANISATION] — Lot 4 T7 (docs/LOT-4-LA-PEAU-DU-JEU.md
+   §3 T7) : le seul style de l'écran de l'organisation (maquette 08,
+   partielle). Jetons --mgmt-* uniquement, aucune couleur en dur ; la
+   catégorie trop mince porte le rouge (direction artistique : le rouge est
+   réservé au danger) ; les informations de décision sont à 13px et 4,5:1
+   minimum (charte L2). Réserves du lot 4 : aucun onglet Contrats/Diffuseur,
+   ni patron, ni objectifs — ce qui n'existe pas n'apparaît pas. ==== */
+.mgmt-org-eff{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:12px}
+.mgmt-org-cat{background:color-mix(in srgb,var(--mgmt-edge) 14%,transparent);padding:14px 16px;min-width:0}
+.mgmt-org-cat.thin{background:color-mix(in srgb,var(--mgmt-red) 22%,transparent)}
+.mgmt-org-nm{font-family:var(--mgmt-font-display);font-style:italic;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:17px;color:var(--mgmt-ink)}
+.mgmt-org-cat.thin .mgmt-org-nm{color:var(--mgmt-red)}
+.mgmt-org-sub{font-size:13px;line-height:1.4;color:var(--mgmt-secondary);margin-top:3px}
+.mgmt-org-cat.thin .mgmt-org-sub{color:var(--mgmt-ink)}
+.mgmt-org-sum{font-size:13px;color:var(--mgmt-secondary);margin:6px 0 0}
+/* Deux groupes de tuiles (divisions H et F d'engine.js), hommes puis
+   femmes — aucun nom de catégorie inventé. */
+.mgmt-org-group{margin-top:10px}
+.mgmt-org-hd{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:15px;color:var(--mgmt-tertiary)}
+.mgmt-org-group .mgmt-org-eff{margin-top:6px}
+.mgmt-org-money{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 24px;align-items:baseline;margin-top:10px}
+.mgmt-org-pill{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;letter-spacing:.06em;font-size:14px;text-transform:uppercase;color:var(--mgmt-secondary)}
+.mgmt-org-val{font-family:var(--mgmt-font-display);font-style:italic;font-weight:700;font-size:clamp(24px,2vw,34px);line-height:1;color:var(--mgmt-ink)}
+.mgmt-org-line{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;font-size:clamp(20px,1.6vw,26px);line-height:1.2;color:var(--mgmt-ink)}
+@media(max-width:1279px){.mgmt-org-eff{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1279px){.mgmt-wrap{height:auto;overflow:visible}.mgmt-cols{grid-template-columns:1fr}.mgmt-col{max-height:none;overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT4_T7_NAV_COURANT] — reprise lot 4 T7 : l'entrée
+   courante de la navigation se distingue visiblement des autres — or plein
+   pour l'écran courant (aria-current), fond atténué pour les autres,
+   toujours à jetons --mgmt-*. Encré (--mgmt-ink) sur fond atténué pour
+   les autres, texte sombre sur or pour la courante : au-dessus de 4,5:1
+   des deux côtés (charte L2). ==== */
+.mgmt-nav button:not(.cur){background:color-mix(in srgb,var(--mgmt-edge) 24%,transparent);color:var(--mgmt-ink)}
 </style></head>
 <body><div id="app"></div>
 <script src="data-skills.js?v=career7"></script>
@@ -674,7 +706,9 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-fiche.js?v=mgmt4t5"></script>
-<script src="mgmt-screens.js?v=mgmt4t5"></script>
+<!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
+<script src="mgmt-ecran-organisation.js?v=mgmt4t7"></script>
+<script src="mgmt-screens.js?v=mgmt4t7"></script>
 <script src="arene-etat.js?v=arene1"></script>
 <script src="arene-vue.js?v=arene1"></script>
 <script src="arene-ecran.js?v=arene1"></script>
