@@ -500,6 +500,16 @@ jeunes entrent en continu.
 **Mesure attendue** : le tableau de la T3 (médiane, p10, p90, moins de 25 ans)
 aux cycles 0, 10, 30, 60, 120, 240, et les deux cibles de la T1.
 
+**Relecture du 25/09 — acceptée** (`8d33048`, GLM). Mesure reproduite à
+l'identique par Claude (graine 20260922) : médiane 31 à l'ouverture, 31 à 33
+ensuite ; p10 24-27, p90 37-39 ; moins de 25 ans à tout cycle (33, 27, 15, 14,
+36, 17) ; neuf départs dès la première année. Le plus court palmarès des 36 ans
+et plus : 25 combats. Cibles de la T1 tenues (r_ext/r_roster 0,884 ; écarts de
+finitions ≤ 0,031). `MGMT_SAVE_VERSION` 9 → 10 sans conversion ; les anciennes
+parties gardent leur monde. **Réserve** : les cibles tiennent au niveau mondial,
+pas par catégorie — au cycle 240, trois catégories n'ont plus de moins de
+25 ans et deux ont une médiane de 35-36 ans.
+
 ### T4 — Le salaire à la victoire, et l'économie sur la durée de vie *(après T3 — condition de fusion)*
 
 - **Le salaire par combat et par victoire** (décision 1) : le cachet existant

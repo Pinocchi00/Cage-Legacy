@@ -95,6 +95,16 @@ Une tranche à la fois par fichier ; deux outils peuvent travailler en parallèl
   `mgmt-screens.js:40`). Le niveau continue d'exister et de compter ; il cesse
   d'être une étiquette.
 
+**Relecture du 25/09 — acceptée** (`881863f`, Sol). Déplacement pur vérifié
+ligne à ligne : les seules lignes qui diffèrent sont les changements d'interface
+annoncés. Deux tests réécrits sur décision citée (C7 et la palette). Vérifiée
+dans le jeu à 1280, 1440 et 1920 : aucun texte sous 4,5:1, aucun marqueur de
+travail. Écarts et réserves : la barre n'a que « Semaine » (les autres écrans
+n'existent pas encore) ; l'emplacement de la réplique de Clara a été **retiré**,
+pas laissé vide — il faudra lui redonner une place quand le texte existera
+(lot 5 §6) ; le contour de focus de la barre était masqué par l'octogone
+(corrigé à la T5) ; à 1920 `#app.mgmt` reste plafonné à 1400 px (confié à la T3).
+
 ### T2 — La semaine *(maquette 02)*
 
 L'écran d'accueil du management remplace l'actuel bureau.
