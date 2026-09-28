@@ -183,8 +183,8 @@ function mgmtNavHtml(){
 }
 function mgmtWithNav(screen){
   return function(){
-    return screen().replace('<div class="scr mgmt-wrap">',
-      '<div class="scr mgmt-wrap">'+mgmtNavHtml());
+    return screen().replace(/<div class="scr mgmt-wrap([^"]*)">/,
+      (opening)=>opening+mgmtNavHtml());
   };
 }
 
@@ -274,13 +274,13 @@ Object.assign(CL,{
     CL.mgmtFiche(m.roster[i].id);
   },
   mgmtFiche(id){
-    if(!G||!G.mgmt||!mgmtFighterById(G.mgmt,id)) return;
+    if(!G||!G.mgmt||!mgmtFicheLigne(G.mgmt,id)) return;
     MGMT_FICHE={id,retour:G.screen==='mgmt_bureau'?'mgmt_bureau':'mgmt_carte',cursor:0};
     CL.go('mgmt_fiche');
   },
   mgmtFicheRetour(){ CL.go(MGMT_FICHE.retour); },
   mgmtFicheDeplacer(dir){
-    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id), f=line&&line.f;
     if(!f) return;
     const n=mgmtFightHistory(m,f).length;
     if(n<1) return;
@@ -288,18 +288,18 @@ Object.assign(CL,{
     render();
   },
   mgmtFicheRevoirSelection(){
-    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id), f=line&&line.f;
     if(!f) return;
     const history=mgmtFightHistory(m,f).slice().reverse();
     const t=history[MGMT_FICHE.cursor];
     if(t) CL.mgmtHistoriqueRevoir(m.hist.indexOf(t));
   },
   mgmtHistoriqueRevoir(i){
-    const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
+    const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id), f=line&&line.f;
     if(!f||!Number.isSafeInteger(i)||i<0||i>=m.hist.length) return;
     const t=m.hist[i];
     if(!mgmtFightHistory(m,f).includes(t)) return;
-    const res=mgmtReplayFight(t);
+    const res=mgmtFicheRejeu(t);
     if(!res) return;
     areneEcranCharger(res,{a:t.a.name,b:t.b.name},t);
     ARENE_ECRAN.retour='mgmt_fiche'; ARENE_ECRAN.finRetour=null;

@@ -415,8 +415,10 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .log-r{flex:0 0 28px;color:var(--muted)}
 /* ==== [ANCRE: MGMT_LOT1D_FOND] — Lot 1f-1 : dégradé vertical sur toute la
    hauteur. Palette brun remplacée par les jetons prune au lot 4 T1 ;
-   périmètre bureau uniquement (#app.mgmt). ==== */
-#app.mgmt{max-width:1400px;background:linear-gradient(180deg,var(--mgmt-plum) 0%,var(--mgmt-plum-deep) 100%);
+   périmètre bureau uniquement (#app.mgmt). Lot 4 T3, réserve 3 du lot 2 :
+   le plafond 1400px est levé à 1920px — la direction artistique est un jeu
+   PC en 1920×1080 ; les cinq écrans restent lisibles à 1920. ==== */
+#app.mgmt{max-width:1920px;background:linear-gradient(180deg,var(--mgmt-plum) 0%,var(--mgmt-plum-deep) 100%);
  --bg:var(--mgmt-plum-deep);--panel2:var(--mgmt-panel);--line:var(--mgmt-edge);
  --text:var(--mgmt-ink);--muted:var(--mgmt-secondary);--faint:var(--mgmt-tertiary);
  --gold:var(--mgmt-yellow);--gold-d:var(--mgmt-yellow);--blood:var(--mgmt-red);--loss:var(--mgmt-red);
@@ -440,6 +442,9 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-nav button{font-family:var(--mgmt-font-display);font-style:italic;font-size:16px;color:var(--mgmt-plum-deep);background:var(--mgmt-yellow);padding:9px 24px;clip-path:var(--mgmt-octagon)}
 .mgmt-nav span{font-family:var(--mgmt-font-display);font-style:italic;font-size:16px;color:var(--mgmt-secondary);padding:9px 24px}
 .mgmt-nav button:hover{filter:brightness(1.1)}
+/* ==== [ANCRE: MGMT_LOT4_T5_FOCUS] — Lot 4 T5 : le clip octogonal ne
+   masque plus l'anneau de focus sorti du bouton. ==== */
+.mgmt-nav button:focus-visible{clip-path:none;outline:3px solid var(--mgmt-ink);outline-offset:2px}
 .mgmt-wrap .opp:hover{background:var(--mgmt-plum);color:var(--mgmt-ink)}
 .mgmt-aff{padding:6px 10px;margin:0 0 5px;min-height:0}
 .mgmt-fight{padding:6px 10px;margin:0 0 5px;min-height:0}
@@ -487,6 +492,86 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    (pile née vide uniquement). Texte et liseré, sans aplat ni ombre. ==== */
 .mgmt-next{display:block;width:100%;text-align:center;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:0;padding:12px;margin:9px 0;cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.08em;text-transform:uppercase}
 .mgmt-next:hover{color:var(--text);border-color:var(--faint)}
+/* ==== [ANCRE: MGMT_LOT4_T3_BOOKER] — Lot 4 T3 (docs/LOT-4-LA-PEAU-DU-JEU.md
+   §3 T3) : l'écran de composition prend la forme de la maquette 04
+   (maquettes/04-booker-un-combat.html) — les deux fiches face à face et
+   l'octogone au premier choix posé, la carte et la liste en dessous,
+   séparées par un filet. Jetons --mgmt-* uniquement, aucune couleur en dur.
+   Réserve 2 (lot 2 §4 bis) : une ligne non choisissable (suspendue, déjà en
+   carte) ne s'allume ni au survol ni au curseur clavier comme une ligne
+   choisissable. Réserve 3 : à 1920, la place en plus va à la carte autant
+   qu'à la liste (pistes minmax(0,1fr) et minmax(440px,1fr)). ==== */
+.mgmt-book-versa{flex:0 0 auto;display:grid;gap:20px;align-items:start;padding-top:12px}
+.mgmt-book-duo{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.mgmt-book-solo{grid-template-columns:minmax(0,1fr)}
+.mgmt-book-fighter{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mgmt-book-b{align-items:flex-end;text-align:right}
+.mgmt-book-nm{font-family:var(--mgmt-font-display);font-style:italic;font-weight:700;text-transform:uppercase;line-height:.94;font-size:clamp(40px,3.6vw,66px);color:var(--mgmt-ink);overflow-wrap:break-word}
+.mgmt-book-meta{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;letter-spacing:.06em;font-size:clamp(16px,1.2vw,22px);color:var(--mgmt-ink)}
+.mgmt-book-a .mgmt-book-meta{color:var(--mgmt-yellow)}
+.mgmt-book-b .mgmt-book-nm{color:var(--mgmt-red)}
+.mgmt-book-vs{position:relative;width:clamp(140px,11vw,210px);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.mgmt-book-vs svg{position:absolute;inset:0;width:100%;height:100%}
+.mgmt-oct-1{fill:none;stroke:var(--mgmt-edge);stroke-width:2}
+.mgmt-oct-2{fill:none;stroke:var(--mgmt-yellow);stroke-width:1;opacity:.55}
+.mgmt-book-vsglyph{font-family:var(--mgmt-font-display);font-style:italic;font-weight:800;font-size:clamp(56px,5vw,92px);line-height:.8;color:var(--mgmt-yellow)}
+/* La moitié basse : la carte (section) et la liste des adversaires (aside),
+   séparées par le filet de la maquette. Réserve 3 : les deux pistes sont
+   flexibles — la place en plus se partage, la liste garde 440px au plus
+   étroit. */
+.mgmt-book-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(440px,1fr);gap:56px;border-top:1px solid var(--mgmt-edge);padding-top:20px;margin-top:16px}
+.mgmt-book-pane{min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;min-width:0;overflow-wrap:break-word}
+/* Ligne de la liste (maquette 04) : nue, un filet inférieur — plus de
+   panneau par ligne. Ligne de métadonnées à 13px (charte L2). */
+.mgmt-book-list .opp{min-height:0;background:transparent;border:1px solid transparent;border-bottom:1px solid var(--mgmt-edge);padding:10px 2px;margin:0}
+.mgmt-book-list .mgmt-aff .opp-nm{font-size:22px}
+.mgmt-book-sub{font-size:13px;color:var(--mgmt-secondary);margin-top:2px}
+/* Curseur clavier : l'élément visé se voit — fond atténué et filet or sur
+   une ligne choisissable ; filet pointillé seul sur une ligne non
+   choisissable (réserve 2 : jamais l'accent or ni l'aplum du survol). */
+.mgmt-book-list .opp.mgmt-cur{background:var(--mgmt-plum);border-bottom-color:var(--mgmt-yellow)}
+.mgmt-book-list .opp.mgmt-offcur{border-bottom-style:dashed;border-bottom-color:var(--mgmt-tertiary)}
+/* Réserve 2 : le survol n'allume pas une ligne non choisissable. Posé après
+   le survol général du management (.mgmt-wrap .opp:hover) et plus
+   spécifique : les lignes choisissables gardent leur survol, les autres ne
+   s'allument plus. */
+.mgmt-book-list .opp:not(.mgmt-can):hover{background:transparent;color:inherit}
+@media(max-width:1279px){
+ .mgmt-book-duo{grid-template-columns:1fr}
+ .mgmt-book-b{align-items:flex-start;text-align:left}
+ .mgmt-book-cols{grid-template-columns:1fr;gap:24px}
+ .mgmt-book-pane{max-height:none;overflow:visible}
+}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT4_T5_FICHE_CSS] — Lot 4 T5, maquette 03 :
+   faits, trajectoires et combats, trois colonnes à 1280–1920. ==== */
+.mgmt-fiche{gap:0}
+#app.mgmt:has(.mgmt-fiche){max-width:1920px}
+.mgmt-fiche{padding-left:clamp(15px,3vw,64px);padding-right:clamp(15px,3vw,64px)}
+.mgmt-fiche-retour{align-self:flex-start;background:none;border:0;color:var(--mgmt-secondary);font:600 18px var(--mgmt-font-display);cursor:pointer;padding:8px 4px}
+.mgmt-fiche-hero{display:flex;justify-content:space-between;align-items:end;gap:30px;border-bottom:1px solid var(--mgmt-edge);padding:8px 0 22px}
+.mgmt-fiche-hero>div:first-child{min-width:0}
+.mgmt-fiche-hero h2.disp{font-size:clamp(42px,5.6vw,86px);line-height:1.08;overflow-wrap:anywhere;margin:0}
+.mgmt-fiche-hero p{font-size:16px;line-height:1.5;color:var(--mgmt-secondary);margin:12px 0 0}
+.mgmt-fiche-attrs{display:flex;gap:24px;flex:0 0 auto;text-align:right}
+.mgmt-fiche-attrs div{display:flex;flex-direction:column}
+.mgmt-fiche-attrs strong{font:italic 700 30px var(--mgmt-font-display);color:var(--mgmt-ink)}
+.mgmt-fiche-attrs div:first-child strong{color:var(--mgmt-yellow)}
+.mgmt-fiche-attrs span{font:13px var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mgmt-fiche-cols{grid-template-columns:minmax(250px,1fr) minmax(360px,1.5fr) minmax(250px,.8fr);gap:clamp(18px,3vw,44px);margin-top:22px}
+.mgmt-fiche-cols>section,.mgmt-fiche-cols>aside{min-width:0;overflow:auto;padding:0 4px}
+.mgmt-fiche h3{font:700 19px var(--mgmt-font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--mgmt-yellow);margin:0 0 14px}
+.mgmt-fiche-map{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--mgmt-secondary);font-size:14px;line-height:1.5}
+.mgmt-fiche-map svg{width:clamp(200px,16vw,290px);height:auto;flex:0 0 auto;max-width:100%}
+.mgmt-fiche-empty,.mgmt-fiche-detail{font-size:14px;color:var(--mgmt-secondary)}
+.mgmt-fiche .mgmt-meta{font-size:14px;color:var(--mgmt-secondary)}
+.mgmt-fiche-fight{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 2px;border-bottom:1px solid var(--mgmt-edge)}
+.mgmt-fiche-fight strong{font-size:17px;font-weight:500;overflow-wrap:anywhere}
+.mgmt-fiche-fight.selected{border-left:2px solid var(--mgmt-yellow);padding-left:10px}
+.mgmt-fiche-fight .mgmt-next{width:auto;white-space:nowrap;margin:0;padding:8px;font-size:14px}
+.mgmt-fiche-org{font-size:15px;padding:12px 0;border-bottom:1px solid var(--mgmt-edge);overflow-wrap:anywhere}
+.mgmt-fiche-org strong{font-weight:500}
+@media(max-width:1279px){.mgmt-fiche-cols{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}}
 @media(max-width:1279px){.mgmt-wrap{height:auto;overflow:visible}.mgmt-cols{grid-template-columns:1fr}.mgmt-col{max-height:none;overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
 </style></head>
@@ -585,11 +670,11 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
 <script src="mgmt-ecran-semaine.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-carte.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-carte.js?v=mgmt4t3"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-fiche.js?v=mgmt4t1"></script>
-<script src="mgmt-screens.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-fiche.js?v=mgmt4t5"></script>
+<script src="mgmt-screens.js?v=mgmt4t5"></script>
 <script src="arene-etat.js?v=arene1"></script>
 <script src="arene-vue.js?v=arene1"></script>
 <script src="arene-ecran.js?v=arene1"></script>

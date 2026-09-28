@@ -136,6 +136,14 @@ aucune règle de composition ne change. **Réserves 2 et 3 du lot 2** : une lign
 non choisissable ne s'allume plus au survol ; à 1920, la place supplémentaire
 va à la carte autant qu'à la liste.
 
+**Relecture du 28/09 — acceptée** (`5c8d294`, GLM). Face-à-face de la maquette
+au premier choix, carte et liste séparées par le filet ; clavier inchangé ;
+aucun test réécrit, trois ajoutés. `#app.mgmt` déplafonné à 1920 px : carte et
+liste à 917 px chacune à 1920, 597 px à 1280. **Réserves** : à 1920 la réplique
+de Leïla sur la semaine s'étale sur 1148 px (~140 caractères par ligne) — à
+régler à la T2 ; le bouton « Voir la fiche » est pleine largeur à gauche,
+compact à droite.
+
 ### T4 — Le lendemain *(maquette 06)*
 
 - **Les résultats racontés par les faits du moteur** : méthode détaillée (geste
@@ -163,6 +171,18 @@ va à la carte autant qu'à la liste.
   organisation à zéro combat (montée récente) ne s'affiche pas « × 0 ».
 - Les blocs « Comment il combat », « Sa faille » et « Son camp » **attendent le
   lot 5** (formules d'auteur et camps).
+
+**Relecture du 28/09 — acceptée après deux reprises** (`dfede0e`, `74c60c1`,
+`a022e04`, Sol). Qui il est (deux rangs pour un combattant de Split), ses
+combats avec Revoir, le parcours d'un combattant extérieur en durées lisibles
+(aucun cycle négatif). La carte « Où il combat » lit les positions de l'arène
+en trois anneaux (centre, mi-espace, bord) et place le rouge à l'angle réel
+d'enfermement ; elle porte sur les **10 derniers combats** (choix de Claude,
+non contesté) — ouverture à froid ~160 ms plafonnée, puis < 1 ms. Sur une
+partie de neuf soirées : 0 à 43 % du temps au centre selon le combattant, rouge
+pour 12 combattants sur 55. Focus clavier visible sur la barre et la fiche.
+**Écart** : aucun écran ne mène encore à la fiche d'un combattant extérieur
+(l'entrée viendra avec la T6).
 
 ### T6 — Les classements *(maquette 07, écran neuf)*
 

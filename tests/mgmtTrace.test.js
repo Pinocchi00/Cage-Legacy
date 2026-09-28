@@ -225,6 +225,135 @@ test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', ()
   win.CL.areneSocleQuitter();
 });
 
+/* ==== [ANCRE: TEST_MGMT_LOT4_T5_FICHE] — La fiche lit les deux classements,
+   les positions de l'arène et la trace extérieure sans stockage dérivé. ==== */
+test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par trace', () => {
+  const win=newGameWindow();
+  freshMgmt(win,20260925);
+  assert.ok(joueSoiree(win));
+  const id=win.eval('G.mgmt.hist[0].a.id');
+  win.eval(`(function(){ window.replays=0; const orig=mgmtReplayFight;
+    mgmtReplayFight=function(t){ window.replays++; return orig(t); };
+    G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(id)});
+  })()`);
+  const html=win.document.getElementById('app').innerHTML;
+  assert.match(html,/Où il combat/);
+  assert.match(html,/clip-path="url\(#mgmt-fiche-oct\)"/);
+  assert.match(html,/Taille/);
+  assert.match(html,/Allonge/);
+  assert.match(html,/garde (orthodoxe|gaucher)/);
+  assert.match(html,/Chez Split :/);
+  assert.match(html,/Mondial :/);
+  const ranks=win.eval(`(function(){const m=G.mgmt,f=mgmtFighterById(m,${JSON.stringify(id)});
+    return [mgmtFicheSituation(m,f,'organization'),mgmtFicheSituation(m,f,'world')];})()`);
+  assert.ok(html.includes(`Chez Split : ${ranks[0]} · Mondial : ${ranks[1]}`));
+  assert.ok(!html.includes('Comment il combat')&&!html.includes('Son camp')&&!html.includes('Sa faille'));
+  const first=win.replays;
+  win.eval('render(); render(); CL.mgmtFicheDeplacer(1)');
+  assert.equal(win.replays,first,'un rendu et un déplacement clavier ne rejouent pas les combats');
+  assert.ok(first>0);
+});
+
+test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappement', () => {
+  const win=newGameWindow();
+  freshMgmt(win,1001);
+  win.eval('mgmtExteriorEnsure(G.mgmt)');
+  const line=win.G.mgmt.exterieur[0];
+  const keys=Object.keys(line).sort();
+  win.eval(`G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(line.id)})`);
+  assert.equal(win.G.screen,'mgmt_fiche');
+  const html=win.document.getElementById('app').innerHTML;
+  assert.match(html,/Sa trajectoire/);
+  assert.match(html,/Amateur/);
+  assert.match(html,/Professionnel/);
+  assert.ok(!html.includes('× 0')&&!html.includes('· 0 combat'));
+  assert.deepEqual(Object.keys(line).sort(),keys,'lecture sans champ stocké');
+  win.eval(`(function(){ const orig=mgmtExteriorTrace;
+    mgmtExteriorTrace=function(line,cycle){ const t=orig(line,cycle);
+      t.orgs[0].from=-24; t.orgs[0].to=-12; return t; };
+    render();
+  })()`);
+  const orgRows=Array.from(win.document.querySelectorAll('.mgmt-fiche-org')).filter(o=>o.querySelector('strong'));
+  assert.ok(orgRows.some(o=>o.textContent.includes('Avant l’ouverture')));
+  assert.ok(orgRows.every(o=>!/-\d+/.test(o.textContent)),'aucun cycle négatif sur la fiche');
+  win.eval(`(function(){
+    const orig=mgmtExteriorTrace;
+    mgmtExteriorTrace=function(line,cycle){ const t=orig(line,cycle);
+      t.name='<img src=x onerror=alert(1)>'; t.orgs[0].name='<svg onload=alert(1)>';
+      return t; };
+    render();
+  })()`);
+  const doc=win.document.getElementById('app');
+  assert.equal(doc.querySelector('img,svg[onload]'),null);
+  assert.ok(doc.innerHTML.includes('&lt;img')&&doc.innerHTML.includes('&lt;svg'));
+});
+
+test('MGMT lot 4 T5 — dix derniers combats pour les zones, historique intact', () => {
+  const win=newGameWindow();
+  freshMgmt(win,20260925);
+  assert.ok(joueSoiree(win));
+  const id=win.eval('G.mgmt.hist[0].a.id');
+  const s=win.eval(`(function(){
+    const m=G.mgmt, base=m.hist[0];
+    m.hist=Array.from({length:30},(_,i)=>({...base,c:i+1}));
+    let builds=0; const orig=areneConstruire;
+    areneConstruire=function(...args){builds++;return orig(...args);};
+    const f=mgmtFighterById(m,${JSON.stringify(id)});
+    const bins=mgmtFicheZones(m,f), html=mgmtHistoriqueHtml(m,f);
+    return {builds,count:bins.rings.reduce((sum,n)=>sum+n,0),revoir:html.split('>Revoir</button>').length-1};
+  })()`);
+  assert.equal(s.builds,10);
+  assert.ok(s.count>0);
+  assert.equal(s.revoir,30);
+});
+
+test('MGMT lot 4 T5 — une trajectoire et son miroir donnent des anneaux identiques et un rouge miroir', () => {
+  const win=newGameWindow();
+  const result=win.eval(`(function(){
+    const left=mgmtFicheZonesVides(),right=mgmtFicheZonesVides();
+    const points=[{own:{x:0,y:0},opp:{x:2,y:0},phase:'debout'},
+      {own:{x:-2,y:0.5},opp:{x:0,y:0},phase:'debout'},
+      ...Array.from({length:8},()=>({own:{x:-4,y:0.5},opp:{x:-2,y:0.5},phase:'debout'}))];
+    for(const p of points){
+      mgmtFicheZoneAjouter(left,p.own,p.opp,p.phase,null);
+      mgmtFicheZoneAjouter(right,{x:-p.own.x,y:p.own.y},{x:-p.opp.x,y:p.opp.y},p.phase,null);
+    }
+    const l=mgmtFicheOctogoneZones(left),r=mgmtFicheOctogoneZones(right);
+    const re=/class="mgmt-fiche-pin" cx="([0-9.]+)" cy="([0-9.]+)"/;
+    const tied=mgmtFicheZonesVides();
+    for(const x of [-4,4]) for(let j=0;j<4;j++)
+      mgmtFicheZoneAjouter(tied,{x,y:0.5},{x:x/2,y:0.5},'debout',null);
+    return {left:left.rings,right:right.rings,redL:re.exec(l)?.slice(1),redR:re.exec(r)?.slice(1),
+      ringsL:l.split('var(--mgmt-yellow)').length-1,
+      tied:re.exec(mgmtFicheOctogoneZones(tied))?.slice(1)};
+  })()`);
+  assert.deepEqual(Array.from(result.left),Array.from(result.right));
+  assert.equal(result.ringsL,3);
+  assert.ok(result.redL&&result.redR);
+  assert.ok(Math.abs(+result.redL[0]+ +result.redR[0]-200)<0.2);
+  assert.equal(result.redL[1],result.redR[1]);
+  assert.equal(result.tied[0],'100.0','une égalité angulaire ne privilégie ni gauche ni droite');
+});
+
+test('MGMT lot 4 T5 — une présence uniforme n’avantage aucun angle du bord', () => {
+  const win=newGameWindow();
+  const result=win.eval(`(function(){
+    const z=mgmtFicheZonesVides();
+    for(let k=0;k<8;k++) for(let j=0;j<4;j++){
+      const angle=(k+0.5)*Math.PI/4;
+      mgmtFicheZoneAjouter(z,{x:3.6*Math.cos(angle),y:3.6*Math.sin(angle)},
+        {x:0,y:0},'sol',null);
+    }
+    const html=mgmtFicheOctogoneZones(z);
+    return {rings:z.rings,bord:z.bord,red:html.includes('mgmt-fiche-pin'),
+      yellow:(html.match(/<circle cx="100" cy="100"/g)||[]).length};
+  })()`);
+  assert.deepEqual(Array.from(result.rings),[0,0,32]);
+  assert.deepEqual(Array.from(result.bord),Array(8).fill(4));
+  assert.equal(result.red,false);
+  assert.equal(result.yellow,3,'seuls des anneaux concentriques portent la présence');
+});
+
 /* ==== [ANCRE: TEST_MGMT_T4_REPRISE_RESUME] — Lot 3 T4, reprise : le résumé
    de chaque vrai combat est borné à cinq lignes et le moteur reste intact. ==== */
 test('MGMT T4 reprise — soirée réelle : zéro à cinq moments par combat, sans marqueurs', () => {
