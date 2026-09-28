@@ -63,8 +63,8 @@ function mgmtExteriorSeedFor(id){
 }
 
 /** Flux mulberry32 propre à une ligne, sauté par domaine ('cree', 'nom',
- *  'amateur', 'carriere', 'arrivees'...) : chaque lecture repart de la
- *  graine, l'ordre des lectures ne change jamais rien. Pur.
+ *  'amateur', 'carriere', 'retraite', 'fondateur'...) : chaque lecture repart
+ *  de la graine, l'ordre des lectures ne change jamais rien. Pur.
  *  @returns {()=>number} */
 function mgmtExteriorStream(salt,seed){
   return mulberry32(duelFnv1a32(salt+'|'+(seed>>>0)));
@@ -73,8 +73,14 @@ function mgmtExteriorStream(salt,seed){
 /** Crée une ligne extérieure : SON IDENTITÉ, rien d'autre. L'identifiant
  *  vient du compteur de la partie (mgmtNextId), la graine du hachage de
  *  l'identifiant, le pays d'un flux propre au combattant, et la catégorie
- *  demandée par le quota — aucun tirage de la RNG du jeu. born : le cycle où il entre dans le
- *  monde. @returns {object} */
+ *  demandée par le quota — aucun tirage de la RNG du jeu.
+ *  Lot 2B T3 bis : à l'ouverture (born passé à 0), la ligne est un
+ *  FONDATEUR — le monde est une ligue déjà installée, il reçoit sa date
+ *  d'entrée dans le passé, dérivée de son identité sur le flux séparé
+ *  'ext-fondateur' (les flux déjà consommés ne bougent pas d'un tirage) :
+ *  born = −round(u × MGMT_EXT_FONDATEUR_SPREAD), et sa carrière dérivée
+ *  compte le passé (mgmtExteriorCareer). Après l'ouverture, l'entrée reste
+ *  le cycle où la catégorie l'a réclamé. @returns {object} */
 function mgmtExteriorCreate(m,born,divId){
   if(!m||typeof m!=='object') return null;
   if(!divById(divId)) return null;
@@ -83,7 +89,11 @@ function mgmtExteriorCreate(m,born,divId){
   const seed=mgmtExteriorSeedFor(id);
   const r=mgmtExteriorStream('ext-cree',seed);
   const ck=COUNTRY_KEYS[Math.floor(r()*COUNTRY_KEYS.length)];
-  return {id,seed,div:divId,ck,born};
+  const fondateur=Number.isSafeInteger(born)&&born===0;
+  const entree=fondateur
+    ?-Math.round(mgmtExteriorStream('ext-fondateur',seed)()*MGMT_EXT_FONDATEUR_SPREAD)
+    :born;
+  return {id,seed,div:divId,ck,born:entree};
 }
 
 /** Nombre de combattants vivants du monde dans une catégorie : Split et
@@ -112,21 +122,24 @@ function mgmtWorldLivingCount(m,divId){
 /** Maintient le quota mondial par catégorie. L'extérieur complète ce que
  *  les vivants de Split ne fournissent pas, sans jamais retirer une ligne
  *  (QO-9 : le passé du monde ne disparaît pas — un partant cesse de
- *  compter, sa ligne reste). À l'ouverture born vaut 0 ; après une
+ *  compter, sa ligne reste). À l'ouverture, les fondateurs portent leur
+ *  entrée dérivée dans le passé (T3 bis, mgmtExteriorCreate) ; après une
  *  retraite, les remplaçants portent le cycle où la catégorie a été
- *  complétée. Le compte est pris une fois par catégorie : les lignes
- *  ajoutées sont vivantes par construction, inutile de re-dériver le
- *  monde à chaque ajout. Ne consomme aucun tirage de la RNG du jeu.
+ *  complétée. Le compte des vivants avance ligne par ligne : un fondateur
+ *  peut être né avec une carrière dérivée déjà close avant l'ouverture
+ *  (T3 bis) — il ne compte pas, la boucle continue jusqu'au quota.
+ *  Ne consomme aucun tirage de la RNG du jeu.
  *  @returns {Array} le vivier extérieur. */
 function mgmtExteriorEnsure(m){
   if(!m||typeof m!=='object') return [];
   if(!Array.isArray(m.exterieur)) m.exterieur=[];
-  const born=Number.isSafeInteger(m.cycle)&&m.cycle>=0?m.cycle:0;
+  const cycle=Number.isSafeInteger(m.cycle)&&m.cycle>=0?m.cycle:0;
   for(const div of allDivisions()){
     let vivants=mgmtWorldLivingCount(m,div.id);
     while(vivants<MGMT_EXT_LIVE_PER_DIVISION){
-      m.exterieur.push(mgmtExteriorCreate(m,born,div.id));
-      vivants++;
+      const ligne=mgmtExteriorCreate(m,cycle,div.id);
+      m.exterieur.push(ligne);
+      if(!mgmtExteriorRetired(ligne,cycle)) vivants++;
     }
   }
   return m.exterieur;
@@ -198,6 +211,9 @@ function mgmtExteriorAmateur(seed){
  *  de sa propre trace, dans un flux séparé ('ext-retraite') : les carrières
  *  déjà dérivées ne bougent pas d'un tirage. Pur — consomme uniquement le
  *  flux donné (pour mgmtExteriorCareer) ou des flux propres à la graine.
+ *  Lot 2B T3 bis : born peut être négatif (fondateur, entrée antérieure à
+ *  l'ouverture) — careerStart et retireCycle se décalent d'autant, la
+ *  chronologie se dérive telle quelle.
  *  @returns {{ageStart,ageBorn,careerStart,retAge,retireCycle}} */
 function mgmtExteriorTimeline(r,seed,born){
   const ageStart=MGMT_EXT_AGE_START_MIN+Math.floor(r()*MGMT_EXT_AGE_START_SPREAD);
@@ -236,6 +252,9 @@ function mgmtExteriorRetired(line,cycle){
  *  MGMT_EXT_ORGS). T3 : la carrière s'arrête à la retraite — la même loi
  *  que le roster (mgmtRetireAgeFor, 39-42 ans) ; le bilan se fige, il ne
  *  régresse jamais, et l'âge courant continue d'avancer (calendrier).
+ *  Lot 2B T3 bis : born peut être négatif (fondateur) — la carrière se
+ *  dérive du même cycle de début jusqu'au cycle lu, et un palmarès lu
+ *  à l'ouverture compte déjà les années passées hors de la partie.
  *  Pur : un seul flux mulberry32 semé par la graine de la ligne, jamais la
  *  RNG du jeu.
  *  @returns {{age,W,L,fin:{ko,sub,dec},fights,streak,orgIdx,orgs:Array,retAge,retireCycle}} */
