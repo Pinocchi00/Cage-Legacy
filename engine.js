@@ -236,21 +236,35 @@ const policyOf=f=>STYLE_POLICY[f&&f.style]||STYLE_POLICY.mma;
 /* ==== [FIN ANCRE] ==== */
 
 /* ------------------------------ NOMS -------------------------------------- */
+/* ==== [ANCRE: NOMS_ACCENTS_2809] — décision d'Anthony du 28/09/2026,
+   accents perdus rendus, liste exhaustive vérifiée sur les 14 pays et les
+   deux pools FIRST_* :
+   - Brésil : Araujo→Araújo, Guimaraes→Guimarães, Magalhaes→Magalhães ;
+   - Mexique : Rodriguez→Rodríguez, Sanchez→Sánchez, Gomez→Gómez,
+     Velasquez→Velásquez, Chavez→Chávez, Marquez→Márquez,
+     Castaneda→Castañeda ;
+   - trouvé par la vérification : Saldivar→Saldívar (même cas — nom espagnol
+     accent perdu — corrigé avec les sept ci-dessus).
+   Rien d'autre : Souza, Barboza, Gomes (portugais), Grasso, Aldana, Cejudo,
+   Cruz, Morales, Reyes, Moreno, Barrera (espagnols sans accent), les listes
+   transcrites du japonais, du russe et du daghestanais, et les prénoms
+   FIRST_M/FIRST_F (pools multi-pays, graphie non accentuée justifiée) sont
+   corrects. ==== */
 const COUNTRIES={
  FR:{name:'France',flag:'🇫🇷',last:['Boulanger','Charpentier','Meunier','Tavernier','Marchand','Vasseur','Tisserand','Pelletier','Maréchal','Mercier','Legrand','Lebon','Leroux','Petitjean','Belhomme','Cassegrain','Beauvisage','Courtois','Boileau','Sanson','De La Tour','Beaulieu','Rochefort','Montmirail','De Saint-Gilles','Castel','Dupré','Le Gall','Quéméneur','Guivarc\'h','Bazin','Papon','Da Silva','Belkacem','Diallo','Camara','Fernandez']},
- BR:{name:'Brésil',flag:'🇧🇷',last:['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha','Carvalho','Gomes','Martins','Araujo','Ribeiro','Melo','Cardoso','Dias','Barbosa','Nascimento','Dos Santos','Guimaraes','Barboza','Teixeira','Magalhaes','Nogueira','Faria','Castilho','Moreira','Fontes','Ramos','Peixoto']},
+ BR:{name:'Brésil',flag:'🇧🇷',last:['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha','Carvalho','Gomes','Martins','Araújo','Ribeiro','Melo','Cardoso','Dias','Barbosa','Nascimento','Dos Santos','Guimarães','Barboza','Teixeira','Magalhães','Nogueira','Faria','Castilho','Moreira','Fontes','Ramos','Peixoto']},
  US:{name:'États-Unis',flag:'🇺🇸',last:['Miller','Davis','Wilson','Carter','Reed','Smith','Jones','Taylor','Jackson','Thompson','Henderson','Holloway','Covington','Gaethje','Strickland','Ferguson','Dillashaw','Edgar','Swanson','Woodley','Sterling','Faber','Griffin','Lawler','Guida','Maynard','Koscheck','Fitch','Lamas','Pettis']},
  DAG:{name:'Daghestan',flag:'🏔️',last:['Nurmagomedov','Aliev','Magomedov','Gadzhiev','Ramazanov','Shamilov','Umarov','Makhachev','Gasanov','Kurbanov','Omarov','Isaev','Ankalaev','Evloev','Chimaev','Tsarnaev','Tukhugov','Salikhov','Rasulov','Gamzatov','Dzhabrailov','Idrisov','Askerov','Muradov','Batirov']},
  JP:{name:'Japon',flag:'🇯🇵',last:['Sato','Suzuki','Takahashi','Tanaka','Watanabe','Kobayashi','Nakamura','Ito','Yamamoto','Saito','Yoshida','Yamada','Sasaki','Yamaguchi','Sakuraba','Gomi','Horiguchi','Aoki','Miura','Okami','Uno','Kawajiri','Ishii','Asakura','Kanehara','Funaki','Kondo']},
  NG:{name:'Nigéria',flag:'🇳🇬',last:['Adeyemi','Okafor','Balogun','Eze','Okoye','Abubakar','Nwosu','Ibrahim','Musa','Bello','Olawale','Abdullahi','Chukwu','Onyeka','Adesanya','Usman','Onwuka','Nnamdi','Oladipo','Chimezie','Ekwueme','Babangida','Yobo','Kanu','Okocha']},
  GB:{name:'Royaume-Uni',flag:'🇬🇧',last:['Wright','Hughes','Ward','Bennett','Davies','Evans','Thomas','Roberts','Bisping','Hardy','Till','Aspinall','Edwards','Pimblett','Allen','Shore','McCann','Wood','Gallagher','Daley','Pearson','Pickett','Craig','Page','Hatton']},
  RU:{name:'Russie',flag:'🇷🇺',last:['Volkov','Petrov','Sokolov','Ivanov','Popov','Kozlov','Orlov','Smirnov','Kuznetsov','Lebedev','Novikov','Morozov','Makarov','Fedorov','Emelianenko','Kharitonov','Pavlovich','Yan','Shlemenko','Vasilevsky','Sarnavskiy','Tokov','Kopylov','Nemkov','Moldavsky']},
- MX:{name:'Mexique',flag:'🇲🇽',last:['Hernández','García','Martínez','López','Ramírez','Torres','Flores','Pérez','Rodriguez','Sanchez','Cruz','Gomez','Morales','Reyes','Moreno','Grasso','Aldana','Velasquez','Cejudo','Chavez','Canelo','Barrera','Marquez','Saldivar','Castaneda']},
+ MX:{name:'Mexique',flag:'🇲🇽',last:['Hernández','García','Martínez','López','Ramírez','Torres','Flores','Pérez','Rodríguez','Sánchez','Cruz','Gómez','Morales','Reyes','Moreno','Grasso','Aldana','Velásquez','Cejudo','Chávez','Canelo','Barrera','Márquez','Saldívar','Castañeda']},
  IE:{name:'Irlande',flag:'🇮🇪',last:['Murphy','Kelly','O\'Brien','Byrne','Ryan','Walsh','McCarthy','O\'Sullivan','O\'Connor','Doyle','Gallagher','Kennedy','Lynch','Murray','McGregor','Kavanagh','Ward','Fields','Pendred','Holohan','Queally','Hughes','Dunphy','Carroll','Hoolahan']},
  TH:{name:'Thaïlande',flag:'🇹🇭',last:['Sittichai','Petchyindee','Kiatmoo','Sor','Rungravee','Saenchai','Banchamek','Srisaket','Tawanchai','Pramuk','Khamsing','Rodtang','Superlek','Nong-O','Capitan','Stamp','Petchmorakot','Sangmanee','Panpayak','Kulabdam','Muangthai']},
- KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon','Dong-hyun','Chan-sung','Doo-ho','Da-un','Si-woo','Myung-ho','Sung-bin','Jin-soo','Kyung-ho']},
+ KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon'],first:['Dong-hyun','Chan-sung','Doo-ho','Da-un','Si-woo','Myung-ho','Sung-bin','Jin-soo','Kyung-ho']},
  CM:{name:'Cameroun',flag:'🇨🇲',last:['Fotso','Biya','Kamga','Takam','Ndi','Abate','Tchakoute','Ndong','Nkemdirim','Milla','Song','Nkono','Emana','Bassong','Matip','Choupo','Anguissa','Toko','Aboubakar','Moukandjo','Kalla','Wome','Ndiefi','Tchato','Oyongo']},
- GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze','Topuria','Guram','Amiran','Ilia','Roman','Merab','Giga','Lasha','Shota','Revaz','Zurab']},
+ GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze','Topuria'],first:['Guram','Amiran','Ilia','Roman','Merab','Giga','Lasha','Shota','Revaz','Zurab']},
 };
 const COUNTRY_KEYS=Object.keys(COUNTRIES);
 /* ==== [ANCRE: COUNTRY_MMA_PREFIX] — 1re lettre du nom FR, 2 lettres si collision
@@ -259,7 +273,23 @@ const COUNTRY_MMA_PREFIX={FR:'F',BR:'B',US:'E',DAG:'D',JP:'J',NG:'N',GB:'RO',RU:
 /* ==== [FIN ANCRE] ==== */
 const FIRST_M=['Alex','Marcus','Diego','Ivan','Kenji','Samuel','Leon','Rashid','Tariq','Bruno','Kai','Omar','Noah','Yuki','Malik','Hugo','Sean','Nikolai','Andre','Felix','Jamal','Ravi','Enzo','Kofi','Dante'];
 const FIRST_F=['Amara','Lena','Sofia','Nadia','Yuki','Maya','Zara','Ana','Ines','Kira','Fatima','Nina','Rosa','Aiko','Elena','Sara','Leïla','Tara','Bianca','Hana'];
-function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?FIRST_F:FIRST_M); const last=pick(c.last); return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
+/* ==== [ANCRE: NOMS_PRENOMS_PAYS_2809] — décision d'Anthony du 28/09/2026 :
+   les prénoms coréens et géorgiens étaient rangés dans `last` — un homme
+   coréen pouvait s'appeler « Alex Dong-hyun » (prénom générique + prénom
+   coréen en nom de famille). Ils sortent de `last` (Corée 23→14 entrées,
+   Géorgie 21→11) et deviennent la liste « first » du pays, à usage masculin
+   uniquement (ce sont des prénoms d'hommes ; une combattante continue de
+   tirer FIRST_F). makeName lit c.first quand elle existe, sinon FIRST_M/
+   FIRST_F — un tirage de prénom et un tirage de nom de famille, exactement
+   comme avant : le NOMBRE de tirages RNG ne bouge pas, seules les suites
+   tirées pour Corée/Géorgie changent. Partie déjà commencée : le nom est
+   STOCKÉ sur le combattant (roster Split, carrière, Panthéon) — rien ne
+   change pour ce qui est écrit ; le monde extérieur du management (nom
+   DÉRIVÉ à la lecture, mgmtExteriorName) repasse par makeName à chaque
+   lecture : une ligne Corée/Géorgie peut donc porter un autre nom au
+   prochain affichage, les autres pays rendent la même suite qu'avant. ==== */
+function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?FIRST_F:(c.first||FIRST_M)); const last=pick(c.last); return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
+/* ==== [FIN ANCRE] ==== */
 
 /* ------------------------- CRÉATION D'UN COMBATTANT ----------------------- */
 // ==== [ANCRE: CORRECTIF_ID_UNIQUE] — bug majeur trouvé : l'ancien compteur
