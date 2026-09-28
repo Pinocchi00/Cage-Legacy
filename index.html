@@ -653,7 +653,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="engine-combat-striking.js?v=career7"></script>
 <script src="engine-combat-grappling.js?v=career7"></script>
 <script src="engine-combat-officials.js?v=career7"></script>
-<script src="engine-combat.js?v=career7"></script>
+<script src="engine-combat.js?v=r2809"></script>
 <script src="engine-combat-outcomes.js?v=career7"></script>
 <!-- ==== [ANCRE: ENGINE_PROGRESSION_SPLIT] — chantier 4 (refactorisation
      progressive du moteur) : engine-progression.js extrait d'engine.js à
@@ -679,22 +679,22 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      et toujours avant state.js/ui-*.js qui appellent ces fonctions. ==== -->
 <script src="engine-events.js?v=career7"></script>
 <script src="state/state-core.js?v=career7"></script>
-<script src="state/state-analytics.js?v=career7"></script>
-<script src="state/state-save.js?v=career7"></script>
-<script src="state/state-migration.js?v=career7"></script>
-<script src="state/state-validation.js?v=career7"></script>
-<script src="state/state-hof.js?v=career7"></script>
+<script src="state/state-analytics.js?v=r2809"></script>
+<script src="state/state-save.js?v=r2809"></script>
+<script src="state/state-migration.js?v=r2809"></script>
+<script src="state/state-validation.js?v=r2809"></script>
+<script src="state/state-hof.js?v=r2809"></script>
 <!-- ui.js a été découpé en 8 fichiers plus petits (refactor du __/2026) pour
      rester lisible et maintenable — l'ORDRE de chargement ci-dessous est
      important et ne doit jamais être changé (voir le commentaire d'en-tête
      de chaque fichier ui-0X-*.js pour le détail). -->
 <script src="ui-01-roster-matchmaking.js?v=career7"></script>
-<script src="ui-02-fight-prep-events.js?v=career7"></script>
+<script src="ui-02-fight-prep-events.js?v=r2809"></script>
 <script src="ui-03-contracts-arcade-data.js?v=career7"></script>
 <script src="ui-05-fight-resolution.js?v=career7"></script>
 <script src="ui-06-career-screens.js?v=noms1"></script>
-<script src="ui-07-contracts-legacy-screens.js?v=career7"></script>
-<script src="ui-08-controller-arena.js?v=career7"></script>
+<script src="ui-07-contracts-legacy-screens.js?v=r2809"></script>
+<script src="ui-08-controller-arena.js?v=r2809"></script>
 <!-- ui-09-arena.js : second découpage, ultérieur au split en 8 fichiers ci-
      dessus (F-07, hygiène technique) — isole le moteur de rendu Canvas 2D de
      l'arène, extrait de ui-08. Chargé APRÈS ui-08 : plusieurs écrans qui le
@@ -707,7 +707,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      branchement CL) dépend de lui et de CL/SCREENS (posés par ui-08), donc
      chargé juste après, toujours avant main.js. ==== -->
 <script src="duel-codec.js?v=career7"></script>
-<script src="ui-10-duel.js?v=career7"></script>
+<script src="ui-10-duel.js?v=r2809"></script>
 <!-- ==== [ANCRE: MGMT_LOT1E_CLAVIER_SCRIPTS] — Lot 1e-7 : ui-11-keys.js porte
      le dispatcher clavier global (registre par écran, écouteur unique) :
      aucune dépendance au chargement, mais chargé avant les écrans qui s'y
@@ -719,10 +719,10 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      et étendus via Object.assign). Toujours avant main.js. ==== -->
 <script src="mgmt-data.js?v=mgmt4t2r1"></script>
 <script src="mgmt-bureau.js?v=mgmt4t2r1"></script>
-<script src="mgmt-carte.js?v=mgmt2g"></script>
-<script src="mgmt-corps.js?v=mgmt2g"></script>
-<script src="mgmt-argent.js?v=mgmt2g"></script>
-<script src="mgmt-monde.js?v=mgmt2g"></script>
+<script src="mgmt-carte.js?v=r2809"></script>
+<script src="mgmt-corps.js?v=r2809"></script>
+<script src="mgmt-argent.js?v=r2809"></script>
+<script src="mgmt-monde.js?v=r2809"></script>
 <script src="mgmt-save.js?v=mgmt4t2r1"></script>
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
@@ -735,8 +735,8 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=fem1"></script>
 <script src="mgmt-screens.js?v=fem1"></script>
-<script src="arene-etat.js?v=arene1"></script>
-<script src="arene-vue.js?v=arene1"></script>
-<script src="arene-ecran.js?v=arene1"></script>
-<script src="main.js?v=career7"></script>
+<script src="arene-etat.js?v=r2809"></script>
+<script src="arene-vue.js?v=r2809"></script>
+<script src="arene-ecran.js?v=r2809"></script>
+<script src="main.js?v=r2809"></script>
 </body></html>
