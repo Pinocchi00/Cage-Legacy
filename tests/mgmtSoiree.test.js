@@ -424,7 +424,8 @@ test('MGMT corps — aucune valeur de traumatisme dans le DOM des écrans bureau
   enterMgmt(win,211);
   win.eval(`G.mgmt.roster.forEach(o=>{o.trauma=${TRAUMA_PLANTÉ};}); render();`);
   let html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('Le bureau'),'l\'écran du bureau est rendu');
+  /* Lot 4 T2 : la semaine remplace le bureau, le traumatisme reste caché. */
+  assert.ok(html.includes('La semaine'),'l\'écran de la semaine est rendu');
   assertSansTrauma(html,'bureau');
   win.eval(`(function(){
     const m=G.mgmt;

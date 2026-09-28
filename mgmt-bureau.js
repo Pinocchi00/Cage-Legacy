@@ -394,12 +394,11 @@ function mgmtPromote(m,f){
   return f;
 }
 
-/** Mémorise un fait, les plus récents d'abord conservés (addendum §1). */
+/** QO-9 : chaque fait demeure dans la partie, même après plusieurs saisons. */
 function mgmtAddFact(m,fact){
   if(!m||!fact) return;
   if(!Array.isArray(m.facts)) m.facts=[];
   m.facts.push(fact);
-  while(m.facts.length>MGMT_FACTS_MAX) m.facts.shift();
 }
 
 /**

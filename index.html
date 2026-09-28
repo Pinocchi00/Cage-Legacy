@@ -492,6 +492,32 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    (pile née vide uniquement). Texte et liseré, sans aplat ni ombre. ==== */
 .mgmt-next{display:block;width:100%;text-align:center;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:0;padding:12px;margin:9px 0;cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.08em;text-transform:uppercase}
 .mgmt-next:hover{color:var(--text);border-color:var(--faint)}
+/* ==== [ANCRE: MGMT_LOT4_T2_SEMAINE_CSS] — Lot 4 T2 : maquette 02,
+   carte d'abord ; voix et monde sur des longueurs de ligne lisibles. ==== */
+.mgmt-week{padding:20px clamp(16px,3vw,64px) 28px}
+.mgmt-week-cols{grid-template-columns:minmax(300px,1.15fr) minmax(330px,1.4fr) minmax(290px,.9fr);gap:clamp(20px,2.6vw,48px);margin-top:20px}
+.mgmt-week-pane{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overflow-wrap:anywhere;padding:0 4px}
+.mgmt-week h3{font:italic 700 21px var(--mgmt-font-display);color:var(--mgmt-yellow);text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px}
+.mgmt-week-card>p,.mgmt-week-instruction{font-size:15px;line-height:1.5;color:var(--mgmt-secondary);margin:0 0 16px}
+.mgmt-week-fight{padding:12px 16px;background:var(--mgmt-panel);margin:0 0 8px;border:1px solid var(--mgmt-edge)}
+.mgmt-week-slot,.mgmt-week-meta{font-size:13px;line-height:1.5;color:var(--mgmt-secondary)}
+.mgmt-week-names{font:italic 700 clamp(21px,1.7vw,29px)/1.18 var(--mgmt-font-display);margin:5px 0;overflow-wrap:anywhere}
+.mgmt-week-names span{font:400 14px var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mgmt-week-free,.mgmt-week-book{display:block;width:100%;font:700 17px var(--mgmt-font-display);text-align:left;cursor:pointer;padding:13px 16px;margin:8px 0;color:var(--mgmt-ink);background:transparent;border:1px dashed var(--mgmt-secondary)}
+.mgmt-week-book{background:var(--mgmt-yellow);color:var(--mgmt-plum-deep);border:1px solid var(--mgmt-yellow);margin-top:14px;text-align:center;clip-path:var(--mgmt-octagon)}
+.mgmt-week-free:hover,.mgmt-week-free:focus-visible{border-color:var(--mgmt-yellow)}
+.mgmt-week-book:hover{filter:brightness(1.1)}
+.mgmt-week-talk,.mgmt-week-dossier,.mgmt-week-memo{border-top:1px solid var(--mgmt-edge);margin-top:22px;padding-top:18px}
+.mgmt-week .mgmt-say,.mgmt-week .mgmt-reps,.mgmt-week .mgmt-rep{max-width:65ch}
+.mgmt-week-news,.mgmt-week-fact{padding:10px 0;border-bottom:1px solid var(--mgmt-edge);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.mgmt-week-news button{display:inline;background:none;color:var(--mgmt-yellow);border:0;cursor:pointer;font:700 14px var(--mgmt-font-display);text-decoration:underline}
+.mgmt-week-memory{margin:10px 0;font-size:14px;color:var(--mgmt-ink)}
+.mgmt-week-memory summary{cursor:pointer;color:var(--mgmt-yellow);padding:7px 0}
+.mgmt-week-memory summary:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:2px}
+.mgmt-week-fact{font-size:13px;color:var(--mgmt-secondary)}
+.mgmt-week .mgmt-meta,.mgmt-week .opp-mid{font-size:13px;color:var(--mgmt-secondary)}
+@media(max-width:1279px){.mgmt-week-cols{grid-template-columns:1fr}.mgmt-week-pane{overflow:visible}}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MGMT_LOT4_T3_BOOKER] — Lot 4 T3 (docs/LOT-4-LA-PEAU-DU-JEU.md
    §3 T3) : l'écran de composition prend la forme de la maquette 04
    (maquettes/04-booker-un-combat.html) — les deux fiches face à face et
@@ -691,17 +717,17 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      sans dépendance), logique du bureau (runtime : engine.js, ui-01 pour
      makeName/correlatedRecord, state), écrans (SCREENS/CL posés par ui-08
      et étendus via Object.assign). Toujours avant main.js. ==== -->
-<script src="mgmt-data.js?v=mgmt2c"></script>
-<script src="mgmt-bureau.js?v=mgmt2g"></script>
+<script src="mgmt-data.js?v=mgmt4t2r1"></script>
+<script src="mgmt-bureau.js?v=mgmt4t2r1"></script>
 <script src="mgmt-carte.js?v=mgmt2g"></script>
 <script src="mgmt-corps.js?v=mgmt2g"></script>
 <script src="mgmt-argent.js?v=mgmt2g"></script>
 <script src="mgmt-monde.js?v=mgmt2g"></script>
-<script src="mgmt-save.js?v=mgmt2g"></script>
+<script src="mgmt-save.js?v=mgmt4t2r1"></script>
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-semaine.js?v=mgmt4t2r1"></script>
 <script src="mgmt-ecran-carte.js?v=fem1"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>

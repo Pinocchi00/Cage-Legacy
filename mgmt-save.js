@@ -241,6 +241,8 @@ function validateMgmt(raw){
   if(!Array.isArray(raw.hist)) return false;
   for(const x of raw.hist){ if(!mgmtValidFightTrace(x)) return false; }
   for(const a of raw.pile){ if(!mgmtValidAffair(a)) return false; }
+  /* QO-9 : aucune limite de longueur ; une sauvegarde ancienne ou une
+      mémoire de plusieurs saisons franchit la même porte sans perte. */
   for(const f of raw.facts){ if(!f||typeof f!=='object') return false; }
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
   return true;
@@ -339,7 +341,7 @@ function mgmtMigrate(raw){
   return raw;
 }
 
-/** Réparation tolérante d'un état chargé valide : faits plafonnés, titres
+/** Réparation tolérante d'un état chargé valide : faits conservés, titres
  *  recalculés quand ils manquent (sauvegardes antérieures), affaire ouverte
  *  recadrée — ou première affaire ouverte sélectionnée d'office quand aucune
  *  ne l'est, pour que le bureau ne s'ouvre jamais vide. */
@@ -347,7 +349,6 @@ function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(!Array.isArray(m.facts)) m.facts=[];
-  while(m.facts.length>MGMT_FACTS_MAX) m.facts.shift();
   /* Lot 2B T1 bis : le vivier extérieur se recadre comme le reste — épuré
      d'abord des identités illisibles, puis complété jusqu'à 30 vivants dans
      chaque catégorie, roster compris. Une sauvegarde d'avant la tranche est
