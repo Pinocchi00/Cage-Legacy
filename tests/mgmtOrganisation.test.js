@@ -7,9 +7,13 @@
      « Organisation » dans la navigation ; échap ramène à la semaine ;
    - aucun texte de travail ni aucun texte de maquette (§1) : aucun onglet
      Contrats ni Diffuseur, ni patron, ni objectifs de saison ;
-   - l'effectif par catégorie se dérive à la lecture — le constat « effectif
-     trop mince » apparaît quand une catégorie tombe sous deux disponibles
-     (mgmtAvailable) ;
+   - l'effectif par catégorie se dérive à la lecture — le nombre de
+     classés (classement de Split, portée « organization » de
+     mgmtDivisionRank), le constat « effectif trop mince » quand une
+     catégorie tombe sous deux disponibles (mgmtAvailable), et deux
+     groupes titrés hommes/femmes (les divisions H et F d'engine.js) ;
+   - la navigation distingue l'entrée courante (aria-current, contrastes
+     ≥ 4,5:1 — charte L2).
    - les finances : la trésorerie (m.treasury) et les recettes des dernières
      soirées (m.recettes), telles qu'elles existent — aucune recette, aucune
      ligne de soirées, aucun chiffre inventé, ni note, ni barème, ni jauge.
@@ -50,14 +54,23 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   assert.equal(win.document.querySelectorAll('.mgmt-nav').length, 1, 'la barre de navigation est présente');
   const navs = [...win.document.querySelectorAll('.mgmt-nav button')].map(b=>b.textContent);
   assert.deepEqual(navs, ['Semaine','Organisation'], 'l’entrée « Organisation » est dans la barre de navigation');
+  /* L'entrée courante (aria-current) se distingue : ici l'Organisation. */
+  const courant = win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]');
+  assert.equal(courant.length, 1, 'une seule entrée courante');
+  assert.equal(courant[0].textContent, 'Organisation', 'l’écran courant est signalé');
+  assert.ok(courant[0].classList.contains('cur'), 'l’entrée courante porte sa classe visuelle');
   /* L'effectif et les finances sont lisibles (charte R1, R3). */
   assert.ok(html.includes('Trésorerie'), 'la trésorerie est lisible');
   assert.ok(html.includes(`${win.eval('G.mgmt.treasury')} k$`), 'la valeur de la trésorerie est telle qu’elle existe');
   assert.ok(html.includes("L'effectif"), 'l’effectif par catégorie est présent');
-  /* Au clavier : échap ramène à la semaine. */
+  /* Au clavier : échap ramène à la semaine — la navigation y signale
+     l'écran courant, cette fois la Semaine. */
   const key = k => win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'${k}',bubbles:true}))`);
   key('Escape');
   assert.equal(win.eval('G.screen'), 'mgmt_bureau', 'échap ramène à la semaine');
+  win.eval('render()');
+  const courant2 = win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]');
+  assert.equal(courant2.length===1 ? courant2[0].textContent : '', 'Semaine', 'l’entrée courante suit l’écran');
 });
 
 test('MGMT T7 — le constat « effectif trop mince » apparaît quand une catégorie tombe sous deux disponibles', () => {
@@ -90,6 +103,27 @@ test('MGMT T7 — le constat « effectif trop mince » apparaît quand une caté
   assert.ok(!moyenne[0].thin&&!moyenne[0].sub.includes('effectif trop mince'),
     'une catégorie encore composable ne porte pas le constat');
   assert.ok(moyenne[0].sub.includes('disponibles'), 'la catégorie lisible dit ses disponibles');
+  /* Le nombre de classés, dérivé (classement de Split, portée
+     « organization »). Les suspendus gardent leur rang : « Poids léger »
+     compte autant de classés que de combattants, la fixture ne l'efface
+     pas du classement. Le non-derivable est vérifié contre la loi unique. */
+  const attendus=JSON.parse(win.eval(`JSON.stringify({
+    legere:mgmtDivisionRanking(G.mgmt,'H-light','organization').length,
+    moyenne:mgmtDivisionRanking(G.mgmt,'H-middle','organization').length})`));
+  assert.ok(moyenne[0].sub.includes(`${attendus.moyenne} classés`),
+    'le classement de Split se lit sur la tuile');
+  assert.ok(legere[0].sub.includes(`${attendus.legere} classés`),
+    'le classement de Split se lit aussi sur la catégorie mince (suspension ne retire pas le rang)');
+  /* Deux groupes titrés : hommes (8 catégories) puis femmes (4). */
+  assert.equal((html.match(/mgmt-org-hd/g)||[]).length, 2, 'deux titres de groupe');
+  assert.ok(html.indexOf('Hommes')>=0&&html.indexOf('Femmes')>=0, 'les groupes hommes et femmes sont titrés');
+  assert.ok(html.indexOf('Hommes')<html.indexOf('Femmes')
+    &&html.indexOf('Femmes')<html.indexOf('Poids paille'),
+    'les catégories de femmes suivent le groupe « Femmes »');
+  assert.equal(tiles.indexOf(tiles.find(t=>t.nm==='Poids paille')), 8,
+    'les huit catégories d’hommes précèdent les quatre de femmes');
+  assert.ok(tiles.slice(8).every(t=>['Poids paille','Poids mouche','Poids coq','Poids plume'].includes(t.nm)),
+    'le groupe des femmes porte ses quatre catégories');
 });
 
 test('MGMT T7 — les recettes des dernières soirées, telles qu’elles existent ; rien d’inventé', () => {

@@ -179,9 +179,15 @@ function mgmtNavHtml(){
   if(G&&(G.screen==='mgmt_soiree'||G.screen==='mgmt_lendemain')){
     return `<nav class="mgmt-nav" aria-label="Navigation management"><span>Semaine</span></nav>`;
   }
+  /* L'entrée courante (aria-current) se distingue visiblement des autres :
+     classe cur (or plein) contre fond atténué — contrastes ≥ 4,5:1 (charte
+     L2, ancre MGMT_LOT4_T7_NAV_COURANT dans index.html). */
+  const navB=(label,screen)=>`<button type="button" class="${G&&G.screen===screen?'cur':''}"`
+    +`${G&&G.screen===screen?' aria-current="page"':''}`
+    +` onclick="CL.go('${screen}')">${label}</button>`;
   return `<nav class="mgmt-nav" aria-label="Navigation management">`
-    +`<button type="button"${G&&G.screen==='mgmt_bureau'?' aria-current="page"':''} onclick="CL.go('mgmt_bureau')">Semaine</button>`
-    +`<button type="button"${G&&G.screen==='mgmt_organisation'?' aria-current="page"':''} onclick="CL.go('mgmt_organisation')">Organisation</button></nav>`;
+    +navB('Semaine','mgmt_bureau')
+    +navB('Organisation','mgmt_organisation')+`</nav>`;
 }
 function mgmtWithNav(screen){
   return function(){

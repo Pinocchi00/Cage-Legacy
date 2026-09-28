@@ -5,11 +5,19 @@
    - l'effectif de Split : nombre de combattants (hors retraités —
      médicaux comme d'âge, test générique mgmtIsRetired : ils ont quitté
      le vivier), nombre de catégories représentées, et par catégorie le
-     nombre de disponibles (mgmtAvailable : ni retraités, ni suspendus).
-     Le constat factuel « effectif trop mince » apparaît quand une
-     catégorie ne permet plus de composer un combat — moins de deux
-     disponibles. Tout se dérive à la lecture, rien n'est stocké (règle
-     du bureau, CDC §3).
+     nombre de disponibles (mgmtAvailable : ni retraités, ni suspendus)
+     et le nombre de classés (classement de Split, portée
+     'organization' de mgmtDivisionRank — les retraités sont hors
+     classement, les suspendus gardent leur rang). Le constat factuel
+     « effectif trop mince » apparaît quand une catégorie ne permet plus
+     de composer un combat — moins de deux disponibles. Tout se dérive à
+     la lecture, rien n'est stocké (règle du bureau, CDC §3). Les tuiles
+     se rangent en deux groupes titrés, hommes et femmes (les divisions
+     H et F d'engine.js) : les noms de catégorie se doublent autrement
+     (deux « Poids mouche » et coq et plume), jamais aucun nom inventé.
+   - les finances : la trésorerie (m.treasury, entier k$) et les recettes
+     nettes des dernières soirées (m.recettes), telles qu'elles existent —
+     aucune recette, aucune ligne de soirées.
    - les finances : la trésorerie (m.treasury, entier k$) et les recettes
      nettes des dernières soirées (m.recettes), telles qu'elles existent —
      aucune recette, aucune ligne de soirées.
@@ -27,17 +35,39 @@ const MGMT_ORG_LABELS={
   soirees:'Dernières soirées',
   thin:'effectif trop mince',
   aucun:'Aucun combattant — effectif trop mince',
+  hommes:'Hommes',
+  femmes:'Femmes',
 };
 
 /** L'effectif de Split par catégorie, dérivé à la lecture. Pur.
- *  @returns {Array<{div,name,total,dispo}>} */
+ *  @returns {Array<{div,name,total,dispo,classes}>} */
 function mgmtOrgEffectifRows(m){
   if(!m||!Array.isArray(m.roster)) return [];
   return allDivisions().map(d=>{
     const dans=m.roster.filter(o=>o&&o.div===d.id&&!mgmtIsRetired(o));
     const dispo=dans.filter(o=>mgmtAvailable(m,o)).length;
-    return {div:d,total:dans.length,dispo:dispo};
+    /* Nombre de classés : le classement de Split (portée « organization »
+       de mgmtDivisionRank, dérivé) — appelle la loi unique, jamais un
+       second compteur. */
+    const classes=mgmtDivisionRanking(m,d.id,'organization').length;
+    return {div:d,total:dans.length,dispo:dispo,classes:classes};
   });
+}
+
+/** Un groupe de tuiles (les divisions H ou F d'engine.js), avec son titre. */
+function mgmtOrgGroupHtml(m,g,rows){
+  const tiles=rows.map(r=>{
+    const thin=r.dispo<2;
+    const sub=r.total===0
+      ?MGMT_ORG_LABELS.aucun
+      :r.total+(r.total===1?' combattant, ':' combattants, ')
+        +r.classes+(r.classes===1?' classé, ':' classés, ')
+        +(r.dispo<2?MGMT_ORG_LABELS.thin:r.dispo+(r.dispo===1?' disponible':' disponibles'));
+    return `<div class="mgmt-org-cat${thin?' thin':''}"><div class="mgmt-org-nm">${esc(r.div.name)}</div>`
+      +`<div class="mgmt-org-sub">${esc(sub)}</div></div>`;
+  }).join('');
+  return `<div class="mgmt-org-group"><div class="mgmt-org-hd">${esc(g)}</div>`
+    +`<div class="mgmt-org-eff">${tiles}</div></div>`;
 }
 
 function mgmtOrgMoneyHtml(m){
@@ -60,15 +90,11 @@ function scr_mgmt_organisation(){
   const rows=mgmtOrgEffectifRows(m);
   const total=m.roster.filter(o=>o&&!mgmtIsRetired(o)).length;
   const legs=rows.filter(r=>r.total>0).length;
-  const tiles=rows.map(r=>{
-    const thin=r.dispo<2;
-    const sub=r.total===0
-      ?MGMT_ORG_LABELS.aucun
-      :r.total+(r.total===1?' combattant, ':' combattants, ')
-        +(r.dispo<2?MGMT_ORG_LABELS.thin:r.dispo+(r.dispo===1?' disponible':' disponibles'));
-    return `<div class="mgmt-org-cat${thin?' thin':''}"><div class="mgmt-org-nm">${esc(r.div.name)}</div>`
-      +`<div class="mgmt-org-sub">${esc(sub)}</div></div>`;
-  }).join('');
+  /* Deux groupes de tuiles, dans l'ordre d'engine.js : hommes puis femmes. */
+  const femmes=rows.filter(r=>r.div.gender==='F');
+  const hommes=rows.filter(r=>r.div.gender!=='F');
+  const groupes=mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.hommes,hommes)
+    +mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.femmes,femmes);
   return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
     +`<div><div class="eyebrow gold">Split — Management</div>`
     +`<h2 class="disp">L'organisation</h2></div>`
@@ -79,7 +105,7 @@ function scr_mgmt_organisation(){
     +`<div class="eyebrow">${esc(MGMT_ORG_LABELS.effectif)}</div>`
     +`<div class="mgmt-org-sum">${esc(total)}${esc(total===1?' combattant, ':' combattants, ')}`
       +`${esc(legs)}${esc(legs===1?' catégorie':' catégories')}</div>`
-    +`<div class="mgmt-org-eff">${tiles}</div>`
+    +groupes
     +`<div class="eyebrow mt">${esc(MGMT_ORG_LABELS.finances)}</div>`
     +mgmtOrgMoneyHtml(m)
     +`</div></div></div>`;
