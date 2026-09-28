@@ -72,9 +72,9 @@ Une tranche à la fois par fichier ; deux outils peuvent travailler en parallèl
 
 ### T1 — Le socle : un fichier par écran, la direction artistique, la navigation
 
-- **Découpage de `mgmt-screens.js`** (768 lignes, quatre écrans) en un fichier
-  par écran — `mgmt-ecran-semaine.js`, `mgmt-ecran-carte.js`,
-  `mgmt-ecran-soiree.js`, `mgmt-ecran-lendemain.js` — plus ce qui reste commun
+- **Découpage de `mgmt-screens.js`** (904 lignes et cinq écrans au 24/09, après le lot 3) en un fichier
+  par écran — `mgmt-ecran-semaine.js` (l'actuel bureau), `mgmt-ecran-carte.js`,
+  `mgmt-ecran-soiree.js`, `mgmt-ecran-lendemain.js`, `mgmt-ecran-fiche.js` — plus ce qui reste commun
   (contrôleur, clavier). **Déplacement pur**, vérifié ligne à ligne comme les
   découpages du 21/09 : aucune ligne de code perdue, aucun test modifié, ancres
   déplacées avec leur code. `index.html` reste la seule source de l'ordre de
@@ -87,13 +87,23 @@ Une tranche à la fois par fichier ; deux outils peuvent travailler en parallèl
   encore n'apparaissent pas.
 - **Les réserves de contraste du lot 2** : le survol `.opp:hover` qui tombe à
   3,54:1 (réserve 1), la ligne du cycle à 4,31:1 contre le haut du dégradé.
-- **B1 — aucun texte de travail visible.** `mgmt-screens.js:327` affiche au
+- **B1 — aucun texte de travail visible.** `mgmt-screens.js:354-357` affiche au
   joueur `[RÉPLIQUE MANQUANTE — Clara : annonce une fin de carrière]`. Un
   emplacement d'auteur vide ne s'affiche jamais tel quel : il n'affiche rien.
   Un test le garde, sur tous les écrans.
 - **C7 — le niveau d'attachement ne s'affiche plus** (`MGMT_LEVEL_LABELS`,
   `mgmt-screens.js:40`). Le niveau continue d'exister et de compter ; il cesse
   d'être une étiquette.
+
+**Relecture du 25/09 — acceptée** (`881863f`, Sol). Déplacement pur vérifié
+ligne à ligne : les seules lignes qui diffèrent sont les changements d'interface
+annoncés. Deux tests réécrits sur décision citée (C7 et la palette). Vérifiée
+dans le jeu à 1280, 1440 et 1920 : aucun texte sous 4,5:1, aucun marqueur de
+travail. Écarts et réserves : la barre n'a que « Semaine » (les autres écrans
+n'existent pas encore) ; l'emplacement de la réplique de Clara a été **retiré**,
+pas laissé vide — il faudra lui redonner une place quand le texte existera
+(lot 5 §6) ; le contour de focus de la barre était masqué par l'octogone
+(corrigé à la T5) ; à 1920 `#app.mgmt` reste plafonné à 1400 px (confié à la T3).
 
 ### T2 — La semaine *(maquette 02)*
 

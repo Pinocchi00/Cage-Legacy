@@ -194,6 +194,22 @@ const MGMT_EXT_AGE_SPREAD=11;
 const MGMT_EXT_AGE_START_MIN=18;
 const MGMT_EXT_AGE_START_SPREAD=4;
 
+/* Lot 2B T3 bis — le monde a déjà des vétérans : à l'ouverture (cycle 0),
+   chaque fondateur reçoit sa date d'entrée dans le PASSÉ, dérivée de son
+   identité sur le flux séparé 'ext-fondateur' — born_fondateur =
+   −round(u × SPREAD) cycles. MGMT_EXT_YEAR_WEEKS / MGMT_EVENT_WEEKS = 10,4
+   cycles par an : 125 cycles reculent l'entrée d'au plus 12,02 ans, et
+   l'âge vivant à l'ouverture s'étale de 20 à ~41 ans (une ligue installée,
+   médiane ≈ 31 — la médiane stable acceptée le 24/09) au lieu de la
+   cohorte 20-30 qui ne partait jamais. Le passé se dérive, aucun champ
+   ajouté : la même ligne lue au cycle 0 a déjà la carrière que ce recul
+   compte (mgmtExteriorCareer). Un fondateur dont la carrière dérivée est
+   close avant l'ouverture (entrée plus vieille que le reste de sa
+   carrière) ne compte pas parmi les vivants — le quota
+   (mgmtExteriorEnsure) le remplace. La porte de sauvegarde
+   (mgmtValidExteriorLine) accepte born jusqu'à −SPREAD. */
+const MGMT_EXT_FONDATEUR_SPREAD=125;
+
 /* Phase amateur : de 1 à 3 ans, combats comptés dans la bande du générateur
    existant (RI(3,20), ui-01-roster-matchmaking.js makeOrgRoster). */
 const MGMT_EXT_AMA_YEARS_MIN=1;

@@ -21,6 +21,12 @@
    - les classements organisation et monde partagent la même loi ;
    - recrutement, retraite médicale et anciennes sauvegardes maintiennent
       le quota sans ajouter un champ aux lignes ;
+   - T3 bis : les fondateurs reçoivent un passé dérivé (entrée antérieure à
+      l'ouverture, bornée par le recul constant) — la porte de sauvegarde
+      l'accepte, une partie neuve se recharge avec tous ses fondateurs,
+      les vétérans portent un palmarès qui compte leurs années, un
+      fondateur déjà parti avant l'ouverture ne compte pas parmi les
+      vivants et sa ligne reste ;
    - persistance : validateMgmt / mgmtRepair sur le champ exterieur.
    ============================================================================ */
 const { test } = require('node:test');
@@ -55,25 +61,39 @@ test('MGMT lot 2B T1 bis — 30 vivants par catégorie à l’ouverture et aprè
     mgmtNewRoster(m);
     const seqAvant=m.seq;
     mgmtExteriorEnsure(m);
+    /* Lot 2B T3 bis : les fondateurs portent une entrée dérivée dans le
+       passé, bornée par le recul constant — et certains sont nés avec une
+       carrière déjà close : leurs lignes restent, ils ne comptent pas. */
+    const bornes=m.exterieur.map(l=>l.born);
+    const parties=m.exterieur.filter(o=>o.born<0&&mgmtExteriorRetired(o,0)).length;
+    const lignes0=m.exterieur.length;
+    const rosterN=m.roster.length;
     const ouverture=allDivisions().map(d=>({id:d.id,vivants:mgmtWorldLivingCount(m,d.id),
       split:m.roster.filter(o=>o.div===d.id&&o.retired!=='medical').length,
-      ext:m.exterieur.filter(o=>o.div===d.id).length}));
+      ext:m.exterieur.filter(o=>o.div===d.id).length,
+      mortes:m.exterieur.filter(o=>o.div===d.id&&o.born<0&&mgmtExteriorRetired(o,0)).length}));
     const clefs=m.exterieur.map(l=>Object.keys(l).sort().join(','));
     const seqApresCohorte=m.seq;
     for(let c=1;c<=20;c++){ m.cycle=c; mgmtExteriorArrive(m); }
     const apres20=allDivisions().map(d=>mgmtWorldLivingCount(m,d.id));
+    const mortes20=m.exterieur.filter(o=>o.born<0&&mgmtExteriorRetired(o,m.cycle)).length;
     return {ouverture:ouverture,apres20:apres20,clefs:clefs,
-      seqApresCohorte:seqApresCohorte,seqAvant:seqAvant,total:m.roster.length+m.exterieur.length};
+      seqApresCohorte:seqApresCohorte,seqAvant:seqAvant,total:m.roster.length+m.exterieur.length,
+      lignes0:lignes0,rosterN:rosterN,bornMin:Math.min.apply(null,bornes),
+      bornMax:Math.max.apply(null,bornes),parties:parties,mortes20:mortes20};
   })()`);
   assert.equal(r.ouverture.length,12,'les douze catégories sont couvertes');
   for(const d of r.ouverture){
     assert.equal(d.vivants,quota,`${d.id} : quota mondial exact à l’ouverture`);
-    assert.equal(d.split+d.ext,quota,`${d.id} : Split et extérieur s’additionnent`);
+    assert.equal(d.split+d.ext,quota+d.mortes,`${d.id} : Split et extérieur s’additionnent, fondateurs déjà partis exceptés`);
   }
   assert.ok(r.apres20.every(n=>n===quota),'les douze catégories tiennent le quota après 20 cycles');
   assert.ok(r.clefs.every(k=>k===CLEFS_IDENTITE.join(',')),'chaque ligne extérieure ne porte que son identité');
   assert.equal(r.seqApresCohorte-r.seqAvant,r.ouverture.reduce((n,d)=>n+d.ext,0),'les identifiants viennent du compteur de la partie');
-  assert.equal(r.total,quota*12,'à effectif vivant inchangé, 360 lignes mondiales suffisent');
+  assert.ok(r.bornMin>=-win.eval('MGMT_EXT_FONDATEUR_SPREAD')&&r.bornMax<=0,
+    `les fondateurs portent une entrée dérivée dans le passé borné (mesuré : ${r.bornMin} à ${r.bornMax})`);
+  assert.equal(r.lignes0,12*quota-r.rosterN+r.parties,'à vivants pleins, l’ouverture pèse le quota mondial de l’extérieur plus ses fondateurs déjà partis');
+  assert.ok(r.total===12*quota+r.mortes20,'au cycle 20, les lignes = les vivants du monde plus les carrières closes, jamais une supprimée (QO-9)');
 });
 
 test('MGMT lot 2B T1 bis — compléter une catégorie ne dépend pas de la RNG du jeu', () => {
@@ -355,8 +375,11 @@ test('MGMT lot 2B T3 — une ligne extérieure en fin de carrière sort des viva
     setSeed(20261001);
     const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     /* La frontière exacte d'une ligne : pas encore partie un cycle plus
-       tôt, partie à son cycle de retraite. */
-    const l=m.exterieur[0];
+       tôt, partie à son cycle de retraite. T3 bis : la cohorte porte des
+       fondateurs — certains sont nés avec une carrière déjà close avant
+       l'ouverture (retireCycle <= 0) ; la frontière se mesure sur une
+       ligne vivante à l'ouverture. */
+    const l=m.exterieur.find(o=>mgmtExteriorTrace(o,0).retireCycle>0);
     const tl0=mgmtExteriorTrace(l,0);
     const fin=tl0.retireCycle;
     const avantFin=mgmtExteriorRetired(l,fin-1);
@@ -410,13 +433,13 @@ test('MGMT lot 2B T3 — après 240 cycles, le monde s’est renouvelé : plus a
     for(const o of m.exterieur){ if(!mgmtExteriorRetired(o,m.cycle)) ages.push(mgmtExteriorTrace(o,m.cycle).age); }
     ages.sort((a,b)=>a-b);
     return JSON.stringify({cycle:m.cycle,lignes:m.exterieur.length,
-      fondatrices:m.exterieur.filter(o=>o.born===0&&!mgmtExteriorRetired(o,m.cycle)).length,
+      fondatrices:m.exterieur.filter(o=>o.born<=0&&!mgmtExteriorRetired(o,m.cycle)).length,
       mondeMoins25:ages.filter(a=>a<25).length,mondeMin:ages[0],
       mondeMedian:ages[Math.floor(ages.length/2)],parCategorie:parCategorie});
   })()`);
   const s=JSON.parse(r);
   assert.equal(s.cycle,240,'240 cycles ont passé');
-  assert.equal(s.fondatrices,0,'plus aucune ligne fondatrice (born 0) ne vit encore : la cohorte d’ouverture a entièrement passé la main');
+  assert.equal(s.fondatrices,0,'plus aucune ligne de la cohorte d’ouverture (born ≤ 0) ne vit encore : les fondateurs ont entièrement passé la main');
   assert.ok(s.mondeMoins25>=10&&s.mondeMin<25,
     'le monde contient une vraie jeunesse (mesuré : '+s.mondeMoins25+' lignes de moins de 25 ans, minimum '+s.mondeMin+')');
   assert.ok(s.mondeMedian<40,'l’âge médian du monde ('+s.mondeMedian+') reste loin des 48 du monde sans départs (T1 bis) — voir le rapport pour la tension sur la décennie exacte');
@@ -424,6 +447,126 @@ test('MGMT lot 2B T3 — après 240 cycles, le monde s’est renouvelé : plus a
     assert.equal(d.vivants,quotaParCategorie(win),`${d.div} tient toujours le quota`);
   }
   assert.ok(s.lignes>s.parCategorie.length*quotaParCategorie(win),'les lignes s’accumulent sans jamais être supprimées');
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_LOT2B_T3BIS_VETERANS_TESTS] — Lot 2B T3 bis le monde a
+   déjà des vétérans (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T3 bis) : à
+   l'ouverture, le monde est une ligue installée. Les fondateurs reçoivent
+   leur entrée dans le passé, dérivée de leur identité sur le flux séparé
+   'ext-fondateur' (les dérivations existantes ne bougent pas d'un tirage) ;
+   la porte de sauvegarde accepte cette entrée antérieure, une partie neuve
+   se recharge avec tous ses fondateurs, un vétéran porte un palmarès qui
+   compte ses années passées, et un fondateur né avec une carrière déjà
+   close avant l'ouverture ne compte pas parmi les vivants sans que sa
+   ligne disparaisse — le quota de 30 vivants tient dès le cycle 0. ==== */
+test('MGMT lot 2B T3 bis — une partie neuve se sauvegarde, se recharge et garde tous ses fondateurs', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    setSeed(20261003);
+    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const avant=JSON.stringify(m.exterieur);
+    const bornes=m.exterieur.map(o=>o.born);
+    G={theme:'dark',mgmt:m};
+    saveMgmt();
+    const disque=JSON.parse(localStorage.getItem(MGMT_KEY));
+    G={theme:'dark'};
+    const charge=loadMgmt();
+    const apres=charge?JSON.stringify(G.mgmt.exterieur):null;
+    return {charge:charge,avant:avant,apres:apres,
+      vDisque:disque?disque.v:null,vCourante:MGMT_SAVE_VERSION,
+      bornMin:Math.min.apply(null,bornes),bornMax:Math.max.apply(null,bornes)};
+  })()`);
+  assert.ok(r.charge,'une partie neuve avec sa cohorte de fondateurs se recharge');
+  assert.equal(r.avant,r.apres,'tous les fondateurs survivent à la sauvegarde et au rechargement, octet pour octet');
+  assert.equal(r.vDisque,r.vCourante,'la sauvegarde porte la version courante');
+  assert.ok(r.bornMin>=-win.eval('MGMT_EXT_FONDATEUR_SPREAD')&&r.bornMax<=0,
+    `les entrées des fondateurs restent dans le passé borné (mesuré : ${r.bornMin} à ${r.bornMax})`);
+});
+
+test('MGMT lot 2B T3 bis — à l’ouverture, une ligue installée : âges de 20 à ~41 ans, médiane autour de 31, vétérans avec un palmarès', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    setSeed(20261004);
+    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const ages=[]; let veterans=0,sansCombat=0,minFights=Infinity,exEmpal='mg?t? age ?';
+    for(const o of m.exterieur){
+      if(mgmtExteriorRetired(o,0)) continue;
+      const t=mgmtExteriorTrace(o,0);
+      ages.push(t.age);
+      if(t.age>=36){
+        veterans++;
+        if(t.fights<=0) sansCombat++;
+        if(t.fights>0&&t.fights<minFights){ minFights=t.fights; exEmpal=o.id+' age '+t.age+' bilan '+t.pro.W+'-'+t.pro.L+' n='+t.fights+' born '+o.born; }
+      }
+    }
+    const tri=ages.slice().sort((x,y)=>x-y);
+    return {vivants:ages.length,min:tri[0],max:tri[tri.length-1],
+      median:tri[Math.floor(tri.length/2)],p10:tri[Math.floor(0.1*(tri.length-1))],
+      p90:tri[Math.floor(0.9*(tri.length-1))],moins25:ages.filter(a=>a<25).length,
+      veterans:veterans,sansCombat:sansCombat,minFights:minFights,exEmpal:exEmpal,
+      ageEntreeMin:MGMT_EXT_AGE_MIN,recul:MGMT_EXT_FONDATEUR_SPREAD};
+  })()`);
+  const ageRetraitBase=42;
+  assert.ok(r.vivants>0,'le monde d’ouverture est peuplé');
+  assert.ok(r.min>=r.ageEntreeMin,'aucun vivant plus jeune que l’âge d’entrée dans le monde (mesuré : '+r.min+')');
+  assert.ok(r.max<=ageRetraitBase-1,'aucun vivant au-delà de la retraite la plus tardive moins un an — la loi de retraite dérive elle-même le plus vieil âge vivant (mesuré : '+r.max+')');
+  assert.ok(r.max>=38,'des vétérans proches de la retraite vivent à l’ouverture (mesuré : plus vieux vivant '+r.max+' ans)');
+  assert.ok(r.median>=30&&r.median<=32,'la médiane d’ouverture reste autour de 31 (mesuré : '+r.median+')');
+  assert.ok(r.moins25>0,'des moins de 25 ans vivent à l’ouverture (mesuré : '+r.moins25+')');
+  assert.ok(r.veterans>10,'la ligue installée porte de vrais vétérans (mesuré : '+r.veterans+' lignes de 36 ans et plus)');
+  assert.equal(r.sansCombat,0,'un vétéran arrive avec un palmarès dérivé, jamais zéro combat');
+  assert.ok(r.minFights>0,'le palmarès le plus court des vétérans reste réel (mesuré : '+r.minFights+' combats — '+r.exEmpal+')');
+});
+
+test('MGMT lot 2B T3 bis — un fondateur né parti ne compte pas parmi les vivants, sa ligne reste, le quota tient, la porte de sauvegarde l’accepte', () => {
+  const win=newGameWindow();
+  const r=win.eval(`(function(){
+    setSeed(20261005);
+    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    /* Le monde d’ouverture est plein : 30 vivants par catégorie. */
+    const vivantsOuverture=allDivisions().map(d=>mgmtWorldLivingCount(m,d.id));
+    /* Fixture : une ligne à l'entrée la plus ancienne dérivée (−recul), dont
+       la carrière dérivée est close AVANT l'ouverture (vérifié : seed 2). */
+    const parti={id:'mgFondateurParti',seed:2,div:'H-light',ck:'FR',born:-MGMT_EXT_FONDATEUR_SPREAD};
+    if(mgmtExteriorRetired(parti,0)!==true) return {erreur:'fixture vivante'};
+    m.exterieur.push(parti);
+    const lignesAvant=m.exterieur.length;
+    /* Sa présence ne compte pas : re-compléter le monde ne dérive rien. */
+    mgmtExteriorEnsure(m);
+    const lignesApresInjection=m.exterieur.length;
+    /* Une retraite médicale libère une place : le remplissage est fondé sur
+       les VIVANTS — le fondateur parti n'est pas rappelé, un nouveau vivant
+       est dérivé et la catégorie revient au quota. */
+    const f=m.roster.find(o=>o.div==='H-light'&&!mgmtIsRetired(o));
+    f.retired='medical';
+    mgmtExteriorArrive(m);
+    const trace=mgmtExteriorTrace(parti,0);
+    /* Le flux du fondateur ne touche aucun autre flux : re-compléter le
+       monde (qui dérive d'autres fondateurs) ne bouge pas la trace d'une
+       ligne déjà lue. */
+    const t1=JSON.stringify(mgmtExteriorTrace(parti,0));
+    mgmtExteriorEnsure(m); mgmtExteriorArrive(m);
+    const t2=JSON.stringify(mgmtExteriorTrace(parti,0));
+    return {erreur:undefined,
+      vivantsOuverture:vivantsOuverture,
+      lignesAvant:lignesAvant,lignesApresInjection:lignesApresInjection,
+      vivantsApresInjection:mgmtWorldLivingCount(m,'H-light'),
+      vivantsApresRetraite:mgmtWorldLivingCount(m,'H-light'),
+      toujoursLa:m.exterieur.some(o=>o.id===parti.id),
+      age:trace.age,combats:trace.fights,bilan:trace.pro.W+'-'+trace.pro.L,parti:trace.retireCycle,
+      ageRetrait:trace.retAge,flux:t1===t2,valide:validateMgmt(m),
+      identite:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,id,seed')};
+  })()`);
+  assert.equal(r.erreur,undefined,'la fixture est bien une ligne déjà partie avant l’ouverture');
+  assert.ok(r.vivantsOuverture.every(n=>n===quotaParCategorie(win)),'le monde d’ouverture tient le quota');
+  assert.equal(r.lignesApresInjection,r.lignesAvant,'le fondateur déjà parti ne compte pas : sa présence ne déclenche aucun remplissage');
+  assert.equal(r.vivantsApresRetraite,quotaParCategorie(win),'la retraite médicale ramène la catégorie au quota — le fondateur parti n’y entre pas');
+  assert.ok(r.toujoursLa,'sa ligne reste en base (QO-9 : le passé du monde ne disparaît pas)');
+  assert.ok(r.combats>0,'même parti avant l’ouverture, sa carrière dérivée compte ses combats (mesuré : '+r.combats+' combats, '+r.bilan+', parti au cycle '+r.parti+' à '+r.ageRetrait+' ans, '+r.age+' ans au calendrier)');
+  assert.ok(r.flux,'le flux dérivé du fondateur ne déplace aucune autre dérivation');
+  assert.ok(r.valide,'l’état avec un fondateur au recul maximal passe la porte de sauvegarde');
+  assert.ok(r.identite,'aucune ligne n’a gagné un champ : le passé est dérivé, jamais stocké');
 });
 /* ==== [FIN ANCRE] ==== */
 
@@ -488,15 +631,25 @@ test('MGMT lot 2B T1 — persistance : validateMgmt accepte le vivier, refuse un
     const paysInconnu=JSON.parse(JSON.stringify(m));
     paysInconnu.exterieur[2].ck='XX';
     const absente=JSON.parse(JSON.stringify(m)); delete absente.exterieur;
+    /* Lot 2B T3 bis : le passé des fondateurs passe la porte, borné —
+       l'entrée la plus ancienne dérivée (−SPREAD) est valide, au-delà est
+       illisible et part en réparation. */
+    const passe=JSON.parse(JSON.stringify(m));
+    passe.exterieur[3].born=-MGMT_EXT_FONDATEUR_SPREAD;
+    const tropVieille=JSON.parse(JSON.stringify(m));
+    tropVieille.exterieur[4].born=-MGMT_EXT_FONDATEUR_SPREAD-1;
     return {propre:validateMgmt(propre),alourdie:validateMgmt(alourdie),
       seedNegative:validateMgmt(seedNegative),paysInconnu:validateMgmt(paysInconnu),
-      absente:validateMgmt(absente)};
+      absente:validateMgmt(absente),passe:validateMgmt(passe),
+      tropVieille:validateMgmt(tropVieille)};
   })()`);
   assert.equal(ok.propre,true,'une sauvegarde avec le vivier passe la porte');
   assert.equal(ok.alourdie,false,'une ligne qui stockerait un bilan est refusée');
   assert.equal(ok.seedNegative,false,'une graine hors 32 bits est refusée');
   assert.equal(ok.paysInconnu,false,'un pays hors catalogue est refusé');
   assert.equal(ok.absente,true,'le champ est toléré absent (sauvegardes d\'avant le lot 2B)');
+  assert.equal(ok.passe,true,'une entrée antérieure à l’ouverture, au recul maximal dérivé, passe la porte (T3 bis)');
+  assert.equal(ok.tropVieille,false,'une entrée encore plus ancienne que le recul dérivé est refusée (T3 bis)');
 });
 
 test('MGMT lot 2B T1 bis — mgmtRepair filtre puis complète les anciennes sauvegardes', () => {
@@ -550,7 +703,11 @@ test('MGMT lot 2B T1 bis — le bureau ouvre à 30 par catégorie et remplace un
       plein:mgmtWorldLivingCount(G.mgmt,f.div)};
   })()`);
   assert.ok(r.ouverture.every(n=>n===quota),'le bureau ouvre avec douze catégories pleines');
-  assert.equal(r.ajouts,1,'la retraite crée exactement une place extérieure');
-  assert.equal(r.entrantsCycle,1,'le remplaçant porte le cycle de la retraite avant l’ouverture suivante');
+  /* T3 bis : la cohorte d'ouverture porte des fondateurs — certains partent
+     de leur propre retraite dérivée, au même cycle que la sortie médicale ;
+     le remplaçant de la retraite porte son cycle, la catégorie est de
+     nouveau pleine. */
+  assert.ok(r.ajouts>=1,'la retraite déclenche au moins une place extérieure');
+  assert.ok(r.entrantsCycle>=1,'des remplaçants portent le cycle de la retraite avant l’ouverture suivante');
   assert.equal(r.plein,quota,'la catégorie est de nouveau pleine');
 });

@@ -439,6 +439,12 @@ l'infirmerie.
   dérivée de son identifiant** (aucun champ ajouté à la ligne), comme le monde
   extérieur dérive déjà l'âge de chacun depuis son propre `born`. Un combattant
   recruté de l'extérieur ne doit pas changer d'âge en changeant de maison.
+- **Décision d'Anthony du 24/09 sur la cible ci-dessous.** Mesurée à la livraison de
+  la T3 : médiane **31 ans** à 240 cycles, et non dans la décennie d'ouverture.
+  GLM a montré que c'est l'arithmétique de la loi (entrants de 20 à 30 ans,
+  départs à 39-42 ans) et non un défaut. La cible voulait dire « le monde se
+  renouvelle au lieu de vieillir en bloc » ; c'est tenu (31 contre 48 sans
+  départs). **Une médiane stable autour de 31 ans est acceptée.**
 - **Cible mesurable ajoutée** : à 240 cycles (23 ans), **l'âge médian du monde
   extérieur reste dans la même décennie qu'à l'ouverture** — un monde vivant
   renouvelle sa population, il ne vieillit pas en bloc. Et à tout cycle, il
@@ -448,6 +454,61 @@ l'infirmerie.
   carrière sort des vivants sans être supprimée, et sa sortie déclenche un
   remplacement par le quota** ; après 240 cycles, chaque catégorie contient
   encore des combattants de moins de 25 ans.
+
+### T3 bis — Le monde a déjà des vétérans *(aucune interface — après T3)*
+
+*Ajoutée le 24/09/2026, décision d'Anthony, après la mesure livrée avec la T3.*
+
+**Le trou.** La cohorte d'ouverture du monde extérieur entre au cycle 0 avec
+20 à 30 ans. Personne n'atteint l'âge de la retraite (39-42 ans) avant une
+dizaine d'années de jeu : pendant tout ce temps, **personne ne part et aucun
+jeune n'entre**. Mesuré : au cycle 60 (5,8 ans), **aucun combattant de moins de
+25 ans dans le monde entier**, médiane 30 ; au cycle 120, médiane 35. Le monde
+vieillit par vagues au lieu de vivre. Et c'est précisément la période où le
+joueur joue : vingt soirées font deux ans.
+
+**La correction.** Le jour où le joueur prend son poste, le monde est une ligue
+déjà installée : ses âges s'étalent de 20 à ~41 ans, avec des vétérans proches
+de la retraite. **Les fondateurs reçoivent un passé** : une date d'entrée dans le
+monde antérieure à l'ouverture, pour que leur carrière dérivée compte déjà leurs
+années de combats. Un homme de 38 ans arrive avec un palmarès de 38 ans, pas
+avec zéro combat. Les départs commencent alors dès les premières saisons, et les
+jeunes entrent en continu.
+
+- **Ce qui ne change pas** : la loi de retraite (T3), l'âge des nouveaux entrants
+  (20 à 30 ans, calibrage T1), le quota de 30 vivants par catégorie (T1 bis), la
+  règle du bureau — aucun champ ajouté, le passé se dérive.
+- **⚠ Le piège.** `mgmt-save.js:134` **refuse toute ligne dont `born` est
+  négatif**. Une date d'entrée antérieure à l'ouverture doit être acceptée par la
+  validation, sinon la sauvegarde devient invalide et la réparation écarte les
+  lignes. Un test : une partie neuve se sauvegarde, se recharge, et garde tous ses
+  fondateurs.
+- **Les deux cibles de réalisme de la T1** (corrélation bilan / niveau, part des
+  finitions) se remesurent : une cohorte plus âgée ne doit pas les casser.
+- **Les parties déjà commencées** gardent leur monde tel quel ; aucune ne devient
+  illisible.
+
+**Cibles, posées avant la mesure :**
+- à l'ouverture, les âges vivants du monde extérieur couvrent 20 à ~41 ans, avec
+  une médiane autour de 31 (la médiane stable acceptée le 24/09) ;
+- **à tout cycle de 0 à 240, des moins de 25 ans existent dans le monde**, et la
+  médiane reste entre 28 et 34 ans, sans vague ;
+- les premiers départs du monde extérieur ont lieu **dans la première année de
+  jeu** (dix premiers cycles) ;
+- un fondateur de 38 ans a un palmarès cohérent avec son âge.
+
+**Mesure attendue** : le tableau de la T3 (médiane, p10, p90, moins de 25 ans)
+aux cycles 0, 10, 30, 60, 120, 240, et les deux cibles de la T1.
+
+**Relecture du 25/09 — acceptée** (`8d33048`, GLM). Mesure reproduite à
+l'identique par Claude (graine 20260922) : médiane 31 à l'ouverture, 31 à 33
+ensuite ; p10 24-27, p90 37-39 ; moins de 25 ans à tout cycle (33, 27, 15, 14,
+36, 17) ; neuf départs dès la première année. Le plus court palmarès des 36 ans
+et plus : 25 combats. Cibles de la T1 tenues (r_ext/r_roster 0,884 ; écarts de
+finitions ≤ 0,031). `MGMT_SAVE_VERSION` 9 → 10 sans conversion ; les anciennes
+parties gardent leur monde. **Réserve** : les cibles tiennent au niveau mondial,
+pas par catégorie — au cycle 240, trois catégories n'ont plus de moins de
+25 ans et deux ont une médiane de 35-36 ans.
 
 ### T4 — Le salaire à la victoire, et l'économie sur la durée de vie *(après T3 — condition de fusion)*
 

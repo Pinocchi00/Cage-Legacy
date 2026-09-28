@@ -14,7 +14,8 @@
    Aucune constante évaluée au chargement. Les fonctions dépendent au
    runtime de mgmt-bureau.js (MGMT_KEY, MGMT_BACKUP_KEY, MGMT_SAVE_VERSION,
    mgmtValidId, mgmtAffairTitle), mgmt-data.js (MGMT_ORG, MGMT_MAIN_SIZE,
-   MGMT_PRELIM_SIZE, MGMT_FAMILY_LABELS), mgmt-corps.js (MGMT_TRAUMA_MAX),
+   MGMT_PRELIM_SIZE, MGMT_FAMILY_LABELS, MGMT_EXT_FONDATEUR_SPREAD),
+   mgmt-corps.js (MGMT_TRAUMA_MAX),
    mgmt-monde.js (mgmtExteriorEnsure, mgmtValidExteriorLine)
    et state/state-core.js (G).
    ============================================================================ */
@@ -122,7 +123,11 @@ function mgmtValidEvent(e){
  *  porterait un bilan, un âge ou un champ dérivé est refusée : la dérivation
  *  est la seule source, la règle du bureau ne se stocke pas (CDC §3). Porte
  *  de validateMgmt : le champ exterieur est toléré absent (sauvegardes
- *  d'avant le lot 2B), strict quand il est là. @returns {boolean} */
+ *  d'avant le lot 2B), strict quand il est là.
+ *  Lot 2B T3 bis : une date d'entrée antérieure à l'ouverture existe —
+ *  le passé des fondateurs (mgmt-monde.js, flux 'ext-fondateur') fait
+ *  descendre born jusqu'à −MGMT_EXT_FONDATEUR_SPREAD ; accepté, borné
+ *  (une entrée encore plus ancienne est illisible, réparation à la porte). */
 function mgmtValidExteriorLine(o){
   if(!o||typeof o!=='object'||Array.isArray(o)) return false;
   const clefs=Object.keys(o).sort().join(',');
@@ -131,7 +136,7 @@ function mgmtValidExteriorLine(o){
   if(!Number.isSafeInteger(o.seed)||o.seed<0||o.seed>0xFFFFFFFF) return false;
   if(typeof o.div!=='string'||!divById(o.div)) return false;
   if(typeof o.ck!=='string'||!COUNTRY_KEYS.includes(o.ck)) return false;
-  if(!Number.isSafeInteger(o.born)||o.born<0) return false;
+  if(!Number.isSafeInteger(o.born)||o.born<-MGMT_EXT_FONDATEUR_SPREAD) return false;
   return true;
 }
 
@@ -319,6 +324,16 @@ function mgmtMigrate(raw){
      dérive de son identifiant à la lecture. */
   if(raw.v===8){
     raw.v=9;
+  }
+  /* 9 → 10 (lot 2B T3 bis, docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T3 bis) :
+     une date d'entrée antérieure à l'ouverture existe — le passé des
+     fondateurs se dérive (mgmt-monde.js, flux 'ext-fondateur'), la porte
+     l'accepte jusqu'à −MGMT_EXT_FONDATEUR_SPREAD. Rien à convertir : aucune
+     ligne d'une v9 ne peut porter un born négatif, la cohorte d'ouverture
+     d'une partie déjà commencée reste celle qu'elle porte — le monde d'une
+     ancienne sauvegarde ne bouge pas. */
+  if(raw.v===9){
+    raw.v=10;
   }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;

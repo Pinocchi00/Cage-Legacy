@@ -1,8 +1,9 @@
 # Cage Legacy — guide d'architecture
 
-Relevé du 24/09/2026, sur la branche `integration-24-09` : lot 2 (fusionné le
-21/09, PR 62), puis le lot 3 (l'arène, T1 à T5) et le lot 2B (T1, T1 bis, T1 ter,
-T2 bis, T3, T4), plus les contrats des lots 4 et 5.
+Relevé du 28/09/2026, sur la branche `integration-28-09` : `main` après la PR 64
+(lot 3 l'arène, lot 2B le vivier, contrats des lots 4 et 5), plus la T1 du lot 4
+(le socle : un fichier par écran) et la T3 bis du lot 2B (le monde a déjà des
+vétérans).
 **Numérotation des lots : depuis le 17/09/2026, les lots 0 à 5 (documents, style
 stable, carte principale, arène, peau du jeu, monde qui parle — voir
 `docs/AUDIT-17-09.md` §8) sont la référence en cours. Les numérotations
@@ -92,12 +93,17 @@ après le découpage de `mgmt-bureau.js` :
    plus de `ui-09` : retirée au lot 3 T4)
 8. `duel-codec.js`, `ui-10-duel.js` — exhibition « Duel entre amis »
 9. `ui-11-keys.js` — navigation clavier globale (`keysRegister`)
-10. **Mode management, huit fichiers depuis le découpage du 21/09/2026** :
+10. **Mode management, treize fichiers** (découpage de la simulation le
+    21/09/2026, découpage des écrans au lot 4 T1 le 25/09) :
     `mgmt-data.js` (données pures) — `mgmt-bureau.js` (pile d'affaires,
     décisions, Leïla) — `mgmt-carte.js` (sous-carte, composition, classement) —
     `mgmt-corps.js` (corps, soirée) — `mgmt-argent.js` (économie) —
     `mgmt-monde.js` (monde extérieur dérivé) — `mgmt-save.js` (persistance) —
-    `mgmt-screens.js` (rendu, dernier car il étend `CL`).
+    puis un fichier par écran : `mgmt-ecran-semaine.js` (le bureau),
+    `mgmt-ecran-carte.js`, `mgmt-ecran-soiree.js`, `mgmt-ecran-lendemain.js`,
+    `mgmt-ecran-fiche.js` — et enfin `mgmt-screens.js` (contrôleur, clavier et
+    barre de navigation communs ; dernier car il enregistre les cinq écrans
+    dans `SCREENS` et étend `CL`).
     **Une seule dépendance de chargement inter-fichiers** dans tout le mode :
     `MGMT_CARD_CONTRACT = MGMT_MAIN_SIZE + MGMT_PRELIM_SIZE` (`mgmt-argent.js`)
     lit `mgmt-data.js`. Les cinq fichiers du milieu sont sinon libres d'ordre ;
@@ -118,7 +124,7 @@ après le découpage de `mgmt-bureau.js` :
 | `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
 | `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
 | `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) ; lues par `saveMgmt`/`loadMgmt` dans `mgmt-save.js` | Sauvegarde management + secours, circuit séparé de la carrière |
-| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **9** | Management : migration séquentielle sans perte jusqu'à 9 (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte, lot 3 T1 la trace, lot 2B T1 ter la récupération du corps, T2 bis le calendrier d'âge, T3 les départs), v1 refusée |
+| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **10** | Management : migration séquentielle sans perte jusqu'à 10 (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte, lot 3 T1 la trace, lot 2B T1 ter la récupération du corps, T2 bis le calendrier d'âge, T3 les départs, T3 bis l'entrée des fondateurs avant l'ouverture), v1 refusée |
 
 ## 5. Séparation des responsabilités
 
@@ -127,7 +133,7 @@ après le découpage de `mgmt-bureau.js` :
   (`mgmt-carte.js`, `mgmt-corps.js`, `mgmt-argent.js`, `mgmt-monde.js`,
   `mgmt-save.js`)** : simulation et état. Aucun
   accès DOM/Canvas, simulation 100 % synchrone.
-- **`ui-*.js`, `mgmt-screens.js`** : rendu et événements utilisateur. Pas de règle
+- **`ui-*.js`, `mgmt-ecran-*.js`, `mgmt-screens.js`** : rendu et événements utilisateur. Pas de règle
   de simulation.
 - Le mode management **réutilise** le moteur existant (`simulateFight`,
   `makeName`, `rollInjury`…) sans le modifier. Ne jamais créer un second système
@@ -155,7 +161,7 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 24/09/2026 (`integration-24-09`) : **342 tests, 338 passants,
+État au 28/09/2026 (`integration-28-09`) : **346 tests, 342 passants,
 0 échec, 4 skip**. Les 4 skip sont dans `mgmtBureau.test.js` : trois sorties de
 carte incomplète (remonter un prélim, short notice, combattant libre) et une
 pénalité économie au-delà du plafond de découvert — comportements décidés mais
@@ -199,7 +205,7 @@ sans citer la décision qui change le comportement attendu.
 | `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré. Sa T2 (carte principale) a été reprise et remplacée par le lot 2 ; ses T3 à T5 (retrait, remonter un prélim, short notice) restent à coder |
 | `docs/LOT-3-L-ARENE.md` | **Lot 3 — livré (T1 à T5) au 24/09.** Répond à C2, C3, M3, M4. La T3 a été recadrée le 23/09 : le déplacement est **porté du prototype**, pas inventé ; la T3 bis a été supprimée. **L'arène est refaite à neuf et sert les deux modes ; `ui-09-arena.js` est retirée** (décision d'Anthony du 21/09). Son §1 porte le principe fondateur — le moteur décide, l'arène met en scène — et son §2 les quatre cibles mesurables du réalisme |
 | `docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` | **Lot 2B — livré au 24/09 (T1, T1 bis, T1 ter, T2 bis, T3, T4)**, sauf la T2 (le recrutement) reportée au lot 5 T5. Répond à QO-8. Son §5 liste les cinq points tranchés avant la T2, son §5 d la relecture de la T1, son **§5 e les décisions du 22/09** : le monde dérivé se lit **à travers un combattant** (sa fiche) plus **trois à cinq informations sur le hub**, au lot 4 ; et les quatre organisations extérieures sont **nommées et ordonnées** (Garden of Blood → MMA Korner → Ultimate Rim → Fighting Pacific Championship, prestige croissant) — `MGMT_EXT_ORGS` n'a plus d'`[EMPLACEMENT AUTEUR]` |
-| `docs/LOT-4-LA-PEAU-DU-JEU.md` | **Lot 4 — contrat écrit le 23/09, non commencé.** Les écrans maquettés remplacent l'habillage, sans créer de système de jeu ; commence par découper `mgmt-screens.js` en un fichier par écran pour permettre deux outils en parallèle. Son §1 : **aucun texte de maquette ne s'affiche en jeu** |
+| `docs/LOT-4-LA-PEAU-DU-JEU.md` | **Lot 4 — en cours : T1 livrée et fusionnée le 28/09 ; T5 (la fiche) en reprise, T3 (booker) en cours.** Les écrans maquettés remplacent l'habillage, sans créer de système de jeu ; commence par découper `mgmt-screens.js` en un fichier par écran pour permettre deux outils en parallèle. Son §1 : **aucun texte de maquette ne s'affiche en jeu** |
 | `docs/LOT-5-LE-MONDE-QUI-PARLE.md` | **Lot 5 — contrat écrit le 23/09, non commencé.** Ceintures et combats en 5 rounds, la voix du monde par formules d'auteur, la pression de l'attente, le recrutement (ex-lot 2B T2), les cartes incomplètes (ex-lot 3B T3-T5), les camps et le classement des organisations sous conditions. Son **§6 dresse la liste de tout ce qu'Anthony doit écrire** |
 | `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
 | `tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md` | Calibrage de l'économie sur le déroulé réel (21/09/2026) : les quatre profils de joueur, les trois cibles, et le tableau des six soirées enchaînées qui a révélé QO-8 |
@@ -244,11 +250,12 @@ sans citer la décision qui change le comportement attendu.
   dans une minuterie de jsdom) : visible dans la sortie de `npm run check`, il
   existait avant le lot 3 (vérifié sur `8a8988e`). Sans échec de test, mais à
   nettoyer un jour.
-- **Le monde extérieur n'a pas de jeunes pendant ses dix premières années**
-  (lot 2B T3, mesuré le 24/09) : la cohorte d'ouverture a 20 à 30 ans et personne
-  n'atteint l'âge de la retraite avant une dizaine d'années de jeu — au cycle 60,
-  aucun combattant de moins de 25 ans. Correction proposée : étaler les âges de la
-  cohorte d'ouverture sur toute la carrière (20 à ~41 ans). Attend Anthony.
+- **Le vieillissement du monde extérieur se tient globalement, pas par
+  catégorie** (lot 2B T3 bis, mesuré le 25/09) : les fondateurs ont désormais
+  20 à 40 ans à l'ouverture, la médiane mondiale reste entre 31 et 33 ans et des
+  moins de 25 ans existent à tout cycle. Mais au cycle 240 (23 ans de jeu), trois
+  catégories n'ont plus aucun moins de 25 ans et deux ont une médiane de 35-36
+  ans. À regarder au prochain recalibrage du vivier.
 - **Plan P8 carrière** : intégralement livré (lots 6 à 10), rapports dans
   `tools/reports/`.
 

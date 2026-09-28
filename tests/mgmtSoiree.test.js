@@ -445,3 +445,26 @@ test('MGMT corps — aucune valeur de traumatisme dans le DOM des écrans bureau
   assert.ok(html.includes('Le lendemain'),'l\'écran du lendemain est rendu');
   assertSansTrauma(html,'lendemain');
 });
+
+/* Lot 4 T1 / audit B1 : l'emplacement de Clara est absent du DOM, quel que
+   soit l'écran, y compris si la soirée porte les trois types de touchés. */
+test('MGMT lot 4 T1 — aucun emplacement d’auteur visible sur les cinq écrans', () => {
+  const win = newGameWindow();
+  enterMgmt(win,211);
+  win.eval(`(function(){
+    const m=G.mgmt;
+    m.lastEvent={cycle:m.cycle,fights:[{a:m.roster[0].id,b:m.roster[1].id,winner:'A',family:'ko',round:2}],
+      touched:[{id:m.roster[0].id,retired:false,injury:'Fracture de la main',days:90},
+        {id:m.roster[1].id,retired:true,injury:null,days:0},
+        {id:m.roster[2].id,retired:false,injury:null,days:60}]};
+    MGMT_FICHE.id=m.roster[0].id;
+  })()`);
+  for(const screen of ['mgmt_bureau','mgmt_carte','mgmt_soiree','mgmt_lendemain','mgmt_fiche']){
+    win.eval(`G.screen='${screen}';render()`);
+    const html=win.document.getElementById('app').innerHTML;
+    assert.ok(!/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|mgmt-lvl/i.test(html), screen);
+    assert.equal(win.document.querySelectorAll('.mgmt-nav').length,1,`navigation ${screen}`);
+    assert.equal(win.document.querySelectorAll('.mgmt-nav button').length,
+      screen==='mgmt_soiree'||screen==='mgmt_lendemain'?0:1,`séquence imposée ${screen}`);
+  }
+});

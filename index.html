@@ -44,6 +44,13 @@ window.onerror = function(msg, url, line) {
     ne rien casser dans le code existant qui les lit encore. ==== */
  --pos:#7FC488; --neg:#E8442F; --warn:#E6B93A;
  --win:var(--pos); --loss:var(--neg);
+ /* ==== [ANCRE: MGMT_LOT4_T1_TOKENS] — Lot 4 T1 : palette, polices et
+    octogone uniques pour les écrans management ; aucun asset distant. ==== */
+ --mgmt-plum:#543344; --mgmt-plum-deep:#281c2d; --mgmt-panel:#463043;
+ --mgmt-edge:#9c7592; --mgmt-ink:#f8f1df; --mgmt-secondary:#e1cddd;
+ --mgmt-tertiary:#cbb4c6; --mgmt-yellow:#f3d45b; --mgmt-red:#f47570;
+ --mgmt-font-display:'Oswald',sans-serif; --mgmt-font-body:'Fraunces',Georgia,serif;
+ --mgmt-octagon:polygon(12% 0,88% 0,100% 12%,100% 88%,88% 100%,12% 100%,0 88%,0 12%);
 }
 /* ==== [ANCRE: FAITH_PAPIER_OBJET] — le crème d'origine (#E4DFD3) était bon,
    juste appliqué à la mauvaise échelle : posé sur TOUT le mode, il n'était
@@ -87,9 +94,9 @@ body{color:var(--text);font-family:'Fraunces',Georgia,serif;font-size:16px;line-
 /* ==== [ANCRE: MGMT_LOT1E_CONFINEMENT] — Lot 1e-1 (remplace MGMT_LOT1B_CHARTE) :
    le fond d'origine ci-dessus est restauré à l'exact pour tout le jeu. Le
    traitement du bureau est confiné au mode bureau : body.mgmt neutralise les
-   marges autour d'#app.mgmt au ton du bas du dégradé zénithal, pour que le
-   fond d'origine ne fuite jamais sur écran large. ==== */
-body.mgmt{background:#120E08}
+   marges autour d'#app.mgmt au ton du bas du dégradé zénithal (repeint au
+   lot 4 T1), pour que le fond d'origine ne fuite jamais sur écran large. ==== */
+body.mgmt{background:var(--mgmt-plum-deep)}
 /* grain fin résiduel — discret, le Glass fait le gros du travail visuel */
 body::after{
  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.03;mix-blend-mode:overlay;
@@ -406,10 +413,14 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .log-row{display:flex;gap:10px;padding:5px 0;border-bottom:1px dotted var(--line);font-family:'JetBrains Mono',monospace;font-size:12.5px}
 .log-row.gold{color:var(--gold)}
 .log-r{flex:0 0 28px;color:var(--muted)}
-/* ==== [ANCRE: MGMT_LOT1D_FOND] — Lot 1f-1 : luminosité -10 %, écarts relatifs
-   gardés. Dégradé vertical #423521 en haut vers #120E08 en bas, sur toute la
-   hauteur. Périmètre bureau uniquement (#app.mgmt). ==== */
-#app.mgmt{max-width:1400px;background:linear-gradient(180deg,#423521 0%,#120E08 100%)}
+/* ==== [ANCRE: MGMT_LOT1D_FOND] — Lot 1f-1 : dégradé vertical sur toute la
+   hauteur. Palette brun remplacée par les jetons prune au lot 4 T1 ;
+   périmètre bureau uniquement (#app.mgmt). ==== */
+#app.mgmt{max-width:1400px;background:linear-gradient(180deg,var(--mgmt-plum) 0%,var(--mgmt-plum-deep) 100%);
+ --bg:var(--mgmt-plum-deep);--panel2:var(--mgmt-panel);--line:var(--mgmt-edge);
+ --text:var(--mgmt-ink);--muted:var(--mgmt-secondary);--faint:var(--mgmt-tertiary);
+ --gold:var(--mgmt-yellow);--gold-d:var(--mgmt-yellow);--blood:var(--mgmt-red);--loss:var(--mgmt-red);
+ color:var(--text);font-family:var(--mgmt-font-body)}
 /* ==== [ANCRE: ARENE_T2_APP] — Lot 3 T2 (reprise, correctifs d'affichage) :
    l'arène n'est pas un écran de bureau — #app est déplafonné à la largeur
    que l'écran demande (1100px) et ne porte PAS le dégradé brun du
@@ -419,11 +430,17 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-wrap{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding:16px 15px 16px}
 .mgmt-head{flex:0 0 auto}
 .mgmt-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr) 360px;gap:16px;margin-top:12px}
-/* ==== [ANCRE: MGMT_LOT1D_MATIERE] — Lot 1f-1 : luminosité -10 %.
-   Panneaux #3A2D1B, bordures #75603E (règles bureau uniquement, token global
-   --line intact). Relief prescrit : ombre 0 8px 24px rgba(0,0,0,.6) +
-   liseré supérieur 1px #75603E. ==== */
-.mgmt-col{min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;background:#3A2D1B;border:1px solid #75603E;padding:14px;min-width:0;overflow-wrap:break-word;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+/* ==== [ANCRE: MGMT_LOT1D_MATIERE] — Lot 1f-1 : panneaux et relief.
+   Panneaux et bordures repeints avec les jetons du lot 4 T1, sans changer
+   la carrière. Relief : ombre 0 8px 24px rgba(0,0,0,.6). ==== */
+.mgmt-col{min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;background:var(--mgmt-panel);border:1px solid var(--mgmt-edge);padding:14px;min-width:0;overflow-wrap:break-word;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.mgmt-wrap .disp,.mgmt-wrap .mgmt-fname,.mgmt-wrap .opp-nm{font-family:var(--mgmt-font-display);font-style:italic}
+.mgmt-cycle{color:var(--mgmt-ink);font-size:13px;margin-top:8px}
+.mgmt-nav{display:flex;gap:12px;align-items:center;flex:0 0 auto;margin-bottom:12px}
+.mgmt-nav button{font-family:var(--mgmt-font-display);font-style:italic;font-size:16px;color:var(--mgmt-plum-deep);background:var(--mgmt-yellow);padding:9px 24px;clip-path:var(--mgmt-octagon)}
+.mgmt-nav span{font-family:var(--mgmt-font-display);font-style:italic;font-size:16px;color:var(--mgmt-secondary);padding:9px 24px}
+.mgmt-nav button:hover{filter:brightness(1.1)}
+.mgmt-wrap .opp:hover{background:var(--mgmt-plum);color:var(--mgmt-ink)}
 .mgmt-aff{padding:6px 10px;margin:0 0 5px;min-height:0}
 .mgmt-fight{padding:6px 10px;margin:0 0 5px;min-height:0}
 .mgmt-aff .opp-nm,.mgmt-fight .opp-nm{font-size:15px;display:block;white-space:normal;overflow:visible;text-overflow:clip}
@@ -564,7 +581,15 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="mgmt-argent.js?v=mgmt2g"></script>
 <script src="mgmt-monde.js?v=mgmt2g"></script>
 <script src="mgmt-save.js?v=mgmt2g"></script>
-<script src="mgmt-screens.js?v=mgmt2f"></script>
+<!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
+     ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
+     contrôleur commun les enregistre et étende CL. ==== -->
+<script src="mgmt-ecran-semaine.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-carte.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-fiche.js?v=mgmt4t1"></script>
+<script src="mgmt-screens.js?v=mgmt4t1"></script>
 <script src="arene-etat.js?v=arene1"></script>
 <script src="arene-vue.js?v=arene1"></script>
 <script src="arene-ecran.js?v=arene1"></script>

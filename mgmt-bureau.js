@@ -65,14 +65,20 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
      6 → 7 sans perte. Lot 2B T2 bis : v8 ajoute le reste de semaines du
      calendrier d'âge à la racine de la sauvegarde. Les âges existants restent
      leur âge courant et le calendrier repart de là. Une v1 reste refusée.
-     Lot 2B T3 les départs (23/09) : v9 — la retraite d'âge existe, la ligne
-     porte retired:'age' à côté de retired:'medical' (validateMgmt l'accepte,
-     mgmtRepair ne l'efface plus). Rien à convertir sur une v8 : aucune
-     valeur 'age' ne peut y figurer, les âges et le reste de semaines du
-     calendrier sont conservés tels quels, et la semaine d'anniversaire de
-     chaque combattant se dérive de son identifiant à la lecture. Une v1
-     reste refusée. ==== */
-const MGMT_SAVE_VERSION=9;
+      Lot 2B T3 les départs (23/09) : v9 — la retraite d'âge existe, la ligne
+      porte retired:'age' à côté de retired:'medical' (validateMgmt l'accepte,
+      mgmtRepair ne l'efface plus). Rien à convertir sur une v8 : aucune
+      valeur 'age' ne peut y figurer, les âges et le reste de semaines du
+      calendrier sont conservés tels quels, et la semaine d'anniversaire de
+      chaque combattant se dérive de son identifiant à la lecture. Une v1
+      reste refusée. Lot 2B T3 bis les vétérans (24/09) : v10 — une date
+      d'entrée antérieure à l'ouverture existe (le passé dérivé des
+      fondateurs, mgmt-monde.js) : validateMgmt accepte born jusqu'à
+      −MGMT_EXT_FONDATEUR_SPREAD. Rien à convertir : aucune ligne d'une v9
+      ne peut porter un born négatif, la cohorte d'ouverture d'une partie
+      déjà commencée reste celle qu'elle porte — le monde d'une ancienne
+      sauvegarde ne bouge pas. Une v1 reste refusée. ==== */
+const MGMT_SAVE_VERSION=10;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){

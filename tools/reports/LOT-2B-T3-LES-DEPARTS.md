@@ -123,6 +123,43 @@ garanties que le mécanisme tient : quota tenu partout, cohortes qui
 passent la main, jeunesse réelle du monde (32 lignes de moins de 25 ans
 à 240 cycles, minimum 20 ans), lignes jamais supprimées.
 
+## 4 bis — T3 bis, le monde a déjà des vétérans
+
+*Ajustée le 25/09/2026 après la tranche T3 bis (décision d'Anthony du 24/09,
+`docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` §T3 bis). Le §4 ci-dessus mesurait la cohorte
+d'ouverture T1 bis : elle entre au cycle 0 avec 20 à 30 ans, personne n'atteint la retraite
+avant une dizaine d'années, et au cycle 60 plus aucun moins de 25 ans ne vit dans le
+monde. La T3 bis donne aux fondateurs un passé : leur date d'entrée dans le monde est
+dérivée dans le passé sur le flux séparé `'ext-fondateur'` — born à −round(u × 125)
+cycles, soit au plus 12,02 ans de recul ; aucun champ ajouté à la ligne, les dérivations
+existantes ne bougent pas d'un tirage, la loi de retraite (39-42 ans), l'âge des entrants
+(20 à 30 ans) et le quota de 30 vivants par catégorie ne changent pas.*
+
+Âges des lignes **extérieures vivantes** (graine 20260922, ouverture : 316 lignes
+extérieures pour 312 vivantes — quatre fondateurs sont nés avec une carrière déjà close
+avant l'ouverture, leurs lignes restent, le quota les a remplacés dès le cycle 0) :
+
+| Cycle | Années | Lignes totales | Vivantes ext. | Médiane | p10 | p90 | Moins de 25 ans | Départs cumulés |
+|---|---|---|---|---|---|---|---|---|
+| 0 | 0 | 316 | 312 | **31** | 24 | 37 | 33 (10,6 %) | 0 |
+| 10 | 1 | 325 | 312 | 31 | 25 | 37 | 27 (8,7 %) | **9** |
+| 30 | 2,9 | 345 | 312 | 32 | 26 | 38 | 15 (4,8 %) | 29 |
+| 60 | 5,8 | 392 | 312 | 33 | 27 | 38 | 14 (4,5 %) | 76 |
+| 120 | 11,5 | 521 | 312 | 33 | 24 | 39 | 36 (11,5 %) | 205 |
+| 240 | 23 | 748 | 312 | 33 | 26 | 38 | 17 (5,4 %) | 432 |
+
+Contre la cohorte jeune du §4 (médiane 25 à l'ouverture, zéro départ avant le cycle ~93,
+zéro moins de 25 ans au cycle 60), le monde d'ouverture est maintenant **une ligue
+installée** : âges vivants de 20 à 40 ans mesurés (la loi dérive 20 à 41 — le plus vieux
+vivant est borné par sa propre retraite dérivée), médiane 31 dès le cycle 0 — la médiane
+stable acceptée le 24/09 — et **les premiers départs tombent dans la première année de
+jeu** (neuf au cycle 10). À tout point de mesure de 0 à 240 cycles, la médiane reste
+entre 28 et 34 ans (31 → 33, sans vague) et des moins de 25 ans vivent dans le monde.
+
+Un vétéran arrive avec son passé : mesuré, le plus court palmarès des lignes de 36 ans
+et plus est de 25 combats (un 36 ans 14-11, entré au cycle −107) — un homme de 38 ans a
+un bilan cohérent avec ses années, jamais zéro combat.
+
 ## 5. Roster : la retraite d'âge sur l'horizon joué
 
 Sur vingt soirées réelles (deux ans de jeu), aucune retraite d'âge : le
@@ -142,6 +179,15 @@ identifiant à la lecture. `validateMgmt` accepte `'medical'` et `'age'`
 d'âge — le partant ne ressuscite pas. Test de survie : un retraité d'âge
 subit une sauvegarde puis un chargement sans changer d'état
 (`tests/mgmtBureau.test.js`).
+
+Lot 2B T3 bis (25/09) : `MGMT_SAVE_VERSION` 9 → 10, rien à convertir non
+plus — une date d'entrée antérieure à l'ouverture est désormais valide
+(`validateMgmt` accepte born jusqu'à −MGMT_EXT_FONDATEUR_SPREAD, au-delà
+réparation à la porte), mais aucune ligne d'une v9 ne peut en porter une :
+la cohorte d'ouverture d'une partie déjà commencée reste celle qu'elle
+porte, le monde d'une ancienne sauvegarde ne bouge pas. Test de survie du
+piège : une partie neuve avec ses fondateurs subit une sauvegarde puis un
+rechargement sans en perdre un seul (`tests/mgmtExterieur.test.js`, T3 bis).
 
 ## 7. Vérifications
 
