@@ -1022,7 +1022,9 @@ test('MGMT lot 4 T2 reprise — versions de chargement cohérentes et monde sans
   assert.ok(types.filter(t=>t==='voisin').length<=2,'les trois voisins de poids mouche ne reviennent pas');
 });
 
-test('MGMT lot 4 T1 — palette prune centralisée et appliquée aux panneaux', () => {
+/* ==== [ANCRE: MGMT_LOT4_FIDELITE_PALETTE] — La maquette 02 remplace le
+   relief inventé à la T1 par ses aplats translucides et son halo zénithal. ==== */
+test('MGMT lot 4 — palette et fond exacts de la maquette 02', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   const rule = sel => {
     const i = src.indexOf(sel);
@@ -1030,11 +1032,15 @@ test('MGMT lot 4 T1 — palette prune centralisée et appliquée aux panneaux', 
     return src.slice(i, src.indexOf('}', i));
   };
   const app = rule('#app.mgmt{');
-  assert.ok(app.includes('var(--mgmt-plum)')&&app.includes('var(--mgmt-plum-deep)'), '#app.mgmt : fond prune');
+  assert.ok(app.includes('radial-gradient(ellipse 900px 600px at 50% 0%,rgba(255,200,61,.16),rgba(255,200,61,0) 70%)'), 'halo jaune de la maquette 02');
+  assert.ok(app.includes('var(--mgmt-plum) 55%')&&app.includes('var(--mgmt-plum-deep)'), '#app.mgmt : fond prune');
+  for(const token of ['--mgmt-plum:#2B2327','--mgmt-plum-deep:#211B1E','--mgmt-ink:#FFF8EE','--mgmt-secondary:#D9CCC0','--mgmt-yellow:#FFC83D','--mgmt-red:#E5322D']){
+    assert.ok(src.includes(token), `${token} : couleur de maquette`);
+  }
   const col = rule('.mgmt-col{');
   assert.ok(col.includes('var(--mgmt-panel)'), '.mgmt-col : panneau à jeton');
   assert.ok(col.includes('var(--mgmt-edge)'), '.mgmt-col : bordures à jeton');
-  assert.ok(col.includes('0 8px 24px rgba(0,0,0,.6)'), '.mgmt-col : relief prescrit');
+  assert.ok(!col.includes('box-shadow'), '.mgmt-col : pas de relief inventé sur les panneaux');
   assert.ok(src.includes('body.mgmt{background:var(--mgmt-plum-deep)}'), 'body.mgmt : confinement au ton du bas');
   for(const old of ['#0A0704','#332818','#6B5636','#3A2E1C']){
     assert.ok(!src.includes(old), `aucune trace de l\u2019ancienne valeur ${old}`);
