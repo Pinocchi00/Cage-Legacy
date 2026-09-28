@@ -124,16 +124,20 @@ test('MGMT T7 — le constat « effectif trop mince » apparaît quand une caté
     'le top 15 mondial se lit sur la tuile');
   assert.ok(legere[0].sub.includes(`${attendus.legere} dans le top 15 mondial`),
     'le top 15 mondial se lit aussi sur la catégorie mince (la suspension ne retire pas du classement)');
-  /* Deux groupes titrés : hommes (8 catégories) puis femmes (4). */
+  /* Deux groupes titrés : hommes (8 catégories) puis femmes (4).
+     Décision d'Anthony du 28/09/2026 : dans le management, une catégorie
+     féminine s'affiche « … féminin » (MGMT_DIVISION_FEMININ). */
   assert.equal((html.match(/mgmt-org-hd/g)||[]).length, 2, 'deux titres de groupe');
   assert.ok(html.indexOf('Hommes')>=0&&html.indexOf('Femmes')>=0, 'les groupes hommes et femmes sont titrés');
   assert.ok(html.indexOf('Hommes')<html.indexOf('Femmes')
     &&html.indexOf('Femmes')<html.indexOf('Poids paille'),
     'les catégories de femmes suivent le groupe « Femmes »');
-  assert.equal(tiles.indexOf(tiles.find(t=>t.nm==='Poids paille')), 8,
+  assert.equal(tiles.indexOf(tiles.find(t=>t.nm==='Poids paille féminin')), 8,
     'les huit catégories d’hommes précèdent les quatre de femmes');
-  assert.ok(tiles.slice(8).every(t=>['Poids paille','Poids mouche','Poids coq','Poids plume'].includes(t.nm)),
-    'le groupe des femmes porte ses quatre catégories');
+  assert.ok(tiles.slice(8).every(t=>['Poids paille féminin','Poids mouche féminin','Poids coq féminin','Poids plume féminin'].includes(t.nm)),
+    'le groupe des femmes porte ses quatre catégories, au libellé féminin');
+  assert.ok(tiles.slice(0,8).every(t=>!t.nm.includes('féminin')),
+    'aucune catégorie d’hommes ne porte le libellé féminin');
 });
 
 test('MGMT T7 — les recettes des dernières soirées, telles qu’elles existent ; rien d’inventé', () => {

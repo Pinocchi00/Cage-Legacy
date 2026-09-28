@@ -36,7 +36,7 @@ function mgmtLineCard(f){
      : suivie en interne (f.raison, f.level), jamais affichée ici. */
   return `<div class="opp-top"><span class="mgmt-fname">${esc(f.name)}</span>`
     +`<span class="opp-rec">${rec}</span></div>`
-    +`<div class="mgmt-meta">${esc(f.age)} ans · ${esc(f.divName)}</div>`;
+    +`<div class="mgmt-meta">${esc(f.age)} ans · ${esc(mgmtDivisionLabel(f.div))}</div>`;
 }
 
 /** Déplace la sélection dans la pile ouverte (lot 1e-7, flèches). */
@@ -107,7 +107,7 @@ function mgmtBulkFightHtml(m,aff,f,idx){
   const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
   const vs=(fa&&fb)?`${fa.name} contre ${fb.name}`:'Combat';
   const rec=x=>`${x.W}-${x.L}-${x.D}`;
-  const div=(fa&&fb)?(fa.divName===fb.divName?fa.divName:`${fa.divName} / ${fb.divName}`):'';
+  const div=(fa&&fb)?(fa.div===fb.div?mgmtDivisionLabel(fa.div):`${mgmtDivisionLabel(fa.div)} / ${mgmtDivisionLabel(fb.div)}`):'';
   const sub=(fa&&fb)?`${div} · ${rec(fa)} contre ${rec(fb)}`:'';
   const open=idx===aff.marked;
   const cls='opp mgmt-fight'+(open?' marked':'');
@@ -153,7 +153,7 @@ function mgmtBulkSubject(m,a){
   for(const f of a.fights){
     const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
     if(!fa||!fb) continue;
-    const d=fa.divName===fb.divName?fa.divName:`${fa.divName} / ${fb.divName}`;
+    const d=fa.div===fb.div?mgmtDivisionLabel(fa.div):`${mgmtDivisionLabel(fa.div)} / ${mgmtDivisionLabel(fb.div)}`;
     if(!divs.includes(d)) divs.push(d);
   }
   return divs.length>0?divs.join(' · '):'Carte';
@@ -165,7 +165,7 @@ function mgmtAffairSubject(m,a){
   const fa=mgmtFighterById(m,a.a), fb=mgmtFighterById(m,a.b);
   if(!fa||!fb) return 'Affaire';
   const rec=f=>`${f.W}-${f.L}-${f.D}`;
-  const div=fa.divName===fb.divName?fa.divName:`${fa.divName} / ${fb.divName}`;
+  const div=fa.div===fb.div?mgmtDivisionLabel(fa.div):`${mgmtDivisionLabel(fa.div)} / ${mgmtDivisionLabel(fb.div)}`;
   return `${div} · ${rec(fa)} contre ${rec(fb)}`;
 }
 

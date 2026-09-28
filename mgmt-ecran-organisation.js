@@ -13,10 +13,11 @@
      dirait toujours le même nombre que l'effectif. Le constat factuel
      « effectif trop mince » apparaît quand une catégorie ne permet plus
      de composer un combat — moins de deux disponibles. Tout se dérive à
-     la lecture, rien n'est stocké (règle du bureau, CDC §3). Les tuiles
-     se rangent en deux groupes titrés, hommes et femmes (les divisions
-     H et F d'engine.js) : les noms de catégorie se doublent autrement
-     (deux « Poids mouche » et coq et plume), jamais aucun nom inventé.
+      la lecture, rien n'est stocké (règle du bureau, CDC §3). Les tuiles
+      se rangent en deux groupes titrés, hommes et femmes (les divisions
+      H et F d'engine.js) : une catégorie féminine porte son libellé
+      « … féminin » (MGMT_DIVISION_FEMININ, mgmt-ecran-carte.js), jamais
+      aucun nom inventé.
    - les finances : la trésorerie (m.treasury, entier k$) et les recettes
      nettes des dernières soirées (m.recettes), telles qu'elles existent —
      aucune recette, aucune ligne de soirées.
@@ -67,7 +68,7 @@ function mgmtOrgGroupHtml(m,g,rows){
       :r.total+(r.total===1?' combattant, ':' combattants, ')
         +r.top15+' dans le top 15 mondial, '
         +(r.dispo<2?MGMT_ORG_LABELS.thin:r.dispo+(r.dispo===1?' disponible':' disponibles'));
-    return `<div class="mgmt-org-cat${thin?' thin':''}"><div class="mgmt-org-nm">${esc(r.div.name)}</div>`
+    return `<div class="mgmt-org-cat${thin?' thin':''}"><div class="mgmt-org-nm">${esc(mgmtDivisionLabel(r.div))}</div>`
       +`<div class="mgmt-org-sub">${esc(sub)}</div></div>`;
   }).join('');
   return `<div class="mgmt-org-group"><div class="mgmt-org-hd">${esc(g)}</div>`
