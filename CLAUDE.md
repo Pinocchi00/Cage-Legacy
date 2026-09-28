@@ -16,7 +16,8 @@ travail de Claude.
 
 ## 0. Rôle de Claude sur ce dépôt
 
-- **Le code est écrit par OpenCode (modèle GLM 5.3, offre Go).** Claude
+- **Le code est écrit par OpenCode (modèle GLM 5.3 Flash, offre Go — le même
+  modèle depuis le début du projet, précisé par Anthony le 28/09/2026).** Claude
   **supervise et orchestre** : il prépare les contrats de lot, découpe en tranches,
   rédige les consignes envoyées à OpenCode, relit les diffs produits, lance les
   vérifications et rend compte à Anthony.
