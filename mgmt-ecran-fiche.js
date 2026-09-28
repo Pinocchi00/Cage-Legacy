@@ -2,6 +2,138 @@
 /* ==== [ANCRE: MGMT_LOT3_T5_HISTORIQUE] — Lot 3 T5 : fiche consultable,
    combats passés et rejeu à partir de leurs traces auto-portantes. ==== */
 let MGMT_FICHE={id:null,retour:'mgmt_carte',cursor:0};
+/* ==== [ANCRE: MGMT_LOT4_T5_FICHE] — Lot 4 T5 : lecture dérivée, rejeux
+   gardés seulement en mémoire par identité de trace ; jamais en sauvegarde. ==== */
+const MGMT_FICHE_REJEUX=new WeakMap();
+function mgmtFicheRejeu(t){
+  if(!MGMT_FICHE_REJEUX.has(t)) MGMT_FICHE_REJEUX.set(t,{replay:mgmtReplayFight(t)});
+  return MGMT_FICHE_REJEUX.get(t).replay;
+}
+function mgmtFicheLigne(m,id){
+  const f=mgmtFighterById(m,id);
+  if(f) return {f,trace:null};
+  const line=Array.isArray(m.exterieur)&&m.exterieur.find(o=>o.id===id);
+  if(!line) return null;
+  const trace=mgmtExteriorTrace(line,m.cycle);
+  if(!trace) return null;
+  return {f:{id:line.id,div:line.div,divName:divById(line.div).name,
+    name:trace.name,first:trace.first,last:trace.last,age:trace.age,
+    W:trace.pro.W,L:trace.pro.L,D:0},trace};
+}
+function mgmtFicheSituation(m,f,scope){
+  const rank=mgmtDivisionRank(m,f,scope);
+  if(rank===null) return 'Hors classement';
+  return rank===16?'Aux portes du top 15':mgmtRankLabel(rank);
+}
+function mgmtFicheZones(m,f){
+  /* La carte décrit sa forme récente : dix combats au plus, sans limiter
+     l'historique ni les liens Revoir. */
+  const hist=mgmtFightHistory(m,f).slice(-10), zones=mgmtFicheZonesVides();
+  for(const t of hist){
+    const side=t.a.id===f.id?'A':'B';
+    const part=mgmtFicheZonesCombat(t,side);
+    for(let i=0;i<3;i++) zones.rings[i]+=part.rings[i];
+    for(let i=0;i<8;i++){
+      zones.bord[i]+=part.bord[i];
+      zones.pin[i].count+=part.pin[i].count;
+      zones.pin[i].x+=part.pin[i].x;
+      zones.pin[i].y+=part.pin[i].y;
+    }
+  }
+  return zones;
+}
+/* Trois couronnes selon le rayon physique (mètres) : centre < 38 % du
+   rayon inscrit de l'arène, mi-espace < 74 %, bord au-delà. Huit angles
+   ÉGAUX ne servent qu'à situer le rouge ; ils ne pondèrent pas la présence.
+   Les positions proviennent exclusivement d'areneMoment (lot 3 T3). */
+function mgmtFicheZonesVides(){
+  return {rings:[0,0,0],bord:Array(8).fill(0),
+    pin:Array.from({length:8},()=>({count:0,x:0,y:0}))};
+}
+function mgmtFicheZoneAjouter(z,own,opp,phase,posClinch){
+  const r=Math.hypot(own.x,own.y);
+  const ring=r<ARENE_RS*0.38?0:r<ARENE_RS*0.74?1:2;
+  z.rings[ring]++;
+  if(ring!==2) return;
+  const angle=(Math.atan2(own.y,own.x)+Math.PI*2)%(Math.PI*2);
+  const sector=Math.floor(angle*8/(Math.PI*2));
+  z.bord[sector]++;
+  if((phase==='clinch'&&posClinch==='cage'||phase==='debout')
+    &&areneBordDist(own)<0.75&&areneBordDist(own)<areneBordDist(opp)){
+    z.pin[sector].count++;
+    z.pin[sector].x+=own.x;
+    z.pin[sector].y+=own.y;
+  }
+}
+function mgmtFicheZonesCombat(t,side){
+  const replay=mgmtFicheRejeu(t), cached=MGMT_FICHE_REJEUX.get(t);
+  if(cached[side]) return cached[side];
+  const zones=mgmtFicheZonesVides();
+  if(replay&&areneVerdictFidele(t,replay)){
+    const session=areneConstruire(replay,{a:t.a.name,b:t.b.name});
+    // L'arène fournit les coordonnées : on ne recalcule aucune trajectoire.
+    for(let sec=5;sec<=session.dureeCombat;sec+=5){
+      const e=areneMoment(session,sec), own=side==='A'?{x:e.ax,y:e.ay}:{x:e.bx,y:e.by};
+      const opp=side==='A'?{x:e.bx,y:e.by}:{x:e.ax,y:e.ay};
+      mgmtFicheZoneAjouter(zones,own,opp,e.phase,e.posClinch);
+    }
+  }
+  cached[side]=zones;
+  return cached[side];
+}
+function mgmtFicheOctogone(m,f){
+  return mgmtFicheOctogoneZones(mgmtFicheZones(m,f));
+}
+function mgmtFicheOctogoneZones(zones){
+  const total=zones.rings.reduce((sum,n)=>sum+n,0);
+  if(!total) return '<div class="mgmt-fiche-empty">Aucune trajectoire enregistrée.</div>';
+  /* Trois anneaux pleins, sans direction jaune arbitraire. La lumière
+     reflète la part de temps réellement passée dans chaque couronne. */
+  const light=n=>n?(0.16+0.6*n/total).toFixed(2):'0';
+  const marks=`<circle cx="100" cy="100" r="80" fill="none" stroke="var(--mgmt-yellow)" stroke-width="20" opacity="${light(zones.rings[2])}"/>`
+    +`<circle cx="100" cy="100" r="52" fill="none" stroke="var(--mgmt-yellow)" stroke-width="35" opacity="${light(zones.rings[1])}"/>`
+    +`<circle cx="100" cy="100" r="34" fill="var(--mgmt-yellow)" opacity="${light(zones.rings[0])}"/>`;
+  /* Rouge : au moins 3 instants, 25 % du temps sur CET angle du bord et
+     5 % de tout le temps au bord. La direction est la moyenne des vraies
+     coordonnées d'enfermement, jamais le centre d'une case. */
+  const borderTotal=zones.rings[2];
+  const eligible=zones.pin.map((p,i)=>({p,i})).filter(({p,i})=>p.count>=3
+    &&p.count/zones.bord[i]>=0.25&&p.count/borderTotal>=0.05);
+  let danger='';
+  if(eligible.length){
+    /* Des angles à égalité se combinent : un départage par numéro de
+       secteur ferait pencher la carte d'un côté même sur son miroir. */
+    const max=Math.max(...eligible.map(({p})=>p.count));
+    const {x,y}=eligible.filter(({p})=>p.count===max)
+      .reduce((sum,{p})=>({x:sum.x+p.x,y:sum.y+p.y}),{x:0,y:0});
+    const len=Math.hypot(x,y);
+    if(len>0){
+      const cx=(100+83*x/len).toFixed(1),cy=(100+83*y/len).toFixed(1);
+      danger=`<circle class="mgmt-fiche-pin" cx="${cx}" cy="${cy}" r="15" fill="var(--mgmt-red)" opacity="0.9"/>`;
+    }
+  }
+  return `<div class="mgmt-fiche-map"><svg viewBox="0 0 200 200" role="img" aria-label="Zones de combat : jaune, présence ; rouge, enfermé contre le grillage">`
+    +`<defs><clipPath id="mgmt-fiche-oct"><polygon points="62,8 138,8 192,62 192,138 138,192 62,192 8,138 8,62"/></clipPath></defs>`
+    +`<polygon points="62,8 138,8 192,62 192,138 138,192 62,192 8,138 8,62" fill="var(--mgmt-plum-deep)" stroke="var(--mgmt-edge)" stroke-width="2"/>`
+    +`<g clip-path="url(#mgmt-fiche-oct)">${marks}${danger}</g></svg><span>Jaune : zones de combat.<br>Rouge : contre le grillage.</span></div>`;
+}
+function mgmtFicheParcours(trace){
+  if(!trace) return '';
+  const duration=o=>{
+    if(o.from===null||o.to===null) return '';
+    const weeks=(o.to-o.from+1)*MGMT_EVENT_WEEKS;
+    const span=weeks<MGMT_EXT_YEAR_WEEKS
+      ?`${Math.max(1,Math.round(weeks*12/MGMT_EXT_YEAR_WEEKS))} mois`
+      :`${(weeks/MGMT_EXT_YEAR_WEEKS).toFixed(1).replace('.',',')} ans`;
+    const when=o.to<0?'Avant l’ouverture':o.from<0?'Avant et depuis l’ouverture':'Depuis l’ouverture';
+    return ` · ${when}, environ ${span}`;
+  };
+  const orgs=trace.orgs.map(o=>`<div class="mgmt-fiche-org"><strong>${o.name?esc(o.name):''}</strong>`
+    +`${o.fights?` · ${esc(o.fights)} ${o.fights===1?'combat':'combats'}`:''}`
+    +`${duration(o)}</div>`).join('');
+  return `<aside class="mgmt-fiche-side"><h3>Sa trajectoire</h3><div class="mgmt-fiche-org">Amateur · ${esc(trace.amateur.W)}-${esc(trace.amateur.L)}</div>`
+    +orgs+`<div class="mgmt-fiche-org">Professionnel · ${esc(trace.pro.W)}-${esc(trace.pro.L)}</div></aside>`;
+}
 function mgmtBureauFicheCard(m,f){
   if(!f) return '';
   return `<div class="opp" style="cursor:default">${mgmtLineCard(f)}`
@@ -17,24 +149,33 @@ function mgmtHistoriqueHtml(m,f){
     /* La trace ne garde que la famille ; le moteur reconstitue le libellé
        exact. En cas de divergence après évolution du moteur, l'issue stockée
        prévaut et aucun résultat rejoué contradictoire n'est affiché. */
-    const replay=mgmtReplayFight(t);
+    const replay=mgmtFicheRejeu(t);
     const methode=(replay&&areneVerdictFidele(t,replay))?replay.method:(MGMT_FAMILY_LABELS[t.family]||t.family);
-    return `<div class="opp" style="cursor:default${k===MGMT_FICHE.cursor?';border-color:var(--gold-d)':''}">`
-      +`<div class="opp-nm">${esc(issue)} · ${esc(adversaire.name)}</div>`
-      +`<div class="mgmt-meta">${esc(methode)} · Round ${esc(t.round)} · Cycle ${esc(t.c)}</div>`
-      +`<button class="mgmt-next" style="width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtHistoriqueRevoir(${i})">Revoir le combat</button>`
+    return `<div class="mgmt-fiche-fight${k===MGMT_FICHE.cursor?' selected':''}">`
+      +`<div><strong>${esc(issue)} · ${esc(adversaire.name)}</strong>`
+      +`<div class="mgmt-fiche-detail">${esc(methode)} · Round ${esc(t.round)} · Cycle ${esc(t.c)}</div></div>`
+      +`<button class="mgmt-next" onclick="CL.mgmtHistoriqueRevoir(${i})">Revoir</button>`
       +`</div>`;
   }).join('');
 }
 function scr_mgmt_fiche(){
-  const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id);
-  if(!f) return scr_mgmt_bureau();
-  return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
-    +`<div><div class="eyebrow gold">Split — Management</div><h2 class="disp">${esc(f.name)}</h2></div>`
-    +`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.mgmtFicheRetour()">← Retour</button></div>`
-    +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr)">`
-    +`<div class="mgmt-col">${mgmtCartFicheHtml(m,f,false)}</div>`
-    +`<div class="mgmt-col"><div class="eyebrow">Combats</div>${mgmtHistoriqueHtml(m,f)}</div>`
-    +`</div></div>`;
+  const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id);
+  if(!line) return scr_mgmt_bureau();
+  const {f,trace}=line;
+  const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):'Split';
+  const div=divById(f.div), record=`${f.W}-${f.L}${f.D?'-'+f.D:''}`;
+  const ranks=trace?`Mondial : ${mgmtFicheSituation(m,f,'world')}`
+    :`Chez Split : ${mgmtFicheSituation(m,f,'organization')} · Mondial : ${mgmtFicheSituation(m,f,'world')}`;
+  const attrs=[['Bilan',record],['Taille',`${(profile.height/100).toFixed(2).replace('.',',')} m`],
+    ['Allonge',`${(profile.reach/100).toFixed(2).replace('.',',')} m`]];
+  return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head">`
+    +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
+    +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)}</h2>`
+    +`<p>${esc(div.name)}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p></div>`
+    +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div></div>`
+    +`<div class="mgmt-cols mgmt-fiche-cols"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
+    +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}</section>`
+    +`${mgmtFicheParcours(trace)}</div></div>`;
 }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
