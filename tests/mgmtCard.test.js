@@ -1299,3 +1299,105 @@ test('MGMT T2 intégration — l\u2019écran carte rend le roster généré', ()
   assert.equal(st.clickable, st.rows, 'roster frais : tout le monde est sélectionnable (ni suspendu, ni engagé)');
 });
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_LOT4_T3_TESTS] — Lot 4 T3 (docs/LOT-4-LA-PEAU-DU-JEU.md
+   §3 T3) : l'écran de composition prend la forme de la maquette 04
+   (maquettes/04-booker-un-combat.html). Aucune règle de composition ne
+   change (mgmt-carte.js intact) — les tests du geste T2 ci-dessus restent
+   la loi. Dirigés ici : la réserve 2 du lot 2 (une ligne non choisissable
+   ne s'allume ni au survol ni au curseur clavier comme une ligne
+   choisissable), la réserve 3 (à 1920, la place en plus va à la carte
+   autant qu'à la liste — #app.mgmt déplafonné), la forme de la maquette
+   (face-à-face et octogone au premier choix posé) et la visibilité de
+   l'élément sous le curseur (le clavier reste entier : ui-11-keys et
+   l'enregistrement mgmt_carte de mgmt-screens.js ne changent pas). ==== */
+
+test('MGMT lot 4 T3 réserve 2 — la ligne suspendue ne s\u2019allume ni au survol ni au curseur clavier', () => {
+  const win = newGameWindow();
+  enterMgmt(win,321);
+  ctlRoster(win);
+  win.eval(`CL.mgmtCarte(); render();`);
+  const susp = win.eval(`mgmtFighterById(G.mgmt,'x5').name`);
+  const rows = () => Array.from(win.document.querySelectorAll('.mgmt-book-row'));
+  const rowOf = name => rows().find(e=>e.textContent.includes(name));
+  const row = rowOf(susp);
+  assert.ok(row, 'la ligne suspendue est rendue');
+  assert.ok(row.className.includes('mgmt-off'), 'elle porte la classe non choisissable');
+  assert.ok(!row.className.includes('mgmt-can'), 'elle n\u2019est pas marquée choisissable');
+  assert.equal(row.getAttribute('onclick'), null, 'elle est muette au clic');
+  /* Réserve 2 : le CSS exclut la ligne non choisissable du survol qui
+     allume les autres — posé sous [ANCRE: MGMT_LOT4_T3_BOOKER]. */
+  const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(src.includes('.mgmt-book-list .opp:not(.mgmt-can):hover{background:transparent;color:inherit}'),
+    'la règle de survol exclut les lignes non choisissables');
+  /* Au curseur clavier : elle est repérée (l\u2019élément visé se voit),
+     mais sans l\u2019accent d\u2019une ligne choisissable. */
+  const idx = win.eval(`mgmtCartRows(G.mgmt).findIndex(f=>f.id==='x5')`);
+  win.eval(`MGMT_CART.cursor=${idx}; render();`);
+  const rowCur = rowOf(susp);
+  assert.ok(rowCur.className.includes('mgmt-offcur'), 'sous le curseur : repérée autrement');
+  assert.ok(!rowCur.className.includes('mgmt-cur'), 'sous le curseur : jamais l\u2019accent d\u2019une ligne choisissable');
+  /* Et le geste ne pose rien : la garde reste celle de la T2. */
+  win.eval(`mgmtKeyCartAct()`);
+  assert.equal(win.eval(`MGMT_CART.pick`), null, 'Entrée sur la ligne suspendue : aucun premier choix');
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 0, 'aucun combat posé');
+});
+
+test('MGMT lot 4 T3 réserve 3 — à 1920, la place en plus va à la carte autant qu\u2019à la liste', () => {
+  const win = newGameWindow();
+  enterMgmt(win,322);
+  ctlRoster(win);
+  win.eval(`CL.mgmtCarte(); render();`);
+  /* La forme du partage : les deux pistes du bas sont flexibles — aucune
+     colonne fixe ne capte la place en plus à 1920 (réserve 3 du lot 2). */
+  const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(/#app\.mgmt\{max-width:1920px/.test(src), 'le plafond du bureau est levé à 1920px');
+  assert.ok(src.includes('grid-template-columns:minmax(0,1fr) minmax(440px,1fr)'),
+    'carte et liste : deux pistes flexibles, la place en plus se partage');
+  /* La liste rend ses lignes dans la piste droite : la structure porte bien
+     les deux moitiés de l\u2019écran. */
+  assert.ok(win.document.querySelector('.mgmt-book-cols .mgmt-book-pane'),
+    'la carte occupe une piste');
+  assert.ok(win.document.querySelector('.mgmt-book-list'),
+    'la liste des adversaires occupe l\u2019autre');
+});
+
+test('MGMT lot 4 T3 forme — le face-à-face de la maquette 04 apparaît au premier choix, le clavier reste entier', () => {
+  const win = newGameWindow();
+  enterMgmt(win,323);
+  ctlRoster(win);
+  win.eval(`CL.mgmtCarte(); render();`);
+  /* Sans premier choix : le dossier de la ligne visée, pas d\u2019octogone —
+     l\u2019affrontement n\u2019existe pas encore (§1 : un bloc vide n\u2019apparaît pas). */
+  assert.ok(win.document.querySelector('.mgmt-book-solo'), 'dossier seul à l\u2019ouverture');
+  assert.equal(win.document.querySelector('.mgmt-book-duo'), null, 'pas de face-à-face sans premier choix');
+  assert.equal(win.document.querySelector('.mgmt-book-vsglyph'), null, 'pas de VS sans combat à composer');
+  const [a,b] = ctlPair(win);
+  const nmOf = id => { const o=JSON.parse(win.eval(`JSON.stringify(mgmtFighterById(G.mgmt,'${id}'))`)); return [o.first,o.last]; };
+  win.eval(`CL.mgmtPick('${a}')`);
+  const [aP,aN] = nmOf(a);
+  const soloNm = win.document.querySelector('.mgmt-book-solo .mgmt-book-nm').textContent;
+  assert.ok(soloNm.includes(aP)&&soloNm.includes(aN), 'le choisi est montré en fiche');
+  /* Ligne suivante visée au clavier : le face-à-face apparaît — choisi
+     contre le pointé, l\u2019octogone entre eux. */
+  win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}))`);
+  assert.ok(win.document.querySelector('.mgmt-book-duo'), 'le face-à-face existe au premier choix');
+  assert.ok(win.document.querySelector('.mgmt-book-vs svg'), 'l\u2019octogone est posé entre les deux fiches');
+  assert.ok(win.document.querySelector('.mgmt-book-vsglyph').textContent === 'VS', 'le VS se lit');
+  const [bP,bN] = nmOf(b);
+  const versaNoms = Array.from(win.document.querySelectorAll('.mgmt-book-duo .mgmt-book-nm')).map(e=>e.textContent);
+  assert.ok(versaNoms[0].includes(aP)&&versaNoms[0].includes(aN)
+    &&versaNoms[1].includes(bP)&&versaNoms[1].includes(bN), 'les deux fiches portent les noms du jeu');
+  /* Le clavier compose toujours : Entrée pose le combat visé (ui-11-keys
+     et l\u2019enregistrement mgmt_carte, inchangés). */
+  win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}))`);
+  const f = JSON.parse(win.eval(`JSON.stringify(G.mgmt.card.main[0])`));
+  assert.deepEqual([f.a,f.b], [a,b], 'Entrée : le combat est posé, comme avant');
+  assert.equal(f.slot, 'main', 'slot main');
+  /* Combat posé : il se lit sur la carte, le face-à-face retombe sur le
+     dossier de la ligne visée. */
+  const html = win.document.getElementById('app').innerHTML;
+  assert.ok(html.includes(' contre '), 'le combat posé se lit sur la carte');
+  assert.ok(win.document.querySelector('.mgmt-book-solo'), 'retour au dossier de la liste');
+});
+/* ==== [FIN ANCRE] ==== */
