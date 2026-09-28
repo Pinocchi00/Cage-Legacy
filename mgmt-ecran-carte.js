@@ -31,6 +31,24 @@ let MGMT_CART={cursor:0,pick:null};
 
 function mgmtCartReset(){ MGMT_CART={cursor:0,pick:null}; }
 
+/* ==== [ANCRE: MGMT_DIVISION_FEMININ] — décision d'Anthony du 28/09/2026 :
+   dans le management, une catégorie féminine s'affiche « Poids mouche
+   féminin », « Poids paille féminin », etc. — les divisions F d'engine.js
+   portent le même nom que les H. Une seule fonction de libellé, dérivée de
+   la division À LA LECTURE : rien n'est stocké, les sauvegardes ne changent
+   pas, le libellé d'engine.js reste inchangé et la carrière ne l'utilise
+   pas. mgmt-ecran-semaine.js (autre session) n'a rien à convertir
+   aujourd'hui — il n'affiche aucune catégorie en direct, il passe par
+   mgmtLineCard/mgmtAffairSubject/mgmtBulkSubject (mgmt-screens.js, déjà
+   convertis) ; s'il en affiche une un jour, il appelle mgmtDivisionLabel
+   avec l'identifiant ou l'objet division. ==== */
+function mgmtDivisionLabel(div){
+  const d=(typeof div==='string')?divById(div):div;
+  if(!d||!d.name) return '';
+  return d.gender==='F' ? d.name+' féminin' : d.name;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Libellé d'un rang : « 1ʳᵉ », « 2ᵉ »… Vide sans rang. */
 function mgmtRankLabel(rank){
   if(rank===1) return '1ʳᵉ';
@@ -61,7 +79,7 @@ function mgmtCartRowHtml(m,f,i,state){
   if(isCur&&!isPick) cls.push(sel?'mgmt-cur':'mgmt-offcur');
   const style=sel?'':' style="cursor:default"';
   const open=sel?` onclick="CL.mgmtPick('${f.id}')"`:'';
-  const meta=`${f.divName} · ${rk}${status?' · '+status:''}`;
+  const meta=`${mgmtDivisionLabel(f.div)} · ${rk}${status?' · '+status:''}`;
   return `<div class="${cls.join(' ')}"${style}${open}>`
     +`<div class="opp-top"><span class="opp-nm">${esc(f.name)}</span><span class="opp-rec">${esc(f.W)}-${esc(f.L)}-${esc(f.D)}</span></div>`
     +`<div class="mgmt-book-sub">${esc(meta)}</div>`
@@ -77,7 +95,7 @@ function mgmtCartSlotHtml(m,i,f){
   }
   const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
   const rec=x=>`${x.W}-${x.L}-${x.D}`;
-  const meta=(fa&&fb)?`${fa.divName} · ${rec(fa)} contre ${rec(fb)}`:'';
+  const meta=(fa&&fb)?`${mgmtDivisionLabel(fa.div)} · ${rec(fa)} contre ${rec(fb)}`:'';
   return `<div class="opp mgmt-fight" style="cursor:default">`
     +`<span class="opp-nm">${esc(fa?fa.name:'?')} contre ${esc(fb?fb.name:'?')}</span>`
     +`<div style="font-size:13px;color:var(--muted);margin-top:2px">${esc(meta)}</div>`
@@ -92,7 +110,7 @@ function mgmtCartSlotHtml(m,i,f){
 function mgmtCartFicheHtml(m,f,ouvrir=true){
   if(!f) return '';
   const rank=mgmtDivisionRank(m,f);
-  const meta=`${f.divName} · ${mgmtRankLabel(rank)} · ${f.age} ans`;
+  const meta=`${mgmtDivisionLabel(f.div)} · ${mgmtRankLabel(rank)} · ${f.age} ans`;
   return `<div class="opp" style="cursor:default">`
     +`<div class="opp-top"><span class="mgmt-fname">${esc(f.name)}</span><span class="opp-rec">${esc(f.W)}-${esc(f.L)}-${esc(f.D)}</span></div>`
      +`<div style="font-size:13px;color:var(--muted);margin-top:4px">${esc(meta)}</div>`
@@ -111,7 +129,7 @@ function mgmtCartFicheHtml(m,f,ouvrir=true){
 function mgmtBookFighterHtml(m,f,side){
   if(!f) return '';
   const rank=mgmtDivisionRank(m,f);
-  const bits=[`${f.W}-${f.L}-${f.D}`,f.divName,mgmtRankLabel(rank),`${f.age} ans`].filter(Boolean);
+  const bits=[`${f.W}-${f.L}-${f.D}`,mgmtDivisionLabel(f.div),mgmtRankLabel(rank),`${f.age} ans`].filter(Boolean);
   if(side==='b') bits.reverse();
   const nm=(typeof f.first==='string'&&typeof f.last==='string')
     ?esc(f.first)+'<br>'+esc(f.last):esc(f.name);
@@ -136,7 +154,7 @@ function mgmtBookVsHtml(){
 function mgmtCartPrelimHtml(m,f){
   const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
   const rec=x=>`${x.W}-${x.L}-${x.D}`;
-  const meta=(fa&&fb)?`${fa.divName} · ${rec(fa)} contre ${rec(fb)}`:'';
+  const meta=(fa&&fb)?`${mgmtDivisionLabel(fa.div)} · ${rec(fa)} contre ${rec(fb)}`:'';
   return `<div class="opp mgmt-fight" style="cursor:default">`
     +`<span class="opp-nm">${esc(fa?fa.name:'?')} contre ${esc(fb?fb.name:'?')}</span>`
     +`<div style="font-size:13px;color:var(--muted);margin-top:2px">${esc(meta)}</div>`
@@ -200,11 +218,11 @@ function scr_mgmt_carte(){
   }else{
     let lastDiv=null;
     shown.forEach((f,i)=>{
-      if(f.div!==lastDiv){ listHtml+=`<div class="eyebrow mt">${esc(f.divName)}</div>`; lastDiv=f.div; }
+      if(f.div!==lastDiv){ listHtml+=`<div class="eyebrow mt">${esc(mgmtDivisionLabel(f.div))}</div>`; lastDiv=f.div; }
       listHtml+=mgmtCartRowHtml(m,f,i,state);
     });
   }
-  const listHead=esc(pickF?`Adversaires — ${pickF.divName}`:MGMT_CART_LABELS.list);
+  const listHead=esc(pickF?`Adversaires — ${mgmtDivisionLabel(pickF.div)}`:MGMT_CART_LABELS.list);
   const hint=(pickF&&shown.every(f=>f.id!==pickF.id&&!mgmtSelectable(m,f,MGMT_CART.pick)))
     ?esc(MGMT_CART_LABELS.empty)
     :(full?esc(MGMT_CART_LABELS.complete):(pickF?'':esc(MGMT_CART_LABELS.hint)));

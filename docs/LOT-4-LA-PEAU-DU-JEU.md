@@ -129,6 +129,18 @@ L'écran d'accueil du management remplace l'actuel bureau.
 - Le bloc « Ce qui se dit » de la maquette **n'apparaît pas** : il attend la
   presse du lot 5.
 
+**Relecture du 28/09 — acceptée après une reprise** (`7a43823`, `1791097`, Sol).
+Carte principale en tête avec les deux rangs, état « compose » expliqué par
+l'interface (QO-10), réplique de Leïla limitée à ~65 caractères par ligne.
+Le monde : au plus cinq constats, une ligne par catégorie, deux par type ; le
+lien « Voir la fiche » est la première entrée vers la fiche d'un combattant
+extérieur. QO-9 codée : le plafond `MGMT_FACTS_MAX` a sauté, la mémoire range
+par groupe (dix faits visibles, le reste replié) ; 500 faits = +33 Ko de
+sauvegarde, rendu en 3 ms. **Écart** : aucun ancien de Split ne vit dans le
+monde, ce type de constat n'existe pas encore. **Reste à faire sur la
+semaine** : les lignes du monde n'appellent pas encore `mgmtDivisionLabel`
+(« féminin ») et écrivent « de Omar » au lieu de « d'Omar ».
+
 ### T3 — Booker un combat *(maquette 04)*
 
 L'écran de composition prend la forme de la maquette. Même logique qu'au lot 2 —
@@ -204,6 +216,21 @@ pour 12 combattants sur 55. Focus clavier visible sur la barre et la fiche.
   objectifs de saison **n'existent pas encore** et n'apparaissent pas (voir
   lot 5 et §5).
 
+**Relecture du 28/09 — acceptée après deux reprises** (`8570909`, `83d0e70`,
+`a9c66a5`, GLM). Nouvel écran `mgmt-ecran-organisation.js`, entrée
+« Organisation » dans la barre (l'entrée courante se distingue). Effectif par
+catégorie en deux groupes Hommes / Femmes : combattants, nombre dans le **top 15
+mondial** (le classement de Split ne dépasse jamais 15, il ne disait rien),
+disponibles, constat « effectif trop mince » sous deux disponibles. Trésorerie
+et recettes telles qu'elles existent.
+
+**Hors tranche, décision d'Anthony du 28/09** (`92a104c`, `84398f1`, GLM) : les
+noms retrouvent apostrophe et trait d'union (13 entrées d'`engine.js` : O'Brien,
+O'Sullivan, O'Connor, Nong-O, neuf prénoms coréens), les trois `onclick` qui
+injectaient une valeur libre passent par `escJsAttr` ; dans le management, une
+catégorie féminine s'écrit « Poids mouche féminin » (`mgmtDivisionLabel`,
+dérivée, rien de stocké ; la carrière ne change pas).
+
 ### T8 — Les écrans de la carrière *(maquettes 01, 09, 10 — à confirmer)*
 
 L'accueil (commun aux deux modes), le Panthéon et la carrière. **N'entre dans
@@ -224,6 +251,10 @@ depuis le 17/09, sauf l'arène.
 - **Aucun test assoupli** sans citer la décision qui change le comportement
   attendu ; les tests qui verrouillent l'ancienne direction (audit B3) se
   réécrivent sur la décision, ils ne se « réparent » pas.
+- **Tout fichier modifié monte sa version dans `index.html` (`?v=`)**, sinon un
+  navigateur qui a déjà chargé le jeu garde l'ancien fichier. Oublié trois fois
+  au lot 4 ; à l'intégration du 28/09, 18 fichiers modifiés depuis leur dernière
+  version ont été montés à `r2809`.
 - **Règle d'arrêt** : deux heures sans atteindre ce que la tranche demande,
   l'outil commite son état, rapporte, et s'arrête. Aucune sonde de débogage
   commitée.

@@ -492,6 +492,32 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    (pile née vide uniquement). Texte et liseré, sans aplat ni ombre. ==== */
 .mgmt-next{display:block;width:100%;text-align:center;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:0;padding:12px;margin:9px 0;cursor:pointer;font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.08em;text-transform:uppercase}
 .mgmt-next:hover{color:var(--text);border-color:var(--faint)}
+/* ==== [ANCRE: MGMT_LOT4_T2_SEMAINE_CSS] — Lot 4 T2 : maquette 02,
+   carte d'abord ; voix et monde sur des longueurs de ligne lisibles. ==== */
+.mgmt-week{padding:20px clamp(16px,3vw,64px) 28px}
+.mgmt-week-cols{grid-template-columns:minmax(300px,1.15fr) minmax(330px,1.4fr) minmax(290px,.9fr);gap:clamp(20px,2.6vw,48px);margin-top:20px}
+.mgmt-week-pane{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overflow-wrap:anywhere;padding:0 4px}
+.mgmt-week h3{font:italic 700 21px var(--mgmt-font-display);color:var(--mgmt-yellow);text-transform:uppercase;letter-spacing:.08em;margin:0 0 12px}
+.mgmt-week-card>p,.mgmt-week-instruction{font-size:15px;line-height:1.5;color:var(--mgmt-secondary);margin:0 0 16px}
+.mgmt-week-fight{padding:12px 16px;background:var(--mgmt-panel);margin:0 0 8px;border:1px solid var(--mgmt-edge)}
+.mgmt-week-slot,.mgmt-week-meta{font-size:13px;line-height:1.5;color:var(--mgmt-secondary)}
+.mgmt-week-names{font:italic 700 clamp(21px,1.7vw,29px)/1.18 var(--mgmt-font-display);margin:5px 0;overflow-wrap:anywhere}
+.mgmt-week-names span{font:400 14px var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mgmt-week-free,.mgmt-week-book{display:block;width:100%;font:700 17px var(--mgmt-font-display);text-align:left;cursor:pointer;padding:13px 16px;margin:8px 0;color:var(--mgmt-ink);background:transparent;border:1px dashed var(--mgmt-secondary)}
+.mgmt-week-book{background:var(--mgmt-yellow);color:var(--mgmt-plum-deep);border:1px solid var(--mgmt-yellow);margin-top:14px;text-align:center;clip-path:var(--mgmt-octagon)}
+.mgmt-week-free:hover,.mgmt-week-free:focus-visible{border-color:var(--mgmt-yellow)}
+.mgmt-week-book:hover{filter:brightness(1.1)}
+.mgmt-week-talk,.mgmt-week-dossier,.mgmt-week-memo{border-top:1px solid var(--mgmt-edge);margin-top:22px;padding-top:18px}
+.mgmt-week .mgmt-say,.mgmt-week .mgmt-reps,.mgmt-week .mgmt-rep{max-width:65ch}
+.mgmt-week-news,.mgmt-week-fact{padding:10px 0;border-bottom:1px solid var(--mgmt-edge);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.mgmt-week-news button{display:inline;background:none;color:var(--mgmt-yellow);border:0;cursor:pointer;font:700 14px var(--mgmt-font-display);text-decoration:underline}
+.mgmt-week-memory{margin:10px 0;font-size:14px;color:var(--mgmt-ink)}
+.mgmt-week-memory summary{cursor:pointer;color:var(--mgmt-yellow);padding:7px 0}
+.mgmt-week-memory summary:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:2px}
+.mgmt-week-fact{font-size:13px;color:var(--mgmt-secondary)}
+.mgmt-week .mgmt-meta,.mgmt-week .opp-mid{font-size:13px;color:var(--mgmt-secondary)}
+@media(max-width:1279px){.mgmt-week-cols{grid-template-columns:1fr}.mgmt-week-pane{overflow:visible}}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MGMT_LOT4_T3_BOOKER] — Lot 4 T3 (docs/LOT-4-LA-PEAU-DU-JEU.md
    §3 T3) : l'écran de composition prend la forme de la maquette 04
    (maquettes/04-booker-un-combat.html) — les deux fiches face à face et
@@ -572,8 +598,40 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-fiche-org{font-size:15px;padding:12px 0;border-bottom:1px solid var(--mgmt-edge);overflow-wrap:anywhere}
 .mgmt-fiche-org strong{font-weight:500}
 @media(max-width:1279px){.mgmt-fiche-cols{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}}
+/* ==== [ANCRE: MGMT_LOT4_T7_ORGANISATION] — Lot 4 T7 (docs/LOT-4-LA-PEAU-DU-JEU.md
+   §3 T7) : le seul style de l'écran de l'organisation (maquette 08,
+   partielle). Jetons --mgmt-* uniquement, aucune couleur en dur ; la
+   catégorie trop mince porte le rouge (direction artistique : le rouge est
+   réservé au danger) ; les informations de décision sont à 13px et 4,5:1
+   minimum (charte L2). Réserves du lot 4 : aucun onglet Contrats/Diffuseur,
+   ni patron, ni objectifs — ce qui n'existe pas n'apparaît pas. ==== */
+.mgmt-org-eff{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:12px}
+.mgmt-org-cat{background:color-mix(in srgb,var(--mgmt-edge) 14%,transparent);padding:14px 16px;min-width:0}
+.mgmt-org-cat.thin{background:color-mix(in srgb,var(--mgmt-red) 22%,transparent)}
+.mgmt-org-nm{font-family:var(--mgmt-font-display);font-style:italic;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:17px;color:var(--mgmt-ink)}
+.mgmt-org-cat.thin .mgmt-org-nm{color:var(--mgmt-red)}
+.mgmt-org-sub{font-size:13px;line-height:1.4;color:var(--mgmt-secondary);margin-top:3px}
+.mgmt-org-cat.thin .mgmt-org-sub{color:var(--mgmt-ink)}
+.mgmt-org-sum{font-size:13px;color:var(--mgmt-secondary);margin:6px 0 0}
+/* Deux groupes de tuiles (divisions H et F d'engine.js), hommes puis
+   femmes — aucun nom de catégorie inventé. */
+.mgmt-org-group{margin-top:10px}
+.mgmt-org-hd{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:15px;color:var(--mgmt-tertiary)}
+.mgmt-org-group .mgmt-org-eff{margin-top:6px}
+.mgmt-org-money{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 24px;align-items:baseline;margin-top:10px}
+.mgmt-org-pill{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;letter-spacing:.06em;font-size:14px;text-transform:uppercase;color:var(--mgmt-secondary)}
+.mgmt-org-val{font-family:var(--mgmt-font-display);font-style:italic;font-weight:700;font-size:clamp(24px,2vw,34px);line-height:1;color:var(--mgmt-ink)}
+.mgmt-org-line{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;font-size:clamp(20px,1.6vw,26px);line-height:1.2;color:var(--mgmt-ink)}
+@media(max-width:1279px){.mgmt-org-eff{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1279px){.mgmt-wrap{height:auto;overflow:visible}.mgmt-cols{grid-template-columns:1fr}.mgmt-col{max-height:none;overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT4_T7_NAV_COURANT] — reprise lot 4 T7 : l'entrée
+   courante de la navigation se distingue visiblement des autres — or plein
+   pour l'écran courant (aria-current), fond atténué pour les autres,
+   toujours à jetons --mgmt-*. Encré (--mgmt-ink) sur fond atténué pour
+   les autres, texte sombre sur or pour la courante : au-dessus de 4,5:1
+   des deux côtés (charte L2). ==== */
+.mgmt-nav button:not(.cur){background:color-mix(in srgb,var(--mgmt-edge) 24%,transparent);color:var(--mgmt-ink)}
 </style></head>
 <body><div id="app"></div>
 <script src="data-skills.js?v=career7"></script>
@@ -583,7 +641,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      pures, aucune fonction d'écran dedans, chargés avant engine.js (aucune
      de leurs constantes n'a besoin d'autre chose que des littéraux JS). ==== -->
 <script src="data-people.js?v=career7"></script>
-<script src="engine.js?v=career7"></script>
+<script src="engine.js?v=noms1"></script>
 <!-- ==== [ANCRE: ENGINE_COMBAT_SPLIT] — chantier 4 (refactorisation
      progressive du moteur) : engine-combat.js extrait d'engine.js à
      l'IDENTIQUE (STYLE_PROFILE, simulateFight, applyResult, catalogue des
@@ -595,7 +653,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="engine-combat-striking.js?v=career7"></script>
 <script src="engine-combat-grappling.js?v=career7"></script>
 <script src="engine-combat-officials.js?v=career7"></script>
-<script src="engine-combat.js?v=career7"></script>
+<script src="engine-combat.js?v=r2809"></script>
 <script src="engine-combat-outcomes.js?v=career7"></script>
 <!-- ==== [ANCRE: ENGINE_PROGRESSION_SPLIT] — chantier 4 (refactorisation
      progressive du moteur) : engine-progression.js extrait d'engine.js à
@@ -621,22 +679,22 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      et toujours avant state.js/ui-*.js qui appellent ces fonctions. ==== -->
 <script src="engine-events.js?v=career7"></script>
 <script src="state/state-core.js?v=career7"></script>
-<script src="state/state-analytics.js?v=career7"></script>
-<script src="state/state-save.js?v=career7"></script>
-<script src="state/state-migration.js?v=career7"></script>
-<script src="state/state-validation.js?v=career7"></script>
-<script src="state/state-hof.js?v=career7"></script>
+<script src="state/state-analytics.js?v=r2809"></script>
+<script src="state/state-save.js?v=r2809"></script>
+<script src="state/state-migration.js?v=r2809"></script>
+<script src="state/state-validation.js?v=r2809"></script>
+<script src="state/state-hof.js?v=r2809"></script>
 <!-- ui.js a été découpé en 8 fichiers plus petits (refactor du __/2026) pour
      rester lisible et maintenable — l'ORDRE de chargement ci-dessous est
      important et ne doit jamais être changé (voir le commentaire d'en-tête
      de chaque fichier ui-0X-*.js pour le détail). -->
 <script src="ui-01-roster-matchmaking.js?v=career7"></script>
-<script src="ui-02-fight-prep-events.js?v=career7"></script>
+<script src="ui-02-fight-prep-events.js?v=r2809"></script>
 <script src="ui-03-contracts-arcade-data.js?v=career7"></script>
 <script src="ui-05-fight-resolution.js?v=career7"></script>
-<script src="ui-06-career-screens.js?v=career7"></script>
-<script src="ui-07-contracts-legacy-screens.js?v=career7"></script>
-<script src="ui-08-controller-arena.js?v=career7"></script>
+<script src="ui-06-career-screens.js?v=noms1"></script>
+<script src="ui-07-contracts-legacy-screens.js?v=r2809"></script>
+<script src="ui-08-controller-arena.js?v=r2809"></script>
 <!-- ui-09-arena.js : second découpage, ultérieur au split en 8 fichiers ci-
      dessus (F-07, hygiène technique) — isole le moteur de rendu Canvas 2D de
      l'arène, extrait de ui-08. Chargé APRÈS ui-08 : plusieurs écrans qui le
@@ -649,7 +707,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      branchement CL) dépend de lui et de CL/SCREENS (posés par ui-08), donc
      chargé juste après, toujours avant main.js. ==== -->
 <script src="duel-codec.js?v=career7"></script>
-<script src="ui-10-duel.js?v=career7"></script>
+<script src="ui-10-duel.js?v=r2809"></script>
 <!-- ==== [ANCRE: MGMT_LOT1E_CLAVIER_SCRIPTS] — Lot 1e-7 : ui-11-keys.js porte
      le dispatcher clavier global (registre par écran, écouteur unique) :
      aucune dépendance au chargement, mais chargé avant les écrans qui s'y
@@ -659,24 +717,26 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      sans dépendance), logique du bureau (runtime : engine.js, ui-01 pour
      makeName/correlatedRecord, state), écrans (SCREENS/CL posés par ui-08
      et étendus via Object.assign). Toujours avant main.js. ==== -->
-<script src="mgmt-data.js?v=mgmt2c"></script>
-<script src="mgmt-bureau.js?v=mgmt2g"></script>
-<script src="mgmt-carte.js?v=mgmt2g"></script>
-<script src="mgmt-corps.js?v=mgmt2g"></script>
-<script src="mgmt-argent.js?v=mgmt2g"></script>
-<script src="mgmt-monde.js?v=mgmt2g"></script>
-<script src="mgmt-save.js?v=mgmt2g"></script>
+<script src="mgmt-data.js?v=mgmt4t2r1"></script>
+<script src="mgmt-bureau.js?v=mgmt4t2r1"></script>
+<script src="mgmt-carte.js?v=r2809"></script>
+<script src="mgmt-corps.js?v=r2809"></script>
+<script src="mgmt-argent.js?v=r2809"></script>
+<script src="mgmt-monde.js?v=r2809"></script>
+<script src="mgmt-save.js?v=mgmt4t2r1"></script>
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-carte.js?v=mgmt4t3"></script>
+<script src="mgmt-ecran-semaine.js?v=mgmt4t2r1"></script>
+<script src="mgmt-ecran-carte.js?v=fem1"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-fiche.js?v=mgmt4t5"></script>
-<script src="mgmt-screens.js?v=mgmt4t5"></script>
-<script src="arene-etat.js?v=arene1"></script>
-<script src="arene-vue.js?v=arene1"></script>
-<script src="arene-ecran.js?v=arene1"></script>
-<script src="main.js?v=career7"></script>
+<script src="mgmt-ecran-fiche.js?v=fem1"></script>
+<!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
+<script src="mgmt-ecran-organisation.js?v=fem1"></script>
+<script src="mgmt-screens.js?v=fem1"></script>
+<script src="arene-etat.js?v=r2809"></script>
+<script src="arene-vue.js?v=r2809"></script>
+<script src="arene-ecran.js?v=r2809"></script>
+<script src="main.js?v=r2809"></script>
 </body></html>

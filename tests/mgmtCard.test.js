@@ -418,7 +418,8 @@ test('MGMT dossier suit le marqué — R2, pas les champs figés', () => {
   const pair2b = JSON.parse(names(2));
   assert.notDeepEqual(pair2b, pair2, 'remplacement effectif');
   html = win.document.getElementById('app').innerHTML;
-  const dossier = html.split('>Dossier</div>')[1].split('Mémoire')[0];
+  /* Lot 4 T2 : le dossier reste attaché au combat marqué dans l'aside de la semaine. */
+  const dossier = html.split('mgmt-week-dossier')[1].split('mgmt-week-memo')[0];
   assert.ok(dossier.includes(pair2b[0])&&dossier.includes(pair2b[1]), 'dossier suit le remplacement');
   assert.ok(!dossier.includes(pair2[0]), 'plus aucune trace du retiré au dossier');
 });

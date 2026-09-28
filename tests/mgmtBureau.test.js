@@ -918,7 +918,9 @@ test('MGMT mémoire — seuls écrasements et revirements, en phrases', () => {
   assert.ok(!lines.some(t=>t.includes('accepté')||t.includes('sa proposition')), 'valider ne se mémorise pas');
   win.eval(`CL.mgmtOpen(G.mgmt.pile.find(a=>a.status==='open').id); render();`);
   const html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('tu as écrasé sa carte'), 'la colonne Mémoire affiche la phrase');
+  /* QO-9, lot 4 T2 : l'écran montre les faits, pas la voix ni son compteur seul. */
+  assert.ok(html.includes('Combat booké')&&html.includes('Combat échangé'),
+    'la colonne Mémoire affiche les faits effectivement enregistrés (la série de la fixture est seulement un compteur)');
   assert.ok(!html.includes('log-row'), 'plus aucune ligne de journal');
 });
 
@@ -927,6 +929,97 @@ test('MGMT mémoire — un refus simple ne se retient plus', () => {
   enterMgmtSingles(win,41);
   win.eval(`CL.mgmtReply(G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id,'refuse')`);
   assert.deepEqual(win.eval(`JSON.stringify(mgmtMemoryLines(G.mgmt))`), '[]', 'refuser n\u2019est pas notable');
+});
+
+test('MGMT lot 4 T2 / QO-9 — les faits survivent au-delà de 500, au chargement et au tri de la mémoire', () => {
+  const win = newGameWindow();
+  enterMgmt(win, 57);
+  const result = JSON.parse(win.eval(`JSON.stringify((()=>{
+    const m=G.mgmt, old=JSON.parse(JSON.stringify(m));
+    old.facts=[{c:0,k:'ignored',a:m.roster[0].id}];
+    const restored=mgmtParseAndValidate(JSON.stringify(old));
+    if(!restored) throw new Error('sauvegarde antérieure refusée');
+    for(let i=0;i<500;i++) mgmtAddFact(restored,{c:i+1,k:'swapped',a:m.roster[0].id,b:m.roster[1].id});
+    const parsed=mgmtParseAndValidate(JSON.stringify(restored));
+    if(!parsed) throw new Error('500 faits refusés');
+    mgmtRepair(parsed);
+    return {length:parsed.facts.length,first:parsed.facts[0],last:parsed.facts[500],
+      html:mgmtSemaineMemoire(parsed),valid:validateMgmt(parsed)};
+  })())`));
+  assert.equal(result.length,501);
+  assert.equal(result.first.c,0,'l’ancien fait n’a pas disparu');
+  assert.equal(result.last.c,500,'le nouveau fait n’a pas disparu');
+  assert.equal(result.valid,true);
+  assert.match(result.html,/501 faits/);
+  assert.ok(result.html.indexOf('Cycle 500')<result.html.indexOf('Cycle 1'), 'les plus récents en premier');
+  const memory=win.document.createElement('section');
+  memory.innerHTML=result.html;
+  const group=memory.querySelector('.mgmt-week-memory');
+  const older=memory.querySelector('.mgmt-week-older');
+  assert.equal(group.open,true,'les faits récents du groupe sont visibles');
+  assert.equal(group.querySelectorAll(':scope > .mgmt-week-fact').length,10,'dix faits récents visibles');
+  assert.equal(older.open,false,'les 491 autres faits sont repliés');
+  assert.equal(older.querySelectorAll('.mgmt-week-fact').length,491,'aucun fait perdu');
+  assert.equal(older.querySelector('summary').textContent,'Tous les 501 faits');
+  older.open=true;
+  assert.equal(older.open,true,'le reste est dépliable sans rechargement');
+});
+
+test('MGMT lot 4 T2 — la semaine mène au booking, compose explique, monde factuel et noms échappés', () => {
+  const win=newGameWindow();
+  enterMgmt(win,58);
+  const initial=win.document.getElementById('app').innerHTML;
+  assert.match(initial,/Carte principale/);
+  assert.match(initial,/Place libre — booker un combat/);
+  assert.ok((initial.match(/mgmt-week-news/g)||[]).length>=3,'trois nouvelles dérivées au démarrage');
+  assert.ok(!initial.includes('CE QUI SE DIT')&&!initial.includes('Cage Hebdo'),'aucun texte de maquette');
+  const worldButton=win.document.querySelector('.mgmt-week-news button');
+  assert.ok(worldButton,'une fiche du monde est accessible à la souris');
+  worldButton.click();
+  assert.equal(win.eval(`G.screen`),'mgmt_fiche');
+  win.eval(`CL.mgmtFicheRetour()`);
+  win.eval(`G.mgmt.pile=[]; G.mgmt.open=null; render();`);
+  const compose=win.document.getElementById('app').innerHTML;
+  assert.match(compose,/La pile est vide\. Il reste des places en carte principale/);
+  assert.match(compose,/CL\.mgmtCarte\(\)/);
+  win.document.querySelector('.mgmt-week-instruction+.mgmt-week-book').click();
+  assert.equal(win.eval(`G.screen`),'mgmt_carte','le bouton de l’état compose ouvre la carte');
+  win.eval(`CL.mgmtCarteLeave()`);
+  win.eval(`G.mgmt.roster[0].name='<img src=x onerror=alert(1)>'; render();`);
+  assert.ok(!win.document.querySelector('.mgmt-week-news img'));
+});
+
+test('MGMT lot 4 T2 reprise — versions de chargement cohérentes et monde sans répétition', () => {
+  const index=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  for(const file of ['mgmt-data','mgmt-bureau','mgmt-save','mgmt-ecran-semaine']){
+    const match=index.match(new RegExp(`<script src="${file}\\.js\\?v=([^"]+)"`));
+    assert.ok(match,`${file} est chargé par index.html`);
+    assert.ok(!['mgmt2c','mgmt2g','mgmt4t1'].includes(match[1]),`${file} ne conserve pas sa version d'avant T2`);
+  }
+  const win=newGameWindow();
+  enterMgmt(win,4);
+  win.eval(`(function(){
+    const m=G.mgmt, divisions=new Map();
+    for(const f of m.roster){
+      if(!divisions.has(f.div)) divisions.set(f.div,[]);
+      divisions.get(f.div).push(f);
+    }
+    let n=0;
+    for(const fighters of divisions.values()){
+      if(fighters.length>=2&&mgmtBookMain(m,fighters[0].id,fighters[1].id)) n++;
+      if(n===3) break;
+    }
+    render();
+  })()`);
+  const rows=[...win.document.querySelectorAll('.mgmt-week-news')];
+  assert.ok(rows.length>=3&&rows.length<=5,'seulement les nouvelles utiles disponibles');
+  const divisions=rows.map(row=>row.dataset.division);
+  assert.equal(new Set(divisions).size,rows.length,'une seule ligne par catégorie');
+  const types=rows.map(row=>row.dataset.type);
+  for(const type of new Set(types)){
+    assert.ok(types.filter(t=>t===type).length<=2,`deux lignes au plus pour ${type}`);
+  }
+  assert.ok(types.filter(t=>t==='voisin').length<=2,'les trois voisins de poids mouche ne reviennent pas');
 });
 
 test('MGMT lot 4 T1 — palette prune centralisée et appliquée aux panneaux', () => {

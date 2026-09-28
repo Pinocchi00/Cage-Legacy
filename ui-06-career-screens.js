@@ -13,6 +13,18 @@
    charger dans l'ordre indiqué dans index.html : 01, 02, 03... jusqu'à 08.
    ============================================================================ */
 
+/* ==== [ANCRE: ESCJS_ATTR_ONCLICK] — décision d'Anthony du 28/09/2026 : un
+   nom avec apostrophe (O'Connor, généré ou saisi) passe par esc() et devient
+   &#39; — dans un attribut onclick, l'analyseur HTML le redécode en '
+   et casse la chaîne JS de l'attribut. Aucun nom n'est aujourd'hui injecté
+   dans un onclick (vérifié : les trois seules interpolations de valeur libre
+   sont ci-dessous — surnoms suggérés, libellés de style et de division du
+   Panthéon) ; ce helper rend l'anti-pattern impossible : échappement JS
+   d'abord (backslash devant ' et \), esc() ensuite pour l'attribut — le
+   navigateur redécode &#39; en \' que le parseur JS lit comme une apostrophe
+   échappée. Sert UNIQUEMENT dans un attribut onclick à valeur de chaîne. ==== */
+function escJsAttr(s){ return esc((''+s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")); }
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: PROCHAIN_OBJECTIF] — retour utilisateur : l'encart prenait
    trop de place et restait affiché en permanence. Il ne sert plus qu'à
    l'amorçage — tant que le joueur n'a lancé aucune run — et disparaît de
@@ -114,7 +126,7 @@ function scr_pro_nickname(){
         <button class="tag2" style="background:#241B10;border-color:var(--gold);color:var(--gold);cursor:pointer;padding:6px 12px" onclick="G._proNickDraft=rollRandomNickname();render();">🎲 Aléatoire</button>
       </div>
       <div class="tagrow" style="margin:0">
-        ${uniqueSugg.map(s=>`<button class="tag2" style="cursor:pointer" onclick="G._proNickDraft='${esc(s)}';render();">« ${esc(s)} »</button>`).join('')}
+        ${uniqueSugg.map(s=>`<button class="tag2" style="cursor:pointer" onclick="G._proNickDraft='${escJsAttr(s)}';render();">« ${esc(s)} »</button>`).join('')}
       </div>
     </div>
     <button class="btn primary" style="font-size:18px;padding:16px" onclick="CL.confirmProNickname(G._proNickDraft)">Valider & Entrer chez les Pros</button>
@@ -465,8 +477,8 @@ function scr_hof(){
      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Affronte deux légendes de ton Panthéon</span></button>
    ${showFilters?`<div style="background:var(--panel2);padding:12px;border:1px solid var(--line);margin-bottom:16px">
    ${modes.length>1?`<div class="eyebrow mb">Mode</div><div class="tagrow mb"><span class="tag2 ${!filt.gameMode?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','')">Tous</span>${modes.map(m=>`<span class="tag2 ${filt.gameMode===m?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','${m}')">${modeLabels[m]||m}</span>`).join('')}</div>`:''}
-   ${styles.length>1?`<div class="eyebrow mb mt">Styles</div><div class="tagrow mb"><span class="tag2 ${!filt.style?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','')">Tous</span>${styles.map(s=>`<span class="tag2 ${filt.style===s?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','${esc(s)}')">${esc(s)}</span>`).join('')}</div>`:''}
-   ${divisions.length>1?`<div class="eyebrow mb mt">Divisions</div><div class="tagrow mb"><span class="tag2 ${!filt.divName?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','')">Toutes</span>${divisions.map(d=>`<span class="tag2 ${filt.divName===d?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','${esc(d)}')">${esc(d)}</span>`).join('')}</div>`:''}
+   ${styles.length>1?`<div class="eyebrow mb mt">Styles</div><div class="tagrow mb"><span class="tag2 ${!filt.style?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','')">Tous</span>${styles.map(s=>`<span class="tag2 ${filt.style===s?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','${escJsAttr(s)}')">${esc(s)}</span>`).join('')}</div>`:''}
+   ${divisions.length>1?`<div class="eyebrow mb mt">Divisions</div><div class="tagrow mb"><span class="tag2 ${!filt.divName?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','')">Toutes</span>${divisions.map(d=>`<span class="tag2 ${filt.divName===d?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','${escJsAttr(d)}')">${esc(d)}</span>`).join('')}</div>`:''}
    <div class="eyebrow mb mt">Défenses</div><div class="tagrow mb"><span class="tag2 ${!filt.minDefenses?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',0)">Toutes</span><span class="tag2 ${filt.minDefenses>=2?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',2)">2+ défenses</span></div>
    </div>`:''}
    ${G.exportedCode?`<div class="card glass mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)">

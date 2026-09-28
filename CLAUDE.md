@@ -16,7 +16,8 @@ travail de Claude.
 
 ## 0. Rôle de Claude sur ce dépôt
 
-- **Le code est écrit par OpenCode (modèle GLM 5.3, offre Go).** Claude
+- **Le code est écrit par OpenCode (modèle GLM 5.3 Flash, offre Go — le même
+  modèle depuis le début du projet, précisé par Anthony le 28/09/2026).** Claude
   **supervise et orchestre** : il prépare les contrats de lot, découpe en tranches,
   rédige les consignes envoyées à OpenCode, relit les diffs produits, lance les
   vérifications et rend compte à Anthony.
@@ -93,16 +94,18 @@ après le découpage de `mgmt-bureau.js` :
    plus de `ui-09` : retirée au lot 3 T4)
 8. `duel-codec.js`, `ui-10-duel.js` — exhibition « Duel entre amis »
 9. `ui-11-keys.js` — navigation clavier globale (`keysRegister`)
-10. **Mode management, treize fichiers** (découpage de la simulation le
-    21/09/2026, découpage des écrans au lot 4 T1 le 25/09) :
+10. **Mode management, quatorze fichiers** (découpage de la simulation le
+    21/09/2026, découpage des écrans au lot 4 T1 le 25/09, écran de
+    l'organisation au lot 4 T7 le 28/09) :
     `mgmt-data.js` (données pures) — `mgmt-bureau.js` (pile d'affaires,
     décisions, Leïla) — `mgmt-carte.js` (sous-carte, composition, classement) —
     `mgmt-corps.js` (corps, soirée) — `mgmt-argent.js` (économie) —
     `mgmt-monde.js` (monde extérieur dérivé) — `mgmt-save.js` (persistance) —
     puis un fichier par écran : `mgmt-ecran-semaine.js` (le bureau),
     `mgmt-ecran-carte.js`, `mgmt-ecran-soiree.js`, `mgmt-ecran-lendemain.js`,
-    `mgmt-ecran-fiche.js` — et enfin `mgmt-screens.js` (contrôleur, clavier et
-    barre de navigation communs ; dernier car il enregistre les cinq écrans
+    `mgmt-ecran-fiche.js`, `mgmt-ecran-organisation.js` — et enfin
+    `mgmt-screens.js` (contrôleur, clavier et barre de navigation communs ;
+    dernier car il enregistre les six écrans
     dans `SCREENS` et étend `CL`).
     **Une seule dépendance de chargement inter-fichiers** dans tout le mode :
     `MGMT_CARD_CONTRACT = MGMT_MAIN_SIZE + MGMT_PRELIM_SIZE` (`mgmt-argent.js`)
@@ -161,7 +164,7 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 28/09/2026 (`integration-28-09-b`) : **354 tests, 350 passants,
+État au 28/09/2026 (`integration-28-09-c`) : **372 tests, 368 passants,
 0 échec, 4 skip**. Les 4 skip sont dans `mgmtBureau.test.js` : trois sorties de
 carte incomplète (remonter un prélim, short notice, combattant libre) et une
 pénalité économie au-delà du plafond de découvert — comportements décidés mais
@@ -205,7 +208,7 @@ sans citer la décision qui change le comportement attendu.
 | `docs/LOT-3B-CARTE-INCOMPLETE.md`, `docs/LOT-3B-CONTRAT.md` | Lot 3B — textes d'auteur complets ; T1 (argent de l'organisation) livré. Sa T2 (carte principale) a été reprise et remplacée par le lot 2 ; ses T3 à T5 (retrait, remonter un prélim, short notice) restent à coder |
 | `docs/LOT-3-L-ARENE.md` | **Lot 3 — livré (T1 à T5) au 24/09.** Répond à C2, C3, M3, M4. La T3 a été recadrée le 23/09 : le déplacement est **porté du prototype**, pas inventé ; la T3 bis a été supprimée. **L'arène est refaite à neuf et sert les deux modes ; `ui-09-arena.js` est retirée** (décision d'Anthony du 21/09). Son §1 porte le principe fondateur — le moteur décide, l'arène met en scène — et son §2 les quatre cibles mesurables du réalisme |
 | `docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` | **Lot 2B — livré au 24/09 (T1, T1 bis, T1 ter, T2 bis, T3, T4)**, sauf la T2 (le recrutement) reportée au lot 5 T5. Répond à QO-8. Son §5 liste les cinq points tranchés avant la T2, son §5 d la relecture de la T1, son **§5 e les décisions du 22/09** : le monde dérivé se lit **à travers un combattant** (sa fiche) plus **trois à cinq informations sur le hub**, au lot 4 ; et les quatre organisations extérieures sont **nommées et ordonnées** (Garden of Blood → MMA Korner → Ultimate Rim → Fighting Pacific Championship, prestige croissant) — `MGMT_EXT_ORGS` n'a plus d'`[EMPLACEMENT AUTEUR]` |
-| `docs/LOT-4-LA-PEAU-DU-JEU.md` | **Lot 4 — en cours : T1, T3 (booker) et T5 (la fiche) acceptées le 28/09 ; T7 (organisation) en cours.** Les écrans maquettés remplacent l'habillage, sans créer de système de jeu ; commence par découper `mgmt-screens.js` en un fichier par écran pour permettre deux outils en parallèle. Son §1 : **aucun texte de maquette ne s'affiche en jeu** |
+| `docs/LOT-4-LA-PEAU-DU-JEU.md` | **Lot 4 — en cours : T1, T2 (la semaine), T3 (booker), T5 (la fiche) et T7 (l'organisation) acceptées le 28/09 ; restent T4 (le lendemain), T6 (les classements) et T8 (à confirmer).** Les écrans maquettés remplacent l'habillage, sans créer de système de jeu ; commence par découper `mgmt-screens.js` en un fichier par écran pour permettre deux outils en parallèle. Son §1 : **aucun texte de maquette ne s'affiche en jeu** |
 | `docs/LOT-5-LE-MONDE-QUI-PARLE.md` | **Lot 5 — contrat écrit le 23/09, non commencé.** Ceintures et combats en 5 rounds, la voix du monde par formules d'auteur, la pression de l'attente, le recrutement (ex-lot 2B T2), les cartes incomplètes (ex-lot 3B T3-T5), les camps et le classement des organisations sous conditions. Son **§6 dresse la liste de tout ce qu'Anthony doit écrire** |
 | `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
 | `tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md` | Calibrage de l'économie sur le déroulé réel (21/09/2026) : les quatre profils de joueur, les trois cibles, et le tableau des six soirées enchaînées qui a révélé QO-8 |
