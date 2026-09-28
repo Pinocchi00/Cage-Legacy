@@ -6,7 +6,7 @@
 
    N'étend jamais ui-08-controller-arena.js par édition directe (même motif
    que ui-10-duel.js) : SCREENS et CL sont étendus ici via Object.assign.
-   Chargé après les cinq écrans, avant main.js (voir index.html).
+   Chargé après les six écrans, avant main.js (voir index.html).
 
    Interface PC (addendum §24-25) : mise en page 1440px, trois colonnes, tout
    à la souris. Le gabarit 560px ne s'applique pas à cet écran : l'entrée
@@ -170,8 +170,9 @@ function mgmtAffairSubject(m,a){
 }
 
 /* ==== [ANCRE: MGMT_LOT4_T1_NAV] — Lot 4 T1 : navigation permanente sur les
-   écrans existants. La liste des combattants, les classements et
-   l'organisation attendent leurs propres écrans : aucune entrée morte. ==== */
+   écrans existants, l'organisation ajoutée à la T7 (LOT-4 §3 T7). La liste
+   des combattants et les classements attendent leurs propres écrans :
+   aucune entrée morte. ==== */
 function mgmtNavHtml(){
   /* La soirée et le lendemain forment la séquence imposée (addendum 1 §14) :
      la barre reste visible, seule la progression de la soirée est cliquable. */
@@ -179,7 +180,8 @@ function mgmtNavHtml(){
     return `<nav class="mgmt-nav" aria-label="Navigation management"><span>Semaine</span></nav>`;
   }
   return `<nav class="mgmt-nav" aria-label="Navigation management">`
-    +`<button type="button"${G&&G.screen==='mgmt_bureau'?' aria-current="page"':''} onclick="CL.go('mgmt_bureau')">Semaine</button></nav>`;
+    +`<button type="button"${G&&G.screen==='mgmt_bureau'?' aria-current="page"':''} onclick="CL.go('mgmt_bureau')">Semaine</button>`
+    +`<button type="button"${G&&G.screen==='mgmt_organisation'?' aria-current="page"':''} onclick="CL.go('mgmt_organisation')">Organisation</button></nav>`;
 }
 function mgmtWithNav(screen){
   return function(){
@@ -189,8 +191,10 @@ function mgmtWithNav(screen){
 }
 
 /* ==== [ANCRE: MGMT_LOT1_CONTROLEUR] — actions du bureau : jamais d'édition
-   directe de ui-08, extension via Object.assign (motif ui-10-duel.js). ==== */
-Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche)});
+   directe de ui-08, extension via Object.assign (motif ui-10-duel.js).
+   Lot 4 T7 : l'organisation rejoint les cinq autres écrans, enregistrée
+   comme eux (mgmtWithNav). ==== */
+Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation)});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -263,6 +267,13 @@ keysRegister('mgmt_fiche',{
   ArrowUp(){ CL.mgmtFicheDeplacer(-1); },
   Enter(){ CL.mgmtFicheRevoirSelection(); },
   Escape(){ CL.mgmtFicheRetour(); },
+});
+/* ==== [ANCRE: MGMT_LOT4_T7_CLAVIER] — Lot 4 T7 : l'écran de l'organisation
+   au clavier — échap ramène à la semaine, comme à la souris. Aucune
+   exclusive : le bouton de la navigation et celui de l'en-tête font le
+   même chemin. ==== */
+keysRegister('mgmt_organisation',{
+  Escape(){ CL.go('mgmt_bureau'); },
 });
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
