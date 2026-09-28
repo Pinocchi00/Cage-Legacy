@@ -34,19 +34,30 @@ function mgmtSemaineCarte(m){
    disponible limité, invaincu extérieur dans une catégorie de Split, ou
    combattant de Split sans combat récent. Pas de voix ni de recrutement fictif. */
 function mgmtSemaineMonde(m){
-  const news=[], used=new Set();
+  const news=[], used=new Set(), divisions=new Set(), types=new Map();
+  const add=(type,div,text,id)=>{
+    if(news.length>=5||divisions.has(div)||(types.get(type)||0)>=2) return false;
+    news.push({type,div,text,id});
+    divisions.add(div);
+    types.set(type,(types.get(type)||0)+1);
+    if(id) used.add(id);
+    return true;
+  };
   const divs=allDivisions().filter(d=>m.roster.some(f=>f.div===d.id&&!mgmtIsRetired(f)));
   for(const div of divs){
+    if((types.get('effectif')||0)>=2) break;
     const split=m.roster.filter(f=>f.div===div.id&&!mgmtIsRetired(f));
     const available=split.filter(f=>mgmtAvailable(m,f)&&!mgmtEngaged(m,f));
     if(available.length<2){
-      news.push({text:`${div.name} : ${available.length} combattant${available.length===1?'':'s'} de Split disponible${available.length===1?'':'s'} pour la carte principale.`,id:null});
+      add('effectif',div.id,`${div.name} : ${available.length} combattant${available.length===1?'':'s'} de Split disponible${available.length===1?'':'s'} pour la carte principale.`,null);
     }
   }
   /* Un voisin dans le classement mondial a un lien vérifiable avec Split.
      Le vivier extérieur est dérivé, la fiche existe mais aucun contrat ni
      bouton de signature n'est inventé. */
   for(const div of divs){
+    if(news.length>=5||(types.get('voisin')||0)>=2) break;
+    if(divisions.has(div.id)) continue;
     const ranks=mgmtDivisionRanking(m,div.id,'world');
     for(let i=0;i<ranks.length;i++){
       const row=ranks[i];
@@ -57,14 +68,14 @@ function mgmtSemaineMonde(m){
       const trace=mgmtExteriorTrace(line,m.cycle);
       const own=m.roster.find(f=>f.id===row.id);
       if(trace){
-        news.push({text:`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1)} mondial en ${div.name}, au voisinage de ${own.name} (${mgmtRankLabel(i+1)}).`,id:line.id});
-        used.add(line.id);
+        add('voisin',div.id,`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1)} mondial en ${div.name}, au voisinage de ${own.name} (${mgmtRankLabel(i+1)}).`,line.id);
+        break;
       }
-      if(used.size>=3) break;
     }
-    if(used.size>=3) break;
   }
   for(const div of divs){
+    if(news.length>=5||(types.get('invaincu')||0)>=2) break;
+    if(divisions.has(div.id)) continue;
     const split=m.roster.filter(f=>f.div===div.id&&!mgmtIsRetired(f));
     if(split.length>=4) continue;
     const line=m.exterieur.find(e=>{
@@ -75,21 +86,22 @@ function mgmtSemaineMonde(m){
     if(!line) continue;
     const trace=mgmtExteriorTrace(line,m.cycle);
     if(trace){
-      news.push({text:`${div.name} : ${split.length} combattants chez Split ; ${trace.name}, ${trace.pro.W}-${trace.pro.L} hors de Split.`,id:line.id});
-      used.add(line.id);
+      add('invaincu',div.id,`${div.name} : ${split.length} combattants chez Split ; ${trace.name}, ${trace.pro.W}-${trace.pro.L} hors de Split.`,line.id);
     }
-    break;
   }
-  const inactive=m.roster.find(f=>!mgmtIsRetired(f)&&!mgmtEngaged(m,f)
-    &&Number.isSafeInteger(f.lastCycle)&&m.cycle-f.lastCycle>=3);
-  if(inactive) news.push({text:`${inactive.name} : dernier combat sous Split il y a ${m.cycle-inactive.lastCycle} cycles.`,id:inactive.id});
-  return news.slice(0,5).map(n=>`<div class="mgmt-week-news">${esc(n.text)}`
+  for(const f of m.roster){
+    if(news.length>=5||(types.get('inactivite')||0)>=2) break;
+    if(divisions.has(f.div)||mgmtIsRetired(f)||mgmtEngaged(m,f)
+      ||!Number.isSafeInteger(f.lastCycle)||m.cycle-f.lastCycle<3) continue;
+    add('inactivite',f.div,`${f.name} : dernier combat sous Split il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
+  }
+  return news.map(n=>`<div class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">${esc(n.text)}`
     +(n.id?` <button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</div>`).join('');
 }
 
-/* QO-9 : aucun fait n'est effacé. Chaque catégorie est repliable, comptée,
-   puis triée du cycle le plus récent au plus ancien. Aucun fait n'est réduit
-   à un score de relation ni à une phrase attribuée à un personnage. */
+/* QO-9 : aucun fait n'est effacé. Chaque catégorie montre dix faits récents,
+   puis range le reste dans un details natif (souris et clavier). Le tri reste
+   du cycle le plus récent au plus ancien, sans score de relation ni voix. */
 function mgmtSemaineMemoire(m){
   const groups=[
     {title:'Cartes et décisions',k:['booked','refused','ignored','reaction_seen','crushed','swapped']},
@@ -108,11 +120,16 @@ function mgmtSemaineMemoire(m){
     const facts=m.facts.map((f,i)=>({f,i})).filter(x=>x.f&&group.k.includes(x.f.k))
       .sort((x,y)=>(y.f.c-x.f.c)||(y.i-x.i));
     if(!facts.length) return '';
+    const factHtml=({f})=>`<div class="mgmt-week-fact">Cycle ${esc(f.c)} · ${esc(labels[f.k])}`
+      +(f.a?` · ${esc(name(f.a))}`:'')+(f.b?` / ${esc(name(f.b))}`:'')
+      +(f.na?` → ${esc(name(f.na))} / ${esc(name(f.nb))}`:'')+`</div>`;
+    const recent=facts.slice(0,10).map(factHtml).join('');
+    const older=facts.length>10
+      ?`<details class="mgmt-week-older"><summary>Tous les ${facts.length} faits</summary>`
+        +facts.slice(10).map(factHtml).join('')+`</details>`:'';
     return `<details class="mgmt-week-memory" open>`
       +`<summary>${esc(group.title)} · ${facts.length} fait${facts.length===1?'':'s'}</summary>`
-      +facts.map(({f})=>`<div class="mgmt-week-fact">Cycle ${esc(f.c)} · ${esc(labels[f.k])}`
-        +(f.a?` · ${esc(name(f.a))}`:'')+(f.b?` / ${esc(name(f.b))}`:'')
-        +(f.na?` → ${esc(name(f.na))} / ${esc(name(f.nb))}`:'')+`</div>`).join('')+`</details>`;
+      +recent+older+`</details>`;
   }).join('');
 }
 

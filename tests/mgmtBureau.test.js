@@ -952,6 +952,17 @@ test('MGMT lot 4 T2 / QO-9 — les faits survivent au-delà de 500, au chargemen
   assert.equal(result.valid,true);
   assert.match(result.html,/501 faits/);
   assert.ok(result.html.indexOf('Cycle 500')<result.html.indexOf('Cycle 1'), 'les plus récents en premier');
+  const memory=win.document.createElement('section');
+  memory.innerHTML=result.html;
+  const group=memory.querySelector('.mgmt-week-memory');
+  const older=memory.querySelector('.mgmt-week-older');
+  assert.equal(group.open,true,'les faits récents du groupe sont visibles');
+  assert.equal(group.querySelectorAll(':scope > .mgmt-week-fact').length,10,'dix faits récents visibles');
+  assert.equal(older.open,false,'les 491 autres faits sont repliés');
+  assert.equal(older.querySelectorAll('.mgmt-week-fact').length,491,'aucun fait perdu');
+  assert.equal(older.querySelector('summary').textContent,'Tous les 501 faits');
+  older.open=true;
+  assert.equal(older.open,true,'le reste est dépliable sans rechargement');
 });
 
 test('MGMT lot 4 T2 — la semaine mène au booking, compose explique, monde factuel et noms échappés', () => {
@@ -976,6 +987,39 @@ test('MGMT lot 4 T2 — la semaine mène au booking, compose explique, monde fac
   win.eval(`CL.mgmtCarteLeave()`);
   win.eval(`G.mgmt.roster[0].name='<img src=x onerror=alert(1)>'; render();`);
   assert.ok(!win.document.querySelector('.mgmt-week-news img'));
+});
+
+test('MGMT lot 4 T2 reprise — versions de chargement cohérentes et monde sans répétition', () => {
+  const index=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  for(const file of ['mgmt-data','mgmt-bureau','mgmt-save','mgmt-ecran-semaine']){
+    const match=index.match(new RegExp(`<script src="${file}\\.js\\?v=([^"]+)"`));
+    assert.ok(match,`${file} est chargé par index.html`);
+    assert.ok(!['mgmt2c','mgmt2g','mgmt4t1'].includes(match[1]),`${file} ne conserve pas sa version d'avant T2`);
+  }
+  const win=newGameWindow();
+  enterMgmt(win,4);
+  win.eval(`(function(){
+    const m=G.mgmt, divisions=new Map();
+    for(const f of m.roster){
+      if(!divisions.has(f.div)) divisions.set(f.div,[]);
+      divisions.get(f.div).push(f);
+    }
+    let n=0;
+    for(const fighters of divisions.values()){
+      if(fighters.length>=2&&mgmtBookMain(m,fighters[0].id,fighters[1].id)) n++;
+      if(n===3) break;
+    }
+    render();
+  })()`);
+  const rows=[...win.document.querySelectorAll('.mgmt-week-news')];
+  assert.ok(rows.length>=3&&rows.length<=5,'seulement les nouvelles utiles disponibles');
+  const divisions=rows.map(row=>row.dataset.division);
+  assert.equal(new Set(divisions).size,rows.length,'une seule ligne par catégorie');
+  const types=rows.map(row=>row.dataset.type);
+  for(const type of new Set(types)){
+    assert.ok(types.filter(t=>t===type).length<=2,`deux lignes au plus pour ${type}`);
+  }
+  assert.ok(types.filter(t=>t==='voisin').length<=2,'les trois voisins de poids mouche ne reviennent pas');
 });
 
 test('MGMT lot 4 T1 — palette prune centralisée et appliquée aux panneaux', () => {
