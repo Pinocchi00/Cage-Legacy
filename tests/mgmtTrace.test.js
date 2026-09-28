@@ -300,38 +300,58 @@ test('MGMT lot 4 T5 — dix derniers combats pour les zones, historique intact',
     areneConstruire=function(...args){builds++;return orig(...args);};
     const f=mgmtFighterById(m,${JSON.stringify(id)});
     const bins=mgmtFicheZones(m,f), html=mgmtHistoriqueHtml(m,f);
-    return {builds,count:bins.size,revoir:html.split('>Revoir</button>').length-1};
+    return {builds,count:bins.rings.reduce((sum,n)=>sum+n,0),revoir:html.split('>Revoir</button>').length-1};
   })()`);
   assert.equal(s.builds,10);
   assert.ok(s.count>0);
   assert.equal(s.revoir,30);
 });
 
-test('MGMT lot 4 T5 — deux ou trois secteurs dominants et rouge seulement si enfermement significatif', () => {
+test('MGMT lot 4 T5 — une trajectoire et son miroir donnent des anneaux identiques et un rouge miroir', () => {
   const win=newGameWindow();
   const result=win.eval(`(function(){
-    const orig=mgmtFicheZones;
-    mgmtFicheZones=function(){
-      const bins=new Map();
-      for(let row=0;row<7;row++) for(let col=0;col<7;col++)
-        bins.set(col+':'+row,{col,row,presence:row<2?10:1,coince:row<2?1:0});
-      return bins;
-    };
-    const quiet=mgmtFicheOctogone(null,null);
-    mgmtFicheZones=function(){return new Map([
-      ['0:0',{col:0,row:0,presence:20,coince:8}],
-      ['3:0',{col:3,row:0,presence:18,coince:2}],
-      ['6:6',{col:6,row:6,presence:12,coince:0}],
-      ['0:6',{col:0,row:6,presence:2,coince:2}]]);};
-    const danger=mgmtFicheOctogone(null,null);
-    mgmtFicheZones=orig;
-    return {quiet:(quiet.match(/<circle /g)||[]).length,
-      danger:(danger.match(/<circle /g)||[]).length,
-      red:danger.split('fill="var(--mgmt-red)"').length-1};
+    const left=mgmtFicheZonesVides(),right=mgmtFicheZonesVides();
+    const points=[{own:{x:0,y:0},opp:{x:2,y:0},phase:'debout'},
+      {own:{x:-2,y:0.5},opp:{x:0,y:0},phase:'debout'},
+      ...Array.from({length:8},()=>({own:{x:-4,y:0.5},opp:{x:-2,y:0.5},phase:'debout'}))];
+    for(const p of points){
+      mgmtFicheZoneAjouter(left,p.own,p.opp,p.phase,null);
+      mgmtFicheZoneAjouter(right,{x:-p.own.x,y:p.own.y},{x:-p.opp.x,y:p.opp.y},p.phase,null);
+    }
+    const l=mgmtFicheOctogoneZones(left),r=mgmtFicheOctogoneZones(right);
+    const re=/class="mgmt-fiche-pin" cx="([0-9.]+)" cy="([0-9.]+)"/;
+    const tied=mgmtFicheZonesVides();
+    for(const x of [-4,4]) for(let j=0;j<4;j++)
+      mgmtFicheZoneAjouter(tied,{x,y:0.5},{x:x/2,y:0.5},'debout',null);
+    return {left:left.rings,right:right.rings,redL:re.exec(l)?.slice(1),redR:re.exec(r)?.slice(1),
+      ringsL:l.split('var(--mgmt-yellow)').length-1,
+      tied:re.exec(mgmtFicheOctogoneZones(tied))?.slice(1)};
   })()`);
-  assert.ok(result.quiet>=2&&result.quiet<=3);
-  assert.equal(result.danger,4,'trois zones dominantes et une seule zone rouge');
-  assert.equal(result.red,1);
+  assert.deepEqual(Array.from(result.left),Array.from(result.right));
+  assert.equal(result.ringsL,3);
+  assert.ok(result.redL&&result.redR);
+  assert.ok(Math.abs(+result.redL[0]+ +result.redR[0]-200)<0.2);
+  assert.equal(result.redL[1],result.redR[1]);
+  assert.equal(result.tied[0],'100.0','une égalité angulaire ne privilégie ni gauche ni droite');
+});
+
+test('MGMT lot 4 T5 — une présence uniforme n’avantage aucun angle du bord', () => {
+  const win=newGameWindow();
+  const result=win.eval(`(function(){
+    const z=mgmtFicheZonesVides();
+    for(let k=0;k<8;k++) for(let j=0;j<4;j++){
+      const angle=(k+0.5)*Math.PI/4;
+      mgmtFicheZoneAjouter(z,{x:3.6*Math.cos(angle),y:3.6*Math.sin(angle)},
+        {x:0,y:0},'sol',null);
+    }
+    const html=mgmtFicheOctogoneZones(z);
+    return {rings:z.rings,bord:z.bord,red:html.includes('mgmt-fiche-pin'),
+      yellow:(html.match(/<circle cx="100" cy="100"/g)||[]).length};
+  })()`);
+  assert.deepEqual(Array.from(result.rings),[0,0,32]);
+  assert.deepEqual(Array.from(result.bord),Array(8).fill(4));
+  assert.equal(result.red,false);
+  assert.equal(result.yellow,3,'seuls des anneaux concentriques portent la présence');
 });
 
 /* ==== [ANCRE: TEST_MGMT_T4_REPRISE_RESUME] — Lot 3 T4, reprise : le résumé

@@ -28,65 +28,94 @@ function mgmtFicheSituation(m,f,scope){
 function mgmtFicheZones(m,f){
   /* La carte décrit sa forme récente : dix combats au plus, sans limiter
      l'historique ni les liens Revoir. */
-  const hist=mgmtFightHistory(m,f).slice(-10), bins=new Map();
+  const hist=mgmtFightHistory(m,f).slice(-10), zones=mgmtFicheZonesVides();
   for(const t of hist){
     const side=t.a.id===f.id?'A':'B';
-    const entries=mgmtFicheZonesCombat(t,side);
-    for(const cell of entries){
-      const key=`${cell.col}:${cell.row}`, total=bins.get(key)||{col:cell.col,row:cell.row,presence:0,coince:0};
-      total.presence+=cell.presence; total.coince+=cell.coince;
-      bins.set(key,total);
+    const part=mgmtFicheZonesCombat(t,side);
+    for(let i=0;i<3;i++) zones.rings[i]+=part.rings[i];
+    for(let i=0;i<8;i++){
+      zones.bord[i]+=part.bord[i];
+      zones.pin[i].count+=part.pin[i].count;
+      zones.pin[i].x+=part.pin[i].x;
+      zones.pin[i].y+=part.pin[i].y;
     }
   }
-  return bins;
+  return zones;
+}
+/* Trois couronnes selon le rayon physique (mètres) : centre < 38 % du
+   rayon inscrit de l'arène, mi-espace < 74 %, bord au-delà. Huit angles
+   ÉGAUX ne servent qu'à situer le rouge ; ils ne pondèrent pas la présence.
+   Les positions proviennent exclusivement d'areneMoment (lot 3 T3). */
+function mgmtFicheZonesVides(){
+  return {rings:[0,0,0],bord:Array(8).fill(0),
+    pin:Array.from({length:8},()=>({count:0,x:0,y:0}))};
+}
+function mgmtFicheZoneAjouter(z,own,opp,phase,posClinch){
+  const r=Math.hypot(own.x,own.y);
+  const ring=r<ARENE_RS*0.38?0:r<ARENE_RS*0.74?1:2;
+  z.rings[ring]++;
+  if(ring!==2) return;
+  const angle=(Math.atan2(own.y,own.x)+Math.PI*2)%(Math.PI*2);
+  const sector=Math.floor(angle*8/(Math.PI*2));
+  z.bord[sector]++;
+  if((phase==='clinch'&&posClinch==='cage'||phase==='debout')
+    &&areneBordDist(own)<0.75&&areneBordDist(own)<areneBordDist(opp)){
+    z.pin[sector].count++;
+    z.pin[sector].x+=own.x;
+    z.pin[sector].y+=own.y;
+  }
 }
 function mgmtFicheZonesCombat(t,side){
   const replay=mgmtFicheRejeu(t), cached=MGMT_FICHE_REJEUX.get(t);
   if(cached[side]) return cached[side];
-  const bins=new Map();
+  const zones=mgmtFicheZonesVides();
   if(replay&&areneVerdictFidele(t,replay)){
     const session=areneConstruire(replay,{a:t.a.name,b:t.b.name});
     // L'arène fournit les coordonnées : on ne recalcule aucune trajectoire.
     for(let sec=5;sec<=session.dureeCombat;sec+=5){
       const e=areneMoment(session,sec), own=side==='A'?{x:e.ax,y:e.ay}:{x:e.bx,y:e.by};
       const opp=side==='A'?{x:e.bx,y:e.by}:{x:e.ax,y:e.ay};
-      const col=Math.max(0,Math.min(6,Math.floor((own.x+ARENE_RV)/(2*ARENE_RV)*7)));
-      const row=Math.max(0,Math.min(6,Math.floor((own.y+ARENE_RV)/(2*ARENE_RV)*7)));
-      const key=`${col}:${row}`, cell=bins.get(key)||{col,row,presence:0,coince:0};
-      cell.presence++;
-      if((e.phase==='clinch'&&e.posClinch==='cage'||e.phase==='debout')
-        &&areneBordDist(own)<0.75&&areneBordDist(own)<areneBordDist(opp)) cell.coince++;
-      bins.set(key,cell);
+      mgmtFicheZoneAjouter(zones,own,opp,e.phase,e.posClinch);
     }
   }
-  cached[side]=Array.from(bins.values());
+  cached[side]=zones;
   return cached[side];
 }
 function mgmtFicheOctogone(m,f){
-  const bins=mgmtFicheZones(m,f);
-  if(!bins.size) return '<div class="mgmt-fiche-empty">Aucune trajectoire enregistrée.</div>';
-  /* Neuf secteurs dans l'octogone ; les deux premiers, puis le troisième
-     uniquement s'il porte au moins 12 % de la présence totale. Les zones
-     rouges exigent 25 % du temps dans le secteur ET trois moments de 5 s. */
-  const sectors=new Map();
-  for(const v of bins.values()){
-    const col=Math.floor(v.col*3/7),row=Math.floor(v.row*3/7),key=`${col}:${row}`;
-    const s=sectors.get(key)||{col,row,presence:0,coince:0};
-    s.presence+=v.presence; s.coince+=v.coince; sectors.set(key,s);
+  return mgmtFicheOctogoneZones(mgmtFicheZones(m,f));
+}
+function mgmtFicheOctogoneZones(zones){
+  const total=zones.rings.reduce((sum,n)=>sum+n,0);
+  if(!total) return '<div class="mgmt-fiche-empty">Aucune trajectoire enregistrée.</div>';
+  /* Trois anneaux pleins, sans direction jaune arbitraire. La lumière
+     reflète la part de temps réellement passée dans chaque couronne. */
+  const light=n=>n?(0.16+0.6*n/total).toFixed(2):'0';
+  const marks=`<circle cx="100" cy="100" r="80" fill="none" stroke="var(--mgmt-yellow)" stroke-width="20" opacity="${light(zones.rings[2])}"/>`
+    +`<circle cx="100" cy="100" r="52" fill="none" stroke="var(--mgmt-yellow)" stroke-width="35" opacity="${light(zones.rings[1])}"/>`
+    +`<circle cx="100" cy="100" r="34" fill="var(--mgmt-yellow)" opacity="${light(zones.rings[0])}"/>`;
+  /* Rouge : au moins 3 instants, 25 % du temps sur CET angle du bord et
+     5 % de tout le temps au bord. La direction est la moyenne des vraies
+     coordonnées d'enfermement, jamais le centre d'une case. */
+  const borderTotal=zones.rings[2];
+  const eligible=zones.pin.map((p,i)=>({p,i})).filter(({p,i})=>p.count>=3
+    &&p.count/zones.bord[i]>=0.25&&p.count/borderTotal>=0.05);
+  let danger='';
+  if(eligible.length){
+    /* Des angles à égalité se combinent : un départage par numéro de
+       secteur ferait pencher la carte d'un côté même sur son miroir. */
+    const max=Math.max(...eligible.map(({p})=>p.count));
+    const {x,y}=eligible.filter(({p})=>p.count===max)
+      .reduce((sum,{p})=>({x:sum.x+p.x,y:sum.y+p.y}),{x:0,y:0});
+    const len=Math.hypot(x,y);
+    if(len>0){
+      const cx=(100+83*x/len).toFixed(1),cy=(100+83*y/len).toFixed(1);
+      danger=`<circle class="mgmt-fiche-pin" cx="${cx}" cy="${cy}" r="15" fill="var(--mgmt-red)" opacity="0.9"/>`;
+    }
   }
-  const total=Array.from(sectors.values()).reduce((sum,s)=>sum+s.presence,0);
-  const top=Array.from(sectors.values()).sort((a,b)=>b.presence-a.presence||a.row-b.row||a.col-b.col)
-    .filter((s,i)=>i<2||i===2&&s.presence/total>=0.12).slice(0,3);
-  const max=top[0].presence;
-  const marks=top.map(v=>{
-    const x=43+v.col*57,y=43+v.row*57;
-    return `<circle cx="${x}" cy="${y}" r="${(27+9*v.presence/max).toFixed(1)}" fill="var(--mgmt-yellow)" opacity="${(0.34+0.26*v.presence/max).toFixed(2)}"/>`
-      +(v.coince>=3&&v.coince/v.presence>=0.25?`<circle cx="${x}" cy="${y}" r="20" fill="var(--mgmt-red)" opacity="0.85"/>`:'');
-  }).join('');
   return `<div class="mgmt-fiche-map"><svg viewBox="0 0 200 200" role="img" aria-label="Zones de combat : jaune, présence ; rouge, enfermé contre le grillage">`
     +`<defs><clipPath id="mgmt-fiche-oct"><polygon points="62,8 138,8 192,62 192,138 138,192 62,192 8,138 8,62"/></clipPath></defs>`
     +`<polygon points="62,8 138,8 192,62 192,138 138,192 62,192 8,138 8,62" fill="var(--mgmt-plum-deep)" stroke="var(--mgmt-edge)" stroke-width="2"/>`
-    +`<g clip-path="url(#mgmt-fiche-oct)">${marks}</g></svg><span>Jaune : zones de combat.<br>Rouge : contre le grillage.</span></div>`;
+    +`<g clip-path="url(#mgmt-fiche-oct)">${marks}${danger}</g></svg><span>Jaune : zones de combat.<br>Rouge : contre le grillage.</span></div>`;
 }
 function mgmtFicheParcours(trace){
   if(!trace) return '';
