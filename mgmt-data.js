@@ -27,7 +27,6 @@ const MGMT_PILE_MIN=8;
 const MGMT_PILE_MAX=15;
 const MGMT_ROSTER_MIN=40;
 const MGMT_ROSTER_MAX=60;
-const MGMT_FACTS_MAX=10;
 
 /* Les cinq déclencheurs du passage niveau 1 → niveau 2, addendum §4.
    Exhaustifs en v1 : pas un de plus. Seul le premier peut survenir en Lot 1
