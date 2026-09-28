@@ -20,13 +20,15 @@ function mgmtFicheLigne(m,id){
     name:trace.name,first:trace.first,last:trace.last,age:trace.age,
     W:trace.pro.W,L:trace.pro.L,D:0},trace};
 }
-function mgmtFicheSituation(m,f,exterieur){
-  const scope=exterieur?'world':'organization', rank=mgmtDivisionRank(m,f,scope);
+function mgmtFicheSituation(m,f,scope){
+  const rank=mgmtDivisionRank(m,f,scope);
   if(rank===null) return 'Hors classement';
-  return rank===16?'Aux portes du top 15':`${mgmtRankLabel(rank)} ${exterieur?'mondial':'chez Split'}`;
+  return rank===16?'Aux portes du top 15':mgmtRankLabel(rank);
 }
 function mgmtFicheZones(m,f){
-  const hist=mgmtFightHistory(m,f), bins=new Map();
+  /* La carte décrit sa forme récente : dix combats au plus, sans limiter
+     l'historique ni les liens Revoir. */
+  const hist=mgmtFightHistory(m,f).slice(-10), bins=new Map();
   for(const t of hist){
     const side=t.a.id===f.id?'A':'B';
     const entries=mgmtFicheZonesCombat(t,side);
@@ -63,11 +65,23 @@ function mgmtFicheZonesCombat(t,side){
 function mgmtFicheOctogone(m,f){
   const bins=mgmtFicheZones(m,f);
   if(!bins.size) return '<div class="mgmt-fiche-empty">Aucune trajectoire enregistrée.</div>';
-  const max=Math.max(...Array.from(bins.values(),v=>v.presence));
-  const marks=Array.from(bins.values()).map(v=>{
-    const x=20+v.col*26.6,y=20+v.row*26.6;
-    return `<circle cx="${x}" cy="${y}" r="17" fill="var(--mgmt-yellow)" opacity="${(0.14+0.5*v.presence/max).toFixed(2)}"/>`
-      +(v.coince?`<circle cx="${x}" cy="${y}" r="${(5+11*v.coince/v.presence).toFixed(1)}" fill="var(--mgmt-red)" opacity="0.85"/>`:'');
+  /* Neuf secteurs dans l'octogone ; les deux premiers, puis le troisième
+     uniquement s'il porte au moins 12 % de la présence totale. Les zones
+     rouges exigent 25 % du temps dans le secteur ET trois moments de 5 s. */
+  const sectors=new Map();
+  for(const v of bins.values()){
+    const col=Math.floor(v.col*3/7),row=Math.floor(v.row*3/7),key=`${col}:${row}`;
+    const s=sectors.get(key)||{col,row,presence:0,coince:0};
+    s.presence+=v.presence; s.coince+=v.coince; sectors.set(key,s);
+  }
+  const total=Array.from(sectors.values()).reduce((sum,s)=>sum+s.presence,0);
+  const top=Array.from(sectors.values()).sort((a,b)=>b.presence-a.presence||a.row-b.row||a.col-b.col)
+    .filter((s,i)=>i<2||i===2&&s.presence/total>=0.12).slice(0,3);
+  const max=top[0].presence;
+  const marks=top.map(v=>{
+    const x=43+v.col*57,y=43+v.row*57;
+    return `<circle cx="${x}" cy="${y}" r="${(27+9*v.presence/max).toFixed(1)}" fill="var(--mgmt-yellow)" opacity="${(0.34+0.26*v.presence/max).toFixed(2)}"/>`
+      +(v.coince>=3&&v.coince/v.presence>=0.25?`<circle cx="${x}" cy="${y}" r="20" fill="var(--mgmt-red)" opacity="0.85"/>`:'');
   }).join('');
   return `<div class="mgmt-fiche-map"><svg viewBox="0 0 200 200" role="img" aria-label="Zones de combat : jaune, présence ; rouge, enfermé contre le grillage">`
     +`<defs><clipPath id="mgmt-fiche-oct"><polygon points="62,8 138,8 192,62 192,138 138,192 62,192 8,138 8,62"/></clipPath></defs>`
@@ -76,9 +90,18 @@ function mgmtFicheOctogone(m,f){
 }
 function mgmtFicheParcours(trace){
   if(!trace) return '';
+  const duration=o=>{
+    if(o.from===null||o.to===null) return '';
+    const weeks=(o.to-o.from+1)*MGMT_EVENT_WEEKS;
+    const span=weeks<MGMT_EXT_YEAR_WEEKS
+      ?`${Math.max(1,Math.round(weeks*12/MGMT_EXT_YEAR_WEEKS))} mois`
+      :`${(weeks/MGMT_EXT_YEAR_WEEKS).toFixed(1).replace('.',',')} ans`;
+    const when=o.to<0?'Avant l’ouverture':o.from<0?'Avant et depuis l’ouverture':'Depuis l’ouverture';
+    return ` · ${when}, environ ${span}`;
+  };
   const orgs=trace.orgs.map(o=>`<div class="mgmt-fiche-org"><strong>${o.name?esc(o.name):''}</strong>`
     +`${o.fights?` · ${esc(o.fights)} ${o.fights===1?'combat':'combats'}`:''}`
-    +`${o.from!==null?` · cycles ${esc(o.from)} à ${esc(o.to)}`:''}</div>`).join('');
+    +`${duration(o)}</div>`).join('');
   return `<aside class="mgmt-fiche-side"><h3>Sa trajectoire</h3><div class="mgmt-fiche-org">Amateur · ${esc(trace.amateur.W)}-${esc(trace.amateur.L)}</div>`
     +orgs+`<div class="mgmt-fiche-org">Professionnel · ${esc(trace.pro.W)}-${esc(trace.pro.L)}</div></aside>`;
 }
@@ -112,12 +135,14 @@ function scr_mgmt_fiche(){
   const {f,trace}=line;
   const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):'Split';
   const div=divById(f.div), record=`${f.W}-${f.L}${f.D?'-'+f.D:''}`;
+  const ranks=trace?`Mondial : ${mgmtFicheSituation(m,f,'world')}`
+    :`Chez Split : ${mgmtFicheSituation(m,f,'organization')} · Mondial : ${mgmtFicheSituation(m,f,'world')}`;
   const attrs=[['Bilan',record],['Taille',`${(profile.height/100).toFixed(2).replace('.',',')} m`],
     ['Allonge',`${(profile.reach/100).toFixed(2).replace('.',',')} m`]];
   return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head">`
     +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
     +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)}</h2>`
-    +`<p>${esc(div.name)}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(mgmtFicheSituation(m,f,!!trace))}</p></div>`
+    +`<p>${esc(div.name)}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p></div>`
     +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div></div>`
     +`<div class="mgmt-cols mgmt-fiche-cols"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
     +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}</section>`

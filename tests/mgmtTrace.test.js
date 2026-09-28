@@ -242,6 +242,11 @@ test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par tr
   assert.match(html,/Taille/);
   assert.match(html,/Allonge/);
   assert.match(html,/garde (orthodoxe|gaucher)/);
+  assert.match(html,/Chez Split :/);
+  assert.match(html,/Mondial :/);
+  const ranks=win.eval(`(function(){const m=G.mgmt,f=mgmtFighterById(m,${JSON.stringify(id)});
+    return [mgmtFicheSituation(m,f,'organization'),mgmtFicheSituation(m,f,'world')];})()`);
+  assert.ok(html.includes(`Chez Split : ${ranks[0]} · Mondial : ${ranks[1]}`));
   assert.ok(!html.includes('Comment il combat')&&!html.includes('Son camp')&&!html.includes('Sa faille'));
   const first=win.replays;
   win.eval('render(); render(); CL.mgmtFicheDeplacer(1)');
@@ -263,6 +268,14 @@ test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappeme
   assert.match(html,/Professionnel/);
   assert.ok(!html.includes('× 0')&&!html.includes('· 0 combat'));
   assert.deepEqual(Object.keys(line).sort(),keys,'lecture sans champ stocké');
+  win.eval(`(function(){ const orig=mgmtExteriorTrace;
+    mgmtExteriorTrace=function(line,cycle){ const t=orig(line,cycle);
+      t.orgs[0].from=-24; t.orgs[0].to=-12; return t; };
+    render();
+  })()`);
+  const orgRows=Array.from(win.document.querySelectorAll('.mgmt-fiche-org')).filter(o=>o.querySelector('strong'));
+  assert.ok(orgRows.some(o=>o.textContent.includes('Avant l’ouverture')));
+  assert.ok(orgRows.every(o=>!/-\d+/.test(o.textContent)),'aucun cycle négatif sur la fiche');
   win.eval(`(function(){
     const orig=mgmtExteriorTrace;
     mgmtExteriorTrace=function(line,cycle){ const t=orig(line,cycle);
@@ -273,6 +286,52 @@ test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappeme
   const doc=win.document.getElementById('app');
   assert.equal(doc.querySelector('img,svg[onload]'),null);
   assert.ok(doc.innerHTML.includes('&lt;img')&&doc.innerHTML.includes('&lt;svg'));
+});
+
+test('MGMT lot 4 T5 — dix derniers combats pour les zones, historique intact', () => {
+  const win=newGameWindow();
+  freshMgmt(win,20260925);
+  assert.ok(joueSoiree(win));
+  const id=win.eval('G.mgmt.hist[0].a.id');
+  const s=win.eval(`(function(){
+    const m=G.mgmt, base=m.hist[0];
+    m.hist=Array.from({length:30},(_,i)=>({...base,c:i+1}));
+    let builds=0; const orig=areneConstruire;
+    areneConstruire=function(...args){builds++;return orig(...args);};
+    const f=mgmtFighterById(m,${JSON.stringify(id)});
+    const bins=mgmtFicheZones(m,f), html=mgmtHistoriqueHtml(m,f);
+    return {builds,count:bins.size,revoir:html.split('>Revoir</button>').length-1};
+  })()`);
+  assert.equal(s.builds,10);
+  assert.ok(s.count>0);
+  assert.equal(s.revoir,30);
+});
+
+test('MGMT lot 4 T5 — deux ou trois secteurs dominants et rouge seulement si enfermement significatif', () => {
+  const win=newGameWindow();
+  const result=win.eval(`(function(){
+    const orig=mgmtFicheZones;
+    mgmtFicheZones=function(){
+      const bins=new Map();
+      for(let row=0;row<7;row++) for(let col=0;col<7;col++)
+        bins.set(col+':'+row,{col,row,presence:row<2?10:1,coince:row<2?1:0});
+      return bins;
+    };
+    const quiet=mgmtFicheOctogone(null,null);
+    mgmtFicheZones=function(){return new Map([
+      ['0:0',{col:0,row:0,presence:20,coince:8}],
+      ['3:0',{col:3,row:0,presence:18,coince:2}],
+      ['6:6',{col:6,row:6,presence:12,coince:0}],
+      ['0:6',{col:0,row:6,presence:2,coince:2}]]);};
+    const danger=mgmtFicheOctogone(null,null);
+    mgmtFicheZones=orig;
+    return {quiet:(quiet.match(/<circle /g)||[]).length,
+      danger:(danger.match(/<circle /g)||[]).length,
+      red:danger.split('fill="var(--mgmt-red)"').length-1};
+  })()`);
+  assert.ok(result.quiet>=2&&result.quiet<=3);
+  assert.equal(result.danger,4,'trois zones dominantes et une seule zone rouge');
+  assert.equal(result.red,1);
 });
 
 /* ==== [ANCRE: TEST_MGMT_T4_REPRISE_RESUME] — Lot 3 T4, reprise : le résumé
