@@ -666,9 +666,16 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-cl-flag{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:0 0 10px}
 .mgmt-cl-stitle{font:700 18px var(--mgmt-font-display);letter-spacing:.16em;text-transform:uppercase;color:var(--mgmt-yellow)}
 .mgmt-cl-scope{font:18px var(--mgmt-font-body);color:var(--mgmt-secondary);letter-spacing:.08em;text-align:right}
-.mgmt-cl-headrow,.mgmt-cl-row{display:grid;grid-template-columns:54px minmax(0,1fr) 150px 190px 110px;gap:18px;align-items:center}
+.mgmt-cl-headrow,.mgmt-cl-row{display:grid;grid-template-columns:54px minmax(0,1fr) 150px minmax(150px,190px) 110px;gap:18px;align-items:center}
 .mgmt-cl-list{display:flex;flex-direction:column}
-.mgmt-cl-headrow{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--mgmt-secondary);padding:6px 0;flex:0 0 auto}
+/* Les lignes ne rétrécissent jamais pour tenir dans le volet : la liste
+   défile, une ligne garde la hauteur de son contenu (à 1080, quinze
+   lignes à organisation longue dépassent l'écran — flex-shrink les
+   écrasait, le texte de la colonne organisation débordait sur la ligne
+   suivante). L'organisation longue retourne à la ligne dans SA ligne,
+   jamais sur la suivante. */
+.mgmt-cl-list>*{flex:0 0 auto}
+.mgmt-cl-headrow{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--mgmt-secondary);padding:6px 0}
 .mgmt-cl-row{align-items:center;padding:13px 8px;font-size:20px;min-height:0;cursor:pointer;border:1px solid transparent;border-bottom:1px solid var(--mgmt-edge)}
 .mgmt-cl-row:nth-child(even){background:var(--mgmt-panel)}
 .mgmt-cl-row:hover{background:var(--mgmt-plum);color:var(--mgmt-ink)}
@@ -840,7 +847,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      et étendus via Object.assign). Toujours avant main.js. ==== -->
 <script src="mgmt-data.js?v=mgmt4t2r1"></script>
 <script src="mgmt-bureau.js?v=mgmt4t2r1"></script>
-<script src="mgmt-carte.js?v=cls3a"></script>
+<script src="mgmt-carte.js?v=cls4a"></script>
 <script src="mgmt-corps.js?v=r2809"></script>
 <script src="mgmt-argent.js?v=r2809"></script>
 <script src="mgmt-monde.js?v=r2809"></script>
@@ -856,7 +863,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=fem1"></script>
 <!-- Lot 4 T6 : l'écran des classements, chargé avant mgmt-screens.js. -->
-<script src="mgmt-ecran-classements.js?v=cls3b"></script>
+<script src="mgmt-ecran-classements.js?v=cls4a"></script>
 <script src="mgmt-screens.js?v=cls3b"></script>
 <script src="arene-etat.js?v=r2809"></script>
 <script src="arene-vue.js?v=lot4fidelite05"></script>

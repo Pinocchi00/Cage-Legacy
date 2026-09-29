@@ -154,3 +154,40 @@ test('MGMT T6 — tendance et constats après une soirée, le classement d’hie
   assert.ok(s.col,'la colonne de tendance se rend');
   assert.ok(s.bloc,'le bloc des constats se rend aussi');
 });
+
+/* Le SENS de la tendance (reprise T6-1) : monter porte « +n » (le numéro
+   de rang gagne), descendre « -n » — la colonne et le constat factuel
+   disent la même chose, jamais l'inverse. */
+test('MGMT T6 — le sens de la tendance : gagner des places porte « +n », la colonne et le constat concordent', () => {
+  const win = newGameWindow();
+  const r = JSON.parse(win.eval(`(function(){
+    const cur=[{id:'a',W:9,L:1},{id:'b',W:9,L:3},{id:'c',W:8,L:3}];
+    const hier=[{id:'b',W:9,L:1},{id:'a',W:8,L:3},{id:'c',W:8,L:4}];
+    /* b : hier 1er, aujourd'hui 2e — il recule d'une place.
+       a : hier 2e, aujourd'hui 1er — il monte d'une place.
+       c : inchangé. */
+    const tA=mgmtClassementsTendance(cur[0],0,hier);
+    const tB=mgmtClassementsTendance(cur[1],1,hier);
+    const tC=mgmtClassementsTendance(cur[2],2,hier);
+    const col=tr=>mgmtClassementsTrendHtml(tr);
+    /* Concordance colonne / constat : même signe, chaque combattant. */
+    const ligne=(cur,ci,tr)=>{
+      const up=tr&&tr.t==='up', down=tr&&tr.t==='down';
+      const mv=up?mgmtClassementsMove({roster:[]},cur.id,'up',tr.n)
+        :(down?mgmtClassementsMove({roster:[]},cur.id,'down',tr.n):'');
+      return {col:col(tr),monte:mv.indexOf('monte')>=0,recule:mv.indexOf('recule')>=0};
+    };
+    return JSON.stringify({
+      aP:{t:tA.t,html:mgmtClassementsTrendHtml(tA)},aL:ligne(cur[0],0,tA),
+      bP:{t:tB.t,html:mgmtClassementsTrendHtml(tB)},bL:ligne(cur[1],1,tB),
+      cP:tC.t,nouveau:mgmtClassementsTendance({id:'z'},0,hier).t});
+  })()`));
+  assert.equal(r.aP.t,'up','hier derrière, aujourd’hui devant : il monte');
+  assert.equal(r.aP.html,'<span class="mgmt-cl-trend up">+1</span>','montée affichée « +1 », jamais « -1 »');
+  assert.ok(r.aL.monte&&!r.aL.recule,'le constat dit « monte »');
+  assert.equal(r.bP.t,'down','hier devant, aujourd’hui derrière : il recule');
+  assert.equal(r.bP.html,'<span class="mgmt-cl-trend down">-1</span>','recul affiché « -1 », jamais « +1 »');
+  assert.ok(r.bL.recule&&!r.bL.monte,'le constat dit « recule »');
+  assert.equal(r.cP,'eq','place tenue : « = »');
+  assert.equal(r.nouveau,'nouveau','absent d’hier : « nouveau »');
+});

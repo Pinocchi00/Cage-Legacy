@@ -109,3 +109,54 @@ test('MGMT T6 — le monde extérieur d’hier suit mgmtExteriorTrace au cycle l
   assert.ok(r.tracesOk, 'chaque ligne extérieure d’hier porte le bilan de sa trace au cycle 2');
   assert.ok(r.maintenantN>=r.hierN, 'le classement du jour compte au moins autant de vivants');
 });
+
+/* Le retraité du cycle reste au classement d'hier (reprise T6-3) : sa
+   retraite est tombée APRÈS le cycle lu, « sort du classement » se lit
+   encore. Deux cas : fin de carrière médicale pendant la soirée du cycle
+   lu (il y a combattu — l'instantané d'avant combat le classe, capturé par
+   le vrai mgmtTraceSide, le même que la soirée capture) et retraite
+   d'âge appliquée à l'ouverture d'un cycle postérieur, sans combat
+   depuis (bilan courant). */
+test('MGMT T6 — un retraité du management reste au classement d’hier', () => {
+  const win = newGameWindow();
+  const s = JSON.parse(win.eval(`(function(){
+    setSeed(303);
+    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=2; mgmtExteriorEnsure(m);
+    G={theme:'dark',mgmt:m};
+    let div=null;
+    for(const d of allDivisions()){
+      const dans=m.roster.filter(o=>o.div===d.id&&!mgmtIsRetired(o));
+      if(dans.length>=3){ div=d.id; break; }
+    }
+    if(!div) return 'null';
+    const avant=mgmtDivisionRanking(m,div,'world').map(x=>x.id);
+    if(avant.length<3) return 'null';
+    /* Le combat du cycle lu : la trace est capturée AVANT combat par le
+       vrai mgmtTraceSide — le médical y combat, l'age non. */
+    const med=m.roster.find(o=>o.div===div&&!mgmtIsRetired(o));
+    const age=m.roster.find(o=>o.div===div&&!mgmtIsRetired(o)&&o!==med);
+    const memeDiv=m.roster.find(o=>o.div===div&&!mgmtIsRetired(o)&&o!==med&&o!==age);
+    if(!med||!age||!memeDiv) return 'null';
+    m.hist.push({c:m.cycle,slot:'main',seed:0,rounds:3,
+      a:mgmtTraceSide(med),b:mgmtTraceSide(memeDiv),winner:'A',family:'ko',round:1});
+    med.retired='medical';
+    mgmtAddFact(m,{c:m.cycle,k:'retired',a:med.id});
+    mgmtNewPile(m);
+    age.retired='age';
+    mgmtAddFact(m,{c:m.cycle,k:'retired',a:age.id});
+    const hier=mgmtDivisionRanking(m,div,'world',2).map(x=>x.id);
+    const vivant=mgmtDivisionRanking(m,div,'world').map(x=>x.id);
+    return JSON.stringify({medIn:hier.indexOf(med.id)>=0,
+      ageIn:hier.indexOf(age.id)>=0,
+      medOut:vivant.indexOf(med.id)<0,ageOut:vivant.indexOf(age.id)<0,
+      medMeme:hier.indexOf(med.id)===avant.indexOf(med.id),
+      ageMeme:hier.indexOf(age.id)===avant.indexOf(age.id)});
+  })()`));
+  assert.ok(s,'la fixture a deux retraits lisibles dans une catégorie assez garnie');
+  assert.ok(s.medIn,'la fin de carrière médicale du cycle lu figure encore au classement d’hier');
+  assert.ok(s.ageIn,'le retraité d’âge du cycle suivant figure aussi au classement d’hier');
+  assert.ok(s.medOut,'le fin de carrière médical sort du classement vivant');
+  assert.ok(s.ageOut,'le retraite d’âge sort du classement vivant');
+  assert.ok(s.medMeme,'la fin de carrière médical garde son rang d’hier');
+  assert.ok(s.ageMeme,'le retraite d’âge garde son rang d’hier');
+});

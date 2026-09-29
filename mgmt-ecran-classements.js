@@ -51,9 +51,10 @@ const MGMT_CLASSEMENTS_LABELS={
   organisation:'Ton organisation',
   combattant:'combattant',
   combattants:'combattants',
-  dans:'dans le top 15 mondial',
+  dans:'classés dans le top 15 mondial de leur catégorie',
   categorie:'catégorie',
   categories:'catégories',
+  sur:'sur',
 };
 
 const MGMT_CL_TOP=15;
@@ -70,24 +71,32 @@ function mgmtClassementsOrgCount(m){
   return {n:rows.reduce((s,r)=>s+r.top15,0),divs:rows.filter(r=>r.top15>0).length};
 }
 
-/** La phrase du bloc « Ton organisation » : le compte factuel dérivé,
- *  sans objectif ni patron (lot 5, §1). @returns {string} */
+/** La phrase du bloc « Ton organisation » : le compte factuel dérivé, sans
+ *  ambiguïté de lecture (ce n'est pas un seul top 15 : chaque combattant
+ *  compte dans le top 15 SA catégorie ; les ranks se lisent sur N catégories
+ *  représentées) et sans objectif ni patron (lot 5, §1). @returns {string} */
 function mgmtClassementsOrgLine(org){
   return `${org.n} ${org.n===1?MGMT_CLASSEMENTS_LABELS.combattant
-    :MGMT_CLASSEMENTS_LABELS.combattants} de Split ${MGMT_CLASSEMENTS_LABELS.dans}, `
-    +`${org.divs} ${org.divs===1?MGMT_CLASSEMENTS_LABELS.categorie
+    :MGMT_CLASSEMENTS_LABELS.combattants} de Split `
+    +MGMT_CLASSEMENTS_LABELS.dans
+    +`, ${MGMT_CLASSEMENTS_LABELS.sur} ${org.divs} `
+    +`${org.divs===1?MGMT_CLASSEMENTS_LABELS.categorie
     :MGMT_CLASSEMENTS_LABELS.categories}.`;
 }
 
 /** Tendance d'un rang entre le classement courant et celui du cycle
  *  précédent (recalcul, jamais stocké). prev null : pas de comparaison
- *  possible (m.cycle = 0). Pur. @returns {object|null} */
+ *  possible (m.cycle = 0). SENS : l'INDEX plus petit = mieux classé —
+ *  hier derrière (i>curI), aujourd'hui devant : il a gagné des places
+ *  (« +n », le NUMÉRO de rang descend) ; hier devant, aujourd'hui
+ *  derrière : il a perdu des places (« -n »). Pur.
+ *  @returns {object|null} */
 function mgmtClassementsTendance(cur,curI,prev){
   if(!prev) return null;
   const i=prev.findIndex(x=>x.id===cur.id);
   if(i<0) return {t:'nouveau'};
-  if(i<curI) return {t:'up',n:curI-i};
-  if(i>curI) return {t:'down',n:i-curI};
+  if(i>curI) return {t:'up',n:i-curI};
+  if(i<curI) return {t:'down',n:curI-i};
   return {t:'eq'};
 }
 
