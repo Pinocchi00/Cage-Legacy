@@ -723,7 +723,26 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-fiche-fight strong{font-size:20px}
 .mgmt-fiche-fight .mgmt-next{font-size:17px}
 .mgmt-fiche-org{font-size:17px}
+/* Maquette 08 : grille effectif large / finances 460px ; les blocs sans
+   système (décisions, patron, objectifs) ne réservent aucune place. */
+.mgmt-org-retour{align-self:flex-start;margin-top:8px;padding:6px 0;background:transparent;color:var(--mgmt-secondary);font:600 19px var(--mgmt-font-display);text-transform:uppercase}
+.mgmt-org-cols{grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:56px;margin-top:24px}
+.mgmt-org-main,.mgmt-org-aside{min-width:0;overflow-y:auto}
+.mgmt-org h3{font:700 20px var(--mgmt-font-display);letter-spacing:.2em;text-transform:uppercase;color:var(--mgmt-yellow);margin:0 0 18px}
+.mgmt-org-eff{gap:16px;margin-top:16px}
+.mgmt-org-cat{padding:16px 18px}
+.mgmt-org-nm{font-size:22px}
+.mgmt-org-sub{font-size:17px;font-weight:300;line-height:1.5}
+.mgmt-org-sum{font-size:18px}
+.mgmt-org-group{margin-top:24px}
+.mgmt-org-hd{font-size:18px}
+.mgmt-org-money{grid-template-columns:1fr;gap:10px;padding:18px 0;border-bottom:1px solid var(--mgmt-edge)}
+.mgmt-org-pill{font-size:18px}
+.mgmt-org-val{font-size:38px}
+.mgmt-org-line{font-size:26px;line-height:1.35}
+@media(max-width:1500px){.mgmt-org-eff{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1279px){.mgmt-fiche{padding:40px 32px 48px}.mgmt-fiche-cols,.mgmt-fiche-no-trace{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}.mgmt-fiche-attrs{text-align:left}}
+@media(max-width:1279px){.mgmt-org-cols{grid-template-columns:1fr}.mgmt-org-main,.mgmt-org-aside{overflow:visible}}
 @media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: ARENE_LOT4_FIDELITE_05] — Maquette 05 : scène 1920×1080,
@@ -864,7 +883,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-fiche.js?v=lot4f2fiche"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
-<script src="mgmt-ecran-organisation.js?v=fem1"></script>
+<script src="mgmt-ecran-organisation.js?v=lot4f2org"></script>
 <script src="mgmt-screens.js?v=fem1"></script>
 <script src="arene-etat.js?v=r2809"></script>
 <script src="arene-vue.js?v=lot4fidelite05"></script>
