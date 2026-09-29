@@ -1,14 +1,15 @@
 "use strict";
 /* Captures de vérification du lot 4 : jeu réel et maquette, chacun à
-   1920×1080, assemblés côte à côte en 3840×1080. Exécuter depuis la racine :
-   node tools/capture-fidelite.js (Playwright/Chromium requis). */
+   1920×1080, assemblés côte à côte en 3840×1080. Ce script demande
+   Playwright et Chromium ; Playwright est absent des dépendances du projet.
+   Exécuter depuis la racine : node tools/capture-fidelite.js. */
 const {chromium}=require('playwright');
 const fs=require('node:fs');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 
 const root=path.resolve(__dirname,'..');
-const output=path.join(root,'captures');
+const output=path.join(root,'tools','reports','lot-4-fidelite');
 const file=p=>pathToFileURL(path.join(root,p)).href;
 
 async function main(){
@@ -116,5 +117,5 @@ async function main(){
     if(errors.length) throw Error(errors.join('\n'));
   }finally{ await browser.close(); }
 }
-if(!fs.existsSync(output)) throw Error('Créer le dossier captures/ avant de lancer les captures');
+if(!fs.existsSync(output)) throw Error('Créer le dossier tools/reports/lot-4-fidelite/ avant de lancer les captures');
 main().catch(error=>{ console.error(error); process.exitCode=1; });
