@@ -464,12 +464,12 @@ test('MGMT lot 4 T1 — aucun emplacement d’auteur visible sur les six écrans
         {id:m.roster[2].id,retired:false,injury:null,days:60}]};
     MGMT_FICHE.id=m.roster[0].id;
   })()`);
-  for(const screen of ['mgmt_bureau','mgmt_carte','mgmt_soiree','mgmt_lendemain','mgmt_fiche','mgmt_organisation']){
+  for(const screen of ['mgmt_bureau','mgmt_carte','mgmt_soiree','mgmt_lendemain','mgmt_fiche','mgmt_organisation','mgmt_classements']){
     win.eval(`G.screen='${screen}';render()`);
     const html=win.document.getElementById('app').innerHTML;
     assert.ok(!/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|mgmt-lvl/i.test(html), screen);
     assert.equal(win.document.querySelectorAll('.mgmt-nav').length,1,`navigation ${screen}`);
     assert.equal(win.document.querySelectorAll('.mgmt-nav button').length,
-      screen==='mgmt_soiree'||screen==='mgmt_lendemain'?0:2,`séquence imposée ${screen}`);
+      screen==='mgmt_soiree'||screen==='mgmt_lendemain'?0:3,`séquence imposée ${screen}`);
   }
 });

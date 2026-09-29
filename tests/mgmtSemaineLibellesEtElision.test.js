@@ -91,7 +91,8 @@ test('Semaine — le voisinage s’élide : d’Omar, mais de Bruna', () => {
     .find(r => r.dataset.type === 'voisin');
   assert.ok(row(), 'la ligne voisinage est rendue');
   assert.ok(row().textContent.includes("au voisinage d'Omar Kamara"), 'le voisinage Omar est élidé (ligne 71)');
-  assert.ok(row().textContent.includes('mondial en Poids mouche féminin'), 'le voisinage porte le libellé dérivé');
+  /* F2, accord du rang : pour une combattante, « mondiale ». */
+  assert.ok(row().textContent.includes('mondiale en Poids mouche féminin'), 'le voisinage porte le libellé dérivé et accordé');
   assert.ok(!row().textContent.includes('voisinage de Omar'), 'plus aucun « de Omar » non élidé');
   /* La forme consonne reste « de ... » : Omar sort, Bruna devient la
      ligne de Split au voisinage. */

@@ -29,9 +29,10 @@ function mgmtSemaineCarte(m){
     const a=mgmtFighterById(m,fight.a), b=mgmtFighterById(m,fight.b);
     if(!a||!b) continue;
     const rank=f=>{
-      const org=mgmtRankLabel(mgmtDivisionRank(m,f,'organization'));
-      const world=mgmtRankLabel(mgmtDivisionRank(m,f,'world'));
-      return `Split ${org||'non classé'} · monde ${world||'non classé'}`;
+       const org=mgmtRankLabel(mgmtDivisionRank(m,f,'organization'),f.div);
+       const world=mgmtRankLabel(mgmtDivisionRank(m,f,'world'),f.div);
+      const adj=divById(f.div)?.gender==='F'?'mondiale':'mondial';
+      return `Split ${org||'non classé'} · ${world?world+' '+adj:'monde non classé'}`;
     };
     slots+=`<div class="mgmt-week-fight"><div class="mgmt-week-slot">Combat ${i+1}</div>`
       +`<div class="mgmt-week-names">${esc(a.name)} <span>contre</span> ${esc(b.name)}</div>`
@@ -39,7 +40,7 @@ function mgmtSemaineCarte(m){
   }
   return `<section class="mgmt-week-card"><h3>Carte principale</h3>`
     +`<p>${esc(booked)} combat${booked===1?'':'s'} booké${booked===1?'':'s'} sur ${esc(size)} · ${esc(size-booked)} place${size-booked===1?'':'s'} libre${size-booked===1?'':'s'}</p>`
-    +slots+`<button class="mgmt-week-book" onclick="CL.mgmtCarte()">${booked<size?'Booker un combat':'Voir la carte principale'}</button></section>`;
+    +slots+`</section>`;
 }
 
 /* Les seules nouvelles du monde sont celles qui peuvent orienter un choix :
@@ -81,7 +82,7 @@ function mgmtSemaineMonde(m){
       const trace=mgmtExteriorTrace(line,m.cycle);
       const own=m.roster.find(f=>f.id===row.id);
       if(trace){
-        add('voisin',div.id,`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1)} mondial en ${mgmtDivisionLabel(div)}, au voisinage ${mgmtElisionDe(own.name)} (${mgmtRankLabel(i+1)}).`,line.id);
+         add('voisin',div.id,`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1,div)} mondial${div.gender==='F'?'e':''} en ${mgmtDivisionLabel(div)}, au voisinage ${mgmtElisionDe(own.name)} (${mgmtRankLabel(i+1,div)}).`,line.id);
         break;
       }
     }
@@ -108,8 +109,44 @@ function mgmtSemaineMonde(m){
       ||!Number.isSafeInteger(f.lastCycle)||m.cycle-f.lastCycle<3) continue;
     add('inactivite',f.div,`${f.name} : dernier combat sous Split il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
   }
-  return news.map(n=>`<div class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">${esc(n.text)}`
-    +(n.id?` <button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</div>`).join('');
+  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split'};
+  return news.map(n=>`<article class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">`
+    +`<span class="mgmt-week-source">${sources[n.type]}</span><p>${esc(n.text)}</p>`
+    +(n.id?`<button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</article>`).join('');
+}
+
+/* Quatre rangs du classement mondial autour des combattants de Split.
+   Quand un combat est posé, ses deux hommes passent en priorité ; sinon le
+   groupe Split le plus dense dans la catégorie choisie guide la fenêtre. */
+function mgmtSemaineClassement(m){
+  const first=m.card.main[0], fighter=first&&mgmtFighterById(m,first.a);
+  const counts=new Map();
+  m.roster.filter(f=>!mgmtIsRetired(f)).forEach(f=>counts.set(f.div,(counts.get(f.div)||0)+1));
+  const div=fighter?fighter.div:[...counts].sort((a,b)=>b[1]-a[1])[0]?.[0];
+  if(!div) return '';
+  const ranks=mgmtDivisionRanking(m,div,'world');
+  const ownIds=new Set(m.roster.filter(f=>f.div===div&&!mgmtIsRetired(f)).map(f=>f.id));
+  const bookedIds=new Set(first?[first.a,first.b]:[]);
+  let start=0, best=-1;
+  for(let s=0;s<=Math.max(0,ranks.length-4);s++){
+    const window=ranks.slice(s,s+4);
+    const booked=window.filter(r=>bookedIds.has(r.id)).length;
+    const own=window.filter(r=>ownIds.has(r.id)).length;
+    const lead=first&&window.some(r=>r.id===first.a)?1:0;
+    const score=booked*100+lead*10+own;
+    if(score>best){ best=score;start=s; }
+  }
+  const rows=ranks.slice(start,start+4).map((r,i)=>{
+    const own=m.roster.find(f=>f.id===r.id);
+    const ext=!own&&m.exterieur.find(f=>f.id===r.id);
+    const trace=ext&&mgmtExteriorTrace(ext,m.cycle);
+    const name=own?own.name:trace?trace.name:r.name;
+    const org=own?'Split':trace&&trace.orgs.length?trace.orgs[trace.orgs.length-1].name:'';
+    return `<div class="mgmt-week-rank${own?' split':''}"><span>${esc(start+i+1)} &nbsp;${esc(name||'')}</span><span>${esc(org)}</span></div>`;
+  }).join('');
+  return `<section class="mgmt-week-ranking"><h3>${esc(mgmtDivisionLabel(div))}</h3>${rows}`
+    +(SCREENS.mgmt_classements?`<button class="mgmt-week-link" onclick="CL.go('mgmt_classements')">Tous les classements</button>`:'')
+    +`</section>`;
 }
 
 /* QO-9 : aucun fait n'est effacé. Chaque catégorie montre dix faits récents,
@@ -204,18 +241,23 @@ function scr_mgmt_bureau(){
     fileHtml=mgmtBureauFicheCard(m,mgmtFighterById(m,sel.a))
       +mgmtBureauFicheCard(m,mgmtFighterById(m,sel.b));
   }
+  const roster=m.roster.filter(f=>!mgmtIsRetired(f)).length;
   return `<div class="scr mgmt-wrap mgmt-week"><div class="mgmt-head bar">`
-    +`<div><div class="eyebrow gold">Split — Management</div><h2 class="disp">La semaine</h2></div>`
-    +`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.mgmtLeave()">← Retour au titre</button></div>`
+    +`<div><h2 class="disp">La semaine</h2></div>`
+    +`<span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtOpenLabel(open.length))}`
     +` — ${esc(mgmtCardLabel(m))}</div>`
     +`<div class="mgmt-cols mgmt-week-cols">`
-    +`<section class="mgmt-week-pane">${mgmtSemaineCarte(m)}</section>`
-    +`<section class="mgmt-week-pane"><h3>Affaires · ${open.length}</h3>${pileHtml}`
-    +`<div class="mgmt-week-talk"><h3>Échange</h3>${talkHtml}</div></section>`
-    +`<aside class="mgmt-week-pane"><h3>Le monde autour de Split</h3>${mgmtSemaineMonde(m)}`
-    +(fileHtml?`<div class="mgmt-week-dossier"><h3>Dossier</h3>${fileHtml}</div>`:'')
-    +`<div class="mgmt-week-memo"><h3>Mémoire · ${m.facts.length} faits</h3>${mgmtSemaineMemoire(m)}</div></aside>`
+    +`<section class="mgmt-week-pane mgmt-week-left">${mgmtSemaineCarte(m)}`
+    +`<div class="mgmt-week-talk">${selOpen&&selOpen.speaker==='leila'?'':'<h3>Échange</h3>'}${talkHtml}</div>`
+    +`<div class="mgmt-week-affairs"><h3>Affaires · ${open.length}</h3>${pileHtml}</div>`
+    +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</section>`
+    +`<section class="mgmt-week-pane"><h3>Le monde autour de Split</h3>${mgmtSemaineMonde(m)}`
+    +`<details class="mgmt-week-memo"><summary>Mémoire · ${m.facts.length} faits</summary>${mgmtSemaineMemoire(m)}</details></section>`
+    +`<aside class="mgmt-week-pane">${mgmtSemaineClassement(m)}`
+    +`<section class="mgmt-week-organisation"><h3>L'organisation</h3>`
+    +`<p>${esc(roster)} combattants · trésorerie ${esc(m.treasury)} k$</p>`
+    +`<button class="mgmt-week-link" onclick="CL.go('mgmt_organisation')">Voir l'organisation</button></section></aside>`
     +`</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

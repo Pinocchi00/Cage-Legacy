@@ -989,6 +989,34 @@ test('MGMT lot 4 T2 — la semaine mène au booking, compose explique, monde fac
   assert.ok(!win.document.querySelector('.mgmt-week-news img'));
 });
 
+test('MGMT F2 reprise — une seule Leïla, places libres seules et quatre rangs autour de Split', () => {
+  const win=newGameWindow();
+  enterMgmt(win,58);
+  const app=win.document.getElementById('app');
+  assert.equal(app.querySelectorAll('.mgmt-week-card .mgmt-week-book').length,0,'pas de second bouton sous les places libres');
+  assert.equal(app.querySelectorAll('.mgmt-week-free').length,5,'les places restent directement cliquables');
+  const initial=[...app.querySelectorAll('.mgmt-week-rank')];
+  assert.equal(initial.length,4);
+  assert.ok(initial.some(row=>row.classList.contains('split')),'la fenêtre de quatre rangs montre Split même sans carte');
+  win.eval(`(function(){
+    const m=G.mgmt;
+    const first=m.roster.find(f=>!mgmtIsRetired(f)&&mgmtDivisionRank(m,f,'world')>8
+      &&m.roster.some(x=>x.id!==f.id&&x.div===f.div&&!mgmtIsRetired(x)));
+    const second=m.roster.find(f=>f.id!==first.id&&f.div===first.div&&!mgmtIsRetired(f));
+    m.card.main=[{a:first.id,b:second.id,cycle:m.cycle,slot:'main'}];
+    window.testBookName=first.name;
+    const leila=m.pile.find(a=>a.status==='open'&&a.speaker==='leila');
+    if(leila) m.open=leila.id;
+    render();
+  })()`);
+  assert.equal(app.querySelectorAll('.mgmt-week-rank').length,4);
+  assert.ok([...app.querySelectorAll('.mgmt-week-rank.split')].some(row=>row.textContent.includes(win.testBookName)),
+    'un combat posé centre la fenêtre autour de Split');
+  if(win.document.querySelector('.mgmt-week-talk .mgmt-spk')){
+    assert.equal(app.querySelectorAll('.mgmt-week-talk h3').length,0,'le titre Leïla ne répète pas le nom de la personne');
+  }
+});
+
 test('MGMT lot 4 T2 reprise — versions de chargement cohérentes et monde sans répétition', () => {
   const index=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
   for(const file of ['mgmt-data','mgmt-bureau','mgmt-save','mgmt-ecran-semaine']){

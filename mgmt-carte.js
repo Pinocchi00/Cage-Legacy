@@ -383,10 +383,22 @@ function mgmtCartRows(m){
    Ordre : victoires − défaites, puis victoires, puis dernier combat sous
    Split (le plus actif devant). Les suspendus gardent leur rang, les
    retraités — médicaux comme d'âge (T3) — sortent du classement.
-   Lot 2B T1 bis : la même loi dessert deux portées — organisation (roster
-   seul, portée historique par défaut) et monde (roster + extérieur). Le
-   bilan et la récence extérieurs sont dérivés à la lecture, jamais écrits
-   sur leur ligne. ==== */
+    Lot 2B T1 bis : la même loi dessert deux portées — organisation (roster
+    seul, portée historique par défaut) et monde (roster + extérieur). Le
+    bilan et la récence extérieurs sont dérivés à la lecture, jamais écrits
+    sur leur ligne.
+    Lot 4 T6 (docs/LOT-4-LA-PEAU-DU-JEU.md §3 T6) : un CYCLE peut passer en
+    quatrième argument — omis, le classement vivant d'aujourd'hui, à l'exact
+    pour les appelants. Au cycle explicite, la même loi trie des vues du
+    cycle lu : côte extérieure par mgmtExteriorTrace(line,cycle), côté
+    Split par le bilan d'AVANT COMBAT stocké dans m.hist (les instantanés
+    a.W/a.L de la trace du premier combat joué depuis) — le classement lu
+    est donc celui qui se voyait au moment du cycle, avant sa soirée ;
+    recalcul, jamais stocké. Un retraité (mgmtIsRetired) sort du classement
+    vivant ; le classement d'un cycle antérieur le garde tant qu'il y
+    combat et tant que sa retraite (fait k:'retired', mgmtRetireCycleOf)
+    n'est pas encore tombée — ainsi « sort du classement » reste lu quand
+    la retraite l'a fait sortir. ==== */
 
 /** L'unique loi de classement : écart W-L, victoires, récence. */
 function mgmtRankingCompare(x,y){
@@ -405,22 +417,84 @@ function mgmtRankingCompare(x,y){
   return xi<yi?-1:(xi>yi?1:0);
 }
 
+/** Le cycle de retraite d'une ligne de Split, connu par son fait
+ *  (k:'retired' porte son cycle — médical : le cycle de la soirée qui l'a
+ *  finie ; d'âge : le cycle d'ouverture où mgmtRetireRoster l'a retirée).
+ *  null si retiré sans fait (sauvegarde antérieure) ou pas retiré.
+ *  Pur. @returns {number|null} */
+function mgmtRetireCycleOf(m,f){
+  if(!f||!mgmtIsRetired(f)) return null;
+  if(Array.isArray(m.facts)){
+    for(const x of m.facts){
+      if(x&&x.k==='retired'&&(x.a===f.id||(x.a&&x.a.id===f.id))
+        &&Number.isSafeInteger(x.c)) return x.c;
+    }
+  }
+  return null;
+}
+
+/** Le bilan du cycle lu d'une ligne de Split, pour le classement au cycle
+ *  explicite. Renvoie null si la ligne n'était pas classée à ce cycle :
+ *  - retraité d'AUJOURD'HUI : le classement d'hier le garde encore s'il y a
+ *    combattu au cycle lu ou après (l'instantané d'AVANT COMBAT de la
+ *    trace du premier combat joué depuis — son état exact au cycle lu, y
+ *    compris le combat qui l'a fini médicalement ce cycle-là), ou si sa
+ *    retraite (fait k:'retired', mgmtRetireCycleOf) est tombée au cycle
+ *    N°2 après : mgmtRetireRoster le retire à l'ouverture du cycle,
+ *    il restait classé pendant les cycles antérieurs, bilan courant (il
+ *    n'a pas combattu depuis) ; sans fait lisible, il sort ( ничего à
+ *    dériver) ;
+ *  - actif : les mêmes vues d'hier que pour les actifs.
+ *  Pur, vue éphémère, jamais écrite sur la ligne. @returns {object|null} */
+function mgmtRosterAuCycle(m,f,cycle){
+  let side=null;
+  if(Array.isArray(m.hist)){
+    for(const x of m.hist){
+      if(!x||!Number.isSafeInteger(x.c)||x.c<cycle) continue;
+      if(x.a&&x.a.id===f.id){ side=x.a; break; }
+      if(x.b&&x.b.id===f.id){ side=x.b; break; }
+    }
+  }
+  if(mgmtIsRetired(f)){
+    const r=mgmtRetireCycleOf(m,f);
+    if(!side&&!(Number.isSafeInteger(r)&&r>cycle)) return null;
+  }
+  if(!side) return {id:f.id,div:f.div,W:f.W,L:f.L,
+    lastCycle:Number.isSafeInteger(f.lastCycle)?f.lastCycle:-1};
+  return {id:f.id,div:f.div,W:side.W,L:side.L,
+    lastCycle:Number.isSafeInteger(side.lastCycle)?side.lastCycle:-1};
+}
+
 /** Population classée d'une catégorie. La portée `organization` ne lit que
  *  Split ; `world` y ajoute des vues éphémères des lignes extérieures.
+ *  cycle : omis aujourd'hui (vivant, à l'exact pour les appelants) ;
+ *  explicite, le classement tel qu'il se voyait au cycle lu — par la seule
+ *  loi de classement (mgmtRankingCompare) sur les vues du cycle.
  *  @returns {Array} */
-function mgmtDivisionRanking(m,divId,scope){
+function mgmtDivisionRanking(m,divId,scope,cycle){
   if(!m||!Array.isArray(m.roster)||!divById(divId)) return [];
   if(scope!=='organization'&&scope!=='world') return [];
-  const cands=m.roster.filter(o=>o&&o.div===divId&&!mgmtIsRetired(o));
+  const today=Number.isSafeInteger(m.cycle)?m.cycle:0;
+  const c=Number.isSafeInteger(cycle)?cycle:today;
+  const passe=Number.isSafeInteger(cycle);
+  /* Vivant : les retraités sortent (test générique mgmtIsRetired). Au
+     cycle explicite, la base garde les retraités — mgmtRosterAuCycle
+     décide : il les garde tant que leur retraite n'est pas encore
+     tombée au cycle lu, sinon elle rend null (ils sont écartés). */
+  const cands=(passe
+    ?m.roster.filter(o=>o&&o.div===divId).map(o=>mgmtRosterAuCycle(m,o,c)).filter(Boolean)
+    :m.roster.filter(o=>o&&o.div===divId&&!mgmtIsRetired(o)));;
   if(scope==='world'&&Array.isArray(m.exterieur)){
     const rosterIds=new Set(cands.map(o=>o.id));
-    const cycle=Number.isSafeInteger(m.cycle)?m.cycle:0;
     for(const line of m.exterieur){
       if(!line||line.div!==divId||rosterIds.has(line.id)) continue;
       /* T3 : une carrière extérieure parvenue à son terme sort du classement
          mondial, comme un retraité de Split — sa ligne reste (QO-9). */
-      if(mgmtExteriorRetired(line,cycle)) continue;
-      const trace=mgmtExteriorTrace(line,m.cycle);
+      if(mgmtExteriorRetired(line,c)) continue;
+      /* Une ligne entrée dans le monde après le cycle lu n'y était pas
+         encore : elle n'apparaît qu'au cycle de son arrivée (born). */
+      if(Number.isSafeInteger(line.born)&&line.born>c) continue;
+      const trace=mgmtExteriorTrace(line,c);
       if(!trace) continue;
       const last=trace.orgs.length>0?trace.orgs[trace.orgs.length-1].to:null;
       cands.push({id:line.id,div:line.div,W:trace.pro.W,L:trace.pro.L,

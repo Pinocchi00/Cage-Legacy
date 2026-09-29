@@ -23,7 +23,7 @@ function mgmtFicheLigne(m,id){
 function mgmtFicheSituation(m,f,scope){
   const rank=mgmtDivisionRank(m,f,scope);
   if(rank===null) return 'Hors classement';
-  return rank===16?'Aux portes du top 15':mgmtRankLabel(rank);
+  return rank===16?'Aux portes du top 15':mgmtRankLabel(rank,f.div);
 }
 function mgmtFicheZones(m,f){
   /* La carte décrit sa forme récente : dix combats au plus, sans limiter
@@ -164,16 +164,20 @@ function scr_mgmt_fiche(){
   const {f,trace}=line;
   const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):'Split';
   const record=`${f.W}-${f.L}${f.D?'-'+f.D:''}`;
-  const ranks=trace?`Mondial : ${mgmtFicheSituation(m,f,'world')}`
-    :`Chez Split : ${mgmtFicheSituation(m,f,'organization')} · Mondial : ${mgmtFicheSituation(m,f,'world')}`;
+   const mondial=divById(f.div)?.gender==='F'?'mondiale':'mondial';
+   const worldRank=mgmtFicheSituation(m,f,'world');
+   const worldText=/^\d/.test(worldRank)?`${worldRank} ${mondial}`:`${mondial} : ${worldRank}`;
+   const ranks=trace?worldText
+     :`Chez Split : ${mgmtFicheSituation(m,f,'organization')} · ${worldText}`;
   const attrs=[['Bilan',record],['Taille',`${(profile.height/100).toFixed(2).replace('.',',')} m`],
     ['Allonge',`${(profile.reach/100).toFixed(2).replace('.',',')} m`]];
-  return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head">`
-    +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
-    +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)}</h2>`
+   return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head bar">`
+     +`<h2 class="disp">La fiche</h2><span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
+     +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
+     +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)}</h2>`
     +`<p>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p></div>`
-    +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div></div>`
-    +`<div class="mgmt-cols mgmt-fiche-cols"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
+     +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
+     +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
     +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}</section>`
     +`${mgmtFicheParcours(trace)}</div></div>`;
 }

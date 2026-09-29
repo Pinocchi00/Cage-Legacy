@@ -100,19 +100,16 @@ function scr_mgmt_organisation(){
   const hommes=rows.filter(r=>r.div.gender!=='F');
   const groupes=mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.hommes,hommes)
     +mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.femmes,femmes);
-  return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
-    +`<div><div class="eyebrow gold">Split — Management</div>`
-    +`<h2 class="disp">L'organisation</h2></div>`
-    +`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.go('mgmt_bureau')">${esc(MGMT_ORG_LABELS.back)}</button></div>`
-    +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)}</div>`
-    +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr)">`
-    +`<div class="mgmt-col">`
-    +`<div class="eyebrow">${esc(MGMT_ORG_LABELS.effectif)}</div>`
+   return `<div class="scr mgmt-wrap mgmt-org"><div class="mgmt-head bar">`
+     +`<h2 class="disp">L'organisation</h2><span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
+     +`<button class="mgmt-org-retour" onclick="CL.go('mgmt_bureau')">${esc(MGMT_ORG_LABELS.back)}</button>`
+     +`<div class="mgmt-cols mgmt-org-cols">`
+     +`<section class="mgmt-org-main">`
+     +`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>`
     +`<div class="mgmt-org-sum">${esc(total)}${esc(total===1?' combattant, ':' combattants, ')}`
       +`${esc(legs)}${esc(legs===1?' catégorie':' catégories')}</div>`
-    +groupes
-    +`<div class="eyebrow mt">${esc(MGMT_ORG_LABELS.finances)}</div>`
-    +mgmtOrgMoneyHtml(m)
-    +`</div></div></div>`;
+     +groupes+`</section>`
+     +`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
+     +mgmtOrgMoneyHtml(m)+`</aside></div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

@@ -170,9 +170,9 @@ function mgmtAffairSubject(m,a){
 }
 
 /* ==== [ANCRE: MGMT_LOT4_T1_NAV] — Lot 4 T1 : navigation permanente sur les
-   écrans existants, l'organisation ajoutée à la T7 (LOT-4 §3 T7). La liste
-   des combattants et les classements attendent leurs propres écrans :
-   aucune entrée morte. ==== */
+   écrans existants, l'organisation ajoutée à la T7 (LOT-4 §3 T7), les
+   classements à la T6 (LOT-4 §3 T6). La fiche et la carte restent des
+   destinations ouvertes par d'autres écrans : aucune entrée morte. ==== */
 function mgmtNavHtml(){
   /* La soirée et le lendemain forment la séquence imposée (addendum 1 §14) :
      la barre reste visible, seule la progression de la soirée est cliquable. */
@@ -187,6 +187,7 @@ function mgmtNavHtml(){
     +` onclick="CL.go('${screen}')">${label}</button>`;
   return `<nav class="mgmt-nav" aria-label="Navigation management">`
     +navB('Semaine','mgmt_bureau')
+    +navB('Classements','mgmt_classements')
     +navB('Organisation','mgmt_organisation')+`</nav>`;
 }
 function mgmtWithNav(screen){
@@ -199,8 +200,8 @@ function mgmtWithNav(screen){
 /* ==== [ANCRE: MGMT_LOT1_CONTROLEUR] — actions du bureau : jamais d'édition
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js).
    Lot 4 T7 : l'organisation rejoint les cinq autres écrans, enregistrée
-   comme eux (mgmtWithNav). ==== */
-Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation)});
+   comme eux (mgmtWithNav). Lot 4 T6 : les classements, de même. ==== */
+Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements)});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -281,6 +282,12 @@ keysRegister('mgmt_fiche',{
 keysRegister('mgmt_organisation',{
   Escape(){ CL.go('mgmt_bureau'); },
 });
+/* ==== [ANCRE: MGMT_LOT4_T6_CLAVIER] — Lot 4 T6 : l'écran des classements
+   au clavier — échap ramène à la semaine, comme à la souris. Aucune
+   exclusive : le bouton de la navigation fait le même chemin. ==== */
+keysRegister('mgmt_classements',{
+  Escape(){ CL.go('mgmt_bureau'); },
+});
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
@@ -292,7 +299,11 @@ Object.assign(CL,{
   },
   mgmtFiche(id){
     if(!G||!G.mgmt||!mgmtFicheLigne(G.mgmt,id)) return;
-    MGMT_FICHE={id,retour:G.screen==='mgmt_bureau'?'mgmt_bureau':'mgmt_carte',cursor:0};
+    /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
+       carte ou les classements ; ailleurs, la semaine reste la maison. */
+    const retour=(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
+      ||G.screen==='mgmt_classements')?G.screen:'mgmt_bureau';
+    MGMT_FICHE={id,retour,cursor:0};
     CL.go('mgmt_fiche');
   },
   mgmtFicheRetour(){ CL.go(MGMT_FICHE.retour); },

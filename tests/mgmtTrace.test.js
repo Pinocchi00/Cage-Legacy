@@ -243,10 +243,11 @@ test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par tr
   assert.match(html,/Allonge/);
   assert.match(html,/garde (orthodoxe|gaucher)/);
   assert.match(html,/Chez Split :/);
-  assert.match(html,/Mondial :/);
+  /* Lot 4 F2 : le rang précède « mondial », accordé au combattant. */
+  assert.match(html,/mondial/);
   const ranks=win.eval(`(function(){const m=G.mgmt,f=mgmtFighterById(m,${JSON.stringify(id)});
     return [mgmtFicheSituation(m,f,'organization'),mgmtFicheSituation(m,f,'world')];})()`);
-  assert.ok(html.includes(`Chez Split : ${ranks[0]} · Mondial : ${ranks[1]}`));
+  assert.ok(html.includes(`Chez Split : ${ranks[0]} · ${ranks[1]} mondial`));
   assert.ok(!html.includes('Comment il combat')&&!html.includes('Son camp')&&!html.includes('Sa faille'));
   const first=win.replays;
   win.eval('render(); render(); CL.mgmtFicheDeplacer(1)');
