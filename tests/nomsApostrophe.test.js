@@ -255,7 +255,7 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
 
   /* Balayage final : tous les boutons de chaque écran, aucun nom dans un
      gestionnaire, aucune erreur. */
-  for(const screen of ['mgmt_bureau','mgmt_carte','mgmt_fiche','mgmt_organisation']){
+  for(const screen of ['mgmt_bureau','mgmt_carte','mgmt_fiche','mgmt_organisation','mgmt_classements']){
     win.eval(`G.screen='${screen}'; render();`);
     const attrs = clickAll(win, screen);
     assertNoNameInHandlers(win, attrs, screen);

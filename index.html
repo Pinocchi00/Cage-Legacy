@@ -642,6 +642,59 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 @media(max-width:1279px){.mgmt-org-eff{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1279px){.mgmt-wrap{height:auto;overflow:visible}.mgmt-cols{grid-template-columns:1fr}.mgmt-col{max-height:none;overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT4_T6_CLASSEMENTS_CSS] — Lot 4 T6 : le seul style de
+   l'écran des classements (maquette 07). Valeurs portées de la maquette :
+   grille de ligne 54px / 1fr / 150px / 190px / 110px avec écart de 18px,
+   rangs à 13px de haut, titres condensés 20-28px lettres espacées, aside
+   460px ; jetons --mgmt-* uniquement, aucune couleur en dur (tendance à
+   l'or pour la montée et l'entrée, au rouge pour le recul et la sortie —
+   le rouge est réservé au danger et à l'adversaire). Les informations de
+   décision portent 13px minimum et 4,5:1 de contraste (charte L2).
+   Les blocs « Champion » et « Ce que la presse réclame » (lot 5)
+   n'existent pas et la place se referme. ==== */
+.mgmt-cl{padding:40px clamp(16px,3.34vw,64px) 48px;gap:0}
+.mgmt-cl .mgmt-head{min-height:79px;border-bottom:1px solid var(--mgmt-edge);margin:0;padding-bottom:18px;align-items:center}
+.mgmt-cl .mgmt-head .disp{font-size:28px;letter-spacing:.12em;font-style:normal}
+.mgmt-cl-scopebtns{display:flex;gap:10px}
+.mgmt-cl-tabs{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:14px;flex:0 0 auto}
+.mgmt-cl-tab{font:600 18px var(--mgmt-font-display);letter-spacing:.06em;text-transform:uppercase;color:var(--mgmt-secondary);background:transparent;border:0;padding:8px 14px;cursor:pointer;border-radius:0}
+.mgmt-cl-tab:hover{color:var(--mgmt-ink)}
+.mgmt-cl-tab.cur{color:#1F1A1D;background:var(--mgmt-yellow)}
+.mgmt-cl-tab:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:2px}
+.mgmt-cl-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,460px);gap:clamp(20px,2.92vw,56px);margin-top:24px}
+.mgmt-cl-pane{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden}
+.mgmt-cl-flag{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:0 0 10px}
+.mgmt-cl-stitle{font:700 18px var(--mgmt-font-display);letter-spacing:.16em;text-transform:uppercase;color:var(--mgmt-yellow)}
+.mgmt-cl-scope{font:18px var(--mgmt-font-body);color:var(--mgmt-secondary);letter-spacing:.08em;text-align:right}
+.mgmt-cl-headrow,.mgmt-cl-row{display:grid;grid-template-columns:54px minmax(0,1fr) 150px 190px 110px;gap:18px;align-items:center}
+.mgmt-cl-list{display:flex;flex-direction:column}
+.mgmt-cl-headrow{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--mgmt-secondary);padding:6px 0;flex:0 0 auto}
+.mgmt-cl-row{align-items:center;padding:13px 8px;font-size:20px;min-height:0;cursor:pointer;border:1px solid transparent;border-bottom:1px solid var(--mgmt-edge)}
+.mgmt-cl-row:nth-child(even){background:var(--mgmt-panel)}
+.mgmt-cl-row:hover{background:var(--mgmt-plum);color:var(--mgmt-ink)}
+.mgmt-cl-row:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:-2px}
+.mgmt-cl-rank{font:700 20px var(--mgmt-font-display)}
+.mgmt-cl-nm{overflow-wrap:anywhere}
+.mgmt-cl-rec{color:var(--mgmt-secondary)}
+.mgmt-cl-org{color:var(--mgmt-secondary);overflow-wrap:anywhere}
+.mgmt-cl-org.split{color:var(--mgmt-yellow)}
+.mgmt-cl-trend{color:var(--mgmt-secondary);justify-self:start}
+.mgmt-cl-trend.up{color:var(--mgmt-yellow)}
+.mgmt-cl-trend.down{color:var(--mgmt-red)}
+.mgmt-cl-plus{margin-top:6px}
+.mgmt-cl-plus summary{cursor:pointer;color:var(--mgmt-yellow);padding:10px 0;font:600 16px var(--mgmt-font-display);letter-spacing:.08em}
+.mgmt-cl-plus summary:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:2px}
+.mgmt-cl-plus .mgmt-cl-row{font-size:16px}
+.mgmt-cl-hd{font:700 20px var(--mgmt-font-display);letter-spacing:.2em;text-transform:uppercase;color:var(--mgmt-yellow);margin:0 0 12px}
+.mgmt-cl-hd.mt{margin-top:26px;border-top:1px solid var(--mgmt-edge);padding-top:18px}
+.mgmt-cl-move{font-size:18px;font-weight:300;line-height:1.6;padding:2px 0;overflow-wrap:anywhere}
+.mgmt-cl-orgline{font-size:18px;font-weight:300;line-height:1.6}
+@media(max-width:1279px){
+  .mgmt-cl-cols{grid-template-columns:1fr;gap:24px}
+  .mgmt-cl-pane{overflow:visible}
+  .mgmt-cl-headrow,.mgmt-cl-row{grid-template-columns:40px minmax(0,1fr) 90px 110px 70px;gap:10px}
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MGMT_LOT4_T7_NAV_COURANT] — reprise lot 4 T7 : l'entrée
    courante de la navigation se distingue visiblement des autres — or plein
    pour l'écran courant (aria-current), fond atténué pour les autres,
@@ -802,7 +855,9 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="mgmt-ecran-fiche.js?v=fem1"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=fem1"></script>
-<script src="mgmt-screens.js?v=fem1"></script>
+<!-- Lot 4 T6 : l'écran des classements, chargé avant mgmt-screens.js. -->
+<script src="mgmt-ecran-classements.js?v=cls3b"></script>
+<script src="mgmt-screens.js?v=cls3b"></script>
 <script src="arene-etat.js?v=r2809"></script>
 <script src="arene-vue.js?v=lot4fidelite05"></script>
 <script src="arene-ecran.js?v=lot4fidelite05"></script>
