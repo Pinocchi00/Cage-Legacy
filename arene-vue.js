@@ -84,16 +84,17 @@ function areneVueDimensionner(vue){
   const w=vue.cv.clientWidth;
   if(!(w>=10)) return;
   vue.dpr=(typeof window!=='undefined'&&window.devicePixelRatio)||1;
-  vue.W=w;
-   /* T4 : réserver au HUD et aux commandes leur place dans la même vue
-      1920×1080 que la maquette. À largeur égale, seul le cadrage change. */
-   vue.H=Math.round(Math.min(w*(w<640?0.9:0.58),
-     Math.max(360,(typeof window!=='undefined'?window.innerHeight:1080)-340)));
+   vue.W=w;
+   /* ==== [ANCRE: ARENE_LOT4_FIDELITE_CAMERA] — Maquette 05 : le canvas
+      remplit la scène entière ; SC cadre la cage sur ~1400px à 1920, avec
+      le tapis derrière le fil, au lieu d'un octogone entier en vignette. ==== */
+   vue.H=Math.round(vue.cv.parentElement&&vue.cv.parentElement.clientHeight||
+     Math.max(360,(typeof window!=='undefined'?window.innerHeight:1080)));
   vue.cv.style.height=vue.H+'px';
   vue.cv.width=Math.round(vue.W*vue.dpr);
   vue.cv.height=Math.round(vue.H*vue.dpr);
-  vue.SC=Math.min(vue.W*0.47/(ARENE_RV+0.9),vue.H*0.47/((ARENE_RV+0.9)*ARENE_TILT+ARENE_CAGE_H*ARENE_ZF*0.55));
-  vue.CX=vue.W/2; vue.CY=vue.H*0.56;
+   vue.SC=Math.min(vue.W*0.40/(ARENE_RV+0.9),vue.H*0.55/((ARENE_RV+0.9)*ARENE_TILT+ARENE_CAGE_H*ARENE_ZF*0.55));
+   vue.CX=vue.W/2; vue.CY=vue.H*0.52;
   areneVueFond(vue);
 }
 /** Projection de trois quarts (prototype, validé) : x/y au sol, z en
@@ -159,15 +160,14 @@ function areneVueFond(vue){
   /* Marquages du centre (motif de la marque). */
   g.save(); g.translate(vue.CX,vue.CY); g.scale(1,ARENE_TILT);
   g.textAlign='center'; g.textBaseline='middle';
-   /* Lot 3 T4 : le lettrage du prototype, atténué sur la zone de travail
-      pour que les deux pions restent lisibles au centre du tapis. */
-   g.fillStyle='rgba(229,50,45,.34)';
-   g.font='800 italic '+Math.round(vue.SC*1.15)+"px 'Saira Condensed', sans-serif";
+    /* La marque du tapis reprend l'encre rouge du prototype et de la
+       maquette 05 ; les pions restent dessinés au-dessus de la marque. */
+    g.fillStyle='rgba(229,50,45,.85)';
+    g.font='800 italic '+Math.round(vue.SC*0.9)+"px 'Saira Condensed', sans-serif";
   g.fillText('SPLIT',0,0);
   g.fillStyle='rgba(60,48,52,.28)';
    g.font='700 '+Math.round(vue.SC*0.36)+"px 'Saira Condensed', sans-serif";
-  g.fillText('SPLIT 14',0,-vue.SC*3.3);
-  g.fillText('CAGE LEGACY',0,vue.SC*3.3);
+   g.fillText('SPLIT 14',0,-vue.SC*3.3);
   g.restore();
   vue.bg=bg;
 }
@@ -179,29 +179,31 @@ function areneGrillage(vue,avant){
   for(let k=0;k<8;k++){
     const a=areneVert(k), b=areneVert(k+1);
     const my=(a.y+b.y)/2;
-    if((my>0)!==avant) continue;
+     if((my>0)!==avant||avant&&vue._grillageAllume!==k) continue;
      const a0=areneProj(vue,a.x,a.y,0,vue._p1), b0=areneProj(vue,b.x,b.y,0,vue._p2);
      const a1=areneProj(vue,a.x,a.y,ARENE_CAGE_H,vue._p3), b1=areneProj(vue,b.x,b.y,ARENE_CAGE_H,vue._p4);
     ctx.beginPath();
     ctx.moveTo(a0.x,a0.y); ctx.lineTo(b0.x,b0.y); ctx.lineTo(b1.x,b1.y); ctx.lineTo(a1.x,a1.y);
-    ctx.closePath();
-    ctx.fillStyle=avant?'rgba(20,15,17,.10)':'rgba(20,15,17,.22)';
-    ctx.fill();
-    ctx.strokeStyle=avant?'rgba(20,15,17,.16)':'rgba(20,15,17,.25)'; ctx.lineWidth=1;
-    for(let i=1;i<10;i++){
+     ctx.closePath();
+     const allume=vue._grillageAllume===k;
+     ctx.fillStyle=allume?'rgba(255,200,61,.20)':avant?'rgba(20,15,17,.10)':'rgba(20,15,17,.22)';
+     ctx.fill();
+     if(allume){ctx.strokeStyle='#FFC83D';ctx.lineWidth=4;ctx.stroke();}
+     ctx.strokeStyle=avant?'rgba(20,15,17,.16)':'rgba(20,15,17,.25)'; ctx.lineWidth=1;
+     for(let i=1;i<10&&!allume;i++){
       const t=i/10;
        const p0=areneProj(vue,a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,0,vue._p3);
        const p1=areneProj(vue,a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,ARENE_CAGE_H,vue._p4);
       ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke();
     }
-    ctx.strokeStyle='#171214'; ctx.lineWidth=3;
+     ctx.strokeStyle=allume?'#FFC83D':'#171214'; ctx.lineWidth=allume?4:3;
     ctx.beginPath(); ctx.moveTo(a1.x,a1.y); ctx.lineTo(b1.x,b1.y); ctx.stroke();
     ctx.lineWidth=2;
     ctx.beginPath(); ctx.moveTo(a0.x,a0.y); ctx.lineTo(b0.x,b0.y); ctx.stroke();
   }
   for(let k=0;k<8;k++){
     const v=areneVert(k);
-    if((v.y>0)!==avant) continue;
+     if((v.y>0)!==avant||avant) continue;
      const p0=areneProj(vue,v.x,v.y,0,vue._p1), p1=areneProj(vue,v.x,v.y,ARENE_CAGE_H,vue._p2);
     ctx.strokeStyle='#171214'; ctx.lineWidth=Math.max(4,vue.SC*0.08);
     ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x,p1.y); ctx.stroke();
@@ -274,7 +276,34 @@ function areneArbitre(vue,x,y){
   const rx=0.22*vue.SC, ry=rx*ARENE_TILT;
   areneEllipse(vue,x+rx*0.1,y+ry*0.22,rx*1.05,ry*1.05,'rgba(40,28,30,.16)');
   areneEllipse(vue,x,y,rx,ry,'#1F1A1D');
-  areneEllipse(vue,x,y,rx*0.62,ry*0.62,'#8C8388');
+   areneEllipse(vue,x,y,rx*0.62,ry*0.62,'#8C8388');
+   /* La maquette nomme le rôle ; aucun nom propre d'arbitre n'existe dans
+      la trace du moteur. Le libellé reste factuel et suit son pion. */
+   const ctx=vue.ctx;
+   ctx.save(); ctx.textAlign='center';
+   ctx.font='300 20px Saira, sans-serif';
+   ctx.fillStyle='rgba(60,48,52,.75)';
+   ctx.fillText('arbitre',x,y+0.42*vue.SC);
+   ctx.restore();
+}
+/** Panneau de grillage le plus proche du combattant enfermé, uniquement
+  *  lorsque la phase/position produite par le moteur le justifie. */
+function areneGrillageActif(etat){
+  const a={x:etat.ax,y:etat.ay}, b={x:etat.bx,y:etat.by};
+  const bordA=areneBordDist(a),bordB=areneBordDist(b);
+  const cage=etat.phase==='clinch'&&etat.posClinch==='cage';
+  const distance=Math.hypot(a.x-b.x,a.y-b.y);
+  if(!cage&&!(etat.phase==='debout'&&Math.min(bordA,bordB)<0.6&&distance<1.6)) return -1;
+  const cible=bordA<bordB?a:b;
+  let meilleur=-1,proximite=Infinity;
+  for(let k=0;k<8;k++){
+    const v=areneVert(k),w=areneVert(k+1);
+    const dx=w.x-v.x,dy=w.y-v.y;
+    const t=Math.max(0,Math.min(1,((cible.x-v.x)*dx+(cible.y-v.y)*dy)/(dx*dx+dy*dy)));
+    const d=Math.hypot(cible.x-v.x-t*dx,cible.y-v.y-t*dy);
+    if(d<proximite){proximite=d;meilleur=k;}
+  }
+  return meilleur;
 }
 /** Les hommes de coin, pendant les pauses. */
 function areneCoins(vue){
@@ -389,8 +418,9 @@ function areneVueDessiner(vue,session,etat,now){
   vue._dernierNow=now||0;
   ctx.setTransform(1,0,0,1,0,0);
   if(vue.bg) ctx.drawImage(vue.bg,0,0);
-  ctx.setTransform(vue.dpr,0,0,vue.dpr,0,0);
-  areneGrillage(vue,false);
+   ctx.setTransform(vue.dpr,0,0,vue.dpr,0,0);
+   vue._grillageAllume=areneGrillageActif(etat);
+   areneGrillage(vue,false);
   /* Signatures nées d'une action nouvelle (une seule fois par action). */
   if(etat.action&&etat.action.id!==vue._lastActionId){
     vue._lastActionId=etat.action.id;

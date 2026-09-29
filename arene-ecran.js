@@ -170,48 +170,44 @@ function scr_arene_socle(){
       +`<button class="btn primary mt" onclick="CL.areneSocle()">Ouvrir le socle</button>`
       +`<div class="mt">${retour}</div></div>`;
   }
-  const s=ec.session;
-  const nomA=esc(s.noms.a.complet), nomB=esc(s.noms.b.complet);
-   const police="'Saira Condensed','Arial Narrow',Oswald,sans-serif";
-   const styleA=s.noms.a.style?`<div style="font-size:14px;color:var(--muted);font-weight:300">${esc(s.noms.a.style)}</div>`:'';
-   const styleB=s.noms.b.style?`<div style="font-size:14px;color:var(--muted);font-weight:300">${esc(s.noms.b.style)}</div>`:'';
-   return `<div class="scr" style="--text:#FFF8EE;--muted:#D9CCC0;--gold:#FFC83D;--blood:#E5322D;--line:rgba(255,248,238,.18);max-width:1920px;margin:0 auto;padding:20px 32px 40px;font-family:'Saira','Segoe UI',sans-serif">`
-     +`<div style="display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;margin-bottom:6px">`
-     +`<div style="min-width:0"><div style="width:min(420px,100%);height:6px;background:${ARENE_COUL_A};transform:skewX(-20deg)"></div>`
-     +`<div style="font-family:${police};font-weight:800;font-style:italic;text-transform:uppercase;font-size:clamp(28px,3vw,40px);line-height:1;overflow-wrap:anywhere;color:var(--text)">${nomA}</div>${styleA}</div>`
-     +`<div style="background:rgba(33,27,30,.8);clip-path:polygon(20% 0,80% 0,100% 30%,100% 70%,80% 100%,20% 100%,0 70%,0 30%);padding:8px 34px;text-align:center;min-width:170px;font-family:${police}">`
-     +`<div id="ar2-rond" style="font-weight:700;font-size:14px;letter-spacing:.18em;color:var(--gold)">ROUND 1</div>`
-     +`<div id="ar2-temps" style="font-weight:800;font-style:italic;font-size:38px;line-height:1;color:var(--text)">5:00</div>`
-     +`<div id="ar2-phase" style="font-size:12px;letter-spacing:.14em;color:var(--muted);margin-top:2px;white-space:nowrap">À DISTANCE</div></div>`
-     +`<div style="min-width:0;text-align:right"><div style="width:min(420px,100%);height:6px;background:${ARENE_COUL_B};transform:skewX(-20deg);margin-left:auto"></div>`
-     +`<div style="font-family:${police};font-weight:800;font-style:italic;text-transform:uppercase;font-size:clamp(28px,3vw,40px);line-height:1;overflow-wrap:anywhere;color:var(--text)">${nomB}</div>${styleB}</div>`
-     +`</div>`
-     +`<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,22%);gap:24px;align-items:center">`
-     +`<canvas id="arene-socle-cv" aria-label="Octogone vu de trois quarts" style="display:block;width:100%;border:1px solid var(--line)"></canvas>`
-     +`<aside style="align-self:stretch;padding:24px 8px;overflow:auto;max-height:570px">`
-     +`<div class="eyebrow gold">Moments clés</div><div id="ar2-fil"></div></aside></div>`
-    +`<div id="ar2-texte" style="min-height:56px;text-align:center;font-family:Fraunces,serif;font-style:italic;font-size:17px;line-height:1.4;color:var(--text);padding:12px 24px 0"></div>`
-    +`<div id="ar2-resultat" style="display:none;text-align:center;font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:20px;color:var(--gold);padding:6px 0 0"></div>`
-    +`<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px">`
-    +`<button class="btn ghost" id="ar2-pause" aria-pressed="false" style="width:auto;padding:10px 16px" onclick="CL.areneSocleBascule()">Pause</button>`
-    +`<button class="btn ghost" id="ar2-v1" aria-pressed="true" style="width:auto;padding:10px 16px" onclick="CL.areneSocleVitesse(1)">×1</button>`
-    +`<button class="btn ghost" id="ar2-v2" aria-pressed="false" style="width:auto;padding:10px 16px" onclick="CL.areneSocleVitesse(2)">×2</button>`
-     +`<button class="btn primary" style="width:auto;padding:10px 22px" onclick="CL.areneSocleSuivant()">Moment suivant</button>${retour}`
-     +(ec.retour?'':`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.areneSocle()">Autre combat</button>`)
-    +`</div></div>`;
+   const s=ec.session;
+   const nomA=esc(s.noms.a.complet), nomB=esc(s.noms.b.complet);
+   const styleA=s.noms.a.style?`<div class="arene-style">${esc(s.noms.a.style)}</div>`:'';
+   const styleB=s.noms.b.style?`<div class="arene-style">${esc(s.noms.b.style)}</div>`:'';
+   /* ==== [ANCRE: ARENE_LOT4_FIDELITE_ECRAN] — Maquette 05 : l'octogone
+      occupe la scène, le fil est posé dessus à gauche ; les seules paroles
+      sont celles du moteur (aucune réplique empruntée à la maquette). ==== */
+   return `<div class="scr arene-scr">`
+     +`<canvas id="arene-socle-cv" aria-label="Octogone vu de trois quarts"></canvas>`
+     +`<header class="arene-top">`
+     +`<div class="arene-plate"><div class="arene-plate-bar"></div><div class="arene-name">${nomA}</div>${styleA}</div>`
+     +`<div class="arene-clock"><div id="ar2-rond">ROUND 1</div><div id="ar2-temps">5:00</div><div id="ar2-phase">À DISTANCE</div></div>`
+     +`<div class="arene-plate"><div class="arene-plate-bar"></div><div class="arene-name">${nomB}</div>${styleB}</div>`
+     +`</header>`
+     +`<aside class="arene-fil"><h3>Moments clés</h3><div id="ar2-fil"></div></aside>`
+     +`<div id="ar2-texte" class="arene-caption" aria-live="polite"></div>`
+     +`<div id="ar2-resultat" class="arene-result" style="display:none"></div>`
+     +`<div class="arene-controls">`
+     +`<button class="btn ghost" id="ar2-pause" aria-pressed="false" onclick="CL.areneSocleBascule()">Pause</button>`
+     +`<button class="btn ghost" id="ar2-v1" aria-pressed="true" onclick="CL.areneSocleVitesse(1)">×1</button>`
+     +`<button class="btn ghost" id="ar2-v2" aria-pressed="false" onclick="CL.areneSocleVitesse(2)">×2</button>`
+     +`<button class="btn ghost" onclick="CL.areneSocleSuivant()">Moment suivant</button>`
+     +`<span class="arene-spacer"></span>${retour}`
+     +(ec.retour?'':`<button class="btn ghost" onclick="CL.areneSocle()">Autre combat</button>`)
+     +`</div></div>`;
 }
 
 /* ---- Boucle de lecture (le temps d'affichage traverse le montage) --------- */
 /** Pose la classe `arene` sur #app (motif mgmtEnter, index.html ancre
- *  ARENE_T2_APP) : #app est déplafonné à 1100px — l'arène n'est pas un
+  *  ARENE_T2_APP) : #app est déplafonné à 1920px — l'arène n'est pas un
  *  écran de bureau et ne porte jamais le dégradé brun de .mgmt. */
 function areneEcranAppPoser(){
   try{
     const app=document.getElementById('app');
-     if(app&&app.classList){app.classList.add('arene');app.style.maxWidth='1920px';}
+      if(app&&app.classList){app.classList.add('arene');app.style.maxWidth='1920px';}
     if(document.body){
       if(ARENE_ECRAN.fondPrecedent===undefined) ARENE_ECRAN.fondPrecedent=document.body.style.background;
-      document.body.style.background='radial-gradient(ellipse 1100px 700px at 50% 35%,rgba(255,200,61,.12),rgba(255,200,61,0) 70%),linear-gradient(180deg,#3B2F33,#2B2327 55%,#211B1E)';
+       document.body.style.background='radial-gradient(ellipse 1100px 700px at 50% 45%,#3A2F33,#1A1517 75%)';
     }
   }catch(e){}
 }
@@ -279,19 +275,30 @@ function areneEcranHud(etat){
   if(rond) rond.textContent=etat.phase==='coins'?'ENTRE LES ROUNDS':(etat.fini?'FIN DU COMBAT':'ROUND '+etat.r);
   if(temps) temps.textContent=areneHorlogeTxt(etat.horloge);
   if(phase) phase.textContent=arenePhaseLabel(etat);
-    if(texte) texte.textContent=areneTextePublic(etat.texte);
+     if(texte) texte.textContent=areneTextePublic(etat.texte).replace(/^\[\d{1,2}:\d{2}\]\s*/,'');
     const fil=document.getElementById('ar2-fil');
     if(fil&&ec.session){
-      const moments=ec.session.momentsCles.filter(b=>b.t<=etat.t);
-      const signature=moments.map(b=>b.i).join(',');
-      if(fil.dataset.moments!==signature){
-        fil.replaceChildren();
-        for(const moment of moments){
-          const p=document.createElement('p');
-          p.style.cssText='font-size:15px;line-height:1.45;color:var(--text);margin:14px 0';
-          if(moment.finish) p.style.color='#FFC83D';
-          p.textContent='R'+moment.r+' · '+areneTextePublic(moment.text);
-          fil.appendChild(p);
+       const moments=ec.session.momentsCles.filter(b=>b.t<=etat.t).slice().reverse();
+       /* Le fil affiche aussi le moment en cours venu du moteur : un
+          combat sans knockdown n'a pas pour autant une colonne vide. */
+       const live=areneTextePublic(etat.texte);
+       if(live&&!moments.some(b=>areneTextePublic(b.text)===live))
+         moments.unshift({r:etat.r,text:etat.texte,i:'live'});
+       const visibles=moments.slice(0,5);
+       const signature=visibles.map(b=>b.i+'-'+b.text).join('|');
+       if(fil.dataset.moments!==signature){
+         fil.replaceChildren();
+         for(const moment of visibles){
+           const p=document.createElement('p');
+           p.className='arene-moment';
+           const time=document.createElement('span');
+           time.className='arene-moment-time';
+           const match=/^\[(\d{1,2}:\d{2})\]/.exec(moment.text);
+           time.textContent='R'+moment.r+(match?' '+match[1]:(moment.i==='live'?' '+areneHorlogeTxt(etat.horloge):''));
+           const body=document.createElement('span');
+           body.textContent=areneTextePublic(moment.text).replace(/^\[\d{1,2}:\d{2}\]\s*/,'');
+           p.append(time,body);
+           fil.appendChild(p);
         }
         fil.dataset.moments=signature;
       }
