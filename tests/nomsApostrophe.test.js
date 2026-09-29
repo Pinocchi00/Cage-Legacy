@@ -83,9 +83,14 @@ function rowOf(win, id){
 
 test('Noms — O\u2019Brien, O\u2019Sullivan, O\u2019Connor, Nong-O et les prénoms coréens retrouvent leur graphie, listes intactes', () => {
   const win = newGameWindow();
-  const lists = JSON.parse(win.eval(`JSON.stringify({
+  /* Collecte des listes. La décision du 28/09 (prénoms rangés) a retiré les
+   prénoms coréens et géorgiens de `last` vers une liste `first` du pays :
+   `kr` reste le nom de famille (14 entrées épinglées), les prénoms sont
+   épinglés dans `krFirst`, la Géorgie suit (11 surnames / 10 prénoms). */
+const lists = JSON.parse(win.eval(`JSON.stringify({
     ie:COUNTRIES.IE.last, th:COUNTRIES.TH.last, kr:COUNTRIES.KR.last,
-    fm:FIRST_M, ff:FIRST_F, autres:COUNTRY_KEYS.filter(k=>!['IE','TH','KR'].includes(k)).map(k=>COUNTRIES[k].last)
+    krFirst:COUNTRIES.KR.first, ge:COUNTRIES.GE.last, geFirst:COUNTRIES.GE.first,
+    fm:FIRST_M, ff:FIRST_F, autres:COUNTRY_KEYS.filter(k=>!['IE','TH','KR','GE'].includes(k)).map(k=>COUNTRIES[k].last)
   })`));
   /* Irlande : 25 entrées, ordre inchangé (épinglé) — aucun tirage ne bouge. */
   assert.equal(lists.ie.length, 25, 'Irlande : toujours 25 entrées');
@@ -95,13 +100,18 @@ test('Noms — O\u2019Brien, O\u2019Sullivan, O\u2019Connor, Nong-O et les prén
   /* Thaïlande : 21 entrées. */
   assert.equal(lists.th.length, 21, 'Thaïlande : toujours 21 entrées');
   assert.ok(lists.th.includes('Nong-O'), 'Nong-O porte son trait d’union');
-  /* Corée : 23 entrées. */
-  assert.equal(lists.kr.length, 23, 'Corée : toujours 23 entrées');
-  for(const n of ['Dong-hyun','Chan-sung','Doo-ho','Da-un','Si-woo','Myung-ho','Sung-bin','Jin-soo','Kyung-ho']){
-    assert.ok(lists.kr.includes(n), 'prénom coréen : ' + n);
-  }
-  /* Aucune ancienne graphie ne survit, dans aucune liste de noms. */
-  const all = JSON.stringify([lists.ie, lists.th, lists.kr, lists.fm, lists.ff, lists.autres]);
+  /* Corée : 14 noms de famille (prénoms sortis vers `first`), ordre épinglé. */
+  assert.equal(lists.kr.length, 14, 'Corée : toujours 14 noms de famille');
+  assert.deepEqual(lists.kr, ['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon']);
+  assert.equal(lists.krFirst.length, 9, 'Corée : 9 prénoms dans la liste first');
+  assert.deepEqual(lists.krFirst, ['Dong-hyun','Chan-sung','Doo-ho','Da-un','Si-woo','Myung-ho','Sung-bin','Jin-soo','Kyung-ho']);
+  /* Géorgie : 11 surnames, 10 prénoms, ordres épinglés. */
+  assert.equal(lists.ge.length, 11, 'Géorgie : toujours 11 noms de famille');
+  assert.deepEqual(lists.ge, ['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze','Topuria']);
+  assert.equal(lists.geFirst.length, 10, 'Géorgie : 10 prénoms dans la liste first');
+  assert.deepEqual(lists.geFirst, ['Guram','Amiran','Ilia','Roman','Merab','Giga','Lasha','Shota','Revaz','Zurab']);
+  /* Aucun prénom ne reste caché dans une liste de noms de famille. */
+  const all = JSON.stringify([lists.ie, lists.th, lists.kr, lists.krFirst, lists.ge, lists.geFirst, lists.fm, lists.ff, lists.autres]);
   for(const legacy of ['OBrien','OSullivan','OConnor','NongO','DongHyun','ChanSung','DooHo','DaUn',
     'SiWoo','MyungHo','SungBin','JinSoo','KyungHo']){
     assert.ok(!all.includes(legacy), 'ancienne graphie restante : ' + legacy);

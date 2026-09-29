@@ -259,18 +259,59 @@ depuis le 17/09, sauf l'arène.
   l'outil commite son état, rapporte, et s'arrête. Aucune sonde de débogage
   commitée.
 
+## 4 bis. Fidélité aux maquettes, écran par écran *(décision du 28/09)*
+
+**Le constat d'Anthony (28/09)** : la DA globale et la « maquette vidéo » de
+l'arène ne sont pas retranscrites. **Décision : tout le jeu ressemble à ses
+maquettes, chaque écran.** La T8 (accueil, Panthéon, carrière) **entre donc
+dans le lot**.
+
+**La cause, relevée par Claude.** La T1 a reçu la DA en mots (« fond prune
+chaud, jaune, rouge ») : Sol a inventé une palette (`#543344`, Oswald et
+Fraunces) au lieu de porter celle des maquettes (`#2B2327` / `#211B1E` avec
+halo jaune, `#FFC83D`, `#E5322D`, `#FFF8EE`, `#D9CCC0`, Saira Condensed et
+Saira — **police jamais chargée par `index.html`**, même l'arène tombe sur une
+police de repli). L'arène du lot 3 a porté le dessin du prototype mais pas le
+cadrage de la maquette 05 (octogone en grand, plein cadre, fil du combat
+par-dessus). Les relectures mesuraient contraste et largeurs, jamais la
+ressemblance.
+
+**La règle qui en sort, pour toutes les tranches.** Un prompt d'écran cite les
+valeurs de sa maquette et dit « porte ». Une relecture compare le jeu et la
+maquette **côte à côte à 1920×1080** (taille de dessin des maquettes), puis
+vérifie 1280 et 1440.
+
+**Ce que « ressembler » veut dire.** Même palette, mêmes polices, même
+disposition, même hiérarchie, mêmes proportions. Les blocs qui attendent un
+système absent (presse, camps, patron, contrats, ceintures, formules d'auteur)
+**n'apparaissent pas** (§1) ; la place qu'ils occupent se referme, elle ne se
+remplit pas d'un texte inventé.
+
+| Écran | Maquette | État au 28/09 | Tranche |
+|---|---|---|---|
+| Palette, polices, barre de navigation | 02 (et toutes) | inventées à la T1 | **F1** (Sol, en cours) |
+| Arène | 05 + prototype | dessin porté, cadrage non | **F1** (Sol, en cours) |
+| La semaine | 02 | blocs présents, disposition à reprendre (en-tête « Split 14 · J-21 », carte et Leïla à gauche, extrait de classement et résumé de l'organisation à droite) | F2 |
+| Booker un combat | 04 | face-à-face porté (T3) | F2 (vérification après F1) |
+| La fiche | 03 | structure portée (T5) | F2 (vérification après F1) |
+| L'organisation | 08 | tuiles (T7) ; bloc « décisions » et patron absents (lot 5) | F2 |
+| Le lendemain | 06 | ancien écran | T4, construite sur la maquette |
+| Les classements | 07 | n'existe pas | T6, construite sur la maquette |
+| L'accueil | 01 | ancien écran titre de la carrière | T8 |
+| Le Panthéon | 09 | ancien écran de la carrière | T8 |
+| La carrière | 10 | ancien hub de la carrière | T8 |
+
 ## 5. Ce qui attend Anthony
 
-- **La T8 entre-t-elle dans le lot ?** Accueil, Panthéon et Carrière selon les
-  maquettes 01, 09 et 10.
+- ~~La T8 entre-t-elle dans le lot ?~~ **Oui, décision du 28/09** (§4 bis).
 - **Contenu d'auteur dû pour ce lot : aucun.** Tout ce qui demande une voix est
   reporté au lot 5, où la liste complète est dressée.
 
 ## 6. Terminé pour le lot
 
-1. Les écrans de la semaine, de la composition, du lendemain, de la fiche, des
-   classements et de l'organisation ressemblent à leurs maquettes, à 1280, 1440
-   et 1920, vérifiés dans le jeu réel.
+1. **Chaque écran du jeu** — les dix maquettes, arène comprise — ressemble à sa
+   maquette, comparé côte à côte à 1920 puis vérifié à 1280 et 1440, dans le
+   jeu réel.
 2. Aucun texte de travail, aucun texte de maquette, aucun niveau d'attachement
    ne s'affiche.
 3. Les faits ne disparaissent plus et se lisent comme des faits.
