@@ -301,6 +301,24 @@ remplit pas d'un texte inventé.
 | Le Panthéon | 09 | ancien écran de la carrière | T8 |
 | La carrière | 10 | ancien hub de la carrière | T8 |
 
+**Relectures du 29-30/09.**
+- **F1 — acceptée** (`caff6e1`, `520e83e`, `2f86320`, Sol) : palette et polices
+  des maquettes (Saira embarquée, licences OFL dans `fonts/`), arène cadrée
+  comme la maquette 05. Fusionnée (PR 68).
+- **F2 — acceptée après une reprise** (`a52031c` à `34810d7`, Sol) : semaine,
+  booker, fiche et organisation disposées comme leurs maquettes ; marges et
+  tailles de texte des maquettes ; barre au même endroit sur tous les écrans ;
+  extrait de classement autour des combattants de Split ; rangs accordés et en
+  exposant (1ᵉʳ, 1ʳᵉ). Écart : « J-X » non dérivable, l'en-tête dit « Split N ».
+  Reste : sur Booker, « Autres adversaires — catégorie » passe sur deux lignes
+  et répète la catégorie.
+- **T6 — acceptée après une reprise** (`1baf904`, `02b2b1f`, `91f46e1`, GLM) :
+  `mgmtDivisionRanking` sait classer à un cycle donné (une seule loi ; un
+  retraité reste au classement d'avant sa retraite) ; écran des classements,
+  mondial et Split, tendance et « ce qui a bougé » recalculés, jamais stockés.
+  La reprise a corrigé une tendance inversée (le test vérifie désormais le
+  sens) et une colonne organisation qui chevauchait la ligne suivante.
+
 ## 5. Ce qui attend Anthony
 
 - ~~La T8 entre-t-elle dans le lot ?~~ **Oui, décision du 28/09** (§4 bis).
