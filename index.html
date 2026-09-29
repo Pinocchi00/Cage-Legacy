@@ -704,6 +704,26 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-book-sub{font-size:16px}
 .mgmt-book-list .opp-rec,.mgmt-book-list .eyebrow{font-size:16px}
 .mgmt-book-cols>.mgmt-book-pane>.eyebrow{font-size:20px;letter-spacing:.2em;color:var(--mgmt-yellow)}
+/* Maquette 03 : en-tête commun puis nom de 116px, colonne gauche 520px,
+   trajectoire à droite seulement si le monde fournit une trace. */
+.mgmt-fiche{padding:40px 64px 48px}
+.mgmt-fiche-retour{padding:6px 0;font-size:19px;align-self:flex-start}
+.mgmt-fiche-hero{padding:6px 0 20px;align-items:end}
+.mgmt-fiche-hero h2.disp{font-size:clamp(58px,6.04vw,116px);font-weight:800;line-height:.88}
+.mgmt-fiche-hero p{font-size:20px;font-weight:300;line-height:1.4}
+.mgmt-fiche-attrs{gap:46px}
+.mgmt-fiche-attrs strong{font-size:38px}
+.mgmt-fiche-attrs span{font-size:14px}
+.mgmt-fiche-cols{grid-template-columns:minmax(0,520px) minmax(0,1fr) minmax(0,400px);gap:48px;margin-top:24px}
+.mgmt-fiche-no-trace{grid-template-columns:minmax(0,520px) minmax(0,1fr)}
+.mgmt-fiche-cols>section,.mgmt-fiche-cols>aside{padding:0}
+.mgmt-fiche-map{gap:26px;font-size:17px}
+.mgmt-fiche-map svg{width:200px}
+.mgmt-fiche-empty,.mgmt-fiche-detail,.mgmt-fiche .mgmt-meta{font-size:16px}
+.mgmt-fiche-fight strong{font-size:20px}
+.mgmt-fiche-fight .mgmt-next{font-size:17px}
+.mgmt-fiche-org{font-size:17px}
+@media(max-width:1279px){.mgmt-fiche{padding:40px 32px 48px}.mgmt-fiche-cols,.mgmt-fiche-no-trace{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}.mgmt-fiche-attrs{text-align:left}}
 @media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: ARENE_LOT4_FIDELITE_05] — Maquette 05 : scène 1920×1080,
@@ -842,7 +862,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="mgmt-ecran-carte.js?v=lot4f2booker"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-fiche.js?v=fem1"></script>
+<script src="mgmt-ecran-fiche.js?v=lot4f2fiche"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=fem1"></script>
 <script src="mgmt-screens.js?v=fem1"></script>
