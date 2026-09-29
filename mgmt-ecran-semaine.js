@@ -31,7 +31,8 @@ function mgmtSemaineCarte(m){
     const rank=f=>{
        const org=mgmtRankLabel(mgmtDivisionRank(m,f,'organization'),f.div);
        const world=mgmtRankLabel(mgmtDivisionRank(m,f,'world'),f.div);
-      return `Split ${org||'non classé'} · monde ${world||'non classé'}`;
+      const adj=divById(f.div)?.gender==='F'?'mondiale':'mondial';
+      return `Split ${org||'non classé'} · ${world?world+' '+adj:'monde non classé'}`;
     };
     slots+=`<div class="mgmt-week-fight"><div class="mgmt-week-slot">Combat ${i+1}</div>`
       +`<div class="mgmt-week-names">${esc(a.name)} <span>contre</span> ${esc(b.name)}</div>`

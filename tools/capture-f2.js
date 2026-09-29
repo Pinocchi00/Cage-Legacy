@@ -38,6 +38,13 @@ async function main(){
     await compare.setContent(`<body style="margin:0;display:flex"><img width="1920" height="1080" src="data:image/png;base64,${shot.toString('base64')}"><img width="1920" height="1080" src="data:image/png;base64,${reference.toString('base64')}"></body>`);
     const out=path.join(root,'tools','reports','lot-4-fidelite','f2-'+label+'-vs-'+entry[0].slice(0,2)+'.png');
     await compare.screenshot({path:out});
+    for(const width of [1440,1280]){
+      await game.setViewportSize({width,height:1080});
+      const layout=await game.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,
+        nav:document.querySelector('.mgmt-nav').getBoundingClientRect().top}));
+      if(layout.document>width) throw Error(`${label} à ${width}px : défilement horizontal ${layout.document}px`);
+      if(Math.abs(layout.nav-40)>2) throw Error(`${label} à ${width}px : navigation à ${layout.nav}px au lieu de 40px`);
+    }
     if(errors.length) throw Error(errors.join('\n'));
     console.log(out);
   }finally{await browser.close();}

@@ -164,9 +164,11 @@ function scr_mgmt_fiche(){
   const {f,trace}=line;
   const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):'Split';
   const record=`${f.W}-${f.L}${f.D?'-'+f.D:''}`;
-   const mondial=divById(f.div)?.gender==='F'?'Mondiale':'Mondial';
-   const ranks=trace?`${mondial} : ${mgmtFicheSituation(m,f,'world')}`
-     :`Chez Split : ${mgmtFicheSituation(m,f,'organization')} · ${mondial} : ${mgmtFicheSituation(m,f,'world')}`;
+   const mondial=divById(f.div)?.gender==='F'?'mondiale':'mondial';
+   const worldRank=mgmtFicheSituation(m,f,'world');
+   const worldText=/^\d/.test(worldRank)?`${worldRank} ${mondial}`:`${mondial} : ${worldRank}`;
+   const ranks=trace?worldText
+     :`Chez Split : ${mgmtFicheSituation(m,f,'organization')} · ${worldText}`;
   const attrs=[['Bilan',record],['Taille',`${(profile.height/100).toFixed(2).replace('.',',')} m`],
     ['Allonge',`${(profile.reach/100).toFixed(2).replace('.',',')} m`]];
    return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head bar">`

@@ -1363,6 +1363,21 @@ test('MGMT lot 4 F2 — maquette 04 : carte souple et liste de 440px à 1920', (
     'la liste des adversaires occupe l\u2019autre');
 });
 
+test('MGMT lot 4 F2 — BOOKER joue le combat visé et libère le face-à-face', () => {
+  const win=newGameWindow();
+  enterMgmt(win,323);
+  ctlRoster(win);
+  const [a,b]=ctlPair(win);
+  win.eval(`CL.mgmtCarte(); CL.mgmtPick('${a}');
+    MGMT_CART.cursor=mgmtCartRows(G.mgmt).filter(f=>f.div===mgmtFighterById(G.mgmt,'${a}').div)
+      .findIndex(f=>f.id==='${b}'); render();`);
+  const button=win.document.querySelector('.mgmt-book-confirm');
+  assert.ok(button,'un adversaire choisi rend BOOKER accessible à la souris');
+  button.click();
+  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify(G.mgmt.card.main.map(f=>[f.a,f.b]))`)),[[a,b]]);
+  assert.equal(win.eval(`MGMT_CART.pick`),null,'le choix est terminé après le clic');
+});
+
 test('MGMT lot 4 T3 forme — le face-à-face de la maquette 04 apparaît au premier choix, le clavier reste entier', () => {
   const win = newGameWindow();
   enterMgmt(win,323);

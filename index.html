@@ -690,11 +690,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-week-news p{margin:0;line-height:1.5}
 .mgmt-week-news button,.mgmt-week-link{align-self:flex-start;background:none;border:0;padding:0;color:var(--mgmt-yellow);font:700 17px var(--mgmt-font-display);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;text-decoration:none}
 .mgmt-week-rank{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--mgmt-edge);font-size:18px}
-.mgmt-week-rank span:last-child{flex:0 0 auto;color:var(--mgmt-secondary)}
+.mgmt-week-rank span:first-child{min-width:0;overflow-wrap:anywhere}
+.mgmt-week-rank span:last-child{flex:0 1 45%;min-width:0;text-align:right;overflow-wrap:anywhere;color:var(--mgmt-secondary)}
 .mgmt-week-ranking,.mgmt-week-organisation{display:flex;flex-direction:column;gap:10px}
 .mgmt-week-organisation{margin-top:26px}
 .mgmt-week-organisation p{font-size:18px;line-height:1.6;margin:0}
-.mgmt-week-memo{font-size:17px}.mgmt-week-fact{font-size:16px}
+.mgmt-week-memo,.mgmt-week-fact{font-size:17px}
 /* Maquette 04 : la carte occupe le reste, la liste mesure 440px. L'action
    BOOKER confirme l'adversaire visé sans modifier la règle de booking. */
 .mgmt-book-cols{grid-template-columns:minmax(0,1fr) minmax(340px,440px);gap:56px}
@@ -741,6 +742,11 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-org-val{font-size:38px}
 .mgmt-org-line{font-size:26px;line-height:1.35}
 @media(max-width:1500px){.mgmt-org-eff{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1280px) and (max-width:1599px){
+  .mgmt-week-cols{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,.9fr);gap:24px}
+  .mgmt-fiche-cols{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:32px}
+  .mgmt-fiche-cols>.mgmt-fiche-side{grid-column:1 / -1}
+}
 @media(max-width:1279px){.mgmt-fiche{padding:40px 32px 48px}.mgmt-fiche-cols,.mgmt-fiche-no-trace{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}.mgmt-fiche-attrs{text-align:left}}
 @media(max-width:1279px){.mgmt-org-cols{grid-template-columns:1fr}.mgmt-org-main,.mgmt-org-aside{overflow:visible}}
 @media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
@@ -877,11 +883,11 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=lot4f2rang"></script>
+<script src="mgmt-ecran-semaine.js?v=lot4f2final"></script>
 <script src="mgmt-ecran-carte.js?v=lot4f2booker"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-fiche.js?v=lot4f2fiche"></script>
+<script src="mgmt-ecran-fiche.js?v=lot4f2final"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=lot4f2org"></script>
 <script src="mgmt-screens.js?v=fem1"></script>
