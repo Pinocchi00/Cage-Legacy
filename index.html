@@ -659,10 +659,44 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-week .mgmt-head .eyebrow{font:300 13px var(--mgmt-font-body);letter-spacing:.08em}
 .mgmt-week .mgmt-head .btn{position:absolute;top:112px;right:64px;margin:0;width:auto;color:var(--mgmt-secondary);background:transparent;border:1px solid var(--mgmt-edge);font-family:var(--mgmt-font-display)}
 .mgmt-week .mgmt-cycle{font-family:var(--mgmt-font-body);font-size:15px;color:var(--mgmt-secondary)}
+.mgmt-week-event{font:600 21px var(--mgmt-font-display);color:var(--mgmt-secondary);text-transform:uppercase}
 .mgmt-wrap .mono,.mgmt-wrap .eyebrow,.mgmt-wrap .btn,.mgmt-wrap .disp{font-family:var(--mgmt-font-display)}
 .mgmt-wrap .mgmt-cycle{font-family:var(--mgmt-font-body)}
 .mgmt-org-cat.thin .mgmt-org-nm{color:var(--mgmt-ink);border-left:3px solid var(--mgmt-red);padding-left:8px}
 @media(max-width:1279px){.mgmt-week .mgmt-nav{position:static;flex-wrap:wrap}.mgmt-week .mgmt-head{flex-wrap:wrap}.mgmt-week .mgmt-head .btn{position:static}}
+/* ==== [ANCRE: MGMT_LOT4_F2_DISPOSITION] — Maquette 02 : 40/64/48,
+   navigation centrée et quatre lectures hiérarchisées. ==== */
+.mgmt-wrap:not(.mgmt-week){padding:40px 64px 48px}
+.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:absolute;top:40px;left:50%;right:auto;transform:translateX(-50%);z-index:2;margin:0;white-space:nowrap}
+.mgmt-wrap .mgmt-head{min-height:79px;border-bottom:1px solid var(--mgmt-edge);margin:0;padding-bottom:18px;align-items:center}
+.mgmt-wrap .mgmt-head .disp{font-size:28px;letter-spacing:.12em;font-style:normal}
+.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:absolute;top:49px;right:64px;margin:0;font-size:18px;color:var(--mgmt-secondary)}
+.mgmt-wrap:not(.mgmt-week) .mgmt-head .btn{position:absolute;top:116px;right:64px;margin:0;width:auto}
+.mgmt-week-cols{grid-template-columns:minmax(0,620px) minmax(0,1fr) minmax(0,420px);gap:52px;margin-top:26px}
+.mgmt-week-pane{padding:0;overflow-y:auto}
+.mgmt-week-left{display:flex;flex-direction:column}
+.mgmt-week-card{flex:0 0 auto}
+.mgmt-week-card>p,.mgmt-week-instruction{font-size:17px}
+.mgmt-week-slot,.mgmt-week-meta{font-size:16px}
+.mgmt-week-fight{padding:18px 24px;margin-bottom:8px}
+.mgmt-week-names{font-size:clamp(26px,1.8vw,34px)}
+.mgmt-week-names span{font-size:19px}
+.mgmt-week-talk{margin-top:auto}
+.mgmt-week-affairs,.mgmt-week-dossier{margin-top:16px}
+.mgmt-week .mgmt-aff{padding:10px 14px}
+.mgmt-week .mgmt-aff .opp-nm{font-size:19px}
+.mgmt-week-news{display:flex;flex-direction:column;gap:6px;padding:16px 0;font-size:19px;font-weight:300}
+.mgmt-week-source{font-size:15px;color:var(--mgmt-secondary)}
+.mgmt-week-news p{margin:0;line-height:1.5}
+.mgmt-week-news button,.mgmt-week-link{align-self:flex-start;background:none;border:0;padding:0;color:var(--mgmt-yellow);font:700 17px var(--mgmt-font-display);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;text-decoration:none}
+.mgmt-week-rank{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--mgmt-edge);font-size:18px}
+.mgmt-week-rank span:last-child{flex:0 0 auto;color:var(--mgmt-secondary)}
+.mgmt-week-ranking,.mgmt-week-organisation{display:flex;flex-direction:column;gap:10px}
+.mgmt-week-organisation{margin-top:26px}
+.mgmt-week-organisation p{font-size:18px;line-height:1.6;margin:0}
+.mgmt-week-memo{font-size:17px}.mgmt-week-fact{font-size:16px}
+@media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: ARENE_LOT4_FIDELITE_05] — Maquette 05 : scène 1920×1080,
    octogone en fond plein cadre ; fil, bandeau et commandes en surimpression.
    Le canvas et l'écran ne reçoivent ici que des règles de présentation. ==== */
@@ -795,7 +829,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=mgmt4t2r2"></script>
+<script src="mgmt-ecran-semaine.js?v=lot4f2semaine"></script>
 <script src="mgmt-ecran-carte.js?v=fem1"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
