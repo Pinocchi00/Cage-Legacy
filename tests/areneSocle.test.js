@@ -19,6 +19,8 @@
    ============================================================================ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { newGameWindow } = require('./helpers/loadGame');
 
 /* Un combat réel du moteur, deux noms, une session d'arène. */
@@ -312,7 +314,10 @@ test('ARENE T4 reprise — ni bandeau ni fil ne montrent les marqueurs du moteur
   assert.ok(result.bandeau.includes('A envoie B au tapis'));
 });
 
-test('ARENE T4 reprise — noms grands, styles fournis seulement, badge octogonal et fond restauré', () => {
+/* ==== [ANCRE: ARENE_LOT4_FIDELITE_TEST] — Maquette 05 : la présentation
+   n'est plus inline dans l'écran, elle appartient aux règles du jeu réel
+   dans index.html ; les mêmes invariants sont vérifiés dans les deux fichiers. ==== */
+test('ARENE lot 4 — noms, badge octogonal et scène de la maquette 05', () => {
   const win=newGameWindow();
   const r=JSON.parse(win.eval(`(function(){
     const res={winner:'D',method:'Nul',round:1,log:[{r:1,phase:'debout',text:'[04:00] Échange.'}]};
@@ -324,11 +329,14 @@ test('ARENE T4 reprise — noms grands, styles fournis seulement, badge octogona
     areneEcranNettoyer();
     return JSON.stringify({html,pendant,apres:document.body.style.background});
   })()`));
-  assert.ok(r.html.includes('font-style:italic')&&r.html.includes('clip-path:polygon('));
+   const css=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+   assert.ok(r.html.includes('class="arene-name"')&&r.html.includes('class="arene-clock"'));
+   assert.ok(css.includes('font:italic 800 clamp(28px,2vw,38px)')&&css.includes('clip-path:polygon(30% 0,70% 0'));
+   assert.ok(r.html.includes('class="arene-fil"')&&css.includes('.arene-scr #arene-socle-cv{position:absolute;inset:0'));
   assert.ok(r.html.includes('Contreur &lt;long&gt;'));
   assert.ok(r.html.includes('Un &lt;champion&gt;'));
   assert.ok(!r.html.includes('<champion>'));
   assert.ok(!r.html.includes('Cage Legacy</div>')&&!r.html.includes('L’arène</h2>'));
-  assert.ok(r.pendant.includes('#3B2F33'),'fond prune pendant le combat');
+   assert.ok(r.pendant.includes('#3A2F33')&&r.pendant.includes('#1A1517'),'fond de la maquette 05 pendant le combat');
   assert.equal(r.apres,'rgb(1, 2, 3)','fond précédent restauré après sortie');
 });
