@@ -8,7 +8,11 @@ const root=path.resolve(__dirname,'..');
 const url=p=>pathToFileURL(path.join(root,p)).href;
 const screens={
   semaine:['02-semaine.html',()=>{}],
-  booker:['04-booker-un-combat.html',()=>{CL.mgmtCarte();}],
+  booker:['04-booker-un-combat.html',()=>{CL.mgmtCarte();const m=G.mgmt;
+    const a=mgmtCartRows(m).find(f=>mgmtSelectable(m,f,null)&&mgmtCartRows(m).some(b=>b.div===f.div&&b.id!==f.id&&mgmtSelectable(m,b,f.id)));
+    CL.mgmtPick(a.id);
+    MGMT_CART.cursor=mgmtCartRows(m).filter(f=>f.div===a.div).findIndex(f=>f.id!==a.id&&mgmtSelectable(m,f,a.id));
+    render();}],
   fiche:['03-fiche-combattant.html',()=>{CL.mgmtFiche(G.mgmt.roster[0].id);}],
   organisation:['08-organisation.html',()=>{CL.go('mgmt_organisation');}]
 };

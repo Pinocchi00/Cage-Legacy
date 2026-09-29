@@ -29,8 +29,8 @@ function mgmtSemaineCarte(m){
     const a=mgmtFighterById(m,fight.a), b=mgmtFighterById(m,fight.b);
     if(!a||!b) continue;
     const rank=f=>{
-      const org=mgmtRankLabel(mgmtDivisionRank(m,f,'organization'));
-      const world=mgmtRankLabel(mgmtDivisionRank(m,f,'world'));
+       const org=mgmtRankLabel(mgmtDivisionRank(m,f,'organization'),f.div);
+       const world=mgmtRankLabel(mgmtDivisionRank(m,f,'world'),f.div);
       return `Split ${org||'non classé'} · monde ${world||'non classé'}`;
     };
     slots+=`<div class="mgmt-week-fight"><div class="mgmt-week-slot">Combat ${i+1}</div>`
@@ -81,7 +81,7 @@ function mgmtSemaineMonde(m){
       const trace=mgmtExteriorTrace(line,m.cycle);
       const own=m.roster.find(f=>f.id===row.id);
       if(trace){
-        add('voisin',div.id,`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1)} mondial en ${mgmtDivisionLabel(div)}, au voisinage ${mgmtElisionDe(own.name)} (${mgmtRankLabel(i+1)}).`,line.id);
+         add('voisin',div.id,`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1,div)} mondial${div.gender==='F'?'e':''} en ${mgmtDivisionLabel(div)}, au voisinage ${mgmtElisionDe(own.name)} (${mgmtRankLabel(i+1,div)}).`,line.id);
         break;
       }
     }

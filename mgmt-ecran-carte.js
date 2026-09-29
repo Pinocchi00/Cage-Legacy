@@ -49,9 +49,9 @@ function mgmtDivisionLabel(div){
 }
 /* ==== [FIN ANCRE] ==== */
 
-/** Libellé d'un rang : « 1ʳᵉ », « 2ᵉ »… Vide sans rang. */
-function mgmtRankLabel(rank){
-  if(rank===1) return '1ʳᵉ';
+/** Rang accordé à la catégorie : 1er mondial / 1re mondiale. */
+function mgmtRankLabel(rank,div){
+  if(rank===1) return div&&divById(typeof div==='string'?div:div.div||div.id)?.gender==='F'?'1re':'1er';
   return Number.isSafeInteger(rank)&&rank>1?`${rank}ᵉ`:'';
 }
 
@@ -66,7 +66,7 @@ function mgmtRankLabel(rank){
  *  Le mot porte le refus (« suspendu », « en carte »), jamais une grisaille. */
 function mgmtCartRowHtml(m,f,i,state){
   const rank=mgmtDivisionRank(m,f);
-  const rk=mgmtRankLabel(rank);
+  const rk=mgmtRankLabel(rank,f.div);
   const susp=!mgmtAvailable(m,f);
   const engaged=mgmtEngaged(m,f);
   const status=susp?'suspendu':(engaged?'en carte':'');
@@ -110,7 +110,7 @@ function mgmtCartSlotHtml(m,i,f){
 function mgmtCartFicheHtml(m,f,ouvrir=true){
   if(!f) return '';
   const rank=mgmtDivisionRank(m,f);
-  const meta=`${mgmtDivisionLabel(f.div)} · ${mgmtRankLabel(rank)} · ${f.age} ans`;
+  const meta=`${mgmtDivisionLabel(f.div)} · ${mgmtRankLabel(rank,f.div)} · ${f.age} ans`;
   return `<div class="opp" style="cursor:default">`
     +`<div class="opp-top"><span class="mgmt-fname">${esc(f.name)}</span><span class="opp-rec">${esc(f.W)}-${esc(f.L)}-${esc(f.D)}</span></div>`
      +`<div style="font-size:13px;color:var(--muted);margin-top:4px">${esc(meta)}</div>`
@@ -129,7 +129,7 @@ function mgmtCartFicheHtml(m,f,ouvrir=true){
 function mgmtBookFighterHtml(m,f,side){
   if(!f) return '';
   const rank=mgmtDivisionRank(m,f);
-  const bits=[`${f.W}-${f.L}-${f.D}`,mgmtDivisionLabel(f.div),mgmtRankLabel(rank),`${f.age} ans`].filter(Boolean);
+  const bits=[`${f.W}-${f.L}-${f.D}`,mgmtDivisionLabel(f.div),mgmtRankLabel(rank,f.div),`${f.age} ans`].filter(Boolean);
   if(side==='b') bits.reverse();
   const nm=(typeof f.first==='string'&&typeof f.last==='string')
     ?esc(f.first)+'<br>'+esc(f.last):esc(f.name);
@@ -222,7 +222,7 @@ function scr_mgmt_carte(){
       listHtml+=mgmtCartRowHtml(m,f,i,state);
     });
   }
-  const listHead=esc(pickF?`Adversaires — ${mgmtDivisionLabel(pickF.div)}`:MGMT_CART_LABELS.list);
+  const listHead=esc(pickF?`Autres adversaires — ${mgmtDivisionLabel(pickF.div)}`:MGMT_CART_LABELS.list);
   const hint=(pickF&&shown.every(f=>f.id!==pickF.id&&!mgmtSelectable(m,f,MGMT_CART.pick)))
     ?esc(MGMT_CART_LABELS.empty)
     :(full?esc(MGMT_CART_LABELS.complete):(pickF?'':esc(MGMT_CART_LABELS.hint)));
@@ -235,9 +235,11 @@ function scr_mgmt_carte(){
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtCardLabel(m))}</div>`
     +versaHtml
     +`<div class="mgmt-book-cols">`
-    +`<section class="mgmt-book-pane"><div class="eyebrow">${esc(MGMT_CART_LABELS.card)}</div>${cardHtml}`
+    +`<section class="mgmt-book-pane mgmt-book-card"><div class="eyebrow">${esc(MGMT_CART_LABELS.card)}</div>${cardHtml}`
     +`<div class="eyebrow mt">${esc(MGMT_CART_LABELS.prelims)}</div>`
-    +`<div class="mgmt-book-sub" style="margin:4px 0 8px">${esc(prelims.length+'/'+sizePrelim)}</div>${prelimHtml}</section>`
+    +`<div class="mgmt-book-sub" style="margin:4px 0 8px">${esc(prelims.length+'/'+sizePrelim)}</div>${prelimHtml}`
+    +(pickF&&oppF&&mgmtSelectable(m,oppF,pickF.id)&&!full
+      ?`<button class="mgmt-book-confirm" onclick="CL.mgmtPick('${escJsAttr(oppF.id)}')">Booker</button>`:'')+`</section>`
     +`<aside class="mgmt-book-pane mgmt-book-list"><div class="eyebrow">${listHead}</div>${hintHtml}${listHtml}</aside>`
     +`</div></div>`;
 }

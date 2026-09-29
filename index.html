@@ -549,15 +549,15 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-book-solo{grid-template-columns:minmax(0,1fr)}
 .mgmt-book-fighter{display:flex;flex-direction:column;gap:8px;min-width:0}
 .mgmt-book-b{align-items:flex-end;text-align:right}
-.mgmt-book-nm{font-family:var(--mgmt-font-display);font-style:italic;font-weight:700;text-transform:uppercase;line-height:.94;font-size:clamp(40px,3.6vw,66px);color:var(--mgmt-ink);overflow-wrap:break-word}
+.mgmt-book-nm{font-family:var(--mgmt-font-display);font-style:italic;font-weight:800;text-transform:uppercase;line-height:.92;font-size:clamp(48px,3.75vw,72px);color:var(--mgmt-ink);overflow-wrap:break-word}
 .mgmt-book-meta{font-family:var(--mgmt-font-display);font-style:italic;font-weight:600;letter-spacing:.06em;font-size:clamp(16px,1.2vw,22px);color:var(--mgmt-ink)}
 .mgmt-book-a .mgmt-book-meta{color:var(--mgmt-yellow)}
 .mgmt-book-b .mgmt-book-nm{color:var(--mgmt-ink);border-bottom:6px solid var(--mgmt-red)}
-.mgmt-book-vs{position:relative;width:clamp(140px,11vw,210px);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.mgmt-book-vs{position:relative;width:clamp(180px,15.63vw,300px);aspect-ratio:1;display:flex;align-items:center;justify-content:center}
 .mgmt-book-vs svg{position:absolute;inset:0;width:100%;height:100%}
 .mgmt-oct-1{fill:none;stroke:var(--mgmt-edge);stroke-width:2}
 .mgmt-oct-2{fill:none;stroke:var(--mgmt-yellow);stroke-width:1;opacity:.55}
-.mgmt-book-vsglyph{font-family:var(--mgmt-font-display);font-style:italic;font-weight:800;font-size:clamp(56px,5vw,92px);line-height:.8;color:var(--mgmt-yellow)}
+.mgmt-book-vsglyph{font-family:var(--mgmt-font-display);font-style:italic;font-weight:800;font-size:clamp(56px,5vw,96px);line-height:.8;color:var(--mgmt-yellow)}
 /* La moitié basse : la carte (section) et la liste des adversaires (aside),
    séparées par le filet de la maquette. Réserve 3 : les deux pistes sont
    flexibles — la place en plus se partage, la liste garde 440px au plus
@@ -695,6 +695,15 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-week-organisation{margin-top:26px}
 .mgmt-week-organisation p{font-size:18px;line-height:1.6;margin:0}
 .mgmt-week-memo{font-size:17px}.mgmt-week-fact{font-size:16px}
+/* Maquette 04 : la carte occupe le reste, la liste mesure 440px. L'action
+   BOOKER confirme l'adversaire visé sans modifier la règle de booking. */
+.mgmt-book-cols{grid-template-columns:minmax(0,1fr) minmax(340px,440px);gap:56px}
+.mgmt-book-card{display:flex;flex-direction:column}
+.mgmt-book-confirm{align-self:flex-start;margin-top:auto;padding:16px 46px;background:var(--mgmt-yellow);color:var(--mgmt-plum-deep);font:italic 800 26px var(--mgmt-font-display);text-transform:uppercase;letter-spacing:.1em;clip-path:polygon(0 0,94% 0,100% 18%,100% 100%,0 100%)}
+.mgmt-book-meta{font-size:clamp(17px,1.15vw,22px)}
+.mgmt-book-sub{font-size:16px}
+.mgmt-book-list .opp-rec,.mgmt-book-list .eyebrow{font-size:16px}
+.mgmt-book-cols>.mgmt-book-pane>.eyebrow{font-size:20px;letter-spacing:.2em;color:var(--mgmt-yellow)}
 @media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: ARENE_LOT4_FIDELITE_05] — Maquette 05 : scène 1920×1080,
@@ -829,8 +838,8 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=lot4f2semaine"></script>
-<script src="mgmt-ecran-carte.js?v=fem1"></script>
+<script src="mgmt-ecran-semaine.js?v=lot4f2rang"></script>
+<script src="mgmt-ecran-carte.js?v=lot4f2booker"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-fiche.js?v=fem1"></script>
