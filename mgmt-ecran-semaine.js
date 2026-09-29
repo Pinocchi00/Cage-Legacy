@@ -4,6 +4,19 @@
    La pile et les paroles existantes restent les seules décisions parlées.
    Aucun texte de la maquette 02 n'est du contenu du jeu. ==== */
 
+/* ==== [ANCRE: MGMT_SEMAINE_LIBELLES_2809] — décisions d'Anthony du
+   28/09/2026 : (1) les quatre sites de catégorie de cette écran (carte
+   principale posée, effectif, voisinage, invaincu) passent par
+   mgmtDivisionLabel (mgmt-ecran-carte.js) — une catégorie féminine
+   s'affiche « Poids mouche féminin », et rien n'est stocké ; (2) l'élision
+   devant voyelle ou h : « au voisinage de Omar » s'écrit « au voisinage
+   d'Omar ». Le texte du monde reste échappé au rendu (esc sur n.text). ==== */
+function mgmtElisionDe(nom){
+  const base=String(nom||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  return /^[aeiouyh]/.test(base) ? 'd\''+nom : 'de '+nom;
+}
+/* ==== [FIN ANCRE] ==== */
+
 function mgmtSemaineCarte(m){
   const card=m.card, size=card.sizeMain, booked=card.main.length;
   let slots='';
@@ -22,7 +35,7 @@ function mgmtSemaineCarte(m){
     };
     slots+=`<div class="mgmt-week-fight"><div class="mgmt-week-slot">Combat ${i+1}</div>`
       +`<div class="mgmt-week-names">${esc(a.name)} <span>contre</span> ${esc(b.name)}</div>`
-      +`<div class="mgmt-week-meta">${esc(a.divName)} · ${esc(rank(a))} contre ${esc(rank(b))}</div></div>`;
+      +`<div class="mgmt-week-meta">${esc(mgmtDivisionLabel(a.div))} · ${esc(rank(a))} contre ${esc(rank(b))}</div></div>`;
   }
   return `<section class="mgmt-week-card"><h3>Carte principale</h3>`
     +`<p>${esc(booked)} combat${booked===1?'':'s'} booké${booked===1?'':'s'} sur ${esc(size)} · ${esc(size-booked)} place${size-booked===1?'':'s'} libre${size-booked===1?'':'s'}</p>`
@@ -49,7 +62,7 @@ function mgmtSemaineMonde(m){
     const split=m.roster.filter(f=>f.div===div.id&&!mgmtIsRetired(f));
     const available=split.filter(f=>mgmtAvailable(m,f)&&!mgmtEngaged(m,f));
     if(available.length<2){
-      add('effectif',div.id,`${div.name} : ${available.length} combattant${available.length===1?'':'s'} de Split disponible${available.length===1?'':'s'} pour la carte principale.`,null);
+      add('effectif',div.id,`${mgmtDivisionLabel(div)} : ${available.length} combattant${available.length===1?'':'s'} de Split disponible${available.length===1?'':'s'} pour la carte principale.`,null);
     }
   }
   /* Un voisin dans le classement mondial a un lien vérifiable avec Split.
@@ -68,7 +81,7 @@ function mgmtSemaineMonde(m){
       const trace=mgmtExteriorTrace(line,m.cycle);
       const own=m.roster.find(f=>f.id===row.id);
       if(trace){
-        add('voisin',div.id,`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1)} mondial en ${div.name}, au voisinage de ${own.name} (${mgmtRankLabel(i+1)}).`,line.id);
+        add('voisin',div.id,`${trace.name}, ${mgmtRankLabel(ranks.indexOf(neighbor)+1)} mondial en ${mgmtDivisionLabel(div)}, au voisinage ${mgmtElisionDe(own.name)} (${mgmtRankLabel(i+1)}).`,line.id);
         break;
       }
     }
@@ -86,7 +99,7 @@ function mgmtSemaineMonde(m){
     if(!line) continue;
     const trace=mgmtExteriorTrace(line,m.cycle);
     if(trace){
-      add('invaincu',div.id,`${div.name} : ${split.length} combattants chez Split ; ${trace.name}, ${trace.pro.W}-${trace.pro.L} hors de Split.`,line.id);
+      add('invaincu',div.id,`${mgmtDivisionLabel(div)} : ${split.length} combattants chez Split ; ${trace.name}, ${trace.pro.W}-${trace.pro.L} hors de Split.`,line.id);
     }
   }
   for(const f of m.roster){
