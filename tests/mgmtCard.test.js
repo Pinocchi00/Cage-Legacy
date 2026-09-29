@@ -1036,7 +1036,7 @@ test('MGMT T2 geste — choisir puis adversaire : premier emplacement libre, slo
   assert.equal(win.eval(`MGMT_CART.pick`), a, 'le premier choix est posé');
   let html = win.document.getElementById('app').innerHTML;
   const divName = win.eval(`mgmtFighterById(G.mgmt,'${a}').divName`);
-  assert.ok(html.includes(`Adversaires — ${divName}`), 'la liste se filtre sur la catégorie du choisi');
+  assert.ok(html.includes(`Autres adversaires — ${divName}`), 'la liste se filtre sur la catégorie du choisi (maquette 04, F2)');
   assert.ok(!html.includes('Choisissez un combattant, puis son adversaire.'), 'l\u2019invite du geste cède la place aux adversaires');
   win.eval(`CL.mgmtPick('${b}')`);
   const f = JSON.parse(win.eval(`JSON.stringify(G.mgmt.card.main[0])`));
@@ -1344,23 +1344,38 @@ test('MGMT lot 4 T3 réserve 2 — la ligne suspendue ne s\u2019allume ni au sur
   assert.equal(win.eval(`G.mgmt.card.main.length`), 0, 'aucun combat posé');
 });
 
-test('MGMT lot 4 T3 réserve 3 — à 1920, la place en plus va à la carte autant qu\u2019à la liste', () => {
+test('MGMT lot 4 F2 — maquette 04 : carte souple et liste de 440px à 1920', () => {
   const win = newGameWindow();
   enterMgmt(win,322);
   ctlRoster(win);
   win.eval(`CL.mgmtCarte(); render();`);
-  /* La forme du partage : les deux pistes du bas sont flexibles — aucune
-     colonne fixe ne capte la place en plus à 1920 (réserve 3 du lot 2). */
+  /* Décision F2 (lot 4 §4 bis, 28/09) : porter les proportions de la maquette
+     04, dont la liste fait 440px ; la carte reçoit la place disponible. */
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(/#app\.mgmt\{max-width:1920px/.test(src), 'le plafond du bureau est levé à 1920px');
-  assert.ok(src.includes('grid-template-columns:minmax(0,1fr) minmax(440px,1fr)'),
-    'carte et liste : deux pistes flexibles, la place en plus se partage');
+  assert.ok(src.includes('.mgmt-book-cols{grid-template-columns:minmax(0,1fr) minmax(340px,440px)'),
+    'carte souple et liste 440px selon la maquette 04');
   /* La liste rend ses lignes dans la piste droite : la structure porte bien
      les deux moitiés de l\u2019écran. */
   assert.ok(win.document.querySelector('.mgmt-book-cols .mgmt-book-pane'),
     'la carte occupe une piste');
   assert.ok(win.document.querySelector('.mgmt-book-list'),
     'la liste des adversaires occupe l\u2019autre');
+});
+
+test('MGMT lot 4 F2 — BOOKER joue le combat visé et libère le face-à-face', () => {
+  const win=newGameWindow();
+  enterMgmt(win,323);
+  ctlRoster(win);
+  const [a,b]=ctlPair(win);
+  win.eval(`CL.mgmtCarte(); CL.mgmtPick('${a}');
+    MGMT_CART.cursor=mgmtCartRows(G.mgmt).filter(f=>f.div===mgmtFighterById(G.mgmt,'${a}').div)
+      .findIndex(f=>f.id==='${b}'); render();`);
+  const button=win.document.querySelector('.mgmt-book-confirm');
+  assert.ok(button,'un adversaire choisi rend BOOKER accessible à la souris');
+  button.click();
+  assert.deepEqual(JSON.parse(win.eval(`JSON.stringify(G.mgmt.card.main.map(f=>[f.a,f.b]))`)),[[a,b]]);
+  assert.equal(win.eval(`MGMT_CART.pick`),null,'le choix est terminé après le clic');
 });
 
 test('MGMT lot 4 T3 forme — le face-à-face de la maquette 04 apparaît au premier choix, le clavier reste entier', () => {
