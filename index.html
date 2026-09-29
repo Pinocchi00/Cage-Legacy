@@ -692,6 +692,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-week-rank{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--mgmt-edge);font-size:18px}
 .mgmt-week-rank span:first-child{min-width:0;overflow-wrap:anywhere}
 .mgmt-week-rank span:last-child{flex:0 1 45%;min-width:0;text-align:right;overflow-wrap:anywhere;color:var(--mgmt-secondary)}
+.mgmt-week-rank.split span:last-child{color:var(--mgmt-yellow);font-weight:700}
 .mgmt-week-ranking,.mgmt-week-organisation{display:flex;flex-direction:column;gap:10px}
 .mgmt-week-organisation{margin-top:26px}
 .mgmt-week-organisation p{font-size:18px;line-height:1.6;margin:0}
@@ -705,6 +706,11 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-book-sub{font-size:16px}
 .mgmt-book-list .opp-rec,.mgmt-book-list .eyebrow{font-size:16px}
 .mgmt-book-cols>.mgmt-book-pane>.eyebrow{font-size:20px;letter-spacing:.2em;color:var(--mgmt-yellow)}
+/* ==== [ANCRE: MGMT_LOT4_F2_REPRISE_RETOUR] — Reprise F2 : retour dans
+   le flux sous l'en-tête, jamais sur les noms du face-à-face, même longs. ==== */
+.mgmt-book-actions{flex:0 0 52px;display:flex;justify-content:flex-end;align-items:center}
+.mgmt-book-actions .mgmt-book-return{width:auto;margin:0;padding:10px 16px;position:static;color:var(--mgmt-secondary);background:transparent;border:1px solid var(--mgmt-edge)}
+/* ==== [FIN ANCRE] ==== */
 /* Maquette 03 : en-tête commun puis nom de 116px, colonne gauche 520px,
    trajectoire à droite seulement si le monde fournit une trace. */
 .mgmt-fiche{padding:40px 64px 48px}
@@ -883,8 +889,8 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=lot4f2final"></script>
-<script src="mgmt-ecran-carte.js?v=lot4f2booker"></script>
+<script src="mgmt-ecran-semaine.js?v=lot4f2reprise"></script>
+<script src="mgmt-ecran-carte.js?v=lot4f2reprise"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-fiche.js?v=lot4f2final"></script>

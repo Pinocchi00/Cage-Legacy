@@ -49,9 +49,9 @@ function mgmtDivisionLabel(div){
 }
 /* ==== [FIN ANCRE] ==== */
 
-/** Rang accordé à la catégorie : 1er mondial / 1re mondiale. */
+/** Rang accordé à la catégorie : 1ᵉʳ mondial / 1ʳᵉ mondiale / 2ᵉ. */
 function mgmtRankLabel(rank,div){
-  if(rank===1) return div&&divById(typeof div==='string'?div:div.div||div.id)?.gender==='F'?'1re':'1er';
+  if(rank===1) return div&&divById(typeof div==='string'?div:div.div||div.id)?.gender==='F'?'1ʳᵉ':'1ᵉʳ';
   return Number.isSafeInteger(rank)&&rank>1?`${rank}ᵉ`:'';
 }
 
@@ -228,11 +228,11 @@ function scr_mgmt_carte(){
     :(full?esc(MGMT_CART_LABELS.complete):(pickF?'':esc(MGMT_CART_LABELS.hint)));
   const hintHtml=hint?`<div class="mgmt-book-sub" style="margin:4px 0 8px">${hint}</div>`:'';
 
-  return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
+  return `<div class="scr mgmt-wrap mgmt-book"><div class="mgmt-head bar">`
     +`<div><div class="eyebrow gold">Split — Management</div>`
-    +`<h2 class="disp">La carte</h2></div>`
-    +`<button class="btn ghost" style="width:auto;padding:10px 16px" onclick="CL.mgmtCarteLeave()">${esc(MGMT_CART_LABELS.leave)}</button></div>`
+    +`<h2 class="disp">La carte</h2></div></div>`
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtCardLabel(m))}</div>`
+    +`<div class="mgmt-book-actions"><button class="btn ghost mgmt-book-return" onclick="CL.mgmtCarteLeave()">${esc(MGMT_CART_LABELS.leave)}</button></div>`
     +versaHtml
     +`<div class="mgmt-book-cols">`
     +`<section class="mgmt-book-pane mgmt-book-card"><div class="eyebrow">${esc(MGMT_CART_LABELS.card)}</div>${cardHtml}`

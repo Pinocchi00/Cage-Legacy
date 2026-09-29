@@ -24,13 +24,13 @@ async function main(){
     const ctx=await browser.newContext({viewport:{width:1920,height:1080},deviceScaleFactor:1});
     const game=await ctx.newPage(), errors=[];
     game.on('pageerror',e=>errors.push(e.message));
-    await game.goto(url('index.html'),{waitUntil:'load'});
+    await game.goto(url('index.html'),{waitUntil:'domcontentloaded',timeout:60000});
     await game.evaluate(()=>{setSeed(11);CL.mgmtEnter();});
     await game.evaluate(entry[1]);
     await game.evaluate(()=>document.fonts.ready);
     const shot=await game.screenshot();
     const sample=await ctx.newPage();
-    await sample.goto(url('maquettes/'+entry[0]),{waitUntil:'load'});
+    await sample.goto(url('maquettes/'+entry[0]),{waitUntil:'domcontentloaded',timeout:60000});
     await sample.addStyleTag({content:`@font-face{font-family:'Saira';src:url('${url('fonts/saira-latin.woff2')}');font-weight:300 600}@font-face{font-family:'Saira Condensed';src:url('${url('fonts/condensed-700-latin.woff2')}');font-weight:700}@font-face{font-family:'Saira Condensed';src:url('${url('fonts/condensed-800-latin.woff2')}');font-weight:800}@font-face{font-family:'Saira Condensed';src:url('${url('fonts/condensed-600-latin.woff2')}');font-weight:600}`});
     await sample.evaluate(()=>document.fonts.ready);
     const reference=await sample.screenshot();

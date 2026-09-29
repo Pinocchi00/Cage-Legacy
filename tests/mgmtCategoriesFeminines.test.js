@@ -102,8 +102,9 @@ test('Composition de la carte — groupes, en-tête de liste et fiches au libell
   win.eval(`CL.mgmtPick('f1'); render();`);
   html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Autres adversaires — Poids mouche féminin'), 'l’en-tête de la maquette 04 dérive le féminin (F2)');
-  assert.equal(win.eval(`mgmtRankLabel(1,'F-fly')`),'1re','première mondiale : accord féminin (F2)');
-  assert.equal(win.eval(`mgmtRankLabel(1,'H-light')`),'1er','premier mondial : accord masculin (F2)');
+  assert.equal(win.eval(`mgmtRankLabel(1,'F-fly')`),'1ʳᵉ','première mondiale : même exposant que 2ᵉ');
+  assert.equal(win.eval(`mgmtRankLabel(1,'H-light')`),'1ᵉʳ','premier mondial : même exposant que 2ᵉ');
+  assert.equal(win.eval(`mgmtRankLabel(2,'H-light')`),'2ᵉ');
   /* La fiche du face-à-face porte bilan, catégorie, rang, âge. */
   win.eval(`CL.mgmtPick('f2'); render();`);
   assert.equal(win.eval(`G.mgmt.card.main.length`), 1, 'le combat se pose comme avant');
