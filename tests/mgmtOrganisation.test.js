@@ -53,10 +53,12 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
   assert.ok(!html.includes('Contrats')&&!html.includes('Diffuseur'), 'aucun onglet Contrats ni Diffuseur');
   assert.ok(!html.includes('Delatour')&&!html.includes('PATRON')&&!html.includes('OBJECTIFS'), 'ni patron ni objectifs de saison');
-  /* Navigation permanente : Semaine et Organisation, aucune entrée morte. */
+  /* Navigation permanente : Semaine, Classements (T6 : l'écran existe,
+     docs/LOT-4-LA-PEAU-DU-JEU.md §3 T6, réécrit sur la décision T6) et
+     Organisation, aucune entrée morte. */
   assert.equal(win.document.querySelectorAll('.mgmt-nav').length, 1, 'la barre de navigation est présente');
   const navs = [...win.document.querySelectorAll('.mgmt-nav button')].map(b=>b.textContent);
-  assert.deepEqual(navs, ['Semaine','Organisation'], 'l’entrée « Organisation » est dans la barre de navigation');
+  assert.deepEqual(navs, ['Semaine','Classements','Organisation'], 'les entrées de navigation suivent les écrans livrés');
   /* L'entrée courante (aria-current) se distingue : ici l'Organisation. */
   const courant = win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]');
   assert.equal(courant.length, 1, 'une seule entrée courante');
