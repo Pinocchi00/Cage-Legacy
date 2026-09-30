@@ -817,6 +817,49 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 @media(max-width:1279px){.mgmt-org-cols{grid-template-columns:1fr}.mgmt-org-main,.mgmt-org-aside{overflow:visible}}
 @media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT4_T4_LENDEMAIN] — Lot 4 T4 : le seul style de l'écran
+   du lendemain (maquette 06). Valeurs portées de la maquette : 40/64/48,
+   grille 560px / 1fr / 420px avec écart de 52px — la place de l'aside « Les
+   suites qu'on réclame » (lot 5) se referme, la grille devient 560px / 1fr ;
+   titres condensés 20-26px, en-tête condensé italique 800 à 62px, détails
+   17-19px légers ; jetons --mgmt-* uniquement, aucune couleur en dur.
+   Les blocs « On en parle » (presse, lot 5), « Les suites qu'on réclame »
+   (la presse et l'attente, lot 5) n'existent pas : la place se referme
+   (lot 4 §4 bis), aucun texte de maquette ne s'affiche (§1). l'or pour
+   l'entrée au top 15 (le même sens de la tendance que les classements, T6),
+   le crème pour le reste — le rouge reste réservé au danger. ==== */
+.mgmt-ld{padding:40px 64px 48px;gap:0}
+.mgmt-ld .mgmt-head{display:flex;align-items:flex-end;justify-content:space-between;gap:26px;border-bottom:1px solid var(--mgmt-edge);padding:0 0 20px;flex-wrap:wrap}
+.mgmt-ld .mgmt-head .disp{font-size:clamp(42px,3.23vw,62px);font-weight:800;font-style:italic;letter-spacing:0;text-transform:uppercase;line-height:1;margin:0}
+.mgmt-ld-next{flex:0 0 auto;display:inline-block;background:var(--mgmt-yellow);color:var(--mgmt-plum-deep);border:0;font:700 22px var(--mgmt-font-display);letter-spacing:.08em;text-transform:uppercase;padding:14px 28px;transform:skewX(-12deg);cursor:pointer}
+.mgmt-ld-next:hover{filter:brightness(1.1)}
+.mgmt-ld-next:focus-visible{outline:3px solid var(--mgmt-ink);outline-offset:3px}
+.mgmt-ld-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:560px minmax(0,1fr);gap:52px;margin-top:26px}
+.mgmt-ld-pane{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 4px}
+.mgmt-ld-results{display:flex;flex-direction:column}
+.mgmt-ld-results>*{flex:0 0 auto}
+.mgmt-ld-hd{font:700 20px var(--mgmt-font-display);letter-spacing:.2em;text-transform:uppercase;color:var(--mgmt-yellow);margin:0 0 10px}
+.mgmt-ld-item{padding:14px 0;border-bottom:1px solid var(--mgmt-edge);display:flex;flex-direction:column;gap:3px;min-width:0}
+.mgmt-ld-slot{font-size:15px;color:var(--mgmt-secondary)}
+.mgmt-ld-slot.gold{color:var(--mgmt-yellow)}
+.mgmt-ld-title{font:700 26px/1.2 var(--mgmt-font-display);text-transform:uppercase;overflow-wrap:anywhere}
+.mgmt-ld-title.gold{color:var(--mgmt-yellow)}
+.mgmt-ld-sub{font:300 17px/1.5 var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mgmt-ld-detail{margin:2px 0 0;font-size:19px;font-weight:300;line-height:1.5;overflow-wrap:anywhere}
+.mgmt-ld-link{align-self:flex-start;background:none;border:0;padding:2px 0;margin:4px 0 0;color:var(--mgmt-yellow);font:700 16px var(--mgmt-font-display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.mgmt-ld-link:hover{filter:brightness(1.15)}
+.mgmt-ld-link:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:2px}
+.mgmt-ld-tout{margin-top:auto}
+@media(min-width:1280px) and (max-width:1599px){
+  .mgmt-ld-cols{grid-template-columns:minmax(0,.9fr) minmax(0,1fr);gap:24px}
+}
+@media(max-width:1279px){
+  .mgmt-ld{padding:40px 32px 48px}
+  .mgmt-ld-cols{grid-template-columns:1fr;gap:24px}
+  .mgmt-ld-pane{overflow:visible}
+  .mgmt-ld-tout{margin-top:12px}
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: ARENE_LOT4_FIDELITE_05] — Maquette 05 : scène 1920×1080,
    octogone en fond plein cadre ; fil, bandeau et commandes en surimpression.
    Le canvas et l'écran ne reçoivent ici que des règles de présentation. ==== */
@@ -952,7 +995,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="mgmt-ecran-semaine.js?v=lot4f2reprise"></script>
 <script src="mgmt-ecran-carte.js?v=lot4f2reprise"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-lendemain.js?v=lot4t4"></script>
 <script src="mgmt-ecran-fiche.js?v=lot4f2final"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=lot4f2org"></script>

@@ -248,7 +248,12 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
   const scr = win.eval(`G.screen`);
   assert.ok(scr === 'mgmt_lendemain' || scr === 'mgmt_bureau', 'la soirée rend la main');
   if(scr === 'mgmt_lendemain'){
-    btn('Continuer').click();
+    /* Lot 4 T4 (maquette 06, docs/LOT-4-LA-PEAU-DU-JEU.md §3 T4) : le
+       lendemain s'habille comme sa maquette — l'action du soir suivant vit
+       dans le bouton de l'en-tête « Préparer Split N+1 », plus aucun
+       bouton « Continuer » au bas de la colonne. Décision de la tranche,
+       jamais un test « réparé ». */
+    win.document.querySelector('.mgmt-ld-next').click();
     assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le lendemain rend la main');
   }
   noErr(win, 'soirée/lendemain');
