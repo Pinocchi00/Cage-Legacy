@@ -1065,7 +1065,7 @@ test('MGMT lot 4 — palette et fond exacts de la maquette 02', () => {
      les valeurs ni le confinement du management. */
   assert.ok(app.includes('background:var(--mgmt-background)'), 'fond à jeton commun');
   const background=rule('--mgmt-background:');
-  assert.ok(background.includes('radial-gradient(ellipse 900px 600px at 50% 0%,rgba(255,200,61,.16),rgba(255,200,61,0) 70%)'), 'halo jaune de la maquette 02');
+  assert.ok(background.includes('radial-gradient(ellipse 900px 600px at 50% 0%,color-mix(in srgb,var(--mgmt-yellow) 16%,transparent),transparent 70%)'), 'halo jaune de la maquette 02, même alpha dérivé du jeton jaune');
   assert.ok(background.includes('var(--mgmt-plum) 55%')&&background.includes('var(--mgmt-plum-deep)'), 'jeton commun : fond prune');
   for(const token of ['--mgmt-plum:#2B2327','--mgmt-plum-deep:#211B1E','--mgmt-ink:#FFF8EE','--mgmt-secondary:#D9CCC0','--mgmt-yellow:#FFC83D','--mgmt-red:#E5322D']){
     assert.ok(src.includes(token), `${token} : couleur de maquette`);

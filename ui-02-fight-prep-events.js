@@ -107,7 +107,7 @@ function matchmakingRole(f,o,e){
   else if(isRival){ role='rivalite'; label='Rivalité Historique'; reward='L\u2019ego et la hype sont en jeu. Bonus de bourse garanti.'; color='var(--blood)'; }
   else if(fightsTot===0){ role='debutant'; label='Le Débutant'; reward='Faible risque. Peu de crédit en cas de victoire, idéal pour se relancer.'; color='var(--muted)'; }
   else if(rnk<rkMe-4){ role='raccourci'; label='Le Raccourci (Risqué)'; reward='Adversaire bien mieux classé. Bond massif au classement si vous créez la surprise.'; color='var(--gold)'; }
-  else if(isProspect){ role='prospect'; label='Le Prodige Régional'; reward='Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.'; color='#4DA6FF'; }
+  else if(isProspect){ role='prospect'; label='Le Prodige Régional'; reward='Voler la hype du petit jeune. Très risqué pour votre crédibilité si battu.'; color='var(--gold)'; }
   else if(isGatekeeper){ role='gatekeeper'; label='Le Gardien du Temple'; reward='Combat bourbier garanti. Passage obligatoire pour le haut du classement.'; color='var(--sage)'; }
   else if(isVeteran){ role='veteran'; label='Le Vétéran'; reward='Nom connu, mais sur le déclin. Bon test pour rassurer votre camp.'; color='var(--text)'; }
   else if(rnk>rkMe+5){ role='piege'; label='Le Combat Piège'; reward='Classement inférieur au vôtre. Tout à perdre, rien à gagner.'; color='var(--loss)'; }

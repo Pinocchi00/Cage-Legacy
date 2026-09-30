@@ -55,6 +55,7 @@ async function accueil(page,context,errors){
     await page.setViewportSize({width,height:1080});
     reports.push(await audit(page,`accueil ${width}`));
     if(width===1920) await pair(page,context,'t8a-accueil','maquettes/01-accueil.html');
+    else await page.screenshot({path:path.join(output,`t8a-accueil-jeu-${width}.png`)});
   }
   await page.setViewportSize({width:1920,height:1080});
   await page.locator('.title-event summary').click();
@@ -69,6 +70,81 @@ async function accueil(page,context,errors){
   if(await page.evaluate(()=>G.screen)!=='mgmt_bureau') throw Error('Reprise management à froid');
   if(errors.length) throw Error(errors.join('\n'));
   fs.writeFileSync(path.join(output,'t8a-accueil-audit.json'),JSON.stringify({reports,consoleErrors:errors,mouseAndKeyboard:true,coldResume:true},null,2)+'\n');
+}
+
+async function pantheon(page,context,errors){
+  const reports=[];
+  await page.getByRole('button',{name:/^Panthéon/}).click();
+  reports.push(await audit(page,'Panthéon vide'));
+  // Quatre vraies carrières jouées par les actions existantes. Les noms,
+  // bilans, épithètes et points ne sont ni copiés d'une maquette ni fabriqués.
+  const careers=await page.evaluate(()=>{
+    const played=[];
+    for(let i=0;i<4;i++){
+      setSeed(120+i);CL.newCareer();
+      G.draft.style=STYLE_KEYS[i];G.draft.country=COUNTRY_KEYS[i*2];
+      CL.create();
+      let screen=G.screen,tried=new Set();
+      for(let step=0;step<1400&&!G.f.retired;step++){
+        if(G.screen==='hub'&&(G.f.history||[]).length>=12) break;
+        if(G.screen==='arena'){CL.skipArena();continue;}
+        if(G.screen!==screen){screen=G.screen;tried=new Set();}
+        const el=[...document.querySelectorAll('#app [onclick]')].find(el=>!el.matches('.eyebrow.x')&&!el.disabled&&!tried.has(el.getAttribute('onclick')));
+        if(!el) throw Error(`Carrière bloquée : ${G.screen}`);
+        const action=el.getAttribute('onclick');el.click();
+        if(G.screen===screen) tried.add(action);
+      }
+      if(!(G.f.history||[]).length) throw Error('Une carrière de capture doit avoir combattu');
+      if(G.screen==='arena') CL.skipArena();
+      played.push({name:G.f.name,fights:G.f.history.length,W:G.f.W,L:G.f.L,ko:G.f.ko,sub:G.f.sub});
+      CL.toLegacy();CL.exitLegacy();
+    }
+    CL.go('hof');return played;
+  });
+  await page.locator('.hof-card-actions button').first().click();
+  for(const width of [1920,1440,1280]){
+    await page.setViewportSize({width,height:1080});
+    reports.push(await audit(page,`Panthéon ${width}`));
+    const geometry=await page.evaluate(()=>{
+      const cards=[...document.querySelectorAll('.hof-card')];
+      return {grid:getComputedStyle(document.querySelector('.hof-columns')).gridTemplateColumns,
+        overlap:cards.some(c=>[...c.querySelectorAll('.nm,.hof-card-meta,.hof-card-facts')].some(e=>e.scrollWidth>e.clientWidth+1))};
+    });
+    if(geometry.overlap) throw Error(`Carte illisible à ${width}px`);
+    console.log(JSON.stringify({width,...geometry}));
+    if(width===1920) await pair(page,context,'t8a-pantheon','maquettes/09-pantheon.html');
+    else await page.screenshot({path:path.join(output,`t8a-pantheon-jeu-${width}.png`)});
+  }
+  await page.locator('[onclick="CL.toggleHofFilters()"]').click();
+  reports.push(await audit(page,'filtres Panthéon'));
+  await page.locator('.hof-filters button').filter({hasText:'2+ défenses'}).click();
+  if(await page.locator('.hof-card').count()) throw Error('Filtre des défenses');
+  await page.evaluate(()=>{CL.filterHof('minDefenses',0);CL.toggleHofFilters();});
+  await page.locator('.hof-card-open').first().focus();await page.keyboard.press('Enter');
+  if(await page.evaluate(()=>G.screen)!=='legend_detail') throw Error('Fiche au clavier');
+  for(const width of [1920,1440,1280]){
+    await page.setViewportSize({width,height:1080});
+    reports.push(await audit(page,`fiche de légende ${width}`));
+    await page.screenshot({path:path.join(output,`t8a-legende-jeu-${width}.png`)});
+  }
+  await page.getByRole('button',{name:'Exporter (partager avec un ami)'}).click();
+  if(!await page.evaluate(()=>decodeDuelCode(G.exportedCode).ok)) throw Error('Partage');
+  reports.push(await audit(page,'partage de la légende'));
+  await page.locator('.hof-home').click();
+  await page.setViewportSize({width:1920,height:1080});
+  await page.locator('.hof-aside [onclick="CL.duelEnter()"]').click();
+  const storage=()=>page.evaluate(()=>JSON.stringify(Object.fromEntries(Object.keys(localStorage).sort().map(k=>[k,localStorage.getItem(k)]))));
+  const before=await storage();
+  await page.locator('[onclick="CL.duelStartSeries()"]').click();
+  for(let i=0;i<3&&await page.evaluate(()=>G.screen)==='duel_launch';i++){
+    await page.locator('[onclick="CL.duelBeginManche()"]').click();
+    await page.evaluate(()=>CL.skipArena());
+    await page.locator('[onclick="CL.afterResult()"]').click();
+  }
+  if(await page.evaluate(()=>G.screen)!=='duel_series_result') throw Error('Le Duel doit terminer sa série');
+  if(await storage()!==before) throw Error('Le Duel a modifié une sauvegarde');
+  if(errors.length) throw Error(errors.join('\n'));
+  fs.writeFileSync(path.join(output,'t8a-pantheon-audit.json'),JSON.stringify({careers,reports,consoleErrors:errors,mouseAndKeyboard:true,duelCompleteWithoutStorageWrites:true},null,2)+'\n');
 }
 
 async function audit(page,label){
@@ -127,7 +203,8 @@ async function audit(page,label){
   },{texts,image:'data:image/png;base64,'+background.toString('base64')});
   const failures=measured.filter(r=>r.contrast<4.5||r.size<13||/Oswald|Fraunces|JetBrains/.test(r.font));
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
-  const report={label,texts:measured.length,minimumContrast:Math.min(...measured.map(r=>r.contrast)),minimumSize:Math.min(...measured.map(r=>r.size)),overflow,failures};
+  const appClass=await page.locator('#app').getAttribute('class');
+  const report={label,appClass,texts:measured.length,minimumContrast:Math.min(...measured.map(r=>r.contrast)),minimumSize:Math.min(...measured.map(r=>r.size)),overflow,failures};
   console.log(JSON.stringify(report));
   if(overflow||failures.length) throw Error(`${label} : audit échoué`);
   return report;
@@ -143,16 +220,19 @@ async function main(){
     page.on('pageerror',e=>errors.push(e.message));
     await page.goto(url('index.html'),{waitUntil:'load'});
     if(phase==='accueil'){await accueil(page,context,errors);return;}
+    if(phase==='pantheon'){await pantheon(page,context,errors);return;}
     await page.evaluate(()=>{setSeed(11);CL.newCareer();});
     reports.push(await audit(page,'création'));
     await page.evaluate(()=>{G.draft.first='Anthony';CL.create();});
-    for(const screen of ['hub','profile','rankings','history','beltLineage','retire']){
+    for(const screen of ['hub','profile','rankings','history','beltLineage','retire','ach','codex']){
       await page.evaluate(s=>CL.go(s),screen);
       reports.push(await audit(page,screen));
     }
     await page.evaluate(()=>{CL.go('hub');CL.fightSelect();});
     reports.push(await audit(page,'sélection'));
-    await page.evaluate(()=>{CL.toLegacy();CL.exitLegacy();CL.duelEnter();});
+    await page.evaluate(()=>CL.toLegacy());
+    reports.push(await audit(page,'retraite archivée'));
+    await page.evaluate(()=>{CL.exitLegacy();CL.duelEnter();});
     reports.push(await audit(page,'duel'));
     if(errors.length) throw Error(errors.join('\n'));
     fs.writeFileSync(path.join(output,'t8a-da-audit.json'),JSON.stringify({viewport:1920,reports,consoleErrors:errors},null,2)+'\n');

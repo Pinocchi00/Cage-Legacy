@@ -117,3 +117,42 @@ test('resetHof() garde les favoris et efface le reste', () => {
   assert.equal(after.length, 1, 'resetHof() ne doit garder que les favoris');
   assert.equal(after[0].favorite, true, 'l\'entrée restante doit être celle marquée favorite');
 });
+
+/* ==== [ANCRE: LOT4_T8A_PANTHEON_TESTS] — maquette 09, données réelles et
+   interactions de l'archive conservées, jamais un score converti en monnaie. ==== */
+test('T8a Panthéon — compteurs réels indépendants des filtres, aucune dépense inventée',()=>{
+  const win=newGameWindow({runMain:true});const list=makeEnshrinedFighter(win);
+  const meta=win.loadMetaStats();meta.legendPoints=73;meta.careersCompleted=9;win.saveMetaStats(meta);
+  win.CL.go('hof');
+  let text=win.document.getElementById('app').textContent;
+  assert.ok(text.includes('73Points de légende'));
+  assert.ok(text.includes('9Carrières terminées'));
+  assert.ok(text.includes('20-3'));
+  assert.ok(!text.includes('Dépenser'));
+  assert.ok(!text.includes('score'));
+  const before=JSON.stringify(win.loadHOF());
+  win.CL.filterHof('divName','aucune catégorie');
+  text=win.document.getElementById('app').textContent;
+  assert.ok(text.includes('73Points de légende'));
+  assert.ok(text.includes('9Carrières terminées'));
+  assert.equal(win.document.querySelectorAll('.hof-card').length,0);
+  assert.equal(JSON.stringify(win.loadHOF()),before,'le filtre ne réécrit pas les archives');
+  assert.equal(win.loadHOF()[0].score,list[0].score,'le score de tri reste inchangé');
+});
+
+test('T8a Panthéon — carte et fiche échappent noms, surnoms, épithètes et identifiant au clic',()=>{
+  const win=newGameWindow({runMain:true});const list=makeEnshrinedFighter(win),f=list[0];
+  f.id="legend_'<>&";f.name="O'Connor <img src=x onerror=alert(1)>";
+  f.nick="L'<b>éclair</b>";f.epithets=['<svg onload=alert(1)>'];
+  win.saveHOF(list);win.CL.go('hof');
+  assert.equal(win.document.querySelectorAll('#app img,#app svg[onload]').length,0);
+  win.document.querySelector('.hof-card-open').click();
+  assert.equal(win.G.screen,'legend_detail');
+  assert.equal(String(win.G.viewingLegendId),f.id);
+  assert.ok(win.document.getElementById('app').textContent.includes(f.nick));
+  assert.equal(win.document.querySelectorAll('#app img,#app svg[onload]').length,0);
+  win.document.querySelector('[onclick^="CL.exportLegend"]').click();
+  assert.ok(win.document.querySelector('.hof-export textarea'),'la fiche rend le partage produit par le contrôleur');
+  assert.ok(win.decodeDuelCode(win.G.exportedCode).ok);
+});
+/* ==== [FIN ANCRE] ==== */

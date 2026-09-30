@@ -1,0 +1,122 @@
+{
+  "careers": [
+    {
+      "name": "Dante Marchand",
+      "fights": 12,
+      "W": 10,
+      "L": 2,
+      "ko": 0,
+      "sub": 0
+    },
+    {
+      "name": "Sean Reed",
+      "fights": 12,
+      "W": 10,
+      "L": 2,
+      "ko": 2,
+      "sub": 0
+    },
+    {
+      "name": "Tariq Watanabe",
+      "fights": 12,
+      "W": 11,
+      "L": 1,
+      "ko": 6,
+      "sub": 0
+    },
+    {
+      "name": "Alex Evans",
+      "fights": 12,
+      "W": 8,
+      "L": 4,
+      "ko": 8,
+      "sub": 0
+    }
+  ],
+  "reports": [
+    {
+      "label": "Panthéon vide",
+      "appClass": null,
+      "texts": 14,
+      "minimumContrast": 6.78,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "Panthéon 1920",
+      "appClass": "",
+      "texts": 44,
+      "minimumContrast": 5.85,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "Panthéon 1440",
+      "appClass": "",
+      "texts": 44,
+      "minimumContrast": 5.85,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "Panthéon 1280",
+      "appClass": "",
+      "texts": 48,
+      "minimumContrast": 5.78,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "filtres Panthéon",
+      "appClass": "",
+      "texts": 72,
+      "minimumContrast": 5.76,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "fiche de légende 1920",
+      "appClass": "",
+      "texts": 30,
+      "minimumContrast": 6.06,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "fiche de légende 1440",
+      "appClass": "",
+      "texts": 32,
+      "minimumContrast": 5.75,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "fiche de légende 1280",
+      "appClass": "",
+      "texts": 32,
+      "minimumContrast": 5.42,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "partage de la légende",
+      "appClass": "",
+      "texts": 38,
+      "minimumContrast": 5.42,
+      "minimumSize": 14,
+      "overflow": false,
+      "failures": []
+    }
+  ],
+  "consoleErrors": [],
+  "mouseAndKeyboard": true,
+  "duelCompleteWithoutStorageWrites": true
+}

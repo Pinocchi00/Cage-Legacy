@@ -60,7 +60,8 @@ window.onerror = function(msg, url, line) {
   /* ==== [ANCRE: MGMT_LOT4_T1_TOKENS] — Lot 4 T1, corrigé par fidélité
      maquettes 02/05 : couleurs, polices et octogone relevés sur les fichiers. ==== */
   --mgmt-plum:#2B2327; --mgmt-plum-top:#3B2F33; --mgmt-plum-deep:#211B1E;
-  --mgmt-panel:rgba(255,248,238,.07); --mgmt-edge:rgba(255,248,238,.16);
+  --mgmt-panel:color-mix(in srgb,var(--mgmt-ink) 7%,transparent); --mgmt-edge:color-mix(in srgb,var(--mgmt-ink) 16%,transparent);
+  --mgmt-panel-soft:color-mix(in srgb,var(--mgmt-ink) 6%,transparent);
   --mgmt-ink:#FFF8EE; --mgmt-secondary:#D9CCC0; --mgmt-tertiary:#D9CCC0;
   --mgmt-yellow:#FFC83D; --mgmt-red:#E5322D;
   --mgmt-font-display:'Saira Condensed','Arial Narrow',sans-serif;
@@ -73,7 +74,7 @@ window.onerror = function(msg, url, line) {
   --mgmt-danger-ink:color-mix(in srgb,var(--mgmt-red) 40%,var(--mgmt-ink));
   --mgmt-cut:polygon(0 0,94% 0,100% 18%,100% 100%,0 100%);
   --mgmt-size-body:18px; --mgmt-size-section:20px; --mgmt-size-name:34px; --mgmt-size-title:64px;
-  --mgmt-background:radial-gradient(ellipse 900px 600px at 50% 0%,rgba(255,200,61,.16),rgba(255,200,61,0) 70%),linear-gradient(180deg,var(--mgmt-plum-top),var(--mgmt-plum) 55%,var(--mgmt-plum-deep));
+  --mgmt-background:radial-gradient(ellipse 900px 600px at 50% 0%,color-mix(in srgb,var(--mgmt-yellow) 16%,transparent),transparent 70%),linear-gradient(180deg,var(--mgmt-plum-top),var(--mgmt-plum) 55%,var(--mgmt-plum-deep));
 }
 /* ==== [ANCRE: FAITH_PAPIER_OBJET] — le crème d'origine (#E4DFD3) était bon,
    juste appliqué à la mauvaise échelle : posé sur TOUT le mode, il n'était
@@ -94,14 +95,15 @@ window.onerror = function(msg, url, line) {
    détache sans trancher), bordure + rotation + ombre déjà en place
    suffisent à le distinguer sur le fond nuit, bien plus sombre. ==== */
 .faith-paper{
-  --bg:#F1ECE0; --panel:#F1ECE0; --panel2:#DAD4C6; --line:#B9B0A0;
-  --text:#16130E; --muted:#5C5346; --faint:#7A7161;
-  --gold:#9C2C1E; --gold-d:#7A2216; --sage:#4A5D50;
-  --blood:#9C2C1E; --blood-d:#7A2216;
-  --f-red-hi:#E8442F;
+  /* T8a : l'objet garde sa disposition, mais prend les jetons communs. */
+  --bg:var(--mgmt-plum-deep); --panel:var(--mgmt-plum); --panel2:var(--mgmt-panel); --line:var(--mgmt-edge);
+  --text:var(--mgmt-ink); --muted:var(--mgmt-secondary); --faint:var(--mgmt-secondary);
+  --gold:var(--mgmt-yellow); --gold-d:var(--mgmt-yellow); --sage:var(--mgmt-yellow);
+  --blood:var(--mgmt-red); --blood-d:var(--mgmt-plum-deep);
+  --f-red-hi:var(--mgmt-danger-ink);
   /* V2-02 : repeint --pos/--neg (jamais --win/--loss directement, cf. ANCRE
      V2_TOKENS_SEMANTIQUES) pour son propre fond clair, comme faith-papier. */
-  --pos:#1A5F33; --neg:#9C2C1E; --warn:#8A6A1E;
+  --pos:var(--mgmt-yellow); --neg:var(--mgmt-danger-ink); --warn:var(--mgmt-yellow);
   background:var(--bg); color:var(--text); font-family:'Fraunces',Georgia,serif;
   padding:24px 20px; border:1px solid var(--line);
   box-shadow:0 14px 34px rgba(0,0,0,.55); transform:rotate(-.4deg);
@@ -861,8 +863,9 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .arene-controls .arene-spacer{flex:1}
 @media(max-width:900px){.arene-scr .arene-top{left:20px;right:20px}.arene-scr .arene-fil{left:20px;top:175px;width:45%;max-height:40%}.arene-scr .arene-controls{left:20px;right:20px;bottom:20px;gap:6px}.arene-controls .btn{font-size:15px;padding:8px}.arene-scr .arene-caption{bottom:105px}}
 </style>
-<link rel="stylesheet" href="ui-skin.css?v=lot4t8a1">
-<link rel="stylesheet" href="ui-accueil.css?v=lot4t8a2">
+<link rel="stylesheet" href="ui-skin.css?v=lot4t8a3">
+<link rel="stylesheet" href="ui-accueil.css?v=lot4t8a3">
+<link rel="stylesheet" href="ui-pantheon.css?v=lot4t8a3">
 </head>
 <body><div id="app"></div>
 <script src="data-skills.js?v=career7"></script>
@@ -919,11 +922,11 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      rester lisible et maintenable — l'ORDRE de chargement ci-dessous est
      important et ne doit jamais être changé (voir le commentaire d'en-tête
      de chaque fichier ui-0X-*.js pour le détail). -->
-<script src="ui-01-roster-matchmaking.js?v=career7"></script>
-<script src="ui-02-fight-prep-events.js?v=r2809"></script>
+<script src="ui-01-roster-matchmaking.js?v=lot4t8a3"></script>
+<script src="ui-02-fight-prep-events.js?v=lot4t8a3"></script>
 <script src="ui-03-contracts-arcade-data.js?v=career7"></script>
 <script src="ui-05-fight-resolution.js?v=career7"></script>
-<script src="ui-06-career-screens.js?v=lot4t8a2"></script>
+<script src="ui-06-career-screens.js?v=lot4t8a3"></script>
 <script src="ui-07-contracts-legacy-screens.js?v=lot4t8a1"></script>
 <script src="ui-08-controller-arena.js?v=r2809"></script>
 <!-- ui-09-arena.js : second découpage, ultérieur au split en 8 fichiers ci-

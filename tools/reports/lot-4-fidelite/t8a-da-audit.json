@@ -3,14 +3,16 @@
   "reports": [
     {
       "label": "création",
+      "appClass": null,
       "texts": 49,
-      "minimumContrast": 5.41,
+      "minimumContrast": 5.43,
       "minimumSize": 13,
       "overflow": false,
       "failures": []
     },
     {
       "label": "hub",
+      "appClass": null,
       "texts": 26,
       "minimumContrast": 5.09,
       "minimumSize": 13,
@@ -19,6 +21,7 @@
     },
     {
       "label": "profile",
+      "appClass": null,
       "texts": 68,
       "minimumContrast": 5.13,
       "minimumSize": 13,
@@ -27,6 +30,7 @@
     },
     {
       "label": "rankings",
+      "appClass": null,
       "texts": 83,
       "minimumContrast": 5.23,
       "minimumSize": 13,
@@ -35,6 +39,7 @@
     },
     {
       "label": "history",
+      "appClass": null,
       "texts": 8,
       "minimumContrast": 5.47,
       "minimumSize": 13,
@@ -43,14 +48,16 @@
     },
     {
       "label": "beltLineage",
+      "appClass": null,
       "texts": 7,
-      "minimumContrast": 5.78,
+      "minimumContrast": 5.81,
       "minimumSize": 13,
       "overflow": false,
       "failures": []
     },
     {
       "label": "retire",
+      "appClass": null,
       "texts": 6,
       "minimumContrast": 5.61,
       "minimumSize": 13,
@@ -58,17 +65,46 @@
       "failures": []
     },
     {
+      "label": "ach",
+      "appClass": null,
+      "texts": 11,
+      "minimumContrast": 6.16,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "codex",
+      "appClass": null,
+      "texts": 40,
+      "minimumContrast": 5.14,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
       "label": "sélection",
-      "texts": 44,
+      "appClass": null,
+      "texts": 45,
       "minimumContrast": 5.54,
       "minimumSize": 13,
       "overflow": false,
       "failures": []
     },
     {
+      "label": "retraite archivée",
+      "appClass": null,
+      "texts": 21,
+      "minimumContrast": 5.36,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
       "label": "duel",
+      "appClass": null,
       "texts": 16,
-      "minimumContrast": 5.89,
+      "minimumContrast": 5.96,
       "minimumSize": 13,
       "overflow": false,
       "failures": []

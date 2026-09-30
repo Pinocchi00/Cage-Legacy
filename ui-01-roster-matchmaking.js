@@ -379,7 +379,7 @@ const CLASSES_31={
   },
 };
 /* ==== [FIN ANCRE] ==== */
-const RAR_COLORS={C:'var(--text)',R:'#4DA6FF',E:'var(--gold)',L:'var(--blood)',M:'#8b5cf6'};
+const RAR_COLORS={C:'var(--text)',R:'var(--muted)',E:'var(--gold)',L:'var(--gold)',M:'var(--text)'};
 /* --------------------------- roster / classement -------------------------- */
 /* ==== [ANCRE: AMA_CHAMPIONSHIPS] — un seul combat décisif (version légère
    validée), aucune incidence sur f.org/ORGS, amateurs uniquement. Config-driven
@@ -689,7 +689,7 @@ function getCardSlot(f,opp,kind){
 /* ==== [FIN ANCRE] ==== */
 function renderFightPoster(f,opp,kind){
   const slot=getCardSlot(f,opp,kind);
-  const slotColors={'AMATEUR CARD':'var(--muted)','EARLY PRELIMS':'var(--line)','PRELIMS':'#4DA6FF','MAIN CARD':'var(--sage)','CO-MAIN':'var(--blood)','MAIN EVENT':'var(--gold)'};
+  const slotColors={'AMATEUR CARD':'var(--muted)','EARLY PRELIMS':'var(--muted)','PRELIMS':'var(--muted)','MAIN CARD':'var(--sage)','CO-MAIN':'var(--gold)','MAIN EVENT':'var(--gold)'};
   const borderColor=slotColors[slot]||'var(--gold-d)';
   const orgName=orgDisplayName(f).toUpperCase();
   const fLast=esc(f.last||f.name).toUpperCase();

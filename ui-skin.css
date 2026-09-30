@@ -12,8 +12,11 @@ body::after{display:none}
 .scr .hero-name em,.scr .narr blockquote,.scr .duel2 .sep,.scr .rk-n,.scr .fld input,.faith-paper{font-family:var(--mgmt-font-body)}
 .scr .mono,.scr .eyebrow,.scr .tag,.scr .tag2,.scr .meta-strip,.scr .narr cite,.scr .rarity-guide span,.scr .tier-lbl,.scr .tier-lbl-lg,.scr .rec,.scr .gal-rail-title span.n,.scr .gal-tile .base,.scr .gal-tile .preview-hint,.scr .shop-rail-title span.n,.scr .shop-tile .price,.scr .shop-tile .rar-lbl,.scr .shop-preview-hint,.scr .fld label,.scr .fh .sub,.scr .l5 .p i,.scr .mf-l,.scr .opp-rec,.scr .opp-wp-l,.scr .opp-wp-v,.scr .dlt,.scr .stats-card .st-row,.scr .attr-l,.scr .attr-v,.scr .rk,.scr .lg-v,.scr .lg-l,.scr .arena-st .st-lbl,.scr .log-row{font-family:var(--mgmt-font-body);font-size:13px}
 .scr .stat-lbl{font-size:13px}
+.scr .epi{font-size:17px}
 .scr .meta-strip>div>span,.scr .opp-read,.scr .story{opacity:1}
 .scr [style*="opacity:.7"],.scr [style*="opacity:.8"],.scr [style*="opacity:.9"]{opacity:1!important}
+.scr .mono.small.muted[style*="opacity:.6"],.scr span[style*="opacity:.5"]{opacity:1!important}
+.scr .card[style*="opacity:0.55"]{opacity:1!important}
 .scr .lede,.scr .lede.small,.scr .opp-mid,.scr .opp-read,.scr .story{font-size:17px}
 .scr button,.scr .pill,.scr .l5 .p{font-family:var(--mgmt-font-display)}
 .scr .opp-nm{font-size:22px}
