@@ -1618,7 +1618,7 @@ histoires humaines (§7).
 **Déplacé et très étendu dans `docs/CATALOGUE-HUMANITE.md`** (v2) : trente
 pays, deux cent cinquante villes, le style qui vient du pays et de la ville,
 des surnoms pour chaque combattant, cent cinquante anciens métiers, vingt-deux
-milieux, cent vingt moments de vie pondérés, cinquante rituels, sept traits
+milieux, cent neuf moments de vie pondérés, cinquante rituels, sept traits
 cachés, douze rôles, quinze trajectoires. Le lot 5 « Un monde humain »
 (`docs/LOT-5-UN-MONDE-HUMAIN.md`) dit comment ils entrent dans le jeu.
 

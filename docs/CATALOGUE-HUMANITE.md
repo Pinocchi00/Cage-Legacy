@@ -516,7 +516,7 @@ enfance dans une salle de boxe (un parent coach)
 - **Le joueur ne voit pas tout** : un moment privé n'apparaît que si la presse ou
   le combattant en parle.
 
-## 6.3 La liste (120)
+## 6.3 La liste (109)
 
 Colonnes : **poids** (charge), **qui le relaie** (média §6 du document des voix,
 ou le combattant lui-même), **ce que ça change**.
@@ -862,7 +862,7 @@ dans la loi qui existe.
 **Pourquoi deux carrières ne se ressemblent jamais.** Une carrière est la
 combinaison : trajectoire (15) × voix (48) × style tiré de son pays et de sa
 ville (8, pondérés sur 30 pays et 250 villes) × métier (150) × milieu (22) ×
-traits (7 × 20) × **moments de vie tirés chaque cycle** (120) × **les choix du
+traits (7 × 20) × **moments de vie tirés chaque cycle** (109) × **les choix du
 joueur**. Même à trajectoire, voix et style égaux, les moments de vie et les
 adversaires rendus différents font diverger les carrières dès le premier camp.
 
