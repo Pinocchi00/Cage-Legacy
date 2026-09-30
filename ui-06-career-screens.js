@@ -40,50 +40,81 @@ function nextObjectiveBlock(){
    et seule l'erreur de lien de légende partagé, posée au démarrage par
    main.js dans G.bootMsg, reste visible. ==== */
 function scr_title(){
-  return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div style="text-align:center;margin-bottom:48px">
-     <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
-     <!-- ==== [ANCRE: V3_TITRE_PROMESSE] — Plan V3 LOT 1 §P22 : "SIMULATEUR
-          DE MANAGEMENT & ARCHIVES" énumérait des fonctionnalités (gérer,
-          archiver) au lieu de dire ce que le joueur va RESSENTIR (Loi 6,
-          test de substitution du §1.3 — cette phrase serait vraie de
-          n'importe quel jeu de gestion, pas seulement de celui-ci). ==== -->
-     <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">BÂTISSEZ UN NOM QUE PERSONNE N’OUBLIERA</div>
-   </div>
-   ${(()=>{ G.lastMsg=null;
-      if(!G.bootMsg) return '';
-      const m=G.bootMsg; G.bootMsg=null;
-      return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
-    })()}
-   <!-- ==== [CORRECTIF V2-43] — "une seule porte d'entrée par mode" : les
-        deux boutons (lancer une nouvelle partie / reprendre celle en
-        cours, ce dernier conditionnel à hasSave) convergent maintenant
-        sur un unique écran d'accueil Faith (scr_faith_home, ui-04), qui
-        porte lui-même les deux actions — plus fidèle au traitement déjà
-        réservé au mode carrière complète juste en dessous (un seul
-        bouton "2. CARRIÈRE COMPLÈTE" → scr_intro, qui gère sa propre
-        reprise). ==== -->
-   <!-- ==== [ANCRE: V3_MODES_PROMESSE] — Plan V3 LOT 1 §P22 : les trois
-        descriptions énuméraient des fonctionnalités ("gérez l'argent, les
-        camps...") au lieu de promettre une expérience ; celle de Faith
-        citait même un jeu concurrent ("Destiny-like", jargon qui suppose
-        que le joueur le connaît, contraire à la Loi 6). Chacune tient en
-        moins de 12 mots. ==== -->
-    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.go('intro')">CARRIÈRE COMPLÈTE
-      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Montez les échelons, un combat à la fois</span></button>
-    <!-- ==== [ANCRE: MGMT_LOT1_ENTREE] — Lot 1 mode management : entrée du
-         bureau depuis l'écran titre (Split, matchmaker). ==== -->
-    <button class="btn" style="font-size:20px;padding:24px" onclick="CL.mgmtEnter()">MODE MANAGEMENT
-      <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Split — le bureau du matchmaker</span></button>
-    <!-- ==== [FIN ANCRE] ==== -->
-    <div class="hr" style="margin:24px 0"></div>
-    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
-      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>
-    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('hof')">VOIR LE PANTHÉON
-      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Toutes les légendes retraitées</span></button>
-    </div>`;
+  /* ==== [ANCRE: LOT4_T8A_ACCUEIL_01] — T8a, maquette 01 : quatre entrées,
+     reprise management et faits réels. Lecture validée, sans charger une
+     partie dans G et sans stocker les textes dérivés. ==== */
+  const m=titleMgmtState(), upcoming=titleMgmtUpcoming(m);
+  const management=m?`Split ${m.cycle} · ${mgmtCardLabel(m)}`:'Split — matchmaker';
+  G.lastMsg=null;
+  const boot=G.bootMsg;G.bootMsg=null;
+  return `<div class="scr title-screen"><div class="title-grid${m?'':' title-no-save'}">
+    <main class="title-main">
+      <!-- ==== [ANCRE: V3_TITRE_PROMESSE] — T8a : hiérarchie du titre portée
+           de 01 ; la promesse d'origine n'est plus un bandeau. ==== -->
+      <div><div class="title-brand"><span class="title-oct" aria-hidden="true"></span><span>${esc(MGMT_ORG)} MMA</span></div>
+        <h1>CAGE<br>LEGACY</h1></div>
+      ${boot?`<p class="title-message" role="alert">${esc(boot)}</p>`:''}
+      <!-- ==== [ANCRE: V3_MODES_PROMESSE] — T8a : descriptions existantes,
+           aucune phrase d'exemple de la maquette. ==== -->
+      <nav class="title-modes" aria-label="Modes de jeu">
+        <!-- ==== [ANCRE: MGMT_LOT1_ENTREE] — même entrée validée. ==== -->
+        <button class="title-mode title-management" onclick="CL.mgmtEnter()"><strong>Management</strong><span>${esc(management)}</span></button>
+        <button class="title-mode" onclick="CL.go('intro')"><strong>Carrière</strong><span>Montez les échelons, un combat à la fois</span></button>
+        <button class="title-mode" onclick="CL.duelEnter()"><strong>Duel entre amis</strong><span>Affronte deux légendes de ton Panthéon</span></button>
+        <button class="title-mode" onclick="CL.go('hof')"><strong>Panthéon</strong><span>Toutes les légendes retraitées</span></button>
+      </nav>
+      <nav class="title-utils" aria-label="Archives"><button onclick="CL.go('ach')">Succès</button></nav>
+    </main>
+    ${m?`<aside class="title-aside" aria-label="Partie management">
+      ${titleMgmtLastEvent(m)}
+      ${upcoming.length?`<section class="title-upcoming"><h2>Ce qui t'attend</h2><p>${upcoming.map(esc).join('<br>')}</p></section>`:''}
+      <button class="title-resume" onclick="CL.mgmtEnter()"><span>Reprendre</span></button>
+    </aside>`:''}
+  </div></div>`;
 }
 
+function titleMgmtState(){
+  if(G&&G.mgmt&&validateMgmt(G.mgmt)) return G.mgmt;
+  try{
+    for(const key of [MGMT_KEY,MGMT_BACKUP_KEY]){
+      const m=mgmtParseAndValidate(localStorage.getItem(key));
+      if(m) return m;
+    }
+  }catch(e){}
+  return null;
+}
+
+function titleMgmtUpcoming(m){
+  if(!m) return [];
+  const facts=[];
+  if(m.card){
+    const free=Math.max(0,m.card.sizeMain-m.card.main.length);
+    if(free) facts.push(`${free} place${free===1?'':'s'} libre${free===1?'':'s'} en carte principale de Split ${m.cycle}.`);
+  }
+  const open=mgmtOpenCount(m);
+  if(open) facts.push(mgmtOpenLabel(open)+'.');
+  return facts;
+}
+
+function titleMgmtLastEvent(m){
+  const e=m&&m.lastEvent;
+  if(!e||!e.fights.length) return '';
+  const rows=e.fights.map(x=>{
+    const trace=(m.hist||[]).find(t=>t.c===e.cycle&&t.a.id===x.a&&t.b.id===x.b);
+    const a=trace?trace.a:mgmtFighterById(m,x.a),b=trace?trace.b:mgmtFighterById(m,x.b);
+    if(!a||!b) return '';
+    const result=x.winner==='D'?`${a.name} contre ${b.name} : nul`
+      :`${x.winner==='A'?a.name:b.name} bat ${x.winner==='A'?b.name:a.name}`;
+    const method=MGMT_FAMILY_LABELS[x.family]||'';
+    return `<li>${esc(result)} · ${esc(method)} · round ${esc(x.round)}</li>`;
+  }).filter(Boolean);
+  if(!rows.length) return '';
+  return `<section class="title-last"><h2>La dernière soirée</h2><div class="title-event">
+    <h3>Split ${esc(e.cycle)}</h3><ul>${rows.slice(0,3).join('')}</ul>
+    ${rows.length>3?`<details><summary>Tous les résultats (${rows.length})</summary><ul>${rows.slice(3).join('')}</ul></details>`:''}
+  </div></section>`;
+}
+/* ==== [FIN ANCRE] ==== */
 
 function scr_intro(){ const c=hasSave('career');
   return `<div class="scr center intro">

@@ -1080,6 +1080,50 @@ test('MGMT lot 4 — palette et fond exacts de la maquette 02', () => {
   }
 });
 
+/* ==== [ANCRE: LOT4_T8A_ACCUEIL_TESTS] — accueil 01, décision du 28/09 :
+   données réelles, lecture sans mutation, reprise avec la porte de validation. ==== */
+test('T8a accueil — partie absente : quatre entrées, aucune soirée ni attente inventée',()=>{
+  const win=newGameWindow({runMain:true});
+  const html=win.scr_title();
+  for(const action of ["CL.mgmtEnter()","CL.go('intro')","CL.duelEnter()","CL.go('hof')"]){
+    assert.ok(html.includes(action));
+  }
+  assert.ok(!html.includes('title-aside'));
+  assert.ok(!html.includes('title-last'));
+  assert.ok(!html.includes('title-upcoming'));
+  assert.equal(win.G.mgmt,undefined);
+});
+
+test('T8a accueil — reprise à froid depuis le secours, lecture pure et noms échappés',()=>{
+  const win=newGameWindow({runMain:true});enterMgmt(win,11);
+  const m=win.G.mgmt,a=m.roster[0],b=m.roster[1];
+  a.name="O'Connor <img src=x onerror=alert(1)>";
+  m.lastEvent={cycle:m.cycle,fights:[{a:a.id,b:b.id,winner:'B',family:'sub',round:2}],touched:[]};
+  m.hist=[];
+  win.saveMgmt();win.saveMgmt();win.CL.mgmtLeave();
+  const key=win.eval('MGMT_KEY');win.localStorage.setItem(key,'corrompu');
+  win.G.mgmt=null;
+  const snapshot=JSON.stringify({...win.localStorage});
+  const html=win.scr_title();
+  assert.ok(html.includes('title-last'));
+  assert.ok(html.includes(win.eval(`esc(${JSON.stringify(b.name)})+' bat '+esc(${JSON.stringify(a.name)})`)));
+  assert.ok(html.includes('Soumission · round 2'));
+  assert.ok(html.includes('title-upcoming'));
+  assert.ok(!html.includes('<img src=x'));
+  assert.equal(win.G.mgmt,null,'l’accueil ne charge pas la partie dans G');
+  assert.equal(JSON.stringify({...win.localStorage}),snapshot,'aucune réparation ni écriture en lisant le titre');
+  win.CL.mgmtEnter();
+  assert.equal(win.G.mgmt.lastEvent.fights[0].winner,'B');
+});
+
+test('T8a accueil — aucune attente sans places libres ni affaires ouvertes',()=>{
+  const win=newGameWindow({runMain:true});enterMgmt(win,11);
+  poseMainCard(win);win.G.mgmt.pile=[];
+  assert.equal(win.titleMgmtUpcoming(win.G.mgmt).length,0);
+  assert.ok(!win.scr_title().includes('title-upcoming'));
+});
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MGMT_LOT1G] — Lot 1g : auto-cycle, bouton discret, mémoire
    Leïla. Réécrit au lot 3a (§5, décisions du 10/09/2026) : « pile vide » ne
    vaut plus « cycle suivant ». Carte complète : la soirée s'ouvre d'abord.

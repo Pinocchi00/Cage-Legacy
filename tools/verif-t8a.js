@@ -9,8 +9,70 @@ const {pathToFileURL}=require('node:url');
 const root=path.resolve(__dirname,'..');
 const output=path.join(root,'tools','reports','lot-4-fidelite');
 const url=file=>pathToFileURL(path.join(root,file)).href;
+const phase=process.argv[2]||'da';
+
+async function pair(page,context,label,mock){
+  await page.evaluate(()=>document.fonts.ready);
+  const game=await page.screenshot({path:path.join(output,`${label}-jeu-1920.png`)});
+  const sample=await context.newPage();
+  await sample.goto(url(mock),{waitUntil:'load'});
+  // Les maquettes utilisent Google ; la référence charge les mêmes fontes
+  // locales que le jeu, y compris sans réseau, sans modifier ses textes.
+  const faces=[500,600,700,800].map(w=>`@font-face{font-family:'Saira Condensed';src:url('${url(`fonts/condensed-${w}-latin.woff2`)}');font-weight:${w}}`).join('');
+  await sample.addStyleTag({content:`@font-face{font-family:'Saira';src:url('${url('fonts/saira-latin.woff2')}');font-weight:300 600}${faces}`});
+  await sample.evaluate(()=>document.fonts.ready);
+  const reference=await sample.screenshot({path:path.join(output,`${label}-maquette-1920.png`)});
+  await sample.close();
+  const compare=await context.newPage();
+  await compare.setViewportSize({width:3840,height:1080});
+  await compare.setContent(`<html><body style="margin:0;display:flex"><img width="1920" height="1080" src="data:image/png;base64,${game.toString('base64')}"><img width="1920" height="1080" src="data:image/png;base64,${reference.toString('base64')}"></body></html>`);
+  await compare.screenshot({path:path.join(output,`${label}-comparaison-1920.png`)});
+  await compare.close();
+}
+
+async function accueil(page,context,errors){
+  const reports=[];
+  if(await page.locator('.title-aside').count()) throw Error('Partie neuve : reprise fictive');
+  reports.push(await audit(page,'accueil sans partie'));
+  await page.getByRole('button',{name:/^Management/}).click();
+  await page.evaluate(()=>{
+    const m=G.mgmt;
+    for(const a of m.roster){
+      const b=m.roster.find(b=>b.id!==a.id&&b.div===a.div&&mgmtAvailable(m,b)&&!mgmtEngaged(m,b));
+      if(b) mgmtBookMain(m,a.id,b.id);
+      if(m.card.main.length===m.card.sizeMain) break;
+    }
+    m.pile=[];m.open=null;
+    mgmtClosePile(m);
+    const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
+    if(!bulk||!mgmtDecide(m,bulk.id,'validate')||!mgmtRunEvent(m)) throw Error('Préparer une vraie soirée');
+    MGMT_SOIREE.index=m.lastEvent.fights.length;
+    CL.mgmtSoireeNext();
+    if(G.screen==='mgmt_lendemain') CL.mgmtLendemainNext();
+    CL.mgmtLeave();
+  });
+  for(const width of [1920,1440,1280]){
+    await page.setViewportSize({width,height:1080});
+    reports.push(await audit(page,`accueil ${width}`));
+    if(width===1920) await pair(page,context,'t8a-accueil','maquettes/01-accueil.html');
+  }
+  await page.setViewportSize({width:1920,height:1080});
+  await page.locator('.title-event summary').click();
+  if(await page.locator('.title-event li:visible').count()!==await page.evaluate(()=>G.mgmt.lastEvent.fights.length)) throw Error('Tous les résultats doivent être accessibles');
+  await page.locator('.title-event summary').click();
+  // Une activation native au clavier et une reprise persistée après rechargement.
+  await page.locator('.title-mode').nth(1).focus();await page.keyboard.press('Enter');
+  if(await page.evaluate(()=>G.screen)!=='intro') throw Error('Entrée carrière au clavier');
+  await page.evaluate(()=>CL.go('title'));
+  await page.reload({waitUntil:'load'});
+  await page.locator('.title-resume').click();
+  if(await page.evaluate(()=>G.screen)!=='mgmt_bureau') throw Error('Reprise management à froid');
+  if(errors.length) throw Error(errors.join('\n'));
+  fs.writeFileSync(path.join(output,'t8a-accueil-audit.json'),JSON.stringify({reports,consoleErrors:errors,mouseAndKeyboard:true,coldResume:true},null,2)+'\n');
+}
 
 async function audit(page,label){
+  await page.mouse.move(0,0);
   await page.evaluate(()=>document.fonts.ready);
   await page.waitForTimeout(450);
   // Chromium finalise aussi les métriques des contrôles natifs à la capture.
@@ -19,6 +81,7 @@ async function audit(page,label){
     const result=[];
     for(const el of document.querySelectorAll('#app *')){
       if(el.closest('[disabled],.locked,.ach.lk,.ach.prog')) continue;
+      if(el.closest('details:not([open])')&&!el.closest('summary')) continue;
       const cs=getComputedStyle(el);
       let opacity=1;
       for(let p=el;p;p=p.parentElement) opacity*=Number(getComputedStyle(p).opacity);
@@ -79,6 +142,7 @@ async function main(){
     const page=await context.newPage(),errors=[],reports=[];
     page.on('pageerror',e=>errors.push(e.message));
     await page.goto(url('index.html'),{waitUntil:'load'});
+    if(phase==='accueil'){await accueil(page,context,errors);return;}
     await page.evaluate(()=>{setSeed(11);CL.newCareer();});
     reports.push(await audit(page,'création'));
     await page.evaluate(()=>{G.draft.first='Anthony';CL.create();});

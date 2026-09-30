@@ -1,0 +1,39 @@
+{
+  "reports": [
+    {
+      "label": "accueil sans partie",
+      "texts": 12,
+      "minimumContrast": 6.21,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "accueil 1920",
+      "texts": 23,
+      "minimumContrast": 6.09,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "accueil 1440",
+      "texts": 25,
+      "minimumContrast": 6.12,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "accueil 1280",
+      "texts": 28,
+      "minimumContrast": 5.91,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    }
+  ],
+  "consoleErrors": [],
+  "mouseAndKeyboard": true,
+  "coldResume": true
+}
