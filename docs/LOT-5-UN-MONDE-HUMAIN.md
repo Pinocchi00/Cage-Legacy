@@ -337,6 +337,19 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
 
 ---
 
+## 9 bis. Relectures
+
+- **H1 — acceptée** (`aa76b0e`, GLM, relue le 30/09) : `mgmt-humanite-data.js`,
+  données pures chargées après `mgmt-data.js`. **Comparée table par table au
+  catalogue par un script** : 233 villes dans 30 pays, 30 lignes de style à
+  100, 38 décalages de ville, 14 villes-écoles, 210 surnoms, 156 métiers,
+  22 milieux, 109 moments de vie (libellés et poids identiques), 50 rituels,
+  12 rôles, 15 trajectoires — **aucun écart, rien d'inventé**. Chaque texte
+  porte `relu:false`, ni les villes ni les poids. Deux retouches à
+  l'intégration : `test:watch` ne portait ni le nouveau test ni celui de la T4
+  (resynchronisé sur `test`), et le catalogue annonçait « 120 » moments pour
+  109 lignes (corrigé). Intégration : 413 tests, 409 passants, 0 échec.
+
 ## 10. Terminé pour le lot
 
 1. Chaque combattant a un pays, une ville, un surnom, un passé, une voix, des
