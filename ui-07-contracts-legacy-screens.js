@@ -193,7 +193,7 @@ function scr_promo(){
        <div class="mono small gold mt">${contractPayLine(previewFast)}</div>
        <div class="mono small muted">Contrat de ${previewFast.fightsLeft} combats</div>
        ${offer.phrase3?`<p class="muted small mt" style="font-style:italic">${offer.phrase3}</p>`:''}
-       <button class="btn mt" style="background:var(--gold-d);color:#fff;border-color:var(--gold-d);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">Signer avec ${offer.orgFlavor3}</button>
+       <button class="btn mt" style="background:var(--gold-d);color:var(--mgmt-dark-ink);border-color:var(--gold-d);font-weight:bold;position:relative;z-index:2" onclick="CL.acceptPro(${offer.fastTier||3},'${offer.orgFlavor3}')">Signer avec ${offer.orgFlavor3}</button>
      </div>`; })():''}
      ${!offer.forced?`<button class="btn ghost mt" onclick="CL.declinePro()">Faire une saison de plus en amateur</button>`:''}
      </div>`;

@@ -1,0 +1,43 @@
+{
+  "reports": [
+    {
+      "label": "accueil sans partie",
+      "appClass": null,
+      "texts": 12,
+      "minimumContrast": 6.18,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "accueil 1920",
+      "appClass": "",
+      "texts": 23,
+      "minimumContrast": 6.09,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "accueil 1440",
+      "appClass": "",
+      "texts": 25,
+      "minimumContrast": 6.12,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "accueil 1280",
+      "appClass": "",
+      "texts": 28,
+      "minimumContrast": 5.89,
+      "minimumSize": 17,
+      "overflow": false,
+      "failures": []
+    }
+  ],
+  "consoleErrors": [],
+  "mouseAndKeyboard": true,
+  "coldResume": true
+}

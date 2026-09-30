@@ -33,57 +33,87 @@ function escJsAttr(s){ return esc((''+s).replace(/\\/g,'\\\\').replace(/'/g,"\\'
 function nextObjectiveBlock(){
   return "";
 }
-/* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — accueil d'origine restauré tel
-   quel (la refonte par durée/hiérarchie n'a pas convenu). Seul correctif
-   conservé : les notifications de partie sont consommées ici SANS être
+/* ==== [ANCRE: TITRE_SANS_NOTIFICATIONS] — T8a porte l'accueil 01 en
+   conservant ce correctif : les notifications de partie sont consommées SANS être
    affichées — elles concernent l'écran d'où vient l'action, pas l'accueil —
    et seule l'erreur de lien de légende partagé, posée au démarrage par
    main.js dans G.bootMsg, reste visible. ==== */
 function scr_title(){
-  return `<div class="scr" style="display:flex;flex-direction:column;justify-content:center;min-height:80vh">
-   <div style="text-align:center;margin-bottom:48px">
-     <h1 class="disp" style="font-size:64px;line-height:.9;margin:0;letter-spacing:-.05em;color:var(--text)">CAGE<br>LEGACY</h1>
-     <!-- ==== [ANCRE: V3_TITRE_PROMESSE] — Plan V3 LOT 1 §P22 : "SIMULATEUR
-          DE MANAGEMENT & ARCHIVES" énumérait des fonctionnalités (gérer,
-          archiver) au lieu de dire ce que le joueur va RESSENTIR (Loi 6,
-          test de substitution du §1.3 — cette phrase serait vraie de
-          n'importe quel jeu de gestion, pas seulement de celui-ci). ==== -->
-     <div class="mono muted" style="margin-top:16px;font-size:14px;letter-spacing:.2em;border-top:2px solid var(--line);border-bottom:2px solid var(--line);padding:8px 0">BÂTISSEZ UN NOM QUE PERSONNE N’OUBLIERA</div>
-   </div>
-   ${(()=>{ G.lastMsg=null;
-      if(!G.bootMsg) return '';
-      const m=G.bootMsg; G.bootMsg=null;
-      return `<div class="card glass" style="border-left:3px solid var(--loss);background:var(--panel2);padding:12px 14px;margin-bottom:16px"><span class="small">${esc(m)}</span></div>`;
-    })()}
-   <!-- ==== [CORRECTIF V2-43] — "une seule porte d'entrée par mode" : les
-        deux boutons (lancer une nouvelle partie / reprendre celle en
-        cours, ce dernier conditionnel à hasSave) convergent maintenant
-        sur un unique écran d'accueil Faith (scr_faith_home, ui-04), qui
-        porte lui-même les deux actions — plus fidèle au traitement déjà
-        réservé au mode carrière complète juste en dessous (un seul
-        bouton "2. CARRIÈRE COMPLÈTE" → scr_intro, qui gère sa propre
-        reprise). ==== -->
-   <!-- ==== [ANCRE: V3_MODES_PROMESSE] — Plan V3 LOT 1 §P22 : les trois
-        descriptions énuméraient des fonctionnalités ("gérez l'argent, les
-        camps...") au lieu de promettre une expérience ; celle de Faith
-        citait même un jeu concurrent ("Destiny-like", jargon qui suppose
-        que le joueur le connaît, contraire à la Loi 6). Chacune tient en
-        moins de 12 mots. ==== -->
-    <button class="btn primary" style="font-size:20px;padding:24px" onclick="CL.go('intro')">CARRIÈRE COMPLÈTE
-      <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Montez les échelons, un combat à la fois</span></button>
-    <!-- ==== [ANCRE: MGMT_LOT1_ENTREE] — Lot 1 mode management : entrée du
-         bureau depuis l'écran titre (Split, matchmaker). ==== -->
-    <button class="btn" style="font-size:20px;padding:24px" onclick="CL.mgmtEnter()">MODE MANAGEMENT
-      <span class="mono muted" style="display:block;font-size:12px;margin-top:8px">Split — le bureau du matchmaker</span></button>
-    <!-- ==== [FIN ANCRE] ==== -->
-    <div class="hr" style="margin:24px 0"></div>
-    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('ach')">VOIR LES SUCCÈS
-      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Suivez votre progression sur tous les succès à débloquer</span></button>
-    <button class="btn ghost" style="font-size:16px;padding:16px;margin-top:8px" onclick="CL.go('hof')">VOIR LE PANTHÉON
-      <span class="mono muted" style="display:block;font-size:11px;margin-top:6px">Toutes les légendes retraitées</span></button>
-    </div>`;
+  /* ==== [ANCRE: LOT4_T8A_ACCUEIL_01] — T8a, maquette 01 : quatre entrées,
+     reprise management et faits réels. Lecture validée, sans charger une
+     partie dans G et sans stocker les textes dérivés. ==== */
+  const m=titleMgmtState(), upcoming=titleMgmtUpcoming(m);
+  const management=m?`Split ${m.cycle} · ${mgmtCardLabel(m)}`:'Split — matchmaker';
+  G.lastMsg=null;
+  const boot=G.bootMsg;G.bootMsg=null;
+  return `<div class="scr title-screen"><div class="title-grid${m?'':' title-no-save'}">
+    <main class="title-main">
+      <!-- ==== [ANCRE: V3_TITRE_PROMESSE] — T8a : hiérarchie du titre portée
+           de 01 ; la promesse d'origine n'est plus un bandeau. ==== -->
+      <div><div class="title-brand"><span class="title-oct" aria-hidden="true"></span><span>${esc(MGMT_ORG)} MMA</span></div>
+        <h1>CAGE<br>LEGACY</h1></div>
+      ${boot?`<p class="title-message" role="alert">${esc(boot)}</p>`:''}
+      <!-- ==== [ANCRE: V3_MODES_PROMESSE] — T8a : descriptions existantes,
+           aucune phrase d'exemple de la maquette. ==== -->
+      <nav class="title-modes" aria-label="Modes de jeu">
+        <!-- ==== [ANCRE: MGMT_LOT1_ENTREE] — même entrée validée. ==== -->
+        <button class="title-mode title-management" onclick="CL.mgmtEnter()"><strong>Management</strong><span>${esc(management)}</span></button>
+        <button class="title-mode" onclick="CL.go('intro')"><strong>Carrière</strong><span>Montez les échelons, un combat à la fois</span></button>
+        <button class="title-mode" onclick="CL.duelEnter()"><strong>Duel entre amis</strong><span>Affronte deux légendes de ton Panthéon</span></button>
+        <button class="title-mode" onclick="CL.go('hof')"><strong>Panthéon</strong><span>Toutes les légendes retraitées</span></button>
+      </nav>
+      <nav class="title-utils" aria-label="Archives"><button onclick="CL.go('ach')">Succès</button></nav>
+    </main>
+    ${m?`<aside class="title-aside" aria-label="Partie management">
+      ${titleMgmtLastEvent(m)}
+      ${upcoming.length?`<section class="title-upcoming"><h2>Ce qui t'attend</h2><p>${upcoming.map(esc).join('<br>')}</p></section>`:''}
+      <button class="title-resume" onclick="CL.mgmtEnter()"><span>Reprendre</span></button>
+    </aside>`:''}
+  </div></div>`;
 }
 
+function titleMgmtState(){
+  if(G&&G.mgmt&&validateMgmt(G.mgmt)) return G.mgmt;
+  try{
+    for(const key of [MGMT_KEY,MGMT_BACKUP_KEY]){
+      const m=mgmtParseAndValidate(localStorage.getItem(key));
+      if(m) return m;
+    }
+  }catch(e){}
+  return null;
+}
+
+function titleMgmtUpcoming(m){
+  if(!m) return [];
+  const facts=[];
+  if(m.card){
+    const free=Math.max(0,m.card.sizeMain-m.card.main.length);
+    if(free) facts.push(`${free} place${free===1?'':'s'} libre${free===1?'':'s'} en carte principale de Split ${m.cycle}.`);
+  }
+  const open=mgmtOpenCount(m);
+  if(open) facts.push(mgmtOpenLabel(open)+'.');
+  return facts;
+}
+
+function titleMgmtLastEvent(m){
+  const e=m&&m.lastEvent;
+  if(!e||!e.fights.length) return '';
+  const rows=e.fights.map(x=>{
+    const trace=(m.hist||[]).find(t=>t.c===e.cycle&&t.a.id===x.a&&t.b.id===x.b);
+    const a=trace?trace.a:mgmtFighterById(m,x.a),b=trace?trace.b:mgmtFighterById(m,x.b);
+    if(!a||!b) return '';
+    const result=x.winner==='D'?`${a.name} contre ${b.name} : nul`
+      :`${x.winner==='A'?a.name:b.name} bat ${x.winner==='A'?b.name:a.name}`;
+    const method=MGMT_FAMILY_LABELS[x.family]||'';
+    return `<li>${esc(result)} · ${esc(method)} · round ${esc(x.round)}</li>`;
+  }).filter(Boolean);
+  if(!rows.length) return '';
+  return `<section class="title-last"><h2>La dernière soirée</h2><div class="title-event">
+    <h3>Split ${esc(e.cycle)}</h3><ul>${rows.slice(0,3).join('')}</ul>
+    ${rows.length>3?`<details><summary>Tous les résultats (${rows.length})</summary><ul>${rows.slice(3).join('')}</ul></details>`:''}
+  </div></section>`;
+}
+/* ==== [FIN ANCRE] ==== */
 
 function scr_intro(){ const c=hasSave('career');
   return `<div class="scr center intro">
@@ -119,11 +149,11 @@ function scr_pro_nickname(){
     <div class="card" style="text-align:left;background:var(--panel2);border:1px solid var(--line);padding:16px;margin:20px 0">
       <div class="fld" style="margin-bottom:12px">
         <label class="eyebrow" style="display:block;margin-bottom:6px">Ton Surnom</label>
-        <input id="pro-nick-input" type="text" maxlength="25" value="${esc(G._proNickDraft||'')}" style="width:100%;box-sizing:border-box;background:#14100B;border:1px solid var(--line);color:#FFF;padding:12px;font-family:'Fraunces',serif;font-style:italic;font-size:16px" oninput="G._proNickDraft=this.value"/>
+        <input id="pro-nick-input" type="text" maxlength="25" value="${esc(G._proNickDraft||'')}" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:12px;font-family:var(--mgmt-font-body);font-style:italic;font-size:16px" oninput="G._proNickDraft=this.value"/>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span class="eyebrow" style="font-size:10px">Idées :</span>
-        <button class="tag2" style="background:#241B10;border-color:var(--gold);color:var(--gold);cursor:pointer;padding:6px 12px" onclick="G._proNickDraft=rollRandomNickname();render();">🎲 Aléatoire</button>
+        <button class="tag2" style="background:var(--bg);border-color:var(--gold);color:var(--gold);cursor:pointer;padding:6px 12px" onclick="G._proNickDraft=rollRandomNickname();render();">🎲 Aléatoire</button>
       </div>
       <div class="tagrow" style="margin:0">
         ${uniqueSugg.map(s=>`<button class="tag2" style="cursor:pointer" onclick="G._proNickDraft='${escJsAttr(s)}';render();">« ${esc(s)} »</button>`).join('')}
@@ -457,7 +487,12 @@ function fightLog(res){ if(!res.log||!res.log.length)return '<span class="muted 
   return `<div class="fight-log" style="max-height:220px;overflow-y:auto;padding-right:5px">${rows.join('')}</div>`; }
 /* ==== [FIN ANCRE] ==== */
 function scr_hof(){
+  /* ==== [ANCRE: LOT4_T8A_PANTHEON_09] — maquette 09 : en-tête chiffré,
+     cartes et colonne 460px. Seuls les faits déjà archivés sont rendus.
+     legendPoints est lu dans les méta-statistiques, jamais assimilé au
+     score de tri d'une légende ; aucune dépense n'existe dans le jeu. ==== */
   const fullList=loadHOF();
+  const meta=loadMetaStats();
   const filt=G.hofFilter||{};
   const list=(typeof filterHallOfFame==='function')?filterHallOfFame(filt):fullList;
   const styles=Object.values(STYLES).map(s=>s.label);
@@ -466,63 +501,62 @@ function scr_hof(){
   const modeLabels={career:'Carrière Complète'};
   const showFilters=!!G.showHofFilters;
   const backDest=(G.f && !G.f.retired)?'hub':'title';
-  return `<div class="scr"><div class="bar"><span class="eyebrow">Panthéon · ${list.length}/${fullList.length} légende(s)</span><span class="eyebrow x" onclick="CL.go('${backDest}')">✕</span></div>
-   <h2 class="disp">Tes anciens combattants</h2>
-   <button class="btn ghost mb" style="border:1px solid var(--line);width:auto;padding:8px 16px" onclick="CL.toggleHofFilters()">Filtres ${showFilters?'−':'+'}</button>
+  return `<div class="scr hof-screen"><header class="hof-header">
+   <div class="hof-heading"><button class="hof-home" onclick="CL.go('${backDest}')" aria-label="Retour au ${backDest==='hub'?'vestiaire':'menu principal'}"><span aria-hidden="true"></span></button><h1>Panthéon</h1></div>
+   <div class="hof-totals"><div><strong>${esc(meta.legendPoints.toLocaleString('fr-FR'))}</strong><span>Points de légende</span></div><div><strong>${esc(meta.careersCompleted.toLocaleString('fr-FR'))}</strong><span>Carrières terminées</span></div></div>
+   </header><div class="hof-columns"><aside class="hof-aside">
    <!-- ==== [ANCRE: DUEL_ENTREE_PANTHEON] — LOT DUEL-03 : le Duel entre amis
         entre désormais par le Panthéon (le LOT DUEL-02, qui l'avait déplacé
         vers scr_intro(), est annulé) — c'est ici, et nulle part ailleurs,
         que se choisissent les deux légendes du duel. ==== -->
-   <button class="btn" style="min-height:44px" onclick="CL.duelEnter()">Duel entre amis
-     <span class="mono" style="display:block;font-size:12px;margin-top:8px;opacity:.8">Affronte deux légendes de ton Panthéon</span></button>
-   ${showFilters?`<div style="background:var(--panel2);padding:12px;border:1px solid var(--line);margin-bottom:16px">
-   ${modes.length>1?`<div class="eyebrow mb">Mode</div><div class="tagrow mb"><span class="tag2 ${!filt.gameMode?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','')">Tous</span>${modes.map(m=>`<span class="tag2 ${filt.gameMode===m?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('gameMode','${m}')">${modeLabels[m]||m}</span>`).join('')}</div>`:''}
-   ${styles.length>1?`<div class="eyebrow mb mt">Styles</div><div class="tagrow mb"><span class="tag2 ${!filt.style?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','')">Tous</span>${styles.map(s=>`<span class="tag2 ${filt.style===s?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('style','${escJsAttr(s)}')">${esc(s)}</span>`).join('')}</div>`:''}
-   ${divisions.length>1?`<div class="eyebrow mb mt">Divisions</div><div class="tagrow mb"><span class="tag2 ${!filt.divName?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','')">Toutes</span>${divisions.map(d=>`<span class="tag2 ${filt.divName===d?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('divName','${escJsAttr(d)}')">${esc(d)}</span>`).join('')}</div>`:''}
-   <div class="eyebrow mb mt">Défenses</div><div class="tagrow mb"><span class="tag2 ${!filt.minDefenses?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',0)">Toutes</span><span class="tag2 ${filt.minDefenses>=2?'hot':''}" style="cursor:pointer" onclick="CL.filterHof('minDefenses',2)">2+ défenses</span></div>
+   <button class="hof-action" onclick="CL.duelEnter()"><strong>Duel entre amis</strong><span>Affronte deux légendes de ton Panthéon</span></button>
+   <button class="hof-action" onclick="CL.go('codex')"><strong>Codex des compétences</strong></button>
+   <button class="hof-action" onclick="CL.toggleHofFilters()" aria-expanded="${showFilters}"><strong>Filtres ${showFilters?'−':'+'}</strong><span>${esc(list.length)} / ${esc(fullList.length)} légendes</span></button>
+   ${showFilters?`<div class="hof-filters">
+   ${modes.length>1?`<div class="eyebrow mb">Mode</div><div class="tagrow mb"><button class="tag2 ${!filt.gameMode?'hot':''}" onclick="CL.filterHof('gameMode','')">Tous</button>${modes.map(m=>`<button class="tag2 ${filt.gameMode===m?'hot':''}" onclick="CL.filterHof('gameMode','${escJsAttr(m)}')">${esc(modeLabels[m]||m)}</button>`).join('')}</div>`:''}
+   ${styles.length>1?`<div class="eyebrow mb mt">Styles</div><div class="tagrow mb"><button class="tag2 ${!filt.style?'hot':''}" onclick="CL.filterHof('style','')">Tous</button>${styles.map(s=>`<button class="tag2 ${filt.style===s?'hot':''}" onclick="CL.filterHof('style','${escJsAttr(s)}')">${esc(s)}</button>`).join('')}</div>`:''}
+   ${divisions.length>1?`<div class="eyebrow mb mt">Divisions</div><div class="tagrow mb"><button class="tag2 ${!filt.divName?'hot':''}" onclick="CL.filterHof('divName','')">Toutes</button>${divisions.map(d=>`<button class="tag2 ${filt.divName===d?'hot':''}" onclick="CL.filterHof('divName','${escJsAttr(d)}')">${esc(d)}</button>`).join('')}</div>`:''}
+   <div class="eyebrow mb mt">Défenses</div><div class="tagrow mb"><button class="tag2 ${!filt.minDefenses?'hot':''}" onclick="CL.filterHof('minDefenses',0)">Toutes</button><button class="tag2 ${filt.minDefenses>=2?'hot':''}" onclick="CL.filterHof('minDefenses',2)">2+ défenses</button></div>
    </div>`:''}
-   ${G.exportedCode?`<div class="card glass mb" style="background:var(--panel2);padding:12px;border-left:3px solid var(--gold)">
-     <div class="eyebrow mb" style="color:var(--gold)">Lien de ${esc(G.exportedName||'')} — envoie-le à ton ami</div>
-     ${G.exportedLink?`<input readonly value="${esc(G.exportedLink)}" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px" onclick="this.select()">
-     <button class="btn primary mt" style="width:auto;padding:6px 14px" onclick="CL.copyExportedLink()">Copier le lien</button>`:''}
-     <details class="mt"><summary class="muted small" style="cursor:pointer">Le lien ne marche pas ? Utiliser le code à la place</summary>
-       <textarea readonly style="width:100%;min-height:70px;background:var(--bg);color:var(--text);border:1px solid var(--line);padding:8px;font-family:'JetBrains Mono';font-size:11px;resize:none;margin-top:8px" onclick="this.select()">${G.exportedCode}</textarea>
-     </details>
-     <button class="btn ghost mt" style="width:auto;padding:6px 12px" onclick="CL.clearExportedCode()">Fermer</button>
-   </div>`:''}
-   <div class="leg-grid">${(()=>{
-     /* ==== [ANCRE: GOAT_PANTHEON] — item demandé : la liste est déjà triée
-        par f.score (posé à l'intronisation, state.js) mais ce classement
-        restait invisible — juste une position, jamais présenté comme un
-        mérite. Recalculé sur 'list' (donc valable sous filtre actif), pas
-        sur l'ordre de tri brut (les favoris passent en tête indépendamment
-        du score). ==== */
-     const topScore=list.length?Math.max(...list.map(x=>x.score||0)):0;
-     return list.length?list.map((f,i)=>{
-      const isGoat=topScore>0 && f.score===topScore;
+   ${hofExportHtml()}
+   <button class="hof-return" onclick="CL.go('${backDest}')">← Revenir au ${backDest==='hub'?'vestiaire':'menu principal'}</button>
+   </aside><section class="hof-main"><h2>Les légendes</h2><div class="leg-grid">${(()=>{
+     /* ==== [ANCRE: GOAT_PANTHEON] — T8a : le tri par f.score reste celui
+        de l'archive ; l'écran montre les faits et le favori, pas une note
+        ni un indicateur de mérite ajouté à la carte de la maquette 09. ==== */
+     /* T8a : le score conserve le tri existant, pas de barème affiché.
+        L'accent de carte signale le favori réellement choisi par le joueur. */
+     return list.length?list.map(f=>{
       const decorations=f.decorations||[];
       const deco=legendDecoStyle(decorations);
-      const tc=legendTierColor(f.rank);
-      return `<div class="leg-tcard ${isGoat?'goat':''}" style="--tc:${tc};${deco.borderCss}" onclick="CL.viewLegend('${f.id}')">
-      <div class="tier-corner"></div>
-      ${deco.holoCss?`<div class="holo" style="${deco.holoCss}"></div>`:''}
-      <div class="tier-lbl">${isGoat?'👑 ':''}${f.rank}</div>
-      <div class="nm" style="${deco.nameCss}">${f.favorite?'★ ':''}${esc(f.name)}</div>
-      <div class="muted small" style="position:relative;z-index:1">${f.style} · ${f.divName}</div>
-      <div class="rec" style="${deco.recordCss}">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></div>
+      return `<article class="leg-tcard hof-card${f.favorite?' hof-favorite':''}" style="${deco.borderCss}">
+      ${deco.holoCss?'<div class="hof-holo" aria-hidden="true"></div>':''}
+      <button class="hof-card-open" onclick="CL.viewLegend('${escJsAttr(f.id)}')">
+        <span class="nm" style="${deco.nameCss}">${f.favorite?'★ ':''}${esc(f.name)}</span>
+        <span class="hof-card-meta">${esc(f.divName)} · retraite à ${esc(f.age)} ans · ${esc(f.W)}-${esc(f.L)} · ${esc(f.ko+f.sub)} finitions</span>
+        <span class="hof-card-facts">${esc(f.style)} · ${esc(f.ko)} KO / ${esc(f.sub)} SUB${f.titles?` · ${esc(f.titles)} titre${f.titles===1?'':'s'}`:''}${f.defenses?` · ${esc(f.defenses)} défense${f.defenses===1?'':'s'}`:''}</span>
+        ${(f.epithets||[]).length?`<span class="hof-card-description">${f.epithets.map(esc).join(' · ')}</span>`:''}
+        <span class="hof-card-rank">${esc(f.rank)}</span>
+      </button>
       ${deco.stickers.length?`<div class="stickers">${deco.stickers.map(s=>`<span>${s}</span>`).join('')}</div>`:''}
-      <div style="display:flex;gap:6px;margin-top:9px;position:relative;z-index:1" onclick="event.stopPropagation()">
-        <button class="btn ghost" style="padding:4px 7px;width:auto;font-size:11px;color:${f.favorite?'var(--gold)':'var(--muted)'}" onclick="CL.toggleHofFav('${f.id}')" title="Favori">${f.favorite?'★':'☆'}</button>
-        <button class="btn ghost" style="padding:4px 7px;width:auto;font-size:11px" onclick="CL.exportLegend('${f.id}')" title="Exporter">🔗</button>
-        <button class="btn ghost" style="padding:4px 7px;width:auto;font-size:11px;color:var(--loss)" onclick="CL.deleteHof('${f.id}')" title="Supprimer">🗑</button>
-      </div></div>`;
+      <div class="hof-card-actions">
+        <button onclick="CL.toggleHofFav('${escJsAttr(f.id)}')" aria-pressed="${!!f.favorite}">${f.favorite?'★':'☆'} Favori</button>
+        <button onclick="CL.exportLegend('${escJsAttr(f.id)}')">Partager</button>
+        <button onclick="CL.deleteHof('${escJsAttr(f.id)}')">Supprimer</button>
+      </div></article>`;
     }).join(''):
-      '<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>';
-   })()}</div>
-   <div class="tagrow mb">
-     <button class="btn ghost" style="width:auto;padding:8px 12px" onclick="CL.go('codex')">Codex des compétences</button>
-   </div>
-   <button class="btn ghost" onclick="CL.go('${backDest}')">← Revenir au ${backDest==='hub'?'vestiaire':'menu principal'}</button></div>`; }
+      (fullList.length?'<p class="lede">Aucune légende ne correspond aux filtres.</p>':'<p class="lede">Aucune légende encore. Ta première carrière retraitée apparaîtra ici pour toujours.</p>');
+   })()}</div></section></div></div>`; }
+
+/* Même panneau de partage existant sur la liste et sur sa fiche : le
+   contrôleur produit le lien/code, ce helper ne fait que les afficher. */
+function hofExportHtml(){
+  if(!G.exportedCode) return '';
+  return `<section class="hof-export"><h2>Lien de ${esc(G.exportedName||'')} — envoie-le à ton ami</h2>
+    ${G.exportedLink?`<input readonly value="${esc(G.exportedLink)}" onclick="this.select()" aria-label="Lien de partage"><button class="btn primary" onclick="CL.copyExportedLink()">Copier le lien</button>`:''}
+    <details><summary>Le lien ne marche pas ? Utiliser le code à la place</summary><textarea readonly onclick="this.select()" aria-label="Code de la légende">${esc(G.exportedCode)}</textarea></details>
+    <button class="hof-return" onclick="CL.clearExportedCode()">Fermer</button></section>`;
+}
 // ==== [ANCRE: ECRAN_DETAIL_LEGENDE] (rendu) — bug bloquant corrigé : le
 // routeur (ui-08-controller-arena.js) référence scr_legend_detail comme
 // gestionnaire de l'écran 'legend_detail' (déclenché par CL.viewLegend()),
@@ -533,32 +567,31 @@ function scr_hof(){
 function scr_legend_detail(){
   const list=loadHOF(); const f=list.find(x=>String(x.id)===String(G.viewingLegendId));
   if(!f) return `<div class="scr center"><p class="lede">Légende introuvable.</p><button class="btn ghost mt" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
-  /* ==== [ANCRE: ALBUM_LEGEND_STYLE] — la fiche complète devient la version
-     grand format de la même carte que dans la grille (scr_hof) : coin de
-     palier identique (legendTierColor), décorations rendues par la MÊME
+  /* ==== [ANCRE: ALBUM_LEGEND_STYLE] — T8a : la fiche est la version
+     grand format de la carte de 09 ; décorations lues par la MÊME
      fonction partagée (legendDecoStyle) plutôt que par une logique
      dupliquée et différente de celle de la liste. Ouvrir une légende, c'est
      visuellement "sortir sa carte du classeur", pas changer d'écran. ==== */
   const decorations=f.decorations||[];
   const deco=legendDecoStyle(decorations);
-  const tc=legendTierColor(f.rank);
   /* ==== [ANCRE: CORRECTIF_COSMETIQUES_EXCLUSIFS_INVISIBLES] — voir ancre
      jumelle dans state.js : excl_mask_oni/excl_gloves_relic figurent
      désormais directement dans LEGEND_UNLOCKABLES (l'offre du jour a été
      retirée), donc ce panneau les voit sans traitement particulier. ==== */
-  const decorationPanel = '';
-  return `<div class="scr"><div class="bar"><span class="eyebrow">${f.ico} ${f.rank}</span><span class="eyebrow x" onclick="CL.go('hof')">✕</span></div>
+  /* ==== [ANCRE: LOT4_T8A_FICHE_LEGENDE] — même cadre que 09, faits de
+     l'archive et actions existantes ; aucun portrait ni description nouvelle. ==== */
+  return `<div class="scr hof-screen hof-detail"><header class="hof-header"><div class="hof-heading"><button class="hof-home" onclick="CL.go('hof')" aria-label="Retour au Panthéon"><span aria-hidden="true"></span></button><h1>${esc(f.name)}</h1></div>
+    <div class="hof-totals"><div><strong>${esc(f.W)}-${esc(f.L)}</strong><span>Bilan pro</span></div><div><strong>${esc(f.ko+f.sub)}</strong><span>Finitions</span></div></div></header>
+    <div class="hof-columns"><section class="hof-main">
    ${G.lastMsg?(()=>{ const m=G.lastMsg; G.lastMsg=null; return `<div class="card mb glass" style="border-left:3px solid var(--gold);background:var(--panel2);padding:10px 14px"><span class="small">${esc(m)}</span></div>`; })():''}
    <div class="leg-hero-card" style="${deco.borderCss}">
-     <div class="tier-corner-lg"></div>
-     ${deco.holoCss?`<div class="holo" style="${deco.holoCss}"></div>`:''}
-     <div class="tier-lbl-lg">${f.ico} ${f.rank}</div>
+      ${deco.holoCss?'<div class="hof-holo" aria-hidden="true"></div>':''}
      <!-- ==== [ANCRE: CORRECTIF_SURNOMS_PARASITES] — Lot C01/2026 §C13a :
           f.classLabel/f.class31Label (libellés de classe interne, ex. "Le
           Mur Défensif") se lisaient comme des surnoms et entraient en
           conflit avec f.nick — retirés de cette ligne, qui se limite
           désormais à « nick » — style · division. ==== -->
-     <div class="hero-name" style="position:relative;z-index:1;${deco.nameCss}">${f.favorite?'★ ':''}${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.style} · ${f.divName}</em></div>
+      <div class="hof-legend-meta">${esc(f.flag||'')} ${f.nick?`« ${esc(f.nick)} » — `:''}${esc(f.style)} · ${esc(f.divName)}</div>
      <!-- ==== [ANCRE: CORRECTIF_ORIGINE_MANQUANTE] — Lot C01/2026 §C13b :
           f.origin existe depuis la génération (engine.js) mais n'était
           affiché nulle part sur la fiche — capturé dans l'entrée du
@@ -566,13 +599,9 @@ function scr_legend_detail(){
           ici, au-dessus de la motivation qu'il précède naturellement. ==== -->
      ${f.origin?`<div class="story" style="position:relative;z-index:1"><b>Venait de.</b> ${esc(f.origin)}</div>`:''}
      ${f.motivation?`<div class="story" style="position:relative;z-index:1"><b>Se battait pour.</b> ${esc(f.motivation)}.</div>`:''}
-     <div class="epis mt" style="position:relative;z-index:1">${(f.epithets||[]).map(e=>`<span class="epi">${e}</span>`).join('')}</div>
+      <div class="epis mt" style="position:relative;z-index:1">${(f.epithets||[]).map(e=>`<span class="epi">${esc(e)}</span>`).join('')}</div>
      ${deco.stickers.length?`<div class="stickers-lg mt">${deco.stickers.map(s=>`<span>${s}</span>`).join('')}</div>`:''}
-     <div class="stat-band" style="position:relative;z-index:1">
-       <div><span class="stat-big" style="font-size:26px;${deco.recordCss}">${f.W}<span class="muted">-</span><span class="loss">${f.L}</span></span><span class="stat-lbl">Bilan pro · retraite ${f.age} ans</span></div>
-       <div style="text-align:right"><span class="stat-big" style="font-size:26px">${f.ko+f.sub}<span class="muted small"> fin.</span></span><span class="stat-lbl">${f.ko} KO / ${f.sub} SUB</span></div>
-     </div>
-     ${f.amaRec?`<div class="mono small muted mt" style="position:relative;z-index:1">Amateur : ${f.amaRec.W}-${f.amaRec.L}</div>`:''}
+      ${f.amaRec?`<div class="hof-legend-meta">Amateur : ${esc(f.amaRec.W)}-${esc(f.amaRec.L)}</div>`:''}
    </div>
    ${(f.amaTitles&&f.amaTitles.length)?`<div class="tagrow mb">${f.amaTitles.map(id=>{const cfg=AMA_CHAMPIONSHIPS.find(c=>c.id===id); return cfg?`<span class="tag2 hot">${SVG.medal} ${cfg.label}</span>`:'';}).join('')}</div>`:''}
    <!-- ==== [ANCRE: CORRECTIF_CEINTURES_BADGES] — Lot C01/2026 §C13c :
@@ -581,9 +610,8 @@ function scr_legend_detail(){
         composant de badge désormais, un par ceinture, dans une tagrow
         homogène juste sous le badge amateur : "ORG (Division) — Année N". ==== -->
    ${(f.beltHistory&&f.beltHistory.length)?`<div class="tagrow mb">${f.beltHistory.map(b=>`<span class="tag2 hot">${SVG.medal} ${esc(b.orgName)} (${esc(b.divName)}) — Année ${b.year}</span>`).join('')}</div>`:''}
-   ${decorationPanel}
-   ${f.biggestRival?`<div class="card mb"><div class="eyebrow mb">⚔ Plus grand rival</div><div class="small" style="color:var(--blood)">${esc(f.biggestRival.name)} ${f.biggestRival.flag} — ${f.biggestRival.count} confrontations</div></div>`:''}
-   ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${h.oppFlag||''} <span class="mono" style="opacity:.7">(${h.oppRecord||'?'}) — ${h.method}</span></div>`).join('')}</div>`:''}
+   ${f.biggestRival?`<div class="card mb"><div class="eyebrow mb">⚔ Plus grand rival</div><div class="small" style="color:var(--blood)">${esc(f.biggestRival.name)} ${esc(f.biggestRival.flag||'')} — ${esc(f.biggestRival.count)} confrontations</div></div>`:''}
+   ${f.notableWins&&f.notableWins.length?`<div class="card mb"><div class="eyebrow mb">🏅 Adversaires notables battus</div>${f.notableWins.map(h=>`<div class="small muted" style="padding:4px 0">${esc(h.oppName)} ${esc(h.oppFlag||'')} <span class="mono">(${esc(h.oppRecord||'?')}) — ${esc(h.method)}</span></div>`).join('')}</div>`:''}
    ${f.nicknameHistory&&f.nicknameHistory.length?`<div class="card mb"><div class="eyebrow mb">Historique des surnoms</div>${f.nicknameHistory.map(n=>`<div class="small muted" style="padding:4px 0">« ${esc(n)} »</div>`).join('')}</div>`:''}
    ${f.signatureMove?`<div class="card mb" style="border-left:3px solid var(--gold-d)"><div class="eyebrow gold mb">${SVG.star} Mouvement Signature</div><b style="color:var(--gold)">${esc(f.signatureMove.customSuffix?`${f.signatureMove.name} ${f.signatureMove.customSuffix}`:f.signatureMove.name)}</b></div>`:''}
    <!-- ==== [ANCRE: PANTHEON_RECAP_SAISON] — item demandé (P5a) : seasonRecap
@@ -594,8 +622,13 @@ function scr_legend_detail(){
         Panthéon doit contenir tout ce que contenait l'écran de retraite. ==== -->
    ${retireSeasonRecapHtml(f)}
    ${f.earnedAchievements&&f.earnedAchievements.length?`<div class="card mb"><div class="eyebrow mb">Succès obtenus (${f.earnedAchievements.length}/${ACH.length})</div>${f.earnedAchievements.map(id=>{const a=ACH.find(x=>x.id===id); return a?`<div class="ach"><span class="ico" style="display:flex;align-items:center;color:var(--gold)">${a.ico}</span><span><b class="gold">${a.h}</b><div class="muted small">${a.d}</div></span></div>`:'';}).join('')}</div>`:''}
-   <button class="btn ghost mt" style="width:auto;padding:6px 12px;font-size:12px" onclick="CL.exportLegend('${f.id}')">Exporter (partager avec un ami)</button>
-   <button class="btn ghost" onclick="CL.go('hof')">Retour au Panthéon</button></div>`;
+   </section><aside class="hof-aside"><h2>${esc(f.rank)}</h2>
+    <p class="hof-legend-meta">Retraite à ${esc(f.age)} ans · ${esc(f.ko)} KO / ${esc(f.sub)} SUB<br>${esc(f.titles||0)} titre${f.titles===1?'':'s'} · ${esc(f.defenses||0)} défense${f.defenses===1?'':'s'}</p>
+    <button class="hof-action" onclick="CL.toggleHofFav('${escJsAttr(f.id)}')" aria-pressed="${!!f.favorite}"><strong>${f.favorite?'★':'☆'} Favori</strong></button>
+    <button class="hof-action" onclick="CL.exportLegend('${escJsAttr(f.id)}')"><strong>Exporter (partager avec un ami)</strong></button>
+    ${hofExportHtml()}
+    <button class="hof-return" onclick="CL.go('hof')">Retour au Panthéon</button>
+   </aside></div></div>`;
 }
 // ==== [ANCRE: SYSTEME_CLASSES] (rendu) — bug bloquant corrigé : même
 // symptôme que scr_legend_detail juste au-dessus. Le routeur référence
@@ -868,7 +901,7 @@ function scr_result(){ const p=G.pending,f=G.f,st=p.res.stats;
   return `<div class="scr">
    <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px;text-align:center">
      <div class="meta-strip" style="justify-content:center">${f.flag} ${esc(f.name)} vs ${p.opp.flag} ${esc(p.opp.name)}</div>
-     <div class="hero-name" style="color:${p.isFantasy||p.isVsFriend?(p.res.winner==='D'?'var(--gold)':(p.win?'var(--blood)':'#4DA6FF')):(p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)'))}">${(p.isFantasy||p.isVsFriend)?(p.res.winner==='D'?'ÉGALITÉ':`${esc(p.win?f.name:p.opp.name)} gagne par ${p.method}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${(p.isFantasy||p.isVsFriend)?'':p.method}${p.res.round?' · Round '+p.res.round:''}${(p.res.finishTimeStr && !isDecisionLike(p.method))?' · '+p.res.finishTimeStr:''}</em></div>
+     <div class="hero-name" style="color:${p.isFantasy||p.isVsFriend?(p.res.winner==='D'?'var(--gold)':(p.win?'var(--gold)':'var(--loss)')):(p.win?'var(--win)':(p.res.winner==='D'?'var(--gold)':'var(--loss)'))}">${(p.isFantasy||p.isVsFriend)?(p.res.winner==='D'?'ÉGALITÉ':`${esc(p.win?f.name:p.opp.name)} gagne par ${p.method}`):(p.win?'VICTOIRE':(p.res.winner==='D'?'ÉGALITÉ':'DÉFAITE'))}<em style="color:var(--muted)">${(p.isFantasy||p.isVsFriend)?'':p.method}${p.res.round?' · Round '+p.res.round:''}${(p.res.finishTimeStr && !isDecisionLike(p.method))?' · '+p.res.finishTimeStr:''}</em></div>
      <div class="tagrow" style="justify-content:center">
        ${(p.res.moveName && !isDecisionLike(p.method))?(()=>{
          const typeStr=isKOMethod(p.method)?'KO/TKO':'Soumission';
