@@ -31,6 +31,13 @@ Documents compagnons :
    demeure** — rien n'entre dans le jeu sans relecture et réécriture d'Anthony.
    OpenCode (GLM) et Sol n'écrivent toujours aucune phrase : ils branchent les
    textes validés.
+7. **La relecture est différée** (30/09, plus tard dans la journée) : « mets
+   côté écriture, je verrai après pour la relecture ». **Le travail n'attend
+   pas Anthony.** Les tranches branchent **les propositions de Claude comme
+   textes provisoires** : chaque texte porte la marque `relu:false` dans les
+   données, et `tools/` produit la liste de ce qui reste à relire. Quand Anthony
+   relit, il remplace le texte et passe la marque à `relu:true` ; aucun code ne
+   change. **Aucun texte n'est définitif avant sa relecture.**
 5. **Du mouvement** : des fils qui défilent, des popups, le temps qui passe à
    l'écran (décision du 30/09, première demande).
 6. **Le cru est permis**, jamais le discriminatoire (voix v2, §2).
@@ -279,7 +286,7 @@ nouvelles s'appellent **H1 à H10**.
 | **H9** — Le mouvement | GLM | Fil qui défile, popups, transitions, `prefers-reduced-motion` | H6 |
 | **H10** — Mémoire et scénarios | Sol | Rivalités, revanches dues, trilogies, puis les scénarios du §5 par groupes | H7 |
 | T1 — Ceintures, titres en 5 rounds | Sol | Inchangée (contrat du 23/09) | — |
-| T2 + T3 — La voix branchée | GLM | Le mécanisme choisit une réplique **validée par Anthony** selon la voix et la situation ; les médias | Réécriture d'Anthony |
+| T2 + T3 — La voix branchée | GLM | Le mécanisme choisit une réplique des voix v2 (provisoire, `relu:false`) selon la voix et la situation ; les médias | H3 |
 | T5 — Le recrutement | Sol | Inchangée, sur le monde agrandi | H4 |
 | T6 — Cartes incomplètes | GLM | Inchangée (4 tests ignorés au vert) | — |
 | T7 — Les camps | Sol | **Entre dans le lot (confirmé le 30/09)** : le catalogue en dépend (changement de camp, noms thaïs) ; noms de salles à écrire | H5 |
@@ -293,8 +300,10 @@ suite** par H1 puis H2, H5, H8, H9, T6.
 
 ## 8. Interdits, toutes tranches
 
-- **Aucune phrase écrite par Sol ou GLM.** Ils branchent des textes validés par
-  Anthony ; un emplacement sans texte validé n'affiche rien.
+- **Aucune phrase écrite par Sol ou GLM.** Ils branchent les textes du catalogue
+  et des voix v2 **tels quels**, marqués `relu:false` tant qu'Anthony ne les a
+  pas relus (§0, décision 7). Un texte absent des documents n'est jamais
+  inventé : l'emplacement reste vide.
 - **Ni note, ni barème, ni jauge** : traits, charge, loyauté, connaissance en
   mots.
 - **Rien de dérivé n'est stocké** ; seuls les faits (combats, moments,
@@ -320,9 +329,11 @@ suite** par H1 puis H2, H5, H8, H9, T6.
    migration 10 → 11 (H3).
 5. ~~Les camps~~ **Entrent dans le lot** : la T7 part.
 
-**Écriture (relire et réécrire).** Les quarante-huit voix et les dix médias ;
-les surnoms ; les libellés des moments de vie, des rituels, des rôles, des
-trajectoires ; les noms de salles et de coachs (T7).
+**Écriture (relire et réécrire) — différée, sans bloquer le code (§0,
+décision 7).** Les quarante-huit voix et les dix médias ; les surnoms ; les
+libellés des moments de vie, des rituels, des rôles, des trajectoires ; les
+noms de salles et de coachs (T7, proposés par Claude au moment de la tranche).
+La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
 
 ---
 
@@ -383,10 +394,14 @@ Recopie du catalogue, sans rien inventer ni reformuler :
 - MGMT_RITUELS (§7.3), MGMT_ROLES (§9.2), MGMT_TRAJECTOIRES (§10.2)
 Les pays qui n'existent pas encore dans COUNTRIES restent dans les tables : H2
 les ajoutera.
+Chaque texte écrit (surnom, métier, milieu, libellé de moment, rituel, rôle,
+trajectoire) porte relu:false — ce sont des propositions qu'Anthony relira plus
+tard. Les villes et les poids n'en portent pas.
 
 Tests (tests/mgmtHumaniteData.test.js, à ajouter dans package.json) :
 chaque ligne de MGMT_STYLE_PAYS fait 100 ; chaque clé de style existe dans
 STYLES ; aucun doublon dans chaque liste ; chaque ville-école existe dans
-MGMT_VILLES ; chaque moment a un poids entre 0 et 100.
+MGMT_VILLES ; chaque moment a un poids entre 0 et 100 ; chaque texte a sa
+marque relu.
 npm run check vert. Règle d'arrêt : 2 h bloqué → commit, rapport, stop.
 ```
