@@ -1,0 +1,2553 @@
+{
+  "career": {
+    "name": "Dante Marchand",
+    "age": 19,
+    "W": 7,
+    "L": 1,
+    "history": [
+      {
+        "res": "win",
+        "method": "Décision unanime",
+        "round": null,
+        "time": null,
+        "oppId": "muo1el51_2v_2y6raz",
+        "oppName": "Jamal Matip",
+        "oppFlag": "🇨🇲",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "8-8",
+        "oppElo": 768,
+        "oppRank": 96,
+        "season": 1,
+        "weighInPassed": true,
+        "cutTier": "complique",
+        "div": "H-light",
+        "narrative": "\"Score sans appel pour les trois juges. Dante Marchand n'a rien laissé au hasard sur la durée du combat.\"",
+        "purse": 0
+      },
+      {
+        "res": "win",
+        "method": "Décision unanime",
+        "round": null,
+        "time": null,
+        "oppId": "muo1el52_3b_mn5mi4",
+        "oppName": "Leon Suzuki",
+        "oppFlag": "🇯🇵",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "4-4",
+        "oppElo": 760,
+        "oppRank": 80,
+        "season": 1,
+        "weighInPassed": true,
+        "cutTier": "facile",
+        "div": "H-light",
+        "narrative": "\"Score sans appel pour les trois juges. Dante Marchand n'a rien laissé au hasard sur la durée du combat.\"",
+        "purse": 0
+      },
+      {
+        "res": "win",
+        "method": "Décision unanime",
+        "round": null,
+        "time": null,
+        "oppId": "muo1el52_3s_pn57w0",
+        "oppName": "Marcus Omarov",
+        "oppFlag": "🏔️",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "3-2",
+        "oppElo": 800,
+        "oppRank": 69,
+        "season": 2,
+        "weighInPassed": true,
+        "cutTier": "facile",
+        "div": "H-light",
+        "narrative": "\"Score sans appel pour les trois juges. Dante Marchand n'a rien laissé au hasard sur la durée du combat.\"",
+        "purse": 0
+      },
+      {
+        "res": "win",
+        "method": "Décision unanime",
+        "round": null,
+        "time": null,
+        "oppId": "muo1el52_3n_np46lx",
+        "oppName": "Kofi Kanu",
+        "oppFlag": "🇳🇬",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "7-7",
+        "oppElo": 794,
+        "oppRank": 68,
+        "season": 3,
+        "weighInPassed": true,
+        "cutTier": "facile",
+        "div": "H-light",
+        "narrative": "\"Trois rounds, un plan tenu du début à la fin. Les juges n'ont eu aucun doute à trancher.\"",
+        "purse": 0
+      },
+      {
+        "res": "loss",
+        "method": "Soumission",
+        "round": 1,
+        "time": "01:11",
+        "oppId": "muo1el53_5m_lvc376",
+        "oppName": "Rashid Grasso",
+        "oppFlag": "🇲🇽",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "3-2",
+        "oppElo": 896,
+        "oppRank": 35,
+        "season": 3,
+        "weighInPassed": true,
+        "cutTier": "normal",
+        "div": "H-light",
+        "narrative": "\"Défaite logique ce soir pour Dante Marchand. Rien de déshonorant, juste un adversaire meilleur sur l'instant T.\"",
+        "purse": 0
+      },
+      {
+        "res": "win",
+        "method": "Décision unanime",
+        "round": null,
+        "time": null,
+        "oppId": "muo1el52_3e_588b7r",
+        "oppName": "Marcus Gadzhiev",
+        "oppFlag": "🏔️",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "7-5",
+        "oppElo": 784,
+        "oppRank": 61,
+        "season": 3,
+        "weighInPassed": true,
+        "cutTier": "normal",
+        "div": "H-light",
+        "narrative": "\"Score sans appel pour les trois juges. Dante Marchand n'a rien laissé au hasard sur la durée du combat.\"",
+        "purse": 0
+      },
+      {
+        "res": "win",
+        "method": "Décision unanime",
+        "round": null,
+        "time": null,
+        "oppId": "muo1el52_4e_yy2xf0",
+        "oppName": "Hugo Nwosu",
+        "oppFlag": "🇳🇬",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "6-4",
+        "oppElo": 840,
+        "oppRank": 45,
+        "season": 4,
+        "weighInPassed": true,
+        "cutTier": "complique",
+        "div": "H-light",
+        "narrative": "\"INCROYABLE ! Personne ne lui donnait la moindre chance ! Dante Marchand vient de choquer le monde entier !\"",
+        "purse": 0
+      },
+      {
+        "res": "win",
+        "method": "Décision unanime",
+        "round": null,
+        "time": null,
+        "oppId": "muo1el52_50_0kc9xv",
+        "oppName": "Diego Okoye",
+        "oppFlag": "🇳🇬",
+        "oppNick": null,
+        "oppWasChamp": false,
+        "oppRecord": "8-5",
+        "oppElo": 904,
+        "oppRank": 34,
+        "season": 4,
+        "weighInPassed": true,
+        "cutTier": "facile",
+        "div": "H-light",
+        "narrative": "\"Trois rounds, un plan tenu du début à la fin. Les juges n'ont eu aucun doute à trancher.\"",
+        "purse": 0
+      }
+    ]
+  },
+  "reports": [
+    {
+      "label": "carrière neuve",
+      "padding": "40px 64px 48px",
+      "columns": "1320px 420px",
+      "title": "76px",
+      "history": [],
+      "horizontalScroll": false,
+      "overflow": [],
+      "texts": [
+        {
+          "text": "Carrière",
+          "color": "rgb(255, 248, 238)",
+          "size": 28,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 114,
+            "y": 46,
+            "width": 123.875,
+            "height": 44
+          },
+          "contrast": 9.8
+        },
+        {
+          "text": "Amateur · année 1",
+          "color": "rgb(217, 204, 192)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 848.859375,
+            "y": 52,
+            "width": 172.734375,
+            "height": 32
+          },
+          "contrast": 7.45
+        },
+        {
+          "text": "Choisir un combat",
+          "color": "rgb(31, 26, 29)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1655.17724609375,
+            "y": 52,
+            "width": 178.2236328125,
+            "height": 32
+          },
+          "contrast": 11.1
+        },
+        {
+          "text": "Ton combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 115,
+            "width": 493.40625,
+            "height": 119
+          },
+          "contrast": 9.08
+        },
+        {
+          "text": "Noah Meunier 🇫🇷",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 207.390625,
+            "width": 244.046875,
+            "height": 63
+          },
+          "contrast": 10.82
+        },
+        {
+          "text": "Poids léger · 15 ans · 0-0 · amateur",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 269.390625,
+            "width": 295.90625,
+            "height": 30
+          },
+          "contrast": 7.41
+        },
+        {
+          "text": "Gains en carrière : 0 $",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 307.78125,
+            "width": 185.734375,
+            "height": 30
+          },
+          "contrast": 8.18
+        },
+        {
+          "text": "Ce que tu es devenu",
+          "color": "rgb(255, 200, 61)",
+          "size": 19,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 356.171875,
+            "width": 209.5,
+            "height": 30
+          },
+          "contrast": 8.62
+        },
+        {
+          "text": "Boxe",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 393.171875,
+            "width": 46.359375,
+            "height": 32
+          },
+          "contrast": 13.73
+        },
+        {
+          "text": "Dossier",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 83.0625,
+            "y": 451.171875,
+            "width": 62.390625,
+            "height": 28
+          },
+          "contrast": 9.49
+        },
+        {
+          "text": "Déclarer la retraite (définitif)",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 505.171875,
+            "width": 257.375,
+            "height": 28
+          },
+          "contrast": 7.86
+        },
+        {
+          "text": "Ton état",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1436,
+            "y": 141,
+            "width": 98.40625,
+            "height": 32
+          },
+          "contrast": 8.68
+        },
+        {
+          "text": "Moral 12/20 · Forme 11/20",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 1436,
+            "y": 181,
+            "width": 210.171875,
+            "height": 28
+          },
+          "contrast": 12.9
+        }
+      ],
+      "minimumContrast": 7.41,
+      "failures": []
+    },
+    {
+      "label": "camp repris",
+      "padding": "40px 64px 48px",
+      "columns": "560px 708px 420px",
+      "title": "76px",
+      "history": [
+        "90px 604px",
+        "90px 604px",
+        "90px 604px",
+        "90px 604px",
+        "90px 604px"
+      ],
+      "horizontalScroll": false,
+      "overflow": [],
+      "texts": [
+        {
+          "text": "Carrière",
+          "color": "rgb(255, 248, 238)",
+          "size": 28,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 114,
+            "y": 46,
+            "width": 123.875,
+            "height": 44
+          },
+          "contrast": 9.8
+        },
+        {
+          "text": "Amateur · année 4",
+          "color": "rgb(217, 204, 192)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 846.5,
+            "y": 52,
+            "width": 176.421875,
+            "height": 32
+          },
+          "contrast": 7.45
+        },
+        {
+          "text": "Continuer le camp",
+          "color": "rgb(31, 26, 29)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1654.13037109375,
+            "y": 52,
+            "width": 179.2705078125,
+            "height": 32
+          },
+          "contrast": 11.1
+        },
+        {
+          "text": "Ton combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 115,
+            "width": 493.40625,
+            "height": 119
+          },
+          "contrast": 9.08
+        },
+        {
+          "text": "Dante Marchand 🇫🇷",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 207.390625,
+            "width": 277.609375,
+            "height": 63
+          },
+          "contrast": 10.65
+        },
+        {
+          "text": "Poids léger · 19 ans · 7-1 · amateur",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 269.390625,
+            "width": 288.71875,
+            "height": 30
+          },
+          "contrast": 7.49
+        },
+        {
+          "text": "Rang #30",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 307.78125,
+            "width": 90.453125,
+            "height": 30
+          },
+          "contrast": 8.44
+        },
+        {
+          "text": "Gains en carrière : 0 $",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 346.171875,
+            "width": 185.734375,
+            "height": 30
+          },
+          "contrast": 8.56
+        },
+        {
+          "text": "Ce que tu es devenu",
+          "color": "rgb(255, 200, 61)",
+          "size": 19,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 394.5625,
+            "width": 209.5,
+            "height": 30
+          },
+          "contrast": 9.13
+        },
+        {
+          "text": "Boxe",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 431.5625,
+            "width": 46.359375,
+            "height": 32
+          },
+          "contrast": 13.91
+        },
+        {
+          "text": "0 KO/TKO · 0 soumissions · 7 décisions",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 462.5625,
+            "width": 351.984375,
+            "height": 32
+          },
+          "contrast": 13.91
+        },
+        {
+          "text": "3 victoires d’affilée",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 493.5625,
+            "width": 169.953125,
+            "height": 32
+          },
+          "contrast": 14.09
+        },
+        {
+          "text": "Le camp de cette semaine",
+          "color": "rgb(255, 200, 61)",
+          "size": 19,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 543.5625,
+            "width": 268.984375,
+            "height": 30
+          },
+          "contrast": 9.77
+        },
+        {
+          "text": "Bases de soumission défensive",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 85,
+            "y": 594.5625,
+            "width": 244.875,
+            "height": 28
+          },
+          "contrast": 11.84
+        },
+        {
+          "text": "Matador (Esquives)",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 385.875,
+            "y": 594.5625,
+            "width": 156.25,
+            "height": 28
+          },
+          "contrast": 11.84
+        },
+        {
+          "text": "Chambre d’altitude",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 85,
+            "y": 662.5625,
+            "width": 156.859375,
+            "height": 28
+          },
+          "contrast": 11.98
+        },
+        {
+          "text": "Voir les détails du camp",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 711.5625,
+            "width": 199.140625,
+            "height": 28
+          },
+          "contrast": 10.15
+        },
+        {
+          "text": "Dossier",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 83.0625,
+            "y": 765.5625,
+            "width": 62.390625,
+            "height": 28
+          },
+          "contrast": 10.3
+        },
+        {
+          "text": "Déclarer la retraite (définitif)",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 819.5625,
+            "width": 257.375,
+            "height": 28
+          },
+          "contrast": 8.5
+        },
+        {
+          "text": "Ton prochain combat",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 141,
+            "width": 244.84375,
+            "height": 32
+          },
+          "contrast": 6.93
+        },
+        {
+          "text": "Amateur · camp de préparation",
+          "color": "rgb(217, 204, 192)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 205,
+            "width": 254.25,
+            "height": 28
+          },
+          "contrast": 5.97
+        },
+        {
+          "text": "Contre Rashid Takahashi",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 231,
+            "width": 400.375,
+            "height": 63
+          },
+          "contrast": 9.36
+        },
+        {
+          "text": "8-4 · MMA complet · 17 ans",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 292,
+            "width": 220.3125,
+            "height": 28
+          },
+          "contrast": 9.78
+        },
+        {
+          "text": "Étudier ses combats",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 328,
+            "width": 166.09375,
+            "height": 28
+          },
+          "contrast": 6.9
+        },
+        {
+          "text": "Ta carrière",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 398,
+            "width": 134.609375,
+            "height": 32
+          },
+          "contrast": 9.22
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 448,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.49
+        },
+        {
+          "text": "contre Diego Okoye 🇳🇬, Décision unanime · RANG #34",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 448,
+            "width": 443.671875,
+            "height": 28
+          },
+          "contrast": 13.91
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 497,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.64
+        },
+        {
+          "text": "contre Hugo Nwosu 🇳🇬, Décision unanime · RANG #45",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 497,
+            "width": 445.78125,
+            "height": 28
+          },
+          "contrast": 14.14
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 546,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.77
+        },
+        {
+          "text": "contre Marcus Gadzhiev 🏔️, Décision unanime · RANG #61",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 546,
+            "width": 481.3125,
+            "height": 28
+          },
+          "contrast": 14.33
+        },
+        {
+          "text": "Défaite",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 595,
+            "width": 51.3125,
+            "height": 28
+          },
+          "contrast": 8.07
+        },
+        {
+          "text": "contre Rashid Grasso 🇲🇽, Soumission · R1 · 01:11 · RANG #35",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 595,
+            "width": 485.484375,
+            "height": 28
+          },
+          "contrast": 14.51
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 644,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 10.02
+        },
+        {
+          "text": "contre Kofi Kanu 🇳🇬, Décision unanime · RANG #68",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 644,
+            "width": 420.484375,
+            "height": 28
+          },
+          "contrast": 14.69
+        },
+        {
+          "text": "Toutes les archives",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 690,
+            "width": 161.203125,
+            "height": 28
+          },
+          "contrast": 10.06
+        },
+        {
+          "text": "Ton état",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1436,
+            "y": 141,
+            "width": 98.40625,
+            "height": 32
+          },
+          "contrast": 8.68
+        },
+        {
+          "text": "Moral 17/20 · Forme 12/20",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 1436,
+            "y": 181,
+            "width": 213.59375,
+            "height": 28
+          },
+          "contrast": 12.9
+        }
+      ],
+      "minimumContrast": 5.97,
+      "failures": []
+    },
+    {
+      "label": "fiche adversaire",
+      "padding": "40px 64px 48px",
+      "columns": null,
+      "title": "76px",
+      "history": [],
+      "horizontalScroll": false,
+      "overflow": [],
+      "texts": [
+        {
+          "text": "Fiche combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 28,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 40,
+            "width": 248.59375,
+            "height": 44
+          },
+          "contrast": 9.38
+        },
+        {
+          "text": "Retour à la carrière",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1686.421875,
+            "y": 40,
+            "width": 169.578125,
+            "height": 28
+          },
+          "contrast": 8.4
+        },
+        {
+          "text": "Rashid Takahashi",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 103,
+            "width": 536.03125,
+            "height": 119
+          },
+          "contrast": 8.81
+        },
+        {
+          "text": "🇯🇵 Poids léger · 17 ans · 8-4",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 205.390625,
+            "width": 226.875,
+            "height": 30
+          },
+          "contrast": 7.25
+        },
+        {
+          "text": "MMA complet",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 235.78125,
+            "width": 115.21875,
+            "height": 28
+          },
+          "contrast": 11.65
+        },
+        {
+          "text": "170 cm · allonge 169 cm · garde orthodoxe",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 282.578125,
+            "width": 341.359375,
+            "height": 28
+          },
+          "contrast": 11.19
+        }
+      ],
+      "minimumContrast": 7.25,
+      "failures": []
+    },
+    {
+      "label": "carrière 1920",
+      "padding": "40px 64px 48px",
+      "columns": "560px 708px 420px",
+      "title": "76px",
+      "history": [
+        "90px 604px",
+        "90px 604px",
+        "90px 604px",
+        "90px 604px",
+        "90px 604px"
+      ],
+      "horizontalScroll": false,
+      "overflow": [],
+      "texts": [
+        {
+          "text": "Carrière",
+          "color": "rgb(255, 248, 238)",
+          "size": 28,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 114,
+            "y": 46,
+            "width": 123.875,
+            "height": 44
+          },
+          "contrast": 9.8
+        },
+        {
+          "text": "Amateur · année 4",
+          "color": "rgb(217, 204, 192)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 855.53125,
+            "y": 52,
+            "width": 176.421875,
+            "height": 32
+          },
+          "contrast": 7.33
+        },
+        {
+          "text": "Aller au combat",
+          "color": "rgb(31, 26, 29)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1672.20849609375,
+            "y": 52,
+            "width": 161.1923828125,
+            "height": 32
+          },
+          "contrast": 11.1
+        },
+        {
+          "text": "Ton combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 115,
+            "width": 493.40625,
+            "height": 119
+          },
+          "contrast": 9.08
+        },
+        {
+          "text": "Dante Marchand 🇫🇷",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 207.390625,
+            "width": 277.609375,
+            "height": 63
+          },
+          "contrast": 10.65
+        },
+        {
+          "text": "Poids léger · 19 ans · 7-1 · amateur",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 269.390625,
+            "width": 288.71875,
+            "height": 30
+          },
+          "contrast": 7.49
+        },
+        {
+          "text": "Rang #30",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 307.78125,
+            "width": 90.453125,
+            "height": 30
+          },
+          "contrast": 8.44
+        },
+        {
+          "text": "Gains en carrière : 0 $",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 346.171875,
+            "width": 185.734375,
+            "height": 30
+          },
+          "contrast": 8.56
+        },
+        {
+          "text": "Ce que tu es devenu",
+          "color": "rgb(255, 200, 61)",
+          "size": 19,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 394.5625,
+            "width": 209.5,
+            "height": 30
+          },
+          "contrast": 9.13
+        },
+        {
+          "text": "Boxe",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 431.5625,
+            "width": 46.359375,
+            "height": 32
+          },
+          "contrast": 13.91
+        },
+        {
+          "text": "0 KO/TKO · 0 soumissions · 7 décisions",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 462.5625,
+            "width": 351.984375,
+            "height": 32
+          },
+          "contrast": 13.91
+        },
+        {
+          "text": "3 victoires d’affilée",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 493.5625,
+            "width": 169.953125,
+            "height": 32
+          },
+          "contrast": 14.09
+        },
+        {
+          "text": "Dossier",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 83.0625,
+            "y": 551.5625,
+            "width": 62.390625,
+            "height": 28
+          },
+          "contrast": 9.77
+        },
+        {
+          "text": "Déclarer la retraite (définitif)",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 605.5625,
+            "width": 257.375,
+            "height": 28
+          },
+          "contrast": 8.07
+        },
+        {
+          "text": "Ton prochain combat",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 141,
+            "width": 244.84375,
+            "height": 32
+          },
+          "contrast": 6.93
+        },
+        {
+          "text": "Amateur · plan de combat",
+          "color": "rgb(217, 204, 192)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 205,
+            "width": 210.71875,
+            "height": 28
+          },
+          "contrast": 5.86
+        },
+        {
+          "text": "Contre Rashid Takahashi",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 231,
+            "width": 400.375,
+            "height": 63
+          },
+          "contrast": 9.36
+        },
+        {
+          "text": "8-4 · MMA complet · 17 ans",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 292,
+            "width": 220.3125,
+            "height": 28
+          },
+          "contrast": 9.78
+        },
+        {
+          "text": "Étudier ses combats",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 704,
+            "y": 328,
+            "width": 166.09375,
+            "height": 28
+          },
+          "contrast": 6.9
+        },
+        {
+          "text": "Ta carrière",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 398,
+            "width": 134.609375,
+            "height": 32
+          },
+          "contrast": 9.22
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 448,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.49
+        },
+        {
+          "text": "contre Diego Okoye 🇳🇬, Décision unanime · RANG #34",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 448,
+            "width": 443.671875,
+            "height": 28
+          },
+          "contrast": 13.91
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 497,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.64
+        },
+        {
+          "text": "contre Hugo Nwosu 🇳🇬, Décision unanime · RANG #45",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 497,
+            "width": 445.78125,
+            "height": 28
+          },
+          "contrast": 14.14
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 546,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.77
+        },
+        {
+          "text": "contre Marcus Gadzhiev 🏔️, Décision unanime · RANG #61",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 546,
+            "width": 481.3125,
+            "height": 28
+          },
+          "contrast": 14.33
+        },
+        {
+          "text": "Défaite",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 595,
+            "width": 51.3125,
+            "height": 28
+          },
+          "contrast": 8.07
+        },
+        {
+          "text": "contre Rashid Grasso 🇲🇽, Soumission · R1 · 01:11 · RANG #35",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 595,
+            "width": 485.484375,
+            "height": 28
+          },
+          "contrast": 14.51
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 644,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 10.02
+        },
+        {
+          "text": "contre Kofi Kanu 🇳🇬, Décision unanime · RANG #68",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 780,
+            "y": 644,
+            "width": 420.484375,
+            "height": 28
+          },
+          "contrast": 14.69
+        },
+        {
+          "text": "Toutes les archives",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 676,
+            "y": 690,
+            "width": 161.203125,
+            "height": 28
+          },
+          "contrast": 10.06
+        },
+        {
+          "text": "Ton état",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1436,
+            "y": 141,
+            "width": 98.40625,
+            "height": 32
+          },
+          "contrast": 8.68
+        },
+        {
+          "text": "Moral 16/20 · Forme 14/20",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 1436,
+            "y": 181,
+            "width": 215.8125,
+            "height": 28
+          },
+          "contrast": 12.77
+        },
+        {
+          "text": "Poids à la pesée : 76.4 kg · limite : 70.3 kg",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 1436,
+            "y": 209.796875,
+            "width": 335.765625,
+            "height": 28
+          },
+          "contrast": 12.9
+        }
+      ],
+      "minimumContrast": 5.86,
+      "failures": []
+    },
+    {
+      "label": "carrière 1280",
+      "padding": "40px 64px 48px",
+      "columns": "412.688px 375.172px 300.141px",
+      "title": "76px",
+      "history": [
+        "90px 271.172px",
+        "90px 271.172px",
+        "90px 271.172px",
+        "90px 271.172px",
+        "90px 271.172px"
+      ],
+      "horizontalScroll": false,
+      "overflow": [],
+      "texts": [
+        {
+          "text": "Carrière",
+          "color": "rgb(255, 248, 238)",
+          "size": 28,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 114,
+            "y": 46,
+            "width": 123.875,
+            "height": 44
+          },
+          "contrast": 8.64
+        },
+        {
+          "text": "Amateur · année 4",
+          "color": "rgb(217, 204, 192)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 544.03125,
+            "y": 52,
+            "width": 159.421875,
+            "height": 32
+          },
+          "contrast": 6.47
+        },
+        {
+          "text": "Aller au combat",
+          "color": "rgb(31, 26, 29)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1032.20849609375,
+            "y": 52,
+            "width": 161.1923828125,
+            "height": 32
+          },
+          "contrast": 11.1
+        },
+        {
+          "text": "Ton combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 115,
+            "width": 110.59375,
+            "height": 119
+          },
+          "contrast": 9.68
+        },
+        {
+          "text": "Ton combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 183.390625,
+            "width": 369.296875,
+            "height": 119
+          },
+          "contrast": 10.01
+        },
+        {
+          "text": "Dante Marchand 🇫🇷",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 275.78125,
+            "width": 277.609375,
+            "height": 63
+          },
+          "contrast": 11.14
+        },
+        {
+          "text": "Poids léger · 19 ans · 7-1 · amateur",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 337.78125,
+            "width": 288.71875,
+            "height": 30
+          },
+          "contrast": 7.97
+        },
+        {
+          "text": "Rang #30",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 376.171875,
+            "width": 90.453125,
+            "height": 30
+          },
+          "contrast": 8.64
+        },
+        {
+          "text": "Gains en carrière : 0 $",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 414.5625,
+            "width": 185.734375,
+            "height": 30
+          },
+          "contrast": 8.82
+        },
+        {
+          "text": "Ce que tu es devenu",
+          "color": "rgb(255, 200, 61)",
+          "size": 19,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 462.953125,
+            "width": 209.5,
+            "height": 30
+          },
+          "contrast": 9.49
+        },
+        {
+          "text": "Boxe",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 499.953125,
+            "width": 46.359375,
+            "height": 32
+          },
+          "contrast": 14.09
+        },
+        {
+          "text": "0 KO/TKO · 0 soumissions · 7 décisions",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 530.953125,
+            "width": 351.984375,
+            "height": 32
+          },
+          "contrast": 14.14
+        },
+        {
+          "text": "3 victoires d’affilée",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 561.953125,
+            "width": 169.953125,
+            "height": 32
+          },
+          "contrast": 14.33
+        },
+        {
+          "text": "Dossier",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 83.0625,
+            "y": 619.953125,
+            "width": 62.390625,
+            "height": 28
+          },
+          "contrast": 9.94
+        },
+        {
+          "text": "Déclarer la retraite (définitif)",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 673.953125,
+            "width": 257.375,
+            "height": 28
+          },
+          "contrast": 8.2
+        },
+        {
+          "text": "Ton prochain combat",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 141,
+            "width": 244.84375,
+            "height": 32
+          },
+          "contrast": 6.93
+        },
+        {
+          "text": "Amateur · plan de combat",
+          "color": "rgb(217, 204, 192)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 536.6875,
+            "y": 205,
+            "width": 210.71875,
+            "height": 28
+          },
+          "contrast": 5.88
+        },
+        {
+          "text": "Contre Rashid Takahashi",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 536.6875,
+            "y": 231,
+            "width": 227.125,
+            "height": 63
+          },
+          "contrast": 9.18
+        },
+        {
+          "text": "Contre Rashid Takahashi",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 536.6875,
+            "y": 275,
+            "width": 166.125,
+            "height": 63
+          },
+          "contrast": 9.5
+        },
+        {
+          "text": "8-4 · MMA complet · 17 ans",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 536.6875,
+            "y": 336,
+            "width": 220.3125,
+            "height": 28
+          },
+          "contrast": 10.23
+        },
+        {
+          "text": "Étudier ses combats",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 536.6875,
+            "y": 372,
+            "width": 166.09375,
+            "height": 28
+          },
+          "contrast": 7.21
+        },
+        {
+          "text": "Ta carrière",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 442,
+            "width": 134.609375,
+            "height": 32
+          },
+          "contrast": 9.49
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 492,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.61
+        },
+        {
+          "text": "contre Diego Okoye 🇳🇬, Décision unanime · RANG #34",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 492,
+            "width": 263.375,
+            "height": 28
+          },
+          "contrast": 14.09
+        },
+        {
+          "text": "contre Diego Okoye 🇳🇬, Décision unanime · RANG #34",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 520,
+            "width": 176.171875,
+            "height": 28
+          },
+          "contrast": 14.14
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 569,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.77
+        },
+        {
+          "text": "contre Hugo Nwosu 🇳🇬, Décision unanime · RANG #45",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 569,
+            "width": 265.140625,
+            "height": 28
+          },
+          "contrast": 14.33
+        },
+        {
+          "text": "contre Hugo Nwosu 🇳🇬, Décision unanime · RANG #45",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 597,
+            "width": 176.515625,
+            "height": 28
+          },
+          "contrast": 14.51
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 646,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 10.02
+        },
+        {
+          "text": "contre Marcus Gadzhiev 🏔️, Décision unanime · RANG #61",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 646,
+            "width": 230.890625,
+            "height": 28
+          },
+          "contrast": 14.69
+        },
+        {
+          "text": "contre Marcus Gadzhiev 🏔️, Décision unanime · RANG #61",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 674,
+            "width": 246.28125,
+            "height": 28
+          },
+          "contrast": 14.69
+        },
+        {
+          "text": "Défaite",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 723,
+            "width": 51.3125,
+            "height": 28
+          },
+          "contrast": 8.3
+        },
+        {
+          "text": "contre Rashid Grasso 🇲🇽, Soumission · R1 · 01:11 · RANG #35",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 723,
+            "width": 203.59375,
+            "height": 28
+          },
+          "contrast": 14.88
+        },
+        {
+          "text": "contre Rashid Grasso 🇲🇽, Soumission · R1 · 01:11 · RANG #35",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 751,
+            "width": 237.140625,
+            "height": 28
+          },
+          "contrast": 14.94
+        },
+        {
+          "text": "contre Rashid Grasso 🇲🇽, Soumission · R1 · 01:11 · RANG #35",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 779,
+            "width": 36.5,
+            "height": 28
+          },
+          "contrast": 15.06
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 828,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 10.43
+        },
+        {
+          "text": "contre Kofi Kanu 🇳🇬, Décision unanime · RANG #68",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 828,
+            "width": 238.453125,
+            "height": 28
+          },
+          "contrast": 15.29
+        },
+        {
+          "text": "contre Kofi Kanu 🇳🇬, Décision unanime · RANG #68",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 612.6875,
+            "y": 856,
+            "width": 177.90625,
+            "height": 28
+          },
+          "contrast": 15.3
+        },
+        {
+          "text": "Toutes les archives",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 508.6875,
+            "y": 902,
+            "width": 161.203125,
+            "height": 28
+          },
+          "contrast": 10.56
+        },
+        {
+          "text": "Ton état",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 915.859375,
+            "y": 141,
+            "width": 98.40625,
+            "height": 32
+          },
+          "contrast": 8.68
+        },
+        {
+          "text": "Moral 16/20 · Forme 14/20",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 915.859375,
+            "y": 181,
+            "width": 215.8125,
+            "height": 28
+          },
+          "contrast": 12.77
+        },
+        {
+          "text": "Poids à la pesée : 76.4 kg · limite : 70.3 kg",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 915.859375,
+            "y": 209.796875,
+            "width": 271.296875,
+            "height": 28
+          },
+          "contrast": 12.9
+        },
+        {
+          "text": "Poids à la pesée : 76.4 kg · limite : 70.3 kg",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 915.859375,
+            "y": 238.59375,
+            "width": 60.328125,
+            "height": 28
+          },
+          "contrast": 13.08
+        }
+      ],
+      "minimumContrast": 5.88,
+      "failures": []
+    },
+    {
+      "label": "carrière 1440",
+      "padding": "40px 64px 48px",
+      "columns": "473.375px 430.344px 344.281px",
+      "title": "76px",
+      "history": [
+        "90px 326.344px",
+        "90px 326.344px",
+        "90px 326.344px",
+        "90px 326.344px",
+        "90px 326.344px"
+      ],
+      "horizontalScroll": false,
+      "overflow": [],
+      "texts": [
+        {
+          "text": "Carrière",
+          "color": "rgb(255, 248, 238)",
+          "size": 28,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 114,
+            "y": 46,
+            "width": 123.875,
+            "height": 44
+          },
+          "contrast": 8.93
+        },
+        {
+          "text": "Amateur · année 4",
+          "color": "rgb(217, 204, 192)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 624.03125,
+            "y": 52,
+            "width": 159.421875,
+            "height": 32
+          },
+          "contrast": 6.7
+        },
+        {
+          "text": "Aller au combat",
+          "color": "rgb(31, 26, 29)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1192.20849609375,
+            "y": 52,
+            "width": 161.1923828125,
+            "height": 32
+          },
+          "contrast": 11.1
+        },
+        {
+          "text": "Ton combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 115,
+            "width": 110.59375,
+            "height": 119
+          },
+          "contrast": 9.97
+        },
+        {
+          "text": "Ton combattant",
+          "color": "rgb(255, 248, 238)",
+          "size": 76,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 183.390625,
+            "width": 369.296875,
+            "height": 119
+          },
+          "contrast": 10.01
+        },
+        {
+          "text": "Dante Marchand 🇫🇷",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 275.78125,
+            "width": 277.609375,
+            "height": 63
+          },
+          "contrast": 11.19
+        },
+        {
+          "text": "Poids léger · 19 ans · 7-1 · amateur",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 337.78125,
+            "width": 288.71875,
+            "height": 30
+          },
+          "contrast": 7.97
+        },
+        {
+          "text": "Rang #30",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 376.171875,
+            "width": 90.453125,
+            "height": 30
+          },
+          "contrast": 8.68
+        },
+        {
+          "text": "Gains en carrière : 0 $",
+          "color": "rgb(217, 204, 192)",
+          "size": 19,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 414.5625,
+            "width": 185.734375,
+            "height": 30
+          },
+          "contrast": 8.85
+        },
+        {
+          "text": "Ce que tu es devenu",
+          "color": "rgb(255, 200, 61)",
+          "size": 19,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 462.953125,
+            "width": 209.5,
+            "height": 30
+          },
+          "contrast": 9.49
+        },
+        {
+          "text": "Boxe",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 499.953125,
+            "width": 46.359375,
+            "height": 32
+          },
+          "contrast": 14.09
+        },
+        {
+          "text": "0 KO/TKO · 0 soumissions · 7 décisions",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 530.953125,
+            "width": 351.984375,
+            "height": 32
+          },
+          "contrast": 14.14
+        },
+        {
+          "text": "3 victoires d’affilée",
+          "color": "rgb(255, 248, 238)",
+          "size": 20,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 561.953125,
+            "width": 169.953125,
+            "height": 32
+          },
+          "contrast": 14.33
+        },
+        {
+          "text": "Dossier",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 83.0625,
+            "y": 619.953125,
+            "width": 62.390625,
+            "height": 28
+          },
+          "contrast": 9.94
+        },
+        {
+          "text": "Déclarer la retraite (définitif)",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 64,
+            "y": 673.953125,
+            "width": 257.375,
+            "height": 28
+          },
+          "contrast": 8.2
+        },
+        {
+          "text": "Ton prochain combat",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 141,
+            "width": 244.84375,
+            "height": 32
+          },
+          "contrast": 7.03
+        },
+        {
+          "text": "Amateur · plan de combat",
+          "color": "rgb(217, 204, 192)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 597.375,
+            "y": 205,
+            "width": 210.71875,
+            "height": 28
+          },
+          "contrast": 5.97
+        },
+        {
+          "text": "Contre Rashid Takahashi",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 597.375,
+            "y": 231,
+            "width": 227.125,
+            "height": 63
+          },
+          "contrast": 9.18
+        },
+        {
+          "text": "Contre Rashid Takahashi",
+          "color": "rgb(255, 248, 238)",
+          "size": 40,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 597.375,
+            "y": 275,
+            "width": 166.125,
+            "height": 63
+          },
+          "contrast": 9.76
+        },
+        {
+          "text": "8-4 · MMA complet · 17 ans",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 597.375,
+            "y": 336,
+            "width": 220.3125,
+            "height": 28
+          },
+          "contrast": 10.23
+        },
+        {
+          "text": "Étudier ses combats",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 597.375,
+            "y": 372,
+            "width": 166.09375,
+            "height": 28
+          },
+          "contrast": 7.23
+        },
+        {
+          "text": "Ta carrière",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 442,
+            "width": 134.609375,
+            "height": 32
+          },
+          "contrast": 9.49
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 492,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.61
+        },
+        {
+          "text": "contre Diego Okoye 🇳🇬, Décision unanime · RANG #34",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 492,
+            "width": 263.375,
+            "height": 28
+          },
+          "contrast": 14.09
+        },
+        {
+          "text": "contre Diego Okoye 🇳🇬, Décision unanime · RANG #34",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 520,
+            "width": 176.171875,
+            "height": 28
+          },
+          "contrast": 14.14
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 569,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 9.77
+        },
+        {
+          "text": "contre Hugo Nwosu 🇳🇬, Décision unanime · RANG #45",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 569,
+            "width": 265.140625,
+            "height": 28
+          },
+          "contrast": 14.33
+        },
+        {
+          "text": "contre Hugo Nwosu 🇳🇬, Décision unanime · RANG #45",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 597,
+            "width": 176.515625,
+            "height": 28
+          },
+          "contrast": 14.51
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 646,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 10.02
+        },
+        {
+          "text": "contre Marcus Gadzhiev 🏔️, Décision unanime · RANG #61",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 646,
+            "width": 304.875,
+            "height": 28
+          },
+          "contrast": 14.69
+        },
+        {
+          "text": "contre Marcus Gadzhiev 🏔️, Décision unanime · RANG #61",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 674,
+            "width": 172.296875,
+            "height": 28
+          },
+          "contrast": 14.69
+        },
+        {
+          "text": "Défaite",
+          "color": "color(srgb 0.959216 0.661961 0.630588)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 723,
+            "width": 51.3125,
+            "height": 28
+          },
+          "contrast": 8.27
+        },
+        {
+          "text": "contre Rashid Grasso 🇲🇽, Soumission · R1 · 01:11 · RANG #35",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 723,
+            "width": 312.109375,
+            "height": 28
+          },
+          "contrast": 14.88
+        },
+        {
+          "text": "contre Rashid Grasso 🇲🇽, Soumission · R1 · 01:11 · RANG #35",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 751,
+            "width": 169.25,
+            "height": 28
+          },
+          "contrast": 14.94
+        },
+        {
+          "text": "Victoire",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 800,
+            "width": 56.9375,
+            "height": 28
+          },
+          "contrast": 10.31
+        },
+        {
+          "text": "contre Kofi Kanu 🇳🇬, Décision unanime · RANG #68",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 800,
+            "width": 323.578125,
+            "height": 28
+          },
+          "contrast": 15.12
+        },
+        {
+          "text": "contre Kofi Kanu 🇳🇬, Décision unanime · RANG #68",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 673.375,
+            "y": 828,
+            "width": 92.78125,
+            "height": 28
+          },
+          "contrast": 15.29
+        },
+        {
+          "text": "Toutes les archives",
+          "color": "rgb(255, 200, 61)",
+          "size": 18,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 569.375,
+            "y": 874,
+            "width": 161.203125,
+            "height": 28
+          },
+          "contrast": 10.47
+        },
+        {
+          "text": "Ton état",
+          "color": "rgb(255, 200, 61)",
+          "size": 20,
+          "font": "\"Saira Condensed\", \"Arial Narrow\", sans-serif",
+          "rect": {
+            "x": 1031.71875,
+            "y": 141,
+            "width": 98.40625,
+            "height": 32
+          },
+          "contrast": 8.68
+        },
+        {
+          "text": "Moral 16/20 · Forme 14/20",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 1031.71875,
+            "y": 181,
+            "width": 215.8125,
+            "height": 28
+          },
+          "contrast": 12.77
+        },
+        {
+          "text": "Poids à la pesée : 76.4 kg · limite : 70.3 kg",
+          "color": "rgb(255, 248, 238)",
+          "size": 18,
+          "font": "Saira, \"Segoe UI\", sans-serif",
+          "rect": {
+            "x": 1031.71875,
+            "y": 209.796875,
+            "width": 335.765625,
+            "height": 28
+          },
+          "contrast": 12.9
+        }
+      ],
+      "minimumContrast": 5.97,
+      "failures": []
+    }
+  ],
+  "consoleErrors": [],
+  "mouseAndKeyboard": true,
+  "coldPreparationResume": true,
+  "referenceAtSmallSizes": "Maquette 1920 réduite proportionnellement"
+}

@@ -55,3 +55,12 @@ tools/reports/*
 # Lot 2B T4 : mesure versionnee du salaire a la victoire et du recalibrage
 # de l'economie (le bonus de victoire, les deux leviers de revenu, les cibles).
 !tools/reports/LOT-2B-T4-CALIBRAGE-ECONOMIE.md
+# Lot 4 T8b : preuves de fidélité et de navigation, régénérables par verif-t8b.
+!tools/reports/lot-4-fidelite/
+tools/reports/lot-4-fidelite/*
+!tools/reports/lot-4-fidelite/T8B-RAPPORT.md
+!tools/reports/lot-4-fidelite/t8b-carriere-comparaison-*.png
+!tools/reports/lot-4-fidelite/t8b-carriere-camp-1920.png
+!tools/reports/lot-4-fidelite/t8b-carriere-neuve-1920.png
+!tools/reports/lot-4-fidelite/t8b-carriere-focus-1440.png
+!tools/reports/lot-4-fidelite/t8b-carriere-audit.json

@@ -25,7 +25,10 @@
 function allOnclicks(win){
   const app = win.document.getElementById('app');
   if(!app) return [];
-  const html = app.innerHTML.replace(/<span class="eyebrow x"[^>]*>.*?<\/span>/g, '');
+  // Lot 4 T8b / maquette 10 : le retour octogonal précède maintenant
+  // l'action principale. Comme le ✕, ce lien n'est pas un choix de carrière.
+  const html = app.innerHTML.replace(/<span class="eyebrow x"[^>]*>.*?<\/span>/g, '')
+    .replace(/<button class="career-home"[^>]*>.*?<\/button>/g,'');
   const re = /onclick="([^"]+)"/g;
   const out = [];
   let m;

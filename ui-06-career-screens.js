@@ -163,7 +163,32 @@ function scr_pro_nickname(){
   </div>`;
 }
 
-function scr_hub(){ const f=G.f; const champ=f.champion;
+/* ==== [ANCRE: LOT4_T8B_PREPARATION_LUE] — Lot 4 T8b : trace de navigation
+   non sauvegardée. Seuls camp/plan prouvent qu'un combat est en préparation ;
+   G.sel/G.train/G.fight seuls peuvent encore décrire le combat précédent.
+   Aucun tirage, aucune offre créée par le rendu, aucun calendrier inventé. ==== */
+let careerHubPreparation=null;
+function careerTrackPreparation(screen){
+  if(!G||!G.f){ careerHubPreparation=null; return; }
+  if(screen==='camp'||screen==='plan'){
+    careerHubPreparation={screen,f:G.f,sel:G.sel,fight:G.fight,
+      count:G.f.W+G.f.L+(G.f.D||0),age:G.f.age,org:G.f.org,div:G.f.div};
+  }else if(!['hub','opponent_card','profile','rankings','history','beltLineage','ach','hof','ach_preview'].includes(screen)){
+    careerHubPreparation=null;
+  }
+  if(G.f.injury||G.f.retired) careerHubPreparation=null;
+}
+function careerCurrentPreparation(){
+  const p=careerHubPreparation,f=G.f;
+  if(!p||p.f!==f||p.sel!==G.sel||p.count!==f.W+f.L+(f.D||0)
+    ||p.age!==f.age||p.org!==f.org||p.div!==f.div||f.injury||f.retired) return null;
+  if(p.screen==='camp') return G.sel&&G.sel.o&&G.train&&G.train.length?p:null;
+  return p.fight===G.fight&&G.fight&&G.fight.opp&&!G.fight._resolved?p:null;
+}
+function careerRecordText(f){ return `${f.W}-${f.L}${f.D?'-'+f.D:''}`; }
+/* ==== [FIN ANCRE] ==== */
+
+function scr_hub(){ const f=G.f;
   // ==== [ANCRE: CORRECTIF_COULEUR_MESSAGE] — bug trouvé : un seul message
   // ("sponsor validé") était reconnu comme positif ; TOUS les autres
   // messages, y compris clairement positifs (ex. "Contrat renouvelé"),
@@ -177,71 +202,57 @@ function scr_hub(){ const f=G.f; const champ=f.champion;
   const isGoodMsg=POSITIVE_HINTS.some(k=>msgLower.includes(k));
   const isBadMsg=!isGoodMsg && NEGATIVE_HINTS.some(k=>msgLower.includes(k));
   const msgColor=isGoodMsg?'var(--win)':isBadMsg?'var(--loss)':'var(--gold)';
-  const msgHtml=G.lastMsg?`<div class="card mb" style="border-left:3px solid ${msgColor};background:var(--panel2)"><div class="small" style="color:${msgColor}">${esc(G.lastMsg)}</div></div>`:'';
-  if(G.lastMsg) G.lastMsg=null;
-  const injuryHtml=f.injury?`<div class="card gold-b glass" style="border-color:var(--loss);margin-bottom:16px">
-     <span class="eyebrow mb" style="color:var(--loss)">⚠ RAPPORT MÉDICAL CRITIQUE</span>
-     <div class="disp" style="font-size:18px">${esc(f.injury.name)}</div>
-     <div class="mono small mt">Convalescence requise : ${f.injury.left} cycle(s)</div>
-     <button class="btn mt" style="width:100%;border-color:var(--loss);color:var(--loss)" onclick="CL.recoverInjury()">Laisser le corps récupérer</button>
-   </div>`:'';
-  const declineHtml=(!f.injury && isDeclining(f))?`<div class="mono small" style="color:var(--loss);margin-top:6px;border-top:1px dashed var(--loss);padding-top:6px">⚠ Tu prends de l\u2019âge, le corps commence à souffrir.</div>`:'';
-  const fightBtnHtml=(f.injury||f.retired)
-    ?`<button class="btn ghost" style="font-size:20px;padding:18px;opacity:.5;cursor:not-allowed" disabled>${f.retired?'Carrière terminée':'Athlète inapte'}</button>`
-    :`<button class="btn primary" style="font-size:20px;padding:18px" onclick="CL.fightSelect()">Évaluer les contrats (Matchmaking)</button>`;
-  const rankTag=champ?`<span class="tag2 hot">CHAMP. ${orgDisplayName(f).toUpperCase()}</span>`:((f.W+f.L+(f.D||0))===0?`<span class="tag2">NON CLASSÉ</span>`:`<span class="tag2 hot">RANG #${divRank(f)}</span>`);
-  const streakTag=f.streak>=3?`<span class="tag2" style="color:var(--win);border-color:var(--win)">Série de ${f.streak} victoires</span>`:(f.streak<=-2?`<span class="tag2" style="color:var(--loss);border-color:var(--blood-d)">${Math.abs(f.streak)} défaites d\u2019affilée</span>`:'');
-  const amaTag=(f.stage==='pro'&&f.amaRec)?`<span class="tag2">Amateur : ${f.amaRec.W}-${f.amaRec.L}</span>`:'';
-  const contractTag=(f.org>0 && f.contract)?`<span class="tag2" style="border-color:var(--gold);color:var(--gold)">${contractFightsLeftLabel(f.contract)}</span>`:'';
-  return `<div class="scr">
-   <div class="bar" style="border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px">
-     <span class="eyebrow mono">${orgDisplayName(f).toUpperCase()} // ${f.divName.toUpperCase()}</span>
-     <span class="eyebrow mono gold">${formatArgent(f.earnings)}</span>
-   </div>
-   ${msgHtml}
-   ${injuryHtml}
-   <div class="glass mwash" style="position:relative;background:var(--panel2);border:1px solid var(--line);padding:16px;margin-bottom:20px">
-     <div class="hero-name">${esc(f.name)} ${f.flag}<em>${f.nick?`« ${f.nick} » — `:''}${f.styleLabel}, ${f.age} ans</em></div>
-     <div class="tagrow">${rankTag}${streakTag}${contractTag}${amaTag}</div>
-     ${declineHtml}
-     <div class="stat-band">
-       <div><span class="stat-big">${recordStr(f)}</span><span class="stat-lbl">Record actuel</span></div>
-       <div style="text-align:right">${f.ko===f.sub?`<span class="stat-lbl" style="display:block;margin-bottom:2px">FINITIONS</span><span class="mono" style="font-size:20px"><span class="gold">${f.ko}</span> KO / <span class="gold">${f.sub}</span> SUB</span>`:f.ko>f.sub?`<span class="stat-big hot">${f.ko}</span><span class="stat-lbl">KO / ${f.sub} SUB</span>`:`<span class="stat-big hot">${f.sub}</span><span class="stat-lbl">SUB / ${f.ko} KO</span>`}</div>
-     </div>
-   </div>
-   <div style="margin-bottom:20px">
-     <div class="eyebrow" style="margin-bottom:8px">Derniers combats</div>
-     ${last5(f)}
-   </div>
-   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px">
-     <div><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>MORAL</span><b class="mono" style="color:var(--text);font-size:12px">${d20(f.morale)}</b></span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.morale,0,100)}%;background:var(--win)"></span></div></div>
-     <div><span class="stat-lbl" style="margin-bottom:4px;display:flex;justify-content:space-between"><span>FORME</span><b class="mono" style="color:var(--text);font-size:12px">${d20(f.form)}</b></span><div class="gauge2" style="background:var(--line);height:4px"><span style="display:block;height:100%;width:${clamp(f.form,0,100)}%;background:var(--sage)"></span></div></div>
-   </div>
-   ${fightBtnHtml}
-   <!-- ==== [ANCRE: HUB_SOUS_MENUS] — Lot P3/2026 : remplacement de la
-        grille à six boutons (Bilan technique, Classements, Palmarès,
-        Archives, Ceintures, Panthéon) et du bloc « Actualités de la
-        division » par deux sous-menus (Combat / Dossier) sous le bouton de
-        matchmaking, pour désencombrer le hub. ==== -->
-   ${hubTabsHtml()}
-   <div style="border-top:2px solid var(--line);margin-top:16px;padding-top:14px">
-     ${G.hubTab==='dossier'?hubDossierHtml():hubCombatHtml(f)}
-   </div>
-   <button class="btn ghost" style="color:var(--loss);margin-top:16px;border-top:1px dashed var(--line);padding-top:16px" onclick="CL.go('retire')">Déclarer la retraite (Définitif)</button>
-   </div>`; }
-/* ==== [ANCRE: HUB_SOUS_MENUS_HELPERS] — helpers de rendu du même lot que
-   l'ANCRE HUB_SOUS_MENUS ci-dessus. Boutons d'onglet Combat/Dossier : actif
-   = bordure/texte dorés sur fond var(--panel2), inactif = bordure
-   var(--line)/texte var(--muted) sur fond transparent — mêmes tokens que le
-   reste du jeu, aucune couleur en dur, aucun dégradé/ombre/coin arrondi
-   (charte plate demandée explicitement). ==== */
-function hubTabsHtml(){
-  const tabStyle=on=>`padding:12px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:14px;letter-spacing:.06em;font-family:'Oswald',sans-serif;${on?'border:1px solid var(--gold);color:var(--gold);background:var(--panel2)':'border:1px solid var(--line);color:var(--muted);background:transparent'}`;
-  return `<div class="g2">
-    <button style="${tabStyle(G.hubTab!=='dossier')}" onclick="CL.setHubTab('combat')">Combat</button>
-    <button style="${tabStyle(G.hubTab==='dossier')}" onclick="CL.setHubTab('dossier')">Dossier</button>
-  </div>`;
+   const msgHtml=G.lastMsg?`<p class="career-message" role="status" style="color:${msgColor}">${esc(G.lastMsg)}</p>`:'';
+   if(G.lastMsg) G.lastMsg=null;
+   /* ==== [ANCRE: LOT4_T8B_CARRIERE_10] — maquette 10, §1/§4 bis : identité,
+      finitions et séries déjà acquises, préparation active et historique.
+      Ni presse ni coach ni semaine ni agent n'existent sur ce hub. ==== */
+   const prep=careerCurrentPreparation();
+   const opponent=prep?(prep.screen==='plan'?G.fight.opp:G.sel.o):null;
+   const history=hubCombatHtml(f);
+   const evolution=[];
+   if(f.styleLabel) evolution.push(f.styleLabel);
+   if(f.ko||f.sub||f.dec) evolution.push(`${f.ko||0} KO/TKO · ${f.sub||0} soumission${f.sub===1?'':'s'} · ${f.dec||0} décision${f.dec===1?'':'s'}`);
+   if(f.streak>=3) evolution.push(`${f.streak} victoires d’affilée`);
+   if(f.streak<=-2) evolution.push(`${Math.abs(f.streak)} défaites d’affilée`);
+   if(f.signatureMove&&f.signatureMove.name) evolution.push(`Mouvement signature : ${f.signatureMove.name}${f.signatureMove.customSuffix?' '+f.signatureMove.customSuffix:''}`);
+    /* T8b reprise : additif par défaut, moral et forme restent lisibles
+       en texte avec leur échelle d20 existante, sans barre. */
+    const state=[`Moral ${d20(f.morale)}/20 · Forme ${d20(f.form)}/20`];
+   if(f.injury) state.push(`${f.injury.name} · convalescence : ${f.injury.left} cycle${f.injury.left===1?'':'s'}`);
+   if(f.retired) state.push('Carrière terminée');
+   const cut=prep&&prep.screen==='plan'&&G.fight.cutResult;
+   if(cut&&Number.isFinite(cut.walk)&&Number.isFinite(cut.limit)) state.push(`Poids à la pesée : ${cut.walk.toFixed(1)} kg · limite : ${cut.limit.toFixed(1)} kg`);
+    const hasMiddle=!!(opponent||history);
+   const fightAction=f.injury?'<button class="career-primary" onclick="CL.recoverInjury()">Laisser le corps récupérer</button>'
+     :f.retired?'':prep?`<button class="career-primary" onclick="CL.go('${prep.screen}')">${prep.screen==='plan'?'Aller au combat':'Continuer le camp'}</button>`
+     :'<button class="career-primary" onclick="CL.fightSelect()">Choisir un combat</button>';
+   return `<div class="scr career-screen"><header class="career-header">
+     <div class="career-heading"><button class="career-home" onclick="CL.go('title')" aria-label="Retour au menu principal"><span aria-hidden="true"></span></button><span>Carrière</span></div>
+     <span class="career-context">${esc(orgDisplayName(f))}${G.season&&G.season.year?` · année ${esc(G.season.year)}`:''}</span>${fightAction}
+    </header>${msgHtml}<div class="career-columns${hasMiddle?'':' career-no-middle'}">
+   <section class="career-identity"><div><h1>Ton combattant</h1><div class="career-name">${esc(f.name)} ${esc(f.flag||'')}${f.nick?` « ${esc(f.nick)} »`:''}</div>
+     <p class="career-meta">${esc(f.divName)} · ${esc(f.age)} ans · ${esc(careerRecordText(f))}${f.stage==='amateur'?' · amateur':''}</p>
+     ${f.champion?`<p class="career-meta">Champion · ${esc(orgDisplayName(f))}</p>`:f.W+f.L+(f.D||0)>0?`<p class="career-meta">Rang #${esc(divRank(f))}</p>`:''}
+     ${f.org>0&&f.contract?`<p class="career-meta">${esc(contractFightsLeftLabel(f.contract))}</p>`:''}
+     ${f.stage==='pro'&&f.amaRec?`<p class="career-meta">Amateur : ${esc(f.amaRec.W)}-${esc(f.amaRec.L)}</p>`:''}
+     <p class="career-meta">Gains en carrière : ${esc(formatArgent(f.earnings))}</p></div>
+     ${evolution.length?`<section class="career-block"><h2>Ce que tu es devenu</h2><p class="career-evolution">${evolution.map(esc).join('<br>')}</p></section>`:''}
+     ${prep&&prep.screen==='camp'?`<section class="career-block career-camp"><h2>Le camp de cette semaine</h2><div class="career-training">${G.train.map((t,i)=>`<button onclick="CL.train(${i})">${esc(t.label)}</button>`).join('')}</div><button class="career-link" onclick="CL.go('camp')">Voir les détails du camp</button></section>`:''}
+     <!-- ==== [ANCRE: HUB_SOUS_MENUS] — Lot P3/2026, remplacé par T8b :
+          historique au centre ; les six accès Dossier restent au déroulé. ==== -->
+     <details class="career-dossier"><summary>Dossier</summary>${hubDossierHtml()}</details>
+     ${!f.retired?'<button class="career-link career-retire" onclick="CL.go(\'retire\')">Déclarer la retraite (définitif)</button>':''}
+   </section>
+   ${hasMiddle?`<section class="career-main">
+     ${opponent?`<section class="career-block"><h2>Ton prochain combat</h2><div class="career-next"><span class="career-meta">${esc(orgDisplayName(f))} · ${prep.screen==='camp'?'camp de préparation':'plan de combat'}</span><h3>Contre ${esc(opponent.name)}</h3><p>${esc(careerRecordText(opponent))}${opponent.styleLabel?' · '+esc(opponent.styleLabel):''}${opponent.age?' · '+esc(opponent.age)+' ans':''}</p><button class="career-link" onclick="CL.viewCareerOpponent('${escJsAttr(opponent.id)}','hub')">Étudier ses combats</button></div></section>`:''}
+     ${history?`<section class="career-block"><h2>Ta carrière</h2>${history}${f.history.length>5?'<button class="career-link" onclick="CL.go(\'history\')">Toutes les archives</button>':''}</section>`:''}
+   </section>`:''}
+    <aside class="career-aside"><section class="career-block"><h2>Ton état</h2><p>${state.map(esc).join('<br>')}</p></section></aside>
+   </div></div>`;
 }
+/* ==== [ANCRE: HUB_SOUS_MENUS_HELPERS] — Lot P3/2026, porté par T8b :
+   historique partagé, cinq lignes, grille 90px / minmax(0,1fr) de 10. ==== */
 /** Sous-menu Combat du hub : les 5 derniers combats de f.history, du plus
  * récent au plus ancien, un par ligne (pas de carte). Une sauvegarde
  * ancienne peut porter des entrées sans oppNick/oppRank/time (ajoutés au
@@ -250,46 +261,50 @@ function hubTabsHtml(){
  * @param {Fighter} f @returns {string} */
 function hubCombatHtml(f){
   const h=(f.history||[]).slice(-5).reverse();
-  if(!h.length) return `<div class="eyebrow" style="margin-bottom:10px">Derniers combats</div><span class="small muted">Pas encore de combat.</span>`;
+   if(!h.length) return '';
   const rows=h.map((e,i)=>{
     const resLabel=e.res==='win'?'Victoire':e.res==='loss'?'Défaite':'Nul';
-    const resColor=e.res==='win'?'var(--pos)':e.res==='loss'?'var(--neg)':'var(--muted)';
+     const resClass=e.res==='win'?'career-win':e.res==='loss'?'career-loss':'career-draw';
     const method=e.method||'';
     let methodLine=method;
     if(!isDecisionLike(method) && method){
       methodLine=method;
       if(e.round) methodLine+=` · R${e.round}`;
       if(e.time) methodLine+=` · ${e.time}`;
-    } else if(method==='Décision'){
-      methodLine='Décision unanime';
-    }
-    const nickHtml=e.oppNick?`<span style="font-family:'Fraunces',serif;font-style:italic;font-size:13.5px;color:var(--gold)">« ${esc(e.oppNick)} »</span>`:'';
-    const rankHtml=e.oppRank?`<span class="tag" style="margin-top:7px;display:inline-block">RANG #${e.oppRank}</span>`:'';
-    const last=i===h.length-1;
-    return `<div style="${last?'':'border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px'}">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
-        <span style="font-family:'Oswald',sans-serif;font-size:19px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:${resColor}">${resLabel}</span>
-        <span style="font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;text-transform:uppercase;color:var(--text)">${esc(e.oppName||'')} <span style="font-size:13px">${e.oppFlag||''}</span></span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:3px">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted)">${methodLine}</span>
-        ${nickHtml}
-      </div>
-      ${rankHtml}
-    </div>`;
-  }).join('');
-  return `<div class="eyebrow" style="margin-bottom:10px">Derniers combats</div>${rows}`;
+     }
+     const nickHtml=e.oppNick?` « ${esc(e.oppNick)} »`:'';
+     const rankHtml=e.oppRank?` · RANG #${esc(e.oppRank)}`:'';
+     const last=i===h.length-1;
+     return `<div class="career-history-row${last?' career-history-last':''}"><span class="career-result ${resClass}">${resLabel}</span><div>contre ${esc(e.oppName||'')}${nickHtml}${e.oppFlag?' '+esc(e.oppFlag):''}${methodLine?', '+esc(methodLine):''}${rankHtml}</div></div>`;
+   }).join('');
+   return `<div class="career-history">${rows}</div>`;
 }
 /** Sous-menu Dossier du hub : les six écrans annexes de carrière, en grille
  * 2 colonnes. Mêmes cibles de navigation que l'ancienne grille à six
  * boutons (ANCRE HUB_GRILLE, retirée). @returns {string} */
 function hubDossierHtml(){
-  const tile=(label,target)=>`<button class="btn" style="margin:0;border:1px solid var(--line);color:var(--text);padding:14px 8px;min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-transform:uppercase;font-size:13px;letter-spacing:.05em;line-height:1.3" onclick="CL.go('${target}')">${label}</button>`;
+   const tile=(label,target)=>`<button class="career-link" onclick="CL.go('${target}')">${label}</button>`;
   return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     ${tile('Bilan technique','profile')}${tile('Classements','rankings')}
     ${tile('Palmarès','ach')}${tile('Archives','history')}
     ${tile('Ceintures','beltLineage')}${tile('Panthéon','hof')}
   </div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: LOT4_T8B_FICHE_ADVERSAIRE] — réparation du lien des deux
+   classements. Même identité et même historique que le hub, lecture seule.
+   Les PNJ peuvent n'avoir aucun historique : aucun combat n'est fabriqué. ==== */
+function careerOpponentById(id){
+  const candidates=[...(G.roster||[]),...(G.opps||[]).map(e=>e.o),G.sel&&G.sel.o,G.fight&&G.fight.opp];
+  return candidates.find(o=>o&&String(o.id)===String(id))||null;
+}
+function scr_opponent_card(){
+  const o=careerOpponentById(G._oppCardId),back=G._oppCardReturn==='rankings'?'rankings':'hub';
+  const returnButton=`<button class="career-link" onclick="CL.go('${back}')">Retour ${back==='rankings'?'aux classements':'à la carrière'}</button>`;
+  if(!o) return `<div class="scr career-screen"><p>Combattant introuvable.</p>${returnButton}</div>`;
+  const history=hubCombatHtml(o);
+  return `<div class="scr career-screen career-opponent"><header class="career-header"><div class="career-heading">Fiche combattant</div>${returnButton}</header><div class="career-opponent-columns"><section class="career-identity"><div><h1>${esc(o.name)}</h1>${o.nick?`<p>« ${esc(o.nick)} »</p>`:''}<p class="career-meta">${esc(o.flag||'')} ${esc(o.divName)} · ${esc(o.age)} ans · ${esc(careerRecordText(o))}</p>${o.styleLabel?`<p>${esc(o.styleLabel)}</p>`:''}</div>${o.phys?`<p>${esc(o.phys.height)} cm · allonge ${esc(o.phys.reach)} cm · ${o.phys.stance==='southpaw'?'garde gauchère':'garde orthodoxe'}</p>`:''}</section>${history?`<section class="career-block"><h2>Ses derniers combats</h2>${history}</section>`:''}</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
 
@@ -1154,7 +1169,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
      <div style="width:32px">RANG</div><div style="flex:1">IDENTITÉ</div><div style="width:82px;text-align:right">RECORD</div><div style="width:56px;text-align:right">P4P</div>
     </div>`;
     p4pSorted.forEach((o,i)=>{ const isPlayer=(o===f); const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
-      h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` onclick="G._oppCardId='${o.id}';G._oppCardReturn='rankings';CL.go('opponent_card')"`}>
+      h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="CL.viewCareerOpponent('${escJsAttr(o.id)}','rankings')"`}>
         <div class="mono" style="width:32px;font-size:15px">${i+1}</div>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column">
           <span class="disp" style="font-size:17px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rankIdentityName(o)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}${o.champion?' <span class="mono gold" style="font-size:11px">C</span>':''}</span>
@@ -1190,7 +1205,7 @@ function scr_rankings(){ const f=G.f; const dr=rankPool(G.roster.concat([f]));
     const fightsTot=o.W+o.L+(o.D||0);
     const statusStr=o.champion?'CHAMPION':(fightsTot===0?'NR':arrow);
     const rowBg=isPlayer?'background:var(--text);color:var(--bg)':'';
-    h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` onclick="G._oppCardId='${o.id}';G._oppCardReturn='rankings';CL.go('opponent_card')"`}>
+    h+=`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px dotted var(--line);font-size:15px;${rowBg}${isPlayer?'':'cursor:pointer'}"${isPlayer?'':` role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="CL.viewCareerOpponent('${escJsAttr(o.id)}','rankings')"`}>
       <div class="mono" style="width:32px;font-size:15px;${o.champion&&!isPlayer?'color:var(--gold)':''}">${o.champion?'C':rank}</div>
       <div style="flex:1;min-width:0;display:flex;flex-direction:column">
         <span class="disp" style="font-size:17px;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${rankIdentityName(o)} ${o.flag}${isPlayer?' <span class="mono" style="font-size:11px">(TOI)</span>':''}</span>
