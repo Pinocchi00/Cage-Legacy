@@ -1,6 +1,8 @@
 # LOT 5 — Le monde qui parle
 
-*Contrat écrit le 23/09/2026, non commencé.*
+*Contrat écrit le 23/09/2026, non commencé. **Étendu et réorganisé le 30/09/2026
+par `docs/LOT-5-UN-MONDE-HUMAIN.md`**, qui reprend ses tranches T1 à T8 et révise
+ses règles d'écriture (décisions d'Anthony du 30/09).*
 
 Répond à l'audit du 17/09 (§8 : « classements et ceintures, presse et callouts,
 camps, recrutement ») et à ses manques M5, M7, M8, M9, au constat C10 ; reprend
