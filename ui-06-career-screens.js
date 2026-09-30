@@ -119,11 +119,11 @@ function scr_pro_nickname(){
     <div class="card" style="text-align:left;background:var(--panel2);border:1px solid var(--line);padding:16px;margin:20px 0">
       <div class="fld" style="margin-bottom:12px">
         <label class="eyebrow" style="display:block;margin-bottom:6px">Ton Surnom</label>
-        <input id="pro-nick-input" type="text" maxlength="25" value="${esc(G._proNickDraft||'')}" style="width:100%;box-sizing:border-box;background:#14100B;border:1px solid var(--line);color:#FFF;padding:12px;font-family:'Fraunces',serif;font-style:italic;font-size:16px" oninput="G._proNickDraft=this.value"/>
+        <input id="pro-nick-input" type="text" maxlength="25" value="${esc(G._proNickDraft||'')}" style="width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:12px;font-family:var(--mgmt-font-body);font-style:italic;font-size:16px" oninput="G._proNickDraft=this.value"/>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span class="eyebrow" style="font-size:10px">Idées :</span>
-        <button class="tag2" style="background:#241B10;border-color:var(--gold);color:var(--gold);cursor:pointer;padding:6px 12px" onclick="G._proNickDraft=rollRandomNickname();render();">🎲 Aléatoire</button>
+        <button class="tag2" style="background:var(--bg);border-color:var(--gold);color:var(--gold);cursor:pointer;padding:6px 12px" onclick="G._proNickDraft=rollRandomNickname();render();">🎲 Aléatoire</button>
       </div>
       <div class="tagrow" style="margin:0">
         ${uniqueSugg.map(s=>`<button class="tag2" style="cursor:pointer" onclick="G._proNickDraft='${escJsAttr(s)}';render();">« ${esc(s)} »</button>`).join('')}

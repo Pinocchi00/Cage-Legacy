@@ -1,0 +1,34 @@
+/* ==== [ANCRE: LOT4_T8A_PEAU_CARRIERE] — décision du 28/09, lot 4 T8a.
+   Maquettes : Saira/Saira Condensed, panneaux mats et jaune principal.
+   Les écrans sans maquette conservent leurs gabarits et leurs actions.
+   Toutes les valeurs d'identité proviennent des jetons communs d'index.html. ==== */
+body{background:var(--mgmt-background);background-attachment:fixed;font-family:var(--mgmt-font-body);font-size:var(--mgmt-size-body);font-weight:300}
+body::after{display:none}
+@scope (#app:not(.mgmt):not(.arene)){
+.scr .disp,.scr .hero-name,.scr .fh .nm,.scr .opp-nm,.scr .stat-big,.scr .duel2 .num,.scr .leg-tcard .nm,.scr .gal-rail-title,.scr .gal-tile .nm,.scr .shop-rail-title,.scr .shop-tile .nm,.scr .epi,.scr .arena-hud{font-family:var(--mgmt-font-display);font-style:italic;font-weight:800}
+.scr .disp.big{font-size:var(--mgmt-size-title)}
+.scr h2.disp{font-size:var(--mgmt-size-name)}
+.scr .hero-name,.scr .fh .nm{font-size:var(--mgmt-size-name)}
+.scr .hero-name em,.scr .narr blockquote,.scr .duel2 .sep,.scr .rk-n,.scr .fld input,.faith-paper{font-family:var(--mgmt-font-body)}
+.scr .mono,.scr .eyebrow,.scr .tag,.scr .tag2,.scr .meta-strip,.scr .narr cite,.scr .rarity-guide span,.scr .tier-lbl,.scr .tier-lbl-lg,.scr .rec,.scr .gal-rail-title span.n,.scr .gal-tile .base,.scr .gal-tile .preview-hint,.scr .shop-rail-title span.n,.scr .shop-tile .price,.scr .shop-tile .rar-lbl,.scr .shop-preview-hint,.scr .fld label,.scr .fh .sub,.scr .l5 .p i,.scr .mf-l,.scr .opp-rec,.scr .opp-wp-l,.scr .opp-wp-v,.scr .dlt,.scr .stats-card .st-row,.scr .attr-l,.scr .attr-v,.scr .rk,.scr .lg-v,.scr .lg-l,.scr .arena-st .st-lbl,.scr .log-row{font-family:var(--mgmt-font-body);font-size:13px}
+.scr .stat-lbl{font-size:13px}
+.scr .meta-strip>div>span,.scr .opp-read,.scr .story{opacity:1}
+.scr [style*="opacity:.7"],.scr [style*="opacity:.8"],.scr [style*="opacity:.9"]{opacity:1!important}
+.scr .lede,.scr .lede.small,.scr .opp-mid,.scr .opp-read,.scr .story{font-size:17px}
+.scr button,.scr .pill,.scr .l5 .p{font-family:var(--mgmt-font-display)}
+.scr .opp-nm{font-size:22px}
+.scr .eyebrow{font-family:var(--mgmt-font-display);font-size:var(--mgmt-size-section)}
+.scr [style*="font-family:'Oswald'"]{font-family:var(--mgmt-font-display)!important}
+.scr [style*="font-family:'Fraunces'"],.scr [style*="font-family:'JetBrains Mono'"]{font-family:var(--mgmt-font-body)!important}
+.scr .glass,.scr .glass.raise,.scr .btn.primary,.scr .btn.gold{background:var(--panel2);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:var(--line)}
+.scr .glass::before,.scr .glass::after,.scr .btn.primary::before,.scr .btn.gold::before{display:none}
+.scr .btn.primary,.scr .btn.gold,.scr .pill.on,.scr .tag2.gold-fill{background:var(--gold);color:var(--mgmt-dark-ink);border-color:var(--gold)}
+.scr .btn.primary:hover,.scr .btn.gold:hover{background:var(--text);color:var(--mgmt-dark-ink)}
+.scr .btn.ghost:hover{background:var(--bg)}
+.scr .blood,.scr [style*="color:var(--blood)"]{color:var(--mgmt-danger-ink)!important}
+.scr .rk.you{background:var(--panel2);border-left:3px solid var(--gold)}
+.scr .mwash{background-image:none}
+.scr [style*="color:#4DA6FF"],.scr [style*="color:#8b5cf6"]{color:var(--muted)!important}
+.scr [style*="font-size:7.5px"],.scr [style*="font-size:8px"],.scr [style*="font-size:8.5px"],.scr [style*="font-size:9px"],.scr [style*="font-size:9.5px"],.scr [style*="font-size:10px"],.scr [style*="font-size:10.5px"],.scr [style*="font-size:11px"],.scr [style*="font-size:11.5px"],.scr [style*="font-size:12px"],.scr [style*="font-size:12.5px"]{font-size:13px!important}
+}
+/* ==== [FIN ANCRE] ==== */

@@ -1,0 +1,78 @@
+{
+  "viewport": 1920,
+  "reports": [
+    {
+      "label": "création",
+      "texts": 49,
+      "minimumContrast": 5.41,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "hub",
+      "texts": 26,
+      "minimumContrast": 5.09,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "profile",
+      "texts": 68,
+      "minimumContrast": 5.13,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "rankings",
+      "texts": 83,
+      "minimumContrast": 5.23,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "history",
+      "texts": 8,
+      "minimumContrast": 5.47,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "beltLineage",
+      "texts": 7,
+      "minimumContrast": 5.78,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "retire",
+      "texts": 6,
+      "minimumContrast": 5.61,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "sélection",
+      "texts": 44,
+      "minimumContrast": 5.54,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    },
+    {
+      "label": "duel",
+      "texts": 16,
+      "minimumContrast": 5.89,
+      "minimumSize": 13,
+      "overflow": false,
+      "failures": []
+    }
+  ],
+  "consoleErrors": []
+}
