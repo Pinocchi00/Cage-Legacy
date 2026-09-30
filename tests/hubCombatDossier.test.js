@@ -8,6 +8,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
+const {clickThrough}=require('./helpers/playthrough');
 
 function fullEntry(over){
   return Object.assign({
@@ -31,23 +32,23 @@ test('hubCombatHtml() — 5 combats complets : les 5 lignes s’affichent, du pl
   assert.ok(html.includes('KO/TKO · R2 · 1:45'), 'méthode condensée avec round et temps');
 });
 
-test('hubCombatHtml() — seulement 2 combats : pas de crash, le dernier de la liste n’a pas de filet', () => {
+test('hubCombatHtml() — T8b / maquette 10 : deux lignes, la dernière sans filet', () => {
   const win = newGameWindow();
   const history = [fullEntry({ oppName: 'Premier' }), fullEntry({ oppName: 'Second' })];
   const f = { history };
   const html = win.hubCombatHtml(f);
   assert.ok(!/undefined/.test(html));
   assert.ok(html.includes('Premier') && html.includes('Second'));
-  const borderCount = (html.match(/border-bottom:1px solid var\(--line\)/g) || []).length;
-  assert.equal(borderCount, 1, 'sur 2 combats affichés, un seul filet (entre les deux, pas après le dernier)');
+  const doc=new win.DOMParser().parseFromString(html,'text/html');
+  assert.equal(doc.querySelectorAll('.career-history-row').length,2);
+  assert.ok(doc.querySelector('.career-history-row:last-child').classList.contains('career-history-last'));
 });
 
-test('hubCombatHtml() — historique vide : une seule ligne .small.muted, pas de crash', () => {
+// Décision T8b, contrat §1/§4 bis : un bloc sans données disparaît.
+test('hubCombatHtml() — T8b : historique vide, aucun bloc ni texte de remplissage', () => {
   const win = newGameWindow();
   const html = win.hubCombatHtml({ history: [] });
-  assert.ok(html.includes('Pas encore de combat.'));
-  assert.ok(html.includes('small') && html.includes('muted'));
-  assert.ok(!/undefined/.test(html));
+  assert.equal(html,'');
 });
 
 test('hubCombatHtml() — entrée ancienne sans oppNick/oppRank/time : repli propre, aucun "undefined", pas de guillemets ni de tag vides', () => {
@@ -68,7 +69,9 @@ test('hubCombatHtml() — décision unanime/partagée et égalité : pas de roun
   const decisionPartagee = { res:'win', method:'Décision partagée', oppId:2, oppName:'B', oppFlag:'🇫🇷' };
   const egalite = { res:'draw', method:'Égalité', oppId:3, oppName:'C', oppFlag:'🇫🇷' };
   const html = win.hubCombatHtml({ history: [decisionUnanime, decisionPartagee, egalite] });
-  assert.ok(html.includes('Décision unanime'));
+  // T8b / §1 : une méthode « Décision » ne prouve pas l'unanimité.
+  assert.ok(html.includes('Décision'));
+  assert.ok(!html.includes('Décision unanime'));
   assert.ok(html.includes('Décision partagée'));
   assert.ok(html.includes('Égalité'));
   assert.ok(!/Décision[^<]*· R/.test(html), 'aucune décision ne porte de round');
@@ -125,3 +128,121 @@ test('hubDossierHtml() — six boutons vers les mêmes écrans qu’avant, en gr
   assert.ok(!/undefined/.test(html));
   assert.ok(!html.includes('CL.duelEnter()'), 'LOT DUEL-02 : le Duel entre amis a quitté le sous-menu Dossier du hub');
 });
+
+/* ==== [ANCRE: LOT4_T8B_TESTS_HUB] — contrat T8 / §1 / §4 bis : absence
+   des données manquantes, préparation réelle, navigation et échappement. ==== */
+function careerWindow(){
+  const win=newGameWindow({runMain:true});
+  win.setSeed(11);
+  win.CL.newCareer();win.CL.create();
+  return win;
+}
+
+test('T8b — hub neuf : données réelles, aucun faux prochain combat ni bloc vide',()=>{
+  const win=careerWindow(),f=win.G.f;
+  win.CL.fightSelect(); // Des offres ne constituent pas un combat signé.
+  win.CL.go('hub');
+  const doc=win.document,html=doc.querySelector('#app').innerHTML;
+  assert.ok(doc.querySelector('.career-name').textContent.includes(f.name));
+  assert.ok(html.includes(f.divName));
+  assert.ok(!html.includes('Ton prochain combat'));
+  assert.ok(!html.includes('Le camp de cette semaine'));
+  assert.ok(!html.includes('Ta carrière'));
+  assert.ok(html.includes('Ton état'),'T8b reprise : moral et forme rendent ce bloc permanent');
+  assert.ok(!html.includes('Ton agent'));
+  assert.ok(!html.includes('Ce qu’on dit de toi'));
+  assert.equal(doc.querySelectorAll('.gauge,.gauge2,.stat-big').length,0);
+  const dossier=doc.querySelector('.career-dossier');
+  assert.equal(dossier.querySelectorAll('button').length,6);
+});
+
+test('T8b reprise — carrière neuve : moral et forme sont lus en d20, en texte sans barre',()=>{
+  const win=careerWindow(),f=win.G.f;
+  const state=()=>win.document.querySelector('.career-aside .career-block p');
+  assert.equal(state().textContent,win.eval('`Moral ${d20(G.f.morale)}/20 · Forme ${d20(G.f.form)}/20`'));
+  f.morale=70;f.form=55;win.render();
+  assert.equal(state().textContent,'Moral 14/20 · Forme 11/20');
+  assert.equal(win.document.querySelectorAll('.gauge,.gauge2').length,0);
+});
+
+test('T8b — préparation existante : camp et étude lisibles ; blessure invalide la préparation',()=>{
+  const win=careerWindow();
+  win.CL.fightSelect();win.CL.opp(0);
+  if(win.G.screen==='press_conf'){win.G.pressConf=null;win.CL.go('camp');}
+  const f=win.G.f,opponent=win.G.sel.o;
+  win.CL.go('hub');
+  assert.ok(win.document.querySelector('.career-next').textContent.includes(opponent.name));
+  assert.equal(win.document.querySelectorAll('.career-training button').length,win.G.train.length);
+  win.document.querySelector('.career-next button').click();
+  assert.equal(win.G.screen,'opponent_card');
+  assert.equal(win.G.f,f,'la consultation ne remplace jamais le joueur');
+  assert.ok(win.document.querySelector('h1').textContent.includes(opponent.name));
+  win.document.querySelector('.career-header button').click();
+  assert.equal(win.G.screen,'hub');
+  assert.ok(win.document.querySelector('.career-camp'));
+  // Une blessure invalide la préparation, y compris après sa guérison.
+  f.injury={name:'Blessure',left:1};win.render();
+  assert.equal(win.document.querySelector('.career-next'),null);
+  f.injury=null;win.render();
+  assert.equal(win.document.querySelector('.career-next'),null);
+});
+
+test('T8b — reprise sauvegardée du camp ; après le combat, les anciennes données ne font pas un prochain combat',()=>{
+  const win=careerWindow();
+  win.CL.fightSelect();win.CL.opp(0);
+  if(win.G.screen==='press_conf'){win.G.pressConf=null;win.CL.go('camp');}
+  win.save();win.CL.go('title');win.CL.cont();
+  assert.equal(win.G.screen,'hub');
+  assert.ok(win.document.querySelector('.career-camp'));
+  win.document.querySelector('.career-primary').click();
+  clickThrough(win,{maxSteps:400,stopWhen:w=>w.G.screen==='hub'});
+  assert.equal(win.G.screen,'hub');
+  assert.ok(win.G.f.history.length||win.G.f.injury,'le flux existant a joué ou blessé le combattant');
+  assert.equal(win.document.querySelector('.career-next'),null);
+  assert.equal(win.document.querySelector('.career-camp'),null);
+});
+
+test('T8b — consultation du hub et de la fiche : aucun tirage ni fait dérivé persisté',()=>{
+  const win=careerWindow(),f=win.G.f,before=JSON.stringify(f);
+  win.setSeed(87);const expected=win.rnd();win.setSeed(87);
+  win.scr_hub();win.scr_hub();
+  win.G._oppCardId=win.G.roster[0].id;win.scr_opponent_card();
+  assert.equal(win.rnd(),expected);
+  assert.equal(JSON.stringify(f),before);
+  assert.ok(!Object.keys(win.G).some(k=>/careerHubPreparation/.test(k)));
+});
+
+test('T8b — les deux classements ouvrent la vraie fiche et reviennent au même onglet',()=>{
+  const win=careerWindow(),f=win.G.f;
+  for(const tab of ['div','p4p']){
+    win.CL.setRankingsTab(tab);win.CL.go('rankings');
+    const row=win.document.querySelector('[onclick^="CL.viewCareerOpponent"]');
+    assert.ok(row,tab);
+    row.click();
+    assert.equal(win.G.screen,'opponent_card');
+    const o=win.careerOpponentById(win.G._oppCardId);
+    assert.equal(win.document.querySelector('h1').textContent,o.name);
+    assert.equal(win.G.f,f);
+    win.render(); // La destination survit à un second rendu de la fiche.
+    win.document.querySelector('.career-header button').click();
+    assert.equal(win.G.screen,'rankings');
+    assert.equal(win.G._rankingsTab,tab);
+  }
+});
+
+test('T8b — nom, surnom, blessure et historique hostiles restent du texte',()=>{
+  const win=careerWindow(),f=win.G.f,attack='<img src=x onerror="window.pwned=true">';
+  f.name=attack;f.nick=attack;f.injury={name:attack,left:1};
+  f.history=[fullEntry({oppName:attack,oppNick:attack,method:attack,oppFlag:attack})];
+  win.render();
+  assert.equal(win.document.querySelectorAll('#app img').length,0);
+  assert.ok(win.document.querySelector('.career-name').textContent.includes(attack));
+  assert.ok(win.document.querySelector('.career-history').textContent.includes(attack));
+  assert.ok(win.document.querySelector('.career-aside').textContent.includes(attack));
+  const o=win.G.roster[0];o.name=attack;o.nick=attack;
+  win.CL.viewCareerOpponent(o.id,'rankings');
+  assert.equal(win.document.querySelectorAll('#app img').length,0);
+  assert.equal(win.document.querySelector('h1').textContent,attack);
+  assert.equal(win.pwned,undefined);
+});
+/* ==== [FIN ANCRE] ==== */
