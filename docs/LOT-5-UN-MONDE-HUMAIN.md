@@ -282,7 +282,7 @@ nouvelles s'appellent **H1 à H10**.
 | T2 + T3 — La voix branchée | GLM | Le mécanisme choisit une réplique **validée par Anthony** selon la voix et la situation ; les médias | Réécriture d'Anthony |
 | T5 — Le recrutement | Sol | Inchangée, sur le monde agrandi | H4 |
 | T6 — Cartes incomplètes | GLM | Inchangée (4 tests ignorés au vert) | — |
-| T7 — Les camps | Sol | **Entre dans le lot** : le catalogue en dépend (changement de camp, noms thaïs) ; noms de salles à écrire | H5 |
+| T7 — Les camps | Sol | **Entre dans le lot (confirmé le 30/09)** : le catalogue en dépend (changement de camp, noms thaïs) ; noms de salles à écrire | H5 |
 | T8 — Classement des organisations | — | Toujours bloquée par QO-11 | Anthony |
 
 **Ordre proposé.** Sol finit d'abord le lot 4 (T8b, l'écran de carrière), puis
@@ -311,14 +311,14 @@ suite** par H1 puis H2, H5, H8, H9, T6.
 
 ## 9. Ce qui attend Anthony
 
-**Décisions.**
-1. Les **effectifs** du §3.1 (≈ 1 025 dans le monde, 130 à 150 chez Split, soirée
-   à 12 combats) : d'accord, ou autre ordre de grandeur ?
-2. **Leïla propose les préliminaires** par défaut : d'accord ?
-3. **Seize nouveaux pays** : d'accord sur la liste ?
-4. **Les parties en cours** gardent-elles leurs styles (marqueur de génération,
-   proposé), ou recommencent-elles ?
-5. Les **camps** entrent dans le lot (T7) : confirmé par cette demande ?
+**Décisions — toutes acceptées par Anthony le 30/09/2026 (« oui à tout »).**
+1. ~~Les effectifs du §3.1~~ **Oui** : ≈ 1 025 dans le monde, 130 à 150 chez
+   Split, soirée à 12 combats (5 + 7).
+2. ~~Leïla propose les préliminaires par défaut~~ **Oui.**
+3. ~~Seize nouveaux pays~~ **Oui**, la liste du catalogue §1.2.
+4. ~~Les parties en cours~~ **Gardent leurs styles** : marqueur de génération,
+   migration 10 → 11 (H3).
+5. ~~Les camps~~ **Entrent dans le lot** : la T7 part.
 
 **Écriture (relire et réécrire).** Les quarante-huit voix et les dix médias ;
 les surnoms ; les libellés des moments de vie, des rituels, des rôles, des
