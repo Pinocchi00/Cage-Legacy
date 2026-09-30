@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr" data-theme="dark"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<meta name="theme-color" content="#14100B"/><title>Cage Legacy</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#211B1E"/><title>Cage Legacy</title>
 <style>
 /* ==== [ANCRE: MGMT_LOT4_FIDELITE_POLICES] — Lot 4 fidélité : les caractères
    des maquettes 02/05 sont embarqués pour rester disponibles hors ligne.
@@ -38,11 +36,11 @@ window.onerror = function(msg, url, line) {
 /* CAGE LEGACY — registre d'archives, thème sombre, contraste renforcé pour
    une lisibilité maximale (y compris en plein soleil) */
 :root{
- --bg:#14100B; --panel:#14100B; --panel2:#241D13; --line:#4A3B26;
- --text:#F5EFE0; --muted:#A89A81; --faint:#8A7C63;
- --blood:#E8442F; --blood-d:#9C2C1E; --gold:#E6B93A; --gold-d:#8A6A1E;
- --sage:#7C9788;
- --frost:#8FC7D9; --frost-d:#4F7E8F;
+ --bg:var(--mgmt-plum-deep); --panel:var(--mgmt-plum); --panel2:var(--mgmt-panel); --line:var(--mgmt-edge);
+ --text:var(--mgmt-ink); --muted:var(--mgmt-secondary); --faint:var(--mgmt-secondary);
+ --blood:var(--mgmt-red); --blood-d:var(--mgmt-plum-deep); --gold:var(--mgmt-yellow); --gold-d:var(--mgmt-yellow);
+ --sage:var(--mgmt-yellow);
+ --frost:var(--mgmt-secondary); --frost-d:var(--mgmt-secondary);
  --r:0px; --maxw:560px;
  /* ==== [ANCRE: V2_TOKENS_SEMANTIQUES] — bug de fond (V2-02) : --win valait
     un BEIGE en mode Faith (#B8B29C, cf. faith-skin plus bas dans
@@ -57,17 +55,26 @@ window.onerror = function(msg, url, line) {
     round perdu, attribut en baisse, blessure → --neg ; risque, seuil,
     avertissement → --warn. --win/--loss deviennent de simples ALIAS pour
     ne rien casser dans le code existant qui les lit encore. ==== */
- --pos:#7FC488; --neg:#E8442F; --warn:#E6B93A;
+ --pos:var(--mgmt-yellow); --neg:var(--mgmt-danger-ink); --warn:var(--mgmt-yellow);
  --win:var(--pos); --loss:var(--neg);
   /* ==== [ANCRE: MGMT_LOT4_T1_TOKENS] — Lot 4 T1, corrigé par fidélité
      maquettes 02/05 : couleurs, polices et octogone relevés sur les fichiers. ==== */
   --mgmt-plum:#2B2327; --mgmt-plum-top:#3B2F33; --mgmt-plum-deep:#211B1E;
-  --mgmt-panel:rgba(255,248,238,.07); --mgmt-edge:rgba(255,248,238,.16);
+  --mgmt-panel:color-mix(in srgb,var(--mgmt-ink) 7%,transparent); --mgmt-edge:color-mix(in srgb,var(--mgmt-ink) 16%,transparent);
+  --mgmt-panel-soft:color-mix(in srgb,var(--mgmt-ink) 6%,transparent);
   --mgmt-ink:#FFF8EE; --mgmt-secondary:#D9CCC0; --mgmt-tertiary:#D9CCC0;
   --mgmt-yellow:#FFC83D; --mgmt-red:#E5322D;
   --mgmt-font-display:'Saira Condensed','Arial Narrow',sans-serif;
   --mgmt-font-body:'Saira','Segoe UI',sans-serif;
   --mgmt-octagon:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);
+  /* ==== [ANCRE: LOT4_T8A_JETONS_COMMUNS] — T8a : la carrière consomme
+     le même socle que le management. Le rouge des aplats reste celui des
+     maquettes ; sa variante de texte est éclaircie pour le contraste AA. ==== */
+  --mgmt-dark-ink:#1F1A1D;
+  --mgmt-danger-ink:color-mix(in srgb,var(--mgmt-red) 40%,var(--mgmt-ink));
+  --mgmt-cut:polygon(0 0,94% 0,100% 18%,100% 100%,0 100%);
+  --mgmt-size-body:18px; --mgmt-size-section:20px; --mgmt-size-name:34px; --mgmt-size-title:64px;
+  --mgmt-background:radial-gradient(ellipse 900px 600px at 50% 0%,color-mix(in srgb,var(--mgmt-yellow) 16%,transparent),transparent 70%),linear-gradient(180deg,var(--mgmt-plum-top),var(--mgmt-plum) 55%,var(--mgmt-plum-deep));
 }
 /* ==== [ANCRE: FAITH_PAPIER_OBJET] — le crème d'origine (#E4DFD3) était bon,
    juste appliqué à la mauvaise échelle : posé sur TOUT le mode, il n'était
@@ -88,14 +95,15 @@ window.onerror = function(msg, url, line) {
    détache sans trancher), bordure + rotation + ombre déjà en place
    suffisent à le distinguer sur le fond nuit, bien plus sombre. ==== */
 .faith-paper{
-  --bg:#F1ECE0; --panel:#F1ECE0; --panel2:#DAD4C6; --line:#B9B0A0;
-  --text:#16130E; --muted:#5C5346; --faint:#7A7161;
-  --gold:#9C2C1E; --gold-d:#7A2216; --sage:#4A5D50;
-  --blood:#9C2C1E; --blood-d:#7A2216;
-  --f-red-hi:#E8442F;
+  /* T8a : l'objet garde sa disposition, mais prend les jetons communs. */
+  --bg:var(--mgmt-plum-deep); --panel:var(--mgmt-plum); --panel2:var(--mgmt-panel); --line:var(--mgmt-edge);
+  --text:var(--mgmt-ink); --muted:var(--mgmt-secondary); --faint:var(--mgmt-secondary);
+  --gold:var(--mgmt-yellow); --gold-d:var(--mgmt-yellow); --sage:var(--mgmt-yellow);
+  --blood:var(--mgmt-red); --blood-d:var(--mgmt-plum-deep);
+  --f-red-hi:var(--mgmt-danger-ink);
   /* V2-02 : repeint --pos/--neg (jamais --win/--loss directement, cf. ANCRE
      V2_TOKENS_SEMANTIQUES) pour son propre fond clair, comme faith-papier. */
-  --pos:#1A5F33; --neg:#9C2C1E; --warn:#8A6A1E;
+  --pos:var(--mgmt-yellow); --neg:var(--mgmt-danger-ink); --warn:var(--mgmt-yellow);
   background:var(--bg); color:var(--text); font-family:'Fraunces',Georgia,serif;
   padding:24px 20px; border:1px solid var(--line);
   box-shadow:0 14px 34px rgba(0,0,0,.55); transform:rotate(-.4deg);
@@ -435,7 +443,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    périmètre bureau uniquement (#app.mgmt). Lot 4 T3, réserve 3 du lot 2 :
    le plafond 1400px est levé à 1920px — la direction artistique est un jeu
    PC en 1920×1080 ; les cinq écrans restent lisibles à 1920. ==== */
-#app.mgmt{max-width:1920px;background:radial-gradient(ellipse 900px 600px at 50% 0%,rgba(255,200,61,.16),rgba(255,200,61,0) 70%),linear-gradient(180deg,var(--mgmt-plum-top),var(--mgmt-plum) 55%,var(--mgmt-plum-deep));
+#app.mgmt{max-width:1920px;background:var(--mgmt-background);
  --bg:var(--mgmt-plum-deep);--panel2:var(--mgmt-panel);--line:var(--mgmt-edge);
  --text:var(--mgmt-ink);--muted:var(--mgmt-secondary);--faint:var(--mgmt-tertiary);
  --gold:var(--mgmt-yellow);--gold-d:var(--mgmt-yellow);--blood:var(--mgmt-red);--loss:var(--mgmt-red);
@@ -817,6 +825,49 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 @media(max-width:1279px){.mgmt-org-cols{grid-template-columns:1fr}.mgmt-org-main,.mgmt-org-aside{overflow:visible}}
 @media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT4_T4_LENDEMAIN] — Lot 4 T4 : le seul style de l'écran
+   du lendemain (maquette 06). Valeurs portées de la maquette : 40/64/48,
+   grille 560px / 1fr / 420px avec écart de 52px — la place de l'aside « Les
+   suites qu'on réclame » (lot 5) se referme, la grille devient 560px / 1fr ;
+   titres condensés 20-26px, en-tête condensé italique 800 à 62px, détails
+   17-19px légers ; jetons --mgmt-* uniquement, aucune couleur en dur.
+   Les blocs « On en parle » (presse, lot 5), « Les suites qu'on réclame »
+   (la presse et l'attente, lot 5) n'existent pas : la place se referme
+   (lot 4 §4 bis), aucun texte de maquette ne s'affiche (§1). l'or pour
+   l'entrée au top 15 (le même sens de la tendance que les classements, T6),
+   le crème pour le reste — le rouge reste réservé au danger. ==== */
+.mgmt-ld{padding:40px 64px 48px;gap:0}
+.mgmt-ld .mgmt-head{display:flex;align-items:flex-end;justify-content:space-between;gap:26px;border-bottom:1px solid var(--mgmt-edge);padding:0 0 20px;flex-wrap:wrap}
+.mgmt-ld .mgmt-head .disp{font-size:clamp(42px,3.23vw,62px);font-weight:800;font-style:italic;letter-spacing:0;text-transform:uppercase;line-height:1;margin:0}
+.mgmt-ld-next{flex:0 0 auto;display:inline-block;background:var(--mgmt-yellow);color:var(--mgmt-plum-deep);border:0;font:700 22px var(--mgmt-font-display);letter-spacing:.08em;text-transform:uppercase;padding:14px 28px;transform:skewX(-12deg);cursor:pointer}
+.mgmt-ld-next:hover{filter:brightness(1.1)}
+.mgmt-ld-next:focus-visible{outline:3px solid var(--mgmt-ink);outline-offset:3px}
+.mgmt-ld-cols{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:560px minmax(0,1fr);gap:52px;margin-top:26px}
+.mgmt-ld-pane{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 4px}
+.mgmt-ld-results{display:flex;flex-direction:column}
+.mgmt-ld-results>*{flex:0 0 auto}
+.mgmt-ld-hd{font:700 20px var(--mgmt-font-display);letter-spacing:.2em;text-transform:uppercase;color:var(--mgmt-yellow);margin:0 0 10px}
+.mgmt-ld-item{padding:14px 0;border-bottom:1px solid var(--mgmt-edge);display:flex;flex-direction:column;gap:3px;min-width:0}
+.mgmt-ld-slot{font-size:15px;color:var(--mgmt-secondary)}
+.mgmt-ld-slot.gold{color:var(--mgmt-yellow)}
+.mgmt-ld-title{font:700 26px/1.2 var(--mgmt-font-display);text-transform:uppercase;overflow-wrap:anywhere}
+.mgmt-ld-title.gold{color:var(--mgmt-yellow)}
+.mgmt-ld-sub{font:300 17px/1.5 var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mgmt-ld-detail{margin:2px 0 0;font-size:19px;font-weight:300;line-height:1.5;overflow-wrap:anywhere}
+.mgmt-ld-link{align-self:flex-start;background:none;border:0;padding:2px 0;margin:4px 0 0;color:var(--mgmt-yellow);font:700 16px var(--mgmt-font-display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.mgmt-ld-link:hover{filter:brightness(1.15)}
+.mgmt-ld-link:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:2px}
+.mgmt-ld-tout{margin-top:auto}
+@media(min-width:1280px) and (max-width:1599px){
+  .mgmt-ld-cols{grid-template-columns:minmax(0,.9fr) minmax(0,1fr);gap:24px}
+}
+@media(max-width:1279px){
+  .mgmt-ld{padding:40px 32px 48px}
+  .mgmt-ld-cols{grid-template-columns:1fr;gap:24px}
+  .mgmt-ld-pane{overflow:visible}
+  .mgmt-ld-tout{margin-top:12px}
+}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: ARENE_LOT4_FIDELITE_05] — Maquette 05 : scène 1920×1080,
    octogone en fond plein cadre ; fil, bandeau et commandes en surimpression.
    Le canvas et l'écran ne reçoivent ici que des règles de présentation. ==== */
@@ -854,7 +905,11 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .arene-controls .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .arene-controls .arene-spacer{flex:1}
 @media(max-width:900px){.arene-scr .arene-top{left:20px;right:20px}.arene-scr .arene-fil{left:20px;top:175px;width:45%;max-height:40%}.arene-scr .arene-controls{left:20px;right:20px;bottom:20px;gap:6px}.arene-controls .btn{font-size:15px;padding:8px}.arene-scr .arene-caption{bottom:105px}}
-</style></head>
+</style>
+<link rel="stylesheet" href="ui-skin.css?v=lot4t8a3">
+<link rel="stylesheet" href="ui-accueil.css?v=lot4t8a3">
+<link rel="stylesheet" href="ui-pantheon.css?v=lot4t8a3">
+</head>
 <body><div id="app"></div>
 <script src="data-skills.js?v=career7"></script>
 <script src="data-content.js?v=career7"></script>
@@ -910,12 +965,12 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      rester lisible et maintenable — l'ORDRE de chargement ci-dessous est
      important et ne doit jamais être changé (voir le commentaire d'en-tête
      de chaque fichier ui-0X-*.js pour le détail). -->
-<script src="ui-01-roster-matchmaking.js?v=career7"></script>
-<script src="ui-02-fight-prep-events.js?v=r2809"></script>
+<script src="ui-01-roster-matchmaking.js?v=lot4t8a3"></script>
+<script src="ui-02-fight-prep-events.js?v=lot4t8a3"></script>
 <script src="ui-03-contracts-arcade-data.js?v=career7"></script>
 <script src="ui-05-fight-resolution.js?v=career7"></script>
-<script src="ui-06-career-screens.js?v=noms1"></script>
-<script src="ui-07-contracts-legacy-screens.js?v=r2809"></script>
+<script src="ui-06-career-screens.js?v=lot4t8a3"></script>
+<script src="ui-07-contracts-legacy-screens.js?v=lot4t8a1"></script>
 <script src="ui-08-controller-arena.js?v=r2809"></script>
 <!-- ui-09-arena.js : second découpage, ultérieur au split en 8 fichiers ci-
      dessus (F-07, hygiène technique) — isole le moteur de rendu Canvas 2D de
@@ -952,7 +1007,7 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 <script src="mgmt-ecran-semaine.js?v=lot4f2reprise"></script>
 <script src="mgmt-ecran-carte.js?v=lot4f2reprise"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
-<script src="mgmt-ecran-lendemain.js?v=mgmt4t1"></script>
+<script src="mgmt-ecran-lendemain.js?v=lot4t4"></script>
 <script src="mgmt-ecran-fiche.js?v=lot4f2final"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=lot4f2org"></script>

@@ -1,0 +1,59 @@
+/* ==== [ANCRE: LOT4_T8A_PANTHEON_CSS] — maquette 09 : 44/64/48, en-tête
+   64px, chiffres 38px, cartes 22/26, grille souple / 460px et espace 56px.
+   Les actions et les filtres existants occupent la colonne annexe ; aucun
+   bloc de dépense ni aucun « regret » sans données. ==== */
+#app:has(.hof-screen){max-width:1920px}
+.hof-screen{min-height:100vh;min-height:100dvh;padding:44px 64px 48px;line-height:normal;background:radial-gradient(ellipse 900px 700px at 50% 5%,color-mix(in srgb,var(--mgmt-yellow) 22%,transparent),transparent 70%),linear-gradient(180deg,var(--mgmt-plum-top),var(--mgmt-plum) 55%,var(--mgmt-plum-deep));display:flex;flex-direction:column;gap:26px}
+.hof-header{display:flex;align-items:flex-end;justify-content:space-between;gap:40px;border-bottom:1px solid var(--mgmt-edge);padding-bottom:20px}
+.hof-heading{display:flex;align-items:center;gap:20px;min-width:0}
+.hof-heading h1{margin:0;font:italic 800 64px/1 var(--mgmt-font-display);text-transform:uppercase;overflow-wrap:anywhere}
+.hof-home{padding:0;width:40px;height:40px;flex:0 0 40px;background:none}
+.hof-home span{display:block;width:100%;height:100%;background:var(--mgmt-yellow);clip-path:var(--mgmt-octagon)}
+.hof-home:focus-visible{outline:3px solid var(--mgmt-yellow);outline-offset:4px}
+.hof-totals{display:flex;gap:46px;text-align:right;flex:0 0 auto}
+.hof-totals>div{display:flex;flex-direction:column}
+.hof-totals strong{font:700 38px/normal var(--mgmt-font-display)}
+.hof-totals>div:first-child strong{color:var(--mgmt-yellow)}
+.hof-totals span{font:400 14px/normal var(--mgmt-font-body);letter-spacing:.1em;color:var(--mgmt-secondary);text-transform:uppercase}
+.hof-columns{display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:56px;flex-grow:1;min-height:0}
+.hof-main{grid-column:1;grid-row:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+.hof-main>h2,.hof-aside h2{margin:0;font:700 20px/normal var(--mgmt-font-display);letter-spacing:.2em;color:var(--mgmt-yellow);text-transform:uppercase}
+.hof-main .leg-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.hof-screen .hof-card{background:var(--mgmt-panel-soft);border:1px solid transparent;padding:22px 26px;cursor:default;clip-path:var(--mgmt-cut);display:flex;flex-direction:column;position:relative;box-shadow:none}
+.hof-screen .hof-card.hof-favorite{background:color-mix(in srgb,var(--mgmt-yellow) 12%,transparent);border-color:color-mix(in srgb,var(--mgmt-yellow) 45%,transparent)}
+.hof-card-open{display:flex;flex-direction:column;gap:6px;background:transparent;color:var(--mgmt-ink);padding:0;text-align:left;letter-spacing:0;position:relative;z-index:1}
+.hof-screen .hof-card .nm{margin:0;font:italic 800 30px/normal var(--mgmt-font-display);text-transform:uppercase;overflow-wrap:anywhere}
+.hof-card-meta{font:300 17px/normal var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.hof-card-facts,.hof-card-description{font:300 18px/1.5 var(--mgmt-font-body);overflow-wrap:anywhere}
+.hof-card-rank{font:700 17px/normal var(--mgmt-font-display);color:var(--mgmt-yellow);margin-top:4px}
+.hof-card-actions{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;position:relative;z-index:1}
+.hof-card-actions button{background:none;color:var(--mgmt-secondary);padding:4px 0;font:600 17px var(--mgmt-font-display);letter-spacing:0}
+.hof-card-actions button[aria-pressed="true"]{color:var(--mgmt-yellow)}
+.hof-card-actions button:hover,.hof-card-open:hover .nm{color:var(--mgmt-yellow)}
+.hof-card:focus-within{clip-path:none}
+.hof-holo{position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,transparent 30%,color-mix(in srgb,var(--mgmt-yellow) 15%,transparent) 45%,var(--mgmt-panel) 58%,transparent 74%)}
+.hof-aside{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:26px;min-width:0}
+.hof-action{display:flex;flex-direction:column;gap:4px;text-align:left;padding:16px 20px;background:var(--mgmt-panel);color:var(--mgmt-ink);clip-path:var(--mgmt-cut);letter-spacing:0}
+.hof-action strong{font:700 22px/normal var(--mgmt-font-display);text-transform:uppercase}
+.hof-action span{font:300 16px/normal var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.hof-action:hover{background:var(--mgmt-plum-deep)}
+.hof-action:focus-visible{clip-path:none}
+.hof-return{background:none;padding:8px 0;text-align:left;color:var(--mgmt-secondary);font:600 18px var(--mgmt-font-display);letter-spacing:0}
+.hof-filters{padding:20px;background:var(--mgmt-panel)}
+.hof-filters .tag2{font:400 16px var(--mgmt-font-body);letter-spacing:0;padding:6px 9px;white-space:normal;text-align:left}
+.hof-screen .lede{margin:0;max-width:none;font:300 18px/1.5 var(--mgmt-font-body)}
+.hof-export{display:flex;flex-direction:column;gap:16px;padding:20px;background:var(--mgmt-panel);border-left:3px solid var(--mgmt-yellow);overflow-wrap:anywhere}
+.hof-export h2{font-size:20px;letter-spacing:.08em}
+.hof-export input,.hof-export textarea{width:100%;padding:10px;background:var(--mgmt-plum-deep);color:var(--mgmt-ink);border:1px solid var(--mgmt-edge);font:400 13px/1.5 var(--mgmt-font-body);resize:vertical}
+.hof-export textarea{min-height:90px;margin-top:10px}
+.hof-export summary{font-size:16px;color:var(--mgmt-secondary);cursor:pointer}
+.hof-detail .hof-heading h1{line-height:1.05}
+.hof-detail .leg-hero-card{padding:22px 26px;background:var(--mgmt-panel);margin:0}
+.hof-detail .card{margin:0;padding:18px 0;border-top:1px solid var(--mgmt-edge);border-bottom:0}
+.hof-detail .story,.hof-detail .small{font-size:18px;font-weight:300;line-height:1.5}
+.hof-detail .tag2,.hof-detail .epi{font-size:17px}
+.hof-legend-meta{margin:0;font:300 20px/1.5 var(--mgmt-font-body);color:var(--mgmt-secondary);overflow-wrap:anywhere;position:relative;z-index:1}
+@media(min-width:1280px) and (max-width:1599px){.hof-screen{padding:44px 48px 48px}.hof-columns{gap:32px;grid-template-columns:minmax(0,1fr) 360px}.hof-card-actions{gap:12px}.hof-screen .hof-card{padding:22px 20px}.hof-totals{gap:28px}}
+@media(max-width:1279px){.hof-screen{padding:32px 24px}.hof-header{flex-wrap:wrap}.hof-columns{grid-template-columns:1fr;gap:32px}.hof-main{grid-row:1}.hof-aside{grid-column:1;grid-row:2}.hof-totals{flex-wrap:wrap;text-align:left}.hof-heading h1{font-size:48px}}
+@media(max-width:599px){.hof-main .leg-grid{grid-template-columns:1fr}}
+/* ==== [FIN ANCRE] ==== */

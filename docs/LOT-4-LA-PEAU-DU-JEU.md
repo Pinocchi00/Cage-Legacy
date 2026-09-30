@@ -231,7 +231,7 @@ injectaient une valeur libre passent par `escJsAttr` ; dans le management, une
 catégorie féminine s'écrit « Poids mouche féminin » (`mgmtDivisionLabel`,
 dérivée, rien de stocké ; la carrière ne change pas).
 
-### T8 — Les écrans de la carrière *(maquettes 01, 09, 10 — à confirmer)*
+### T8 — Les écrans de la carrière *(maquettes 01, 09, 10 — confirmée le 28/09 ; T8a livrée le 30/09, reste T8b)*
 
 L'accueil (commun aux deux modes), le Panthéon et la carrière. **N'entre dans
 le lot que si Anthony le confirme** (§5) : la carrière est hors des lots 0 à 5
@@ -318,6 +318,33 @@ remplit pas d'un texte inventé.
   mondial et Split, tendance et « ce qui a bougé » recalculés, jamais stockés.
   La reprise a corrigé une tendance inversée (le test vérifie désormais le
   sens) et une colonne organisation qui chevauchait la ligne suivante.
+
+**Relectures du 30/09.**
+
+- **T4 — acceptée** (`af52a2f`, GLM) : le lendemain porte la maquette 06.
+  Résultats racontés par les faits du moteur (méthode, round, geste, « secoué
+  n fois »), Revoir et Voir toute la soirée ; « Ce que ça a changé » factuel
+  (top 15 mondial au cycle d'avant, blessures, suspensions, retraites), aucune
+  phrase de presse. Soirée réelle jouée à 1920 : rendu en 8 ms, aucune erreur,
+  aucun débordement. Un test réécrit sur décision citée (le bouton du bas
+  devient celui de l'en-tête). **Fausse alerte levée** : les combats homme
+  contre femme de la capture venaient du script `capture-t4.js`, qui pose les
+  affiches sans passer par `mgmtBookMain` ; le jeu relie toujours deux
+  combattants de la même catégorie. À corriger à sa prochaine tranche : ses
+  montages de soirée doivent passer par le vrai booking.
+- **T8a — acceptée** (`5114879`, `70c8f68`, `8a86ae5`, Sol) : la carrière
+  consomme les jetons partagés du management (Oswald et Fraunces retirés,
+  plus aucune police chargée du réseau) ; l'accueil porte la maquette 01 avec
+  la reprise du management et les vrais résultats ; le Panthéon et la fiche de
+  légende portent la maquette 09. Vérifiés à 1280, 1440 et 1920, contrastes
+  de 5,09:1 au minimum, Duel sans écriture de sauvegarde. Écarts déclarés et
+  acceptés : pas de dépense de points de légende (le système n'existe pas en
+  carrière), la colonne annexe garde Duel, Codex et Filtres. Lien mort
+  `opponent_card` (`ui-06-career-screens.js`) toujours ouvert.
+- **Intégration du 30/09** (`integration-30-09`) : T4 et T8a fusionnées sans
+  conflit, versions de cache à jour, `npm run check` : 400 tests, 396 passants,
+  0 échec, 4 skip. **Il ne reste au lot que la T8b** (l'écran de carrière,
+  maquette 10).
 
 ## 5. Ce qui attend Anthony
 
