@@ -22,7 +22,7 @@ const SCREENS={title:scr_title,intro:scr_intro,create:scr_create,hub:scr_hub,sel
   history:scr_history,beltLineage:scr_beltLineage,promo:scr_promo,pro_nickname:scr_pro_nickname,codex:scr_codex,mueChoice:scr_mueChoice,legend_detail:scr_legend_detail,class_choice:scr_class_choice,class_choice_31:scr_class_choice_31,
   fantasy_setup:scr_fantasySetup,allstars:scr_allstars,allstars_setup:scr_allstars_setup,
   contract_nego:scr_contract_nego,free_agency:scr_free_agency,champ_champ_offer:scr_champ_champ_offer,press_conf:scr_press_conf,
-  ach_preview:scr_ach_preview};
+  ach_preview:scr_ach_preview,opponent_card:scr_opponent_card};
 
 function currentGameMode(){
   return 'career';
@@ -47,15 +47,9 @@ function fighterDisplayName(o,withNick){
 /* ==== [FIN ANCRE] ==== */
 
 /* ============================== RENDER + CL =============================== */
-/* ==== [ANCRE: HUB_SOUS_MENUS_RESET] — Lot P3/2026 : sous-menu Combat/Dossier
-   du hub (G.hubTab, scr_hub()/ui-06) réinitialisé sur 'combat' à CHAQUE
-   ENTRÉE dans le hub, jamais seulement à la création de partie. G.screen
-   est réassigné à 'hub' directement (pas via CL.go) depuis une dizaine
-   d'endroits du contrôleur, donc la détection se fait ici, au seul point de
-   passage commun à tout changement d'écran effectivement affiché — une
-   variable de module (pas sur G : purement une trace de rendu, jamais
-   persistée par save(), qui sérialise G tel quel). */
-let _lastRenderedScreen=null;
+/* ==== [ANCRE: HUB_SOUS_MENUS_RESET] — Lot P3/2026, remplacé par T8b :
+   le Dossier natif <details> revient fermé à chaque rendu. La trace de
+   préparation du hub est elle aussi purement visuelle, jamais sauvegardée. */
 /* ==== [FIN ANCRE] ==== */
 function render(preserveScroll){ const app=document.getElementById('app'); if(!app)return;
   if(G && G.screen==='arena' && G.pending && !G.pending._flashShown
@@ -64,8 +58,6 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
     G.pending.flashLines=buildFightFlashLines(G.pending.res);
     G.screen='fight_flash';
   }
-  if(G && G.screen==='hub' && _lastRenderedScreen!=='hub') G.hubTab='combat';
-  _lastRenderedScreen=G&&G.screen;
    const fn=SCREENS[G&&G.screen]||scr_intro;
    if(G&&G.screen==='arena'&&G.pending&&G.pending.res){
      areneEcranCharger(G.pending.res,{a:G.f&&G.f.name,b:G.pending.opp&&G.pending.opp.name,
@@ -73,6 +65,7 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      ARENE_ECRAN.retour='result';
      ARENE_ECRAN.finRetour=null;
    }
+   careerTrackPreparation(G&&G.screen);
    app.innerHTML=fn();
    if(G&&G.screen==='arena') areneEcranDemarrer();
    if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
@@ -104,19 +97,16 @@ function refocusInput(id){
 }
 const CL={
   go(s){ if(!G)G={theme:'dark'}; G.screen=s; render(); },
+  /* ==== [ANCRE: LOT4_T8B_ADVERSAIRE_ACTION] — même fiche depuis le hub et
+     les deux classements ; aucune substitution du joueur dans G.f. ==== */
+  viewCareerOpponent(id,back){ G._oppCardId=id; G._oppCardReturn=back==='rankings'?'rankings':'hub'; CL.go('opponent_card'); },
+  /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: V3_RANKINGS_P4P_TAB] — bascule d'onglet sur scr_rankings()
      (ui-06), cf. son ancre pour le détail. */
   setRankingsTab(tab){ G._rankingsTab=tab; render(); },
   /* ==== [FIN ANCRE] ==== */
-  /* ==== [ANCRE: HUB_SOUS_MENUS] — bascule d'onglet Combat/Dossier sur
-     scr_hub() (ui-06), cf. son ancre pour le détail. Contrairement à
-     _rankingsTab, la remise à zéro sur 'combat' à chaque ENTRÉE dans le hub
-     est gérée dans render() (ci-dessous), pas ici : G.screen passe à 'hub'
-     depuis une dizaine de points d'appel différents du contrôleur (fin de
-     combat, retour de blessure, refus de contrat...), presque jamais via
-     CL.go('hub') seul — un reset posé ici serait contourné par tous les
-     autres. ==== */
-  setHubTab(tab){ G.hubTab=tab; render(); },
+  /* ==== [ANCRE: HUB_SOUS_MENUS] — Lot P3/2026, remplacé par T8b :
+     Dossier au déroulé natif, historique directement dans la maquette 10. ==== */
   /* ==== [FIN ANCRE] ==== */
   filterCodex(key,val){ if(!G.codexFilter) G.codexFilter={style:'all',rar:'all',status:'all'}; G.codexFilter[key]=val; render(); },
   /* ==== [ANCRE: APERCU_BOUTIQUE_UNIFIE] — CL.toggleShopPreview (aperçu
@@ -301,6 +291,8 @@ const CL={
     G.f._fy=(G.f._fy||0)+1; if(G.f._fy>=RI(1,3)){ applyAging(G.f); G.f._fy=0; }
     advanceRoster(); G.screen='hub'; save(); render(); },
   cont(){ if(load()){ setTheme(G.theme||'dark');
+    // T8b : garder la destination de préparation réellement sauvegardée.
+    careerTrackPreparation(G.screen);
     // ==== [ANCRE: CORRECTIF_RETRAITE_FANTOME] — bug trouvé : cont() forçait
     // TOUJOURS l'écran 'hub' au chargement, sans jamais vérifier f.retired.
     // Un joueur qui rechargeait la page juste après sa retraite (l'écran

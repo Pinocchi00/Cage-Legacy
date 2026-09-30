@@ -1,0 +1,50 @@
+/* ==== [ANCRE: LOT4_T8B_CARRIERE_CSS] — maquette 10 : dimensions de dessin
+   à 1920, jetons T8a, blocs absents refermés ; adaptation PC sans changer
+   la hiérarchie ni réduire les textes de décision. ==== */
+#app:has(.career-screen){max-width:1920px}
+.career-screen{min-height:100vh;min-height:100dvh;padding:40px 64px 48px;display:flex;flex-direction:column;gap:26px;line-height:normal;background:radial-gradient(ellipse 800px 600px at 25% 5%,color-mix(in srgb,var(--mgmt-yellow) 18%,transparent),transparent 70%),linear-gradient(180deg,var(--mgmt-plum-top),var(--mgmt-plum) 55%,var(--mgmt-plum-deep))}
+.career-header{display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--mgmt-edge);padding-bottom:18px}
+.career-heading{display:flex;align-items:center;gap:16px;font:700 28px/normal var(--mgmt-font-display);letter-spacing:.12em;text-transform:uppercase}
+.career-home{background:none;padding:0;width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center}
+.career-home span{display:block;width:34px;height:34px;background:var(--mgmt-yellow);clip-path:var(--mgmt-octagon)}
+.career-context{font:500 20px/normal var(--mgmt-font-display);color:var(--mgmt-secondary);letter-spacing:.1em;text-transform:uppercase}
+.career-primary{background:var(--mgmt-yellow);color:var(--mgmt-dark-ink);font:700 20px/normal var(--mgmt-font-display);letter-spacing:.08em;padding:12px 26px;transform:skewX(-12deg);text-transform:uppercase}
+.career-primary:hover{background:var(--mgmt-ink)}
+.career-columns{display:grid;grid-template-columns:560px minmax(0,1fr) 420px;gap:52px;flex-grow:1;min-height:0;align-items:start}
+.career-columns.career-no-state{grid-template-columns:560px minmax(0,1fr)}
+.career-columns.career-no-middle{grid-template-columns:minmax(0,1fr) 420px}
+.career-columns.career-no-middle.career-no-state{grid-template-columns:minmax(0,1fr)}
+.career-identity,.career-main{display:flex;flex-direction:column;gap:18px;min-width:0}
+.career-aside{display:flex;flex-direction:column;gap:26px;min-width:0}
+.career-screen h1{margin:0;font:italic 800 76px/.9 var(--mgmt-font-display);text-transform:uppercase;overflow-wrap:anywhere}
+.career-screen h2{margin:0;color:var(--mgmt-yellow);font:700 20px/normal var(--mgmt-font-display);letter-spacing:.2em;text-transform:uppercase}
+.career-identity h2{font-size:19px;letter-spacing:.18em}
+.career-name{margin-top:8px;font:italic 800 40px/1.1 var(--mgmt-font-display);overflow-wrap:anywhere}
+.career-screen p{margin:0;font-size:18px;font-weight:300;line-height:1.6;overflow-wrap:anywhere}
+.career-screen .career-meta{font-size:19px;color:var(--mgmt-secondary);font-weight:300;margin-top:8px}
+.career-block{display:flex;flex-direction:column;gap:8px;min-width:0}
+.career-screen .career-evolution{font-size:20px;line-height:1.55}
+.career-training{display:flex;gap:14px;flex-wrap:wrap}
+.career-training button{background:var(--mgmt-panel);border:1px solid var(--mgmt-edge);color:var(--mgmt-ink);font:700 18px/normal var(--mgmt-font-display);padding:12px 20px;text-transform:uppercase}
+.career-training button:hover{background:var(--mgmt-yellow);color:var(--mgmt-dark-ink)}
+.career-next{background:var(--mgmt-panel);padding:24px 28px;display:flex;flex-direction:column;gap:8px;clip-path:var(--mgmt-cut)}
+.career-next .career-meta{margin:0;font-size:18px}
+.career-next h3{margin:0;font:italic 800 40px/1.1 var(--mgmt-font-display);text-transform:uppercase;overflow-wrap:anywhere}
+.career-next p{line-height:1.5}
+.career-link,.career-dossier summary{align-self:flex-start;background:none;padding:0;color:var(--mgmt-yellow);font:700 18px/normal var(--mgmt-font-display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-align:left}
+.career-next:has(button:focus-visible){clip-path:none}
+.career-history-row{display:grid;grid-template-columns:90px minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid var(--mgmt-edge);font-size:18px;font-weight:300;overflow-wrap:anywhere}
+.career-history-last{border-bottom:0}
+.career-result{font:500 18px/normal var(--mgmt-font-display);text-transform:uppercase}
+.career-win{color:var(--mgmt-yellow)}
+.career-loss{color:var(--mgmt-danger-ink)}
+.career-draw{color:var(--mgmt-secondary)}
+.career-dossier{margin-top:8px}
+.career-dossier>div{margin-top:14px}
+.career-retire{color:var(--mgmt-danger-ink);margin-top:8px}
+.career-message{padding:12px 16px;border-left:3px solid currentColor;background:var(--mgmt-panel)}
+.career-screen button:focus-visible,.career-screen summary:focus-visible{outline:3px solid var(--mgmt-yellow);outline-offset:4px}
+.career-opponent-columns{display:grid;grid-template-columns:560px minmax(0,1fr);gap:52px}
+@media(min-width:1280px) and (max-width:1599px){.career-columns{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,.8fr);gap:32px}.career-columns.career-no-state,.career-columns.career-no-middle,.career-opponent-columns{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}.career-columns.career-no-middle.career-no-state{grid-template-columns:minmax(0,1fr)}.career-header{gap:20px}.career-context{letter-spacing:.05em}}
+@media(max-width:1279px){.career-screen{padding:40px 32px 48px}.career-columns,.career-columns.career-no-state,.career-columns.career-no-middle,.career-opponent-columns{grid-template-columns:1fr;gap:26px}.career-header{flex-wrap:wrap}.career-screen h1{font-size:64px}}
+/* ==== [FIN ANCRE] ==== */
