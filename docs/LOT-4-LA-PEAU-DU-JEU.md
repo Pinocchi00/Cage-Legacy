@@ -231,7 +231,7 @@ injectaient une valeur libre passent par `escJsAttr` ; dans le management, une
 catégorie féminine s'écrit « Poids mouche féminin » (`mgmtDivisionLabel`,
 dérivée, rien de stocké ; la carrière ne change pas).
 
-### T8 — Les écrans de la carrière *(maquettes 01, 09, 10 — confirmée le 28/09 ; T8a livrée le 30/09, reste T8b)*
+### T8 — Les écrans de la carrière *(maquettes 01, 09, 10 — confirmée le 28/09 ; T8a et T8b livrées le 30/09)*
 
 L'accueil (commun aux deux modes), le Panthéon et la carrière. **N'entre dans
 le lot que si Anthony le confirme** (§5) : la carrière est hors des lots 0 à 5
@@ -345,6 +345,19 @@ remplit pas d'un texte inventé.
   conflit, versions de cache à jour, `npm run check` : 400 tests, 396 passants,
   0 échec, 4 skip. **Il ne reste au lot que la T8b** (l'écran de carrière,
   maquette 10).
+- **T8b — acceptée après une reprise** (`7e65b0f`, Sol) : le hub de la
+  carrière porte la maquette 10 (padding 40/64/48, grille 560/1fr/420, titre
+  76 px) ; chaque bloc lit des données réelles et disparaît sans elles ; « Ce
+  qu'on dit de toi » et « Ton agent » absents. Le lien mort `opponent_card` est
+  réparé (classements et « Étudier ses combats », retour au bon onglet). Un
+  test réécrit sur décision citée (§1) : l'ancien historique affichait
+  « Décision unanime » pour toute décision, il affiche désormais « Décision ».
+  **La reprise** : rien n'était commité ; le moral et la forme avaient disparu
+  du hub sans décision (règle : additif par défaut) — ils reviennent dans
+  « Ton état » en texte (« Moral N/20 · Forme N/20 ») ; la vidéo de preuve
+  (1 Mo) n'est pas versionnée. Carrière neuve vérifiée dans le jeu à 1920.
+
+**Le lot 4 est terminé le 30/09/2026.** Les dix écrans maquettés sont portés.
 
 ## 5. Ce qui attend Anthony
 
