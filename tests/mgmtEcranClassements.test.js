@@ -10,8 +10,8 @@
    - la liste porte rang, combattant, bilan, organisation, tendance ;
    - tendance et constats comparés au cycle précédent par le classement au
      cycle explicite (T6-1) — recalcul, jamais stocké ;
-   - ce qui n'existe pas n'apparaît pas : ni « Champion », ni ceinture,
-     ni presse (lot 5) ;
+    - Lot 5 T1 (contrat §T1, décision du 02/10) : champions factuels ;
+      la presse reste absente ;
    - un combattant extérieur s'ouvre en fiche (CL.mgmtFiche), retour là
      d'où il a été ouvert ;
    - esc() sur tout nom ; aucun Math.random() ; ni note, ni barème.
@@ -26,15 +26,15 @@ function key(win,k){
   win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'${k}',bubbles:true}))`);
 }
 
-test('MGMT T6 — l’écran rend : onglets, portée, tendance, rien des lots 5, échap ramène', () => {
+test('MGMT T6 / lot 5 T1 — l’écran rend : onglets, portée, tendance, champions, échap ramène', () => {
   const win = newGameWindow();
   win.eval(`setSeed(401); CL.mgmtEnter(); CL.go('mgmt_classements');`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Classements'), 'le titre de l’écran est présent');
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
-  /* Lot 5 : ni « Champion », ni ceinture, ni ce que la presse réclame. */
-  assert.ok(!/Champion(?!ship)/.test(html), 'aucun bloc « Champion »');
-  assert.ok(!/[Cc]einture|CEINTURE/.test(html), 'aucune ceinture');
+  /* Lot 5 T1 remplace l'absence de ceintures prévue au lot 4. */
+  assert.equal(win.document.querySelectorAll('.mgmt-cl-champion').length,5,
+    'une ceinture par organisation en portée Mondial');
   assert.ok(!/PRESSE|réclame/.test(html), 'aucun bloc de presse (lot 5)');
   /* L'entrée « Classements » est dans la barre, signalée comme courante. */
   const courant=[...win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]')];

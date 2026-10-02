@@ -96,9 +96,18 @@ function mgmtCartSlotHtml(m,i,f){
   const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
   const rec=x=>`${x.W}-${x.L}-${x.D}`;
   const meta=(fa&&fb)?`${mgmtDivisionLabel(fa.div)} · ${rec(fa)} contre ${rec(fb)}`:'';
+  /* Lot 5 T1 : geste validé dans maquettes/04b-combat-de-titre.html le
+     02/10/2026. R4 : pas d'option grisée pour une paire sans titre possible.
+     S6 : libellé de rounds et case mis à jour dès le choix. */
+  const rounds=mgmtBoutRounds(m,f);
+  const title=f.title===true||mgmtCanTitle(m,f)
+    ?`<label class="mgmt-title-choice" for="mgmt-title-${i}">`
+      +`<input id="mgmt-title-${i}" type="checkbox"${f.title===true?' checked':''}`
+      +` onchange="CL.mgmtTitle(${i},this.checked)">Pour le titre · 5 rounds</label>`:'';
   return `<div class="opp mgmt-fight" style="cursor:default">`
     +`<span class="opp-nm">${esc(fa?fa.name:'?')} contre ${esc(fb?fb.name:'?')}</span>`
-    +`<div style="font-size:13px;color:var(--muted);margin-top:2px">${esc(meta)}</div>`
+    +`<div style="font-size:13px;color:var(--muted);margin-top:2px">${esc(meta)} · ${i===0?'Combat principal · ':''}${esc(rounds)} rounds</div>`
+    +title
     +`<button class="mgmt-next" style="display:inline-block;width:auto;padding:6px 12px;margin:8px 0 0;font-size:13px" onclick="CL.mgmtUnbook(${i})">${esc(MGMT_CART_LABELS.remove)}</button>`
     +`</div>`;
 }

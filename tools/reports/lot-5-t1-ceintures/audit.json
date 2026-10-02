@@ -1,0 +1,335 @@
+{
+  "errors": [],
+  "audits": [
+    {
+      "width": 1280,
+      "scope": "world",
+      "champions": 5,
+      "measured": [
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1280,
+      "scope": "split",
+      "champions": 1,
+      "measured": [
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1440,
+      "scope": "world",
+      "champions": 5,
+      "measured": [
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1440,
+      "scope": "split",
+      "champions": 1,
+      "measured": [
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1920,
+      "scope": "world",
+      "champions": 5,
+      "measured": [
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        },
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        }
+      ],
+      "failures": []
+    },
+    {
+      "width": 1920,
+      "scope": "split",
+      "champions": 1,
+      "measured": [
+        {
+          "class": "mgmt-cl-champion-label",
+          "size": 18,
+          "contrast": 7.067637471045329
+        },
+        {
+          "class": "mgmt-cl-champion-name",
+          "size": 34,
+          "contrast": 10.36307406493104
+        },
+        {
+          "class": "mgmt-cl-champion-meta",
+          "size": 18,
+          "contrast": 6.946668955375669
+        }
+      ],
+      "failures": []
+    }
+  ],
+  "memory": {
+    "fresh": 0,
+    "played": {
+      "summary": "Mémoire · 188 faits",
+      "rows": 188,
+      "titles": 100,
+      "initialFacts": 12
+    }
+  },
+  "mouse": true,
+  "keyboard": true,
+  "reload": true
+}

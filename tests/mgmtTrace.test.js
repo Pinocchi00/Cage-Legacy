@@ -110,12 +110,12 @@ test('MGMT trace — rejeu fidèle : chaque combat rejoué redonne le même dér
       const m=G.mgmt, rep=[];
       for(let i=0;i<m.hist.length;i++){
         const res=mgmtReplayFight(m.hist[i]);
-        /* Une décision ne porte pas de round (judgesVerdict) : le même
-           repli à 3 que mgmtRunEvent s'applique des deux côtés. */
+        /* Lot 5 T1 : une décision finit au nombre de rounds de sa trace,
+           trois ou cinq, comme mgmtRunEvent. */
         rep.push({d:JSON.stringify(res)===window.__deroules[i],
           w:res.winner===m.hist[i].winner,
           f:mgmtMethodFamily(res.method,res.winner)===m.hist[i].family,
-          r:(Number.isSafeInteger(res.round)?res.round:3)===m.hist[i].round});
+          r:(Number.isSafeInteger(res.round)?res.round:m.hist[i].rounds)===m.hist[i].round});
       }
       return JSON.stringify({n:m.hist.length,deroules:window.__deroules.length,rep});
     })()`));
