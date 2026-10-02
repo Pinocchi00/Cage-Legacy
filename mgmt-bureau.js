@@ -100,7 +100,9 @@ function mgmtNextId(m){ const id='mg'+m.seq; m.seq++; return id; }
  * second système de génération. Les prénoms et noms réservés (six
  * personnages, cinq légendes — MGMT_EXCLUDED_FIRST/LAST) sont retirés par
  * nouveau tirage seedé, borné.
- * Variété (lot 1e-5) : les 14 origines sont couvertes avant toute répétition
+ * Variété (lot 1e-5, étendue au 30/09 : seize nouveaux pays — décision du
+ * 30/09, docs/LOT-5-UN-MONDE-HUMAIN.md §7 H2) : les 30 origines sont
+ * couvertes avant toute répétition
  * (tirage sans remise seedé) ; le bilan suit des bandes débutant/vétéran —
  * 22-26 ans : 2-12 combats, 27-28 ans : 8-22, 29-35 ans : 15-30 — bornées en
  * plus par la garde 1d (âge-18)..(âge-18)*4, qui ne mord jamais à vide.
@@ -117,8 +119,9 @@ function mgmtNewRoster(m){
   for(let i=0;i<n;i++){
     const div=pick(divs);
     /* Un tirage pays par emplacement, jamais consommé par un retirage :
-       à 40 emplacements minimum, les 14 origines sortent toutes au moins
-       deux fois. Le retirage rejoue le même pays (seule Leïla peut
+       à 40 emplacements minimum, les 30 origines sortent toutes au moins
+       une fois (40 - 30 = 10 réapparitions ; lot 1e-5, seize nouveaux pays
+       décision du 30/09). Le retirage rejoue le même pays (seule Leïla peut
        collisionner, 1/20 du pool féminin — le prénom est retiré à chaque
        appel de makeName). */
     const ck=drawCountry();

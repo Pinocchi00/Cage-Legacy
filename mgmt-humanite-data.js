@@ -14,8 +14,8 @@
    `relu:true`, aucun code ne change. Les villes et les poids n'en portent
    pas : ce sont des données de calibrage, pas des textes.
 
-   Les pays qui n'existent pas encore dans COUNTRIES (engine.js) restent dans
-   les tables : H2 les ajoutera.
+   Les trente pays du catalogue existent dans COUNTRIES (engine.js) depuis
+   H2 (seize nouveaux pays, décision du 30/09).
    ============================================================================ */
 
 /* ==== [ANCRE: MGMT_LOT5_H1_DONNEES] — Lot 5 H1 les données de l'humanité
@@ -24,7 +24,8 @@
 
 /* ---- §1.3 Les villes (une par combattant, tirée dans son pays ; poids
    égaux sauf ville-école, double §2.2). Pays réels, villes réelles ; rien
-   d'autre. Les codes sans pays dans COUNTRIES attendent H2. ==== */
+   d'autre. Les trente codes du catalogue sont portés par COUNTRIES
+   (engine.js) depuis H2 (seize nouveaux pays, décision du 30/09). ==== */
 const MGMT_VILLES = {
   FR: ['Paris', 'Saint-Denis', 'Aubervilliers', 'Marseille', 'Lyon', 'Villeurbanne', 'Lille', 'Roubaix', 'Toulouse', 'Bordeaux', 'Nice', 'Montpellier', 'Nantes', 'Strasbourg', 'Rennes', 'Grenoble', 'Saint-Étienne', 'Le Havre', 'Reims', 'Perpignan', 'Bayonne', 'Mulhouse', 'Limoges', 'Metz', 'Saint-Denis de La Réunion', 'Pointe-à-Pitre', 'Fort-de-France', 'Cayenne', 'Nouméa'],
   BR: ['Rio de Janeiro', 'São Paulo', 'Curitiba', 'Belo Horizonte', 'Manaus', 'Salvador', 'Recife', 'Natal', 'Fortaleza', 'Porto Alegre', 'Belém', 'Goiânia'],
