@@ -277,7 +277,7 @@ nouvelles s'appellent **H1 à H10**.
 |---|---|---|---|
 | **H1** — Les données | GLM | Nouveau fichier `mgmt-humanite-data.js`, **données pures** : villes, poids de style par pays et par ville, surnoms, métiers, milieux, moments de vie (id, poids, relais, effet), rituels, rôles, trajectoires, identifiants et poids des voix. Tests de forme (sommes à 100, aucun doublon, tous les pays connus) | — |
 | **H2** — Les nouveaux pays | GLM | Seize pays dans `COUNTRIES` (`engine.js`) avec prénoms et noms réels, apostrophes et traits d'union, tests (même méthode que la T3 bis « noms » du 28/09) | — |
-| **H3** — L'identité déduite | Sol | `mgmt-humanite.js` : identité d'un combattant sur des flux séparés ; **le style tiré du pays et de la ville**, passé à `makeFighter` par `opt.style` ; **un marqueur de génération** pour que les combattants des parties en cours gardent leur style (migration 10 → 11) | H1, H2 |
+| **H3** — L'identité déduite | Sol | `mgmt-humanite.js` : identité d'un combattant sur des flux séparés ; **le style tiré du pays et de la ville**, passé à `makeFighter` par `opt.style` ; **un marqueur de génération** pour que les combattants des parties en cours gardent leur style (**migration 11 → 12** : la 10 → 11 est prise par les ceintures, T1) | H1, H2 |
 | **H4** — Plus de combattants | Sol | Effectifs du §3.1, soirée à 5 + 7, **Leïla propose les préliminaires** ; mesures de temps et d'économie | H3 |
 | **H5** — Les moments de vie | GLM | Tirage par cycle (flux `'vie'`), faits gardés, charge dérivée, effets simples (indisponibilité, `dynamic`), bloc « Sa vie » de la fiche | H1, H3 |
 | **H6** — L'attention | Sol | Cercles et suivis, rôles, connaissance progressive, **le conteur**, Continuer qui s'arrête | H4, H5 |
@@ -326,7 +326,7 @@ suite** par H1 puis H2, H5, H8, H9, T6.
 2. ~~Leïla propose les préliminaires par défaut~~ **Oui.**
 3. ~~Seize nouveaux pays~~ **Oui**, la liste du catalogue §1.2.
 4. ~~Les parties en cours~~ **Gardent leurs styles** : marqueur de génération,
-   migration 10 → 11 (H3).
+   migration 11 → 12 (H3 ; la version 11 est celle des ceintures).
 5. ~~Les camps~~ **Entrent dans le lot** : la T7 part.
 
 **Écriture (relire et réécrire) — différée, sans bloquer le code (§0,
@@ -349,6 +349,30 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   l'intégration : `test:watch` ne portait ni le nouveau test ni celui de la T4
   (resynchronisé sur `test`), et le catalogue annonçait « 120 » moments pour
   109 lignes (corrigé). Intégration : 413 tests, 409 passants, 0 échec.
+
+- **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
+  `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
+  classé au départ, zéro défense) ; un combat de titre est un fait gardé
+  (`title_fight`, qui renvoie au combat de `m.hist`) ; les quatre organisations
+  extérieures dérivent leurs champions et leurs défenses de la trace, rien de
+  stocké. Le joueur choisit le titre par une case « Pour le titre · 5 rounds »
+  sur le combat posé ; le premier combat de la carte principale est en cinq
+  rounds ; le rejeu est fidèle. Bloc Champion aux classements. **Migration de
+  sauvegarde 10 → 11.** La reprise : rien n'était commité ; la semaine
+  affichait « Mémoire · 12 faits » avec une liste vide sur une partie neuve —
+  les attributions de départ ne comptent plus et ne s'affichent plus, un
+  combat de titre s'affiche (« Ceinture conservée », « Ceinture perdue »,
+  « Ceinture attribuée »), et le compteur vaut le nombre de lignes rendues.
+  Vérifiée dans le jeu à 1920 (partie neuve, case de titre, classements).
+  Intégration : 424 tests, 420 passants, 0 échec.
+  **Décisions rapportées par Sol comme prises par Anthony le 02/10, à
+  confirmer** : premier classé champion au départ ; titre choisi
+  explicitement ; un nul conserve le titre sans défense gagnée ; un nul pour
+  un titre vacant le laisse vacant ; départ du champion = vacance ; maquette
+  `maquettes/04b-combat-de-titre.html`.
+  **À remesurer après H4** : le champion ne tombe que dans 13,7 % des combats
+  de titre (une championne à 12 défenses en 20 soirées) — les challengers sont
+  faibles tant que Split n'a que quatre combattants par catégorie.
 
 ## 10. Terminé pour le lot
 

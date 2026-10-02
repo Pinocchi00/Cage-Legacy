@@ -94,7 +94,9 @@ après le découpage de `mgmt-bureau.js` :
    plus de `ui-09` : retirée au lot 3 T4)
 8. `duel-codec.js`, `ui-10-duel.js` — exhibition « Duel entre amis »
 9. `ui-11-keys.js` — navigation clavier globale (`keysRegister`)
-10. **Mode management, quinze fichiers** (découpage de la simulation le
+10. **Mode management, dix-sept fichiers** (avec `mgmt-humanite-data.js`,
+    données du lot 5 H1 chargées après `mgmt-data.js`, et `mgmt-ceintures.js`,
+    lot 5 T1, chargé après `mgmt-monde.js` ; découpage de la simulation le
     21/09/2026, découpage des écrans au lot 4 T1 le 25/09, écran de
     l'organisation au lot 4 T7 le 28/09, des classements à la T6 le 29/09) :
     `mgmt-data.js` (données pures) — `mgmt-bureau.js` (pile d'affaires,
@@ -128,7 +130,7 @@ après le découpage de `mgmt-bureau.js` :
 | `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
 | `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
 | `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) ; lues par `saveMgmt`/`loadMgmt` dans `mgmt-save.js` | Sauvegarde management + secours, circuit séparé de la carrière |
-| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **10** | Management : migration séquentielle sans perte jusqu'à 10 (`mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte, lot 3 T1 la trace, lot 2B T1 ter la récupération du corps, T2 bis le calendrier d'âge, T3 les départs, T3 bis l'entrée des fondateurs avant l'ouverture), v1 refusée |
+| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **11** | Management : migration séquentielle sans perte jusqu'à 11 (10 → 11 : les ceintures, lot 5 T1 ; avant : `mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte, lot 3 T1 la trace, lot 2B T1 ter la récupération du corps, T2 bis le calendrier d'âge, T3 les départs, T3 bis l'entrée des fondateurs avant l'ouverture), v1 refusée |
 
 ## 5. Séparation des responsabilités
 
@@ -165,11 +167,11 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 30/09/2026 (`integration-30-09-h1`) : **413 tests, 409 passants,
+État au 02/10/2026 (`integration-02-10-t1`) : **424 tests, 420 passants,
 0 échec, 4 skip**. Les 4 skip sont dans `mgmtBureau.test.js` : trois sorties de
 carte incomplète (remonter un prélim, short notice, combattant libre) et une
 pénalité économie au-delà du plafond de découvert — comportements décidés mais
-absents du code (voir `docs/QUESTIONS-OUVERTES.md`). **29 fichiers dans
+absents du code (voir `docs/QUESTIONS-OUVERTES.md`). **30 fichiers dans
 `tests/`**, dont `mgmtBureau.test.js` (58), `mgmtCard.test.js` (44),
 `mgmtEconomie.test.js` (15) et `mgmtSoiree.test.js` (11) pour le management,
 `regressionFixes.test.js` (75) et `duel.test.js` (28) pour la carrière.
@@ -211,7 +213,7 @@ sans citer la décision qui change le comportement attendu.
 | `docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md` | **Lot 2B — livré au 24/09 (T1, T1 bis, T1 ter, T2 bis, T3, T4)**, sauf la T2 (le recrutement) reportée au lot 5 T5. Répond à QO-8. Son §5 liste les cinq points tranchés avant la T2, son §5 d la relecture de la T1, son **§5 e les décisions du 22/09** : le monde dérivé se lit **à travers un combattant** (sa fiche) plus **trois à cinq informations sur le hub**, au lot 4 ; et les quatre organisations extérieures sont **nommées et ordonnées** (Garden of Blood → MMA Korner → Ultimate Rim → Fighting Pacific Championship, prestige croissant) — `MGMT_EXT_ORGS` n'a plus d'`[EMPLACEMENT AUTEUR]` |
 | `docs/LOT-4-LA-PEAU-DU-JEU.md` | **Lot 4 — terminé : T1, T2 (la semaine), T3 (booker), T5 (la fiche) et T7 (l'organisation) acceptées le 28/09 ; F1 et F2 (fidélité aux maquettes) et T6 (les classements) acceptées les 29-30/09 ; T4 (le lendemain), T8a (accueil, Panthéon, DA de la carrière) et T8b (le hub de carrière) acceptées le 30/09. **Lot 4 terminé le 30/09/2026.** Les écrans maquettés remplacent l'habillage, sans créer de système de jeu ; commence par découper `mgmt-screens.js` en un fichier par écran pour permettre deux outils en parallèle. Son §1 : **aucun texte de maquette ne s'affiche en jeu** |
 | `docs/LOT-5-LE-MONDE-QUI-PARLE.md` | **Lot 5 — contrat écrit le 23/09, non commencé.** Ceintures et combats en 5 rounds, la voix du monde par formules d'auteur, la pression de l'attente, le recrutement (ex-lot 2B T2), les cartes incomplètes (ex-lot 3B T3-T5), les camps et le classement des organisations sous conditions. Son **§6 dresse la liste de tout ce qu'Anthony doit écrire** |
-| `docs/LOT-5-UN-MONDE-HUMAIN.md` | **Lot 5 — contrat du 30/09 ; H1 (les données, `mgmt-humanite-data.js`) acceptée le 30/09.** Étend `LOT-5-LE-MONDE-QUI-PARLE.md` après les décisions d'Anthony du 30/09 : l'humanité d'abord, plus de combattants par catégorie sans trop-plein (cercles, rôles, Leïla aux préliminaires, conteur), le style qui vient du pays et de la ville, les moments de vie, les traits, les promesses, la mémoire, les scénarios, le mouvement. **Claude peut écrire des propositions de texte ; rien n'entre en jeu sans la réécriture d'Anthony.** Tranches H1 à H10 plus les T1 à T8 d'origine ; consignes prêtes en annexe |
+| `docs/LOT-5-UN-MONDE-HUMAIN.md` | **Lot 5 — contrat du 30/09 ; H1 (les données, `mgmt-humanite-data.js`) acceptée le 30/09, T1 (les ceintures, `mgmt-ceintures.js`) le 02/10.** Étend `LOT-5-LE-MONDE-QUI-PARLE.md` après les décisions d'Anthony du 30/09 : l'humanité d'abord, plus de combattants par catégorie sans trop-plein (cercles, rôles, Leïla aux préliminaires, conteur), le style qui vient du pays et de la ville, les moments de vie, les traits, les promesses, la mémoire, les scénarios, le mouvement. **Claude peut écrire des propositions de texte ; rien n'entre en jeu sans la réécriture d'Anthony.** Tranches H1 à H10 plus les T1 à T8 d'origine ; consignes prêtes en annexe |
 | `docs/CATALOGUE-HUMANITE.md` | Données du lot 5 (30/09, propositions sourcées) : pays et villes, poids de style par pays et par ville, surnoms, métiers, milieux, moments de vie pondérés (Holmes et Rahe), rituels, traits cachés, rôles, trajectoires |
 | `docs/LES-VOIX-DES-COMBATTANTS-v2.md` | Quarante-huit voix de combattants et dix médias fictifs (30/09, propositions de Claude tirées de l'observation), à relire et réécrire par Anthony |
 | `docs/LOT-2-CARTE-PRINCIPALE.md` | **Lot 2 — livré et fusionné (PR 62).** Contrat, les cinq tranches, les décisions du 20/09 et les relectures. Son §4 bis porte les réserves d'interface encore ouvertes (lot 4) |
