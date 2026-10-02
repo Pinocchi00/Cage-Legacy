@@ -19,9 +19,10 @@
      (m.cycle = 0), le bloc n'existe pas et la colonne de tendance porte « - » ;
    - un combattant extérieur s'ouvre en fiche (CL.mgmtFiche), comme un
      combattant de Split.
-   Ce qui n'existe pas n'apparaît pas (§4 bis) : ni « Champion », ni
-   ceinture, ni « ce que la presse réclame », ni objectif de patron —
-   ceintures et presse attendent le lot 5, l'objectif du patron aussi. Les
+    Lot 5 T1 : le bloc Champion de la maquette 07 lit les ceintures de chaque
+    organisation (faits Split, trace extérieure), avec bilan et défenses.
+    Ce qui n'existe pas n'apparaît pas (§4 bis) : ni « ce que la presse
+    réclame », ni objectif de patron. Les
    blocs de la maquette écrits au-dessus d'un système absent se ferment ; aucun
    texte de maquette ne s'affiche (§1). esc() sur tout nom affiché,
    escJsAttr sur tout identifiant injecté dans un onclick.
@@ -195,6 +196,29 @@ function mgmtClassementsScopeBtnsHtml(){
   return bt('world',L.worldTab)+bt('split',L.splitTab);
 }
 
+/* ==== [ANCRE: MGMT_LOT5_T1_CHAMPIONS_ECRAN] — Lot 5 T1, maquette 07 et
+   complément 04b validé le 02/10/2026. Mondial n'est pas une fédération :
+   cinq ceintures distinctes, une par organisation ; Split : la sienne.
+   Faits seulement (R1), aucun portrait, aucun pronostic ni voix (H1/H4).
+   Les ceintures vacantes restent lisibles, sans inventer de détenteur. ==== */
+function mgmtClassementsChampionsHtml(m,div,scope){
+  const belts=[mgmtSplitTitle(m,div)];
+  if(scope==='world') belts.push(...mgmtExteriorTitles(m,div).belts);
+  const label=divById(div)?.gender==='F'?'Championne':'Champion';
+  return `<div class="mgmt-cl-champions">`+belts.map(belt=>{
+    const line=belt.id?mgmtFicheLigne(m,belt.id):null;
+    const f=line&&line.f;
+    const org=`<span class="mgmt-cl-champion-label">${esc(label)} · ${esc(belt.org)}</span>`;
+    if(!f) return `<div class="mgmt-cl-champion">${org}<span class="mgmt-cl-champion-meta">Titre vacant</span></div>`;
+    const record=`${f.W}-${f.L}${f.D>0?'-'+f.D:''}`;
+    const defenses=`${belt.defenses} ${belt.defenses>1?'défenses':'défense'}`;
+    return `<button type="button" class="mgmt-cl-champion" onclick="CL.mgmtFiche('${escJsAttr(f.id)}')">`
+      +org+`<span class="mgmt-cl-champion-name">${esc(f.name)}</span>`
+      +`<span class="mgmt-cl-champion-meta">${esc(record)} · ${esc(defenses)}</span></button>`;
+  }).join('')+`</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** L'écran (maquette 07) : onglets de catégorie et portée en tête, la
  *  liste du top 15 à gauche, les constats et le compte de Split à droite. */
 function scr_mgmt_classements(){
@@ -230,6 +254,7 @@ function scr_mgmt_classements(){
     +`<div class="mgmt-cl-tabs">${mgmtClassementsTabsHtml()}</div>`
     +`<div class="mgmt-cl-cols">`
     +`<section class="mgmt-cl-pane mgmt-cl-list">`
+    +mgmtClassementsChampionsHtml(m,MGMT_CLASSEMENTS.div,scope)
     +`<div class="mgmt-cl-flag"><span class="mgmt-cl-stitle">${esc(L.top15)}</span>${label}</div>`
     +(cur.length===0
       ?`<div class="mgmt-cl-move">${esc(L.vide)}</div>`

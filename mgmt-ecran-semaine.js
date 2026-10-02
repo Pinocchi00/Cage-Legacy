@@ -149,30 +149,50 @@ function mgmtSemaineClassement(m){
     +`</section>`;
 }
 
-/* QO-9 : aucun fait n'est effacé. Chaque catégorie montre dix faits récents,
-   puis range le reste dans un details natif (souris et clavier). Le tri reste
-   du cycle le plus récent au plus ancien, sans score de relation ni voix. */
-function mgmtSemaineMemoire(m){
-  const groups=[
-    {title:'Cartes et décisions',k:['booked','refused','ignored','reaction_seen','crushed','swapped']},
-    {title:'Corps et carrières',k:['susp','injury','retired']}
-  ];
-  const name=id=>{
-    const f=mgmtFighterById(m,id);
-    if(f) return f.name;
-    const line=m.exterieur.find(e=>e.id===id);
-    return line?mgmtExteriorTrace(line,m.cycle).name:'Combattant';
-  };
+const MGMT_WEEK_MEMORY_GROUPS=[
+  {title:'Cartes et décisions',k:['booked','refused','ignored','reaction_seen','crushed','swapped','title_fight']},
+  {title:'Corps et carrières',k:['susp','injury','retired']}
+];
+
+/* ==== [ANCRE: MGMT_LOT5_T1_SEMAINE_MEMOIRE] — Reprise T1 : compteur et
+   rendu lisent les mêmes lignes. Les attributions initiales restent des
+   faits stockés du monde, hors de la Mémoire du joueur. Les titres joués
+   se racontent par leurs seuls libellés factuels et les deux noms. ==== */
+function mgmtSemaineMemoireRows(m){
+  const titles=mgmtTitleMemoryRows(m);
+  const kinds=MGMT_WEEK_MEMORY_GROUPS.flatMap(g=>g.k);
   const labels={booked:'Combat booké',refused:'Combat refusé',ignored:'Affaire ignorée',
     reaction_seen:'Réaction reçue',crushed:'Carte préliminaire écartée',swapped:'Combat échangé',
     susp:'Suspension',injury:'Blessure',retired:'Retraite'};
-  return groups.map(group=>{
-    const facts=m.facts.map((f,i)=>({f,i})).filter(x=>x.f&&group.k.includes(x.f.k))
+  const name=id=>{
+    if(!id) return null;
+    const f=mgmtFighterById(m,id);
+    if(f) return f.name;
+    const line=(m.exterieur||[]).find(e=>e.id===id);
+    return line?mgmtExteriorTrace(line,m.cycle).name:'Combattant';
+  };
+  return (m.facts||[]).map((f,i)=>({f,i})).filter(x=>x.f&&kinds.includes(x.f.k))
+    .map(({f,i})=>{
+      if(f.k==='title_fight'){
+        const title=titles.get(f);
+        return title?{f,i,...title}:null;
+      }
+      return {f,i,label:labels[f.k],a:name(f.a),b:name(f.b),na:name(f.na),nb:name(f.nb)};
+    }).filter(Boolean);
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* QO-9 : aucun fait n'est effacé. Chaque catégorie montre dix faits récents,
+   puis range le reste dans un details natif (souris et clavier). Le tri reste
+   du cycle le plus récent au plus ancien, sans score de relation ni voix. */
+function mgmtSemaineMemoire(m,rows=mgmtSemaineMemoireRows(m)){
+  return MGMT_WEEK_MEMORY_GROUPS.map(group=>{
+    const facts=rows.filter(x=>group.k.includes(x.f.k))
       .sort((x,y)=>(y.f.c-x.f.c)||(y.i-x.i));
     if(!facts.length) return '';
-    const factHtml=({f})=>`<div class="mgmt-week-fact">Cycle ${esc(f.c)} · ${esc(labels[f.k])}`
-      +(f.a?` · ${esc(name(f.a))}`:'')+(f.b?` / ${esc(name(f.b))}`:'')
-      +(f.na?` → ${esc(name(f.na))} / ${esc(name(f.nb))}`:'')+`</div>`;
+    const factHtml=({f,label,a,b,na,nb})=>`<div class="mgmt-week-fact">Cycle ${esc(f.c)} · ${esc(label)}`
+      +(a?` · ${esc(a)}`:'')+(b?` / ${esc(b)}`:'')
+      +(na?` → ${esc(na)} / ${esc(nb)}`:'')+`</div>`;
     const recent=facts.slice(0,10).map(factHtml).join('');
     const older=facts.length>10
       ?`<details class="mgmt-week-older"><summary>Tous les ${facts.length} faits</summary>`
@@ -242,6 +262,7 @@ function scr_mgmt_bureau(){
       +mgmtBureauFicheCard(m,mgmtFighterById(m,sel.b));
   }
   const roster=m.roster.filter(f=>!mgmtIsRetired(f)).length;
+  const memory=mgmtSemaineMemoireRows(m);
   return `<div class="scr mgmt-wrap mgmt-week"><div class="mgmt-head bar">`
     +`<div><h2 class="disp">La semaine</h2></div>`
     +`<span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
@@ -253,7 +274,7 @@ function scr_mgmt_bureau(){
     +`<div class="mgmt-week-affairs"><h3>Affaires · ${open.length}</h3>${pileHtml}</div>`
     +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</section>`
     +`<section class="mgmt-week-pane"><h3>Le monde autour de Split</h3>${mgmtSemaineMonde(m)}`
-    +`<details class="mgmt-week-memo"><summary>Mémoire · ${m.facts.length} faits</summary>${mgmtSemaineMemoire(m)}</details></section>`
+    +`<details class="mgmt-week-memo"><summary>Mémoire · ${esc(memory.length)} fait${memory.length===1?'':'s'}</summary>${mgmtSemaineMemoire(m,memory)}</details></section>`
     +`<aside class="mgmt-week-pane">${mgmtSemaineClassement(m)}`
     +`<section class="mgmt-week-organisation"><h3>L'organisation</h3>`
     +`<p>${esc(roster)} combattants · trésorerie ${esc(m.treasury)} k$</p>`

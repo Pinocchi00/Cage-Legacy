@@ -704,6 +704,21 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
 .mgmt-cl-hd.mt{margin-top:26px;border-top:1px solid var(--mgmt-edge);padding-top:18px}
 .mgmt-cl-move{font-size:18px;font-weight:300;line-height:1.6;padding:2px 0;overflow-wrap:anywhere}
 .mgmt-cl-orgline{font-size:18px;font-weight:300;line-height:1.6}
+/* ==== [ANCRE: MGMT_LOT5_T1_TITRE_UI] — Lot 5 T1 : geste de la maquette
+   04b validé le 02/10/2026, bloc Champion de la maquette 07. L2/L4 :
+   encre et secondaire lisibles, noms enroulés, aucune ellipse. ==== */
+.mgmt-title-choice{display:flex;align-items:center;gap:10px;margin-top:10px;font:16px var(--mgmt-font-body);color:var(--mgmt-ink);cursor:pointer}
+.mgmt-title-choice input{width:20px;height:20px;margin:0;accent-color:var(--mgmt-yellow);cursor:pointer}
+.mgmt-title-choice input:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:3px}
+.mgmt-cl-champions{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.mgmt-cl-champion{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;width:100%;padding:16px 24px;background:linear-gradient(rgba(255,200,61,.14),rgba(255,200,61,.14)),var(--mgmt-plum);border:0;border-left:4px solid var(--mgmt-yellow);color:var(--mgmt-ink);text-align:left}
+button.mgmt-cl-champion{cursor:pointer}
+button.mgmt-cl-champion:hover{background:linear-gradient(rgba(255,200,61,.2),rgba(255,200,61,.2)),var(--mgmt-plum)}
+button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outline-offset:-2px}
+.mgmt-cl-champion-label{font:700 18px var(--mgmt-font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--mgmt-yellow);overflow-wrap:anywhere}
+.mgmt-cl-champion-name{font:italic 800 34px/1.1 var(--mgmt-font-display);overflow-wrap:anywhere}
+.mgmt-cl-champion-meta{font:300 18px var(--mgmt-font-body);color:var(--mgmt-secondary)}
+/* ==== [FIN ANCRE] ==== */
 @media(max-width:1279px){
   .mgmt-cl-cols{grid-template-columns:1fr;gap:24px}
   .mgmt-cl-pane{overflow:visible}
@@ -783,7 +798,10 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
    trajectoire à droite seulement si le monde fournit une trace. */
 .mgmt-fiche{padding:40px 64px 48px}
 .mgmt-fiche-retour{padding:6px 0;font-size:19px;align-self:flex-start}
-.mgmt-fiche-hero{padding:6px 0 20px;align-items:end}
+/* Lot 5 T1, parcours Champion -> fiche : le nom condensé de 116px peint
+   au-dessus de sa boîte (line-height .88). L4/S5 : réserver cet espace
+   évite qu'il masque Retour et intercepte son clic réel. */
+.mgmt-fiche-hero{padding:40px 0 20px;align-items:end}
 .mgmt-fiche-hero h2.disp{font-size:clamp(58px,6.04vw,116px);font-weight:800;line-height:.88}
 .mgmt-fiche-hero p{font-size:20px;font-weight:300;line-height:1.4}
 .mgmt-fiche-attrs{gap:46px}
@@ -995,27 +1013,28 @@ button{font-family:'Oswald',sans-serif;cursor:pointer;border:0;border-radius:0;f
      sans dépendance), logique du bureau (runtime : engine.js, ui-01 pour
      makeName/correlatedRecord, state), écrans (SCREENS/CL posés par ui-08
      et étendus via Object.assign). Toujours avant main.js. ==== -->
-<script src="mgmt-data.js?v=mgmt4t2r1"></script>
+<script src="mgmt-data.js?v=lot5t1r2"></script>
 <script src="mgmt-humanite-data.js?v=lot5h1"></script>
-<script src="mgmt-bureau.js?v=mgmt4t2r1"></script>
+<script src="mgmt-bureau.js?v=lot5t1"></script>
 <script src="mgmt-carte.js?v=cls4a"></script>
-<script src="mgmt-corps.js?v=r2809"></script>
+<script src="mgmt-corps.js?v=lot5t1"></script>
 <script src="mgmt-argent.js?v=r2809"></script>
-<script src="mgmt-monde.js?v=r2809"></script>
-<script src="mgmt-save.js?v=mgmt4t2r1"></script>
+<script src="mgmt-monde.js?v=lot5t1"></script>
+<script src="mgmt-ceintures.js?v=lot5t1r2"></script>
+<script src="mgmt-save.js?v=lot5t1"></script>
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=lot4f2reprise"></script>
-<script src="mgmt-ecran-carte.js?v=lot4f2reprise"></script>
+<script src="mgmt-ecran-semaine.js?v=lot5t1r2"></script>
+<script src="mgmt-ecran-carte.js?v=lot5t1"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=lot4t4"></script>
 <script src="mgmt-ecran-fiche.js?v=lot4f2final"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=lot4f2org"></script>
 <!-- Lot 4 T6 : l'écran des classements, chargé avant mgmt-screens.js. -->
-<script src="mgmt-ecran-classements.js?v=cls4a"></script>
-<script src="mgmt-screens.js?v=cls3b"></script>
+<script src="mgmt-ecran-classements.js?v=lot5t1"></script>
+<script src="mgmt-screens.js?v=lot5t1"></script>
 <script src="arene-etat.js?v=r2809"></script>
 <script src="arene-vue.js?v=lot4fidelite05"></script>
 <script src="arene-ecran.js?v=lot4fidelite05"></script>

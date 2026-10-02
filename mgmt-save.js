@@ -92,6 +92,10 @@ function mgmtValidEvent(e){
     if(x.winner!=='A'&&x.winner!=='B'&&x.winner!=='D') return false;
     if(!MGMT_FAMILY_LABELS[x.family]) return false;
     if(!Number.isSafeInteger(x.round)||x.round<1) return false;
+    /* Lot 5 T1 : absents dans les anciennes soirées, stricts si présents. */
+    if(x.title!==undefined&&typeof x.title!=='boolean') return false;
+    if(x.rounds!==undefined&&(x.rounds!==3&&x.rounds!==5||x.round>x.rounds)) return false;
+    if(x.title===true&&x.rounds!==5) return false;
   }
   for(const t of e.touched){
     if(!t||typeof t.id!=='string'||!t.id) return false;
@@ -221,6 +225,7 @@ function validateMgmt(raw){
     for(const f of raw.card.main.concat(raw.card.prelims)){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(f.slot!=='main'&&f.slot!=='prelim') return false;
+      if(f.title!==undefined&&typeof f.title!=='boolean') return false;
     }
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
@@ -243,7 +248,26 @@ function validateMgmt(raw){
   for(const a of raw.pile){ if(!mgmtValidAffair(a)) return false; }
   /* QO-9 : aucune limite de longueur ; une sauvegarde ancienne ou une
       mémoire de plusieurs saisons franchit la même porte sans perte. */
-  for(const f of raw.facts){ if(!f||typeof f!=='object') return false; }
+  const titleInitial=new Set(),titleFights=new Set();
+  for(const f of raw.facts){
+    if(!f||typeof f!=='object'||Array.isArray(f)) return false;
+    /* Lot 5 T1 : un fait de titre pointe vers le combat auto-portant ;
+       aucun champion ni compteur dérivé n'est persisté à côté. */
+    if(f.k==='title_initial'){
+      if(Object.keys(f).sort().join(',')!=='a,c,div,k'||!divById(f.div)
+        ||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle
+        ||f.a!==null&&!mgmtValidId(f.a)||titleInitial.has(f.div)) return false;
+      titleInitial.add(f.div);
+    }else if(f.k==='title_fight'){
+      if(Object.keys(f).sort().join(',')!=='c,div,fight,k'||!divById(f.div)
+        ||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle
+        ||!Number.isSafeInteger(f.fight)||f.fight<0||titleFights.has(f.fight)) return false;
+      const t=raw.hist[f.fight];
+      if(!t||t.c!==f.c||t.a.div!==f.div||t.b.div!==f.div
+        ||t.a.id===t.b.id||t.rounds!==5||t.round>t.rounds) return false;
+      titleFights.add(f.fight);
+    }
+  }
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
   return true;
 }
@@ -337,6 +361,14 @@ function mgmtMigrate(raw){
   if(raw.v===9){
     raw.v=10;
   }
+  /* 10 → 11 (lot 5 T1, décisions d'Anthony du 02/10/2026) : attribuer
+     aujourd'hui les ceintures au premier classé, zéro défense. Aucun ancien
+     combat n'est requalifié en titre ou en cinq rounds ; trace et faits
+     existants restent intacts. Les choix title absents valent faux. */
+  if(raw.v===10){
+    raw.v=11;
+    mgmtInitTitles(raw);
+  }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
@@ -391,7 +423,15 @@ function mgmtRepair(m){
      n'est jamais coupée : la mémoire des combats ne s'efface pas (QO-9,
      même esprit). */
   if(!Array.isArray(m.hist)) m.hist=[];
-  else m.hist=m.hist.filter(x=>mgmtValidFightTrace(x));
+  else {
+    /* Lot 5 T1 : si une trace illisible est écartée, recaler les références
+       des faits de titre, sans couper ni décaler leur combat par erreur. */
+    const indices=new Map(),hist=[];
+    m.hist.forEach((x,i)=>{ if(mgmtValidFightTrace(x)){ indices.set(i,hist.length); hist.push(x); } });
+    m.hist=hist;
+    m.facts=m.facts.filter(f=>f.k!=='title_fight'||indices.has(f.fight));
+    for(const f of m.facts){ if(f.k==='title_fight') f.fight=indices.get(f.fight); }
+  }
   /* Lot 2 T1 : la carte {sizeMain,sizePrelims,main,prelims} se recadre — les
      deux capacités et les deux listes existent toujours, un combat qui ne
      pointe plus vers le roster est retiré de son emplacement. */

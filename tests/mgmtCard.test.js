@@ -831,7 +831,10 @@ test('MGMT T1 migration — v4 → v5 sans perte : les combats d\u2019une carte 
   assert.deepEqual(mig.card.prelims.map(f=>f.cycle), [2,1], 'les cycles posés sont conservés');
   assert.equal(mig.roster.length, 1, 'roster intact');
   assert.equal(mig.leila.crushes.length, 1, 'mémoire intacte');
-  assert.equal(mig.facts.length, 1, 'faits intacts');
+  /* Lot 5 T1 : le fait ancien reste exact, les attributions s'ajoutent. */
+  assert.equal(mig.facts.length, 13);
+  assert.deepEqual(mig.facts[0],MGMT_V4_BASE.facts[0], 'fait ancien intact');
+  assert.equal(mig.facts.filter(f=>f.k==='title_initial').length,12);
   assert.equal(mig.treasury, 120, 'argent d\u2019une v4 conservé');
   assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`), true, 'la v4 migrée passe la porte v5');
   /* La même v4 se charge depuis le stockage dédié. */

@@ -534,7 +534,7 @@ function mgmtApplyFight(m,f,opp,res,side){
 }
 
 /** Joue la soirée : les combats de la carte se règlent en une seule fois
- *  par simulateFight(A,B,3) — sans applyResult(), le bilan est mis à jour
+ *  par simulateFight(A,B,rounds) — sans applyResult(), le bilan est mis à jour
  *  à la main — avec toutes leurs conséquences (§6). Lot 3b T1 (QO-5) : le
  *  même calcul unique porte la finance — attrait et cachets lus sur les
  *  lignes d'avant combat, spectacle observé sur les combats joués, recette
@@ -556,12 +556,14 @@ function mgmtRunEvent(m){
   if(!mgmtCardFull(m)) return null;
   /* Lot 2 T1 : chaque combat porte son emplacement (slot:'main'|'prelim')
      et la soirée joue la carte principale d'abord, puis les préliminaires. */
-  const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim'}));
+  const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim',
+    title:f.title===true,rounds:mgmtBoutRounds(m,f),source:f}));
   /* Disponibilités vérifiées d'abord : une paire introuvable n'applique
      aucune conséquence — la soirée n'a pas commencé. */
   for(const cf of booked){
     const fa=mgmtFighterById(m,cf.a), fb=mgmtFighterById(m,cf.b);
     if(!fa||!fb||!mgmtAvailable(m,fa)||!mgmtAvailable(m,fb)) return null;
+    if(cf.title&&!mgmtCanTitle(m,cf.source)) return null;
   }
   /* Cachets et attrait : la carte d'avant la soirée — le bilan et le corps
      d'avant combat, jamais d'après (les combats mutent les lignes). */
@@ -579,12 +581,14 @@ function mgmtRunEvent(m){
        intact, aucun reseingage par combat). */
     const traceA=mgmtTraceSide(fa), traceB=mgmtTraceSide(fb);
     const seedFight=SEED;
-    const res=simulateFight(mgmtFightReady(fa,m.cycle),mgmtFightReady(fb,m.cycle),3);
+    const res=simulateFight(mgmtFightReady(fa,m.cycle),mgmtFightReady(fb,m.cycle),cf.rounds);
     const fam=mgmtMethodFamily(res.method,res.winner);
-    const roundF=Number.isSafeInteger(res.round)?res.round:3;
-    fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF});
-    m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:3,a:traceA,b:traceB,
+    const roundF=Number.isSafeInteger(res.round)?res.round:cf.rounds;
+    fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF,
+      rounds:cf.rounds,title:cf.title});
+    m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
       winner:res.winner,family:fam,round:roundF});
+    if(cf.title) mgmtAddFact(m,{c:m.cycle,k:'title_fight',div:fa.div,fight:m.hist.length-1});
     const ta=mgmtApplyFight(m,fa,fb,res,'A');
     const tb=mgmtApplyFight(m,fb,fa,res,'B');
     if(ta) touched.push(ta);

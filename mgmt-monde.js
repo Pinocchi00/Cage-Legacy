@@ -276,6 +276,9 @@ function mgmtExteriorCareer(seed,born,cycle){
   const proStart=Math.round(amaYears*cpy);
   const tNow=c-careerStart;
   const fin={ko:0,sub:0,dec:0};
+  /* Lot 5 T1 : exposition des combats déjà dérivés, sans tirage ajouté.
+     Vue éphémère pour les ceintures, jamais écrite dans la sauvegarde. */
+  const bouts=[];
   let W=0,L=0,fights=0,streak=0,orgIdx=0,orgFights=0,w3=0;
   const orgs=[{i:0,from:null,to:null,fights:0}];
   const orgMax=MGMT_EXT_ORGS.length;
@@ -299,6 +302,7 @@ function mgmtExteriorCareer(seed,born,cycle){
     const fam=mr<MGMT_EXT_FIN_KO?'ko':(mr<MGMT_EXT_FIN_KO+MGMT_EXT_FIN_SUB?'sub':'dec');
     const moveRoll=r();
     const worldC=careerStart+s;
+    const foughtOrg=orgIdx;
     fights++;
     if(win){ W++; streak=streak>=0?streak+1:1; }else{ L++; streak=streak<=0?streak-1:-1; }
     fin[fam]++;
@@ -313,10 +317,11 @@ function mgmtExteriorCareer(seed,born,cycle){
       orgIdx++; orgFights=0;
       orgs.push({i:orgIdx,from:null,to:null,fights:0});
     }
+    bouts.push({c:worldC,win,org:foughtOrg,nextOrg:orgIdx,W,L});
   }
   const age=Math.floor(ageStart+tNow/cpy);
   return {age:age,W:W,L:L,fin:fin,fights:fights,streak:streak,orgIdx:orgIdx,orgs:orgs,
-    retAge:tl.retAge,retireCycle:tl.retireCycle};
+    retAge:tl.retAge,retireCycle:tl.retireCycle,bouts};
 }
 
 /** La trace de carrière d'une combattant extérieur : TOUT le passé, dérivé
