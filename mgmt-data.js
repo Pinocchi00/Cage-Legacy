@@ -147,7 +147,10 @@ Object.assign(MGMT_EXCHANGES,{
 const MGMT_BODY_THRESHOLD=60;
 const MGMT_EVENT_WEEKS=5;
 const MGMT_FAMILY_LABELS={ko:'KO',stop:'Arrêt',sub:'Soumission',dec:'Décision',draw:'Nul'};
-const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',susp:'Suspension médicale'};
+const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',susp:'Suspension médicale',
+  /* Lot 5 T1, reprise Mémoire : libellés factuels demandés par Anthony. */
+  title_retained:'Ceinture conservée',title_lost:'Ceinture perdue',title_awarded:'Ceinture attribuée',
+  title_vacant:'Titre vacant'};
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_LOT2B_EXTERIEUR_DONNEES] — Lot 2B T1 le monde extérieur

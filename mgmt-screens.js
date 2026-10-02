@@ -414,6 +414,14 @@ Object.assign(CL,{
     if(mgmtRemoveMain(G.mgmt,i)) saveMgmt();
     render();
   },
+  /* Lot 5 T1 : case native, même geste à la souris et au clavier (S5).
+     Le focus revient sur la case après le retour visible immédiat (S6). */
+  mgmtTitle(i,title){
+    if(!G||!G.mgmt) return;
+    if(mgmtSetTitle(G.mgmt,i,title)) saveMgmt();
+    render();
+    document.getElementById('mgmt-title-'+i)?.focus();
+  },
   /* ==== [FIN ANCRE] ==== */
   mgmtOpen(id){
     if(!G||!G.mgmt) return;

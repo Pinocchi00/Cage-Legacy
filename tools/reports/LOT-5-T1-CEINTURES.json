@@ -1,0 +1,790 @@
+{
+  "config": {
+    "seed": 20261002,
+    "n": 3,
+    "soirees": 20,
+    "out": "tools/reports/LOT-5-T1-CEINTURES.md",
+    "save": "tools/reports/lot-5-t1-capture-save.json"
+  },
+  "totals": {
+    "titles": 300,
+    "changes": 41,
+    "defenses": 259,
+    "awards": 0,
+    "draws": 0,
+    "vacancies": 0
+  },
+  "results": [
+    {
+      "seed": 20261002,
+      "played": 20,
+      "cycle": 20,
+      "skipped": 0,
+      "split": {
+        "changes": 9,
+        "defenses": 91,
+        "awards": 0,
+        "draws": 0,
+        "vacancies": 0
+      },
+      "exterior": [
+        {
+          "org": "Garden of Blood",
+          "changes": 13,
+          "defenses": 24,
+          "losses": 13,
+          "transfers": 6,
+          "retirements": 0,
+          "awards": 6,
+          "vacant": 1
+        },
+        {
+          "org": "MMA Korner",
+          "changes": 27,
+          "defenses": 38,
+          "losses": 27,
+          "transfers": 8,
+          "retirements": 0,
+          "awards": 8,
+          "vacant": 0
+        },
+        {
+          "org": "Ultimate Rim",
+          "changes": 19,
+          "defenses": 45,
+          "losses": 19,
+          "transfers": 14,
+          "retirements": 0,
+          "awards": 13,
+          "vacant": 1
+        },
+        {
+          "org": "Fighting Pacific Championship",
+          "changes": 17,
+          "defenses": 42,
+          "losses": 17,
+          "transfers": 0,
+          "retirements": 4,
+          "awards": 4,
+          "vacant": 0
+        }
+      ],
+      "evenings": [
+        {
+          "n": 1,
+          "cycle": 1,
+          "titles": 5,
+          "changes": 2,
+          "defenses": 3,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 2,
+          "cycle": 2,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 3,
+          "cycle": 3,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 4,
+          "cycle": 4,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 5,
+          "cycle": 5,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 6,
+          "cycle": 6,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 7,
+          "cycle": 7,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 8,
+          "cycle": 8,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 9,
+          "cycle": 9,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 10,
+          "cycle": 10,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 11,
+          "cycle": 11,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 12,
+          "cycle": 12,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 13,
+          "cycle": 13,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 14,
+          "cycle": 14,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 15,
+          "cycle": 15,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 16,
+          "cycle": 16,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 17,
+          "cycle": 17,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 18,
+          "cycle": 18,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 19,
+          "cycle": 19,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 20,
+          "cycle": 20,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        }
+      ]
+    },
+    {
+      "seed": 20261003,
+      "played": 20,
+      "cycle": 20,
+      "skipped": 0,
+      "split": {
+        "changes": 13,
+        "defenses": 87,
+        "awards": 0,
+        "draws": 0,
+        "vacancies": 0
+      },
+      "exterior": [
+        {
+          "org": "Garden of Blood",
+          "changes": 11,
+          "defenses": 24,
+          "losses": 12,
+          "transfers": 5,
+          "retirements": 0,
+          "awards": 5,
+          "vacant": 2
+        },
+        {
+          "org": "MMA Korner",
+          "changes": 25,
+          "defenses": 37,
+          "losses": 25,
+          "transfers": 8,
+          "retirements": 0,
+          "awards": 8,
+          "vacant": 0
+        },
+        {
+          "org": "Ultimate Rim",
+          "changes": 20,
+          "defenses": 45,
+          "losses": 20,
+          "transfers": 14,
+          "retirements": 0,
+          "awards": 13,
+          "vacant": 1
+        },
+        {
+          "org": "Fighting Pacific Championship",
+          "changes": 17,
+          "defenses": 43,
+          "losses": 17,
+          "transfers": 0,
+          "retirements": 4,
+          "awards": 4,
+          "vacant": 0
+        }
+      ],
+      "evenings": [
+        {
+          "n": 1,
+          "cycle": 1,
+          "titles": 5,
+          "changes": 2,
+          "defenses": 3,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 2,
+          "cycle": 2,
+          "titles": 5,
+          "changes": 2,
+          "defenses": 3,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 3,
+          "cycle": 3,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 4,
+          "cycle": 4,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 5,
+          "cycle": 5,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 6,
+          "cycle": 6,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 7,
+          "cycle": 7,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 8,
+          "cycle": 8,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 9,
+          "cycle": 9,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 10,
+          "cycle": 10,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 11,
+          "cycle": 11,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 12,
+          "cycle": 12,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 13,
+          "cycle": 13,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 14,
+          "cycle": 14,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 15,
+          "cycle": 15,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 16,
+          "cycle": 16,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 17,
+          "cycle": 17,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 18,
+          "cycle": 18,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 19,
+          "cycle": 19,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 20,
+          "cycle": 20,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        }
+      ]
+    },
+    {
+      "seed": 20261004,
+      "played": 20,
+      "cycle": 20,
+      "skipped": 0,
+      "split": {
+        "changes": 19,
+        "defenses": 81,
+        "awards": 0,
+        "draws": 0,
+        "vacancies": 0
+      },
+      "exterior": [
+        {
+          "org": "Garden of Blood",
+          "changes": 12,
+          "defenses": 27,
+          "losses": 12,
+          "transfers": 9,
+          "retirements": 0,
+          "awards": 9,
+          "vacant": 1
+        },
+        {
+          "org": "MMA Korner",
+          "changes": 24,
+          "defenses": 42,
+          "losses": 24,
+          "transfers": 9,
+          "retirements": 0,
+          "awards": 9,
+          "vacant": 0
+        },
+        {
+          "org": "Ultimate Rim",
+          "changes": 19,
+          "defenses": 44,
+          "losses": 19,
+          "transfers": 13,
+          "retirements": 0,
+          "awards": 12,
+          "vacant": 1
+        },
+        {
+          "org": "Fighting Pacific Championship",
+          "changes": 15,
+          "defenses": 44,
+          "losses": 15,
+          "transfers": 0,
+          "retirements": 4,
+          "awards": 4,
+          "vacant": 0
+        }
+      ],
+      "evenings": [
+        {
+          "n": 1,
+          "cycle": 1,
+          "titles": 5,
+          "changes": 2,
+          "defenses": 3,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 2,
+          "cycle": 2,
+          "titles": 5,
+          "changes": 4,
+          "defenses": 1,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 3,
+          "cycle": 3,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 4,
+          "cycle": 4,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 5,
+          "cycle": 5,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 6,
+          "cycle": 6,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 7,
+          "cycle": 7,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 8,
+          "cycle": 8,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 9,
+          "cycle": 9,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 10,
+          "cycle": 10,
+          "titles": 5,
+          "changes": 2,
+          "defenses": 3,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 11,
+          "cycle": 11,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 12,
+          "cycle": 12,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 13,
+          "cycle": 13,
+          "titles": 5,
+          "changes": 2,
+          "defenses": 3,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 14,
+          "cycle": 14,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 15,
+          "cycle": 15,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 16,
+          "cycle": 16,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 17,
+          "cycle": 17,
+          "titles": 5,
+          "changes": 1,
+          "defenses": 4,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 18,
+          "cycle": 18,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 19,
+          "cycle": 19,
+          "titles": 5,
+          "changes": 2,
+          "defenses": 3,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        },
+        {
+          "n": 20,
+          "cycle": 20,
+          "titles": 5,
+          "changes": 0,
+          "defenses": 5,
+          "awards": 0,
+          "draws": 0,
+          "vacancies": 0
+        }
+      ]
+    }
+  ]
+}

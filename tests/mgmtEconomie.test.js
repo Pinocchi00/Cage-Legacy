@@ -374,7 +374,10 @@ test('MGMT économie T1 — migration 3 → 4 → 5 sans perte (carte en prélim
   assert.equal(mig.card.prelims[0].slot, 'prelim', 'le combat migré porte slot:\u2019prelim\u2019');
   assert.equal(mig.card.prelims[0].cycle, 2, 'le cycle posé est conservé');
   assert.equal(mig.leila.crushes.length, 1, 'mémoire intacte');
-  assert.equal(mig.facts.length, 1, 'faits intacts');
+  /* Lot 5 T1 : conserver le fait ancien, ajouter douze attributions. */
+  assert.equal(mig.facts.length, 13);
+  assert.deepEqual(mig.facts[0],v3.facts[0], 'fait ancien intact');
+  assert.equal(mig.facts.filter(f=>f.k==='title_initial').length,12);
   assert.equal(win.eval(`validateMgmt(${JSON.stringify(mig)})`), true, 'la v3 migrée passe la porte v5');
   /* La même v3 se charge depuis le stockage dédié. */
   win.localStorage.setItem('cage-legacy-mgmt', JSON.stringify(v3));

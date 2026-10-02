@@ -64,3 +64,11 @@ tools/reports/lot-4-fidelite/*
 !tools/reports/lot-4-fidelite/t8b-carriere-neuve-1920.png
 !tools/reports/lot-4-fidelite/t8b-carriere-focus-1440.png
 !tools/reports/lot-4-fidelite/t8b-carriere-audit.json
+# Lot 5 T1 : mesure de vingt soirées et preuves du geste/classements.
+!tools/reports/LOT-5-T1-CEINTURES.md
+!tools/reports/LOT-5-T1-CEINTURES.json
+!tools/reports/lot-5-t1-ceintures/
+tools/reports/lot-5-t1-ceintures/*
+!tools/reports/lot-5-t1-ceintures/*.png
+!tools/reports/lot-5-t1-ceintures/audit.json
+!tools/reports/lot-5-t1-ceintures/VERIFICATION.md

@@ -78,7 +78,7 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       ne peut porter un born négatif, la cohorte d'ouverture d'une partie
       déjà commencée reste celle qu'elle porte — le monde d'une ancienne
       sauvegarde ne bouge pas. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=10;
+const MGMT_SAVE_VERSION=11;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
@@ -139,6 +139,7 @@ function mgmtNewRoster(m){
       level:1,raison:null,interactions:0,
     });
   }
+  mgmtInitTitles(m);
   return m.roster;
 }
 
