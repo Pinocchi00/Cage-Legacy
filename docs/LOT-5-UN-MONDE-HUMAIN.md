@@ -478,3 +478,79 @@ MGMT_VILLES ; chaque moment a un poids entre 0 et 100 ; chaque texte a sa
 marque relu.
 npm run check vert. Règle d'arrêt : 2 h bloqué → commit, rapport, stop.
 ```
+
+### Kimi K3 — lot 5 H4 (plus de combattants) — prompt du 03/10
+
+```
+NOUVEAU TRAVAIL — Lot 5 H4 : plus de combattants, soirée à 5 + 7.
+Worktree cage-legacy-arene (lance TOUTES tes commandes depuis C:\Users\antho\Documents\cage-legacy-arene),
+branche lot-5-h4-effectifs créée depuis origin/main (2004ee0 : H1, H2, H2 bis, H3 et T1 y sont).
+Contrat : docs/LOT-5-UN-MONDE-HUMAIN.md §3.1, §3.3 (Leïla boucle les préliminaires), §7 (H4), §8.
+
+À faire :
+1. Effectifs. Vestiaire de Split : 130 à 150 combattants (MGMT_ROSTER_MIN/MAX, mgmt-data.js),
+   répartis par catégorie comme le monde (~14 %). Monde par catégorie (§3.1) : lourds 45, mi-lourds 60,
+   moyens 100, mi-moyens 130, légers 150, plumes 125, coqs 125, mouches 75 ; femmes paille 70,
+   mouches 65, coqs 50, plumes 30. Lis comment mgmt-monde.js dimensionne aujourd'hui (30 par catégorie)
+   et réutilise ce mécanisme : AUCUN second système.
+2. Soirée à 5 + 7 : MGMT_PRELIM_SIZE passe de 4 à 7 (MGMT_CARD_CONTRACT en dérive). Une partie déjà
+   commencée garde sa carte et son vestiaire : rien ne se redimensionne dans une sauvegarde existante ;
+   dis dans ton rapport si une migration (12 → 13) est nécessaire et pourquoi.
+3. Leïla propose les sept préliminaires par défaut (affaire `leila_bulk`, déjà dans mgmt-bureau.js) ;
+   le joueur valide, change un combat ou reprend tout. Le joueur booke les cinq combats de la carte principale.
+4. Combats par an et par combattant de Split : viser ~1,8 (réel 1,7). Mesure obligatoire.
+5. Une catégorie qui manque de monde ne doit jamais bloquer une carte : vérifie les sorties de carte
+   incomplète déjà décidées (lot 3B).
+
+MESURES OBLIGATOIRES avant de figer (rapport dans tools/reports/lot-5-h4/) :
+- temps de rendu de chaque écran du management (la semaine s'affiche en 8 ms aujourd'hui),
+- temps de mgmtExteriorEnsure et d'un cycle complet,
+- économie sur vingt soirées avec tools/monte-carlo-economie.js (douze combats coûtent plus que neuf :
+  si la trésorerie s'effondre, REPORTE le chiffre au lieu de bricoler les barèmes),
+- part des combats de titre où le champion tombe (13,7 % avant H4 — le contrat vise un monde où le titre se perd).
+Si une mesure dépasse un seuil raisonnable (écran > 50 ms, cycle > 1 s), rapporte et stoppe, ne contourne pas.
+
+Interdits (§8) : moteur de combat intact ; aucune phrase inventée ; rien de dérivé n'est stocké ;
+?v= montés pour tout .js modifié ; test et test:watch identiques dans package.json ;
+npm run check vert ; capture de la semaine et de la carte à 1920 ; COMMIT avant de livrer.
+Un test n'est jamais assoupli sans citer la décision (30/09, §3.1).
+Règle d'arrêt : 2 h bloqué → commit, rapport, stop. Économise ton quota : pas de Monte Carlo complet à chaque essai.
+```
+
+### GLM — lot 5 H5 (les moments de vie) — prompt du 03/10
+
+```
+NOUVEAU TRAVAIL — Lot 5 H5 : les moments de vie.
+Worktree cage-legacy-corps (commandes depuis C:\Users\antho\Documents\cage-legacy-corps),
+branche lot-5-h5-vie depuis origin/main (2004ee0 : H1, H2, H3 y sont).
+Contrat : docs/LOT-5-UN-MONDE-HUMAIN.md §7 (H5) et §8 ; docs/CATALOGUE-HUMANITE.md §6.2 et §6.3.
+Données : MGMT_MOMENTS dans mgmt-humanite-data.js (109 moments : id, famille, libelle, poids, relais, effet).
+
+À faire :
+1. Nouveau fichier mgmt-vie.js (logique pure, chargé après mgmt-humanite.js, avec ?v=) :
+   - À chaque cycle, chaque combattant (Split ET extérieur) a une petite chance de vivre un moment, tirée sur un
+     flux séparé 'vie' (mulberry32 + duelFnv1a32, comme mgmtIdentiteStream de mgmt-humanite.js). Aucun Math.random.
+     Choisis la probabilité pour qu'un combattant vive ~1 à 2 moments par an en moyenne ; MESURE-la.
+   - Le moment est un FAIT : il se garde avec mgmtAddFact (kind 'moment_vie', id du moment, cycle) ; les faits ne
+     disparaissent jamais (QO-9). Ajoute le libellé dans MGMT_FACT_LABELS et vérifie la validation des faits
+     (mgmt-save.js). Si le format de sauvegarde doit changer, passe par mgmtMigrate (dis-le dans le rapport).
+   - La CHARGE d'un combattant = somme des poids de ses moments des douze derniers cycles. DÉRIVÉE, jamais stockée,
+     jamais affichée en chiffre (ni note, ni jauge) : §8.
+   - Effets simples seulement : au-delà de 150, risque de blessure au camp un peu augmenté et forme en baisse
+     (paramètre `dynamic` de makeFighter via mgmtCombatProfile, aujourd'hui 0) ; au-delà de 300, retrait sur
+     blessure probable. Les moments heureux (poids > 0) pèsent mais ne comptent pas dans le risque de blessure.
+     Indisponibilité (« peut refuser un combat ce cycle-là ») : réutilise mgmtAvailable, aucun second système.
+     Les effets du catalogue qui supposent un système absent (agent, camps, argent personnel…) restent en texte seulement.
+   - Un moment privé n'apparaît que si son relais existe (presse ou lui-même).
+2. Bloc « Sa vie » dans la fiche (mgmt-ecran-fiche.js) : les moments relayés, du plus récent au plus ancien,
+   libellé du catalogue tel quel ; sans moment, « On ne sait pas encore ». Tout texte injecté passe par esc().
+   Ne casse pas la maquette 11 : pas de nouveau style hors des jetons existants.
+
+Interdits (§8) : AUCUNE phrase inventée (libellés du catalogue tels quels, relu:false conservé) ; moteur de combat
+intact ; ni note ni jauge ; rien de dérivé stocké ; pas de second système (réutilise mgmtAddFact, mgmtAvailable,
+l'anti-répétition existante). Chaque moment : max un par combattant et par cycle.
+Tests : déterminisme (même graine, mêmes moments), charge dérivée, seuils 150/300, moment privé masqué,
+faits conservés après rechargement, anciens profils intacts. Ajoute le fichier de test à test ET test:watch.
+?v= montés pour tout .js modifié ; npm run check vert ; capture de la fiche à 1920 ; COMMIT avant de livrer.
+Règle d'arrêt : 2 h bloqué → commit, rapport, stop.
+```
