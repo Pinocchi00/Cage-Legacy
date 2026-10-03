@@ -248,6 +248,8 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
     for(let i=0;i<5;i++) m.card.main.push({a:d[2*i].id,b:d[2*i+1].id,cycle:m.cycle,slot:'main'});
     for(let i=0;i<sp;i++) m.card.prelims.push({a:d[10+2*i].id,b:d[11+2*i].id,cycle:m.cycle,slot:'prelim'});
   })()`);
+  /* T6 : aucun retrait tiré au sort ici — ce test vérifie l'affichage, pas la carte incomplète. */
+  win.eval(`mgmtRetraitProb=function(){return 0;};`);
   win.eval(`CL.mgmtNextCycle();`);
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'la soirée s’ouvre');
   assert.ok(win.document.getElementById('app').textContent.includes(OCONNOR), 'les noms s’affichent à la soirée');
