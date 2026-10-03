@@ -470,6 +470,6 @@ test('MGMT lot 4 T1 — aucun emplacement d’auteur visible sur les six écrans
     assert.ok(!/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|mgmt-lvl/i.test(html), screen);
     assert.equal(win.document.querySelectorAll('.mgmt-nav').length,1,`navigation ${screen}`);
     assert.equal(win.document.querySelectorAll('.mgmt-nav button').length,
-      screen==='mgmt_soiree'||screen==='mgmt_lendemain'?0:4,`séquence imposée ${screen}`);
+      screen==='mgmt_soiree'||screen==='mgmt_lendemain'?0:5,`séquence imposée ${screen}`);
   }
 });

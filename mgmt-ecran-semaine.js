@@ -61,6 +61,11 @@ function mgmtSemaineMonde(m){
       used.add(f.id);
     }
   }
+  /* Lot 5 T5 : une recrue de la semaine se raconte (une seule). */
+  if(typeof mgmtRecruesLignes==='function'&&news.length<budget-1){
+    const r=mgmtRecruesLignes(m)[0];
+    if(r){ news.push({type:'recrue',div:r.div,text:r.text,id:r.id,source:'Recrutement'}); used.add(r.id); }
+  }
   /* Lot 5 H10 : une rivalité ou une trilogie née du dernier combat se raconte (une seule). */
   if(typeof mgmtRivalitesLignes==='function'&&news.length<budget-1){
     const r=mgmtRivalitesLignes(m)[0];
@@ -136,7 +141,7 @@ function mgmtSemaineMonde(m){
       ||!Number.isSafeInteger(f.lastCycle)||m.cycle-f.lastCycle<3) continue;
     add('inactivite',f.div,`${f.name} : dernier combat sous Split il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
   }
-  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie',demande:'Demande',rivalite:'Rivalité',parole:'Ce qui se dit'};
+  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie',demande:'Demande',rivalite:'Rivalité',parole:'Ce qui se dit',recrue:'Recrutement'};
   return news.map(n=>`<article class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">`
     +`<span class="mgmt-week-source">${esc(n.source||sources[n.type])}</span><p>${esc(n.text)}</p>`
     +(n.id?`<button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</article>`).join('');
