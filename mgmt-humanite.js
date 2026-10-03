@@ -83,16 +83,25 @@ function mgmtIdentiteSurnoms(f){
  *  combattant arrive. Les retraités restent réservés, aucun cache ni registre
  *  parallèle. Un transfert conservant l'id est dédoublonné. */
 function mgmtIdentiteSurnom(m,f){
+  return mgmtIdentiteAllouer(m,f.div,f,f.id).get(f.id)||'';
+}
+/** Les surnoms de TOUTE une catégorie, en une seule passe (lot 5 H8, le
+ *  vestiaire) : la même allocation que mgmtIdentiteSurnom, sans la refaire
+ *  pour chaque ligne. @returns {Map<string,string>} id → surnom */
+function mgmtIdentiteSurnomsDe(m,div){
+  return mgmtIdentiteAllouer(m,div,null,null);
+}
+function mgmtIdentiteAllouer(m,div,extra,jusquA){
   const lignes=new Map();
-  for(const o of [...(m?.roster||[]),...(m?.exterieur||[]),f]){
-    if(o&&o.div===f.div) lignes.set(o.id,o);
+  for(const o of [...(m?.roster||[]),...(m?.exterieur||[]),extra]){
+    if(o&&o.div===div) lignes.set(o.id,o);
   }
   const ordre=(a,b)=>{
     const na=/^mg(\d+)$/.exec(a.id),nb=/^mg(\d+)$/.exec(b.id);
     if(na&&nb) return Number(na[1])-Number(nb[1]);
     return a.id<b.id?-1:a.id>b.id?1:0;
   };
-  const pris=new Set();
+  const pris=new Set(), sortie=new Map();
   for(const o of [...lignes.values()].sort(ordre)){
     const candidats=mgmtIdentiteSurnoms(o);
     let surnom=candidats.find(t=>!pris.has(t));
@@ -103,10 +112,11 @@ function mgmtIdentiteSurnom(m,f){
       let n=2;
       do{ surnom=base+' · '+mgmtIdentiteOrdinal(n++); }while(pris.has(surnom));
     }
-    if(o.id===f.id) return surnom;
+    sortie.set(o.id,surnom);
     pris.add(surnom);
+    if(jusquA!==null&&o.id===jusquA) break;
   }
-  return '';
+  return sortie;
 }
 function mgmtIdentiteOrdinal(n){
   let texte='';

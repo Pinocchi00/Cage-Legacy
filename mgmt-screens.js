@@ -187,6 +187,7 @@ function mgmtNavHtml(){
     +` onclick="CL.go('${screen}')">${label}</button>`;
   return `<nav class="mgmt-nav" aria-label="Navigation management">`
     +navB('Semaine','mgmt_bureau')
+    +navB('Vestiaire','mgmt_vestiaire')
     +navB('Classements','mgmt_classements')
     +navB('Organisation','mgmt_organisation')+`</nav>`;
 }
@@ -201,7 +202,7 @@ function mgmtWithNav(screen){
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js).
    Lot 4 T7 : l'organisation rejoint les cinq autres écrans, enregistrée
    comme eux (mgmtWithNav). Lot 4 T6 : les classements, de même. ==== */
-Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements)});
+Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_vestiaire:mgmtWithNav(scr_mgmt_vestiaire),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements)});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -288,6 +289,9 @@ keysRegister('mgmt_organisation',{
 keysRegister('mgmt_classements',{
   Escape(){ CL.go('mgmt_bureau'); },
 });
+keysRegister('mgmt_vestiaire',{
+  Escape(){ CL.go('mgmt_bureau'); },
+});
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
@@ -302,7 +306,7 @@ Object.assign(CL,{
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
     const retour=(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
-      ||G.screen==='mgmt_classements')?G.screen:'mgmt_bureau';
+      ||G.screen==='mgmt_classements'||G.screen==='mgmt_vestiaire')?G.screen:'mgmt_bureau';
     MGMT_FICHE={id,retour,cursor:0};
     CL.go('mgmt_fiche');
   },
@@ -514,6 +518,15 @@ Object.assign(CL,{
     if(!G||!G.mgmt) return;
     if(mgmtRepondreDemande(G.mgmt,Number(i),reponse)){ saveMgmt(); render(); }
   },
+  /* Lot 5 H8 : les filtres du vestiaire vivent à l'écran, rien ne se garde. */
+  mgmtVestiaireFiltre(cle,valeur){
+    const F=MGMT_VESTIAIRE;
+    if(cle==='div'||cle==='role') F[cle]=valeur;
+    else if(cle==='lien') F.lien=F.lien===valeur?'':valeur;
+    else if(cle==='dispo'||cle==='signe') F[cle]=!F[cle];
+    F.page=0; render();
+  },
+  mgmtVestiairePage(delta){ MGMT_VESTIAIRE.page=Math.max(0,MGMT_VESTIAIRE.page+(Number(delta)||0)); render(); },
   mgmtNextCycle(){
     if(!G||!G.mgmt) return;
     const r=mgmtClosePile(G.mgmt);
