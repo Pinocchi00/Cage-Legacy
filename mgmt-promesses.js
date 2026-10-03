@@ -40,6 +40,8 @@ const MGMT_DEMANDES={
   'revanche':{libelle:'Une revanche',relu:false},
   /* Lot 5 H10 (scénario n° 2, la trilogie) : « le troisième combat » du contrat §5. */
   'trilogie':{libelle:'Le troisième combat',relu:false},
+  /* Lot 5 H10 (scénario n° 29, la descente aux enfers) : une pause se tient en NE bookant PAS. */
+  'pause':{libelle:'Une pause',relu:false},
 };
 const MGMT_PROMESSE_CYCLES=3;
 const MGMT_DEMANDE_EXPIRE=3;
@@ -111,7 +113,8 @@ function mgmtPromesses(m,f){
       &&(t.a.id===f.id||t.b.id===f.id)
       &&(x.want!=='carte-principale'||t.slot==='main')
       &&(!x.target||t.a.id===x.target||t.b.id===x.target));
-    const etat=joue?'tenue':(m.cycle>x.due?'rompue':'en cours');
+    /* Une pause est tenue quand le combattant n'a pas combattu jusqu'à l'échéance, rompue s'il a combattu. */
+    const etat=x.want==='pause'?(joue?'rompue':(m.cycle>x.due?'tenue':'en cours')):(joue?'tenue':(m.cycle>x.due?'rompue':'en cours'));
     out.push({i,want:x.want,target:x.target||null,c:x.c,due:x.due,etat});
   });
   return out;

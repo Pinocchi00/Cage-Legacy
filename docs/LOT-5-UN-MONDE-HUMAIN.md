@@ -474,6 +474,27 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   les autres scénarios du §5 (30 sur 32), dont ceux qui demandent les camps (T7), le recrutement (T5),
   les décisions partagées contestées (le moteur n'en publie pas le détail) et les voix (T2 + T3).
 
+- **H10 — deuxième groupe, codé par Claude** (03/10 ; à relire par Anthony). `mgmt-scenarios.js`
+  (mesures : `tools/mesure-scenarios.js`). Même mécanique que le premier groupe : un déclencheur
+  **dérivé de l'état, rien de stocké**, une **demande imposée par l'histoire** (H7 : Promettre ou Refuser),
+  des faits qui restent. **N° 5 le train de la hype** : la série de victoires de Split atteint douze, au
+  moment où elle l'atteint ; il demande « un classé » (un des cinq premiers de sa catégorie) ; le protéger,
+  c'est refuser. **N° 4 la dernière danse** : un vétéran de 36 ans et plus, quinze victoires de carrière au
+  moins, vient de perdre quatre fois de suite ; il demande la carte principale. **N° 10 le deuil** : décès
+  d'un parent, d'un frère ou d'une sœur, ou mort de son coach (moments H5) ; la moitié (flux `deuil`)
+  veut combattre pour le défunt et demande la carte principale, reporter c'est refuser. **N° 29 la descente
+  aux enfers** : deux défaites de suite **et** plus de 300 de charge ; il demande **une pause** — nouvelle
+  demande `pause`, **une promesse qui se tient en ne le bookant pas** (tenue à l'échéance sans combat,
+  rompue s'il combat : 20 de charge et la loyauté comme toute promesse rompue), jamais redemandée dans
+  les six cycles qui suivent. La fiche (« Ses rivaux ») nomme le scénario en cours. **Mesuré (52 cycles,
+  graine 20261003, booking aléatoire)** : hype 0,27, danse 0,23, deuil 0,21 par cycle, calcul 3 ms ; les
+  seuils ont été resserrés après une première mesure à 2,7 danses par cycle (un vétéran sur une pente
+  mauvaise est la norme dans un monde où les forts écrasent les faibles : 29 séries de huit victoires
+  en cinq ans). **La descente n'a jamais eu lieu dans la mesure** : 300 de charge (le chiffre du contrat)
+  demande des refus et des promesses rompues, que le joueur seul produit. Parties neuves seulement.
+  **Restent** : 24 scénarios sur 32 (couverts : 1, 2, 3 par T7, 4, 5, 6, 10, 29), dont ceux
+  qui attendent un système (visa, descente de catégorie, transfuge, fratrie, blues du champion).
+
 - **T2 + T3 — la voix branchée, codées par Claude** (03/10 ; **les répliques sont
   celles du document, `relu:false` : Anthony les relit et les réécrit**).
   `mgmt-voix-data.js` est **généré** par `tools/extraire-voix.js` depuis

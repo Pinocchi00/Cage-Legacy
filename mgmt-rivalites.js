@@ -107,6 +107,8 @@ function mgmtDemandesImposees(m){
     if(m.cycle-r.c>1) continue;
     out.push({a:r.a,want:r.k==='rivalite'?'revanche':'trilogie',target:r.b});
   }
+  /* Lot 5 H10, deuxième groupe (mgmt-scenarios.js). */
+  if(typeof mgmtScenariosImposes==='function') out.push(...mgmtScenariosImposes(m));
   return out;
 }
 
@@ -114,10 +116,11 @@ function mgmtDemandesImposees(m){
 function mgmtFicheRivaux(m,f){
   if(m.effectifs!==1) return '';
   const rivaux=mgmtRivauxDe(m,f);
-  if(!rivaux.length) return '';
+  const scenarios=typeof mgmtScenariosDe==='function'?mgmtScenariosDe(m,f):[];
+  if(!rivaux.length&&!scenarios.length) return '';
   const etiquette={rivalite:'Revanche due',trilogie:'Le troisième combat'};
   return `<h3>Ses rivaux</h3><ul class="mgmt-fiche-vie-liste">`
     +rivaux.map(r=>{ const o=mgmtFighterById(m,r.autre); return `<li>${esc(o?o.name:'')} <span class="mgmt-fiche-vie-relais">${esc(etiquette[r.k])}</span></li>`; }).join('')
-    +`</ul>`;
+    +scenarios.map(s=>`<li>${esc(s)}</li>`).join('')+`</ul>`;
 }
 /* ==== [FIN ANCRE] ==== */
