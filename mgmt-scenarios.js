@@ -31,12 +31,23 @@ const MGMT_DEUIL_PART=0.5;
 const MGMT_DESCENTE_CHARGE=300;
 /** Les moments de vie qui font un deuil (catalogue §6). */
 const MGMT_DEUIL_MOMENTS=['deces-parent','deces-frere-soeur','coach-meurt'];
+/** Le blues du champion : un champion qui vient de gagner sa ceinture ne veut
+ *  plus de cage pour l'instant. Une fois sur deux (flux 'blues'). */
+const MGMT_BLUES_PART=0.5;
+/** La fratrie : parmi les combattants de Split qui portent le même nom de
+ *  famille dans le même pays (une vingtaine de paires par vestiaire,
+ *  mesuré le 03/10), cette part-là sont de la même famille — de l'ordre de
+ *  deux à sept paires (cinq graines mesurées : 3 à 13 à 15 %, d'où 10 %). Le choix est semé par la paire, jamais par la partie. */
+const MGMT_FRATRIE_PART=0.1;
+/** Les frères et sœurs ne se combattent jamais : les booker l'un contre l'autre pèse. */
+const MGMT_CONTRARIE_FRATRIE=30;
 /** Les étiquettes de la fiche. */
 const MGMT_SCENARIOS_LIBELLES={
   hype:'Le train de la hype',
   'derniere-danse':'La dernière danse',
   deuil:'Un deuil',
   descente:'La descente',
+  blues:'Le blues du champion',
 };
 
 /** Les scénarios vivants de ce cycle : [{k,a,want,target?}]. Dérivé de l'état,
@@ -72,7 +83,25 @@ function mgmtScenarios(m){
       out.push({k:'descente',a:f.id,want:'pause',target:null});
     }
   }
+  /* n° 24 — le blues du champion : la ceinture date du dernier cycle. */
+  for(const div of allDivisions()){
+    const belt=mgmtSplitTitle(m,div.id);
+    if(belt.id&&Number.isSafeInteger(belt.since)&&belt.since>=m.cycle-1&&belt.since>0
+      &&mgmtIdentiteStream(belt.id,'blues|'+belt.since)()<MGMT_BLUES_PART){
+      out.push({k:'blues',a:belt.id,want:'pause',target:null});
+    }
+  }
   return out;
+}
+
+/** Les frères et sœurs d'un combattant chez Split (n° 23) : même pays, même
+ *  nom de famille, et la part de ces paires qui sont de la même famille.
+ *  @returns {string[]} les identifiants. */
+function mgmtFratrie(m,f){
+  if(!m||m.effectifs!==1||!f||!f.last) return [];
+  const pays=mgmtIdentitePays(f);
+  return m.roster.filter(o=>o.id!==f.id&&!mgmtIsRetired(o)&&o.last===f.last&&mgmtIdentitePays(o)===pays
+    &&mgmtIdentiteStream([f.id,o.id].sort().join('|'),'fratrie')()<MGMT_FRATRIE_PART).map(o=>o.id);
 }
 
 /** Les demandes que ces scénarios imposent (même forme que mgmtDemandesImposees).
@@ -84,6 +113,7 @@ function mgmtScenariosImposes(m){
 
 /** Les scénarios d'un combattant, pour sa fiche : étiquettes sans chiffre. */
 function mgmtScenariosDe(m,f){
-  return mgmtScenarios(m).filter(s=>s.a===f.id).map(s=>MGMT_SCENARIOS_LIBELLES[s.k]);
+  const fratrie=mgmtFratrie(m,f).map(id=>{ const o=mgmtFighterById(m,id); return 'Sa famille chez Split : '+(o?o.name:''); });
+  return mgmtScenarios(m).filter(s=>s.a===f.id).map(s=>MGMT_SCENARIOS_LIBELLES[s.k]).concat(fratrie);
 }
 /* ==== [FIN ANCRE] ==== */

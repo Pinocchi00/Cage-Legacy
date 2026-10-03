@@ -298,7 +298,7 @@ function validateMgmt(raw){
       if(f.target!==undefined&&!mgmtValidId(f.target)) return false;
       if(f.k==='promesse'&&(!Number.isSafeInteger(f.due)||f.due<f.c||!Number.isSafeInteger(f.d))) return false;
       if(f.k==='refus'&&!Number.isSafeInteger(f.d)) return false;
-      if(f.k==='contrarie'&&(!Number.isSafeInteger(f.p)||f.p<10||f.p>30||(f.why!=='titre'&&f.why!=='jeune'&&f.why!=='coequipier'))) return false;
+      if(f.k==='contrarie'&&(!Number.isSafeInteger(f.p)||f.p<10||f.p>30||(f.why!=='titre'&&f.why!=='jeune'&&f.why!=='coequipier'&&f.why!=='fratrie'))) return false;
     }
   }
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
