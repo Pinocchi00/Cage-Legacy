@@ -8,9 +8,10 @@ function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(
 const NEUVE=`setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m,screen:'mgmt_bureau'};
   m.facts=[]; m.hist=[]; m.cycle=10;
   const libres=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o)); const [X,Y,Z]=libres;
-  const combat=(c,g,p,family,round,gW,pW,pL)=>m.hist.push({c,slot:'main',rounds:3,a:{id:g.id,W:gW||5,L:0,D:0},b:{id:p.id,W:pW||5,L:pL===undefined?1:pL,D:0},winner:'A',family,round});`;
+  /* le perdant a le meilleur bilan : le favori écrasé (H10 : défaite humiliante = finish au 1er round + bilan meilleur chez le perdant) */
+  const combat=(c,g,p,family,round,gW,pW,pL)=>m.hist.push({c,slot:'main',rounds:3,a:{id:g.id,W:gW||5,L:pL===undefined?2:pL,D:0},b:{id:p.id,W:pW||8,L:0,D:0},winner:'A',family,round});`;
 
-test('H10 — une défaite humiliante (KO ou soumission dans les deux premiers rounds) fait une rivalité ; revanche due', () => {
+test('H10 — une défaite humiliante (KO ou soumission au premier round, le favori écrasé) fait une rivalité ; revanche due', () => {
   const win=newGameWindow();
   const r=result(win,`${NEUVE}
     combat(9,X,Y,'ko',1);
@@ -26,15 +27,16 @@ test('H10 — pas de rivalité pour une décision, un finish tardif, un nul ; la
   const win=newGameWindow();
   const r=result(win,`${NEUVE}
     combat(9,X,Y,'dec',3); const dec=mgmtRivalites(m).length;
-    m.hist=[]; combat(9,X,Y,'ko',3); const tard=mgmtRivalites(m).length;
+    m.hist=[]; combat(9,X,Y,'ko',2); const tard=mgmtRivalites(m).length;
+    m.hist=[]; m.hist.push({c:9,slot:'main',rounds:3,a:{id:X.id,W:8,L:0,D:0},b:{id:Y.id,W:5,L:2,D:0},winner:'A',family:'ko',round:1}); const normal=mgmtRivalites(m).length;
     m.hist=[]; m.hist.push({c:9,slot:'main',rounds:3,a:{id:X.id,W:5,L:0,D:0},b:{id:Y.id,W:5,L:1,D:0},winner:'D',family:'draw',round:3}); const nul=mgmtRivalites(m).length;
-    m.hist=[]; combat(9,X,Y,'sub',2); const sub=mgmtRivalites(m).length;
+    m.hist=[]; combat(9,X,Y,'sub',1); const sub=mgmtRivalites(m).length;
     /* la revanche : Y gagne par décision → plus une rivalité, une trilogie à jouer */
     m.hist.push({c:10,slot:'main',rounds:3,a:{id:Y.id,W:5,L:1,D:0},b:{id:X.id,W:6,L:0,D:0},winner:'A',family:'dec',round:3});
     const apres=mgmtRivalites(m);
-    return {dec,tard,nul,sub,apres};
+    return {dec,tard,normal,nul,sub,apres};
   `);
-  assert.equal(r.dec,0); assert.equal(r.tard,0); assert.equal(r.nul,0); assert.equal(r.sub,1);
+  assert.equal(r.dec,0); assert.equal(r.tard,0,'un finish au 2e round n’humilie pas'); assert.equal(r.normal,0,'battre un adversaire au meilleur bilan n’est pas humiliant à l’envers'); assert.equal(r.nul,0); assert.equal(r.sub,1);
   assert.equal(r.apres.length,1); assert.equal(r.apres[0].k,'trilogie','la revanche jouée remplace la rivalité par une trilogie');
 });
 
@@ -116,11 +118,12 @@ test('H10 — la semaine, le fil et la fiche racontent la rivalité ; tout est �
     const semaine=SCREENS.mgmt_bureau(); const fil=mgmtFilLignes(m);
     MGMT_FICHE={id:Y.id,retour:'mgmt_bureau',cursor:0}; G.screen='mgmt_fiche'; const fiche=scr_mgmt_fiche();
     const ancien=mgmtDefaultAvantH4(); mgmtNewRoster(ancien); ancien.hist=[{c:1,slot:'main',rounds:3,a:{id:ancien.roster[0].id,W:5,L:0,D:0},b:{id:ancien.roster[1].id,W:5,L:1,D:0},winner:'A',family:'ko',round:1}]; ancien.cycle=2;
-    return {n:lignes.length,texte:lignes[0].text.includes('revanche due'),semaine:semaine.includes('data-type="rivalite"')&&semaine.includes('revanche due'),
+    /* le favori écrasé était invaincu de 8 victoires : la même scène est aussi un tueur de hype */
+    return {n:lignes.filter(l=>l.text.includes('revanche due')).length,hype:lignes.some(l=>l.text.includes('invaincu')),texte:lignes[0].text.includes('revanche due'),semaine:semaine.includes('data-type="rivalite"')&&semaine.includes('revanche due'),
       brut:semaine.includes('<b>'+X.name.slice(3)),fil:fil.some(x=>x.includes('revanche due')),rivaux:fiche.includes('Ses rivaux')&&fiche.includes('Revanche due'),
       fcheBrut:fiche.includes('<b>'),ancien:mgmtFicheRivaux(ancien,ancien.roster[0])};
   `);
-  assert.equal(r.n,1); assert.ok(r.texte); assert.ok(r.semaine); assert.ok(r.fil); assert.ok(r.rivaux);
+  assert.equal(r.n,1); assert.ok(r.hype); assert.ok(r.texte); assert.ok(r.semaine); assert.ok(r.fil); assert.ok(r.rivaux);
   assert.equal(r.fcheBrut,false,'rien n’est injecté sans esc()'); assert.equal(r.ancien,'');
 });
 

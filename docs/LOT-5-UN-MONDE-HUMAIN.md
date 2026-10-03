@@ -462,7 +462,9 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
 - **H10 — premier groupe, codé par Claude** (03/10 ; à relire par Anthony) :
   `mgmt-rivalites.js`, la mémoire des affrontements (§6) **lue dans `m.hist`, rien de stocké,
   aucune mémoire parallèle**. **Scénario 1, la rivalité** : une défaite humiliante (KO ou
-  soumission dans les deux premiers rounds) ; la revanche est due tant qu'elle n'a pas eu lieu,
+  soumission **au premier round, contre un adversaire au bilan moins bon** — le favori écrasé ; mesuré
+  le 03/10 : 67 % des combats finissent dans les deux premiers rounds, 45 % au premier, d'où cette
+  exigence) ; la revanche est due tant qu'elle n'a pas eu lieu,
   et le perdant la demande à coup sûr (demande imposée, H7). **Scénario 2, la trilogie** : une
   victoire partout, celui qui vient de perdre réclame « le troisième combat » ; elle se clôt au
   troisième. **Scénario 6, le tueur de hype** : un combattant bat un invaincu de cinq victoires ou
@@ -471,6 +473,25 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   et la fiche (« Ses rivaux ») la racontent, sans chiffre. Parties neuves seulement. **Restent** :
   les autres scénarios du §5 (30 sur 32), dont ceux qui demandent les camps (T7), le recrutement (T5),
   les décisions partagées contestées (le moteur n'en publie pas le détail) et les voix (T2 + T3).
+
+- **T2 + T3 — la voix branchée, codées par Claude** (03/10 ; **les répliques sont
+  celles du document, `relu:false` : Anthony les relit et les réécrit**).
+  `mgmt-voix-data.js` est **généré** par `tools/extraire-voix.js` depuis
+  `docs/LES-VOIX-DES-COMBATTANTS-v2.md` §3 (48 voix, 220 répliques, aucune retouchée à la main ;
+  un test régénère et compare : on corrige le document, puis on relance l'outil). `mgmt-voix.js` :
+  **la voix d'un combattant** se déduit de son identifiant (flux `'voix'`, rien de stocké) — la
+  Commune un quart, les autres à poids égaux, le Signeur un sur deux cents, les contraintes du §8
+  (Interprété BR JP RU MX TH KR GE, Mère, Vieux de la vieille, Timide, Pionnière ; Hanté et
+  Converti tardif jamais au départ ; le poids d'une voix écartée revient à la Commune). **Une
+  réplique** de SA voix est choisie selon la situation (annonce, victoire, défaite — avec la
+  variante « KO » ou « décision » —, inactivité), ses emplacements remplis depuis l'état du jeu
+  (`{adv}` `{cat}` `{rang}` `{round}` `{mois}` `{pays}` `{metier}` `{surnom}`), accordée au
+  féminin ; **une réplique dont un emplacement manque n'est jamais montrée** (à défaut, la Commune).
+  Déterministe sur (id, situation, cycle). **Branchement** : « Ce qu'on dit de lui » sur la fiche
+  et « Ce qui se dit » dans la semaine et le fil (deux paroles au plus, ton cercle d'abord).
+  Parties neuves seulement. **Non fait** : les médias (§6 du document des voix — leurs lignes
+  d'exemple citent des noms et n'ont pas d'emplacements), la voix qui change (§4), la réponse à
+  une proposition, les réseaux, la voix à la pesée, « Pendant le combat » (arène).
 
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
