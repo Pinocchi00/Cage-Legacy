@@ -167,10 +167,10 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 03/10/2026 (`lot-5-t3-medias`, H1 à H10 + T2/T3 + médias + T5 + T6 + T7) : **571 tests, 571 passants,
+État au 03/10/2026 (`lot-5-h10-suite`, H1 à H10 + T2/T3 + médias + T5 + T6 + T7) : **577 tests, 577 passants,
 0 échec, 0 skip**. Les 4 anciens skip de `mgmtBureau.test.js` (trois sorties de
 carte incomplète et la carte réduite au-delà du plafond) sont devenus de vrais
-tests au lot 5 T6 (`mgmt-retraits.js`, QO-1 à QO-4 et QO-7). **32 fichiers dans
+tests au lot 5 T6 (`mgmt-retraits.js`, QO-1 à QO-4 et QO-7). **33 fichiers dans
 `tests/`**, dont `mgmtBureau.test.js` (58), `mgmtCard.test.js` (44),
 `mgmtEconomie.test.js` (15) et `mgmtSoiree.test.js` (11) pour le management,
 `regressionFixes.test.js` (75) et `duel.test.js` (28) pour la carrière.
