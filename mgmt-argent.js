@@ -112,6 +112,16 @@ const MGMT_CARD_CONTRACT=MGMT_MAIN_SIZE+MGMT_PRELIM_SIZE;
    historique redonne ainsi l'audience moyenne mesurée de la carte du
    joueur d'écran. */
 const MGMT_DRAW_AVG=0.49;
+/* ==== [ANCRE: MGMT_LOT5_H4_ECONOMIE] — Lot 5 H4 : la soirée à 12 combats.
+   Les constantes ci-dessus sont celles de la carte à 9 (calibrage du lot 2B T4,
+   conservé pour les parties d'avant H4). Sur la carte à 12, la billetterie et
+   les droits du diffuseur se multiplient par MGMT_ECO_ECHELLE_H4 : la salle et
+   l'écran ne grandissent pas aussi vite que le nombre de combats. Calibrée par
+   tools/monte-carlo-economie.js (tools/reports/lot-5-h4/economie.md) pour que le
+   joueur d'écran soit rentable dans 70 à 80 % des soirées. ==== */
+const MGMT_CARD_AVANT_H4=MGMT_MAIN_SIZE+MGMT_PRELIM_AVANT_H4;
+const MGMT_ECO_ECHELLE_H4=0.87;
+/* ==== [FIN ANCRE] ====*/
 const MGMT_SPECTACLE_REF=0.64;
 
 /** Nom d'une ligne (0..1) : valeur de scène dérivée du bilan — activité,
@@ -227,14 +237,17 @@ function mgmtEventRecette(attraction,spectacle,purses,nFights,bonuses,contract){
      le spectacle observé (part de finitions) ne porte que le reste. */
   const mix=MGMT_AUD_BASE+(1-MGMT_AUD_BASE)*s;
   const audience=Math.round(MGMT_AUD_PER_DRAW*a*mix);
-  const ticketing=Math.round(MGMT_TICKET_PER_DRAW*a);
+  /* Lot 5 H4 : échelle de la carte à 12 ; la carte à 9 d'avant H4 garde ses barèmes. */
+  const kc=(Number.isSafeInteger(contract)&&contract>0)?contract:MGMT_CARD_CONTRACT;
+  const echelle=kc===MGMT_CARD_AVANT_H4?1:MGMT_ECO_ECHELLE_H4;
+  const ticketing=Math.round(MGMT_TICKET_PER_DRAW*echelle*a);
   /* Droits au prorata des combats joués sur la carte contractuelle. */
   const n=(typeof nFights==='number'&&Number.isFinite(nFights))?Math.max(0,nFights):MGMT_CARD_CONTRACT;
   /* Lot 5 H4 : la carte contractuelle est celle de la partie (card.sizeMain +
      card.sizePrelims) — une soirée à 9 d'avant H4 paie ses droits au prorata
      de 9, une soirée à 12 au prorata de 12. */
   const k=(Number.isSafeInteger(contract)&&contract>0)?contract:MGMT_CARD_CONTRACT;
-  const tv=Math.round(MGMT_TV_PER_AUD*audience*n/(MGMT_TV_ECRANS*k));
+  const tv=Math.round(MGMT_TV_PER_AUD*echelle*audience*n/(MGMT_TV_ECRANS*k));
   return {attraction:Math.round(a*1000)/1000,spectacle:Math.round(s*1000)/1000,
     audience,ticketing,tv,purses:p,bonuses:b,recette:ticketing+tv-p-b};
 }

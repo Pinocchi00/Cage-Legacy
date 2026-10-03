@@ -109,6 +109,8 @@ test('H4 — droits télé : la carte contractuelle est celle de la partie', () 
       neufSurDouze:mgmtEventRecette(8,1,100,9,0,12).tv,defaut:mgmtEventRecette(8,1,100,12).tv};
   `);
   assert.equal(r.defaut,r.douzeSurDouze,'sans contrat explicite : la carte de douze');
-  assert.equal(r.neufSurNeuf,r.douzeSurDouze,'une carte complète paie ses droits entiers, à 9 comme à 12');
+  /* Lot 5 H4 : la carte à 12 porte l'échelle MGMT_ECO_ECHELLE_H4, la carte à 9 d'avant H4 garde ses barèmes. */
+  const echelle=win.eval('MGMT_ECO_ECHELLE_H4');
+  assert.ok(Math.abs(r.douzeSurDouze-Math.round(r.neufSurNeuf*echelle))<=1,'une carte complète paie ses droits entiers, à 9 (barème d’avant) comme à 12 (échelle H4)');
   assert.ok(Math.abs(r.neufSurDouze-Math.round(r.douzeSurDouze*9/12))<=1,'neuf combats sur douze : trois quarts des droits');
 });

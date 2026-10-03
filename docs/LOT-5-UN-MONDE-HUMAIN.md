@@ -377,7 +377,12 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   entrée en partie 108 ms, un cycle 110 ms en moyenne (157 max), `mgmtExteriorEnsure`
   20 ms ; écrans : semaine 34 ms, carte 13 ms, **organisation 65 ms et classements
   94 ms (au-dessus de 50 ms — lisible, à surveiller ; un cache est possible)**.
-  **Économie : à décider.** L'outil du lot 2 T4 donne le joueur d'écran rentable dans
+  **Économie recalibrée le 03/10** (`MGMT_ECO_ECHELLE_H4` = 0,87 sur la billetterie et les
+  droits du diffuseur de la carte à 12 ; la carte à 9 d'avant H4 garde ses barèmes) : sur
+  300 cartes, le joueur d'écran est rentable dans **74,3 %** des soirées (cible 70 à 80),
+  le bâclé 0 %, la réduite garde l'audience de référence à 95,7 %, gradient oracle >
+  écran > bâclé tenu (`tools/reports/lot-5-h4/economie.md`). Avant : 100 %, puis 87,5 % à
+  0,88 et 69 % à 0,865. (Texte d'origine :) **Économie : à décider.** L'outil du lot 2 T4 donne le joueur d'écran rentable dans
   **100 %** des soirées (cible 70 à 80 %) : douze combats rapportent plus qu'ils ne
   coûtent. Les barèmes n'ont PAS été touchés ; l'outil est écrit pour 5 + 4, sa
   lecture est indicative. À recalibrer avant d'ouvrir ce format à tous. Le taux
