@@ -78,7 +78,7 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       ne peut porter un born négatif, la cohorte d'ouverture d'une partie
       déjà commencée reste celle qu'elle porte — le monde d'une ancienne
       sauvegarde ne bouge pas. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=11;
+const MGMT_SAVE_VERSION=12;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
@@ -109,19 +109,11 @@ function mgmtNewRoster(m){
   const n=RI(MGMT_ROSTER_MIN,MGMT_ROSTER_MAX);
   m.roster=[];
   const divs=allDivisions();
-  const cks=COUNTRY_KEYS.slice();
-  const drawCountry=()=>{
-    if(cks.length===0) cks.push(...COUNTRY_KEYS);
-    return cks.splice(Math.floor(rnd()*cks.length),1)[0];
-  };
   for(let i=0;i<n;i++){
     const div=pick(divs);
-    /* Un tirage pays par emplacement, jamais consommé par un retirage :
-       à 40 emplacements minimum, les 14 origines sortent toutes au moins
-       deux fois. Le retirage rejoue le même pays (seule Leïla peut
-       collisionner, 1/20 du pool féminin — le prénom est retiré à chaque
-       appel de makeName). */
-    const ck=drawCountry();
+    /* Lot 5 H3 : un tirage pondéré (poids Split, catalogue §1.2) par
+       emplacement ; le retirage du prénom rejoue le même pays. */
+    const ck=mgmtPaysTire(rnd(),'split');
     let nm=makeName(div.gender,ck), guard=0;
     while((MGMT_EXCLUDED_FIRST.includes(nm.first)||MGMT_EXCLUDED_LAST.includes(nm.last))&&guard<50){
       nm=makeName(div.gender,ck); guard++;
@@ -131,7 +123,7 @@ function mgmtNewRoster(m){
     const rec=correlatedRecord(RI(40,80),clamp(band,age-18,(age-18)*4));
     m.roster.push({
       id:mgmtNextId(m),
-      name:nm.name,first:nm.first,last:nm.last,
+      name:nm.name,first:nm.first,last:nm.last,ck,generation:MGMT_IDENTITE_GENERATION,
       W:rec.W,L:rec.L,D:RI(0,2),
       age,
       div:div.id,divName:div.name,

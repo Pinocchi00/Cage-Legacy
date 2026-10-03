@@ -416,6 +416,8 @@ test('MGMT trace — migration 5 → 6 sans perte : une sauvegarde d\u2019avant 
   const v5Raw = JSON.parse(win.eval(`(function(){
     const raw=JSON.parse(JSON.stringify(G.mgmt));
     raw.v=5; delete raw.hist; delete raw.ageWeeks;
+    // H3 : une v5 ne peut pas porter la génération neuve de la fixture.
+    for(const f of raw.roster.concat(raw.exterieur)) f.generation=0;
     return JSON.stringify(raw);
   })()`));
   const sansVersionEtTrace = x => {

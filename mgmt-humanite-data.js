@@ -186,6 +186,31 @@ const MGMT_SURNOMS = {
   },
 };
 
+/* ==== [ANCRE: MGMT_PAYS_POIDS] — Lot 5 H3, catalogue §1.2 : poids des pays,
+   chacun somme 100. Split sert le vestiaire, le monde sert l'extérieur. ==== */
+const MGMT_PAYS_POIDS = {
+  split: { FR: 37, BR: 7, US: 4, GB: 5, RU: 3, DAG: 3, GE: 3, CM: 4, NG: 3, IE: 3, MX: 2, JP: 2, KR: 2, TH: 2, BE: 3, CH: 2, MA: 3, DZ: 2, SN: 1, PL: 2, NL: 1, ES: 1, IT: 1, DE: 1, SE: 1, KZ: 1, KG: 1, CN: 0, AU: 0, CA: 0 },
+  monde: { FR: 4, BR: 15, US: 24, GB: 5, RU: 5, DAG: 4, GE: 3, CM: 1, NG: 2, IE: 2, MX: 5, JP: 3, KR: 3, TH: 2, BE: 1, CH: 1, MA: 1, DZ: 1, SN: 1, PL: 2, NL: 1, ES: 1, IT: 1, DE: 1, SE: 1, KZ: 1, KG: 1, CN: 3, AU: 3, CA: 2 },
+};
+/** Tirage pondéré : un seul tirage u dans [0,1), ordre stable de COUNTRY_KEYS.
+ *  @param {number} u @param {'split'|'monde'} loi @returns {string} */
+function mgmtPaysTire(u,loi){
+  const poids=MGMT_PAYS_POIDS[loi]; let t=u*100;
+  for(const ck of COUNTRY_KEYS){ t-=poids[ck]||0; if(t<0) return ck; }
+  return COUNTRY_KEYS.filter(ck=>poids[ck]>0).pop();
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_LOT5_H3_PROVENANCE] — Motifs littéraux du catalogue
+   §3.4, même statut provisoire que la banque H1. ==== */
+const MGMT_SURNOMS_PROVENANCE = [
+  { texte: 'Le Gamin de {ville}', relu: false },
+  { texte: 'La Fierté de {ville}', relu: false },
+  { texte: '{Ville} Kid', relu: false },
+  { texte: 'Le Mur de {ville}', relu: false },
+];
+/* ==== [FIN ANCRE] ==== */
+
 /* ---- §4.3 La liste des anciens métiers (150), par famille. ==== */
 const MGMT_METIERS = {
   'Bâtiment et travaux': [{ texte: 'maçon', relu: false }, { texte: 'couvreur', relu: false }, { texte: 'électricien', relu: false }, { texte: 'plombier', relu: false }, { texte: 'carreleur', relu: false }, { texte: 'plaquiste', relu: false }, { texte: 'peintre en bâtiment', relu: false }, { texte: 'charpentier', relu: false }, { texte: 'menuisier', relu: false }, { texte: 'grutier', relu: false }, { texte: 'conducteur d\'engins', relu: false }, { texte: 'soudeur', relu: false }, { texte: 'chaudronnier', relu: false }, { texte: 'ferrailleur', relu: false }, { texte: 'échafaudeur', relu: false }, { texte: 'cordiste', relu: false }, { texte: 'paysagiste', relu: false }, { texte: 'élagueur', relu: false }, { texte: 'démolisseur', relu: false }, { texte: 'étancheur', relu: false }],

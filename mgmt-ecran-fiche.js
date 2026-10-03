@@ -16,7 +16,7 @@ function mgmtFicheLigne(m,id){
   if(!line) return null;
   const trace=mgmtExteriorTrace(line,m.cycle);
   if(!trace) return null;
-  return {f:{id:line.id,div:line.div,divName:divById(line.div).name,
+  return {f:{id:line.id,div:line.div,divName:divById(line.div).name,ck:line.ck,generation:line.generation,
     name:trace.name,first:trace.first,last:trace.last,age:trace.age,
     W:trace.pro.W,L:trace.pro.L,D:0},trace};
 }
@@ -162,6 +162,7 @@ function scr_mgmt_fiche(){
   const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id);
   if(!line) return scr_mgmt_bureau();
   const {f,trace}=line;
+  const identite=mgmtIdentite(m,f),pays=COUNTRIES[mgmtIdentitePays(f)];
   const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):'Split';
   const record=`${f.W}-${f.L}${f.D?'-'+f.D:''}`;
    const mondial=divById(f.div)?.gender==='F'?'mondiale':'mondial';
@@ -174,8 +175,8 @@ function scr_mgmt_fiche(){
    return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head bar">`
      +`<h2 class="disp">La fiche</h2><span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
      +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
-     +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)}</h2>`
-    +`<p>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p></div>`
+      +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span></h2>`
+     +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p></div>`
      +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
      +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
     +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}</section>`
