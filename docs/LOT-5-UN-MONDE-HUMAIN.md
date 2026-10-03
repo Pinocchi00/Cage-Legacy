@@ -537,6 +537,23 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   qui attendent un système — le visa, la descente de catégorie, le transfuge (un départ de Split),
   la mère qui revient, la soirée à domicile — ou une décision (la pesée ratée).
 
+- **Les rencontres et le terrain, codés par Claude** (03/10 ; **les lignes sont des propositions
+  `relu:false`, Anthony les relit**). `mgmt-medias.js`, `mgmt-medias-data.js` : la couche médias s'étend.
+  **Quand deux voix se rencontrent (document des voix §4)** : les onze affiches du tableau (Metteur en
+  scène contre Métronome, Sans-filtre contre Fataliste, Bavard contre Signeur, Méchant de catch contre Clan,
+  Prophète contre Prophète, Violent heureux contre Lutteur de fac, Influenceur contre Vieux de la vieille,
+  Réclamant contre Plan de carrière, Timide contre un bruyant, Aigri contre Bon client, tout le monde
+  contre l'Interprété) écrivent une ligne de presse à l'affiche, lue sur les voix **actuelles** (T3 :
+  les voix qui changent), dans l'ordre des voix de la ligne, **avant** les lignes ordinaires. **Le terrain
+  écrit** : **n° 32 la pionnière** — la première soirée dont le combat principal est féminin (une seule
+  fois) ; **n° 20 la guerre de l'année** — deux Violents heureux qui vont au bout (décision ou round 3
+  et plus). Ces trois scénarios n'ont pas de décision du joueur : ils se lisent. **Un changement** : la
+  presse du lendemain commente désormais le **combat principal** de la soirée (le premier de la carte
+  principale, décision T1 du 02/10), et non le dernier combat de la carte principale. Parties neuves
+  seulement. **Restent** : 20 scénarios sur 32 (couverts : 1 à 6, 10, 20, 23, 24, 29, 32), dont ceux qui
+  attendent un système — le visa, la descente de catégorie, le transfuge, la mère qui revient, la soirée
+  à domicile — ou une décision (la pesée ratée).
+
 - **T2 + T3 — la voix branchée, codées par Claude** (03/10 ; **les répliques sont
   celles du document, `relu:false` : Anthony les relit et les réécrit**).
   `mgmt-voix-data.js` est **généré** par `tools/extraire-voix.js` depuis

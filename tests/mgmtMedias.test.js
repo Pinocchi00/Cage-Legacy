@@ -102,3 +102,51 @@ test('T3 — la semaine, le fil et le lendemain portent la presse ; une partie d
   assert.equal(r.ancien,0);
 });
 function MGMT_NOMS_OK(s){ return ['Cage Hebdo','Sources Proches','Clé de Bras','La Pesée','Tableau Noir','Micro Tendu','Le Plateau','Le Forum','La presse du pays','Coin Rouge'].includes(s); }
+
+const AVEC_VOIX=`const origV=mgmtVoixActuelle; const voix=(map)=>{ mgmtVoixActuelle=(mm,f)=>map[f.id]||origV(mm,f); };`;
+
+test('T3 rencontres — deux voix qui se rencontrent (§4) font l’affiche, dans l’ordre des voix, avant les lignes ordinaires', () => {
+  const win=newGameWindow();
+  const r=result(win,`${NEUVE}${AVEC_VOIX}
+    m.card.main=[{a:Y.id,b:X.id,cycle:m.cycle,slot:'main'}];
+    voix({[X.id]:'le-timide',[Y.id]:'le-sans-filtre'});
+    const vus=new Set(); for(let c=1;c<=30;c++){ m.cycle=c; m.card.main[0].cycle=c; mgmtMediasAffiche(m).forEach(x=>vus.add(x.media+'|'+x.texte)); }
+    m.cycle=10;
+    const l=mgmtMediasAffiche(m);
+    voix({[X.id]:'le-fataliste',[Y.id]:'le-sans-filtre'}); const caps=mgmtMediasAffiche(m).find(x=>x.media==='cle-de-bras');
+    voix({[X.id]:'le-metronome',[Y.id]:'le-fataliste'}); const aucune=mgmtMediasAffiche(m).some(x=>/trois semaines|GLACÉE|se taira/.test(x.texte));
+    voix({[X.id]:'linterprete',[Y.id]:'le-fataliste'}); const interprete=mgmtMediasAffiche(m).some(x=>x.media==='le-forum'&&/n’a pas répondu/.test(x.texte));
+    return {coin:[...vus].filter(s=>s.startsWith('coin-rouge|')),x:X.name,y:Y.name,premier:l[0]&&l[0].media,caps:caps&&caps.texte,aucune,interprete};`);
+  assert.equal(r.coin.length,1,'le Timide contre un bruyant : Coin Rouge'); assert.ok(r.coin[0].includes(r.x+' se taira, '+r.y),'le Timide d’abord ({a}), le bruyant ensuite');
+  assert.equal(r.premier,'coin-rouge','la ligne de la rencontre passe avant les lignes ordinaires');
+  assert.ok(r.caps&&r.caps.includes(r.y.toUpperCase())&&r.caps.includes(r.x.toUpperCase()),'Clé de Bras écrit en majuscules, le Sans-filtre d’abord');
+  assert.equal(r.aucune,false,'deux voix qui ne se rencontrent pas : aucune ligne de rencontre'); assert.ok(r.interprete,'tout le monde contre l’Interprété');
+});
+
+test('T3 rencontres — la pionnière : la première soirée dont le combat principal est féminin, une seule fois', () => {
+  const win=newGameWindow();
+  const r=result(win,`${NEUVE}
+    const dF=allDivisions().find(d=>d.gender==='F'); const f=m.roster.filter(o=>o.div===dF.id); const [A,B]=f;
+    const trace=(c,g,p)=>({c,slot:'main',rounds:3,a:{id:g.id,W:g.W,L:g.L,D:0,div:g.div},b:{id:p.id,W:p.W,L:p.L,D:0,div:p.div},winner:'A',family:'dec',round:3});
+    m.hist=[trace(10,A,B)]; m.lastEvent={cycle:10,fights:[{a:A.id,b:B.id,winner:'A',family:'dec',round:3,rounds:3}],touched:[],finance:{},e1:false};
+    const vus=[]; for(let c=10;c<=10;c++){ for(let k=0;k<30;k++){ m.hist[0].c=10; m.lastEvent.cycle=10; m.cycle=10+k; mgmtMediasLendemain(m).forEach(x=>vus.push(x.texte)); } }
+    m.cycle=11; const premiere=mgmtMediasLendemain(m).length>0&&vus.some(t=>/première fois|Première soirée/.test(t));
+    /* une soirée après une soirée déjà menée par une femme : plus de pionnière */
+    m.hist=[trace(8,A,B),trace(10,A,B)]; m.lastEvent.cycle=10; m.cycle=11;
+    const seconde=mgmtMediasLendemain(m).some(x=>/première fois|Première soirée/.test(x.texte));
+    return {premiere,seconde};`);
+  assert.ok(r.premiere); assert.equal(r.seconde,false,'la première fois n’a lieu qu’une fois');
+});
+
+test('T3 rencontres — la guerre de l’année : deux Violents heureux qui vont au bout', () => {
+  const win=newGameWindow();
+  const r=result(win,`${NEUVE}${AVEC_VOIX}
+    voix({[X.id]:'le-violent-heureux',[Y.id]:'le-violent-heureux'});
+    const tr=(family,round)=>({c:10,slot:'main',rounds:3,a:{id:X.id,W:X.W,L:X.L,D:0,div:X.div},b:{id:Y.id,W:Y.W,L:Y.L,D:0,div:Y.div},winner:'A',family,round});
+    m.lastEvent={cycle:10,fights:[],touched:[],finance:{},e1:false};
+    const dit=h=>{ const vus=[]; for(let k=0;k<30;k++){ m.cycle=10+k; m.hist=[h]; mgmtMediasLendemain(m).forEach(x=>vus.push(x.texte)); } return vus.some(t=>/guerre/.test(t)); };
+    const long=dit(tr('dec',3)), court=dit(tr('ko',1));
+    voix({[X.id]:'le-violent-heureux',[Y.id]:'le-metronome'}); const seul=dit(tr('dec',3));
+    return {long,court,seul};`);
+  assert.ok(r.long); assert.equal(r.court,false,'un KO au premier round n’est pas une guerre'); assert.equal(r.seul,false,'il faut deux Violents heureux');
+});
