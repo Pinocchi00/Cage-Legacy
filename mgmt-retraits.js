@@ -32,7 +32,7 @@ const MGMT_LIBRE_MIN=2;
 const MGMT_LIBRE_MAX=6;
 const MGMT_AUTRE_MAX=1;
 /** Ce que le joueur lit à l'écran (état d'interface, rien n'est stocké). */
-let MGMT_RETRAIT_UI={qui:'',texte:''};
+let MGMT_RETRAIT_UI={qui:'',texte:'',c:-1};
 
 /** Chance qu'un combattant booké se retire : faible, plus forte s'il est chargé
  *  (H5 : la charge de l'année). */
@@ -200,7 +200,13 @@ function mgmtLendemainPatronHtml(m){
  *  (silence sur la cause), puis les sorties que porte l'interface. */
 function mgmtRetraitHtml(m){
   const o=mgmtRetraitOptions(m);
-  if(!o) return '';
+  if(!o){
+    /* Le trou est comblé : la réponse de celui qu'on vient d'engager (C1, C3) ou du prélim qui monte (B2) reste lue ce cycle. */
+    if(MGMT_RETRAIT_UI.texte&&MGMT_RETRAIT_UI.c===m.cycle){
+      return `<section class="mgmt-retrait" aria-label="Carte incomplète"><h3>Carte incomplète</h3><p class="mgmt-retrait-parole"><span>${esc(MGMT_RETRAIT_UI.qui)}</span> « ${esc(MGMT_RETRAIT_UI.texte)} »</p></section>`;
+    }
+    return '';
+  }
   const R=MGMT_RETRAITS_REPLIQUES;
   const retire=mgmtFighterById(m,o.retrait.a);
   const nom=retire?retire.name:'';

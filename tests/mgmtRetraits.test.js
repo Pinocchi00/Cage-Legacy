@@ -211,6 +211,18 @@ test('T6 — E1 : le patron ne parle de la dette que si un découvert a été d�
   assert.deepEqual(r.avec,[true]); assert.equal(r.sans,0); assert.ok(r.html); assert.equal(r.ancien,0);
 });
 
+test('T6 — la réponse de celui qu’on vient d’engager (C1) reste lue ce cycle, une fois le trou comblé', () => {
+  const win=newGameWindow();
+  const r=result(win,`${CARTE}
+    retire('main',1); const o=mgmtRetraitOptions(m); const split=o.candidats.find(c=>c.src==='split');
+    CL.mgmtRetraitEngager(split.id); const pleine=mgmtCardFull(m); const html=mgmtRetraitHtml(m);
+    const lue=html.includes('mgmt-retrait')&&(html.includes(esc(MGMT_RETRAITS_REPLIQUES.C1.texte))||html.includes(esc(MGMT_RETRAITS_REPLIQUES.C2.texte)));
+    m.cycle+=1; const plusTard=mgmtRetraitHtml(m);
+    return {pleine,lue,plusTard};
+  `);
+  if(r.pleine) assert.ok(r.lue,'C1 reste affichée une fois la carte complète'); assert.equal(r.plusTard,'','un cycle plus tard, plus rien');
+});
+
 test('T6 — le déroulé réel : Continuer à la veille peut ouvrir un retrait, le joueur sort du trou, la soirée se joue et le cycle avance', () => {
   const win=newGameWindow();
   const r=result(win,`${CARTE}

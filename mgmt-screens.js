@@ -542,7 +542,7 @@ Object.assign(CL,{
     const m=G.mgmt, haut=m.card.prelims[0];
     if(mgmtRetraitRemonter(m)){
       const f=haut?mgmtFighterById(m,haut.a):null;
-      MGMT_RETRAIT_UI={qui:f?f.name:'',texte:MGMT_RETRAITS_REPLIQUES.B2.texte};
+      MGMT_RETRAIT_UI={qui:f?f.name:'',texte:MGMT_RETRAITS_REPLIQUES.B2.texte,c:m.cycle};
       saveMgmt(); render();
     }
   },
@@ -552,13 +552,13 @@ Object.assign(CL,{
     const r=mgmtRetraitEngager(m,id);
     const nom=f.name||'';
     const cle={C1:'C1',C2:'C2',C3:'C3',C4:'C4'}[r.reponse];
-    MGMT_RETRAIT_UI=cle?{qui:nom,texte:MGMT_RETRAITS_REPLIQUES[cle].texte}:{qui:'',texte:''};
+    MGMT_RETRAIT_UI=cle?{qui:nom,texte:MGMT_RETRAITS_REPLIQUES[cle].texte,c:m.cycle}:{qui:'',texte:'',c:m.cycle};
     if(r.ok) saveMgmt();
     render();
   },
   mgmtRetraitReduite(){
     if(!G||!G.mgmt) return;
-    if(mgmtRetraitReduite(G.mgmt)){ MGMT_RETRAIT_UI={qui:'',texte:''}; saveMgmt(); }
+    if(mgmtRetraitReduite(G.mgmt)){ MGMT_RETRAIT_UI={qui:'',texte:'',c:-1}; saveMgmt(); }
     render();
   },
   mgmtNextCycle(){
@@ -567,7 +567,7 @@ Object.assign(CL,{
     if(r==='event'){
        /* Lot 5 T6 : un combattant booké peut se retirer à la veille — la carte est incomplète, le bureau le dit. */
        if(typeof mgmtRetraitsAvantSoiree==='function'&&mgmtRetraitsAvantSoiree(G.mgmt)){
-         MGMT_RETRAIT_UI={qui:'',texte:''};
+         MGMT_RETRAIT_UI={qui:'',texte:'',c:-1};
          saveMgmt(); render(); return;
        }
        if(mgmtRunEvent(G.mgmt)){ MGMT_SOIREE.index=0; CL.go('mgmt_soiree'); return; }
