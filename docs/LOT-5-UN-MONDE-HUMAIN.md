@@ -395,6 +395,22 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   déclenchés par l'état du jeu (ceinture, classement, poids, retraite) ne se tirent pas
   au hasard : ils attendent leur branchement (scénarios).
 
+- **H6 — codée par Claude** (03/10 ; à relire par Anthony) : `mgmt-attention.js`.
+  **Le rôle en un mot** (`mgmtRole`, critères de MGMT_ROLES : Champion, En perdition,
+  Contender, Invaincu, Espoir, Vétéran, Journeyman ; Ancien champion, Gatekeeper, Bête noire,
+  Revenant et Remplaçant de luxe attendent une mémoire que le jeu ne tient pas encore).
+  **Ton cercle (5) et tes suivis (15)** : seuls états stockés, validés par la porte de
+  sauvegarde (absents tolérés : aucune migration). **Connaissance progressive** : « Comment il
+  combat » (discipline et garde) dès un combat vu sous Split, « Sa faille » (son attribut le
+  plus faible) après deux, sinon « On ne sait pas encore » ; ni jauge ni pourcentage.
+  **Le conteur** : budget de cinq informations par semaine, trois après une semaine lourde ;
+  les moments de la semaine passent d'abord (cercle, suivis, puis vestiaire ; jamais deux sur
+  le même combattant ; seulement les moments relayés), une place reste aux nouvelles du monde ;
+  parties neuves seulement. **Continuer** est toujours là et dit pourquoi il s'arrête
+  (« Répondre à Leïla », « Carte incomplète », « Cycle suivant »). Test de la T5 lot 4 réécrit
+  (décision du 30/09 : « Comment il combat » et « Sa faille » reviennent). Non fait : les filtres
+  du vestiaire et l'écran du vestiaire (H8), les promesses (H7).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé
