@@ -78,16 +78,25 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       ne peut porter un born négatif, la cohorte d'ouverture d'une partie
       déjà commencée reste celle qu'elle porte — le monde d'une ancienne
       sauvegarde ne bouge pas. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=12;
+const MGMT_SAVE_VERSION=13;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
   /* Lot 2B T1 : le vivier extérieur démarre vide — la cohorte initiale se
      crée à l'ouverture du premier cycle (mgmtExteriorEnsure), chaque ligne
      ne portera que son identité. */
-  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,
+  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
     hist:[],treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
+}
+
+/** Catégorie tirée au poids du monde (lot 5 H4). Un seul tirage u dans [0,1).
+ *  @param {Array} divs @param {number} u @returns {object} */
+function mgmtDivisionPonderee(divs,u){
+  const total=divs.reduce((n,d)=>n+(MGMT_WORLD_SIZE[d.id]||0),0);
+  let t=u*total;
+  for(const d of divs){ t-=MGMT_WORLD_SIZE[d.id]||0; if(t<0) return d; }
+  return divs[divs.length-1];
 }
 
 /** Identifiant stable et déterministe (compteur de partie, pas de hasard). */
@@ -108,11 +117,18 @@ function mgmtNextId(m){ const id='mg'+m.seq; m.seq++; return id; }
  * plus par la garde 1d (âge-18)..(âge-18)*4, qui ne mord jamais à vide.
  */
 function mgmtNewRoster(m){
-  const n=RI(MGMT_ROSTER_MIN,MGMT_ROSTER_MAX);
+  /* Lot 5 H4 : une partie neuve (effectifs 1) porte 130 à 150 combattants
+     répartis comme le monde ; le chemin d'avant (effectifs 0 : 40 à 60,
+     catégorie tirée à poids égaux) est conservé tel quel — mêmes bornes,
+     mêmes tirages — pour les sauvegardes et fixtures d'avant H4. */
+  const avant=m.effectifs===0;
+  const n=avant?RI(MGMT_ROSTER_AVANT_MIN,MGMT_ROSTER_AVANT_MAX):RI(MGMT_ROSTER_MIN,MGMT_ROSTER_MAX);
   m.roster=[];
   const divs=allDivisions();
   for(let i=0;i<n;i++){
-    const div=pick(divs);
+    /* Lot 5 H4 : la catégorie se tire au poids du monde (MGMT_WORLD_SIZE) :
+       le vestiaire est réparti comme lui, ~14 % de chaque catégorie. */
+    const div=avant?pick(divs):mgmtDivisionPonderee(divs,rnd());
     /* Lot 5 H3 : un tirage pondéré (poids Split, catalogue §1.2) par
        emplacement ; le retirage du prénom rejoue le même pays. */
     const ck=mgmtPaysTire(rnd(),'split');
@@ -321,6 +337,7 @@ function mgmtNewPile(m){
      partant est reprise par un jeune du monde au même cycle. */
   mgmtRetireRoster(m);
   mgmtExteriorArrive(m);
+  mgmtVieOuvreCycle(m);
   m.pile=[];
   m.open=null;
   m.shortfall=false;

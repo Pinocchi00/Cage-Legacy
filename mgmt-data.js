@@ -25,8 +25,14 @@ const MGMT_ORG='Split';
    conservées pour les lots suivants. */
 const MGMT_PILE_MIN=8;
 const MGMT_PILE_MAX=15;
-const MGMT_ROSTER_MIN=40;
-const MGMT_ROSTER_MAX=60;
+/* Lot 5 H4 (décision du 30/09, contrat §3.1) : le vestiaire de Split compte
+   130 à 150 combattants à l'ouverture d'une partie neuve (~14 % du monde),
+   réparti comme le monde. Une partie commencée avant H4 garde son vestiaire. */
+/* Avant H4 (effectifs 0) : 40 à 60. */
+const MGMT_ROSTER_AVANT_MIN=40;
+const MGMT_ROSTER_AVANT_MAX=60;
+const MGMT_ROSTER_MIN=130;
+const MGMT_ROSTER_MAX=150;
 
 /* Les cinq déclencheurs du passage niveau 1 → niveau 2, addendum §4.
    Exhaustifs en v1 : pas un de plus. Seul le premier peut survenir en Lot 1
@@ -102,7 +108,11 @@ const MGMT_EXCHANGES={
    « 4 + 4 » du 15/09 (LOT-3B-CONTRAT.md §1, Q3) : MGMT_CARD_SIZE est
    remplacé par MGMT_MAIN_SIZE et MGMT_PRELIM_SIZE. ==== */
 const MGMT_MAIN_SIZE=5;
-const MGMT_PRELIM_SIZE=4;
+/* Lot 5 H4 : la soirée passe à 5 + 7 = 12 combats, le format réel d'une Fight
+   Night (contrat §3.1). Une carte déjà ouverte garde sa taille (card.sizePrelims). */
+const MGMT_PRELIM_SIZE=7;
+/* Taille des préliminaires d'avant H4 (effectifs 0, migration 4 → 5, réparation). */
+const MGMT_PRELIM_AVANT_H4=4;
 
 Object.assign(MGMT_EXCHANGES,{
   leila_bulk:{
@@ -188,6 +198,18 @@ const MGMT_EXT_YEAR_WEEKS=52;
    pas un effectif propre : il complète exactement ce que Split ne fournit
    pas dans la catégorie. */
 const MGMT_EXT_LIVE_PER_DIVISION=30;
+
+/* ==== [ANCRE: MGMT_LOT5_H4_EFFECTIFS] — Lot 5 H4, contrat §3.1 : combattants
+   vivants par catégorie, Split compris (~1,5 fois l'UFC pour cinq
+   organisations, total 1 025). Une partie neuve porte m.effectifs=1 et lit
+   cette table ; une partie d'avant H4 (effectifs 0, migration 12 → 13) garde
+   MGMT_EXT_LIVE_PER_DIVISION : son monde ne grossit pas en cours de route. ==== */
+const MGMT_WORLD_SIZE={
+  'H-heavy':45,'H-lheavy':60,'H-middle':100,'H-welter':130,'H-light':150,
+  'H-feather':125,'H-bantam':125,'H-fly':75,
+  'F-straw':70,'F-fly':65,'F-bantam':50,'F-feather':30,
+};
+/* ==== [FIN ANCRE] ==== */
 
 /* Âge à l'entrée dans le monde (MGMT_EXT_AGE_MIN à MIN+SPREAD-1) et âge de
    début de carrière amateur (les débuts, à 18-21 ans). */

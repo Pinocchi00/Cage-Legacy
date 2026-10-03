@@ -131,6 +131,15 @@ function newGameWindow(opts){
     scriptEl.textContent = code;
     document.body.appendChild(scriptEl);
   }
+  /* ==== [ANCRE: TESTS_LOADGAME_AVANT_H4] — Lot 5 H4 : état management au format
+     d'avant H4 (monde à 30 par catégorie, vestiaire de 40 à 60, carte 5 + 4).
+     Les tests de mécanique (carte, argent, monde, trace) s'y appuient : ce
+     format reste celui des sauvegardes migrées 12 → 13. Les tests des
+     nouveaux effectifs passent par mgmtDefault() tel quel. ==== */
+  const avantH4 = document.createElement('script');
+  avantH4.textContent = 'function mgmtDefaultAvantH4(){ const m=mgmtDefault(); m.effectifs=0; m.card.sizePrelims=4; return m; }'
+    + ' function mgmtEntrerAvantH4(){ if(!G) G={theme:"dark"}; if(!G.mgmt){ G.mgmt=mgmtDefaultAvantH4(); if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); saveMgmt(); } } CL.mgmtEnter(); }';
+  document.body.appendChild(avantH4);
   /* ==== [ANCRE: TESTS_LOADGAME_G_BRIDGE] — `G` (state.js: `let G=null;`)
      est un binding lexical de haut niveau, PAS une propriété de l'objet
      global : contrairement à `CL` (exposé explicitement via

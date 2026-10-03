@@ -19,7 +19,7 @@ const { newGameWindow } = require('./helpers/loadGame');
    bouge pas. Les divName STOCKÉS sont les libellés d'engine.js — c'est
    l'affichage qui dérive le féminin. */
 function freshMgmt(win, seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
   win.eval(`(function(){
     const m=G.mgmt;
     const mk=(id,first,div,divName,W,L)=>({id:id,name:first+' Test',first:first,last:'Test',

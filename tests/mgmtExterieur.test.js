@@ -46,7 +46,7 @@ function quotaParCategorie(win){
    demandé. Retourne {m} sérialisable (les lignes sont des données pures). */
 function mondeFrais(win,cycles){
   return win.eval(`(function(){
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     mgmtExteriorEnsure(m);
     for(let c=0;c<${cycles};c++){ m.cycle++; mgmtExteriorArrive(m); }
     return {seq:m.seq,exterieur:JSON.parse(JSON.stringify(m.exterieur))};
@@ -58,7 +58,7 @@ test('MGMT lot 2B T1 bis — 30 vivants par catégorie à l’ouverture et aprè
   const quota=quotaParCategorie(win);
   const r=win.eval(`(function(){
     setSeed(9001);
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     mgmtNewRoster(m);
     const seqAvant=m.seq;
     mgmtExteriorEnsure(m);
@@ -101,7 +101,7 @@ test('MGMT lot 2B T1 bis — compléter une catégorie ne dépend pas de la RNG 
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(11);
-    const base=mgmtDefault(); mgmtNewRoster(base); mgmtExteriorEnsure(base);
+    const base=mgmtDefaultAvantH4(); mgmtNewRoster(base); mgmtExteriorEnsure(base);
     const retire=base.roster.find(o=>o.retired!=='medical'); retire.retired='medical'; base.cycle=5;
     const a=JSON.parse(JSON.stringify(base)), b=JSON.parse(JSON.stringify(base));
     setSeed(123); const rngA=rnd(); setSeed(123); mgmtExteriorArrive(a); const apresA=rnd();
@@ -144,7 +144,7 @@ test('MGMT lot 2B T1 — lire la trace, le vivier et les entrants ne consomme AU
        Aucune génération de roster ici — seule la lecture du monde est
        mesurée (mgmtNewRoster, elle, consomme la RNG du jeu, c'est son
        rôle). */
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     mgmtExteriorEnsure(m);
     for(let c=1;c<=6;c++){ m.cycle=c; mgmtExteriorArrive(m); }
     const ext=${JSON.stringify(monde.exterieur)};
@@ -277,7 +277,7 @@ test('MGMT lot 2B T1 bis — deux classements, une seule loi : organisation et m
   const r=win.eval(`(function(){
     const mk=(id,W,L,lastCycle)=>({id:id,name:id,first:id,last:'Test',W:W,L:L,D:0,age:27,
       div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0,lastCycle:lastCycle});
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     m.roster=[mk('split-a',14,2,4),mk('split-b',12,3,8),mk('split-c',14,2,4)];
     m.seq=100; m.cycle=10; mgmtExteriorEnsure(m);
     const ext=m.exterieur.find(o=>o.div==='H-light');
@@ -309,7 +309,7 @@ test('MGMT lot 2B T1 bis — recruter ne déplace pas le rang mondial et ne vide
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(20260922);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=1; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=1; mgmtExteriorEnsure(m);
     let choisi=null, trace=null, last=-1;
     for(const line of m.exterieur){
       const t=mgmtExteriorTrace(line,m.cycle);
@@ -346,7 +346,7 @@ test('MGMT lot 2B T1 bis — un retraité médical sort des deux classements et 
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(444);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=7; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=7; mgmtExteriorEnsure(m);
     const f=m.roster.find(o=>mgmtDivisionRank(m,o)!==null);
     const extAvant=m.exterieur.length;
     f.retired='medical';
@@ -374,7 +374,7 @@ test('MGMT lot 2B T3 — une ligne extérieure en fin de carrière sort des viva
   const win = newGameWindow();
   const r = win.eval(`(function(){
     setSeed(20261001);
-    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     /* La frontière exacte d'une ligne : pas encore partie un cycle plus
        tôt, partie à son cycle de retraite. T3 bis : la cohorte porte des
        fondateurs — certains sont nés avec une carrière déjà close avant
@@ -421,7 +421,7 @@ test('MGMT lot 2B T3 — après 240 cycles, le monde s’est renouvelé : plus a
   const win = newGameWindow();
   const r = win.eval(`(function(){
     setSeed(20261002);
-    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     for(let c=1;c<=240;c++){ m.cycle=c; mgmtExteriorArrive(m); }
     const parCategorie=allDivisions().map(d=>{
       const split=m.roster.filter(o=>o&&o.div===d.id&&!mgmtIsRetired(o)).length;
@@ -465,7 +465,7 @@ test('MGMT lot 2B T3 bis — une partie neuve se sauvegarde, se recharge et gard
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(20261003);
-    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     const avant=JSON.stringify(m.exterieur);
     const bornes=m.exterieur.map(o=>o.born);
     G={theme:'dark',mgmt:m};
@@ -489,7 +489,7 @@ test('MGMT lot 2B T3 bis — à l’ouverture, une ligue installée : âges de 2
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(20261004);
-    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     const ages=[]; let veterans=0,sansCombat=0,minFights=Infinity,exEmpal='mg?t? age ?';
     for(const o of m.exterieur){
       if(mgmtExteriorRetired(o,0)) continue;
@@ -524,7 +524,7 @@ test('MGMT lot 2B T3 bis — un fondateur né parti ne compte pas parmi les viva
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(20261005);
-    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     /* Le monde d’ouverture est plein : 30 vivants par catégorie. */
     const vivantsOuverture=allDivisions().map(d=>mgmtWorldLivingCount(m,d.id));
     /* Fixture : une ligne à l'entrée la plus ancienne dérivée (−recul), dont
@@ -575,7 +575,7 @@ test('MGMT lot 2B T1 bis — après une retraite, continuer ou recharger crée l
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(445);
-    const base=mgmtDefault(); mgmtNewRoster(base); base.cycle=6; mgmtExteriorEnsure(base);
+    const base=mgmtDefaultAvantH4(); mgmtNewRoster(base); base.cycle=6; mgmtExteriorEnsure(base);
     base.roster[0].retired='medical';
     const continuee=JSON.parse(JSON.stringify(base));
     mgmtExteriorEnsure(continuee);
@@ -596,7 +596,7 @@ test('MGMT lot 2B T1 bis — une soirée rétablit le quota avant de sauvegarder
   const win=newGameWindow();
   const r=win.eval(`(function(){
     setSeed(446);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=4; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=4; mgmtExteriorEnsure(m);
     G={theme:'dark',mgmt:m};
     const pris=m.roster.slice(0,18);
     for(const f of pris) f.trauma=MGMT_TRAUMA_MAX;
@@ -621,7 +621,7 @@ test('MGMT lot 2B T1 — persistance : validateMgmt accepte le vivier, refuse un
   const win=newGameWindow();
   const ok=win.eval(`(function(){
     setSeed(77);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     mgmtExteriorEnsure(m); m.cycle=3; mgmtExteriorArrive(m);
     const propre=JSON.parse(JSON.stringify(m));
     /* Une ligne qui accumulerait un bilan stocké ne passe plus la porte. */
@@ -658,7 +658,7 @@ test('MGMT lot 2B T1 bis — mgmtRepair filtre puis complète les anciennes sauv
   const quota=quotaParCategorie(win);
   const r=win.eval(`(function(){
     setSeed(88);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     mgmtExteriorEnsure(m); m.cycle=2; mgmtExteriorArrive(m);
     const avant=m.exterieur.length;
     m.exterieur[0].div='inconnu';
@@ -666,7 +666,7 @@ test('MGMT lot 2B T1 bis — mgmtRepair filtre puis complète les anciennes sauv
     const epure=repare.exterieur.length;
     /* Sauvegarde d'avant la tranche : petit monde global et catégories
        creuses, mais lignes T1 valides. */
-    const ancienne=mgmtDefault();
+    const ancienne=mgmtDefaultAvantH4();
     mgmtNewRoster(ancienne);
     mgmtExteriorEnsure(ancienne); ancienne.exterieur=ancienne.exterieur.slice(0,35);
     const idsAvant=ancienne.exterieur.map(o=>o.id);
@@ -690,7 +690,7 @@ test('MGMT lot 2B T1 bis — mgmtRepair filtre puis complète les anciennes sauv
 test('MGMT lot 2B T1 bis — le bureau ouvre à 30 par catégorie et remplace une retraite au cycle suivant', () => {
   const win=newGameWindow();
   const quota=quotaParCategorie(win);
-  win.eval(`setSeed(66); CL.mgmtEnter();`);
+  win.eval(`setSeed(66); mgmtEntrerAvantH4();`);
   const r=win.eval(`(function(){
     const ouverture=allDivisions().map(d=>mgmtWorldLivingCount(G.mgmt,d.id));
     const f=G.mgmt.roster.find(o=>o.retired!=='medical');

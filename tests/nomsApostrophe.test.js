@@ -241,10 +241,12 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
     const m=G.mgmt;
     m.pile.forEach(x=>{x.status='closed';x.decision='ignored';}); m.open=null;
     const d=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
-    if(d.length<18) throw new Error('fixture : roster trop court');
+    /* H4 : la carte d'une partie neuve compte sept préliminaires. */
+    const sp=m.card.sizePrelims;
+    if(d.length<10+2*sp) throw new Error('fixture : roster trop court');
     m.card.main=[]; m.card.prelims=[];
     for(let i=0;i<5;i++) m.card.main.push({a:d[2*i].id,b:d[2*i+1].id,cycle:m.cycle,slot:'main'});
-    for(let i=0;i<4;i++) m.card.prelims.push({a:d[10+2*i].id,b:d[11+2*i].id,cycle:m.cycle,slot:'prelim'});
+    for(let i=0;i<sp;i++) m.card.prelims.push({a:d[10+2*i].id,b:d[11+2*i].id,cycle:m.cycle,slot:'prelim'});
   })()`);
   win.eval(`CL.mgmtNextCycle();`);
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'la soirée s’ouvre');
@@ -257,7 +259,7 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
   [...win.document.querySelectorAll('button')].find(x => (x.getAttribute('onclick') || '').includes('areneSocleQuitter')).click();
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'retour à la soirée');
   btn('Tout simuler').click();
-  assert.equal(win.eval(`MGMT_SOIREE.index`), 9, 'les neuf combats sont traversés');
+  assert.equal(win.eval(`MGMT_SOIREE.index`), 5 + win.eval(`G.mgmt.card.sizePrelims`) , 'tous les combats de la carte sont traversés (5 + 7 depuis H4)');
   btn('Continuer').click();
   const scr = win.eval(`G.screen`);
   assert.ok(scr === 'mgmt_lendemain' || scr === 'mgmt_bureau', 'la soirée rend la main');

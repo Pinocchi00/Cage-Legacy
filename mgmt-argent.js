@@ -220,7 +220,7 @@ function mgmtSpectacle(fights){
  *  lignes d'avant combat par l'appelant, spectacle et nombre de combats sur
  *  les combats joués. Tout est entier (k$, écrans) ; R peut être négative.
  *  @returns {{attraction,spectacle,audience,ticketing,tv,purses,bonuses,recette}} */
-function mgmtEventRecette(attraction,spectacle,purses,nFights,bonuses){
+function mgmtEventRecette(attraction,spectacle,purses,nFights,bonuses,contract){
   const a=Math.max(0,num(attraction)), s=clamp(num(spectacle),0,1), p=Math.max(0,Math.round(num(purses)));
   const b=(bonuses===undefined||bonuses===null)?0:Math.max(0,Math.round(num(bonuses)));
   /* L'audience est décidée surtout avant la soirée : la base est acquise,
@@ -230,7 +230,11 @@ function mgmtEventRecette(attraction,spectacle,purses,nFights,bonuses){
   const ticketing=Math.round(MGMT_TICKET_PER_DRAW*a);
   /* Droits au prorata des combats joués sur la carte contractuelle. */
   const n=(typeof nFights==='number'&&Number.isFinite(nFights))?Math.max(0,nFights):MGMT_CARD_CONTRACT;
-  const tv=Math.round(MGMT_TV_PER_AUD*audience*n/(MGMT_TV_ECRANS*MGMT_CARD_CONTRACT));
+  /* Lot 5 H4 : la carte contractuelle est celle de la partie (card.sizeMain +
+     card.sizePrelims) — une soirée à 9 d'avant H4 paie ses droits au prorata
+     de 9, une soirée à 12 au prorata de 12. */
+  const k=(Number.isSafeInteger(contract)&&contract>0)?contract:MGMT_CARD_CONTRACT;
+  const tv=Math.round(MGMT_TV_PER_AUD*audience*n/(MGMT_TV_ECRANS*k));
   return {attraction:Math.round(a*1000)/1000,spectacle:Math.round(s*1000)/1000,
     audience,ticketing,tv,purses:p,bonuses:b,recette:ticketing+tv-p-b};
 }
@@ -267,7 +271,9 @@ function mgmtAudienceRef(m){
     for(const a of m.audiences){ if(Number.isSafeInteger(a)&&a>=0){ s+=a; n++; } }
     if(n>0) return Math.round(s/n);
   }
-  const refAttraction=MGMT_DRAW_AVG*(MGMT_MAIN_SIZE*MGMT_ATTR_MAIN_W+MGMT_PRELIM_SIZE*MGMT_ATTR_PRELIM_W);
+  const sm=(m&&m.card&&Number.isSafeInteger(m.card.sizeMain)&&m.card.sizeMain>0)?m.card.sizeMain:MGMT_MAIN_SIZE;
+  const sp=(m&&m.card&&Number.isSafeInteger(m.card.sizePrelims)&&m.card.sizePrelims>0)?m.card.sizePrelims:MGMT_PRELIM_SIZE;
+  const refAttraction=MGMT_DRAW_AVG*(sm*MGMT_ATTR_MAIN_W+sp*MGMT_ATTR_PRELIM_W);
   const refMix=MGMT_AUD_BASE+(1-MGMT_AUD_BASE)*MGMT_SPECTACLE_REF;
   return Math.round(MGMT_AUD_PER_DRAW*refAttraction*refMix);
 }

@@ -8,7 +8,7 @@ const {newGameWindow}=require('./helpers/loadGame');
 
 function fresh(){
   const win=newGameWindow();
-  win.eval('setSeed(20261002); const m=mgmtDefault(); mgmtNewRoster(m); G={theme:"dark",mgmt:m}; mgmtExteriorEnsure(m);');
+  win.eval('setSeed(20261002); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); G={theme:"dark",mgmt:m}; mgmtExteriorEnsure(m);');
   return win;
 }
 

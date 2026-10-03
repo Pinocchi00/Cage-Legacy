@@ -119,6 +119,14 @@ function mgmtWorldLivingCount(m,divId){
   return ids.size;
 }
 
+/** Combattants vivants que le monde doit porter dans une catégorie, Split
+ *  compris. Partie neuve (effectifs 1) : la table du lot 5 H4 ; partie
+ *  d'avant H4 : les 30 d'origine. @returns {number} */
+function mgmtWorldQuota(m,divId){
+  if(m&&m.effectifs===1&&Number.isSafeInteger(MGMT_WORLD_SIZE[divId])) return MGMT_WORLD_SIZE[divId];
+  return MGMT_EXT_LIVE_PER_DIVISION;
+}
+
 /** Maintient le quota mondial par catégorie. L'extérieur complète ce que
  *  les vivants de Split ne fournissent pas, sans jamais retirer une ligne
  *  (QO-9 : le passé du monde ne disparaît pas — un partant cesse de
@@ -136,7 +144,8 @@ function mgmtExteriorEnsure(m){
   const cycle=Number.isSafeInteger(m.cycle)&&m.cycle>=0?m.cycle:0;
   for(const div of allDivisions()){
     let vivants=mgmtWorldLivingCount(m,div.id);
-    while(vivants<MGMT_EXT_LIVE_PER_DIVISION){
+    const quota=mgmtWorldQuota(m,div.id);
+    while(vivants<quota){
       const ligne=mgmtExteriorCreate(m,cycle,div.id);
       m.exterieur.push(ligne);
       if(!mgmtExteriorRetired(ligne,cycle)) vivants++;

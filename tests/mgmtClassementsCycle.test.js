@@ -19,7 +19,7 @@ test('MGMT T6 — cycle omis à cycle explicite : le même classement, une seule
   const win = newGameWindow();
   const r = JSON.parse(win.eval(`(function(){
     setSeed(300);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=6; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=6; mgmtExteriorEnsure(m);
     const avant=JSON.stringify({roster:m.roster,exterieur:m.exterieur});
     const omissions={}, explicites={};
     for(const scope of ['organization','world']){
@@ -44,7 +44,7 @@ test('MGMT T6 — après une soirée, le rang d’hier se retrouve', () => {
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(301);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=2; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=2; mgmtExteriorEnsure(m);
     /* Une catégorie de Split avec deux disponibles pour booker le combat. */
     let div=null, cible=null;
     for(const d of allDivisions()){
@@ -90,7 +90,7 @@ test('MGMT T6 — le monde extérieur d’hier suit mgmtExteriorTrace au cycle l
   const win = newGameWindow();
   const r = JSON.parse(win.eval(`(function(){
     setSeed(302);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=4; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=4; mgmtExteriorEnsure(m);
     const ext=m.exterieur.find(o=>o.div==='H-light');
     if(!ext) return 'null';
     const hier=mgmtDivisionRanking(m,'H-light','world',2);
@@ -124,7 +124,7 @@ test('MGMT T6 — un retraité du management reste au classement d’hier', () =
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(303);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=2; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=2; mgmtExteriorEnsure(m);
     G={theme:'dark',mgmt:m};
     let div=null;
     for(const d of allDivisions()){

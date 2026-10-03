@@ -28,7 +28,7 @@ function key(win,k){
 
 test('MGMT T6 / lot 5 T1 — l’écran rend : onglets, portée, tendance, champions, échap ramène', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(401); CL.mgmtEnter(); CL.go('mgmt_classements');`);
+  win.eval(`setSeed(401); mgmtEntrerAvantH4(); CL.go('mgmt_classements');`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Classements'), 'le titre de l’écran est présent');
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
@@ -65,7 +65,7 @@ test('MGMT T6 / lot 5 T1 — l’écran rend : onglets, portée, tendance, champ
 
 test('MGMT T6 — onglet de catégorie et bascule SPLIT lisent le vrai classement', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(402); CL.mgmtEnter(); CL.go('mgmt_classements');`);
+  win.eval(`setSeed(402); mgmtEntrerAvantH4(); CL.go('mgmt_classements');`);
   win.eval(`CL.mgmtClassementsTab('H-light'); CL.mgmtClassementsScope('split');`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes('Poids léger'),'l’onglet choisi porte son libellé');
@@ -84,7 +84,7 @@ test('MGMT T6 — onglet de catégorie et bascule SPLIT lisent le vrai classemen
 /* Un combattant extérieur s'ouvre en fiche, et y revient au retour. */
 test('MGMT T6 — un combattant extérieur s’ouvre en fiche, retour aux classements', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(403); CL.mgmtEnter();`);
+  win.eval(`setSeed(403); mgmtEntrerAvantH4();`);
   win.eval(`(function(){ const m=G.mgmt; m.cycle=3; mgmtExteriorEnsure(m); })();
     G.screen='mgmt_classements'; render()`);
   const extId=win.eval(`(function(){
@@ -116,7 +116,7 @@ test('MGMT T6 — tendance et constats après une soirée, le classement d’hie
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(404);
-    const m=mgmtDefault(); mgmtNewRoster(m); m.cycle=2; mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); m.cycle=2; mgmtExteriorEnsure(m);
     G={theme:'dark',mgmt:m};
     let div=null;
     for(const d of allDivisions()){

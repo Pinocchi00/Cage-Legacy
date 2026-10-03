@@ -13,7 +13,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
 
-function enterMgmt(win, seed){ win.eval(`setSeed(${seed}); CL.mgmtEnter();`); }
+function enterMgmt(win, seed){ win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`); }
 
 test('Semaine — carte posée, effectif et invaincu portent le libellé féminin, masculin inchangé', () => {
   const win = newGameWindow();
