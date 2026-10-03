@@ -34,6 +34,7 @@ function mgmtFilLignes(m){
       if(f&&MGMT_DEMANDES[d.want]) out.push(f.name+' demande : '+MGMT_DEMANDES[d.want].libelle.toLowerCase());
     }
   }
+  if(typeof mgmtRivalitesLignes==='function') for(const r of mgmtRivalitesLignes(m)) out.push(r.text);
   for(const c of mgmtConteurCandidats(m,m.cycle)) out.push(c.name+' : '+c.moment.libelle);
   return out.slice(0,MGMT_FIL_MAX_LIGNES);
 }
