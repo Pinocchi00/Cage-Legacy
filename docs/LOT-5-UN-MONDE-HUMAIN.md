@@ -459,6 +459,19 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   le jeu réel. **Non fait** : les boutons « Envisager ce combat » et « L'appeler » (aucun
   système pour les porter).
 
+- **H10 — premier groupe, codé par Claude** (03/10 ; à relire par Anthony) :
+  `mgmt-rivalites.js`, la mémoire des affrontements (§6) **lue dans `m.hist`, rien de stocké,
+  aucune mémoire parallèle**. **Scénario 1, la rivalité** : une défaite humiliante (KO ou
+  soumission dans les deux premiers rounds) ; la revanche est due tant qu'elle n'a pas eu lieu,
+  et le perdant la demande à coup sûr (demande imposée, H7). **Scénario 2, la trilogie** : une
+  victoire partout, celui qui vient de perdre réclame « le troisième combat » ; elle se clôt au
+  troisième. **Scénario 6, le tueur de hype** : un combattant bat un invaincu de cinq victoires ou
+  plus. Le joueur décide par Promettre (la promesse est tenue quand le combat se joue) ou Refuser
+  (10 de charge). Une rivalité s'éteint après 12 cycles ou si l'un des deux part. La semaine, le fil
+  et la fiche (« Ses rivaux ») la racontent, sans chiffre. Parties neuves seulement. **Restent** :
+  les autres scénarios du §5 (30 sur 32), dont ceux qui demandent les camps (T7), le recrutement (T5),
+  les décisions partagées contestées (le moteur n'en publie pas le détail) et les voix (T2 + T3).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé

@@ -38,6 +38,8 @@ const MGMT_DEMANDES={
   'carte-principale':{libelle:'La carte principale',relu:false},
   'un-classe':{libelle:'Un classé',relu:false},
   'revanche':{libelle:'Une revanche',relu:false},
+  /* Lot 5 H10 (scénario n° 2, la trilogie) : « le troisième combat » du contrat §5. */
+  'trilogie':{libelle:'Le troisième combat',relu:false},
 };
 const MGMT_PROMESSE_CYCLES=3;
 const MGMT_DEMANDE_EXPIRE=3;
@@ -164,6 +166,19 @@ function mgmtDemandesOuvreCycle(m){
   if(!m||m.effectifs!==1||!Number.isSafeInteger(m.cycle)) return null;
   if(mgmtDemandesOuvertes(m).length>=MGMT_DEMANDE_MAX_OUVERTES) return null;
   const deja=new Set(mgmtDemandesOuvertes(m).map(d=>d.a));
+  /* Lot 5 H10 : l'histoire impose d'abord — la revanche après une défaite
+     humiliante, le troisième combat après une victoire partout. */
+  if(typeof mgmtDemandesImposees==='function'){
+    for(const imp of mgmtDemandesImposees(m)){
+      const f=mgmtFighterById(m,imp.a);
+      if(!f||f.retired||deja.has(f.id)||mgmtEngaged(m,f)) continue;
+      if(mgmtPromesses(m,f).some(p=>p.etat==='en cours')) continue;
+      if((m.facts||[]).some(x=>x&&x.k==='demande'&&x.a===imp.a&&x.want===imp.want&&x.target===imp.target&&m.cycle-x.c<=MGMT_DEMANDE_EXPIRE)) continue;
+      const fait={c:m.cycle,k:'demande',a:imp.a,want:imp.want,target:imp.target};
+      mgmtAddFact(m,fait);
+      return fait;
+    }
+  }
   let meilleur=null;
   for(const f of m.roster){
     if(!f||f.retired||deja.has(f.id)||mgmtEngaged(m,f)) continue;
