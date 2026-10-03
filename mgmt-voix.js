@@ -57,6 +57,55 @@ function mgmtVoixId(f){
   return MGMT_VOIX_COMMUNE;
 }
 
+/* ---- Les voix qui changent (document §4 et §8) ------------------------ */
+
+/** Le Timide a cessé de l'être après tant de combats (document §4 : dix). */
+const MGMT_VOIX_TIMIDE_COMBATS=10;
+/** Le Repenti rechute après tant de défaites de suite. */
+const MGMT_VOIX_REPENTI_DEFAITES=3;
+/** Un KO « très lourd » : subi dès le premier round. */
+const MGMT_VOIX_KO_LOURD_ROUND=1;
+/** La part des combattants qu'un KO très lourd hante (flux 'voix-change'). Mesuré le 03/10 : à 25 %, 14 % du vestiaire était Hanté au bout de cinq ans (la voix est censée peser 2 %) ; à 5 %, ~3 %. */
+const MGMT_VOIX_HANTE_PART=0.05;
+
+/** Le premier KO très lourd subi par un combattant, lu sur la trace ; null sinon. */
+function mgmtVoixPremierKoLourd(m,f){
+  const res=mgmtResultatsDetail(m,f);
+  for(let i=res.length-1;i>=0;i--){
+    if(res[i].issue==='loss'&&res[i].family==='ko'&&res[i].round<=MGMT_VOIX_KO_LOURD_ROUND) return res[i];
+  }
+  return null;
+}
+
+/** Le changement de voix d'un combattant, déduit de l'historique : UNE fois
+ *  dans une carrière, jamais d'un tirage de partie (le flux 'voix-change'
+ *  n'est semé que par l'identifiant). Le Timide après dix combats ; le
+ *  Metteur en scène après un KO très lourd (Cœur ouvert ou Métronome) ; le
+ *  Repenti qui rechute devient Aigri ; ceux qu'un KO très lourd hante
+ *  deviennent le Hanté. @returns {{vers:string,raison:string}|null} */
+function mgmtVoixChangement(m,f){
+  if(!m||m.effectifs!==1||!(m.roster||[]).some(o=>o.id===f.id)) return null;
+  const base=mgmtVoixId(f);
+  const ko=mgmtVoixPremierKoLourd(m,f);
+  const r=mgmtIdentiteStream(f.id,'voix-change');
+  if(base==='le-metteur-en-scene'&&ko) return {vers:r()<0.5?'le-coeur-ouvert':'le-metronome',raison:'ko'};
+  if(ko&&base!=='le-hante'&&r()<MGMT_VOIX_HANTE_PART) return {vers:'le-hante',raison:'ko'};
+  if(base==='le-timide'&&(f.W||0)+(f.L||0)+(f.D||0)>=MGMT_VOIX_TIMIDE_COMBATS) return {vers:MGMT_VOIX_COMMUNE,raison:'combats'};
+  if(base==='le-repenti'){
+    const res=mgmtResultatsDetail(m,f);
+    let k=0; for(const x of res){ if(x.issue==='loss') k++; else break; }
+    if(k>=MGMT_VOIX_REPENTI_DEFAITES) return {vers:'laigri',raison:'rechute'};
+  }
+  return null;
+}
+
+/** La voix d'un combattant AUJOURD'HUI : la voix du départ, ou celle que
+ *  l'histoire lui a donnée. Déduite, jamais stockée. */
+function mgmtVoixActuelle(m,f){
+  const c=mgmtVoixChangement(m,f);
+  return c?c.vers:mgmtVoixId(f);
+}
+
 /** Accorde les [masculin|féminin] du locuteur. */
 function mgmtVoixAccorde(texte,genre){
   return texte.replace(/\[([^|\]]+)\|([^\]]+)\]/g,(m,a,b)=>genre==='F'?b:a);
@@ -147,7 +196,7 @@ function mgmtReplique(m,f,situation,variante){
     }
     return null;
   };
-  return essayer(mgmtVoixId(f))||essayer(MGMT_VOIX_COMMUNE);
+  return essayer(mgmtVoixActuelle(m,f))||essayer(MGMT_VOIX_COMMUNE);
 }
 
 /** Ce qu'on dit de lui en ce moment : sa dernière parole, selon ce qu'il vit —
@@ -171,7 +220,9 @@ function mgmtParoleRecente(m,f){
 function mgmtFicheParole(m,f){
   if(!(m.roster||[]).some(o=>o.id===f.id)) return '';
   const p=mgmtParoleRecente(m,f);
-  return `<h3>Ce qu'on dit de lui</h3>`+(p?`<p class="mgmt-fiche-parole">« ${esc(p.texte)} »</p>`:'<p>On ne sait pas encore.</p>');
+  const change=typeof mgmtVoixChangement==='function'&&mgmtVoixChangement(m,f);
+  return `<h3>Ce qu'on dit de lui</h3>`+(p?`<p class="mgmt-fiche-parole">« ${esc(p.texte)} »</p>`:'<p>On ne sait pas encore.</p>')
+    +(change?'<p class="mgmt-fiche-vie-relais">Il ne parle plus comme avant.</p>':'');
 }
 
 /** Les paroles de la semaine (« Ce qui se dit ») : ton cercle et tes suivis

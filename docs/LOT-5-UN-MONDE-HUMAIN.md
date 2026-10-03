@@ -495,6 +495,21 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   **Restent** : 24 scénarios sur 32 (couverts : 1, 2, 3 par T7, 4, 5, 6, 10, 29), dont ceux
   qui attendent un système (visa, descente de catégorie, transfuge, fratrie, blues du champion).
 
+- **Les voix qui changent, codées par Claude** (03/10 ; reprend le document des voix §4 et §8 ; à
+  relire par Anthony). `mgmt-voix.js` : `mgmtVoixChangement(m,f)` et `mgmtVoixActuelle(m,f)`. Le
+  changement **se déduit de l'historique, une fois par carrière, jamais d'un tirage de partie, rien
+  ne se stocke** (la voix du départ, `mgmtVoixId`, ne bouge pas). Quatre règles : **le Timide devient la
+  Commune au dixième combat** ; **le Metteur en scène, après son premier KO subi au premier round
+  (« très lourd »), devient Cœur ouvert ou Métronome** (50/50, flux `voix-change`) ; **le Repenti
+  qui rechute — trois défaites de suite — devient Aigri** ; **un KO très lourd hante une minorité** (5 %,
+  même flux) : le Hanté du scénario n° 30. Mesuré (52 cycles, graine 20261003, `tools/mesure-voix-changent.js`) :
+  à 25 % de Hantés le vestiaire en comptait 14 % au bout de cinq ans — une voix censée peser 2 % —,
+  d'où 5 % (~3 %) ; 5 changements sur 139 combattants en cinq ans, 5 ms pour tout le vestiaire. Les
+  répliques (T2) viennent de la voix **actuelle** ; la fiche (« Ce qu'on dit de lui ») ajoute « Il ne
+  parle plus comme avant. ». Parties neuves seulement. **Non fait** : le Converti tardif (jamais attribué
+  au départ, aucune règle d'arrivée), « Il ne parle plus comme avant » en parole du joueur, le choix du
+  joueur sur « un combat de reprise ou l'arrêt » du scénario n° 30.
+
 - **T2 + T3 — la voix branchée, codées par Claude** (03/10 ; **les répliques sont
   celles du document, `relu:false` : Anthony les relit et les réécrit**).
   `mgmt-voix-data.js` est **généré** par `tools/extraire-voix.js` depuis
