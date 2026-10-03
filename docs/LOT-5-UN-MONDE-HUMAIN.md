@@ -366,6 +366,35 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   `first`/`firstF` ; les noms retirés restent dans `COUNTRY_LAST_ANCIENS` pour
   retrouver l'origine d'une ancienne sauvegarde. Tests épinglés réécrits (décision du 30/09).
 
+- **H4 — codée par Claude** (03/10, quota OpenCode épuisé ; à relire par Anthony) :
+  partie neuve = `effectifs` 1, **vestiaire de 130 à 150** réparti comme le monde
+  (`MGMT_WORLD_SIZE`, total **1 025**), **soirée à 5 + 7**, monde tenu à la table
+  par catégorie (`mgmtWorldQuota`), droits télé proportionnels à la carte de la
+  partie. **Migration 12 → 13** : une partie commencée garde son monde à 30, son
+  vestiaire, sa carte 5 + 4 (`effectifs` 0). Leïla propose les sept préliminaires
+  (affaire `leila_bulk`, déjà là). **Mesures** (`tools/reports/lot-5-h4/`, 52 soirées
+  sur un vestiaire de 139) : **1,80 combat par an et par combattant** (cible 1,8),
+  entrée en partie 108 ms, un cycle 110 ms en moyenne (157 max), `mgmtExteriorEnsure`
+  20 ms ; écrans : semaine 34 ms, carte 13 ms, **organisation 65 ms et classements
+  94 ms (au-dessus de 50 ms — lisible, à surveiller ; un cache est possible)**.
+  **Économie : à décider.** L'outil du lot 2 T4 donne le joueur d'écran rentable dans
+  **100 %** des soirées (cible 70 à 80 %) : douze combats rapportent plus qu'ils ne
+  coûtent. Les barèmes n'ont PAS été touchés ; l'outil est écrit pour 5 + 4, sa
+  lecture est indicative. À recalibrer avant d'ouvrir ce format à tous. Le taux
+  où le champion tombe n'est pas remesuré (outil de T1 à rejouer).
+- **H5 — codée par Claude** (03/10 ; à relire par Anthony) : `mgmt-vie.js`. Un flux
+  `'vie'` semé par (id, cycle) tire 1 à 2 moments par an et par combattant, sans toucher
+  à la RNG de la partie. Split : le moment est un **fait gardé** (`moment_vie`) ;
+  monde extérieur : **dérivé**, rien de stocké. La **charge** (somme des poids des 11
+  derniers cycles) est dérivée et jamais affichée : au-delà de 150, blessure au camp
+  plus probable (+4 %) et forme en baisse (`dynamic`) ; au-delà de 300, +10 % et retrait
+  possible. Les moments heureux pèsent mais ne comptent pas dans le risque. Absences
+  par `f.susp`, jamais pour un combattant déjà booké. Bloc « Sa vie » dans la fiche :
+  les moments relayés, libellés du catalogue tels quels, « On ne sait pas encore »
+  sinon. **Seulement dans les parties neuves** (comme les effectifs). Les moments
+  déclenchés par l'état du jeu (ceinture, classement, poids, retraite) ne se tirent pas
+  au hasard : ils attendent leur branchement (scénarios).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé

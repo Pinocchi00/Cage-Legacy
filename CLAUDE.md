@@ -130,7 +130,7 @@ après le découpage de `mgmt-bureau.js` :
 | `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
 | `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
 | `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) ; lues par `saveMgmt`/`loadMgmt` dans `mgmt-save.js` | Sauvegarde management + secours, circuit séparé de la carrière |
-| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **12** | Management : migration séquentielle sans perte jusqu'à 12 (11 → 12 : l'origine et la génération de style, lot 5 H3 ; 10 → 11 : les ceintures, lot 5 T1 ; avant : `mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte, lot 3 T1 la trace, lot 2B T1 ter la récupération du corps, T2 bis le calendrier d'âge, T3 les départs, T3 bis l'entrée des fondateurs avant l'ouverture), v1 refusée |
+| `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **13** | Management : migration séquentielle sans perte jusqu'à 13 (12 → 13 : les effectifs, lot 5 H4 — `effectifs` 0 = partie d'avant, monde à 30 et carte 5 + 4 conservés ; 11 → 12 : l'origine et la génération de style, lot 5 H3 ; 10 → 11 : les ceintures, lot 5 T1 ; avant : `mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte, lot 3 T1 la trace, lot 2B T1 ter la récupération du corps, T2 bis le calendrier d'âge, T3 les départs, T3 bis l'entrée des fondateurs avant l'ouverture), v1 refusée |
 
 ## 5. Séparation des responsabilités
 
@@ -167,7 +167,7 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 03/10/2026 (`integration-03-10-h3`) : **447 tests, 443 passants,
+État au 03/10/2026 (`lot-5-h4-effectifs`, H4 + H5) : **464 tests, 460 passants,
 0 échec, 4 skip**. Les 4 skip sont dans `mgmtBureau.test.js` : trois sorties de
 carte incomplète (remonter un prélim, short notice, combattant libre) et une
 pénalité économie au-delà du plafond de découvert — comportements décidés mais
