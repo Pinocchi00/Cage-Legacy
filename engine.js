@@ -265,11 +265,81 @@ const COUNTRIES={
  KR:{name:'Corée',flag:'🇰🇷',last:['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon'],first:['Dong-hyun','Chan-sung','Doo-ho','Da-un','Si-woo','Myung-ho','Sung-bin','Jin-soo','Kyung-ho']},
  CM:{name:'Cameroun',flag:'🇨🇲',last:['Fotso','Biya','Kamga','Takam','Ndi','Abate','Tchakoute','Ndong','Nkemdirim','Milla','Song','Nkono','Emana','Bassong','Matip','Choupo','Anguissa','Toko','Aboubakar','Moukandjo','Kalla','Wome','Ndiefi','Tchato','Oyongo']},
  GE:{name:'Géorgie',flag:'🇬🇪',last:['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze','Topuria'],first:['Guram','Amiran','Ilia','Roman','Merab','Giga','Lasha','Shota','Revaz','Zurab']},
+ /* ==== [ANCRE: LOT5_H2_SEIZE_PAYS] — décision du 30/09 : seize nouveaux pays
+    (docs/LOT-5-UN-MONDE-HUMAIN.md §7 H2 ; docs/CATALOGUE-HUMANITE.md §1.2).
+    Noms de famille, prénoms masculins (first) et prénoms féminins (firstF)
+    RÉELS et courants du pays — mêmes règles que la T3 bis « noms » du
+    28/09 : apostrophes, traits d'union et accents gardés, rien d'inventé.
+    Les prénoms féminins d'un pays se tirent dans firstF (makeName) ; les
+    prénoms masculins dans first ; un pays sans liste garde FIRST_F/FIRST_M.
+    Reprise du 02/10 : les noms de célébrités du SPORT sortent des listes
+    (Hakimi, Amrabat, Mazraoui, Aguerd, Saïss, En-Nesyri ; Mahrez, Slimani,
+    Bounedjah, Ghezzal ; Walid pour Walid Cherif, Zhong pour « Zhong Guo »,
+    Xiang, Tao, Lei, Hao, Ting, Yue, Xin ; Dries pour Dries Mertens, Erik
+    pour Erik Karlsson, Elias pour Elias Pettersson, Chapman, Émile pour
+    Émile Bouchard) — le jeu ne peut jamais générer le nom complet d'un
+    sportif célèbre (tests/nomsSeizePays.test.js épingle ces combinaisons
+    interdites). ==== */
+ BE:{name:'Belgique',flag:'🇧🇪',last:['Peeters','Janssens','Maes','Jacobs','Mertens','Willems','Claes','Wouters','Goossens','De Smet','Vermeulen','Hendrickx','Dubois','Dupont','Lambert','Renard','Lejeune','Collin','Georges','Dumont','Vervoort','Vandenberghe'],
+     first:['Lucas','Arthur','Louis','Jules','Noah','Liam','Milan','Daan','Sem','Lars','Ruben','Mats','Jens','Lowie','Victor','Simon','Mathis','Wout'],
+     firstF:['Emma','Louise','Alice','Camille','Juliette','Lotte','Roos','Fien','Élise','Charlotte','Marie','Margaux','Inès','Lucie','Noor','Amélie','Hélène']},
+ CH:{name:'Suisse',flag:'🇨🇭',last:['Müller','Meier','Schmid','Keller','Weber','Huber','Schneider','Steiner','Bauer','Bühler','Ammann','Widmer','Brunner','Frei','Favre','Rochat','Droz','Perret','Bonvin','Dubois','Abplanalp','Kaufmann'],
+     first:['Luca','Noah','Leandro','Tim','Levin','Matteo','Elias','Liam','Gabriel','Nathan','Jonas','Ben','Moritz','Milan','Théo','Simon'],
+     firstF:['Mia','Laura','Emma','Leana','Elisa','Julia','Sofia','Alice','Joy','Nina','Lina','Lena','Milena','Léa','Chloé','Sara']},
+ MA:{name:'Maroc',flag:'🇲🇦',last:['Alaoui','Bennani','El Amrani','El Fassi','El Idrissi','El Mansouri','Benslimane','Rachidi','Boukhriss','Chraïbi','Zerouali','Tazi','Berrada','Benali','Benjelloun','Ouazzani','Chami','Sekkat','Lahlou','Benhima','Lamrani','Amrani'],
+     first:['Youssef','Hamza','Adam','Ayoub','Omar','Anas','Bilal','Mehdi','Zakaria','Walid','Ilyas','Amine','Karim','Aymen','Rayan','Achraf'],
+     firstF:['Salma','Sara','Aya','Imane','Malak','Khadija','Ghita','Lina','Nisrine','Chaimae','Meryem','Nadia','Soukaina','Inès','Wiam','Hajar']},
+ DZ:{name:'Algérie',flag:'🇩🇿',last:['Benali','Belkacem','Belhadj','Benamar','Benyahia','Bensalem','Bensaid','Mansouri','Meziane','Taleb','Boukhari','Bouazza','Boudiaf','Kaddour','Zeroual','Chaïbi','Hamidi','Cherif','Kaci','Kadri','Haddad','Aït-Ali'],
+     first:['Yacine','Hicham','Sofiane','Bilal','Amine','Hamza','Adel','Omar','Anis','Islam','Ilyes','Rayan','Mehdi','Youcef','Riyad'],
+     firstF:['Yasmine','Lina','Amina','Sarah','Meriem','Inès','Sofia','Nour','Imene','Kahina','Tiziri','Nada','Salma','Lynda','Farida']},
+ SN:{name:'Sénégal',flag:'🇸🇳',last:['Diop','Ndiaye','Diouf','Ndoye','Niang','Faye','Sow','Sy','Ba','Gueye','Sène','Ngom','Mbaye','Diallo','Kane','Cissé','Fall','Samb','Diagne','Dieng','Gassama','Thiam'],
+     first:['Moussa','Abdoulaye','Ibrahima','Ousmane','Cheikh','Mamadou','Amadou','Souleymane','Babacar','Malick','Serigne','Modou','Lamine','Assane','Pape'],
+     firstF:['Maïmouna','Fatou','Aminata','Mariama','Awa','Khady','Codou','Ndèye','Sokhna','Bintou','Astou','Ramatoulaye','Dieynaba','Coumba','Yandé']},
+ PL:{name:'Pologne',flag:'🇵🇱',last:['Nowak','Kowalski','Kowalczyk','Wiśniewski','Lewandowski','Zieliński','Szymański','Woźniak','Dąbrowski','Kozłowski','Jankowski','Mazur','Krawczyk','Kaczmarek','Piotrowski','Grabowski','Zając','Król','Wieczorek','Jabłoński','Wróbel','Nowicki','Pawłowski','Michalski','Kamiński'],
+     first:['Jan','Piotr','Krzysztof','Andrzej','Stanisław','Tomasz','Marek','Paweł','Kamil','Łukasz','Mateusz','Michał','Dawid','Adam','Jakub','Wojciech','Bartosz','Marcin'],
+     firstF:['Anna','Maria','Katarzyna','Agnieszka','Magdalena','Marta','Justyna','Beata','Ewa','Małgorzata','Karolina','Monika','Aleksandra','Natalia','Iwona','Dorota','Paulina','Zofia']},
+ NL:{name:'Pays-Bas',flag:'🇳🇱',last:['De Jong','Jansen','De Vries','Van den Berg','Van Dijk','Bakker','Visser','Smit','Meijer','De Boer','Mulder','De Groot','Bos','Vos','Peters','Hendriks','Van Leeuwen','Hoekstra','Dekker','Dijkstra'],
+     first:['Daan','Sem','Luuk','Bram','Jesse','Thijs','Lars','Tim','Ruben','Niels','Bas','Sven','Joost','Willem','Joep','Gijs'],
+     firstF:['Emma','Julia','Sophie','Anna','Lotte','Tess','Fem','Sanne','Anne','Mila','Floor','Kiki','Yara','Sofia','Roos','Eva']},
+ ES:{name:'Espagne',flag:'🇪🇸',last:['García','Fernández','González','Rodríguez','López','Martínez','Sánchez','Pérez','Gómez','Martín','Jiménez','Ruiz','Hernández','Díaz','Moreno','Álvarez','Romero','Alonso','Gutiérrez','Navarro','Torres','Domínguez','Vázquez'],
+     first:['Hugo','Martín','Pablo','Lucas','Alejandro','Daniel','Mateo','Adrián','Álvaro','David','Mario','Diego','Javier','Manuel','Sergio','Carlos'],
+     firstF:['Lucía','María','Martina','Sofía','Paula','Valeria','Carmen','Laura','Elena','Daniela','Julia','Carla','Alba','Emma','Noa','Vega']},
+ IT:{name:'Italie',flag:'🇮🇹',last:['Rossi','Russo','Ferrari','Esposito','Bianchi','Romano','Colombo','Ricci','Marino','Greco','Bruno','Gallo','Conti','De Luca','Costa','Giordano','Mancini','Rizzo','Lombardi','Moretti'],
+     first:['Andrea','Marco','Luca','Matteo','Alessandro','Davide','Francesco','Lorenzo','Giulio','Simone','Federico','Paolo','Fabio','Riccardo','Daniele','Gabriele'],
+     firstF:['Giulia','Sofia','Aurora','Alice','Ginevra','Francesca','Chiara','Martina','Giorgia','Alessia','Federica','Elena','Camilla','Beatrice','Valentina','Sara']},
+ DE:{name:'Allemagne',flag:'🇩🇪',last:['Müller','Schmidt','Schneider','Fischer','Weber','Meyer','Wagner','Becker','Schulz','Hoffmann','Schäfer','Koch','Bauer','Richter','Klein','Wolf','Schröder','Neumann','Braun','Krüger','Zimmermann','Lang'],
+     first:['Lukas','Jonas','Felix','Paul','Leon','Noah','Finn','Max','Louis','Elias','Ben','Luca','Tim','Erik','Moritz','Jakob','Julian'],
+     firstF:['Anna','Emma','Mia','Hannah','Lena','Lea','Marie','Lina','Klara','Elisa','Sara','Laura','Maja','Leni','Amelie','Nele']},
+ SE:{name:'Suède',flag:'🇸🇪',last:['Andersson','Johansson','Karlsson','Nilsson','Eriksson','Larsson','Olsson','Persson','Svensson','Gustafsson','Pettersson','Jonsson','Jansson','Hansson','Sandberg','Sjöberg','Lindberg','Bergström','Norberg','Holm'],
+     first:['Filip','Lucas','Liam','Samuel','Oscar','Hugo','Viktor','Anton','Melker','Isak','Joel','Rasmus','Kalle','Ludvig','August','Alvar'],
+     firstF:['Alice','Olivia','Astrid','Elsa','Vera','Selma','Ebba','Ingrid','Linnéa','Maja','Freja','Saga','Klara','Ellen','Liv','Hedda']},
+ KZ:{name:'Kazakhstan',flag:'🇰🇿',last:['Kenes','Omarov','Sultanov','Akhmetov','Umarov','Belgibaev','Kemelov','Kambarov','Smagulov','Ospanov','Serikov','Suleymenov','Muratov','Ibragimov','Kaliev','Tulegenov','Iskakov','Musin','Abdullaev','Musaev','Nauryzbaev','Nurgaliev','Bazarbaev','Mukashev','Zhumagaliev','Bolatov','Galiev','Sadykov','Sarsenbaev','Amanzholov'],
+     first:['Mukhammed','Aisultan','Alikhan','Omar','Aldiyar','Amir','Alan','Ali','Nursultan','Ruslan','Azamat','Temirlan','Damir','Adil','Bekzat','Erasyl','Daulet','Alibek','Aslan','Ernar'],
+     firstF:['Ailin','Medina','Asylym','Aisha','Tomiris','Ayala','Aiym','Mariam','Rayana','Safiya','Madina','Kamila','Dana','Dinara','Zarina','Nazerke','Ayazhan','Zhansaya','Amina','Asel']},
+ KG:{name:'Kirghizistan',flag:'🇰🇬',last:['Ismailov','Akmatov','Abdullaev','Osmonov','Isakov','Sulaymanov','Ergeshov','Kadyrov','Aliev','Sydykov','Sultanov','Karimov','Asanov','Mamatov','Yuldashev','Musaev','Abdyldaev','Mamytov','Zhumabaev','Ibragimov','Kurbanov','Abdrakhmanov'],
+     first:['Nurlan','Ruslan','Azamat','Nurbek','Chyngyz','Erkin','Asylbek','Tilek','Murat','Omurbek','Aibek','Dastan','Bakyt','Adilet','Almaz','Kanat','Talant','Kubanychbek','Kurmanbek','Askar'],
+     firstF:['Gulmira','Aynura','Gulnara','Aygul','Nazgul','Baktygul','Elmira','Nargiza','Asel','Nazira','Nurgul','Dinara','Aysuluu','Bermet','Cholpon','Altynai','Zhibek','Salamat']},
+  CN:{name:'Chine',flag:'🇨🇳',last:['Wang','Li','Zhang','Liu','Chen','Yang','Huang','Zhao','Wu','Zhou','Xu','Sun','Ma','Zhu','Hu','Guo','He','Lin','Gao','Luo'],
+      first:['Wei','Rui','Jun','Ming','Qiang','Bo','Peng','Chao','Kai','Feng','Sheng','Jian','Junjie','Cheng','Gang','Yong'],
+      firstF:['Mei','Fang','Yan','Jing','Hui','Xia','Jia','Ling','Yun','Shan','Wen','Ping','Xiu','Qing','Yuan','Lan']},
+  AU:{name:'Australie',flag:'🇦🇺',last:['Smith','Jones','Williams','Brown','Wilson','Taylor','Johnson','White','Martin','Anderson','Thompson','Hughes','Kelly','Ryan','Campbell','Mitchell','Stewart','Turner','Cooper','Ward','Grant','Robinson'],
+     first:['Oliver','Jack','Noah','William','Thomas','Henry','Lucas','Ethan','Levi','Lachlan','Cooper','Harrison','Charlie','Angus','Archie','Flynn'],
+     firstF:['Charlotte','Mia','Ava','Amelia','Sophie','Isla','Chloe','Grace','Zoe','Lily','Emily','Ella','Ruby','Harper','Matilda','Willow']},
+ CA:{name:'Canada',flag:'🇨🇦',last:['Tremblay','Gagnon','Roy','Bouchard','Gagné','Gauthier','Morin','Lavoie','Fortin','Pelletier','Bélanger','Caron','Côté','Bergeron','Simard','Poirier','Leblanc','Lachance','Bélisle','Boisvert','Boivin','Audette','Perron','Martel'],
+      first:['William','Liam','Noah','Olivier','Thomas','Félix','Jacob','Samuel','Nathan','Mathis','Arthur','Louis','Charles','Xavier','Léo','Antoine'],
+     firstF:['Olivia','Charlotte','Emma','Alice','Rose','Florence','Léa','Camille','Jade','Romy','Éloïse','Maëlle','Sara','Élodie','Flavie','Violette']},
 };
 const COUNTRY_KEYS=Object.keys(COUNTRIES);
 /* ==== [ANCRE: COUNTRY_MMA_PREFIX] — 1re lettre du nom FR, 2 lettres si collision
-   (Royaume-Uni/Russie et Corée/Cameroun partagent leur 1re lettre). ==== */
-const COUNTRY_MMA_PREFIX={FR:'F',BR:'B',US:'E',DAG:'D',JP:'J',NG:'N',GB:'RO',RU:'RU',MX:'M',IE:'I',TH:'T',KR:'CO',CM:'CA',GE:'G'};
+   (Royaume-Uni/Russie, Corée/Cameroun, Mexique/Maroc, États-Unis/Espagne,
+   Irlande/Italie, Brésil/Belgique, Algérie/Allemagne/Australie, Pologne/
+   Pays-Bas, Kazakhstan/Kirghizistan, Corée/Cameroun/Chine partagent leur
+   1re lettre) ; triple collision S (Suisse/Sénégal/Suède) et Canada
+   derrière le 'CA' du Cameroun : sigles sportifs réels (SUI, SEN, SWE,
+   CAN, ALG, ALL). Utilisé par ui-01-roster-matchmaking.js (championnats
+   amateurs — l'id est pfx+'MMA' : deux pays ne peuvent jamais partager
+   le même préfixe). ==== */
+const COUNTRY_MMA_PREFIX={FR:'F',BR:'B',US:'E',DAG:'D',JP:'J',NG:'N',GB:'RO',RU:'RU',MX:'M',IE:'I',TH:'T',KR:'CO',CM:'CA',GE:'G',BE:'BE',CH:'SUI',MA:'MA',DZ:'ALG',SN:'SEN',PL:'PO',NL:'PA',ES:'ES',IT:'IT',DE:'ALL',SE:'SWE',KZ:'KA',KG:'KI',CN:'CH',AU:'AU',CA:'CAN'};
 /* ==== [FIN ANCRE] ==== */
 const FIRST_M=['Alex','Marcus','Diego','Ivan','Kenji','Samuel','Leon','Rashid','Tariq','Bruno','Kai','Omar','Noah','Yuki','Malik','Hugo','Sean','Nikolai','Andre','Felix','Jamal','Ravi','Enzo','Kofi','Dante'];
 const FIRST_F=['Amara','Lena','Sofia','Nadia','Yuki','Maya','Zara','Ana','Ines','Kira','Fatima','Nina','Rosa','Aiko','Elena','Sara','Leïla','Tara','Bianca','Hana'];
@@ -287,8 +357,13 @@ const FIRST_F=['Amara','Lena','Sofia','Nadia','Yuki','Maya','Zara','Ana','Ines',
    change pour ce qui est écrit ; le monde extérieur du management (nom
    DÉRIVÉ à la lecture, mgmtExteriorName) repasse par makeName à chaque
    lecture : une ligne Corée/Géorgie peut donc porter un autre nom au
-   prochain affichage, les autres pays rendent la même suite qu'avant. ==== */
-function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?FIRST_F:(c.first||FIRST_M)); const last=pick(c.last); return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
+   prochain affichage, les autres pays rendent la même suite qu'avant. ====
+   ==== [ANCRE: LOT5_H2_SEIZE_PAYS] — décision du 30/09 : seize nouveaux pays
+   (docs/LOT-5-UN-MONDE-HUMAIN.md §7 H2) : le prénom féminin se tire
+   désormais dans la liste firstF du pays quand elle existe (c.firstF ||
+   FIRST_F), exactement comme le prénom masculin lit c.first || FIRST_M
+   depuis le 28/09 — toujours deux tirages (prénom, nom de famille). ==== */
+function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?(c.firstF||FIRST_F):(c.first||FIRST_M)); const last=pick(c.last); return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
 /* ==== [FIN ANCRE] ==== */
 
 /* ------------------------- CRÉATION D'UN COMBATTANT ----------------------- */
