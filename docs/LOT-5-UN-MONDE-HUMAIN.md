@@ -444,6 +444,21 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   suspensions gardées). Vérifié à 1920 et 1280. **Non fait** : « Ses liens » et « Son camp »
   (T7), la presse et la voix (T2 + T3).
 
+- **H9 — codée par Claude** (03/10 ; à relire par Anthony) : `mgmt-mouvement.js`.
+  **Le fil qui défile** : quand une semaine s'ouvre (Continuer après la soirée, ou le cycle
+  qui avance), les demandes en attente puis les moments relayés de la semaine défilent
+  pendant **2 à 4 secondes** (selon le nombre de lignes, huit au plus) ; un clic ou une
+  touche le passe, le délai aussi. **Les cartes** : les moments de ton cercle et de tes
+  suivis (deux au plus) s'ouvrent ensuite en carte qui glisse — portrait du combattant,
+  moment et relais, « Voir la fiche » et « Lui trouver un combat » (carte principale
+  ouverte sur lui) ; Échap ou ✕ la ferme. **Transitions** : toute animation (lignes du fil,
+  carte, entrée des nouvelles de la semaine) vit sous `prefers-reduced-motion:no-preference`
+  (testé : aucune animation hors de ce bloc, lignes visibles sans animation) ; les écrans
+  gardent leur fondu existant, déjà désactivé en mouvement réduit. Rien n'est stocké (l'état
+  du fil et des cartes vit à l'écran) ; une ancienne partie n'a ni fil ni carte. Vérifié dans
+  le jeu réel. **Non fait** : les boutons « Envisager ce combat » et « L'appeler » (aucun
+  système pour les porter).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé
