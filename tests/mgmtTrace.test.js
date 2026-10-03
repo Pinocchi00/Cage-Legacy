@@ -250,6 +250,7 @@ test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par tr
   assert.ok(html.includes(`Chez Split : ${ranks[0]} · ${ranks[1]} mondial`));
   /* Lot 5 H6 (contrat §3.3, décision du 30/09) : « Comment il combat » et « Sa faille » reviennent,
      en connaissance progressive — jamais remplis d'avance. « Son camp » reste absent (lot 5 T7). */
+  /* Lot 5 T7 : « Son camp » se remplit aussi (parties neuves) — la fiche d'une ancienne partie, ici, ne le porte pas. */
   assert.ok(html.includes('Comment il combat')&&html.includes('Sa faille')&&!html.includes('Son camp'));
   const first=win.replays;
   win.eval('render(); render(); CL.mgmtFicheDeplacer(1)');

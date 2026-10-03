@@ -159,7 +159,8 @@ test('H7 — une vraie soirée avec un titre pose les faits contraires et la sau
     m.card.main=paires.slice(0,5).map(p=>({a:p[0].id,b:p[1].id,cycle:m.cycle,slot:'main'}));
     m.card.prelims=paires.slice(5,12).map(p=>({a:p[0].id,b:p[1].id,cycle:m.cycle,slot:'prelim'}));
     const ev=mgmtRunEvent(m);
-    const faits=m.facts.filter(x=>x.k==='contrarie');
+    /* T7 : un combat entre coéquipiers pèse aussi (why 'coequipier') ; ici on isole le titre. */
+    const faits=m.facts.filter(x=>x.k==='contrarie'&&x.why!=='coequipier');
     return {joue:!!ev,faits:faits.length,titre:faits.every(x=>x.why==='titre'&&x.a===faible.id),valide:validateMgmt(JSON.parse(JSON.stringify(m)))};
   `);
   /* Le premier combat de la carte principale est en cinq rounds (T1) : le sang-froid faible qui l'ouvre laisse un fait. */
