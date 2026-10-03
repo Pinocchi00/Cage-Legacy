@@ -35,7 +35,8 @@ const { newGameWindow } = require('./helpers/loadGame');
 
 /* Identité seule : la liste exacte des clés qu'une ligne extérieure a le
    droit de porter (ancre MGMT_LOT2B_EXTERIEUR). */
-const CLEFS_IDENTITE=['born','ck','div','id','seed'];
+// Lot 5 H3 : marqueur de génération, aucun nouveau champ dérivé.
+const CLEFS_IDENTITE=['born','ck','div','generation','id','seed'];
 
 function quotaParCategorie(win){
   return win.eval('MGMT_EXT_LIVE_PER_DIVISION');
@@ -320,7 +321,7 @@ test('MGMT lot 2B T1 bis — recruter ne déplace pas le rang mondial et ne vide
     const totalAvant=mgmtWorldLivingCount(m,choisi.div);
     const extAvant=m.exterieur.filter(o=>o.div===choisi.div).length;
     m.exterieur=m.exterieur.filter(o=>o.id!==choisi.id);
-    const recrute={id:choisi.id,name:trace.name,first:trace.first,last:trace.last,
+    const recrute={id:choisi.id,name:trace.name,first:trace.first,last:trace.last,ck:choisi.ck,generation:choisi.generation,
       W:trace.pro.W,L:trace.pro.L,D:0,age:trace.age,div:choisi.div,
       divName:divById(choisi.div).name,org:MGMT_ORG,level:1,raison:null,interactions:0,lastCycle:last};
     m.roster.push(recrute);
@@ -329,7 +330,7 @@ test('MGMT lot 2B T1 bis — recruter ne déplace pas le rang mondial et ne vide
       totalAvant:totalAvant,totalApres:mgmtWorldLivingCount(m,choisi.div),
       extAvant:extAvant,extApres:m.exterieur.filter(o=>o.div===choisi.div).length,
       last:last,valide:validateMgmt(m),
-      clefs:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,id,seed')};
+      clefs:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,generation,id,seed')};
   })()`);
   assert.equal(r.erreur,undefined,'la fixture couvre un dernier combat antérieur au cycle 0');
   assert.equal(r.apres,r.avant,'changer de maison ne change pas le rang mondial');
@@ -401,7 +402,7 @@ test('MGMT lot 2B T3 — une ligne extérieure en fin de carrière sort des viva
       jeunes:jeunes.length,rangMonde,quota:MGMT_EXT_LIVE_PER_DIVISION,
       gela:gelaApres>=gelaAvant,gelaConstant:mgmtExteriorTrace(l,fin+600).fights===gelaApres,
       bilanOk:bilanApres.W>=bilanAvant.W&&bilanApres.L>=bilanAvant.L,
-      identite:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,id,seed')});
+      identite:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,generation,id,seed')});
   })()`);
   const s=JSON.parse(r);
   assert.equal(s.avantFin,false,'un cycle avant son terme, la ligne est encore vivante');
@@ -528,7 +529,7 @@ test('MGMT lot 2B T3 bis — un fondateur né parti ne compte pas parmi les viva
     const vivantsOuverture=allDivisions().map(d=>mgmtWorldLivingCount(m,d.id));
     /* Fixture : une ligne à l'entrée la plus ancienne dérivée (−recul), dont
        la carrière dérivée est close AVANT l'ouverture (vérifié : seed 2). */
-    const parti={id:'mgFondateurParti',seed:2,div:'H-light',ck:'FR',born:-MGMT_EXT_FONDATEUR_SPREAD};
+    const parti={id:'mgFondateurParti',seed:2,div:'H-light',ck:'FR',born:-MGMT_EXT_FONDATEUR_SPREAD,generation:0};
     if(mgmtExteriorRetired(parti,0)!==true) return {erreur:'fixture vivante'};
     m.exterieur.push(parti);
     const lignesAvant=m.exterieur.length;
@@ -556,7 +557,7 @@ test('MGMT lot 2B T3 bis — un fondateur né parti ne compte pas parmi les viva
       toujoursLa:m.exterieur.some(o=>o.id===parti.id),
       age:trace.age,combats:trace.fights,bilan:trace.pro.W+'-'+trace.pro.L,parti:trace.retireCycle,
       ageRetrait:trace.retAge,flux:t1===t2,valide:validateMgmt(m),
-      identite:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,id,seed')};
+      identite:m.exterieur.every(o=>Object.keys(o).sort().join(',')==='born,ck,div,generation,id,seed')};
   })()`);
   assert.equal(r.erreur,undefined,'la fixture est bien une ligne déjà partie avant l’ouverture');
   assert.ok(r.vivantsOuverture.every(n=>n===quotaParCategorie(win)),'le monde d’ouverture tient le quota');
@@ -676,7 +677,7 @@ test('MGMT lot 2B T1 bis — mgmtRepair filtre puis complète les anciennes sauv
     return {avant:avant,epure:epure,valideAvant:valideAvant,charge:charge,
       quotas:allDivisions().map(d=>mgmtWorldLivingCount(G.mgmt,d.id)),
       conserve:idsAvant.every(id=>G.mgmt.exterieur.some(o=>o.id===id)),
-      identite:repare.exterieur.every(l=>Object.keys(l).sort().join(',')==='born,ck,div,id,seed')};
+      identite:repare.exterieur.every(l=>Object.keys(l).sort().join(',')==='born,ck,div,generation,id,seed')};
   })()`);
   assert.equal(r.epure,r.avant,'la ligne illisible est remplacée après filtrage pour tenir le quota');
   assert.ok(r.valideAvant,'l’ancien petit monde passe validateMgmt avant réparation');

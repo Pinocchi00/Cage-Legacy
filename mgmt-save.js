@@ -25,6 +25,8 @@ function mgmtValidLine(o){
   if(!o||typeof o!=='object'||Array.isArray(o)) return false;
   if(!mgmtValidId(o.id)) return false;
   if(typeof o.name!=='string'||!o.name) return false;
+  if(typeof o.ck!=='string'||!COUNTRY_KEYS.includes(o.ck)) return false;
+  if(o.generation!==undefined&&o.generation!==0&&o.generation!==MGMT_IDENTITE_GENERATION) return false;
   for(const k of ['W','L','D']){ if(!Number.isSafeInteger(o[k])||o[k]<0) return false; }
   if(typeof o.age!=='number'||!Number.isFinite(o.age)||o.age<0||o.age>100) return false;
   if(typeof o.div!=='string'||!divById(o.div)) return false;
@@ -123,7 +125,8 @@ function mgmtValidEvent(e){
 }
 
 /** Validation d'une ligne extérieure : SON IDENTITÉ, RIEN D'AUTRE — la
- *  liste exacte des cinq clés (id, seed, div, ck, born). Toute ligne qui
+ *  liste exacte des cinq clés historiques (id, seed, div, ck, born) et du
+ *  marqueur generation en H3 (absent = ancien). Toute ligne qui
  *  porterait un bilan, un âge ou un champ dérivé est refusée : la dérivation
  *  est la seule source, la règle du bureau ne se stocke pas (CDC §3). Porte
  *  de validateMgmt : le champ exterieur est toléré absent (sauvegardes
@@ -135,7 +138,8 @@ function mgmtValidEvent(e){
 function mgmtValidExteriorLine(o){
   if(!o||typeof o!=='object'||Array.isArray(o)) return false;
   const clefs=Object.keys(o).sort().join(',');
-  if(clefs!=='born,ck,div,id,seed') return false;
+  if(clefs!=='born,ck,div,id,seed'&&clefs!=='born,ck,div,generation,id,seed') return false;
+  if(o.generation!==undefined&&o.generation!==0&&o.generation!==MGMT_IDENTITE_GENERATION) return false;
   if(!mgmtValidId(o.id)) return false;
   if(!Number.isSafeInteger(o.seed)||o.seed<0||o.seed>0xFFFFFFFF) return false;
   if(typeof o.div!=='string'||!divById(o.div)) return false;
@@ -162,7 +166,10 @@ function mgmtValidExteriorLine(o){
 function mgmtValidTraceSide(t){
   if(!t||typeof t!=='object'||Array.isArray(t)) return false;
   const clefs=Object.keys(t).sort().join(',');
-  if(clefs!=='D,L,W,age,div,first,id,last,lastCycle,name,trauma,traumaFloor') return false;
+  if(clefs!=='D,L,W,age,div,first,id,last,lastCycle,name,trauma,traumaFloor'){
+    if(clefs!=='D,L,W,age,ck,div,first,generation,id,last,lastCycle,name,trauma,traumaFloor'
+      ||t.generation!==MGMT_IDENTITE_GENERATION||!COUNTRY_KEYS.includes(t.ck)) return false;
+  }
   if(!mgmtValidId(t.id)) return false;
   for(const k of ['name','first','last']){ if(typeof t[k]!=='string'||!t[k]) return false; }
   if(typeof t.div!=='string'||!divById(t.div)) return false;
@@ -369,6 +376,21 @@ function mgmtMigrate(raw){
     raw.v=11;
     mgmtInitTitles(raw);
   }
+  /* ==== [ANCRE: MGMT_LOT5_H3_MIGRATION] — 11 → 12 : origine retrouvée,
+     génération ancienne figée. Aucun profil, style, identité dérivée ni
+     attribut stocké ; traces anciennes intactes et rejouables. ==== */
+  if(raw.v===11){
+    for(const o of raw.roster||[]){
+      if(!o||typeof o!=='object') continue;
+      o.ck=mgmtIdentitePays(o);
+      o.generation=0;
+    }
+    for(const o of raw.exterieur||[]){
+      if(o&&typeof o==='object') o.generation=0;
+    }
+    raw.v=12;
+  }
+  /* ==== [FIN ANCRE] ==== */
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }

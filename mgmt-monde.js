@@ -88,12 +88,12 @@ function mgmtExteriorCreate(m,born,divId){
   const id=mgmtNextId(m);
   const seed=mgmtExteriorSeedFor(id);
   const r=mgmtExteriorStream('ext-cree',seed);
-  const ck=COUNTRY_KEYS[Math.floor(r()*COUNTRY_KEYS.length)];
+  const ck=mgmtPaysTire(r(),'monde');
   const fondateur=Number.isSafeInteger(born)&&born===0;
   const entree=fondateur
     ?-Math.round(mgmtExteriorStream('ext-fondateur',seed)()*MGMT_EXT_FONDATEUR_SPREAD)
     :born;
-  return {id,seed,div:divId,ck,born:entree};
+  return {id,seed,div:divId,ck,born:entree,generation:MGMT_IDENTITE_GENERATION};
 }
 
 /** Nombre de combattants vivants du monde dans une catégorie : Split et
