@@ -271,18 +271,26 @@ const COUNTRIES={
     RÉELS et courants du pays — mêmes règles que la T3 bis « noms » du
     28/09 : apostrophes, traits d'union et accents gardés, rien d'inventé.
     Les prénoms féminins d'un pays se tirent dans firstF (makeName) ; les
-    prénoms masculins dans first ; un pays sans liste garde FIRST_F/FIRST_M. ==== */
+    prénoms masculins dans first ; un pays sans liste garde FIRST_F/FIRST_M.
+    Reprise du 02/10 : les noms de célébrités du SPORT sortent des listes
+    (Hakimi, Amrabat, Mazraoui, Aguerd, Saïss, En-Nesyri ; Mahrez, Slimani,
+    Bounedjah, Ghezzal ; Walid pour Walid Cherif, Zhong pour « Zhong Guo »,
+    Xiang, Tao, Lei, Hao, Ting, Yue, Xin ; Dries pour Dries Mertens, Erik
+    pour Erik Karlsson, Elias pour Elias Pettersson, Chapman, Émile pour
+    Émile Bouchard) — le jeu ne peut jamais générer le nom complet d'un
+    sportif célèbre (tests/nomsSeizePays.test.js épingle ces combinaisons
+    interdites). ==== */
  BE:{name:'Belgique',flag:'🇧🇪',last:['Peeters','Janssens','Maes','Jacobs','Mertens','Willems','Claes','Wouters','Goossens','De Smet','Vermeulen','Hendrickx','Dubois','Dupont','Lambert','Renard','Lejeune','Collin','Georges','Dumont','Vervoort','Vandenberghe'],
-     first:['Lucas','Arthur','Louis','Jules','Noah','Liam','Milan','Daan','Sem','Lars','Ruben','Mats','Jens','Lowie','Victor','Simon','Mathis','Alexander'],
+     first:['Lucas','Arthur','Louis','Jules','Noah','Liam','Milan','Daan','Sem','Lars','Ruben','Mats','Jens','Lowie','Victor','Simon','Mathis','Wout'],
      firstF:['Emma','Louise','Alice','Camille','Juliette','Lotte','Roos','Fien','Élise','Charlotte','Marie','Margaux','Inès','Lucie','Noor','Amélie','Hélène']},
  CH:{name:'Suisse',flag:'🇨🇭',last:['Müller','Meier','Schmid','Keller','Weber','Huber','Schneider','Steiner','Bauer','Bühler','Ammann','Widmer','Brunner','Frei','Favre','Rochat','Droz','Perret','Bonvin','Dubois','Abplanalp','Kaufmann'],
      first:['Luca','Noah','Leandro','Tim','Levin','Matteo','Elias','Liam','Gabriel','Nathan','Jonas','Ben','Moritz','Milan','Théo','Simon'],
      firstF:['Mia','Laura','Emma','Leana','Elisa','Julia','Sofia','Alice','Joy','Nina','Lina','Lena','Milena','Léa','Chloé','Sara']},
- MA:{name:'Maroc',flag:'🇲🇦',last:['Alaoui','Bennani','El Amrani','El Fassi','El Idrissi','El Mansouri','Benslimane','Rachidi','Boukhriss','Chraïbi','Zerouali','Tazi','Berrada','Benali','Benjelloun','Hakimi','Amrabat','Mazraoui','Aguerd','Saïss','En-Nesyri','Amrani'],
+ MA:{name:'Maroc',flag:'🇲🇦',last:['Alaoui','Bennani','El Amrani','El Fassi','El Idrissi','El Mansouri','Benslimane','Rachidi','Boukhriss','Chraïbi','Zerouali','Tazi','Berrada','Benali','Benjelloun','Ouazzani','Chami','Sekkat','Lahlou','Benhima','Lamrani','Amrani'],
      first:['Youssef','Hamza','Adam','Ayoub','Omar','Anas','Bilal','Mehdi','Zakaria','Walid','Ilyas','Amine','Karim','Aymen','Rayan','Achraf'],
      firstF:['Salma','Sara','Aya','Imane','Malak','Khadija','Ghita','Lina','Nisrine','Chaimae','Meryem','Nadia','Soukaina','Inès','Wiam','Hajar']},
- DZ:{name:'Algérie',flag:'🇩🇿',last:['Benali','Belkacem','Belhadj','Benamar','Benyahia','Bensalem','Bensaid','Slimani','Mahrez','Bounedjah','Ghezzal','Bouazza','Boudiaf','Kaddour','Zeroual','Chaïbi','Hamidi','Cherif','Kaci','Kadri','Haddad','Aït-Ali'],
-     first:['Yacine','Walid','Sofiane','Bilal','Amine','Hamza','Adel','Omar','Anis','Islam','Ilyes','Rayan','Mehdi','Youcef','Riyad'],
+ DZ:{name:'Algérie',flag:'🇩🇿',last:['Benali','Belkacem','Belhadj','Benamar','Benyahia','Bensalem','Bensaid','Mansouri','Meziane','Taleb','Boukhari','Bouazza','Boudiaf','Kaddour','Zeroual','Chaïbi','Hamidi','Cherif','Kaci','Kadri','Haddad','Aït-Ali'],
+     first:['Yacine','Hicham','Sofiane','Bilal','Amine','Hamza','Adel','Omar','Anis','Islam','Ilyes','Rayan','Mehdi','Youcef','Riyad'],
      firstF:['Yasmine','Lina','Amina','Sarah','Meriem','Inès','Sofia','Nour','Imene','Kahina','Tiziri','Nada','Salma','Lynda','Farida']},
  SN:{name:'Sénégal',flag:'🇸🇳',last:['Diop','Ndiaye','Diouf','Ndoye','Niang','Faye','Sow','Sy','Ba','Gueye','Sène','Ngom','Mbaye','Diallo','Kane','Cissé','Fall','Samb','Diagne','Dieng','Gassama','Thiam'],
      first:['Moussa','Abdoulaye','Ibrahima','Ousmane','Cheikh','Mamadou','Amadou','Souleymane','Babacar','Malick','Serigne','Modou','Lamine','Assane','Pape'],
@@ -303,7 +311,7 @@ const COUNTRIES={
      first:['Lukas','Jonas','Felix','Paul','Leon','Noah','Finn','Max','Louis','Elias','Ben','Luca','Tim','Erik','Moritz','Jakob','Julian'],
      firstF:['Anna','Emma','Mia','Hannah','Lena','Lea','Marie','Lina','Klara','Elisa','Sara','Laura','Maja','Leni','Amelie','Nele']},
  SE:{name:'Suède',flag:'🇸🇪',last:['Andersson','Johansson','Karlsson','Nilsson','Eriksson','Larsson','Olsson','Persson','Svensson','Gustafsson','Pettersson','Jonsson','Jansson','Hansson','Sandberg','Sjöberg','Lindberg','Bergström','Norberg','Holm'],
-     first:['Elias','Lucas','Liam','Erik','Oscar','Hugo','Viktor','Anton','Melker','Isak','Joel','Rasmus','Kalle','Ludvig','August','Alvar'],
+     first:['Filip','Lucas','Liam','Samuel','Oscar','Hugo','Viktor','Anton','Melker','Isak','Joel','Rasmus','Kalle','Ludvig','August','Alvar'],
      firstF:['Alice','Olivia','Astrid','Elsa','Vera','Selma','Ebba','Ingrid','Linnéa','Maja','Freja','Saga','Klara','Ellen','Liv','Hedda']},
  KZ:{name:'Kazakhstan',flag:'🇰🇿',last:['Kenes','Omarov','Sultanov','Akhmetov','Umarov','Belgibaev','Kemelov','Kambarov','Smagulov','Ospanov','Serikov','Suleymenov','Muratov','Ibragimov','Kaliev','Tulegenov','Iskakov','Musin','Abdullaev','Musaev','Nauryzbaev','Nurgaliev','Bazarbaev','Mukashev','Zhumagaliev','Bolatov','Galiev','Sadykov','Sarsenbaev','Amanzholov'],
      first:['Mukhammed','Aisultan','Alikhan','Omar','Aldiyar','Amir','Alan','Ali','Nursultan','Ruslan','Azamat','Temirlan','Damir','Adil','Bekzat','Erasyl','Daulet','Alibek','Aslan','Ernar'],
@@ -311,14 +319,14 @@ const COUNTRIES={
  KG:{name:'Kirghizistan',flag:'🇰🇬',last:['Ismailov','Akmatov','Abdullaev','Osmonov','Isakov','Sulaymanov','Ergeshov','Kadyrov','Aliev','Sydykov','Sultanov','Karimov','Asanov','Mamatov','Yuldashev','Musaev','Abdyldaev','Mamytov','Zhumabaev','Ibragimov','Kurbanov','Abdrakhmanov'],
      first:['Nurlan','Ruslan','Azamat','Nurbek','Chyngyz','Erkin','Asylbek','Tilek','Murat','Omurbek','Aibek','Dastan','Bakyt','Adilet','Almaz','Kanat','Talant','Kubanychbek','Kurmanbek','Askar'],
      firstF:['Gulmira','Aynura','Gulnara','Aygul','Nazgul','Baktygul','Elmira','Nargiza','Asel','Nazira','Nurgul','Dinara','Aysuluu','Bermet','Cholpon','Altynai','Zhibek','Salamat']},
- CN:{name:'Chine',flag:'🇨🇳',last:['Wang','Li','Zhang','Liu','Chen','Yang','Huang','Zhao','Wu','Zhou','Xu','Sun','Ma','Zhu','Hu','Guo','He','Lin','Gao','Luo'],
-     first:['Wei','Hao','Jun','Ming','Lei','Qiang','Xiang','Bo','Peng','Chao','Kai','Tao','Feng','Zhong','Sheng','Jian'],
-     firstF:['Mei','Fang','Yan','Jing','Hui','Xia','Jia','Ling','Yun','Shan','Yue','Wen','Ting','Xin','Ping','Xiu']},
- AU:{name:'Australie',flag:'🇦🇺',last:['Smith','Jones','Williams','Brown','Wilson','Taylor','Johnson','White','Martin','Anderson','Thompson','Hughes','Kelly','Ryan','Campbell','Mitchell','Stewart','Turner','Cooper','Ward','Grant','Chapman'],
+  CN:{name:'Chine',flag:'🇨🇳',last:['Wang','Li','Zhang','Liu','Chen','Yang','Huang','Zhao','Wu','Zhou','Xu','Sun','Ma','Zhu','Hu','Guo','He','Lin','Gao','Luo'],
+      first:['Wei','Rui','Jun','Ming','Qiang','Bo','Peng','Chao','Kai','Feng','Sheng','Jian','Junjie','Cheng','Gang','Yong'],
+      firstF:['Mei','Fang','Yan','Jing','Hui','Xia','Jia','Ling','Yun','Shan','Wen','Ping','Xiu','Qing','Yuan','Lan']},
+  AU:{name:'Australie',flag:'🇦🇺',last:['Smith','Jones','Williams','Brown','Wilson','Taylor','Johnson','White','Martin','Anderson','Thompson','Hughes','Kelly','Ryan','Campbell','Mitchell','Stewart','Turner','Cooper','Ward','Grant','Robinson'],
      first:['Oliver','Jack','Noah','William','Thomas','Henry','Lucas','Ethan','Levi','Lachlan','Cooper','Harrison','Charlie','Angus','Archie','Flynn'],
      firstF:['Charlotte','Mia','Ava','Amelia','Sophie','Isla','Chloe','Grace','Zoe','Lily','Emily','Ella','Ruby','Harper','Matilda','Willow']},
  CA:{name:'Canada',flag:'🇨🇦',last:['Tremblay','Gagnon','Roy','Bouchard','Gagné','Gauthier','Morin','Lavoie','Fortin','Pelletier','Bélanger','Caron','Côté','Bergeron','Simard','Poirier','Leblanc','Lachance','Bélisle','Boisvert','Boivin','Audette','Perron','Martel'],
-     first:['William','Liam','Noah','Olivier','Thomas','Félix','Jacob','Samuel','Nathan','Émile','Arthur','Louis','Charles','Xavier','Léo','Antoine'],
+      first:['William','Liam','Noah','Olivier','Thomas','Félix','Jacob','Samuel','Nathan','Mathis','Arthur','Louis','Charles','Xavier','Léo','Antoine'],
      firstF:['Olivia','Charlotte','Emma','Alice','Rose','Florence','Léa','Camille','Jade','Romy','Éloïse','Maëlle','Sara','Élodie','Flavie','Violette']},
 };
 const COUNTRY_KEYS=Object.keys(COUNTRIES);

@@ -103,10 +103,97 @@ test('H2 — apostrophes, traits d\'union, accents et graphies composées gardé
   assert.ok(r.es.includes('García')&&r.es.includes('Domínguez'), 'Espagne : accents espagnols');
   assert.ok(r.pl.includes('Wiśniewski')&&r.pl.includes('Dąbrowski'), 'Pologne : ś, ą gardés');
   assert.ok(r.nl.includes('De Jong')&&r.nl.includes('Van den Berg')&&r.nl.includes('Dijkstra'), 'Pays-Bas : graphies composées');
-  assert.ok(r.ma.includes('Chraïbi')&&r.ma.includes('Saïss')&&r.ma.includes('En-Nesyri'), 'Maroc : ï, î et trait d\'union');
+  assert.ok(r.ma.includes('Chraïbi')&&r.ma.includes('Benjelloun'), 'Maroc : ï gardé');
   assert.ok(r.sn.includes('Sène')&&r.sn.includes('Cissé'), 'Sénégal : è et é gardés');
   assert.ok(r.snF.includes('Ndèye')&&r.snF.includes('Maïmouna'), 'Sénégal : ï et è dans les prénoms féminins');
   assert.ok(r.plF.includes('Małgorzata'), 'Pologne : ł dans les prénoms féminins');
+});
+
+/* Reprise du 02/10 — les combinaisons interdites : le jeu ne peut jamais
+   générer le nom complet d'un sportif célèbre. La liste épinglée ci-dessous
+   porte les noms retirés des listes à la demande d'Anthony (Hakimi,
+   Amrabat, Mazraoui, Aguerd, Saïss, En-Nesyri ; Mahrez, Slimani, Bounedjah,
+   Ghezzal) et ceux trouvés par la vérification des seize pays (Walid Cherif,
+   Zhong Guo, Liu Xiang, Ma Long, Wang Tao, Wang Hao, Wu Lei, Sun Yang,
+   Sun Yue, Zhu Ting, Xu Xin, Dries Mertens, Erik Karlsson, Elias
+   Pettersson, Alexander Isak, Cooper Chapman, Émile Bouchard) ; les grands
+   noms des sports hors des seize pays sont épinglés pour que la règle
+   tienne si le tirage croise des listes voisines. */
+const INTERDITS = [
+  'Achraf Hakimi','Sofyan Amrabat','Noussair Mazraoui','Nayef Aguerd','Romain Saïss','Yassine En-Nesyri',
+  'Riyad Mahrez','Islam Slimani','Baghdad Bounedjah','Rachid Ghezzal',
+  'Walid Cherif','Zhong Guo','Liu Xiang','Ma Long','Wang Tao','Wang Hao','Wu Lei','Sun Yang','Sun Yue','Zhu Ting','Xu Xin','Lin Dan','Yao Ming',
+  'Dries Mertens','Erik Karlsson','Elias Pettersson','Alexander Isak','Cooper Chapman','Émile Bouchard',
+  'Zinedine Zidane','Robert Lewandowski','Romelu Lukaku','Kylian Mbappé','Khabib Nurmagomedov','Floyd Mayweather'
+];
+
+test('H2 — aucune combinaison prénom + nom des seize pays ne donne un sportif célèbre', () => {
+  const win = newGameWindow();
+  const cks = JSON.stringify(Object.keys(NOUVEAUX_PAYS));
+  const r = JSON.parse(win.eval(`JSON.stringify((function(){
+    const interdits=new Set(${JSON.stringify(INTERDITS)});
+    const cksListe=${cks};
+    const collisions=[];
+    for(const ck of cksListe){
+      const c=COUNTRIES[ck];
+      const prenoms=c.first.concat(c.firstF||[]);
+      for(const p of prenoms){
+        for(const n of c.last){
+          const nom=p+' '+n;
+          if(interdits.has(nom)) collisions.push(nom);
+        }
+      }
+    }
+    return collisions;
+  })())`));
+  assert.deepEqual(r, [], 'aucune combinaison interdite (' + JSON.stringify(r) + ')');
+});
+
+test('H2 — les noms de sportifs célèbres sont bien sortis des listes (reprise du 02/10)', () => {
+  const win = newGameWindow();
+  const r = JSON.parse(win.eval(`JSON.stringify({
+    maLast:COUNTRIES.MA.last, dzLast:COUNTRIES.DZ.last, dzFirst:COUNTRIES.DZ.first,
+    cnFirst:COUNTRIES.CN.first, cnFirstF:COUNTRIES.CN.firstF,
+    beFirst:COUNTRIES.BE.first, seFirst:COUNTRIES.SE.first,
+    auLast:COUNTRIES.AU.last, caFirst:COUNTRIES.CA.first
+  })`));
+  /* Maroc : les six noms de la sélection sortent, les remplacements entrent. */
+  for(const sorti of ['Hakimi','Amrabat','Mazraoui','Aguerd','Saïss','En-Nesyri']){
+    assert.ok(!r.maLast.includes(sorti), 'Maroc : ' + sorti + ' retiré');
+  }
+  for(const entre of ['Ouazzani','Chami','Sekkat','Lahlou','Benhima','Lamrani']){
+    assert.ok(r.maLast.includes(entre), 'Maroc : ' + entre + ' entre');
+  }
+  /* Algérie : les quatre noms de la sélection sortent, les remplacements entrent. */
+  for(const sorti of ['Mahrez','Slimani','Bounedjah','Ghezzal']){
+    assert.ok(!r.dzLast.includes(sorti), 'Algérie : ' + sorti + ' retiré');
+  }
+  for(const entre of ['Mansouri','Meziane','Taleb','Boukhari']){
+    assert.ok(r.dzLast.includes(entre), 'Algérie : ' + entre + ' entre');
+  }
+  /* Walid Cherif : le prénom sort de la liste algérienne. */
+  assert.ok(!r.dzFirst.includes('Walid'), 'Algérie : le prénom Walid retiré (Walid Cherif)');
+  assert.ok(r.dzFirst.includes('Hicham'), 'Algérie : Hicham entre');
+  /* Chine : Zhong (« Zhong Guo ») et les prénoms des sportifs célèbres sortent. */
+  for(const sorti of ['Zhong','Xiang','Tao','Lei','Hao']){
+    assert.ok(!r.cnFirst.includes(sorti), 'Chine : ' + sorti + ' retiré de first');
+  }
+  for(const sorti of ['Ting','Yue','Xin']){
+    assert.ok(!r.cnFirstF.includes(sorti), 'Chine : ' + sorti + ' retiré de firstF');
+  }
+  /* Les autres neutralisations de la vérification. */
+  assert.ok(!r.beFirst.includes('Dries'), 'Belgique : Dries retiré (Dries Mertens)');
+  assert.ok(r.beFirst.includes('Wout'), 'Belgique : Wout entre');
+  assert.ok(!r.seFirst.includes('Erik')&&!r.seFirst.includes('Elias'), 'Suède : Erik et Elias retirés (Erik Karlsson, Elias Pettersson)');
+  assert.ok(r.seFirst.includes('Filip')&&r.seFirst.includes('Samuel'), 'Suède : Filip et Samuel entrent');
+  assert.ok(!r.auLast.includes('Chapman'), 'Australie : Chapman retiré (Cooper Chapman)');
+  assert.ok(r.auLast.includes('Robinson'), 'Australie : Robinson entre');
+  assert.ok(!r.caFirst.includes('Émile'), 'Canada : Émile retiré (Émile Bouchard)');
+  assert.ok(r.caFirst.includes('Mathis'), 'Canada : Mathis entre');
+  /* Tailles maintenues après retrait/remplacement. */
+  assert.ok(r.maLast.length>=20, 'Maroc : toujours au moins 20 noms de famille');
+  assert.ok(r.dzLast.length>=20, 'Algérie : toujours au moins 20 noms de famille');
+  assert.ok(r.cnFirst.length>=15&&r.cnFirstF.length>=15, 'Chine : toujours 15 prénoms et 15 prénoms féminins');
 });
 
 test('H2 — makeName : les femmes des seize pays tirent dans firstF, les hommes dans first', () => {
