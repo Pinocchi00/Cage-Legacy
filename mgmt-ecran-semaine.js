@@ -53,6 +53,14 @@ function mgmtSemaineMonde(m){
      cercle, tes suivis, puis le vestiaire), dans le budget de trois à cinq
      informations ; les nouvelles du monde remplissent le reste. */
   const budget=mgmtConteurBudget(m);
+  /* Lot 5 H7 : une demande en attente est une décision — elle passe avant les moments. */
+  if(typeof mgmtDemandesOuvertes==='function'){
+    for(const d of mgmtDemandesOuvertes(m).slice(0,2)){
+      const f=mgmtFighterById(m,d.a), cible=d.target?mgmtFighterById(m,d.target):null;
+      news.push({type:'demande',div:f.div,text:f.name+' demande : '+MGMT_DEMANDES[d.want].libelle.toLowerCase()+(cible?' — '+cible.name:''),id:f.id,source:'Demande'});
+      used.add(f.id);
+    }
+  }
   for(const c of mgmtConteur(m)){
     news.push({type:'vie',div:c.div,text:c.name+' : '+c.moment.libelle,id:c.id,source:c.moment.relais[0]});
     used.add(c.id);
@@ -117,7 +125,7 @@ function mgmtSemaineMonde(m){
       ||!Number.isSafeInteger(f.lastCycle)||m.cycle-f.lastCycle<3) continue;
     add('inactivite',f.div,`${f.name} : dernier combat sous Split il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
   }
-  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie'};
+  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie',demande:'Demande'};
   return news.map(n=>`<article class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">`
     +`<span class="mgmt-week-source">${esc(n.source||sources[n.type])}</span><p>${esc(n.text)}</p>`
     +(n.id?`<button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</article>`).join('');

@@ -589,6 +589,7 @@ function mgmtRunEvent(m){
   const fights=[];
   const touched=[];
   if(!Array.isArray(m.hist)) m.hist=[];
+  const premier=m.hist.length;
   for(const cf of booked){
     const fa=mgmtFighterById(m,cf.a), fb=mgmtFighterById(m,cf.b);
     /* Lot 3 T1 : la trace se capture AVANT le combat — l'état de la RNG à
@@ -628,6 +629,8 @@ function mgmtRunEvent(m){
   if(!Array.isArray(m.audiences)) m.audiences=[];
   m.audiences.push(finance.audience);
   m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
+  /* Lot 5 H7 : les décisions contraires de la soirée deviennent des faits. */
+  mgmtContrariesApresSoiree(m,m.hist.slice(premier));
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   m.card.main=[];
   m.card.prelims=[];
