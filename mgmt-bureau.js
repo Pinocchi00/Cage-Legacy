@@ -85,7 +85,7 @@ function mgmtDefault(){
   /* Lot 2B T1 : le vivier extérieur démarre vide — la cohorte initiale se
      crée à l'ouverture du premier cycle (mgmtExteriorEnsure), chaque ligne
      ne portera que son identité. */
-  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,
+  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,cercle:[],suivis:[],
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
     hist:[],treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
 }

@@ -49,8 +49,16 @@ function mgmtSemaineCarte(m){
    combattant de Split sans combat récent. Pas de voix ni de recrutement fictif. */
 function mgmtSemaineMonde(m){
   const news=[], used=new Set(), divisions=new Set(), types=new Map();
+  /* Lot 5 H6 : le conteur. Les moments de la semaine passent d'abord (ton
+     cercle, tes suivis, puis le vestiaire), dans le budget de trois à cinq
+     informations ; les nouvelles du monde remplissent le reste. */
+  const budget=mgmtConteurBudget(m);
+  for(const c of mgmtConteur(m)){
+    news.push({type:'vie',div:c.div,text:c.name+' : '+c.moment.libelle,id:c.id,source:c.moment.relais[0]});
+    used.add(c.id);
+  }
   const add=(type,div,text,id)=>{
-    if(news.length>=5||divisions.has(div)||(types.get(type)||0)>=2) return false;
+    if(news.length>=budget||divisions.has(div)||(types.get(type)||0)>=2) return false;
     news.push({type,div,text,id});
     divisions.add(div);
     types.set(type,(types.get(type)||0)+1);
@@ -70,7 +78,7 @@ function mgmtSemaineMonde(m){
      Le vivier extérieur est dérivé, la fiche existe mais aucun contrat ni
      bouton de signature n'est inventé. */
   for(const div of divs){
-    if(news.length>=5||(types.get('voisin')||0)>=2) break;
+    if(news.length>=budget||(types.get('voisin')||0)>=2) break;
     if(divisions.has(div.id)) continue;
     const ranks=mgmtDivisionRanking(m,div.id,'world');
     for(let i=0;i<ranks.length;i++){
@@ -88,7 +96,7 @@ function mgmtSemaineMonde(m){
     }
   }
   for(const div of divs){
-    if(news.length>=5||(types.get('invaincu')||0)>=2) break;
+    if(news.length>=budget||(types.get('invaincu')||0)>=2) break;
     if(divisions.has(div.id)) continue;
     const split=m.roster.filter(f=>f.div===div.id&&!mgmtIsRetired(f));
     if(split.length>=4) continue;
@@ -104,14 +112,14 @@ function mgmtSemaineMonde(m){
     }
   }
   for(const f of m.roster){
-    if(news.length>=5||(types.get('inactivite')||0)>=2) break;
+    if(news.length>=budget||(types.get('inactivite')||0)>=2) break;
     if(divisions.has(f.div)||mgmtIsRetired(f)||mgmtEngaged(m,f)
       ||!Number.isSafeInteger(f.lastCycle)||m.cycle-f.lastCycle<3) continue;
     add('inactivite',f.div,`${f.name} : dernier combat sous Split il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
   }
-  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split'};
+  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie'};
   return news.map(n=>`<article class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">`
-    +`<span class="mgmt-week-source">${sources[n.type]}</span><p>${esc(n.text)}</p>`
+    +`<span class="mgmt-week-source">${esc(n.source||sources[n.type])}</span><p>${esc(n.text)}</p>`
     +(n.id?`<button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</article>`).join('');
 }
 
@@ -227,9 +235,10 @@ function scr_mgmt_bureau(){
     return `<div class="${cls}" onclick="CL.mgmtOpen('${a.id}')">`
       +`<span class="opp-nm">${esc(vs)}</span>${sub}</div>`;
   }).join('');
-  if(mgmtOpenCount(m)===0&&!mgmtMainPosable(m)){
-    pileHtml+=`<button class="mgmt-next" onclick="CL.mgmtNextCycle()">Cycle suivant</button>`;
-  }
+  /* Lot 5 H6 : Continuer fait avancer le temps et ne s'arrête que sur ce que
+     le joueur doit décider ; son libellé dit sur quoi. */
+  const suite=mgmtContinuerRaison(m);
+  pileHtml+=`<button class="mgmt-next" data-raison="${esc(suite.raison)}" onclick="CL.mgmtContinuer()">${esc(suite.libelle)}</button>`;
 
   let talkHtml;
   if(!selOpen){

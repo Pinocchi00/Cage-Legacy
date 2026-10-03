@@ -217,6 +217,13 @@ function validateMgmt(raw){
   if(raw.open!==null&&typeof raw.open!=='string') return false;
   if(raw.shortfall!==undefined&&typeof raw.shortfall!=='boolean') return false;
   if(raw.effectifs!==undefined&&raw.effectifs!==0&&raw.effectifs!==1) return false;
+  /* Lot 5 H6 : ton cercle (5) et tes suivis (15) — des identifiants, sans doublon. */
+  for(const [cle,max] of [['cercle',5],['suivis',15]]){
+    if(raw[cle]===undefined) continue;
+    if(!Array.isArray(raw[cle])||raw[cle].length>max||new Set(raw[cle]).size!==raw[cle].length) return false;
+    for(const id of raw[cle]){ if(!mgmtValidId(id)) return false; }
+  }
+  if(raw.cercle&&raw.suivis&&raw.cercle.some(id=>raw.suivis.includes(id))) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
   for(const r of raw.recettes){ if(!Number.isSafeInteger(r)) return false; }
