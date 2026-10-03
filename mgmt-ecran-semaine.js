@@ -66,6 +66,11 @@ function mgmtSemaineMonde(m){
     const r=mgmtRivalitesLignes(m)[0];
     if(r){ const f=mgmtFighterById(m,r.id); news.push({type:'rivalite',div:f.div,text:r.text,id:r.id,source:'Rivalité'}); used.add(r.id); }
   }
+  /* Lot 5 T2 + T3 : « Ce qui se dit » — la réplique de SA voix, celle du document (une seule, dans le budget). */
+  if(typeof mgmtParolesDeLaSemaine==='function'&&news.length<budget-1){
+    const p=mgmtParolesDeLaSemaine(m)[0];
+    if(p){ news.push({type:'parole',div:p.div,text:p.name+' : « '+p.texte+' »',id:p.id,source:'Ce qui se dit'}); used.add(p.id); }
+  }
   for(const c of mgmtConteur(m)){
     news.push({type:'vie',div:c.div,text:c.name+' : '+c.moment.libelle,id:c.id,source:c.moment.relais[0]});
     used.add(c.id);
@@ -130,7 +135,7 @@ function mgmtSemaineMonde(m){
       ||!Number.isSafeInteger(f.lastCycle)||m.cycle-f.lastCycle<3) continue;
     add('inactivite',f.div,`${f.name} : dernier combat sous Split il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
   }
-  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie',demande:'Demande',rivalite:'Rivalité'};
+  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie',demande:'Demande',rivalite:'Rivalité',parole:'Ce qui se dit'};
   return news.map(n=>`<article class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">`
     +`<span class="mgmt-week-source">${esc(n.source||sources[n.type])}</span><p>${esc(n.text)}</p>`
     +(n.id?`<button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</article>`).join('');

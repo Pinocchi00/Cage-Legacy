@@ -35,6 +35,7 @@ function mgmtFilLignes(m){
     }
   }
   if(typeof mgmtRivalitesLignes==='function') for(const r of mgmtRivalitesLignes(m)) out.push(r.text);
+  if(typeof mgmtParolesDeLaSemaine==='function') for(const p of mgmtParolesDeLaSemaine(m)) out.push(p.name+' : « '+p.texte+' »');
   for(const c of mgmtConteurCandidats(m,m.cycle)) out.push(c.name+' : '+c.moment.libelle);
   return out.slice(0,MGMT_FIL_MAX_LIGNES);
 }
