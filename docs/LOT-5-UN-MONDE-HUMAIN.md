@@ -374,6 +374,26 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   de titre (une championne à 12 défenses en 20 soirées) — les challengers sont
   faibles tant que Split n'a que quatre combattants par catégorie.
 
+- **H2 — acceptée après une reprise** (`9520428`, `14c092e`, GLM, relue le
+  03/10) : seize pays dans `COUNTRIES` (BE CH MA DZ SN PL NL ES IT DE SE KZ KG
+  CN AU CA), chacun avec 20 à 30 noms de famille réels, 15 à 20 prénoms
+  masculins et autant de féminins (`firstF`, lu par `makeName` comme `first`) ;
+  `COUNTRY_MMA_PREFIX` complété (sans lui, « undefinedMMA » aux championnats
+  amateurs). Un test réécrit sur la décision des seize pays. **La reprise** :
+  les listes permettaient de générer le nom complet de sportifs célèbres
+  (« Achraf Hakimi », « Riyad Mahrez », « Islam Slimani ») et « Zhong Guo »
+  (« Chine ») ; GLM les a retirés, en a trouvé d'autres lui-même (Belgique,
+  Suède, Australie, Canada, Chine), et un test balaie toutes les combinaisons
+  prénom × nom contre une liste d'interdits. À l'intégration, trois versions de
+  cache montées (`engine.js`, `mgmt-humanite-data.js`, `mgmt-bureau.js`).
+  Vérifiée dans le jeu (30 pays à la création de carrière, vestiaire neuf).
+  **Signalé par GLM, à décider** : les compétences de pays de la carrière
+  (`data-skills.js`, 20 par pays) n'existent pas pour les seize nouveaux pays.
+  **Relevé à la relecture** : les quatorze anciens pays (sauf KR et GE pour les
+  hommes) tirent encore leurs prénoms dans les listes communes — d'où « Leon
+  Kondo » ou une Coréenne prénommée Bianca. Une petite tranche (H2 bis) leur
+  donnera `first` et `firstF` propres.
+
 ## 10. Terminé pour le lot
 
 1. Chaque combattant a un pays, une ville, un surnom, un passé, une voix, des

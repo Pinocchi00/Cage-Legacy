@@ -1215,12 +1215,22 @@ test('MGMT cycle suivant — carte complète : le déclencheur manuel ouvre la s
   assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'carte incomplète : pas de soirée d\u2019office');
   /* La cinquième place se re-pose à l'écran (geste T2) — la carte devient
      complète, la pile est vidée. La pose passe par mgmtBookMain direct
-     (hors contrôleur) : le rendu suit, comme après le vrai geste. */
+     (hors contrôleur) : le rendu suit, comme après le vrai geste.
+     Réécrite pour la décision du 30/09 : seize nouveaux pays (lot 5 H2,
+     docs/LOT-5-UN-MONDE-HUMAIN.md §7 H2) — le tirage des pays a changé
+     (COUNTRY_KEYS : 14 -> 30), la suite seedée du roster ne place plus une
+     paire posable après le PREMIER combattant de la liste ; la fixture
+     cherche donc une paire posable, toutes catégories confondues, comme le
+     geste réel le permet. */
   win.eval(`(function(){
     const m=G.mgmt, rows=mgmtCartRows(m);
-    const a=rows.find(f=>mgmtSelectable(m,f,null));
-    const b=rows.find(f=>f.id!==a.id&&f.div===a.div&&mgmtSelectable(m,f,a.id));
-    if(!a||!b||!mgmtBookMain(m,a.id,b.id)) throw new Error('fixture : pose impossible');
+    let pose=false;
+    for(const f of rows){
+      if(!mgmtSelectable(m,f,null)) continue;
+      const b=rows.find(o=>o.id!==f.id&&o.div===f.div&&mgmtSelectable(m,o,f.id));
+      if(b&&mgmtBookMain(m,f.id,b.id)){ pose=true; break; }
+    }
+    if(!pose) throw new Error('fixture : pose impossible');
     render();
   })()`);
   assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), true, 'carte complète à 5 + 4');
