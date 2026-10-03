@@ -350,6 +350,22 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   (resynchronisé sur `test`), et le catalogue annonçait « 120 » moments pour
   109 lignes (corrigé). Intégration : 413 tests, 409 passants, 0 échec.
 
+- **H3 — acceptée, finie par Claude** (Kimi K3, 03/10 ; poids des pays et intégration par Claude, quota OpenCode épuisé) :
+  `mgmt-humanite.js` (identité pure sur flux séparés : ville, surnom unique par
+  catégorie, métier, milieu, rituel, trajectoire, sept traits), origine `ck` et
+  marqueur `generation` enregistrés, **style tiré du pays et de la ville** pour
+  les seuls combattants neufs (les anciens gardent leur profil exact), migration
+  **11 → 12**, fiche avec surnom et « de {ville} · {pays} ». `MGMT_PAYS_POIDS`
+  (catalogue §1.2) : vestiaire de Split et monde extérieur tirés pondérés
+  (40 vestiaires : FR 38 %, BR 6 %, US 4 %). Mesure : 42 000 profils, écart de style
+  maximal 1,64 point par pays, 0 doublon de surnom. Vérifié dans le jeu réel à 1920.
+  À noter : le vestiaire reste à ~45 combattants (les 130–150 viennent avec H4).
+- **H2 bis — acceptée** (GLM piloté par Claude, 03/10) : les quatorze anciens pays
+  perdent les noms de combattants, footballeurs et politiques célèbres (Tsarnaev,
+  Nurmagomedov, Biya, Canelo…) et les noms de ring thaïlandais, et reçoivent
+  `first`/`firstF` ; les noms retirés restent dans `COUNTRY_LAST_ANCIENS` pour
+  retrouver l'origine d'une ancienne sauvegarde. Tests épinglés réécrits (décision du 30/09).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé

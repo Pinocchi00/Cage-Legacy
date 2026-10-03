@@ -171,7 +171,11 @@ function mgmtCombatProfile(f){
        style d'une soirée à l'autre. ==== */
     setSeed(mgmtHashId(f.id));
     const d=divById(f.div);
-    p=makeFighter({div:f.div,gender:d?d.gender:'H',level:mgmtLevelForRecord(f.W,f.L),age:f.age});
+    const opt={div:f.div,gender:d?d.gender:'H',level:mgmtLevelForRecord(f.W,f.L),age:f.age};
+    // Lot 5 H3 : seule la génération neuve change de loi. Le chemin ancien
+    // garde exactement les options et l'ordre de tirage de makeFighter.
+    if(f.generation===MGMT_IDENTITE_GENERATION) opt.style=mgmtIdentiteStyle(f);
+    p=makeFighter(opt);
   }finally{
     setSeed(saved);
   }
@@ -343,11 +347,13 @@ function mgmtRetireRoster(m){
  *  Pur, ne consomme jamais rnd().
  *  @returns {object} */
 function mgmtTraceSide(f){
-  return {id:f.id,name:f.name,first:f.first,last:f.last,div:f.div,age:f.age,
+  const t={id:f.id,name:f.name,first:f.first,last:f.last,div:f.div,age:f.age,
     W:f.W,L:f.L,D:f.D,
     trauma:(typeof f.trauma==='number'&&Number.isFinite(f.trauma))?f.trauma:null,
     traumaFloor:(typeof f.traumaFloor==='number'&&Number.isFinite(f.traumaFloor))?f.traumaFloor:null,
     lastCycle:Number.isSafeInteger(f.lastCycle)?f.lastCycle:null};
+  if(f.generation===MGMT_IDENTITE_GENERATION){ t.ck=f.ck; t.generation=f.generation; }
+  return t;
 }
 
 /** Reconstitue la ligne d'avant combat depuis son instantané : l'état exact
@@ -355,6 +361,7 @@ function mgmtTraceSide(f){
  *  null. Pur. @returns {object} */
 function mgmtTraceLine(t){
   const f={id:t.id,name:t.name,first:t.first,last:t.last,div:t.div,age:t.age,W:t.W,L:t.L,D:t.D};
+  if(t.generation===MGMT_IDENTITE_GENERATION){ f.ck=t.ck; f.generation=t.generation; }
   if(t.trauma!==null) f.trauma=t.trauma;
   if(t.traumaFloor!==null) f.traumaFloor=t.traumaFloor;
   if(t.lastCycle!==null) f.lastCycle=t.lastCycle;

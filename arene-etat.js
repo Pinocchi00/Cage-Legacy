@@ -688,7 +688,8 @@ function areneInstant(session,d){
    l'historique annonce est un mensonge à l'écran. La famille est classée par
    mgmtMethodFamily (mgmt-corps.js) — le classificateur unique du dépôt,
    jamais une seconde table ; le round d'une décision n'existe pas sur le
-   résultat du moteur (judgesVerdict) : même repli à 3 que mgmtRunEvent. ==== */
+   résultat du moteur (judgesVerdict) : même repli au nombre de rounds de
+   la trace que mgmtRunEvent (lot 5 H3, décisions en cinq rounds). ==== */
 /** Compare l'issue d'un déroulé rejoué à celle stockée dans la trace.
  *  @param {{winner:string,family:string,round:number}} trace issue vraie.
  *  @param {object} res résultat du rejeu (simulateFight).
@@ -698,7 +699,7 @@ function areneVerdictFidele(trace,res){
   if(trace.winner!=='A'&&trace.winner!=='B'&&trace.winner!=='D') return false;
   if(res.winner!==trace.winner) return false;
   if(mgmtMethodFamily(res.method,res.winner)!==trace.family) return false;
-  const round=Number.isSafeInteger(res.round)?res.round:3;
+  const round=Number.isSafeInteger(res.round)?res.round:(trace.rounds||3);
   return round===trace.round;
 }
 /* ==== [FIN ANCRE] ==== */

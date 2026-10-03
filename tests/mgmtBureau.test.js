@@ -110,7 +110,8 @@ test('MGMT niveau 1 — une ligne nom/bilan/âge/catégorie/organisation, rien d
   const win = newGameWindow();
   enterMgmt(win,12);
   const keys = win.eval(`JSON.stringify(Object.keys(G.mgmt.roster[0]).sort())`);
-  assert.equal(keys, JSON.stringify(['D','L','W','age','div','divName','first','id','interactions','last','level','name','org','raison'].sort()));
+  // Lot 5 H3 : pays et génération sont les deux nouveaux champs d'identité.
+  assert.equal(keys, JSON.stringify(['D','L','W','age','ck','generation','div','divName','first','id','interactions','last','level','name','org','raison'].sort()));
   assert.equal(win.eval(`G.mgmt.roster.every(o=>o.level===1&&o.raison===null)`), true);
 });
 

@@ -52,12 +52,15 @@ test('MGMT T6 — après une soirée, le rang d’hier se retrouve', () => {
       if(dispo.length>=2){ div=d.id; cible=[dispo[0],dispo[1]]; break; }
     }
     if(!div) return 'null';
-    const avant=JSON.stringify(mgmtDivisionRanking(m,div,'world').map(x=>x.id));
     /* Carte complète : cinq combats bookés à la main, préliminaires par le
        bloc de Leïla (même fixture éprouvée que mgmtEconomie). */
     m.card.main=[];
     const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
     if(dispo.length<10) return 'null';
+    /* Lot 5 H3 : la cible est le premier combat booké, jamais un tirage qui
+       dépend de la composition du vestiaire (pays pondérés). */
+    cible=[dispo[0],dispo[1]]; div=dispo[0].div;
+    const avant=JSON.stringify(mgmtDivisionRanking(m,div,'world').map(x=>x.id));
     for(let i=0;i<5;i++) m.card.main.push({a:dispo[2*i].id,b:dispo[2*i+1].id,cycle:m.cycle,slot:'main'});
     m.pile=[]; m.open=null;
     if(mgmtClosePile(m)!=='refill') return 'null';
