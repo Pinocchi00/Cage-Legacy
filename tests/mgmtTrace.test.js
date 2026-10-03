@@ -248,7 +248,9 @@ test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par tr
   const ranks=win.eval(`(function(){const m=G.mgmt,f=mgmtFighterById(m,${JSON.stringify(id)});
     return [mgmtFicheSituation(m,f,'organization'),mgmtFicheSituation(m,f,'world')];})()`);
   assert.ok(html.includes(`Chez Split : ${ranks[0]} · ${ranks[1]} mondial`));
-  assert.ok(!html.includes('Comment il combat')&&!html.includes('Son camp')&&!html.includes('Sa faille'));
+  /* Lot 5 H6 (contrat §3.3, décision du 30/09) : « Comment il combat » et « Sa faille » reviennent,
+     en connaissance progressive — jamais remplis d'avance. « Son camp » reste absent (lot 5 T7). */
+  assert.ok(html.includes('Comment il combat')&&html.includes('Sa faille')&&!html.includes('Son camp'));
   const first=win.replays;
   win.eval('render(); render(); CL.mgmtFicheDeplacer(1)');
   assert.equal(win.replays,first,'un rendu et un déplacement clavier ne rejouent pas les combats');

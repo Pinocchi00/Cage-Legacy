@@ -486,6 +486,26 @@ Object.assign(CL,{
      le bureau reste ouvert, le joueur compose ; 'refill' et 'compose'
      font le même retour, seul 'stuck' (pot épuisé) avance le cycle à la
      main (lot 1g : aucun blocage). */
+  /* Lot 5 H6 : Continuer ne s'arrête que sur ce que le joueur doit décider —
+     une affaire (la première ouverte), la carte principale, sinon le cycle. */
+  mgmtContinuer(){
+    if(!G||!G.mgmt) return;
+    const m=G.mgmt, r=mgmtContinuerRaison(m);
+    if(r.raison==='affaire'){
+      const a=m.pile.find(x=>x.status==='open');
+      if(a){ CL.mgmtOpen(a.id); return; }
+    }else if(r.raison==='carte'){ CL.mgmtCarte(); return; }
+    CL.mgmtNextCycle();
+  },
+  /* Lot 5 H6 : ton cercle (5) et tes suivis (15), choix du joueur, gardés. */
+  mgmtCercle(id){
+    if(!G||!G.mgmt) return;
+    if(mgmtCercleToggle(G.mgmt,id)){ saveMgmt(); render(); }
+  },
+  mgmtSuivre(id){
+    if(!G||!G.mgmt) return;
+    if(mgmtSuiviToggle(G.mgmt,id)){ saveMgmt(); render(); }
+  },
   mgmtNextCycle(){
     if(!G||!G.mgmt) return;
     const r=mgmtClosePile(G.mgmt);
