@@ -281,6 +281,9 @@ function validateMgmt(raw){
       if(!t||t.c!==f.c||t.a.div!==f.div||t.b.div!==f.div
         ||t.a.id===t.b.id||t.rounds!==5||t.round>t.rounds) return false;
       titleFights.add(f.fight);
+    }else if(f.k==='recrue'){
+      /* Lot 5 T5 : le geste de recruter — un fait, l'identifiant du recruté et le cycle. */
+      if(!mgmtValidId(f.a)||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;
     }else if(f.k==='demande'||f.k==='promesse'||f.k==='refus'||f.k==='contrarie'){
       /* Lot 5 H7 : demandes, promesses, refus et décisions contraires — des faits, rien de dérivé. */
       if(!mgmtValidId(f.a)||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;

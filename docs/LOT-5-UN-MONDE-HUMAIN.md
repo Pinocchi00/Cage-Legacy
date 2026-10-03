@@ -510,6 +510,21 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   nom de ring thaï suivi du nom de la salle (noms de ring à écrire), « l'un quitte le camp » si le
   joueur insiste, les noms de salle par ville (modèles seulement).
 
+- **T5 — le recrutement, codé par Claude** (03/10 ; reprend le lot 2B T2 ; **maquette 12**
+  `maquettes/12-recrutement.html` dessinée avant la tranche). `mgmt-recrutement.js` : l'écran
+  « Recrutement » (entrée de la navigation) cherche dans le monde hors de Split, **par catégorie, du
+  mieux au moins bien classé dans le monde**, douze par page ; chaque recrutable montre sa **trace** :
+  rang mondial, nom, âge, bilan, organisations traversées (noms de `MGMT_EXT_ORGS`) — **aucune note,
+  aucun pronostic, aucune jauge** — et un bouton Recruter ; un clic sur le nom ouvre sa fiche. Au
+  clavier : flèches, Entrée (la fiche), R (recruter), Échap. **Recruter** : une ligne de Split à son
+  **âge et à son bilan**, niveau 1, un fait `recrue` ; il ne change **ni de rang mondial** (la ligne
+  extérieure reste — QO-9 — et le classement dédoublonne par identifiant) **ni la taille de la
+  catégorie** ; aucun plafond de vivier. Le recruté est un combattant de Split à part entière
+  (disponible, bookable, vestiaire, fiche, voix, camp). La semaine et le fil le racontent (« X rejoint
+  Split, venu de … »). Marche aussi dans une partie d'avant H4. **Non fait** : la mesure « tout
+  recruter contre recruter peu » (le recrutement est gratuit, seuls les cachets de combat coûtent) et
+  le récit de la presse au premier combat (les médias de T3).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé

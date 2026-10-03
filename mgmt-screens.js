@@ -188,6 +188,7 @@ function mgmtNavHtml(){
   return `<nav class="mgmt-nav" aria-label="Navigation management">`
     +navB('Semaine','mgmt_bureau')
     +navB('Vestiaire','mgmt_vestiaire')
+    +navB('Recrutement','mgmt_recrutement')
     +navB('Classements','mgmt_classements')
     +navB('Organisation','mgmt_organisation')+`</nav>`;
 }
@@ -202,7 +203,7 @@ function mgmtWithNav(screen){
    directe de ui-08, extension via Object.assign (motif ui-10-duel.js).
    Lot 4 T7 : l'organisation rejoint les cinq autres écrans, enregistrée
    comme eux (mgmtWithNav). Lot 4 T6 : les classements, de même. ==== */
-Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_vestiaire:mgmtWithNav(scr_mgmt_vestiaire),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements)});
+Object.assign(SCREENS,{mgmt_bureau:mgmtWithNav(scr_mgmt_bureau),mgmt_soiree:mgmtWithNav(scr_mgmt_soiree),mgmt_lendemain:mgmtWithNav(scr_mgmt_lendemain),mgmt_carte:mgmtWithNav(scr_mgmt_carte),mgmt_fiche:mgmtWithNav(scr_mgmt_fiche),mgmt_vestiaire:mgmtWithNav(scr_mgmt_vestiaire),mgmt_recrutement:mgmtWithNav(scr_mgmt_recrutement),mgmt_organisation:mgmtWithNav(scr_mgmt_organisation),mgmt_classements:mgmtWithNav(scr_mgmt_classements)});
 
 /* ==== [ANCRE: MGMT_LOT1E_CLAVIER_BUREAU] — Lot 1e-7 : carte clavier du
    bureau. Flèches : parcourir la pile ouverte. Chiffres : jouer la réponse
@@ -292,6 +293,14 @@ keysRegister('mgmt_classements',{
 keysRegister('mgmt_vestiaire',{
   Escape(){ CL.go('mgmt_bureau'); },
 });
+/* Lot 5 T5 : le recrutement au clavier — flèches pour la ligne, Entrée la fiche, R recrute, échap ramène. */
+keysRegister('mgmt_recrutement',{
+  Escape(){ CL.go('mgmt_bureau'); },
+  ArrowDown(){ CL.mgmtRecrutementCurseur(1); },
+  ArrowUp(){ CL.mgmtRecrutementCurseur(-1); },
+  Enter(){ const x=mgmtRecrutables(G.mgmt,mgmtRecrutementDiv())[MGMT_RECRUTEMENT.page*MGMT_RECRUTEMENT_PAGE+MGMT_RECRUTEMENT.curseur]; if(x) CL.mgmtFiche(x.id); },
+  r(){ const x=mgmtRecrutables(G.mgmt,mgmtRecrutementDiv())[MGMT_RECRUTEMENT.page*MGMT_RECRUTEMENT_PAGE+MGMT_RECRUTEMENT.curseur]; if(x) CL.mgmtRecruter(x.id); },
+});
 /* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
@@ -306,7 +315,7 @@ Object.assign(CL,{
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
     const retour=(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
-      ||G.screen==='mgmt_classements'||G.screen==='mgmt_vestiaire')?G.screen:'mgmt_bureau';
+      ||G.screen==='mgmt_classements'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement')?G.screen:'mgmt_bureau';
     MGMT_FICHE={id,retour,cursor:0};
     CL.go('mgmt_fiche');
   },
