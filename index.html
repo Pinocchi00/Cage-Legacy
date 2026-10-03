@@ -870,6 +870,32 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 .mgmt-vest-bloc p{font-size:18px;font-weight:300;line-height:1.6;margin:0}
 .mgmt-vest-mini{display:block;font-size:18px;font-weight:300;line-height:1.7;color:var(--text);background:none;border:0;padding:0;text-align:left;cursor:pointer}
 .mgmt-vest-vide{padding:24px;color:var(--muted)}
+/* ==== [ANCRE: MGMT_LOT5_H9_CSS_MOUVEMENT] — le fil, les cartes, l'entrée de la semaine.
+   Toute animation vit sous prefers-reduced-motion:no-preference ; sinon, rien ne bouge. ==== */
+.mgmt-fil{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(33,27,30,.86);cursor:pointer}
+.mgmt-fil-liste{max-width:900px;padding:0 32px}
+.mgmt-fil-ligne{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:30px;font-weight:600;letter-spacing:.04em;margin:0 0 14px;color:var(--text)}
+.mgmt-fil-passe{font-size:16px;letter-spacing:.14em;color:var(--muted);margin:26px 0 0;text-transform:uppercase}
+.mgmt-popup{position:fixed;right:32px;bottom:32px;z-index:50;width:min(420px,calc(100vw - 48px));box-sizing:border-box;padding:20px 24px;background:var(--panel);border-left:4px solid var(--gold);color:var(--text)}
+.mgmt-popup h4{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:26px;font-weight:800;margin:6px 0;text-transform:uppercase;padding-right:28px}
+.mgmt-popup h4 em{font-size:17px;font-weight:300;font-style:italic;color:var(--muted);text-transform:none}
+.mgmt-popup-lien{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:15px;font-weight:700;letter-spacing:.2em;color:var(--gold);text-transform:uppercase}
+.mgmt-popup p{font-size:18px;font-weight:300;line-height:1.5;margin:4px 0}
+.mgmt-popup-moment span{color:var(--muted)}
+.mgmt-popup-ferme{position:absolute;top:10px;right:12px;background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer}
+.mgmt-popup-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.mgmt-popup-actions button{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:17px;font-weight:600;letter-spacing:.06em;padding:8px 14px;color:var(--bg);background:var(--gold);border:0;cursor:pointer}
+.mgmt-popup-actions button:focus-visible,.mgmt-popup-ferme:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+@media(prefers-reduced-motion:no-preference){
+.mgmt-fil-ligne{opacity:0;animation:mgmtFilEntre .4s ease-out forwards;animation-delay:calc(var(--i)*.32s)}
+.mgmt-popup{animation:mgmtPopupGlisse .38s cubic-bezier(.2,.9,.25,1)}
+.mgmt-week-news{animation:mgmtSemaineEntre .36s ease-out both}
+.mgmt-week-news:nth-child(2){animation-delay:.05s}.mgmt-week-news:nth-child(3){animation-delay:.1s}.mgmt-week-news:nth-child(4){animation-delay:.15s}.mgmt-week-news:nth-child(5){animation-delay:.2s}
+}
+@keyframes mgmtFilEntre{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes mgmtPopupGlisse{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:none}}
+@keyframes mgmtSemaineEntre{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* ==== [FIN ANCRE] ==== */
 @media(max-width:1599px){.mgmt-vestiaire{padding:40px 40px 48px}.mgmt-vest-cols{grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:32px}.mgmt-vest-row{grid-template-columns:22px minmax(0,1fr) 110px 110px 76px 112px;gap:10px;padding:10px 14px;font-size:18px}.mgmt-vest-name em{font-size:15px}}
 @media(max-width:1279px){.mgmt-vestiaire{padding:40px 32px 48px}.mgmt-vest-cols{grid-template-columns:1fr}.mgmt-vest-row{grid-template-columns:24px minmax(0,1fr) 110px 120px 80px 80px;gap:12px;padding:10px 12px;font-size:18px}}
 /* ==== [FIN ANCRE] ==== */
@@ -1072,6 +1098,7 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <!-- Lot 4 T6 : l'écran des classements, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-classements.js?v=lot5t1"></script>
 <script src="mgmt-ecran-vestiaire.js?v=lot5h8b"></script>
+<script src="mgmt-mouvement.js?v=lot5h9"></script>
 <script src="mgmt-screens.js?v=lot5h8"></script>
 <script src="arene-etat.js?v=lot5h3"></script>
 <script src="arene-vue.js?v=lot4fidelite05"></script>

@@ -296,6 +296,6 @@ function scr_mgmt_bureau(){
     +`<section class="mgmt-week-organisation"><h3>L'organisation</h3>`
     +`<p>${esc(roster)} combattants · trésorerie ${esc(m.treasury)} k$</p>`
     +`<button class="mgmt-week-link" onclick="CL.go('mgmt_organisation')">Voir l'organisation</button></section></aside>`
-    +`</div></div>`;
+    +`</div>${mgmtMouvementHtml(m)}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
