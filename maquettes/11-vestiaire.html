@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cage Legacy — le vestiaire</title>
+<style>html,body{margin:0;background:#211B1E;display:flex;justify-content:center}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,500;0,600;0,700;1,700;1,800&amp;family=Saira:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #2B2327; color: #FFF8EE; font-family: 'Saira', 'Segoe UI', sans-serif; }
+    a { color: #FFC83D; text-decoration: none; } a:hover { color: #FFE08A; }
+    .cond { font-family: 'Saira Condensed', 'Arial Narrow', sans-serif; }
+    button, select { font-family: 'Saira Condensed', sans-serif; cursor: pointer; }
+    .oct { clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+    .cut { clip-path: polygon(0 0, 94% 0, 100% 18%, 100% 100%, 0 100%); }
+    .row { display: grid; grid-template-columns: 34px minmax(0, 1fr) 150px 160px 110px 90px; gap: 18px; align-items: center; padding: 11px 24px; font-size: 20px; }
+    .row.alt { background: rgba(255, 248, 238, .05); }
+    .head { font-size: 14px; letter-spacing: .14em; color: #D9CCC0; padding: 6px 24px; }
+    .chip { font-size: 17px; font-weight: 600; letter-spacing: .08em; padding: 7px 14px; color: #D9CCC0; border: 1px solid rgba(255, 248, 238, .22); background: none; }
+    .chip.on { color: #1F1A1D; background: #FFC83D; border-color: #FFC83D; }
+    .sign { width: 14px; height: 14px; background: #FFC83D; display: block; }
+    .surnom { font-size: 17px; font-weight: 300; font-style: italic; color: #D9CCC0; margin-left: 10px; }
+    .role { font-size: 17px; font-weight: 600; letter-spacing: .1em; color: #FFC83D; }
+    .eyebrow { font-size: 20px; font-weight: 700; letter-spacing: .2em; color: #FFC83D; }
+  </style>
+</head>
+<body>
+<div style="width: 1920px; height: 1080px; box-sizing: border-box; padding: 40px 64px 48px; display: flex; flex-direction: column; gap: 22px; background: radial-gradient(ellipse 900px 600px at 50% 0%, rgba(255, 200, 61, .09), transparent 70%), #2B2327; overflow: hidden;">
+  <header style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 248, 238, .16); padding-bottom: 18px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="02-semaine.html" class="oct" style="width: 34px; height: 34px; background: #FFC83D; display: block;"></a>
+      <span class="cond" style="font-size: 28px; font-weight: 700; letter-spacing: .12em;">LE VESTIAIRE</span>
+    </div>
+    <nav class="cond" style="display: flex; gap: 26px; font-size: 19px; font-weight: 600; letter-spacing: .06em;">
+      <a href="02-semaine.html" style="color: #D9CCC0;">SEMAINE</a>
+      <a href="#" style="color: #1F1A1D; background: #FFC83D; padding: 8px 16px;">VESTIAIRE</a>
+      <a href="07-classements.html" style="color: #D9CCC0;">CLASSEMENTS</a>
+      <a href="08-organisation.html" style="color: #D9CCC0;">ORGANISATION</a>
+    </nav>
+    <span class="cond" style="font-size: 18px; color: #D9CCC0; letter-spacing: .1em;">139 COMBATTANTS · 12 CATÉGORIES</span>
+  </header>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div class="cond" style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button class="chip on">TOUS</button><button class="chip">MOUCHE</button><button class="chip">COQ</button><button class="chip">PLUME</button><button class="chip">LÉGER</button>
+      <button class="chip">MI-MOYEN</button><button class="chip">MOYEN</button><button class="chip">MI-LOURD</button><button class="chip">LOURD</button>
+      <span style="width: 22px;"></span>
+      <button class="chip">PAILLE</button><button class="chip">MOUCHE F.</button><button class="chip">COQ F.</button><button class="chip">PLUME F.</button>
+    </div>
+    <div class="cond" style="display: flex; gap: 10px; align-items: center;">
+      <span style="font-size: 15px; letter-spacing: .16em; color: #D9CCC0;">RÔLE</span>
+      <select style="font-size: 17px; padding: 6px 12px; background: #1F1A1D; color: #FFF8EE; border: 1px solid rgba(255, 248, 238, .22);"><option>Tous</option></select>
+      <button class="chip on">DISPONIBLES</button><button class="chip">TON CERCLE</button><button class="chip">TES SUIVIS</button><button class="chip">QUELQUE CHOSE À DIRE</button>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 460px; gap: 56px; flex-grow: 1; min-height: 0;">
+    <section style="display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: hidden;">
+      <div class="row head" style="padding-top: 0;"><span></span><span>COMBATTANT</span><span>RÔLE</span><span>CATÉGORIE</span><span>BILAN</span><span>LIEN</span></div>
+      <div class="row alt"><span class="sign"></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">DYLAN LE GALL</span><span class="surnom">« Casse-Noix »</span></span><span class="role cond">CHAMPION</span><span class="cond" style="color: #D9CCC0;">MOUCHE</span><span class="cond">20-8</span><span class="cond" style="color: #FFC83D;">CERCLE</span></div>
+      <div class="row"><span class="sign"></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">SAMIRA DE SAINT-GILLES</span><span class="surnom">« La Mécanique »</span></span><span class="role cond">CONTENDER</span><span class="cond" style="color: #D9CCC0;">PAILLE</span><span class="cond">14-2</span><span class="cond" style="color: #D9CCC0;">SUIVI</span></div>
+      <div class="row alt"><span></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">HAILEY WALKER</span><span class="surnom">« Tonnerre »</span></span><span class="role cond">ESPOIR</span><span class="cond" style="color: #D9CCC0;">LÉGER</span><span class="cond">4-0</span><span></span></div>
+      <div class="row"><span></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">LOUIS BRAUN</span><span class="surnom">« Le Mur »</span></span><span class="role cond">VÉTÉRAN</span><span class="cond" style="color: #D9CCC0;">MOYEN</span><span class="cond">22-14</span><span></span></div>
+      <div class="row alt" style="color: #D9CCC0;"><span></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">ADRIEN LEBON</span><span class="surnom">« Pique-Feu »</span></span><span class="role cond" style="color: #D9CCC0;">EN PERDITION</span><span class="cond">MI-LOURD</span><span class="cond">9-9</span><span class="cond">INDISPONIBLE</span></div>
+      <div class="row"><span></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">ROMAIN FAURE</span><span class="surnom">« Le Gamin de Limoges »</span></span><span class="role cond"></span><span class="cond" style="color: #D9CCC0;">COQ</span><span class="cond">7-3</span><span></span></div>
+      <div class="row alt"><span class="sign"></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">MEHDI BENALI</span><span class="surnom">« Le Docteur »</span></span><span class="role cond">JOURNEYMAN</span><span class="cond" style="color: #D9CCC0;">PLUME</span><span class="cond">18-17</span><span></span></div>
+      <div class="row"><span></span><span><span class="cond" style="font-weight: 700; letter-spacing: .04em;">JUN-HO KIM</span><span class="surnom">« Pas-de-Loup »</span></span><span class="role cond">INVAINCU</span><span class="cond" style="color: #D9CCC0;">MOUCHE</span><span class="cond">6-0</span><span class="cond" style="color: #D9CCC0;">SUIVI</span></div>
+      <div class="cond" style="font-size: 17px; letter-spacing: .1em; color: #D9CCC0; padding: 14px 24px;">SUITE · PAGE 1 / 7</div>
+    </section>
+
+    <aside style="display: flex; flex-direction: column; gap: 26px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="cond eyebrow">TON CERCLE · 2/5</div>
+        <div style="font-size: 18px; font-weight: 300; line-height: 1.7;">Dylan Le Gall — Champion, Mouche<br>Samira De Saint-Gilles — Contender, Paille</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="cond eyebrow">TES SUIVIS · 2/15</div>
+        <div style="font-size: 18px; font-weight: 300; line-height: 1.7;">Jun-Ho Kim — Invaincu, Mouche</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="cond eyebrow">QUELQUE CHOSE À DIRE</div>
+        <div style="font-size: 18px; font-weight: 300; line-height: 1.7;">Un carré jaune signale une demande en attente ou un moment relayé cette semaine. Un clic ouvre la fiche.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

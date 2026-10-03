@@ -209,6 +209,23 @@ function mgmtFichePromesses(m,f){
     +(prom.length?`<ul class="mgmt-fiche-vie-liste">${prom.map(p=>`<li>${esc(etats[p.etat])} : ${esc(lib(p.want))}${p.target?' — '+esc(nom(p.target)):''}</li>`).join('')}</ul>`:'');
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT5_H8_FICHE_ETENDUE] — La fiche devient l'écran le plus
+   riche (contrat §4) : son histoire (milieu, ancien métier — le catalogue tel
+   quel) et son corps (disponibilité, blessures et suspensions gardées comme
+   faits). Ni jauge ni chiffre. ==== */
+function mgmtFicheHistoire(identite){
+  return `<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p>`;
+}
+function mgmtFicheCorps(m,f){
+  const ligne=m.roster.find(o=>o.id===f.id);
+  if(!ligne) return '';
+  const faits=(m.facts||[]).filter(x=>x&&x.a===f.id&&(x.k==='injury'||x.k==='susp'||x.k==='retired'))
+    .sort((a,b)=>b.c-a.c).slice(0,5);
+  const dispo=mgmtAvailable(m,ligne)?'Disponible':'Indisponible';
+  return `<h3>Son corps</h3><p>${esc(dispo)}</p>`
+    +(faits.length?`<ul class="mgmt-fiche-vie-liste">${faits.map(x=>`<li>${esc(MGMT_FACT_LABELS[x.k])} <span class="mgmt-fiche-vie-relais">cycle ${esc(x.c)}</span></li>`).join('')}</ul>`:'');
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_mgmt_fiche(){
   const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id);
   if(!line) return scr_mgmt_bureau();
@@ -230,7 +247,7 @@ function scr_mgmt_fiche(){
      +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p>${mgmtFicheLien(m,f)}</div>`
      +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
      +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
-    +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}${mgmtFicheConnaissance(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheVie(m,f)}</section>`
+    +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}${mgmtFicheHistoire(identite)}${mgmtFicheCorps(m,f)}${mgmtFicheConnaissance(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheVie(m,f)}</section>`
     +`${mgmtFicheParcours(trace)}</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

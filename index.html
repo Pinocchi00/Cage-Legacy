@@ -841,6 +841,38 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
   .mgmt-fiche-cols>.mgmt-fiche-side{grid-column:1 / -1}
 }
 @media(max-width:1279px){.mgmt-fiche{padding:40px 32px 48px}.mgmt-fiche-cols,.mgmt-fiche-no-trace{grid-template-columns:1fr}.mgmt-fiche-hero{flex-wrap:wrap}.mgmt-fiche-attrs{text-align:left}}
+/* ==== [ANCRE: MGMT_LOT5_H8_CSS_VESTIAIRE] — maquettes/11-vestiaire.html : padding 40px 64px 48px, liste + aside de 460px, gap 56px, lignes de 20px, puces de 17px. ==== */
+.mgmt-vestiaire{padding:40px 64px 48px}
+.mgmt-vest-filtres{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.mgmt-vest-chips{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-family:'Saira Condensed','Arial Narrow',sans-serif}
+.mgmt-vest-chips>span{font-size:15px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+.mgmt-vest-chips select{font-size:17px;padding:6px 12px;background:var(--bg);color:var(--text);border:1px solid var(--line)}
+.mgmt-vest-chip{font-family:inherit;font-size:17px;font-weight:600;letter-spacing:.08em;padding:7px 14px;color:var(--muted);border:1px solid var(--line);background:none;text-transform:uppercase;cursor:pointer}
+.mgmt-vest-chip.on{color:var(--bg);background:var(--gold);border-color:var(--gold)}
+.mgmt-vest-cols{grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:56px;margin-top:22px}
+.mgmt-vest-liste,.mgmt-vest-aside{min-width:0}
+.mgmt-vest-row{display:grid;grid-template-columns:34px minmax(0,1fr) 150px 160px 110px 90px;gap:18px;align-items:center;padding:11px 24px;font-size:20px;width:100%;box-sizing:border-box;background:none;border:0;color:var(--text);text-align:left;cursor:pointer}
+.mgmt-vest-row.alt{background:rgba(255,248,238,.05)}
+.mgmt-vest-row.head{font-size:14px;letter-spacing:.14em;color:var(--muted);padding:6px 24px;text-transform:uppercase;cursor:default}
+.mgmt-vest-row.off{color:var(--muted)}
+.mgmt-vest-row:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+.mgmt-vest-name b{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.mgmt-vest-name em{font-size:17px;font-weight:300;color:var(--muted)}
+.mgmt-vest-role{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:17px;font-weight:600;letter-spacing:.1em;color:var(--gold);text-transform:uppercase}
+.mgmt-vest-div,.mgmt-vest-lien{font-family:'Saira Condensed','Arial Narrow',sans-serif;color:var(--muted);text-transform:uppercase}
+.mgmt-vest-lien.on{color:var(--gold)}
+.mgmt-vest-sign i{display:block;width:14px;height:14px;background:var(--gold)}
+.mgmt-vest-pages{display:flex;gap:18px;align-items:center;padding:14px 24px;font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:17px;letter-spacing:.1em;color:var(--muted)}
+.mgmt-vest-pages button{font-family:inherit;font-size:17px;padding:6px 14px;color:var(--text);background:none;border:1px solid var(--line);cursor:pointer}
+.mgmt-vest-pages button:disabled{opacity:.4;cursor:default}
+.mgmt-vest-aside{display:flex;flex-direction:column;gap:26px}
+.mgmt-vest-bloc h3{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:700;letter-spacing:.2em;color:var(--gold);margin:0 0 8px;text-transform:uppercase}
+.mgmt-vest-bloc p{font-size:18px;font-weight:300;line-height:1.6;margin:0}
+.mgmt-vest-mini{display:block;font-size:18px;font-weight:300;line-height:1.7;color:var(--text);background:none;border:0;padding:0;text-align:left;cursor:pointer}
+.mgmt-vest-vide{padding:24px;color:var(--muted)}
+@media(max-width:1599px){.mgmt-vestiaire{padding:40px 40px 48px}.mgmt-vest-cols{grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:32px}.mgmt-vest-row{grid-template-columns:22px minmax(0,1fr) 110px 110px 76px 112px;gap:10px;padding:10px 14px;font-size:18px}.mgmt-vest-name em{font-size:15px}}
+@media(max-width:1279px){.mgmt-vestiaire{padding:40px 32px 48px}.mgmt-vest-cols{grid-template-columns:1fr}.mgmt-vest-row{grid-template-columns:24px minmax(0,1fr) 110px 120px 80px 80px;gap:12px;padding:10px 12px;font-size:18px}}
+/* ==== [FIN ANCRE] ==== */
 @media(max-width:1279px){.mgmt-org-cols{grid-template-columns:1fr}.mgmt-org-main,.mgmt-org-aside{overflow:visible}}
 @media(max-width:1279px){.mgmt-wrap:not(.mgmt-week){padding:40px 32px 48px}.mgmt-wrap .mgmt-nav,.mgmt-week .mgmt-nav{position:static;transform:none;flex-wrap:wrap}.mgmt-wrap .mgmt-head{flex-wrap:wrap}.mgmt-wrap:not(.mgmt-week)>.mgmt-cycle{position:static}.mgmt-week-cols{grid-template-columns:1fr;gap:24px}.mgmt-week-pane{overflow:visible}}
 /* ==== [FIN ANCRE] ==== */
@@ -1016,7 +1048,7 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
      et étendus via Object.assign). Toujours avant main.js. ==== -->
 <script src="mgmt-data.js?v=lot5h45"></script>
 <script src="mgmt-humanite-data.js?v=lot5h3b"></script>
-<script src="mgmt-humanite.js?v=lot5h3"></script>
+<script src="mgmt-humanite.js?v=lot5h8"></script>
 <script src="mgmt-bureau.js?v=lot5h7"></script>
 <script src="mgmt-carte.js?v=cls4a"></script>
 <script src="mgmt-corps.js?v=lot5h7"></script>
@@ -1024,7 +1056,7 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <script src="mgmt-monde.js?v=lot5h45"></script>
 <script src="mgmt-ceintures.js?v=lot5t1r2"></script>
 <script src="mgmt-vie.js?v=lot5h7"></script>
-<script src="mgmt-attention.js?v=lot5h7"></script>
+<script src="mgmt-attention.js?v=lot5h8"></script>
 <script src="mgmt-promesses.js?v=lot5h7"></script>
 <script src="mgmt-save.js?v=lot5h7"></script>
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
@@ -1034,12 +1066,13 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <script src="mgmt-ecran-carte.js?v=lot5t1"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=lot4t4"></script>
-<script src="mgmt-ecran-fiche.js?v=lot5h7"></script>
+<script src="mgmt-ecran-fiche.js?v=lot5h8"></script>
 <!-- Lot 4 T7 : l'écran de l'organisation, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-organisation.js?v=lot4f2org"></script>
 <!-- Lot 4 T6 : l'écran des classements, chargé avant mgmt-screens.js. -->
 <script src="mgmt-ecran-classements.js?v=lot5t1"></script>
-<script src="mgmt-screens.js?v=lot5h7"></script>
+<script src="mgmt-ecran-vestiaire.js?v=lot5h8b"></script>
+<script src="mgmt-screens.js?v=lot5h8"></script>
 <script src="arene-etat.js?v=lot5h3"></script>
 <script src="arene-vue.js?v=lot4fidelite05"></script>
 <script src="arene-ecran.js?v=lot4fidelite05"></script>

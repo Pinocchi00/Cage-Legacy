@@ -35,8 +35,9 @@ function mgmtResultats(m,f){
 /** Rôle d'un combattant, ou null : le premier critère rempli (MGMT_ROLES,
  *  `criteres`). Les roles qui demandent une mémoire que le jeu ne tient pas
  *  encore (Ancien champion, Gatekeeper, Bête noire, Revenant, Remplaçant de luxe) ne sont
- *  pas attribués. Pur. @returns {{id:string,libelle:string}|null} */
-function mgmtRole(m,f){
+ *  pas attribués. Pur. `classements` : cache optionnel d'un appelant qui
+ *  lit beaucoup de rôles à la suite. @returns {{id:string,libelle:string}|null} */
+function mgmtRole(m,f,classements){
   if(!m||!f) return null;
   const role=id=>MGMT_ROLES.find(r=>r.id===id)||null;
   const total=f.W+f.L+f.D;
@@ -44,7 +45,16 @@ function mgmtRole(m,f){
   if(titre.id===f.id) return role('champion');
   const res=mgmtResultats(m,f);
   if(res.length>=3&&res.slice(0,3).every(x=>x==='loss')) return role('en-perdition');
-  const rang=mgmtDivisionRank(m,f,'world');
+  /* Lot 5 H8 : le vestiaire passe un cache {div: ids classés} — un classement
+     mondial par catégorie, pas un par combattant. */
+  let rang;
+  if(classements){
+    if(!classements[f.div]) classements[f.div]=mgmtDivisionRanking(m,f.div,'world').map(o=>o.id);
+    const i=classements[f.div].indexOf(f.id);
+    rang=(i>=0&&!mgmtIsRetired(f))?i+1:null;
+  }else{
+    rang=mgmtDivisionRank(m,f,'world');
+  }
   if(rang!==null&&rang<=5) return role('contender');
   if(f.L===0&&f.W>=5) return role('invaincu');
   if(f.age<25&&total<6) return role('espoir');
