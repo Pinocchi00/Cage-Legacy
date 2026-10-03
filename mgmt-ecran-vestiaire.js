@@ -8,15 +8,19 @@
    et les suivis sont ceux de H6. Tout texte injecté passe par esc(). ==== */
 let MGMT_VESTIAIRE={div:'',role:'',dispo:false,lien:'',signe:false,page:0};
 const MGMT_VESTIAIRE_PAGE=14;
+/** Le vestiaire ne signale que les moments majeurs (contrat §3.2) : un moment relayé
+ *  d'au moins ce poids ; pour ton cercle et tes suivis, tout moment relayé. */
+const MGMT_VESTIAIRE_SIGNE_POIDS=30;
 
-/** Ce qui mérite un coup d'œil : une demande en attente ou un moment
- *  relayé ce cycle ou le précédent. Dérivé, jamais stocké. */
+/** Ce qui mérite un coup d'œil : une demande en attente ou un moment majeur
+ *  relayé ce cycle ou le précédent (tout moment relayé pour ton cercle et tes
+ *  suivis). Dérivé, jamais stocké. */
 function mgmtVestiaireSigne(m,f){
   if(typeof mgmtDemandesOuvertes==='function'&&mgmtDemandesOuvertes(m).some(d=>d.a===f.id)) return true;
   for(const x of m.facts||[]){
     if(!x||x.k!=='moment_vie'||x.a!==f.id||x.c<m.cycle-1) continue;
     const mo=mgmtVieMomentById(x.m);
-    if(mo&&mo.relais.length) return true;
+    if(mo&&mo.relais.length&&(mo.poids>=MGMT_VESTIAIRE_SIGNE_POIDS||mgmtLien(m,f.id))) return true;
   }
   return false;
 }
