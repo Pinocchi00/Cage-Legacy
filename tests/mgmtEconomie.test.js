@@ -41,7 +41,7 @@ function runEvenings(win,seed,n,tBefore){
   const force=tBefore===undefined?'':`if(e===0) m.treasury=${tBefore};`;
   return JSON.parse(win.eval(`(function(){
     setSeed(${seed});
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     for(let e=0;e<${n};e++){
       /* §T3 : la carte principale d'abord, la proposition de Leïla ensuite. */
       m.card.main=[];
@@ -79,7 +79,7 @@ function runRealEveningsT4(win,seed,n){
     setSeed(${seed});
     let jouees=0, rentables=0, somme=0;
     for(let e=0;e<${n};e++){
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       mgmtNewPile(m);
       for(const a of m.pile.slice()){ if(a.status==='open'&&a.kind==='leila_propose') mgmtIgnore(m,a.id); }
       let pose=true;
@@ -147,7 +147,7 @@ function runEveningsBatcle(win,seed,n){
     setSeed(${seed});
     let jouees=0, somme=0;
     for(let e=0;e<${n};e++){
-      const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtNewPile(m);
       for(const a of m.pile.slice()){ if(a.status==='open'&&a.kind==='leila_propose') mgmtIgnore(m,a.id); }
       /* composeMainBatcle de l'outil, à l'identique. */
       const r=m.roster;
@@ -219,7 +219,7 @@ function oneEveningMeasured(win,seed,tBefore){
   const force=tBefore===undefined?'':`m.treasury=${tBefore};`;
   return JSON.parse(win.eval(`(function(){
     setSeed(${seed});
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     /* §T3 : la carte principale d'abord (fixture), la proposition de
        Leïla ensuite. */
     m.card.main=[];
@@ -243,7 +243,7 @@ function oneEveningMeasured(win,seed,tBefore){
 
 test('MGMT économie T1 — un seul solde au premier jour, historiques vides', () => {
   const win = newGameWindow();
-  const s = JSON.parse(win.eval(`JSON.stringify((function(){ const m=mgmtDefault();
+  const s = JSON.parse(win.eval(`JSON.stringify((function(){ const m=mgmtDefaultAvantH4();
     return {v:m.v,treasury:m.treasury,recettes:m.recettes,audiences:m.audiences,eventsPlayed:m.eventsPlayed}; })())`));
   assert.equal(s.v, win.eval(`MGMT_SAVE_VERSION`), "l'état courant porte la version");
   assert.equal(s.treasury, win.eval(`MGMT_TREASURY_START`), 'trésorerie au premier jour');
@@ -290,23 +290,23 @@ test('MGMT économie T1 — l\u2019attrait et les cachets sont ceux de la carte 
 
 test('MGMT économie T1 — plafond de découvert : trois paliers (QO-5)', () => {
   const win = newGameWindow();
-  assert.equal(win.eval(`mgmtOverdraftCap(mgmtDefault())`), 0,
+  assert.equal(win.eval(`mgmtOverdraftCap(mgmtDefaultAvantH4())`), 0,
     '0 soirée : plancher fixe, aucun découvert possible');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.recettes=[120]; m.eventsPlayed=1; return mgmtOverdraftCap(m); })()`), 120,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.recettes=[120]; m.eventsPlayed=1; return mgmtOverdraftCap(m); })()`), 120,
     '1 soirée : P = max(0, R₁)');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.recettes=[120,90]; m.eventsPlayed=2; return mgmtOverdraftCap(m); })()`), 105,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.recettes=[120,90]; m.eventsPlayed=2; return mgmtOverdraftCap(m); })()`), 105,
     '2 soirées : moyenne arrondie des deux dernières (R₂=90, R₁=120)');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.recettes=[120,-40]; m.eventsPlayed=2; return mgmtOverdraftCap(m); })()`), 40,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.recettes=[120,-40]; m.eventsPlayed=2; return mgmtOverdraftCap(m); })()`), 40,
     'exemple QO-5 : R₁=−40, R₂=120 → P=40');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.recettes=[120,-40]; m.eventsPlayed=5; return mgmtOverdraftCap(m); })()`), 40,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.recettes=[120,-40]; m.eventsPlayed=5; return mgmtOverdraftCap(m); })()`), 40,
     'au-delà de deux soirées : seules les deux dernières recettes comptent');
 });
 
 test('MGMT économie T1 — le plafond n\u2019est jamais négatif', () => {
   const win = newGameWindow();
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.recettes=[-40]; m.eventsPlayed=1; return mgmtOverdraftCap(m); })()`), 0,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.recettes=[-40]; m.eventsPlayed=1; return mgmtOverdraftCap(m); })()`), 0,
     'une seule soirée perdante : aucun crédit');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.recettes=[-40,-60]; m.eventsPlayed=2; return mgmtOverdraftCap(m); })()`), 0,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.recettes=[-40,-60]; m.eventsPlayed=2; return mgmtOverdraftCap(m); })()`), 0,
     'deux soirées perdantes : le plancher à zéro tient');
 });
 
@@ -316,7 +316,7 @@ test('MGMT économie T1 — E1 seulement si une dette a été déduite', () => {
     const out={dette:[],riche:[]};
     const uneSoiree=(seed,t)=>{
       setSeed(seed);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       /* §T3 : la carte principale d'abord (fixture), la proposition de
          Leïla ensuite, sur des combattants disponibles. */
       m.card.main=[];
@@ -395,17 +395,17 @@ test('MGMT économie T1 — migration 3 → 4 → 5 sans perte (carte en prélim
   const v1 = {org:'Split',cycle:3,seq:9,roster:[],pile:[],facts:[],open:null,shortfall:false};
   assert.equal(win.eval(`mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v1)})))`), null, 'v1 sans version : refusée');
   /* Une v5 incomplète ne passe pas la porte. */
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); delete m.treasury; return validateMgmt(m); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); delete m.treasury; return validateMgmt(m); })()`), false,
     'v5 sans trésorerie rejetée');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.recettes=[1,2,3]; return validateMgmt(m); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.recettes=[1,2,3]; return validateMgmt(m); })()`), false,
     'plus de deux recettes rejetées (on garde les deux dernières)');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.audiences=[-1]; return validateMgmt(m); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.audiences=[-1]; return validateMgmt(m); })()`), false,
     'audience négative rejetée');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.eventsPlayed='x'; return validateMgmt(m); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.eventsPlayed='x'; return validateMgmt(m); })()`), false,
     'compte de soirées non entier rejeté');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.card={sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:1}],prelims:[]}; return validateMgmt(m); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.card={sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:1}],prelims:[]}; return validateMgmt(m); })()`), false,
     'un combat de carte sans slot est rejeté (§T1)');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.card={sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:1,slot:'prelim'}],prelims:[]}; return validateMgmt(m); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.card={sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:1,slot:'prelim'}],prelims:[]}; return validateMgmt(m); })()`), false,
     'un combat de carte à l\u2019emplacement incohérent est rejeté (§T1)');
 });
 
@@ -429,7 +429,7 @@ test('MGMT économie T1 — recharger après la soirée ne recompte pas la recet
   const win = newGameWindow();
   win.eval(`(function(){
     setSeed(80);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     /* §T3 : la carte principale d'abord (fixture), la proposition de
        Leïla ensuite, sur des combattants disponibles. */
     m.card.main=[];
@@ -457,7 +457,7 @@ test('MGMT économie T1 — cachets dérivés de la ligne, main card plus chère
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(90);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     const f=m.roster[0];
     return JSON.stringify({p1:mgmtPurse(f,'prelim'),p2:mgmtPurse(f,'prelim'),pm:mgmtPurse(f,'main'),star:mgmtStar(f)});
   })()`));
@@ -477,7 +477,7 @@ test('MGMT économie T1 — référence D4 : moyenne des soirées, ou carte comp
   const expected = win.eval(`Math.round(MGMT_AUD_PER_DRAW*MGMT_DRAW_AVG*(MGMT_MAIN_SIZE*MGMT_ATTR_MAIN_W+MGMT_PRELIM_SIZE*MGMT_ATTR_PRELIM_W)*(MGMT_AUD_BASE+(1-MGMT_AUD_BASE)*MGMT_SPECTACLE_REF))`);
   assert.equal(win.eval(`mgmtAudienceRef(null)`), expected,
     'avant toute soirée : l\u2019audience d\u2019une carte complète (5 + 4) d\u2019attrait moyen');
-  win.eval(`(function(){ const m=mgmtDefault(); m.audiences=[10000,12000]; window.__ref=mgmtAudienceRef(m); })()`);
+  win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.audiences=[10000,12000]; window.__ref=mgmtAudienceRef(m); })()`);
   assert.equal(win.eval(`window.__ref`), 11000, 'ensuite : la moyenne des soirées précédentes, en écrans entiers');
 });
 
@@ -485,10 +485,13 @@ test('MGMT économie T1 — audience décidée surtout avant la soirée, droits 
   const win = newGameWindow();
   /* §T1 : la carte contractuelle est celle du lot 2 — 9 combats (5 + 4). */
   const s = JSON.parse(win.eval(`JSON.stringify({
-    pleine:mgmtEventRecette(8,1,100,9),
-    sansFinition:mgmtEventRecette(8,0,100,9),
-    trois:mgmtEventRecette(8,1,100,3),
-    huit:mgmtEventRecette(8,1,100,8)
+    /* H4 : la carte contractuelle est celle de la partie ; ces cas sont ceux d'une carte de 9 (avant H4). */
+    pleine:mgmtEventRecette(8,1,100,9,0,9),
+    sansFinition:mgmtEventRecette(8,0,100,9,0,9),
+    trois:mgmtEventRecette(8,1,100,3,0,9),
+    huit:mgmtEventRecette(8,1,100,8,0,9),
+    douze:mgmtEventRecette(8,1,100,12,0,12),
+    douzeSurNeuf:mgmtEventRecette(8,1,100,9,0,12)
   })`));
   const audBase = Math.round(Number(win.eval(`MGMT_AUD_PER_DRAW`))*8*Number(win.eval(`MGMT_AUD_BASE`)));
   assert.ok(audBase>0, 'une soirée sans finition garde une audience non nulle');
@@ -518,7 +521,7 @@ test('MGMT T4 — le bonus de victoire se calcule après les combats : vainqueur
   const win = newGameWindow();
   const r = JSON.parse(win.eval(`(function(){
     setSeed(20261003);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     const a=m.roster[0], b=m.roster[1];
     const slotted=[{a:a.id,b:b.id,slot:'main'}];
     const pa=mgmtPurse(a,'main'), pb=mgmtPurse(b,'main');
@@ -543,7 +546,7 @@ test('MGMT T4 — une soirée réelle porte ses bonus : la somme des cachets des
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(20261004);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     m.card.main=[];
     const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
     if(dispo.length<10) return 'null';
@@ -595,7 +598,7 @@ test('MGMT économie T1 — dernier combat indisponible : la soirée est annulé
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(85);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     /* §T3 : la carte principale d'abord (fixture), la proposition de
        Leïla ensuite. */
     m.card.main=[];

@@ -25,7 +25,7 @@ const { newGameWindow } = require('./helpers/loadGame');
 const TRAVAIL_RE=/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|TODO/i;
 
 function freshMgmt(win,seed){
-  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefault(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
+  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
 }
 
 /* Une soirée complète (copie de la fixture de mgmtTrace.test.js) : la carte

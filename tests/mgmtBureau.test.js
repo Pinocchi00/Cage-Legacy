@@ -28,20 +28,20 @@ const LEILA_PROPOSE="Écoute chef, je sais que je m'occupe que des combats en d�
 const LEILA_REFUSED="Pas de soucis, j'accepte parce que c'est vous mais retenez bien le nom des deux combattants parce qu'à mon avis ils vont monter au classement.";
 
 function enterMgmt(win,seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
 }
 
 /* Entrée avec pile non vide garantie (cycles bornés, déterministe) pour les
    tests qui jouent des décisions. */
 function enterMgmtFull(win,seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter(); for(let c=0;c<30&&G.mgmt.pile.length===0;c++) mgmtNewPile(G.mgmt); render();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4(); for(let c=0;c<30&&G.mgmt.pile.length===0;c++) mgmtNewPile(G.mgmt); render();`);
 }
 
 /* Entrée avec au moins une proposition simple ouverte (les tests lot 1
    ciblent les singles ; la proposition en bloc n'arrive qu'une fois la
    carte principale complète, §T3). */
 function enterMgmtSingles(win,seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_propose');c++) mgmtNewPile(G.mgmt); render();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4(); for(let c=0;c<30&&!G.mgmt.pile.some(a=>a.status==='open'&&a.kind==='leila_propose');c++) mgmtNewPile(G.mgmt); render();`);
 }
 function mgmtFirstSingle(win){
   return win.eval(`G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id`);
@@ -76,7 +76,7 @@ function poseMainCard(win){
    Leïla propose en fin de pile (refill du §5). Pile non vide garantie :
    la proposition en bloc est ouverte. */
 function enterMgmtWithBulk(win,seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
   win.eval(`(function(){ let g=0; while(mgmtOpenCount(G.mgmt)>0&&g<40){ g++; const a=G.mgmt.pile.find(x=>x.status==='open'); CL.mgmtReply(a.id,a.exchange==='leila_propose'?'refuse':MGMT_EXCHANGES[a.exchange].replies[0].id); } })()`);
   poseMainCard(win);
   win.eval(`CL.mgmtNextCycle(); render();`);
@@ -119,7 +119,7 @@ test('MGMT lot 2B T2 bis + T3 — l’âge suit les semaines du calendrier, anni
   const win = newGameWindow();
   const s = JSON.parse(win.eval(`(function(){
     setSeed(20260922);
-    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     const ages0=m.roster.map(o=>o.age);
     const ext=m.exterieur[0];
     const ext0=mgmtExteriorTrace(ext,0).age;
@@ -191,7 +191,7 @@ test('MGMT T3 — la loi de retraite est celle de la carrière : max(39, 42 − 
 
 test('MGMT T3 — le départ tombe à l’ouverture du cycle, sans drame : hors carte, hors vivier, hors classement', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(20260929); G={theme:'dark',mgmt:mgmtDefault()};`);
+  win.eval(`setSeed(20260929); G={theme:'dark',mgmt:mgmtDefaultAvantH4()};`);
   const r = JSON.parse(win.eval(`(function(){
     ${T3_MK}
     const m=G.mgmt;
@@ -231,7 +231,7 @@ test('MGMT T3 — un retraité d’âge survit à une sauvegarde puis un chargem
   const win = newGameWindow();
   const r = JSON.parse(win.eval(`(function(){
     setSeed(20260930);
-    const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
     m.roster[0].retired='age';
     const valueOk=validateMgmt(m);
     const repare=mgmtRepair(JSON.parse(JSON.stringify(m)));
@@ -460,7 +460,7 @@ test('MGMT pile — aucun combat en double, A contre B et B contre A confondus',
       let bad=0;
       for(let s=1;s<=40;s++){
         setSeed(s);
-        const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtNewPile(m);
         const seen=new Set();
         for(const a of m.pile){
           if(a.kind!=='leila_propose') continue;
@@ -481,7 +481,7 @@ test('MGMT noms — aucun prénom ni nom des six personnages et des cinq légend
       let bad=0;
       for(let s=1;s<=60;s++){
         setSeed(s);
-        const m=mgmtDefault(); mgmtNewRoster(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
         for(const o of m.roster){
           if(MGMT_EXCLUDED_FIRST.includes(o.first)) bad++;
           if(MGMT_EXCLUDED_LAST.includes(o.last)) bad++;
@@ -604,7 +604,7 @@ test('MGMT variété — prénoms uniques par pile, run max 2, singles 0-2 + blo
       let bad=0;
       for(let s=1;s<=200;s++){
         setSeed(s);
-        const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtNewPile(m);
         /* §T3 : le bloc attend la carte principale complète — posée en
            fixture, la proposition de Leïla est tirée par le refill,
            après les singles du cycle. */
@@ -665,7 +665,7 @@ test('MGMT pot de prénoms — le shortfall se signale au lieu de contourner', (
       let fired=0, clean=0, total=0;
       for(let s=1;s<=50;s++){
         setSeed(s*7919+13);
-        const m=mgmtDefault();
+        const m=mgmtDefaultAvantH4();
         m.roster=[
           {id:'a',name:'A Boxeur',first:'A',last:'Boxeur',W:5,L:2,D:0,age:25,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
           {id:'b',name:'B Lutteur',first:'B',last:'Lutteur',W:4,L:3,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},
@@ -697,7 +697,7 @@ test('MGMT âge/bilan — bandes débutant/vétéran disjointes, garde 1d intact
       let bad=0, maxRookie=-1e9, minVet=1e9;
       for(let s=1;s<=200;s++){
         setSeed(s);
-        const m=mgmtDefault(); mgmtNewRoster(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
         for(const o of m.roster){
           const fights=o.W+o.L;
           if(o.age<=26){ if(fights<4||fights>12) bad++; if(fights>maxRookie) maxRookie=fights; }
@@ -894,9 +894,9 @@ test('MGMT version — une sauvegarde d\u2019avant ne ressuscite jamais', () => 
   win.localStorage.setItem('cage-legacy-mgmt', JSON.stringify(old));
   win.eval(`G={theme:'dark'}; loadMgmt();`);
   assert.equal(win.eval(`G.mgmt==null`), true, 'aucune résurrection d\u2019ancien format');
-  const fresh = win.eval(`(function(){ const m=mgmtDefault(); return m.v; })()`);
+  const fresh = win.eval(`(function(){ const m=mgmtDefaultAvantH4(); return m.v; })()`);
   assert.equal(win.eval(`MGMT_SAVE_VERSION`), fresh, 'les sauvegardes neuves portent la version');
-  assert.equal(win.eval(`validateMgmt(JSON.parse(JSON.stringify(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION}))))`), true, 'v2 bien formée acceptée');
+  assert.equal(win.eval(`validateMgmt(JSON.parse(JSON.stringify(Object.assign(mgmtDefaultAvantH4(),{v:MGMT_SAVE_VERSION}))))`), true, 'v2 bien formée acceptée');
 });
 
 test('MGMT mémoire — seuls écrasements et revirements, en phrases', () => {
@@ -1117,7 +1117,7 @@ test('T8a accueil — reprise à froid depuis le secours, lecture pure et noms �
   assert.ok(!html.includes('<img src=x'));
   assert.equal(win.G.mgmt,null,'l’accueil ne charge pas la partie dans G');
   assert.equal(JSON.stringify({...win.localStorage}),snapshot,'aucune réparation ni écriture en lisant le titre');
-  win.CL.mgmtEnter();
+  win.mgmtEntrerAvantH4();
   assert.equal(win.G.mgmt.lastEvent.fights[0].winner,'B');
 });
 
@@ -1249,7 +1249,7 @@ test('MGMT cycle suivant — carte complète : le déclencheur manuel ouvre la s
 
 test('MGMT sortie de carte incomplète — la reproposition validée complète la carte, le cycle avance normalement', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(46); CL.mgmtEnter();`);
+  win.eval(`setSeed(46); mgmtEntrerAvantH4();`);
   /* §T1 : la carte principale est posée en fixture (composition = T2) ; le
      bloc reproposé complète les préliminaires — 5 + 4, la soirée s'ouvre. */
   poseMainCard(win);
@@ -1302,7 +1302,7 @@ test('MGMT absence de blocage — pot épuisé, le cycle avance toujours', () =>
   const r = win.eval(`
     (function(){
       setSeed(55);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       /* §4 bis, décision 4 d'Anthony du 20/09/2026 : le pot est épuisé
          quand plus rien n'est composable ni proposable — ici la carte
          principale complète (fixture, composition = T2) engage les dix
@@ -1341,7 +1341,7 @@ test('MGMT T5 fin de pile — les quatre issues de mgmtClosePile', () => {
   const r = win.eval(`
     (function(){
       const dispo=(m,n)=>m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o)).slice(0,n);
-      const etat=()=>{ setSeed(70); const m=mgmtDefault(); mgmtNewRoster(m); return m; };
+      const etat=()=>{ setSeed(70); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); return m; };
       /* Carte principale complète (fixture — composition = T2) : les dix
          premiers disponibles y sont posés, ils sortent du pot. */
       const poseMain=m=>{ const d=dispo(m,10);
@@ -1406,7 +1406,7 @@ test('MGMT T5 calendrier — pot épuisé : le cycle avance encore', () => {
   const r = win.eval(`
     (function(){
       setSeed(72);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       const d=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o)).slice(0,10);
       m.roster=d;
       for(let i=0;i<5;i++) m.card.main.push({a:d[2*i].id,b:d[2*i+1].id,cycle:m.cycle,slot:'main'});
@@ -1451,20 +1451,20 @@ test('MGMT économie — short notice payable à découvert dans la limite du pl
   /* QO-5 : le short notice est autorisé si et seulement si T − coût ≥ −P,
      avec P = 0 avant la première soirée, P = max(0, R₁) après une, puis
      P = max(0, arrondi((R₁ + R₂) / 2)). */
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=50; return mgmtCanAfford(m,60); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.treasury=50; return mgmtCanAfford(m,60); })()`), false,
     'avant la 1ʳᵉ soirée (exemple QO-5) : T=50 refuse un coût de 60, P=0');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=50; return mgmtCanAfford(m,50); })()`), true,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.treasury=50; return mgmtCanAfford(m,50); })()`), true,
     'la limite exacte passe : T − coût = −0 ≥ −0');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,100); })()`), true,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,100); })()`), true,
     'exemple QO-5 : R₁=120, T=30 accepte un coût de 100 (−70 ≥ −120)');
-  assert.equal(win.eval(`(function(){ const m=mgmtDefault(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,151); })()`), false,
+  assert.equal(win.eval(`(function(){ const m=mgmtDefaultAvantH4(); m.treasury=30; m.recettes=[120]; m.eventsPlayed=1; return mgmtCanAfford(m,151); })()`), false,
     'au-delà du plafond : refusé');
   /* Palier 2, mesuré sur deux vraies soirées : le plafond est la moyenne
      arrondie des deux dernières recettes, pas un compteur séparé. */
   const r = win.eval(`
     (function(){
       setSeed(66);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       for(let e=0;e<2;e++){
         /* §T3 : la carte principale est posée d'abord en fixture
            (composition = T2), Leïla propose les prélims ensuite. */
@@ -1491,7 +1491,7 @@ test('MGMT économie — remboursement du découvert sur la recette suivante', (
   const r = win.eval(`
     (function(){
       setSeed(64);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       /* §T3 : la carte principale est posée d'abord en fixture
          (composition = T2), Leïla propose les prélims ensuite. */
       m.card.main=[];
@@ -1556,7 +1556,7 @@ test('MGMT bloc non ignorable — carte incomplète : seuls valider, échanger, 
 
 test('MGMT aucun remplissage d\u2019office — rien n\u2019entre en carte sans une décision du joueur', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(61); CL.mgmtEnter();`);
+  win.eval(`setSeed(61); mgmtEntrerAvantH4();`);
   /* §T3 : la carte principale est posée d'abord en fixture (composition =
      T2), puis Leïla propose les prélims — écrasés sans validation. Les
      singles sont refusés : les accepter entrerait en carte, et c'est une
@@ -1628,7 +1628,7 @@ test('MGMT mémoire — formes singulier, pluriel et suites', () => {
    format strict. ==== */
 test('MGMT L1-R1 — reprendre une carrière préserve le bureau récent', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(11); CL.mgmtEnter();`);
+  win.eval(`setSeed(11); mgmtEntrerAvantH4();`);
   win.eval(`CL.mgmtOpen(G.mgmt.pile.find(a=>a.status==='open'&&a.kind==='leila_propose').id)`);
   const id = win.eval(`G.mgmt.open`);
   win.eval(`CL.mgmtReply('${id}','accept')`);
@@ -1644,7 +1644,7 @@ test('MGMT L1-R1 — reprendre une carrière préserve le bureau récent', () =>
     localStorage.setItem('cage-legacy-v3',JSON.stringify(raw)); })()`);
   win.eval(`CL.cont()`);
   assert.equal(win.eval(`G.mgmt`), undefined, 'aucune copie embarquée ne survit au chargement');
-  win.eval(`CL.go('title'); CL.mgmtEnter();`);
+  win.eval(`CL.go('title'); mgmtEntrerAvantH4();`);
   assert.equal(win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').decision`), 'accepted', 'le bureau dédié gagne sur la copie embarquée');
   /* Traiter une autre affaire persiste sans écraser la décision. */
   win.eval(`G.mgmt.pile.push({id:'k-r1',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:G.mgmt.roster[0].id,b:G.mgmt.roster[1].id,status:'open',decision:null,title:'t'}); CL.mgmtIgnore('k-r1');`);
@@ -1662,7 +1662,7 @@ test('MGMT L1-R2 — un identifiant importé reste une donnée', () => {
     assert.equal(win.eval(`mgmtValidAffair({id:'${ok}',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:'p',b:'q',status:'open'})`), true, 'id interne accepté : '+ok);
   }
   /* Bout en bout : import piégé, clic réel, aucun code exécuté. */
-  win.eval(`setSeed(11); CL.mgmtEnter();`);
+  win.eval(`setSeed(11); mgmtEntrerAvantH4();`);
   win.eval(`G.f=makeFighter({}); G.season={year:1,fights:[]}; G.ach=[]; G.titleHistory=[]; G.screen='hub'; save();`);
   const data = win.eval(`JSON.stringify((()=>{ const raw=JSON.parse(localStorage.getItem('cage-legacy-v3'));
     raw.mgmt=JSON.parse(localStorage.getItem('cage-legacy-mgmt'));
@@ -1670,7 +1670,7 @@ test('MGMT L1-R2 — un identifiant importé reste une donnée', () => {
     return JSON.stringify(raw); })())`);
   win.prompt = () => data;
   win.eval(`CL.importSave()`);
-  win.eval(`CL.go('title'); CL.mgmtEnter();`);
+  win.eval(`CL.go('title'); mgmtEntrerAvantH4();`);
   const row = win.document.querySelector('.mgmt-aff');
   assert.ok(row, 'une affaire saine est affichée');
   row.click();
@@ -1680,7 +1680,7 @@ test('MGMT L1-R2 — un identifiant importé reste une donnée', () => {
 
 test('MGMT L1-R3 — un champ mgmt importé invalide ne bloque pas le bureau sain', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(11); CL.mgmtEnter();`);
+  win.eval(`setSeed(11); mgmtEntrerAvantH4();`);
   const before = win.eval(`JSON.stringify(G.mgmt.pile.map(a=>a.id))`);
   win.eval(`G.f=makeFighter({}); G.season={year:1,fights:[]}; G.ach=[]; G.titleHistory=[]; G.screen='hub'; save();`);
   const data = win.eval(`JSON.stringify((()=>{ const raw=JSON.parse(localStorage.getItem('cage-legacy-v3'));

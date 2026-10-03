@@ -52,7 +52,7 @@ function poseMainCard5(win){
    posée en fixture, puis Leïla propose en fin de pile (refill du §5).
    Cycles bornés, déterministe. */
 function enterMgmtBulk(win,seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
   win.eval(`(function(){ let g=0; while(mgmtOpenCount(G.mgmt)>0&&g<40){ g++; const a=G.mgmt.pile.find(x=>x.status==='open'); CL.mgmtReply(a.id,a.exchange==='leila_propose'?'refuse':MGMT_EXCHANGES[a.exchange].replies[0].id); } })()`);
   poseMainCard5(win);
   win.eval(`CL.mgmtNextCycle(); render();`);
@@ -67,7 +67,7 @@ function mgmtBulkId(win){
 /* État management neuf avec roster généré par le vrai mgmtNewRoster, sans
    passer par l'écran : pour les tests qui ne regardent que la logique. */
 function freshState(win,seed){
-  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefault(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
+  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
 }
 
 /* ==== [ANCRE: MGMT_LOT2_TESTS] — Lot 2 la sous-carte. Réécrit au lot 2 T1
@@ -215,7 +215,7 @@ test('MGMT qualité — soigneuse sans écrasement, bâclée après', () => {
       let bad=0;
       for(let s=1;s<=200;s++){
         setSeed(s);
-        const m=mgmtDefault(); mgmtNewRoster(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
         m.leila={crushes:[]};
         const used=new Set(), seen=new Set();
         for(let i=0;i<4;i++){
@@ -233,7 +233,7 @@ test('MGMT qualité — soigneuse sans écrasement, bâclée après', () => {
       let sloppy=0;
       for(let s=1;s<=200;s++){
         setSeed(s+5000);
-        const m=mgmtDefault(); mgmtNewRoster(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
         m.leila={crushes:[3,4,5]};
         const used=new Set(), seen=new Set();
         for(let i=0;i<4;i++){
@@ -255,7 +255,7 @@ test('MGMT avertissement — existe puis s\u2019éteint, jamais annoncé', () =>
       let warnedYoung=0, warnedDead=0;
       for(let s=1;s<=200;s++){
         setSeed(s+7000);
-        const m=mgmtDefault(); mgmtNewRoster(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
         m.leila={crushes:[9]};
         const used=new Set(), seen=new Set();
         for(let i=0;i<4;i++){
@@ -267,7 +267,7 @@ test('MGMT avertissement — existe puis s\u2019éteint, jamais annoncé', () =>
       }
       for(let s=1;s<=200;s++){
         setSeed(s+9000);
-        const m=mgmtDefault(); mgmtNewRoster(m);
+        const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
         m.leila={crushes:[6,7,8,9,10]};
         const used=new Set(), seen=new Set();
         for(let i=0;i<4;i++){
@@ -382,7 +382,7 @@ test('MGMT aucun homonyme dans un combat — Rosa contre Rosa interdit', () => {
     let bad=0;
     for(let s=1;s<=300;s++){
       setSeed(s+4000);
-      const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtNewPile(m);
       /* §T3 : le bloc attend la carte principale complète — posée en
          fixture pour faire entrer la proposition dans le contrôle. */
       const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
@@ -445,7 +445,7 @@ test('MGMT extinction bout-en-bout — trois écrasements puis silence définiti
     let warned=0, piles=0;
     for(let s=1;s<=200;s++){
       setSeed(s+3000);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       m.leila={crushes:[11,12,13]};
       /* §T3 : la proposition en bloc n'arrive qu'une fois la carte
          principale complète — posée en fixture (composition = T2),
@@ -496,7 +496,7 @@ test('MGMT carte sanctuarisée — aucun appariement booké n\u2019est repropos�
     let bad=0;
     for(let s=1;s<=50;s++){
       setSeed(s);
-      const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtNewPile(m);
       const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open');
       if(!bulk) continue;
       mgmtDecide(m,bulk.id,'validate');
@@ -522,7 +522,7 @@ test('MGMT swap avec carte en prélims — le remplaçant évite aussi les paire
   const win = newGameWindow();
   const ok = win.eval(`(function(){
     setSeed(121);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
     if(dispo.length<10) return 'roster-court';
     mgmtNewPile(m);
@@ -556,7 +556,7 @@ test('MGMT arbitrage genre — aucun appariement mixte hommes/femmes', () => {
     let bad=0;
     for(let s=1;s<=200;s++){
       setSeed(s);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       m.leila={crushes:[2,3,4]};
       mgmtNewPile(m);
       /* §T3 : le bloc attend la carte principale complète — posée en
@@ -590,9 +590,9 @@ test('MGMT validation — bloc bien formé accepté, malformé rejeté', () => {
   assert.equal(win.eval(`mgmtValidAffair({id:'x',kind:'leila_bulk',exchange:'leila_bulk',speaker:'leila',a:'p',b:'q',status:'open',marked:0})`), false, 'bloc sans combats rejeté');
   assert.equal(win.eval(`mgmtValidAffair({id:'x',kind:'leila_bulk',exchange:'leila_bulk',speaker:'leila',a:'p',b:'q',status:'open',marked:0,fights:[{a:'p',b:'q',sloppy:'oui',warned:false}]})`), false, 'drapeau non booléen rejeté');
   assert.equal(win.eval(`mgmtValidAffair({id:'x',kind:'leila_bulk',exchange:'leila_bulk',speaker:'leila',a:'p',b:'q',status:'open',marked:0,fights:[{a:'p',b:'q',slot:'coin',sloppy:false,warned:false}]})`), false, 'emplacement inconnu rejeté');
-  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,card:{sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:2,slot:'main'}],prelims:[{a:'p',b:'q',cycle:2,slot:'prelim'}]},leila:{crushes:[2,3]}}))`), true, 'carte et historique bien formés acceptés');
-  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,card:{sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:1,slot:'prelim'}],prelims:[]}}))`), false, 'emplacement incohérent avec sa liste rejeté');
-  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefault(),{v:MGMT_SAVE_VERSION,leila:{crushes:[-1]}}))`), false, 'horodatage négatif rejeté');
+  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefaultAvantH4(),{v:MGMT_SAVE_VERSION,card:{sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:2,slot:'main'}],prelims:[{a:'p',b:'q',cycle:2,slot:'prelim'}]},leila:{crushes:[2,3]}}))`), true, 'carte et historique bien formés acceptés');
+  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefaultAvantH4(),{v:MGMT_SAVE_VERSION,card:{sizeMain:5,sizePrelims:4,main:[{a:'p',b:'q',cycle:1,slot:'prelim'}],prelims:[]}}))`), false, 'emplacement incohérent avec sa liste rejeté');
+  assert.equal(win.eval(`validateMgmt(Object.assign(mgmtDefaultAvantH4(),{v:MGMT_SAVE_VERSION,leila:{crushes:[-1]}}))`), false, 'horodatage négatif rejeté');
 });
 /* ==== [FIN ANCRE] ==== */
 
@@ -649,7 +649,7 @@ test('MGMT T3 hors carte — aucun combattant de la carte principale ne se retro
     let bad=0;
     for(let s=1;s<=60;s++){
       setSeed(s+7000);
-      const m=mgmtDefault(); mgmtNewRoster(m);
+      const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
       /* §T3 : la carte principale d'abord (fixture), la proposition de
          Leïla ensuite — construite avec ce qui reste. */
       const dispo=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
@@ -671,7 +671,7 @@ test('MGMT T3 rangs proches — au-delà de MGMT_RANK_GAP, la paire est bâclée
   const r = win.eval(`(function(){
     const mk=(id,first,W,L)=>({id:id,name:first+' Test',first:first,last:'Test',W:W,L:L,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0});
     const cle=p=>p?[p.a.id,p.b.id].sort().join('|'):null;
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     /* Une catégorie à six rangs : #1 (20-0) … #6 (0-20). Les prénoms mis
        à part (used) laissent exactement la paire voulue au tirage. */
     m.roster=[mk('g1','Gaston',20,0),mk('g2','Gérard',18,1),mk('g3','Gilbert',16,2),mk('g4','Gustave',14,3),mk('g5','Gaspard',4,10),mk('g6','Gauthier',0,20)];
@@ -693,7 +693,7 @@ test('MGMT T3 repos — pas de combattant de la soirée précédente, sauf en mo
   const win = newGameWindow();
   const r = win.eval(`(function(){
     const mk=(id,first,extra)=>Object.assign({id:id,name:first+' Test',first:first,last:'Test',W:9,L:7,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},extra||{});
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     m.cycle=3;
     /* Quatre combattants, tous de la soirée précédente (cycle 2) —
        aucun reposé : en strict, la paire est impossible. */
@@ -712,7 +712,7 @@ test('MGMT T3 revanche — pas de reprise d\u2019un combat de la soirée précé
   const win = newGameWindow();
   const r = win.eval(`(function(){
     const mk=(id,first)=>({id:id,name:first+' Test',first:first,last:'Test',W:9,L:7,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0});
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     m.cycle=2;
     /* La soirée précédente : Alain contre Bruno (fixture m.lastEvent). */
     m.lastEvent={cycle:1,fights:[{a:'a',b:'b',winner:'A',family:'ko',round:2}],touched:[]};
@@ -734,7 +734,7 @@ test('MGMT T3 priorité — les combattants inactifs depuis le plus longtemps so
   const win = newGameWindow();
   const r = win.eval(`(function(){
     const mk=(id,first,lc)=>Object.assign({id:id,name:first+' Test',first:first,last:'Test',W:9,L:7,D:0,age:27,div:'H-light',divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},lc===undefined?{}:{lastCycle:lc});
-    const m=mgmtDefault(); m.cycle=5;
+    const m=mgmtDefaultAvantH4(); m.cycle=5;
     /* Deux jamais combattus (les plus en attente), deux inactifs depuis
        le cycle 1, deux depuis le cycle 3 : les paliers se lisent dans
        l'ordre des tirages. */
@@ -871,7 +871,7 @@ test('MGMT T1 migration — v2 et v3 migrent en chaîne 2 → 3 → 4 → 5', ()
 test('MGMT T1 classement — mgmtDivisionRank : dérivé, pur, retraité hors classement, suspendu classé', () => {
   const win = newGameWindow();
   const r = win.eval(`(function(){
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     const mk=(id,first,div,W,L,extra)=>Object.assign({id:id,name:first+' Test',first:first,last:'Test',W:W,L:L,D:0,age:27,div:div,divName:'Poids léger',org:'Split',level:1,raison:null,interactions:0},extra||{});
     m.roster=[
       mk('mg1','Alain','H-light',10,2),            /* +8, 10 victoires */
@@ -908,7 +908,7 @@ test('MGMT T1 classement — mgmtDivisionRank : dérivé, pur, retraité hors cl
 test('MGMT T1 carte — complète à 5 + 4, pas avant', () => {
   const win = newGameWindow();
   const st = win.eval(`(function(){
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     const res={};
     res.vide=mgmtCardFull(m);
     m.card.main=[{a:'mg1',b:'mg2',cycle:1,slot:'main'}];
@@ -984,7 +984,7 @@ test('MGMT T1 soirée — les 9 combats se jouent, carte principale d\u2019abord
    tout nom affiché. ==== */
 
 function enterMgmt(win,seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
 }
 
 /* Roster contrôlé : six légers (quatre disponibles, un suspendu, un

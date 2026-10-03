@@ -23,13 +23,13 @@ const { newGameWindow } = require('./helpers/loadGame');
 
 /* Entrée du bureau avec graine imposée (déterministe). */
 function enterMgmt(win,seed){
-  win.eval(`setSeed(${seed}); CL.mgmtEnter();`);
+  win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
 }
 
 /* État management neuf avec roster généré par le vrai mgmtNewRoster, sans
    passer par l'écran : pour les tests qui ne regardent que la logique. */
 function freshState(win,seed){
-  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefault(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
+  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
 }
 
 /* Le traumatisme est caché : aucune valeur ne doit fuiter dans le DOM.
@@ -392,7 +392,7 @@ test('MGMT soirée — calculée une seule fois : recharger après la soirée ne
   const win = newGameWindow();
   win.eval(`(function(){
     setSeed(210);
-    const m=mgmtDefault(); mgmtNewRoster(m);
+    const m=mgmtDefaultAvantH4(); mgmtNewRoster(m);
     /* §T3 (docs/LOT-2-CARTE-PRINCIPALE.md ; LOT-3B §2) : la carte
        principale d'abord en fixture (composition = T2), la proposition de
        Leïla ensuite, sur des combattants disponibles hors carte. */

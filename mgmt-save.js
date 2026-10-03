@@ -216,6 +216,7 @@ function validateMgmt(raw){
   if(!Array.isArray(raw.roster)||!Array.isArray(raw.pile)||!Array.isArray(raw.facts)) return false;
   if(raw.open!==null&&typeof raw.open!=='string') return false;
   if(raw.shortfall!==undefined&&typeof raw.shortfall!=='boolean') return false;
+  if(raw.effectifs!==undefined&&raw.effectifs!==0&&raw.effectifs!==1) return false;
   if(!Number.isSafeInteger(raw.treasury)) return false;
   if(!Array.isArray(raw.recettes)||raw.recettes.length>2) return false;
   for(const r of raw.recettes){ if(!Number.isSafeInteger(r)) return false; }
@@ -318,7 +319,7 @@ function mgmtMigrate(raw){
   if(raw.v===4){
     raw.v=5;
     const old=(raw.card&&Array.isArray(raw.card.fights))?raw.card.fights:[];
-    raw.card={sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],
+    raw.card={sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_AVANT_H4,main:[],
       prelims:old.map(f=>({a:f.a,b:f.b,cycle:f.cycle,slot:'prelim'}))};
   }
   if(raw.v===5){
@@ -391,6 +392,15 @@ function mgmtMigrate(raw){
     raw.v=12;
   }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MGMT_LOT5_H4_MIGRATION] — 12 → 13 : les effectifs. Une
+     partie commencée garde son monde à 30 par catégorie, son vestiaire et la
+     taille de sa carte (card.sizePrelims déjà sauvegardée) : effectifs 0.
+     Aucune ligne ajoutée ni retirée. ==== */
+  if(raw.v===12){
+    raw.effectifs=0;
+    raw.v=13;
+  }
+  /* ==== [FIN ANCRE] ==== */
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
@@ -458,10 +468,10 @@ function mgmtRepair(m){
      deux capacités et les deux listes existent toujours, un combat qui ne
      pointe plus vers le roster est retiré de son emplacement. */
   if(!m.card||typeof m.card!=='object'||Array.isArray(m.card)){
-    m.card={sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]};
+    m.card={sizeMain:MGMT_MAIN_SIZE,sizePrelims:m.effectifs===1?MGMT_PRELIM_SIZE:MGMT_PRELIM_AVANT_H4,main:[],prelims:[]};
   }
   if(!Number.isSafeInteger(m.card.sizeMain)||m.card.sizeMain<1) m.card.sizeMain=MGMT_MAIN_SIZE;
-  if(!Number.isSafeInteger(m.card.sizePrelims)||m.card.sizePrelims<1) m.card.sizePrelims=MGMT_PRELIM_SIZE;
+  if(!Number.isSafeInteger(m.card.sizePrelims)||m.card.sizePrelims<1) m.card.sizePrelims=m.effectifs===1?MGMT_PRELIM_SIZE:MGMT_PRELIM_AVANT_H4;
   if(!Array.isArray(m.card.main)) m.card.main=[];
   if(!Array.isArray(m.card.prelims)) m.card.prelims=[];
   for(const slot of ['main','prelims']){

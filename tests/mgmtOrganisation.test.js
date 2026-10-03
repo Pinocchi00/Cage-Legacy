@@ -32,7 +32,7 @@ const TRAVAIL_RE=/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|mgmt-lvl|TODO/i;
 /* État management neuf, roster généré par le vrai mgmtNewRoster, sans
    passer par mgmtEnter (le test pilote la navigation lui-même). */
 function freshState(win,seed){
-  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefault(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
+  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
 }
 
 /** Les tuiles d'effectif rendues : {nm,sub,thin}. */
@@ -45,7 +45,7 @@ function mgmtOrgTiles(html){
 
 test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, aucun texte de travail', () => {
   const win = newGameWindow();
-  win.eval(`setSeed(77); CL.mgmtEnter(); CL.go('mgmt_organisation');`);
+  win.eval(`setSeed(77); mgmtEntrerAvantH4(); CL.go('mgmt_organisation');`);
   const html = win.document.getElementById('app').innerHTML;
   assert.ok(html.includes("L'organisation"), 'l’écran de l’organisation est rendu');
   /* Ce qui n'existe pas n'apparaît pas : aucun texte de la maquette 08 hors

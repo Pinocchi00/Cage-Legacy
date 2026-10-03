@@ -31,7 +31,7 @@ const { newGameWindow } = require('./helpers/loadGame');
 
 /* État management neuf, roster généré par le vrai mgmtNewRoster. */
 function freshMgmt(win,seed){
-  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefault(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
+  win.eval(`(function(){ setSeed(${seed}); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); G={theme:'dark',mgmt:m}; })()`);
 }
 
 /* Une soirée complète : un cycle s'ouvre (mgmtNewPile, le compteur avance),
@@ -521,7 +521,7 @@ test('MGMT trace — validateMgmt refuse un historique structurellement faux, mg
   assert.ok(joueSoiree(win),'une soirée a été jouée (trace réelle en base)');
   const okTrace = JSON.parse(win.eval(`JSON.stringify(G.mgmt.hist[0])`));
   const valide = t => win.eval(`(function(){
-    const m=mgmtDefault(); m.hist=JSON.parse(${JSON.stringify(JSON.stringify([t]))});
+    const m=mgmtDefaultAvantH4(); m.hist=JSON.parse(${JSON.stringify(JSON.stringify([t]))});
     return validateMgmt(m);
   })()`);
   assert.equal(valide(okTrace), true, 'une trace réelle bien formée passe la porte');
@@ -553,7 +553,7 @@ test('MGMT trace — validateMgmt refuse un historique structurellement faux, mg
   }
   /* Le rechargement tolérant écarte l'entrée illisible, garde l'autre. */
   const repare = JSON.parse(win.eval(`(function(){
-    const m=mgmtDefault();
+    const m=mgmtDefaultAvantH4();
     const ok=JSON.parse(${JSON.stringify(JSON.stringify(okTrace))});
     const casse=JSON.parse(JSON.stringify(ok)); casse.seed='x';
     m.hist=[ok,casse];

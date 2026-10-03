@@ -204,6 +204,12 @@ function mgmtFightReady(f,cycle){
     c.attrs.chin=Math.max(1,Math.round(num(c.attrs.chin)*k));
     c.attrs.durability=Math.max(1,Math.round(num(c.attrs.durability)*k));
   }
+  /* Lot 5 H5 : la forme baisse quand l'année a été chargée. Lue dans les
+     faits gardés de la partie (jusqu'au cycle du combat) : le rejeu d'un
+     combat passé retrouve exactement la même forme. */
+  const partie=(typeof G!=='undefined'&&G&&G.mgmt)?G.mgmt:null;
+  const baisse=partie?mgmtVieFormeBaisse(partie,f,cycle):0;
+  if(baisse<0&&c){ c.dynamic=num(c.dynamic)+baisse; c.overall=overall(c); }
   return c;
 }
 
@@ -513,7 +519,11 @@ function mgmtApplyFight(m,f,opp,res,side){
   if(res.method==='Blessure'&&loserSide===side){
     injury=rollInjury();
   }else{
-    const p=MGMT_INJURY_BASE+MGMT_INJURY_HEAD*H+MGMT_INJURY_TRAUMA*T0+(K>0?MGMT_INJURY_KD*K:0);
+    /* Lot 5 H5 : une année chargée (moments de vie, hors moments heureux)
+       rend la blessure au camp plus probable ; 0 à charge faible, le combat
+       d'avant est strictement identique. */
+    const p=MGMT_INJURY_BASE+MGMT_INJURY_HEAD*H+MGMT_INJURY_TRAUMA*T0+(K>0?MGMT_INJURY_KD*K:0)
+      +mgmtVieRisqueBlessure(m,f,m.cycle);
     if(rnd()<p) injury=rollInjury();
   }
   let days=0;
@@ -606,7 +616,7 @@ function mgmtRunEvent(m){
      cachet reste le salaire de combat, le vainqueur touche le sien une
      seconde fois, et la recette nette le déduit. */
   const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length,
-    mgmtWinBonuses(m,booked,fights));
+    mgmtWinBonuses(m,booked,fights),m.card.sizeMain+m.card.sizePrelims);
   /* Un seul solde (QO-5) : T ← T + R. Remboursement « avant tout bénéfice »
      automatique — tant que T < 0, rien n'est bénéfice. E1 si et seulement
      si T < 0 avant la soirée et R > 0. */

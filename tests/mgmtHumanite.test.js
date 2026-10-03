@@ -72,7 +72,8 @@ test('H3 — migration 11 → 12 : chaque ancien profil et rejeu reste EXACTEMEN
         ext:apres.every((f,i)=>extProfils[i]===JSON.stringify(mgmtCombatProfile(f))),
         hist:hist===JSON.stringify(m.hist),rejeu:avant===JSON.stringify(mgmtReplayFight(m.hist[0]))&&avant===JSON.stringify(res),
         rng:seed===SEED,idempotent:premiere===JSON.stringify(m)};`);
-    assert.deepEqual(r,{v:12,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
+    /* H4 : la même chaîne mène maintenant à la version 13 (effectifs 0). */
+    assert.deepEqual(r,{v:13,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
   }finally{ w.close(); }
 });
 

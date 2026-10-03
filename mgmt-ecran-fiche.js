@@ -158,6 +158,18 @@ function mgmtHistoriqueHtml(m,f){
       +`</div>`;
   }).join('');
 }
+/* ==== [ANCRE: MGMT_LOT5_H5_FICHE_VIE] — « Sa vie » : les moments que la
+   presse ou lui-même relaie, du plus récent au plus ancien, libellé du
+   catalogue tel quel. Aucun relais, aucune ligne : « On ne sait pas encore ».
+   Pas de charge, pas de jauge. ==== */
+function mgmtFicheVie(m,f){
+  const lignes=mgmtVieRelayes(m,f).slice(0,8);
+  const corps=lignes.length
+    ?`<ul class="mgmt-fiche-vie-liste">${lignes.map(x=>`<li>${esc(x.moment.libelle)} <span class="mgmt-fiche-vie-relais">${esc(x.moment.relais.join(' · '))}</span></li>`).join('')}</ul>`
+    :'<p>On ne sait pas encore.</p>';
+  return `<h3 class="mgmt-fiche-vie">Sa vie</h3>${corps}`;
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_mgmt_fiche(){
   const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id);
   if(!line) return scr_mgmt_bureau();
@@ -179,7 +191,7 @@ function scr_mgmt_fiche(){
      +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p></div>`
      +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
      +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
-    +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}</section>`
+    +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}${mgmtFicheVie(m,f)}</section>`
     +`${mgmtFicheParcours(trace)}</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */
