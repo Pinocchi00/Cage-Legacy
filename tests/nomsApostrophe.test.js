@@ -92,22 +92,36 @@ const lists = JSON.parse(win.eval(`JSON.stringify({
     krFirst:COUNTRIES.KR.first, ge:COUNTRIES.GE.last, geFirst:COUNTRIES.GE.first,
     fm:FIRST_M, ff:FIRST_F, autres:COUNTRY_KEYS.filter(k=>!['IE','TH','KR','GE'].includes(k)).map(k=>COUNTRIES[k].last)
   })`));
-  /* Irlande : 25 entrées, ordre inchangé (épinglé) — aucun tirage ne bouge. */
-  assert.equal(lists.ie.length, 25, 'Irlande : toujours 25 entrées');
-  assert.deepEqual(lists.ie, ['Murphy','Kelly',"O'Brien",'Byrne','Ryan','Walsh','McCarthy',
-    "O'Sullivan","O'Connor",'Doyle','Gallagher','Kennedy','Lynch','Murray','McGregor','Kavanagh',
-    'Ward','Fields','Pendred','Holohan','Queally','Hughes','Dunphy','Carroll','Hoolahan']);
-  /* Thaïlande : 21 entrées. */
-  assert.equal(lists.th.length, 21, 'Thaïlande : toujours 21 entrées');
-  assert.ok(lists.th.includes('Nong-O'), 'Nong-O porte son trait d’union');
-  /* Corée : 14 noms de famille (prénoms sortis vers `first`), ordre épinglé. */
+/* Lot 5 H2 bis (03/10/2026), décision d'Anthony du 30/09 (humanité : noms réels,
+   jamais un sportif célèbre ni un nom de ring) : les listes des quatorze anciens
+   pays changent ; elles ne sont plus épinglées à l'identique. */
+  /* Irlande : les noms d'origine restent, McGregor/Pendred/Holohan/Queally sortent. */
+  for(const nom of ['Murphy','Kelly',"O'Brien",'Byrne','Ryan',"O'Sullivan","O'Connor",'Kavanagh','Brennan','Quinn']){
+    assert.ok(lists.ie.includes(nom), 'Irlande : ' + nom);
+  }
+  for(const sorti of ['McGregor','Pendred','Holohan','Queally']){
+    assert.ok(!lists.ie.includes(sorti), 'Irlande : ' + sorti + ' retiré');
+  }
+  assert.equal(lists.ie.length, 30, 'Irlande : 30 entrées');
+  /* Thaïlande : de vrais noms de famille, plus de noms de ring (Nong-O et les autres sortent). */
+  assert.ok(lists.th.length>=20, 'Thaïlande : au moins 20 noms de famille');
+  for(const sorti of ['Nong-O','Saenchai','Rodtang','Superlek','Banchamek']){
+    assert.ok(!lists.th.includes(sorti), 'Thaïlande : ' + sorti + ' (nom de ring) retiré');
+  }
+  /* Corée : 14 noms de famille inchangés ; prénoms renouvelés (Dong-hyun, Chan-sung, Doo-ho, Da-un sortent). */
   assert.equal(lists.kr.length, 14, 'Corée : toujours 14 noms de famille');
   assert.deepEqual(lists.kr, ['Kim','Lee','Park','Choi','Jung','Kang','Yoon','Jo','Lim','Jang','Shin','Yoo','Han','Kwon']);
-  assert.equal(lists.krFirst.length, 9, 'Corée : 9 prénoms dans la liste first');
-  assert.deepEqual(lists.krFirst, ['Dong-hyun','Chan-sung','Doo-ho','Da-un','Si-woo','Myung-ho','Sung-bin','Jin-soo','Kyung-ho']);
-  /* Géorgie : 11 surnames, 10 prénoms, ordres épinglés. */
-  assert.equal(lists.ge.length, 11, 'Géorgie : toujours 11 noms de famille');
-  assert.deepEqual(lists.ge, ['Dvalishvili','Beridze','Kvaratskhelia','Chikadze','Gogitidze','Maisuradze','Kapanadze','Gelashvili','Bolkvadze','Diasamidze','Topuria']);
+  assert.equal(lists.krFirst.length, 16, 'Corée : 16 prénoms dans la liste first');
+  for(const sorti of ['Dong-hyun','Chan-sung','Doo-ho','Da-un']){
+    assert.ok(!lists.krFirst.includes(sorti), 'Corée : ' + sorti + ' retiré');
+  }
+  assert.ok(lists.krFirst.includes('Min-jun')&&lists.krFirst.includes('Seo-jun'), 'Corée : prénoms courants');
+  /* Géorgie : Dvalishvili, Kvaratskhelia, Chikadze et Topuria sortent ; les prénoms restent. */
+  assert.equal(lists.ge.length, 15, 'Géorgie : 15 noms de famille');
+  for(const sorti of ['Dvalishvili','Kvaratskhelia','Chikadze','Topuria']){
+    assert.ok(!lists.ge.includes(sorti), 'Géorgie : ' + sorti + ' retiré');
+  }
+  assert.ok(lists.ge.includes('Beridze')&&lists.ge.includes('Lomidze'), 'Géorgie : noms courants');
   assert.equal(lists.geFirst.length, 10, 'Géorgie : 10 prénoms dans la liste first');
   assert.deepEqual(lists.geFirst, ['Guram','Amiran','Ilia','Roman','Merab','Giga','Lasha','Shota','Revaz','Zurab']);
   /* Aucun prénom ne reste caché dans une liste de noms de famille. */

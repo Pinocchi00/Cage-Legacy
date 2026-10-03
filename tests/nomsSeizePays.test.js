@@ -124,12 +124,13 @@ const INTERDITS = [
   'Riyad Mahrez','Islam Slimani','Baghdad Bounedjah','Rachid Ghezzal',
   'Walid Cherif','Zhong Guo','Liu Xiang','Ma Long','Wang Tao','Wang Hao','Wu Lei','Sun Yang','Sun Yue','Zhu Ting','Xu Xin','Lin Dan','Yao Ming',
   'Dries Mertens','Erik Karlsson','Elias Pettersson','Alexander Isak','Cooper Chapman','Émile Bouchard',
-  'Zinedine Zidane','Robert Lewandowski','Romelu Lukaku','Kylian Mbappé','Khabib Nurmagomedov','Floyd Mayweather'
+  'Zinedine Zidane','Robert Lewandowski','Romelu Lukaku','Kylian Mbappé','Khabib Nurmagomedov','Floyd Mayweather',
+  'Anderson Silva','Thiago Silva','Rodrigo Nogueira','Júnior Dos Santos','Charles Oliveira','Jon Jones','Derrick Lewis','Anthony Smith','Kamaru Usman','Tony Ferguson','Conor McGregor','Kim Dong-hyun'
 ];
 
-test('H2 — aucune combinaison prénom + nom des seize pays ne donne un sportif célèbre', () => {
+test('H2 / H2 bis — aucune combinaison prénom + nom des trente pays ne donne un sportif célèbre', () => {
   const win = newGameWindow();
-  const cks = JSON.stringify(Object.keys(NOUVEAUX_PAYS));
+  const cks = JSON.stringify(Object.keys(NOUVEAUX_PAYS).concat(ANCIENS_PAYS));
   const r = JSON.parse(win.eval(`JSON.stringify((function(){
     const interdits=new Set(${JSON.stringify(INTERDITS)});
     const cksListe=${cks};
@@ -217,19 +218,19 @@ test('H2 — makeName : les femmes des seize pays tirent dans firstF, les hommes
     assert.ok(lists[ck].firstF.includes(m.fFirst), `femme ${ck} : prénom féminin du pays (${m.fFirst})`);
     assert.ok(lists[ck].last.includes(m.fLast), `femme ${ck} : nom du pays (${m.fLast})`);
   }
-  /* Les femmes des pays sans firstF restent dans FIRST_F (KR/GE/FR). */
+  /* H2 bis (03/10) : les quatorze anciens pays ont désormais leur firstF et leur first. */
   const vieux = JSON.parse(win.eval(`JSON.stringify((function(){
     setSeed(5050); const fr=makeName('F','FR');
     setSeed(5051); const kr=makeName('F','KR');
     setSeed(5052); const ge=makeName('F','GE');
     setSeed(5053); const frH=makeName('H','FR');
-    return {fr:fr.first,kr:kr.first,ge:ge.first,frH:frH.first};
+    return {fr:fr.first,kr:kr.first,ge:ge.first,frH:frH.first,
+      ffr:COUNTRIES.FR.firstF,fkr:COUNTRIES.KR.firstF,fge:COUNTRIES.GE.firstF,mfr:COUNTRIES.FR.first};
   })())`));
-  const pools = JSON.parse(win.eval(`JSON.stringify({fm:FIRST_M,ff:FIRST_F})`));
-  assert.ok(pools.ff.includes(vieux.fr), 'femme française : FIRST_F');
-  assert.ok(pools.ff.includes(vieux.kr), 'femme coréenne : FIRST_F');
-  assert.ok(pools.ff.includes(vieux.ge), 'femme géorgienne : FIRST_F');
-  assert.ok(pools.fm.includes(vieux.frH), 'homme français : FIRST_M');
+  assert.ok(vieux.ffr.includes(vieux.fr), 'femme française : firstF du pays');
+  assert.ok(vieux.fkr.includes(vieux.kr), 'femme coréenne : firstF du pays');
+  assert.ok(vieux.fge.includes(vieux.ge), 'femme géorgienne : firstF du pays');
+  assert.ok(vieux.mfr.includes(vieux.frH), 'homme français : first du pays');
   /* Une femme d'un pays à liste féminine ne tire jamais dans first (hommes). */
   const plF = JSON.parse(win.eval(`JSON.stringify((function(){
     setSeed(5060); const f=makeName('F','PL');
@@ -330,4 +331,34 @@ test('H2 — un combattant des seize pays passe la porte de sauvegarde (validate
   })()`);
   const ok = JSON.parse(win.eval(`JSON.stringify({passe:validateMgmt(G.mgmt)})`));
   assert.equal(ok.passe, true, 'un combattant kirghize passe la porte de sauvegarde (COUNTRY_KEYS étendue)');
+});
+
+/* Lot 5 H2 bis (03/10/2026) — les quatorze anciens pays : plus de nom de
+   combattant, de footballeur ou de politique célèbre (Nurmagomedov, Makhachev,
+   Chimaev, Tsarnaev, Adesanya, Biya, Canelo, McGregor…), plus de nom de ring
+   thaïlandais, et chacun porte ses prénoms masculins et féminins. */
+test('H2 bis — les quatorze anciens pays : noms célèbres sortis, prénoms du pays présents', () => {
+  const win = newGameWindow();
+  const r = JSON.parse(win.eval(`JSON.stringify({
+    pays:${JSON.stringify(ANCIENS_PAYS)}.map(k=>({k,last:COUNTRIES[k].last,first:COUNTRIES[k].first,firstF:COUNTRIES[k].firstF})),
+    anciens:COUNTRY_LAST_ANCIENS
+  })`));
+  const SORTIS = ['Tsarnaev','Nurmagomedov','Makhachev','Chimaev','Adesanya','Biya','Canelo','McGregor','Cejudo',
+    'Emelianenko','Bisping','Aspinall','Pimblett','Dvalishvili','Topuria','Gaethje','Sakuraba','Saenchai','Rodtang'];
+  for(const p of r.pays){
+    assert.ok(p.last.length>=14, p.k + ' : au moins 14 noms de famille');
+    assert.ok(p.first&&p.first.length>=9, p.k + ' : prénoms masculins du pays');
+    assert.ok(p.firstF&&p.firstF.length>=15, p.k + ' : prénoms féminins du pays');
+    assert.equal(new Set(p.last).size, p.last.length, p.k + ' : aucun doublon (noms)');
+    assert.equal(new Set(p.first).size, p.first.length, p.k + ' : aucun doublon (prénoms)');
+    assert.equal(new Set(p.firstF).size, p.firstF.length, p.k + ' : aucun doublon (prénoms féminins)');
+    for(const s of SORTIS){ assert.ok(!p.last.includes(s), p.k + ' : ' + s + ' retiré'); }
+  }
+  /* Les noms retirés restent connus d'une seule chose : retrouver l'origine d'une ancienne sauvegarde. */
+  assert.ok(r.anciens.DAG.includes('Tsarnaev')&&r.anciens.DAG.includes('Chimaev'), 'DAG : noms retirés mémorisés');
+  assert.ok(r.anciens.TH.includes('Saenchai'), 'TH : noms de ring mémorisés');
+  for(const [ck,l] of Object.entries(r.anciens)){
+    const actuels = r.pays.find(p=>p.k===ck).last;
+    for(const nom of l){ assert.ok(!actuels.includes(nom), ck + ' : ' + nom + ' absent des tirages'); }
+  }
 });
