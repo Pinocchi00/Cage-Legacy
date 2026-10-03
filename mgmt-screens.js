@@ -416,8 +416,11 @@ Object.assign(CL,{
       return;
     }
     /* Deuxième choix : le combat entre dans le premier emplacement libre. */
-    if(mgmtBookMain(m,MGMT_CART.pick,id)){
+    const premier=MGMT_CART.pick;
+    if(mgmtBookMain(m,premier,id)){
       MGMT_CART.pick=null; MGMT_CART.cursor=0;
+      /* Lot 5 : le combat est proposé, chacun des deux répond de sa voix. */
+      if(typeof mgmtReponsesProposition==='function') MGMT_PROPOSITION={c:m.cycle,lignes:mgmtReponsesProposition(m,premier,id)};
       saveMgmt();
     }
     render();

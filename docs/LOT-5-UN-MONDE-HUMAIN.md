@@ -510,6 +510,19 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   au départ, aucune règle d'arrivée), « Il ne parle plus comme avant » en parole du joueur, le choix du
   joueur sur « un combat de reprise ou l'arrêt » du scénario n° 30.
 
+- **Les réseaux et les propositions, codés par Claude** (03/10 ; les répliques sont celles du document des
+  voix, `relu:false`). `mgmt-voix.js`. **Réseaux** : ceux qui sont à l'affiche publient, de leur voix
+  (situation `reseaux`) ; la tête de la carte principale d'abord, ton cercle avant le reste, deux paroles
+  au plus avec les résultats ; une publication s'affiche « Nom (réseaux) : texte », sans guillemets, car
+  plusieurs lignes décrivent une publication plutôt qu'une citation. **Réponse à une proposition** : quand
+  le joueur booke un combat sur la carte (second clic), **chacun des deux répond de sa voix** (situation
+  `proposition`) ; la variante suit l'adversaire — « lutteur » (propension au sol de 0,5 et plus), « frappeur »,
+  ou « inconnu » (moins de trois combats) — et la réponse se lit au-dessus de la carte pendant le cycle (état
+  d'interface, jamais sauvegardé). Parties neuves seulement. **Non fait** : « Proposition refusée »
+  (aucun combattant ne refuse une proposition : ce serait une règle de jeu à décider), « Proposition à court
+  préavis » et « Forfait » (les réponses du retrait sont celles d'Anthony, T6, qui ne disent pas pourquoi),
+  « Provocation reçue », « Sur l'affiche d'un autre », « Pesée ratée », « Pendant le combat ».
+
 - **T2 + T3 — la voix branchée, codées par Claude** (03/10 ; **les répliques sont
   celles du document, `relu:false` : Anthony les relit et les réécrit**).
   `mgmt-voix-data.js` est **généré** par `tools/extraire-voix.js` depuis

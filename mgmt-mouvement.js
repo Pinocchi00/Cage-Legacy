@@ -36,7 +36,7 @@ function mgmtFilLignes(m){
   }
   if(typeof mgmtRecruesLignes==='function') for(const r of mgmtRecruesLignes(m)) out.push(r.text);
   if(typeof mgmtRivalitesLignes==='function') for(const r of mgmtRivalitesLignes(m)) out.push(r.text);
-  if(typeof mgmtParolesDeLaSemaine==='function') for(const p of mgmtParolesDeLaSemaine(m)) out.push(p.name+' : « '+p.texte+' »');
+  if(typeof mgmtParolesDeLaSemaine==='function') for(const p of mgmtParolesDeLaSemaine(m)) out.push(mgmtParoleLigne(p));
   if(typeof mgmtMediasLignes==='function') for(const p of mgmtMediasLignes(m)) out.push(p.nom+' : '+p.texte);
   for(const c of mgmtConteurCandidats(m,m.cycle)) out.push(c.name+' : '+c.moment.libelle);
   return out.slice(0,MGMT_FIL_MAX_LIGNES);
