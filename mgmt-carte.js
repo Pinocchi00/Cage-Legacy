@@ -615,7 +615,7 @@ function mgmtMainPosable(m){
  *  @returns {string} 'none'|'event'|'compose'|'refill'|'stuck'. */
 function mgmtClosePile(m){
   if(!m||mgmtOpenCount(m)>0) return 'none';
-  if(mgmtCardFull(m)) return 'event';
+  if(mgmtCardFull(m)||(typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m))) return 'event';
   if(m.card&&Array.isArray(m.card.main)&&Number.isSafeInteger(m.card.sizeMain)
     &&m.card.main.length<m.card.sizeMain){
     return mgmtMainPosable(m)?'compose':'stuck';

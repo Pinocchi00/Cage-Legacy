@@ -302,7 +302,7 @@ function scr_mgmt_bureau(){
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtOpenLabel(open.length))}`
     +` — ${esc(mgmtCardLabel(m))}</div>`
     +`<div class="mgmt-cols mgmt-week-cols">`
-    +`<section class="mgmt-week-pane mgmt-week-left">${mgmtSemaineCarte(m)}`
+    +`<section class="mgmt-week-pane mgmt-week-left">${mgmtSemaineCarte(m)}${typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):''}`
     +`<div class="mgmt-week-talk">${selOpen&&selOpen.speaker==='leila'?'':'<h3>Échange</h3>'}${talkHtml}</div>`
     +`<div class="mgmt-week-affairs"><h3>Affaires · ${open.length}</h3>${pileHtml}</div>`
     +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</section>`

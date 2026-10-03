@@ -525,6 +525,31 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   recruter contre recruter peu » (le recrutement est gratuit, seuls les cachets de combat coûtent) et
   le récit de la presse au premier combat (les médias de T3).
 
+- **T6 — les cartes incomplètes, codées par Claude** (03/10 ; **les 4 tests ignorés passent au
+  vert**). `mgmt-retraits.js` ; `mgmt-retraits-data.js` est **généré** par `tools/extraire-retraits.js`
+  depuis `docs/LOT-3B-CARTE-INCOMPLETE.md` : les **treize répliques du registre sont de la main
+  d'Anthony et entrent sans la moindre retouche** (seul le nom de l'exemple A1 devient `{nom}`).
+  **A — le retrait** : à la veille de la soirée, un combattant booké peut se retirer (1,5 % ; 4,5 %
+  chargé, 9,5 % au bord — la charge de H5) ; son combat tombe, son adversaire reste libre, la carte est
+  incomplète (un fait `retrait`, au plus un par cycle). Leïla annonce (A1), le combattant répond (A2),
+  ni l'un ni l'autre ne dit pourquoi. **L'interface porte les sorties** (bloc « Carte incomplète » de
+  la semaine) : **1. remonter un combat des préliminaires** (QO-1, gratuit, B1 la première fois, B2 répond,
+  Leïla repropose les préliminaires) ; **2. short notice** (QO-2) : deux combattants de Split et un
+  d'une autre organisation, coût = prime de 1,5 sur leur cachet de carte principale, payé sur la
+  trésorerie dans la limite du plafond (QO-5) — C1/C3 acceptent, **C2** : un combattant du top 5 refuse
+  un préavis qui nuirait à sa carrière, **C4** : cachet insuffisant, l'offre suivante monte de 40 % ;
+  **3. combattant libre de contrat** (QO-3 : sa dernière organisation l'a quitté il y a 2 à 6 cycles) ;
+  ceux d'une autre organisation ou libres **rejoignent Split pour la soirée** (T5). **Au-delà du
+  plafond** : les boutons se désactivent, il reste la **soirée en carte réduite** (D1) : elle se joue
+  incomplète, l'attrait (donc audience, billetterie et droits) baisse de 15 % en plus de la baisse
+  naturelle. **Lendemain** : le patron D2 à la première carte réduite, D3 dès la deuxième ; le
+  diffuseur D4 seulement si l'audience a vraiment baissé (moins de 90 % de la moyenne) ; E1 si un
+  découvert a été déduit (la réplique existait, elle n'était branchée nulle part). Faits validés par la
+  porte de sauvegarde. Parties neuves seulement. **Décisions de Claude à relire** : le seuil de 1,5 %
+  du retrait, la prime de 1,5, les 2 à 6 cycles du « libre », les 15 % de pénalité, le top 5 du C2 ; **les
+  libellés des boutons** reprennent les mots du document (« remonter », « short notice », « libre de
+  contrat », « carte réduite »).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé

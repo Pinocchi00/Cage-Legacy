@@ -236,6 +236,7 @@ function scr_mgmt_lendemain(){
     +`<section class="mgmt-ld-pane">`
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.changes)}</h3>`
       +mgmtLendemainConstatsHtml(m)
+      +(typeof mgmtLendemainPatronHtml==='function'?mgmtLendemainPatronHtml(m):'')
       +`</section>`
     +`</div></div>`;
 }

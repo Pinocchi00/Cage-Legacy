@@ -281,6 +281,13 @@ function validateMgmt(raw){
       if(!t||t.c!==f.c||t.a.div!==f.div||t.b.div!==f.div
         ||t.a.id===t.b.id||t.rounds!==5||t.round>t.rounds) return false;
       titleFights.add(f.fight);
+    }else if(f.k==='retrait'||f.k==='retrait_sortie'||f.k==='offre'||f.k==='engage'||f.k==='reduite'){
+      /* Lot 5 T6 : la carte incomplète — retrait, sortie choisie, offre, engagement, carte réduite. */
+      if(!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;
+      if((f.k==='retrait'||f.k==='offre'||f.k==='engage')&&!mgmtValidId(f.a)) return false;
+      if(f.k==='retrait'&&(!mgmtValidId(f.adv)||(f.slot!=='main'&&f.slot!=='prelim'))) return false;
+      if(f.k==='retrait_sortie'&&!['remonter','split','externe','reduite'].includes(f.s)) return false;
+      if(f.k==='engage'&&!['split','autre','libre'].includes(f.src)) return false;
     }else if(f.k==='recrue'){
       /* Lot 5 T5 : le geste de recruter — un fait, l'identifiant du recruté et le cycle. */
       if(!mgmtValidId(f.a)||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;

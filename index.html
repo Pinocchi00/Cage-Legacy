@@ -870,6 +870,17 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 .mgmt-vest-bloc p{font-size:18px;font-weight:300;line-height:1.6;margin:0}
 .mgmt-vest-mini{display:block;font-size:18px;font-weight:300;line-height:1.7;color:var(--text);background:none;border:0;padding:0;text-align:left;cursor:pointer}
 .mgmt-vest-vide{padding:24px;color:var(--muted)}
+/* ==== [ANCRE: MGMT_LOT5_T6_CSS_RETRAIT] — la carte incomplète : citations des personnages et sorties portées par l'interface. ==== */
+.mgmt-retrait{margin:14px 0;padding:14px 18px;border-left:4px solid var(--gold);background:rgba(255,248,238,.05)}
+.mgmt-retrait h3{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:20px;letter-spacing:.2em;color:var(--gold);margin:0 0 8px;text-transform:uppercase}
+.mgmt-retrait-parole,.mgmt-ld-parole{font-size:18px;font-weight:300;line-height:1.5;margin:6px 0}
+.mgmt-retrait-parole span,.mgmt-ld-parole span{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:15px;font-weight:700;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-right:8px}
+.mgmt-retrait-sortie{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:10px 14px;font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:18px;font-weight:600;letter-spacing:.04em;text-align:left;color:var(--text);background:none;border:1px solid var(--line);cursor:pointer}
+.mgmt-retrait-sortie:hover:not(:disabled){border-color:var(--gold)}
+.mgmt-retrait-sortie:disabled{opacity:.45;cursor:default}
+.mgmt-retrait-sortie:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.mgmt-ld-patron{margin:18px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+/* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MGMT_LOT5_T5_CSS_RECRUTEMENT] — maquettes/12-recrutement.html : colonnes 70px / 1fr / 70px / 110px / 260px / 140px, lignes de 20px, aside de 460px. ==== */
 .mgmt-recrutement{padding:40px 64px 48px}
 .mgmt-recru-row{display:grid;grid-template-columns:70px minmax(0,1fr) 70px 110px minmax(0,260px) 140px;gap:18px;align-items:center;padding:11px 24px;font-size:20px;box-sizing:border-box}
@@ -1091,6 +1102,7 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <script src="mgmt-humanite-data.js?v=lot5h3b"></script>
 <script src="mgmt-voix-data.js?v=lot5t2t3"></script>
 <script src="mgmt-camps-data.js?v=lot5t7"></script>
+<script src="mgmt-retraits-data.js?v=lot5t6"></script>
 <script src="mgmt-humanite.js?v=lot5h8"></script>
 <script src="mgmt-bureau.js?v=lot5h7"></script>
 <script src="mgmt-carte.js?v=cls4a"></script>
@@ -1119,6 +1131,7 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <script src="mgmt-ecran-classements.js?v=lot5t1"></script>
 <script src="mgmt-ecran-vestiaire.js?v=lot5h8b"></script>
 <script src="mgmt-recrutement.js?v=lot5t5"></script>
+<script src="mgmt-retraits.js?v=lot5t6"></script>
 <script src="mgmt-mouvement.js?v=lot5t5"></script>
 <script src="mgmt-screens.js?v=lot5t5"></script>
 <script src="arene-etat.js?v=lot5h3"></script>
