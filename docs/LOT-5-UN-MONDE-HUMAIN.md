@@ -462,7 +462,9 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
 - **H10 — premier groupe, codé par Claude** (03/10 ; à relire par Anthony) :
   `mgmt-rivalites.js`, la mémoire des affrontements (§6) **lue dans `m.hist`, rien de stocké,
   aucune mémoire parallèle**. **Scénario 1, la rivalité** : une défaite humiliante (KO ou
-  soumission dans les deux premiers rounds) ; la revanche est due tant qu'elle n'a pas eu lieu,
+  soumission **au premier round, contre un adversaire au bilan moins bon** — le favori écrasé ; mesuré
+  le 03/10 : 67 % des combats finissent dans les deux premiers rounds, 45 % au premier, d'où cette
+  exigence) ; la revanche est due tant qu'elle n'a pas eu lieu,
   et le perdant la demande à coup sûr (demande imposée, H7). **Scénario 2, la trilogie** : une
   victoire partout, celui qui vient de perdre réclame « le troisième combat » ; elle se clôt au
   troisième. **Scénario 6, le tueur de hype** : un combattant bat un invaincu de cinq victoires ou

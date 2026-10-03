@@ -4,8 +4,9 @@
    comment ; ce souvenir est l'historique des combats (m.hist) — AUCUNE
    mémoire parallèle : tout se lit, rien ne se stocke.
    Premier groupe de scénarios :
-   - n° 1 la rivalité : une défaite humiliante (KO ou soumission dans les deux
-     premiers rounds) ; la revanche est due tant qu'elle n'a pas eu lieu ;
+   - n° 1 la rivalité : une défaite humiliante (KO ou soumission au premier
+     round, contre un adversaire au bilan moins bon — le favori écrasé) ; la
+     revanche est due tant qu'elle n'a pas eu lieu ;
    - n° 2 la trilogie : une victoire partout entre deux combattants, le
      troisième combat est réclamé ;
    - n° 6 le tueur de hype : un combattant bat un invaincu.
@@ -14,8 +15,10 @@
    demander le troisième combat. Aucun texte d'auteur : étiquettes
    fonctionnelles et noms des combattants. Parties neuves seulement. ==== */
 
-/** Rounds d'une défaite humiliante : une finition dans les deux premiers. */
-const MGMT_HUMILIATION_ROUND=2;
+/** Round d'une défaite humiliante : la finition tombe dès le premier. Mesuré le
+ *  03/10 : 67 % des combats finissent dans les deux premiers rounds, 45 % au
+ *  premier — d'où l'exigence en plus d'un bilan meilleur chez le perdant. */
+const MGMT_HUMILIATION_ROUND=1;
 /** Une rivalité ou une trilogie s'éteint si le dernier combat date de plus de N cycles. */
 const MGMT_RIVALITE_CYCLES=12;
 const MGMT_TUEUR_MIN_VICTOIRES=5;
@@ -31,7 +34,10 @@ function mgmtAffrontements(m){
     const gagnant=t.winner==='A'?t.a.id:(t.winner==='B'?t.b.id:null);
     const perdant=t.winner==='A'?t.b.id:(t.winner==='B'?t.a.id:null);
     if(!out.has(cle)) out.set(cle,[]);
-    out.get(cle).push({i,c:t.c,gagnant,perdant,family:t.family,round:t.round,rounds:t.rounds});
+    const [g,p]=t.winner==='A'?[t.a,t.b]:[t.b,t.a];
+    const ratio=s=>(s.W||0)/Math.max(1,(s.W||0)+(s.L||0));
+    out.get(cle).push({i,c:t.c,gagnant,perdant,family:t.family,round:t.round,rounds:t.rounds,
+      favoriEcrase:t.winner!=='D'&&ratio(p)>ratio(g)});
   });
   return out;
 }
@@ -47,7 +53,7 @@ function mgmtRivalites(m){
     const [x,y]=cle.split('|');
     const vivants=[x,y].every(id=>{ const f=mgmtFighterById(m,id); return f&&!mgmtIsRetired(f); });
     if(!vivants||!dernier.gagnant) continue;
-    const finale=(dernier.family==='ko'||dernier.family==='sub')&&dernier.round<=MGMT_HUMILIATION_ROUND;
+    const finale=(dernier.family==='ko'||dernier.family==='sub')&&dernier.round<=MGMT_HUMILIATION_ROUND&&dernier.favoriEcrase;
     if(rencontres.length===1&&finale){
       out.push({k:'rivalite',a:dernier.perdant,b:dernier.gagnant,c:dernier.c});
     }else if(rencontres.length===2&&rencontres[0].gagnant&&rencontres[0].gagnant!==dernier.gagnant){

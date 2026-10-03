@@ -72,6 +72,7 @@ function mgmtSemaineMonde(m){
     if(p){ news.push({type:'parole',div:p.div,text:p.name+' : « '+p.texte+' »',id:p.id,source:'Ce qui se dit'}); used.add(p.id); }
   }
   for(const c of mgmtConteur(m)){
+    if(news.length>=budget) break; /* le budget de la semaine tient, demandes comprises */
     news.push({type:'vie',div:c.div,text:c.name+' : '+c.moment.libelle,id:c.id,source:c.moment.relais[0]});
     used.add(c.id);
   }
