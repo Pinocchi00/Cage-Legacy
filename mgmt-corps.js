@@ -208,8 +208,10 @@ function mgmtFightReady(f,cycle){
      faits gardés de la partie (jusqu'au cycle du combat) : le rejeu d'un
      combat passé retrouve exactement la même forme. */
   const partie=(typeof G!=='undefined'&&G&&G.mgmt)?G.mgmt:null;
-  const baisse=partie?mgmtVieFormeBaisse(partie,f,cycle):0;
-  if(baisse<0&&c){ c.dynamic=num(c.dynamic)+baisse; c.overall=overall(c); }
+  /* Lot 5 T7 : le camp (sa qualité, le rodage après un changement) joue aussi, lu dans
+     les moments de vie gardés — le rejeu d'un combat passé retrouve la même forme. */
+  const baisse=(partie?mgmtVieFormeBaisse(partie,f,cycle):0)+(partie&&typeof mgmtCampForme==='function'?mgmtCampForme(partie,f,cycle):0);
+  if(baisse!==0&&c){ c.dynamic=num(c.dynamic)+baisse; c.overall=overall(c); }
   return c;
 }
 

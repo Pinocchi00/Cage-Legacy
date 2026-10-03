@@ -234,6 +234,13 @@ function mgmtContrariesApresSoiree(m,combats){
   if(!m||m.effectifs!==1||!Array.isArray(combats)) return 0;
   let n=0;
   for(const t of combats){
+    /* Lot 5 T7 (scénario n° 3, le coéquipier) : booker deux combattants du même camp l'un contre l'autre. */
+    if(typeof mgmtMemeCamp==='function'){
+      const fa=mgmtFighterById(m,t.a.id), fb=mgmtFighterById(m,t.b.id);
+      if(fa&&fb&&mgmtMemeCamp(m,fa,fb)){
+        for(const id of [t.a.id,t.b.id]){ mgmtAddFact(m,{c:t.c,k:'contrarie',a:id,p:MGMT_CONTRARIE_COEQUIPIER,why:'coequipier'}); n++; }
+      }
+    }
     for(const id of [t.a.id,t.b.id]){
       const f=mgmtFighterById(m,id);
       if(!f) continue;

@@ -493,6 +493,23 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   d'exemple citent des noms et n'ont pas d'emplacements), la voix qui change (§4), la réponse à
   une proposition, les réseaux, la voix à la pesée, « Pendant le combat » (arène).
 
+- **T7 — les camps, codée par Claude** (03/10 ; **les noms de salles sont des propositions
+  `relu:false`, Anthony les relit**). `mgmt-camps-data.js` (20 modèles de noms de salle, 5 par langue —
+  fr, pt, es, en —, bâtis sur la ville réelle, aucun nom de personne) et `mgmt-camps.js`. **Un camp**
+  (salle, ville, coach) est un élément du monde que le joueur observe et subit, sans gérer d'entraînement.
+  **Tout se déduit** : le camp d'origine vient de l'identifiant (85 % dans sa ville, 15 % ailleurs dans son
+  pays), le coach se tire des prénoms et noms réels du pays ; un changement de camp ou de coach est un
+  **moment de vie déjà gardé** (H5 : « Change de camp », « Dispute publique avec son coach » — 60 % des
+  cas —, « Déménage dans une autre ville » — 50 % —, « S'installe à l'étranger pour un camp », « Le coach
+  meurt », « Le coach prend sa retraite »), le camp à un cycle se lit dans ces faits. **Effet** : la
+  qualité du camp (cachée, jamais un chiffre : −3, 0 ou +3 de forme) et un **rodage de deux cycles**
+  (−3) après un changement de camp entrent dans la forme du combat, lus dans les faits — le rejeu retrouve
+  la même forme. **Scénario n° 3, le coéquipier** : booker deux combattants du même camp l'un contre
+  l'autre est une décision contraire (15 de charge pour chacun). **Fiche** : « Son camp » (salle, pays,
+  coach, le moment qui explique le changement, le rodage). Parties neuves seulement. **Non fait** : le
+  nom de ring thaï suivi du nom de la salle (noms de ring à écrire), « l'un quitte le camp » si le
+  joueur insiste, les noms de salle par ville (modèles seulement).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé
