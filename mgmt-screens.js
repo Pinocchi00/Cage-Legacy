@@ -539,6 +539,8 @@ Object.assign(CL,{
     }
     mgmtNewPile(G.mgmt);
     saveMgmt();
+    /* Lot 5 H9 : la semaine qui s'ouvre s'annonce par le fil. */
+    CL.mgmtFilDemarrer();
     render();
   },
   /* Lot 3a §5/§7 : après la soirée, le lendemain s'il y a des touchés, sinon
@@ -579,6 +581,7 @@ Object.assign(CL,{
     if(!G||!G.mgmt) return;
     mgmtNewPile(G.mgmt);
     saveMgmt();
+    CL.mgmtFilDemarrer();
     CL.go('mgmt_bureau');
   },
 });
