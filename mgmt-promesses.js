@@ -244,6 +244,13 @@ function mgmtContrariesApresSoiree(m,combats){
         for(const id of [t.a.id,t.b.id]){ mgmtAddFact(m,{c:t.c,k:'contrarie',a:id,p:MGMT_CONTRARIE_COEQUIPIER,why:'coequipier'}); n++; }
       }
     }
+    /* Lot 5 H10 (scénario n° 23, la fratrie) : des frères et sœurs ne se combattent jamais. */
+    if(typeof mgmtFratrie==='function'){
+      const fa=mgmtFighterById(m,t.a.id);
+      if(fa&&mgmtFratrie(m,fa).includes(t.b.id)){
+        for(const id of [t.a.id,t.b.id]){ mgmtAddFact(m,{c:t.c,k:'contrarie',a:id,p:MGMT_CONTRARIE_FRATRIE,why:'fratrie'}); n++; }
+      }
+    }
     for(const id of [t.a.id,t.b.id]){
       const f=mgmtFighterById(m,id);
       if(!f) continue;

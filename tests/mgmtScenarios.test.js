@@ -111,3 +111,40 @@ test('H10 bis — la sauvegarde accepte une pause, la fiche nomme le scénario, 
   assert.ok(r.fiche.includes('Le train de la hype')); assert.equal(r.ancien,0); assert.equal(r.ancienFiche,'');
   assert.ok(r.valide,'une promesse de pause passe la validation de la sauvegarde');
 });
+
+test('H10 ter — le blues du champion : celui qui vient de gagner la ceinture demande une pause, une fois sur deux', () => {
+  const win=newGameWindow();
+  const r=result(win,`${NEUVE}
+    m.cycle=10; mgmtInitTitles(m);
+    const champ=(f,opp)=>{ m.hist.push({c:9,slot:'main',rounds:5,a:{id:f.id,W:f.W,L:f.L,D:0},b:{id:opp.id,W:opp.W,L:opp.L,D:0},winner:'A',family:'dec',round:5}); m.facts.push({c:9,k:'title_fight',div:f.div,fight:m.hist.length-1}); };
+    const memeDiv=f=>m.roster.find(o=>o!==f&&o.div===f.div);
+    const gate=(f)=>mgmtIdentiteStream(f.id,'blues|9')()<MGMT_BLUES_PART;
+    const P=m.roster.find(o=>gate(o)&&memeDiv(o)), Q=m.roster.find(o=>!gate(o)&&memeDiv(o)&&o.div!==P.div);
+    champ(P,memeDiv(P)); champ(Q,memeDiv(Q));
+    const de=id=>mgmtScenarios(m).filter(s=>s.a===id).map(s=>s.k+':'+s.want);
+    const p=de(P.id), q=de(Q.id);
+    m.cycle=20; const tard=de(P.id);
+    return {p,q,tard,libelle:mgmtScenariosDe(Object.assign({},m,{cycle:10}),P)};`);
+  assert.deepEqual(r.p,['blues:pause']); assert.deepEqual(r.q,[],'l’autre champion veut défendre'); assert.deepEqual(r.tard,[],'le blues passe');
+});
+
+test('H10 ter — la fratrie : même nom, même pays, une part de ces paires est de la même famille ; les booker l’un contre l’autre pèse 30', () => {
+  const win=newGameWindow();
+  const r=result(win,`${NEUVE}
+    const A=m.roster[0]; const cle=(a,b)=>[a.id,b.id].sort().join('|');
+    const B=m.roster.find(o=>o!==A&&mgmtIdentiteStream(cle(A,o),'fratrie')()<MGMT_FRATRIE_PART);
+    const C=m.roster.find(o=>o!==A&&o!==B&&mgmtIdentiteStream(cle(A,o),'fratrie')()>=MGMT_FRATRIE_PART);
+    B.last=A.last; B.ck=A.ck; C.last=A.last; C.ck=A.ck;
+    const freres=mgmtFratrie(m,A);
+    const autrePays=m.roster.find(o=>o!==A&&o!==B&&o!==C); autrePays.last=A.last; autrePays.ck=COUNTRY_KEYS.find(k=>k!==A.ck);
+    const fiche=mgmtFicheRivaux(m,A);
+    const jamais=[mgmtFratrie(m,{id:'zz',last:''}).length];
+    const t={c:10,slot:'main',a:{id:A.id},b:{id:B.id},rounds:3};
+    const n=mgmtContrariesApresSoiree(m,[t]);
+    const contr=m.facts.filter(x=>x.k==='contrarie'&&x.why==='fratrie').map(x=>[x.a,x.p]);
+    m.hist=[]; const sain=validateMgmt(JSON.parse(JSON.stringify(Object.assign({},m,{hist:[]}))));
+    return {freres,b:B.id,c:C.id,fiche,n,contr,a:A.id,jamais,sain:!!sain};`);
+  assert.deepEqual(r.freres,[r.b],'seule la paire tirée est de la famille'); assert.ok(r.fiche.includes('Sa famille chez Split'));
+  assert.deepEqual(r.contr.sort(),[[r.a,30],[r.b,30]].sort(),'un contrarié de 30 pour chacun'); assert.ok(r.n>=2);
+  assert.ok(r.sain,'le fait « contrarie » de la fratrie passe la validation');
+});

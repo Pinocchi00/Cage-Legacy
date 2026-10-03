@@ -523,6 +523,20 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   préavis » et « Forfait » (les réponses du retrait sont celles d'Anthony, T6, qui ne disent pas pourquoi),
   « Provocation reçue », « Sur l'affiche d'un autre », « Pesée ratée », « Pendant le combat ».
 
+- **H10 — troisième groupe, codé par Claude** (03/10 ; à relire par Anthony). `mgmt-scenarios.js`.
+  **N° 24 le blues du champion** : celui qui vient de gagner la ceinture de Split (titre joué par le
+  joueur, T1) ne veut plus de cage pour l'instant — une fois sur deux (flux `blues`) il demande
+  **une pause** (la demande du n° 29 : tenue en ne le bookant pas) ; la refuser, c'est le laisser défendre
+  (10 de charge). Non mesuré en simulation : les titres sont un choix explicite du joueur. **N° 23 la
+  fratrie** : parmi les combattants de Split qui portent **le même nom de famille dans le même pays**
+  (une vingtaine de paires par vestiaire, mesuré), 10 % sont de la même famille — de 2 à 7 paires par
+  vestiaire (15 % en donnait de 3 à 13), le tirage est semé par la paire. Les booker **l'un contre
+  l'autre** est une décision contraire : 30 de charge pour chacun (`why:'fratrie'`, validé à la
+  sauvegarde) ; la fiche (« Ses rivaux ») écrit « Sa famille chez Split : … ». Parties neuves
+  seulement. **Restent** : 22 scénarios sur 32 (couverts : 1, 2, 3, 4, 5, 6, 10, 23, 24, 29), dont ceux
+  qui attendent un système — le visa, la descente de catégorie, le transfuge (un départ de Split),
+  la mère qui revient, la soirée à domicile — ou une décision (la pesée ratée).
+
 - **T2 + T3 — la voix branchée, codées par Claude** (03/10 ; **les répliques sont
   celles du document, `relu:false` : Anthony les relit et les réécrit**).
   `mgmt-voix-data.js` est **généré** par `tools/extraire-voix.js` depuis
