@@ -12,37 +12,43 @@
 
   "permission": {
     "bash": {
-      "*": "ask",
+      "*": "allow",
 
-      "npm test": "allow",
-      "npm run lint": "allow",
-      "npm run lint:content": "allow",
-      "npm run check": "allow",
-      "node tools/*": "allow",
-      "node --test*": "allow",
-      "npm ci": "allow",
+      "rm *": "deny",
+      "rm -*": "deny",
+      "rmdir*": "deny",
+      "del *": "deny",
+      "rd *": "deny",
+      "Remove-Item*": "deny",
+      "ri *": "deny",
 
-      "git status": "allow",
-      "git diff*": "allow",
-      "git log*": "allow",
-      "git add*": "allow",
-      "git commit*": "allow",
-      "git checkout -b*": "allow",
-
-      "ls*": "allow",
-      "cat*": "allow",
-      "grep*": "allow",
-      "rg*": "allow",
-
-      "rm*": "deny",
-      "git push*": "ask",
+      "git push*": "deny",
       "git reset*": "deny",
       "git clean*": "deny",
-      "npm install*": "ask",
-      "npx*": "ask"
+      "git restore*": "deny",
+      "git checkout -- *": "deny",
+      "git checkout .": "deny",
+      "git stash drop*": "deny",
+      "git stash clear*": "deny",
+      "git branch -D*": "deny",
+      "git rebase*": "deny",
+      "git merge*": "deny",
+      "git remote*": "deny",
+      "git config*": "deny",
+
+      "npm install*": "deny",
+      "npm i *": "deny",
+      "npm uninstall*": "deny",
+      "npx *": "deny",
+      "curl *": "deny",
+      "Invoke-WebRequest*": "deny",
+      "iwr *": "deny"
     },
 
     "edit": "allow",
-    "webfetch": "ask"
+    "read": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "external_directory": "deny"
   }
 }
