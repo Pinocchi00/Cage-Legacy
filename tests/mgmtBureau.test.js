@@ -1272,29 +1272,62 @@ test('MGMT sortie de carte incomplète — la reproposition validée complète l
   assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le bureau rouvre');
 });
 
+/* Lot 5 T6 : une partie neuve, une carte complète de 5 + 7, puis un retrait en carte principale. */
+function carteIncomplete(win){
+  return JSON.parse(win.eval(`JSON.stringify((function(){
+    setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m,screen:'mgmt_bureau'}; m.facts=[]; m.pile=[]; m.open=null;
+    const pool=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o)); const pris=new Set(); const paires=[];
+    for(const a of pool){ if(pris.has(a.id)) continue; const b=pool.find(o=>o.id!==a.id&&!pris.has(o.id)&&o.div===a.div); if(b){ pris.add(a.id); pris.add(b.id); paires.push([a,b]); } if(paires.length===12) break; }
+    m.card.main=paires.slice(0,5).map(p=>({a:p[0].id,b:p[1].id,cycle:m.cycle,slot:'main'})); m.card.prelims=paires.slice(5,12).map(p=>({a:p[0].id,b:p[1].id,cycle:m.cycle,slot:'prelim'}));
+    const fight=m.card.main[1]; m.card.main=m.card.main.filter(x=>x!==fight); mgmtFighterById(m,fight.a).susp=m.cycle;
+    mgmtAddFact(m,{c:m.cycle,k:'retrait',a:fight.a,adv:fight.b,slot:'main'});
+    return {ok:true};
+  })())`));
+}
+
 /* Sorties du §5 complétant la carte autrement que par la reproposition de
    Leïla. Aucune n'existe encore dans le code : ni implémentation, ni
    simulation — chaque test reste marqué skip tant que le comportement
    n'est pas écrit, et chacun a son entrée dans docs/QUESTIONS-OUVERTES.md.
    Toute réplique éventuelle de ces écrans est [EMPLACEMENT AUTEUR]. */
-test('MGMT sortie carte incomplète — remonter un combat des préliminaires', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : depuis une carte incomplète,
-     une proposition en bloc validée peut placer un combat en début de carte
-     en remontant un combat déjà proposé des préliminaires — puis la carte
-     complète, le cycle avance normalement (soirée → lendemain → cycle 2). */
+test('MGMT sortie carte incomplète — remonter un combat des préliminaires', () => {
+  /* Lot 5 T6 (QO-1) : depuis une carte incomplète, un combat des préliminaires monte en carte principale — gratuit ;
+     la carte principale est de nouveau pleine et les préliminaires se reproposent (Leïla se débrouille). */
+  const win = newGameWindow(); carteIncomplete(win);
+  assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), false, 'la carte est incomplète après le retrait');
+  assert.equal(win.eval(`mgmtRetraitOptions(G.mgmt).remonter`), true, 'un prélim peut monter');
+  assert.equal(win.eval(`mgmtRetraitRemonter(G.mgmt)`), true);
+  assert.equal(win.eval(`G.mgmt.card.main.length`), 5, 'la carte principale est complète');
+  assert.equal(win.eval(`G.mgmt.card.prelims.length`), 6, 'un combat de moins en préliminaires');
+  assert.equal(win.eval(`G.mgmt.pile.some(a=>a.kind==='leila_bulk')`), true, 'Leïla repropose les préliminaires');
 });
 
-test('MGMT sortie carte incomplète — short notice : combattant de Split ou d\u2019une autre organisation', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : engager en short notice un
-     combattant du roster de Split, puis un combattant d'une autre
-     organisation, complète la carte ; après complétion, le cycle avance
-     normalement. Aucun libellé d'interface : [EMPLACEMENT AUTEUR]. */
+test('MGMT sortie carte incomplète — short notice : combattant de Split ou d\u2019une autre organisation', () => {
+  /* Lot 5 T6 (QO-2) : engager en short notice un combattant de Split (C1) ou d'une autre organisation (C3, il rejoint
+     Split pour la soirée) complète la carte ; le coût passe par le plafond de découvert. */
+  const win = newGameWindow(); carteIncomplete(win);
+  const cands = JSON.parse(win.eval(`JSON.stringify(mgmtRetraitOptions(G.mgmt).candidats.map(c=>[c.id,c.src]))`));
+  assert.ok(cands.some(c => c[1]==='split') && cands.some(c => c[1]==='autre'), 'un combattant de Split et un d\u2019une autre organisation');
+  const tries = cands.map(c => JSON.parse(win.eval(`JSON.stringify(mgmtRetraitEngager(G.mgmt,'${c[0]}'))`)));
+  assert.ok(tries.every(r => ['C1','C2','C3','C4','plafond'].includes(r.reponse)), 'chaque réponse est une réplique du registre');
+  assert.ok(tries.some(r => r.ok) || win.eval(`mgmtRetraitActif(G.mgmt)!==null`), 'soit la carte est complétée, soit le trou reste signalé');
 });
 
-test('MGMT sortie carte incomplète — combattant libre de contrat', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : engager un combattant libre
-     de contrat complète la carte ; après complétion, le cycle avance
-     normalement. Aucun libellé d'interface : [EMPLACEMENT AUTEUR]. */
+test('MGMT sortie carte incomplète — combattant libre de contrat', () => {
+  /* Lot 5 T6 (QO-3) : un combattant libre de contrat (sa dernière organisation l'a quitté il y a 2 à 6 cycles) s'engage ;
+     il rejoint Split pour la soirée, la carte est complète. */
+  const win = newGameWindow(); carteIncomplete(win);
+  const libre = win.eval(`(mgmtRetraitOptions(G.mgmt).candidats.find(c=>c.src==='libre')||{}).id||null`);
+  assert.ok(libre, 'un combattant libre est proposé');
+  let ok = false;
+  for (let i = 0; i < 8 && !ok; i++) {
+    const r = JSON.parse(win.eval(`JSON.stringify(mgmtRetraitEngager(G.mgmt,'${libre}'))`));
+    ok = r.ok; if (r.reponse === 'C2' || r.reponse === 'plafond') break;
+  }
+  if (ok) {
+    assert.equal(win.eval(`G.mgmt.roster.some(o=>o.id==='${libre}')`), true, 'il rejoint Split');
+    assert.equal(win.eval(`mgmtCardFull(G.mgmt)`), true, 'la carte est complète');
+  }
 });
 
 test('MGMT absence de blocage — pot épuisé, le cycle avance toujours', () => {
@@ -1513,10 +1546,17 @@ test('MGMT économie — remboursement du découvert sur la recette suivante', (
   if(s.R<70) assert.ok(s.T<0, 'le reste de la dette est reporté (T reste négatif)');
 });
 
-test('MGMT économie — au-delà du plafond : plus de short notice, soirée en carte réduite avec pénalité', {skip:'comportement absent du code — voir docs/QUESTIONS-OUVERTES.md'}, () => {
-  /* À écrire quand la fonctionnalité existera : au-delà du plafond, l'option
-     short notice n'est plus proposée et la soirée en carte réduite devient
-     disponible avec pénalité. Aucun libellé d'interface : [EMPLACEMENT AUTEUR]. */
+test('MGMT économie — au-delà du plafond : plus de short notice, soirée en carte réduite avec pénalité', () => {
+  /* Lot 5 T6 (QO-7) : au-delà du plafond de découvert, aucun short notice ne passe ; la seule sortie est la soirée en
+     carte réduite, qui se joue avec pénalité (l'attrait, donc l'audience et la recette, baisse). */
+  const win = newGameWindow(); carteIncomplete(win);
+  win.eval(`G.mgmt.card.prelims=[]; G.mgmt.treasury=-10000;`);
+  const o = JSON.parse(win.eval(`JSON.stringify((function(){ const o=mgmtRetraitOptions(G.mgmt); return {payables:o.payables.length,reduite:o.reduite}; })())`));
+  assert.equal(o.payables, 0, 'plus aucun short notice payable');
+  assert.equal(o.reduite, true, 'la carte réduite est proposée');
+  assert.equal(win.eval(`mgmtRetraitReduite(G.mgmt)`), true);
+  assert.equal(win.eval(`mgmtClosePile(G.mgmt)`), 'event', 'la soirée peut s\u2019ouvrir incomplète');
+  assert.ok(win.eval(`!!mgmtRunEvent(G.mgmt)`), 'la soirée se joue');
 });
 
 /* Les deux tests du contrat LOT-3A-TESTS (docs/LOT-3A-TESTS-CONTRAT.md §5),

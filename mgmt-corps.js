@@ -572,7 +572,9 @@ function mgmtApplyFight(m,f,opp,res,side){
  *  @returns {object|null} m.lastEvent. */
 function mgmtRunEvent(m){
   if(!m||!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return null;
-  if(!mgmtCardFull(m)) return null;
+  /* Lot 5 T6 : une carte incomplète se joue seulement si le joueur a décidé la carte réduite ce cycle. */
+  const reduite=!mgmtCardFull(m)&&typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m);
+  if(!mgmtCardFull(m)&&!reduite) return null;
   /* Lot 2 T1 : chaque combat porte son emplacement (slot:'main'|'prelim')
      et la soirée joue la carte principale d'abord, puis les préliminaires. */
   const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim',
@@ -586,7 +588,8 @@ function mgmtRunEvent(m){
   }
   /* Cachets et attrait : la carte d'avant la soirée — le bilan et le corps
      d'avant combat, jamais d'après (les combats mutent les lignes). */
-  const attraction=mgmtCardAttraction(m,booked);
+  /* Carte réduite : l'attrait, donc l'audience et la recette, baisse (QO-7). */
+  const attraction=mgmtCardAttraction(m,booked)*(reduite?MGMT_REDUITE_PENALITE:1);
   const purses=mgmtPurses(m,booked);
   const fights=[];
   const touched=[];
