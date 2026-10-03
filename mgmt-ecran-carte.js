@@ -242,6 +242,7 @@ function scr_mgmt_carte(){
     +`<h2 class="disp">La carte</h2></div></div>`
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtCardLabel(m))}</div>`
     +`<div class="mgmt-book-actions"><button class="btn ghost mgmt-book-return" onclick="CL.mgmtCarteLeave()">${esc(MGMT_CART_LABELS.leave)}</button></div>`
+    +(typeof mgmtPropositionHtml==='function'?mgmtPropositionHtml(m):'')
     +versaHtml
     +`<div class="mgmt-book-cols">`
     +`<section class="mgmt-book-pane mgmt-book-card"><div class="eyebrow">${esc(MGMT_CART_LABELS.card)}</div>${cardHtml}`

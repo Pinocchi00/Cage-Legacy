@@ -74,7 +74,7 @@ function mgmtSemaineMonde(m){
   /* Lot 5 T2 + T3 : « Ce qui se dit » — la réplique de SA voix, celle du document (une seule, dans le budget). */
   if(typeof mgmtParolesDeLaSemaine==='function'&&news.length<budget-1){
     const p=mgmtParolesDeLaSemaine(m)[0];
-    if(p){ news.push({type:'parole',div:p.div,text:p.name+' : « '+p.texte+' »',id:p.id,source:'Ce qui se dit'}); used.add(p.id); }
+    if(p){ news.push({type:'parole',div:p.div,text:mgmtParoleLigne(p),id:p.id,source:'Ce qui se dit'}); used.add(p.id); }
   }
   /* Lot 5 T3 : la presse (document des voix §6) — une ligne de média, dans le budget. */
   if(typeof mgmtMediasLignes==='function'&&news.length<budget-1){

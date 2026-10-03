@@ -216,6 +216,12 @@ function mgmtParoleRecente(m,f){
   return texte?{situation,texte}:null;
 }
 
+/** Une parole telle qu'on l'affiche : entre guillemets, sauf les réseaux, dont
+ *  les lignes décrivent parfois une publication plutôt qu'une citation. */
+function mgmtParoleLigne(p){
+  return p.reseaux?p.name+' (réseaux) : '+p.texte:p.name+' : « '+p.texte+' »';
+}
+
 /** « Ce qu'on dit de lui » (fiche) : sa parole et rien d'autre. */
 function mgmtFicheParole(m,f){
   if(!(m.roster||[]).some(o=>o.id===f.id)) return '';
@@ -243,6 +249,56 @@ function mgmtParolesDeLaSemaine(m){
     const p=mgmtParoleRecente(m,f);
     if(p&&(p.situation==='victoire'||p.situation==='defaite')) out.push({id:f.id,name:f.name,div:f.div,texte:p.texte});
   }
+  /* Les réseaux (situation 'reseaux') : ceux qui se préparent à combattre
+     publient ; la tête de la carte principale d'abord, ton cercle avant le reste. */
+  if(out.length<2){
+    const sur=[];
+    for(const cf of mgmtCardFights(m)){
+      for(const id of [cf.a,cf.b]){ const f=mgmtFighterById(m,id); if(f&&!sur.some(x=>x.f.id===f.id)) sur.push({f,lien:mgmtLien(m,f.id),slot:cf.slot==='main'?1:0}); }
+    }
+    const rang=x=>(x.lien==='cercle'?4:(x.lien==='suivi'?2:0))+x.slot;
+    sur.sort((a,b)=>rang(b)-rang(a)||(a.f.id<b.f.id?-1:1));
+    for(const {f} of sur){
+      if(out.length>=2) break;
+      if(out.some(x=>x.id===f.id)) continue;
+      const texte=mgmtReplique(m,f,'reseaux');
+      if(texte) out.push({id:f.id,name:f.name,div:f.div,texte,reseaux:true});
+    }
+  }
   return out;
+}
+
+/** Le style d'un adversaire pour la voix : « lutteur » (propension au sol de
+ *  0,5 et plus), « frappeur », ou « inconnu » (moins de trois combats). */
+function mgmtVarianteAdversaire(adv){
+  if((adv.W||0)+(adv.L||0)+(adv.D||0)<3) return 'inconnu';
+  const s=STYLES[mgmtIdentiteStyle(adv)];
+  return s&&s.grap>=0.5?'lutteur':'frappeur';
+}
+
+/** Les réponses à une proposition : quand le joueur booke un combat, chacun des
+ *  deux répond, de SA voix (situation 'proposition', variante selon
+ *  l'adversaire). Une réplique dont un emplacement manque n'est pas montrée.
+ *  @returns {Array<{id:string,name:string,texte:string}>} */
+function mgmtReponsesProposition(m,aid,bid){
+  if(!m||m.effectifs!==1) return [];
+  const out=[];
+  for(const [moi,lui] of [[aid,bid],[bid,aid]]){
+    const f=mgmtFighterById(m,moi), adv=mgmtFighterById(m,lui);
+    if(!f||!adv) continue;
+    const texte=mgmtReplique(m,f,'proposition',mgmtVarianteAdversaire(adv));
+    /* Deux voix communes disent la même phrase : on ne la lit qu'une fois. */
+    if(texte&&!out.some(x=>x.texte===texte)) out.push({id:f.id,name:f.name,texte});
+  }
+  return out;
+}
+
+/** Les dernières réponses à une proposition, lues par l'écran de la carte
+ *  (état d'interface seulement : jamais sauvegardé). */
+let MGMT_PROPOSITION={c:-1,lignes:[]};
+function mgmtPropositionHtml(m){
+  if(!m||MGMT_PROPOSITION.c!==m.cycle||!MGMT_PROPOSITION.lignes.length) return '';
+  return '<div class="mgmt-proposition" role="status">'
+    +MGMT_PROPOSITION.lignes.map(l=>'<p class="mgmt-proposition-ligne"><span>'+esc(l.name)+'</span> « '+esc(l.texte)+' »</p>').join('')+'</div>';
 }
 /* ==== [FIN ANCRE] ==== */
