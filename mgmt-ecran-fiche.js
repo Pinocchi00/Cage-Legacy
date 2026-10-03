@@ -191,11 +191,29 @@ function mgmtFicheConnaissance(m,f){
   return `<h3>Comment il combat</h3>${combat}<h3>Sa faille</h3>${faille}`;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_LOT5_H7_FICHE_PROMESSES] — Le mot du combattant, ce qu'il
+   demande (promettre ou refuser), ses promesses et leur état. Jamais un chiffre. ==== */
+function mgmtFichePromesses(m,f){
+  if(m.effectifs!==1) return '';
+  const demandes=mgmtDemandesOuvertes(m).filter(d=>d.a===f.id);
+  const prom=mgmtPromesses(m,f);
+  if(!demandes.length&&!prom.length) return '';
+  const lib=w=>MGMT_DEMANDES[w]?MGMT_DEMANDES[w].libelle:'';
+  const nom=id=>{ const o=id&&mgmtFighterById(m,id); return o?o.name:''; };
+  const etats={tenue:'Promesse tenue',rompue:'Promesse rompue','en cours':'Promesse en cours'};
+  return `<h3>Ce qu'il demande</h3>`
+    +(demandes.length?demandes.map(d=>`<p>${esc(lib(d.want))}${d.target?' — '+esc(nom(d.target)):''}</p>`
+      +`<div class="mgmt-fiche-lien"><button onclick="CL.mgmtDemande(${esc(d.i)},'promettre')">Promettre</button>`
+      +`<button onclick="CL.mgmtDemande(${esc(d.i)},'refuser')">Refuser</button></div>`).join('')
+      :'<p>Rien pour le moment.</p>')
+    +(prom.length?`<ul class="mgmt-fiche-vie-liste">${prom.map(p=>`<li>${esc(etats[p.etat])} : ${esc(lib(p.want))}${p.target?' — '+esc(nom(p.target)):''}</li>`).join('')}</ul>`:'');
+}
+/* ==== [FIN ANCRE] ==== */
 function scr_mgmt_fiche(){
   const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id);
   if(!line) return scr_mgmt_bureau();
   const {f,trace}=line;
-  const identite=mgmtIdentite(m,f),pays=COUNTRIES[mgmtIdentitePays(f)],role=mgmtRole(m,f);
+  const identite=mgmtIdentite(m,f),pays=COUNTRIES[mgmtIdentitePays(f)],role=mgmtRole(m,f),mot=(m.effectifs===1&&mgmtConnaissance(m,f).combat)?mgmtTraitMot(m,f):null;
   const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):'Split';
   const record=`${f.W}-${f.L}${f.D?'-'+f.D:''}`;
    const mondial=divById(f.div)?.gender==='F'?'mondiale':'mondial';
@@ -208,11 +226,11 @@ function scr_mgmt_fiche(){
    return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head bar">`
      +`<h2 class="disp">La fiche</h2><span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
      +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
-      +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}</h2>`
+      +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}${mot?` <span class="mgmt-fiche-mot">${esc(mot)}</span>`:''}</h2>`
      +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p>${mgmtFicheLien(m,f)}</div>`
      +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
      +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
-    +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}${mgmtFicheConnaissance(m,f)}${mgmtFicheVie(m,f)}</section>`
+    +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}${mgmtFicheConnaissance(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheVie(m,f)}</section>`
     +`${mgmtFicheParcours(trace)}</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

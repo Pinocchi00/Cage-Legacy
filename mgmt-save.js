@@ -281,6 +281,14 @@ function validateMgmt(raw){
       if(!t||t.c!==f.c||t.a.div!==f.div||t.b.div!==f.div
         ||t.a.id===t.b.id||t.rounds!==5||t.round>t.rounds) return false;
       titleFights.add(f.fight);
+    }else if(f.k==='demande'||f.k==='promesse'||f.k==='refus'||f.k==='contrarie'){
+      /* Lot 5 H7 : demandes, promesses, refus et décisions contraires — des faits, rien de dérivé. */
+      if(!mgmtValidId(f.a)||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;
+      if((f.k==='demande'||f.k==='promesse')&&(typeof f.want!=='string'||!MGMT_DEMANDES[f.want])) return false;
+      if(f.target!==undefined&&!mgmtValidId(f.target)) return false;
+      if(f.k==='promesse'&&(!Number.isSafeInteger(f.due)||f.due<f.c||!Number.isSafeInteger(f.d))) return false;
+      if(f.k==='refus'&&!Number.isSafeInteger(f.d)) return false;
+      if(f.k==='contrarie'&&(!Number.isSafeInteger(f.p)||f.p<10||f.p>30||(f.why!=='titre'&&f.why!=='jeune'))) return false;
     }
   }
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;

@@ -494,6 +494,9 @@ Object.assign(CL,{
     if(r.raison==='affaire'){
       const a=m.pile.find(x=>x.status==='open');
       if(a){ CL.mgmtOpen(a.id); return; }
+    }else if(r.raison==='demande'){
+      const d=mgmtDemandesOuvertes(m)[0];
+      if(d){ CL.mgmtFiche(d.a); return; }
     }else if(r.raison==='carte'){ CL.mgmtCarte(); return; }
     CL.mgmtNextCycle();
   },
@@ -505,6 +508,11 @@ Object.assign(CL,{
   mgmtSuivre(id){
     if(!G||!G.mgmt) return;
     if(mgmtSuiviToggle(G.mgmt,id)){ saveMgmt(); render(); }
+  },
+  /* Lot 5 H7 : répondre à une demande — promettre ou refuser, un fait chaque fois. */
+  mgmtDemande(i,reponse){
+    if(!G||!G.mgmt) return;
+    if(mgmtRepondreDemande(G.mgmt,Number(i),reponse)){ saveMgmt(); render(); }
   },
   mgmtNextCycle(){
     if(!G||!G.mgmt) return;

@@ -129,6 +129,12 @@ function mgmtVieCharge(m,f,cycle,risque){
     if(risque&&MGMT_VIE_HEUREUX.has(moment.id)) continue;
     somme+=moment.poids;
   }
+  /* Lot 5 H7 : les décisions contraires du joueur (refus, promesse rompue,
+     titre au sang-froid faible, jeûne imposé) pèsent aussi, et comptent
+     dans le risque de blessure. */
+  if(typeof mgmtContrarieCharge==='function'&&m&&Array.isArray(m.facts)&&(m.roster||[]).some(o=>o.id===f.id)){
+    somme+=mgmtContrarieCharge(m,f,fin,MGMT_VIE_FENETRE);
+  }
   return somme;
 }
 

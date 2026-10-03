@@ -416,6 +416,21 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   (décision du 30/09 : « Comment il combat » et « Sa faille » reviennent). Non fait : les filtres
   du vestiaire et l'écran du vestiaire (H8), les promesses (H7).
 
+- **H7 — codée par Claude** (03/10 ; à relire par Anthony) : `mgmt-promesses.js`.
+  **Les sept traits** viennent de l'identifiant (jamais un chiffre) ; le joueur lit **un mot** à
+  l'extrême du trait, ceux que le catalogue §8.2 nomme (Professionnel, Carriériste, Fidèle,
+  Instable, Grande gueule, Discret, Réglo), une fois le combattant vu combattre. **Les demandes**
+  (la carte principale, un classé, une revanche) sont des faits, au plus une nouvelle par cycle et
+  deux ouvertes, répondues depuis la fiche (Promettre / Refuser) ; elles passent en tête de la
+  semaine et arrêtent Continuer (« Demande en attente »). **Une promesse** est un fait avec une
+  échéance de trois cycles ; tenue, rompue ou en cours se **lit dans l'historique**, rien n'est
+  stocké. **La loyauté** se dérive du trait et des gestes du joueur (tenue +3, rompue −5, refus −2) :
+  le mot « Fidèle » se gagne et se perd. **Décisions contraires → charge** (H5) : refus 10,
+  promesse rompue 20, combat de titre d'un sang-froid faible 20, combat imposé pendant son jeûne
+  15 ; elles comptent dans le risque de blessure. Faits validés par la porte de sauvegarde.
+  Parties neuves seulement. **Non fait** (demandes et effets sans système pour les porter) :
+  soirée dans sa ville, augmentation, partir, « booker un loyal contre son ami ».
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé

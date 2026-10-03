@@ -176,6 +176,7 @@ function mgmtConteur(m){
 /** Pourquoi le temps s'arrête : le libellé du bouton le dit. @returns {{libelle:string,raison:string}} */
 function mgmtContinuerRaison(m){
   if(mgmtOpenCount(m)>0) return {libelle:'Répondre à Leïla',raison:'affaire'};
+  if(typeof mgmtDemandesOuvertes==='function'&&mgmtDemandesOuvertes(m).length>0) return {libelle:'Demande en attente',raison:'demande'};
   if(mgmtMainPosable(m)) return {libelle:'Carte incomplète',raison:'carte'};
   return {libelle:'Cycle suivant',raison:'cycle'};
 }

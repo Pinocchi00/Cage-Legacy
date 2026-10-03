@@ -135,6 +135,7 @@ test('H6 — Continuer dit pourquoi il s’arrête et mène à ce qu’il y a à
   const win=newGameWindow();
   const r=result(win,`${NEUVE}
     m.cycle=3; m.pile=[]; m.card.main=[]; m.card.prelims=[];
+    m.facts=m.facts.filter(x=>x.k!=='demande'); /* H7 : une demande en attente arrêterait déjà Continuer */
     const carte=mgmtContinuerRaison(m);
     m.pile=[{id:'k1',kind:'leila_propose',exchange:'leila_propose',speaker:'leila',a:m.roster[0].id,b:m.roster[1].id,status:'open',decision:null,title:'t'}];
     const affaire=mgmtContinuerRaison(m);

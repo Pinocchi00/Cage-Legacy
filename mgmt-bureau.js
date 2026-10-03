@@ -338,6 +338,7 @@ function mgmtNewPile(m){
   mgmtRetireRoster(m);
   mgmtExteriorArrive(m);
   mgmtVieOuvreCycle(m);
+  mgmtDemandesOuvreCycle(m);
   m.pile=[];
   m.open=null;
   m.shortfall=false;
