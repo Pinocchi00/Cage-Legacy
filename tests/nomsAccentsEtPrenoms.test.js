@@ -21,7 +21,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { newGameWindow } = require('./helpers/loadGame');
 
-const KR = ['Dong-hyun','Chan-sung','Doo-ho','Da-un','Si-woo','Myung-ho','Sung-bin','Jin-soo','Kyung-ho'];
+const KR = ['Min-jun','Seo-jun','Ji-ho','Hyun-woo','Joon-ho','Tae-yang','Sang-min','Woo-jin','Min-ho','Gun-woo','Jae-hyun','Seung-woo','Do-yoon','Sung-min','Young-ho','Jin-woo'];
 const GE = ['Guram','Amiran','Ilia','Roman','Merab','Giga','Lasha','Shota','Revaz','Zurab'];
 
 test('Accents — Araújo, Guimarães, Magalhães rendus, listes brésilienne et mexicaine intactes', () => {
@@ -32,16 +32,18 @@ test('Accents — Araújo, Guimarães, Magalhães rendus, listes brésilienne et
   })`));
   /* Brésil : 30 entrées, mêmes positions que la mise noms1, seuls les trois
      noms listés changent de graphie. */
-  assert.equal(r.brN, 30);
-  assert.deepEqual(r.br, ['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha','Carvalho',
+  assert.equal(r.brN, 38, 'Brésil : 30 d\'origine + 8 ajoutés (H2 bis, 03/10)');
+  assert.deepEqual(r.br.slice(0,30), ['Silva','Souza','Oliveira','Costa','Almeida','Pereira','Lima','Rocha','Carvalho',
     'Gomes','Martins','Araújo','Ribeiro','Melo','Cardoso','Dias','Barbosa','Nascimento','Dos Santos',
     'Guimarães','Barboza','Teixeira','Magalhães','Nogueira','Faria','Castilho','Moreira','Fontes','Ramos','Peixoto']);
   /* Mexique : 25 entrées, huit graphies rendues (les sept décidées et
      Saldívar, trouvé par la vérification). */
-  assert.equal(r.mxN, 25);
-  assert.deepEqual(r.mx, ['Hernández','García','Martínez','López','Ramírez','Torres','Flores','Pérez',
-    'Rodríguez','Sánchez','Cruz','Gómez','Morales','Reyes','Moreno','Grasso','Aldana','Velásquez',
-    'Cejudo','Chávez','Canelo','Barrera','Márquez','Saldívar','Castañeda']);
+  assert.equal(r.mxN, 25, 'Mexique : 25 entrées (H2 bis, 03/10 : 10 noms de combattants sortis, 10 noms courants entrés)');
+  assert.deepEqual(r.mx.slice(0,15), ['Hernández','García','Martínez','López','Ramírez','Torres','Flores','Pérez',
+    'Rodríguez','Sánchez','Cruz','Gómez','Morales','Reyes','Moreno']);
+  for(const sorti of ['Cejudo','Canelo','Grasso','Aldana','Barrera']){
+    assert.ok(!r.mx.includes(sorti), 'Mexique : ' + sorti + ' retiré');
+  }
   /* Les graphies retirées ne survivent nulle part. */
   const all = JSON.stringify(r);
   for(const legacy of ['Araujo','Guimaraes','Magalhaes','Rodriguez','Sanchez','Gomez','Velasquez',
@@ -56,7 +58,7 @@ test('Prénoms rangés — KR/GE mènent à une liste first du pays, hommes seul
   assert.deepEqual(win.eval(`JSON.stringify(COUNTRIES.KR.first)`), JSON.stringify(KR));
   assert.deepEqual(win.eval(`JSON.stringify(COUNTRIES.GE.first)`), JSON.stringify(GE));
   assert.equal(win.eval(`COUNTRIES.KR.last.length`), 14, 'Corée : 14 noms de famille');
-  assert.equal(win.eval(`COUNTRIES.GE.last.length`), 11, 'Géorgie : 11 noms de famille');
+  assert.equal(win.eval(`COUNTRIES.GE.last.length`), 15, 'Géorgie : 15 noms de famille (H2 bis, 03/10)');
   const m = JSON.parse(win.eval(`JSON.stringify((function(){
     const KRF=${JSON.stringify(KR)}, GEF=${JSON.stringify(GE)};
     setSeed(4242); const krH=makeName('H','KR');
@@ -71,17 +73,17 @@ test('Prénoms rangés — KR/GE mènent à une liste first du pays, hommes seul
             frH:frH.name,frHf:frH.first,
             krInFirst:KRF.includes(krH.first), krLastOk:COUNTRIES.KR.last.includes(krH.last),
             geInFirst:GEF.includes(geH.first), geLastOk:COUNTRIES.GE.last.includes(geH.last),
-            krFf:FIRST_F.includes(krF.first), krFnotKr:KRF.includes(krF.first),
-            geFf:FIRST_F.includes(geF.first),
-            frM:FIRST_M.includes(frH.first)};
+            krFf:COUNTRIES.KR.firstF.includes(krF.first), krFnotKr:KRF.includes(krF.first),
+            geFf:COUNTRIES.GE.firstF.includes(geF.first),
+            frM:COUNTRIES.FR.first.includes(frH.first)};
   })())` ) );
   /* Les hommes KR/GE portent la liste du pays. */
   assert.ok(m.krInFirst && m.krLastOk, 'homme coréen : ' + m.krH);
   assert.ok(m.geInFirst && m.geLastOk, 'homme géorgien : ' + m.geH);
-  /* Les femmes KR/GE restent dans FIRST_F, jamais dans la liste des hommes. */
+  /* Les femmes KR/GE tirent dans la firstF du pays (H2 bis, 03/10), jamais dans la liste des hommes. */
   assert.ok(m.krFf && !m.krFnotKr, 'femme coréenne : ' + m.krF);
   assert.ok(m.geFf, 'femme géorgienne : ' + m.geF);
-  /* Les autres pays restent dans FIRST_M. */
+  /* La France tire dans sa liste first (H2 bis, 03/10). */
   assert.ok(m.frM, 'homme français : ' + m.frH);
   /* Même nombre de tirages : makeName consomme EXACTEMENT deux appels rnd()
      (un prénom, un nom de famille), qu'il passe par c.first ou par
