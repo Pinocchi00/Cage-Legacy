@@ -525,6 +525,27 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   recruter contre recruter peu » (le recrutement est gratuit, seuls les cachets de combat coûtent) et
   le récit de la presse au premier combat (les médias de T3).
 
+- **T3 — la couche médias, codée par Claude** (03/10 ; **les lignes sont des propositions `relu:false`,
+  Anthony les relit et les réécrit**). `mgmt-medias-data.js` (les dix médias du document §6 et 31 lignes,
+  **sans un nom propre : seulement des emplacements** `{a}` `{b}` `{n}` `{round}` `{rounds}` `{cat}` `{pays}`,
+  ce que les lignes d'exemple du document ne faisaient pas) et `mgmt-medias.js`. **Trois situations** lues
+  sur l'état du jeu : l'**affiche** (la tête de la carte principale), le **lendemain** (le dernier combat
+  principal joué : vainqueur, vaincu, round, méthode) et le **rebook** (La Pesée : un combattant remis sur
+  la carte le cycle qui suit un KO subi). Des **conditions** choisissent le média qui a quelque chose à
+  dire : finition, décision, KO au round 1 (Clé de Bras, Le Forum), défaite surprise (le vaincu avait un
+  meilleur bilan), série de trois victoires (Micro Tendu), un Français sur l'affiche (Coin Rouge), un
+  étranger rare dans Split (La presse du pays : « notre X », le pays nommé). Le choix du média et de la
+  ligne est tiré sur un flux séparé (id, situation, cycle) : rejouer dit la même chose, **rien ne se
+  stocke**; une ligne dont un emplacement manque n'est jamais montrée ; Clé de Bras écrit en majuscules,
+  Cage Hebdo sans point d'exclamation. **Branchements** : la semaine (une ligne de presse dans le budget
+  du conteur, source = le média), le fil (toutes les lignes) et le lendemain (bloc « Ce qu'en dit la
+  presse », trois lignes au plus, médias différents). Parties neuves seulement. **Non fait** : Sources
+  Proches qui annonce un combat avant qu'il soit officialisé (la fuite — couleur seulement, voir document
+  §9), Tableau Noir sur les statistiques du combat (la trace ne garde ni coups ni zones : il ne cite que
+  le round et la méthode), La Pesée sur « un avis de Clara ignoré » et sur les bourses, Micro Tendu en
+  vraies questions-réponses par voix, la traduction par langue (la presse du pays dit seulement le pays),
+  et la presse du pays qui remonte un prospect sur la semaine.
+
 - **T6 — les cartes incomplètes, codées par Claude** (03/10 ; **les 4 tests ignorés passent au
   vert**). `mgmt-retraits.js` ; `mgmt-retraits-data.js` est **généré** par `tools/extraire-retraits.js`
   depuis `docs/LOT-3B-CARTE-INCOMPLETE.md` : les **treize répliques du registre sont de la main

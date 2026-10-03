@@ -234,6 +234,7 @@ function scr_mgmt_lendemain(){
       +`<button class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button>`
       +`</section>`
     +`<section class="mgmt-ld-pane">`
+      +(typeof mgmtMediasLendemainHtml==='function'?mgmtMediasLendemainHtml(m):'')
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.changes)}</h3>`
       +mgmtLendemainConstatsHtml(m)
       +(typeof mgmtLendemainPatronHtml==='function'?mgmtLendemainPatronHtml(m):'')
