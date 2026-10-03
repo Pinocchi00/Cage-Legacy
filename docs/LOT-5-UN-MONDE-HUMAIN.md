@@ -431,6 +431,19 @@ La liste de ce qui reste marqué `relu:false` sert d'ordre du jour.
   Parties neuves seulement. **Non fait** (demandes et effets sans système pour les porter) :
   soirée dans sa ville, augmentation, partir, « booker un loyal contre son ami ».
 
+- **H8 — codée par Claude** (03/10 ; à relire par Anthony) : **maquette 11**
+  (`maquettes/11-vestiaire.html`, dessinée avant la tranche) et l'écran
+  `mgmt-ecran-vestiaire.js`. Les 130 à 150 de Split, 14 par page, nom + surnom + rôle +
+  catégorie + bilan + lien, **filtres** (catégorie, rôle, disponibles, ton cercle, tes suivis,
+  quelque chose à dire), tri (cercle, suivis, signes), aside cercle et suivis. Le carré
+  signale une demande en attente ou un moment **majeur** (poids ≥ 30) relayé cette semaine ;
+  tout moment relayé pour le cercle et les suivis. Les surnoms d'une catégorie se calculent
+  en une passe (`mgmtIdentiteSurnomsDe`) ; rendu 21 ms à 1920. Entrée « Vestiaire » dans la
+  navigation, échap ramène à la semaine, la fiche revient au vestiaire. **Fiche étendue** :
+  « Son histoire » (milieu, ancien métier) et « Son corps » (disponibilité, blessures et
+  suspensions gardées). Vérifié à 1920 et 1280. **Non fait** : « Ses liens » et « Son camp »
+  (T7), la presse et la voix (T2 + T3).
+
 - **T1 — acceptée après une reprise** (`99a1f52`, Sol, relue le 02/10) :
   `mgmt-ceintures.js`. Chaque catégorie de Split a un champion (le premier
   classé au départ, zéro défense) ; un combat de titre est un fait gardé
