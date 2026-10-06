@@ -368,3 +368,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-car-cat{margin-top:auto}
 .mf-car-titre{font-weight:600;font-size:22px;line-height:1;padding:3px 8px;border:2px solid var(--mf-jaune);color:var(--mf-jaune);background:none;margin-left:auto}
 .mf-car-titre.on{background:var(--mf-jaune);color:var(--mf-noir)}
+
+/* ---- Préliminaires : la carte de Leïla ------------------------------------------- */
+.mf-pre-slots{gap:6px}
+.mf-pre-slot{height:84px;width:100%;text-align:left}
+.mf-pre-slot .mf-car-slot-c{gap:8px}
+.mf-pre-slot.atrouver .mf-car-slot-n{display:none}
+.mf-pre-compte{font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:.8}
+.mf-pre-manque{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1}
+.mf-pastille-j{display:inline-block;width:18px;height:18px;background:var(--mf-jaune)}
+.mf-pre-voix{display:flex;flex-direction:column;gap:14px;margin-top:10px;overflow:hidden}
+.mf-pre-ouvrir{height:40px}

@@ -25,3 +25,10 @@ n'existent pas ; les enjeux affichés sont « Titre possible » et le nombre de 
 **Tests** : les tests qui lisaient le DOM de l'ancien écran (`mgmtCard`, `mgmtCategoriesFeminines`, `mgmtCeintures`, `nomsApostrophe`) tournent sur
 la fonction ancienne `scr_mgmt_carte` (restée dans le code) via `tests/helpers/loadGameCarteAncienne.js` ; décision : « ressemble exactement » (Anthony,
 06/10). Le comportement est re-testé sur le nouvel écran dans `tests/mgmtCarteCadre.test.js`.
+
+## Troisième tranche : les Préliminaires — `mgmt-prelims.js`
+Planche « Préliminaires » : « La carte de Leïla » (sept préliminaires, chacun **validé** s'il est sur la carte, **à valider** s'il est dans la proposition
+de Leïla, **à trouver** sinon), face-à-face du choisi, état de la carte principale et voix de Leïla à droite. Réponses = celles qui existent :
+Entrée valide la carte, C change le combat choisi (échange), R refait la carte (écrasement) ; « Ses autres affaires » ramène au bureau. La section
+Préliminaires de la barre ouvre cet écran ; le bureau (affaires, soirée suivante) reste atteignable par Échap et par ce bouton.
+**Pas fait** : valider ou changer combat par combat (la proposition reste un bloc, règle d'aujourd'hui), les early prelims (soirée de 13), la réservation.
