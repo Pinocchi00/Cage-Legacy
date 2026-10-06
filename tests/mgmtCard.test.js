@@ -30,7 +30,19 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { newGameWindow } = require('./helpers/loadGame');
+const { newGameWindow: newGameWindowCadre } = require('./helpers/loadGame');
+/* Brief du 06/10/2026, lot 7 : l'écran Carte est refait sur la planche « Booking » (mgmt-carte-cadre.js) à la demande
+   d'Anthony (« exactement » les maquettes). Les tests de ce fichier qui lisent le DOM de l'ANCIEN écran de composition
+   (classes mgmt-book-*, mgmt-can/off, textes d'état) tournent sur la fonction ancienne scr_mgmt_carte, qui reste
+   dans le code avec son clavier d'origine ; le comportement de composition (gardes, geste, retrait, capacité,
+   échappement) est re-testé sur le nouvel écran dans tests/mgmtCarteCadre.test.js. Aucune règle de composition n'a changé. */
+function newGameWindow(opts){
+  const win=newGameWindowCadre(opts);
+  win.eval(`SCREENS.mgmt_carte=scr_mgmt_carte;
+    keysRegister('mgmt_carte',{ArrowUp(){mgmtKeyCartMove(-1);},ArrowDown(){mgmtKeyCartMove(1);},Enter(){mgmtKeyCartAct();},
+      '1'(){CL.mgmtUnbook(0);},'2'(){CL.mgmtUnbook(1);},'3'(){CL.mgmtUnbook(2);},'4'(){CL.mgmtUnbook(3);},'5'(){CL.mgmtUnbook(4);},Escape(){CL.mgmtCarteLeave();}});`);
+  return win;
+}
 
 /* §T1 : la carte principale est composée par le joueur — geste T2. Les
    tests la posent en fixture : cinq combats, dix combattants distincts et

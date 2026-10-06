@@ -301,3 +301,70 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-cal-onglets{position:absolute;left:0;top:800px;width:1564px;display:flex;gap:8px}
 .mf-cal-onglet{flex:1;height:56px;background:var(--mf-ligne);font-family:var(--mf-titre);font-weight:800;font-size:30px;text-align:center!important}
 .mf-cal-onglet.ouvert{background:var(--mf-blanc);color:var(--mf-noir)}
+
+/* ---- Carte (Booking) : la carte à gauche, le face-à-face au centre, les adversaires à droite ---- */
+.mf-carte{display:flex;gap:20px}
+.mf-car-g{width:430px;flex:none}
+.mf-car-g .mf-p3,.mf-car-d .mf-p3{padding:13px;gap:14px}
+.mf-car-t{font-family:var(--mf-titre);font-weight:800;font-size:44px;line-height:.75;position:relative;padding-bottom:18px}
+.mf-car-t::after{content:'';position:absolute;left:0;bottom:0;width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-car-slots{display:flex;flex-direction:column;gap:8px}
+.mf-car-slot{height:104px;padding:0 16px;display:flex;align-items:center;gap:12px;background:var(--mf-ligne);color:var(--mf-blanc);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-car-slot.choisi{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-car-num{font-family:var(--mf-titre);font-weight:800;font-size:52px;line-height:.69;width:34px;flex:none}
+.mf-car-slot-c{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.mf-car-slot-t{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.mf-car-slot-t span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em}
+.mf-car-slot-t em{font-style:normal;font-weight:600;font-size:22px;line-height:1;padding:3px 8px;border:2px solid currentColor}
+.mf-car-slot-t em.titre{background:var(--mf-jaune);border-color:var(--mf-jaune);color:var(--mf-noir)}
+.mf-car-slot-n{display:flex;align-items:baseline;gap:6px;white-space:nowrap;overflow:hidden}
+.mf-car-slot-n b{font-family:var(--mf-titre);font-weight:800;font-size:25px;line-height:.85;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.mf-car-slot-n span{font-size:22px;line-height:1;flex:none}
+.mf-car-slot-v{font-size:26px;line-height:26px;color:var(--mf-texte2)}
+.mf-car-slot.vide{background:var(--mf-ligne)}
+.mf-car-slot-s{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.mf-car-slot.choisi .mf-car-slot-s svg path{stroke:var(--mf-noir)}
+.mf-car-retire{width:26px;height:26px;border:2px solid currentColor;font-size:26px;line-height:26px;text-align:center!important}
+.mf-car-legende{margin-top:auto;display:flex;gap:22px;font-size:22px;line-height:1;color:var(--mf-texte2)}
+.mf-car-legende span{display:flex;align-items:center;gap:8px}
+.mf-car-legende .mf-eff-q{display:inline-block;width:20px;font-style:normal;font-size:28px}
+.mf-car-c{width:684px;flex:none;display:flex;flex-direction:column;gap:16px;position:relative}
+.mf-car-prop{margin-top:16px;font-size:22px}
+.mf-car-ban{position:relative;width:684px;height:250px;flex:none;display:flex;background:var(--mf-noir);padding:6px}
+.mf-car-ban-a,.mf-car-ban-b{position:relative;flex:1;overflow:hidden}
+.mf-car-ban-a{background:var(--mf-rouge)}
+.mf-car-ban-b{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-car-ban-nom{position:absolute;left:24px;top:22px;display:flex;flex-direction:column;gap:12px;font-family:var(--mf-titre);font-weight:800;line-height:.69;white-space:nowrap;text-transform:uppercase}
+.mf-car-ban-nom span{font-size:24px;line-height:1}
+.mf-car-ban-nom b{line-height:.69}
+.mf-car-ban-nom.d{left:auto;right:24px;top:auto;bottom:22px;align-items:flex-end}
+.mf-car-vs{position:absolute;left:300px;top:60px;width:84px;height:84px;background:var(--mf-blanc);color:var(--mf-noir);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:50px;clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-car-ban-tag{position:absolute;right:20px;top:20px;background:var(--mf-blanc);color:var(--mf-noir);padding:9px 12px 7px;font-family:var(--mf-titre);font-weight:800;font-size:30px;line-height:1.1}
+.mf-car-ban-b .mf-car-ban-tag{display:none}
+.mf-car-cmp{flex:1}
+.mf-car-cmp .mf-p3{padding:1px 15px 15px;gap:0}
+.mf-car-comp-l{display:flex;flex-direction:column}
+.mf-car-comp{height:62px;display:grid;grid-template-columns:1fr 200px 1fr;align-items:center;border-bottom:2px solid var(--mf-sep);text-align:center}
+.mf-car-comp div{font-family:var(--mf-titre);font-weight:800;font-size:32px;line-height:1;white-space:nowrap;display:flex;justify-content:center}
+.mf-car-comp span{font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2)}
+.mf-car-aide{padding:30px 16px;font-size:26px;color:var(--mf-texte2)}
+.mf-car-enjeux{margin-top:22px;display:flex;flex-direction:column;gap:12px}
+.mf-car-enjeux div:last-child{display:flex;gap:8px}
+.mf-car-enjeux span{height:40px;padding:0 16px;background:var(--mf-ligne);font-size:22px;line-height:40px}
+.mf-car-boutons{margin-top:auto;display:flex;gap:16px}
+.mf-car-d{width:410px;flex:none}
+.mf-car-tri{display:flex;justify-content:space-between;font-size:22px;line-height:1;color:var(--mf-texte2)}
+.mf-car-advs{display:flex;flex-direction:column;gap:8px;flex:1}
+.mf-car-adv{height:100px;padding:0 18px;display:flex;align-items:center;gap:12px;background:var(--mf-ligne);color:var(--mf-blanc);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);width:100%}
+.mf-car-adv.choisi{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-car-adv.off{opacity:.6}
+.mf-car-adv-r{font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:1;width:48px;flex:none}
+.mf-car-adv-c{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.mf-car-adv-nb{display:flex;justify-content:space-between;align-items:baseline;gap:10px;white-space:nowrap}
+.mf-car-adv-nb b{font-family:var(--mf-titre);font-weight:800;line-height:.85}
+.mf-car-adv-nb i{font-style:normal;font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:.85}
+.mf-car-adv-s{font-size:22px;line-height:1;color:var(--mf-texte2)}
+.mf-car-adv.choisi .mf-car-adv-s{color:rgba(13,11,11,.74)}
+.mf-car-cat{margin-top:auto}
+.mf-car-titre{font-weight:600;font-size:22px;line-height:1;padding:3px 8px;border:2px solid var(--mf-jaune);color:var(--mf-jaune);background:none;margin-left:auto}
+.mf-car-titre.on{background:var(--mf-jaune);color:var(--mf-noir)}
