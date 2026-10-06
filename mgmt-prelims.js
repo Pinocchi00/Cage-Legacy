@@ -26,7 +26,7 @@ function mgmtPrelimsEmplacements(m){
 
 function mgmtPrelimsLigne(m,s,i,choisi){
   const f=s.fight, fa=f&&mgmtFighterById(m,f.a), fb=f&&mgmtFighterById(m,f.b);
-  const nom=`PRÉLIM ${i+1}`;
+  const early=i<(m.card.sizeEarly||0), nom=early?`EARLY PRELIM ${i+1}`:`PRÉLIM ${i+1}`;
   const etat=s.etat==='valide'?MF_SVG_CONFIRME:(s.etat==='avalider'?'<div class="mf-eff-q" aria-hidden="true">?</div>':'');
   const corps=f&&fa&&fb
     ?`<div class="mf-car-slot-t"><span>${esc(nom)}</span><em>${esc(mgmtCarteCourt(fa.div))}</em></div>`

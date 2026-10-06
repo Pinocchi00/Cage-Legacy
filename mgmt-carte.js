@@ -147,6 +147,8 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
          combattant déjà engagé (principale comme prélims) n'est jamais
          candidat. */
       if(mgmtEngaged(m,A)||mgmtEngaged(m,B)) continue;
+      /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
+      if(typeof mgmtAgendaReserve==='function'&&(mgmtAgendaReserve(m,A)||mgmtAgendaReserve(m,B))) continue;
       const key=[A.id,B.id].sort().join('|');
       if(seen.has(key)) continue;
       if(rematch.has(key)) continue;
@@ -615,7 +617,8 @@ function mgmtMainPosable(m){
  *  @returns {string} 'none'|'event'|'compose'|'refill'|'stuck'. */
 function mgmtClosePile(m){
   if(!m||mgmtOpenCount(m)>0) return 'none';
-  if(mgmtCardFull(m)||(typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m))) return 'event';
+  /* Lot 7 : avec l'agenda du joueur la soirée ne part jamais d'elle-même — elle est « prête » et le joueur la lance. */
+  if(mgmtCardFull(m)||(typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m))) return (typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m))?'prete':'event';
   if(m.card&&Array.isArray(m.card.main)&&Number.isSafeInteger(m.card.sizeMain)
     &&m.card.main.length<m.card.sizeMain){
     return mgmtMainPosable(m)?'compose':'stuck';

@@ -122,6 +122,7 @@ function scr_mgmt_carte_cadre(){
   const boutons=`<div class="mf-car-boutons">`
     +(peutConf?mfBouton('Confirmer le combat',{touche:'Entrée',jaune:true,onclick:`CL.mgmtPick('${esc(etat.vise.id)}')`})
       :(!pickF&&vise&&mgmtSelectable(m,vise,null)&&!plein?mfBouton('Choisir ce combattant',{touche:'Entrée',jaune:true,onclick:`CL.mgmtPick('${esc(vise.id)}')`}):''))
+    +(pickF&&mgmtAgendaActif(m)?mfBouton('Proposer',{touche:'D',onclick:'CL.mgmtCarteProposer()'}):'')
     +(A?mfBouton('Sa fiche',{touche:'F',onclick:`CL.mgmtCarteFiche()`}):'')+`</div>`;
   const centre=`<div class="mf-car-c">${mgmtCarteBanniere(A,B,A?A.div:mgmtCarteDiv(m))}`
     +mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${prop?`<div class="mf-car-prop mf-ancien">${prop}</div>`:''}${faits}${boutons}`,'normal','mf-car-cmp')+`</div>`;
@@ -155,6 +156,12 @@ Object.assign(CL,{
     const i=ids.indexOf(mgmtCarteDiv(m));
     MGMT_CART.div=ids[(i+(delta<0?-1:1)+ids.length)%ids.length]; MGMT_CART.cursor=0; render();
   },
+  /** La préparation à la demande : l'assistante propose un adversaire au premier choix posé — le curseur s'y place, le joueur confirme. */
+  mgmtCarteProposer(){
+    const m=G.mgmt; if(!MGMT_CART.pick||!mgmtAgendaActif(m)) return;
+    const o=mgmtAgendaProposer(m,MGMT_CART.pick); if(!o) return;
+    const i=mgmtCarteListe(m).findIndex(x=>x.id===o.id); if(i>=0){ MGMT_CART.cursor=i; render(); }
+  },
   mgmtCarteFiche(){
     const m=G.mgmt, f=(MGMT_CART.pick&&mgmtFighterById(m,MGMT_CART.pick))||mgmtCarteListe(m)[MGMT_CART.cursor||0];
     if(f) CL.mgmtFicheParIndex(m.roster.indexOf(f));
@@ -169,6 +176,8 @@ keysRegister('mgmt_carte',{
   Enter(){ CL.mgmtCarteEntree(); },
   c(){ CL.mgmtCarteCategorie(1); },
   C(){ CL.mgmtCarteCategorie(1); },
+  d(){ CL.mgmtCarteProposer(); },
+  D(){ CL.mgmtCarteProposer(); },
   f(){ CL.mgmtCarteFiche(); },
   F(){ CL.mgmtCarteFiche(); },
   '1'(){ CL.mgmtUnbook(0); },

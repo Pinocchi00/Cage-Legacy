@@ -197,7 +197,7 @@ function mgmtBirthdayWeek(id){
 function mgmtAdvanceRosterAges(m){
   if(!m||typeof m!=='object') return 0;
   const previous=Number.isSafeInteger(m.ageWeeks)&&m.ageWeeks>=0?m.ageWeeks:0;
-  const elapsed=previous+MGMT_EVENT_WEEKS;
+  const elapsed=previous+(typeof mgmtAgendaSemaines==='function'?mgmtAgendaSemaines(m):MGMT_EVENT_WEEKS);
   const years=Math.floor(elapsed/MGMT_EXT_YEAR_WEEKS);
   m.ageWeeks=elapsed%MGMT_EXT_YEAR_WEEKS;
   if(Array.isArray(m.roster)){

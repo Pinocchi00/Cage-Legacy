@@ -587,6 +587,12 @@ function mgmtRunEvent(m){
      et la soirée joue la carte principale d'abord, puis les préliminaires. */
   const booked=mgmtCardFights(m).map(f=>({a:f.a,b:f.b,slot:f.slot==='main'?'main':'prelim',
     title:f.title===true,rounds:mgmtBoutRounds(m,f),source:f}));
+  /* Lot 7 : avec l'agenda, l'ordre de passage est celui d'une vraie soirée — les premiers préliminaires (early prelims), les
+     préliminaires, puis les combats de la carte principale en remontant, le principal en dernier. */
+  if(typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)){
+    const pre=booked.filter(x=>x.slot==='prelim'), pri=booked.filter(x=>x.slot==='main').reverse();
+    booked.length=0; booked.push(...pre,...pri);
+  }
   /* Disponibilités vérifiées d'abord : une paire introuvable n'applique
      aucune conséquence — la soirée n'a pas commencé. */
   for(const cf of booked){
