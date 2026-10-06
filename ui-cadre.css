@@ -270,3 +270,34 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fiche-corps .mgmt-fiche-fight{font-size:24px}
 .mf-fiche-retour{margin-left:auto}
 .mf-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---- Calendrier : trois soirées côte à côte, la courante au centre --------------- */
+.mf-calendrier{position:relative}
+.mf-cal-trois{position:absolute;left:0;top:0;width:1564px;height:800px}
+.mf-cal-lat{position:absolute;top:72px;width:320px;height:616px;background:var(--mf-panneau);border:2px solid var(--mf-bord);padding:20px 24px;display:flex;flex-direction:column;gap:14px;font-size:24px}
+.mf-cal-lat:first-child{left:0}
+.mf-cal-lat:last-child{right:0}
+.mf-cal-lat.vide{border-style:dashed;opacity:.3}
+.mf-cal-lat-d{font-weight:600;font-size:24px;color:var(--mf-texte2);letter-spacing:.04em;text-transform:uppercase}
+.mf-cal-lat-n{font-family:var(--mf-titre);font-weight:800;font-size:40px;line-height:1;text-transform:uppercase}
+.mf-cal-lat-num{font-family:var(--mf-titre);font-weight:800;font-size:150px;line-height:.8;display:flex;align-items:flex-end;gap:14px}
+.mf-cal-lat-num span{font-size:26px;line-height:1.1;color:var(--mf-texte2);padding-bottom:6px}
+.mf-cal-lib{font-weight:600;font-size:22px;letter-spacing:.04em;text-transform:uppercase;color:var(--mf-texte2)}
+.mf-cal-texte{font-size:26px;line-height:1.2}
+.mf-cal-pastille{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--mf-jaune);margin-right:10px}
+.mf-cal-fleche{position:absolute;right:20px;bottom:20px;width:44px;height:36px;border:2px solid var(--mf-blanc);font-size:26px;line-height:30px;text-align:center}
+.mf-cal-centre{position:absolute;left:342px;top:0;width:878px;height:760px;background:var(--mf-panneau);border:2px solid var(--mf-blanc);display:flex;flex-direction:column}
+.mf-cal-rouge{background:var(--mf-rouge);padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-end;height:176px;flex:none}
+.mf-cal-quand{font-weight:600;font-size:26px;letter-spacing:.04em}
+.mf-cal-nom{font-family:var(--mf-titre);font-weight:800;font-size:84px;line-height:.9}
+.mf-cal-gros{font-family:var(--mf-titre);font-weight:800;font-size:130px;line-height:.75;text-align:right}
+.mf-cal-gros span{display:block;font-size:24px;line-height:1;margin-top:12px;letter-spacing:.04em}
+.mf-cal-corps{flex:1;padding:28px 32px;display:flex;flex-direction:column;gap:16px}
+.mf-cal-etat{display:flex;flex-direction:column;gap:10px;width:60%}
+.mf-cal-ligne{display:flex;justify-content:space-between;background:var(--mf-ligne);padding:14px 20px;font-size:26px}
+.mf-cal-ligne b{font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:1}
+.mf-cal-pied{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end}
+.mf-cal-manque{background:var(--mf-ligne);padding:10px 16px;font-size:24px}
+.mf-cal-onglets{position:absolute;left:0;top:800px;width:1564px;display:flex;gap:8px}
+.mf-cal-onglet{flex:1;height:56px;background:var(--mf-ligne);font-family:var(--mf-titre);font-weight:800;font-size:30px;text-align:center!important}
+.mf-cal-onglet.ouvert{background:var(--mf-blanc);color:var(--mf-noir)}
