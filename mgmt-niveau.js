@@ -25,27 +25,36 @@
    la catégorie ou le style doit le changer ; la part de palmarès gonflés est
    celle de MGMT_NIV_BIAIS_*. ==== */
 
-const MGMT_NIV_MIN=40, MGMT_NIV_MAX=80;
+const MGMT_NIV_MIN=40;
+const MGMT_NIV_MAX=80;
 /** L'âge de pic : de 26 à 30 ans. */
-const MGMT_NIV_PIC_MIN=26, MGMT_NIV_PIC_SPREAD=5;
+const MGMT_NIV_PIC_MIN=26;
+const MGMT_NIV_PIC_SPREAD=5;
 /** Le potentiel : de 50 à 80, tiré en moyenne de trois flux (la plupart des combattants au milieu). */
-const MGMT_NIV_POT_MIN=50, MGMT_NIV_POT_MAX=80;
+const MGMT_NIV_POT_MIN=50;
+const MGMT_NIV_POT_MAX=80;
 /** Avant le pic : part de l'écart au potentiel gagnée à chaque combat (au plus MGMT_NIV_COMBAT_MAX points)
  *  et à chaque anniversaire (au plus MGMT_NIV_AN_MAX). */
-const MGMT_NIV_PART_COMBAT=0.14, MGMT_NIV_COMBAT_MAX=3.5;
-const MGMT_NIV_PART_AN=0.10, MGMT_NIV_AN_MAX=2;
+const MGMT_NIV_PART_COMBAT=0.14;
+const MGMT_NIV_COMBAT_MAX=3.5;
+const MGMT_NIV_PART_AN=0.10;
+const MGMT_NIV_AN_MAX=2;
 /** Une défaite ne coûte jamais plus de ce nombre de points. */
 const MGMT_NIV_DEFAITE=1;
 /** Après le pic, le déclin ne commence qu'à pic + ce nombre d'années, puis MGMT_NIV_DECLIN points par an. */
-const MGMT_NIV_DECLIN_DELAI=3, MGMT_NIV_DECLIN=1.2;
+const MGMT_NIV_DECLIN_DELAI=3;
+const MGMT_NIV_DECLIN=1.2;
 /** Le camp change la progression d'avant le pic d'au plus cette part (qualité −1, 0 ou +1). */
 const MGMT_NIV_CAMP=0.2;
 /** Le biais du palmarès : un combattant dont le bilan vient d'une organisation plus faible (gonflé) ou plus
  *  forte (dégonflé) que ce qu'il vaut. Biais = (u − PART_BAS) × ETENDUE, en points de niveau. */
-const MGMT_NIV_BIAIS_BAS=0.45, MGMT_NIV_BIAIS_ETENDUE=26;
+const MGMT_NIV_BIAIS_BAS=0.45;
+const MGMT_NIV_BIAIS_ETENDUE=26;
 /** La rouille : après tant de cycles sans combat, une baisse passagère de forme (points de dynamique), au plus
  *  MGMT_NIV_ROUILLE_MAX, effacée au combat suivant (le lot 9 y branche ses paliers d'attente). */
-const MGMT_NIV_ROUILLE_DELAI=12, MGMT_NIV_ROUILLE_PAR_CYCLE=0.5, MGMT_NIV_ROUILLE_MAX=5;
+const MGMT_NIV_ROUILLE_DELAI=12;
+const MGMT_NIV_ROUILLE_PAR_CYCLE=0.5;
+const MGMT_NIV_ROUILLE_MAX=5;
 
 function mgmtNivFlux(id,couche){ return mgmtIdentiteStream(id,'niv-'+couche); }
 const mgmtNivRond=x=>Math.round(x*10)/10;
