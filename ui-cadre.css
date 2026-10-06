@@ -177,6 +177,65 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-date{position:absolute;left:1498px;top:924px;width:350px;height:84px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;justify-content:center;gap:20px}
 .mf-date b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.69}
 .mf-date span{font-weight:600;font-size:26px;line-height:1;letter-spacing:.06em}
+/* ---- Effectif : la liste d'une catégorie et l'aperçu du choisi ---------------- */
+.mf-effectif{display:flex;flex-direction:column;gap:16px}
+.mf-eff-barre{height:56px;flex:none;display:flex;align-items:center;gap:20px}
+.mf-eff-sexe{display:flex;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-eff-sexe button,.mf-eff-puces button{height:56px;background:var(--mf-ligne);color:var(--mf-blanc);font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:32px;line-height:56px;white-space:nowrap}
+.mf-eff-sexe button{padding:0 22px}
+.mf-eff-puces{display:flex;gap:8px}
+.mf-eff-puces button{padding:0 20px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-eff-sexe button.on,.mf-eff-puces button.on{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-eff-trait{width:2px;height:40px;background:var(--mf-bord)}
+.mf-eff-corps{flex:1;display:flex;gap:20px;min-height:0}
+.mf-eff-panneau{width:1104px;flex:none}
+.mf-eff-panneau .mf-p3{padding:9px 23px 9px 11px;gap:6px;position:relative}
+.mf-eff-liste{display:flex;flex-direction:column;gap:6px;flex:1;position:relative}
+.mf-eff-entete,.mf-eff-ligne{display:grid;grid-template-columns:64px minmax(0,1fr) 104px 110px 232px 124px;align-items:center;column-gap:16px;padding:0 18px}
+.mf-eff-entete{height:36px;flex:none;font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-eff-ligne{height:68px;flex:none;width:100%;background:var(--mf-ligne);color:var(--mf-blanc);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-eff-ligne.choisie{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-eff-ligne.choisie .mf-eff-nom span,.mf-eff-ligne.choisie .mf-eff-sit.libre{color:rgba(13,11,11,.74)}
+.mf-eff-ligne.choisie .mf-eff-sit svg path{stroke:var(--mf-noir)}
+.mf-eff-rang{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:34px;line-height:1;white-space:nowrap}
+.mf-eff-c{width:34px;height:34px;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);letter-spacing:0;font-weight:800;font-size:24px;line-height:1}
+.mf-eff-nom{display:flex;align-items:baseline;gap:12px;min-width:0;white-space:nowrap}
+.mf-eff-nom b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1;flex:none}
+.mf-eff-nom span{font-size:22px;line-height:1;color:var(--mf-texte2);overflow:hidden;text-overflow:ellipsis}
+.mf-eff-bilan{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1;white-space:nowrap}
+.mf-eff-forme{display:flex;gap:6px}
+.mf-eff-forme .mf-marque{width:30px;height:30px;font-size:22px}
+.mf-eff-forme .mf-marque.d>i,.mf-eff-forme .mf-marque.n>i{width:25px;height:25px}
+.mf-eff-sit{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-blanc)}
+.mf-eff-sit.libre{color:var(--mf-texte2)}
+.mf-eff-vide{width:26px;height:26px;flex:none}
+.mf-eff-q{width:26px;height:26px;flex:none;text-align:center;font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:1}
+.mf-eff-contrat{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:28px;line-height:1;white-space:nowrap;text-align:right;color:var(--mf-texte2)}
+.mf-eff-ligne.choisie .mf-eff-contrat{color:rgba(13,11,11,.74)}
+.mf-eff-asc{position:absolute;right:-18px;top:42px;width:6px;height:660px;background:var(--mf-ligne)}
+.mf-eff-asc div{width:6px;background:var(--mf-blanc)}
+.mf-eff-pied{margin-top:auto;display:flex;justify-content:space-between;align-items:center;height:30px;padding:0 18px;font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap}
+.mf-eff-aucun{padding:24px 18px;font-size:24px;color:var(--mf-texte2)}
+.mf-eff-aside{width:440px;flex:none;display:flex;flex-direction:column;gap:16px}
+.mf-eff-banniere{position:relative;width:440px;height:150px;flex:none;background:rgba(233,230,225,.6);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.mf-eff-b2{width:100%;height:100%;background:var(--mf-noir);padding:6px;clip-path:polygon(17px 0,100% 0,100% calc(100% - 17px),calc(100% - 17px) 100%,0 100%,0 17px)}
+.mf-eff-b3{position:relative;width:100%;height:100%;background:var(--mf-rouge);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.mf-eff-banniere-nom{position:absolute;left:22px;bottom:20px;display:flex;flex-direction:column;gap:12px;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.69;white-space:nowrap;text-transform:uppercase}
+.mf-eff-banniere-nom span{line-height:.69}
+.mf-eff-fiche{flex:1}
+.mf-eff-fiche .mf-p3{padding:13px}
+.mf-eff-fiche-t{display:flex;align-items:center;justify-content:space-between}
+.mf-eff-fiche-s{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);text-transform:uppercase;margin-bottom:12px}
+.mf-eff-fiche-rec{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:84px;line-height:.69;white-space:nowrap}
+.mf-eff-badge{width:72px;height:72px;flex:none;background:var(--mf-blanc);color:var(--mf-noir);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);letter-spacing:0;font-weight:800;font-size:34px;line-height:1}
+.mf-eff-badge.champion{background:var(--mf-jaune)}
+.mf-eff-fiche-ls{margin-top:22px;border-top:2px solid var(--mf-sep);display:flex;flex-direction:column}
+.mf-eff-fiche-l{height:52px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep)}
+.mf-eff-fiche-l span{font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-eff-fiche-l b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1;white-space:nowrap;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
+.mf-eff-fiche-pied{margin-top:auto;display:flex}
+.mf-eff-apercu-vide{padding:24px;font-size:24px;color:var(--mf-texte2)}
+
 /* ---- Nouvelle partie : le choix de l'organisation ------------------------- */
 .mf-logo-seul{position:absolute;left:22px;top:20px}
 .mf-logo-seul .mf-logo svg{width:64px;height:64px}

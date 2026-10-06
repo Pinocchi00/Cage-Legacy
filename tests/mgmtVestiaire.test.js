@@ -14,11 +14,11 @@ test('H8 — le vestiaire liste les 130 à 150 de Split, par pages, sans erreur 
     G.screen='mgmt_vestiaire'; const page=SCREENS.mgmt_vestiaire();
     const lignes=mgmtVestiaireLignes(m);
     return {n:lignes.length,roster:m.roster.filter(f=>!mgmtIsRetired(f)).length,rows:(page.match(/class="mgmt-vest-row( alt)?( off)?"/g)||[]).length,
-      pageSize:MGMT_VESTIAIRE_PAGE,nav:/Vestiaire<\\/button>/.test(page)&&page.includes('aria-current="page"'),titre:page.includes('Le vestiaire'),
+      pageSize:MGMT_VESTIAIRE_PAGE,nav:/Effectif<\\/button>/.test(page),titre:page.includes('Le vestiaire'),
       pages:page.includes('Page 1 / '+Math.ceil(lignes.length/MGMT_VESTIAIRE_PAGE))};
   `);
   assert.equal(r.n,r.roster); assert.ok(r.n>=130); assert.equal(r.rows,r.pageSize,'une page de lignes');
-  assert.ok(r.nav,'le bouton Vestiaire est dans la navigation, courant'); assert.ok(r.titre); assert.ok(r.pages);
+  assert.ok(r.nav,'le bouton Effectif remplace Vestiaire dans la navigation'); assert.ok(r.titre); assert.ok(r.pages);
 });
 
 test('H8 — chaque ligne montre nom, surnom unique, rôle, catégorie, bilan ; un clic ouvre la fiche et Retour revient', () => {
