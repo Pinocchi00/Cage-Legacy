@@ -18,7 +18,7 @@ const MF_LARGEUR=1920, MF_HAUTEUR=1080;
 /** Rapport de largeur entre le titre de repli (Saira Condensed 800) et Saira Extra
  *  Condensed 800, que les tables d'avance des maquettes décrivent. À ramener à 1 le jour
  *  où le vrai fichier de la police est dans fonts/ (voir ui-cadre.css). */
-const MF_ADV_ECHELLE=1.05;
+const MF_ADV_ECHELLE=1;
 
 /** Met le cadre à l'échelle de la fenêtre : un seul rapport, jamais de réorganisation. */
 function mfAjuste(){

@@ -5,19 +5,15 @@
    coupés à 45°), la grille (barre 260, en-tête à 20 et haut de 64, contenu
    1564 × 856 à 300 / 128, touches à 1010) et les neuf pièces. Aucun composant
    natif du navigateur à l'écran ; le texte n'est pas sélectionnable. ==== */
-/* La famille des titres, noms et chiffres : Saira Extra Condensed 800. Son fichier n'est PAS
-   encore dans le dépôt (fonts/ ne porte que Saira et Saira Condensed) : en attendant, le nom
-   de famille pointe sur Saira Condensed 800, un peu plus large. Poser le vrai fichier ici,
-   et ramener MF_ADV_ECHELLE à 1 et --mf-titre-ls à 0 dans mgmt-cadre.js. */
-@font-face{font-family:'Saira Extra Condensed';src:url('fonts/condensed-800-latin.woff2?v=b4') format('woff2');font-weight:800;font-display:swap}
-@font-face{font-family:'Saira Extra Condensed';src:url('fonts/condensed-800-ext.woff2?v=b4') format('woff2');font-weight:800;font-display:swap;unicode-range:U+0100-02FF,U+0304,U+0308,U+0329,U+1E00-1EFF,U+2020,U+20A0-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF}
+/* La famille des titres, noms et chiffres : Saira Extra Condensed 800 (SIL OFL, Google Fonts), posée le 06/10/2026. */
+@font-face{font-family:'Saira Extra Condensed';src:url('fonts/extracondensed-800.ttf?v=b6') format('truetype');font-weight:800;font-display:swap}
 :root{
   --mf-noir:#0D0B0B; --mf-panneau:#121010; --mf-ligne:#252121; --mf-blanc:#E9E6E1;
   --mf-rouge:#B32A1E; --mf-rouge-vif:#E23A2B; --mf-jaune:#F0B220;
   --mf-texte2:rgba(233,230,225,.74); --mf-sep:rgba(233,230,225,.16); --mf-bord:rgba(233,230,225,.38);
   --mf-titre:'Saira Extra Condensed','Saira Condensed','Arial Narrow',sans-serif;
   --mf-texte:'Saira Condensed','Arial Narrow',sans-serif;
-  --mf-s:1; --mf-titre-ls:-.06em;
+  --mf-s:1; --mf-titre-ls:0;
 }
 body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ecran{position:fixed;inset:0;z-index:5;overflow:hidden;background:var(--mf-noir);color:var(--mf-blanc);font-family:var(--mf-texte);font-weight:500;line-height:1.2;user-select:none;-webkit-user-select:none}
@@ -28,14 +24,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-stage button:focus-visible{outline:3px solid var(--mf-jaune);outline-offset:2px}
 .mf-stage button[disabled]{cursor:default}
 
-/* Le fond cendré : jamais un noir plein. Texture de repli dessinée en CSS tant que
-   le fichier de texture des maquettes n'est pas dans le dépôt. */
-.mf-fond{position:absolute;inset:0;background:
-  radial-gradient(ellipse 1200px 760px at 64% 40%,rgba(78,64,58,.62),transparent 72%),
-  radial-gradient(ellipse 900px 620px at 14% 92%,rgba(52,40,38,.55),transparent 72%),
-  radial-gradient(ellipse 700px 500px at 96% 8%,rgba(60,48,44,.45),transparent 70%),
-  linear-gradient(180deg,#1b1615,#110e0e 58%,#0D0B0B)}
-.mf-fond::after{content:'';position:absolute;inset:0;opacity:.2;mix-blend-mode:screen;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='360' height='360'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .92 0 0 0 0 .88 0 0 0 0 .82 0 0 0 .5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+/* Le fond cendré : la texture des maquettes (images/cendre.jpg, 1920×1080). */
+.mf-fond{position:absolute;inset:0;background:#171413 url('images/cendre.jpg?v=b6') center/1920px 1080px no-repeat}
 .mf-teinte{position:absolute;inset:0;background:radial-gradient(ellipse 1000px 900px at 64% 50%,var(--mf-couleur,#B32A1E),transparent 74%);opacity:.34;mix-blend-mode:screen}
 
 /* L'en-tête : la plaque, son libellé, ce qui se lit à droite. */
