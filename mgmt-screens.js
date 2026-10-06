@@ -194,8 +194,11 @@ function mgmtNavHtml(){
 }
 function mgmtWithNav(screen){
   return function(){
-    return screen().replace(/<div class="scr mgmt-wrap([^"]*)">/,
+    /* Brief du 06/10/2026, lot 4 : l'écran ancien garde son habillage et se pose dans le cadre sous la barre
+       des sections ; sa navigation d'origine reste dans le HTML (les tests la lisent) et le cadre la masque. */
+    const html=screen().replace(/<div class="scr mgmt-wrap([^"]*)">/,
       (opening)=>opening+mgmtNavHtml());
+    return mfAncien(html,G&&G.screen);
   };
 }
 

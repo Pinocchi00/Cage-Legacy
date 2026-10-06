@@ -51,7 +51,10 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   /* Ce qui n'existe pas n'apparaît pas : aucun texte de la maquette 08 hors
      l'effectif et les finances (§1, §3 T7). */
   assert.ok(!TRAVAIL_RE.test(html), 'aucun texte de travail');
-  assert.ok(!html.includes('Contrats')&&!html.includes('Diffuseur'), 'aucun onglet Contrats ni Diffuseur');
+  /* Brief du 06/10/2026, lot 4 : la barre des sections du cadre porte un « Contrats » ; ce que le test garde,
+     c'est que l'écran de l'organisation lui-même (le contenu ancien) n'a ni onglet Contrats ni Diffuseur. */
+  const ancien=win.document.querySelector('.mf-ancien').innerHTML;
+  assert.ok(!ancien.includes('Contrats')&&!ancien.includes('Diffuseur'), 'aucun onglet Contrats ni Diffuseur');
   assert.ok(!html.includes('Delatour')&&!html.includes('PATRON')&&!html.includes('OBJECTIFS'), 'ni patron ni objectifs de saison');
   /* Navigation permanente : Semaine, Classements (T6 : l'écran existe,
      docs/LOT-4-LA-PEAU-DU-JEU.md §3 T6, réécrit sur la décision T6) et

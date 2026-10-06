@@ -1111,11 +1111,16 @@ test('T8a accueil — reprise à froid depuis le secours, lecture pure et noms �
   win.G.mgmt=null;
   const snapshot=JSON.stringify({...win.localStorage});
   const html=win.scr_title();
-  assert.ok(html.includes('title-last'));
-  assert.ok(html.includes(win.eval(`esc(${JSON.stringify(b.name)})+' bat '+esc(${JSON.stringify(a.name)})`)));
-  assert.ok(html.includes('Soumission · round 2'));
-  assert.ok(html.includes('title-upcoming'));
-  assert.ok(!html.includes('<img src=x'));
+  /* Brief du 06/10/2026, lot 4 : l'accueil du canvas (affiche, menu) remplace l'accueil T8a et ne montre
+     plus les résultats de la dernière soirée. Les lectures pures qui les produisaient restent testées
+     directement ; l'accueil, lui, offre Reprendre et n'injecte jamais un nom. */
+  const dernier=win.titleMgmtLastEvent(win.titleMgmtState());
+  assert.ok(dernier.includes('title-last'));
+  assert.ok(dernier.includes(win.eval(`esc(${JSON.stringify(b.name)})+' bat '+esc(${JSON.stringify(a.name)})`)));
+  assert.ok(dernier.includes('Soumission · round 2'));
+  assert.ok(win.titleMgmtUpcoming(win.titleMgmtState()).length>0);
+  assert.ok(html.includes('title-resume'),'Reprendre est offert quand une partie existe');
+  assert.ok(!html.includes('<img src=x')&&!dernier.includes('<img src=x'));
   assert.equal(win.G.mgmt,null,'l’accueil ne charge pas la partie dans G');
   assert.equal(JSON.stringify({...win.localStorage}),snapshot,'aucune réparation ni écriture en lisant le titre');
   win.mgmtEntrerAvantH4();

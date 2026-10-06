@@ -38,39 +38,9 @@ function nextObjectiveBlock(){
    affichées — elles concernent l'écran d'où vient l'action, pas l'accueil —
    et seule l'erreur de lien de légende partagé, posée au démarrage par
    main.js dans G.bootMsg, reste visible. ==== */
-function scr_title(){
-  /* ==== [ANCRE: LOT4_T8A_ACCUEIL_01] — T8a, maquette 01 : quatre entrées,
-     reprise management et faits réels. Lecture validée, sans charger une
-     partie dans G et sans stocker les textes dérivés. ==== */
-  const m=titleMgmtState(), upcoming=titleMgmtUpcoming(m);
-  const management=m?`Split ${m.cycle} · ${mgmtCardLabel(m)}`:'Split — matchmaker';
-  G.lastMsg=null;
-  const boot=G.bootMsg;G.bootMsg=null;
-  return `<div class="scr title-screen"><div class="title-grid${m?'':' title-no-save'}">
-    <main class="title-main">
-      <!-- ==== [ANCRE: V3_TITRE_PROMESSE] — T8a : hiérarchie du titre portée
-           de 01 ; la promesse d'origine n'est plus un bandeau. ==== -->
-      <div><div class="title-brand"><span class="title-oct" aria-hidden="true"></span><span>${esc(MGMT_ORG)} MMA</span></div>
-        <h1>CAGE<br>LEGACY</h1></div>
-      ${boot?`<p class="title-message" role="alert">${esc(boot)}</p>`:''}
-      <!-- ==== [ANCRE: V3_MODES_PROMESSE] — T8a : descriptions existantes,
-           aucune phrase d'exemple de la maquette. ==== -->
-      <nav class="title-modes" aria-label="Modes de jeu">
-        <!-- ==== [ANCRE: MGMT_LOT1_ENTREE] — même entrée validée. ==== -->
-        <button class="title-mode title-management" onclick="CL.mgmtParties()"><strong>Management</strong><span>${esc(management)}</span></button>
-        <button class="title-mode" onclick="CL.go('intro')"><strong>Carrière</strong><span>Montez les échelons, un combat à la fois</span></button>
-        <button class="title-mode" onclick="CL.duelEnter()"><strong>Duel entre amis</strong><span>Affronte deux légendes de ton Panthéon</span></button>
-        <button class="title-mode" onclick="CL.go('hof')"><strong>Panthéon</strong><span>Toutes les légendes retraitées</span></button>
-      </nav>
-      <nav class="title-utils" aria-label="Archives"><button onclick="CL.go('ach')">Succès</button></nav>
-    </main>
-    ${m?`<aside class="title-aside" aria-label="Partie management">
-      ${titleMgmtLastEvent(m)}
-      ${upcoming.length?`<section class="title-upcoming"><h2>Ce qui t'attend</h2><p>${upcoming.map(esc).join('<br>')}</p></section>`:''}
-      <button class="title-resume" onclick="CL.mgmtEnter(mgmtSlotDernier()||1)"><span>Reprendre</span></button>
-    </aside>`:''}
-  </div></div>`;
-}
+/* Brief du 06/10/2026, lot 4 : l'accueil du canvas (affiche, menu, touches) vit dans mgmt-cadre.js ;
+   cette porte garde le nom que SCREENS lit au chargement. Remplace l'accueil T8a (maquette 01). */
+function scr_title(){ return mfTitre(); }
 
 function titleMgmtState(){
   /* Brief lot 1 : l'accueil lit la dernière partie jouée, sans rien écrire. */
