@@ -367,7 +367,8 @@ Object.assign(CL,{
     if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
       G.mgmt=mgmtDefault(orgId);
-      if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); saveMgmt(); }
+      if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); }
+      else mgmtAgendaPreparer(G.mgmt);
     }else{
       mgmtRepair(G.mgmt);
     }
@@ -572,6 +573,7 @@ Object.assign(CL,{
   mgmtNextCycle(){
     if(!G||!G.mgmt) return;
     const r=mgmtClosePile(G.mgmt);
+    if(r==='prete'){ saveMgmt(); CL.go('mgmt_calendrier'); return; }
     if(r==='event'){
        /* Lot 5 T6 : un combattant booké peut se retirer à la veille — la carte est incomplète, le bureau le dit. */
        if(typeof mgmtRetraitsAvantSoiree==='function'&&mgmtRetraitsAvantSoiree(G.mgmt)){
@@ -598,6 +600,7 @@ Object.assign(CL,{
     const m=G.mgmt;
     const touched=m.lastEvent&&Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
     if(touched.length>0){ CL.go('mgmt_lendemain'); return; }
+    mgmtAgendaActiver(m);
     mgmtNewPile(m);
     saveMgmt();
     CL.go('mgmt_bureau');
@@ -626,6 +629,7 @@ Object.assign(CL,{
   },
   mgmtLendemainNext(){
     if(!G||!G.mgmt) return;
+    mgmtAgendaActiver(G.mgmt);
     mgmtNewPile(G.mgmt);
     saveMgmt();
     CL.mgmtFilDemarrer();

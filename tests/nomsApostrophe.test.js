@@ -240,6 +240,8 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
   win.eval(`(function(){
     const m=G.mgmt;
     m.pile.forEach(x=>{x.status='closed';x.decision='ignored';}); m.open=null;
+    /* Lot 7 : l'agenda du joueur — une petite soirée posée sur une carte vide (5 + 4). */
+    m.card.main=[]; m.card.prelims=[]; mgmtAgendaPoser(m,7,'petite');
     const d=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o));
     /* H4 : la carte d'une partie neuve compte sept préliminaires. */
     const sp=m.card.sizePrelims;
@@ -251,6 +253,8 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
   /* T6 : aucun retrait tiré au sort ici — ce test vérifie l'affichage, pas la carte incomplète. */
   win.eval(`mgmtRetraitProb=function(){return 0;};`);
   win.eval(`CL.mgmtNextCycle();`);
+  assert.equal(win.eval(`G.screen`), 'mgmt_calendrier', 'la soirée est prête, le joueur la lance depuis le calendrier');
+  win.eval(`CL.mgmtCalendrierJouer();`);
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'la soirée s’ouvre');
   assert.ok(win.document.getElementById('app').textContent.includes(OCONNOR), 'les noms s’affichent à la soirée');
   const btn = t => [...win.document.querySelectorAll('button')].find(x => x.textContent === t);

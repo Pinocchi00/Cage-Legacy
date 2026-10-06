@@ -250,6 +250,8 @@ function validateMgmt(raw){
     }
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
+  if(raw.cal!==undefined&&!mgmtAgendaValide(raw.cal)) return false;
+  if(raw.card!==undefined&&raw.card.sizeEarly!==undefined&&(!Number.isSafeInteger(raw.card.sizeEarly)||raw.card.sizeEarly<0||raw.card.sizeEarly>raw.card.sizePrelims)) return false;
   if(raw.leila!==undefined){
     if(!raw.leila||typeof raw.leila!=='object'||Array.isArray(raw.leila)) return false;
     if(!Array.isArray(raw.leila.crushes)) return false;
@@ -457,6 +459,8 @@ function mgmtMigrate(raw){
 function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
+  if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
+  if(m.card&&m.card.sizeEarly!==undefined&&(!Number.isSafeInteger(m.card.sizeEarly)||m.card.sizeEarly<0||m.card.sizeEarly>m.card.sizePrelims)) m.card.sizeEarly=0;
   if(!Array.isArray(m.facts)) m.facts=[];
   /* Lot 2B T1 bis : le vivier extérieur se recadre comme le reste — épuré
      d'abord des identités illisibles, puis complété jusqu'à 30 vivants dans

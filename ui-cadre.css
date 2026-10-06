@@ -379,3 +379,4 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pastille-j{display:inline-block;width:18px;height:18px;background:var(--mf-jaune)}
 .mf-pre-voix{display:flex;flex-direction:column;gap:14px;margin-top:10px;overflow:hidden}
 .mf-pre-ouvrir{height:40px}
+.mf-cal-poser{background:var(--mf-ligne);border:2px dashed var(--mf-bord)}
