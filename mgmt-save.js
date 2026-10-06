@@ -48,6 +48,9 @@ function mgmtValidLine(o){
      Split positif, ou cycle extérieur négatif pour une recrue dont le
      dernier combat précède l'ouverture de la partie. */
   if(o.lastCycle!==undefined&&!Number.isSafeInteger(o.lastCycle)) return false;
+  /* Brief du 06/10, lot 2 : le niveau, le potentiel et l'âge de pic — absents d'une ligne d'avant le lot. */
+  for(const k of ['niv','pot']){ if(o[k]!==undefined&&(!Number.isFinite(o[k])||o[k]<MGMT_NIV_MIN||o[k]>MGMT_NIV_MAX)) return false; }
+  if(o.pic!==undefined&&(!Number.isSafeInteger(o.pic)||o.pic<MGMT_NIV_PIC_MIN||o.pic>MGMT_NIV_PIC_MIN+MGMT_NIV_PIC_SPREAD)) return false;
   return true;
 }
 
@@ -165,7 +168,9 @@ function mgmtValidExteriorLine(o){
  *  était absent à l'instant capturé. @returns {boolean} */
 function mgmtValidTraceSide(t){
   if(!t||typeof t!=='object'||Array.isArray(t)) return false;
-  const clefs=Object.keys(t).sort().join(',');
+  /* Brief du 06/10, lot 2 : le niveau d'avant combat est facultatif — les traces d'avant le lot n'en portent pas. */
+  if(t.niv!==undefined&&(!Number.isFinite(t.niv)||t.niv<MGMT_NIV_MIN||t.niv>MGMT_NIV_MAX)) return false;
+  const clefs=Object.keys(t).filter(k=>k!=='niv').sort().join(',');
   if(clefs!=='D,L,W,age,div,first,id,last,lastCycle,name,trauma,traumaFloor'){
     if(clefs!=='D,L,W,age,ck,div,first,generation,id,last,lastCycle,name,trauma,traumaFloor'
       ||t.generation!==MGMT_IDENTITE_GENERATION||!COUNTRY_KEYS.includes(t.ck)) return false;
@@ -217,6 +222,7 @@ function validateMgmt(raw){
   if(raw.open!==null&&typeof raw.open!=='string') return false;
   if(raw.shortfall!==undefined&&typeof raw.shortfall!=='boolean') return false;
   if(raw.effectifs!==undefined&&raw.effectifs!==0&&raw.effectifs!==1) return false;
+  if(raw.niveaux!==undefined&&raw.niveaux!==0&&raw.niveaux!==1) return false;
   /* Lot 5 H6 : ton cercle (5) et tes suivis (15) — des identifiants, sans doublon. */
   for(const [cle,max] of [['cercle',5],['suivis',15]]){
     if(raw[cle]===undefined) continue;
@@ -427,6 +433,19 @@ function mgmtMigrate(raw){
     raw.v=13;
   }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MGMT_BRIEF_LOT2_MIGRATION] — 13 → 14 : un niveau propre à chaque combattant. Chaque ligne reçoit
+     comme niveau actuel celui que lui donnait son palmarès, un potentiel et un pic déduits de son identifiant. Les traces
+     de combat d'avant ne portent pas de niveau et se rejouent à l'identique (ancienne loi). ==== */
+  if(raw.v===13){
+    raw.niveaux=1;
+    if(Array.isArray(raw.roster)){
+      for(const o of raw.roster){
+        try{ if(o&&typeof o==='object'&&typeof o.id==='string'&&Number.isFinite(o.W)&&Number.isFinite(o.L)&&Number.isFinite(o.age)) mgmtNiveauPose(o); }catch(e){}
+      }
+    }
+    raw.v=14;
+  }
+  /* ==== [FIN ANCRE] ==== */
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
@@ -465,6 +484,8 @@ function mgmtRepair(m){
       }
     }
   }
+  /* Brief du 06/10, lot 2 : une partie à niveaux complète les lignes qui n'en ont pas. */
+  if(m.niveaux===1) mgmtNiveauxComplete(m);
   if(typeof m.shortfall!=='boolean') m.shortfall=false;
   /* Lot 3b T1 : l'argent se recadre comme le reste — une recette au-delà de
      deux est écartée (on ne garde que les deux dernières, QO-5), une

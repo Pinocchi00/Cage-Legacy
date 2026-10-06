@@ -329,7 +329,11 @@ function mgmtExteriorCareer(seed,born,cycle){
     bouts.push({c:worldC,win,org:foughtOrg,nextOrg:orgIdx,W,L});
   }
   const age=Math.floor(ageStart+tNow/cpy);
-  return {age:age,W:W,L:L,fin:fin,fights:fights,streak:streak,orgIdx:orgIdx,orgs:orgs,
+  /* Brief du 06/10, lot 2 : le niveau d'aujourd'hui, par la même loi que celle qui fait ses combats. */
+  const anProNow=Math.max(0,(tNow-proStart)/cpy);
+  const niveau=clamp(clamp(Math.round(lvStart+rate*anProNow),MGMT_EXT_LVL_FLOOR,MGMT_EXT_LVL_CAP)
+    -Math.max(0,age-MGMT_EXT_DECLINE_AGE)*MGMT_EXT_DECLINE_PER_YEAR,MGMT_EXT_LVL_FLOOR,MGMT_EXT_LVL_CAP);
+  return {age:age,W:W,L:L,fin:fin,fights:fights,streak:streak,orgIdx:orgIdx,orgs:orgs,niveau,
     retAge:tl.retAge,retireCycle:tl.retireCycle,bouts};
 }
 
@@ -360,6 +364,7 @@ function mgmtExteriorTrace(line,cycle){
     amateur:{W:am.W,L:am.L,fin:{ko:am.fin.ko,sub:am.fin.sub,dec:am.fin.dec}},
     pro:{W:car.W,L:car.L,fin:{ko:car.fin.ko,sub:car.fin.sub,dec:car.fin.dec}},
     fights:car.fights,
+    niveau:car.niveau,
     streak:car.streak,
     org:car.orgIdx,
     orgs:car.orgs.map(o=>({i:o.i,name:MGMT_EXT_ORGS[o.i]||null,from:o.from,to:o.to,fights:o.fights})),

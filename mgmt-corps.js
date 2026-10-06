@@ -171,7 +171,8 @@ function mgmtCombatProfile(f){
        style d'une soirée à l'autre. ==== */
     setSeed(mgmtHashId(f.id));
     const d=divById(f.div);
-    const opt={div:f.div,gender:d?d.gender:'H',level:mgmtLevelForRecord(f.W,f.L),age:f.age};
+    /* Brief du 06/10, lot 2 : le niveau est celui de la ligne quand elle en a un ; sinon l'ancienne loi (le bilan). */
+    const opt={div:f.div,gender:d?d.gender:'H',level:typeof mgmtNiveauCombat==='function'?mgmtNiveauCombat(f):mgmtLevelForRecord(f.W,f.L),age:f.age};
     // Lot 5 H3 : seule la génération neuve change de loi. Le chemin ancien
     // garde exactement les options et l'ordre de tirage de makeFighter.
     if(f.generation===MGMT_IDENTITE_GENERATION) opt.style=mgmtIdentiteStyle(f);
@@ -210,7 +211,8 @@ function mgmtFightReady(f,cycle){
   const partie=(typeof G!=='undefined'&&G&&G.mgmt)?G.mgmt:null;
   /* Lot 5 T7 : le camp (sa qualité, le rodage après un changement) joue aussi, lu dans
      les moments de vie gardés — le rejeu d'un combat passé retrouve la même forme. */
-  const baisse=(partie?mgmtVieFormeBaisse(partie,f,cycle):0)+(partie&&typeof mgmtCampForme==='function'?mgmtCampForme(partie,f,cycle):0);
+  const baisse=(partie?mgmtVieFormeBaisse(partie,f,cycle):0)+(partie&&typeof mgmtCampForme==='function'?mgmtCampForme(partie,f,cycle):0)
+    -(partie&&typeof mgmtRouille==='function'?mgmtRouille(partie,f,cycle):0);
   if(baisse!==0&&c){ c.dynamic=num(c.dynamic)+baisse; c.overall=overall(c); }
   return c;
 }
@@ -361,6 +363,8 @@ function mgmtTraceSide(f){
     traumaFloor:(typeof f.traumaFloor==='number'&&Number.isFinite(f.traumaFloor))?f.traumaFloor:null,
     lastCycle:Number.isSafeInteger(f.lastCycle)?f.lastCycle:null};
   if(f.generation===MGMT_IDENTITE_GENERATION){ t.ck=f.ck; t.generation=f.generation; }
+  /* Brief du 06/10, lot 2 : le niveau d'AVANT combat voyage avec la trace — le rejeu retrouve le même combat. */
+  if(Number.isFinite(f.niv)) t.niv=f.niv;
   return t;
 }
 
@@ -516,6 +520,8 @@ function mgmtApplyFight(m,f,opp,res,side){
   if(issue==='win') f.W++;
   else if(issue==='loss') f.L++;
   else f.D++;
+  /* Brief du 06/10, lot 2 : le niveau avance (jamais de plus d'un point perdu sur une défaite). */
+  if(typeof mgmtNiveauApresCombat==='function') mgmtNiveauApresCombat(m,f,issue);
   const loserSide=res.winner==='D'?null:(res.winner==='A'?'B':'A');
   let injury=null;
   if(res.method==='Blessure'&&loserSide===side){

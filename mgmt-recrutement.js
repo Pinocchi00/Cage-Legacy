@@ -57,6 +57,12 @@ function mgmtRecruter(m,id){
     div:div.id,divName:div.name,org:MGMT_ORG,
     level:1,raison:null,interactions:0,
   };
+  /* Brief du 06/10, lot 2 : il arrive avec le niveau que sa carrière dérivée lui donne aujourd'hui ; son pic est le sien. */
+  if(typeof mgmtNiveaux==='function'&&mgmtNiveaux(m)&&Number.isFinite(trace.niveau)){
+    const pic=mgmtNivPic(line.id);
+    ligne.niv=trace.niveau; ligne.pic=pic;
+    ligne.pot=clamp(trace.niveau+Math.round(Math.max(0,pic-ligne.age)*1.8),trace.niveau,MGMT_NIV_MAX);
+  }
   m.roster.push(ligne);
   mgmtAddFact(m,{c:m.cycle,k:'recrue',a:line.id});
   return ligne;

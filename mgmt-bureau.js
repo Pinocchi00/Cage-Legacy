@@ -78,14 +78,14 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       ne peut porter un born négatif, la cohorte d'ouverture d'une partie
       déjà commencée reste celle qu'elle porte — le monde d'une ancienne
       sauvegarde ne bouge pas. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=13;
+const MGMT_SAVE_VERSION=14;
 
 /** État management vierge. @returns {object} */
 function mgmtDefault(){
   /* Lot 2B T1 : le vivier extérieur démarre vide — la cohorte initiale se
      crée à l'ouverture du premier cycle (mgmtExteriorEnsure), chaque ligne
      ne portera que son identité. */
-  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,cercle:[],suivis:[],
+  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,niveaux:1,cercle:[],suivis:[],
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
     hist:[],treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
 }
@@ -138,15 +138,22 @@ function mgmtNewRoster(m){
     }
     const age=RI(22,35);
     const band=age<=26?RI(2,12):(age>=29?RI(15,30):RI(8,22));
-    const rec=correlatedRecord(RI(40,80),clamp(band,age-18,(age-18)*4));
+    const id=mgmtNextId(m);
+    /* Brief du 06/10, lot 2 : une partie à niveaux tire d'abord le niveau du combattant (son potentiel, son pic),
+       puis un bilan COHÉRENT avec lui — gonflé ou dégonflé par son organisation d'origine. Le tirage RI(40,80)
+       d'avant reste consommé : la suite des tirages de la partie ne bouge pas. */
+    const lvAvant=RI(40,80);
+    const tir=m.niveaux===1?mgmtNiveauTire(id,age):null;
+    const rec=correlatedRecord(tir?mgmtNiveauPourBilan(id,tir.niv):lvAvant,clamp(band,age-18,(age-18)*4));
     m.roster.push({
-      id:mgmtNextId(m),
+      id,
       name:nm.name,first:nm.first,last:nm.last,ck,generation:MGMT_IDENTITE_GENERATION,
       W:rec.W,L:rec.L,D:RI(0,2),
       age,
       div:div.id,divName:div.name,
       org:MGMT_ORG,
       level:1,raison:null,interactions:0,
+      ...(tir?{niv:tir.niv,pot:tir.pot,pic:tir.pic}:{}),
     });
   }
   mgmtInitTitles(m);
@@ -195,7 +202,11 @@ function mgmtAdvanceRosterAges(m){
       const anniversaire=m.ageWeeks<previous
         ?(b>previous||b<=m.ageWeeks)
         :(b>previous&&b<=m.ageWeeks);
-      if(anniversaire) f.age=Math.min(100,f.age+1);
+      if(anniversaire){
+        f.age=Math.min(100,f.age+1);
+        /* Brief du 06/10, lot 2 : un an de plus, le niveau monte vers le potentiel ou décline. */
+        if(typeof mgmtNiveauAnniversaire==='function') mgmtNiveauAnniversaire(m,f);
+      }
     }
   }
   return years;
