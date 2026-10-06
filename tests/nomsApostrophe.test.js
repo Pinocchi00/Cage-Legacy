@@ -16,7 +16,7 @@
    ============================================================================ */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { newGameWindow } = require('./helpers/loadGame');
+const { newGameWindow } = require('./helpers/loadGameCarteAncienne');
 
 const OCONNOR = "O'Connor";
 
