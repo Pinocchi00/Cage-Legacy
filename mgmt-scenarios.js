@@ -113,7 +113,7 @@ function mgmtScenariosImposes(m){
 
 /** Les scénarios d'un combattant, pour sa fiche : étiquettes sans chiffre. */
 function mgmtScenariosDe(m,f){
-  const fratrie=mgmtFratrie(m,f).map(id=>{ const o=mgmtFighterById(m,id); return 'Sa famille chez Split : '+(o?o.name:''); });
+  const fratrie=mgmtFratrie(m,f).map(id=>{ const o=mgmtFighterById(m,id); return 'Sa famille chez '+mgmtOrgNom(m)+' : '+(o?o.name:''); });
   return mgmtScenarios(m).filter(s=>s.a===f.id).map(s=>MGMT_SCENARIOS_LIBELLES[s.k]).concat(fratrie);
 }
 /* ==== [FIN ANCRE] ==== */

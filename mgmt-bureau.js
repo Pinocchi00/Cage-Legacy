@@ -81,21 +81,26 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
 const MGMT_SAVE_VERSION=14;
 
 /** État management vierge. @returns {object} */
-function mgmtDefault(){
+/** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;
+ *  à défaut, Split. La caisse de départ est celle du profil de l'organisation. */
+function mgmtDefault(orgRef){
+  const choix=(typeof orgRef==='string'&&(mgmtOrgParId(orgRef)||mgmtOrgParNom(orgRef)))||mgmtOrgParNom(MGMT_ORG);
   /* Lot 2B T1 : le vivier extérieur démarre vide — la cohorte initiale se
      crée à l'ouverture du premier cycle (mgmtExteriorEnsure), chaque ligne
      ne portera que son identité. */
-  return {org:MGMT_ORG,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,niveaux:1,cercle:[],suivis:[],
+  return {org:choix.nom,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,niveaux:1,cercle:[],suivis:[],
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
-    hist:[],treasury:MGMT_TREASURY_START,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
+    hist:[],treasury:choix.profil.caisse,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
 }
 
 /** Catégorie tirée au poids du monde (lot 5 H4). Un seul tirage u dans [0,1).
  *  @param {Array} divs @param {number} u @returns {object} */
-function mgmtDivisionPonderee(divs,u){
-  const total=divs.reduce((n,d)=>n+(MGMT_WORLD_SIZE[d.id]||0),0);
+function mgmtDivisionPonderee(divs,u,profil){
+  /* Brief du 06/10, lot 5 : les catégories fortes de l'organisation pèsent 1,5, les faibles 0,5. */
+  const poids=d=>(MGMT_WORLD_SIZE[d.id]||0)*(profil?mgmtOrgPoidsCategorie(profil,d.id):1);
+  const total=divs.reduce((n,d)=>n+poids(d),0);
   let t=u*total;
-  for(const d of divs){ t-=MGMT_WORLD_SIZE[d.id]||0; if(t<0) return d; }
+  for(const d of divs){ t-=poids(d); if(t<0) return d; }
   return divs[divs.length-1];
 }
 
@@ -122,13 +127,16 @@ function mgmtNewRoster(m){
      catégorie tirée à poids égaux) est conservé tel quel — mêmes bornes,
      mêmes tirages — pour les sauvegardes et fixtures d'avant H4. */
   const avant=m.effectifs===0;
-  const n=avant?RI(MGMT_ROSTER_AVANT_MIN,MGMT_ROSTER_AVANT_MAX):RI(MGMT_ROSTER_MIN,MGMT_ROSTER_MAX);
+  const profil=mgmtOrgProfil(m);
+  const tire=avant?RI(MGMT_ROSTER_AVANT_MIN,MGMT_ROSTER_AVANT_MAX):RI(MGMT_ROSTER_MIN,MGMT_ROSTER_MAX);
+  /* Brief du 06/10, lot 5 : la taille de l'effectif suit le profil (le tirage est consommé comme avant). */
+  const n=avant?tire:Math.max(40,Math.round(tire*profil.effectif));
   m.roster=[];
   const divs=allDivisions();
   for(let i=0;i<n;i++){
     /* Lot 5 H4 : la catégorie se tire au poids du monde (MGMT_WORLD_SIZE) :
        le vestiaire est réparti comme lui, ~14 % de chaque catégorie. */
-    const div=avant?pick(divs):mgmtDivisionPonderee(divs,rnd());
+    const div=avant?pick(divs):mgmtDivisionPonderee(divs,rnd(),profil);
     /* Lot 5 H3 : un tirage pondéré (poids Split, catalogue §1.2) par
        emplacement ; le retirage du prénom rejoue le même pays. */
     const ck=mgmtPaysTire(rnd(),'split');
@@ -136,7 +144,7 @@ function mgmtNewRoster(m){
     while((MGMT_EXCLUDED_FIRST.includes(nm.first)||MGMT_EXCLUDED_LAST.includes(nm.last))&&guard<50){
       nm=makeName(div.gender,ck); guard++;
     }
-    const age=RI(22,35);
+    const age=avant?RI(22,35):clamp(RI(22,35)+profil.age,20,40);
     const band=age<=26?RI(2,12):(age>=29?RI(15,30):RI(8,22));
     const id=mgmtNextId(m);
     /* Brief du 06/10, lot 2 : une partie à niveaux tire d'abord le niveau du combattant (son potentiel, son pic),
@@ -144,6 +152,7 @@ function mgmtNewRoster(m){
        d'avant reste consommé : la suite des tirages de la partie ne bouge pas. */
     const lvAvant=RI(40,80);
     const tir=m.niveaux===1?mgmtNiveauTire(id,age):null;
+    if(tir) tir.niv=clamp(tir.niv+mgmtOrgDecalageNiveau(profil,div.id),MGMT_NIV_MIN,MGMT_NIV_MAX);
     const rec=correlatedRecord(tir?mgmtNiveauPourBilan(id,tir.niv):lvAvant,clamp(band,age-18,(age-18)*4));
     m.roster.push({
       id,
@@ -151,7 +160,7 @@ function mgmtNewRoster(m){
       W:rec.W,L:rec.L,D:RI(0,2),
       age,
       div:div.id,divName:div.name,
-      org:MGMT_ORG,
+      org:m.org,
       level:1,raison:null,interactions:0,
       ...(tir?{niv:tir.niv,pot:tir.pot,pic:tir.pic}:{}),
     });

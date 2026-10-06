@@ -351,7 +351,7 @@ Object.assign(CL,{
     areneEcranDemarrer();
   },
   /* Brief lot 1 : mgmtEnter(n) ouvre l'emplacement n ; sans argument, l'emplacement 1. */
-  mgmtEnter(n){
+  mgmtEnter(n,orgId){
     if(!G) G={theme:'dark'};
     mgmtSlotOuvrir(n===undefined?1:n);
     /* Confinement (lot 1e-1) : le traitement du bureau vit sur #app.mgmt ET
@@ -366,7 +366,7 @@ Object.assign(CL,{
        écarté, la sauvegarde dédiée (ou un bureau neuf) prend le relais. */
     if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
-      G.mgmt=mgmtDefault();
+      G.mgmt=mgmtDefault(orgId);
       if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); saveMgmt(); }
     }else{
       mgmtRepair(G.mgmt);

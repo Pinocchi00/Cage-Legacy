@@ -377,6 +377,8 @@ function mgmtTraceLine(t){
   if(t.trauma!==null) f.trauma=t.trauma;
   if(t.traumaFloor!==null) f.traumaFloor=t.traumaFloor;
   if(t.lastCycle!==null) f.lastCycle=t.lastCycle;
+  /* Brief du 06/10, lot 2 : le niveau d'avant combat — sans lui (trace d'avant le lot), l'ancienne loi. */
+  if(Number.isFinite(t.niv)) f.niv=t.niv;
   return f;
 }
 

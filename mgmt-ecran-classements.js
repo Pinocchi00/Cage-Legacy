@@ -78,7 +78,7 @@ function mgmtClassementsOrgCount(m){
  *  représentées) et sans objectif ni patron (lot 5, §1). @returns {string} */
 function mgmtClassementsOrgLine(org){
   return `${org.n} ${org.n===1?MGMT_CLASSEMENTS_LABELS.combattant
-    :MGMT_CLASSEMENTS_LABELS.combattants} de Split `
+    :MGMT_CLASSEMENTS_LABELS.combattants} de ${mgmtOrgNom()} `
     +MGMT_CLASSEMENTS_LABELS.dans
     +`, ${MGMT_CLASSEMENTS_LABELS.sur} ${org.divs} `
     +`${org.divs===1?MGMT_CLASSEMENTS_LABELS.categorie
@@ -118,7 +118,7 @@ function mgmtClassementsRowHtml(m,rank,row,tr){
   const d=(row.D===undefined)?0:row.D;
   const rec=`${row.W}-${row.L}${d>0?'-'+d:''}`;
   const split=!!(f&&!f.trace);
-  const org=f?(f.trace?(f.trace.orgs.length?(f.trace.orgs[f.trace.orgs.length-1].name||''):''):'Split'):'';
+  const org=f?(f.trace?(f.trace.orgs.length?(f.trace.orgs[f.trace.orgs.length-1].name||''):''):mgmtOrgNom(m)):'';
   return `<div class="mgmt-cl-row" onclick="CL.mgmtFiche('${escJsAttr(row.id)}')">`
     +`<span class="mgmt-cl-rank">${esc(rank)}</span>`
     +`<span class="mgmt-cl-nm">${esc(nom)}</span>`
@@ -193,7 +193,7 @@ function mgmtClassementsScopeBtnsHtml(){
       +`${sel?' aria-pressed="true"':''}`
       +` onclick="CL.mgmtClassementsScope('${key}')">${esc(txt)}</button>`;
   };
-  return bt('world',L.worldTab)+bt('split',L.splitTab);
+  return bt('world',L.worldTab)+bt('split',mgmtOrgNom());
 }
 
 /* ==== [ANCRE: MGMT_LOT5_T1_CHAMPIONS_ECRAN] — Lot 5 T1, maquette 07 et
@@ -239,7 +239,7 @@ function scr_mgmt_classements(){
   const trs=cur.map((row,i)=>({row,tr:mgmtClassementsTendance(row,i,prev)}));
   const top=trs.slice(0,MGMT_CL_TOP);
   const autres=trs.slice(MGMT_CL_TOP);
-  const label=`<div class="mgmt-cl-scope">${esc(scope==='world'?L.worldLabel:L.splitLabel)}</div>`;
+  const label=`<div class="mgmt-cl-scope">${esc(scope==='world'?L.worldLabel:mgmtOrgNom()+' — l\'organisation')}</div>`;
   const headRow=`<div class="mgmt-cl-headrow">${L.head.map(h=>`<span>${esc(h)}</span>`).join('')}</div>`;
   const topHtml=top.map((x,i)=>mgmtClassementsRowHtml(m,i+1,x.row,x.tr)).join('');
   const autresHtml=autres.length>0
@@ -248,7 +248,7 @@ function scr_mgmt_classements(){
     :'';
   const org=mgmtClassementsOrgCount(m);
   return `<div class="scr mgmt-wrap mgmt-cl">`
-    +`<div class="mgmt-head bar"><div><div class="eyebrow gold">Split — Management</div>`
+    +`<div class="mgmt-head bar"><div><div class="eyebrow gold">${esc(mgmtOrgNom(m))} — Management</div>`
     +`<h2 class="disp">${esc(L.title)}</h2></div>`
     +`<div class="mgmt-cl-scopebtns">${mgmtClassementsScopeBtnsHtml()}</div></div>`
     +`<div class="mgmt-cl-tabs">${mgmtClassementsTabsHtml()}</div>`

@@ -13,7 +13,7 @@ const NEUVE=`setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEn
 
 test('T3 — les dix médias et leurs lignes : relu:false, emplacements connus, aucun nom propre, règles d’écriture', () => {
   const win=newGameWindow();
-  const r=result(win,`const ok=new Set(['a','b','n','round','rounds','cat','pays']);
+  const r=result(win,`const ok=new Set(['a','b','n','round','rounds','cat','pays','org']);
     const manques=[]; const inconnus=[];
     for(const l of MGMT_MEDIAS_LIGNES){ if(!MGMT_MEDIAS.some(x=>x.id===l.media)) manques.push(l.media);
       for(const s of l.texte.matchAll(/\\{([a-z]+)\\}/g)) if(!ok.has(s[1])) inconnus.push(s[1]); }

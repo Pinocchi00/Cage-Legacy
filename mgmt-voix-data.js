@@ -27,7 +27,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Merci à Dieu, merci à mon équipe, merci à Split, j'avais dit que j'étais [prêt|prête] et voilà, maintenant je veux un classé.",
+    "texte": "Merci à Dieu, merci à mon équipe, merci à {org}, j'avais dit que j'étais [prêt|prête] et voilà, maintenant je veux un classé.",
     "relu": false
    },
    {
@@ -225,7 +225,7 @@ const MGMT_VOIX=[
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Le matchmaker de Split m'a mis contre {adv}, soit il m'aime pas soit il a jamais regardé un combat de sa putain de vie, les deux c'est possible.",
+    "texte": "Le matchmaker de {org} m'a mis contre {adv}, soit il m'aime pas soit il a jamais regardé un combat de sa putain de vie, les deux c'est possible.",
     "relu": false
    },
    {
@@ -243,7 +243,7 @@ const MGMT_VOIX=[
    {
     "situation": "inactivite",
     "etiquette": "Inactivité",
-    "texte": "Ça fait {mois} mois que Split me paye à rien foutre, remarque je me plains pas, mais je préfère taper des gens.",
+    "texte": "Ça fait {mois} mois que {org} me paye à rien foutre, remarque je me plains pas, mais je préfère taper des gens.",
     "relu": false
    },
    {
@@ -321,7 +321,7 @@ const MGMT_VOIX=[
    {
     "situation": "inactivite",
     "etiquette": "Inactivité",
-    "texte": "Chaque mois sans combat c'est un mois perdu, je l'ai calculé, à ce rythme Split me coûte une ceinture.",
+    "texte": "Chaque mois sans combat c'est un mois perdu, je l'ai calculé, à ce rythme {org} me coûte une ceinture.",
     "relu": false
    },
    {
@@ -393,7 +393,7 @@ const MGMT_VOIX=[
    {
     "situation": "inactivite",
     "etiquette": "Inactivité",
-    "texte": "Si Split a une place je suis là, sans pression hein ahah.",
+    "texte": "Si {org} a une place je suis là, sans pression hein ahah.",
     "relu": false
    }
   ]
@@ -411,7 +411,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Voilà. Maintenant {classe}, arrête de te cacher. Split, t'as mon numéro.",
+    "texte": "Voilà. Maintenant {classe}, arrête de te cacher. {org}, t'as mon numéro.",
     "relu": false
    },
    {
@@ -453,7 +453,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Je voulais juste finir vite parce que j'avais envie de chier depuis la pesée. Voilà. Merci Split.",
+    "texte": "Je voulais juste finir vite parce que j'avais envie de chier depuis la pesée. Voilà. Merci {org}.",
     "relu": false
    },
    {
@@ -1107,13 +1107,13 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Je combats pour une bourse qui paye à peine mon camp. Mais c'est pas grave, Split a besoin de sous pour ses néons.",
+    "texte": "Je combats pour une bourse qui paye à peine mon camp. Mais c'est pas grave, {org} a besoin de sous pour ses néons.",
     "relu": false
    },
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Soirée de Split : 4 000 places vendues. Ma bourse : pareil que l'an dernier. Cherchez l'erreur.",
+    "texte": "Soirée de {org} : 4 000 places vendues. Ma bourse : pareil que l'an dernier. Cherchez l'erreur.",
     "relu": false
    },
    {
@@ -1149,7 +1149,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Euh… merci. Merci à ma mère. Et… voilà. Merci Split. Désolé je sais pas trop parler.",
+    "texte": "Euh… merci. Merci à ma mère. Et… voilà. Merci {org}. Désolé je sais pas trop parler.",
     "relu": false
    },
    {
@@ -1575,7 +1575,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "On se retrouve tous au bar d'en face, c'est moi qui paye. Enfin c'est Split qui paye, c'est ma bourse.",
+    "texte": "On se retrouve tous au bar d'en face, c'est moi qui paye. Enfin c'est {org} qui paye, c'est ma bourse.",
     "relu": false
    },
    {

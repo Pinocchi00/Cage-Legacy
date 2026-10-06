@@ -367,7 +367,7 @@ function mgmtExteriorTrace(line,cycle){
     niveau:car.niveau,
     streak:car.streak,
     org:car.orgIdx,
-    orgs:car.orgs.map(o=>({i:o.i,name:MGMT_EXT_ORGS[o.i]||null,from:o.from,to:o.to,fights:o.fights})),
+    orgs:car.orgs.map(o=>({i:o.i,name:mgmtExtOrgs()[o.i]||null,from:o.from,to:o.to,fights:o.fights})),
     retAge:car.retAge,retireCycle:car.retireCycle,
   };
 }

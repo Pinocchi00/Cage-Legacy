@@ -238,7 +238,7 @@ function scr_mgmt_carte(){
   const hintHtml=hint?`<div class="mgmt-book-sub" style="margin:4px 0 8px">${hint}</div>`:'';
 
   return `<div class="scr mgmt-wrap mgmt-book"><div class="mgmt-head bar">`
-    +`<div><div class="eyebrow gold">Split — Management</div>`
+    +`<div><div class="eyebrow gold">${esc(mgmtOrgNom(m))} — Management</div>`
     +`<h2 class="disp">La carte</h2></div></div>`
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtCardLabel(m))}</div>`
     +`<div class="mgmt-book-actions"><button class="btn ghost mgmt-book-return" onclick="CL.mgmtCarteLeave()">${esc(MGMT_CART_LABELS.leave)}</button></div>`

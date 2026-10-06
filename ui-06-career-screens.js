@@ -53,7 +53,7 @@ function titleMgmtUpcoming(m){
   const facts=[];
   if(m.card){
     const free=Math.max(0,m.card.sizeMain-m.card.main.length);
-    if(free) facts.push(`${free} place${free===1?'':'s'} libre${free===1?'':'s'} en carte principale de Split ${m.cycle}.`);
+    if(free) facts.push(`${free} place${free===1?'':'s'} libre${free===1?'':'s'} en carte principale de ${mgmtOrgNom(m)} ${m.cycle}.`);
   }
   const open=mgmtOpenCount(m);
   if(open) facts.push(mgmtOpenLabel(open)+'.');
@@ -74,7 +74,7 @@ function titleMgmtLastEvent(m){
   }).filter(Boolean);
   if(!rows.length) return '';
   return `<section class="title-last"><h2>La dernière soirée</h2><div class="title-event">
-    <h3>Split ${esc(e.cycle)}</h3><ul>${rows.slice(0,3).join('')}</ul>
+    <h3>${esc(mgmtOrgNom(m))} ${esc(e.cycle)}</h3><ul>${rows.slice(0,3).join('')}</ul>
     ${rows.length>3?`<details><summary>Tous les résultats (${rows.length})</summary><ul>${rows.slice(3).join('')}</ul></details>`:''}
   </div></section>`;
 }

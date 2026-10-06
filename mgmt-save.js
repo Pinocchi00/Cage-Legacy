@@ -31,7 +31,7 @@ function mgmtValidLine(o){
   if(typeof o.age!=='number'||!Number.isFinite(o.age)||o.age<0||o.age>100) return false;
   if(typeof o.div!=='string'||!divById(o.div)) return false;
   if(typeof o.divName!=='string') return false;
-  if(o.org!==MGMT_ORG) return false;
+  if(!mgmtOrgValide(o.org)) return false;
   if(o.level!==1&&o.level!==2&&o.level!==3) return false;
   if(o.raison!==null&&!MGMT_RAISONS.some(r=>r.id===o.raison)) return false;
   if(!Number.isSafeInteger(o.interactions)||o.interactions<0) return false;
@@ -214,7 +214,7 @@ function mgmtValidFightTrace(x){
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
-  if(raw.org!==MGMT_ORG) return false;
+  if(!mgmtOrgValide(raw.org)) return false;
   if(!Number.isSafeInteger(raw.cycle)||raw.cycle<0) return false;
   if(!Number.isSafeInteger(raw.ageWeeks)||raw.ageWeeks<0||raw.ageWeeks>=MGMT_EXT_YEAR_WEEKS) return false;
   if(!Number.isSafeInteger(raw.seq)||raw.seq<1) return false;

@@ -54,7 +54,7 @@ function mgmtRecruter(m,id){
   const ligne={
     id:line.id,name:trace.name,first:trace.first,last:trace.last,ck:line.ck,generation:line.generation===undefined?0:line.generation,
     W:trace.pro.W,L:trace.pro.L,D:0,age:Math.floor(trace.age),
-    div:div.id,divName:div.name,org:MGMT_ORG,
+    div:div.id,divName:div.name,org:mgmtOrgNom(m),
     level:1,raison:null,interactions:0,
   };
   /* Brief du 06/10, lot 2 : il arrive avec le niveau que sa carrière dérivée lui donne aujourd'hui ; son pic est le sien. */
@@ -85,7 +85,7 @@ function mgmtRecruesRecentes(m){
 /** Les lignes que la semaine raconte : « X rejoint Split, venu de … ». */
 function mgmtRecruesLignes(m){
   return mgmtRecruesRecentes(m).map(r=>({type:'recrue',id:r.id,div:r.div,
-    text:r.d?`${r.name} rejoint Split, venu de ${r.d}`:`${r.name} rejoint Split`}));
+    text:r.d?`${r.name} rejoint ${mgmtOrgNom(m)}, venu de ${r.d}`:`${r.name} rejoint ${mgmtOrgNom(m)}`}));
 }
 
 function mgmtRecrutementLigneHtml(x,i,curseur){
@@ -110,7 +110,7 @@ function scr_mgmt_recrutement(){
   if(F.curseur>=vue.length) F.curseur=Math.max(0,vue.length-1);
   const chips=allDivisions().map(d=>`<button type="button" class="mgmt-vest-chip${d.id===div?' on':''}" aria-pressed="${d.id===div}" onclick="CL.mgmtRecrutementFiltre('${esc(d.id)}')">${esc(mgmtDivisionLabel(d.id))}</button>`).join('');
   return `<div class="scr mgmt-wrap mgmt-recrutement"><div class="mgmt-head bar"><h2 class="disp">Le recrutement</h2>`
-    +`<span class="mgmt-week-event">Hors de Split · ${esc(tous.length)} dans la catégorie</span></div>`
+    +`<span class="mgmt-week-event">Hors de ${esc(mgmtOrgNom(m))} · ${esc(tous.length)} dans la catégorie</span></div>`
     +`<div class="mgmt-vest-chips">${chips}</div>`
     +(F.message?`<p class="mgmt-recru-msg" role="status">${esc(F.message)}</p>`:'')
     +`<div class="mgmt-cols mgmt-vest-cols"><section class="mgmt-vest-liste">`
@@ -120,7 +120,7 @@ function scr_mgmt_recrutement(){
     +`<span>Page ${esc(F.page+1)} / ${esc(pages)}</span>`
     +`<button type="button" onclick="CL.mgmtRecrutementPage(1)"${F.page>=pages-1?' disabled':''}>Suivant</button></div></section>`
     +`<aside class="mgmt-vest-aside"><div class="mgmt-vest-bloc"><h3>Sa trace</h3><p>Un clic sur un nom ouvre sa fiche : son bilan amateur, ses organisations, sa série. Aucune note, aucun pronostic.</p></div>`
-    +`<div class="mgmt-vest-bloc"><h3>Ce que recruter change</h3><p>Il rejoint Split avec son bilan et son âge. Il ne change pas de rang mondial. Aucun plafond de vivier.</p></div></aside>`
+    +`<div class="mgmt-vest-bloc"><h3>Ce que recruter change</h3><p>Il rejoint ${esc(mgmtOrgNom(m))} avec son bilan et son âge. Il ne change pas de rang mondial. Aucun plafond de vivier.</p></div></aside>`
     +`</div></div>`;
 }
 
@@ -134,7 +134,7 @@ Object.assign(CL,{
   mgmtRecruter(id){
     if(!G||!G.mgmt) return;
     const ligne=mgmtRecruter(G.mgmt,id);
-    MGMT_RECRUTEMENT.message=ligne?`${ligne.name} rejoint Split.`:'';
+    MGMT_RECRUTEMENT.message=ligne?`${ligne.name} rejoint ${mgmtOrgNom(G.mgmt)}.`:'';
     if(ligne) saveMgmt();
     render();
   },
