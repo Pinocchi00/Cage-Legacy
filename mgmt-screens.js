@@ -347,8 +347,10 @@ Object.assign(CL,{
     CL.go('arene_socle');
     areneEcranDemarrer();
   },
-  mgmtEnter(){
+  /* Brief lot 1 : mgmtEnter(n) ouvre l'emplacement n ; sans argument, l'emplacement 1. */
+  mgmtEnter(n){
     if(!G) G={theme:'dark'};
+    mgmtSlotOuvrir(n===undefined?1:n);
     /* Confinement (lot 1e-1) : le traitement du bureau vit sur #app.mgmt ET
        body.mgmt, retirés ensemble au départ. Hors bureau, le fond d'origine
        est strictement intact. */

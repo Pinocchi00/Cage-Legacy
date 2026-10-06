@@ -176,8 +176,10 @@ function mgmtDemandesOuvreCycle(m){
       const f=mgmtFighterById(m,imp.a);
       if(!f||f.retired||deja.has(f.id)||mgmtEngaged(m,f)) continue;
       if(mgmtPromesses(m,f).some(p=>p.etat==='en cours')) continue;
-      if((m.facts||[]).some(x=>x&&x.k==='demande'&&x.a===imp.a&&x.want===imp.want&&x.target===imp.target&&m.cycle-x.c<=MGMT_DEMANDE_EXPIRE)) continue;
-      const fait={c:m.cycle,k:'demande',a:imp.a,want:imp.want,target:imp.target};
+      if((m.facts||[]).some(x=>x&&x.k==='demande'&&x.a===imp.a&&x.want===imp.want&&(x.target||null)===(imp.target||null)&&m.cycle-x.c<=MGMT_DEMANDE_EXPIRE)) continue;
+      /* Correctif du 06/10 : une demande sans cible (deuil, dernière danse, pause) n'écrit PAS
+         target:null — la validation le refusait et la partie ne se rechargeait plus. */
+      const fait={c:m.cycle,k:'demande',a:imp.a,want:imp.want,...(imp.target?{target:imp.target}:{})};
       mgmtAddFact(m,fait);
       return fait;
     }

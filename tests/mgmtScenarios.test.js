@@ -148,3 +148,25 @@ test('H10 ter — la fratrie : même nom, même pays, une part de ces paires est
   assert.deepEqual(r.contr.sort(),[[r.a,30],[r.b,30]].sort(),'un contrarié de 30 pour chacun'); assert.ok(r.n>=2);
   assert.ok(r.sain,'le fait « contrarie » de la fratrie passe la validation');
 });
+
+/* Correctif du 06/10/2026 : une demande imposée sans cible écrivait target:null, que la
+   validation refusait — la partie neuve de graine 99 (un deuil au premier cycle) ne se
+   rechargeait plus. */
+test('H10 bis — correctif : une demande sans cible ne rend pas la partie invalide, et une partie qui porte target:null se recharge', () => {
+  const win=newGameWindow();
+  const r=result(win,`${NEUVE}
+    const E=libres.find(o=>mgmtIdentiteStream(o.id,'deuil|10')()<MGMT_DEUIL_PART);
+    m.facts.push({c:9,k:'moment_vie',a:E.id,m:'deces-parent'});
+    const fait=mgmtDemandesOuvreCycle(m);
+    const copie=JSON.parse(JSON.stringify(m)); const sain=validateMgmt(copie);
+    const vieux=JSON.parse(JSON.stringify(m)); vieux.facts.find(x=>x.k==='demande').target=null;
+    return {want:fait.want,aCible:'target' in fait,sain,vieux:validateMgmt(vieux),ouverte:mgmtDemandesOuvertes(vieux).length};`);
+  assert.equal(r.want,'carte-principale'); assert.equal(r.aCible,false,'pas de target:null écrit');
+  assert.ok(r.sain,'la partie reste valide'); assert.ok(r.vieux,'une partie déjà enregistrée avec target:null se recharge'); assert.equal(r.ouverte,1);
+});
+
+test('H10 bis — correctif : cinquante parties neuves, graines 1 à 50, passent toutes la validation', () => {
+  const win=newGameWindow();
+  const r=result(win,`const ko=[]; for(let s=1;s<=50;s++){ setSeed(s*33); const m=mgmtDefault(); mgmtNewRoster(m); mgmtNewPile(m); if(!validateMgmt(JSON.parse(JSON.stringify(m)))) ko.push(s*33); } return ko;`);
+  assert.deepEqual(r,[]);
+});
