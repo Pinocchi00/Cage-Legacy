@@ -34,6 +34,8 @@ function mgmtRecrutables(m,divId){
     if(!line) return;
     const trace=mgmtExteriorTrace(line,m.cycle);
     if(!trace) return;
+    /* Lot 9 : un combattant sous contrat ailleurs n'est pas recrutable. */
+    if(typeof mgmtContratsActif==='function'&&mgmtContratsActif(m)&&!mgmtExtLibre(m,line,trace)) return;
     const orgs=trace.orgs.map(x=>x.name).filter(Boolean);
     out.push({id:o.id,rang:i+1,name:trace.name,age:Math.floor(trace.age),W:trace.pro.W,L:trace.pro.L,
       orgs,derniere:orgs.length?orgs[orgs.length-1]:''});
@@ -43,8 +45,10 @@ function mgmtRecrutables(m,divId){
 
 /** Recrute un combattant du monde extérieur : une ligne de Split à son âge et à
  *  son bilan, au niveau 1 ; le geste est un fait. @returns {object|null} la ligne. */
-function mgmtRecruter(m,id){
+function mgmtRecruter(m,id,interne){
   if(!m||!Array.isArray(m.roster)||!mgmtValidId(id)) return null;
+  /* Lot 9 : avec l'agenda, aucun recrutement n'est gratuit — on signe un contrat (mgmtContratSigner). */
+  if(!interne&&typeof mgmtContratsActif==='function'&&mgmtContratsActif(m)) return null;
   if(m.roster.some(o=>o.id===id)) return null;
   const line=(m.exterieur||[]).find(e=>e.id===id);
   if(!line||mgmtExteriorRetired(line,m.cycle)) return null;

@@ -24,6 +24,7 @@ function mgmtAgendaActif(m){ return !!(m&&m.cal&&m.cal.actif===true); }
 function mgmtAgendaInit(m){
   m.cal={actif:true,jour:0,vieJour:0,prochaines:[],faites:[]};
   mgmtSallesInit(m);
+  mgmtContratsInit(m);
   return m.cal;
 }
 
@@ -34,6 +35,7 @@ function mgmtAgendaActiver(m){
   const j=Math.max(0,(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0))*MGMT_EVENT_WEEKS*7;
   m.cal={actif:true,jour:j,vieJour:j,prochaines:[],faites:[]};
   mgmtSallesInit(m);
+  mgmtContratsInit(m);
   return true;
 }
 

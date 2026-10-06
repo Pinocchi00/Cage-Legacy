@@ -1,0 +1,145 @@
+"use strict";
+/* ==== [ANCRE: MGMT_BRIEF_LOT9_CONTRATS] — Brief du 06/10/2026, lot 9 : les contrats et le recrutement. Signer un
+   combattant coûte (une prime à la signature, débitée de la caisse), le laisser sans combat aussi (il s'impatiente,
+   puis rouille, puis refuse). Un engagement par combattant : ligne.ct={n,f,b,since} — combats signés, faits, bourse par
+   combat (en k$), cycle de signature. La bourse payée le soir du combat est celle du contrat (mgmtPurse). À zéro
+   combat restant, sans renouvellement, le combattant devient « sans contrat » (ligne.libre) : il ne se book plus et
+   figure au marché. Le marché se nourrit des sans-contrat de la partie, des débutants du monde et d'une fin de
+   contrat à tour de rôle chez les autres organisations ; un combattant sous contrat ailleurs n'est pas recrutable.
+   L'attente a quatre paliers, dans l'ordre : il le dit, la presse le relaie, il revient rouillé et demande un peu
+   plus au renouvellement, puis il refuse tous les combats ; un combat joué ramène au début. Aucun texte de personnage
+   ici : les paliers sont des étiquettes fonctionnelles (la parole et la presse sont d'auteur, lot 10). Tout ceci ne
+   vaut que pour une partie à l'agenda actif (lot 7) ; l'ancien rythme garde ses bourses calculées. ==== */
+
+const MGMT_CT_MIN=1;
+const MGMT_CT_MAX=8;
+const MGMT_CT_PRIME_PART=0.1;
+const MGMT_CT_ATTENTE=[3,5,7,10];
+const MGMT_CT_RENOUV_MAJORATION=1.1;
+const MGMT_CT_BOURSE_ECHELLE=1.7;
+const MGMT_CT_REFUS_MARGE=25;
+const MGMT_CT_LIBRE_PERIODE=6;
+const MGMT_CT_DEBUTANT_AGE=23;
+const MGMT_CT_DEBUTANT_COMBATS=3;
+const MGMT_CT_PALIERS=['','Attend un combat','Attend depuis longtemps','Revient rouillé','Refuse tout combat'];
+
+function mgmtContratsActif(m){ return typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m); }
+
+/** La bourse par combat qu'un combattant demande (k$) : son renom, rapporté à la moyenne des places ; un peu plus
+ *  après une longue attente au renouvellement. Pur. */
+function mgmtBourseSouhaitee(m,f,renouvellement){
+  const base=Math.max(1,Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*mgmtStar(f))*MGMT_CT_BOURSE_ECHELLE));
+  const plus=renouvellement&&f.ct&&mgmtContratPalier(m,f)>=3;
+  return plus?Math.round(base*MGMT_CT_RENOUV_MAJORATION):base;
+}
+function mgmtContratPrime(n,b){ return Math.max(1,Math.round(n*b*MGMT_CT_PRIME_PART)); }
+
+/** Donne un contrat à chaque combattant de l'effectif qui n'en a pas : une partie qui passe à l'agenda. Déterministe. */
+function mgmtContratsInit(m){
+  for(const f of m.roster||[]){
+    if(f.ct||f.libre||f.retired) continue;
+    const u=mgmtIdentiteStream(f.id,'contrat-n')();
+    f.ct={n:MGMT_CT_MIN+1+Math.floor(u*4),f:0,b:mgmtBourseSouhaitee(m,f,false),since:m.cycle};
+  }
+}
+
+/** Soirées depuis son dernier combat (ou depuis sa signature). Pur. */
+function mgmtContratAttente(m,f){
+  const depuis=Number.isSafeInteger(f.lastCycle)&&f.lastCycle>=0?f.lastCycle:(f.ct?f.ct.since:m.cycle);
+  return Math.max(0,m.cycle-depuis);
+}
+/** Le palier d'attente : 0 à 4. Pur. */
+function mgmtContratPalier(m,f){
+  if(!f||!f.ct) return 0;
+  const a=mgmtContratAttente(m,f); let p=0;
+  MGMT_CT_ATTENTE.forEach((s,i)=>{ if(a>=s) p=i+1; });
+  return p;
+}
+function mgmtContratRestants(f){ return f&&f.ct?Math.max(0,f.ct.n-f.ct.f):0; }
+
+/** Un combattant qui ne peut plus se booker à cause de son contrat : sans contrat, ou au dernier palier d'attente. Pur. */
+function mgmtContratIndispo(m,f){
+  if(!mgmtContratsActif(m)||!f) return false;
+  if(f.libre) return true;
+  return !!f.ct&&mgmtContratPalier(m,f)>=4;
+}
+
+/** Après une soirée : le combat joué compte, un contrat épuisé fait un sans-contrat. */
+function mgmtContratsApresSoiree(m,ids){
+  for(const id of ids){
+    const f=mgmtFighterById(m,id); if(!f||!f.ct) continue;
+    f.ct.f++;
+    if(f.ct.f>=f.ct.n){ delete f.ct; f.libre=true; mgmtAddFact(m,{c:m.cycle,k:'fin_contrat',a:f.id}); }
+  }
+}
+
+/** Les paliers d'attente franchis ce cycle deviennent des faits (la parole et la presse sont d'auteur, lot 10). */
+function mgmtContratsOuvreCycle(m){
+  if(!mgmtContratsActif(m)) return;
+  for(const f of m.roster||[]){
+    const p=mgmtContratPalier(m,f);
+    if(p>=1&&p<=2&&!(m.facts||[]).some(x=>x&&x.k==='attend'&&x.a===f.id&&x.p===p&&x.c>=(Number.isSafeInteger(f.lastCycle)?f.lastCycle:-1))) mgmtAddFact(m,{c:m.cycle,k:'attend',a:f.id,p});
+  }
+}
+
+/** Ce que le marché propose : débutants, un combattant en fin de contrat à tour de rôle, et les sans-contrat de la partie. */
+function mgmtExtLibre(m,line,trace){
+  if(!line||!trace) return false;
+  const pro=trace.pro?trace.pro.W+trace.pro.L:0;
+  if(Math.floor(trace.age)<=MGMT_CT_DEBUTANT_AGE&&pro<=MGMT_CT_DEBUTANT_COMBATS) return true;
+  return (duelFnv1a32('libre|'+line.id)+m.cycle)%MGMT_CT_LIBRE_PERIODE===0;
+}
+
+/** La réponse d'un combattant à une offre. Pur : aucune écriture.
+ *  @returns {{ok:boolean,raison?:string,demande:number,prime:number}} */
+function mgmtContratReponse(m,f,n,b,renouvellement){
+  const demande=mgmtBourseSouhaitee(m,f,renouvellement), prime=Number.isSafeInteger(n)&&b>0?mgmtContratPrime(n,b):0;
+  if(!Number.isSafeInteger(n)||n<MGMT_CT_MIN||n>MGMT_CT_MAX||!Number.isFinite(b)||b<=0) return {ok:false,raison:'offre',demande,prime};
+  if(mgmtStar(f)*100>(Number.isFinite(m.pop)?m.pop:40)+MGMT_CT_REFUS_MARGE) return {ok:false,raison:'trop-grand',demande,prime};
+  if(!mgmtCanAfford(m,prime)) return {ok:false,raison:'caisse',demande,prime};
+  if(b<demande) return {ok:false,raison:'trop-bas',demande,prime};
+  return {ok:true,demande,prime};
+}
+
+/** Renouvelle le contrat d'un combattant de l'effectif : les combats s'ajoutent aux restants, la bourse change, la prime est débitée. */
+function mgmtContratRenouveler(m,id,n,b){
+  const f=mgmtFighterById(m,id); if(!f||!f.ct||!mgmtContratsActif(m)) return {ok:false,raison:'inconnu'};
+  const r=mgmtContratReponse(m,f,n,b,true); if(!r.ok) return r;
+  f.ct.n+=n; f.ct.b=b; m.treasury-=r.prime; mgmtAddFact(m,{c:m.cycle,k:'contrat',a:f.id});
+  return r;
+}
+/** Signe un sans-contrat : un ancien de la partie ou un combattant du marché. Aucune signature n'est gratuite. */
+function mgmtContratSigner(m,id,n,b){
+  if(!mgmtContratsActif(m)) return {ok:false,raison:'inactif'};
+  let f=mgmtFighterById(m,id);
+  if(f){
+    if(!f.libre) return {ok:false,raison:'sous-contrat'};
+  }else{
+    const line=(m.exterieur||[]).find(e=>e.id===id); if(!line) return {ok:false,raison:'inconnu'};
+    const trace=mgmtExteriorTrace(line,m.cycle); if(!trace||!mgmtExtLibre(m,line,trace)) return {ok:false,raison:'sous-contrat'};
+  }
+  const cible=f||mgmtExteriorPourOffre(m,id); if(!cible) return {ok:false,raison:'inconnu'};
+  const r=mgmtContratReponse(m,cible,n,b,false); if(!r.ok) return r;
+  if(!f){ f=mgmtRecruter(m,id,true); if(!f) return {ok:false,raison:'inconnu'}; }
+  delete f.libre; f.ct={n,f:0,b,since:m.cycle}; m.treasury-=r.prime;
+  mgmtAddFact(m,{c:m.cycle,k:'contrat',a:f.id});
+  return r;
+}
+/** Une ligne provisoire pour juger une offre à un combattant du marché (jamais ajoutée à l'effectif). */
+function mgmtExteriorPourOffre(m,id){
+  const line=(m.exterieur||[]).find(e=>e.id===id); if(!line) return null;
+  const t=mgmtExteriorTrace(line,m.cycle); if(!t) return null;
+  return {id:line.id,name:t.name,W:t.pro.W,L:t.pro.L,D:0,age:Math.floor(t.age),div:line.div};
+}
+
+/** Le champ ct / libre d'une ligne est-il bien formé ? */
+function mgmtContratLigneValide(o){
+  if(o.libre!==undefined&&o.libre!==true) return false;
+  if(o.ct!==undefined){
+    const c=o.ct;
+    if(!c||typeof c!=='object'||!Number.isSafeInteger(c.n)||c.n<1||!Number.isSafeInteger(c.f)||c.f<0||!Number.isFinite(c.b)||c.b<=0||!Number.isSafeInteger(c.since)) return false;
+    if(o.libre) return false;
+  }
+  return true;
+}
+/* ==== [FIN ANCRE] ==== */

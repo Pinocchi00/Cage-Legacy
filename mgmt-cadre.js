@@ -54,7 +54,7 @@ const MF_SECTIONS=[
   {id:'effectif',libelle:'Effectif',ecran:'mgmt_effectif'},
   {id:'classements',libelle:'Classements',ecran:'mgmt_classements'},
   {id:'ceintures',libelle:'Ceintures',ecran:null},
-  {id:'contrats',libelle:'Contrats',ecran:'mgmt_recrutement'},
+  {id:'contrats',libelle:'Contrats',ecran:'mgmt_contrats'},
   {id:'camps',libelle:'Camps',ecran:null},
   {id:'presse',libelle:'Presse',ecran:null},
   {id:'calendrier',libelle:'Calendrier',ecran:'mgmt_calendrier'},
@@ -63,7 +63,7 @@ const MF_SECTIONS=[
 ];
 /** L'écran ouvert → la section qu'il éclaire dans la barre. */
 const MF_ECRAN_SECTION={mgmt_carte:'carte',mgmt_bureau:'preliminaires',mgmt_effectif:'effectif',mgmt_classements:'classements',
-  mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier',mgmt_prelims:'preliminaires',mgmt_finances:'finances'};
+  mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier',mgmt_prelims:'preliminaires',mgmt_finances:'finances',mgmt_contrats:'contrats'};
 
 /** La section que l'écran courant éclaire ; une fiche éclaire celle d'où on l'a ouverte. */
 function mfSectionCourante(screen){

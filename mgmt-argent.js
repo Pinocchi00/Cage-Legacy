@@ -146,6 +146,8 @@ function mgmtStar(f){
  *  (anti-rechargement).
  *  @returns {number} entier k$ > 0. */
 function mgmtPurse(f,slot){
+  /* Lot 9 : avec un contrat, la bourse du soir est celle de sa signature, la même pour tous les emplacements. */
+  if(f&&f.ct&&Number.isFinite(f.ct.b)) return Math.max(1,Math.round(f.ct.b));
   const star=mgmtStar(f);
   const w=slot==='main'?MGMT_PURSE_MAIN_W:MGMT_PURSE_PRELIM_W;
   return Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*star)*w);

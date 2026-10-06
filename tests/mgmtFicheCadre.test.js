@@ -5,9 +5,9 @@ const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 const touche=(win,key)=>win.eval(`keysHandle({key:${JSON.stringify(key)},preventDefault(){}})`);
 
-test('Fiche — cinq onglets, Contrat grisé, Tab fait le tour sans passer par Contrat', () => {
+test('Fiche — cinq onglets, Contrat grisé avant le calendrier du joueur, Tab fait le tour sans passer par Contrat', () => {
   const win=newGameWindow({runMain:true});
-  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_effectif'); CL.mgmtEffectifOuvrir();`);
+  win.eval(`setSeed(7); CL.mgmtEnter(1); delete G.mgmt.cal; CL.go('mgmt_effectif'); CL.mgmtEffectifOuvrir();`);
   assert.equal(win.eval('G.screen'),'mgmt_fiche');
   assert.equal(win.eval(`document.querySelectorAll('.mf-fiche-onglets .mf-onglet:not(.mf-fiche-retour)').length`),5);
   assert.equal(win.eval(`document.querySelectorAll('.mf-fiche-grise[aria-disabled="true"]').length`),1);

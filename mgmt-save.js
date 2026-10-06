@@ -44,6 +44,7 @@ function mgmtValidLine(o){
   /* Lot 2B T3 : la retraite d'âge existe — 'medical' (lot 3a) et 'age'
      (T3) sont les deux valeurs valides, toute autre est refusée. */
   if(o.retired!==undefined&&o.retired!=='medical'&&o.retired!=='age') return false;
+  if(typeof mgmtContratLigneValide==='function'&&!mgmtContratLigneValide(o)) return false;
   /* Lot 2B T1 bis : dernier combat connu — absent (jamais combattu), cycle
      Split positif, ou cycle extérieur négatif pour une recrue dont le
      dernier combat précède l'ouverture de la partie. */
@@ -170,7 +171,9 @@ function mgmtValidTraceSide(t){
   if(!t||typeof t!=='object'||Array.isArray(t)) return false;
   /* Brief du 06/10, lot 2 : le niveau d'avant combat est facultatif — les traces d'avant le lot n'en portent pas. */
   if(t.niv!==undefined&&(!Number.isFinite(t.niv)||t.niv<MGMT_NIV_MIN||t.niv>MGMT_NIV_MAX)) return false;
-  const clefs=Object.keys(t).filter(k=>k!=='niv').sort().join(',');
+  /* Lot 9 : la rouille sous contrat se lit sur l'attente depuis la signature (rg), facultative. */
+  if(t.rg!==undefined&&!Number.isSafeInteger(t.rg)) return false;
+  const clefs=Object.keys(t).filter(k=>k!=='niv'&&k!=='rg').sort().join(',');
   if(clefs!=='D,L,W,age,div,first,id,last,lastCycle,name,trauma,traumaFloor'){
     if(clefs!=='D,L,W,age,ck,div,first,generation,id,last,lastCycle,name,trauma,traumaFloor'
       ||t.generation!==MGMT_IDENTITE_GENERATION||!COUNTRY_KEYS.includes(t.ck)) return false;

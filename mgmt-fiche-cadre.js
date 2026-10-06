@@ -7,11 +7,14 @@
 
 const MGMT_FICHE_ONGLETS=[
   {id:'apercu',libelle:'Aperçu'},{id:'style',libelle:'Style'},{id:'combats',libelle:'Combats'},
-  {id:'contrat',libelle:'Contrat',grise:true},{id:'ondit',libelle:'On en dit'},
+  {id:'contrat',libelle:'Contrat',contrat:true},{id:'ondit',libelle:'On en dit'},
 ];
 
+/** « Contrat » n'existe qu'avec l'agenda du joueur (lots 7 et 9) ; avant, il reste grisé. */
+function mgmtFicheOngletGrise(o){ return !!o.contrat&&!(G&&G.mgmt&&typeof mgmtContratsActif==='function'&&mgmtContratsActif(G.mgmt)); }
+
 function mgmtFicheOngletCourant(){
-  const ids=MGMT_FICHE_ONGLETS.filter(o=>!o.grise).map(o=>o.id);
+  const ids=MGMT_FICHE_ONGLETS.filter(o=>!mgmtFicheOngletGrise(o)).map(o=>o.id);
   if(!ids.includes(MGMT_FICHE.onglet)) MGMT_FICHE.onglet='apercu';
   return MGMT_FICHE.onglet;
 }
@@ -28,8 +31,22 @@ function mgmtFicheBanniereHtml(f){
     +`<span style="font-size:34px">${esc(prenom)}</span><span style="font-size:${mfCorps(nom,380,92,46)}px">${esc(nom)}</span></div></div></div></div>`;
 }
 
+/** L'onglet Contrat : les combats du contrat un par un (fait, le prochain, à venir), la bourse fixée à la signature, ce qui se passe ensuite. */
+function mgmtFicheContratHtml(m,f){
+  if(f.libre) return `<h3>Son contrat</h3><p>Sans contrat : il ne se book plus. Il figure au recrutement.</p>`;
+  if(!f.ct) return `<h3>Son contrat</h3><p>Pas de contrat suivi pour ce combattant.</p>`;
+  const c=f.ct, lignes=[];
+  for(let i=1;i<=c.n;i++){ const etat=i<=c.f?'Fait':(i===c.f+1?'Le prochain':'À venir'); lignes.push(`<div class="mf-ligne${i===c.f+1?' choisie':''}"><span class="mf-ligne-t">Combat ${i}</span><span class="mf-ligne-v">${esc(etat)}</span></div>`); }
+  const p=mgmtContratPalier(m,f);
+  return `<h3>Son contrat</h3>${lignes.join('')}`
+    +`<h3>La bourse</h3><p>${esc(mgmtEuros(c.b))} par combat, fixés à la signature.</p>`
+    +`<h3>Ensuite</h3><p>${esc(mgmtContratRestants(f))} combat${mgmtContratRestants(f)>1?'s':''} restant${mgmtContratRestants(f)>1?'s':''} ; sans nouveau contrat, il rejoint les sans-contrat. Le renouvellement se propose dans Contrats.</p>`
+    +(p>=1?`<p>${esc(MGMT_CT_PALIERS[p])}.</p>`:'');
+}
+
 function mgmtFicheCorpsOnglet(m,f,line,id){
   const identite=mgmtIdentite(m,f);
+  if(id==='contrat') return mgmtFicheContratHtml(m,f);
   if(id==='style') return mgmtFicheConnaissance(m,f)+`<h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}`;
   if(id==='combats') return `<h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}${mgmtFicheParcours(line.trace)}`;
   if(id==='ondit') return mgmtFicheVie(m,f)+mgmtFichePromesses(m,f)+mgmtFicheRivaux(m,f)+mgmtFicheParole(m,f)+mgmtFicheLien(m,f);
@@ -53,7 +70,7 @@ function scr_mgmt_fiche_cadre(){
     +`<div class="mf-eff-fiche-ls">${ligne('Catégorie',mgmtDivisionLabel(f.div))}${ligne('Âge',f.age+' ans')}${ligne('Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHODOXE')}${ligne('Taille',taille)}${ligne('Allonge',allonge)}`
     +(role?ligne('Rôle',role.libelle):'')+ligne('Prochain combat',prochain?(prochain.adv?'Contre '+prochain.adv:'Sur la carte'):'—')+`</div>`
     +`<div class="mf-eff-fiche-pied">${mfBouton('Préparer son combat',{touche:'Entrée',jaune:true,onclick:"CL.mgmtFicheCarte()"})}</div>`;
-  const onglets=MGMT_FICHE_ONGLETS.map(o=>o.grise
+  const onglets=MGMT_FICHE_ONGLETS.map(o=>mgmtFicheOngletGrise(o)
     ?`<span class="mf-onglet mf-fiche-grise" aria-disabled="true">${esc(o.libelle.toUpperCase())}</span>`
     :`<button type="button" class="mf-onglet${o.id===onglet?' ouvert':''}" aria-pressed="${o.id===onglet}" onclick="CL.mgmtFicheOnglet('${o.id}')">${esc(o.libelle.toUpperCase())}</button>`).join('');
   const contenu=`<main class="mf-contenu mf-fiche-cadre"><div class="mf-eff-aside mf-fiche-gauche"><h2 class="mf-sr">${esc(f.name)}</h2>${mgmtFicheBanniereHtml(f)}${mfPanneau(stats,'normal','mf-eff-fiche')}</div>`
@@ -68,7 +85,7 @@ SCREENS.mgmt_fiche=scr_mgmt_fiche_cadre;
 Object.assign(CL,{
   /** Un onglet par son identifiant, ou +1/−1 pour le suivant (les onglets grisés sont sautés). */
   mgmtFicheOnglet(x){
-    const ids=MGMT_FICHE_ONGLETS.filter(o=>!o.grise).map(o=>o.id);
+    const ids=MGMT_FICHE_ONGLETS.filter(o=>!mgmtFicheOngletGrise(o)).map(o=>o.id);
     if(typeof x==='number'){ const i=ids.indexOf(mgmtFicheOngletCourant()); MGMT_FICHE.onglet=ids[(i+(x<0?-1:1)+ids.length)%ids.length]; MGMT_FICHE.cursor=0; }
     else if(ids.includes(x)){ MGMT_FICHE.onglet=x; MGMT_FICHE.cursor=0; }
     render();
