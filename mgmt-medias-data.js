@@ -24,7 +24,8 @@ const MGMT_MEDIAS=[
 ];
 
 /* situation : affiche | lendemain | rebook ; si : condition facultative
-   (fr, etranger, etrangerPerd, ko1, dec, surprise, serie, finition). */
+   (fr, etranger, etrangerPerd, ko1, dec, surprise, serie, finition ; pionniere,
+   guerre ; voix:x+y — deux voix qui se rencontrent, '*' toute voix, 'bruyant'). */
 const MGMT_MEDIAS_LIGNES=[
   /* Cage Hebdo */
   {media:'cage-hebdo',situation:'affiche',texte:'{a} et {b} se retrouvent en tête d’affiche de Split {n}, en {cat}. Le combat dira lequel des deux a besoin de l’autre.',relu:false},
@@ -64,6 +65,23 @@ const MGMT_MEDIAS_LIGNES=[
   {media:'presse-du-pays',situation:'affiche',si:'etranger',texte:'(Presse nationale — {pays}, traduit) Notre {a} combat à Split {n}. Le pays entier sera devant son écran, à n’importe quelle heure.',relu:false},
   {media:'presse-du-pays',situation:'lendemain',si:'etranger',texte:'(Presse nationale — {pays}, traduit) Notre {a} a gagné en France. Une organisation française de plus qui sait maintenant son nom.',relu:false},
   {media:'presse-du-pays',situation:'lendemain',si:'etrangerPerd',texte:'(Presse nationale — {pays}, traduit) Défaite amère pour notre {a} : l’organisation française lui a donné un adversaire trop dur.',relu:false},
+  /* Quand deux voix se rencontrent (document des voix §4) : la tension de l'affiche. */
+  {media:'cage-hebdo',situation:'affiche',si:'voix:le-metteur-en-scene+le-metronome',texte:'{a} provoque {b} depuis trois semaines. {b} n’a pas répondu une seule fois. Ça ne durera pas.',relu:false},
+  {media:'cle-de-bras',situation:'affiche',si:'voix:le-sans-filtre+le-fataliste',texte:'{a} DÉRAPE SUR {b} : LA RÉPONSE GLACÉE QUE PERSONNE N’ATTENDAIT',relu:false},
+  {media:'le-forum',situation:'affiche',si:'voix:le-bavard-de-la-cage+le-signeur',texte:'quinze minutes de monologue de {a} devant {b}, qui n’a pas entendu un mot. le feuilleton de la semaine',relu:false},
+  {media:'cage-hebdo',situation:'affiche',si:'voix:le-mechant-de-catch+le-clan',texte:'{a} a trouvé le seul sujet qui ne se plaisante pas chez {b}. {b} ne dit plus rien. C’est le combat le plus attendu de la saison.',relu:false},
+  {media:'le-forum',situation:'affiche',si:'voix:le-prophete+le-prophete',texte:'deux prophètes sur la même affiche : {a} et {b} ont annoncé le contraire l’un de l’autre. un des deux a tort, forcément',relu:false},
+  {media:'tableau-noir',situation:'affiche',si:'voix:le-violent-heureux+le-lutteur-de-fac',texte:'{a} veut la guerre debout, {b} veut le sol. Quelqu’un criera au vol samedi.',relu:false},
+  {media:'le-plateau',situation:'affiche',si:'voix:linfluenceur+le-vieux-de-la-vieille',texte:'Le monde d’avant contre celui d’après, mesdames et messieurs : {a} contre {b}, et les vues explosent.',relu:false},
+  {media:'cage-hebdo',situation:'affiche',si:'voix:le-reclamant+le-plan-de-carriere',texte:'{a} réclame, {b} calcule. Deux façons de monter, un seul combat.',relu:false},
+  {media:'coin-rouge',situation:'affiche',si:'voix:le-timide+bruyant',texte:'{a} se taira, {b} parlera pour deux. On parie lequel dira « merci » en premier.',relu:false},
+  {media:'la-pesee',situation:'affiche',si:'voix:laigri+le-bon-client',texte:'{a} se plaint des bourses, {b} remercie Split. On a comparé les deux contrats.',relu:false},
+  {media:'le-forum',situation:'affiche',si:'voix:*+linterprete',texte:'{a} a encore provoqué {b}. {b} n’a pas répondu : il ne l’a pas lu.',relu:false},
+  /* Les scénarios que le terrain écrit : la pionnière (n° 32) et la guerre de l'année (n° 20). */
+  {media:'cage-hebdo',situation:'lendemain',si:'pionniere',texte:'Pour la première fois, Split a placé un combat féminin en tête d’affiche : {a} contre {b}. La carte n’a pas souffert de ce choix.',relu:false},
+  {media:'coin-rouge',situation:'lendemain',si:'pionniere',texte:'Première soirée de Split menée par un combat féminin. {a} et {b} ont ouvert la porte, on est fans.',relu:false},
+  {media:'cage-hebdo',situation:'lendemain',si:'guerre',texte:'{a} et {b} ont fait la guerre pendant {round} rounds. Deux combattants heureux, une salle debout.',relu:false},
+  {media:'le-plateau',situation:'lendemain',si:'guerre',texte:'La guerre de l’année, mesdames et messieurs : {a} contre {b}, {round} rounds sans un pas en arrière. Historique.',relu:false},
   /* Coin Rouge (a = le combattant français) */
   {media:'coin-rouge',situation:'affiche',si:'fr',texte:'Split met {a} en tête d’affiche pour Split {n}. Enfin. Il avait mérité sa place depuis longtemps.',relu:false},
   {media:'coin-rouge',situation:'lendemain',si:'fr',texte:'On a retrouvé {a} dans sa salle après Split {n}. Il a ramené des croissants pour tout le monde. On est fans.',relu:false},
