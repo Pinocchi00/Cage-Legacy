@@ -168,7 +168,7 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 06/10/2026 (`lot-b1-trois-emplacements`, lot 5 complet jusqu'à la PR 94 + lot 1 du brief du 06/10) : **600 tests, 600 passants,
+État au 06/10/2026 (`lot-b1-trois-emplacements`, lot 5 complet jusqu'à la PR 94 + lot 1 du brief du 06/10) : **603 tests, 603 passants,
 0 échec, 0 skip**. Les 4 anciens skip de `mgmtBureau.test.js` (trois sorties de
 carte incomplète et la carte réduite au-delà du plafond) sont devenus de vrais
 tests au lot 5 T6 (`mgmt-retraits.js`, QO-1 à QO-4 et QO-7). **36 fichiers dans

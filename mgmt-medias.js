@@ -17,6 +17,34 @@ const MGMT_MEDIAS_PAYS_RARE=4;
 
 function mgmtMediaDe(id){ return MGMT_MEDIAS.find(x=>x.id===id)||null; }
 
+/** Les voix « bruyantes » du document des voix §4 (Timide contre n'importe qui de bruyant). */
+const MGMT_MEDIAS_BRUYANTS=['le-sans-filtre','le-bavard-de-la-cage','le-mechant-de-catch','le-metteur-en-scene','linfluenceur','le-reclamant'];
+
+/** Une voix correspond-elle à un jeton de condition : '*' (toute voix), 'bruyant', ou un identifiant. */
+function mgmtMediasVoixJeton(jeton,voix){
+  if(jeton==='*') return true;
+  if(jeton==='bruyant') return MGMT_MEDIAS_BRUYANTS.includes(voix);
+  return jeton===voix;
+}
+
+/** Quand deux voix se rencontrent (§4) : 'x+y' ; renvoie [premier,second] — le
+ *  combattant de la première voix d'abord —, ou null. */
+function mgmtMediasVoixPaire(spec,scene){
+  const [x,y]=spec.split('+');
+  if(mgmtMediasVoixJeton(x,scene.va)&&mgmtMediasVoixJeton(y,scene.vb)) return [scene.a,scene.b];
+  if(mgmtMediasVoixJeton(x,scene.vb)&&mgmtMediasVoixJeton(y,scene.va)) return [scene.b,scene.a];
+  return null;
+}
+
+/** Première soirée dont le combat principal est un combat féminin (scénario n° 32). */
+function mgmtMediasPionniere(m,t){
+  const tete={};
+  for(const h of m.hist||[]){ if(h&&h.slot==='main'&&tete[h.c]===undefined) tete[h.c]=h; }
+  const feminin=h=>{ const d=divById(h.a.div); return !!d&&d.gender==='F'; };
+  if(tete[t.c]!==t||!feminin(t)) return false;
+  return !Object.keys(tete).some(c=>Number(c)<t.c&&feminin(tete[c]));
+}
+
 /** Le pays d'un combattant est-il rare dans Split (et n'est-il pas la France) ? */
 function mgmtMediasPaysRare(m,f){
   const ck=mgmtIdentitePays(f);
@@ -48,7 +76,13 @@ function mgmtMediasContexte(m,si,scene){
       if(!lui) return null;
       return Object.assign(base,{a:lui.name,b:(lui===scene.a?scene.b:scene.a).name,pays:COUNTRIES[mgmtIdentitePays(lui)].name});
     }
-    default: return null;
+    case 'pionniere': return scene.pionniere?Object.assign(base,{a:scene.a.name,b:scene.b.name}):null;
+    case 'guerre': return scene.guerre?Object.assign(base,{a:scene.a.name,b:scene.b.name}):null;
+    default: {
+      if(!si.startsWith('voix:')) return null;
+      const p=mgmtMediasVoixPaire(si.slice(5),scene);
+      return p?Object.assign(base,{a:p[0].name,b:p[1].name}):null;
+    }
   }
 }
 
@@ -58,7 +92,7 @@ function mgmtMediasContexte(m,si,scene){
 function mgmtMediasScene(m,situation,scene,cle,max){
   const r=mgmtIdentiteStream(cle,'media|'+situation+'|'+m.cycle);
   const candidates=MGMT_MEDIAS_LIGNES.filter(l=>l.situation===situation)
-    .map(l=>({l,k:r()})).sort((x,y)=>x.k-y.k);
+    .map(l=>({l,k:r(),s:/^(voix:|pionniere|guerre)/.test(l.si||'')?0:1})).sort((x,y)=>x.s-y.s||x.k-y.k);
   const out=[], pris=new Set();
   for(const {l} of candidates){
     if(out.length>=max) break;
@@ -81,17 +115,18 @@ function mgmtMediasAffiche(m){
   if(!cf) return [];
   const a=mgmtFighterById(m,cf.a), b=mgmtFighterById(m,cf.b);
   if(!a||!b) return [];
-  const scene={a,b,n:m.eventsPlayed+1,cat:mgmtDivisionLabel(a.div)};
+  const scene={a,b,n:m.eventsPlayed+1,cat:mgmtDivisionLabel(a.div),va:mgmtVoixActuelle(m,a),vb:mgmtVoixActuelle(m,b)};
   return mgmtMediasScene(m,'affiche',scene,cf.a+'|'+cf.b,MGMT_MEDIAS_MAX)
     .map(x=>Object.assign(x,{id:a.id,div:a.div}));
 }
 
-/** Le lendemain : le dernier combat principal joué. @returns {Array} */
+/** Le lendemain : le combat principal de la dernière soirée (le premier de la
+ *  carte principale, décision T1 du 02/10). @returns {Array} */
 function mgmtMediasLendemain(m){
   if(!m||m.effectifs!==1||!m.lastEvent||!Array.isArray(m.hist)) return [];
   const c=m.lastEvent.cycle;
   const mains=m.hist.filter(t=>t&&t.c===c&&t.slot==='main'&&t.winner!=='D');
-  const t=mains[mains.length-1];
+  const t=mains[0];
   if(!t) return [];
   const gagnant=t.winner==='A'?t.a:t.b, perdant=t.winner==='A'?t.b:t.a;
   const a=mgmtFighterById(m,gagnant.id), b=mgmtFighterById(m,perdant.id);
@@ -100,7 +135,9 @@ function mgmtMediasLendemain(m){
   const serie=mgmtResultatsDetail(m,a).filter((x,i,l)=>l.slice(0,i+1).every(y=>y.issue==='win')).length>=3;
   const surprise=(perdant.W-perdant.L)>(gagnant.W-gagnant.L);
   const scene={a,b,gagne:true,family:t.family,round:t.round,rounds:t.rounds,n:m.eventsPlayed,
-    cat:mgmtDivisionLabel(a.div),serie,surprise};
+    cat:mgmtDivisionLabel(a.div),serie,surprise,va:mgmtVoixActuelle(m,a),vb:mgmtVoixActuelle(m,b)};
+  scene.pionniere=mgmtMediasPionniere(m,t);
+  scene.guerre=scene.va==='le-violent-heureux'&&scene.vb==='le-violent-heureux'&&(t.family==='dec'||t.round>=3);
   return mgmtMediasScene(m,'lendemain',scene,t.a.id+'|'+t.b.id,MGMT_MEDIAS_MAX)
     .map(x=>Object.assign(x,{id:a.id,div:a.div}));
 }
