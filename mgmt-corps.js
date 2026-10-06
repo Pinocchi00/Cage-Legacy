@@ -365,6 +365,8 @@ function mgmtTraceSide(f){
   if(f.generation===MGMT_IDENTITE_GENERATION){ t.ck=f.ck; t.generation=f.generation; }
   /* Brief du 06/10, lot 2 : le niveau d'AVANT combat voyage avec la trace — le rejeu retrouve le même combat. */
   if(Number.isFinite(f.niv)) t.niv=f.niv;
+  /* Lot 9 : sous contrat, la rouille se lit sur l'attente depuis la signature — elle voyage avec la trace. */
+  if(f.ct&&Number.isSafeInteger(f.ct.since)) t.rg=f.ct.since;
   return t;
 }
 
@@ -379,6 +381,7 @@ function mgmtTraceLine(t){
   if(t.lastCycle!==null) f.lastCycle=t.lastCycle;
   /* Brief du 06/10, lot 2 : le niveau d'avant combat — sans lui (trace d'avant le lot), l'ancienne loi. */
   if(Number.isFinite(t.niv)) f.niv=t.niv;
+  if(Number.isSafeInteger(t.rg)) f.rg=t.rg;
   return f;
 }
 
@@ -472,6 +475,8 @@ function mgmtSuspensionUntil(cycle,days){
  *  (susp = cycle jusqu'auquel il est indisponible). */
 function mgmtAvailable(m,f){
   if(!f||f.retired) return false;
+  /* Lot 9 : sans contrat, ou au dernier palier d'attente, il refuse tout combat. */
+  if(typeof mgmtContratIndispo==='function'&&mgmtContratIndispo(m,f)) return false;
   if(Number.isSafeInteger(f.susp)&&m&&Number.isSafeInteger(m.cycle)&&m.cycle<=f.susp) return false;
   return true;
 }
@@ -634,6 +639,8 @@ function mgmtRunEvent(m){
     if(ta) touched.push(ta);
     if(tb) touched.push(tb);
   }
+  /* Lot 9 : un combat de plus au contrat ; un contrat épuisé fait un sans-contrat. */
+  if(agenda) mgmtContratsApresSoiree(m,booked.reduce((l,x)=>l.concat([x.a,x.b]),[]));
   touched.sort((x,y)=>mgmtTouchedRank(y)-mgmtTouchedRank(x));
   /* Lot 2B T4 : le bonus de victoire se calcule après les combats — le
      cachet reste le salaire de combat, le vainqueur touche le sien une

@@ -399,3 +399,24 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fin-note{font-size:22px;line-height:1;color:var(--mf-texte2);margin-top:auto}
 .mf-fin-detail{width:1000px}
 .mf-fin-lignes{padding:20px;display:flex;flex-direction:column;gap:8px}
+
+/* ---- Contrats et recrutement : la liste, les pastilles de contrat, l'offre --------------- */
+.mf-ct-entete,.mf-ct-ligne{display:grid;grid-template-columns:minmax(0,1fr) 110px 70px 130px 120px 290px;align-items:center;column-gap:12px;padding:0 18px}
+.mf-ct-entete{height:36px;flex:none;font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-ct-ligne{height:68px;flex:none;width:100%;background:var(--mf-ligne);color:var(--mf-blanc);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-ct-ligne.choisie{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-ct-ligne.choisie .mf-eff-nom span,.mf-ct-ligne.choisie .mf-eff-sit.libre{color:rgba(13,11,11,.74)}
+.mf-ct-div{font-size:22px;line-height:1;white-space:nowrap}
+.mf-ct-reste{font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:1;white-space:nowrap}
+.mf-ct-pips{display:flex;gap:4px}
+.mf-ct-pips i{width:16px;height:20px;border:2px solid currentColor;display:block}
+.mf-ct-pips i.fait{background:currentColor}
+.mf-eff-sit.jaune{color:var(--mf-jaune)}
+.mf-ct-ligne.choisie .mf-eff-sit.jaune{color:var(--mf-noir)}
+.mf-ct-fiche .mf-p3{padding:13px;gap:8px}
+.mf-ct-offre{display:flex;flex-direction:column;gap:2px}
+.mf-ct-n{display:flex;gap:6px;margin:6px 0}
+.mf-ct-n button{width:44px;height:48px;background:var(--mf-ligne);font-family:var(--mf-titre);font-weight:800;font-size:30px;text-align:center!important;line-height:48px}
+.mf-ct-n button.on{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-ct-msg{margin-top:8px;font-size:24px;line-height:1.2;color:var(--mf-jaune)}
+.mf-ct-ligne .mf-eff-sit{overflow:hidden;text-overflow:ellipsis;display:block;font-size:22px;line-height:1.1}

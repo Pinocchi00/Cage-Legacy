@@ -56,6 +56,8 @@ const MF_SVG_BLESSE='<svg width="26" height="26" viewBox="0 0 26 26" fill="none"
 
 /** La situation d'un combattant : l'icône, le texte, et si elle est « active ». */
 function mgmtEffectifSituation(m,f){
+  if(f.libre) return {icone:'<div class="mf-eff-vide"></div>',texte:'Sans contrat',classe:'libre'};
+  if(typeof mgmtContratPalier==='function'&&mgmtContratPalier(m,f)>=4) return {icone:MF_SVG_BLESSE,texte:MGMT_CT_PALIERS[4],classe:'blesse'};
   if(!mgmtAvailable(m,f)){
     const sem=Number.isSafeInteger(f.susp)&&f.susp>m.cycle?(f.susp-m.cycle)*MGMT_EVENT_WEEKS:0;
     return {icone:MF_SVG_BLESSE,texte:sem?`Blessé, ${sem} semaine${sem>1?'s':''}`:'Indisponible',classe:'blesse'};
