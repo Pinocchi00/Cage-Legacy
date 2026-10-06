@@ -11,3 +11,9 @@ Source : planche « Management — Effectif » du canvas. Code : `mgmt-effectif.
 
 ## Reste du lot 6
 La Fiche à cinq onglets (Aperçu, Style, Combats, Contrat grisé jusqu'au lot 9, On en dit), la bannière, le savoir trait par trait.
+
+## Fiche (livrée ensuite, `mgmt-fiche-cadre.js`)
+Bannière au nom (rétrécit si long), chiffres à gauche, cinq onglets (Aperçu, Style, Combats, Contrat grisé jusqu'au lot 9, On en dit),
+Tab onglet suivant, ← → autre combattant de la catégorie, Entrée prépare son combat (ou revoit un combat dans Combats), Échap retour.
+Le contenu des onglets réutilise les blocs existants de l'ancienne fiche (même habillage intérieur) ; le savoir « Vu contre X » trait par trait
+et le diagramme de cage refait restent à faire. L'ancienne `scr_mgmt_fiche` reste dans `mgmt-ecran-fiche.js` (ses blocs servent).

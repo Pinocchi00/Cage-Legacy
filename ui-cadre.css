@@ -254,3 +254,19 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
   @keyframes mfEntre{from{opacity:0;transform:translateX(-48px) skewX(-10deg)}to{opacity:1;transform:none}}
 }
 /* ==== [FIN ANCRE] ==== */
+
+/* ---- La Fiche : bannière et chiffres à gauche, cinq onglets à droite ------------ */
+.mf-fiche-cadre{display:flex;gap:20px}
+.mf-fiche-gauche{height:100%}
+.mf-fiche-banniere{height:200px}
+.mf-fiche-droite{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+.mf-fiche-onglets{display:flex;gap:8px;flex:none}
+.mf-fiche-onglets .mf-onglet.ouvert{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-fiche-grise{opacity:.4}
+.mf-fiche-corps{flex:1;padding:18px 22px;background:var(--mf-panneau);border:2px solid var(--mf-bord);min-height:0;font-size:22px}
+.mf-fiche-corps h3{font-family:var(--mf-titre);font-weight:800;font-size:30px;line-height:1;text-transform:uppercase;margin:22px 0 8px;color:var(--mf-blanc)}
+.mf-fiche-corps h3:first-of-type{margin-top:10px}
+.mf-fiche-corps p,.mf-fiche-corps li,.mf-fiche-corps .mgmt-meta,.mf-fiche-corps .mgmt-fiche-detail{font-size:24px;line-height:1.3;color:var(--mf-blanc)}
+.mf-fiche-corps .mgmt-fiche-fight{font-size:24px}
+.mf-fiche-retour{margin-left:auto}
+.mf-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
