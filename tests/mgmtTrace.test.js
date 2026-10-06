@@ -192,6 +192,7 @@ test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', ()
   const m=win.G.mgmt, traces=m.hist.filter(t=>t.a.id===id||t.b.id===id);
   const original=traces[0].a.id===id?traces[0].b.name:traces[0].a.name;
   assert.ok(traces.length>=1);
+  win.eval(`CL.mgmtFicheOnglet('combats')`);
   const html=win.document.getElementById('app').innerHTML;
   for(const t of traces){
     const opp=t.a.id===id?t.b:t.a;
@@ -236,6 +237,7 @@ test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par tr
     mgmtReplayFight=function(t){ window.replays++; return orig(t); };
     G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(id)});
   })()`);
+  win.eval(`CL.mgmtFicheOnglet('style')`);
   const html=win.document.getElementById('app').innerHTML;
   assert.match(html,/Où il combat/);
   assert.match(html,/clip-path="url\(#mgmt-fiche-oct\)"/);
@@ -266,6 +268,7 @@ test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappeme
   const keys=Object.keys(line).sort();
   win.eval(`G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(line.id)})`);
   assert.equal(win.G.screen,'mgmt_fiche');
+  win.eval("CL.mgmtFicheOnglet('combats')");
   const html=win.document.getElementById('app').innerHTML;
   assert.match(html,/Sa trajectoire/);
   assert.match(html,/Amateur/);
@@ -285,7 +288,7 @@ test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappeme
     mgmtExteriorTrace=function(line,cycle){ const t=orig(line,cycle);
       t.name='<img src=x onerror=alert(1)>'; t.orgs[0].name='<svg onload=alert(1)>';
       return t; };
-    render();
+    CL.mgmtFicheOnglet('combats');
   })()`);
   const doc=win.document.getElementById('app');
   assert.equal(doc.querySelector('img,svg[onload]'),null);
