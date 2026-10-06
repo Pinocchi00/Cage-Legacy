@@ -95,7 +95,7 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
   assert.deepEqual(r.sections,['carte','preliminaires','effectif','classements','ceintures','contrats','camps','presse','calendrier','resultats','finances']);
   assert.equal(r.carte.length,13,'onze sections, Options, Menu principal');
   assert.equal(r.carte.filter(x=>x.cur).length,1); assert.equal(r.carte.find(x=>x.cur).sec,'carte');
-  assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),['ceintures','camps','presse','calendrier','resultats','options'],'les sections dont le lot n’est pas livré sont grisées');
+  assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),['ceintures','camps','presse','resultats','options'],'les sections dont le lot n’est pas livré sont grisées');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct===false||true);
   assert.equal(r.bureau.find(x=>x.cur).sec,'preliminaires','l’écran de la semaine éclaire Préliminaires (écran ancien)');
   assert.equal(r.fiche.find(x=>x.cur).sec,'classements','une fiche éclaire la section d’où on l’a ouverte');

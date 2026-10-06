@@ -57,13 +57,13 @@ const MF_SECTIONS=[
   {id:'contrats',libelle:'Contrats',ecran:'mgmt_recrutement'},
   {id:'camps',libelle:'Camps',ecran:null},
   {id:'presse',libelle:'Presse',ecran:null},
-  {id:'calendrier',libelle:'Calendrier',ecran:null},
+  {id:'calendrier',libelle:'Calendrier',ecran:'mgmt_calendrier'},
   {id:'resultats',libelle:'Résultats',ecran:null},
   {id:'finances',libelle:'Finances',ecran:'mgmt_organisation'},
 ];
 /** L'écran ouvert → la section qu'il éclaire dans la barre. */
 const MF_ECRAN_SECTION={mgmt_carte:'carte',mgmt_bureau:'preliminaires',mgmt_effectif:'effectif',mgmt_classements:'classements',
-  mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats'};
+  mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier'};
 
 /** La section que l'écran courant éclaire ; une fiche éclaire celle d'où on l'a ouverte. */
 function mfSectionCourante(screen){
