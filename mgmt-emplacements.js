@@ -112,7 +112,12 @@ Object.assign(CL,{
     if(MGMT_PARTIES.curseur===n){ CL.mgmtPartieOuvrir(); return; }
     MGMT_PARTIES.curseur=n; render();
   },
-  mgmtPartieOuvrir(){ if(!MGMT_PARTIES.effacer) CL.mgmtEnter(MGMT_PARTIES.curseur); },
+  /** Un emplacement occupé se reprend ; un emplacement vide ouvre le choix de l'organisation (brief du 06/10, lot 5). */
+  mgmtPartieOuvrir(){
+    if(MGMT_PARTIES.effacer) return;
+    if(mgmtSlotPeek(MGMT_PARTIES.curseur)) CL.mgmtEnter(MGMT_PARTIES.curseur);
+    else CL.mgmtNouvelle(MGMT_PARTIES.curseur);
+  },
   mgmtPartieEffacer(){
     if(MGMT_PARTIES.effacer||!mgmtSlotPeek(MGMT_PARTIES.curseur)) return;
     MGMT_PARTIES.effacer=MGMT_PARTIES.curseur; render();

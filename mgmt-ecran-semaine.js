@@ -32,7 +32,7 @@ function mgmtSemaineCarte(m){
        const org=mgmtRankLabel(mgmtDivisionRank(m,f,'organization'),f.div);
        const world=mgmtRankLabel(mgmtDivisionRank(m,f,'world'),f.div);
       const adj=divById(f.div)?.gender==='F'?'mondiale':'mondial';
-      return `Split ${org||'non classé'} · ${world?world+' '+adj:'monde non classé'}`;
+      return `${mgmtOrgNom(m)} ${org||'non classé'} · ${world?world+' '+adj:'monde non classé'}`;
     };
     slots+=`<div class="mgmt-week-fight"><div class="mgmt-week-slot">Combat ${i+1}</div>`
       +`<div class="mgmt-week-names">${esc(a.name)} <span>contre</span> ${esc(b.name)}</div>`
@@ -100,7 +100,7 @@ function mgmtSemaineMonde(m){
     const split=m.roster.filter(f=>f.div===div.id&&!mgmtIsRetired(f));
     const available=split.filter(f=>mgmtAvailable(m,f)&&!mgmtEngaged(m,f));
     if(available.length<2){
-      add('effectif',div.id,`${mgmtDivisionLabel(div)} : ${available.length} combattant${available.length===1?'':'s'} de Split disponible${available.length===1?'':'s'} pour la carte principale.`,null);
+      add('effectif',div.id,`${mgmtDivisionLabel(div)} : ${available.length} combattant${available.length===1?'':'s'} de ${mgmtOrgNom(m)} disponible${available.length===1?'':'s'} pour la carte principale.`,null);
     }
   }
   /* Un voisin dans le classement mondial a un lien vérifiable avec Split.
@@ -137,16 +137,16 @@ function mgmtSemaineMonde(m){
     if(!line) continue;
     const trace=mgmtExteriorTrace(line,m.cycle);
     if(trace){
-      add('invaincu',div.id,`${mgmtDivisionLabel(div)} : ${split.length} combattants chez Split ; ${trace.name}, ${trace.pro.W}-${trace.pro.L} hors de Split.`,line.id);
+      add('invaincu',div.id,`${mgmtDivisionLabel(div)} : ${split.length} combattants chez ${mgmtOrgNom(m)} ; ${trace.name}, ${trace.pro.W}-${trace.pro.L} hors de ${mgmtOrgNom(m)}.`,line.id);
     }
   }
   for(const f of m.roster){
     if(news.length>=budget||(types.get('inactivite')||0)>=2) break;
     if(divisions.has(f.div)||mgmtIsRetired(f)||mgmtEngaged(m,f)
       ||!Number.isSafeInteger(f.lastCycle)||m.cycle-f.lastCycle<3) continue;
-    add('inactivite',f.div,`${f.name} : dernier combat sous Split il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
+    add('inactivite',f.div,`${f.name} : dernier combat sous ${mgmtOrgNom(m)} il y a ${m.cycle-f.lastCycle} cycles.`,f.id);
   }
-  const sources={effectif:'Effectif Split',voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité Split',vie:'Vie',demande:'Demande',rivalite:'Rivalité',parole:'Ce qui se dit',recrue:'Recrutement'};
+  const sources={effectif:'Effectif '+mgmtOrgNom(m),voisin:'Classement mondial',invaincu:'Monde extérieur',inactivite:'Activité '+mgmtOrgNom(m),vie:'Vie',demande:'Demande',rivalite:'Rivalité',parole:'Ce qui se dit',recrue:'Recrutement'};
   return news.map(n=>`<article class="mgmt-week-news" data-type="${n.type}" data-division="${esc(n.div)}">`
     +`<span class="mgmt-week-source">${esc(n.source||sources[n.type])}</span><p>${esc(n.text)}</p>`
     +(n.id?`<button onclick="CL.mgmtFiche('${esc(n.id)}')">Voir la fiche</button>`:'')+`</article>`).join('');
@@ -178,7 +178,7 @@ function mgmtSemaineClassement(m){
     const ext=!own&&m.exterieur.find(f=>f.id===r.id);
     const trace=ext&&mgmtExteriorTrace(ext,m.cycle);
     const name=own?own.name:trace?trace.name:r.name;
-    const org=own?'Split':trace&&trace.orgs.length?trace.orgs[trace.orgs.length-1].name:'';
+    const org=own?mgmtOrgNom(m):trace&&trace.orgs.length?trace.orgs[trace.orgs.length-1].name:'';
     return `<div class="mgmt-week-rank${own?' split':''}"><span>${esc(start+i+1)} &nbsp;${esc(name||'')}</span><span>${esc(org)}</span></div>`;
   }).join('');
   return `<section class="mgmt-week-ranking"><h3>${esc(mgmtDivisionLabel(div))}</h3>${rows}`
@@ -242,7 +242,7 @@ function mgmtSemaineMemoire(m,rows=mgmtSemaineMemoireRows(m)){
 
 function scr_mgmt_bureau(){
   if(!G||!G.mgmt){
-    return `<div class="scr center intro"><div class="eyebrow gold">Split — Management</div>`
+    return `<div class="scr center intro"><div class="eyebrow gold">${esc(mgmtOrgNom(G&&G.mgmt))} — Management</div>`
       +`<h2 class="disp">La semaine</h2><p class="lede">Le bureau n'est pas ouvert.</p>`
       +`<button class="btn primary mt" onclick="CL.mgmtEnter(MGMT_SLOT)">Ouvrir le bureau</button></div>`;
   }
@@ -303,7 +303,7 @@ function scr_mgmt_bureau(){
   const memory=mgmtSemaineMemoireRows(m);
   return `<div class="scr mgmt-wrap mgmt-week"><div class="mgmt-head bar">`
     +`<div><h2 class="disp">La semaine</h2></div>`
-    +`<span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
+    +`<span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtOpenLabel(open.length))}`
     +` — ${esc(mgmtCardLabel(m))}</div>`
     +`<div class="mgmt-cols mgmt-week-cols">`
@@ -311,7 +311,7 @@ function scr_mgmt_bureau(){
     +`<div class="mgmt-week-talk">${selOpen&&selOpen.speaker==='leila'?'':'<h3>Échange</h3>'}${talkHtml}</div>`
     +`<div class="mgmt-week-affairs"><h3>Affaires · ${open.length}</h3>${pileHtml}</div>`
     +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</section>`
-    +`<section class="mgmt-week-pane"><h3>Le monde autour de Split</h3>${mgmtSemaineMonde(m)}`
+    +`<section class="mgmt-week-pane"><h3>Le monde autour de ${esc(mgmtOrgNom(m))}</h3>${mgmtSemaineMonde(m)}`
     +`<details class="mgmt-week-memo"><summary>Mémoire · ${esc(memory.length)} fait${memory.length===1?'':'s'}</summary>${mgmtSemaineMemoire(m,memory)}</details></section>`
     +`<aside class="mgmt-week-pane">${mgmtSemaineClassement(m)}`
     +`<section class="mgmt-week-organisation"><h3>L'organisation</h3>`

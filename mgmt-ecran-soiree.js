@@ -50,7 +50,7 @@ function scr_mgmt_soiree(){
        +`<button class="mgmt-next" onclick="CL.mgmtSoireeToutSimuler()">Tout simuler</button>`
      :`<button class="mgmt-next" onclick="CL.mgmtSoireeNext()">Continuer</button>`;
   return `<div class="scr mgmt-wrap"><div class="mgmt-head bar">`
-    +`<div><div class="eyebrow gold">Split — Management</div>`
+    +`<div><div class="eyebrow gold">${esc(mgmtOrgNom(m))} — Management</div>`
     +`<h2 class="disp">La soirée</h2></div></div>`
     +`<div class="mgmt-cols" style="grid-template-columns:minmax(0,1fr)">`
     +`<div class="mgmt-col">${rows}`

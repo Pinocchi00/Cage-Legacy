@@ -231,17 +231,17 @@ function scr_mgmt_fiche(){
   if(!line) return scr_mgmt_bureau();
   const {f,trace}=line;
   const identite=mgmtIdentite(m,f),pays=COUNTRIES[mgmtIdentitePays(f)],role=mgmtRole(m,f),mot=(m.effectifs===1&&mgmtConnaissance(m,f).combat)?mgmtTraitMot(m,f):null;
-  const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):'Split';
+  const profile=mgmtCombatProfile(f).phys, org=trace?(trace.orgs[trace.orgs.length-1].name||''):mgmtOrgNom(m);
   const record=`${f.W}-${f.L}${f.D?'-'+f.D:''}`;
    const mondial=divById(f.div)?.gender==='F'?'mondiale':'mondial';
    const worldRank=mgmtFicheSituation(m,f,'world');
    const worldText=/^\d/.test(worldRank)?`${worldRank} ${mondial}`:`${mondial} : ${worldRank}`;
    const ranks=trace?worldText
-     :`Chez Split : ${mgmtFicheSituation(m,f,'organization')} · ${worldText}`;
+         :`Chez ${mgmtOrgNom(m)} : ${mgmtFicheSituation(m,f,'organization')} · ${worldText}`;
   const attrs=[['Bilan',record],['Taille',`${(profile.height/100).toFixed(2).replace('.',',')} m`],
     ['Allonge',`${(profile.reach/100).toFixed(2).replace('.',',')} m`]];
    return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head bar">`
-     +`<h2 class="disp">La fiche</h2><span class="mgmt-week-event">Split ${esc(m.eventsPlayed+1)}</span></div>`
+     +`<h2 class="disp">La fiche</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
      +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
       +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}${mot?` <span class="mgmt-fiche-mot">${esc(mot)}</span>`:''}</h2>`
      +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p>${mgmtFicheLien(m,f)}</div>`

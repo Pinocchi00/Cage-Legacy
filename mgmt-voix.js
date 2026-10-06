@@ -125,7 +125,7 @@ function mgmtVoixRemplit(texte,ctx){
 /** Le contexte d'une situation, lu sur l'état du jeu (la trace, la carte,
  *  le classement) : jamais un chiffre inventé. */
 function mgmtVoixContexte(m,f,situation){
-  const ctx={cat:mgmtDivisionLabel(f.div)};
+  const ctx={cat:mgmtDivisionLabel(f.div),org:mgmtOrgNom(m)};
   /* Les emplacements coûteux (identité, classements) se calculent à la demande :
      une réplique qui ne les cite pas ne les paie pas. */
   const paresseux=(cle,calcul)=>Object.defineProperty(ctx,cle,{enumerable:true,configurable:true,get(){

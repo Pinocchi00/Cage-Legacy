@@ -223,9 +223,9 @@ function scr_mgmt_lendemain(){
     return scr_mgmt_bureau();
   }
   return `<div class="scr mgmt-wrap mgmt-ld"><div class="mgmt-head bar">`
-    +`<h2 class="disp">Le lendemain de Split ${esc(m.eventsPlayed)}</h2>`
+    +`<h2 class="disp">Le lendemain de ${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed)}</h2>`
     +`<button class="mgmt-ld-next" onclick="CL.mgmtLendemainNext()">`
-      +`${esc(MGMT_LD_LABELS.prepare)} ${esc(m.eventsPlayed+1)}</button>`
+      +`${esc(MGMT_LD_LABELS.prepare.replace('Split',mgmtOrgNom(m)))} ${esc(m.eventsPlayed+1)}</button>`
     +`</div>`
     +`<div class="mgmt-ld-cols">`
     +`<section class="mgmt-ld-pane mgmt-ld-results">`

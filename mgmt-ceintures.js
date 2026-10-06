@@ -25,7 +25,7 @@ function mgmtInitTitles(m){
  *  départ du détenteur la rendent vacante, sans effacer son règne passé. */
 function mgmtSplitTitle(m,div){
   let id=null,defenses=0,since=null;
-  if(!m||!divById(div)) return {org:MGMT_ORG,div,id,defenses,since};
+  if(!m||!divById(div)) return {org:mgmtOrgNom(m),div,id,defenses,since};
   for(const fact of m.facts||[]){
     if(!fact||fact.div!==div) continue;
     if(fact.k==='title_initial'){
@@ -41,7 +41,7 @@ function mgmtSplitTitle(m,div){
   }
   const f=id?mgmtFighterById(m,id):null;
   if(!f||f.div!==div||mgmtIsRetired(f)){ id=null; defenses=0; since=null; }
-  return {org:MGMT_ORG,div,id,defenses,since};
+  return {org:mgmtOrgNom(m),div,id,defenses,since};
 }
 
 /* ==== [ANCRE: MGMT_LOT5_T1_MEMOIRE_TITRES] — Reprise T1 : lire l'issue
@@ -113,7 +113,7 @@ function mgmtBoutRounds(m,fight){
  *  @returns {{belts:Array,history:Array}} vues éphémères uniquement. */
 function mgmtExteriorTitles(m,div,cycle){
   const c=Number.isSafeInteger(cycle)?cycle:(m&&Number.isSafeInteger(m.cycle)?m.cycle:0);
-  const belts=MGMT_EXT_ORGS.map((org,i)=>({org,orgIdx:i,div,id:null,defenses:0,since:null}));
+  const belts=mgmtExtOrgs(m).map((org,i)=>({org,orgIdx:i,div,id:null,defenses:0,since:null}));
   const history=[];
   if(!m||!divById(div)) return {belts,history};
   const rosterIds=new Set((m.roster||[]).map(f=>f.id));

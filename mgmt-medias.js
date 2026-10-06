@@ -56,7 +56,7 @@ function mgmtMediasPaysRare(m,f){
 /** Le contexte d'une ligne de condition `si` pour la scène {x (sujet),y (l'autre),
  *  gagnant, trace}, ou null si la condition n'est pas remplie. */
 function mgmtMediasContexte(m,si,scene){
-  const base={n:scene.n,round:scene.round,rounds:scene.rounds,cat:scene.cat};
+  const base={n:scene.n,round:scene.round,rounds:scene.rounds,cat:scene.cat,org:mgmtOrgNom(m)};
   const pair=[scene.a,scene.b].filter(Boolean);
   const fam=scene.family;
   switch(si||''){

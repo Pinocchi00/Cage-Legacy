@@ -221,7 +221,9 @@ function mfEcran(contenu,opts={}){
   const entete=o.plaque
     ?`<header class="mf-entete"><div class="mf-entete-g"><div class="mf-plaque">${esc(o.plaque)}</div>${o.libelle?`<div class="mf-entete-lib">${esc(o.libelle)}</div>`:''}</div>${o.droite?`<div class="mf-entete-d">${esc(o.droite)}</div>`:''}</header>`
     :'';
-  const barre=o.barre==='aucune'?'':mfBarreHtml({mode:o.barre,courant:o.courant,grise:o.grise,m:o.m});
+  const barre=o.barre==='aucune'?'':(o.barre==='logo'
+    ?`<div class="mf-logo-seul">${mfLogoHtml()}</div>`
+    :mfBarreHtml({mode:o.barre,courant:o.courant,grise:o.grise,m:o.m}));
   return `<div class="mf-ecran${mfEntreeClasse()}"><div class="mf-stage"><div class="mf-fond"></div>`
     +(o.couleur?`<div class="mf-teinte" style="--mf-couleur:${esc(o.couleur)}"></div>`:'')
     +entete+contenu+barre+(o.touches?mfTouchesHtml(o.touches):'')+`</div></div>`;
@@ -233,7 +235,7 @@ function mfAncien(html,screen){
   const soir=screen==='mgmt_soiree'||screen==='mgmt_lendemain';
   const courant=mfSectionCourante(screen);
   const lib=courant?(MF_SECTIONS.find(s=>s.id===courant)||{}).libelle:(screen==='mgmt_soiree'?'Soirée':'');
-  const droite=m?`${m.org} ${Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed+1:''}`.trim():'';
+  const droite=m?`${mgmtOrgNom(m)} ${Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed+1:''}`.trim():'';
   return mfEcran(`<main class="mf-contenu"><div class="mf-ancien">${html}</div></main>`,
     {barre:'jeu',courant,grise:soir,m,plaque:lib||'Management',droite});
 }

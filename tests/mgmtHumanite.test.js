@@ -46,7 +46,8 @@ test('H3 — flux séparés : changer les rituels ne change aucune autre couche 
 test('H3 — migration 11 → 12 : chaque ancien profil et rejeu reste EXACTEMENT identique',()=>{
   const w=newGameWindow();
   try{
-    const r=result(w,`setSeed(20261002); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
+    /* Brief du 06/10, lot 2 : une partie d'avant porte un niveau déduit de son palmarès — la fixture est une partie d'avant. */
+    const r=result(w,`setSeed(20261002); const m=mgmtDefaultAvantH4(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
       m.v=11; for(const f of m.roster){ delete f.ck; delete f.generation; }
       for(const f of m.exterieur) delete f.generation;
       // Chemin du profil v11, copié littéralement depuis origin/main.
@@ -72,8 +73,8 @@ test('H3 — migration 11 → 12 : chaque ancien profil et rejeu reste EXACTEMEN
         ext:apres.every((f,i)=>extProfils[i]===JSON.stringify(mgmtCombatProfile(f))),
         hist:hist===JSON.stringify(m.hist),rejeu:avant===JSON.stringify(mgmtReplayFight(m.hist[0]))&&avant===JSON.stringify(res),
         rng:seed===SEED,idempotent:premiere===JSON.stringify(m)};`);
-    /* H4 : la même chaîne mène maintenant à la version 13 (effectifs 0). */
-    assert.deepEqual(r,{v:13,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
+    /* H4 : la même chaîne mène à l'effectifs 0 ; lot 2 du brief du 06/10 : jusqu'à la version 14. */
+    assert.deepEqual(r,{v:14,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
   }finally{ w.close(); }
 });
 

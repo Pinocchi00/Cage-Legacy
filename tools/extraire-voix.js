@@ -23,7 +23,8 @@ const fermeBloc=()=>{
     const m=/^\*\*(.+?)\*\*\s*—\s*([\s\S]*)$/.exec(texte);
     if(m){
       const etiquette=m[1].trim(), repl=nettoie(m[2]);
-      if(repl) courante.repliques.push({situation:slug(etiquette.split(',')[0]),etiquette,texte:repl,relu:false});
+      /* Brief du 06/10, lot 5 : l'organisation jouée n'est plus toujours Split — l'emplacement {org} la porte. */
+      if(repl) courante.repliques.push({situation:slug(etiquette.split(',')[0]),etiquette,texte:repl.replace(/\bSplit\b/g,'{org}'),relu:false});
     }
   }
   bloc=null;
