@@ -43,25 +43,25 @@ function mgmtPartieDate(ms,maintenant){
   return n===0?'Aujourd’hui':(n===1?'Hier':`Il y a ${n} jours`);
 }
 
+/** Un emplacement : un panneau du cadre (choisi à 100 %, les autres de côté à 30 %). */
 function mgmtPartieHtml(n,curseur,reg,maintenant){
   const m=mgmtSlotPeek(n), on=n===curseur;
-  const tete=nom=>`<span class="mgmt-partie-tete"><span class="mgmt-partie-num">Emplacement ${esc(n)}</span><span class="mgmt-partie-org">${esc(nom)}</span></span>`;
-  const go=texte=>on?`<span class="mgmt-partie-go">${esc(texte)}</span>`:'';
-  const ouvre=`<button type="button" class="mgmt-partie${on?' on':''}" aria-pressed="${on}" onclick="CL.mgmtPartieChoisir(${n})">`;
+  const tete=nom=>`<div class="mf-partie-tete"><div class="mf-partie-num">Emplacement ${esc(n)}</div><div class="mf-partie-org">${esc(nom)}</div></div>`;
+  const pied=texte=>on?`<div class="mf-partie-pied">${mfBouton(texte,{touche:'Entrée',jaune:true,onclick:'CL.mgmtPartieOuvrir()'})}</div>`:'';
+  const attr=`role="button" tabindex="0" aria-pressed="${on}" aria-label="Emplacement ${esc(n)}" onclick="CL.mgmtPartieChoisir(${n})"`;
+  let corps;
   if(!m){
-    return ouvre+tete('Vide')+`<span class="mgmt-partie-corps"><span><span class="mgmt-partie-sur">Ici, tu peux lancer</span>`
-      +`<span class="mgmt-partie-grand" style="display:block">Une nouvelle partie</span></span>`
-      +`<span class="mgmt-partie-note">Chaque partie crée un effectif neuf : les noms, les palmarès, les classements.</span>`
-      +go('Nouvelle partie')+`</span></button>`;
+    corps=tete('Vide')+`<div class="mf-partie-corps"><div><div class="mf-partie-sur">Ici, tu peux lancer</div><div class="mf-partie-vide">Une nouvelle<br>partie</div></div>`
+      +`<div class="mf-partie-note">Chaque partie crée un effectif neuf :<br>les noms, les palmarès, les classements.</div>`+pied('Nouvelle partie')+`</div>`;
+  }else{
+    const date=mgmtPartieDate(reg.dates[n],maintenant);
+    corps=tete(m.org)+`<div class="mf-partie-corps"><div style="display:flex;flex-direction:column;gap:12px"><div class="mf-partie-sur">La prochaine soirée</div>`
+      +`<div class="mf-partie-soiree"><span>${esc(m.org)} Fight Night</span><b>${esc(m.eventsPlayed+1)}</b></div></div>`
+      +`<div class="mf-partie-lignes">`+mfLigne('Soirées jouées',m.eventsPlayed)
+      +mfLigne('En caisse',(Number.isSafeInteger(m.treasury)?m.treasury:0)+' k$')
+      +(date?mfLigne('Jouée pour la dernière fois',date):'')+`</div>`+pied('Reprendre')+`</div>`;
   }
-  const date=mgmtPartieDate(reg.dates[n],maintenant);
-  const ligne=(k,v)=>`<span class="mgmt-partie-ligne"><span>${esc(k)}</span><strong>${esc(v)}</strong></span>`;
-  return ouvre+tete(m.org)+`<span class="mgmt-partie-corps"><span><span class="mgmt-partie-sur">La prochaine soirée</span>`
-    +`<span class="mgmt-partie-grand" style="display:block">${esc(m.org)} <b>${esc(m.eventsPlayed+1)}</b></span></span>`
-    +ligne('Soirées jouées',m.eventsPlayed)
-    +ligne('En caisse',(Number.isSafeInteger(m.treasury)?m.treasury:0)+' k$')
-    +(date?ligne('Jouée pour la dernière fois',date):'')
-    +go('Reprendre')+`</span></button>`;
+  return mfPanneau(corps,on?'choisi':'cote','mf-partie'+(on?' choisi':''),attr);
 }
 
 function scr_mgmt_parties(){
@@ -69,26 +69,24 @@ function scr_mgmt_parties(){
   if(!mgmtSlotValide(F.curseur)) F.curseur=1;
   const occupe=!!mgmtSlotPeek(F.curseur);
   if(F.effacer&&!mgmtSlotPeek(F.effacer)) F.effacer=0;
-  let corps;
+  let cartes='';
+  for(let n=1;n<=MGMT_SLOTS;n++) cartes+=mgmtPartieHtml(n,F.curseur,reg,maintenant);
+  let dialogue='', touches;
   if(F.effacer){
-    /* La phrase de confirmation n'est pas décidée (brief, « À trancher », lot 1) : le titre seul. */
+    /* La phrase de confirmation n'est pas décidée (brief, « À trancher », lot 1) : le titre et les faits. */
     const m=mgmtSlotPeek(F.effacer);
-    corps=`<div class="mgmt-parties-confirme" role="dialog" aria-label="Effacer la partie">`
-      +`<h3>Effacer la partie ?</h3><p class="mgmt-partie-note">Emplacement ${esc(F.effacer)} · ${esc(m.org)} · ${esc(m.eventsPlayed)} soirée${m.eventsPlayed>1?'s':''} jouée${m.eventsPlayed>1?'s':''}</p>`
-      +`<div><button type="button" onclick="CL.mgmtPartieEffacerAnnuler()">Échap · Garder</button>`
-      +`<button type="button" class="or" onclick="CL.mgmtPartieEffacerConfirmer()">Entrée · Effacer la partie</button></div></div>`;
+    dialogue=`<div class="mf-voile"></div><div class="mf-dialogue mgmt-parties-confirme" role="dialog" aria-label="Effacer la partie">`
+      +mfPanneau(`<div><div class="mf-dialogue-titre">EFFACER LA PARTIE ?</div><div class="mf-dialogue-trait"></div></div>`
+        +`<div class="mf-dialogue-texte">Emplacement ${esc(F.effacer)} · ${esc(m.org)} · ${esc(m.eventsPlayed)} soirée${m.eventsPlayed>1?'s':''} jouée${m.eventsPlayed>1?'s':''}</div>`
+        +`<div class="mf-dialogue-boutons">${mfBouton('Garder',{touche:'Échap',onclick:'CL.mgmtPartieEffacerAnnuler()'})}${mfBouton('Effacer la partie',{touche:'Entrée',jaune:true,onclick:'CL.mgmtPartieEffacerConfirmer()'})}</div>`,'choisi')+`</div>`;
+    touches=[{ks:['Échap'],t:'Garder la partie',onclick:'CL.mgmtPartieEffacerAnnuler()'},{ks:['Entrée'],t:'Effacer la partie',jaune:true,onclick:'CL.mgmtPartieEffacerConfirmer()'}];
   }else{
-    let cartes='';
-    for(let n=1;n<=MGMT_SLOTS;n++) cartes+=mgmtPartieHtml(n,F.curseur,reg,maintenant);
-    corps=`<div class="mgmt-parties-grille">${cartes}</div>`
-      +`<div class="mgmt-parties-touches">`
-      +`<button type="button" onclick="CL.mgmtLeave()"><kbd>Échap</kbd> Retour à l’accueil</button>`
-      +`<span><kbd>←</kbd> <kbd>→</kbd> Choisir</span>`
-      +(occupe?`<button type="button" onclick="CL.mgmtPartieEffacer()"><kbd>Suppr</kbd> Effacer la partie</button>`:'')
-      +`<button type="button" class="or" onclick="CL.mgmtPartieOuvrir()"><kbd>Entrée</kbd> ${occupe?'Reprendre':'Nouvelle partie'}</button></div>`;
+    touches=[{ks:['Échap'],t:'Retour à l’accueil',onclick:'CL.mgmtLeave()'},{ks:['←','→'],t:'Choisir'}]
+      .concat(occupe?[{ks:['Suppr'],t:'Effacer la partie',onclick:'CL.mgmtPartieEffacer()'}]:[])
+      .concat([{ks:['Entrée'],t:occupe?'Reprendre':'Nouvelle partie',jaune:true,onclick:'CL.mgmtPartieOuvrir()'}]);
   }
-  return `<div class="scr mgmt-wrap mgmt-parties"><div class="mgmt-head bar"><h2 class="disp">Management</h2>`
-    +`<span class="mgmt-week-event">Choisis une partie · ${esc(MGMT_SLOTS)} emplacements</span></div>${corps}</div>`;
+  return mfEcran(`<div class="mf-parties mgmt-parties">${cartes}</div>${dialogue}`,
+    {barre:'demarrage',plaque:'Management',libelle:'Choisis une partie',droite:MGMT_SLOTS+' emplacements',touches});
 }
 SCREENS.mgmt_parties=scr_mgmt_parties;
 

@@ -100,15 +100,15 @@ test('Emplacements — l’écran : un occupé montre l’organisation, la proch
   const win=newGameWindow({runMain:true});
   const r=result(win,`
     setSeed(5); CL.mgmtEnter(1); G.mgmt.treasury=64; G.mgmt.eventsPlayed=14; saveMgmt(); CL.mgmtLeave(); CL.mgmtParties();
-    const cartes=[...document.querySelectorAll('.mgmt-partie')].map(c=>c.textContent);
-    const boutons=()=>[...document.querySelectorAll('.mgmt-parties-touches button')].map(b=>b.textContent.trim());
+    const cartes=[...document.querySelectorAll('.mf-partie')].map(c=>c.textContent);
+    const boutons=()=>[...document.querySelectorAll('.mf-touches button')].map(b=>b.textContent.trim());
     const b1=boutons();
-    CL.mgmtPartieCurseur(1); const b2=boutons(); const go2=document.querySelector('.mgmt-partie.on .mgmt-partie-go').textContent;
-    const jaunes=document.querySelectorAll('.mgmt-partie-go').length;
+    CL.mgmtPartieCurseur(1); const b2=boutons(); const go2=document.querySelector('.mf-partie.choisi .mf-bouton-t').textContent;
+    const jaunes=document.querySelectorAll('.mf-parties .mf-bouton.jaune').length;
     return {cartes,b1,b2,go2,jaunes};`);
   assert.equal(r.cartes.length,3);
   for(const mot of ['Emplacement 1','Split','La prochaine soirée','15','Soirées jouées','14','En caisse','64 k$','Reprendre']) assert.ok(r.cartes[0].includes(mot),mot);
-  for(const c of [r.cartes[1],r.cartes[2]]){ assert.ok(c.includes('Vide')&&c.includes('Ici, tu peux lancer')&&c.includes('Une nouvelle partie')); assert.ok(!c.includes('Reprendre')&&!c.includes('En caisse')); }
+  for(const c of [r.cartes[1],r.cartes[2]]){ assert.ok(c.includes('Vide')&&c.includes('Ici, tu peux lancer')&&c.includes('Une nouvelle')&&c.includes('partie')); assert.ok(!c.includes('Reprendre')&&!c.includes('En caisse')); }
   assert.ok(r.b1.some(t=>t.includes('Effacer la partie'))&&r.b1.some(t=>t.includes('Reprendre')));
   assert.ok(!r.b2.some(t=>t.includes('Effacer'))&&!r.b2.some(t=>t.includes('Reprendre')),'un emplacement vide : ni reprise ni effacement');
   assert.equal(r.go2,'Nouvelle partie'); assert.equal(r.jaunes,1,'une seule action principale');
@@ -135,7 +135,7 @@ test('Emplacements — aucun effacement sans confirmation ; effacer le 2 ne touc
     CL.mgmtLeave(); CL.mgmtParties(); MGMT_PARTIES.curseur=2; render();
     const k=key=>keysHandle({key,preventDefault(){}});
     const un=localStorage.getItem(mgmtSlotKey(1)), trois=localStorage.getItem(mgmtSlotKey(3));
-    k('Delete'); const demande=[MGMT_PARTIES.effacer,!!mgmtSlotPeek(2),document.getElementById('app').textContent.includes('Effacer la partie ?')];
+    k('Delete'); const demande=[MGMT_PARTIES.effacer,!!mgmtSlotPeek(2),document.getElementById('app').textContent.includes('EFFACER LA PARTIE ?')];
     k('ArrowRight'); const fige=MGMT_PARTIES.curseur;
     k('Escape'); const annule=[MGMT_PARTIES.effacer,!!mgmtSlotPeek(2),G.screen];
     k('Delete'); k('Enter');
