@@ -6,9 +6,9 @@
    Les « plus » et les « moins » sont ceux des maquettes, tels quels (le brief demande à
    Anthony s'ils sont les bons). La maquette ne nomme pas ses organisations 2 à 8 : elles sont
    ici dans l'ordre de la maquette, les quatre noms que le code connaissait (MGMT_EXT_ORGS,
-   par prestige croissant) sur les emplacements 2 à 5, puis les trois noms que seul Anthony
-   donne — [ORGANISATION 6] à [ORGANISATION 8], marqués auteur:true, REMPLACEMENT SEUL À FAIRE
-   dans ce fichier. L'ASSIGNATION des profils à ces noms n'est écrite nulle part : c'est un trou
+   par prestige croissant) sur les emplacements 2 à 5, puis les trois noms
+   donnés par Anthony le 06/10 : Knuckle Gate, Pure Impact, Undisputed Cage (dans l'ordre présenté).
+   ... L'ASSIGNATION des profils à ces noms n'est écrite nulle part : c'est un trou
    de spécification, signalé, pas une décision.
    Le PROFIL règle la création du monde (caisse de départ, taille et âge de l'effectif, catégories
    fortes et faibles) ; popularité, taille des salles, niveau des bourses et entente des camps
@@ -30,14 +30,14 @@ const MGMT_ORGANISATIONS=[
   {id:'fighting-pacific-championship',nom:'Fighting Pacific Championship',auteur:false,relu:false,
     plus:['Des champions installés','Un public fidèle'],moins:['Un effectif vieillissant','Des contrats longs'],
     profil:{caisse:60,effectif:1,age:3,popularite:60,salles:1,bourses:1,fortes:[],faibles:[],entente:0.7}},
-  {id:'organisation-6',nom:'[ORGANISATION 6]',auteur:true,relu:false,
+  {id:'organisation-6',nom:'Knuckle Gate',auteur:false,relu:false,
     plus:['Les meilleures combattantes','Une image forte'],moins:['Peu d’hommes classés','Une caisse moyenne'],
     profil:{caisse:35,effectif:1,age:0,popularite:55,salles:1,bourses:1,fortes:['F-straw','F-fly','F-bantam','F-feather'],
       faibles:['H-fly','H-bantam','H-feather','H-light','H-welter','H-middle','H-lheavy','H-heavy'],entente:0.7}},
-  {id:'organisation-7',nom:'[ORGANISATION 7]',auteur:true,relu:false,
+  {id:'organisation-7',nom:'Pure Impact',auteur:false,relu:false,
     plus:['Beaucoup d’argent','Des salles neuves'],moins:['Aucune histoire','Un public à gagner'],
     profil:{caisse:120,effectif:1,age:0,popularite:20,salles:1.2,bourses:1,fortes:[],faibles:[],entente:0.7}},
-  {id:'organisation-8',nom:'[ORGANISATION 8]',auteur:true,relu:false,
+  {id:'organisation-8',nom:'Undisputed Cage',auteur:false,relu:false,
     plus:['Les meilleurs poids lourds','Des soirées attendues'],moins:['Les petites catégories vides','Des camps en conflit'],
     profil:{caisse:50,effectif:1,age:0,popularite:60,salles:1,bourses:1,fortes:['H-heavy','H-lheavy'],
       faibles:['H-fly','F-straw','F-fly','F-bantam','F-feather'],entente:0.3}},

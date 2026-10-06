@@ -8,15 +8,15 @@ const {newGameWindow}=require('./helpers/loadGame');
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
 const touche=(win,key)=>win.eval(`keysHandle({key:${JSON.stringify(key)},preventDefault(){}})`);
 
-test('Organisations — huit, chacune avec deux plus et deux moins ; les trois noms d’auteur restent des emplacements', () => {
+test('Organisations — huit, chacune avec deux plus et deux moins ; les trois derniers noms sont ceux d’Anthony', () => {
   const win=newGameWindow();
   const r=result(win,`return {n:MGMT_ORGANISATIONS.length,ids:new Set(MGMT_ORGANISATIONS.map(o=>o.id)).size,noms:new Set(MGMT_ORGANISATIONS.map(o=>o.nom)).size,
     plus:MGMT_ORGANISATIONS.every(o=>o.plus.length===2&&o.moins.length===2),auteur:MGMT_ORGANISATIONS.filter(o=>o.auteur).map(o=>o.nom),
     connus:MGMT_ORGANISATIONS.filter(o=>!o.auteur).map(o=>o.nom),ext:MGMT_EXT_ORGS,premier:MGMT_ORGANISATIONS[0].nom,
     profils:MGMT_ORGANISATIONS.every(o=>['caisse','effectif','age','popularite','salles','bourses','fortes','faibles','entente'].every(k=>k in o.profil))};`);
   assert.equal(r.n,8); assert.equal(r.ids,8); assert.equal(r.noms,8); assert.ok(r.plus); assert.ok(r.profils);
-  assert.deepEqual(r.auteur,['[ORGANISATION 6]','[ORGANISATION 7]','[ORGANISATION 8]'],'les trois noms qu’Anthony donne ne sont pas inventés');
-  assert.deepEqual(r.connus,['Split',...r.ext],'Split et les quatre noms que le code connaissait'); assert.equal(r.premier,'Split');
+  assert.deepEqual(r.auteur,[],'plus aucun emplacement d’auteur : les trois derniers noms sont ceux d’Anthony');
+  assert.deepEqual(r.connus,['Split',...r.ext,'Knuckle Gate','Pure Impact','Undisputed Cage'],'Split, les quatre noms du code, puis les trois d’Anthony dans l’ordre'); assert.equal(r.premier,'Split');
 });
 
 test('Organisations — « Choisis une partie » : Entrée sur un emplacement vide ouvre le choix, jamais la partie', () => {

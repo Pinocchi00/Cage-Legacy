@@ -62,7 +62,7 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   assert.equal(win.document.querySelectorAll('.mgmt-nav').length, 1, 'la barre de navigation est présente');
   const navs = [...win.document.querySelectorAll('.mgmt-nav button')].map(b=>b.textContent);
   /* Lot 5 H8 : le vestiaire rejoint la navigation (maquette 11). */
-  assert.deepEqual(navs, ['Semaine','Vestiaire','Recrutement','Classements','Organisation'], 'les entrées de navigation suivent les écrans livrés');
+  assert.deepEqual(navs, ['Semaine','Effectif','Recrutement','Classements','Organisation'], 'les entrées de navigation suivent les écrans livrés');
   /* L'entrée courante (aria-current) se distingue : ici l'Organisation. */
   const courant = win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]');
   assert.equal(courant.length, 1, 'une seule entrée courante');

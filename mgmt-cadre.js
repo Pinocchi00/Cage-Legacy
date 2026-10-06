@@ -51,7 +51,7 @@ function mfLogoHtml(){
 const MF_SECTIONS=[
   {id:'carte',libelle:'Carte',ecran:'mgmt_carte'},
   {id:'preliminaires',libelle:'Préliminaires',ecran:'mgmt_bureau'},
-  {id:'effectif',libelle:'Effectif',ecran:'mgmt_vestiaire'},
+  {id:'effectif',libelle:'Effectif',ecran:'mgmt_effectif'},
   {id:'classements',libelle:'Classements',ecran:'mgmt_classements'},
   {id:'ceintures',libelle:'Ceintures',ecran:null},
   {id:'contrats',libelle:'Contrats',ecran:'mgmt_recrutement'},
@@ -62,7 +62,7 @@ const MF_SECTIONS=[
   {id:'finances',libelle:'Finances',ecran:'mgmt_organisation'},
 ];
 /** L'écran ouvert → la section qu'il éclaire dans la barre. */
-const MF_ECRAN_SECTION={mgmt_carte:'carte',mgmt_bureau:'preliminaires',mgmt_vestiaire:'effectif',mgmt_classements:'classements',
+const MF_ECRAN_SECTION={mgmt_carte:'carte',mgmt_bureau:'preliminaires',mgmt_effectif:'effectif',mgmt_classements:'classements',
   mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats'};
 
 /** La section que l'écran courant éclaire ; une fiche éclaire celle d'où on l'a ouverte. */
