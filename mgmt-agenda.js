@@ -23,6 +23,7 @@ function mgmtAgendaActif(m){ return !!(m&&m.cal&&m.cal.actif===true); }
 /** Crée l'agenda d'une partie neuve : aujourd'hui est le jour 0, rien n'est posé. */
 function mgmtAgendaInit(m){
   m.cal={actif:true,jour:0,vieJour:0,prochaines:[],faites:[]};
+  mgmtSallesInit(m);
   return m.cal;
 }
 
@@ -32,6 +33,7 @@ function mgmtAgendaActiver(m){
   if(!m||!m.cal||m.cal.actif!==false) return false;
   const j=Math.max(0,(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0))*MGMT_EVENT_WEEKS*7;
   m.cal={actif:true,jour:j,vieJour:j,prochaines:[],faites:[]};
+  mgmtSallesInit(m);
   return true;
 }
 
@@ -64,9 +66,10 @@ function mgmtAgendaMois(jour){
 }
 
 /** Une soirée peut-elle se poser là, de cette taille ? Pur. @returns {{ok:boolean,raison?:string}} */
-function mgmtAgendaVerifier(m,jour,taille){
+function mgmtAgendaVerifier(m,jour,taille,salle){
   if(!mgmtAgendaActif(m)) return {ok:false,raison:'inactif'};
   if(!Number.isSafeInteger(jour)||!MGMT_AGENDA_TAILLES.includes(taille)) return {ok:false,raison:'invalide'};
+  if(salle!==undefined&&salle!==null&&!mgmtSalleParId(m,salle)) return {ok:false,raison:'salle'};
   const c=m.cal;
   if(jour<=c.jour) return {ok:false,raison:'passee'};
   if(c.prochaines.some(x=>x.jour===jour)) return {ok:false,raison:'occupee'};
@@ -81,10 +84,11 @@ function mgmtAgendaVerifier(m,jour,taille){
 }
 
 /** Pose une soirée. @returns {{ok:boolean,raison?:string}} */
-function mgmtAgendaPoser(m,jour,taille){
-  const v=mgmtAgendaVerifier(m,jour,taille); if(!v.ok) return v;
+function mgmtAgendaPoser(m,jour,taille,salle){
+  const v=mgmtAgendaVerifier(m,jour,taille,salle); if(!v.ok) return v;
   const c=m.cal;
-  c.prochaines.push({jour,taille});
+  const lieu=salle||(mgmtSalleDefaut(m)||{}).id;
+  c.prochaines.push(lieu?{jour,taille,salle:lieu}:{jour,taille});
   c.prochaines.sort((a,b)=>a.jour-b.jour);
   mgmtAgendaSynchroCarte(m);
   return {ok:true};
@@ -149,7 +153,7 @@ function mgmtAgendaJouer(m){
   if(!ev){ c.jour=avant; return null; }
   mgmtAdvanceRosterAges(m);
   c.prochaines.shift();
-  c.faites.push({n:m.eventsPlayed,jour:p.jour,taille:p.taille});
+  c.faites.push(p.salle?{n:m.eventsPlayed,jour:p.jour,taille:p.taille,salle:p.salle}:{n:m.eventsPlayed,jour:p.jour,taille:p.taille});
   while(c.faites.length>24) c.faites.shift();
   return ev;
 }
@@ -176,7 +180,7 @@ function mgmtAgendaValide(c){
   if(!c.actif) return true;
   if(!Number.isSafeInteger(c.jour)||c.jour<0||!Number.isSafeInteger(c.vieJour)||c.vieJour<0||c.vieJour>c.jour) return false;
   if(!Array.isArray(c.prochaines)||!Array.isArray(c.faites)) return false;
-  for(const p of c.prochaines){ if(!p||!Number.isSafeInteger(p.jour)||!MGMT_AGENDA_TAILLES.includes(p.taille)) return false; }
+  for(const p of c.prochaines){ if(!p||!Number.isSafeInteger(p.jour)||!MGMT_AGENDA_TAILLES.includes(p.taille)||(p.salle!==undefined&&typeof p.salle!=='string')) return false; }
   for(const f of c.faites){ if(!f||!Number.isSafeInteger(f.n)||f.n<1||!Number.isSafeInteger(f.jour)||f.jour<0||!MGMT_AGENDA_TAILLES.includes(f.taille)) return false; }
   return true;
 }

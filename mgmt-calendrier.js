@@ -45,6 +45,14 @@ function mgmtCalendrierSoiree(m,n){
   const actif=mgmtAgendaActif(m);
   return {n,jour,taille:t,passee:n<cur,encours:n===cur&&(!actif||jour!==null),posee:jour!==null};
 }
+/** Le lieu d'une soirée : le nom de sa salle, ou « LIEU À CHOISIR » avant l'agenda. */
+function mgmtCalendrierLieu(m,n){
+  const c=m.cal, i=n-((m.eventsPlayed||0)+1);
+  let id=null;
+  if(c&&c.actif){ const f=(c.faites||[]).find(x=>x.n===n); id=f?f.salle:(i>=0&&c.prochaines[i]?c.prochaines[i].salle:null); }
+  const s=id?mgmtSalleParId(m,id):null;
+  return s?s.nom.toUpperCase():'LIEU À CHOISIR';
+}
 function mgmtCalendrierTailleTexte(t){ return t==='grosse'?'GROSSE · 13 COMBATS':(t==='petite'?'PETITE · 9 COMBATS':''); }
 
 function mgmtCalendrierCarteLaterale(m,n,passee){
@@ -54,7 +62,7 @@ function mgmtCalendrierCarteLaterale(m,n,passee){
   const resume=passee?mgmtCalendrierResume(m,n):null;
   const corps=passee
     ?`<div class="mf-cal-lib">Le combat principal</div><div class="mf-cal-texte">${esc(resume||'Pas de trace de ce combat.')}</div>`
-    :`<div class="mf-cal-lib">Le lieu</div><div class="mf-cal-texte"><span class="mf-cal-pastille"></span>À choisir</div>`;
+    :`<div class="mf-cal-lib">Le lieu</div><div class="mf-cal-texte">${mgmtCalendrierLieu(m,n)==='LIEU À CHOISIR'?'<span class="mf-cal-pastille"></span>À choisir':esc(mgmtCalendrierLieu(m,n))}</div>`;
   return `<div class="mf-cal-lat"><div><div class="mf-cal-lat-d">${esc(d.jour)} ${esc(d.mois)}</div><div class="mf-cal-lat-n">${esc(nom)}</div></div>`
     +`<div class="mf-cal-lat-num">${n}<span>${passee?'PASSÉE':'DANS<br>'+jours+' JOURS'}</span></div>${corps}`
     +`<button type="button" class="mf-cal-fleche" aria-label="${passee?'Soirée précédente':'Soirée suivante'}" onclick="CL.mgmtCalendrierVa(${passee?-1:1})">${passee?'←':'→'}</button></div>`;
@@ -66,13 +74,16 @@ const MGMT_CAL_RAISONS={passee:'Cette date est passée.',occupee:'Une soirée es
 /** Le panneau central de pose : la date, la taille, ce qui l'empêche. */
 function mgmtCalendrierPoseHtml(m){
   const P=MGMT_CALENDRIER.pose, d=mgmtJourDate(P.jour);
-  const r=mgmtAgendaVerifier(m,P.jour,P.taille);
+  const r=mgmtAgendaVerifier(m,P.jour,P.taille,P.salle);
+  const salle=mgmtSalleParId(m,P.salle), plafond=mgmtPopPlafond(m.pop);
+  const lieu=salle?`${esc(salle.nom)} · ${esc(salle.capacite)} places${salle.capacite>plafond*1.25?' · plus grande que ce que le public remplit':''}`:'';
   const taille=t=>`<button type="button" class="mf-onglet${P.taille===t?' ouvert':''}" onclick="CL.mgmtCalendrierPoseTaille('${t}')">${t==='grosse'?'GROSSE · 13':'PETITE · 9'}</button>`;
   return `<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">POSER UNE SOIRÉE</div><div class="mf-cal-nom">${esc(d.jour)} ${esc(d.mois)}</div></div>`
     +`<div class="mf-cal-gros">${P.jour-m.cal.jour}<span>JOURS</span></div></div>`
     +`<div class="mf-cal-corps"><div class="mf-cal-lib">Taille</div><div class="mf-fiche-onglets">${taille('petite')}${taille('grosse')}</div>`
+    +`<div class="mf-cal-lib">Salle</div><div class="mf-cal-texte">${lieu}</div>`
     +`<div class="mf-cal-texte">${r.ok?'La date est libre.':esc(MGMT_CAL_RAISONS[r.raison]||'Impossible.')}</div>`
-    +`<div class="mf-cal-pied"><span class="mf-cal-manque">← → un jour · ↑ ↓ une semaine · T la taille</span>`
+    +`<div class="mf-cal-pied"><span class="mf-cal-manque">← → un jour · ↑ ↓ une semaine · T la taille · V la salle</span>`
     +mfBouton('Poser la soirée',{touche:'Entrée',jaune:true,onclick:'CL.mgmtCalendrierPoseValider()'})+`</div></div></div>`;
 }
 
@@ -98,7 +109,7 @@ function scr_mgmt_calendrier(){
         :`<div class="mf-cal-texte">Rien n’est encore posé pour cette soirée.</div>`);
     const boutons=(encours?mfBouton('Ouvrir la carte',{touche:actif&&pret?'':'Entrée',jaune:!pret,onclick:"CL.go('mgmt_carte')"}):'')
       +(encours&&actif&&pret?mfBouton('Jouer la soirée',{touche:'Entrée',jaune:true,onclick:'CL.mgmtCalendrierJouer()'}):'');
-    centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">${esc(d.jour)} ${esc(d.mois)} · LIEU À CHOISIR${s.taille?' · '+esc(mgmtCalendrierTailleTexte(s.taille)):''}</div><div class="mf-cal-nom">${esc(nom.toUpperCase())}</div></div>`
+    centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">${esc(d.jour)} ${esc(d.mois)} · ${esc(mgmtCalendrierLieu(m,n))}${s.taille?' · '+esc(mgmtCalendrierTailleTexte(s.taille)):''}</div><div class="mf-cal-nom">${esc(nom.toUpperCase())}</div></div>`
       +`<div class="mf-cal-gros">${n}<span>${joues?'JOUÉE':(jours<=0?'CE SOIR':'DANS '+jours+' JOURS')}</span></div></div>`
       +`<div class="mf-cal-corps"><div class="mf-cal-lib">${joues?'Le combat principal':'Où en est la soirée'}</div>${etat}`
       +`<div class="mf-cal-pied">${encours&&c.manque?`<span class="mf-cal-manque">Il manque ${c.manque} combat${c.manque>1?'s':''}</span>`:'<span></span>'}<div class="mf-car-boutons">${boutons}</div></div></div></div>`;
@@ -109,7 +120,7 @@ function scr_mgmt_calendrier(){
   const lateral=!F.pose?mgmtCalendrierCarteLaterale(m,n+1,false):'<div class="mf-cal-lat vide"></div>';
   const contenu=`<main class="mf-contenu mf-calendrier"><div class="mf-cal-trois">${n>1&&!F.pose?mgmtCalendrierCarteLaterale(m,n-1,true):'<div class="mf-cal-lat vide"></div>'}${centre}${lateral}</div><div class="mf-cal-onglets">${onglets.join('')}</div></main>`;
   const touches=F.pose
-    ?[{ks:['Échap'],t:'Annuler',onclick:'CL.mgmtCalendrierPoseFermer()'},{ks:['←','→'],t:'Un jour'},{ks:['↑','↓'],t:'Une semaine'},{ks:['T'],t:'Taille',onclick:'CL.mgmtCalendrierPoseTaille()'},
+    ?[{ks:['Échap'],t:'Annuler',onclick:'CL.mgmtCalendrierPoseFermer()'},{ks:['←','→'],t:'Un jour'},{ks:['↑','↓'],t:'Une semaine'},{ks:['T'],t:'Taille',onclick:'CL.mgmtCalendrierPoseTaille()'},{ks:['V'],t:'Salle',onclick:'CL.mgmtCalendrierPoseSalle()'},
       {ks:['Entrée'],t:'Poser la soirée',jaune:true,onclick:'CL.mgmtCalendrierPoseValider()'}]
     :[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Autre soirée'},{ks:['A','E'],t:'Section'}]
       .concat(actif?[{ks:['P'],t:'Poser',onclick:'CL.mgmtCalendrierPoseOuvrir()'},{ks:['L'],t:'Laisser passer',onclick:'CL.mgmtCalendrierPasser()'}]:[])
@@ -143,14 +154,19 @@ Object.assign(CL,{
   mgmtCalendrierPoseOuvrir(){
     const m=G.mgmt; if(!mgmtAgendaActif(m)) return;
     const dernier=m.cal.prochaines.length?m.cal.prochaines[m.cal.prochaines.length-1].jour:m.cal.jour;
-    MGMT_CALENDRIER.pose={jour:dernier+MGMT_EVENT_WEEKS*7,taille:'petite'}; render();
+    MGMT_CALENDRIER.pose={jour:dernier+MGMT_EVENT_WEEKS*7,taille:'petite',salle:(mgmtSalleDefaut(m)||{}).id}; render();
   },
   mgmtCalendrierPoseFermer(){ MGMT_CALENDRIER.pose=null; render(); },
   mgmtCalendrierPoseBouge(delta){ const P=MGMT_CALENDRIER.pose; if(!P) return; P.jour=Math.max(G.mgmt.cal.jour+1,P.jour+delta); render(); },
   mgmtCalendrierPoseTaille(t){ const P=MGMT_CALENDRIER.pose; if(!P) return; P.taille=(t==='grosse'||t==='petite')?t:(P.taille==='petite'?'grosse':'petite'); render(); },
+  /** V : la salle suivante, des petites aux grandes. */
+  mgmtCalendrierPoseSalle(){
+    const m=G.mgmt, P=MGMT_CALENDRIER.pose; if(!P||!m.salles||!m.salles.length) return;
+    const i=m.salles.findIndex(s=>s.id===P.salle); P.salle=m.salles[(i+1)%m.salles.length].id; render();
+  },
   mgmtCalendrierPoseValider(){
     const m=G.mgmt, P=MGMT_CALENDRIER.pose; if(!P) return;
-    if(mgmtAgendaPoser(m,P.jour,P.taille).ok){
+    if(mgmtAgendaPoser(m,P.jour,P.taille,P.salle).ok){
       const i=m.cal.prochaines.findIndex(x=>x.jour===P.jour);
       MGMT_CALENDRIER.pose=null; MGMT_CALENDRIER.n=m.eventsPlayed+1+i; saveMgmt();
     }
@@ -170,6 +186,8 @@ keysRegister('mgmt_calendrier',{
   Enter(){ CL.mgmtCalendrierEntree(); },
   p(){ CL.mgmtCalendrierPoseOuvrir(); },
   P(){ CL.mgmtCalendrierPoseOuvrir(); },
+  v(){ CL.mgmtCalendrierPoseSalle(); },
+  V(){ CL.mgmtCalendrierPoseSalle(); },
   t(){ CL.mgmtCalendrierPoseTaille(); },
   T(){ CL.mgmtCalendrierPoseTaille(); },
   l(){ if(!MGMT_CALENDRIER.pose) CL.mgmtCalendrierPasser(); },
