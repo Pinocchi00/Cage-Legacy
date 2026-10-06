@@ -57,7 +57,7 @@ function scr_title(){
            aucune phrase d'exemple de la maquette. ==== -->
       <nav class="title-modes" aria-label="Modes de jeu">
         <!-- ==== [ANCRE: MGMT_LOT1_ENTREE] — même entrée validée. ==== -->
-        <button class="title-mode title-management" onclick="CL.mgmtEnter()"><strong>Management</strong><span>${esc(management)}</span></button>
+        <button class="title-mode title-management" onclick="CL.mgmtParties()"><strong>Management</strong><span>${esc(management)}</span></button>
         <button class="title-mode" onclick="CL.go('intro')"><strong>Carrière</strong><span>Montez les échelons, un combat à la fois</span></button>
         <button class="title-mode" onclick="CL.duelEnter()"><strong>Duel entre amis</strong><span>Affronte deux légendes de ton Panthéon</span></button>
         <button class="title-mode" onclick="CL.go('hof')"><strong>Panthéon</strong><span>Toutes les légendes retraitées</span></button>
@@ -67,20 +67,15 @@ function scr_title(){
     ${m?`<aside class="title-aside" aria-label="Partie management">
       ${titleMgmtLastEvent(m)}
       ${upcoming.length?`<section class="title-upcoming"><h2>Ce qui t'attend</h2><p>${upcoming.map(esc).join('<br>')}</p></section>`:''}
-      <button class="title-resume" onclick="CL.mgmtEnter()"><span>Reprendre</span></button>
+      <button class="title-resume" onclick="CL.mgmtEnter(mgmtSlotDernier()||1)"><span>Reprendre</span></button>
     </aside>`:''}
   </div></div>`;
 }
 
 function titleMgmtState(){
-  if(G&&G.mgmt&&validateMgmt(G.mgmt)) return G.mgmt;
-  try{
-    for(const key of [MGMT_KEY,MGMT_BACKUP_KEY]){
-      const m=mgmtParseAndValidate(localStorage.getItem(key));
-      if(m) return m;
-    }
-  }catch(e){}
-  return null;
+  /* Brief lot 1 : l'accueil lit la dernière partie jouée, sans rien écrire. */
+  const n=mgmtSlotDernier();
+  return n?mgmtSlotPeek(n):null;
 }
 
 function titleMgmtUpcoming(m){

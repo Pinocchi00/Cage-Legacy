@@ -295,7 +295,8 @@ function validateMgmt(raw){
       /* Lot 5 H7 : demandes, promesses, refus et décisions contraires — des faits, rien de dérivé. */
       if(!mgmtValidId(f.a)||!Number.isSafeInteger(f.c)||f.c<0||f.c>raw.cycle) return false;
       if((f.k==='demande'||f.k==='promesse')&&(typeof f.want!=='string'||!MGMT_DEMANDES[f.want])) return false;
-      if(f.target!==undefined&&!mgmtValidId(f.target)) return false;
+      /* target:null est toléré : des parties enregistrées entre le 03/10 et le 06/10 en portent (H10, deuxième groupe). */
+      if(f.target!==undefined&&f.target!==null&&!mgmtValidId(f.target)) return false;
       if(f.k==='promesse'&&(!Number.isSafeInteger(f.due)||f.due<f.c||!Number.isSafeInteger(f.d))) return false;
       if(f.k==='refus'&&!Number.isSafeInteger(f.d)) return false;
       if(f.k==='contrarie'&&(!Number.isSafeInteger(f.p)||f.p<10||f.p>30||(f.why!=='titre'&&f.why!=='jeune'&&f.why!=='coequipier'&&f.why!=='fratrie'))) return false;
@@ -537,6 +538,76 @@ function mgmtParseAndValidate(raw){
   catch(e){ return null; }
 }
 
+/* ==== [ANCRE: MGMT_BRIEF_LOT1_EMPLACEMENTS] — Brief du 06/10/2026, lot 1 : les
+   trois emplacements. L'emplacement 1 garde la clé historique (MGMT_KEY et son
+   secours) : aucune donnée n'est déplacée, la partie d'avant le lot y est déjà.
+   Les emplacements 2 et 3 ont leur clé et leur secours. saveMgmt, loadMgmt et
+   hasMgmt travaillent sur l'emplacement ACTIF. Le format d'une partie ne
+   change pas (MGMT_SAVE_VERSION inchangé). Un petit registre, hors de l'état
+   de la partie, garde la dernière partie jouée et la date du dernier
+   enregistrement de chaque emplacement ; absent ou illisible, il ne fait
+   rien planter : la date ne s'affiche pas. ==== */
+const MGMT_SLOTS=3;
+const MGMT_REGISTRE_KEY=MGMT_KEY+'-registre';
+let MGMT_SLOT=1;
+
+function mgmtSlotValide(n){ return Number.isSafeInteger(n)&&n>=1&&n<=MGMT_SLOTS; }
+/** La clé d'un emplacement : l'historique pour le 1, la sienne pour les autres. */
+function mgmtSlotKey(n){ return n===1?MGMT_KEY:MGMT_KEY+'-'+n; }
+function mgmtSlotBackupKey(n){ return mgmtSlotKey(n)+'_backup'; }
+
+/** Le registre : {dernier:1..3|null, dates:{'1':ms,…}}. Toujours une forme saine. */
+function mgmtRegistre(){
+  const out={dernier:null,dates:{}};
+  try{
+    const raw=JSON.parse(localStorage.getItem(MGMT_REGISTRE_KEY));
+    if(raw&&typeof raw==='object'&&!Array.isArray(raw)){
+      if(mgmtSlotValide(raw.dernier)) out.dernier=raw.dernier;
+      if(raw.dates&&typeof raw.dates==='object'){
+        for(let n=1;n<=MGMT_SLOTS;n++){ const d=raw.dates[n]; if(Number.isSafeInteger(d)&&d>0) out.dates[n]=d; }
+      }
+    }
+  }catch(e){}
+  return out;
+}
+function mgmtRegistreEcrit(reg){ try{ localStorage.setItem(MGMT_REGISTRE_KEY,JSON.stringify(reg)); }catch(e){} }
+
+/** La partie d'un emplacement, lue sur le disque sans rien écrire ni réparer
+ *  (secours compris) ; l'emplacement actif rend la partie en mémoire. */
+function mgmtSlotPeek(n){
+  if(!mgmtSlotValide(n)) return null;
+  if(n===MGMT_SLOT&&typeof G!=='undefined'&&G&&G.mgmt&&validateMgmt(G.mgmt)) return G.mgmt;
+  try{
+    for(const key of [mgmtSlotKey(n),mgmtSlotBackupKey(n)]){
+      const m=mgmtParseAndValidate(localStorage.getItem(key));
+      if(m) return m;
+    }
+  }catch(e){}
+  return null;
+}
+
+/** L'emplacement que « Reprendre » rouvre : le dernier joué s'il est encore
+ *  occupé, sinon le premier occupé, sinon null. */
+function mgmtSlotDernier(){
+  const d=mgmtRegistre().dernier;
+  if(d&&mgmtSlotPeek(d)) return d;
+  for(let n=1;n<=MGMT_SLOTS;n++){ if(mgmtSlotPeek(n)) return n; }
+  return null;
+}
+
+/** Efface un emplacement : sa clé, son secours, sa date. Les autres ne bougent pas. */
+function mgmtSlotEffacer(n){
+  if(!mgmtSlotValide(n)) return false;
+  try{ localStorage.removeItem(mgmtSlotKey(n)); localStorage.removeItem(mgmtSlotBackupKey(n)); }catch(e){}
+  const reg=mgmtRegistre();
+  delete reg.dates[n];
+  if(reg.dernier===n) reg.dernier=null;
+  mgmtRegistreEcrit(reg);
+  if(n===MGMT_SLOT&&typeof G!=='undefined'&&G) G.mgmt=null;
+  return true;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Persiste le bureau : le secours garde la dernière version connue-bonne,
  *  comme SAVE_KEY / SAVE_BACKUP_KEY (state-save.js). */
 function saveMgmt(){
@@ -546,21 +617,25 @@ function saveMgmt(){
        quand elle se sauvegarde. Le quota est rétabli dans l'état vivant
        avant sa sérialisation, jamais seulement dans la copie disque. */
     mgmtExteriorEnsure(G.mgmt);
-    const previous=localStorage.getItem(MGMT_KEY);
-    if(mgmtParseAndValidate(previous)) localStorage.setItem(MGMT_BACKUP_KEY,previous);
-    localStorage.setItem(MGMT_KEY,JSON.stringify(G.mgmt));
+    const cle=mgmtSlotKey(MGMT_SLOT);
+    const previous=localStorage.getItem(cle);
+    if(mgmtParseAndValidate(previous)) localStorage.setItem(mgmtSlotBackupKey(MGMT_SLOT),previous);
+    localStorage.setItem(cle,JSON.stringify(G.mgmt));
+    /* Brief lot 1 : la dernière partie jouée et la date de l'enregistrement, hors de la partie. */
+    const reg=mgmtRegistre(); reg.dernier=MGMT_SLOT; reg.dates[MGMT_SLOT]=Date.now(); mgmtRegistreEcrit(reg);
   }catch(e){}
 }
 
 /** Charge le bureau, secours inclus. @returns {boolean} */
 function loadMgmt(){
   try{
-    for(const key of [MGMT_KEY,MGMT_BACKUP_KEY]){
+    const cle=mgmtSlotKey(MGMT_SLOT), secours=mgmtSlotBackupKey(MGMT_SLOT);
+    for(const key of [cle,secours]){
       const candidate=mgmtParseAndValidate(localStorage.getItem(key));
       if(!candidate) continue;
       G.mgmt=mgmtRepair(candidate);
-      if(key===MGMT_BACKUP_KEY){
-        try{ localStorage.setItem(MGMT_KEY,JSON.stringify(G.mgmt)); }catch(e){}
+      if(key===secours){
+        try{ localStorage.setItem(cle,JSON.stringify(G.mgmt)); }catch(e){}
       }
       return true;
     }
@@ -570,8 +645,8 @@ function loadMgmt(){
 
 function hasMgmt(){
   try{
-    if(mgmtParseAndValidate(localStorage.getItem(MGMT_KEY))) return true;
-    if(mgmtParseAndValidate(localStorage.getItem(MGMT_BACKUP_KEY))) return true;
+    if(mgmtParseAndValidate(localStorage.getItem(mgmtSlotKey(MGMT_SLOT)))) return true;
+    if(mgmtParseAndValidate(localStorage.getItem(mgmtSlotBackupKey(MGMT_SLOT)))) return true;
   }catch(e){}
   return false;
 }

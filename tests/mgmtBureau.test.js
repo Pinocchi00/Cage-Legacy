@@ -1090,7 +1090,8 @@ test('MGMT lot 4 — palette et fond exacts de la maquette 02', () => {
 test('T8a accueil — partie absente : quatre entrées, aucune soirée ni attente inventée',()=>{
   const win=newGameWindow({runMain:true});
   const html=win.scr_title();
-  for(const action of ["CL.mgmtEnter()","CL.go('intro')","CL.duelEnter()","CL.go('hof')"]){
+  /* Brief du 06/10/2026, lot 1 (décision d'Anthony) : le bouton Management ouvre « Choisis une partie » (CL.mgmtParties) au lieu de lancer la partie. */
+  for(const action of ["CL.mgmtParties()","CL.go('intro')","CL.duelEnter()","CL.go('hof')"]){
     assert.ok(html.includes(action));
   }
   assert.ok(!html.includes('title-aside'));

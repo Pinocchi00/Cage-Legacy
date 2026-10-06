@@ -876,6 +876,33 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 .mgmt-retrait-parole,.mgmt-ld-parole,.mgmt-proposition-ligne{font-size:18px;font-weight:300;line-height:1.5;margin:6px 0}
 .mgmt-retrait-parole span,.mgmt-ld-parole span,.mgmt-proposition-ligne span{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:15px;font-weight:700;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-right:8px}
 .mgmt-proposition{margin:8px 0 14px}
+/* ==== [ANCRE: MGMT_BRIEF_LOT1_CSS_PARTIES] — Brief lot 1 : « Choisis une partie »,
+   composants de la charte actuelle (le lot 4 portera l'habillage du canvas). ==== */
+.mgmt-parties-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;align-items:center;margin-top:28px}
+.mgmt-partie{display:flex;flex-direction:column;min-height:560px;background:var(--mgmt-panel);border:2px solid var(--mgmt-edge);color:var(--mgmt-ink);text-align:left;padding:0;cursor:pointer;font:inherit}
+.mgmt-partie.on{min-height:640px;border-color:var(--mgmt-ink)}
+.mgmt-partie-tete{padding:20px 24px;background:var(--mgmt-plum-deep);display:flex;flex-direction:column;gap:10px}
+.mgmt-partie.on .mgmt-partie-tete{background:var(--mgmt-red)}
+.mgmt-partie-num{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:600;font-size:22px;letter-spacing:.06em;text-transform:uppercase}
+.mgmt-partie-org{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:64px;line-height:.8;text-transform:uppercase;overflow-wrap:anywhere}
+.mgmt-partie-corps{flex:1;display:flex;flex-direction:column;gap:18px;padding:24px}
+.mgmt-partie-sur{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:600;font-size:20px;letter-spacing:.04em;text-transform:uppercase;color:var(--mgmt-secondary);margin:0}
+.mgmt-partie-grand{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:40px;line-height:.95;text-transform:uppercase;margin:6px 0 0}
+.mgmt-partie-grand b{color:var(--mgmt-red)}
+.mgmt-partie-ligne{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;background:var(--mgmt-plum-deep);font-size:22px}
+.mgmt-partie-ligne strong{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:28px;text-transform:uppercase;white-space:nowrap}
+.mgmt-partie-note{font-size:22px;line-height:1.3;color:var(--mgmt-secondary);margin:0}
+.mgmt-partie-go{margin-top:auto;align-self:flex-start;background:var(--mgmt-yellow);color:var(--mgmt-plum-deep);font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:30px;text-transform:uppercase;padding:12px 20px}
+.mgmt-parties-touches{display:flex;flex-wrap:wrap;gap:28px;margin-top:26px;font-size:22px;align-items:center}
+.mgmt-parties-touches button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0}
+.mgmt-parties-touches kbd{border:2px solid currentColor;padding:4px 9px;font:inherit}
+.mgmt-parties-touches .or kbd{border-color:var(--mgmt-yellow);color:var(--mgmt-yellow)}
+.mgmt-parties-confirme{margin-top:28px;max-width:800px;background:var(--mgmt-panel);border:2px solid var(--mgmt-ink);padding:28px 32px;display:flex;flex-direction:column;gap:24px}
+.mgmt-parties-confirme h3{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:56px;line-height:.9;text-transform:uppercase;margin:0}
+.mgmt-parties-confirme div{display:flex;justify-content:space-between;gap:16px}
+.mgmt-parties-confirme button{font-family:'Saira Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:30px;text-transform:uppercase;padding:12px 20px;border:0;cursor:pointer;background:var(--mgmt-plum-deep);color:var(--mgmt-ink)}
+.mgmt-parties-confirme button.or{background:var(--mgmt-yellow);color:var(--mgmt-plum-deep)}
+/* ==== [FIN ANCRE] ==== */
 .mgmt-retrait-sortie{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:10px 14px;font-family:'Saira Condensed','Arial Narrow',sans-serif;font-size:18px;font-weight:600;letter-spacing:.04em;text-align:left;color:var(--text);background:none;border:1px solid var(--line);cursor:pointer}
 .mgmt-retrait-sortie:hover:not(:disabled){border-color:var(--gold)}
 .mgmt-retrait-sortie:disabled{opacity:.45;cursor:default}
@@ -1075,7 +1102,7 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <script src="ui-02-fight-prep-events.js?v=lot4t8a3"></script>
 <script src="ui-03-contracts-arcade-data.js?v=career7"></script>
 <script src="ui-05-fight-resolution.js?v=career7"></script>
-<script src="ui-06-career-screens.js?v=lot4t8b2"></script>
+<script src="ui-06-career-screens.js?v=b1"></script>
 <script src="ui-07-contracts-legacy-screens.js?v=lot4t8a1"></script>
 <script src="ui-08-controller-arena.js?v=lot4t8b1"></script>
 <!-- ui-09-arena.js : second découpage, ultérieur au split en 8 fichiers ci-
@@ -1115,15 +1142,15 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <script src="mgmt-ceintures.js?v=lot5t1r2"></script>
 <script src="mgmt-vie.js?v=lot5h7"></script>
 <script src="mgmt-attention.js?v=lot5h8"></script>
-<script src="mgmt-promesses.js?v=lot5h10c"></script>
+<script src="mgmt-promesses.js?v=b1"></script>
 <script src="mgmt-rivalites.js?v=lot5h10b"></script>
 <script src="mgmt-voix.js?v=lot5rq"></script>
 <script src="mgmt-camps.js?v=lot5t7"></script>
-<script src="mgmt-save.js?v=lot5h10c"></script>
+<script src="mgmt-save.js?v=b1"></script>
 <!-- ==== [ANCRE: MGMT_LOT4_T1_ECRANS] — Lot 4 T1 : ui-08 a posé CL/SCREENS,
      ui-11 a posé keysRegister ; les cinq écrans sont déclarés avant que le
      contrôleur commun les enregistre et étende CL. ==== -->
-<script src="mgmt-ecran-semaine.js?v=lot5rp"></script>
+<script src="mgmt-ecran-semaine.js?v=b1"></script>
 <script src="mgmt-ecran-carte.js?v=lot5rp"></script>
 <script src="mgmt-ecran-soiree.js?v=mgmt4t1"></script>
 <script src="mgmt-ecran-lendemain.js?v=lot5t3n"></script>
@@ -1136,9 +1163,10 @@ button.mgmt-cl-champion:focus-visible{outline:2px solid var(--mgmt-yellow);outli
 <script src="mgmt-recrutement.js?v=lot5t5"></script>
 <script src="mgmt-retraits.js?v=lot5t6b"></script>
 <script src="mgmt-scenarios.js?v=lot5h10c"></script>
+<script src="mgmt-emplacements.js?v=b1"></script>
 <script src="mgmt-medias.js?v=lot5rc"></script>
 <script src="mgmt-mouvement.js?v=lot5rp"></script>
-<script src="mgmt-screens.js?v=lot5rp"></script>
+<script src="mgmt-screens.js?v=b1"></script>
 <script src="arene-etat.js?v=lot5h3"></script>
 <script src="arene-vue.js?v=lot4fidelite05"></script>
 <script src="arene-ecran.js?v=lot4fidelite05"></script>

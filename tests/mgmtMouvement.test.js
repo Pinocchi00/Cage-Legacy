@@ -116,7 +116,8 @@ test('H9 — tout est échappé : nom, surnom, libellé ; une ancienne partie n�
 });
 
 test('H9 — le CSS : toute animation du mouvement vit sous prefers-reduced-motion:no-preference ; rien ne bouge sinon', () => {
-  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+  /* Fins de ligne normalisées : sous Windows, git écrit parfois index.html en CRLF et le motif ci-dessous cherche des LF. */
+  const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8').split('\r\n').join('\n');
   const a=html.indexOf('MGMT_LOT5_H9_CSS_MOUVEMENT'), b=html.indexOf('[FIN ANCRE]',a);
   const css=html.slice(a,b);
   const sans=css.replace(/@media\(prefers-reduced-motion:no-preference\)\{[\s\S]*?\n\}\n/,'');

@@ -244,7 +244,7 @@ function scr_mgmt_bureau(){
   if(!G||!G.mgmt){
     return `<div class="scr center intro"><div class="eyebrow gold">Split — Management</div>`
       +`<h2 class="disp">La semaine</h2><p class="lede">Le bureau n'est pas ouvert.</p>`
-      +`<button class="btn primary mt" onclick="CL.mgmtEnter()">Ouvrir le bureau</button></div>`;
+      +`<button class="btn primary mt" onclick="CL.mgmtEnter(MGMT_SLOT)">Ouvrir le bureau</button></div>`;
   }
   const m=G.mgmt, open=m.pile.filter(a=>a.status==='open');
   const sel=m.open?m.pile.find(a=>a.id===m.open):null;

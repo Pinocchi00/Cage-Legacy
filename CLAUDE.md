@@ -130,6 +130,7 @@ après le découpage de `mgmt-bureau.js` :
 | `SAVE_KEY` / `SAVE_BACKUP_KEY` | `state/state-save.js` (`'cage-legacy-v3'`) | Sauvegarde carrière + secours |
 | `SAVE_VERSION` | `state/state-migration.js` — **5** | Carrière : toute version ≠ 5 est refusée proprement (reset historique décidé) |
 | `MGMT_KEY` / `MGMT_BACKUP_KEY` | `mgmt-bureau.js` (`'cage-legacy-mgmt'`) ; lues par `saveMgmt`/`loadMgmt` dans `mgmt-save.js` | Sauvegarde management + secours, circuit séparé de la carrière |
+| `MGMT_SLOT`, `MGMT_SLOTS` | `mgmt-save.js` (`mgmtSlotKey`, `mgmtRegistre`) ; écran et changement d'emplacement dans `mgmt-emplacements.js` | **Trois emplacements** (brief du 06/10, lot 1). L'emplacement 1 garde la clé historique ; `saveMgmt`/`loadMgmt`/`hasMgmt` travaillent sur l'emplacement actif ; `CL.mgmtEnter()` sans argument ouvre le 1. Changer d'emplacement vide `G.mgmt` et les dix états d'interface. Registre à part (`cage-legacy-mgmt-registre`), hors du format de la partie |
 | `MGMT_SAVE_VERSION` | `mgmt-bureau.js` — **13** | Management : migration séquentielle sans perte jusqu'à 13 (12 → 13 : les effectifs, lot 5 H4 — `effectifs` 0 = partie d'avant, monde à 30 et carte 5 + 4 conservés ; 11 → 12 : l'origine et la génération de style, lot 5 H3 ; 10 → 11 : les ceintures, lot 5 T1 ; avant : `mgmtMigrate` — lot 3a le corps, lot 3B T1 l'argent, lot 2 T1 la carte, lot 3 T1 la trace, lot 2B T1 ter la récupération du corps, T2 bis le calendrier d'âge, T3 les départs, T3 bis l'entrée des fondateurs avant l'ouverture), v1 refusée |
 
 ## 5. Séparation des responsabilités
@@ -167,10 +168,10 @@ npm run check        # lint + lint:content + test — DOIT être vert avant tout
 npm run lint:content # linter de contenu narratif — inclus dans check depuis le lot 0 (17/09/2026)
 ```
 
-État au 03/10/2026 (`lot-5-rencontres-medias`, H1 à H10 + T2/T3 + médias + T5 + T6 + T7) : **592 tests, 592 passants,
+État au 06/10/2026 (`lot-b1-trois-emplacements`, lot 5 complet jusqu'à la PR 94 + lot 1 du brief du 06/10) : **603 tests, 603 passants,
 0 échec, 0 skip**. Les 4 anciens skip de `mgmtBureau.test.js` (trois sorties de
 carte incomplète et la carte réduite au-delà du plafond) sont devenus de vrais
-tests au lot 5 T6 (`mgmt-retraits.js`, QO-1 à QO-4 et QO-7). **35 fichiers dans
+tests au lot 5 T6 (`mgmt-retraits.js`, QO-1 à QO-4 et QO-7). **36 fichiers dans
 `tests/`**, dont `mgmtBureau.test.js` (58), `mgmtCard.test.js` (44),
 `mgmtEconomie.test.js` (15) et `mgmtSoiree.test.js` (11) pour le management,
 `regressionFixes.test.js` (75) et `duel.test.js` (28) pour la carrière.
@@ -201,6 +202,7 @@ sans citer la décision qui change le comportement attendu.
 
 | Document | Rôle |
 |---|---|
+| **Brief complet du 06/10/2026** (Claude Docs, hors dépôt) et canvas de maquettes « Autres écrans » | **La référence en cours : douze lots, dans l'ordre.** Les décisions d'Anthony priment, puis le canvas, puis le dépôt. `docs/BRIEF-06-10-LOT-1-LES-TROIS-EMPLACEMENTS.md` dit ce qui est livré pour le lot 1 (trois emplacements) et les écarts. Les lots 2 à 12 ne sont pas commencés |
 | `docs/VISION-MODE-MANAGEMENT.md` | Vision du mode management (16-17/09/2026). **Prime en cas de contradiction avec tout autre document.** |
 | `docs/AUDIT-17-09.md` | Audit du mode management (17/09/2026) : constats X/C/D/B/G/M/T, ordre des lots 0 à 5. Chaque constat attend la décision d'Anthony. |
 | `docs/CDC-MODE-MANAGEMENT.md` | Cahier des charges du management — fait foi sauf contradiction avec la vision ; sections périmées marquées en tête. |
