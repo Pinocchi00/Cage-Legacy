@@ -30,4 +30,4 @@ Champs **optionnels** `ct` et `libre` sur les lignes, `rg` sur les traces ; vali
 - **« Il le dit » / « la presse le relaie »** : des étiquettes fonctionnelles et deux faits, pas de texte de personnage.
 - **Les fins de contrat des huit organisations** sont modélisées par la rotation du marché, pas par un calendrier de contrats par organisation.
 - **Fins de contrat dans Finances** : la carte reste « — » (le suivi des contrats par date n'existe pas : un contrat se compte en combats).
-- Valeurs (prime, marge de refus, paliers, 4 sauts) : propositions `relu:false`. Aucun plafond d'effectif, aucune date limite, aucun débauchage en cours de contrat.
+- Valeurs (prime, marge de refus, paliers) : propositions `relu:false`. Aucun plafond d'effectif, aucune date limite, aucun débauchage en cours de contrat.
