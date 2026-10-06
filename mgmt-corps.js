@@ -605,6 +605,9 @@ function mgmtRunEvent(m){
   /* Carte réduite : l'attrait, donc l'audience et la recette, baisse (QO-7). */
   const attraction=mgmtCardAttraction(m,booked)*(reduite?MGMT_REDUITE_PENALITE:1);
   const purses=mgmtPurses(m,booked);
+  /* Lot 8 : la salle et le public se lisent sur la carte d'avant la soirée. */
+  const agenda=typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m);
+  const avantSalle=agenda?mgmtSallesAvant(m,booked):null;
   const fights=[];
   const touched=[];
   if(!Array.isArray(m.hist)) m.hist=[];
@@ -637,6 +640,7 @@ function mgmtRunEvent(m){
      seconde fois, et la recette nette le déduit. */
   const finance=mgmtEventRecette(attraction,mgmtSpectacle(fights),purses,fights.length,
     mgmtWinBonuses(m,booked,fights),m.card.sizeMain+m.card.sizePrelims);
+  if(agenda) mgmtSallesApplique(m,finance,fights,avantSalle);
   /* Un seul solde (QO-5) : T ← T + R. Remboursement « avant tout bénéfice »
      automatique — tant que T < 0, rien n'est bénéfice. E1 si et seulement
      si T < 0 avant la soirée et R > 0. */

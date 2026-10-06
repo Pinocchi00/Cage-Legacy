@@ -380,3 +380,22 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pre-voix{display:flex;flex-direction:column;gap:14px;margin-top:10px;overflow:hidden}
 .mf-pre-ouvrir{height:40px}
 .mf-cal-poser{background:var(--mf-ligne);border:2px dashed var(--mf-bord)}
+
+/* ---- Finances : six cartes, grand chiffre, deux lignes ------------------------------- */
+.mf-finances{position:relative}
+.mf-fin-grille{display:grid;grid-template-columns:repeat(3,508px);grid-template-rows:repeat(2,418px);gap:20px}
+.mf-fin-p{width:100%;height:100%;text-align:left}
+.mf-fin-p .mf-p3{padding:0;gap:0;height:100%;display:flex;flex-direction:column}
+.mf-fin-t{height:68px;flex:none;background:var(--mf-rouge);padding:0 20px;display:flex;align-items:center;font-family:var(--mf-titre);font-weight:800;font-size:44px;line-height:1;white-space:nowrap}
+.mf-fin-corps{padding:24px 20px 20px;display:flex;flex-direction:column;gap:20px;flex:1}
+.mf-fin-v{font-family:var(--mf-titre);font-weight:800;font-size:104px;line-height:.75;white-space:nowrap;padding-top:12px}
+.mf-fin-ls{display:flex;flex-direction:column;gap:10px;font-size:24px;line-height:1;color:var(--mf-texte2)}
+.mf-fin-barres{display:flex;gap:14px;align-items:flex-end;height:230px}
+.mf-fin-barre{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px}
+.mf-fin-b-v{font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:1}
+.mf-fin-b-h{width:100%;background:var(--mf-blanc)}
+.mf-fin-b-h.last{background:var(--mf-rouge-vif)}
+.mf-fin-b-n{font-size:22px;line-height:1;color:var(--mf-texte2)}
+.mf-fin-note{font-size:22px;line-height:1;color:var(--mf-texte2);margin-top:auto}
+.mf-fin-detail{width:1000px}
+.mf-fin-lignes{padding:20px;display:flex;flex-direction:column;gap:8px}
