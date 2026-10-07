@@ -264,12 +264,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-nouvelle-texte{font-size:24px;line-height:1.2;color:var(--mf-texte2)}
 .mf-org-avenir{display:flex;align-items:center;gap:14px;font-size:24px;line-height:1;color:var(--mf-texte2);opacity:.74;white-space:nowrap;margin-left:auto}
 
-/* Le mouvement : tout arrive vite et en biais, tout se pose droit. Rien ne bouge au repos, et rien
-   du tout si le système demande moins de mouvement. */
-@media (prefers-reduced-motion:no-preference){
-  .mf-entree .mf-panneau,.mf-entree .mf-ancien,.mf-entree .mf-accueil-gauche,.mf-entree .mf-affiche>*,.mf-entree .mf-dialogue{animation:mfEntre .22s cubic-bezier(.2,.9,.25,1) both}
-  @keyframes mfEntre{from{opacity:0;transform:translateX(-48px) skewX(-10deg)}to{opacity:1;transform:none}}
-}
+/* Le mouvement (planche « Le mouvement de l'interface ») : tout arrive vite et en biais, tout se pose droit, rien ne bouge au repos. Les gestes sont joués par
+   mgmt-animations.js (API d'animation du navigateur) ; ici, seulement la bande qui traverse l'écran et le masque du premier tiers du passage. */
+.mf-balayage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;pointer-events:none;z-index:60}
+.mf-balayage>[data-m="wipe"]{position:absolute;left:0;top:0;width:5000px;height:1080px;display:flex;transform:translateX(-5200px) skewX(-45deg);transform-origin:0 0;pointer-events:none}
+.mf-stage.mf-masque>*:not(.mf-fond):not(.mf-balayage){visibility:hidden}
 /* ==== [FIN ANCRE] ==== */
 
 /* ---- La Fiche : bannière et chiffres à gauche, cinq onglets à droite ------------ */

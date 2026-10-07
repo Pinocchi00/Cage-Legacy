@@ -23,6 +23,7 @@ const MGMT_OP_LIGNES={
     {cle:'plein',lib:'PLEIN ÉCRAN',aide:'Le jeu occupe tout l’écran, ou tient dans une fenêtre.',choix:[[true,'OUI'],[false,'NON']]},
     {cle:'taille',lib:'TAILLE DE L’IMAGE',aide:'Les écrans sont dessinés en 1920 × 1080 et s’adaptent aux autres tailles.',choix:[[1280,'1280 × 720'],[1920,'1920 × 1080'],[2560,'2560 × 1440']]},
     {cle:'fps',lib:'IMAGES PAR SECONDE',aide:'Moins d’images soulage les petites machines.',choix:[[30,'30'],[60,'60']]},
+    {cle:'mouvement',lib:'MOUVEMENT DE L’INTERFACE',aide:'Les écrans arrivent en biais, une bande les relie. À couper si ça te gêne.',choix:[[true,'OUI'],[false,'NON']]},
   ],
   son:[
     {cle:'general',lib:'VOLUME GÉNÉRAL',aide:'Tout le son du jeu.',niveau:true},

@@ -14,13 +14,13 @@ const MGMT_REGLAGES_VERSION=1;
 /** Les réglages d'origine. */
 const MGMT_REGLAGES_ORIGINE={
   combat:{vitesse:1,camera:'cable',commentaire:true,coins:true,noms:true,secousses:true},
-  affichage:{plein:false,taille:1920,fps:60},
+  affichage:{plein:false,taille:1920,fps:60,mouvement:true},
   son:{general:8,musique:6,salle:8,coups:7,silence:true},
 };
 /** Ce que chaque réglage accepte : une liste de valeurs, ou un entier de 0 à 10. */
 const MGMT_REGLAGES_VALEURS={
   combat:{vitesse:[1,2,4],camera:['cable','plafond','large'],commentaire:[true,false],coins:[true,false],noms:[true,false],secousses:[true,false]},
-  affichage:{plein:[true,false],taille:[1280,1920,2560],fps:[30,60]},
+  affichage:{plein:[true,false],taille:[1280,1920,2560],fps:[30,60],mouvement:[true,false]},
   son:{general:'niveau',musique:'niveau',salle:'niveau',coups:'niveau',silence:[true,false]},
 };
 const MGMT_REGLAGES_ONGLETS=['combat','affichage','son'];

@@ -175,10 +175,8 @@ test('Confirmation — Menu principal ouvre la confirmation ; Échap reste, Entr
   assert.equal(r.fin,'title'); assert.equal(r.disque,77,'la partie est sauvegardée en quittant'); assert.ok(r.quitte);
 });
 
-test('Mouvement — l’entrée ne se joue qu’à l’arrivée sur un écran, jamais quand il se redessine ; tout vit sous prefers-reduced-motion', () => {
-  const sans=css.replace(/@media \(prefers-reduced-motion:no-preference\)\{[\s\S]*?\n\}\n/,'');
-  assert.ok(/@media \(prefers-reduced-motion:no-preference\)\{/.test(css)&&css.includes('@keyframes mfEntre'));
-  assert.deepEqual(sans.split('\n').filter(l=>/animation\s*:|transition\s*:/.test(l)),[],'aucune animation hors du bloc no-preference');
+test('Mouvement — l’entrée ne se joue qu’à l’arrivée sur un écran, jamais quand il se redessine ; le mouvement est écrit en script, pas en feuille de style (décision du 07/10 : planche « Le mouvement de l’interface », réglage Affichage › Mouvement ; voir tests/mgmtAnimations.test.js)', () => {
+  assert.deepEqual(css.split(/\r?\n/).filter(l=>/animation\s*:|transition\s*:|@keyframes/.test(l)),[],'aucune animation en feuille de style : tout le mouvement est dans mgmt-animations.js');
   const win=newGameWindow({runMain:true});
   const r=result(win,`
     MF_VU=null; G.screen='title'; render(); const premier=document.querySelector('.mf-ecran').classList.contains('mf-entree');
