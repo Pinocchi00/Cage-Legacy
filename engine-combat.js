@@ -544,7 +544,8 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            totalement déconnecté. ==== */
         const groundWear=gnp*0.32*(dt/50);
         if(topIsA){sa+=topPts*(dt/50);sb+=botPts*(dt/50);dmgB+=groundWear;st.A.ctrl+=dt*(0.2/50);st.A.sig+=gHits*(dt/50);} else {sb+=topPts*(dt/50);sa+=botPts*(dt/50);dmgA+=groundWear;st.B.ctrl+=dt*(0.2/50);st.B.sig+=gHits*(dt/50);}
-        stTop.ctrlSec+=beatGroundSec*(dt/50); stTop.groundCtrlSec+=beatGroundSec*(dt/50);
+        const tenueTop=lutteTenue((STYLES[(topIsA?A:B).style]||STYLES.mma).grap);
+        stTop.ctrlSec+=beatGroundSec*tenueTop*(dt/50); stTop.groundCtrlSec+=beatGroundSec*tenueTop*(dt/50);
         // Enrichissement stats sol (frappes au sol, tentatives, temps de contrôle continu)
         const gAtt=gHits+Math.max(1,1+((top.aggression||50)-50)*0.03);
         stTop.sigAtt+=gAtt*(dt/50); stTop.groundStrikes+=gHits*(dt/50); stTop.groundAtt+=gAtt*(dt/50);
@@ -576,7 +577,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            a l'intensite d'attaque (subTop/subBot ci-dessus, qui pilote toujours
            subAtt) : un defenseur souple/calme/fort rend la finition plus dure
            sans changer combien de fois l'attaquant a reellement tente. ==== */
-        const subChT=clamp((top.submission-bot.guard)/7,0,0.95)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult*posProf.topSubMult*submissionDefenseMult(bot);
+        const subChT=clamp((top.submission-bot.guard)/7,0,0.95)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult*posProf.topSubMult*submissionDefenseMult(bot)/Math.pow(tenueTop,1.6);
         const subChB=clamp((bot.submission-top.submission)/10,0,0.88)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult*posProf.botSubMult*submissionDefenseMult(top);
         /* ==== [FIN ANCRE] ==== */
         if(rnd()<subChT*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
@@ -689,12 +690,12 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           } else if(groundPos==='openGuard'){
             if(rnd()<groundPassChance(top,bot)*(dt/50)){ groundPos='halfGuard'; stTop.guardPasses++; transitioned=true; }
             else if(rnd()<groundSweepChance(top,bot)*(dt/50)){ topIsA=!topIsA; stBot.reversals++; transitioned=true; }
-            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
+            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)/lutteTenue((STYLES[(topIsA?A:B).style]||STYLES.mma).grap)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
             else if(rnd()<groundGuardCloseChance(bot)*(dt/50)){ groundPos='closedGuard'; transitioned=true; }
           } else { // closedGuard
             if(rnd()<groundPassChance(top,bot)*0.7*(dt/50)){ groundPos='halfGuard'; stTop.guardPasses++; transitioned=true; }
             else if(rnd()<groundSweepChance(top,bot)*(dt/50)){ topIsA=!topIsA; stBot.reversals++; transitioned=true; }
-            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
+            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)/lutteTenue((STYLES[(topIsA?A:B).style]||STYLES.mma).grap)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
             else if(rnd()<groundGuardOpenChance(bot)*(dt/50)){ groundPos='openGuard'; transitioned=true; }
           }
           if(!transitioned){
@@ -731,7 +732,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           if(transitioned || gHits>1.0 || subTop>2.5 || subBot>2.5){ groundInactivity=0; }
           else {
             groundInactivity+=dt;
-            if(groundInactivity>=(REF_STANDUP_THRESHOLD[groundPos]||55)){
+            if(groundInactivity>=(REF_STANDUP_THRESHOLD[groundPos]||55)*lutteTenue((STYLES[(topIsA?A:B).style]||STYLES.mma).grap)){
               currentPhase='debout'; groundInactivity=0; stBot.standups++; refStandupCount++;
               log.push({r,phase:'sol',top:topIsA?'A':'B',pos:groundPos,by:'me',
                 text:`[${formatTime(beatT)}] L’arbitre relance les combattants debout : plus aucune progression au sol.`,
@@ -897,7 +898,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            n'est donc journalisée qu'en échantillon (densité de routine),
            jamais systématiquement — une réussite (rare, notable) reste
            toujours journalisée. ==== */
-        if(attA>0.14 && rnd()<0.18){ st.A.tdAtt+=(dt/50); handled=true;
+        if(attA>0.14 && rnd()<0.18*lutteEnchaine(STYLES[A.style]?STYLES[A.style].grap:0.5)){ st.A.tdAtt+=(dt/50); handled=true;
           /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — §4.2, remplace
              sigmoid((...)/15) telle quelle par takedownSigmoidSteep(),
              plafond relevé 0.85->0.95 (sinon un écart devenu "quasi
@@ -909,7 +910,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
             st.B.tdDef+=(dt/50);
             if(rnd()<dt/90) log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Bonne défense de ${B.name} sur la tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
-        } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt+=(dt/50); handled=true;
+        } else if(attB>0.14 && rnd()<0.18*lutteEnchaine(STYLES[B.style]?STYLES[B.style].grap:0.5)){ st.B.tdAtt+=(dt/50); handled=true;
           /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — voir ci-dessus, côté B. ==== */
           const tdChanceB=takedownSigmoidSteep(b.takedown-a.tdd)*attB;
           if(rnd()<clamp(tdChanceB,0.05,0.95)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a); groundInactivity=0;

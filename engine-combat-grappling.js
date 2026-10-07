@@ -24,6 +24,20 @@
    se relever complètement (standupOk — uniquement depuis la garde, jamais
    depuis demi-garde/latéral/montée/dos, où se relever tout court n'est pas
    une option réaliste sans d'abord récupérer une garde). */
+/* ==== [ANCRE: MGMT_BRIEF_LOT3_LUTTE] — Brief du 06/10/2026, lot 3, tranche 2 (la lutte) : un lutteur contrôlait moins longtemps qu'un combattant de
+   muay-thaï (46 s contre 71 s par combat de 3 rounds) et amenait 0,78 fois sur 2,18 tentées. Deux leviers, tous deux fonction de la propension au
+   grappling du style (`grap`, 0,15 pour un boxeur, 0,77 pour un lutteur) et nuls en dessous de LUTTE_SEUIL — un frappeur ne change donc pas :
+   - ENCHAÎNER : le taux de tentatives d'amenée debout monte (jusqu'à 1 + LUTTE_ENCHAINE), parce qu'un lutteur qui rate repart aussitôt ;
+   - TENIR : un combattant qui domine au sol avec ce profil se fait relever moins facilement (le relevé du dessous et le seuil de relance de
+     l'arbitre s'éloignent jusqu'à 1 + LUTTE_TENUE), c'est le maintien au sol plus long, le travail contre la cage. ==== */
+const LUTTE_SEUIL=0.45, LUTTE_PLEIN=0.3, LUTTE_ENCHAINE=1.8, LUTTE_TENUE=1.2;
+/** Part de 0 à 1 du profil de lutte d'un style (0 sous le seuil, 1 pour un lutteur plein). Pur. */
+function lutteProfil(grap){ return clamp((grap-LUTTE_SEUIL)/LUTTE_PLEIN,0,1); }
+/** Multiplicateur du taux de tentatives d'amenée debout. */
+function lutteEnchaine(grap){ return 1+lutteProfil(grap)*LUTTE_ENCHAINE; }
+/** Multiplicateur de tenue au sol (relevé du dessous et relance de l'arbitre). */
+function lutteTenue(grap){ return 1+lutteProfil(grap)*LUTTE_TENUE; }
+/* ==== [FIN ANCRE] ==== */
 const GROUND_POS_ORDER=['closedGuard','openGuard','halfGuard','sideControl','mount','backControl'];
 const GROUND_POS={
   closedGuard:{dominance:1.0, ctrlMult:0.55, gnpMult:0.75, topSubMult:0.55, botSubMult:2.30, standupOk:true},
