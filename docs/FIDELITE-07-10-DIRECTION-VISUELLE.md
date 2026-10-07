@@ -14,6 +14,8 @@ Demande d'Anthony : les planches ne sont pas toutes respectées (l'accueil par e
 
 - **Le logo.** La planche « Logo » retient deux versions : B (octogone à côté du titre) pour la barre des sections — déjà en place — et A (le titre dans l'octogone) « pour l'icône du jeu et tout ce qui se montre seul ; l'accueil garde le titre écrit ». L'accueil sans soirée n'a donc plus d'octogone à droite, comme sa planche ; l'icône de la version installable reprend les trois octogones de la planche.
 
+- **Le mouvement** (planche « Le mouvement de l'interface ») : `mgmt-animations.js` rejoue ses gestes, aux durées et courbes de la planche : l'arrivée d'un écran (barre 200 ms, en-tête 220 ms, panneaux 340 ms avec rebond, touches), la bande à 45° (blanc cassé, rouge, noir) qui traverse en 620 ms pendant que l'écran change à mi-course, la ligne claire qui arrive en biais sur un choix (190 ms), le glissement de 60 px d'un changement d'onglet, le défilé des cartes du calendrier (170 px), le bouton jaune qui s'enfonce avec son éclat, la phrase de la voix qui se déroule. Rien ne bouge au repos. Un réglage **Affichage › Mouvement de l'interface** (oui d'origine) le coupe ; je ne suis pas la préférence « moins de mouvement » du système, qui était activée dans le navigateur où j'ai vérifié et aurait masqué tout le mouvement — c'est un écart à l'usage courant, à trancher.
+
 ## Ce qui reste écart
 - Ces cinq écrans n'ont pas de planche : ils suivent le langage visuel, pas une maquette. À dessiner si Anthony veut une composition exacte.
 - Les colonnes de quelques tableaux (Classements : Palmarès, Série en cours, Dernier combat ; Effectif) sont décalées de quelques dizaines de pixels par rapport aux planches.
