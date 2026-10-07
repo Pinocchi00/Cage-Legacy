@@ -42,6 +42,12 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
      de combat ci-dessous. ==== */
   const policyA=policyOf(A), policyB=policyOf(B);
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MGMT_BRIEF_LOT3_PRECISION] — Brief du 06/10/2026, lot 3, tranche 4 (la précision) : la précision des frappes significatives était de
+     38,6 % (la page de vision en voulait 45 %). On l'élève en réduisant les coups TENTÉS : la base de précision passe de 0,42 à PRECISION_BASE, la
+     fourchette suit. Les coups touchés (landedA/landedB) ne sont pas calculés ici : ils ne bougent pas, donc ni les dégâts, ni les coups touchés par
+     minute (3,2), ni le déroulé du combat. ==== */
+  const PRECISION_BASE=0.475;
+  /* ==== [FIN ANCRE] ==== */
   const wf=weightFactor(A);
   /* ==== [ANCRE: MGMT_BRIEF_LOT3_GENRE] — Brief du 06/10/2026, lot 3, tranche 3 (le genre) : aucune ligne du moteur ne lisait le genre, et les femmes
      finissaient par KO aussi souvent que les hommes (24 % en poids paille, l'UFC : 13,5 %). Les catégories féminines ont leur propre réglage de
@@ -1028,7 +1034,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           /* ==== [FIN ANCRE] ==== */
 
           // Tentatives et frappes debout pour A
-          const accRateA=clamp(0.42+((a.handSpeed||50)*0.08+(a.discipline||50)*0.06-(b.footSpeed||50)*0.10-(b.footwork||50)*0.06)*0.003,0.30,0.65);
+          const accRateA=clamp(PRECISION_BASE+((a.handSpeed||50)*0.08+(a.discipline||50)*0.06-(b.footSpeed||50)*0.10-(b.footwork||50)*0.06)*0.003,PRECISION_BASE-0.12,PRECISION_BASE+0.23);
           const attA=Math.max(landedA,landedA/accRateA+((a.aggression||50)>60?RI(1,3):RI(0,1)));
           st.A.sigAtt+=attA*(dt/50); st.A.distStrikes+=landedA*(dt/50); st.A.distAtt+=attA*(dt/50);
           st.A.total+=(landedA+RI(1,3))*(dt/50); st.A.totalAtt+=(attA+RI(2,4))*(dt/50);
@@ -1070,7 +1076,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           /* ==== [FIN ANCRE] ==== */
 
           // Tentatives et frappes debout pour B
-          const accRateB=clamp(0.42+((b.handSpeed||50)*0.08+(b.discipline||50)*0.06-(a.footSpeed||50)*0.10-(a.footwork||50)*0.06)*0.003,0.30,0.65);
+          const accRateB=clamp(PRECISION_BASE+((b.handSpeed||50)*0.08+(b.discipline||50)*0.06-(a.footSpeed||50)*0.10-(a.footwork||50)*0.06)*0.003,PRECISION_BASE-0.12,PRECISION_BASE+0.23);
           const attB=Math.max(landedB,landedB/accRateB+((b.aggression||50)>60?RI(1,3):RI(0,1)));
           st.B.sigAtt+=attB*(dt/50); st.B.distStrikes+=landedB*(dt/50); st.B.distAtt+=attB*(dt/50);
           st.B.total+=(landedB+RI(1,3))*(dt/50); st.B.totalAtt+=(attB+RI(2,4))*(dt/50);
