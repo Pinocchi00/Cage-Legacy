@@ -253,3 +253,6 @@ function adaptGroundDisadvantage(posProf,round,botAdaptability){
     topSubMult:blend('topSubMult'),botSubMult:blend('botSubMult'),standupOk:posProf.standupOk};
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_BRIEF_LOT3_GENRE_CONSTANTE] — voir MGMT_BRIEF_LOT3_GENRE (engine-combat.js) : multiplicateur de la chance de KO/TKO des catégories féminines. ==== */
+const FINITION_KO_FEMMES=0.5, FINITION_KO_HOMMES=1.32, FINITION_SUB_FEMMES=0.88;
+/* ==== [FIN ANCRE] ==== */

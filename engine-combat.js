@@ -43,8 +43,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   const policyA=policyOf(A), policyB=policyOf(B);
   /* ==== [FIN ANCRE] ==== */
   const wf=weightFactor(A);
-  const koWeightMult=1+(wf-0.5)*0.8;
-  const subWeightMult=1+(0.5-Math.abs(wf-0.5))*0.7; // pic d'efficacité au poids moyen (wf≈0.5)
+  /* ==== [ANCRE: MGMT_BRIEF_LOT3_GENRE] — Brief du 06/10/2026, lot 3, tranche 3 (le genre) : aucune ligne du moteur ne lisait le genre, et les femmes
+     finissaient par KO aussi souvent que les hommes (24 % en poids paille, l'UFC : 13,5 %). Les catégories féminines ont leur propre réglage de
+     puissance de finition : FINITION_KO_FEMMES multiplie la chance de KO/TKO (debout comme au sol). Les soumissions des femmes sont à peine réduites (FINITION_SUB_FEMMES), pour que les combats aillent plus souvent au bout. Le genre est lu
+     sur le combattant A ; les deux camps d'un combat ont toujours le même (une division n'est ouverte qu'à un genre). ==== */
+  const koGenreMult=A.gender==='F'?FINITION_KO_FEMMES:FINITION_KO_HOMMES;
+  const koWeightMult=(1+(wf-0.5)*0.8)*koGenreMult;
+  /* ==== [FIN ANCRE] ==== */
+  const subWeightMult=(1+(0.5-Math.abs(wf-0.5))*0.7)*(A.gender==='F'?FINITION_SUB_FEMMES:1); // pic d'efficacité au poids moyen (wf≈0.5)
   const noiseWeightMult=1+(wf-0.5)*0.4;
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: PLAN_TACTIQUE] — modificateurs du vestiaire (audit §11), appliqués
@@ -570,7 +576,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         if(subBot>2.5) stBot.subAtt+=(dt/50);
 
         const heartR=1-(bot.heart*0.0016);
-        const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.40*posProf.gnpMult;
+        const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.40*posProf.gnpMult*koGenreMult;
         /* ==== [ANCRE: P7_L3_SUBMISSION_DEFENSE] — Lot 3/P7 sec.3.2 : "elle se
            defend (flexibility, composure, strength)" -- submissionDefenseMult()
            applique cette defense a la CHANCE DE FINITION (subChT/subChB), pas
