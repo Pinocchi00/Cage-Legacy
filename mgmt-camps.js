@@ -32,6 +32,10 @@ function mgmtCampModele(ck,k){
   return liste[k%liste.length].texte;
 }
 
+/** Lot 10 : une ville n'a qu'une salle — son modèle de nom se tire de la ville, pas du combattant. Ainsi les combattants d'une
+ *  même ville s'entraînent ensemble (c'est ce que l'écran Camps montre) au lieu d'une salle par tête. */
+function mgmtCampSalleDeVille(ck,ville){ return duelFnv1a32('salle|'+ck+'|'+ville)%5; }
+
 /** Un camp : {ville, ck, k (modèle), coachCle, nom, coach, qualite}. Pur. */
 function mgmtCampFait(ck,ville,k,coachCle){
   const nom=mgmtCampModele(ck,k).replace('{Ville}',ville);
@@ -50,8 +54,7 @@ function mgmtCampInitial(f){
     const autres=MGMT_VILLES[ck].filter(v=>v!==ville);
     if(autres.length) ville=autres[Math.floor(r()*autres.length)];
   }
-  const k=Math.floor(r()*5);
-  return mgmtCampFait(ck,ville,k,0);
+  return mgmtCampFait(ck,ville,mgmtCampSalleDeVille(ck,ville),0);
 }
 
 /** Les changements de camp et de coach d'un combattant de Split, du plus
@@ -89,7 +92,8 @@ function mgmtCamp(m,f,cycle){
         ck=autres[Math.floor(r()*autres.length)];
       }
       const villes=MGMT_VILLES[ck].filter(v=>v!==camp.ville||ck!==camp.ck);
-      camp=mgmtCampFait(ck,villes[Math.floor(r()*villes.length)],Math.floor(r()*5),n);
+      const nv=villes[Math.floor(r()*villes.length)];
+      camp=mgmtCampFait(ck,nv,mgmtCampSalleDeVille(ck,nv),n);
       dernierChangement={c:ch.c,id:ch.id,camp:true};
     }else if(ch.coach){
       camp=mgmtCampFait(camp.ck,camp.ville,camp.k,n);

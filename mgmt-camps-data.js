@@ -28,6 +28,17 @@ const MGMT_CAMP_FORME=3;
 const MGMT_CAMP_RODAGE=2;
 /** Part des combattants qui s'entraînent hors de leur ville d'origine. */
 const MGMT_CAMP_AILLEURS=0.15;
+/** Lot 10 : ce qu'on travaille dans une salle. Propositions de Claude (relu:false) — la spécialité pèse sur la progression des
+ * combattants de son style (plein) ou de tous (le travail de fond, la moitié). */
+const MGMT_CAMP_SPECIALITES=[
+  {id:'distance',libelle:'Le contre à distance',styles:['boxer','karate','kickboxer'],relu:false},
+  {id:'clinch',libelle:'Le clinch et les coudes',styles:['muayThai','kickboxer'],relu:false},
+  {id:'lutte',libelle:'La lutte et le contrôle',styles:['wrestler','sambo'],relu:false},
+  {id:'sol',libelle:'Le travail au sol',styles:['bjj','sambo'],relu:false},
+  {id:'cardio',libelle:'Le cardio et les longs combats',styles:[],tous:true,relu:false},
+];
+/** Le surcroît de progression d'une spécialité qui convient (part du gain de niveau). */
+const MGMT_CAMP_SPEC=0.15;
 /** Poids (charge) du combat entre coéquipiers (décision contraire, H7). */
 const MGMT_CONTRARIE_COEQUIPIER=15;
 /* ==== [FIN ANCRE] ==== */

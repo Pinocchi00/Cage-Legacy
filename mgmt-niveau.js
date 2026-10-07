@@ -132,7 +132,7 @@ function mgmtNiveauApresCombat(m,f,issue){
   let g=0;
   if(f.age<=f.pic){
     const camp=typeof mgmtCamp==='function'?mgmtCamp(m,f,m.cycle).qualite:0;
-    g=clamp((f.pot-f.niv)*MGMT_NIV_PART_COMBAT,0,MGMT_NIV_COMBAT_MAX)*(1+MGMT_NIV_CAMP*clamp(camp,-1,1));
+    g=clamp((f.pot-f.niv)*MGMT_NIV_PART_COMBAT,0,MGMT_NIV_COMBAT_MAX)*(1+MGMT_NIV_CAMP*clamp(camp,-1,1)+(typeof mgmtCampSpecBonus==='function'?mgmtCampSpecBonus(m,f):0));
   }
   if(issue==='loss') g-=MGMT_NIV_DEFAITE;
   const avant=f.niv;
@@ -146,7 +146,7 @@ function mgmtNiveauAnniversaire(m,f){
   if(!mgmtNiveaux(m)||!f||!Number.isFinite(f.niv)||!Number.isFinite(f.pot)||!Number.isFinite(f.pic)) return;
   if(f.age<=f.pic){
     const camp=typeof mgmtCamp==='function'?mgmtCamp(m,f,m.cycle).qualite:0;
-    f.niv=mgmtNivRond(mgmtNivBorne(f.niv+clamp((f.pot-f.niv)*MGMT_NIV_PART_AN,0,MGMT_NIV_AN_MAX)*(1+MGMT_NIV_CAMP*clamp(camp,-1,1))));
+    f.niv=mgmtNivRond(mgmtNivBorne(f.niv+clamp((f.pot-f.niv)*MGMT_NIV_PART_AN,0,MGMT_NIV_AN_MAX)*(1+MGMT_NIV_CAMP*clamp(camp,-1,1)+(typeof mgmtCampSpecBonus==='function'?mgmtCampSpecBonus(m,f):0))));
   }else if(f.age>f.pic+MGMT_NIV_DECLIN_DELAI){
     f.niv=mgmtNivRond(mgmtNivBorne(f.niv-MGMT_NIV_DECLIN));
   }

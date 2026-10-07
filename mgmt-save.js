@@ -254,6 +254,7 @@ function validateMgmt(raw){
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
   if(raw.cal!==undefined&&!mgmtAgendaValide(raw.cal)) return false;
+  if(raw.fil!==undefined&&!mgmtFilValide(raw.fil)) return false;
   if(!mgmtSallesValide(raw)) return false;
   if(raw.card!==undefined&&raw.card.sizeEarly!==undefined&&(!Number.isSafeInteger(raw.card.sizeEarly)||raw.card.sizeEarly<0||raw.card.sizeEarly>raw.card.sizePrelims)) return false;
   if(raw.leila!==undefined){
@@ -464,6 +465,7 @@ function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
+  if(m.fil!==undefined&&!mgmtFilValide(m.fil)) delete m.fil;
   if(!mgmtSallesValide(m)){ delete m.salles; delete m.pop; delete m.comptes; }
   if(m.cal&&m.cal.actif===true) mgmtSallesInit(m);
   if(m.card&&m.card.sizeEarly!==undefined&&(!Number.isSafeInteger(m.card.sizeEarly)||m.card.sizeEarly<0||m.card.sizeEarly>m.card.sizePrelims)) m.card.sizeEarly=0;

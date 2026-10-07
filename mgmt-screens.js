@@ -318,7 +318,8 @@ Object.assign(CL,{
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
     const retour=(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
-      ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement')?G.screen:'mgmt_bureau';
+      ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
+      ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats')?G.screen:'mgmt_bureau';
     MGMT_FICHE={id,retour,cursor:0};
     CL.go('mgmt_fiche');
   },
