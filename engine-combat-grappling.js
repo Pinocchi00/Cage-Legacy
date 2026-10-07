@@ -31,12 +31,15 @@
    - TENIR : un combattant qui domine au sol avec ce profil se fait relever moins facilement (le relevé du dessous et le seuil de relance de
      l'arbitre s'éloignent jusqu'à 1 + LUTTE_TENUE), c'est le maintien au sol plus long, le travail contre la cage. ==== */
 const LUTTE_PROFIL={wrestler:1,sambo:0.8,bjj:0,mma:0.3};
-const LUTTE_ENCHAINE=1.8;
+const LUTTE_ENCHAINE=1.3;
 const LUTTE_TENUE=1.2;
+const LUTTE_SUCCES=0.5;
 /** Part de 0 à 1 du profil de lutte d'un style (0 pour un frappeur, 1 pour un lutteur). Pur. */
 function lutteProfil(style){ return LUTTE_PROFIL[style]||0; }
 /** Multiplicateur du taux de tentatives d'amenée debout. */
 function lutteEnchaine(style){ return 1+lutteProfil(style)*LUTTE_ENCHAINE; }
+/** Multiplicateur de la réussite d'une amenée : un lutteur réussit environ quatre amenées sur dix, comme la moyenne UFC (38 à 42 %). */
+function lutteSucces(style){ return 1+lutteProfil(style)*LUTTE_SUCCES; }
 /** Multiplicateur de tenue au sol (relevé du dessous et relance de l'arbitre). */
 function lutteTenue(style){ return 1+lutteProfil(style)*LUTTE_TENUE; }
 /* ==== [FIN ANCRE] ==== */
