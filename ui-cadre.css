@@ -971,3 +971,115 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .mgmt-recru-nom{font:800 28px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1}
 .mf-ancien .mgmt-recru-go{font:800 26px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;background:var(--mf-jaune);color:#0D0B0B;border:0;padding:6px 16px}
 .mf-entete-ongs{display:flex;gap:8px}
+
+/* ==== [ANCRE: MGMT_FIDELITE_FICHE_CSS] — La fiche des planches (FicheFinal, FicheStyle, FicheCombats, FicheContrat, FicheOnEnDit, FicheChampion), reprise de fidélité du 07/10/2026.
+   Les tunnels d'octogones sont ceux des planches : rouge derrière un combattant, jaune derrière un champion ; le même jaune derrière la carte du champion des
+   classements et derrière la ceinture ouverte. Aucun texte sous 22 px. ==== */
+.mf-fi{display:flex;flex-direction:column;gap:16px}
+.mf-fb{position:relative;width:1564px;height:260px;flex:none;background:var(--mf-noir);overflow:hidden}
+.mf-fb-img{position:absolute;left:-150.6px;top:-356px;width:1728px;height:972px;background:url('images/accueil-octogones.jpg?v=b29') 0 0/1728px 972px no-repeat}
+.mf-fb.or .mf-fb-img{background-image:url('images/tunnel-or.jpg?v=b29')}
+.mf-fb-nom{position:absolute;left:32px;bottom:30px;display:flex;flex-direction:column;gap:16px;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.69;white-space:nowrap;text-transform:uppercase;text-shadow:0.0300em 0.0000em 0 #0D0B0B, 0.0277em 0.0115em 0 #0D0B0B, 0.0212em 0.0212em 0 #0D0B0B, 0.0115em 0.0277em 0 #0D0B0B, 0.0000em 0.0300em 0 #0D0B0B, -0.0115em 0.0277em 0 #0D0B0B, -0.0212em 0.0212em 0 #0D0B0B, -0.0277em 0.0115em 0 #0D0B0B, -0.0300em 0.0000em 0 #0D0B0B, -0.0277em -0.0115em 0 #0D0B0B, -0.0212em -0.0212em 0 #0D0B0B, -0.0115em -0.0277em 0 #0D0B0B, -0.0000em -0.0300em 0 #0D0B0B, 0.0115em -0.0277em 0 #0D0B0B, 0.0212em -0.0212em 0 #0D0B0B, 0.0277em -0.0115em 0 #0D0B0B}
+.mf-fb-nom .p{font-size:64px}
+.mf-fb-pal{position:absolute;right:32px;top:30px;width:400px;height:200px;box-sizing:border-box;border:2px solid var(--mf-bord);background:rgba(13,11,11,.86);padding:0 22px;display:flex;align-items:center;justify-content:space-between}
+.mf-fb-pg{display:flex;flex-direction:column;gap:14px}
+.mf-fb-pl{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}
+.mf-fb-pg b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:116px;line-height:.69;white-space:nowrap}
+.mf-fb-forme{display:flex;gap:8px;margin-top:4px}
+.mf-fb-forme .mf-marque{width:34px;height:34px}
+.mf-fb-forme .mf-marque.d>i,.mf-fb-forme .mf-marque.n>i{width:29px;height:29px}
+.mf-fb-pd{display:flex;flex-direction:column;align-items:center;gap:14px}
+.mf-fb-rang{width:84px;height:84px;background:var(--mf-blanc);color:var(--mf-noir);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:46px;line-height:1}
+.mf-fb-rang.or{background:var(--mf-jaune)}
+.mf-fb-cat{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:1.1;text-align:center}
+.mf-fi-onglets{height:56px;flex:none;display:flex;justify-content:space-between;align-items:center}
+.mf-fi .mf-fiche-retour{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+.mf-fi-tab{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1}
+.mf-fi-corps{flex:1;min-height:0;display:flex}
+.mf-fi-ligne{flex:1;display:flex;gap:16px;min-height:0;min-width:0}
+.mf-fi-c1{flex:1;display:flex;min-width:0}
+.mf-fi-col{flex-direction:column;gap:16px}
+.mf-fi-pan{min-width:0}
+.mf-fi-pan.mf-fi-fill{flex:1}
+.mf-fi-c1>.mf-fi-pan{flex:1}
+.mf-fi-p{flex:1;padding:15px;display:flex;flex-direction:column;gap:16px;min-height:0;box-sizing:border-box}
+.mf-fi-ph{display:flex;justify-content:space-between;align-items:flex-start}
+.mf-fi-pt{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.75;white-space:nowrap;text-transform:uppercase}
+.mf-fi-barre{display:block;margin-top:12px;width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-fi-pm{font-weight:600;font-size:24px;line-height:1;white-space:nowrap}
+.mf-fi-profil{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.75;white-space:nowrap;margin-top:4px;text-transform:uppercase}
+.mf-fi-lgs{display:flex;flex-direction:column;gap:8px}
+.mf-fi-lg{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);height:52px;flex:none;padding:0 16px;display:flex;align-items:center;gap:14px;font-size:26px;line-height:1;white-space:nowrap}
+.mf-fi-lg .q,.mf-fi-p .q{width:26px;flex:none;text-align:center;font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:1;color:var(--mf-blanc)}
+.mf-fi-sg{display:block;width:26px;height:26px;flex:none}
+.mf-fi-bas{margin-top:auto;display:flex;flex-direction:column;gap:12px}
+.mf-fi-bt{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap}
+.mf-fi-cagebox{flex:1;display:flex;justify-content:center;align-items:center;min-height:0}
+.mf-fi-leg{display:flex;justify-content:space-between}
+.mf-fi-leg>div,.mf-fi-legv>div{display:flex;align-items:center;gap:8px;font-size:22px;line-height:1;white-space:nowrap}
+.mf-fi-legv{display:flex;flex-direction:column;gap:10px}
+.mf-fi-leg i,.mf-fi-legv i{display:block;flex:none}
+.mf-fi-leg i.rouge,.mf-fi-legv i.rouge{width:26px;height:18px;background:var(--mf-rouge)}
+.mf-fi-leg i.hache,.mf-fi-legv i.hache{width:26px;height:18px;background:repeating-linear-gradient(45deg,rgba(233,230,225,.55) 0 3px,var(--mf-ligne) 3px 9px)}
+.mf-fi-leg i.rond,.mf-fi-legv i.rond{width:24px;height:24px;border-radius:50%;background:var(--mf-blanc);color:var(--mf-noir);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:22px;line-height:1;font-style:normal}
+.mf-fi-cage-pan{width:440px;flex:none}
+.mf-fi-cage-p{justify-content:space-between}
+.mf-fi-grille{flex:1;padding:15px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-content:start}
+.mf-fi-case{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);height:72px;padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.mf-fi-case span{font-weight:600;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-fi-case b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:38px;line-height:.8;white-space:nowrap}
+.mf-fi-prochain{flex:1}
+.mf-fi-prochain .mf-p3{justify-content:space-between;padding:13px 15px}
+.mf-fi-pc{display:flex;flex-direction:column;gap:12px}
+.mf-fi-pch{display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap}
+.mf-fi-pcs{display:flex;align-items:center;gap:8px;letter-spacing:0}
+.mf-fi-pcn{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.8;white-space:nowrap}
+.mf-fi-pcd{font-size:24px;line-height:1;white-space:nowrap}
+.mf-fi-pcb{display:flex}
+.mf-fi-rows{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:9px 15px;min-height:0}
+.mf-fi-row{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);height:74px;flex:none;padding:0 18px;display:grid;grid-template-columns:196px minmax(0,1fr);align-items:center;column-gap:16px}
+.mf-fi-rl{display:flex;align-items:center;gap:10px}
+.mf-fi-rl span:last-child{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap}
+.mf-fi-rc{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mf-fi-rt{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.mf-fi-rt b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:34px;line-height:.85;white-space:nowrap}
+.mf-fi-rt span{font-size:22px;line-height:1;white-space:nowrap;color:var(--mf-texte2)}
+.mf-fi-rp{font-size:24px;line-height:1.1}
+.mf-fi-cth{display:flex;justify-content:space-between;font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}
+.mf-fi-cos{flex:1;display:flex;flex-direction:column;gap:8px;min-height:0}
+.mf-fi-co{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);height:80px;flex:none;padding:0 18px;display:grid;grid-template-columns:44px 360px minmax(0,1fr) 52px;align-items:center;column-gap:16px;cursor:pointer}
+.mf-fi-co.choisie{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-fi-co.autres{display:flex;gap:14px;font-size:24px;height:60px;cursor:default;background:var(--mf-panneau)}
+.mf-fi-cn{width:36px;height:36px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1}
+.mf-fi-ct{display:flex;flex-direction:column;gap:8px}
+.mf-fi-ct b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:.85;white-space:nowrap;text-transform:uppercase}
+.mf-fi-ct span{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-fi-co.choisie .mf-fi-ct span,.mf-fi-co.choisie .mf-fi-cg{color:rgba(13,11,11,.72)}
+.mf-fi-cg{font-size:24px;line-height:1.1;color:var(--mf-blanc)}
+.mf-fi-cm{display:flex;justify-content:flex-end}
+.mf-fi-ctl{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}
+.mf-fi-ctn{display:flex;align-items:center;gap:22px}
+.mf-fi-ctn b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:200px;line-height:.69}
+.mf-fi-ctn span{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:1.05}
+.mf-fi-ccs{display:flex;flex-wrap:wrap;gap:8px}
+.mf-fi-cc{width:64px;height:64px;box-sizing:border-box;border:2px solid var(--mf-bord);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:1}
+.mf-fi-cc.fait{background:var(--mf-blanc);color:var(--mf-noir);border-color:var(--mf-blanc)}
+.mf-fi-cc.prochain{border-color:var(--mf-jaune);color:var(--mf-jaune)}
+.mf-fi-ccl{display:flex;gap:18px;font-size:22px;line-height:1}
+.mf-fi-ccl span{display:flex;align-items:center;gap:8px}
+.mf-fi-ccl i{display:block;width:18px;height:18px;box-sizing:border-box;border:2px solid var(--mf-bord)}
+.mf-fi-ccl i.fait{background:var(--mf-blanc);border-color:var(--mf-blanc)}
+.mf-fi-ccl i.prochain{border-color:var(--mf-jaune)}
+.mf-fi-contrat-pan{width:440px;flex:none}
+.mf-fi-scroll{overflow-y:auto;scrollbar-width:thin}
+.mf-fi-oc{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);flex:none;padding:14px 22px;display:grid;grid-template-columns:260px minmax(0,1fr);column-gap:24px;align-items:center}
+.mf-fi-ocq{display:flex;flex-direction:column;gap:10px}
+.mf-fi-ocq span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}
+.mf-fi-ocq b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:34px;line-height:.85;white-space:nowrap}
+.mf-fi-oct{display:flex;flex-direction:column;gap:10px}
+.mf-fi-ocp{font-weight:600;font-size:28px;line-height:1.1}
+.mf-fi-ancien{margin-top:8px}
+/* Les tunnels jaunes : la carte du champion des classements, et la ceinture ouverte. */
+.mf-su-champ-in::before{content:'';position:absolute;left:-138.7px;top:-167px;width:1056px;height:594px;background:url('images/tunnel-or.jpg?v=b29') 0 0/1056px 594px no-repeat}
+.mf-su-det-in::before{content:'';position:absolute;left:-420.6px;top:-248px;width:1728px;height:972px;background:url('images/tunnel-or.jpg?v=b29') 0 0/1728px 972px no-repeat}
+/* ==== [FIN ANCRE] ==== */

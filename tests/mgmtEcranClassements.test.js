@@ -104,7 +104,7 @@ test('MGMT T6 — un combattant extérieur s’ouvre en fiche, retour aux classe
   assert.equal(win.eval('G.screen'),'mgmt_classements','le retour ramène aux classements');
   /* La fiche extérieure raconte la trajectoire (décision du 22/09, T5). */
   win.eval(`CL.mgmtFiche(${JSON.stringify(extId)}); CL.mgmtFicheOnglet('combats')`);
-  assert.ok(win.document.getElementById('app').textContent.includes('trajectoire'),
+  assert.ok(win.document.getElementById('app').textContent.toLowerCase().includes('trajectoire'),
     'la fiche extérieure porte sa trajectoire');
   win.eval(`CL.mgmtFicheRetour()`);
   assert.equal(win.eval('G.screen'),'mgmt_classements','le retour suit l’écran des classements');
