@@ -25,18 +25,20 @@
    depuis demi-garde/latéral/montée/dos, où se relever tout court n'est pas
    une option réaliste sans d'abord récupérer une garde). */
 /* ==== [ANCRE: MGMT_BRIEF_LOT3_LUTTE] — Brief du 06/10/2026, lot 3, tranche 2 (la lutte) : un lutteur contrôlait moins longtemps qu'un combattant de
-   muay-thaï (46 s contre 71 s par combat de 3 rounds) et amenait 0,78 fois sur 2,18 tentées. Deux leviers, tous deux fonction de la propension au
-   grappling du style (`grap`, 0,15 pour un boxeur, 0,77 pour un lutteur) et nuls en dessous de LUTTE_SEUIL — un frappeur ne change donc pas :
+   muay-thaï (46 s contre 71 s par combat de 3 rounds) et amenait 0,78 fois sur 2,18 tentées. Deux leviers, tous deux fonction du profil de lutte du style (LUTTE_PROFIL : 1 pour un lutteur, 0,8 sambo, 0,3 MMA, rien pour un frappeur ni pour le
+   jiu-jitsu, qui garde son jeu de garde : le boxeur doit rester favori contre lui, test P7_L4_MATCHUP_ASYMETRIE) :
    - ENCHAÎNER : le taux de tentatives d'amenée debout monte (jusqu'à 1 + LUTTE_ENCHAINE), parce qu'un lutteur qui rate repart aussitôt ;
    - TENIR : un combattant qui domine au sol avec ce profil se fait relever moins facilement (le relevé du dessous et le seuil de relance de
      l'arbitre s'éloignent jusqu'à 1 + LUTTE_TENUE), c'est le maintien au sol plus long, le travail contre la cage. ==== */
-const LUTTE_SEUIL=0.45, LUTTE_PLEIN=0.3, LUTTE_ENCHAINE=1.8, LUTTE_TENUE=1.2;
-/** Part de 0 à 1 du profil de lutte d'un style (0 sous le seuil, 1 pour un lutteur plein). Pur. */
-function lutteProfil(grap){ return clamp((grap-LUTTE_SEUIL)/LUTTE_PLEIN,0,1); }
+const LUTTE_PROFIL={wrestler:1,sambo:0.8,bjj:0,mma:0.3};
+const LUTTE_ENCHAINE=1.8;
+const LUTTE_TENUE=1.2;
+/** Part de 0 à 1 du profil de lutte d'un style (0 pour un frappeur, 1 pour un lutteur). Pur. */
+function lutteProfil(style){ return LUTTE_PROFIL[style]||0; }
 /** Multiplicateur du taux de tentatives d'amenée debout. */
-function lutteEnchaine(grap){ return 1+lutteProfil(grap)*LUTTE_ENCHAINE; }
+function lutteEnchaine(style){ return 1+lutteProfil(style)*LUTTE_ENCHAINE; }
 /** Multiplicateur de tenue au sol (relevé du dessous et relance de l'arbitre). */
-function lutteTenue(grap){ return 1+lutteProfil(grap)*LUTTE_TENUE; }
+function lutteTenue(style){ return 1+lutteProfil(style)*LUTTE_TENUE; }
 /* ==== [FIN ANCRE] ==== */
 const GROUND_POS_ORDER=['closedGuard','openGuard','halfGuard','sideControl','mount','backControl'];
 const GROUND_POS={
