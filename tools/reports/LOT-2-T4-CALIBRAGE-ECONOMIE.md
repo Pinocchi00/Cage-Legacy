@@ -1,23 +1,18 @@
-# Calibrage Monte Carlo — l’argent sur le déroulé réel (lot 2B T4, le salaire à la victoire)
+# Calibrage Monte Carlo — l’argent sur le déroulé réel (lot 2 T4, reprise du 21/09)
 
 Outil : `tools/monte-carlo-economie.js` — jeu réel (jsdom), VRAI déroulé : le joueur-type
 compose sa carte principale par le geste du jeu (`mgmtBookMain`), Leïla propose les
 préliminaires (`mgmtNewBulkAffair`), la soirée se joue par `mgmtRunEvent` — attrait et
 cachets lus sur les lignes d’avant combat, conséquences réelles (`mgmtApplyFight`).
-Lot 2B T4 (docs/LOT-2B-LE-VIVIER-SE-RENOUVELLE.md §T4, décision 1 du 21/09) : le cachet
-reste le salaire de combat et le VAINQUEUR touche un bonus — calculé après les combats,
-déduit de la recette. Le modèle d’argent change, donc le calibrage de la T4 du lot 2
-(caduc depuis la T1 ter de toute façon) est refait ici. Les cibles se jugent sur la
-soirée 1 du joueur d’écran ; la lecture « durée de vie » attend le recrutement (T2) —
-sans lui, le roster ne peut que fondre et la table des soirées enchaînées mesure cette
-fonte, pas un défaut de calibrage.
+Reprise demandée par la relecture du 21/09 (docs/LOT-2-CARTE-PRINCIPALE.md §4 bis) :
+la T4 livrée (933ce41) calibrait sur un joueur qui voit ce que l’écran lui cache.
 
 - Graine de base : `20260919`
 - Carrières demandées par profil : 4000 (paquets contigus, au plus 12 processus)
-- Soirées enchaînées par carrière : 1 (--soirees — à 1 : chaque soirée repart d’une organisation neuve)
+- Soirées enchaînées par carrière : 6 (--soirees — à 1 : chaque soirée repart d’une organisation neuve)
 - Premières soirées jouées (la table des résultats) : oracle 4000, joueur d’écran 4000, réduite 4000, bâclée 4000
-- Carrières interrompues par une soirée non composable (pot épuisé, la carrière s’arrête) : oracle 0, joueur d’écran 0, bâclée 0
-- Référence D4 d’avant première soirée (mgmtAudienceRef sans historique, carte 5 + 4) : 8523 écrans
+- Carrières interrompues par une soirée non composable (pot épuisé, la carrière s’arrête) : oracle 19, joueur d’écran 26, bâclée 21
+- Référence D4 d’avant première soirée (mgmtAudienceRef sans historique, carte 5 + 4) : 7231 écrans
 
 ## Heuristiques des joueurs-types (documentées, aucun tirage caché)
 
@@ -32,22 +27,21 @@ parfait. Le joueur bâclé est la borne basse du déroulé réel (le coût de l�
 | bâclé | cinq paires tirées au hasard seedé parmi les paires de même catégorie bâclées au sens du jeu (écart de bilan ≥ 8 combats, ou écart de rang > 3) ; complétées au hasard à défaut | cinq propositions de Leïla ÉCRASÉES, la sixième validée (coût de l’écrasement, addendum §12) |
 | réduite | — | la carte du joueur d’écran moins son prélim d’attrait le plus faible (QO-7) — **hors déroulé réel**, voir plus bas |
 
-## Résultats (graine de base 20260919, 1 soirée par organisation)
+## Résultats (graine de base 20260919, 6 soirées par organisation)
 
-Valeurs en k$ (milliers), audience en écrans entiers. R = recette nette (revenus − cachets
-− bonus de victoire).
-Les cibles se jugent sur la ligne du joueur d’écran, jamais sur l’oracle.
+Valeurs en k$ (milliers), audience en écrans entiers. R = recette nette (revenus − cachets).
+Les cibles se jugent sur la ligne du joueur d’écran, jamais sur l’oracle. À --soirees=6, la première soirée de chaque carrière repart d’une organisation neuve : cette table est la soirée 1, exactement la mesure de --soirees=1 (mêmes graines de première soirée).
 
-| Profil | n | R moyen | R écart | R p5 | R méd | R p95 | % rentables | Revenus | Cachets | Bonus | Attrait | Spectacle | Audience | Aud écart | Aud ≥ réf |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| oracle (borne haute — ne sert à aucune cible) | 4000 | 24 | 6.3 | 14 | 24 | 34 | 100 | 226.2 | 132.9 | 69.2 | 13.45 | 0.539 | 11591.3 | 704.7 | — |
-| joueur d’écran (sert les cibles) | 4000 | 11.6 | 8 | -2 | 11 | 25 | 91.7 | 205.5 | 127.2 | 66.8 | 12.2 | 0.551 | 10558.3 | 801.4 | — |
-| réduite (8, prélim faible retiré du joueur d’écran) | 4000 | 8.4 | 7.6 | -4 | 8 | 21 | 85.4 | 194.4 | 123.5 | 62.5 | 11.98 | 0.537 | 10313.3 | 795.1 | 99 % |
-| bâclée (5+4 écrasée, déroulé réel) | 4000 | -25.8 | 9.2 | -41 | -26 | -11 | 0.3 | 138.8 | 104.8 | 59.8 | 8.23 | 0.563 | 7150.4 | 786.6 | — |
+| Profil | n | R moyen | R écart | R p5 | R méd | R p95 | % rentables | Revenus | Cachets | Attrait | Spectacle | Audience | Aud écart | Aud ≥ réf |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| oracle (borne haute — ne sert à aucune cible) | 4000 | 17.6 | 5.8 | 8 | 17 | 27 | 99.8 | 121.7 | 104.1 | 9.81 | 0.67 | 8838.4 | 805.3 | — |
+| joueur d’écran (sert les cibles) | 4000 | 5.3 | 6.2 | -5 | 5 | 16 | 77.4 | 98.8 | 93.5 | 7.93 | 0.705 | 7223.5 | 862.2 | — |
+| réduite (8, prélim faible retiré du joueur d’écran) | 4000 | 1.5 | 5.6 | -8 | 1 | 11 | 55.7 | 91 | 89.5 | 7.68 | 0.702 | 6989.1 | 858.8 | 38 % |
+| bâclée (5+4 écrasée, déroulé réel) | 4000 | -4.8 | 5.4 | -13 | -5 | 5 | 16.1 | 79.4 | 84.2 | 6.35 | 0.728 | 5827.8 | 765.7 | — |
 
-Gradient de lecture (contrainte de forme) : oracle (24 k$) > joueur d’écran (11.6 k$) > bâclé (-25.8 k$) — l’ordre tient sur R moyen et sur les % rentables.
+Gradient de lecture (contrainte de forme) : oracle (17.6 k$) > joueur d’écran (5.3 k$) > bâclé (-4.8 k$) — l’ordre tient sur R moyen et sur les % rentables.
 
-Part de combats de préliminaires bâclés dans les propositions validées : 22.4 %
+Part de combats de préliminaires bâclés dans les propositions validées : 37.4 %
 (joueur d’écran et oracle : attendue quasi nulle — Leïla est soigneuse sans écrasement ;
 bâclée : au plafond du jeu, 0,65).
 
@@ -55,53 +49,102 @@ bâclée : au plafond du jeu, 0,65).
 
 | Cible (lot 3b T1) | Avant | Après (joueur d’écran) | Verdict |
 |---|---|---|---|
-| 1. Le joueur d’écran (carte complète moyenne) est rentable dans 70 à 80 % des soirées | 0 % (joueur d’écran, bonus de victoire sans remontée des revenus) | 91.7 % (joueur d’écran, soirée 1) | MANQUÉE |
-| 2. Le joueur bâclé perd de l'argent plus souvent qu'il n'en gagne | 0 % de rentables (bonus sans remontée des revenus) | 0.3 % (bâclé, soirée 1) | ATTEINTE |
-| 3. La carte réduite (du joueur d'écran) garde son audience de référence dans une part mesurable des cas | 38 % (réduite du joueur d’écran, bonus sans remontée des revenus) | 99 % (réduite, réf 8523 écrans) | ATTEINTE |
+| 1. Le joueur d’écran (carte complète moyenne) est rentable dans 70 à 80 % des soirées | 10.3 % (joueur d’écran, avant recalibrage — sonde du 21/09 : 9.5 %) | 77.4 % (joueur d’écran) | ATTEINTE |
+| 2. Le joueur bâclé perd de l'argent plus souvent qu'il n'en gagne | 0.3 % de rentables (T4 livrée — profil inchangé) | 16.1 % (bâclé) | ATTEINTE |
+| 3. La carte réduite (du joueur d'écran) garde son audience de référence dans une part mesurable des cas | 1.8 % (réduite du joueur d’écran, avant recalibrage, réf de l’ancien déroulé) | 38 % (réduite, réf 7231 écrans) | ATTEINTE |
 
-## Ce que le bonus de victoire change, et ce que le recalibrage corrige
+## Pourquoi la T4 livrée était fausse, et ce que cette reprise corrige
 
-Le bonus de victoire (lot 2B T4) alourdit une soirée d’environ la moitié de sa masse
-de cachets : le vainqueur de chacun des neuf combats touche son cachet une seconde
-fois (partage show/win du sport réel, `MGMT_WIN_BONUS_SHARE=1`). Avant remontée des
-revenus, le joueur d’écran mesurait R moyen -49.4 k$ (médiane -49)
-pour 0 % de rentables — la soirée perdait ~50 k$ en moyenne. C’est ce que le
-recalibrage corrige : les deux leviers de revenu (billetterie et droits du diffuseur)
-suivent le coût, dans leurs proportions d’avant. L’écart oracle − joueur d’écran
-(12.4 k$ de R moyen) reste le prix du joueur parfait : un joueur qui choisit
-exactement ce que le jeu vend. Le bonus frappe aussi le joueur d’écran plus fort que
-le bâclé — ses vainqueurs sont les mieux payés — et c’est voulu : booker les bons
-numéros coûte leur salaire.
+La T4 livrée (933ce41) mesurait un joueur qui choisissait par `mgmtFightDraw`
+décroissant — la grandeur qui produit la billetterie et les droits du diffuseur,
+invisible à l’écran (§T2 : catégorie, rang, bilan — rien d’autre). Un joueur qui
+voit ce que le jeu lui cache, pas un joueur. Le joueur d’écran, lui, ne dispose que
+de la catégorie, du rang et du bilan : avant recalibrage, R moyen -6.6 k$
+(médiane -7) pour 10.3 % de rentables — **R = −6 k$ est l’ordre de
+grandeur NORMAL d’un joueur qui ne dispose que de l’écran** : la sonde du 21/09 le
+mesurait à -6.5 k$ (9.5 % de rentables, soirées abandonnées au premier
+refus), l’outil le mesure à -6.6 k$ (10.3 % de rentables, la règle du réessai
+composant toutes les soirées). C’était la médiane de sa distribution, pas « un tirage
+sous le 5e centile » comme l’expliquait à tort le rapport de la T4 livrée. C’est ce
+que le recalibrage corrige : la soirée réelle jouée en jeu le 20/09 (R = −6,
+trésorerie 50 → 44) n’était pas malchanceuse, elle était représentative. L’écart
+oracle − joueur d’écran (12.3 k$ de R moyen) est le prix du joueur
+parfait : un joueur qui choisit exactement ce que le jeu vend.
 
 ## Ce qui reste hors déroulé réel (le profil réduite)
 
 La réduite (QO-7 : la carte moins son prélim d’attrait le plus faible) n’est PAS
 jouée par `mgmtRunEvent` : le jeu refuse une carte incomplète (la carte contractuelle
 est de 9 combats, 5 + 4). Elle se mesure sur les clones d’avant combat (`mgmtFightReady`),
-avec la vraie finance (`mgmtEventRecette`, droits au prorata 8/9 des combats joués,
-bonus de victoire des huit combats rejoués compris) —
+avec la vraie finance (`mgmtEventRecette`, droits au prorata 8/9 des combats joués) —
 l’attrait et les cachets sont ceux de la carte du joueur d’écran avant la soirée,
-le spectacle et les vainqueurs viennent des huit combats rejoués sous une graine du
-même run. Elle est un proxy assumé, mesuré comme tel : c’est la lecture de la cible 3,
-pas une soirée que le jeu peut produire.
+le spectacle vient des huit combats rejoués sous une graine du même run. Elle est un
+proxy assumé, mesuré comme tel : c’est la lecture de la cible 3, pas une soirée que
+le jeu peut produire.
 
-## Cibles manquées — signalées
+Aucune cible manquée.
 
-- **91.7 % (joueur d’écran, soirée 1) mesuré contre « 70 à 80 % »** (1. Le joueur d’écran (carte complète moyenne) est rentable dans 70 à 80 % des soirées).
+## Soirées enchaînées — l’organisation qui vieillit (--soirees=6)
 
-## Constantes recalibrées (ancre MGMT_LOT3B_T1_ECONOMIE, mgmt-argent.js)
+K soirées enchaînées sur la MÊME organisation (mgmtNewPile entre chaque ; le bilan et
+la notoriété des combattants évoluent, le corps s’use, Leïla respecte le repos).
+Chaque ligne est l’index de la soirée dans la carrière de l’organisation.
+« Disponibles » : les lignes que la liste de composition laisse choisir au moment
+de composer (mesuré sur la carrière du joueur d’écran) ; « suspensions » : les
+combattants sous suspension médicale à ce moment.
 
-Les cibles sont des décisions d’auteur — jamais touchées. Ce sont les poids d’argent
-qui ont bougé, pour porter le joueur d’écran (le seul qui sert les cibles) dans la
-bande 70-80 % malgré le bonus de victoire. Effets mesurés : comparaison des essais
---n=200 --soirees=20 (avant recalibrage : -49.4 k$ / 0 % ; après : 11.6 k$ / 91.7 %, soirée 1).
+| Soirée | Profil | n | R moyen | R méd | R p5 | R p95 | % rentables | Audience | Disponibles | Suspensions |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | oracle | 4000 | 17.6 | 17 | 8 | 27 | 99.8 | 8838.4 | — | — |
+| 2 | oracle | 4000 | 10.5 | 10 | 1 | 20 | 96.3 | 7966.4 | — | — |
+| 3 | oracle | 4000 | 5.3 | 5 | -4 | 15 | 79 | 7332.4 | — | — |
+| 4 | oracle | 3998 | 5.6 | 6 | -5 | 16 | 78.9 | 7403.3 | — | — |
+| 5 | oracle | 3993 | 4.3 | 4 | -7 | 15 | 72.5 | 7281.4 | — | — |
+| 6 | oracle | 3981 | 1.3 | 2 | -10 | 12 | 56.4 | 6954.6 | — | — |
+| 1 | joueur d’écran | 4000 | 5.3 | 5 | -5 | 16 | 77.4 | 7223.5 | 48.6 | 0 |
+| 2 | joueur d’écran | 4000 | 1.6 | 1 | -8 | 12 | 56.5 | 6922.4 | 41.6 | 6.9 |
+| 3 | joueur d’écran | 4000 | 0.3 | 0 | -10 | 11 | 47.3 | 6856.6 | 34.6 | 13.9 |
+| 4 | joueur d’écran | 3996 | -1.5 | -2 | -12 | 10 | 37.3 | 6708.4 | 27.9 | 20.6 |
+| 5 | joueur d’écran | 3989 | -2.6 | -3 | -13 | 9 | 31 | 6615.1 | 25.1 | 23.3 |
+| 6 | joueur d’écran | 3971 | -3.7 | -4 | -14 | 8 | 25.5 | 6517.9 | 23.5 | 24.8 |
+| 1 | réduite | 4000 | 1.5 | 1 | -8 | 11 | 55.7 | 6989.1 | — | — |
+| 2 | réduite | 4000 | -1.9 | -2 | -11 | 8 | 33.5 | 6716.1 | — | — |
+| 3 | réduite | 4000 | -3.2 | -3 | -13 | 7 | 26.6 | 6650.6 | — | — |
+| 4 | réduite | 3996 | -4.7 | -5 | -14 | 6 | 18.7 | 6519.6 | — | — |
+| 5 | réduite | 3989 | -5.9 | -6 | -16 | 5 | 14.4 | 6426.8 | — | — |
+| 6 | réduite | 3971 | -6.8 | -7 | -17 | 4 | 11.9 | 6356.8 | — | — |
+| 1 | bâclée | 4000 | -4.8 | -5 | -13 | 5 | 16.1 | 5827.8 | — | — |
+| 2 | bâclée | 4000 | -4.2 | -4 | -13 | 5 | 19.9 | 5984.4 | — | — |
+| 3 | bâclée | 4000 | -3.4 | -4 | -13 | 7 | 25.2 | 6158.6 | — | — |
+| 4 | bâclée | 4000 | -4.7 | -5 | -14 | 6 | 19.7 | 6028.8 | — | — |
+| 5 | bâclée | 3996 | -5.9 | -6 | -16 | 5 | 16.2 | 5913.5 | — | — |
+| 6 | bâclée | 3979 | -6.2 | -6 | -17 | 5 | 16 | 5939.4 | — | — |
+
+**Information de design : l’hypothèse inverse est mesurée.** Le joueur d’écran est
+rentable à la première soirée (R moyen 5.3 k$, 77.4 % de rentables) et
+il SE DÉGRADE d’une soirée à l’autre : R moyen -3.7 k$ à la sixième
+(25.5 % de rentables),
+audience 7223.5 → 6517.9 écrans, vivier 48.6 → 23.5 disponibles,
+suspensions en cours 0 → 24.8, et des soirées qui ne se
+composent plus (4000 → 3971 carrières complètes).
+L’hypothèse « l’organisation vieillissante s’enrichit quand ses noms montent » n’est
+PAS vérifiée à K=6 : la notoriété monte, mais le corps s’use et les
+suspensions retirent les meilleurs noms de la rotation, plus vite que les noms ne
+montent. C’est une information de design, pas un détail — la jeunesse de
+l’organisation est son âge d’or, et le déclin des cartes suit l’usure du vivier.
+
+## Constantes recalibrées (ancre MGMT_LOT3B_T1_ECONOMIE, mgmt-bureau.js)
+
+Les cibles du lot 3b T1 sont des décisions d’auteur — jamais touchées. Ce sont les
+poids d’argent qui ont bougé, pour porter le joueur d’écran (le seul qui sert les
+cibles) dans la bande 70-80 %. Effets mesurés : comparaison des essais --n=600
+(avant recalibrage : -6.6 k$ / 10.3 % ; après : 5.3 k$ / 77.4 %).
 
 | Constante | Ancienne | Nouvelle | Effet mesuré |
 |---|---|---|---|
-| `MGMT_WIN_BONUS_SHARE` | — (nouveau) | 1 | NOUVEAU (lot 2B T4) — part du cachet reversée au vainqueur : 1, la pratique show/win du sport réel ; le vainqueur des neuf combats touche son cachet une seconde fois, le nul ne bonus personne |
-| `MGMT_TICKET_PER_DRAW` | 7 | 11.4 | billetterie (k$) par point d’attrait — LE levier de revenu de ce recalibrage : le bonus de victoire alourdit le coût d’une soirée de ~50 k$, la billetterie suit (7 → 11.4) ; R moyen -49.4 → 11.6 k$, rentables 0 % → 91.7 % (soirée 1) |
-| `MGMT_TV_PER_AUD` | 6 | 9.2 | droits du diffuseur (k$) pour 1000 écrans — second levier de revenu, monté dans ses proportions avec la billetterie (6 → 9.2) |
-| `MGMT_PURSE_PER_STAR` | 3.35 | 3.35 | INCHANGÉ — cachet par point de nom (calibrage T4 du lot 2 : le joueur d’écran book les mieux classés, la prime au nom subsiste) |
+| `MGMT_PURSE_PER_STAR` | 4 | 3.35 | cachet par point de nom — LE levier de cette reprise : le joueur d’écran book les mieux classés, donc les bilans les plus lourds et les mieux payés ; cachets du joueur d’écran 104.7 → 93.2 k$ (essais --n=600), R moyen -6.6 → 5.3 k$, rentables 10.3 % → 77.4 % — l’écart de cachets entre un rang 1 et un reste-de-liste subsiste (prime au nom conservée) |
+| `MGMT_TICKET_PER_DRAW` | 7 | 7 | INCHANGÉ — billetterie (k$) par point d’attrait |
+| `MGMT_TV_PER_AUD` | 6 | 6 | INCHANGÉ — droits du diffuseur (k$) pour 1000 écrans |
 | `MGMT_PURSE_BASE` | 1 | 1 | INCHANGÉ — cachet plancher |
 | `MGMT_PURSE_PRELIM_W` | 1 | 1 | INCHANGÉ — poids du cachet en prélim |
 | `MGMT_PURSE_MAIN_W` | 2.5 | 2.5 | INCHANGÉ — poids du cachet en carte principale |
@@ -110,11 +153,11 @@ bande 70-80 % malgré le bonus de victoire. Effets mesurés : comparaison des es
 | `MGMT_ATTR_GAP` | 0.6 | 0.6 | INCHANGÉ — morsure de l’écart de nom sur l’attrait (baisser aurait aidé le bâclé plus que le joueur d’écran : ordre du gradient menacé) |
 | `MGMT_AUD_BASE` | 0.7 | 0.7 | INCHANGÉ — part d’audience acquise avant la soirée |
 | `MGMT_AUD_PER_DRAW` | 1000 | 1000 | INCHANGÉ — écrans par point d’attrait × mix de spectacle |
-| `MGMT_DRAW_AVG` | 0.48 | 0.49 | MESURE reposée sur le joueur d’écran — attrait moyen mesuré d’un combat : 0.626 ; mgmtAudienceRef sans historique (8523 écrans) reste l’audience moyenne du joueur d’écran (QO-7) |
-| `MGMT_SPECTACLE_REF` | 0.71 | 0.64 | MESURE reposée sur le joueur d’écran — part de finitions mesurée : 0.551 |
+| `MGMT_DRAW_AVG` | 0.59 | 0.48 | MESURE reposée sur le joueur d’écran — attrait moyen mesuré d’un combat : 0.481 ; mgmtAudienceRef sans historique (7231 écrans) reste l’audience moyenne du joueur d’écran (écart mesuré < 1 %, QO-7) |
+| `MGMT_SPECTACLE_REF` | 0.67 | 0.71 | MESURE reposée sur le joueur d’écran — part de finitions mesurée : 0.705 |
 | `MGMT_TREASURY_START` | 50 | 50 | INCHANGÉ — décision QO-5 |
 | `MGMT_TV_ECRANS` | 1000 | 1000 | INCHANGÉ — définition, pas un réglage |
-| `MGMT_CARD_CONTRACT` | 9 | 12 | INCHANGÉ — la carte complète du lot 2 (5 + 4), définition |
+| `MGMT_CARD_CONTRACT` | 9 | 9 | INCHANGÉ — la carte complète du lot 2 (5 + 4), définition |
 
 Reproductibilité : un même `--seed`/`--n`/`--soirees` redonne exactement ces valeurs. Chaque
 carrière r démarre sous `setSeed(base + r)` (oracle), `setSeed(base + 1000000 + r)` (joueur
