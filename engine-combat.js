@@ -915,7 +915,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              sigmoid((...)/15) telle quelle par takedownSigmoidSteep(),
              plafond relevé 0.85->0.95 (sinon un écart devenu "quasi
              certain" par la steepening restait artificiellement bridé). ==== */
-          const tdChanceA=takedownSigmoidSteep(a.takedown-b.tdd)*attA;
+          const tdChanceA=takedownSigmoidSteep(a.takedown-b.tdd)*attA*lutteSucces(A.style);
           if(rnd()<clamp(tdChanceA,0.05,0.95)*(dt/50)){ st.A.td++; currentPhase='sol'; topIsA=true; groundPos=initialGroundPos(a,b); groundInactivity=0;
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
@@ -924,7 +924,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           }
         } else if(attB>0.14 && rnd()<0.18*lutteEnchaine(B.style)){ st.B.tdAtt+=(dt/50); handled=true;
           /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — voir ci-dessus, côté B. ==== */
-          const tdChanceB=takedownSigmoidSteep(b.takedown-a.tdd)*attB;
+          const tdChanceB=takedownSigmoidSteep(b.takedown-a.tdd)*attB*lutteSucces(B.style);
           if(rnd()<clamp(tdChanceB,0.05,0.95)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a); groundInactivity=0;
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
