@@ -88,7 +88,7 @@ function scr_mgmt_options(){
   const bandeau=`<div class="mf-op-bande"><div class="mf-op-ongs">${onglets}</div><div class="mf-op-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div></div>`;
   const nb=o.onglet==='touches'?'Clavier':(ls.length+(o.onglet==='partie'?' actions':' réglages'));
   const corps=o.onglet==='touches'?mgmtOpTouchesHtml():`<div class="mf-op-ls">${ls.map((l,i)=>mgmtOpLigneHtml(o.onglet,l,i)).join('')}</div>`;
-  const panneau=mfPanneau(`<div class="mf-op-p"><div class="mf-so-ct"><div><div class="mf-so-ti">${esc(MGMT_OP_TITRES[o.onglet])}</div><i class="mf-so-bar"></i></div><span>${esc(nb)}</span></div>${corps}${o.onglet==='partie'?mgmtOpPiedHtml():''}</div>`,'choisi','mf-op-pan');
+  const panneau=mfPanneau(`<div class="mf-op-p"><div class="mf-so-ct"><div><div class="mf-so-ti">${esc(MGMT_OP_TITRES[o.onglet])}</div><i class="mf-so-bar"></i></div><span>${esc(nb)}</span></div>${corps}${o.onglet==='partie'?mgmtOpPiedHtml():''}${(o.onglet!=='touches'&&o.onglet!=='partie')?`<div class="mf-op-bas">${mfBouton('Réglages d’origine',{touche:'R',onclick:'CL.mgmtOpRaz()'})}</div>`:''}</div>`,'choisi','mf-op-pan');
   const contenu=`<main class="mf-contenu mf-op">${bandeau}${panneau}</main>`;
   const touches=[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtOpRetour()'}];
   if(o.onglet==='partie') touches.push({ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Onglet',onclick:'CL.mgmtOpOnglet(1)'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Sauvegarder maintenant',jaune:true,onclick:"CL.mgmtOpAction('sauver')"});

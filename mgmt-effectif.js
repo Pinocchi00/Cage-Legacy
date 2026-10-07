@@ -129,7 +129,7 @@ function scr_mgmt_effectif(){
     +`<div class="mf-eff-corps">${liste}<div class="mf-eff-aside">${mgmtEffectifApercuHtml(m,lignes[F.curseur])}</div></div>`;
   const d=divById(div);
   return mfEcran(`<main class="mf-contenu mf-effectif">${contenu}</main>`,
-    {barre:'jeu',courant:'effectif',m,plaque:'Effectif',libelle:`${lignes.length} combattants en ${String(d.name).toLowerCase()}`,
+    {barre:'jeu',courant:'effectif',m,plaque:'Effectif',libelle:`${lignes.length} ${d.gender==='F'?(lignes.length>1?'combattantes':'combattante'):(lignes.length>1?'combattants':'combattant')} en ${String(d.name).toLowerCase()}`,
       droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
       touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtEffectifSexe()'},
         {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtEffectifCategorie(1)'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir sa fiche',jaune:true,onclick:'CL.mgmtEffectifOuvrir()'}]});

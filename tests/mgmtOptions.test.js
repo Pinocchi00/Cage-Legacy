@@ -194,7 +194,7 @@ test('La version PC : manifeste, icônes, service worker et enregistrement', () 
   assert.ok(scripts.length>80);
   for(const s of scripts) assert.ok(liste.includes(s),s);
   assert.ok(liste.some(u=>/fonts\/.*\.woff2/.test(u)),'les polices aussi');
-  assert.ok(liste.includes('./ui-cadre.css?v=b12'));
+  assert.ok(liste.some(u=>/^\.\/ui-cadre\.css\?v=/.test(u)),'la feuille du cadre');
 });
 
 test('Mise à jour : une nouvelle version garde les trois emplacements', () => {

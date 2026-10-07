@@ -32,7 +32,19 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-entete{position:absolute;left:300px;top:20px;width:1564px;height:64px;display:flex;align-items:center;justify-content:space-between}
 .mf-entete-g{display:flex;align-items:center;gap:18px}
 .mf-plaque{height:64px;padding:0 18px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;gap:16px;white-space:nowrap;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.69;text-transform:uppercase}
-.mf-entete-lib{font-weight:600;font-size:24px;line-height:1;letter-spacing:.06em;white-space:nowrap;text-transform:uppercase}
+.mf-entete-lib{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;white-space:nowrap;text-transform:uppercase}
+.mf-entete-n{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.69;white-space:nowrap}
+.mf-tuiles{display:flex;gap:6px}
+.mf-tuiles i{box-sizing:border-box;width:36px;height:12px;border:2px solid var(--mf-blanc);display:block}
+.mf-tuiles i.p{background:var(--mf-blanc)}
+.mf-entete-d.soiree{display:flex;align-items:center;gap:16px}
+.mf-tete-dans{font-size:24px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-tete-boite{box-sizing:border-box;height:64px;padding:0 18px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;gap:16px;white-space:nowrap}
+.mf-tete-boite b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.69}
+.mf-tete-boite span{font-weight:600;font-size:24px;line-height:1;letter-spacing:.06em}
+.mf-tete-boite.soir{gap:14px}
+.mf-tete-boite.soir b{font-size:56px}
+.mf-tete-boite.soir b.n{color:var(--mf-rouge-vif)}
 .mf-entete-d{font-size:24px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
 
 /* La barre des sections : 260 px à gauche, toute la hauteur. */
@@ -167,6 +179,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-date{position:absolute;left:1498px;top:924px;width:350px;height:84px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;justify-content:center;gap:20px}
 .mf-date b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.69}
 .mf-date span{font-weight:600;font-size:26px;line-height:1;letter-spacing:.06em}
+.mf-date b{white-space:nowrap}
+/* Un lieu long (« Palais des sports de Marseille ») ne tient pas à côté de la date : il passe dessous, la boîte grandit vers le haut. */
+.mf-date.long{top:auto;bottom:72px;height:auto;min-height:84px;padding:12px 16px;flex-direction:column;gap:8px;text-align:center}
+.mf-date.long span{line-height:1.1}
 /* ---- Effectif : la liste d'une catégorie et l'aperçu du choisi ---------------- */
 .mf-effectif{display:flex;flex-direction:column;gap:16px}
 .mf-eff-barre{height:56px;flex:none;display:flex;align-items:center;gap:20px}
@@ -780,33 +796,37 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-cb-p.on{background:var(--mf-blanc);color:var(--mf-noir)}
 /* ==== [FIN ANCRE] ==== */
 
-/* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. ==== */
+/* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. Valeurs reprises sur la planche
+   (reprise de fidélité du 07/10/2026) : lignes de 88 px à coins coupés de 14 px, titre 36 px, aide 22 px, choix de 48 px de haut en 30 px. ==== */
 .mf-op{display:flex;flex-direction:column;gap:16px}
 .mf-op-bande{display:flex;justify-content:space-between;align-items:center;height:56px}
 .mf-op-ongs{display:flex;gap:8px}
-.mf-op-tab{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1;color:var(--mf-texte2)}
+.mf-op-tab{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1}
 .mf-op-pan{flex:1;min-height:0}
-.mf-op-p{display:flex;flex-direction:column;gap:20px;height:100%;box-sizing:border-box;padding:24px 28px}
-.mf-op-ls{display:flex;flex-direction:column;gap:6px}
-.mf-op-l{display:flex;justify-content:space-between;align-items:center;gap:32px;height:88px;box-sizing:border-box;padding:0 24px;background:var(--mf-ligne);cursor:pointer}
+.mf-op-p{display:flex;flex-direction:column;gap:16px;height:100%;box-sizing:border-box;padding:15px}
+.mf-op-ls{display:flex;flex-direction:column;gap:8px}
+.mf-op-l{display:flex;justify-content:space-between;align-items:center;gap:24px;height:88px;flex:none;box-sizing:border-box;padding:0 20px;background:var(--mf-ligne);color:var(--mf-blanc);cursor:pointer;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
 .mf-op-l.sel{background:var(--mf-blanc);color:var(--mf-noir)}
-.mf-op-t{display:flex;flex-direction:column;gap:6px;min-width:0}
-.mf-op-t b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:32px;line-height:1;text-transform:uppercase}
-.mf-op-t span{font-size:22px;line-height:1.1;color:var(--mf-texte2)}
-.mf-op-l.sel .mf-op-t span{color:rgba(13,11,11,.74)}
-.mf-op-ctl{display:flex;align-items:center;gap:8px;flex:none}
-.mf-op-ch{box-sizing:border-box;height:48px;padding:0 20px;border:2px solid var(--mf-bord);background:transparent;color:inherit;font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:44px;white-space:nowrap}
-.mf-op-ch.on{background:var(--mf-rouge);border-color:var(--mf-rouge);color:var(--mf-blanc)}
-.mf-op-l.sel .mf-op-ch{border-color:var(--mf-noir)}
+.mf-op-t{display:flex;flex-direction:column;gap:10px;min-width:0}
+.mf-op-t b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:36px;line-height:.8;white-space:nowrap;text-transform:uppercase}
+.mf-op-t span{font-size:22px;line-height:1;white-space:nowrap;color:var(--mf-texte2)}
+.mf-op-l.sel .mf-op-t span{color:rgba(13,11,11,.72)}
+.mf-op-ctl{display:flex;align-items:center;gap:6px;flex:none}
+.mf-op-ch{box-sizing:border-box;height:48px;padding:0 16px;border:2px solid var(--mf-bord);background:transparent;color:var(--mf-blanc);font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:44px;white-space:nowrap;text-transform:uppercase}
+.mf-op-ch.on{background:var(--mf-blanc);border-color:var(--mf-blanc);color:var(--mf-noir)}
+.mf-op-l.sel .mf-op-ch{border-color:var(--mf-noir);color:var(--mf-noir)}
 .mf-op-l.sel .mf-op-ch.on{background:var(--mf-noir);color:var(--mf-blanc)}
 .mf-op-blocs{display:flex;gap:4px}
 .mf-op-bloc{box-sizing:border-box;width:28px;height:40px;border:2px solid var(--mf-bord);background:transparent;padding:0}
-.mf-op-bloc.on{background:var(--mf-rouge-vif);border-color:var(--mf-rouge-vif)}
+.mf-op-bloc.on{background:var(--mf-blanc);border-color:var(--mf-blanc)}
+.mf-op-l.sel .mf-op-bloc{border-color:var(--mf-noir)}
+.mf-op-l.sel .mf-op-bloc.on{background:var(--mf-noir)}
 .mf-op-n{min-width:44px;text-align:right;font-family:var(--mf-titre);font-weight:800;font-size:36px;line-height:1}
-.mf-op-act{box-sizing:border-box;height:48px;padding:0 24px;border:2px solid var(--mf-bord);background:transparent;color:inherit;display:inline-flex;align-items:center;gap:12px;font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:44px;white-space:nowrap}
+.mf-op-act{box-sizing:border-box;height:48px;padding:0 20px;border:2px solid var(--mf-bord);background:transparent;color:inherit;display:inline-flex;align-items:center;gap:12px;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:44px;white-space:nowrap;text-transform:uppercase}
 .mf-op-act.sel{background:var(--mf-jaune);border-color:var(--mf-jaune);color:var(--mf-noir)}
 .mf-op-act[disabled]{opacity:.45}
 .mf-op-k{border:2px solid var(--mf-noir);padding:2px 8px;font-size:24px;line-height:1}
+.mf-op-bas{margin-top:auto;display:flex;justify-content:flex-end}
 .mf-op-touches{display:grid;grid-template-columns:1fr 1fr;gap:40px}
 .mf-op-touches>div{display:flex;flex-direction:column;gap:28px}
 .mf-op-tc{display:flex;flex-direction:column;gap:10px}
@@ -815,3 +835,139 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-op-pied{display:flex;justify-content:space-between;align-items:center;margin-top:auto;font-size:24px;line-height:1;color:var(--mf-texte2)}
 .mf-op-pg{display:flex;align-items:center;gap:16px;color:var(--mf-blanc)}
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_FIDELITE_ANCIEN] — Reprise de fidélité du 07/10/2026 : les écrans qui n'ont pas encore de planche propre (la semaine, le lendemain,
+   l'organisation, le vestiaire, le recrutement) sont dessinés dans le langage visuel des planches. Les jetons de l'ancien habillage (prune, jaune
+   doré) sont redéfinis dans le cadre : mêmes noirs, même blanc cassé, même jaune et même rouge que le reste du management ; les titres prennent le
+   caractère extra-condensé, le texte le condensé, rien sous 22 px. Les panneaux sont ceux du cadre (mfPanneau) quand l'écran les pose. ==== */
+.mf-ancien{
+  --mgmt-ink:#E9E6E1; --mgmt-secondary:rgba(233,230,225,.74); --mgmt-tertiary:rgba(233,230,225,.74);
+  --mgmt-yellow:#F0B220; --mgmt-red:#E23A2B; --mgmt-plum:#121010; --mgmt-plum-top:#121010; --mgmt-plum-deep:#0D0B0B;
+  --mgmt-panel:#252121; --mgmt-panel-soft:#1b1818; --mgmt-edge:rgba(233,230,225,.16); --mgmt-dark-ink:#0D0B0B;
+  --mgmt-font-display:'Saira Extra Condensed','Saira Condensed','Arial Narrow',sans-serif; --mgmt-font-body:'Saira Condensed','Arial Narrow',sans-serif;
+  --text:#E9E6E1; --muted:rgba(233,230,225,.74); --faint:rgba(233,230,225,.74); --gold:#F0B220; --line:rgba(233,230,225,.16);
+  font-family:'Saira Condensed','Arial Narrow',sans-serif; font-weight:500; color:#E9E6E1; padding:0; background:none;
+}
+.mf-ancien .scr.mgmt-wrap{padding:0;background:none;gap:0;max-width:none;width:100%;min-height:0;box-sizing:border-box}
+.mf-ancien .mgmt-head.bar,.mf-ancien .mgmt-cycle{display:none}
+.mf-ancien .mgmt-week{padding:0}
+.mf-ancien .mgmt-week-cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,.8fr);gap:16px;margin:0;height:856px;align-items:stretch}
+.mf-ancien .mgmt-week-cols>.mf-sem-p{min-height:0}
+.mf-ancien .mf-sem-p>.mf-p2>.mf-p3{min-height:0;overflow:hidden}
+.mf-ancien .mf-sem-p .mgmt-week-pane{height:100%;overflow-y:auto;overflow-x:hidden;padding:22px 24px 26px;box-sizing:border-box;scrollbar-width:thin}
+.mf-ancien h2,.mf-ancien h3,.mf-ancien .mgmt-week h3{font:800 44px/.75 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);color:#E9E6E1;text-transform:uppercase;margin:0 0 26px;padding-bottom:18px;position:relative}
+.mf-ancien h3::after{content:'';position:absolute;left:0;bottom:0;width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-ancien .mgmt-week-card>p,.mf-ancien .mgmt-week-instruction,.mf-ancien p,.mf-ancien .lede{font:600 24px/1.25 var(--mgmt-font-body);color:var(--mgmt-secondary);margin:0 0 14px}
+.mf-ancien .mgmt-week-fight,.mf-ancien .opp{background:var(--mf-ligne);padding:14px 18px;margin:0 0 8px;border:0;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-ancien .mgmt-week-slot,.mf-ancien .mgmt-week-meta,.mf-ancien .mgmt-meta,.mf-ancien .opp-mid,.mf-ancien .mgmt-role,.mf-ancien .mono{font:600 22px/1.2 var(--mgmt-font-body);color:var(--mgmt-secondary);letter-spacing:.04em;text-transform:none}
+.mf-ancien .mgmt-week-names,.mf-ancien .opp-nm,.mf-ancien .mgmt-fname{font:800 34px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;margin:6px 0;color:#E9E6E1}
+.mf-ancien .mgmt-week-names span{font:600 22px var(--mgmt-font-body);letter-spacing:.04em;text-transform:none;color:var(--mgmt-secondary)}
+.mf-ancien .opp{cursor:pointer}
+.mf-ancien .opp.sel,.mf-ancien .opp.mgmt-aff.sel{background:#E9E6E1;color:#0D0B0B}
+.mf-ancien .opp.sel .opp-nm,.mf-ancien .opp.sel .opp-mid{color:#0D0B0B}
+.mf-ancien .opp-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.mf-ancien .opp-rec{font:800 34px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls)}
+.mf-ancien .mgmt-week-free,.mf-ancien .mgmt-week-book,.mf-ancien .mgmt-next,.mf-ancien .mgmt-week-link,.mf-ancien .mgmt-rep{
+  display:flex;align-items:center;width:100%;box-sizing:border-box;min-height:60px;padding:8px 20px;margin:8px 0;border:0;cursor:pointer;text-align:left;
+  background:var(--mf-ligne);color:#E9E6E1;font:800 30px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;
+  clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);border-radius:0;max-width:none}
+.mf-ancien .mgmt-rep{font:600 24px/1.2 var(--mgmt-font-body);letter-spacing:.02em;text-transform:none;background:var(--mf-ligne)}
+.mf-ancien .mgmt-rep::before{content:'\2014\00A0';color:var(--mgmt-secondary)}
+.mf-ancien .mgmt-week-free{font:600 24px/1.2 var(--mgmt-font-body);letter-spacing:.02em;text-transform:none;color:var(--mgmt-secondary);background:transparent;box-shadow:inset 0 0 0 2px var(--mf-bord);clip-path:none}
+.mf-ancien .mgmt-rep:hover,.mf-ancien .mgmt-week-link:hover,.mf-ancien .mgmt-week-free:hover,.mf-ancien .mgmt-next:hover{background:#E9E6E1;color:#0D0B0B;filter:none}
+.mf-ancien .mgmt-week-book{background:var(--mf-jaune);color:#0D0B0B;justify-content:center;margin-top:16px}
+.mf-ancien .mgmt-next{justify-content:center;background:var(--mf-jaune);color:#0D0B0B}
+.mf-ancien .mgmt-next:hover{background:#ffc83d}
+.mf-ancien .mgmt-spk{display:inline-flex;align-items:center;height:32px;padding:0 12px;background:#E9E6E1;color:#0D0B0B;font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em;text-transform:uppercase;margin:0 0 8px}
+.mf-ancien .mgmt-say{font:600 26px/1.25 var(--mgmt-font-body);color:#E9E6E1;margin:0 0 12px;padding:12px 18px;background:#0D0B0B;border:2px solid rgba(233,230,225,.62);max-width:none}
+.mf-ancien .mgmt-reps{margin:18px 0 8px}
+.mf-ancien .mgmt-week-talk,.mf-ancien .mgmt-week-dossier,.mf-ancien .mgmt-week-memo{border-top:2px solid var(--mf-sep);margin-top:24px;padding-top:20px}
+.mf-ancien details>summary{font:800 30px/1.1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;cursor:pointer;color:#E9E6E1;list-style:none;padding:4px 0}
+.mf-ancien details>summary::-webkit-details-marker{display:none}
+.mf-ancien details>summary::before{content:'+';display:inline-block;width:30px;color:var(--mf-jaune)}
+.mf-ancien details[open]>summary::before{content:'\2212'}
+.mf-ancien .mgmt-week-news,.mf-ancien .mgmt-week-fact{padding:14px 0;border-bottom:2px solid var(--mf-sep);font:600 24px/1.25 var(--mgmt-font-body);color:#E9E6E1}
+.mf-ancien .mgmt-week-source{display:inline-block;margin-right:10px;padding:2px 8px;background:#E9E6E1;color:#0D0B0B;font:600 22px/1.2 var(--mgmt-font-body);letter-spacing:.04em;text-transform:uppercase}
+.mf-ancien .mgmt-week-news button{background:none;border:0;color:var(--mf-jaune);font:800 26px var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-decoration:none;text-transform:uppercase;cursor:pointer;padding:0 4px}
+.mf-ancien .mgmt-week-fact{font-size:22px;color:var(--mgmt-secondary)}
+.mf-ancien .mgmt-week-memory summary{color:#E9E6E1;font-size:26px}
+.mf-ancien .mgmt-week-rank{display:flex;gap:12px;align-items:center;min-height:48px;padding:6px 14px;margin:0 0 6px;background:var(--mf-ligne);font:600 24px/1.1 var(--mgmt-font-body);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-ancien .mgmt-week-rank.split{background:#E9E6E1;color:#0D0B0B}
+.mf-ancien .mgmt-week-organisation{margin-top:22px}
+.mf-ancien .mgmt-week-organisation>p{font-size:24px}
+/* ==== [FIN ANCRE] ==== */
+.mf-ancien,.mf-ancien *{scrollbar-color:rgba(233,230,225,.38) transparent}
+.mf-ancien .mgmt-week .mgmt-aff .opp-nm,.mf-ancien .mgmt-book-list .mgmt-aff .opp-nm,.mf-ancien .mgmt-aff .opp-nm,.mf-ancien .mgmt-fight .opp-nm{font-size:32px}
+.mf-ancien .mgmt-week-news button,.mf-ancien .mgmt-fiche-fight .mgmt-next,.mf-ancien .mgmt-week-news .mgmt-next{width:auto;min-height:0;margin:6px 0 0;padding:6px 14px;background:transparent;color:var(--mf-jaune);font:800 26px/1.1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;clip-path:none;justify-content:flex-start}
+.mf-ancien .mgmt-week-news{font-size:24px;font-weight:600}
+.mf-ancien .mgmt-week-news p{font-size:24px;line-height:1.25;color:#E9E6E1}
+
+/* ==== [ANCRE: MGMT_FIDELITE_ANCIEN_SUITE] — Le lendemain, l'organisation, le vestiaire et le recrutement dans le même langage que la semaine : des panneaux du cadre,
+   des lignes à coins coupés, le blanc cassé pour ce qui est choisi, un seul jaune pour l'action. ==== */
+/* Le lendemain */
+.mf-ancien .mgmt-ld{padding:0}
+.mf-ancien .mgmt-ld .mgmt-head.bar{display:flex;justify-content:flex-end;align-items:center;height:76px;padding:0;margin:0 0 16px;border:0}
+.mf-ancien .mgmt-ld .mgmt-head .disp{display:none}
+.mf-ancien .mgmt-ld-next{display:inline-flex;align-items:center;height:60px;padding:0 24px;border:0;cursor:pointer;background:var(--mf-jaune);color:#0D0B0B;font:800 34px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.mf-ancien .mgmt-ld-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:0;height:764px}
+.mf-ancien .mgmt-ld-pane{display:flex;min-height:0;overflow:hidden;padding:0}
+.mf-ancien .mgmt-ld-pane>.mf-sem-p{flex:1}
+.mf-ancien .mf-sem-p .mf-sem-in{height:100%;overflow-y:auto;overflow-x:hidden;padding:22px 24px 26px;box-sizing:border-box;display:flex;flex-direction:column}
+.mf-ancien .mgmt-ld-hd{font:800 44px/.75 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1;margin:0 0 26px;padding-bottom:18px;position:relative}
+.mf-ancien .mgmt-ld-hd::after{content:'';position:absolute;left:0;bottom:0;width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-ancien .mgmt-ld-item{padding:12px 16px;margin:0 0 8px;border:0;background:var(--mf-ligne);gap:4px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-ancien .mgmt-ld-slot{font:600 22px/1.2 var(--mgmt-font-body);letter-spacing:.04em;color:var(--mgmt-secondary);text-transform:uppercase}
+.mf-ancien .mgmt-ld-slot.gold{color:var(--mf-jaune)}
+.mf-ancien .mgmt-ld-title{font:800 32px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);color:#E9E6E1}
+.mf-ancien .mgmt-ld-title.gold{color:var(--mf-jaune)}
+.mf-ancien .mgmt-ld-sub,.mf-ancien .mgmt-ld-detail,.mf-ancien .mgmt-ld-parole{font:600 24px/1.25 var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mf-ancien .mgmt-ld-link{align-self:flex-start;background:none;border:0;padding:4px 0;margin:4px 0 0;color:var(--mf-jaune);font:800 26px/1.1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;cursor:pointer}
+.mf-ancien .mgmt-ld-tout{margin-top:16px}
+.mf-ancien .mgmt-ld-presse,.mf-ancien .mgmt-ld-patron{border-color:var(--mf-sep);border-width:2px}
+.mf-ancien .mgmt-ld-parole span,.mf-ancien .mgmt-retrait-parole span,.mf-ancien .mgmt-proposition-ligne span{font:600 22px var(--mgmt-font-body);letter-spacing:.04em;color:#E9E6E1;background:none}
+.mf-ancien .mgmt-retrait-parole,.mf-ancien .mgmt-proposition-ligne{font:600 24px/1.25 var(--mgmt-font-body)}
+/* L'organisation */
+.mf-ancien .mgmt-org{padding:0}
+.mf-ancien .mgmt-org .mgmt-head.bar{display:none}
+.mf-ancien .mgmt-org-retour{display:inline-flex;align-items:center;height:48px;padding:0 18px;margin:0 0 16px;border:0;cursor:pointer;background:var(--mf-ligne);color:#E9E6E1;font:600 24px/1 var(--mgmt-font-body);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-ancien .mgmt-org-cols{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;margin:0;height:792px}
+.mf-ancien .mgmt-org-cols>.mf-sem-p{min-height:0}
+.mf-ancien .mf-sem-p .mgmt-org-main,.mf-ancien .mf-sem-p .mgmt-org-aside{height:100%;overflow-y:auto;padding:22px 24px 26px;box-sizing:border-box}
+.mf-ancien .mgmt-org-sum{font:600 24px/1.2 var(--mgmt-font-body);color:var(--mgmt-secondary);margin:0 0 18px}
+.mf-ancien .mgmt-org-hd{font:800 34px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1;margin:14px 0 10px}
+.mf-ancien .mgmt-org-eff{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mf-ancien .mgmt-org-cat{padding:12px 16px;background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-ancien .mgmt-org-cat.thin{box-shadow:inset 4px 0 0 var(--mf-jaune)}
+.mf-ancien .mgmt-org-nm{font:800 30px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1}
+.mf-ancien .mgmt-org-sub{font:600 22px/1.2 var(--mgmt-font-body);color:var(--mgmt-secondary);margin-top:4px}
+.mf-ancien .mgmt-org-money{display:flex;flex-direction:column;gap:6px;margin:0 0 18px}
+.mf-ancien .mgmt-org-pill{display:inline-flex;align-self:flex-start;height:32px;padding:0 12px;align-items:center;background:#E9E6E1;color:#0D0B0B;font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em;text-transform:uppercase}
+.mf-ancien .mgmt-org-val{font:800 64px/.8 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);color:#E9E6E1}
+.mf-ancien .mgmt-org-line{font:600 24px/1.25 var(--mgmt-font-body);color:var(--mgmt-secondary)}
+/* Le vestiaire */
+.mf-ancien .mgmt-vestiaire{padding:0}
+.mf-ancien .mgmt-vestiaire .mgmt-head.bar{display:none}
+.mf-ancien .mgmt-vest-filtres{display:flex;flex-direction:column;gap:8px;margin:0 0 14px}
+.mf-ancien .mgmt-vest-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mf-ancien .mgmt-vest-chips>span{font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em;color:var(--mgmt-secondary);text-transform:uppercase}
+.mf-ancien .mgmt-vest-chip{height:44px;padding:0 16px;border:0;cursor:pointer;background:var(--mf-ligne);color:#E9E6E1;font:600 22px/1 var(--mgmt-font-body);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.mf-ancien .mgmt-vest-chip.on{background:#E9E6E1;color:#0D0B0B}
+.mf-ancien .mgmt-vest-chips select{height:44px;padding:0 12px;background:var(--mf-ligne);color:#E9E6E1;border:0;font:600 22px var(--mgmt-font-body)}
+.mf-ancien .mgmt-vest-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px;margin:0}
+.mf-ancien .mgmt-vest-liste,.mf-ancien .mgmt-vest-aside{background:#121010;box-shadow:inset 0 0 0 2px var(--mf-bord);padding:14px 16px;min-width:0}
+.mf-ancien .mgmt-vest-row{display:grid;align-items:center;gap:10px;min-height:48px;padding:4px 12px;margin:0 0 6px;background:var(--mf-ligne);font:600 24px/1.1 var(--mgmt-font-body);color:#E9E6E1;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.mf-ancien .mgmt-vest-row.head{background:none;font:600 22px/1 var(--mgmt-font-body);color:var(--mgmt-secondary);text-transform:uppercase;letter-spacing:.04em;clip-path:none;min-height:36px}
+.mf-ancien .mgmt-vest-row b{font:800 28px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase}
+.mf-ancien .mgmt-vest-row em{font:600 22px var(--mgmt-font-body);font-style:normal;color:var(--mgmt-secondary)}
+.mf-ancien .mgmt-vest-pages{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;font:600 22px var(--mgmt-font-body);color:var(--mgmt-secondary)}
+.mf-ancien .mgmt-vest-pages button{height:44px;padding:0 18px;border:0;cursor:pointer;background:var(--mf-ligne);color:#E9E6E1;font:800 24px var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase}
+.mf-ancien .mgmt-vest-pages button[disabled]{opacity:.4;cursor:default}
+.mf-ancien .mgmt-vest-bloc{margin:0 0 18px}
+/* Le recrutement (ancien écran) */
+.mf-ancien .mgmt-recru-rang,.mf-ancien .mgmt-recru-age,.mf-ancien .mgmt-recru-bilan{font:800 28px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls)}
+.mf-ancien .mgmt-week-event{display:none}
+/* ==== [FIN ANCRE] ==== */
+.mf-ancien .mgmt-recru-row.head span{font:600 22px/1 var(--mgmt-font-body);letter-spacing:.04em;text-transform:uppercase;color:var(--mgmt-secondary)}
+.mf-ancien .mgmt-recru-nom{font:800 28px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1}
+.mf-ancien .mgmt-recru-go{font:800 26px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;background:var(--mf-jaune);color:#0D0B0B;border:0;padding:6px 16px}
+.mf-entete-ongs{display:flex;gap:8px}

@@ -216,12 +216,56 @@ function mfEntreeClasse(){
   return nouveau?' mf-entree':'';
 }
 
+/* ==== [ANCRE: MGMT_FIDELITE_ENTETE] — Reprise de fidélité du 07/10/2026 : l'en-tête des planches. À gauche, la plaque, puis (selon l'écran) les pastilles de
+   progression, un grand nombre (44 px) et son libellé (22 px) ; à droite, « Dans N jours », la boîte de la date et du lieu (40 px et 24 px) et la boîte
+   « SPLIT FIGHT NIGHT » suivie du numéro en rouge (56 px). Sans agenda (partie d'avant), seule la boîte de la soirée reste. ==== */
+/** Ce qu'on sait de la prochaine soirée : dans combien de jours, quel jour, quel lieu. Pur, dérivé de l'agenda. */
+function mfSoireeInfos(m){
+  const vide={dans:'',date:'',lieu:''};
+  try{
+    if(!m||typeof mgmtAgendaActif!=='function'||!mgmtAgendaActif(m)||!m.cal||!m.cal.prochaines||!m.cal.prochaines[0]) return vide;
+    const soir=m.cal.prochaines[0], jd=mgmtJourDate(soir.jour), reste=Math.max(0,soir.jour-(m.cal.jour||0));
+    const salle=(typeof mgmtSalleParId==='function'&&mgmtSalleParId(m,soir.salle))||(typeof mgmtSalleDefaut==='function'?mgmtSalleDefaut(m):null);
+    /* Un nom de salle long (« Palais des sports de Marseille ») ne tient pas dans la boîte de la planche (« Dôme de Lyon ») : la ville le remplace. */
+    const lieu=salle?String(salle.nom.length<=16||!salle.ville?salle.nom:salle.ville).toUpperCase():'';
+    return {dans:reste===0?'Aujourd’hui':'Dans '+reste+' jour'+(reste>1?'s':''),date:jd.jour+' '+jd.mois,lieu};
+  }catch(e){ return vide; }
+}
+/** Le bloc de droite de l'en-tête pour une partie : le décompte, la date, la soirée. */
+function mfEnteteSoiree(m){
+  const i=mfSoireeInfos(m);
+  const n=(m.eventsPlayed||0)+1;
+  return `<div class="mf-entete-d soiree">`
+    +(i.dans?`<div class="mf-tete-dans">${esc(i.dans)}</div>`:'')
+    +(i.date?`<div class="mf-tete-boite"><b>${esc(i.date)}</b>${i.lieu?`<span>${esc(i.lieu)}</span>`:''}</div>`:'')
+    +`<div class="mf-tete-boite soir"><b>${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT</b><b class="n">${esc(n)}</b></div></div>`;
+}
+/** Le libellé de l'en-tête : un nombre en grand suivi de son texte, ou un simple texte. */
+function mfEnteteLibelle(lib){
+  const t=String(lib||''); if(!t) return '';
+  const mm=/^(\d+(?: \/ \d+)?)(?:\s+(.*))?$/.exec(t);
+  if(mm) return `<div class="mf-entete-n">${esc(mm[1])}</div>${mm[2]?`<div class="mf-entete-lib">${esc(mm[2])}</div>`:''}`;
+  return `<div class="mf-entete-lib">${esc(t)}</div>`;
+}
+/** Les onglets de l'en-tête (Contrats : sous contrat / recrutement) : [{t,on,onclick}]. */
+function mfEnteteOnglets(o){
+  if(!Array.isArray(o)||!o.length) return '';
+  return `<div class="mf-entete-ongs">${o.map(x=>`<button type="button" class="mf-onglet${x.on?' ouvert':''}" aria-pressed="${!!x.on}"${x.onclick?` onclick="${x.onclick}"`:''}>${esc(String(x.t).toUpperCase())}</button>`).join('')}</div>`;
+}
+/** Les pastilles de progression de la carte : pleines pour les combats posés, creuses pour ceux qui manquent. */
+function mfEntetePastilles(t){
+  if(!t||!(t[1]>0)) return '';
+  return `<div class="mf-tuiles" aria-hidden="true">${Array.from({length:t[1]},(_,i)=>`<i class="${i<t[0]?'p':''}"></i>`).join('')}</div>`;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Un écran du cadre : le fond cendré, l'en-tête, la barre, le contenu, les touches.
  *  opts : {barre:'jeu'|'demarrage'|'aucune', courant, grise, m, plaque, libelle, droite, touches, fond:'cendre'|'teinte', couleur, contenuBrut} */
 function mfEcran(contenu,opts={}){
   const o=Object.assign({barre:'jeu',courant:null,grise:false,m:null,plaque:'',libelle:'',droite:'',touches:null,couleur:''},opts);
   const entete=o.plaque
-    ?`<header class="mf-entete"><div class="mf-entete-g"><div class="mf-plaque">${esc(o.plaque)}</div>${o.libelle?`<div class="mf-entete-lib">${esc(o.libelle)}</div>`:''}</div>${o.droite?`<div class="mf-entete-d">${esc(o.droite)}</div>`:''}</header>`
+    ?`<header class="mf-entete"><div class="mf-entete-g"><div class="mf-plaque">${esc(o.plaque)}</div>${mfEntetePastilles(o.tuiles)}${mfEnteteOnglets(o.onglets)}${mfEnteteLibelle(o.libelle)}${o.compteur?`<div class="mf-entete-n">${esc(o.compteur)}</div>`:''}</div>`
+      +(o.droite?(o.m&&/fight night/i.test(o.droite)?mfEnteteSoiree(o.m):`<div class="mf-entete-d">${esc(o.droite)}</div>`):'')+`</header>`
     :'';
   const barre=o.barre==='aucune'?'':(o.barre==='logo'
     ?`<div class="mf-logo-seul">${mfLogoHtml()}</div>`
@@ -236,8 +280,12 @@ function mfAncien(html,screen){
   const m=typeof G!=='undefined'&&G?G.mgmt:null;
   const soir=screen==='mgmt_soiree'||screen==='mgmt_lendemain';
   const courant=mfSectionCourante(screen);
-  const lib=courant?(MF_SECTIONS.find(s=>s.id===courant)||{}).libelle:(screen==='mgmt_soiree'?'Soirée':'');
-  const droite=m?`${mgmtOrgNom(m)} ${Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed+1:''}`.trim():'';
+  /* ==== [ANCRE: MGMT_FIDELITE_ANCIEN_ENTETE] — Reprise de fidélité du 07/10/2026 : la plaque dit ce qu'est l'écran (« Les affaires », « Le lendemain »…) et non la
+     section de la barre qui l'éclaire ; la droite de l'en-tête est celle des planches (décompte, date, soirée). ==== */
+  const PLAQUES={mgmt_bureau:'Les affaires',mgmt_organisation:'Organisation',mgmt_lendemain:'Le lendemain',mgmt_vestiaire:'Le vestiaire',mgmt_recrutement:'Recrutement',mgmt_soiree:'Soirée'};
+  const lib=PLAQUES[screen]||(courant?(MF_SECTIONS.find(s=>s.id===courant)||{}).libelle:'');
+  const droite=m?`${mgmtOrgNom(m)} Fight Night ${Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed+1:''}`.trim():'';
+  /* ==== [FIN ANCRE] ====*/
   return mfEcran(`<main class="mf-contenu"><div class="mf-ancien">${html}</div></main>`,
     {barre:'jeu',courant,grise:soir,m,plaque:lib||'Management',droite});
 }
@@ -319,7 +367,8 @@ function mfAfficheDonnees(m){
   }).filter(Boolean);
   const couleurs=['#B32A1E','#1F4E8C','#C9962A','#1C7A5A','#D2641C','#A3216B','#BFBAB2','#1B8C8F'];
   const h=typeof mgmtHashId==='function'?mgmtHashId(cf.a+'|'+cf.b):0;
-  return {a:fiche(a),b:fiche(b),cat:mgmtDivisionLabel(a.div),n:(m.eventsPlayed||0)+1,org:m.org,autres,couleur:couleurs[Math.abs(h)%couleurs.length]};
+  const info=mfSoireeInfos(m), date=info.date, lieu=info.lieu;
+  return {a:fiche(a),b:fiche(b),cat:mgmtDivisionLabel(a.div),n:(m.eventsPlayed||0)+1,org:m.org,autres,date,lieu,couleur:couleurs[Math.abs(h)%couleurs.length]};
 }
 
 function mfFicheAccueilHtml(f,cote,recFs){
@@ -345,6 +394,7 @@ function mfAfficheHtml(m){
     +`<div class="mf-soiree"><div>${esc(d.org.toUpperCase())} FIGHT</div><div><span>NIGHT</span><b>${esc(d.n)}</b></div></div>`
     +mfFicheAccueilHtml(d.a,'g',recFs)+mfFicheAccueilHtml(d.b,'d',recFs)
     +(d.autres.length?`<div class="mf-aussi"><div class="mf-aussi-t">AUSSI À L’AFFICHE</div>${d.autres.map(x=>`<div class="mf-aussi-l">${esc(x)}</div>`).join('')}</div>`:'')
+    +(d.date?`<div class="mf-date${d.lieu.length>14?' long':''}"><b>${esc(d.date)}</b><span>${esc(d.lieu)}</span></div>`:'')
     +`</div>`;
 }
 

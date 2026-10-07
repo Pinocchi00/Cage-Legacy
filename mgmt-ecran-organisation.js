@@ -104,12 +104,12 @@ function scr_mgmt_organisation(){
      +`<h2 class="disp">L'organisation</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
      +`<button class="mgmt-org-retour" onclick="CL.go('mgmt_bureau')">${esc(MGMT_ORG_LABELS.back)}</button>`
      +`<div class="mgmt-cols mgmt-org-cols">`
-     +`<section class="mgmt-org-main">`
+     +mfPanneau(`<section class="mgmt-org-main">`
      +`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>`
     +`<div class="mgmt-org-sum">${esc(total)}${esc(total===1?' combattant, ':' combattants, ')}`
       +`${esc(legs)}${esc(legs===1?' catégorie':' catégories')}</div>`
-     +groupes+`</section>`
-     +`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
-     +mgmtOrgMoneyHtml(m)+`</aside></div></div>`;
+     +groupes+`</section>`,'normal','mf-sem-p')
+     +mfPanneau(`<aside class="mgmt-org-aside"><h3>${esc(MGMT_ORG_LABELS.finances)}</h3>`
+     +mgmtOrgMoneyHtml(m)+`</aside>`,'normal','mf-sem-p')+`</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

@@ -136,7 +136,7 @@ function scr_mgmt_carte_cadre(){
     +`<div class="mf-car-advs">${lignes||'<div class="mf-eff-aucun">Personne dans cette catégorie.</div>'}</div>`
     +mfBouton('Catégorie : '+mfNet(mgmtDivisionLabel(mgmtCarteDiv(m))),{touche:'C',onclick:'CL.mgmtCarteCategorie(1)',classe:'mf-car-cat'}),'normal','mf-car-d');
   const contenu=`<main class="mf-contenu mf-carte">${gauche}${centre}${droite}</main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:'carte',m,plaque:'Carte',libelle:`${main.length} / ${taille}`,droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
+  return mfEcran(contenu,{barre:'jeu',courant:'carte',m,plaque:'Carte',libelle:`${main.length} / ${taille}`,tuiles:[main.length,taille],droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtCarteLeave()'},{ks:['↑','↓'],t:'Choisir'},{ks:['A','E'],t:'Section'},{ks:['C'],t:'Catégorie',onclick:'CL.mgmtCarteCategorie(1)'},
       {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},{ks:['Entrée'],t:pickF?'Confirmer':'Choisir',jaune:true,onclick:'CL.mgmtCarteEntree()'}]});
 }

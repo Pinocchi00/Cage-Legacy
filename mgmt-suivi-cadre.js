@@ -232,7 +232,7 @@ function scr_mgmt_camps(){
   const debut=Math.min(Math.max(0,i-3),Math.max(0,liste.length-7));
   const puces=liste.slice(debut,debut+7).map((g,k)=>`<button type="button" class="${debut+k===i?'on':''}" onclick="CL.mgmtSuCaChoisir(${debut+k})">${esc(mgmtSuMaj(g.nom))}</button>`).join('');
   const contenu=`<main class="mf-contenu mf-su mf-su-camps">${corps}<div class="mf-su-ca-puces">${puces}</div></main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:'camps',m,plaque:'Camps',libelle:liste.length?`${liste.length} salle${liste.length>1?'s':''} où s’entraînent tes combattants`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
+  return mfEcran(contenu,{barre:'jeu',courant:'camps',m,plaque:'Camps',libelle:liste.length?`${liste.length} salle${liste.length>1?'s':''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Autre salle'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir ses combattants',jaune:true,onclick:'CL.mgmtSuCaVoir()'}]});
 }
 SCREENS.mgmt_camps=scr_mgmt_camps;
@@ -320,7 +320,7 @@ function scr_mgmt_presse(){
     corps=mgmtSuUne(mgmtSuHeroPresse(m,x,vois),mgmtSuCotePresse(m,vois),suite);
   }
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${puces}</div>${corps}</main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:'presse',m,plaque:'Presse',libelle:liste.length?`${liste.length} nouvelle${liste.length>1?'s':''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
+  return mfEcran(contenu,{barre:'jeu',courant:'presse',m,plaque:'Presse',libelle:liste.length?`${liste.length} nouvelle${liste.length>1?'s':''} cette semaine`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Filtre',onclick:'CL.mgmtSuPrFiltreSuivant()'},{ks:['A','E'],t:'Section'},
       {ks:['Entrée'],t:'Préparer ce combat',jaune:true,onclick:'CL.mgmtSuPrEntree()'}]});
 }
@@ -364,7 +364,7 @@ function scr_mgmt_resultats(){
     corps=mgmtSuUne(hero,cote,petits);
   }
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${puces}</div>${corps}</main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:soirees.length?`${mgmtOrgNom(m)} Fight Night ${soirees[F.s].n}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
+  return mfEcran(contenu,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:soirees.length?`${mgmtOrgNom(m)} Fight Night ${soirees[F.s].n}${Number.isFinite(soirees[F.s].jour)?' · '+mgmtJourDate(soirees[F.s].jour).jour+' '+mgmtJourDate(soirees[F.s].jour).mois:''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Soirée',onclick:'CL.mgmtSuReSoiree(MGMT_SU_RE.s+1)'},{ks:['A','E'],t:'Section'},
       {ks:['Entrée'],t:'Revoir ce combat',jaune:true,onclick:'CL.mgmtSuReRevoir()'}]});
 }

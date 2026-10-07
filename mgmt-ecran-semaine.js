@@ -307,16 +307,16 @@ function scr_mgmt_bureau(){
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtOpenLabel(open.length))}`
     +` — ${esc(mgmtCardLabel(m))}</div>`
     +`<div class="mgmt-cols mgmt-week-cols">`
-    +`<section class="mgmt-week-pane mgmt-week-left">${typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):''}${mgmtSemaineCarte(m)}`
+    +mfPanneau(`<section class="mgmt-week-pane mgmt-week-left">${typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):''}${mgmtSemaineCarte(m)}`
     +`<div class="mgmt-week-talk">${selOpen&&selOpen.speaker==='leila'?'':'<h3>Échange</h3>'}${talkHtml}</div>`
     +`<div class="mgmt-week-affairs"><h3>Affaires · ${open.length}</h3>${pileHtml}</div>`
-    +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</section>`
-    +`<section class="mgmt-week-pane"><h3>Le monde autour de ${esc(mgmtOrgNom(m))}</h3>${mgmtSemaineMonde(m)}`
-    +`<details class="mgmt-week-memo"><summary>Mémoire · ${esc(memory.length)} fait${memory.length===1?'':'s'}</summary>${mgmtSemaineMemoire(m,memory)}</details></section>`
-    +`<aside class="mgmt-week-pane">${mgmtSemaineClassement(m)}`
+    +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</section>`,'normal','mf-sem-p')
+    +mfPanneau(`<section class="mgmt-week-pane"><h3>Le monde autour de ${esc(mgmtOrgNom(m))}</h3>${mgmtSemaineMonde(m)}`
+    +`<details class="mgmt-week-memo"><summary>Mémoire · ${esc(memory.length)} fait${memory.length===1?'':'s'}</summary>${mgmtSemaineMemoire(m,memory)}</details></section>`,'normal','mf-sem-p')
+    +mfPanneau(`<aside class="mgmt-week-pane">${mgmtSemaineClassement(m)}`
     +`<section class="mgmt-week-organisation"><h3>L'organisation</h3>`
     +`<p>${esc(roster)} combattants · trésorerie ${esc(m.treasury)} k$</p>`
-    +`<button class="mgmt-week-link" onclick="CL.go('mgmt_organisation')">Voir l'organisation</button></section></aside>`
+    +`<button class="mgmt-week-link" onclick="CL.go('mgmt_organisation')">Voir l'organisation</button></section></aside>`,'normal','mf-sem-p')
     +`</div>${mgmtMouvementHtml(m)}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */

@@ -69,7 +69,7 @@ function scr_mgmt_prelims(){
     +`<div class="mf-pre-voix">${parole}${alerte}</div>`
     +mfBouton('Ses autres affaires',{onclick:"CL.go('mgmt_bureau')",classe:'mf-car-cat'}),'normal','mf-car-d');
   const contenu=`<main class="mf-contenu mf-carte">${gauche}${centre}${droite}</main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:'preliminaires',m,plaque:'Préliminaires',libelle:`${slots.filter(x=>x.etat==='valide').length} / ${slots.length}`,
+  return mfEcran(contenu,{barre:'jeu',courant:'preliminaires',m,plaque:'Préliminaires',libelle:`${slots.filter(x=>x.etat==='valide').length} / ${slots.length}`,tuiles:[slots.filter(x=>x.etat==='valide').length,slots.length],
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['↑','↓'],t:'Choisir'},{ks:['A','E'],t:'Section'},
       {ks:['C'],t:'Changer',onclick:'CL.mgmtPrelimsChanger()'},{ks:['R'],t:'Refaire',onclick:'CL.mgmtPrelimsRefaire()'},

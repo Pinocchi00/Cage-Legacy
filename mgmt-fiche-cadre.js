@@ -75,8 +75,8 @@ function scr_mgmt_fiche_cadre(){
     :`<button type="button" class="mf-onglet${o.id===onglet?' ouvert':''}" aria-pressed="${o.id===onglet}" onclick="CL.mgmtFicheOnglet('${o.id}')">${esc(o.libelle.toUpperCase())}</button>`).join('');
   const contenu=`<main class="mf-contenu mf-fiche-cadre"><div class="mf-eff-aside mf-fiche-gauche"><h2 class="mf-sr">${esc(f.name)}</h2>${mgmtFicheBanniereHtml(f)}${mfPanneau(stats,'normal','mf-eff-fiche')}</div>`
     +`<div class="mf-fiche-droite"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div><div class="mf-fiche-corps mf-ancien"><p class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc((COUNTRIES[mgmtIdentitePays(f)]||{}).name||'')} · « ${esc(identite.surnom)} »<br>${esc(rangs)}</p>${mgmtFicheCorpsOnglet(m,f,line,onglet)}</div></div></main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',m,plaque:'Effectif',libelle:'Combattant',
-    droite:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
+  return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',m,plaque:'Effectif',libelle:'Combattant',compteur:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
+    droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtFicheRetour()'},{ks:['←','→'],t:'Autre combattant'},{ks:['Tab'],t:'Onglet',onclick:'CL.mgmtFicheOnglet(1)'},
       {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:onglet==='combats'?'Revoir le combat':'Préparer son combat',jaune:true,onclick:'CL.mgmtFicheEntree()'}]});
 }

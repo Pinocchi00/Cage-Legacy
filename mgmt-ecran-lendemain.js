@@ -228,17 +228,17 @@ function scr_mgmt_lendemain(){
       +`${esc(MGMT_LD_LABELS.prepare.replace('Split',mgmtOrgNom(m)))} ${esc(m.eventsPlayed+1)}</button>`
     +`</div>`
     +`<div class="mgmt-ld-cols">`
-    +`<section class="mgmt-ld-pane mgmt-ld-results">`
+    +`<section class="mgmt-ld-pane mgmt-ld-results">`+mfPanneau(`<div class="mf-sem-in">`
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.results)}</h3>`
       +mgmtLendemainResultatsHtml(m)
       +`<button class="mgmt-ld-link mgmt-ld-tout" onclick="CL.go('mgmt_soiree')">${esc(MGMT_LD_LABELS.touteLaSoiree)}</button>`
-      +`</section>`
-    +`<section class="mgmt-ld-pane">`
+      +`</div>`,'normal','mf-sem-p')+`</section>`
+    +`<section class="mgmt-ld-pane">`+mfPanneau(`<div class="mf-sem-in">`
       +(typeof mgmtMediasLendemainHtml==='function'?mgmtMediasLendemainHtml(m):'')
       +`<h3 class="mgmt-ld-hd">${esc(MGMT_LD_LABELS.changes)}</h3>`
       +mgmtLendemainConstatsHtml(m)
       +(typeof mgmtLendemainPatronHtml==='function'?mgmtLendemainPatronHtml(m):'')
-      +`</section>`
+      +`</div>`,'normal','mf-sem-p')+`</section>`
     +`</div></div>`;
 }
 /* ==== [FIN ANCRE] ==== */

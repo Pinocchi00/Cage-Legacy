@@ -90,7 +90,7 @@ function scr_mgmt_contrats(){
     +`<div class="mf-eff-pied"><span>${esc(fen.length)} AFFICHÉS SUR ${esc(lignes.length)}</span><span>${F.mode==='contrats'?'SOUS CONTRAT':'SANS CONTRAT'}</span></div></div>`,'normal','mf-eff-panneau');
   const contenu=`<div class="mf-eff-barre">${sexe}<div class="mf-eff-trait"></div><div class="mf-eff-puces">${puces}</div></div><div class="mf-eff-corps">${liste}<div class="mf-eff-aside">${mgmtContratsOffreHtml(m,choisi)}</div></div>`;
   return mfEcran(`<main class="mf-contenu mf-effectif">${contenu}</main>`,{barre:'jeu',courant:'contrats',m,plaque:'Contrats',
-    libelle:F.mode==='contrats'?`${lignes.length} combattants`:`${lignes.length} sans contrat`,droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
+    onglets:[{t:'Sous contrat',on:F.mode==='contrats',onclick:"CL.mgmtContratsMode('contrats')"},{t:'Recrutement',on:F.mode!=='contrats',onclick:"CL.mgmtContratsMode('recrutement')"}],droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['↑','↓'],t:'Choisir'},{ks:['←','→'],t:'Combats'},{ks:['+','−'],t:'Bourse'},
       {ks:['R'],t:'Recrutement',onclick:'CL.mgmtContratsMode()'},{ks:['G'],t:'H ou F',onclick:'CL.mgmtContratsSexe()'},{ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtContratsCategorie(1)'},
       {ks:['Entrée'],t:'Proposer',jaune:true,onclick:'CL.mgmtContratsPropose()'}]});
@@ -142,7 +142,7 @@ Object.assign(CL,{
     const cible=x.propre?x.f:(mgmtExteriorPourOffre(m,x.id)||x.f), dem=mgmtBourseSouhaitee(m,cible,x.propre&&!!x.f.ct);
     MGMT_CONTRATS.b=Math.max(1,(Number.isFinite(MGMT_CONTRATS.b)?MGMT_CONTRATS.b:dem)+d); MGMT_CONTRATS.msg=''; render();
   },
-  mgmtContratsMode(){ MGMT_CONTRATS.mode=MGMT_CONTRATS.mode==='contrats'?'recrutement':'contrats'; MGMT_CONTRATS.curseur=0; MGMT_CONTRATS.b=null; MGMT_CONTRATS.msg=''; render(); },
+  mgmtContratsMode(x){ const veut=(x==='contrats'||x==='recrutement')?x:(MGMT_CONTRATS.mode==='contrats'?'recrutement':'contrats'); if(veut===MGMT_CONTRATS.mode&&x) return; MGMT_CONTRATS.mode=veut; MGMT_CONTRATS.curseur=0; MGMT_CONTRATS.b=null; MGMT_CONTRATS.msg=''; render(); },
   mgmtContratsSexe(s){ MGMT_CONTRATS.sexe=(s==='H'||s==='F')?s:(MGMT_CONTRATS.sexe==='H'?'F':'H'); MGMT_CONTRATS.div=''; MGMT_CONTRATS.curseur=0; MGMT_CONTRATS.msg=''; render(); },
   mgmtContratsDiv(id){ if(id===''||divById(id)){ if(id) MGMT_CONTRATS.sexe=divById(id).gender; MGMT_CONTRATS.div=id; MGMT_CONTRATS.curseur=0; MGMT_CONTRATS.msg=''; render(); } },
   mgmtContratsCategorie(delta){
