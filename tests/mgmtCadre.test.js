@@ -95,7 +95,7 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
   assert.deepEqual(r.sections,['carte','preliminaires','effectif','classements','ceintures','contrats','camps','presse','calendrier','resultats','finances']);
   assert.equal(r.carte.length,13,'onze sections, Options, Menu principal');
   assert.equal(r.carte.filter(x=>x.cur).length,1); assert.equal(r.carte.find(x=>x.cur).sec,'carte');
-  assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),['options'],'les sections dont le lot n’est pas livré sont grisées (lot 10 : ceintures, camps, presse et résultats sont livrées)');
+  assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),[],'plus aucune section n’est grisée sur la carte : Options est livrée au lot 12 (décision du brief : Options ne se grise que pendant la soirée, comme la barre entière)');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct===false||true);
   assert.equal(r.bureau.find(x=>x.cur).sec,'preliminaires','l’écran de la semaine éclaire Préliminaires (écran ancien)');
   assert.equal(r.fiche.find(x=>x.cur).sec,'classements','une fiche éclaire la section d’où on l’a ouverte');
@@ -148,7 +148,9 @@ test('Accueil — au clavier : ↑ ↓ choisissent en sautant le grisé, Entrée
   assert.equal(win.eval('MF_ACCUEIL.i'),0);
   touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'carriere');
   touche(win,'ArrowDown'); touche(win,'ArrowDown'); touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'succes');
-  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'management','Options et Quitter, grisés, sont sautés : on revient au début');
+  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','Options est livrée au lot 12 : le curseur s’y arrête');
+  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'management','Quitter, grisé, est sauté : on revient au début');
+  touche(win,'ArrowUp'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','en remontant depuis le début, le curseur s’arrête sur Options (Quitter, grisé, est sauté)');
   touche(win,'ArrowUp'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'succes');
   touche(win,'ArrowUp'); touche(win,'ArrowUp'); touche(win,'ArrowUp'); touche(win,'ArrowUp'); assert.equal(win.eval('MF_ACCUEIL.i'),0);
   touche(win,'ArrowDown'); touche(win,'Enter'); assert.equal(win.eval('G.screen'),'intro','Entrée ouvre la Carrière');
