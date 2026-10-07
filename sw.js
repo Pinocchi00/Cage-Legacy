@@ -3,9 +3,9 @@
    Le service worker garde en cache tous les fichiers listés par index.html (scripts, feuilles de style, polices) et les sert d'abord depuis le cache,
    puis les rafraîchit en arrière-plan : une mise à jour arrive au lancement suivant. Les SAUVEGARDES ne passent jamais par ici : elles vivent dans le
    localStorage de la page (même origine), que ni l'installation ni une nouvelle version ne touchent. Monter SW_VERSION à chaque livraison. ==== */
-const SW_VERSION='b12';
+const SW_VERSION='b26';
 const SW_CACHE='cage-legacy-sw-'+SW_VERSION;
-const SW_BASE=['./','./index.html','./manifest.webmanifest','./icons/icone-192.png','./icons/icone-512.png'];
+const SW_BASE=['./','./index.html','./manifest.webmanifest','./icons/icone-192.png','./icons/icone-512.png','./images/cendre.jpg','./images/accueil-octogones.jpg'];
 
 /** Les fichiers que la page demande (src= et href= de index.html), sans les liens externes. */
 function swListerFichiers(html){

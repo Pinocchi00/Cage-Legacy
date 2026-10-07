@@ -26,6 +26,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 
 /* Le fond cendré : la texture des maquettes (images/cendre.jpg, 1920×1080). */
 .mf-fond{position:absolute;inset:0;background:#171413 url('images/cendre.jpg?v=b6') center/1920px 1080px no-repeat}
+.mf-fond.octogones{background:#0D0B0B url('images/accueil-octogones.jpg?v=b26') center/1920px 1080px no-repeat}
 .mf-teinte{position:absolute;inset:0;background:radial-gradient(ellipse 1000px 900px at 64% 50%,var(--mf-couleur,#B32A1E),transparent 74%);opacity:.34;mix-blend-mode:screen}
 
 /* L'en-tête : la plaque, son libellé, ce qui se lit à droite. */
