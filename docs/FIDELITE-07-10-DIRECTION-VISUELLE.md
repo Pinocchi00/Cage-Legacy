@@ -12,9 +12,10 @@ Demande d'Anthony : les planches ne sont pas toutes respectées (l'accueil par e
 - **Options** : les valeurs de la planche (lignes de 88 px à coins coupés de 14 px, titre 36 px, choix de 48 px en 30 px, choix inversés sur la ligne choisie) et le bouton « R — Réglages d'origine » dans le panneau.
 - **Les écrans qui n'avaient pas de planche et gardaient l'ancien habillage** (la semaine — rebaptisée « Les affaires » —, le lendemain, l'organisation, le vestiaire, l'ancien recrutement) sont dessinés dans le langage des planches : mêmes noirs, blanc cassé, jaune et rouge ; titres extra-condensés avec la barre rouge ; panneaux à coins coupés ; lignes choisies en blanc cassé ; un seul jaune pour l'action ; rien sous 22 px. Aucune règle ni donnée ne change : seul l'habillage (les jetons `--mgmt-*` sont redéfinis sous `.mf-ancien`, les trois colonnes de la semaine et les deux du lendemain et de l'organisation sont posées dans des panneaux du cadre).
 
+- **Le logo.** La planche « Logo » retient deux versions : B (octogone à côté du titre) pour la barre des sections — déjà en place — et A (le titre dans l'octogone) « pour l'icône du jeu et tout ce qui se montre seul ; l'accueil garde le titre écrit ». L'accueil sans soirée n'a donc plus d'octogone à droite, comme sa planche ; l'icône de la version installable reprend les trois octogones de la planche.
+
 ## Ce qui reste écart
 - Ces cinq écrans n'ont pas de planche : ils suivent le langage visuel, pas une maquette. À dessiner si Anthony veut une composition exacte.
-- **L'accueil sans soirée** garde le logo octogonal à droite (le brief du lot 4 le demande) alors que la planche « Accueil, sans soirée prévue » n'en a pas : à trancher.
 - Les colonnes de quelques tableaux (Classements : Palmarès, Série en cours, Dernier combat ; Effectif) sont décalées de quelques dizaines de pixels par rapport aux planches.
 - Booking (la carte) : le bloc « Leïla — Préliminaires » sous la carte et le lien « Voir les N combattants » de la planche ne sont pas posés ; les préliminaires à catégorie choisie dans la ligne ne le sont pas non plus.
 - Le lendemain garde la barre des sections grisée (séquence imposée du lot 4).

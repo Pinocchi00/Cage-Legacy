@@ -113,10 +113,10 @@ test('Écrans anciens — posés dans le cadre sous la barre, avec leur navigati
   for(const [e,v] of Object.entries(r)) assert.deepEqual(v,[true,true,true,true],e);
 });
 
-test('Accueil — sans soirée prévue : le titre, le menu, le logo à droite, aucune affiche', () => {
+test('Accueil — sans soirée prévue : le titre et le menu sur le fond cendré, ni logo à droite ni affiche (planche « Accueil, aucune soirée prévue » ; décision du 07/10 : l’accueil garde le titre écrit)', () => {
   const win=newGameWindow({runMain:true});
   const html=win.scr_title();
-  assert.ok(html.includes('mf-ecran')&&html.includes('CAGE<br>LEGACY')&&html.includes('mf-accueil-logo'));
+  assert.ok(html.includes('mf-ecran')&&html.includes('CAGE<br>LEGACY')&&!html.includes('mf-accueil-logo'));
   assert.ok(!html.includes('mf-affiche')&&!html.includes('title-resume'));
   for(const t of ['Management','Matchmaker','Carrière','Duel entre amis','Panthéon','Succès','Options','Quitter']) assert.ok(html.includes(t),t);
   for(const a of ['CL.mgmtParties()',"CL.go('intro')",'CL.duelEnter()',"CL.go('hof')","CL.go('ach')"]) assert.ok(html.includes(a),a);
