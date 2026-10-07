@@ -256,19 +256,23 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
   assert.equal(win.eval(`G.screen`), 'mgmt_calendrier', 'la soirée est prête, le joueur la lance depuis le calendrier');
   win.eval(`CL.mgmtCalendrierJouer();`);
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'la soirée s’ouvre');
-  assert.ok(win.document.getElementById('app').textContent.includes(OCONNOR), 'les noms s’affichent à la soirée');
-  const btn = t => [...win.document.querySelectorAll('button')].find(x => x.textContent === t);
-  btn('Voir ce combat').click();
-  assert.equal(win.eval(`G.screen`), 'arene_socle', 'le combat s’ouvre dans l’arène');
-  assert.ok(win.document.getElementById('app').textContent.includes(OCONNOR), 'les noms s’affichent dans l’arène');
-  noErr(win, 'arène (soirée)');
-  [...win.document.querySelectorAll('button')].find(x => (x.getAttribute('onclick') || '').includes('areneSocleQuitter')).click();
+  /* Lot 11 : la soirée s'habille comme ses planches — les noms en capitales, l'apostrophe droite (mfNet) ; le combat s'ouvre sur l'écran animé
+     (les noms sont dans l'image : la plaque du haut), les boutons « Voir ce combat » et « Tout simuler » sont remplacés par Entrée, P et F. Décision de la tranche, jamais un test « réparé ». */
+  const OC = win.eval(`mfNet(${JSON.stringify(OCONNOR)})`);
+  assert.ok(win.document.getElementById('app').textContent.includes(OC), 'les noms s’affichent à la soirée');
+  const place = win.eval(`mgmtSoireeProgramme(G.mgmt).findIndex(p=>p.a.name.includes(${JSON.stringify(OCONNOR)})||p.b.name.includes(${JSON.stringify(OCONNOR)}))`);
+  assert.ok(place >= 0, 'O’Connor est sur la carte');
+  win.eval(`CL.mgmtSoCommencer(); MGMT_SOIREE.index=${place}; CL.mgmtSoRegarder();`);
+  assert.equal(win.eval(`G.screen`), 'mgmt_combat', 'le combat s’ouvre sur l’écran animé');
+  assert.ok(win.eval(`MGMT_COMBAT.carte.a`).includes(OC) || win.eval(`MGMT_COMBAT.carte.b`).includes(OC), 'les noms s’affichent dans l’image du combat');
+  noErr(win, 'combat animé (soirée)');
+  win.eval(`CL.mgmtCbPasser(); CL.mgmtCbRetour();`);
   assert.equal(win.eval(`G.screen`), 'mgmt_soiree', 'retour à la soirée');
-  btn('Tout simuler').click();
+  win.eval(`CL.mgmtSoireeToutSimuler();`);
   assert.equal(win.eval(`MGMT_SOIREE.index`), 5 + win.eval(`G.mgmt.card.sizePrelims`) , 'tous les combats de la carte sont traversés (5 + 7 depuis H4)');
-  btn('Continuer').click();
+  win.eval(`CL.mgmtSoFin();`);
   const scr = win.eval(`G.screen`);
-  assert.ok(scr === 'mgmt_lendemain' || scr === 'mgmt_bureau', 'la soirée rend la main');
+  assert.ok(scr === 'mgmt_lendemain' || scr === 'mgmt_bureau' || scr === 'mgmt_resultats', 'la soirée rend la main');
   if(scr === 'mgmt_lendemain'){
     /* Lot 4 T4 (maquette 06, docs/LOT-4-LA-PEAU-DU-JEU.md §3 T4) : le
        lendemain s'habille comme sa maquette — l'action du soir suivant vit

@@ -457,10 +457,8 @@ Object.assign(CL,{
   mgmtSuReRevoir(){
     const m=G.mgmt, s=mgmtSoirees(m).slice().reverse()[MGMT_SU_RE.s]; if(!s) return;
     const x=mgmtSuResultatsListe(m,s)[MGMT_SU_RE.i]; if(!x) return;
-    const t=m.hist[x.i], res=mgmtReplayFight(t); if(!res) return;
-    areneEcranCharger(res,{a:t.a.name,b:t.b.name},t);
-    ARENE_ECRAN.retour='mgmt_resultats'; ARENE_ECRAN.finRetour=null;
-    CL.go('arene_socle'); areneEcranDemarrer();
+    const t=m.hist[x.i];
+    mgmtRevoirCombat(t,'mgmt_resultats',null);
   },
 });
 

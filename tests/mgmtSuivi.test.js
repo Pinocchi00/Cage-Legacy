@@ -215,8 +215,9 @@ test('Résultats — chaque soirée jouée est archivée, combat par combat, ave
   assert.ok(win.eval(`document.querySelector('.mf-su-h-titre').textContent.includes('BAT ')||document.querySelector('.mf-su-h-titre').textContent.includes('NUL')`));
   touche(win,'Tab'); assert.equal(win.eval('MGMT_SU_RE.s'),1); assert.ok(texte(win).includes('Soirée 2')||texte(win).includes('SOIRÉE 2'));
   touche(win,'ArrowRight'); assert.equal(win.eval('MGMT_SU_RE.i'),1);
-  touche(win,'Enter'); assert.equal(win.eval('G.screen'),'arene_socle','Revoir ouvre l’arène sur la trace');
-  assert.equal(win.eval('ARENE_ECRAN.retour'),'mgmt_resultats');
+  /* Lot 11 : avec l'agenda, revoir ouvre l'écran du combat animé (la planche « Le combat animé »), non plus l'arène d'origine ; le retour reste les résultats. */
+  touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_combat','Revoir ouvre le combat animé sur la trace');
+  assert.equal(win.eval('MGMT_COMBAT.retour'),'mgmt_resultats');
 });
 
 test('Résultats — un combat de la première soirée se revoit à l’identique après quarante soirées', () => {
