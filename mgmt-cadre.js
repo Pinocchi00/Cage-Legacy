@@ -424,8 +424,9 @@ function mfTitre(){
     +`<div class="mf-touche-g">${mfTouche('Entrée',true)}<span>Valider</span></div>`
     +(m?`<div class="mf-touche-g"><button type="button" class="title-resume" onclick="CL.mgmtEnter(mgmtSlotDernier()||1)">${reprise}<span>Reprendre</span></button></div>`:'')+`</div>`;
   const d=mfAfficheDonnees(m);
-  return `<div class="mf-ecran title-screen${mfEntreeClasse()}"><div class="mf-stage"><div class="mf-fond"></div>`
-    +(d?`<div class="mf-teinte" style="--mf-couleur:${esc(d.couleur)}"></div>`:'')
+  /* Reprise de fidélité du 07/10/2026 (planches « Accueil corrigé » et « Accueil, contours et grand octogone », celles que retient Anthony) : le fond de l'accueil est le
+     tunnel d'octogones rouges, avec ou sans affiche ; la teinte de couleur par soirée de l'ancien fond cendré ne s'y superpose plus. */
+  return `<div class="mf-ecran title-screen${mfEntreeClasse()}"><div class="mf-stage"><div class="mf-fond octogones"></div>`
     +mfAfficheHtml(m)+gauche+touches+`</div></div>`;
 }
 

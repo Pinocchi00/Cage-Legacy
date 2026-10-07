@@ -85,3 +85,13 @@ test('Options : la ligne choisie, les choix et le bouton « Réglages d\'origine
   assert.equal(r.bas,true); assert.equal(r.touche,'R'); assert.equal(r.lignes,6);
   assert.ok(texte(win).toUpperCase().includes('RÉGLAGES D’ORIGINE'));
 });
+
+test('L\'accueil a pour fond le tunnel d\'octogones rouges des planches « Accueil corrigé », avec ou sans affiche, et l\'image est livrée', () => {
+  const fs=require('fs'), path=require('path');
+  const win=newGameWindow({runMain:true});
+  assert.ok(win.scr_title().includes('class="mf-fond octogones"'),'sans soirée');
+  assert.ok(!win.scr_title().includes('mf-accueil-logo'));
+  assert.ok(fs.statSync(path.join(__dirname,'..','images','accueil-octogones.jpg')).size>100000,'l\'image du fond');
+  assert.ok(/mf-fond\.octogones\{[^}]*accueil-octogones\.jpg/.test(fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8')));
+  assert.ok(/accueil-octogones\.jpg/.test(fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8')),'gardée pour le hors ligne');
+});
