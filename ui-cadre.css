@@ -779,3 +779,39 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-cb-p.lg{font-size:26px}
 .mf-cb-p.on{background:var(--mf-blanc);color:var(--mf-noir)}
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_BRIEF_LOT12_CSS] — Brief du 06/10/2026, lot 12 : l'écran Options (planches « Options »). Aucun texte sous 22px. ==== */
+.mf-op{display:flex;flex-direction:column;gap:16px}
+.mf-op-bande{display:flex;justify-content:space-between;align-items:center;height:56px}
+.mf-op-ongs{display:flex;gap:8px}
+.mf-op-tab{display:flex;align-items:center;gap:10px;font-size:24px;line-height:1;color:var(--mf-texte2)}
+.mf-op-pan{flex:1;min-height:0}
+.mf-op-p{display:flex;flex-direction:column;gap:20px;height:100%;box-sizing:border-box;padding:24px 28px}
+.mf-op-ls{display:flex;flex-direction:column;gap:6px}
+.mf-op-l{display:flex;justify-content:space-between;align-items:center;gap:32px;height:88px;box-sizing:border-box;padding:0 24px;background:var(--mf-ligne);cursor:pointer}
+.mf-op-l.sel{background:var(--mf-blanc);color:var(--mf-noir)}
+.mf-op-t{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mf-op-t b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:32px;line-height:1;text-transform:uppercase}
+.mf-op-t span{font-size:22px;line-height:1.1;color:var(--mf-texte2)}
+.mf-op-l.sel .mf-op-t span{color:rgba(13,11,11,.74)}
+.mf-op-ctl{display:flex;align-items:center;gap:8px;flex:none}
+.mf-op-ch{box-sizing:border-box;height:48px;padding:0 20px;border:2px solid var(--mf-bord);background:transparent;color:inherit;font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:44px;white-space:nowrap}
+.mf-op-ch.on{background:var(--mf-rouge);border-color:var(--mf-rouge);color:var(--mf-blanc)}
+.mf-op-l.sel .mf-op-ch{border-color:var(--mf-noir)}
+.mf-op-l.sel .mf-op-ch.on{background:var(--mf-noir);color:var(--mf-blanc)}
+.mf-op-blocs{display:flex;gap:4px}
+.mf-op-bloc{box-sizing:border-box;width:28px;height:40px;border:2px solid var(--mf-bord);background:transparent;padding:0}
+.mf-op-bloc.on{background:var(--mf-rouge-vif);border-color:var(--mf-rouge-vif)}
+.mf-op-n{min-width:44px;text-align:right;font-family:var(--mf-titre);font-weight:800;font-size:36px;line-height:1}
+.mf-op-act{box-sizing:border-box;height:48px;padding:0 24px;border:2px solid var(--mf-bord);background:transparent;color:inherit;display:inline-flex;align-items:center;gap:12px;font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:44px;white-space:nowrap}
+.mf-op-act.sel{background:var(--mf-jaune);border-color:var(--mf-jaune);color:var(--mf-noir)}
+.mf-op-act[disabled]{opacity:.45}
+.mf-op-k{border:2px solid var(--mf-noir);padding:2px 8px;font-size:24px;line-height:1}
+.mf-op-touches{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.mf-op-touches>div{display:flex;flex-direction:column;gap:28px}
+.mf-op-tc{display:flex;flex-direction:column;gap:10px}
+.mf-op-tl{display:flex;align-items:center;gap:20px;font-size:24px;line-height:1.1}
+.mf-op-tk{display:flex;gap:8px;flex:none;min-width:170px}
+.mf-op-pied{display:flex;justify-content:space-between;align-items:center;margin-top:auto;font-size:24px;line-height:1;color:var(--mf-texte2)}
+.mf-op-pg{display:flex;align-items:center;gap:16px;color:var(--mf-blanc)}
+/* ==== [FIN ANCRE] ==== */

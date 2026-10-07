@@ -110,6 +110,7 @@ const browserGlobals = {
   Image: 'readonly', Audio: 'readonly', performance: 'readonly',
   btoa: 'readonly', atob: 'readonly',
   TextEncoder: 'readonly', TextDecoder: 'readonly',
+  self: 'readonly', caches: 'readonly', fetch: 'readonly', Request: 'readonly', Response: 'readonly', /* sw.js (lot 12) */
 };
 
 module.exports = [

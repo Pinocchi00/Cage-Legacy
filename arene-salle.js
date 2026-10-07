@@ -141,7 +141,8 @@ function areneSalleCreer(cv){
     const r=typeof cv.getBoundingClientRect==='function'?cv.getBoundingClientRect():null;
     const w=(r&&r.width)||cv.clientWidth||W;  // la garde de areneSalleCreer assure une largeur réelle
     const dpr=(typeof window!=='undefined'&&window.devicePixelRatio)||1;
-    V.k=clamp(w*dpr/W,0.5,2);
+    const kmax=typeof MGMT_REGLAGES!=='undefined'?MGMT_REGLAGES.affichage.taille/W:2;  // la taille de l'image choisie (lot 12) borne la résolution
+    V.k=clamp(w*dpr/W,0.5,kmax);
     cv.width=Math.round(W*V.k); cv.height=Math.round(H*V.k);
   };
   V.redim();

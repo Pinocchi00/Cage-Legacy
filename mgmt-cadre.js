@@ -96,7 +96,9 @@ function mfBarreHtml({mode='jeu',courant=null,grise=false,m=null}={}){
     }
   }
   const bas=`<div class="mf-barre-bas">`
-    +`<button type="button" class="mf-barre-item grise" data-section="options" disabled aria-disabled="true"><span>Options</span></button>`
+    +(mode==='jeu'&&!grise
+      ?`<button type="button" class="mf-barre-item${courant==='options'?' cur':''}" data-section="options"${courant==='options'?' aria-current="page"':''} onclick="CL.mgmtOptions()"><span>Options</span></button>`
+      :`<button type="button" class="mf-barre-item grise" data-section="options" disabled aria-disabled="true"><span>Options</span></button>`)
     +(mode==='jeu'&&grise
       ?`<button type="button" class="mf-barre-item grise" data-section="menu" disabled aria-disabled="true"><span>Menu principal</span></button>`
       :`<button type="button" class="mf-barre-item" data-section="menu" onclick="${mode==='jeu'?'CL.mgmtMenuPrincipal()':'CL.mgmtLeave()'}"><span>Menu principal</span></button>`)
@@ -294,7 +296,7 @@ const MF_MENU=[
   {id:'duel',t:'Duel entre amis',action:'CL.duelEnter()',fn:()=>CL.duelEnter()},
   {id:'pantheon',t:'Panthéon',action:"CL.go('hof')",fn:()=>CL.go('hof')},
   {id:'succes',t:'Succès',bas:true,action:"CL.go('ach')",fn:()=>CL.go('ach')},
-  {id:'options',t:'Options',bas:true,grise:true},
+  {id:'options',t:'Options',bas:true,action:'CL.mgmtOptions()',fn:()=>CL.mgmtOptions()},
   {id:'quitter',t:'Quitter',bas:true,grise:true},
 ];
 

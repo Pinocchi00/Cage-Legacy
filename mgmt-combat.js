@@ -77,6 +77,7 @@ function mgmtCombatOuvrir(o){
   if(!S){ C.refuse=true; CL.go('mgmt_combat'); return false; }
   areneCoupsConstruire(S);
   const R=MGMT_COMBAT_REGLAGES, salle=o.salle||mgmtCombatSalleDeTrace(m,t);
+  C.sonT=-1;
   C.session=S; C.d=0; C.pause=false; C.mode='fight'; C.fin=0; C.decT=0; C.real=0; C.last=0; C.decalRefait=false;
   C.vitesse=MGMT_COMBAT_VITESSES.includes(R.vitesse)?R.vitesse:1;
   C.plan=ARENE_SALLE_PLANS.includes(R.camera)?R.camera:'cable';
@@ -149,6 +150,16 @@ function mgmtCombatCx(){
     juges:decisionTail?(C.fin-1.1)/0.25:0,
     chrono:(C.d>2.2&&C.d<3)||(e.horloge<10&&!pause&&!e.fini)};
 }
+/** Le son du combat (lot 12) : le public suit le remplissage de la salle, un impact à chaque coup qui touche. Présentation seule. */
+function mgmtCombatSon(cx){
+  const C=MGMT_COMBAT, S=C.session;
+  if(typeof mgmtSonSalle!=='function'||!S) return;
+  mgmtSonSalle(C.pause||C.mode==='dec'?0.1:cx.room.part*cx.room.noise);
+  if(C.pause||C.mode!=='fight'||cx.pause){ C.sonT=cx.t; return; }
+  if(!(C.sonT>=0)||cx.t<C.sonT) C.sonT=cx.t;
+  for(const e of S.coups){ if(e.t>C.sonT&&e.t<=cx.t&&e.r===1) mgmtSonCoup(e.big?1:e.p); }
+  C.sonT=cx.t;
+}
 function mgmtCombatBoucle(now){
   const C=MGMT_COMBAT; C.raf=0;
   if(!G||G.screen!=='mgmt_combat'||!C.session) return;
@@ -166,12 +177,19 @@ function mgmtCombatBoucle(now){
     }
   }
   C.essais=0;
+  /* Images par seconde (réglage du lot 12) : le combat n'est redessiné que si le temps est venu. */
+  if(C.last&&typeof mgmtReglagesPasImage==='function'&&now-C.last<mgmtReglagesPasImage()){
+    if(typeof requestAnimationFrame!=='undefined') C.raf=requestAnimationFrame(mgmtCombatBoucle);
+    return;
+  }
   const dt=C.last?Math.min(0.05,Math.max(0,(now-C.last)/1000)):0; C.last=now;
   mgmtCombatAvancer(dt);
   if(C.vue){
     /* La police arrive après le premier dessin : l'affiche posée au sol est refaite une fois. */
     if(!C.decalRefait&&C.real>1.2){ C.decalRefait=true; C.vue.decalCle=''; }
-    C.vue.dessiner(mgmtCombatCx());
+    const cx=mgmtCombatCx();
+    C.vue.dessiner(cx);
+    mgmtCombatSon(cx);
   }
   if(typeof requestAnimationFrame!=='undefined') C.raf=requestAnimationFrame(mgmtCombatBoucle);
 }
@@ -261,7 +279,7 @@ Object.assign(CL,{
   },
   mgmtCbRevoir(){
     const C=MGMT_COMBAT; if(!C.session||C.mode!=='dec') return;
-    C.mode='fight'; C.d=0; C.fin=0; C.decT=0; C.pause=false;
+    C.mode='fight'; C.d=0; C.fin=0; C.decT=0; C.pause=false; C.sonT=-1;
     if(C.vue){ C.vue.camS=null; C.vue.trail={A:[],B:[]}; C.vue.tPrec=-1; }
     mgmtCombatBarreMaj();
   },

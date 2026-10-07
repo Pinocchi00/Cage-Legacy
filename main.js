@@ -97,3 +97,9 @@ if(document.getElementById('app')){
   }
   render();
 }
+
+/* ==== [ANCRE: MGMT_BRIEF_LOT12_SW] — Brief du 06/10/2026, lot 12 : la version installable hors ligne (sw.js). Seulement sur http(s) ; sans effet ailleurs. ==== */
+if(typeof navigator!=='undefined'&&'serviceWorker' in navigator&&typeof location!=='undefined'&&/^https?:$/.test(location.protocol)){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+/* ==== [FIN ANCRE] ==== */
