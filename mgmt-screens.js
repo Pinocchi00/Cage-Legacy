@@ -346,10 +346,7 @@ Object.assign(CL,{
     if(!mgmtFightHistory(m,f).includes(t)) return;
     const res=mgmtFicheRejeu(t);
     if(!res) return;
-    areneEcranCharger(res,{a:t.a.name,b:t.b.name},t);
-    ARENE_ECRAN.retour='mgmt_fiche'; ARENE_ECRAN.finRetour=null;
-    CL.go('arene_socle');
-    areneEcranDemarrer();
+    mgmtRevoirCombat(t,'mgmt_fiche',null);
   },
   /* Brief lot 1 : mgmtEnter(n) ouvre l'emplacement n ; sans argument, l'emplacement 1. */
   mgmtEnter(n,orgId){

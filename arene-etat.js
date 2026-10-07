@@ -104,22 +104,24 @@ function areneAngleSemee(idx,sel){ const a=areneAlea(idx*97+(sel||1))()*Math.PI*
 const ARENE_RE_TEMPS=/^\[(\d{1,2}):(\d{2})\] /;
 /** Temps de combat écoulé (depuis le début du combat) d'un moment du moteur :
  *  l'horodatage du texte est le temps RESTANT dans le round. @returns {number} */
-function areneTempsCombat(b,defaut){
+function areneTempsCombat(b,defaut,echelle){
   const m=ARENE_RE_TEMPS.exec(typeof b.text==='string'?b.text:'');
   if(!m) return defaut;
   const reste=(+m[1])*60+(+m[2]);
-  return ARENE_ROUND_LEN-Math.min(ARENE_ROUND_LEN,Math.max(0,reste));
+  const ech=echelle>0?echelle:1;
+  return (ARENE_ROUND_LEN-Math.min(ARENE_ROUND_LEN,Math.max(0,reste)))/ech;
 }
 /** Les moments du moteur, horodatés, en ordre de combat. Le premier moment
  *  de finition clôt le combat (aucun moment ne le suit). @returns {Array} */
-function areneBeats(res){
+function areneBeats(res,echelle){
   const log=(res&&Array.isArray(res.log))?res.log:[];
+  const ech=echelle>0?echelle:1, len=ARENE_ROUND_LEN/ech;
   const beats=[]; let tPrev=-1;
   for(let i=0;i<log.length;i++){
     const L=log[i];
     if(!L||typeof L!=='object') continue;
     const r=(Number.isSafeInteger(L.r)&&L.r>=1)?L.r:1;
-    const t=(r-1)*ARENE_ROUND_LEN+Math.min(ARENE_ROUND_LEN,Math.max(0,areneTempsCombat(L,ARENE_ROUND_LEN)));
+    const t=(r-1)*len+Math.min(len,Math.max(0,areneTempsCombat(L,len,ech)));
     const tClamp=Math.max(t,tPrev); tPrev=tClamp;
     beats.push({i:beats.length,r:r,t:tClamp,phase:typeof L.phase==='string'?L.phase:'debout',
       top:(L.top==='A'||L.top==='B')?L.top:null,
@@ -403,24 +405,29 @@ function areneNomCourt(c){ const p=String(c||'?').trim().split(/\s+/); return p.
  *  @param {{a:string,b:string}} noms noms complets des deux combattants
  *    (a = combattant A du résultat, b = B).
  *  @returns {object|null} la session, ou null sans résultat. */
-function areneConstruire(res,noms){
+function areneConstruire(res,noms,opts){
   if(!res||typeof res!=='object') return null;
+  /* Lot 11 : l'échelle de temps. 1 (défaut) = temps de combat 1:1 ; 7 = un round de 300 s tient en ~43 s
+     d'affichage (la planche « Le combat animé »). Les durées de présentation (action, tapis, finition, pause)
+     restent en secondes d'affichage ; seul le temps du combat est compressé. */
+  const ech=(opts&&opts.echelle>0)?opts.echelle:1, len=ARENE_ROUND_LEN/ech;
+  const pauseS=(opts&&opts.pause>0)?opts.pause:ARENE_PAUSE_S;
   const na=(noms&&typeof noms.a==='string'&&noms.a)?noms.a:'A';
   const nb=(noms&&typeof noms.b==='string'&&noms.b)?noms.b:'B';
-  const S={res:res,noms:{a:{complet:na,court:areneNomCourt(na),coul:ARENE_COUL_A},
+  const S={echelle:ech,roundLen:len,pauseS:pauseS,res:res,noms:{a:{complet:na,court:areneNomCourt(na),coul:ARENE_COUL_A},
       b:{complet:nb,court:areneNomCourt(nb),coul:ARENE_COUL_B}},
      _etat:{},_etatAff:{},tapis:[]};
   const vainqueur=(res.winner==='A'||res.winner==='B')?res.winner:'D';
   S.vainqueur=vainqueur;
   S.methode=typeof res.method==='string'?res.method:'';
   S.roundFin=Number.isSafeInteger(res.round)?res.round:null;
-  const beats=areneBeats(res);
+  const beats=areneBeats(res,ech);
   const beatsOr=beats.length>0?beats:[{i:0,r:1,t:0,phase:'debout',top:null,pos:null,by:null,text:'',finish:false,method:null,sub:false}];
   let roundsMax=1;
   for(const b of beatsOr){ if(b.r>roundsMax) roundsMax=b.r; }
   if(Number.isSafeInteger(res.round)&&res.round>roundsMax) roundsMax=res.round;
   const bFin=beatsOr[beatsOr.length-1];
-  const finT=bFin.finish?(bFin.t+ARENE_FIN_S):roundsMax*ARENE_ROUND_LEN;
+  const finT=bFin.finish?(bFin.t+ARENE_FIN_S):roundsMax*len;
   S.finT=finT;
 
   /* Segments : [t_i, t_{i+1}) — la phase d'après transition s'applique dès
@@ -567,9 +574,9 @@ function areneConstruire(res,noms){
        const image=areneImage(S,sg.t0);
        const depuisA={x:image[0],y:image[1]};
        const depuisB={x:image[2],y:image[3]};
-       montage.push({genre:'pause',d0:d,d1:d+ARENE_PAUSE_S,rNext:sg.r,
+       montage.push({genre:'pause',d0:d,d1:d+pauseS,rNext:sg.r,
          fromA:depuisA,fromB:depuisB,refX:image[4],refY:image[5]});
-      d+=ARENE_PAUSE_S;
+      d+=pauseS;
     }
     montage.push({genre:'combat',d0:d,d1:d+(sg.t1-sg.t0),t0:sg.t0,t1:sg.t1});
     d+=sg.t1-sg.t0;
@@ -642,7 +649,7 @@ function areneMoment(session,t){
   if(sg.texte&&(tt<sg.t0+ARENE_TEXTE_S||sg.phase==='fini')) e.texte=sg.texte;
   else if(sg.i>0){ const psg=session.segs[sg.i-1]; if(psg.texte&&tt<psg.t0+ARENE_TEXTE_S) e.texte=psg.texte; }
   /* Horloge du round (temps restant, convention du moteur). */
-  e.horloge=Math.min(ARENE_ROUND_LEN,Math.max(0,ARENE_ROUND_LEN-(tt-(sg.r-1)*ARENE_ROUND_LEN)));
+  e.horloge=Math.min(ARENE_ROUND_LEN,Math.max(0,ARENE_ROUND_LEN-(tt-(sg.r-1)*session.roundLen)*session.echelle));
   e.vainqueur=session.vainqueur; e.methode=session.methode;
   e.instable=!!(sg.morph&&tt-sg.t0<ARENE_MORPH_S);
   e.refX=image[4]; e.refY=image[5];

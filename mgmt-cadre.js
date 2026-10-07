@@ -251,6 +251,26 @@ function scr_mgmt_confirmation(){
     +`</div>`;
   return `<div class="mf-ecran${mfEntreeClasse()}"><div class="mf-stage"><div class="mf-fond"></div><div class="mf-voile"></div>${dialogue}</div></div>`;
 }
+/* Lot 11 : A et E passent à la section d'avant ou d'après quand la barre est ouverte (la rangée de touches l'annonce depuis le lot 4). Une
+   touche déjà prise par l'écran garde son sens ; la barre grisée (le soir) n'a aucune section ouverte, rien ne se passe. */
+function mfSectionVoisine(delta){
+  if(typeof document==='undefined') return false;
+  const barre=document.querySelector('.mf-barre'); if(!barre) return false;
+  const items=[...barre.querySelectorAll('.mf-barre-item[data-section]')].filter(b=>!b.disabled&&b.dataset.section!=='menu'&&b.dataset.section!=='options');
+  if(!items.length) return false;
+  let i=items.findIndex(b=>b.classList.contains('cur'));
+  if(i<0) i=delta>0?-1:0;
+  items[(i+delta+items.length)%items.length].click();
+  return true;
+}
+if(typeof document!=='undefined'&&document.addEventListener){
+  document.addEventListener('keydown',e=>{
+    if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey) return;
+    const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+    if(e.key==='a'||e.key==='A'){ if(mfSectionVoisine(-1)) e.preventDefault(); }
+    else if(e.key==='e'||e.key==='E'){ if(mfSectionVoisine(1)) e.preventDefault(); }
+  });
+}
 SCREENS.mgmt_confirmation=scr_mgmt_confirmation;
 SCREENS.title=scr_title;
 Object.assign(CL,{

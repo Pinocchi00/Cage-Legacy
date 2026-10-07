@@ -258,12 +258,8 @@ Object.assign(CL,{
     if(!Number.isSafeInteger(i)||i<0||i>=m.lastEvent.fights.length) return;
     const t=mgmtSoireeTrace(m,i);
     if(!t) return;
-    const res=mgmtReplayFight(t);
-    if(!res) return;
-    areneEcranCharger(res,{a:t.a.name,b:t.b.name},t);
-    ARENE_ECRAN.retour='mgmt_lendemain'; ARENE_ECRAN.finRetour=null;
-    CL.go('arene_socle');
-    areneEcranDemarrer();
+    /* Lot 11 : avec l'agenda, le combat se revoit sur l'écran animé (mgmtRevoirCombat) ; sinon, l'arène d'avant. */
+    mgmtRevoirCombat(t,'mgmt_lendemain',null);
   },
 });
 /* ==== [FIN ANCRE] ==== */
