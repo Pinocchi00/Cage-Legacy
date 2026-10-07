@@ -381,7 +381,9 @@ function mfFicheAccueilHtml(f,cote,recFs){
 /** L'affiche de la prochaine soirée en plein écran, ou le logo à droite quand aucune n'est prévue. */
 function mfAfficheHtml(m){
   const d=mfAfficheDonnees(m);
-  if(!d) return `<div class="mf-accueil-logo" aria-hidden="true">${MF_LOGO_SVG.replace('width="88" height="88"','width="420" height="420"')}</div>`;
+  /* Reprise de fidélité du 07/10/2026 : la planche « Accueil — Aucune soirée prévue » n'a que le titre et le menu sur le fond cendré ; la planche « Logo » dit que
+     l'accueil garde le titre écrit (le logo seul est pour l'icône du jeu). Plus d'octogone à droite. */
+  if(!d) return '';
   const L=mfAfficheMise(d.a.nom,d.b.nom);
   const recFs=Math.floor(Math.min(180,302/Math.max(mfAvance(d.a.rec),mfAvance(d.b.rec),0.5)));
   const lignes=d.cat.toUpperCase().split(' ');
