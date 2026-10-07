@@ -25,11 +25,7 @@ function mgmtFicheVoisins(m,f){
   return {ids:l,i:l.indexOf(f.id)};
 }
 
-function mgmtFicheBanniereHtml(f){
-  const nom=mfNet(f.last||f.name), prenom=mfNet(f.first||'');
-  return `<div class="mf-eff-banniere mf-fiche-banniere"><div class="mf-eff-b2"><div class="mf-eff-b3"><div class="mf-eff-banniere-nom">`
-    +`<span style="font-size:34px">${esc(prenom)}</span><span style="font-size:${mfCorps(nom,380,92,46)}px">${esc(nom)}</span></div></div></div></div>`;
-}
+
 
 /** L'onglet Contrat : les combats du contrat un par un (fait, le prochain, à venir), la bourse fixée à la signature, ce qui se passe ensuite. */
 function mgmtFicheContratHtml(m,f){
@@ -56,25 +52,19 @@ function mgmtFicheCorpsOnglet(m,f,line,id){
 function scr_mgmt_fiche_cadre(){
   const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id);
   if(!line) return scr_mgmt_bureau();
-  const {f}=line, onglet=mgmtFicheOngletCourant();
-  const identite=mgmtIdentite(m,f), phys=mgmtCombatProfile(f).phys||{}, role=mgmtRole(m,f);
-  const mondial=divById(f.div)&&divById(f.div).gender==='F'?'mondiale':'mondial', rangMonde=mgmtFicheSituation(m,f,'world');
-  const texteMonde=/^\d/.test(rangMonde)?`${rangMonde} ${mondial}`:`${mondial} : ${rangMonde}`;
-  const rangs=line.trace?texteMonde:`Chez ${mgmtOrgNom(m)} : ${mgmtFicheSituation(m,f,'organization')} · ${texteMonde}`;
-  const prochain=mgmtEffectifProchain(m,f), forme=mgmtEffectifForme(m,f), v=mgmtFicheVoisins(m,f);
-  const ligne=(k,val)=>`<div class="mf-eff-fiche-l"><span>${esc(k)}</span><b>${esc(val)}</b></div>`;
-  const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
-  const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
-  const stats=`<div class="mf-eff-fiche-t"><div><div class="mf-eff-fiche-s">Palmarès</div><div class="mf-eff-fiche-rec">${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</div></div>`
-    +`<div class="mf-eff-forme">${forme.map(mfMarque).join('')}</div></div>`
-    +`<div class="mf-eff-fiche-ls">${ligne('Catégorie',mgmtDivisionLabel(f.div))}${ligne('Âge',f.age+' ans')}${ligne('Garde',phys.stance==='southpaw'?'GAUCHER':'ORTHODOXE')}${ligne('Taille',taille)}${ligne('Allonge',allonge)}`
-    +(role?ligne('Rôle',role.libelle):'')+ligne('Prochain combat',prochain?(prochain.adv?'Contre '+prochain.adv:'Sur la carte'):'—')+`</div>`
-    +`<div class="mf-eff-fiche-pied">${mfBouton('Préparer son combat',{touche:'Entrée',jaune:true,onclick:"CL.mgmtFicheCarte()"})}</div>`;
+  const {f}=line, onglet=mgmtFicheOngletCourant(), v=mgmtFicheVoisins(m,f);
+  let champion=false; try{ const t=typeof mgmtSplitTitle==='function'?mgmtSplitTitle(m,f.div):null; champion=!!(t&&t.id===f.id); }catch(e){ champion=false; }
+  /* Reprise de fidélité du 07/10/2026 : la fiche est celle des planches (voir mgmt-fiche-planche.js) ; son ancien corps, en texte, n'existe plus. */
   const onglets=MGMT_FICHE_ONGLETS.map(o=>mgmtFicheOngletGrise(o)
     ?`<span class="mf-onglet mf-fiche-grise" aria-disabled="true">${esc(o.libelle.toUpperCase())}</span>`
     :`<button type="button" class="mf-onglet${o.id===onglet?' ouvert':''}" aria-pressed="${o.id===onglet}" onclick="CL.mgmtFicheOnglet('${o.id}')">${esc(o.libelle.toUpperCase())}</button>`).join('');
-  const contenu=`<main class="mf-contenu mf-fiche-cadre"><div class="mf-eff-aside mf-fiche-gauche"><h2 class="mf-sr">${esc(f.name)}</h2>${mgmtFicheBanniereHtml(f)}${mfPanneau(stats,'normal','mf-eff-fiche')}</div>`
-    +`<div class="mf-fiche-droite"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div><div class="mf-fiche-corps mf-ancien"><p class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc((COUNTRIES[mgmtIdentitePays(f)]||{}).name||'')} · « ${esc(identite.surnom)} »<br>${esc(rangs)}</p>${mgmtFicheCorpsOnglet(m,f,line,onglet)}</div></div></main>`;
+  let corps;
+  try{
+    corps=onglet==='style'?mgmtFicheStyleHtml(m,f):onglet==='combats'?mgmtFicheCombatsHtml(m,f,line):onglet==='contrat'?mgmtFicheContratPlanche(m,f):onglet==='ondit'?mgmtFicheOnEnDitHtml(m,f):mgmtFicheApercuHtml(m,f,line);
+  }catch(e){ corps=`<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-rp">Cette fiche ne se lit pas pour l’instant.</div></div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`; }
+  const contenu=`<main class="mf-contenu mf-fiche-cadre mf-fi"><h2 class="mf-sr">${esc(f.name)}</h2>${mgmtFicheBanniereHtml(m,f,champion)}`
+    +`<div class="mf-fi-onglets"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div><div class="mf-fi-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div></div>`
+    +`<div class="mf-fi-corps">${corps}</div></main>`;
   return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',m,plaque:'Effectif',libelle:'Combattant',compteur:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtFicheRetour()'},{ks:['←','→'],t:'Autre combattant'},{ks:['Tab'],t:'Onglet',onclick:'CL.mgmtFicheOnglet(1)'},

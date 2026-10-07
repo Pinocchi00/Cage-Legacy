@@ -118,10 +118,10 @@ test('Fiche combattant — l’en-tête porte le libellé féminin, masculin inc
   win.eval(`CL.mgmtFiche('f3'); render();`);
   assert.equal(win.eval(`G.screen`), 'mgmt_fiche');
   let html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('Poids mouche féminin'), 'la fiche d’une combattante porte le féminin');
+  assert.ok(/POIDS<\/div><div>MOUCHE<\/div><div>FÉMININ/.test(html), 'la fiche d’une combattante porte le féminin');
   win.eval(`CL.mgmtFiche('h1'); render();`);
   html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('Poids léger') && !html.includes('Poids léger féminin'),
+  assert.ok(/POIDS<\/div><div>LÉGER<\/div>/.test(html) && !html.includes('FÉMININ'),
     'la fiche d’un combattant reste au masculin');
 });
 

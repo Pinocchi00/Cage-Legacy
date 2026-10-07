@@ -196,7 +196,7 @@ test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', ()
   const html=win.document.getElementById('app').innerHTML;
   for(const t of traces){
     const opp=t.a.id===id?t.b:t.a;
-    assert.ok(html.includes(opp.name),'adversaire du cycle '+t.c);
+    assert.ok(html.includes(win.eval(`mfNet(${JSON.stringify(opp.name)})`)),'adversaire du cycle '+t.c);
     assert.ok(html.includes('Cycle '+t.c),'date disponible dans la trace');
   }
   /* Une ancienne trace peut contenir un nom hostile ; la fiche ne doit
@@ -208,7 +208,7 @@ test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', ()
   })()`);
   const safe=win.document.getElementById('app');
   assert.equal(safe.querySelector('img'),null,'aucune balise hostile insérée');
-  assert.ok(safe.innerHTML.includes('&lt;img'),'nom échappé');
+  assert.ok(safe.innerHTML.includes('&lt;IMG'),'nom échappé');
   /* Restaurer le nom de la trace pour conserver le rejeu fidèle. */
   win.eval(`(function(){
     const t=G.mgmt.hist[0], f=mgmtFighterById(G.mgmt,${JSON.stringify(id)});
@@ -238,22 +238,20 @@ test('MGMT lot 4 T5 — fiche Split, zones réelles, rejeu une seule fois par tr
     G.screen='mgmt_carte'; CL.mgmtFiche(${JSON.stringify(id)});
   })()`);
   win.eval(`CL.mgmtFicheOnglet('style')`);
-  const html=win.document.getElementById('app').innerHTML;
-  assert.match(html,/Où il combat/);
-  assert.match(html,/clip-path="url\(#mgmt-fiche-oct\)"/);
+  let html=win.document.getElementById('app').innerHTML;
+  /* Reprise de fidélité du 07/10 : la fiche suit les planches FicheStyle / FicheFinal — la cage d'abord, puis les lignes façon, force, faille, inconnu, allonge. */
+  assert.match(html,/class="mf-fi-cage"/);
+  assert.match(html,/Rouge : là où il impose son combat/);
+  assert.match(html,/FAÇON/);
+  assert.match(html,/ALLONGE/);
+  win.eval(`CL.mgmtFicheOnglet('apercu')`);
+  html=win.document.getElementById('app').innerHTML;
   assert.match(html,/Taille/);
   assert.match(html,/Allonge/);
-  assert.match(html,/garde (orthodoxe|gaucher)/);
-  assert.match(html,/Chez Split :/);
-  /* Lot 4 F2 : le rang précède « mondial », accordé au combattant. */
-  assert.match(html,/mondial/);
-  const ranks=win.eval(`(function(){const m=G.mgmt,f=mgmtFighterById(m,${JSON.stringify(id)});
-    return [mgmtFicheSituation(m,f,'organization'),mgmtFicheSituation(m,f,'world')];})()`);
-  assert.ok(html.includes(`Chez Split : ${ranks[0]} · ${ranks[1]} mondial`));
-  /* Lot 5 H6 (contrat §3.3, décision du 30/09) : « Comment il combat » et « Sa faille » reviennent,
-     en connaissance progressive — jamais remplis d'avance. « Son camp » reste absent (lot 5 T7). */
-  /* Lot 5 T7 : « Son camp » se remplit aussi (parties neuves) — la fiche d'une ancienne partie, ici, ne le porte pas. */
-  assert.ok(html.includes('Comment il combat')&&html.includes('Sa faille')&&!html.includes('Son camp'));
+  assert.match(html,/GAUCHER|ORTHODOXE/);
+  assert.match(html,/Chez Split/);
+  assert.match(html,/class="mf-fb(?: or)?"/,'la bannière du tunnel');
+  assert.ok(!html.includes('Son camp'));
   const first=win.replays;
   win.eval('render(); render(); CL.mgmtFicheDeplacer(1)');
   assert.equal(win.replays,first,'un rendu et un déplacement clavier ne rejouent pas les combats');
@@ -270,7 +268,7 @@ test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappeme
   assert.equal(win.G.screen,'mgmt_fiche');
   win.eval("CL.mgmtFicheOnglet('combats')");
   const html=win.document.getElementById('app').innerHTML;
-  assert.match(html,/Sa trajectoire/);
+  assert.match(html,/SA TRAJECTOIRE/);
   assert.match(html,/Amateur/);
   assert.match(html,/Professionnel/);
   assert.ok(!html.includes('× 0')&&!html.includes('· 0 combat'));

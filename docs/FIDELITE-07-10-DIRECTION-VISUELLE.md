@@ -21,3 +21,10 @@ Demande d'Anthony : les planches ne sont pas toutes respectées (l'accueil par e
 - Les colonnes de quelques tableaux (Classements : Palmarès, Série en cours, Dernier combat ; Effectif) sont décalées de quelques dizaines de pixels par rapport aux planches.
 - Booking (la carte) : le bloc « Leïla — Préliminaires » sous la carte et le lien « Voir les N combattants » de la planche ne sont pas posés ; les préliminaires à catégorie choisie dans la ligne ne le sont pas non plus.
 - Le lendemain garde la barre des sections grisée (séquence imposée du lot 4).
+
+## Les tunnels et la Fiche (07/10/2026)
+
+- Les tunnels d'octogones figurent sur d'autres planches que l'accueil : **rouge** derrière la bannière de la Fiche (`images/accueil-octogones.jpg`), **jaune** (`images/tunnel-or.jpg`) derrière la bannière d'un champion, la carte du champion des Classements et la ceinture ouverte. Les deux images sont précachées (`sw.js`, version b29).
+- La Fiche est refaite sur ses six planches (`mgmt-fiche-planche.js`) : bannière, cinq onglets (aperçu, style, combats, contrat, on en dit), variante champion. Rien de nouveau dans le jeu : tout se lit dans les systèmes existants. Les phrases que j'ai écrites (`MGMT_FICHE_TEXTES`) sont `relu:false`.
+- Conservé de l'ancienne Fiche : le libellé « féminin » (dans la bannière), la date « Cycle N » de chaque combat, la trajectoire d'un combattant extérieur (onglet Combats), le rejeu une seule fois par trace.
+- Écart assumé : l'ancienne ligne « Chez Split : rang · rang mondial » n'a pas de place dans les planches ; la bannière porte le rang dans la catégorie.

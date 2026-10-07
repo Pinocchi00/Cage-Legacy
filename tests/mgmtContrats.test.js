@@ -124,7 +124,7 @@ test('Contrats — la fiche : l’onglet Contrat montre les combats un par un, l
   win.eval(`CL.go('mgmt_effectif'); CL.mgmtEffectifOuvrir(); CL.mgmtFicheOnglet('contrat');`);
   assert.equal(win.eval('MGMT_FICHE.onglet'),'contrat');
   const t=win.eval(`document.getElementById('app').textContent`);
-  assert.ok(t.includes('Le prochain')&&t.includes('par combat')&&t.includes('sans-contrat'));
+  assert.ok(t.includes('Le prochain')&&t.includes('DURÉE')&&t.includes('ENSUITE'),'les combats un par un, la durée et la suite');
   assert.equal(win.eval(`document.querySelectorAll('.mf-fiche-grise').length`),0);
 });
 
