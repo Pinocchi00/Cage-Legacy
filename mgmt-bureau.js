@@ -359,6 +359,8 @@ function mgmtNewPile(m){
   mgmtExteriorArrive(m);
   mgmtVieOuvreCycle(m);
   mgmtDemandesOuvreCycle(m);
+  /* Lot 10 : les nouvelles du cycle (défis, public, combattants qui attendent) entrent au fil. */
+  if(typeof mgmtFilMettreAJour==='function') mgmtFilMettreAJour(m);
   m.pile=[];
   m.open=null;
   m.shortfall=false;

@@ -95,7 +95,7 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
   assert.deepEqual(r.sections,['carte','preliminaires','effectif','classements','ceintures','contrats','camps','presse','calendrier','resultats','finances']);
   assert.equal(r.carte.length,13,'onze sections, Options, Menu principal');
   assert.equal(r.carte.filter(x=>x.cur).length,1); assert.equal(r.carte.find(x=>x.cur).sec,'carte');
-  assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),['ceintures','camps','presse','resultats','options'],'les sections dont le lot n’est pas livré sont grisées');
+  assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),['options'],'les sections dont le lot n’est pas livré sont grisées (lot 10 : ceintures, camps, presse et résultats sont livrées)');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct===false||true);
   assert.equal(r.bureau.find(x=>x.cur).sec,'preliminaires','l’écran de la semaine éclaire Préliminaires (écran ancien)');
   assert.equal(r.fiche.find(x=>x.cur).sec,'classements','une fiche éclaire la section d’où on l’a ouverte');
@@ -107,7 +107,7 @@ test('Écrans anciens — posés dans le cadre sous la barre, avec leur navigati
   const win=newGameWindow({runMain:true});
   const r=result(win,`${NEUVE}
     const out={};
-    for(const e of ['mgmt_bureau','mgmt_vestiaire','mgmt_recrutement','mgmt_classements','mgmt_organisation']){
+    for(const e of ['mgmt_bureau','mgmt_vestiaire','mgmt_recrutement','mgmt_organisation']){
       G.screen=e; const h=SCREENS[e](); out[e]=[h.includes('class="mf-ecran'),h.includes('class="mf-ancien"'),h.includes('class="mgmt-nav"'),h.includes('mf-barre')]; }
     return out;`);
   for(const [e,v] of Object.entries(r)) assert.deepEqual(v,[true,true,true,true],e);

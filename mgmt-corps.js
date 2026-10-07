@@ -664,6 +664,8 @@ function mgmtRunEvent(m){
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   m.card.main=[];
   m.card.prelims=[];
+  /* Lot 10 : la soirée jouée entre au fil (presse, ceintures, public). */
+  if(typeof mgmtFilMettreAJour==='function') mgmtFilMettreAJour(m);
   saveMgmt();
   return m.lastEvent;
 }

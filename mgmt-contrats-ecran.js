@@ -97,6 +97,17 @@ function scr_mgmt_contrats(){
 }
 SCREENS.mgmt_contrats=scr_mgmt_contrats;
 
+/** Lot 10 : ce qu'on dit de lui — sa parole (dans sa voix) et la ligne de média la plus récente (« Cage Hebdo en dit »). */
+function mgmtContratsDitHtml(m,x){
+  const f=x.f; let h='';
+  const p=x.propre&&typeof mgmtParoleRecente==='function'?mgmtParoleRecente(m,f):null;
+  if(p) h+=`<div class="mf-ct-dit"><b>Il dit</b><span>« ${esc(p.texte)} »</span></div>`;
+  const l=(m.fil||[]).filter(y=>y.k==='presse'&&y.w==='media'&&y.t&&y.a===f.id).pop();
+  const md=l&&typeof mgmtMediaDe==='function'?mgmtMediaDe(l.x):null;
+  if(l&&md) h+=`<div class="mf-ct-dit"><b>${esc(md.nom)} en dit</b><span>${esc(l.t)}</span></div>`;
+  return h;
+}
+
 /** La fiche d'offre : le combattant choisi, ce que le joueur sait de lui, le contrat en cours, l'offre. */
 function mgmtContratsOffreHtml(m,x){
   if(!x) return `<div class="mf-eff-apercu-vide">Personne dans cette catégorie.</div>`;
@@ -114,6 +125,7 @@ function mgmtContratsOffreHtml(m,x){
     +actuel
     +ligne('Nombre de combats',n+' COMBAT'+(n>1?'S':''))+`<div class="mf-ct-n">${pips.join('')}</div>`
     +ligne('Il demande, par combat',mgmtEuros(demande))+ligne('Tu proposes, par combat',mgmtEuros(b))+ligne('Prime de signature',mgmtEuros(prime))
+    +mgmtContratsDitHtml(m,x)
     +(F.msg?`<div class="mf-ct-msg">${esc(F.msg)}</div>`:'')+`</div>`
     +`<div class="mf-eff-fiche-pied">${mfBouton(reno?'Proposer ce contrat':(x.propre?'Reprendre':'Proposer ce contrat'),{touche:'Entrée',jaune:true,onclick:'CL.mgmtContratsPropose()'})}</div>`;
   return ban+mfPanneau(corps,'normal','mf-eff-fiche mf-ct-fiche');
