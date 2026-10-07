@@ -42,9 +42,21 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
      de combat ci-dessous. ==== */
   const policyA=policyOf(A), policyB=policyOf(B);
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MGMT_BRIEF_LOT3_PRECISION] — Brief du 06/10/2026, lot 3, tranche 4 (la précision) : la précision des frappes significatives était de
+     38,6 % (la page de vision en voulait 45 %). On l'élève en réduisant les coups TENTÉS : la base de précision passe de 0,42 à PRECISION_BASE, la
+     fourchette suit. Les coups touchés (landedA/landedB) ne sont pas calculés ici : ils ne bougent pas, donc ni les dégâts, ni les coups touchés par
+     minute (3,2), ni le déroulé du combat. ==== */
+  const PRECISION_BASE=0.475;
+  /* ==== [FIN ANCRE] ==== */
   const wf=weightFactor(A);
-  const koWeightMult=1+(wf-0.5)*0.8;
-  const subWeightMult=1+(0.5-Math.abs(wf-0.5))*0.7; // pic d'efficacité au poids moyen (wf≈0.5)
+  /* ==== [ANCRE: MGMT_BRIEF_LOT3_GENRE] — Brief du 06/10/2026, lot 3, tranche 3 (le genre) : aucune ligne du moteur ne lisait le genre, et les femmes
+     finissaient par KO aussi souvent que les hommes (24 % en poids paille, l'UFC : 13,5 %). Les catégories féminines ont leur propre réglage de
+     puissance de finition : FINITION_KO_FEMMES multiplie la chance de KO/TKO (debout comme au sol). Les soumissions des femmes sont à peine réduites (FINITION_SUB_FEMMES), pour que les combats aillent plus souvent au bout. Le genre est lu
+     sur le combattant A ; les deux camps d'un combat ont toujours le même (une division n'est ouverte qu'à un genre). ==== */
+  const koGenreMult=A.gender==='F'?FINITION_KO_FEMMES:FINITION_KO_HOMMES-FINITION_KO_HOMMES_LOURDS*clamp((weightFactor(A)-0.5)/0.5,0,1);
+  const koWeightMult=(1+(wf-0.5)*0.8)*koGenreMult;
+  /* ==== [FIN ANCRE] ==== */
+  const subWeightMult=(1+(0.5-Math.abs(wf-0.5))*0.7)*(A.gender==='F'?FINITION_SUB_FEMMES:1); // pic d'efficacité au poids moyen (wf≈0.5)
   const noiseWeightMult=1+(wf-0.5)*0.4;
   // ==== [FIN ANCRE] ====
   // ==== [ANCRE: PLAN_TACTIQUE] — modificateurs du vestiaire (audit §11), appliqués
@@ -544,7 +556,8 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            totalement déconnecté. ==== */
         const groundWear=gnp*0.32*(dt/50);
         if(topIsA){sa+=topPts*(dt/50);sb+=botPts*(dt/50);dmgB+=groundWear;st.A.ctrl+=dt*(0.2/50);st.A.sig+=gHits*(dt/50);} else {sb+=topPts*(dt/50);sa+=botPts*(dt/50);dmgA+=groundWear;st.B.ctrl+=dt*(0.2/50);st.B.sig+=gHits*(dt/50);}
-        stTop.ctrlSec+=beatGroundSec*(dt/50); stTop.groundCtrlSec+=beatGroundSec*(dt/50);
+        const tenueTop=lutteTenue((topIsA?A:B).style);
+        stTop.ctrlSec+=beatGroundSec*tenueTop*(dt/50); stTop.groundCtrlSec+=beatGroundSec*tenueTop*(dt/50);
         // Enrichissement stats sol (frappes au sol, tentatives, temps de contrôle continu)
         const gAtt=gHits+Math.max(1,1+((top.aggression||50)-50)*0.03);
         stTop.sigAtt+=gAtt*(dt/50); stTop.groundStrikes+=gHits*(dt/50); stTop.groundAtt+=gAtt*(dt/50);
@@ -569,14 +582,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         if(subBot>2.5) stBot.subAtt+=(dt/50);
 
         const heartR=1-(bot.heart*0.0016);
-        const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.40*posProf.gnpMult;
+        const koGnp=clamp((top.power-bot.chin)/56,0,.72)*clamp(gnp/9,0,1)*0.62*(1-bot.fightIQ*0.0022)*heartR*topProf.koMod*0.40*posProf.gnpMult*koGenreMult;
         /* ==== [ANCRE: P7_L3_SUBMISSION_DEFENSE] — Lot 3/P7 sec.3.2 : "elle se
            defend (flexibility, composure, strength)" -- submissionDefenseMult()
            applique cette defense a la CHANCE DE FINITION (subChT/subChB), pas
            a l'intensite d'attaque (subTop/subBot ci-dessus, qui pilote toujours
            subAtt) : un defenseur souple/calme/fort rend la finition plus dure
            sans changer combien de fois l'attaquant a reellement tente. ==== */
-        const subChT=clamp((top.submission-bot.guard)/7,0,0.95)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult*posProf.topSubMult*submissionDefenseMult(bot);
+        const subChT=clamp((top.submission-bot.guard)/7,0,0.95)*0.68*(1-bot.fightIQ*0.0022)*topProf.subMod*0.4*subWeightMult*posProf.topSubMult*submissionDefenseMult(bot)/Math.pow(tenueTop,1.6);
         const subChB=clamp((bot.submission-top.submission)/10,0,0.88)*0.44*(1-top.fightIQ*0.0022)*botProf.subMod*0.4*subWeightMult*posProf.botSubMult*submissionDefenseMult(top);
         /* ==== [FIN ANCRE] ==== */
         if(rnd()<subChT*(dt/50) && !(immuneA&&botF===A)){finish={by:topF,loser:botF,method:'Soumission',round:r};(topIsA?st.A:st.B).sub++;}
@@ -689,12 +702,12 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           } else if(groundPos==='openGuard'){
             if(rnd()<groundPassChance(top,bot)*(dt/50)){ groundPos='halfGuard'; stTop.guardPasses++; transitioned=true; }
             else if(rnd()<groundSweepChance(top,bot)*(dt/50)){ topIsA=!topIsA; stBot.reversals++; transitioned=true; }
-            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
+            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)/lutteTenue((topIsA?A:B).style)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
             else if(rnd()<groundGuardCloseChance(bot)*(dt/50)){ groundPos='closedGuard'; transitioned=true; }
           } else { // closedGuard
             if(rnd()<groundPassChance(top,bot)*0.7*(dt/50)){ groundPos='halfGuard'; stTop.guardPasses++; transitioned=true; }
             else if(rnd()<groundSweepChance(top,bot)*(dt/50)){ topIsA=!topIsA; stBot.reversals++; transitioned=true; }
-            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
+            else if(posProf.standupOk && rnd()<groundStandupChance(top,bot,topFat)/lutteTenue((topIsA?A:B).style)*(dt/50)){ currentPhase='debout'; stBot.standups++; transitioned=true; }
             else if(rnd()<groundGuardOpenChance(bot)*(dt/50)){ groundPos='openGuard'; transitioned=true; }
           }
           if(!transitioned){
@@ -731,7 +744,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           if(transitioned || gHits>1.0 || subTop>2.5 || subBot>2.5){ groundInactivity=0; }
           else {
             groundInactivity+=dt;
-            if(groundInactivity>=(REF_STANDUP_THRESHOLD[groundPos]||55)){
+            if(groundInactivity>=(REF_STANDUP_THRESHOLD[groundPos]||55)*lutteTenue((topIsA?A:B).style)){
               currentPhase='debout'; groundInactivity=0; stBot.standups++; refStandupCount++;
               log.push({r,phase:'sol',top:topIsA?'A':'B',pos:groundPos,by:'me',
                 text:`[${formatTime(beatT)}] L’arbitre relance les combattants debout : plus aucune progression au sol.`,
@@ -897,7 +910,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
            n'est donc journalisée qu'en échantillon (densité de routine),
            jamais systématiquement — une réussite (rare, notable) reste
            toujours journalisée. ==== */
-        if(attA>0.14 && rnd()<0.18){ st.A.tdAtt+=(dt/50); handled=true;
+        if(attA>0.14 && rnd()<0.18*lutteEnchaine(A.style)){ st.A.tdAtt+=(dt/50); handled=true;
           /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — §4.2, remplace
              sigmoid((...)/15) telle quelle par takedownSigmoidSteep(),
              plafond relevé 0.85->0.95 (sinon un écart devenu "quasi
@@ -909,7 +922,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
             st.B.tdDef+=(dt/50);
             if(rnd()<dt/90) log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Bonne défense de ${B.name} sur la tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
-        } else if(attB>0.14 && rnd()<0.18){ st.B.tdAtt+=(dt/50); handled=true;
+        } else if(attB>0.14 && rnd()<0.18*lutteEnchaine(B.style)){ st.B.tdAtt+=(dt/50); handled=true;
           /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — voir ci-dessus, côté B. ==== */
           const tdChanceB=takedownSigmoidSteep(b.takedown-a.tdd)*attB;
           if(rnd()<clamp(tdChanceB,0.05,0.95)*(dt/50)){ st.B.td++; currentPhase='sol'; topIsA=false; groundPos=initialGroundPos(b,a); groundInactivity=0;
@@ -1021,7 +1034,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           /* ==== [FIN ANCRE] ==== */
 
           // Tentatives et frappes debout pour A
-          const accRateA=clamp(0.42+((a.handSpeed||50)*0.08+(a.discipline||50)*0.06-(b.footSpeed||50)*0.10-(b.footwork||50)*0.06)*0.003,0.30,0.65);
+          const accRateA=clamp(PRECISION_BASE+((a.handSpeed||50)*0.08+(a.discipline||50)*0.06-(b.footSpeed||50)*0.10-(b.footwork||50)*0.06)*0.003,PRECISION_BASE-0.12,PRECISION_BASE+0.23);
           const attA=Math.max(landedA,landedA/accRateA+((a.aggression||50)>60?RI(1,3):RI(0,1)));
           st.A.sigAtt+=attA*(dt/50); st.A.distStrikes+=landedA*(dt/50); st.A.distAtt+=attA*(dt/50);
           st.A.total+=(landedA+RI(1,3))*(dt/50); st.A.totalAtt+=(attA+RI(2,4))*(dt/50);
@@ -1063,7 +1076,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
           /* ==== [FIN ANCRE] ==== */
 
           // Tentatives et frappes debout pour B
-          const accRateB=clamp(0.42+((b.handSpeed||50)*0.08+(b.discipline||50)*0.06-(a.footSpeed||50)*0.10-(a.footwork||50)*0.06)*0.003,0.30,0.65);
+          const accRateB=clamp(PRECISION_BASE+((b.handSpeed||50)*0.08+(b.discipline||50)*0.06-(a.footSpeed||50)*0.10-(a.footwork||50)*0.06)*0.003,PRECISION_BASE-0.12,PRECISION_BASE+0.23);
           const attB=Math.max(landedB,landedB/accRateB+((b.aggression||50)>60?RI(1,3):RI(0,1)));
           st.B.sigAtt+=attB*(dt/50); st.B.distStrikes+=landedB*(dt/50); st.B.distAtt+=attB*(dt/50);
           st.B.total+=(landedB+RI(1,3))*(dt/50); st.B.totalAtt+=(attB+RI(2,4))*(dt/50);
@@ -1412,6 +1425,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
        composante pondérée est exposée en clair (judgeDiffs, ci-dessous dans
        roundStats) pour rester inspectable par le harnais. ==== */
     const judgeRDiff=w=>(rSigA-rSigB)*w.sig+rPwrDiff*w.pwr+(rTdA-rTdB)*w.td+rSubDiff*w.sub+rWobDiff*w.wob+(rCtrlA-rCtrlB)*w.ctrl+aggDiff*w.agg;
+    const JUGES_ECART=6;
     const JUDGE_WEIGHTS=[
       {sig:1.0, pwr:0.5, td:1.5, sub:1.2, wob:1.8, ctrl:3.0, agg:1.0}, // juge 1 : lecture de référence (formule pré-L3, inchangée)
       {sig:0.9, pwr:0.3, td:2.0, sub:1.3, wob:1.6, ctrl:4.2, agg:0.8}, // juge 2 : plus sensible au contrôle/amenées
@@ -1428,7 +1442,13 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       if(rDiff<0) return [9,10]; // bande serrée mais B garde un léger avantage réel
       return rnd()<0.5?[10,9]:[9,10]; // égalité mathématique exacte, rarissime
     };
-    const judgeDiffs=JUDGE_WEIGHTS.map(judgeRDiff);
+    /* ==== [ANCRE: MGMT_BRIEF_LOT3_JUGES] — Brief du 06/10/2026, lot 3, tranche 1 (les juges) : les trois juges partaient des mêmes chiffres et ne
+       divergeaient presque jamais (3 % de décisions partagées ou majoritaires, l'UFC en compte 22,9 %). Chaque juge a maintenant sa propre lecture du
+       round : un écart personnel (somme de deux tirages, de -JUGES_ECART à +JUGES_ECART, tirés dans l'ordre juge 1, 2, 3) s'ajoute à son total
+       pondéré. L'écart est de l'ordre de la bande serrée (|rDiff| ≤ 3 → 10-9) : un round serré peut basculer chez un juge et pas chez l'autre, un
+       round nettement dominé (au-delà de ~10 points d'écart) garde son vainqueur chez les trois. ==== */
+    const judgeDiffs=JUDGE_WEIGHTS.map(w=>judgeRDiff(w)+(rnd()+rnd()-1)*JUGES_ECART);
+    /* ==== [FIN ANCRE] ==== */
     let [sA,sB]=scoreFromDiff(judgeDiffs[0]);
     let [s2A,s2B]=scoreFromDiff(judgeDiffs[1]);
     let [s3A,s3B]=scoreFromDiff(judgeDiffs[2]);
