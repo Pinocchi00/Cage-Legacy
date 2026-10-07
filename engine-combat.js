@@ -1412,6 +1412,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
        composante pondérée est exposée en clair (judgeDiffs, ci-dessous dans
        roundStats) pour rester inspectable par le harnais. ==== */
     const judgeRDiff=w=>(rSigA-rSigB)*w.sig+rPwrDiff*w.pwr+(rTdA-rTdB)*w.td+rSubDiff*w.sub+rWobDiff*w.wob+(rCtrlA-rCtrlB)*w.ctrl+aggDiff*w.agg;
+    const JUGES_ECART=6;
     const JUDGE_WEIGHTS=[
       {sig:1.0, pwr:0.5, td:1.5, sub:1.2, wob:1.8, ctrl:3.0, agg:1.0}, // juge 1 : lecture de référence (formule pré-L3, inchangée)
       {sig:0.9, pwr:0.3, td:2.0, sub:1.3, wob:1.6, ctrl:4.2, agg:0.8}, // juge 2 : plus sensible au contrôle/amenées
@@ -1428,7 +1429,13 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
       if(rDiff<0) return [9,10]; // bande serrée mais B garde un léger avantage réel
       return rnd()<0.5?[10,9]:[9,10]; // égalité mathématique exacte, rarissime
     };
-    const judgeDiffs=JUDGE_WEIGHTS.map(judgeRDiff);
+    /* ==== [ANCRE: MGMT_BRIEF_LOT3_JUGES] — Brief du 06/10/2026, lot 3, tranche 1 (les juges) : les trois juges partaient des mêmes chiffres et ne
+       divergeaient presque jamais (3 % de décisions partagées ou majoritaires, l'UFC en compte 22,9 %). Chaque juge a maintenant sa propre lecture du
+       round : un écart personnel (somme de deux tirages, de -JUGES_ECART à +JUGES_ECART, tirés dans l'ordre juge 1, 2, 3) s'ajoute à son total
+       pondéré. L'écart est de l'ordre de la bande serrée (|rDiff| ≤ 3 → 10-9) : un round serré peut basculer chez un juge et pas chez l'autre, un
+       round nettement dominé (au-delà de ~10 points d'écart) garde son vainqueur chez les trois. ==== */
+    const judgeDiffs=JUDGE_WEIGHTS.map(w=>judgeRDiff(w)+(rnd()+rnd()-1)*JUGES_ECART);
+    /* ==== [FIN ANCRE] ==== */
     let [sA,sB]=scoreFromDiff(judgeDiffs[0]);
     let [s2A,s2B]=scoreFromDiff(judgeDiffs[1]);
     let [s3A,s3B]=scoreFromDiff(judgeDiffs[2]);
