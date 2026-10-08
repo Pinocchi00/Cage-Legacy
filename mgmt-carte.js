@@ -411,8 +411,37 @@ function mgmtCartRows(m){
     n'est pas encore tombée — ainsi « sort du classement » reste lu quand
     la retraite l'a fait sortir. ==== */
 
-/** L'unique loi de classement : écart W-L, victoires, récence. */
-function mgmtRankingCompare(x,y){
+/* Corrections du 08/10/2026 (top 5) : le haut du classement bouge comme dans la vraie vie. Le bilan d'avant la partie pèse de moins en moins à mesure qu'un combattant
+   combat à Split (MGMT_RANG_OUBLI par combat), et ses résultats récents pèsent plus que les anciens : une défaite fait chuter, une série fait monter. Le score est dérivé
+   de l'historique des combats (m.hist), jamais stocké. Un combattant sans combat à Split (extérieur) garde son écart W-L. */
+const MGMT_RANG_OUBLI=0.5;
+/* Et le temps seul use le passé : le bilan d'avant la partie garde MGMT_RANG_TEMPS de son poids à chaque soirée jouée, qu'on combatte ou non — pour tout le monde, extérieur compris, afin qu'une recrue ne change pas de rang en signant. */
+const MGMT_RANG_TEMPS=0.94;
+
+/** Les scores de classement des lignes d'une catégorie : Map id → score. Pur.
+ *  score = (W0−L0)·ρⁿ + Σ résultats·ρ^(n−i), n combats à Split avant le cycle lu, W0/L0 le bilan d'avant ces combats. */
+function mgmtRangScores(m,cands,cycle){
+  const sc=new Map(), par=new Map();
+  for(const t of m.hist||[]){
+    if(!t||!t.a||!t.b||(Number.isSafeInteger(cycle)&&t.c>=cycle)) continue;
+    const r=t.winner==='A'?1:(t.winner==='B'?-1:0);
+    for(const [side,v] of [[t.a,r],[t.b,-r]]){ if(!par.has(side.id)) par.set(side.id,[]); par.get(side.id).push(v); }
+  }
+  for(const o of cands){
+    const w=Number.isSafeInteger(o.W)?o.W:0, l=Number.isSafeInteger(o.L)?o.L:0, res=par.get(o.id)||[];
+    let W0=w, L0=l;
+    for(const v of res){ if(v>0) W0--; else if(v<0) L0--; }
+    const n=res.length, ref0=Number.isSafeInteger(cycle)?cycle:m.cycle;
+    let s=(W0-L0)*Math.pow(MGMT_RANG_OUBLI,n)*Math.pow(MGMT_RANG_TEMPS,Math.max(0,ref0-1));
+    for(let i=0;i<n;i++) s+=res[i]*Math.pow(MGMT_RANG_OUBLI,n-1-i);
+    sc.set(o.id,s);
+  }
+  return sc;
+}
+
+/** L'unique loi de classement : score de forme (si fourni), écart W-L, victoires, récence. */
+function mgmtRankingCompare(x,y,sc){
+  if(sc){ const a=sc.get(x.id), b=sc.get(y.id); if(a!==undefined&&b!==undefined&&a!==b) return b-a; }
   const xd=(Number.isSafeInteger(x.W)?x.W:0)-(Number.isSafeInteger(x.L)?x.L:0);
   const yd=(Number.isSafeInteger(y.W)?y.W:0)-(Number.isSafeInteger(y.L)?y.L:0);
   if(xd!==yd) return yd-xd;
@@ -512,7 +541,8 @@ function mgmtDivisionRanking(m,divId,scope,cycle){
         lastCycle:Number.isSafeInteger(last)?last:-1});
     }
   }
-  cands.sort(mgmtRankingCompare);
+  const scores=mgmtRangScores(m,cands,passe?c:undefined);
+  cands.sort((x,y)=>mgmtRankingCompare(x,y,scores));
   return cands;
 }
 

@@ -8,7 +8,7 @@
    Il lit les vraies fonctions du jeu, ne modifie aucun fichier du dépôt, et écrit par défaut tools/reports/MESURE-MANAGEMENT.md.
    Colonnes : caisse (€), popularité, satisfaction du public (0 à 100), paliers d'attente (1 : attend, 2 : longtemps, 3 : rouillé, 4 : refuse tout combat),
    refus de prolongation (trop-grand, caisse, trop-bas), combats de titre par carte et changements de champion, âge moyen, moins de 25 ans, 36 ans et plus,
-   et, depuis le lot 13, les retraites cumulées, le renouvellement du top 5 (membres du top 5 de départ qui en sont sortis, en moyenne par catégorie) et les jeunes
+   et, depuis le lot 13, les retraites cumulées, le renouvellement du top 5 (membres du top 5 de départ qui en sont sortis, en moyenne par catégorie d'au moins dix combattants : dans une plus petite, le top 5 est tout le monde) et les jeunes
    de 24 ans et moins signables sur le marché. */
 const fs = require('fs');
 const path = require('path');
@@ -41,7 +41,7 @@ function partie(orgId, seed) {
         paliers:{p1:pal[1],p2:pal[2],p3:pal[3],p4:pal[4]},refus:Object.assign({},refus),titresParCarte:cartes?Math.round(100*titres/cartes)/100:0,changementsDeChampion:changes,
         ageMoyen:Math.round(10*ages.reduce((a,b)=>a+b,0)/Math.max(1,ages.length))/10,moins25:ages.filter(a=>a<25).length,plus36:ages.filter(a=>a>=36).length,decouvert,
         retraites:m.roster.filter(f=>mgmtIsRetired(f)).length,
-        top5Renouvele:(()=>{ const t=top5(); let s=0; for(const d of divsIds) s+=top5Depart[d].filter(id=>!t[d].includes(id)).length; return Math.round(100*s/divsIds.length)/100; })(),
+        top5Renouvele:(()=>{ const t=top5(); let s=0; const grandes=divsIds.filter(d=>m.roster.filter(f=>f.div===d).length>=10); for(const d of grandes) s+=top5Depart[d].filter(id=>!t[d].includes(id)).length; return Math.round(100*s/Math.max(1,grandes.length))/100; })(),
         marcheJeunes:divsIds.reduce((s,d)=>s+mgmtRecrutables(m,d).filter(x=>x.age<=24).length,0)}; };
     for(let k=0;k<${SOIREES};k++){
       m.pile.forEach(x=>{x.status='closed';x.decision='ignored';}); m.open=null;
