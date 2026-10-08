@@ -1156,3 +1156,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pre-pourquoi{margin-top:12px}
 .mf-pre-aide{font-size:22px;line-height:1.2;color:var(--mf-texte2);margin-top:6px}
 /* ==== [FIN ANCRE] ==== */
+/* Planche « Contrats » : le contrat en cours en grand. */
+.mf-ct-cours{margin-bottom:6px}
+.mf-ct-cours-l{display:flex;align-items:center;gap:14px}
+.mf-ct-cours-l b{font-family:var(--mf-titre);font-weight:800;font-size:72px;line-height:.9}
+.mf-ct-cours-l span{font-family:var(--mf-titre);font-weight:800;font-size:26px;line-height:1;text-transform:uppercase;letter-spacing:var(--mf-titre-ls)}
+.mf-ct-cours-l em{margin-left:auto;font-style:normal;font-size:22px;color:var(--mf-texte2)}
+.mf-fi-co{grid-template-columns:44px 340px minmax(0,1fr) 52px}
+.mf-fi-ct span{overflow:hidden;text-overflow:ellipsis;max-width:340px}

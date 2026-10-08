@@ -102,7 +102,7 @@ function mgmtEffectifApercuHtml(m,x){
   const marque=x.champion?`<div class="mf-eff-badge champion" role="img" aria-label="Champion">C</div>`:`<div class="mf-eff-badge">${esc(rang)}</div>`;
   const corps=`<div class="mf-eff-fiche-t"><div><div class="mf-eff-fiche-s">Palmarès</div><div class="mf-eff-fiche-rec">${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</div></div>${marque}</div>`
     +`<div class="mf-eff-fiche-ls">${ligne('Façon',facon||'?')}${Number.isFinite(phys.reach)?ligne('Allonge',(phys.reach/100).toFixed(2).replace('.',',')+' m'):''}`
-    +ligne('Âge',f.age+' ans')+ligne('Prochain combat',prochain?(prochain.adv?'Contre '+prochain.adv:'Sur la carte'):'—')+`</div>`
+    +ligne('Âge',f.age+' ans')+ligne('Contrat restant',f.libre?'Libre':(f.ct?mgmtContratRestants(f)+' combat'+(mgmtContratRestants(f)>1?'s':''):'—'))+ligne('Prochain combat',prochain?(prochain.adv?'Contre '+prochain.adv:'Sur la carte'):'—')+`</div>`
     +`<div class="mf-eff-fiche-pied">${mfBouton('Ouvrir sa fiche',{touche:'Entrée',jaune:true,onclick:`CL.mgmtFiche('${esc(f.id)}')`})}</div>`;
   return banniere+mfPanneau(corps,'normal','mf-eff-fiche');
 }
