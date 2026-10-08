@@ -202,9 +202,9 @@ function mgmtFichePromesses(m,f){
   const nom=id=>{ const o=id&&mgmtFighterById(m,id); return o?o.name:''; };
   const etats={tenue:'Promesse tenue',rompue:'Promesse rompue','en cours':'Promesse en cours'};
   return `<h3>Ce qu'il demande</h3>`
-    +(demandes.length?demandes.map(d=>`<p>${esc(lib(d.want))}${d.target?' — '+esc(nom(d.target)):''}</p>`
-      +`<div class="mgmt-fiche-lien"><button onclick="CL.mgmtDemande(${esc(d.i)},'promettre')">Promettre</button>`
-      +`<button onclick="CL.mgmtDemande(${esc(d.i)},'refuser')">Refuser</button></div>`).join('')
+    +(demandes.length?demandes.map((d,k)=>`<p>${esc(lib(d.want))}${d.target?' — '+esc(nom(d.target)):''}</p>`
+      +`<div class="mf-demande">${mfBouton('Promettre',{touche:k===0?'P':'',jaune:true,onclick:`CL.mgmtDemande(${esc(d.i)},'promettre')`})}`
+      +`${mfBouton('Refuser',{touche:k===0?'R':'',onclick:`CL.mgmtDemande(${esc(d.i)},'refuser')`})}</div>`).join('')
       :'<p>Rien pour le moment.</p>')
     +(prom.length?`<ul class="mgmt-fiche-vie-liste">${prom.map(p=>`<li>${esc(etats[p.etat])} : ${esc(lib(p.want))}${p.target?' — '+esc(nom(p.target)):''}</li>`).join('')}</ul>`:'');
 }

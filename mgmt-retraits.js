@@ -113,7 +113,9 @@ function mgmtRetraitOptions(m){
   const candidats=trouMain?mgmtRetraitCandidats(m,r):[];
   const payables=candidats.filter(c=>mgmtCanAfford(m,c.cout));
   const premiere=!(m.facts||[]).some(x=>x&&x.k==='retrait_sortie');
-  return {retrait:r,trouMain,remonter,candidats,payables,
+  /* Corrections du 08/10, 1.2 : un forfait en préliminaires se règle lui aussi, par un remplaçant que Leïla propose. */
+  const trouPrelim=!trouMain&&m.card.prelims.length<(m.card.sizePrelims||MGMT_PRELIM_SIZE);
+  return {retrait:r,trouMain,trouPrelim,remonter,candidats,payables,
     reduite:trouMain&&!remonter&&payables.length===0,
     premiereFois:premiere};
 }
@@ -229,6 +231,7 @@ function mgmtRetraitHtml(m){
         +`<button type="button" class="mgmt-retrait-sortie" onclick="CL.mgmtRetraitReduite()">Jouer la soirée en carte réduite</button>`;
     }
   }
+  if(o.trouPrelim) html+=`<button type="button" class="mgmt-retrait-sortie" onclick="CL.mgmtPrelimsRemplacer()">Trouver un remplaçant</button>`;
   return html+`</section>`;
 }
 /* ==== [FIN ANCRE] ==== */

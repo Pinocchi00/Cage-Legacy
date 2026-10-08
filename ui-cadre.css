@@ -313,6 +313,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-cal-ligne{display:flex;justify-content:space-between;background:var(--mf-ligne);padding:14px 20px;font-size:26px}
 .mf-cal-ligne b{font-family:var(--mf-titre);font-weight:800;font-size:34px;line-height:1}
 .mf-cal-pied{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end}
+.mf-ancien .mf-sem-p .mgmt-week-pane.mgmt-week-left{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.mf-ancien .mgmt-week-defile{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:22px 24px 26px;scrollbar-width:thin}
+.mf-ancien .mgmt-week-suite{flex:none;padding:14px 24px 20px;background:var(--mf-panneau)}
+.mf-ancien .mgmt-week-suite .mgmt-next{margin:0}
+.mf-demande{display:flex;gap:16px;margin:10px 0 22px;flex-wrap:wrap}
+.mf-demande .mf-bouton{flex:none}
+.mf-cal-blocs{display:flex;flex-direction:column;gap:10px;width:100%}
+.mf-cal-bloc{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--mf-ligne);padding:10px 16px;font-size:24px;line-height:1.1}
+.mf-cal-bloc .mf-onglet{flex:none;font-size:22px}
 .mf-cal-manque{background:var(--mf-ligne);padding:10px 16px;font-size:24px}
 .mf-cal-onglets{position:absolute;left:0;top:800px;width:1564px;display:flex;gap:8px}
 .mf-cal-onglet{flex:1;height:56px;background:var(--mf-ligne);font-family:var(--mf-titre);font-weight:800;font-size:30px;text-align:center!important}
