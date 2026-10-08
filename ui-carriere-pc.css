@@ -1,0 +1,31 @@
+/* ==== [ANCRE: CORR0810_CARRIERE_PC_CSS] — Corrections du 08/10/2026 : les écrans de la Carrière, du Duel et des légendes sur un corps large, dans la grammaire de la maquette 10.
+   Le contenu écrit pour 560 px est agrandi (zoom 1,4 : 13 px devient 18 px, 15 px devient 21 px) puis rangé en colonnes de 560 px logiques ; l'en-tête est celui du hub. ==== */
+#app:has(.career-pcshell){max-width:1920px}
+.career-pcshell{gap:30px}
+.career-pcshell .career-header{padding-bottom:20px}
+.career-pc-body{min-width:0}
+.career-pc-body .scr{zoom:1.4;max-width:none;padding:0;animation:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(540px,1fr));gap:22px 40px;align-content:start;align-items:start}
+.career-pc-body .scr>*{grid-column:1/-1;min-width:0}
+.career-pc-body .scr>.stagger,.career-pc-body .scr>.stagger-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(540px,1fr));gap:22px 40px;align-items:start}
+.career-pc-body .scr>.stagger>*{margin-bottom:0!important}
+.career-pc-body .scr>.fld,.career-pc-body .scr>.card,.career-pc-body .scr>.glass{grid-column:auto}
+/* Les composants de la maquette 10 : pavés mats à coin coupé, intitulés jaunes, boutons biseautés. */
+.career-pc-body .glass,.career-pc-body .card,.career-pc-body .glass.mwash{background:var(--mgmt-panel)!important;border:0!important;border-radius:0;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%);box-shadow:none}
+.career-pc-body .eyebrow,.career-pc-body .eyebrow.mono{color:var(--mgmt-yellow);font:700 20px/normal var(--mgmt-font-display);letter-spacing:.2em;text-transform:uppercase}
+.career-pc-body h2.disp,.career-pc-body .disp.big{font:italic 800 56px/.95 var(--mgmt-font-display);text-transform:uppercase}
+.career-pc-body .btn,.career-pc-body button.btn{font:700 20px/normal var(--mgmt-font-display);letter-spacing:.08em;text-transform:uppercase;border-radius:0}
+.career-pc-body .btn.primary,.career-pc-body .btn.gold{background:var(--mgmt-yellow);color:var(--mgmt-dark-ink);transform:skewX(-12deg);padding:12px 26px}
+.career-pc-body .btn.ghost{background:none;border:1px solid var(--mgmt-edge);color:var(--mgmt-ink)}
+.career-pc-body .pill{border-radius:0;font:700 18px/normal var(--mgmt-font-display);letter-spacing:.06em;text-transform:uppercase;padding:10px 18px}
+.career-pc-body .pill.on{background:var(--mgmt-yellow);color:var(--mgmt-dark-ink)}
+.career-pc-body .fld input,.career-pc-body input[type=text]{background:var(--mgmt-panel);border:1px solid var(--mgmt-edge);border-radius:0;color:var(--mgmt-ink);font:300 20px var(--mgmt-font-body);padding:12px 16px}
+.career-pc-body .note{background:var(--mgmt-panel);border-left:3px solid var(--mgmt-yellow);padding:14px 18px}
+.career-pc-body .lede{font-size:18px;line-height:1.5}
+/* ==== [FIN ANCRE] ==== */
+.career-pc-body .scr>p,.career-pc-body .scr>.lede,.career-pc-body .scr .lede{max-width:none}
+.career-pc-body .scr>.opp,.career-pc-body .scr>.tile,.career-pc-body .scr>.cell{grid-column:auto}
+.career-pc-body .opp{background:var(--mgmt-panel);border:0;border-left:3px solid var(--mgmt-yellow);border-radius:0;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.career-pc-body .opp-nm{font:italic 800 28px/1.05 var(--mgmt-font-display);text-transform:uppercase}
+.career-pc-body .dlt{border-radius:0}
+.career-pc-body .scr>button,.career-pc-body .scr>.btn{justify-self:start;width:auto;min-width:260px}
+.career-pc-body .scr>.btn.primary,.career-pc-body .scr>.btn.gold{justify-self:end;min-width:320px}
