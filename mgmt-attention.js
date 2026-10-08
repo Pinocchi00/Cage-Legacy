@@ -141,7 +141,7 @@ function mgmtSaFaille(f){
 function mgmtConteurCandidats(m,cycle){
   const vus=new Set(), out=[];
   const poser=(f,moment)=>{
-    if(vus.has(f.id)||!moment.relais.length) return;
+    if(vus.has(f.id)||!moment.relais.length||!mgmtVieTexte(moment)) return;   /* 3.3 : un libellé de catalogue ne s'affiche jamais tel quel */
     vus.add(f.id);
     const lien=mgmtLien(m,f.id);
     out.push({id:f.id,name:f.name,div:f.div,moment,lien,
