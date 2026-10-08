@@ -157,6 +157,12 @@ function mgmtFicheStyleHtml(m,f){
   const forces=lec.detail.filter(l=>l.s==='+').slice(0,2), failles=lec.detail.filter(l=>l.s==='−').slice(0,1);
   forces.forEach(l=>rows.push({lab:'FORCE',signe:'+',t:l.t,src:vu,p:l.p}));
   failles.forEach(l=>rows.push({lab:'FAILLE',signe:'−',t:l.t,src:vu,p:l.p}));
+  /* Demande d'Anthony du 08/10/2026 : ce que ses anciens combats disent de lui comble ce que le joueur n'a pas vu lui-même. */
+  const bilan=mgmtAnciensBilan(m,f);
+  if(forces.length<1) bilan.filter(x=>x.s==='+').slice(0,1).forEach(x=>rows.push({lab:'FORCE',signe:'+',t:x.t,src:'D’après son bilan',p:x.p}));
+  if(failles.length<1) bilan.filter(x=>x.s==='−').slice(0,1).forEach(x=>rows.push({lab:'FAILLE',signe:'−',t:x.t,src:'D’après son bilan',p:x.p}));
+  const xp=typeof mgmtExperience==='function'?mgmtExperience(m,f,m.cycle):null;
+  if(xp&&xp.n>0) rows.push({lab:'PROGRESSION',signe:'+',t:xp.points>=1?'+'+Math.round(xp.points)+' points':'En progrès',src:xp.n+' combat'+(xp.n>1?'s':'')+' chez '+mgmtOrgNom(m),p:'Chaque combat joué chez nous fait progresser, d’autant plus vite que l’on est jeune.'});
   lec.detailInconnus.slice(0,1).forEach(l=>rows.push({lab:'INCONNU',signe:'?',t:l.t,src:'Jamais vu',p:T.inconnuPhrase}));
   /* L'allonge, lue sur sa catégorie. */
   const phys=mgmtCombatProfile(f).phys||{}, cat=mgmtEffectifLignes?mgmtEffectifLignes(m,f.div).map(x=>mgmtAllongeCm(x.f)).filter(x=>x>0):[];
@@ -193,25 +199,31 @@ function mgmtFicheParcoursHtml(trace){
   return `<div class="mf-fi-cth"><span>SA TRAJECTOIRE</span></div>${orgs}<div class="mf-fi-co autres mgmt-fiche-org"><span>Professionnel · ${esc(trace.pro.W)}-${esc(trace.pro.L)}</span></div>`;
 }
 
-/** Combats : les combats vus, du plus récent au plus ancien. */
+/** Combats : tous ses combats, du plus récent au plus ancien — ceux joués sous les yeux du joueur (rejouables), puis ceux d'avant la partie (dérivés, mgmt-anciens.js) —
+ *  chacun avec ce qu'il dit de lui, une force ou une faille (demande d'Anthony du 08/10/2026 : « remplir chaque case de ses anciens combats »). */
 function mgmtFicheCombatsHtml(m,f,line){
-  const hist=mgmtFightHistory(m,f).slice().reverse(), total=(f.W||0)+(f.L||0)+(f.D||0), vus=hist.length, curseur=MGMT_FICHE.cursor||0;
-  const rows=hist.slice(0,4).map((t,k)=>{
+  const hist=mgmtFightHistory(m,f).slice().reverse(), curseur=MGMT_FICHE.cursor||0;
+  const anciens=mgmtAnciensCombats(m,f), total=hist.length+anciens.length;
+  const marque=tag=>tag?`<i class="mf-fi-tag ${tag==='FORCE'?'f':'x'}">${tag}</i>`:'';
+  const rows=hist.map((t,k)=>{
     const i=m.hist.indexOf(t), side=t.a.id===f.id?'A':'B', adv=side==='A'?t.b:t.a;
     const issue=t.winner==='D'?'n':(t.winner===side?'v':'d');
     const d=mgmtResultatDetail(m,i);
     const methode=d&&d.methode?d.methode:(MGMT_FAMILY_LABELS[t.family]||t.family);
     const rnd=(t.family==='dec'||t.family==='draw')?'':(d?mgmtRoundTexte(d):'');
     const geste=d&&d.geste?d.geste:'';
+    const lec=mgmtCombatLecon(m,f,t);
     return `<div class="mf-fi-co${k===curseur?' choisie':''}" onclick="CL.mgmtHistoriqueRevoir(${i})"><div class="mf-fi-cn">${k+1}</div>`
       +`<div class="mf-fi-ct"><b>${esc(mfNet(adv.name))}</b><span>${esc(methode)}${rnd?', '+esc(rnd):''} · ${esc(mgmtSoireeNomDate(m,t.c))}</span></div>`
-      +`<div class="mf-fi-cg">${esc(geste?'Finition : '+geste:'')}</div><div class="mf-fi-cm">${mfMarque(issue)}</div></div>`;
+      +`<div class="mf-fi-cg">${marque(lec.tag)} ${esc(lec.phrase)}${geste?' <em>Finition : '+esc(geste)+'.</em>':''}</div><div class="mf-fi-cm">${mfMarque(issue)}</div></div>`;
   }).join('');
-  const autres=Math.max(0,total-vus), parcours=mgmtFichePalmaresAmateurHtml(m,f)+(line&&line.trace?mgmtFicheParcoursHtml(line.trace):'');
-  const pied=autres>0?`<div class="mf-fi-co autres"><b class="q">?</b><span>Ses ${autres} autres combats : pas vus.</span></div>`:'';
+  const vieux=anciens.map((x,k)=>`<div class="mf-fi-co ancien"><div class="mf-fi-cn">${hist.length+k+1}</div>`
+    +`<div class="mf-fi-ct"><b>${esc(mfNet(x.adv))}</b><span>${esc(x.methode)}${x.round?', '+esc(x.round===1?'1er round':x.round+'e round'):''} · à ${esc(x.age)} ans</span></div>`
+    +`<div class="mf-fi-cg">${marque(x.tag)} ${esc(x.phrase)}</div><div class="mf-fi-cm">${mfMarque(x.issue)}</div></div>`).join('');
+  const parcours=mgmtFichePalmaresAmateurHtml(m,f)+(line&&line.trace?mgmtFicheParcoursHtml(line.trace):'');
   const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${`<div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses combats vus</span></div></div>`}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
-  const droite=mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-cth"><span>DU PLUS RÉCENT AU PLUS ANCIEN</span><span>${vus} COMBAT${vus>1?'S':''} VU${vus>1?'S':''} SUR ${esc(total)}</span></div>`
-    +`<div class="mf-fi-cos">${rows||'<div class="mf-fi-co autres"><b class="q">?</b><span>Aucun combat vu sous ton affiche.</span></div>'}${vus?pied:''}${parcours}</div></div>`,'normal','mf-fi-pan mf-fi-fill');
+  const droite=mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-cth"><span>DU PLUS RÉCENT AU PLUS ANCIEN</span><span>${total} COMBAT${total>1?'S':''}</span></div>`
+    +`<div class="mf-fi-cos mf-fi-defile">${rows+vieux||'<div class="mf-fi-co autres"><b class="q">?</b><span>Aucun combat professionnel.</span></div>'}${parcours}</div></div>`,'normal','mf-fi-pan mf-fi-fill');
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
 }
 

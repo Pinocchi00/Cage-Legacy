@@ -1069,7 +1069,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-rp{font-size:24px;line-height:1.1}
 .mf-fi-cth{display:flex;justify-content:space-between;font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}
 .mf-fi-cos{flex:1;display:flex;flex-direction:column;gap:8px;min-height:0}
-.mf-fi-co{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);height:80px;flex:none;padding:0 18px;display:grid;grid-template-columns:44px 360px minmax(0,1fr) 52px;align-items:center;column-gap:16px;cursor:pointer}
+.mf-fi-co{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);height:80px;flex:none;padding:0 18px;display:grid;grid-template-columns:44px 290px minmax(0,1fr) 52px;align-items:center;column-gap:16px;cursor:pointer}
 .mf-fi-co.choisie{background:var(--mf-blanc);color:var(--mf-noir)}
 .mf-fi-co.autres{display:flex;gap:14px;font-size:24px;height:60px;cursor:default;background:var(--mf-panneau)}
 .mf-fi-cn{width:36px;height:36px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1}
@@ -1077,7 +1077,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-ct b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:30px;line-height:.85;white-space:nowrap;text-transform:uppercase}
 .mf-fi-ct span{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
 .mf-fi-co.choisie .mf-fi-ct span,.mf-fi-co.choisie .mf-fi-cg{color:rgba(13,11,11,.72)}
-.mf-fi-cg{font-size:24px;line-height:1.1;color:var(--mf-blanc)}
+.mf-fi-cg{font-size:22px;line-height:1.1;color:var(--mf-blanc)}
 .mf-fi-cm{display:flex;justify-content:flex-end}
 .mf-fi-ctl{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}
 .mf-fi-ctn{display:flex;align-items:center;gap:22px}
@@ -1120,4 +1120,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ligne:not(.choisie):hover,.mf-onglet:not(.ouvert):hover,.mf-bouton:not(.jaune):hover{background:#3b3535;filter:none}
 .mf-eff-ligne:not(.choisie):hover,.mf-su-ligne:not(.sel):hover{background:#3b3535;filter:none}
 .mf-stage button:disabled,.mf-stage .grise{cursor:default}
+/* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORR0810_FICHE_COMBATS] — Demande d'Anthony du 08/10/2026 : tous les combats de la fiche, chacun avec sa force ou sa faille ; la liste défile. ==== */
+.mf-fi-defile{overflow-y:auto;padding-right:10px;scrollbar-width:thin;scrollbar-color:#6b6460 transparent}
+.mf-fi-co.ancien{background:var(--mf-panneau);border:2px solid var(--mf-ligne)}
+.mf-fi-co.ancien:hover,.mf-fi-co:hover{background:#3b3535}
+.mf-fi-co.choisie:hover{background:var(--mf-blanc)}
+.mf-fi-tag{font-style:normal;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:22px;padding:2px 8px;margin-right:8px;vertical-align:2px}
+.mf-fi-tag.f{background:var(--mf-jaune);color:var(--mf-noir)}
+.mf-fi-tag.x{background:var(--mf-rouge-vif);color:var(--mf-noir)}
+.mf-fi-cg em{display:block;font-style:normal;font-size:22px;color:var(--mf-texte2)}
 /* ==== [FIN ANCRE] ==== */
