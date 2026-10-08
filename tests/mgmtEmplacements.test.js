@@ -107,7 +107,7 @@ test('Emplacements — l’écran : un occupé montre l’organisation, la proch
     const jaunes=document.querySelectorAll('.mf-parties .mf-bouton.jaune').length;
     return {cartes,b1,b2,go2,jaunes};`);
   assert.equal(r.cartes.length,3);
-  for(const mot of ['Emplacement 1','Split','La prochaine soirée','15','Soirées jouées','14','En caisse','64 k$','Reprendre']) assert.ok(r.cartes[0].includes(mot),mot);
+  for(const mot of ['Emplacement 1','Split','La prochaine soirée','15','Soirées jouées','14','En caisse','64\u202f000\u00a0€','Reprendre']) assert.ok(r.cartes[0].includes(mot),mot);
   for(const c of [r.cartes[1],r.cartes[2]]){ assert.ok(c.includes('Vide')&&c.includes('Ici, tu peux lancer')&&c.includes('Une nouvelle')&&c.includes('partie')); assert.ok(!c.includes('Reprendre')&&!c.includes('En caisse')); }
   assert.ok(r.b1.some(t=>t.includes('Effacer la partie'))&&r.b1.some(t=>t.includes('Reprendre')));
   assert.ok(!r.b2.some(t=>t.includes('Effacer'))&&!r.b2.some(t=>t.includes('Reprendre')),'un emplacement vide : ni reprise ni effacement');

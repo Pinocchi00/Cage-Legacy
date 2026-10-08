@@ -316,7 +316,7 @@ function scr_mgmt_bureau(){
     +`<details class="mgmt-week-memo"><summary>Mémoire · ${esc(memory.length)} fait${memory.length===1?'':'s'}</summary>${mgmtSemaineMemoire(m,memory)}</details></section>`,'normal','mf-sem-p')
     +mfPanneau(`<aside class="mgmt-week-pane">${mgmtSemaineClassement(m)}`
     +`<section class="mgmt-week-organisation"><h3>L'organisation</h3>`
-    +`<p>${esc(roster)} combattants · trésorerie ${esc(m.treasury)} k$</p>`
+    +`<p>${esc(roster)} combattants · trésorerie ${esc(mgmtEuros(m.treasury))}</p>`
     +`<button class="mgmt-week-link" onclick="CL.go('mgmt_organisation')">Voir l'organisation</button></section></aside>`,'normal','mf-sem-p')
     +`</div>${mgmtMouvementHtml(m)}</div>`;
 }

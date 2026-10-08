@@ -49,6 +49,14 @@ function mgmtDivisionLabel(div){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/** Un combattant est-il une combattante ? Se lit sur sa catégorie. */
+function mgmtFeminin(f){ const d=f&&f.div?divById(f.div):null; return !!(d&&d.gender==='F'); }
+/** Accorde un texte d'interface au genre de la personne dont il parle (corrections du 08/10, 5.3) : {Il} {il} {lui} {delui} deviennent Elle, elle, elle,
+ *  d'elle pour une combattante, restent Il, il, lui, de lui sinon. Aucun texte d'auteur n'est touché. */
+function mgmtAccord(f,texte){
+  const F=mgmtFeminin(f);
+  return String(texte).replace(/\{(Il|il|lui|delui)\}/g,(x,k)=>F?{Il:'Elle',il:'elle',lui:'elle',delui:'d’elle'}[k]:{Il:'Il',il:'il',lui:'lui',delui:'de lui'}[k]);
+}
 /** Le rang tel que le jeu l'écrit PARTOUT (décision du 5 octobre, corrections du 08/10, 4.3) : « C » pour le champion, puis 1, 2, 3 — le champion ne
  *  compte pas dans la suite. null : hors classement. @param {string} [scope] 'organization' (défaut) ou 'world'. @returns {'C'|number|null} */
 function mgmtRangAffichable(m,f,scope){

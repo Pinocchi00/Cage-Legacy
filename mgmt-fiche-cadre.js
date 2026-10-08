@@ -62,6 +62,7 @@ function scr_mgmt_fiche_cadre(){
   try{
     corps=onglet==='style'?mgmtFicheStyleHtml(m,f):onglet==='combats'?mgmtFicheCombatsHtml(m,f,line):onglet==='contrat'?mgmtFicheContratPlanche(m,f):onglet==='ondit'?mgmtFicheOnEnDitHtml(m,f):mgmtFicheApercuHtml(m,f,line);
   }catch(e){ corps=`<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-rp">Cette fiche ne se lit pas pour l’instant.</div></div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`; }
+  corps=mgmtAccord(f,corps);
   const contenu=`<main class="mf-contenu mf-fiche-cadre mf-fi"><h2 class="mf-sr">${esc(f.name)}</h2>${mgmtFicheBanniereHtml(m,f,champion)}`
     +`<div class="mf-fi-onglets"><div class="mf-fiche-onglets">${onglets}<button type="button" class="mf-onglet mgmt-fiche-retour mf-fiche-retour" onclick="CL.mgmtFicheRetour()">← RETOUR</button></div><div class="mf-fi-tab">${mfTouche('Tab')}<span>Onglet suivant</span></div></div>`
     +`<div class="mf-fi-corps">${corps}</div></main>`;

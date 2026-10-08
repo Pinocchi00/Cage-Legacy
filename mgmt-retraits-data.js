@@ -13,7 +13,7 @@ const MGMT_RETRAITS_REPLIQUES={
   "auteur": "Anthony"
  },
  "A2": {
-  "texte": "Je reviendrais, je vais d'abord prendre soin de moi mais je remonterais dans la cage.",
+  "texte": "Je reviendrai, je vais d'abord prendre soin de moi mais je remonterai dans la cage.",
   "auteur": "Anthony"
  },
  "B1": {

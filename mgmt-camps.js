@@ -36,9 +36,22 @@ function mgmtCampModele(ck,k){
  *  même ville s'entraînent ensemble (c'est ce que l'écran Camps montre) au lieu d'une salle par tête. */
 function mgmtCampSalleDeVille(ck,ville){ return duelFnv1a32('salle|'+ck+'|'+ville)%5; }
 
+/** Le nom d'une salle (corrections du 08/10, 5.6) : « de » + « Le Havre » donne « du Havre », « de » + « Les Sables » donne « des Sables », « d' » devant une
+ *  voyelle ; « à » + « Le » donne « au », + « Les » « aux ». Les autres modèles posent la ville telle quelle. Pur. */
+function mgmtCampNomPropre(modele,ville){
+  const v=String(ville);
+  /* « à » n'est pas un caractère de mot pour \b : on s'appuie sur le début de chaîne ou l'espace qui précède. */
+  return String(modele).replace(/(^|\s)(de|à) \{Ville\}/g,(x,sp,prep)=>{
+    if(/^Les /.test(v)) return sp+(prep==='de'?'des ':'aux ')+v.slice(4);
+    if(/^Le /.test(v)) return sp+(prep==='de'?'du ':'au ')+v.slice(3);
+    if(prep==='de'&&/^[AEIOUYÀÂÄÉÈÊËÎÏÔÖÛÜ]/i.test(v)) return sp+'d’'+v;
+    return sp+prep+' '+v;
+  }).replace('{Ville}',v);
+}
+
 /** Un camp : {ville, ck, k (modèle), coachCle, nom, coach, qualite}. Pur. */
 function mgmtCampFait(ck,ville,k,coachCle){
-  const nom=mgmtCampModele(ck,k).replace('{Ville}',ville);
+  const nom=mgmtCampNomPropre(mgmtCampModele(ck,k),ville);
   const r=mgmtIdentiteStream('camp|'+ck+'|'+ville+'|'+k,'qualite');
   const u=r();
   return {ville,ck,k,coachCle,nom,coach:mgmtCoachNom(ck,ville+'|'+k+'|'+coachCle),

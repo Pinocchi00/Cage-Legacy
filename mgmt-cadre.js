@@ -159,9 +159,10 @@ function mfAvance(s){
   for(const c of String(s)){ const w=MF_ADV[c]; t+=(w===undefined?0.45:w); }
   return t*MF_ADV_ECHELLE;
 }
-/** Un nom comme sur une affiche : majuscules, sans accent, apostrophe droite. */
+/** Un nom comme sur une affiche : majuscules (accents gardés), apostrophe droite. */
 function mfNet(s){
-  return String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/’/g,"'").toUpperCase().trim();
+  /* Corrections du 08/10, 5.8 : les capitales gardent leurs accents (FÉMININ, LÉGER, LEFÈVRE, GUIMARÃES), comme partout ailleurs dans le jeu. */
+  return String(s==null?'':s).replace(/’/g,"'").toLocaleUpperCase('fr').trim();
 }
 /** Le plus grand corps (jusqu'à `max`, au moins `min`) qui tient `largeur` px : un nom long rétrécit, rien ne déborde. */
 function mfCorps(texte,largeur,max,min=22){

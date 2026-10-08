@@ -37,7 +37,7 @@ lorsque celui-ci justifie d'en dire plus. Voir §F.
 
 ### A2 — Taylor Saint-Morand
 
-> Je reviendrais, je vais d'abord prendre soin de moi mais je remonterais dans la cage.
+> Je reviendrai, je vais d'abord prendre soin de moi mais je remonterai dans la cage.
 
 **Application de la règle de silence :** ni Leïla ni Taylor ne disent pourquoi. Le joueur remplit
 le vide lui-même.

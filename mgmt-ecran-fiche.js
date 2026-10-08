@@ -193,7 +193,7 @@ function mgmtFicheConnaissance(m,f){
   let combat=inconnu, faille=inconnu;
   if(k.combat){ const c=mgmtCommentIlCombat(f); combat=`<p>${esc(c.style)} · garde ${esc(c.garde)}</p>`; }
   if(k.faille){ faille=`<p>${esc(mgmtSaFaille(f))}</p>`; }
-  return `<h3>Comment il combat</h3>${combat}<h3>Sa faille</h3>${faille}`;
+  return `<h3>Comment {il} combat</h3>${combat}<h3>Sa faille</h3>${faille}`;
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MGMT_LOT5_H7_FICHE_PROMESSES] — Le mot du combattant, ce qu'il
@@ -206,7 +206,7 @@ function mgmtFichePromesses(m,f){
   const lib=w=>MGMT_DEMANDES[w]?MGMT_DEMANDES[w].libelle:'';
   const nom=id=>{ const o=id&&mgmtFighterById(m,id); return o?o.name:''; };
   const etats={tenue:'Promesse tenue',rompue:'Promesse rompue','en cours':'Promesse en cours'};
-  return `<h3>Ce qu'il demande</h3>`
+  return `<h3>Ce qu'{il} demande</h3>`
     +(demandes.length?demandes.map((d,k)=>`<p>${esc(lib(d.want))}${d.target?' — '+esc(nom(d.target)):''}</p>`
       +`<div class="mf-demande">${mfBouton('Promettre',{touche:k===0?'P':'',jaune:true,onclick:`CL.mgmtDemande(${esc(d.i)},'promettre')`})}`
       +`${mfBouton('Refuser',{touche:k===0?'R':'',onclick:`CL.mgmtDemande(${esc(d.i)},'refuser')`})}</div>`).join('')
@@ -251,7 +251,7 @@ function scr_mgmt_fiche(){
       +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}${mot?` <span class="mgmt-fiche-mot">${esc(mot)}</span>`:''}</h2>`
      +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p>${mgmtFicheLien(m,f)}</div>`
      +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
-     +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où il combat</h3>${mgmtFicheOctogone(m,f)}</section>`
+     +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où {il} combat</h3>${mgmtFicheOctogone(m,f)}</section>`
     +`<section class="mgmt-fiche-history"><h3>Ses derniers combats</h3>${mgmtHistoriqueHtml(m,f)}${mgmtFicheHistoire(identite)}${mgmtFicheCorps(m,f)}${mgmtFicheCamp(m,f)}${mgmtFicheConnaissance(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheRivaux(m,f)}${mgmtFicheParole(m,f)}${mgmtFicheVie(m,f)}</section>`
     +`${mgmtFicheParcours(trace)}</div></div>`;
 }

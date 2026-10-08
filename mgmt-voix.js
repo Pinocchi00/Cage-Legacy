@@ -227,7 +227,7 @@ function mgmtFicheParole(m,f){
   if(!(m.roster||[]).some(o=>o.id===f.id)) return '';
   const p=mgmtParoleRecente(m,f);
   const change=typeof mgmtVoixChangement==='function'&&mgmtVoixChangement(m,f);
-  return `<h3>Ce qu'on dit de lui</h3>`+(p?`<p class="mgmt-fiche-parole">« ${esc(p.texte)} »</p>`:'<p>On ne sait pas encore.</p>')
+  return `<h3>Ce qu'on dit {delui}</h3>`+(p?`<p class="mgmt-fiche-parole">« ${esc(p.texte)} »</p>`:'<p>On ne sait pas encore.</p>')
     +(change?'<p class="mgmt-fiche-vie-relais">Il ne parle plus comme avant.</p>':'');
 }
 

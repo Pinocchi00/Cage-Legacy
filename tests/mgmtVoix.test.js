@@ -112,7 +112,7 @@ test('T3 — « Ce qu’on dit de lui » : la parole du combattant selon ce qu�
     const calme=m.roster.find(o=>o.id!==X.id&&o.id!==Y.id&&!mgmtEngaged(m,o)); calme.lastCycle=undefined; const sans=mgmtFicheParole(m,calme);
     const ex=m.exterieur[0]; const ext=mgmtFicheParole(m,{id:ex.id,div:ex.div});
     const ancien=mgmtDefaultAvantH4(); mgmtNewRoster(ancien);
-    return {gagnant:gagnant&&gagnant.situation,perdant:perdant&&perdant.situation,htmlX:htmlX.includes('Ce qu\\'on dit de lui')&&htmlX.includes('«'),sans:sans.includes('On ne sait pas encore'),ext,ancien:mgmtParoleRecente(ancien,ancien.roster[0])};
+    return {gagnant:gagnant&&gagnant.situation,perdant:perdant&&perdant.situation,htmlX:mgmtAccord(X,htmlX).includes('Ce qu\\'on dit '+(mgmtFeminin(X)?'d’elle':'de lui'))&&htmlX.includes('«'),sans:sans.includes('On ne sait pas encore'),ext,ancien:mgmtParoleRecente(ancien,ancien.roster[0])};
   `);
   assert.equal(r.gagnant,'victoire'); assert.equal(r.perdant,'defaite'); assert.ok(r.htmlX); assert.ok(r.sans);
   assert.equal(r.ext,'','le monde extérieur n’a pas de parole à Split'); assert.equal(r.ancien,null,'une ancienne partie ne parle pas');

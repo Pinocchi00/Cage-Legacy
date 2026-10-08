@@ -660,7 +660,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-so-pip.on{background:var(--mf-blanc);border-color:var(--mf-blanc)}
 .mf-so-pip.sep{margin-left:10px}
 .mf-so-cpt{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.69}
-.mf-so-dr{display:flex;align-items:center;gap:16px}
+.mf-so-dr{display:flex;align-items:center;gap:16px;min-width:0;flex:1;justify-content:flex-end}
+.mf-so-entete .mf-entete-g{flex:none}
+.mf-so-chip.org{flex:none}
+.mf-so-chip:not(.org){min-width:0;flex:0 1 auto}
+.mf-so-chip:not(.org) span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .mf-so-chip{height:64px;padding:0 18px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;gap:16px;white-space:nowrap}
 .mf-so-chip b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.69}
 .mf-so-chip span{font-weight:600;font-size:24px;line-height:1;letter-spacing:.06em}

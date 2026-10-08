@@ -246,7 +246,7 @@ test('T6 — la maquette-texte : les sorties ont leurs mots (remonter, short not
   const o=readScriptOrder(); assert.ok(o.indexOf('mgmt-retraits-data.js')<o.indexOf('mgmt-retraits.js')&&o.indexOf('mgmt-retraits.js')<o.indexOf('mgmt-screens.js'));
   const win=newGameWindow();
   const r=result(win,`${CARTE}
-    retire('main',1); const html=mgmtRetraitHtml(m); return {rem:html.includes('Remonter un combat des préliminaires'),short:html.includes('Short notice'),libre:/Libre de contrat|Short notice, une autre organisation/.test(html),chiffre:/\\d+ k\\$/.test(html)};
+    retire('main',1); const html=mgmtRetraitHtml(m); return {rem:html.includes('Remonter un combat des préliminaires'),short:html.includes('Short notice'),libre:/Libre de contrat|Short notice, une autre organisation/.test(html),chiffre:/\\d[\\d\\u202f]*\\u00a0€/.test(html)};
   `);
   assert.ok(r.rem&&r.short&&r.libre); assert.ok(r.chiffre,'le coût du préavis se lit sur le bouton, jamais dans une réplique');
 });

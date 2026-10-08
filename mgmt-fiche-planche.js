@@ -10,28 +10,28 @@
 const MGMT_FICHE_TEXTES={
   relu:false,
   profils:{
-    'CONTRE À DISTANCE':'Il laisse venir et frappe quand l’autre avance.',
-    'FRAPPE ET SORT':'Il touche et se dégage avant la réponse.',
-    'AVANCE SANS ARRÊT':'Il avance sans cesse et use l’autre sous le volume.',
-    'AMÈNE AU SOL':'Il cherche l’amenée dès que l’occasion se présente.',
-    'ÉTOUFFE AU CLINCH':'Il colle l’adversaire et le travaille au corps à corps.',
+    'CONTRE À DISTANCE':'{Il} laisse venir et frappe quand l’autre avance.',
+    'FRAPPE ET SORT':'{Il} touche et se dégage avant la réponse.',
+    'AVANCE SANS ARRÊT':'{Il} avance sans cesse et use l’autre sous le volume.',
+    'AMÈNE AU SOL':'{Il} cherche l’amenée dès que l’occasion se présente.',
+    'ÉTOUFFE AU CLINCH':'{Il} colle l’adversaire et le travaille au corps à corps.',
     'SANS SIGNATURE':'Aucun trait ne ressort de ses combats vus.',
     'PAS ENCORE VU':'Tu ne l’as pas encore vu combattre.',
   },
   lignes:{
-    initiative:{s:'+',t:'PREND L’INITIATIVE',p:'Il lance les échanges et impose le rythme.'},
-    attend:{s:'+',t:'TIENT LE CENTRE',p:'Il reste au milieu de la cage et attend l’erreur.'},
-    loinJuste:{s:'+',t:'FRAPPE JUSTE DE LOIN',p:'Il touche de loin, au moment où l’autre s’avance.'},
+    initiative:{s:'+',t:'PREND L’INITIATIVE',p:'{Il} lance les échanges et impose le rythme.'},
+    attend:{s:'+',t:'TIENT LE CENTRE',p:'{Il} reste au milieu de la cage et attend l’erreur.'},
+    loinJuste:{s:'+',t:'FRAPPE JUSTE DE LOIN',p:'{Il} touche de loin, au moment où l’autre s’avance.'},
     loinVide:{s:'−',t:'FRAPPE DANS LE VIDE',p:'De loin, beaucoup de ses coups ne touchent rien.'},
-    corps:{s:'+',t:'CHERCHE LE CORPS À CORPS',p:'Il colle l’adversaire dès qu’il le peut.'},
-    amenee:{s:'+',t:'CHERCHE L’AMENÉE',p:'Il tente l’amenée au sol à chaque occasion.'},
-    controleSol:{s:'+',t:'CONTRÔLE AU SOL',p:'Une fois au sol, il garde sa position.'},
-    defendAmenee:{s:'+',t:'DÉFEND LES AMENÉES',p:'Il reste debout quand on tente de l’amener au sol.'},
-    subitSol:{s:'−',t:'PERD SES MOYENS AU SOL',p:'Au sol, il se fait dominer.'},
-    soumission:{s:'+',t:'CHERCHE LA SOUMISSION',p:'Il enchaîne les tentatives de soumission.'},
+    corps:{s:'+',t:'CHERCHE LE CORPS À CORPS',p:'{Il} colle l’adversaire dès qu’{il} le peut.'},
+    amenee:{s:'+',t:'CHERCHE L’AMENÉE',p:'{Il} tente l’amenée au sol à chaque occasion.'},
+    controleSol:{s:'+',t:'CONTRÔLE AU SOL',p:'Une fois au sol, {il} garde sa position.'},
+    defendAmenee:{s:'+',t:'DÉFEND LES AMENÉES',p:'{Il} reste debout quand on tente de l’amener au sol.'},
+    subitSol:{s:'−',t:'PERD SES MOYENS AU SOL',p:'Au sol, {il} se fait dominer.'},
+    soumission:{s:'+',t:'CHERCHE LA SOUMISSION',p:'{Il} enchaîne les tentatives de soumission.'},
     vacille:{s:'−',t:'VACILLE QUAND ON LE TOUCHE',p:'Un coup net le fait chanceler.'},
-    poidsClinch:{s:'+',t:'IMPOSE SON POIDS',p:'Au clinch, il pèse sur l’adversaire.'},
-    subitCage:{s:'−',t:'PERD SES MOYENS CONTRE LA CAGE',p:'Pressé contre le grillage, il ne trouve plus ses coups.'},
+    poidsClinch:{s:'+',t:'IMPOSE SON POIDS',p:'Au clinch, {il} pèse sur l’adversaire.'},
+    subitCage:{s:'−',t:'PERD SES MOYENS CONTRE LA CAGE',p:'Pressé contre le grillage, {il} ne trouve plus ses coups.'},
     rien:{s:'',t:'RIEN DE MARQUANT',p:'Rien de net ne ressort de ses combats vus.'},
   },
   inconnus:{
@@ -88,13 +88,13 @@ function mgmtFicheCageHtml(m,f,taille){
   const pts=hist.map((tr,i)=>{ const p=mgmtFichePointCombat(tr,tr.a.id===f.id?'A':'B'); return p?{n:i+1,x:cx+(p.x/ARENE_RS)*ext*0.9,y:cy+(p.y/ARENE_RS)*ext*0.9}:null; }).filter(Boolean);
   const marques=pts.map(p=>`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="12.7" fill="#E9E6E1" stroke="#0D0B0B" stroke-width="3"/><text x="${p.x.toFixed(1)}" y="${(p.y+6.36).toFixed(2)}" text-anchor="middle" fill="#0D0B0B" style="font-family:'Saira Extra Condensed','Arial Narrow',sans-serif;font-weight:800;font-size:18.7px">${p.n}</text>`).join('');
   const rouge=total?`<path d="${mgmtFicheOcto(cx,cy,int)}" fill="#B32A1E"/>`:'';
-  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="La cage vue du dessus : en rouge là où il impose son combat, en hachuré là où il le subit">`
+  return `<svg class="mf-fi-cage" width="${t}" height="${t}" viewBox="0 0 250 250" fill="none" role="img" aria-label="La cage vue du dessus : en rouge là où {il} impose son combat, en hachuré là où {il} le subit">`
     +`<defs><pattern id="mf-fi-ha" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="9" height="9" fill="#252121"/><rect width="3" height="9" fill="#E9E6E1" fill-opacity="0.55"/></pattern></defs>`
     +`<path d="${mgmtFicheOcto(cx,cy,ext)}" fill="${subit?'url(#mf-fi-ha)':'#252121'}"/>${rouge}`
     +`<path d="${mgmtFicheOcto(cx,cy,ext)}" stroke="#E9E6E1" stroke-width="4"/>${total?`<path d="${mgmtFicheOcto(cx,cy,int)}" stroke="#E9E6E1" stroke-width="2"/>`:''}${marques}</svg>`;
 }
 function mgmtFicheLegendeHtml(){
-  return `<div class="mf-fi-leg"><div><i class="rouge"></i><span>Il impose</span></div><div><i class="hache"></i><span>Il subit</span></div><div><i class="rond">1</i><span>Ses combats</span></div></div>`;
+  return `<div class="mf-fi-leg"><div><i class="rouge"></i><span>{Il} impose</span></div><div><i class="hache"></i><span>{Il} subit</span></div><div><i class="rond">1</i><span>Ses combats</span></div></div>`;
 }
 
 /* ---- Les pièces communes -------------------------------------------------------------------------------------------- */
@@ -143,7 +143,7 @@ function mgmtFicheApercuHtml(m,f,line){
   const p3=mfPanneau(`<div class="mf-fi-grille">${cases.map(([k,v])=>`<div class="mf-fi-case"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div>`,'normal','mf-fi-pan');
   const suite=prochain
     ?`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span><span class="mf-fi-pcs"><b class="q">?</b>À confirmer</span></div><div class="mf-fi-pcn">${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT ${esc((m.eventsPlayed||0)+1)}</div><div class="mf-fi-pcd">${esc((inf.date?inf.date.toLowerCase()+' · ':'')+(prochain.adv?'contre '+prochain.adv:'sur la carte'))}</div></div>`
-    :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">Il ne figure pas encore sur la carte.</div></div>`;
+    :`<div class="mf-fi-pc"><div class="mf-fi-pch"><span>PROCHAIN COMBAT</span></div><div class="mf-fi-pcn">AUCUN COMBAT PRÉVU</div><div class="mf-fi-pcd">{Il} ne figure pas encore sur la carte.</div></div>`;
   const p4=mfPanneau(`${suite}<div class="mf-fi-pcb">${mfBouton('Préparer son combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtFicheCarte()'})}</div>`,'normal','mf-fi-pan mf-fi-prochain');
   void phrase; void line;
   return `<div class="mf-fi-ligne"><div class="mf-fi-c1">${p1}</div><div class="mf-fi-c1">${p2}</div><div class="mf-fi-c1 mf-fi-col">${p3}${p4}</div></div>`;
@@ -167,7 +167,7 @@ function mgmtFicheStyleHtml(m,f){
   }
   const lignes=rows.slice(0,6).map(r=>`<div class="mf-fi-row"><div class="mf-fi-rl">${r.signe==='+'?mgmtFicheSigne('+'):(r.signe==='−'?mgmtFicheSigne('−'):(r.signe==='?'?'<b class="q">?</b>':'<span class="mf-fi-sg"></span>'))}<span>${r.lab}</span></div>`
     +`<div class="mf-fi-rc"><div class="mf-fi-rt"><b>${esc(r.t)}</b><span>${esc(r.src)}</span></div><div class="mf-fi-rp">${esc(r.p)}</div></div></div>`).join('');
-  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div><div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où il impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où il le subit</span></div><div><i class="rond">1</i><span>Numéros : ses quatre combats</span></div></div></div>`,'normal','mf-fi-pan mf-fi-cage-pan');
+  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div><div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses quatre combats</span></div></div></div>`,'normal','mf-fi-pan mf-fi-cage-pan');
   const droite=mfPanneau(`<div class="mf-fi-rows">${lignes}</div>`,'normal','mf-fi-pan mf-fi-fill');
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
 }
@@ -200,7 +200,7 @@ function mgmtFicheCombatsHtml(m,f,line){
   }).join('');
   const autres=Math.max(0,total-vus), parcours=line&&line.trace?mgmtFicheParcoursHtml(line.trace):'';
   const pied=autres>0?`<div class="mf-fi-co autres"><b class="q">?</b><span>Ses ${autres} autres combats : pas vus.</span></div>`:'';
-  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${`<div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où il impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où il le subit</span></div><div><i class="rond">1</i><span>Numéros : ses combats vus</span></div></div>`}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
+  const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${`<div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses combats vus</span></div></div>`}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
   const droite=mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-cth"><span>DU PLUS RÉCENT AU PLUS ANCIEN</span><span>${vus} COMBAT${vus>1?'S':''} VU${vus>1?'S':''} SUR ${esc(total)}</span></div>`
     +`<div class="mf-fi-cos">${rows||'<div class="mf-fi-co autres"><b class="q">?</b><span>Aucun combat vu sous ton affiche.</span></div>'}${vus?pied:''}${parcours}</div></div>`,'normal','mf-fi-pan mf-fi-fill');
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
@@ -210,7 +210,7 @@ function mgmtFicheCombatsHtml(m,f,line){
 function mgmtFicheContratPlanche(m,f){
   const ct=f.ct, org=mgmtOrgNom(m);
   if(f.libre||!ct){
-    const texte=f.libre?'Sans contrat : il ne se book plus. Il figure au recrutement.':'Pas de contrat suivi pour ce combattant.';
+    const texte=f.libre?'Sans contrat : {il} ne se book plus. {Il} figure au recrutement.':'Pas de contrat suivi pour ce combattant.';
     return `<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-rp" style="font-size:30px">${esc(texte)}</div></div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`;
   }
   const restant=mgmtContratRestants(f), faits=ct.f;
@@ -223,8 +223,8 @@ function mgmtFicheContratPlanche(m,f){
     ['FAIT',faits+' COMBAT'+(faits>1?'S':''),`${faits>1?'Des combats déjà disputés':'Un combat déjà disputé'} sur ce contrat.`],
     ['RESTE',restant+' COMBAT'+(restant>1?'S':''),`Le prochain serait ${org} Fight Night ${n}, s’il est confirmé.`],
     ['BOURSE',mgmtEuros(ct.b),'Fixée à la signature, la même à chaque combat.'],
-    ['ARRIVÉE',ct.since===0?'LE DÉBUT':'SOIRÉE '+ct.since,`Il combat chez ${org} depuis ce moment.`],
-    ['ENSUITE',restant>1?'LE CONTRAT SE POURSUIT':'LIBRE',restant>1?'Le renouvellement se propose dans Contrats.':'Sans nouveau contrat, il pourra partir.'],
+    ['ARRIVÉE',ct.since===0?'LE DÉBUT':'SOIRÉE '+ct.since,`{Il} combat chez ${org} depuis ce moment.`],
+    ['ENSUITE',restant>1?'LE CONTRAT SE POURSUIT':'LIBRE',restant>1?'Le renouvellement se propose dans Contrats.':'Sans nouveau contrat, {il} pourra partir.'],
   ];
   void palier;
   const droite=mfPanneau(`<div class="mf-fi-rows">${rows.map(r=>`<div class="mf-fi-row"><div class="mf-fi-rl"><span class="mf-fi-sg"></span><span>${r[0]}</span></div><div class="mf-fi-rc"><div class="mf-fi-rt"><b>${esc(r[1])}</b></div><div class="mf-fi-rp">${esc(r[2])}</div></div></div>`).join('')}</div>`,'normal','mf-fi-pan mf-fi-fill');
