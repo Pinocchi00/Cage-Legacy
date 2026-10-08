@@ -172,9 +172,9 @@ test('Le temps de combat — un round de 300 s tient en une quarantaine de secon
   const win=neuve(7); touche(win,'Enter');
   const r=res(win,`const prog=mgmtSoireeProgramme(G.mgmt), t=(prog.find(p=>p.trace&&p.trace.family==='dec')||prog[0]).trace, rr=mgmtReplayFight(t);   /* une décision : un combat qui va à la limite, quelle que soit la graine */
     const a=areneConstruire(rr,{a:'A',b:'B'}), b=areneConstruire(rr,{a:'A',b:'B'},{echelle:7,pause:3.4});
-    return {a:[a.echelle,a.roundLen,a.dureeCombat],b:[b.echelle,b.roundLen,b.dureeCombat,b.pauseS],h:areneMoment(b,b.dureeCombat*0.5).horloge,rounds:t.rounds};`);
+    return {a:[a.echelle,a.roundLen,a.dureeCombat],b:[b.echelle,b.roundLen,b.dureeCombat,b.pauseS],h:Math.max(...[0.1,0.3,0.5,0.7,0.9].map(x=>areneMoment(b,b.dureeCombat*x).horloge)),rounds:t.rounds};`);
   assert.deepEqual(r.a.slice(0,2),[1,300]); assert.ok(Math.abs(r.b[1]-300/7)<1e-9); assert.ok(r.b[2]<r.a[2]/6.5,'le combat compressé est sept fois plus court');
-  assert.equal(r.b[3],3.4); assert.ok(r.h>0&&r.h<=300);
+  assert.equal(r.b[3],3.4); assert.ok(r.h>0&&r.h<=300); /* plusieurs échantillons : selon la trace, un instant donné peut tomber dans une pause entre deux rounds (horloge à zéro) */
 });
 
 test('Les coups — le nom du coup est celui que le moteur donne déjà (byType), les gestes ont leur mot', () => {
