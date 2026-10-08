@@ -1314,8 +1314,10 @@ test('MGMT sortie carte incomplète — short notice : combattant de Split ou d\
   const win = newGameWindow(); carteIncomplete(win);
   const cands = JSON.parse(win.eval(`JSON.stringify(mgmtRetraitOptions(G.mgmt).candidats.map(c=>[c.id,c.src]))`));
   assert.ok(cands.some(c => c[1]==='split') && cands.some(c => c[1]==='autre'), 'un combattant de Split et un d\u2019une autre organisation');
-  const tries = cands.map(c => JSON.parse(win.eval(`JSON.stringify(mgmtRetraitEngager(G.mgmt,'${c[0]}'))`)));
-  assert.ok(tries.every(r => ['C1','C2','C3','C4','plafond'].includes(r.reponse)), 'chaque réponse est une réplique du registre');
+  /* Effectif de 30 par catégorie (08/10) : des sans-contrat figurent parmi les candidats (src 'libre') ; engager un combattant libre est un comportement décidé mais absent (voir le test skip « combattant libre »), il répond 'aucun'. */
+  const tries = cands.filter(c => c[1] !== 'libre').map(c => JSON.parse(win.eval(`JSON.stringify(mgmtRetraitEngager(G.mgmt,'${c[0]}'))`)));
+  /* Une fois le trou comblé par un engagement, les candidats suivants répondent 'aucun' : il n'y a plus de place à prendre. */
+  assert.ok(tries.every((r, i) => ['C1','C2','C3','C4','plafond'].includes(r.reponse) || (r.reponse === 'aucun' && tries.slice(0, i).some(x => x.ok))), 'chaque réponse est une réplique du registre');
   assert.ok(tries.some(r => r.ok) || win.eval(`mgmtRetraitActif(G.mgmt)!==null`), 'soit la carte est complétée, soit le trou reste signalé');
 });
 

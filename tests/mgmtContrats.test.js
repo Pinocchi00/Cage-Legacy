@@ -47,30 +47,32 @@ test('Contrats — le nombre de combats restants baisse d’un à chaque combat 
   assert.equal(r.r0,2); assert.equal(r.r1,1); assert.ok(r.encore); assert.ok(r.libre&&r.sansCt&&r.fait); assert.equal(r.dispo,false,'un sans-contrat ne se book plus');
 });
 
+/* Corrections du 08/10/2026 (effectif de 30 par catégorie) : les paliers d'attente d'une partie neuve valent 2,5 fois ceux de 140 combattants (mgmtCtSeuils) ; ce test les lit au lieu de les écrire en dur. */
 test('Contrats — les quatre paliers d’attente se suivent dans l’ordre, un combat joué ramène au début, le dernier refuse tout combat', () => {
   const win=neuve();
-  const r=res(win,`const m=G.mgmt; m.cycle=30; const f=m.roster[4]; f.lastCycle=m.cycle; const p=[];
-    for(const a of [0,2,3,4,5,6,7,9,10,14]){ f.lastCycle=m.cycle-a; p.push(mgmtContratPalier(m,f)); }
-    f.lastCycle=m.cycle-10; const refuse=!mgmtAvailable(m,f); const aff={a:f.id,b:m.roster.find(o=>o.div===f.div&&o.id!==f.id).id}; const acc=mgmtAcceptable(m,aff);
+  const r=res(win,`const m=G.mgmt; m.cycle=90; const f=m.roster[4]; f.lastCycle=m.cycle; const p=[]; const s=mgmtCtSeuils(m);
+    for(const a of [0,s[0]-1,s[0],s[1]-1,s[1],s[2]-1,s[2],s[3]-1,s[3],s[3]+4]){ f.lastCycle=m.cycle-a; p.push(mgmtContratPalier(m,f)); }
+    f.lastCycle=m.cycle-s[3]; const refuse=!mgmtAvailable(m,f); const aff={a:f.id,b:m.roster.find(o=>o.div===f.div&&o.id!==f.id).id}; const acc=mgmtAcceptable(m,aff);
     f.lastCycle=m.cycle; const apres=mgmtContratPalier(m,f);
     return {p,refuse,acc,apres};`);
   assert.deepEqual(r.p,[0,0,1,1,2,2,3,3,4,4]); assert.ok(r.refuse); assert.equal(r.acc,false,'toute proposition de combat est refusée'); assert.equal(r.apres,0);
 });
 
+/* Corrections du 08/10/2026 (effectif de 30 par catégorie) : les paliers d'attente d'une partie neuve valent 2,5 fois ceux de 140 combattants (mgmtCtSeuils) ; ce test les lit au lieu de les écrire en dur. */
 test('Contrats — la rouille agit sur le niveau à partir du troisième palier et s’efface au combat suivant', () => {
   const win=neuve();
-  const r=res(win,`const m=G.mgmt; m.cycle=40; const f=m.roster[5]; const out=[];
-    for(const a of [0,6,7,9,30]){ f.lastCycle=m.cycle-a; out.push(mgmtRouille(m,f,m.cycle)); }
+  const r=res(win,`const m=G.mgmt; m.cycle=120; const f=m.roster[5]; const out=[]; const s2=mgmtCtSeuils(m)[2];
+    for(const a of [0,s2-1,s2,s2+2,90]){ f.lastCycle=m.cycle-a; out.push(mgmtRouille(m,f,m.cycle)); }
     f.lastCycle=m.cycle; return {out,efface:mgmtRouille(m,f,m.cycle)};`);
   assert.equal(r.out[0],0); assert.equal(r.out[1],0); assert.ok(r.out[2]>0&&r.out[3]>r.out[2]); assert.equal(r.out[4],5,'bornée'); assert.equal(r.efface,0);
 });
 
 test('Contrats — le renouvellement : les combats s’ajoutent, la bourse change, la prime est débitée ; le combattant peut refuser', () => {
   const win=neuve();
-  const r=res(win,`const m=G.mgmt; const f=m.roster[6]; const n0=f.ct.n, dem=mgmtBourseSouhaitee(m,f,true);
+  const r=res(win,`const m=G.mgmt; m.cycle=60; const f=m.roster.find(x=>x.ct&&mgmtContratGrandeur(m,x).ecart===0); const n0=f.ct.n, dem=mgmtBourseSouhaitee(m,f,true);
     const bas=mgmtContratRenouveler(m,f.id,3,0.5); const t0=m.treasury;
     const ok=mgmtContratRenouveler(m,f.id,3,dem+2);
-    f.lastCycle=m.cycle-8; const plus=mgmtBourseSouhaitee(m,f,true), base=mgmtBourseSouhaitee(m,f,false);
+    f.lastCycle=m.cycle-mgmtCtSeuils(m)[2]; const plus=mgmtBourseSouhaitee(m,f,true), base=mgmtBourseSouhaitee(m,f,false);
     return {bas:bas.raison,ok:ok.ok,n:f.ct.n-n0,b:f.ct.b===dem+2,debit:t0-m.treasury===ok.prime,plus,base,hors:mgmtContratReponse(m,f,9,5,true).raison};`);
   assert.equal(r.bas,'trop-bas'); assert.ok(r.ok); assert.equal(r.n,3); assert.ok(r.b); assert.ok(r.debit); assert.ok(r.plus>=r.base,'il demande un peu plus après une longue attente'); assert.equal(r.hors,'offre');
 });
@@ -94,9 +96,9 @@ test('Contrats — sur 40 parties simulées, signer des combattants sans les fai
   const r=res(win,`let baisseCaisse=0, rouilles=0, total=0;
     for(let g=0;g<40;g++){
       setSeed(3000+g); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; mgmtAgendaInit(m);
-      const t0=m.treasury; const cibles=allDivisions().flatMap(d=>mgmtRecrutables(m,d.id)).slice(0,4); const signes=[];
+      const t0=m.treasury; const cibles=allDivisions().flatMap(d=>mgmtRecrutables(m,d.id)).slice(-4); const signes=[];
       for(const x of cibles){ const dem=mgmtBourseSouhaitee(m,mgmtExteriorPourOffre(m,x.id),false); const s=mgmtContratSigner(m,x.id,4,dem); if(s.ok) signes.push(x.id); }
-      m.cycle+=12;
+      m.cycle+=60;
       total++; if(signes.length&&m.treasury<t0) baisseCaisse++;
       if(signes.length&&signes.every(id=>{ const f=mgmtFighterById(m,id); return mgmtRouille(m,f,m.cycle)>0||mgmtContratPalier(m,f)>=4; })) rouilles++;
     }

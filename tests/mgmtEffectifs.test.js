@@ -7,7 +7,8 @@ const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
 
-test('H4 — partie neuve : version 14 (brief du 06/10, lot 2), effectifs 1, carte 5 + 7, vestiaire de 130 à 150', () => {
+/* Corrections du 08/10/2026 (demande d'Anthony : environ 30 combattants par catégorie dans chaque organisation) remplace « 130 à 150 combattants, répartis comme le monde ». */
+test('H4 — partie neuve : version 14 (brief du 06/10, lot 2), effectifs 1, carte 5 + 7, vestiaire d’environ 30 par catégorie (330 à 390)', () => {
   const win=newGameWindow();
   const r=result(win,`
     const tailles=[];
@@ -19,23 +20,20 @@ test('H4 — partie neuve : version 14 (brief du 06/10, lot 2), effectifs 1, car
   `);
   assert.equal(r.v,14); assert.equal(r.effectifs,1);
   assert.equal(r.main,5); assert.equal(r.prelims,7);
-  assert.ok(r.min>=130&&r.max<=150,`vestiaire ${r.min}–${r.max}`);
+  assert.ok(r.min>=330&&r.max<=390,`vestiaire ${r.min}–${r.max}`);
   assert.ok(r.valide,'la partie neuve passe la porte de sauvegarde');
 });
 
-test('H4 — le vestiaire est réparti comme le monde (~14 % de chaque catégorie)', () => {
+/* Corrections du 08/10/2026 (demande d'Anthony : environ 30 combattants par catégorie dans chaque organisation) remplace « 130 à 150 combattants, répartis comme le monde ». Chaque catégorie compte environ 30 combattants (de 28 à 32) ; le monde, cinq organisations de cette taille, en compte environ 1 800. */
+test('H4 — chaque catégorie du vestiaire compte environ 30 combattants, et le monde environ 1 800', () => {
   const win=newGameWindow();
   const r=result(win,`
-    const compte={}; let total=0;
-    for(let s=1;s<=40;s++){ setSeed(s); const m=mgmtDefault(); mgmtNewRoster(m);
-      for(const f of m.roster){ compte[f.div]=(compte[f.div]||0)+1; total++; } }
-    const somme=Object.values(MGMT_WORLD_SIZE).reduce((a,b)=>a+b,0);
-    return {total,somme,ecarts:Object.entries(MGMT_WORLD_SIZE).map(([d,n])=>[d,100*(compte[d]||0)/total,100*n/somme])};
+    const par={};
+    for(let s=1;s<=20;s++){ setSeed(s); const m=mgmtDefault(); mgmtNewRoster(m); const c={}; for(const f of m.roster) c[f.div]=(c[f.div]||0)+1; for(const d of allDivisions()){ (par[d.id]=par[d.id]||[]).push(c[d.id]||0); } }
+    return {somme:Object.values(MGMT_WORLD_SIZE).reduce((a,b)=>a+b,0),min:Math.min(...Object.values(par).flat()),max:Math.max(...Object.values(par).flat())};
   `);
-  assert.equal(r.somme,1025,'le monde compte 1 025 combattants (contrat §3.1)');
-  for(const [d,obs,att] of r.ecarts){
-    assert.ok(Math.abs(obs-att)<1.5,`${d} : ${obs.toFixed(1)} % au vestiaire pour ${att.toFixed(1)} % du monde`);
-  }
+  assert.ok(r.somme>=1750&&r.somme<=1850,'le monde compte environ 1 800 combattants : '+r.somme);
+  assert.ok(r.min>=28&&r.max<=32,`de 28 à 32 combattants par catégorie : ${r.min}–${r.max}`);
 });
 
 test('H4 — le monde tient la table par catégorie, Split compris, et la retraite est remplacée', () => {

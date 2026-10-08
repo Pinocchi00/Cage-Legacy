@@ -121,7 +121,7 @@ function mgmtClassementsRowHtml(m,rank,row,tr){
   const org=f?(f.trace?(f.trace.orgs.length?(f.trace.orgs[f.trace.orgs.length-1].name||''):''):mgmtOrgNom(m)):'';
   return `<div class="mgmt-cl-row" onclick="CL.mgmtFiche('${escJsAttr(row.id)}')">`
     +`<span class="mgmt-cl-rank">${esc(rank)}</span>`
-    +`<span class="mgmt-cl-nm">${esc(nom)}</span>`
+    +`<span class="mgmt-cl-nm">${esc(nom)}${(()=>{ const s=mgmtSurnomDe(m,row.id); return s?` <i class="mgmt-cl-sur">« ${esc(s)} »</i>`:''; })()}</span>`
     +`<span class="mgmt-cl-rec">${esc(rec)}</span>`
     +`<span class="mgmt-cl-org${split?' split':''}">${esc(org)}</span>`
     +mgmtClassementsTrendHtml(tr)+`</div>`;

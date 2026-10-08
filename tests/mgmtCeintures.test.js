@@ -35,7 +35,7 @@ test('T1 ceintures — titre explicite, champion requis et une seule ceinture pa
   const win=fresh();
   const r=JSON.parse(win.eval(`JSON.stringify((()=>{
     const m=G.mgmt, group=allDivisions().map(d=>m.roster.filter(f=>f.div===d.id)).find(a=>a.length>=4);
-    const champ=mgmtSplitTitle(m,group[0].div).id, others=group.filter(f=>f.id!==champ);
+    const champ=mgmtSplitTitle(m,group[0].div).id, others=group.filter(f=>f.id!==champ&&mgmtAvailable(m,f));
     const first=mgmtBookMain(m,others[0].id,others[1].id);
     const bad=mgmtSetTitle(m,0,true),ordinary=first.title!==true;
     mgmtRemoveMain(m,0);
@@ -60,7 +60,7 @@ test('T1 ceintures — cinq rounds en combat principal et titre ailleurs, vrai r
     m.card.sizeMain=2; m.card.sizePrelims=1;
     const book=g=>{
       const champ=mgmtSplitTitle(m,g[0].div).id;
-      return mgmtBookMain(m,champ,g.find(f=>f.id!==champ).id);
+      return mgmtBookMain(m,champ,g.find(f=>f.id!==champ&&mgmtAvailable(m,f)).id);
     };
     book(groups[0]); book(groups[1]);
     mgmtSetTitle(m,1,true);
@@ -167,7 +167,7 @@ test('T1 ceintures — case de booking, retour immédiat, focus clavier et noms 
   win.eval(`(()=>{
     const m=G.mgmt,g=allDivisions().map(d=>m.roster.filter(f=>f.div===d.id)).find(a=>a.length>=2);
     const champ=mgmtSplitTitle(m,g[0].div).id;
-    mgmtBookMain(m,champ,g.find(f=>f.id!==champ).id);
+    mgmtBookMain(m,champ,g.find(f=>f.id!==champ&&mgmtAvailable(m,f)).id);
     G.screen='mgmt_carte'; render();
   })()`);
   let box=win.document.getElementById('mgmt-title-0');

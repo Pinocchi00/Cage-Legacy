@@ -32,7 +32,7 @@ test('2.1 — « Contrat restant » affiche le même nombre que l’écran Contr
 
 test('2.2 — La ceinture en jeu ou non se lit sur la carte, sans doute possible, et un champion sans ceinture le dit à l’avant-combat', () => {
   const win=neuve();
-  win.eval(`(function(){ const m=G.mgmt; const f=m.roster.find(x=>{const t=mgmtSplitTitle(m,x.div); return t&&t.id===x.id;}); const adv=m.roster.find(x=>x.div===f.div&&x.id!==f.id);
+  win.eval(`(function(){ const m=G.mgmt; const f=m.roster.find(x=>{const t=mgmtSplitTitle(m,x.div); return t&&t.id===x.id;}); const adv=m.roster.find(x=>x.div===f.div&&x.id!==f.id&&mgmtAvailable(m,x));
     m.card.main=[{a:f.id,b:adv.id,cycle:m.cycle,slot:'main'}]; G.screen='mgmt_carte'; render(); })()`);
   assert.match(app(win).textContent,/SANS TITRE/,'éteint, le bouton dit « sans titre »');
   win.eval(`mgmtSetTitle(G.mgmt,0,true); render();`);

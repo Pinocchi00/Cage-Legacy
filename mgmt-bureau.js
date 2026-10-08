@@ -124,17 +124,22 @@ function mgmtNextId(m){ const id='mg'+m.seq; m.seq++; return id; }
 /** Les fratries voulues d'un effectif neuf : au plus ce nombre de paires qui partagent un nom de famille (corrections du 08/10, 5.1). */
 const MGMT_FRATRIES_VOULUES=5;
 /** La part de l'effectif qui peut partager un nom de famille hors fratrie (d'une catégorie à l'autre, jamais dans la même) : chaque nom partagé compte deux combattants. */
-const MGMT_NOMS_PARTAGES_PART=0.03;
+const MGMT_NOMS_PARTAGES_PART=0.02;
+/** Corrections du 08/10 : au moins 98 % des prénoms, et 98 % des noms de famille (fratries voulues comprises), sont différents dans un effectif. */
+const MGMT_PRENOMS_REPETES_PART=0.012;
 /** Ce nom est-il déjà pris de façon gênante ? Un homonyme exact l'est toujours ; un nom de famille déjà porté ne l'est que s'il fait ni une fratrie voulue
  *  (même pays, tirée comme mgmtFratrie la lit), ni un partage d'une autre catégorie dans la limite du budget. Pur.
  *  @returns {{conflit:boolean,genre:string}} genre : '' | 'fratrie' | 'partage'. */
 function mgmtNomEnConflit(m,nm,ck,id,div,bilan){
   const memes=m.roster.filter(o=>o.last===nm.last);
   if(m.roster.some(o=>o.first===nm.first&&o.last===nm.last)) return {conflit:true,genre:''};
-  if(!memes.length) return {conflit:false,genre:''};
-  if(bilan.fratries<MGMT_FRATRIES_VOULUES&&memes.some(o=>o.ck===ck&&typeof mgmtIdentiteStream==='function'&&mgmtIdentiteStream([id,o.id].sort().join('|'),'fratrie')()<MGMT_FRATRIE_PART)) return {conflit:false,genre:'fratrie'};
+  /* Un prénom déjà porté ne revient que dans la limite du budget (2 % de l'effectif). */
+  const prenom=m.roster.some(o=>o.first===nm.first);
+  if(prenom&&bilan.prenoms>=bilan.prenomsMax) return {conflit:true,genre:'',prenom};
+  if(!memes.length) return {conflit:false,genre:'',prenom};
+  if(bilan.fratries<bilan.fratriesMax&&memes.some(o=>o.ck===ck&&typeof mgmtIdentiteStream==='function'&&mgmtIdentiteStream([id,o.id].sort().join('|'),'fratrie')()<MGMT_FRATRIE_PART)) return {conflit:false,genre:'fratrie',prenom};
   if(memes.some(o=>o.div===div)) return {conflit:true,genre:''};
-  return bilan.partages<bilan.partagesMax?{conflit:false,genre:'partage'}:{conflit:true,genre:''};
+  return bilan.partages<bilan.partagesMax?{conflit:false,genre:'partage',prenom}:{conflit:true,genre:''};
 }
 function mgmtNewRoster(m){
   /* Lot 5 H4 : une partie neuve (effectifs 1) porte 130 à 150 combattants
@@ -145,14 +150,18 @@ function mgmtNewRoster(m){
   const profil=mgmtOrgProfil(m);
   const tire=avant?RI(MGMT_ROSTER_AVANT_MIN,MGMT_ROSTER_AVANT_MAX):RI(MGMT_ROSTER_MIN,MGMT_ROSTER_MAX);
   /* Brief du 06/10, lot 5 : la taille de l'effectif suit le profil (le tirage est consommé comme avant). */
-  const n=avant?tire:Math.max(40,Math.round(tire*profil.effectif));
-  m.roster=[];
-  const bilan={fratries:0,partages:0,partagesMax:Math.floor(n*MGMT_NOMS_PARTAGES_PART/2)};
   const divs=allDivisions();
+  /* Corrections du 08/10 : une partie neuve compte environ 30 combattants par catégorie (±2), ses catégories fortes ×1,5 et faibles ×0,5, le tout × l'effectif du profil. */
+  const plan=[];
+  if(!avant) for(const d of divs){ const k=Math.max(4,Math.round(MGMT_EFFECTIF_PAR_CATEGORIE*mgmtOrgPoidsCategorie(profil,d.id)*profil.effectif)+RI(-2,2)); for(let j=0;j<k;j++) plan.push(d); }
+  const n=avant?Math.max(40,Math.round(tire*profil.effectif)):plan.length;
+  m.roster=[];
+  const fratriesMax=Math.min(MGMT_FRATRIES_VOULUES,Math.floor(n*MGMT_NOMS_PARTAGES_PART/2));
+  const bilan={fratries:0,fratriesMax,partages:0,prenoms:0,prenomsMax:Math.floor(n*MGMT_PRENOMS_REPETES_PART),partagesMax:Math.max(0,Math.floor(n*MGMT_NOMS_PARTAGES_PART)-fratriesMax-1)};
   for(let i=0;i<n;i++){
     /* Lot 5 H4 : la catégorie se tire au poids du monde (MGMT_WORLD_SIZE) :
        le vestiaire est réparti comme lui, ~14 % de chaque catégorie. */
-    const div=avant?pick(divs):mgmtDivisionPonderee(divs,rnd(),profil);
+    const div=avant?pick(divs):plan[i];
     /* Lot 5 H3 : un tirage pondéré (poids Split, catalogue §1.2) par
        emplacement ; le retirage du prénom rejoue le même pays. */
     let ck=mgmtPaysTire(rnd(),'split');
@@ -165,7 +174,7 @@ function mgmtNewRoster(m){
       if(!avant&&guard>0&&guard%80===0) ck=mgmtPaysTire(rnd(),'split');   /* un pays dont les noms sont épuisés : on en tire un autre */
       nm=makeName(div.gender,ck); guard++;
     }
-    if(!avant){ const g=mgmtNomEnConflit(m,nm,ck,id,div.id,bilan).genre; if(g==='fratrie') bilan.fratries++; else if(g==='partage') bilan.partages++; }
+    if(!avant){ const c=mgmtNomEnConflit(m,nm,ck,id,div.id,bilan); if(c.genre==='fratrie') bilan.fratries++; else if(c.genre==='partage') bilan.partages++; if(c.prenom) bilan.prenoms++; }
     const age=avant?RI(22,35):clamp(RI(22,35)+profil.age,20,40);
     const band=age<=26?RI(2,12):(age>=29?RI(15,30):RI(8,22));
     /* Brief du 06/10, lot 2 : une partie à niveaux tire d'abord le niveau du combattant (son potentiel, son pic),

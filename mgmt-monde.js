@@ -212,6 +212,24 @@ function mgmtExteriorAmateur(seed){
   return out;
 }
 
+/** Le palmarès amateur d'un combattant (demande d'Anthony du 08/10/2026 : « le palmarès amateur sur chaque combattant, sur sa fiche »). Dérivé, jamais stocké : un combattant venu du
+ *  monde extérieur garde son bilan amateur de trace (mgmtExteriorAmateur) ; celui d'un vestiaire de départ le tire de son identifiant, par la même loi. Y ajoute l'âge de ses débuts
+ *  (18 à 21 ans, jamais après l'âge actuel moins un) et ses titres amateurs, qui suivent le bilan : un bilan d'au moins 80 % de victoires fait un titre régional et souvent un national,
+ *  d'au moins 65 % un titre régional une fois sur deux. @returns {{W:number,L:number,fin:{ko:number,sub:number,dec:number},debuts:number,titres:string[]}} */
+function mgmtPalmaresAmateur(m,f){
+  if(!f) return null;
+  const ligne=m&&Array.isArray(m.exterieur)?m.exterieur.find(e=>e&&e.id===f.id):null;
+  const seed=ligne&&Number.isFinite(ligne.seed)?ligne.seed:duelFnv1a32('amateur|'+String(f.id));
+  const a=mgmtExteriorAmateur(seed);
+  const r=mgmtIdentiteStream(String(f.id),'palmares-amateur');
+  const debuts=Math.min(MGMT_EXT_AGE_START_MIN+Math.floor(r()*MGMT_EXT_AGE_START_SPREAD),Math.max(16,Math.floor(f.age||21)-1));
+  const total=a.W+a.L, ratio=total>0?a.W/total:0, u=r(), v=r();
+  const titres=[];
+  if(ratio>=0.8){ titres.push('Champion amateur régional'); if(u<0.55) titres.push('Champion amateur national'); }
+  else if(ratio>=0.65&&v<0.5) titres.push('Champion amateur régional');
+  return {W:a.W,L:a.L,fin:a.fin,debuts,titres};
+}
+
 /** Chronologie d'une carrière extérieure : les deux premiers tirages du
  *  flux de carrière (âge de début, âge au passage dans le monde), le départ
  *  professionnel et la FIN DE CARRÉE — la retraite du T3, la même loi que

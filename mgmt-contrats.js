@@ -39,7 +39,15 @@ const MGMT_CT_BOURSE_POP_PENTE=0.8;
 const MGMT_CT_LIBRE_PERIODE=6;
 const MGMT_CT_DEBUTANT_AGE=23;
 const MGMT_CT_DEBUTANT_COMBATS=3;
+/* Corrections du 08/10/2026 (effectif de 30 par catégorie) : avec 350 combattants au lieu de 140, chacun passe deux fois et demie moins souvent. Les paliers d'attente, écrits
+   pour 140, sont multipliés par MGMT_CT_ECHELLE_EFFECTIF dans une partie à effectifs neufs (effectifs 1) ; les anciennes parties gardent les leurs. */
+const MGMT_CT_ECHELLE_EFFECTIF=2.5;
 const MGMT_CT_PALIERS=['','Attend un combat','Attend depuis longtemps','Revient rouillé','Refuse tout combat'];
+
+/** Les seuils d'attente de la partie, en soirées : [attend, longtemps, rouillé, refuse]. Pur. */
+function mgmtCtSeuils(m){ const e=m&&m.effectifs===1?MGMT_CT_ECHELLE_EFFECTIF:1; return MGMT_CT_ATTENTE.map(x=>Math.round(x*e)); }
+/** Soirées de plus passées au dernier palier avant que le combattant parte. Pur. */
+function mgmtCtDepart(m){ return Math.round(MGMT_CT_DEPART_SOIREES*(m&&m.effectifs===1?MGMT_CT_ECHELLE_EFFECTIF:1)); }
 
 function mgmtContratsActif(m){ return typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m); }
 
@@ -94,7 +102,7 @@ function mgmtContratAttente(m,f){
 function mgmtContratPalier(m,f){
   if(!f||!f.ct) return 0;
   const a=mgmtContratAttente(m,f); let p=0;
-  MGMT_CT_ATTENTE.forEach((s,i)=>{ if(a>=s) p=i+1; });
+  mgmtCtSeuils(m).forEach((s,i)=>{ if(a>=s) p=i+1; });
   return p;
 }
 function mgmtContratRestants(f){ return f&&f.ct?Math.max(0,f.ct.n-f.ct.f):0; }
@@ -139,7 +147,7 @@ function mgmtContratsApresSoiree(m,ids){
 function mgmtContratsOuvreCycle(m){
   if(!mgmtContratsActif(m)) return;
   for(const f of m.roster||[]){
-    if(f.ct&&!mgmtIsRetired(f)&&mgmtContratAttente(m,f)>=MGMT_CT_ATTENTE[3]+MGMT_CT_DEPART_SOIREES&&!mgmtEngaged(m,f)){
+    if(f.ct&&!mgmtIsRetired(f)&&mgmtContratAttente(m,f)>=mgmtCtSeuils(m)[3]+mgmtCtDepart(m)&&!mgmtEngaged(m,f)){
       delete f.ct; f.libre=true; mgmtAddFact(m,{c:m.cycle,k:'depart_attente',a:f.id}); continue;
     }
     const p=mgmtContratPalier(m,f);

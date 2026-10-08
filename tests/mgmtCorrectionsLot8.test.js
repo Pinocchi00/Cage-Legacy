@@ -7,9 +7,9 @@ const {newGameWindow}=require('./helpers/loadGame');
 const neuve=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(7); CL.mgmtEnter(1);`); return w; };
 const res=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ ${code} })())`));
 /* Trois combattants disponibles d'une même catégorie, du plus connu au moins connu. */
-const TROIS=`const m=G.mgmt; m.cycle=30; m.roster.forEach(f=>{ f.lastCycle=30; }); const div=m.roster.find(g=>mgmtAvailable(m,g)&&g.ct).div;
+const TROIS=`const m=G.mgmt; m.cycle=60; m.roster.forEach(f=>{ f.lastCycle=60; }); const div=m.roster.find(g=>mgmtAvailable(m,g)&&g.ct).div;
   const [grand,milieu,petit]=m.roster.filter(f=>f.div===div&&f.ct&&mgmtAvailable(m,f)).sort((x,y)=>mgmtStar(y)-mgmtStar(x)).filter((f,i,l)=>i===0||i===Math.floor(l.length/2)||i===l.length-1);
-  const bloque=f=>{ f.lastCycle=m.cycle-MGMT_CT_ATTENTE[3]-1; };`;
+  const bloque=f=>{ f.lastCycle=m.cycle-mgmtCtSeuils(m)[3]-1; };`;
 
 test('8 — Au dernier palier, il refuse tout combat sauf contre un nom moins connu que lui', () => {
   const win=neuve();
@@ -42,8 +42,8 @@ test('8 — Libérer un combattant paie le reste de son contrat, le rend sans co
 test('8 — Trois soirées après le dernier palier, le combattant demande son départ et s’en va, sans indemnité ; avant, il reste', () => {
   const win=neuve();
   const r=res(win,`${TROIS} const f=milieu;
-    f.lastCycle=m.cycle-MGMT_CT_ATTENTE[3]-MGMT_CT_DEPART_SOIREES+1; mgmtContratsOuvreCycle(m); const reste=!!f.ct&&!f.libre;
-    f.lastCycle=m.cycle-MGMT_CT_ATTENTE[3]-MGMT_CT_DEPART_SOIREES; const avant=m.treasury; mgmtContratsOuvreCycle(m);
+    f.lastCycle=m.cycle-mgmtCtSeuils(m)[3]-mgmtCtDepart(m)+1; mgmtContratsOuvreCycle(m); const reste=!!f.ct&&!f.libre;
+    f.lastCycle=m.cycle-mgmtCtSeuils(m)[3]-mgmtCtDepart(m); const avant=m.treasury; mgmtContratsOuvreCycle(m);
     return {reste,parti:f.libre===true&&f.ct===undefined,gratuit:m.treasury===avant,fait:m.facts.some(x=>x.k==='depart_attente'&&x.a===f.id)};`);
   assert.equal(r.reste,true); assert.ok(r.parti&&r.gratuit&&r.fait);
 });

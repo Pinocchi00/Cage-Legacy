@@ -112,12 +112,12 @@ const MGMT_FICHE_CONTRAT_OCTO='M12.6 2.5h14.8l10.1 10.1v14.8L27.4 37.5H12.6L2.5 
 
 /** La bannière : le tunnel (rouge, jaune pour un champion), le nom, le palmarès, le rang. */
 function mgmtFicheBanniereHtml(m,f,champion){
-  const nom=mfNet(f.last||f.name), prenom=mfNet(f.first||'');
+  const nom=mfNet(f.last||f.name), prenom=mfNet(f.first||''), sur=mgmtSurnomDe(m,f.id);
   const rang=mgmtRangTexte(m,f);
   const forme=mgmtEffectifForme(m,f);
   const d=divById(f.div), cat=d?String(mgmtDivisionLabel(d)).toUpperCase().split(' '):[];
   return `<div class="mf-fb${champion?' or':''}" data-m="head"><i class="mf-fb-img" aria-hidden="true"></i>`
-    +`<div class="mf-fb-nom"><span class="p">${esc(prenom)}</span><span class="n" style="font-size:${mfCorps(nom,1000,200,90)}px">${esc(nom)}</span></div>`
+    +`<div class="mf-fb-nom"><span class="p">${esc(prenom)}${sur?` <em class="s">« ${esc(mfNet(sur))} »</em>`:''}</span><span class="n" style="font-size:${mfCorps(nom,1000,200,90)}px">${esc(nom)}</span></div>`
     +`<div class="mf-fb-pal"><div class="mf-fb-pg"><span class="mf-fb-pl">PALMARÈS</span><b>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</b><div class="mf-fb-forme">${forme.map(mfMarque).join('')}</div></div>`
     +`<div class="mf-fb-pd"><div class="mf-fb-rang${champion?' or':''}">${esc(rang)}</div><div class="mf-fb-cat">${cat.map(x=>`<div>${esc(x)}</div>`).join('')}</div></div></div></div>`;
 }
@@ -172,6 +172,15 @@ function mgmtFicheStyleHtml(m,f){
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
 }
 
+/** Le palmarès amateur de la fiche : le bilan, les finitions, les débuts, les titres. Rien n'est stocké (mgmtPalmaresAmateur). */
+function mgmtFichePalmaresAmateurHtml(m,f){
+  const p=mgmtPalmaresAmateur(m,f); if(!p) return '';
+  const fin=[p.fin.ko?p.fin.ko+(p.fin.ko>1?' KO':' KO'):'',p.fin.sub?p.fin.sub+(p.fin.sub>1?' soumissions':' soumission'):'',p.fin.dec?p.fin.dec+(p.fin.dec>1?' décisions':' décision'):''].filter(Boolean).join(' · ');
+  const titres=p.titres.length?p.titres.map(t=>`<div class="mf-fi-co autres mgmt-fiche-amateur"><strong>${esc(t)}</strong></div>`).join(''):'<div class="mf-fi-co autres mgmt-fiche-amateur"><span>Aucun titre amateur</span></div>';
+  return `<div class="mf-fi-cth"><span>SON PALMARÈS AMATEUR</span><span>DÉBUTS À ${esc(p.debuts)} ANS</span></div>`
+    +`<div class="mf-fi-co autres mgmt-fiche-amateur"><strong>${esc(p.W)}-${esc(p.L)}</strong><span>Fins de combat : ${esc(fin)}</span></div>${titres}`;
+}
+
 /** La trajectoire d'un combattant extérieur (sa trace) : amateur, organisations traversées, professionnel. Rien n'est stocké. */
 function mgmtFicheParcoursHtml(trace){
   const duree=o=>{
@@ -181,7 +190,7 @@ function mgmtFicheParcoursHtml(trace){
     return ` · ${o.to<0?'Avant l’ouverture':o.from<0?'Avant et depuis l’ouverture':'Depuis l’ouverture'}, environ ${span}`;
   };
   const orgs=trace.orgs.map(o=>`<div class="mf-fi-co autres mgmt-fiche-org"><strong>${o.name?esc(o.name):''}</strong><span>${o.fights?`${esc(o.fights)} ${o.fights===1?'combat':'combats'}`:''}${esc(duree(o))}</span></div>`).join('');
-  return `<div class="mf-fi-cth"><span>SA TRAJECTOIRE</span></div><div class="mf-fi-co autres mgmt-fiche-org"><span>Amateur · ${esc(trace.amateur.W)}-${esc(trace.amateur.L)}</span></div>${orgs}<div class="mf-fi-co autres mgmt-fiche-org"><span>Professionnel · ${esc(trace.pro.W)}-${esc(trace.pro.L)}</span></div>`;
+  return `<div class="mf-fi-cth"><span>SA TRAJECTOIRE</span></div>${orgs}<div class="mf-fi-co autres mgmt-fiche-org"><span>Professionnel · ${esc(trace.pro.W)}-${esc(trace.pro.L)}</span></div>`;
 }
 
 /** Combats : les combats vus, du plus récent au plus ancien. */
@@ -198,7 +207,7 @@ function mgmtFicheCombatsHtml(m,f,line){
       +`<div class="mf-fi-ct"><b>${esc(mfNet(adv.name))}</b><span>${esc(methode)}${rnd?', '+esc(rnd):''} · ${esc(mgmtSoireeNomDate(m,t.c))}</span></div>`
       +`<div class="mf-fi-cg">${esc(geste?'Finition : '+geste:'')}</div><div class="mf-fi-cm">${mfMarque(issue)}</div></div>`;
   }).join('');
-  const autres=Math.max(0,total-vus), parcours=line&&line.trace?mgmtFicheParcoursHtml(line.trace):'';
+  const autres=Math.max(0,total-vus), parcours=mgmtFichePalmaresAmateurHtml(m,f)+(line&&line.trace?mgmtFicheParcoursHtml(line.trace):'');
   const pied=autres>0?`<div class="mf-fi-co autres"><b class="q">?</b><span>Ses ${autres} autres combats : pas vus.</span></div>`:'';
   const gauche=mfPanneau(`<div class="mf-fi-p mf-fi-cage-p"><div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${`<div class="mf-fi-legv"><div><i class="rouge"></i><span>Rouge : là où {il} impose son combat</span></div><div><i class="hache"></i><span>Hachuré : là où {il} le subit</span></div><div><i class="rond">1</i><span>Numéros : ses combats vus</span></div></div>`}</div>`,'normal','mf-fi-pan mf-fi-cage-pan');
   const droite=mfPanneau(`<div class="mf-fi-p"><div class="mf-fi-cth"><span>DU PLUS RÉCENT AU PLUS ANCIEN</span><span>${vus} COMBAT${vus>1?'S':''} VU${vus>1?'S':''} SUR ${esc(total)}</span></div>`
