@@ -5,9 +5,10 @@ vanilla JavaScript, sans build, sans backend, 100 % offline une fois chargé.
 
 **Jouer en ligne : https://pinocchi00.github.io/Cage-Legacy/**
 
-## Mode de jeu
+## Modes de jeu
 
-**Carrière Complète** : amateur → pro → retraite, gestion physique et financière, camps d'entraînement, classements, contrats, et Panthéon des légendes.
+- **Carrière Complète** : amateur → pro → retraite, gestion physique et financière, camps d'entraînement, classements, contrats, Panthéon des légendes, et l'exhibition « Duel entre amis ».
+- **Mode management** : le joueur est le matchmaker d'une organisation (Split par défaut, huit au choix). Il compose les cartes, négocie les contrats, pose ses soirées au calendrier, lit la presse et les classements, et regarde les combats dans l'arène. Cible : un PC en 1920 × 1080 (le cadre se met à l'échelle), souris d'abord, clavier en accélérateur. Mode jouable, en développement actif ; sa direction visuelle est celle des maquettes du dossier `maquettes/`.
 
 ## Arborescence
 
@@ -16,10 +17,12 @@ index.html                        point d'entrée, ordre de chargement des scrip
 data-*.js                         données pures (compétences, contenus, personnages)
 engine.js, engine-*.js            moteur de simulation (combat, carrière, progression, événements)
 state/                            état de jeu et logique métier, par domaine (sauvegarde, analytics, Panthéon...)
-ui-01…ui-09*.js                   rendu Canvas 2D et écrans, un fichier par zone fonctionnelle
+ui-*.js                           rendu et écrans de la carrière, de l'arène, du duel et des touches (Canvas 2D)
+mgmt-*.js                         le mode management : données, simulation (bureau, carte, corps, argent, monde, agenda, contrats…), cadre et écrans
+sw.js, manifest.webmanifest, icons/  application installable (PWA), jouable hors ligne
 main.js                           bootstrap au chargement de la page
 tests/                            suite de tests (node --test) sur le vrai code du jeu, chargé dans un DOM virtuel
-tools/lint-content.js             linter de contenu narratif (anglicismes, longueur des phrases, etc.)
+tools/                            outils : lint de contenu, mesures (management, gestes de finition, monde, économie), export des textes à relire, Monte-Carlo
 eslint.config.js                  configuration ESLint
 ```
 
@@ -35,7 +38,7 @@ Pour valider une modification :
 
 ```bash
 npm install     # une seule fois
-npm run check    # lint + suite de tests — doit être vert avant toute livraison
+npm run check    # lint + lint de contenu + suite de tests — doit être vert avant toute livraison
 ```
 
 ## Suite de tests
@@ -50,22 +53,17 @@ npm test          # lance la suite complète
 npm run test:watch # idem, en mode watch
 ```
 
-9 fichiers de test, 62 tests au total au moment de la rédaction :
+72 fichiers de test et près de 800 tests au 08/10/2026 (`npm run check` donne le compte exact ; ne pas se fier à ce chiffre). **La liste des fichiers est écrite à la main dans `package.json`** (scripts `test` et `test:watch`) : un nouveau fichier de test doit y être ajouté, sinon il ne tourne jamais.
 
 ```
 tests/
   helpers/
     loadGame.js            charge le jeu dans un DOM virtuel
-    playthrough.js          un "joueur automatique" qui enchaîne des actions de jeu
-  analytics.test.js          analytics locales
-  career.test.js              simulations de carrière complètes
-  champChamp.test.js           supercombat double champion
-  hallOfFame.test.js            Panthéon (ajout, suppression, favoris, export)
-  invariants.test.js            invariants d'état (classement, cohérence des données)
-  proceduralNarrative.test.js    génération procédurale (rivalités, arcs narratifs)
-  ranking.test.js                classement (rang #1, pénalités du champion)
-  regressionFixes.test.js         un test par bug corrigé — le fichier le plus fourni
-  saveSystem.test.js              sauvegarde, migration, récupération automatique
+    playthrough.js          le « joueur automatique » de la carrière
+    jouerSoirees.js         joue des soirées du management
+  career.test.js, regressionFixes.test.js, saveSystem.test.js …   la carrière
+  mgmt*.test.js           le mode management, un fichier par sujet
+  mgmtCorrections*.test.js   les corrections du 08/10/2026, un fichier par lot
 ```
 
 **Un bug corrigé = un test ajouté dans `tests/regressionFixes.test.js`.**
@@ -108,9 +106,19 @@ carrière *i* utilise `seed+i`, donc un run est intégralement reproductible),
 carrière), `--quiet` (masque la progression sur stderr).
 
 Écrit un rapport texte + JSON dans `tools/reports/` (ignoré par git — ce sont
-des mesures locales, jamais un livrable versionné) : `monte-carlo-<horodatage>.
+des mesures locales, jamais un livrable versionné ; le joueur automatique de l'outil est une copie de celui de `tests/helpers/playthrough.js`, et `tests/outillage.test.js` échoue si les deux divergent) : `monte-carlo-<horodatage>.
 {txt,json}` et une copie `latest.{txt,json}` toujours à jour, pour differ
 deux runs facilement.
+
+## Mesurer le management et les textes
+
+```bash
+node tools/mesure-management.js           # 40 soirées pour chacune des huit organisations → tools/reports/MESURE-MANAGEMENT.md
+node tools/mesure-gestes.js               # les gestes de finition sur 600 finitions
+node tools/exporter-textes.js             # tous les textes relu:false, par famille → docs/TEXTES-A-RELIRE.md
+```
+
+Ces outils lisent les vraies fonctions du jeu, n'écrivent que leur rapport, et n'utilisent jamais `Math.random()`.
 
 ## Confidentialité
 
