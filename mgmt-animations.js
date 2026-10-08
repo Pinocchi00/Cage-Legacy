@@ -112,17 +112,28 @@ function mgmtAnimVoix(stage,retard){
   MGMT_ANIM.voix=cle;
 }
 
+/** Les étapes importantes, seules à jouer le grand mouvement : la soirée, le lendemain, et tout passage entre le jeu et l'extérieur (menu, nouvelle partie). */
+const MGMT_ANIM_MAJEURS=['mgmt_soiree','mgmt_lendemain','mgmt_confirmation'];
+const MGMT_ANIM_FONDU_MS=90;
+function mgmtAnimImportant(avant,apres){
+  const dedans=x=>typeof x==='string'&&x.indexOf('mgmt_')===0;
+  return MGMT_ANIM_MAJEURS.indexOf(avant)>=0||MGMT_ANIM_MAJEURS.indexOf(apres)>=0||!dedans(avant)||!dedans(apres);
+}
+
 /** Après chaque dessin d'écran : l'arrivée (avec la bande si l'on vient d'un autre écran) ou le geste du changement. */
 function mgmtAnimApres(){
   if(typeof G==='undefined'||!G||!mgmtAnimOk()) return;
   const stage=document.querySelector('.mf-stage'); if(!stage) return;
-  const ecran=G.screen, nouveau=ecran!==MGMT_ANIM.vu, depart=MGMT_ANIM.vu===null;
+  const ecran=G.screen, avant=MGMT_ANIM.vu, nouveau=ecran!==avant, depart=avant===null;
   MGMT_ANIM.vu=ecran;
   if(nouveau){
     MGMT_ANIM.sel=[]; MGMT_ANIM.ong=[]; MGMT_ANIM.cal=null; MGMT_ANIM.voix='';
     mgmtAnimChoix(stage,true); mgmtAnimOnglet(stage,true); mgmtAnimDefile(stage,true);
     const joue=()=>{ mgmtAnimArrivee(stage); mgmtAnimVoix(stage,420); };
-    if(depart) joue(); else mgmtAnimBalayage(stage,joue);
+    /* Demande d'Anthony du 08/10/2026 : le grand mouvement (la bande et l'arrivée des pièces) ne sert qu'aux étapes importantes ; entre deux sections de la barre, un fondu bref. */
+    if(depart) joue();
+    else if(mgmtAnimImportant(avant,ecran)) mgmtAnimBalayage(stage,joue);
+    else mgmtAnimJoue(stage.querySelector('.mf-contenu')||stage,[{opacity:0},{opacity:1}],MGMT_ANIM_FONDU_MS);
     return;
   }
   mgmtAnimChoix(stage,false); mgmtAnimOnglet(stage,false); mgmtAnimDefile(stage,false); mgmtAnimVoix(stage,0);

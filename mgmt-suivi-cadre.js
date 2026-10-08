@@ -57,12 +57,12 @@ function mgmtSuCarteClassement(m,x,selectionne,k){
   const n=mgmtNomParId(m,x.id), rec=`${x.W}-${x.L}-${x.D}`;
   const choisi=selectionne?' sel':'';
   if(x.champion){
-    return `<button type="button" class="mf-su-champ${choisi}" onclick="CL.mgmtSuClChoisir(${k})" ondblclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="Champion ${esc(n.name)}">`
+    return `<button type="button" class="mf-su-champ${choisi}" onclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="Champion ${esc(n.name)}">`
       +mfPanneau(`<div class="mf-su-champ-in"><div class="mf-su-champ-c" aria-hidden="true">C</div>`
         +`<div class="mf-su-champ-nom">${mgmtSuNom(n,330,44,104,52,mgmtSurnomDe(m,x.id))}</div>`
         +`<div class="mf-su-champ-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
   }
-  return `<button type="button" class="mf-su-rang${choisi}" onclick="CL.mgmtSuClChoisir(${k})" ondblclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="${esc(x.rang)} ${esc(n.name)}">`
+  return `<button type="button" class="mf-su-rang${choisi}" onclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="${esc(x.rang)} ${esc(n.name)}">`
     +mfPanneau(`<div class="mf-su-rang-in"><div class="mf-su-rang-evo">${mgmtSuEvolution(x,selectionne)}</div><div class="mf-su-rang-n">${esc(x.rang)}</div>`
       +`<div class="mf-su-rang-nom">${mgmtSuNom(n,230,36,76,36,mgmtSurnomDe(m,x.id))}</div>`
       +`<div class="mf-su-rang-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
@@ -70,7 +70,7 @@ function mgmtSuCarteClassement(m,x,selectionne,k){
 function mgmtSuLigneClassement(m,x,selectionne,k){
   const n=mgmtNomParId(m,x.id), d=x.dernier;
   const dernier=d?`${mgmtSuMarque(d.issue)}<span>${esc(d.famille)}${d.adv?', contre '+esc(d.adv):''}</span>`:'<span>—</span>';
-  return `<button type="button" class="mf-su-ligne${selectionne?' sel':''}" onclick="CL.mgmtSuClChoisir(${k})" ondblclick="CL.mgmtFiche('${esc(x.id)}')">`
+  return `<button type="button" class="mf-su-ligne${selectionne?' sel':''}" onclick="CL.mgmtFiche('${esc(x.id)}')">`
     +`<div class="mf-su-l-rang">${esc(x.rang)}</div><div class="mf-su-l-evo">${mgmtSuEvolution(x,selectionne)}</div>`
     +`<div class="mf-su-l-nom"><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}${(()=>{ const s=mgmtSurnomDe(m,x.id); return s?` · « ${esc(mgmtSuMaj(s))} »`:''; })()}</span></div>`
     +`<div class="mf-su-l-rec">${esc(x.W)}-${esc(x.L)}-${esc(x.D)}</div><div class="mf-su-l-serie">${esc(x.serie)}</div><div class="mf-su-l-dernier">${dernier}</div></button>`;
@@ -100,7 +100,7 @@ function scr_mgmt_classements_cadre(){
   const d=divById(div);
   return mfEcran(contenu,{barre:'jeu',courant:'classements',m,plaque:'Classements',libelle:F.portee==='world'?'Mondial · '+String(d.name).replace(/^Poids /,'').toUpperCase():String(d.name).toUpperCase(),
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtSuClSexe()'},
+    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtSuClSexe()'},
       {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtSuClCategorie(1)'},{ks:['M'],t:F.portee==='world'?'Classement de l’organisation':'Classement mondial',onclick:'CL.mgmtSuClPortee()'},
       {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir sa fiche',jaune:true,onclick:'CL.mgmtSuClOuvrir()'}]});
 }
@@ -132,7 +132,7 @@ function mgmtSuCeinturesMur(m){
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${mgmtSuSexeHtml(F,'CL.mgmtSuCeSexe')}<div class="mf-eff-trait"></div>`
     +`<div class="mf-su-compte">${divs.length} CEINTURES, UNE PAR CATÉGORIE</div></div><div class="mf-su-mur">${cartes}</div></main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'ceintures',m,plaque:'Ceintures',libelle:'Le mur',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtSuCeSexe()'},
+    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtSuCeSexe()'},
       {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir la ceinture',jaune:true,onclick:'CL.mgmtSuCeOuvre()'}]});
 }
 
@@ -232,7 +232,7 @@ function scr_mgmt_camps(){
   const puces=liste.slice(debut,debut+7).map((g,k)=>`<button type="button" class="${debut+k===i?'on':''}" onclick="CL.mgmtSuCaChoisir(${debut+k})">${esc(mgmtSuMaj(g.nom))}</button>`).join('');
   const contenu=`<main class="mf-contenu mf-su mf-su-camps">${corps}<div class="mf-su-ca-puces">${puces}</div></main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'camps',m,plaque:'Camps',libelle:liste.length?`${liste.length} salle${liste.length>1?'s':''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Autre salle'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir ses combattants',jaune:true,onclick:'CL.mgmtSuCaVoir()'}]});
+    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Autre salle'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir ses combattants',jaune:true,onclick:'CL.mgmtSuCaVoir()'}]});
 }
 SCREENS.mgmt_camps=scr_mgmt_camps;
 
@@ -320,7 +320,7 @@ function scr_mgmt_presse(){
   }
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${puces}</div>${corps}</main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'presse',m,plaque:'Presse',libelle:liste.length?`${liste.length} nouvelle${liste.length>1?'s':''} cette semaine`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Filtre',onclick:'CL.mgmtSuPrFiltreSuivant()'},{ks:['A','E'],t:'Section'},
+    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Filtre',onclick:'CL.mgmtSuPrFiltreSuivant()'},{ks:['A','E'],t:'Section'},
       {ks:['Entrée'],t:'Préparer ce combat',jaune:true,onclick:'CL.mgmtSuPrEntree()'}]});
 }
 SCREENS.mgmt_presse=scr_mgmt_presse;
@@ -364,7 +364,7 @@ function scr_mgmt_resultats(){
   }
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${puces}</div>${corps}</main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:soirees.length?`${mgmtOrgNom(m)} Fight Night ${soirees[F.s].n}${Number.isFinite(soirees[F.s].jour)?' · '+mgmtJourDate(soirees[F.s].jour).jour+' '+mgmtJourDate(soirees[F.s].jour).mois:''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Soirée',onclick:'CL.mgmtSuReSoiree(MGMT_SU_RE.s+1)'},{ks:['A','E'],t:'Section'},
+    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Soirée',onclick:'CL.mgmtSuReSoiree(MGMT_SU_RE.s+1)'},{ks:['A','E'],t:'Section'},
       {ks:['Entrée'],t:'Revoir ce combat',jaune:true,onclick:'CL.mgmtSuReRevoir()'}]});
 }
 SCREENS.mgmt_resultats=scr_mgmt_resultats;
@@ -468,7 +468,7 @@ keysRegister('mgmt_classements',{
   m(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); }, M(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); },
   Tab(){ if(mgmtSuAgenda()) CL.mgmtSuClCategorie(1); },
   Enter(){ if(mgmtSuAgenda()) CL.mgmtSuClOuvrir(); },
-  Escape(){ CL.go('mgmt_bureau'); },
+  Escape(){ CL.go('mgmt_carte'); },
 });
 keysRegister('mgmt_ceintures',{
   ArrowLeft(){ if(!MGMT_SU_CE.ouverte) CL.mgmtSuCeDeplacer(-1,0); },
@@ -478,26 +478,26 @@ keysRegister('mgmt_ceintures',{
   g(){ CL.mgmtSuCeSexe(); }, G(){ CL.mgmtSuCeSexe(); },
   Tab(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeCategorie(1); },
   Enter(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeFiche(); else CL.mgmtSuCeOuvre(); },
-  Escape(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeFerme(); else CL.go('mgmt_bureau'); },
+  Escape(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeFerme(); else CL.go('mgmt_carte'); },
 });
 keysRegister('mgmt_camps',{
   ArrowLeft(){ CL.mgmtSuCaDeplacer(-1); },
   ArrowRight(){ CL.mgmtSuCaDeplacer(1); },
   Enter(){ CL.mgmtSuCaVoir(); },
-  Escape(){ CL.go('mgmt_bureau'); },
+  Escape(){ CL.go('mgmt_carte'); },
 });
 keysRegister('mgmt_presse',{
   ArrowLeft(){ CL.mgmtSuPrDeplacer(-1); },
   ArrowRight(){ CL.mgmtSuPrDeplacer(1); },
   Tab(){ CL.mgmtSuPrFiltreSuivant(); },
   Enter(){ CL.mgmtSuPrEntree(); },
-  Escape(){ CL.go('mgmt_bureau'); },
+  Escape(){ CL.go('mgmt_carte'); },
 });
 keysRegister('mgmt_resultats',{
   ArrowLeft(){ CL.mgmtSuReDeplacer(-1); },
   ArrowRight(){ CL.mgmtSuReDeplacer(1); },
   Tab(){ CL.mgmtSuReSoiree(MGMT_SU_RE.s+1); },
   Enter(){ CL.mgmtSuReRevoir(); },
-  Escape(){ CL.go('mgmt_bureau'); },
+  Escape(){ CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

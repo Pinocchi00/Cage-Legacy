@@ -65,7 +65,7 @@ function scr_mgmt_finances(){
   }
   return mfEcran(contenu,{barre:'jeu',courant:'finances',m,plaque:'Finances',libelle:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:F.detail?[{ks:['Échap'],t:'Fermer le détail',onclick:'CL.mgmtFinancesFerme()'},{ks:['A','E'],t:'Section'}]
-      :[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Choisir'},{ks:['A','E'],t:'Section'},
+      :[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Choisir'},{ks:['A','E'],t:'Section'},
         {ks:['Entrée'],t:'Voir le détail',jaune:true,onclick:'CL.mgmtFinancesDetail()'}]});
 }
 SCREENS.mgmt_finances=scr_mgmt_finances;
@@ -82,6 +82,6 @@ keysRegister('mgmt_finances',{
   ArrowUp(){ if(!MGMT_FINANCES.detail) CL.mgmtFinancesBouge(-3); },
   ArrowDown(){ if(!MGMT_FINANCES.detail) CL.mgmtFinancesBouge(3); },
   Enter(){ if(!MGMT_FINANCES.detail) CL.mgmtFinancesDetail(); },
-  Escape(){ if(MGMT_FINANCES.detail) CL.mgmtFinancesFerme(); else CL.go('mgmt_bureau'); },
+  Escape(){ if(MGMT_FINANCES.detail) CL.mgmtFinancesFerme(); else CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

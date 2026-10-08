@@ -194,7 +194,7 @@ test('escJsAttr — le motif d’avant (esc() seul) cassait réellement l’attr
 test('Management — chaque écran rend avec « O\u2019Connor », tous les boutons cliqués, aucun appel cassé', () => {
   const win = newGameWindow();
   watchErrors(win);
-  enterMgmt(win,404);
+  enterMgmt(win,404); win.eval(`CL.go('mgmt_bureau')`);
   win.eval(`for(let c=0;c<30&&mgmtOpenCount(G.mgmt)===0;c++) mgmtNewPile(G.mgmt);`);
   oconnorizeRoster(win);
 
@@ -280,7 +280,7 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
        bouton « Continuer » au bas de la colonne. Décision de la tranche,
        jamais un test « réparé ». */
     win.document.querySelector('.mgmt-ld-next').click();
-    assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le lendemain rend la main');
+    assert.equal(win.eval(`G.screen`), 'mgmt_carte', 'le lendemain rend la main');
   }
   noErr(win, 'soirée/lendemain');
 

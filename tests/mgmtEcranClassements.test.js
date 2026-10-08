@@ -60,7 +60,7 @@ test('MGMT T6 / lot 5 T1 — l’écran rend : onglets, portée, tendance, champ
   }
   /* échap ramène à la semaine — le même chemin que le bouton. */
   key(win,'Escape');
-  assert.equal(win.eval('G.screen'),'mgmt_bureau','échap ramène à la semaine');
+  assert.equal(win.eval('G.screen'),'mgmt_carte','échap ramène à la carte (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture ; l’entrée et le retour ramènent à la carte)');
 });
 
 test('MGMT T6 — onglet de catégorie et bascule SPLIT lisent le vrai classement', () => {

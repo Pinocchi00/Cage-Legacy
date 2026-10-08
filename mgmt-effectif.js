@@ -84,7 +84,7 @@ function mgmtEffectifLigneHtml(m,x,i,choisi){
   const rang=x.champion?`<div class="mf-eff-c" role="img" aria-label="Champion">C</div>`:`<div class="mf-eff-rang">${esc(x.rang)}</div>`;
   const lien=mgmtLien(m,f.id);
   const nom=mfNet(f.last||f.name), prenom=f.first||'';
-  return `<button type="button" class="mf-eff-ligne${choisi?' choisie':''}${lien?' lien':''}" data-id="${esc(f.id)}" onclick="CL.mgmtEffectifChoisir(${i})" ondblclick="CL.mgmtFiche('${esc(f.id)}')">`
+  return `<button type="button" class="mf-eff-ligne${choisi?' choisie':''}${lien?' lien':''}" data-id="${esc(f.id)}" onclick="CL.mgmtFiche('${esc(f.id)}')">`
     +rang+`<div class="mf-eff-nom"><b>${esc(nom)}</b><span>${esc(prenom)}</span></div>`
     +`<div class="mf-eff-bilan">${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</div>`
     +`<div class="mf-eff-forme">${mgmtEffectifForme(m,f).map(mfMarque).join('')}</div>`
@@ -131,7 +131,7 @@ function scr_mgmt_effectif(){
   return mfEcran(`<main class="mf-contenu mf-effectif">${contenu}</main>`,
     {barre:'jeu',courant:'effectif',m,plaque:'Effectif',libelle:`${lignes.length} ${d.gender==='F'?(lignes.length>1?'combattantes':'combattante'):(lignes.length>1?'combattants':'combattant')} en ${String(d.name).toLowerCase()}`,
       droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-      touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtEffectifSexe()'},
+      touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['G'],t:'Hommes ou femmes',onclick:'CL.mgmtEffectifSexe()'},
         {ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtEffectifCategorie(1)'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Ouvrir sa fiche',jaune:true,onclick:'CL.mgmtEffectifOuvrir()'}]});
 }
 SCREENS.mgmt_effectif=scr_mgmt_effectif;
@@ -166,6 +166,6 @@ keysRegister('mgmt_effectif',{
   G(){ CL.mgmtEffectifSexe(); },
   Tab(){ CL.mgmtEffectifCategorie(1); },
   Enter(){ CL.mgmtEffectifOuvrir(); },
-  Escape(){ CL.go('mgmt_bureau'); },
+  Escape(){ CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

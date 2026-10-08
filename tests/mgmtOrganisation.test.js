@@ -76,10 +76,7 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
      l'écran courant, cette fois la Semaine. */
   const key = k => win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'${k}',bubbles:true}))`);
   key('Escape');
-  assert.equal(win.eval('G.screen'), 'mgmt_bureau', 'échap ramène à la semaine');
-  win.eval('render()');
-  const courant2 = win.document.querySelectorAll('.mgmt-nav button[aria-current="page"]');
-  assert.equal(courant2.length===1 ? courant2[0].textContent : '', 'Semaine', 'l’entrée courante suit l’écran');
+  assert.equal(win.eval('G.screen'), 'mgmt_carte', 'échap ramène à la carte (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture ; l’entrée et le retour ramènent à la carte)');
 });
 
 test('MGMT T7 — le constat « effectif trop mince » apparaît quand une catégorie tombe sous deux disponibles', () => {

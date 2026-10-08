@@ -120,7 +120,7 @@ test('T5 — le clavier : flèches pour la ligne, Entrée ouvre la fiche, R recr
     return {c1,c2,c0,bas,recrue,fiche,retour,pageMax:MGMT_RECRUTEMENT_PAGE-1};
   `);
   assert.equal(r.c1,1); assert.equal(r.c2,1); assert.equal(r.c0,0,'la ligne ne sort pas par le haut'); assert.equal(r.bas,r.pageMax,'ni par le bas');
-  assert.ok(r.recrue,'R recrute la ligne choisie'); assert.ok(r.fiche,'Entrée ouvre la fiche, qui revient au recrutement'); assert.equal(r.retour,'mgmt_bureau');
+  assert.ok(r.recrue,'R recrute la ligne choisie'); assert.ok(r.fiche,'Entrée ouvre la fiche, qui revient au recrutement'); assert.equal(r.retour,'mgmt_carte','décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte');
 });
 
 test('T5 — la semaine et le fil racontent la recrue (organisation d’où elle vient) ; tout est échappé', () => {

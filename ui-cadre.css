@@ -1110,3 +1110,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-su-champ-in::before{content:'';position:absolute;left:-138.7px;top:-167px;width:1056px;height:594px;background:url('images/tunnel-or.jpg?v=b29') 0 0/1056px 594px no-repeat}
 .mf-su-det-in::before{content:'';position:absolute;left:-420.6px;top:-248px;width:1728px;height:972px;background:url('images/tunnel-or.jpg?v=b29') 0 0/1728px 972px no-repeat}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORR0810_SURVOL] — Demande d'Anthony du 08/10/2026 : chaque option s'éclaire quand la souris la survole, comme dans n'importe quel jeu. Un seul trait pour tout le cadre : la barre, les lignes, les onglets, les boutons, les cartes et les liens du lexique. ==== */
+.mf-stage button:not(:disabled),.mf-stage [onclick],.mgmt button:not(:disabled),.mgmt [onclick]{cursor:pointer}
+.mf-stage button:not(:disabled):hover,.mf-stage [onclick]:hover,.mgmt button:not(:disabled):hover,.mgmt [onclick]:hover{filter:brightness(1.28)}
+.mf-barre-item:not(.cur):not(.grise):hover{background:#2c2727;filter:none}
+.mf-barre-item.cur:hover{filter:none}
+.mf-ligne.choisie:hover,.mf-onglet.ouvert:hover,.mf-bouton.jaune:hover{filter:brightness(1.1)}
+.mf-bouton.jaune:hover{box-shadow:inset 0 0 0 3px #fff3c9}
+.mf-ligne:not(.choisie):hover,.mf-onglet:not(.ouvert):hover,.mf-bouton:not(.jaune):hover{background:#3b3535;filter:none}
+.mf-eff-ligne:not(.choisie):hover,.mf-su-ligne:not(.sel):hover{background:#3b3535;filter:none}
+.mf-stage button:disabled,.mf-stage .grise{cursor:default}
+/* ==== [FIN ANCRE] ==== */

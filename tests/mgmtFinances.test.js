@@ -31,7 +31,7 @@ test('Finances — ← → choisissent, Entrée montre le détail, Échap le fer
   touche(win,'ArrowRight'); assert.equal(win.eval('MGMT_FINANCES.i'),1);
   touche(win,'Enter'); assert.ok(win.eval('MGMT_FINANCES.detail')); assert.ok(win.eval(`document.getElementById('app').textContent.includes('Rien encore')`));
   touche(win,'Escape'); assert.ok(!win.eval('MGMT_FINANCES.detail')); assert.equal(win.eval('G.screen'),'mgmt_finances');
-  touche(win,'Escape'); assert.equal(win.eval('G.screen'),'mgmt_bureau');
+  touche(win,'Escape'); assert.equal(win.eval('G.screen'),'mgmt_carte','échap ramène à la carte (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture ; l’entrée et le retour ramènent à la carte)');
   assert.equal(win.eval(`document.querySelector('.mf-barre-item[data-section="finances"]').getAttribute('onclick')`),"CL.go('mgmt_finances')");
 });
 
