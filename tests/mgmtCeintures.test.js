@@ -30,6 +30,7 @@ test('T1 ceintures — attribution initiale stable, indépendante du rang vivant
   assert.deepEqual(r.after,r.belt,'un recul au classement ne perd pas la ceinture');
 });
 
+/* Corrections du 08/10, lot 11 (D5) : « un champion combat que pour sa ceinture » — booker un champion met sa ceinture en jeu d'office. `off` devient false : le joueur ne retire plus la ceinture d'un champion. */
 test('T1 ceintures — titre explicite, champion requis et une seule ceinture par catégorie',()=>{
   const win=fresh();
   const r=JSON.parse(win.eval(`JSON.stringify((()=>{
@@ -47,9 +48,10 @@ test('T1 ceintures — titre explicite, champion requis et une seule ceinture pa
     const conflict=mgmtCanTitle(m,fight);
     return {bad,ordinary,on,off,invalid,conflict};
   })())`));
-  assert.deepEqual(r,{bad:false,ordinary:true,on:true,off:true,invalid:false,conflict:false});
+  assert.deepEqual(r,{bad:false,ordinary:true,on:true,off:false,invalid:false,conflict:false});
 });
 
+/* Corrections du 08/10, lot 11 (D5) : « un champion combat que pour sa ceinture » — booker un champion met sa ceinture en jeu d'office. Les deux champions bookés laissent donc chacun un fait de titre. */
 test('T1 ceintures — cinq rounds en combat principal et titre ailleurs, vrai rejeu fidèle et rechargement',()=>{
   const win=fresh();
   const r=JSON.parse(win.eval(`JSON.stringify((()=>{
@@ -82,8 +84,8 @@ test('T1 ceintures — cinq rounds en combat principal et titre ailleurs, vrai r
   assert.deepEqual(r.rounds,[5,5,3]);
   assert.deepEqual(r.eventRounds,[5,5,3]);
   assert.ok(r.replays.every(Boolean),'déroulé entier identique à l’original');
-  assert.equal(r.facts.length,1,'seul le titre explicitement choisi laisse un fait de titre');
-  assert.equal(r.facts[0].fight,1,'la référence pointe sur le titre, pas sur le main event');
+  assert.equal(r.facts.length,2,'chaque champion booké laisse un fait de titre');
+  assert.deepEqual(r.facts.map(f=>f.fight),[0,1],'chaque référence pointe sur son combat');
   // Une retraite médicale simultanée rend le titre vacant.
   assert.ok(r.belt.id===r.expected||r.belt.id===null);
   assert.ok(r.valid&&r.loaded&&r.same,'sauvegarde et secours : aucun recalcul de soirée');
@@ -159,6 +161,7 @@ test('T1 ceintures — extérieur dérivé : préfixe, résultats de carrière, 
   assert.ok(r.unchanged&&r.rng,'aucun état extérieur ou tirage global stocké');
 });
 
+/* Corrections du 08/10, lot 11 (D5) : « un champion combat que pour sa ceinture » — booker un champion met sa ceinture en jeu d'office. La case est cochée d'office et ne se décoche plus. */
 test('T1 ceintures — case de booking, retour immédiat, focus clavier et noms échappés',()=>{
   const win=fresh();
   win.eval(`(()=>{
@@ -168,13 +171,10 @@ test('T1 ceintures — case de booking, retour immédiat, focus clavier et noms 
     G.screen='mgmt_carte'; render();
   })()`);
   let box=win.document.getElementById('mgmt-title-0');
-  assert.ok(box&&!box.checked,'aucun titre implicite au booking');
-  box.click();
-  box=win.document.getElementById('mgmt-title-0');
-  assert.ok(box.checked); assert.equal(win.eval('G.mgmt.card.main[0].title'),true);
-  assert.equal(win.document.activeElement,box,'focus conservé après rendu');
+  assert.ok(box&&box.checked,'la ceinture est en jeu d’office au booking');
   win.eval(`CL.mgmtTitle(0,false)`);
-  assert.ok(!win.document.getElementById('mgmt-title-0').checked);
+  assert.ok(win.document.getElementById('mgmt-title-0').checked,'un champion ne retire pas sa ceinture');
+  assert.equal(win.eval('G.mgmt.card.main[0].title'),true);
   win.eval(`(()=>{
     const m=G.mgmt,f=mgmtFighterById(m,m.card.main[0].a);
     f.name='<img src=x onerror=alert(1)>';
