@@ -29,7 +29,7 @@ test('7.1 — La mesure d’ensemble du management joue des soirées et rend cai
   const r=JSON.parse(sortie.slice(sortie.indexOf('{')));
   const x=r.split['10'];
   assert.ok(x,'une mesure à la soirée 10');
-  for(const k of ['caisse','pop','satisfaction','effectif','sansContrat','paliers','refus','titresParCarte','changementsDeChampion','ageMoyen','moins25','plus36']) assert.ok(k in x,k);
+  for(const k of ['caisse','pop','satisfaction','effectif','sansContrat','paliers','refus','titresParCarte','changementsDeChampion','ageMoyen','moins25','plus36','retraites','top5Renouvele','marcheJeunes']) assert.ok(k in x,k);
   assert.deepEqual(Object.keys(x.paliers),['p1','p2','p3','p4']);
   assert.ok(x.effectif>100&&x.caisse>0&&x.ageMoyen>20);
 });
