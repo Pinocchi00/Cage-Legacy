@@ -75,9 +75,10 @@ test('Contrats — le renouvellement : les combats s’ajoutent, la bourse chang
   assert.equal(r.bas,'trop-bas'); assert.ok(r.ok); assert.equal(r.n,3); assert.ok(r.b); assert.ok(r.debit); assert.ok(r.plus>=r.base,'il demande un peu plus après une longue attente'); assert.equal(r.hors,'offre');
 });
 
-test('Contrats — une vedette trop grande pour la popularité de l’organisation refuse', () => {
+/* Corrections du 08/10, lot 9 (D3) : la décision d'Anthony remplace « refus quel que soit le prix » — un combattant trop grand refuse selon ce qui l'intéresse (voir mgmtCorrectionsLot9.test.js). Ici : celui que l'ambition porte refuse toujours. */
+test('Contrats — une vedette trop grande pour la popularité de l’organisation, que l’ambition porte, refuse quel que soit le prix', () => {
   const win=neuve();
-  const r=res(win,`const m=G.mgmt; m.pop=5; const f=m.roster.slice().sort((a,b)=>mgmtStar(b)-mgmtStar(a))[0]; f.W=40; f.L=0; return {star:mgmtStar(f),rep:mgmtContratReponse(m,f,3,999,true)};`);
+  const r=res(win,`const m=G.mgmt; m.pop=5; for(const g of m.roster){ g.W=40; g.L=0; } const f=m.roster.find(g=>mgmtContratInteret(g)==='ambition'); return {star:mgmtStar(f),rep:mgmtContratReponse(m,f,3,999,true)};`);
   assert.ok(r.star*100>30); assert.equal(r.rep.ok,false); assert.equal(r.rep.raison,'trop-grand');
 });
 
