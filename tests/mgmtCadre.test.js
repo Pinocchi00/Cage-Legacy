@@ -159,7 +159,7 @@ test('Accueil — au clavier : ↑ ↓ choisissent en sautant le grisé, Entrée
   win.eval(`CL.mgmtLeave();`);
   touche(win,'r'); assert.equal(win.eval('G.screen'),'title','R ne reprend rien sans partie');
   win.eval(`setSeed(9); CL.mgmtEnter(2); saveMgmt(); CL.mgmtLeave();`);
-  touche(win,'r'); assert.deepEqual(JSON.parse(win.eval('JSON.stringify([G.screen,MGMT_SLOT])')),['mgmt_bureau',2],'R reprend la dernière partie jouée');
+  touche(win,'r'); assert.deepEqual(JSON.parse(win.eval('JSON.stringify([G.screen,MGMT_SLOT])')),['mgmt_carte',2],'R reprend la dernière partie jouée');
 });
 
 test('Confirmation — Menu principal ouvre la confirmation ; Échap reste, Entrée revient au menu après sauvegarde', () => {

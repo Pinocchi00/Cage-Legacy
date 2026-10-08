@@ -1264,7 +1264,7 @@ test('MGMT T2 clavier — flèches et entrée composent, chiffre retire, échap 
   key('ArrowDown');
   assert.equal(win.eval(`MGMT_CART.cursor`), 0, 'rebouclage : retour en tête');
   key('Escape');
-  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'échap : retour au bureau');
+  assert.equal(win.eval(`G.screen`), 'mgmt_carte', 'échap : retour à la carte (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte)');
   assert.equal(win.eval(`MGMT_CART.pick`), null, 'la trace de composition ne survit pas au retour');
 });
 

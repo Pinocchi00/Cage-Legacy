@@ -138,7 +138,7 @@ function newGameWindow(opts){
      nouveaux effectifs passent par mgmtDefault() tel quel. ==== */
   const avantH4 = document.createElement('script');
   avantH4.textContent = 'function mgmtDefaultAvantH4(){ const m=mgmtDefault(); m.effectifs=0; m.niveaux=0; m.card.sizePrelims=4; return m; }'
-    + ' function mgmtEntrerAvantH4(){ if(!G) G={theme:"dark"}; if(!G.mgmt){ G.mgmt=mgmtDefaultAvantH4(); if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); saveMgmt(); } } CL.mgmtEnter(); }';
+    + ' function mgmtEntrerAvantH4(){ if(!G) G={theme:"dark"}; if(!G.mgmt){ G.mgmt=mgmtDefaultAvantH4(); if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); saveMgmt(); } } CL.mgmtEnter(); CL.go("mgmt_bureau"); }';
   document.body.appendChild(avantH4);
   /* ==== [ANCRE: TESTS_LOADGAME_G_BRIDGE] — `G` (state.js: `let G=null;`)
      est un binding lexical de haut niveau, PAS une propriété de l'objet

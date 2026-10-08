@@ -1174,7 +1174,7 @@ test('MGMT auto-cycle — pile vidée avec carte complète : la soirée s\u2019o
   /* « Continuer » soirée puis, s'il y a des touchés, lendemain. */
   mgmtFinishEvent(win);
   assert.equal(win.eval(`G.mgmt.cycle`), c0+1, 'après la soirée puis le lendemain, le cycle vaut 2');
-  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le bureau rouvre');
+  assert.equal(win.eval(`G.screen`), 'mgmt_carte', 'la carte rouvre (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte)');
   assert.ok(win.eval(`G.mgmt.pile.every(a=>a.status==='open')`), 'nouvelle pile fraîche');
 });
 
@@ -1275,7 +1275,7 @@ test('MGMT sortie de carte incomplète — la reproposition validée complète l
   /* Après complétion, le cycle avance normalement (soirée → lendemain). */
   mgmtFinishEvent(win);
   assert.equal(win.eval(`G.mgmt.cycle`), 2, 'après complétion, le cycle avance normalement');
-  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'le bureau rouvre');
+  assert.equal(win.eval(`G.screen`), 'mgmt_carte', 'la carte rouvre (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte)');
 });
 
 /* Lot 5 T6 : une partie neuve, une carte complète de 5 + 7, puis un retrait en carte principale. */

@@ -132,7 +132,7 @@ function scr_mgmt_calendrier(){
   const touches=F.pose
     ?[{ks:['Échap'],t:'Annuler',onclick:'CL.mgmtCalendrierPoseFermer()'},{ks:['←','→'],t:'Un jour'},{ks:['↑','↓'],t:'Une semaine'},{ks:['T'],t:'Taille',onclick:'CL.mgmtCalendrierPoseTaille()'},{ks:['V'],t:'Salle',onclick:'CL.mgmtCalendrierPoseSalle()'},
       {ks:['Entrée'],t:'Poser la soirée',jaune:true,onclick:'CL.mgmtCalendrierPoseValider()'}]
-    :[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['←','→'],t:'Autre soirée'},{ks:['A','E'],t:'Section'}]
+    :[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Autre soirée'},{ks:['A','E'],t:'Section'}]
       .concat(actif?[{ks:['P'],t:'Poser',onclick:'CL.mgmtCalendrierPoseOuvrir()'},{ks:['L'],t:'Laisser passer',onclick:'CL.mgmtCalendrierPasser()'}]:[])
       .concat([{ks:['Entrée'],t:pret?'Jouer la soirée':'Ouvrir la carte',jaune:true,onclick:'CL.mgmtCalendrierEntree()'}]);
   return mfEcran(contenu,{barre:'jeu',courant:'calendrier',m,plaque:'Calendrier',
@@ -203,6 +203,6 @@ keysRegister('mgmt_calendrier',{
   l(){ if(!MGMT_CALENDRIER.pose) CL.mgmtCalendrierPasser(); },
   L(){ if(!MGMT_CALENDRIER.pose) CL.mgmtCalendrierPasser(); },
   Delete(){ if(!MGMT_CALENDRIER.pose) CL.mgmtCalendrierRetirer(); },
-  Escape(){ if(MGMT_CALENDRIER.pose) CL.mgmtCalendrierPoseFermer(); else CL.go('mgmt_bureau'); },
+  Escape(){ if(MGMT_CALENDRIER.pose) CL.mgmtCalendrierPoseFermer(); else CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

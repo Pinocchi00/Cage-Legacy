@@ -102,7 +102,7 @@ function scr_mgmt_organisation(){
     +mgmtOrgGroupHtml(m,MGMT_ORG_LABELS.femmes,femmes);
    return `<div class="scr mgmt-wrap mgmt-org"><div class="mgmt-head bar">`
      +`<h2 class="disp">L'organisation</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
-     +`<button class="mgmt-org-retour" onclick="CL.go('mgmt_bureau')">${esc(MGMT_ORG_LABELS.back)}</button>`
+     +`<button class="mgmt-org-retour" onclick="CL.go('mgmt_carte')">${esc(MGMT_ORG_LABELS.back)}</button>`
      +`<div class="mgmt-cols mgmt-org-cols">`
      +mfPanneau(`<section class="mgmt-org-main">`
      +`<h3>${esc(MGMT_ORG_LABELS.effectif)}</h3>`

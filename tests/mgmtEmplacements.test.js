@@ -91,7 +91,7 @@ test('Emplacements — l’accueil : Management ouvre « Choisis une partie », 
     CL.mgmtLeave(); document.querySelector('.title-management').click();
     return {reprendre:titre.includes('CL.mgmtEnter(mgmtSlotDernier()||1)'),etat,repris,ecran:G.screen,curseur:MGMT_PARTIES.curseur,
       texte:document.getElementById('app').textContent};`);
-  assert.ok(r.reprendre); assert.equal(r.etat,30); assert.deepEqual(r.repris,['mgmt_bureau',3,30]);
+  assert.ok(r.reprendre); assert.equal(r.etat,30); assert.deepEqual(r.repris,['mgmt_carte',3,30]);
   assert.equal(r.ecran,'mgmt_parties'); assert.equal(r.curseur,3,'le curseur part de la dernière partie jouée');
   assert.ok(r.texte.includes('Choisis une partie')&&r.texte.includes('3 emplacements'));
 });
@@ -123,7 +123,7 @@ test('Emplacements — au clavier seul : flèches, Entrée lance ou reprend, Éc
   touche(win,'ArrowLeft'); touche(win,'Enter');
   /* Brief du 06/10, lot 5 : un emplacement vide ouvre d'abord le choix de l'organisation ; Entrée y crée la partie (Split d'abord). */
   assert.equal(win.eval('G.screen'),'mgmt_nouvelle'); touche(win,'Enter');
-  assert.deepEqual(result(win,`return [G.screen,MGMT_SLOT,!!mgmtSlotPeek(2),mgmtSlotPeek(1),G.mgmt.org];`),['mgmt_bureau',2,true,null,'Split'],'un emplacement vide lance une partie, dans le sien');
+  assert.deepEqual(result(win,`return [G.screen,MGMT_SLOT,!!mgmtSlotPeek(2),mgmtSlotPeek(1),G.mgmt.org];`),['mgmt_carte',2,true,null,'Split'],'un emplacement vide lance une partie, dans le sien');
   win.eval(`CL.mgmtLeave(); CL.mgmtParties();`);
   assert.equal(win.eval('MGMT_PARTIES.curseur'),2);
   touche(win,'Escape'); assert.equal(win.eval('G.screen'),'title');

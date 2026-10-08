@@ -91,7 +91,7 @@ function scr_mgmt_contrats(){
   const contenu=`<div class="mf-eff-barre">${sexe}<div class="mf-eff-trait"></div><div class="mf-eff-puces">${puces}</div></div><div class="mf-eff-corps">${liste}<div class="mf-eff-aside">${mgmtContratsOffreHtml(m,choisi)}</div></div>`;
   return mfEcran(`<main class="mf-contenu mf-effectif">${contenu}</main>`,{barre:'jeu',courant:'contrats',m,plaque:'Contrats',
     onglets:[{t:'Sous contrat',on:F.mode==='contrats',onclick:"CL.mgmtContratsMode('contrats')"},{t:'Recrutement',on:F.mode!=='contrats',onclick:"CL.mgmtContratsMode('recrutement')"}],droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['↑','↓'],t:'Choisir'},{ks:['←','→'],t:'Combats'},{ks:['+','−'],t:'Bourse'},
+    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['←','→'],t:'Combats'},{ks:['+','−'],t:'Bourse'},
       {ks:['R'],t:'Recrutement',onclick:'CL.mgmtContratsMode()'},{ks:['G'],t:'H ou F',onclick:'CL.mgmtContratsSexe()'},{ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtContratsCategorie(1)'},
       {ks:['L'],t:'Libérer',onclick:'CL.mgmtContratsLiberer()'},{ks:['Entrée'],t:'Proposer',jaune:true,onclick:'CL.mgmtContratsPropose()'}]});
 }
@@ -187,6 +187,6 @@ keysRegister('mgmt_contrats',{
   l(){ CL.mgmtContratsLiberer(); },
   L(){ CL.mgmtContratsLiberer(); },
   Enter(){ CL.mgmtContratsPropose(); },
-  Escape(){ CL.go('mgmt_bureau'); },
+  Escape(){ CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

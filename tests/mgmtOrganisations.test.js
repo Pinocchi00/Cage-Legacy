@@ -28,7 +28,7 @@ test('Organisations — « Choisis une partie » : Entrée sur un emplacement vi
   assert.equal(win.eval('mgmtSlotPeek(1)'),null,'rien n’est créé tant qu’on ne l’a pas décidé');
   touche(win,'Escape'); assert.equal(win.eval('G.screen'),'mgmt_parties','Échap revient aux emplacements');
   win.eval(`setSeed(5); CL.mgmtEnter(1); saveMgmt(); CL.mgmtLeave(); CL.mgmtParties();`);
-  touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_bureau','un emplacement occupé se reprend');
+  touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_carte','un emplacement occupé se reprend (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte)');
 });
 
 /* Corrections du 08/10, lot 12 (D6) : les lignes sont déduites du profil — Split garde « Une caisse saine », et « Peu connue hors de sa région » devient « Encore peu connue » (popularité 40). */
@@ -58,7 +58,7 @@ test('Organisations — au clavier : la grille se parcourt, Entrée crée la par
   win.eval(`MGMT_NOUVELLE.i=1;`); touche(win,'Enter');
   const r=result(win,`return {ecran:G.screen,slot:MGMT_SLOT,org:G.mgmt.org,disque:mgmtSlotPeek(2).org,un:mgmtSlotPeek(1),caisse:G.mgmt.treasury,
     lignes:G.mgmt.roster.every(o=>o.org==='Garden of Blood'),valide:validateMgmt(JSON.parse(JSON.stringify(G.mgmt)))};`);
-  assert.equal(r.ecran,'mgmt_bureau'); assert.equal(r.slot,2); assert.equal(r.org,'Garden of Blood'); assert.equal(r.disque,'Garden of Blood');
+  assert.equal(r.ecran,'mgmt_carte'); assert.equal(r.slot,2); assert.equal(r.org,'Garden of Blood'); assert.equal(r.disque,'Garden of Blood');
   assert.equal(r.un,null,'les autres emplacements ne bougent pas'); assert.ok(r.lignes); assert.ok(r.valide); assert.equal(r.caisse,45,'la caisse de départ du profil');
 });
 

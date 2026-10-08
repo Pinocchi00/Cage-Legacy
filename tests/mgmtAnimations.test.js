@@ -48,7 +48,7 @@ test('L\'arrivée : la barre, l\'en-tête, les panneaux et les touches, aux dur�
 test('Le passage d\'un écran à l\'autre : une bande à 45° en 620 ms, l\'écran change à mi-course', async () => {
   const win=avecAnimation(neuve());
   win.eval(`CL.go('mgmt_effectif');`);
-  win.eval(`window.__gestes.length=0; CL.go('mgmt_classements');`);
+  win.eval(`window.__gestes.length=0; CL.go('mgmt_confirmation');`);
   assert.equal(win.eval(`document.querySelectorAll('.mf-balayage [data-m="wipe"]').length`),1,'la bande');
   assert.equal(win.eval(`document.querySelector('.mf-stage').classList.contains('mf-masque')`),true,'le contenu attend la mi-course');
   const bande=gestes(win).find(x=>x.tag==='DIV'&&/translateX\(-5200px\) skewX\(-45deg\)/.test(x.f0));
@@ -56,7 +56,7 @@ test('Le passage d\'un écran à l\'autre : une bande à 45° en 620 ms, l\'écr
   assert.match(win.eval(`document.querySelector('.mf-balayage').innerHTML`),/E9E6E1[\s\S]*B32A1E[\s\S]*0D0B0B[\s\S]*B32A1E[\s\S]*E9E6E1/,'blanc cassé, rouge, noir, rouge, blanc cassé');
   await attend(340);
   assert.equal(win.eval(`document.querySelector('.mf-stage').classList.contains('mf-masque')`),false,'à mi-course l\'écran apparaît');
-  assert.ok(gestes(win).some(x=>/mf-entete/.test(x.cls)),'et ses pièces arrivent');
+  assert.ok(gestes(win).some(x=>/mf-entete|mf-dialogue/.test(x.cls)),'et ses pièces arrivent');
   await attend(400);
   assert.equal(win.eval(`document.querySelectorAll('.mf-balayage').length`),0,'la bande est retirée');
 });
@@ -122,4 +122,14 @@ test('Le défilé du calendrier : les cartes glissent de 170 px, l\'une après l
   assert.ok(g.length>=1,'des cartes glissent'); assert.match(g[0].f0,/translateX\(170px\)/);
   win.eval(`window.__gestes.length=0; CL.mgmtCalendrierVa(-1);`);
   assert.match(gestes(win).filter(x=>x.ms===320)[0].f0,/translateX\(-170px\)/);
+});
+
+test('Entre deux sections de la barre : ni bande ni arrivée des pièces, un fondu bref (décision d’Anthony du 08/10/2026 : le grand mouvement ne sert qu’aux étapes importantes)', () => {
+  const win=avecAnimation(neuve());
+  win.eval(`CL.go('mgmt_effectif');`);
+  win.eval(`window.__gestes.length=0; CL.go('mgmt_classements');`);
+  assert.equal(win.eval(`document.querySelectorAll('.mf-balayage').length`),0,'pas de bande');
+  assert.equal(win.eval(`document.querySelector('.mf-stage').classList.contains('mf-masque')`),false,'rien ne masque l’écran');
+  assert.ok(!gestes(win).some(x=>/mf-entete|mf-panneau/.test(x.cls)),'les pièces ne rejouent pas leur arrivée');
+  assert.ok(gestes(win).some(x=>x.ms===90),'un fondu de 90 ms');
 });

@@ -81,7 +81,7 @@ test('MGMT T4 — l’écran rend : en-tête, résultats, constats, rien des lot
   assert.ok(rev.some(b=>/Voir toute la soirée/.test(b.textContent)),'« Voir toute la soirée » porte son lien');
   /* La séquence impose sa suite : le bouton de l'en-tête rend la main. */
   win.document.querySelector('.mgmt-ld-next').click();
-  assert.equal(win.eval('G.screen'),'mgmt_bureau','la main passe à la semaine');
+  assert.equal(win.eval('G.screen'),'mgmt_carte','la main passe à la carte (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte)');
 });
 
 test('MGMT T4 — la ligne de méthode vient du déroulé rejoué : méthode, round, geste, secoués', () => {
