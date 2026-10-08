@@ -141,6 +141,41 @@ const MOVE_SIGNATURE_FLAVOR={
   'Heel Hook':'Le heel hook est devenu sa signature — le genou cède avant que ça fasse mal.',
   'Clé de cheville':'La clé de cheville est devenue sa signature — la cheville plie, l\u2019adversaire tape.'
 };
+/* ==== [ANCRE: CORRECTIONS_08_10_LOT6_GESTES] — Brief des corrections du 08/10/2026, lot 6 : le geste de finition n'est plus tiré à poids égal dans la zone,
+   mais pondéré par sa fréquence dans le MMA réel, puis ajusté au style du vainqueur. Le taux de finition, lui, ne bouge pas. SOURCES (à valider par Anthony
+   avant fusion) :
+   - soumissions : sur 3 123 combats de l'UFC (UFC 1 à 294, Fares et coll.), l'étranglement arrière fait 32,7 % des soumissions, les étranglements 65,5 % ; parmi
+     les étranglements (5 834 combats, Stellpflug et coll.), l'étranglement arrière 49,1 %, la guillotine 13,7 % (9,7 % avec le bras dedans), le triangle 8,8 %, le
+     triangle de bras 8,2 % (https://agentmma.com/mma-lab/most-common-ufc-submissions, https://combatsportslaw.com/2020/12/26/physician-reviews-and-analyzes-all-choke-submissions-in-ufc-history/) ;
+   - coups de poing : sur 264 KO/TKO au poing de l'UFC (2020 à 2022), les crochets font 50,8 %, les directs 35,2 %, les uppercuts et overhands 14 %
+     (https://agentmma.com/mma-lab/most-common-ufc-knockout-punch) ;
+   - ESTIMATIONS de l'agent, sans source chiffrée trouvée : la part du sol, des coups de pied, des genoux et des coudes, et la rareté des gestes sautés ou retournés
+     (le coup de pied retourné, le genou sauté, le coude retourné, le superman punch et le jab chanceux restent possibles, à moins de 1 % des KO). Ces poids sont à
+     corriger par Anthony. ==== */
+const FINISH_POIDS={
+  sub:{'Rear Naked Choke':30,'Guillotine':14,'Armbar':10,'Triangle':9,'Kimura':7,'Americana':4,'Heel Hook':5,'Clé de cheville':5,'Anaconda':5,'Twister':1},
+  ko:{'Crochet':28,'Direct puissant':22,'Marteau au sol':12,'Uppercut':6,'Overhand':5,'Crochet au foie':4,'Coup de pied au corps':3,'Coup de genou au corps':3,
+    'High kick':3,'Low kick':3,'Calf kick':2,'Jab chanceux':1.5,'Coup de genou sauté':0.5,'Coup de pied retourné':0.5,'Coup de coude retourné':0.4,'Superman punch':0.5}
+};
+const FINISH_STYLE_FACTEUR={
+  boxer:{'Crochet':1.4,'Direct puissant':1.4,'Uppercut':1.4,'Overhand':1.4,'Crochet au foie':1.4},
+  kickboxer:{'Coup de pied au corps':2.5,'High kick':2.5,'Low kick':2.5,'Calf kick':2.5,'Coup de pied retourné':2},
+  muayThai:{'Coup de pied au corps':2.5,'High kick':2.5,'Low kick':2.5,'Calf kick':2.5,'Coup de genou au corps':3,'Coup de genou sauté':3,'Coup de coude retourné':3},
+  karate:{'Coup de pied au corps':2.5,'High kick':3,'Low kick':2,'Calf kick':2,'Coup de pied retourné':3},
+  wrestler:{'Marteau au sol':2,'Guillotine':1.5,'Anaconda':1.5},
+  bjj:{'Marteau au sol':1.5,'Armbar':1.4,'Triangle':1.4,'Kimura':1.4,'Heel Hook':1.5,'Clé de cheville':1.5},
+  sambo:{'Marteau au sol':1.5,'Armbar':1.3,'Kimura':1.3,'Heel Hook':1.5,'Clé de cheville':1.5},
+  mma:{}
+};
+/** Tire un geste générique pondéré par sa fréquence réelle, la zone la plus touchée (×2) et le style du vainqueur. Un seul tirage rnd(), comme pick(). Pur à la graine. */
+function pickFinishPondere(winner,type,zone){
+  const liste=type==='sub'?GENERIC_SUB:GENERIC_KO, base=FINISH_POIDS[type], st=FINISH_STYLE_FACTEUR[winner&&winner.style]||{};
+  const poids=liste.map(m=>(base[m.name]||1)*(st[m.name]||1)*(zone&&m.zone===zone?2:1));
+  let t=rnd()*poids.reduce((a,b)=>a+b,0);
+  for(let i=0;i<liste.length;i++){ t-=poids[i]; if(t<0) return liste[i]; }
+  return liste[liste.length-1];
+}
+/* ==== [FIN ANCRE] ==== */
 function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'ko' — priorité aux compétences signature possédées, puis à la zone la plus endommagée
   // Mouvement signature (#6) : si le combattant a déjà déverrouillé une prise
   // signature (5 finitions identiques auparavant), 40% de chance de la rejouer
@@ -175,7 +210,7 @@ function pickFinishMove(winner,type,zone,fightStats,round){ // type: 'sub' ou 'k
     if(zone){ const zoneMatches=owned.filter(id=>FINISH_MOVES[type].find(m=>m.id===id).zone===zone); if(zoneMatches.length) candidates=zoneMatches; }
     const chosenId=pick(candidates); baseMove=FINISH_MOVES[type].find(m=>m.id===chosenId).name;
   }
-  else{ const generic=type==='sub'?GENERIC_SUB:GENERIC_KO; const zoned=zone?generic.filter(m=>m.zone===zone):[]; baseMove=(zoned.length?pick(zoned):pick(generic)).name; }
+  else{ baseMove=pickFinishPondere(winner,type,zone).name; }
   // Comptage des finitions identiques — au 5e succès avec le même geste, il
   // devient signature : compétence unique + boost de stat + 40% de retour
   // automatique désormais géré ci-dessus.
