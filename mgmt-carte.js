@@ -315,7 +315,7 @@ function mgmtBookMain(m,aid,bid){
   const fa=mgmtFighterById(m,aid), fb=mgmtFighterById(m,bid);
   if(!fa||!fb||fa===fb) return null;
   if(fa.div!==fb.div) return null;
-  if(!mgmtAvailable(m,fa)||!mgmtAvailable(m,fb)) return null;
+  if(!mgmtAvailable(m,fa,fb)||!mgmtAvailable(m,fb,fa)) return null;
   if(mgmtEngaged(m,fa)||mgmtEngaged(m,fb)) return null;
   const fight={a:fa.id,b:fb.id,cycle:m.cycle,slot:'main'};
   m.card.main.push(fight);
@@ -344,10 +344,10 @@ function mgmtRemoveMain(m,idx){
  *  lui-même, re-cliquer doit pouvoir annuler. Pur. @returns {boolean} */
 function mgmtSelectable(m,f,pick){
   if(!m||!f) return false;
-  if(!mgmtAvailable(m,f)) return false;
+  const a=pick?mgmtFighterById(m,pick):null;
+  if(!mgmtAvailable(m,f,a)) return false;
   if(mgmtEngaged(m,f)) return false;
   if(pick){
-    const a=mgmtFighterById(m,pick);
     if(!a) return false;
     if(f.id===a.id) return true;
     if(a.div!==f.div) return false;

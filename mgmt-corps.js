@@ -473,10 +473,10 @@ function mgmtSuspensionUntil(cycle,days){
 
 /** Disponibilité pour une proposition : ni retraité médical, ni suspendu
  *  (susp = cycle jusqu'auquel il est indisponible). */
-function mgmtAvailable(m,f){
+function mgmtAvailable(m,f,contre){
   if(!f||f.retired) return false;
   /* Lot 9 : sans contrat, ou au dernier palier d'attente, il refuse tout combat. */
-  if(typeof mgmtContratIndispo==='function'&&mgmtContratIndispo(m,f)) return false;
+  if(typeof mgmtContratIndispo==='function'&&mgmtContratIndispo(m,f,contre)) return false;
   if(Number.isSafeInteger(f.susp)&&m&&Number.isSafeInteger(m.cycle)&&m.cycle<=f.susp) return false;
   return true;
 }
@@ -602,7 +602,7 @@ function mgmtRunEvent(m){
      aucune conséquence — la soirée n'a pas commencé. */
   for(const cf of booked){
     const fa=mgmtFighterById(m,cf.a), fb=mgmtFighterById(m,cf.b);
-    if(!fa||!fb||!mgmtAvailable(m,fa)||!mgmtAvailable(m,fb)) return null;
+    if(!fa||!fb||!mgmtAvailable(m,fa,fb)||!mgmtAvailable(m,fb,fa)) return null;
     if(cf.title&&!mgmtCanTitle(m,cf.source)) return null;
   }
   /* Cachets et attrait : la carte d'avant la soirée — le bilan et le corps
