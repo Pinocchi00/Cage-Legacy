@@ -25,6 +25,9 @@ const MGMT_PRIX_BILLET=0.065;
 const MGMT_LOCATION_PAR_PLACE=0.004;
 const MGMT_SATISFAIT_SEUIL=55;
 const MGMT_COMPTES_MAX=8;
+/* Corrections du 08/10, lot 9 : la tête d'affiche pèse sur la qualité de la carte — chaque point d'attrait du meilleur combat principal au-dessus de l'attrait moyen
+   ajoute MGMT_TETE_AFFICHE_POIDS point de qualité (une carte moyenne ne change pas). */
+const MGMT_TETE_AFFICHE_POIDS=0.5;
 
 /** Les salles d'une partie : dérivées de l'organisation et de l'ordre, jamais tirées au hasard (aucun hasard hors graine).
  *  Les capacités suivent le profil de l'organisation (taille de ses salles). Pur. */
@@ -75,7 +78,10 @@ function mgmtCarteQualite(m,slotted){
   const sm=slotted.filter(x=>x.slot==='main').length, sp=slotted.length-sm;
   const ref=MGMT_DRAW_AVG*(sm*MGMT_ATTR_MAIN_W+sp*MGMT_ATTR_PRELIM_W);
   if(ref<=0) return 0;
-  return Math.max(0,Math.min(1,mgmtCardAttraction(m,slotted)/ref/2));
+  const carte=mgmtCardAttraction(m,slotted)/ref/2;
+  const mains=slotted.filter(x=>x.slot==='main').map(x=>{ const a=mgmtFighterById(m,x.a), b=mgmtFighterById(m,x.b); return a&&b?mgmtFightDraw(a,b):0; });
+  const tete=mains.length?Math.max(...mains)-MGMT_DRAW_AVG:0;
+  return Math.max(0,Math.min(1,carte+MGMT_TETE_AFFICHE_POIDS*tete));
 }
 
 /** Le remplissage : salle, popularité (plafond), qualité de la carte, taille de la soirée. Pur.
