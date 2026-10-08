@@ -630,7 +630,7 @@ function mgmtRunEvent(m){
     const fam=mgmtMethodFamily(res.method,res.winner);
     const roundF=Number.isSafeInteger(res.round)?res.round:cf.rounds;
     fights.push({a:fa.id,b:fb.id,winner:res.winner,family:fam,round:roundF,
-      rounds:cf.rounds,title:cf.title});
+      rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
     m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
       winner:res.winner,family:fam,round:roundF});
     if(cf.title) mgmtAddFact(m,{c:m.cycle,k:'title_fight',div:fa.div,fight:m.hist.length-1});

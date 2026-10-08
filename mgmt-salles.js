@@ -107,6 +107,21 @@ function mgmtPublicReclame(m){
   return out;
 }
 
+/** Corrections du 08/10, 10.1 : les combats réclamés dont les deux combattants sont disponibles. Pur. */
+function mgmtReclamesBookables(m,reclames){
+  return (reclames||[]).filter(r=>{ const a=mgmtFighterById(m,r.a), b=mgmtFighterById(m,r.b); return a&&b&&mgmtAvailable(m,a)&&mgmtAvailable(m,b); });
+}
+
+/** Corrections du 08/10, 10.2 : à quel point une décision est serrée, lu sur les cartes des juges. 1 : partagée ou majoritaire, ou écart moyen d'un point au plus ;
+ *  0,7 : écart moyen de deux points au plus ; 0,4 : décision à sens unique. Hors décision : null (la méthode décide). Pur. @param {object} res résultat de simulateFight */
+function mgmtDecisionSerree(res){
+  if(!res||!res.judges||typeof res.method!=='string'||res.method.indexOf('Décision')!==0) return null;
+  if(/partagée|majoritaire/.test(res.method)) return 1;
+  const ecarts=Object.values(res.judges).map(j=>Math.abs(j[0]-j[1]));
+  const moy=ecarts.reduce((x,y)=>x+y,0)/Math.max(1,ecarts.length);
+  return moy<=1?1:moy<=2?0.7:0.4;
+}
+
 /** La satisfaction du public, de 0 à 100, sur trois critères — chacun de 0 à 1, chacun monte quand il est rempli :
  *  les combats réclamés qui ont eu lieu (neutre à 0,5 quand rien n'était réclamé), les combats finis avant la limite
  *  (un nul compte pour serré), les noms à l'affiche (le renom moyen des deux derniers combats). Pur. */
@@ -118,7 +133,7 @@ function mgmtSatisfaction(m,{reclames,fights,noms}){
   for(const f of fights||[]){
     if(f.family==='ko'||f.family==='sub'||f.family==='stop') serres+=(Number.isSafeInteger(f.round)&&Number.isSafeInteger(f.rounds)&&f.round<f.rounds)?1:0.6;
     else if(f.family==='draw') serres+=0.7;
-    else serres+=0.4;
+    else serres+=(f.serre===1?1:f.serre===0.7?0.7:0.4);
   }
   serres=n?serres/n:0;
   const score=Math.round(100*(0.4*reclame+0.3*serres+0.3*Math.max(0,Math.min(1,noms))));
@@ -134,9 +149,10 @@ function mgmtAfficheNoms(m,booked){
   return k?Math.max(0,Math.min(1,(s/k)/0.7)):0;
 }
 
-/** Ce qu'on lit AVANT la soirée (les lignes d'avant combat) : qualité de la carte, combats réclamés, noms à l'affiche. */
+/** Ce qu'on lit AVANT la soirée (les lignes d'avant combat) : qualité de la carte, combats réclamés, noms à l'affiche. Corrections du 08/10, 10.1 : un combat réclamé
+ *  ne compte que si les deux combattants sont disponibles pour la soirée — on le lit avant, car la soirée elle-même suspend. */
 function mgmtSallesAvant(m,booked){
-  return {qualite:mgmtCarteQualite(m,booked),reclames:mgmtPublicReclame(m),noms:mgmtAfficheNoms(m,booked)};
+  return {qualite:mgmtCarteQualite(m,booked),reclames:mgmtReclamesBookables(m,mgmtPublicReclame(m)),noms:mgmtAfficheNoms(m,booked)};
 }
 
 /** Applique les salles à la recette d'une soirée de l'agenda : billetterie sur le remplissage, satisfaction, popularité, comptes.
