@@ -112,8 +112,8 @@ test('H8 — la fiche étendue : son histoire (milieu, ancien métier) et son co
     m.facts.push({c:9,k:'injury',a:f.id}); m.facts.push({c:11,k:'susp',a:f.id}); f.susp=m.cycle+3;
     const blesse=scr_mgmt_fiche();
     return {histoire:sain.includes('Son histoire')&&sain.includes(id.milieu.replace(/'/g,'&#39;'))||sain.includes('Milieu :'),metier:sain.includes('Ancien métier'),
-      dispo:sain.includes('Disponible'),indispo:blesse.includes('Indisponible'),blessure:blesse.includes('Blessure')&&blesse.includes('cycle 9'),susp:blesse.includes('Suspension médicale'),
-      ordre:blesse.indexOf('cycle 11')<blesse.indexOf('cycle 9'),jauge:/\\/20|%/.test(blesse.slice(blesse.indexOf('Son corps'),blesse.indexOf('Son corps')+300))};
+      dispo:sain.includes('Disponible'),indispo:blesse.includes('Indisponible'),blessure:blesse.includes('Blessure')&&blesse.includes(mgmtSoireeNomDate(m,9)),susp:blesse.includes('Suspension médicale'),
+      ordre:blesse.indexOf(mgmtSoireeNomDate(m,11))<blesse.indexOf(mgmtSoireeNomDate(m,9)),jauge:/\\/20|%/.test(blesse.slice(blesse.indexOf('Son corps'),blesse.indexOf('Son corps')+300))};
   `);
   assert.ok(r.histoire&&r.metier); assert.ok(r.dispo&&r.indispo); assert.ok(r.blessure&&r.susp); assert.ok(r.ordre,'le plus récent d’abord');
   assert.equal(r.jauge,false,'ni jauge ni pourcentage');

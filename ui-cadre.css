@@ -317,6 +317,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .mgmt-week-defile{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:22px 24px 26px;scrollbar-width:thin}
 .mf-ancien .mgmt-week-suite{flex:none;padding:14px 24px 20px;background:var(--mf-panneau)}
 .mf-ancien .mgmt-week-suite .mgmt-next{margin:0}
+.mf-lien{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 22px}
 .mf-demande{display:flex;gap:16px;margin:10px 0 22px;flex-wrap:wrap}
 .mf-demande .mf-bouton{flex:none}
 .mf-cal-blocs{display:flex;flex-direction:column;gap:10px;width:100%}
@@ -1088,7 +1089,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-ocq b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:34px;line-height:.85;white-space:nowrap}
 .mf-fi-oct{display:flex;flex-direction:column;gap:10px}
 .mf-fi-ocp{font-weight:600;font-size:28px;line-height:1.1}
-.mf-fi-ancien{margin-top:8px}
+.mf-fi-ancien{margin-top:8px;font-size:24px;line-height:1.25;color:var(--mf-texte)}
+.mf-fi-ancien h3{font-family:var(--mf-titre);font-size:30px;letter-spacing:var(--mf-titre-ls);text-transform:uppercase;margin:26px 0 10px;padding-bottom:8px;border-bottom:4px solid var(--mf-rouge,#B32A1E);display:inline-block}
+.mf-fi-ancien p,.mf-fi-ancien li,.mf-fi-ancien .mgmt-fiche-vie-relais,.mf-fi-ancien button{font-size:24px;line-height:1.25}
+.mf-fi-ancien ul{padding-left:26px;margin:6px 0 12px}
+.mf-fi-ancien .mgmt-fiche-vie-relais{color:var(--mf-texte2);margin-left:10px}
+.mf-fi-ancien .mgmt-fiche-lien button{font-size:22px;padding:10px 18px}
 /* Les tunnels jaunes : la carte du champion des classements, et la ceinture ouverte. */
 .mf-su-champ-in::before{content:'';position:absolute;left:-138.7px;top:-167px;width:1056px;height:594px;background:url('images/tunnel-or.jpg?v=b29') 0 0/1056px 594px no-repeat}
 .mf-su-det-in::before{content:'';position:absolute;left:-420.6px;top:-248px;width:1728px;height:972px;background:url('images/tunnel-or.jpg?v=b29') 0 0/1728px 972px no-repeat}

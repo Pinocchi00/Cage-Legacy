@@ -50,8 +50,8 @@ function mgmtCarteContratTexte(f){
 
 function mgmtCarteColonne(m,f){
   if(!f) return {rang:'?',contrat:'?',bilan:'?',allonge:'?',style:'?',forme:'<b>?</b>'};
-  const rg=mgmtDivisionRank(m,f), phys=mgmtCombatProfile(f).phys||{};
-  return {rang:rg?'N°'+rg:'—',contrat:mgmtCarteContratTexte(f),bilan:`${f.W}-${f.L}-${f.D||0}`,
+  const phys=mgmtCombatProfile(f).phys||{};
+  return {rang:mgmtRangTexte(m,f),contrat:mgmtCarteContratTexte(f),bilan:`${f.W}-${f.L}-${f.D||0}`,
     allonge:Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?',
     style:mfNet(mgmtEffectifFacon(m,f)||'?'),forme:mgmtCarteFormeHtml(m,f)};
 }
@@ -97,7 +97,7 @@ function mgmtCarteHomonymes(liste){
 function mgmtCarteAdvLigne(m,f,i,choisi,homo){
   const sel=mgmtSelectable(m,f,MGMT_CART.pick);
   const raison=!mgmtAvailable(m,f)?'Indisponible':(mgmtEngaged(m,f)?'Sur la carte':'');
-  const rg=mgmtDivisionRank(m,f);
+  const rg=mgmtRangAffichable(m,f);
   return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${esc(f.id)}')">`
     +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}</b>`
     +`<i>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</i></span><span class="mf-car-adv-s">${esc(raison||' ')}</span></span></button>`;

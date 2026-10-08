@@ -153,7 +153,7 @@ function mgmtHistoriqueHtml(m,f){
     const methode=(replay&&areneVerdictFidele(t,replay))?replay.method:(MGMT_FAMILY_LABELS[t.family]||t.family);
     return `<div class="mgmt-fiche-fight${k===MGMT_FICHE.cursor?' selected':''}">`
       +`<div><strong>${esc(issue)} · ${esc(adversaire.name)}</strong>`
-      +`<div class="mgmt-fiche-detail">${esc(methode)} · Round ${esc(t.round)} · Cycle ${esc(t.c)}</div></div>`
+      +`<div class="mgmt-fiche-detail">${esc(methode)} · Round ${esc(t.round)} · ${esc(mgmtSoireeNomDate(m,t.c))}</div></div>`
       +`<button class="mgmt-next" onclick="CL.mgmtHistoriqueRevoir(${i})">Revoir</button>`
       +`</div>`;
   }).join('');
@@ -165,7 +165,7 @@ function mgmtHistoriqueHtml(m,f){
 function mgmtFicheVie(m,f){
   const lignes=mgmtVieRelayes(m,f).slice(0,8);
   const corps=lignes.length
-    ?`<ul class="mgmt-fiche-vie-liste">${lignes.map(x=>`<li>${esc(x.moment.libelle)} <span class="mgmt-fiche-vie-relais">${esc(x.moment.relais.join(' · '))}</span></li>`).join('')}</ul>`
+    ?`<ul class="mgmt-fiche-vie-liste">${lignes.map(x=>`<li>${esc(x.moment.libelle)}${mgmtFicheRelaisHtml(x.moment)}</li>`).join('')}</ul>`
     :'<p>On ne sait pas encore.</p>';
   return `<h3 class="mgmt-fiche-vie">Sa vie</h3>${corps}`;
 }
@@ -174,10 +174,15 @@ function mgmtFicheVie(m,f){
    et tes suivis, la connaissance progressive (« Comment il combat » une fois
    vu, « Sa faille » après deux combats vus, sinon « On ne sait pas encore »).
    Ni jauge ni pourcentage. ==== */
+/** Le relais d'un moment (corrections du 08/10, 4.5) : « via Réseaux », jamais le mot déjà dit par le libellé (« Revient sur les réseaux Réseaux »). */
+function mgmtFicheRelaisHtml(moment){
+  const dit=mfNet(moment.libelle), r=(moment.relais||[]).filter(x=>!dit.includes(mfNet(x)));
+  return r.length?` <span class="mgmt-fiche-vie-relais">via ${esc(r.join(' · '))}</span>`:'';
+}
 function mgmtFicheLien(m,f){
   const lien=mgmtLien(m,f.id), id=esc(f.id);
   const cercle=lien==='cercle', suivi=lien==='suivi';
-  return `<div class="mgmt-fiche-lien">`
+  return `<div class="mgmt-fiche-lien mf-lien">`
     +`<button class="mgmt-fiche-lien-cercle${cercle?' on':''}" aria-pressed="${cercle}" onclick="CL.mgmtCercle('${id}')">Ton cercle · ${esc(mgmtCercle(m).length)}/${MGMT_CERCLE_MAX}</button>`
     +(cercle?'':`<button class="mgmt-fiche-lien-suivi${suivi?' on':''}" aria-pressed="${suivi}" onclick="CL.mgmtSuivre('${id}')">Tes suivis · ${esc(mgmtSuivis(m).length)}/${MGMT_SUIVIS_MAX}</button>`)
     +`</div>`;
@@ -223,7 +228,7 @@ function mgmtFicheCorps(m,f){
     .sort((a,b)=>b.c-a.c).slice(0,5);
   const dispo=mgmtAvailable(m,ligne)?'Disponible':'Indisponible';
   return `<h3>Son corps</h3><p>${esc(dispo)}</p>`
-    +(faits.length?`<ul class="mgmt-fiche-vie-liste">${faits.map(x=>`<li>${esc(MGMT_FACT_LABELS[x.k])} <span class="mgmt-fiche-vie-relais">cycle ${esc(x.c)}</span></li>`).join('')}</ul>`:'');
+    +(faits.length?`<ul class="mgmt-fiche-vie-liste">${faits.map(x=>`<li>${esc(MGMT_FACT_LABELS[x.k])} <span class="mgmt-fiche-vie-relais">${esc(mgmtSoireeNomDate(m,x.c))}</span></li>`).join('')}</ul>`:'');
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_mgmt_fiche(){
