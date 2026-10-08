@@ -37,6 +37,8 @@ test('Finances — ← → choisissent, Entrée montre le détail, Échap le fer
 
 test('Finances — le lieu se choisit au Calendrier : V change de salle, la soirée posée porte sa salle', () => {
   const win=neuve();
+  /* Demande d’Anthony du 08/10/2026 : l’ouverture pose déjà la première soirée ; ce test pose la sienne, il retire d’abord celle-là. */
+  win.eval('G.mgmt.cal.prochaines=[]; mgmtAgendaSynchroCarte(G.mgmt);');
   win.eval(`CL.go('mgmt_calendrier'); CL.mgmtCalendrierPoseOuvrir();`);
   const s0=win.eval('MGMT_CALENDRIER.pose.salle'); touche(win,'v'); assert.notEqual(win.eval('MGMT_CALENDRIER.pose.salle'),s0);
   const choisie=win.eval('MGMT_CALENDRIER.pose.salle'); touche(win,'Enter');

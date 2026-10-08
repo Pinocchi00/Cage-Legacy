@@ -96,9 +96,22 @@ function mgmtCarteHomonymes(liste){
   for(const f of liste){ const k=mfNet(f.last||f.name); n.set(k,(n.get(k)||0)+1); }
   return new Set([...n].filter(([,c])=>c>1).map(([k])=>k));
 }
+/** Ce que le booking sait d'un combattant en une ligne (planche « Booking » : « Attend depuis 7 mois », « Battu par Swat », « Sur la carte »). Dérivé. */
+function mgmtCarteNote(m,f){
+  if(!f) return '';
+  if(!mgmtAvailable(m,f)) return 'Indisponible';
+  if(mgmtEngaged(m,f)) return 'Sur la carte';
+  const n=typeof mgmtContratAttente==='function'?mgmtContratAttente(m,f):0;
+  if(n>=2) return 'Attend depuis '+Math.max(1,Math.round(n*MGMT_EVENT_WEEKS/4.345))+' mois';
+  const h=typeof mgmtFightHistory==='function'?mgmtFightHistory(m,f):[], t=h[h.length-1];
+  if(t){ const cote=t.a.id===f.id?'A':'B', adv=cote==='A'?t.b:t.a, nom=mfNet((adv.name||'').split(' ').slice(-1)[0]);
+    if(t.winner==='D') return 'Nul contre '+nom;
+    return (t.winner===cote?'A battu ':'Battu par ')+nom; }
+  return '';
+}
 function mgmtCarteAdvLigne(m,f,i,choisi,homo){
   const sel=mgmtSelectable(m,f,MGMT_CART.pick);
-  const raison=!mgmtAvailable(m,f)?'Indisponible':(mgmtEngaged(m,f)?'Sur la carte':'');
+  const raison=mgmtCarteNote(m,f);
   const rg=mgmtRangAffichable(m,f);
   return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${esc(f.id)}')">`
     +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}</b>`

@@ -319,7 +319,7 @@ Object.assign(CL,{
        carte ou les classements ; ailleurs, la semaine reste la maison. */
     const retour=(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
       ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
-      ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats')?G.screen:'mgmt_bureau';
+      ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats'||G.screen==='mgmt_prelims'||G.screen==='mgmt_finances'||G.screen==='mgmt_calendrier')?G.screen:'mgmt_carte';
     MGMT_FICHE={id,retour,cursor:0};
     CL.go('mgmt_fiche');
   },
@@ -370,6 +370,7 @@ Object.assign(CL,{
     }else{
       mgmtRepair(G.mgmt);
     }
+    if(mgmtAgendaSuivante(G.mgmt)) saveMgmt();
     CL.go('mgmt_carte');
   },
   mgmtLeave(){
@@ -599,6 +600,7 @@ Object.assign(CL,{
     const touched=m.lastEvent&&Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
     if(touched.length>0){ CL.go('mgmt_lendemain'); return; }
     mgmtAgendaActiver(m);
+    mgmtAgendaSuivante(m);
     mgmtNewPile(m);
     saveMgmt();
     CL.go('mgmt_carte');
@@ -628,6 +630,7 @@ Object.assign(CL,{
   mgmtLendemainNext(){
     if(!G||!G.mgmt) return;
     mgmtAgendaActiver(G.mgmt);
+    mgmtAgendaSuivante(G.mgmt);
     mgmtNewPile(G.mgmt);
     saveMgmt();
     CL.mgmtFilDemarrer();

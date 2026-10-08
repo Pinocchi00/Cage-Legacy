@@ -7,7 +7,9 @@ const {newGameWindow}=require('./helpers/loadGame');
 const touche=(win,key)=>win.eval(`keysHandle({key:${JSON.stringify(key)},preventDefault(){}})`);
 const res=(win,code)=>JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`));
 
-function neuve(){ const win=newGameWindow({runMain:true}); win.eval(`setSeed(7); CL.mgmtEnter(1);`); return win; }
+/* Demande d'Anthony du 08/10/2026 : l'ouverture pose elle-même la première soirée (mgmtAgendaSuivante) ; ces tests étudient le calendrier vide, ils la retirent d'abord. */
+function neuve(){ const win=newGameWindow({runMain:true}); win.eval(`setSeed(7); CL.mgmtEnter(1); G.mgmt.cal.prochaines=[]; mgmtAgendaSynchroCarte(G.mgmt);`); return win; }
+function ouverte(){ const win=newGameWindow({runMain:true}); win.eval(`setSeed(7); CL.mgmtEnter(1);`); return win; }
 const COMPOSE=`(()=>{ const m=G.mgmt; for(let k=0;k<40&&m.card.main.length<m.card.sizeMain;k++){ const rows=mgmtCartRows(m).filter(f=>mgmtSelectable(m,f,null)); let ok=false;
     for(const a of rows){ const b=rows.find(x=>x.id!==a.id&&x.div===a.div&&mgmtSelectable(m,x,a.id)); if(b&&mgmtBookMain(m,a.id,b.id)){ ok=true; break; } } if(!ok) break; } })()`;
 /** Compose une carte principale complète puis valide les préliminaires de Leïla. */
@@ -130,4 +132,13 @@ test('Agenda — préparation à la demande : le joueur désigne un combattant, 
   const i0=win.eval('MGMT_CART.cursor'); touche(win,'d');
   assert.equal(win.eval(`mgmtCarteListe(G.mgmt)[MGMT_CART.cursor].id`),win.eval(`mgmtAgendaProposer(G.mgmt,MGMT_CART.pick).id`),'le curseur se place sur l’adversaire proposé');
   assert.ok(i0>=0);
+});
+
+test('Une soirée est toujours posée : l’ouverture pose la première, à cinq semaines, et la suivante se pose après une soirée jouée (demande d’Anthony du 08/10/2026 : les planches montrent la date sur chaque écran)', () => {
+  const win=ouverte();
+  const r=JSON.parse(win.eval(`JSON.stringify((function(){ const m=G.mgmt, p=m.cal.prochaines.slice(); const tete=document.getElementById('app').textContent;
+    const jour=m.cal.jour; const dans=p.length?p[0].jour-jour:0;
+    m.cal.prochaines=[]; const v=mgmtAgendaSuivante(m), apres=m.cal.prochaines.length, encore=mgmtAgendaSuivante(m);
+    return {n:p.length,dans,taille:p[0]&&p[0].taille,v,apres,encore,tete:/Dans 35 jours/.test(tete)}; })())`));
+  assert.equal(r.n,1); assert.equal(r.dans,35); assert.equal(r.taille,'petite'); assert.equal(r.v,true); assert.equal(r.apres,1); assert.equal(r.encore,false,'rien de plus tant qu’une soirée est posée'); assert.equal(r.tete,true,'le décompte est dans l’en-tête');
 });
