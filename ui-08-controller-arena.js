@@ -66,7 +66,7 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
      ARENE_ECRAN.finRetour=null;
    }
    careerTrackPreparation(G&&G.screen);
-   app.innerHTML=fn();
+   app.innerHTML=(typeof careerPcWrap==='function'&&!(G&&G.screen&&String(G.screen).indexOf('mgmt_')===0))?careerPcWrap(G&&G.screen,fn()):fn();
    if(G&&G.screen==='arena') areneEcranDemarrer();
    if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
 function routeAfterOrgChange(){
