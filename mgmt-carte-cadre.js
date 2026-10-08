@@ -128,7 +128,8 @@ function scr_mgmt_carte_cadre(){
   const enjeux=[]; if(peutTitre) enjeux.push('Titre possible'); if(rounds) enjeux.push(rounds+' rounds');
   /* Corrections du 08/10, 2.3 et 2.4 : ce que le booking sait de la paire, dit avant la confirmation. */
   if(duo){
-    if(typeof mgmtPublicReclame==='function'&&mgmtPublicReclame(m).some(r=>(r.a===A.id&&r.b===B.id)||(r.a===B.id&&r.b===A.id))) enjeux.push('Combat réclamé');
+    const reclame=typeof mgmtPublicReclame==='function'?mgmtPublicReclame(m).find(r=>(r.a===A.id&&r.b===B.id)||(r.a===B.id&&r.b===A.id)):null;
+    if(reclame) enjeux.push('Combat réclamé'+(reclame.raison&&MGMT_RECLAME_LIBELLES[reclame.raison]?' : '+MGMT_RECLAME_LIBELLES[reclame.raison].toLowerCase():''));
     if(typeof mgmtMemeCamp==='function'&&m.effectifs===1&&mgmtMemeCamp(m,A,B)) enjeux.push('Même camp : les opposer les contrarie');
     if(typeof mgmtFratrie==='function'&&m.effectifs===1&&mgmtFratrie(m,A).includes(B.id)) enjeux.push('Frère et sœur : les opposer les contrarie');
   }

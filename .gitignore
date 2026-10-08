@@ -74,3 +74,4 @@ tools/reports/lot-5-t1-ceintures/*
 !tools/reports/lot-5-t1-ceintures/*.png
 !tools/reports/lot-5-t1-ceintures/audit.json
 !tools/reports/lot-5-t1-ceintures/VERIFICATION.md
+!tools/reports/RECLAMES.md

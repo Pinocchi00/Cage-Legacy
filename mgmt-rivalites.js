@@ -36,7 +36,7 @@ function mgmtAffrontements(m){
     if(!out.has(cle)) out.set(cle,[]);
     const [g,p]=t.winner==='A'?[t.a,t.b]:[t.b,t.a];
     const ratio=s=>(s.W||0)/Math.max(1,(s.W||0)+(s.L||0));
-    out.get(cle).push({i,c:t.c,gagnant,perdant,family:t.family,round:t.round,rounds:t.rounds,
+    out.get(cle).push({i,c:t.c,gagnant,perdant,family:t.family,round:t.round,rounds:t.rounds,slot:t.slot,
       favoriEcrase:t.winner!=='D'&&ratio(p)>ratio(g)});
   });
   return out;
@@ -53,13 +53,77 @@ function mgmtRivalites(m){
     const [x,y]=cle.split('|');
     const vivants=[x,y].every(id=>{ const f=mgmtFighterById(m,id); return f&&!mgmtIsRetired(f); });
     if(!vivants||!dernier.gagnant) continue;
-    const finale=(dernier.family==='ko'||dernier.family==='sub')&&dernier.round<=MGMT_HUMILIATION_ROUND&&dernier.favoriEcrase;
+    /* Corrections du 08/10, lot 10 (D4) : une humiliation qui se paie en revanche est celle d'un combat de la carte principale — plus celle d'un préliminaire entre inconnus. */
+    const finale=(dernier.family==='ko'||dernier.family==='sub')&&dernier.round<=MGMT_HUMILIATION_ROUND&&dernier.favoriEcrase&&dernier.slot!=='prelim';
     if(rencontres.length===1&&finale){
       out.push({k:'rivalite',a:dernier.perdant,b:dernier.gagnant,c:dernier.c});
     }else if(rencontres.length===2&&rencontres[0].gagnant&&rencontres[0].gagnant!==dernier.gagnant){
       out.push({k:'trilogie',a:dernier.perdant,b:dernier.gagnant,c:dernier.c});
     }
   }
+  return out;
+}
+
+/* Corrections du 08/10, lot 10 (D4) : ce qui fait réclamer un combat, comme dans la vraie vie. Quatre sources, toutes dérivées de l'histoire ou du vestiaire (rien n'est
+   stocké) : l'humiliation en carte principale et la trilogie (mgmtRivalites), le MICRO — le vainqueur d'un combat principal fini avant la limite appelle le champion de sa
+   catégorie, ou le premier du classement — , et le CHAMBRAGE sur les réseaux entre deux têtes de classement qui ne se sont jamais rencontrées (une paire tous les deux cycles).
+   Les anciens partenaires de salle ne sont pas repris : le booking les dit déjà contrariés d'être opposés (2.3), les réclamer se contredirait. */
+const MGMT_RECLAME_MICRO_CYCLES=2;
+const MGMT_RECLAME_TETE=5;
+const MGMT_RECLAME_CHAMBRAGE_PERIODE=2;
+const MGMT_RECLAME_LIBELLES={rivalite:'Revanche après une humiliation',trilogie:'Le troisième combat',micro:'Appel au micro après sa victoire',reseaux:'Se chambrent sur les réseaux'};
+
+/** Les paires déjà rencontrées en carte (m.hist), en clés triées. */
+function mgmtDejaRencontres(m){
+  const s=new Set();
+  for(const t of m.hist||[]) if(t&&t.a&&t.b) s.add([t.a.id,t.b.id].sort().join('|'));
+  return s;
+}
+
+/** Les têtes de classement d'une catégorie, disponibles, dans l'ordre du classement. Pur. */
+function mgmtReclameTetes(m,div,n){
+  return mgmtDivisionRanking(m,div,'organization').filter(f=>mgmtAvailable(m,f)).slice(0,n);
+}
+
+/** Tout ce que le public réclame, avec la raison de chaque combat. Pur.
+ *  @returns {Array<{a:string,b:string,raison:string,texte:string,c:number}>} */
+function mgmtReclamesRaisons(m){
+  const out=[], vus=new Set();
+  const nom=id=>{ const f=mgmtFighterById(m,id); return f?f.name:''; };
+  const ajoute=(a,b,raison,c)=>{
+    if(!a||!b||a===b) return; const k=[a,b].sort().join('|'); if(vus.has(k)) return; vus.add(k);
+    out.push({a,b,raison,texte:`${nom(a)} contre ${nom(b)} : ${MGMT_RECLAME_LIBELLES[raison]}`,c});
+  };
+  for(const r of mgmtRivalites(m)) ajoute(r.a,r.b,r.k,r.c);
+  if(!m||m.effectifs!==1||!Array.isArray(m.roster)) return out;
+  /* Le micro : le meilleur vainqueur des derniers combats principaux, fini avant la limite. */
+  const recents=(m.hist||[]).filter(t=>t&&t.a&&t.b&&t.slot==='main'&&m.cycle-t.c<=MGMT_RECLAME_MICRO_CYCLES&&(t.family==='ko'||t.family==='sub')&&(t.winner==='A'||t.winner==='B'));
+  let meilleur=null;
+  for(const t of recents){
+    const g=t.winner==='A'?t.a:t.b, p=t.winner==='A'?t.b:t.a;
+    const f=mgmtFighterById(m,g.id); if(!f||mgmtIsRetired(f)) continue;
+    const s=mgmtStar(f); if(!meilleur||s>meilleur.s) meilleur={f,s,perdant:p.id,c:t.c};
+  }
+  if(meilleur){
+    const ceinture=mgmtSplitTitle(m,meilleur.f.div);
+    const tetes=mgmtReclameTetes(m,meilleur.f.div,MGMT_RECLAME_TETE).filter(x=>x.id!==meilleur.f.id&&x.id!==meilleur.perdant);
+    const cible=(ceinture&&ceinture.id&&ceinture.id!==meilleur.f.id&&ceinture.id!==meilleur.perdant&&mgmtFighterById(m,ceinture.id))||tetes[0];
+    if(cible) ajoute(meilleur.f.id,cible.id,'micro',meilleur.c);
+  }
+  /* Chambrage : une paire à la fois, tirée du cycle (flux d'identité, jamais de hasard de partie). */
+  const rencontres=mgmtDejaRencontres(m), divs=[...new Set(m.roster.map(f=>f.div))].sort();
+  const paires=(periode,filtre,cle)=>{
+    if(m.cycle%periode!==0) return null;
+    const u=mgmtIdentiteStream(m.org+'|'+cle+'|'+m.cycle,'reclame')();
+    const tous=[];
+    for(const d of divs){
+      const t=mgmtReclameTetes(m,d,MGMT_RECLAME_TETE);
+      for(let i=0;i<t.length;i++) for(let j=i+1;j<t.length;j++) if(!rencontres.has([t[i].id,t[j].id].sort().join('|'))&&filtre(t[i],t[j])) tous.push([t[i],t[j]]);
+    }
+    return tous.length?tous[Math.floor(u*tous.length)]:null;
+  };
+  const cham=paires(MGMT_RECLAME_CHAMBRAGE_PERIODE,()=>true,'chambrage');
+  if(cham) ajoute(cham[0].id,cham[1].id,'reseaux',m.cycle);
   return out;
 }
 
