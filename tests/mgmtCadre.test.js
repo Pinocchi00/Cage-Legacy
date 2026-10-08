@@ -97,7 +97,7 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
   assert.equal(r.carte.filter(x=>x.cur).length,1); assert.equal(r.carte.find(x=>x.cur).sec,'carte');
   assert.deepEqual(r.carte.filter(x=>x.grise).map(x=>x.sec),[],'plus aucune section n’est grisée sur la carte : Options est livrée au lot 12 (décision du brief : Options ne se grise que pendant la soirée, comme la barre entière)');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct===false||true);
-  assert.equal(r.bureau.find(x=>x.cur).sec,'preliminaires','l’écran de la semaine éclaire Préliminaires (écran ancien)');
+  assert.equal(r.bureau.filter(x=>x.cur).length,0,'brief du 08/10, 1.5 : l’écran de la semaine n’est aucune section de la barre, donc aucune n’est allumée');
   assert.equal(r.fiche.find(x=>x.cur).sec,'classements','une fiche éclaire la section d’où on l’a ouverte');
   assert.ok(r.soir.every(x=>x.grise),'le soir, toute la barre est grisée');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct,'des affaires attendent Leïla : l’octogone jaune');

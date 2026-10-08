@@ -73,6 +73,11 @@ function scr_mgmt_fiche_cadre(){
 SCREENS.mgmt_fiche=scr_mgmt_fiche_cadre;
 
 Object.assign(CL,{
+  /** Corrections du 08/10, 1.4 : P et R répondent à la première demande du combattant ouvert, sur l'onglet « On en dit ». */
+  mgmtFicheDemande(reponse){
+    const m=G&&G.mgmt; if(!m||!MGMT_FICHE||MGMT_FICHE.onglet!=='ondit'||m.effectifs!==1) return;
+    const d=mgmtDemandesOuvertes(m).find(x=>x.a===MGMT_FICHE.id); if(d) CL.mgmtDemande(d.i,reponse);
+  },
   /** Un onglet par son identifiant, ou +1/−1 pour le suivant (les onglets grisés sont sautés). */
   mgmtFicheOnglet(x){
     const ids=MGMT_FICHE_ONGLETS.filter(o=>!mgmtFicheOngletGrise(o)).map(o=>o.id);
@@ -97,5 +102,9 @@ keysRegister('mgmt_fiche',{
   ArrowUp(){ CL.mgmtFicheDeplacer(-1); },
   Enter(){ CL.mgmtFicheEntree(); },
   Escape(){ CL.mgmtFicheRetour(); },
+  p(){ CL.mgmtFicheDemande('promettre'); },
+  P(){ CL.mgmtFicheDemande('promettre'); },
+  r(){ CL.mgmtFicheDemande('refuser'); },
+  R(){ CL.mgmtFicheDemande('refuser'); },
 });
 /* ==== [FIN ANCRE] ==== */

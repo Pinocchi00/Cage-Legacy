@@ -536,6 +536,11 @@ function mgmtRepair(m){
   for(const slot of ['main','prelims']){
     if(Array.isArray(m.card[slot])) m.card[slot]=m.card[slot].filter(x=>x&&typeof x.a==='string'&&typeof x.b==='string');
   }
+  /* Corrections du 08/10, 1.1 : une carte de 12 places, qui ne correspond à aucune soirée, se recadre sur la prochaine soirée posée (ou la petite). */
+  if(typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)&&Array.isArray(m.cal.prochaines)&&mgmtAgendaTailleCarte(m)===null){
+    const p=m.cal.prochaines[0];
+    mgmtAgendaAjusterCarte(m,p&&p.taille==='grosse'?'grosse':'petite');
+  }
   if(!m.leila||typeof m.leila!=='object'||Array.isArray(m.leila)) m.leila={crushes:[]};
   if(!Array.isArray(m.leila.crushes)) m.leila.crushes=[];
   m.leila.crushes=m.leila.crushes.filter(c=>Number.isSafeInteger(c)&&c>=0);

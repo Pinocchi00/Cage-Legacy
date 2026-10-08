@@ -69,7 +69,7 @@ function mgmtCalendrierCarteLaterale(m,n,passee){
 }
 
 const MGMT_CAL_RAISONS={passee:'Cette date est passée.',occupee:'Une soirée est déjà posée ce jour-là.',
-  'grosse-du-mois':'Une grosse soirée par mois au plus.','carte-composee':'La carte en cours est déjà composée pour l’autre taille.'};
+  'grosse-du-mois':'Une grosse soirée par mois au plus.','carte-composee':'La carte compte déjà plus de préliminaires que cette taille n’en offre : joue la soirée d’abord.'};
 
 /** Le panneau central de pose : la date, la taille, ce qui l'empêche. */
 function mgmtCalendrierPoseHtml(m){
@@ -98,6 +98,7 @@ function scr_mgmt_calendrier(){
   const auj=mgmtCalAujourdhui(m), jours=s.jour===null?0:s.jour-auj;
   const d=s.jour===null?null:mgmtJourDate(s.jour);
   const pret=actif&&mgmtAgendaPret(m);
+  const blocages=actif&&encours&&!joues&&s.jour!==null&&!pret?mgmtAgendaBlocages(m):[];
   let centre;
   if(F.pose&&actif) centre=mgmtCalendrierPoseHtml(m);
   else if(s.jour===null) centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">AUCUNE SOIRÉE POSÉE</div><div class="mf-cal-nom">${esc(nom.toUpperCase())}</div></div></div>`
@@ -106,13 +107,14 @@ function scr_mgmt_calendrier(){
   else{
     const etat=joues?`<div class="mf-cal-texte">${esc(mgmtCalendrierResume(m,n)||'Soirée jouée.')}</div>`
       :(encours?`<div class="mf-cal-etat"><div class="mf-cal-ligne"><span>Carte principale</span><b>${c.main} / ${c.sm}</b></div><div class="mf-cal-ligne"><span>Préliminaires</span><b>${c.prel} / ${c.sp}</b></div></div>`
+        +(blocages.length?`<div class="mf-cal-lib">Ce qui empêche la soirée</div><div class="mf-cal-blocs">${blocages.map(b=>`<div class="mf-cal-bloc"><span><i class="mf-cal-pastille"></i>${esc(b.texte)}</span><button type="button" class="mf-onglet" onclick="${b.onclick}">${esc(b.label)}</button></div>`).join('')}</div>`:'')
         :`<div class="mf-cal-texte">Rien n’est encore posé pour cette soirée.</div>`);
     const boutons=(encours?mfBouton('Ouvrir la carte',{touche:actif&&pret?'':'Entrée',jaune:!pret,onclick:"CL.go('mgmt_carte')"}):'')
       +(encours&&actif&&pret?mfBouton('Jouer la soirée',{touche:'Entrée',jaune:true,onclick:'CL.mgmtCalendrierJouer()'}):'');
     centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">${esc(d.jour)} ${esc(d.mois)} · ${esc(mgmtCalendrierLieu(m,n))}${s.taille?' · '+esc(mgmtCalendrierTailleTexte(s.taille)):''}</div><div class="mf-cal-nom">${esc(nom.toUpperCase())}</div></div>`
       +`<div class="mf-cal-gros">${n}<span>${joues?'JOUÉE':(jours<=0?'CE SOIR':'DANS '+jours+' JOURS')}</span></div></div>`
       +`<div class="mf-cal-corps"><div class="mf-cal-lib">${joues?'Le combat principal':'Où en est la soirée'}</div>${etat}`
-      +`<div class="mf-cal-pied">${encours&&c.manque?`<span class="mf-cal-manque">Il manque ${c.manque} combat${c.manque>1?'s':''}</span>`:'<span></span>'}<div class="mf-car-boutons">${boutons}</div></div></div></div>`;
+      +`<div class="mf-cal-pied">${encours&&c.manque&&!blocages.length?`<span class="mf-cal-manque">Il manque ${c.manque} combat${c.manque>1?'s':''}</span>`:'<span></span>'}<div class="mf-car-boutons">${boutons}</div></div></div></div>`;
   }
   const debut=Math.max(1,n-3), onglets=[];
   for(let k=debut;k<debut+8&&k<=max;k++) onglets.push(`<button type="button" class="mf-cal-onglet${k===n?' ouvert':''}" onclick="CL.mgmtCalendrierVers(${k})">SOIRÉE ${k}</button>`);

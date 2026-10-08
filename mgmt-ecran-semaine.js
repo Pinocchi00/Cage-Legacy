@@ -267,7 +267,8 @@ function scr_mgmt_bureau(){
   /* Lot 5 H6 : Continuer fait avancer le temps et ne s'arrête que sur ce que
      le joueur doit décider ; son libellé dit sur quoi. */
   const suite=mgmtContinuerRaison(m);
-  pileHtml+=`<button class="mgmt-next" data-raison="${esc(suite.raison)}" onclick="CL.mgmtContinuer()">${esc(suite.libelle)}</button>`;
+  /* Corrections du 08/10, 1.5 : le bouton qui fait avancer reste visible au pied du panneau, sans défiler. */
+  const suiteHtml=`<button class="mgmt-next" data-raison="${esc(suite.raison)}" onclick="CL.mgmtContinuer()">${esc(suite.libelle)}</button>`;
 
   let talkHtml;
   if(!selOpen){
@@ -307,10 +308,10 @@ function scr_mgmt_bureau(){
     +`<div class="mono mgmt-cycle">Cycle ${esc(m.cycle)} — ${esc(mgmtOpenLabel(open.length))}`
     +` — ${esc(mgmtCardLabel(m))}</div>`
     +`<div class="mgmt-cols mgmt-week-cols">`
-    +mfPanneau(`<section class="mgmt-week-pane mgmt-week-left">${typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):''}${mgmtSemaineCarte(m)}`
+    +mfPanneau(`<section class="mgmt-week-pane mgmt-week-left"><div class="mgmt-week-defile">${typeof mgmtRetraitHtml==='function'?mgmtRetraitHtml(m):''}${mgmtSemaineCarte(m)}`
     +`<div class="mgmt-week-talk">${selOpen&&selOpen.speaker==='leila'?'':'<h3>Échange</h3>'}${talkHtml}</div>`
     +`<div class="mgmt-week-affairs"><h3>Affaires · ${open.length}</h3>${pileHtml}</div>`
-    +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</section>`,'normal','mf-sem-p')
+    +(fileHtml?`<details class="mgmt-week-dossier"><summary>Dossier</summary>${fileHtml}</details>`:'')+`</div><div class="mgmt-week-suite">${suiteHtml}</div></section>`,'normal','mf-sem-p')
     +mfPanneau(`<section class="mgmt-week-pane"><h3>Le monde autour de ${esc(mgmtOrgNom(m))}</h3>${mgmtSemaineMonde(m)}`
     +`<details class="mgmt-week-memo"><summary>Mémoire · ${esc(memory.length)} fait${memory.length===1?'':'s'}</summary>${mgmtSemaineMemoire(m,memory)}</details></section>`,'normal','mf-sem-p')
     +mfPanneau(`<aside class="mgmt-week-pane">${mgmtSemaineClassement(m)}`

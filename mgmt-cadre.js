@@ -62,7 +62,7 @@ const MF_SECTIONS=[
   {id:'finances',libelle:'Finances',ecran:'mgmt_finances'},
 ];
 /** L'écran ouvert → la section qu'il éclaire dans la barre. */
-const MF_ECRAN_SECTION={mgmt_carte:'carte',mgmt_bureau:'preliminaires',mgmt_effectif:'effectif',mgmt_classements:'classements',
+const MF_ECRAN_SECTION={mgmt_carte:'carte',mgmt_bureau:null,mgmt_effectif:'effectif',mgmt_classements:'classements',
   mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier',mgmt_prelims:'preliminaires',mgmt_finances:'finances',mgmt_contrats:'contrats',mgmt_ceintures:'ceintures',mgmt_camps:'camps',mgmt_presse:'presse',mgmt_resultats:'resultats'};
 
 /** La section que l'écran courant éclaire ; une fiche éclaire celle d'où on l'a ouverte. */

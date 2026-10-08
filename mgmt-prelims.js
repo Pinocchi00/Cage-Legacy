@@ -51,8 +51,10 @@ function scr_mgmt_prelims(){
     ?mgmtCarteLigneComp(esc(ca.rang),esc(cb.rang),'Classement')+mgmtCarteLigneComp(esc(ca.bilan),esc(cb.bilan),'Palmarès')
       +mgmtCarteLigneComp(esc(ca.allonge),esc(cb.allonge),'Allonge')+mgmtCarteLigneComp(esc(ca.style),esc(cb.style),'Style')
       +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp('<b>—</b>','<b>—</b>','Contrat restant')
-    :`<div class="mf-car-aide">${esc(m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE)?'Leïla prépare les préliminaires quand la carte principale est complète.':'Ce préliminaire n’est pas encore trouvé.')}</div>`;
+    :`<div class="mf-car-aide">${esc(P.aide?P.aide:m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE)?'Leïla prépare les préliminaires quand la carte principale est complète.':'Ce préliminaire n’est pas encore trouvé.')}</div>`;
+  const trou=!bloc&&m.card.main.length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&m.card.prelims.length<(m.card.sizePrelims||MGMT_PRELIM_SIZE);
   const boutons=`<div class="mf-car-boutons">`
+    +(trou?mfBouton('Trouver un remplaçant',{touche:'Entrée',jaune:true,onclick:'CL.mgmtPrelimsRemplacer()'}):'')
     +(bloc?mfBouton('Valider la carte',{touche:'Entrée',jaune:true,onclick:'CL.mgmtPrelimsValider()'}):'')
     +(bloc&&s.etat==='avalider'?mfBouton('Changer',{touche:'C',onclick:'CL.mgmtPrelimsChanger()'}):'')
     +(bloc?mfBouton('Refaire',{touche:'R',onclick:'CL.mgmtPrelimsRefaire()'}):'')+`</div>`;
@@ -93,11 +95,18 @@ Object.assign(CL,{
     bloc.marked=s.idxBloc; const r=mgmtPrelimsReponse('swap'); if(r) CL.mgmtReply(r.id,r.rep);
   },
   mgmtPrelimsRefaire(){ const r=mgmtPrelimsReponse('crush'); if(r) CL.mgmtReply(r.id,r.rep); },
+  /** Un trou en préliminaires se règle ici, en une action : Leïla propose le remplaçant, qu'on valide ensuite. */
+  mgmtPrelimsRemplacer(){
+    const m=G.mgmt;
+    if(!mgmtOfferBulk(m,true)){ MGMT_PRELIMS.aide=m.shortfall?'Aucun remplaçant disponible pour l’instant.':''; }
+    else MGMT_PRELIMS.aide='';
+    saveMgmt(); CL.go('mgmt_prelims');
+  },
 });
 keysRegister('mgmt_prelims',{
   ArrowUp(){ CL.mgmtPrelimsBouge(-1); },
   ArrowDown(){ CL.mgmtPrelimsBouge(1); },
-  Enter(){ CL.mgmtPrelimsValider(); },
+  Enter(){ if(mgmtPrelimsEmplacements(G.mgmt).bloc) CL.mgmtPrelimsValider(); else CL.mgmtPrelimsRemplacer(); },
   c(){ CL.mgmtPrelimsChanger(); },
   C(){ CL.mgmtPrelimsChanger(); },
   r(){ CL.mgmtPrelimsRefaire(); },
