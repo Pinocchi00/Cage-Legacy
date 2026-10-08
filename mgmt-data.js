@@ -31,6 +31,8 @@ const MGMT_PILE_MAX=15;
 /* Avant H4 (effectifs 0) : 40 à 60. */
 const MGMT_ROSTER_AVANT_MIN=40;
 const MGMT_ROSTER_AVANT_MAX=60;
+/* Corrections du 08/10/2026 : une partie neuve porte environ 30 combattants par catégorie (ses fortes ×1,5, ses faibles ×0,5, le tout × l'effectif du profil). */
+const MGMT_EFFECTIF_PAR_CATEGORIE=30;
 const MGMT_ROSTER_MIN=130;
 const MGMT_ROSTER_MAX=150;
 
@@ -204,10 +206,12 @@ const MGMT_EXT_LIVE_PER_DIVISION=30;
    organisations, total 1 025). Une partie neuve porte m.effectifs=1 et lit
    cette table ; une partie d'avant H4 (effectifs 0, migration 12 → 13) garde
    MGMT_EXT_LIVE_PER_DIVISION : son monde ne grossit pas en cours de route. ==== */
+/* Corrections du 08/10/2026 : chacune des cinq organisations du monde compte environ 30 combattants par catégorie, soit 1 800 combattants — la table du contrat
+   d'origine (1 025) multipliée par 1,76, mêmes proportions entre catégories. */
 const MGMT_WORLD_SIZE={
-  'H-heavy':45,'H-lheavy':60,'H-middle':100,'H-welter':130,'H-light':150,
-  'H-feather':125,'H-bantam':125,'H-fly':75,
-  'F-straw':70,'F-fly':65,'F-bantam':50,'F-feather':30,
+  'H-heavy':79,'H-lheavy':105,'H-middle':176,'H-welter':229,'H-light':264,
+  'H-feather':220,'H-bantam':220,'H-fly':132,
+  'F-straw':123,'F-fly':114,'F-bantam':88,'F-feather':53,
 };
 /* ==== [FIN ANCRE] ==== */
 

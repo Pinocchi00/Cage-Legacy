@@ -1001,6 +1001,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fb.or .mf-fb-img{background-image:url('images/tunnel-or.jpg?v=b29')}
 .mf-fb-nom{position:absolute;left:32px;bottom:30px;display:flex;flex-direction:column;gap:16px;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.69;white-space:nowrap;text-transform:uppercase;text-shadow:0.0300em 0.0000em 0 #0D0B0B, 0.0277em 0.0115em 0 #0D0B0B, 0.0212em 0.0212em 0 #0D0B0B, 0.0115em 0.0277em 0 #0D0B0B, 0.0000em 0.0300em 0 #0D0B0B, -0.0115em 0.0277em 0 #0D0B0B, -0.0212em 0.0212em 0 #0D0B0B, -0.0277em 0.0115em 0 #0D0B0B, -0.0300em 0.0000em 0 #0D0B0B, -0.0277em -0.0115em 0 #0D0B0B, -0.0212em -0.0212em 0 #0D0B0B, -0.0115em -0.0277em 0 #0D0B0B, -0.0000em -0.0300em 0 #0D0B0B, 0.0115em -0.0277em 0 #0D0B0B, 0.0212em -0.0212em 0 #0D0B0B, 0.0277em -0.0115em 0 #0D0B0B}
 .mf-fb-nom .p{font-size:64px}
+.mf-fb-nom .p .s{font-style:normal;font-size:36px;letter-spacing:.04em;opacity:.86;margin-left:10px}
+.mgmt-cl-sur{font-style:normal;color:var(--mf-texte2);font-size:inherit;margin-left:8px}
 .mf-fb-pal{position:absolute;right:32px;top:30px;width:400px;height:200px;box-sizing:border-box;border:2px solid var(--mf-bord);background:rgba(13,11,11,.86);padding:0 22px;display:flex;align-items:center;justify-content:space-between}
 .mf-fb-pg{display:flex;flex-direction:column;gap:14px}
 .mf-fb-pl{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2)}

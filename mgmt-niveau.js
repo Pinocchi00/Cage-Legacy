@@ -162,7 +162,8 @@ function mgmtRouille(m,f,cycle){
   /* Lot 9 : sous contrat, les paliers d'attente règlent la rouille — au troisième palier, puis un demi-point par soirée. */
   if(Number.isSafeInteger(f.rg)||f.ct){
     const depuis=Number.isSafeInteger(f.lastCycle)&&f.lastCycle>=0?f.lastCycle:(f.ct?f.ct.since:f.rg), a=c-depuis;
-    return a>=MGMT_CT_ATTENTE[2]?Math.min(MGMT_NIV_ROUILLE_MAX,2.5+(a-MGMT_CT_ATTENTE[2])*MGMT_NIV_ROUILLE_PAR_CYCLE):0;
+    const s2=mgmtCtSeuils(m)[2];
+    return a>=s2?Math.min(MGMT_NIV_ROUILLE_MAX,2.5+(a-s2)*MGMT_NIV_ROUILLE_PAR_CYCLE):0;
   }
   const attente=c-f.lastCycle-MGMT_NIV_ROUILLE_DELAI;
   return attente>0?Math.min(MGMT_NIV_ROUILLE_MAX,attente*MGMT_NIV_ROUILLE_PAR_CYCLE):0;

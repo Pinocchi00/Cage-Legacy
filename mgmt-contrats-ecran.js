@@ -123,7 +123,7 @@ function mgmtContratsOffreHtml(m,x){
   const prime=mgmtContratPrime(n,b);
   /* Corrections du 08/10, lot 8 : au dernier palier il refuse tout combat sauf contre un nom moins connu, et il finit par partir ; le joueur peut aussi le libérer. */
   const palier4=reno&&mgmtContratPalier(m,f)>=4;
-  const depart=palier4?ligne('Il refuse tout combat',`sauf contre un nom moins connu · part dans ${Math.max(0,MGMT_CT_ATTENTE[3]+MGMT_CT_DEPART_SOIREES-mgmtContratAttente(m,f))} soirée${MGMT_CT_ATTENTE[3]+MGMT_CT_DEPART_SOIREES-mgmtContratAttente(m,f)>1?'s':''}`):'';
+  const depart=palier4?ligne('Il refuse tout combat',`sauf contre un nom moins connu · part dans ${Math.max(0,mgmtCtSeuils(m)[3]+mgmtCtDepart(m)-mgmtContratAttente(m,f))} soirée${mgmtCtSeuils(m)[3]+mgmtCtDepart(m)-mgmtContratAttente(m,f)>1?'s':''}`):'';
   const libere=reno?mfBouton('Libérer · '+mgmtEuros(mgmtContratIndemnite(f)),{touche:'L',onclick:'CL.mgmtContratsLiberer()'}):'';
   const corps=`<div class="mf-ct-offre"><div class="mf-eff-fiche-s">TON OFFRE</div>`
     +actuel+depart

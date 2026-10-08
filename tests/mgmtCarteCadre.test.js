@@ -51,7 +51,7 @@ test('Carte — un nom hostile s’affiche échappé, jamais injecté', () => {
 test('Carte — un combat de champion se pose avec sa ceinture en jeu d’office, la pastille TITRE ne se retire pas', () => {
   const win=newGameWindow({runMain:true});
   win.eval(`setSeed(7); CL.mgmtEnter(1); (()=>{ const m=G.mgmt,g=allDivisions().map(d=>m.roster.filter(f=>f.div===d.id)).find(a=>a.length>=2);
-    const champ=mgmtSplitTitle(m,g[0].div).id; mgmtBookMain(m,champ,g.find(f=>f.id!==champ).id); G.screen='mgmt_carte'; render(); })()`);
+    const champ=mgmtSplitTitle(m,g[0].div).id; mgmtBookMain(m,champ,g.find(f=>f.id!==champ&&mgmtAvailable(m,f)).id); G.screen='mgmt_carte'; render(); })()`);
   const b=win.eval(`document.querySelector('.mf-car-titre')?document.querySelector('.mf-car-titre').getAttribute('aria-pressed'):null`);
   assert.equal(b,'true','la ceinture est en jeu d’office au booking');
   assert.equal(win.eval(`document.querySelector('.mf-car-titre').disabled`),true);

@@ -82,6 +82,19 @@ function mgmtIdentiteSurnoms(f){
  *  L'ordre numérique de mgmtNextId conserve les attributions quand un nouveau
  *  combattant arrive. Les retraités restent réservés, aucun cache ni registre
  *  parallèle. Un transfert conservant l'id est dédoublonné. */
+/** Le surnom d'un combattant par son identifiant (roster ou monde extérieur), pour l'afficher partout où l'on nomme (demande d'Anthony du 08/10/2026 : « ajoute dans le jeu les surnoms »).
+ *  Les surnoms d'une catégorie s'allouent d'un bloc : on les garde par catégorie, le temps d'un cycle et d'un effectif. Pur. @returns {string} "" si inconnu. */
+function mgmtSurnomDe(m,id){
+  if(!m||!id) return '';
+  const f=(m.roster||[]).find(o=>o.id===id)||(m.exterieur||[]).find(o=>o.id===id);
+  if(!f||!f.div) return '';
+  const cle=(m.cycle||0)+'|'+(m.roster?m.roster.length:0)+'|'+(m.exterieur?m.exterieur.length:0);
+  if(MGMT_SURNOMS_MEMO.m!==m||MGMT_SURNOMS_MEMO.cle!==cle){ MGMT_SURNOMS_MEMO.m=m; MGMT_SURNOMS_MEMO.cle=cle; MGMT_SURNOMS_MEMO.par=new Map(); }
+  if(!MGMT_SURNOMS_MEMO.par.has(f.div)) MGMT_SURNOMS_MEMO.par.set(f.div,mgmtIdentiteSurnomsDe(m,f.div));
+  return MGMT_SURNOMS_MEMO.par.get(f.div).get(id)||'';
+}
+const MGMT_SURNOMS_MEMO={m:null,cle:'',par:new Map()};
+
 function mgmtIdentiteSurnom(m,f){
   return mgmtIdentiteAllouer(m,f.div,f,f.id).get(f.id)||'';
 }

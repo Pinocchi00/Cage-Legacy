@@ -270,7 +270,7 @@ test('MGMT lot 4 T5 — ligne extérieure, passage à zéro combat et échappeme
   win.eval("CL.mgmtFicheOnglet('combats')");
   const html=win.document.getElementById('app').innerHTML;
   assert.match(html,/SA TRAJECTOIRE/);
-  assert.match(html,/Amateur/);
+  assert.match(html,/PALMARÈS AMATEUR/); /* demande du 08/10 : le palmarès amateur a sa propre rubrique, détaillée */
   assert.match(html,/Professionnel/);
   assert.ok(!html.includes('× 0')&&!html.includes('· 0 combat'));
   assert.deepEqual(Object.keys(line).sort(),keys,'lecture sans champ stocké');

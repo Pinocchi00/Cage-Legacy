@@ -11,11 +11,11 @@ const res=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ ${code} })())
 test('13 — Après huit soirées, le marché offre toujours des jeunes de 24 ans et moins, et en signer un le met dans l’effectif avec un contrat', () => {
   const win=neuve(); jouer(win,8,{titre:true});
   const r=res(win,`const m=G.mgmt; let jeunes=[]; for(const d of allDivisions()) for(const x of mgmtRecrutables(m,d.id)) if(x.age<=24) jeunes.push(x);
-    const x=jeunes.find(j=>true); const avant=m.roster.length; let sign=null;
-    for(const j of jeunes){ const cible=mgmtExteriorPourOffre(m,j.id); if(!cible) continue; const b=mgmtBourseSouhaitee(m,cible,false); const rep=mgmtContratSigner(m,j.id,3,b); if(rep.ok){ sign=j.id; break; } }
+    m.treasury=500; const avant=m.roster.length; let sign=null; const raisons=[];
+    for(const j of jeunes.slice().reverse()){ const cible=mgmtExteriorPourOffre(m,j.id); if(!cible) continue; const b=mgmtBourseSouhaitee(m,cible,false); const rep=mgmtContratSigner(m,j.id,3,b); if(rep.ok){ sign=j.id; break; } else raisons.push(rep.raison); }
     const f=sign?mgmtFighterById(m,sign):null;
-    return {n:jeunes.length,avant,apres:m.roster.length,sign:!!sign,contrat:!!(f&&f.ct&&f.ct.n===3),age:f&&f.age};`);
-  assert.ok(r.n>=10,'au moins dix jeunes sur le marché : '+r.n); assert.ok(r.sign,'un jeune a pu être signé');
+    return {n:jeunes.length,avant,apres:m.roster.length,sign:!!sign,contrat:!!(f&&f.ct&&f.ct.n===3),age:f&&f.age,raisons:raisons.slice(0,6),treasury:m.treasury};`);
+  assert.ok(r.n>=10,'au moins dix jeunes sur le marché : '+r.n); assert.ok(r.sign,'un jeune a pu être signé '+JSON.stringify(r));
   assert.equal(r.apres,r.avant+1); assert.ok(r.contrat); assert.ok(r.age<=25);
 });
 

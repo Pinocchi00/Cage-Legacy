@@ -314,9 +314,10 @@ test('MGMT mémoire écrasements — vécus, suite contre espacés', () => {
     ['Leïla — tu as écrasé 3 de ses cartes, dont 3 de suite.']);
 });
 
+/* Graine 108 → 109 : les listes de noms ont grandi (08/10), la graine 108 ne laissait plus de paire fraîche à ce tirage — le test vérifie le geste, pas la graine. */
 test('MGMT clavier bloc — marquer puis échanger sans souris', () => {
   const win = newGameWindow();
-  enterMgmtBulk(win,108);
+  enterMgmtBulk(win,109);
   const id = mgmtBulkId(win);
   win.eval(`CL.mgmtOpen('${id}')`);
   const key = k => win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'${k}',bubbles:true}))`);

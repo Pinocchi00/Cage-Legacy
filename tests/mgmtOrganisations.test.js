@@ -82,7 +82,7 @@ test('Organisations — le monde correspond au profil : la caisse, la taille, l�
     return {split:stat('split'),riche:stat('organisation-7'),fragile:stat('mma-korner'),jeune:stat('ultimate-rim'),vieux:stat('fighting-pacific-championship'),
       femmes:stat('organisation-6'),lourds:stat('organisation-8')};`);
   assert.ok(r.riche.caisse>r.split.caisse&&r.split.caisse>r.fragile.caisse,'une caisse fragile démarre avec moins qu’une organisation riche');
-  assert.ok(r.fragile.taille<r.split.taille*0.9&&r.jeune.taille<r.split.taille*0.85,'un effectif mince'); assert.ok(r.split.taille>=130&&r.split.taille<=150);
+  assert.ok(r.fragile.taille<r.split.taille*0.9&&r.jeune.taille<r.split.taille*0.85,'un effectif mince'); assert.ok(r.split.taille>=330&&r.split.taille<=390); /* Corrections du 08/10/2026 (demande d'Anthony : environ 30 combattants par catégorie dans chaque organisation) remplace « 130 à 150 combattants, répartis comme le monde ». */
   assert.ok(r.jeune.age<r.split.age-2&&r.vieux.age>r.split.age+2,'jeunes combattants, effectif vieillissant');
   assert.ok(r.femmes.fem>r.split.fem+0.15,'les meilleures combattantes : plus de femmes'); assert.ok(r.femmes.nF>r.femmes.nH,'et mieux classées que les hommes');
   assert.ok(r.lourds.lourds>r.split.lourds+0.05,'les meilleurs poids lourds : plus de lourds');

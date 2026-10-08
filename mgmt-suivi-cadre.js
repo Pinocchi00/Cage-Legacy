@@ -36,9 +36,9 @@ function mgmtSuPucesHtml(F,div,fnDiv){
   return `<div class="mf-eff-puces">`+allDivisions().filter(d=>d.gender===F.sexe).map(d=>`<button type="button" class="${d.id===div?'on':''}" aria-pressed="${d.id===div}" onclick="${fnDiv}('${esc(d.id)}')">${esc(mgmtEffectifPuce(d))}</button>`).join('')+`</div>`;
 }
 /** Un nom en deux lignes : le prénom petit, le nom grand, qui rétrécit pour tenir `largeur`. */
-function mgmtSuNom(n,largeurPx,pPrenom,pNom,mini){
+function mgmtSuNom(n,largeurPx,pPrenom,pNom,mini,sur){
   const nom=mgmtSuMaj(n.last||n.name), prenom=mgmtSuMaj(n.first||'');
-  return `<span style="font-size:${pPrenom}px">${esc(prenom)}</span><span style="font-size:${mfCorps(nom,largeurPx,pNom,mini||36)}px">${esc(nom)}</span>`;
+  return `<span style="font-size:${pPrenom}px">${esc(prenom)}${sur?` <em style="font-style:normal;font-size:.8em;opacity:.86">« ${esc(mgmtSuMaj(sur))} »</em>`:''}</span><span style="font-size:${mfCorps(nom,largeurPx,pNom,mini||36)}px">${esc(nom)}</span>`;
 }
 /** Le nom court (« DAMAGAEV ») d'un combattant, en majuscules nettes. */
 function mgmtSuCourt(m,id){ return mgmtSuMaj(mgmtNomParId(m,id).last); }
@@ -59,12 +59,12 @@ function mgmtSuCarteClassement(m,x,selectionne,k){
   if(x.champion){
     return `<button type="button" class="mf-su-champ${choisi}" onclick="CL.mgmtSuClChoisir(${k})" ondblclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="Champion ${esc(n.name)}">`
       +mfPanneau(`<div class="mf-su-champ-in"><div class="mf-su-champ-c" aria-hidden="true">C</div>`
-        +`<div class="mf-su-champ-nom">${mgmtSuNom(n,330,44,104,52)}</div>`
+        +`<div class="mf-su-champ-nom">${mgmtSuNom(n,330,44,104,52,mgmtSurnomDe(m,x.id))}</div>`
         +`<div class="mf-su-champ-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
   }
   return `<button type="button" class="mf-su-rang${choisi}" onclick="CL.mgmtSuClChoisir(${k})" ondblclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="${esc(x.rang)} ${esc(n.name)}">`
     +mfPanneau(`<div class="mf-su-rang-in"><div class="mf-su-rang-evo">${mgmtSuEvolution(x,selectionne)}</div><div class="mf-su-rang-n">${esc(x.rang)}</div>`
-      +`<div class="mf-su-rang-nom">${mgmtSuNom(n,230,36,76,36)}</div>`
+      +`<div class="mf-su-rang-nom">${mgmtSuNom(n,230,36,76,36,mgmtSurnomDe(m,x.id))}</div>`
       +`<div class="mf-su-rang-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
 }
 function mgmtSuLigneClassement(m,x,selectionne,k){
@@ -72,7 +72,7 @@ function mgmtSuLigneClassement(m,x,selectionne,k){
   const dernier=d?`${mgmtSuMarque(d.issue)}<span>${esc(d.famille)}${d.adv?', contre '+esc(d.adv):''}</span>`:'<span>—</span>';
   return `<button type="button" class="mf-su-ligne${selectionne?' sel':''}" onclick="CL.mgmtSuClChoisir(${k})" ondblclick="CL.mgmtFiche('${esc(x.id)}')">`
     +`<div class="mf-su-l-rang">${esc(x.rang)}</div><div class="mf-su-l-evo">${mgmtSuEvolution(x,selectionne)}</div>`
-    +`<div class="mf-su-l-nom"><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}</span></div>`
+    +`<div class="mf-su-l-nom"><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}${(()=>{ const s=mgmtSurnomDe(m,x.id); return s?` · « ${esc(mgmtSuMaj(s))} »`:''; })()}</span></div>`
     +`<div class="mf-su-l-rec">${esc(x.W)}-${esc(x.L)}-${esc(x.D)}</div><div class="mf-su-l-serie">${esc(x.serie)}</div><div class="mf-su-l-dernier">${dernier}</div></button>`;
 }
 
