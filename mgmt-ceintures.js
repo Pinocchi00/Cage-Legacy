@@ -82,7 +82,7 @@ function mgmtTitleMemoryRows(m){
 function mgmtCanTitle(m,fight){
   if(!m||!fight) return false;
   const a=mgmtFighterById(m,fight.a),b=mgmtFighterById(m,fight.b);
-  if(!a||!b||a.id===b.id||a.div!==b.div||!mgmtAvailable(m,a)||!mgmtAvailable(m,b)) return false;
+  if(!a||!b||a.id===b.id||a.div!==b.div||!mgmtAvailable(m,a,b)||!mgmtAvailable(m,b,a)) return false;
   const belt=mgmtSplitTitle(m,a.div);
   if(belt.id&&belt.id!==a.id&&belt.id!==b.id) return false;
   return !mgmtCardFights(m).some(x=>x!==fight&&x.title===true

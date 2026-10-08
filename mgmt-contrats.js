@@ -15,6 +15,12 @@ const MGMT_CT_MIN=1;
 const MGMT_CT_MAX=8;
 const MGMT_CT_PRIME_PART=0.1;
 const MGMT_CT_ATTENTE=[3,5,7,10];
+/* Corrections du 08/10, lot 8 (D1) : le dernier palier a toujours une sortie. Au bout de MGMT_CT_DEPART_SOIREES soirées de plus sans combat, le combattant
+   demande son départ et s'en va, libre (aucune indemnité : il n'a rien joué). Tant qu'il est là, le matchmaker choisit : le laisser, le libérer en lui
+   payant le reste de son contrat, ou le tenter avec un nom moins connu que lui — il accepte un adversaire dont la renommée ne dépasse pas
+   MGMT_CT_REFUS_NOM_RATIO de la sienne. */
+const MGMT_CT_DEPART_SOIREES=3;
+const MGMT_CT_REFUS_NOM_RATIO=0.8;
 const MGMT_CT_RENOUV_MAJORATION=1.1;
 const MGMT_CT_BOURSE_ECHELLE=1.7;
 const MGMT_CT_REFUS_MARGE=25;
@@ -57,11 +63,30 @@ function mgmtContratPalier(m,f){
 }
 function mgmtContratRestants(f){ return f&&f.ct?Math.max(0,f.ct.n-f.ct.f):0; }
 
-/** Un combattant qui ne peut plus se booker à cause de son contrat : sans contrat, ou au dernier palier d'attente. Pur. */
-function mgmtContratIndispo(m,f){
+/** Un combattant qui ne peut plus se booker à cause de son contrat : sans contrat, ou au dernier palier d'attente. Au dernier palier, il accepte
+ *  pourtant un adversaire moins connu que lui (`contre`, une ligne de l'effectif) : le matchmaker peut le tenter. Pur. */
+function mgmtContratIndispo(m,f,contre){
   if(!mgmtContratsActif(m)||!f) return false;
   if(f.libre) return true;
-  return !!f.ct&&mgmtContratPalier(m,f)>=4;
+  if(!f.ct||mgmtContratPalier(m,f)<4) return false;
+  return !(contre&&contre.id!==f.id&&mgmtStar(contre)<=mgmtStar(f)*MGMT_CT_REFUS_NOM_RATIO);
+}
+
+/** Ce qu'il en coûte de libérer un combattant : le reste de son contrat, aux bourses prévues (k$). Pur. */
+function mgmtContratIndemnite(f){ return f&&f.ct?mgmtContratRestants(f)*f.ct.b:0; }
+
+/** Libère un combattant sous contrat : le reste de ce qu'on lui doit est payé, il devient sans contrat et rejoint le marché. Refusé s'il est sur la carte,
+ *  sans contrat ou si la caisse ne suffit pas. @returns {{ok:boolean,raison?:string,indemnite?:number}} */
+function mgmtContratLiberer(m,id){
+  const f=mgmtFighterById(m,id);
+  if(!mgmtContratsActif(m)) return {ok:false,raison:'inactif'};
+  if(!f||!f.ct) return {ok:false,raison:'inconnu'};
+  if(mgmtEngaged(m,f)) return {ok:false,raison:'carte'};
+  const indemnite=mgmtContratIndemnite(f);
+  if(!mgmtCanAfford(m,indemnite)) return {ok:false,raison:'caisse',indemnite};
+  m.treasury-=indemnite; delete f.ct; f.libre=true;
+  mgmtAddFact(m,{c:m.cycle,k:'libere',a:f.id});
+  return {ok:true,indemnite};
 }
 
 /** Après une soirée : le combat joué compte, un contrat épuisé fait un sans-contrat. */
@@ -73,10 +98,14 @@ function mgmtContratsApresSoiree(m,ids){
   }
 }
 
-/** Les paliers d'attente franchis ce cycle deviennent des faits (la parole et la presse sont d'auteur, lot 10). */
+/** Les paliers d'attente franchis ce cycle deviennent des faits (la parole et la presse sont d'auteur, lot 10). Le combattant qui a dépassé le dernier
+ *  palier de MGMT_CT_DEPART_SOIREES soirées s'en va (fait 'depart_attente'). */
 function mgmtContratsOuvreCycle(m){
   if(!mgmtContratsActif(m)) return;
   for(const f of m.roster||[]){
+    if(f.ct&&!mgmtIsRetired(f)&&mgmtContratAttente(m,f)>=MGMT_CT_ATTENTE[3]+MGMT_CT_DEPART_SOIREES&&!mgmtEngaged(m,f)){
+      delete f.ct; f.libre=true; mgmtAddFact(m,{c:m.cycle,k:'depart_attente',a:f.id}); continue;
+    }
     const p=mgmtContratPalier(m,f);
     if(p>=1&&p<=2&&!(m.facts||[]).some(x=>x&&x.k==='attend'&&x.a===f.id&&x.p===p&&x.c>=(Number.isSafeInteger(f.lastCycle)?f.lastCycle:-1))) mgmtAddFact(m,{c:m.cycle,k:'attend',a:f.id,p});
   }

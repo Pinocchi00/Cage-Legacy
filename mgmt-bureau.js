@@ -379,6 +379,8 @@ function mgmtNewPile(m){
   mgmtRetireRoster(m);
   mgmtExteriorArrive(m);
   mgmtVieOuvreCycle(m);
+  /* Corrections du 08/10, lot 8 : les paliers d'attente deviennent des faits, et le dernier palier a sa sortie (ce crochet n'était appelé nulle part). */
+  if(typeof mgmtContratsOuvreCycle==='function') mgmtContratsOuvreCycle(m);
   mgmtDemandesOuvreCycle(m);
   /* Lot 10 : les nouvelles du cycle (défis, public, combattants qui attendent) entrent au fil. */
   if(typeof mgmtFilMettreAJour==='function') mgmtFilMettreAJour(m);
@@ -497,7 +499,7 @@ function mgmtAcceptable(m,aff){
   if(!Number.isSafeInteger(m.card.sizeMain)||m.card.main.length>=m.card.sizeMain) return false;
   const a=mgmtFighterById(m,aff.a), b=mgmtFighterById(m,aff.b);
   if(!a||!b||a===b||a.div!==b.div) return false;
-  if(!mgmtAvailable(m,a)||!mgmtAvailable(m,b)) return false;
+  if(!mgmtAvailable(m,a,b)||!mgmtAvailable(m,b,a)) return false;
   if(mgmtEngaged(m,a)||mgmtEngaged(m,b)) return false;
   return true;
 }
