@@ -107,9 +107,11 @@ function mgmtLocation(salle){ return salle?Math.round(salle.capacite*MGMT_LOCATI
  *  (Les défis publics et la presse n'existent pas encore : lot 10.) Pur. @returns {Array<{a:string,b:string}>} */
 function mgmtPublicReclame(m){
   const vus=new Set(), out=[];
-  const ajoute=(a,b)=>{ if(!a||!b||a===b) return; const k=[a,b].sort().join('|'); if(vus.has(k)) return; vus.add(k); out.push({a,b}); };
-  if(typeof mgmtRivalites==='function') for(const r of mgmtRivalites(m)) ajoute(r.a,r.b);
-  if(typeof mgmtDemandesOuvertes==='function') for(const d of mgmtDemandesOuvertes(m)) if((d.want==='revanche'||d.want==='trilogie')&&d.target) ajoute(d.a,d.target);
+  const ajoute=(a,b,raison,texte)=>{ if(!a||!b||a===b) return; const k=[a,b].sort().join('|'); if(vus.has(k)) return; vus.add(k); out.push({a,b,raison,texte}); };
+  /* Corrections du 08/10, lot 10 (D4) : chaque combat réclamé dit pourquoi (mgmtReclamesRaisons). */
+  if(typeof mgmtReclamesRaisons==='function') for(const r of mgmtReclamesRaisons(m)) ajoute(r.a,r.b,r.raison,r.texte);
+  else if(typeof mgmtRivalites==='function') for(const r of mgmtRivalites(m)) ajoute(r.a,r.b,r.k);
+  if(typeof mgmtDemandesOuvertes==='function') for(const d of mgmtDemandesOuvertes(m)) if((d.want==='revanche'||d.want==='trilogie')&&d.target) ajoute(d.a,d.target,d.want);
   return out;
 }
 

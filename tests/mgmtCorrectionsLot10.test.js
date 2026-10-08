@@ -60,3 +60,47 @@ test('10.2 — Un combat joué porte son indice de décision serrée, à partir 
   assert.ok(r.n>0,'au moins une décision en 60 combats');
   assert.ok(r.vus.every(v=>[0.4,0.7,1].includes(v)));
 });
+
+/* D4 : ce qui fait réclamer un combat. */
+const DEUX=`const m=G.mgmt; m.cycle=20; m.roster.forEach(f=>{ f.lastCycle=20; }); const div=m.roster.find(g=>mgmtAvailable(m,g)).div;
+  const [x,y,z]=m.roster.filter(f=>f.div===div&&mgmtAvailable(m,f)).slice(0,3);
+  const trace=(f,W,L)=>({id:f.id,W,L,D:0,age:25,lastCycle:null});
+  const ajoute=(slot,gagnant,perdant,family,round,c)=>m.hist.push({c:c===undefined?m.cycle-1:c,slot,seed:1,rounds:3,a:trace(gagnant,3,3),b:trace(perdant,8,1),winner:'A',family,round});`;
+
+test('10 / D4 — Une humiliation en préliminaire ne fait plus réclamer de revanche ; la même en carte principale, si', () => {
+  const win=neuve();
+  const r=res(win,`${DEUX} m.hist=[]; ajoute('prelim',x,y,'ko',1);
+    const prelim=mgmtRivalites(m).length; m.hist=[]; ajoute('main',x,y,'ko',1); const main=mgmtRivalites(m);
+    return {prelim,main:main.length,raison:mgmtPublicReclame(m).find(q=>q.a===y.id||q.b===y.id).raison};`);
+  assert.equal(r.prelim,0); assert.equal(r.main,1); assert.equal(r.raison,'rivalite');
+});
+
+test('10 / D4 — Le vainqueur d’un combat principal fini avant la limite appelle le champion ou le premier de sa catégorie, au micro', () => {
+  const win=neuve();
+  const r=res(win,`${DEUX} m.hist=[]; ajoute('main',x,y,'ko',3);
+    const l=mgmtReclamesRaisons(m).filter(q=>q.raison==='micro');
+    const ok=l.length===1&&l[0].a===x.id&&l[0].b!==x.id&&l[0].b!==y.id;
+    m.hist=[]; ajoute('main',x,y,'dec',3); const decision=mgmtReclamesRaisons(m).filter(q=>q.raison==='micro').length;
+    m.hist=[]; ajoute('main',x,y,'ko',3,m.cycle-6); const vieux=mgmtReclamesRaisons(m).filter(q=>q.raison==='micro').length;
+    return {ok,decision,vieux,texte:l[0]&&l[0].texte};`);
+  assert.equal(r.ok,true); assert.equal(r.decision,0,'une décision ne fait pas appeler au micro'); assert.equal(r.vieux,0,'un appel s’éteint');
+  assert.match(r.texte,/Appel au micro/);
+});
+
+test('10 / D4 — Deux têtes de classement qui ne se sont jamais rencontrées se chambrent sur les réseaux, un cycle sur deux ; jamais une paire déjà rencontrée', () => {
+  const win=neuve();
+  const r=res(win,`const m=G.mgmt; m.hist=[]; const pairs=[]; let impairs=0;
+    for(let c=2;c<=40;c++){ m.cycle=c; m.roster.forEach(f=>{ f.lastCycle=c; }); const l=mgmtReclamesRaisons(m).filter(q=>q.raison==='reseaux'); if(c%2) impairs+=l.length; else pairs.push(l.length); }
+    m.roster.forEach(f=>{ f.lastCycle=40; }); const l=mgmtReclamesRaisons(Object.assign(m,{cycle:40})).filter(q=>q.raison==='reseaux');
+    const a=l[0]; m.hist.push({c:39,slot:'main',seed:1,rounds:3,a:{id:a.a,W:1,L:0,D:0,age:25,lastCycle:null},b:{id:a.b,W:1,L:0,D:0,age:25,lastCycle:null},winner:'A',family:'dec',round:3});
+    const apres=mgmtReclamesRaisons(m).filter(q=>q.raison==='reseaux'&&[q.a,q.b].sort().join()===[a.a,a.b].sort().join()).length;
+    return {impairs,pairesTotal:pairs.reduce((s,v)=>s+v,0),apres};`);
+  assert.equal(r.impairs,0); assert.ok(r.pairesTotal>=15,'presque chaque cycle pair en donne une'); assert.equal(r.apres,0);
+});
+
+test('10 / D4 — Le booking dit pourquoi le combat est réclamé', () => {
+  const win=neuve();
+  const r=res(win,`${DEUX} m.hist=[]; ajoute('main',x,y,'ko',1); CL.go('mgmt_carte');
+    const q=mgmtPublicReclame(m).find(v=>v.a===y.id); return {raison:q.raison,texte:q.texte};`);
+  assert.equal(r.raison,'rivalite'); assert.match(r.texte,/Revanche après une humiliation/);
+});
