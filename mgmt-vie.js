@@ -69,6 +69,11 @@ function mgmtVieStream(id,cycle,couche){
   return mulberry32(duelFnv1a32('mgmt-vie|'+String(id)+'|'+cycle+'|'+(couche||'moment')));
 }
 
+/** Le texte d'auteur qui raconte ce moment dans la presse, ou null (corrections du 08/10, 3.3). Le libellé du catalogue n'est pas un texte : sans `texte`
+ *  écrit et relu, le moment ne paraît pas dans la presse. */
+function mgmtVieTexte(moment){
+  return moment&&typeof moment.texte==='string'&&moment.texte.trim()?moment.texte:null;
+}
 function mgmtVieMomentById(id){
   return MGMT_MOMENTS.find(x=>x.id===id)||null;
 }

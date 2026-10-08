@@ -117,6 +117,8 @@ function mgmtLendemainMethode(t){
 function mgmtLendemainResultatsHtml(m){
   const e=m.lastEvent;
   let html='', mains=0, prelimVu=false;
+  /* Corrections du 08/10, 3.1 : les combats sont dans l'ordre de passage — le DERNIER de la carte principale est le combat principal. */
+  const nMain=e.fights.filter((x,k)=>{ const tk=mgmtSoireeTrace(m,k); return tk&&tk.slot==='main'; }).length;
   for(let i=0;i<e.fights.length;i++){
     const f=e.fights[i], t=mgmtSoireeTrace(m,i);
     const frA=mgmtFighterById(m,f.a), frB=mgmtFighterById(m,f.b);
@@ -131,7 +133,7 @@ function mgmtLendemainResultatsHtml(m){
     if(t){
       if(t.slot==='main'){
         mains++;
-        slot=mains===1?MGMT_LD_LABELS.mainEvent:(mains===2?MGMT_LD_LABELS.coMain:'');
+        slot=mains===nMain?MGMT_LD_LABELS.mainEvent:(mains===nMain-1&&nMain>=2?MGMT_LD_LABELS.coMain:'');
       }else{
         slot=prelimVu?'':(prelimVu=true,MGMT_LD_LABELS.prelims);
       }

@@ -120,17 +120,12 @@ function mgmtMediasAffiche(m){
     .map(x=>Object.assign(x,{id:a.id,div:a.div}));
 }
 
-/** Le lendemain : le combat principal de la dernière soirée (le premier de la
- *  carte principale, décision T1 du 02/10). @returns {Array} */
-function mgmtMediasLendemain(m){
-  if(!m||m.effectifs!==1||!m.lastEvent||!Array.isArray(m.hist)) return [];
-  const c=m.lastEvent.cycle;
-  const mains=m.hist.filter(t=>t&&t.c===c&&t.slot==='main'&&t.winner!=='D');
-  const t=mains[0];
-  if(!t) return [];
+/** La scène d'un combat joué, lue sur sa trace (gagnant en a, perdant en b), ou null pour un nul. */
+function mgmtMediasSceneDe(m,t){
+  if(!t||t.winner==='D') return null;
   const gagnant=t.winner==='A'?t.a:t.b, perdant=t.winner==='A'?t.b:t.a;
   const a=mgmtFighterById(m,gagnant.id), b=mgmtFighterById(m,perdant.id);
-  if(!a||!b) return [];
+  if(!a||!b) return null;
   /* La série et la surprise se lisent dans la trace d'avant combat. */
   const serie=mgmtResultatsDetail(m,a).filter((x,i,l)=>l.slice(0,i+1).every(y=>y.issue==='win')).length>=3;
   const surprise=(perdant.W-perdant.L)>(gagnant.W-gagnant.L);
@@ -138,8 +133,41 @@ function mgmtMediasLendemain(m){
     cat:mgmtDivisionLabel(a.div),serie,surprise,va:mgmtVoixActuelle(m,a),vb:mgmtVoixActuelle(m,b)};
   scene.pionniere=mgmtMediasPionniere(m,t);
   scene.guerre=scene.va==='le-violent-heureux'&&scene.vb==='le-violent-heureux'&&(t.family==='dec'||t.round>=3);
-  return mgmtMediasScene(m,'lendemain',scene,t.a.id+'|'+t.b.id,MGMT_MEDIAS_MAX)
-    .map(x=>Object.assign(x,{id:a.id,div:a.div}));
+  return scene;
+}
+
+/** Le poids d'un résultat pour la presse du lendemain (corrections du 08/10, 3.2) : un champion battu ou une ceinture qui change de
+ *  main d'abord, puis un favori fini au premier round. 0 : rien de marquant. Pur. */
+function mgmtMediasMarquant(m,t,h){
+  if(!t||t.winner==='D') return 0;
+  const gagnant=t.winner==='A'?t.a:t.b, perdant=t.winner==='A'?t.b:t.a;
+  const champPerd=typeof mgmtRangAvant==='function'&&mgmtRangAvant(m,perdant.id,perdant.div,t.c,h)==='C';
+  if(champPerd) return 3;
+  const favoriFini=t.family!=='dec'&&t.round===1&&(perdant.W-perdant.L)>(gagnant.W-gagnant.L);
+  return favoriFini?2:0;
+}
+
+/** Le lendemain : d'abord le combat principal de la dernière soirée (le dernier de la carte principale, dans l'ordre de passage),
+ *  puis les résultats les plus marquants — champion battu, favori fini au premier round, ceinture qui change de main
+ *  (corrections du 08/10, 3.1 et 3.2). @returns {Array} */
+function mgmtMediasLendemain(m){
+  if(!m||m.effectifs!==1||!m.lastEvent||!Array.isArray(m.hist)) return [];
+  const c=m.lastEvent.cycle;
+  const traces=[]; m.hist.forEach((t,h)=>{ if(t&&t.c===c) traces.push({t,h}); });
+  const mains=traces.filter(x=>x.t.slot==='main'&&x.t.winner!=='D');
+  const principal=mains[mains.length-1];
+  const lignes=[];
+  const marquants=traces.filter(x=>x!==principal).map(x=>({x,p:mgmtMediasMarquant(m,x.t,x.h)})).filter(y=>y.p>0).sort((y,z)=>z.p-y.p||y.x.h-z.x.h).slice(0,1);
+  if(principal){
+    const scene=mgmtMediasSceneDe(m,principal.t);
+    if(scene) for(const l of mgmtMediasScene(m,'lendemain',scene,principal.t.a.id+'|'+principal.t.b.id,marquants.length?2:MGMT_MEDIAS_MAX))
+      lignes.push(Object.assign(l,{id:scene.a.id,div:scene.a.div}));
+  }
+  for(const {x} of marquants){
+    const scene=mgmtMediasSceneDe(m,x.t);
+    if(scene) for(const l of mgmtMediasScene(m,'lendemain',scene,x.t.a.id+'|'+x.t.b.id,1)) lignes.push(Object.assign(l,{id:scene.a.id,div:scene.a.div}));
+  }
+  return lignes;
 }
 
 /** Le rebook : un combattant de la carte dont le dernier combat est un KO subi

@@ -5,7 +5,8 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
-const NEUVE=`setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m};`;
+/* Corrections du 08/10, 3.3 : sans texte d'auteur un moment ne paraît pas dans la presse ; ces tests lisent le conteur, ils donnent donc un texte à chaque moment (fixture). */
+const NEUVE=`MGMT_MOMENTS.forEach(x=>{ if(!x.texte) x.texte=x.libelle; }); setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m};`;
 
 test('H6 — le cercle tient 5, les suivis 15, un membre du cercle n’est plus un simple suivi', () => {
   const win=newGameWindow();

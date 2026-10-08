@@ -38,7 +38,7 @@ function mgmtFilLignes(m){
   if(typeof mgmtRivalitesLignes==='function') for(const r of mgmtRivalitesLignes(m)) out.push(r.text);
   if(typeof mgmtParolesDeLaSemaine==='function') for(const p of mgmtParolesDeLaSemaine(m)) out.push(mgmtParoleLigne(p));
   if(typeof mgmtMediasLignes==='function') for(const p of mgmtMediasLignes(m)) out.push(p.nom+' : '+p.texte);
-  for(const c of mgmtConteurCandidats(m,m.cycle)) out.push(c.name+' : '+c.moment.libelle);
+  for(const c of mgmtConteurCandidats(m,m.cycle)) out.push(c.name+' : '+mgmtVieTexte(c.moment));
   return out.slice(0,MGMT_FIL_MAX_LIGNES);
 }
 
@@ -69,7 +69,7 @@ function mgmtMouvementHtml(m){
     +`<div class="mgmt-popup-lien">${c.lien==='cercle'?'Ton cercle':'Tes suivis'}</div>`
     +`<h4>${esc(f.name)}${sur?` <em>« ${esc(sur)} »</em>`:''}</h4>`
     +`<p class="mgmt-popup-portrait">${role?esc(role.libelle)+' · ':''}${esc(mgmtDivisionLabel(f.div))} · ${esc(f.W)}-${esc(f.L)}${f.D?'-'+esc(f.D):''}</p>`
-    +`<p class="mgmt-popup-moment">${esc(c.moment.libelle)} <span>${esc(c.moment.relais.join(' · '))}</span></p>`
+    +`<p class="mgmt-popup-moment">${esc(mgmtVieTexte(c.moment))} <span>${esc(c.moment.relais.join(' · '))}</span></p>`
     +`<div class="mgmt-popup-actions"><button type="button" onclick="CL.mgmtPopupFiche('${id}')">Voir la fiche</button>`
     +(libre?`<button type="button" onclick="CL.mgmtPopupCombat('${id}')">Lui trouver un combat</button>`:'')+`</div></aside>`;
 }
