@@ -119,14 +119,16 @@ function mgmtContratsOffreHtml(m,x){
   const demande=mgmtBourseSouhaitee(m,cible,reno), b=Number.isFinite(F.b)?F.b:demande;
   const n=Math.max(MGMT_CT_MIN,Math.min(MGMT_CT_MAX,F.n));
   const pips=[]; for(let i=1;i<=8;i++) pips.push(`<button type="button" class="${i<=n?'on':''}" onclick="CL.mgmtContratsN(${i})">${i}</button>`);
-  const actuel=reno?ligne('Contrat en cours',`${mgmtContratRestants(f)} restant${mgmtContratRestants(f)>1?'s':''} · ${mgmtEuros(f.ct.b)} par combat`):'';
+  const rest=reno?mgmtContratRestants(f):0;
+  /* Planche « Contrats » : le contrat en cours se lit d'un coup d'œil, en grand, avant le nouveau. */
+  const actuel=reno?`<div class="mf-ct-cours"><div class="mf-eff-fiche-s">Contrat en cours</div><div class="mf-ct-cours-l"><b>${esc(rest)}</b><span>combat${rest>1?'s':''}<br>restant${rest>1?'s':''}</span><em>${esc(mgmtEuros(f.ct.b))} par combat</em></div></div>`:'';
   const prime=mgmtContratPrime(n,b);
   /* Corrections du 08/10, lot 8 : au dernier palier il refuse tout combat sauf contre un nom moins connu, et il finit par partir ; le joueur peut aussi le libérer. */
   const palier4=reno&&mgmtContratPalier(m,f)>=4;
   const depart=palier4?ligne('Il refuse tout combat',`sauf contre un nom moins connu · part dans ${Math.max(0,mgmtCtSeuils(m)[3]+mgmtCtDepart(m)-mgmtContratAttente(m,f))} soirée${mgmtCtSeuils(m)[3]+mgmtCtDepart(m)-mgmtContratAttente(m,f)>1?'s':''}`):'';
   const libere=reno?mfBouton('Libérer · '+mgmtEuros(mgmtContratIndemnite(f)),{touche:'L',onclick:'CL.mgmtContratsLiberer()'}):'';
-  const corps=`<div class="mf-ct-offre"><div class="mf-eff-fiche-s">TON OFFRE</div>`
-    +actuel+depart
+  const corps=`<div class="mf-ct-offre">${actuel}<div class="mf-eff-fiche-s">${reno?'NOUVEAU CONTRAT':'TON OFFRE'}</div>`
+    +depart
     +ligne('Nombre de combats',n+' COMBAT'+(n>1?'S':''))+`<div class="mf-ct-n">${pips.join('')}</div>`
     +ligne('Il demande, par combat',mgmtEuros(demande))+ligne('Tu proposes, par combat',mgmtEuros(b))+ligne('Prime de signature',mgmtEuros(prime))
     +mgmtContratsDitHtml(m,x)
