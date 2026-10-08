@@ -20,7 +20,7 @@ const MGMT_SOIREE_TEXTES={
   prelim:'PRÉLIM {n}', combat:'COMBAT {n}', coprincipal:'CO-PRINCIPAL', principal:'COMBAT PRINCIPAL',
   court:{prelim:'PRÉLIM {n}', combat:'COMBAT {n}', coprincipal:'CO-PRINCIPAL', principal:'PRINCIPAL'},
   mois:'{nom} attend depuis {n} mois', battu:'{perdant} battu par {gagnant}', nul:'{a} et {b} se sont quittés sur un nul',
-  ceinture:'Pour la ceinture', public:'Réclamé par le public', defi:'Défi public',
+  ceinture:'Pour la ceinture', sansCeinture:'Ceinture pas en jeu', public:'Réclamé par le public', defi:'Défi public',
   rounds:{3:'trois',5:'cinq'},
 };
 /** Ce qu'on peut lire d'un combattant déjà vu. relu:false */
@@ -276,6 +276,7 @@ function mgmtAvantCote(m,p,cote){
 function mgmtSoireeEnjeux(m,p,A,B){
   const T=MGMT_SOIREE_TEXTES, out=[], t=p.trace;
   if(p.titre) out.push(T.ceinture);
+  else if(A.rang==='C'||B.rang==='C') out.push(T.sansCeinture);   /* corrections du 08/10, 2.2 : un champion qui combat sans sa ceinture, on le dit */
   for(const c of [A,B]) if(c.attente>=3) out.push(T.mois.replace('{nom}',c.last).replace('{n}',c.attente));
   /* La dernière rencontre, avant ce soir. */
   for(let i=p.h-1;i>=0;i--){

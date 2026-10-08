@@ -376,7 +376,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-car-enjeux{margin-top:22px;display:flex;flex-direction:column;gap:12px}
 .mf-car-enjeux div:last-child{display:flex;gap:8px}
 .mf-car-enjeux span{height:40px;padding:0 16px;background:var(--mf-ligne);font-size:22px;line-height:40px}
-.mf-car-boutons{margin-top:auto;display:flex;gap:16px}
+.mf-car-boutons{margin-top:auto;display:flex;gap:16px;flex-wrap:wrap;max-width:100%}
+.mf-car-boutons .mf-bouton{min-width:0}
 .mf-car-d{width:410px;flex:none}
 .mf-car-tri{display:flex;justify-content:space-between;font-size:22px;line-height:1;color:var(--mf-texte2)}
 .mf-car-advs{display:flex;flex-direction:column;gap:8px;flex:1}

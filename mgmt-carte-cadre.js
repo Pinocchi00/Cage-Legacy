@@ -39,10 +39,19 @@ function mgmtCarteFormeHtml(m,f){
   return l.length?`<div class="mf-eff-forme">${l.map(mfMarque).join('')}</div>`:'<b>—</b>';
 }
 
+/** Le contrat restant, tel que l'écran Contrats le donne (corrections du 08/10, 2.1) : le même nombre, jamais écrit en dur. */
+function mgmtCarteContratTexte(f){
+  if(!f) return '?';
+  if(f.libre) return 'LIBRE';
+  if(!f.ct) return '—';
+  const n=mgmtContratRestants(f);
+  return n+' COMBAT'+(n>1?'S':'');
+}
+
 function mgmtCarteColonne(m,f){
-  if(!f) return {rang:'?',bilan:'?',allonge:'?',style:'?',forme:'<b>?</b>'};
+  if(!f) return {rang:'?',contrat:'?',bilan:'?',allonge:'?',style:'?',forme:'<b>?</b>'};
   const rg=mgmtDivisionRank(m,f), phys=mgmtCombatProfile(f).phys||{};
-  return {rang:rg?'N°'+rg:'—',bilan:`${f.W}-${f.L}-${f.D||0}`,
+  return {rang:rg?'N°'+rg:'—',contrat:mgmtCarteContratTexte(f),bilan:`${f.W}-${f.L}-${f.D||0}`,
     allonge:Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?',
     style:mfNet(mgmtEffectifFacon(m,f)||'?'),forme:mgmtCarteFormeHtml(m,f)};
 }
@@ -63,7 +72,7 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
     const fa=mgmtFighterById(m,fight.a), fb=mgmtFighterById(m,fight.b);
     const titre=fight.title===true;
     return `<div class="mf-car-slot confirme${cur?' choisi':''}"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">`
-      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${(titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">TITRE</button>`:''}</div>`
+      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${(titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:''}</div>`
       +`<div class="mf-car-slot-n"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b><span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b></div></div>`
       +`<div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
   }
@@ -79,12 +88,18 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
     +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span></div><div class="mf-car-slot-v">À composer</div></div></div>`;
 }
 
-function mgmtCarteAdvLigne(m,f,i,choisi){
+/** Les noms de famille portés par plusieurs combattants de la liste (corrections du 08/10, 2.6) : on y ajoute l'initiale du prénom. */
+function mgmtCarteHomonymes(liste){
+  const n=new Map();
+  for(const f of liste){ const k=mfNet(f.last||f.name); n.set(k,(n.get(k)||0)+1); }
+  return new Set([...n].filter(([,c])=>c>1).map(([k])=>k));
+}
+function mgmtCarteAdvLigne(m,f,i,choisi,homo){
   const sel=mgmtSelectable(m,f,MGMT_CART.pick);
   const raison=!mgmtAvailable(m,f)?'Indisponible':(mgmtEngaged(m,f)?'Sur la carte':'');
   const rg=mgmtDivisionRank(m,f);
   return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${esc(f.id)}')">`
-    +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(mfNet(f.last||f.name))}</b>`
+    +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}</b>`
     +`<i>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</i></span><span class="mf-car-adv-s">${esc(raison||' ')}</span></span></button>`;
 }
 
@@ -111,10 +126,16 @@ function scr_mgmt_carte_cadre(){
   const rounds=duo?(main.length===0?5:3):'';
   const peutTitre=duo&&typeof mgmtCanTitle==='function'&&mgmtCanTitle(m,{a:A.id,b:B.id});
   const enjeux=[]; if(peutTitre) enjeux.push('Titre possible'); if(rounds) enjeux.push(rounds+' rounds');
+  /* Corrections du 08/10, 2.3 et 2.4 : ce que le booking sait de la paire, dit avant la confirmation. */
+  if(duo){
+    if(typeof mgmtPublicReclame==='function'&&mgmtPublicReclame(m).some(r=>(r.a===A.id&&r.b===B.id)||(r.a===B.id&&r.b===A.id))) enjeux.push('Combat réclamé');
+    if(typeof mgmtMemeCamp==='function'&&m.effectifs===1&&mgmtMemeCamp(m,A,B)) enjeux.push('Même camp : les opposer les contrarie');
+    if(typeof mgmtFratrie==='function'&&m.effectifs===1&&mgmtFratrie(m,A).includes(B.id)) enjeux.push('Frère et sœur : les opposer les contrarie');
+  }
   const comp=duo
     ?mgmtCarteLigneComp(esc(ca.rang),esc(cb.rang),'Classement')+mgmtCarteLigneComp(esc(ca.bilan),esc(cb.bilan),'Palmarès')
       +mgmtCarteLigneComp(esc(ca.allonge),esc(cb.allonge),'Allonge')+mgmtCarteLigneComp(esc(ca.style),esc(cb.style),'Style')
-      +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp('<b>—</b>','<b>—</b>','Contrat restant')
+      +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp(`<b>${esc(ca.contrat)}</b>`,`<b>${esc(cb.contrat)}</b>`,'Contrat restant')
     :`<div class="mf-car-aide">${esc(plein?'La carte principale est complète.':(A?'Choisis son adversaire dans la liste.':'Aucun combattant disponible dans cette catégorie.'))}</div>`;
   const faits=duo&&enjeux.length?`<div class="mf-car-enjeux"><div class="mf-cal-lib">Enjeux</div><div>${enjeux.map(e=>`<span>${esc(e)}</span>`).join('')}</div></div>`:'';
   const prop=typeof mgmtPropositionHtml==='function'?mgmtPropositionHtml(m):'';
@@ -129,7 +150,8 @@ function scr_mgmt_carte_cadre(){
 
   /* La droite : les adversaires, six lignes qui suivent le curseur. */
   const debut=Math.min(Math.max(0,cur-MGMT_CARTE_LIGNES+1),Math.max(0,liste.length-MGMT_CARTE_LIGNES));
-  const lignes=liste.slice(debut,debut+MGMT_CARTE_LIGNES).map((f,k)=>mgmtCarteAdvLigne(m,f,debut+k,debut+k===cur)).join('');
+  const homo=mgmtCarteHomonymes(liste);
+  const lignes=liste.slice(debut,debut+MGMT_CARTE_LIGNES).map((f,k)=>mgmtCarteAdvLigne(m,f,debut+k,debut+k===cur,homo)).join('');
   const libres=liste.filter(f=>mgmtSelectable(m,f,MGMT_CART.pick)).length;
   const droite=mfPanneau(`<div class="mf-car-t">${pickF?'ADVERSAIRES':'COMBATTANTS'}</div>`
     +`<div class="mf-car-tri"><span>${libres} libres sur ${liste.length}</span><span>Tri : classement</span></div>`

@@ -146,7 +146,7 @@ test('Camps — l’écran défile les salles, annonce le refus, Entrée ouvre u
   const refus=res(win,`const l=mgmtCampsListe(G.mgmt); return l.filter(g=>g.refus).length;`);
   assert.ok(refus>=1);
   win.eval(`MGMT_SU_CA.i=mgmtCampsListe(G.mgmt).findIndex(g=>g.refus); render();`);
-  assert.ok(texte(win).includes('Ils refusent de s’affronter entre eux'));
+  assert.ok(texte(win).includes('Les opposer les contrarie'));
   touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_fiche');
 });
 

@@ -50,7 +50,7 @@ function scr_mgmt_prelims(){
   const comp=duo
     ?mgmtCarteLigneComp(esc(ca.rang),esc(cb.rang),'Classement')+mgmtCarteLigneComp(esc(ca.bilan),esc(cb.bilan),'Palmarès')
       +mgmtCarteLigneComp(esc(ca.allonge),esc(cb.allonge),'Allonge')+mgmtCarteLigneComp(esc(ca.style),esc(cb.style),'Style')
-      +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp('<b>—</b>','<b>—</b>','Contrat restant')
+      +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp(`<b>${esc(ca.contrat)}</b>`,`<b>${esc(cb.contrat)}</b>`,'Contrat restant')
     :`<div class="mf-car-aide">${esc(P.aide?P.aide:m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE)?'Leïla prépare les préliminaires quand la carte principale est complète.':'Ce préliminaire n’est pas encore trouvé.')}</div>`;
   const trou=!bloc&&m.card.main.length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&m.card.prelims.length<(m.card.sizePrelims||MGMT_PRELIM_SIZE);
   const boutons=`<div class="mf-car-boutons">`
