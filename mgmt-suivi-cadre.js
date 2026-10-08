@@ -205,9 +205,8 @@ function mgmtSuCampGrand(m,g){
   const n=g.membres.length, couleur=mgmtSuCoulCamp(g), mots=String(g.coach).split(' ');
   const prenom=mots.shift()||'', nom=mots.join(' ');
   const lignes=g.membres.slice(0,6).map(f=>{
-    const rang=mgmtDivisionRank(m,f), champion=mgmtSplitTitle(m,f.div).id===f.id;
     return `<div class="mf-su-ca-m"><div class="mf-su-ca-mn"><b>${esc(mgmtSuMaj(f.last||f.name))}</b><span>${esc(f.first||'')}</span></div>`
-      +`<span class="mf-su-ca-mc">${esc(mgmtEffectifPuce(divById(f.div)).charAt(0)+mgmtEffectifPuce(divById(f.div)).slice(1).toLowerCase())}</span><b>${champion?'C':(rang===null?'—':'N°'+esc(rang))}</b></div>`;
+      +`<span class="mf-su-ca-mc">${esc(mgmtEffectifPuce(divById(f.div)).charAt(0)+mgmtEffectifPuce(divById(f.div)).slice(1).toLowerCase())}</span><b>${esc(mgmtRangTexte(m,f))}</b></div>`;
   }).join('');
   const refus=g.refus?`<div class="mf-su-ca-refus">Les opposer les contrarie</div>`:'<div></div>';
   const corps=`<div class="mf-su-ca-g1"><div class="mf-su-ca-bloc"><span>LE COACH</span><b>${esc(mgmtSuMaj(prenom))}${nom?'<br>'+esc(mgmtSuMaj(nom)):''}</b></div>`

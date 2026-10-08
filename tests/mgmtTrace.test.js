@@ -197,7 +197,8 @@ test('MGMT T5 — fiche, adversaire échappé, cycles et rejeu à la souris', ()
   for(const t of traces){
     const opp=t.a.id===id?t.b:t.a;
     assert.ok(html.includes(win.eval(`mfNet(${JSON.stringify(opp.name)})`)),'adversaire du cycle '+t.c);
-    assert.ok(html.includes('Cycle '+t.c),'date disponible dans la trace');
+    assert.ok(html.includes(win.eval(`mgmtSoireeNomDate(G.mgmt,${t.c})`).replace(/&/g,'&amp;')),'le nom et la date de la soirée, jamais « Cycle »');
+    assert.ok(!html.includes('Cycle '+t.c));
   }
   /* Une ancienne trace peut contenir un nom hostile ; la fiche ne doit
      jamais l'injecter en HTML, même si l'adversaire a quitté le roster. */

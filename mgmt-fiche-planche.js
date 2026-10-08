@@ -113,7 +113,7 @@ const MGMT_FICHE_CONTRAT_OCTO='M12.6 2.5h14.8l10.1 10.1v14.8L27.4 37.5H12.6L2.5 
 /** La bannière : le tunnel (rouge, jaune pour un champion), le nom, le palmarès, le rang. */
 function mgmtFicheBanniereHtml(m,f,champion){
   const nom=mfNet(f.last||f.name), prenom=mfNet(f.first||'');
-  const rang=champion?'C':(function(){ const r=mgmtDivisionRank(m,f,'organization'); return r===null||r===undefined?'—':'N°'+r; })();
+  const rang=mgmtRangTexte(m,f);
   const forme=mgmtEffectifForme(m,f);
   const d=divById(f.div), cat=d?String(mgmtDivisionLabel(d)).toUpperCase().split(' '):[];
   return `<div class="mf-fb${champion?' or':''}" data-m="head"><i class="mf-fb-img" aria-hidden="true"></i>`
@@ -195,7 +195,7 @@ function mgmtFicheCombatsHtml(m,f,line){
     const rnd=(t.family==='dec'||t.family==='draw')?'':(d?mgmtRoundTexte(d):'');
     const geste=d&&d.geste?d.geste:'';
     return `<div class="mf-fi-co${k===curseur?' choisie':''}" onclick="CL.mgmtHistoriqueRevoir(${i})"><div class="mf-fi-cn">${k+1}</div>`
-      +`<div class="mf-fi-ct"><b>${esc(mfNet(adv.name))}</b><span>${esc(methode)}${rnd?', '+esc(rnd):''} · Cycle ${esc(t.c)}</span></div>`
+      +`<div class="mf-fi-ct"><b>${esc(mfNet(adv.name))}</b><span>${esc(methode)}${rnd?', '+esc(rnd):''} · ${esc(mgmtSoireeNomDate(m,t.c))}</span></div>`
       +`<div class="mf-fi-cg">${esc(geste?'Finition : '+geste:'')}</div><div class="mf-fi-cm">${mfMarque(issue)}</div></div>`;
   }).join('');
   const autres=Math.max(0,total-vus), parcours=line&&line.trace?mgmtFicheParcoursHtml(line.trace):'';

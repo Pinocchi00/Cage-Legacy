@@ -355,11 +355,9 @@ function mfAfficheDonnees(m){
   const a=mgmtFighterById(m,cf.a), b=mgmtFighterById(m,cf.b);
   if(!a||!b) return null;
   const fiche=f=>{
-    const rang=mgmtDivisionRank(m,f,'organization');
-    const champion=typeof mgmtSplitTitle==='function'&&mgmtSplitTitle(m,f.div).id===f.id;
     const forme=mgmtResultatsDetail(m,f).slice(0,3).reverse().map(x=>x.issue==='win'?'v':(x.issue==='loss'?'d':'n'));
     return {prenom:mfNet(f.first||String(f.name).split(' ')[0]),nom:mfNet(f.last||f.name),rec:`${f.W||0}-${f.L||0}-${f.D||0}`,
-      ligneA:`${champion?'C':(rang===null?'—':'N°'+rang)} · ${mgmtDivisionLabel(f.div)}`,ligneB:`${f.age} ans`,forme};
+      ligneA:`${mgmtRangTexte(m,f)} · ${mgmtDivisionLabel(f.div)}`,ligneB:`${f.age} ans`,forme};
   };
   const autres=m.card.main.filter(x=>x&&x.a&&x.b&&x!==cf).slice(0,2).map(x=>{
     const p=mgmtFighterById(m,x.a), q=mgmtFighterById(m,x.b);

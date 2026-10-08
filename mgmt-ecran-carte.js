@@ -49,6 +49,22 @@ function mgmtDivisionLabel(div){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/** Le rang tel que le jeu l'écrit PARTOUT (décision du 5 octobre, corrections du 08/10, 4.3) : « C » pour le champion, puis 1, 2, 3 — le champion ne
+ *  compte pas dans la suite. null : hors classement. @param {string} [scope] 'organization' (défaut) ou 'world'. @returns {'C'|number|null} */
+function mgmtRangAffichable(m,f,scope){
+  if(!m||!f) return null;
+  const t=typeof mgmtSplitTitle==='function'?mgmtSplitTitle(m,f.div):null;
+  if(t&&t.id===f.id) return 'C';
+  const l=mgmtDivisionRanking(m,f.div,scope||'organization').filter(x=>!(t&&t.id===x.id));
+  const i=l.findIndex(x=>x.id===f.id);
+  return i>=0?i+1:null;
+}
+/** Le même rang en texte de liste : « C », « N°3 » ou « — ». */
+function mgmtRangTexte(m,f,scope){
+  const r=mgmtRangAffichable(m,f,scope);
+  return r==='C'?'C':(r===null?'—':'N°'+r);
+}
+
 /** Rang accordé à la catégorie : 1ᵉʳ mondial / 1ʳᵉ mondiale / 2ᵉ. */
 function mgmtRankLabel(rank,div){
   if(rank===1) return div&&divById(typeof div==='string'?div:div.div||div.id)?.gender==='F'?'1ʳᵉ':'1ᵉʳ';

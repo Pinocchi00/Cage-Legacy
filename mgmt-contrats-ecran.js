@@ -62,7 +62,7 @@ function mgmtContratsLigneHtml(m,x,i,choisi){
   const f=x.f, nom=mfNet(f.last||f.name), prenom=mfNet(f.first||''), s=mgmtContratsSituation(m,x);
   const dv=divById(f.div);
   const milieu=MGMT_CONTRATS.mode==='contrats'
-    ?`<div class="mf-eff-bilan">${esc(mgmtDivisionRank(m,f)||'—')}</div>${mgmtContratsPips(f)}<div class="mf-ct-reste">${f.ct?esc(mgmtContratRestants(f))+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—'}</div>`
+    ?`<div class="mf-eff-bilan">${esc(mgmtRangAffichable(m,f)||'—')}</div>${mgmtContratsPips(f)}<div class="mf-ct-reste">${f.ct?esc(mgmtContratRestants(f))+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—'}</div>`
     :`<div class="mf-eff-bilan">${esc(Math.floor(f.age))}</div><div class="mf-eff-bilan">${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</div><div class="mf-ct-reste">${esc(x.ancien?'DÉJÀ':(mgmtContratsVu(m,f)?'DÉJÀ':'JAMAIS'))}</div>`;
   return `<button type="button" class="mf-ct-ligne${choisi?' choisie':''}" onclick="CL.mgmtContratsVa(${i})">`
     +`<div class="mf-eff-nom"><b>${esc(nom)}</b><span>${esc(prenom)}</span></div><div class="mf-ct-div">${esc(mgmtCarteCourt(f.div))}</div>${milieu}`
