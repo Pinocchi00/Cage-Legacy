@@ -36,6 +36,24 @@ function mgmtPrelimsLigne(m,s,i,choisi){
     +`<div class="mf-car-slot-s">${etat}</div></button>`;
 }
 
+/** Les raisons de Leïla pour la paire (planche « Pourquoi elle le propose ») : l'attente de l'un, la défaite de l'autre ; à défaut, ce qu'ils ont en commun. Dérivé. */
+function mgmtPrelimsRaisons(m,fa,fb){
+  const out=[];
+  for(const f of [fa,fb]){
+    if(!f) continue;
+    const n=mgmtCarteNote(m,f);
+    if(/^(Attend depuis|Battu par|A battu|Nul contre)/.test(n)) out.push(mfNet(f.last||f.name).replace(/^(.)(.*)$/,(x,a,b)=>a+b.toLowerCase())+' '+n.charAt(0).toLowerCase()+n.slice(1));
+  }
+  if(!out.length&&fa&&fb) out.push('Deux combattants libres de la même catégorie');
+  return out.slice(0,2);
+}
+/** Les autres choix pour le préliminaire proposé : la catégorie, libres et hors de la proposition, dans l'ordre du classement. */
+function mgmtPrelimsAlternatives(m,fight,bloc){
+  const fa=fight&&mgmtFighterById(m,fight.a); if(!fa||!bloc) return [];
+  const pris=new Set(); (bloc.fights||[]).forEach(x=>{ pris.add(x.a); pris.add(x.b); });
+  return mgmtCartRows(m).filter(f=>f.div===fa.div&&!pris.has(f.id)&&mgmtSelectable(m,f,fa.id));
+}
+
 function scr_mgmt_prelims(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt, P=MGMT_PRELIMS, {slots,bloc}=mgmtPrelimsEmplacements(m);
@@ -43,7 +61,7 @@ function scr_mgmt_prelims(){
   const s=slots[P.i], f=s.fight;
   const lignes=slots.map((x,i)=>mgmtPrelimsLigne(m,x,i,i===P.i)).join('');
   const legende=`<div class="mf-car-legende"><span>${MF_SVG_CONFIRME}Validé</span><span><i class="mf-eff-q">?</i>À valider</span><span>À trouver</span></div>`;
-  const gauche=mfPanneau(`<div class="mf-car-t">LA CARTE DE LEÏLA</div><div class="mf-car-slots mf-pre-slots">${lignes}</div>${legende}`,'normal','mf-car-g');
+  const gaucheHtml=(petit)=>mfPanneau(`<div class="mf-car-t">LA CARTE DE LEÏLA</div><div class="mf-car-slots mf-pre-slots">${lignes}</div>${legende}${petit||''}`,'normal','mf-car-g');
 
   const fa=f&&mgmtFighterById(m,f.a), fb=f&&mgmtFighterById(m,f.b);
   const duo=!!(fa&&fb), ca=mgmtCarteColonne(m,fa), cb=mgmtCarteColonne(m,fb);
@@ -53,27 +71,42 @@ function scr_mgmt_prelims(){
       +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp(`<b>${esc(ca.contrat)}</b>`,`<b>${esc(cb.contrat)}</b>`,'Contrat restant')
     :`<div class="mf-car-aide">${esc(P.aide?P.aide:m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE)?'Leïla prépare les préliminaires quand la carte principale est complète.':'Ce préliminaire n’est pas encore trouvé.')}</div>`;
   const trou=!bloc&&m.card.main.length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&m.card.prelims.length<(m.card.sizePrelims||MGMT_PRELIM_SIZE);
+  const raisons=duo&&bloc&&s.etat==='avalider'?mgmtPrelimsRaisons(m,fa,fb):[];
+  const pourquoi=raisons.length?`<div class="mf-car-enjeux mf-pre-pourquoi"><div class="mf-cal-lib">Leïla · pourquoi elle le propose</div><div>${raisons.map(r=>`<span>${esc(r)}</span>`).join('')}</div></div>`:'';
+  const monte=bloc&&s.etat==='avalider'&&m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE);
   const boutons=`<div class="mf-car-boutons">`
     +(trou?mfBouton('Trouver un remplaçant',{touche:'Entrée',jaune:true,onclick:'CL.mgmtPrelimsRemplacer()'}):'')
     +(bloc?mfBouton('Valider la carte',{touche:'Entrée',jaune:true,onclick:'CL.mgmtPrelimsValider()'}):'')
     +(bloc&&s.etat==='avalider'?mfBouton('Changer',{touche:'C',onclick:'CL.mgmtPrelimsChanger()'}):'')
-    +(bloc?mfBouton('Refaire',{touche:'R',onclick:'CL.mgmtPrelimsRefaire()'}):'')+`</div>`;
+    +(bloc?mfBouton('Refaire',{touche:'R',onclick:'CL.mgmtPrelimsRefaire()'}):'')
+    +(duo?mfBouton('Fiches',{touche:'F',onclick:'CL.mgmtPrelimsFiche()'}):'')
+    +(monte?mfBouton('Faire monter',{touche:'M',onclick:'CL.mgmtPrelimsMonter()'}):'')+`</div>`;
   const banniere=mgmtCarteBanniere(fa,fb,fa?fa.div:(allDivisions()[0]||{}).id);
-  const centre=`<div class="mf-car-c">${banniere}${mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${boutons}`,'normal','mf-car-cmp')}</div>`;
+  const centre=`<div class="mf-car-c">${banniere}${mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${pourquoi}${boutons}`,'normal','mf-car-cmp')}</div>`;
 
   const sM=Number.isSafeInteger(m.card.sizeMain)?m.card.sizeMain:MGMT_MAIN_SIZE, nM=m.card.main.length, manque=Math.max(0,sM-nM);
   const ex=MGMT_EXCHANGES.leila_bulk, parole=bloc&&ex&&ex.lines&&ex.lines[0]?mfVoix('Leïla',ex.lines[0]):'';
   const alerte=bloc&&(bloc.fights||[]).some(x=>x.warned)&&ex&&typeof ex.warning==='string'?mfVoix('Leïla',ex.warning):'';
-  const droite=mfPanneau(`<div class="mf-car-t" style="font-size:22px;letter-spacing:.04em;color:var(--mf-texte2)">CARTE PRINCIPALE</div>`
+  const alts=bloc&&s.etat==='avalider'?mgmtPrelimsAlternatives(m,f,bloc):null;
+  const homo=alts?mgmtCarteHomonymes(alts):null;
+  const lignesAlt=alts?alts.slice(0,6).map((x,k)=>mgmtCarteAdvLigne(m,x,k,false,homo).replace(/onclick="CL\.mgmtCarteVise\('([^']*)'\)"/,"onclick=\"CL.mgmtPrelimsRemplace('$1')\"")).join(''):'';
+  const autres=alts?mfPanneau(`<div class="mf-car-t">AUTRES CHOIX</div>`
+    +`<div class="mf-car-tri"><span>${alts.length} libres</span><span>Tri : classement</span></div>`
+    +`<div class="mf-car-advs">${lignesAlt||'<div class="mf-eff-aucun">Personne d’autre de libre.</div>'}</div>`
+    +`<div class="mf-pre-aide">Choisis un nom pour remplacer le second combattant.</div>`
+    +mfBouton('Voir les '+mgmtCartRows(m).filter(x=>x.div===(fa?fa.div:'')).length+' combattants',{onclick:"CL.go('mgmt_effectif')",classe:'mf-car-cat'}),'normal','mf-car-d'):null;
+  const petit=`<div class="mf-pre-pc"><div class="mf-pre-pc-t"><span>CARTE PRINCIPALE</span><b>${nM} / ${sM}</b></div><div class="mf-pre-pc-b">${manque?`<span><i class="mf-pastille-j"></i>Manque : ${manque} combat${manque>1?'s':''}</span>`:'<span>Complète</span>'}<button type="button" onclick="CL.go('mgmt_carte')">Ouvrir</button></div></div>`;
+  const droite=autres||mfPanneau(`<div class="mf-car-t" style="font-size:22px;letter-spacing:.04em;color:var(--mf-texte2)">CARTE PRINCIPALE</div>`
     +`<div class="mf-pre-compte">${nM} / ${sM}</div>`
     +(manque?`<div class="mf-pre-manque"><i class="mf-pastille-j"></i>Manque : ${manque} combat${manque>1?'s':''}</div>`:'')
     +mfBouton('Ouvrir la carte',{onclick:"CL.go('mgmt_carte')",classe:'mf-pre-ouvrir'})
     +`<div class="mf-pre-voix">${parole}${alerte}</div>`,'normal','mf-car-d');
+  const gauche=gaucheHtml(autres?petit:'');
   const contenu=`<main class="mf-contenu mf-carte">${gauche}${centre}${droite}</main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'preliminaires',m,plaque:'Préliminaires',libelle:`${slots.filter(x=>x.etat==='valide').length} / ${slots.length}`,tuiles:[slots.filter(x=>x.etat==='valide').length,slots.length],
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['A','E'],t:'Section'},
-      {ks:['C'],t:'Changer',onclick:'CL.mgmtPrelimsChanger()'},{ks:['R'],t:'Refaire',onclick:'CL.mgmtPrelimsRefaire()'},
+      {ks:['C'],t:'Changer',onclick:'CL.mgmtPrelimsChanger()'},{ks:['R'],t:'Refaire',onclick:'CL.mgmtPrelimsRefaire()'},{ks:['F'],t:'Fiches',onclick:'CL.mgmtPrelimsFiche()'},{ks:['M'],t:'Faire monter',onclick:'CL.mgmtPrelimsMonter()'},
       {ks:['Entrée'],t:'Valider la carte',jaune:true,onclick:'CL.mgmtPrelimsValider()'}]});
 }
 SCREENS.mgmt_prelims=scr_mgmt_prelims;
@@ -94,6 +127,25 @@ Object.assign(CL,{
     bloc.marked=s.idxBloc; const r=mgmtPrelimsReponse('swap'); if(r) CL.mgmtReply(r.id,r.rep);
   },
   mgmtPrelimsRefaire(){ const r=mgmtPrelimsReponse('crush'); if(r) CL.mgmtReply(r.id,r.rep); },
+  /* Planche « Préliminaires » : un clic sur un autre choix remplace le second combattant du préliminaire proposé. */
+  mgmtPrelimsRemplace(id){
+    const {slots,bloc}=mgmtPrelimsEmplacements(G.mgmt), s=slots[MGMT_PRELIMS.i||0];
+    if(!bloc||!s||s.etat!=='avalider') return;
+    if(mgmtBulkRemplacer(G.mgmt,bloc.id,s.idxBloc,id)){ saveMgmt(); render(); }
+  },
+  /** Faire monter le préliminaire proposé sur la carte principale, s'il y reste une place. */
+  mgmtPrelimsMonter(){
+    const {slots,bloc}=mgmtPrelimsEmplacements(G.mgmt), s=slots[MGMT_PRELIMS.i||0];
+    if(!bloc||!s||s.etat!=='avalider') return;
+    if(mgmtBulkMonter(G.mgmt,bloc.id,s.idxBloc)){ saveMgmt(); MGMT_PRELIMS.i=0; render(); }
+  },
+  /** La fiche du premier combattant du préliminaire choisi (la touche répétée ouvre celle du second). */
+  mgmtPrelimsFiche(){
+    const {slots}=mgmtPrelimsEmplacements(G.mgmt), s=slots[MGMT_PRELIMS.i||0];
+    if(!s||!s.fight) return;
+    MGMT_PRELIMS.fiche=MGMT_PRELIMS.fiche==='a'?'b':'a';
+    CL.mgmtFiche(MGMT_PRELIMS.fiche==='a'?s.fight.a:s.fight.b);
+  },
   /** Un trou en préliminaires se règle ici, en une action : Leïla propose le remplaçant, qu'on valide ensuite. */
   mgmtPrelimsRemplacer(){
     const m=G.mgmt;
@@ -110,6 +162,10 @@ keysRegister('mgmt_prelims',{
   C(){ CL.mgmtPrelimsChanger(); },
   r(){ CL.mgmtPrelimsRefaire(); },
   R(){ CL.mgmtPrelimsRefaire(); },
+  f(){ CL.mgmtPrelimsFiche(); },
+  F(){ CL.mgmtPrelimsFiche(); },
+  m(){ CL.mgmtPrelimsMonter(); },
+  M(){ CL.mgmtPrelimsMonter(); },
   Escape(){ CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

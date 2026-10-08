@@ -53,18 +53,19 @@ function mgmtSuEvolution(x,clair){
   const gagne=x.delta>0, n=Math.abs(x.delta);
   return `<span class="mf-su-evo${gagne?'':' perdu'}">${gagne?MF_SVG_GAGNE(clair?'#0D0B0B':'#E9E6E1'):MF_SVG_PERDU}<b>${esc(n)}</b></span>`;
 }
+/* Demande d'Anthony du 08/10/2026 : sur les trois grandes cartes (champion, 1er, 2e) comme sur la planche, le prénom et le nom seuls — le surnom chevauchait le palmarès ; il reste dans le tableau et sur la fiche. */
 function mgmtSuCarteClassement(m,x,selectionne,k){
   const n=mgmtNomParId(m,x.id), rec=`${x.W}-${x.L}-${x.D}`;
   const choisi=selectionne?' sel':'';
   if(x.champion){
     return `<button type="button" class="mf-su-champ${choisi}" onclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="Champion ${esc(n.name)}">`
       +mfPanneau(`<div class="mf-su-champ-in"><div class="mf-su-champ-c" aria-hidden="true">C</div>`
-        +`<div class="mf-su-champ-nom">${mgmtSuNom(n,330,44,104,52,mgmtSurnomDe(m,x.id))}</div>`
+        +`<div class="mf-su-champ-nom">${mgmtSuNom(n,330,44,104,52)}</div>`
         +`<div class="mf-su-champ-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
   }
   return `<button type="button" class="mf-su-rang${choisi}" onclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="${esc(x.rang)} ${esc(n.name)}">`
     +mfPanneau(`<div class="mf-su-rang-in"><div class="mf-su-rang-evo">${mgmtSuEvolution(x,selectionne)}</div><div class="mf-su-rang-n">${esc(x.rang)}</div>`
-      +`<div class="mf-su-rang-nom">${mgmtSuNom(n,230,36,76,36,mgmtSurnomDe(m,x.id))}</div>`
+      +`<div class="mf-su-rang-nom">${mgmtSuNom(n,230,36,76,36)}</div>`
       +`<div class="mf-su-rang-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
 }
 function mgmtSuLigneClassement(m,x,selectionne,k){

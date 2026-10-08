@@ -29,6 +29,16 @@ function mgmtAgendaInit(m){
   return m.cal;
 }
 
+/** Demande d'Anthony du 08/10/2026 (les planches montrent « Dans 34 jours, 12 avril, Dôme de Lyon » sur chaque écran) : une soirée est toujours posée. À défaut, la suivante se pose
+ *  toute seule — une petite soirée au rythme habituel, jamais dans le passé ; le joueur la déplace ou la retire au calendrier. Appelée par l'interface, jamais par le moteur.
+ *  @returns {boolean} vrai si une soirée vient d'être posée. */
+function mgmtAgendaSuivante(m){
+  if(!mgmtAgendaActif(m)||m.cal.prochaines.length) return false;
+  const base=m.cal.jour+MGMT_EVENT_WEEKS*7;
+  for(let j=base;j<base+14;j++){ if(mgmtAgendaPoser(m,j,'petite').ok) return true; }
+  return false;
+}
+
 /** Une partie d'avant : l'agenda attend la fin de sa soirée en cours (actif:false), puis prend le relais. */
 function mgmtAgendaPreparer(m){ if(m&&m.cal===undefined) m.cal={actif:false}; }
 function mgmtAgendaActiver(m){

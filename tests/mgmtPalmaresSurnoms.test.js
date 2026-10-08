@@ -34,7 +34,7 @@ test('Surnoms — la bannière de la fiche, le classement affichent le surnom du
   const r=res(win,`const m=G.mgmt; const f=m.roster.find(x=>mgmtSurnomDe(m,x.id)); const s=mgmtSurnomDe(m,f.id);
     CL.mgmtFiche(f.id); const fiche=document.querySelector('.mf-fb-nom')?document.querySelector('.mf-fb-nom').textContent.toUpperCase().includes(s.toUpperCase()):false;
     const div=m.roster[0].div; MGMT_CLASSEMENTS={div,scope:'split'}; MGMT_SU_CL.div=div; CL.go('mgmt_classements'); const txt=document.getElementById('app').textContent.toUpperCase();
-    const vus=mgmtClassementLignes(m,div,MGMT_SU_CL.portee).slice(0,3+MGMT_SU_LIGNES_CLASSEMENT).map(x=>mgmtSurnomDe(m,x.id)).filter(Boolean);
+    const vus=mgmtClassementLignes(m,div,MGMT_SU_CL.portee).slice(3,3+MGMT_SU_LIGNES_CLASSEMENT).map(x=>mgmtSurnomDe(m,x.id)).filter(Boolean);
     return {s:!!s,fiche,vus:vus.length,tous:vus.every(v=>txt.includes(v.toUpperCase())),manque:vus.filter(v=>!txt.includes(v.toUpperCase())),lignes:MGMT_SU_LIGNES_CLASSEMENT,stable:mgmtSurnomDe(m,f.id)===s,inconnu:mgmtSurnomDe(m,'zzz')};`);
-  assert.equal(r.s,true); assert.equal(r.fiche,true,JSON.stringify(r)); assert.ok(r.vus>0,'des surnoms parmi les dix premiers : '+JSON.stringify(r)); assert.equal(r.tous,true,JSON.stringify(r)); assert.equal(r.stable,true); assert.equal(r.inconnu,'');
+  assert.equal(r.s,true); assert.equal(r.fiche,true,JSON.stringify(r)); assert.ok(r.vus>0,'des surnoms dans le tableau (les trois grandes cartes n’affichent plus que le nom, décision d’Anthony du 08/10/2026 : le surnom chevauchait le palmarès) : '+JSON.stringify(r)); assert.equal(r.tous,true,JSON.stringify(r)); assert.equal(r.stable,true); assert.equal(r.inconnu,'');
 });

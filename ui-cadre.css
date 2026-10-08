@@ -1131,3 +1131,28 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-fi-tag.x{background:var(--mf-rouge-vif);color:var(--mf-noir)}
 .mf-fi-cg em{display:block;font-style:normal;font-size:22px;color:var(--mf-texte2)}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: CORR0810_DEBORDEMENTS] — Demande d'Anthony du 08/10/2026 : les boutons ne dépassent plus de leur panneau (booker un combat, contrats). ==== */
+.mf-car-boutons{flex-wrap:nowrap;gap:12px}
+.mf-car-boutons .mf-bouton{padding:0 14px;gap:10px;flex:0 1 auto;min-width:0}
+.mf-car-boutons .mf-bouton-t{font-size:28px}
+.mf-ct-fiche .mf-eff-fiche-pied{flex-direction:column;align-items:stretch;gap:10px}
+.mf-ct-fiche .mf-eff-fiche-pied .mf-bouton{width:100%;justify-content:center}
+.mf-ct-fiche .mf-eff-fiche-pied .mf-bouton:not(.jaune){height:48px}
+.mf-ct-fiche .mf-eff-fiche-pied .mf-bouton:not(.jaune) .mf-bouton-t{font-size:26px}
+/* ==== [FIN ANCRE] ==== */
+.mf-car-comp{height:54px}
+.mf-car-prop{margin-top:10px;max-height:60px;overflow:hidden;line-height:1.2}
+.mf-car-enjeux{margin-top:14px;gap:8px}
+.mf-car-boutons{flex-wrap:wrap;gap:10px}
+.mf-car-boutons .mf-bouton{height:56px}
+.mf-car-boutons .mf-bouton-t{font-size:26px}
+/* ==== [ANCRE: CORR0810_PRELIMS_MAQUETTE] — Planche « Préliminaires » : le bloc de la carte principale sous la liste, les raisons de Leïla, les autres choix à droite. ==== */
+.mf-pre-pc{margin-top:14px;padding:12px 16px;background:var(--mf-ligne);display:flex;flex-direction:column;gap:8px}
+.mf-pre-pc-t{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em}
+.mf-pre-pc-t b{font-family:var(--mf-titre);font-weight:800;font-size:32px}
+.mf-pre-pc-b{display:flex;justify-content:space-between;align-items:center;font-size:22px;line-height:1}
+.mf-pre-pc-b span{display:flex;align-items:center;gap:10px}
+.mf-pre-pc-b button{height:40px;padding:0 20px;background:var(--mf-noir);color:var(--mf-blanc);font-family:var(--mf-titre);font-weight:800;font-size:24px;text-transform:uppercase}
+.mf-pre-pourquoi{margin-top:12px}
+.mf-pre-aide{font-size:22px;line-height:1.2;color:var(--mf-texte2);margin-top:6px}
+/* ==== [FIN ANCRE] ==== */

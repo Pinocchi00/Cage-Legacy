@@ -89,7 +89,7 @@ function mgmtEffectifLigneHtml(m,x,i,choisi){
     +`<div class="mf-eff-bilan">${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</div>`
     +`<div class="mf-eff-forme">${mgmtEffectifForme(m,f).map(mfMarque).join('')}</div>`
     +`<div class="mf-eff-sit ${esc(s.classe)}">${s.icone}<span>${esc(s.texte)}</span></div>`
-    +`<div class="mf-eff-contrat">—</div></button>`;
+    +`<div class="mf-eff-contrat">${f.ct&&!f.libre?esc(mgmtContratRestants(f))+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—'}</div></button>`;
 }
 
 function mgmtEffectifApercuHtml(m,x){
