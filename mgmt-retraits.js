@@ -224,7 +224,7 @@ function mgmtRetraitHtml(m){
     for(const c of o.candidats){
       const lib={split:'Short notice',autre:'Short notice, une autre organisation',libre:'Libre de contrat'}[c.src];
       const ok=mgmtCanAfford(m,c.cout);
-      html+=`<button type="button" class="mgmt-retrait-sortie" onclick="CL.mgmtRetraitEngager('${esc(c.id)}')"${ok?'':' disabled'}>${esc(lib)} : ${esc(c.name)} · ${esc(c.cout)} k$</button>`;
+      html+=`<button type="button" class="mgmt-retrait-sortie" onclick="CL.mgmtRetraitEngager('${esc(c.id)}')"${ok?'':' disabled'}>${esc(lib)} : ${esc(c.name)} · ${esc(mgmtEuros(c.cout))}</button>`;
     }
     if(o.reduite){
       html+=ligne('Leïla Malika',R.D1.texte)

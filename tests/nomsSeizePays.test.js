@@ -216,7 +216,9 @@ test('H2 — makeName : les femmes des seize pays tirent dans firstF, les hommes
     assert.ok(lists[ck].first.includes(m.hFirst), `homme ${ck} : prénom du pays (${m.hFirst})`);
     assert.ok(lists[ck].last.includes(m.hLast), `homme ${ck} : nom du pays (${m.hLast})`);
     assert.ok(lists[ck].firstF.includes(m.fFirst), `femme ${ck} : prénom féminin du pays (${m.fFirst})`);
-    assert.ok(lists[ck].last.includes(m.fLast), `femme ${ck} : nom du pays (${m.fLast})`);
+    /* Corrections du 08/10, 5.2 : une femme porte la forme féminine du nom quand la langue en a une. */
+    const fem=lists[ck].last.some(l=>win.eval(`feminiserNom(${JSON.stringify(l)},${JSON.stringify(ck)})`)===m.fLast);
+    assert.ok(lists[ck].last.includes(m.fLast)||fem, `femme ${ck} : nom du pays, au féminin si la langue en a un (${m.fLast})`);
   }
   /* H2 bis (03/10) : les quatorze anciens pays ont désormais leur firstF et leur first. */
   const vieux = JSON.parse(win.eval(`JSON.stringify((function(){

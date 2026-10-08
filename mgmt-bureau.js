@@ -121,6 +121,21 @@ function mgmtNextId(m){ const id='mg'+m.seq; m.seq++; return id; }
  * 22-26 ans : 2-12 combats, 27-28 ans : 8-22, 29-35 ans : 15-30 — bornées en
  * plus par la garde 1d (âge-18)..(âge-18)*4, qui ne mord jamais à vide.
  */
+/** Les fratries voulues d'un effectif neuf : au plus ce nombre de paires qui partagent un nom de famille (corrections du 08/10, 5.1). */
+const MGMT_FRATRIES_VOULUES=5;
+/** La part de l'effectif qui peut partager un nom de famille hors fratrie (d'une catégorie à l'autre, jamais dans la même) : chaque nom partagé compte deux combattants. */
+const MGMT_NOMS_PARTAGES_PART=0.03;
+/** Ce nom est-il déjà pris de façon gênante ? Un homonyme exact l'est toujours ; un nom de famille déjà porté ne l'est que s'il fait ni une fratrie voulue
+ *  (même pays, tirée comme mgmtFratrie la lit), ni un partage d'une autre catégorie dans la limite du budget. Pur.
+ *  @returns {{conflit:boolean,genre:string}} genre : '' | 'fratrie' | 'partage'. */
+function mgmtNomEnConflit(m,nm,ck,id,div,bilan){
+  const memes=m.roster.filter(o=>o.last===nm.last);
+  if(m.roster.some(o=>o.first===nm.first&&o.last===nm.last)) return {conflit:true,genre:''};
+  if(!memes.length) return {conflit:false,genre:''};
+  if(bilan.fratries<MGMT_FRATRIES_VOULUES&&memes.some(o=>o.ck===ck&&typeof mgmtIdentiteStream==='function'&&mgmtIdentiteStream([id,o.id].sort().join('|'),'fratrie')()<MGMT_FRATRIE_PART)) return {conflit:false,genre:'fratrie'};
+  if(memes.some(o=>o.div===div)) return {conflit:true,genre:''};
+  return bilan.partages<bilan.partagesMax?{conflit:false,genre:'partage'}:{conflit:true,genre:''};
+}
 function mgmtNewRoster(m){
   /* Lot 5 H4 : une partie neuve (effectifs 1) porte 130 à 150 combattants
      répartis comme le monde ; le chemin d'avant (effectifs 0 : 40 à 60,
@@ -132,6 +147,7 @@ function mgmtNewRoster(m){
   /* Brief du 06/10, lot 5 : la taille de l'effectif suit le profil (le tirage est consommé comme avant). */
   const n=avant?tire:Math.max(40,Math.round(tire*profil.effectif));
   m.roster=[];
+  const bilan={fratries:0,partages:0,partagesMax:Math.floor(n*MGMT_NOMS_PARTAGES_PART/2)};
   const divs=allDivisions();
   for(let i=0;i<n;i++){
     /* Lot 5 H4 : la catégorie se tire au poids du monde (MGMT_WORLD_SIZE) :
@@ -139,14 +155,19 @@ function mgmtNewRoster(m){
     const div=avant?pick(divs):mgmtDivisionPonderee(divs,rnd(),profil);
     /* Lot 5 H3 : un tirage pondéré (poids Split, catalogue §1.2) par
        emplacement ; le retirage du prénom rejoue le même pays. */
-    const ck=mgmtPaysTire(rnd(),'split');
+    let ck=mgmtPaysTire(rnd(),'split');
+    const id=mgmtNextId(m);
     let nm=makeName(div.gender,ck), guard=0;
-    while((MGMT_EXCLUDED_FIRST.includes(nm.first)||MGMT_EXCLUDED_LAST.includes(nm.last))&&guard<50){
+    /* Corrections du 08/10, 5.1 : aucun homonyme exact, et un nom de famille déjà porté ne revient que pour une fratrie voulue (même pays, tirée comme
+       mgmtFratrie la lit, au plus MGMT_FRATRIES_VOULUES par effectif). Le chemin d'avant (effectifs 0) garde ses tirages tels quels. */
+    const refuse=n=>MGMT_EXCLUDED_FIRST.includes(n.first)||MGMT_EXCLUDED_LAST.includes(n.last)||(!avant&&mgmtNomEnConflit(m,n,ck,id,div.id,bilan).conflit);
+    while(refuse(nm)&&guard<(avant?50:400)){
+      if(!avant&&guard>0&&guard%80===0) ck=mgmtPaysTire(rnd(),'split');   /* un pays dont les noms sont épuisés : on en tire un autre */
       nm=makeName(div.gender,ck); guard++;
     }
+    if(!avant){ const g=mgmtNomEnConflit(m,nm,ck,id,div.id,bilan).genre; if(g==='fratrie') bilan.fratries++; else if(g==='partage') bilan.partages++; }
     const age=avant?RI(22,35):clamp(RI(22,35)+profil.age,20,40);
     const band=age<=26?RI(2,12):(age>=29?RI(15,30):RI(8,22));
-    const id=mgmtNextId(m);
     /* Brief du 06/10, lot 2 : une partie à niveaux tire d'abord le niveau du combattant (son potentiel, son pic),
        puis un bilan COHÉRENT avec lui — gonflé ou dégonflé par son organisation d'origine. Le tirage RI(40,80)
        d'avant reste consommé : la suite des tirages de la partie ne bouge pas. */

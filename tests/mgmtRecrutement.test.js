@@ -27,7 +27,9 @@ test('T5 — les recrutables : le monde hors de Split, du mieux classé au moins
 test('T5 — recruter : une ligne de Split à son âge et à son bilan, niveau 1, un fait ; il ne change ni de rang mondial ni la catégorie du monde', () => {
   const win=newGameWindow();
   const r=result(win,`${NEUVE}
-    const x=mgmtRecrutables(m,DIV)[5]; const viv=mgmtWorldLivingCount(m,DIV);
+    /* Un bilan sans égal dans la catégorie : à bilan égal, le départage lit lastCycle, que la ligne d'un recruté n'a pas encore (corrections du 08/10, 5.1 : les effectifs ont changé, pas la règle). */
+    const rk=mgmtDivisionRanking(m,DIV,'world'); const unique=id=>{ const o=rk.find(r=>r.id===id); return rk.filter(r=>r.W===o.W&&r.L===o.L).length===1; };
+    const x=mgmtRecrutables(m,DIV).find((y,i)=>i>=3&&unique(y.id)); const viv=mgmtWorldLivingCount(m,DIV);
     const rangAvant=x.rang; const lineExt=m.exterieur.find(e=>e.id===x.id); const traceAvant=JSON.stringify(mgmtExteriorTrace(lineExt,m.cycle));
     const l=mgmtRecruter(m,x.id);
     const rangApres=mgmtDivisionRank(m,l,'world');

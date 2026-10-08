@@ -369,7 +369,18 @@ const FIRST_F=['Amara','Lena','Sofia','Nadia','Yuki','Maya','Zara','Ana','Ines',
    désormais dans la liste firstF du pays quand elle existe (c.firstF ||
    FIRST_F), exactement comme le prénom masculin lit c.first || FIRST_M
    depuis le 28/09 — toujours deux tirages (prénom, nom de famille). ==== */
-function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?(c.firstF||FIRST_F):(c.first||FIRST_M)); const last=pick(c.last); return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
+/** La forme féminine d'un nom de famille quand la langue en a une (corrections du 08/10/2026, 5.2) : russe, daghestanais, kazakh et kirghize en -ov, -ev, -in → -ova, -eva, -ina ;
+ *  polonais en -ski, -cki → -ska, -cka. Les autres noms sont invariables. Pur. */
+function feminiserNom(last,ck){
+  const s=String(last||'');
+  if(['RU','DAG','KZ','KG'].includes(ck)){
+    if(/(ov|ev|in)$/.test(s)) return s+'a';
+    return s;
+  }
+  if(ck==='PL'&&/(ski|cki)$/.test(s)) return s.slice(0,-1)+'a';
+  return s;
+}
+function makeName(gender,ck,firstOverride){ const c=COUNTRIES[ck]; const first=firstOverride||pick(gender==='F'?(c.firstF||FIRST_F):(c.first||FIRST_M)); const last0=pick(c.last); const last=gender==='F'?feminiserNom(last0,ck):last0; return {first,last,name:first+' '+last,flag:c.flag,countryKey:ck}; }
 /* ==== [FIN ANCRE] ==== */
 
 /* ------------------------- CRÉATION D'UN COMBATTANT ----------------------- */

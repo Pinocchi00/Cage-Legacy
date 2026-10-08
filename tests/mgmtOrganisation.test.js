@@ -70,7 +70,7 @@ test('MGMT T7 — l’écran rend, navigation, échap ramène à la semaine, auc
   assert.ok(courant[0].classList.contains('cur'), 'l’entrée courante porte sa classe visuelle');
   /* L'effectif et les finances sont lisibles (charte R1, R3). */
   assert.ok(html.includes('Trésorerie'), 'la trésorerie est lisible');
-  assert.ok(html.includes(`${win.eval('G.mgmt.treasury')} k$`), 'la valeur de la trésorerie est telle qu’elle existe');
+  assert.ok(win.document.getElementById('app').textContent.includes(win.eval('mgmtEuros(G.mgmt.treasury)')), 'la valeur de la trésorerie est telle qu’elle existe');
   assert.ok(html.includes("L'effectif"), 'l’effectif par catégorie est présent');
   /* Au clavier : échap ramène à la semaine — la navigation y signale
      l'écran courant, cette fois la Semaine. */
@@ -152,9 +152,9 @@ test('MGMT T7 — les recettes des dernières soirées, telles qu’elles existe
   win.eval(`(function(){ const m=G.mgmt; m.treasury=-12; m.recettes=[120,-40]; })()`);
   win.eval(`G.screen='mgmt_organisation'; render();`);
   const html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('-12 k$'), 'la trésorerie sous zéro se lit telle quelle (un seul solde, QO-5)');
+  assert.ok(win.document.getElementById('app').textContent.includes(win.eval('mgmtEuros(-12)')), 'la trésorerie sous zéro se lit telle quelle (un seul solde, QO-5)');
   assert.ok(html.includes('Dernières soirées'), 'la ligne des recettes apparaît');
-  assert.ok(html.includes('-40 k$ · +120 k$'), 'les deux recettes mémorisées, la plus récente d’abord, sans aucun chiffre inventé');
+  assert.ok(win.document.getElementById('app').textContent.includes(win.eval('mgmtEuros(-40)+" · +"+mgmtEuros(120)')), 'les deux recettes mémorisées, la plus récente d’abord, sans aucun chiffre inventé');
   /* Aucune soirée jouée : la ligne de soirées n'apparaît pas (ce qui
      n'existe pas n'apparaît pas). */
   const win2 = newGameWindow();

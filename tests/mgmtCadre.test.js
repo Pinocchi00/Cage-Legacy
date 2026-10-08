@@ -79,7 +79,7 @@ test('Gabarit des noms — courts, égaux et longs tiennent sans déborder ; un 
   }
   assert.ok(r[0].fs>r[2].fs&&r[2].fs>r[3].fs,'plus le nom est long, plus il rétrécit');
   assert.equal(r[3].n1,"O'CONNOR","apostrophe droite, majuscules");
-  assert.equal(r[1].n1,'MONTAGNE','sans accent');
+  assert.equal(r[1].n1,'MONTAGNÉ','les accents sont gardés en capitales (corrections du 08/10, 5.8)');
 });
 
 test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce qui n’est pas livré grisé', () => {

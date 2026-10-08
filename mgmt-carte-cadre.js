@@ -30,7 +30,7 @@ function mgmtCarteListe(m){
 }
 
 /** Le libellé court d'une catégorie : « LÉGER », « MOUCHE F ». */
-function mgmtCarteCourt(div){ return mfNet(mgmtDivisionLabel(div)).replace(/^POIDS /,'').replace(/ FEMININ$/,' F'); }
+function mgmtCarteCourt(div){ return mfNet(mgmtDivisionLabel(div)).replace(/^POIDS /,'').replace(/ FÉMININ$/,' F'); }
 
 function mgmtCarteLigneComp(a,b,c){ return `<div class="mf-car-comp"><div>${a}</div><span>${esc(c)}</span><div>${b}</div></div>`; }
 

@@ -17,7 +17,7 @@ const mgmtSoAgenda=()=>!!(G&&G.mgmt&&G.mgmt.lastEvent&&mgmtAgendaActif(G.mgmt));
 /** Les mots de l'écran. relu:false */
 const MGMT_SOIREE_ECRAN={
   relu:false,
-  leila:{pret:'Mes {n} préliminaires sont prêts.',attend:'{nom} passe en {rang} : il attend depuis {mois} mois.'},
+  leila:{pret:'Mes {n} préliminaires sont prêts.',attend:'{nom} passe en {rang} : {mois} mois d’attente.'},
   fin:{joue:'JOUÉ',rouvertes:'Les sections sont rouvertes',terminee:'TERMINÉE',lieu:'LE LIEU',maintenant:'ET MAINTENANT',resultats:['LES','RÉSULTATS'],etat:'OÙ EN EST LA SOIRÉE',
     prelims:'Préliminaires',main:'Carte principale',principal:'Combat principal',pas:'PAS DE SOIRÉE POSÉE',aChoisir:'À choisir',aposer:'À POSER'},
 };

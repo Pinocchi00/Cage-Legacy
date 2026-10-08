@@ -272,9 +272,9 @@ function mgmtSuPresseTitreHtml(m,x,fs,largeur){
   return `<span style="font-size:${fs*0.77}px">« ${esc(mgmtSuMaj(x.t||''))} »</span>`;
 }
 function mgmtSuPresseSous(m,x){
-  if(x.k==='defi'){ const w={revanche:'Il réclame sa revanche.',trilogie:'Il réclame le troisième combat.'}[x.w]||''; return w; }
+  if(x.k==='defi'){ const w={revanche:'Réclame sa revanche.',trilogie:'Réclame le troisième combat.'}[x.w]||''; return w; }
   if(x.k==='public') return `${mgmtSuCourt(m,x.a)} contre ${mgmtSuCourt(m,x.b)}`;
-  if(x.k==='combattant') return x.w==='attend'?'Il veut un combat.':'Il attend ta réponse.';
+  if(x.k==='combattant') return x.w==='attend'?'Veut un combat.':'Attend ta réponse.';
   if(x.w==='garde'||x.w==='prend'||x.w==='vacant'||x.w==='resultat'){ const d=Number.isSafeInteger(x.f)?mgmtResultatDetail(m,x.f):null; return d?`${d.methode}, contre ${mgmtSuCourt(m,x.b)}`:''; }
   return x.b?`Sur ${mgmtSuCourt(m,x.a)} face à ${mgmtSuCourt(m,x.b)}.`:'';
 }
@@ -353,7 +353,7 @@ function scr_mgmt_resultats(){
     const etiq=x=>mgmtResultatEtiquette(m,m.hist[x.i],x.k,x.d.titre).toUpperCase();
     const cat=x=>String(divById(x.d.cat)?divById(x.d.cat).name:'').replace(/^Poids /,'').toUpperCase();
     const issue=h.d.titre?mgmtTitreIssue(m,h.i):null;
-    const ligneTitre=issue?`<div class="mf-su-h-ti"><div class="mf-eff-c">C</div><span>${issue==='garde'?'Il garde sa ceinture.':(issue==='vacant'?'Il prend le titre vacant.':'Il prend la ceinture.')}</span></div>`:'';
+    const ligneTitre=issue?`<div class="mf-su-h-ti"><div class="mf-eff-c">C</div><span>${issue==='garde'?'Garde sa ceinture.':(issue==='vacant'?'Prend le titre vacant.':'Prend la ceinture.')}</span></div>`:'';
     const hero=mgmtSuHero(etiq(h),cat(h)+(h.d.titre?' · POUR LA CEINTURE':''),mgmtSuQui(m,h.d,104,520),`<div class="mf-su-quote"><div>${esc(mgmtSuRoundLigne(h.d))}</div>${ligneTitre}</div>`,
       mfBouton('Revoir ce combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuReRevoir()'}));
     const cote=co?mgmtSuCoteGrand(etiq(co),cat(co),mgmtSuQui(m,co.d,80,440),

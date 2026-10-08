@@ -81,10 +81,10 @@ function mgmtOrgMoneyHtml(m){
     ?m.recettes.filter(r=>Number.isSafeInteger(r)).slice().reverse():[];
   const lignes=`<div class="mgmt-org-money">`
     +`<span class="mgmt-org-pill">${esc(MGMT_ORG_LABELS.treasury)}</span>`
-    +`<span class="mgmt-org-val">${esc(T)} k$</span></div>`;
+    +`<span class="mgmt-org-val">${esc(mgmtEuros(T))}</span></div>`;
   const soirees=recettes.length>0
     ?`<div class="mgmt-org-money"><span class="mgmt-org-pill">${esc(MGMT_ORG_LABELS.soirees)}</span>`
-      +`<span class="mgmt-org-line">${esc(recettes.map(v=>(v>0?'+'+v:String(v))+' k$').join(' · '))}</span></div>`
+      +`<span class="mgmt-org-line">${esc(recettes.map(v=>(v>0?'+':'')+mgmtEuros(v)).join(' · '))}</span></div>`
     :''; /* Aucune soirée jouée : la ligne n'apparaît pas. */
   return lignes+soirees;
 }
