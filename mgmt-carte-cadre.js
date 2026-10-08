@@ -71,8 +71,10 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
   if(fight){
     const fa=mgmtFighterById(m,fight.a), fb=mgmtFighterById(m,fight.b);
     const titre=fight.title===true;
+    /* Lot 11 (D5) : un champion ne combat que pour sa ceinture — elle est en jeu d'office, le joueur ne la retire pas. */
+    const champ=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set(), force=titre&&(champ.has(fight.a)||champ.has(fight.b));
     return `<div class="mf-car-slot confirme${cur?' choisi':''}"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">`
-      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${(titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:''}</div>`
+      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Le champion ne combat que pour sa ceinture">TITRE EN JEU</button>`:((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:'')}</div>`
       +`<div class="mf-car-slot-n"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b><span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b></div></div>`
       +`<div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
   }
@@ -128,7 +130,8 @@ function scr_mgmt_carte_cadre(){
   const enjeux=[]; if(peutTitre) enjeux.push('Titre possible'); if(rounds) enjeux.push(rounds+' rounds');
   /* Corrections du 08/10, 2.3 et 2.4 : ce que le booking sait de la paire, dit avant la confirmation. */
   if(duo){
-    if(typeof mgmtPublicReclame==='function'&&mgmtPublicReclame(m).some(r=>(r.a===A.id&&r.b===B.id)||(r.a===B.id&&r.b===A.id))) enjeux.push('Combat réclamé');
+    const reclame=typeof mgmtPublicReclame==='function'?mgmtPublicReclame(m).find(r=>(r.a===A.id&&r.b===B.id)||(r.a===B.id&&r.b===A.id)):null;
+    if(reclame) enjeux.push('Combat réclamé'+(reclame.raison&&MGMT_RECLAME_LIBELLES[reclame.raison]?' : '+MGMT_RECLAME_LIBELLES[reclame.raison].toLowerCase():''));
     if(typeof mgmtMemeCamp==='function'&&m.effectifs===1&&mgmtMemeCamp(m,A,B)) enjeux.push('Même camp : les opposer les contrarie');
     if(typeof mgmtFratrie==='function'&&m.effectifs===1&&mgmtFratrie(m,A).includes(B.id)) enjeux.push('Frère et sœur : les opposer les contrarie');
   }

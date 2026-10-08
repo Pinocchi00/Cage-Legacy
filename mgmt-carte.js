@@ -135,6 +135,7 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
       if(f&&typeof f.a==='string'&&typeof f.b==='string') rematch.add([f.a,f.b].sort().join('|'));
     }
   }
+  const champions=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set();
   const collect=mode=>{
     const out=[];
     for(let i=0;i<r.length;i++){
@@ -143,6 +144,8 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
       if(A.first===B.first) continue;
       if(genderOf(A)!==genderOf(B)) continue;
       if(!mgmtAvailable(m,A)||!mgmtAvailable(m,B)) continue;
+      /* Lot 11 (D5) : un champion ne combat jamais en préliminaire. */
+      if(champions.has(A.id)||champions.has(B.id)) continue;
       /* §T3 : les prélims se construisent hors carte principale — un
          combattant déjà engagé (principale comme prélims) n'est jamais
          candidat. */
@@ -315,9 +318,13 @@ function mgmtBookMain(m,aid,bid){
   const fa=mgmtFighterById(m,aid), fb=mgmtFighterById(m,bid);
   if(!fa||!fb||fa===fb) return null;
   if(fa.div!==fb.div) return null;
-  if(!mgmtAvailable(m,fa)||!mgmtAvailable(m,fb)) return null;
+  if(!mgmtAvailable(m,fa,fb)||!mgmtAvailable(m,fb,fa)) return null;
   if(mgmtEngaged(m,fa)||mgmtEngaged(m,fb)) return null;
+  /* Lot 11 (D5) : un champion ne combat que pour sa ceinture — le booker la met en jeu, ou le booking est refusé. */
+  const titre=typeof mgmtChampionIds==='function'&&(()=>{ const c=mgmtChampionIds(m); return c.has(fa.id)||c.has(fb.id); })();
+  if(titre&&!mgmtCanTitle(m,{a:fa.id,b:fb.id})) return null;
   const fight={a:fa.id,b:fb.id,cycle:m.cycle,slot:'main'};
+  if(titre) fight.title=true;
   m.card.main.push(fight);
   mgmtPromote(m,fa); mgmtPromote(m,fb);
   /* §T3 : une fois la cinquième place posée, Leïla propose aussitôt les
@@ -344,10 +351,12 @@ function mgmtRemoveMain(m,idx){
  *  lui-même, re-cliquer doit pouvoir annuler. Pur. @returns {boolean} */
 function mgmtSelectable(m,f,pick){
   if(!m||!f) return false;
-  if(!mgmtAvailable(m,f)) return false;
+  const a=pick?mgmtFighterById(m,pick):null;
+  if(!mgmtAvailable(m,f,a)) return false;
   if(mgmtEngaged(m,f)) return false;
+  /* Lot 11 (D5) : un champion ne se choisit que si sa ceinture peut être mise en jeu. */
+  if(typeof mgmtChampionBookable==='function'&&!mgmtChampionBookable(m,f)&&!(a&&a.id===f.id)) return false;
   if(pick){
-    const a=mgmtFighterById(m,pick);
     if(!a) return false;
     if(f.id===a.id) return true;
     if(a.div!==f.div) return false;

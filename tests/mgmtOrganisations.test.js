@@ -8,12 +8,13 @@ const {newGameWindow}=require('./helpers/loadGame');
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
 const touche=(win,key)=>win.eval(`keysHandle({key:${JSON.stringify(key)},preventDefault(){}})`);
 
-test('Organisations — huit, chacune avec deux plus et deux moins ; les trois derniers noms sont ceux d’Anthony', () => {
+/* Corrections du 08/10, lot 12 (D6) : les lignes « plus » et « moins » se déduisent du profil (au plus deux de chaque), et le réglage `entente`, que le jeu ne lisait pas, est retiré. */
+test('Organisations — huit, chacune avec au plus deux atouts et deux contreparties déduits de son profil ; les trois derniers noms sont ceux d’Anthony', () => {
   const win=newGameWindow();
   const r=result(win,`return {n:MGMT_ORGANISATIONS.length,ids:new Set(MGMT_ORGANISATIONS.map(o=>o.id)).size,noms:new Set(MGMT_ORGANISATIONS.map(o=>o.nom)).size,
-    plus:MGMT_ORGANISATIONS.every(o=>o.plus.length===2&&o.moins.length===2),auteur:MGMT_ORGANISATIONS.filter(o=>o.auteur).map(o=>o.nom),
+    plus:MGMT_ORGANISATIONS.every(o=>{ const a=mgmtOrgAtouts(o.profil); return a.plus.length>=1&&a.plus.length<=2&&a.moins.length<=2&&a.moins.length>=1; }),auteur:MGMT_ORGANISATIONS.filter(o=>o.auteur).map(o=>o.nom),
     connus:MGMT_ORGANISATIONS.filter(o=>!o.auteur).map(o=>o.nom),ext:MGMT_EXT_ORGS,premier:MGMT_ORGANISATIONS[0].nom,
-    profils:MGMT_ORGANISATIONS.every(o=>['caisse','effectif','age','popularite','salles','bourses','fortes','faibles','entente'].every(k=>k in o.profil))};`);
+    profils:MGMT_ORGANISATIONS.every(o=>['caisse','effectif','age','popularite','salles','bourses','fortes','faibles'].every(k=>k in o.profil))};`);
   assert.equal(r.n,8); assert.equal(r.ids,8); assert.equal(r.noms,8); assert.ok(r.plus); assert.ok(r.profils);
   assert.deepEqual(r.auteur,[],'plus aucun emplacement d’auteur : les trois derniers noms sont ceux d’Anthony');
   assert.deepEqual(r.connus,['Split',...r.ext,'Knuckle Gate','Pure Impact','Undisputed Cage'],'Split, les quatre noms du code, puis les trois d’Anthony dans l’ordre'); assert.equal(r.premier,'Split');
@@ -30,6 +31,7 @@ test('Organisations — « Choisis une partie » : Entrée sur un emplacement vi
   touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_bureau','un emplacement occupé se reprend');
 });
 
+/* Corrections du 08/10, lot 12 (D6) : les lignes sont déduites du profil — Split garde « Une caisse saine », et « Peu connue hors de sa région » devient « Encore peu connue » (popularité 40). */
 test('Organisations — l’écran : huit organisations, la choisie marquée, « Créer ton organisation » visible et sans effet', () => {
   const win=newGameWindow({runMain:true});
   const r=result(win,`setSeed(5); CL.mgmtNouvelle(3);
@@ -39,7 +41,7 @@ test('Organisations — l’écran : huit organisations, la choisie marquée, «
     const avant=G.screen; avenir.click(); const apres=G.screen;
     return {cartes,t,avenir:avenir.textContent,avenirDisabled:avenir.getAttribute('aria-disabled'),avant,apres,bouton:document.querySelectorAll('.mf-bouton.jaune').length,slot:MGMT_NOUVELLE.slot};`);
   assert.equal(r.cartes.length,8); assert.equal(r.cartes.filter(c=>c.choisie).length,1); assert.equal(r.cartes[0].nom,'Split'); assert.ok(r.cartes[0].choisie);
-  assert.ok(r.cartes[0].texte.includes('Une caisse saine')&&r.cartes[0].texte.includes('Peu connue hors de sa région'));
+  assert.ok(r.cartes[0].texte.includes('Une caisse saine')&&r.cartes[0].texte.includes('Encore peu connue'));
   assert.ok(r.t.includes('Le jeu crée tout le reste pour cette partie : les combattants, les camps, les salles, la presse, ton assistante.'));
   assert.ok(r.t.includes('Emplacement 3 · 8 organisations')&&r.t.includes('Nouvelle partie · choisis ton organisation'));
   assert.ok(r.avenir.includes('Créer ton organisation')&&r.avenir.includes('À venir')); assert.equal(r.avenirDisabled,'true');

@@ -11,7 +11,7 @@ let MGMT_CONTRATS={mode:'contrats',sexe:'H',div:'',curseur:0,n:3,b:null,msg:''};
 const MGMT_CONTRATS_LIGNES=9;
 
 const MGMT_CT_REFUS_TEXTES={'trop-bas':'Refusé : il demande plus par combat.','trop-grand':'Refusé : il vise plus haut que l’organisation.',
-  caisse:'La caisse ne permet pas la prime de signature.',offre:'Offre incomplète.',inconnu:'Introuvable.','sous-contrat':'Il est sous contrat.',inactif:'Pas de contrats avant le calendrier.'};
+  caisse:'La caisse ne permet pas la prime de signature.',offre:'Offre incomplète.',inconnu:'Introuvable.','sous-contrat':'Il est sous contrat.',inactif:'Pas de contrats avant le calendrier.',carte:'Il est sur la carte : retire-le d’abord.'};
 
 /** Les lignes de l'écran selon le mode : sous contrat (l'effectif) ou sans contrat (le marché). Pur. */
 function mgmtContratsLignes(m){
@@ -93,7 +93,7 @@ function scr_mgmt_contrats(){
     onglets:[{t:'Sous contrat',on:F.mode==='contrats',onclick:"CL.mgmtContratsMode('contrats')"},{t:'Recrutement',on:F.mode!=='contrats',onclick:"CL.mgmtContratsMode('recrutement')"}],droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_bureau')"},{ks:['↑','↓'],t:'Choisir'},{ks:['←','→'],t:'Combats'},{ks:['+','−'],t:'Bourse'},
       {ks:['R'],t:'Recrutement',onclick:'CL.mgmtContratsMode()'},{ks:['G'],t:'H ou F',onclick:'CL.mgmtContratsSexe()'},{ks:['Tab'],t:'Catégorie',onclick:'CL.mgmtContratsCategorie(1)'},
-      {ks:['Entrée'],t:'Proposer',jaune:true,onclick:'CL.mgmtContratsPropose()'}]});
+      {ks:['L'],t:'Libérer',onclick:'CL.mgmtContratsLiberer()'},{ks:['Entrée'],t:'Proposer',jaune:true,onclick:'CL.mgmtContratsPropose()'}]});
 }
 SCREENS.mgmt_contrats=scr_mgmt_contrats;
 
@@ -121,13 +121,17 @@ function mgmtContratsOffreHtml(m,x){
   const pips=[]; for(let i=1;i<=8;i++) pips.push(`<button type="button" class="${i<=n?'on':''}" onclick="CL.mgmtContratsN(${i})">${i}</button>`);
   const actuel=reno?ligne('Contrat en cours',`${mgmtContratRestants(f)} restant${mgmtContratRestants(f)>1?'s':''} · ${mgmtEuros(f.ct.b)} par combat`):'';
   const prime=mgmtContratPrime(n,b);
+  /* Corrections du 08/10, lot 8 : au dernier palier il refuse tout combat sauf contre un nom moins connu, et il finit par partir ; le joueur peut aussi le libérer. */
+  const palier4=reno&&mgmtContratPalier(m,f)>=4;
+  const depart=palier4?ligne('Il refuse tout combat',`sauf contre un nom moins connu · part dans ${Math.max(0,MGMT_CT_ATTENTE[3]+MGMT_CT_DEPART_SOIREES-mgmtContratAttente(m,f))} soirée${MGMT_CT_ATTENTE[3]+MGMT_CT_DEPART_SOIREES-mgmtContratAttente(m,f)>1?'s':''}`):'';
+  const libere=reno?mfBouton('Libérer · '+mgmtEuros(mgmtContratIndemnite(f)),{touche:'L',onclick:'CL.mgmtContratsLiberer()'}):'';
   const corps=`<div class="mf-ct-offre"><div class="mf-eff-fiche-s">TON OFFRE</div>`
-    +actuel
+    +actuel+depart
     +ligne('Nombre de combats',n+' COMBAT'+(n>1?'S':''))+`<div class="mf-ct-n">${pips.join('')}</div>`
     +ligne('Il demande, par combat',mgmtEuros(demande))+ligne('Tu proposes, par combat',mgmtEuros(b))+ligne('Prime de signature',mgmtEuros(prime))
     +mgmtContratsDitHtml(m,x)
     +(F.msg?`<div class="mf-ct-msg">${esc(F.msg)}</div>`:'')+`</div>`
-    +`<div class="mf-eff-fiche-pied">${mfBouton(reno?'Proposer ce contrat':(x.propre?'Reprendre':'Proposer ce contrat'),{touche:'Entrée',jaune:true,onclick:'CL.mgmtContratsPropose()'})}</div>`;
+    +`<div class="mf-eff-fiche-pied">${libere}${mfBouton(reno?'Proposer ce contrat':(x.propre?'Reprendre':'Proposer ce contrat'),{touche:'Entrée',jaune:true,onclick:'CL.mgmtContratsPropose()'})}</div>`;
   return ban+mfPanneau(corps,'normal','mf-eff-fiche mf-ct-fiche');
 }
 
@@ -148,6 +152,14 @@ Object.assign(CL,{
   mgmtContratsCategorie(delta){
     const ids=['',...allDivisions().filter(d=>d.gender===MGMT_CONTRATS.sexe).map(d=>d.id)], i=ids.indexOf(MGMT_CONTRATS.div);
     CL.mgmtContratsDiv(ids[(i+(delta<0?-1:1)+ids.length)%ids.length]);
+  },
+  /** L : libérer le combattant choisi en lui payant le reste de son contrat. */
+  mgmtContratsLiberer(){
+    const m=G.mgmt, F=MGMT_CONTRATS, x=mgmtContratsLignes(m)[F.curseur]; if(!x||!x.propre||!x.f.ct) return;
+    const r=mgmtContratLiberer(m,x.id);
+    F.msg=r.ok?`Libéré : ${mgmtEuros(r.indemnite)} versés pour le reste de son contrat.`:(MGMT_CT_REFUS_TEXTES[r.raison]||'Refusé.');
+    if(r.ok){ saveMgmt(); F.b=null; }
+    render();
   },
   /** Entrée : renouveler (sous contrat), reprendre un ancien ou signer un combattant du marché. */
   mgmtContratsPropose(){
@@ -172,6 +184,8 @@ keysRegister('mgmt_contrats',{
   g(){ CL.mgmtContratsSexe(); },
   G(){ CL.mgmtContratsSexe(); },
   Tab(){ CL.mgmtContratsCategorie(1); },
+  l(){ CL.mgmtContratsLiberer(); },
+  L(){ CL.mgmtContratsLiberer(); },
   Enter(){ CL.mgmtContratsPropose(); },
   Escape(){ CL.go('mgmt_bureau'); },
 });

@@ -137,11 +137,14 @@ function newGameWindow(){
 
 /* --------------------------- 3) politique de jeu --------------------------- */
 /** Extrait tous les onclick="..." du HTML actuellement rendu, dans l'ordre
- * d'apparition — même extraction que tests/helpers/playthrough.js. */
+ * d'apparition — même extraction que tests/helpers/playthrough.js. Corrections du
+ * 08/10/2026, 7.2 : la copie n'avait pas reçu le filtre du bouton « retour » du hub
+ * (career-home, 30/09) ; tests/outillage.test.js échoue maintenant si les deux copies divergent. */
 function allOnclicks(win){
   const app = win.document.getElementById('app');
   if(!app) return [];
-  const html = app.innerHTML.replace(/<span class="eyebrow x"[^>]*>.*?<\/span>/g, '');
+  const html = app.innerHTML.replace(/<span class="eyebrow x"[^>]*>.*?<\/span>/g, '')
+    .replace(/<button class="career-home"[^>]*>.*?<\/button>/g,'');
   const re = /onclick="([^"]+)"/g;
   const out = [];
   let m;

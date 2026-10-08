@@ -15,9 +15,27 @@ const MGMT_CT_MIN=1;
 const MGMT_CT_MAX=8;
 const MGMT_CT_PRIME_PART=0.1;
 const MGMT_CT_ATTENTE=[3,5,7,10];
+/* Corrections du 08/10, lot 8 (D1) : le dernier palier a toujours une sortie. Au bout de MGMT_CT_DEPART_SOIREES soirées de plus sans combat, le combattant
+   demande son départ et s'en va, libre (aucune indemnité : il n'a rien joué). Tant qu'il est là, le matchmaker choisit : le laisser, le libérer en lui
+   payant le reste de son contrat, ou le tenter avec un nom moins connu que lui — il accepte un adversaire dont la renommée ne dépasse pas
+   MGMT_CT_REFUS_NOM_RATIO de la sienne. */
+const MGMT_CT_DEPART_SOIREES=3;
+const MGMT_CT_REFUS_NOM_RATIO=0.8;
 const MGMT_CT_RENOUV_MAJORATION=1.1;
 const MGMT_CT_BOURSE_ECHELLE=1.7;
 const MGMT_CT_REFUS_MARGE=25;
+/* Corrections du 08/10, lot 9 (D3) : un combattant « trop grand » pour l'organisation (renommée au-dessus de la popularité + MGMT_CT_REFUS_MARGE) ne refuse plus
+   quel que soit le prix : tout dépend de ce qui l'intéresse. L'argent (50 %) accepte contre une bourse majorée de MGMT_CT_GRAND_PRIME par point d'écart ; le titre (30 %)
+   accepte au prix normal s'il détient la ceinture ou est dans les deux premiers de sa catégorie ; l'ambition (20 %) vise plus haut et refuse, tant que l'organisation
+   ne grandit pas. L'intérêt est dérivé de son identifiant, jamais stocké. */
+const MGMT_CT_GRAND_PRIME=0.04;
+const MGMT_CT_INTERETS=[['argent',0.5],['titre',0.8],['ambition',1]];
+/* Lot 9 : la bourse suit la renommée en courbe, pas en droite — le débutant coûte presque rien, la vedette beaucoup. */
+const MGMT_CT_BOURSE_COURBE_BASE=0.5;
+const MGMT_CT_BOURSE_COURBE_PENTE=2.4;
+/* Plus l'organisation est connue, plus ses combattants valent cher sur le marché : la bourse demandée est multipliée par BASE + PENTE × popularité / 100. */
+const MGMT_CT_BOURSE_POP_BASE=0.6;
+const MGMT_CT_BOURSE_POP_PENTE=0.8;
 const MGMT_CT_LIBRE_PERIODE=6;
 const MGMT_CT_DEBUTANT_AGE=23;
 const MGMT_CT_DEBUTANT_COMBATS=3;
@@ -28,9 +46,33 @@ function mgmtContratsActif(m){ return typeof mgmtAgendaActif==='function'&&mgmtA
 /** La bourse par combat qu'un combattant demande (k$) : son renom, rapporté à la moyenne des places ; un peu plus
  *  après une longue attente au renouvellement. Pur. */
 function mgmtBourseSouhaitee(m,f,renouvellement){
-  const base=Math.max(1,Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*mgmtStar(f))*MGMT_CT_BOURSE_ECHELLE));
+  const s=mgmtStar(f);
+  const courbe=MGMT_CT_BOURSE_COURBE_BASE+MGMT_CT_BOURSE_COURBE_PENTE*s*s;
+  const g=mgmtContratGrandeur(m,f);
+  const base=Math.max(1,Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*s)*MGMT_CT_BOURSE_ECHELLE*courbe*g.prime*(MGMT_CT_BOURSE_POP_BASE+MGMT_CT_BOURSE_POP_PENTE*(Number.isFinite(m.pop)?m.pop:40)/100)*(typeof mgmtOrgProfil==='function'&&Number.isFinite(mgmtOrgProfil(m).bourses)?mgmtOrgProfil(m).bourses:1)));
   const plus=renouvellement&&f.ct&&mgmtContratPalier(m,f)>=3;
   return plus?Math.round(base*MGMT_CT_RENOUV_MAJORATION):base;
+}
+
+/** Ce qui l'intéresse : 'argent', 'titre' ou 'ambition', dérivé de son identifiant. Pur. */
+function mgmtContratInteret(f){
+  const u=mgmtIdentiteStream(f.id,'interet')();
+  return MGMT_CT_INTERETS.find(x=>u<x[1])[0];
+}
+
+/** Le combattant est-il trop grand pour l'organisation, et que veut-il ? Pur.
+ *  @returns {{ecart:number,interet:string,refus:boolean,prime:number}} prime : multiplicateur de la bourse (1 si l'argent ne le retient pas). */
+function mgmtContratGrandeur(m,f){
+  const ecart=mgmtStar(f)*100-((Number.isFinite(m.pop)?m.pop:40)+MGMT_CT_REFUS_MARGE);
+  if(!(ecart>0)) return {ecart:0,interet:'',refus:false,prime:1};
+  const interet=mgmtContratInteret(f);
+  if(interet==='argent') return {ecart,interet,refus:false,prime:1+MGMT_CT_GRAND_PRIME*ecart};
+  if(interet==='titre'){
+    const ceinture=typeof mgmtSplitTitle==='function'?mgmtSplitTitle(m,f.div):null;
+    const rang=typeof mgmtDivisionRank==='function'?mgmtDivisionRank(m,f):99;
+    return {ecart,interet,refus:!((ceinture&&ceinture.id===f.id)||(rang>0&&rang<=2)),prime:1};
+  }
+  return {ecart,interet,refus:true,prime:1};
 }
 function mgmtContratPrime(n,b){ return Math.max(1,Math.round(n*b*MGMT_CT_PRIME_PART)); }
 
@@ -57,11 +99,30 @@ function mgmtContratPalier(m,f){
 }
 function mgmtContratRestants(f){ return f&&f.ct?Math.max(0,f.ct.n-f.ct.f):0; }
 
-/** Un combattant qui ne peut plus se booker à cause de son contrat : sans contrat, ou au dernier palier d'attente. Pur. */
-function mgmtContratIndispo(m,f){
+/** Un combattant qui ne peut plus se booker à cause de son contrat : sans contrat, ou au dernier palier d'attente. Au dernier palier, il accepte
+ *  pourtant un adversaire moins connu que lui (`contre`, une ligne de l'effectif) : le matchmaker peut le tenter. Pur. */
+function mgmtContratIndispo(m,f,contre){
   if(!mgmtContratsActif(m)||!f) return false;
   if(f.libre) return true;
-  return !!f.ct&&mgmtContratPalier(m,f)>=4;
+  if(!f.ct||mgmtContratPalier(m,f)<4) return false;
+  return !(contre&&contre.id!==f.id&&mgmtStar(contre)<=mgmtStar(f)*MGMT_CT_REFUS_NOM_RATIO);
+}
+
+/** Ce qu'il en coûte de libérer un combattant : le reste de son contrat, aux bourses prévues (k$). Pur. */
+function mgmtContratIndemnite(f){ return f&&f.ct?mgmtContratRestants(f)*f.ct.b:0; }
+
+/** Libère un combattant sous contrat : le reste de ce qu'on lui doit est payé, il devient sans contrat et rejoint le marché. Refusé s'il est sur la carte,
+ *  sans contrat ou si la caisse ne suffit pas. @returns {{ok:boolean,raison?:string,indemnite?:number}} */
+function mgmtContratLiberer(m,id){
+  const f=mgmtFighterById(m,id);
+  if(!mgmtContratsActif(m)) return {ok:false,raison:'inactif'};
+  if(!f||!f.ct) return {ok:false,raison:'inconnu'};
+  if(mgmtEngaged(m,f)) return {ok:false,raison:'carte'};
+  const indemnite=mgmtContratIndemnite(f);
+  if(!mgmtCanAfford(m,indemnite)) return {ok:false,raison:'caisse',indemnite};
+  m.treasury-=indemnite; delete f.ct; f.libre=true;
+  mgmtAddFact(m,{c:m.cycle,k:'libere',a:f.id});
+  return {ok:true,indemnite};
 }
 
 /** Après une soirée : le combat joué compte, un contrat épuisé fait un sans-contrat. */
@@ -73,10 +134,14 @@ function mgmtContratsApresSoiree(m,ids){
   }
 }
 
-/** Les paliers d'attente franchis ce cycle deviennent des faits (la parole et la presse sont d'auteur, lot 10). */
+/** Les paliers d'attente franchis ce cycle deviennent des faits (la parole et la presse sont d'auteur, lot 10). Le combattant qui a dépassé le dernier
+ *  palier de MGMT_CT_DEPART_SOIREES soirées s'en va (fait 'depart_attente'). */
 function mgmtContratsOuvreCycle(m){
   if(!mgmtContratsActif(m)) return;
   for(const f of m.roster||[]){
+    if(f.ct&&!mgmtIsRetired(f)&&mgmtContratAttente(m,f)>=MGMT_CT_ATTENTE[3]+MGMT_CT_DEPART_SOIREES&&!mgmtEngaged(m,f)){
+      delete f.ct; f.libre=true; mgmtAddFact(m,{c:m.cycle,k:'depart_attente',a:f.id}); continue;
+    }
     const p=mgmtContratPalier(m,f);
     if(p>=1&&p<=2&&!(m.facts||[]).some(x=>x&&x.k==='attend'&&x.a===f.id&&x.p===p&&x.c>=(Number.isSafeInteger(f.lastCycle)?f.lastCycle:-1))) mgmtAddFact(m,{c:m.cycle,k:'attend',a:f.id,p});
   }
@@ -95,7 +160,7 @@ function mgmtExtLibre(m,line,trace){
 function mgmtContratReponse(m,f,n,b,renouvellement){
   const demande=mgmtBourseSouhaitee(m,f,renouvellement), prime=Number.isSafeInteger(n)&&b>0?mgmtContratPrime(n,b):0;
   if(!Number.isSafeInteger(n)||n<MGMT_CT_MIN||n>MGMT_CT_MAX||!Number.isFinite(b)||b<=0) return {ok:false,raison:'offre',demande,prime};
-  if(mgmtStar(f)*100>(Number.isFinite(m.pop)?m.pop:40)+MGMT_CT_REFUS_MARGE) return {ok:false,raison:'trop-grand',demande,prime};
+  if(mgmtContratGrandeur(m,f).refus) return {ok:false,raison:'trop-grand',demande,prime};
   if(!mgmtCanAfford(m,prime)) return {ok:false,raison:'caisse',demande,prime};
   if(b<demande) return {ok:false,raison:'trop-bas',demande,prime};
   return {ok:true,demande,prime};

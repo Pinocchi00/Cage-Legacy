@@ -249,17 +249,22 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-stage:has(.mf-logo-seul) .mf-touches{left:56px}
 .mf-nouvelle{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;justify-content:space-between}
 .mf-org-grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.mf-org{height:374px}
+.mf-org{height:322px}
 .mf-org-tete{height:76px;flex:none;padding:0 16px;background:var(--mf-ligne);display:flex;align-items:center;justify-content:space-between;gap:12px}
 .mf-org.choisie .mf-org-tete{background:var(--mf-rouge)}
 .mf-org-nom{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.8;white-space:nowrap;text-transform:uppercase;min-width:0;overflow:hidden}
 .mf-org-nom.long{font-size:40px}
 .mf-org-choisie{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.mf-org-corps{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.mf-org-corps{flex:1;padding:10px 16px;display:flex;flex-direction:column;gap:8px}
 .mf-org-bloc{display:flex;flex-direction:column}
 .mf-org-titre{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;margin-bottom:6px;text-transform:uppercase}
-.mf-org-ligne{height:44px;flex:none;display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep);font-size:22px;line-height:1;white-space:nowrap}
+.mf-org-ligne{height:40px;flex:none;display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep);font-size:22px;line-height:1;white-space:nowrap}
 .mf-org-ligne svg{width:26px;height:26px}
+.mf-org-apercu{display:flex;align-items:stretch;gap:12px;height:96px;flex:none;background:var(--mf-ligne);padding:0 16px}
+.mf-org-apercu-nom{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.8;white-space:nowrap;text-transform:uppercase;display:flex;align-items:center;padding-right:16px;border-right:2px solid var(--mf-sep);max-width:430px;overflow:hidden}
+.mf-org-tuile{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.mf-org-tuile span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase}
+.mf-org-tuile b{font-weight:600;font-size:24px;line-height:1;white-space:nowrap}
 .mf-nouvelle-pied{height:60px;flex:none;display:flex;justify-content:space-between;align-items:center;gap:24px}
 .mf-nouvelle-texte{font-size:24px;line-height:1.2;color:var(--mf-texte2)}
 .mf-org-avenir{display:flex;align-items:center;gap:14px;font-size:24px;line-height:1;color:var(--mf-texte2);opacity:.74;white-space:nowrap;margin-left:auto}

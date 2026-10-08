@@ -26,6 +26,8 @@ tools/reports/*
 # Lot 3a §8 (livré au lot 1 le style stable) : même principe — le rapport de
 # calibrage du corps et de la soirée est le livrable §8, versionné.
 !tools/reports/LOT-3A-CALIBRAGE-SOIREE.md
+# Corrections du 08/10/2026, lot 7.1 : la mesure d'ensemble du management est le livrable, versionnée.
+!tools/reports/MESURE-MANAGEMENT.md
 # Lot 2 §T4 (docs/LOT-2-CARTE-PRINCIPALE.md) : même principe — le rapport de
 # calibrage de l'argent sur le déroulé réel est le livrable T4, versionné.
 !tools/reports/LOT-2-T4-CALIBRAGE-ECONOMIE.md
@@ -72,4 +74,8 @@ tools/reports/lot-5-t1-ceintures/*
 !tools/reports/lot-5-t1-ceintures/*.png
 !tools/reports/lot-5-t1-ceintures/audit.json
 !tools/reports/lot-5-t1-ceintures/VERIFICATION.md
+<<<<<<< HEAD
 !tools/reports/LOT-6-GESTES-DE-FINITION.md
+=======
+!tools/reports/RECLAMES.md
+>>>>>>> main
