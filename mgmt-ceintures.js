@@ -77,14 +77,48 @@ function mgmtTitleMemoryRows(m){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* Corrections du 08/10, lot 11 (D5) : un combat de titre est un événement. Une carte en porte au plus MGMT_TITRES_PAR_CARTE (en général un, parfois zéro ou deux) ;
+   un champion ne combat que pour sa ceinture — le booker, c'est la mettre en jeu, et il n'est jamais un préliminaire ; un combat de titre pèse sur l'attrait de la carte
+   (MGMT_ATTR_TITRE, mgmt-argent.js), donc sur le remplissage. */
+const MGMT_TITRES_PAR_CARTE=2;
+
+/** Les champions de Split en titre (un par catégorie au plus), en ensemble d'identifiants. Pur. */
+function mgmtChampionIds(m){
+  const s=new Set();
+  if(!m||!Array.isArray(m.roster)) return s;
+  /* Mémo : les listes demandent la sélection de chaque ligne. Les ceintures ne changent qu'avec les faits ; le cycle clôt la clé par sécurité. */
+  const cle=(m.facts?m.facts.length:0)+'|'+m.cycle+'|'+m.roster.length;
+  if(MGMT_CHAMPIONS_MEMO.m===m&&MGMT_CHAMPIONS_MEMO.cle===cle) return MGMT_CHAMPIONS_MEMO.set;
+  for(const d of new Set(m.roster.map(f=>f.div))){ const b=mgmtSplitTitle(m,d); if(b&&b.id) s.add(b.id); }
+  MGMT_CHAMPIONS_MEMO.m=m; MGMT_CHAMPIONS_MEMO.cle=cle; MGMT_CHAMPIONS_MEMO.set=s;
+  return s;
+}
+const MGMT_CHAMPIONS_MEMO={m:null,cle:'',set:null};
+
+/** Un champion peut-il encore être booké (premier choix) ? Seulement si une ceinture peut encore être mise en jeu sur la carte. Pur. */
+function mgmtChampionBookable(m,f){
+  if(!mgmtChampionIds(m).has(f.id)) return true;
+  const titres=mgmtCardFights(m).filter(x=>x.title===true);
+  if(titres.length>=MGMT_TITRES_PAR_CARTE) return false;
+  return !titres.some(x=>mgmtFighterById(m,x.a)?.div===f.div);
+}
+
+/** Le champion peut-il combattre dans cette paire ? Sans champion, toujours ; avec un champion, seulement si la ceinture peut être mise en jeu. Pur. */
+function mgmtChampionPeutCombattre(m,aid,bid){
+  const ch=mgmtChampionIds(m);
+  if(!ch.has(aid)&&!ch.has(bid)) return true;
+  return mgmtCanTitle(m,{a:aid,b:bid});
+}
+
 /** Une paire peut jouer un titre vacant ou celui du champion présent.
- *  Une seule ceinture de cette catégorie peut être engagée sur la carte. */
+ *  Une seule ceinture de cette catégorie peut être engagée sur la carte, et deux au plus par carte. */
 function mgmtCanTitle(m,fight){
   if(!m||!fight) return false;
   const a=mgmtFighterById(m,fight.a),b=mgmtFighterById(m,fight.b);
   if(!a||!b||a.id===b.id||a.div!==b.div||!mgmtAvailable(m,a,b)||!mgmtAvailable(m,b,a)) return false;
   const belt=mgmtSplitTitle(m,a.div);
   if(belt.id&&belt.id!==a.id&&belt.id!==b.id) return false;
+  if(mgmtCardFights(m).filter(x=>x!==fight&&x.title===true).length>=MGMT_TITRES_PAR_CARTE) return false;
   return !mgmtCardFights(m).some(x=>x!==fight&&x.title===true
     &&mgmtFighterById(m,x.a)?.div===a.div);
 }
@@ -95,6 +129,7 @@ function mgmtSetTitle(m,idx,title){
     ||!Number.isSafeInteger(idx)||idx<0||idx>=m.card.main.length) return false;
   const fight=m.card.main[idx];
   if(title&&!mgmtCanTitle(m,fight)) return false;
+  if(!title){ const ch=mgmtChampionIds(m); if(ch.has(fight.a)||ch.has(fight.b)) return false; }
   fight.title=title;
   return true;
 }

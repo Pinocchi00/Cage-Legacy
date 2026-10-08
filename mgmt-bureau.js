@@ -501,6 +501,7 @@ function mgmtAcceptable(m,aff){
   if(!a||!b||a===b||a.div!==b.div) return false;
   if(!mgmtAvailable(m,a,b)||!mgmtAvailable(m,b,a)) return false;
   if(mgmtEngaged(m,a)||mgmtEngaged(m,b)) return false;
+  if(typeof mgmtChampionPeutCombattre==='function'&&!mgmtChampionPeutCombattre(m,a.id,b.id)) return false;
   return true;
 }
 

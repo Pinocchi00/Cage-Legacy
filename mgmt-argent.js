@@ -81,6 +81,8 @@ const MGMT_WIN_BONUS_SHARE=1;
 const MGMT_ATTR_PRELIM_W=1;
 const MGMT_ATTR_MAIN_W=2.5;
 const MGMT_ATTR_GAP=0.6;
+/* Corrections du 08/10, lot 11 (D5) : un combat de titre ajoute cet attrait à la carte (un combat principal moyen en vaut 2,5 × 0,49). */
+const MGMT_ATTR_TITRE=0.5;
 /* Billetterie (k$) par point d'attrait de la carte. Lot 2B T4 : recalibrée
    de 7 à 11.4 avec les droits du diffuseur — le bonus de victoire (partage
    show/win) alourdit le coût d'une soirée de ~50 %, les deux leviers de
@@ -192,7 +194,7 @@ function mgmtCardAttraction(m,slotted){
     if(!f||typeof f.a!=='string'||typeof f.b!=='string') continue;
     const fa=mgmtFighterById(m,f.a), fb=mgmtFighterById(m,f.b);
     if(!fa||!fb) continue;
-    s+=(f.slot==='main'?MGMT_ATTR_MAIN_W:MGMT_ATTR_PRELIM_W)*mgmtFightDraw(fa,fb);
+    s+=(f.slot==='main'?MGMT_ATTR_MAIN_W:MGMT_ATTR_PRELIM_W)*mgmtFightDraw(fa,fb)+(f.title===true?MGMT_ATTR_TITRE:0);
   }
   return s;
 }
