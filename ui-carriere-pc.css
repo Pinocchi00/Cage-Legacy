@@ -29,3 +29,7 @@
 .career-pc-body .dlt{border-radius:0}
 .career-pc-body .scr>button,.career-pc-body .scr>.btn{justify-self:start;width:auto;min-width:260px}
 .career-pc-body .scr>.btn.primary,.career-pc-body .scr>.btn.gold{justify-self:end;min-width:320px}
+/* Les écrans de texte centré (surnom, conférence de presse, événement, offres, promotion) : une colonne unique de 860 px au milieu du corps, boutons au centre. */
+.career-pc-body .scr.center{grid-template-columns:minmax(0,860px);justify-content:center;min-height:0!important}
+.career-pc-body .scr.center>.btn,.career-pc-body .scr.center>button,.career-pc-body .scr.center>.btn.primary,.career-pc-body .scr.center>.btn.gold{justify-self:center}
+.career-pc-body .scr.center>.stagger,.career-pc-body .scr.center>.stagger-grid{grid-template-columns:minmax(0,1fr)}
