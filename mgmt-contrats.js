@@ -49,7 +49,7 @@ function mgmtBourseSouhaitee(m,f,renouvellement){
   const s=mgmtStar(f);
   const courbe=MGMT_CT_BOURSE_COURBE_BASE+MGMT_CT_BOURSE_COURBE_PENTE*s*s;
   const g=mgmtContratGrandeur(m,f);
-  const base=Math.max(1,Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*s)*MGMT_CT_BOURSE_ECHELLE*courbe*g.prime*(MGMT_CT_BOURSE_POP_BASE+MGMT_CT_BOURSE_POP_PENTE*(Number.isFinite(m.pop)?m.pop:40)/100)));
+  const base=Math.max(1,Math.round((MGMT_PURSE_BASE+MGMT_PURSE_PER_STAR*s)*MGMT_CT_BOURSE_ECHELLE*courbe*g.prime*(MGMT_CT_BOURSE_POP_BASE+MGMT_CT_BOURSE_POP_PENTE*(Number.isFinite(m.pop)?m.pop:40)/100)*(typeof mgmtOrgProfil==='function'&&Number.isFinite(mgmtOrgProfil(m).bourses)?mgmtOrgProfil(m).bourses:1)));
   const plus=renouvellement&&f.ct&&mgmtContratPalier(m,f)>=3;
   return plus?Math.round(base*MGMT_CT_RENOUV_MAJORATION):base;
 }
