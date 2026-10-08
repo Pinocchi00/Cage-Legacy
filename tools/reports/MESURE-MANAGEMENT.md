@@ -4,40 +4,40 @@
 
 ## À la soirée 10
 
-| Organisation | Caisse | Pop. | Satisf. | Effectif | Sans contrat | Paliers 1 / 2 / 3 / 4 | Refus : trop grand / caisse / trop bas | Titres par carte | Champions changés | Âge moyen | < 25 ans | ≥ 36 ans | Soirées à découvert |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| split | 613 000 € | 52 | 55 | 139 | 9 | 26 / 19 / 27 / 27 | 26 / 0 / 0 | 1 | 5 | 29.7 | 18 | 9 | 0 |
-| garden-of-blood | 1 685 000 € | 100 | 79 | 139 | 0 | 22 / 22 / 29 / 31 | 0 / 0 / 0 | 1.1 | 5 | 29.7 | 18 | 9 | 0 |
-| mma-korner | −52 000 € | 20 | 40 | 111 | 20 | 18 / 19 / 17 / 11 | 106 / 43 / 0 | 1.4 | 7 | 29.7 | 15 | 8 | 8 |
-| ultimate-rim | 437 000 € | 60 | 61 | 97 | 3 | 21 / 21 / 15 / 3 | 12 / 0 / 0 | 2 | 7 | 26.8 | 30 | 0 | 0 |
-| fighting-pacific-championship | 1 301 000 € | 86 | 51 | 139 | 0 | 27 / 18 / 29 / 34 | 0 / 0 / 0 | 1.7 | 7 | 32.7 | 0 | 43 | 0 |
-| organisation-6 | 1 010 000 € | 67 | 48 | 139 | 1 | 23 / 22 / 27 / 31 | 1 / 0 / 0 | 1.6 | 4 | 29.4 | 18 | 8 | 0 |
-| organisation-7 | 252 000 € | 33 | 73 | 139 | 16 | 20 / 19 / 26 / 30 | 63 / 0 / 0 | 1 | 4 | 29.7 | 18 | 9 | 0 |
-| organisation-8 | 1 107 000 € | 89 | 73 | 139 | 0 | 24 / 18 / 28 / 36 | 0 / 0 / 0 | 1.6 | 3 | 29.9 | 18 | 10 | 0 |
+| Organisation | Caisse | Pop. | Satisf. | Effectif | Sans contrat | Paliers 1 / 2 / 3 / 4 | Refus : trop grand / caisse / trop bas | Titres par carte | Champions changés | Âge moyen | < 25 ans | ≥ 36 ans | Soirées à découvert | Retraites | Top 5 renouvelé | Jeunes sur le marché |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| split | 740 000 € | 100 | 93 | 139 | 0 | 26 / 19 / 36 / 25 | 0 / 0 / 0 | 2 | 9 | 29.7 | 18 | 9 | 0 | 0 | 0.67 | 35 |
+| garden-of-blood | 328 000 € | 100 | 92 | 139 | 0 | 20 / 25 / 29 / 33 | 0 / 0 / 0 | 2 | 9 | 29.7 | 18 | 9 | 0 | 0 | 0.5 | 35 |
+| mma-korner | 329 000 € | 70 | 95 | 111 | 2 | 27 / 19 / 22 / 6 | 8 / 29 / 0 | 2 | 6 | 29.7 | 15 | 8 | 5 | 0 | 0.33 | 36 |
+| ultimate-rim | 580 000 € | 86 | 84 | 97 | 0 | 22 / 21 / 13 / 10 | 0 / 0 / 0 | 2 | 8 | 26.8 | 30 | 0 | 0 | 0 | 0.58 | 36 |
+| fighting-pacific-championship | 1 077 000 € | 100 | 98 | 139 | 0 | 21 / 18 / 35 / 31 | 0 / 0 / 0 | 2 | 9 | 32.7 | 0 | 43 | 0 | 0 | 0.75 | 33 |
+| organisation-6 | 950 000 € | 100 | 88 | 139 | 0 | 23 / 22 / 30 / 28 | 0 / 0 / 0 | 2 | 6 | 29.4 | 18 | 8 | 0 | 0 | 0.33 | 35 |
+| organisation-7 | −8 000 € | 76 | 84 | 139 | 17 | 19 / 20 / 29 / 26 | 6 / 126 / 0 | 1.9 | 11 | 29.7 | 18 | 9 | 9 | 0 | 0.58 | 37 |
+| organisation-8 | 1 100 000 € | 100 | 93 | 139 | 0 | 25 / 21 / 34 / 28 | 0 / 0 / 0 | 2 | 7 | 29.9 | 18 | 10 | 0 | 0 | 0.67 | 35 |
 
 ## À la soirée 20
 
-| Organisation | Caisse | Pop. | Satisf. | Effectif | Sans contrat | Paliers 1 / 2 / 3 / 4 | Refus : trop grand / caisse / trop bas | Titres par carte | Champions changés | Âge moyen | < 25 ans | ≥ 36 ans | Soirées à découvert |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| split | 1 320 000 € | 64 | 57 | 139 | 11 | 24 / 18 / 10 / 43 | 30 / 0 / 0 | 0.6 | 5 | 30.7 | 9 | 23 | 0 |
-| garden-of-blood | 3 269 000 € | 100 | 58 | 139 | 0 | 27 / 20 / 13 / 48 | 0 / 0 / 0 | 1.05 | 11 | 30.7 | 9 | 23 | 0 |
-| mma-korner | partie arrêtée avant la soirée 20 | | | | | | | | | | | | |
-| ultimate-rim | 872 000 € | 57 | 87 | 97 | 4 | 21 / 16 / 11 / 12 | 19 / 0 / 0 | 1.55 | 9 | 27.8 | 27 | 0 | 0 |
-| fighting-pacific-championship | 2 946 000 € | 100 | 55 | 139 | 0 | 25 / 19 / 7 / 57 | 0 / 0 / 0 | 1.65 | 16 | 33.7 | 0 | 58 | 0 |
-| organisation-6 | 1 962 000 € | 86 | 66 | 139 | 1 | 27 / 22 / 13 / 48 | 1 / 0 / 0 | 1.4 | 8 | 30.4 | 7 | 14 | 0 |
-| organisation-7 | 204 000 € | 27 | 56 | 139 | 28 | 18 / 11 / 7 / 43 | 114 / 0 / 0 | 0.6 | 6 | 30.7 | 9 | 23 | 0 |
-| organisation-8 | 2 829 000 € | 100 | 71 | 139 | 0 | 22 / 18 / 12 / 54 | 0 / 0 / 0 | 1.55 | 6 | 30.9 | 9 | 25 | 0 |
+| Organisation | Caisse | Pop. | Satisf. | Effectif | Sans contrat | Paliers 1 / 2 / 3 / 4 | Refus : trop grand / caisse / trop bas | Titres par carte | Champions changés | Âge moyen | < 25 ans | ≥ 36 ans | Soirées à découvert | Retraites | Top 5 renouvelé | Jeunes sur le marché |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| split | 1 886 000 € | 100 | 87 | 139 | 48 | 22 / 19 / 13 / 3 | 0 / 0 / 0 | 1.9 | 14 | 30.7 | 9 | 23 | 0 | 0 | 0.83 | 25 |
+| garden-of-blood | 312 000 € | 100 | 96 | 139 | 49 | 25 / 19 / 9 / 3 | 0 / 0 / 0 | 1.8 | 15 | 30.7 | 9 | 23 | 0 | 0 | 0.83 | 26 |
+| mma-korner | 1 616 000 € | 100 | 96 | 111 | 18 | 22 / 21 / 15 / 2 | 8 / 29 / 0 | 1.95 | 13 | 30.7 | 6 | 15 | 5 | 0 | 0.58 | 24 |
+| ultimate-rim | 1 327 000 € | 100 | 73 | 97 | 14 | 23 / 17 / 11 / 1 | 0 / 0 / 0 | 1.95 | 17 | 27.8 | 27 | 0 | 0 | 0 | 0.67 | 23 |
+| fighting-pacific-championship | 1 654 000 € | 100 | 92 | 138 | 51 | 23 / 17 / 11 / 4 | 0 / 0 / 0 | 1.75 | 10 | 33.7 | 0 | 57 | 0 | 1 | 0.83 | 23 |
+| organisation-6 | 2 071 000 € | 100 | 89 | 139 | 44 | 22 / 19 / 15 / 6 | 0 / 0 / 0 | 1.9 | 15 | 30.4 | 7 | 14 | 0 | 0 | 0.58 | 24 |
+| organisation-7 | 788 000 € | 100 | 87 | 139 | 58 | 25 / 15 / 8 / 2 | 6 / 126 / 0 | 1.65 | 14 | 30.7 | 9 | 23 | 9 | 0 | 0.83 | 28 |
+| organisation-8 | 2 172 000 € | 100 | 97 | 139 | 48 | 25 / 16 / 13 / 4 | 0 / 0 / 0 | 1.9 | 10 | 30.9 | 9 | 25 | 0 | 0 | 1.08 | 27 |
 
 ## À la soirée 40
 
-| Organisation | Caisse | Pop. | Satisf. | Effectif | Sans contrat | Paliers 1 / 2 / 3 / 4 | Refus : trop grand / caisse / trop bas | Titres par carte | Champions changés | Âge moyen | < 25 ans | ≥ 36 ans | Soirées à découvert |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| split | 2 775 000 € | 89 | 48 | 138 | 11 | 18 / 10 / 7 / 57 | 31 / 0 / 0 | 0.5 | 8 | 32.6 | 0 | 41 | 0 |
-| garden-of-blood | 5 877 000 € | 100 | 78 | 139 | 0 | 25 / 13 / 3 / 66 | 0 / 0 / 0 | 1.05 | 21 | 32.6 | 0 | 42 | 0 |
-| mma-korner | partie arrêtée avant la soirée 40 | | | | | | | | | | | | |
-| ultimate-rim | 2 090 000 € | 100 | 75 | 94 | 4 | 19 / 13 / 5 / 20 | 20 / 0 / 0 | 1.45 | 19 | 29.7 | 14 | 5 | 0 |
-| fighting-pacific-championship | 5 756 000 € | 100 | 74 | 123 | 0 | 24 / 7 / 0 / 61 | 0 / 0 / 0 | 1.73 | 22 | 35 | 0 | 53 | 0 |
-| organisation-6 | 4 885 000 € | 98 | 44 | 137 | 1 | 20 / 8 / 4 / 70 | 1 / 0 / 0 | 1.5 | 18 | 32.2 | 0 | 36 | 0 |
-| organisation-7 | partie arrêtée avant la soirée 40 | | | | | | | | | | | | |
-| organisation-8 | 5 526 000 € | 100 | 70 | 138 | 0 | 24 / 9 / 3 / 73 | 0 / 0 / 0 | 1.28 | 13 | 32.7 | 0 | 43 | 0 |
+| Organisation | Caisse | Pop. | Satisf. | Effectif | Sans contrat | Paliers 1 / 2 / 3 / 4 | Refus : trop grand / caisse / trop bas | Titres par carte | Champions changés | Âge moyen | < 25 ans | ≥ 36 ans | Soirées à découvert | Retraites | Top 5 renouvelé | Jeunes sur le marché |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| split | 2 545 000 € | 100 | 79 | 137 | 69 | 24 / 11 / 4 / 1 | 0 / 0 / 0 | 1.63 | 14 | 32.7 | 0 | 42 | 0 | 2 | 1.42 | 23 |
+| garden-of-blood | −192 000 € | 100 | 88 | 138 | 76 | 20 / 9 / 4 / 4 | 0 / 65 / 0 | 1.05 | 18 | 32.6 | 0 | 41 | 6 | 1 | 1.33 | 24 |
+| mma-korner | 3 164 000 € | 100 | 79 | 111 | 36 | 25 / 12 / 5 / 3 | 8 / 29 / 0 | 1.75 | 21 | 32.6 | 0 | 33 | 5 | 0 | 1 | 21 |
+| ultimate-rim | 1 366 000 € | 100 | 89 | 95 | 26 | 21 / 13 / 5 / 0 | 0 / 0 / 0 | 1.5 | 23 | 29.7 | 14 | 5 | 0 | 2 | 1.08 | 24 |
+| fighting-pacific-championship | 2 506 000 € | 100 | 84 | 122 | 65 | 13 / 3 / 6 / 2 | 0 / 0 / 0 | 1.48 | 11 | 34.9 | 0 | 51 | 0 | 17 | 1.5 | 32 |
+| organisation-6 | 3 301 000 € | 100 | 89 | 139 | 68 | 21 / 8 / 10 / 0 | 0 / 0 / 0 | 1.73 | 24 | 32.3 | 0 | 37 | 0 | 0 | 1.17 | 20 |
+| organisation-7 | 1 388 000 € | 100 | 93 | 138 | 72 | 18 / 7 / 3 / 2 | 6 / 126 / 0 | 1.28 | 17 | 32.6 | 0 | 42 | 9 | 1 | 1.25 | 25 |
+| organisation-8 | 3 578 000 € | 100 | 88 | 138 | 64 | 20 / 13 / 8 / 2 | 0 / 0 / 0 | 1.55 | 21 | 32.8 | 0 | 44 | 0 | 1 | 1.25 | 23 |
 
