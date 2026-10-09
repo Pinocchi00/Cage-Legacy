@@ -425,7 +425,7 @@ Object.assign(CL,{
     /* Deuxième choix : le combat entre dans le premier emplacement libre. */
     const premier=MGMT_CART.pick;
     if(mgmtBookMain(m,premier,id)){
-      MGMT_CART.pick=null; MGMT_CART.cursor=0;
+      MGMT_CART.pick=null; MGMT_CART.cursor=Math.max(0,mgmtCarteListe(m).findIndex(x=>mgmtSelectable(m,x,null)));   /* brief démo, lot 4 (D8) : le curseur se pose sur le premier combattant libre */
       /* Lot 5 : le combat est proposé, chacun des deux répond de sa voix. */
       if(typeof mgmtReponsesProposition==='function') MGMT_PROPOSITION={c:m.cycle,lignes:mgmtReponsesProposition(m,premier,id)};
       saveMgmt();

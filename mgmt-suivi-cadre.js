@@ -277,6 +277,9 @@ function mgmtSuPresseSous(m,x){
   if(x.k==='public') return `${mgmtSuCourt(m,x.a)} contre ${mgmtSuCourt(m,x.b)}`;
   if(x.k==='combattant') return x.w==='attend'?'Veut un combat.':'Attend ta réponse.';
   if(x.w==='garde'||x.w==='prend'||x.w==='vacant'||x.w==='resultat'){ const d=Number.isSafeInteger(x.f)?mgmtResultatDetail(m,x.f):null; return d?`${d.methode}, contre ${mgmtSuCourt(m,x.b)}`:''; }
+  /* Brief démo, lot 4 (D2) : la légende nomme les deux combattants du combat dont parle la citation, jamais un adversaire d'un autre. */
+  const tr=Number.isSafeInteger(x.f)&&m.hist?m.hist[x.f]:null;
+  if(tr&&tr.a&&tr.b) return `Sur ${mgmtSuCourt(m,tr.a.id)} face à ${mgmtSuCourt(m,tr.b.id)}.`;
   return x.b?`Sur ${mgmtSuCourt(m,x.a)} face à ${mgmtSuCourt(m,x.b)}.`:'';
 }
 
@@ -305,6 +308,13 @@ function mgmtSuPetitePresse(m,x,i){
   return mgmtSuPetit(MGMT_FIL_LIBELLES[x.k].toUpperCase(),mgmtFilAge(m,x),mgmtSuPresseTitreHtml(m,x,48,440),`<span class="mf-su-dim">${esc(sous)}</span>`,`CL.mgmtSuPrChoisir(${i})`);
 }
 
+/** Ce que fait Entrée sur la nouvelle choisie : la même chose dit la légende et le bouton (brief démo, lot 4, D6). */
+function mgmtSuPresseEntreeTexte(m,x){
+  if(!x) return 'Sa fiche';
+  if((x.k==='defi'||x.k==='public')&&mgmtFilPreparable(m,x)&&!mgmtFilSurCarte(m,x)) return 'Préparer ce combat';
+  if(Number.isSafeInteger(x.f)) return 'Voir le résultat';
+  return 'Sa fiche';
+}
 function scr_mgmt_presse(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt, F=MGMT_SU_PR;
@@ -322,7 +332,7 @@ function scr_mgmt_presse(){
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${puces}</div>${corps}</main>`;
   return mfEcran(contenu,{barre:'jeu',courant:'presse',m,plaque:'Presse',libelle:liste.length?`${liste.length} nouvelle${liste.length>1?'s':''} cette semaine`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Filtre',onclick:'CL.mgmtSuPrFiltreSuivant()'},{ks:['A','E'],t:'Section'},
-      {ks:['Entrée'],t:'Préparer ce combat',jaune:true,onclick:'CL.mgmtSuPrEntree()'}]});
+      {ks:['Entrée'],t:liste.length?mgmtSuPresseEntreeTexte(m,liste[F.i]):'Sa fiche',jaune:true,onclick:'CL.mgmtSuPrEntree()'}]});
 }
 SCREENS.mgmt_presse=scr_mgmt_presse;
 
@@ -428,7 +438,7 @@ Object.assign(CL,{
     const m=G.mgmt, x=mgmtFilListe(m,MGMT_SU_PR.filtre||null)[MGMT_SU_PR.i]; if(!x) return;
     if((x.k==='defi'||x.k==='public')&&mgmtFilPreparable(m,x)&&!mgmtFilSurCarte(m,x)) return CL.mgmtSuPreparer(x.a,x.b);
     if(Number.isSafeInteger(x.f)) return CL.mgmtSuResultatDe(x.f);
-    if(mgmtFicheLigne(m,x.a)) CL.mgmtFiche(x.a);
+    if(mgmtFicheLigne(m,x.a)){ CL.mgmtFiche(x.a); if(x.k==='combattant'&&x.w==='demande') MGMT_FICHE.onglet='ondit'; render(); }
   },
   /** Ouvre la carte avec le premier combattant choisi et son adversaire visé : « Confirmer le combat » n'a plus qu'à être pressé. */
   mgmtSuPreparer(a,b){

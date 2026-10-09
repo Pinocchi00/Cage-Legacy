@@ -59,8 +59,8 @@ function mgmtCarteColonne(m,f){
 function mgmtCarteBanniere(a,b,div){
   const nom=f=>f?{p:mfNet(f.first||''),n:mfNet(f.last||f.name)}:{p:'',n:'?'};
   const A=nom(a), B=nom(b);
-  return `<div class="mf-car-ban"><div class="mf-car-ban-a"><div class="mf-car-ban-nom"><b style="font-size:${mfCorps(A.n,300,96,40)}px">${esc(A.n)}</b><span>${esc(A.p)}</span></div></div>`
-    +`<div class="mf-car-ban-b"><div class="mf-car-ban-nom d"><span>${esc(B.p)}</span><b style="font-size:${mfCorps(B.n,300,96,40)}px">${esc(B.n)}</b></div></div>`
+  return `<div class="mf-car-ban"><div class="mf-car-ban-a"><div class="mf-car-ban-nom"><b style="font-size:${mfCorps(A.n,262,96,26)}px">${esc(A.n)}</b><span>${esc(A.p)}</span></div></div>`
+    +`<div class="mf-car-ban-b"><div class="mf-car-ban-nom d"><span>${esc(B.p)}</span><b style="font-size:${mfCorps(B.n,262,96,26)}px">${esc(B.n)}</b></div></div>`
     +`<div class="mf-car-vs">VS</div>`
     +`<div class="mf-car-ban-tag"><div>${esc(mfNet(mgmtDivisionLabel(div)))}</div></div></div>`;
 }
@@ -205,7 +205,10 @@ Object.assign(CL,{
     if(f) CL.mgmtFicheParIndex(m.roster.indexOf(f));
   },
   mgmtCarteEntree(){
-    const m=G.mgmt, l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0]; if(f) CL.mgmtPick(f.id);
+    const m=G.mgmt, l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0];
+    /* Brief démo, lot 4 (D8) : Entrée sur un combattant déjà engagé ne reste pas muet, le curseur passe au premier libre. */
+    if(f&&!MGMT_CART.pick&&!mgmtSelectable(m,f,null)){ const i=l.findIndex(x=>mgmtSelectable(m,x,null)); if(i>=0){ MGMT_CART.cursor=i; render(); return; } }
+    if(f) CL.mgmtPick(f.id);
   },
 });
 keysRegister('mgmt_carte',{

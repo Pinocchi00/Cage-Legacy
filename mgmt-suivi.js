@@ -323,6 +323,9 @@ function mgmtFilMettreAJour(m){
   if(typeof mgmtRivalites==='function'){
     for(const r of mgmtRivalites(m)){
       if(r.c!==c-1&&r.c!==c) continue;
+      /* Brief démo, lot 4 (D3) : un seul combat réclamé, une seule carte — et la revanche est déjà portée par « Un défi ». */
+      const meme=y=>y&&(y.k==='public'||y.k==='defi')&&((y.a===r.a&&y.b===r.b)||(y.a===r.b&&y.b===r.a));
+      if((m.fil||[]).some(meme)) continue;
       if(mgmtFilAjoute(m,{k:'public',c,a:r.a,b:r.b,w:r.k,p:r.c})) n++;
     }
   }
