@@ -80,17 +80,17 @@ const MGMT_EXCHANGES={
   leila_propose:{
     speaker:'leila',
     lines:[
-      "Écoute chef, je sais que je m'occupe que des combats en début de carte mais là tu dois me croire, je pense que j'ai un combat parfait pour l'organisation, ça va être un combat incroyable, il va te plaire, s'il te plaît laisse-moi le placer dans les plus gros combats.",
+      "Patron, j'ai un très bon combat à vous proposer. Pouvez-vous le placer dans la carte principale ?",
     ],
     replies:[
-      {id:'accept',action:'accept',text:"Allez j'accepte, j'apprécie ta conviction et le match-up, je te fais confiance sur ce coup, j'espère un beau combat ahah."},
-      {id:'refuse',action:'refuse',text:"Non désolé vraiment, sur cette carte j'ai déjà mes combats en tête, j'ai pas de place en plus ni de combats à déclasser mais une prochaine fois peut être."},
+      {id:'accept',action:'accept',text:"D'accord. Je vous fais confiance."},
+      {id:'refuse',action:'refuse',text:"Non, désolé. Ma carte est déjà faite."},
     ],
   },
   leila_refused:{
     speaker:'leila',
     lines:[
-      "Pas de soucis, j'accepte parce que c'est vous mais retenez bien le nom des deux combattants parce qu'à mon avis ils vont monter au classement.",
+      "Pas de souci. Retenez ces deux noms : ils vont monter au classement.",
     ],
     replies:[
       {id:'close',action:'close',text:null,empty:'[RÉPLIQUE MANQUANTE — Leïla réagit à un refus : prendre acte]'},
@@ -120,19 +120,19 @@ Object.assign(MGMT_EXCHANGES,{
   leila_bulk:{
     speaker:'leila',
     lines:[
-      "Voilà j'ai enfin préparé la carte préliminaire, il y a de quoi faire un beau spectacle enfin j'espère, hâte de voir la carte principale !",
+      "J'ai préparé les préliminaires. J'espère qu'ils vous plairont.",
     ],
-    warning:"Patron, il y a un combat, je ne sais pas, je ne le sens pas du tout, ça m'a tracassé tout hier soir, je pense qu'il faudrait le changer, j'espère que ça ne te dérange pas.",
+    warning:"Patron, un combat me gêne. Je pense qu'il faut le changer.",
     replies:[
-      {id:'validate',action:'validate',text:"Parfait, c'est du très bon travail Leïla, la carte à l'air incroyable on garde tout !"},
-      {id:'swap',action:'swap',text:"Leïla la carte est vraiment bien, je l'apprécie mais je préfère ajouter ce combat à la place."},
-      {id:'crush',action:'crush',text:"Leïla tu m'avais déjà habitué à un meilleur travail, cette carte n'est pas à la hauteur de mes attentes."},
+      {id:'validate',action:'validate',text:"Très bien, Leïla. On garde tout."},
+      {id:'swap',action:'swap',text:"C'est bien, Leïla. Je change seulement ce combat."},
+      {id:'crush',action:'crush',text:"Leïla, cette carte ne me plaît pas. Je la refais."},
     ],
   },
   leila_react_swap:{
     speaker:'leila',
     lines:[
-      "J'ai vu que vous m'avez échangé un combat, je comprends mais ses deux combattants doivent combattre aussi, j'espère que je pourrais les replacer vite..",
+      "Vous avez changé un combat. Les deux combattants doivent quand même combattre. Je les replace vite.",
     ],
     replies:[
       {id:'close',action:'close'},
@@ -141,7 +141,7 @@ Object.assign(MGMT_EXCHANGES,{
   leila_react_crush:{
     speaker:'leila',
     lines:[
-      "Je sais que j'ai pas forcément mon mot à dire, mais j'aimerais bien que vous me prévenez en avance la fois d'après que je ne passe pas ma semaine à l'organiser",
+      "Prévenez-moi la prochaine fois. Je ne veux pas perdre ma semaine.",
     ],
     replies:[
       {id:'close',action:'close'},
@@ -300,19 +300,19 @@ const MGMT_EXT_ORG_MOVE_SPREAD=0.3;
    niveau 2 du CDC). Textes et effets repris du document, sans réécriture. */
 const MGMT_RAISONS=[
   {id:'necessite',label:'La nécessité',
-   text:"J'ai dû commencer à combattre car je devais gagner de l'argent, sinon je n'avais pas de quoi me payer un toit sur la tête.",
+   text:"Je me bats pour l'argent. Sans ça, je n'ai pas de toit.",
    rule:"Il accepte tout ce qui paye. Court préavis, catégorie au-dessus, adversaire dangereux. Il ne refuse jamais. Et il ne t'en voudra pas de l'avoir utilisé — c'est ce qui rend le joueur complice."},
   {id:'passion',label:'La passion',
-   text:"Je l'ai fait juste par passion. Depuis tout petit je regarde des sports de combat, ça m'a toujours plu, je me suis dit pourquoi pas essayer.",
+   text:"Je me bats par passion. Je regarde les sports de combat depuis tout petit.",
    rule:"Il veut des combats intéressants, pas des combats payants. Il accepte un adversaire trop fort si le nom est beau, et refuse un combat sûr et ennuyeux. Il ne s'arrêtera jamais de lui-même. C'est le profil de la last dance."},
   {id:'hasard',label:'Le hasard',
-   text:"C'est un peu malgré moi. Je m'étais inscrit pour accompagner un pote à l'université, et apparemment j'avais du talent. J'ai saisi ma chance, ça fait de l'argent, ça me fait connaître, et ce n'est pas un métier traditionnel, donc ça me va.",
+   text:"Je suis venu avec un ami, et j'avais du talent. Ça paye, ça me fait connaître. Ça me va.",
    rule:"Du talent, aucune faim. Il négocie de haut et refuse ce qui ne l'arrange pas. Et il peut arrêter du jour au lendemain — une mauvaise défaite, une blessure, une meilleure opportunité, et il s'en va sans drame. Le joueur investira sur lui et le perdra bêtement."},
   {id:'addiction',label:"L'addiction",
-   text:"Le combat est la seule chose qui l'empêche d'y penser. Les semaines d'entraînement, les camps, le temps passé sur les tatamis — c'est ce qui le tient éloigné. Ça lui sauve la vie petit à petit.",
+   text:"Le combat l'empêche de replonger. L'entraînement le sauve, petit à petit.",
    rule:"Il accepte pour rester en camp, pas pour l'argent ni pour le nom. Et l'inactivité le détruit. Le laisser sans combat pendant des mois n'est pas neutre : c'est une décision qui a un coût. C'est la seule raison où ne rien proposer est le mauvais choix."},
   {id:'reconversion',label:'La reconversion',
-   text:"Un ancien sportif de combat — un lutteur, par exemple — qui n'a jamais réussi à s'imposer dans sa discipline. Il a rejoint une salle de MMA qui l'a propulsé bien plus vite que la précédente, ses premiers combats amateurs ont révélé un vrai talent.",
+   text:"Je viens d'un autre sport, où je n'ai pas réussi. En MMA, j'ai vite progressé.",
    rule:"Il a déjà connu l'échec ailleurs et il ne veut pas le revivre. Il refuse ce qui pourrait le renvoyer à ce qu'il était, et accepte ce qui prouve qu'il avait raison de changer."},
 ];
 /* ==== [FIN ANCRE] ==== */

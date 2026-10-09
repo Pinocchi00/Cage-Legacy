@@ -8,13 +8,13 @@
    Les phrases sont des PROPOSITIONS de Claude (relu:false) : elles se relisent avec les autres textes (tools/exporter-textes.js). ==== */
 
 const MGMT_ANCIENS_TEXTES={relu:false,
-  koV:[{t:'Un enchaînement main arrière, main avant, qui a éteint le combat.'},{t:'Un crochet à la volée, sur une ouverture.'},{t:'Un contre pris au bon moment, l’adversaire n’a rien vu.'},{t:'Une série à la tête contre le grillage.'},{t:'Un coup de pied circulaire parti de nulle part.'}],
-  koD:[{t:'Un coup reçu en reculant, sans protection sur le côté.'},{t:'Un contre reçu en entrant en distance.'},{t:'Un enchaînement venu sans qu’on le voie.'},{t:'Les mains baissées en fin de round.'},{t:'Un début de combat subi, impossible de s’en remettre.'}],
-  subV:[{t:'Un étranglement pris dans un scramble.'},{t:'Un contrôle au sol suivi d’une clé de bras.'},{t:'Un dos pris à la relance, puis l’étranglement.'},{t:'L’autre a ouvert le jeu, la jambe est restée attrapée.'},{t:'Une soumission venue d’une garde qu’on croyait neutre.'}],
-  subD:[{t:'Un étranglement subi en défendant son dos.'},{t:'Un contrôle subi au sol, sans solution.'},{t:'Une clé de cheville venue sans prévenir.'},{t:'La tête relevée trop tôt, le cou offert.'},{t:'Une amenée ratée, puis le sol subi.'}],
-  decV:[{t:'Plus de volume, round après round.'},{t:'Un contrôle régulier, sans prise de risque.'},{t:'Une guerre, partout dans la cage, gagnée de peu.'},{t:'Le jab a fait la différence.'},{t:'Une fin de combat mieux gérée.'}],
-  decD:[{t:'Un volume dépassé, surtout en fin de combat.'},{t:'Trop de temps passé contre le grillage.'},{t:'Un combat serré, perdu de peu.'},{t:'Trop d’attente, les juges ont suivi l’autre.'},{t:'Un adversaire plus frais dans les derniers rounds.'}],
-  nul:[{t:'Un combat équilibré, sans vainqueur net.'},{t:'Chacun a pris deux rounds, les juges n’ont pas tranché.'},{t:'Deux styles qui se sont annulés.'}]};
+  koV:[{t:'Deux coups de poing de suite, et le combat s’arrête.'},{t:'Un crochet au bon moment.'},{t:'Un contre : l’adversaire n’a rien vu venir.'},{t:'Une série de coups à la tête contre le grillage.'},{t:'Un coup de pied qui arrive de nulle part.'}],
+  koD:[{t:'Un coup reçu en reculant, sans se protéger.'},{t:'Un contre reçu en s’approchant trop.'},{t:'Un coup reçu sans l’avoir vu venir.'},{t:'Les mains baissées en fin de round.'},{t:'Un mauvais début de combat, sans retour possible.'}],
+  subV:[{t:'Un étranglement dans une mêlée au sol.'},{t:'Un contrôle au sol, puis une clé de bras.'},{t:'Le dos est pris, puis l’étranglement.'},{t:'Une jambe laissée à portée, puis la soumission.'},{t:'Une soumission surprise depuis le sol.'}],
+  subD:[{t:'Un étranglement, en défendant son dos.'},{t:'Dominé au sol, sans solution.'},{t:'Une clé de cheville surprise.'},{t:'La tête relevée trop tôt, le cou à découvert.'},{t:'Une amenée ratée, puis il est resté au sol.'}],
+  decV:[{t:'Plus de coups que l’adversaire, round après round.'},{t:'Un combat contrôlé, sans risque.'},{t:'Un combat très dur, gagné de peu.'},{t:'Son jab a fait la différence.'},{t:'Une meilleure fin de combat.'}],
+  decD:[{t:'Moins de coups que l’adversaire, surtout à la fin.'},{t:'Trop de temps passé contre le grillage.'},{t:'Un combat serré, perdu de peu.'},{t:'Trop d’attente : les juges ont choisi l’autre.'},{t:'L’adversaire avait plus d’énergie à la fin.'}],
+  nul:[{t:'Un combat égal, sans vrai gagnant.'},{t:'Chacun a gagné deux rounds. Les juges n’ont pas choisi.'},{t:'Deux styles qui s’annulent.'}]};
 
 /** Un adversaire d'un ancien combat : nom tiré des listes réelles d'un pays, sous un hachage stable. SEED sauvegardé puis restauré. */
 function mgmtAncienAdversaire(f,k){

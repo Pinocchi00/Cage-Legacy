@@ -24,8 +24,8 @@ const fs = require('fs');
 const path = require('path');
 const { newGameWindow } = require('./helpers/loadGame');
 
-const LEILA_PROPOSE="Écoute chef, je sais que je m'occupe que des combats en début de carte mais là tu dois me croire, je pense que j'ai un combat parfait pour l'organisation, ça va être un combat incroyable, il va te plaire, s'il te plaît laisse-moi le placer dans les plus gros combats.";
-const LEILA_REFUSED="Pas de soucis, j'accepte parce que c'est vous mais retenez bien le nom des deux combattants parce qu'à mon avis ils vont monter au classement.";
+const LEILA_PROPOSE="Patron, j'ai un très bon combat à vous proposer. Pouvez-vous le placer dans la carte principale ?";
+const LEILA_REFUSED="Pas de souci. Retenez ces deux noms : ils vont monter au classement.";
 
 function enterMgmt(win,seed){
   win.eval(`setSeed(${seed}); mgmtEntrerAvantH4();`);
@@ -269,8 +269,8 @@ test('MGMT voix — les répliques de référence de Leïla figurent verbatim da
   assert.ok(html.includes('Leïla Malika'), 'le nom de la voix doit s\u2019afficher');
 });
 
-const LEILA_ACCEPT="Allez j'accepte, j'apprécie ta conviction et le match-up, je te fais confiance sur ce coup, j'espère un beau combat ahah.";
-const LEILA_REFUSE="Non désolé vraiment, sur cette carte j'ai déjà mes combats en tête, j'ai pas de place en plus ni de combats à déclasser mais une prochaine fois peut être.";
+const LEILA_ACCEPT="D'accord. Je vous fais confiance.";
+const LEILA_REFUSE="Non, désolé. Ma carte est déjà faite.";
 
 test('MGMT réponses-joueur — deux répliques d\u2019auteur verbatim, une vide marquée', () => {
   const win = newGameWindow();

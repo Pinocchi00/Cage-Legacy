@@ -1,4 +1,4 @@
-# Les textes à relire — 984 textes (corrections du 08/10/2026, lot 7.3)
+# Les textes à relire — 998 textes (corrections du 08/10/2026, lot 7.3)
 
 Export généré par `tools/exporter-textes.js`. **Aucun texte n'est modifié par l'outil.** Chaque ligne est un texte marqué `relu:false` : coche-la quand tu l'as relue, réécris-la dans le fichier de données, puis passe sa marque à `relu:true`. Les voix des combattants viennent d'un document (`docs/LES-VOIX-DES-COMBATTANTS-v2.md`) : on y corrige d'abord le document, puis on relance `tools/extraire-voix.js`.
 
@@ -589,10 +589,10 @@ Fichier : `mgmt-humanite-data.js`
 
 Fichier : `mgmt-voix-data.js`
 
-- [ ] `MGMT_VOIX[0].repliques[0]` (annonce) : Franchement je suis dans la meilleure forme de ma vie, on a fait un gros camp avec l'équipe, {adv} c'est un bon combattant mais samedi vous allez voir la meilleure version de moi.
+- [ ] `MGMT_VOIX[0].repliques[0]` (annonce) : Je suis dans la meilleure forme de ma vie. {adv} est un bon combattant, mais samedi vous verrez la meilleure version de moi.
 - [ ] `MGMT_VOIX[0].repliques[1]` (reseaux) : Camp terminé. Plus que quelques jours. Merci à toute l'équipe.
-- [ ] `MGMT_VOIX[0].repliques[2]` (victoire) : Merci à Dieu, merci à mon équipe, merci à {org}, j'avais dit que j'étais [prêt|prête] et voilà, maintenant je veux un classé.
-- [ ] `MGMT_VOIX[0].repliques[3]` (defaite) : C'était pas mon soir, bravo à {adv}, je vais revenir plus [fort|forte], c'est tout ce que je peux dire.
+- [ ] `MGMT_VOIX[0].repliques[2]` (victoire) : Merci à Dieu, à mon équipe et à {org}. J'avais dit que j'étais [prêt|prête]. Maintenant, je veux un classé.
+- [ ] `MGMT_VOIX[0].repliques[3]` (defaite) : C'était pas mon soir. Bravo à {adv}. Je vais revenir plus [fort|forte].
 - [ ] `MGMT_VOIX[0].repliques[4]` (inactivite) : Ça fait {mois} mois que j'attends, je suis [prêt|prête], n'importe qui, n'importe quand.
 - [ ] `MGMT_VOIX[0].repliques[5]` (proposition) : Je prends, pas de souci, dis-moi juste la date.
 - [ ] `MGMT_VOIX[0].repliques[6]` (forfait) : [Blessé|Blessée] à l'entraînement, je suis [dégoûté|dégoûtée], je reviens vite.
@@ -603,45 +603,45 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[1].repliques[4]` (proposition) : D'accord. / Non.
 - [ ] `MGMT_VOIX[1].repliques[5]` (forfait) : [Blessé|Blessée]. Je reviendrai.
 - [ ] `MGMT_VOIX[1].repliques[6]` (la-felure) : Il parle beaucoup. Samedi il va fermer sa gueule.
-- [ ] `MGMT_VOIX[2].repliques[0]` (annonce) : Bon {adv} mon ami, j'ai appelé ton déménageur, samedi on vide ta place au classement, round deux, gauche au foie, tu rentres en taxi, c'est moi qui paye.
-- [ ] `MGMT_VOIX[2].repliques[1]` (reseaux) : Météo de samedi pour {adv} : couvert en début de soirée, averses au deuxième round, fin de soirée allongée.
-- [ ] `MGMT_VOIX[2].repliques[2]` (victoire) : Je vous l'avais dit ou pas ?? Round {round}, j'avais même donné l'heure, les gens ils paient pour ça, et moi je livre.
+- [ ] `MGMT_VOIX[2].repliques[0]` (annonce) : {adv}, mon ami, samedi je prends ta place au classement. Round deux, gauche au foie. Tu rentres en taxi, c'est moi qui paye.
+- [ ] `MGMT_VOIX[2].repliques[1]` (reseaux) : Météo de samedi pour {adv} : couvert au début, averses au deuxième round, fin de soirée allongée.
+- [ ] `MGMT_VOIX[2].repliques[2]` (victoire) : Je vous l'avais dit ! Round {round}. Les gens paient pour ça, et moi je livre.
 - [ ] `MGMT_VOIX[2].repliques[3]` (victoire) : J'avais dit round deux, j'ai été gentil, il a eu droit à du rab.
 - [ ] `MGMT_VOIX[2].repliques[4]` (proposition) : Tu veux que je fasse un spectacle devant qui, devant ses cousins ?
-- [ ] `MGMT_VOIX[3].repliques[0]` (annonce) : Je respecte {adv}, le résultat c'est Dieu qui décide, moi je fais ma part, je m'entraîne, je dors, je mange, c'est tout.
+- [ ] `MGMT_VOIX[3].repliques[0]` (annonce) : Je respecte {adv}. Le résultat, c'est Dieu qui le décide. Moi, je fais ma part : je m'entraîne, je dors, je mange.
 - [ ] `MGMT_VOIX[3].repliques[1]` (victoire) : Dieu merci. Merci à mes parents, à mon coach, à {adv} aussi qui est venu se battre. C'était écrit.
 - [ ] `MGMT_VOIX[3].repliques[2]` (defaite) : Dieu merci quand même. Aujourd'hui c'était son jour, pas le mien.
 - [ ] `MGMT_VOIX[3].repliques[3]` (la-menace-froide) : Parle de moi autant que tu veux. Tu as parlé de ma famille. Samedi on règle ça.
 - [ ] `MGMT_VOIX[3].repliques[4]` (forfait) : C'est une épreuve. Ça pouvait être pire.
-- [ ] `MGMT_VOIX[4].repliques[0]` (annonce) : Je pense pas à {adv}, je pense à l'instant où la porte se ferme, là il y a plus de passé, plus de classement, juste deux [hommes|femmes] qui ont peur et qui avancent quand même.
+- [ ] `MGMT_VOIX[4].repliques[0]` (annonce) : Je ne pense pas à {adv}. Je pense au moment où la porte se ferme. Il n'y a plus de classement, juste deux [hommes|femmes] qui ont peur. Et qui avancent quand même.
 - [ ] `MGMT_VOIX[4].repliques[1]` (reseaux) : Levé avant le soleil. Le bois est froid. Encore six jours.
 - [ ] `MGMT_VOIX[4].repliques[2]` (victoire) : La peur était là, je l'ai laissée s'asseoir à côté de moi.
 - [ ] `MGMT_VOIX[4].repliques[3]` (defaite) : Mon corps était dans la cage, ma tête était déjà à la fin du combat. C'est ma faute.
 - [ ] `MGMT_VOIX[4].repliques[4]` (inactivite) : L'hiver aussi, c'est une saison.
-- [ ] `MGMT_VOIX[5].repliques[0]` (annonce) : Écoute {adv} c'est un mec bien je pense, il paye ses impôts tout ça, mais il boxe comme mon oncle bourré au mariage, et moi j'ai le genou en vrac depuis un mois, je m'en bats les couilles, je vais le finir quand même.
-- [ ] `MGMT_VOIX[5].repliques[1]` (reseaux) : Le matchmaker de {org} m'a mis contre {adv}, soit il m'aime pas soit il a jamais regardé un combat de sa putain de vie, les deux c'est possible.
-- [ ] `MGMT_VOIX[5].repliques[2]` (victoire) : Voilà ! Je vous avais dit que c'était une connerie de parier contre moi, respect au mec, il m'a mis une droite j'ai vu ma grand-mère, putain j'ai faim.
-- [ ] `MGMT_VOIX[5].repliques[3]` (defaite) : Il m'a défoncé, y a rien à dire, j'étais une merde ce soir, je vais boire un coup et on en reparle lundi.
-- [ ] `MGMT_VOIX[5].repliques[4]` (inactivite) : Ça fait {mois} mois que {org} me paye à rien foutre, remarque je me plains pas, mais je préfère taper des gens.
-- [ ] `MGMT_VOIX[5].repliques[5]` (proposition) : Lui ? Il va me frotter contre le grillage quinze minutes, non merci, je suis pas venu me faire peloter.
+- [ ] `MGMT_VOIX[5].repliques[0]` (annonce) : {adv} a l'air d'un mec bien, mais il boxe comme mon oncle au mariage. J'ai mal au genou depuis un mois, mais je vais le finir quand même.
+- [ ] `MGMT_VOIX[5].repliques[1]` (reseaux) : Le matchmaker de {org} m'a mis contre {adv}. Soit il ne m'aime pas, soit il n'a jamais vu un combat. Peut-être les deux.
+- [ ] `MGMT_VOIX[5].repliques[2]` (victoire) : Je vous avais dit qu'il ne fallait pas parier contre moi ! Respect au mec, il m'a mis une droite, j'ai vu ma grand-mère. Et j'ai faim.
+- [ ] `MGMT_VOIX[5].repliques[3]` (defaite) : Il était meilleur que moi, rien à dire. J'étais nul ce soir. Je vais boire un coup, on en reparle lundi.
+- [ ] `MGMT_VOIX[5].repliques[4]` (inactivite) : Ça fait {mois} mois que {org} me paye sans que je combatte. Je ne me plains pas, mais je préfère taper des gens.
+- [ ] `MGMT_VOIX[5].repliques[5]` (proposition) : Lui ? Il va me coller au grillage quinze minutes. Non merci, je ne suis pas venu pour ça.
 - [ ] `MGMT_VOIX[6].repliques[0]` (annonce) : (par son interprète) Il dit qu'il est prêt. Il dit que {adv} sait pourquoi.
 - [ ] `MGMT_VOIX[6].repliques[1]` (reseaux) : Publication en russe, sans traduction. Une photo : une balance, 70,3 kg.
-- [ ] `MGMT_VOIX[6].repliques[2]` (victoire) : (par son interprète) Il remercie son équipe et son pays. Il a dit aussi quelque chose sur {adv}, je préfère pas traduire.
+- [ ] `MGMT_VOIX[6].repliques[2]` (victoire) : (par son interprète) Il remercie son équipe et son pays. Il a dit aussi quelque chose sur {adv}. Je ne le traduis pas.
 - [ ] `MGMT_VOIX[6].repliques[3]` (defaite) : (par son interprète) Il ne veut pas parler.
 - [ ] `MGMT_VOIX[6].repliques[4]` (inactivite) : (par son interprète) Il demande pourquoi personne ne dit son nom.
 - [ ] `MGMT_VOIX[6].repliques[5]` (proposition) : (par son interprète) Il a dit oui. Enfin, il a dit « quand ».
-- [ ] `MGMT_VOIX[7].repliques[0]` (annonce) : {adv} est {rang_adv} [mondial|mondiale], je suis {rang}, si je gagne je rentre dans le top 10 et cet été je veux le titre, c'est simple.
+- [ ] `MGMT_VOIX[7].repliques[0]` (annonce) : {adv} est {rang_adv} [mondial|mondiale], je suis {rang}. Si je gagne, j'entre dans le top 10. Cet été, je veux le titre. C'est simple.
 - [ ] `MGMT_VOIX[7].repliques[1]` (reseaux) : Étape sept sur dix.
 - [ ] `MGMT_VOIX[7].repliques[2]` (defaite) : Ça repousse tout de six mois. Je reprends le plan.
-- [ ] `MGMT_VOIX[7].repliques[3]` (inactivite) : Chaque mois sans combat c'est un mois perdu, je l'ai calculé, à ce rythme {org} me coûte une ceinture.
+- [ ] `MGMT_VOIX[7].repliques[3]` (inactivite) : Chaque mois sans combat est un mois perdu. Je l'ai calculé : à ce rythme, {org} me coûte une ceinture.
 - [ ] `MGMT_VOIX[7].repliques[4]` (proposition-refusee) : Il est derrière moi au classement, ça m'apporte rien. Trouve-moi un classé.
-- [ ] `MGMT_VOIX[8].repliques[0]` (annonce) : Avant je travaillais la nuit sur les chantiers, je dormais quatre heures, alors {adv} avec tout le respect, quinze minutes dans une cage ça me fait pas peur.
-- [ ] `MGMT_VOIX[8].repliques[1]` (victoire) : Cette bourse elle va chez ma mère. Elle a jamais regardé un de mes combats, mais la bourse elle va la regarder ahah.
+- [ ] `MGMT_VOIX[8].repliques[0]` (annonce) : Avant, je travaillais la nuit sur des chantiers et je dormais quatre heures. {adv}, avec respect, quinze minutes dans une cage ne me font pas peur.
+- [ ] `MGMT_VOIX[8].repliques[1]` (victoire) : Cette bourse va chez ma mère. Elle n'a jamais regardé un de mes combats, mais cette bourse, elle va la regarder.
 - [ ] `MGMT_VOIX[8].repliques[2]` (defaite) : J'ai connu pire. Beaucoup pire. Demain je suis à la salle.
 - [ ] `MGMT_VOIX[8].repliques[3]` (proposition-a-court-preavis) : Dans {jours} jours ? Je prends. Je prends toujours.
 - [ ] `MGMT_VOIX[8].repliques[4]` (forfait) : Le pire c'est pas la blessure, c'est les mois sans paie.
-- [ ] `MGMT_VOIX[9].repliques[0]` (annonce) : Franchement je suis trop content, {adv} je le respecte énormément, ça va être un beau combat pour les gens, venez nombreux ahah.
-- [ ] `MGMT_VOIX[9].repliques[1]` (victoire) : Merci à {adv}, il m'a posé des problèmes franchement, au deuxième round j'ai senti sa droite, je lui dis bravo.
+- [ ] `MGMT_VOIX[9].repliques[0]` (annonce) : Je suis très content. Je respecte beaucoup {adv}. Ça va être un beau combat, venez nombreux !
+- [ ] `MGMT_VOIX[9].repliques[1]` (victoire) : Merci à {adv}. Il m'a posé des problèmes. Au deuxième round, j'ai senti sa droite. Bravo à lui.
 - [ ] `MGMT_VOIX[9].repliques[2]` (defaite) : C'est le jeu, il m'a eu sur les entrées, j'ai des choses à travailler. Merci à vous en tout cas.
 - [ ] `MGMT_VOIX[9].repliques[3]` (inactivite) : Si {org} a une place je suis là, sans pression hein ahah.
 - [ ] `MGMT_VOIX[10].repliques[0]` (reseaux) : Jour 187 sans combat. {classe}, ou n'importe qui du top 15, je m'en fous lequel. Personne répond. Bizarre.
@@ -656,23 +656,23 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[11].repliques[4]` (defaite) : Il m'a endormi. C'était la meilleure sieste de ma semaine.
 - [ ] `MGMT_VOIX[11].repliques[5]` (proposition) : Il y a un buffet après ? Alors oui.
 - [ ] `MGMT_VOIX[11].repliques[6]` (forfait) : Je me suis pété le dos en me levant du canapé. C'est pas une blague. Enfin si, mais c'est vrai.
-- [ ] `MGMT_VOIX[12].repliques[0]` (annonce) : J'ai hâte de discuter avec {adv}, on s'est jamais vraiment parlé, samedi on aura quinze minutes rien que tous les deux.
+- [ ] `MGMT_VOIX[12].repliques[0]` (annonce) : J'ai hâte de discuter avec {adv}. On ne s'est jamais vraiment parlé. Samedi, on aura quinze minutes rien que tous les deux.
 - [ ] `MGMT_VOIX[12].repliques[1]` (pendant-le-combat) : T'as pas faim ? Moi j'ai faim.
 - [ ] `MGMT_VOIX[12].repliques[2]` (pendant-le-combat) : Oh pardon. Non en vrai, pas pardon.
 - [ ] `MGMT_VOIX[12].repliques[3]` (pendant-le-combat) : Encore ? On a dit pas de lutte aujourd'hui.
 - [ ] `MGMT_VOIX[12].repliques[4]` (victoire) : Il m'a pas répondu de tout le combat, c'est malpoli franchement.
 - [ ] `MGMT_VOIX[12].repliques[5]` (defaite) : Là il m'a fermé la bouche, je le reconnais, c'est rare.
-- [ ] `MGMT_VOIX[13].repliques[0]` (annonce) : Mesdames et messieurs, je vais être très clair, {adv} n'est pas un combattant, c'est un figurant, on l'a engagé pour se tenir debout à côté de moi sur l'affiche, et samedi il va même rater ça.
-- [ ] `MGMT_VOIX[13].repliques[1]` (reseaux) : Chère ville de samedi, j'ai vu vos restaurants, j'ai vu vos femmes et vos hommes, et je vous le dis avec amour : vous méritez mieux que {adv}.
+- [ ] `MGMT_VOIX[13].repliques[0]` (annonce) : Mesdames et messieurs, soyons clairs : {adv} n'est pas un combattant, c'est un figurant. Il est là pour se tenir à côté de moi sur l'affiche. Et samedi, il va même rater ça.
+- [ ] `MGMT_VOIX[13].repliques[1]` (reseaux) : Chère ville de samedi, vous méritez mieux que {adv}. Je vous le dis avec amour.
 - [ ] `MGMT_VOIX[13].repliques[2]` (victoire) : Huez-moi. Allez-y. Plus fort. Vous paierez quand même la prochaine fois.
-- [ ] `MGMT_VOIX[13].repliques[3]` (defaite) : Ce soir j'ai combattu {adv}, l'arbitre, les juges, et une intoxication alimentaire que je ne détaillerai pas. Trois contre un.
+- [ ] `MGMT_VOIX[13].repliques[3]` (defaite) : Ce soir, j'ai combattu {adv}, l'arbitre, les juges, et une intoxication alimentaire. Trois contre un.
 - [ ] `MGMT_VOIX[13].repliques[4]` (sur-laffiche-dun-autre) : Si ces deux-là se battent, moi je paie ma place. Et je paie jamais.
-- [ ] `MGMT_VOIX[14].repliques[0]` (annonce) : {adv} il a une coupe de cheveux de prof de géo, je vais lui faire une faveur, je vais lui arranger ça avec les coudes.
-- [ ] `MGMT_VOIX[14].repliques[1]` (victoire) : Merci merci, vous êtes des malades, je vous aime tous, même toi là-bas qui m'as insulté à la pesée ahah.
-- [ ] `MGMT_VOIX[14].repliques[2]` (victoire) : Attendez. Il y a deux semaines on a enterré un pote. Il parlait à personne. Les gars, si ça va pas dans votre tête, parlez, à n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule que d'aller à votre enterrement.
+- [ ] `MGMT_VOIX[14].repliques[0]` (annonce) : {adv} a une coupe de cheveux de prof de géo. Je vais lui arranger ça, avec les coudes.
+- [ ] `MGMT_VOIX[14].repliques[1]` (victoire) : Merci, vous êtes des malades, je vous aime tous. Même toi là-bas, qui m'as insulté à la pesée !
+- [ ] `MGMT_VOIX[14].repliques[2]` (victoire) : Attendez. Il y a deux semaines, on a enterré un ami. Il ne parlait à personne. Les gars, si ça ne va pas, parlez. À n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule.
 - [ ] `MGMT_VOIX[14].repliques[3]` (defaite) : Je suis dégoûté, mais je vais bien, vraiment. On se voit au pub.
-- [ ] `MGMT_VOIX[15].repliques[0]` (annonce) : (en langue des signes) Tout le monde me demande si le bruit du public me manque. Non. Moi j'entends pas {adv} parler. C'est un avantage.
-- [ ] `MGMT_VOIX[15].repliques[1]` (victoire) : (en langue des signes) Il y a des millions de sourds dans le monde. Ce soir ils ont tous gagné avec moi.
+- [ ] `MGMT_VOIX[15].repliques[0]` (annonce) : (en langue des signes) On me demande si le bruit du public me manque. Non. Moi, je n'entends pas {adv} parler. C'est un avantage.
+- [ ] `MGMT_VOIX[15].repliques[1]` (victoire) : (en langue des signes) Il y a des millions de sourds dans le monde. Ce soir, ils ont tous gagné avec moi.
 - [ ] `MGMT_VOIX[15].repliques[2]` (victoire) : (en langue des signes) Ses épaules parlent avant ses poings. Je lis les épaules.
 - [ ] `MGMT_VOIX[15].repliques[3]` (defaite) : (en langue des signes) Il a été meilleur. Je reviens.
 - [ ] `MGMT_VOIX[15].repliques[4]` (proposition) : (en langue des signes) Oui. Mais trouvez-moi un bon interprète pour la conférence, le dernier traduisait comme un pied.
@@ -681,37 +681,37 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[16].repliques[2]` (victoire) : (par son interprète) Il dit… qu'il remercie la montagne. Je crois. Ou sa mère. C'est le même mot.
 - [ ] `MGMT_VOIX[16].repliques[3]` (defaite) : Le tigre ne dort pas. Le tigre attend.
 - [ ] `MGMT_VOIX[16].repliques[4]` (proposition) : Il faut que je demande à mon corps. (Il ferme les yeux longtemps.) Il dit oui.
-- [ ] `MGMT_VOIX[17].repliques[0]` (annonce) : Les gens me demandent si c'est dur de reprendre après ma fille. J'ai accouché. Pendant trente heures. {adv} me fait pas peur.
-- [ ] `MGMT_VOIX[17].repliques[1]` (reseaux) : Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Qui c'est qui est [fatigué|fatiguée] ? Pas moi. Enfin si. Mais pas moi.
-- [ ] `MGMT_VOIX[17].repliques[2]` (victoire) : Ma fille est dans la salle. Elle a trois ans. Elle se souviendra pas de ce soir, mais un jour je lui montrerai la vidéo.
-- [ ] `MGMT_VOIX[17].repliques[3]` (defaite) : Ce qui me fait mal c'est pas le coup, c'est que mon fils était devant la télé.
+- [ ] `MGMT_VOIX[17].repliques[0]` (annonce) : On me demande si c'est dur de reprendre après ma fille. J'ai accouché pendant trente heures. {adv} ne me fait pas peur.
+- [ ] `MGMT_VOIX[17].repliques[1]` (reseaux) : Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Moi, [fatigué|fatiguée] ? Non. Enfin si. Mais pas moi.
+- [ ] `MGMT_VOIX[17].repliques[2]` (victoire) : Ma fille est dans la salle. Elle a trois ans. Elle ne se souviendra pas de ce soir, mais un jour je lui montrerai la vidéo.
+- [ ] `MGMT_VOIX[17].repliques[3]` (defaite) : Ce qui me fait mal, ce n'est pas le coup. C'est que mon fils regardait.
 - [ ] `MGMT_VOIX[17].repliques[4]` (proposition-refusee) : Pas ce mois-là. C'est l'anniversaire du petit. Le mois d'après, qui tu veux.
 - [ ] `MGMT_VOIX[18].repliques[0]` (annonce) : Objectif identifié. On a étudié {adv} pendant huit semaines, on connaît son terrain, samedi on exécute.
 - [ ] `MGMT_VOIX[18].repliques[1]` (reseaux) : Dernière séance. Le groupe est prêt.
-- [ ] `MGMT_VOIX[18].repliques[2]` (victoire) : Mission remplie. Je remercie les gars qui étaient avec moi dans le camp, c'est eux qui ont fait le boulot.
+- [ ] `MGMT_VOIX[18].repliques[2]` (victoire) : Mission remplie. Je remercie les gars du camp. C'est eux qui ont fait le travail.
 - [ ] `MGMT_VOIX[18].repliques[3]` (defaite) : J'ai pris une mauvaise décision au deuxième round. C'est moi qui l'ai prise. On corrige.
 - [ ] `MGMT_VOIX[18].repliques[4]` (proposition-a-court-preavis) : J'ai déjà été [appelé|appelée] avec deux heures de préavis pour des choses beaucoup moins drôles. Oui.
 - [ ] `MGMT_VOIX[19].repliques[0]` (annonce) : À vingt ans j'étais en cellule avec un mec qui voulait me planter pour une clope. {adv} franchement, c'est des vacances.
-- [ ] `MGMT_VOIX[19].repliques[1]` (victoire) : Les petits du quartier qui regardent, je sais que vous regardez, la rue elle vous rendra rien, moi j'ai failli y rester.
+- [ ] `MGMT_VOIX[19].repliques[1]` (victoire) : Les petits du quartier, je sais que vous regardez. La rue ne vous donnera rien. Moi, j'ai failli y rester.
 - [ ] `MGMT_VOIX[19].repliques[2]` (defaite) : J'ai perdu un combat. Avant je perdais des années. Ça va.
-- [ ] `MGMT_VOIX[19].repliques[3]` (inactivite) : Quand je combats pas, je tourne en rond, et quand je tourne en rond je connais la suite. Donnez-moi un combat.
-- [ ] `MGMT_VOIX[19].repliques[4]` (forfait) : Blessure. Pas de connerie, je suis resté chez moi. Je le précise parce que je sais ce que les gens vont penser.
-- [ ] `MGMT_VOIX[20].repliques[0]` (annonce) : Wesh {adv}, t'as vu mes combats ou pas ? Nan parce que si t'as vu, t'aurais refusé frérot. Samedi tu vas manger, sah.
-- [ ] `MGMT_VOIX[20].repliques[1]` (reseaux) : Toute la team au premier rang samedi, ramenez le bruit, on va faire trembler la salle de ouf.
-- [ ] `MGMT_VOIX[20].repliques[2]` (victoire) : C'est pour la ville ça ! Pour les grands, pour les petits, pour ma mère qui m'a dit arrête la boxe t'es bête, regarde maman !
+- [ ] `MGMT_VOIX[19].repliques[3]` (inactivite) : Quand je ne combats pas, je tourne en rond. Et quand je tourne en rond, je connais la suite. Donnez-moi un combat.
+- [ ] `MGMT_VOIX[19].repliques[4]` (forfait) : Blessure. Je suis resté chez moi, je le précise. Je sais ce que les gens vont penser.
+- [ ] `MGMT_VOIX[20].repliques[0]` (annonce) : Wesh {adv}, tu as vu mes combats ? Si tu les avais vus, tu aurais refusé. Samedi, tu vas manger.
+- [ ] `MGMT_VOIX[20].repliques[1]` (reseaux) : Toute la team au premier rang samedi ! Ramenez le bruit, on va faire trembler la salle.
+- [ ] `MGMT_VOIX[20].repliques[2]` (victoire) : C'est pour la ville ! Pour les grands, pour les petits, pour ma mère qui me disait d'arrêter la boxe. Regarde maman !
 - [ ] `MGMT_VOIX[20].repliques[3]` (defaite) : Il m'a allumé, je peux rien dire, il m'a allumé. Bon, on rentre, kebab.
-- [ ] `MGMT_VOIX[20].repliques[4]` (proposition-refusee) : Lui ? Frère il a zéro abonné, personne le connaît, même sa mère elle regarde pas ses combats, trouve-moi un vrai nom.
-- [ ] `MGMT_VOIX[21].repliques[0]` (annonce) : {adv} c'est un danseur. Je vais le mettre au sol, m'asseoir dessus, et le noyer pendant quinze minutes. C'est pas beau, c'est efficace.
+- [ ] `MGMT_VOIX[20].repliques[4]` (proposition-refusee) : Lui ? Il n'a aucun abonné, personne ne le connaît, même sa mère ne regarde pas ses combats. Trouve-moi un vrai nom.
+- [ ] `MGMT_VOIX[21].repliques[0]` (annonce) : {adv} est un danseur. Je vais le mettre au sol, m'asseoir dessus, et le noyer pendant quinze minutes. Ce n'est pas beau, mais c'est efficace.
 - [ ] `MGMT_VOIX[21].repliques[1]` (reseaux) : Six heures de lutte aujourd'hui. Demain sept.
 - [ ] `MGMT_VOIX[21].repliques[2]` (victoire) : Je vous avais dit que c'était pas beau. Vous voulez du beau, allez au ballet.
 - [ ] `MGMT_VOIX[21].repliques[3]` (defaite) : Mon cardio a lâché au troisième. C'est pas lui, c'est moi. Je retourne courir.
 - [ ] `MGMT_VOIX[21].repliques[4]` (proposition) : Un frappeur ? Parfait. Il va découvrir le sol.
-- [ ] `MGMT_VOIX[22].repliques[0]` (annonce) : Frère, {adv} c'est un bon garçon, je lui souhaite rien de mal. Mais mon père sera au premier rang. Je peux pas perdre devant mon père.
+- [ ] `MGMT_VOIX[22].repliques[0]` (annonce) : Frère, {adv} est un bon garçon, je ne lui veux aucun mal. Mais mon père sera au premier rang. Je ne peux pas perdre devant mon père.
 - [ ] `MGMT_VOIX[22].repliques[1]` (victoire) : Je dédie au village. Mon père m'a regardé, il a hoché la tête. Pour moi c'est plus qu'une ceinture.
 - [ ] `MGMT_VOIX[22].repliques[2]` (defaite) : J'ai fait honte à ma famille ce soir. Je rentre, je parle avec mon père, après on verra.
 - [ ] `MGMT_VOIX[22].repliques[3]` (provocation-recue) : Frère, tu parles beaucoup. Chez nous ceux qui parlent beaucoup, on les voit plus.
 - [ ] `MGMT_VOIX[22].repliques[4]` (proposition) : Je dois appeler mon père. (Il rappelle dix minutes plus tard.) C'est oui.
-- [ ] `MGMT_VOIX[23].repliques[0]` (annonce) : Samedi c'est pas moi qui entre dans la cage. C'est tout le {pays}. J'ai reçu des messages de gens que je connais même pas.
+- [ ] `MGMT_VOIX[23].repliques[0]` (annonce) : Samedi, ce n'est pas moi qui entre dans la cage. C'est tout le {pays}. J'ai reçu des messages de gens que je ne connais pas.
 - [ ] `MGMT_VOIX[23].repliques[1]` (victoire) : (il pleure) C'est pour vous, là-bas. Pour les gamins qui s'entraînent sur du béton. Un jour ce sera vous ici.
 - [ ] `MGMT_VOIX[23].repliques[2]` (defaite) : Je demande pardon à mon pays. Je vous ai déçus ce soir.
 - [ ] `MGMT_VOIX[23].repliques[3]` (inactivite) : Au pays on me demande tous les jours quand je combats. Je sais plus quoi leur répondre.
@@ -719,13 +719,13 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[24].repliques[1]` (victoire) : Je vous l'avais dit. C'est tout.
 - [ ] `MGMT_VOIX[24].repliques[2]` (victoire) : J'avais dit premier round. Je me suis trompé. Ça m'arrive pas souvent.
 - [ ] `MGMT_VOIX[24].repliques[3]` (defaite) : Je ne l'avais pas vu. C'est la première fois que je ne vois pas.
-- [ ] `MGMT_VOIX[25].repliques[0]` (annonce) : {adv} a un problème très simple : il baisse la main droite quand il lance le crochet gauche. Samedi on fera une interrogation surprise.
+- [ ] `MGMT_VOIX[25].repliques[0]` (annonce) : {adv} a un problème simple. Il baisse la main droite quand il lance son crochet gauche. Samedi, interrogation surprise.
 - [ ] `MGMT_VOIX[25].repliques[1]` (reseaux) : Rappel : le coude est une articulation, pas une option.
 - [ ] `MGMT_VOIX[25].repliques[2]` (victoire) : Copie rendue. Je lui mets 4 sur 20, mais c'est pour l'encourager.
 - [ ] `MGMT_VOIX[25].repliques[3]` (defaite) : Il connaissait la leçon mieux que moi. Je retourne réviser.
-- [ ] `MGMT_VOIX[26].repliques[0]` (annonce) : {adv} c'est le boss du niveau 3. Moi je suis au niveau 9. Il faut que quelqu'un lui explique qu'il a raté des mises à jour.
+- [ ] `MGMT_VOIX[26].repliques[0]` (annonce) : {adv} est le boss du niveau 3. Moi, je suis au niveau 9. Quelqu'un doit lui dire qu'il a raté des mises à jour.
 - [ ] `MGMT_VOIX[26].repliques[1]` (reseaux) : Nouvelle attaque spéciale débloquée. Samedi on la teste en ligne.
-- [ ] `MGMT_VOIX[26].repliques[2]` (victoire) : Combo complet, pas une barre de vie restante, j'ai même pas utilisé mon ultime. Il m'a filé des points d'expérience, merci à lui.
+- [ ] `MGMT_VOIX[26].repliques[2]` (victoire) : Combo complet, sa barre de vie à zéro, je n'ai même pas utilisé mon ultime. Merci pour les points d'expérience.
 - [ ] `MGMT_VOIX[26].repliques[3]` (defaite) : Game over. J'ai pas sauvegardé. Je relance une partie.
 - [ ] `MGMT_VOIX[26].repliques[4]` (proposition-refusee) : Lui ? C'est un mob de début de jeu. Donne-moi un boss.
 - [ ] `MGMT_VOIX[27].repliques[0]` (annonce) : J'espère que {adv} vient pour de vrai. Si on sort pas tous les deux défigurés, les gens ont été volés.
@@ -733,15 +733,15 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[27].repliques[2]` (victoire) : Regardez sa tête, regardez la mienne. Ça c'est un combat. Je l'aime ce mec.
 - [ ] `MGMT_VOIX[27].repliques[3]` (defaite) : J'ai perdu, mais putain c'était beau. Je signerais pour le refaire demain.
 - [ ] `MGMT_VOIX[27].repliques[4]` (defaite) : Il a couru pendant quinze minutes. Il a gagné. Ça me donne envie de vomir.
-- [ ] `MGMT_VOIX[28].repliques[0]` (annonce) : Il y a un enfant quelque part qui regarde ça et qui pense qu'il peut pas. Samedi c'est pour lui. {adv} est un grand combattant, mais moi j'ai une mission.
+- [ ] `MGMT_VOIX[28].repliques[0]` (annonce) : Quelque part, un enfant regarde ça et pense qu'il ne peut pas. Samedi, c'est pour lui. {adv} est un grand combattant, mais moi, j'ai une mission.
 - [ ] `MGMT_VOIX[28].repliques[1]` (reseaux) : 4 h 50. Tout le monde dort. Pas moi. On se voit au sommet.
-- [ ] `MGMT_VOIX[28].repliques[2]` (victoire) : Je veux parler aux gamins à la maison : on vous dira que c'est impossible. C'est faux. On se voit au sommet.
+- [ ] `MGMT_VOIX[28].repliques[2]` (victoire) : Je parle aux gamins de chez moi : on vous dira que c'est impossible. C'est faux. On se voit au sommet.
 - [ ] `MGMT_VOIX[28].repliques[3]` (defaite) : Aujourd'hui je suis tombé. Demain je me relève. C'est ça la leçon. On se voit au sommet.
-- [ ] `MGMT_VOIX[29].repliques[0]` (annonce) : Quand j'ai commencé on se battait dans des parkings, le vainqueur repartait avec l'enveloppe et le perdant avec les dents dans la poche. {adv} il est né l'année où j'ai eu mon premier nez cassé.
+- [ ] `MGMT_VOIX[29].repliques[0]` (annonce) : Quand j'ai commencé, on se battait dans des parkings. Le vainqueur prenait l'enveloppe, le perdant repartait sans dents. {adv} est né l'année de mon premier nez cassé.
 - [ ] `MGMT_VOIX[29].repliques[1]` (victoire) : Le petit il frappe fort, hein. Mais à mon âge on sait où sont les portes.
 - [ ] `MGMT_VOIX[29].repliques[2]` (defaite) : Il m'a sorti. Bravo gamin. Moi je vais aller mettre de la glace partout.
 - [ ] `MGMT_VOIX[29].repliques[3]` (proposition) : Un jeune ? Envoie. Il faut bien que quelqu'un leur apprenne.
-- [ ] `MGMT_VOIX[30].repliques[0]` (annonce) : Je combats pour une bourse qui paye à peine mon camp. Mais c'est pas grave, {org} a besoin de sous pour ses néons.
+- [ ] `MGMT_VOIX[30].repliques[0]` (annonce) : Je me bats pour une bourse qui paye à peine mon camp. Ce n'est pas grave : {org} a besoin d'argent pour ses néons.
 - [ ] `MGMT_VOIX[30].repliques[1]` (reseaux) : Soirée de {org} : 4 000 places vendues. Ma bourse : pareil que l'an dernier. Cherchez l'erreur.
 - [ ] `MGMT_VOIX[30].repliques[2]` (victoire) : J'ai gagné. Je vais recevoir une prime qui paiera à peine le taxi. Merci à moi.
 - [ ] `MGMT_VOIX[30].repliques[3]` (defaite) : Trois juges, zéro yeux. Je fais appel. Je sais que ça sert à rien, je fais appel quand même.
@@ -750,9 +750,9 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[31].repliques[1]` (victoire) : Euh… merci. Merci à ma mère. Et… voilà. Merci {org}. Désolé je sais pas trop parler.
 - [ ] `MGMT_VOIX[31].repliques[2]` (defaite) : (il ne vient pas en conférence de presse ; son coach parle pour lui)
 - [ ] `MGMT_VOIX[31].repliques[3]` (proposition) : Euh, oui, si vous pensez que c'est bien, oui.
-- [ ] `MGMT_VOIX[32].repliques[0]` (annonce) : {adv} a demandé ce combat pour avoir des vues, et franchement je comprends, moi aussi j'aurais voulu être moi. Code FIGHT10 sur la boisson énergisante, lien en bio.
+- [ ] `MGMT_VOIX[32].repliques[0]` (annonce) : {adv} a demandé ce combat pour avoir des vues. Je comprends, moi aussi j'aimerais être moi. Code FIGHT10 sur la boisson énergisante, lien en bio.
 - [ ] `MGMT_VOIX[32].repliques[1]` (reseaux) : VLOG DE PESÉE EN LIGNE. Je vous montre tout. Même ce qu'il faut pas.
-- [ ] `MGMT_VOIX[32].repliques[2]` (victoire) : Allez vous abonner à {adv}, il en a besoin, là il a plus de dents que d'abonnés.
+- [ ] `MGMT_VOIX[32].repliques[2]` (victoire) : Allez vous abonner à {adv}. Il en a besoin : il a plus de dents que d'abonnés.
 - [ ] `MGMT_VOIX[32].repliques[3]` (defaite) : Vidéo demain. Je vous dis TOUT. Ce qui s'est vraiment passé. (Rien ne s'est passé.)
 - [ ] `MGMT_VOIX[32].repliques[4]` (proposition-refusee) : Il fait pas de vues. Désolé mais il fait pas de vues.
 - [ ] `MGMT_VOIX[33].repliques[0]` (annonce) : J'ai traversé des choses pour être ici. Samedi c'est quinze minutes. Je sais faire quinze minutes.
@@ -763,11 +763,11 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[34].repliques[1]` (victoire) : Papa était au premier rang. Pour une fois il a rien dit. Je crois que c'est un compliment.
 - [ ] `MGMT_VOIX[34].repliques[2]` (defaite) : Allez-y, dites-le, il n'est pas son père. Je sais. Je le sais depuis que j'ai huit ans.
 - [ ] `MGMT_VOIX[34].repliques[3]` (inactivite) : On croit que j'ai des passe-droits. J'attends comme tout le monde. Plus, même.
-- [ ] `MGMT_VOIX[35].repliques[0]` (annonce) : Dans mon village il y avait zéro fille dans les salles. Aujourd'hui il y en a onze. Samedi c'est pour les onze.
-- [ ] `MGMT_VOIX[35].repliques[1]` (reseaux) : Encore un gars qui me dit que je devrais faire du yoga. Mon gars, viens au sparring demain, on fera du yoga ensemble.
+- [ ] `MGMT_VOIX[35].repliques[0]` (annonce) : Dans mon village, il n'y avait aucune fille dans les salles. Aujourd'hui, il y en a onze. Samedi, c'est pour les onze.
+- [ ] `MGMT_VOIX[35].repliques[1]` (reseaux) : Encore un gars qui me dit de faire du yoga. Viens au sparring demain, on fera du yoga ensemble.
 - [ ] `MGMT_VOIX[35].repliques[2]` (victoire) : Les petites qui regardent : on vous dira que c'est pas pour vous. C'est pour vous.
 - [ ] `MGMT_VOIX[35].repliques[3]` (defaite) : J'ai perdu. Ça veut pas dire qu'on avait tort d'essayer.
-- [ ] `MGMT_VOIX[36].repliques[0]` (annonce) : J'ai échangé deux gardes avec un collègue pour le camp, je lui dois un week-end et un kebab.
+- [ ] `MGMT_VOIX[36].repliques[0]` (annonce) : J'ai échangé deux gardes avec un collègue pour le camp. Je lui dois un week-end et un kebab.
 - [ ] `MGMT_VOIX[36].repliques[1]` (victoire) : Lundi 7 h je suis au boulot. Les collègues vont me chambrer toute la journée, et j'ai hâte.
 - [ ] `MGMT_VOIX[36].repliques[2]` (defaite) : Bon. Lundi 7 h je suis au boulot. Au moins là-bas personne me tape.
 - [ ] `MGMT_VOIX[36].repliques[3]` (proposition-refusee) : Pas ce mois-là, je suis de nuit toute la semaine. Je peux pas lâcher l'équipe.
@@ -778,34 +778,34 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[38].repliques[1]` (reseaux) : Chaussettes lavées par erreur par ma copine. Je suis en deuil.
 - [ ] `MGMT_VOIX[38].repliques[2]` (victoire) : Vous voyez ? Même chaussettes. Je vous l'avais dit.
 - [ ] `MGMT_VOIX[38].repliques[3]` (defaite) : J'ai croisé un chat noir dans le parking. Je dis rien de plus.
-- [ ] `MGMT_VOIX[39].repliques[0]` (annonce) : Il y a cinq ans j'étais comptable et je pesais 110 kilos. Je suis pas en retard, je suis en avance sur celui que j'étais.
+- [ ] `MGMT_VOIX[39].repliques[0]` (annonce) : Il y a cinq ans, j'étais comptable et je pesais 110 kilos. Je ne suis pas en retard : je suis en avance sur celui que j'étais.
 - [ ] `MGMT_VOIX[39].repliques[1]` (victoire) : Le type que j'étais à trente ans ne me croirait pas. Salut à lui.
 - [ ] `MGMT_VOIX[39].repliques[2]` (defaite) : Je perds un combat. J'ai déjà perdu une vie entière, alors ça va.
 - [ ] `MGMT_VOIX[40].repliques[0]` (annonce) : Au judo on m'a appris à tomber. Ici j'apprends à ne pas tomber. C'est pas le même métier.
 - [ ] `MGMT_VOIX[40].repliques[1]` (victoire) : Projection de hanche, vingt ans que je la fais. Elle marche aussi avec des coups de poing, apparemment.
 - [ ] `MGMT_VOIX[40].repliques[2]` (defaite) : Il m'a frappé à un endroit où, au judo, personne frappe jamais. Leçon.
-- [ ] `MGMT_VOIX[41].repliques[0]` (annonce) : {adv}, t'as le cardio d'un poème qui s'arrête à la deuxième strophe, moi je finis mes textes et je finis mes combats.
+- [ ] `MGMT_VOIX[41].repliques[0]` (annonce) : {adv}, ton cardio est comme un poème qui s'arrête à la deuxième strophe. Moi, je finis mes textes et mes combats.
 - [ ] `MGMT_VOIX[41].repliques[1]` (reseaux) : Nouveau son vendredi. Nouveau KO samedi. Même label : moi.
 - [ ] `MGMT_VOIX[41].repliques[2]` (victoire) : J'avais écrit le couplet avant le combat. Il manquait juste la fin. Là, je l'ai.
 - [ ] `MGMT_VOIX[41].repliques[3]` (defaite) : Ce soir j'écris un morceau triste. Il va être très bon.
-- [ ] `MGMT_VOIX[42].repliques[0]` (annonce) : Je vais être honnête. Je dors mal depuis le dernier. Mais je veux savoir si je suis encore moi. Samedi je saurai.
+- [ ] `MGMT_VOIX[42].repliques[0]` (annonce) : Je vais être honnête : je dors mal depuis mon dernier combat. Mais je veux savoir si je suis encore moi. Samedi, je saurai.
 - [ ] `MGMT_VOIX[42].repliques[1]` (victoire) : J'ai gagné. Je sais pas encore si je suis content. Laissez-moi un peu.
 - [ ] `MGMT_VOIX[42].repliques[2]` (defaite) : Je crois que c'est fini. Je crois. Je vous dirai.
-- [ ] `MGMT_VOIX[43].repliques[0]` (annonce) : J'ai quatre petits frères. Deux à l'école, un à l'apprentissage, un qui veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.
+- [ ] `MGMT_VOIX[43].repliques[0]` (annonce) : J'ai quatre petits frères. Deux vont à l'école, un est apprenti, un veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.
 - [ ] `MGMT_VOIX[43].repliques[1]` (victoire) : L'inscription au permis de ma petite sœur est payée. Ça, c'est une ceinture.
 - [ ] `MGMT_VOIX[43].repliques[2]` (inactivite) : Chaque mois sans combat, c'est un mois où c'est ma mère qui compte. Je veux pas que ma mère compte.
-- [ ] `MGMT_VOIX[44].repliques[0]` (annonce) : J'ai pleuré en signant le contrat. Je vais sûrement pleurer à la pesée. Et samedi je vais le frapper très fort. Les deux sont vrais.
+- [ ] `MGMT_VOIX[44].repliques[0]` (annonce) : J'ai pleuré en signant le contrat. Je pleurerai sans doute à la pesée. Et samedi, je le frapperai très fort. Les deux sont vrais.
 - [ ] `MGMT_VOIX[44].repliques[1]` (victoire) : (il pleure) Pardon. Pardon. Merci. J'ai eu tellement peur toute la semaine.
 - [ ] `MGMT_VOIX[44].repliques[2]` (defaite) : J'ai mal au cœur plus qu'au visage. C'est normal je crois.
 - [ ] `MGMT_VOIX[45].repliques[0]` (annonce) : Vous me demandez mon plan ? Vous le verrez samedi. Lui aussi.
 - [ ] `MGMT_VOIX[45].repliques[1]` (victoire) : Round deux, j'ai changé de garde. Pourquoi ? Question suivante.
 - [ ] `MGMT_VOIX[45].repliques[2]` (defaite) : Il avait un meilleur plan. Je voudrais bien savoir lequel.
 - [ ] `MGMT_VOIX[45].repliques[3]` (micro-tendu) : Q. Tu joues aux échecs ? — R. Pourquoi, vous voulez perdre ?
-- [ ] `MGMT_VOIX[46].repliques[0]` (annonce) : Le camp s'est super bien passé. Enfin les deux dernières semaines. Les deux premières, on va dire que c'était un camp de base.
+- [ ] `MGMT_VOIX[46].repliques[0]` (annonce) : Le camp s'est très bien passé. Enfin, les deux dernières semaines. Les deux premières, c'était plutôt un camp de base.
 - [ ] `MGMT_VOIX[46].repliques[1]` (pesee-ratee) : J'avais oublié que c'était aujourd'hui. Je suis pas fier. Enfin un peu quand même, il était bon ce burger.
 - [ ] `MGMT_VOIX[46].repliques[2]` (victoire) : On se retrouve tous au bar d'en face, c'est moi qui paye. Enfin c'est {org} qui paye, c'est ma bourse.
 - [ ] `MGMT_VOIX[46].repliques[3]` (defaite) : Je vais faire la fête quand même. On fête la défaite aussi, sinon on fête jamais rien.
-- [ ] `MGMT_VOIX[47].repliques[0]` (annonce) : Il y a six ans je montais pas un escalier sans m'arrêter. Samedi je monte dans une cage. Je sais lequel des deux était le plus dur.
+- [ ] `MGMT_VOIX[47].repliques[0]` (annonce) : Il y a six ans, je ne montais pas un escalier sans m'arrêter. Samedi, je monte dans une cage. Je sais lequel était le plus dur.
 - [ ] `MGMT_VOIX[47].repliques[1]` (reseaux) : Photo de moi à 128 kilos, à côté de la pesée d'hier. Je la garde dans mon téléphone. Elle me regarde.
 - [ ] `MGMT_VOIX[47].repliques[2]` (victoire) : À tous ceux qui se regardent dans la glace et qui ont honte : moi aussi. Et regardez maintenant.
 - [ ] `MGMT_VOIX[47].repliques[3]` (defaite) : J'ai perdu. Mais le vieux moi, je l'ai battu il y a longtemps.
@@ -814,52 +814,52 @@ Fichier : `mgmt-voix-data.js`
 
 Fichier : `mgmt-medias-data.js`
 
-- [ ] `MGMT_MEDIAS_LIGNES[0]` (affiche) : {a} et {b} se retrouvent en tête d’affiche de {org} {n}, en {cat}. Le combat dira lequel des deux a besoin de l’autre.
-- [ ] `MGMT_MEDIAS_LIGNES[1]` (affiche) : La carte principale de {org} {n} s’ouvre sur {a} contre {b}. Une affiche sans fausse note, et sans surprise.
-- [ ] `MGMT_MEDIAS_LIGNES[2]` (lendemain) : {a} a battu {b} à {org} {n}, au round {round}. La suite de la division passe par lui.
-- [ ] `MGMT_MEDIAS_LIGNES[3]` (lendemain) : {a} a mis fin au combat face à {b} au round {round}. Le résultat ne laisse aucune place à la discussion.
-- [ ] `MGMT_MEDIAS_LIGNES[4]` (lendemain) : {a} l’emporte aux points contre {b} après {round} rounds. Les juges ont tranché ; le public attendait plus.
-- [ ] `MGMT_MEDIAS_LIGNES[5]` (affiche) : Selon plusieurs sources, {a} contre {b} sera la tête d’affiche de {org} {n}. On me le confirme.
-- [ ] `MGMT_MEDIAS_LIGNES[6]` (affiche) : Info : {a} et {b} sont sur la même carte à {org} {n}. Rien ne sortira avant la pesée.
-- [ ] `MGMT_MEDIAS_LIGNES[7]` (lendemain) : {a} ÉTEINT {b} EN UN ROUND : VOICI CE QUE LES FANS ONT DIT
-- [ ] `MGMT_MEDIAS_LIGNES[8]` (lendemain) : {b} DÉTRUIT PAR {a} ? LES FANS N’EN REVIENNENT PAS
-- [ ] `MGMT_MEDIAS_LIGNES[9]` (lendemain) : {a} ENCHAÎNE ENCORE : VOICI POURQUOI ON NE PEUT PLUS L’IGNORER
-- [ ] `MGMT_MEDIAS_LIGNES[10]` (lendemain) : {b} RÉAGIT APRÈS SA DÉFAITE : SA RÉPONSE VA VOUS SURPRENDRE
-- [ ] `MGMT_MEDIAS_LIGNES[11]` (rebook) : {a} est rebooké cinq semaines après un KO. La médecin de commission est disponible pour commenter. {org} n’a pas souhaité répondre.
-- [ ] `MGMT_MEDIAS_LIGNES[12]` (rebook) : Cinq semaines après son KO, {a} remonte dans la cage. On cherche encore qui l’a décidé.
-- [ ] `MGMT_MEDIAS_LIGNES[13]` (lendemain) : {a} a trouvé la finition au round {round}. {b} a tenu le plan jusque-là ; tout le combat est dans ce qui a changé juste avant.
-- [ ] `MGMT_MEDIAS_LIGNES[14]` (lendemain) : {a} a gagné aux points, sur {rounds} rounds. Une victoire propre : aucun risque pris, aucun risque couru.
-- [ ] `MGMT_MEDIAS_LIGNES[15]` (lendemain) : {b} a perdu le combat au round {round}. La question n’est pas ce qu’il a manqué, mais ce qu’il a laissé faire.
-- [ ] `MGMT_MEDIAS_LIGNES[16]` (lendemain) : Q. {a}, ta série, tu la vis comment ? — R. Je dors beaucoup. Et je mange mal.
-- [ ] `MGMT_MEDIAS_LIGNES[17]` (lendemain) : Q. {a}, ce soir, tu as eu peur ? — R. Avant, oui. Pendant, je n’ai pas eu le temps.
-- [ ] `MGMT_MEDIAS_LIGNES[18]` (lendemain) : Q. {a}, ton plat préféré avant une pesée ? — R. Celui que je ne peux pas manger.
-- [ ] `MGMT_MEDIAS_LIGNES[19]` (affiche) : Mesdames et messieurs, ce que vous verrez à {org} {n}, c’est tout simplement historique. {a} contre {b}. Un seul survivant.
-- [ ] `MGMT_MEDIAS_LIGNES[20]` (affiche) : Le combat de l’année ? Ce sera {a} contre {b} à {org} {n}, et ne dites pas qu’on ne vous avait pas prévenus.
-- [ ] `MGMT_MEDIAS_LIGNES[21]` (lendemain) : Un moment immanquable, mesdames et messieurs : {a} a battu {b} à {org} {n}. C’est tout simplement historique.
-- [ ] `MGMT_MEDIAS_LIGNES[22]` (lendemain) : vol. VOL. VOOOL. les juges ils ont regardé un autre sport
-- [ ] `MGMT_MEDIAS_LIGNES[23]` (lendemain) : {a} c’est le GOAT et vous êtes pas prêts
-- [ ] `MGMT_MEDIAS_LIGNES[24]` (lendemain) : {b} fini, à la retraite, rendez l’argent à {org}
-- [ ] `MGMT_MEDIAS_LIGNES[25]` (affiche) : qui a booké cette affiche sérieux, {a} {b} c’est du remplissage
-- [ ] `MGMT_MEDIAS_LIGNES[26]` (affiche) : (Presse nationale — {pays}, traduit) Notre {a} combat à {org} {n}. Le pays entier sera devant son écran, à n’importe quelle heure.
-- [ ] `MGMT_MEDIAS_LIGNES[27]` (lendemain) : (Presse nationale — {pays}, traduit) Notre {a} a gagné en France. Une organisation française de plus qui sait maintenant son nom.
-- [ ] `MGMT_MEDIAS_LIGNES[28]` (lendemain) : (Presse nationale — {pays}, traduit) Défaite amère pour notre {a} : l’organisation française lui a donné un adversaire trop dur.
-- [ ] `MGMT_MEDIAS_LIGNES[29]` (affiche) : {a} provoque {b} depuis trois semaines. {b} n’a pas répondu une seule fois. Ça ne durera pas.
-- [ ] `MGMT_MEDIAS_LIGNES[30]` (affiche) : {a} DÉRAPE SUR {b} : LA RÉPONSE GLACÉE QUE PERSONNE N’ATTENDAIT
-- [ ] `MGMT_MEDIAS_LIGNES[31]` (affiche) : quinze minutes de monologue de {a} devant {b}, qui n’a pas entendu un mot. le feuilleton de la semaine
-- [ ] `MGMT_MEDIAS_LIGNES[32]` (affiche) : {a} a trouvé le seul sujet qui ne se plaisante pas chez {b}. {b} ne dit plus rien. C’est le combat le plus attendu de la saison.
-- [ ] `MGMT_MEDIAS_LIGNES[33]` (affiche) : deux prophètes sur la même affiche : {a} et {b} ont annoncé le contraire l’un de l’autre. un des deux a tort, forcément
-- [ ] `MGMT_MEDIAS_LIGNES[34]` (affiche) : {a} veut la guerre debout, {b} veut le sol. Quelqu’un criera au vol samedi.
-- [ ] `MGMT_MEDIAS_LIGNES[35]` (affiche) : Le monde d’avant contre celui d’après, mesdames et messieurs : {a} contre {b}, et les vues explosent.
+- [ ] `MGMT_MEDIAS_LIGNES[0]` (affiche) : {a} et {b} sont en tête d’affiche de {org} {n}, en {cat}. Qui va gagner ?
+- [ ] `MGMT_MEDIAS_LIGNES[1]` (affiche) : La carte principale de {org} {n} commence par {a} contre {b}. Un combat sans surprise.
+- [ ] `MGMT_MEDIAS_LIGNES[2]` (lendemain) : {a} a battu {b} à {org} {n}, au round {round}. Il monte dans sa division.
+- [ ] `MGMT_MEDIAS_LIGNES[3]` (lendemain) : {a} a fini le combat contre {b} au round {round}. Le résultat est clair.
+- [ ] `MGMT_MEDIAS_LIGNES[4]` (lendemain) : {a} gagne aux points contre {b}, après {round} rounds. Le public voulait plus de spectacle.
+- [ ] `MGMT_MEDIAS_LIGNES[5]` (affiche) : {a} contre {b} sera en tête d’affiche de {org} {n}. Plusieurs sources le disent.
+- [ ] `MGMT_MEDIAS_LIGNES[6]` (affiche) : Info : {a} et {b} sont sur la même carte à {org} {n}. On saura tout à la pesée.
+- [ ] `MGMT_MEDIAS_LIGNES[7]` (lendemain) : {a} BAT {b} EN UN ROUND : VOYEZ LA RÉACTION DES FANS
+- [ ] `MGMT_MEDIAS_LIGNES[8]` (lendemain) : {b} PERD FACE À {a} : LES FANS SONT CHOQUÉS
+- [ ] `MGMT_MEDIAS_LIGNES[9]` (lendemain) : {a} GAGNE ENCORE : VOICI POURQUOI IL FAUT LE SUIVRE
+- [ ] `MGMT_MEDIAS_LIGNES[10]` (lendemain) : {b} PARLE APRÈS SA DÉFAITE : SA RÉPONSE VA VOUS SURPRENDRE
+- [ ] `MGMT_MEDIAS_LIGNES[11]` (rebook) : {a} se bat de nouveau cinq semaines après un KO. La médecin de la commission est prête à en parler. {org} ne répond pas.
+- [ ] `MGMT_MEDIAS_LIGNES[12]` (rebook) : {a} remonte dans la cage cinq semaines après son KO. Qui l’a décidé ? On ne sait pas.
+- [ ] `MGMT_MEDIAS_LIGNES[13]` (lendemain) : {a} finit le combat au round {round}. {b} suivait son plan, puis tout a changé en quelques secondes.
+- [ ] `MGMT_MEDIAS_LIGNES[14]` (lendemain) : {a} gagne aux points, sur {rounds} rounds. Il n’a pris aucun risque.
+- [ ] `MGMT_MEDIAS_LIGNES[15]` (lendemain) : {b} perd au round {round}. Il a laissé son adversaire faire ce qu’il voulait.
+- [ ] `MGMT_MEDIAS_LIGNES[16]` (lendemain) : Q. {a}, ta série, comment tu la vis ? — R. Je dors beaucoup. Je mange mal.
+- [ ] `MGMT_MEDIAS_LIGNES[17]` (lendemain) : Q. {a}, tu as eu peur ce soir ? — R. Avant, oui. Pendant, non. Pas le temps.
+- [ ] `MGMT_MEDIAS_LIGNES[18]` (lendemain) : Q. {a}, ton plat préféré avant une pesée ? — R. Celui que je n’ai pas le droit de manger.
+- [ ] `MGMT_MEDIAS_LIGNES[19]` (affiche) : Mesdames et messieurs, {org} {n} sera historique. {a} contre {b}. Un seul gagnant.
+- [ ] `MGMT_MEDIAS_LIGNES[20]` (affiche) : Le combat de l’année : {a} contre {b}, à {org} {n}. Ne le ratez pas.
+- [ ] `MGMT_MEDIAS_LIGNES[21]` (lendemain) : Un grand moment : {a} a battu {b} à {org} {n}. C’est historique.
+- [ ] `MGMT_MEDIAS_LIGNES[22]` (lendemain) : vol. VOL. VOOOL. les juges n’ont rien compris
+- [ ] `MGMT_MEDIAS_LIGNES[23]` (lendemain) : {a} est le meilleur et vous n’êtes pas prêts
+- [ ] `MGMT_MEDIAS_LIGNES[24]` (lendemain) : {b} est fini, qu’il arrête, rendez l’argent à {org}
+- [ ] `MGMT_MEDIAS_LIGNES[25]` (affiche) : qui a fait cette affiche ? {a} contre {b}, c’est du remplissage
+- [ ] `MGMT_MEDIAS_LIGNES[26]` (affiche) : (Presse nationale — {pays}, traduit) Notre {a} combat à {org} {n}. Tout le pays va regarder, à toute heure.
+- [ ] `MGMT_MEDIAS_LIGNES[27]` (lendemain) : (Presse nationale — {pays}, traduit) Notre {a} a gagné en France. Les organisations françaises connaissent maintenant son nom.
+- [ ] `MGMT_MEDIAS_LIGNES[28]` (lendemain) : (Presse nationale — {pays}, traduit) Défaite pour notre {a}. L’organisation française lui a donné un adversaire trop fort.
+- [ ] `MGMT_MEDIAS_LIGNES[29]` (affiche) : {a} provoque {b} depuis trois semaines. {b} ne répond jamais. Ça ne va pas durer.
+- [ ] `MGMT_MEDIAS_LIGNES[30]` (affiche) : {a} S’EN PREND À {b} : LA RÉPONSE GLACÉE QUE PERSONNE N’ATTENDAIT
+- [ ] `MGMT_MEDIAS_LIGNES[31]` (affiche) : {a} parle quinze minutes devant {b}, qui n’écoute pas. le feuilleton de la semaine
+- [ ] `MGMT_MEDIAS_LIGNES[32]` (affiche) : {a} a touché un sujet très sensible pour {b}. {b} ne dit plus rien. C’est le combat le plus attendu de la saison.
+- [ ] `MGMT_MEDIAS_LIGNES[33]` (affiche) : deux prophètes sur la même affiche : {a} et {b} disent le contraire. l’un des deux a tort
+- [ ] `MGMT_MEDIAS_LIGNES[34]` (affiche) : {a} veut se battre debout, {b} veut aller au sol. Quelqu’un va crier au vol samedi.
+- [ ] `MGMT_MEDIAS_LIGNES[35]` (affiche) : L’ancienne école contre la nouvelle : {a} contre {b}. Tout le monde regarde.
 - [ ] `MGMT_MEDIAS_LIGNES[36]` (affiche) : {a} réclame, {b} calcule. Deux façons de monter, un seul combat.
-- [ ] `MGMT_MEDIAS_LIGNES[37]` (affiche) : {a} se taira, {b} parlera pour deux. On parie lequel dira « merci » en premier.
+- [ ] `MGMT_MEDIAS_LIGNES[37]` (affiche) : {a} se taira, {b} parlera pour deux. Qui dira « merci » le premier ?
 - [ ] `MGMT_MEDIAS_LIGNES[38]` (affiche) : {a} se plaint des bourses, {b} remercie {org}. On a comparé les deux contrats.
 - [ ] `MGMT_MEDIAS_LIGNES[39]` (affiche) : {a} a encore provoqué {b}. {b} n’a pas répondu : il ne l’a pas lu.
-- [ ] `MGMT_MEDIAS_LIGNES[40]` (lendemain) : Pour la première fois, {org} a placé un combat féminin en tête d’affiche : {a} contre {b}. La carte n’a pas souffert de ce choix.
-- [ ] `MGMT_MEDIAS_LIGNES[41]` (lendemain) : Première soirée de {org} menée par un combat féminin. {a} et {b} ont ouvert la porte, on est fans.
-- [ ] `MGMT_MEDIAS_LIGNES[42]` (lendemain) : {a} et {b} ont fait la guerre pendant {round} rounds. Deux combattants heureux, une salle debout.
-- [ ] `MGMT_MEDIAS_LIGNES[43]` (lendemain) : La guerre de l’année, mesdames et messieurs : {a} contre {b}, {round} rounds sans un pas en arrière. Historique.
-- [ ] `MGMT_MEDIAS_LIGNES[44]` (affiche) : {org} met {a} en tête d’affiche pour {org} {n}. Enfin. Il avait mérité sa place depuis longtemps.
-- [ ] `MGMT_MEDIAS_LIGNES[45]` (lendemain) : On a retrouvé {a} dans sa salle après {org} {n}. Il a ramené des croissants pour tout le monde. On est fans.
+- [ ] `MGMT_MEDIAS_LIGNES[40]` (lendemain) : Pour la première fois, {org} met un combat féminin en tête d’affiche. {a} contre {b}. La soirée a très bien marché.
+- [ ] `MGMT_MEDIAS_LIGNES[41]` (lendemain) : Première soirée de {org} avec un combat féminin en tête. {a} et {b} ont ouvert la voie. On est fans.
+- [ ] `MGMT_MEDIAS_LIGNES[42]` (lendemain) : {a} et {b} ont fait la guerre pendant {round} rounds. Deux combattants contents, une salle debout.
+- [ ] `MGMT_MEDIAS_LIGNES[43]` (lendemain) : La guerre de l’année : {a} contre {b}, {round} rounds sans reculer. C’est historique.
+- [ ] `MGMT_MEDIAS_LIGNES[44]` (affiche) : {a} est enfin en tête d’affiche de {org} {n}. Il le méritait depuis longtemps.
+- [ ] `MGMT_MEDIAS_LIGNES[45]` (lendemain) : On a retrouvé {a} dans sa salle après {org} {n}. Il a apporté des croissants pour tout le monde. On est fans.
 
 ## Camps et salles — 25 textes
 
@@ -938,44 +938,51 @@ Fichier : `arene-coups.js`
 
 Fichier : `mgmt-anciens.js`
 
-- [ ] `MGMT_ANCIENS_TEXTES.koV[0]` : Un enchaînement main arrière, main avant, qui a éteint le combat.
-- [ ] `MGMT_ANCIENS_TEXTES.koV[1]` : Un crochet à la volée, sur une ouverture.
-- [ ] `MGMT_ANCIENS_TEXTES.koV[2]` : Un contre pris au bon moment, l’adversaire n’a rien vu.
-- [ ] `MGMT_ANCIENS_TEXTES.koV[3]` : Une série à la tête contre le grillage.
-- [ ] `MGMT_ANCIENS_TEXTES.koV[4]` : Un coup de pied circulaire parti de nulle part.
-- [ ] `MGMT_ANCIENS_TEXTES.koD[0]` : Un coup reçu en reculant, sans protection sur le côté.
-- [ ] `MGMT_ANCIENS_TEXTES.koD[1]` : Un contre reçu en entrant en distance.
-- [ ] `MGMT_ANCIENS_TEXTES.koD[2]` : Un enchaînement venu sans qu’on le voie.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[0]` : Deux coups de poing de suite, et le combat s’arrête.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[1]` : Un crochet au bon moment.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[2]` : Un contre : l’adversaire n’a rien vu venir.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[3]` : Une série de coups à la tête contre le grillage.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[4]` : Un coup de pied qui arrive de nulle part.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[0]` : Un coup reçu en reculant, sans se protéger.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[1]` : Un contre reçu en s’approchant trop.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[2]` : Un coup reçu sans l’avoir vu venir.
 - [ ] `MGMT_ANCIENS_TEXTES.koD[3]` : Les mains baissées en fin de round.
-- [ ] `MGMT_ANCIENS_TEXTES.koD[4]` : Un début de combat subi, impossible de s’en remettre.
-- [ ] `MGMT_ANCIENS_TEXTES.subV[0]` : Un étranglement pris dans un scramble.
-- [ ] `MGMT_ANCIENS_TEXTES.subV[1]` : Un contrôle au sol suivi d’une clé de bras.
-- [ ] `MGMT_ANCIENS_TEXTES.subV[2]` : Un dos pris à la relance, puis l’étranglement.
-- [ ] `MGMT_ANCIENS_TEXTES.subV[3]` : L’autre a ouvert le jeu, la jambe est restée attrapée.
-- [ ] `MGMT_ANCIENS_TEXTES.subV[4]` : Une soumission venue d’une garde qu’on croyait neutre.
-- [ ] `MGMT_ANCIENS_TEXTES.subD[0]` : Un étranglement subi en défendant son dos.
-- [ ] `MGMT_ANCIENS_TEXTES.subD[1]` : Un contrôle subi au sol, sans solution.
-- [ ] `MGMT_ANCIENS_TEXTES.subD[2]` : Une clé de cheville venue sans prévenir.
-- [ ] `MGMT_ANCIENS_TEXTES.subD[3]` : La tête relevée trop tôt, le cou offert.
-- [ ] `MGMT_ANCIENS_TEXTES.subD[4]` : Une amenée ratée, puis le sol subi.
-- [ ] `MGMT_ANCIENS_TEXTES.decV[0]` : Plus de volume, round après round.
-- [ ] `MGMT_ANCIENS_TEXTES.decV[1]` : Un contrôle régulier, sans prise de risque.
-- [ ] `MGMT_ANCIENS_TEXTES.decV[2]` : Une guerre, partout dans la cage, gagnée de peu.
-- [ ] `MGMT_ANCIENS_TEXTES.decV[3]` : Le jab a fait la différence.
-- [ ] `MGMT_ANCIENS_TEXTES.decV[4]` : Une fin de combat mieux gérée.
-- [ ] `MGMT_ANCIENS_TEXTES.decD[0]` : Un volume dépassé, surtout en fin de combat.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[4]` : Un mauvais début de combat, sans retour possible.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[0]` : Un étranglement dans une mêlée au sol.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[1]` : Un contrôle au sol, puis une clé de bras.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[2]` : Le dos est pris, puis l’étranglement.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[3]` : Une jambe laissée à portée, puis la soumission.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[4]` : Une soumission surprise depuis le sol.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[0]` : Un étranglement, en défendant son dos.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[1]` : Dominé au sol, sans solution.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[2]` : Une clé de cheville surprise.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[3]` : La tête relevée trop tôt, le cou à découvert.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[4]` : Une amenée ratée, puis il est resté au sol.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[0]` : Plus de coups que l’adversaire, round après round.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[1]` : Un combat contrôlé, sans risque.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[2]` : Un combat très dur, gagné de peu.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[3]` : Son jab a fait la différence.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[4]` : Une meilleure fin de combat.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[0]` : Moins de coups que l’adversaire, surtout à la fin.
 - [ ] `MGMT_ANCIENS_TEXTES.decD[1]` : Trop de temps passé contre le grillage.
 - [ ] `MGMT_ANCIENS_TEXTES.decD[2]` : Un combat serré, perdu de peu.
-- [ ] `MGMT_ANCIENS_TEXTES.decD[3]` : Trop d’attente, les juges ont suivi l’autre.
-- [ ] `MGMT_ANCIENS_TEXTES.decD[4]` : Un adversaire plus frais dans les derniers rounds.
-- [ ] `MGMT_ANCIENS_TEXTES.nul[0]` : Un combat équilibré, sans vainqueur net.
-- [ ] `MGMT_ANCIENS_TEXTES.nul[1]` : Chacun a pris deux rounds, les juges n’ont pas tranché.
-- [ ] `MGMT_ANCIENS_TEXTES.nul[2]` : Deux styles qui se sont annulés.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[3]` : Trop d’attente : les juges ont choisi l’autre.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[4]` : L’adversaire avait plus d’énergie à la fin.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[0]` : Un combat égal, sans vrai gagnant.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[1]` : Chacun a gagné deux rounds. Les juges n’ont pas choisi.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[2]` : Deux styles qui s’annulent.
 
 ## Écrans et mécanismes — mgmt-camps.js — 0 textes
 
 Fichier : `mgmt-camps.js`
 
+
+## Écrans et mécanismes — mgmt-demo.js — 2 textes
+
+Fichier : `mgmt-demo.js`
+
+- [ ] `MGMT_DEMO_FIN.titre` : Fin de la démo
+- [ ] `MGMT_DEMO_FIN.corps` : Vous avez monté cinq soirées. Le jeu complet vous attend : ajoutez Cage Legacy à votre liste de souhaits sur Steam.
 
 ## Écrans et mécanismes — mgmt-fiche-planche.js — 14 textes
 
@@ -1032,6 +1039,21 @@ Fichier : `mgmt-organisations-data.js`
 Fichier : `mgmt-organisations.js`
 
 
+## Écrans et mécanismes — mgmt-prise-en-main.js — 10 textes
+
+Fichier : `mgmt-prise-en-main.js`
+
+- [ ] `MGMT_PRISE_TEXTES.arrivee.titre` : Vous êtes le matchmaker de {org}
+- [ ] `MGMT_PRISE_TEXTES.arrivee.leila` : Je suis Leïla. Je vous aiderai pour les premiers combats.
+- [ ] `MGMT_PRISE_TEXTES.arrivee.bouton` : Commencer
+- [ ] `MGMT_PRISE_TEXTES.moments.carte_vide` : Bienvenue. Choisissez un combattant, puis son adversaire.
+- [ ] `MGMT_PRISE_TEXTES.moments.premier_combat` : Un premier combat. Il en faut cinq sur la carte principale.
+- [ ] `MGMT_PRISE_TEXTES.moments.carte_complete` : La carte principale est complète. Je prépare les préliminaires.
+- [ ] `MGMT_PRISE_TEXTES.moments.prelims` : Voici mes préliminaires. Validez la carte, ou changez un combat.
+- [ ] `MGMT_PRISE_TEXTES.moments.soiree_prete` : Tout est prêt. Ouvrez le calendrier pour jouer la soirée.
+- [ ] `MGMT_PRISE_TEXTES.moments.premier_lendemain` : Première soirée terminée. Regardez comment le public a réagi.
+- [ ] `MGMT_PRISE_TEXTES.prete` : La soirée est prête.
+
 ## Écrans et mécanismes — mgmt-promesses.js — 12 textes
 
 Fichier : `mgmt-promesses.js`
@@ -1085,4 +1107,11 @@ Fichier : `mgmt-suivi.js`
 
 Fichier : `mgmt-voix.js`
 
+
+## Écrans et mécanismes — stockage.js — 2 textes
+
+Fichier : `stockage.js`
+
+- [ ] `STOCKAGE_TEXTES.echec` : La sauvegarde a échoué. Votre partie n’est pas enregistrée.
+- [ ] `STOCKAGE_TEXTES.reessayer` : Réessayer
 

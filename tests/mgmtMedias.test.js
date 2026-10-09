@@ -47,8 +47,8 @@ test('T3 — les conditions : une décision ne reçoit ni « KO en un round », 
   const r=result(win,`${NEUVE}
     const pool=cas=>{ const vus=new Set(); for(let c=1;c<=40;c++){ m.cycle=c; lendemain(cas[0],cas[1],cas[2]); m.cycle=c; mgmtMediasLendemain(m).forEach(x=>vus.add(x.texte)); } return [...vus]; };
     const dec=pool(['dec',3]); const ko=pool(['ko',1]); const surprise=pool(['ko',2,[2,8]]);
-    return {decKo:dec.some(t=>/UN ROUND|GOAT/i.test(t)),koUn:ko.some(t=>/UN ROUND/i.test(t)),koGoat:ko.some(t=>/GOAT/.test(t)),
-      decVol:dec.some(t=>/VOL/.test(t)),koVol:ko.some(t=>/VOOOL/.test(t)),surprise:surprise.some(t=>/N’EN REVIENNENT PAS|rendez l’argent/i.test(t))};`);
+    return {decKo:dec.some(t=>/UN ROUND|GOAT/i.test(t)),koUn:ko.some(t=>/UN ROUND/i.test(t)),koGoat:ko.some(t=>/meilleur et vous/.test(t)),
+      decVol:dec.some(t=>/VOL/.test(t)),koVol:ko.some(t=>/VOOOL/.test(t)),surprise:surprise.some(t=>/SONT CHOQUÉS|rendez l’argent/i.test(t))};`);
   assert.equal(r.decKo,false); assert.ok(r.koUn); assert.ok(r.koGoat); assert.ok(r.decVol); assert.equal(r.koVol,false); assert.ok(r.surprise);
 });
 

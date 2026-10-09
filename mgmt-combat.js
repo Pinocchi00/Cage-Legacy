@@ -143,7 +143,7 @@ function mgmtCombatCx(){
   let fade=C.d<0.5?1-eas(C.d/0.5):0;
   if(decisionTail) fade=Math.max(fade,eas((C.fin-(C.queue-0.9))/0.9));
   const noms={a:S.noms.a.court,b:S.noms.b.court};
-  return {t:t,real:C.real,etat:e,session:S,plan:C.plan,planLibelle:areneSallePlanLibelle(C.plan,noms),room:C.room,carte:C.carte,org:C.org,num:C.num,
+  return {t:t,real:C.real,etat:e,session:S,plan:C.plan,planLibelle:areneSallePlanLibelle(C.plan,noms),planCourt:areneSallePlanLibelle(C.plan,noms,true),room:C.room,carte:C.carte,org:C.org,num:C.num,
     regl:R,pause:pause,mode:C.mode,decT:C.decT,dec:C.decision,voix:areneVoixA(S,t),salleDit:C.salleDit,
     coins:(pause||C.mode==='dec')?[]:areneCoinsA(S,t),titre:titre,fade:fade,
     combattez:(e.r===1&&C.d>2.2&&C.d<3.3)?Math.min(eas((C.d-2.2)/0.15),1-eas((C.d-3.0)/0.3)):0,
