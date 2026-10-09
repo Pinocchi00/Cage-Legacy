@@ -14,7 +14,7 @@ function neuve(n){
 test('3.1 — Le libellé « Combat principal » du lendemain désigne le dernier combat de la carte principale, « Co-main » l’avant-dernier', () => {
   const win=neuve();
   win.eval(`CL.go('mgmt_lendemain')`);
-  const items=win.eval(`[...document.querySelectorAll('.mgmt-ld-item')].map(x=>({slot:(x.querySelector('.mgmt-ld-slot')||{}).textContent||'',titre:x.querySelector('.mgmt-ld-title').textContent}))`);
+  const items=win.eval(`[...document.querySelectorAll('.mgmt-ld-results .mgmt-ld-item')].map(x=>({slot:(x.querySelector('.mgmt-ld-slot')||{}).textContent||'',titre:x.querySelector('.mgmt-ld-title').textContent}))`);
   const idx=win.eval(`(function(){ const m=G.mgmt, e=m.lastEvent; const mains=[]; e.fights.forEach((f,i)=>{ const t=mgmtSoireeTrace(m,i); if(t&&t.slot==='main') mains.push(i); }); return mains; })()`);
   assert.ok(idx.length>=2);
   assert.equal(items[idx[idx.length-1]].slot,'Combat principal','le dernier combat joué de la carte principale');

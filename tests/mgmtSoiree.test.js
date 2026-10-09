@@ -468,7 +468,7 @@ test('MGMT lot 4 T1 — aucun emplacement d’auteur visible sur les six écrans
     win.eval(`G.screen='${screen}';render()`);
     const html=win.document.getElementById('app').innerHTML;
     assert.ok(!/RÉPLIQUE MANQUANTE|EMPLACEMENT AUTEUR|mgmt-lvl/i.test(html), screen);
-    if(screen!=='mgmt_fiche'&&screen!=='mgmt_carte') assert.equal(win.document.querySelectorAll('.mgmt-nav').length,1,`navigation ${screen}`);
+    if(screen!=='mgmt_fiche'&&screen!=='mgmt_carte'&&screen!=='mgmt_lendemain') assert.equal(win.document.querySelectorAll('.mgmt-nav').length,1,`navigation ${screen}`);   /* brief démo, lot 6 T3 : le lendemain est un écran du cadre */
     assert.equal(win.document.querySelectorAll('.mgmt-nav button').length,
       screen==='mgmt_soiree'||screen==='mgmt_lendemain'||screen==='mgmt_fiche'||screen==='mgmt_carte'?0:5,`séquence imposée ${screen}`);
   }

@@ -279,7 +279,8 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
        dans le bouton de l'en-tête « Préparer Split N+1 », plus aucun
        bouton « Continuer » au bas de la colonne. Décision de la tranche,
        jamais un test « réparé ». */
-    win.document.querySelector('.mgmt-ld-next').click();
+    /* Brief démo, lot 6 T3 : l'action du soir suivant est la touche jaune de la barre du bas, plus le bouton de l'en-tête. */
+    win.eval(`CL.mgmtLendemainNext()`);
     assert.equal(win.eval(`G.screen`), 'mgmt_carte', 'le lendemain rend la main');
   }
   noErr(win, 'soirée/lendemain');
