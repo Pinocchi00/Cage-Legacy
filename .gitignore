@@ -76,3 +76,7 @@ tools/reports/lot-5-t1-ceintures/*
 !tools/reports/lot-5-t1-ceintures/VERIFICATION.md
 !tools/reports/LOT-6-GESTES-DE-FINITION.md
 !tools/reports/RECLAMES.md
+node_modules/
+pc/dist/
+pc/sortie/
+pc/node_modules/
