@@ -95,6 +95,9 @@ function mgmtReglagesAppliquer(g){
         else if(!MGMT_REGLAGES.affichage.plein&&plein&&document.exitFullscreen) document.exitFullscreen().catch(()=>{});
       }
       const t=MGMT_REGLAGES.affichage.taille;
+      /* Lot 3 T3 du brief démo : dans la version PC, plein écran et taille de fenêtre s'appliquent vraiment. */
+      const pc=typeof stockageMoteurPC==='function'&&stockageMoteurPC();
+      if(pc&&pc.fenetre) pc.fenetre({plein:MGMT_REGLAGES.affichage.plein,taille:t});
       if(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches&&window.resizeTo&&!MGMT_REGLAGES.affichage.plein) window.resizeTo(t,Math.round(t*9/16)+80);
     }catch(e){}
   }

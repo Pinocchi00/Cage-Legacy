@@ -348,7 +348,12 @@ const MF_MENU=[
 ];
 
 /** T2 du lot 10 : dans la démo, l'accueil ne propose que le management, les options et « Quitter » (aucune touche ni lien ne mène ailleurs). */
-function mfMenu(){ return (typeof CL_DEMO!=='undefined'&&CL_DEMO===true)?MF_MENU.filter(x=>x.id==='management'||x.id==='options'||x.id==='quitter'):MF_MENU; }
+function mfMenu(){
+  const l=(typeof CL_DEMO!=='undefined'&&CL_DEMO===true)?MF_MENU.filter(x=>x.id==='management'||x.id==='options'||x.id==='quitter'):MF_MENU;
+  /* Lot 3 T2 du brief démo : dans la version PC, « Quitter » est actif sur l'accueil. */
+  const pc=typeof stockageMoteurPC==='function'&&stockageMoteurPC();
+  return pc&&pc.quitter?l.map(x=>x.id==='quitter'?Object.assign({},x,{grise:false,action:'CL.mfQuitter()',fn:()=>CL.mfQuitter()}):x):l;
+}
 
 /** Les données de l'affiche : le combat principal de la prochaine soirée, lu sur la carte. */
 function mfAfficheDonnees(m){
@@ -439,6 +444,12 @@ Object.assign(CL,{
       if(!menu[i].grise) break;
     }
     MF_ACCUEIL.i=i; render();
+  },
+  /** Quitter la version PC : la partie est sauvegardée, puis la fenêtre se ferme. */
+  mfQuitter(){
+    const pc=typeof stockageMoteurPC==='function'&&stockageMoteurPC(); if(!pc||!pc.quitter) return;
+    if(G&&G.mgmt&&typeof saveMgmt==='function') saveMgmt();
+    pc.quitter();
   },
   mfMenuValider(){ const x=mfMenu()[MF_ACCUEIL.i]; if(x&&x.fn&&!x.grise) x.fn(); },
 });

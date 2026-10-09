@@ -41,7 +41,7 @@ function findGameFiles(rootDir) {
     .filter((e) => !e.name.startsWith('eslint.config'))
     .filter((e) => e.name !== 'extract_globals.js') // scripts d'outillage, pas du code du jeu
     .map((e) => e.name);
-  for (const dir of top.filter((e) => e.isDirectory() && !['node_modules', 'tests', 'tools', '.git'].includes(e.name))) {
+  for (const dir of top.filter((e) => e.isDirectory() && !['node_modules', 'tests', 'tools', 'pc', '.git'].includes(e.name))) {
     for (const f of fs.readdirSync(path.join(rootDir, dir.name))) {
       if (f.endsWith('.js')) files.push(path.join(dir.name, f));
     }
