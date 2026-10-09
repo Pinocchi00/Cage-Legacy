@@ -118,13 +118,13 @@ test('MGMT bloc lisible — chaque combat : combattants, catégorie, bilan', () 
   }
 });
 
-const LEILA_BULK_LINE="Voilà j'ai enfin préparé la carte préliminaire, il y a de quoi faire un beau spectacle enfin j'espère, hâte de voir la carte principale !";
-const LEILA_BULK_WARN="Patron, il y a un combat, je ne sais pas, je ne le sens pas du tout, ça m'a tracassé tout hier soir, je pense qu'il faudrait le changer, j'espère que ça ne te dérange pas.";
-const LEILA_SWAP_LINE="J'ai vu que vous m'avez échangé un combat, je comprends mais ses deux combattants doivent combattre aussi, j'espère que je pourrais les replacer vite..";
-const LEILA_CRUSH_LINE="Je sais que j'ai pas forcément mon mot à dire, mais j'aimerais bien que vous me prévenez en avance la fois d'après que je ne passe pas ma semaine à l'organiser";
-const LEILA_R_VALIDATE="Parfait, c'est du très bon travail Leïla, la carte à l'air incroyable on garde tout !";
-const LEILA_R_SWAP="Leïla la carte est vraiment bien, je l'apprécie mais je préfère ajouter ce combat à la place.";
-const LEILA_R_CRUSH="Leïla tu m'avais déjà habitué à un meilleur travail, cette carte n'est pas à la hauteur de mes attentes.";
+const LEILA_BULK_LINE="J'ai préparé les préliminaires. J'espère qu'ils vous plairont.";
+const LEILA_BULK_WARN="Patron, un combat me gêne. Je pense qu'il faut le changer.";
+const LEILA_SWAP_LINE="Vous avez changé un combat. Les deux combattants doivent quand même combattre. Je les replace vite.";
+const LEILA_CRUSH_LINE="Prévenez-moi la prochaine fois. Je ne veux pas perdre ma semaine.";
+const LEILA_R_VALIDATE="Très bien, Leïla. On garde tout.";
+const LEILA_R_SWAP="C'est bien, Leïla. Je change seulement ce combat.";
+const LEILA_R_CRUSH="Leïla, cette carte ne me plaît pas. Je la refais.";
 
 test('MGMT sept textes — auteur verbatim, aucun marqueur restant', () => {
   const win = newGameWindow();
@@ -444,12 +444,12 @@ test('MGMT avertissement affiché — avec les combats, sans désigner, puis sil
   /* Force un combat signalé : la remarque paraît une fois, sans nommer. */
   win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').fights[1].warned=true; render();`);
   let html = win.document.getElementById('app').innerHTML;
-  assert.ok(html.includes('je ne le sens pas du tout'), 'la remarque s\u2019affiche avec les combats');
-  assert.equal((html.match(/je ne le sens pas du tout/g)||[]).length, 1, 'une seule fois : le combat gênant reste à deviner');
+  assert.ok(html.includes('un combat me gêne'), 'la remarque s\u2019affiche avec les combats');
+  assert.equal((html.match(/un combat me gêne/g)||[]).length, 1, 'une seule fois : le combat gênant reste à deviner');
   /* Aucun signalé : rien. */
   win.eval(`G.mgmt.pile.find(a=>a.id==='${id}').fights.forEach(f=>{f.warned=false;}); render();`);
   html = win.document.getElementById('app').innerHTML;
-  assert.ok(!html.includes('je ne le sens pas du tout'), 'sans signalement, pas de remarque');
+  assert.ok(!html.includes('un combat me gêne'), 'sans signalement, pas de remarque');
 });
 
 test('MGMT extinction bout-en-bout — trois écrasements puis silence définitif', () => {

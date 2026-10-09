@@ -325,6 +325,15 @@ function areneSalleCreer(cv){
     const tx=-Math.sin(o.a)*o.L, ty=Math.cos(o.a)*o.L, nx=Math.cos(o.a)*0.045, ny=Math.sin(o.a)*0.045;
     for(let g=0;g<2;g++){ const z=g?0.04:0; poly([P(o.x-tx-nx,o.y-ty-ny,z),P(o.x+tx-nx,o.y+ty-ny,z),P(o.x+tx+nx,o.y+ty+ny,z),P(o.x-tx+nx,o.y-ty+ny,z)],g?'#2A2626':'#080707',g?'rgba(233,230,225,0.55)':null,2); }
   }
+  /* Brief démo du 09/10/2026 : les noms des tables (JUGE, CHRONO…) se taisent là où un texte du direct est posé par-dessus (commentaire, paroles des coins, carton de round). */
+  function reserve(l,t,r,b){
+    const X=function(a,c,d,e){ return l<d&&r>a&&t<e&&b>c; }, cx=V.dernier;
+    if(!cx) return false;
+    const v=cx.voix; if(cx.regl.commentaire!==false&&v&&(v.salle?cx.salleDit:v.a)&&X(40,v.l===0?860:(v.l===1?830:(v.b?600:740)),v.l>=2?W-40:1360,H)) return true;
+    if(cx.regl.coins!==false&&cx.coins.length&&(X(40,120,700,300)||X(W-700,120,W-40,300))) return true;
+    if(cx.titre&&cx.titre.alpha>0&&X(620,150,1300,440)) return true;
+    return false;
+  }
   function sideline(st,cx){
     const arr=[], t=cx.t, real=cx.real;
     for(let i=0;i<SAL_SIDE.length;i++){ const o=SAL_SIDE[i], p=P(o.x,o.y,0); if(!off(p,120)) arr.push([p[2],o,p]); }
@@ -361,7 +370,7 @@ function areneSalleCreer(cv){
       for(let i=0;i<arr.length;i++){
         const o=arr[i][1], p=arr[i][2]; if(!o.label) continue;
         const ox=p[0]-pc[0], oy=p[1]-pc[1], ol=Math.sqrt(ox*ox+oy*oy)||1, far=0.1*cam.zoom*(0.4+0.6*cam.ky)+24+Math.abs(ox/ol)*(tw(o.label,20,FC,600)/2+(o.L||0)*cam.zoom*0.4), lx=p[0]+ox/ol*far, ly=p[1]+oy/ol*far+7;
-        if(ly<140||ly>H-92||lx<60||lx>W-60) continue;
+        if(ly<140||ly>H-92||lx<60||lx>W-60||reserve(lx-110,ly-26,lx+110,ly+8)) continue;
         txt(o.label,lx,ly,20,'rgba(233,230,225,0.7)',FC,'center',600);
       }
     }
@@ -441,19 +450,20 @@ function areneSalleCreer(cv){
     else order=dy<0?[up,dx>=0?rt:lf,dx>=0?lf:rt,down]:[down,dx>=0?rt:lf,dx>=0?lf:rt,up];
     let pick=null;
     for(let i=0;i<order.length&&!pick;i++){
-      const c=order[i]; let ok=c[0]>40&&c[0]+w<W-40&&c[1]>120&&c[1]+h<H-90;
+      const c=order[i]; let ok=c[0]>40&&c[0]+w<W-40&&c[1]>120&&c[1]+h<H-90&&!reserve(c[0],c[1],c[0]+w,c[1]+h);
       for(let j=0;ok&&j<avoid.length;j++){ const a=avoid[j], nx=clamp(a[0],c[0],c[0]+w), ny=clamp(a[1],c[1],c[1]+h), ex=(a[0]-nx)/a[2], ey=(a[1]-ny)/(a[2]*cam.ky); if(ex*ex+ey*ey<1) ok=false; }
       if(ok) pick=c;
     }
-    pick=pick||order[0];
+    if(!pick){ if(avoid.length>3) return; pick=order.find(function(c){ return c[0]>40&&c[0]+w<W-40&&!reserve(c[0],c[1],c[0]+w,c[1]+h); }); if(!pick) return; }   /* plus de place : une étiquette de plus ne s'écrit pas sur une autre */
     plate(s,pick[0],pick[1]+h,px,bg,fg,'left'); avoid.push([pick[0]+w/2,pick[1]+h/2,w/2]);
   }
-  function drawLabels(st){
+  function drawLabels(st,deja){
     const Rp=0.112*cam.zoom;
+    /* Brief démo du 09/10/2026 (« enlever tous les textes qui se superposent ») : les places prises sont communes à toutes les étiquettes de l'image — deux coups proches ne s'écrivent plus l'un sur l'autre. */
+    const pA=P(st.A.x+st.A.dx,st.A.y+st.A.dy,0), pB=P(st.B.x+st.B.dx,st.B.y+st.B.dy,0), pR=P(st.R.x,st.R.y,0), avoid=[[pA[0],pA[1],Rp*1.05],[pB[0],pB[1],Rp*1.05],[pR[0],pR[1],0.09*cam.zoom]].concat(deja||[]);
     for(let i=0;i<st.fx.length;i++){
       const f=st.fx[i], e=f.e, dt=f.dt; if(dt>1.15||!e.k) continue;
       const A=st[e.by], B=st[e.by==='A'?'B':'A'], pa=P(A.x+A.dx,A.y+A.dy,0), pb=P(B.x+B.dx,B.y+B.dy,0), al=dt<0.9?1:1-(dt-0.9)/0.25;
-      const pr=P(st.R.x,st.R.y,0), avoid=[[pa[0],pa[1],Rp*1.05],[pb[0],pb[1],Rp*1.05],[pr[0],pr[1],0.09*cam.zoom]];
       ctx.globalAlpha=clamp(al,0,1);
       tag(e.k,e.big?56:36,e.by==='A'?C.cr:C.rdf,e.by==='A'?C.ink:C.cr,pa,pb,Rp,salEase(dt/0.2)*10,avoid);
       if((e.r===0||e.r===2)&&dt>0.1) tag(e.r===0?MGMT_GESTES.esquive:MGMT_GESTES.bloque,30,C.panel,C.cr,pb,pa,Rp,0,avoid);
@@ -480,8 +490,10 @@ function areneSalleCreer(cv){
     let s1=K.plate, w1=Math.round(tw(s1,22,FC,600)+40);
     if(56+w1>x0-16){ s1=s1.split(' · ')[0]; w1=Math.round(tw(s1,22,FC,600)+40); }
     panel(56,38,w1,48,C.panel,10,3); txt(s1,76,70,22,C.cr,FC,'left',600);
-    const s2=cx.planLibelle, w2=Math.round(tw(s2,22,FC,600)+66);
-    panel(W-56-w2,38,w2,48,C.panel,10,3); ctx.fillStyle=C.red; ctx.beginPath(); ctx.arc(W-56-w2+27,62,7,0,TAU); ctx.fill(); txt(s2,W-56-w2+44,70,22,C.cr,FC,'left',600);
+    let s2=cx.planLibelle, w2=Math.round(tw(s2,22,FC,600)+66);
+    if(W-56-w2<x0+tot+16&&cx.planCourt){ s2=cx.planCourt; w2=Math.round(tw(s2,22,FC,600)+66); }   /* un grand nom : le libellé court, jamais sur le tableau */
+    if(W-56-w2<x0+tot+16) w2=0;
+    if(w2){ panel(W-56-w2,38,w2,48,C.panel,10,3); ctx.fillStyle=C.red; ctx.beginPath(); ctx.arc(W-56-w2+27,62,7,0,TAU); ctx.fill(); txt(s2,W-56-w2+44,70,22,C.cr,FC,'left',600); }
   }
   /* le commentaire : en bas à gauche, toujours droit. Les coins : en haut, chacun de son côté, sous les plaques. */
   function voices(cx){
@@ -508,7 +520,7 @@ function areneSalleCreer(cv){
         const s=x.c, d=x.d, isA=s.w==='A';
         const al=d<1.6?salEase(d/0.14):1-(d-1.6)/0.3, sl=(1-salEase(d/0.2))*36;
         ctx.globalAlpha=clamp(al,0,1);
-        insert(isA?56-sl:W-56+sl,228,!isA,'LE COIN DE '+(isA?K.a:K.b),isA?C.cr:C.rdf,isA?C.ink:C.cr,s.a,44,FX,800,C.panel,C.cr,620);
+        insert(isA?56-sl:W-56+sl,228,!isA,'LE COIN DE '+(isA?K.a:K.b),isA?C.cr:C.rdf,isA?C.ink:C.cr,s.a,44,FX,800,C.panel,C.cr,580);
         ctx.globalAlpha=1;
       }
     }
@@ -618,7 +630,7 @@ function areneSalleCreer(cv){
   }
 
   /* ---- une image ---- */
-  V.dessiner=function(cx){
+  V.dessiner=function(cx){ V.dernier=cx;
     const dtReel=V.reelPrec===undefined?0.016:clamp(cx.real-V.reelPrec,0,0.1); V.reelPrec=cx.real;
     ctx.setTransform(V.k,0,0,V.k,0,0); ctx.globalAlpha=1; ctx.setLineDash([]);
     const st=pions(cx);
@@ -650,10 +662,10 @@ function areneSalleCreer(cv){
     for(let i=0;i<3;i++){ const c=list[i]; coin(c[1],c[2],c[3],c[4],c[5],c[6],c[7],c[8],c[9]); }
     cage(st,true,cx);
     if(st.ground&&gp&&cx.regl.noms!==false) plate(MGMT_GESTES.sol,gp[0],gp[1]+gr*cam.ky+62,30,C.panel,C.cr,'center');
-    if(cx.regl.noms!==false) drawLabels(st);
+    if(cx.regl.noms!==false) drawLabels(st,(st.ground&&gp)?[[gp[0],gp[1]+gr*cam.ky+51,tw(MGMT_GESTES.sol,30)/2+34]]:[]);
     if(cx.combattez){ const rp=P(st.R.x,st.R.y,0); ctx.globalAlpha=clamp(cx.combattez,0,1); plate('« COMBATTEZ ! »',rp[0],rp[1]-0.082*cam.zoom*cam.ky-18,44,C.panel,C.cr,'center'); ctx.globalAlpha=1; }
     if(cx.juges>0){
-      for(let i=0;i<SAL_SIDE.length;i++){ const o=SAL_SIDE[i]; if(o.judge===undefined) continue; const jp=P(o.x,o.y,0), a2=salEase(cx.juges-o.judge*1.6); if(a2>0&&jp[1]<H-130&&jp[1]>200){ ctx.globalAlpha=a2; plate('10 – ?',jp[0],jp[1]-24,34,C.cr,C.ink,'center'); ctx.globalAlpha=1; } }
+      for(let i=0;i<SAL_SIDE.length;i++){ const o=SAL_SIDE[i]; if(o.judge===undefined) continue; const jp=P(o.x,o.y,0), a2=salEase(cx.juges-o.judge*1.6); if(a2>0&&jp[1]<H-130&&jp[1]>200&&cx.mode!=='dec'&&!reserve(jp[0]-80,jp[1]-70,jp[0]+80,jp[1]-14)){ ctx.globalAlpha=a2; plate('10 – ?',jp[0],jp[1]-24,34,C.cr,C.ink,'center'); ctx.globalAlpha=1; } }
     }
     ctx.restore();
     if(cx.mode==='dec'){ hud(cx); decision(cx); }

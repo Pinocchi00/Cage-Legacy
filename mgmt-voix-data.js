@@ -15,7 +15,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Franchement je suis dans la meilleure forme de ma vie, on a fait un gros camp avec l'équipe, {adv} c'est un bon combattant mais samedi vous allez voir la meilleure version de moi.",
+    "texte": "Je suis dans la meilleure forme de ma vie. {adv} est un bon combattant, mais samedi vous verrez la meilleure version de moi.",
     "relu": false
    },
    {
@@ -27,13 +27,13 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Merci à Dieu, merci à mon équipe, merci à {org}, j'avais dit que j'étais [prêt|prête] et voilà, maintenant je veux un classé.",
+    "texte": "Merci à Dieu, à mon équipe et à {org}. J'avais dit que j'étais [prêt|prête]. Maintenant, je veux un classé.",
     "relu": false
    },
    {
     "situation": "defaite",
     "etiquette": "Défaite",
-    "texte": "C'était pas mon soir, bravo à {adv}, je vais revenir plus [fort|forte], c'est tout ce que je peux dire.",
+    "texte": "C'était pas mon soir. Bravo à {adv}. Je vais revenir plus [fort|forte].",
     "relu": false
    },
    {
@@ -111,19 +111,19 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Bon {adv} mon ami, j'ai appelé ton déménageur, samedi on vide ta place au classement, round deux, gauche au foie, tu rentres en taxi, c'est moi qui paye.",
+    "texte": "{adv}, mon ami, samedi je prends ta place au classement. Round deux, gauche au foie. Tu rentres en taxi, c'est moi qui paye.",
     "relu": false
    },
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Météo de samedi pour {adv} : couvert en début de soirée, averses au deuxième round, fin de soirée allongée.",
+    "texte": "Météo de samedi pour {adv} : couvert au début, averses au deuxième round, fin de soirée allongée.",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire, prédiction juste",
-    "texte": "Je vous l'avais dit ou pas ?? Round {round}, j'avais même donné l'heure, les gens ils paient pour ça, et moi je livre.",
+    "texte": "Je vous l'avais dit ! Round {round}. Les gens paient pour ça, et moi je livre.",
     "relu": false
    },
    {
@@ -147,7 +147,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Je respecte {adv}, le résultat c'est Dieu qui décide, moi je fais ma part, je m'entraîne, je dors, je mange, c'est tout.",
+    "texte": "Je respecte {adv}. Le résultat, c'est Dieu qui le décide. Moi, je fais ma part : je m'entraîne, je dors, je mange.",
     "relu": false
    },
    {
@@ -183,7 +183,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Je pense pas à {adv}, je pense à l'instant où la porte se ferme, là il y a plus de passé, plus de classement, juste deux [hommes|femmes] qui ont peur et qui avancent quand même.",
+    "texte": "Je ne pense pas à {adv}. Je pense au moment où la porte se ferme. Il n'y a plus de classement, juste deux [hommes|femmes] qui ont peur. Et qui avancent quand même.",
     "relu": false
    },
    {
@@ -219,37 +219,37 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Écoute {adv} c'est un mec bien je pense, il paye ses impôts tout ça, mais il boxe comme mon oncle bourré au mariage, et moi j'ai le genou en vrac depuis un mois, je m'en bats les couilles, je vais le finir quand même.",
+    "texte": "{adv} a l'air d'un mec bien, mais il boxe comme mon oncle au mariage. J'ai mal au genou depuis un mois, mais je vais le finir quand même.",
     "relu": false
    },
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Le matchmaker de {org} m'a mis contre {adv}, soit il m'aime pas soit il a jamais regardé un combat de sa putain de vie, les deux c'est possible.",
+    "texte": "Le matchmaker de {org} m'a mis contre {adv}. Soit il ne m'aime pas, soit il n'a jamais vu un combat. Peut-être les deux.",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Voilà ! Je vous avais dit que c'était une connerie de parier contre moi, respect au mec, il m'a mis une droite j'ai vu ma grand-mère, putain j'ai faim.",
+    "texte": "Je vous avais dit qu'il ne fallait pas parier contre moi ! Respect au mec, il m'a mis une droite, j'ai vu ma grand-mère. Et j'ai faim.",
     "relu": false
    },
    {
     "situation": "defaite",
     "etiquette": "Défaite",
-    "texte": "Il m'a défoncé, y a rien à dire, j'étais une merde ce soir, je vais boire un coup et on en reparle lundi.",
+    "texte": "Il était meilleur que moi, rien à dire. J'étais nul ce soir. Je vais boire un coup, on en reparle lundi.",
     "relu": false
    },
    {
     "situation": "inactivite",
     "etiquette": "Inactivité",
-    "texte": "Ça fait {mois} mois que {org} me paye à rien foutre, remarque je me plains pas, mais je préfère taper des gens.",
+    "texte": "Ça fait {mois} mois que {org} me paye sans que je combatte. Je ne me plains pas, mais je préfère taper des gens.",
     "relu": false
    },
    {
     "situation": "proposition",
     "etiquette": "Proposition, lutteur",
-    "texte": "Lui ? Il va me frotter contre le grillage quinze minutes, non merci, je suis pas venu me faire peloter.",
+    "texte": "Lui ? Il va me coller au grillage quinze minutes. Non merci, je ne suis pas venu pour ça.",
     "relu": false
    }
   ]
@@ -273,7 +273,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "(par son interprète) Il remercie son équipe et son pays. Il a dit aussi quelque chose sur {adv}, je préfère pas traduire.",
+    "texte": "(par son interprète) Il remercie son équipe et son pays. Il a dit aussi quelque chose sur {adv}. Je ne le traduis pas.",
     "relu": false
    },
    {
@@ -303,7 +303,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "{adv} est {rang_adv} [mondial|mondiale], je suis {rang}, si je gagne je rentre dans le top 10 et cet été je veux le titre, c'est simple.",
+    "texte": "{adv} est {rang_adv} [mondial|mondiale], je suis {rang}. Si je gagne, j'entre dans le top 10. Cet été, je veux le titre. C'est simple.",
     "relu": false
    },
    {
@@ -321,7 +321,7 @@ const MGMT_VOIX=[
    {
     "situation": "inactivite",
     "etiquette": "Inactivité",
-    "texte": "Chaque mois sans combat c'est un mois perdu, je l'ai calculé, à ce rythme {org} me coûte une ceinture.",
+    "texte": "Chaque mois sans combat est un mois perdu. Je l'ai calculé : à ce rythme, {org} me coûte une ceinture.",
     "relu": false
    },
    {
@@ -339,13 +339,13 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Avant je travaillais la nuit sur les chantiers, je dormais quatre heures, alors {adv} avec tout le respect, quinze minutes dans une cage ça me fait pas peur.",
+    "texte": "Avant, je travaillais la nuit sur des chantiers et je dormais quatre heures. {adv}, avec respect, quinze minutes dans une cage ne me font pas peur.",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Cette bourse elle va chez ma mère. Elle a jamais regardé un de mes combats, mais la bourse elle va la regarder ahah.",
+    "texte": "Cette bourse va chez ma mère. Elle n'a jamais regardé un de mes combats, mais cette bourse, elle va la regarder.",
     "relu": false
    },
    {
@@ -375,13 +375,13 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Franchement je suis trop content, {adv} je le respecte énormément, ça va être un beau combat pour les gens, venez nombreux ahah.",
+    "texte": "Je suis très content. Je respecte beaucoup {adv}. Ça va être un beau combat, venez nombreux !",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Merci à {adv}, il m'a posé des problèmes franchement, au deuxième round j'ai senti sa droite, je lui dis bravo.",
+    "texte": "Merci à {adv}. Il m'a posé des problèmes. Au deuxième round, j'ai senti sa droite. Bravo à lui.",
     "relu": false
    },
    {
@@ -489,7 +489,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "J'ai hâte de discuter avec {adv}, on s'est jamais vraiment parlé, samedi on aura quinze minutes rien que tous les deux.",
+    "texte": "J'ai hâte de discuter avec {adv}. On ne s'est jamais vraiment parlé. Samedi, on aura quinze minutes rien que tous les deux.",
     "relu": false
    },
    {
@@ -531,13 +531,13 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Mesdames et messieurs, je vais être très clair, {adv} n'est pas un combattant, c'est un figurant, on l'a engagé pour se tenir debout à côté de moi sur l'affiche, et samedi il va même rater ça.",
+    "texte": "Mesdames et messieurs, soyons clairs : {adv} n'est pas un combattant, c'est un figurant. Il est là pour se tenir à côté de moi sur l'affiche. Et samedi, il va même rater ça.",
     "relu": false
    },
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Chère ville de samedi, j'ai vu vos restaurants, j'ai vu vos femmes et vos hommes, et je vous le dis avec amour : vous méritez mieux que {adv}.",
+    "texte": "Chère ville de samedi, vous méritez mieux que {adv}. Je vous le dis avec amour.",
     "relu": false
    },
    {
@@ -549,7 +549,7 @@ const MGMT_VOIX=[
    {
     "situation": "defaite",
     "etiquette": "Défaite",
-    "texte": "Ce soir j'ai combattu {adv}, l'arbitre, les juges, et une intoxication alimentaire que je ne détaillerai pas. Trois contre un.",
+    "texte": "Ce soir, j'ai combattu {adv}, l'arbitre, les juges, et une intoxication alimentaire. Trois contre un.",
     "relu": false
    },
    {
@@ -567,19 +567,19 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "{adv} il a une coupe de cheveux de prof de géo, je vais lui faire une faveur, je vais lui arranger ça avec les coudes.",
+    "texte": "{adv} a une coupe de cheveux de prof de géo. Je vais lui arranger ça, avec les coudes.",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Merci merci, vous êtes des malades, je vous aime tous, même toi là-bas qui m'as insulté à la pesée ahah.",
+    "texte": "Merci, vous êtes des malades, je vous aime tous. Même toi là-bas, qui m'as insulté à la pesée !",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire, la rupture",
-    "texte": "Attendez. Il y a deux semaines on a enterré un pote. Il parlait à personne. Les gars, si ça va pas dans votre tête, parlez, à n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule que d'aller à votre enterrement.",
+    "texte": "Attendez. Il y a deux semaines, on a enterré un ami. Il ne parlait à personne. Les gars, si ça ne va pas, parlez. À n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule.",
     "relu": false
    },
    {
@@ -597,13 +597,13 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "(en langue des signes) Tout le monde me demande si le bruit du public me manque. Non. Moi j'entends pas {adv} parler. C'est un avantage.",
+    "texte": "(en langue des signes) On me demande si le bruit du public me manque. Non. Moi, je n'entends pas {adv} parler. C'est un avantage.",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "(en langue des signes) Il y a des millions de sourds dans le monde. Ce soir ils ont tous gagné avec moi.",
+    "texte": "(en langue des signes) Il y a des millions de sourds dans le monde. Ce soir, ils ont tous gagné avec moi.",
     "relu": false
    },
    {
@@ -669,25 +669,25 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Les gens me demandent si c'est dur de reprendre après ma fille. J'ai accouché. Pendant trente heures. {adv} me fait pas peur.",
+    "texte": "On me demande si c'est dur de reprendre après ma fille. J'ai accouché pendant trente heures. {adv} ne me fait pas peur.",
     "relu": false
    },
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Qui c'est qui est [fatigué|fatiguée] ? Pas moi. Enfin si. Mais pas moi.",
+    "texte": "Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Moi, [fatigué|fatiguée] ? Non. Enfin si. Mais pas moi.",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Ma fille est dans la salle. Elle a trois ans. Elle se souviendra pas de ce soir, mais un jour je lui montrerai la vidéo.",
+    "texte": "Ma fille est dans la salle. Elle a trois ans. Elle ne se souviendra pas de ce soir, mais un jour je lui montrerai la vidéo.",
     "relu": false
    },
    {
     "situation": "defaite",
     "etiquette": "Défaite",
-    "texte": "Ce qui me fait mal c'est pas le coup, c'est que mon fils était devant la télé.",
+    "texte": "Ce qui me fait mal, ce n'est pas le coup. C'est que mon fils regardait.",
     "relu": false
    },
    {
@@ -717,7 +717,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Mission remplie. Je remercie les gars qui étaient avec moi dans le camp, c'est eux qui ont fait le boulot.",
+    "texte": "Mission remplie. Je remercie les gars du camp. C'est eux qui ont fait le travail.",
     "relu": false
    },
    {
@@ -747,7 +747,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Les petits du quartier qui regardent, je sais que vous regardez, la rue elle vous rendra rien, moi j'ai failli y rester.",
+    "texte": "Les petits du quartier, je sais que vous regardez. La rue ne vous donnera rien. Moi, j'ai failli y rester.",
     "relu": false
    },
    {
@@ -759,13 +759,13 @@ const MGMT_VOIX=[
    {
     "situation": "inactivite",
     "etiquette": "Inactivité",
-    "texte": "Quand je combats pas, je tourne en rond, et quand je tourne en rond je connais la suite. Donnez-moi un combat.",
+    "texte": "Quand je ne combats pas, je tourne en rond. Et quand je tourne en rond, je connais la suite. Donnez-moi un combat.",
     "relu": false
    },
    {
     "situation": "forfait",
     "etiquette": "Forfait",
-    "texte": "Blessure. Pas de connerie, je suis resté chez moi. Je le précise parce que je sais ce que les gens vont penser.",
+    "texte": "Blessure. Je suis resté chez moi, je le précise. Je sais ce que les gens vont penser.",
     "relu": false
    }
   ]
@@ -777,19 +777,19 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Wesh {adv}, t'as vu mes combats ou pas ? Nan parce que si t'as vu, t'aurais refusé frérot. Samedi tu vas manger, sah.",
+    "texte": "Wesh {adv}, tu as vu mes combats ? Si tu les avais vus, tu aurais refusé. Samedi, tu vas manger.",
     "relu": false
    },
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Toute la team au premier rang samedi, ramenez le bruit, on va faire trembler la salle de ouf.",
+    "texte": "Toute la team au premier rang samedi ! Ramenez le bruit, on va faire trembler la salle.",
     "relu": false
    },
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "C'est pour la ville ça ! Pour les grands, pour les petits, pour ma mère qui m'a dit arrête la boxe t'es bête, regarde maman !",
+    "texte": "C'est pour la ville ! Pour les grands, pour les petits, pour ma mère qui me disait d'arrêter la boxe. Regarde maman !",
     "relu": false
    },
    {
@@ -801,7 +801,7 @@ const MGMT_VOIX=[
    {
     "situation": "proposition-refusee",
     "etiquette": "Proposition refusée",
-    "texte": "Lui ? Frère il a zéro abonné, personne le connaît, même sa mère elle regarde pas ses combats, trouve-moi un vrai nom.",
+    "texte": "Lui ? Il n'a aucun abonné, personne ne le connaît, même sa mère ne regarde pas ses combats. Trouve-moi un vrai nom.",
     "relu": false
    }
   ]
@@ -813,7 +813,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "{adv} c'est un danseur. Je vais le mettre au sol, m'asseoir dessus, et le noyer pendant quinze minutes. C'est pas beau, c'est efficace.",
+    "texte": "{adv} est un danseur. Je vais le mettre au sol, m'asseoir dessus, et le noyer pendant quinze minutes. Ce n'est pas beau, mais c'est efficace.",
     "relu": false
    },
    {
@@ -849,7 +849,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Frère, {adv} c'est un bon garçon, je lui souhaite rien de mal. Mais mon père sera au premier rang. Je peux pas perdre devant mon père.",
+    "texte": "Frère, {adv} est un bon garçon, je ne lui veux aucun mal. Mais mon père sera au premier rang. Je ne peux pas perdre devant mon père.",
     "relu": false
    },
    {
@@ -885,7 +885,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Samedi c'est pas moi qui entre dans la cage. C'est tout le {pays}. J'ai reçu des messages de gens que je connais même pas.",
+    "texte": "Samedi, ce n'est pas moi qui entre dans la cage. C'est tout le {pays}. J'ai reçu des messages de gens que je ne connais pas.",
     "relu": false
    },
    {
@@ -945,7 +945,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "{adv} a un problème très simple : il baisse la main droite quand il lance le crochet gauche. Samedi on fera une interrogation surprise.",
+    "texte": "{adv} a un problème simple. Il baisse la main droite quand il lance son crochet gauche. Samedi, interrogation surprise.",
     "relu": false
    },
    {
@@ -975,7 +975,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "{adv} c'est le boss du niveau 3. Moi je suis au niveau 9. Il faut que quelqu'un lui explique qu'il a raté des mises à jour.",
+    "texte": "{adv} est le boss du niveau 3. Moi, je suis au niveau 9. Quelqu'un doit lui dire qu'il a raté des mises à jour.",
     "relu": false
    },
    {
@@ -987,7 +987,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Combo complet, pas une barre de vie restante, j'ai même pas utilisé mon ultime. Il m'a filé des points d'expérience, merci à lui.",
+    "texte": "Combo complet, sa barre de vie à zéro, je n'ai même pas utilisé mon ultime. Merci pour les points d'expérience.",
     "relu": false
    },
    {
@@ -1047,7 +1047,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Il y a un enfant quelque part qui regarde ça et qui pense qu'il peut pas. Samedi c'est pour lui. {adv} est un grand combattant, mais moi j'ai une mission.",
+    "texte": "Quelque part, un enfant regarde ça et pense qu'il ne peut pas. Samedi, c'est pour lui. {adv} est un grand combattant, mais moi, j'ai une mission.",
     "relu": false
    },
    {
@@ -1059,7 +1059,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Je veux parler aux gamins à la maison : on vous dira que c'est impossible. C'est faux. On se voit au sommet.",
+    "texte": "Je parle aux gamins de chez moi : on vous dira que c'est impossible. C'est faux. On se voit au sommet.",
     "relu": false
    },
    {
@@ -1077,7 +1077,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Quand j'ai commencé on se battait dans des parkings, le vainqueur repartait avec l'enveloppe et le perdant avec les dents dans la poche. {adv} il est né l'année où j'ai eu mon premier nez cassé.",
+    "texte": "Quand j'ai commencé, on se battait dans des parkings. Le vainqueur prenait l'enveloppe, le perdant repartait sans dents. {adv} est né l'année de mon premier nez cassé.",
     "relu": false
    },
    {
@@ -1107,7 +1107,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Je combats pour une bourse qui paye à peine mon camp. Mais c'est pas grave, {org} a besoin de sous pour ses néons.",
+    "texte": "Je me bats pour une bourse qui paye à peine mon camp. Ce n'est pas grave : {org} a besoin d'argent pour ses néons.",
     "relu": false
    },
    {
@@ -1173,7 +1173,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "{adv} a demandé ce combat pour avoir des vues, et franchement je comprends, moi aussi j'aurais voulu être moi. Code FIGHT10 sur la boisson énergisante, lien en bio.",
+    "texte": "{adv} a demandé ce combat pour avoir des vues. Je comprends, moi aussi j'aimerais être moi. Code FIGHT10 sur la boisson énergisante, lien en bio.",
     "relu": false
    },
    {
@@ -1185,7 +1185,7 @@ const MGMT_VOIX=[
    {
     "situation": "victoire",
     "etiquette": "Victoire",
-    "texte": "Allez vous abonner à {adv}, il en a besoin, là il a plus de dents que d'abonnés.",
+    "texte": "Allez vous abonner à {adv}. Il en a besoin : il a plus de dents que d'abonnés.",
     "relu": false
    },
    {
@@ -1269,13 +1269,13 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Dans mon village il y avait zéro fille dans les salles. Aujourd'hui il y en a onze. Samedi c'est pour les onze.",
+    "texte": "Dans mon village, il n'y avait aucune fille dans les salles. Aujourd'hui, il y en a onze. Samedi, c'est pour les onze.",
     "relu": false
    },
    {
     "situation": "reseaux",
     "etiquette": "Réseaux",
-    "texte": "Encore un gars qui me dit que je devrais faire du yoga. Mon gars, viens au sparring demain, on fera du yoga ensemble.",
+    "texte": "Encore un gars qui me dit de faire du yoga. Viens au sparring demain, on fera du yoga ensemble.",
     "relu": false
    },
    {
@@ -1299,7 +1299,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "J'ai échangé deux gardes avec un collègue pour le camp, je lui dois un week-end et un kebab.",
+    "texte": "J'ai échangé deux gardes avec un collègue pour le camp. Je lui dois un week-end et un kebab.",
     "relu": false
    },
    {
@@ -1383,7 +1383,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Il y a cinq ans j'étais comptable et je pesais 110 kilos. Je suis pas en retard, je suis en avance sur celui que j'étais.",
+    "texte": "Il y a cinq ans, j'étais comptable et je pesais 110 kilos. Je ne suis pas en retard : je suis en avance sur celui que j'étais.",
     "relu": false
    },
    {
@@ -1431,7 +1431,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "{adv}, t'as le cardio d'un poème qui s'arrête à la deuxième strophe, moi je finis mes textes et je finis mes combats.",
+    "texte": "{adv}, ton cardio est comme un poème qui s'arrête à la deuxième strophe. Moi, je finis mes textes et mes combats.",
     "relu": false
    },
    {
@@ -1461,7 +1461,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Je vais être honnête. Je dors mal depuis le dernier. Mais je veux savoir si je suis encore moi. Samedi je saurai.",
+    "texte": "Je vais être honnête : je dors mal depuis mon dernier combat. Mais je veux savoir si je suis encore moi. Samedi, je saurai.",
     "relu": false
    },
    {
@@ -1485,7 +1485,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "J'ai quatre petits frères. Deux à l'école, un à l'apprentissage, un qui veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.",
+    "texte": "J'ai quatre petits frères. Deux vont à l'école, un est apprenti, un veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.",
     "relu": false
    },
    {
@@ -1509,7 +1509,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "J'ai pleuré en signant le contrat. Je vais sûrement pleurer à la pesée. Et samedi je vais le frapper très fort. Les deux sont vrais.",
+    "texte": "J'ai pleuré en signant le contrat. Je pleurerai sans doute à la pesée. Et samedi, je le frapperai très fort. Les deux sont vrais.",
     "relu": false
    },
    {
@@ -1563,7 +1563,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Le camp s'est super bien passé. Enfin les deux dernières semaines. Les deux premières, on va dire que c'était un camp de base.",
+    "texte": "Le camp s'est très bien passé. Enfin, les deux dernières semaines. Les deux premières, c'était plutôt un camp de base.",
     "relu": false
    },
    {
@@ -1593,7 +1593,7 @@ const MGMT_VOIX=[
    {
     "situation": "annonce",
     "etiquette": "Annonce",
-    "texte": "Il y a six ans je montais pas un escalier sans m'arrêter. Samedi je monte dans une cage. Je sais lequel des deux était le plus dur.",
+    "texte": "Il y a six ans, je ne montais pas un escalier sans m'arrêter. Samedi, je monte dans une cage. Je sais lequel était le plus dur.",
     "relu": false
    },
    {

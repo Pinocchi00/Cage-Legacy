@@ -158,17 +158,13 @@ camp », « je veux un classé ».
 **Quand ça va mal.** « Je reviendrai plus fort. »
 **Jamais.** Rien de surprenant.
 
-> **Annonce** — Franchement je suis dans la meilleure forme de ma vie, on a fait
-> un gros camp avec l'équipe, {adv} c'est un bon combattant mais samedi vous
-> allez voir la meilleure version de moi.
+> **Annonce** — Je suis dans la meilleure forme de ma vie. {adv} est un bon combattant, mais samedi vous verrez la meilleure version de moi.
 
 > **Réseaux** — Camp terminé. Plus que quelques jours. Merci à toute l'équipe.
 
-> **Victoire** — Merci à Dieu, merci à mon équipe, merci à Split, j'avais dit que
-> j'étais [prêt|prête] et voilà, maintenant je veux un classé.
+> **Victoire** — Merci à Dieu, à mon équipe et à Split. J'avais dit que j'étais [prêt|prête]. Maintenant, je veux un classé.
 
-> **Défaite** — C'était pas mon soir, bravo à {adv}, je vais revenir plus
-> [fort|forte], c'est tout ce que je peux dire.
+> **Défaite** — C'était pas mon soir. Bravo à {adv}. Je vais revenir plus [fort|forte].
 
 > **Inactivité** — Ça fait {mois} mois que j'attends, je suis [prêt|prête],
 > n'importe qui, n'importe quand.
@@ -215,15 +211,11 @@ si elle tombe juste. « Mon ami » avant de démolir.
 **Quand ça va mal.** Trois semaines de silence, puis une blague sur lui-même.
 **Jamais.** Qu'il a eu peur.
 
-> **Annonce** — Bon {adv} mon ami, j'ai appelé ton déménageur, samedi on vide ta
-> place au classement, round deux, gauche au foie, tu rentres en taxi, c'est moi
-> qui paye.
+> **Annonce** — {adv}, mon ami, samedi je prends ta place au classement. Round deux, gauche au foie. Tu rentres en taxi, c'est moi qui paye.
 
-> **Réseaux** — Météo de samedi pour {adv} : couvert en début de soirée, averses
-> au deuxième round, fin de soirée allongée.
+> **Réseaux** — Météo de samedi pour {adv} : couvert au début, averses au deuxième round, fin de soirée allongée.
 
-> **Victoire, prédiction juste** — Je vous l'avais dit ou pas ?? Round {round},
-> j'avais même donné l'heure, les gens ils paient pour ça, et moi je livre.
+> **Victoire, prédiction juste** — Je vous l'avais dit ! Round {round}. Les gens paient pour ça, et moi je livre.
 
 > **Victoire, prédiction fausse** — J'avais dit round deux, j'ai été gentil, il a
 > eu droit à du rab.
@@ -246,8 +238,7 @@ famille.
 **Quand ça va mal.** Accepte, remercie. **Ne réclame jamais.**
 **Jamais.** Qu'il a gagné seul.
 
-> **Annonce** — Je respecte {adv}, le résultat c'est Dieu qui décide, moi je fais
-> ma part, je m'entraîne, je dors, je mange, c'est tout.
+> **Annonce** — Je respecte {adv}. Le résultat, c'est Dieu qui le décide. Moi, je fais ma part : je m'entraîne, je dors, je mange.
 
 > **Victoire** — Dieu merci. Merci à mes parents, à mon coach, à {adv} aussi qui
 > est venu se battre. C'était écrit.
@@ -269,9 +260,7 @@ question.** « Présence », « l'instant », « honneur ».
 **Quand ça va mal.** La défaite racontée de l'intérieur.
 **Jamais.** Un chiffre.
 
-> **Annonce** — Je pense pas à {adv}, je pense à l'instant où la porte se ferme,
-> là il y a plus de passé, plus de classement, juste deux [hommes|femmes] qui
-> ont peur et qui avancent quand même.
+> **Annonce** — Je ne pense pas à {adv}. Je pense au moment où la porte se ferme. Il n'y a plus de classement, juste deux [hommes|femmes] qui ont peur. Et qui avancent quand même.
 
 > **Réseaux** — Levé avant le soleil. Le bois est froid. Encore six jours.
 
@@ -292,26 +281,17 @@ provocation**, et **il s'en prend au matchmaker en public**.
 **Quand ça va mal.** « Il m'a défoncé, point. »
 **Jamais.** Une phrase préparée.
 
-> **Annonce** — Écoute {adv} c'est un mec bien je pense, il paye ses impôts tout
-> ça, mais il boxe comme mon oncle bourré au mariage, et moi j'ai le genou en
-> vrac depuis un mois, je m'en bats les couilles, je vais le finir quand même.
+> **Annonce** — {adv} a l'air d'un mec bien, mais il boxe comme mon oncle au mariage. J'ai mal au genou depuis un mois, mais je vais le finir quand même.
 
-> **Réseaux** — Le matchmaker de Split m'a mis contre {adv}, soit il m'aime pas
-> soit il a jamais regardé un combat de sa putain de vie, les deux c'est
-> possible.
+> **Réseaux** — Le matchmaker de Split m'a mis contre {adv}. Soit il ne m'aime pas, soit il n'a jamais vu un combat. Peut-être les deux.
 
-> **Victoire** — Voilà ! Je vous avais dit que c'était une connerie de parier
-> contre moi, respect au mec, il m'a mis une droite j'ai vu ma grand-mère,
-> putain j'ai faim.
+> **Victoire** — Je vous avais dit qu'il ne fallait pas parier contre moi ! Respect au mec, il m'a mis une droite, j'ai vu ma grand-mère. Et j'ai faim.
 
-> **Défaite** — Il m'a défoncé, y a rien à dire, j'étais une merde ce soir, je
-> vais boire un coup et on en reparle lundi.
+> **Défaite** — Il était meilleur que moi, rien à dire. J'étais nul ce soir. Je vais boire un coup, on en reparle lundi.
 
-> **Inactivité** — Ça fait {mois} mois que Split me paye à rien foutre, remarque
-> je me plains pas, mais je préfère taper des gens.
+> **Inactivité** — Ça fait {mois} mois que Split me paye sans que je combatte. Je ne me plains pas, mais je préfère taper des gens.
 
-> **Proposition, lutteur** — Lui ? Il va me frotter contre le grillage quinze
-> minutes, non merci, je suis pas venu me faire peloter.
+> **Proposition, lutteur** — Lui ? Il va me coller au grillage quinze minutes. Non merci, je ne suis pas venu pour ça.
 
 ---
 
@@ -330,8 +310,7 @@ non traduites** : « Publication en coréen », une photo décrite.
 > **Réseaux** — Publication en russe, sans traduction. Une photo : une balance,
 > 70,3 kg.
 
-> **Victoire** — *(par son interprète)* Il remercie son équipe et son pays. Il a
-> dit aussi quelque chose sur {adv}, je préfère pas traduire.
+> **Victoire** — *(par son interprète)* Il remercie son équipe et son pays. Il a dit aussi quelque chose sur {adv}. Je ne le traduis pas.
 
 > **Défaite** — *(par son interprète)* Il ne veut pas parler.
 
@@ -351,15 +330,13 @@ l'adversaire. Froid, pas méchant.
 **Il refuse ce qui ne fait pas monter.**
 **Jamais.** Qu'il combat pour le plaisir.
 
-> **Annonce** — {adv} est {rang_adv} [mondial|mondiale], je suis {rang}, si je
-> gagne je rentre dans le top 10 et cet été je veux le titre, c'est simple.
+> **Annonce** — {adv} est {rang_adv} [mondial|mondiale], je suis {rang}. Si je gagne, j'entre dans le top 10. Cet été, je veux le titre. C'est simple.
 
 > **Réseaux** — Étape sept sur dix.
 
 > **Défaite** — Ça repousse tout de six mois. Je reprends le plan.
 
-> **Inactivité** — Chaque mois sans combat c'est un mois perdu, je l'ai calculé,
-> à ce rythme Split me coûte une ceinture.
+> **Inactivité** — Chaque mois sans combat est un mois perdu. Je l'ai calculé : à ce rythme, Split me coûte une ceinture.
 
 > **Proposition refusée** — Il est derrière moi au classement, ça m'apporte rien.
 > Trouve-moi un classé.
@@ -373,12 +350,9 @@ l'adversaire. Froid, pas méchant.
 **Il accepte toujours le court préavis.**
 **Jamais.** Qu'il a peur de l'adversaire.
 
-> **Annonce** — Avant je travaillais la nuit sur les chantiers, je dormais quatre
-> heures, alors {adv} avec tout le respect, quinze minutes dans une cage ça me
-> fait pas peur.
+> **Annonce** — Avant, je travaillais la nuit sur des chantiers et je dormais quatre heures. {adv}, avec respect, quinze minutes dans une cage ne me font pas peur.
 
-> **Victoire** — Cette bourse elle va chez ma mère. Elle a jamais regardé un de
-> mes combats, mais la bourse elle va la regarder ahah.
+> **Victoire** — Cette bourse va chez ma mère. Elle n'a jamais regardé un de mes combats, mais cette bourse, elle va la regarder.
 
 > **Défaite** — J'ai connu pire. Beaucoup pire. Demain je suis à la salle.
 
@@ -397,11 +371,9 @@ l'adversaire précisément.**
 **Quand ça va mal.** « C'est le jeu », puis une analyse technique honnête.
 **Jamais.** Une insulte.
 
-> **Annonce** — Franchement je suis trop content, {adv} je le respecte énormément,
-> ça va être un beau combat pour les gens, venez nombreux ahah.
+> **Annonce** — Je suis très content. Je respecte beaucoup {adv}. Ça va être un beau combat, venez nombreux !
 
-> **Victoire** — Merci à {adv}, il m'a posé des problèmes franchement, au deuxième
-> round j'ai senti sa droite, je lui dis bravo.
+> **Victoire** — Merci à {adv}. Il m'a posé des problèmes. Au deuxième round, j'ai senti sa droite. Bravo à lui.
 
 > **Défaite** — C'est le jeu, il m'a eu sur les entrées, j'ai des choses à
 > travailler. Merci à vous en tout cas.
@@ -475,8 +447,7 @@ l'arène, attribuées : « Swat à Damagaev : … ». C'est la seule voix qu'on
 entend en plein combat.
 **Jamais.** Le silence.
 
-> **Annonce** — J'ai hâte de discuter avec {adv}, on s'est jamais vraiment
-> parlé, samedi on aura quinze minutes rien que tous les deux.
+> **Annonce** — J'ai hâte de discuter avec {adv}. On ne s'est jamais vraiment parlé. Samedi, on aura quinze minutes rien que tous les deux.
 
 > **Pendant le combat** — T'as pas faim ? Moi j'ai faim.
 
@@ -504,19 +475,14 @@ propos d'une affiche où il n'est pas.
 tout le monde la répète.
 **Jamais.** Une seule phrase sincère en public.
 
-> **Annonce** — Mesdames et messieurs, je vais être très clair, {adv} n'est pas
-> un combattant, c'est un figurant, on l'a engagé pour se tenir debout à côté de
-> moi sur l'affiche, et samedi il va même rater ça.
+> **Annonce** — Mesdames et messieurs, soyons clairs : {adv} n'est pas un combattant, c'est un figurant. Il est là pour se tenir à côté de moi sur l'affiche. Et samedi, il va même rater ça.
 
-> **Réseaux** — Chère ville de samedi, j'ai vu vos restaurants, j'ai vu vos
-> femmes et vos hommes, et je vous le dis avec amour : vous méritez mieux que
-> {adv}.
+> **Réseaux** — Chère ville de samedi, vous méritez mieux que {adv}. Je vous le dis avec amour.
 
 > **Victoire** — Huez-moi. Allez-y. Plus fort. Vous paierez quand même la
 > prochaine fois.
 
-> **Défaite** — Ce soir j'ai combattu {adv}, l'arbitre, les juges, et une
-> intoxication alimentaire que je ne détaillerai pas. Trois contre un.
+> **Défaite** — Ce soir, j'ai combattu {adv}, l'arbitre, les juges, et une intoxication alimentaire. Trois contre un.
 
 > **Sur l'affiche d'un autre** — Si ces deux-là se battent, moi je paie ma
 > place. Et je paie jamais.
@@ -534,16 +500,11 @@ rupture : phrases simples, directes, sur la tête, la dépression, un ami perdu.
 fait le permet (deuil dans l'entourage, §7).
 **Jamais.** Se moquer de quelqu'un qui va mal.
 
-> **Annonce** — {adv} il a une coupe de cheveux de prof de géo, je vais lui
-> faire une faveur, je vais lui arranger ça avec les coudes.
+> **Annonce** — {adv} a une coupe de cheveux de prof de géo. Je vais lui arranger ça, avec les coudes.
 
-> **Victoire** — Merci merci, vous êtes des malades, je vous aime tous, même toi
-> là-bas qui m'as insulté à la pesée ahah.
+> **Victoire** — Merci, vous êtes des malades, je vous aime tous. Même toi là-bas, qui m'as insulté à la pesée !
 
-> **Victoire, la rupture** — Attendez. Il y a deux semaines on a enterré un pote.
-> Il parlait à personne. Les gars, si ça va pas dans votre tête, parlez, à
-> n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon
-> épaule que d'aller à votre enterrement.
+> **Victoire, la rupture** — Attendez. Il y a deux semaines, on a enterré un ami. Il ne parlait à personne. Les gars, si ça ne va pas, parlez. À n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule.
 
 > **Défaite** — Je suis dégoûté, mais je vais bien, vraiment. On se voit au pub.
 
@@ -560,11 +521,9 @@ annoncent le coup, la peur dans les yeux.
 **Ce qu'il porte.** Il sait qu'une communauté entière le regarde, et il le dit.
 **Jamais.** Se plaindre de sa surdité.
 
-> **Annonce** — *(en langue des signes)* Tout le monde me demande si le bruit du
-> public me manque. Non. Moi j'entends pas {adv} parler. C'est un avantage.
+> **Annonce** — *(en langue des signes)* On me demande si le bruit du public me manque. Non. Moi, je n'entends pas {adv} parler. C'est un avantage.
 
-> **Victoire** — *(en langue des signes)* Il y a des millions de sourds dans le
-> monde. Ce soir ils ont tous gagné avec moi.
+> **Victoire** — *(en langue des signes)* Il y a des millions de sourds dans le monde. Ce soir, ils ont tous gagné avec moi.
 
 > **Victoire, sur la technique** — *(en langue des signes)* Ses épaules parlent
 > avant ses poings. Je lis les épaules.
@@ -612,17 +571,13 @@ dans chaque phrase. Elle ne tolère pas qu'on la plaigne.
 **Quand ça va mal.** Elle pense à ce que ses enfants ont vu.
 **Jamais.** Qu'elle aurait dû arrêter.
 
-> **Annonce** — Les gens me demandent si c'est dur de reprendre après ma fille.
-> J'ai accouché. Pendant trente heures. {adv} me fait pas peur.
+> **Annonce** — On me demande si c'est dur de reprendre après ma fille. J'ai accouché pendant trente heures. {adv} ne me fait pas peur.
 
-> **Réseaux** — Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Qui c'est qui
-> est [fatigué|fatiguée] ? Pas moi. Enfin si. Mais pas moi.
+> **Réseaux** — Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Moi, [fatigué|fatiguée] ? Non. Enfin si. Mais pas moi.
 
-> **Victoire** — Ma fille est dans la salle. Elle a trois ans. Elle se souviendra
-> pas de ce soir, mais un jour je lui montrerai la vidéo.
+> **Victoire** — Ma fille est dans la salle. Elle a trois ans. Elle ne se souviendra pas de ce soir, mais un jour je lui montrerai la vidéo.
 
-> **Défaite** — Ce qui me fait mal c'est pas le coup, c'est que mon fils était
-> devant la télé.
+> **Défaite** — Ce qui me fait mal, ce n'est pas le coup. C'est que mon fils regardait.
 
 > **Proposition refusée** — Pas ce mois-là. C'est l'anniversaire du petit. Le
 > mois d'après, qui tu veux.
@@ -644,8 +599,7 @@ peur et avancent.
 
 > **Réseaux** — Dernière séance. Le groupe est prêt.
 
-> **Victoire** — Mission remplie. Je remercie les gars qui étaient avec moi dans
-> le camp, c'est eux qui ont fait le boulot.
+> **Victoire** — Mission remplie. Je remercie les gars du camp. C'est eux qui ont fait le travail.
 
 > **Défaite** — J'ai pris une mauvaise décision au deuxième round. C'est moi qui
 > l'ai prise. On corrige.
@@ -667,16 +621,13 @@ de la taule », « j'ai vendu ». Il parle aux jeunes.
 > **Annonce** — À vingt ans j'étais en cellule avec un mec qui voulait me planter
 > pour une clope. {adv} franchement, c'est des vacances.
 
-> **Victoire** — Les petits du quartier qui regardent, je sais que vous
-> regardez, la rue elle vous rendra rien, moi j'ai failli y rester.
+> **Victoire** — Les petits du quartier, je sais que vous regardez. La rue ne vous donnera rien. Moi, j'ai failli y rester.
 
 > **Défaite** — J'ai perdu un combat. Avant je perdais des années. Ça va.
 
-> **Inactivité** — Quand je combats pas, je tourne en rond, et quand je tourne en
-> rond je connais la suite. Donnez-moi un combat.
+> **Inactivité** — Quand je ne combats pas, je tourne en rond. Et quand je tourne en rond, je connais la suite. Donnez-moi un combat.
 
-> **Forfait** — Blessure. Pas de connerie, je suis resté chez moi. Je le précise
-> parce que je sais ce que les gens vont penser.
+> **Forfait** — Blessure. Je suis resté chez moi, je le précise. Je sais ce que les gens vont penser.
 
 ---
 
@@ -690,20 +641,16 @@ rafale. Salue sa ville et ses potes par leur prénom.
 **Quand ça va mal.** Il accuse le coup, puis il rigole avec ses potes.
 **Jamais.** Oublier de citer son quartier.
 
-> **Annonce** — Wesh {adv}, t'as vu mes combats ou pas ? Nan parce que si t'as vu,
-> t'aurais refusé frérot. Samedi tu vas manger, sah.
+> **Annonce** — Wesh {adv}, tu as vu mes combats ? Si tu les avais vus, tu aurais refusé. Samedi, tu vas manger.
 
-> **Réseaux** — Toute la team au premier rang samedi, ramenez le bruit, on va
-> faire trembler la salle de ouf.
+> **Réseaux** — Toute la team au premier rang samedi ! Ramenez le bruit, on va faire trembler la salle.
 
-> **Victoire** — C'est pour la ville ça ! Pour les grands, pour les petits, pour
-> ma mère qui m'a dit arrête la boxe t'es bête, regarde maman !
+> **Victoire** — C'est pour la ville ! Pour les grands, pour les petits, pour ma mère qui me disait d'arrêter la boxe. Regarde maman !
 
 > **Défaite** — Il m'a allumé, je peux rien dire, il m'a allumé. Bon, on rentre,
 > kebab.
 
-> **Proposition refusée** — Lui ? Frère il a zéro abonné, personne le connaît,
-> même sa mère elle regarde pas ses combats, trouve-moi un vrai nom.
+> **Proposition refusée** — Lui ? Il n'a aucun abonné, personne ne le connaît, même sa mère ne regarde pas ses combats. Trouve-moi un vrai nom.
 
 ---
 
@@ -717,8 +664,7 @@ aucun humour sur la lutte.
 **Quand ça va mal.** Il accuse son cardio, jamais l'adversaire.
 **Jamais.** Qu'un combat debout l'intéresse.
 
-> **Annonce** — {adv} c'est un danseur. Je vais le mettre au sol, m'asseoir
-> dessus, et le noyer pendant quinze minutes. C'est pas beau, c'est efficace.
+> **Annonce** — {adv} est un danseur. Je vais le mettre au sol, m'asseoir dessus, et le noyer pendant quinze minutes. Ce n'est pas beau, mais c'est efficace.
 
 > **Réseaux** — Six heures de lutte aujourd'hui. Demain sept.
 
@@ -742,8 +688,7 @@ comme une autorité. Humilité apparente, menace sous-entendue.
 défaite.
 **Jamais.** Contredire son père en public.
 
-> **Annonce** — Frère, {adv} c'est un bon garçon, je lui souhaite rien de mal.
-> Mais mon père sera au premier rang. Je peux pas perdre devant mon père.
+> **Annonce** — Frère, {adv} est un bon garçon, je ne lui veux aucun mal. Mais mon père sera au premier rang. Je ne peux pas perdre devant mon père.
 
 > **Victoire** — Je dédie au village. Mon père m'a regardé, il a hoché la tête.
 > Pour moi c'est plus qu'une ceinture.
@@ -770,8 +715,7 @@ aux gens de chez lui en premier.
 remonter sur la semaine.
 **Jamais.** Parler de lui sans parler de son pays.
 
-> **Annonce** — Samedi c'est pas moi qui entre dans la cage. C'est tout le
-> {pays}. J'ai reçu des messages de gens que je connais même pas.
+> **Annonce** — Samedi, ce n'est pas moi qui entre dans la cage. C'est tout le {pays}. J'ai reçu des messages de gens que je ne connais pas.
 
 > **Victoire** — *(il pleure)* C'est pour vous, là-bas. Pour les gamins qui
 > s'entraînent sur du béton. Un jour ce sera vous ici.
@@ -815,8 +759,7 @@ utilise les vrais mots techniques, fait des blagues de salle des profs.
 **Quand ça va mal.** « Leçon apprise. »
 **Jamais.** Faire une faute d'accord dans ses publications.
 
-> **Annonce** — {adv} a un problème très simple : il baisse la main droite quand
-> il lance le crochet gauche. Samedi on fera une interrogation surprise.
+> **Annonce** — {adv} a un problème simple. Il baisse la main droite quand il lance son crochet gauche. Samedi, interrogation surprise.
 
 > **Réseaux** — Rappel : le coude est une articulation, pas une option.
 
@@ -837,13 +780,11 @@ spéciales.
 **Quand ça va mal.** « Game over. Je relance une partie. »
 **Jamais.** Admettre qu'une série est surcotée.
 
-> **Annonce** — {adv} c'est le boss du niveau 3. Moi je suis au niveau 9. Il faut
-> que quelqu'un lui explique qu'il a raté des mises à jour.
+> **Annonce** — {adv} est le boss du niveau 3. Moi, je suis au niveau 9. Quelqu'un doit lui dire qu'il a raté des mises à jour.
 
 > **Réseaux** — Nouvelle attaque spéciale débloquée. Samedi on la teste en ligne.
 
-> **Victoire** — Combo complet, pas une barre de vie restante, j'ai même pas
-> utilisé mon ultime. Il m'a filé des points d'expérience, merci à lui.
+> **Victoire** — Combo complet, sa barre de vie à zéro, je n'ai même pas utilisé mon ultime. Merci pour les points d'expérience.
 
 > **Défaite** — Game over. J'ai pas sauvegardé. Je relance une partie.
 
@@ -889,14 +830,11 @@ fois.** La presse finit par s'en moquer.
 **Quand ça va mal.** Une leçon, toujours.
 **Jamais.** Un doute exprimé en public.
 
-> **Annonce** — Il y a un enfant quelque part qui regarde ça et qui pense qu'il
-> peut pas. Samedi c'est pour lui. {adv} est un grand combattant, mais moi j'ai
-> une mission.
+> **Annonce** — Quelque part, un enfant regarde ça et pense qu'il ne peut pas. Samedi, c'est pour lui. {adv} est un grand combattant, mais moi, j'ai une mission.
 
 > **Réseaux** — 4 h 50. Tout le monde dort. Pas moi. On se voit au sommet.
 
-> **Victoire** — Je veux parler aux gamins à la maison : on vous dira que c'est
-> impossible. C'est faux. On se voit au sommet.
+> **Victoire** — Je parle aux gamins de chez moi : on vous dira que c'est impossible. C'est faux. On se voit au sommet.
 
 > **Défaite** — Aujourd'hui je suis tombé. Demain je me relève. C'est ça la
 > leçon. On se voit au sommet.
@@ -916,9 +854,7 @@ tomber. »
 **Jamais.** Dire que c'était mieux avant sans ajouter que c'était aussi plus
 con.
 
-> **Annonce** — Quand j'ai commencé on se battait dans des parkings, le vainqueur
-> repartait avec l'enveloppe et le perdant avec les dents dans la poche. {adv}
-> il est né l'année où j'ai eu mon premier nez cassé.
+> **Annonce** — Quand j'ai commencé, on se battait dans des parkings. Le vainqueur prenait l'enveloppe, le perdant repartait sans dents. {adv} est né l'année de mon premier nez cassé.
 
 > **Victoire** — Le petit il frappe fort, hein. Mais à mon âge on sait où sont
 > les portes.
@@ -940,8 +876,7 @@ l'organisation. Sarcasme sec.
 **Quand ça va mal.** Tout le monde est coupable sauf lui.
 **Jamais.** Remercier Split.
 
-> **Annonce** — Je combats pour une bourse qui paye à peine mon camp. Mais c'est
-> pas grave, Split a besoin de sous pour ses néons.
+> **Annonce** — Je me bats pour une bourse qui paye à peine mon camp. Ce n'est pas grave : Split a besoin d'argent pour ses néons.
 
 > **Réseaux** — Soirée de Split : 4 000 places vendues. Ma bourse : pareil que
 > l'an dernier. Cherchez l'erreur.
@@ -989,15 +924,12 @@ calculés pour faire des vues.
 **Quand ça va mal.** La défaite devient une vidéo : « je vous dis tout ».
 **Jamais.** Un combat qui ne se filme pas bien.
 
-> **Annonce** — {adv} a demandé ce combat pour avoir des vues, et franchement je
-> comprends, moi aussi j'aurais voulu être moi. Code FIGHT10 sur la boisson
-> énergisante, lien en bio.
+> **Annonce** — {adv} a demandé ce combat pour avoir des vues. Je comprends, moi aussi j'aimerais être moi. Code FIGHT10 sur la boisson énergisante, lien en bio.
 
 > **Réseaux** — VLOG DE PESÉE EN LIGNE. Je vous montre tout. Même ce qu'il faut
 > pas.
 
-> **Victoire** — Allez vous abonner à {adv}, il en a besoin, là il a plus de
-> dents que d'abonnés.
+> **Victoire** — Allez vous abonner à {adv}. Il en a besoin : il a plus de dents que d'abonnés.
 
 > **Défaite** — Vidéo demain. Je vous dis TOUT. Ce qui s'est vraiment passé.
 > *(Rien ne s'est passé.)*
@@ -1066,11 +998,9 @@ Elle a entendu « c'est pas un sport de fille » mille fois et elle en rit.
 messages qu'elle reçoit. Refuse d'être un symbole quand ça l'arrange pas.
 **Jamais.** Se justifier d'être là.
 
-> **Annonce** — Dans mon village il y avait zéro fille dans les salles. Aujourd'hui
-> il y en a onze. Samedi c'est pour les onze.
+> **Annonce** — Dans mon village, il n'y avait aucune fille dans les salles. Aujourd'hui, il y en a onze. Samedi, c'est pour les onze.
 
-> **Réseaux** — Encore un gars qui me dit que je devrais faire du yoga. Mon
-> gars, viens au sparring demain, on fera du yoga ensemble.
+> **Réseaux** — Encore un gars qui me dit de faire du yoga. Viens au sparring demain, on fera du yoga ensemble.
 
 > **Victoire** — Les petites qui regardent : on vous dira que c'est pas pour
 > vous. C'est pour vous.
@@ -1089,8 +1019,7 @@ qui viennent le voir. Le combat est presque un loisir sérieux.
 jour où la bourse suffit, **il doit choisir** — et c'est un moment de vie.
 **Jamais.** Mépriser son métier.
 
-> **Annonce** — J'ai échangé deux gardes avec un collègue pour le camp, je lui
-> dois un week-end et un kebab.
+> **Annonce** — J'ai échangé deux gardes avec un collègue pour le camp. Je lui dois un week-end et un kebab.
 
 > **Victoire** — Lundi 7 h je suis au boulot. Les collègues vont me chambrer
 > toute la journée, et j'ai hâte.
@@ -1151,8 +1080,7 @@ sauvé.
 et du temps qu'il n'a plus.
 **Jamais.** Se plaindre de son âge. Il sait qu'il est en retard.
 
-> **Annonce** — Il y a cinq ans j'étais comptable et je pesais 110 kilos. Je
-> suis pas en retard, je suis en avance sur celui que j'étais.
+> **Annonce** — Il y a cinq ans, j'étais comptable et je pesais 110 kilos. Je ne suis pas en retard : je suis en avance sur celui que j'étais.
 
 > **Victoire** — Le type que j'étais à trente ans ne me croirait pas. Salut à
 > lui.
@@ -1191,8 +1119,7 @@ combats, il sort des morceaux, il parle en rimes quand il est inspiré.
 commente sa vie comme un couplet.
 **Jamais.** Laisser un micro sans avoir placé une rime.
 
-> **Annonce** — {adv}, t'as le cardio d'un poème qui s'arrête à la deuxième
-> strophe, moi je finis mes textes et je finis mes combats.
+> **Annonce** — {adv}, ton cardio est comme un poème qui s'arrête à la deuxième strophe. Moi, je finis mes textes et mes combats.
 
 > **Réseaux** — Nouveau son vendredi. Nouveau KO samedi. Même label : moi.
 
@@ -1213,8 +1140,7 @@ images, du sommeil. **C'est lui que Clara regarde.**
 subi » ou « blesse gravement un adversaire » (catalogue §6).
 **Jamais.** Dire que tout va bien d'une voix convaincante.
 
-> **Annonce** — Je vais être honnête. Je dors mal depuis le dernier. Mais je
-> veux savoir si je suis encore moi. Samedi je saurai.
+> **Annonce** — Je vais être honnête : je dors mal depuis mon dernier combat. Mais je veux savoir si je suis encore moi. Samedi, je saurai.
 
 > **Victoire** — J'ai gagné. Je sais pas encore si je suis content. Laissez-moi
 > un peu.
@@ -1232,8 +1158,7 @@ dépendent de ses bourses.
 du loyer de sa mère. Ne se plaint jamais de porter.
 **Jamais.** Garder une bourse pour lui seul.
 
-> **Annonce** — J'ai quatre petits frères. Deux à l'école, un à l'apprentissage,
-> un qui veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.
+> **Annonce** — J'ai quatre petits frères. Deux vont à l'école, un est apprenti, un veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.
 
 > **Victoire** — L'inscription au permis de ma petite sœur est payée. Ça, c'est
 > une ceinture.
@@ -1254,8 +1179,7 @@ t'aime ». Remercie tout le monde, longtemps.
 son état permanent.
 **Jamais.** Cacher une larme.
 
-> **Annonce** — J'ai pleuré en signant le contrat. Je vais sûrement pleurer à la
-> pesée. Et samedi je vais le frapper très fort. Les deux sont vrais.
+> **Annonce** — J'ai pleuré en signant le contrat. Je pleurerai sans doute à la pesée. Et samedi, je le frapperai très fort. Les deux sont vrais.
 
 > **Victoire** — *(il pleure)* Pardon. Pardon. Merci. J'ai eu tellement peur
 > toute la semaine.
@@ -1295,8 +1219,7 @@ moments de vie « bagarre de bar », « vacances qui dérapent ». **Le joueur
 l'aime et le redoute.**
 **Jamais.** Refuser une fête après un combat, gagné ou perdu.
 
-> **Annonce** — Le camp s'est super bien passé. Enfin les deux dernières
-> semaines. Les deux premières, on va dire que c'était un camp de base.
+> **Annonce** — Le camp s'est très bien passé. Enfin, les deux dernières semaines. Les deux premières, c'était plutôt un camp de base.
 
 > **Pesée ratée** — J'avais oublié que c'était aujourd'hui. Je suis pas fier.
 > Enfin un peu quand même, il était bon ce burger.
@@ -1317,8 +1240,7 @@ arrêté de boire ou de fumer, reconstruit un corps. Le combat est la preuve.
 avant-après. De la honte, puis de la fierté.
 **Jamais.** Se moquer de quelqu'un pour son physique. Il sait ce que ça fait.
 
-> **Annonce** — Il y a six ans je montais pas un escalier sans m'arrêter. Samedi
-> je monte dans une cage. Je sais lequel des deux était le plus dur.
+> **Annonce** — Il y a six ans, je ne montais pas un escalier sans m'arrêter. Samedi, je monte dans une cage. Je sais lequel était le plus dur.
 
 > **Réseaux** — Photo de moi à 128 kilos, à côté de la pesée d'hier. Je la garde
 > dans mon téléphone. Elle me regarde.
