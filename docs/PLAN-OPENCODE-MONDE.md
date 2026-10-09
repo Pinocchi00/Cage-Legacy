@@ -104,6 +104,22 @@ lot 1, avant la T3.
 Le lot 2 écrit les fiches des huit organisations dès l'étape 1 : c'est du texte, et les huit
 existent déjà dans le jeu. Seule leur simulation complète attend le lot 9.
 
+## Les planches
+
+Publiées le 09/10/2026 dans le canevas Design
+(https://claude.ai/artifact/RgWpgQLBnj1jgcKnpEhjrs), page « Monde — à valider » :
+
+| Planche | Lot |
+| --- | --- |
+| `MondeNouvellePartie` | Lot 2 T5 |
+| `MondePresentationCombattant`, `MondePresentationCombat` | Lot 3 T4 |
+| `MondeDossiersCombattant`, `MondeDossiersAdversaire` | Lot 4 T3 |
+| `MondeAccueilArrivee`, `MondeAccueil` | Lot 7 T3 |
+
+Une planche n'est « validée » que lorsqu'Anthony l'a dit ; la fiche de la tranche d'écran cite
+alors la planche et ses valeurs. Toutes ajoutent « ACCUEIL » en tête de la barre des sections :
+douze entrées, de 69 px de haut au lieu de 75, pour tenir dans 1080 px.
+
 ## Les points d'arrêt
 
 | Quand | Qui | Quoi |
