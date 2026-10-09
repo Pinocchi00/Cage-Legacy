@@ -174,6 +174,34 @@ camp », « je veux un classé ».
 > **Forfait** — [Blessé|Blessée] à l'entraînement, je suis [dégoûté|dégoûtée],
 > je reviens vite.
 
+> **Annonce** — Le camp s'est bien passé. Je suis [prêt|prête]. {adv} aussi, mais je suis plus [prêt|prête].
+
+> **Annonce** — Je remercie mon équipe pour ce camp. Samedi, on montre ce qu'on a travaillé.
+
+> **Annonce** — Je suis très concentré. {adv} est dangereux, je le sais. Je serai prêt.
+
+> **Réseaux** — Dernière séance avant samedi. Merci à mes partenaires d'entraînement.
+
+> **Réseaux** — Pesée faite, poids bon. Maintenant on se repose.
+
+> **Victoire** — Merci à tout le monde. Une grosse pensée pour ma famille. On continue.
+
+> **Victoire** — {adv} est costaud, mais on avait un plan. Ça a marché. Merci au coach.
+
+> **Défaite** — Je n'ai rien à dire de plus. Bravo à {adv}. On retourne travailler.
+
+> **Défaite** — Ça arrive. Je ne vais pas chercher d'excuse. Je reviens plus [fort|forte].
+
+> **Inactivité** — Ça fait {mois} mois sans combat. Je m'entraîne tous les jours, appelez-moi.
+
+> **Inactivité** — {mois} mois que j'attends. Je suis en forme, il me faut juste une date.
+
+> **Proposition** — Oui, ça me va. Envoyez-moi le contrat.
+
+> **Proposition** — Pourquoi pas. Je veux juste savoir la date.
+
+> **Forfait** — Je me suis [blessé|blessée] au camp. Je suis déçu, mais je serai de retour.
+
 ---
 
 ## 3.2 LE MÉTRONOME
@@ -199,6 +227,16 @@ Il ne recommence jamais.
 > **Forfait** — [Blessé|Blessée]. Je reviendrai.
 
 > **La fêlure** — Il parle beaucoup. Samedi il va fermer sa gueule.
+
+> **Annonce** — Entraînement fini. Combat samedi.
+
+> **Victoire** — Je rentre dormir.
+
+> **Défaite** — Perdu. On corrige.
+
+> **Proposition** — Quand ? Oui.
+
+> **Forfait** — Pas ce mois-ci. Le dos.
 
 ---
 
@@ -226,6 +264,16 @@ si elle tombe juste. « Mon ami » avant de démolir.
 > **Proposition, inconnu** — Tu veux que je fasse un spectacle devant qui, devant
 > ses cousins ?
 
+> **Annonce** — {adv}, prépare ton plus beau sourire. Samedi, tu le montres au plafond.
+
+> **Réseaux** — Il paraît que {adv} dort bien. Dites-lui de profiter de ses dernières nuits.
+
+> **Victoire** — Round {round}. Je l'avais dit. Maintenant je mange.
+
+> **Défaite** — Ce soir, le scénario a changé. Je reprends mon stylo.
+
+> **Proposition** — Mon nom en gros sur l'affiche, et c'est oui.
+
 ---
 
 ## 3.4 LE FATALISTE
@@ -250,6 +298,16 @@ famille.
 
 > **Forfait** — C'est une épreuve. Ça pouvait être pire.
 
+> **Annonce** — Ce qui doit arriver arrivera. Je serai dans la cage, c'est déjà beaucoup.
+
+> **Victoire** — Ça devait finir comme ça. Je n'y suis pour rien.
+
+> **Défaite** — Je savais. Ce n'est pas grave.
+
+> **Proposition** — Si c'est écrit, c'est oui.
+
+> **Forfait** — Une blessure. Elle devait arriver un jour.
+
 ---
 
 ## 3.5 LE CONTEMPLATIF
@@ -270,6 +328,16 @@ question.** « Présence », « l'instant », « honneur ».
 > combat. C'est ma faute.
 
 > **Inactivité** — L'hiver aussi, c'est une saison.
+
+> **Annonce** — La cage est petite. Le ciel est grand. Samedi, je regarde les deux.
+
+> **Victoire** — Je regarde mes mains. Elles ont gagné, moi je suis resté calme.
+
+> **Défaite** — Perdre apprend ce que gagner cache.
+
+> **Réseaux** — Une montagne, un matin. Encore trois jours.
+
+> **Proposition** — Je vais y réfléchir un moment. Oui.
 
 ---
 
@@ -292,6 +360,18 @@ provocation**, et **il s'en prend au matchmaker en public**.
 > **Inactivité** — Ça fait {mois} mois que Split me paye sans que je combatte. Je ne me plains pas, mais je préfère taper des gens.
 
 > **Proposition, lutteur** — Lui ? Il va me coller au grillage quinze minutes. Non merci, je ne suis pas venu pour ça.
+
+> **Annonce** — {adv} est nul. Dites-le-lui de ma part. Samedi, je lui montre aussi.
+
+> **Réseaux** — Quelqu'un m'a dit de me calmer. J'ai ri tellement fort que j'en ai cassé ma chaise.
+
+> **Victoire** — Dix minutes de travail, deux heures de bar. Mon plan est parfait.
+
+> **Défaite** — J'ai perdu. Ça m'emmerde. Je ne vais pas dire que c'est de sa faute.
+
+> **Proposition** — Lui ? Il a l'air gentil. Moi pas. Allez, oui.
+
+> **Forfait** — Une cheville. J'ai marché sur un truc. Ne me demandez pas quoi.
 
 ---
 
@@ -320,6 +400,16 @@ non traduites** : « Publication en coréen », une photo décrite.
 > **Proposition** — *(par son interprète)* Il a dit oui. Enfin, il a dit
 > « quand ».
 
+> **Annonce** — *(par son interprète)* Il dit qu'il a bien travaillé. Il dit que {adv} aussi.
+
+> **Victoire** — *(par son interprète)* Il dit merci. Il pense à sa famille.
+
+> **Défaite** — *(par son interprète)* Il dit qu'il reviendra. Il dit aussi qu'il a faim.
+
+> **Réseaux** — Publication sans texte. Une photo de ses mains bandées.
+
+> **Proposition** — *(par son interprète)* Il dit oui. Il veut d'abord savoir si c'est loin.
+
 ---
 
 ## 3.8 LE PLAN DE CARRIÈRE
@@ -341,6 +431,18 @@ l'adversaire. Froid, pas méchant.
 > **Proposition refusée** — Il est derrière moi au classement, ça m'apporte rien.
 > Trouve-moi un classé.
 
+> **Annonce** — {adv} est {rang_adv}. Je suis {rang}. Une victoire me rapproche du titre.
+
+> **Réseaux** — Étape huit sur dix. Tout est dans les temps.
+
+> **Victoire** — Un de plus dans le classement. Prochain objectif : le top 5.
+
+> **Défaite** — Ça retarde le plan. Je change une ligne du tableau, pas le tableau.
+
+> **Proposition** — Il est mieux classé que moi ? Alors oui.
+
+> **Inactivité** — {mois} mois sans combat. Mon plan prévoyait trois semaines. Appelez-moi.
+
 ---
 
 ## 3.9 LE RESCAPÉ
@@ -361,6 +463,16 @@ l'adversaire. Froid, pas méchant.
 
 > **Forfait** — Le pire c'est pas la blessure, c'est les mois sans paie.
 
+> **Annonce** — J'ai connu pire que {adv}. Beaucoup pire. Samedi, ça va aller.
+
+> **Victoire** — Ça me fait du bien. J'avais oublié ce que ça faisait de gagner.
+
+> **Défaite** — J'ai déjà perdu plus que ça. Demain, je retourne travailler.
+
+> **Proposition** — Oui. J'ai besoin de combattre. Je ne dis pas non.
+
+> **Inactivité** — {mois} mois sans combat. Je ne sais pas faire autre chose.
+
 ---
 
 ## 3.10 LE BON CLIENT
@@ -379,6 +491,16 @@ l'adversaire précisément.**
 > travailler. Merci à vous en tout cas.
 
 > **Inactivité** — Si Split a une place je suis là, sans pression hein ahah.
+
+> **Annonce** — Je suis ravi de combattre {adv}. Beau combat en vue, j'espère que vous viendrez.
+
+> **Victoire** — Merci à {adv}, un vrai guerrier. Merci à {org}. Je suis content, vraiment.
+
+> **Défaite** — Bravo à lui. Je corrige mes erreurs et je reviens.
+
+> **Proposition** — Avec plaisir. Dites-moi où signer.
+
+> **Inactivité** — Je ne me plains pas, mais si {org} a une date, je suis là.
 
 ---
 
@@ -405,6 +527,16 @@ bouton « Lui trouver un combat ».
 
 > **Proposition refusée** — Encore un combat pour rien. Vous me faites tourner en
 > rond.
+
+> **Annonce** — {adv} ? Encore un qui ne mérite pas d'être là. Mais je le prends.
+
+> **Victoire** — Maintenant, le classé. Je ne le répéterai pas.
+
+> **Défaite** — C'est une erreur. Je veux la revanche. Maintenant.
+
+> **Réseaux** — Jour 190 sans réponse. Les classés me bloquent ou me fuient.
+
+> **Proposition** — Ce n'est pas ce que je demandais. Mais d'accord, une dernière fois.
 
 ---
 
@@ -434,6 +566,16 @@ transpiration, chiottes, couilles. Il ne rit jamais de ses propres blagues.
 > **Forfait** — Je me suis pété le dos en me levant du canapé. C'est pas une
 > blague. Enfin si, mais c'est vrai.
 
+> **Annonce** — {adv} frappe fort, moi je mange fort. Qui tiendra le plus longtemps ?
+
+> **Victoire** — J'ai gagné et j'ai faim. Bonne soirée à tous, je vais au restaurant.
+
+> **Défaite** — J'ai perdu, mais j'ai eu un super sandwich avant. Ça compense.
+
+> **Réseaux** — Pesée : 200 grammes de trop. J'ai couru, j'ai pleuré, j'ai ri. Ça passe.
+
+> **Proposition** — Il y aura un traiteur ? Alors c'est oui.
+
 ---
 
 ## 3.13 LE BAVARD DE LA CAGE
@@ -459,6 +601,16 @@ entend en plein combat.
 > **Victoire** — Il m'a pas répondu de tout le combat, c'est malpoli franchement.
 
 > **Défaite** — Là il m'a fermé la bouche, je le reconnais, c'est rare.
+
+> **Annonce** — {adv}, tu es un bon gars. Je vais te dire plein de choses samedi. Tu vas aimer.
+
+> **Victoire** — Il n'a pas voulu discuter. Je lui ai raconté ma semaine, ça lui a suffi.
+
+> **Défaite** — Il m'a fait taire, une fois. Je ne lui en veux pas.
+
+> **Proposition** — On parle un peu ? Non ? Alors oui, c'est bon.
+
+> **Réseaux** — Je cherche quelqu'un pour discuter. Pas un combattant. Un humain.
 
 ---
 
@@ -487,6 +639,16 @@ tout le monde la répète.
 > **Sur l'affiche d'un autre** — Si ces deux-là se battent, moi je paie ma
 > place. Et je paie jamais.
 
+> **Annonce** — Mesdames et messieurs, {adv} est venu ici pour tomber. Je suis venu pour l'aider.
+
+> **Victoire** — Huez-moi. Ça ne change rien : je suis le meilleur, et vous l'avez vu.
+
+> **Défaite** — Un incident. Une erreur d'arbitrage. Une mouche. Je cherche encore.
+
+> **Réseaux** — Chère salle de samedi : mettez vos meilleurs vêtements. Je viens vous décevoir.
+
+> **Proposition** — Mon nom en gros et ma bourse en plus gros. Alors oui.
+
 ---
 
 ## 3.15 LE CŒUR OUVERT
@@ -507,6 +669,16 @@ fait le permet (deuil dans l'entourage, §7).
 > **Victoire, la rupture** — Attendez. Il y a deux semaines, on a enterré un ami. Il ne parlait à personne. Les gars, si ça ne va pas, parlez. À n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule.
 
 > **Défaite** — Je suis dégoûté, mais je vais bien, vraiment. On se voit au pub.
+
+> **Annonce** — Je vais être sincère : j'ai peur, mais je suis content d'être là. Merci de m'écouter.
+
+> **Victoire** — Je pleure comme un enfant. C'est la plus belle soirée de ma vie.
+
+> **Défaite** — Je suis triste. Je vous remercie quand même d'être venus. Vous êtes super.
+
+> **Réseaux** — Une photo de mon coach qui m'enlace. Trois jours avant, il me dit de pas pleurer.
+
+> **Proposition** — Oui, avec tout mon cœur. Merci de penser à moi.
 
 ---
 
@@ -532,6 +704,14 @@ annoncent le coup, la peur dans les yeux.
 
 > **Proposition** — *(en langue des signes)* Oui. Mais trouvez-moi un bon
 > interprète pour la conférence, le dernier traduisait comme un pied.
+
+> **Annonce** — *(en langue des signes)* Je n'ai pas peur du bruit. Je sens la salle dans mes pieds.
+
+> **Victoire** — *(en langue des signes)* Je dédie ça à ceux qui m'ont dit que ce n'était pas possible.
+
+> **Défaite** — *(en langue des signes)* Ce soir, il a été plus rapide. Je ne l'ai pas vu venir.
+
+> **Proposition** — *(en langue des signes)* Oui. Et faites en sorte que l'interprète soit à l'heure.
 
 ---
 
@@ -559,6 +739,16 @@ aboie, il embrasse le tapis, il salue un coin vide.
 > **Proposition** — Il faut que je demande à mon corps. *(Il ferme les yeux
 > longtemps.)* Il dit oui.
 
+> **Annonce** — *(par son interprète)* Il dit qu'il a médité sur {adv}. Il dit que c'est un frère.
+
+> **Victoire** — *(par son interprète)* Il dit que la nuit lui a parlé. Je n'ai pas tout compris.
+
+> **Défaite** — *(par son interprète)* Il dit que ce n'est pas une défaite, c'est une page.
+
+> **Réseaux** — Une photo d'un arbre. Pas de texte. Il reste trois jours.
+
+> **Proposition** — *(par son interprète)* Il a regardé la lune. La lune dit oui.
+
 ---
 
 ## 3.18 LA MÈRE
@@ -581,6 +771,16 @@ dans chaque phrase. Elle ne tolère pas qu'on la plaigne.
 
 > **Proposition refusée** — Pas ce mois-là. C'est l'anniversaire du petit. Le
 > mois d'après, qui tu veux.
+
+> **Annonce** — Ce matin, j'ai préparé le sac de mon fils, puis le mien. Samedi, c'est moi qui gagne.
+
+> **Victoire** — Je vais rentrer et je ferai des crêpes. Merci à ma mère qui garde les enfants.
+
+> **Défaite** — J'ai perdu. Mon petit m'a dit : maman, ce n'est pas grave. Il a raison.
+
+> **Réseaux** — Réveil à 5 h. Biberon, entraînement, école. Samedi, je me bats.
+
+> **Proposition** — Je dois d'abord vérifier le calendrier de l'école. Après, oui.
 
 ---
 
@@ -607,6 +807,16 @@ peur et avancent.
 > **Proposition à court préavis** — J'ai déjà été [appelé|appelée] avec deux
 > heures de préavis pour des choses beaucoup moins drôles. Oui.
 
+> **Annonce** — Mission claire : tenir trois rounds, finir au quatrième. On connaît son plan.
+
+> **Victoire** — Mission accomplie. Merci à l'équipe. On rentre.
+
+> **Défaite** — Échec de mission. Je prends la faute, on analyse, on repart.
+
+> **Réseaux** — Briefing terminé. Rassemblement samedi 9 h.
+
+> **Proposition** — Reçu. Dites-moi l'heure.
+
 ---
 
 ## 3.20 LE REPENTI
@@ -628,6 +838,16 @@ de la taule », « j'ai vendu ». Il parle aux jeunes.
 > **Inactivité** — Quand je ne combats pas, je tourne en rond. Et quand je tourne en rond, je connais la suite. Donnez-moi un combat.
 
 > **Forfait** — Blessure. Je suis resté chez moi, je le précise. Je sais ce que les gens vont penser.
+
+> **Annonce** — J'ai fait des erreurs, j'en fais moins. {adv} va le sentir samedi.
+
+> **Victoire** — Je dédie ça à ceux qui croient encore en moi. Ils sont peu, mais ils comptent.
+
+> **Défaite** — Je ne vais pas craquer. Je rentre, je m'entraîne, je reviens.
+
+> **Réseaux** — Pas de bar ce soir. Seulement du thé et du sommeil.
+
+> **Proposition** — Oui. J'ai besoin d'un objectif, sinon je tourne en rond.
 
 ---
 
@@ -652,6 +872,16 @@ rafale. Salue sa ville et ses potes par leur prénom.
 
 > **Proposition refusée** — Lui ? Il n'a aucun abonné, personne ne le connaît, même sa mère ne regarde pas ses combats. Trouve-moi un vrai nom.
 
+> **Annonce** — {adv}, viens, on s'explique dans la cage. Le quartier sera là, il regardera.
+
+> **Victoire** — C'est pour le quartier ! Pour la bande, pour ceux d'en bas, pour maman !
+
+> **Défaite** — J'ai perdu, mais on reste fiers. On rentre manger, on en reparle demain.
+
+> **Réseaux** — Toute la rue sera là. Gardez la place pour les petits, devant.
+
+> **Proposition** — Lui ? Je le connais pas, mais ok, c'est bon. Envoie.
+
 ---
 
 ## 3.22 LE LUTTEUR DE FAC
@@ -675,6 +905,16 @@ aucun humour sur la lutte.
 > retourne courir.
 
 > **Proposition, frappeur** — Un frappeur ? Parfait. Il va découvrir le sol.
+
+> **Annonce** — Je vais prendre ses jambes, l'amener au sol, et attendre que ça passe. C'est sûr.
+
+> **Victoire** — Quinze minutes au sol, ça fait mal aux genoux. Ça valait le coup.
+
+> **Défaite** — Il s'est relevé trop vite. Je dois mieux contrôler. Je retourne au tapis.
+
+> **Réseaux** — Séance de lutte du matin. Dix fois la même prise, jusqu'à ce que ça marche.
+
+> **Proposition** — Un grand frappeur ? Très bien. Je l'emmène au sol, il va voir.
 
 ---
 
@@ -702,6 +942,16 @@ défaite.
 > **Proposition** — Je dois appeler mon père. *(Il rappelle dix minutes plus
 > tard.)* C'est oui.
 
+> **Annonce** — Toute la famille sera dans la salle. Je ne peux pas perdre devant eux.
+
+> **Victoire** — Je dédie cette victoire à mes oncles, à ma tante, à toute la famille.
+
+> **Défaite** — J'ai déçu les miens. On parle à la maison. Après, on verra.
+
+> **Réseaux** — Trois cars de la famille arrivent samedi. Ils vont chanter fort.
+
+> **Proposition** — Je demande à mon père. Il dit oui.
+
 ---
 
 ## 3.24 L'ENFANT DU PAYS
@@ -724,6 +974,16 @@ remonter sur la semaine.
 
 > **Inactivité** — Au pays on me demande tous les jours quand je combats. Je sais
 > plus quoi leur répondre.
+
+> **Annonce** — Tout le {pays} regarde samedi. Je ne veux pas les décevoir.
+
+> **Victoire** — Pour tous ceux qui ont veillé là-bas. Je rentre à la maison avec un sourire.
+
+> **Défaite** — Je m'excuse auprès du {pays}. Je reviendrai avec la tête haute.
+
+> **Réseaux** — Les messages du {pays} arrivent par centaines. Je les lis tous.
+
+> **Proposition** — Oui. Pour mon pays, oui.
 
 ---
 
@@ -748,6 +1008,16 @@ fascinant.
 
 > **Défaite** — Je ne l'avais pas vu. C'est la première fois que je ne vois pas.
 
+> **Annonce** — Je vais le finir au troisième round. Ce n'est pas un défi, c'est un calendrier.
+
+> **Victoire** — Troisième round, comme prévu. Je n'ai pas de mérite, je lis.
+
+> **Défaite** — Je m'étais trompé de round. Je corrige ma prédiction.
+
+> **Réseaux** — Rappel pour samedi : troisième round. Notez-le.
+
+> **Proposition** — Il tombera en trois rounds. D'accord.
+
 ---
 
 ## 3.26 LE PROF
@@ -767,6 +1037,16 @@ utilise les vrais mots techniques, fait des blagues de salle des profs.
 > l'encourager.
 
 > **Défaite** — Il connaissait la leçon mieux que moi. Je retourne réviser.
+
+> **Annonce** — {adv} fait toujours la même erreur au deuxième round. Samedi, on la corrige.
+
+> **Victoire** — Bon exercice. Je lui mets 12 sur 20, mais il a progressé.
+
+> **Défaite** — J'ai raté mon cours. L'élève était meilleur que prévu.
+
+> **Réseaux** — Séance de vidéo. Quatre-vingts minutes de notes. Tout est prêt.
+
+> **Proposition** — Voyons son dossier. Très bien, c'est oui.
 
 ---
 
@@ -789,6 +1069,16 @@ spéciales.
 > **Défaite** — Game over. J'ai pas sauvegardé. Je relance une partie.
 
 > **Proposition refusée** — Lui ? C'est un mob de début de jeu. Donne-moi un boss.
+
+> **Annonce** — {adv} est un ennemi de niveau 5. Moi je suis niveau 12. Pas de souci.
+
+> **Victoire** — Combo parfait. Il m'a donné des points d'expérience. Merci {adv}.
+
+> **Défaite** — Game over. Je recharge la sauvegarde et je recommence.
+
+> **Réseaux** — Nouvelle compétence débloquée : esquive de gauche. Je la teste samedi.
+
+> **Proposition** — Un boss de fin ? Oui. Je prends toujours les boss.
 
 ---
 
@@ -816,6 +1106,16 @@ vacances.
 > **Défaite, décision fade** — Il a couru pendant quinze minutes. Il a gagné. Ça
 > me donne envie de vomir.
 
+> **Annonce** — {adv} est venu pour se battre ? Alors on sera deux. Ça va saigner un peu.
+
+> **Victoire** — Quel combat ! Je lui dois une bière. Et un pansement.
+
+> **Défaite** — J'ai perdu, mais c'était un super combat. Je recommence quand tu veux.
+
+> **Réseaux** — Nez cassé à l'entraînement. Troisième fois. Je suis content.
+
+> **Proposition** — Quelqu'un qui frappe fort ? Oui, avec plaisir.
+
 ---
 
 ## 3.29 LE PRÉDICATEUR
@@ -838,6 +1138,16 @@ fois.** La presse finit par s'en moquer.
 
 > **Défaite** — Aujourd'hui je suis tombé. Demain je me relève. C'est ça la
 > leçon. On se voit au sommet.
+
+> **Annonce** — Quelque part, un jeune regarde. Samedi, je lui montre que c'est possible.
+
+> **Victoire** — À tous les jeunes qui regardent : travaillez, croyez, relevez-vous. On se voit au sommet.
+
+> **Défaite** — Je suis tombé. Je me relève demain. Voilà la vraie leçon. On se voit au sommet.
+
+> **Réseaux** — 4 h 40. Un grand verre d'eau. Aujourd'hui, on bouge. On se voit au sommet.
+
+> **Proposition** — Je prends. Chaque combat est une leçon pour quelqu'un.
 
 ---
 
@@ -864,6 +1174,16 @@ con.
 
 > **Proposition** — Un jeune ? Envoie. Il faut bien que quelqu'un leur apprenne.
 
+> **Annonce** — {adv} est né quand j'avais déjà dix combats. Samedi, il apprend un truc.
+
+> **Victoire** — Le métier, ça ne s'achète pas. Merci à ceux qui me l'ont appris.
+
+> **Défaite** — Il était plus rapide. À mon âge, c'est normal. Je ne regrette rien.
+
+> **Réseaux** — Chaque matin, mes genoux me disent bonjour. Chaque soir, je leur réponds.
+
+> **Proposition** — Un jeune, encore ? Oui. Il faut bien que quelqu'un leur montre.
+
 ---
 
 ## 3.31 L'AIGRI
@@ -889,6 +1209,16 @@ l'organisation. Sarcasme sec.
 
 > **Proposition** — Combien ? *(Il ne demande rien d'autre.)*
 
+> **Annonce** — Je vais me battre pour presque rien. Ça ne change pas grand-chose pour moi.
+
+> **Victoire** — J'ai gagné. La bourse, vous la connaissez. Je n'ai rien d'autre à dire.
+
+> **Défaite** — Perdu. Les juges, vous connaissez leur travail. Moi, le mien.
+
+> **Réseaux** — Soirée sold out. Ma bourse : la même qu'avant. Quelqu'un a compris le système ?
+
+> **Inactivité** — {mois} mois sans combat. Je paie mon loyer avec du vent.
+
 ---
 
 ## 3.32 LE TIMIDE
@@ -911,6 +1241,14 @@ nouveau (§8). **Le joueur l'aura vu grandir.**
 > lui)*
 
 > **Proposition** — Euh, oui, si vous pensez que c'est bien, oui.
+
+> **Annonce** — Euh… je vais faire de mon mieux. Merci à ceux qui viennent.
+
+> **Victoire** — Merci… merci beaucoup. Je… j'espère que ma mère regarde.
+
+> **Proposition** — Oui, si c'est bien pour la carte. Je vous fais confiance.
+
+> **Réseaux** — Camp terminé. Euh… voilà.
 
 ---
 
@@ -935,6 +1273,16 @@ calculés pour faire des vues.
 > *(Rien ne s'est passé.)*
 
 > **Proposition refusée** — Il fait pas de vues. Désolé mais il fait pas de vues.
+
+> **Annonce** — {adv} n'a pas autant d'abonnés que moi, mais il a plus de dents. On verra samedi.
+
+> **Victoire** — Dix millions de vues sur ce KO. Abonnez-vous, likez, partagez.
+
+> **Défaite** — Défaite. Mais mon contenu de ce soir est incroyable. Vidéo bientôt.
+
+> **Réseaux** — Teasing de la pesée : vous n'allez pas croire ce que j'ai mangé avant.
+
+> **Proposition** — Combien de vues ? Dites-moi ça, après on parle.
 
 ---
 
@@ -962,6 +1310,14 @@ assez.
 > **Moment de vie : papiers obtenus** — Aujourd'hui j'ai eu mes papiers. Je
 > peux combattre partout maintenant. Même chez lui.
 
+> **Annonce** — J'ai quitté mon pays pour pouvoir faire ça. Samedi, je n'ai pas le droit de rater.
+
+> **Victoire** — Je dédie ça à ceux qui sont restés là-bas et qui regardent sur un téléphone.
+
+> **Défaite** — Je suis tombé. Je me relève. J'ai déjà traversé pire.
+
+> **Proposition** — Oui. Chaque combat me rapproche des papiers.
+
 ---
 
 ## 3.35 LE FILS DE
@@ -986,6 +1342,16 @@ même nom, même pays.
 > **Inactivité** — On croit que j'ai des passe-droits. J'attends comme tout le
 > monde. Plus, même.
 
+> **Annonce** — Tout le monde connaît mon nom. Samedi, ils vont connaître ma boxe.
+
+> **Victoire** — Mon père m'a serré la main. C'est la première fois qu'il le fait en public.
+
+> **Défaite** — Je ne veux pas qu'on parle de mon père. Je veux qu'on parle du combat.
+
+> **Réseaux** — Un entraînement, un jus d'orange. Je n'ai pas de passe-droit, juste de la fatigue.
+
+> **Proposition** — Choisissez-moi quelqu'un de difficile. Je veux le mériter.
+
 ---
 
 ## 3.36 LA PIONNIÈRE
@@ -1006,6 +1372,16 @@ messages qu'elle reçoit. Refuse d'être un symbole quand ça l'arrange pas.
 > vous. C'est pour vous.
 
 > **Défaite** — J'ai perdu. Ça veut pas dire qu'on avait tort d'essayer.
+
+> **Annonce** — Il y a dix ans, nous étions trois dans la salle. Aujourd'hui, il y en a trente. Samedi, c'est pour elles.
+
+> **Victoire** — Je dédie cette victoire à toutes celles qui ont commencé avant moi.
+
+> **Défaite** — Je ne suis pas la première à perdre. Je ne serai pas la dernière à gagner.
+
+> **Réseaux** — On m'a demandé si je me bats comme un homme. Je me bats comme moi.
+
+> **Proposition** — Oui. Et prenez-moi quelqu'un de fort, je ne suis pas là pour faire joli.
 
 ---
 
@@ -1030,6 +1406,16 @@ jour où la bourse suffit, **il doit choisir** — et c'est un moment de vie.
 > **Proposition refusée** — Pas ce mois-là, je suis de nuit toute la
 > semaine. Je peux pas lâcher l'équipe.
 
+> **Annonce** — Combat samedi, boulot lundi. J'ai posé une demi-journée, j'ai hâte.
+
+> **Victoire** — Je dormirai peu cette nuit. Lundi 6 h, je suis au travail. Je souris déjà.
+
+> **Défaite** — Lundi, mes collègues vont me demander ce qui s'est passé. Je vais mentir un peu.
+
+> **Réseaux** — Entraînement à 6 h, boulot de 9 h à 17 h, salle jusqu'à 21 h. Samedi, je me repose. Enfin non.
+
+> **Proposition** — Je dois voir si mon chef me libère. Normalement, oui.
+
 ---
 
 ## 3.38 L'ÉTUDIANT
@@ -1048,6 +1434,16 @@ Prof : il ne donne pas la leçon, il la prend.
 
 > **Défaite** — Traumatisme crânien léger, d'après le médecin. Je sais ce que
 > ça veut dire, j'ai eu le cours. C'est pas rassurant.
+
+> **Annonce** — J'ai un examen mercredi et un combat samedi. Je ne sais pas lequel est le plus dur.
+
+> **Victoire** — La bourse paiera mon loyer pour trois mois. Merci {adv}, sincèrement.
+
+> **Défaite** — Je prends deux jours de repos. Après, je retourne aux cours. On verra.
+
+> **Réseaux** — Révision de physiologie dans le vestiaire. Avant, pendant, après la pesée.
+
+> **Proposition** — Oui, tant que ça ne tombe pas pendant les partiels.
 
 ---
 
@@ -1069,6 +1465,16 @@ bonheur. Totalement sérieux.
 
 > **Défaite** — J'ai croisé un chat noir dans le parking. Je dis rien de plus.
 
+> **Annonce** — Combat un vendredi 13 ? Non merci. Changez la date, ou je ne viens pas.
+
+> **Victoire** — Même chaussettes, même caleçon, même chemin. Ça marche, je ne change rien.
+
+> **Défaite** — Quelqu'un a marché sur mon sac dans le vestiaire. Voilà. Je ne dis rien de plus.
+
+> **Réseaux** — J'ai trouvé un trèfle à quatre feuilles dans le parking. Samedi, c'est bon.
+
+> **Proposition** — Quelle date ? Quel chiffre ? Dites-moi tout avant.
+
 ---
 
 ## 3.40 LE CONVERTI TARDIF
@@ -1087,6 +1493,16 @@ et du temps qu'il n'a plus.
 
 > **Défaite** — Je perds un combat. J'ai déjà perdu une vie entière, alors ça
 > va.
+
+> **Annonce** — À mon âge, on ne court plus après le temps. Samedi, je cours après {adv}.
+
+> **Victoire** — Je ne pensais pas gagner un jour. Le moi de vingt ans rigole.
+
+> **Défaite** — J'ai perdu, et alors ? J'ai gagné quelque chose avant d'arriver ici.
+
+> **Réseaux** — Footing à 6 h. Pesée à midi. Je fête mes 40 ans la semaine prochaine, on verra.
+
+> **Proposition** — Oui, dites-moi seulement l'heure. Je me couche tôt.
 
 ---
 
@@ -1109,6 +1525,16 @@ qu'il sait.
 > **Défaite** — Il m'a frappé à un endroit où, au judo, personne frappe jamais.
 > Leçon.
 
+> **Annonce** — Dans mon ancien sport, on gagnait aux points. Ici, on gagne en frappant. Je m'adapte.
+
+> **Victoire** — Ma vieille prise a servi. Ça marche aussi dans une cage.
+
+> **Défaite** — Il a frappé là où mon ancien sport ne frappe pas. Je corrige.
+
+> **Réseaux** — Séance de sparring avec mon ancien club. Ils me regardent bizarrement. Moi aussi.
+
+> **Proposition** — Oui. Je veux continuer à apprendre.
+
 ---
 
 ## 3.42 L'ARTISTE
@@ -1127,6 +1553,16 @@ commente sa vie comme un couplet.
 > fin. Là, je l'ai.
 
 > **Défaite** — Ce soir j'écris un morceau triste. Il va être très bon.
+
+> **Annonce** — Samedi, j'écris un couplet sur le visage de {adv}. Je le chanterai après.
+
+> **Victoire** — J'ai gagné. Le refrain est trouvé. Merci à tous, à vendredi pour le son.
+
+> **Défaite** — Cette défaite fera un très bon morceau. Ne vous inquiétez pas.
+
+> **Réseaux** — Un nouveau texte ce soir. Un nouveau KO samedi. Même combat, même rythme.
+
+> **Proposition** — Oui, avec un bon éclairage et un bon son. Je fais ça aussi.
 
 ---
 
@@ -1147,6 +1583,14 @@ subi » ou « blesse gravement un adversaire » (catalogue §6).
 
 > **Défaite** — Je crois que c'est fini. Je crois. Je vous dirai.
 
+> **Annonce** — Je ne dors plus bien. Mais je suis là. C'est déjà beaucoup.
+
+> **Victoire** — Je ne sais pas ce que je ressens. Peut-être du soulagement.
+
+> **Défaite** — Je crois que c'est moins grave que ce que je craignais. Mais je ne sais pas.
+
+> **Proposition** — Je vais y penser. Je vais dire oui. Je crois.
+
 ---
 
 ## 3.44 L'AÎNÉ
@@ -1165,6 +1609,16 @@ du loyer de sa mère. Ne se plaint jamais de porter.
 
 > **Inactivité** — Chaque mois sans combat, c'est un mois où c'est ma mère qui
 > compte. Je veux pas que ma mère compte.
+
+> **Annonce** — Je me bats pour mes frères et sœurs. Samedi, je ne les décevrai pas.
+
+> **Victoire** — Ça fait une année scolaire payée pour ma petite sœur. C'est ma ceinture.
+
+> **Défaite** — Je dis à ma mère que ça va. Je suis fatigué, mais ça va.
+
+> **Réseaux** — Réveil à 5 h, entraînement, dîner, devoirs de mon petit frère. Je dors à 23 h.
+
+> **Proposition** — Oui. Dites-moi combien, et je signe.
 
 ---
 
@@ -1186,6 +1640,16 @@ son état permanent.
 
 > **Défaite** — J'ai mal au cœur plus qu'au visage. C'est normal je crois.
 
+> **Annonce** — Je suis très ému à l'idée d'y aller. J'ai déjà pleuré deux fois ce matin.
+
+> **Victoire** — Merci, merci, merci. Je ne pensais pas que j'allais y arriver.
+
+> **Défaite** — J'ai pleuré dans le vestiaire. Je reviens plus fort, je promets.
+
+> **Réseaux** — Mon coach m'a pris dans ses bras. Je n'ai plus de larmes.
+
+> **Proposition** — Oui, et merci de penser à moi. Ça me touche.
+
 ---
 
 ## 3.46 LE STRATÈGE
@@ -1205,6 +1669,16 @@ explique, le Stratège cache.
 > **Défaite** — Il avait un meilleur plan. Je voudrais bien savoir lequel.
 
 > **Micro Tendu** — Q. Tu joues aux échecs ? — R. Pourquoi, vous voulez perdre ?
+
+> **Annonce** — J'ai trois plans. Samedi, {adv} n'en verra qu'un. Il choisira le mauvais.
+
+> **Victoire** — Le plan B était meilleur que le plan A. Je ne dis pas ce qu'est le plan C.
+
+> **Défaite** — Il a lu mon jeu au premier round. Je note. On change tout.
+
+> **Réseaux** — Une photo d'un échiquier. Pas de texte. Il reste deux jours.
+
+> **Proposition** — Donnez-moi sa vidéo. Après, je dirai oui ou non.
 
 ---
 
@@ -1230,6 +1704,16 @@ l'aime et le redoute.**
 > **Défaite** — Je vais faire la fête quand même. On fête la défaite aussi,
 > sinon on fête jamais rien.
 
+> **Annonce** — Combat samedi, soirée dimanche. Je ne dis pas où, mais il y aura de la musique.
+
+> **Victoire** — On rentre tard. On rentre bien. Merci à tous, je paye la tournée.
+
+> **Défaite** — On va fêter ça quand même. Perdre, c'est aussi une occasion de boire à la santé des autres.
+
+> **Réseaux** — J'ai promis de dormir tôt. J'ai menti. Voilà, c'est dit.
+
+> **Proposition** — Oui, tant qu'il y a une fête après.
+
 ---
 
 ## 3.48 LA TRANSFORMATION
@@ -1249,6 +1733,16 @@ avant-après. De la honte, puis de la fierté.
 > moi aussi. Et regardez maintenant.
 
 > **Défaite** — J'ai perdu. Mais le vieux moi, je l'ai battu il y a longtemps.
+
+> **Annonce** — Je me suis levé tous les matins pendant cinq ans. Samedi, on voit si ça a payé.
+
+> **Victoire** — À celui que j'étais : regarde-moi. À ceux qui m'ont suivi : merci.
+
+> **Défaite** — Je ne perds pas, j'apprends. Le moi d'avant n'aurait pas essayé.
+
+> **Réseaux** — Un vieux pantalon trop grand, accroché dans le vestiaire. Il me rappelle tout.
+
+> **Proposition** — Oui. Je veux continuer à me surprendre.
 
 ---
 

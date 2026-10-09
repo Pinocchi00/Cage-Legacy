@@ -169,3 +169,23 @@ function mgmtRouille(m,f,cycle){
   return attente>0?Math.min(MGMT_NIV_ROUILLE_MAX,attente*MGMT_NIV_ROUILLE_PAR_CYCLE):0;
 }
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_RETOURS0910_PALMARES_REEL] — Retours d'Anthony du 09/10/2026 : « vérifie les palmarès avec ce qui se fait dans la vraie vie ».
+   Mesure d'une partie neuve (1 080 combattants) avant la correction : 5,6 % de nuls (64 % des combattants en avaient au moins un) contre 1,5 à 2 % des
+   combats (15 à 20 % des combattants) dans la vraie vie ; des champions à 74 % de victoires et un top 5 à 71 % contre 85-90 % et 80 % ; aucun invaincu ;
+   des vétérans de 33 à 35 ans plafonnés à 32 combats. Trois corrections, chacune sans changer le nombre de tirages de la partie :
+   la loi bilan↔niveau passe de la droite 45-88 % à une courbe qui monte jusqu'à 94 % au sommet, les nuls suivent le nombre de combats, les vétérans
+   vont plus loin. Le monde extérieur et la carrière gardent leur loi. ==== */
+/** Le bilan d'un combattant de niveau `lv` sur `total` combats : un tirage (comme correlatedRecord), mais une courbe qui reste modeste au milieu et touche 90 % et plus au sommet. */
+function mgmtBilanReel(lv,total){
+  const u=clamp((lv-MGMT_NIV_MIN)/(MGMT_NIV_MAX-MGMT_NIV_MIN),0,1);
+  const ratio=clamp(0.48+0.42*Math.pow(u,1.6)+(rnd()*2-1)*0.06,0.2,1);
+  const W=clamp(Math.round(total*ratio),0,total);
+  return {W,L:total-W};
+}
+/** Les nuls d'un combattant : rares, plus probables avec le nombre de combats (≈ 1,5 % des combats, ≈ 18 % des combattants en comptent un). `u` est un tirage 0-99. */
+function mgmtNulsReels(total,u){
+  const seuil=5+total*0.7;
+  return u<seuil?(u<3&&total>=15?2:1):0;
+}
+/* ==== [FIN ANCRE] ==== */

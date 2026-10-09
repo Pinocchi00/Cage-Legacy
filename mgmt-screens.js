@@ -366,7 +366,7 @@ Object.assign(CL,{
     if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
       G.mgmt=mgmtDefault(orgId);
-      if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
+      if(!loadMgmt()){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
       else mgmtAgendaPreparer(G.mgmt);
     }else{
       mgmtRepair(G.mgmt);

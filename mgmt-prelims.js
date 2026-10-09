@@ -36,6 +36,9 @@ function mgmtPrelimsLigne(m,s,i,choisi){
     +`<div class="mf-car-slot-s">${etat}</div></button>`;
 }
 
+/** Une phrase de Leïla qui tourne : la première au premier cycle, puis la suivante à chaque soirée — jamais deux soirées de suite la même. Dérivé du cycle, rien ne se stocke. */
+function mgmtLeilaTour(m,liste){ return liste[((m&&m.cycle||0)%liste.length+liste.length)%liste.length]; }
+
 /** Les raisons de Leïla pour la paire (planche « Pourquoi elle le propose ») : l'attente de l'un, la défaite de l'autre ; à défaut, ce qu'ils ont en commun. Dérivé. */
 function mgmtPrelimsRaisons(m,fa,fb){
   const out=[];
@@ -86,8 +89,8 @@ function scr_mgmt_prelims(){
   const centre=`<div class="mf-car-c">${banniere}${mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${pourquoi}${boutons}`,'normal','mf-car-cmp')}</div>`;
 
   const sM=Number.isSafeInteger(m.card.sizeMain)?m.card.sizeMain:MGMT_MAIN_SIZE, nM=m.card.main.length, manque=Math.max(0,sM-nM);
-  const ex=MGMT_EXCHANGES.leila_bulk, parole=bloc&&ex&&ex.lines&&ex.lines[0]?mfVoix('Leïla',ex.lines[0]):'';
-  const alerte=bloc&&(bloc.fights||[]).some(x=>x.warned)&&ex&&typeof ex.warning==='string'?mfVoix('Leïla',ex.warning):'';
+  const ex=MGMT_EXCHANGES.leila_bulk, parole=bloc&&ex&&ex.lines&&ex.lines[0]?mfVoix('Leïla',mgmtLeilaTour(m,[ex.lines[0]].concat(ex.variantes||[]))):'';
+  const alerte=bloc&&(bloc.fights||[]).some(x=>x.warned)&&ex&&typeof ex.warning==='string'?mfVoix('Leïla',mgmtLeilaTour(m,ex.avertissements&&ex.avertissements.length?ex.avertissements:[ex.warning])):'';
   const cote=P.cote==='a'?'a':'b', alts=bloc&&s.etat==='avalider'?mgmtPrelimsAlternatives(m,f,bloc,cote):null;
   const homo=alts?mgmtCarteHomonymes(alts):null;
   const lignesAlt=alts?alts.slice(0,5).map((x,k)=>mgmtCarteAdvLigne(m,x,k,false,homo).replace(/onclick="CL\.mgmtCarteVise\('([^']*)'\)"/,"onclick=\"CL.mgmtPrelimsRemplace('$1')\"")).join(''):'';

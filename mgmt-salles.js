@@ -33,7 +33,7 @@ const MGMT_TETE_AFFICHE_POIDS=0.5;
  *  Les capacités suivent le profil de l'organisation (taille de ses salles). Pur. */
 function mgmtSallesCreer(m){
   const profil=typeof mgmtOrgProfil==='function'?mgmtOrgProfil(m):null, k=profil&&Number.isFinite(profil.salles)?profil.salles:1;
-  const graine=String(m&&m.org||'')+'|salles';
+  const graine=String(m&&m.org||'')+'|salles|'+(m&&typeof m.graine==='string'?m.graine:'');
   const villes=new Set(), out=[];
   for(let i=0;i<MGMT_SALLES_NOMBRE;i++){
     let v=duelFnv1a32(graine+'|ville|'+i)%MGMT_SALLES_VILLES.length;

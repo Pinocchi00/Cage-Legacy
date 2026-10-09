@@ -53,6 +53,90 @@ const MGMT_VOIX=[
     "etiquette": "Forfait",
     "texte": "[Blessé|Blessée] à l'entraînement, je suis [dégoûté|dégoûtée], je reviens vite.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Le camp s'est bien passé. Je suis [prêt|prête]. {adv} aussi, mais je suis plus [prêt|prête].",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je remercie mon équipe pour ce camp. Samedi, on montre ce qu'on a travaillé.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je suis très concentré. {adv} est dangereux, je le sais. Je serai prêt.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Dernière séance avant samedi. Merci à mes partenaires d'entraînement.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Pesée faite, poids bon. Maintenant on se repose.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Merci à tout le monde. Une grosse pensée pour ma famille. On continue.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "{adv} est costaud, mais on avait un plan. Ça a marché. Merci au coach.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je n'ai rien à dire de plus. Bravo à {adv}. On retourne travailler.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Ça arrive. Je ne vais pas chercher d'excuse. Je reviens plus [fort|forte].",
+    "relu": false
+   },
+   {
+    "situation": "inactivite",
+    "etiquette": "Inactivité",
+    "texte": "Ça fait {mois} mois sans combat. Je m'entraîne tous les jours, appelez-moi.",
+    "relu": false
+   },
+   {
+    "situation": "inactivite",
+    "etiquette": "Inactivité",
+    "texte": "{mois} mois que j'attends. Je suis en forme, il me faut juste une date.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, ça me va. Envoyez-moi le contrat.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Pourquoi pas. Je veux juste savoir la date.",
+    "relu": false
+   },
+   {
+    "situation": "forfait",
+    "etiquette": "Forfait",
+    "texte": "Je me suis [blessé|blessée] au camp. Je suis déçu, mais je serai de retour.",
+    "relu": false
    }
   ]
  },
@@ -101,6 +185,36 @@ const MGMT_VOIX=[
     "etiquette": "La fêlure",
     "texte": "Il parle beaucoup. Samedi il va fermer sa gueule.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Entraînement fini. Combat samedi.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je rentre dormir.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Perdu. On corrige.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Quand ? Oui.",
+    "relu": false
+   },
+   {
+    "situation": "forfait",
+    "etiquette": "Forfait",
+    "texte": "Pas ce mois-ci. Le dos.",
+    "relu": false
    }
   ]
  },
@@ -136,6 +250,36 @@ const MGMT_VOIX=[
     "situation": "proposition",
     "etiquette": "Proposition, inconnu",
     "texte": "Tu veux que je fasse un spectacle devant qui, devant ses cousins ?",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv}, prépare ton plus beau sourire. Samedi, tu le montres au plafond.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Il paraît que {adv} dort bien. Dites-lui de profiter de ses dernières nuits.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Round {round}. Je l'avais dit. Maintenant je mange.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Ce soir, le scénario a changé. Je reprends mon stylo.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Mon nom en gros sur l'affiche, et c'est oui.",
     "relu": false
    }
   ]
@@ -173,6 +317,36 @@ const MGMT_VOIX=[
     "etiquette": "Forfait",
     "texte": "C'est une épreuve. Ça pouvait être pire.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Ce qui doit arriver arrivera. Je serai dans la cage, c'est déjà beaucoup.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Ça devait finir comme ça. Je n'y suis pour rien.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je savais. Ce n'est pas grave.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Si c'est écrit, c'est oui.",
+    "relu": false
+   },
+   {
+    "situation": "forfait",
+    "etiquette": "Forfait",
+    "texte": "Une blessure. Elle devait arriver un jour.",
+    "relu": false
    }
   ]
  },
@@ -208,6 +382,36 @@ const MGMT_VOIX=[
     "situation": "inactivite",
     "etiquette": "Inactivité",
     "texte": "L'hiver aussi, c'est une saison.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "La cage est petite. Le ciel est grand. Samedi, je regarde les deux.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je regarde mes mains. Elles ont gagné, moi je suis resté calme.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Perdre apprend ce que gagner cache.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Une montagne, un matin. Encore trois jours.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Je vais y réfléchir un moment. Oui.",
     "relu": false
    }
   ]
@@ -251,6 +455,42 @@ const MGMT_VOIX=[
     "etiquette": "Proposition, lutteur",
     "texte": "Lui ? Il va me coller au grillage quinze minutes. Non merci, je ne suis pas venu pour ça.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} est nul. Dites-le-lui de ma part. Samedi, je lui montre aussi.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Quelqu'un m'a dit de me calmer. J'ai ri tellement fort que j'en ai cassé ma chaise.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Dix minutes de travail, deux heures de bar. Mon plan est parfait.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai perdu. Ça m'emmerde. Je ne vais pas dire que c'est de sa faute.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Lui ? Il a l'air gentil. Moi pas. Allez, oui.",
+    "relu": false
+   },
+   {
+    "situation": "forfait",
+    "etiquette": "Forfait",
+    "texte": "Une cheville. J'ai marché sur un truc. Ne me demandez pas quoi.",
+    "relu": false
    }
   ]
  },
@@ -293,6 +533,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition",
     "texte": "(par son interprète) Il a dit oui. Enfin, il a dit « quand ».",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "(par son interprète) Il dit qu'il a bien travaillé. Il dit que {adv} aussi.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "(par son interprète) Il dit merci. Il pense à sa famille.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "(par son interprète) Il dit qu'il reviendra. Il dit aussi qu'il a faim.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Publication sans texte. Une photo de ses mains bandées.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "(par son interprète) Il dit oui. Il veut d'abord savoir si c'est loin.",
+    "relu": false
    }
   ]
  },
@@ -328,6 +598,42 @@ const MGMT_VOIX=[
     "situation": "proposition-refusee",
     "etiquette": "Proposition refusée",
     "texte": "Il est derrière moi au classement, ça m'apporte rien. Trouve-moi un classé.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} est {rang_adv}. Je suis {rang}. Une victoire me rapproche du titre.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Étape huit sur dix. Tout est dans les temps.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Un de plus dans le classement. Prochain objectif : le top 5.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Ça retarde le plan. Je change une ligne du tableau, pas le tableau.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Il est mieux classé que moi ? Alors oui.",
+    "relu": false
+   },
+   {
+    "situation": "inactivite",
+    "etiquette": "Inactivité",
+    "texte": "{mois} mois sans combat. Mon plan prévoyait trois semaines. Appelez-moi.",
     "relu": false
    }
   ]
@@ -365,6 +671,36 @@ const MGMT_VOIX=[
     "etiquette": "Forfait",
     "texte": "Le pire c'est pas la blessure, c'est les mois sans paie.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "J'ai connu pire que {adv}. Beaucoup pire. Samedi, ça va aller.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Ça me fait du bien. J'avais oublié ce que ça faisait de gagner.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai déjà perdu plus que ça. Demain, je retourne travailler.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. J'ai besoin de combattre. Je ne dis pas non.",
+    "relu": false
+   },
+   {
+    "situation": "inactivite",
+    "etiquette": "Inactivité",
+    "texte": "{mois} mois sans combat. Je ne sais pas faire autre chose.",
+    "relu": false
    }
   ]
  },
@@ -394,6 +730,36 @@ const MGMT_VOIX=[
     "situation": "inactivite",
     "etiquette": "Inactivité",
     "texte": "Si {org} a une place je suis là, sans pression hein ahah.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je suis ravi de combattre {adv}. Beau combat en vue, j'espère que vous viendrez.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Merci à {adv}, un vrai guerrier. Merci à {org}. Je suis content, vraiment.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Bravo à lui. Je corrige mes erreurs et je reviens.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Avec plaisir. Dites-moi où signer.",
+    "relu": false
+   },
+   {
+    "situation": "inactivite",
+    "etiquette": "Inactivité",
+    "texte": "Je ne me plains pas, mais si {org} a une date, je suis là.",
     "relu": false
    }
   ]
@@ -430,6 +796,36 @@ const MGMT_VOIX=[
     "situation": "proposition-refusee",
     "etiquette": "Proposition refusée",
     "texte": "Encore un combat pour rien. Vous me faites tourner en rond.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} ? Encore un qui ne mérite pas d'être là. Mais je le prends.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Maintenant, le classé. Je ne le répéterai pas.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "C'est une erreur. Je veux la revanche. Maintenant.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Jour 190 sans réponse. Les classés me bloquent ou me fuient.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Ce n'est pas ce que je demandais. Mais d'accord, une dernière fois.",
     "relu": false
    }
   ]
@@ -479,6 +875,36 @@ const MGMT_VOIX=[
     "etiquette": "Forfait",
     "texte": "Je me suis pété le dos en me levant du canapé. C'est pas une blague. Enfin si, mais c'est vrai.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} frappe fort, moi je mange fort. Qui tiendra le plus longtemps ?",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "J'ai gagné et j'ai faim. Bonne soirée à tous, je vais au restaurant.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai perdu, mais j'ai eu un super sandwich avant. Ça compense.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Pesée : 200 grammes de trop. J'ai couru, j'ai pleuré, j'ai ri. Ça passe.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Il y aura un traiteur ? Alors c'est oui.",
+    "relu": false
    }
   ]
  },
@@ -521,6 +947,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite",
     "texte": "Là il m'a fermé la bouche, je le reconnais, c'est rare.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv}, tu es un bon gars. Je vais te dire plein de choses samedi. Tu vas aimer.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Il n'a pas voulu discuter. Je lui ai raconté ma semaine, ça lui a suffi.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Il m'a fait taire, une fois. Je ne lui en veux pas.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "On parle un peu ? Non ? Alors oui, c'est bon.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Je cherche quelqu'un pour discuter. Pas un combattant. Un humain.",
+    "relu": false
    }
   ]
  },
@@ -557,6 +1013,36 @@ const MGMT_VOIX=[
     "etiquette": "Sur l'affiche d'un autre",
     "texte": "Si ces deux-là se battent, moi je paie ma place. Et je paie jamais.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Mesdames et messieurs, {adv} est venu ici pour tomber. Je suis venu pour l'aider.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Huez-moi. Ça ne change rien : je suis le meilleur, et vous l'avez vu.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Un incident. Une erreur d'arbitrage. Une mouche. Je cherche encore.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Chère salle de samedi : mettez vos meilleurs vêtements. Je viens vous décevoir.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Mon nom en gros et ma bourse en plus gros. Alors oui.",
+    "relu": false
    }
   ]
  },
@@ -586,6 +1072,36 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "Je suis dégoûté, mais je vais bien, vraiment. On se voit au pub.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je vais être sincère : j'ai peur, mais je suis content d'être là. Merci de m'écouter.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je pleure comme un enfant. C'est la plus belle soirée de ma vie.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je suis triste. Je vous remercie quand même d'être venus. Vous êtes super.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Une photo de mon coach qui m'enlace. Trois jours avant, il me dit de pas pleurer.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, avec tout mon cœur. Merci de penser à moi.",
     "relu": false
    }
   ]
@@ -623,6 +1139,30 @@ const MGMT_VOIX=[
     "etiquette": "Proposition",
     "texte": "(en langue des signes) Oui. Mais trouvez-moi un bon interprète pour la conférence, le dernier traduisait comme un pied.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "(en langue des signes) Je n'ai pas peur du bruit. Je sens la salle dans mes pieds.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "(en langue des signes) Je dédie ça à ceux qui m'ont dit que ce n'était pas possible.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "(en langue des signes) Ce soir, il a été plus rapide. Je ne l'ai pas vu venir.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "(en langue des signes) Oui. Et faites en sorte que l'interprète soit à l'heure.",
+    "relu": false
    }
   ]
  },
@@ -658,6 +1198,36 @@ const MGMT_VOIX=[
     "situation": "proposition",
     "etiquette": "Proposition",
     "texte": "Il faut que je demande à mon corps. (Il ferme les yeux longtemps.) Il dit oui.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "(par son interprète) Il dit qu'il a médité sur {adv}. Il dit que c'est un frère.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "(par son interprète) Il dit que la nuit lui a parlé. Je n'ai pas tout compris.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "(par son interprète) Il dit que ce n'est pas une défaite, c'est une page.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Une photo d'un arbre. Pas de texte. Il reste trois jours.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "(par son interprète) Il a regardé la lune. La lune dit oui.",
     "relu": false
    }
   ]
@@ -695,6 +1265,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition refusée",
     "texte": "Pas ce mois-là. C'est l'anniversaire du petit. Le mois d'après, qui tu veux.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Ce matin, j'ai préparé le sac de mon fils, puis le mien. Samedi, c'est moi qui gagne.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je vais rentrer et je ferai des crêpes. Merci à ma mère qui garde les enfants.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai perdu. Mon petit m'a dit : maman, ce n'est pas grave. Il a raison.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Réveil à 5 h. Biberon, entraînement, école. Samedi, je me bats.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Je dois d'abord vérifier le calendrier de l'école. Après, oui.",
+    "relu": false
    }
   ]
  },
@@ -730,6 +1330,36 @@ const MGMT_VOIX=[
     "situation": "proposition-a-court-preavis",
     "etiquette": "Proposition à court préavis",
     "texte": "J'ai déjà été [appelé|appelée] avec deux heures de préavis pour des choses beaucoup moins drôles. Oui.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Mission claire : tenir trois rounds, finir au quatrième. On connaît son plan.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Mission accomplie. Merci à l'équipe. On rentre.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Échec de mission. Je prends la faute, on analyse, on repart.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Briefing terminé. Rassemblement samedi 9 h.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Reçu. Dites-moi l'heure.",
     "relu": false
    }
   ]
@@ -767,6 +1397,36 @@ const MGMT_VOIX=[
     "etiquette": "Forfait",
     "texte": "Blessure. Je suis resté chez moi, je le précise. Je sais ce que les gens vont penser.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "J'ai fait des erreurs, j'en fais moins. {adv} va le sentir samedi.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je dédie ça à ceux qui croient encore en moi. Ils sont peu, mais ils comptent.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je ne vais pas craquer. Je rentre, je m'entraîne, je reviens.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Pas de bar ce soir. Seulement du thé et du sommeil.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. J'ai besoin d'un objectif, sinon je tourne en rond.",
+    "relu": false
    }
   ]
  },
@@ -802,6 +1462,36 @@ const MGMT_VOIX=[
     "situation": "proposition-refusee",
     "etiquette": "Proposition refusée",
     "texte": "Lui ? Il n'a aucun abonné, personne ne le connaît, même sa mère ne regarde pas ses combats. Trouve-moi un vrai nom.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv}, viens, on s'explique dans la cage. Le quartier sera là, il regardera.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "C'est pour le quartier ! Pour la bande, pour ceux d'en bas, pour maman !",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai perdu, mais on reste fiers. On rentre manger, on en reparle demain.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Toute la rue sera là. Gardez la place pour les petits, devant.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Lui ? Je le connais pas, mais ok, c'est bon. Envoie.",
     "relu": false
    }
   ]
@@ -839,6 +1529,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition, frappeur",
     "texte": "Un frappeur ? Parfait. Il va découvrir le sol.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je vais prendre ses jambes, l'amener au sol, et attendre que ça passe. C'est sûr.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Quinze minutes au sol, ça fait mal aux genoux. Ça valait le coup.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Il s'est relevé trop vite. Je dois mieux contrôler. Je retourne au tapis.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Séance de lutte du matin. Dix fois la même prise, jusqu'à ce que ça marche.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Un grand frappeur ? Très bien. Je l'emmène au sol, il va voir.",
+    "relu": false
    }
   ]
  },
@@ -875,6 +1595,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition",
     "texte": "Je dois appeler mon père. (Il rappelle dix minutes plus tard.) C'est oui.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Toute la famille sera dans la salle. Je ne peux pas perdre devant eux.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je dédie cette victoire à mes oncles, à ma tante, à toute la famille.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai déçu les miens. On parle à la maison. Après, on verra.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Trois cars de la famille arrivent samedi. Ils vont chanter fort.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Je demande à mon père. Il dit oui.",
+    "relu": false
    }
   ]
  },
@@ -904,6 +1654,36 @@ const MGMT_VOIX=[
     "situation": "inactivite",
     "etiquette": "Inactivité",
     "texte": "Au pays on me demande tous les jours quand je combats. Je sais plus quoi leur répondre.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Tout le {pays} regarde samedi. Je ne veux pas les décevoir.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Pour tous ceux qui ont veillé là-bas. Je rentre à la maison avec un sourire.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je m'excuse auprès du {pays}. Je reviendrai avec la tête haute.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Les messages du {pays} arrivent par centaines. Je les lis tous.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. Pour mon pays, oui.",
     "relu": false
    }
   ]
@@ -935,6 +1715,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite",
     "texte": "Je ne l'avais pas vu. C'est la première fois que je ne vois pas.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je vais le finir au troisième round. Ce n'est pas un défi, c'est un calendrier.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Troisième round, comme prévu. Je n'ai pas de mérite, je lis.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je m'étais trompé de round. Je corrige ma prédiction.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Rappel pour samedi : troisième round. Notez-le.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Il tombera en trois rounds. D'accord.",
+    "relu": false
    }
   ]
  },
@@ -964,6 +1774,36 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "Il connaissait la leçon mieux que moi. Je retourne réviser.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} fait toujours la même erreur au deuxième round. Samedi, on la corrige.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Bon exercice. Je lui mets 12 sur 20, mais il a progressé.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai raté mon cours. L'élève était meilleur que prévu.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Séance de vidéo. Quatre-vingts minutes de notes. Tout est prêt.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Voyons son dossier. Très bien, c'est oui.",
     "relu": false
    }
   ]
@@ -1001,6 +1841,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition refusée",
     "texte": "Lui ? C'est un mob de début de jeu. Donne-moi un boss.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} est un ennemi de niveau 5. Moi je suis niveau 12. Pas de souci.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Combo parfait. Il m'a donné des points d'expérience. Merci {adv}.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Game over. Je recharge la sauvegarde et je recommence.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Nouvelle compétence débloquée : esquive de gauche. Je la teste samedi.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Un boss de fin ? Oui. Je prends toujours les boss.",
+    "relu": false
    }
   ]
  },
@@ -1037,6 +1907,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite, décision fade",
     "texte": "Il a couru pendant quinze minutes. Il a gagné. Ça me donne envie de vomir.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} est venu pour se battre ? Alors on sera deux. Ça va saigner un peu.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Quel combat ! Je lui dois une bière. Et un pansement.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai perdu, mais c'était un super combat. Je recommence quand tu veux.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Nez cassé à l'entraînement. Troisième fois. Je suis content.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Quelqu'un qui frappe fort ? Oui, avec plaisir.",
+    "relu": false
    }
   ]
  },
@@ -1067,6 +1967,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite",
     "texte": "Aujourd'hui je suis tombé. Demain je me relève. C'est ça la leçon. On se voit au sommet.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Quelque part, un jeune regarde. Samedi, je lui montre que c'est possible.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "À tous les jeunes qui regardent : travaillez, croyez, relevez-vous. On se voit au sommet.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je suis tombé. Je me relève demain. Voilà la vraie leçon. On se voit au sommet.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "4 h 40. Un grand verre d'eau. Aujourd'hui, on bouge. On se voit au sommet.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Je prends. Chaque combat est une leçon pour quelqu'un.",
+    "relu": false
    }
   ]
  },
@@ -1096,6 +2026,36 @@ const MGMT_VOIX=[
     "situation": "proposition",
     "etiquette": "Proposition",
     "texte": "Un jeune ? Envoie. Il faut bien que quelqu'un leur apprenne.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} est né quand j'avais déjà dix combats. Samedi, il apprend un truc.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Le métier, ça ne s'achète pas. Merci à ceux qui me l'ont appris.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Il était plus rapide. À mon âge, c'est normal. Je ne regrette rien.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Chaque matin, mes genoux me disent bonjour. Chaque soir, je leur réponds.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Un jeune, encore ? Oui. Il faut bien que quelqu'un leur montre.",
     "relu": false
    }
   ]
@@ -1133,6 +2093,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition",
     "texte": "Combien ? (Il ne demande rien d'autre.)",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je vais me battre pour presque rien. Ça ne change pas grand-chose pour moi.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "J'ai gagné. La bourse, vous la connaissez. Je n'ai rien d'autre à dire.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Perdu. Les juges, vous connaissez leur travail. Moi, le mien.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Soirée sold out. Ma bourse : la même qu'avant. Quelqu'un a compris le système ?",
+    "relu": false
+   },
+   {
+    "situation": "inactivite",
+    "etiquette": "Inactivité",
+    "texte": "{mois} mois sans combat. Je paie mon loyer avec du vent.",
+    "relu": false
    }
   ]
  },
@@ -1162,6 +2152,30 @@ const MGMT_VOIX=[
     "situation": "proposition",
     "etiquette": "Proposition",
     "texte": "Euh, oui, si vous pensez que c'est bien, oui.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Euh… je vais faire de mon mieux. Merci à ceux qui viennent.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Merci… merci beaucoup. Je… j'espère que ma mère regarde.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, si c'est bien pour la carte. Je vous fais confiance.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Camp terminé. Euh… voilà.",
     "relu": false
    }
   ]
@@ -1199,6 +2213,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition refusée",
     "texte": "Il fait pas de vues. Désolé mais il fait pas de vues.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "{adv} n'a pas autant d'abonnés que moi, mais il a plus de dents. On verra samedi.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Dix millions de vues sur ce KO. Abonnez-vous, likez, partagez.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Défaite. Mais mon contenu de ce soir est incroyable. Vidéo bientôt.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Teasing de la pesée : vous n'allez pas croire ce que j'ai mangé avant.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Combien de vues ? Dites-moi ça, après on parle.",
+    "relu": false
    }
   ]
  },
@@ -1228,6 +2272,30 @@ const MGMT_VOIX=[
     "situation": "moment-de-vie-papiers-obtenus",
     "etiquette": "Moment de vie : papiers obtenus",
     "texte": "Aujourd'hui j'ai eu mes papiers. Je peux combattre partout maintenant. Même chez lui.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "J'ai quitté mon pays pour pouvoir faire ça. Samedi, je n'ai pas le droit de rater.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je dédie ça à ceux qui sont restés là-bas et qui regardent sur un téléphone.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je suis tombé. Je me relève. J'ai déjà traversé pire.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. Chaque combat me rapproche des papiers.",
     "relu": false
    }
   ]
@@ -1259,6 +2327,36 @@ const MGMT_VOIX=[
     "etiquette": "Inactivité",
     "texte": "On croit que j'ai des passe-droits. J'attends comme tout le monde. Plus, même.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Tout le monde connaît mon nom. Samedi, ils vont connaître ma boxe.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Mon père m'a serré la main. C'est la première fois qu'il le fait en public.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je ne veux pas qu'on parle de mon père. Je veux qu'on parle du combat.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Un entraînement, un jus d'orange. Je n'ai pas de passe-droit, juste de la fatigue.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Choisissez-moi quelqu'un de difficile. Je veux le mériter.",
+    "relu": false
    }
   ]
  },
@@ -1288,6 +2386,36 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "J'ai perdu. Ça veut pas dire qu'on avait tort d'essayer.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Il y a dix ans, nous étions trois dans la salle. Aujourd'hui, il y en a trente. Samedi, c'est pour elles.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je dédie cette victoire à toutes celles qui ont commencé avant moi.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je ne suis pas la première à perdre. Je ne serai pas la dernière à gagner.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "On m'a demandé si je me bats comme un homme. Je me bats comme moi.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. Et prenez-moi quelqu'un de fort, je ne suis pas là pour faire joli.",
     "relu": false
    }
   ]
@@ -1319,6 +2447,36 @@ const MGMT_VOIX=[
     "etiquette": "Proposition refusée",
     "texte": "Pas ce mois-là, je suis de nuit toute la semaine. Je peux pas lâcher l'équipe.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Combat samedi, boulot lundi. J'ai posé une demi-journée, j'ai hâte.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je dormirai peu cette nuit. Lundi 6 h, je suis au travail. Je souris déjà.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Lundi, mes collègues vont me demander ce qui s'est passé. Je vais mentir un peu.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Entraînement à 6 h, boulot de 9 h à 17 h, salle jusqu'à 21 h. Samedi, je me repose. Enfin non.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Je dois voir si mon chef me libère. Normalement, oui.",
+    "relu": false
    }
   ]
  },
@@ -1342,6 +2500,36 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "Traumatisme crânien léger, d'après le médecin. Je sais ce que ça veut dire, j'ai eu le cours. C'est pas rassurant.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "J'ai un examen mercredi et un combat samedi. Je ne sais pas lequel est le plus dur.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "La bourse paiera mon loyer pour trois mois. Merci {adv}, sincèrement.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je prends deux jours de repos. Après, je retourne aux cours. On verra.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Révision de physiologie dans le vestiaire. Avant, pendant, après la pesée.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, tant que ça ne tombe pas pendant les partiels.",
     "relu": false
    }
   ]
@@ -1373,6 +2561,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite",
     "texte": "J'ai croisé un chat noir dans le parking. Je dis rien de plus.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Combat un vendredi 13 ? Non merci. Changez la date, ou je ne viens pas.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Même chaussettes, même caleçon, même chemin. Ça marche, je ne change rien.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Quelqu'un a marché sur mon sac dans le vestiaire. Voilà. Je ne dis rien de plus.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "J'ai trouvé un trèfle à quatre feuilles dans le parking. Samedi, c'est bon.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Quelle date ? Quel chiffre ? Dites-moi tout avant.",
+    "relu": false
    }
   ]
  },
@@ -1397,6 +2615,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite",
     "texte": "Je perds un combat. J'ai déjà perdu une vie entière, alors ça va.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "À mon âge, on ne court plus après le temps. Samedi, je cours après {adv}.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je ne pensais pas gagner un jour. Le moi de vingt ans rigole.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai perdu, et alors ? J'ai gagné quelque chose avant d'arriver ici.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Footing à 6 h. Pesée à midi. Je fête mes 40 ans la semaine prochaine, on verra.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, dites-moi seulement l'heure. Je me couche tôt.",
+    "relu": false
    }
   ]
  },
@@ -1420,6 +2668,36 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "Il m'a frappé à un endroit où, au judo, personne frappe jamais. Leçon.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Dans mon ancien sport, on gagnait aux points. Ici, on gagne en frappant. Je m'adapte.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Ma vieille prise a servi. Ça marche aussi dans une cage.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Il a frappé là où mon ancien sport ne frappe pas. Je corrige.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Séance de sparring avec mon ancien club. Ils me regardent bizarrement. Moi aussi.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. Je veux continuer à apprendre.",
     "relu": false
    }
   ]
@@ -1451,6 +2729,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite",
     "texte": "Ce soir j'écris un morceau triste. Il va être très bon.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Samedi, j'écris un couplet sur le visage de {adv}. Je le chanterai après.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "J'ai gagné. Le refrain est trouvé. Merci à tous, à vendredi pour le son.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Cette défaite fera un très bon morceau. Ne vous inquiétez pas.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Un nouveau texte ce soir. Un nouveau KO samedi. Même combat, même rythme.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, avec un bon éclairage et un bon son. Je fais ça aussi.",
+    "relu": false
    }
   ]
  },
@@ -1474,6 +2782,30 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "Je crois que c'est fini. Je crois. Je vous dirai.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je ne dors plus bien. Mais je suis là. C'est déjà beaucoup.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Je ne sais pas ce que je ressens. Peut-être du soulagement.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je crois que c'est moins grave que ce que je craignais. Mais je ne sais pas.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Je vais y penser. Je vais dire oui. Je crois.",
     "relu": false
    }
   ]
@@ -1499,6 +2831,36 @@ const MGMT_VOIX=[
     "etiquette": "Inactivité",
     "texte": "Chaque mois sans combat, c'est un mois où c'est ma mère qui compte. Je veux pas que ma mère compte.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je me bats pour mes frères et sœurs. Samedi, je ne les décevrai pas.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Ça fait une année scolaire payée pour ma petite sœur. C'est ma ceinture.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je dis à ma mère que ça va. Je suis fatigué, mais ça va.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Réveil à 5 h, entraînement, dîner, devoirs de mon petit frère. Je dors à 23 h.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. Dites-moi combien, et je signe.",
+    "relu": false
    }
   ]
  },
@@ -1522,6 +2884,36 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "J'ai mal au cœur plus qu'au visage. C'est normal je crois.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je suis très ému à l'idée d'y aller. J'ai déjà pleuré deux fois ce matin.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Merci, merci, merci. Je ne pensais pas que j'allais y arriver.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "J'ai pleuré dans le vestiaire. Je reviens plus fort, je promets.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Mon coach m'a pris dans ses bras. Je n'ai plus de larmes.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, et merci de penser à moi. Ça me touche.",
     "relu": false
    }
   ]
@@ -1553,6 +2945,36 @@ const MGMT_VOIX=[
     "etiquette": "Micro Tendu",
     "texte": "Q. Tu joues aux échecs ? — R. Pourquoi, vous voulez perdre ?",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "J'ai trois plans. Samedi, {adv} n'en verra qu'un. Il choisira le mauvais.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "Le plan B était meilleur que le plan A. Je ne dis pas ce qu'est le plan C.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Il a lu mon jeu au premier round. Je note. On change tout.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Une photo d'un échiquier. Pas de texte. Il reste deux jours.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Donnez-moi sa vidéo. Après, je dirai oui ou non.",
+    "relu": false
    }
   ]
  },
@@ -1583,6 +3005,36 @@ const MGMT_VOIX=[
     "etiquette": "Défaite",
     "texte": "Je vais faire la fête quand même. On fête la défaite aussi, sinon on fête jamais rien.",
     "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Combat samedi, soirée dimanche. Je ne dis pas où, mais il y aura de la musique.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "On rentre tard. On rentre bien. Merci à tous, je paye la tournée.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "On va fêter ça quand même. Perdre, c'est aussi une occasion de boire à la santé des autres.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "J'ai promis de dormir tôt. J'ai menti. Voilà, c'est dit.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui, tant qu'il y a une fête après.",
+    "relu": false
    }
   ]
  },
@@ -1612,6 +3064,36 @@ const MGMT_VOIX=[
     "situation": "defaite",
     "etiquette": "Défaite",
     "texte": "J'ai perdu. Mais le vieux moi, je l'ai battu il y a longtemps.",
+    "relu": false
+   },
+   {
+    "situation": "annonce",
+    "etiquette": "Annonce",
+    "texte": "Je me suis levé tous les matins pendant cinq ans. Samedi, on voit si ça a payé.",
+    "relu": false
+   },
+   {
+    "situation": "victoire",
+    "etiquette": "Victoire",
+    "texte": "À celui que j'étais : regarde-moi. À ceux qui m'ont suivi : merci.",
+    "relu": false
+   },
+   {
+    "situation": "defaite",
+    "etiquette": "Défaite",
+    "texte": "Je ne perds pas, j'apprends. Le moi d'avant n'aurait pas essayé.",
+    "relu": false
+   },
+   {
+    "situation": "reseaux",
+    "etiquette": "Réseaux",
+    "texte": "Un vieux pantalon trop grand, accroché dans le vestiaire. Il me rappelle tout.",
+    "relu": false
+   },
+   {
+    "situation": "proposition",
+    "etiquette": "Proposition",
+    "texte": "Oui. Je veux continuer à me surprendre.",
     "relu": false
    }
   ]

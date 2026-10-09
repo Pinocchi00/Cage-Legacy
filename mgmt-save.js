@@ -324,6 +324,8 @@ function validateMgmt(raw){
     }
   }
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
+  /* Retours du 09/10/2026 : la graine de la partie (facultative : une partie d'avant n'en a pas). */
+  if(raw.graine!==undefined&&(typeof raw.graine!=='string'||!/^[0-9a-z]{1,16}$/.test(raw.graine))) return false;
   return true;
 }
 

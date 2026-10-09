@@ -4,8 +4,15 @@
    possède un flux mulberry32 indépendant, semé par l'identifiant. ==== */
 const MGMT_IDENTITE_GENERATION=1;
 
+/** Retours d'Anthony du 09/10/2026 (« sur une partie de A à Z tout doit toujours être différent ») : chaque partie neuve porte sa graine (`m.graine`, lue sur la RNG à la création), et tout ce qui se déduit d'un identifiant s'en sale — le combattant « mg1 » n'a plus le même métier, le même surnom, la même voix dans deux parties. Sans graine (une partie d'avant) : le sel est vide, rien ne bouge. */
+function mgmtSel(){
+  const m=typeof G!=='undefined'&&G&&G.mgmt;
+  return m&&typeof m.graine==='string'&&m.graine?m.graine+'|':'';
+}
+/** La graine d'une partie neuve : l'état de la RNG à cet instant (lecture seule, aucun tirage). */
+function mgmtGraineNeuve(){ return (SEED>>>0).toString(36); }
 function mgmtIdentiteStream(id,couche){
-  return mulberry32(duelFnv1a32('mgmt-identite|'+String(id)+'|'+couche));
+  return mulberry32(duelFnv1a32('mgmt-identite|'+mgmtSel()+String(id)+'|'+couche));
 }
 function mgmtIdentitePick(id,couche,liste){
   return liste[Math.floor(mgmtIdentiteStream(id,couche)()*liste.length)];

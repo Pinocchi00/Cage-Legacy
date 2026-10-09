@@ -1,8 +1,8 @@
-# Les textes à relire — 998 textes (corrections du 08/10/2026, lot 7.3)
+# Les textes à relire — 1801 textes (corrections du 08/10/2026, lot 7.3)
 
 Export généré par `tools/exporter-textes.js`. **Aucun texte n'est modifié par l'outil.** Chaque ligne est un texte marqué `relu:false` : coche-la quand tu l'as relue, réécris-la dans le fichier de données, puis passe sa marque à `relu:true`. Les voix des combattants viennent d'un document (`docs/LES-VOIX-DES-COMBATTANTS-v2.md`) : on y corrige d'abord le document, puis on relance `tools/extraire-voix.js`.
 
-## Humanité (surnoms, métiers, milieux, moments de vie, rituels, rôles, trajectoires) — 578 textes
+## Humanité (surnoms, métiers, milieux, moments de vie, rituels, rôles, trajectoires) — 1020 textes
 
 Fichier : `mgmt-humanite-data.js`
 
@@ -26,6 +26,26 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.fr.personnalite[17]` : Le Sourire
 - [ ] `MGMT_SURNOMS.fr.personnalite[18]` : Pas-de-Chance
 - [ ] `MGMT_SURNOMS.fr.personnalite[19]` : L'Insolent
+- [ ] `MGMT_SURNOMS.fr.personnalite[20]` : Le Calme
+- [ ] `MGMT_SURNOMS.fr.personnalite[21]` : La Flèche
+- [ ] `MGMT_SURNOMS.fr.personnalite[22]` : Le Sérieux
+- [ ] `MGMT_SURNOMS.fr.personnalite[23]` : Bon-Cœur
+- [ ] `MGMT_SURNOMS.fr.personnalite[24]` : Le Rusé
+- [ ] `MGMT_SURNOMS.fr.personnalite[25]` : Fil-de-Soie
+- [ ] `MGMT_SURNOMS.fr.personnalite[26]` : Le Têtu
+- [ ] `MGMT_SURNOMS.fr.personnalite[27]` : La Tornade
+- [ ] `MGMT_SURNOMS.fr.personnalite[28]` : Sans-Peur
+- [ ] `MGMT_SURNOMS.fr.personnalite[29]` : Le Silencieux
+- [ ] `MGMT_SURNOMS.fr.personnalite[30]` : Le Malin
+- [ ] `MGMT_SURNOMS.fr.personnalite[31]` : Le Bagarreur
+- [ ] `MGMT_SURNOMS.fr.personnalite[32]` : Petit-Bras
+- [ ] `MGMT_SURNOMS.fr.personnalite[33]` : Le Joyeux
+- [ ] `MGMT_SURNOMS.fr.personnalite[34]` : Rase-Mottes
+- [ ] `MGMT_SURNOMS.fr.personnalite[35]` : Le Fidèle
+- [ ] `MGMT_SURNOMS.fr.personnalite[36]` : La Terreur
+- [ ] `MGMT_SURNOMS.fr.personnalite[37]` : Cœur-Vaillant
+- [ ] `MGMT_SURNOMS.fr.personnalite[38]` : Le Discret
+- [ ] `MGMT_SURNOMS.fr.personnalite[39]` : Le Fougueux
 - [ ] `MGMT_SURNOMS.fr.metiers[0]` : Le Notaire
 - [ ] `MGMT_SURNOMS.fr.metiers[1]` : L'Horloger
 - [ ] `MGMT_SURNOMS.fr.metiers[2]` : Le Couvreur
@@ -46,6 +66,26 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.fr.metiers[17]` : L'Huissier
 - [ ] `MGMT_SURNOMS.fr.metiers[18]` : Le Menuisier
 - [ ] `MGMT_SURNOMS.fr.metiers[19]` : Le Chaudronnier
+- [ ] `MGMT_SURNOMS.fr.metiers[20]` : Le Cordiste
+- [ ] `MGMT_SURNOMS.fr.metiers[21]` : Le Soudeur
+- [ ] `MGMT_SURNOMS.fr.metiers[22]` : Le Docker
+- [ ] `MGMT_SURNOMS.fr.metiers[23]` : Le Cariste
+- [ ] `MGMT_SURNOMS.fr.metiers[24]` : Le Boucher
+- [ ] `MGMT_SURNOMS.fr.metiers[25]` : Le Serveur
+- [ ] `MGMT_SURNOMS.fr.metiers[26]` : Le Barman
+- [ ] `MGMT_SURNOMS.fr.metiers[27]` : Le Cuisinier
+- [ ] `MGMT_SURNOMS.fr.metiers[28]` : Le Pâtissier
+- [ ] `MGMT_SURNOMS.fr.metiers[29]` : Le Mineur
+- [ ] `MGMT_SURNOMS.fr.metiers[30]` : Le Berger
+- [ ] `MGMT_SURNOMS.fr.metiers[31]` : Le Jardinier
+- [ ] `MGMT_SURNOMS.fr.metiers[32]` : Le Taxi
+- [ ] `MGMT_SURNOMS.fr.metiers[33]` : Le Gendarme
+- [ ] `MGMT_SURNOMS.fr.metiers[34]` : Le Pizzaïolo
+- [ ] `MGMT_SURNOMS.fr.metiers[35]` : Le Coiffeur
+- [ ] `MGMT_SURNOMS.fr.metiers[36]` : Le Barbier
+- [ ] `MGMT_SURNOMS.fr.metiers[37]` : Le Photographe
+- [ ] `MGMT_SURNOMS.fr.metiers[38]` : Le Danseur
+- [ ] `MGMT_SURNOMS.fr.metiers[39]` : Le Cascadeur
 - [ ] `MGMT_SURNOMS.fr.animaux[0]` : La Mangouste
 - [ ] `MGMT_SURNOMS.fr.animaux[1]` : Le Frelon
 - [ ] `MGMT_SURNOMS.fr.animaux[2]` : Le Sanglier
@@ -66,6 +106,26 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.fr.animaux[17]` : La Vipère
 - [ ] `MGMT_SURNOMS.fr.animaux[18]` : Le Chacal
 - [ ] `MGMT_SURNOMS.fr.animaux[19]` : Le Corbeau
+- [ ] `MGMT_SURNOMS.fr.animaux[20]` : La Loutre
+- [ ] `MGMT_SURNOMS.fr.animaux[21]` : Le Lynx
+- [ ] `MGMT_SURNOMS.fr.animaux[22]` : Le Renard
+- [ ] `MGMT_SURNOMS.fr.animaux[23]` : La Panthère
+- [ ] `MGMT_SURNOMS.fr.animaux[24]` : Le Faucon
+- [ ] `MGMT_SURNOMS.fr.animaux[25]` : Le Lion
+- [ ] `MGMT_SURNOMS.fr.animaux[26]` : Le Requin
+- [ ] `MGMT_SURNOMS.fr.animaux[27]` : Le Dogue
+- [ ] `MGMT_SURNOMS.fr.animaux[28]` : Le Cobra
+- [ ] `MGMT_SURNOMS.fr.animaux[29]` : Le Scorpion
+- [ ] `MGMT_SURNOMS.fr.animaux[30]` : La Hyène
+- [ ] `MGMT_SURNOMS.fr.animaux[31]` : Le Loup
+- [ ] `MGMT_SURNOMS.fr.animaux[32]` : Le Rhino
+- [ ] `MGMT_SURNOMS.fr.animaux[33]` : La Mule
+- [ ] `MGMT_SURNOMS.fr.animaux[34]` : L'Aigle
+- [ ] `MGMT_SURNOMS.fr.animaux[35]` : Le Putois
+- [ ] `MGMT_SURNOMS.fr.animaux[36]` : Le Furet
+- [ ] `MGMT_SURNOMS.fr.animaux[37]` : La Tortue
+- [ ] `MGMT_SURNOMS.fr.animaux[38]` : Le Hérisson
+- [ ] `MGMT_SURNOMS.fr.animaux[39]` : Le Cerf
 - [ ] `MGMT_SURNOMS.fr.armes[0]` : L'Enclume
 - [ ] `MGMT_SURNOMS.fr.armes[1]` : Casse-Noix
 - [ ] `MGMT_SURNOMS.fr.armes[2]` : Brise-Os
@@ -86,6 +146,26 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.fr.armes[17]` : La Marée
 - [ ] `MGMT_SURNOMS.fr.armes[18]` : Coup-de-Grisou
 - [ ] `MGMT_SURNOMS.fr.armes[19]` : Pique-Feu
+- [ ] `MGMT_SURNOMS.fr.armes[20]` : Le Marteau
+- [ ] `MGMT_SURNOMS.fr.armes[21]` : La Hache
+- [ ] `MGMT_SURNOMS.fr.armes[22]` : Le Burin
+- [ ] `MGMT_SURNOMS.fr.armes[23]` : L'Étau
+- [ ] `MGMT_SURNOMS.fr.armes[24]` : La Masse
+- [ ] `MGMT_SURNOMS.fr.armes[25]` : Le Pic
+- [ ] `MGMT_SURNOMS.fr.armes[26]` : La Pince
+- [ ] `MGMT_SURNOMS.fr.armes[27]` : Coup-de-Poing
+- [ ] `MGMT_SURNOMS.fr.armes[28]` : Fer-Blanc
+- [ ] `MGMT_SURNOMS.fr.armes[29]` : Poing-d'Acier
+- [ ] `MGMT_SURNOMS.fr.armes[30]` : La Tempête
+- [ ] `MGMT_SURNOMS.fr.armes[31]` : Le Tonnerre
+- [ ] `MGMT_SURNOMS.fr.armes[32]` : L'Éclair
+- [ ] `MGMT_SURNOMS.fr.armes[33]` : La Foudre
+- [ ] `MGMT_SURNOMS.fr.armes[34]` : Le Béton
+- [ ] `MGMT_SURNOMS.fr.armes[35]` : La Pierre
+- [ ] `MGMT_SURNOMS.fr.armes[36]` : Le Fer
+- [ ] `MGMT_SURNOMS.fr.armes[37]` : Le Chêne
+- [ ] `MGMT_SURNOMS.fr.armes[38]` : La Falaise
+- [ ] `MGMT_SURNOMS.fr.armes[39]` : Le Typhon
 - [ ] `MGMT_SURNOMS.fr.droles[0]` : Tonneau
 - [ ] `MGMT_SURNOMS.fr.droles[1]` : Quart-d'Heure
 - [ ] `MGMT_SURNOMS.fr.droles[2]` : Bout-d'Allumette
@@ -101,6 +181,21 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.fr.droles[12]` : Chaussette
 - [ ] `MGMT_SURNOMS.fr.droles[13]` : Gros-Câlin
 - [ ] `MGMT_SURNOMS.fr.droles[14]` : La Sieste
+- [ ] `MGMT_SURNOMS.fr.droles[15]` : Pantoufle
+- [ ] `MGMT_SURNOMS.fr.droles[16]` : Le Pépère
+- [ ] `MGMT_SURNOMS.fr.droles[17]` : Rondelet
+- [ ] `MGMT_SURNOMS.fr.droles[18]` : Petit-Pois
+- [ ] `MGMT_SURNOMS.fr.droles[19]` : Saucisson
+- [ ] `MGMT_SURNOMS.fr.droles[20]` : Bouillon
+- [ ] `MGMT_SURNOMS.fr.droles[21]` : Biscotte
+- [ ] `MGMT_SURNOMS.fr.droles[22]` : Mimosa
+- [ ] `MGMT_SURNOMS.fr.droles[23]` : Crevette
+- [ ] `MGMT_SURNOMS.fr.droles[24]` : Zigoto
+- [ ] `MGMT_SURNOMS.fr.droles[25]` : Le Marquis
+- [ ] `MGMT_SURNOMS.fr.droles[26]` : Bricolo
+- [ ] `MGMT_SURNOMS.fr.droles[27]` : Chouquette
+- [ ] `MGMT_SURNOMS.fr.droles[28]` : Patatras
+- [ ] `MGMT_SURNOMS.fr.droles[29]` : Gros-Nounours
 - [ ] `MGMT_SURNOMS.en.general[0]` : The Anvil
 - [ ] `MGMT_SURNOMS.en.general[1]` : Nightshift
 - [ ] `MGMT_SURNOMS.en.general[2]` : The Locksmith
@@ -141,6 +236,46 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.en.general[37]` : The Hammer
 - [ ] `MGMT_SURNOMS.en.general[38]` : The Beast
 - [ ] `MGMT_SURNOMS.en.general[39]` : The Machine
+- [ ] `MGMT_SURNOMS.en.general[40]` : The Closer
+- [ ] `MGMT_SURNOMS.en.general[41]` : Ironclad
+- [ ] `MGMT_SURNOMS.en.general[42]` : The Janitor
+- [ ] `MGMT_SURNOMS.en.general[43]` : Sledgehammer
+- [ ] `MGMT_SURNOMS.en.general[44]` : Cinderblock
+- [ ] `MGMT_SURNOMS.en.general[45]` : The Pitbull
+- [ ] `MGMT_SURNOMS.en.general[46]` : The Drifter
+- [ ] `MGMT_SURNOMS.en.general[47]` : Old Boots
+- [ ] `MGMT_SURNOMS.en.general[48]` : Roadkill
+- [ ] `MGMT_SURNOMS.en.general[49]` : The Professor
+- [ ] `MGMT_SURNOMS.en.general[50]` : Hard Rain
+- [ ] `MGMT_SURNOMS.en.general[51]` : The Crowbar
+- [ ] `MGMT_SURNOMS.en.general[52]` : The Fisherman
+- [ ] `MGMT_SURNOMS.en.general[53]` : Highway
+- [ ] `MGMT_SURNOMS.en.general[54]` : The Welder
+- [ ] `MGMT_SURNOMS.en.general[55]` : The Ghost
+- [ ] `MGMT_SURNOMS.en.general[56]` : The Barber
+- [ ] `MGMT_SURNOMS.en.general[57]` : Big Easy
+- [ ] `MGMT_SURNOMS.en.general[58]` : Hot Sauce
+- [ ] `MGMT_SURNOMS.en.general[59]` : The Farmer
+- [ ] `MGMT_SURNOMS.en.general[60]` : Steel Toe
+- [ ] `MGMT_SURNOMS.en.general[61]` : Thunderhead
+- [ ] `MGMT_SURNOMS.en.general[62]` : Pocket Rocket
+- [ ] `MGMT_SURNOMS.en.general[63]` : The Lumberjack
+- [ ] `MGMT_SURNOMS.en.general[64]` : Dusty
+- [ ] `MGMT_SURNOMS.en.general[65]` : Black Ice
+- [ ] `MGMT_SURNOMS.en.general[66]` : The Milkman
+- [ ] `MGMT_SURNOMS.en.general[67]` : Boxcar
+- [ ] `MGMT_SURNOMS.en.general[68]` : The Sheriff
+- [ ] `MGMT_SURNOMS.en.general[69]` : Redline
+- [ ] `MGMT_SURNOMS.en.general[70]` : The Bouncer
+- [ ] `MGMT_SURNOMS.en.general[71]` : Old Smoke
+- [ ] `MGMT_SURNOMS.en.general[72]` : Switchblade
+- [ ] `MGMT_SURNOMS.en.general[73]` : The Gardener
+- [ ] `MGMT_SURNOMS.en.general[74]` : Loose Change
+- [ ] `MGMT_SURNOMS.en.general[75]` : Dead Weight
+- [ ] `MGMT_SURNOMS.en.general[76]` : Quicksilver
+- [ ] `MGMT_SURNOMS.en.general[77]` : The Carpenter
+- [ ] `MGMT_SURNOMS.en.general[78]` : Blacktop
+- [ ] `MGMT_SURNOMS.en.general[79]` : The Hurricane
 - [ ] `MGMT_SURNOMS.pt.general[0]` : Tijolo
 - [ ] `MGMT_SURNOMS.pt.general[1]` : Marreta
 - [ ] `MGMT_SURNOMS.pt.general[2]` : Furacão
@@ -166,6 +301,31 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.pt.general[22]` : Boca de Ferro
 - [ ] `MGMT_SURNOMS.pt.general[23]` : Tubarão
 - [ ] `MGMT_SURNOMS.pt.general[24]` : Mão Pesada
+- [ ] `MGMT_SURNOMS.pt.general[25]` : Touro
+- [ ] `MGMT_SURNOMS.pt.general[26]` : Onça
+- [ ] `MGMT_SURNOMS.pt.general[27]` : Lobo
+- [ ] `MGMT_SURNOMS.pt.general[28]` : Gavião
+- [ ] `MGMT_SURNOMS.pt.general[29]` : Jacaré
+- [ ] `MGMT_SURNOMS.pt.general[30]` : Barata
+- [ ] `MGMT_SURNOMS.pt.general[31]` : Machado
+- [ ] `MGMT_SURNOMS.pt.general[32]` : Pedra
+- [ ] `MGMT_SURNOMS.pt.general[33]` : Ferro
+- [ ] `MGMT_SURNOMS.pt.general[34]` : Raio
+- [ ] `MGMT_SURNOMS.pt.general[35]` : Cobra
+- [ ] `MGMT_SURNOMS.pt.general[36]` : Carcará
+- [ ] `MGMT_SURNOMS.pt.general[37]` : Gigante
+- [ ] `MGMT_SURNOMS.pt.general[38]` : Pinguim
+- [ ] `MGMT_SURNOMS.pt.general[39]` : Bala
+- [ ] `MGMT_SURNOMS.pt.general[40]` : Brasa
+- [ ] `MGMT_SURNOMS.pt.general[41]` : Fogo
+- [ ] `MGMT_SURNOMS.pt.general[42]` : Mestre
+- [ ] `MGMT_SURNOMS.pt.general[43]` : Doutor
+- [ ] `MGMT_SURNOMS.pt.general[44]` : Cigano
+- [ ] `MGMT_SURNOMS.pt.general[45]` : Capitão
+- [ ] `MGMT_SURNOMS.pt.general[46]` : Zagueiro
+- [ ] `MGMT_SURNOMS.pt.general[47]` : Tempestade
+- [ ] `MGMT_SURNOMS.pt.general[48]` : Jaguar
+- [ ] `MGMT_SURNOMS.pt.general[49]` : Ponta-Firme
 - [ ] `MGMT_SURNOMS.es.general[0]` : El Martillo
 - [ ] `MGMT_SURNOMS.es.general[1]` : La Mula
 - [ ] `MGMT_SURNOMS.es.general[2]` : El Alacrán
@@ -186,6 +346,26 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.es.general[17]` : Sin Miedo
 - [ ] `MGMT_SURNOMS.es.general[18]` : El Terco
 - [ ] `MGMT_SURNOMS.es.general[19]` : El Albañil
+- [ ] `MGMT_SURNOMS.es.general[20]` : El Toro
+- [ ] `MGMT_SURNOMS.es.general[21]` : El Lobo
+- [ ] `MGMT_SURNOMS.es.general[22]` : La Pantera
+- [ ] `MGMT_SURNOMS.es.general[23]` : El Águila
+- [ ] `MGMT_SURNOMS.es.general[24]` : El Cóndor
+- [ ] `MGMT_SURNOMS.es.general[25]` : El Tigre
+- [ ] `MGMT_SURNOMS.es.general[26]` : La Roca
+- [ ] `MGMT_SURNOMS.es.general[27]` : El Yunque
+- [ ] `MGMT_SURNOMS.es.general[28]` : El Sapo
+- [ ] `MGMT_SURNOMS.es.general[29]` : La Piedra
+- [ ] `MGMT_SURNOMS.es.general[30]` : El Huracán
+- [ ] `MGMT_SURNOMS.es.general[31]` : El Fantasma
+- [ ] `MGMT_SURNOMS.es.general[32]` : El Carnicero
+- [ ] `MGMT_SURNOMS.es.general[33]` : El Mecánico
+- [ ] `MGMT_SURNOMS.es.general[34]` : El Doctor
+- [ ] `MGMT_SURNOMS.es.general[35]` : El Cura
+- [ ] `MGMT_SURNOMS.es.general[36]` : El Ñato
+- [ ] `MGMT_SURNOMS.es.general[37]` : Pie de Plomo
+- [ ] `MGMT_SURNOMS.es.general[38]` : El Pistolero
+- [ ] `MGMT_SURNOMS.es.general[39]` : Mano Dura
 - [ ] `MGMT_SURNOMS.ja.general[0]` : Kaminari
 - [ ] `MGMT_SURNOMS.ja.general[1]` : Tetsu
 - [ ] `MGMT_SURNOMS.ja.general[2]` : Kuma
@@ -198,6 +378,18 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.ja.general[9]` : Oni
 - [ ] `MGMT_SURNOMS.ja.general[10]` : Kawauso
 - [ ] `MGMT_SURNOMS.ja.general[11]` : Hibana
+- [ ] `MGMT_SURNOMS.ja.general[12]` : Hayate
+- [ ] `MGMT_SURNOMS.ja.general[13]` : Ryu
+- [ ] `MGMT_SURNOMS.ja.general[14]` : Saru
+- [ ] `MGMT_SURNOMS.ja.general[15]` : Washi
+- [ ] `MGMT_SURNOMS.ja.general[16]` : Ishi
+- [ ] `MGMT_SURNOMS.ja.general[17]` : Ikazuchi
+- [ ] `MGMT_SURNOMS.ja.general[18]` : Taka
+- [ ] `MGMT_SURNOMS.ja.general[19]` : Kiba
+- [ ] `MGMT_SURNOMS.ja.general[20]` : Daruma
+- [ ] `MGMT_SURNOMS.ja.general[21]` : Tsubame
+- [ ] `MGMT_SURNOMS.ja.general[22]` : Maru
+- [ ] `MGMT_SURNOMS.ja.general[23]` : Tanuki
 - [ ] `MGMT_SURNOMS.ru.general[0]` : Medved
 - [ ] `MGMT_SURNOMS.ru.general[1]` : Molot
 - [ ] `MGMT_SURNOMS.ru.general[2]` : Kuvalda
@@ -208,18 +400,40 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_SURNOMS.ru.general[7]` : Sokol
 - [ ] `MGMT_SURNOMS.ru.general[8]` : Gorets
 - [ ] `MGMT_SURNOMS.ru.general[9]` : Batyr
+- [ ] `MGMT_SURNOMS.ru.general[10]` : Bars
+- [ ] `MGMT_SURNOMS.ru.general[11]` : Orel
+- [ ] `MGMT_SURNOMS.ru.general[12]` : Zhelezo
+- [ ] `MGMT_SURNOMS.ru.general[13]` : Snayper
+- [ ] `MGMT_SURNOMS.ru.general[14]` : Grom
+- [ ] `MGMT_SURNOMS.ru.general[15]` : Skala
+- [ ] `MGMT_SURNOMS.ru.general[16]` : Rys
+- [ ] `MGMT_SURNOMS.ru.general[17]` : Yastreb
+- [ ] `MGMT_SURNOMS.ru.general[18]` : Beton
+- [ ] `MGMT_SURNOMS.ru.general[19]` : Bulat
 - [ ] `MGMT_SURNOMS.ko.general[0]` : The Korean Bulldozer
 - [ ] `MGMT_SURNOMS.ko.general[1]` : The Korean Wolf
 - [ ] `MGMT_SURNOMS.ko.general[2]` : The Korean Mailman
 - [ ] `MGMT_SURNOMS.ko.general[3]` : The Seoul Train
+- [ ] `MGMT_SURNOMS.ko.general[4]` : The Busan Bull
+- [ ] `MGMT_SURNOMS.ko.general[5]` : The Korean Tiger
+- [ ] `MGMT_SURNOMS.ko.general[6]` : The Han River
+- [ ] `MGMT_SURNOMS.ko.general[7]` : The Seoul Hammer
 - [ ] `MGMT_SURNOMS.ge.general[0]` : The Georgian Bull
 - [ ] `MGMT_SURNOMS.ge.general[1]` : Lomi
+- [ ] `MGMT_SURNOMS.ge.general[2]` : The Tbilisi Wolf
+- [ ] `MGMT_SURNOMS.ge.general[3]` : The Caucasus
 - [ ] `MGMT_SURNOMS.pl.general[0]` : Mlot
 - [ ] `MGMT_SURNOMS.pl.general[1]` : Wilk
+- [ ] `MGMT_SURNOMS.pl.general[2]` : Zubr
+- [ ] `MGMT_SURNOMS.pl.general[3]` : Kowal
 - [ ] `MGMT_SURNOMS_PROVENANCE[0]` : Le Gamin de {ville}
 - [ ] `MGMT_SURNOMS_PROVENANCE[1]` : La Fierté de {ville}
 - [ ] `MGMT_SURNOMS_PROVENANCE[2]` : {Ville} Kid
 - [ ] `MGMT_SURNOMS_PROVENANCE[3]` : Le Mur de {ville}
+- [ ] `MGMT_SURNOMS_PROVENANCE[4]` : Le Petit de {ville}
+- [ ] `MGMT_SURNOMS_PROVENANCE[5]` : Le Roc de {ville}
+- [ ] `MGMT_SURNOMS_PROVENANCE[6]` : {Ville} Express
+- [ ] `MGMT_SURNOMS_PROVENANCE[7]` : Le Poing de {ville}
 - [ ] `MGMT_METIERS.Bâtiment et travaux[0]` : maçon
 - [ ] `MGMT_METIERS.Bâtiment et travaux[1]` : couvreur
 - [ ] `MGMT_METIERS.Bâtiment et travaux[2]` : électricien
@@ -240,6 +454,26 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Bâtiment et travaux[17]` : élagueur
 - [ ] `MGMT_METIERS.Bâtiment et travaux[18]` : démolisseur
 - [ ] `MGMT_METIERS.Bâtiment et travaux[19]` : étancheur
+- [ ] `MGMT_METIERS.Bâtiment et travaux[20]` : serrurier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[21]` : ferronnier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[22]` : vitrier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[23]` : solier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[24]` : façadier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[25]` : terrassier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[26]` : canalisateur
+- [ ] `MGMT_METIERS.Bâtiment et travaux[27]` : ouvrier routier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[28]` : poseur de fenêtres
+- [ ] `MGMT_METIERS.Bâtiment et travaux[29]` : chauffagiste
+- [ ] `MGMT_METIERS.Bâtiment et travaux[30]` : ramoneur
+- [ ] `MGMT_METIERS.Bâtiment et travaux[31]` : vitrier de chantier
+- [ ] `MGMT_METIERS.Bâtiment et travaux[32]` : tailleur de pierre
+- [ ] `MGMT_METIERS.Bâtiment et travaux[33]` : coffreur
+- [ ] `MGMT_METIERS.Bâtiment et travaux[34]` : ouvrier du béton
+- [ ] `MGMT_METIERS.Bâtiment et travaux[35]` : installateur de clim
+- [ ] `MGMT_METIERS.Bâtiment et travaux[36]` : monteur de cuisines
+- [ ] `MGMT_METIERS.Bâtiment et travaux[37]` : poseur de parquet
+- [ ] `MGMT_METIERS.Bâtiment et travaux[38]` : staffeur
+- [ ] `MGMT_METIERS.Bâtiment et travaux[39]` : maçon-coffreur
 - [ ] `MGMT_METIERS.Industrie et logistique[0]` : ouvrier en usine
 - [ ] `MGMT_METIERS.Industrie et logistique[1]` : cariste
 - [ ] `MGMT_METIERS.Industrie et logistique[2]` : préparateur de commandes
@@ -255,6 +489,21 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Industrie et logistique[12]` : ouvrier en abattoir
 - [ ] `MGMT_METIERS.Industrie et logistique[13]` : opérateur de ligne
 - [ ] `MGMT_METIERS.Industrie et logistique[14]` : magasinier
+- [ ] `MGMT_METIERS.Industrie et logistique[15]` : tourneur-fraiseur
+- [ ] `MGMT_METIERS.Industrie et logistique[16]` : ajusteur
+- [ ] `MGMT_METIERS.Industrie et logistique[17]` : opérateur sur machine
+- [ ] `MGMT_METIERS.Industrie et logistique[18]` : électromécanicien
+- [ ] `MGMT_METIERS.Industrie et logistique[19]` : contrôleur qualité
+- [ ] `MGMT_METIERS.Industrie et logistique[20]` : ouvrier en verrerie
+- [ ] `MGMT_METIERS.Industrie et logistique[21]` : ouvrier papetier
+- [ ] `MGMT_METIERS.Industrie et logistique[22]` : agent de maintenance
+- [ ] `MGMT_METIERS.Industrie et logistique[23]` : conducteur de presse
+- [ ] `MGMT_METIERS.Industrie et logistique[24]` : ouvrier du textile
+- [ ] `MGMT_METIERS.Industrie et logistique[25]` : ouvrier de scierie
+- [ ] `MGMT_METIERS.Industrie et logistique[26]` : emballeur
+- [ ] `MGMT_METIERS.Industrie et logistique[27]` : chef d'équipe en entrepôt
+- [ ] `MGMT_METIERS.Industrie et logistique[28]` : ouvrier en fonderie
+- [ ] `MGMT_METIERS.Industrie et logistique[29]` : monteur en chaîne
 - [ ] `MGMT_METIERS.Transport[0]` : livreur à scooter
 - [ ] `MGMT_METIERS.Transport[1]` : coursier à vélo
 - [ ] `MGMT_METIERS.Transport[2]` : chauffeur routier
@@ -265,6 +514,16 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Transport[7]` : convoyeur de fonds
 - [ ] `MGMT_METIERS.Transport[8]` : marin pêcheur
 - [ ] `MGMT_METIERS.Transport[9]` : matelot de commerce
+- [ ] `MGMT_METIERS.Transport[10]` : conducteur de tram
+- [ ] `MGMT_METIERS.Transport[11]` : conducteur de train
+- [ ] `MGMT_METIERS.Transport[12]` : aiguilleur
+- [ ] `MGMT_METIERS.Transport[13]` : livreur de colis
+- [ ] `MGMT_METIERS.Transport[14]` : chauffeur de car
+- [ ] `MGMT_METIERS.Transport[15]` : chauffeur-livreur
+- [ ] `MGMT_METIERS.Transport[16]` : mécanicien de bateau
+- [ ] `MGMT_METIERS.Transport[17]` : pilote de remorqueur
+- [ ] `MGMT_METIERS.Transport[18]` : dépanneur
+- [ ] `MGMT_METIERS.Transport[19]` : éboueur
 - [ ] `MGMT_METIERS.Sécurité et uniformes[0]` : videur
 - [ ] `MGMT_METIERS.Sécurité et uniformes[1]` : agent de sécurité
 - [ ] `MGMT_METIERS.Sécurité et uniformes[2]` : maître-chien
@@ -279,6 +538,20 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Sécurité et uniformes[11]` : garde du corps
 - [ ] `MGMT_METIERS.Sécurité et uniformes[12]` : sauveteur en mer
 - [ ] `MGMT_METIERS.Sécurité et uniformes[13]` : surveillant de baignade
+- [ ] `MGMT_METIERS.Sécurité et uniformes[14]` : agent de ronde
+- [ ] `MGMT_METIERS.Sécurité et uniformes[15]` : surveillant de musée
+- [ ] `MGMT_METIERS.Sécurité et uniformes[16]` : agent de sûreté aéroportuaire
+- [ ] `MGMT_METIERS.Sécurité et uniformes[17]` : policier
+- [ ] `MGMT_METIERS.Sécurité et uniformes[18]` : CRS
+- [ ] `MGMT_METIERS.Sécurité et uniformes[19]` : légionnaire
+- [ ] `MGMT_METIERS.Sécurité et uniformes[20]` : marin-pompier
+- [ ] `MGMT_METIERS.Sécurité et uniformes[21]` : démineur
+- [ ] `MGMT_METIERS.Sécurité et uniformes[22]` : garde forestier
+- [ ] `MGMT_METIERS.Sécurité et uniformes[23]` : garde-côte
+- [ ] `MGMT_METIERS.Sécurité et uniformes[24]` : agent de douane
+- [ ] `MGMT_METIERS.Sécurité et uniformes[25]` : agent de sécurité de stade
+- [ ] `MGMT_METIERS.Sécurité et uniformes[26]` : agent de contrôle de transport
+- [ ] `MGMT_METIERS.Sécurité et uniformes[27]` : surveillant de nuit
 - [ ] `MGMT_METIERS.Santé et soin[0]` : aide-soignant
 - [ ] `MGMT_METIERS.Santé et soin[1]` : infirmier
 - [ ] `MGMT_METIERS.Santé et soin[2]` : kinésithérapeute
@@ -289,6 +562,16 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Santé et soin[7]` : auxiliaire de vie
 - [ ] `MGMT_METIERS.Santé et soin[8]` : masseur
 - [ ] `MGMT_METIERS.Santé et soin[9]` : éducateur spécialisé
+- [ ] `MGMT_METIERS.Santé et soin[10]` : aide-soignant de nuit
+- [ ] `MGMT_METIERS.Santé et soin[11]` : secouriste
+- [ ] `MGMT_METIERS.Santé et soin[12]` : infirmier de bloc
+- [ ] `MGMT_METIERS.Santé et soin[13]` : ambulancier de nuit
+- [ ] `MGMT_METIERS.Santé et soin[14]` : podologue
+- [ ] `MGMT_METIERS.Santé et soin[15]` : agent hospitalier
+- [ ] `MGMT_METIERS.Santé et soin[16]` : dentiste
+- [ ] `MGMT_METIERS.Santé et soin[17]` : préparateur de pharmacie
+- [ ] `MGMT_METIERS.Santé et soin[18]` : sage-femme
+- [ ] `MGMT_METIERS.Santé et soin[19]` : technicien de laboratoire
 - [ ] `MGMT_METIERS.Éducation et sport[0]` : professeur d'EPS
 - [ ] `MGMT_METIERS.Éducation et sport[1]` : professeur de maths
 - [ ] `MGMT_METIERS.Éducation et sport[2]` : professeur d'histoire
@@ -299,6 +582,16 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Éducation et sport[7]` : coach de fitness
 - [ ] `MGMT_METIERS.Éducation et sport[8]` : maître-nageur
 - [ ] `MGMT_METIERS.Éducation et sport[9]` : entraîneur de foot des petits
+- [ ] `MGMT_METIERS.Éducation et sport[10]` : professeur de physique
+- [ ] `MGMT_METIERS.Éducation et sport[11]` : professeur de français
+- [ ] `MGMT_METIERS.Éducation et sport[12]` : professeur de musique
+- [ ] `MGMT_METIERS.Éducation et sport[13]` : conseiller d'éducation
+- [ ] `MGMT_METIERS.Éducation et sport[14]` : moniteur de colonie
+- [ ] `MGMT_METIERS.Éducation et sport[15]` : entraîneur de judo des enfants
+- [ ] `MGMT_METIERS.Éducation et sport[16]` : moniteur de ski
+- [ ] `MGMT_METIERS.Éducation et sport[17]` : moniteur d'auto-école
+- [ ] `MGMT_METIERS.Éducation et sport[18]` : éducateur de rue
+- [ ] `MGMT_METIERS.Éducation et sport[19]` : surveillant de lycée
 - [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[0]` : serveur
 - [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[1]` : barman
 - [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[2]` : plongeur
@@ -319,6 +612,26 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[17]` : marchand sur les marchés
 - [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[18]` : primeur
 - [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[19]` : kebab du quartier
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[20]` : réceptionniste d'hôtel
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[21]` : portier d'hôtel
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[22]` : sommelier
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[23]` : charcutier
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[24]` : fromager
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[25]` : glacier
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[26]` : vendeur de voitures
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[27]` : vendeur de meubles
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[28]` : chef de rayon
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[29]` : manager de fast-food
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[30]` : livreur de repas
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[31]` : serveur en brasserie
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[32]` : gérant de bar
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[33]` : traiteur
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[34]` : fleuriste
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[35]` : cordonnier
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[36]` : libraire
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[37]` : pharmacien
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[38]` : buraliste
+- [ ] `MGMT_METIERS.Commerce, hôtellerie, bouche[39]` : boulanger de nuit
 - [ ] `MGMT_METIERS.Terre et mer[0]` : agriculteur
 - [ ] `MGMT_METIERS.Terre et mer[1]` : éleveur
 - [ ] `MGMT_METIERS.Terre et mer[2]` : berger
@@ -329,6 +642,16 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Terre et mer[7]` : saisonnier aux vendanges
 - [ ] `MGMT_METIERS.Terre et mer[8]` : jardinier
 - [ ] `MGMT_METIERS.Terre et mer[9]` : apiculteur
+- [ ] `MGMT_METIERS.Terre et mer[10]` : maraîcher
+- [ ] `MGMT_METIERS.Terre et mer[11]` : céréalier
+- [ ] `MGMT_METIERS.Terre et mer[12]` : arboriculteur
+- [ ] `MGMT_METIERS.Terre et mer[13]` : ostréiculteur
+- [ ] `MGMT_METIERS.Terre et mer[14]` : forestier
+- [ ] `MGMT_METIERS.Terre et mer[15]` : conducteur de tracteur
+- [ ] `MGMT_METIERS.Terre et mer[16]` : ouvrier de ferme
+- [ ] `MGMT_METIERS.Terre et mer[17]` : marin de la marine marchande
+- [ ] `MGMT_METIERS.Terre et mer[18]` : saunier
+- [ ] `MGMT_METIERS.Terre et mer[19]` : guide de haute montagne
 - [ ] `MGMT_METIERS.Arts, spectacle, image[0]` : danseur
 - [ ] `MGMT_METIERS.Arts, spectacle, image[1]` : cascadeur
 - [ ] `MGMT_METIERS.Arts, spectacle, image[2]` : figurant
@@ -343,6 +666,20 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Arts, spectacle, image[11]` : graphiste
 - [ ] `MGMT_METIERS.Arts, spectacle, image[12]` : streamer
 - [ ] `MGMT_METIERS.Arts, spectacle, image[13]` : monteur vidéo
+- [ ] `MGMT_METIERS.Arts, spectacle, image[14]` : comédien
+- [ ] `MGMT_METIERS.Arts, spectacle, image[15]` : acteur de théâtre
+- [ ] `MGMT_METIERS.Arts, spectacle, image[16]` : machiniste de scène
+- [ ] `MGMT_METIERS.Arts, spectacle, image[17]` : technicien du son
+- [ ] `MGMT_METIERS.Arts, spectacle, image[18]` : régisseur
+- [ ] `MGMT_METIERS.Arts, spectacle, image[19]` : peintre en lettres
+- [ ] `MGMT_METIERS.Arts, spectacle, image[20]` : sculpteur
+- [ ] `MGMT_METIERS.Arts, spectacle, image[21]` : tailleur
+- [ ] `MGMT_METIERS.Arts, spectacle, image[22]` : styliste
+- [ ] `MGMT_METIERS.Arts, spectacle, image[23]` : journaliste
+- [ ] `MGMT_METIERS.Arts, spectacle, image[24]` : DJ de mariage
+- [ ] `MGMT_METIERS.Arts, spectacle, image[25]` : animateur radio
+- [ ] `MGMT_METIERS.Arts, spectacle, image[26]` : cameraman
+- [ ] `MGMT_METIERS.Arts, spectacle, image[27]` : régisseur de plateau
 - [ ] `MGMT_METIERS.Bureau et technique[0]` : comptable
 - [ ] `MGMT_METIERS.Bureau et technique[1]` : informaticien
 - [ ] `MGMT_METIERS.Bureau et technique[2]` : développeur
@@ -353,6 +690,16 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Bureau et technique[7]` : employé de mairie
 - [ ] `MGMT_METIERS.Bureau et technique[8]` : agent de la Poste
 - [ ] `MGMT_METIERS.Bureau et technique[9]` : standardiste
+- [ ] `MGMT_METIERS.Bureau et technique[10]` : secrétaire
+- [ ] `MGMT_METIERS.Bureau et technique[11]` : gestionnaire de paie
+- [ ] `MGMT_METIERS.Bureau et technique[12]` : conseiller bancaire
+- [ ] `MGMT_METIERS.Bureau et technique[13]` : géomètre
+- [ ] `MGMT_METIERS.Bureau et technique[14]` : dessinateur industriel
+- [ ] `MGMT_METIERS.Bureau et technique[15]` : agent d'accueil
+- [ ] `MGMT_METIERS.Bureau et technique[16]` : technicien de maintenance
+- [ ] `MGMT_METIERS.Bureau et technique[17]` : ingénieur
+- [ ] `MGMT_METIERS.Bureau et technique[18]` : chef de projet
+- [ ] `MGMT_METIERS.Bureau et technique[19]` : expert-comptable
 - [ ] `MGMT_METIERS.Études et à-côtés[0]` : étudiant en droit
 - [ ] `MGMT_METIERS.Études et à-côtés[1]` : étudiant en STAPS
 - [ ] `MGMT_METIERS.Études et à-côtés[2]` : étudiant en ingénierie
@@ -360,6 +707,13 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Études et à-côtés[4]` : apprenti
 - [ ] `MGMT_METIERS.Études et à-côtés[5]` : intérimaire
 - [ ] `MGMT_METIERS.Études et à-côtés[6]` : saisonnier en station de ski
+- [ ] `MGMT_METIERS.Études et à-côtés[7]` : étudiant en lettres
+- [ ] `MGMT_METIERS.Études et à-côtés[8]` : étudiant en pharmacie
+- [ ] `MGMT_METIERS.Études et à-côtés[9]` : étudiant en architecture
+- [ ] `MGMT_METIERS.Études et à-côtés[10]` : étudiant en gestion
+- [ ] `MGMT_METIERS.Études et à-côtés[11]` : étudiant en kinésithérapie
+- [ ] `MGMT_METIERS.Études et à-côtés[12]` : stagiaire
+- [ ] `MGMT_METIERS.Études et à-côtés[13]` : vendeur à la sauvette
 - [ ] `MGMT_METIERS.Autres sports[0]` : lutteur olympique
 - [ ] `MGMT_METIERS.Autres sports[1]` : judoka de haut niveau
 - [ ] `MGMT_METIERS.Autres sports[2]` : boxeur amateur de l'équipe nationale
@@ -370,12 +724,28 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_METIERS.Autres sports[7]` : haltérophile
 - [ ] `MGMT_METIERS.Autres sports[8]` : champion de taekwondo
 - [ ] `MGMT_METIERS.Autres sports[9]` : lutteur de lutte traditionnelle
+- [ ] `MGMT_METIERS.Autres sports[10]` : nageur de haut niveau
+- [ ] `MGMT_METIERS.Autres sports[11]` : cycliste amateur
+- [ ] `MGMT_METIERS.Autres sports[12]` : coureur de fond
+- [ ] `MGMT_METIERS.Autres sports[13]` : gymnaste
+- [ ] `MGMT_METIERS.Autres sports[14]` : escrimeur
+- [ ] `MGMT_METIERS.Autres sports[15]` : joueur de basket
+- [ ] `MGMT_METIERS.Autres sports[16]` : joueur de volley
+- [ ] `MGMT_METIERS.Autres sports[17]` : boxeur thaï
+- [ ] `MGMT_METIERS.Autres sports[18]` : pratiquant de capoeira
+- [ ] `MGMT_METIERS.Autres sports[19]` : lanceur de poids
 - [ ] `MGMT_METIERS.La vie sans métier[0]` : sans emploi
 - [ ] `MGMT_METIERS.La vie sans métier[1]` : en foyer
 - [ ] `MGMT_METIERS.La vie sans métier[2]` : a vécu dans la rue
 - [ ] `MGMT_METIERS.La vie sans métier[3]` : a fait de la prison
 - [ ] `MGMT_METIERS.La vie sans métier[4]` : a vendu dans son quartier
 - [ ] `MGMT_METIERS.La vie sans métier[5]` : réfugié en attente de papiers
+- [ ] `MGMT_METIERS.La vie sans métier[6]` : a voyagé sans but pendant trois ans
+- [ ] `MGMT_METIERS.La vie sans métier[7]` : a vécu chez ses parents longtemps
+- [ ] `MGMT_METIERS.La vie sans métier[8]` : a été à la charge de son frère
+- [ ] `MGMT_METIERS.La vie sans métier[9]` : a tout quitté pour se battre
+- [ ] `MGMT_METIERS.La vie sans métier[10]` : a erré de ville en ville
+- [ ] `MGMT_METIERS.La vie sans métier[11]` : a attendu un contrat qui n'est jamais venu
 - [ ] `MGMT_MILIEUX[0]` : quartier populaire d'une grande ville
 - [ ] `MGMT_MILIEUX[1]` : cité de banlieue
 - [ ] `MGMT_MILIEUX[2]` : centre-ville
@@ -398,115 +768,137 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_MILIEUX[19]` : famille de commerçants
 - [ ] `MGMT_MILIEUX[20]` : famille d'agriculteurs
 - [ ] `MGMT_MILIEUX[21]` : enfance dans une salle de boxe (un parent coach)
-- [ ] `MGMT_MOMENTS[0]` : Naissance d'un enfant
-- [ ] `MGMT_MOMENTS[1]` : Grossesse annoncée (combattante)
-- [ ] `MGMT_MOMENTS[2]` : Grossesse de sa compagne
-- [ ] `MGMT_MOMENTS[3]` : Décès d'un parent
-- [ ] `MGMT_MOMENTS[4]` : Décès d'un grand-parent
-- [ ] `MGMT_MOMENTS[5]` : Décès d'un frère ou d'une sœur
-- [ ] `MGMT_MOMENTS[6]` : Parent gravement malade
-- [ ] `MGMT_MOMENTS[7]` : Enfant malade
-- [ ] `MGMT_MOMENTS[8]` : Mariage
-- [ ] `MGMT_MOMENTS[9]` : Séparation
-- [ ] `MGMT_MOMENTS[10]` : Divorce
-- [ ] `MGMT_MOMENTS[11]` : Réconciliation
-- [ ] `MGMT_MOMENTS[12]` : Nouveau couple médiatisé
-- [ ] `MGMT_MOMENTS[13]` : Un frère ou une sœur passe pro
-- [ ] `MGMT_MOMENTS[14]` : Son enfant fait ses débuts dans un sport de combat
-- [ ] `MGMT_MOMENTS[15]` : Adopte un chien
-- [ ] `MGMT_MOMENTS[16]` : Déménage pour rejoindre sa famille
-- [ ] `MGMT_MOMENTS[17]` : Dispute familiale publique
-- [ ] `MGMT_MOMENTS[18]` : Père ou mère vient le voir combattre pour la première fois
-- [ ] `MGMT_MOMENTS[19]` : Réunion de famille au pays
-- [ ] `MGMT_MOMENTS[20]` : Blessure à l'entraînement
-- [ ] `MGMT_MOMENTS[21]` : Opération chirurgicale
-- [ ] `MGMT_MOMENTS[22]` : Commotion en sparring
-- [ ] `MGMT_MOMENTS[23]` : Maladie la semaine du combat
-- [ ] `MGMT_MOMENTS[24]` : Pesée ratée
-- [ ] `MGMT_MOMENTS[25]` : Coupe de poids dangereuse
-- [ ] `MGMT_MOMENTS[26]` : Monte d'une catégorie
-- [ ] `MGMT_MOMENTS[27]` : Descend d'une catégorie
-- [ ] `MGMT_MOMENTS[28]` : Reprend 15 kilos hors camp
-- [ ] `MGMT_MOMENTS[29]` : Contrôle antidopage positif
-- [ ] `MGMT_MOMENTS[30]` : Blues d'après-combat
-- [ ] `MGMT_MOMENTS[31]` : Dépression déclarée
-- [ ] `MGMT_MOMENTS[32]` : Arrête l'alcool
-- [ ] `MGMT_MOMENTS[33]` : Se remet à boire
-- [ ] `MGMT_MOMENTS[34]` : Insomnies de camp
-- [ ] `MGMT_MOMENTS[35]` : Blessure hors cage (accident de scooter, chute)
-- [ ] `MGMT_MOMENTS[36]` : Bagarre de bar
-- [ ] `MGMT_MOMENTS[37]` : Mois de jeûne pendant le camp
-- [ ] `MGMT_MOMENTS[38]` : Décide de ne plus couper de poids
-- [ ] `MGMT_MOMENTS[39]` : Premier scanner cérébral inquiétant
-- [ ] `MGMT_MOMENTS[40]` : Quitte son emploi pour combattre à plein temps
-- [ ] `MGMT_MOMENTS[41]` : Perd son emploi
-- [ ] `MGMT_MOMENTS[42]` : Reprend un emploi
-- [ ] `MGMT_MOMENTS[43]` : Première grosse prime
-- [ ] `MGMT_MOMENTS[44]` : Achète une maison à ses parents
-- [ ] `MGMT_MOMENTS[45]` : Dettes
-- [ ] `MGMT_MOMENTS[46]` : Nouveau sponsor
-- [ ] `MGMT_MOMENTS[47]` : Perd un sponsor
-- [ ] `MGMT_MOMENTS[48]` : Ouvre sa salle
-- [ ] `MGMT_MOMENTS[49]` : Lance une marque de vêtements
-- [ ] `MGMT_MOMENTS[50]` : Litige avec son manager
-- [ ] `MGMT_MOMENTS[51]` : Change d'agent
-- [ ] `MGMT_MOMENTS[52]` : Bourse publiée
-- [ ] `MGMT_MOMENTS[53]` : Réclame une augmentation
-- [ ] `MGMT_MOMENTS[54]` : Garde à vue
-- [ ] `MGMT_MOMENTS[55]` : Condamnation
-- [ ] `MGMT_MOMENTS[56]` : Excès de vitesse médiatisé
-- [ ] `MGMT_MOMENTS[57]` : Problème de visa
-- [ ] `MGMT_MOMENTS[58]` : Obtient la nationalité
-- [ ] `MGMT_MOMENTS[59]` : Obtient ses papiers
-- [ ] `MGMT_MOMENTS[60]` : Accusé à tort, puis blanchi
-- [ ] `MGMT_MOMENTS[61]` : Plainte d'un voisin de salle
-- [ ] `MGMT_MOMENTS[62]` : Change de camp
-- [ ] `MGMT_MOMENTS[63]` : Dispute publique avec son coach
-- [ ] `MGMT_MOMENTS[64]` : Son coach meurt
-- [ ] `MGMT_MOMENTS[65]` : Son coach prend sa retraite
-- [ ] `MGMT_MOMENTS[66]` : Nouveau partenaire d'entraînement célèbre
-- [ ] `MGMT_MOMENTS[67]` : Un coéquipier est booké contre lui
-- [ ] `MGMT_MOMENTS[68]` : Offre d'une autre organisation
-- [ ] `MGMT_MOMENTS[69]` : Invité en consultant à la télévision
-- [ ] `MGMT_MOMENTS[70]` : Tourne dans un film ou une série
-- [ ] `MGMT_MOMENTS[71]` : Documentaire sur sa vie
-- [ ] `MGMT_MOMENTS[72]` : Vidéo virale
-- [ ] `MGMT_MOMENTS[73]` : Clash avec un combattant d'une autre organisation
-- [ ] `MGMT_MOMENTS[74]` : Rival qui l'appelle en public
-- [ ] `MGMT_MOMENTS[75]` : Reçoit un surnom de la presse
-- [ ] `MGMT_MOMENTS[76]` : Annonce sa retraite
-- [ ] `MGMT_MOMENTS[77]` : Revient de sa retraite
-- [ ] `MGMT_MOMENTS[78]` : Retraite d'un ancien coéquipier
-- [ ] `MGMT_MOMENTS[79]` : Sparring qui tourne à la bagarre
-- [ ] `MGMT_MOMENTS[80]` : Obtient une ceinture noire
-- [ ] `MGMT_MOMENTS[81]` : Diplôme obtenu
-- [ ] `MGMT_MOMENTS[82]` : Déménage dans une autre ville
-- [ ] `MGMT_MOMENTS[83]` : S'installe à l'étranger pour un camp
-- [ ] `MGMT_MOMENTS[84]` : Retourne vivre au pays
-- [ ] `MGMT_MOMENTS[85]` : Maison inondée ou incendiée
-- [ ] `MGMT_MOMENTS[86]` : Voyage de pèlerinage
-- [ ] `MGMT_MOMENTS[87]` : Vacances qui dérapent (photos)
-- [ ] `MGMT_MOMENTS[88]` : Engagement associatif (enfants, prison, santé mentale)
-- [ ] `MGMT_MOMENTS[89]` : Visite une école de son ancien quartier
-- [ ] `MGMT_MOMENTS[90]` : Arrête les réseaux sociaux
-- [ ] `MGMT_MOMENTS[91]` : Revient sur les réseaux
-- [ ] `MGMT_MOMENTS[92]` : Se fait tatouer le nom de sa ville
-- [ ] `MGMT_MOMENTS[93]` : Change de religion ou reprend la pratique
-- [ ] `MGMT_MOMENTS[94]` : Participe à une émission de télé-réalité
-- [ ] `MGMT_MOMENTS[95]` : Chante l'hymne à un match de foot
-- [ ] `MGMT_MOMENTS[96]` : Première victoire par KO
-- [ ] `MGMT_MOMENTS[97]` : Premier KO subi
-- [ ] `MGMT_MOMENTS[98]` : Série de trois défaites
-- [ ] `MGMT_MOMENTS[99]` : Série de cinq victoires
-- [ ] `MGMT_MOMENTS[100]` : Entre dans le top 15
-- [ ] `MGMT_MOMENTS[101]` : Sort du top 15
-- [ ] `MGMT_MOMENTS[102]` : Devient champion
-- [ ] `MGMT_MOMENTS[103]` : Perd sa ceinture
-- [ ] `MGMT_MOMENTS[104]` : Combat annulé la veille
-- [ ] `MGMT_MOMENTS[105]` : Victoire volée (décision contestée)
-- [ ] `MGMT_MOMENTS[106]` : Blesse gravement un adversaire
-- [ ] `MGMT_MOMENTS[107]` : Combat de l'année
-- [ ] `MGMT_MOMENTS[108]` : Premier combat devant son public
+- [ ] `MGMT_MILIEUX[22]` : petit village de plaine
+- [ ] `MGMT_MILIEUX[23]` : quartier d'une ville portuaire
+- [ ] `MGMT_MILIEUX[24]` : résidence de banlieue
+- [ ] `MGMT_MILIEUX[25]` : ville universitaire
+- [ ] `MGMT_MILIEUX[26]` : village de bord de mer
+- [ ] `MGMT_MILIEUX[27]` : ferme isolée
+- [ ] `MGMT_MILIEUX[28]` : immeuble de grande ville
+- [ ] `MGMT_MILIEUX[29]` : famille d'artisans
+- [ ] `MGMT_MILIEUX[30]` : famille de médecins
+- [ ] `MGMT_MILIEUX[31]` : famille de policiers
+- [ ] `MGMT_MILIEUX[32]` : famille de chauffeurs
+- [ ] `MGMT_MILIEUX[33]` : famille de cuisiniers
+- [ ] `MGMT_MILIEUX[34]` : famille de musiciens
+- [ ] `MGMT_MILIEUX[35]` : famille d'ouvriers
+- [ ] `MGMT_MILIEUX[36]` : élevé par un oncle
+- [ ] `MGMT_MILIEUX[37]` : élevé par une tante
+- [ ] `MGMT_MILIEUX[38]` : élevé par ses frères et sœurs
+- [ ] `MGMT_MILIEUX[39]` : enfance à l'internat
+- [ ] `MGMT_MILIEUX[40]` : enfance dans un camion de forain
+- [ ] `MGMT_MILIEUX[41]` : enfance dans un hôtel familial
+- [ ] `MGMT_MILIEUX[42]` : enfance entre trois villes
+- [ ] `MGMT_MILIEUX[43]` : famille de pêcheurs
+- [ ] `MGMT_MOMENTS[0]` : un enfant est né cette semaine, toute la famille est ravie
+- [ ] `MGMT_MOMENTS[1]` : annonce une grossesse, pause de carrière en vue
+- [ ] `MGMT_MOMENTS[2]` : sa compagne attend un enfant, combattre avant la naissance compte
+- [ ] `MGMT_MOMENTS[3]` : perd un parent, la semaine est dure
+- [ ] `MGMT_MOMENTS[4]` : perd un grand-parent, le prochain combat sera dédié à sa mémoire
+- [ ] `MGMT_MOMENTS[5]` : perd un frère ou une sœur, le camp se fait en silence
+- [ ] `MGMT_MOMENTS[6]` : un parent est gravement malade, combattre près de chez soi compte beaucoup
+- [ ] `MGMT_MOMENTS[7]` : un enfant est malade, le combat passe après
+- [ ] `MGMT_MOMENTS[8]` : se marie ce week-end, la salle est invitée
+- [ ] `MGMT_MOMENTS[9]` : se sépare, la forme s'en ressent
+- [ ] `MGMT_MOMENTS[10]` : divorce, la semaine est lourde, l'argent aussi
+- [ ] `MGMT_MOMENTS[11]` : se réconcilie, le sourire est revenu
+- [ ] `MGMT_MOMENTS[12]` : montre son nouveau couple, les photos font le tour du web
+- [ ] `MGMT_MOMENTS[13]` : un frère ou une sœur passe professionnel, la famille regarde
+- [ ] `MGMT_MOMENTS[14]` : son enfant fait ses débuts dans un sport de combat
+- [ ] `MGMT_MOMENTS[15]` : adopte un chien, les photos arrivent
+- [ ] `MGMT_MOMENTS[16]` : déménage pour se rapprocher de sa famille
+- [ ] `MGMT_MOMENTS[17]` : une dispute de famille éclate en public, tout le monde en parle
+- [ ] `MGMT_MOMENTS[18]` : sa famille viendra assister à son combat pour la première fois
+- [ ] `MGMT_MOMENTS[19]` : retrouve sa famille au pays, les messages affluent
+- [ ] `MGMT_MOMENTS[20]` : se blesse à l'entraînement, quelques semaines de repos
+- [ ] `MGMT_MOMENTS[21]` : passe sur le billard, l'absence sera longue
+- [ ] `MGMT_MOMENTS[22]` : une commotion en sparring, le médecin demande du repos
+- [ ] `MGMT_MOMENTS[23]` : tombe malade la semaine du combat, tout est à revoir
+- [ ] `MGMT_MOMENTS[24]` : rate la pesée, une amende et une soirée tendue
+- [ ] `MGMT_MOMENTS[25]` : une coupe de poids trop dure, le camp s'inquiète
+- [ ] `MGMT_MOMENTS[26]` : monte d'une catégorie, tout se redessine
+- [ ] `MGMT_MOMENTS[27]` : descend d'une catégorie, la coupe sera plus dure
+- [ ] `MGMT_MOMENTS[28]` : reprend quinze kilos hors camp, la prochaine pesée fait peur
+- [ ] `MGMT_MOMENTS[29]` : un contrôle antidopage positif, la suspension se profile
+- [ ] `MGMT_MOMENTS[30]` : un coup de blues après le combat, plus un mot à personne
+- [ ] `MGMT_MOMENTS[31]` : parle de sa dépression et fait une pause
+- [ ] `MGMT_MOMENTS[32]` : arrête l'alcool, ça se voit déjà dans la forme
+- [ ] `MGMT_MOMENTS[33]` : recommence à boire, l'entourage s'inquiète
+- [ ] `MGMT_MOMENTS[34]` : ne dort plus pendant le camp, la forme baisse un peu
+- [ ] `MGMT_MOMENTS[35]` : se blesse hors de la cage, une chute bête
+- [ ] `MGMT_MOMENTS[36]` : une bagarre de bar fait la une, la main est abîmée
+- [ ] `MGMT_MOMENTS[37]` : un mois de jeûne pendant le camp, pas de combat ce mois-là
+- [ ] `MGMT_MOMENTS[38]` : ne coupera plus de poids, un changement de catégorie est à prévoir
+- [ ] `MGMT_MOMENTS[39]` : un premier scanner du cerveau inquiète les médecins
+- [ ] `MGMT_MOMENTS[40]` : quitte son travail pour se consacrer au combat
+- [ ] `MGMT_MOMENTS[41]` : perd son emploi, tous les combats sont à prendre
+- [ ] `MGMT_MOMENTS[42]` : reprend un travail, moins de temps pour l'entraînement
+- [ ] `MGMT_MOMENTS[43]` : touche sa première grosse prime, un achat plaisir en vue
+- [ ] `MGMT_MOMENTS[44]` : achète une maison à ses parents, la salle applaudit
+- [ ] `MGMT_MOMENTS[45]` : des dettes à payer, les combats à court préavis seront acceptés
+- [ ] `MGMT_MOMENTS[46]` : signe un nouveau sponsor, le logo est déjà sur le short
+- [ ] `MGMT_MOMENTS[47]` : perd un sponsor, la presse le note
+- [ ] `MGMT_MOMENTS[48]` : ouvre sa propre salle, l'après-carrière se prépare
+- [ ] `MGMT_MOMENTS[49]` : lance sa marque de vêtements, la boutique ouvre samedi
+- [ ] `MGMT_MOMENTS[50]` : un litige avec son manager, les négociations sont gelées
+- [ ] `MGMT_MOMENTS[51]` : change d'agent, une nouvelle équipe arrive
+- [ ] `MGMT_MOMENTS[52]` : sa bourse est publiée, tout le vestiaire la lit
+- [ ] `MGMT_MOMENTS[53]` : réclame une augmentation, et le dit publiquement
+- [ ] `MGMT_MOMENTS[54]` : passe une nuit en garde à vue, l'affaire est floue
+- [ ] `MGMT_MOMENTS[55]` : une condamnation tombe, une absence est à prévoir
+- [ ] `MGMT_MOMENTS[56]` : un excès de vitesse fait le tour de la presse
+- [ ] `MGMT_MOMENTS[57]` : un problème de visa l'empêche de combattre en France
+- [ ] `MGMT_MOMENTS[58]` : obtient la nationalité, tout un pays se réjouit
+- [ ] `MGMT_MOMENTS[59]` : obtient enfin ses papiers, combattre partout devient possible
+- [ ] `MGMT_MOMENTS[60]` : une accusation fausse tombe, la justice rend son nom propre, le ton se durcit
+- [ ] `MGMT_MOMENTS[61]` : un voisin de la salle porte plainte, le camp doit s'adapter
+- [ ] `MGMT_MOMENTS[62]` : change de camp d'entraînement, son style va évoluer
+- [ ] `MGMT_MOMENTS[63]` : se dispute avec son coach en public, un départ est possible
+- [ ] `MGMT_MOMENTS[64]` : la mort de son coach endeuille la salle, un hommage est prévu
+- [ ] `MGMT_MOMENTS[65]` : son coach prend sa retraite après trente ans de salle
+- [ ] `MGMT_MOMENTS[66]` : s'entraîne maintenant avec un partenaire connu
+- [ ] `MGMT_MOMENTS[67]` : un coéquipier est booké en face, la salle est partagée
+- [ ] `MGMT_MOMENTS[68]` : reçoit une offre d'une autre organisation, l'équipe réfléchit
+- [ ] `MGMT_MOMENTS[69]` : invité comme consultant à la télévision pour expliquer le sport
+- [ ] `MGMT_MOMENTS[70]` : tourne dans un film, absence prévue pendant un cycle
+- [ ] `MGMT_MOMENTS[71]` : un documentaire sur sa vie est en préparation
+- [ ] `MGMT_MOMENTS[72]` : sa vidéo devient virale, tout le monde la partage
+- [ ] `MGMT_MOMENTS[73]` : se clashe avec un combattant d'une autre organisation
+- [ ] `MGMT_MOMENTS[74]` : un rival l'appelle en public, la réponse est attendue
+- [ ] `MGMT_MOMENTS[75]` : la presse invente un nouveau surnom, la salle l'adopte
+- [ ] `MGMT_MOMENTS[76]` : annonce sa retraite, la salle est émue
+- [ ] `MGMT_MOMENTS[77]` : revient de sa retraite, personne n'y croyait
+- [ ] `MGMT_MOMENTS[78]` : un ancien coéquipier prend sa retraite, l'idée fait son chemin
+- [ ] `MGMT_MOMENTS[79]` : un sparring tourne à la bagarre, la vidéo circule
+- [ ] `MGMT_MOMENTS[80]` : obtient sa ceinture noire, tout le camp applaudit
+- [ ] `MGMT_MOMENTS[81]` : obtient son diplôme, toute la famille est fière
+- [ ] `MGMT_MOMENTS[82]` : déménage dans une autre ville, le camp change peut-être
+- [ ] `MGMT_MOMENTS[83]` : part en camp à l'étranger, son style va évoluer
+- [ ] `MGMT_MOMENTS[84]` : retourne vivre au pays, moins de combats pour Split en vue
+- [ ] `MGMT_MOMENTS[85]` : sa maison est détruite, tous les combats seront acceptés pour payer
+- [ ] `MGMT_MOMENTS[86]` : part en pèlerinage, absence prévue pendant un cycle
+- [ ] `MGMT_MOMENTS[87]` : des photos de vacances qui dérapent circulent sur le web
+- [ ] `MGMT_MOMENTS[88]` : s'engage dans une association, l'équipe est fière
+- [ ] `MGMT_MOMENTS[89]` : visite une école de son ancien quartier, les enfants l'applaudissent
+- [ ] `MGMT_MOMENTS[90]` : quitte les réseaux sociaux, plus un mot sur le web
+- [ ] `MGMT_MOMENTS[91]` : revient sur les réseaux avec beaucoup à dire
+- [ ] `MGMT_MOMENTS[92]` : se fait tatouer le nom de sa ville sur le bras
+- [ ] `MGMT_MOMENTS[93]` : change de religion, la presse en parle avec respect
+- [ ] `MGMT_MOMENTS[94]` : participe à une émission de télé-réalité, la salle sourit
+- [ ] `MGMT_MOMENTS[95]` : chante l'hymne avant un match de foot, le stade applaudit
+- [ ] `MGMT_MOMENTS[96]` : première victoire par KO, la confiance revient
+- [ ] `MGMT_MOMENTS[97]` : son premier KO subi, la peur s'installe
+- [ ] `MGMT_MOMENTS[98]` : trois défaites de suite, l'idée d'arrêter revient
+- [ ] `MGMT_MOMENTS[99]` : cinq victoires de suite, un classé est réclamé
+- [ ] `MGMT_MOMENTS[100]` : entre dans le top 15, la division le regarde autrement
+- [ ] `MGMT_MOMENTS[101]` : sort du top 15, la presse en parle
+- [ ] `MGMT_MOMENTS[102]` : décroche la ceinture, la pression est là
+- [ ] `MGMT_MOMENTS[103]` : perd sa ceinture, la presse le regarde
+- [ ] `MGMT_MOMENTS[104]` : son combat est annulé la veille, la bourse est perdue
+- [ ] `MGMT_MOMENTS[105]` : une victoire jugée volée, la revanche est demandée
+- [ ] `MGMT_MOMENTS[106]` : un adversaire gravement blessé, le doute s'installe
+- [ ] `MGMT_MOMENTS[107]` : un combat de l'année, tout le monde en parle
+- [ ] `MGMT_MOMENTS[108]` : son premier combat devant son public, l'émotion est grande
 - [ ] `MGMT_RITUELS[0]` : mange le même plat la veille de chaque combat
 - [ ] `MGMT_RITUELS[1]` : porte les mêmes chaussettes depuis son premier combat
 - [ ] `MGMT_RITUELS[2]` : ne se rase plus à partir du début du camp
@@ -557,6 +949,56 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_RITUELS[47]` : rit tout seul pendant l'échauffement
 - [ ] `MGMT_RITUELS[48]` : fait l'inventaire de son sac trois fois
 - [ ] `MGMT_RITUELS[49]` : ne mange que de la nourriture de son pays pendant la semaine du combat
+- [ ] `MGMT_RITUELS[50]` : mange des pâtes avec du beurre trois heures avant le combat
+- [ ] `MGMT_RITUELS[51]` : coupe un bout de ruban de son premier combat et le garde dans sa chaussure
+- [ ] `MGMT_RITUELS[52]` : touche le sol du bout des doigts avant de monter
+- [ ] `MGMT_RITUELS[53]` : ne dit jamais un mot dans l'ascenseur de la salle
+- [ ] `MGMT_RITUELS[54]` : chante tout bas dans le couloir
+- [ ] `MGMT_RITUELS[55]` : porte le même pull à capuche à chaque entrée
+- [ ] `MGMT_RITUELS[56]` : fait trois fois le tour de la cage avant le premier round
+- [ ] `MGMT_RITUELS[57]` : boit un thé chaud juste avant la pesée
+- [ ] `MGMT_RITUELS[58]` : signe sa signature sur le bandage de sa main
+- [ ] `MGMT_RITUELS[59]` : écrit le nom de son fils sur son poignet
+- [ ] `MGMT_RITUELS[60]` : regarde un dessin animé la veille de chaque combat
+- [ ] `MGMT_RITUELS[61]` : laisse toujours une pièce dans le vestiaire
+- [ ] `MGMT_RITUELS[62]` : dort avec un vieux gant sous l'oreiller
+- [ ] `MGMT_RITUELS[63]` : mâche un chewing-gum à la menthe avant d'entrer
+- [ ] `MGMT_RITUELS[64]` : attache ses lacets exactement trois fois
+- [ ] `MGMT_RITUELS[65]` : enlève sa montre à l'entrée de la salle
+- [ ] `MGMT_RITUELS[66]` : lit une page du même livre à chaque camp
+- [ ] `MGMT_RITUELS[67]` : chante l'hymne de son club de foot
+- [ ] `MGMT_RITUELS[68]` : fait le signe de croix en regardant le plafond
+- [ ] `MGMT_RITUELS[69]` : salue le public dans les quatre directions
+- [ ] `MGMT_RITUELS[70]` : fait craquer ses doigts un à un devant son coin
+- [ ] `MGMT_RITUELS[71]` : embrasse le poing de son coach
+- [ ] `MGMT_RITUELS[72]` : garde un porte-bonheur offert par sa grand-mère
+- [ ] `MGMT_RITUELS[73]` : refuse de se laver les cheveux la veille
+- [ ] `MGMT_RITUELS[74]` : ne prend jamais l'ascenseur le jour du combat
+- [ ] `MGMT_RITUELS[75]` : fait un appel vidéo à son frère juste avant d'entrer
+- [ ] `MGMT_RITUELS[76]` : regarde le ciel avant de monter dans la cage
+- [ ] `MGMT_RITUELS[77]` : se frotte les mains avec de la craie de sa vieille salle
+- [ ] `MGMT_RITUELS[78]` : boit un jus d'orange à la même heure à chaque camp
+- [ ] `MGMT_RITUELS[79]` : porte un maillot de son équipe préférée sous son short
+- [ ] `MGMT_RITUELS[80]` : dessine une croix sur son bandage droit
+- [ ] `MGMT_RITUELS[81]` : frappe trois fois dans ses gants avant de monter
+- [ ] `MGMT_RITUELS[82]` : met son pied gauche en premier dans chaque cage
+- [ ] `MGMT_RITUELS[83]` : écrit une phrase sur un carnet avant chaque soirée
+- [ ] `MGMT_RITUELS[84]` : fait une promenade seul à l'aube avant la pesée
+- [ ] `MGMT_RITUELS[85]` : chante pour lui-même dans le vestiaire
+- [ ] `MGMT_RITUELS[86]` : laisse tomber un caillou dans sa poche à chaque victoire
+- [ ] `MGMT_RITUELS[87]` : garde la veste de son premier coach dans son sac
+- [ ] `MGMT_RITUELS[88]` : refait son sac trois fois avant de partir
+- [ ] `MGMT_RITUELS[89]` : ne regarde jamais le public pendant l'entrée
+- [ ] `MGMT_RITUELS[90]` : embrasse son coach sur le front avant de monter
+- [ ] `MGMT_RITUELS[91]` : tapote le tapis de la main avant de se lever
+- [ ] `MGMT_RITUELS[92]` : demande le même masseur à chaque soirée
+- [ ] `MGMT_RITUELS[93]` : mange une orange coupée en quartiers dans le vestiaire
+- [ ] `MGMT_RITUELS[94]` : arrive toujours trois heures avant la salle ouverte
+- [ ] `MGMT_RITUELS[95]` : écoute le même podcast la veille d'un combat
+- [ ] `MGMT_RITUELS[96]` : respire quatre fois devant le grillage
+- [ ] `MGMT_RITUELS[97]` : pose son sac toujours à la même place
+- [ ] `MGMT_RITUELS[98]` : boit de l'eau en trois gorgées exactes
+- [ ] `MGMT_RITUELS[99]` : se coiffe seul devant un miroir cassé
 - [ ] `MGMT_ROLES[0]` : Espoir
 - [ ] `MGMT_ROLES[1]` : Invaincu
 - [ ] `MGMT_ROLES[2]` : Journeyman
@@ -585,7 +1027,7 @@ Fichier : `mgmt-humanite-data.js`
 - [ ] `MGMT_TRAJECTOIRES[13]` : Changement de poids
 - [ ] `MGMT_TRAJECTOIRES[14]` : Un seul soir
 
-## Voix des combattants — 220 textes
+## Voix des combattants — 467 textes
 
 Fichier : `mgmt-voix-data.js`
 
@@ -596,6 +1038,20 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[0].repliques[4]` (inactivite) : Ça fait {mois} mois que j'attends, je suis [prêt|prête], n'importe qui, n'importe quand.
 - [ ] `MGMT_VOIX[0].repliques[5]` (proposition) : Je prends, pas de souci, dis-moi juste la date.
 - [ ] `MGMT_VOIX[0].repliques[6]` (forfait) : [Blessé|Blessée] à l'entraînement, je suis [dégoûté|dégoûtée], je reviens vite.
+- [ ] `MGMT_VOIX[0].repliques[7]` (annonce) : Le camp s'est bien passé. Je suis [prêt|prête]. {adv} aussi, mais je suis plus [prêt|prête].
+- [ ] `MGMT_VOIX[0].repliques[8]` (annonce) : Je remercie mon équipe pour ce camp. Samedi, on montre ce qu'on a travaillé.
+- [ ] `MGMT_VOIX[0].repliques[9]` (annonce) : Je suis très concentré. {adv} est dangereux, je le sais. Je serai prêt.
+- [ ] `MGMT_VOIX[0].repliques[10]` (reseaux) : Dernière séance avant samedi. Merci à mes partenaires d'entraînement.
+- [ ] `MGMT_VOIX[0].repliques[11]` (reseaux) : Pesée faite, poids bon. Maintenant on se repose.
+- [ ] `MGMT_VOIX[0].repliques[12]` (victoire) : Merci à tout le monde. Une grosse pensée pour ma famille. On continue.
+- [ ] `MGMT_VOIX[0].repliques[13]` (victoire) : {adv} est costaud, mais on avait un plan. Ça a marché. Merci au coach.
+- [ ] `MGMT_VOIX[0].repliques[14]` (defaite) : Je n'ai rien à dire de plus. Bravo à {adv}. On retourne travailler.
+- [ ] `MGMT_VOIX[0].repliques[15]` (defaite) : Ça arrive. Je ne vais pas chercher d'excuse. Je reviens plus [fort|forte].
+- [ ] `MGMT_VOIX[0].repliques[16]` (inactivite) : Ça fait {mois} mois sans combat. Je m'entraîne tous les jours, appelez-moi.
+- [ ] `MGMT_VOIX[0].repliques[17]` (inactivite) : {mois} mois que j'attends. Je suis en forme, il me faut juste une date.
+- [ ] `MGMT_VOIX[0].repliques[18]` (proposition) : Oui, ça me va. Envoyez-moi le contrat.
+- [ ] `MGMT_VOIX[0].repliques[19]` (proposition) : Pourquoi pas. Je veux juste savoir la date.
+- [ ] `MGMT_VOIX[0].repliques[20]` (forfait) : Je me suis [blessé|blessée] au camp. Je suis déçu, mais je serai de retour.
 - [ ] `MGMT_VOIX[1].repliques[0]` (annonce) : Je m'entraîne. Je combats. C'est tout.
 - [ ] `MGMT_VOIX[1].repliques[1]` (victoire) : Travail fait. Je rentre.
 - [ ] `MGMT_VOIX[1].repliques[2]` (defaite) : Il était meilleur ce soir. On retravaille.
@@ -603,52 +1059,104 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[1].repliques[4]` (proposition) : D'accord. / Non.
 - [ ] `MGMT_VOIX[1].repliques[5]` (forfait) : [Blessé|Blessée]. Je reviendrai.
 - [ ] `MGMT_VOIX[1].repliques[6]` (la-felure) : Il parle beaucoup. Samedi il va fermer sa gueule.
+- [ ] `MGMT_VOIX[1].repliques[7]` (annonce) : Entraînement fini. Combat samedi.
+- [ ] `MGMT_VOIX[1].repliques[8]` (victoire) : Je rentre dormir.
+- [ ] `MGMT_VOIX[1].repliques[9]` (defaite) : Perdu. On corrige.
+- [ ] `MGMT_VOIX[1].repliques[10]` (proposition) : Quand ? Oui.
+- [ ] `MGMT_VOIX[1].repliques[11]` (forfait) : Pas ce mois-ci. Le dos.
 - [ ] `MGMT_VOIX[2].repliques[0]` (annonce) : {adv}, mon ami, samedi je prends ta place au classement. Round deux, gauche au foie. Tu rentres en taxi, c'est moi qui paye.
 - [ ] `MGMT_VOIX[2].repliques[1]` (reseaux) : Météo de samedi pour {adv} : couvert au début, averses au deuxième round, fin de soirée allongée.
 - [ ] `MGMT_VOIX[2].repliques[2]` (victoire) : Je vous l'avais dit ! Round {round}. Les gens paient pour ça, et moi je livre.
 - [ ] `MGMT_VOIX[2].repliques[3]` (victoire) : J'avais dit round deux, j'ai été gentil, il a eu droit à du rab.
 - [ ] `MGMT_VOIX[2].repliques[4]` (proposition) : Tu veux que je fasse un spectacle devant qui, devant ses cousins ?
+- [ ] `MGMT_VOIX[2].repliques[5]` (annonce) : {adv}, prépare ton plus beau sourire. Samedi, tu le montres au plafond.
+- [ ] `MGMT_VOIX[2].repliques[6]` (reseaux) : Il paraît que {adv} dort bien. Dites-lui de profiter de ses dernières nuits.
+- [ ] `MGMT_VOIX[2].repliques[7]` (victoire) : Round {round}. Je l'avais dit. Maintenant je mange.
+- [ ] `MGMT_VOIX[2].repliques[8]` (defaite) : Ce soir, le scénario a changé. Je reprends mon stylo.
+- [ ] `MGMT_VOIX[2].repliques[9]` (proposition) : Mon nom en gros sur l'affiche, et c'est oui.
 - [ ] `MGMT_VOIX[3].repliques[0]` (annonce) : Je respecte {adv}. Le résultat, c'est Dieu qui le décide. Moi, je fais ma part : je m'entraîne, je dors, je mange.
 - [ ] `MGMT_VOIX[3].repliques[1]` (victoire) : Dieu merci. Merci à mes parents, à mon coach, à {adv} aussi qui est venu se battre. C'était écrit.
 - [ ] `MGMT_VOIX[3].repliques[2]` (defaite) : Dieu merci quand même. Aujourd'hui c'était son jour, pas le mien.
 - [ ] `MGMT_VOIX[3].repliques[3]` (la-menace-froide) : Parle de moi autant que tu veux. Tu as parlé de ma famille. Samedi on règle ça.
 - [ ] `MGMT_VOIX[3].repliques[4]` (forfait) : C'est une épreuve. Ça pouvait être pire.
+- [ ] `MGMT_VOIX[3].repliques[5]` (annonce) : Ce qui doit arriver arrivera. Je serai dans la cage, c'est déjà beaucoup.
+- [ ] `MGMT_VOIX[3].repliques[6]` (victoire) : Ça devait finir comme ça. Je n'y suis pour rien.
+- [ ] `MGMT_VOIX[3].repliques[7]` (defaite) : Je savais. Ce n'est pas grave.
+- [ ] `MGMT_VOIX[3].repliques[8]` (proposition) : Si c'est écrit, c'est oui.
+- [ ] `MGMT_VOIX[3].repliques[9]` (forfait) : Une blessure. Elle devait arriver un jour.
 - [ ] `MGMT_VOIX[4].repliques[0]` (annonce) : Je ne pense pas à {adv}. Je pense au moment où la porte se ferme. Il n'y a plus de classement, juste deux [hommes|femmes] qui ont peur. Et qui avancent quand même.
 - [ ] `MGMT_VOIX[4].repliques[1]` (reseaux) : Levé avant le soleil. Le bois est froid. Encore six jours.
 - [ ] `MGMT_VOIX[4].repliques[2]` (victoire) : La peur était là, je l'ai laissée s'asseoir à côté de moi.
 - [ ] `MGMT_VOIX[4].repliques[3]` (defaite) : Mon corps était dans la cage, ma tête était déjà à la fin du combat. C'est ma faute.
 - [ ] `MGMT_VOIX[4].repliques[4]` (inactivite) : L'hiver aussi, c'est une saison.
+- [ ] `MGMT_VOIX[4].repliques[5]` (annonce) : La cage est petite. Le ciel est grand. Samedi, je regarde les deux.
+- [ ] `MGMT_VOIX[4].repliques[6]` (victoire) : Je regarde mes mains. Elles ont gagné, moi je suis resté calme.
+- [ ] `MGMT_VOIX[4].repliques[7]` (defaite) : Perdre apprend ce que gagner cache.
+- [ ] `MGMT_VOIX[4].repliques[8]` (reseaux) : Une montagne, un matin. Encore trois jours.
+- [ ] `MGMT_VOIX[4].repliques[9]` (proposition) : Je vais y réfléchir un moment. Oui.
 - [ ] `MGMT_VOIX[5].repliques[0]` (annonce) : {adv} a l'air d'un mec bien, mais il boxe comme mon oncle au mariage. J'ai mal au genou depuis un mois, mais je vais le finir quand même.
 - [ ] `MGMT_VOIX[5].repliques[1]` (reseaux) : Le matchmaker de {org} m'a mis contre {adv}. Soit il ne m'aime pas, soit il n'a jamais vu un combat. Peut-être les deux.
 - [ ] `MGMT_VOIX[5].repliques[2]` (victoire) : Je vous avais dit qu'il ne fallait pas parier contre moi ! Respect au mec, il m'a mis une droite, j'ai vu ma grand-mère. Et j'ai faim.
 - [ ] `MGMT_VOIX[5].repliques[3]` (defaite) : Il était meilleur que moi, rien à dire. J'étais nul ce soir. Je vais boire un coup, on en reparle lundi.
 - [ ] `MGMT_VOIX[5].repliques[4]` (inactivite) : Ça fait {mois} mois que {org} me paye sans que je combatte. Je ne me plains pas, mais je préfère taper des gens.
 - [ ] `MGMT_VOIX[5].repliques[5]` (proposition) : Lui ? Il va me coller au grillage quinze minutes. Non merci, je ne suis pas venu pour ça.
+- [ ] `MGMT_VOIX[5].repliques[6]` (annonce) : {adv} est nul. Dites-le-lui de ma part. Samedi, je lui montre aussi.
+- [ ] `MGMT_VOIX[5].repliques[7]` (reseaux) : Quelqu'un m'a dit de me calmer. J'ai ri tellement fort que j'en ai cassé ma chaise.
+- [ ] `MGMT_VOIX[5].repliques[8]` (victoire) : Dix minutes de travail, deux heures de bar. Mon plan est parfait.
+- [ ] `MGMT_VOIX[5].repliques[9]` (defaite) : J'ai perdu. Ça m'emmerde. Je ne vais pas dire que c'est de sa faute.
+- [ ] `MGMT_VOIX[5].repliques[10]` (proposition) : Lui ? Il a l'air gentil. Moi pas. Allez, oui.
+- [ ] `MGMT_VOIX[5].repliques[11]` (forfait) : Une cheville. J'ai marché sur un truc. Ne me demandez pas quoi.
 - [ ] `MGMT_VOIX[6].repliques[0]` (annonce) : (par son interprète) Il dit qu'il est prêt. Il dit que {adv} sait pourquoi.
 - [ ] `MGMT_VOIX[6].repliques[1]` (reseaux) : Publication en russe, sans traduction. Une photo : une balance, 70,3 kg.
 - [ ] `MGMT_VOIX[6].repliques[2]` (victoire) : (par son interprète) Il remercie son équipe et son pays. Il a dit aussi quelque chose sur {adv}. Je ne le traduis pas.
 - [ ] `MGMT_VOIX[6].repliques[3]` (defaite) : (par son interprète) Il ne veut pas parler.
 - [ ] `MGMT_VOIX[6].repliques[4]` (inactivite) : (par son interprète) Il demande pourquoi personne ne dit son nom.
 - [ ] `MGMT_VOIX[6].repliques[5]` (proposition) : (par son interprète) Il a dit oui. Enfin, il a dit « quand ».
+- [ ] `MGMT_VOIX[6].repliques[6]` (annonce) : (par son interprète) Il dit qu'il a bien travaillé. Il dit que {adv} aussi.
+- [ ] `MGMT_VOIX[6].repliques[7]` (victoire) : (par son interprète) Il dit merci. Il pense à sa famille.
+- [ ] `MGMT_VOIX[6].repliques[8]` (defaite) : (par son interprète) Il dit qu'il reviendra. Il dit aussi qu'il a faim.
+- [ ] `MGMT_VOIX[6].repliques[9]` (reseaux) : Publication sans texte. Une photo de ses mains bandées.
+- [ ] `MGMT_VOIX[6].repliques[10]` (proposition) : (par son interprète) Il dit oui. Il veut d'abord savoir si c'est loin.
 - [ ] `MGMT_VOIX[7].repliques[0]` (annonce) : {adv} est {rang_adv} [mondial|mondiale], je suis {rang}. Si je gagne, j'entre dans le top 10. Cet été, je veux le titre. C'est simple.
 - [ ] `MGMT_VOIX[7].repliques[1]` (reseaux) : Étape sept sur dix.
 - [ ] `MGMT_VOIX[7].repliques[2]` (defaite) : Ça repousse tout de six mois. Je reprends le plan.
 - [ ] `MGMT_VOIX[7].repliques[3]` (inactivite) : Chaque mois sans combat est un mois perdu. Je l'ai calculé : à ce rythme, {org} me coûte une ceinture.
 - [ ] `MGMT_VOIX[7].repliques[4]` (proposition-refusee) : Il est derrière moi au classement, ça m'apporte rien. Trouve-moi un classé.
+- [ ] `MGMT_VOIX[7].repliques[5]` (annonce) : {adv} est {rang_adv}. Je suis {rang}. Une victoire me rapproche du titre.
+- [ ] `MGMT_VOIX[7].repliques[6]` (reseaux) : Étape huit sur dix. Tout est dans les temps.
+- [ ] `MGMT_VOIX[7].repliques[7]` (victoire) : Un de plus dans le classement. Prochain objectif : le top 5.
+- [ ] `MGMT_VOIX[7].repliques[8]` (defaite) : Ça retarde le plan. Je change une ligne du tableau, pas le tableau.
+- [ ] `MGMT_VOIX[7].repliques[9]` (proposition) : Il est mieux classé que moi ? Alors oui.
+- [ ] `MGMT_VOIX[7].repliques[10]` (inactivite) : {mois} mois sans combat. Mon plan prévoyait trois semaines. Appelez-moi.
 - [ ] `MGMT_VOIX[8].repliques[0]` (annonce) : Avant, je travaillais la nuit sur des chantiers et je dormais quatre heures. {adv}, avec respect, quinze minutes dans une cage ne me font pas peur.
 - [ ] `MGMT_VOIX[8].repliques[1]` (victoire) : Cette bourse va chez ma mère. Elle n'a jamais regardé un de mes combats, mais cette bourse, elle va la regarder.
 - [ ] `MGMT_VOIX[8].repliques[2]` (defaite) : J'ai connu pire. Beaucoup pire. Demain je suis à la salle.
 - [ ] `MGMT_VOIX[8].repliques[3]` (proposition-a-court-preavis) : Dans {jours} jours ? Je prends. Je prends toujours.
 - [ ] `MGMT_VOIX[8].repliques[4]` (forfait) : Le pire c'est pas la blessure, c'est les mois sans paie.
+- [ ] `MGMT_VOIX[8].repliques[5]` (annonce) : J'ai connu pire que {adv}. Beaucoup pire. Samedi, ça va aller.
+- [ ] `MGMT_VOIX[8].repliques[6]` (victoire) : Ça me fait du bien. J'avais oublié ce que ça faisait de gagner.
+- [ ] `MGMT_VOIX[8].repliques[7]` (defaite) : J'ai déjà perdu plus que ça. Demain, je retourne travailler.
+- [ ] `MGMT_VOIX[8].repliques[8]` (proposition) : Oui. J'ai besoin de combattre. Je ne dis pas non.
+- [ ] `MGMT_VOIX[8].repliques[9]` (inactivite) : {mois} mois sans combat. Je ne sais pas faire autre chose.
 - [ ] `MGMT_VOIX[9].repliques[0]` (annonce) : Je suis très content. Je respecte beaucoup {adv}. Ça va être un beau combat, venez nombreux !
 - [ ] `MGMT_VOIX[9].repliques[1]` (victoire) : Merci à {adv}. Il m'a posé des problèmes. Au deuxième round, j'ai senti sa droite. Bravo à lui.
 - [ ] `MGMT_VOIX[9].repliques[2]` (defaite) : C'est le jeu, il m'a eu sur les entrées, j'ai des choses à travailler. Merci à vous en tout cas.
 - [ ] `MGMT_VOIX[9].repliques[3]` (inactivite) : Si {org} a une place je suis là, sans pression hein ahah.
+- [ ] `MGMT_VOIX[9].repliques[4]` (annonce) : Je suis ravi de combattre {adv}. Beau combat en vue, j'espère que vous viendrez.
+- [ ] `MGMT_VOIX[9].repliques[5]` (victoire) : Merci à {adv}, un vrai guerrier. Merci à {org}. Je suis content, vraiment.
+- [ ] `MGMT_VOIX[9].repliques[6]` (defaite) : Bravo à lui. Je corrige mes erreurs et je reviens.
+- [ ] `MGMT_VOIX[9].repliques[7]` (proposition) : Avec plaisir. Dites-moi où signer.
+- [ ] `MGMT_VOIX[9].repliques[8]` (inactivite) : Je ne me plains pas, mais si {org} a une date, je suis là.
 - [ ] `MGMT_VOIX[10].repliques[0]` (reseaux) : Jour 187 sans combat. {classe}, ou n'importe qui du top 15, je m'en fous lequel. Personne répond. Bizarre.
 - [ ] `MGMT_VOIX[10].repliques[1]` (victoire) : Voilà. Maintenant {classe}, arrête de te cacher. {org}, t'as mon numéro.
 - [ ] `MGMT_VOIX[10].repliques[2]` (defaite) : Je veux la revanche. Tout de suite. Les juges ont vu un autre combat.
 - [ ] `MGMT_VOIX[10].repliques[3]` (defaite) : Revanche.
 - [ ] `MGMT_VOIX[10].repliques[4]` (proposition-refusee) : Encore un combat pour rien. Vous me faites tourner en rond.
+- [ ] `MGMT_VOIX[10].repliques[5]` (annonce) : {adv} ? Encore un qui ne mérite pas d'être là. Mais je le prends.
+- [ ] `MGMT_VOIX[10].repliques[6]` (victoire) : Maintenant, le classé. Je ne le répéterai pas.
+- [ ] `MGMT_VOIX[10].repliques[7]` (defaite) : C'est une erreur. Je veux la revanche. Maintenant.
+- [ ] `MGMT_VOIX[10].repliques[8]` (reseaux) : Jour 190 sans réponse. Les classés me bloquent ou me fuient.
+- [ ] `MGMT_VOIX[10].repliques[9]` (proposition) : Ce n'est pas ce que je demandais. Mais d'accord, une dernière fois.
 - [ ] `MGMT_VOIX[11].repliques[0]` (annonce) : {adv} il est fort, moi je suis gros, on va voir ce qui gagne.
 - [ ] `MGMT_VOIX[11].repliques[1]` (reseaux) : Pesée ratée de 200 grammes. J'ai pissé. C'est bon.
 - [ ] `MGMT_VOIX[11].repliques[2]` (victoire) : Je voulais juste finir vite parce que j'avais envie de chier depuis la pesée. Voilà. Merci {org}.
@@ -656,161 +1164,342 @@ Fichier : `mgmt-voix-data.js`
 - [ ] `MGMT_VOIX[11].repliques[4]` (defaite) : Il m'a endormi. C'était la meilleure sieste de ma semaine.
 - [ ] `MGMT_VOIX[11].repliques[5]` (proposition) : Il y a un buffet après ? Alors oui.
 - [ ] `MGMT_VOIX[11].repliques[6]` (forfait) : Je me suis pété le dos en me levant du canapé. C'est pas une blague. Enfin si, mais c'est vrai.
+- [ ] `MGMT_VOIX[11].repliques[7]` (annonce) : {adv} frappe fort, moi je mange fort. Qui tiendra le plus longtemps ?
+- [ ] `MGMT_VOIX[11].repliques[8]` (victoire) : J'ai gagné et j'ai faim. Bonne soirée à tous, je vais au restaurant.
+- [ ] `MGMT_VOIX[11].repliques[9]` (defaite) : J'ai perdu, mais j'ai eu un super sandwich avant. Ça compense.
+- [ ] `MGMT_VOIX[11].repliques[10]` (reseaux) : Pesée : 200 grammes de trop. J'ai couru, j'ai pleuré, j'ai ri. Ça passe.
+- [ ] `MGMT_VOIX[11].repliques[11]` (proposition) : Il y aura un traiteur ? Alors c'est oui.
 - [ ] `MGMT_VOIX[12].repliques[0]` (annonce) : J'ai hâte de discuter avec {adv}. On ne s'est jamais vraiment parlé. Samedi, on aura quinze minutes rien que tous les deux.
 - [ ] `MGMT_VOIX[12].repliques[1]` (pendant-le-combat) : T'as pas faim ? Moi j'ai faim.
 - [ ] `MGMT_VOIX[12].repliques[2]` (pendant-le-combat) : Oh pardon. Non en vrai, pas pardon.
 - [ ] `MGMT_VOIX[12].repliques[3]` (pendant-le-combat) : Encore ? On a dit pas de lutte aujourd'hui.
 - [ ] `MGMT_VOIX[12].repliques[4]` (victoire) : Il m'a pas répondu de tout le combat, c'est malpoli franchement.
 - [ ] `MGMT_VOIX[12].repliques[5]` (defaite) : Là il m'a fermé la bouche, je le reconnais, c'est rare.
+- [ ] `MGMT_VOIX[12].repliques[6]` (annonce) : {adv}, tu es un bon gars. Je vais te dire plein de choses samedi. Tu vas aimer.
+- [ ] `MGMT_VOIX[12].repliques[7]` (victoire) : Il n'a pas voulu discuter. Je lui ai raconté ma semaine, ça lui a suffi.
+- [ ] `MGMT_VOIX[12].repliques[8]` (defaite) : Il m'a fait taire, une fois. Je ne lui en veux pas.
+- [ ] `MGMT_VOIX[12].repliques[9]` (proposition) : On parle un peu ? Non ? Alors oui, c'est bon.
+- [ ] `MGMT_VOIX[12].repliques[10]` (reseaux) : Je cherche quelqu'un pour discuter. Pas un combattant. Un humain.
 - [ ] `MGMT_VOIX[13].repliques[0]` (annonce) : Mesdames et messieurs, soyons clairs : {adv} n'est pas un combattant, c'est un figurant. Il est là pour se tenir à côté de moi sur l'affiche. Et samedi, il va même rater ça.
 - [ ] `MGMT_VOIX[13].repliques[1]` (reseaux) : Chère ville de samedi, vous méritez mieux que {adv}. Je vous le dis avec amour.
 - [ ] `MGMT_VOIX[13].repliques[2]` (victoire) : Huez-moi. Allez-y. Plus fort. Vous paierez quand même la prochaine fois.
 - [ ] `MGMT_VOIX[13].repliques[3]` (defaite) : Ce soir, j'ai combattu {adv}, l'arbitre, les juges, et une intoxication alimentaire. Trois contre un.
 - [ ] `MGMT_VOIX[13].repliques[4]` (sur-laffiche-dun-autre) : Si ces deux-là se battent, moi je paie ma place. Et je paie jamais.
+- [ ] `MGMT_VOIX[13].repliques[5]` (annonce) : Mesdames et messieurs, {adv} est venu ici pour tomber. Je suis venu pour l'aider.
+- [ ] `MGMT_VOIX[13].repliques[6]` (victoire) : Huez-moi. Ça ne change rien : je suis le meilleur, et vous l'avez vu.
+- [ ] `MGMT_VOIX[13].repliques[7]` (defaite) : Un incident. Une erreur d'arbitrage. Une mouche. Je cherche encore.
+- [ ] `MGMT_VOIX[13].repliques[8]` (reseaux) : Chère salle de samedi : mettez vos meilleurs vêtements. Je viens vous décevoir.
+- [ ] `MGMT_VOIX[13].repliques[9]` (proposition) : Mon nom en gros et ma bourse en plus gros. Alors oui.
 - [ ] `MGMT_VOIX[14].repliques[0]` (annonce) : {adv} a une coupe de cheveux de prof de géo. Je vais lui arranger ça, avec les coudes.
 - [ ] `MGMT_VOIX[14].repliques[1]` (victoire) : Merci, vous êtes des malades, je vous aime tous. Même toi là-bas, qui m'as insulté à la pesée !
 - [ ] `MGMT_VOIX[14].repliques[2]` (victoire) : Attendez. Il y a deux semaines, on a enterré un ami. Il ne parlait à personne. Les gars, si ça ne va pas, parlez. À n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule.
 - [ ] `MGMT_VOIX[14].repliques[3]` (defaite) : Je suis dégoûté, mais je vais bien, vraiment. On se voit au pub.
+- [ ] `MGMT_VOIX[14].repliques[4]` (annonce) : Je vais être sincère : j'ai peur, mais je suis content d'être là. Merci de m'écouter.
+- [ ] `MGMT_VOIX[14].repliques[5]` (victoire) : Je pleure comme un enfant. C'est la plus belle soirée de ma vie.
+- [ ] `MGMT_VOIX[14].repliques[6]` (defaite) : Je suis triste. Je vous remercie quand même d'être venus. Vous êtes super.
+- [ ] `MGMT_VOIX[14].repliques[7]` (reseaux) : Une photo de mon coach qui m'enlace. Trois jours avant, il me dit de pas pleurer.
+- [ ] `MGMT_VOIX[14].repliques[8]` (proposition) : Oui, avec tout mon cœur. Merci de penser à moi.
 - [ ] `MGMT_VOIX[15].repliques[0]` (annonce) : (en langue des signes) On me demande si le bruit du public me manque. Non. Moi, je n'entends pas {adv} parler. C'est un avantage.
 - [ ] `MGMT_VOIX[15].repliques[1]` (victoire) : (en langue des signes) Il y a des millions de sourds dans le monde. Ce soir, ils ont tous gagné avec moi.
 - [ ] `MGMT_VOIX[15].repliques[2]` (victoire) : (en langue des signes) Ses épaules parlent avant ses poings. Je lis les épaules.
 - [ ] `MGMT_VOIX[15].repliques[3]` (defaite) : (en langue des signes) Il a été meilleur. Je reviens.
 - [ ] `MGMT_VOIX[15].repliques[4]` (proposition) : (en langue des signes) Oui. Mais trouvez-moi un bon interprète pour la conférence, le dernier traduisait comme un pied.
+- [ ] `MGMT_VOIX[15].repliques[5]` (annonce) : (en langue des signes) Je n'ai pas peur du bruit. Je sens la salle dans mes pieds.
+- [ ] `MGMT_VOIX[15].repliques[6]` (victoire) : (en langue des signes) Je dédie ça à ceux qui m'ont dit que ce n'était pas possible.
+- [ ] `MGMT_VOIX[15].repliques[7]` (defaite) : (en langue des signes) Ce soir, il a été plus rapide. Je ne l'ai pas vu venir.
+- [ ] `MGMT_VOIX[15].repliques[8]` (proposition) : (en langue des signes) Oui. Et faites en sorte que l'interprète soit à l'heure.
 - [ ] `MGMT_VOIX[16].repliques[0]` (annonce) : Je me suis entraîné avec les chevaux cette année. Pas à côté des chevaux. Avec.
 - [ ] `MGMT_VOIX[16].repliques[1]` (reseaux) : La lune était pleine hier. {adv} le sait. {adv} a vu.
 - [ ] `MGMT_VOIX[16].repliques[2]` (victoire) : (par son interprète) Il dit… qu'il remercie la montagne. Je crois. Ou sa mère. C'est le même mot.
 - [ ] `MGMT_VOIX[16].repliques[3]` (defaite) : Le tigre ne dort pas. Le tigre attend.
 - [ ] `MGMT_VOIX[16].repliques[4]` (proposition) : Il faut que je demande à mon corps. (Il ferme les yeux longtemps.) Il dit oui.
+- [ ] `MGMT_VOIX[16].repliques[5]` (annonce) : (par son interprète) Il dit qu'il a médité sur {adv}. Il dit que c'est un frère.
+- [ ] `MGMT_VOIX[16].repliques[6]` (victoire) : (par son interprète) Il dit que la nuit lui a parlé. Je n'ai pas tout compris.
+- [ ] `MGMT_VOIX[16].repliques[7]` (defaite) : (par son interprète) Il dit que ce n'est pas une défaite, c'est une page.
+- [ ] `MGMT_VOIX[16].repliques[8]` (reseaux) : Une photo d'un arbre. Pas de texte. Il reste trois jours.
+- [ ] `MGMT_VOIX[16].repliques[9]` (proposition) : (par son interprète) Il a regardé la lune. La lune dit oui.
 - [ ] `MGMT_VOIX[17].repliques[0]` (annonce) : On me demande si c'est dur de reprendre après ma fille. J'ai accouché pendant trente heures. {adv} ne me fait pas peur.
 - [ ] `MGMT_VOIX[17].repliques[1]` (reseaux) : Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Moi, [fatigué|fatiguée] ? Non. Enfin si. Mais pas moi.
 - [ ] `MGMT_VOIX[17].repliques[2]` (victoire) : Ma fille est dans la salle. Elle a trois ans. Elle ne se souviendra pas de ce soir, mais un jour je lui montrerai la vidéo.
 - [ ] `MGMT_VOIX[17].repliques[3]` (defaite) : Ce qui me fait mal, ce n'est pas le coup. C'est que mon fils regardait.
 - [ ] `MGMT_VOIX[17].repliques[4]` (proposition-refusee) : Pas ce mois-là. C'est l'anniversaire du petit. Le mois d'après, qui tu veux.
+- [ ] `MGMT_VOIX[17].repliques[5]` (annonce) : Ce matin, j'ai préparé le sac de mon fils, puis le mien. Samedi, c'est moi qui gagne.
+- [ ] `MGMT_VOIX[17].repliques[6]` (victoire) : Je vais rentrer et je ferai des crêpes. Merci à ma mère qui garde les enfants.
+- [ ] `MGMT_VOIX[17].repliques[7]` (defaite) : J'ai perdu. Mon petit m'a dit : maman, ce n'est pas grave. Il a raison.
+- [ ] `MGMT_VOIX[17].repliques[8]` (reseaux) : Réveil à 5 h. Biberon, entraînement, école. Samedi, je me bats.
+- [ ] `MGMT_VOIX[17].repliques[9]` (proposition) : Je dois d'abord vérifier le calendrier de l'école. Après, oui.
 - [ ] `MGMT_VOIX[18].repliques[0]` (annonce) : Objectif identifié. On a étudié {adv} pendant huit semaines, on connaît son terrain, samedi on exécute.
 - [ ] `MGMT_VOIX[18].repliques[1]` (reseaux) : Dernière séance. Le groupe est prêt.
 - [ ] `MGMT_VOIX[18].repliques[2]` (victoire) : Mission remplie. Je remercie les gars du camp. C'est eux qui ont fait le travail.
 - [ ] `MGMT_VOIX[18].repliques[3]` (defaite) : J'ai pris une mauvaise décision au deuxième round. C'est moi qui l'ai prise. On corrige.
 - [ ] `MGMT_VOIX[18].repliques[4]` (proposition-a-court-preavis) : J'ai déjà été [appelé|appelée] avec deux heures de préavis pour des choses beaucoup moins drôles. Oui.
+- [ ] `MGMT_VOIX[18].repliques[5]` (annonce) : Mission claire : tenir trois rounds, finir au quatrième. On connaît son plan.
+- [ ] `MGMT_VOIX[18].repliques[6]` (victoire) : Mission accomplie. Merci à l'équipe. On rentre.
+- [ ] `MGMT_VOIX[18].repliques[7]` (defaite) : Échec de mission. Je prends la faute, on analyse, on repart.
+- [ ] `MGMT_VOIX[18].repliques[8]` (reseaux) : Briefing terminé. Rassemblement samedi 9 h.
+- [ ] `MGMT_VOIX[18].repliques[9]` (proposition) : Reçu. Dites-moi l'heure.
 - [ ] `MGMT_VOIX[19].repliques[0]` (annonce) : À vingt ans j'étais en cellule avec un mec qui voulait me planter pour une clope. {adv} franchement, c'est des vacances.
 - [ ] `MGMT_VOIX[19].repliques[1]` (victoire) : Les petits du quartier, je sais que vous regardez. La rue ne vous donnera rien. Moi, j'ai failli y rester.
 - [ ] `MGMT_VOIX[19].repliques[2]` (defaite) : J'ai perdu un combat. Avant je perdais des années. Ça va.
 - [ ] `MGMT_VOIX[19].repliques[3]` (inactivite) : Quand je ne combats pas, je tourne en rond. Et quand je tourne en rond, je connais la suite. Donnez-moi un combat.
 - [ ] `MGMT_VOIX[19].repliques[4]` (forfait) : Blessure. Je suis resté chez moi, je le précise. Je sais ce que les gens vont penser.
+- [ ] `MGMT_VOIX[19].repliques[5]` (annonce) : J'ai fait des erreurs, j'en fais moins. {adv} va le sentir samedi.
+- [ ] `MGMT_VOIX[19].repliques[6]` (victoire) : Je dédie ça à ceux qui croient encore en moi. Ils sont peu, mais ils comptent.
+- [ ] `MGMT_VOIX[19].repliques[7]` (defaite) : Je ne vais pas craquer. Je rentre, je m'entraîne, je reviens.
+- [ ] `MGMT_VOIX[19].repliques[8]` (reseaux) : Pas de bar ce soir. Seulement du thé et du sommeil.
+- [ ] `MGMT_VOIX[19].repliques[9]` (proposition) : Oui. J'ai besoin d'un objectif, sinon je tourne en rond.
 - [ ] `MGMT_VOIX[20].repliques[0]` (annonce) : Wesh {adv}, tu as vu mes combats ? Si tu les avais vus, tu aurais refusé. Samedi, tu vas manger.
 - [ ] `MGMT_VOIX[20].repliques[1]` (reseaux) : Toute la team au premier rang samedi ! Ramenez le bruit, on va faire trembler la salle.
 - [ ] `MGMT_VOIX[20].repliques[2]` (victoire) : C'est pour la ville ! Pour les grands, pour les petits, pour ma mère qui me disait d'arrêter la boxe. Regarde maman !
 - [ ] `MGMT_VOIX[20].repliques[3]` (defaite) : Il m'a allumé, je peux rien dire, il m'a allumé. Bon, on rentre, kebab.
 - [ ] `MGMT_VOIX[20].repliques[4]` (proposition-refusee) : Lui ? Il n'a aucun abonné, personne ne le connaît, même sa mère ne regarde pas ses combats. Trouve-moi un vrai nom.
+- [ ] `MGMT_VOIX[20].repliques[5]` (annonce) : {adv}, viens, on s'explique dans la cage. Le quartier sera là, il regardera.
+- [ ] `MGMT_VOIX[20].repliques[6]` (victoire) : C'est pour le quartier ! Pour la bande, pour ceux d'en bas, pour maman !
+- [ ] `MGMT_VOIX[20].repliques[7]` (defaite) : J'ai perdu, mais on reste fiers. On rentre manger, on en reparle demain.
+- [ ] `MGMT_VOIX[20].repliques[8]` (reseaux) : Toute la rue sera là. Gardez la place pour les petits, devant.
+- [ ] `MGMT_VOIX[20].repliques[9]` (proposition) : Lui ? Je le connais pas, mais ok, c'est bon. Envoie.
 - [ ] `MGMT_VOIX[21].repliques[0]` (annonce) : {adv} est un danseur. Je vais le mettre au sol, m'asseoir dessus, et le noyer pendant quinze minutes. Ce n'est pas beau, mais c'est efficace.
 - [ ] `MGMT_VOIX[21].repliques[1]` (reseaux) : Six heures de lutte aujourd'hui. Demain sept.
 - [ ] `MGMT_VOIX[21].repliques[2]` (victoire) : Je vous avais dit que c'était pas beau. Vous voulez du beau, allez au ballet.
 - [ ] `MGMT_VOIX[21].repliques[3]` (defaite) : Mon cardio a lâché au troisième. C'est pas lui, c'est moi. Je retourne courir.
 - [ ] `MGMT_VOIX[21].repliques[4]` (proposition) : Un frappeur ? Parfait. Il va découvrir le sol.
+- [ ] `MGMT_VOIX[21].repliques[5]` (annonce) : Je vais prendre ses jambes, l'amener au sol, et attendre que ça passe. C'est sûr.
+- [ ] `MGMT_VOIX[21].repliques[6]` (victoire) : Quinze minutes au sol, ça fait mal aux genoux. Ça valait le coup.
+- [ ] `MGMT_VOIX[21].repliques[7]` (defaite) : Il s'est relevé trop vite. Je dois mieux contrôler. Je retourne au tapis.
+- [ ] `MGMT_VOIX[21].repliques[8]` (reseaux) : Séance de lutte du matin. Dix fois la même prise, jusqu'à ce que ça marche.
+- [ ] `MGMT_VOIX[21].repliques[9]` (proposition) : Un grand frappeur ? Très bien. Je l'emmène au sol, il va voir.
 - [ ] `MGMT_VOIX[22].repliques[0]` (annonce) : Frère, {adv} est un bon garçon, je ne lui veux aucun mal. Mais mon père sera au premier rang. Je ne peux pas perdre devant mon père.
 - [ ] `MGMT_VOIX[22].repliques[1]` (victoire) : Je dédie au village. Mon père m'a regardé, il a hoché la tête. Pour moi c'est plus qu'une ceinture.
 - [ ] `MGMT_VOIX[22].repliques[2]` (defaite) : J'ai fait honte à ma famille ce soir. Je rentre, je parle avec mon père, après on verra.
 - [ ] `MGMT_VOIX[22].repliques[3]` (provocation-recue) : Frère, tu parles beaucoup. Chez nous ceux qui parlent beaucoup, on les voit plus.
 - [ ] `MGMT_VOIX[22].repliques[4]` (proposition) : Je dois appeler mon père. (Il rappelle dix minutes plus tard.) C'est oui.
+- [ ] `MGMT_VOIX[22].repliques[5]` (annonce) : Toute la famille sera dans la salle. Je ne peux pas perdre devant eux.
+- [ ] `MGMT_VOIX[22].repliques[6]` (victoire) : Je dédie cette victoire à mes oncles, à ma tante, à toute la famille.
+- [ ] `MGMT_VOIX[22].repliques[7]` (defaite) : J'ai déçu les miens. On parle à la maison. Après, on verra.
+- [ ] `MGMT_VOIX[22].repliques[8]` (reseaux) : Trois cars de la famille arrivent samedi. Ils vont chanter fort.
+- [ ] `MGMT_VOIX[22].repliques[9]` (proposition) : Je demande à mon père. Il dit oui.
 - [ ] `MGMT_VOIX[23].repliques[0]` (annonce) : Samedi, ce n'est pas moi qui entre dans la cage. C'est tout le {pays}. J'ai reçu des messages de gens que je ne connais pas.
 - [ ] `MGMT_VOIX[23].repliques[1]` (victoire) : (il pleure) C'est pour vous, là-bas. Pour les gamins qui s'entraînent sur du béton. Un jour ce sera vous ici.
 - [ ] `MGMT_VOIX[23].repliques[2]` (defaite) : Je demande pardon à mon pays. Je vous ai déçus ce soir.
 - [ ] `MGMT_VOIX[23].repliques[3]` (inactivite) : Au pays on me demande tous les jours quand je combats. Je sais plus quoi leur répondre.
+- [ ] `MGMT_VOIX[23].repliques[4]` (annonce) : Tout le {pays} regarde samedi. Je ne veux pas les décevoir.
+- [ ] `MGMT_VOIX[23].repliques[5]` (victoire) : Pour tous ceux qui ont veillé là-bas. Je rentre à la maison avec un sourire.
+- [ ] `MGMT_VOIX[23].repliques[6]` (defaite) : Je m'excuse auprès du {pays}. Je reviendrai avec la tête haute.
+- [ ] `MGMT_VOIX[23].repliques[7]` (reseaux) : Les messages du {pays} arrivent par centaines. Je les lis tous.
+- [ ] `MGMT_VOIX[23].repliques[8]` (proposition) : Oui. Pour mon pays, oui.
 - [ ] `MGMT_VOIX[24].repliques[0]` (annonce) : Je vais le mettre KO au premier round. C'est pas une provocation, c'est une information.
 - [ ] `MGMT_VOIX[24].repliques[1]` (victoire) : Je vous l'avais dit. C'est tout.
 - [ ] `MGMT_VOIX[24].repliques[2]` (victoire) : J'avais dit premier round. Je me suis trompé. Ça m'arrive pas souvent.
 - [ ] `MGMT_VOIX[24].repliques[3]` (defaite) : Je ne l'avais pas vu. C'est la première fois que je ne vois pas.
+- [ ] `MGMT_VOIX[24].repliques[4]` (annonce) : Je vais le finir au troisième round. Ce n'est pas un défi, c'est un calendrier.
+- [ ] `MGMT_VOIX[24].repliques[5]` (victoire) : Troisième round, comme prévu. Je n'ai pas de mérite, je lis.
+- [ ] `MGMT_VOIX[24].repliques[6]` (defaite) : Je m'étais trompé de round. Je corrige ma prédiction.
+- [ ] `MGMT_VOIX[24].repliques[7]` (reseaux) : Rappel pour samedi : troisième round. Notez-le.
+- [ ] `MGMT_VOIX[24].repliques[8]` (proposition) : Il tombera en trois rounds. D'accord.
 - [ ] `MGMT_VOIX[25].repliques[0]` (annonce) : {adv} a un problème simple. Il baisse la main droite quand il lance son crochet gauche. Samedi, interrogation surprise.
 - [ ] `MGMT_VOIX[25].repliques[1]` (reseaux) : Rappel : le coude est une articulation, pas une option.
 - [ ] `MGMT_VOIX[25].repliques[2]` (victoire) : Copie rendue. Je lui mets 4 sur 20, mais c'est pour l'encourager.
 - [ ] `MGMT_VOIX[25].repliques[3]` (defaite) : Il connaissait la leçon mieux que moi. Je retourne réviser.
+- [ ] `MGMT_VOIX[25].repliques[4]` (annonce) : {adv} fait toujours la même erreur au deuxième round. Samedi, on la corrige.
+- [ ] `MGMT_VOIX[25].repliques[5]` (victoire) : Bon exercice. Je lui mets 12 sur 20, mais il a progressé.
+- [ ] `MGMT_VOIX[25].repliques[6]` (defaite) : J'ai raté mon cours. L'élève était meilleur que prévu.
+- [ ] `MGMT_VOIX[25].repliques[7]` (reseaux) : Séance de vidéo. Quatre-vingts minutes de notes. Tout est prêt.
+- [ ] `MGMT_VOIX[25].repliques[8]` (proposition) : Voyons son dossier. Très bien, c'est oui.
 - [ ] `MGMT_VOIX[26].repliques[0]` (annonce) : {adv} est le boss du niveau 3. Moi, je suis au niveau 9. Quelqu'un doit lui dire qu'il a raté des mises à jour.
 - [ ] `MGMT_VOIX[26].repliques[1]` (reseaux) : Nouvelle attaque spéciale débloquée. Samedi on la teste en ligne.
 - [ ] `MGMT_VOIX[26].repliques[2]` (victoire) : Combo complet, sa barre de vie à zéro, je n'ai même pas utilisé mon ultime. Merci pour les points d'expérience.
 - [ ] `MGMT_VOIX[26].repliques[3]` (defaite) : Game over. J'ai pas sauvegardé. Je relance une partie.
 - [ ] `MGMT_VOIX[26].repliques[4]` (proposition-refusee) : Lui ? C'est un mob de début de jeu. Donne-moi un boss.
+- [ ] `MGMT_VOIX[26].repliques[5]` (annonce) : {adv} est un ennemi de niveau 5. Moi je suis niveau 12. Pas de souci.
+- [ ] `MGMT_VOIX[26].repliques[6]` (victoire) : Combo parfait. Il m'a donné des points d'expérience. Merci {adv}.
+- [ ] `MGMT_VOIX[26].repliques[7]` (defaite) : Game over. Je recharge la sauvegarde et je recommence.
+- [ ] `MGMT_VOIX[26].repliques[8]` (reseaux) : Nouvelle compétence débloquée : esquive de gauche. Je la teste samedi.
+- [ ] `MGMT_VOIX[26].repliques[9]` (proposition) : Un boss de fin ? Oui. Je prends toujours les boss.
 - [ ] `MGMT_VOIX[27].repliques[0]` (annonce) : J'espère que {adv} vient pour de vrai. Si on sort pas tous les deux défigurés, les gens ont été volés.
 - [ ] `MGMT_VOIX[27].repliques[1]` (reseaux) : Nez cassé à l'entraînement. Troisième fois. On y va.
 - [ ] `MGMT_VOIX[27].repliques[2]` (victoire) : Regardez sa tête, regardez la mienne. Ça c'est un combat. Je l'aime ce mec.
 - [ ] `MGMT_VOIX[27].repliques[3]` (defaite) : J'ai perdu, mais putain c'était beau. Je signerais pour le refaire demain.
 - [ ] `MGMT_VOIX[27].repliques[4]` (defaite) : Il a couru pendant quinze minutes. Il a gagné. Ça me donne envie de vomir.
+- [ ] `MGMT_VOIX[27].repliques[5]` (annonce) : {adv} est venu pour se battre ? Alors on sera deux. Ça va saigner un peu.
+- [ ] `MGMT_VOIX[27].repliques[6]` (victoire) : Quel combat ! Je lui dois une bière. Et un pansement.
+- [ ] `MGMT_VOIX[27].repliques[7]` (defaite) : J'ai perdu, mais c'était un super combat. Je recommence quand tu veux.
+- [ ] `MGMT_VOIX[27].repliques[8]` (reseaux) : Nez cassé à l'entraînement. Troisième fois. Je suis content.
+- [ ] `MGMT_VOIX[27].repliques[9]` (proposition) : Quelqu'un qui frappe fort ? Oui, avec plaisir.
 - [ ] `MGMT_VOIX[28].repliques[0]` (annonce) : Quelque part, un enfant regarde ça et pense qu'il ne peut pas. Samedi, c'est pour lui. {adv} est un grand combattant, mais moi, j'ai une mission.
 - [ ] `MGMT_VOIX[28].repliques[1]` (reseaux) : 4 h 50. Tout le monde dort. Pas moi. On se voit au sommet.
 - [ ] `MGMT_VOIX[28].repliques[2]` (victoire) : Je parle aux gamins de chez moi : on vous dira que c'est impossible. C'est faux. On se voit au sommet.
 - [ ] `MGMT_VOIX[28].repliques[3]` (defaite) : Aujourd'hui je suis tombé. Demain je me relève. C'est ça la leçon. On se voit au sommet.
+- [ ] `MGMT_VOIX[28].repliques[4]` (annonce) : Quelque part, un jeune regarde. Samedi, je lui montre que c'est possible.
+- [ ] `MGMT_VOIX[28].repliques[5]` (victoire) : À tous les jeunes qui regardent : travaillez, croyez, relevez-vous. On se voit au sommet.
+- [ ] `MGMT_VOIX[28].repliques[6]` (defaite) : Je suis tombé. Je me relève demain. Voilà la vraie leçon. On se voit au sommet.
+- [ ] `MGMT_VOIX[28].repliques[7]` (reseaux) : 4 h 40. Un grand verre d'eau. Aujourd'hui, on bouge. On se voit au sommet.
+- [ ] `MGMT_VOIX[28].repliques[8]` (proposition) : Je prends. Chaque combat est une leçon pour quelqu'un.
 - [ ] `MGMT_VOIX[29].repliques[0]` (annonce) : Quand j'ai commencé, on se battait dans des parkings. Le vainqueur prenait l'enveloppe, le perdant repartait sans dents. {adv} est né l'année de mon premier nez cassé.
 - [ ] `MGMT_VOIX[29].repliques[1]` (victoire) : Le petit il frappe fort, hein. Mais à mon âge on sait où sont les portes.
 - [ ] `MGMT_VOIX[29].repliques[2]` (defaite) : Il m'a sorti. Bravo gamin. Moi je vais aller mettre de la glace partout.
 - [ ] `MGMT_VOIX[29].repliques[3]` (proposition) : Un jeune ? Envoie. Il faut bien que quelqu'un leur apprenne.
+- [ ] `MGMT_VOIX[29].repliques[4]` (annonce) : {adv} est né quand j'avais déjà dix combats. Samedi, il apprend un truc.
+- [ ] `MGMT_VOIX[29].repliques[5]` (victoire) : Le métier, ça ne s'achète pas. Merci à ceux qui me l'ont appris.
+- [ ] `MGMT_VOIX[29].repliques[6]` (defaite) : Il était plus rapide. À mon âge, c'est normal. Je ne regrette rien.
+- [ ] `MGMT_VOIX[29].repliques[7]` (reseaux) : Chaque matin, mes genoux me disent bonjour. Chaque soir, je leur réponds.
+- [ ] `MGMT_VOIX[29].repliques[8]` (proposition) : Un jeune, encore ? Oui. Il faut bien que quelqu'un leur montre.
 - [ ] `MGMT_VOIX[30].repliques[0]` (annonce) : Je me bats pour une bourse qui paye à peine mon camp. Ce n'est pas grave : {org} a besoin d'argent pour ses néons.
 - [ ] `MGMT_VOIX[30].repliques[1]` (reseaux) : Soirée de {org} : 4 000 places vendues. Ma bourse : pareil que l'an dernier. Cherchez l'erreur.
 - [ ] `MGMT_VOIX[30].repliques[2]` (victoire) : J'ai gagné. Je vais recevoir une prime qui paiera à peine le taxi. Merci à moi.
 - [ ] `MGMT_VOIX[30].repliques[3]` (defaite) : Trois juges, zéro yeux. Je fais appel. Je sais que ça sert à rien, je fais appel quand même.
 - [ ] `MGMT_VOIX[30].repliques[4]` (proposition) : Combien ? (Il ne demande rien d'autre.)
+- [ ] `MGMT_VOIX[30].repliques[5]` (annonce) : Je vais me battre pour presque rien. Ça ne change pas grand-chose pour moi.
+- [ ] `MGMT_VOIX[30].repliques[6]` (victoire) : J'ai gagné. La bourse, vous la connaissez. Je n'ai rien d'autre à dire.
+- [ ] `MGMT_VOIX[30].repliques[7]` (defaite) : Perdu. Les juges, vous connaissez leur travail. Moi, le mien.
+- [ ] `MGMT_VOIX[30].repliques[8]` (reseaux) : Soirée sold out. Ma bourse : la même qu'avant. Quelqu'un a compris le système ?
+- [ ] `MGMT_VOIX[30].repliques[9]` (inactivite) : {mois} mois sans combat. Je paie mon loyer avec du vent.
 - [ ] `MGMT_VOIX[31].repliques[0]` (annonce) : Euh… je suis content. Voilà. Merci.
 - [ ] `MGMT_VOIX[31].repliques[1]` (victoire) : Euh… merci. Merci à ma mère. Et… voilà. Merci {org}. Désolé je sais pas trop parler.
 - [ ] `MGMT_VOIX[31].repliques[2]` (defaite) : (il ne vient pas en conférence de presse ; son coach parle pour lui)
 - [ ] `MGMT_VOIX[31].repliques[3]` (proposition) : Euh, oui, si vous pensez que c'est bien, oui.
+- [ ] `MGMT_VOIX[31].repliques[4]` (annonce) : Euh… je vais faire de mon mieux. Merci à ceux qui viennent.
+- [ ] `MGMT_VOIX[31].repliques[5]` (victoire) : Merci… merci beaucoup. Je… j'espère que ma mère regarde.
+- [ ] `MGMT_VOIX[31].repliques[6]` (proposition) : Oui, si c'est bien pour la carte. Je vous fais confiance.
+- [ ] `MGMT_VOIX[31].repliques[7]` (reseaux) : Camp terminé. Euh… voilà.
 - [ ] `MGMT_VOIX[32].repliques[0]` (annonce) : {adv} a demandé ce combat pour avoir des vues. Je comprends, moi aussi j'aimerais être moi. Code FIGHT10 sur la boisson énergisante, lien en bio.
 - [ ] `MGMT_VOIX[32].repliques[1]` (reseaux) : VLOG DE PESÉE EN LIGNE. Je vous montre tout. Même ce qu'il faut pas.
 - [ ] `MGMT_VOIX[32].repliques[2]` (victoire) : Allez vous abonner à {adv}. Il en a besoin : il a plus de dents que d'abonnés.
 - [ ] `MGMT_VOIX[32].repliques[3]` (defaite) : Vidéo demain. Je vous dis TOUT. Ce qui s'est vraiment passé. (Rien ne s'est passé.)
 - [ ] `MGMT_VOIX[32].repliques[4]` (proposition-refusee) : Il fait pas de vues. Désolé mais il fait pas de vues.
+- [ ] `MGMT_VOIX[32].repliques[5]` (annonce) : {adv} n'a pas autant d'abonnés que moi, mais il a plus de dents. On verra samedi.
+- [ ] `MGMT_VOIX[32].repliques[6]` (victoire) : Dix millions de vues sur ce KO. Abonnez-vous, likez, partagez.
+- [ ] `MGMT_VOIX[32].repliques[7]` (defaite) : Défaite. Mais mon contenu de ce soir est incroyable. Vidéo bientôt.
+- [ ] `MGMT_VOIX[32].repliques[8]` (reseaux) : Teasing de la pesée : vous n'allez pas croire ce que j'ai mangé avant.
+- [ ] `MGMT_VOIX[32].repliques[9]` (proposition) : Combien de vues ? Dites-moi ça, après on parle.
 - [ ] `MGMT_VOIX[33].repliques[0]` (annonce) : J'ai traversé des choses pour être ici. Samedi c'est quinze minutes. Je sais faire quinze minutes.
 - [ ] `MGMT_VOIX[33].repliques[1]` (victoire) : Ma mère n'a pas pu venir, elle n'a pas le visa. Maman, j'ai gagné. Je t'appelle ce soir.
 - [ ] `MGMT_VOIX[33].repliques[2]` (defaite) : J'ai perdu un combat. Je n'ai pas perdu ma place. C'est différent.
 - [ ] `MGMT_VOIX[33].repliques[3]` (moment-de-vie-papiers-obtenus) : Aujourd'hui j'ai eu mes papiers. Je peux combattre partout maintenant. Même chez lui.
+- [ ] `MGMT_VOIX[33].repliques[4]` (annonce) : J'ai quitté mon pays pour pouvoir faire ça. Samedi, je n'ai pas le droit de rater.
+- [ ] `MGMT_VOIX[33].repliques[5]` (victoire) : Je dédie ça à ceux qui sont restés là-bas et qui regardent sur un téléphone.
+- [ ] `MGMT_VOIX[33].repliques[6]` (defaite) : Je suis tombé. Je me relève. J'ai déjà traversé pire.
+- [ ] `MGMT_VOIX[33].repliques[7]` (proposition) : Oui. Chaque combat me rapproche des papiers.
 - [ ] `MGMT_VOIX[34].repliques[0]` (annonce) : Les gens viennent voir le nom. Samedi je veux qu'ils repartent avec le mien.
 - [ ] `MGMT_VOIX[34].repliques[1]` (victoire) : Papa était au premier rang. Pour une fois il a rien dit. Je crois que c'est un compliment.
 - [ ] `MGMT_VOIX[34].repliques[2]` (defaite) : Allez-y, dites-le, il n'est pas son père. Je sais. Je le sais depuis que j'ai huit ans.
 - [ ] `MGMT_VOIX[34].repliques[3]` (inactivite) : On croit que j'ai des passe-droits. J'attends comme tout le monde. Plus, même.
+- [ ] `MGMT_VOIX[34].repliques[4]` (annonce) : Tout le monde connaît mon nom. Samedi, ils vont connaître ma boxe.
+- [ ] `MGMT_VOIX[34].repliques[5]` (victoire) : Mon père m'a serré la main. C'est la première fois qu'il le fait en public.
+- [ ] `MGMT_VOIX[34].repliques[6]` (defaite) : Je ne veux pas qu'on parle de mon père. Je veux qu'on parle du combat.
+- [ ] `MGMT_VOIX[34].repliques[7]` (reseaux) : Un entraînement, un jus d'orange. Je n'ai pas de passe-droit, juste de la fatigue.
+- [ ] `MGMT_VOIX[34].repliques[8]` (proposition) : Choisissez-moi quelqu'un de difficile. Je veux le mériter.
 - [ ] `MGMT_VOIX[35].repliques[0]` (annonce) : Dans mon village, il n'y avait aucune fille dans les salles. Aujourd'hui, il y en a onze. Samedi, c'est pour les onze.
 - [ ] `MGMT_VOIX[35].repliques[1]` (reseaux) : Encore un gars qui me dit de faire du yoga. Viens au sparring demain, on fera du yoga ensemble.
 - [ ] `MGMT_VOIX[35].repliques[2]` (victoire) : Les petites qui regardent : on vous dira que c'est pas pour vous. C'est pour vous.
 - [ ] `MGMT_VOIX[35].repliques[3]` (defaite) : J'ai perdu. Ça veut pas dire qu'on avait tort d'essayer.
+- [ ] `MGMT_VOIX[35].repliques[4]` (annonce) : Il y a dix ans, nous étions trois dans la salle. Aujourd'hui, il y en a trente. Samedi, c'est pour elles.
+- [ ] `MGMT_VOIX[35].repliques[5]` (victoire) : Je dédie cette victoire à toutes celles qui ont commencé avant moi.
+- [ ] `MGMT_VOIX[35].repliques[6]` (defaite) : Je ne suis pas la première à perdre. Je ne serai pas la dernière à gagner.
+- [ ] `MGMT_VOIX[35].repliques[7]` (reseaux) : On m'a demandé si je me bats comme un homme. Je me bats comme moi.
+- [ ] `MGMT_VOIX[35].repliques[8]` (proposition) : Oui. Et prenez-moi quelqu'un de fort, je ne suis pas là pour faire joli.
 - [ ] `MGMT_VOIX[36].repliques[0]` (annonce) : J'ai échangé deux gardes avec un collègue pour le camp. Je lui dois un week-end et un kebab.
 - [ ] `MGMT_VOIX[36].repliques[1]` (victoire) : Lundi 7 h je suis au boulot. Les collègues vont me chambrer toute la journée, et j'ai hâte.
 - [ ] `MGMT_VOIX[36].repliques[2]` (defaite) : Bon. Lundi 7 h je suis au boulot. Au moins là-bas personne me tape.
 - [ ] `MGMT_VOIX[36].repliques[3]` (proposition-refusee) : Pas ce mois-là, je suis de nuit toute la semaine. Je peux pas lâcher l'équipe.
+- [ ] `MGMT_VOIX[36].repliques[4]` (annonce) : Combat samedi, boulot lundi. J'ai posé une demi-journée, j'ai hâte.
+- [ ] `MGMT_VOIX[36].repliques[5]` (victoire) : Je dormirai peu cette nuit. Lundi 6 h, je suis au travail. Je souris déjà.
+- [ ] `MGMT_VOIX[36].repliques[6]` (defaite) : Lundi, mes collègues vont me demander ce qui s'est passé. Je vais mentir un peu.
+- [ ] `MGMT_VOIX[36].repliques[7]` (reseaux) : Entraînement à 6 h, boulot de 9 h à 17 h, salle jusqu'à 21 h. Samedi, je me repose. Enfin non.
+- [ ] `MGMT_VOIX[36].repliques[8]` (proposition) : Je dois voir si mon chef me libère. Normalement, oui.
 - [ ] `MGMT_VOIX[37].repliques[0]` (annonce) : J'ai mon partiel de pharmacologie mardi et mon combat samedi. Je sais lequel me fait le plus peur.
 - [ ] `MGMT_VOIX[37].repliques[1]` (victoire) : Je vais pouvoir payer l'inscription de l'année prochaine. Merci {adv}, sincèrement.
 - [ ] `MGMT_VOIX[37].repliques[2]` (defaite) : Traumatisme crânien léger, d'après le médecin. Je sais ce que ça veut dire, j'ai eu le cours. C'est pas rassurant.
+- [ ] `MGMT_VOIX[37].repliques[3]` (annonce) : J'ai un examen mercredi et un combat samedi. Je ne sais pas lequel est le plus dur.
+- [ ] `MGMT_VOIX[37].repliques[4]` (victoire) : La bourse paiera mon loyer pour trois mois. Merci {adv}, sincèrement.
+- [ ] `MGMT_VOIX[37].repliques[5]` (defaite) : Je prends deux jours de repos. Après, je retourne aux cours. On verra.
+- [ ] `MGMT_VOIX[37].repliques[6]` (reseaux) : Révision de physiologie dans le vestiaire. Avant, pendant, après la pesée.
+- [ ] `MGMT_VOIX[37].repliques[7]` (proposition) : Oui, tant que ça ne tombe pas pendant les partiels.
 - [ ] `MGMT_VOIX[38].repliques[0]` (annonce) : Combat le 13 ? Non. Je plaisante pas. Changez la date ou changez de combattant.
 - [ ] `MGMT_VOIX[38].repliques[1]` (reseaux) : Chaussettes lavées par erreur par ma copine. Je suis en deuil.
 - [ ] `MGMT_VOIX[38].repliques[2]` (victoire) : Vous voyez ? Même chaussettes. Je vous l'avais dit.
 - [ ] `MGMT_VOIX[38].repliques[3]` (defaite) : J'ai croisé un chat noir dans le parking. Je dis rien de plus.
+- [ ] `MGMT_VOIX[38].repliques[4]` (annonce) : Combat un vendredi 13 ? Non merci. Changez la date, ou je ne viens pas.
+- [ ] `MGMT_VOIX[38].repliques[5]` (victoire) : Même chaussettes, même caleçon, même chemin. Ça marche, je ne change rien.
+- [ ] `MGMT_VOIX[38].repliques[6]` (defaite) : Quelqu'un a marché sur mon sac dans le vestiaire. Voilà. Je ne dis rien de plus.
+- [ ] `MGMT_VOIX[38].repliques[7]` (reseaux) : J'ai trouvé un trèfle à quatre feuilles dans le parking. Samedi, c'est bon.
+- [ ] `MGMT_VOIX[38].repliques[8]` (proposition) : Quelle date ? Quel chiffre ? Dites-moi tout avant.
 - [ ] `MGMT_VOIX[39].repliques[0]` (annonce) : Il y a cinq ans, j'étais comptable et je pesais 110 kilos. Je ne suis pas en retard : je suis en avance sur celui que j'étais.
 - [ ] `MGMT_VOIX[39].repliques[1]` (victoire) : Le type que j'étais à trente ans ne me croirait pas. Salut à lui.
 - [ ] `MGMT_VOIX[39].repliques[2]` (defaite) : Je perds un combat. J'ai déjà perdu une vie entière, alors ça va.
+- [ ] `MGMT_VOIX[39].repliques[3]` (annonce) : À mon âge, on ne court plus après le temps. Samedi, je cours après {adv}.
+- [ ] `MGMT_VOIX[39].repliques[4]` (victoire) : Je ne pensais pas gagner un jour. Le moi de vingt ans rigole.
+- [ ] `MGMT_VOIX[39].repliques[5]` (defaite) : J'ai perdu, et alors ? J'ai gagné quelque chose avant d'arriver ici.
+- [ ] `MGMT_VOIX[39].repliques[6]` (reseaux) : Footing à 6 h. Pesée à midi. Je fête mes 40 ans la semaine prochaine, on verra.
+- [ ] `MGMT_VOIX[39].repliques[7]` (proposition) : Oui, dites-moi seulement l'heure. Je me couche tôt.
 - [ ] `MGMT_VOIX[40].repliques[0]` (annonce) : Au judo on m'a appris à tomber. Ici j'apprends à ne pas tomber. C'est pas le même métier.
 - [ ] `MGMT_VOIX[40].repliques[1]` (victoire) : Projection de hanche, vingt ans que je la fais. Elle marche aussi avec des coups de poing, apparemment.
 - [ ] `MGMT_VOIX[40].repliques[2]` (defaite) : Il m'a frappé à un endroit où, au judo, personne frappe jamais. Leçon.
+- [ ] `MGMT_VOIX[40].repliques[3]` (annonce) : Dans mon ancien sport, on gagnait aux points. Ici, on gagne en frappant. Je m'adapte.
+- [ ] `MGMT_VOIX[40].repliques[4]` (victoire) : Ma vieille prise a servi. Ça marche aussi dans une cage.
+- [ ] `MGMT_VOIX[40].repliques[5]` (defaite) : Il a frappé là où mon ancien sport ne frappe pas. Je corrige.
+- [ ] `MGMT_VOIX[40].repliques[6]` (reseaux) : Séance de sparring avec mon ancien club. Ils me regardent bizarrement. Moi aussi.
+- [ ] `MGMT_VOIX[40].repliques[7]` (proposition) : Oui. Je veux continuer à apprendre.
 - [ ] `MGMT_VOIX[41].repliques[0]` (annonce) : {adv}, ton cardio est comme un poème qui s'arrête à la deuxième strophe. Moi, je finis mes textes et mes combats.
 - [ ] `MGMT_VOIX[41].repliques[1]` (reseaux) : Nouveau son vendredi. Nouveau KO samedi. Même label : moi.
 - [ ] `MGMT_VOIX[41].repliques[2]` (victoire) : J'avais écrit le couplet avant le combat. Il manquait juste la fin. Là, je l'ai.
 - [ ] `MGMT_VOIX[41].repliques[3]` (defaite) : Ce soir j'écris un morceau triste. Il va être très bon.
+- [ ] `MGMT_VOIX[41].repliques[4]` (annonce) : Samedi, j'écris un couplet sur le visage de {adv}. Je le chanterai après.
+- [ ] `MGMT_VOIX[41].repliques[5]` (victoire) : J'ai gagné. Le refrain est trouvé. Merci à tous, à vendredi pour le son.
+- [ ] `MGMT_VOIX[41].repliques[6]` (defaite) : Cette défaite fera un très bon morceau. Ne vous inquiétez pas.
+- [ ] `MGMT_VOIX[41].repliques[7]` (reseaux) : Un nouveau texte ce soir. Un nouveau KO samedi. Même combat, même rythme.
+- [ ] `MGMT_VOIX[41].repliques[8]` (proposition) : Oui, avec un bon éclairage et un bon son. Je fais ça aussi.
 - [ ] `MGMT_VOIX[42].repliques[0]` (annonce) : Je vais être honnête : je dors mal depuis mon dernier combat. Mais je veux savoir si je suis encore moi. Samedi, je saurai.
 - [ ] `MGMT_VOIX[42].repliques[1]` (victoire) : J'ai gagné. Je sais pas encore si je suis content. Laissez-moi un peu.
 - [ ] `MGMT_VOIX[42].repliques[2]` (defaite) : Je crois que c'est fini. Je crois. Je vous dirai.
+- [ ] `MGMT_VOIX[42].repliques[3]` (annonce) : Je ne dors plus bien. Mais je suis là. C'est déjà beaucoup.
+- [ ] `MGMT_VOIX[42].repliques[4]` (victoire) : Je ne sais pas ce que je ressens. Peut-être du soulagement.
+- [ ] `MGMT_VOIX[42].repliques[5]` (defaite) : Je crois que c'est moins grave que ce que je craignais. Mais je ne sais pas.
+- [ ] `MGMT_VOIX[42].repliques[6]` (proposition) : Je vais y penser. Je vais dire oui. Je crois.
 - [ ] `MGMT_VOIX[43].repliques[0]` (annonce) : J'ai quatre petits frères. Deux vont à l'école, un est apprenti, un veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.
 - [ ] `MGMT_VOIX[43].repliques[1]` (victoire) : L'inscription au permis de ma petite sœur est payée. Ça, c'est une ceinture.
 - [ ] `MGMT_VOIX[43].repliques[2]` (inactivite) : Chaque mois sans combat, c'est un mois où c'est ma mère qui compte. Je veux pas que ma mère compte.
+- [ ] `MGMT_VOIX[43].repliques[3]` (annonce) : Je me bats pour mes frères et sœurs. Samedi, je ne les décevrai pas.
+- [ ] `MGMT_VOIX[43].repliques[4]` (victoire) : Ça fait une année scolaire payée pour ma petite sœur. C'est ma ceinture.
+- [ ] `MGMT_VOIX[43].repliques[5]` (defaite) : Je dis à ma mère que ça va. Je suis fatigué, mais ça va.
+- [ ] `MGMT_VOIX[43].repliques[6]` (reseaux) : Réveil à 5 h, entraînement, dîner, devoirs de mon petit frère. Je dors à 23 h.
+- [ ] `MGMT_VOIX[43].repliques[7]` (proposition) : Oui. Dites-moi combien, et je signe.
 - [ ] `MGMT_VOIX[44].repliques[0]` (annonce) : J'ai pleuré en signant le contrat. Je pleurerai sans doute à la pesée. Et samedi, je le frapperai très fort. Les deux sont vrais.
 - [ ] `MGMT_VOIX[44].repliques[1]` (victoire) : (il pleure) Pardon. Pardon. Merci. J'ai eu tellement peur toute la semaine.
 - [ ] `MGMT_VOIX[44].repliques[2]` (defaite) : J'ai mal au cœur plus qu'au visage. C'est normal je crois.
+- [ ] `MGMT_VOIX[44].repliques[3]` (annonce) : Je suis très ému à l'idée d'y aller. J'ai déjà pleuré deux fois ce matin.
+- [ ] `MGMT_VOIX[44].repliques[4]` (victoire) : Merci, merci, merci. Je ne pensais pas que j'allais y arriver.
+- [ ] `MGMT_VOIX[44].repliques[5]` (defaite) : J'ai pleuré dans le vestiaire. Je reviens plus fort, je promets.
+- [ ] `MGMT_VOIX[44].repliques[6]` (reseaux) : Mon coach m'a pris dans ses bras. Je n'ai plus de larmes.
+- [ ] `MGMT_VOIX[44].repliques[7]` (proposition) : Oui, et merci de penser à moi. Ça me touche.
 - [ ] `MGMT_VOIX[45].repliques[0]` (annonce) : Vous me demandez mon plan ? Vous le verrez samedi. Lui aussi.
 - [ ] `MGMT_VOIX[45].repliques[1]` (victoire) : Round deux, j'ai changé de garde. Pourquoi ? Question suivante.
 - [ ] `MGMT_VOIX[45].repliques[2]` (defaite) : Il avait un meilleur plan. Je voudrais bien savoir lequel.
 - [ ] `MGMT_VOIX[45].repliques[3]` (micro-tendu) : Q. Tu joues aux échecs ? — R. Pourquoi, vous voulez perdre ?
+- [ ] `MGMT_VOIX[45].repliques[4]` (annonce) : J'ai trois plans. Samedi, {adv} n'en verra qu'un. Il choisira le mauvais.
+- [ ] `MGMT_VOIX[45].repliques[5]` (victoire) : Le plan B était meilleur que le plan A. Je ne dis pas ce qu'est le plan C.
+- [ ] `MGMT_VOIX[45].repliques[6]` (defaite) : Il a lu mon jeu au premier round. Je note. On change tout.
+- [ ] `MGMT_VOIX[45].repliques[7]` (reseaux) : Une photo d'un échiquier. Pas de texte. Il reste deux jours.
+- [ ] `MGMT_VOIX[45].repliques[8]` (proposition) : Donnez-moi sa vidéo. Après, je dirai oui ou non.
 - [ ] `MGMT_VOIX[46].repliques[0]` (annonce) : Le camp s'est très bien passé. Enfin, les deux dernières semaines. Les deux premières, c'était plutôt un camp de base.
 - [ ] `MGMT_VOIX[46].repliques[1]` (pesee-ratee) : J'avais oublié que c'était aujourd'hui. Je suis pas fier. Enfin un peu quand même, il était bon ce burger.
 - [ ] `MGMT_VOIX[46].repliques[2]` (victoire) : On se retrouve tous au bar d'en face, c'est moi qui paye. Enfin c'est {org} qui paye, c'est ma bourse.
 - [ ] `MGMT_VOIX[46].repliques[3]` (defaite) : Je vais faire la fête quand même. On fête la défaite aussi, sinon on fête jamais rien.
+- [ ] `MGMT_VOIX[46].repliques[4]` (annonce) : Combat samedi, soirée dimanche. Je ne dis pas où, mais il y aura de la musique.
+- [ ] `MGMT_VOIX[46].repliques[5]` (victoire) : On rentre tard. On rentre bien. Merci à tous, je paye la tournée.
+- [ ] `MGMT_VOIX[46].repliques[6]` (defaite) : On va fêter ça quand même. Perdre, c'est aussi une occasion de boire à la santé des autres.
+- [ ] `MGMT_VOIX[46].repliques[7]` (reseaux) : J'ai promis de dormir tôt. J'ai menti. Voilà, c'est dit.
+- [ ] `MGMT_VOIX[46].repliques[8]` (proposition) : Oui, tant qu'il y a une fête après.
 - [ ] `MGMT_VOIX[47].repliques[0]` (annonce) : Il y a six ans, je ne montais pas un escalier sans m'arrêter. Samedi, je monte dans une cage. Je sais lequel était le plus dur.
 - [ ] `MGMT_VOIX[47].repliques[1]` (reseaux) : Photo de moi à 128 kilos, à côté de la pesée d'hier. Je la garde dans mon téléphone. Elle me regarde.
 - [ ] `MGMT_VOIX[47].repliques[2]` (victoire) : À tous ceux qui se regardent dans la glace et qui ont honte : moi aussi. Et regardez maintenant.
 - [ ] `MGMT_VOIX[47].repliques[3]` (defaite) : J'ai perdu. Mais le vieux moi, je l'ai battu il y a longtemps.
+- [ ] `MGMT_VOIX[47].repliques[4]` (annonce) : Je me suis levé tous les matins pendant cinq ans. Samedi, on voit si ça a payé.
+- [ ] `MGMT_VOIX[47].repliques[5]` (victoire) : À celui que j'étais : regarde-moi. À ceux qui m'ont suivi : merci.
+- [ ] `MGMT_VOIX[47].repliques[6]` (defaite) : Je ne perds pas, j'apprends. Le moi d'avant n'aurait pas essayé.
+- [ ] `MGMT_VOIX[47].repliques[7]` (reseaux) : Un vieux pantalon trop grand, accroché dans le vestiaire. Il me rappelle tout.
+- [ ] `MGMT_VOIX[47].repliques[8]` (proposition) : Oui. Je veux continuer à me surprendre.
 
-## Médias — 46 textes
+## Médias — 95 textes
 
 Fichier : `mgmt-medias-data.js`
 
@@ -860,6 +1549,55 @@ Fichier : `mgmt-medias-data.js`
 - [ ] `MGMT_MEDIAS_LIGNES[43]` (lendemain) : La guerre de l’année : {a} contre {b}, {round} rounds sans reculer. C’est historique.
 - [ ] `MGMT_MEDIAS_LIGNES[44]` (affiche) : {a} est enfin en tête d’affiche de {org} {n}. Il le méritait depuis longtemps.
 - [ ] `MGMT_MEDIAS_LIGNES[45]` (lendemain) : On a retrouvé {a} dans sa salle après {org} {n}. Il a apporté des croissants pour tout le monde. On est fans.
+- [ ] `MGMT_MEDIAS_LIGNES[46]` (affiche) : {org} {n} s’annonce chargée. Le combat principal : {a} contre {b}, en {cat}.
+- [ ] `MGMT_MEDIAS_LIGNES[47]` (affiche) : {a} et {b} ouvrent la saison de {org} {n}. La division attendait ce combat.
+- [ ] `MGMT_MEDIAS_LIGNES[48]` (lendemain) : {a} bat {b} à {org} {n}. Le classement de la division va bouger.
+- [ ] `MGMT_MEDIAS_LIGNES[49]` (lendemain) : {a} finit {b} au round {round}. Le public n’a rien à ajouter.
+- [ ] `MGMT_MEDIAS_LIGNES[50]` (lendemain) : Décision pour {a} contre {b}, après {round} rounds. Un combat plus serré que prévu.
+- [ ] `MGMT_MEDIAS_LIGNES[51]` (lendemain) : {a} gagne encore. Sa série devient un sujet pour toute la division.
+- [ ] `MGMT_MEDIAS_LIGNES[52]` (affiche) : Je confirme : {a} contre {b} en tête d’affiche de {org} {n}. Rien ne change.
+- [ ] `MGMT_MEDIAS_LIGNES[53]` (affiche) : Tout est calé pour {a} contre {b} à {org} {n}. Je vous dis la suite.
+- [ ] `MGMT_MEDIAS_LIGNES[54]` (lendemain) : Résultat confirmé : {a} bat {b} à {org} {n}. Les deux camps se parlent déjà.
+- [ ] `MGMT_MEDIAS_LIGNES[55]` (lendemain) : On me dit que {a} n’était pas le favori de ses propres coachs. Il les a surpris.
+- [ ] `MGMT_MEDIAS_LIGNES[56]` (affiche) : {a} CONTRE {b} : CE QUE PERSONNE NE VOUS DIT SUR CE COMBAT
+- [ ] `MGMT_MEDIAS_LIGNES[57]` (lendemain) : {a} EXPÉDIE {b} AU PREMIER ROUND : LA VIDÉO FAIT LE TOUR DU WEB
+- [ ] `MGMT_MEDIAS_LIGNES[58]` (lendemain) : {b} ÉTAIT FAVORI ET PERD : CE QUI S’EST PASSÉ DANS SON COIN
+- [ ] `MGMT_MEDIAS_LIGNES[59]` (lendemain) : {a} : TROISIÈME VICTOIRE DE SUITE, ET ÇA NE FAIT QUE COMMENCER
+- [ ] `MGMT_MEDIAS_LIGNES[60]` (lendemain) : {a} GAGNE, MAIS PERSONNE N’EST CONTENT : VOICI POURQUOI
+- [ ] `MGMT_MEDIAS_LIGNES[61]` (rebook) : Cinq semaines entre le KO de {a} et son nouveau combat. {org} confirme la date.
+- [ ] `MGMT_MEDIAS_LIGNES[62]` (rebook) : Un KO, cinq semaines, puis la cage : {a} revient. Personne ne dit qui l’a voulu.
+- [ ] `MGMT_MEDIAS_LIGNES[63]` (affiche) : {a} contre {b} : qui a choisi ce combat, et pourquoi maintenant ?
+- [ ] `MGMT_MEDIAS_LIGNES[64]` (lendemain) : {b} perd contre {a}. Son camp avait-il bien préparé ce combat ?
+- [ ] `MGMT_MEDIAS_LIGNES[65]` (affiche) : Ce qu’il faut regarder dans {a} contre {b} : les trois premiers rounds.
+- [ ] `MGMT_MEDIAS_LIGNES[66]` (lendemain) : {a} a gagné en trois temps : distance, clinch, fin au round {round}.
+- [ ] `MGMT_MEDIAS_LIGNES[67]` (lendemain) : {a} a pris les rounds courts, {b} les longs échanges. Les juges ont suivi {a}.
+- [ ] `MGMT_MEDIAS_LIGNES[68]` (lendemain) : {a} a gagné parce qu’il a fait un seul choix, et qu’il l’a tenu.
+- [ ] `MGMT_MEDIAS_LIGNES[69]` (affiche) : Q. {a}, {b} en face samedi : vous en pensez quoi ? — R. Je pense à ma pesée.
+- [ ] `MGMT_MEDIAS_LIGNES[70]` (lendemain) : Q. {a}, qu’avez-vous dit à {b} après le combat ? — R. Merci. Rien d’autre.
+- [ ] `MGMT_MEDIAS_LIGNES[71]` (lendemain) : Q. {a}, un mot sur ce soir ? — R. Je suis content. Je vais dormir.
+- [ ] `MGMT_MEDIAS_LIGNES[72]` (lendemain) : Q. {a}, les juges, vous les avez compris ? — R. Moi, j’ai fait mon travail.
+- [ ] `MGMT_MEDIAS_LIGNES[73]` (affiche) : Soirée {org} {n} : {a} contre {b}. Le public sera là, et vous aussi.
+- [ ] `MGMT_MEDIAS_LIGNES[74]` (lendemain) : Quel moment : {a} bat {b} à {org} {n}. On n’oubliera pas ce soir.
+- [ ] `MGMT_MEDIAS_LIGNES[75]` (lendemain) : En un seul round ! {a} bat {b} à {org} {n}. Incroyable.
+- [ ] `MGMT_MEDIAS_LIGNES[76]` (affiche) : {a} contre {b} : j’y serai, je prends mon billet
+- [ ] `MGMT_MEDIAS_LIGNES[77]` (lendemain) : {a} a gagné, {b} a perdu, fin du sujet
+- [ ] `MGMT_MEDIAS_LIGNES[78]` (lendemain) : {b} n’a même pas eu le temps de s’échauffer, merci {a}
+- [ ] `MGMT_MEDIAS_LIGNES[79]` (lendemain) : les juges ont encore fait n’importe quoi, {a} n’a pas gagné ça
+- [ ] `MGMT_MEDIAS_LIGNES[80]` (affiche) : (Presse nationale — {pays}, traduit) Notre {a} se bat à {org} {n}. Tout le pays veillera pour lui.
+- [ ] `MGMT_MEDIAS_LIGNES[81]` (lendemain) : (Presse nationale — {pays}, traduit) Notre {a} a battu {b}. Le pays entier a veillé pour ça.
+- [ ] `MGMT_MEDIAS_LIGNES[82]` (lendemain) : (Presse nationale — {pays}, traduit) Notre {a} a perdu. Nous l’attendons de nouveau, la tête haute.
+- [ ] `MGMT_MEDIAS_LIGNES[83]` (affiche) : {a} contre {b} à {org} {n}, ça va bouger. Venez dans la salle.
+- [ ] `MGMT_MEDIAS_LIGNES[84]` (affiche) : {a} combat à {org} {n}, tous ses potes de la salle seront là.
+- [ ] `MGMT_MEDIAS_LIGNES[85]` (lendemain) : {a} a gagné devant ses potes de la salle. Gros respect.
+- [ ] `MGMT_MEDIAS_LIGNES[86]` (affiche) : {a} a étudié {b} pendant huit semaines. {b} a surtout joué à des jeux vidéo.
+- [ ] `MGMT_MEDIAS_LIGNES[87]` (affiche) : {a} médite avant le combat. {b} plaisante dans le couloir. Même soirée.
+- [ ] `MGMT_MEDIAS_LIGNES[88]` (affiche) : {a} se couche à 21 h, {b} à l’aube. Ils se battent samedi.
+- [ ] `MGMT_MEDIAS_LIGNES[89]` (affiche) : {a} ne dit rien, {b} dit tout. Qui gagnera la bataille des mots ?
+- [ ] `MGMT_MEDIAS_LIGNES[90]` (affiche) : {a} se bat loin de son pays. {b} combat devant le sien. La salle choisira.
+- [ ] `MGMT_MEDIAS_LIGNES[91]` (affiche) : {a} dit ce qu’il ressent, {b} dit ce qu’il pense. Les deux sont sur la même affiche.
+- [ ] `MGMT_MEDIAS_LIGNES[92]` (affiche) : {a} a un plan sur dix ans. {b} n’en a pas. Samedi, l’un des deux a raison.
+- [ ] `MGMT_MEDIAS_LIGNES[93]` (affiche) : {a} filme tout, {b} regarde le ciel. Deux façons de préparer le même combat.
+- [ ] `MGMT_MEDIAS_LIGNES[94]` (affiche) : {a} évite les chats noirs, {b} évite les bugs. Samedi, l’un des deux sera déçu.
 
 ## Camps et salles — 25 textes
 
@@ -891,50 +1629,82 @@ Fichier : `mgmt-camps-data.js`
 - [ ] `MGMT_CAMP_SPECIALITES[3]` : Le travail au sol
 - [ ] `MGMT_CAMP_SPECIALITES[4]` : Le cardio et les longs combats
 
-## Combat (commentaire, coins) — 33 textes
+## Combat (commentaire, coins) — 65 textes
 
 Fichier : `mgmt-combat-data.js`
 
 - [ ] `MGMT_COMMENTAIRE.tourne[0]` : {X} tourne, il garde ses distances.
 - [ ] `MGMT_COMMENTAIRE.tourne[1]` : {X} cherche la bonne distance.
 - [ ] `MGMT_COMMENTAIRE.tourne[2]` : {X} avance, {Y} recule.
+- [ ] `MGMT_COMMENTAIRE.tourne[3]` : {X} et {Y} se testent à distance.
+- [ ] `MGMT_COMMENTAIRE.tourne[4]` : {X} tourne autour de {Y}.
+- [ ] `MGMT_COMMENTAIRE.tourne[5]` : Rien de décisif pour l’instant : {X} observe.
 - [ ] `MGMT_COMMENTAIRE.coupe[0]` : {X} LUI COUPE LA ROUTE !
 - [ ] `MGMT_COMMENTAIRE.coupe[1]` : {X} AVANCE SANS S’ARRÊTER !
+- [ ] `MGMT_COMMENTAIRE.coupe[2]` : {X} FERME LE CENTRE !
+- [ ] `MGMT_COMMENTAIRE.coupe[3]` : {X} POUSSE {Y} VERS LA CAGE !
 - [ ] `MGMT_COMMENTAIRE.coup[0]` : {COUP} de {X}.
+- [ ] `MGMT_COMMENTAIRE.coup[1]` : {X} lance {COUP}.
+- [ ] `MGMT_COMMENTAIRE.coup[2]` : {COUP}, côté {X}.
 - [ ] `MGMT_COMMENTAIRE.bloque[0]` : Bloqué. {X} avance encore.
 - [ ] `MGMT_COMMENTAIRE.bloque[1]` : {Y} ferme sa garde.
+- [ ] `MGMT_COMMENTAIRE.bloque[2]` : {Y} bloque et reste en place.
+- [ ] `MGMT_COMMENTAIRE.bloque[3]` : La garde de {Y} tient bon.
 - [ ] `MGMT_COMMENTAIRE.esquive[0]` : {Y} esquive.
 - [ ] `MGMT_COMMENTAIRE.esquive[1]` : Dans le vide : {Y} n’était déjà plus là.
+- [ ] `MGMT_COMMENTAIRE.esquive[2]` : {Y} évite le coup de justesse.
+- [ ] `MGMT_COMMENTAIRE.esquive[3]` : {X} manque sa cible : {Y} a bougé à temps.
 - [ ] `MGMT_COMMENTAIRE.touche[0]` : {Y} EST TOUCHÉ !
 - [ ] `MGMT_COMMENTAIRE.touche[1]` : {X} TOUCHE FORT !
+- [ ] `MGMT_COMMENTAIRE.touche[2]` : {X} PLACE UN GROS COUP !
+- [ ] `MGMT_COMMENTAIRE.touche[3]` : {Y} ENCAISSE ET RECULE !
 - [ ] `MGMT_COMMENTAIRE.tapis[0]` : OH !
+- [ ] `MGMT_COMMENTAIRE.tapis[1]` : ÇA TOMBE !
 - [ ] `MGMT_COMMENTAIRE.clinchCage[0]` : {X} L’ENFERME CONTRE LE GRILLAGE !
+- [ ] `MGMT_COMMENTAIRE.clinchCage[1]` : {X} PLAQUE {Y} CONTRE LES BARRES !
+- [ ] `MGMT_COMMENTAIRE.clinchCage[2]` : {Y} EST COINCÉ CONTRE LE GRILLAGE !
 - [ ] `MGMT_COMMENTAIRE.clinchCentre[0]` : {X} s’accroche. Clinch au centre.
+- [ ] `MGMT_COMMENTAIRE.clinchCentre[1]` : Corps à corps au centre : {X} serre {Y}.
+- [ ] `MGMT_COMMENTAIRE.clinchCentre[2]` : Clinch au centre, personne ne lâche.
 - [ ] `MGMT_COMMENTAIRE.separe[0]` : Il sort. Retour au centre.
 - [ ] `MGMT_COMMENTAIRE.separe[1]` : L’arbitre sépare. Retour au centre.
+- [ ] `MGMT_COMMENTAIRE.separe[2]` : L’arbitre ramène les deux au centre.
+- [ ] `MGMT_COMMENTAIRE.separe[3]` : Séparation. On repart debout.
 - [ ] `MGMT_COMMENTAIRE.amene[0]` : {X} L’AMÈNE AU SOL !
 - [ ] `MGMT_COMMENTAIRE.amene[1]` : {X} LE PREND ET L’AMÈNE AU SOL !
+- [ ] `MGMT_COMMENTAIRE.amene[2]` : {X} PROJETTE {Y} AU SOL !
+- [ ] `MGMT_COMMENTAIRE.amene[3]` : {X} ENTRAÎNE {Y} VERS LE SOL !
 - [ ] `MGMT_COMMENTAIRE.sol[0]` : {X} contrôle. {Y} cherche la sortie.
 - [ ] `MGMT_COMMENTAIRE.sol[1]` : {X} garde le contrôle au sol.
 - [ ] `MGMT_COMMENTAIRE.releve[0]` : {X} SE RELÈVE !
 - [ ] `MGMT_COMMENTAIRE.releve[1]` : {X} REMET LE COMBAT DEBOUT !
+- [ ] `MGMT_COMMENTAIRE.releve[2]` : {X} RETROUVE SES JAMBES !
+- [ ] `MGMT_COMMENTAIRE.releve[3]` : {X} S’ÉCHAPPE ET SE LÈVE !
 - [ ] `MGMT_COMMENTAIRE.sub[0]` : {X} CHERCHE LA SOUMISSION !
 - [ ] `MGMT_COMMENTAIRE.sub[1]` : ÇA SERRE ! {Y} DOIT SORTIR !
+- [ ] `MGMT_COMMENTAIRE.sub[2]` : {X} VISE UNE CLÉ !
+- [ ] `MGMT_COMMENTAIRE.sub[3]` : {Y} SERRE LES DENTS, ÇA TIENT ENCORE !
 - [ ] `MGMT_COMMENTAIRE.minute[0]` : Dernière minute.
+- [ ] `MGMT_COMMENTAIRE.minute[1]` : Une minute à jouer dans ce round.
 - [ ] `MGMT_COMMENTAIRE.dix[0]` : DIX SECONDES !
 - [ ] `MGMT_COMMENTAIRE.finRound[0]` : FIN DU ROUND !
 - [ ] `MGMT_COMMENTAIRE.juges[0]` : Les juges notent. Rien n’est joué.
 - [ ] `MGMT_COMMENTAIRE.juges[1]` : Le round est fini. Les juges décideront.
+- [ ] `MGMT_COMMENTAIRE.juges[2]` : Chaque juge se fait son avis. On verra les cartes.
+- [ ] `MGMT_COMMENTAIRE.juges[3]` : Le round est terminé, tout se jouera aux points.
 - [ ] `MGMT_COMMENTAIRE.finKO[0]` : C’EST FINI !
+- [ ] `MGMT_COMMENTAIRE.finKO[1]` : KO !
 - [ ] `MGMT_COMMENTAIRE.finSub[0]` : ÇA TAPE !
+- [ ] `MGMT_COMMENTAIRE.finSub[1]` : ÇA TAPE ENCORE !
 - [ ] `MGMT_COMMENTAIRE.finStop[0]` : LE COMBAT S’ARRÊTE !
+- [ ] `MGMT_COMMENTAIRE.finStop[1]` : L’ARBITRE ARRÊTE TOUT !
 
 ## Écrans et mécanismes — arene-coups.js — 0 textes
 
 Fichier : `arene-coups.js`
 
 
-## Écrans et mécanismes — mgmt-anciens.js — 33 textes
+## Écrans et mécanismes — mgmt-anciens.js — 66 textes
 
 Fichier : `mgmt-anciens.js`
 
@@ -943,34 +1713,67 @@ Fichier : `mgmt-anciens.js`
 - [ ] `MGMT_ANCIENS_TEXTES.koV[2]` : Un contre : l’adversaire n’a rien vu venir.
 - [ ] `MGMT_ANCIENS_TEXTES.koV[3]` : Une série de coups à la tête contre le grillage.
 - [ ] `MGMT_ANCIENS_TEXTES.koV[4]` : Un coup de pied qui arrive de nulle part.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[5]` : Un crochet du gauche, net, au bon moment.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[6]` : Une série courte, puis l’adversaire est tombé.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[7]` : Un coup de genou dans le clinch.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[8]` : Un direct du bras arrière qui a tout arrêté.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[9]` : Un coup de coude en fin de mêlée.
 - [ ] `MGMT_ANCIENS_TEXTES.koD[0]` : Un coup reçu en reculant, sans se protéger.
 - [ ] `MGMT_ANCIENS_TEXTES.koD[1]` : Un contre reçu en s’approchant trop.
 - [ ] `MGMT_ANCIENS_TEXTES.koD[2]` : Un coup reçu sans l’avoir vu venir.
 - [ ] `MGMT_ANCIENS_TEXTES.koD[3]` : Les mains baissées en fin de round.
 - [ ] `MGMT_ANCIENS_TEXTES.koD[4]` : Un mauvais début de combat, sans retour possible.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[5]` : Un crochet reçu, les mains trop basses.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[6]` : Un coup au corps, puis la tête a suivi.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[7]` : Un coup reçu en tournant le dos.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[8]` : Un contre arrivé sans prévenir.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[9]` : Un genou reçu dans le clinch.
 - [ ] `MGMT_ANCIENS_TEXTES.subV[0]` : Un étranglement dans une mêlée au sol.
 - [ ] `MGMT_ANCIENS_TEXTES.subV[1]` : Un contrôle au sol, puis une clé de bras.
 - [ ] `MGMT_ANCIENS_TEXTES.subV[2]` : Le dos est pris, puis l’étranglement.
 - [ ] `MGMT_ANCIENS_TEXTES.subV[3]` : Une jambe laissée à portée, puis la soumission.
 - [ ] `MGMT_ANCIENS_TEXTES.subV[4]` : Une soumission surprise depuis le sol.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[5]` : Un étranglement par derrière, sans échappatoire.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[6]` : Une clé de bras prise sur un retournement.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[7]` : Un triangle arrivé en plein scramble.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[8]` : Une clé de jambe sur une amenée ratée.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[9]` : Un étranglement guillotine au bon moment.
 - [ ] `MGMT_ANCIENS_TEXTES.subD[0]` : Un étranglement, en défendant son dos.
 - [ ] `MGMT_ANCIENS_TEXTES.subD[1]` : Dominé au sol, sans solution.
 - [ ] `MGMT_ANCIENS_TEXTES.subD[2]` : Une clé de cheville surprise.
 - [ ] `MGMT_ANCIENS_TEXTES.subD[3]` : La tête relevée trop tôt, le cou à découvert.
 - [ ] `MGMT_ANCIENS_TEXTES.subD[4]` : Une amenée ratée, puis il est resté au sol.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[5]` : Une clé de bras prise en défendant le sol.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[6]` : Un triangle subi après une mauvaise garde.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[7]` : Une clé de cheville sur un retournement raté.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[8]` : Un étranglement par derrière, le dos tourné.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[9]` : Le bras trop tendu, la clé est venue vite.
 - [ ] `MGMT_ANCIENS_TEXTES.decV[0]` : Plus de coups que l’adversaire, round après round.
 - [ ] `MGMT_ANCIENS_TEXTES.decV[1]` : Un combat contrôlé, sans risque.
 - [ ] `MGMT_ANCIENS_TEXTES.decV[2]` : Un combat très dur, gagné de peu.
 - [ ] `MGMT_ANCIENS_TEXTES.decV[3]` : Son jab a fait la différence.
 - [ ] `MGMT_ANCIENS_TEXTES.decV[4]` : Une meilleure fin de combat.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[5]` : Un combat gagné au centre, round après round.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[6]` : Plus de précision, moins de risques.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[7]` : Une série de jabs qui a usé l’adversaire.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[8]` : Les trois rounds pris sur un meilleur rythme.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[9]` : Une victoire propre, sans moment dangereux.
 - [ ] `MGMT_ANCIENS_TEXTES.decD[0]` : Moins de coups que l’adversaire, surtout à la fin.
 - [ ] `MGMT_ANCIENS_TEXTES.decD[1]` : Trop de temps passé contre le grillage.
 - [ ] `MGMT_ANCIENS_TEXTES.decD[2]` : Un combat serré, perdu de peu.
 - [ ] `MGMT_ANCIENS_TEXTES.decD[3]` : Trop d’attente : les juges ont choisi l’autre.
 - [ ] `MGMT_ANCIENS_TEXTES.decD[4]` : L’adversaire avait plus d’énergie à la fin.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[5]` : Un combat perdu à cause d’un mauvais deuxième round.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[6]` : Moins de précision, surtout dans le dernier round.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[7]` : Un combat trop prudent, perdu aux points.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[8]` : Un adversaire plus précis, round après round.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[9]` : Trop de temps au sol sans rien produire.
 - [ ] `MGMT_ANCIENS_TEXTES.nul[0]` : Un combat égal, sans vrai gagnant.
 - [ ] `MGMT_ANCIENS_TEXTES.nul[1]` : Chacun a gagné deux rounds. Les juges n’ont pas choisi.
 - [ ] `MGMT_ANCIENS_TEXTES.nul[2]` : Deux styles qui s’annulent.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[3]` : Trois rounds équilibrés, un nul logique.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[4]` : Deux juges pour un, un pour l’autre : égalité.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[5]` : Deux combattants fatigués, aucun vainqueur.
 
 ## Écrans et mécanismes — mgmt-camps.js — 0 textes
 

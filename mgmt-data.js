@@ -122,6 +122,19 @@ Object.assign(MGMT_EXCHANGES,{
     lines:[
       "J'ai préparé les préliminaires. J'espère qu'ils vous plairont.",
     ],
+    /* Retours d'Anthony du 09/10/2026 : Leïla ne redit pas la même phrase d'une soirée à l'autre — la première est celle du premier cycle, les suivantes tournent. */
+    variantes:[
+      "Les préliminaires sont prêts, Patron. Dites-moi ce que vous en pensez.",
+      "Voici ma carte du début de soirée. Je crois qu'elle tient bien.",
+      "J'ai choisi les préliminaires. Un ou deux combats peuvent vous surprendre.",
+      "Mes préliminaires sont là. J'ai pensé à ceux qui attendent depuis longtemps.",
+    ],
+    avertissements:[
+      "Patron, un combat me gêne. Je pense qu'il faut le changer.",
+      "Un des combats ne me convainc pas. Pouvez-vous le regarder ?",
+      "Je ne suis pas sûre d'un combat. Un autre choix serait peut-être mieux.",
+      "Il y a un combat que je changerais. Je vous laisse décider.",
+    ],
     warning:"Patron, un combat me gêne. Je pense qu'il faut le changer.",
     replies:[
       {id:'validate',action:'validate',text:"Très bien, Leïla. On garde tout."},

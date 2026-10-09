@@ -8,7 +8,7 @@ const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
 /* Corrections du 08/10, 3.3 : sans texte d'auteur un moment ne paraît pas dans la presse ; ces tests lisent le fil et les cartes, ils donnent donc un texte à chaque moment (fixture). */
-const NEUVE=`MGMT_MOMENTS.forEach(x=>{ if(!x.texte) x.texte=x.libelle; }); setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m,screen:'mgmt_bureau'}; MGMT_FIL={actif:false,lignes:[],ms:0,jeton:0}; MGMT_POPUPS={file:[]};
+const NEUVE=`MGMT_MOMENTS.forEach(x=>{ x.texte=x.libelle; }); setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m,screen:'mgmt_bureau'}; MGMT_FIL={actif:false,lignes:[],ms:0,jeton:0}; MGMT_POPUPS={file:[]};
   const moment=(f,id)=>m.facts.push({c:m.cycle,k:'moment_vie',a:f.id,m:id});`;
 
 test('H9 — la durée du fil : deux à quatre secondes, selon les lignes', () => {

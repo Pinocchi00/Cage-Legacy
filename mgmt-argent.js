@@ -135,7 +135,7 @@ function mgmtStar(f){
   const W=Number.isSafeInteger(f.W)?f.W:0, L=Number.isSafeInteger(f.L)?f.L:0, D=Number.isSafeInteger(f.D)?f.D:0;
   const t=W+L+D;
   const ratio=t>0?(W+0.5*D)/t:0.5;
-  const lvl=mgmtLevelForRecord(W,L);
+  const lvl=mgmtLevelForRecord(W,L,Number.isFinite(f.niv));
   const fame=1-Math.exp(-t/MGMT_STAR_FIGHTS);
   return clamp(fame*(MGMT_STAR_W_RATIO*ratio+MGMT_STAR_W_LVL*((lvl-MGMT_STAR_LVL_MIN)/(MGMT_STAR_LVL_MAX-MGMT_STAR_LVL_MIN))),0,1);
 }

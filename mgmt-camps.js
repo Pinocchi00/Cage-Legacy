@@ -34,7 +34,7 @@ function mgmtCampModele(ck,k){
 
 /** Lot 10 : une ville n'a qu'une salle — son modèle de nom se tire de la ville, pas du combattant. Ainsi les combattants d'une
  *  même ville s'entraînent ensemble (c'est ce que l'écran Camps montre) au lieu d'une salle par tête. */
-function mgmtCampSalleDeVille(ck,ville){ return duelFnv1a32('salle|'+ck+'|'+ville)%5; }
+function mgmtCampSalleDeVille(ck,ville){ return duelFnv1a32('salle|'+mgmtSel()+ck+'|'+ville)%5; }
 
 /** Le nom d'une salle (corrections du 08/10, 5.6) : « de » + « Le Havre » donne « du Havre », « de » + « Les Sables » donne « des Sables », « d' » devant une
  *  voyelle ; « à » + « Le » donne « au », + « Les » « aux ». Les autres modèles posent la ville telle quelle. Pur. */
