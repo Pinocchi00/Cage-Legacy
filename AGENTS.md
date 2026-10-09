@@ -25,16 +25,39 @@ Vérifier la table de politique de données de Go avant tout changement de modè
 ## Règles de travail
 
 - Pas de stub, pas de `TODO`, pas de fonction vide. Ce que tu livres est fini.
-- Fichiers complets, jamais de diff partiel ni de « … reste inchangé ».
+- Modifie par éditions ciblées (outil d'édition). Ne réécris jamais un fichier existant en
+  entier : plusieurs fichiers `mgmt-*.js` dépassent 600 lignes, et `mgmt-voix-data.js` 3 000.
 - Un changement à la fois, tests verts après chacun.
 - Tu ne demandes pas la permission de continuer. Tu produis et tu vérifies.
 - Tu ne combles jamais un trou de spécification par une supposition : tu poses la question.
 
-## Ce que tu n'écris jamais
+## Économie (offre OpenCode Go : chaque modèle a son budget)
 
-**Les dialogues et la voix des personnages sont écrits par l'auteur, pas par toi.**
-Si une tâche demande des répliques, des noms de personnages ou leurs motivations, tu
-laisses un emplacement vide et tu le signales. Une réplique générique est pire que rien.
+- Lis les fichiers par morceaux (offset/limit) autour de ce que tu cherches. Pour chercher,
+  `@eclaireur` d'abord.
+- Pendant le travail : `node --test tests/<fichier>.test.js`, jamais toute la suite.
+  `npm run check` complet une fois, à la fin, par `@verif`.
+- Mesures et Monte Carlo : petits paramètres pendant les essais (`--n=1000`), une mesure
+  complète à la fin.
+- Une session par tranche. On ne prolonge pas une session d'une tranche à la suivante.
+
+## Les textes
+
+**Avant le 09/10/2026** : les dialogues et la voix des personnages étaient écrits par l'auteur ;
+tu laissais un emplacement vide.
+
+**Depuis la décision d'Anthony du 09/10/2026** (brief « Un monde qui a vécu ») : les textes de
+ce brief — fiches d'organisation, adjointes, prédécesseurs, raisons, présentations, pronostics,
+événements — sont écrits par Claude (agent `@ecrivain`) et entrent marqués `relu:false`.
+Le codeur n'en invente aucun : il passe la commande de sa fiche à `@ecrivain`. Hors de ce
+brief, l'ancienne règle s'applique toujours.
+
+## Le brief en cours
+
+- `docs/BRIEF-09-10-UN-MONDE-QUI-A-VECU.md` — le brief, neuf lots (« Monde lot 1 » à 9).
+- `docs/PLAN-OPENCODE-MONDE.md` — l'ordre des lots, les branches, les agents.
+- `docs/lots/MONDE-LOT-<N>-T<K>.md` — la fiche de chaque tranche : la seule spécification
+  du codeur.
 
 ## Documents de référence
 
