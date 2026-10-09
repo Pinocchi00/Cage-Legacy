@@ -44,14 +44,14 @@ let MGMT_REGLAGES=mgmtReglagesValide(null);
 
 function mgmtReglagesLire(){
   try{
-    const t=localStorage.getItem(MGMT_REGLAGES_CLE);
+    const t=stockageLire(MGMT_REGLAGES_CLE);
     if(t){ const j=JSON.parse(t); MGMT_REGLAGES=mgmtReglagesValide(j&&j.reglages); return MGMT_REGLAGES; }
   }catch(e){}
   MGMT_REGLAGES=mgmtReglagesValide(null);
   return MGMT_REGLAGES;
 }
 function mgmtReglagesSauver(){
-  try{ localStorage.setItem(MGMT_REGLAGES_CLE,JSON.stringify({v:MGMT_REGLAGES_VERSION,reglages:MGMT_REGLAGES})); return true; }catch(e){ return false; }
+  try{ stockageEcrire(MGMT_REGLAGES_CLE,JSON.stringify({v:MGMT_REGLAGES_VERSION,reglages:MGMT_REGLAGES})); return true; }catch(e){ return false; }
 }
 /** Pose un réglage (valeur permise seulement), l'applique et le garde. @returns {boolean} */
 function mgmtReglagesChanger(g,k,v){

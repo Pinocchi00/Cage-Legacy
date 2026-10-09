@@ -97,7 +97,7 @@ test('Options : ouverte depuis le menu et la barre, grisée seulement pendant la
   win2.eval(`G.screen='title'; CL.mgmtOptions();`);
   assert.equal(res(win2,`return G.screen;`),'mgmt_options'); assert.ok(maj(win2).includes('LE COMBAT'));
   win2.eval(`CL.mgmtOpOnglet('partie');`); assert.ok(maj(win2).includes('AUCUNE PARTIE OUVERTE'));
-  assert.equal(res(win2,`return document.querySelectorAll('.mf-op-act[disabled]').length;`),3);
+  assert.equal(res(win2,`return document.querySelectorAll('.mf-op-act[disabled]').length;`),5);   /* brief démo, lot 2 T4 : l'export et l'import s'ajoutent aux trois actions de l'onglet Partie */
   touche(win2,'Escape'); assert.equal(res(win2,`return G.screen;`),'title');
 });
 

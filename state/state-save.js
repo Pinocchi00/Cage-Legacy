@@ -38,17 +38,17 @@ function parseAndValidate(raw){
    contrat d'exhibition pure exige qu'aucune écriture localStorage ne
    puisse capturer cet état transitoire. G.vsFriendActive (ancien mode "Défi
    Multijoueur", retiré au LOT DUEL-03) a disparu de cette garde. ==== */
-function save(){ if(G&&(G.fantasyActive||G.duelActive||['fantasy_setup','allstars'].includes(G.screen))) return;
+function save(){ if(G&&(G.fantasyActive||G.duelActive||['fantasy_setup','allstars'].includes(G.screen))) return true;
   try{
     /* ==== [ANCRE: SAVE_VERSION_PERSISTEE] — Lot 0 TÂCHE 0.4 : garantit que
        la sauvegarde persistée porte SAVE_VERSION (version 5), évitant qu'une
        nouvelle partie soit traitée comme ancienne à la relecture. ==== */
     if(G && typeof SAVE_VERSION !== 'undefined') G.version = SAVE_VERSION;
     /* ==== [FIN ANCRE] ==== */
-    const previous=localStorage.getItem(SAVE_KEY);
+    const previous=stockageLire(SAVE_KEY);
     /* ==== [ANCRE: FIX_B02_SECOURS_SAIN] — une principale corrompue ne doit
        jamais remplacer le dernier secours chargeable. ==== */
-    if(parseAndValidate(previous)) localStorage.setItem(SAVE_BACKUP_KEY,previous);
+    if(parseAndValidate(previous)) stockageEcrire(SAVE_BACKUP_KEY,previous);
     /* ==== [FIN ANCRE] ==== */
     /* ==== [ANCRE: MGMT_LOT2REV_SAVE_SANS_BUREAU] — revue lot 1 (L1-R1) : le
        bureau a sa sauvegarde dédiée (cage-legacy-mgmt), seule référence. La
@@ -57,8 +57,9 @@ function save(){ if(G&&(G.fantasyActive||G.duelActive||['fantasy_setup','allstar
        G.mgmt vivant n'est pas touché, seule la copie persistée. ==== */
     const data=Object.assign({},G);
     delete data.mgmt;
-    localStorage.setItem(SAVE_KEY,JSON.stringify(data));
-  }catch(e){}
+    stockageEcrire(SAVE_KEY,JSON.stringify(data));
+    return stockageSignaler(true);
+  }catch(e){ return stockageSignaler(false); }   /* brief démo, lot 2 T2 */
 }
 /* ==== [FIN ANCRE] ==== */
 function load(){
@@ -69,7 +70,7 @@ function load(){
     for(const key of [SAVE_KEY,SAVE_BACKUP_KEY]){
       let candidate;
       try{
-        candidate=migrate(parseAndValidate(localStorage.getItem(key)));
+        candidate=migrate(parseAndValidate(stockageLire(key)));
         if(!candidate || !validateState(candidate)) continue;
       }catch(e){ continue; }
       G=candidate;
@@ -80,7 +81,7 @@ function load(){
       delete G.mgmt;
       if(key===SAVE_BACKUP_KEY){
         console.warn('Sauvegarde principale illisible ou invalide : restauration automatique depuis la copie de secours.');
-        try{ localStorage.setItem(SAVE_KEY,JSON.stringify(candidate)); }
+        try{ stockageEcrire(SAVE_KEY,JSON.stringify(candidate)); }
         catch(e){ alert('Carrière récupérée depuis le secours. Impossible de réécrire la sauvegarde principale : libère de l’espace puis sauvegarde à nouveau.'); }
       }
       return true;
@@ -95,10 +96,10 @@ function load(){
    contrairement à load(), qui isole déjà chaque parse via parseAndValidate(). ==== */
 function hasSave(){
   try{
-    let p=parseAndValidate(localStorage.getItem(SAVE_KEY));
-    if(!p) p=parseAndValidate(localStorage.getItem(SAVE_BACKUP_KEY));
+    let p=parseAndValidate(stockageLire(SAVE_KEY));
+    if(!p) p=parseAndValidate(stockageLire(SAVE_BACKUP_KEY));
     if(p) return true;
   }catch(e){}
   return false;
 }
-function wipe(){ try{ localStorage.removeItem(SAVE_KEY); localStorage.removeItem(SAVE_BACKUP_KEY); }catch(e){} }
+function wipe(){ try{ stockageSupprimer(SAVE_KEY); stockageSupprimer(SAVE_BACKUP_KEY); }catch(e){} }

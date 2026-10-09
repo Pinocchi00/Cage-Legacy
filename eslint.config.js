@@ -100,7 +100,7 @@ for (const file of gameFiles) {
 }
 
 const browserGlobals = {
-  window: 'readonly', document: 'readonly', localStorage: 'readonly',
+  window: 'readonly', document: 'readonly', localStorage: 'readonly', Blob: 'readonly', FileReader: 'readonly', URL: 'readonly',
   navigator: 'readonly', location: 'readonly', history: 'readonly',
   console: 'readonly', alert: 'readonly', confirm: 'readonly', prompt: 'readonly',
   requestAnimationFrame: 'readonly', cancelAnimationFrame: 'readonly',
