@@ -157,7 +157,7 @@ function scr_arene_socle(){
     return `<div class="scr center intro"><div class="eyebrow gold">Arène — socle (lot 3, tranche 2)</div>`
       +`<h2 class="disp">L'arène</h2>`
       +`<div class="card" style="max-width:640px;margin:16px auto;padding:18px;border-color:var(--line)">`
-      +`<div class="mgmt-say" style="border-left-color:var(--faint)">${esc('[EMPLACEMENT AUTEUR — rejeu divergent : ce combat ne peut pas être montré]')}</div>`
+      +`<div class="mgmt-say" style="border-left-color:var(--faint)">${esc('Ce combat ne peut pas être montré.')}</div>`
       +`<div class="mono small muted" style="margin-top:10px">L'issue rejouée ne correspond plus à l'issue enregistrée.</div>`
       +`</div>`
       +`<button class="btn primary mt" onclick="CL.areneSocle()">Autre combat</button>`

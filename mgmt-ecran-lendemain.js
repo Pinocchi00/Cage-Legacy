@@ -52,7 +52,7 @@ const MGMT_LD_LABELS={
   results:'Les résultats',
   changes:'Ce que ça a changé',
   mainEvent:'Combat principal',
-  coMain:'Co-main',
+  coMain:'Co-principal',
   prelims:'Préliminaires',
   nul:'Match nul',
   battre:'bat',

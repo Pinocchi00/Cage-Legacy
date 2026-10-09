@@ -345,6 +345,12 @@ function main(){
 
   const totalBlocking = pools.skipped ? 0 : (pools.sizeFindings.length + pools.reqFindings.length + pools.contextFindings.length);
   const total = angl.length + sentences.length + totalBlocking + deadFields.length;
+  /* Brief démo, lot 9 T1 : le nombre de textes non relus restants, compté sur les marques relu:false des fichiers du jeu. */
+  try{
+    const fs2=require('fs'), p2=require('path'), r2=p2.join(__dirname,'..');
+    let n=0; for(const f of fs2.readdirSync(r2)) if(/\.js$/.test(f)) n+=(fs2.readFileSync(p2.join(r2,f),'utf8').match(/relu\s*:\s*false/g)||[]).length;
+    console.log(`\nTextes non relus restants : ${n} (marques relu:false dans le jeu).`);
+  }catch(e){}
   console.log(`\n${total} signalement(s) au total.`);
   if(STRICT && total > 0){ process.exitCode = 1; }
 }

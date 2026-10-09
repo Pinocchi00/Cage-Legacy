@@ -1,4 +1,4 @@
-# Les textes à relire — 902 textes (corrections du 08/10/2026, lot 7.3)
+# Les textes à relire — 984 textes (corrections du 08/10/2026, lot 7.3)
 
 Export généré par `tools/exporter-textes.js`. **Aucun texte n'est modifié par l'outil.** Chaque ligne est un texte marqué `relu:false` : coche-la quand tu l'as relue, réécris-la dans le fichier de données, puis passe sa marque à `relu:true`. Les voix des combattants viennent d'un document (`docs/LES-VOIX-DES-COMBATTANTS-v2.md`) : on y corrige d'abord le document, puis on relance `tools/extraire-voix.js`.
 
@@ -928,4 +928,161 @@ Fichier : `mgmt-combat-data.js`
 - [ ] `MGMT_COMMENTAIRE.finKO[0]` : C’EST FINI !
 - [ ] `MGMT_COMMENTAIRE.finSub[0]` : ÇA TAPE !
 - [ ] `MGMT_COMMENTAIRE.finStop[0]` : LE COMBAT S’ARRÊTE !
+
+## Écrans et mécanismes — arene-coups.js — 0 textes
+
+Fichier : `arene-coups.js`
+
+
+## Écrans et mécanismes — mgmt-anciens.js — 33 textes
+
+Fichier : `mgmt-anciens.js`
+
+- [ ] `MGMT_ANCIENS_TEXTES.koV[0]` : Un enchaînement main arrière, main avant, qui a éteint le combat.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[1]` : Un crochet à la volée, sur une ouverture.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[2]` : Un contre pris au bon moment, l’adversaire n’a rien vu.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[3]` : Une série à la tête contre le grillage.
+- [ ] `MGMT_ANCIENS_TEXTES.koV[4]` : Un coup de pied circulaire parti de nulle part.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[0]` : Un coup reçu en reculant, sans protection sur le côté.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[1]` : Un contre reçu en entrant en distance.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[2]` : Un enchaînement venu sans qu’on le voie.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[3]` : Les mains baissées en fin de round.
+- [ ] `MGMT_ANCIENS_TEXTES.koD[4]` : Un début de combat subi, impossible de s’en remettre.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[0]` : Un étranglement pris dans un scramble.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[1]` : Un contrôle au sol suivi d’une clé de bras.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[2]` : Un dos pris à la relance, puis l’étranglement.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[3]` : L’autre a ouvert le jeu, la jambe est restée attrapée.
+- [ ] `MGMT_ANCIENS_TEXTES.subV[4]` : Une soumission venue d’une garde qu’on croyait neutre.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[0]` : Un étranglement subi en défendant son dos.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[1]` : Un contrôle subi au sol, sans solution.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[2]` : Une clé de cheville venue sans prévenir.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[3]` : La tête relevée trop tôt, le cou offert.
+- [ ] `MGMT_ANCIENS_TEXTES.subD[4]` : Une amenée ratée, puis le sol subi.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[0]` : Plus de volume, round après round.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[1]` : Un contrôle régulier, sans prise de risque.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[2]` : Une guerre, partout dans la cage, gagnée de peu.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[3]` : Le jab a fait la différence.
+- [ ] `MGMT_ANCIENS_TEXTES.decV[4]` : Une fin de combat mieux gérée.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[0]` : Un volume dépassé, surtout en fin de combat.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[1]` : Trop de temps passé contre le grillage.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[2]` : Un combat serré, perdu de peu.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[3]` : Trop d’attente, les juges ont suivi l’autre.
+- [ ] `MGMT_ANCIENS_TEXTES.decD[4]` : Un adversaire plus frais dans les derniers rounds.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[0]` : Un combat équilibré, sans vainqueur net.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[1]` : Chacun a pris deux rounds, les juges n’ont pas tranché.
+- [ ] `MGMT_ANCIENS_TEXTES.nul[2]` : Deux styles qui se sont annulés.
+
+## Écrans et mécanismes — mgmt-camps.js — 0 textes
+
+Fichier : `mgmt-camps.js`
+
+
+## Écrans et mécanismes — mgmt-fiche-planche.js — 14 textes
+
+Fichier : `mgmt-fiche-planche.js`
+
+- [ ] `MGMT_FICHE_TEXTES.lignes.initiative` : PREND L’INITIATIVE
+- [ ] `MGMT_FICHE_TEXTES.lignes.attend` : TIENT LE CENTRE
+- [ ] `MGMT_FICHE_TEXTES.lignes.loinJuste` : FRAPPE JUSTE DE LOIN
+- [ ] `MGMT_FICHE_TEXTES.lignes.loinVide` : FRAPPE DANS LE VIDE
+- [ ] `MGMT_FICHE_TEXTES.lignes.corps` : CHERCHE LE CORPS À CORPS
+- [ ] `MGMT_FICHE_TEXTES.lignes.amenee` : CHERCHE L’AMENÉE
+- [ ] `MGMT_FICHE_TEXTES.lignes.controleSol` : CONTRÔLE AU SOL
+- [ ] `MGMT_FICHE_TEXTES.lignes.defendAmenee` : DÉFEND LES AMENÉES
+- [ ] `MGMT_FICHE_TEXTES.lignes.subitSol` : PERD SES MOYENS AU SOL
+- [ ] `MGMT_FICHE_TEXTES.lignes.soumission` : CHERCHE LA SOUMISSION
+- [ ] `MGMT_FICHE_TEXTES.lignes.vacille` : VACILLE QUAND ON LE TOUCHE
+- [ ] `MGMT_FICHE_TEXTES.lignes.poidsClinch` : IMPOSE SON POIDS
+- [ ] `MGMT_FICHE_TEXTES.lignes.subitCage` : PERD SES MOYENS CONTRE LA CAGE
+- [ ] `MGMT_FICHE_TEXTES.lignes.rien` : RIEN DE MARQUANT
+
+## Écrans et mécanismes — mgmt-lendemain-cadre.js — 8 textes
+
+Fichier : `mgmt-lendemain-cadre.js`
+
+- [ ] `MGMT_LD_CRITERES.reclame.ok` : Le public a eu les combats qu’il réclamait.
+- [ ] `MGMT_LD_CRITERES.reclame.non` : Les combats réclamés n’ont pas eu lieu.
+- [ ] `MGMT_LD_CRITERES.reclame.neutre` : Personne ne réclamait de combat ce soir.
+- [ ] `MGMT_LD_CRITERES.serres.ok` : Des combats serrés ou finis avant la limite.
+- [ ] `MGMT_LD_CRITERES.serres.non` : Trop de décisions sans relief.
+- [ ] `MGMT_LD_CRITERES.noms.ok` : Des noms connus à l’affiche.
+- [ ] `MGMT_LD_CRITERES.noms.non` : Peu de noms connus à l’affiche.
+- [ ] `MGMT_LD_CRITERES.determination` : La salle n’a pas été conquise. Vous savez quoi changer pour la prochaine.
+
+## Écrans et mécanismes — mgmt-medias.js — 0 textes
+
+Fichier : `mgmt-medias.js`
+
+
+## Écrans et mécanismes — mgmt-organisations-data.js — 8 textes
+
+Fichier : `mgmt-organisations-data.js`
+
+- [ ] `MGMT_ORGANISATIONS[0]` : Split
+- [ ] `MGMT_ORGANISATIONS[1]` : Garden of Blood
+- [ ] `MGMT_ORGANISATIONS[2]` : MMA Korner
+- [ ] `MGMT_ORGANISATIONS[3]` : Ultimate Rim
+- [ ] `MGMT_ORGANISATIONS[4]` : Fighting Pacific Championship
+- [ ] `MGMT_ORGANISATIONS[5]` : Knuckle Gate
+- [ ] `MGMT_ORGANISATIONS[6]` : Pure Impact
+- [ ] `MGMT_ORGANISATIONS[7]` : Undisputed Cage
+
+## Écrans et mécanismes — mgmt-organisations.js — 0 textes
+
+Fichier : `mgmt-organisations.js`
+
+
+## Écrans et mécanismes — mgmt-promesses.js — 12 textes
+
+Fichier : `mgmt-promesses.js`
+
+- [ ] `MGMT_TRAITS_MOTS.discipline.haut` : Professionnel
+- [ ] `MGMT_TRAITS_MOTS.ambition.haut` : Carriériste
+- [ ] `MGMT_TRAITS_MOTS.loyaute.haut` : Fidèle
+- [ ] `MGMT_TRAITS_MOTS.temperament.bas` : Instable
+- [ ] `MGMT_TRAITS_MOTS.exposition.haut` : Grande gueule
+- [ ] `MGMT_TRAITS_MOTS.exposition.bas` : Discret
+- [ ] `MGMT_TRAITS_MOTS.fairPlay.haut` : Réglo
+- [ ] `MGMT_DEMANDES.carte-principale` : La carte principale
+- [ ] `MGMT_DEMANDES.un-classe` : Un classé
+- [ ] `MGMT_DEMANDES.revanche` : Une revanche
+- [ ] `MGMT_DEMANDES.trilogie` : Le troisième combat
+- [ ] `MGMT_DEMANDES.pause` : Une pause
+
+## Écrans et mécanismes — mgmt-salles.js — 0 textes
+
+Fichier : `mgmt-salles.js`
+
+
+## Écrans et mécanismes — mgmt-soiree-cadre.js — 0 textes
+
+Fichier : `mgmt-soiree-cadre.js`
+
+
+## Écrans et mécanismes — mgmt-soiree-show.js — 0 textes
+
+Fichier : `mgmt-soiree-show.js`
+
+
+## Écrans et mécanismes — mgmt-suivi-cadre.js — 0 textes
+
+Fichier : `mgmt-suivi-cadre.js`
+
+
+## Écrans et mécanismes — mgmt-suivi.js — 7 textes
+
+Fichier : `mgmt-suivi.js`
+
+- [ ] `MGMT_FIL_MODELES.defi` : {a} défie {b}
+- [ ] `MGMT_FIL_MODELES.garde` : {a} garde sa ceinture
+- [ ] `MGMT_FIL_MODELES.prend` : {a} devient champion
+- [ ] `MGMT_FIL_MODELES.vacant` : {a} s’empare du titre vacant
+- [ ] `MGMT_FIL_MODELES.public` : Le public réclame ce combat
+- [ ] `MGMT_FIL_MODELES.attend` : {a} attend depuis {n} mois
+- [ ] `MGMT_FIL_MODELES.demande` : {a} fait une demande
+
+## Écrans et mécanismes — mgmt-voix.js — 0 textes
+
+Fichier : `mgmt-voix.js`
+
 
