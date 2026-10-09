@@ -158,8 +158,13 @@ Split retrouvées dans le contexte, 7 tests verts.**
 - **Deux mondes dans le test** : les phrases viennent de la fenêtre de jeu (`win.eval` ou
   `result(win, …)`), le contexte du disque (`fs`). Le code de comparaison vit en Node.js.
 
+- **Test Split, citations** (ajout de Claude après relecture) : la phrase de `adjointe.voix`
+  est dans une citation du contexte, coupée sur deux lignes dont la seconde commence par `> `.
+  La normalisation retire aussi `>` et les espaces en début de chaque ligne, avant de fusionner
+  les espaces. Vérifié par Claude : avec ce retrait, les six phrases sont retrouvées.
+
 ## Questions pour Anthony
 
-- `soirees:'Split Fight Night'` pour Split n'apparaît dans aucun des deux contextes et n'est
-  pas listé dans `aConfirmer`. Faut-il l'y ajouter, ou ce nom vient-il d'ailleurs ?
-  *(Non bloquant : le test vérifie les phrases, pas les noms.)*
+- ~~`soirees:'Split Fight Night'` vient-il d'ailleurs ?~~ Réponse de Claude : oui, c'est le nom
+  que le jeu donne déjà aux soirées (`mgmt-calendrier.js:20`, `mgmtOrgNom(m)+' Fight Night '+n`).
+  Rien à faire.
