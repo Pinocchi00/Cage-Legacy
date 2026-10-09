@@ -371,6 +371,8 @@ Object.assign(CL,{
       mgmtRepair(G.mgmt);
     }
     if(mgmtAgendaSuivante(G.mgmt)) saveMgmt();
+    /* Lot 1 du brief démo : une soirée interrompue se rouvre là où elle a été laissée. */
+    if(mgmtSoireeEnCours(G.mgmt)){ mgmtSoireeReprendre(G.mgmt); CL.go('mgmt_soiree'); return; }
     CL.go('mgmt_carte');
   },
   mgmtLeave(){

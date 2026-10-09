@@ -110,6 +110,7 @@ function mgmtValidEvent(e){
     if(!Number.isSafeInteger(t.days)||t.days<0) return false;
   }
   if(e.e1!==undefined&&typeof e.e1!=='boolean') return false;
+  if(e.vu!==undefined&&(!Number.isSafeInteger(e.vu)||e.vu<0)) return false;
   if(e.finance!==undefined){
     const f=e.finance;
     if(!f||typeof f!=='object'||Array.isArray(f)) return false;

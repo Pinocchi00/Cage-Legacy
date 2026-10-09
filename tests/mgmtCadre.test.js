@@ -99,7 +99,7 @@ test('Barre — onze sections, la courante éclairée, ce qui attend marqué, ce
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct===false||true);
   assert.equal(r.bureau.filter(x=>x.cur).length,0,'brief du 08/10, 1.5 : l’écran de la semaine n’est aucune section de la barre, donc aucune n’est allumée');
   assert.equal(r.fiche.find(x=>x.cur).sec,'classements','une fiche éclaire la section d’où on l’a ouverte');
-  assert.ok(r.soir.every(x=>x.grise),'le soir, toute la barre est grisée');
+  assert.ok(r.soir.filter(x=>x.sec!=='menu').every(x=>x.grise),'le soir, la barre est grisée, sauf « Menu principal » (brief démo, lot 1 T3 : on peut quitter proprement pendant la soirée)');
   assert.ok(r.carte.find(x=>x.sec==='preliminaires').oct,'des affaires attendent Leïla : l’octogone jaune');
 });
 
