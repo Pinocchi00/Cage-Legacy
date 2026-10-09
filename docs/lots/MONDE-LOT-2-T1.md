@@ -168,3 +168,52 @@ Split retrouvées dans le contexte, 7 tests verts.**
 - ~~`soirees:'Split Fight Night'` vient-il d'ailleurs ?~~ Réponse de Claude : oui, c'est le nom
   que le jeu donne déjà aux soirées (`mgmt-calendrier.js:20`, `mgmtOrgNom(m)+' Fight Night '+n`).
   Rien à faire.
+
+## Compte rendu
+
+### Fichiers modifiés
+
+- `mgmt-organisations.js` — nouvelle ancre `MGMT_MONDE_LOT2_IDENTITES_FONCTIONS` (Monde lot 2 T1),
+  après les ancres fermées du brief lot 5 : `mgmtOrgIdentite(id)` telle que la fiche la donne,
+  code copié verbatim. Les nulls se résolvent à l'exécution (jamais au chargement) :
+  `villesSalles` → `MGMT_SALLES_VILLES`, `paysPoids` → `MGMT_PAYS_POIDS.split`.
+- `tests/mgmtIdentites.test.js` — nouveau, 7 tests (intitulés de la fiche), porte
+  `mgmtOrganisations` (harnais `newGameWindow`/`result`) et `mgmtHumaniteData`
+  (vérification de données, comparaisons système/fenêtre).
+- `package.json` — `tests/mgmtIdentites.test.js` ajouté après `mgmtOrganisations.test.js`
+  dans les scripts `test` et `test:watch`.
+- `index.html` — seul `?v=` de `mgmt-organisations.js` monté (b9 → suivant, via `tools/_bump.js`) ;
+  aucune balise nouvelle (aucun fichier .js nouveau côté jeu).
+- `sw.js` — `SW_VERSION` b66 → b67, monté automatiquement par `tools/_bump.js` à la livraison.
+
+### Tests ajoutés (intitulés)
+
+1. Identités — chaque fiche a tous ses champs, aucune organisation n'est sa propre rivale
+2. Identités — les ids sont ceux des huit organisations du profil
+3. Identités — Leïla n'existe qu'à Split
+4. Identités — les réglages de la main sont dans les quatre énumérations
+5. Identités — les mélanges de pays sont valides
+6. Identités — mgmtOrgIdentite résout les nulls et refuse un id inconnu
+7. Identités — la fiche de Split ne contient aucune phrase absente de son contexte
+
+### Migration de sauvegarde
+
+Aucune (fiche §Sauvegarde) : les identités sont des données de code, `MGMT_SAVE_VERSION`
+reste à 14.
+
+### Vérification
+
+- `node --test tests/mgmtIdentites.test.js` : 7 pass.
+- `npm run check` (via @verif) : tout vert — 933 tests, 0 échec, lint et lint:content sans
+  erreur bloquante.
+- `@relecteur` : ACCEPTÉ, premier tour.
+
+### Écarts à la fiche
+
+Aucun. Critère de fin chiffré atteint : 8 organisations, 0 champ manquant, 0 auto-rivale,
+6 phrases de Split retrouvées dans le contexte, 7 tests verts.
+
+### Questions pour Anthony
+
+Aucune nouvelle ; la question du commit 95e1fd0 (`soirees`) est déjà close dans la section
+précédente.
