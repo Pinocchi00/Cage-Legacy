@@ -80,7 +80,7 @@ test('MGMT T4 — l’écran rend : en-tête, résultats, constats, rien des lot
   assert.equal(rev.filter(b=>b.textContent==='Revoir').length,titles.length,'un Revoir par combat');
   assert.ok(rev.some(b=>/Voir toute la soirée/.test(b.textContent)),'« Voir toute la soirée » porte son lien');
   /* La séquence impose sa suite : le bouton de l'en-tête rend la main. */
-  win.document.querySelector('.mgmt-ld-next').click();
+  win.eval(`CL.mgmtLendemainNext()`);   /* brief démo, lot 6 T3 : l'action du soir suivant est la touche jaune de la barre du bas */
   assert.equal(win.eval('G.screen'),'mgmt_carte','la main passe à la carte (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte)');
 });
 
@@ -156,7 +156,7 @@ test('MGMT T4 — les constats suivent le classement au cycle précédent, une s
   const e=JSON.parse(win.eval(`(function(){
     const m=G.mgmt;
     G.screen='mgmt_lendemain'; render();
-    const items=[...document.querySelectorAll('.mgmt-ld-pane:nth-child(2) .mgmt-ld-title')];
+    const items=[...document.querySelectorAll('.mf-ld-change .mgmt-ld-title')];
     return JSON.stringify(items.map(x=>x.textContent));
   })()`));
   let entre=0,sort=0;

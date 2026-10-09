@@ -68,7 +68,8 @@ test('Les écrans sans planche propre sont dessinés en panneaux du cadre, avec 
   const win=neuve(3);
   const lire=sc=>{ win.eval(`CL.go('${sc}')`); return res(win,`return {plaque:document.querySelector('.mf-plaque').textContent,panneaux:document.querySelectorAll('.mf-ancien .mf-panneau.mf-sem-p').length,hors:!!document.querySelector('.mf-ancien .scr.mgmt-wrap')};`); };
   let r=lire('mgmt_bureau'); assert.equal(r.plaque,'Les affaires'); assert.equal(r.panneaux,3);
-  r=lire('mgmt_lendemain'); assert.equal(r.plaque,'Le lendemain'); assert.equal(r.panneaux,2);
+  /* Brief démo, lot 6 T3 : le lendemain est recomposé en panneaux du cadre (mgmt-lendemain-cadre.js), il n'est plus un écran ancien. */
+  r=lire('mgmt_lendemain'); assert.equal(r.plaque,'Le lendemain'); assert.equal(r.panneaux,0);
   r=lire('mgmt_organisation'); assert.equal(r.plaque,'Organisation'); assert.equal(r.panneaux,2);
   r=lire('mgmt_vestiaire'); assert.equal(r.plaque,'Le vestiaire');
   /* Les jetons de l'ancien habillage (prune, jaune doré) sont ceux du cadre (la feuille ne se calcule pas sous jsdom : on lit sa source). */

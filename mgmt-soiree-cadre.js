@@ -300,12 +300,8 @@ Object.assign(CL,{
     if(MGMT_SOIREE.index<G.mgmt.lastEvent.fights.length) return;
     const m=G.mgmt, touched=Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
     MGMT_SOIREE_UI.commence=null; MGMT_SOIREE_UI.focus=null;
-    if(touched.length>0){ CL.go('mgmt_lendemain'); return; }
-    mgmtAgendaActiver(m);
-    mgmtNewPile(m);
-    saveMgmt();
-    MGMT_SU_RE.s=0; MGMT_SU_RE.i=0;
-    CL.go('mgmt_resultats');
+    /* Brief démo, lot 6 T2 : le lendemain passe après chaque soirée, blessés ou non. */
+    CL.go('mgmt_lendemain');
   },
   /** Le combat vu depuis l'écran de soirée : l'écran animé avec l'agenda, l'arène d'avant sans. */
   mgmtSoireeVoir(){

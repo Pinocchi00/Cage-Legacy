@@ -175,7 +175,9 @@ function mgmtSallesApplique(m,finance,fights,avant){
   finance.location=mgmtLocation(salle);
   finance.recette=finance.ticketing+finance.tv-finance.purses-finance.bonuses-finance.location;
   Object.assign(finance,{salle:salle?salle.nom:'',capacite:r.capacite,spectateurs:r.spectateurs,taux:Math.round(r.taux*1000)/1000,
-    taille:soir.taille,satisfaction:sat.score,popAvant:m.pop});
+    taille:soir.taille,satisfaction:sat.score,popAvant:m.pop,
+    /* Brief démo, lot 6 T1 : les trois raisons de la satisfaction sont gardées avec la soirée, à côté du total. */
+    criteres:{reclame:Math.round(sat.reclame*100)/100,serres:Math.round(sat.serres*100)/100,noms:Math.round(sat.noms*100)/100,reclames:avant.reclames.length}});
   m.pop=mgmtPopApres(m.pop,sat.score,r.taux);
   finance.popApres=m.pop;
   m.comptes.push({n:(m.eventsPlayed||0)+1,recette:finance.recette,ticketing:finance.ticketing,tv:finance.tv,purses:finance.purses,bonuses:finance.bonuses,location:finance.location,

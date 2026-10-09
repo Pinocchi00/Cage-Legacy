@@ -125,6 +125,13 @@ function mgmtValidEvent(e){
        absent (soirée d'avant la tranche), strict quand il est là. */
     if(f.bonuses!==undefined&&(!Number.isSafeInteger(f.bonuses)||f.bonuses<0)) return false;
     if(!Number.isSafeInteger(f.recette)) return false;
+    /* Brief démo, lot 6 : les trois critères de la satisfaction, absents des soirées d'avant. */
+    if(f.criteres!==undefined){
+      const k=f.criteres;
+      if(!k||typeof k!=='object'||Array.isArray(k)) return false;
+      for(const n of ['reclame','serres','noms']){ if(typeof k[n]!=='number'||!(k[n]>=0&&k[n]<=1)) return false; }
+      if(!Number.isSafeInteger(k.reclames)||k.reclames<0) return false;
+    }
   }
   return true;
 }

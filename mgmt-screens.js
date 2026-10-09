@@ -599,13 +599,8 @@ Object.assign(CL,{
     if(!G||!G.mgmt) return;
     if(MGMT_SOIREE.index<G.mgmt.lastEvent.fights.length) return;
     const m=G.mgmt;
-    const touched=m.lastEvent&&Array.isArray(m.lastEvent.touched)?m.lastEvent.touched:[];
-    if(touched.length>0){ CL.go('mgmt_lendemain'); return; }
-    mgmtAgendaActiver(m);
-    mgmtAgendaSuivante(m);
-    mgmtNewPile(m);
-    saveMgmt();
-    CL.go('mgmt_carte');
+    /* Brief démo, lot 6 T2 : le lendemain passe après chaque soirée. */
+    CL.go('mgmt_lendemain');
   },
   mgmtSoireeVoir(){
     if(!G||!G.mgmt||!G.mgmt.lastEvent) return;
