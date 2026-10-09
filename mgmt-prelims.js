@@ -41,10 +41,11 @@ function mgmtPrelimsRaisons(m,fa,fb){
   const out=[];
   for(const f of [fa,fb]){
     if(!f) continue;
-    const n=mgmtCarteNote(m,f);
-    if(/^(Attend depuis|Battu par|A battu|Nul contre)/.test(n)) out.push(mfNet(f.last||f.name).replace(/^(.)(.*)$/,(x,a,b)=>a+b.toLowerCase())+' '+n.charAt(0).toLowerCase()+n.slice(1));
+    const fem=(divById(f.div)||{}).gender==='F';   /* brief démo, lot 9 T3 : la raison s'accorde avec la combattante */
+    const n=fem?mgmtCarteNote(m,f).replace(/^Battu par/,'Battue par'):mgmtCarteNote(m,f);
+    if(/^(Attend depuis|Battue? par|A battu|Nul contre)/.test(n)) out.push(mfNet(f.last||f.name).replace(/^(.)(.*)$/,(x,a,b)=>a+b.toLowerCase())+' '+n.charAt(0).toLowerCase()+n.slice(1));
   }
-  if(!out.length&&fa&&fb) out.push('Deux combattants libres de la même catégorie');
+  if(!out.length&&fa&&fb) out.push((divById(fa.div)||{}).gender==='F'?'Deux combattantes libres de la même catégorie':'Deux combattants libres de la même catégorie');
   return out.slice(0,2);
 }
 /** Les autres choix pour le préliminaire proposé : la catégorie, libres et hors de la proposition, dans l'ordre du classement. */

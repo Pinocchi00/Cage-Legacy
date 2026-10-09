@@ -10,12 +10,16 @@ const { newGameWindow } = require('../tests/helpers/loadGame');
 const racine = path.join(__dirname, '..');
 const iOut = process.argv.indexOf('--out');
 const out = iOut >= 0 ? process.argv[iOut + 1] : path.join(racine, 'docs', 'TEXTES-A-RELIRE.md');
+/* Brief démo, lot 9 T1 : tout fichier du jeu qui porte la marque relu:false est lu — la liste des familles est complétée par les fichiers de code qui la portent. */
+const DEJA = ['mgmt-humanite-data.js', 'mgmt-voix-data.js', 'mgmt-medias-data.js', 'mgmt-camps-data.js', 'mgmt-combat-data.js'];
+const AUTRES = fs.readdirSync(racine).filter(f => /.js$/.test(f) && !DEJA.includes(f) && /relus*:s*false/.test(fs.readFileSync(path.join(racine, f), 'utf8'))).sort();
 const FAMILLES = [
   ['Humanité (surnoms, métiers, milieux, moments de vie, rituels, rôles, trajectoires)', 'mgmt-humanite-data.js'],
   ['Voix des combattants', 'mgmt-voix-data.js'],
   ['Médias', 'mgmt-medias-data.js'],
   ['Camps et salles', 'mgmt-camps-data.js'],
   ['Combat (commentaire, coins)', 'mgmt-combat-data.js'],
+  ...AUTRES.map(f => ['Écrans et mécanismes — ' + f, f]),
 ];
 const win = newGameWindow({ runMain: false });
 const lire = fichier => {

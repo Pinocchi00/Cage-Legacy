@@ -239,7 +239,7 @@ function scr_mgmt_combat(){
   const C=MGMT_COMBAT;
   if(C.refuse||!C.session){
     /* Garde-fou du rejeu : l'issue rejouée ne correspond plus à l'issue enregistrée, rien n'est montré. Le texte est un texte d'auteur. */
-    return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">${esc('[EMPLACEMENT AUTEUR — rejeu divergent : ce combat ne peut pas être montré]')}</div>`,'normal')}</div></main>`,
+    return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">${esc('Ce combat ne peut pas être montré.')}</div>`,'normal')}</div></main>`,
       {barre:'aucune',touches:[{ks:['Entrée'],t:'Revenir',jaune:true,onclick:'CL.mgmtCbRetour()'}]});
   }
   return `<div class="mf-ecran mf-cb"><div class="mf-stage"><canvas id="mc-cv" class="mf-cb-cv" width="1920" height="1080" role="img" aria-label="Le combat : les pions des deux combattants dans la cage, la salle autour"></canvas>`

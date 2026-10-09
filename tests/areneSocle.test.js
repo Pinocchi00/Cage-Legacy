@@ -160,7 +160,7 @@ test('ARENE socle — garde-fou du rejeu : trace trafiquée, issue divergente, r
   })()`);
   assert.equal(JSON.parse(refuse).refuse,true,'le chargeur pose le refus');
   const htmlRefus = win.scr_arene_socle();
-  assert.ok(htmlRefus.includes('[EMPLACEMENT AUTEUR'),'l\u2019emplacement auteur du refus est affiché');
+  assert.ok(htmlRefus.includes('Ce combat ne peut pas être montré'),'le refus est dit au joueur, sans mention entre crochets (brief démo, lot 9 T2)');
   assert.ok(!htmlRefus.includes('<canvas'),'aucune arène n\u2019est montrée sur un rejeu divergent');
   /* Le rejeu fidèle, lui, se montre. */
   win.eval(`(function(){
