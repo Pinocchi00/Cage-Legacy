@@ -1259,6 +1259,7 @@ test('MGMT T2 clavier — flèches et entrée composent, chiffre retire, échap 
   assert.equal(win.eval(`MGMT_CART.pick`), null, 'le choix est effacé après la pose');
   key('1');
   assert.equal(win.eval(`G.mgmt.card.main.length`), 0, 'chiffre 1 : le combat posé est retiré');
+  win.eval(`MGMT_CART.cursor=0`);   /* brief démo, lot 4 (D8) : après une pose le curseur va au premier libre ; le test repart de la première ligne */
   key('ArrowUp');
   assert.equal(win.eval(`MGMT_CART.cursor`), win.eval(`mgmtCartRows(G.mgmt).length-1`), 'rebouclage : la dernière ligne par le haut');
   key('ArrowDown');

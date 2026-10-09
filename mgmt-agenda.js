@@ -159,9 +159,14 @@ function mgmtAgendaPasser(m){
 }
 
 /** La soirée peut se jouer : une soirée posée, la carte pleine (ou réduite décidée), aucune proposition à valider. */
+/** Les affaires qui bloquent la soirée : une réaction de Leïla se lit, elle ne bloque pas (brief démo, lot 4, D7). */
+function mgmtAffairesBloquantes(m){
+  if(!m||!Array.isArray(m.pile)) return 0;
+  return m.pile.filter(a=>a.status==='open'&&a.kind!=='leila_react'&&a.kind!=='leila_react_crush').length;
+}
 function mgmtAgendaPret(m){
   if(!mgmtAgendaActif(m)||!m.cal.prochaines.length) return false;
-  if(mgmtOpenCount(m)>0) return false;
+  if(mgmtAffairesBloquantes(m)>0) return false;
   return mgmtCardFull(m)||(typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m));
 }
 
@@ -171,7 +176,7 @@ function mgmtAgendaBlocages(m){
   const out=[];
   if(!mgmtAgendaActif(m)) return out;
   if(!m.cal.prochaines.length) return [{k:'pose',texte:'Aucune soirée n’est posée.',label:'Poser une soirée',onclick:"CL.go('mgmt_calendrier')"}];
-  if(typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m)&&mgmtOpenCount(m)===0) return out;
+  if(typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m)&&mgmtAffairesBloquantes(m)===0) return out;
   const c=m.card||{}, main=(c.main||[]).length, prel=(c.prelims||[]).length;
   const sm=Number.isSafeInteger(c.sizeMain)?c.sizeMain:MGMT_MAIN_SIZE, sp=Number.isSafeInteger(c.sizePrelims)?c.sizePrelims:MGMT_PRELIM_SIZE;
   const pl=n=>n>1?'s':'';
@@ -180,7 +185,7 @@ function mgmtAgendaBlocages(m){
     const sm1=main>=sm;
     out.push({k:'prelims',texte:`Il manque ${sp-prel} préliminaire${pl(sp-prel)}.`,label:sm1?'Trouver un remplaçant':'Ouvrir les préliminaires',onclick:sm1?'CL.mgmtPrelimsRemplacer()':"CL.go('mgmt_prelims')"});
   }
-  const n=mgmtOpenCount(m);
+  const n=mgmtAffairesBloquantes(m);
   if(n>0) out.push({k:'affaires',texte:`${n} affaire${pl(n)} ou demande${pl(n)} à régler.`,label:'Les affaires',onclick:"CL.go('mgmt_bureau')"});
   return out;
 }

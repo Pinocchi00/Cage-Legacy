@@ -251,7 +251,10 @@ function mgmtParolesDeLaSemaine(m){
   }
   /* Les réseaux (situation 'reseaux') : ceux qui se préparent à combattre
      publient ; la tête de la carte principale d'abord, ton cercle avant le reste. */
-  if(out.length<2){
+  /* Brief démo, lot 4 (D10) : « Camp terminé, plus que quelques jours » ne sort que dans la dernière semaine avant la soirée. */
+  const prochaine=m.cal&&m.cal.actif&&m.cal.prochaines&&m.cal.prochaines[0];
+  const veille=!prochaine||(prochaine.jour-m.cal.jour)<=7;
+  if(out.length<2&&veille){
     const sur=[];
     for(const cf of mgmtCardFights(m)){
       for(const id of [cf.a,cf.b]){ const f=mgmtFighterById(m,id); if(f&&!sur.some(x=>x.f.id===f.id)) sur.push({f,lien:mgmtLien(m,f.id),slot:cf.slot==='main'?1:0}); }

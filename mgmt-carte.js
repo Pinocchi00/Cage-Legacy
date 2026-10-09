@@ -297,7 +297,8 @@ function mgmtBulkMonter(m,affairId,idx){
   if(!aff||aff.status!=='open'||aff.kind!=='leila_bulk'||!Array.isArray(aff.fights)||!Number.isSafeInteger(idx)||idx<0||idx>=aff.fights.length) return false;
   const f=aff.fights[idx];
   if(!mgmtBookMain(m,f.a,f.b)) return false;
-  aff.fights.splice(idx,1);
+  /* mgmtBookMain a déjà retiré de la proposition tout combat devenu impossible, celui-ci compris. */
+  const k=aff.fights.indexOf(f); if(k>=0) aff.fights.splice(k,1);
   aff.marked=null;
   if(!aff.fights.length){ aff.status='closed'; aff.decision='ignored'; }
   else { aff.a=aff.fights[0].a; aff.b=aff.fights[0].b; }
@@ -354,12 +355,29 @@ function mgmtBookMain(m,aid,bid){
   if(titre) fight.title=true;
   m.card.main.push(fight);
   mgmtPromote(m,fa); mgmtPromote(m,fb);
+  mgmtPropositionsPerimees(m);
   /* §T3 : une fois la cinquième place posée, Leïla propose aussitôt les
      préliminaires — en fin de pile, jamais avant la carte principale
      complète (mgmtOfferBulk garde tout elle-même : no-op tant que la carte
      principale est incomplète). */
   mgmtOfferBulk(m,false);
   return fight;
+}
+
+/** Brief démo, lot 4 (D9) : une proposition de Leïla dont un combattant n'est plus libre est retirée (le combat d'un bloc) ou fermée (une paire). */
+function mgmtPropositionsPerimees(m){
+  if(!m||!Array.isArray(m.pile)) return;
+  const pris=id=>{ const f=mgmtFighterById(m,id); return !f||mgmtEngaged(m,f); };
+  for(const a of m.pile){
+    if(a.status!=='open') continue;
+    if(a.kind==='leila_bulk'&&Array.isArray(a.fights)){
+      const gardes=a.fights.filter(x=>!pris(x.a)&&!pris(x.b));
+      if(gardes.length!==a.fights.length){
+        a.fights=gardes; a.marked=null;
+        if(!gardes.length){ a.status='closed'; a.decision='ignored'; } else { a.a=gardes[0].a; a.b=gardes[0].b; }
+      }
+    }else if(a.kind==='leila_propose'&&typeof a.a==='string'&&typeof a.b==='string'&&(pris(a.a)||pris(a.b))){ a.status='closed'; a.decision='ignored'; }
+  }
 }
 
 /** Retire un combat posé de la carte principale (index dans m.card.main) :
@@ -444,6 +462,8 @@ function mgmtCartRows(m){
 const MGMT_RANG_OUBLI=0.5;
 /* Et le temps seul use le passé : le bilan d'avant la partie garde MGMT_RANG_TEMPS de son poids à chaque soirée jouée, qu'on combatte ou non — pour tout le monde, extérieur compris, afin qu'une recrue ne change pas de rang en signant. */
 const MGMT_RANG_TEMPS=0.94;
+/* Part minimale d'une victoire qui s'ajoute au score : un vainqueur ne recule pas (brief démo, lot 4, D1). */
+const MGMT_RANG_VICTOIRE=0.5;
 
 /** Les scores de classement des lignes d'une catégorie : Map id → score. Pur.
  *  score = (W0−L0)·ρⁿ + Σ résultats·ρ^(n−i), n combats à Split avant le cycle lu, W0/L0 le bilan d'avant ces combats. */
@@ -459,8 +479,9 @@ function mgmtRangScores(m,cands,cycle){
     let W0=w, L0=l;
     for(const v of res){ if(v>0) W0--; else if(v<0) L0--; }
     const n=res.length, ref0=Number.isSafeInteger(cycle)?cycle:m.cycle;
-    let s=(W0-L0)*Math.pow(MGMT_RANG_OUBLI,n)*Math.pow(MGMT_RANG_TEMPS,Math.max(0,ref0-1));
-    for(let i=0;i<n;i++) s+=res[i]*Math.pow(MGMT_RANG_OUBLI,n-1-i);
+    /* Brief démo, lot 4 (D1) : la formule d'origine divisait par deux le bilan de celui qui venait de combattre, vainqueur compris, alors que ceux qui n'avaient pas combattu le gardaient entier — tout vainqueur reculait derrière eux. Résultat par résultat : une défaite garde l'oubli (le score est divisé par MGMT_RANG_OUBLI), une victoire ne fait jamais reculer (elle ajoute au moins la moitié de sa valeur). */
+    let s=(W0-L0)*Math.pow(MGMT_RANG_TEMPS,Math.max(0,ref0-1));
+    for(let i=0;i<n;i++) s=res[i]>0?Math.max(s*MGMT_RANG_OUBLI+res[i],s+res[i]*MGMT_RANG_VICTOIRE):s*MGMT_RANG_OUBLI+res[i];
     sc.set(o.id,s);
   }
   return sc;

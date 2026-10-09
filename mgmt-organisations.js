@@ -101,7 +101,8 @@ function mgmtOrgAtouts(profil){
 function mgmtOrgApercu(o){
   const p=o.profil;
   const salle=Math.max(200,Math.round(MGMT_SALLES_CAPACITES[MGMT_SALLES_CAPACITES.length-1]*p.salles/50)*50);
-  const eff=Math.max(40,Math.round(150*p.effectif));
+  /* Brief démo, lot 4 (D4) : le chiffre vient de ce que la partie crée — environ 30 combattants par catégorie, pesés comme mgmtNewRoster. */
+  const eff=Math.round(allDivisions().reduce((t,d)=>t+Math.max(4,Math.round(MGMT_EFFECTIF_PAR_CATEGORIE*mgmtOrgPoidsCategorie(p,d.id)*p.effectif)),0)/10)*10;
   const age=Math.round(10*(27.9+p.age))/10;
   const bourse=p.bourses<=0.85?'modestes':(p.bourses>=1.2?'lourdes':'normales');
   return [
