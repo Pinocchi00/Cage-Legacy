@@ -1,7 +1,7 @@
 ---
 description: Cherche dans le code de Cage Legacy et rend une réponse courte (fichier:ligne, signature, appelants). À appeler au lieu d'ouvrir soi-même beaucoup de fichiers. Lecture seule.
 mode: subagent
-model: opencode-go/deepseek-v4.1-flash
+model: opencode-go/mimo-v2.6-flash
 steps: 25
 permission:
   edit: deny

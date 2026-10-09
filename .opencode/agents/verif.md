@@ -1,7 +1,7 @@
 ---
 description: Lance npm run check et l'audit des versions de cache, et ne rend que les échecs. À appeler avant chaque relecture et chaque commit.
 mode: subagent
-model: opencode-go/deepseek-v4.1-flash
+model: opencode-go/mimo-v2.6-flash
 steps: 12
 permission:
   edit: deny

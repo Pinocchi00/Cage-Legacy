@@ -15,10 +15,10 @@ les planches, la relecture de fin de lot avec le jeu ouvert, la PR et la fusion.
 
 | Agent | Modèle Go | Rôle | Budget Go (5 h / mois, requêtes estimées) |
 | --- | --- | --- | --- |
-| `architecte` | deepseek-v4-pro | Lit le brief et le code, écrit la fiche de tranche | 1 050 / 5 200 |
+| `architecte` | mimo-v2.6-pro | Lit le brief et le code, écrit la fiche de tranche | 3 250 / 16 300 |
 | `codeur` | glm-5.3-flash | Code la tranche, teste, commite | 6 320 / 31 580 |
-| `eclaireur` | deepseek-v4.1-flash | Cherche dans le code, rend `fichier:ligne` | 26 000 / 130 000 |
-| `verif` | deepseek-v4.1-flash | `npm run check` + audit des versions, rend les échecs seuls | même budget |
+| `eclaireur` | mimo-v2.6-flash | Cherche dans le code, rend `fichier:ligne` | 30 100 / 150 400 |
+| `verif` | mimo-v2.6-flash | `npm run check` + audit des versions, rend les échecs seuls | même budget |
 | `relecteur` | kimi-k2.7-code | Relit le diff contre la fiche : ACCEPTÉ ou À REPRENDRE | 1 350 / 6 750 |
 | `ecrivain` | claude-haiku-5-5 | Écrit les textes `relu:false` | 3 850 / 19 230 |
 | `juge` | kimi-k3 | Relecture de fin de lot, rapport | 110 / 490 — une fois par lot |
@@ -26,9 +26,12 @@ les planches, la relecture de fin de lot avec le jeu ouvert, la PR et la fusion.
 Les budgets sont ceux de la page Go au 09/10/2026, calculés pour des requêtes moyennes : les
 contextes de Cage Legacy sont plus gros, compte deux fois moins. Tous ces modèles sont
 « entraînement : non utilisé » ; rétention 0 jour, sauf Claude Haiku (30 jours, accord en
-place). **L'accord de DeepSeek court jusqu'au 31/10/2026** : le 01/11, vérifier la table ; s'il
-n'est pas renouvelé, passer `eclaireur` et `verif` sur `mimo-v2.6-flash` et `architecte` sur
-`glm-5.3` (une ligne `model:` à changer dans `.opencode/agents/`).
+place).
+
+**Les modèles DeepSeek sont refusés sur ce compte** (constaté le 09/10/2026 : « This Go model
+requires Global regions », un réglage de confidentialité de l'espace Go). Ils sont remplacés par
+MiMo. Si Anthony active un jour les régions mondiales, revenir à DeepSeek tient en une ligne
+`model:` dans `.opencode/agents/`, après avoir revérifié son accord de rétention.
 
 Le relecteur n'est pas de la même famille que le codeur : un modèle relit mal ses propres
 erreurs.
@@ -173,7 +176,7 @@ sur la branche monde-lot-N-…, dis-moi quoi décider et réécris la fiche.
 après les premières tranches : 100 à 200 requêtes de codeur par tranche, 30 de fiche, 30 de
 relecture. Le tout tient dans un mois d'offre Go si les deux pistes tournent ; le budget le plus
 serré est celui du juge (Kimi K3 : 490 requêtes par mois, une quarantaine par lot). S'il
-manque, `juge` passe sur `deepseek-v4-pro`.
+manque, `juge` passe sur `mimo-v2.6-pro`.
 
 Économies déjà en place dans ce dépôt :
 
