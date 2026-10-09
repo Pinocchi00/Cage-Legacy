@@ -17,6 +17,22 @@ permission:
     "git commit*": allow
     "npm run check*": allow
     "node tools/verif-versions.js*": allow
+    "ls*": allow
+    "wc *": allow
+    "head *": allow
+    "tail *": allow
+    "cat *": allow
+    "grep *": allow
+    "rg *": allow
+    "sort*": allow
+    "uniq*": allow
+    "cut *": allow
+    "sed -n *": allow
+    "git grep*": allow
+    "git ls-files*": allow
+    "git branch --show-current": allow
+    "git branch --list*": allow
+    "git blame*": allow
   task:
     "*": deny
     eclaireur: allow

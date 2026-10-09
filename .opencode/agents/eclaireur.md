@@ -11,6 +11,22 @@ permission:
     "git show*": allow
     "git diff*": allow
     "git grep*": allow
+    "ls*": allow
+    "wc *": allow
+    "head *": allow
+    "tail *": allow
+    "cat *": allow
+    "grep *": allow
+    "rg *": allow
+    "sort*": allow
+    "uniq*": allow
+    "cut *": allow
+    "sed -n *": allow
+    "git status*": allow
+    "git ls-files*": allow
+    "git branch --show-current": allow
+    "git branch --list*": allow
+    "git blame*": allow
   webfetch: deny
   websearch: deny
 ---
