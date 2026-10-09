@@ -32,7 +32,8 @@ function mgmtCarteListe(m){
 /** Le libellé court d'une catégorie : « LÉGER », « MOUCHE F ». */
 function mgmtCarteCourt(div){ return mfNet(mgmtDivisionLabel(div)).replace(/^POIDS /,'').replace(/ FÉMININ$/,' F'); }
 
-function mgmtCarteStyleHtml(c){ return esc(c.style)+(c.styleBilan?'<em class="mf-car-src">D’après son bilan</em>':''); }
+/** Le style d'un combattant, au corps qui tient dans sa colonne ; la source (le bilan) se dit une fois, dans les enjeux, jamais sous le texte. */
+function mgmtCarteStyleHtml(c){ return `<b style="font-size:${mfCorps(c.style,215,32,22)}px">${esc(c.style)}</b>`; }
 function mgmtCarteLigneComp(a,b,c){ return `<div class="mf-car-comp"><div>${a}</div><span>${esc(c)}</span><div>${b}</div></div>`; }
 
 function mgmtCarteFormeHtml(m,f){
@@ -72,13 +73,18 @@ function mgmtCarteColonne(m,f){
     style:mfNet(mgmtEffectifFacon(m,f)||mgmtCarteStyleBilan(m,f).t||'?'),styleBilan:!mgmtEffectifFacon(m,f)&&!!mgmtCarteStyleBilan(m,f).t,forme:mgmtCarteFormeHtml(m,f)};
 }
 
-function mgmtCarteBanniere(a,b,div){
+/** La bannière du face-à-face (planche « Booking ») : le premier combattant sur le noir, le second sur le rouge, la séparation en diagonale. Les noms rétrécissent
+ *  dans la place que la diagonale leur laisse (300 px en haut à gauche, 320 px en bas à droite) : ils ne touchent ni le VS, ni le cartouche, ni l'autre nom ; un prénom trop long se coupe. */
+function mgmtCarteBanniere(a,b,div,rounds,retour){
   const nom=f=>f?{p:mfNet(f.first||''),n:mfNet(f.last||f.name)}:{p:'',n:'?'};
   const A=nom(a), B=nom(b);
-  return `<div class="mf-car-ban"><div class="mf-car-ban-a"><div class="mf-car-ban-nom"><b style="font-size:${mfCorps(A.n,262,96,26)}px">${esc(A.n)}</b><span>${esc(A.p)}</span></div></div>`
-    +`<div class="mf-car-ban-b"><div class="mf-car-ban-nom d"><span>${esc(B.p)}</span><b style="font-size:${mfCorps(B.n,262,96,26)}px">${esc(B.n)}</b></div></div>`
-    +`<div class="mf-car-vs">VS</div>`
-    +`<div class="mf-car-ban-tag"><div>${esc(mfNet(mgmtDivisionLabel(div)))}</div></div></div>`;
+  const tag=`<div>${esc(mfNet(mgmtDivisionLabel(div)))}</div>`+(rounds?`<div>${esc(rounds)} ROUNDS</div>`:'');
+  const clic=retour?` onclick="${retour}" role="button" title="Changer de combattant" style="cursor:pointer"`:'';
+  return `<div class="mf-car-ban"><i class="mf-car-diag r"></i><i class="mf-car-diag c"></i>`
+    +`<div class="mf-car-ban-nom"${clic}><b style="font-size:${mfCorps(A.n,300,96,22)}px">${esc(A.n)}</b><span>${esc(A.p)}</span></div>`
+    +`<div class="mf-car-ban-tag">${tag}</div>`
+    +`<div class="mf-car-ban-nom d"><span>${esc(B.p)}</span><b style="font-size:${mfCorps(B.n,320,96,22)}px">${esc(B.n)}</b></div>`
+    +`<div class="mf-car-vs">VS</div></div>`;
 }
 
 function mgmtCarteCombatLigne(m,i,fight,etatMain){
@@ -89,9 +95,9 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
     const titre=fight.title===true;
     /* Lot 11 (D5) : un champion ne combat que pour sa ceinture — elle est en jeu d'office, le joueur ne la retire pas. */
     const champ=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set(), force=titre&&(champ.has(fight.a)||champ.has(fight.b));
-    return `<div class="mf-car-slot confirme${cur?' choisi':''}"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">`
+    return `<div class="mf-car-slot confirme${cur?' choisi':''}"><div class="mf-car-num" onclick="CL.mgmtCarteModifie(${i})">${i+1}</div><div class="mf-car-slot-c">`
       +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Le champion ne combat que pour sa ceinture">TITRE EN JEU</button>`:((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:'')}</div>`
-      +`<div class="mf-car-slot-n"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b><span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b></div></div>`
+      +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${i})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b><span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b></div></div>`
       +`<div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
   }
   const pre=etatMain.pre===i;
@@ -158,7 +164,7 @@ function scr_mgmt_carte_cadre(){
   const duo=!!(A&&B);
   const rounds=duo?(main.length===0?5:3):'';
   const peutTitre=duo&&typeof mgmtCanTitle==='function'&&mgmtCanTitle(m,{a:A.id,b:B.id});
-  const enjeux=[]; if(peutTitre) enjeux.push('Titre possible'); if(rounds) enjeux.push(rounds+' rounds');
+  const enjeux=[]; if(duo&&(ca.styleBilan||cb.styleBilan)) enjeux.push('D’après son bilan : le style'); if(peutTitre) enjeux.push('Titre possible'); if(rounds) enjeux.push(rounds+' rounds');
   /* Corrections du 08/10, 2.3 et 2.4 : ce que le booking sait de la paire, dit avant la confirmation. */
   if(duo){
     const reclame=typeof mgmtPublicReclame==='function'?mgmtPublicReclame(m).find(r=>(r.a===A.id&&r.b===B.id)||(r.a===B.id&&r.b===A.id)):null;
@@ -177,9 +183,10 @@ function scr_mgmt_carte_cadre(){
   const boutons=`<div class="mf-car-boutons">`
     +(peutConf?mfBouton('Confirmer le combat',{touche:'Entrée',jaune:true,onclick:`CL.mgmtPick('${esc(etat.vise.id)}')`})
       :(!pickF&&vise&&mgmtSelectable(m,vise,null)&&!plein?mfBouton('Choisir ce combattant',{touche:'Entrée',jaune:true,onclick:`CL.mgmtPick('${esc(vise.id)}')`}):''))
+    +(pickF?mfBouton('Retour',{touche:'Échap',onclick:'CL.mgmtCarteLeave()'}):'')
     +(pickF&&mgmtAgendaActif(m)?mfBouton('Proposer',{touche:'D',onclick:'CL.mgmtCarteProposer()'}):'')
     +(A?mfBouton('Sa fiche',{touche:'F',onclick:`CL.mgmtCarteFiche()`}):'')+`</div>`;
-  const centre=`<div class="mf-car-c">${mgmtCarteBanniere(A,B,A?A.div:mgmtCarteDiv(m))}`
+  const centre=`<div class="mf-car-c">${mgmtCarteBanniere(A,B,A?A.div:mgmtCarteDiv(m),rounds,pickF?'CL.mgmtCarteLeave()':'')}`
     +mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${prop?`<div class="mf-car-prop mf-ancien">${prop}</div>`:''}${faits}${boutons}`,'normal','mf-car-cmp')+`</div>`;
 
   /* La droite : les adversaires, six lignes qui suivent le curseur. */
@@ -205,6 +212,14 @@ Object.assign(CL,{
     if(!MGMT_CART.pick){ CL.mgmtPick(id); return; }
     const i=mgmtCarteListe(m).findIndex(x=>x.id===id); if(i>=0) MGMT_CART.cursor=i;
     render();
+  },
+  /** Un combat confirmé se reprend : il est retiré de la carte et le premier combattant revient en choix, le curseur sur son adversaire (Échap remonte d'un cran de plus, jusqu'au premier choix). */
+  mgmtCarteModifie(i){
+    const m=G.mgmt, f=m.card.main[i]; if(!f) return;
+    const a=f.a, b=f.b;
+    if(!mgmtRemoveMain(m,i)) return;
+    saveMgmt(); mgmtCartReset(); MGMT_CART.pick=a;
+    MGMT_CART.cursor=Math.max(0,mgmtCarteListe(m).findIndex(x=>x.id===b)); render();
   },
   mgmtCarteCategorie(delta){
     const m=G.mgmt; if(MGMT_CART.pick) return;
@@ -245,5 +260,6 @@ keysRegister('mgmt_carte',{
   '4'(){ CL.mgmtUnbook(3); },
   '5'(){ CL.mgmtUnbook(4); },
   Escape(){ CL.mgmtCarteLeave(); },
+  Backspace(){ CL.mgmtCarteLeave(); },
 });
 /* ==== [FIN ANCRE] ==== */
