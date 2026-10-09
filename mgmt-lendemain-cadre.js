@@ -83,6 +83,7 @@ Object.assign(CL,{
     mgmtNewPile(m);
     saveMgmt();
     MGMT_SU_RE.s=0; MGMT_SU_RE.i=0;
+    if(typeof mgmtDemoApresSoiree==='function'&&mgmtDemoApresSoiree()) return;
     CL.go('mgmt_resultats');
   },
 });
