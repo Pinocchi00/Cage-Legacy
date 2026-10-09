@@ -14,7 +14,22 @@ permission:
     "git status*": allow
     "git add docs/lots/*": allow
     "git commit*": allow
-    "git branch*": allow
+    "git branch --show-current": allow
+    "git branch --list*": allow
+    "ls*": allow
+    "wc *": allow
+    "head *": allow
+    "tail *": allow
+    "cat *": allow
+    "grep *": allow
+    "rg *": allow
+    "sort*": allow
+    "uniq*": allow
+    "cut *": allow
+    "sed -n *": allow
+    "git grep*": allow
+    "git ls-files*": allow
+    "git blame*": allow
   task:
     "*": deny
     eclaireur: allow
