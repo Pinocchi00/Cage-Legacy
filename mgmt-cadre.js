@@ -347,6 +347,9 @@ const MF_MENU=[
   {id:'quitter',t:'Quitter',bas:true,grise:true},
 ];
 
+/** T2 du lot 10 : dans la démo, l'accueil ne propose que le management, les options et « Quitter » (aucune touche ni lien ne mène ailleurs). */
+function mfMenu(){ return (typeof CL_DEMO!=='undefined'&&CL_DEMO===true)?MF_MENU.filter(x=>x.id==='management'||x.id==='options'||x.id==='quitter'):MF_MENU; }
+
 /** Les données de l'affiche : le combat principal de la prochaine soirée, lu sur la carte. */
 function mfAfficheDonnees(m){
   const cf=m&&m.card&&Array.isArray(m.card.main)?m.card.main.find(x=>x&&x.a&&x.b):null;
@@ -403,7 +406,7 @@ function mfTitre(){
   const m=titleMgmtState();
   G.lastMsg=null;
   const boot=G.bootMsg; G.bootMsg=null;
-  if(!Number.isSafeInteger(MF_ACCUEIL.i)||MF_ACCUEIL.i<0||MF_ACCUEIL.i>=MF_MENU.length) MF_ACCUEIL.i=0;
+  if(!Number.isSafeInteger(MF_ACCUEIL.i)||MF_ACCUEIL.i<0||MF_ACCUEIL.i>=mfMenu().length) MF_ACCUEIL.i=0;
   const bouton=(x,i)=>{
     const on=i===MF_ACCUEIL.i&&!x.grise;
     const cls=[x.premier?'premier':'',on?'on':'',x.grise?'grise':'',x.classe||''].filter(Boolean).join(' ');
@@ -411,8 +414,8 @@ function mfTitre(){
       ?`<button type="button" class="${cls}" disabled aria-disabled="true">${esc(x.t)}</button>`
       :`<button type="button" class="${cls}"${on?' aria-current="true"':''} onclick="${x.action}"><span>${esc(x.t)}</span>${x.sous?`<small>${esc(x.sous)}</small>`:''}</button>`;
   };
-  const haut=MF_MENU.map((x,i)=>x.bas?'':bouton(Object.assign({premier:i===0},x),i)).join('');
-  const bas=MF_MENU.map((x,i)=>x.bas?bouton(x,i):'').join('');
+  const haut=mfMenu().map((x,i)=>x.bas?'':bouton(Object.assign({premier:i===0},x),i)).join('');
+  const bas=mfMenu().map((x,i)=>x.bas?bouton(x,i):'').join('');
   const reprise=m?mfTouche('R',false):'';
   const gauche=`<div class="mf-accueil-gauche"><h1 class="mf-accueil-titre">CAGE<br>LEGACY</h1>`
     +`<nav class="mf-menu" aria-label="Modes de jeu">${haut}</nav><div class="mf-menu-sep"></div><nav class="mf-menu-bas" aria-label="Autres">${bas}</nav>`
@@ -430,13 +433,14 @@ function mfTitre(){
 Object.assign(CL,{
   mfMenuDeplacer(delta){
     let i=MF_ACCUEIL.i;
-    for(let k=0;k<MF_MENU.length;k++){
-      i=(i+delta+MF_MENU.length)%MF_MENU.length;
-      if(!MF_MENU[i].grise) break;
+    const menu=mfMenu();
+    for(let k=0;k<menu.length;k++){
+      i=(i+delta+menu.length)%menu.length;
+      if(!menu[i].grise) break;
     }
     MF_ACCUEIL.i=i; render();
   },
-  mfMenuValider(){ const x=MF_MENU[MF_ACCUEIL.i]; if(x&&x.fn&&!x.grise) x.fn(); },
+  mfMenuValider(){ const x=mfMenu()[MF_ACCUEIL.i]; if(x&&x.fn&&!x.grise) x.fn(); },
 });
 keysRegister('title',{
   ArrowUp(){ CL.mfMenuDeplacer(-1); },

@@ -631,6 +631,7 @@ Object.assign(CL,{
     mgmtNewPile(G.mgmt);
     saveMgmt();
     CL.mgmtFilDemarrer();
+    if(typeof mgmtDemoApresSoiree==='function'&&mgmtDemoApresSoiree()) return;
     CL.go('mgmt_carte');
   },
 });

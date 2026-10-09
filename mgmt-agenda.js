@@ -165,6 +165,7 @@ function mgmtAffairesBloquantes(m){
   return m.pile.filter(a=>a.status==='open'&&a.kind!=='leila_react'&&a.kind!=='leila_react_crush').length;
 }
 function mgmtAgendaPret(m){
+  if(typeof mgmtDemoTerminee==='function'&&mgmtDemoTerminee(m)) return false;   /* lot 10 T4 : la démo ne propose plus de soirée après la dernière */
   if(!mgmtAgendaActif(m)||!m.cal.prochaines.length) return false;
   if(mgmtAffairesBloquantes(m)>0) return false;
   return mgmtCardFull(m)||(typeof mgmtReduiteOuverte==='function'&&mgmtReduiteOuverte(m));

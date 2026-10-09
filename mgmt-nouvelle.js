@@ -24,7 +24,8 @@ function mgmtNouvelleOrgHtml(o,i,choisie){
   const atouts=mgmtOrgAtouts(o.profil);
   const lignes=(titre,liste,svg)=>`<div class="mf-org-bloc"><div class="mf-org-titre">${titre}</div>`
     +liste.map(t=>`<div class="mf-org-ligne">${svg}<div>${esc(t)}</div></div>`).join('')+`</div>`;
-  const tete=`<div class="mf-org-tete"><div class="mf-org-nom" style="font-size:${mfCorps(o.nom,choisie?290:380,56,28)}px">${esc(o.nom)}</div>${choisie?'<div class="mf-org-choisie">Choisie</div>':''}</div>`;
+  const verrou=typeof mgmtDemoActive==='function'&&mgmtDemoActive()&&o.id!==CL_DEMO_ORG;
+  const tete=`<div class="mf-org-tete"><div class="mf-org-nom" style="font-size:${mfCorps(o.nom,choisie?290:380,56,28)}px">${esc(o.nom)}</div>${verrou?'<div class="mf-org-choisie">Verrouillée</div>':(choisie?'<div class="mf-org-choisie">Choisie</div>':'')}</div>`;
   const corps=`<div class="mf-org-corps">${lignes('Les plus',atouts.plus,MF_PLUS_SVG)}${lignes('Les contreparties',atouts.moins,MF_MOINS_SVG)}</div>`;
   return mfPanneau(tete+corps,choisie?'choisi':'cote','mf-org'+(choisie?' choisie':'')+(o.auteur?' auteur':''),
     `role="button" tabindex="0" aria-pressed="${choisie}" aria-label="${esc(o.nom)}" data-org="${esc(o.id)}" onclick="CL.mgmtNouvelleChoisir(${i})"`);
@@ -49,7 +50,7 @@ Object.assign(CL,{
   /** Ouvre l'écran de choix pour l'emplacement vide `slot`. */
   mgmtNouvelle(slot){
     if(!G) G={theme:'dark'};
-    MGMT_NOUVELLE={slot:mgmtSlotValide(slot)?slot:1,i:0};
+    MGMT_NOUVELLE={slot:mgmtSlotValide(slot)?slot:1,i:typeof mgmtDemoActive==='function'&&mgmtDemoActive()?Math.max(0,MGMT_ORGANISATIONS.findIndex(o=>o.id===CL_DEMO_ORG)):0};
     CL.go('mgmt_nouvelle');
   },
   mgmtNouvelleChoisir(i){ if(Number.isSafeInteger(i)&&i>=0&&i<MGMT_ORGANISATIONS.length){ MGMT_NOUVELLE.i=i; render(); } },
@@ -65,6 +66,7 @@ Object.assign(CL,{
   /** Crée la partie de l'organisation choisie dans l'emplacement. */
   mgmtNouvelleCreer(){
     const o=MGMT_ORGANISATIONS[MGMT_NOUVELLE.i];
+    if(typeof mgmtDemoActive==='function'&&mgmtDemoActive()&&o&&o.id!==CL_DEMO_ORG) return;   /* lot 10 T3 : une organisation verrouillée ne se crée pas */
     if(o) CL.mgmtEnter(MGMT_NOUVELLE.slot,o.id);
   },
 });
