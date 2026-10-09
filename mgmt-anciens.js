@@ -8,13 +8,13 @@
    Les phrases sont des PROPOSITIONS de Claude (relu:false) : elles se relisent avec les autres textes (tools/exporter-textes.js). ==== */
 
 const MGMT_ANCIENS_TEXTES={relu:false,
-  koV:[{t:'Deux coups de poing de suite, et le combat s’arrête.'},{t:'Un crochet au bon moment.'},{t:'Un contre : l’adversaire n’a rien vu venir.'},{t:'Une série de coups à la tête contre le grillage.'},{t:'Un coup de pied qui arrive de nulle part.'}],
-  koD:[{t:'Un coup reçu en reculant, sans se protéger.'},{t:'Un contre reçu en s’approchant trop.'},{t:'Un coup reçu sans l’avoir vu venir.'},{t:'Les mains baissées en fin de round.'},{t:'Un mauvais début de combat, sans retour possible.'}],
-  subV:[{t:'Un étranglement dans une mêlée au sol.'},{t:'Un contrôle au sol, puis une clé de bras.'},{t:'Le dos est pris, puis l’étranglement.'},{t:'Une jambe laissée à portée, puis la soumission.'},{t:'Une soumission surprise depuis le sol.'}],
-  subD:[{t:'Un étranglement, en défendant son dos.'},{t:'Dominé au sol, sans solution.'},{t:'Une clé de cheville surprise.'},{t:'La tête relevée trop tôt, le cou à découvert.'},{t:'Une amenée ratée, puis il est resté au sol.'}],
-  decV:[{t:'Plus de coups que l’adversaire, round après round.'},{t:'Un combat contrôlé, sans risque.'},{t:'Un combat très dur, gagné de peu.'},{t:'Son jab a fait la différence.'},{t:'Une meilleure fin de combat.'}],
-  decD:[{t:'Moins de coups que l’adversaire, surtout à la fin.'},{t:'Trop de temps passé contre le grillage.'},{t:'Un combat serré, perdu de peu.'},{t:'Trop d’attente : les juges ont choisi l’autre.'},{t:'L’adversaire avait plus d’énergie à la fin.'}],
-  nul:[{t:'Un combat égal, sans vrai gagnant.'},{t:'Chacun a gagné deux rounds. Les juges n’ont pas choisi.'},{t:'Deux styles qui s’annulent.'}]};
+  koV:[{t:'Deux coups de poing de suite, et le combat s’arrête.'},{t:'Un crochet au bon moment.'},{t:'Un contre : l’adversaire n’a rien vu venir.'},{t:'Une série de coups à la tête contre le grillage.'},{t:'Un coup de pied qui arrive de nulle part.'},{t:'Un crochet du gauche, net, au bon moment.'},{t:'Une série courte, puis l’adversaire est tombé.'},{t:'Un coup de genou dans le clinch.'},{t:'Un direct du bras arrière qui a tout arrêté.'},{t:'Un coup de coude en fin de mêlée.'}],
+  koD:[{t:'Un coup reçu en reculant, sans se protéger.'},{t:'Un contre reçu en s’approchant trop.'},{t:'Un coup reçu sans l’avoir vu venir.'},{t:'Les mains baissées en fin de round.'},{t:'Un mauvais début de combat, sans retour possible.'},{t:'Un crochet reçu, les mains trop basses.'},{t:'Un coup au corps, puis la tête a suivi.'},{t:'Un coup reçu en tournant le dos.'},{t:'Un contre arrivé sans prévenir.'},{t:'Un genou reçu dans le clinch.'}],
+  subV:[{t:'Un étranglement dans une mêlée au sol.'},{t:'Un contrôle au sol, puis une clé de bras.'},{t:'Le dos est pris, puis l’étranglement.'},{t:'Une jambe laissée à portée, puis la soumission.'},{t:'Une soumission surprise depuis le sol.'},{t:'Un étranglement par derrière, sans échappatoire.'},{t:'Une clé de bras prise sur un retournement.'},{t:'Un triangle arrivé en plein scramble.'},{t:'Une clé de jambe sur une amenée ratée.'},{t:'Un étranglement guillotine au bon moment.'}],
+  subD:[{t:'Un étranglement, en défendant son dos.'},{t:'Dominé au sol, sans solution.'},{t:'Une clé de cheville surprise.'},{t:'La tête relevée trop tôt, le cou à découvert.'},{t:'Une amenée ratée, puis il est resté au sol.'},{t:'Une clé de bras prise en défendant le sol.'},{t:'Un triangle subi après une mauvaise garde.'},{t:'Une clé de cheville sur un retournement raté.'},{t:'Un étranglement par derrière, le dos tourné.'},{t:'Le bras trop tendu, la clé est venue vite.'}],
+  decV:[{t:'Plus de coups que l’adversaire, round après round.'},{t:'Un combat contrôlé, sans risque.'},{t:'Un combat très dur, gagné de peu.'},{t:'Son jab a fait la différence.'},{t:'Une meilleure fin de combat.'},{t:'Un combat gagné au centre, round après round.'},{t:'Plus de précision, moins de risques.'},{t:'Une série de jabs qui a usé l’adversaire.'},{t:'Les trois rounds pris sur un meilleur rythme.'},{t:'Une victoire propre, sans moment dangereux.'}],
+  decD:[{t:'Moins de coups que l’adversaire, surtout à la fin.'},{t:'Trop de temps passé contre le grillage.'},{t:'Un combat serré, perdu de peu.'},{t:'Trop d’attente : les juges ont choisi l’autre.'},{t:'L’adversaire avait plus d’énergie à la fin.'},{t:'Un combat perdu à cause d’un mauvais deuxième round.'},{t:'Moins de précision, surtout dans le dernier round.'},{t:'Un combat trop prudent, perdu aux points.'},{t:'Un adversaire plus précis, round après round.'},{t:'Trop de temps au sol sans rien produire.'}],
+  nul:[{t:'Un combat égal, sans vrai gagnant.'},{t:'Chacun a gagné deux rounds. Les juges n’ont pas choisi.'},{t:'Deux styles qui s’annulent.'},{t:'Trois rounds équilibrés, un nul logique.'},{t:'Deux juges pour un, un pour l’autre : égalité.'},{t:'Deux combattants fatigués, aucun vainqueur.'}]};
 
 /** Un adversaire d'un ancien combat : nom tiré des listes réelles d'un pays, sous un hachage stable. SEED sauvegardé puis restauré. */
 function mgmtAncienAdversaire(f,k){
@@ -22,7 +22,7 @@ function mgmtAncienAdversaire(f,k){
   try{
     const r=mgmtIdentiteStream(String(f.id),'ancien-adv|'+k);
     const pays=COUNTRY_KEYS[Math.floor(r()*COUNTRY_KEYS.length)];
-    setSeed(duelFnv1a32('ancien-nom|'+String(f.id)+'|'+k));
+    setSeed(duelFnv1a32('ancien-nom|'+mgmtSel()+String(f.id)+'|'+k));
     const d=typeof divById==='function'?divById(f.div):null;
     const nm=makeName(d&&d.gender==='F'?'F':'H',pays);
     return {first:nm.first,last:nm.last,pays};
@@ -43,7 +43,7 @@ function mgmtAnciensCombats(m,f){
   for(let i=issues.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); const x=issues[i]; issues[i]=issues[j]; issues[j]=x; }
   const p=typeof mgmtCombatProfile==='function'?mgmtCombatProfile(f):null;
   const grap=p&&STYLES[p.style]?STYLES[p.style].grap:0.4;
-  const T=MGMT_ANCIENS_TEXTES, out=[];
+  const T=MGMT_ANCIENS_TEXTES, out=[], pris={};   /* retours du 09/10 : une phrase ne se répète pas dans le palmarès d'un même combattant (tant qu'il en reste) */
   for(let k=0;k<n;k++){
     const issue=issues[k], u=r(), a=r(), b=r(), c=r();
     let famille, cle, tag='';
@@ -58,8 +58,9 @@ function mgmtAnciensCombats(m,f){
     }
     const rounds=3, round=famille==='dec'||famille==='draw'?0:1+Math.floor(a*rounds);
     const methode=famille==='ko'?'KO':(famille==='sub'?'Soumission':(famille==='draw'?'Nul':(b<0.6?'Décision unanime':(b<0.9?'Décision partagée':'Décision majoritaire'))));
-    const adv=mgmtAncienAdversaire(f,k), liste=T[cle];
-    out.push({n:k+1,adv:adv.first+' '+adv.last,issue,famille,methode,round,rounds,age:Math.max(17,Math.floor((f.age||25)-k*0.45)),tag,phrase:liste[Math.floor(c*liste.length)].t});
+    const adv=mgmtAncienAdversaire(f,k), liste=T[cle], deja=pris[cle]||(pris[cle]=new Set());
+    let idx=Math.floor(c*liste.length); for(let g=0;g<liste.length&&deja.has(idx);g++) idx=(idx+1)%liste.length; deja.add(idx);
+    out.push({n:k+1,adv:adv.first+' '+adv.last,issue,famille,methode,round,rounds,age:Math.max(17,Math.floor((f.age||25)-k*0.45)),tag,phrase:liste[idx].t});
   }
   return out;
 }

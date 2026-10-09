@@ -66,7 +66,7 @@ const MGMT_VIE_ABSENCE={'naissance-enfant':1,'grossesse-annoncee':6,'deces-paren
 
 /** Flux 'vie' d'un combattant à un cycle : séparé, sans RNG de partie. */
 function mgmtVieStream(id,cycle,couche){
-  return mulberry32(duelFnv1a32('mgmt-vie|'+String(id)+'|'+cycle+'|'+(couche||'moment')));
+  return mulberry32(duelFnv1a32('mgmt-vie|'+mgmtSel()+String(id)+'|'+cycle+'|'+(couche||'moment')));
 }
 
 /** Le texte d'auteur qui raconte ce moment dans la presse, ou null (corrections du 08/10, 3.3). Le libellé du catalogue n'est pas un texte : sans `texte`

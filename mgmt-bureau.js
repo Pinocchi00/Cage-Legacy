@@ -176,18 +176,18 @@ function mgmtNewRoster(m){
     }
     if(!avant){ const c=mgmtNomEnConflit(m,nm,ck,id,div.id,bilan); if(c.genre==='fratrie') bilan.fratries++; else if(c.genre==='partage') bilan.partages++; if(c.prenom) bilan.prenoms++; }
     const age=avant?RI(22,35):clamp(RI(22,35)+profil.age,20,40);
-    const band=age<=26?RI(2,12):(age>=29?RI(15,30):RI(8,22));
+    const band=age<=26?RI(2,12):(age>=33&&m.niveaux===1?RI(18,36):(age>=29?RI(15,30):RI(8,22)));   /* retours du 09/10 : les vétérans de 33 ans et plus ont connu plus de combats */
     /* Brief du 06/10, lot 2 : une partie à niveaux tire d'abord le niveau du combattant (son potentiel, son pic),
        puis un bilan COHÉRENT avec lui — gonflé ou dégonflé par son organisation d'origine. Le tirage RI(40,80)
        d'avant reste consommé : la suite des tirages de la partie ne bouge pas. */
     const lvAvant=RI(40,80);
     const tir=m.niveaux===1?mgmtNiveauTire(id,age):null;
     if(tir) tir.niv=clamp(tir.niv+mgmtOrgDecalageNiveau(profil,div.id),MGMT_NIV_MIN,MGMT_NIV_MAX);
-    const rec=correlatedRecord(tir?mgmtNiveauPourBilan(id,tir.niv):lvAvant,clamp(band,age-18,(age-18)*4));
+    const rec=m.niveaux===1?mgmtBilanReel(mgmtNiveauPourBilan(id,tir.niv),clamp(band,age-18,(age-18)*4)):correlatedRecord(tir?mgmtNiveauPourBilan(id,tir.niv):lvAvant,clamp(band,age-18,(age-18)*4));
     m.roster.push({
       id,
       name:nm.name,first:nm.first,last:nm.last,ck,generation:MGMT_IDENTITE_GENERATION,
-      W:rec.W,L:rec.L,D:RI(0,2),
+      W:rec.W,L:rec.L,D:m.niveaux===1?mgmtNulsReels(rec.W+rec.L,RI(0,99)):RI(0,2),
       age,
       div:div.id,divName:div.name,
       org:m.org,

@@ -89,21 +89,39 @@ function mgmtMediasContexte(m,si,scene){
 /** Les lignes de presse d'une scène pour une situation : au plus `max`, de
  *  médias différents, dans un ordre tiré sur (cle, situation, cycle).
  *  @returns {Array<{media,nom,texte}>} */
-function mgmtMediasScene(m,situation,scene,cle,max){
-  const r=mgmtIdentiteStream(cle,'media|'+situation+'|'+m.cycle);
-  const candidates=MGMT_MEDIAS_LIGNES.filter(l=>l.situation===situation)
-    .map(l=>({l,k:r(),s:/^(voix:|pionniere|guerre)/.test(l.si||'')?0:1})).sort((x,y)=>x.s-y.s||x.k-y.k);
+function mgmtMediasScene(m,situation,scene,cle,max,role){
+  /* Retours d'Anthony du 09/10/2026 (« toujours différent ») : parmi les lignes que la scène permet (la condition tient, les emplacements se remplissent), on lit
+     les suivantes à chaque cycle, dans un ordre mélangé une fois pour la partie (flux 'presse') — la même ligne ne revient qu'après le tour des autres. Les lignes de
+     rencontre de voix, de pionnière et de guerre passent d'abord. `role` décale la scène secondaire d'un demi-tour. Rien ne se stocke. */
+  const pool=MGMT_MEDIAS_LIGNES.filter(l=>l.situation===situation);
+  const ordre=mgmtIdentiteMelange(pool.map((l,i)=>i),mgmtIdentiteStream('presse','ordre|'+situation)), rang=[]; ordre.forEach((i,p)=>{ rang[i]=p; });
+  const eligibles=[];
+  pool.forEach((l,i)=>{
+    const ctx=mgmtMediasContexte(m,l.si,scene); if(!ctx) return;
+    const plein=mgmtVoixRemplit(l.texte,ctx); if(plein===null) return;
+    eligibles.push({l,plein,rang:rang[i],s:/^(voix:|pionniere|guerre)/.test(l.si||'')?0:1});
+  });
+  eligibles.sort((x,y)=>x.s-y.s||x.rang-y.rang);
+  /* Dans chaque groupe, les lignes s'alternent d'un média à l'autre (un tour de chacun, puis un second tour…) : trois lignes de suite viennent de trois médias,
+     et le tour se lit de bout en bout avant de recommencer. */
+  const alterne=g=>{
+    const parMedia=new Map(); for(const x of g){ if(!parMedia.has(x.l.media)) parMedia.set(x.l.media,[]); parMedia.get(x.l.media).push(x); }
+    const listes=[...parMedia.values()], out=[];
+    for(let r=0;listes.some(l=>l.length>r);r++) for(const l of listes) if(l.length>r) out.push(l[r]);
+    return out;
+  };
+  const groupes=[alterne(eligibles.filter(x=>x.s===0)),alterne(eligibles.filter(x=>x.s===1))];
   const out=[], pris=new Set();
-  for(const {l} of candidates){
-    if(out.length>=max) break;
-    if(pris.has(l.media)) continue;
-    const ctx=mgmtMediasContexte(m,l.si,scene);
-    if(!ctx) continue;
-    const plein=mgmtVoixRemplit(l.texte,ctx);
-    if(plein===null) continue;
-    const media=mgmtMediaDe(l.media);
-    pris.add(l.media);
-    out.push({media:l.media,nom:media.nom,texte:media.majuscules?plein.toLocaleUpperCase('fr'):plein});
+  for(const g of groupes){
+    const n=g.length; if(!n) continue;
+    const debut=((m.cycle||0)*MGMT_MEDIAS_MAX+(role?Math.floor(n/2):0))%n;
+    for(let k=0;k<n&&out.length<max;k++){
+      const {l,plein}=g[(debut+k)%n];
+      if(pris.has(l.media)) continue;
+      const media=mgmtMediaDe(l.media);
+      pris.add(l.media);
+      out.push({media:l.media,nom:media.nom,texte:media.majuscules?plein.toLocaleUpperCase('fr'):plein});
+    }
   }
   return out;
 }
@@ -165,7 +183,7 @@ function mgmtMediasLendemain(m){
   }
   for(const {x} of marquants){
     const scene=mgmtMediasSceneDe(m,x.t);
-    if(scene) for(const l of mgmtMediasScene(m,'lendemain',scene,x.t.a.id+'|'+x.t.b.id,1)) lignes.push(Object.assign(l,{id:scene.a.id,div:scene.a.div}));
+    if(scene) for(const l of mgmtMediasScene(m,'lendemain',scene,x.t.a.id+'|'+x.t.b.id,1,1)) lignes.push(Object.assign(l,{id:scene.a.id,div:scene.a.div}));
   }
   return lignes;
 }

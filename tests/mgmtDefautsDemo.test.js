@@ -57,7 +57,7 @@ test('D5 — le nom de la bannière s’adapte à sa longueur et ne passe pas so
   const r=res(w,`const long={first:'Anne',last:'Phetcharatwongsakul',name:'Anne Phetcharatwongsakul'}, court={first:'Léa',last:'Dos',name:'Léa Dos'};
     const h=mgmtCarteBanniere(long,long,'x'); const tailles=[...h.matchAll(/<b style="font-size:(\\d+)px">/g)].map(x=>Number(x[1]));
     return {tailles,larg:tailles.map(t=>mfAvance(mfNet('Phetcharatwongsakul'))*t),court:[...mgmtCarteBanniere(court,court,'x').matchAll(/<b style="font-size:(\\d+)px">/g)].map(x=>Number(x[1]))};`);
-  assert.ok(r.tailles.every(t=>t<96)); assert.ok(r.larg.every((l,i)=>l<=262+1||r.tailles[i]===26)); assert.ok(r.court.every(t=>t===96));
+  assert.ok(r.tailles.every(t=>t<96)); /* retours d'Anthony du 09/10 : la diagonale laisse 300 px au premier nom et 320 au second, le corps ne descend pas sous 22 px */ assert.ok(r.larg.every((l,i)=>l<=(i===0?300:320)+1||r.tailles[i]===22)); assert.ok(r.court.every(t=>t===96));
 });
 
 test('D6 — une demande de combattant ouvre la fiche sur « On en dit », et la légende dit ce que fait Entrée', () => {

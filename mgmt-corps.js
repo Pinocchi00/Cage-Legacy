@@ -105,8 +105,10 @@ function mgmtTrauma(f,cycle){
 /** Retrouve un niveau makeFighter en inversant correlatedRecord()
  *  (ui-01-roster-matchmaking.js:465) à partir du ratio de victoires,
  *  borné à 40-80. Pur et déterministe. */
-function mgmtLevelForRecord(W,L){
+function mgmtLevelForRecord(W,L,reel){
   const t=(Number.isSafeInteger(W)&&Number.isSafeInteger(L)&&(W+L)>0)?W/(W+L):0.5;
+  /* Retours du 09/10/2026 : les parties neuves tirent leurs bilans sur la loi réelle (mgmtBilanReel) ; son inverse rend le niveau que le bilan dit, ce qui garde l'économie calibrée. */
+  if(reel) return clamp(Math.round(MGMT_NIV_MIN+(MGMT_NIV_MAX-MGMT_NIV_MIN)*Math.pow(clamp((t-0.48)/0.42,0,1),1/1.6)),MGMT_NIV_MIN,MGMT_NIV_MAX);
   return clamp(Math.round(20+clamp((t-0.45)/0.43,0,1)*77),40,80);
 }
 

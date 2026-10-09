@@ -77,7 +77,7 @@ function partie(orgId, seed) {
 const lignes = {};
 for (const id of orgIds) {
   const t0 = Date.now();
-  lignes[id] = partie(id, 20261008);
+  lignes[id] = partie(id, Number(opt('--graine')||20261008));   /* --graine : une autre partie, pour juger l'économie sur plusieurs tirages (retours du 09/10) */
   console.error(`${id} : ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 }
 if (json) { console.log(JSON.stringify(lignes, null, 1)); process.exit(0); }

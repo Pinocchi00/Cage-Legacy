@@ -85,5 +85,66 @@ const MGMT_MEDIAS_LIGNES=[
   /* Coin Rouge (a = le combattant français) */
   {media:'coin-rouge',situation:'affiche',si:'fr',texte:'{a} est enfin en tête d’affiche de {org} {n}. Il le méritait depuis longtemps.',relu:false},
   {media:'coin-rouge',situation:'lendemain',si:'fr',texte:'On a retrouvé {a} dans sa salle après {org} {n}. Il a apporté des croissants pour tout le monde. On est fans.',relu:false},
+  /* Retours d'Anthony du 09/10/2026 : deux fois plus de lignes de presse (relu:false). */
+  /* Cage Hebdo */
+  {media:'cage-hebdo',situation:'affiche',texte:'{org} {n} s’annonce chargée. Le combat principal : {a} contre {b}, en {cat}.',relu:false},
+  {media:'cage-hebdo',situation:'affiche',texte:'{a} et {b} ouvrent la saison de {org} {n}. La division attendait ce combat.',relu:false},
+  {media:'cage-hebdo',situation:'lendemain',texte:'{a} bat {b} à {org} {n}. Le classement de la division va bouger.',relu:false},
+  {media:'cage-hebdo',situation:'lendemain',si:'finition',texte:'{a} finit {b} au round {round}. Le public n’a rien à ajouter.',relu:false},
+  {media:'cage-hebdo',situation:'lendemain',si:'dec',texte:'Décision pour {a} contre {b}, après {round} rounds. Un combat plus serré que prévu.',relu:false},
+  {media:'cage-hebdo',situation:'lendemain',si:'serie',texte:'{a} gagne encore. Sa série devient un sujet pour toute la division.',relu:false},
+  /* Sources Proches */
+  {media:'sources-proches',situation:'affiche',texte:'Je confirme : {a} contre {b} en tête d’affiche de {org} {n}. Rien ne change.',relu:false},
+  {media:'sources-proches',situation:'affiche',texte:'Tout est calé pour {a} contre {b} à {org} {n}. Je vous dis la suite.',relu:false},
+  {media:'sources-proches',situation:'lendemain',texte:'Résultat confirmé : {a} bat {b} à {org} {n}. Les deux camps se parlent déjà.',relu:false},
+  {media:'sources-proches',situation:'lendemain',si:'surprise',texte:'On me dit que {a} n’était pas le favori de ses propres coachs. Il les a surpris.',relu:false},
+  /* Clé de Bras (tout en majuscules) */
+  {media:'cle-de-bras',situation:'affiche',texte:'{a} CONTRE {b} : CE QUE PERSONNE NE VOUS DIT SUR CE COMBAT',relu:false},
+  {media:'cle-de-bras',situation:'lendemain',si:'ko1',texte:'{a} EXPÉDIE {b} AU PREMIER ROUND : LA VIDÉO FAIT LE TOUR DU WEB',relu:false},
+  {media:'cle-de-bras',situation:'lendemain',si:'surprise',texte:'{b} ÉTAIT FAVORI ET PERD : CE QUI S’EST PASSÉ DANS SON COIN',relu:false},
+  {media:'cle-de-bras',situation:'lendemain',si:'serie',texte:'{a} : TROISIÈME VICTOIRE DE SUITE, ET ÇA NE FAIT QUE COMMENCER',relu:false},
+  {media:'cle-de-bras',situation:'lendemain',si:'dec',texte:'{a} GAGNE, MAIS PERSONNE N’EST CONTENT : VOICI POURQUOI',relu:false},
+  /* La Pesée */
+  {media:'la-pesee',situation:'rebook',texte:'Cinq semaines entre le KO de {a} et son nouveau combat. {org} confirme la date.',relu:false},
+  {media:'la-pesee',situation:'rebook',texte:'Un KO, cinq semaines, puis la cage : {a} revient. Personne ne dit qui l’a voulu.',relu:false},
+  {media:'la-pesee',situation:'affiche',texte:'{a} contre {b} : qui a choisi ce combat, et pourquoi maintenant ?',relu:false},
+  {media:'la-pesee',situation:'lendemain',texte:'{b} perd contre {a}. Son camp avait-il bien préparé ce combat ?',relu:false},
+  /* Tableau Noir */
+  {media:'tableau-noir',situation:'affiche',texte:'Ce qu’il faut regarder dans {a} contre {b} : les trois premiers rounds.',relu:false},
+  {media:'tableau-noir',situation:'lendemain',si:'finition',texte:'{a} a gagné en trois temps : distance, clinch, fin au round {round}.',relu:false},
+  {media:'tableau-noir',situation:'lendemain',si:'dec',texte:'{a} a pris les rounds courts, {b} les longs échanges. Les juges ont suivi {a}.',relu:false},
+  {media:'tableau-noir',situation:'lendemain',texte:'{a} a gagné parce qu’il a fait un seul choix, et qu’il l’a tenu.',relu:false},
+  /* Micro Tendu (question, réponse) */
+  {media:'micro-tendu',situation:'affiche',texte:'Q. {a}, {b} en face samedi : vous en pensez quoi ? — R. Je pense à ma pesée.',relu:false},
+  {media:'micro-tendu',situation:'lendemain',texte:'Q. {a}, qu’avez-vous dit à {b} après le combat ? — R. Merci. Rien d’autre.',relu:false},
+  {media:'micro-tendu',situation:'lendemain',texte:'Q. {a}, un mot sur ce soir ? — R. Je suis content. Je vais dormir.',relu:false},
+  {media:'micro-tendu',situation:'lendemain',si:'dec',texte:'Q. {a}, les juges, vous les avez compris ? — R. Moi, j’ai fait mon travail.',relu:false},
+  /* Le Plateau */
+  {media:'le-plateau',situation:'affiche',texte:'Soirée {org} {n} : {a} contre {b}. Le public sera là, et vous aussi.',relu:false},
+  {media:'le-plateau',situation:'lendemain',texte:'Quel moment : {a} bat {b} à {org} {n}. On n’oubliera pas ce soir.',relu:false},
+  {media:'le-plateau',situation:'lendemain',si:'ko1',texte:'En un seul round ! {a} bat {b} à {org} {n}. Incroyable.',relu:false},
+  /* Le Forum */
+  {media:'le-forum',situation:'affiche',texte:'{a} contre {b} : j’y serai, je prends mon billet',relu:false},
+  {media:'le-forum',situation:'lendemain',texte:'{a} a gagné, {b} a perdu, fin du sujet',relu:false},
+  {media:'le-forum',situation:'lendemain',si:'ko1',texte:'{b} n’a même pas eu le temps de s’échauffer, merci {a}',relu:false},
+  {media:'le-forum',situation:'lendemain',si:'dec',texte:'les juges ont encore fait n’importe quoi, {a} n’a pas gagné ça',relu:false},
+  /* La presse du pays (a = le combattant de ce pays) */
+  {media:'presse-du-pays',situation:'affiche',si:'etranger',texte:'(Presse nationale — {pays}, traduit) Notre {a} se bat à {org} {n}. Tout le pays veillera pour lui.',relu:false},
+  {media:'presse-du-pays',situation:'lendemain',si:'etranger',texte:'(Presse nationale — {pays}, traduit) Notre {a} a battu {b}. Le pays entier a veillé pour ça.',relu:false},
+  {media:'presse-du-pays',situation:'lendemain',si:'etrangerPerd',texte:'(Presse nationale — {pays}, traduit) Notre {a} a perdu. Nous l’attendons de nouveau, la tête haute.',relu:false},
+  /* Coin Rouge (a = le combattant français) */
+  {media:'coin-rouge',situation:'affiche',texte:'{a} contre {b} à {org} {n}, ça va bouger. Venez dans la salle.',relu:false},
+  {media:'coin-rouge',situation:'affiche',si:'fr',texte:'{a} combat à {org} {n}, tous ses potes de la salle seront là.',relu:false},
+  {media:'coin-rouge',situation:'lendemain',si:'fr',texte:'{a} a gagné devant ses potes de la salle. Gros respect.',relu:false},
+  /* Quand deux voix se rencontrent */
+  {media:'tableau-noir',situation:'affiche',si:'voix:le-prof+le-geek',texte:'{a} a étudié {b} pendant huit semaines. {b} a surtout joué à des jeux vidéo.',relu:false},
+  {media:'cage-hebdo',situation:'affiche',si:'voix:le-mystique+le-gros-rieur',texte:'{a} médite avant le combat. {b} plaisante dans le couloir. Même soirée.',relu:false},
+  {media:'le-forum',situation:'affiche',si:'voix:la-mere+le-fetard',texte:'{a} se couche à 21 h, {b} à l’aube. Ils se battent samedi.',relu:false},
+  {media:'coin-rouge',situation:'affiche',si:'voix:le-soldat+le-bavard-de-la-cage',texte:'{a} ne dit rien, {b} dit tout. Qui gagnera la bataille des mots ?',relu:false},
+  {media:'cage-hebdo',situation:'affiche',si:'voix:lexile+lenfant-du-pays',texte:'{a} se bat loin de son pays. {b} combat devant le sien. La salle choisira.',relu:false},
+  {media:'la-pesee',situation:'affiche',si:'voix:le-coeur-ouvert+le-sans-filtre',texte:'{a} dit ce qu’il ressent, {b} dit ce qu’il pense. Les deux sont sur la même affiche.',relu:false},
+  {media:'cage-hebdo',situation:'affiche',si:'voix:le-plan-de-carriere+le-fataliste',texte:'{a} a un plan sur dix ans. {b} n’en a pas. Samedi, l’un des deux a raison.',relu:false},
+  {media:'le-plateau',situation:'affiche',si:'voix:linfluenceur+le-contemplatif',texte:'{a} filme tout, {b} regarde le ciel. Deux façons de préparer le même combat.',relu:false},
+  {media:'le-forum',situation:'affiche',si:'voix:le-superstitieux+le-geek',texte:'{a} évite les chats noirs, {b} évite les bugs. Samedi, l’un des deux sera déçu.',relu:false},
 ];
 /* ==== [FIN ANCRE] ==== */

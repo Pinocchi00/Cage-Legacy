@@ -187,10 +187,11 @@ function mgmtReplique(m,f,situation,variante){
   const essayer=voixId=>{
     const liste=mgmtVoixRepliquesDe(voixId,situation,variante);
     if(!liste.length) return null;
-    const r=mgmtIdentiteStream(f.id,'parole|'+situation+'|'+m.cycle);
-    const debut=Math.floor(r()*liste.length);
+    /* Retours d'Anthony du 09/10/2026 (« toujours différent ») : chaque combattant a SON ordre de répliques par situation, et en lit une de plus à chaque cycle — il ne redit la même qu'après les avoir toutes dites. Dérivé de l'identifiant et du cycle, rien ne se stocke. */
+    const ordre=mgmtIdentiteMelange(liste.map((x,i)=>i),mgmtIdentiteStream(f.id,'ordre|'+situation+'|'+(variante||'')));
+    const debut=((m.cycle||0)%liste.length+liste.length)%liste.length;
     for(let k=0;k<liste.length;k++){
-      const rep=liste[(debut+k)%liste.length];
+      const rep=liste[ordre[(debut+k)%liste.length]];
       const plein=mgmtVoixRemplit(mgmtVoixAccorde(rep.texte,genre),ctx);
       if(plein!==null) return plein;
     }

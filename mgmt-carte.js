@@ -278,15 +278,17 @@ function mgmtSwapFight(m,affairId){
 }
 /** Demande d'Anthony du 08/10/2026 (planche « Préliminaires », « Autres choix ») : le joueur remplace lui-même le second combattant d'un préliminaire que Leïla propose, par un
  *  autre de la même catégorie, libre et pas déjà dans la proposition. Aucun écrasement, aucune trace. @returns {boolean} */
-function mgmtBulkRemplacer(m,affairId,idx,newId){
+function mgmtBulkRemplacer(m,affairId,idx,newId,cote){
   if(!m||!Array.isArray(m.pile)) return false;
   const aff=m.pile.find(a=>a.id===affairId);
   if(!aff||aff.status!=='open'||aff.kind!=='leila_bulk'||!Array.isArray(aff.fights)||!Number.isSafeInteger(idx)||idx<0||idx>=aff.fights.length) return false;
-  const fi=aff.fights[idx], nf=mgmtFighterById(m,newId), A=mgmtFighterById(m,fi.a);
-  if(!nf||!A||nf.div!==A.div||newId===fi.a||newId===fi.b) return false;
-  if(!mgmtSelectable(m,nf,fi.a)) return false;
+  /* Retours d'Anthony du 09/10/2026 : on peut aussi remplacer le premier combattant du préliminaire (cote 'a'), pas seulement le second. */
+  const premier=cote==='a', fi=aff.fights[idx], nf=mgmtFighterById(m,newId), reste=mgmtFighterById(m,premier?fi.b:fi.a);
+  if(!nf||!reste||nf.div!==reste.div||newId===fi.a||newId===fi.b) return false;
+  if(!mgmtSelectable(m,nf,reste.id)) return false;
   if(aff.fights.some((x,i)=>i!==idx&&(x.a===newId||x.b===newId))) return false;
-  fi.b=newId; fi.sloppy=false; fi.warned=false;
+  if(premier) fi.a=newId; else fi.b=newId;
+  fi.sloppy=false; fi.warned=false;
   if(idx===0){ aff.a=fi.a; aff.b=fi.b; }
   return true;
 }

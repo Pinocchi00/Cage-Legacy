@@ -53,6 +53,6 @@ test('8 — L’écran des contrats propose « Libérer » avec son prix, et L f
   win.eval(`CL.go('mgmt_contrats')`);
   const t=win.eval(`document.getElementById('app').textContent`);
   assert.match(t,/Libérer/);
-  const r=res(win,`const m=G.mgmt, x=mgmtContratsLignes(m)[MGMT_CONTRATS.curseur]; const id=x.id; CL.mgmtContratsLiberer(); return {libre:mgmtFighterById(m,id).libre===true};`);
+  const r=res(win,`const m=G.mgmt; /* retours du 09/10 : les palmarès réels rendent les têtes de liste plus chères ; on libère le premier combattant que la caisse de départ permet de payer */ const k=mgmtContratsLignes(m).findIndex(y=>y.propre&&y.f.ct&&!mgmtEngaged(m,y.f)&&mgmtCanAfford(m,mgmtContratIndemnite(y.f))); MGMT_CONTRATS.curseur=k; const x=mgmtContratsLignes(m)[k]; const id=x.id; CL.mgmtContratsLiberer(); return {libre:mgmtFighterById(m,id).libre===true};`);
   assert.equal(r.libre,true);
 });

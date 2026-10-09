@@ -7,7 +7,7 @@
    sont celles qui existent : valider la carte, changer le combat choisi (échange), la refaire (écrasement).
    Aucune règle ne change, aucun format de sauvegarde non plus. ==== */
 
-let MGMT_PRELIMS={i:0};
+let MGMT_PRELIMS={i:0,cote:'b'};
 
 /** Les emplacements des préliminaires, dans l'ordre : validés, puis à valider, puis à trouver. Pur. */
 function mgmtPrelimsEmplacements(m){
@@ -36,6 +36,9 @@ function mgmtPrelimsLigne(m,s,i,choisi){
     +`<div class="mf-car-slot-s">${etat}</div></button>`;
 }
 
+/** Une phrase de Leïla qui tourne : la première au premier cycle, puis la suivante à chaque soirée — jamais deux soirées de suite la même. Dérivé du cycle, rien ne se stocke. */
+function mgmtLeilaTour(m,liste){ return liste[((m&&m.cycle||0)%liste.length+liste.length)%liste.length]; }
+
 /** Les raisons de Leïla pour la paire (planche « Pourquoi elle le propose ») : l'attente de l'un, la défaite de l'autre ; à défaut, ce qu'ils ont en commun. Dérivé. */
 function mgmtPrelimsRaisons(m,fa,fb){
   const out=[];
@@ -49,8 +52,8 @@ function mgmtPrelimsRaisons(m,fa,fb){
   return out.slice(0,2);
 }
 /** Les autres choix pour le préliminaire proposé : la catégorie, libres et hors de la proposition, dans l'ordre du classement. */
-function mgmtPrelimsAlternatives(m,fight,bloc){
-  const fa=fight&&mgmtFighterById(m,fight.a); if(!fa||!bloc) return [];
+function mgmtPrelimsAlternatives(m,fight,bloc,cote){
+  const fa=fight&&mgmtFighterById(m,cote==='a'?fight.b:fight.a); if(!fa||!bloc) return [];
   const pris=new Set(); (bloc.fights||[]).forEach(x=>{ pris.add(x.a); pris.add(x.b); });
   return mgmtCartRows(m).filter(f=>f.div===fa.div&&!pris.has(f.id)&&mgmtSelectable(m,f,fa.id));
 }
@@ -82,19 +85,20 @@ function scr_mgmt_prelims(){
     +(bloc?mfBouton('Refaire',{touche:'R',onclick:'CL.mgmtPrelimsRefaire()'}):'')
     +(duo?mfBouton('Fiches',{touche:'F',onclick:'CL.mgmtPrelimsFiche()'}):'')
     +(monte?mfBouton('Faire monter',{touche:'M',onclick:'CL.mgmtPrelimsMonter()'}):'')+`</div>`;
-  const banniere=mgmtCarteBanniere(fa,fb,fa?fa.div:(allDivisions()[0]||{}).id);
+  const banniere=mgmtCarteBanniere(fa,fb,fa?fa.div:(allDivisions()[0]||{}).id,duo?3:'','');
   const centre=`<div class="mf-car-c">${banniere}${mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${pourquoi}${boutons}`,'normal','mf-car-cmp')}</div>`;
 
   const sM=Number.isSafeInteger(m.card.sizeMain)?m.card.sizeMain:MGMT_MAIN_SIZE, nM=m.card.main.length, manque=Math.max(0,sM-nM);
-  const ex=MGMT_EXCHANGES.leila_bulk, parole=bloc&&ex&&ex.lines&&ex.lines[0]?mfVoix('Leïla',ex.lines[0]):'';
-  const alerte=bloc&&(bloc.fights||[]).some(x=>x.warned)&&ex&&typeof ex.warning==='string'?mfVoix('Leïla',ex.warning):'';
-  const alts=bloc&&s.etat==='avalider'?mgmtPrelimsAlternatives(m,f,bloc):null;
+  const ex=MGMT_EXCHANGES.leila_bulk, parole=bloc&&ex&&ex.lines&&ex.lines[0]?mfVoix('Leïla',mgmtLeilaTour(m,[ex.lines[0]].concat(ex.variantes||[]))):'';
+  const alerte=bloc&&(bloc.fights||[]).some(x=>x.warned)&&ex&&typeof ex.warning==='string'?mfVoix('Leïla',mgmtLeilaTour(m,ex.avertissements&&ex.avertissements.length?ex.avertissements:[ex.warning])):'';
+  const cote=P.cote==='a'?'a':'b', alts=bloc&&s.etat==='avalider'?mgmtPrelimsAlternatives(m,f,bloc,cote):null;
   const homo=alts?mgmtCarteHomonymes(alts):null;
-  const lignesAlt=alts?alts.slice(0,6).map((x,k)=>mgmtCarteAdvLigne(m,x,k,false,homo).replace(/onclick="CL\.mgmtCarteVise\('([^']*)'\)"/,"onclick=\"CL.mgmtPrelimsRemplace('$1')\"")).join(''):'';
+  const lignesAlt=alts?alts.slice(0,5).map((x,k)=>mgmtCarteAdvLigne(m,x,k,false,homo).replace(/onclick="CL\.mgmtCarteVise\('([^']*)'\)"/,"onclick=\"CL.mgmtPrelimsRemplace('$1')\"")).join(''):'';
   const autres=alts?mfPanneau(`<div class="mf-car-t">AUTRES CHOIX</div>`
+    +(duo?`<div class="mf-pre-cotes"><button type="button" class="mf-pre-cote${cote==='a'?' on':''}" onclick="CL.mgmtPrelimsCote('a')">${esc(mfNet(fa.last||fa.name))}</button><button type="button" class="mf-pre-cote${cote==='b'?' on':''}" onclick="CL.mgmtPrelimsCote('b')">${esc(mfNet(fb.last||fb.name))}</button></div>`:'')
     +`<div class="mf-car-tri"><span>${alts.length} libres</span><span>Tri : classement</span></div>`
     +`<div class="mf-car-advs">${lignesAlt||'<div class="mf-eff-aucun">Personne d’autre de libre.</div>'}</div>`
-    +`<div class="mf-pre-aide">Choisis un nom pour remplacer le second combattant.</div>`
+    +`<div class="mf-pre-aide">Choisis un nom pour remplacer ${esc(mfNet((cote==='a'?fa:fb)?((cote==='a'?fa:fb).last||(cote==='a'?fa:fb).name):''))}.</div>`
     +mfBouton('Voir les '+mgmtCartRows(m).filter(x=>x.div===(fa?fa.div:'')).length+' combattants',{onclick:"CL.go('mgmt_effectif')",classe:'mf-car-cat'}),'normal','mf-car-d'):null;
   const petit=`<div class="mf-pre-pc"><div class="mf-pre-pc-t"><span>CARTE PRINCIPALE</span><b>${nM} / ${sM}</b></div><div class="mf-pre-pc-b">${manque?`<span><i class="mf-pastille-j"></i>Manque : ${manque} combat${manque>1?'s':''}</span>`:'<span>Complète</span>'}<button type="button" onclick="CL.go('mgmt_carte')">Ouvrir</button></div></div>`;
   const droite=autres||mfPanneau(`<div class="mf-car-t" style="font-size:22px;letter-spacing:.04em;color:var(--mf-texte2)">CARTE PRINCIPALE</div>`
@@ -107,7 +111,7 @@ function scr_mgmt_prelims(){
   return mfEcran(contenu,{barre:'jeu',courant:'preliminaires',m,plaque:'Préliminaires',libelle:`${slots.filter(x=>x.etat==='valide').length} / ${slots.length}`,tuiles:[slots.filter(x=>x.etat==='valide').length,slots.length],
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['↑','↓'],t:'Choisir'},{ks:['A','E'],t:'Section'},
-      {ks:['C'],t:'Changer',onclick:'CL.mgmtPrelimsChanger()'},{ks:['R'],t:'Refaire',onclick:'CL.mgmtPrelimsRefaire()'},{ks:['F'],t:'Fiches',onclick:'CL.mgmtPrelimsFiche()'},{ks:['M'],t:'Faire monter',onclick:'CL.mgmtPrelimsMonter()'},
+      {ks:['C'],t:'Changer',onclick:'CL.mgmtPrelimsChanger()'},{ks:['R'],t:'Refaire',onclick:'CL.mgmtPrelimsRefaire()'},{ks:['F'],t:'Fiches',onclick:'CL.mgmtPrelimsFiche()'},{ks:['M'],t:'Faire monter',onclick:'CL.mgmtPrelimsMonter()'},{ks:['Tab'],t:'Qui remplacer',onclick:"CL.mgmtPrelimsCote(MGMT_PRELIMS.cote==='a'?'b':'a')"},
       {ks:['Entrée'],t:'Valider la carte',jaune:true,onclick:'CL.mgmtPrelimsValider()'}]});
 }
 SCREENS.mgmt_prelims=scr_mgmt_prelims;
@@ -119,6 +123,8 @@ function mgmtPrelimsReponse(action){
 }
 Object.assign(CL,{
   mgmtPrelimsVa(i){ if(Number.isSafeInteger(i)&&i>=0){ MGMT_PRELIMS.i=i; render(); } },
+  /** Quel combattant du préliminaire proposé on remplace : le premier ou le second. */
+  mgmtPrelimsCote(c){ MGMT_PRELIMS.cote=c==='a'?'a':'b'; render(); },
   mgmtPrelimsBouge(d){ const n=mgmtPrelimsEmplacements(G.mgmt).slots.length; MGMT_PRELIMS.i=((MGMT_PRELIMS.i||0)+d+n)%n; render(); },
   mgmtPrelimsValider(){ const r=mgmtPrelimsReponse('validate'); if(r) CL.mgmtReply(r.id,r.rep); },
   /** Marque le combat choisi (s'il est « à valider ») puis l'échange. */
@@ -132,7 +138,7 @@ Object.assign(CL,{
   mgmtPrelimsRemplace(id){
     const {slots,bloc}=mgmtPrelimsEmplacements(G.mgmt), s=slots[MGMT_PRELIMS.i||0];
     if(!bloc||!s||s.etat!=='avalider') return;
-    if(mgmtBulkRemplacer(G.mgmt,bloc.id,s.idxBloc,id)){ saveMgmt(); render(); }
+    if(mgmtBulkRemplacer(G.mgmt,bloc.id,s.idxBloc,id,MGMT_PRELIMS.cote)){ saveMgmt(); render(); }
   },
   /** Faire monter le préliminaire proposé sur la carte principale, s'il y reste une place. */
   mgmtPrelimsMonter(){
@@ -167,6 +173,7 @@ keysRegister('mgmt_prelims',{
   F(){ CL.mgmtPrelimsFiche(); },
   m(){ CL.mgmtPrelimsMonter(); },
   M(){ CL.mgmtPrelimsMonter(); },
+  Tab(){ CL.mgmtPrelimsCote(MGMT_PRELIMS.cote==='a'?'b':'a'); },
   Escape(){ CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

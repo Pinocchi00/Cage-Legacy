@@ -80,10 +80,13 @@ function mgmtSoBanniereHtml(av){
 }
 function soLigne(g,lib,d){ return `<div class="mf-so-r"><div class="mf-so-rg">${g}</div><div class="mf-so-rl">${esc(lib)}</div><div class="mf-so-rd">${d}</div></div>`; }
 /** Le centre de l'entre-deux : la bannière, les lignes de comparaison (rang, bilan, allonge, style, forme), les enjeux, les actes. */
-function mgmtSoCentreHtml(m,av,libre){
+function mgmtSoCentreHtml(m,av,libre,joue,k){
   const a=av.a, b=av.b;
   const enjeux=av.enjeux.length?`<div class="mf-so-enj"><div class="mf-so-s">ENJEUX</div><div class="mf-so-chips">${av.enjeux.map(x=>`<span class="mf-puce">${esc(x)}</span>`).join('')}</div></div>`:'';
-  const actes=libre
+  /* Retours d'Anthony du 09/10/2026 : un combat déjà passé se revoit pendant la soirée. */
+  const actes=joue
+    ?`<div class="mf-so-actes">${mfBouton('Revoir le combat',{touche:'Entrée',jaune:true,onclick:`CL.mgmtSoRevoir(${k})`})}${mfBouton('Revenir au prochain combat',{touche:'Échap',onclick:'CL.mgmtSoAutre(0)'})}</div>`
+    :libre
     ?`<div class="mf-so-actes">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoRegarder()'})}${mfBouton('Passer',{touche:'P',onclick:'CL.mgmtSoPasser()'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`
     :`<div class="mf-so-actes">${mfBouton('Revenir au prochain combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoAutre(0)'})}${mfBouton('Avant-combat',{touche:'F',onclick:'CL.mgmtSoAvant()'})}</div>`;
   return mgmtSoBanniereHtml(av)
@@ -143,7 +146,7 @@ function mgmtSoEntreHtml(m,prog,index,focus){
     :`<div class="mf-so-ph"><div class="mf-so-s">CE SOIR · ${esc(prog.length)} COMBATS</div><div class="mf-so-h">OUVERTURE</div></div>`
       +`<div class="mf-so-pc"><div class="mf-so-qui">${esc(mfNet(mgmtOrgNom(m)))}<br>FIGHT NIGHT ${esc(m.eventsPlayed||1)}</div><div class="mf-so-meth"><div class="mf-so-s">LE LIEU</div><div class="mf-so-m">${esc(mgmtSoireeSalle(m,0).nom)}</div></div><div class="mf-so-fl"></div></div>`;
   const haut=`<div class="mf-so-haut">${mfPanneau(gauche,'cote','mf-so-g')}`
-    +mfPanneau(av?mgmtSoCentreHtml(m,av,focus===index):'','choisi','mf-so-c')
+    +mfPanneau(av?mgmtSoCentreHtml(m,av,focus===index,focus<index,focus):'','choisi','mf-so-c')
     +mfPanneau(mgmtSoApresHtml(prog,focus),'cote','mf-so-d')+`</div>`;
   return haut+mgmtSoBandeHtml(prog,index,focus);
 }
@@ -215,7 +218,7 @@ function scr_mgmt_soiree_cadre(){
   const m=G.mgmt, prog=mgmtSoireeProgramme(m), n=prog.length, index=MGMT_SOIREE.index;
   if(!n||prog.some(p=>!p.trace)) return mgmtSoireeFallback();
   const moment=(index<=0&&!mgmtSoCommence())?'ouverture':mgmtSoireeMoment(m,Math.max(1,index));
-  const focus=MGMT_SOIREE_UI.focus===null?Math.min(index,n-1):Math.max(index,Math.min(n-1,MGMT_SOIREE_UI.focus));
+  const focus=MGMT_SOIREE_UI.focus===null?Math.min(index,n-1):Math.max(0,Math.min(n-1,MGMT_SOIREE_UI.focus));
   let corps, touches, grise=true, courant=null;
   if(moment==='ouverture'){
     corps=mgmtSoOuvertureHtml(m,prog);
@@ -225,8 +228,8 @@ function scr_mgmt_soiree_cadre(){
     touches=[{ks:['←'],t:'Dernier combat',onclick:'CL.mgmtSoRevoirDernier()'},{ks:['A','E'],t:'Section'},{ks:['Entrée'],t:'Voir les résultats',jaune:true,onclick:'CL.mgmtSoFin()'}];
   }else{
     corps=mgmtSoEntreHtml(m,prog,index,focus);
-    touches=[{ks:['←','→'],t:'Autre combat'},{ks:['F'],t:'L’avant-combat',onclick:'CL.mgmtSoAvant()'},{ks:['P'],t:'Passer le combat',onclick:'CL.mgmtSoPasser()'},
-      {ks:['Entrée'],t:focus===index?'Regarder le combat':'Revenir au prochain combat',jaune:true,onclick:focus===index?'CL.mgmtSoRegarder()':'CL.mgmtSoAutre(0)'}];
+    touches=[{ks:['←','→'],t:'Autre combat'},...(focus<index?[{ks:['Échap'],t:'Prochain combat',onclick:'CL.mgmtSoAutre(0)'}]:[{ks:['F'],t:'L’avant-combat',onclick:'CL.mgmtSoAvant()'},{ks:['P'],t:'Passer le combat',onclick:'CL.mgmtSoPasser()'}]),
+      {ks:['Entrée'],t:focus===index?'Regarder le combat':(focus<index?'Revoir le combat':'Revenir au prochain combat'),jaune:true,onclick:focus===index?'CL.mgmtSoRegarder()':(focus<index?`CL.mgmtSoRevoir(${focus})`:'CL.mgmtSoAutre(0)')}];
   }
   return mfEcran(mgmtSoEntete(m,prog,index)+`<main class="mf-contenu mf-so">${corps}</main>`,{barre:'jeu',courant,grise,m,touches});
 }
@@ -271,15 +274,23 @@ Object.assign(CL,{
     if(i>=n) return;
     if(d===0){ MGMT_SOIREE_UI.focus=null; render(); return; }
     const cur=MGMT_SOIREE_UI.focus===null?i:MGMT_SOIREE_UI.focus;
-    MGMT_SOIREE_UI.focus=Math.max(i,Math.min(n-1,cur+(d<0?-1:1)));
+    MGMT_SOIREE_UI.focus=Math.max(0,Math.min(n-1,cur+(d<0?-1:1)));
     if(MGMT_SOIREE_UI.focus===i) MGMT_SOIREE_UI.focus=null;
     render();
   },
   mgmtSoFocus(k){
     if(!mgmtSoAgenda()) return;
     const n=G.mgmt.lastEvent.fights.length;
-    if(MGMT_SOIREE.index>=n||k<MGMT_SOIREE.index) return;
+    if(MGMT_SOIREE.index>=n){ CL.mgmtSoRevoir(k); return; }   /* la soirée finie : une pastille rouvre le combat */
+    if(!Number.isSafeInteger(k)||k<0||k>=n) return;
     MGMT_SOIREE_UI.focus=k===MGMT_SOIREE.index?null:k; render();
+  },
+  /** Revoir un combat déjà passé de la soirée : l'arène, sans rien changer au déroulé. */
+  mgmtSoRevoir(k){
+    if(!mgmtSoAgenda()) return;
+    const m=G.mgmt, p=mgmtSoireeProgramme(m)[k];
+    if(!p||!p.trace) return;
+    mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:p.slot==='main'&&k===mgmtSoireeProgramme(m).length-1?'le combat principal':'ce combat',salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:null});
   },
   /** Le dernier combat de la soirée, revu depuis l'écran de fin. */
   mgmtSoRevoirDernier(){
@@ -324,10 +335,12 @@ function mgmtSoTouche(nom){
     if(nom==='Enter'){
       if(ouverture) CL.mgmtSoCommencer();
       else if(i>=n) CL.mgmtSoFin();
+      else if(MGMT_SOIREE_UI.focus!==null&&MGMT_SOIREE_UI.focus<i) CL.mgmtSoRevoir(MGMT_SOIREE_UI.focus);
       else if(MGMT_SOIREE_UI.focus!==null) CL.mgmtSoAutre(0);
       else CL.mgmtSoRegarder();
-    }else if(nom==='p'&&!ouverture&&i<n) CL.mgmtSoPasser();
-    else if(nom==='f'&&!ouverture&&i<n) CL.mgmtSoAvant();
+    }else if(nom==='Escape'){ if(MGMT_SOIREE_UI.focus!==null&&i<n) CL.mgmtSoAutre(0); }
+    else if(nom==='p'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoPasser();
+    else if(nom==='f'&&!ouverture&&i<n&&(MGMT_SOIREE_UI.focus===null||MGMT_SOIREE_UI.focus>=i)) CL.mgmtSoAvant();
     else if(nom==='ArrowLeft'){ if(i>=n) CL.mgmtSoRevoirDernier(); else if(!ouverture) CL.mgmtSoAutre(-1); }
     else if(nom==='ArrowRight'&&!ouverture&&i<n) CL.mgmtSoAutre(1);
   };
@@ -339,7 +352,7 @@ keysRegister('mgmt_soiree',{
   Enter:mgmtSoTouche('Enter'),
   p:mgmtSoTouche('p'), P:mgmtSoTouche('p'),
   f:mgmtSoTouche('f'), F:mgmtSoTouche('f'),
-  ArrowLeft:mgmtSoTouche('ArrowLeft'), ArrowRight:mgmtSoTouche('ArrowRight'),
+  ArrowLeft:mgmtSoTouche('ArrowLeft'), ArrowRight:mgmtSoTouche('ArrowRight'), Escape:mgmtSoTouche('Escape'),
 });
 keysRegister('mgmt_soiree_avant',{
   Enter(){ CL.mgmtSoAvantRegarder(); },
