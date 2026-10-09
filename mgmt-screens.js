@@ -351,6 +351,7 @@ Object.assign(CL,{
   /* Brief lot 1 : mgmtEnter(n) ouvre l'emplacement n ; sans argument, l'emplacement 1. */
   mgmtEnter(n,orgId){
     if(!G) G={theme:'dark'};
+    let neuve=false;
     mgmtSlotOuvrir(n===undefined?1:n);
     /* Confinement (lot 1e-1) : le traitement du bureau vit sur #app.mgmt ET
        body.mgmt, retirés ensemble au départ. Hors bureau, le fond d'origine
@@ -365,7 +366,7 @@ Object.assign(CL,{
     if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
       G.mgmt=mgmtDefault(orgId);
-      if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); }
+      if(!loadMgmt()){ mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
       else mgmtAgendaPreparer(G.mgmt);
     }else{
       mgmtRepair(G.mgmt);
@@ -373,6 +374,8 @@ Object.assign(CL,{
     if(mgmtAgendaSuivante(G.mgmt)) saveMgmt();
     /* Lot 1 du brief démo : une soirée interrompue se rouvre là où elle a été laissée. */
     if(mgmtSoireeEnCours(G.mgmt)){ mgmtSoireeReprendre(G.mgmt); CL.go('mgmt_soiree'); return; }
+    /* Lot 8 T1 du brief démo : une partie neuve s'ouvre sur l'arrivée ; une partie reprise ne la revoit pas. */
+    if(neuve&&typeof scr_mgmt_arrivee==='function'){ CL.go('mgmt_arrivee'); return; }
     CL.go('mgmt_carte');
   },
   mgmtLeave(){

@@ -271,7 +271,7 @@ function mfEcran(contenu,opts={}){
     :mfBarreHtml({mode:o.barre,courant:o.courant,grise:o.grise,m:o.m}));
   return `<div class="mf-ecran${mfEntreeClasse()}"><div class="mf-stage"><div class="mf-fond"></div>`
     +(o.couleur?`<div class="mf-teinte" style="--mf-couleur:${esc(o.couleur)}"></div>`:'')
-    +entete+contenu+barre+(o.touches?mfTouchesHtml(o.touches):'')+`</div></div>`;
+    +entete+contenu+barre+(o.touches?mfTouchesHtml(o.touches):'')+(o.barre==='jeu'&&typeof mfPriseHtml==='function'?mfPriseHtml(o.m,G&&G.screen,o.grise):'')+`</div></div>`;
 }
 
 /** Un écran ancien, dans son habillage actuel, posé dans le cadre sous la barre des sections. */

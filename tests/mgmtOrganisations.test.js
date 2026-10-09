@@ -58,7 +58,8 @@ test('Organisations — au clavier : la grille se parcourt, Entrée crée la par
   win.eval(`MGMT_NOUVELLE.i=1;`); touche(win,'Enter');
   const r=result(win,`return {ecran:G.screen,slot:MGMT_SLOT,org:G.mgmt.org,disque:mgmtSlotPeek(2).org,un:mgmtSlotPeek(1),caisse:G.mgmt.treasury,
     lignes:G.mgmt.roster.every(o=>o.org==='Garden of Blood'),valide:validateMgmt(JSON.parse(JSON.stringify(G.mgmt)))};`);
-  assert.equal(r.ecran,'mgmt_carte'); assert.equal(r.slot,2); assert.equal(r.org,'Garden of Blood'); assert.equal(r.disque,'Garden of Blood');
+  assert.equal(r.ecran,'mgmt_arrivee'); assert.equal(r.slot,2);   /* brief démo, lot 8 T1 : une partie neuve s'ouvre sur l'arrivée */
+   assert.equal(r.org,'Garden of Blood'); assert.equal(r.disque,'Garden of Blood');
   assert.equal(r.un,null,'les autres emplacements ne bougent pas'); assert.ok(r.lignes); assert.ok(r.valide); assert.equal(r.caisse,45,'la caisse de départ du profil');
 });
 

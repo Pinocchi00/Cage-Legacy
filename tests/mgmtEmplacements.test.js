@@ -123,7 +123,7 @@ test('Emplacements — au clavier seul : flèches, Entrée lance ou reprend, Éc
   touche(win,'ArrowLeft'); touche(win,'Enter');
   /* Brief du 06/10, lot 5 : un emplacement vide ouvre d'abord le choix de l'organisation ; Entrée y crée la partie (Split d'abord). */
   assert.equal(win.eval('G.screen'),'mgmt_nouvelle'); touche(win,'Enter');
-  assert.deepEqual(result(win,`return [G.screen,MGMT_SLOT,!!mgmtSlotPeek(2),mgmtSlotPeek(1),G.mgmt.org];`),['mgmt_carte',2,true,null,'Split'],'un emplacement vide lance une partie, dans le sien');
+  assert.deepEqual(result(win,`return [G.screen,MGMT_SLOT,!!mgmtSlotPeek(2),mgmtSlotPeek(1),G.mgmt.org];`),['mgmt_arrivee',2,true,null,'Split'],'un emplacement vide lance une partie, dans le sien');   /* brief démo, lot 8 T1 : une partie neuve s ouvre sur l arrivée */
   win.eval(`CL.mgmtLeave(); CL.mgmtParties();`);
   assert.equal(win.eval('MGMT_PARTIES.curseur'),2);
   touche(win,'Escape'); assert.equal(win.eval('G.screen'),'title');

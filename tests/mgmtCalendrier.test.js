@@ -136,7 +136,7 @@ test('Agenda — préparation à la demande : le joueur désigne un combattant, 
 
 test('Une soirée est toujours posée : l’ouverture pose la première, à cinq semaines, et la suivante se pose après une soirée jouée (demande d’Anthony du 08/10/2026 : les planches montrent la date sur chaque écran)', () => {
   const win=ouverte();
-  const r=JSON.parse(win.eval(`JSON.stringify((function(){ const m=G.mgmt, p=m.cal.prochaines.slice(); const tete=document.getElementById('app').textContent;
+  const r=JSON.parse(win.eval(`JSON.stringify((function(){ const m=G.mgmt, p=m.cal.prochaines.slice(); if(G.screen==='mgmt_arrivee') CL.mgmtArriveeFin(); const tete=document.getElementById('app').textContent;
     const jour=m.cal.jour; const dans=p.length?p[0].jour-jour:0;
     m.cal.prochaines=[]; const v=mgmtAgendaSuivante(m), apres=m.cal.prochaines.length, encore=mgmtAgendaSuivante(m);
     return {n:p.length,dans,taille:p[0]&&p[0].taille,v,apres,encore,tete:/Dans 35 jours/.test(tete)}; })())`));

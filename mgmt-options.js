@@ -38,6 +38,7 @@ const MGMT_OP_LIGNES={
     {cle:'exporter',lib:'EXPORTER LA PARTIE',aide:'Un fichier de cette partie, à garder ou à envoyer. Il se relit avec « Importer ».',action:'EXPORTER'},
     {cle:'importer',lib:'IMPORTER UNE PARTIE',aide:'Relit un fichier exporté dans cet emplacement. Un fichier abîmé ou d’une version inconnue est refusé, rien n’est écrasé.',action:'CHOISIR UN FICHIER'},
     {cle:'effacer',lib:'EFFACER CETTE PARTIE',aide:'L’emplacement redevient vide. Une confirmation est demandée.',action:'EFFACER'},
+    {cle:'accompagnement',groupe:'aide',lib:'ACCOMPAGNEMENT DE LEÏLA',aide:'Leïla vous guide pour les premiers combats, une phrase à la fois. Ce réglage vaut pour toutes les parties.',choix:[[true,'OUI'],[false,'NON']]},
   ],
 };
 /* ==== [ANCRE: MGMT_BRIEF_DEMO_LOT2_T4_EXPORT] — Brief démo, lot 2 T4 : exporter et importer une partie. L'import passe par mgmtParseAndValidate (migration et
@@ -103,7 +104,7 @@ function mgmtOpCtl(g,l,sel){
 }
 function mgmtOpLigneHtml(g,l,i){
   const sel=i===MGMT_OP.ligne;
-  return `<div class="mf-op-l${sel?' sel':''}" onclick="CL.mgmtOpSelect(${i})"><div class="mf-op-t"><b>${esc(l.lib)}</b><span>${esc(l.aide)}</span></div>${mgmtOpCtl(g,l,sel)}</div>`;
+  return `<div class="mf-op-l${sel?' sel':''}" onclick="CL.mgmtOpSelect(${i})"><div class="mf-op-t"><b>${esc(l.lib)}</b><span>${esc(l.aide)}</span></div>${mgmtOpCtl(l.groupe||g,l,sel)}</div>`;
 }
 function mgmtOpTouchesHtml(){
   const col=b=>`<div class="mf-op-tc"><div class="mf-so-s">${esc(b.titre)}</div>${b.liste.map(([k,t])=>`<div class="mf-op-tl"><span class="mf-op-tk">${k.split('  ').map(x=>`<span class="mf-k">${esc(x)}</span>`).join('')}</span><span>${esc(t)}</span></div>`).join('')}</div>`;
@@ -160,11 +161,13 @@ Object.assign(CL,{
   /** ← → sur la ligne choisie. */
   mgmtOpChange(d){
     const l=mgmtOpLignes()[MGMT_OP.ligne]; if(!l||l.action) return;
-    if(mgmtReglagesChanger(MGMT_OP.onglet,l.cle,mgmtReglagesPas(MGMT_OP.onglet,l.cle,d))) render();
+    const g=l.groupe||MGMT_OP.onglet;
+    if(mgmtReglagesChanger(g,l.cle,mgmtReglagesPas(g,l.cle,d))) render();
   },
   mgmtOpChoisir(g,cle,i){
-    const l=(MGMT_OP_LIGNES[g]||[]).find(x=>x.cle===cle); if(!l||!l.choix||!l.choix[i]) return;
-    MGMT_OP.ligne=(MGMT_OP_LIGNES[g]||[]).indexOf(l);
+    const liste=MGMT_OP_LIGNES[g]||MGMT_OP_LIGNES[MGMT_OP.onglet]||[];
+    const l=liste.find(x=>x.cle===cle); if(!l||!l.choix||!l.choix[i]) return;
+    MGMT_OP.ligne=liste.indexOf(l);
     mgmtReglagesChanger(g,cle,l.choix[i][0]); render();
   },
   mgmtOpNiveau(g,cle,v){
