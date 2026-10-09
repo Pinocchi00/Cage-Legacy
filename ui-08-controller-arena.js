@@ -324,7 +324,7 @@ const CL={
     // création : (1) bonus d'archétype selon le style du mentor, (2) faveur des
     // promoteurs (cooldown d'offre pro réduit de 50%), (3) bonus de camp
     // persistant sur la stat principale du mentor (+2 à chaque entraînement).
-    try{ const raw=localStorage.getItem('cage-legacy-mentor-bonus');
+    try{ const raw=stockageLire('cage-legacy-mentor-bonus');
       if(raw){
         const mentor=JSON.parse(raw);
         const ARCHETYPE_BONUS={
@@ -340,7 +340,7 @@ const CL={
         f._mentorMainStat=MAIN_STAT[mentor.style]||null; // pilier 3, lu par chooseTraining()
         f.proOfferCooldown=0; f._mentorFastTrack=true; // pilier 2, lu par declinePro()
         G.lastMsg=`Bonus testamentaire actif ! Votre ancienne légende vous laisse un héritage : attributs de style de départ, cooldown des offres pro réduit de moitié, et bonus de camp permanent en ${f._mentorMainStat?attrLabel(f._mentorMainStat):'polyvalence'}.`;
-        localStorage.removeItem('cage-legacy-mentor-bonus');
+        stockageSupprimer('cage-legacy-mentor-bonus');
       }
     }catch(e){}
     // ==== [FIN ANCRE] ====
@@ -714,14 +714,14 @@ const CL={
     G.f=candidate;
     if(seasonEval) G.season.fights=[];
     syncPlayerSkillsToCodex(G.f); G.f._enshrined=true;
-    if(G.f.skills&&G.f.skills.includes('meta02')){ try{ localStorage.setItem('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
+    if(G.f.skills&&G.f.skills.includes('meta02')){ try{ stockageEcrire('cage-legacy-mentor-bonus',JSON.stringify({style:G.f.style})); }catch(e){} }
     G.screen='legacy'; save(); render();
   },
   /* ==== [FIN ANCRE] ==== */
   /* ==== [ANCRE: CORRECTIF_RETRAITE_FANTOME_PURGE] — Lot C01/2026 §C12 :
      quitter définitivement l'écran de retraite ("Retour au menu") laissait
      la sauvegarde de carrière (retired:true, _enshrined:true) intacte dans
-     localStorage. go('title') seul ne persiste rien (pas de save()), mais
+     le stockage. go('title') seul ne persiste rien (pas de save()), mais
      tout rechargement ou "Reprendre le dossier" (cont(), qui appelle
      load()) relisait cette même sauvegarde figée en fin de carrière — le
      joueur retombait sur l'écran de retraite qu'il venait de quitter.

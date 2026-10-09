@@ -29,7 +29,7 @@ function validateSkills(){
 validateSkills();
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: RESET_FINAL_CIBLE] — Remise à zéro ciblée (Lot 0) : remplace
-   l'ancien localStorage.clear() par une suppression limitée aux seules clés
+   l'ancien localStorage clear() par une suppression limitée aux seules clés
    du jeu, évitant d'effacer les données d'autres applications servies sur le
    même domaine (GitHub Pages partagé).
    ATTENTION : ce bloc est TEMPORAIRE et devra être retiré une fois que les
@@ -46,11 +46,11 @@ const CAGE_LEGACY_KEYS = [
   'cage-legacy-reset-zero-v1'
 ];
 try {
-  if (typeof localStorage !== 'undefined' && !localStorage.getItem(RESET_KEY_V2)) {
+  if (typeof stockageLire === 'function' && !stockageLire(RESET_KEY_V2)) {
     for (const k of CAGE_LEGACY_KEYS) {
-      localStorage.removeItem(k);
+      stockageSupprimer(k);
     }
-    localStorage.setItem(RESET_KEY_V2, '1');
+    stockageEcrire(RESET_KEY_V2, '1');
   }
 } catch(e) {}
 /* ==== [FIN ANCRE] ==== */

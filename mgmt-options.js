@@ -35,9 +35,50 @@ const MGMT_OP_LIGNES={
   partie:[
     {cle:'sauver',lib:'SAUVEGARDER',aide:'La partie s’enregistre aussi toute seule après chaque soirée.',action:'SAUVEGARDER MAINTENANT',touche:'Entrée'},
     {cle:'changer',lib:'CHANGER DE PARTIE',aide:'Ouvre les trois emplacements. La partie en cours est sauvegardée avant.',action:'OUVRIR LES EMPLACEMENTS'},
+    {cle:'exporter',lib:'EXPORTER LA PARTIE',aide:'Un fichier de cette partie, à garder ou à envoyer. Il se relit avec « Importer ».',action:'EXPORTER'},
+    {cle:'importer',lib:'IMPORTER UNE PARTIE',aide:'Relit un fichier exporté dans cet emplacement. Un fichier abîmé ou d’une version inconnue est refusé, rien n’est écrasé.',action:'CHOISIR UN FICHIER'},
     {cle:'effacer',lib:'EFFACER CETTE PARTIE',aide:'L’emplacement redevient vide. Une confirmation est demandée.',action:'EFFACER'},
   ],
 };
+/* ==== [ANCRE: MGMT_BRIEF_DEMO_LOT2_T4_EXPORT] — Brief démo, lot 2 T4 : exporter et importer une partie. L'import passe par mgmtParseAndValidate (migration et
+   validation) : un fichier abîmé ou d'une version inconnue est refusé et rien n'est écrasé. ==== */
+/** Le texte de l'export : la partie telle qu'elle est sur le disque (celle de l'emplacement actif), sinon l'état vivant. */
+function mgmtPartieExportee(m){
+  try{ const brut=stockageLire(mgmtSlotKey(MGMT_SLOT)); if(brut&&mgmtParseAndValidate(brut)) return brut; }catch(e){}
+  return JSON.stringify(m);
+}
+/** Importe le texte d'un fichier dans l'emplacement `slot` : la partie d'avant passe en secours si elle est valide. @returns {{ok:boolean,raison:string}} */
+function mgmtPartieImporter(texte,slot){
+  const m=mgmtParseAndValidate(texte);
+  if(!m) return {ok:false,raison:'Fichier illisible ou d’une version inconnue.'};
+  try{
+    const cle=mgmtSlotKey(slot), prec=stockageLire(cle);
+    if(prec&&mgmtParseAndValidate(prec)) stockageEcrire(mgmtSlotBackupKey(slot),prec);
+    stockageEcrire(cle,JSON.stringify(m));
+    return {ok:true,raison:''};
+  }catch(e){ return {ok:false,raison:'L’écriture a échoué.'}; }
+}
+/** Le fichier de l'export, proposé au téléchargement. */
+function mgmtPartieTelecharger(m){
+  try{
+    const blob=new Blob([mgmtPartieExportee(m)],{type:'application/json'}), a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='cage-legacy-partie-'+MGMT_SLOT+'.json'; document.body.appendChild(a); a.click(); a.remove();
+    return true;
+  }catch(e){ return false; }
+}
+/** Ouvre le sélecteur de fichier ; le fichier lu est importé dans l'emplacement actif. */
+function mgmtPartieChoisirFichier(){
+  try{
+    const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+    inp.onchange=()=>{ const f=inp.files&&inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{
+      const rep=mgmtPartieImporter(String(r.result||''),MGMT_SLOT);
+      MGMT_OP.message=rep.ok?'Partie importée.':rep.raison; if(rep.ok){ G.mgmt=null; const n=MGMT_SLOT; CL.mgmtEnter(n); CL.mgmtOptions(); } else render();
+    }; r.readAsText(f); };
+    inp.click();
+  }catch(e){ MGMT_OP.message='L’import a échoué.'; render(); }
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** La liste des touches, par situation, comme sur la planche. */
 const MGMT_OP_TOUCHES=[
   {titre:'PARTOUT',liste:[['Échap','Revenir en arrière'],['A  E','Changer de section'],['↑ ↓ ← →','Choisir'],['Tab','Changer d’onglet, de catégorie ou de soirée'],['Entrée','Faire l’action écrite en jaune']]},
@@ -137,6 +178,8 @@ Object.assign(CL,{
   mgmtOpAction(cle){
     const m=G&&G.mgmt; if(!m||MGMT_OP.onglet!=='partie') return;
     if(cle==='sauver'){ saveMgmt(); MGMT_OP.message='Partie sauvegardée.'; render(); }
+    else if(cle==='exporter'){ saveMgmt(); MGMT_OP.message=mgmtPartieTelecharger(m)?'Partie exportée.':'L’export a échoué.'; render(); }
+    else if(cle==='importer') mgmtPartieChoisirFichier();
     else if(cle==='changer'){ saveMgmt(); CL.mgmtParties(); }
     else if(cle==='effacer'){
       saveMgmt(); const n=MGMT_SLOT; CL.mgmtParties();

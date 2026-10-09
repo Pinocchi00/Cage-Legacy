@@ -25,7 +25,7 @@ function registryLabel(key){
 }
 function readRegistry(key,decode,fallback){
   try{
-    const raw=localStorage.getItem(key);
+    const raw=stockageLire(key);
     if(raw===null){ registryWarnings.delete(key); return {value:fallback(),ok:true}; }
     const result=decode(JSON.parse(raw));
     if(result.ok) registryWarnings.delete(key);
@@ -41,8 +41,8 @@ function writeRegistry(key,value,decode,fallback){
   try{
     if(!decode(value).ok) throw new Error('Données invalides');
     const raw=JSON.stringify(value);
-    localStorage.setItem(key,raw);
-    if(localStorage.getItem(key)!==raw) throw new Error('Écriture non confirmée');
+    stockageEcrire(key,raw);
+    if(stockageLire(key)!==raw) throw new Error('Écriture non confirmée');
     return true;
   }catch(e){
     warnRegistry(key,registryLabel(key)+' : enregistrement impossible ou non confirmé. Vérifie l’espace de stockage disponible puis réessaie.');

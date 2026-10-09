@@ -606,7 +606,7 @@ function mgmtSlotBackupKey(n){ return mgmtSlotKey(n)+'_backup'; }
 function mgmtRegistre(){
   const out={dernier:null,dates:{}};
   try{
-    const raw=JSON.parse(localStorage.getItem(MGMT_REGISTRE_KEY));
+    const raw=JSON.parse(stockageLire(MGMT_REGISTRE_KEY));
     if(raw&&typeof raw==='object'&&!Array.isArray(raw)){
       if(mgmtSlotValide(raw.dernier)) out.dernier=raw.dernier;
       if(raw.dates&&typeof raw.dates==='object'){
@@ -616,7 +616,7 @@ function mgmtRegistre(){
   }catch(e){}
   return out;
 }
-function mgmtRegistreEcrit(reg){ try{ localStorage.setItem(MGMT_REGISTRE_KEY,JSON.stringify(reg)); }catch(e){} }
+function mgmtRegistreEcrit(reg){ try{ stockageEcrire(MGMT_REGISTRE_KEY,JSON.stringify(reg)); }catch(e){} }
 
 /** La partie d'un emplacement, lue sur le disque sans rien écrire ni réparer
  *  (secours compris) ; l'emplacement actif rend la partie en mémoire. */
@@ -625,7 +625,7 @@ function mgmtSlotPeek(n){
   if(n===MGMT_SLOT&&typeof G!=='undefined'&&G&&G.mgmt&&validateMgmt(G.mgmt)) return G.mgmt;
   try{
     for(const key of [mgmtSlotKey(n),mgmtSlotBackupKey(n)]){
-      const m=mgmtParseAndValidate(localStorage.getItem(key));
+      const m=mgmtParseAndValidate(stockageLire(key));
       if(m) return m;
     }
   }catch(e){}
@@ -644,7 +644,7 @@ function mgmtSlotDernier(){
 /** Efface un emplacement : sa clé, son secours, sa date. Les autres ne bougent pas. */
 function mgmtSlotEffacer(n){
   if(!mgmtSlotValide(n)) return false;
-  try{ localStorage.removeItem(mgmtSlotKey(n)); localStorage.removeItem(mgmtSlotBackupKey(n)); }catch(e){}
+  try{ stockageSupprimer(mgmtSlotKey(n)); stockageSupprimer(mgmtSlotBackupKey(n)); }catch(e){}
   const reg=mgmtRegistre();
   delete reg.dates[n];
   if(reg.dernier===n) reg.dernier=null;
@@ -657,19 +657,20 @@ function mgmtSlotEffacer(n){
 /** Persiste le bureau : le secours garde la dernière version connue-bonne,
  *  comme SAVE_KEY / SAVE_BACKUP_KEY (state-save.js). */
 function saveMgmt(){
-  if(!G||!G.mgmt) return;
+  if(!G||!G.mgmt) return false;
   try{
     /* Lot 2B T1 bis : les retraites de la soirée ont déjà été appliquées
        quand elle se sauvegarde. Le quota est rétabli dans l'état vivant
        avant sa sérialisation, jamais seulement dans la copie disque. */
     mgmtExteriorEnsure(G.mgmt);
     const cle=mgmtSlotKey(MGMT_SLOT);
-    const previous=localStorage.getItem(cle);
-    if(mgmtParseAndValidate(previous)) localStorage.setItem(mgmtSlotBackupKey(MGMT_SLOT),previous);
-    localStorage.setItem(cle,JSON.stringify(G.mgmt));
+    const previous=stockageLire(cle);
+    if(mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
+    stockageEcrire(cle,JSON.stringify(G.mgmt));
     /* Brief lot 1 : la dernière partie jouée et la date de l'enregistrement, hors de la partie. */
     const reg=mgmtRegistre(); reg.dernier=MGMT_SLOT; reg.dates[MGMT_SLOT]=Date.now(); mgmtRegistreEcrit(reg);
-  }catch(e){}
+    return stockageSignaler(true);
+  }catch(e){ return stockageSignaler(false); }   /* brief démo, lot 2 T2 : l'échec se voit, avec « Réessayer » */
 }
 
 /** Charge le bureau, secours inclus. @returns {boolean} */
@@ -677,11 +678,11 @@ function loadMgmt(){
   try{
     const cle=mgmtSlotKey(MGMT_SLOT), secours=mgmtSlotBackupKey(MGMT_SLOT);
     for(const key of [cle,secours]){
-      const candidate=mgmtParseAndValidate(localStorage.getItem(key));
+      const candidate=mgmtParseAndValidate(stockageLire(key));
       if(!candidate) continue;
       G.mgmt=mgmtRepair(candidate);
       if(key===secours){
-        try{ localStorage.setItem(cle,JSON.stringify(G.mgmt)); }catch(e){}
+        try{ stockageEcrire(cle,JSON.stringify(G.mgmt)); }catch(e){}
       }
       return true;
     }
@@ -691,8 +692,8 @@ function loadMgmt(){
 
 function hasMgmt(){
   try{
-    if(mgmtParseAndValidate(localStorage.getItem(mgmtSlotKey(MGMT_SLOT)))) return true;
-    if(mgmtParseAndValidate(localStorage.getItem(mgmtSlotBackupKey(MGMT_SLOT)))) return true;
+    if(mgmtParseAndValidate(stockageLire(mgmtSlotKey(MGMT_SLOT)))) return true;
+    if(mgmtParseAndValidate(stockageLire(mgmtSlotBackupKey(MGMT_SLOT)))) return true;
   }catch(e){}
   return false;
 }
