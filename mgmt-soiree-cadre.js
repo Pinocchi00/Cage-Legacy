@@ -207,8 +207,8 @@ function mgmtSoFinHtml(m,prog){
 }
 /** Le repli quand une trace manque (sauvegarde incomplète) : on rend la main au joueur sans rien montrer d'inventé. */
 function mgmtSoireeFallback(){
-  return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">${esc('La soirée ne peut pas être montrée : le combat n’est pas dans l’historique.')}</div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoFin()'})}`,'normal')}</div></main>`,
-    {barre:'jeu',grise:true,m:G.mgmt,touches:[{ks:['Entrée'],t:'Continuer',jaune:true,onclick:'CL.mgmtSoFin()'}]});
+  return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">${esc('La soirée ne peut pas être montrée : le combat n’est pas dans l’historique.')}</div>${mfBouton('Continuer',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoireeSortir()'})}`,'normal')}</div></main>`,
+    {barre:'jeu',grise:true,m:G.mgmt,touches:[{ks:['Entrée'],t:'Continuer',jaune:true,onclick:'CL.mgmtSoireeSortir()'}]});
 }
 
 function scr_mgmt_soiree_cadre(){
@@ -287,6 +287,12 @@ Object.assign(CL,{
     const m=G.mgmt, prog=mgmtSoireeProgramme(m), p=prog[prog.length-1];
     if(!p||!p.trace) return;
     mgmtCombatOuvrir({trace:p.trace,etiquette:p.etiquette,quel:'le combat principal',salle:mgmtSoireeSalle(m,p.i),retour:'mgmt_soiree',finRetour:null});
+  },
+  /** Lot 1 du brief démo : l'écran de repli referme toujours la soirée et rend la main, quel que soit le combat où l'on en était. */
+  mgmtSoireeSortir(){
+    if(!G||!G.mgmt||!G.mgmt.lastEvent) return;
+    MGMT_SOIREE.index=G.mgmt.lastEvent.fights.length;
+    CL.mgmtSoFin();
   },
   /** La fin de la soirée : le lendemain s'il y a des touchés, sinon la liste des résultats. */
   mgmtSoFin(){

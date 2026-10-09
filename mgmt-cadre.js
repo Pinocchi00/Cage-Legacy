@@ -99,9 +99,7 @@ function mfBarreHtml({mode='jeu',courant=null,grise=false,m=null}={}){
     +(mode==='jeu'&&!grise
       ?`<button type="button" class="mf-barre-item${courant==='options'?' cur':''}" data-section="options"${courant==='options'?' aria-current="page"':''} onclick="CL.mgmtOptions()"><span>Options</span></button>`
       :`<button type="button" class="mf-barre-item grise" data-section="options" disabled aria-disabled="true"><span>Options</span></button>`)
-    +(mode==='jeu'&&grise
-      ?`<button type="button" class="mf-barre-item grise" data-section="menu" disabled aria-disabled="true"><span>Menu principal</span></button>`
-      :`<button type="button" class="mf-barre-item" data-section="menu" onclick="${mode==='jeu'?'CL.mgmtMenuPrincipal()':'CL.mgmtLeave()'}"><span>Menu principal</span></button>`)
+    +(`<button type="button" class="mf-barre-item" data-section="menu" onclick="${mode==='jeu'?'CL.mgmtMenuPrincipal()':'CL.mgmtLeave()'}"><span>Menu principal</span></button>`)
     +`</div>`;
   return `<nav class="mf-barre" aria-label="Sections"><div class="mf-barre-logo">${mfLogoHtml()}</div>${items}${bas}</nav>`;
 }

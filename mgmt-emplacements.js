@@ -15,7 +15,7 @@ function mgmtInterfaceRaz(){
   MGMT_CART={cursor:0,pick:null};
   MGMT_CLASSEMENTS={div:'H-fly',scope:'world'};
   MGMT_FICHE={id:null,retour:'mgmt_carte',cursor:0};
-  MGMT_SOIREE={index:0};
+  MGMT_SOIREE=mgmtSoireeNeuve(0);
   MGMT_VESTIAIRE={div:'',role:'',dispo:false,lien:'',signe:false,page:0}; MGMT_EFFECTIF={sexe:'H',div:'',curseur:0};
   MGMT_FIL={actif:false,lignes:[],ms:0,jeton:MGMT_FIL.jeton+1};
   MGMT_POPUPS={file:[]};

@@ -3,10 +3,11 @@
    catégories qui tournent ; `titre` : le premier combat de la carte est un combat de titre si c'est possible.
    S'évalue dans la fenêtre du jeu. */
 module.exports=function jouerSoirees(win,n,opts){
-  const titre=!!(opts&&opts.titre);
+  const titre=!!(opts&&opts.titre), recharge=!!(opts&&opts.recharge);
   return win.eval(`(function(){
-    const m=G.mgmt; let joues=0;
+    let m=G.mgmt; let joues=0;
     for(let k=0;k<${n};k++){
+      m=G.mgmt;
       m.pile.forEach(x=>{x.status='closed';x.decision='ignored';}); m.open=null;
       /* Les contrats se renouvellent d'eux-mêmes : la partie sert aux tests de lecture, pas à ceux de l'argent (lot 9). */
       for(const f of m.roster){ if(f.libre){ delete f.libre; f.ct={n:6,f:0,b:mgmtBourseSouhaitee(m,f,false),since:m.cycle}; } else if(f.ct&&f.ct.n-f.ct.f<=1) f.ct.n+=5; }
@@ -23,7 +24,8 @@ module.exports=function jouerSoirees(win,n,opts){
       const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk) mgmtDecide(m,bulk.id,'validate');
       if(!mgmtAgendaJouer(m)) break;
       joues++;
-      mgmtNewPile(m);
+      ${recharge?`MGMT_SOIREE.index=3; G.mgmt=null; MGMT_SOIREE=mgmtSoireeNeuve(0); CL.mgmtEnter(1); if(G.screen!=='mgmt_soiree') throw new Error('la soirée interrompue ne se rouvre pas');`:''}
+      mgmtNewPile(G.mgmt);
     }
     return joues;
   })()`);

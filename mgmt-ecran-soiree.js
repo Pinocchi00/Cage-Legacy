@@ -10,13 +10,31 @@
    dans aucun DOM. Souris et clavier (ui-11-keys.js, jamais exclusif). ==== */
 /* ==== [ANCRE: MGMT_LOT3_T4_SOIREE] — Trois parcours de soirée, trace de
    navigation non persistée ; le résultat appartient exclusivement au moteur. ==== */
-let MGMT_SOIREE={index:0};
+/* Lot 1 du brief démo (09/10/2026) : le combat où le joueur s'est arrêté est gardé dans la partie (m.lastEvent.vu), pour qu'une soirée interrompue se rouvre là où elle a été laissée. */
+function mgmtSoireeNeuve(i){
+  let v=Number.isSafeInteger(i)&&i>0?i:0;
+  return {get index(){ return v; },set index(n){
+    v=n;
+    const e=typeof G!=='undefined'&&G&&G.mgmt&&G.mgmt.lastEvent;
+    if(e&&Number.isSafeInteger(n)&&n>=0&&e.vu!==n){ e.vu=n; if(typeof saveMgmt==='function') saveMgmt(); }
+  }};
+}
+let MGMT_SOIREE=mgmtSoireeNeuve(0);
+/** Une soirée est en cours quand elle a été simulée et que la semaine n'a pas encore avancé. Pur. */
+function mgmtSoireeEnCours(m){
+  return !!(m&&m.cal&&m.cal.actif===true&&m.lastEvent&&Array.isArray(m.lastEvent.fights)&&m.lastEvent.fights.length>0&&m.lastEvent.cycle===m.cycle);
+}
+/** Reprend une soirée interrompue : le combat gardé, jamais au-delà du dernier. */
+function mgmtSoireeReprendre(m){
+  const n=m.lastEvent.fights.length, vu=Number.isSafeInteger(m.lastEvent.vu)?m.lastEvent.vu:0;
+  MGMT_SOIREE=mgmtSoireeNeuve(Math.max(0,Math.min(n,vu)));
+}
 function mgmtSoireeTrace(m,i){
   const e=m&&m.lastEvent, f=e&&e.fights[i];
   if(!f||!Array.isArray(m.hist)) return null;
   /* L'historique est append-only et conserve l'ordre de la soirée, y compris
      lorsqu'une paire se retrouve plusieurs cycles plus tard. */
-  const traces=m.hist.filter(t=>t.c===e.cycle);
+  const memes=m.hist.filter(t=>t.c===e.cycle), traces=memes.slice(Math.max(0,memes.length-e.fights.length));
   return traces[i]&&traces[i].a.id===f.a&&traces[i].b.id===f.b?traces[i]:null;
 }
 function mgmtSoireeResume(m,i){
