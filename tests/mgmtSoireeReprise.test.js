@@ -53,7 +53,7 @@ test('Partie déjà touchée (deux soirées sous le même numéro de semaine) : 
     /* La seconde soirée se joue sans que la semaine ait avancé : le défaut d'avant le lot. */
     const ev=jouer(); const m=G.mgmt;
     const doubles=m.hist.filter(t=>t.c===c).length>ev.fights.length;
-    const toutes=ev.fights.every((_,i)=>!!mgmtSoireeTrace(m,i));
+    const toutes=ev.fights.every((_,i)=>!!mgmtSoireeTrace(m,i))&&mgmtSoireeProgramme(m).every(p=>!!p.trace);
     saveMgmt(); ${RECHARGER}
     ${FINIR}
     return {doubles,toutes,avance:G.mgmt.cycle===c+1};`);

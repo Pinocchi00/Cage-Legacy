@@ -47,7 +47,13 @@ function mgmtEffectifLignes(m,divId){
 
 /** Les trois derniers résultats, du plus ancien au plus récent : 'v', 'd' ou 'n'. */
 function mgmtEffectifForme(m,f){
-  return mgmtResultatsDetail(m,f).slice(0,3).reverse().map(x=>x.issue==='win'?'v':(x.issue==='loss'?'d':'n'));
+  const l=mgmtResultatsDetail(m,f).slice(0,3).map(x=>x.issue==='win'?'v':(x.issue==='loss'?'d':'n'));
+  /* Brief démo, lot 7 T2 : les combats d'avant la partie complètent les trois derniers, du plus récent au plus ancien (mgmtAnciensCombats, dérivés). */
+  if(l.length<3&&typeof mgmtAnciensCombats==='function'&&m.effectifs===1){
+    const anc=mgmtAnciensCombats(m,f);
+    for(let i=anc.length-1;i>=0&&l.length<3;i--) l.push(anc[i].issue);
+  }
+  return l.reverse();
 }
 
 const MF_SVG_COCHE='<svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true" style="flex:none"><path d="M4 14l6 6L22 6" stroke="#E9E6E1" stroke-width="4"></path></svg>';
