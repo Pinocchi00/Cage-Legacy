@@ -32,6 +32,7 @@ function mgmtCarteListe(m){
 /** Le libellé court d'une catégorie : « LÉGER », « MOUCHE F ». */
 function mgmtCarteCourt(div){ return mfNet(mgmtDivisionLabel(div)).replace(/^POIDS /,'').replace(/ FÉMININ$/,' F'); }
 
+function mgmtCarteStyleHtml(c){ return esc(c.style)+(c.styleBilan?'<em class="mf-car-src">D’après son bilan</em>':''); }
 function mgmtCarteLigneComp(a,b,c){ return `<div class="mf-car-comp"><div>${a}</div><span>${esc(c)}</span><div>${b}</div></div>`; }
 
 function mgmtCarteFormeHtml(m,f){
@@ -48,12 +49,27 @@ function mgmtCarteContratTexte(f){
   return n+' COMBAT'+(n>1?'S':'');
 }
 
+/** Brief démo, lot 7 T1 : tant que le joueur n'a rien vu, la ligne Style dit la force, à défaut la faille, que son bilan laisse lire — avec la même mention que la fiche. */
+/** Le public réclame-t-il ce combat ? Dérivé de mgmtPublicReclame, jamais stocké. */
+function mgmtCarteReclame(m,a,b){
+  if(!m||m.effectifs!==1||typeof mgmtPublicReclame!=='function') return false;
+  const cle=m.cycle+':'+(m.hist||[]).length+':'+(m.card.main||[]).length+':'+(m.cal&&m.cal.jour);
+  if(!MGMT_CARTE_RECL||MGMT_CARTE_RECL.m!==m||MGMT_CARTE_RECL.cle!==cle) MGMT_CARTE_RECL={m,cle,s:new Set(mgmtPublicReclame(m).map(r=>[r.a,r.b].sort().join('|')))};
+  return MGMT_CARTE_RECL.s.has([a,b].sort().join('|'));
+}
+let MGMT_CARTE_RECL=null;
+function mgmtCarteStyleBilan(m,f){
+  if(!f||m.effectifs!==1||typeof mgmtAnciensBilan!=='function') return {t:''};
+  const l=mgmtAnciensBilan(m,f), x=l.find(y=>y.s==='+')||l[0];
+  return {t:x?x.t:''};
+}
+
 function mgmtCarteColonne(m,f){
   if(!f) return {rang:'?',contrat:'?',bilan:'?',allonge:'?',style:'?',forme:'<b>?</b>'};
   const phys=mgmtCombatProfile(f).phys||{};
   return {rang:mgmtRangTexte(m,f),contrat:mgmtCarteContratTexte(f),bilan:`${f.W}-${f.L}-${f.D||0}`,
     allonge:Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?',
-    style:mfNet(mgmtEffectifFacon(m,f)||'?'),forme:mgmtCarteFormeHtml(m,f)};
+    style:mfNet(mgmtEffectifFacon(m,f)||mgmtCarteStyleBilan(m,f).t||'?'),styleBilan:!mgmtEffectifFacon(m,f)&&!!mgmtCarteStyleBilan(m,f).t,forme:mgmtCarteFormeHtml(m,f)};
 }
 
 function mgmtCarteBanniere(a,b,div){
@@ -97,8 +113,10 @@ function mgmtCarteHomonymes(liste){
   return new Set([...n].filter(([,c])=>c>1).map(([k])=>k));
 }
 /** Ce que le booking sait d'un combattant en une ligne (planche « Booking » : « Attend depuis 7 mois », « Battu par Swat », « Sur la carte »). Dérivé. */
-function mgmtCarteNote(m,f){
+function mgmtCarteNote(m,f,contre){
   if(!f) return '';
+  /* Brief démo, lot 7 T3 : avec un premier choix posé, le public qui réclame ce combat se lit avant toute confirmation. */
+  if(contre&&mgmtCarteReclame(m,contre,f.id)&&mgmtAvailable(m,f)&&!mgmtEngaged(m,f)) return 'Le public réclame ce combat';
   if(!mgmtAvailable(m,f)) return 'Indisponible';
   if(mgmtEngaged(m,f)) return 'Sur la carte';
   const n=typeof mgmtContratAttente==='function'?mgmtContratAttente(m,f):0;
@@ -111,7 +129,7 @@ function mgmtCarteNote(m,f){
 }
 function mgmtCarteAdvLigne(m,f,i,choisi,homo){
   const sel=mgmtSelectable(m,f,MGMT_CART.pick);
-  const raison=mgmtCarteNote(m,f);
+  const raison=mgmtCarteNote(m,f,MGMT_CART.pick);
   const rg=mgmtRangAffichable(m,f);
   return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${esc(f.id)}')">`
     +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}</b>`
@@ -150,7 +168,7 @@ function scr_mgmt_carte_cadre(){
   }
   const comp=duo
     ?mgmtCarteLigneComp(esc(ca.rang),esc(cb.rang),'Classement')+mgmtCarteLigneComp(esc(ca.bilan),esc(cb.bilan),'Palmarès')
-      +mgmtCarteLigneComp(esc(ca.allonge),esc(cb.allonge),'Allonge')+mgmtCarteLigneComp(esc(ca.style),esc(cb.style),'Style')
+      +mgmtCarteLigneComp(esc(ca.allonge),esc(cb.allonge),'Allonge')+mgmtCarteLigneComp(mgmtCarteStyleHtml(ca),mgmtCarteStyleHtml(cb),'Style')
       +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp(`<b>${esc(ca.contrat)}</b>`,`<b>${esc(cb.contrat)}</b>`,'Contrat restant')
     :`<div class="mf-car-aide">${esc(plein?'La carte principale est complète.':(A?'Choisis son adversaire dans la liste.':'Aucun combattant disponible dans cette catégorie.'))}</div>`;
   const faits=duo&&enjeux.length?`<div class="mf-car-enjeux"><div class="mf-cal-lib">Enjeux</div><div>${enjeux.map(e=>`<span>${esc(e)}</span>`).join('')}</div></div>`:'';

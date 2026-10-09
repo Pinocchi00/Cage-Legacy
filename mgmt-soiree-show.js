@@ -70,7 +70,9 @@ function mgmtSoireeNomCourt(nom){
 function mgmtSoireeProgramme(m){
   const e=m&&m.lastEvent;
   if(!e||!Array.isArray(e.fights)||!Array.isArray(m.hist)) return [];
-  const idx=[]; m.hist.forEach((t,i)=>{ if(t&&t.c===e.cycle) idx.push(i); });
+  let idx=[]; m.hist.forEach((t,i)=>{ if(t&&t.c===e.cycle) idx.push(i); });
+  /* Brief démo, lot 1 : une partie où deux soirées portent le même numéro de semaine — la soirée en cours est la fin de la liste. */
+  idx=idx.slice(Math.max(0,idx.length-e.fights.length));
   let rp=0, rm=0;
   const nMain=e.fights.filter((x,i)=>{ const t=m.hist[idx[i]]; return t&&t.slot==='main'; }).length;
   return e.fights.map((x,i)=>{
