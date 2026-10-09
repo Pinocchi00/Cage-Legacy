@@ -23,8 +23,8 @@ Tu codes UNE tranche de Cage Legacy (jeu de MMA, JS vanilla). Ta seule spécific
 6. Écris les tests exigés par la fiche, avec ses intitulés. Un nouveau fichier de test s'ajoute dans `package.json`, scripts `test` ET `test:watch`.
 7. Quand tout est vert localement : `@verif` (il lance `npm run check` et l'audit des versions, et ne te rend que les échecs). Corrige, relance `@verif`.
 8. Puis `@relecteur` avec le numéro de lot et de tranche. S'il rend « À REPRENDRE », corrige et redemande, deux tours au plus. Au-delà, écris le désaccord dans le compte rendu.
-9. Commit : `git add` des fichiers de la tranche seulement, message `Monde lot <N> T<K> : <titre de la tranche>`. Tu ne pousses pas.
-10. Ajoute en bas de la fiche une section `## Compte rendu` : fichiers modifiés et leur rôle, tests ajoutés (intitulés), migration de sauvegarde s'il y en a, écarts à la fiche, questions pour Anthony.
+9. Ajoute en bas de la fiche une section `## Compte rendu` : fichiers modifiés et leur rôle, tests ajoutés (intitulés), migration de sauvegarde s'il y en a, écarts à la fiche, questions pour Anthony.
+10. Commit, compte rendu compris : `git add` des fichiers de la tranche et de la fiche seulement, message `Monde lot <N> T<K> : <titre de la tranche>`. Tu ne pousses pas. Un fichier que `git status` montre modifié alors que `git diff --ignore-all-space` ne montre rien (fins de ligne réécrites par un test) ne s'ajoute pas.
 
 ## Règles du dépôt, toutes obligatoires
 
