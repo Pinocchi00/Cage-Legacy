@@ -7,6 +7,7 @@ const fs=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const {execFileSync}=require('node:child_process');
+const {newGameWindow}=require('./helpers/loadGame');
 const racine=path.join(__dirname,'..');
 const lire=f=>fs.readFileSync(path.join(racine,f),'utf8');
 
@@ -43,6 +44,49 @@ test('7.3 — L’export des textes à relire couvre les cinq familles et ne mod
   assert.ok((md.match(/^- \[ \] /gm)||[]).length>800,'plus de 800 textes listés');
   const apres=['mgmt-humanite-data.js','mgmt-voix-data.js','mgmt-medias-data.js','mgmt-camps-data.js','mgmt-combat-data.js'].map(f=>lire(f));
   assert.deepEqual(apres,avant,'aucun texte n’a été modifié');
+});
+
+test('Monde lot 2 T6 — l’export des textes contient les huit fiches d’identité, une organisation par bloc, un texte par ligne avec sa situation', {timeout:120000}, () => {
+  const tmp=path.join(os.tmpdir(),'textes-a-relire-identites.md');
+  execFileSync(process.execPath,[path.join(racine,'tools','exporter-textes.js'),'--out',tmp],{stdio:'ignore',timeout:120000});
+  const md=fs.readFileSync(tmp,'utf8');
+  const section=md.split(/^## /m).find(s=>s.startsWith('Fiches d’identité'));
+  assert.ok(section,'la section des fiches d’identité existe');
+  assert.match(section,/^Fiches d’identité des huit organisations \(Monde lot 2\) — 69 textes$/m);
+  const blocs=section.split(/^### /m).slice(1);
+  assert.equal(blocs.length,8,'huit blocs, une organisation par bloc');
+  const debuts=['Split — Lyon, France, depuis 2004','Garden of Blood','MMA Korner','Ultimate Rim','Fighting Pacific Championship','Knuckle Gate','Pure Impact','Undisputed Cage'];
+  debuts.forEach((d,i)=>assert.ok(blocs[i].startsWith(d),'le bloc '+(i+1)+' commence par '+d));
+  const nLignes=blocs.map(b=>(b.match(/^- \[ \] /gm)||[]).length);
+  assert.deepEqual(nLignes,[6,9,9,9,9,9,9,9],'6 lignes pour Split (Leïla n’a pas d’exemples), 9 pour les sept autres');
+  const w=newGameWindow({runMain:false});
+  const identites=JSON.parse(w.eval('JSON.stringify(MGMT_ORG_IDENTITES)'));
+  const ids=Object.keys(identites);
+  assert.equal(ids.length,8);
+  ids.forEach((id,i)=>{
+    const f=identites[id], a=f.adjointe, p=f.predecesseur, bloc=blocs[i];
+    const chemin=c=>'MGMT_ORG_IDENTITES[\''+id+'\'].'+c;
+    const attendus=[chemin('reputation'),chemin('blessure'),chemin('adjointe.parcours'),chemin('adjointe.voix')];
+    if(a.exemples) a.exemples.forEach((x,k)=>attendus.push(chemin('adjointe.exemples['+k+']')));
+    attendus.push(chemin('predecesseur.depart'),chemin('predecesseur.posteActuel'));
+    for(const c of attendus) assert.ok(bloc.includes('`'+c+'`'),'le chemin '+c+' est dans le bloc de '+id);
+    assert.ok(bloc.includes('(réputation)'),'la situation réputation est dans le bloc de '+id);
+    assert.ok(bloc.includes('(blessure de son histoire)'),'la situation blessure est dans le bloc de '+id);
+    assert.ok(bloc.includes('(adjointe '+a.prenom+' '+a.nom+', parcours)'),'la situation adjointe parcours est dans le bloc de '+id);
+    if(a.exemples) assert.ok(bloc.includes('(adjointe '+a.prenom+' '+a.nom+', exemple 3)'),'la situation exemple 3 est dans le bloc de '+id);
+    else assert.ok(!bloc.includes('.exemples['),'aucun exemple exporté pour '+id);
+    assert.ok(bloc.includes('(prédécesseur '+p.prenom+' '+p.nom+', poste actuel)'),'la situation poste actuel est dans le bloc de '+id);
+  });
+  assert.equal((md.match(/Fichier : `mgmt-organisations-identites-data\.js`/g)||[]).length,1);
+  assert.ok(!md.includes('Écrans et mécanismes — mgmt-organisations-identites-data.js'),'le fichier ne sort plus dans Écrans et mécanismes');
+});
+
+test('Monde lot 2 T6 — l’export des fiches ne modifie aucun fichier de données', {timeout:120000}, () => {
+  const avant=[lire('mgmt-organisations-identites-data.js'),lire('mgmt-organisations-data.js')];
+  const tmp=path.join(os.tmpdir(),'textes-a-relire-identites-donnees.md');
+  execFileSync(process.execPath,[path.join(racine,'tools','exporter-textes.js'),'--out',tmp],{stdio:'ignore',timeout:120000});
+  const apres=[lire('mgmt-organisations-identites-data.js'),lire('mgmt-organisations-data.js')];
+  assert.deepEqual(apres,avant,'aucun fichier de données modifié');
 });
 
 test('7.4 — Le README décrit les deux modes, les commandes et le fichier de liste des tests', () => {
