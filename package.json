@@ -11,7 +11,8 @@
     "pc:demo": "node pc/construire.js --demo",
     "lint": "eslint .",
     "lint:content": "node tools/lint-content.js",
-    "check": "npm run lint && npm run lint:content && npm test"
+    "check": "npm run lint && npm run lint:content && npm test",
+    "check:rapide": "node tools/check-rapide.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.3",

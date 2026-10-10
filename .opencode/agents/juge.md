@@ -1,6 +1,6 @@
 ---
 description: Relecture de fin de lot du brief « Un monde qui a vécu » - compare la branche entière au brief et écrit le rapport de lot pour Anthony et Claude. Modèle rare - une fois par lot seulement.
-mode: primary
+mode: all
 model: opencode-go/kimi-k3
 steps: 40
 permission:
