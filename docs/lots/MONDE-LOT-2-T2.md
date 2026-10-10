@@ -148,3 +148,105 @@ dominants FR/JP/BR, 0 pays hors mélange sur 2000 tirages.** Puis `npm run check
   voudra peut-être orienter ce vivier — à trancher alors, pas ici.
 - Les sept mélanges `paysPoids` (écrits par Claude au commit `95e1fd0`) les voit-on validés par toi
   comme le reste des fiches, ou veux-tu les relire avant la fusion du lot 2 ?
+
+## Compte rendu
+
+**Branche** `monde-lot-2-identites`. **Tranche inachevée à l'arrêt demandé : 3 tests verts sur 4,
+1 test casse le garde `tests/mgmtEffectif30.test.js` exigé vert.** Voir ci-dessous l'analyse.
+
+### Fichiers modifiés et rôle
+
+- `mgmt-humanite-data.js` — `mgmtPaysTire(u,melange)` : la signature/JSDoc de la fiche
+  (loi `'split'|'monde'` **ou** mélange de poids lui-même), corps inchangé
+  (`const poids=typeof melange==='string'?MGMT_PAYS_POIDS[melange]:melange;`). `?v=` bumpé
+  (`lot5h3bxx`).
+- `mgmt-organisations.js` — ancre `MGMT_MONDE_LOT2_PAYS_FONCTIONS` (Monde lot 2 T2) après
+  l'ancre T1, avec `mgmtOrgPaysPoids(m)` tel que la fiche le donne (résolution via
+  `mgmtOrgNom`/`mgmtOrgParNom`/`mgmtOrgIdentite`, repli `MGMT_PAYS_POIDS.split`). `?v=` bumpé
+  (`b9xx`).
+- `mgmt-bureau.js` — `mgmtNewRoster` : `const paysPoids=mgmtOrgPaysPoids(m);` après le profil ;
+  les **deux** tirages (`:169` et le re-tirage `:176`) reçoivent `paysPoids` ; commentaire
+  remplacé par la formulation de la fiche (le JSDoc périmé « 30 origines » reste en l'état comme
+  le veut la tranche : seul le commentaire `:165` change). `?v=` bumpé (`b42xx`), `sw.js` suit
+  (SW_VERSION `b71`).
+- `package.json` — `tests/mgmtPaysOrganisations.test.js` ajouté après `tests/mgmtIdentites.test.js`
+  dans `test` et `test:watch` uniquement (`test:ceintures` pas touché).
+- `tests/mgmtPaysOrganisations.test.js` — nouveau, les 4 tests de la fiche, intitulés exacts,
+  jamais modifié par rapport à ce que la fiche impose.
+- Aucun texte (`@ecrivain` non appelé), aucun écran, `MGMT_SAVE_VERSION` reste 14 : aucune
+  migration (aucun champ nouveau, aucun roster régénéré).
+
+### Tests ajoutés (intitulés)
+
+1. « Pays — le mélange de pays de deux organisations n'est pas le même » **— ÉCHOUANT en état**
+   (voir bloquant).
+2. « Pays — mgmtPaysTire tire avec le mélange donné, jamais un pays qui n'y figure pas » ✔
+3. « Pays — mgmtOrgPaysPoids donne le mélange de l'organisation jouée » ✔
+4. « Pays — chaque mélange est cohérent avec la ville de l'organisation » ✔
+   (8 mélanges résolus distincts ✔, cohérences ville → pays dominant : 7/7 ✔ uniquement
+   parce que les échecs du test 1 ne sélectionnent pas leurs assertions frères ; les tests 2-4
+   balayent les 2000 u : 0 pays hors mélange ✔.)
+
+Gardes exigés verts par la fiche, vérifiés **sans modification** :
+`tests/mgmtIdentites.test.js` 7/7 ✔, `tests/mgmtHumanite.test.js` 11/11 ✔ (Split inchangé,
+`mgmtPaysTire(u,'split')` ≡ `mgmtPaysTire(u,MGMT_PAYS_POIDS.split)` un à un),
+`tests/mgmtCorrectionsLot12.test.js` 4/4 ✔ (« Aucune organisation n'est injouable » compris).
+`tests/mgmtEffectif30.test.js` **ÉCHOUANT** (voir bloquant) ; vérifié qu'il passait **avant**
+les modifications T2 (stash/diff : 3/3 verts sur HEAD).
+
+### Bloquant (STOP prévu par la fiche, question à Anthony)
+
+Le test 1 exige, à graine 4242, la part du pays dominant du mélange ≥ 0,20 pour trois rosters :
+Split (FR 37) ✔ 36,2 % ; fighting-pacific-championship (JP 40) ✖ **14,6 %** ; organisation-8
+(BR 42) ✖ **14,8 %**. Le tirage pondéré lui-même est exact (500 tirages nus au même `rnd()` :
+JP sortait à 42 % pour un poids de 40 — mesuré par sonde, `tools/reports/`, jamais commitée).
+L'écart vient du refus des noms répétés dans `mgmtNewRoster` : un pays dominant demande
+~140-150 combattants sur un effectif de ~360, mais le plafond de répétitions de prénom
+(`MGMT_PRENOMS_REPETES_PART=0.012` → ~4 doublons tolérés par roster, commentaire du code
+périmé qui dit « 2 % », ligne 136 de `mgmt-bureau.js`) limite un pays à
+**~(prénoms distincts de son catalogue) + 4 + les doublons forcés à la garde 400** ≈ 13-15 %.
+Le catalogue FR a été étendu en place par `engine.js:334-336` (123 prénoms, ~250 familles),
+d'où FR à 36 % chez Split qui masque le phénomène ; JP (37 prénoms) et BR (43) franchissent
+le plafond à ~13-14 %.
+
+Conséquence en chaîne : le garde `tests/mgmtEffectif30.test.js` (« ≥ 98 % de prénoms et de noms
+de famille distincts », demande d'Anthony du 08/10) passe avant T2 (tout le monde à Split, aucun
+pays dominant au-delà du plafond FR) et casse dès que les sept mélanges concentraient leurs
+tirages : à graine 508, garden-of-blood passe de … à 95-97 % de prénoms distincts (les pays
+dominants US/JP/BR/GB demandent plus de slots que leurs catalogues). Ce n'est PAS un bug de la
+tranche : c'est une **contradiction entre la demande du 08/10 (≥ 98 % distinct) et le brief du
+09/10 (mélange dominant 35-42 % par organisation)**, au vu des catalogues de prénoms actuels.
+
+Ce que j'ai essayé avant de m'arrêter : mesure par sondes (tirage nu, parts des trois rosters,
+valeur réelle de `MGMT_PRENOMS_REPETES_PART`, catalogues exacts de JP/BR/FR, états HEAD vs
+modifié pour `mgmtEffectif30`). Aucune voie conforme n'existe dans le périmètre (le test 1 et
+l'assertion viennent de la fiche et ne se modifient pas ; `paysPoids` « jamais modifié » ;
+`MGMT_PRENOMS_REPETES_PART` et les catalogues de prénoms hors périmètre). J'ai refusé les trois
+tentations : affaiblir l'assertion du test 1, modifier `mgmtEffectif30`, retoucher les `paysPoids`.
+
+Le code livré implémente correctement la mécanique demandée (tests 2-4, gardes Split/Identités
+verts, Lot12 vert) ; c'est le seuil du test 1 et le garde du 08/10 qui exigent un arbitrage d'Anthony.
+
+### Écart à la fiche
+
+- Le critère de fin chiffré (« 4 tests verts ») manque : bloquant ci-dessus.
+- Fait exactement : les sept autres points de « Ce qui change » (signature de `mgmtPaysTire`,
+  `mgmtOrgPaysPoids` sous la nouvelle ancre, les deux tirages de `mgmtNewRoster`, commentaire
+  `:165`/`:167`, test ajouté dans `package.json`, `?v=` bumpés, `sw.js` suit, migration non
+  applicable).
+
+### Questions pour Anthony (nouvelles)
+
+1. **Arbitrage 08/10 ⟷ 09/10.** Le test `tests/mgmtEffectif30.test.js` (≥ 98 % de prénoms et de
+   noms de famille distincts par organisation) est-il périmé depuis le brief « Un monde qui a
+   vécu » (les organisations ont des populations nationales concentrées, leurs noms se
+   répètent mécaniquement davantage) ? Si oui : quel seuil ? Si non : faut-il inversement élargir
+   les `paysPoids` des sept (moins de concentration, pays dominants sous 20 %) ou élargir les
+   catalogues de noms des pays dominants (JP/BR/US…) — deux données marquées hors périmètre ici ?
+2. **Seuil du test 1.** La part ≥ 0,20 du pays dominant a été calibrée en pensant qu'elle suivait
+   le poids (40 %). Franchir 0,20 exige que les capacités du pays à ~360 combattants
+   (≈ 1,5 × les catalogues, ou des doublons de prénoms ouverts) passent avant : quelle barre
+   veux-tu (0,20 tient pour FR/Split, pas pour JP/BR/US/…) ?
+3. Les questions reprises ci-dessus depuis la fiche (vivier `'monde'`, validation des sept
+   `paysPoids` de `95e1fd0`) restent posées.
+

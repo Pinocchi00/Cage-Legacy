@@ -194,9 +194,12 @@ const MGMT_PAYS_POIDS = {
   monde: { FR: 4, BR: 15, US: 24, GB: 5, RU: 5, DAG: 4, GE: 3, CM: 1, NG: 2, IE: 2, MX: 5, JP: 3, KR: 3, TH: 2, BE: 1, CH: 1, MA: 1, DZ: 1, SN: 1, PL: 2, NL: 1, ES: 1, IT: 1, DE: 1, SE: 1, KZ: 1, KG: 1, CN: 3, AU: 3, CA: 2 },
 };
 /** Tirage pondéré : un seul tirage u dans [0,1), ordre stable de COUNTRY_KEYS.
- *  @param {number} u @param {'split'|'monde'} loi @returns {string} */
-function mgmtPaysTire(u,loi){
-  const poids=MGMT_PAYS_POIDS[loi]; let t=u*100;
+ *  @param {number} u
+ *  @param {'split'|'monde'|Object<string,number>} melange — loi de MGMT_PAYS_POIDS ou mélange de
+ *    poids lui-même (paysPoids d'une organisation, Monde lot 2 T2)
+ *  @returns {string} la clé de pays tirée */
+function mgmtPaysTire(u,melange){
+  const poids=typeof melange==='string'?MGMT_PAYS_POIDS[melange]:melange; let t=u*100;
   for(const ck of COUNTRY_KEYS){ t-=poids[ck]||0; if(t<0) return ck; }
   return COUNTRY_KEYS.filter(ck=>poids[ck]>0).pop();
 }
