@@ -82,7 +82,7 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       v15 — la table des visites (m.visites, une paire d'entiers par
       combattant : mgmtVisitesInit, mgmt-attention.js). Rien à convertir sur
       les données : la table part pleine (tous vus) à l'instant de la
-      migration (MGMT_BRIEF_LOT2_MIGRATION, mgmt-save.js). Une v1 reste
+      migration (MONDE_LOT8_T1_MIGRATION, mgmt-save.js). Une v1 reste
       refusée. ==== */
 const MGMT_SAVE_VERSION=15;
 

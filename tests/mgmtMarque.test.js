@@ -45,9 +45,10 @@ test('Marque — un acte du joueur, un moment sans relais et un combat de préli
   win.eval(`const m=G.mgmt; mgmtVisitesInit(m);`);
   win.eval(`const m=G.mgmt; mgmtAddFact(m,{c:m.cycle,k:'contrat',a:'${D}'});
            mgmtAddFact(m,{c:m.cycle,k:'promesse',a:'${D}',want:'revanche'});
-           mgmtAddFact(m,{c:m.cycle,k:'refus',a:'${D}',want:'revanche'});
-           const muet=MGMT_MOMENTS.find(x=>mgmtVieTexte(x)&&!x.relais.length);
-           mgmtAddFact(m,{c:m.cycle,k:'moment_vie',a:'${E}',m:muet?muet.id:MGMT_MOMENTS[0].id});`);
+           mgmtAddFact(m,{c:m.cycle,k:'refus',a:'${D}',want:'revanche'});`);
+  const muet=res(win,`return MGMT_MOMENTS.find(x=>mgmtVieTexte(x)&&!x.relais.length)||null;`);
+  assert.ok(muet,'un moment sans relais existe bien dans les données');
+  win.eval(`const m=G.mgmt; mgmtAddFact(m,{c:m.cycle,k:'moment_vie',a:'${E}',m:${JSON.stringify(muet.id)}});`);
   let r=res(win,`const m=G.mgmt; return [mgmtMarque(m,'${D}'),mgmtMarque(m,'${E}')];`);
   assert.deepEqual(r,[false,false],'les actes du joueur et un moment privé restent muets');
   /* Un combat de préliminaire : une trace copiée, rebaptisée slot 'prelim'. */
@@ -193,7 +194,6 @@ test('Marque — validateMgmt refuse une table des visites mal formée, mgmtRepa
 });
 
 test('Marque — le dessin de la marque tient dans sa cellule', () => {
-  const bloc=css.split('.mf-oct-nom{width:18px').find(b=>b.length)&&css;
   const regle=css.match(/\.mf-oct-nom\{[^}]*\}/g).filter(r=>r.includes('width:18px'));
   assert.equal(regle.length,1,'une seule règle pose les dimensions');
   const r=regle[0];
