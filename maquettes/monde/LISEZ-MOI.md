@@ -23,4 +23,4 @@ La première version de ces planches portait des textes de 17 à 21 px, contre l
 `MondeNouvellePartie` reprend désormais la mise en page réelle de l'écran (grille 4 × 2 de cartes de 440 × 322,
 aperçu chiffré de 96 px, pied de 60 px avec « Créer ton organisation · À venir ») et y ajoute, dans chaque carte,
 la ville, l'année et la réputation ; les intertitres « Les plus » / « Les contreparties » laissent la place à ces
-trois lignes (les signes + et − suffisent). Ces versions corrigées attendent la confirmation d'Anthony.
+trois lignes (les signes + et − suffisent). **Ces versions corrigées sont confirmées par Anthony le 10/10/2026** (« oui c'est bon »).
