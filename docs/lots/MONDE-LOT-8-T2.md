@@ -80,3 +80,14 @@ La marque et la table des visites (T1, ne les modifie pas : seule `mgmtFicheVue`
 ## 11. Questions pour Anthony (aucune ne bloque)
 1. Faut-il ouvrir la fiche directement sur « On en dit » quand il y a quelque chose à lire (valeur par défaut ici), ou garder Aperçu et mettre un indice sur l’onglet ?
 2. Le bloc répète parfois une ligne du fil juste dessous. On le laisse tel quel en T2 ?
+
+## Décisions de Claude (10/10/2026) — Anthony : « fais le mieux pour la lisibilité »
+
+- **Question 5 : oui.** Quand il y a du nouveau, la fiche s'ouvre sur l'onglet « On en dit », le bloc « Depuis ta
+  dernière visite » en tête. L'onglet « Aperçu » est déjà plein : y glisser un bloc de plus ferait déborder ses
+  panneaux. L'onglet « On en dit » porte la marque (le même octogone, `mfMarqueNom`) tant que le bloc n'a pas été
+  lu, pour que le joueur comprenne pourquoi la fiche s'ouvre là. Sans rien de nouveau, la fiche s'ouvre sur
+  « Aperçu », comme aujourd'hui.
+- **Question 6 : pas de doublon.** Une ligne déjà dite dans « Depuis ta dernière visite » n'est pas répétée dans le
+  fil juste en dessous, tant que le bloc est affiché.
+- Un test existant qui attend « Aperçu » après un événement s'adapte en citant cette décision.
