@@ -34,6 +34,22 @@ test('7.1 — La mesure d’ensemble du management joue des soirées et rend cai
   assert.ok(x.effectif>100&&x.caisse>0&&x.ageMoyen>20);
 });
 
+test('Monde lot 1 T1 — l’outil de mesure chronomètre les six ans : total, trois étapes, projection', () => {
+  const sortie=execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'5','--six-ans','--orgs','split','--json'],{encoding:'utf8',timeout:300000,stdio:['ignore','pipe','ignore']});
+  const r=JSON.parse(sortie.slice(sortie.indexOf('{')));
+  const ch=r.split.chrono;
+  assert.ok(ch,'la clé chrono, sœur des points de mesure (lignes[org].chrono)');
+  assert.equal(ch.soirees,5,'cinq soirées mesurées');
+  assert.ok(ch.totalMs>0,'un total chronométré');
+  assert.ok(ch.combatsMs+ch.suiteMs+ch.bookingMs<=ch.totalMs*1.1,'les trois étapes couvrent la soirée (à la marge près déjà)');
+  assert.ok(ch.sixAnsMs>0&&ch.mesureSixAns===false,'six ans projetés (5 soirées ≠ 62), jamais mesurés faussement');
+  const tmp=path.join(os.tmpdir(),'mesure-six-ans-test.md');
+  execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'5','--six-ans','--orgs','split','--out',tmp],{stdio:'ignore',timeout:300000});
+  const md=fs.readFileSync(tmp,'utf8');
+  assert.match(md,/## Chrono des six ans/,'la section « Chrono des six ans » dans le rapport');
+  for(const k of ['Combats','Suite','Booking']) assert.match(md,new RegExp(`\\*\\*${k}\\*\\*`),'les trois étapes du brief sont nommées');
+});
+
 test('7.3 — L’export des textes à relire couvre les cinq familles et ne modifie aucun fichier de données', () => {
   const avant=['mgmt-humanite-data.js','mgmt-voix-data.js','mgmt-medias-data.js','mgmt-camps-data.js','mgmt-combat-data.js'].map(f=>lire(f));
   const tmp=path.join(os.tmpdir(),'textes-a-relire-test.md');

@@ -195,6 +195,7 @@ function mgmtNewRoster(m){
       ...(tir?{niv:tir.niv,pot:tir.pot,pic:tir.pic}:{}),
     });
   }
+  mgmtRangsInvalider(m);   /* Monde lot 1 T1 : l'effectif vient de muter (une fois, le roster entier créé). */
   mgmtInitTitles(m);
   return m.roster;
 }
@@ -381,6 +382,7 @@ function mgmtNewPile(m){
      ainsi exactement les mêmes lignes qu'une partie continuée. */
   mgmtExteriorEnsure(m);
   m.cycle++;
+  mgmtRangsInvalider(m);   /* Monde lot 1 T1 : le temps use le passé (MGMT_RANG_TEMPS), l'avancée de cycle peut changer l'ordre. */
   mgmtAdvanceRosterAges(m);
   /* Lot 2B T3 : les départs tombent à l'ouverture du cycle, après le
      vieillissement et avant l'arrivée extérieure — la place libérée par un
@@ -438,6 +440,7 @@ function mgmtNewPile(m){
     else if(m.pile.length===0) m.shortfall=true;
   }
   if(m.pile.length>0) m.open=m.pile[0].id;
+  mgmtRangsInvalider(m);   /* Monde lot 1 T1 : mgmtNewPile mute plusieurs fois, invalidation de fin de livraison. */
   return m.pile;
 }
 

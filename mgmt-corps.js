@@ -307,6 +307,7 @@ function mgmtRetireRoster(m){
     if(!f||mgmtIsRetired(f)||!Number.isFinite(f.age)) continue;
     if(f.age>=mgmtRetireAge(f,m.cycle)){
       f.retired='age';
+      mgmtRangsInvalider(m);   /* Monde lot 1 T1 : la retraite d'âge sort une entrée du classement vivant. */
       mgmtPromoteSilent(m,f,3);
       mgmtAddFact(m,{c:m.cycle,k:'retired',a:f.id});
       n++;
@@ -531,6 +532,7 @@ function mgmtApplyFight(m,f,opp,res,side){
   if(issue==='win') f.W++;
   else if(issue==='loss') f.L++;
   else f.D++;
+  mgmtRangsInvalider(m);   /* Monde lot 1 T1 : le bilan de la ligne vient de muter. */
   /* Brief du 06/10, lot 2 : le niveau avance (jamais de plus d'un point perdu sur une défaite). */
   if(typeof mgmtNiveauApresCombat==='function') mgmtNiveauApresCombat(m,f,issue);
   const loserSide=res.winner==='D'?null:(res.winner==='A'?'B':'A');
@@ -559,6 +561,7 @@ function mgmtApplyFight(m,f,opp,res,side){
   else if(injury&&typeof injury.name==='string'&&injury.name.indexOf('Commotion')>=0&&T0>MGMT_BODY_THRESHOLD) retired=true;
   if(retired){
     f.retired='medical';
+    mgmtRangsInvalider(m);   /* Monde lot 1 T1 : la retraite médicale sort une entrée du classement vivant. */
     mgmtPromoteSilent(m,f,3);
     mgmtAddFact(m,{c:m.cycle,k:'retired',a:f.id});
   }else if(injury||days>=90){
@@ -637,9 +640,12 @@ function mgmtRunEvent(m){
       rounds:cf.rounds,title:cf.title,serre:mgmtDecisionSerree(res)});
     m.hist.push({c:m.cycle,slot:cf.slot,seed:seedFight,rounds:cf.rounds,a:traceA,b:traceB,
       winner:res.winner,family:fam,round:roundF});
+    mgmtRangsInvalider(m);   /* Monde lot 1 T1 : le score dérive de m.hist, muté à ce combat. */
     if(cf.title) mgmtAddFact(m,{c:m.cycle,k:'title_fight',div:fa.div,fight:m.hist.length-1});
     const ta=mgmtApplyFight(m,fa,fb,res,'A');
+    mgmtRangsInvalider(m);   /* Monde lot 1 T1 : les bilans mutent dans mgmtApplyFight, avant le m.hist.push suivant. */
     const tb=mgmtApplyFight(m,fb,fa,res,'B');
+    mgmtRangsInvalider(m);
     if(ta) touched.push(ta);
     if(tb) touched.push(tb);
   }

@@ -12,7 +12,10 @@ const { spawnSync } = require('child_process');
 const path = require('path');
 const racine = path.join(__dirname, '..');
 const LENTS = ['tests/mgmtCorrectionsLot12.test.js', 'tests/mgmtSoireeShow.test.js', 'tests/mgmtSuivi.test.js', 'tests/mgmtSalles.test.js',
-  'tests/nomsApostrophe.test.js', 'tests/moteurRecalibrage.test.js', 'tests/mgmtAnimations.test.js'];
+  'tests/nomsApostrophe.test.js', 'tests/moteurRecalibrage.test.js', 'tests/mgmtAnimations.test.js',
+  /* Monde lot 1 T1 : la preuve (test 6 — vingt soirées avec et sans mémo, 171 s mesurée le 10/10)
+     et l'exactitude (test 2 — 3 graines × 40 soirées, 218 s) dépassent 60 s ; lancers manuels ou check complet. */
+  'tests/mgmtClassementsMemoire.test.js'];
 const gardes = process.argv.slice(2).map(f => f.replace(/\\/g, '/'));
 const tous = require(path.join(racine, 'package.json')).scripts.test.replace(/^node --test\s+/, '').split(/\s+/).filter(Boolean);
 const ecartes = LENTS.filter(f => tous.includes(f) && !gardes.includes(f));

@@ -123,3 +123,40 @@ pas (il compare le mémo au calcul pur dans le même état, après la soirée).
 ## 11. Questions pour Anthony
 
 - La barre de chargement (décision 2) : je la place avec la génération des six ans (T3 et après), pas en T1 — rien n'est encore chargé à la création. Tu valides ? *(Non bloquant : le classement et le chronomètre partent sans elle ; si tu la veux en T1, il faudra une planche.)*
+
+## Compte rendu — Monde lot 1 T1 (10/10/2026)
+
+**Fichiers modifiés et leur rôle**
+
+- `mgmt-carte.js` — l'ancre `MGMT_LOT2_CLASSEMENT` est amendée et son corps devient la voie pure `mgmtDivisionRankingCalcule` (loi inchangée) ; ancre neuve `MONDE_LOT1_T1` juste après : mémo `WeakMap` de module (jamais sur `m`, jamais dans `G`, jamais sauvegardé), `mgmtDivisionRanking` servie en mémoire (clé `portée|catégorie|cycle`, la clé vivante porte `m.cycle`, rend `slice()`), `mgmtRangsInvalider`, `mgmtRangsMemoActif` (interrupteur de preuve, vrai par défaut), et la garde de vigueur (voir écarts).
+- `mgmt-corps.js` — `mgmtRangsInvalider(m)` : après chaque `m.hist.push` et chaque `mgmtApplyFight` dans `mgmtRunEvent`, après le bloc de bilan dans `mgmtApplyFight`, après `f.retired='medical'` (`mgmtApplyFight`) et après `f.retired='age'` (`mgmtRetireRoster`).
+- `mgmt-bureau.js` — `mgmtRangsInvalider(m)` après `m.cycle++` et en fin de `mgmtNewPile` ; une fois en fin de création du roster dans `mgmtNewRoster`.
+- `mgmt-recrutement.js` — `mgmtRangsInvalider(m)` après le `m.roster.push(ligne)` de `mgmtRecruter`.
+- `mgmt-monde.js` — `mgmtRangsInvalider(m)` après chaque `m.exterieur.push` de `mgmtExteriorEnsure` (couvre `mgmtExteriorArrive`, appelée par `mgmtNewPile`).
+- `tools/mesure-management.js` — `--six-ans` : 62 soirées par défaut (nombre explicite en premier argument conservé) ; le chrono est accumulé **dans** le `win.eval` de `partie()` (pas de `Date.now()` Node-side) ; clé sœur `lignes[org].chrono = {soirees,totalMs,combatsMs,suiteMs,bookingMs,sixAnsMs,mesureSixAns}` ; section « Chrono des six ans » dans le rapport, en secondes et en parts.
+- `tools/check-rapide.js` — le nouveau fichier de test ajouté à `LENTS` (test 6 : 171 s, test 2 : 218 s — les deux > 60 s).
+- `package.json` — `tests/mgmtClassementsMemoire.test.js` ajouté aux scripts `test` et `test:watch`.
+- `index.html`, `sw.js` — montées de version par `tools/_bump.js` (aucun `<script>` ajouté).
+- `tests/mgmtClassementsMemoire.test.js` — fichier neuf.
+
+**Tests ajoutés** (intitulés exacts de la fiche)
+
+1. `Monde lot 1 T1 — cent appels dans un même état, un seul calcul pur par catégorie et portée`
+2. `Monde lot 1 T1 — le classement en mémoire est exactement celui du calcul : graines 20261008, 20261009, 20261010, quarante soirées, comparé à chaque soirée` (0 divergence)
+3. `Monde lot 1 T1 — une mutation hors résultat invalide le mémo : recrue signée, retraite, avancée de cycle`
+4. `Monde lot 1 T1 — le mémo ne se sauvegarde pas : la partie sérialisée ne change pas quand on lit les classements`
+5. `Monde lot 1 T1 — l’outil de mesure chronomètre les six ans : total, trois étapes, projection` (dans `tests/outillage.test.js`)
+6. `Monde lot 1 T1 — la partie jouée avec le mémo est identique à la partie jouée sans : deux graines, vingt soirées, état comparé après chaque soirée` (0 différence)
+
+Test 1 : 2 calculs purs (un par portée), 0 ensuite. Test 3 : la retraite d'âge passe par le chemin réel (`mgmtRetireRoster`, ligne vieillie par le test, même effet que `f.retired='age'` en fix).
+
+**Migration de sauvegarde** — aucune : `MGMT_SAVE_VERSION` reste à 14, `mgmtMigrate()` et `validateMgmt()` intouchés (§4 de la fiche).
+
+**Vérification** — `node tools/verif-versions.js : « aucun écart par rapport à main »` ; `npm run check:rapide : VERT` (90 fichiers de test, 8 écartés dont le présent fichier, listé dans `LENTS` et lancé à la main : 5 fail 0 fait de suite, seule la preuve/exactitude sont lentes). Les tests `MGMT T1 classement` (`tests/mgmtCard.test.js`) et tout `mgmtTop5` restent verts. Point d'arrêt : la mesure des six ans (`node tools/mesure-management.js --six-ans`) revient à Claude/Anthony, après le commit ; la mesure courte (5 soirées, `split`) donne 6,8 s mesurées et 84,8 s projetées, booking 76 % du total.
+
+**Écarts à la fiche**
+
+- **La garde de vigueur** (`MGMRANGS_VIGUEUR`, `mgmt-carte.js`, dans l'ancre `MONDE_LOT1_T1`) : deux tests existants non cités par la fiche mutate le classement à la main — `MGMT T2 non sélectionnables` (`tests/mgmtCard.test.js:1078`, remplace `m.roster` après des lectures) et `Top 5 — une défaite fait chuter…` (`tests/mgmtTop5.test.js:10`, pousse dans `m.hist` après une lecture). `mgmtDivisionRanking` relit donc à chaque appel la vigueur de l'effectif — trois `.length` (`roster`, `exterieur`, `m.hist`), aucune boucle — et vide son mémo si elle a changé. Le jeu réel ne change pas (toutes ses mutations passent déjà par `mgmtRangsInvalider`) ; les deux tests existants redeviennent verts sans être touchés.
+- `suiteMs = totalMs − bookingMs − combatsMs` (le reste) : l'overhead de mesure (JSON de changement de champions, un point de mesure rare) est dedans — honnête, et la somme égale exactement le total.
+
+**Questions pour Anthony** — celle de la §11 (barre de chargement posée avec la génération des six ans, T3 et après), rien d'autre.

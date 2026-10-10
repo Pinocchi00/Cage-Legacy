@@ -68,6 +68,7 @@ function mgmtRecruter(m,id,interne){
     ligne.pot=clamp(trace.niveau+Math.round(Math.max(0,pic-ligne.age)*1.8),trace.niveau,MGMT_NIV_MAX);
   }
   m.roster.push(ligne);
+  mgmtRangsInvalider(m);   /* Monde lot 1 T1 : une recrue entre dans l'effectif classé. */
   mgmtAddFact(m,{c:m.cycle,k:'recrue',a:line.id});
   return ligne;
 }
