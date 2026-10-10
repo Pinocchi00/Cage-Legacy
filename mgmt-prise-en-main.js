@@ -25,12 +25,12 @@ const MGMT_PRISE_CLE='cage-legacy-accompagnement';
 
 /** Les six moments, dans l'ordre, chacun avec la condition de l'état du jeu qui le déclenche. Pur. */
 const MGMT_PRISE_MOMENTS=[
-  ['carte_vide',(m,ecran)=>(m.eventsPlayed||0)===0&&(m.card.main||[]).length===0&&ecran==='mgmt_carte'],
-  ['premier_combat',(m)=>(m.eventsPlayed||0)===0&&(m.card.main||[]).length===1],
-  ['carte_complete',(m)=>(m.eventsPlayed||0)===0&&(m.card.main||[]).length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&!m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')&&(m.card.prelims||[]).length===0],
-  ['prelims',(m)=>(m.eventsPlayed||0)===0&&m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')],
-  ['soiree_prete',(m)=>(m.eventsPlayed||0)===0&&typeof mgmtAgendaPret==='function'&&mgmtAgendaPret(m)],
-  ['premier_lendemain',(m,ecran)=>(m.eventsPlayed||0)===1&&ecran==='mgmt_lendemain'],
+  ['carte_vide',(m,ecran)=>mgmtSoireesJoueur(m)===0&&(m.card.main||[]).length===0&&ecran==='mgmt_carte'],
+  ['premier_combat',(m)=>mgmtSoireesJoueur(m)===0&&(m.card.main||[]).length===1],
+  ['carte_complete',(m)=>mgmtSoireesJoueur(m)===0&&(m.card.main||[]).length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&!m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')&&(m.card.prelims||[]).length===0],
+  ['prelims',(m)=>mgmtSoireesJoueur(m)===0&&m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')],
+  ['soiree_prete',(m)=>mgmtSoireesJoueur(m)===0&&typeof mgmtAgendaPret==='function'&&mgmtAgendaPret(m)],
+  ['premier_lendemain',(m,ecran)=>mgmtSoireesJoueur(m)===1&&ecran==='mgmt_lendemain'],
 ];
 let MGMT_PRISE={courant:null,vus:null};
 

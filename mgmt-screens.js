@@ -349,7 +349,7 @@ Object.assign(CL,{
     mgmtRevoirCombat(t,'mgmt_fiche',null);
   },
   /* Brief lot 1 : mgmtEnter(n) ouvre l'emplacement n ; sans argument, l'emplacement 1. */
-  mgmtEnter(n,orgId){
+  mgmtEnter(n,orgId,opts){
     if(!G) G={theme:'dark'};
     let neuve=false;
     mgmtSlotOuvrir(n===undefined?1:n);
@@ -365,8 +365,10 @@ Object.assign(CL,{
        écarté, la sauvegarde dédiée (ou un bureau neuf) prend le relais. */
     if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
-      G.mgmt=mgmtDefault(orgId);
-      if(!loadMgmt()){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
+      G.mgmt=(opts&&opts.partie)||mgmtDefault(orgId);   /* Monde lot 1 T3 : une partie au passé déjà joué */
+      const chargee=loadMgmt();
+      if(!chargee&&opts&&opts.partie){ saveMgmt(); neuve=true; }
+      else if(!chargee){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
       else mgmtAgendaPreparer(G.mgmt);
     }else{
       mgmtRepair(G.mgmt);

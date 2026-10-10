@@ -13,7 +13,7 @@ let MGMT_DEMO_FIN_VUE=false;
 const mgmtDemoActive=()=>typeof CL_DEMO!=='undefined'&&CL_DEMO===true;
 /** Les cinq soirées de la démo sont jouées. Pur. */
 function mgmtDemoTerminee(m){
-  return mgmtDemoActive()&&!!m&&Number.isSafeInteger(m.eventsPlayed)&&m.eventsPlayed>=CL_DEMO_SOIREES;
+  return mgmtDemoActive()&&!!m&&Number.isSafeInteger(m.eventsPlayed)&&mgmtSoireesJoueur(m)>=CL_DEMO_SOIREES;
 }
 /** Après le lendemain de la dernière soirée permise, l'écran de fin passe, une seule fois. @returns {boolean} vrai si l'écran de fin a pris la main. */
 function mgmtDemoApresSoiree(){

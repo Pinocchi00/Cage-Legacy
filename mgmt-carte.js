@@ -136,22 +136,23 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
     }
   }
   const champions=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set();
+  /* Monde lot 1 T3 (vitesse) : les conditions qui ne regardent qu'UN combattant se lisent une fois par combattant, plus une fois par paire (66 000 paires
+     pour 366 combattants). Mêmes conditions, même ordre des paires (celui de r), aucun tirage : le résultat est identique. */
+  const aptes=r.filter(o=>mgmtAvailable(m,o)
+    /* Lot 11 (D5) : un champion ne combat jamais en préliminaire. */
+    &&!champions.has(o.id)
+    /* §T3 : les prélims se construisent hors carte principale — un combattant déjà engagé (principale comme prélims) n'est jamais candidat. */
+    &&!mgmtEngaged(m,o)
+    /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
+    &&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,o)));
+  const sexes=aptes.map(genderOf);
   const collect=mode=>{
     const out=[];
-    for(let i=0;i<r.length;i++){
-      for(let j=i+1;j<r.length;j++){
-      const A=r[i], B=r[j];
+    for(let i=0;i<aptes.length;i++){
+      for(let j=i+1;j<aptes.length;j++){
+      const A=aptes[i], B=aptes[j];
       if(A.first===B.first) continue;
-      if(genderOf(A)!==genderOf(B)) continue;
-      if(!mgmtAvailable(m,A)||!mgmtAvailable(m,B)) continue;
-      /* Lot 11 (D5) : un champion ne combat jamais en préliminaire. */
-      if(champions.has(A.id)||champions.has(B.id)) continue;
-      /* §T3 : les prélims se construisent hors carte principale — un
-         combattant déjà engagé (principale comme prélims) n'est jamais
-         candidat. */
-      if(mgmtEngaged(m,A)||mgmtEngaged(m,B)) continue;
-      /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
-      if(typeof mgmtAgendaReserve==='function'&&(mgmtAgendaReserve(m,A)||mgmtAgendaReserve(m,B))) continue;
+      if(sexes[i]!==sexes[j]) continue;
       const key=[A.id,B.id].sort().join('|');
       if(seen.has(key)) continue;
       if(rematch.has(key)) continue;
@@ -424,10 +425,12 @@ function mgmtCartRows(m){
   const rows=m.roster.filter(o=>o&&!mgmtIsRetired(o));
   const order=allDivisions().map(d=>d.id);
   const dx=o=>{ const i=order.indexOf(o.div); return i<0?order.length:i; };
+  /* Monde lot 1 T3 (vitesse) : le rang de chaque ligne se lit une fois, pas à chaque comparaison du tri (même fonction pure, même valeur). */
+  const rangs=new Map(); for(const o of rows) rangs.set(o,mgmtDivisionRank(m,o)||0);
   rows.sort((x,y)=>{
     const a=dx(x), b=dx(y);
     if(a!==b) return a-b;
-    const rx=mgmtDivisionRank(m,x)||0, ry=mgmtDivisionRank(m,y)||0;
+    const rx=rangs.get(x), ry=rangs.get(y);
     if(rx!==ry) return rx-ry;
     return x.id<y.id?-1:1;
   });

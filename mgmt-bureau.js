@@ -78,7 +78,7 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       ne peut porter un born négatif, la cohorte d'ouverture d'une partie
       déjà commencée reste celle qu'elle porte — le monde d'une ancienne
       sauvegarde ne bouge pas. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=14;
+const MGMT_SAVE_VERSION=15;   /* Monde lot 1 T3 : ligne isolée, à renuméroter à la fusion */
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;
@@ -141,13 +141,16 @@ function mgmtNomEnConflit(m,nm,ck,id,div,bilan){
   if(memes.some(o=>o.div===div)) return {conflit:true,genre:''};
   return bilan.partages<bilan.partagesMax?{conflit:false,genre:'partage',prenom}:{conflit:true,genre:''};
 }
-function mgmtNewRoster(m){
+function mgmtNewRoster(m,opts){
   /* Lot 5 H4 : une partie neuve (effectifs 1) porte 130 à 150 combattants
      répartis comme le monde ; le chemin d'avant (effectifs 0 : 40 à 60,
      catégorie tirée à poids égaux) est conservé tel quel — mêmes bornes,
      mêmes tirages — pour les sauvegardes et fixtures d'avant H4. */
   const avant=m.effectifs===0;
   const profil=mgmtOrgProfil(m);
+  /* Monde lot 1 T3 : sans option, rien ne change (mêmes tirages, mêmes lignes). */
+  const recul=opts&&Number.isSafeInteger(opts.reculAns)&&opts.reculAns>0?opts.reculAns:0;
+  const attendus=recul>0&&Number.isSafeInteger(opts.combatsAttendus)?opts.combatsAttendus:0;
   const tire=avant?RI(MGMT_ROSTER_AVANT_MIN,MGMT_ROSTER_AVANT_MAX):RI(MGMT_ROSTER_MIN,MGMT_ROSTER_MAX);
   /* Brief du 06/10, lot 5 : la taille de l'effectif suit le profil (le tirage est consommé comme avant). */
   const divs=allDivisions();
@@ -176,6 +179,8 @@ function mgmtNewRoster(m){
     }
     if(!avant){ const c=mgmtNomEnConflit(m,nm,ck,id,div.id,bilan); if(c.genre==='fratrie') bilan.fratries++; else if(c.genre==='partage') bilan.partages++; if(c.prenom) bilan.prenoms++; }
     const age=avant?RI(22,35):clamp(RI(22,35)+profil.age,20,40);
+    /* Monde lot 1 T3 : à l'ouverture du passé, l'effectif naît reculé de `reculAns` ans (plancher 18) ; `age` reste l'âge du premier jour, `ageDebut` celui de la naissance du passé. */
+    const ageDebut=recul>0?Math.max(18,age-recul):age;
     const band=age<=26?RI(2,12):(age>=33&&m.niveaux===1?RI(18,36):(age>=29?RI(15,30):RI(8,22)));   /* retours du 09/10 : les vétérans de 33 ans et plus ont connu plus de combats */
     /* Brief du 06/10, lot 2 : une partie à niveaux tire d'abord le niveau du combattant (son potentiel, son pic),
        puis un bilan COHÉRENT avec lui — gonflé ou dégonflé par son organisation d'origine. Le tirage RI(40,80)
@@ -183,12 +188,21 @@ function mgmtNewRoster(m){
     const lvAvant=RI(40,80);
     const tir=m.niveaux===1?mgmtNiveauTire(id,age):null;
     if(tir) tir.niv=clamp(tir.niv+mgmtOrgDecalageNiveau(profil,div.id),MGMT_NIV_MIN,MGMT_NIV_MAX);
-    const rec=m.niveaux===1?mgmtBilanReel(mgmtNiveauPourBilan(id,tir.niv),clamp(band,age-18,(age-18)*4)):correlatedRecord(tir?mgmtNiveauPourBilan(id,tir.niv):lvAvant,clamp(band,age-18,(age-18)*4));
+    /* Monde lot 1 T3 : le bilan d'avant les six ans est celui d'aujourd'hui moins les combats que les six ans apporteront ; le niveau stocké est celui de l'âge reculé. */
+    const total=clamp(band,age-18,(age-18)*4);
+    const rec=m.niveaux===1?mgmtBilanReel(mgmtNiveauPourBilan(id,tir.niv),total):correlatedRecord(tir?mgmtNiveauPourBilan(id,tir.niv):lvAvant,total);
+    if(recul>0&&attendus>0){
+      /* Les combats des six ans se partagent à peu près à égalité entre victoires et défaites : on retire autant de l'un que de l'autre (un de plus tour à tour), sans passer sous un combat par année de carrière. */
+      const ret=Math.min(attendus,Math.max(0,rec.W+rec.L-(ageDebut-18)));
+      const dW=Math.min(rec.W,i%2===0?Math.ceil(ret/2):Math.floor(ret/2)), dL=Math.min(rec.L,ret-dW);
+      rec.W-=dW; rec.L-=dL;
+    }
+    if(recul>0&&tir){ const t2=mgmtNiveauTire(id,ageDebut); tir.niv=clamp(t2.niv+mgmtOrgDecalageNiveau(profil,div.id),MGMT_NIV_MIN,MGMT_NIV_MAX); }
     m.roster.push({
       id,
       name:nm.name,first:nm.first,last:nm.last,ck,generation:MGMT_IDENTITE_GENERATION,
       W:rec.W,L:rec.L,D:m.niveaux===1?mgmtNulsReels(rec.W+rec.L,RI(0,99)):RI(0,2),
-      age,
+      age:ageDebut,
       div:div.id,divName:div.name,
       org:m.org,
       level:1,raison:null,interactions:0,
@@ -343,20 +357,18 @@ function mgmtEligiblePairs(m,usedFirsts,seen,lastDiv,run){
   const outSame=[], outAny=[];
   const r=m.roster;
   const genderOf=o=>{ const d=divById(o.div); return d?d.gender:null; };
-  for(let i=0;i<r.length;i++){
-    for(let j=i+1;j<r.length;j++){
-      const A=r[i], B=r[j];
+  /* Monde lot 1 T3 (vitesse) : les conditions d'un seul combattant se lisent une fois chacun, pas une fois par paire. Mêmes paires, même ordre. */
+  const aptes=r.filter(o=>mgmtAvailable(m,o)&&!usedFirsts.has(o.first)&&!mgmtEngaged(m,o));
+  const sexes=aptes.map(genderOf);
+  for(let i=0;i<aptes.length;i++){
+    for(let j=i+1;j<aptes.length;j++){
+      const A=aptes[i], B=aptes[j];
       if(A.first===B.first) continue;
-      if(genderOf(A)!==genderOf(B)) continue;
-      if(!mgmtAvailable(m,A)||!mgmtAvailable(m,B)) continue;
-      if(usedFirsts.has(A.first)||usedFirsts.has(B.first)) continue;
+      if(sexes[i]!==sexes[j]) continue;
       const key=[A.id,B.id].sort().join('|');
       if(seen.has(key)) continue;
       const d=A.div===B.div?A.div:A.div;
       if(d===lastDiv&&run>=2) continue;
-      /* Lot 2 T3, C1 : accepter booke dans la carte principale — un
-         combattant déjà engagé n'est jamais proposé. */
-      if(mgmtEngaged(m,A)||mgmtEngaged(m,B)) continue;
       (A.div===B.div?outSame:outAny).push([A,B]);
     }
   }

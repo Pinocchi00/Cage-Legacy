@@ -57,7 +57,7 @@ function mgmtAgendaJour(m,n){
     const f=(c.faites||[]).find(x=>x.n===n); if(f) return f.jour;
     const i=n-((m.eventsPlayed||0)+1);
     if(i>=0&&c.prochaines[i]) return c.prochaines[i].jour;
-    if(i<0) return (n-1)*MGMT_EVENT_WEEKS*7;
+    if(i<0) return (n-1-(m.passe&&Number.isSafeInteger(m.passe.soirees)?m.passe.soirees:0))*MGMT_EVENT_WEEKS*7;   /* Monde lot 1 T3 : le passé précède le jour 0 */
     return null;
   }
   return (n-1)*MGMT_EVENT_WEEKS*7;
@@ -229,7 +229,7 @@ function mgmtAgendaValide(c){
   if(!Number.isSafeInteger(c.jour)||c.jour<0||!Number.isSafeInteger(c.vieJour)||c.vieJour<0||c.vieJour>c.jour) return false;
   if(!Array.isArray(c.prochaines)||!Array.isArray(c.faites)) return false;
   for(const p of c.prochaines){ if(!p||!Number.isSafeInteger(p.jour)||!MGMT_AGENDA_TAILLES.includes(p.taille)||(p.salle!==undefined&&typeof p.salle!=='string')) return false; }
-  for(const f of c.faites){ if(!f||!Number.isSafeInteger(f.n)||f.n<1||!Number.isSafeInteger(f.jour)||f.jour<0||!MGMT_AGENDA_TAILLES.includes(f.taille)) return false; }
+  for(const f of c.faites){ if(!f||!Number.isSafeInteger(f.n)||f.n<1||!Number.isSafeInteger(f.jour)||f.jour<-20000||!MGMT_AGENDA_TAILLES.includes(f.taille)) return false; }
   return true;
 }
 /* ==== [FIN ANCRE] ==== */
