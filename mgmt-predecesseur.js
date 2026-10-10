@@ -12,6 +12,41 @@
  *  @returns {{titreCadence:number}} un objet neuf à chaque appel. */
 function mgmtPredecesseurReglages(){ return {titreCadence:2}; }
 
+/* ==== [ANCRE: MONDE_LOT1_T4BIS_PREDECESSEUR] — Monde lot 1 T4 bis : un matchmaker raisonnable garde ses combattants sous contrat et fait entrer des jeunes.
+   Réglages OPT-IN (mgmtPredecesseurReglages garde ses défauts : l'outil de mesure et ses repères ne bougent pas) : `renouvelle` re-signe tout sans-contrat de l'effectif
+   (la cause des 45 % de sans-contrat au premier jour : le jeu les laisse partir après une longue attente, et le prédécesseur ne les reprenait jamais) ;
+   `recrues` fait entrer, par le mécanisme d'arrivée existant (le vivier : mgmtRecrutables, puis mgmtContratSigner qui appelle mgmtRecruter), le meilleur jeune
+   de la catégorie quand elle est sous son plan — une catégorie sur `pas` à chaque soirée, à partir de la soirée `depuis`. Aucun tirage de la RNG. ==== */
+/** Re-signe les sans-contrat de l'effectif (3 combats, à la bourse qu'ils demandent). @returns {number} les signatures acceptées. */
+function mgmtPredecesseurResigne(m){
+  let n=0;
+  for(const f of m.roster){
+    if(!f.libre||mgmtIsRetired(f)) continue;
+    const r=mgmtContratSigner(m,f.id,3,mgmtBourseSouhaitee(m,f,false));
+    if(r.ok) n++;
+  }
+  return n;
+}
+/** Fait entrer des jeunes du vivier dans les catégories sous leur plan. cfg : {depuis,pas,parSoiree,ageMax,fin,finAgeMax,plan:{divId:nombre}}. @returns {number} les recrues. */
+function mgmtPredecesseurRecrute(m,k,cfg){
+  if(!cfg||k<cfg.depuis) return 0;
+  let n=0;
+  allDivisions().forEach((d,i)=>{
+    if((k+i)%cfg.pas!==0) return;
+    /* Les dernières soirées, la catégorie encore sous son plan prend aussi des combattants plus âgés (finAgeMax) : l'effectif reste celui du plan. */
+    const ageMax=k>=cfg.fin?cfg.finAgeMax:cfg.ageMax;
+    for(let j=0;j<cfg.parSoiree;j++){
+      if(m.roster.filter(f=>f.div===d.id&&!mgmtIsRetired(f)).length>=(cfg.plan[d.id]||0)) return;
+      const x=mgmtRecrutables(m,d.id).find(y=>y.age<=ageMax);
+      const cible=x&&mgmtExteriorPourOffre(m,x.id);
+      if(!cible) return;
+      if(mgmtContratSigner(m,x.id,3,mgmtBourseSouhaitee(m,cible,false)).ok) n++; else return;
+    }
+  });
+  return n;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Les champions de Split, un par catégorie (id ou null), dans l'ordre de allDivisions().
  *  @param {object} m la partie  @returns {Array<string|null>} */
 function mgmtPredecesseurChampions(m){ return allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null); }
@@ -26,9 +61,9 @@ function mgmtPredecesseurChampions(m){ return allDivisions().map(d=>(mgmtSplitTi
  *   reclames:number,tetes:number,titres:number,champions:{avant:Array,apres:Array},decouvert:boolean,evenement:object|null}} */
 function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   if(typeof G==='undefined'||!G||G.mgmt!==m) throw new Error('mgmtPredecesseurSoiree : G.mgmt doit être la partie jouée');
-  const cad=Object.assign(mgmtPredecesseurReglages(),reglages||{}).titreCadence;
+  const cfg=Object.assign(mgmtPredecesseurReglages(),reglages||{}), cad=cfg.titreCadence;
   const refus={'trop-grand':0,caisse:0,'trop-bas':0,offre:0};
-  let prolonges=0, reclames=0, tetes=0;
+  let prolonges=0, reclames=0, tetes=0, resignes=0, recrues=0;
   const t0=Date.now();
   const champAvant=mgmtPredecesseurChampions(m);
   /* Lot 5 T2 : le prédécesseur répondra aux demandes ici. */
@@ -36,6 +71,8 @@ function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   /* Il prolonge à l'avance : un contrat à un combat de la fin est renouvelé sur trois combats, à la bourse que le combattant demande. */
   for(const f of m.roster){ if(mgmtIsRetired(f)||f.libre||!f.ct) continue; if(mgmtContratRestants(f)>1) continue;
     const b=mgmtBourseSouhaitee(m,f,true); const r=mgmtContratRenouveler(m,f.id,3,b); if(r.ok) prolonges++; else if(refus[r.raison]!==undefined) refus[r.raison]++; }
+  if(cfg.renouvelle===true) resignes=mgmtPredecesseurResigne(m);
+  if(cfg.recrues) recrues=mgmtPredecesseurRecrute(m,k,cfg.recrues);
   if(!m.cal.prochaines.length) mgmtAgendaPoser(m,m.cal.jour+MGMT_EVENT_WEEKS*7,'petite');
   /* La carte principale : les combats réclamés d'abord, puis les meilleures têtes d'affiche de chaque catégorie. */
   for(const r of mgmtPublicReclame(m)){ if(m.card.main.length>=m.card.sizeMain) break; const a=mgmtFighterById(m,r.a), b=mgmtFighterById(m,r.b);
@@ -55,7 +92,7 @@ function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   const t1=Date.now();
   const ev=mgmtAgendaJouer(m);
   if(mesure) mesure.combatsMs+=Date.now()-t1;
-  const compte={jouee:!!ev,k,prolonges,refus,reclames,tetes,titres,champions:{avant:champAvant,apres:mgmtPredecesseurChampions(m)},decouvert:m.treasury<0,evenement:ev||null};
+  const compte={jouee:!!ev,k,prolonges,resignes,recrues,refus,reclames,tetes,titres,champions:{avant:champAvant,apres:mgmtPredecesseurChampions(m)},decouvert:m.treasury<0,evenement:ev||null};
   if(!ev) return compte;
   mgmtNewPile(m);
   return compte;

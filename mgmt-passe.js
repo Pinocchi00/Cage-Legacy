@@ -22,6 +22,13 @@ const MGMT_PASSE_RECUL_ANS=6;
 const MGMT_PASSE_COMBATS_ATTENDUS=3;
 /** Borne des jours négatifs et de l'origine acceptés par les validateurs (≈ 55 ans). */
 const MGMT_PASSE_JOURS_MAX=20000;
+/** T4 bis : les recrues entrent pendant les dernières soirées du passé (dix-huit : un an et demi), une catégorie sur trois à chaque soirée, des jeunes de 23 ans au plus. */
+const MGMT_PASSE_FENETRE_RECRUES=4;
+const MGMT_PASSE_RECRUES_PAS=1;
+const MGMT_PASSE_RECRUES_PAR_SOIREE=4;
+const MGMT_PASSE_RECRUES_AGE_MAX=23;
+const MGMT_PASSE_RECRUES_FIN=2;
+const MGMT_PASSE_RECRUES_FIN_AGE_MAX=27;
 
 /** Les soirées jouées par le joueur : celles de la partie moins celles du passé. Pur. @returns {number} */
 function mgmtSoireesJoueur(m){
@@ -55,10 +62,11 @@ function mgmtPassePreparer(orgId,opts){
   if(typeof G==='undefined'||!G) G={theme:'dark'};
   const m=mgmtDefault(orgId);
   m.graine=mgmtGraineNeuve();
-  mgmtNewRoster(m,{reculAns:o.reculAns,combatsAttendus:o.combatsAttendus});
+  const plan={};
+  mgmtNewRoster(m,{reculAns:o.reculAns,combatsAttendus:o.combatsAttendus,sansJeunes:true,plan});
   mgmtNewPile(m);
   mgmtAgendaInit(m);
-  m.passe={enCours:true,soirees:o.soirees,reculAns:o.reculAns,combatsAttendus:o.combatsAttendus};
+  m.passe={enCours:true,soirees:o.soirees,reculAns:o.reculAns,combatsAttendus:o.combatsAttendus,plan};
   G.mgmt=m;
   return m;
 }
@@ -67,7 +75,9 @@ function mgmtPassePreparer(orgId,opts){
  *  @returns {{k:number,n:number,jouee:boolean,termine:boolean,annee:number}} k = soirées faites après ce pas */
 function mgmtPasseSoiree(m,k){
   const n=m.passe.soirees;
-  const s=mgmtPredecesseurSoiree(m,k);
+  /* T4 bis : il re-signe ses sans-contrat et recrute des jeunes en fin de passé (réglages opt-in du prédécesseur). */
+  const reglages={renouvelle:true,recrues:{depuis:Math.max(0,n-MGMT_PASSE_FENETRE_RECRUES),pas:MGMT_PASSE_RECRUES_PAS,parSoiree:MGMT_PASSE_RECRUES_PAR_SOIREE,ageMax:MGMT_PASSE_RECRUES_AGE_MAX,fin:Math.max(0,n-MGMT_PASSE_RECRUES_FIN),finAgeMax:MGMT_PASSE_RECRUES_FIN_AGE_MAX,plan:m.passe.plan||{}}};
+  const s=mgmtPredecesseurSoiree(m,k,reglages);
   const fait=s.jouee?k+1:k;
   return {k:fait,n,jouee:s.jouee,termine:!s.jouee||fait>=n,annee:mgmtPasseAnnee(n,Math.min(fait,n-1))};
 }
@@ -77,6 +87,8 @@ function mgmtPasseCloturer(m){
   const p=m&&m.passe;
   if(!p||p.enCours!==true) return m;
   const c=m.cal;
+  /* T4 bis : sa dernière action — il re-signe ceux que l'ouverture du dernier cycle a laissés partir, pour que l'héritage ne soit pas un effectif sans contrat. */
+  mgmtPredecesseurResigne(m);
   p.soirees=Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:p.soirees;
   /* Le temps : un cycle de plus (les âges suivent), puis le jour d'arrivée du joueur devient le jour 0. */
   c.jour+=MGMT_EVENT_WEEKS*7;
@@ -87,7 +99,7 @@ function mgmtPasseCloturer(m){
   for(const x of c.prochaines) x.jour-=origine;
   if(Array.isArray(m.fil)){ for(const x of m.fil){ if(x&&Number.isSafeInteger(x.j)) x.j-=origine; } }
   p.origineJours=origine;
-  delete p.enCours;
+  delete p.enCours; delete p.plan;
   /* Le passage de témoin : la richesse reprend le profil, l'histoire reste. */
   const profil=mgmtOrgProfil(m);
   m.treasury=profil.caisse;

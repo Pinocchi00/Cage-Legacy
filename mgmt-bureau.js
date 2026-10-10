@@ -181,6 +181,9 @@ function mgmtNewRoster(m,opts){
     const age=avant?RI(22,35):clamp(RI(22,35)+profil.age,20,40);
     /* Monde lot 1 T3 : à l'ouverture du passé, l'effectif naît reculé de `reculAns` ans (plancher 18) ; `age` reste l'âge du premier jour, `ageDebut` celui de la naissance du passé. */
     const ageDebut=recul>0?Math.max(18,age-recul):age;
+    /* Monde lot 1 T4 bis : les combattants qui n'auraient pas encore 18 ans à l'ouverture du passé n'y naissent pas — le prédécesseur les recrutera dans le vivier, en fin de passé. `opts.plan` (sortie) compte les places de chaque catégorie, recrues attendues comprises. */
+    if(opts&&opts.plan) opts.plan[div.id]=(opts.plan[div.id]||0)+1;
+    if(recul>0&&opts.sansJeunes===true&&age-recul<18) continue;
     const band=age<=26?RI(2,12):(age>=33&&m.niveaux===1?RI(18,36):(age>=29?RI(15,30):RI(8,22)));   /* retours du 09/10 : les vétérans de 33 ans et plus ont connu plus de combats */
     /* Brief du 06/10, lot 2 : une partie à niveaux tire d'abord le niveau du combattant (son potentiel, son pic),
        puis un bilan COHÉRENT avec lui — gonflé ou dégonflé par son organisation d'origine. Le tirage RI(40,80)
