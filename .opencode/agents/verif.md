@@ -1,5 +1,5 @@
 ---
-description: Lance npm run check et l'audit des versions de cache, et ne rend que les échecs. À appeler avant chaque relecture et chaque commit.
+description: Lance la vérification rapide (ou complète si on le lui demande) et l'audit des versions de cache, et ne rend que les échecs. À appeler avant chaque relecture et chaque commit.
 mode: subagent
 model: opencode-go/mimo-v2.6-flash
 steps: 12
@@ -8,6 +8,7 @@ permission:
   bash:
     "*": deny
     "npm run check*": allow
+    "node tools/check-rapide.js*": allow
     "npm run lint*": allow
     "npm test*": allow
     "node --test *": allow
@@ -39,7 +40,7 @@ permission:
 Tu vérifies l'état réel du dépôt. Tu ne corriges rien.
 
 1. `node tools/verif-versions.js` — fichiers modifiés depuis `main` dont la version `?v=` n'a pas monté, nouveaux fichiers absents d'`index.html`, fins de ligne d'`index.html`.
-2. `npm run check` (lint, lint:content, tests ; plusieurs minutes).
+2. `npm run check:rapide` (lint, lint:content, tests sans les sept fichiers les plus longs ; trois à cinq minutes). Si l'appelant te nomme un test lent que sa tranche touche, passe-le en argument : `npm run check:rapide -- tests/mgmtSuivi.test.js`. Seulement si l'appelant écrit « complet » : `npm run check` (huit minutes).
 
 Rends, en 30 lignes au plus :
 - la dernière ligne `# pass N` / `# fail N` / `# skipped N` ;
