@@ -5,7 +5,7 @@
    Textes écrits par Claude sur décision d'Anthony du 09/10/2026, tous relu:false.
    SPLIT : chaque PHRASE est reprise mot pour mot de docs/SPLIT-CONTEXTE-DEPART.md et
    docs/SPLIT-CONTEXTE-COMPLEMENT.md (test du brief : aucune phrase absente du contexte). Ses valeurs
-   courtes que le contexte ne donne pas (ville, année, rivale) sont des propositions, listées dans aConfirmer.
+   courtes que le contexte ne donne pas (ville Lyon, année 2004, rivale Garden of Blood) ont été confirmées par Anthony le 10/10/2026.
    Leïla n'existe qu'à Split ; les sept autres adjointes sont neuves.
    Champs :
    - ville, pays : le siège. annee : l'année de création (le joueur arrive en janvier 2027, le passé couvre 2021 à 2026).
@@ -20,7 +20,7 @@
      noms (recrute des noms connus) 'souvent'|'parfois'|'jamais' ; contrats 'garde'|'normal'|'laisse-filer'.
    - paysPoids : le mélange de pays de ses combattants, somme 100 sur COUNTRY_KEYS ; null = MGMT_PAYS_POIDS.split. ==== */
 const MGMT_ORG_IDENTITES={
-  'split':{relu:false,aConfirmer:['ville','annee','rivale'],
+  'split':{relu:false,
     ville:'Lyon',pays:'France',annee:2004,
     reputation:'Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.',
     blessure:'L\'organisation a perdu plusieurs combattants légendaires, partis rejoindre les plus grandes organisations parce qu\'ils n\'étaient pas respectés.',
