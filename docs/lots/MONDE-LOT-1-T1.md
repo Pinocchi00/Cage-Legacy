@@ -90,6 +90,36 @@ Aucun.
 - Toujours rendre `slice()` : aucun appelant ne doit recevoir la référence du mémo. `mgmtDivisionRank` rend `null` pour un retraité avant tout calcul ; test `MGMT T1 classement` (`tests/mgmtCard.test.js:884`) — ne pas le casser.
 - Chronométrer **dans** le `win.eval` de `partie()` : un `Date.now()` Node-side chronométrerait le pont jsdom. Aucun tirage RNG ajouté, aucun `Math.random()` : la mesure reste comparable à celle du 09/10. `tests/outillage.test.js` (7.1) lit le JSON : `chrono` est une clé **sœur** des points de mesure (`lignes[org].chrono`), jamais dans un point.
 
+## 10 bis. Ajouts de Claude après relecture (10/10/2026) — ils priment sur les §3 et §7 en cas de contradiction
+
+Le classement lit `m.hist`, les bilans `W`/`L` de chaque ligne, `f.retired`, l'appartenance à `m.roster` et à
+`m.exterieur`, et `m.cycle` (`mgmtRangScores`, `mgmt-carte.js:472`). Les bilans changent **avant** le
+`m.hist.push`, et des lectures de classement ont lieu entre deux combats d'une même soirée. Vider le mémo
+seulement en fin de fonction laisserait donc ces lectures sur une entrée périmée, et le test 2 ne le verrait
+pas (il compare le mémo au calcul pur dans le même état, après la soirée).
+
+- **Invalider tout de suite, pas à la fin.** `mgmtRangsInvalider(m)` s'appelle immédiatement après chaque
+  mutation : après chaque combat appliqué dans `mgmtRunEvent` (bilans et `m.hist.push`), juste après chacune
+  des deux affectations `f.retired=` (`mgmt-corps.js:309` et `:561`), juste après `m.cycle++`, après chaque
+  `m.roster.push` (`mgmt-bureau.js:187` — une fois le roster entier créé suffit —, `mgmt-recrutement.js:70`),
+  après `m.exterieur.push` (`mgmt-monde.js:150`). Vider le mémo coûte une instruction ; seul le recalcul coûte,
+  et il n'a lieu qu'à la lecture suivante.
+- **Un interrupteur pour la preuve** : `function mgmtRangsMemoActif(actif)` (dans l'ancre `MONDE_LOT1_T1`) pose
+  un drapeau de module, vrai par défaut ; à faux, `mgmtDivisionRanking` appelle toujours la voie pure. Il ne
+  sert qu'aux tests et à la mesure ; aucun écran ne l'appelle.
+- **Test 6, la preuve** (dans `tests/mgmtClassementsMemoire.test.js`) :
+  `Monde lot 1 T1 — la partie jouée avec le mémo est identique à la partie jouée sans : deux graines, vingt soirées, état comparé après chaque soirée`
+  — graines 20261008 et 20261009 ; pour chacune, deux parties créées à l'identique, l'une mémo actif, l'autre
+  mémo inactif, vingt soirées par `jouerSoirees` ; après **chaque** soirée, `JSON.stringify(m)` des deux parties
+  est strictement égal. Attendu : 0 différence. C'est ce test qui prouve que rien n'a changé dans le jeu ;
+  s'il échoue, on ne l'assouplit pas : on cherche la mutation qui n'invalide pas.
+- Ce test est long (il joue vingt soirées sans mémo) : l'ajouter aussi à la liste `LENTS` de
+  `tools/check-rapide.js` s'il dépasse 60 s, et le lancer à la main pour cette tranche.
+- Critère de fin : **6 tests verts**, et la suite complète `npm run check` verte pour cette tranche (demander
+  « complet » à `@verif`) : elle touche le cœur du mode, tous les tests existants servent de filet.
+- Point d'arrêt : Claude lance lui-même `node tools/mesure-management.js --six-ans` sur le PC d'Anthony après le
+  commit ; le codeur ne lance que la mesure courte (`5 --six-ans --orgs split`).
+
 ## 11. Questions pour Anthony
 
 - La barre de chargement (décision 2) : je la place avec la génération des six ans (T3 et après), pas en T1 — rien n'est encore chargé à la création. Tu valides ? *(Non bloquant : le classement et le chronomètre partent sans elle ; si tu la veux en T1, il faudra une planche.)*
