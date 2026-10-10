@@ -122,8 +122,7 @@ chaque combattant (image `/_blob/f0735629a6f7ece03b1dd472f1279f76`, nom cerné d
 `FicheFinal`), dossiers de Leïla sur un écran à part avec ses trois étapes. La présentation d'un
 combattant est une page à part : la fiche à cinq onglets reste, ouverte par la touche F. La fiche de
 chaque tranche d'écran cite sa planche et en porte les valeurs exactes (tailles, couleurs, positions),
-jamais une description. Une copie en images est dans le canevas ; le fichier `.dc.html` de la planche
-se lit avec l'outil Artifact (`project/<nom>.dc.html`). Toutes ajoutent « ACCUEIL » en tête de la barre des sections :
+jamais une description. Les sept fichiers sont copiés dans `maquettes/monde/` : c'est là que l'architecte et le codeur les lisent. Toutes ajoutent « ACCUEIL » en tête de la barre des sections :
 douze entrées, de 69 px de haut au lieu de 75, pour tenir dans 1080 px.
 
 ## Les points d'arrêt
