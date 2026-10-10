@@ -35,10 +35,11 @@ function mgmtSuSexeHtml(F,fnSexe){
 function mgmtSuPucesHtml(F,div,fnDiv){
   return `<div class="mf-eff-puces">`+allDivisions().filter(d=>d.gender===F.sexe).map(d=>`<button type="button" class="${d.id===div?'on':''}" aria-pressed="${d.id===div}" onclick="${fnDiv}('${esc(d.id)}')">${esc(mgmtEffectifPuce(d))}</button>`).join('')+`</div>`;
 }
-/** Un nom en deux lignes : le prénom petit, le nom grand, qui rétrécit pour tenir `largeur`. */
-function mgmtSuNom(n,largeurPx,pPrenom,pNom,mini,sur){
+/** Un nom en deux lignes : le prénom petit, le nom grand, qui rétrécit pour tenir `largeur`.
+ *  `marque` (monde lot 8 T1) : la chaîne HTML de mfMarqueNom, à la fin du prénom. */
+function mgmtSuNom(n,largeurPx,pPrenom,pNom,mini,sur,marque=''){
   const nom=mgmtSuMaj(n.last||n.name), prenom=mgmtSuMaj(n.first||'');
-  return `<span style="font-size:${pPrenom}px">${esc(prenom)}${sur?` <em style="font-style:normal;font-size:.8em;opacity:.86">« ${esc(mgmtSuMaj(sur))} »</em>`:''}</span><span style="font-size:${mfCorps(nom,largeurPx,pNom,mini||36)}px">${esc(nom)}</span>`;
+  return `<span style="font-size:${pPrenom}px">${esc(prenom)}${sur?` <em style="font-style:normal;font-size:.8em;opacity:.86">« ${esc(mgmtSuMaj(sur))} »</em>`:''}${marque||''}</span><span style="font-size:${mfCorps(nom,largeurPx,pNom,mini||36)}px">${esc(nom)}</span>`;
 }
 /** Le nom court (« DAMAGAEV ») d'un combattant, en majuscules nettes. */
 function mgmtSuCourt(m,id){ return mgmtSuMaj(mgmtNomParId(m,id).last); }
@@ -60,12 +61,12 @@ function mgmtSuCarteClassement(m,x,selectionne,k){
   if(x.champion){
     return `<button type="button" class="mf-su-champ${choisi}" onclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="Champion ${esc(n.name)}">`
       +mfPanneau(`<div class="mf-su-champ-in"><div class="mf-su-champ-c" aria-hidden="true">C</div>`
-        +`<div class="mf-su-champ-nom">${mgmtSuNom(n,330,44,104,52)}</div>`
+        +`<div class="mf-su-champ-nom">${mgmtSuNom(n,330,44,104,52,'',mfMarqueNom(m,x.id))}</div>`
         +`<div class="mf-su-champ-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
   }
   return `<button type="button" class="mf-su-rang${choisi}" onclick="CL.mgmtFiche('${esc(x.id)}')" aria-label="${esc(x.rang)} ${esc(n.name)}">`
     +mfPanneau(`<div class="mf-su-rang-in"><div class="mf-su-rang-evo">${mgmtSuEvolution(x,selectionne)}</div><div class="mf-su-rang-n">${esc(x.rang)}</div>`
-      +`<div class="mf-su-rang-nom">${mgmtSuNom(n,230,36,76,36)}</div>`
+      +`<div class="mf-su-rang-nom">${mgmtSuNom(n,230,36,76,36,'',mfMarqueNom(m,x.id))}</div>`
       +`<div class="mf-su-rang-box"><b>${esc(rec)}</b><span>${esc(x.serie)}</span></div></div>`,selectionne?'choisi':'normal')+`</button>`;
 }
 function mgmtSuLigneClassement(m,x,selectionne,k){
@@ -73,7 +74,7 @@ function mgmtSuLigneClassement(m,x,selectionne,k){
   const dernier=d?`${mgmtSuMarque(d.issue)}<span>${esc(d.famille)}${d.adv?', contre '+esc(d.adv):''}</span>`:'<span>—</span>';
   return `<button type="button" class="mf-su-ligne${selectionne?' sel':''}" onclick="CL.mgmtFiche('${esc(x.id)}')">`
     +`<div class="mf-su-l-rang">${esc(x.rang)}</div><div class="mf-su-l-evo">${mgmtSuEvolution(x,selectionne)}</div>`
-    +`<div class="mf-su-l-nom"><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}${(()=>{ const s=mgmtSurnomDe(m,x.id); return s?` · « ${esc(mgmtSuMaj(s))} »`:''; })()}</span></div>`
+    +`<div class="mf-su-l-nom"><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}${(()=>{ const s=mgmtSurnomDe(m,x.id); return s?` · « ${esc(mgmtSuMaj(s))} »`:''; })()}</span>${mfMarqueNom(m,x.id)}</div>`
     +`<div class="mf-su-l-rec">${esc(x.W)}-${esc(x.L)}-${esc(x.D)}</div><div class="mf-su-l-serie">${esc(x.serie)}</div><div class="mf-su-l-dernier">${dernier}</div></button>`;
 }
 
@@ -113,7 +114,7 @@ function mgmtSuCeintureCarte(m,d,k,selectionne){
   const pr=mgmtPretendant(m,d.id), npr=pr?mgmtSuCourt(m,pr.id):'—';
   const duree=belt.id&&belt.since!==null?mgmtDureeTexte(m,mgmtSoireeSince(m,belt),m.eventsPlayed||0):null;
   const corps=belt.id
-    ?`<div class="mf-su-ce-nom"><span>${esc(n.first)}</span><b style="font-size:${mfCorps(n.last||n.name,330,64,34)}px">${esc(mgmtSuMaj(n.last||n.name))}</b></div>`
+    ?`<div class="mf-su-ce-nom"><span>${esc(n.first)}${mfMarqueNom(m,belt.id)}</span><b style="font-size:${mfCorps(n.last||n.name,330,64,34)}px">${esc(mgmtSuMaj(n.last||n.name))}</b></div>`
       +`<div class="mf-su-ce-def"><div class="mf-su-ce-n"><b>${esc(belt.defenses)}</b><span>${belt.defenses>1?'DÉFENSES':'DÉFENSE'}</span></div>`
       +`<div class="mf-su-ce-depuis"><span>${duree?'DEPUIS':'SOIRÉE'}</span><b>${esc(duree||('N°'+mgmtSoireeSince(m,belt)))}</b></div></div>`
     :`<div class="mf-su-ce-nom"><span>Personne ne la porte</span><b style="font-size:50px">TITRE VACANT</b></div>`;
@@ -141,7 +142,7 @@ function mgmtSuReignLigne(m,r,k,total,actuelle){
   const n=mgmtNomParId(m,r.id);
   const sous=r.jusqua===null?(r.depuis===0?'Depuis le début':'Depuis la soirée '+r.depuis):(r.depuis===0?`Du début à la soirée ${r.jusqua}`:`Soirées ${r.depuis} à ${r.jusqua}`);
   const marque=actuelle?`<div class="mf-su-r-c" aria-label="Champion actuel">C</div>`:`<div class="mf-su-r-n">${esc(total-k)}</div>`;
-  return `<div class="mf-su-reign${actuelle?' actuel':''}">${marque}<div class="mf-su-r-nom"><div><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}</span></div><span class="mf-su-r-sous">${esc(sous)}</span></div>`
+  return `<div class="mf-su-reign${actuelle?' actuel':''}">${marque}<div class="mf-su-r-nom"><div><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}</span>${mfMarqueNom(m,r.id)}</div><span class="mf-su-r-sous">${esc(sous)}</span></div>`
     +`<b class="mf-su-r-def">${esc(r.defenses)} ${r.defenses>1?'DÉFENSES':'DÉFENSE'}</b></div>`;
 }
 
@@ -152,7 +153,7 @@ function mgmtSuCeintureDetail(m){
   const fem=d.gender==='F', nomCat=String(d.name).replace(/^Poids /,'').toUpperCase();
   const rec=f?`${f.W}-${f.L}-${f.D||0}`:'', serie=f?mgmtSerieTexte(mgmtSerie(m,f)):'';
   const champ=belt.id
-    ?`<div class="mf-su-det-c">C</div><div class="mf-su-det-nom">${mgmtSuNom(n,640,56,150,60)}</div>`
+    ?`<div class="mf-su-det-c">C</div><div class="mf-su-det-nom">${mgmtSuNom(n,640,56,150,60,'',mfMarqueNom(m,belt.id))}</div>`
       +`<div class="mf-su-det-box"><b>${esc(rec)}</b><span>${esc(serie)}</span></div>`
       +`<div class="mf-su-det-btn">${mfBouton('Ouvrir sa fiche',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuCeFiche()'})}</div>`
     :`<div class="mf-su-det-nom"><span style="font-size:56px">LA CEINTURE</span><span style="font-size:130px">VACANTE</span></div>`;
@@ -206,7 +207,7 @@ function mgmtSuCampGrand(m,g){
   const n=g.membres.length, couleur=mgmtSuCoulCamp(g), mots=String(g.coach).split(' ');
   const prenom=mots.shift()||'', nom=mots.join(' ');
   const lignes=g.membres.slice(0,6).map(f=>{
-    return `<div class="mf-su-ca-m"><div class="mf-su-ca-mn"><b>${esc(mgmtSuMaj(f.last||f.name))}</b><span>${esc(f.first||'')}</span></div>`
+    return `<div class="mf-su-ca-m"><div class="mf-su-ca-mn"><b>${esc(mgmtSuMaj(f.last||f.name))}</b><span>${esc(f.first||'')}</span>${mfMarqueNom(m,f.id)}</div>`
       +`<span class="mf-su-ca-mc">${esc(mgmtEffectifPuce(divById(f.div)).charAt(0)+mgmtEffectifPuce(divById(f.div)).slice(1).toLowerCase())}</span><b>${esc(mgmtRangTexte(m,f))}</b></div>`;
   }).join('');
   const refus=g.refus?`<div class="mf-su-ca-refus">Les opposer les contrarie</div>`:'<div></div>';

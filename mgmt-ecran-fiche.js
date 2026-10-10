@@ -2,6 +2,16 @@
 /* ==== [ANCRE: MGMT_LOT3_T5_HISTORIQUE] — Lot 3 T5 : fiche consultable,
    combats passés et rejeu à partir de leurs traces auto-portantes. ==== */
 let MGMT_FICHE={id:null,retour:'mgmt_carte',cursor:0};
+/* ==== [ANCRE: MONDE_LOT8_T1_VUE] — Monde lot 8 T1 : ouvrir la fiche éteint la
+   marque. Le seul enregistrement de la visite : appelle mgmtVuEnregistre et,
+   SEULEMENT si la valeur a changé, sauvegarde (une sauvegarde pèse ~350 Ko
+   après dix soirées — on n'écrit pas le disque pour rien). Les deux seuls
+   appelants sont les deux points d'ouverture de la fiche : CL.mgmtFiche
+   (mgmt-screens.js) et CL.mgmtFicheAutre (mgmt-fiche-cadre.js). */
+function mgmtFicheVue(id){
+  const m=G&&G.mgmt;
+  if(m&&mgmtVuEnregistre(m,id)) saveMgmt();
+}
 /* ==== [ANCRE: MGMT_LOT4_T5_FICHE] — Lot 4 T5 : lecture dérivée, rejeux
    gardés seulement en mémoire par identité de trace ; jamais en sauvegarde. ==== */
 const MGMT_FICHE_REJEUX=new WeakMap();

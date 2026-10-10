@@ -191,3 +191,108 @@ function mgmtContinuerRaison(m){
   return {libelle:'Cycle suivant',raison:'cycle'};
 }
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT8_T1_MARQUE] — Monde lot 8 T1 (docs/lots/MONDE-LOT-8-T1.md,
+   branche monde-lot-8-marques) : la marque jaune à côté du nom d'un combattant
+   dans chaque liste — quelque chose lui est arrivé depuis la dernière fois
+   que sa fiche a été ouverte. Ouvrir la fiche éteint la marque partout, même
+   après un rechargement. Pas de numéro de semaine : un cycle a deux moments
+   (avant la soirée, puis après) ; les faits (m.facts) et les combats (m.hist)
+   ne font que grandir, leur longueur est une horloge exacte — m.visites garde
+   pour chaque combattant [nFaits, nCombats] vus à l'instant de l'ouverture.
+   Etat pur ici : aucune fonction ne touche le DOM, le dessin est dans
+   mgmt-cadre.js (mfMarqueNom), l'enregistrement dans mgmt-ecran-fiche.js
+   (mgmtFicheVue) — un seul morceau de code par titre. ==== */
+
+/** Les faits qui allument la marque : la fiche doit pouvoir expliquer la
+ *  marque (T2 lit mgmtEvenementsDepuis). Les faits de titre et les
+ *  rivalités sont déjà portés par `demande` ; les actes du joueur
+ *  (promesse, refus, contrarie, contrat, recrue, offre, engage, retrait*,
+ *  reduite, swapped, ignored), title_initial, libere, fin_contrat et
+ *  depart_attente ne sont PAS des événements pour le joueur (décision de
+ *  la T1). */
+const MGMT_MARQUE_FAITS=['moment_vie','demande','attend','injury','susp','retired'];
+
+/** La seule étiquette fonctionnelle de la marque : aria-label et infobulle. */
+const MGMT_MARQUE_LIBELLE={texte:'Du nouveau depuis ta dernière visite',relu:false};
+
+/** [nFaits,nCombats] vus pour un combattant. Absent = [0,0] : rien vu.
+ *  @returns {number[]} */
+function mgmtVisiteDe(m,id){
+  const v=m&&m.visites&&m.visites[id];
+  return Array.isArray(v)&&v.length===2?v:[0,0];
+}
+
+/** Les événements arrivés à id depuis sa dernière visite, dans l'ordre.
+ *  Un fait de moment de vie ne compte que s'il se relaie (même règle que le
+ *  conteur : relais non vide et phrase non nulle — mgmtVieMomentById /
+ *  mgmtVieTexte). Un combat de préliminaire ne compte pas (slot 'main' seul).
+ *  Pur.
+ *  @returns {Array<{type:'fait',i:number,fait:object}|{type:'combat',i:number,trace:object}>} */
+function mgmtEvenementsDepuis(m,id){
+  if(!m||!mgmtValidId(id)) return [];
+  const out=[], v=mgmtVisiteDe(m,id);
+  const facts=Array.isArray(m.facts)?m.facts:[], hist=Array.isArray(m.hist)?m.hist:[];
+  for(let i=Math.min(Math.max(0,v[0]),facts.length);i<facts.length;i++){
+    const x=facts[i];
+    if(!x||x.a!==id||!MGMT_MARQUE_FAITS.includes(x.k)) continue;
+    if(x.k==='moment_vie'){
+      const moment=mgmtVieMomentById(x.m);
+      if(!moment||!moment.relais.length||!mgmtVieTexte(moment)) continue;
+    }
+    out.push({type:'fait',i,fait:x});
+  }
+  for(let i=Math.min(Math.max(0,v[1]),hist.length);i<hist.length;i++){
+    const t=hist[i];
+    if(!t||t.slot!=='main'||!t.a||!t.b) continue;
+    if(t.a.id!==id&&t.b.id!==id) continue;
+    out.push({type:'combat',i,trace:t});
+  }
+  return out;
+}
+
+/** La marque d'un combattant : quelque chose est arrivé depuis sa dernière
+ *  visite. Pur — ne modifie rien, ne dessine rien. @returns {boolean} */
+function mgmtMarque(m,id){
+  return mgmtEvenementsDepuis(m,id).length>0;
+}
+
+/** Tout est « vu » : la table se pose à la longueur courante des faits et des combats.
+ *  Tolère l'absence de roster, facts et hist (migrations). */
+function mgmtVisitesInit(m){
+  if(!m||typeof m!=='object'||Array.isArray(m)) return;
+  m.visites={};
+  for(const o of Array.isArray(m.roster)?m.roster:[]){
+    if(o&&mgmtValidId(o.id)) m.visites[o.id]=[(m.facts||[]).length,(m.hist||[]).length];
+  }
+}
+
+/** La table des visites est-elle bien formée ? Objet simple (pas un
+ *  tableau), identifiants stricts, valeurs paires d'entiers sûrs ≥ 0.
+ *  @returns {boolean} */
+function mgmtVisitesValide(v){
+  if(!v||typeof v!=='object'||Array.isArray(v)) return false;
+  for(const k of Object.keys(v)){
+    if(!mgmtValidId(k)) return false;
+    const p=v[k];
+    if(!Array.isArray(p)||p.length!==2) return false;
+    for(const n of p){ if(!Number.isSafeInteger(n)||n<0) return false; }
+  }
+  return true;
+}
+
+/** Enregistre ce que le combattant vient de voir : pose la table à la
+ *  longueur courante des faits et des combats. Renvoie true seulement si la
+ *  valeur a changé (l'appelant décide alors de sauvegarder).
+ *  @returns {boolean} */
+function mgmtVuEnregistre(m,id){
+  if(!mgmtValidId(id)) return false;
+  if(!m||typeof m!=='object') return false;
+  if(!m.visites||typeof m.visites!=='object'||Array.isArray(m.visites)) m.visites={};
+  const v=[Array.isArray(m.facts)?m.facts.length:0,Array.isArray(m.hist)?m.hist.length:0];
+  const anc=mgmtVisiteDe(m,id);
+  if(anc[0]===v[0]&&anc[1]===v[1]) return false;
+  m.visites[id]=v;
+  return true;
+}
+/* ==== [FIN ANCRE] ==== */

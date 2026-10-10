@@ -122,3 +122,86 @@ Le budget des marques (T6), le bloc « depuis ta dernière visite » (T2), tout 
   l'agenda actif ; une partie d'avant garde ses écrans tels quels.
 - **Question 4 (T1 et T6)** : oui. La T6 (le budget des marques) est codée juste après la T1, sur cette même
   branche, et les deux partent ensemble. Rien n'est fusionné avec la T1 seule.
+
+## Compte rendu
+
+### Situation au départ
+Le travail de T1 était entamé mais non commité (13 fichiers modifiés, aucun commit « T1 ; le dernier
+commit était T2). Vérifié contre la fiche, complété et corrigé.
+
+### Fichiers modifiés et leur rôle
+- `mgmt-attention.js` — l'ancre `MONDE_LOT8_T1_MARQUE` : les constantes
+  (`MGMT_MARQUE_FAITS`, `MGMT_MARQUE_LIBELLE`) et les cinq fonctions d'état pur
+  (`mgmtVisiteDe`, `mgmtEvenementsDepuis`, `mgmtMarque`, `mgmtVisitesInit`,
+  `mgmtVisitesValide`, `mgmtVuEnregistre`). Repris du travail entamé, conforme.
+- `mgmt-bureau.js` — `MGMT_SAVE_VERSION=15` (ancre `MONDE_LOT8_T1_VERSION`),
+  `mgmtDefault` porte `visites:{}`, commentaire de version complété. Conforme.
+- `mgmt-save.js` — `validateMgmt` (table tolérée absente, stricte quand présente),
+  migration 14 → 15 (ancre `MONDE_LOT8_T1_MIGRATION`, dans `mgmtMigrate`, après le bloc
+  `13 → 14`), `mgmtRepair` (table illisible reconstruite pleine). Conforme.
+- `mgmt-ecran-fiche.js` — `mgmtFicheVue` : enregistre la visite, ne sauvegarde que si la
+  valeur a changé. Les deux seuls points d'ouverture appellent : `mgmt-screens.js`
+  (`CL.mgmtFiche`, juste après `MGMT_FICHE={...}`) et `mgmt-fiche-cadre.js`
+  (`mgmtFicheAutre`, avant `render()`). Conforme.
+- `mgmt-screens.js` — `mgmtVisitesInit(G.mgmt)` au démarrage d'une partie neuve
+  (0 marque à l'ouverture). Conforme.
+- `mgmt-cadre.js` — `mfMarqueNom`, le seul dessinateur (ancre `MONDE_LOT8_T1_MARQUE_NOM`,
+  après `mfMarque`). Conforme.
+- `mgmt-effectif.js`, `mgmt-contrats-ecran.js`, `mgmt-suivi-cadre.js`,
+  `mgmt-carte-cadre.js`, `mgmt-prelims.js` — les 12 points d'insertion du nom en liste
+  (fiche §3), `mgmtSuNom` prend le 7e paramètre `marque` (défaut `''`). Conforme.
+- `ui-cadre.css` — `.mf-oct-nom` 18 × 18, `flex:none`, pas de `position:absolute` ;
+  sur une ligne choisie, encre `#0D0B0B` (décisions de Claude, question 1) ;
+  les conteneurs flex à gap collent la marque au nom. Conforme.
+- `index.html`, `sw.js` — `?v=` et SW_VERSION montés par `tools/_bump.js` (13 fichiers,
+  à la fin).
+- `package.json` — `tests/mgmtMarque.test.js` ajouté aux scripts `test` et `test:watch`
+  (pas à `test:ceintures`, hors fiche).
+
+### Corrections apportées au travail entamé
+1. `mgmt-suivi-cadre.js:64` : un backtick en trop (`` `</div>`` ``) cassait le fichier
+   (SyntaxError) — corrigé. C'était un écart non signalé dans le travail existant.
+2. `mgmtSuNom` : le 7e paramètre a maintenant une valeur par défaut `''`, comme la fiche
+   le demande (l'existant déférait à `marque||''`).
+
+### Tests ajoutés : `tests/mgmtMarque.test.js` (11 tests, intitulés de la fiche §7)
+1. `Marque — mgmtMarque allume pour un moment relayé, une blessure, une demande et un combat du carton principal`
+2. `Marque — un acte du joueur, un moment sans relais et un combat de préliminaire n’allument pas`
+3. `Marque — après une soirée, exactement les combattants du carton principal et ceux qui ont un fait compté sont allumés`
+4. `Marque — la marque est dessinée dans chaque liste où le nom figure`
+5. `Marque — un seul combattant marqué n’allume qu’une marque dans la liste de l’Effectif`
+6. `Marque — ouvrir la fiche éteint la marque partout, et elle reste éteinte après un rechargement`
+7. `Marque — ← → de la fiche éteint aussi la marque du combattant atteint`
+8. `Marque — une partie en version 14 se charge, se valide, ne s’allume pas, et joue une soirée`
+9. `Marque — validateMgmt refuse une table des visites mal formée, mgmtRepair la reconstruit`
+10. `Marque — le dessin de la marque tient dans sa cellule`
+11. `Marque — une partie neuve démarre sans aucune marque`
+
+### Tests existants retouchés — signalés, jamais assouplis en silence (piège §10)
+- `mgmtNiveau.test.js` (lignes 34 et 120) et `mgmtEffectifs.test.js` (lignes 21 et 65),
+  `mgmtEmplacements.test.js` (ligne 23), `mgmtHumanite.test.js` (ligne 77) : la version en
+  dur `14` devient `15`, conséquence directe de la décision §4 (`MGMT_SAVE_VERSION` 14 → 15 ;
+  la migration 13 → 14 enchaîne 13 → 14 → 15). Aucun comportement testé ne change.
+- `mgmtTrace.test.js` (test de migration sans perte, v5) : la sauvegarde d'avant portait
+  `visites:{}` ; la migration la reconstruit PLEINE (décision §4 : tous vus à l'instant de
+  la migration). `visites` est exclu de la comparaison « sans perte » des deux côtés —
+  un champ qui n'existait pas en v5 ne peut pas être « perdu ».
+
+### Vérification
+- Ciblée : `node --test tests/mgmtMarque.test.js` : 11 tests, 0 échec ; les six lots touchés
+  (`mgmtEffectif`, `mgmtFicheCadre`, `mgmtCarteCadre`, `mgmtPrelims`, `mgmtContrats`,
+  `mgmtNiveau`) : 37 tests, 0 échec.
+- `node tools/verif-versions.js` : aucun écart par rapport à main.
+- `@verif` et `@relecteur` appelés : indisponibles dans cette session (limite de profondeur
+  des sous-agents) — les vérifications équivalentes faites à la main : `npm run check:rapide`
+  VERT (860 tests, 0 échec, mêmes 7 fichiers écartés qu'avant la tranche). Le check complet
+  reste au bilan du lot, comme prévu.
+
+### Écarts à la fiche
+Aucun fonctionnel : les comptes mesurés du test 4 (Effectif 9, Contrats 9, Classements
+1 + 2 + 6, mur des ceintures 8, ceinture ouverte 2, Camps 6, Carte 6 puis 2 par combat
+confirmé, Préliminaires 2 par combat à valider) tombent tous sur les valeurs de la fiche.
+
+### Questions pour Anthony
+Aucune nouvelle : les quatre questions du §11 restent ouvertes (toutes non bloquantes et
+décidées par Claude après relecture).

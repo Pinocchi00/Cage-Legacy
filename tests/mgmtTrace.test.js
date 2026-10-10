@@ -426,7 +426,9 @@ test('MGMT trace — migration 5 → 6 sans perte : une sauvegarde d\u2019avant 
     return JSON.stringify(raw);
   })()`));
   const sansVersionEtTrace = x => {
-    const c=JSON.parse(JSON.stringify(x)); delete c.v; delete c.hist; delete c.ageWeeks; delete c.niveaux; for(const o of c.roster){ delete o.niv; delete o.pot; delete o.pic; } return c;
+    /* visites : champ absent des v5, reconstruit PLEIN à l'instant de la migration
+       (décision du monde lot 8 T1, docs/lots/MONDE-LOT-8-T1.md §4) — hors comparaison. */
+    const c=JSON.parse(JSON.stringify(x)); delete c.v; delete c.hist; delete c.ageWeeks; delete c.niveaux; delete c.visites; for(const o of c.roster){ delete o.niv; delete o.pot; delete o.pic; } return c;
   };
   const etatV5 = JSON.stringify(sansVersionEtTrace(v5Raw));
   const mig = JSON.parse(win.eval(`JSON.stringify(mgmtMigrate(JSON.parse(JSON.stringify(${JSON.stringify(v5Raw)}))))`));
@@ -439,7 +441,7 @@ test('MGMT trace — migration 5 → 6 sans perte : une sauvegarde d\u2019avant 
   const apres = JSON.parse(win.eval(`(function(){
     const m=G.mgmt;
     return JSON.stringify({v:m.v,hist:m.hist,etat:JSON.stringify((function(){
-      const c=JSON.parse(JSON.stringify(m)); delete c.v; delete c.hist; delete c.ageWeeks; delete c.niveaux; for(const o of c.roster){ delete o.niv; delete o.pot; delete o.pic; } return c;
+      const c=JSON.parse(JSON.stringify(m)); delete c.v; delete c.hist; delete c.ageWeeks; delete c.niveaux; delete c.visites; for(const o of c.roster){ delete o.niv; delete o.pot; delete o.pic; } return c;
     })())});
   })()`));
   /* Sans perte : tout ce que la v5 portait est intact, à la version et à la

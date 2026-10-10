@@ -18,7 +18,8 @@ test('H4 — partie neuve : version 14 (brief du 06/10, lot 2), effectifs 1, car
       min:Math.min(...tailles),max:Math.max(...tailles),valide:(function(){ mgmtNewRoster(m); mgmtExteriorEnsure(m); return validateMgmt(m); })(),
       constMin:MGMT_ROSTER_MIN,constMax:MGMT_ROSTER_MAX};
   `);
-  assert.equal(r.v,14); assert.equal(r.effectifs,1);
+  /* 15 : la version courante (la table des visites, monde lot 8 T1) — la fiche cite 14 → 15. */
+  assert.equal(r.v,15); assert.equal(r.effectifs,1);
   assert.equal(r.main,5); assert.equal(r.prelims,7);
   assert.ok(r.min>=330&&r.max<=390,`vestiaire ${r.min}–${r.max}`);
   assert.ok(r.valide,'la partie neuve passe la porte de sauvegarde');
@@ -60,8 +61,8 @@ test('H4 — migration 12 → 13 : une partie commencée garde son monde à 30, 
     return {v:migre.v,effectifs:migre.effectifs,n:migre.roster.length,prelims:migre.card.sizePrelims,
       avant,vivants:allDivisions().map(d=>mgmtWorldLivingCount(migre,d.id)),quota:mgmtWorldQuota(migre,'H-light'),valide:validateMgmt(migre)};
   `);
-  /* Brief du 06/10, lot 2 : la chaîne continue jusqu'à la version 14 (13 → 14 : les niveaux). */
-  assert.equal(r.v,14); assert.equal(r.effectifs,0);
+  /* Brief du 06/10, lot 2 : la chaîne continue jusqu'à la version 14 (13 → 14 : les niveaux), portée à 15 par le monde lot 8 T1. */
+  assert.equal(r.v,15); assert.equal(r.effectifs,0);
   assert.equal(r.n,r.avant.n,'aucun combattant ajouté ni retiré');
   assert.equal(r.prelims,4,'la carte garde ses quatre préliminaires');
   assert.deepEqual(r.vivants,r.avant.vivants,'le monde ne grossit pas en cours de route');

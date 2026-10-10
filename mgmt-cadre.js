@@ -131,6 +131,17 @@ function mfMarque(code){
   if(c==='n') return '<span class="mf-marque n" role="img" aria-label="Nul"><i>N</i></span>';
   return '<span class="mf-marque d" role="img" aria-label="Défaite"><i>D</i></span>';
 }
+/* ==== [ANCRE: MONDE_LOT8_T1_MARQUE_NOM] — Monde lot 8 T1 : la marque d'un nom
+   dans les listes. Seul dessinateur de la marque du nom : aucun autre fichier
+   ne contient .mf-oct-nom (sauf le CSS). Le motif est celui de la barre des
+   sections (.mf-oct, ui-cadre.css), la phrase vient de MGMT_MARQUE_LIBELLE
+   (mgmt-attention.js). `m` est passé en paramètre : jamais G.mgmt dedans.
+   Un combattant absent (id invalide) renvoie '' sans lever. ==== */
+/** La marque d'un nom : un octogone jaune de 18 px, ou '' si rien n'est arrivé. @returns {string} */
+function mfMarqueNom(m,id){
+  if(!mgmtMarque(m,id)) return '';
+  return `<span class="mf-oct mf-oct-nom" role="img" aria-label="${esc(MGMT_MARQUE_LIBELLE.texte)}" title="${esc(MGMT_MARQUE_LIBELLE.texte)}"></span>`;
+}
 /** La voix : une seule pièce pour tout ce qui parle (commentaire, coins, assistante). */
 function mfVoix(qui,texte){
   return `<div style="display:flex;flex-direction:column;align-items:flex-start"><span class="mf-voix-qui">${esc(qui)}</span>`

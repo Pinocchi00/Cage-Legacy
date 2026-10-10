@@ -20,7 +20,7 @@ test('Emplacements — une partie d’avant le lot se retrouve dans l’emplacem
       v:MGMT_SAVE_VERSION,vides:[mgmtSlotPeek(2),mgmtSlotPeek(3)],dernier:mgmtSlotDernier()};`);
   assert.equal(r.cle,'cage-legacy-mgmt'); assert.equal(r.secours,'cage-legacy-mgmt_backup');
   assert.deepEqual(r.peek,[7,123]); assert.ok(r.intact,'lire un emplacement n’écrit rien');
-  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,14,'le lot 1 ne change pas le format : la version est celle du lot 2 (14)');
+  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,15,'la version courante (14 au lot 2, 15 depuis le monde lot 8 T1 : la table des visites)');
   assert.deepEqual(r.vides,[null,null]); assert.equal(r.dernier,1);
 });
 

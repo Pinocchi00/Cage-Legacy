@@ -321,6 +321,8 @@ Object.assign(CL,{
       ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
       ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats'||G.screen==='mgmt_prelims'||G.screen==='mgmt_finances'||G.screen==='mgmt_calendrier')?G.screen:'mgmt_carte';
     MGMT_FICHE={id,retour,cursor:0};
+    /* Monde lot 8 T1 : ouvrir la fiche éteint la marque partout. */
+    mgmtFicheVue(id);
     CL.go('mgmt_fiche');
   },
   mgmtFicheRetour(){ CL.go(MGMT_FICHE.retour); },
@@ -366,7 +368,9 @@ Object.assign(CL,{
     if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
       G.mgmt=mgmtDefault(orgId);
-      if(!loadMgmt()){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
+      /* Monde lot 8 T1 : une partie neuve démarre sans marque — tout est « vu »
+         (sinon 57 combattants sur 364 s'allumeraient dès le premier cycle). */
+      if(!loadMgmt()){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); mgmtVisitesInit(G.mgmt); saveMgmt(); neuve=true; }
       else mgmtAgendaPreparer(G.mgmt);
     }else{
       mgmtRepair(G.mgmt);

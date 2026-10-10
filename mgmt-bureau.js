@@ -78,7 +78,13 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       ne peut porter un born négatif, la cohorte d'ouverture d'une partie
       déjà commencée reste celle qu'elle porte — le monde d'une ancienne
       sauvegarde ne bouge pas. Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=14;
+      /* ==== [ANCRE: MONDE_LOT8_T1_VERSION] — Monde lot 8 T1 (10/10/2026) :
+      v15 — la table des visites (m.visites, une paire d'entiers par
+      combattant : mgmtVisitesInit, mgmt-attention.js). Rien à convertir sur
+      les données : la table part pleine (tous vus) à l'instant de la
+      migration (MGMT_BRIEF_LOT2_MIGRATION, mgmt-save.js). Une v1 reste
+      refusée. ==== */
+const MGMT_SAVE_VERSION=15;
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;
@@ -90,6 +96,7 @@ function mgmtDefault(orgRef){
      ne portera que son identité. */
   return {org:choix.nom,v:MGMT_SAVE_VERSION,cycle:0,ageWeeks:0,seq:1,roster:[],pile:[],facts:[],open:null,shortfall:false,effectifs:1,niveaux:1,cercle:[],suivis:[],
     card:{sizeMain:MGMT_MAIN_SIZE,sizePrelims:MGMT_PRELIM_SIZE,main:[],prelims:[]},leila:{crushes:[]},lastEvent:null,
+    visites:{},   /* Monde lot 8 T1 : [nFaits,nCombats] vus par combattant — une partie neuve n'a rien vu (réglé par mgmtVisitesInit, mgmt-attention.js). */
     hist:[],treasury:choix.profil.caisse,recettes:[],audiences:[],eventsPlayed:0,exterieur:[]};
 }
 

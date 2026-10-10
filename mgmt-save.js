@@ -263,6 +263,9 @@ function validateMgmt(raw){
   }
   if(raw.cal!==undefined&&!mgmtAgendaValide(raw.cal)) return false;
   if(raw.fil!==undefined&&!mgmtFilValide(raw.fil)) return false;
+  /* Monde lot 8 T1 : la table des visites — tolérée absente (états construits
+     par les tests, migrations), strict quand elle est là. */
+  if(raw.visites!==undefined&&!mgmtVisitesValide(raw.visites)) return false;
   if(!mgmtSallesValide(raw)) return false;
   if(raw.card!==undefined&&raw.card.sizeEarly!==undefined&&(!Number.isSafeInteger(raw.card.sizeEarly)||raw.card.sizeEarly<0||raw.card.sizeEarly>raw.card.sizePrelims)) return false;
   if(raw.leila!==undefined){
@@ -349,8 +352,10 @@ function validateMgmt(raw){
  *  calendrier annuel repart de là. 8 → 9 (lot 2B T3 les départs, 23/09) :
  *  la retraite d'âge existe (retired:'age' accepté, jamais effacé) — rien
  *  à convertir sur une v8, la semaine d'anniversaire de chaque combattant
- *  se dérive de son identifiant. Sans perte, sans
- *  reset : une v1 reste refusée, comme avant. */
+ *  se dérive de son identifiant à la lecture. Sans perte, sans
+ *  reset : une v1 reste refusée, comme avant. 14 → 15 (monde lot 8 T1,
+ *  10/10/2026) : la table des visites part pleine (tous vus, migration
+ *  MONDE_LOT8_T1_MIGRATION), rien d'autre ne bouge. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
   if(raw.v===MGMT_SAVE_VERSION) return raw;
@@ -463,6 +468,15 @@ function mgmtMigrate(raw){
     raw.v=14;
   }
   /* ==== [FIN ANCRE] ==== */
+   /* ==== [ANCRE: MONDE_LOT8_T1_MIGRATION] — 14 → 15 (monde lot 8 T1, docs/lots/MONDE-LOT-8-T1.md) : la table des
+      visites (m.visites, {id:[nFaits,nCombats]}, mgmt-attention.js) part PLEINE à l'instant de la migration —
+      tous les combattants déjà dans la partie sont considérés vus, donc 0 marque au premier chargement (sinon
+      351 sur 364 s'allumeraient après dix soirées). Sans perte : aucun autre champ n'est touché. ==== */
+  if(raw.v===14){
+    mgmtVisitesInit(raw);
+    raw.v=15;
+  }
+  /* ==== [FIN ANCRE] ==== */
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
@@ -476,6 +490,9 @@ function mgmtRepair(m){
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
   if(m.fil!==undefined&&!mgmtFilValide(m.fil)) delete m.fil;
+  /* Monde lot 8 T1 : une table des visites illisible (ou absente) est
+     reconstruite pleine — la réparation ne rallume jamais de marque. */
+  if(!mgmtVisitesValide(m.visites)) mgmtVisitesInit(m);
   if(!mgmtSallesValide(m)){ delete m.salles; delete m.pop; delete m.comptes; }
   if(m.cal&&m.cal.actif===true) mgmtSallesInit(m);
   if(m.card&&m.card.sizeEarly!==undefined&&(!Number.isSafeInteger(m.card.sizeEarly)||m.card.sizeEarly<0||m.card.sizeEarly>m.card.sizePrelims)) m.card.sizeEarly=0;

@@ -90,7 +90,10 @@ Object.assign(CL,{
   mgmtFicheAutre(delta){
     const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id); if(!f) return;
     const v=mgmtFicheVoisins(m,f); if(v.i<0||!v.ids.length) return;
-    MGMT_FICHE.id=v.ids[(v.i+(delta<0?-1:1)+v.ids.length)%v.ids.length]; MGMT_FICHE.cursor=0; render();
+    MGMT_FICHE.id=v.ids[(v.i+(delta<0?-1:1)+v.ids.length)%v.ids.length]; MGMT_FICHE.cursor=0;
+    /* Monde lot 8 T1 : naviguer ← → ouvre la fiche de l'autre — sa marque s'éteint aussi. */
+    mgmtFicheVue(MGMT_FICHE.id);
+    render();
   },
   mgmtFicheCarte(){ CL.go('mgmt_carte'); },
   mgmtFicheEntree(){ if(mgmtFicheOngletCourant()==='combats') CL.mgmtFicheRevoirSelection(); else CL.mgmtFicheCarte(); },
