@@ -118,3 +118,28 @@ test('Pays — chaque mélange est cohérent avec la ville de l’organisation',
     assert.ok(e.topW > e.secondW, `« ${e.id} » : ${e.local} (${e.topW}) strictement devant la seconde (${e.second})`);
   }
 });
+
+test('Pays — les huit organisations gardent 98 % de prénoms et de noms distincts avec leur propre mélange', () => {
+  const win = newGameWindow({runMain:true});
+  const r = result(win, `
+    /* Décision du 10/10 : la règle du 08/10 (98 % distinct) tient avec les mélanges
+       dominants si les catalogues suivent — même mesure que tests/mgmtEffectif30.test.js, */
+    const mauvais=[]; const detail=[];
+    for(const id of Object.keys(MGMT_ORG_IDENTITES)){
+      for(const s of [508,4242]){
+        setSeed(s); const m=mgmtDefault(id); mgmtNewRoster(m); const n=m.roster.length;
+        const p=100*new Set(m.roster.map(f=>f.first)).size/n;
+        const l=100*new Set(m.roster.map(f=>f.last)).size/n;
+        /* Part du pays dominant du mélange dans le roster (paysPoids le plus lourd). */
+        const pp=mgmtOrgIdentite(id).paysPoids;
+        const dom=pp?Object.entries(pp).sort((a,b)=>b[1]-a[1])[0][0]:null;
+        const d=dom?100*m.roster.filter(f=>f.ck===dom).length/n:0;
+        /* Correction de Claude du 10/10 : le seuil suit le poids du pays dominant (Pure Impact achète partout : son premier pays ne pèse que 15). */
+        const seuil=dom?0.6*pp[dom]:0;
+        detail.push([id,s,Math.round(p*10)/10,Math.round(l*10)/10,Math.round(d*10)/10]);
+        if(p<98||l<98||(dom&&d<seuil)) mauvais.push([id,s,Math.round(p*10)/10,Math.round(l*10)/10,Math.round(d*10)/10]);
+      }
+    }
+    return {mauvais,detail};`);
+  assert.deepEqual(r.mauvais, [], JSON.stringify(r.mauvais));
+});

@@ -284,3 +284,28 @@ pour 37 % d'un effectif de 360). Aucun test n'est assoupli, aucun plafond n'est 
 5. Le commentaire périmé « 2 % » de `mgmt-bureau.js` (la constante vaut 0,012) est corrigé au passage.
 
 Les trois questions du codeur sont closes par cette décision. Commit final : `Monde lot 2 T2 : d'où viennent les combattants`.
+
+## Compte rendu final (tranche terminée par Claude le 10/10/2026)
+
+Le codeur a rendu deux fois une sortie illisible sans commit ; son travail sur le disque était presque complet.
+Claude l'a vérifié, fini et commité.
+
+- `mgmt-humanite-data.js` : `MGMT_NOMS_AJOUTS` (noms de famille, prénoms masculins et féminins par pays, propres
+  au management, propositions à relire) et `mgmtMakeName(gender,ck)` qui complète `COUNTRIES` sans le modifier.
+  `engine.js` n'est PAS touché : la carrière, les duels et leurs graines figées tirent les mêmes noms qu'avant.
+  Les prénoms australiens que le codeur avait poussés dans `COUNTRIES` ont été déplacés dans le catalogue.
+- `mgmt-bureau.js` : `mgmtNewRoster` tire les pays dans le mélange de l'organisation (`mgmtOrgPaysPoids`) et les
+  noms par `mgmtMakeName`.
+- `mgmt-organisations.js` : `mgmtOrgPaysPoids(m)` (commit précédent de la tranche).
+- Mesure, graines 508 et 4242, huit organisations : prénoms distincts 98,8 à 99,1 %, noms distincts 98,3 à
+  98,7 %, pays dominant 29 à 43 % de l'effectif (Pure Impact : 13 à 17 %, son premier pays ne pèse que 15).
+- Tests : `tests/mgmtPaysOrganisations.test.js` (5 tests). **Deux corrections citées** :
+  1. le seuil du pays dominant du test 5 suit son poids (0,6 × poids) au lieu de 25 % fixes — l'exigence écrite
+     par Claude dans la décision ci-dessus était fausse pour Pure Impact ;
+  2. `tests/mgmtHumanite.test.js` (H3, « identité complète ») accepte un nom venu du pays OU de
+     `MGMT_NOMS_AJOUTS` — décision du 10/10 : le management complète les catalogues par le sien.
+  `tests/mgmtEffectif30.test.js` passe sans modification.
+- `npm run check:rapide` : 865 tests, 864 verts ; le seul rouge est le test de vitesse `mgmtCamps` T7
+  (« la fiche reste rapide »), vert quand il tourne seul (11/11) : trois pistes chargeaient le processeur.
+- À relire par Anthony en fin de lot : les listes de noms (`node tools/exporter-textes.js` ne les sort pas ;
+  elles sont dans `mgmt-humanite-data.js`, ancre `MGMT_MONDE_LOT2_NOMS_AJOUTS`).

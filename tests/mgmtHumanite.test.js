@@ -16,7 +16,9 @@ test('H3 — origine enregistrée dès la création ; identité complète, pure 
     const r=result(w,`setSeed(20261003); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
       G={theme:'dark',mgmt:m}; const avant=JSON.stringify(m),seed=SEED;
       const tous=m.roster.concat(m.exterieur),identites=tous.map(f=>mgmtIdentite(m,f));
-      const noms=tous.every(f=>!f.last||COUNTRIES[f.ck].last.includes(f.last)||COUNTRIES[f.ck].last.some(l=>feminiserNom(l,f.ck)===f.last));   /* 5.2 : les femmes portent la forme féminine */
+      /* Monde lot 2 T2 (décision du 10/10/2026) : le management complète les noms de chaque pays par son propre catalogue, MGMT_NOMS_AJOUTS ; un nom vient du pays ou de ce complément. */
+      const duPays=ck=>COUNTRIES[ck].last.concat(((typeof MGMT_NOMS_AJOUTS!=="undefined"&&MGMT_NOMS_AJOUTS[ck])||{}).last||[]);
+      const noms=tous.every(f=>!f.last||duPays(f.ck).includes(f.last)||duPays(f.ck).some(l=>feminiserNom(l,f.ck)===f.last));   /* 5.2 : les femmes portent la forme féminine */
       const pur=avant===JSON.stringify(m)&&seed===SEED;
       saveMgmt(); G.mgmt=null; const charge=loadMgmt();
       return {pur,noms,charge,generation:tous.every(f=>f.generation===1),identites,
