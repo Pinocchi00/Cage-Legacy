@@ -69,3 +69,28 @@ test('7.4 — Le README décrit les deux modes, les commandes et le fichier de l
   assert.match(t,/package\.json/);
   assert.ok(!/9 fichiers de test, 62 tests/.test(t));
 });
+
+/** Le source d'un fichier sans commentaires (blocs et lignes). */
+function sansCommentaires(src){ return src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/[^\n]*/g,''); }
+
+test('Monde lot 1 T2 — l’outil de mesure ne contient plus aucune décision du joueur : il appelle mgmtPredecesseurSoiree', () => {
+  const src=sansCommentaires(lire('tools/mesure-management.js'));
+  for(const motif of ['mgmtBookMain','mgmtContratRenouveler','mgmtBourseSouhaitee','mgmtPublicReclame','mgmtCartRows','mgmtSetTitle','mgmtCanTitle','mgmtOfferBulk','mgmtDecide','mgmtAgendaPoser','mgmtAgendaJouer']){
+    assert.ok(!src.includes(motif),'l’outil ne contient plus '+motif);
+  }
+  assert.ok((src.match(/mgmtNewPile/g)||[]).length<=1,'mgmtNewPile au plus une fois (la création de la partie)');
+  assert.ok(src.includes('mgmtPredecesseurSoiree('),'l’outil appelle mgmtPredecesseurSoiree');
+});
+
+test('Monde lot 1 T2 — l’outil et la fonction du jeu donnent les mêmes chiffres : graine 20261008, split, dix soirées', () => {
+  const sortie=execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'10','--orgs','split','--json'],{encoding:'utf8',timeout:300000,stdio:['ignore','pipe','ignore']});
+  const outil=JSON.parse(sortie.slice(sortie.indexOf('{'))).split['10'];
+  const {newGameWindow}=require('./helpers/loadGame');
+  const win=newGameWindow({runMain:true});
+  const jeu=JSON.parse(win.eval(`JSON.stringify((function(){
+    mgmtRetraitProb=function(){return 0;}; setSeed(20261008);
+    const m=mgmtDefault('split'); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; mgmtAgendaInit(m);
+    for(let k=0;k<10;k++) mgmtPredecesseurSoiree(m,k);
+    return {caisse:Math.round(m.treasury*1000),pop:m.pop,effectif:m.roster.filter(f=>!mgmtIsRetired(f)).length,retraites:m.roster.filter(f=>mgmtIsRetired(f)).length}; })())`));
+  for(const k of ['caisse','pop','effectif','retraites']) assert.equal(jeu[k],outil[k],k+' : l’outil et la fonction du jeu donnent le même chiffre');
+});

@@ -3,6 +3,7 @@
    Brief des corrections du 08/10/2026, lot 7.1 : la mesure d'ensemble du mode management sur la longue durée. Joue N soirées (40 par défaut) avec un joueur
    automatique « raisonnable » — il prolonge les contrats à l'avance, booke d'abord les combats réclamés puis les meilleures têtes d'affiche, met le titre en jeu
    quand il le peut une fois sur deux, valide la proposition de Leïla — pour chacune des huit organisations, et écrit un rapport.
+   Monde lot 1 T2 : ce joueur n'est plus recopié ici, c'est la fonction du jeu mgmtPredecesseurSoiree (mgmt-predecesseur.js) ; l'outil prépare la partie et mesure.
    Ce joueur ne recrute pas et ignore les affaires : les chiffres sont des ordres de grandeur, pas des valeurs exactes.
    Usage : node tools/mesure-management.js [soirées] [--orgs id1,id2] [--out chemin.md] [--json]
    Il lit les vraies fonctions du jeu, ne modifie aucun fichier du dépôt, et écrit par défaut tools/reports/MESURE-MANAGEMENT.md.
@@ -38,7 +39,7 @@ function partie(orgId, seed) {
     const vivants=()=>m.roster.filter(f=>!mgmtIsRetired(f));
     const divsIds=[...new Set(m.roster.map(f=>f.div))].sort();
     /* Monde lot 1 T1 : le chrono des trois étapes accumulé DANS le win.eval — un Date.now() Node-side chronomètrerait le pont jsdom. */
-    let combatsMs = 0, suiteMs = 0, bookingMs = 0, totalMs = 0;
+    const chrono = { bookingMs: 0, combatsMs: 0 }; let totalMs = 0;
     const top5=()=>{ const o={}; for(const d of divsIds) o[d]=mgmtDivisionRanking(m,d,'organization').slice(0,5).map(f=>f.id); return o; };
     const top5Depart=top5();
     const mesure=n=>{ const v=vivants(), pal=[0,0,0,0,0], ages=v.map(f=>f.age);
@@ -50,42 +51,19 @@ function partie(orgId, seed) {
         retraites:m.roster.filter(f=>mgmtIsRetired(f)).length,
         top5Renouvele:(()=>{ const t=top5(); let s=0; const grandes=divsIds.filter(d=>m.roster.filter(f=>f.div===d).length>=10); for(const d of grandes) s+=top5Depart[d].filter(id=>!t[d].includes(id)).length; return Math.round(100*s/Math.max(1,grandes.length))/100; })(),
         marcheJeunes:divsIds.reduce((s,d)=>s+mgmtRecrutables(m,d).filter(x=>x.age<=24).length,0)}; };
-    for(let k=0;k<${SOIREES};k++){
-      const t0 = Date.now();
-      m.pile.forEach(x=>{x.status='closed';x.decision='ignored';}); m.open=null;
-      /* Il prolonge à l'avance : un contrat à un combat de la fin est renouvelé sur trois combats, à la bourse que le combattant demande. */
-      for(const f of m.roster){ if(mgmtIsRetired(f)||f.libre||!f.ct) continue; if(mgmtContratRestants(f)>1) continue;
-        const b=mgmtBourseSouhaitee(m,f,true); const r=mgmtContratRenouveler(m,f.id,3,b); if(!r.ok&&refus[r.raison]!==undefined) refus[r.raison]++; }
-      if(!m.cal.prochaines.length) mgmtAgendaPoser(m,m.cal.jour+MGMT_EVENT_WEEKS*7,'petite');
-      /* La carte principale : les combats réclamés d'abord, puis les meilleures têtes d'affiche de chaque catégorie. */
-      for(const r of mgmtPublicReclame(m)){ if(m.card.main.length>=m.card.sizeMain) break; const a=mgmtFighterById(m,r.a), b=mgmtFighterById(m,r.b);
-        if(a&&b&&a.div===b.div&&mgmtSelectable(m,a,null)&&mgmtSelectable(m,b,a.id)) mgmtBookMain(m,a.id,b.id); }
-      const divs=[...new Set(mgmtCartRows(m).map(f=>f.div))];
-      let essais=0;
-      while(m.card.main.length<m.card.sizeMain&&essais++<60){
-        const div=divs[(k+m.card.main.length+essais)%divs.length];
-        const rows=mgmtCartRows(m).filter(f=>f.div===div&&mgmtSelectable(m,f,null)).sort((x,y)=>mgmtStar(y)-mgmtStar(x));
-        const a=rows[0], b=a&&rows.find(x=>x.id!==a.id&&mgmtSelectable(m,x,a.id)); if(a&&b) mgmtBookMain(m,a.id,b.id); }
-      m.card.main.forEach((cf,i)=>{ if(k%2===0&&mgmtCanTitle(m,cf)) mgmtSetTitle(m,i,true); });
-      const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(!bulk) mgmtOfferBulk(m,true);
-      const bulk2=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk2) mgmtDecide(m,bulk2.id,'validate');
-      m.pile.forEach(x=>{x.status='closed';});
-      const champsAvant=JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null));
-      bookingMs += Date.now() - t0;
-      const t1 = Date.now();
-      const ev=mgmtAgendaJouer(m); if(!ev) break;
-      const t2 = Date.now();
-      combatsMs += t2 - t1;
-      joues++; cartes++; titres+=ev.fights.filter(f=>f.title).length;
-      const champsApres=JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null));
-      if(champsAvant!==champsApres){ const a=JSON.parse(champsAvant), b=JSON.parse(champsApres); changes+=a.filter((x,i)=>x!==b[i]).length; }
-      if(m.treasury<0) decouvert++;
-      mgmtNewPile(m);
+    /* Monde lot 1 T2 : le joueur est la fonction du jeu mgmtPredecesseurSoiree (mgmt-predecesseur.js) ; l'outil ne garde que la préparation et la mesure. */
+    for(let k=0;k<${SOIREES};k++){ const t0 = Date.now();
+      const s=mgmtPredecesseurSoiree(m,k,undefined,chrono);
+      for(const r of ['trop-grand','caisse','trop-bas','offre']) refus[r]+=s.refus[r];
+      if(!s.jouee) break;
+      joues++; cartes++; titres+=s.evenement.fights.filter(f=>f.title).length;
+      changes+=s.champions.avant.filter((x,i)=>x!==s.champions.apres[i]).length;
+      if(s.decouvert) decouvert++;
       if(POINTS.includes(joues)) mesure(joues);
       totalMs += Date.now() - t0;
     }
-    suiteMs = totalMs - bookingMs - combatsMs;
-    res.chrono={soirees:joues,totalMs:Math.round(totalMs),combatsMs:Math.round(combatsMs),bookingMs:Math.round(bookingMs),suiteMs:Math.round(suiteMs)};
+    const suiteMs = totalMs - chrono.bookingMs - chrono.combatsMs;
+    res.chrono={soirees:joues,totalMs:Math.round(totalMs),combatsMs:Math.round(chrono.combatsMs),bookingMs:Math.round(chrono.bookingMs),suiteMs:Math.round(suiteMs)};
     return res; })())`));
 }
 
@@ -116,7 +94,7 @@ for (const p of POINTS) {
   md += '\n';
 }
 /* Monde lot 1 T1 : la section chrono — où va le temps, en secondes et en parts. */
-md += `## Chrono des six ans\n\nSix ans = 62 soirées (MGMT_EVENT_WEEKS=5, 312 semaines). Le chrono est pris dans la fenêtre du jeu, aux trois étapes du brief : **Combats** (mgmtAgendaJouer), **Suite** (le reste de la soirée et l'ouverture de la semaine suivante, mgmtNewPile compris) et **Booking** (prolongations, combats réclamés, têtes d'affiche, titre, Leïla — les listes de booking et les recalculs de classement) sur ${SOIREES} soirées mesurées.\n\n`;
+md += `## Chrono des six ans\n\nSix ans = 62 soirées (MGMT_EVENT_WEEKS=5, 312 semaines). Le chrono est pris dans la fenêtre du jeu, aux trois étapes du brief : **Combats** (les combats de la soirée), **Suite** (le reste de la soirée et l'ouverture de la semaine suivante comprise) et **Booking** (prolongations, combats réclamés, têtes d'affiche, titre, Leïla — les listes de booking et les recalculs de classement) sur ${SOIREES} soirées mesurées.\n\n`;
 md += `| Organisation | Soirées mesurées | Total | Six ans | Mesure | Combats | Suite | Booking | Booking, part du total |\n|---|---|---|---|---|---|---|---|---|\n`;
 for (const id of orgIds) {
   const ch = lignes[id] && lignes[id].chrono;

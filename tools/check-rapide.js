@@ -15,7 +15,9 @@ const LENTS = ['tests/mgmtCorrectionsLot12.test.js', 'tests/mgmtSoireeShow.test.
   'tests/nomsApostrophe.test.js', 'tests/moteurRecalibrage.test.js', 'tests/mgmtAnimations.test.js',
   /* Monde lot 1 T1 : la preuve (test 6 — vingt soirées avec et sans mémo, 171 s mesurée le 10/10)
      et l'exactitude (test 2 — 3 graines × 40 soirées, 218 s) dépassent 60 s ; lancers manuels ou check complet. */
-  'tests/mgmtClassementsMemoire.test.js'];
+  'tests/mgmtClassementsMemoire.test.js',
+  /* Monde lot 1 T2 : le test 5 (quatre soirées × 3 parties, état sérialisé à chaque soirée) dépasse 60 s (63 s mesurée le 10/10). */
+  'tests/mgmtPredecesseur.test.js'];
 const gardes = process.argv.slice(2).map(f => f.replace(/\\/g, '/'));
 const tous = require(path.join(racine, 'package.json')).scripts.test.replace(/^node --test\s+/, '').split(/\s+/).filter(Boolean);
 const ecartes = LENTS.filter(f => tous.includes(f) && !gardes.includes(f));
