@@ -3,13 +3,14 @@
    les huit organisations parmi lesquelles une nouvelle partie commence (planche
    « Management — Nouvelle partie » du canvas). Seuls les NOMS des organisations sont
    fixes ; tout le reste est recréé à chaque partie.
-   Les « plus » et les « moins » sont ceux des maquettes, tels quels (le brief demande à
-   Anthony s'ils sont les bons). La maquette ne nomme pas ses organisations 2 à 8 : elles sont
+   Les « plus » et les « moins » sont ceux des maquettes, tels quels (validés par
+   Anthony le 09/10/2026). La maquette ne nomme pas ses organisations 2 à 8 : elles sont
    ici dans l'ordre de la maquette, les quatre noms que le code connaissait (MGMT_EXT_ORGS,
    par prestige croissant) sur les emplacements 2 à 5, puis les trois noms
    donnés par Anthony le 06/10 : Knuckle Gate, Pure Impact, Undisputed Cage (dans l'ordre présenté).
-   ... L'ASSIGNATION des profils à ces noms n'est écrite nulle part : c'est un trou
-   de spécification, signalé, pas une décision.
+   L'attribution des profils aux noms est celle du tableau « Tes plus et contreparties » du
+   brief « Un monde qui a vécu » (lot 2), validé par Anthony le 09/10/2026 ; elle est figée
+   par tests/mgmtAttributionProfils.test.js (Monde lot 2 T4).
    Le PROFIL règle la création du monde (caisse de départ, taille et âge de l'effectif, catégories
    fortes et faibles) ; popularité, taille des salles, niveau des bourses et entente des camps
    sont portés ici pour les lots 8 (la salle), 9 (les contrats) et 10 (les camps). Les valeurs
