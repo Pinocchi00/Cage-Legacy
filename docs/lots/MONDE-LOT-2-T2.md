@@ -250,3 +250,37 @@ verts, Lot12 vert) ; c'est le seuil du test 1 et le garde du 08/10 qui exigent u
 3. Les questions reprises ci-dessus depuis la fiche (vivier `'monde'`, validation des sept
    `paysPoids` de `95e1fd0`) restent posées.
 
+
+## Décision de Claude après le blocage (10/10/2026) — la tranche reprend
+
+Le blocage est réel et bien mesuré. Il n'y a pas de contradiction à arbitrer : la règle du 08/10 (98 % de noms
+distincts) et les mélanges du brief tiennent ensemble **si les catalogues de noms suivent**, exactement comme
+la France a été agrandie le 08/10 (`engine.js`, sous `COUNTRIES` : 267 noms, 109 prénoms, 74 prénoms féminins
+pour 37 % d'un effectif de 360). Aucun test n'est assoupli, aucun plafond n'est relevé.
+
+**Ce qui s'ajoute à la tranche :**
+
+1. **Mesurer le besoin.** Pour chaque pays et chaque organisation : combattants attendus = poids du pays ÷ 100
+   × effectif de l'organisation (profil compris). Retenir, par pays, le plus grand besoin des huit
+   organisations. Cibles, sur le modèle de la France : noms de famille ≥ 2 × le besoin ; prénoms masculins
+   ≥ 0,8 × le besoin ; prénoms féminins ≥ 0,55 × le besoin. Écrire le tableau (pays, besoin, tailles actuelles,
+   manque) dans le compte rendu.
+2. **Agrandir les catalogues** des pays en manque — d'abord les six pays dominants (US, NL, AU, JP, GB, BR),
+   puis tout pays dont le besoin dépasse son catalogue (BE, IE, KR, RU, DAG, CN, MA… selon le tableau).
+   Les listes sont demandées à `@ecrivain`, pays par pays, avec les nombres exacts du tableau : prénoms et
+   noms **courants et réels** du pays, en écriture latine, sans doublon avec la liste existante du même pays,
+   sans nom de combattant ou de célébrité reconnaissable (prénom et nom ne sont jamais fournis en paire).
+   Forme : la même que pour la France (`COUNTRIES.XX.last.push(…)`, `.first.push(…)`, `.firstF.push(…)`),
+   sous un commentaire « Monde lot 2 T2 … propositions de Claude (à relire) ».
+3. **Si un test existant casse parce que des tirages de noms changent** (carrière, duel, graines figées) : on ne
+   touche pas au test. Les noms ajoutés vont alors dans un catalogue propre au management
+   (`mgmt-humanite-data.js`, lu par `mgmtNewRoster` seulement), et `COUNTRIES` reste comme avant.
+4. **Tests** : le test 1 de la fiche reste tel quel (part du pays dominant ≥ 0,20 à graine 4242). S'ajoute, dans
+   `tests/mgmtPaysOrganisations.test.js` :
+   `Pays — les huit organisations gardent 98 % de prénoms et de noms distincts avec leur propre mélange` —
+   graines 508 et 4242, pour chacune des huit organisations : prénoms distincts ≥ 98 % et noms de famille
+   distincts ≥ 98 % (même mesure que `tests/mgmtEffectif30.test.js`), et part du pays dominant ≥ 0,25.
+   `tests/mgmtEffectif30.test.js` doit repasser sans modification.
+5. Le commentaire périmé « 2 % » de `mgmt-bureau.js` (la constante vaut 0,012) est corrigé au passage.
+
+Les trois questions du codeur sont closes par cette décision. Commit final : `Monde lot 2 T2 : d'où viennent les combattants`.
