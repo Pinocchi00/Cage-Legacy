@@ -1,6 +1,6 @@
 ---
 description: Écrit la fiche d'une tranche du brief « Un monde qui a vécu » (docs/lots/MONDE-LOT-N-TK.md) après avoir lu la section du brief et le code concerné. Ne modifie jamais le code.
-mode: primary
+mode: all
 model: opencode-go/mimo-v2.6-pro
 permission:
   edit:

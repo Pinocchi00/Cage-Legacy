@@ -20,7 +20,8 @@ Vérifier la table de politique de données de Go avant tout changement de modè
 
 ## Avant de livrer
 
-`npm run check` (lint + lint:content + tests) doit passer. Tu le lances toi-même.
+Une tranche : `npm run check:rapide` (les mêmes contrôles, sans les sept fichiers de test les plus longs) doit passer.
+Un lot, et toute fusion : `npm run check` complet (lint + lint:content + tests) doit passer.
 
 ## Règles de travail
 
