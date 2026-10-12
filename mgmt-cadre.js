@@ -231,13 +231,30 @@ function mfSoireeInfos(m){
   }catch(e){ return vide; }
 }
 /** Le bloc de droite de l'en-tête pour une partie : le décompte, la date, la soirée. */
+/* ==== [ANCRE: MONDE_LOT2_T8_GABARIT] — Monde lot 2 T8 (décision du 12/10/2026, retour d'Anthony) : le nom de la soirée suit la règle de la carte
+   d'organisation : au-delà de 18 caractères il passe à 30 px, au-delà de 26 il se coupe sur deux lignes dans le même cadre, jamais tronqué. ==== */
+/** Le gabarit du nom de la soirée : { px, lignes[] } ; base = la taille quand le nom est court. */
+function mfNomSoireeGabarit(nom,base){
+  const t=String(nom==null?'':nom).toUpperCase().trim(), n=t.length;
+  if(n<=18) return {px:base||56,lignes:[t]};
+  if(n<=26) return {px:30,lignes:[t]};
+  const mots=t.split(/\s+/); let meilleur=1, ecart=1e9;
+  for(let i=1;i<mots.length;i++){ const a=mots.slice(0,i).join(' ').length, b=mots.slice(i).join(' ').length; if(Math.abs(a-b)<ecart){ ecart=Math.abs(a-b); meilleur=i; } }
+  return {px:30,lignes:mots.length<2?[t]:[mots.slice(0,meilleur).join(' '),mots.slice(meilleur).join(' ')]};
+}
+/** Le nom de la soirée en HTML selon son gabarit. */
+function mfNomSoireeHtml(nom,base,cls){
+  const g=mfNomSoireeGabarit(nom,base);
+  return `<span class="mf-nom-soiree ${cls||''}" style="font-size:${g.px}px">${g.lignes.map(l=>`<span class="l">${esc(l)}</span>`).join('')}</span>`;
+}
+/* ==== [FIN ANCRE] ====*/
 function mfEnteteSoiree(m){
   const i=mfSoireeInfos(m);
   const n=(m.eventsPlayed||0)+1;
   return `<div class="mf-entete-d soiree">`
     +(i.dans?`<div class="mf-tete-dans">${esc(i.dans)}</div>`:'')
     +(i.date?`<div class="mf-tete-boite"><b>${esc(i.date)}</b>${i.lieu?`<span>${esc(i.lieu)}</span>`:''}</div>`:'')
-    +`<div class="mf-tete-boite soir"><b>${esc(String(mgmtOrgNom(m)).toUpperCase())} FIGHT NIGHT</b><b class="n">${esc(n)}</b></div></div>`;
+    +`<div class="mf-tete-boite soir"><b class="mf-tete-nom">${mfNomSoireeHtml(String(mgmtOrgNom(m))+' Fight Night',56,'')}</b><b class="n">${esc(n)}</b></div></div>`;
 }
 /** Le libellé de l'en-tête : un nombre en grand suivi de son texte, ou un simple texte. */
 function mfEnteteLibelle(lib){

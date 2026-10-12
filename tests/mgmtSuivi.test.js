@@ -211,10 +211,12 @@ test('Résultats — chaque soirée jouée est archivée, combat par combat, ave
   const r=res(win,`const m=G.mgmt, s=mgmtSoirees(m); return {n:s.length,numeros:s.map(x=>x.n),combats:s.map(x=>x.idx.length),total:m.hist.length,joues:m.eventsPlayed};`);
   assert.equal(r.n,3); assert.deepEqual(r.numeros,[1,2,3]); assert.equal(r.combats.reduce((a,b)=>a+b,0),r.total); assert.equal(r.joues,3);
   win.eval(`MGMT_SU_RE={s:0,i:0}; CL.go('mgmt_resultats');`);
-  const t=texte(win); for(const s of ['SOIRÉE 3','SOIRÉE 2','SOIRÉE 1','COMBAT PRINCIPAL','CO-PRINCIPAL']) assert.ok(t.includes(s),s);
-  assert.ok(win.eval(`document.querySelector('.mf-su-h-titre').textContent.includes('BAT ')||document.querySelector('.mf-su-h-titre').textContent.includes('NUL')`));
-  touche(win,'Tab'); assert.equal(win.eval('MGMT_SU_RE.s'),1); assert.ok(texte(win).includes('Soirée 2')||texte(win).includes('SOIRÉE 2'));
-  touche(win,'ArrowRight'); assert.equal(win.eval('MGMT_SU_RE.i'),1);
+  /* Décision du 12/10/2026, retour d'Anthony (Monde lot 2 T8) : liste des soirées à gauche, tableau des combats à droite ;
+     ← → changent de soirée, ↑ ↓ de ligne, Tab passe de la liste au tableau. */
+  const t=texte(win); for(const s of ['SOIRÉE 3','SOIRÉE 2','SOIRÉE 1','PRINCIPAL','CO-PRINCIPAL']) assert.ok(t.includes(s),s);
+  assert.ok(win.eval(`/ bat |match nul/.test(document.querySelector('.mf-re-qui').textContent)`));
+  touche(win,'ArrowLeft'); assert.equal(win.eval('MGMT_SU_RE.s'),1); assert.ok(texte(win).includes('Soirée 2')||texte(win).includes('SOIRÉE 2'));
+  touche(win,'ArrowDown'); assert.equal(win.eval('MGMT_SU_RE.i'),1);
   /* Lot 11 : avec l'agenda, revoir ouvre l'écran du combat animé (la planche « Le combat animé »), non plus l'arène d'origine ; le retour reste les résultats. */
   touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_combat','Revoir ouvre le combat animé sur la trace');
   assert.equal(win.eval('MGMT_COMBAT.retour'),'mgmt_resultats');
