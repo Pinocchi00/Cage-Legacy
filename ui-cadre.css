@@ -1222,6 +1222,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-prise-suite b{color:var(--mf-blanc);font-weight:600}
 .mf-arrivee{width:900px}
 .mf-arrivee .mf-prise-leila{height:auto;padding:12px 16px;font-size:26px;line-height:1.1;width:auto;white-space:normal}
+/* Monde lot 2 T9 : l'arrivée en trois blocs (organisation, passé, étapes) */
+.mf-arrivee-blocs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:20px}
+.mf-arrivee-bloc{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mf-arrivee-h{font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;color:var(--mf-blanc);text-transform:uppercase}
+.mf-arrivee .mf-fin-ls{font-size:24px;line-height:1.2;white-space:normal}
+.mf-arrivee .mf-fin-ls b{color:var(--mf-blanc);font-weight:700}
 /* Retours d'Anthony du 09/10/2026 : reprendre un combat confirmé, choisir lequel des deux préliminaires on remplace. */
 .mf-car-slot.confirme .mf-car-slot-n,.mf-car-slot.confirme .mf-car-num{cursor:pointer}
 .mf-pre-cotes{display:flex;gap:8px;margin:0 0 8px}
