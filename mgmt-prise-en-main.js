@@ -102,6 +102,7 @@ function scr_mgmt_arrivee(){
     {barre:'aucune',m:null,plaque:'Management',libelle:'Votre arrivée',touches:[{ks:['Entrée'],t:T.bouton.texte,jaune:true,onclick:"CL.mgmtArriveeFin()"}]});
 }
 SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
-Object.assign(CL,{ mgmtArriveeFin(){ CL.go('mgmt_carte'); } });
+/* Monde lot 7 (décision du 12/10/2026) : « Commencer » mène à l'Accueil, qui présente l'héritage. */
+Object.assign(CL,{ mgmtArriveeFin(){ CL.go('mgmt_accueil'); } });
 keysRegister('mgmt_arrivee',{ Enter(){ CL.mgmtArriveeFin(); }, Escape(){ CL.mgmtArriveeFin(); } });
 /* ==== [FIN ANCRE] ==== */

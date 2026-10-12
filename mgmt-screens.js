@@ -177,7 +177,7 @@ function mgmtNavHtml(){
   /* La soirée et le lendemain forment la séquence imposée (addendum 1 §14) :
      la barre reste visible, seule la progression de la soirée est cliquable. */
   if(G&&(G.screen==='mgmt_soiree'||G.screen==='mgmt_lendemain')){
-    return `<nav class="mgmt-nav" aria-label="Navigation management"><span>Semaine</span></nav>`;
+    return `<nav class="mgmt-nav" aria-label="Navigation management"><span>Accueil</span></nav>`;
   }
   /* L'entrée courante (aria-current) se distingue visiblement des autres :
      classe cur (or plein) contre fond atténué — contrastes ≥ 4,5:1 (charte
@@ -186,7 +186,7 @@ function mgmtNavHtml(){
     +`${G&&G.screen===screen?' aria-current="page"':''}`
     +` onclick="CL.go('${screen}')">${label}</button>`;
   return `<nav class="mgmt-nav" aria-label="Navigation management">`
-    +navB('Semaine','mgmt_bureau')
+    +navB('Accueil','mgmt_accueil')
     +navB('Effectif','mgmt_effectif')
     +navB('Recrutement','mgmt_recrutement')
     +navB('Classements','mgmt_classements')
@@ -317,7 +317,7 @@ Object.assign(CL,{
     if(!G||!G.mgmt||!mgmtFicheLigne(G.mgmt,id)) return;
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
-    const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
+    const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_accueil'||G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
       ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
       ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats'||G.screen==='mgmt_prelims'||G.screen==='mgmt_finances'||G.screen==='mgmt_calendrier')?G.screen:'mgmt_carte';
     MGMT_FICHE={id,retour,cursor:0};
@@ -383,7 +383,8 @@ Object.assign(CL,{
     if(mgmtSoireeEnCours(G.mgmt)){ mgmtSoireeReprendre(G.mgmt); CL.go('mgmt_soiree'); return; }
     /* Lot 8 T1 du brief démo : une partie neuve s'ouvre sur l'arrivée ; une partie reprise ne la revoit pas. */
     if(neuve&&typeof scr_mgmt_arrivee==='function'){ CL.go('mgmt_arrivee'); return; }
-    CL.go('mgmt_carte');
+    /* Monde lot 7 (décision du 12/10/2026) : une partie reprise s'ouvre sur l'Accueil. */
+    CL.go('mgmt_accueil');
   },
   mgmtLeave(){
     try{
@@ -599,8 +600,7 @@ Object.assign(CL,{
     }
     mgmtNewPile(G.mgmt);
     saveMgmt();
-    /* Lot 5 H9 : la semaine qui s'ouvre s'annonce par le fil. */
-    CL.mgmtFilDemarrer();
+    /* Monde lot 7 (décision du 12/10/2026) : plus de défilé à minuterie — les nouvelles de la semaine sont dans l'Accueil. */
     render();
   },
   /* Lot 3a §5/§7 : après la soirée, le lendemain s'il y a des touchés, sinon
@@ -640,9 +640,9 @@ Object.assign(CL,{
     mgmtAgendaSuivante(G.mgmt);
     mgmtNewPile(G.mgmt);
     saveMgmt();
-    CL.mgmtFilDemarrer();
     if(typeof mgmtDemoApresSoiree==='function'&&mgmtDemoApresSoiree()) return;
-    CL.go('mgmt_carte');
+    /* Monde lot 7 : après le lendemain, l'Accueil dit ce qui s'est passé et ce qui attend. */
+    CL.go('mgmt_accueil');
   },
 });
 /* ==== [FIN ANCRE] ==== */

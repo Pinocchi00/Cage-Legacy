@@ -28,7 +28,7 @@ test('Organisations — « Choisis une partie » : Entrée sur un emplacement vi
   assert.equal(win.eval('mgmtSlotPeek(1)'),null,'rien n’est créé tant qu’on ne l’a pas décidé');
   touche(win,'Escape'); assert.equal(win.eval('G.screen'),'mgmt_parties','Échap revient aux emplacements');
   win.eval(`setSeed(5); CL.mgmtEnter(1); saveMgmt(); CL.mgmtLeave(); CL.mgmtParties();`);
-  touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_carte','un emplacement occupé se reprend (décision d’Anthony du 08/10/2026 : plus d’écran « Les affaires » à l’ouverture, on revient à la carte)');
+  touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_accueil','un emplacement occupé se reprend sur l’Accueil (décision du 12/10/2026 : l’Accueil est la première section (lot 7); avant, décision du 08/10/2026 : la carte)');
 });
 
 /* Corrections du 08/10, lot 12 (D6) : les lignes sont déduites du profil — Split garde « Une caisse saine », et « Peu connue hors de sa région » devient « Encore peu connue » (popularité 40). */

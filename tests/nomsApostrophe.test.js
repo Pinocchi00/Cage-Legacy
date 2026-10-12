@@ -231,9 +231,9 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
 
   /* Organisation : pas de nom affiché, mais la navigation répond. */
   win.eval(`CL.go('mgmt_organisation'); render();`);
-  const semaine = [...win.document.querySelectorAll('.mgmt-nav button')].find(x => x.textContent === 'Semaine');
+  const semaine = [...win.document.querySelectorAll('.mgmt-nav button')].find(x => x.textContent === 'Accueil');   /* décision du 12/10/2026 : l’Accueil est la première section (lot 7) : « Semaine » devient « Accueil » */
   semaine.click();
-  assert.equal(win.eval(`G.screen`), 'mgmt_bureau', 'la navigation répond');
+  assert.equal(win.eval(`G.screen`), 'mgmt_accueil', 'la navigation répond');
   noErr(win, 'organisation');
 
   /* Soirée et lendemain : carte pleine d’O'Connor, la soirée se joue au clic. */
@@ -281,7 +281,7 @@ test('Management — chaque écran rend avec « O\u2019Connor », tous les bouto
        jamais un test « réparé ». */
     /* Brief démo, lot 6 T3 : l'action du soir suivant est la touche jaune de la barre du bas, plus le bouton de l'en-tête. */
     win.eval(`CL.mgmtLendemainNext()`);
-    assert.equal(win.eval(`G.screen`), 'mgmt_carte', 'le lendemain rend la main');
+    assert.equal(win.eval(`G.screen`), 'mgmt_accueil', 'le lendemain rend la main (décision du 12/10/2026 : l’Accueil est la première section (lot 7))');
   }
   noErr(win, 'soirée/lendemain');
 

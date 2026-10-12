@@ -37,7 +37,7 @@ test('Monde lot 1 T7 — la partie se charge par l\'emplacement et joue une soir
   const w = newGameWindow({ runMain: true });
   w.__texte = TEXTE;
   w.eval(`setSeed(5); stockageEcrire(mgmtSlotKey(1),window.__texte); CL.mgmtEnter(1);`);
-  assert.equal(w.eval('G.screen'), 'mgmt_carte', 'une partie reprise ne revoit pas l\'arrivée');
+  assert.equal(w.eval('G.screen'), /* décision du 12/10/2026 : l’Accueil est la première section (lot 7) */ 'mgmt_accueil', 'une partie reprise ne revoit pas l\'arrivée');
   assert.equal(w.eval('G.mgmt.eventsPlayed'), 3);
   const avant = w.eval('G.mgmt.hist.length');
   assert.equal(jouerSoirees(w, 1), 1);

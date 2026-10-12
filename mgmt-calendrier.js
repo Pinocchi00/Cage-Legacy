@@ -162,7 +162,7 @@ Object.assign(CL,{
   mgmtCalendrierJouer(){
     const m=G.mgmt; if(!mgmtAgendaPret(m)) return;
     /* Lot 5 T6 : un combattant booké peut se retirer à la veille — la carte est incomplète, le bureau le dit. */
-    if(typeof mgmtRetraitsAvantSoiree==='function'&&mgmtRetraitsAvantSoiree(m)){ MGMT_RETRAIT_UI={qui:'',texte:'',c:-1}; saveMgmt(); CL.go('mgmt_bureau'); return; }
+    if(typeof mgmtRetraitsAvantSoiree==='function'&&mgmtRetraitsAvantSoiree(m)){ MGMT_RETRAIT_UI={qui:'',texte:'',c:-1}; saveMgmt(); CL.go('mgmt_accueil'); return; }
     if(mgmtAgendaJouer(m)){ MGMT_CALENDRIER.n=0; MGMT_SOIREE.index=0; saveMgmt(); CL.go('mgmt_soiree'); } else render();
   },
   mgmtCalendrierPasser(){ const m=G.mgmt; if(mgmtAgendaPasser(m)>0) saveMgmt(); render(); },
