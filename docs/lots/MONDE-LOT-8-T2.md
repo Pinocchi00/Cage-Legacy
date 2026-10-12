@@ -91,3 +91,60 @@ La marque et la table des visites (T1, ne les modifie pas : seule `mgmtFicheVue`
 - **Question 6 : pas de doublon.** Une ligne déjà dite dans « Depuis ta dernière visite » n'est pas répétée dans le
   fil juste en dessous, tant que le bloc est affiché.
 - Un test existant qui attend « Aperçu » après un événement s'adapte en citant cette décision.
+
+## Compte rendu — Monde lot 8 T2 (12/10/2026)
+
+**Fichiers modifiés et leur rôle**
+- `mgmt-fiche-planche.js` : `MGMT_DEPUIS_LIBELLES` ; `mgmtDepuisVisite(m,id)` (pur : tri c décroissant, combat
+  avant fait du même cycle, i décroissant ; phrase de chaque sorte lue sur son système — `MGMT_FACT_LABELS`,
+  `MGMT_DEMANDES` + cible, `mgmtFilTitre` du modèle `attend` avec `mgmtContratAttente×MGMT_VOIX_MOIS_PAR_CYCLE`,
+  `mgmtVieTexte` + relais ; `sorte:'titre'` via `title_fight` ; `detail` = `mgmtSoireeNomDate` +
+  « · via … » / « · Attend ta réponse » / « · mgmtSuRoundLigne ») ; `mgmtFicheDepuisHtml(liste)` (en-tête
+  `DEPUIS TA DERNIÈRE VISITE` + lignes `.mf-fi-oc.depuis`, `esc()` au rendu, aucun `<b>`, aucune classe
+  neuve) ; `mgmtFicheOnEnDitHtml` : le bloc en tête du panneau défilant, et — décision Q6 — le fil ne
+  répète pas une ligne déjà dite par le bloc tant que celui-ci est affiché (comparaison des phrases, la
+  presse garde son commentaire, le fil reste limité à trois lignes).
+- `mgmt-ecran-fiche.js` : `mgmtFicheVue(id)` réécrite dans l'ordre de la fiche : calcul de
+  `MGMT_FICHE.depuis` AVANT `mgmtVuEnregistre`, ouverture sur `'ondit'` si du nouveau (décision Q5),
+  puis enregistrement de la visite + `saveMgmt()` seulement si changement. Aucun appelant changé.
+- `mgmt-cadre.js` : `mfMarqueDessin()` (dessin partagé de l'octogone, reste le seul fichier qui pose
+  `mf-oct-nom`) et `mfMarqueOnglet(f)` : l'onglet « On en dit » porte le même octogone tant que le bloc
+  du combattant ouvert n'a pas été lu (décision Q5). `mfMarqueNom` est inchangé de comportement.
+- `mgmt-fiche-cadre.js` : les onglets dessinent `mfMarqueOnglet(f)` devant « ON EN DIT ».
+- `index.html` : versions montées par `node tools/_bump.js` (4 fichiers, un second passage sur
+  `mgmt-ecran-fiche.js` que l'audit des versions a signalé) ; `sw.js` : `SW_VERSION` b75 (outil).
+  Aucun fichier .js ajouté : l'ordre des scripts ne change pas.
+
+**Tests ajoutés** — `tests/mgmtDepuis.test.js` (ajouté aux scripts `test` et `test:watch`),
+12 tests, titres exactement ceux du §7 (« Depuis — … »), graine 7, amorce de `mgmtMarque.test.js` :
+tous verts en local. Les sept fichiers du §8 (`mgmtMarque`, `mgmtFicheCadre`, `CorrectionsLot4/5`,
+`mgmtTunnels`, `mgmtDefautsDemo`, `mgmtFicheCombats`) : 42 tests, tous verts.
+
+**Migration de sauvegarde** : aucune — `MGMT_SAVE_VERSION` reste celle de la T1 ; `MGMT_FICHE.depuis`
+est un champ d'une visite, jamais sauvegardé. Le test 8 (rechargement) le vérifie.
+
+**Écarts à la fiche**
+- La décision Q5 exigeait que l'octogone de l'onglet soit « le même, `mfMarqueNom` ». Tel quel,
+  `mfMarqueNom` lit `mgmtMarqueAllumee` — la marque du nom s'éteint à l'ouverture de la fiche, il
+  n'aurait donc jamais dessiné. L'octogone de l'onglet passe donc par `mfMarqueOnglet`, qui regarde le
+  bloc en attente (`MGMT_FICHE.depuis`) et partage le dessin avec `mfMarqueNom` : l'invariance T1
+  « `mf-oct-nom` n'apparaît que dans `mgmt-cadre.js` » est respectée (le test du §8 le confirme).
+  De plus, le test T1 interdit toute seconde pose du `mf-oct-nom` hors `mgmt-cadre.js` : écrire
+  directement le span dans `mgmt-fiche-cadre.js` l'aurait fait échouer.
+- Le §8 annonçait un test existant à adapter (une fiche marquée attendue sur `Aperçu`) : aucun test
+  existant n'asserte `MGMT_FICHE.onglet` dans ce cas (les seuls `onglet` testés : `contrat` et `ondit`),
+  rien n'a été modifié côté tests existants, aucune assertion desserrée.
+
+**Questions pour Anthony** (aucune ne bloque, celles du §11 restent dans la fiche)
+- L'onglet marque s'appuie sur « le bloc est affiché » (`MGMT_FICHE.depuis` non vide pour le combattant
+  ouvert). Il reste affiché jusqu'à ce que la fiche soit quittée (retour, autre combattant par ← →) :
+  conformément à « tant que le bloc n'a pas été lu ». À confirmer si « lu » devait vouloir dire
+  « l'onglet a été visité ».
+- Le fil, sous le bloc, ne répète plus ligne déjà dite ; si une ligne du fil disparaît, la quatrième
+  plus récente peut monter. Voulu ?
+
+**Vérification** : `node --test tests/mgmtDepuis.test.js` 12/12 verts ; lots touchés 42/42 verts ;
+`node tools/lint-content.js` : 3 signalements préexistants, aucun nouveau ; `node tools/verif-versions.js` :
+aucun écart ; `npm run check:rapide` : VERT (885 tests, 7 fichiers longs écartés comme prévu).
+`@verif` et `@relecteur` inaccessibles (limite de profondeur des sous-agents) : contrôles relancés
+à la main, relecture faite contre la fiche et les règles du dépôt.

@@ -57,7 +57,7 @@ function scr_mgmt_fiche_cadre(){
   /* Reprise de fidélité du 07/10/2026 : la fiche est celle des planches (voir mgmt-fiche-planche.js) ; son ancien corps, en texte, n'existe plus. */
   const onglets=MGMT_FICHE_ONGLETS.map(o=>mgmtFicheOngletGrise(o)
     ?`<span class="mf-onglet mf-fiche-grise" aria-disabled="true">${esc(o.libelle.toUpperCase())}</span>`
-    :`<button type="button" class="mf-onglet${o.id===onglet?' ouvert':''}" aria-pressed="${o.id===onglet}" onclick="CL.mgmtFicheOnglet('${o.id}')">${esc(o.libelle.toUpperCase())}</button>`).join('');
+    :`${o.id==='ondit'&&typeof mfMarqueOnglet==='function'?mfMarqueOnglet(f):''}`+`<button type="button" class="mf-onglet${o.id===onglet?' ouvert':''}" aria-pressed="${o.id===onglet}" onclick="CL.mgmtFicheOnglet('${o.id}')">${esc(o.libelle.toUpperCase())}</button>`).join('');
   let corps;
   try{
     corps=onglet==='style'?mgmtFicheStyleHtml(m,f):onglet==='combats'?mgmtFicheCombatsHtml(m,f,line):onglet==='contrat'?mgmtFicheContratPlanche(m,f):onglet==='ondit'?mgmtFicheOnEnDitHtml(m,f):mgmtFicheApercuHtml(m,f,line);

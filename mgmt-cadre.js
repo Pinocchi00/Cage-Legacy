@@ -137,12 +137,29 @@ function mfMarque(code){
    sections (.mf-oct, ui-cadre.css), la phrase vient de MGMT_MARQUE_LIBELLE
    (mgmt-attention.js). `m` est passé en paramètre : jamais G.mgmt dedans.
    Un combattant absent (id invalide) renvoie '' sans lever. ==== */
+/** Le dessin de l'octogone, partagé par la marque d'un nom et celle de l'onglet. @returns {string} */
+function mfMarqueDessin(){
+  return `<span class="mf-oct mf-oct-nom" role="img" aria-label="${esc(MGMT_MARQUE_LIBELLE.texte)}" title="${esc(MGMT_MARQUE_LIBELLE.texte)}"></span>`;
+}
 /** La marque d'un nom : un octogone jaune de 18 px, ou '' si rien n'est arrivé. @returns {string} */
 function mfMarqueNom(m,id){
   /* T6 : au plus le budget du conteur de marques allumées en même temps ; un
      combattant éteint garde son événement lisible sur la fiche (mgmtMarque). */
   if(!mgmtMarqueAllumee(m,id)) return '';
-  return `<span class="mf-oct mf-oct-nom" role="img" aria-label="${esc(MGMT_MARQUE_LIBELLE.texte)}" title="${esc(MGMT_MARQUE_LIBELLE.texte)}"></span>`;
+  return mfMarqueDessin();
+}
+/* ==== [ANCRE: MONDE_LOT8_T2_MARQUE_ONGLET] — Monde lot 8 T2 (docs/lots/MONDE-LOT-8-T2.md,
+   décision de la question 5) : l'onglet « On en dit » porte le même octogone tant
+   que le bloc « Depuis ta dernière visite » n'a pas été lu, pour que le joueur
+   comprenne pourquoi la fiche s'ouvre là. On ne позe pas mfMarqueNom : la visite
+   vient d'être enregistrée, la marque du nom est déjà éteinte — lui-même lirait
+   la table des visites. Le test T1 (un seul dessinateur de .mf-oct-nom) est
+   respecté : le dessin reste ici, dans mgmt-cadre.js. `f` est le combattant
+   ouvert. ==== */
+/** L'octogone de l'onglet « On en dit » : le bloc du combattant ouvert attend d'être lu. @returns {string} */
+function mfMarqueOnglet(f){
+  const ok=MGMT_FICHE&&MGMT_FICHE.id===(f&&f.id)&&Array.isArray(MGMT_FICHE.depuis)&&MGMT_FICHE.depuis.length>0;
+  return ok?mfMarqueDessin():'';
 }
 /** La voix : une seule pièce pour tout ce qui parle (commentaire, coins, assistante). */
 function mfVoix(qui,texte){

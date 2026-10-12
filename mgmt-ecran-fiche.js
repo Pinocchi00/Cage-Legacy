@@ -8,9 +8,18 @@ let MGMT_FICHE={id:null,retour:'mgmt_carte',cursor:0};
    après dix soirées — on n'écrit pas le disque pour rien). Les deux seuls
    appelants sont les deux points d'ouverture de la fiche : CL.mgmtFiche
    (mgmt-screens.js) et CL.mgmtFicheAutre (mgmt-fiche-cadre.js). */
+/* ==== [ANCRE: MONDE_LOT8_T2_VUE] — Monde lot 8 T2 (docs/lots/MONDE-LOT-8-T2.md) :
+   ouvrir la fiche montre aussi ce qui est arrivé. L'ordre EST le point de la
+   tranche : calculer le bloc AVANT d'enregistrer la visite (sinon toujours
+   vide), puis l'ouvrir sur « On en dit » quand il y a du nouveau (décision de
+   la T2, question 1), puis seulement enregistrer la visite et sauvegarder.
+   MGMT_FICHE.depuis vit le temps d'une visite : jamais sauvegardé. ==== */
 function mgmtFicheVue(id){
   const m=G&&G.mgmt;
-  if(m&&mgmtVuEnregistre(m,id)) saveMgmt();
+  if(!m) return;
+  MGMT_FICHE.depuis=mgmtDepuisVisite(m,id);
+  if(MGMT_FICHE.depuis.length) MGMT_FICHE.onglet='ondit';
+  if(mgmtVuEnregistre(m,id)) saveMgmt();
 }
 /* ==== [ANCRE: MGMT_LOT4_T5_FICHE] — Lot 4 T5 : lecture dérivée, rejeux
    gardés seulement en mémoire par identité de trace ; jamais en sauvegarde. ==== */

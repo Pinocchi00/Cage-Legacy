@@ -252,10 +252,102 @@ function mgmtFicheContratPlanche(m,f){
   return `<div class="mf-fi-ligne">${gauche}${droite}</div>`;
 }
 
+/* ==== [ANCRE: MONDE_LOT8_T2_DEPUIS] — Monde lot 8 T2 (docs/lots/MONDE-LOT-8-T2.md,
+   branche monde-lot-8-marques) : « Depuis ta dernière visite ». En ouvrant la fiche
+   d'un combattant marqué, le joueur lit en tête de « On en dit » ce qui lui est
+   arrivé, du plus récent au plus ancien. Le bloc reprend le panneau « On en dit »
+   et ses lignes : aucune planche neuve, aucune valeur ajoutée, le CSS ne change pas.
+   Décision du 10/10/2026, question 6 : pas de doublon — une ligne déjà dite dans
+   le bloc n'est pas répétée dans le fil juste dessous, tant que le bloc est
+   affiché. Les étiquettes et l'en-tête (relu:false) sont des libellés
+   fonctionnels : la phrase de chaque sorte vient de son système (aucun texte
+   neuf écrit ici). ==== */
+
+/** Les étiquettes fonctionnelles du bloc (12 caractères au plus : elles tiennent
+ *  dans la colonne de 260 px, sans le b de 34 px). relu:false.
+ *  @type {{vie:string,demande:string,attente:string,corps:string,resultat:string,titre:string,relu:boolean}} */
+const MGMT_DEPUIS_LIBELLES={vie:'Sa vie',demande:'Une demande',attente:'Une attente',corps:'Son corps',resultat:'Un résultat',titre:'Un titre',relu:false};
+
+/** Ce qui est arrivé à id depuis sa dernière visite, du plus récent au plus
+ *  ancien. Pur, sans DOM, ne modifie rien.
+ *  @returns {Array<{sorte:string,libelle:string,phrase:string,detail:string,c:number}>} sorte ∈ vie|demande|attente|corps|resultat|titre */
+function mgmtDepuisVisite(m,id){
+  const out=[];
+  /* Le tri se fait d'abord sur les événements, avant de composer les phrases :
+     c décroissant, puis un combat avant un fait du même cycle, puis i décroissant. */
+  const tri=mgmtEvenementsDepuis(m,id).slice().sort((p,q)=>{
+    const cp=p.fait?p.fait.c:p.trace.c, cq=q.fait?q.fait.c:q.trace.c;
+    if(cp!==cq) return cq-cp;
+    if((p.type==='combat')!==(q.type==='combat')) return p.type==='combat'?-1:1;
+    return (q.i-p.i);
+  });
+  for(const e of tri){
+    const c=e.fait?e.fait.c:e.trace.c;
+    let sorte='',libelle='',phrase='',detail=mgmtSoireeNomDate(m,c);
+    if(e.type==='fait'){
+      const x=e.fait;
+      if(x.k==='moment_vie'){
+        /* mgmtFaitMarque (T1) ne laisse passer qu'un moment relayé et dont la
+           phrase existe : par économie, si le texte manque, la ligne n'est pas
+           écrite (aucun texte inventé, jamais). */
+        const moment=mgmtVieMomentById(x.m);
+        phrase=(moment&&mgmtVieTexte(moment))||'';
+        if(phrase){ sorte='vie'; libelle=MGMT_DEPUIS_LIBELLES.vie;
+          const r=(moment.relais||[]);
+          if(r.length) detail+=' · via '+r.join(' · ');
+        }
+      }else if(x.k==='demande'){
+        const lib=MGMT_DEMANDES[x.want]?MGMT_DEMANDES[x.want].libelle:'';
+        const cible=x.target?mgmtFighterById(m,x.target):null;
+        phrase=lib?(cible?lib+' — '+cible.name:lib):'';
+        if(phrase){ sorte='demande'; libelle=MGMT_DEPUIS_LIBELLES.demande;
+          if(mgmtDemandesOuvertes(m).some(d=>d.i===e.i)) detail+=' · Attend ta réponse';
+        }
+      }else if(x.k==='attend'){
+        const f=mgmtFighterById(m,x.a);
+        phrase=f?mgmtFilTitre(m,{k:'combattant',w:'attend',a:x.a,n:Math.max(1,Math.round(mgmtContratAttente(m,f)*MGMT_VOIX_MOIS_PAR_CYCLE))}):'';
+        if(phrase){ sorte='attente'; libelle=MGMT_DEPUIS_LIBELLES.attente; }
+      }else if((x.k==='injury'||x.k==='susp'||x.k==='retired')&&MGMT_FACT_LABELS[x.k]){
+        phrase=MGMT_FACT_LABELS[x.k]; sorte='corps'; libelle=MGMT_DEPUIS_LIBELLES.corps;
+      }
+    }else{
+      const t=e.trace, side=t.a.id===id?'A':'B', adv=side==='A'?t.b:t.a;
+      const issue=t.winner==='D'?'Nul':(t.winner===side?'Victoire':'Défaite');
+      phrase=issue+' · '+adv.name;
+      /* Un titre en jeu sur ce combat : « Un titre », sinon un simple résultat. */
+      const titre=(m.facts||[]).some(x=>x&&x.k==='title_fight'&&x.fight===e.i);
+      sorte=titre?'titre':'resultat'; libelle=MGMT_DEPUIS_LIBELLES[sorte];
+      const d=mgmtResultatDetail(m,e.i);
+      const ligne=d?mgmtSuRoundLigne(d):(MGMT_FAMILY_LABELS[t.family]||'');
+      if(ligne) detail+=' · '+ligne;
+    }
+    if(!phrase||!sorte) continue;
+    out.push({sorte,libelle,phrase,detail,c});
+  }
+  return out;
+}
+
+/** Le bloc « Depuis ta dernière visite » : son en-tête et ses lignes, au panneau
+ *  « On en dit ». '' sans liste, sans événement. Toute chaîne est du texte
+ *  brut — l'échappement (esc) se fait au rendu, ici. */
+function mgmtFicheDepuisHtml(liste){
+  if(!Array.isArray(liste)||!liste.length) return '';
+  const n=liste.length;
+  return `<div class="mf-fi-cth"><span>DEPUIS TA DERNIÈRE VISITE</span><span>${n} ÉVÉNEMENT${n>1?'S':''}</span></div>`
+    +liste.map(x=>`<div class="mf-fi-oc depuis"><div class="mf-fi-ocq"><span>${esc((x.libelle||'').toUpperCase())}</span></div>`
+      +`<div class="mf-fi-oct"><div class="mf-fi-ocp">${esc(x.phrase||'')}</div><div class="mf-fi-rp">${esc(x.detail||'')}</div></div></div>`).join('');
+}
+
 /** On en dit : la presse, un défi, le public, un combattant, puis ce que la fiche d'origine sait de lui. */
 function mgmtFicheOnEnDitHtml(m,f){
-  let fil=[]; try{ fil=(typeof mgmtFilListe==='function'?mgmtFilListe(m):[]).filter(x=>x&&(x.a===f.id||x.b===f.id)).slice(0,3); }catch(e){ fil=[]; }
-  const rows=fil.map(x=>{
+  let fil=[]; try{ fil=(typeof mgmtFilListe==='function'?mgmtFilListe(m):[]).filter(x=>x&&(x.a===f.id||x.b===f.id)); }catch(e){ fil=[]; }
+  /* Décision du 10/10/2026, question 6 : tant que le bloc est affiché, une ligne
+     que le bloc dit déjà n'est pas répétée dans le fil. On compare la phrase du
+     fil à celles du bloc ; la demande et l'attente dites là-haut disparaissent
+     d'en dessous, la presse garde son commentaire (il ne dit pas la même chose). */
+  const depuis=(MGMT_FICHE.id===f.id)?mgmtFicheDepuisHtml(MGMT_FICHE.depuis):'';
+  if(depuis){ const dites=new Set((MGMT_FICHE.depuis||[]).map(x=>x.phrase)); fil=fil.filter(x=>!dites.has(x.t?`« ${x.t} »`:mgmtFilTitre(m,x))); }
+  const rows=fil.slice(0,3).map(x=>{
     const lib=(MGMT_FIL_LIBELLES[x.k]||'').toUpperCase(), titre=mgmtFilTitre(m,x), age=mgmtFilAge(m,x);
     const nom=x.k==='presse'?'LA PRESSE':(x.k==='public'?'LES FANS':mfNet(mgmtNomParId(m,x.a).name));
     const citation=x.t?`« ${x.t} »`:titre;
@@ -263,6 +355,6 @@ function mgmtFicheOnEnDitHtml(m,f){
   }).join('');
   const identite=mgmtIdentite(m,f);
   const reste=`<div class="mf-fi-ancien mf-ancien">${mgmtFicheVie(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheRivaux(m,f)}${mgmtFicheParole(m,f)}${mgmtFicheLien(m,f)}<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p></div>`;
-  return `<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p mf-fi-scroll">${rows}${reste}</div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`;
+  return `<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p mf-fi-scroll">${depuis}${rows}${reste}</div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */
