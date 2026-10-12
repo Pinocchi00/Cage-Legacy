@@ -77,7 +77,7 @@ function mgmtPassePreparer(orgId,opts){
 function mgmtPasseSoiree(m,k){
   const n=m.passe.soirees;
   /* T4 bis : il re-signe ses sans-contrat et recrute des jeunes en fin de passé (réglages opt-in du prédécesseur). */
-  const reglages={renouvelle:true,recrues:{depuis:Math.max(0,n-MGMT_PASSE_FENETRE_RECRUES),pas:MGMT_PASSE_RECRUES_PAS,parSoiree:MGMT_PASSE_RECRUES_PAR_SOIREE,ageMax:MGMT_PASSE_RECRUES_AGE_MAX,fin:Math.max(0,n-MGMT_PASSE_RECRUES_FIN),finAgeMax:MGMT_PASSE_RECRUES_FIN_AGE_MAX,plan:m.passe.plan||{}}};
+  const reglages={renouvelle:true,rotationTitres:n-20,recrues:{depuis:Math.max(0,n-MGMT_PASSE_FENETRE_RECRUES),pas:MGMT_PASSE_RECRUES_PAS,parSoiree:MGMT_PASSE_RECRUES_PAR_SOIREE,ageMax:MGMT_PASSE_RECRUES_AGE_MAX,fin:Math.max(0,n-MGMT_PASSE_RECRUES_FIN),finAgeMax:MGMT_PASSE_RECRUES_FIN_AGE_MAX,plan:m.passe.plan||{}}};
   const s=mgmtPredecesseurSoiree(m,k,reglages);
   const fait=s.jouee?k+1:k;
   return {k:fait,n,jouee:s.jouee,termine:!s.jouee||fait>=n,annee:mgmtPasseAnnee(n,Math.min(fait,n-1))};

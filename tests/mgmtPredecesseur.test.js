@@ -49,7 +49,7 @@ test('Monde lot 1 T2 — mgmt-predecesseur.js est chargé après mgmt-agenda.js 
 
 /* ===================== Test 2 ===================== */
 test('Monde lot 1 T2 — le prédécesseur est sans écran : ni document, ni CL, ni window, ni localStorage, ni Math.random', () => {
-  assert.equal(SOURCE.split('\n')[0], '"use strict";', 'ligne 1 : "use strict";');
+  assert.equal(SOURCE.split(/\r?\n/)[0], '"use strict";', 'ligne 1 : "use strict";');
   assert.ok(SOURCE.includes('/* ==== [ANCRE: MONDE_LOT1_T2_PREDECESSEUR]') && SOURCE.includes('/* ==== [FIN ANCRE] ==== */'), "l'ancre et sa fin");
   for (const motif of [/\bdocument\b/, /\bCL\b/, /\bwindow\b/, /\blocalStorage\b/, /Math\.random/, /\brnd\s*\(/, /\bsetSeed\b/]) {
     assert.ok(!motif.test(SANS_COMMENTAIRES), 'le source ne contient pas ' + motif);
