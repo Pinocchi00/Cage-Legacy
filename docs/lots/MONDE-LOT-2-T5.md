@@ -155,7 +155,7 @@ pour garder leur style actuel, retirer les lignes « Aperçu », « Pied » et �
 
 1. « Nouvelle partie — chaque carte montre la ville, l’année et la réputation de son organisation » (16 vérifications : 8 villes aux valeurs de la planche, 8 réputations = `mgmtOrgIdentite(id).reputation`).
 2. « Nouvelle partie — le nom s’écrit en 44 px, en 30 px au-delà de 18 caractères, et tient dans la carte » (44/30 selon la longueur ; `mfAvance` : 73, 240, 188, 196, 301, 191, 179, 240, tous ≤ 306).
-3. « Nouvelle partie — les lignes d’atout suivent le profil, sans intertitre, et la carte la plus chargée tient dans 322 px » (textes = plus-contreparties du profil ; `[2,3,3,3,3,4,3,3]` ; aucun `.mf-org-titre`/`.mf-org-bloc` ; réputations 47–78 ≤ 90 ; hauteur 234 ≤ 248, calculée avec les nombres lus dans `ui-cadre.css`).
+3. « Nouvelle partie — les lignes d’atout suivent le profil, sans intertitre, et la carte la plus chargée tient dans 322 px » (textes = plus-contreparties du profil ; `[2,3,3,3,3,4,3,3]` ; aucun `.mf-org-titre`/`.mf-org-bloc` ; réputations 47–78 ≤ 90 ; hauteur 8 + 22 + 6 + 48 + 6 + 4 × (34 + 2) + 8 = 238 ≤ 248, calculée avec les nombres lus dans `ui-cadre.css` — reprise : les bordures basses des lignes d'atout comptées, gaps du corps inclus).
 4. « Nouvelle partie — les valeurs de la planche sont dans la feuille de style ».
 5. « Nouvelle partie — le texte du bas, l’aperçu, « Créer ton organisation » et le bouton jaune sont ceux de la planche » (phrase exacte ; un bouton jaune ; aperçu 6 tuiles ; `aria-disabled="true"`).
 6. « Nouvelle partie — une réputation hostile s’affiche échappée, jamais injectée » (0 `img` dans `#app`, texte échappé).
@@ -183,3 +183,11 @@ Non concernée : un écran ; les identités sont des données de code.
 - `node tools/verif-versions.js` : un écart détecté et corrigé (`ui-cadre.css` a dû être remonté une deuxième fois, la version `m15xx` étant déjà celle de main) ; ensuite « aucun écart par rapport à main ».
 
 Sonde jetable : `tools/reports/sonde-t5-noms.js` (non commitée, ignorée par git, à supprimer librement).
+
+### Reprise (2e tour, écarts du relecteur corrigés)
+
+1. ui-cadre.css : huit sélecteurs (.mf-org-apercu, .mf-org-apercu-nom, .mf-org-tuile, .mf-org-tuile span, .mf-org-tuile b, .mf-nouvelle-pied, .mf-nouvelle-texte, .mf-org-avenir) étaient définis deux fois (277-284) ; une seule définition garde-à-portée, la première.
+2. ui-cadre.css : .mf-org-avenir définissait margin-left:auto dans la copie fantôme seulement ; une seule définition, sans margin-left:auto (son conteneur .mf-nouvelle-droite porte le margin-left:auto).
+3. ui-cadre.css : .mf-org-nom.long{font-size:30px} supprimée (morte : la taille est injectée en ligne).
+4. tests/mgmtNouvellePartie.test.js : le calcul de hauteur compte les border-bottom:2px de chaque ligne d'atout (lues dans ui-cadre.css) : 8 + 22 + 6 + 48 + 6 + 4 × (34 + 2) + 8 = 238 ≤ 248.
+5. mgmt-retraits-data.js et mgmt-voix-data.js : fins de ligne réécrites par un test, hors périmètre ; working tree nettoyé (contenu de HEAD réécrit tel quel, puis autocrlf normalisé).

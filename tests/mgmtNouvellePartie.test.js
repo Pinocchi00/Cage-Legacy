@@ -14,7 +14,7 @@ function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(
 const NEUVE=`setSeed(5); CL.mgmtNouvelle(3);`;
 
 /* La feuille de style, lue en valeurs : padding vertical du corps, corps de la ligne ville, gap du corps,
-   hauteur de la réputation, hauteur d'une ligne d'atout, hauteur du bandeau, contour (2 + 5). */
+   hauteur de la réputation, hauteur d'une ligne d'atout, sa bordure basse, hauteur du bandeau, contour (2 + 5). */
 function valeursCss(){
   const m=(r)=>{ const x=css.match(r); if(!x||!x[1]) throw new Error('valeur absente de ui-cadre.css : '+r); return +x[1]; };
   return {
@@ -23,6 +23,7 @@ function valeursCss(){
     fsVille:m(/\.mf-org-ville\{[^}]*font-size:(\d+)px/),
     hRep:m(/\.mf-org-reputation\{[^}]*height:(\d+)px/),
     hLigne:m(/\.mf-org-ligne\{[^}]*height:(\d+)px/),
+    bordLigne:m(/\.mf-org-ligne\{[^}]*border-bottom:(\d+)px/),
     hTete:m(/\.mf-org-tete\{[^}]*height:(\d+)px/),
     carte:m(/\.mf-org\{height:(\d+)px\}/),
     contour:m(/\.mf-panneau\{[^}]*padding:(\d+)px/)+m(/\.mf-panneau>\.mf-p2\{[^}]*padding:(\d+)px/),
@@ -76,7 +77,11 @@ test('Nouvelle partie — les lignes d’atout suivent le profil, sans intertitr
   assert.deepEqual(r.lignes,attendu,'les plus puis les contreparties du profil, en une colonne');
   assert.deepEqual(r.lignes.map(x=>x.length),[2,3,3,3,3,4,3,3]);
   assert.ok(r.repMax.every(n=>n<=90),`chaque réputation ≤ 90 caractères (les huit : ${Math.min(...r.repMax)} à ${Math.max(...r.repMax)}), sinon overflow:hidden la coupe en silence`);
-  const contenue=v.padCorps+v.fsVille+v.gapCorps+v.hRep+v.gapCorps+4*v.hLigne+v.padCorps;
+  /* La carte la plus chargée : Knuckle Gate, 4 lignes d'atout (Monde lot 2 T5, point 4 de la relecture :
+     chaque ligne ajoute sa bordure basse de 2 px, lue dans ui-cadre.css malgré box-sizing par défaut). */
+  const nLignes=Math.max(...r.lignes.map(x=>x.length));
+  const contenue=v.padCorps+v.fsVille+v.gapCorps+v.hRep+v.gapCorps+nLignes*v.hLigne+nLignes*v.bordLigne+v.padCorps;
+  /* L'écart de la ligne à la ligne: la bordure basse est comptée à l'extérieur de la hauteur (pas de box-sizing:border-box). */
   assert.ok(contenue<=v.carte-v.contour*2-v.hTete,`corps ${contenue} ≤ carte ${v.carte} − contour ${v.contour*2} − bandeau ${v.hTete}`);
 });
 
