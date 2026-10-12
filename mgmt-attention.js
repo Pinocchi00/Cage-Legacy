@@ -32,10 +32,62 @@ function mgmtResultats(m,f){
   return out;
 }
 
+/* ==== [ANCRE: MONDE_LOT1_T6_ROLES] — Monde lot 1 T6 : les cinq rôles qui demandent une mémoire. Ils se lisent sur m.hist et m.facts (le passé de six ans compris), jamais
+   stockés. Règles (la fiche docs/lots/MONDE-LOT-1-T6.md §3 les justifie) :
+   - Ancien champion : a tenu une ceinture de Split (un règne de la lignée, mgmtCeintureLignee) et ne la porte plus.
+   - Remplaçant de luxe : au moins deux faits 'engage' (un combat accepté à court préavis).
+   - Bête noire : a battu au moins deux adversaires distincts aujourd'hui mieux classés que lui dans l'organisation.
+   - Revenant : son dernier combat date des trois derniers cycles et le précédent d'au moins 11 cycles (plus d'un an : MGMT_EXT_YEAR_WEEKS / MGMT_EVENT_WEEKS).
+   - Gatekeeper : plus de 30 ans, a battu et perdu contre des adversaires aujourd'hui classés dans les 15 premiers de l'organisation.
+   Priorité : après Champion et En perdition, avant Contender pour l'ancien champion, après lui pour les quatre autres. ==== */
+const MGMT_ROLES_REVENANT_ABSENCE=11;
+const MGMT_ROLES_REVENANT_RECENT=3;
+const MGMT_ROLES_GATEKEEPER_TOP=15;
+const MGMT_ROLES_MEMO={m:null,cle:'',data:null};
+
+/** Ce que la mémoire de la partie dit de chacun. Mémo : la clé suit les combats, les faits, le cycle et l'effectif. Pur. @returns {{ancien:Set,engage:Map,vs:Map,rang:Map}} */
+function mgmtRolesMemoire(m){
+  const cle=[(m.hist||[]).length,(m.facts||[]).length,m.cycle,(m.roster||[]).length].join('|');
+  if(MGMT_ROLES_MEMO.m===m&&MGMT_ROLES_MEMO.cle===cle) return MGMT_ROLES_MEMO.data;
+  const ancien=new Set(), engage=new Map(), vs=new Map(), rang=new Map();
+  for(const d of allDivisions()){
+    for(const r of mgmtCeintureLignee(m,d.id).reigns) ancien.add(r.id);
+    mgmtDivisionRanking(m,d.id,'organization').forEach((o,i)=>rang.set(o.id,i+1));
+  }
+  for(const x of m.facts||[]){ if(x&&x.k==='engage'&&typeof x.a==='string') engage.set(x.a,(engage.get(x.a)||0)+1); }
+  const donnees=id=>{ let v=vs.get(id); if(!v){ v={battus:[],perdus:[],cycles:[]}; vs.set(id,v); } return v; };
+  for(const t of m.hist||[]){
+    if(!t||!t.a||!t.b) continue;
+    for(const [moi,lui,cote] of [[t.a.id,t.b.id,'A'],[t.b.id,t.a.id,'B']]){
+      const v=donnees(moi); v.cycles.push(t.c);
+      if(t.winner===cote) v.battus.push(lui); else if(t.winner!=='D') v.perdus.push(lui);
+    }
+  }
+  const data={ancien,engage,vs,rang};
+  MGMT_ROLES_MEMO.m=m; MGMT_ROLES_MEMO.cle=cle; MGMT_ROLES_MEMO.data=data;
+  return data;
+}
+/** Le rôle de mémoire d'un combattant, ou null : 'ancien-champion', 'remplacant-de-luxe', 'bete-noire', 'revenant' ou 'gatekeeper', dans cet ordre. Pur. */
+function mgmtRoleMemoire(m,f,ordre){
+  const M=mgmtRolesMemoire(m), v=M.vs.get(f.id)||{battus:[],perdus:[],cycles:[]};
+  const rg=id=>M.rang.get(id)||Infinity, moi=rg(f.id);
+  for(const quoi of ordre){
+    if(quoi==='ancien-champion'&&M.ancien.has(f.id)) return quoi;
+    if(quoi==='remplacant-de-luxe'&&(M.engage.get(f.id)||0)>=2) return quoi;
+    if(quoi==='bete-noire'&&new Set(v.battus.filter(id=>rg(id)<moi)).size>=2) return quoi;
+    if(quoi==='revenant'&&v.cycles.length>=2){
+      const c=v.cycles; if(m.cycle-c[c.length-1]<=MGMT_ROLES_REVENANT_RECENT&&c[c.length-1]-c[c.length-2]>=MGMT_ROLES_REVENANT_ABSENCE) return quoi;
+    }
+    if(quoi==='gatekeeper'&&f.age>30&&v.battus.some(id=>rg(id)<=MGMT_ROLES_GATEKEEPER_TOP)&&v.perdus.some(id=>rg(id)<=MGMT_ROLES_GATEKEEPER_TOP)) return quoi;
+  }
+  return null;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /** Rôle d'un combattant, ou null : le premier critère rempli (MGMT_ROLES,
  *  `criteres`). Les roles qui demandent une mémoire que le jeu ne tient pas
- *  encore (Ancien champion, Gatekeeper, Bête noire, Revenant, Remplaçant de luxe) ne sont
- *  pas attribués. Pur. `classements` : cache optionnel d'un appelant qui
+ *  encore (Ancien champion, Gatekeeper, Bête noire, Revenant, Remplaçant de luxe) se lisent
+ *  depuis le Monde lot 1 T6 sur m.hist et m.facts (mgmtRoleMemoire). Pur. `classements` : cache optionnel d'un appelant qui
  *  lit beaucoup de rôles à la suite. @returns {{id:string,libelle:string}|null} */
 function mgmtRole(m,f,classements){
   if(!m||!f) return null;
@@ -45,6 +97,8 @@ function mgmtRole(m,f,classements){
   if(titre.id===f.id) return role('champion');
   const res=mgmtResultats(m,f);
   if(res.length>=3&&res.slice(0,3).every(x=>x==='loss')) return role('en-perdition');
+  const ancien=mgmtRoleMemoire(m,f,['ancien-champion']);   /* Monde lot 1 T6 */
+  if(ancien) return role(ancien);
   /* Lot 5 H8 : le vestiaire passe un cache {div: ids classés} — un classement
      mondial par catégorie, pas un par combattant. */
   let rang;
@@ -56,6 +110,8 @@ function mgmtRole(m,f,classements){
     rang=mgmtDivisionRank(m,f,'world');
   }
   if(rang!==null&&rang<=5) return role('contender');
+  const memoire=mgmtRoleMemoire(m,f,['remplacant-de-luxe','bete-noire','revenant','gatekeeper']);   /* Monde lot 1 T6 */
+  if(memoire) return role(memoire);
   if(f.L===0&&f.W>=5) return role('invaincu');
   if(f.age<25&&total<6) return role('espoir');
   if(f.age>34||total>30) return role('veteran');

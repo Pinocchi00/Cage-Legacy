@@ -1,4 +1,4 @@
-# Les textes à relire — 1801 textes (corrections du 08/10/2026, lot 7.3)
+# Les textes à relire — 1870 textes (corrections du 08/10/2026, lot 7.3)
 
 Export généré par `tools/exporter-textes.js`. **Aucun texte n'est modifié par l'outil.** Chaque ligne est un texte marqué `relu:false` : coche-la quand tu l'as relue, réécris-la dans le fichier de données, puis passe sa marque à `relu:true`. Les voix des combattants viennent d'un document (`docs/LES-VOIX-DES-COMBATTANTS-v2.md`) : on y corrige d'abord le document, puis on relance `tools/extraire-voix.js`.
 
@@ -1698,6 +1698,103 @@ Fichier : `mgmt-combat-data.js`
 - [ ] `MGMT_COMMENTAIRE.finSub[1]` : ÇA TAPE ENCORE !
 - [ ] `MGMT_COMMENTAIRE.finStop[0]` : LE COMBAT S’ARRÊTE !
 - [ ] `MGMT_COMMENTAIRE.finStop[1]` : L’ARBITRE ARRÊTE TOUT !
+
+## Fiches d’identité des huit organisations (Monde lot 2) — 69 textes
+
+Fichier : `mgmt-organisations-identites-data.js`
+
+### Split — Lyon, France, depuis 2004
+
+- [ ] `MGMT_ORG_IDENTITES['split'].reputation` (réputation) : Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.
+- [ ] `MGMT_ORG_IDENTITES['split'].blessure` (blessure de son histoire) : L'organisation a perdu plusieurs combattants légendaires, partis rejoindre les plus grandes organisations parce qu'ils n'étaient pas respectés.
+- [ ] `MGMT_ORG_IDENTITES['split'].adjointe.parcours` (adjointe Leïla Malika, parcours) : Leïla Malika est sa fille.
+- [ ] `MGMT_ORG_IDENTITES['split'].adjointe.voix` (adjointe Leïla Malika, voix) : Elle s'excuse d'exister, elle n'a aucune autorité, elle s'occupe des combats de début de carte.
+- [ ] `MGMT_ORG_IDENTITES['split'].predecesseur.depart` (prédécesseur Kader Malika, raison du départ) : Ancien matchmaker de Split, parti à la retraite.
+- [ ] `MGMT_ORG_IDENTITES['split'].predecesseur.posteActuel` (prédécesseur Kader Malika, poste actuel) : Parti à la retraite.
+
+### Garden of Blood — New York, États-Unis, depuis 1999
+
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].reputation` (réputation) : La plus grande scène du monde. On y vient pour l'argent et pour la lumière.
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].blessure` (blessure de son histoire) : En 2015, sa plus grande vedette est partie en plein contrat, et le procès a duré trois ans.
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.parcours` (adjointe Rachel Okafor, parcours) : Ancienne avocate, elle a négocié les contrats des vedettes avant de passer de l'autre côté de la table.
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.voix` (adjointe Rachel Okafor, voix) : Rapide et précise. Elle tutoie tout le monde, parle en chiffres et en délais, et ne dit jamais non sans proposer autre chose.
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.exemples[0]` (adjointe Rachel Okafor, exemple 1) : Trois vedettes, trois contrats à revoir avant l'été. On commence par lequel ?
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.exemples[1]` (adjointe Rachel Okafor, exemple 2) : Ce combat coûte cher. Il rapporte plus. Je signe ?
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.exemples[2]` (adjointe Rachel Okafor, exemple 3) : Non. Mais j'ai mieux, et pour moins cher.
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].predecesseur.depart` (prédécesseur Mitch Calloway, raison du départ) : Débauché par une chaîne de télévision qui lui offrait le triple.
+- [ ] `MGMT_ORG_IDENTITES['garden-of-blood'].predecesseur.posteActuel` (prédécesseur Mitch Calloway, poste actuel) : Directeur des sports de combat d'une grande chaîne américaine.
+
+### MMA Korner — Rotterdam, Pays-Bas, depuis 2011
+
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].reputation` (réputation) : Une petite maison sérieuse, où les champions apprennent avant de partir.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].blessure` (blessure de son histoire) : Chaque champion qu'elle a fait naître est parti signer plus gros après sa première défense.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].adjointe.parcours` (adjointe Femke Jansen, parcours) : Ancienne combattante amateur, elle a arrêté après une blessure au genou et n'a jamais quitté la salle.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].adjointe.voix` (adjointe Femke Jansen, voix) : Chaleureuse et un peu fataliste. Elle tutoie, appelle les combattants par leur prénom, et s'attend toujours à les voir partir.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].adjointe.exemples[0]` (adjointe Femke Jansen, exemple 1) : Il a encore gagné. Profites-en, il ne restera pas.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].adjointe.exemples[1]` (adjointe Femke Jansen, exemple 2) : On n'a pas l'argent pour ça. On a mieux : des gens qui ont faim.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].adjointe.exemples[2]` (adjointe Femke Jansen, exemple 3) : Je l'aime bien, celui-là. Ça ne veut rien dire, je les aime tous.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].predecesseur.depart` (prédécesseur Ruud Bakker, raison du départ) : Parti ouvrir sa propre salle d'entraînement.
+- [ ] `MGMT_ORG_IDENTITES['mma-korner'].predecesseur.posteActuel` (prédécesseur Ruud Bakker, poste actuel) : Patron d'une salle d'entraînement à Rotterdam.
+
+### Ultimate Rim — Melbourne, Australie, depuis 2020
+
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].reputation` (réputation) : La jeune organisation de l'autre bout du monde, qui mise tout sur ses espoirs.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].blessure` (blessure de son histoire) : Sa toute première soirée a été annulée la veille, faute d'autorisation, et il a fallu un an pour en refaire une.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.parcours` (adjointe Tahlia Brennan, parcours) : Ancienne journaliste sportive, elle a suivi l'organisation dès sa première soirée et n'en est plus repartie.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.voix` (adjointe Tahlia Brennan, voix) : Enthousiaste et pressée. Elle tutoie, voit un futur champion dans chaque espoir, et l'annonce déjà sur les réseaux.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.exemples[0]` (adjointe Tahlia Brennan, exemple 1) : Lui, dans deux ans, il a une ceinture. Je te le promets.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.exemples[1]` (adjointe Tahlia Brennan, exemple 2) : Petite salle, oui. Mais elle sera pleine.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.exemples[2]` (adjointe Tahlia Brennan, exemple 3) : On a créé cette ceinture l'an dernier. Elle attend son histoire.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].predecesseur.depart` (prédécesseur Liam Hargreaves, raison du départ) : Renvoyé après une soirée annulée qui a coûté une saison entière.
+- [ ] `MGMT_ORG_IDENTITES['ultimate-rim'].predecesseur.posteActuel` (prédécesseur Liam Hargreaves, poste actuel) : Matchmaker dans une ligue régionale de boxe.
+
+### Fighting Pacific Championship — Tokyo, Japon, depuis 1997
+
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].reputation` (réputation) : La plus ancienne. Un public fidèle, et des champions qui règnent longtemps.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].blessure` (blessure de son histoire) : En 2013, une soirée truquée a été prouvée, et la télévision nationale l'a lâchée pendant quatre ans.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.parcours` (adjointe Aiko Morimoto, parcours) : Entrée à l'accueil des soirées à vingt ans, elle connaît chaque ceinture et chaque champion depuis.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.voix` (adjointe Aiko Morimoto, voix) : Formelle et patiente. Elle vouvoie, rappelle l'histoire de chaque ceinture, et parle de la fin des champions avec respect.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.exemples[0]` (adjointe Aiko Morimoto, exemple 1) : Ce champion règne depuis quatre ans. Le public attend de savoir qui le remplacera.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.exemples[1]` (adjointe Aiko Morimoto, exemple 2) : Nous avons toujours fait ainsi. Vous pouvez le changer, mais pas trop vite.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.exemples[2]` (adjointe Aiko Morimoto, exemple 3) : Il a trente-sept ans. Offrons-lui une belle sortie.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].predecesseur.depart` (prédécesseur Hideki Sawamura, raison du départ) : Parti après vingt-deux ans en poste, pour raisons de santé.
+- [ ] `MGMT_ORG_IDENTITES['fighting-pacific-championship'].predecesseur.posteActuel` (prédécesseur Hideki Sawamura, poste actuel) : Conseiller du président de l'organisation. Il assiste encore à chaque soirée.
+
+### Knuckle Gate — Manchester, Royaume-Uni, depuis 2012
+
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].reputation` (réputation) : La maison des meilleures combattantes du monde.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].blessure` (blessure de son histoire) : Pendant ses cinq premières années, aucune chaîne ne voulait diffuser un combat principal féminin.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].adjointe.parcours` (adjointe Niamh Gallagher, parcours) : Première championne de l'organisation, elle a raccroché les gants pour s'occuper des cartes.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].adjointe.voix` (adjointe Niamh Gallagher, voix) : Directe et sèche. Elle tutoie, défend ses combattantes avant tout, et n'a aucune patience pour les excuses.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].adjointe.exemples[0]` (adjointe Niamh Gallagher, exemple 1) : La meilleure carte du pays, et ce sont elles qui la font.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].adjointe.exemples[1]` (adjointe Niamh Gallagher, exemple 2) : Les hommes ? Il en manque. Trouve-m'en.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].adjointe.exemples[2]` (adjointe Niamh Gallagher, exemple 3) : Pas de discours. Un nom, une date.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].predecesseur.depart` (prédécesseur Siobhan Carey, raison du départ) : A démissionné après un désaccord avec le patron sur les catégories masculines.
+- [ ] `MGMT_ORG_IDENTITES['organisation-6'].predecesseur.posteActuel` (prédécesseur Siobhan Carey, poste actuel) : Consultante pour une chaîne de télévision britannique.
+
+### Pure Impact — Dubaï, Émirats arabes unis, depuis 2018
+
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].reputation` (réputation) : Beaucoup d'argent, des noms célèbres, et des salles encore à remplir.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].blessure` (blessure de son histoire) : Sa première grande soirée s'est jouée devant des milliers de sièges vides, et les photos ont fait le tour du monde.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].adjointe.parcours` (adjointe Sara Mansour, parcours) : Elle organisait des événements de luxe avant que l'organisation ne l'engage pour ses soirées.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].adjointe.voix` (adjointe Sara Mansour, voix) : Polie et brillante, toujours en représentation. Elle vouvoie, parle d'image et de prestige, et adoucit les mauvaises nouvelles.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].adjointe.exemples[0]` (adjointe Sara Mansour, exemple 1) : Le nom est parfait. La salle suivra, j'en suis sûre.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].adjointe.exemples[1]` (adjointe Sara Mansour, exemple 2) : Ce combattant coûte beaucoup. Il vaut davantage en photo.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].adjointe.exemples[2]` (adjointe Sara Mansour, exemple 3) : La salle était à moitié pleine. Disons à moitié prête.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].predecesseur.depart` (prédécesseur Karim Haddad, raison du départ) : Renvoyé : les salles restaient à moitié vides.
+- [ ] `MGMT_ORG_IDENTITES['organisation-7'].predecesseur.posteActuel` (prédécesseur Karim Haddad, poste actuel) : Agent de combattants, à Londres.
+
+### Undisputed Cage — São Paulo, Brésil, depuis 2005
+
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].reputation` (réputation) : Les poids lourds les plus durs du monde, et des catégories qui se cherchent.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].blessure` (blessure de son histoire) : En 2019, trois champions sont partis la même semaine, et leurs ceintures sont restées vacantes un an.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].adjointe.parcours` (adjointe Mariana Couto, parcours) : Ancienne arbitre, elle a quitté la cage pour passer derrière les cartes.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].adjointe.voix` (adjointe Mariana Couto, voix) : Calme et ironique. Elle vouvoie, parle des lourds avec fierté et des petites catégories avec un soupir.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].adjointe.exemples[0]` (adjointe Mariana Couto, exemple 1) : Nos lourds, personne ne veut les affronter. C'est bien notre problème.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].adjointe.exemples[1]` (adjointe Mariana Couto, exemple 2) : Une ceinture sans champion, c'est une ceinture qui attend. Nous en avons plusieurs.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].adjointe.exemples[2]` (adjointe Mariana Couto, exemple 3) : Vous voulez remplir les poids mouches ? Bonne chance. Je vous aiderai.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].predecesseur.depart` (prédécesseur Rodrigo Valença, raison du départ) : Parti à la retraite après vingt ans en poste.
+- [ ] `MGMT_ORG_IDENTITES['organisation-8'].predecesseur.posteActuel` (prédécesseur Rodrigo Valença, poste actuel) : Commentateur à la télévision brésilienne.
 
 ## Écrans et mécanismes — arene-coups.js — 0 textes
 

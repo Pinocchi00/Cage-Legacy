@@ -25,12 +25,12 @@ const MGMT_PRISE_CLE='cage-legacy-accompagnement';
 
 /** Les six moments, dans l'ordre, chacun avec la condition de l'état du jeu qui le déclenche. Pur. */
 const MGMT_PRISE_MOMENTS=[
-  ['carte_vide',(m,ecran)=>(m.eventsPlayed||0)===0&&(m.card.main||[]).length===0&&ecran==='mgmt_carte'],
-  ['premier_combat',(m)=>(m.eventsPlayed||0)===0&&(m.card.main||[]).length===1],
-  ['carte_complete',(m)=>(m.eventsPlayed||0)===0&&(m.card.main||[]).length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&!m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')&&(m.card.prelims||[]).length===0],
-  ['prelims',(m)=>(m.eventsPlayed||0)===0&&m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')],
-  ['soiree_prete',(m)=>(m.eventsPlayed||0)===0&&typeof mgmtAgendaPret==='function'&&mgmtAgendaPret(m)],
-  ['premier_lendemain',(m,ecran)=>(m.eventsPlayed||0)===1&&ecran==='mgmt_lendemain'],
+  ['carte_vide',(m,ecran)=>mgmtSoireesJoueur(m)===0&&(m.card.main||[]).length===0&&ecran==='mgmt_carte'],
+  ['premier_combat',(m)=>mgmtSoireesJoueur(m)===0&&(m.card.main||[]).length===1],
+  ['carte_complete',(m)=>mgmtSoireesJoueur(m)===0&&(m.card.main||[]).length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&!m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')&&(m.card.prelims||[]).length===0],
+  ['prelims',(m)=>mgmtSoireesJoueur(m)===0&&m.pile.some(a=>a.kind==='leila_bulk'&&a.status==='open')],
+  ['soiree_prete',(m)=>mgmtSoireesJoueur(m)===0&&typeof mgmtAgendaPret==='function'&&mgmtAgendaPret(m)],
+  ['premier_lendemain',(m,ecran)=>mgmtSoireesJoueur(m)===1&&ecran==='mgmt_lendemain'],
 ];
 let MGMT_PRISE={courant:null,vus:null};
 
@@ -86,8 +86,18 @@ function scr_mgmt_arrivee(){
   const faits=mgmtOrgApercu({profil:mgmtOrgProfil(m)}).filter(x=>['Caisse de départ','Popularité','Plus grande salle'].includes(x.k));
   let quand='';
   if(typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)&&m.cal.prochaines[0]) quand='Votre première soirée a lieu dans '+Math.max(0,m.cal.prochaines[0].jour-m.cal.jour)+' jours.';
-  const corps=`<div class="mf-ld-crit"><div class="mf-fin-ls">${faits.map(x=>`<div>${esc(x.k)} : <b>${esc(x.v)}</b></div>`).join('')}${quand?`<div>${esc(quand)}</div>`:''}</div>`
-    +`<div class="mf-prise-leila"><b>Leïla</b><span>${esc(T.leila.texte)}</span></div></div>`;
+  const pl=(n,s,p)=>n+' '+(n>1?p:s);
+  const soirees=Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0;
+  const combats=Array.isArray(m.hist)?m.hist.length:0;
+  const retraites=(m.facts||[]).filter(f=>f&&f.k==='retired').length;
+  const champions=typeof mgmtPredecesseurChampions==='function'?mgmtPredecesseurChampions(m).filter(Boolean).length:0;
+  const passe=m.passe?`<section class="mf-arrivee-bloc"><div class="mf-arrivee-h">Ce qui s'est passé avant toi</div><div class="mf-fin-ls"><div>${esc([pl(soirees,'soirée','soirées'),pl(combats,'combat','combats'),pl(champions,'champion en titre','champions en titre'),pl(retraites,'retraité','retraités')].join(', '))}</div></div></section>`:'';
+  const corps=`<div class="mf-arrivee-blocs">`
+    +`<section class="mf-arrivee-bloc"><div class="mf-arrivee-h">Ton organisation</div><div class="mf-fin-ls">${faits.map(x=>`<div>${esc(x.k)} : <b>${esc(x.v)}</b></div>`).join('')}${quand?`<div>${esc(quand)}</div>`:''}</div></section>`
+    +passe
+    +`<section class="mf-arrivee-bloc"><div class="mf-arrivee-h">Ce que tu dois faire maintenant</div><div class="mf-fin-ls"><div>1 · Ouvre la Carte : cinq combats à composer.</div><div>2 · Laisse Leïla proposer, ou choisis toi-même.</div><div>3 · Quand la carte est complète, pose la soirée au Calendrier.</div></div></section>`
+    +`</div>`
+    +`<div class="mf-prise-leila"><b>Leïla</b><span>${esc(T.leila.texte)}</span></div>`;
   return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-fin-t">${esc(T.titre.texte.replace('{org}',org).toUpperCase())}</div>${corps}`,'normal','mf-fin-p mf-arrivee')}</div></main>`,
     {barre:'aucune',m:null,plaque:'Management',libelle:'Votre arrivée',touches:[{ks:['Entrée'],t:T.bouton.texte,jaune:true,onclick:"CL.mgmtArriveeFin()"}]});
 }

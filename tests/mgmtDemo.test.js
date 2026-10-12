@@ -1,5 +1,7 @@
 "use strict";
-/* Lot 10 du brief démo (09/10/2026) : le périmètre de la démo, derrière un seul interrupteur (CL_DEMO). */
+/* Lot 10 du brief démo (09/10/2026) : le périmètre de la démo, derrière un seul interrupteur (CL_DEMO).
+   Décision d'Anthony du 10/10/2026 : la démo a aussi les six ans de passé (même création, même barre) et sa limite compte les soirées du JOUEUR. Les tests de ce fichier qui ne portent pas
+   sur le passé créent leur partie sans passé (CL.mgmtEnter, CL.mgmtNouvelleCreer : aucune génération) pour rester rapides ; le dernier test porte sur le passé. */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
@@ -59,4 +61,22 @@ test('Le texte de l’écran de fin est une proposition non relue', () => {
   const w=neuve();
   const r=res(w,`return [MGMT_DEMO_FIN.titre.relu,MGMT_DEMO_FIN.corps.relu];`);
   assert.deepEqual(r,[false,false]);
+});
+
+test('Monde lot 1 : la démo commence avec six ans de passé, et sa limite compte les soirées du joueur', async () => {
+  /* Décision d'Anthony du 10/10/2026. Passé réduit à deux soirées pour la durée du test ; la création est celle de l'écran Nouvelle partie. */
+  const w=newGameWindow({runMain:true});
+  w.eval(`CL_DEMO=true; setSeed(7); CL.mgmtNouvelle(1); MGMT_NOUVELLE.soirees=2; CL.mgmtNouvelleLancer();`);
+  assert.ok(w.document.getElementById('app').innerHTML.includes('mf-genese-barre'),'la démo montre la même barre de chargement');
+  const debut=Date.now();
+  /* Décision d'Anthony du 12/10/2026 : la partie attend le bouton « Entrer » ; le test attend gen.pret puis valide avec Entrée. */
+  while(Date.now()-debut<120000){ await new Promise(r=>setTimeout(r,150)); if(w.eval('!!(MGMT_NOUVELLE.gen&&MGMT_NOUVELLE.gen.pret)')) break; }
+  w.eval('CL.mgmtNouvelleEntrer()');
+  const r=res(w,`const m=G.mgmt; const out={org:m.org,passe:m.passe.soirees,joues:m.eventsPlayed,joueur:mgmtSoireesJoueur(m),fin0:mgmtDemoTerminee(m)};
+    m.eventsPlayed=m.passe.soirees+CL_DEMO_SOIREES-1; out.fin4=mgmtDemoTerminee(m); out.joueur4=mgmtSoireesJoueur(m);
+    m.eventsPlayed=m.passe.soirees+CL_DEMO_SOIREES; out.fin5=mgmtDemoTerminee(m); out.joueur5=mgmtSoireesJoueur(m);
+    CL_DEMO=false; return out;`);
+  assert.equal(r.org,'Split'); assert.equal(r.passe,2); assert.equal(r.joues,2); assert.equal(r.joueur,0);
+  assert.equal(r.fin0,false,'le passé ne compte pas dans la limite de la démo');
+  assert.equal(r.fin4,false); assert.equal(r.joueur4,5-1); assert.equal(r.fin5,true); assert.equal(r.joueur5,5);
 });

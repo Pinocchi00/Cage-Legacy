@@ -30,20 +30,22 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-teinte{position:absolute;inset:0;background:radial-gradient(ellipse 1000px 900px at 64% 50%,var(--mf-couleur,#B32A1E),transparent 74%);opacity:.34;mix-blend-mode:screen}
 
 /* L'en-tête : la plaque, son libellé, ce qui se lit à droite. */
-.mf-entete{position:absolute;left:300px;top:20px;width:1564px;height:64px;display:flex;align-items:center;justify-content:space-between}
-.mf-entete-g{display:flex;align-items:center;gap:18px}
+.mf-entete{position:absolute;left:300px;top:20px;width:1564px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.mf-entete-g{display:flex;align-items:center;gap:24px;min-width:0;flex:0 1 auto}
 .mf-plaque{height:64px;padding:0 18px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;gap:16px;white-space:nowrap;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.69;text-transform:uppercase}
-.mf-entete-lib{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;white-space:nowrap;text-transform:uppercase}
+.mf-entete-lib{font-weight:600;font-size:22px;line-height:1.1;letter-spacing:.06em;white-space:normal;min-width:0;text-transform:uppercase}
 .mf-entete-n{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.69;white-space:nowrap}
 .mf-tuiles{display:flex;gap:6px}
 .mf-tuiles i{box-sizing:border-box;width:36px;height:12px;border:2px solid var(--mf-blanc);display:block}
 .mf-tuiles i.p{background:var(--mf-blanc)}
-.mf-entete-d.soiree{display:flex;align-items:center;gap:16px}
+.mf-entete-d.soiree{display:flex;align-items:center;gap:24px;flex:none}
 .mf-tete-dans{font-size:24px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
 .mf-tete-boite{box-sizing:border-box;height:64px;padding:0 18px;border:2px solid var(--mf-bord);background:var(--mf-noir);display:flex;align-items:center;gap:16px;white-space:nowrap}
 .mf-tete-boite b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.69}
 .mf-tete-boite span{font-weight:600;font-size:24px;line-height:1;letter-spacing:.06em}
-.mf-tete-boite.soir{gap:14px}
+.mf-tete-boite.soir{gap:24px}
+.mf-tete-nom .mf-nom-soiree,.mf-cal-nom .mf-nom-soiree{display:flex;flex-direction:column;line-height:.9;white-space:nowrap}
+.mf-tete-boite.soir b.mf-tete-nom{font-size:inherit;line-height:.9}
 .mf-tete-boite.soir b{font-size:56px}
 .mf-tete-boite.soir b.n{color:var(--mf-rouge-vif)}
 .mf-entete-d{font-size:24px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
@@ -260,27 +262,56 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-logo-seul{position:absolute;left:22px;top:20px}
 .mf-logo-seul .mf-logo svg{width:64px;height:64px}
 .mf-stage:has(.mf-logo-seul) .mf-touches{left:56px}
-.mf-nouvelle{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;justify-content:space-between}
-.mf-org-grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+/* ==== [ANCRE: MF_NOUVELLE_PARTIE] — Monde lot 2 T5 : valeurs de maquettes/monde/MondeNouvellePartie.dc.html
+   (planche validée par Anthony le 10/10/2026, corrigée le même jour). Décision de Claude : seules les cartes
+   changent ; l'aperçu, le pied et le bouton jaune gardent le style actuel. ==== */
+.mf-nouvelle{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;gap:20px}
+.mf-org-grille{display:grid;grid-template-columns:repeat(4,440px);grid-template-rows:repeat(2,322px);gap:16px}
 .mf-org{height:322px}
-.mf-org-tete{height:76px;flex:none;padding:0 16px;background:var(--mf-ligne);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.mf-org.choisie .mf-org-tete{background:var(--mf-rouge)}
-.mf-org-nom{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.8;white-space:nowrap;text-transform:uppercase;min-width:0;overflow:hidden}
-.mf-org-nom.long{font-size:40px}
+.mf-org .mf-p3{overflow:hidden}
+.mf-org-tete{height:60px;flex:none;padding:0 16px;background:#252121;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mf-org.choisie .mf-org-tete{background:#B32A1E}
+.mf-org-nom{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:.8;white-space:nowrap;text-transform:uppercase;min-width:0;overflow:hidden}
 .mf-org-choisie{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.mf-org-corps{flex:1;padding:10px 16px;display:flex;flex-direction:column;gap:8px}
-.mf-org-bloc{display:flex;flex-direction:column}
-.mf-org-titre{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;margin-bottom:6px;text-transform:uppercase}
-.mf-org-ligne{height:40px;flex:none;display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep);font-size:22px;line-height:1;white-space:nowrap}
+.mf-org-corps{flex:1;min-height:0;box-sizing:border-box;padding:8px 16px;display:flex;flex-direction:column;gap:6px}
+.mf-org-ville{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap}
+.mf-org-reputation{font-size:22px;line-height:1.1;height:48px;overflow:hidden}
+.mf-org-lignes{display:flex;flex-direction:column}
+.mf-org-ligne{height:34px;flex:none;display:flex;align-items:center;gap:12px;border-bottom:2px solid rgba(233,230,225,.16);font-size:22px;line-height:1;white-space:nowrap}
 .mf-org-ligne svg{width:26px;height:26px}
 .mf-org-apercu{display:flex;align-items:stretch;gap:12px;height:96px;flex:none;background:var(--mf-ligne);padding:0 16px}
 .mf-org-apercu-nom{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.8;white-space:nowrap;text-transform:uppercase;display:flex;align-items:center;padding-right:16px;border-right:2px solid var(--mf-sep);max-width:430px;overflow:hidden}
 .mf-org-tuile{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .mf-org-tuile span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase}
 .mf-org-tuile b{font-weight:600;font-size:24px;line-height:1;white-space:nowrap}
+.mf-genese{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;gap:56px;align-items:stretch}
+.mf-genese-gauche{flex:0 0 40%;max-width:40%;display:flex;flex-direction:column;justify-content:center;gap:24px;min-width:0}
+.mf-genese-droite{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:24px;position:relative}
+.mf-genese-nom{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.9;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+.mf-genese-frise{display:flex;gap:8px}
+.mf-genese-an{flex:1;font-size:22px;line-height:1;padding:10px 0;text-align:center;background:var(--mf-ligne);color:var(--mf-texte2);white-space:nowrap}
+.mf-genese-an.fait{color:var(--mf-texte)}
+.mf-genese-an.cours{background:var(--mf-rouge);color:var(--mf-texte)}
+.mf-genese-compteurs{display:flex;gap:16px}
+.mf-genese-cpt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;background:var(--mf-ligne);padding:12px 14px}
+.mf-genese-cpt b{font-size:40px;line-height:1;font-weight:800}
+.mf-genese-cpt span{font-size:22px;line-height:1.1;color:var(--mf-texte2)}
+.mf-genese-barre{height:32px;width:100%;background:var(--mf-ligne);position:relative;overflow:hidden}
+.mf-genese-barre b{display:block;height:100%;background:var(--mf-rouge);position:relative;overflow:hidden}
+.mf-genese-lueur{position:absolute;top:0;bottom:0;left:0;width:120px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)}
+.mf-genese-texte{font-size:24px;line-height:1.2;color:var(--mf-texte2)}
+.mf-lecture-entete{font-size:24px;line-height:1.2;color:var(--mf-texte2)}
+.mf-lecture-carton{background:var(--mf-ligne);padding:32px 36px;min-height:320px;display:flex;flex-direction:column;gap:20px}
+.mf-lecture-titre{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:44px;line-height:1;text-transform:uppercase}
+.mf-lecture-texte{font-size:28px;line-height:1.3}
+.mf-lecture-pastilles{display:flex;gap:12px}
+.mf-lecture-pastille{width:52px;height:52px;font-size:22px;line-height:1;background:var(--mf-ligne);color:var(--mf-texte2);border:2px solid var(--mf-sep);cursor:pointer;font-family:inherit}
+.mf-lecture-pastille.actif{background:var(--mf-rouge);color:var(--mf-texte);border-color:var(--mf-rouge)}
+.mf-genese-entree{display:flex;justify-content:flex-end}
 .mf-nouvelle-pied{height:60px;flex:none;display:flex;justify-content:space-between;align-items:center;gap:24px}
 .mf-nouvelle-texte{font-size:24px;line-height:1.2;color:var(--mf-texte2)}
-.mf-org-avenir{display:flex;align-items:center;gap:14px;font-size:24px;line-height:1;color:var(--mf-texte2);opacity:.74;white-space:nowrap;margin-left:auto}
+.mf-nouvelle-droite{display:flex;align-items:center;gap:20px;flex:none;margin-left:auto}
+.mf-org-avenir{display:flex;align-items:center;gap:14px;font-size:24px;line-height:1;color:var(--mf-texte2);opacity:.74;white-space:nowrap}
 
 /* Le mouvement (planche « Le mouvement de l'interface ») : tout arrive vite et en biais, tout se pose droit, rien ne bouge au repos. Les gestes sont joués par
    mgmt-animations.js (API d'animation du navigateur) ; ici, seulement la bande qui traverse l'écran et le masque du premier tiers du passage. */
@@ -321,8 +352,10 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-cal-pastille{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--mf-jaune);margin-right:10px}
 .mf-cal-fleche{position:absolute;right:20px;bottom:20px;width:44px;height:36px;border:2px solid var(--mf-blanc);font-size:26px;line-height:30px;text-align:center}
 .mf-cal-centre{position:absolute;left:342px;top:0;width:878px;height:760px;background:var(--mf-panneau);border:2px solid var(--mf-blanc);display:flex;flex-direction:column}
-.mf-cal-rouge{background:var(--mf-rouge);padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-end;height:176px;flex:none}
-.mf-cal-quand{font-weight:600;font-size:26px;letter-spacing:.04em}
+.mf-cal-rouge{background:var(--mf-rouge);padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;height:176px;box-sizing:border-box;flex:none;overflow:hidden}
+.mf-cal-rouge>div:first-child{min-width:0;flex:1 1 auto}
+.mf-cal-gros{flex:none}
+.mf-cal-quand{font-weight:600;font-size:26px;line-height:1.1;letter-spacing:.04em;margin-bottom:12px}
 .mf-cal-nom{font-family:var(--mf-titre);font-weight:800;font-size:84px;line-height:.9}
 .mf-cal-gros{font-family:var(--mf-titre);font-weight:800;font-size:130px;line-height:.75;text-align:right}
 .mf-cal-gros span{display:block;font-size:24px;line-height:1;margin-top:12px;letter-spacing:.04em}
@@ -532,12 +565,12 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-su-ce{display:flex;min-width:0}
 .mf-su-ce .mf-panneau{flex:1}
 .mf-su-ce-in{flex:1;display:flex;flex-direction:column;background:#2A2626;color:var(--mf-blanc)}
-.mf-su-ce.sel .mf-su-ce-in{background:var(--mf-blanc);color:var(--mf-noir)}
+/* Monde lot 2 T8 (décision du 12/10/2026, retour d'Anthony) : la carte sélectionnée garde son fond sombre ; un contour blanc de 3 px, et rien sur les autres. */
+.mf-su-ce.sel{outline:3px solid #FFFFFF;outline-offset:-3px}
 .mf-su-ce-titre{height:72px;flex:none;background:var(--mf-jaune);color:var(--mf-noir);padding:0 20px;display:flex;align-items:center;font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:46px;line-height:1;text-transform:uppercase}
 .mf-su-ce-corps{flex:1;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-height:0}
 .mf-su-ce-nom{display:flex;flex-direction:column;gap:10px;white-space:nowrap}
 .mf-su-ce-nom span{font-size:24px;line-height:1;color:var(--mf-texte2)}
-.mf-su-ce.sel .mf-su-ce-nom span,.mf-su-ce.sel .mf-su-ce-n span,.mf-su-ce.sel .mf-su-ce-depuis span,.mf-su-ce.sel .mf-su-ce-pret span{color:rgba(13,11,11,.72)}
 .mf-su-ce-nom b,.mf-su-ce-n b,.mf-su-ce-depuis b,.mf-su-ce-pret b{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;text-transform:uppercase}
 .mf-su-ce-nom b{font-size:64px}
 .mf-su-ce-def{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
@@ -1206,8 +1239,39 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-prise-suite b{color:var(--mf-blanc);font-weight:600}
 .mf-arrivee{width:900px}
 .mf-arrivee .mf-prise-leila{height:auto;padding:12px 16px;font-size:26px;line-height:1.1;width:auto;white-space:normal}
+/* Monde lot 2 T9 : l'arrivée en trois blocs (organisation, passé, étapes) */
+.mf-arrivee-blocs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:20px}
+.mf-arrivee-bloc{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mf-arrivee-h{font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;color:var(--mf-blanc);text-transform:uppercase}
+.mf-arrivee .mf-fin-ls{font-size:24px;line-height:1.2;white-space:normal}
+.mf-arrivee .mf-fin-ls b{color:var(--mf-blanc);font-weight:700}
 /* Retours d'Anthony du 09/10/2026 : reprendre un combat confirmé, choisir lequel des deux préliminaires on remplace. */
 .mf-car-slot.confirme .mf-car-slot-n,.mf-car-slot.confirme .mf-car-num{cursor:pointer}
 .mf-pre-cotes{display:flex;gap:8px;margin:0 0 8px}
 .mf-pre-cote{flex:1;min-width:0;height:44px;border:0;background:var(--mf-ligne);color:var(--mf-blanc);font-family:var(--mf-titre);font-weight:800;font-size:28px;text-transform:uppercase;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 10px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 .mf-pre-cote.on{background:var(--mf-blanc);color:var(--mf-noir)}
+
+/* ==== Monde lot 2 T8 : Résultats — la liste des soirées et le tableau des combats (décision du 12/10/2026, retour d'Anthony) ==== */
+.mf-re{position:relative}
+.mf-re-grille{display:flex;gap:32px;height:760px}
+.mf-re-gauche{flex:none;width:520px;display:flex;flex-direction:column;gap:10px}
+.mf-re-lib,.mf-re-plus{font-weight:600;font-size:22px;line-height:1.1;letter-spacing:.06em;color:var(--mf-texte2)}
+.mf-re-liste{display:flex;flex-direction:column;gap:8px}
+.mf-re-s{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--mf-ligne);color:var(--mf-blanc);padding:10px 16px;border:2px solid transparent;font-size:24px;line-height:1.15}
+.mf-re-s b{font-weight:700;font-size:24px;letter-spacing:.02em}
+.mf-re-s span{font-size:24px;color:var(--mf-texte2);overflow-wrap:anywhere}
+.mf-re-s.sel{border-color:rgba(233,230,225,.5)}
+.mf-re-s.actif,.mf-re-l.actif{outline:3px solid #FFFFFF;outline-offset:-3px}
+.mf-re-droite{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.mf-re-titre{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:1.1}
+.mf-re-tab{display:flex;flex-direction:column;gap:6px}
+.mf-re-l{display:flex;align-items:center;gap:20px;text-align:left;background:var(--mf-ligne);color:var(--mf-blanc);padding:10px 16px;border:2px solid transparent;font-size:24px;line-height:1.15;min-width:0}
+.mf-re-l.sel{border-color:rgba(233,230,225,.5)}
+.mf-re-place{flex:none;width:190px;font-weight:700;font-size:22px;letter-spacing:.04em;color:var(--mf-texte2)}
+.mf-re-qui{flex:1;min-width:0;font-size:24px;overflow-wrap:anywhere}
+.mf-re-qui .g{font-weight:800;color:#F3EDE0}
+.mf-re-qui .p{color:var(--mf-texte2)}
+.mf-re-qui i{font-style:normal;color:var(--mf-texte2)}
+.mf-re-ceinture{font-style:normal;font-weight:800;font-size:22px;margin-left:14px;padding:2px 10px;background:var(--mf-jaune);color:var(--mf-noir);letter-spacing:.04em}
+.mf-re-meth{flex:none;width:280px;font-size:24px;color:var(--mf-blanc);font-weight:400}
+.mf-re-aide{margin-top:8px;font-size:24px;line-height:1.2;color:var(--mf-texte2)}

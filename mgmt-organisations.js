@@ -113,3 +113,41 @@ function mgmtOrgApercu(o){
 }
 
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_MONDE_LOT2_IDENTITES_FONCTIONS] — Monde lot 2 T1 : la fiche d'identité
+   (MGMT_ORG_IDENTITES, mgmt-organisations-identites-data.js) devient accessible au jeu.
+   Les valeurs null sont résolues ici, jamais écrites dans les données : villesSalles →
+   MGMT_SALLES_VILLES (mgmt-salles.js), paysPoids → MGMT_PAYS_POIDS.split (mgmt-humanite-data.js).
+   Ces deux données se chargent APRÈS ce fichier — la fonction les lit à l'exécution,
+   jamais au chargement. ==== */
+
+/** L'identité d'une organisation, valeurs null résolues (villesSalles → MGMT_SALLES_VILLES,
+ *  paysPoids → MGMT_PAYS_POIDS.split). Pur.
+ *  @param {string} id — id d'organisation (celui de MGMT_ORGANISATIONS)
+ *  @returns {object|null} l'identité résolue, null si id inconnu */
+function mgmtOrgIdentite(id){
+  const it=MGMT_ORG_IDENTITES[id];
+  if(!it) return null;
+  return Object.assign({},it,{
+    villesSalles:it.villesSalles||MGMT_SALLES_VILLES,
+    paysPoids:it.paysPoids||MGMT_PAYS_POIDS.split,
+  });
+}
+
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MGMT_MONDE_LOT2_PAYS_FONCTIONS] — Monde lot 2 T2 : le mélange de pays de
+   l'organisation jouée. mgmtPaysTire (mgmt-humanite-data.js) accepte depuis cette tranche un
+   mélange de poids lui-même : les combattants de chaque organisation sont tirés avec le
+   paysPoids de son identité, plus avec Split en dur. ==== */
+
+/** Le mélange de pays de l'organisation jouée : paysPoids de son identité (null résolu en
+ *  MGMT_PAYS_POIDS.split par mgmtOrgIdentite). Pur.
+ *  @param {object} [m] — la partie (à défaut la partie en cours, comme mgmtOrgNom)
+ *  @returns {Object<string,number>} les poids par clé de pays, somme 100 */
+function mgmtOrgPaysPoids(m){
+  const o=mgmtOrgParNom(mgmtOrgNom(m));
+  return (o&&mgmtOrgIdentite(o.id).paysPoids)||MGMT_PAYS_POIDS.split;
+}
+
+/* ==== [FIN ANCRE] ==== */

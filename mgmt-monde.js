@@ -148,6 +148,7 @@ function mgmtExteriorEnsure(m){
     while(vivants<quota){
       const ligne=mgmtExteriorCreate(m,cycle,div.id);
       m.exterieur.push(ligne);
+      mgmtRangsInvalider(m);   /* Monde lot 1 T1 : une ligne du monde entre dans la portée world. */
       if(!mgmtExteriorRetired(ligne,cycle)) vivants++;
     }
   }

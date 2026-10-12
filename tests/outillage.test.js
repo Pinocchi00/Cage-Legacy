@@ -7,6 +7,7 @@ const fs=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const {execFileSync}=require('node:child_process');
+const {newGameWindow}=require('./helpers/loadGame');
 const racine=path.join(__dirname,'..');
 const lire=f=>fs.readFileSync(path.join(racine,f),'utf8');
 
@@ -34,6 +35,22 @@ test('7.1 — La mesure d’ensemble du management joue des soirées et rend cai
   assert.ok(x.effectif>100&&x.caisse>0&&x.ageMoyen>20);
 });
 
+test('Monde lot 1 T1 — l’outil de mesure chronomètre les six ans : total, trois étapes, projection', () => {
+  const sortie=execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'5','--six-ans','--orgs','split','--json'],{encoding:'utf8',timeout:300000,stdio:['ignore','pipe','ignore']});
+  const r=JSON.parse(sortie.slice(sortie.indexOf('{')));
+  const ch=r.split.chrono;
+  assert.ok(ch,'la clé chrono, sœur des points de mesure (lignes[org].chrono)');
+  assert.equal(ch.soirees,5,'cinq soirées mesurées');
+  assert.ok(ch.totalMs>0,'un total chronométré');
+  assert.ok(ch.combatsMs+ch.suiteMs+ch.bookingMs<=ch.totalMs*1.1,'les trois étapes couvrent la soirée (à la marge près déjà)');
+  assert.ok(ch.sixAnsMs>0&&ch.mesureSixAns===false,'six ans projetés (5 soirées ≠ 62), jamais mesurés faussement');
+  const tmp=path.join(os.tmpdir(),'mesure-six-ans-test.md');
+  execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'5','--six-ans','--orgs','split','--out',tmp],{stdio:'ignore',timeout:300000});
+  const md=fs.readFileSync(tmp,'utf8');
+  assert.match(md,/## Chrono des six ans/,'la section « Chrono des six ans » dans le rapport');
+  for(const k of ['Combats','Suite','Booking']) assert.match(md,new RegExp(`\\*\\*${k}\\*\\*`),'les trois étapes du brief sont nommées');
+});
+
 test('7.3 — L’export des textes à relire couvre les cinq familles et ne modifie aucun fichier de données', () => {
   const avant=['mgmt-humanite-data.js','mgmt-voix-data.js','mgmt-medias-data.js','mgmt-camps-data.js','mgmt-combat-data.js'].map(f=>lire(f));
   const tmp=path.join(os.tmpdir(),'textes-a-relire-test.md');
@@ -45,6 +62,49 @@ test('7.3 — L’export des textes à relire couvre les cinq familles et ne mod
   assert.deepEqual(apres,avant,'aucun texte n’a été modifié');
 });
 
+test('Monde lot 2 T6 — l’export des textes contient les huit fiches d’identité, une organisation par bloc, un texte par ligne avec sa situation', {timeout:120000}, () => {
+  const tmp=path.join(os.tmpdir(),'textes-a-relire-identites.md');
+  execFileSync(process.execPath,[path.join(racine,'tools','exporter-textes.js'),'--out',tmp],{stdio:'ignore',timeout:120000});
+  const md=fs.readFileSync(tmp,'utf8');
+  const section=md.split(/^## /m).find(s=>s.startsWith('Fiches d’identité'));
+  assert.ok(section,'la section des fiches d’identité existe');
+  assert.match(section,/^Fiches d’identité des huit organisations \(Monde lot 2\) — 69 textes$/m);
+  const blocs=section.split(/^### /m).slice(1);
+  assert.equal(blocs.length,8,'huit blocs, une organisation par bloc');
+  const debuts=['Split — Lyon, France, depuis 2004','Garden of Blood','MMA Korner','Ultimate Rim','Fighting Pacific Championship','Knuckle Gate','Pure Impact','Undisputed Cage'];
+  debuts.forEach((d,i)=>assert.ok(blocs[i].startsWith(d),'le bloc '+(i+1)+' commence par '+d));
+  const nLignes=blocs.map(b=>(b.match(/^- \[ \] /gm)||[]).length);
+  assert.deepEqual(nLignes,[6,9,9,9,9,9,9,9],'6 lignes pour Split (Leïla n’a pas d’exemples), 9 pour les sept autres');
+  const w=newGameWindow({runMain:false});
+  const identites=JSON.parse(w.eval('JSON.stringify(MGMT_ORG_IDENTITES)'));
+  const ids=Object.keys(identites);
+  assert.equal(ids.length,8);
+  ids.forEach((id,i)=>{
+    const f=identites[id], a=f.adjointe, p=f.predecesseur, bloc=blocs[i];
+    const chemin=c=>'MGMT_ORG_IDENTITES[\''+id+'\'].'+c;
+    const attendus=[chemin('reputation'),chemin('blessure'),chemin('adjointe.parcours'),chemin('adjointe.voix')];
+    if(a.exemples) a.exemples.forEach((x,k)=>attendus.push(chemin('adjointe.exemples['+k+']')));
+    attendus.push(chemin('predecesseur.depart'),chemin('predecesseur.posteActuel'));
+    for(const c of attendus) assert.ok(bloc.includes('`'+c+'`'),'le chemin '+c+' est dans le bloc de '+id);
+    assert.ok(bloc.includes('(réputation)'),'la situation réputation est dans le bloc de '+id);
+    assert.ok(bloc.includes('(blessure de son histoire)'),'la situation blessure est dans le bloc de '+id);
+    assert.ok(bloc.includes('(adjointe '+a.prenom+' '+a.nom+', parcours)'),'la situation adjointe parcours est dans le bloc de '+id);
+    if(a.exemples) assert.ok(bloc.includes('(adjointe '+a.prenom+' '+a.nom+', exemple 3)'),'la situation exemple 3 est dans le bloc de '+id);
+    else assert.ok(!bloc.includes('.exemples['),'aucun exemple exporté pour '+id);
+    assert.ok(bloc.includes('(prédécesseur '+p.prenom+' '+p.nom+', poste actuel)'),'la situation poste actuel est dans le bloc de '+id);
+  });
+  assert.equal((md.match(/Fichier : `mgmt-organisations-identites-data\.js`/g)||[]).length,1);
+  assert.ok(!md.includes('Écrans et mécanismes — mgmt-organisations-identites-data.js'),'le fichier ne sort plus dans Écrans et mécanismes');
+});
+
+test('Monde lot 2 T6 — l’export des fiches ne modifie aucun fichier de données', {timeout:120000}, () => {
+  const avant=[lire('mgmt-organisations-identites-data.js'),lire('mgmt-organisations-data.js')];
+  const tmp=path.join(os.tmpdir(),'textes-a-relire-identites-donnees.md');
+  execFileSync(process.execPath,[path.join(racine,'tools','exporter-textes.js'),'--out',tmp],{stdio:'ignore',timeout:120000});
+  const apres=[lire('mgmt-organisations-identites-data.js'),lire('mgmt-organisations-data.js')];
+  assert.deepEqual(apres,avant,'aucun fichier de données modifié');
+});
+
 test('7.4 — Le README décrit les deux modes, les commandes et le fichier de liste des tests', () => {
   const t=lire('README.md');
   assert.match(t,/Mode management/);
@@ -52,4 +112,29 @@ test('7.4 — Le README décrit les deux modes, les commandes et le fichier de l
   assert.match(t,/mesure-management\.js/);
   assert.match(t,/package\.json/);
   assert.ok(!/9 fichiers de test, 62 tests/.test(t));
+});
+
+/** Le source d'un fichier sans commentaires (blocs et lignes). */
+function sansCommentaires(src){ return src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/[^\n]*/g,''); }
+
+test('Monde lot 1 T2 — l’outil de mesure ne contient plus aucune décision du joueur : il appelle mgmtPredecesseurSoiree', () => {
+  const src=sansCommentaires(lire('tools/mesure-management.js'));
+  for(const motif of ['mgmtBookMain','mgmtContratRenouveler','mgmtBourseSouhaitee','mgmtPublicReclame','mgmtCartRows','mgmtSetTitle','mgmtCanTitle','mgmtOfferBulk','mgmtDecide','mgmtAgendaPoser','mgmtAgendaJouer']){
+    assert.ok(!src.includes(motif),'l’outil ne contient plus '+motif);
+  }
+  assert.ok((src.match(/mgmtNewPile/g)||[]).length<=1,'mgmtNewPile au plus une fois (la création de la partie)');
+  assert.ok(src.includes('mgmtPredecesseurSoiree('),'l’outil appelle mgmtPredecesseurSoiree');
+});
+
+test('Monde lot 1 T2 — l’outil et la fonction du jeu donnent les mêmes chiffres : graine 20261008, split, dix soirées', () => {
+  const sortie=execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'10','--orgs','split','--json'],{encoding:'utf8',timeout:300000,stdio:['ignore','pipe','ignore']});
+  const outil=JSON.parse(sortie.slice(sortie.indexOf('{'))).split['10'];
+  const {newGameWindow}=require('./helpers/loadGame');
+  const win=newGameWindow({runMain:true});
+  const jeu=JSON.parse(win.eval(`JSON.stringify((function(){
+    mgmtRetraitProb=function(){return 0;}; setSeed(20261008);
+    const m=mgmtDefault('split'); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; mgmtAgendaInit(m);
+    for(let k=0;k<10;k++) mgmtPredecesseurSoiree(m,k);
+    return {caisse:Math.round(m.treasury*1000),pop:m.pop,effectif:m.roster.filter(f=>!mgmtIsRetired(f)).length,retraites:m.roster.filter(f=>mgmtIsRetired(f)).length}; })())`));
+  for(const k of ['caisse','pop','effectif','retraites']) assert.equal(jeu[k],outil[k],k+' : l’outil et la fonction du jeu donnent le même chiffre');
 });

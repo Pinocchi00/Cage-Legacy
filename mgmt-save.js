@@ -204,7 +204,9 @@ function mgmtValidTraceSide(t){
  *  (vainqueur A/B/D, famille, round). @returns {boolean} */
 function mgmtValidFightTrace(x){
   if(!x||typeof x!=='object'||Array.isArray(x)) return false;
-  const clefs=Object.keys(x).sort().join(',');
+  /* Monde lot 1 T5 : p:true marque un combat du passé (allégé, il ne se revoit pas). */
+  if(x.p!==undefined&&x.p!==true) return false;
+  const clefs=Object.keys(x).filter(k=>k!=='p').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -262,6 +264,7 @@ function validateMgmt(raw){
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
   if(raw.cal!==undefined&&!mgmtAgendaValide(raw.cal)) return false;
+  if(raw.passe!==undefined&&!mgmtPasseValide(raw.passe)) return false;   /* Monde lot 1 T3 */
   if(raw.fil!==undefined&&!mgmtFilValide(raw.fil)) return false;
   /* Monde lot 8 T1 : la table des visites — tolérée absente (états construits
      par les tests, migrations), strict quand elle est là. */
@@ -353,8 +356,8 @@ function validateMgmt(raw){
  *  la retraite d'âge existe (retired:'age' accepté, jamais effacé) — rien
  *  à convertir sur une v8, la semaine d'anniversaire de chaque combattant
  *  se dérive de son identifiant à la lecture. Sans perte, sans
- *  reset : une v1 reste refusée, comme avant. 14 → 15 (monde lot 8 T1,
- *  10/10/2026) : la table des visites part pleine (tous vus, migration
+ *  reset : une v1 reste refusée, comme avant. 14 → 15 (monde lot 1 T3, le passé : rien à convertir),
+ *  15 → 16 (monde lot 8 T1, 10/10/2026, renumérotée à la fusion) : la table des visites part pleine (tous vus, migration
  *  MONDE_LOT8_T1_MIGRATION), rien d'autre ne bouge. */
 function mgmtMigrate(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
@@ -467,14 +470,18 @@ function mgmtMigrate(raw){
     }
     raw.v=14;
   }
+  /* Monde lot 1 T3 : 14 → 15. Une partie d'avant n'a pas de passé (m.passe absent est valide) : rien à convertir, rien à perdre. */
+  if(raw.v===14){
+    raw.v=15;
+  }
   /* ==== [FIN ANCRE] ==== */
-   /* ==== [ANCRE: MONDE_LOT8_T1_MIGRATION] — 14 → 15 (monde lot 8 T1, docs/lots/MONDE-LOT-8-T1.md) : la table des
+   /* ==== [ANCRE: MONDE_LOT8_T1_MIGRATION] — 15 → 16 (monde lot 8 T1, docs/lots/MONDE-LOT-8-T1.md) : la table des
       visites (m.visites, {id:[nFaits,nCombats]}, mgmt-attention.js) part PLEINE à l'instant de la migration —
       tous les combattants déjà dans la partie sont considérés vus, donc 0 marque au premier chargement (sinon
       351 sur 364 s'allumeraient après dix soirées). Sans perte : aucun autre champ n'est touché. ==== */
-  if(raw.v===14){
+  if(raw.v===15){
     mgmtVisitesInit(raw);
-    raw.v=15;
+    raw.v=16;
   }
   /* ==== [FIN ANCRE] ==== */
   if(raw.v!==MGMT_SAVE_VERSION) return null;
@@ -489,6 +496,7 @@ function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
+  if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */
   if(m.fil!==undefined&&!mgmtFilValide(m.fil)) delete m.fil;
   /* Monde lot 8 T1 : une table des visites illisible (ou absente) est
      reconstruite pleine — la réparation ne rallume jamais de marque. */
@@ -599,7 +607,7 @@ function mgmtRepair(m){
 
 function mgmtParseAndValidate(raw){
   if(!raw) return null;
-  try{ const parsed=JSON.parse(raw); const mgr=mgmtMigrate(parsed); return mgr&&validateMgmt(mgr)?mgr:null; }
+  try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); return mgr&&validateMgmt(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
   catch(e){ return null; }
 }
 
@@ -677,6 +685,8 @@ function mgmtSlotEffacer(n){
  *  comme SAVE_KEY / SAVE_BACKUP_KEY (state-save.js). */
 function saveMgmt(){
   if(!G||!G.mgmt) return false;
+  /* Monde lot 1 T3 : un passé en cours de génération ne s'écrit jamais — rien d'une partie à moitié née ne touche l'emplacement. */
+  if(G.mgmt.passe&&G.mgmt.passe.enCours===true) return true;
   try{
     /* Lot 2B T1 bis : les retraites de la soirée ont déjà été appliquées
        quand elle se sauvegarde. Le quota est rétabli dans l'état vivant
@@ -685,7 +695,7 @@ function saveMgmt(){
     const cle=mgmtSlotKey(MGMT_SLOT);
     const previous=stockageLire(cle);
     if(mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
-    stockageEcrire(cle,JSON.stringify(G.mgmt));
+    stockageEcrire(cle,mgmtSerialiser(G.mgmt));   /* Monde lot 1 T5 : la part du passé s'écrit en archive compacte */
     /* Brief lot 1 : la dernière partie jouée et la date de l'enregistrement, hors de la partie. */
     const reg=mgmtRegistre(); reg.dernier=MGMT_SLOT; reg.dates[MGMT_SLOT]=Date.now(); mgmtRegistreEcrit(reg);
     return stockageSignaler(true);
@@ -701,7 +711,7 @@ function loadMgmt(){
       if(!candidate) continue;
       G.mgmt=mgmtRepair(candidate);
       if(key===secours){
-        try{ stockageEcrire(cle,JSON.stringify(G.mgmt)); }catch(e){}
+        try{ stockageEcrire(cle,mgmtSerialiser(G.mgmt)); }catch(e){}
       }
       return true;
     }

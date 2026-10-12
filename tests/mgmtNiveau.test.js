@@ -31,8 +31,7 @@ test('Niveau — une partie neuve : chaque ligne porte niv, pot, pic ; le profil
     const f=m.roster[0]; f.niv=42; const bas=mgmtCombatProfile(f).overall; f.niv=78; const haut=mgmtCombatProfile(f).overall;
     const g=m.roster[1]; const w=g.W, l=g.L; g.niv=60; const o1=mgmtCombatProfile(g).overall; g.W=w+9; g.L=Math.max(0,l-1); const o2=mgmtCombatProfile(g).overall;
     return {toutes,n:m.roster.length,v:m.v,niveaux:m.niveaux,bas,haut,memeNiveauMemeProfil:o1===o2};`);
-  /* 15 : la version courante depuis le monde lot 8 T1 (la table des visites) — avant : 14. */
-  assert.ok(r.toutes); assert.equal(r.v,15); assert.equal(r.niveaux,1);
+  assert.ok(r.toutes); assert.equal(r.v,16); /* renumérotation de version à la fusion du lot 8, 12/10/2026 : 15 = le passé (lot 1), 16 = la table des visites */ assert.equal(r.niveaux,1);
   assert.ok(r.haut>r.bas+3,'un niveau de 78 vaut plus qu’un niveau de 42'); assert.ok(r.memeNiveauMemeProfil,'neuf victoires de plus ne changent pas le niveau : il est stocké');
 });
 
@@ -118,8 +117,7 @@ test('Niveau — migration 13 → 14 : une partie d’avant se charge, chaque li
     const mig=mgmtMigrate(brut);
     const bonnes=mig.roster.every(o=>o.niv===mgmtLevelForRecord(o.W,o.L)&&o.pot>=o.niv&&o.pic>=26&&o.pic<=30);
     return {v:mig.v,niveaux:mig.niveaux,bonnes,valide:validateMgmt(mig),n:mig.roster.length,pic:mig.roster.every(o=>o.pic===mgmtNivPic(o.id)),ancienneRef:m.roster.length===mig.roster.length};`);
-  /* 15 : la version courante depuis le monde lot 8 T1 — la migration 13 → 14 enchaîne 13 → 14 → 15. */
-  assert.equal(r.v,15); assert.equal(r.niveaux,1); assert.ok(r.bonnes,'le niveau de départ est celui du palmarès'); assert.ok(r.valide); assert.ok(r.pic);
+  assert.equal(r.v,16); /* renumérotation de version à la fusion du lot 8, 12/10/2026 : 15 = le passé (lot 1), 16 = la table des visites */ assert.equal(r.niveaux,1); assert.ok(r.bonnes,'le niveau de départ est celui du palmarès'); assert.ok(r.valide); assert.ok(r.pic);
 });
 
 test('Niveau — la validation : un niveau hors bornes est refusé ; une partie sans niveau d’avant le lot reste lisible', () => {

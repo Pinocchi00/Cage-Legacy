@@ -9,11 +9,12 @@ const MGMT_DEMO_FIN={
 };
 let MGMT_DEMO_FIN_VUE=false;
 
+/* Monde lot 1 (décision d'Anthony du 10/10/2026) : la démo passe par la même création que le jeu complet (CL.mgmtNouvelleLancer : les six ans de passé, la même barre) ; sa limite compte les soirées du JOUEUR, pas celles du passé. */
 /** La démo est active. */
 const mgmtDemoActive=()=>typeof CL_DEMO!=='undefined'&&CL_DEMO===true;
 /** Les cinq soirées de la démo sont jouées. Pur. */
 function mgmtDemoTerminee(m){
-  return mgmtDemoActive()&&!!m&&Number.isSafeInteger(m.eventsPlayed)&&m.eventsPlayed>=CL_DEMO_SOIREES;
+  return mgmtDemoActive()&&!!m&&Number.isSafeInteger(m.eventsPlayed)&&mgmtSoireesJoueur(m)>=CL_DEMO_SOIREES;
 }
 /** Après le lendemain de la dernière soirée permise, l'écran de fin passe, une seule fois. @returns {boolean} vrai si l'écran de fin a pris la main. */
 function mgmtDemoApresSoiree(){

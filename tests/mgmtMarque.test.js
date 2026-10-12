@@ -3,7 +3,7 @@
    à côté du nom d'un combattant, dans chaque liste, quand lui est arrivé
    quelque chose depuis la dernière fois que sa fiche a été ouverte. Ouvrir la
    fiche l'éteint partout, même après un rechargement. m.visites (table de
-   paires [nFaits,nCombats] vus), migration 14 → 15, dessin unique mfMarqueNom. */
+   paires [nFaits,nCombats] vus), migration 15 → 16 (renumérotée à la fusion du lot 8, 12/10/2026), dessin unique mfMarqueNom. */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
@@ -171,7 +171,7 @@ test('Marque — une partie en version 14 se charge, se valide, ne s\u2019allume
     G.mgmt=mig;
     return {v:mig.v,valide:validateMgmt(JSON.parse(JSON.stringify(mig))),allumes:mig.roster.filter(o=>mgmtMarque(mig,o.id)).length,n:mig.roster.length};`);
   assert.ok(r,'la migration n\u2019a pas refusé la partie');
-  assert.equal(r.v,15); assert.equal(r.n,364); assert.ok(r.valide,'la partie migrée se valide');
+  assert.equal(r.v,16,'chaîne 14 → 15 (lot 1) → 16 (lot 8) ; renumérotation de version à la fusion du lot 8, 12/10/2026'); assert.equal(r.n,364); assert.ok(r.valide,'la partie migrée se valide');
   assert.equal(r.allumes,0,'la migration part pleine : personne n\u2019est marqué');
   const charge=res(win,`G.mgmt=null; return !!mgmtParseAndValidate(JSON.stringify(G.brut));`);
   assert.ok(charge,'une v14 persistée se charge sans perte');
@@ -179,7 +179,18 @@ test('Marque — une partie en version 14 se charge, se valide, ne s\u2019allume
   const j2=jouer(win,1);
   assert.ok(j2>=1,'la soirée a été jouée sur l\u2019état migré');
   const r2=res(win,`const m=G.mgmt; return {allumes:m.roster.filter(o=>mgmtMarque(m,o.id)).length};`);
-  assert.ok(r2.allumes>=2,'la soirée a allumé quelqu\u2019un ; la v15 vit');
+  assert.ok(r2.allumes>=2,'la soirée a allumé quelqu\u2019un ; la v16 vit');
+});
+
+test('Marque — une partie en version 15 (le passé) migre vers 16 : la table des visites naît pleine, rien d’autre ne bouge', () => {
+  const win=neuve(7);
+  jouer(win,2);
+  win.eval(`G.brut=JSON.parse(JSON.stringify(G.mgmt)); G.brut.v=15; delete G.brut.visites; G.ref=JSON.parse(JSON.stringify(G.brut));`);
+  const r=res(win,`const mig=mgmtMigrate(G.brut); if(!mig) return null;
+    const sans=JSON.parse(JSON.stringify(mig)); delete sans.visites; sans.v=15;
+    return {v:mig.v,valide:validateMgmt(JSON.parse(JSON.stringify(mig))),intact:JSON.stringify(sans)===JSON.stringify(G.ref),allumes:mig.roster.filter(o=>mgmtMarque(mig,o.id)).length};`);
+  assert.ok(r,'la migration n’a pas refusé la partie');
+  assert.equal(r.v,16); assert.ok(r.valide); assert.ok(r.intact,'aucun autre champ ne bouge'); assert.equal(r.allumes,0);
 });
 
 test('Marque — validateMgmt refuse une table des visites mal formée, mgmtRepair la reconstruit', () => {

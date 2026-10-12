@@ -10,7 +10,7 @@ let MGMT_SU_CL={sexe:'H',div:'',curseur:0,portee:'organization'};
 let MGMT_SU_CE={sexe:'H',div:'',i:0,ouverte:false};
 let MGMT_SU_CA={i:0};
 let MGMT_SU_PR={filtre:'',i:0};
-let MGMT_SU_RE={s:0,i:0};
+let MGMT_SU_RE={s:0,i:0,zone:'table'};
 
 const MGMT_SU_FILTRES=[['','Tout'],['defi','Défis'],['presse','Presse'],['public','Public'],['combattant','Combattants']];
 const MGMT_SU_LIGNES_CLASSEMENT=6;
@@ -140,7 +140,9 @@ function mgmtSuCeinturesMur(m){
 
 function mgmtSuReignLigne(m,r,k,total,actuelle){
   const n=mgmtNomParId(m,r.id);
-  const sous=r.jusqua===null?(r.depuis===0?'Depuis le début':'Depuis la soirée '+r.depuis):(r.depuis===0?`Du début à la soirée ${r.jusqua}`:`Soirées ${r.depuis} à ${r.jusqua}`);
+  const an=n=>{ const j=mgmtSoireeJour(m,n); return Number.isFinite(j)?new Date(MGMT_CALENDRIER_DEBUT+j*86400000).getUTCFullYear():null; };
+  const a1=an(r.depuis), a2=r.jusqua===null?null:an(r.jusqua), annees=a1===null?'':' · '+(a2===null||a2===a1?a1:a1+'-'+a2);   /* Monde lot 1 T6 : les règnes du passé se datent */
+  const sous=(r.jusqua===null?(r.depuis===0?'Depuis le début':'Depuis la soirée '+r.depuis):(r.depuis===0?`Du début à la soirée ${r.jusqua}`:`Soirées ${r.depuis} à ${r.jusqua}`))+annees;
   const marque=actuelle?`<div class="mf-su-r-c" aria-label="Champion actuel">C</div>`:`<div class="mf-su-r-n">${esc(total-k)}</div>`;
   return `<div class="mf-su-reign${actuelle?' actuel':''}">${marque}<div class="mf-su-r-nom"><div><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}</span>${mfMarqueNom(m,r.id)}</div><span class="mf-su-r-sous">${esc(sous)}</span></div>`
     +`<b class="mf-su-r-def">${esc(r.defenses)} ${r.defenses>1?'DÉFENSES':'DÉFENSE'}</b></div>`;
@@ -161,7 +163,7 @@ function mgmtSuCeintureDetail(m){
   const rs=lignee.reigns.slice().reverse();
   const lignes=rs.slice(0,5).map((r,k)=>mgmtSuReignLigne(m,r,k,rs.length,k===0&&lignee.actuel===r)).join('');
   const liste=mfPanneau(`<div class="mf-su-lignee"><div class="mf-su-lignee-t"><span class="mf-su-tag">LA LIGNÉE</span><span class="mf-su-dim">${rs.length} CHAMPION${rs.length>1?'S':''}</span></div>`
-    +`<div class="mf-su-reigns">${lignes||'<div class="mf-eff-aucun">Aucun champion pour l’instant.</div>'}</div><div class="mf-su-dim2">Du champion actuel au tout premier.</div></div>`,'normal','mf-su-lig');
+    +`<div class="mf-su-reigns">${lignes||'<div class="mf-eff-aucun">Aucun champion pour l’instant.</div>'}</div><div class="mf-su-dim2">${rs.length>5?`Les 5 derniers sur ${rs.length}.`:'Du champion actuel au tout premier.'}</div></div>`,'normal','mf-su-lig');
   const r=lignee.actuel, nS=m.eventsPlayed||0;
   const duree=r?mgmtDureeTexte(m,r.depuis,nS):null;
   const regne=r
@@ -348,37 +350,75 @@ function mgmtSuQui(m,d,fs,largeur){
 }
 function mgmtSuRoundLigne(d){ return d.nul?`Match nul ${mgmtRoundTexte(d)}`:`${d.methode}, ${mgmtRoundTexte(d)}`; }
 
+/* ==== [ANCRE: MONDE_LOT2_T8_RESULTATS] — Monde lot 2 T8 (décision du 12/10/2026, retour d'Anthony) : à gauche la liste des soirées (date + combat
+   principal), à droite tous les combats de la soirée choisie en tableau ; le rouge n'est plus la couleur d'un résultat ; une ligne d'aide dit ce
+   que fait Entrée. ====*/
+/** La place d'un combat dans la soirée : PRINCIPAL, CO-PRINCIPAL, 3, 4, 5, PRÉLIM 1… */
+function mgmtSuPlaceTexte(t,k,nPrel){
+  if(t.slot!=='main') return 'PRÉLIM '+nPrel;
+  return k===0?'PRINCIPAL':(k===1?'CO-PRINCIPAL':String(k+1));
+}
+/** La méthode et le round en texte normal : « Décision · 5 rounds », « KO · 2e round ». */
+function mgmtSuMethodeTexte(d){
+  if(d.nul) return 'Match nul · '+d.rounds+' rounds';
+  if(d.family==='dec') return 'Décision · '+d.rounds+' rounds';
+  return (MGMT_FAMILY_LABELS[d.family]||d.methode||'Fin du combat')+' · '+(d.round===1?'1er round':d.round+'e round');
+}
+/** Le combat principal d'une soirée en une ligne : « Gosselin bat Dzhabrailova ». */
+function mgmtSuPrincipalLigne(m,s){
+  const x=mgmtSuResultatsListe(m,s)[0]; if(!x) return '';
+  const g=x.d.gagnant.last||x.d.gagnant.name, p=x.d.perdant.last||x.d.perdant.name;
+  return x.d.nul?`${g} et ${p} : match nul`:`${g} bat ${p}`;
+}
 function scr_mgmt_resultats(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt, F=MGMT_SU_RE, soirees=mgmtSoirees(m).slice().reverse();
   if(F.s>=soirees.length) F.s=Math.max(0,soirees.length-1);
   if(F.s<0) F.s=0;
-  const debutP=Math.min(Math.max(0,F.s-4),Math.max(0,soirees.length-5));
-  const puces=`<div class="mf-eff-puces">`+soirees.slice(debutP,debutP+5).map((s,k)=>`<button type="button" class="${debutP+k===F.s?'on':''}" aria-pressed="${debutP+k===F.s}" onclick="CL.mgmtSuReSoiree(${debutP+k})">SOIRÉE ${esc(s.n)}</button>`).join('')+`</div>`;
-  let corps;
+  if(F.zone!=='liste') F.zone='table';
+  const ligneSoiree=(s,k)=>{
+    const dt=Number.isFinite(s.jour)?mgmtJourDateTexte(s.jour):'';
+    return `<button type="button" class="mf-re-s${k===F.s?' sel':''}${k===F.s&&F.zone==='liste'?' actif':''}" aria-pressed="${k===F.s}" onclick="CL.mgmtSuReSoiree(${k})"><b>SOIRÉE ${esc(s.n)}${dt?' · '+esc(dt):''}</b><span>${esc(mgmtSuPrincipalLigne(m,s))}</span></button>`;
+  };
+  let liste='', corps, revoyable=false, aide='';
   if(!soirees.length) corps=`<div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">Aucune soirée jouée : les résultats viendront avec la première.</div>`,'normal')}</div>`;
   else{
-    const s=soirees[F.s], liste=mgmtSuResultatsListe(m,s);
-    if(F.i>=liste.length) F.i=Math.max(0,liste.length-1);
+    const recentes=soirees.slice(0,5).map((s,k)=>ligneSoiree(s,k)).join('');
+    const reste=soirees.length-5;
+    let anciennes='';
+    if(reste>0){
+      const deb=Math.min(Math.max(5,F.s-1),Math.max(5,soirees.length-4));
+      anciennes=`<div class="mf-re-plus">PLUS ANCIENNES · ${reste}</div>`+soirees.slice(deb,deb+4).map((s,k)=>ligneSoiree(s,deb+k)).join('');
+    }
+    liste=`<div class="mf-re-liste" role="list">${recentes}${anciennes}</div>`;
+    const s=soirees[F.s], lst=mgmtSuResultatsListe(m,s);
+    if(F.i>=lst.length) F.i=Math.max(0,lst.length-1);
     if(F.i<0) F.i=0;
-    const h=liste[F.i], co=liste[F.i+1], suite=liste.slice(F.i+2,F.i+5);
-    const etiq=x=>mgmtResultatEtiquette(m,m.hist[x.i],x.k,x.d.titre).toUpperCase();
-    const cat=x=>String(divById(x.d.cat)?divById(x.d.cat).name:'').replace(/^Poids /,'').toUpperCase();
-    const issue=h.d.titre?mgmtTitreIssue(m,h.i):null;
-    const ligneTitre=issue?`<div class="mf-su-h-ti"><div class="mf-eff-c">C</div><span>${issue==='garde'?'Garde sa ceinture.':(issue==='vacant'?'Prend le titre vacant.':'Prend la ceinture.')}</span></div>`:'';
-    const hero=mgmtSuHero(etiq(h),cat(h)+(h.d.titre?' · POUR LA CEINTURE':''),mgmtSuQui(m,h.d,104,520),`<div class="mf-su-quote"><div>${esc(mgmtSuRoundLigne(h.d))}</div>${ligneTitre}</div>`,
-      mfBouton('Revoir ce combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuReRevoir()'}));
-    const cote=co?mgmtSuCoteGrand(etiq(co),cat(co),mgmtSuQui(m,co.d,80,440),
-      `<div class="mf-su-ko"><b style="font-size:${mfCorps(co.d.nul?'NUL':(MGMT_FAMILY_LABELS[co.d.family]||co.d.methode),360,130,60)}px">${esc(mgmtSuMaj(co.d.nul?'NUL':(MGMT_FAMILY_LABELS[co.d.family]||co.d.methode)))}</b><div><span>${esc(mgmtRoundTexte(co.d))}</span>${co.d.geste?`<em>${esc(co.d.geste)}</em>`:''}</div></div>`)
-      :mgmtSuCoteGrand('PRÉLIMINAIRES','','<span style="font-size:60px">FIN DE SOIRÉE</span>','');
-    const petits=suite.map(x=>mgmtSuPetit(etiq(x),cat(x),mgmtSuQui(m,x.d,48,440),`<b class="mf-su-meth">${esc(x.d.nul?'Match nul':(x.d.family==='dec'?'Décision':(MGMT_FAMILY_LABELS[x.d.family]||'')+', '+mgmtRoundTexte(x.d)))}</b>`,`CL.mgmtSuReChoisir(${F.i+2+suite.indexOf(x)})`));
-    corps=mgmtSuUne(hero,cote,petits);
+    let nPrel=0, rangMain=0;
+    const lignes=lst.map((x,k)=>{
+      const t=m.hist[x.i], d=x.d;
+      if(t.slot!=='main') nPrel++; else rangMain++;
+      const place=mgmtSuPlaceTexte(t,t.slot==='main'?rangMain-1:0,nPrel);
+      const g=esc(d.gagnant.name||d.gagnant.last), p=esc(d.perdant.name||d.perdant.last);
+      const qui=d.nul?`<span>${g}</span> <i>et</i> <span>${p}</span> <i>: match nul</i>`:`<b class="g">${g}</b> <i>bat</i> <span class="p">${p}</span>`;
+      const sel=k===F.i;
+      return `<button type="button" class="mf-re-l${sel?' sel':''}${sel&&F.zone==='table'?' actif':''}" aria-pressed="${sel}" onclick="CL.mgmtSuReChoisir(${k})" ondblclick="CL.mgmtSuReEntree()">`
+        +`<span class="mf-re-place">${esc(place)}</span><span class="mf-re-qui">${qui}${d.titre?'<em class="mf-re-ceinture">CEINTURE</em>':''}</span><span class="mf-re-meth">${esc(mgmtSuMethodeTexte(d))}</span></button>`;
+    }).join('');
+    const h=lst[F.i];
+    revoyable=!!h&&mgmtCombatRevoyable(m.hist[h.i]);
+    aide=revoyable?'Entrée : revoir le combat'
+      :'Combat des six ans : pas de rediffusion — Entrée ouvre la fiche du vainqueur';
+    const dt=Number.isFinite(s.jour)?mgmtJourDateTexte(s.jour):'';
+    corps=`<div class="mf-re-droite"><div class="mf-re-titre">SOIRÉE ${esc(s.n)}${dt?' · '+esc(dt):''} · ${lst.length} COMBAT${lst.length>1?'S':''}</div>`
+      +`<div class="mf-re-tab">${lignes}</div><div class="mf-re-aide">${esc(aide)}</div></div>`;
   }
-  const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${puces}</div>${corps}</main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:soirees.length?`${mgmtOrgNom(m)} Fight Night ${soirees[F.s].n}${Number.isFinite(soirees[F.s].jour)?' · '+mgmtJourDate(soirees[F.s].jour).jour+' '+mgmtJourDate(soirees[F.s].jour).mois:''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
-    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Soirée',onclick:'CL.mgmtSuReSoiree(MGMT_SU_RE.s+1)'},{ks:['A','E'],t:'Section'},
-      {ks:['Entrée'],t:'Revoir ce combat',jaune:true,onclick:'CL.mgmtSuReRevoir()'}]});
+  const contenu=`<main class="mf-contenu mf-su mf-re"><div class="mf-re-grille"><div class="mf-re-gauche"><div class="mf-re-lib">LES SOIRÉES</div>${liste}</div>${corps}</div></main>`;
+  return mfEcran(contenu,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:soirees.length?`${mgmtOrgNom(m)} Fight Night ${soirees[F.s].n}${Number.isFinite(soirees[F.s].jour)?' · '+mgmtJourDateTexte(soirees[F.s].jour):''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
+    touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Soirée'},{ks:['↑','↓'],t:'Combat'},{ks:['Tab'],t:'Liste ou tableau',onclick:'CL.mgmtSuReZone()'},{ks:['A','E'],t:'Section'},
+      ...(soirees.length?[revoyable?{ks:['Entrée'],t:'Revoir ce combat',jaune:true,onclick:'CL.mgmtSuReRevoir()'}:{ks:['Entrée'],t:'Fiche du vainqueur',jaune:true,onclick:'CL.mgmtSuReEntree()'}]:[])]});
 }
+/* ==== [FIN ANCRE] ====*/
 SCREENS.mgmt_resultats=scr_mgmt_resultats;
 
 /* ---- Les gestes ------------------------------------------------------------------------------------------ */
@@ -454,6 +494,25 @@ Object.assign(CL,{
   /* Résultats */
   mgmtSuReSoiree(k){ const n=mgmtSoirees(G.mgmt).length; if(!n) return; MGMT_SU_RE.s=((k%n)+n)%n; MGMT_SU_RE.i=0; render(); },
   mgmtSuReChoisir(i){ MGMT_SU_RE.i=Math.max(0,i); render(); },
+  /** Monde lot 2 T8 : Tab passe de la liste des soirées au tableau des combats, et inversement. */
+  mgmtSuReZone(){ MGMT_SU_RE.zone=MGMT_SU_RE.zone==='liste'?'table':'liste'; render(); },
+  /** ← → : la soirée précédente ou suivante, sans boucler. */
+  mgmtSuReSoireeDe(d){
+    const n=mgmtSoirees(G.mgmt).length; if(!n) return;
+    const k=Math.min(Math.max(0,MGMT_SU_RE.s+d),n-1); if(k===MGMT_SU_RE.s) return;
+    MGMT_SU_RE.s=k; MGMT_SU_RE.i=0; render();
+  },
+  /** ↑ ↓ : une ligne du tableau (ou une soirée si la liste est active). */
+  mgmtSuReHautBas(d){ if(MGMT_SU_RE.zone==='liste') CL.mgmtSuReSoireeDe(d); else CL.mgmtSuReDeplacer(d); },
+  /** Entrée : revoir un combat joué sous le joueur ; pour un combat du passé, ouvrir la fiche du vainqueur. */
+  mgmtSuReEntree(){
+    const m=G.mgmt, s=mgmtSoirees(m).slice().reverse()[MGMT_SU_RE.s]; if(!s) return;
+    const x=mgmtSuResultatsListe(m,s)[MGMT_SU_RE.i]; if(!x) return;
+    const t=m.hist[x.i];
+    if(mgmtCombatRevoyable(t)) return CL.mgmtSuReRevoir();
+    const id=t.winner==='B'?t.b.id:t.a.id;
+    if(mgmtFicheLigne(m,id)){ CL.mgmtFiche(id); render(); }
+  },
   mgmtSuReDeplacer(d){
     const soirees=mgmtSoirees(G.mgmt).slice().reverse(), s=soirees[MGMT_SU_RE.s]; if(!s) return;
     const n=mgmtSuResultatsListe(G.mgmt,s).length; CL.mgmtSuReChoisir(Math.min(Math.max(0,MGMT_SU_RE.i+d),Math.max(0,n-1)));
@@ -469,6 +528,7 @@ Object.assign(CL,{
     const m=G.mgmt, s=mgmtSoirees(m).slice().reverse()[MGMT_SU_RE.s]; if(!s) return;
     const x=mgmtSuResultatsListe(m,s)[MGMT_SU_RE.i]; if(!x) return;
     const t=m.hist[x.i];
+    if(!mgmtCombatRevoyable(t)) return;
     mgmtRevoirCombat(t,'mgmt_resultats',null);
   },
 });
@@ -506,10 +566,12 @@ keysRegister('mgmt_presse',{
   Escape(){ CL.go('mgmt_carte'); },
 });
 keysRegister('mgmt_resultats',{
-  ArrowLeft(){ CL.mgmtSuReDeplacer(-1); },
-  ArrowRight(){ CL.mgmtSuReDeplacer(1); },
-  Tab(){ CL.mgmtSuReSoiree(MGMT_SU_RE.s+1); },
-  Enter(){ CL.mgmtSuReRevoir(); },
+  ArrowLeft(){ CL.mgmtSuReSoireeDe(1); },
+  ArrowRight(){ CL.mgmtSuReSoireeDe(-1); },
+  ArrowUp(){ CL.mgmtSuReHautBas(-1); },
+  ArrowDown(){ CL.mgmtSuReHautBas(1); },
+  Tab(){ CL.mgmtSuReZone(); },
+  Enter(){ CL.mgmtSuReEntree(); },
   Escape(){ CL.go('mgmt_carte'); },
 });
 /* ==== [FIN ANCRE] ==== */

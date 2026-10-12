@@ -16,7 +16,9 @@ test('H3 — origine enregistrée dès la création ; identité complète, pure 
     const r=result(w,`setSeed(20261003); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m);
       G={theme:'dark',mgmt:m}; const avant=JSON.stringify(m),seed=SEED;
       const tous=m.roster.concat(m.exterieur),identites=tous.map(f=>mgmtIdentite(m,f));
-      const noms=tous.every(f=>!f.last||COUNTRIES[f.ck].last.includes(f.last)||COUNTRIES[f.ck].last.some(l=>feminiserNom(l,f.ck)===f.last));   /* 5.2 : les femmes portent la forme féminine */
+      /* Monde lot 2 T2 (décision du 10/10/2026) : le management complète les noms de chaque pays par son propre catalogue, MGMT_NOMS_AJOUTS ; un nom vient du pays ou de ce complément. */
+      const duPays=ck=>COUNTRIES[ck].last.concat(((typeof MGMT_NOMS_AJOUTS!=="undefined"&&MGMT_NOMS_AJOUTS[ck])||{}).last||[]);
+      const noms=tous.every(f=>!f.last||duPays(f.ck).includes(f.last)||duPays(f.ck).some(l=>feminiserNom(l,f.ck)===f.last));   /* 5.2 : les femmes portent la forme féminine */
       const pur=avant===JSON.stringify(m)&&seed===SEED;
       saveMgmt(); G.mgmt=null; const charge=loadMgmt();
       return {pur,noms,charge,generation:tous.every(f=>f.generation===1),identites,
@@ -73,8 +75,8 @@ test('H3 — migration 11 → 12 : chaque ancien profil et rejeu reste EXACTEMEN
         ext:apres.every((f,i)=>extProfils[i]===JSON.stringify(mgmtCombatProfile(f))),
         hist:hist===JSON.stringify(m.hist),rejeu:avant===JSON.stringify(mgmtReplayFight(m.hist[0]))&&avant===JSON.stringify(res),
         rng:seed===SEED,idempotent:premiere===JSON.stringify(m)};`);
-    /* H4 : la même chaîne mène à l'effectifs 0 ; lot 2 du brief du 06/10, version 14, portée à 15 par le monde lot 8 T1 (la table des visites). */
-    assert.deepEqual(r,{v:15,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
+    /* H4 : la même chaîne mène à l'effectifs 0 ; lot 2 du brief du 06/10 : jusqu'à la version 14. */
+    assert.deepEqual(r,{v:16,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
   }finally{ w.close(); }
 });
 
