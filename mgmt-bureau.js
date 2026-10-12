@@ -110,7 +110,7 @@ function mgmtNextId(m){ const id='mg'+m.seq; m.seq++; return id; }
 /**
  * Génère le roster de Split : 40 à 60 noms (CDC §9). Niveau 1 uniquement :
  * une ligne nom / bilan / âge / catégorie / organisation, rien d'autre
- * (CDC §3). Réutilise makeName() et correlatedRecord() existants, jamais un
+ * (CDC §3). Réutilise mgmtMakeName() et correlatedRecord() existants, jamais un
  * second système de génération. Les prénoms et noms réservés (six
  * personnages, cinq légendes — MGMT_EXCLUDED_FIRST/LAST) sont retirés par
  * nouveau tirage seedé, borné.
@@ -148,6 +148,8 @@ function mgmtNewRoster(m,opts){
      mêmes tirages — pour les sauvegardes et fixtures d'avant H4. */
   const avant=m.effectifs===0;
   const profil=mgmtOrgProfil(m);
+  /* Monde lot 2 T2 : les combattants sont tirés au mélange de pays de l'organisation. */
+  const paysPoids=mgmtOrgPaysPoids(m);
   /* Monde lot 1 T3 : sans option, rien ne change (mêmes tirages, mêmes lignes). */
   const recul=opts&&Number.isSafeInteger(opts.reculAns)&&opts.reculAns>0?opts.reculAns:0;
   const attendus=recul>0&&Number.isSafeInteger(opts.combatsAttendus)?opts.combatsAttendus:0;
@@ -165,17 +167,17 @@ function mgmtNewRoster(m,opts){
     /* Lot 5 H4 : la catégorie se tire au poids du monde (MGMT_WORLD_SIZE) :
        le vestiaire est réparti comme lui, ~14 % de chaque catégorie. */
     const div=avant?pick(divs):plan[i];
-    /* Lot 5 H3 : un tirage pondéré (poids Split, catalogue §1.2) par
-       emplacement ; le retirage du prénom rejoue le même pays. */
-    let ck=mgmtPaysTire(rnd(),'split');
+    /* Monde lot 2 T2 : un tirage pondéré au mélange de pays de l'organisation (paysPoids de
+       son identité) par emplacement ; le retirage du prénom rejoue le même pays. */
+    let ck=mgmtPaysTire(rnd(),paysPoids);
     const id=mgmtNextId(m);
-    let nm=makeName(div.gender,ck), guard=0;
+    let nm=mgmtMakeName(div.gender,ck), guard=0;
     /* Corrections du 08/10, 5.1 : aucun homonyme exact, et un nom de famille déjà porté ne revient que pour une fratrie voulue (même pays, tirée comme
        mgmtFratrie la lit, au plus MGMT_FRATRIES_VOULUES par effectif). Le chemin d'avant (effectifs 0) garde ses tirages tels quels. */
     const refuse=n=>MGMT_EXCLUDED_FIRST.includes(n.first)||MGMT_EXCLUDED_LAST.includes(n.last)||(!avant&&mgmtNomEnConflit(m,n,ck,id,div.id,bilan).conflit);
     while(refuse(nm)&&guard<(avant?50:400)){
-      if(!avant&&guard>0&&guard%80===0) ck=mgmtPaysTire(rnd(),'split');   /* un pays dont les noms sont épuisés : on en tire un autre */
-      nm=makeName(div.gender,ck); guard++;
+      if(!avant&&guard>0&&guard%80===0) ck=mgmtPaysTire(rnd(),paysPoids);   /* un pays dont les noms sont épuisés : on en tire un autre */
+      nm=mgmtMakeName(div.gender,ck); guard++;
     }
     if(!avant){ const c=mgmtNomEnConflit(m,nm,ck,id,div.id,bilan); if(c.genre==='fratrie') bilan.fratries++; else if(c.genre==='partage') bilan.partages++; if(c.prenom) bilan.prenoms++; }
     const age=avant?RI(22,35):clamp(RI(22,35)+profil.age,20,40);

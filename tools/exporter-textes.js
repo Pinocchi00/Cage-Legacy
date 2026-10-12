@@ -3,7 +3,8 @@
    Brief des corrections du 08/10/2026, lot 7.3 : un export lisible des textes marqués relu:false, par famille, un texte par ligne avec sa situation, pour
    qu'Anthony relise et coche. L'outil ne modifie AUCUN texte : il lit les données du jeu et écrit docs/TEXTES-A-RELIRE.md.
    Usage : node tools/exporter-textes.js [--out chemin.md]
-   Familles : humanité (mgmt-humanite-data.js), voix (mgmt-voix-data.js), médias (mgmt-medias-data.js), camps (mgmt-camps-data.js), combat (mgmt-combat-data.js). */
+   Familles : humanité (mgmt-humanite-data.js), voix (mgmt-voix-data.js), médias (mgmt-medias-data.js), camps (mgmt-camps-data.js), combat (mgmt-combat-data.js),
+   fiches d'identité (mgmt-organisations-identites-data.js). */
 const fs = require('fs');
 const path = require('path');
 const { newGameWindow } = require('../tests/helpers/loadGame');
@@ -11,7 +12,7 @@ const racine = path.join(__dirname, '..');
 const iOut = process.argv.indexOf('--out');
 const out = iOut >= 0 ? process.argv[iOut + 1] : path.join(racine, 'docs', 'TEXTES-A-RELIRE.md');
 /* Brief démo, lot 9 T1 : tout fichier du jeu qui porte la marque relu:false est lu — la liste des familles est complétée par les fichiers de code qui la portent. */
-const DEJA = ['mgmt-humanite-data.js', 'mgmt-voix-data.js', 'mgmt-medias-data.js', 'mgmt-camps-data.js', 'mgmt-combat-data.js'];
+const DEJA = ['mgmt-humanite-data.js', 'mgmt-voix-data.js', 'mgmt-medias-data.js', 'mgmt-camps-data.js', 'mgmt-combat-data.js', 'mgmt-organisations-identites-data.js'];
 const AUTRES = fs.readdirSync(racine).filter(f => /.js$/.test(f) && !DEJA.includes(f) && /relus*:s*false/.test(fs.readFileSync(path.join(racine, f), 'utf8'))).sort();
 const FAMILLES = [
   ['Humanité (surnoms, métiers, milieux, moments de vie, rituels, rôles, trajectoires)', 'mgmt-humanite-data.js'],
@@ -19,6 +20,7 @@ const FAMILLES = [
   ['Médias', 'mgmt-medias-data.js'],
   ['Camps et salles', 'mgmt-camps-data.js'],
   ['Combat (commentaire, coins)', 'mgmt-combat-data.js'],
+  ['Fiches d’identité des huit organisations (Monde lot 2)', 'mgmt-organisations-identites-data.js'],
   ...AUTRES.map(f => ['Écrans et mécanismes — ' + f, f]),
 ];
 const win = newGameWindow({ runMain: false });
@@ -38,14 +40,42 @@ const lire = fichier => {
     for(const n of noms){ let v; try{ v=eval(n); }catch(e){ continue; } marche(v,n,0,false); }
     return sortie; })())`));
 };
+/* ==== [ANCRE: OUTIL_EXPORT_IDENTITES] — Monde lot 2 T6 : les fiches d'identité marquées relu:false, un bloc par organisation, dans l'ordre de MGMT_ORG_IDENTITES.
+ *  @returns {Array<{titre:string,textes:Array<{chemin:string,t:string,situation:string}>}>} */
+const lireIdentites = () => JSON.parse(win.eval(`JSON.stringify(Object.entries(MGMT_ORG_IDENTITES)
+  .filter(([, f]) => f.relu === false).map(([id, f]) => {
+    const a = f.adjointe, p = f.predecesseur, textes = [];
+    const ajout = (champ, situation, v) => { if (v) textes.push({ chemin: "MGMT_ORG_IDENTITES['" + id + "']." + champ, situation: situation, t: v }); };
+    ajout('reputation', 'réputation', f.reputation);
+    ajout('blessure', 'blessure de son histoire', f.blessure);
+    ajout('adjointe.parcours', 'adjointe ' + a.prenom + ' ' + a.nom + ', parcours', a.parcours);
+    ajout('adjointe.voix', 'adjointe ' + a.prenom + ' ' + a.nom + ', voix', a.voix);
+    if (a.exemples) a.exemples.forEach((x, i) => ajout('adjointe.exemples[' + i + ']', 'adjointe ' + a.prenom + ' ' + a.nom + ', exemple ' + (i + 1), x));
+    ajout('predecesseur.depart', 'prédécesseur ' + p.prenom + ' ' + p.nom + ', raison du départ', p.depart);
+    ajout('predecesseur.posteActuel', 'prédécesseur ' + p.prenom + ' ' + p.nom + ', poste actuel', p.posteActuel);
+    return { titre: (MGMT_ORGANISATIONS.find(o => o.id === id) || {}).nom + ' — ' + f.ville + ', ' + f.pays + ', depuis ' + f.annee, textes: textes };
+  }))`));
+const ligne = x => `- [ ] \`${x.chemin}\`${x.situation ? ' (' + x.situation + ')' : ''} : ${x.t.replace(/\n/g, ' ')}\n`;
 let md = `# Les textes à relire (corrections du 08/10/2026, lot 7.3)\n\nExport généré par \`tools/exporter-textes.js\`. **Aucun texte n'est modifié par l'outil.** Chaque ligne est un texte marqué \`relu:false\` : coche-la quand tu l'as relue, réécris-la dans le fichier de données, puis passe sa marque à \`relu:true\`. Les voix des combattants viennent d'un document (\`docs/LES-VOIX-DES-COMBATTANTS-v2.md\`) : on y corrige d'abord le document, puis on relance \`tools/extraire-voix.js\`.\n\n`;
 let total = 0;
 for (const [titre, fichier] of FAMILLES) {
-  const l = lire(fichier);
-  total += l.length;
-  md += `## ${titre} — ${l.length} textes\n\nFichier : \`${fichier}\`\n\n`;
-  for (const x of l) md += `- [ ] \`${x.chemin}\`${x.situation ? ' (' + x.situation + ')' : ''} : ${x.t.replace(/\n/g, ' ')}\n`;
-  md += '\n';
+  if (fichier === 'mgmt-organisations-identites-data.js') {
+    const blocs = lireIdentites();
+    const n = blocs.reduce((s, b) => s + b.textes.length, 0);
+    total += n;
+    md += `## ${titre} — ${n} textes\n\nFichier : \`${fichier}\`\n\n`;
+    for (const b of blocs) {
+      md += `### ${b.titre}\n\n`;
+      for (const x of b.textes) md += ligne(x);
+      md += '\n';
+    }
+  } else {
+    const l = lire(fichier);
+    total += l.length;
+    md += `## ${titre} — ${l.length} textes\n\nFichier : \`${fichier}\`\n\n`;
+    for (const x of l) md += ligne(x);
+    md += '\n';
+  }
 }
 md = md.replace('# Les textes à relire (corrections', `# Les textes à relire — ${total} textes (corrections`);
 fs.mkdirSync(path.dirname(out), { recursive: true });

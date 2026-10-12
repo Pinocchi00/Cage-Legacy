@@ -78,12 +78,35 @@ function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   for(const r of mgmtPublicReclame(m)){ if(m.card.main.length>=m.card.sizeMain) break; const a=mgmtFighterById(m,r.a), b=mgmtFighterById(m,r.b);
     if(a&&b&&a.div===b.div&&mgmtSelectable(m,a,null)&&mgmtSelectable(m,b,a.id)){ if(mgmtBookMain(m,a.id,b.id)) reclames++; } }
   const divs=[...new Set(mgmtCartRows(m).map(f=>f.div))];
+  /* Décision du 12/10/2026 : le prédécesseur fait tourner les combats de titre. Une catégorie qui n'a qu'un règne (ou aucun) est servie d'abord, chaque soirée,
+     et son titre est mis en jeu : le champion contre le mieux placé des autres. Aucune issue forcée : le moteur joue le combat. Opt-in : rotationTitres = la soirée à partir de laquelle il s'applique (la première moitié du passé n'est pas touchée). */
+  /* Deux catégories par soirée au plus (le plafond des titres d'une carte) (à tour de rôle) : les têtes d'affiche des autres catégories gardent leurs places, la caisse d'une petite organisation aussi. */
+  const manque=(Number.isSafeInteger(cfg.rotationTitres)&&k>=cfg.rotationTitres)?divs.filter(d=>mgmtCeintureLignee(m,d).reigns.length<2):[];
+  const besoin=new Set(manque.length?[manque[k%manque.length],manque[(k+1)%manque.length]]:[]);
+  const surCarte=d=>m.card.main.some(x=>{ const f=mgmtFighterById(m,x.a); return f&&f.div===d; });
   let essais=0;
   while(m.card.main.length<m.card.sizeMain&&essais++<60){
-    const div=divs[(k+m.card.main.length+essais)%divs.length];
+    const prio=[...besoin].find(d=>!surCarte(d)&&mgmtCartRows(m).filter(f=>f.div===d&&mgmtSelectable(m,f,null)).length>=2);
+    const div=prio||divs[(k+m.card.main.length+essais)%divs.length];
     const rows=mgmtCartRows(m).filter(f=>f.div===div&&mgmtSelectable(m,f,null)).sort((x,y)=>mgmtStar(y)-mgmtStar(x));
-    const a=rows[0], b=a&&rows.find(x=>x.id!==a.id&&mgmtSelectable(m,x,a.id)); if(a&&b){ if(mgmtBookMain(m,a.id,b.id)) tetes++; } }
-  m.card.main.forEach((cf,i)=>{ if(cad>0&&k%cad===0&&mgmtCanTitle(m,cf)) mgmtSetTitle(m,i,true); });
+    /* Le champion d'une catégorie délaissée peut être au dernier palier d'attente : il n'est plus « sélectionnable » seul, mais accepte un adversaire moins connu
+       que lui (mgmtContratIndispo). On le prend quand même, avec le mieux placé de ceux qu'il accepte. */
+    const champ=prio&&mgmtFighterById(m,mgmtSplitTitle(m,div).id);
+    const cOk=champ&&!champ.libre&&!mgmtIsRetired(champ)&&!mgmtEngaged(m,champ);
+    const a=cOk?champ:rows[0];
+    let b=null;
+    if(a&&prio){
+      /* Le challenger est celui qui a le plus de chances : la meilleure valeur de combat (lue, sans tirage) parmi ceux que le champion accepte. Le combat, lui, est joué. */
+      let mieux=-1;
+      for(const x of rows){ if(x.id===a.id||!mgmtSelectable(m,x,a.id)||!mgmtAvailable(m,a,x)) continue;
+        const v=mgmtFightReady(x,m.cycle).overall; if(v>mieux){ mieux=v; b=x; } }
+    }else b=a&&rows.find(x=>x.id!==a.id&&mgmtSelectable(m,x,a.id));
+    if(a&&b){ if(mgmtBookMain(m,a.id,b.id)) tetes++; else if(prio) besoin.delete(prio); } else if(prio) besoin.delete(prio); }
+  const ordreTitre=m.card.main.map((cf,i)=>i).sort((i,j)=>{
+    const di=(mgmtFighterById(m,m.card.main[i].a)||{}).div, dj=(mgmtFighterById(m,m.card.main[j].a)||{}).div;
+    return (besoin.has(dj)?1:0)-(besoin.has(di)?1:0)||i-j; });
+  ordreTitre.forEach(i=>{ const cf=m.card.main[i], d=(mgmtFighterById(m,cf.a)||{}).div;
+    if(((cad>0&&k%cad===0)||besoin.has(d))&&mgmtCanTitle(m,cf)) mgmtSetTitle(m,i,true); });
   const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(!bulk) mgmtOfferBulk(m,true);
   const bulk2=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk2) mgmtDecide(m,bulk2.id,'validate');
   m.pile.forEach(x=>{x.status='closed';});

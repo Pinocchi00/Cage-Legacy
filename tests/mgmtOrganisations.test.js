@@ -42,7 +42,9 @@ test('Organisations — l’écran : huit organisations, la choisie marquée, «
     return {cartes,t,avenir:avenir.textContent,avenirDisabled:avenir.getAttribute('aria-disabled'),avant,apres,bouton:document.querySelectorAll('.mf-bouton.jaune').length,slot:MGMT_NOUVELLE.slot};`);
   assert.equal(r.cartes.length,8); assert.equal(r.cartes.filter(c=>c.choisie).length,1); assert.equal(r.cartes[0].nom,'Split'); assert.ok(r.cartes[0].choisie);
   assert.ok(r.cartes[0].texte.includes('Une caisse saine')&&r.cartes[0].texte.includes('Encore peu connue'));
-  assert.ok(r.t.includes('Le jeu crée tout le reste pour cette partie : les combattants, les camps, les salles, la presse, ton assistante.'));
+  /* Monde lot 2 T5 : planche validée par Anthony le 10/10/2026, corrigée le même jour — plus aucun texte sous 22 px,
+     « six ans d’histoire » entre dans l’annonce, « ton assistante » en sort. */
+  assert.ok(r.t.includes('Le jeu crée tout le reste pour cette partie : six ans d’histoire, les combattants, les camps, les salles, la presse.'));
   assert.ok(r.t.includes('Emplacement 3 · 8 organisations')&&r.t.includes('Nouvelle partie · choisis ton organisation'));
   assert.ok(r.avenir.includes('Créer ton organisation')&&r.avenir.includes('À venir')); assert.equal(r.avenirDisabled,'true');
   assert.equal(r.apres,r.avant,'« Créer ton organisation » n’ouvre rien'); assert.equal(r.bouton,1,'un seul bouton jaune');

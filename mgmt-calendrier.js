@@ -114,7 +114,7 @@ function scr_mgmt_calendrier(){
   const blocages=actif&&encours&&!joues&&s.jour!==null&&!pret?mgmtAgendaBlocages(m):[];
   let centre;
   if(F.pose&&actif) centre=mgmtCalendrierPoseHtml(m);
-  else if(s.jour===null) centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">AUCUNE SOIRÉE POSÉE</div><div class="mf-cal-nom">${esc(nom.toUpperCase())}</div></div></div>`
+  else if(s.jour===null) centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">AUCUNE SOIRÉE POSÉE</div><div class="mf-cal-nom">${mfNomSoireeHtml(nom,84,'cal')}</div></div></div>`
     +`<div class="mf-cal-corps"><div class="mf-cal-texte">Pose une soirée : une date et une taille. Le temps avance jusqu’à elle.</div>`
     +`<div class="mf-cal-pied"><span></span>${actif?mfBouton('Poser une soirée',{touche:'P',jaune:true,onclick:'CL.mgmtCalendrierPoseOuvrir()'}):''}</div></div></div>`;
   else{
@@ -124,7 +124,7 @@ function scr_mgmt_calendrier(){
         :`<div class="mf-cal-texte">Rien n’est encore posé pour cette soirée.</div>`);
     const boutons=(encours?mfBouton('Ouvrir la carte',{touche:actif&&pret?'':'Entrée',jaune:!pret,onclick:"CL.go('mgmt_carte')"}):'')
       +(encours&&actif&&pret?mfBouton('Jouer la soirée',{touche:'Entrée',jaune:true,onclick:'CL.mgmtCalendrierJouer()'}):'');
-    centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">${esc(d.jour)} ${esc(d.mois)} · ${esc(mgmtCalendrierLieu(m,n))}${s.taille?' · '+esc(mgmtCalendrierTailleTexte(s.taille)):''}</div><div class="mf-cal-nom">${esc(nom.toUpperCase())}</div></div>`
+    centre=`<div class="mf-cal-centre"><div class="mf-cal-rouge"><div><div class="mf-cal-quand">${esc(d.jour)} ${esc(d.mois)} · ${esc(mgmtCalendrierLieu(m,n))}${s.taille?' · '+esc(mgmtCalendrierTailleTexte(s.taille)):''}</div><div class="mf-cal-nom">${mfNomSoireeHtml(nom,84,'cal')}</div></div>`
       +`<div class="mf-cal-gros">${n}<span>${joues?'JOUÉE':(jours<=0?'CE SOIR':'DANS '+jours+' JOURS')}</span></div></div>`
       +`<div class="mf-cal-corps"><div class="mf-cal-lib">${joues?'Le combat principal':'Où en est la soirée'}</div>${etat}`
       +`<div class="mf-cal-pied">${encours&&c.manque&&!blocages.length?`<span class="mf-cal-manque">Il manque ${c.manque} combat${c.manque>1?'s':''}</span>`:'<span></span>'}<div class="mf-car-boutons">${boutons}</div></div></div></div>`;

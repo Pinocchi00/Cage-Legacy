@@ -28,12 +28,15 @@ const json = win => win.eval('JSON.stringify(G.mgmt)');
 
 /* ===================== Test 1 : la création sans passé n'a pas bougé (point A) ===================== */
 test('Monde lot 1 T3 — une partie créée sans le passé est identique à celle d\'avant la tranche (empreinte)', () => {
-  /* Empreintes relevées AVANT la tranche (commit 6417e12), la version de sauvegarde mise à 0 : seul le numéro de version a bougé. */
+  /* Empreintes relevées AVANT la tranche (commit 6417e12), la version de sauvegarde mise à 0 : seul le numéro de version a bougé.
+     Décision du lot 2 T2 : le tirage des pays et des noms (mgmtOrgPaysPoids, mgmtPaysTire, MGMT_NOMS_AJOUTS) change les empreintes
+     de création ; recalculées le 12/10/2026. La vraie propriété reste : même graine → même résultat (test 2), et sans option
+     de passé, aucun effet de passé (mgmtNewRoster(m,{}) = mgmtNewRoster(m), ci-dessous). */
   const AVANT = {
-    'split|20261008': '40fc9394194891c3', 'split|20261009': 'fa08ee1d99c34b63',
-    'ultimate-rim|20261008': '6d1f9a3a1bc8fbdf', 'ultimate-rim|20261009': '213b7995879145bb',
-    'fighting-pacific-championship|20261008': '03a485ec495f9983', 'fighting-pacific-championship|20261009': '5f70dcebd891c1a2',
-    jouee3: 'ea5f1db9f12c6849',
+    'split|20261008': 'b21af921ac61f66f', 'split|20261009': '822ff68c20ecc9bf',
+    'ultimate-rim|20261008': 'b5e4a39517f83a4e', 'ultimate-rim|20261009': 'aff68002e268ee1a',
+    'fighting-pacific-championship|20261008': 'a48641fbc7bd0e3e', 'fighting-pacific-championship|20261009': 'ddc0dcc1ef8f5b79',
+    jouee3: '76424b29907c76a0',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -199,8 +202,8 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
   win.eval('CL.mgmtNouvelleLancer()');
   const html0 = win.document.getElementById('app').innerHTML;
   assert.ok(html0.includes('mf-genese-barre'), 'la barre est là dès le lancement');
-  assert.ok(html0.includes('Création de la partie'));
-  assert.ok(/SPLIT · 20\d\d/i.test(html0), 'le nom de l\'organisation et l\'année');
+  assert.ok(html0.includes('Six années à vivre'));
+  assert.ok(/SPLIT/i.test(html0) && /Année 20\d\d/.test(html0), 'le nom de l\'organisation et l\'année');
   assert.ok(!html0.includes('mf-voile') && !html0.includes('mf-dialogue'), 'aucune fenêtre par-dessus');
   win.eval('CL.mgmtNouvelleChoisir(3); CL.mgmtNouvelleDeplacer(1,0); CL.mgmtNouvelleRetour(); CL.mgmtNouvelleLancer();');
   assert.equal(win.eval('MGMT_NOUVELLE.i'), iAvant, 'les touches sont inactives pendant la génération');
@@ -212,9 +215,12 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
     const h = win.document.getElementById('app').innerHTML;
     const m = /aria-valuenow="(\d+)"/.exec(h);
     if (m) vus.add(+m[1]);
-    if (win.eval('G.screen') !== 'mgmt_nouvelle') break;
+    if (win.eval('!!(MGMT_NOUVELLE.gen&&MGMT_NOUVELLE.gen.pret)')) break;
   }
   assert.ok(vus.has(0) || vus.has(1), 'la barre a été vue en route : ' + [...vus]);
+  /* Décision d'Anthony du 12/10/2026 : la partie attend le bouton « Entrer », elle ne s'ouvre plus toute seule. */
+  assert.equal(win.eval('G.mgmt'), null, 'rien ne s\'ouvre tout seul');
+  win.eval('CL.mgmtNouvelleEntrer()');
   assert.ok(win.eval('G.screen') !== 'mgmt_nouvelle', 'le joueur arrive sur l\'écran habituel : ' + win.eval('G.screen'));
   assert.equal(win.eval('G.mgmt.passe.soirees'), 2);
   assert.equal(win.eval('G.mgmt.passe.enCours'), undefined);
@@ -226,7 +232,9 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
 test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', () => {
   /* Empreintes de l'état complet (JSON de la partie, version à 0) après six soirées du prédécesseur, relevées AVANT l'optimisation
      (mgmtPickBulkPair, mgmtEligiblePairs et mgmtCartRows lisent une fois par combattant ce qu'ils lisaient une fois par paire). */
-  const AVANT = { 20261008: 'ea295d5b65750468', 20261009: '7ce807a38e3e79c9' };
+  /* Décision du lot 2 T2 : empreintes recalculées le 12/10/2026 (le tirage des pays et des noms décale le flux du RNG de création) ;
+     la propriété gardée est inchangée : la version optimisée est déterministe et le calcul ne dépend d'aucun état annexe. */
+  const AVANT = { 20261008: '27c5eb0e634b437b', 20261009: '68e82338c8690944' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });
