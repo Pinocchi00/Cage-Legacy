@@ -187,7 +187,7 @@ function mgmtAgendaBlocages(m){
     out.push({k:'prelims',texte:`Il manque ${sp-prel} préliminaire${pl(sp-prel)}.`,label:sm1?'Trouver un remplaçant':'Ouvrir les préliminaires',onclick:sm1?'CL.mgmtPrelimsRemplacer()':"CL.go('mgmt_prelims')"});
   }
   const n=mgmtAffairesBloquantes(m);
-  if(n>0) out.push({k:'affaires',texte:`${n} affaire${pl(n)} ou demande${pl(n)} à régler.`,label:'Les affaires',onclick:"CL.go('mgmt_bureau')"});
+  if(n>0) out.push({k:'affaires',texte:`${n} affaire${pl(n)} ou demande${pl(n)} à régler.`,label:'Les affaires',onclick:"CL.go('mgmt_accueil')"});
   return out;
 }
 

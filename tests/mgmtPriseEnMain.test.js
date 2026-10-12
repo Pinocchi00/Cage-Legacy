@@ -10,7 +10,7 @@ test('T1 — partie neuve : l’arrivée passe avant la carte ; partie reprise :
   const w=neuve();
   const r=res(w,`const premier=G.screen, texte=document.getElementById('app').textContent; CL.mgmtArriveeFin(); const apres=G.screen;
     G.mgmt=null; CL.mgmtEnter(1); return {premier,apres,reprise:G.screen,titre:texte.includes('matchmaker de Split'.toUpperCase())||texte.toUpperCase().includes('MATCHMAKER DE SPLIT')};`);
-  assert.deepEqual(r,{premier:'mgmt_arrivee',apres:'mgmt_carte',reprise:'mgmt_carte',titre:true});
+  assert.deepEqual(r,{premier:'mgmt_arrivee',apres:'mgmt_accueil',reprise:'mgmt_accueil',titre:true});   /* décision du 12/10/2026 : l’Accueil est la première section (lot 7) */
 });
 
 test('T2 — les moments de Leïla sortent dans l’ordre de la partie, une seule fois chacun', () => {

@@ -91,7 +91,7 @@ test('Emplacements — l’accueil : Management ouvre « Choisis une partie », 
     CL.mgmtLeave(); document.querySelector('.title-management').click();
     return {reprendre:titre.includes('CL.mgmtEnter(mgmtSlotDernier()||1)'),etat,repris,ecran:G.screen,curseur:MGMT_PARTIES.curseur,
       texte:document.getElementById('app').textContent};`);
-  assert.ok(r.reprendre); assert.equal(r.etat,30); assert.deepEqual(r.repris,['mgmt_carte',3,30]);
+  assert.ok(r.reprendre); assert.equal(r.etat,30); assert.deepEqual(r.repris,['mgmt_accueil',3,30]);
   assert.equal(r.ecran,'mgmt_parties'); assert.equal(r.curseur,3,'le curseur part de la dernière partie jouée');
   assert.ok(r.texte.includes('Choisis une partie')&&r.texte.includes('3 emplacements'));
 });

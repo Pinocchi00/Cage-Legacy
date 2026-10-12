@@ -46,9 +46,11 @@ function mfLogoHtml(){
 
 /* ---- Les sections de la barre --------------------------------------------- */
 
-/** Les onze sections, dans l'ordre de la barre. `ecran` : l'écran ancien qui la porte tant que
+/** Les douze sections, dans l'ordre de la barre (Accueil en tête depuis le lot 7). `ecran` : l'écran ancien qui la porte tant que
  *  son remplaçant n'est pas livré ; null : la section reste grisée. */
 const MF_SECTIONS=[
+  /* Monde lot 7 (décision du 12/10/2026) : l'Accueil est la première section et l'écran d'arrivée. */
+  {id:'accueil',libelle:'Accueil',ecran:'mgmt_accueil'},
   {id:'carte',libelle:'Carte',ecran:'mgmt_carte'},
   {id:'preliminaires',libelle:'Préliminaires',ecran:'mgmt_prelims'},
   {id:'effectif',libelle:'Effectif',ecran:'mgmt_effectif'},
@@ -62,7 +64,7 @@ const MF_SECTIONS=[
   {id:'finances',libelle:'Finances',ecran:'mgmt_finances'},
 ];
 /** L'écran ouvert → la section qu'il éclaire dans la barre. */
-const MF_ECRAN_SECTION={mgmt_carte:'carte',mgmt_bureau:null,mgmt_effectif:'effectif',mgmt_classements:'classements',
+const MF_ECRAN_SECTION={mgmt_accueil:'accueil',mgmt_carte:'carte',mgmt_bureau:null,mgmt_effectif:'effectif',mgmt_classements:'classements',
   mgmt_recrutement:'contrats',mgmt_organisation:'finances',mgmt_lendemain:'resultats',mgmt_calendrier:'calendrier',mgmt_prelims:'preliminaires',mgmt_finances:'finances',mgmt_contrats:'contrats',mgmt_ceintures:'ceintures',mgmt_camps:'camps',mgmt_presse:'presse',mgmt_resultats:'resultats'};
 
 /** La section que l'écran courant éclaire ; une fiche éclaire celle d'où on l'a ouverte. */
@@ -80,7 +82,7 @@ function mfAttentes(m){
   return out;
 }
 
-/** La barre. mode 'jeu' : les onze sections ; 'demarrage' : le logo seul, avant d'être dans une partie.
+/** La barre. mode 'jeu' : les douze sections ; 'demarrage' : le logo seul, avant d'être dans une partie.
  *  `grise` : toute la barre est grisée (le soir). */
 function mfBarreHtml({mode='jeu',courant=null,grise=false,m=null}={}){
   const attend=mfAttentes(m);
@@ -338,7 +340,7 @@ function mfAncien(html,screen){
 
 /* ---- La confirmation « Retour au menu principal » -------------------------- */
 
-let MF_CONFIRMATION={retour:'mgmt_bureau'};
+let MF_CONFIRMATION={retour:'mgmt_accueil'};
 function scr_mgmt_confirmation(){
   const dialogue=`<div class="mf-dialogue" role="dialog" aria-label="Retour au menu principal">`
     +mfPanneau(`<div><div class="mf-dialogue-titre">RETOUR AU MENU PRINCIPAL ?</div><div class="mf-dialogue-trait"></div></div>`
@@ -371,8 +373,8 @@ SCREENS.mgmt_confirmation=scr_mgmt_confirmation;
 SCREENS.title=scr_title;
 Object.assign(CL,{
   /** Ouvre la confirmation depuis l'écran courant. */
-  mgmtMenuPrincipal(){ MF_CONFIRMATION={retour:(G&&G.screen&&G.screen!=='mgmt_confirmation')?G.screen:'mgmt_bureau'}; CL.go('mgmt_confirmation'); },
-  mgmtMenuPrincipalAnnuler(){ CL.go(MF_CONFIRMATION.retour||'mgmt_bureau'); },
+  mgmtMenuPrincipal(){ MF_CONFIRMATION={retour:(G&&G.screen&&G.screen!=='mgmt_confirmation')?G.screen:'mgmt_accueil'}; CL.go('mgmt_confirmation'); },
+  mgmtMenuPrincipalAnnuler(){ CL.go(MF_CONFIRMATION.retour||'mgmt_accueil'); },
   mgmtMenuPrincipalConfirmer(){ if(typeof saveMgmt==='function') saveMgmt(); CL.mgmtLeave(); },
 });
 keysRegister('mgmt_confirmation',{
