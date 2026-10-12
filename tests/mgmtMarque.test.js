@@ -80,6 +80,9 @@ test('Marque — après une soirée, exactement les combattants du carton princi
 
 test('Marque — la marque est dessinée dans chaque liste où le nom figure', () => {
   const win=neuve(7);
+  /* T6 : le budget est testé dans mgmtMarqueBudget.test.js — ici on vérifie
+     le dessin, toutes les places confondues. */
+  win.eval('mgmtMarqueBudget=function(){return 100000;}');
   win.eval(`const m=G.mgmt; mgmtVisitesInit(m); for(const o of m.roster){ mgmtAddFact(m,{c:m.cycle,k:'injury',a:o.id}); }`);
   /* Chaque écran rendu, sous la forme {ecran, préparation, sélecteur des marques}. */
   const ecrans=[

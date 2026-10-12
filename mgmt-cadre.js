@@ -139,7 +139,9 @@ function mfMarque(code){
    Un combattant absent (id invalide) renvoie '' sans lever. ==== */
 /** La marque d'un nom : un octogone jaune de 18 px, ou '' si rien n'est arrivé. @returns {string} */
 function mfMarqueNom(m,id){
-  if(!mgmtMarque(m,id)) return '';
+  /* T6 : au plus le budget du conteur de marques allumées en même temps ; un
+     combattant éteint garde son événement lisible sur la fiche (mgmtMarque). */
+  if(!mgmtMarqueAllumee(m,id)) return '';
   return `<span class="mf-oct mf-oct-nom" role="img" aria-label="${esc(MGMT_MARQUE_LIBELLE.texte)}" title="${esc(MGMT_MARQUE_LIBELLE.texte)}"></span>`;
 }
 /** La voix : une seule pièce pour tout ce qui parle (commentaire, coins, assistante). */
