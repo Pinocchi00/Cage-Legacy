@@ -65,6 +65,26 @@ test('Budget — huit combattants marqués, cinq allumés ; les trois autres att
   }
 });
 
+test('Budget — un combat ancien déjà lu n\'est plus un événement en attente : il ne maintient rien d\'allumé', () => {
+  const win=neuve(7);
+  win.eval(`const m=G.mgmt; mgmtVisitesInit(m); mgmtMarqueBudget=function(){return 1;};
+    const S=m.roster[0].id, V=m.roster[1].id, U=m.roster[2].id;
+    m.hist.push({c:10,slot:'main',a:{id:S},b:{id:V},winner:'b'});
+    /* S et V lisent le combat (fiche ouverte) : sa place de passe est franchie
+       pour chacun — visites = [longueur courante des faits, des combats]. */
+    mgmtVuEnregistre(m,S); mgmtVuEnregistre(m,V);
+    /* Puis un fait plus ancien (c:5) arrive à U, inconnu. */
+    m.facts.push({c:5,k:'injury',a:U});
+    G.IDS2={S,V,U};`);
+  const {S,V,U}=JSON.parse(win.eval('JSON.stringify(G.IDS2)'));
+  assert.deepEqual(res(win,`return mgmtMarquesAllumees(G.mgmt);`),[U],
+    'le combat lu (c:10) n\'écrase pas le fait (c:5) : U seul est allumé');
+  const r=res(win,`const m=G.mgmt; return [mgmtMarque(m,'${S}'),mgmtMarque(m,'${V}'),mgmtEvenementsDepuis(m,'${S}').length];`);
+  assert.equal(r[2],0,'S n\'a plus rien en attente (la passe suit la porte de mgmtEvenementsDepuis)');
+  assert.equal(r[0],false,'S n\'est plus marqué (mgmtMarque brut)');
+  assert.equal(r[1],false,'V non plus : les deux ont lu le combat');
+});
+
 test('Budget — le cercle passe avant le suivi, le suivi avant l\'inconnu, même quand l\'inconnu est plus récent', () => {
   const win=neuve(7);
   win.eval(`const m=G.mgmt; mgmtVisitesInit(m); mgmtMarqueBudget=function(){return 1;};

@@ -362,8 +362,11 @@ function mgmtMarquesAllumees(m){
   for(let i=0;i<hist.length;i++){
     const t=hist[i];
     if(!t||t.slot!=='main'||!t.a||!t.b) continue;
-    pose(t.a.id,t.c,false);
-    pose(t.b.id,t.c,false);
+    /* Le combat ne compte que pour qui ne l'a pas encore vu : chacun dans
+       sa passe (la même porte que mgmtEvenementsDepuis — la trace est
+       partagée, la visite ne l'est pas), fiche §3. */
+    if(i>=mgmtVisiteDe(m,t.a.id)[1]) pose(t.a.id,t.c,false);
+    if(t.b.id!==t.a.id&&i>=mgmtVisiteDe(m,t.b.id)[1]) pose(t.b.id,t.c,false);
   }
   const B=mgmtMarqueBudget(m);
   if(B<=0||frais.size===0) return [];
