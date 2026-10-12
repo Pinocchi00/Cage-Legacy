@@ -64,6 +64,19 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-barre-bas .mf-barre-item{height:60px}
 .mf-oct{display:inline-block;background:var(--mf-jaune);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 .mf-barre-item .mf-oct{width:18px;height:18px}
+/* ==== [ANCRE: MONDE_LOT8_T1_MARQUE_NOM_CSS] — Monde lot 8 T1 : la marque à côté du nom,
+   la même forme que la barre des sections. Elle tient dans sa cellule (L4 :
+   rien ne bouge, rien ne recouvre) — 18 × 18 px, flex:none, jamais
+   position:absolute. Sur une ligne choisie (fond blanc cassé), le jaune y
+   serait illisible : la marque passe en encre #0D0B0B, même forme, même
+   taille (décision d'Anthony, question 1 de la fiche). Les listes flex avec
+   un gap collent la marque au nom (margin-left:0). ==== */
+.mf-oct-nom{width:18px;height:18px;flex:none;margin-left:10px;vertical-align:middle}
+.mf-oct-nom{background:var(--mf-jaune)}
+.mf-ligne.choisie .mf-oct-nom,.mf-eff-ligne.choisie .mf-oct-nom,.mf-ct-ligne.choisie .mf-oct-nom,
+.mf-su-ligne.sel .mf-oct-nom,.mf-su-champ.sel .mf-oct-nom,.mf-su-rang.sel .mf-oct-nom,
+.mf-car-slot.choisi .mf-oct-nom,.mf-pre-slot.choisi .mf-oct-nom,.mf-car-adv.choisi .mf-oct-nom{background:#0D0B0B}
+.mf-eff-nom .mf-oct-nom,.mf-su-l-nom .mf-oct-nom,.mf-su-ca-mn .mf-oct-nom,.mf-su-r-nom div .mf-oct-nom,.mf-car-slot-n .mf-oct-nom{margin-left:0;align-self:center}
 
 /* Le contenu et la rangée de touches. */
 .mf-contenu{position:absolute;left:300px;top:128px;width:1564px;height:856px}

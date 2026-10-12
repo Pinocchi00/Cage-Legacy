@@ -25,6 +25,8 @@ const A = partiePassee(GRAINE);
 const B = partiePassee(GRAINE);
 const C = partiePassee(GRAINE + 1);
 const json = win => win.eval('JSON.stringify(G.mgmt)');
+/* Renumérotation de version à la fusion du lot 8 (12/10/2026) : la partie neuve porte maintenant `visites:{}` (monde lot 8 T1) ; l'empreinte est calculée sans ce champ, les empreintes d'avant restent donc valables. */
+const sansVisites = j => { const o = JSON.parse(j); delete o.visites; return JSON.stringify(o); };
 
 /* ===================== Test 1 : la création sans passé n'a pas bougé (point A) ===================== */
 test('Monde lot 1 T3 — une partie créée sans le passé est identique à celle d\'avant la tranche (empreinte)', () => {
@@ -44,11 +46,11 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
     if (cle === 'jouee3') continue;
     const [org, graine] = cle.split('|');
     const j = win.eval(`(function(){ setSeed(${graine}); const m=mgmtDefault(${JSON.stringify(org)}); m.graine=mgmtGraineNeuve(); mgmtNewRoster(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; mgmtAgendaInit(m); m.v=0; return JSON.stringify(m);})()`);
-    assert.equal(sha(j), AVANT[cle], 'création sans passé inchangée : ' + cle);
+    assert.equal(sha(sansVisites(j)), AVANT[cle], 'création sans passé inchangée : ' + cle);
   }
   win.eval(`setSeed(777); (function(){const m=mgmtDefault('split'); m.graine=mgmtGraineNeuve(); mgmtNewRoster(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; mgmtAgendaInit(m);})()`);
   jouerSoirees(win, 3);
-  assert.equal(sha(win.eval('(function(){const m=G.mgmt; m.v=0; return JSON.stringify(m);})()')), AVANT.jouee3, 'trois soirées de l\'aide de test : inchangées');
+  assert.equal(sha(sansVisites(win.eval('(function(){const m=G.mgmt; m.v=0; return JSON.stringify(m);})()'))), AVANT.jouee3, 'trois soirées de l\'aide de test : inchangées');
   /* Une option vide ou absente ne change rien non plus. */
   const sans = win.eval(`(function(){ setSeed(5); const m=mgmtDefault('split'); mgmtNewRoster(m); return JSON.stringify(m.roster);})()`);
   const vide = win.eval(`(function(){ setSeed(5); const m=mgmtDefault('split'); mgmtNewRoster(m,{}); return JSON.stringify(m.roster);})()`);
@@ -240,6 +242,6 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
     const win = newGameWindow({ runMain: true });
     const j = win.eval(`(function(){ setSeed(${graine}); const m=mgmtDefault('split'); m.graine=mgmtGraineNeuve(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; mgmtAgendaInit(m);
       for(let k=0;k<6;k++) mgmtPredecesseurSoiree(m,k); m.v=0; return JSON.stringify(m); })()`);
-    assert.equal(sha(j), AVANT[graine], 'six soirées, graine ' + graine + ' : état identique à celui d\'avant l\'optimisation');
+    assert.equal(sha(sansVisites(j)), AVANT[graine], 'six soirées, graine ' + graine + ' : état identique à celui d\'avant l\'optimisation');
   }
 });

@@ -25,7 +25,8 @@ test('Monde lot 1 T7 — la sauvegarde 14 d\'avant le lot est bien une 14, sans 
 test('Monde lot 1 T7 — une sauvegarde d\'avant ce lot se charge sans rien perdre, se valide, et est écrite telle quelle', () => {
   const r = ev(`const brut=JSON.parse(window.__texte); const m=mgmtParseAndValidate(window.__texte);
     const attendu=JSON.stringify(Object.assign({},brut,{v:MGMT_SAVE_VERSION}));
-    return {charge:!!m,v:m&&m.v,identique:!!m&&JSON.stringify(m)===attendu,valide:!!m&&validateMgmt(m),sansPasse:!!m&&m.passe===undefined,
+    return {charge:!!m,v:m&&m.v,identique:!!m&&(function(){const c=JSON.parse(JSON.stringify(m)); const vis=c.visites; delete c.visites; return JSON.stringify(c)===attendu&&mgmtVisitesValide(vis);})(), /* fusion du lot 8, 12/10/2026 : v16 ajoute la table des visites, seule différence admise */
+     valide:!!m&&validateMgmt(m),sansPasse:!!m&&m.passe===undefined,
       ecriture:!!m&&mgmtSerialiser(m)===JSON.stringify(m),soireesJoueur:m?mgmtSoireesJoueur(m):null,hist:m?m.hist.length:0,tousLourds:m?m.hist.every(t=>t.p===undefined):false};`);
   assert.equal(r.charge, true); assert.equal(r.v, win.eval('MGMT_SAVE_VERSION')); assert.equal(r.identique, true, 'seule la version change');
   assert.equal(r.valide, true); assert.equal(r.sansPasse, true); assert.equal(r.ecriture, true, 'aucune archive : la partie s\'écrit comme avant');

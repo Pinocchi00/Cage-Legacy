@@ -65,7 +65,7 @@ function mgmtContratsLigneHtml(m,x,i,choisi){
     ?`<div class="mf-eff-bilan">${esc(mgmtRangAffichable(m,f)||'—')}</div>${mgmtContratsPips(f)}<div class="mf-ct-reste">${f.ct?esc(mgmtContratRestants(f))+' COMBAT'+(mgmtContratRestants(f)>1?'S':''):'—'}</div>`
     :`<div class="mf-eff-bilan">${esc(Math.floor(f.age))}</div><div class="mf-eff-bilan">${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</div><div class="mf-ct-reste">${esc(x.ancien?'DÉJÀ':(mgmtContratsVu(m,f)?'DÉJÀ':'JAMAIS'))}</div>`;
   return `<button type="button" class="mf-ct-ligne${choisi?' choisie':''}" onclick="CL.mgmtContratsVa(${i})">`
-    +`<div class="mf-eff-nom"><b>${esc(nom)}</b><span>${esc(prenom)}</span></div><div class="mf-ct-div">${esc(mgmtCarteCourt(f.div))}</div>${milieu}`
+    +`<div class="mf-eff-nom"><b>${esc(nom)}</b><span>${esc(prenom)}</span>${mfMarqueNom(m,f.id)}</div><div class="mf-ct-div">${esc(mgmtCarteCourt(f.div))}</div>${milieu}`
     +`<div class="mf-eff-sit ${s.classe}">${esc(s.texte)}</div></button>`;
 }
 /** Le joueur l'a-t-il déjà vu combattre ? Seulement s'il a combattu pour lui. */

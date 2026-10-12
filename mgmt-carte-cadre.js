@@ -96,8 +96,8 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
     /* Lot 11 (D5) : un champion ne combat que pour sa ceinture — elle est en jeu d'office, le joueur ne la retire pas. */
     const champ=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set(), force=titre&&(champ.has(fight.a)||champ.has(fight.b));
     return `<div class="mf-car-slot confirme${cur?' choisi':''}"><div class="mf-car-num" onclick="CL.mgmtCarteModifie(${i})">${i+1}</div><div class="mf-car-slot-c">`
-      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Le champion ne combat que pour sa ceinture">TITRE EN JEU</button>`:((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:'')}</div>`
-      +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${i})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b><span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b></div></div>`
+      +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Le champion ne combat que pour sa ceinture">TITRE EN JEU</button>`      :((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:'')}</div>`
+      +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${i})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b>${mfMarqueNom(m,fb&&fb.id)}</div></div>`
       +`<div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
   }
   const pre=etatMain.pre===i;
@@ -105,7 +105,7 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
   if(pre&&pa){
     return `<div class="mf-car-slot apreparer choisi"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">`
       +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(pa.div))}</em></div>`
-      +`<div class="mf-car-slot-n"><b>${esc(mfNet(pa.last||pa.name))}</b><span>contre</span><b>${esc(pb?mfNet(pb.last||pb.name):'?')}</b></div></div>`
+      +`<div class="mf-car-slot-n"><b>${esc(mfNet(pa.last||pa.name))}</b>${mfMarqueNom(m,pa&&pa.id)}<span>contre</span><b>${esc(pb?mfNet(pb.last||pb.name):'?')}</b>${mfMarqueNom(m,pb&&pb.id)}</div></div>`
       +`<div class="mf-car-slot-s"><div class="mf-eff-q" aria-hidden="true">?</div></div></div>`;
   }
   return `<div class="mf-car-slot vide${cur?' choisi':''}"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">`
@@ -138,7 +138,7 @@ function mgmtCarteAdvLigne(m,f,i,choisi,homo){
   const raison=mgmtCarteNote(m,f,MGMT_CART.pick);
   const rg=mgmtRangAffichable(m,f);
   return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${esc(f.id)}')">`
-    +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}</b>`
+    +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}${mfMarqueNom(m,f.id)}</b>`
     +`<i>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</i></span><span class="mf-car-adv-s">${esc(raison||' ')}</span></span></button>`;
 }
 

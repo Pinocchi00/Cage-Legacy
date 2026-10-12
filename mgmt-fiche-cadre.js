@@ -57,7 +57,7 @@ function scr_mgmt_fiche_cadre(){
   /* Reprise de fidélité du 07/10/2026 : la fiche est celle des planches (voir mgmt-fiche-planche.js) ; son ancien corps, en texte, n'existe plus. */
   const onglets=MGMT_FICHE_ONGLETS.map(o=>mgmtFicheOngletGrise(o)
     ?`<span class="mf-onglet mf-fiche-grise" aria-disabled="true">${esc(o.libelle.toUpperCase())}</span>`
-    :`<button type="button" class="mf-onglet${o.id===onglet?' ouvert':''}" aria-pressed="${o.id===onglet}" onclick="CL.mgmtFicheOnglet('${o.id}')">${esc(o.libelle.toUpperCase())}</button>`).join('');
+    :`${o.id==='ondit'&&typeof mfMarqueOnglet==='function'?mfMarqueOnglet(f):''}`+`<button type="button" class="mf-onglet${o.id===onglet?' ouvert':''}" aria-pressed="${o.id===onglet}" onclick="CL.mgmtFicheOnglet('${o.id}')">${esc(o.libelle.toUpperCase())}</button>`).join('');
   let corps;
   try{
     corps=onglet==='style'?mgmtFicheStyleHtml(m,f):onglet==='combats'?mgmtFicheCombatsHtml(m,f,line):onglet==='contrat'?mgmtFicheContratPlanche(m,f):onglet==='ondit'?mgmtFicheOnEnDitHtml(m,f):mgmtFicheApercuHtml(m,f,line);
@@ -90,7 +90,10 @@ Object.assign(CL,{
   mgmtFicheAutre(delta){
     const m=G&&G.mgmt, f=m&&mgmtFighterById(m,MGMT_FICHE.id); if(!f) return;
     const v=mgmtFicheVoisins(m,f); if(v.i<0||!v.ids.length) return;
-    MGMT_FICHE.id=v.ids[(v.i+(delta<0?-1:1)+v.ids.length)%v.ids.length]; MGMT_FICHE.cursor=0; render();
+    MGMT_FICHE.id=v.ids[(v.i+(delta<0?-1:1)+v.ids.length)%v.ids.length]; MGMT_FICHE.cursor=0;
+    /* Monde lot 8 T1 : naviguer ← → ouvre la fiche de l'autre — sa marque s'éteint aussi. */
+    mgmtFicheVue(MGMT_FICHE.id);
+    render();
   },
   mgmtFicheCarte(){ CL.go('mgmt_carte'); },
   mgmtFicheEntree(){ if(mgmtFicheOngletCourant()==='combats') CL.mgmtFicheRevoirSelection(); else CL.mgmtFicheCarte(); },

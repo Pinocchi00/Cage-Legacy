@@ -91,7 +91,7 @@ function mgmtEffectifLigneHtml(m,x,i,choisi){
   const lien=mgmtLien(m,f.id);
   const nom=mfNet(f.last||f.name), prenom=f.first||'';
   return `<button type="button" class="mf-eff-ligne${choisi?' choisie':''}${lien?' lien':''}" data-id="${esc(f.id)}" onclick="CL.mgmtFiche('${esc(f.id)}')">`
-    +rang+`<div class="mf-eff-nom"><b>${esc(nom)}</b><span>${esc(prenom)}</span></div>`
+    +rang+`<div class="mf-eff-nom"><b>${esc(nom)}</b><span>${esc(prenom)}</span>${mfMarqueNom(m,f.id)}</div>`
     +`<div class="mf-eff-bilan">${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</div>`
     +`<div class="mf-eff-forme">${mgmtEffectifForme(m,f).map(mfMarque).join('')}</div>`
     +`<div class="mf-eff-sit ${esc(s.classe)}">${s.icone}<span>${esc(s.texte)}</span></div>`

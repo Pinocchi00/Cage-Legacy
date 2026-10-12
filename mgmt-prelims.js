@@ -30,7 +30,7 @@ function mgmtPrelimsLigne(m,s,i,choisi){
   const etat=s.etat==='valide'?MF_SVG_CONFIRME:(s.etat==='avalider'?'<div class="mf-eff-q" aria-hidden="true">?</div>':'');
   const corps=f&&fa&&fb
     ?`<div class="mf-car-slot-t"><span>${esc(nom)}</span><em>${esc(mgmtCarteCourt(fa.div))}</em></div>`
-      +`<div class="mf-car-slot-n"><b>${esc(mfNet(fa.last||fa.name))}</b><span>contre</span><b>${esc(mfNet(fb.last||fb.name))}</b></div>`
+      +`<div class="mf-car-slot-n"><b>${esc(mfNet(fa.last||fa.name))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb.last||fb.name))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`
     :`<div class="mf-car-slot-t"><span>${esc(nom)}</span></div><div class="mf-car-slot-v">À trouver</div>`;
   return `<button type="button" class="mf-car-slot mf-pre-slot ${s.etat}${choisi?' choisi':''}" onclick="CL.mgmtPrelimsVa(${i})"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">${corps}</div>`
     +`<div class="mf-car-slot-s">${etat}</div></button>`;

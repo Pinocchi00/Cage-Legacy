@@ -247,3 +247,241 @@ function mgmtContinuerRaison(m){
   return {libelle:'Cycle suivant',raison:'cycle'};
 }
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT8_T1_MARQUE] — Monde lot 8 T1 (docs/lots/MONDE-LOT-8-T1.md,
+   branche monde-lot-8-marques) : la marque jaune à côté du nom d'un combattant
+   dans chaque liste — quelque chose lui est arrivé depuis la dernière fois
+   que sa fiche a été ouverte. Ouvrir la fiche éteint la marque partout, même
+   après un rechargement. Pas de numéro de semaine : un cycle a deux moments
+   (avant la soirée, puis après) ; les faits (m.facts) et les combats (m.hist)
+   ne font que grandir, leur longueur est une horloge exacte — m.visites garde
+   pour chaque combattant [nFaits, nCombats] vus à l'instant de l'ouverture.
+   Etat pur ici : aucune fonction ne touche le DOM, le dessin est dans
+   mgmt-cadre.js (mfMarqueNom), l'enregistrement dans mgmt-ecran-fiche.js
+   (mgmtFicheVue) — un seul morceau de code par titre. ==== */
+
+/** Les faits qui allument la marque : la fiche doit pouvoir expliquer la
+ *  marque (T2 lit mgmtEvenementsDepuis). Les faits de titre et les
+ *  rivalités sont déjà portés par `demande` ; les actes du joueur
+ *  (promesse, refus, contrarie, contrat, recrue, offre, engage, retrait*,
+ *  reduite, swapped, ignored), title_initial, libere, fin_contrat et
+ *  depart_attente ne sont PAS des événements pour le joueur (décision de
+ *  la T1). */
+const MGMT_MARQUE_FAITS=['moment_vie','demande','attend','injury','susp','retired'];
+
+/** La seule étiquette fonctionnelle de la marque : aria-label et infobulle. */
+const MGMT_MARQUE_LIBELLE={texte:'Du nouveau depuis ta dernière visite',relu:false};
+
+/** [nFaits,nCombats] vus pour un combattant. Absent = [0,0] : rien vu.
+ *  @returns {number[]} */
+function mgmtVisiteDe(m,id){
+  const v=m&&m.visites&&m.visites[id];
+  return Array.isArray(v)&&v.length===2?v:[0,0];
+}
+
+/** Ce fait compte pour la marque : dans MGMT_MARQUE_FAITS, et pour un
+ *  moment de vie seulement s'il se relaie (relais non vide et phrase non
+ *  nulle — même règle que le conteur). Une seule copie de la règle,
+ *  partagée avec mgmtEvenementsDepuis. Pur. @returns {boolean} */
+function mgmtFaitMarque(x){
+  if(!x||!MGMT_MARQUE_FAITS.includes(x.k)) return false;
+  if(x.k==='moment_vie'){
+    const moment=mgmtVieMomentById(x.m);
+    if(!moment||!moment.relais.length||!mgmtVieTexte(moment)) return false;
+  }
+  return true;
+}
+
+/** Les événements arrivés à id depuis sa dernière visite, dans l'ordre.
+ *  Un fait de moment de vie ne compte que s'il se relaie (même règle que le
+ *  conteur : relais non vide et phrase non nulle — mgmtVieMomentById /
+ *  mgmtVieTexte). Un combat de préliminaire ne compte pas (slot 'main' seul).
+ *  Pur.
+ *  @returns {Array<{type:'fait',i:number,fait:object}|{type:'combat',i:number,trace:object}>} */
+function mgmtEvenementsDepuis(m,id){
+  if(!m||!mgmtValidId(id)) return [];
+  const out=[], v=mgmtVisiteDe(m,id);
+  const facts=Array.isArray(m.facts)?m.facts:[], hist=Array.isArray(m.hist)?m.hist:[];
+  for(let i=Math.min(Math.max(0,v[0]),facts.length);i<facts.length;i++){
+    const x=facts[i];
+    if(!x||x.a!==id||!mgmtFaitMarque(x)) continue;
+    out.push({type:'fait',i,fait:x});
+  }
+  for(let i=Math.min(Math.max(0,v[1]),hist.length);i<hist.length;i++){
+    const t=hist[i];
+    if(!t||t.slot!=='main'||!t.a||!t.b) continue;
+    if(t.a.id!==id&&t.b.id!==id) continue;
+    out.push({type:'combat',i,trace:t});
+  }
+  return out;
+}
+
+/** La marque d'un combattant : quelque chose est arrivé depuis sa dernière
+ *  visite. Pur — ne modifie rien, ne dessine rien. @returns {boolean} */
+function mgmtMarque(m,id){
+  return mgmtEvenementsDepuis(m,id).length>0;
+}
+
+/** Tout est « vu » : la table se pose à la longueur courante des faits et des combats.
+ *  Tolère l'absence de roster, facts et hist (migrations). */
+function mgmtVisitesInit(m){
+  if(!m||typeof m!=='object'||Array.isArray(m)) return;
+  m.visites={};
+  for(const o of Array.isArray(m.roster)?m.roster:[]){
+    if(o&&mgmtValidId(o.id)) m.visites[o.id]=[(m.facts||[]).length,(m.hist||[]).length];
+  }
+}
+
+/** La table des visites est-elle bien formée ? Objet simple (pas un
+ *  tableau), identifiants stricts, valeurs paires d'entiers sûrs ≥ 0.
+ *  @returns {boolean} */
+function mgmtVisitesValide(v){
+  if(!v||typeof v!=='object'||Array.isArray(v)) return false;
+  for(const k of Object.keys(v)){
+    if(!mgmtValidId(k)) return false;
+    const p=v[k];
+    if(!Array.isArray(p)||p.length!==2) return false;
+    for(const n of p){ if(!Number.isSafeInteger(n)||n<0) return false; }
+  }
+  return true;
+}
+
+/** Enregistre ce que le combattant vient de voir : pose la table à la
+ *  longueur courante des faits et des combats. Renvoie true seulement si la
+ *  valeur a changé (l'appelant décide alors de sauvegarder).
+ *  @returns {boolean} */
+function mgmtVuEnregistre(m,id){
+  if(!mgmtValidId(id)) return false;
+  if(!m||typeof m!=='object') return false;
+  if(!m.visites||typeof m.visites!=='object'||Array.isArray(m.visites)) m.visites={};
+  const v=[Array.isArray(m.facts)?m.facts.length:0,Array.isArray(m.hist)?m.hist.length:0];
+  const anc=mgmtVisiteDe(m,id);
+  if(anc[0]===v[0]&&anc[1]===v[1]) return false;
+  m.visites[id]=v;
+  return true;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT8_T6_BUDGET] — Monde lot 8 T6 (docs/lots/MONDE-LOT-8-T6.md,
+   branche monde-lot-8-marques) : le budget de la marque. Lecture (b), décision
+   du 10/10/2026 : au plus mgmtMarqueBudget(m) marques allumées en même temps ;
+   une marque qui n'a pas eu sa place n'est pas dessinée — rien n'est perdu, son
+   événement reste en attente sur la fiche, elle s'allume si une place se
+   libère. Décision de la question 2 : le budget est celui du conteur, réutilisé
+   tel quel. Décision de la question 3 : une place revient à un combattant hors
+   du cercle et des suivis dès qu'il y en a un, le cercle et les suivis gardent
+   les autres places (à partir de deux places : à budget 1, la fiche §7 test 4
+   veut que le cercle passe avant). Décision de la question 4 : à date égale,
+   une blessure, une demande ou un moment de vie passe avant un simple combat.
+   mgmtMarque (brut) ne change pas. État pur : aucune fonction ne touche le
+   DOM, le dessin reste dans mgmt-cadre.js (mfMarqueNom). Le calcul ne garde
+   aucun cache : la liste est recomputée à chaque lecture (le tableau m est
+   l'unique vérité). ==== */
+
+/** Le nombre de marques allumées en même temps : celui du conteur, réutilisé.
+ *  Pur. Déclaration de fonction (pas const) : les tests la remplacent.
+ *  @returns {number} */
+function mgmtMarqueBudget(m){
+  const b=mgmtConteurBudget(m);
+  return Number.isSafeInteger(b)&&b>=0?b:0;
+}
+
+/** Les combattants dont la marque est allumée, du premier au dernier, au plus
+ *  mgmtMarqueBudget(m). Une seule passe sur m.facts et m.hist — jamais
+ *  mgmtEvenementsDepuis par combattant. Pur, sans rnd(), ne modifie rien.
+ *  Ordre : le lien (cercle, suivi, les autres), puis l'événement en attente le
+ *  plus récent, puis à date égale un fait compté avant un simple combat,
+ *  puis le mieux classé de sa catégorie (portée 'organization') — calculé
+ *  seulement pour les divisions des candidats à égalité au rang du budget —
+ *  puis l'identifiant. Les retraités ne prennent pas de place.
+ *  @returns {string[]} */
+function mgmtMarquesAllumees(m){
+  if(!m||!Array.isArray(m.roster)) return [];
+  const vifs=new Map();
+  for(const o of m.roster){
+    if(o&&mgmtValidId(o.id)&&!mgmtIsRetired(o)) vifs.set(o.id,o);
+  }
+  /* Le plus récent événement en attente de chaque vivant : [c, sev] — sev vaut
+     1 si un fait compté (pas un simple combat) porte ce même c. */
+  const frais=new Map();
+  const pose=(id,c,nc)=>{
+    const cur=frais.get(id);
+    const cc=Number.isSafeInteger(c)?c:0;
+    if(cur===undefined||cc>cur[0]) frais.set(id,[cc,nc?1:0]);
+    else if(cc===cur[0]&&nc&&!cur[1]) cur[1]=1;
+  };
+  const facts=Array.isArray(m.facts)?m.facts:[], hist=Array.isArray(m.hist)?m.hist:[];
+  for(let i=0;i<facts.length;i++){
+    const x=facts[i];
+    if(x&&mgmtFaitMarque(x)&&i>=mgmtVisiteDe(m,x.a)[0]) pose(x.a,x.c,true);
+  }
+  for(let i=0;i<hist.length;i++){
+    const t=hist[i];
+    if(!t||t.slot!=='main'||!t.a||!t.b) continue;
+    /* Le combat ne compte que pour qui ne l'a pas encore vu : chacun dans
+       sa passe (la même porte que mgmtEvenementsDepuis — la trace est
+       partagée, la visite ne l'est pas), fiche §3. */
+    if(i>=mgmtVisiteDe(m,t.a.id)[1]) pose(t.a.id,t.c,false);
+    if(t.b.id!==t.a.id&&i>=mgmtVisiteDe(m,t.b.id)[1]) pose(t.b.id,t.c,false);
+  }
+  const B=mgmtMarqueBudget(m);
+  if(B<=0||frais.size===0) return [];
+  let cands=[];
+  for(const [id,ev] of frais){
+    const o=vifs.get(id);
+    if(o) cands.push({id,div:o.div,lien:mgmtLien(m,id),c:ev[0],sev:ev[1],ind:9999});
+  }
+  if(!cands.length) return [];
+  /* Tri initial sur le lien, la date, la gravité et l'identifiant : total sans
+     le classement. Tous les ind valent encore 9999 — le critère est neutre. */
+  const cmp=(a,b)=>{
+    const pic={cercle:2,suivi:1};
+    const la=pic[a.lien]||0, lb=pic[b.lien]||0;
+    if(la!==lb) return lb-la;
+    if(a.c!==b.c) return b.c-a.c;
+    if(a.sev!==b.sev) return b.sev-a.sev;
+    if(a.ind!==b.ind) return a.ind-b.ind;
+    return a.id<b.id?-1:(a.id>b.id?1:0);
+  };
+  cands.sort(cmp);
+  if(B<cands.length){
+    /* Le groupe d'égalité au rang B : même lien, même c, même gravité que le
+       B-ème — le classement est lu une seule fois par division de ce groupe,
+       jamais ailleurs. Les candidats d'un même (lien, c, sev) sont contigus
+       dans cands : le bloc se remplace en place. */
+    const ref=cands[B-1], grp=[];
+    for(const x of cands){
+      if(x.lien===ref.lien&&x.c===ref.c&&x.sev===ref.sev) grp.push(x);
+    }
+    const parDiv=new Map();
+    for(const x of grp){
+      if(!parDiv.has(x.div)) parDiv.set(x.div,mgmtDivisionRanking(m,x.div,'organization').map(o=>o.id));
+      const i=parDiv.get(x.div).indexOf(x.id);
+      x.ind=i>=0?i:9999;
+    }
+    grp.sort(cmp);
+    /* Les candidats d'un même (lien, c, sev) sont contigus dans cands AVANT le
+       retri du groupe : le bloc à remplacer commence au premier membre et fait
+       exactement grp.length candidats. */
+    const deb=cands.findIndex(x=>x.lien===ref.lien&&x.c===ref.c&&x.sev===ref.sev);
+    cands=cands.slice(0,deb).concat(grp,cands.slice(deb+grp.length));
+  }
+  let sel=cands.slice(0,B);
+  /* Une place réservée dès qu'un combattant hors du cercle et des suivis est
+     en attente (décision de la question 3) : si les « liés » ont pris tout le
+     budget, le dernier d'entre eux rend sa place au premier des autres. */
+  if(B>=2&&sel.length&&sel.every(x=>!!x.lien)){
+    const autre=cands.find(x=>!x.lien);
+    if(autre){ sel.pop(); sel.push(autre); sel.sort(cmp); }
+  }
+  return sel.map(x=>x.id);
+}
+
+/** La marque allumée d'un combattant : « sa » marque est allumée — au plus
+ *  mgmtMarqueBudget(m) en même temps. La marque n'est pas l'événement : un
+ *  combattant éteint garde son événement lisible sur la fiche.
+ *  @returns {boolean} */
+function mgmtMarqueAllumee(m,id){
+  return mgmtMarquesAllumees(m).includes(id);
+}
+/* ==== [FIN ANCRE] ==== */
