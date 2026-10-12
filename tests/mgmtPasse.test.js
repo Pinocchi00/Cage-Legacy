@@ -199,8 +199,8 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
   win.eval('CL.mgmtNouvelleLancer()');
   const html0 = win.document.getElementById('app').innerHTML;
   assert.ok(html0.includes('mf-genese-barre'), 'la barre est là dès le lancement');
-  assert.ok(html0.includes('Création de la partie'));
-  assert.ok(/SPLIT · 20\d\d/i.test(html0), 'le nom de l\'organisation et l\'année');
+  assert.ok(html0.includes('Six années à vivre'));
+  assert.ok(/SPLIT/i.test(html0) && /Année 20\d\d/.test(html0), 'le nom de l\'organisation et l\'année');
   assert.ok(!html0.includes('mf-voile') && !html0.includes('mf-dialogue'), 'aucune fenêtre par-dessus');
   win.eval('CL.mgmtNouvelleChoisir(3); CL.mgmtNouvelleDeplacer(1,0); CL.mgmtNouvelleRetour(); CL.mgmtNouvelleLancer();');
   assert.equal(win.eval('MGMT_NOUVELLE.i'), iAvant, 'les touches sont inactives pendant la génération');
@@ -212,9 +212,12 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
     const h = win.document.getElementById('app').innerHTML;
     const m = /aria-valuenow="(\d+)"/.exec(h);
     if (m) vus.add(+m[1]);
-    if (win.eval('G.screen') !== 'mgmt_nouvelle') break;
+    if (win.eval('!!(MGMT_NOUVELLE.gen&&MGMT_NOUVELLE.gen.pret)')) break;
   }
   assert.ok(vus.has(0) || vus.has(1), 'la barre a été vue en route : ' + [...vus]);
+  /* Décision d'Anthony du 12/10/2026 : la partie attend le bouton « Entrer », elle ne s'ouvre plus toute seule. */
+  assert.equal(win.eval('G.mgmt'), null, 'rien ne s\'ouvre tout seul');
+  win.eval('CL.mgmtNouvelleEntrer()');
   assert.ok(win.eval('G.screen') !== 'mgmt_nouvelle', 'le joueur arrive sur l\'écran habituel : ' + win.eval('G.screen'));
   assert.equal(win.eval('G.mgmt.passe.soirees'), 2);
   assert.equal(win.eval('G.mgmt.passe.enCours'), undefined);

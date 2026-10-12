@@ -69,7 +69,9 @@ test('Monde lot 1 : la démo commence avec six ans de passé, et sa limite compt
   w.eval(`CL_DEMO=true; setSeed(7); CL.mgmtNouvelle(1); MGMT_NOUVELLE.soirees=2; CL.mgmtNouvelleLancer();`);
   assert.ok(w.document.getElementById('app').innerHTML.includes('mf-genese-barre'),'la démo montre la même barre de chargement');
   const debut=Date.now();
-  while(Date.now()-debut<120000){ await new Promise(r=>setTimeout(r,150)); if(w.eval('G.screen')!=='mgmt_nouvelle') break; }
+  /* Décision d'Anthony du 12/10/2026 : la partie attend le bouton « Entrer » ; le test attend gen.pret puis valide avec Entrée. */
+  while(Date.now()-debut<120000){ await new Promise(r=>setTimeout(r,150)); if(w.eval('!!(MGMT_NOUVELLE.gen&&MGMT_NOUVELLE.gen.pret)')) break; }
+  w.eval('CL.mgmtNouvelleEntrer()');
   const r=res(w,`const m=G.mgmt; const out={org:m.org,passe:m.passe.soirees,joues:m.eventsPlayed,joueur:mgmtSoireesJoueur(m),fin0:mgmtDemoTerminee(m)};
     m.eventsPlayed=m.passe.soirees+CL_DEMO_SOIREES-1; out.fin4=mgmtDemoTerminee(m); out.joueur4=mgmtSoireesJoueur(m);
     m.eventsPlayed=m.passe.soirees+CL_DEMO_SOIREES; out.fin5=mgmtDemoTerminee(m); out.joueur5=mgmtSoireesJoueur(m);
