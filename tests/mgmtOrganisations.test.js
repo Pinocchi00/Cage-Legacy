@@ -57,7 +57,8 @@ test('Organisations — au clavier : la grille se parcourt, Entrée crée la par
   touche(win,'ArrowDown'); assert.equal(win.eval('MGMT_NOUVELLE.i'),5,'une rangée de quatre plus bas');
   touche(win,'ArrowUp'); assert.equal(win.eval('MGMT_NOUVELLE.i'),1);
   touche(win,'ArrowLeft'); touche(win,'ArrowLeft'); assert.equal(win.eval('MGMT_NOUVELLE.i'),7,'on fait le tour');
-  win.eval(`MGMT_NOUVELLE.i=1;`); touche(win,'Enter');
+  /* Monde lot 1 T3 : Entrée lance la génération des six ans ; soirees:0 est la création sans passé, immédiate (décision de la fiche MONDE-LOT-1-T3, §3 Écran). */
+  win.eval(`MGMT_NOUVELLE.i=1; MGMT_NOUVELLE.soirees=0;`); touche(win,'Enter');
   const r=result(win,`return {ecran:G.screen,slot:MGMT_SLOT,org:G.mgmt.org,disque:mgmtSlotPeek(2).org,un:mgmtSlotPeek(1),caisse:G.mgmt.treasury,
     lignes:G.mgmt.roster.every(o=>o.org==='Garden of Blood'),valide:validateMgmt(JSON.parse(JSON.stringify(G.mgmt)))};`);
   assert.equal(r.ecran,'mgmt_arrivee'); assert.equal(r.slot,2);   /* brief démo, lot 8 T1 : une partie neuve s'ouvre sur l'arrivée */

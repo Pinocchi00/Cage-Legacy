@@ -269,6 +269,11 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-org-tuile{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .mf-org-tuile span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase}
 .mf-org-tuile b{font-weight:600;font-size:24px;line-height:1;white-space:nowrap}
+.mf-genese{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;justify-content:center;gap:32px}
+.mf-genese-nom{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:56px;line-height:.9;text-transform:uppercase;white-space:nowrap}
+.mf-genese-barre{height:32px;width:100%;background:var(--mf-ligne)}
+.mf-genese-barre b{display:block;height:100%;background:var(--mf-rouge)}
+.mf-genese-texte{font-size:24px;line-height:1.2;color:var(--mf-texte2)}
 .mf-nouvelle-pied{height:60px;flex:none;display:flex;justify-content:space-between;align-items:center;gap:24px}
 .mf-nouvelle-texte{font-size:24px;line-height:1.2;color:var(--mf-texte2)}
 .mf-nouvelle-droite{display:flex;align-items:center;gap:20px;flex:none;margin-left:auto}

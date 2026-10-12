@@ -96,8 +96,11 @@ function mgmtCombatOuvrir(o){
   mgmtCombatDemarrer();
   return true;
 }
+/** Un combat se revoit-il ? Non s'il vient du passé (Monde lot 1 T5 : on en lit le résultat, on ne le revoit pas). Pur. */
+function mgmtCombatRevoyable(t){ return !!t&&t.p!==true; }
 /** Revoir un combat (résultats, lendemain, fiche) : l'écran animé avec l'agenda, l'arène d'avant sans. */
 function mgmtRevoirCombat(t,retour,finRetour){
+  if(!mgmtCombatRevoyable(t)) return false;
   const m=G&&G.mgmt;
   if(m&&typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)) return mgmtCombatOuvrir({trace:t,retour:retour,finRetour:finRetour});
   const res=mgmtReplayFight(t); if(!res) return false;
