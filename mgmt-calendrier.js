@@ -15,13 +15,18 @@ function mgmtJourDate(jour){
   const d=new Date(MGMT_CALENDRIER_DEBUT+jour*86400000);
   return {jour:d.getUTCDate(),mois:MGMT_MOIS[d.getUTCMonth()],ts:d.getTime()};
 }
+/** Le jour et le mois d'un jour, avec l'année quand il précède l'ouverture de la partie (le passé : 2021 à 2026). Pur. */
+function mgmtJourDateTexte(jour){
+  const d=mgmtJourDate(jour);
+  return d.jour+' '+d.mois+(jour<0?' '+new Date(d.ts).getUTCFullYear():'');
+}
 /** Le nom et la date d'une soirée jouée (corrections du 08/10, 4.5) : « Split Fight Night 3, 30 janvier ». Remplace le mot technique « Cycle ». Pur. */
 function mgmtSoireeNomDate(m,n){
   const nom=mgmtOrgNom(m)+' Fight Night '+n;
   const j=typeof mgmtAgendaJour==='function'?mgmtAgendaJour(m,n):null;
   if(j===null||j===undefined) return nom;
   const d=mgmtJourDate(j);
-  return nom+', '+d.jour+' '+d.mois;
+  return nom+', '+mgmtJourDateTexte(j);
 }
 /** La date de la soirée n selon l'ancien rythme (une toutes les cinq semaines). Pur, dérivé. */
 function mgmtSoireeDate(n){ return mgmtJourDate((n-1)*MGMT_EVENT_WEEKS*7); }

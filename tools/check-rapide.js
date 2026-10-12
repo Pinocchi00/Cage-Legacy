@@ -21,7 +21,9 @@ const LENTS = ['tests/mgmtCorrectionsLot12.test.js', 'tests/mgmtSoireeShow.test.
   /* Monde lot 1 T3 : les six ans complets (62 soirées, 30 à 90 s par organisation, trois organisations). */
   'tests/mgmtPasseSixAns.test.js',
   /* Monde lot 1 T4 bis : les recrues du passé réduit rendent le fichier plus long (85 s mesurées le 10/10) ; au-delà de 20 s il est lancé à part. */
-  'tests/mgmtPasse.test.js'];
+  'tests/mgmtPasse.test.js',
+  /* Monde lot 1 T6 : six ans complets pour tout le fichier (25 s de génération). */
+  'tests/mgmtPasseT6.test.js'];
 const gardes = process.argv.slice(2).map(f => f.replace(/\\/g, '/'));
 const tous = require(path.join(racine, 'package.json')).scripts.test.replace(/^node --test\s+/, '').split(/\s+/).filter(Boolean);
 const ecartes = LENTS.filter(f => tous.includes(f) && !gardes.includes(f));

@@ -87,11 +87,12 @@ test('Monde lot 1 T5 — un combat du passé ne se revoit pas : ni bouton mort, 
     MGMT_FICHE={id:f.id,retour:'mgmt_carte',cursor:0};
     out.fiche=mgmtFicheCombatsHtml(m,f,null);
     out.ficheBoutons=(out.fiche.match(/mgmtHistoriqueRevoir/g)||[]).length;
-    CL.mgmtHistoriqueRevoir(0); out.ecranApres=G.screen;
+    G.screen='mgmt_fiche'; CL.mgmtHistoriqueRevoir(0); out.ecranApres=G.screen; out.ficheOuverte=MGMT_FICHE.id;
     return {replay:out.replay,revoyable:out.revoyable,revoir:out.revoir,ficheBoutons:out.ficheBoutons,ficheTexte:out.fiche.length>0,ecranApres:out.ecranApres}; })())`));
   assert.equal(r.replay, null); assert.equal(r.revoyable, false); assert.equal(r.revoir, false);
-  assert.equal(r.ficheBoutons, 0, 'la fiche ne propose pas de revoir un combat du passé'); assert.equal(r.ficheTexte, true);
-  assert.notEqual(r.ecranApres, 'mgmt_combat');
+  /* Monde lot 1 T6 : la ligne d'un combat du passé ouvre la fiche de l'adversaire (mgmtHistoriqueRevoir), jamais le combat. */
+  assert.ok(r.ficheBoutons > 0, 'chaque ligne mène quelque part'); assert.equal(r.ficheTexte, true);
+  assert.equal(r.ecranApres, 'mgmt_fiche', 'ouvrir un combat du passé ouvre une fiche, pas un combat');
   /* Un combat joué sous le joueur se revoit toujours. */
   const joueur = A.eval(`(function(){ const m=G.mgmt; mgmtPredecesseurSoiree(m,0); const t=m.hist[m.hist.length-1]; return [t.p===undefined, mgmtCombatRevoyable(t), !!mgmtReplayFight(t)]; })()`);
   assert.deepEqual(Array.from(joueur), [true, true, true]);

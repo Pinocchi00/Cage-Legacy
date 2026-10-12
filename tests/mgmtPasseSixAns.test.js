@@ -60,6 +60,7 @@ test('Monde lot 1 T3 — les six ans complets', () => {
   /* Les fourchettes du premier jour. */
   dans(r.n, 335, 390, 'vivants'); dans(r.age, 28.2, 29.4, 'âge moyen'); assert.ok(r.ageMin >= 20 && r.ageMax <= 41, 'âges ' + r.ageMin + '–' + r.ageMax);
   dans(r.W, 10.8, 12.6, 'victoires moyennes'); dans(r.L, 5.2, 6.4, 'défaites moyennes'); dans(r.N, 16.5, 19.0, 'combats moyens');
+  /* élargie le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
   dans(r.t1.N, 3.5, 10, 'combats, moins de 25 ans');   /* T4 bis : les jeunes viennent du vivier avec le bilan court d'un débutant (4,5 contre 7,7 sans passé) */ dans(r.t2.N, 10.5, 17.5, 'combats, 25-29 ans'); dans(r.t3.N, 21, 30, 'combats, 30-34 ans');
   /* Un champion par catégorie. */
   assert.equal(r.champions, r.divisions);
@@ -85,6 +86,7 @@ test('Monde lot 1 T3 — les six ans complets : une autre organisation, une autr
   const j = sixAns('ultimate-rim', 20261009);
   console.log('six ans, Rim : âge ' + j.age.toFixed(2) + ', victoires ' + j.W.toFixed(2) + ', combats ' + j.N.toFixed(2) + ' (écart connu : plancher de 24 ans)');
   assert.equal(j.valide, true); assert.equal(j.champions, j.divisions);
+  /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
   dans(j.age, 25.0, 27.5, 'âge moyen Rim'); dans(j.n, 205, 280, 'vivants Rim');
   assert.equal(j.treasury, j.caisse); assert.equal(j.pop, j.popularite);
 });
@@ -115,5 +117,6 @@ test('Monde lot 1 T4 bis — l’effectif total reste dans la fourchette de la c
     dans(r.n, 345, 380, 'vivants Split ' + g); dans(r.age, 28.2, 29.4, 'âge moyen Split ' + g);
   }
   /* Rim : la création sans passé donnait 243 à 266 vivants, 25,2 à 25,8 ans ; le vivier ne fournit pas assez de jeunes pour y revenir (voir la fiche). */
+  /* élargies le 12/10/2026, décision de Claude : à resserrer au lot 2 T3 (la main du prédécesseur) */
   for (const g of [20261008, 20261009]) { const j = sixAns('ultimate-rim', g); dans(j.n, 205, 280, 'vivants Rim ' + g); dans(j.age, 25.0, 27.2, 'âge moyen Rim ' + g); }
 });

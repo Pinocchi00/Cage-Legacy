@@ -154,7 +154,7 @@ function mgmtHistoriqueHtml(m,f){
     return `<div class="mgmt-fiche-fight${k===MGMT_FICHE.cursor?' selected':''}">`
       +`<div><strong>${esc(issue)} · ${esc(adversaire.name)}</strong>`
       +`<div class="mgmt-fiche-detail">${esc(methode)} · Round ${esc(t.round)} · ${esc(mgmtSoireeNomDate(m,t.c))}</div></div>`
-      +(mgmtCombatRevoyable(t)?`<button class="mgmt-next" onclick="CL.mgmtHistoriqueRevoir(${i})">Revoir</button>`:'')
+      +`<button class="mgmt-next" onclick="CL.mgmtHistoriqueRevoir(${i})">${mgmtCombatRevoyable(t)?'Revoir':'Son adversaire'}</button>`
       +`</div>`;
   }).join('');
 }
