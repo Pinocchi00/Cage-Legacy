@@ -317,7 +317,7 @@ Object.assign(CL,{
     if(!G||!G.mgmt||!mgmtFicheLigne(G.mgmt,id)) return;
     /* Lot 4 T6 : la fiche revient d'où elle a été ouverte — la semaine, la
        carte ou les classements ; ailleurs, la semaine reste la maison. */
-    const retour=(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
+    const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
       ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
       ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats'||G.screen==='mgmt_prelims'||G.screen==='mgmt_finances'||G.screen==='mgmt_calendrier')?G.screen:'mgmt_carte';
     MGMT_FICHE={id,retour,cursor:0};
@@ -344,12 +344,14 @@ Object.assign(CL,{
     if(!f||!Number.isSafeInteger(i)||i<0||i>=m.hist.length) return;
     const t=m.hist[i];
     if(!mgmtFightHistory(m,f).includes(t)) return;
+    /* Monde lot 1 T6 : un combat du passé ne se revoit pas, mais son adversaire s'ouvre (retraités compris). */
+    if(!mgmtCombatRevoyable(t)){ CL.mgmtFiche(t.a.id===f.id?t.b.id:t.a.id); return; }
     const res=mgmtFicheRejeu(t);
     if(!res) return;
     mgmtRevoirCombat(t,'mgmt_fiche',null);
   },
   /* Brief lot 1 : mgmtEnter(n) ouvre l'emplacement n ; sans argument, l'emplacement 1. */
-  mgmtEnter(n,orgId){
+  mgmtEnter(n,orgId,opts){
     if(!G) G={theme:'dark'};
     let neuve=false;
     mgmtSlotOuvrir(n===undefined?1:n);
@@ -365,8 +367,10 @@ Object.assign(CL,{
        écarté, la sauvegarde dédiée (ou un bureau neuf) prend le relais. */
     if(G.mgmt&&!validateMgmt(G.mgmt)) G.mgmt=null;
     if(!G.mgmt){
-      G.mgmt=mgmtDefault(orgId);
-      if(!loadMgmt()){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
+      G.mgmt=(opts&&opts.partie)||mgmtDefault(orgId);   /* Monde lot 1 T3 : une partie au passé déjà joué */
+      const chargee=loadMgmt();
+      if(!chargee&&opts&&opts.partie){ saveMgmt(); neuve=true; }
+      else if(!chargee){ G.mgmt.graine=mgmtGraineNeuve(); mgmtNewRoster(G.mgmt); mgmtNewPile(G.mgmt); mgmtAgendaInit(G.mgmt); saveMgmt(); neuve=true; }
       else mgmtAgendaPreparer(G.mgmt);
     }else{
       mgmtRepair(G.mgmt);

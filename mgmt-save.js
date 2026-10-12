@@ -204,7 +204,9 @@ function mgmtValidTraceSide(t){
  *  (vainqueur A/B/D, famille, round). @returns {boolean} */
 function mgmtValidFightTrace(x){
   if(!x||typeof x!=='object'||Array.isArray(x)) return false;
-  const clefs=Object.keys(x).sort().join(',');
+  /* Monde lot 1 T5 : p:true marque un combat du passé (allégé, il ne se revoit pas). */
+  if(x.p!==undefined&&x.p!==true) return false;
+  const clefs=Object.keys(x).filter(k=>k!=='p').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -262,6 +264,7 @@ function validateMgmt(raw){
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
   if(raw.cal!==undefined&&!mgmtAgendaValide(raw.cal)) return false;
+  if(raw.passe!==undefined&&!mgmtPasseValide(raw.passe)) return false;   /* Monde lot 1 T3 */
   if(raw.fil!==undefined&&!mgmtFilValide(raw.fil)) return false;
   if(!mgmtSallesValide(raw)) return false;
   if(raw.card!==undefined&&raw.card.sizeEarly!==undefined&&(!Number.isSafeInteger(raw.card.sizeEarly)||raw.card.sizeEarly<0||raw.card.sizeEarly>raw.card.sizePrelims)) return false;
@@ -462,6 +465,10 @@ function mgmtMigrate(raw){
     }
     raw.v=14;
   }
+  /* Monde lot 1 T3 : 14 → 15. Une partie d'avant n'a pas de passé (m.passe absent est valide) : rien à convertir, rien à perdre. */
+  if(raw.v===14){
+    raw.v=15;
+  }
   /* ==== [FIN ANCRE] ==== */
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
@@ -475,6 +482,7 @@ function mgmtRepair(m){
   if(!m||typeof m!=='object') return null;
   if(!Number.isSafeInteger(m.ageWeeks)||m.ageWeeks<0||m.ageWeeks>=MGMT_EXT_YEAR_WEEKS) m.ageWeeks=0;
   if(m.cal!==undefined&&!mgmtAgendaValide(m.cal)) delete m.cal;
+  if(m.passe!==undefined&&!mgmtPasseValide(m.passe)) delete m.passe;   /* Monde lot 1 T3 */
   if(m.fil!==undefined&&!mgmtFilValide(m.fil)) delete m.fil;
   if(!mgmtSallesValide(m)){ delete m.salles; delete m.pop; delete m.comptes; }
   if(m.cal&&m.cal.actif===true) mgmtSallesInit(m);
@@ -582,7 +590,7 @@ function mgmtRepair(m){
 
 function mgmtParseAndValidate(raw){
   if(!raw) return null;
-  try{ const parsed=JSON.parse(raw); const mgr=mgmtMigrate(parsed); return mgr&&validateMgmt(mgr)?mgr:null; }
+  try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); return mgr&&validateMgmt(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
   catch(e){ return null; }
 }
 
@@ -660,6 +668,8 @@ function mgmtSlotEffacer(n){
  *  comme SAVE_KEY / SAVE_BACKUP_KEY (state-save.js). */
 function saveMgmt(){
   if(!G||!G.mgmt) return false;
+  /* Monde lot 1 T3 : un passé en cours de génération ne s'écrit jamais — rien d'une partie à moitié née ne touche l'emplacement. */
+  if(G.mgmt.passe&&G.mgmt.passe.enCours===true) return true;
   try{
     /* Lot 2B T1 bis : les retraites de la soirée ont déjà été appliquées
        quand elle se sauvegarde. Le quota est rétabli dans l'état vivant
@@ -668,7 +678,7 @@ function saveMgmt(){
     const cle=mgmtSlotKey(MGMT_SLOT);
     const previous=stockageLire(cle);
     if(mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
-    stockageEcrire(cle,JSON.stringify(G.mgmt));
+    stockageEcrire(cle,mgmtSerialiser(G.mgmt));   /* Monde lot 1 T5 : la part du passé s'écrit en archive compacte */
     /* Brief lot 1 : la dernière partie jouée et la date de l'enregistrement, hors de la partie. */
     const reg=mgmtRegistre(); reg.dernier=MGMT_SLOT; reg.dates[MGMT_SLOT]=Date.now(); mgmtRegistreEcrit(reg);
     return stockageSignaler(true);
@@ -684,7 +694,7 @@ function loadMgmt(){
       if(!candidate) continue;
       G.mgmt=mgmtRepair(candidate);
       if(key===secours){
-        try{ stockageEcrire(cle,JSON.stringify(G.mgmt)); }catch(e){}
+        try{ stockageEcrire(cle,mgmtSerialiser(G.mgmt)); }catch(e){}
       }
       return true;
     }

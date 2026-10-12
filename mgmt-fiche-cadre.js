@@ -69,7 +69,7 @@ function scr_mgmt_fiche_cadre(){
   return mfEcran(contenu,{barre:'jeu',courant:mfSectionCourante('mgmt_fiche')||'effectif',m,plaque:'Effectif',libelle:'Combattant',compteur:`${Math.max(1,v.i+1)} / ${v.ids.length}`,
     droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtFicheRetour()'},{ks:['←','→'],t:'Autre combattant'},{ks:['Tab'],t:'Onglet',onclick:'CL.mgmtFicheOnglet(1)'},
-      {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:onglet==='combats'?'Revoir le combat':'Préparer son combat',jaune:true,onclick:'CL.mgmtFicheEntree()'}]});
+      {ks:['A','E'],t:'Section'},{ks:['Entrée'],t:onglet==='combats'?(mgmtCombatRevoyable(mgmtFightHistory(m,f).slice().reverse()[MGMT_FICHE.cursor||0])?'Revoir le combat':'Ouvrir son adversaire'):'Préparer son combat',jaune:true,onclick:'CL.mgmtFicheEntree()'}]});
 }
 SCREENS.mgmt_fiche=scr_mgmt_fiche_cadre;
 

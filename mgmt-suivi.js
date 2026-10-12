@@ -63,7 +63,9 @@ function mgmtSoirees(m){
 function mgmtSoireeJour(m,n){
   if(n<=0) return 0;
   if(typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)){
-    const f=(m.cal.faites||[]).find(x=>x.n===n); return f?f.jour:null;
+    const f=(m.cal.faites||[]).find(x=>x.n===n); if(f) return f.jour;
+    /* Monde lot 1 T6 : une soirée du passé hors des 24 gardées retrouve son jour par le rythme des 35 jours. */
+    return (m.passe&&Number.isSafeInteger(m.passe.soirees)&&n<=m.passe.soirees)?mgmtAgendaJour(m,n):null;
   }
   return (n-1)*MGMT_EVENT_WEEKS*7;
 }

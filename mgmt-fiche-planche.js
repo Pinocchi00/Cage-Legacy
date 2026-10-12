@@ -213,7 +213,7 @@ function mgmtFicheCombatsHtml(m,f,line){
     const rnd=(t.family==='dec'||t.family==='draw')?'':(d?mgmtRoundTexte(d):'');
     const geste=d&&d.geste?d.geste:'';
     const lec=mgmtCombatLecon(m,f,t);
-    return `<div class="mf-fi-co${k===curseur?' choisie':''}" onclick="CL.mgmtHistoriqueRevoir(${i})"><div class="mf-fi-cn">${k+1}</div>`
+    return `<div class="mf-fi-co${k===curseur?' choisie':''}"${` onclick="CL.mgmtHistoriqueRevoir(${i})"`}><div class="mf-fi-cn">${k+1}</div>`
       +`<div class="mf-fi-ct"><b>${esc(mfNet(adv.name))}</b><span>${esc(methode)}${rnd?', '+esc(rnd):''} · ${esc(mgmtSoireeNomDate(m,t.c))}</span></div>`
       +`<div class="mf-fi-cg">${marque(lec.tag)} ${esc(lec.phrase)}${geste?' <em>Finition : '+esc(geste)+'.</em>':''}</div><div class="mf-fi-cm">${mfMarque(issue)}</div></div>`;
   }).join('');

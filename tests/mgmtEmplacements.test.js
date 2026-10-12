@@ -20,7 +20,7 @@ test('Emplacements — une partie d’avant le lot se retrouve dans l’emplacem
       v:MGMT_SAVE_VERSION,vides:[mgmtSlotPeek(2),mgmtSlotPeek(3)],dernier:mgmtSlotDernier()};`);
   assert.equal(r.cle,'cage-legacy-mgmt'); assert.equal(r.secours,'cage-legacy-mgmt_backup');
   assert.deepEqual(r.peek,[7,123]); assert.ok(r.intact,'lire un emplacement n’écrit rien');
-  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,14,'le lot 1 ne change pas le format : la version est celle du lot 2 (14)');
+  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,15,'le lot 1 ne change pas le format : la version est celle du lot 2 (15 depuis Monde lot 1 T3, décision G de la consigne)');
   assert.deepEqual(r.vides,[null,null]); assert.equal(r.dernier,1);
 });
 
@@ -122,7 +122,9 @@ test('Emplacements — au clavier seul : flèches, Entrée lance ou reprend, Éc
   touche(win,'ArrowRight'); touche(win,'ArrowRight'); touche(win,'ArrowRight'); assert.equal(win.eval('MGMT_PARTIES.curseur'),3,'butée à droite');
   touche(win,'ArrowLeft'); touche(win,'Enter');
   /* Brief du 06/10, lot 5 : un emplacement vide ouvre d'abord le choix de l'organisation ; Entrée y crée la partie (Split d'abord). */
-  assert.equal(win.eval('G.screen'),'mgmt_nouvelle'); touche(win,'Enter');
+  assert.equal(win.eval('G.screen'),'mgmt_nouvelle');
+  win.eval('MGMT_NOUVELLE.soirees=0');   /* Monde lot 1 T3 : sans passé, création immédiate (fiche MONDE-LOT-1-T3, §3 Écran) */
+  touche(win,'Enter');
   assert.deepEqual(result(win,`return [G.screen,MGMT_SLOT,!!mgmtSlotPeek(2),mgmtSlotPeek(1),G.mgmt.org];`),['mgmt_arrivee',2,true,null,'Split'],'un emplacement vide lance une partie, dans le sien');   /* brief démo, lot 8 T1 : une partie neuve s ouvre sur l arrivée */
   win.eval(`CL.mgmtLeave(); CL.mgmtParties();`);
   assert.equal(win.eval('MGMT_PARTIES.curseur'),2);

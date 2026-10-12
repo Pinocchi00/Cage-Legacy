@@ -136,22 +136,23 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
     }
   }
   const champions=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set();
+  /* Monde lot 1 T3 (vitesse) : les conditions qui ne regardent qu'UN combattant se lisent une fois par combattant, plus une fois par paire (66 000 paires
+     pour 366 combattants). Mêmes conditions, même ordre des paires (celui de r), aucun tirage : le résultat est identique. */
+  const aptes=r.filter(o=>mgmtAvailable(m,o)
+    /* Lot 11 (D5) : un champion ne combat jamais en préliminaire. */
+    &&!champions.has(o.id)
+    /* §T3 : les prélims se construisent hors carte principale — un combattant déjà engagé (principale comme prélims) n'est jamais candidat. */
+    &&!mgmtEngaged(m,o)
+    /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
+    &&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,o)));
+  const sexes=aptes.map(genderOf);
   const collect=mode=>{
     const out=[];
-    for(let i=0;i<r.length;i++){
-      for(let j=i+1;j<r.length;j++){
-      const A=r[i], B=r[j];
+    for(let i=0;i<aptes.length;i++){
+      for(let j=i+1;j<aptes.length;j++){
+      const A=aptes[i], B=aptes[j];
       if(A.first===B.first) continue;
-      if(genderOf(A)!==genderOf(B)) continue;
-      if(!mgmtAvailable(m,A)||!mgmtAvailable(m,B)) continue;
-      /* Lot 11 (D5) : un champion ne combat jamais en préliminaire. */
-      if(champions.has(A.id)||champions.has(B.id)) continue;
-      /* §T3 : les prélims se construisent hors carte principale — un
-         combattant déjà engagé (principale comme prélims) n'est jamais
-         candidat. */
-      if(mgmtEngaged(m,A)||mgmtEngaged(m,B)) continue;
-      /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
-      if(typeof mgmtAgendaReserve==='function'&&(mgmtAgendaReserve(m,A)||mgmtAgendaReserve(m,B))) continue;
+      if(sexes[i]!==sexes[j]) continue;
       const key=[A.id,B.id].sort().join('|');
       if(seen.has(key)) continue;
       if(rematch.has(key)) continue;
@@ -424,10 +425,12 @@ function mgmtCartRows(m){
   const rows=m.roster.filter(o=>o&&!mgmtIsRetired(o));
   const order=allDivisions().map(d=>d.id);
   const dx=o=>{ const i=order.indexOf(o.div); return i<0?order.length:i; };
+  /* Monde lot 1 T3 (vitesse) : le rang de chaque ligne se lit une fois, pas à chaque comparaison du tri (même fonction pure, même valeur). */
+  const rangs=new Map(); for(const o of rows) rangs.set(o,mgmtDivisionRank(m,o)||0);
   rows.sort((x,y)=>{
     const a=dx(x), b=dx(y);
     if(a!==b) return a-b;
-    const rx=mgmtDivisionRank(m,x)||0, ry=mgmtDivisionRank(m,y)||0;
+    const rx=rangs.get(x), ry=rangs.get(y);
     if(rx!==ry) return rx-ry;
     return x.id<y.id?-1:1;
   });
@@ -456,7 +459,11 @@ function mgmtCartRows(m){
     vivant ; le classement d'un cycle antérieur le garde tant qu'il y
     combat et tant que sa retraite (fait k:'retired', mgmtRetireCycleOf)
     n'est pas encore tombée — ainsi « sort du classement » reste lu quand
-    la retraite l'a fait sortir. ==== */
+    la retraite l'a fait sortir.
+    Monde lot 1 T1 (docs/lots/MONDE-LOT-1-T1.md) : le corps du calcul est
+    désormais la voie pure mgmtDivisionRankingCalcule (la loi de classement
+    ne change pas) ; la lecture servie en mémoire et l'invalidation vivent
+    dans l'ancre MONDE_LOT1_T1, juste après. ==== */
 
 /* Corrections du 08/10/2026 (top 5) : le haut du classement bouge comme dans la vraie vie. Le bilan d'avant la partie pèse de moins en moins à mesure qu'un combattant
    combat à Split (MGMT_RANG_OUBLI par combat), et ses résultats récents pèsent plus que les anciens : une défaite fait chuter, une série fait monter. Le score est dérivé
@@ -555,13 +562,15 @@ function mgmtRosterAuCycle(m,f,cycle){
     lastCycle:Number.isSafeInteger(side.lastCycle)?side.lastCycle:-1};
 }
 
-/** Population classée d'une catégorie. La portée `organization` ne lit que
+/** Population classée d'une catégorie — la voie pure, exactement le calcul
+ *  d'avant le Monde lot 1 T1. Référence des tests d'exactitude. La portée
+ *  `organization` ne lit que
  *  Split ; `world` y ajoute des vues éphémères des lignes extérieures.
  *  cycle : omis aujourd'hui (vivant, à l'exact pour les appelants) ;
  *  explicite, le classement tel qu'il se voyait au cycle lu — par la seule
  *  loi de classement (mgmtRankingCompare) sur les vues du cycle.
  *  @returns {Array} */
-function mgmtDivisionRanking(m,divId,scope,cycle){
+function mgmtDivisionRankingCalcule(m,divId,scope,cycle){
   if(!m||!Array.isArray(m.roster)||!divById(divId)) return [];
   if(scope!=='organization'&&scope!=='world') return [];
   const today=Number.isSafeInteger(m.cycle)?m.cycle:0;
@@ -609,6 +618,63 @@ function mgmtDivisionRank(m,f,scope){
   const cands=mgmtDivisionRanking(m,f.div,resolved);
   const i=cands.findIndex(o=>o.id===f.id);
   return i>=0?i+1:null;
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT1_T1] — Monde lot 1 T1 (docs/lots/MONDE-LOT-1-T1.md) :
+   le classement en mémoire. Une population classée est calculée une fois par
+   (portée, catégorie, cycle) puis servie en mémoire jusqu'à
+   mgmtRangsInvalider — un recalcul du classement pur ne coûte qu'à la
+   lecture suivante après une mutation. Le mémo vit dans une WeakMap de
+   module (clé `m`, valeur Map de `portée|catégorie|cycle` → tableau) :
+   jamais sur `m`, jamais dans G, jamais sauvegardé — au chargement, `m` est
+   un objet neuf et le mémo est vide. La clé vivante porte `m.cycle` (le
+   temps use le passé, MGMT_RANG_TEMPS) ; la clé d'un cycle explicite porte
+   ce cycle. La vigueur (tailles de roster, d'extérieur et de m.hist)
+   refuse une entrée qui ne correspond plus à l'effectif. mgmtRangsMemoActif : un
+   interrupteur de preuve, vrai par défaut ; à faux, chaque lecture repasse
+   par la voie pure — il ne sert qu'aux tests et à la mesure, aucun écran
+   ne l'appelle. ==== */
+const MGMRANGS_MEMO=new WeakMap();
+/* La vigueur de l'effectif et de la mémoire : tailles de roster, d'extérieur
+   et de m.hist. Le score dérive de ces trois tableaux (mgmtRangScores la
+   parcourt), une entrée qui ne correspond plus les sert vieilles : le
+   changement de vigueur vide le mémo à la lecture suivante — le filet qui
+   couvre une mutation qui n'aurait pas (encore) passé par
+   mgmtRangsInvalider. La lecture est trois .length, pas une boucle. */
+const MGMRANGS_VIGUEUR=new WeakMap();
+let MGMRANGS_MEMO_ACTIF=true;
+
+/** Pose le drapeau du mémo (tests et mesure seulement). @returns {void} */
+function mgmtRangsMemoActif(actif){ MGMRANGS_MEMO_ACTIF=!!actif; }
+
+/** Vide le mémo de la partie. Après toute mutation d'une entrée du
+ *  classement : résultat, retraite, effectif, extérieur, cycle.
+ *  Vider le mémo coûte une instruction ; seul le recalcul coûte.
+ *  @returns {void} */
+function mgmtRangsInvalider(m){ if(m&&typeof m==='object') MGMRANGS_MEMO.delete(m); }
+
+/** Population classée, servie en mémoire : une fois par (portée, catégorie,
+ *  cycle), gardée jusqu'à mgmtRangsInvalider. Identique au calcul pur.
+ *  Rend slice() : aucun appelant ne reçoit la référence du mémo.
+ *  @returns {Array} */
+function mgmtDivisionRanking(m,divId,scope,cycle){
+  if(MGMRANGS_MEMO_ACTIF===false) return mgmtDivisionRankingCalcule(m,divId,scope,cycle);
+  if(!m||!Array.isArray(m.roster)||!divById(divId)) return [];
+  if(scope!=='organization'&&scope!=='world') return [];
+  const vigeur=(Array.isArray(m.roster)?m.roster.length:0)+'@'
+    +(Array.isArray(m.exterieur)?m.exterieur.length:0)+'@'
+    +(Array.isArray(m.hist)?m.hist.length:0);
+  if(MGMRANGS_VIGUEUR.get(m)!==vigeur){ MGMRANGS_VIGUEUR.set(m,vigeur); MGMRANGS_MEMO.delete(m); }
+  const c=Number.isSafeInteger(cycle)?cycle:(Number.isSafeInteger(m.cycle)?m.cycle:0);
+  const cle=scope+'|'+divId+'|'+c;
+  let par=MGMRANGS_MEMO.get(m);
+  if(!par){ par=new Map(); MGMRANGS_MEMO.set(m,par); }
+  const tenu=par.get(cle);
+  if(tenu) return tenu.slice();
+  const calcule=mgmtDivisionRankingCalcule(m,divId,scope,cycle);
+  par.set(cle,calcule);
+  return calcule.slice();
 }
 /* ==== [FIN ANCRE] ==== */
 

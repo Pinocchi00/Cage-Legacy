@@ -16,7 +16,7 @@ function mgmtFinancesEngagees(m){
 
 /** Les six cartes : titre, grand chiffre, deux lignes, et le détail. Pur sur la partie. */
 function mgmtFinancesCartes(m){
-  const f=m.lastEvent&&m.lastEvent.finance, org=mgmtOrgNom(m), joues=m.eventsPlayed||0;
+  const f=m.lastEvent&&m.lastEvent.finance, org=mgmtOrgNom(m), joues=mgmtSoireesJoueur(m);
   const eng=mgmtFinancesEngagees(m), cap=mgmtOverdraftCap(m), debut=m.treasury<0?-m.treasury:0;
   const recettes=f?f.ticketing+f.tv:0, depenses=f?f.purses+f.bonuses+(f.location||0):0;
   const comptes=Array.isArray(m.comptes)?m.comptes.slice(-5):[];

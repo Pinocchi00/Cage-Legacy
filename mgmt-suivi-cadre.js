@@ -139,7 +139,9 @@ function mgmtSuCeinturesMur(m){
 
 function mgmtSuReignLigne(m,r,k,total,actuelle){
   const n=mgmtNomParId(m,r.id);
-  const sous=r.jusqua===null?(r.depuis===0?'Depuis le début':'Depuis la soirée '+r.depuis):(r.depuis===0?`Du début à la soirée ${r.jusqua}`:`Soirées ${r.depuis} à ${r.jusqua}`);
+  const an=n=>{ const j=mgmtSoireeJour(m,n); return Number.isFinite(j)?new Date(MGMT_CALENDRIER_DEBUT+j*86400000).getUTCFullYear():null; };
+  const a1=an(r.depuis), a2=r.jusqua===null?null:an(r.jusqua), annees=a1===null?'':' · '+(a2===null||a2===a1?a1:a1+'-'+a2);   /* Monde lot 1 T6 : les règnes du passé se datent */
+  const sous=(r.jusqua===null?(r.depuis===0?'Depuis le début':'Depuis la soirée '+r.depuis):(r.depuis===0?`Du début à la soirée ${r.jusqua}`:`Soirées ${r.depuis} à ${r.jusqua}`))+annees;
   const marque=actuelle?`<div class="mf-su-r-c" aria-label="Champion actuel">C</div>`:`<div class="mf-su-r-n">${esc(total-k)}</div>`;
   return `<div class="mf-su-reign${actuelle?' actuel':''}">${marque}<div class="mf-su-r-nom"><div><b>${esc(mgmtSuMaj(n.last||n.name))}</b><span>${esc(n.first)}</span></div><span class="mf-su-r-sous">${esc(sous)}</span></div>`
     +`<b class="mf-su-r-def">${esc(r.defenses)} ${r.defenses>1?'DÉFENSES':'DÉFENSE'}</b></div>`;
@@ -160,7 +162,7 @@ function mgmtSuCeintureDetail(m){
   const rs=lignee.reigns.slice().reverse();
   const lignes=rs.slice(0,5).map((r,k)=>mgmtSuReignLigne(m,r,k,rs.length,k===0&&lignee.actuel===r)).join('');
   const liste=mfPanneau(`<div class="mf-su-lignee"><div class="mf-su-lignee-t"><span class="mf-su-tag">LA LIGNÉE</span><span class="mf-su-dim">${rs.length} CHAMPION${rs.length>1?'S':''}</span></div>`
-    +`<div class="mf-su-reigns">${lignes||'<div class="mf-eff-aucun">Aucun champion pour l’instant.</div>'}</div><div class="mf-su-dim2">Du champion actuel au tout premier.</div></div>`,'normal','mf-su-lig');
+    +`<div class="mf-su-reigns">${lignes||'<div class="mf-eff-aucun">Aucun champion pour l’instant.</div>'}</div><div class="mf-su-dim2">${rs.length>5?`Les 5 derniers sur ${rs.length}.`:'Du champion actuel au tout premier.'}</div></div>`,'normal','mf-su-lig');
   const r=lignee.actuel, nS=m.eventsPlayed||0;
   const duree=r?mgmtDureeTexte(m,r.depuis,nS):null;
   const regne=r
@@ -354,19 +356,20 @@ function scr_mgmt_resultats(){
   if(F.s<0) F.s=0;
   const debutP=Math.min(Math.max(0,F.s-4),Math.max(0,soirees.length-5));
   const puces=`<div class="mf-eff-puces">`+soirees.slice(debutP,debutP+5).map((s,k)=>`<button type="button" class="${debutP+k===F.s?'on':''}" aria-pressed="${debutP+k===F.s}" onclick="CL.mgmtSuReSoiree(${debutP+k})">SOIRÉE ${esc(s.n)}</button>`).join('')+`</div>`;
-  let corps;
+  let corps, revoyable=false;
   if(!soirees.length) corps=`<div class="mf-su-vide">${mfPanneau(`<div class="mf-eff-aucun">Aucune soirée jouée : les résultats viendront avec la première.</div>`,'normal')}</div>`;
   else{
     const s=soirees[F.s], liste=mgmtSuResultatsListe(m,s);
     if(F.i>=liste.length) F.i=Math.max(0,liste.length-1);
     if(F.i<0) F.i=0;
     const h=liste[F.i], co=liste[F.i+1], suite=liste.slice(F.i+2,F.i+5);
+    revoyable=mgmtCombatRevoyable(m.hist[h.i]);   /* Monde lot 1 T5 : un combat du passé ne se revoit pas */
     const etiq=x=>mgmtResultatEtiquette(m,m.hist[x.i],x.k,x.d.titre).toUpperCase();
     const cat=x=>String(divById(x.d.cat)?divById(x.d.cat).name:'').replace(/^Poids /,'').toUpperCase();
     const issue=h.d.titre?mgmtTitreIssue(m,h.i):null;
     const ligneTitre=issue?`<div class="mf-su-h-ti"><div class="mf-eff-c">C</div><span>${issue==='garde'?'Garde sa ceinture.':(issue==='vacant'?'Prend le titre vacant.':'Prend la ceinture.')}</span></div>`:'';
     const hero=mgmtSuHero(etiq(h),cat(h)+(h.d.titre?' · POUR LA CEINTURE':''),mgmtSuQui(m,h.d,104,520),`<div class="mf-su-quote"><div>${esc(mgmtSuRoundLigne(h.d))}</div>${ligneTitre}</div>`,
-      mfBouton('Revoir ce combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuReRevoir()'}));
+      revoyable?mfBouton('Revoir ce combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuReRevoir()'}):'');
     const cote=co?mgmtSuCoteGrand(etiq(co),cat(co),mgmtSuQui(m,co.d,80,440),
       `<div class="mf-su-ko"><b style="font-size:${mfCorps(co.d.nul?'NUL':(MGMT_FAMILY_LABELS[co.d.family]||co.d.methode),360,130,60)}px">${esc(mgmtSuMaj(co.d.nul?'NUL':(MGMT_FAMILY_LABELS[co.d.family]||co.d.methode)))}</b><div><span>${esc(mgmtRoundTexte(co.d))}</span>${co.d.geste?`<em>${esc(co.d.geste)}</em>`:''}</div></div>`)
       :mgmtSuCoteGrand('PRÉLIMINAIRES','','<span style="font-size:60px">FIN DE SOIRÉE</span>','');
@@ -374,9 +377,9 @@ function scr_mgmt_resultats(){
     corps=mgmtSuUne(hero,cote,petits);
   }
   const contenu=`<main class="mf-contenu mf-su"><div class="mf-eff-barre">${puces}</div>${corps}</main>`;
-  return mfEcran(contenu,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:soirees.length?`${mgmtOrgNom(m)} Fight Night ${soirees[F.s].n}${Number.isFinite(soirees[F.s].jour)?' · '+mgmtJourDate(soirees[F.s].jour).jour+' '+mgmtJourDate(soirees[F.s].jour).mois:''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
+  return mfEcran(contenu,{barre:'jeu',courant:'resultats',m,plaque:'Résultats',libelle:soirees.length?`${mgmtOrgNom(m)} Fight Night ${soirees[F.s].n}${Number.isFinite(soirees[F.s].jour)?' · '+mgmtJourDateTexte(soirees[F.s].jour):''}`:'',droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,
     touches:[{ks:['Échap'],t:'Retour',onclick:"CL.go('mgmt_carte')"},{ks:['←','→'],t:'Choisir'},{ks:['Tab'],t:'Soirée',onclick:'CL.mgmtSuReSoiree(MGMT_SU_RE.s+1)'},{ks:['A','E'],t:'Section'},
-      {ks:['Entrée'],t:'Revoir ce combat',jaune:true,onclick:'CL.mgmtSuReRevoir()'}]});
+      ...(revoyable?[{ks:['Entrée'],t:'Revoir ce combat',jaune:true,onclick:'CL.mgmtSuReRevoir()'}]:[])]});
 }
 SCREENS.mgmt_resultats=scr_mgmt_resultats;
 
@@ -468,6 +471,7 @@ Object.assign(CL,{
     const m=G.mgmt, s=mgmtSoirees(m).slice().reverse()[MGMT_SU_RE.s]; if(!s) return;
     const x=mgmtSuResultatsListe(m,s)[MGMT_SU_RE.i]; if(!x) return;
     const t=m.hist[x.i];
+    if(!mgmtCombatRevoyable(t)) return;
     mgmtRevoirCombat(t,'mgmt_resultats',null);
   },
 });
