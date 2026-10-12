@@ -400,6 +400,7 @@ function mgmtTraceLine(t){
  *  @returns {object} le résultat complet du moteur (log, stats, juges...). */
 function mgmtReplayFight(t){
   if(!t||!t.a||!t.b) return null;
+  if(t.p===true) return null;   /* Monde lot 1 T5 : un combat du passé ne se rejoue pas (il n'en garde ni l'état de la RNG ni les corps) */
   const saved=SEED;
   let res;
   try{

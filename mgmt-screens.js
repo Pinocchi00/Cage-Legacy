@@ -343,7 +343,7 @@ Object.assign(CL,{
     const m=G&&G.mgmt, line=m&&mgmtFicheLigne(m,MGMT_FICHE.id), f=line&&line.f;
     if(!f||!Number.isSafeInteger(i)||i<0||i>=m.hist.length) return;
     const t=m.hist[i];
-    if(!mgmtFightHistory(m,f).includes(t)) return;
+    if(!mgmtFightHistory(m,f).includes(t)||!mgmtCombatRevoyable(t)) return;
     const res=mgmtFicheRejeu(t);
     if(!res) return;
     mgmtRevoirCombat(t,'mgmt_fiche',null);

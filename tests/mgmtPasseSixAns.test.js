@@ -41,7 +41,8 @@ function sixAnsCalcule(org, graine) {
       an62:new Date(MGMT_CALENDRIER_DEBUT+mgmtAgendaJour(m,62)*86400000).getUTCFullYear(),
       an0:mgmtPasseAnnee(62,0),an61:mgmtPasseAnnee(62,61),
       treasury:m.treasury,caisse:mgmtOrgProfil(m).caisse,pop:m.pop,popularite:Math.round(mgmtOrgProfil(m).popularite),
-      poids:JSON.stringify(m).length,cycle:m.cycle,
+      poids:JSON.stringify(m).length,disque:mgmtSerialiser(m).length,combatsDisque:(function(){ const a=JSON.parse(mgmtSerialiser(m)).passe.archive; return JSON.stringify(a.h).length+JSON.stringify(a.s).length; })(),
+      relu:(function(){ const d=mgmtSerialiser(m); const l=mgmtParseAndValidate(d); return !!l&&JSON.stringify(l)===JSON.stringify(m); })(),cycle:m.cycle,
       libres:v.filter(f=>f.libre).length,jeunes:v.filter(f=>f.age>=20&&f.age<=23).length,recrues:m.facts.filter(x=>x.k==='recrue').length}; })())`));
   r.ms = Date.now() - t0;
   return r;
@@ -68,6 +69,11 @@ test('Monde lot 1 T3 — les six ans complets', () => {
   assert.equal(r.orphelins, 0); assert.equal(r.sommeHist, 2 * r.hist); assert.equal(r.partNegative, 0);
   /* Le passage de témoin. */
   assert.equal(r.treasury, r.caisse); assert.equal(r.pop, r.popularite);
+  /* T5 : le poids. Les combats des six ans pèsent 80 Ko au plus dans la sauvegarde, la partie du premier jour 420 Ko au plus (236 Ko sans passé). */
+  assert.ok(r.combatsDisque <= 80000, 'combats du passé : ' + r.combatsDisque + ' octets');
+  assert.ok(r.disque <= 420000, 'partie du premier jour : ' + r.disque + ' octets');
+  assert.equal(r.relu, true, 'la partie relue sur le disque est celle de la mémoire');
+  console.log('poids au premier jour : ' + r.disque + ' octets sur disque (' + r.poids + ' en clair), dont les combats du passé ' + r.combatsDisque);
 });
 
 test('Monde lot 1 T3 — les six ans complets : une autre organisation, une autre graine', () => {

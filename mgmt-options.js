@@ -46,7 +46,7 @@ const MGMT_OP_LIGNES={
 /** Le texte de l'export : la partie telle qu'elle est sur le disque (celle de l'emplacement actif), sinon l'état vivant. */
 function mgmtPartieExportee(m){
   try{ const brut=stockageLire(mgmtSlotKey(MGMT_SLOT)); if(brut&&mgmtParseAndValidate(brut)) return brut; }catch(e){}
-  return JSON.stringify(m);
+  return mgmtSerialiser(m);
 }
 /** Importe le texte d'un fichier dans l'emplacement `slot` : la partie d'avant passe en secours si elle est valide. @returns {{ok:boolean,raison:string}} */
 function mgmtPartieImporter(texte,slot){

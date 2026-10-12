@@ -141,10 +141,12 @@ test('Monde lot 1 T4 — les contrats, blessures, attentes, ceintures et histori
     const m=mgmtPassePreparer('split',{soirees:2});
     for(let k=0;k<2;k++) mgmtPasseSoiree(m,k);
     const corps=()=>JSON.stringify(m.roster.map(f=>[f.id,f.ct||null,!!f.libre,f.trauma||0,f.traumaFloor||0,f.susp||0,f.retired||null,f.lastCycle||0,f.level,f.raison,f.interactions]));
-    const avant={corps:corps(),hist:JSON.stringify(m.hist),facts:JSON.stringify(m.facts),titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null)),pile:JSON.stringify(m.pile),cycle:m.cycle,fil:m.fil?m.fil.length:0};
+    const avant={corps:corps(),histResume:JSON.stringify(m.hist.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L])),factsGardes:JSON.stringify(m.facts.filter(x=>!MGMT_PASSE_FAITS_PERDUS.includes(x.k))),titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null)),pile:JSON.stringify(m.pile),cycle:m.cycle,fil:m.fil?m.fil.length:0};
     const ageAvant=m.roster.map(f=>f.age).join();
     mgmtPasseCloturer(m);
-    return {corps:corps()===avant.corps,hist:JSON.stringify(m.hist)===avant.hist,facts:JSON.stringify(m.facts)===avant.facts,
+    /* Monde lot 1 T5 (fiche MONDE-LOT-1-T5 §3) : à la clôture les combats s'allègent (mêmes combattants, même issue) et les faits perdus (contrats, départs, attentes) sont écartés ; tout le reste est conservé. */
+    const resume=h=>JSON.stringify(h.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L]));
+    return {corps:corps()===avant.corps,hist:resume(m.hist)===avant.histResume,facts:JSON.stringify(m.facts)===avant.factsGardes,
       titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null))===avant.titres,pile:JSON.stringify(m.pile)===avant.pile,
       cycle:m.cycle===avant.cycle,fil:(m.fil?m.fil.length:0)===avant.fil,nbHist:m.hist.length,nbFacts:m.facts.length,
       sous:m.roster.filter(f=>f.ct).length,n:m.roster.length,vieilli:m.roster.map(f=>f.age).join()!==ageAvant}; })())`));

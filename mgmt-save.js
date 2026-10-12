@@ -204,7 +204,9 @@ function mgmtValidTraceSide(t){
  *  (vainqueur A/B/D, famille, round). @returns {boolean} */
 function mgmtValidFightTrace(x){
   if(!x||typeof x!=='object'||Array.isArray(x)) return false;
-  const clefs=Object.keys(x).sort().join(',');
+  /* Monde lot 1 T5 : p:true marque un combat du passé (allégé, il ne se revoit pas). */
+  if(x.p!==undefined&&x.p!==true) return false;
+  const clefs=Object.keys(x).filter(k=>k!=='p').sort().join(',');
   if(clefs!=='a,b,c,family,round,rounds,seed,slot,winner') return false;
   if(!Number.isSafeInteger(x.c)||x.c<0) return false;
   if(x.slot!=='main'&&x.slot!=='prelim') return false;
@@ -588,7 +590,7 @@ function mgmtRepair(m){
 
 function mgmtParseAndValidate(raw){
   if(!raw) return null;
-  try{ const parsed=JSON.parse(raw); const mgr=mgmtMigrate(parsed); return mgr&&validateMgmt(mgr)?mgr:null; }
+  try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); return mgr&&validateMgmt(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
   catch(e){ return null; }
 }
 
@@ -676,7 +678,7 @@ function saveMgmt(){
     const cle=mgmtSlotKey(MGMT_SLOT);
     const previous=stockageLire(cle);
     if(mgmtParseAndValidate(previous)) stockageEcrire(mgmtSlotBackupKey(MGMT_SLOT),previous);
-    stockageEcrire(cle,JSON.stringify(G.mgmt));
+    stockageEcrire(cle,mgmtSerialiser(G.mgmt));   /* Monde lot 1 T5 : la part du passé s'écrit en archive compacte */
     /* Brief lot 1 : la dernière partie jouée et la date de l'enregistrement, hors de la partie. */
     const reg=mgmtRegistre(); reg.dernier=MGMT_SLOT; reg.dates[MGMT_SLOT]=Date.now(); mgmtRegistreEcrit(reg);
     return stockageSignaler(true);
@@ -692,7 +694,7 @@ function loadMgmt(){
       if(!candidate) continue;
       G.mgmt=mgmtRepair(candidate);
       if(key===secours){
-        try{ stockageEcrire(cle,JSON.stringify(G.mgmt)); }catch(e){}
+        try{ stockageEcrire(cle,mgmtSerialiser(G.mgmt)); }catch(e){}
       }
       return true;
     }
