@@ -9,6 +9,7 @@ const MGMT_DEMO_FIN={
 };
 let MGMT_DEMO_FIN_VUE=false;
 
+/* Monde lot 1 (décision d'Anthony du 10/10/2026) : la démo passe par la même création que le jeu complet (CL.mgmtNouvelleLancer : les six ans de passé, la même barre) ; sa limite compte les soirées du JOUEUR, pas celles du passé. */
 /** La démo est active. */
 const mgmtDemoActive=()=>typeof CL_DEMO!=='undefined'&&CL_DEMO===true;
 /** Les cinq soirées de la démo sont jouées. Pur. */
