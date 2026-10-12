@@ -1,11 +1,14 @@
 "use strict";
-/* ==== [ANCRE: MGMT_BRIEF_LOT5_NOUVELLE_PARTIE] — Brief du 06/10/2026, lot 5 : l'écran
-   « Nouvelle partie » (planche « Management — Nouvelle partie » du canvas). Dans un emplacement
-   vide, le joueur choisit son organisation parmi huit, chacune avec deux points forts et deux
-   points faibles ; Entrée crée la partie. Le jeu annonce qu'il crée tout le reste — les
-   combattants, les camps, les salles, la presse, l'assistante. « Créer ton organisation » est
-   visible et annoncé à venir : il n'ouvre rien. Les noms des organisations 6 à 8 sont des
-   emplacements d'auteur (mgmt-organisations-data.js). ==== */
+/* ==== [ANCRE: MGMT_BRIEF_LOT5_NOUVELLE_PARTIE] — Monde lot 2 T5 : valeurs de
+   maquettes/monde/MondeNouvellePartie.dc.html (planche validée par Anthony le 10/10/2026,
+   corrigée le même jour). Brief du 06/10/2026, lot 5 : l'écran « Nouvelle partie » (planche
+   « Management — Nouvelle partie » du canvas). Dans un emplacement vide, le joueur choisit
+   son organisation parmi huit, chacune avec deux points forts et deux points faibles ; Entrée
+   crée la partie. Le jeu annonce qu'il crée tout le reste — six ans d'histoire, les
+   combattants, les camps, les salles, la presse. « Créer ton organisation » est visible et
+   annoncé à venir : il n'ouvre rien. Chaque carte montre la ville, l'année (mgmtOrgIdentite,
+   Monde lot 2 T1) et la réputation de son organisation. Les noms des organisations 6 à 8 sont
+   des emplacements d'auteur (mgmt-organisations-data.js). ==== */
 
 let MGMT_NOUVELLE={slot:1,i:0};
 /** Le libellé de l'entrée à venir : celui du brief (le libellé définitif est une question ouverte). */
@@ -21,12 +24,15 @@ function mgmtNouvelleApercuHtml(o){
 }
 
 function mgmtNouvelleOrgHtml(o,i,choisie){
+  const idn=mgmtOrgIdentite(o.id);
   const atouts=mgmtOrgAtouts(o.profil);
-  const lignes=(titre,liste,svg)=>`<div class="mf-org-bloc"><div class="mf-org-titre">${titre}</div>`
-    +liste.map(t=>`<div class="mf-org-ligne">${svg}<div>${esc(t)}</div></div>`).join('')+`</div>`;
+  /* Monde lot 2 T5 : plus puis contreparties dans une seule colonne, sans intertitre (planche corrigée). */
+  const lignes=[...atouts.plus,...atouts.moins]
+    .map((t,k)=>`<div class="mf-org-ligne">${k<atouts.plus.length?MF_PLUS_SVG:MF_MOINS_SVG}<div>${esc(t)}</div></div>`).join('');
   const verrou=typeof mgmtDemoActive==='function'&&mgmtDemoActive()&&o.id!==CL_DEMO_ORG;
-  const tete=`<div class="mf-org-tete"><div class="mf-org-nom" style="font-size:${mfCorps(o.nom,choisie?290:380,56,28)}px">${esc(o.nom)}</div>${verrou?'<div class="mf-org-choisie">Verrouillée</div>':(choisie?'<div class="mf-org-choisie">Choisie</div>':'')}</div>`;
-  const corps=`<div class="mf-org-corps">${lignes('Les plus',atouts.plus,MF_PLUS_SVG)}${lignes('Les contreparties',atouts.moins,MF_MOINS_SVG)}</div>`;
+  const identite=idn?`<div class="mf-org-ville">${esc(mfNet(idn.ville)+' · DEPUIS '+idn.annee)}</div><div class="mf-org-reputation">${esc(idn.reputation)}</div>`:'';
+  const tete=`<div class="mf-org-tete"><div class="mf-org-nom" style="font-size:${o.nom.length>18?30:44}px">${esc(o.nom)}</div>${verrou?'<div class="mf-org-choisie">Verrouillée</div>':(choisie?'<div class="mf-org-choisie">Choisie</div>':'')}</div>`;
+  const corps=`<div class="mf-org-corps">${identite}<div class="mf-org-lignes">${lignes}</div></div>`;
   return mfPanneau(tete+corps,choisie?'choisi':'cote','mf-org'+(choisie?' choisie':'')+(o.auteur?' auteur':''),
     `role="button" tabindex="0" aria-pressed="${choisie}" aria-label="${esc(o.nom)}" data-org="${esc(o.id)}" onclick="CL.mgmtNouvelleChoisir(${i})"`);
 }
@@ -37,8 +43,9 @@ function scr_mgmt_nouvelle(){
   const cartes=MGMT_ORGANISATIONS.map((o,i)=>mgmtNouvelleOrgHtml(o,i,i===F.i)).join('');
   const avenir=`<div class="mf-org-avenir" aria-disabled="true"><span>${esc(MGMT_CREER_ORG_LIBELLE)}</span><span class="mf-puce">${esc(MGMT_CREER_ORG_AVENIR)}</span></div>`;
   const contenu=`<div class="mf-nouvelle"><div class="mf-org-grille">${cartes}</div>${mgmtNouvelleApercuHtml(MGMT_ORGANISATIONS[F.i])}`
-    +`<div class="mf-nouvelle-pied"><div class="mf-nouvelle-texte">Le jeu crée tout le reste pour cette partie : les combattants, les camps, les salles, la presse, ton assistante.</div>${avenir}`
-    +mfBouton('Créer la partie',{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleCreer()'})+`</div></div>`;
+    +`<div class="mf-nouvelle-pied"><div class="mf-nouvelle-texte">Le jeu crée tout le reste pour cette partie : six ans d’histoire, les combattants, les camps, les salles, la presse.</div>`
+    +`<div class="mf-nouvelle-droite">${avenir}`
+    +mfBouton('Créer la partie',{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleCreer()'})+`</div></div></div>`;
   return mfEcran(contenu,{barre:'logo',plaque:'Management',libelle:'Nouvelle partie · choisis ton organisation',
     droite:'Emplacement '+F.slot+' · '+MGMT_ORGANISATIONS.length+' organisations',
     touches:[{ks:['Échap'],t:'Retour aux emplacements',onclick:'CL.mgmtNouvelleRetour()'},{ks:['↑','↓','←','→'],t:'Choisir'},
