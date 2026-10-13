@@ -27,7 +27,7 @@ function mgmtFaitsBase(contexte,id){
   const m=contexte&&contexte.m;
   if(!m||!Array.isArray(m.roster)) return null;
   const f=m.roster.find(x=>x.id===id);
-  if(!f||mgmtIsRetired(f)) return null;
+  if(!f) return null;
   const h=Number.isSafeInteger(contexte.h)?Math.max(0,Math.min(contexte.h,(m.hist||[]).length)):(m.hist||[]).length;
   // Si la soirée est déjà calculée, la première trace exclue porte le bilan
   // public d'avant combat. Projection explicite : pas de spread d'un profil.
@@ -41,24 +41,48 @@ function mgmtFaitsBase(contexte,id){
       lastCycle:side.lastCycle,retired:false};
   });
   const population=roster.filter(x=>x.div===f.div&&!mgmtIsRetired(x));
+  if(!population.some(x=>x.id===id)) return null;
   const vue={...m,roster,hist:(m.hist||[]).slice(0,h),facts:(m.facts||[]).filter(x=>x.c<=m.cycle
     &&(x.k!=='title_fight'||x.fight<h))};
   const rang=mgmtDivisionRankingCalcule(vue,f.div,'organization');
   const precedent=mgmtDivisionRankingCalcule(vue,f.div,'organization',m.cycle-1);
-  return {m:vue,population,h,rang,precedent};
+  return {m:vue,population,h,rang,precedent,original:m};
+}
+/* ==== [ANCRE: MGMT_FAITS_PROVENANCE_FRONTIERE] — Monde lot 3 T1 ==== */
+function mgmtFaitsSourceFiche(base,f,champs){
+  const index=base.original.hist.slice(base.h).findIndex(t=>t.a.id===f.id||t.b.id===f.id);
+  if(index>=0&&champs.every(k=>['age','W','L','D','lastCycle'].includes(k))){
+    const i=base.h+index,t=base.original.hist[i];
+    return {type:'hist',index:i,cote:t.a.id===f.id?'a':'b',champs,projection:true};
+  }
+  return {type:'fiche',id:f.id,champs};
+}
+function mgmtFaitsAttente(base,f){
+  const depuis=Number.isSafeInteger(f.lastCycle)&&f.lastCycle>=0?f.lastCycle:f.ct&&f.ct.since;
+  if(!Number.isSafeInteger(depuis)) return null;
+  const debut=depuis===0?0:mgmtAgendaJour(base.original,depuis);
+  const fin=base.h<base.original.hist.length?mgmtAgendaJour(base.original,base.original.hist[base.h].c)
+    :mgmtCalAujourdhui(base.original);
+  if(!Number.isSafeInteger(debut)||!Number.isSafeInteger(fin)) return null;
+  const a=new Date(mgmtJourDate(debut).ts),b=new Date(mgmtJourDate(fin).ts);
+  const mois=Math.max(0,(b.getUTCFullYear()-a.getUTCFullYear())*12+b.getUTCMonth()-a.getUTCMonth()
+    -(b.getUTCDate()<a.getUTCDate()?1:0));
+  return {mois,source:{type:'calendrier',depuis,jourDebut:debut,jourFin:fin,h:base.h}};
 }
 function mgmtFaitsIndividuels(base,f){
   const {m,h,rang,precedent}=base,out=[];
-  const fiche=champs=>({type:'fiche',id:f.id,champs});
+  const fiche=champs=>mgmtFaitsSourceFiche(base,f,champs);
   const trace=i=>({type:'hist',index:i});
   const add=(famille,groupe,valeur,sources)=>out.push({id:f.id+'|'+famille+'|'+JSON.stringify(valeur),
     famille,groupe,valeur,sujets:[f.id],sources});
   add('age',mgmtFaitsTranche(f.age),{age:f.age},[fiche(['age'])]);
   const pos=rang.findIndex(x=>x.id===f.id)+1,ancien=precedent.findIndex(x=>x.id===f.id)+1;
-  const classement={type:'classement',div:f.div,scope:'organization',cycle:m.cycle};
+  // Le cycle courant est vivant ; le précédent est un instantané au cycle
+  // explicite. h décrit la vue publique sur laquelle les deux sont calculés.
+  const classement={type:'classement',div:f.div,scope:'organization',cycle:m.cycle,h,mode:'vivant'};
   if(pos>0&&pos<=3) add('rang','top3',{rang:pos},[classement]);
   if(pos&&ancien&&Math.abs(ancien-pos)>=3) add('mouvement',ancien>pos?'hausse':'baisse',
-    {places:ancien-pos},[classement,{...classement,cycle:m.cycle-1}]);
+    {places:ancien-pos},[classement,{...classement,cycle:m.cycle-1,mode:'cycle'}]);
   const combats=mgmtObsAvant(m,f.id,h),suite=[];
   let issue=null;
   const victoires=[];
@@ -79,8 +103,9 @@ function mgmtFaitsIndividuels(base,f){
     for(const [k,n] of methodes) if(n/f.W>=0.6)
       add('methode',k,{methode:k,victoires:n,total:f.W},[...victoires.map(trace),fiche(['W'])]);
   }
-  const attente=mgmtContratAttente(m,f);
-  if(attente>=6) add('attente','6+',{mois:attente},[fiche(['lastCycle','ct'])]);
+  const attente=mgmtFaitsAttente(base,f);
+  if(attente&&attente.mois>=6) add('attente','6+',{mois:attente.mois},
+    [fiche(Number.isSafeInteger(f.lastCycle)&&f.lastCycle>=0?['lastCycle']:['ct']),attente.source]);
   const camp=mgmtCamp(m,f,m.cycle,m);
   add('camp',[camp.ck,camp.ville,camp.k],{nom:camp.nom,ville:camp.ville},[fiche(['camp'])]);
   const titre=mgmtSplitTitle(m,f.div);
@@ -117,7 +142,7 @@ function mgmtFaitsCombattant(contexte,id){
 /* ==== [ANCRE: MGMT_PRESENTATION_FAITS_PAIRE] — Monde lot 3 T1 ==== */
 function mgmtFaitsPaire(base,a,b){
   const {m,h,rang}=base,out=[],sujets=[a.id,b.id].sort();
-  const fiche=(f,champs)=>({type:'fiche',id:f.id,champs});
+  const fiche=(f,champs)=>mgmtFaitsSourceFiche(base,f,champs);
   const add=(famille,groupe,valeur,sources)=>out.push({id:sujets.join('|')+'|'+famille+'|'+JSON.stringify(groupe),
     famille,groupe,valeur,sujets,sources});
   const age=mgmtFaitsTranche(a.age);
@@ -131,7 +156,7 @@ function mgmtFaitsPaire(base,a,b){
     add('meme_camp',[camps[0].ck,camps[0].ville,camps[0].k],{nom:camps[0].nom},[fiche(a,['camp']),fiche(b,['camp'])]);
   const positions=[a,b].map(f=>rang.findIndex(x=>x.id===f.id)+1);
   if(positions.every(x=>x>0)&&Math.abs(positions[0]-positions[1])===1)
-    add('rangs_voisins','voisins',{rangs:positions},[{type:'classement',div:a.div,scope:'organization',cycle:m.cycle}]);
+    add('rangs_voisins','voisins',{rangs:positions},[{type:'classement',div:a.div,scope:'organization',cycle:m.cycle,h,mode:'vivant'}]);
   const adversaire=(i,id)=>m.hist[i].a.id===id?m.hist[i].b.id:m.hist[i].a.id;
   for(const id of new Set(ca.map(i=>adversaire(i,a.id)))){
     const ia=ca.filter(i=>adversaire(i,a.id)===id),ib=cb.filter(i=>adversaire(i,b.id)===id);
