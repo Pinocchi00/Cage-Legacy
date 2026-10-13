@@ -31,11 +31,11 @@ Fondement : « T1 — Les quinze familles, chacune avec sa condition et le fait 
 - Recherche `@eclaireur` tentée : refus technique « Subagent depth limit reached ». Lectures ciblées effectuées directement ; aucun code modifié.
 
 ## 4. Ce qui change
-Après levée du STOP, réviser cette fiche avec les conditions et valeurs attendues approuvées ; le codeur ne les choisit pas.
+Les conditions et valeurs sont celles du §13 ; le codeur les applique.
 - Ajouter `mgmt-raisons.js` : catalogue des quinze identifiants et lecteurs de preuves, sans texte affichable, sans mutation, sans RNG de partie.
 - Ajouter `tests/mgmtRaisons.test.js` : tests des conditions et des preuves, cas positif et négatif pour chaque famille.
 - `index.html` : charger ce fichier après les lecteurs requis ; aucune exécution au chargement. Aujourd'hui carte à :1120, attention :1126, promesses :1127, rivalités :1128, suivi :1132, contrats :1133, préliminaires :1167.
-- Contrat de fonction prévu (à compléter, non exécutable tant que STOP) :
+- Contrat de fonction (complet, §13) :
   `mgmtRaisonsPourPaire(m,fa,fb)`.
   JSDoc : `/** Lit les familles justifiées pour deux combattants, sans mutation ni texte. @param {Object} m Partie en mémoire. @param {Object} fa Premier combattant. @param {Object} fb Second combattant. @returns {Array<Object>} Preuves structurées ; schémas et ordre à fixer après décisions. */`
 - Les champs par famille, seuils et cas limites doivent être inscrits ici avant toute implémentation ; ni objet de sauvegarde ni sélection de raison dominante en T1.
@@ -59,7 +59,7 @@ Fichier nouveau : `tests/mgmtRaisons.test.js`. Intitulés exacts réservés :
 Répartition explicite des autres tests du brief : diversité sur 20 graines × 8 organisations en T2/T3 ; disparition de la phrase passe-partout en T4/T5 ; deux lignes au féminin en T4/T5 ; ancienne pile chargeable et affichable en T3/T4. Ne pas les déclarer réussis en T1.
 
 ## 9. Vérification
-- Après levée du STOP : `node --test tests/mgmtRaisons.test.js tests/mgmtArchive.test.js tests/mgmtRivalites.test.js tests/mgmtPrelims.test.js`, puis `npm run check:rapide`.
+- Après les décisions du §13 : `node --test tests/mgmtRaisons.test.js tests/mgmtArchive.test.js tests/mgmtRivalites.test.js tests/mgmtPrelims.test.js`, puis `npm run check:rapide`.
 - Mesure : aucune. Pas de génération complète des six ans pour cette tranche.
 - Critère final à compléter après réponses : 15 familles, 30 cas de condition minimum, 0 preuve fausse, 0 mutation, 0 échec ciblé et rapide.
 - Cette fiche bloquée ne nécessite pas d'exécuter les tests du jeu ; elle ne livre aucun code.
@@ -95,3 +95,6 @@ Toutes les décisions ci-dessous bloquent le contrat T1 ; répondre puis révise
 5. **Retour de blessure** : recevable s'il existe un fait `injury` du combattant et qu'il n'a pas combattu depuis, pendant 3 cycles après sa guérison. On cite le temps écoulé depuis son dernier combat, sans l'attribuer entièrement à la blessure.
 6. **Styles opposés** : paire « frappeur » contre « lutteur ou soumission », d'après les libellés publics du bilan. Le codeur écrit une petite table constante de ces libellés lue dans les données existantes (grep), sans matrice inventée ; un libellé hors table ne produit pas cette famille.
 7. **Demande ou promesse** : seules celles qu'un préliminaire contre cette paire peut satisfaire. **Débuts** : zéro combat dans l'archive de l'organisation suffit, y compris pour un membre de l'effectif initial (pas de fait `recrue` exigé).
+
+## 14. DÉCISION FINALE du 13/10/2026 — lis ceci en dernier, elle prime
+Il n'y a AUCUN STOP : le §13 répond à toutes les questions du §12 et cette fiche est exécutable. « Pure » veut dire déterministe et sans effet de bord (ne modifie ni `G`, ni la partie, ni l'état du générateur aléatoire global) ; les accessoires publics existants à flux local à graine fixe sont autorisés. Tu choisis toi-même la signature exacte de la fonction (nom et arguments les plus cohérents avec `mgmtReclamesRaisons` et le lecteur existant, vérifie par grep), la forme du retour (famille, fait cité, priorité) et les fichiers touchés ; tu documentes ces choix dans le compte rendu. Les quinze familles et leurs seuils sont ceux du brief et du §13 ; si une famille manque de donnée lisible, elle est omise et listée dans le compte rendu (jamais de fait inventé). Écris le code, les tests (un par famille livrée, repli, déterminisme), vérifie, et commite « Monde lot 6 T1 : les quinze familles » (sans « inachevé »).
