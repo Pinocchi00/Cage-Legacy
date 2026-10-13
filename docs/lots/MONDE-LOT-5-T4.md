@@ -138,3 +138,14 @@ Vérification et écarts :
 - Les « six écarts du relecteur » mentionnés par la décision finale ne sont pas détaillés dans cette fiche ; pas de liste inventée. Relecteur indisponible pour les restituer.
 - `mgmt-retraits-data.js` et `mgmt-voix-data.js` : modifications de fins de ligne dues à la vérification, diff sans espaces vide, exclues du commit.
 - Questions pour Anthony : aucune décision fonctionnelle ouverte ; restent la vérification visuelle et la relecture indépendante indisponibles dans cette session.
+
+## Compte rendu — reprise des écarts du relecteur
+
+- `mgmt-carte-cadre.js` : le bouton « Annuler ce combat » arrête la propagation d'Entrée/Espace comme Confirmer/Renoncer, sans empêcher l'activation native. `index.html` et `sw.js` : versions montées par `tools/_bump.js` ; ordre inchangé, index LF.
+- `tests/mgmtAnnulationHeritee.test.js` : intitulés des sept tests conservés. Test 4 : cinq fenêtres/parties indépendantes, carte complétée par `mgmtBookMain`, paire héritée déplacée à chaque index ; validation vraie et dix identifiants distincts. Chaque événement clavier réel 1–5 laisse le JSON entier, les faits, les sauvegardes et la RNG inchangés avant confirmation.
+- Test 4 : Entrée est émise depuis le bouton focalisé et traverse le véritable écouteur DOM ; absence de `preventDefault` et de mutation vérifiée. jsdom ne génère pas l'activation native : le clic est ensuite explicite, ce qui ne remplace pas la preuve navigateur attendue.
+- Test 3 : photographie JSON complète avant confirmation ; état attendu obtenu uniquement par retrait ciblé et ajout des deux faits. Égalité complète après confirmation, avec conservation des références roster/contrats, agenda et pile (demandes) ; les promesses/faits préexistants sont couverts par l'égalité complète.
+- Vérification : T4 **7/7 verts** ; `npm run check:rapide` **970/970 verts**, lint et lint:content inclus ; `node tools/verif-versions.js` sans écart. Première tentative interrompue par le délai outil de 120 s, relance à 600 s réussie. Aucune nouvelle migration (version 18 conservée).
+- Agents `@eclaireur`, `@verif`, `@relecteur` sollicités mais indisponibles (`Subagent depth limit reached (1)`) ; contrôles exécutés directement, aucun verdict indépendant revendiqué.
+- **Écart 4 non résolu** : aucune capture ni contrôle navigateur à 1280/1440/1920 px, donc ni absence de chevauchement/découpe ni console navigateur sans erreur certifiées. Playwright, @playwright/test et Puppeteer non résolus dans l'environnement ; installation demandée mais refusée par les permissions `npm install*`. Aucun contournement tenté. Les tests jsdom ne sont pas présentés comme preuve visuelle.
+- Questions pour Anthony : fournir un outil navigateur autorisé ou les captures/contrôles manuels pour terminer l'écart 4. Reprise partielle, pas d'acceptation finale revendiquée. Fichiers de données réécrits uniquement en fins de ligne exclus du commit.
