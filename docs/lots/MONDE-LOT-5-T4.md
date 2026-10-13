@@ -1,4 +1,3 @@
-STOP : planche non validée
 
 # Monde lot 5 T4 — Annuler un combat hérité
 
@@ -91,3 +90,12 @@ Ne pas rouvrir les écarts T3 acceptés ; ne pas appliquer la pénalité au simp
 - **Version future 18 et migration sans rétroactivité** : extension explicite du vocabulaire validé, sans fabriquer un scénario historique.
 - **Question pour Anthony (seule bloquante)** : faire produire puis valider la planche du geste T4 sur la Carte (paire, avertissement sur les deux contrariétés, libellés confirmer/renoncer, souris/clavier, retour ou reprise de modification) ; quel fichier de planche validée doit faire foi ?
 - Aucun seuil ou choix de compatibilité technique n'est renvoyé à Anthony. Après validation, réécrire cette fiche avant de lancer le codeur ; ce STOP n'autorise aucune livraison partielle.
+
+## DÉCISION du 13/10/2026 (Claude) — le STOP « planche non validée » est levé
+Pas de planche : la tranche réutilise la grammaire EXISTANTE (composants de l'écran Carte, mécanisme de contrariété déjà codé pour les retraits ; vérifie par grep `mgmtContrarie` et le flux « retrait » de `mgmt-carte.js`). Aucune fenêtre par-dessus l'écran : la confirmation est EN LIGNE, dans l'emplacement du combat.
+1. Sur un combat hérité (provenance du T3) de la carte principale, une action « Annuler ce combat » (bouton du composant, touche libre vérifiée dans `keysRegister`).
+2. Premier appui : l'emplacement affiche en ligne l'avertissement « Annuler ce combat contrarie {a} et {b} : ils en gardent une contrariété. » et deux boutons « Confirmer l'annulation » et « Renoncer » (Échap = renoncer). Textes : propositions Claude, `relu:false`, 22 px minimum, épicènes.
+3. Confirmer : le combat est retiré, les deux combattants reçoivent la contrariété EXISTANTE (même mécanisme que l'annulation d'un combat signé), la place redevient libre ; la provenance du combat disparaît ; retour à la Carte au même curseur.
+4. Renoncer : rien ne change.
+5. Tests : l'avertissement précède toute écriture ; confirmer retire le combat et pose les deux contrariétés ; renoncer ne change aucun état ; un combat non hérité n'offre pas cette action ; version de sauvegarde inchangée (17).
+Plus aucune question : code, vérifie (check:rapide, jamais plus de 16 créations de six ans), commit « Monde lot 5 T4 : annuler un combat hérité ».
