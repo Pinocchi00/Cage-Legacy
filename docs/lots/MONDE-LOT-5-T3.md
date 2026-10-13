@@ -85,3 +85,27 @@ Il n'existe pas de planche pour la carte du premier jour, mais la tranche ne dem
 3. Les places libres gardent leur affichage actuel (« Place libre — booker un combat ») ; les dossiers viennent au lot 4.
 4. Aucun écran nouveau, aucun texte au-delà de « VIENT D'AVANT » et « Lire la présentation » (propositions Claude, relu:false, dans le fichier de données existant de la carte).
 Plus aucune question : code, vérifie (tests ciblés, jamais plus de 16 créations de six ans, tâche de fond pour le lent), commit « Monde lot 5 T3 : la carte du premier jour ».
+
+## Compte rendu
+
+État atteint : **inachevé — vérification rapide rouge, arrêt sans modifier les tests existants**.
+
+- `mgmt-predecesseur.js` : la porte existante marque uniquement les combats qu'elle vient de signer (`herite:true`), sans marquer les combats déjà présents.
+- `mgmt-carte-cadre.js`, `ui-cadre.css` : étiquette « VIENT D'AVANT » échappée, style d'étiquette existant de 22 px, espacement compact dans la ligne de carte existante ; aucune superposition ajoutée.
+- `mgmt-data.js` : libellé exact prescrit par la décision finale, marqué `relu:false`. Aucun texte inventé ; l'appel à `@ecrivain` est indisponible (limite de profondeur des sous-agents).
+- `mgmt-ceintures.js` : un changement effectif de titre efface la provenance ; le retrait/rebooking existant ne la retransmet pas.
+- `mgmt-bureau.js`, `mgmt-save.js` : version 17, migration 16 → 17 sans ajout rétroactif de provenance et sans perte ; validation stricte du champ facultatif, réservé aux combats principaux.
+- `tests/mgmtCartePremierJour.test.js`, `package.json` : fixtures portées de `partie()` T1 (graine 20261008, trois soirées), inscription dans `test` et `test:watch`.
+- `index.html`, `sw.js` : versions de cache montées avec `tools/_bump.js` pour les sept ressources modifiées.
+
+Tests ajoutés (préfixe commun `Monde lot 5 T3 —`) :
+1. `seuls les combats hérités portent la provenance`.
+2. `la lecture répétée ne crée aucun héritage` (rendus et sauvegarde, pas d'ouverture de présentation absente).
+3. `une ancienne sauvegarde ne reçoit aucune provenance`.
+4. `modifier un combat efface sa provenance`.
+
+Vérifications : **4/4 T3 et 5/5 T1 verts** ; `node tools/verif-versions.js` vert ; `npm run check:rapide` **rouge**, notamment assertions de version 16 dans `mgmtNiveau.test.js`, `mgmtMarque.test.js` et `mgmtPredecesseurDemandes.test.js` (version chargée désormais 17). Aucun test existant modifié pour les faire passer. Aucun essai six ans ni Monte Carlo lancé. Contrôle visuel navigateur aux trois largeurs non réalisé.
+
+Écarts et dépendances : `mgmtPresentationCombat` est absent de cette branche ; aucun bouton « Lire la présentation » ni raccourci ajouté, conformément à la décision finale. Places libres inchangées ; parcours dossiers et présentation non testés, dépendances explicitement reportées par cette décision. Le changement de format exige la version 17 malgré le §5 antérieur à la levée du STOP. Les tentatives d'appeler `@eclaireur`, `@verif` et `@relecteur` échouent toutes avec `Subagent depth limit reached (1)` ; vérification exécutée localement, aucun verdict de relecteur revendiqué. La modification locale préexistante de `tests/mgmtPredecesseurDemandes.test.js` est préservée et exclue du commit.
+
+Question pour Anthony : autoriser explicitement la mise à jour des seules assertions de version attendue vers 17 dans les tests existants, et préciser comment traiter celle du fichier local préexistant interdit de modification ? Sans cette décision, impossible de rendre le check rapide vert tout en respectant l'obligation de migration et les interdictions de modification des tests.

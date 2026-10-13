@@ -19,6 +19,9 @@
 /* ==== [ANCRE: MGMT_LOT1_DONNEES] — Lot 1 mode management : socle de données
    du bureau (voix, échanges, raisons, déclencheurs, cadrage). ==== */
 const MGMT_ORG='Split';
+/* ==== [ANCRE: MONDE_LOT5_T3_LIBELLE] — Monde lot 5 T3 ==== */
+/* Proposition Claude prescrite par la décision du 13/10/2026. */
+const MGMT_CARTE_PROVENANCE={texte:"VIENT D'AVANT",relu:false};
 /* Cadrage de la pile complète (CDC §9 : 8 à 15 affaires par cycle, toutes
    voix confondues). Au lot 1e, seule Leïla propose (0 à 2 par cycle,
    mgmtNewPile) : ces bornes ne s'appliquent pas encore, elles sont

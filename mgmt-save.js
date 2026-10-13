@@ -260,6 +260,8 @@ function validateMgmt(raw){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(f.slot!=='main'&&f.slot!=='prelim') return false;
       if(f.title!==undefined&&typeof f.title!=='boolean') return false;
+      /* ==== [ANCRE: MONDE_LOT5_T3_VALIDATION] — Monde lot 5 T3 ==== */
+      if(f.herite!==undefined&&(f.herite!==true||f.slot!=='main')) return false;
     }
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
@@ -484,6 +486,9 @@ function mgmtMigrate(raw){
     raw.v=16;
   }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MONDE_LOT5_T3_MIGRATION] — Monde lot 5 T3 ==== */
+  /* 16 → 17 : provenance facultative, jamais déduite pour une ancienne carte. */
+  if(raw.v===16) raw.v=17;
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }

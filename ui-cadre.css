@@ -390,6 +390,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-car-slot.choisi{background:var(--mf-blanc);color:var(--mf-noir)}
 .mf-car-num{font-family:var(--mf-titre);font-weight:800;font-size:52px;line-height:.69;width:34px;flex:none}
 .mf-car-slot-c{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+/* ==== [ANCRE: MONDE_LOT5_T3_ESPACEMENT] — Monde lot 5 T3 ==== */
+.mf-car-slot.herite .mf-car-slot-c{gap:4px}
 .mf-car-slot-t{display:flex;align-items:center;gap:10px;white-space:nowrap}
 .mf-car-slot-t span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em}
 .mf-car-slot-t em{font-style:normal;font-weight:600;font-size:22px;line-height:1;padding:3px 8px;border:2px solid currentColor}

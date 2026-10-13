@@ -104,7 +104,10 @@ function mgmtPredecesseurCarteHeritee(m,k,reglages){
   if(typeof G==='undefined'||!G||G.mgmt!==m) throw new Error('mgmtPredecesseurCarteHeritee : G.mgmt doit être la partie préparée');
   const cfg=Object.assign(mgmtPredecesseurReglages(),reglages||{});
   const limite=2+Math.floor(rnd()*2);
+  /* ==== [ANCRE: MONDE_LOT5_T3_PROVENANCE] — Monde lot 5 T3 ==== */
+  const existants=new Set(m.card.main);
   const r=mgmtPredecesseurBooker(m,k,cfg,limite,true);
+  for(const fight of m.card.main){ if(!existants.has(fight)) fight.herite=true; }
   return r.reclames+r.tetes;
 }
 
