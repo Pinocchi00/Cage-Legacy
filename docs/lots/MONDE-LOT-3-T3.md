@@ -147,3 +147,6 @@ Trois médias existants et règles distinctes : contradiction possible sans iden
 Zones/presse/enjeux futurs sans source T1 omis : ne pas déduire centre/cage/sol d'un style ou
 inventer un effet sur classement/contrat ; leurs enrichissements attendront une source publique.
 Questions pour Anthony : aucune décision à demander ; les textes passent par l'agent autorisé.
+
+## 9. DÉCISION du 13/10/2026 — les 10 textes sont LIVRÉS (§6 : « demander au superviseur de livrer ces 10 propositions »)
+Les dix propositions `relu:false` sont écrites par Claude dans `mgmt-presentation-combat-data.js` (`MGMT_PRESENTATION_COMBAT_TEXTES`, clés du §6). Ne les réécris pas et n'appelle pas `@ecrivain` (limite de profondeur des sous-agents). Charge le fichier dans `index.html` après `mgmt-presentation-faits.js` avec `?v=`, résous les variables à l'écran (noms publics ; `{styles}` et `{rangs}` joints par « et »), et implémente T3. Si un test épicène/forme refuse une phrase, ne la réécris pas : liste-la dans le compte rendu et livre le reste ; le superviseur la corrigera. Plus aucune question : commit « Monde lot 3 T3 : la présentation du combat » (sans « inachevé »).
