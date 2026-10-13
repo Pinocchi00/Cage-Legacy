@@ -1,0 +1,128 @@
+STOP : rareté, diversité des ouvertures et accès aux données publiques à trancher par Anthony.
+
+# Monde lot 3 T1 — Le tri des faits
+
+## 1. Branche
+`monde-lot-3-presentation` (branche courante vérifiée). Le plan place le lot 3 sur la piste B,
+étape 3, après les fusions des lots 1 et 2 ; il ne donne pas de nom de branche explicite pour ce lot.
+Les commits de fusion des lots 1 et 2 sont présents. Aucune fiche ni compte rendu Monde lot 3 antérieur.
+
+## 2. Objectif
+Produire sans mutation les faits publics d'un combattant et d'une paire, ordonnés par rareté et vérifiables à leur source.
+Fondement : « Une fonction pure donne, pour un combattant puis pour une paire, la liste de ses faits
+classés du plus rare au plus commun. » (brief, lot 3 T1, ligne 188).
+Cette fiche est bloquée : ne pas coder les choix signalés en section 12 ; la compléter après réponse.
+
+## 3. Ce qui existe
+- `mgmt-carte.js:573` : `mgmtDivisionRankingCalcule(m,divId,scope,cycle)`, voie pure du classement.
+  `:614` : `mgmtDivisionRank(m,f,scope)` appelle le classement mémorisé (`:661`).
+  Réutiliser les lois de classement, pas une seconde formule. Les portées sont `organization` et `world`.
+- `mgmt-passe.js:127-146` : `mgmtPasseCote`, `mgmtPasseLigne`, `mgmtPasseEntree`.
+  Les combats du passé restent dans `m.hist`, marqués `p:true`, avec résultat, famille et round,
+  mais sans profil moteur. `mgmtPasseAlleger(m)` (`:150`) supprime les faits `contrat`, `attend`, `depart_attente` du passé.
+- `mgmt-ceintures.js:26` : `mgmtSplitTitle(m,div)` lit `title_initial` et `title_fight`.
+  Porte `mgmtTitleMemoryRows(m)` (`:52`) pour reconstituer le champion AU MOMENT du combat,
+  plutôt que déduire une victoire sur champion à partir de la ceinture actuelle.
+- `mgmt-humanite.js:32,49` : `mgmtIdentiteVille(f)`, `mgmtIdentiteMetier(f)`.
+  Éviter `mgmtIdentite(m,f)` (`:148`) pour ce tri : il calcule aussi des traits non demandés.
+- `mgmt-vie.js:148` : `mgmtVieRelayes(m,f)` filtre les moments lisibles ; `mgmtVieDe` (`:105`)
+  contient aussi des moments privés, à ne pas exposer.
+- `mgmt-soiree-show.js:140` : `mgmtObsAvant(m,id,h)` exclut le combat courant et ses suivants.
+  Porte cette frontière temporelle pour les futurs lecteurs de Soirée, sans appeler le rejeu.
+- `mgmt-ecran-fiche.js:258-271` : garde/allonge publiques viennent de `mgmtCombatProfile(f).phys`.
+  Or `mgmt-corps.js:164-188`, `mgmtCombatProfile(f)`, lit le niveau (`:177`), génère un combattant
+  moteur et applique l'usure. Les aides `mgmtAllongeCm` et `mgmtAllongeTexte`
+  (`mgmt-soiree-show.js:221-225`) passent aussi par ce profil : pas de raccourci autorisé sans décision.
+- `tests/mgmtArchive.test.js:12-20` : modèle de fixture, graine 20261008, Split, quatre soirées.
+  `:28-51` vérifie les identifiants et bilans ; `:54-69` le chargement de l'archive.
+- `tests/helpers/loadGame.js:23-44` : `newGameWindow` charge les vrais scripts d'`index.html`.
+  Ordre vérifié : humanité 1118, carte 1120, passé 1138, soirée-show 1177.
+Recherche déléguée à `@eclaireur` tentée, indisponible (limite de profondeur) ; passages ci-dessus lus directement.
+
+## 4. Ce qui change
+Aucun changement de code tant que STOP demeure. Emplacements prévus après clarification :
+- Nouveau `mgmt-presentation-faits.js` : extraction publique, provenance et classement des faits,
+  sans DOM, sans texte rédigé, sans RNG, sans lecture de `G` ni modification des entrées.
+- `index.html` : charger cette logique après ses dépendances ; pas de modification d'écran.
+- Nouveau `tests/mgmtPresentationFaits.test.js` : tests ciblés ci-dessous.
+- `package.json` : inclure ce test dans les listes explicites `test` et `test:watch` ; vérifier
+  sa présence effective dans `check:rapide`, sans ajouter une exclusion.
+Contrats proposés, à finaliser avec les décisions (ils ne constituent pas une autorisation de coder) :
+```js
+/** Faits publics d'un combattant, avec sources, triés par rareté. Pur.
+ * @param {object} contexte Contexte public explicite, population et frontière temporelle à préciser.
+ * @param {string} id Identifiant du combattant.
+ * @returns {Array<object>} Schéma du fait et règle de départage à fixer après réponses.
+ */
+function mgmtFaitsCombattant(contexte,id)
+/** Faits publics d'une paire, avec sources, triés par rareté. Pur.
+ * @param {object} contexte Même contexte public que pour un combattant.
+ * @param {string} aid @param {string} bid
+ * @returns {Array<object>} Même schéma ; référence de rareté des paires à préciser.
+ */
+function mgmtFaitsCombat(contexte,aid,bid)
+```
+Ne pas figer des seuils, des regroupements, un quota ou un schéma implicite en attendant les réponses.
+
+## 5. Sauvegarde
+Non : fonctions dérivées uniquement. `MGMT_SAVE_VERSION` reste 16 (`mgmt-bureau.js:85`).
+Aucune migration ni modification de validation. Si une donnée publique persistante devient nécessaire,
+réouvrir cette section et coordonner le changement de version, ne pas l'ajouter discrètement.
+
+## 6. Textes
+Aucun : descripteurs de faits, pas de phrases de présentation. Les textes relu:false sont pour T2/T3.
+
+## 7. Écran
+Aucun : T1 n'intègre ni n'affiche une présentation. Les planches validées concernent les tranches d'écran.
+
+## 8. Tests
+Fichier prévu : `tests/mgmtPresentationFaits.test.js`. Intitulés exacts à conserver :
+- « Monde lot 3 T1 — mêmes données publiques, mêmes faits sans mutation ni tirage » : deux appels,
+  entrées gelées, sérialisation avant/après identique et SEED inchangée ; 0 soirée simulée.
+- « Monde lot 3 T1 — aucun accès au niveau caché ni aux attributs moteur » : getters interdits qui
+  lèvent, appels moteur piégés ; 0 lecture et 0 appel. Périmètre garde/allonge bloqué par Q3.
+- « Monde lot 3 T1 — chaque fait possède une source publique retrouvable » : sur Split,
+  graine 20261008 et quatre soirées, retrouver toutes les sources dans l'historique en mémoire,
+  un contrat ou une donnée publique de fiche ; 0 source orpheline, 0 moment privé.
+- « Monde lot 3 T1 — le passé allégé reste une source après rechargement » : même fixture,
+  `mgmtSerialiser` puis `mgmtParseAndValidate`, listes avant/après identiques.
+- « Monde lot 3 T1 — trente combattants ont trente signatures et au plus six ouvertures par famille » :
+  fixture contrôlée de 30 dans une catégorie, 0 soirée ; signatures fondées sur le contenu,
+  pas sur les seuls noms/identifiants. Attendus : 30 signatures distinctes, maximum 6.
+  Assertion du brief réservée ici au futur tri utilisé pour ouvrir les présentations ; sa définition
+  exacte reste bloquée par Q2. Ne pas prétendre tester déjà les pages de T2/T3.
+- « Monde lot 3 T1 — les faits de paire sont sourcés et classés par rareté » : fixture contrôlée,
+  0 soirée ; valeurs de fréquence et ordre attendus à inscrire après Q1/Q4, pas de test tautologique.
+Le test des voix et pourcentages du brief appartient à T3, pas à cette tranche sans pronostic.
+
+## 9. Vérification
+Après levée du STOP : `node --test tests/mgmtPresentationFaits.test.js tests/mgmtArchive.test.js`,
+puis `npm run check:rapide`. Pas de mesure Monte Carlo. Fin : 0 échec ; 0 lecture cachée,
+0 mutation, 0 source orpheline ; 30 signatures et maximum 6 selon la définition validée.
+Aujourd'hui : fiche seule ; aucun test de code exécuté pour prétendre valider la tranche.
+
+## 10. Hors périmètre
+T2/T3 (phrases, pages et pronostics), navigation T5, bilan T6, amendements T7, génération du passé,
+booking, moteur, économie, refonte de la fiche, ajout de faits inventés et changements de sauvegarde.
+
+## 11. Pièges
+Une rareté sur valeur exacte rend presque tout unique (âge/allonge/rang) et ne garantit pas la diversité.
+Un tri indépendant peut ouvrir 30 fois sur la même famille : le quota de six n'en découle pas.
+`m.hist` en mémoire n'est pas l'archive compactée sur disque ; ne pas lire deux fois le passé.
+Les titres sont des faits séparés des traces. Les moments sans relais sont privés.
+Le mémo de classement peut être périmé après une mutation de fixture : voie pure ou invalidation explicite.
+La soirée est calculée d'un bloc : ne pas présenter comme connus des résultats postérieurs au combat.
+
+## 12. Questions pour Anthony
+1. **Bloquante :** quelle population mesure la rareté (effectif actif de la catégorie, organisation,
+   monde), et quelles valeurs/regroupements et seuils retient chaque famille, notamment âge, allonge,
+   rang/mouvement, séries, méthodes, attente ? Quel départage entre faits également rares ?
+2. **Bloquante :** le maximum de six ouvertures par famille doit-il contraindre T1 par une sélection
+   collective des 30 combattants, ou seulement T2 ? Que faire si les faits disponibles ne permettent
+   pas ce quota, et que signifie « aucune présentation identique » pour un tri sans texte ?
+3. **Bloquante :** autorises-tu un adaptateur limité aux données physiques publiques garde/allonge
+   malgré le passage actuel par `mgmtCombatProfile`, ou faut-il une source publique indépendante
+   ne lisant jamais le niveau ni le moteur ? L'interdiction porte-t-elle aussi sur ces lectures indirectes ?
+4. **Bloquante :** la rareté d'une paire se mesure-t-elle parmi toutes les paires de la catégorie,
+   les paires bookables ou les combats de la carte ? Quelles familles sont propres à la paire,
+   et faut-il aussi fusionner les faits individuels ? Quel instant de référence avant un combat ?
