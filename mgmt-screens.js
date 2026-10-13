@@ -406,6 +406,8 @@ Object.assign(CL,{
   },
   mgmtCarteLeave(){
     if(!G||!G.mgmt) return;
+    /* ==== [ANCRE: MONDE_LOT5_T4_RENONCER] — Monde lot 5 T4 ==== */
+    if(MGMT_CART.annulation){ CL.mgmtCarteRenonce(); return; }
     mgmtCartReset();
     CL.go('mgmt_carte');
   },
@@ -445,6 +447,8 @@ Object.assign(CL,{
   },
   mgmtUnbook(i){
     if(!G||!G.mgmt) return;
+    /* ==== [ANCRE: MONDE_LOT5_T4_RETRAIT] — Monde lot 5 T4 ==== */
+    if(G.mgmt.card.main[i]?.herite===true){ CL.mgmtCarteAnnule(i,false); return; }
     if(mgmtRemoveMain(G.mgmt,i)) saveMgmt();
     render();
   },

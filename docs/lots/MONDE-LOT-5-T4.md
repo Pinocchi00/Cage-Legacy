@@ -107,3 +107,34 @@ Plus aucune question : code, vérifie (check:rapide, jamais plus de 16 création
 4. **Touche d'annulation** : `X` si libre dans `keysRegister`, sinon la première libre parmi `K`, `Suppr` ; documente le choix dans le compte rendu.
 5. Les six écarts du relecteur : traite-les dans la même tranche si ce sont des défauts de code ou de test ; liste dans le compte rendu ceux que tu juges hors fiche, sans arrêter.
 Code, vérifie, commit « Monde lot 5 T4 : annuler un combat hérité » (sans « inachevé »).
+
+## Compte rendu
+
+- Décision finale du 13/10 appliquée : confirmation en ligne, pas de fenêtre ni de nouvelle jauge ; primitive `mgmtRemoveMain` inchangée.
+- `mgmt-carte-cadre.js` : avertissement à la place du combat, libellés de la décision repris exactement et `relu:false`, confirmation commune, garde index/identité/provenance et reprise de modification.
+- `mgmt-screens.js` : les retraits hérités passent par cette porte ; Échap renonce sans réinitialiser le choix ni le curseur.
+- `ui-cadre.css` : disposition dans le flux, boutons repliables et corps de 22 px minimum.
+- `mgmt-bureau.js`, `mgmt-save.js` : version 18, validation du motif exact `annulation-heritee`, migration 17 → 18 limitée au numéro ; aucun fait rétroactif. L'attente reste hors sauvegarde.
+- `index.html`, `sw.js` : versions de cache montées par `tools/_bump.js`, ordre des scripts conservé ; `index.html` reste LF.
+- `tests/mgmtAnnulationHeritee.test.js`, `package.json` : sept tests dédiés, inscrits dans `test` et `test:watch` ; fixture `partie()` reprise avec graine 20261008 et trois soirées de passé.
+- Assertions de version alignées, avec citation de la décision T4 : `tests/mgmtCartePremierJour.test.js`, `mgmtEmplacements.test.js`, `mgmtEffectifs.test.js`, `mgmtMarque.test.js`, `mgmtNiveau.test.js`, `mgmtHumanite.test.js`, `mgmtPredecesseurDemandes.test.js`.
+- Touche retenue : **X**, libre dans la carte `keysRegister('mgmt_carte')` ; elle vise le combat hérité du combattant au curseur de la liste. Les chiffres 1–5 restent protégés. Entrée confirme l'attente ; les boutons gardent leur activation native, y compris Renoncer au clavier.
+
+Tests ajoutés (intitulés exacts) :
+1. `Monde lot 5 T4 — avertir avant de retirer un combat hérité`
+2. `Monde lot 5 T4 — renoncer conserve exactement le combat hérité`
+3. `Monde lot 5 T4 — confirmer contrarie exactement les deux combattants`
+4. `Monde lot 5 T4 — souris clavier et modification ne contournent pas la confirmation`
+5. `Monde lot 5 T4 — une confirmation périmée ou répétée ne retire aucun autre combat`
+6. `Monde lot 5 T4 — un combat joueur reste retirable sans contrariété héritée`
+7. `Monde lot 5 T4 — la contrariété survit à la sauvegarde sans se recréer`
+
+Vérification et écarts :
+- Tests T4 : **7/7 verts** ; commande ciblée T4/T3/Card/Promesses : **71/71 verts**. Dernière relance T4 après ajout d'Entrée : 7/7.
+- `@eclaireur`, `@ecrivain`, `@verif` et `@relecteur` sollicités mais indisponibles (`Subagent depth limit reached (1)`). Aucun verdict indépendant revendiqué ; aucun texte nouveau inventé, seuls les libellés Claude de la fiche sont repris.
+- Repli demandé : `node tools/verif-versions.js` sans écart ; `npm run check:rapide` **VERT, 970/970 tests**, lint et lint:content inclus. Première passe rouge seulement sur deux assertions v17 supplémentaires, alignées par la décision finale puis revérifiées.
+- Pas de check complet ni de création de monde de six ans pour les essais T4. Les tests lents écartés restent à lancer au bilan du lot.
+- Tests souris simulés via les actions HTML, clavier via la carte existante ; pas de captures navigateur à 1280/1440/1920 px réalisées : conformité visuelle à vérifier séparément.
+- Les « six écarts du relecteur » mentionnés par la décision finale ne sont pas détaillés dans cette fiche ; pas de liste inventée. Relecteur indisponible pour les restituer.
+- `mgmt-retraits-data.js` et `mgmt-voix-data.js` : modifications de fins de ligne dues à la vérification, diff sans espaces vide, exclues du commit.
+- Questions pour Anthony : aucune décision fonctionnelle ouverte ; restent la vérification visuelle et la relecture indépendante indisponibles dans cette session.

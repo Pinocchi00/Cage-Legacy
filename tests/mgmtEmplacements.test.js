@@ -21,7 +21,7 @@ test('Emplacements — une partie d’avant le lot se retrouve dans l’emplacem
   assert.equal(r.cle,'cage-legacy-mgmt'); assert.equal(r.secours,'cage-legacy-mgmt_backup');
   assert.deepEqual(r.peek,[7,123]); assert.ok(r.intact,'lire un emplacement n’écrit rien');
   /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_EMPLACEMENTS] — Monde lot 5 T3 ==== */
-  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,17); /* renumérotation de version, lot 5 T3, décision du 13/10/2026 */
+  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,18); /* décision du 13/10/2026, lot 5 T4 */
   assert.deepEqual(r.vides,[null,null]); assert.equal(r.dernier,1);
 });
 

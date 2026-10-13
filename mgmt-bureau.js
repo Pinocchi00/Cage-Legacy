@@ -83,7 +83,8 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       Rien à convertir sur les données : la table part pleine (tous vus) à l'instant de la migration
       (MONDE_LOT8_T1_MIGRATION, mgmt-save.js). v15 = le passé (monde lot 1 T3). Une v1 reste refusée. ==== */
 /* ==== [ANCRE: MONDE_LOT5_T3_VERSION] — Monde lot 5 T3 ==== */
-const MGMT_SAVE_VERSION=17;
+/* ==== [ANCRE: MONDE_LOT5_T4_VERSION] — Monde lot 5 T4 ==== */
+const MGMT_SAVE_VERSION=18;
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;

@@ -10,6 +10,11 @@
    Contrat restant (lot 9) et enjeux (presse, public — lots 8 et 10) : « — » tant qu'ils n'existent pas. ==== */
 
 const MGMT_CARTE_LIGNES=6;
+/* ==== [ANCRE: MONDE_LOT5_T4_LIBELLES] — Monde lot 5 T4 ==== */
+/* Propositions Claude reprises de la décision du 13/10/2026, sans texte ajouté. */
+const MGMT_CARTE_ANNULATION={relu:false,action:'Annuler ce combat',
+  avertissement:'Annuler ce combat contrarie {a} et {b} : ils en gardent une contrariété.',
+  confirmer:"Confirmer l'annulation",renoncer:'Renoncer'};
 const MGMT_CARTE_NOMS=['Combat principal','Co-principal','Combat 3','Combat 4','Combat 5'];
 const MF_SVG_CONFIRME='<svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true" style="flex:none"><path d="M4 14l6 6L22 6" stroke="#E9E6E1" stroke-width="4"></path></svg>';
 
@@ -93,13 +98,23 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
   if(fight){
     const fa=mgmtFighterById(m,fight.a), fb=mgmtFighterById(m,fight.b);
     const titre=fight.title===true;
+    /* ==== [ANCRE: MONDE_LOT5_T4_AVERTISSEMENT] — Monde lot 5 T4 ==== */
+    const attente=MGMT_CART.annulation;
+    if(attente&&attente.m===m&&attente.i===i&&attente.fight===fight&&fight.herite===true){
+      const texte=MGMT_CARTE_ANNULATION.avertissement.replace('{a}',fa?fa.name:'?').replace('{b}',fb?fb.name:'?');
+      return `<div class="mf-car-slot mf-car-annulation"><div class="mf-car-slot-c"><div class="mf-car-avertissement">${esc(texte)}</div>`
+        +`<div class="mf-car-annulation-actions"><button type="button" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtCarteConfirmeAnnulation()">${esc(MGMT_CARTE_ANNULATION.confirmer)}</button>`
+        +`<button type="button" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtCarteRenonce()">${esc(MGMT_CARTE_ANNULATION.renoncer)}</button></div></div></div>`;
+    }
     /* ==== [ANCRE: MONDE_LOT5_T3_ETIQUETTE] — Monde lot 5 T3 ==== */
     const provenance=fight.herite===true?`<div class="mf-car-slot-t mf-car-provenance"><em>${esc(MGMT_CARTE_PROVENANCE.texte)}</em></div>`:'';
     /* Lot 11 (D5) : un champion ne combat que pour sa ceinture — elle est en jeu d'office, le joueur ne la retire pas. */
     const champ=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set(), force=titre&&(champ.has(fight.a)||champ.has(fight.b));
     return `<div class="mf-car-slot confirme${provenance?' herite':''}${cur?' choisi':''}"><div class="mf-car-num" onclick="CL.mgmtCarteModifie(${i})">${i+1}</div><div class="mf-car-slot-c">`
       +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Le champion ne combat que pour sa ceinture">TITRE EN JEU</button>`      :((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:'')}</div>`
-      +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${i})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`+provenance+`</div>`
+      +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${i})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`+provenance
+      /* ==== [ANCRE: MONDE_LOT5_T4_ACTION] — Monde lot 5 T4 ==== */
+      +(fight.herite===true?`<button type="button" class="mf-car-annule" onclick="CL.mgmtUnbook(${i})">${esc(MGMT_CARTE_ANNULATION.action)} [X]</button>`:'')+`</div>`
       +`<div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
   }
   const pre=etatMain.pre===i;
@@ -208,6 +223,38 @@ function scr_mgmt_carte_cadre(){
 SCREENS.mgmt_carte=scr_mgmt_carte_cadre;
 
 Object.assign(CL,{
+  /* ==== [ANCRE: MONDE_LOT5_T4_CONFIRMATION] — Monde lot 5 T4 ==== */
+  mgmtCarteAnnule(i,modifier){
+    const m=G&&G.mgmt, fight=m&&m.card.main[i];
+    if(!fight||fight.herite!==true||MGMT_CART.annulation) return;
+    MGMT_CART.annulation={m,i,fight,a:fight.a,b:fight.b,modifier};
+    render();
+  },
+  mgmtCarteRenonce(){
+    delete MGMT_CART.annulation;
+    render();
+  },
+  mgmtCarteConfirmeAnnulation(){
+    const p=MGMT_CART.annulation;
+    delete MGMT_CART.annulation;
+    if(!p) return;
+    const m=G&&G.mgmt, f=m&&m.card.main[p.i];
+    if(m!==p.m||f!==p.fight||f.herite!==true||f.a!==p.a||f.b!==p.b){ render(); return; }
+    if(!mgmtRemoveMain(m,p.i)){ render(); return; }
+    for(const id of [p.a,p.b]) mgmtAddFact(m,{c:m.cycle,k:'contrarie',a:id,p:10,why:'annulation-heritee'});
+    if(p.modifier){
+      mgmtCartReset(); MGMT_CART.pick=p.a;
+      MGMT_CART.cursor=Math.max(0,mgmtCarteListe(m).findIndex(x=>x.id===p.b));
+    }
+    saveMgmt(); render();
+  },
+  mgmtCarteAnnuleVise(){
+    if(MGMT_CART.annulation) return;
+    const m=G&&G.mgmt; if(!m) return;
+    const f=mgmtCarteListe(m)[MGMT_CART.cursor||0];
+    const i=f?m.card.main.findIndex(t=>t.herite===true&&(t.a===f.id||t.b===f.id)):-1;
+    if(i>=0) CL.mgmtCarteAnnule(i,false);
+  },
   /** Un clic sur la liste : sans premier choix il choisit ; avec un premier choix il VISE (la confirmation se fait au bouton ou à Entrée). */
   mgmtCarteVise(id){
     const m=G.mgmt, f=mgmtFighterById(m,id); if(!f) return;
@@ -218,6 +265,8 @@ Object.assign(CL,{
   /** Un combat confirmé se reprend : il est retiré de la carte et le premier combattant revient en choix, le curseur sur son adversaire (Échap remonte d'un cran de plus, jusqu'au premier choix). */
   mgmtCarteModifie(i){
     const m=G.mgmt, f=m.card.main[i]; if(!f) return;
+    /* ==== [ANCRE: MONDE_LOT5_T4_MODIFICATION] — Monde lot 5 T4 ==== */
+    if(f.herite===true){ CL.mgmtCarteAnnule(i,true); return; }
     const a=f.a, b=f.b;
     if(!mgmtRemoveMain(m,i)) return;
     saveMgmt(); mgmtCartReset(); MGMT_CART.pick=a;
@@ -240,6 +289,8 @@ Object.assign(CL,{
     if(f) CL.mgmtFicheParIndex(m.roster.indexOf(f));
   },
   mgmtCarteEntree(){
+    /* ==== [ANCRE: MONDE_LOT5_T4_ENTREE] — Monde lot 5 T4 ==== */
+    if(MGMT_CART.annulation){ CL.mgmtCarteConfirmeAnnulation(); return; }
     const m=G.mgmt, l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0];
     /* Brief démo, lot 4 (D8) : Entrée sur un combattant déjà engagé ne reste pas muet, le curseur passe au premier libre. */
     if(f&&!MGMT_CART.pick&&!mgmtSelectable(m,f,null)){ const i=l.findIndex(x=>mgmtSelectable(m,x,null)); if(i>=0){ MGMT_CART.cursor=i; render(); return; } }
@@ -247,6 +298,9 @@ Object.assign(CL,{
   },
 });
 keysRegister('mgmt_carte',{
+  /* ==== [ANCRE: MONDE_LOT5_T4_TOUCHE_X] — Monde lot 5 T4 ==== */
+  x(){ CL.mgmtCarteAnnuleVise(); },
+  X(){ CL.mgmtCarteAnnuleVise(); },
   ArrowUp(){ const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)-1+n)%n; render(); } },
   ArrowDown(){ const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)+1)%n; render(); } },
   Enter(){ CL.mgmtCarteEntree(); },
