@@ -1,3 +1,5 @@
+> **Le STOP est levé : toutes les questions du §12 sont tranchées au §13 (Claude, 13/10/2026). Code la tranche.**
+
 # Monde lot 3 T1 — Le tri des faits
 
 ## 1. Branche
@@ -38,7 +40,7 @@ Cette fiche est bloquée : ne pas coder les choix signalés en section 12 ; la c
 Recherche déléguée à `@eclaireur` tentée, indisponible (limite de profondeur) ; passages ci-dessus lus directement.
 
 ## 4. Ce qui change
-Aucun changement de code tant que STOP demeure. Emplacements prévus après clarification :
+décision prise (§13) levé le 13/10/2026 par les décisions du §13. Emplacements prévus après clarification :
 - Nouveau `mgmt-presentation-faits.js` : extraction publique, provenance et classement des faits,
   sans DOM, sans texte rédigé, sans RNG, sans lecture de `G` ni modification des entrées.
 - `index.html` : charger cette logique après ses dépendances ; pas de modification d'écran.
@@ -94,7 +96,7 @@ Fichier prévu : `tests/mgmtPresentationFaits.test.js`. Intitulés exacts à con
 Le test des voix et pourcentages du brief appartient à T3, pas à cette tranche sans pronostic.
 
 ## 9. Vérification
-Après levée du STOP : `node --test tests/mgmtPresentationFaits.test.js tests/mgmtArchive.test.js`,
+Après les décisions du §13 : `node --test tests/mgmtPresentationFaits.test.js tests/mgmtArchive.test.js`,
 puis `npm run check:rapide`. Pas de mesure Monte Carlo. Fin : 0 échec ; 0 lecture cachée,
 0 mutation, 0 source orpheline ; 30 signatures et maximum 6 selon la définition validée.
 Aujourd'hui : fiche seule ; aucun test de code exécuté pour prétendre valider la tranche.
