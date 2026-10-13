@@ -19,9 +19,9 @@ const MGMT_PRESENTATION_COMBATTANT_TEXTES = {
   ville:             { id: 'ville',             texte: 'Originaire de {ville}.',                                               situation: 'ville publique', relu: false },
   metier:            { id: 'metier',            texte: 'Dans la vie : {metier}.',                                              situation: 'métier public', relu: false },
   moment:            { id: 'moment',            texte: 'Moment de vie récent : {moment}.',                                     situation: 'moment de vie relayé', relu: false },
-  victoire_champion: { id: 'victoire_champion', texte: 'A battu le champion en titre, {adversaire}.',                          situation: 'victoire sur un champion', relu: false },
+  victoire_champion: { id: 'victoire_champion', texte: 'Victoire de prestige : {adversaire} portait la ceinture.',                          situation: 'victoire sur un champion', relu: false },
   W:                 { id: 'W',                 texte: 'Victoire contre {adversaire}, {methode} {round}.',                     situation: 'résultat d’histoire : victoire', relu: false },
   L:                 { id: 'L',                 texte: 'Défaite contre {adversaire}, {methode} {round}.',                      situation: 'résultat d’histoire : défaite', relu: false },
-  D:                 { id: 'D',                 texte: 'Match nul contre {adversaire}.',                                       situation: 'résultat d’histoire : nul', relu: false }
+  D:                 { id: 'D',                 texte: 'Match nul contre {adversaire}, {methode} {round}.',                                       situation: 'résultat d’histoire : nul', relu: false }
 };
 /* ==== [FIN ANCRE] ==== */
