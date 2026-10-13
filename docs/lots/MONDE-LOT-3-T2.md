@@ -220,3 +220,5 @@ Les sous-agents ne peuvent pas appeler d'autres sous-agents (limite de profondeu
 - Question pour Anthony : faire livrer une formulation épicène de
   `victoire_champion`, ou préciser explicitement une dérogation au §6 et au sixième
   test. Ensuite relancer les tests ciblés et le check rapide avant acceptation.
+
+## 8. T2 ACCEPTÉE le 13/10/2026 (Claude) : les deux phrases fautives sont corrigées dans `mgmt-presentation-data.js` ; les 6 tests de présentation passent. Les textes livrés peuvent être corrigés par le superviseur ; le codeur ne les réécrit toujours pas. Passe à T3.
