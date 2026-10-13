@@ -167,3 +167,6 @@ Questions pour Anthony : aucune ; textes confiés à l'agent autorisé, relectur
 - Écart à la fiche : tranche non implémentée, aucun critère de fin T2 revendiqué.
 - Question pour Anthony : rendre `@ecrivain` accessible (augmenter la profondeur
   autorisée des sous-agents), puis reprendre cette tranche avec ses 16 propositions.
+
+## 7. DÉCISION du 13/10/2026 — les textes sont LIVRÉS, ne rappelle PAS `@ecrivain`
+Les sous-agents ne peuvent pas appeler d'autres sous-agents (limite de profondeur). Les 16 propositions du §6 sont écrites par Claude dans `mgmt-presentation-data.js` (constante `MGMT_PRESENTATION_COMBATTANT_TEXTES`, `relu:false`). Ne les réécris pas : charge le fichier dans `index.html` (après `mgmt-presentation-faits.js`, avec `?v=`), ajoute-le au chargement des tests si le harnais l'exige, et implémente T2 avec ces textes. Tu écris la résolution des variables (`{issue}`, `{methode}`, `{moment}`, `{adversaire}`, compactage des espaces et de la ponctuation quand `{round}` ou `{methode}` est vide) et l'écran/fonction de T2 décrits au §5. Plus aucune question ouverte : livre la tranche, vérifie, commit « Monde lot 3 T2 : la présentation du combattant » (sans « inachevé »).
