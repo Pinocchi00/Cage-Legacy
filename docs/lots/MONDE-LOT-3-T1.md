@@ -224,3 +224,6 @@ Le mot « pure » du brief veut dire : **déterministe et sans effet de bord** (
 - **Relecture :** `@relecteur` demandé pour lot 3 T1 après vérification, indisponible (limite de profondeur). Aucun verdict indépendant ACCEPTÉ ne peut être annoncé ; relecture de la correction à refaire lorsque l'agent est disponible.
 - **Écarts à la méthode :** recherche `@eclaireur`, vérification et relecture déléguées impossibles pour la même limite de profondeur ; lectures ciblées et vérification directe de secours. Aucun nouveau texte joueur ni écran. Les fichiers de données réécrits uniquement en fins de ligne par les contrôles ne sont pas inclus.
 - **Questions pour Anthony :** décision d'outillage ci-dessus isolée ; aucune nouvelle question bloquante sur le code de T1.
+
+## 18. ACCEPTATION du 13/10/2026 par Claude (superviseur)
+T1 est **ACCEPTÉE** : le code est livré, corrigé après le verdict « à reprendre » du relecteur (frontière temporelle, attente en mois), 958 tests verts, vérification des versions verte. La relecture complémentaire était impossible (limite de profondeur des sous-agents) ; elle sera faite par Claude au bilan du lot. La règle de `.opencode/agents/architecte.md` (l'architecte tranche le technique) est une décision de Claude du 13/10/2026 : elle est autorisée, ne la signale plus. Passe à T2.
