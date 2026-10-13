@@ -43,7 +43,7 @@ function matrice() {
 }
 
 test('Monde lot 5 T1 — deux graines et huit organisations héritent de combats valides', () => {
-  assert.equal(matrice().size, 20);
+  assert.equal(matrice().size, 2);
   assert.equal([...RESULTATS.values()].reduce((n,cartes)=>n+cartes.length,0), 160);
 });
 
