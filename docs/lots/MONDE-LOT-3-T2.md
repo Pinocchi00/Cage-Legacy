@@ -170,3 +170,53 @@ Questions pour Anthony : aucune ; textes confiés à l'agent autorisé, relectur
 
 ## 7. DÉCISION du 13/10/2026 — les textes sont LIVRÉS, ne rappelle PAS `@ecrivain`
 Les sous-agents ne peuvent pas appeler d'autres sous-agents (limite de profondeur). Les 16 propositions du §6 sont écrites par Claude dans `mgmt-presentation-data.js` (constante `MGMT_PRESENTATION_COMBATTANT_TEXTES`, `relu:false`). Ne les réécris pas : charge le fichier dans `index.html` (après `mgmt-presentation-faits.js`, avec `?v=`), ajoute-le au chargement des tests si le harnais l'exige, et implémente T2 avec ces textes. Tu écris la résolution des variables (`{issue}`, `{methode}`, `{moment}`, `{adversaire}`, compactage des espaces et de la ponctuation quand `{round}` ou `{methode}` est vide) et l'écran/fonction de T2 décrits au §5. Plus aucune question ouverte : livre la tranche, vérifie, commit « Monde lot 3 T2 : la présentation du combattant » (sans « inachevé »).
+
+## Compte rendu
+
+### Reprise du 13/10/2026 après livraison des textes
+
+- Branche vérifiée : `monde-lot-3-presentation`, arbre initial propre. Compositeur
+  implémenté, mais **critère de fin non atteint** : un modèle livré contredit
+  l'exigence épicène. Le commit conserve le titre imposé par la décision finale,
+  sans revendiquer une livraison verte ni une acceptation de T2.
+- `mgmt-presentation-combattant.js` : composition pure, population et frontière T1,
+  chemins augmentants déterministes (six ouvertures par famille), ouverture puis
+  bilan et faits rares, histoire prioritaire des victoires sur une ceinture puis
+  combats récents. Variables publiques et libellés existants, texte brut sans DOM.
+- `index.html` : données livrées puis compositeur après T1 ; `_bump.js` a monté leurs
+  versions à `b1x` et le cache de `sw.js` à `b132`. Aucun texte livré réécrit.
+- `tests/mgmtPresentationCombattant.test.js` : six tests ; reconstruction des sources
+  portée de T1 et passé Split limité à quatre soirées. `package.json` : ajout dans
+  `test` et `test:watch`, sans exclusion du check rapide.
+- Tests ajoutés (intitulés exacts) :
+  - « Monde lot 3 T2 — trente textes distincts et six ouvertures au maximum » ;
+  - « Monde lot 3 T2 — appariement stable et manque de faits sans invention » ;
+  - « Monde lot 3 T2 — aucun niveau caché ni appel moteur » ;
+  - « Monde lot 3 T2 — chaque phrase retrouve sa source publique » ;
+  - « Monde lot 3 T2 — frontière historique et rechargement déterministes » ;
+  - « Monde lot 3 T2 — féminin et propositions exportables ».
+- Tests ciblés T2 : 5 réussites sur 6. Avec T1 : 15 réussites sur 16. Les assertions
+  fonctionnelles passent : 30 textes distincts sans noms/ids, six ouvertures au
+  maximum, déplacements et ordre stables, sources reconstruites, aucune lecture
+  cachée ni moteur, frontières, entrées gelées et rechargement déterministes.
+  L'export temporaire retrouve les 16 propositions et leurs clés ; il est supprimé
+  par le test et n'est pas commité.
+- Migration : aucune, `MGMT_SAVE_VERSION` reste 16, validation inchangée ; aucune
+  présentation persistée. Aucun écran ni navigation ajouté (§7).
+- Agents : `@eclaireur`, `@verif` et `@relecteur` appelés, tous refusés avec
+  « Subagent depth limit reached (1) ». Aucun verdict de relecture disponible.
+- Secours demandé : `node tools/verif-versions.js`, aucun écart ; puis
+  `npm run check:rapide`, **ROUGE**, 963 réussites sur 964, un échec ci-dessous
+  (104 fichiers lancés, 12 écartés). Le bilan final est présent, mais le terminal
+  signale ensuite un dépassement du délai de 240 secondes.
+- Blocage : `mgmt-presentation-data.js:22`, modèle `victoire_champion`, contient
+  « A battu le champion en titre, {adversaire}. ». Le §6 exige des formulations
+  épicènes, « y compris champion », et le sixième test impose l'absence de flexion
+  masculine. La décision finale interdit de réécrire les textes ou de rappeler
+  `@ecrivain`. Le test n'est ni affaibli ni désactivé pour cacher cette contradiction.
+- Écart : arrêt sur ce point de spécification, sans correction inventée du texte.
+  Les modifications de fins de ligne seules de `mgmt-retraits-data.js` et
+  `mgmt-voix-data.js`, produites par la vérification, restent hors commit.
+- Question pour Anthony : faire livrer une formulation épicène de
+  `victoire_champion`, ou préciser explicitement une dérogation au §6 et au sixième
+  test. Ensuite relancer les tests ciblés et le check rapide avant acceptation.
