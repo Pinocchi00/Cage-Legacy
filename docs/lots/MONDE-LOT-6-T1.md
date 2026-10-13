@@ -98,3 +98,45 @@ Toutes les décisions ci-dessous bloquent le contrat T1 ; répondre puis révise
 
 ## 14. DÉCISION FINALE du 13/10/2026 — lis ceci en dernier, elle prime
 Il n'y a AUCUN STOP : le §13 répond à toutes les questions du §12 et cette fiche est exécutable. « Pure » veut dire déterministe et sans effet de bord (ne modifie ni `G`, ni la partie, ni l'état du générateur aléatoire global) ; les accessoires publics existants à flux local à graine fixe sont autorisés. Tu choisis toi-même la signature exacte de la fonction (nom et arguments les plus cohérents avec `mgmtReclamesRaisons` et le lecteur existant, vérifie par grep), la forme du retour (famille, fait cité, priorité) et les fichiers touchés ; tu documentes ces choix dans le compte rendu. Les quinze familles et leurs seuils sont ceux du brief et du §13 ; si une famille manque de donnée lisible, elle est omise et listée dans le compte rendu (jamais de fait inventé). Écris le code, les tests (un par famille livrée, repli, déterminisme), vérifie, et commite « Monde lot 6 T1 : les quinze familles » (sans « inachevé »).
+
+## Compte rendu
+
+### Livraison et contrat
+- Branche vérifiée : `monde-lot-6-raisons`. Les changements de la tranche déjà présents dans le répertoire de travail ont été repris, examinés et complétés.
+- `mgmt-raisons.js` : catalogue constant et lecteur `mgmtRaisonsPourPaire(m,fa,fb)`, porté sur les lecteurs existants, sans sélection de combat ni formulation. Retour : tableau de `{famille,fait}`, au plus une preuve par famille, dans l'ordre du catalogue (aucune priorité de booking). Les interlocuteurs sont triés par identifiant : inverser les arguments rend le même JSON. Les indices `i` désignent `m.hist` ou `m.facts` d'origine ; les autres preuves citent les valeurs des lecteurs publics et leurs identifiants.
+- Lecture sur copie locale de la partie et des combattants ; restauration du mémo global des rôles dans `finally`. Aucun changement de `G`, de la partie fournie ou de la graine. Les identités et bilans publics utilisent leurs flux locaux existants, sans attribut caché ni analyse de phrase.
+- `tests/mgmtRaisons.test.js` : 28 tests, dont un cas positif et un cas négatif pour chacun des 15 identifiants livrés, contrôle des sources, des seuils, du repli et du passé court.
+- `index.html` : chargement après suivi/contrats et les autres lecteurs requis ; version `mgmt-raisons.js` montée par `node tools/_bump.js mgmt-raisons.js`.
+- `package.json` : nouveau test inscrit dans `test` et `test:watch`.
+- `sw.js` : version de cache montée par l'outil. Cette fiche : compte rendu.
+- `mgmt-retraits-data.js` et `mgmt-voix-data.js`, signalés modifiés mais sans diff hors espaces/fins de ligne, restent exclus du commit.
+
+### Tests ajoutés (intitulés)
+Tous commencent par `Monde lot 6 T1 — ` :
+- `les quinze familles possèdent chacune une condition et une preuve`.
+- `<famille> : condition positive et négative`, pour chacun de : `revanche`, `rivalite-ouverte`, `series-croisees`, `classement-voisin`, `test-jeune`, `derniere-chance`, `longue-attente`, `demande-promesse`, `fin-contrat`, `styles-opposes`, `derby`, `debuts`, `veteran`, `reclame-public`, `meme-categorie-jamais-affrontes`.
+- `chaque raison est vérifiée contre sa source`.
+- `la lecture est pure et déterministe`.
+- `le repli cite seulement la catégorie et l’absence de rencontre`.
+- `classement voisin accepte deux rangs mais pas trois`.
+- `longue attente franchit le seuil public de six mois`.
+- `vingt combats suffisent au vétéran malgré son âge`.
+- `une réponse éteint le défi et une autre cible ne satisfait pas la promesse`.
+- `une promesse tenue ou rompue ne justifie plus la paire`.
+- `aucune guérison n’est inventée à partir d’une blessure`.
+- `une paire absente ou identique ne donne aucune preuve`.
+- `la revanche cite un combat de l'archive et son vrai vainqueur`.
+- `un passé allégé suffit sans rejouer les combats`.
+
+### Vérification et relecture
+- `node --test tests/mgmtRaisons.test.js` : 28/28 verts.
+- Commande ciblée du §9 (raisons, archive, rivalités, préliminaires) : 47/47 verts.
+- `node tools/verif-versions.js` : aucun écart.
+- `npm run check:rapide` : VERT, 976 tests réussis, 103 fichiers lancés, 12 écartés par l'outillage actuel. Aucune mesure complète, aucun test lent modifié ; check complet réservé au bilan du lot.
+- Appels à `@eclaireur`, `@verif` et `@relecteur` tentés : refus technique `Subagent depth limit reached (1)`. Lectures ciblées et vérifications locales de secours effectuées ; aucun verdict indépendant de relecteur disponible.
+
+### Sauvegarde, écarts et questions pour Anthony
+- Aucune migration : format, version, validation et archive inchangés. Aucun écran, texte joueur ou changement du booking.
+- Selon l'autorisation du §14, **retour de blessure omis** : les faits `injury` ne conservent pas leur échéance de guérison. `f.susp` est une échéance courante, pas une date historique rattachée à la blessure citée ; impossible de prouver la fenêtre de trois cycles sans inventer le fait.
+- Donc **14 familles du brief plus le repli distinct** `meme-categorie-jamais-affrontes`, soit 15 identifiants livrés, et non les 15 familles originales toutes implémentées. Aucun enjeu de dépassement au classement n'est affirmé.
+- Questions pour Anthony : aucune question bloquante restante selon le §14. Si le retour de blessure doit être livré ultérieurement, il faudra conserver une échéance de guérison associée au fait ; rien n'a été ajouté à la sauvegarde dans cette tranche.
