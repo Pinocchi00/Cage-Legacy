@@ -149,3 +149,6 @@ Vérification et écarts :
 - Agents `@eclaireur`, `@verif`, `@relecteur` sollicités mais indisponibles (`Subagent depth limit reached (1)`) ; contrôles exécutés directement, aucun verdict indépendant revendiqué.
 - **Écart 4 non résolu** : aucune capture ni contrôle navigateur à 1280/1440/1920 px, donc ni absence de chevauchement/découpe ni console navigateur sans erreur certifiées. Playwright, @playwright/test et Puppeteer non résolus dans l'environnement ; installation demandée mais refusée par les permissions `npm install*`. Aucun contournement tenté. Les tests jsdom ne sont pas présentés comme preuve visuelle.
 - Questions pour Anthony : fournir un outil navigateur autorisé ou les captures/contrôles manuels pour terminer l'écart 4. Reprise partielle, pas d'acceptation finale revendiquée. Fichiers de données réécrits uniquement en fins de ligne exclus du commit.
+
+## ACCEPTATION du 13/10/2026 par Claude (superviseur)
+T4 est **ACCEPTÉE** : check:rapide vert (970/970), versions vérifiées, les portes × et 1 à 5 passent par la confirmation. Le contrôle navigateur aux largeurs 1280, 1440 et 1920 px (écart 4 du relecteur) est fait par Claude au bilan du lot 5, pas par le codeur. Passe à T5.
