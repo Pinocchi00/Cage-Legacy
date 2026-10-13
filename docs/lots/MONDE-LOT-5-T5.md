@@ -84,3 +84,33 @@ Pas de fusion de dépendances, réécriture des six ans, second simulateur ou r�
 - **Aucune réparation de contrat dans le parcours UI** : prouve l'héritage réel sans masquer un défaut ; l'aide automatique conserve son contrat historique, explicitement limité au test 5.
 - **Reprise à l'index 3 et fin au cycle 5** : mêmes repères que les tests démo existants, sans seuil arbitraire ni scénario d'auteur.
 - Questions pour Anthony : **aucune**.
+
+## Compte rendu
+
+### État : inachevé — contradiction entre le critère de reprise et le périmètre tests seuls
+
+- `tests/mgmtSuiteHeritee.test.js` : cinq tests d'intégration sur la fixture déterministe de T1, remplissage sans réparation des contrats, portes UI existantes et aide automatique avec reprise. Fenêtres fermées par nettoyage de test. Aucun code de production modifié.
+- `package.json` : ajout du seul fichier T5 aux listes explicites `test` et `test:watch`, sans ajout aux tests lents.
+- `docs/lots/MONDE-LOT-5-T5.md` : présent compte rendu et question bloquante.
+- Sauvegarde : aucun changement de format ni migration ; version 18 conservée. Aucun cache, index ou service worker modifié.
+
+### Tests ajoutés (intitulés)
+
+1. `Monde lot 5 T5 — la première soirée conserve les paires héritées et leur ordre de passage` — vert.
+2. `Monde lot 5 T5 — la provenance ne change ni le combat ni la recette` — vert.
+3. `Monde lot 5 T5 — regarder passer et revoir ne rejouent pas la première soirée` — vert.
+4. `Monde lot 5 T5 — reprendre la première soirée mène au lendemain puis aux résultats` — rouge sur le JSON entier après reprise ; assertions de fin et variante sans touchés écrites mais non atteintes.
+5. `Monde lot 5 T5 — le joueur automatique finit la carte héritée avec une reprise` — vert.
+
+### Vérification et diagnostic
+
+- Ciblée exigée : **42/43 verts**, dont **4/5 T5** ; aucun ancien test en échec. Première soirée : **9 traces**, **1 soirée joueur**, aucune paire héritée perdue ou dupliquée ; consultation : JSON entier inchangé hors `lastEvent.vu`, SEED inchangé.
+- `@verif` indisponible (`Subagent depth limit reached (1)`). Repli exécuté directement : `node tools/verif-versions.js` sans écart ; `npm run check:rapide` **rouge, 974/975 verts**, unique échec identique au test 4 T5. Aucun check complet ni mesure lancé.
+- `@relecteur` sollicité avec lot 5/T5 et les résultats ; indisponible avec la même erreur. Aucun verdict délégué revendiqué. `@eclaireur` également indisponible ; lecture directe des passages désignés par la fiche.
+- La sonde locale, non commitée dans `tools/reports/t5-reprise.js`, compare récursivement la partie avant/après `CL.mgmtEnter(1)` : seule différence de données observée, `cal.prochaines[0]` passe d'absent à `{jour:70,taille:'petite',salle:'salle-4'}`. `mgmt-screens.js:381` appelle `mgmtAgendaSuivante(G.mgmt)` avant la reprise prioritaire (:383). Écran, index=vu=3, cycle=4, événements=4 et validation sont conformes avant l'assertion JSON qui échoue.
+- Aucun assouplissement de test, aucune neutralisation de l'agenda, aucun contournement de la porte de reprise, aucune modification de production. L'assertion compare toujours le JSON entier ; son diagnostic a seulement été raccourci pour éviter d'imprimer toute la sauvegarde.
+
+### Écarts et question pour Anthony
+
+- Le critère **5/5** et la preuve de fin UI ne sont pas atteints. Arrêt sur ce point, état conservé dans un commit **inachevé**, sans push.
+- **Question bloquante :** faut-il autoriser une correction de production pour ne préparer la prochaine date qu'après la reprise/fin de la soirée, ou réviser explicitement le critère de JSON inchangé pour admettre la préparation à J70 au chargement ? La tranche interdit actuellement la première option et exige une assertion incompatible avec la seconde ; aucune option n'a été choisie sans décision.
