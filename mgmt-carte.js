@@ -110,8 +110,12 @@ function mgmtRecGap(A,B){ return Math.abs((A.W+A.L)-(B.W+B.L)); }
  *   retenue est prise parmi celles qui cumulent la plus longue inactivité
  *   (jamais combattu sous Split = le plus inactif) ; à égalité, le tirage
  *   seedé garde la variété.
- * @returns {{a,b,sloppy,warned,div}|null} */
-function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
+ * @param {string} [famille] Famille obligatoire pour ce tirage.
+ * @param {Map<string,Array<Object>>} [raisonsIndex] Preuves locales précalculées.
+ * @returns {Object|null} Paire existante, avec raison {famille,fait} seulement si une famille est demandée. */
+/* ==== [ANCRE: MONDE_LOT6_T2_SELECTION] — Monde lot 6 T2 ==== */
+function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsIndex){
+  if(famille&&!MGMT_RAISON_FAMILLES.includes(famille)) return null;
   const totals=stats||{total:0,streak:0};
   const wantSloppy=rnd()<mgmtSloppyProb(totals.total,totals.streak);
   const r=m.roster;
@@ -146,6 +150,7 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
     /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
     &&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,o)));
   const sexes=aptes.map(genderOf);
+  if(famille&&!raisonsIndex) raisonsIndex=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
   const collect=mode=>{
     const out=[];
     for(let i=0;i<aptes.length;i++){
@@ -156,6 +161,8 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
       const key=[A.id,B.id].sort().join('|');
       if(seen.has(key)) continue;
       if(rematch.has(key)) continue;
+      const raison=famille?(raisonsIndex.get(key)||[]).find(r=>r.famille===famille):null;
+      if(famille&&!raison) continue;
       if(!relaxed){
         /* §T3 : repos sauf en mode assoupli. */
         if(repos(A)||repos(B)) continue;
@@ -171,7 +178,7 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
         const sloppy=(A.div!==B.div)||rankGap>MGMT_RANK_GAP||mgmtRecGap(A,B)>=MGMT_SLOPPY_GAP;
         if(mode==='clean'&&sloppy) continue;
         if(mode==='sloppy'&&!sloppy) continue;
-        out.push({A,B,sloppy,div:d,inact:inact(A)+inact(B)});
+        out.push({A,B,sloppy,div:d,inact:inact(A)+inact(B),raison});
       }
     }
     return out;
@@ -187,7 +194,47 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
   const top=cands.filter(c=>c.inact===best);
   const c=pick(top);
   const warned=c.sloppy&&rnd()<mgmtWarnProb(totals.total);
-  return {a:c.A,b:c.B,sloppy:c.sloppy,warned,div:c.div};
+  const result={a:c.A,b:c.B,sloppy:c.sloppy,warned,div:c.div};
+  if(famille) result.raison=c.raison;
+  return result;
+}
+
+/* ==== [ANCRE: MONDE_LOT6_T2_BLOC] — Monde lot 6 T2 ==== */
+/** Couples distincts, de même genre et sans homonymes, dans l'ordre du roster. */
+function mgmtBulkReasonPairs(aptes){
+  const paires=[], sexes=aptes.map(f=>divById(f.div)?.gender||null);
+  for(let i=0;i<aptes.length;i++){
+    for(let j=i+1;j<aptes.length;j++){
+      if(aptes[i].first!==aptes[j].first&&sexes[i]===sexes[j]) paires.push([aptes[i],aptes[j]]);
+    }
+  }
+  return paires;
+}
+
+/** Choisit les familles puis leurs paires pour un bloc neuf. @param {Object} m Partie. @param {Set<string>} used Prénoms à exclure. @param {Set<string>} seen Paires à exclure. @param {number} n Nombre de combats. @param {Object} stats Écrasements. @param {boolean} relaxed Assouplissement existant. @returns {Array<Object>|null} n résultats du picker avec raison, ou null ; ensembles fournis inchangés en cas d'échec. */
+function mgmtBulkSelection(m,used,seen,n,stats,relaxed){
+  const champions=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set();
+  const aptes=m.roster.filter(f=>mgmtAvailable(m,f)&&!champions.has(f.id)
+    &&!mgmtEngaged(m,f)&&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,f)));
+  const index=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
+  const localUsed=new Set(used), localSeen=new Set(seen), familles=new Set(), result=[];
+  let lastDiv=null, run=0;
+  for(let i=0;i<n;i++){
+    let p=null;
+    for(const famille of MGMT_RAISON_FAMILLES){
+      if(familles.has(famille)) continue;
+      p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index);
+      if(p) break;
+    }
+    if(!p) return null;
+    localUsed.add(p.a.first); localUsed.add(p.b.first);
+    localSeen.add([p.a.id,p.b.id].sort().join('|'));
+    run=p.div===lastDiv?run+1:1; lastDiv=p.div;
+    familles.add(p.raison.famille); result.push(p);
+  }
+  for(const first of localUsed) used.add(first);
+  for(const key of localSeen) seen.add(key);
+  return result;
 }
 
 /**
@@ -215,20 +262,14 @@ function mgmtNewBulkAffair(m,used,seen,relaxed){
   const n=(Number.isSafeInteger(m.card.sizePrelims)?m.card.sizePrelims:MGMT_PRELIM_SIZE)-m.card.prelims.length;
   if(n<=0) return null;
   const stats=mgmtCrushStats(m);
-  const fights=[];
-  let lastDiv=null, run=0;
   /* §T3 : la proposition est un tout — Leïla propose les préliminaires
      MANQUANTS, jamais une carte partielle ; si un combat de la carte est
      introuvable, l'appelant signale le shortfall et on ne remplit rien
      (lot 3a §5). */
-  for(let i=0;i<n;i++){
-    const p=mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed);
-    if(!p) return null;
-    used.add(p.a.first); used.add(p.b.first);
-    seen.add([p.a.id,p.b.id].sort().join('|'));
-    run=(p.div===lastDiv)?run+1:1; lastDiv=p.div;
-    fights.push({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned});
-  }
+  /* ==== [ANCRE: MONDE_LOT6_T2_PROPOSITION] — Monde lot 6 T2 ==== */
+  const selection=mgmtBulkSelection(m,used,seen,n,stats,relaxed);
+  if(!selection) return null;
+  const fights=selection.map(p=>({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned}));
   const aff={
     id:mgmtNextId(m),kind:'leila_bulk',exchange:'leila_bulk',
     speaker:'leila',a:fights[0].a,b:fights[0].b,fights,marked:null,

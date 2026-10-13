@@ -88,3 +88,61 @@ T3 (persistance, migrations, anciennes piles, échanges et raccord aux prélimin
 - Compatibilité : arguments finaux optionnels et ancienne voie intacte ; la génération neuve utilise la nouvelle voie dès T2, les gestes qui nécessitent la mémoire de la cause attendent T3.
 - Pas de backtracking ni nouveau cache global : limite le changement au sélectionneur actuel ; les 160 blocs complets sont la preuve de suffisance sur la population de début retenue.
 - Questions pour Anthony : aucune. L'omission du retour de blessure autorisée et documentée en T1 demeure ; aucune décision d'auteur supplémentaire demandée.
+
+## Compte rendu
+
+### État : inachevé — arrêt sur contradiction du critère de fin
+
+Le 13/10/2026, sur la branche attendue `monde-lot-6-raisons`. Le code de sélection et les huit tests ont été écrits, mais T2 **n'est pas livrée** : le critère 160/160 blocs complets est incompatible avec au moins une population de début prévue par la fiche. Aucun seuil de T1, règle de booking, roster ou ancien test n'a été changé pour masquer cet échec.
+
+### Fichiers modifiés et rôle
+
+- `mgmt-raisons.js` : `mgmtRaisonsIndex`, copie unique de la partie, préparation canonique et restauration du mémo des rôles dans `finally`. Les lectures publiques coûteuses sont mémorisées seulement dans l'appel groupé, sur l'état local identique ; une paire apportant des combattants différents du roster reçoit des lectures séparées. Aucun cache durable ni tirage.
+- `mgmt-carte.js` : arguments optionnels du picker et filtrage par preuve ; collecte des couples admissibles ; sélection dans l'ordre des familles, sans répétition, sur copies des ensembles ; publication seulement après bloc complet ; raccord de `mgmtNewBulkAffair` sans sérialiser `raison`.
+- `tests/mgmtRaisonsSelection.test.js` : les huit tests exigés, sources, pureté, déterminisme, manque de familles et population de 160 départs sans soirée simulée.
+- `package.json` : ajout du nouveau fichier à `test` et `test:watch`, aucun ancien test retiré.
+- `index.html`, `sw.js` : versions seulement, via `node tools/_bump.js mgmt-raisons.js mgmt-carte.js` ; ordre des scripts inchangé.
+- Cette fiche : compte rendu et question bloquante.
+- `mgmt-retraits-data.js` et `mgmt-voix-data.js` restent exclus : modifications antérieures, sans différence de contenu dans le diff courant.
+
+### Tests ajoutés (intitulés exacts)
+
+- `Monde lot 6 T2 — la famille demandée précède le choix de paire`
+- `Monde lot 6 T2 — la revanche choisie cite le vrai vainqueur`
+- `Monde lot 6 T2 — vingt graines et huit organisations ne répètent aucune famille`
+- `Monde lot 6 T2 — le bloc strict conserve paires prénoms et catégories variés`
+- `Monde lot 6 T2 — une proposition neuve utilise la sélection sans changer son format`
+- `Monde lot 6 T2 — le manque de familles ne produit pas de bloc partiel`
+- `Monde lot 6 T2 — la lecture groupée égale les lectures unitaires et reste pure`
+- `Monde lot 6 T2 — une même graine donne les mêmes familles paires et tirages`
+
+### Vérifications et essais
+
+- Nouveau fichier : **7 tests verts, 1 rouge**, exécution entière terminée en environ 956 secondes. Le test des 160 départs n'ignore aucun shortfall. Les violations strictes comptées sur les blocs effectivement rendus sont toutes à zéro ; cela ne prouve pas 160 blocs complets.
+- `node --test tests/mgmtRaisons.test.js tests/mgmtCard.test.js tests/mgmtPrelims.test.js` : **79/79 verts**. Les quinze familles de T1 et les anciens tirages du picker sans famille restent couverts.
+- `@eclaireur`, `@verif`, `@relecteur` : appels refusés, `Subagent depth limit reached (1)`. Repérage direct limité aux passages de la fiche ; aucun verdict indépendant de relecture disponible.
+- Repli demandé : `node tools/verif-versions.js` **vert**, puis `npm run check:rapide` **rouge : 983/984 tests verts**, seul échec : le test des 160 départs ci-dessus. Seule la fin des sorties du repli a été affichée/lue. Pas de check complet ni Monte Carlo.
+- `git diff --check` : **vert** avant le compte rendu ; revérifié avant commit.
+- Essais de coût : deux premières exécutions interrompues par délai (120 et 600 secondes) ; partage local des lectures publiques ajouté sans changer leurs conditions ; exécution entière ensuite menée à terme. Le nouveau contrôle reste lent.
+- Diagnostic isolé du contre-exemple : même graine, même organisation, même geste de booking, puis index de **tous** les couples aptes (disponibilité, champions, engagements, réservations, genre et homonymes). Pas d'assouplissement, pas de recherche rétroactive, pas de modification de population.
+
+### Contre-exemple et questions pour Anthony
+
+Graine **20261001**, id **`fighting-pacific-championship`**, 0 soirée simulée, `mgmtDefault(id)` → `mgmtNewRoster` → `mgmtExteriorEnsure` → booking porté de `mgmtPrelims.test.js:8-10` : carte principale complète **5/5**, **7** préliminaires demandés, roster de **359** combattants.
+
+L'index complet du roster admissible ne contient que **six** familles (nombre de couples justifiés) :
+
+- `classement-voisin` : 640 ;
+- `styles-opposes` : 1172 ;
+- `derby` : 6454 ;
+- `debuts` : 31198 ;
+- `veteran` : 26796 ;
+- `meme-categorie-jamais-affrontes` : 4647.
+
+Toutes les autres familles sont absentes, même avant les exclusions progressives de prénoms/paires/divisions. La sélection trouve six combats puis rend `null` au septième, conformément au §12. Sept familles distinctes sont donc impossibles ici, indépendamment d'un changement de graine de tirage ou d'un backtracking.
+
+**Question bloquante : quelle exigence faut-il réviser pour cette population (sept préliminaires, diversité sans répétition, ou hypothèse de suffisance des populations de début) ?** Une décision explicite et une fiche reprise sont nécessaires ; aucune alternative n'a été choisie par le codeur.
+
+### Sauvegarde et écarts
+
+Aucune migration : `MGMT_SAVE_VERSION`, validation et format des affaires/cartes inchangés. Aucun texte, écran ou changement T3/T4/T5 livré. Écart principal : le critère de fin n'est pas atteint et le check rapide reste rouge. Le partage des lectures à l'intérieur du lecteur groupé est local uniquement, pour éviter de recalculer les classements et rôles par paire ; les preuves restent produites par `mgmtRaisonsLire` et comparées aux lectures unitaires. Commit de l'état **inachevé**, pas une livraison validée ; pas de push.

@@ -30,40 +30,79 @@ function mgmtRaisonsPourPaire(m,fa,fb){
   finally{ Object.assign(MGMT_ROLES_MEMO,memo); }
 }
 
+/* ==== [ANCRE: MONDE_LOT6_T2_RAISON_INDEX] — Monde lot 6 T2 ==== */
+/** Lit les preuves d'un ensemble de paires sans effet de bord. @param {Object} m Partie. @param {Array<Array<Object>>} paires Couples de combattants. @returns {Map<string,Array<Object>>} Clés ids triés joints par |, preuves {famille,fait}. */
+function mgmtRaisonsIndex(m,paires){
+  const out=new Map();
+  if(!m) return out;
+  const local=JSON.parse(JSON.stringify(m)), roster=local.roster||[];
+  const origin=new Map(roster.map(f=>[f.id,JSON.stringify(f)])), lectures=new Map(), preparations=new Map();
+  const prepare=f=>{
+    if(!preparations.has(f)){
+      const json=JSON.stringify(f);
+      preparations.set(f,{json,identique:origin.get(f.id)===json});
+    }
+    const p=preparations.get(f);
+    return {f:JSON.parse(p.json),identique:p.identique};
+  };
+  const memo={...MGMT_ROLES_MEMO};
+  try{
+    for(const [fa,fb] of paires){
+      if(!fa||!fb||!fa.id||!fb.id||fa.id===fb.id) continue;
+      const key=[fa.id,fb.id].sort().join('|');
+      if(out.has(key)) continue;
+      const prep=[prepare(fa),prepare(fb)], identiques=prep.every(p=>p.identique);
+      const fs=prep.map(p=>p.f).sort((a,b)=>a.id<b.id?-1:1);
+      local.roster=identiques?roster:roster.map(f=>fs.find(x=>x.id===f.id)||f);
+      if(!identiques) MGMT_ROLES_MEMO.m=null;
+      out.set(key,mgmtRaisonsLire(local,fs,identiques?lectures:new Map()));
+      if(!identiques) MGMT_ROLES_MEMO.m=null;
+    }
+    return out;
+  }finally{ Object.assign(MGMT_ROLES_MEMO,memo); }
+}
+
 /* ==== [ANCRE: MONDE_LOT6_T1_RAISON_PREUVES] — Monde lot 6 T1 ==== */
 /** Lecteurs existants portés sur un état local ; aucune sélection dominante.
  * Chaque famille garde sa première preuve dans l'ordre des ids canoniques.
  * Les indices hist/facts se rapportent à la partie d'origine, non réordonnée.
  */
-function mgmtRaisonsLire(m,fs){
+function mgmtRaisonsLire(m,fs,lectures){
+  /* ==== [ANCRE: MONDE_LOT6_T2_LECTURES_LOCALES] — Monde lot 6 T2 ==== */
+  // Seulement l'état local identique est partagé entre paires ; jamais un cache du jeu.
+  const lit=(cle,fn)=>{
+    if(!lectures) return fn();
+    if(!lectures.has(cle)) lectures.set(cle,fn());
+    return lectures.get(cle);
+  };
   const [a,b]=fs, out=new Map(), ids=fs.map(f=>f.id);
   const ajoute=(famille,fait)=>{ if(!out.has(famille)) out.set(famille,{famille,fait}); };
   const paire=x=>ids.includes(x.a)&&ids.includes(x.b)&&x.a!==x.b;
-  const rencontres=mgmtAffrontements(m).get(ids.join('|'))||[];
+  const rencontres=lit('affrontements',()=>mgmtAffrontements(m)).get(ids.join('|'))||[];
   const dernier=rencontres[rencontres.length-1];
   if(dernier&&dernier.gagnant) ajoute('revanche',{source:'hist',i:dernier.i,c:dernier.c,gagnant:dernier.gagnant,perdant:dernier.perdant});
-  const reclames=mgmtReclamesRaisons(m).filter(paire);
+  const reclames=lit('reclames',()=>mgmtReclamesRaisons(m)).filter(paire);
   for(const r of reclames){
     const fait={source:'reclames',a:r.a,b:r.b,raison:r.raison,c:r.c};
     ajoute('reclame-public',fait);
     if(r.raison==='micro'||r.raison==='reseaux') ajoute('rivalite-ouverte',{...fait});
   }
-  const demandes=mgmtDemandesOuvertes(m);
+  const demandes=lit('demandes',()=>mgmtDemandesOuvertes(m));
   for(const d of demandes){
     if(ids.includes(d.a)&&d.want==='revanche'&&ids.includes(d.target)&&d.target!==d.a){
       ajoute('rivalite-ouverte',{source:'facts',i:d.i,a:d.a,target:d.target,c:d.c});
     }
   }
-  const series=fs.map(f=>mgmtSerie(m,f));
+  const series=fs.map(f=>lit('serie|'+f.id,()=>mgmtSerie(m,f)));
   if(series.every(s=>s&&s.issue==='win'&&s.n>=3)) ajoute('series-croisees',{
     source:'serie',combattants:fs.map((f,i)=>({a:f.id,...series[i]}))
   });
-  const rangs=a.div===b.div?mgmtClassementLignes(m,a.div,'organization'):[];
+  const rangs=a.div===b.div?lit('rangs|'+a.div,()=>mgmtClassementLignes(m,a.div,'organization')):[];
   const ra=rangs.find(r=>r.id===a.id), rb=rangs.find(r=>r.id===b.id);
   if(ra&&rb&&Math.abs(ra.rang-rb.rang)<=2) ajoute('classement-voisin',{
     source:'classement',portee:'organization',div:a.div,combattants:[{a:a.id,rang:ra.rang},{a:b.id,rang:rb.rang}]
   });
-  const roles=fs.map(f=>mgmtRole(m,f));
+  const roles=fs.map(f=>lit('role|'+f.id,()=>mgmtRole(m,f)));
   const total=f=>(f.W||0)+(f.L||0)+(f.D||0);
   const veteran=f=>f.age>=33||total(f)>=20;
   for(let j=0;j<fs.length;j++){
@@ -81,12 +120,12 @@ function mgmtRaisonsLire(m,fs){
       &&((['revanche','trilogie'].includes(d.want)&&d.target===contre.id)
         ||(d.want==='un-classe'&&rangContre&&rangContre.rang<=15&&(!d.target||d.target===contre.id)));
     for(const d of demandes.filter(d=>d.a===f.id&&compatible(d))) ajoute('demande-promesse',{source:'facts',i:d.i,k:'demande',a:f.id,want:d.want,target:d.target,c:d.c});
-    for(const p of mgmtPromesses(m,f).filter(p=>p.etat==='en cours'&&compatible(p))) ajoute('demande-promesse',{source:'facts',i:p.i,k:'promesse',a:f.id,want:p.want,target:p.target,c:p.c,due:p.due});
+    for(const p of lit('promesses|'+f.id,()=>mgmtPromesses(m,f)).filter(p=>p.etat==='en cours'&&compatible(p))) ajoute('demande-promesse',{source:'facts',i:p.i,k:'promesse',a:f.id,want:p.want,target:p.target,c:p.c,due:p.due});
     if(f.ct&&mgmtContratRestants(f)===1) ajoute('fin-contrat',{source:'contrat',a:f.id,n:f.ct.n,f:f.ct.f,restants:1});
-    if(!mgmtResultats(m,f).length) ajoute('debuts',{source:'hist',a:f.id,n:0});
+    if(!lit('resultats|'+f.id,()=>mgmtResultats(m,f)).length) ajoute('debuts',{source:'hist',a:f.id,n:0});
     if(veteran(f)) ajoute('veteran',{source:'bilan',a:f.id,age:f.age,total:total(f)});
   }
-  const styles=fs.map(f=>mgmtCarteStyleBilan(m,f).t);
+  const styles=fs.map(f=>lit('style|'+f.id,()=>mgmtCarteStyleBilan(m,f).t));
   if(MGMT_RAISON_STYLES[styles[0]]&&MGMT_RAISON_STYLES[styles[1]]&&MGMT_RAISON_STYLES[styles[0]]!==MGMT_RAISON_STYLES[styles[1]]) ajoute('styles-opposes',{
     source:'bilan-public',combattants:fs.map((f,i)=>({a:f.id,style:styles[i]}))
   });
