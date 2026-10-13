@@ -1,5 +1,3 @@
-STOP : conditions des familles et garantie de repli non tranchées ; aucune implémentation avant les réponses d'Anthony.
-
 # Monde lot 6 T1 — Les quinze familles
 
 ## 1. Branche
@@ -88,3 +86,12 @@ Toutes les décisions ci-dessous bloquent le contrat T1 ; répondre puis révise
 5. Quand « retour de blessure » devient-il recevable, pendant combien de temps, et depuis quelle date compter les mois ? Les faits `injury` ne conservent pas de durée ; faut-il citer le temps depuis le dernier combat sans l'attribuer intégralement à la blessure ?
 6. Quelles oppositions du bilan public définissent « styles opposés » ? Le lecteur actuel ne rend qu'un libellé et aucune matrice d'oppositions ; le codeur ne doit pas en inventer une.
 7. Pour « demande ou promesse », ne retenir que celles qu'un préliminaire contre cette paire peut satisfaire ? Pour les débuts, faut-il un fait `recrue`, ou zéro combat dans l'archive de l'organisation suffit-il aussi pour un membre de l'effectif initial ?
+
+## 13. Décisions de Claude du 13/10/2026 (réponses aux questions du §12 ; Anthony laisse le technique à Claude)
+1. Branche `monde-lot-6-raisons` : confirmée.
+2. **Classement voisin** : deux rangs au plus d'écart dans la même catégorie. Le repli promis est une famille distincte « même catégorie, jamais affrontés » qui n'affirme rien sur le classement ni sur qui passe devant.
+3. **Seuils** : série = au moins 3 victoires de suite ; longue attente = au moins 6 mois ; vétéran = 33 ans ou plus, ou au moins 20 combats ; dernière chance = au moins 2 défaites de suite ; jeune à tester = rôle espoir ou invaincu ; « nom installé » = rôle contender, champion ou vétéran ; les critères espoir/vétéran s'appliquent même si un rôle prioritaire les masque.
+4. **Défi resté sans réponse** : les paires micro/réseaux de `mgmtReclamesRaisons` et les demandes de revanche sans réponse suffisent. Aucune autre preuve à inventer.
+5. **Retour de blessure** : recevable s'il existe un fait `injury` du combattant et qu'il n'a pas combattu depuis, pendant 3 cycles après sa guérison. On cite le temps écoulé depuis son dernier combat, sans l'attribuer entièrement à la blessure.
+6. **Styles opposés** : paire « frappeur » contre « lutteur ou soumission », d'après les libellés publics du bilan. Le codeur écrit une petite table constante de ces libellés lue dans les données existantes (grep), sans matrice inventée ; un libellé hors table ne produit pas cette famille.
+7. **Demande ou promesse** : seules celles qu'un préliminaire contre cette paire peut satisfaire. **Débuts** : zéro combat dans l'archive de l'organisation suffit, y compris pour un membre de l'effectif initial (pas de fait `recrue` exigé).
