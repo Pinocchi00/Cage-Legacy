@@ -146,3 +146,24 @@ Bilan toujours retenu : distingue réellement la fixture 30 ; aucune garantie im
 population sans données distinctives, aucune phrase inventée pour contourner cette limite.
 Rubriques sans source omises : respecte le brief « toujours différent » et l'interdiction du niveau.
 Questions pour Anthony : aucune ; textes confiés à l'agent autorisé, relecture de fin de lot prévue.
+
+## Compte rendu
+
+- État : inachevé, arrêté avant implémentation le 13/10/2026. Branche vérifiée :
+  `monde-lot-3-presentation` ; arbre de travail initial propre.
+- Fichier modifié : cette fiche uniquement, pour consigner le blocage. Aucun code,
+  modèle de phrase, script de cache ou fichier de test modifié.
+- Tests ajoutés : aucun ; les six tests du §8 restent à réaliser.
+- Migration de sauvegarde : aucune ; version inchangée.
+- Blocage et essais : les appels à `@eclaireur`, `@ecrivain`, `@verif` et `@relecteur`
+  sont tous refusés avec « Subagent depth limit reached (1) ». Le §6 et les règles
+  du dépôt interdisent au codeur d'écrire les textes à la place de `@ecrivain`.
+- Vérification de secours demandée : `node tools/verif-versions.js` indique aucun
+  écart ; `npm run check:rapide` affiche VERT, 958 tests réussis, zéro échec
+  (103 fichiers lancés, 12 écartés). Le terminal signale néanmoins un dépassement
+  du délai de 120 secondes après avoir rendu ce bilan final.
+- Relecture : aucun verdict, agent inaccessible. Ces vérifications portent sur
+  l'état existant et ne valident pas une implémentation de T2.
+- Écart à la fiche : tranche non implémentée, aucun critère de fin T2 revendiqué.
+- Question pour Anthony : rendre `@ecrivain` accessible (augmenter la profondeur
+  autorisée des sous-agents), puis reprendre cette tranche avec ses 16 propositions.
