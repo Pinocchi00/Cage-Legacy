@@ -1,4 +1,3 @@
-STOP : planche non validée
 
 # Monde lot 5 T3 — La carte du premier jour
 
@@ -78,3 +77,11 @@ Ne toucher ni au code ni à la modification locale préexistante de `tests/mgmtP
 - **Décision technique** : garder les invariants, tests courts et portes de booking existantes ; aucun seuil nouveau. Le STOP porte exclusivement sur un geste visible non maquetté, pas sur une règle technique.
 - **Question pour Anthony** : faire produire puis valider une planche de la Carte du premier jour montrant les 2 ou 3 combats hérités, leur libellé exact de provenance, l'action « Lire la présentation » et l'accès immédiat aux dossiers des places libres, avec le retour depuis ces destinations. Quel fichier de planche validée doit faire foi pour T3 ?
 - Après cette validation, la fiche est réécrite complètement ; le codeur ne doit pas compléter lui-même les points suspendus.
+
+## DÉCISION du 13/10/2026 (Claude) — le STOP « planche non validée » est levé
+Il n'existe pas de planche pour la carte du premier jour, mais la tranche ne demande qu'un marquage minimal dans la grammaire visuelle EXISTANTE de l'écran Carte (la passe de design sera faite plus tard par Anthony avec Opus) :
+1. Chaque combat hérité de la carte principale porte une étiquette texte « VIENT D'AVANT » (22 px au moins, dans le style des étiquettes existantes de la carte, ex. celle de l'état du combat) ; elle disparaît dès que le joueur modifie ce combat.
+2. Une action « Lire la présentation » (bouton existant du composant, touche `P` si libre, sinon la touche libre la plus proche dans la barre des touches ; vérifie `keysRegister` pour éviter tout conflit) ouvre la présentation du combat du lot 3 (`mgmtPresentationCombat`, écran livré en T3 du lot 3 dans la branche voisine : si le lot 3 n'est pas dans ta branche, l'action n'est PAS ajoutée et tu le signales dans le compte rendu ; l'étiquette suffit pour clore T3).
+3. Les places libres gardent leur affichage actuel (« Place libre — booker un combat ») ; les dossiers viennent au lot 4.
+4. Aucun écran nouveau, aucun texte au-delà de « VIENT D'AVANT » et « Lire la présentation » (propositions Claude, relu:false, dans le fichier de données existant de la carte).
+Plus aucune question : code, vérifie (tests ciblés, jamais plus de 16 créations de six ans, tâche de fond pour le lent), commit « Monde lot 5 T3 : la carte du premier jour ».
