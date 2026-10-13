@@ -1,7 +1,7 @@
 ---
 description: Relit le diff d'une tranche contre sa fiche et les règles du dépôt, et rend ACCEPTÉ ou À REPRENDRE avec une liste numérotée. Ne modifie rien.
 mode: subagent
-model: opencode-go/kimi-k2.7-code
+model: openai/gpt-6.1-sol
 steps: 30
 permission:
   edit: deny
