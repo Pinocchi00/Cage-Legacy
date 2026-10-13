@@ -234,7 +234,7 @@ test('Monde lot 3 T3 — féminin et dix propositions exportables',()=>{
   try{execFileSync(process.execPath,['tools/exporter-textes.js','--out',out],{cwd:path.join(__dirname,'..')});
     const exporte=fs.readFileSync(out,'utf8');for(const m of modeles){assert.ok(exporte.includes('`MGMT_PRESENTATION_COMBAT_TEXTES.'+m.id+'`'));assert.ok(exporte.includes(m.texte));}
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
-  // Décision du 13/10 : les réserves de forme sont relevées, pas réécrites par le codeur.
+  // Décision du 13/10 (superviseur) : les réserves de forme relevées ont été corrigées dans les textes ; plus aucune ne doit rester.
   const reserves=modeles.filter(m=>/\b(?:ils|combattants|gagnant|eux)\b/i.test(m.texte)).map(m=>m.id);
-  assert.deepEqual(reserves,['meme_age','revanche','cage-hebdo','le-forum']);
+  assert.deepEqual(reserves,[]);
 });
