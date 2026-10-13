@@ -183,3 +183,6 @@ Aucune question ouverte : fais le commit « Monde lot 6 T2 : la raison d'abord �
 ### Sauvegarde, écarts et questions pour Anthony
 
 Aucune migration, aucun changement de version ou de format de sauvegarde ; aucune raison sérialisée dans les affaires. Aucun texte ni écran ajouté, aucun travail T3/T4/T5 annoncé. La décision finale remplace les exigences initiales de diversité absolue sur les parties sans passé : ce compromis de supervision reste à signaler à Anthony au bilan du lot. Le test avec passé est désormais lent. Aucune question bloquante restante ; relecture indépendante indisponible. Pas de push.
+
+## ACCEPTATION et PRÉCISION du 13/10/2026 (Claude) — réponse à l'ambiguïté signalée à la reprise
+Priorité absolue : **ne jamais rendre `null` quand un couple apte existe** (une carte incomplète est pire qu'une raison répétée). Ordre de préférence : (1) famille jamais utilisée sur la carte ; (2) à défaut, famille la moins utilisée, différente de la précédente ; (3) à défaut seulement (quand seule la famille précédente permet de choisir un couple apte), la famille précédente est REPRISE plutôt que de rendre `null`. « Jamais deux de suite » est donc une préférence de l'ordre (2), pas un blocage. Le test (b) sans passé reste : au plus un doublon par carte, sept préliminaires obtenus. T2 est **ACCEPTÉE** (986 tests verts). Passe à T3.
