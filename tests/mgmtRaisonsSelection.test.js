@@ -71,11 +71,34 @@ function blocs(){
   })())`));
   return population;
 }
-test('Monde lot 6 T2 — vingt graines et huit organisations ne répètent aucune famille',()=>{
+/* ==== [ANCRE: MONDE_LOT6_T2_TEST_DECISION] — Monde lot 6 T2 ==== */
+// Décision du 13/10/2026 : sans passé, diversité maximale non bloquante.
+test('Monde lot 6 T2 — vingt graines et huit organisations maximisent la variété sans bloquer',()=>{
   const {blocs:bs}=blocs();assert.equal(bs.length,160);
   for(const b of bs){assert.ok(b.ps,JSON.stringify(b));assert.equal(b.main,b.sizeMain);
-    assert.equal(b.ps.length,b.n);assert.equal(new Set(b.ps.map(p=>p.famille)).size,b.n);
+    assert.equal(b.ps.length,b.n);assert.ok(new Set(b.ps.map(p=>p.famille)).size>=Math.min(6,b.n));
+    for(let i=1;i<b.ps.length;i++)assert.notEqual(b.ps[i].famille,b.ps[i-1].famille);
     assert.ok(b.ps.every(p=>p.preuve),JSON.stringify(b));}
+});
+test('Monde lot 6 T2 — sans passé sept préliminaires gardent au moins six familles',()=>{
+  const b=blocs().blocs.find(b=>b.seed===20261001&&b.org==='fighting-pacific-championship');
+  assert.ok(b.ps);assert.equal(b.ps.length,7);
+  assert.ok(new Set(b.ps.map(p=>p.famille)).size>=6);
+  assert.ok(b.ps.length-new Set(b.ps.map(p=>p.famille)).size<=1);
+  for(let i=1;i<b.ps.length;i++)assert.notEqual(b.ps[i].famille,b.ps[i-1].famille);
+});
+test('Monde lot 6 T2 — avec passé sept raisons ont des familles différentes',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`JSON.stringify((()=>{setSeed(20261008);
+      const m=mgmtPasseGenerer('fighting-pacific-championship');${remplir}
+      const ps=mgmtBulkSelection(m,new Set(),new Set(),7,mgmtCrushStats(m),false);
+      return {main:m.card.main.length,sizeMain:m.card.sizeMain,ps:ps?.map(p=>({famille:p.raison.famille,
+        preuve:mgmtRaisonsPourPaire(m,p.a,p.b).some(r=>JSON.stringify(r)===JSON.stringify(p.raison))}))};
+    })())`));
+    assert.equal(r.main,r.sizeMain);assert.ok(r.ps);assert.equal(r.ps.length,7);
+    assert.equal(new Set(r.ps.map(p=>p.famille)).size,7);assert.ok(r.ps.every(p=>p.preuve));
+  }finally{w.close();}
 });
 test('Monde lot 6 T2 — le bloc strict conserve paires prénoms et catégories variés',()=>{
   assert.deepEqual(blocs().violations,{paire:0,prenom:0,division:0,indisponible:0,engage:0,champion:0,reserve:0,suspendu:0,revanche:0});

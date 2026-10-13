@@ -217,7 +217,7 @@ function mgmtBulkSelection(m,used,seen,n,stats,relaxed){
   const aptes=m.roster.filter(f=>mgmtAvailable(m,f)&&!champions.has(f.id)
     &&!mgmtEngaged(m,f)&&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,f)));
   const index=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
-  const localUsed=new Set(used), localSeen=new Set(seen), familles=new Set(), result=[];
+  const localUsed=new Set(used), localSeen=new Set(seen), familles=new Map(), result=[];
   let lastDiv=null, run=0;
   for(let i=0;i<n;i++){
     let p=null;
@@ -226,11 +226,25 @@ function mgmtBulkSelection(m,used,seen,n,stats,relaxed){
       p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index);
       if(p) break;
     }
+    /* ==== [ANCRE: MONDE_LOT6_T2_VARIETE_MAXIMALE] — Monde lot 6 T2 ==== */
+    // Décision du 13/10/2026 : épuiser les familles inédites avant toute
+    // reprise ; privilégier le repli, puis le moindre usage (ordre du catalogue
+    // à égalité), sans jamais reprendre la famille du combat précédent.
+    if(!p){
+      const precedente=result[result.length-1]?.raison.famille;
+      const repli='meme-categorie-jamais-affrontes';
+      const reprises=MGMT_RAISON_FAMILLES.filter(f=>familles.has(f)&&f!==precedente)
+        .sort((a,b)=>(a===repli?-1:b===repli?1:0)||familles.get(a)-familles.get(b));
+      for(const famille of reprises){
+        p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index);
+        if(p) break;
+      }
+    }
     if(!p) return null;
     localUsed.add(p.a.first); localUsed.add(p.b.first);
     localSeen.add([p.a.id,p.b.id].sort().join('|'));
     run=p.div===lastDiv?run+1:1; lastDiv=p.div;
-    familles.add(p.raison.famille); result.push(p);
+    familles.set(p.raison.famille,(familles.get(p.raison.famille)||0)+1); result.push(p);
   }
   for(const first of localUsed) used.add(first);
   for(const key of localSeen) seen.add(key);

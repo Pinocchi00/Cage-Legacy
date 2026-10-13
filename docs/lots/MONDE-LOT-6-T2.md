@@ -154,3 +154,32 @@ Le contre-exemple est une partie créée SANS passé (0 soirée, `mgmtDefault`) 
 3. Tests : (a) sur une partie AVEC passé (`mgmtPasseGenerer` à graine fixe, test lent éventuel) : sept raisons toutes de familles différentes ; (b) sur une partie SANS passé (graine 20261001, fighting-pacific-championship) : sept préliminaires obtenus, au moins six familles distinctes, au plus un doublon, jamais deux de suite.
 4. L'exigence « jamais la même deux fois sur une carte » du brief reste l'objectif ; elle est garantie dès que l'histoire fournit assez de familles. C'est un compromis de supervision, à signaler à Anthony au bilan.
 Aucune question ouverte : fais le commit « Monde lot 6 T2 : la raison d'abord » (sans « inachevé »).
+
+## Compte rendu
+
+### Reprise du 13/10/2026 — livrée selon la décision finale
+
+- `mgmt-carte.js` : reprise des modifications présentes au début de cette session ; comptage local des familles, priorité aux familles inédites, puis au repli `meme-categorie-jamais-affrontes`, puis aux familles les moins utilisées dans l'ordre du catalogue. La famille précédente est exclue des reprises. Les exclusions du picker, l'index unique, l'atomicité des ensembles et le format des affaires restent inchangés. Commentaire de décision ajouté sous l'ancre de reprise.
+- `tests/mgmtRaisonsSelection.test.js` : test de population adapté à la décision explicitement citée, tests sans passé et avec passé ajoutés ; assertion explicite d'au plus un doublon sur le contre-exemple sans passé.
+- `index.html`, `sw.js` : versions des scripts raisons/carte et du cache montées avec `node tools/_bump.js mgmt-raisons.js mgmt-carte.js`, sans déplacement de scripts.
+- Cette fiche : compte rendu de reprise. Le lecteur groupé, le raccord de proposition et l'inscription dans les deux scripts de `package.json` étaient déjà commités dans l'état inachevé ; aucun second système ajouté.
+- `mgmt-retraits-data.js` et `mgmt-voix-data.js` : exclus du commit, modifications de fins de ligne sans différence de contenu.
+
+### Tests ajoutés ou adaptés (intitulés)
+
+- `Monde lot 6 T2 — vingt graines et huit organisations maximisent la variété sans bloquer` (remplace l'intitulé exigeant zéro répétition, conformément à la décision finale).
+- `Monde lot 6 T2 — sans passé sept préliminaires gardent au moins six familles`.
+- `Monde lot 6 T2 — avec passé sept raisons ont des familles différentes`.
+- Les sept autres intitulés du compte rendu initial sont conservés.
+
+### Vérification
+
+- Sélection : **10/10 verts**, deux exécutions ; dernière exécution environ 1 005 secondes. **160/160 blocs complets**, preuves vérifiées contre le lecteur unitaire, zéro violation stricte comptée. Contre-exemple sans passé : sept combats, au moins six familles, au plus un doublon, aucune répétition consécutive. Avec passé généré à graine 20261008 : sept familles distinctes et preuves exactes.
+- Régressions `mgmtRaisons.test.js`, `mgmtCard.test.js`, `mgmtPrelims.test.js` : **79/79 verts**, quinze identifiants T1 inchangés.
+- `@eclaireur`, `@verif` et `@relecteur` : appels tentés, tous refusés avec `Subagent depth limit reached (1)`. Aucun verdict indépendant du relecteur disponible.
+- Repli demandé, seule fin des sorties lue : `node tools/verif-versions.js` **vert**, puis `npm run check:rapide` **vert, 986/986 tests**, 104 fichiers lancés et 12 écartés. Aucun check complet ni Monte Carlo ; une génération de passé dans le test exigé par la décision.
+- `git diff --check` **vert**, revérifié avant commit.
+
+### Sauvegarde, écarts et questions pour Anthony
+
+Aucune migration, aucun changement de version ou de format de sauvegarde ; aucune raison sérialisée dans les affaires. Aucun texte ni écran ajouté, aucun travail T3/T4/T5 annoncé. La décision finale remplace les exigences initiales de diversité absolue sur les parties sans passé : ce compromis de supervision reste à signaler à Anthony au bilan du lot. Le test avec passé est désormais lent. Aucune question bloquante restante ; relecture indépendante indisponible. Pas de push.
