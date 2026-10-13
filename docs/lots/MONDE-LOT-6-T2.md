@@ -146,3 +146,11 @@ Toutes les autres familles sont absentes, même avant les exclusions progressive
 ### Sauvegarde et écarts
 
 Aucune migration : `MGMT_SAVE_VERSION`, validation et format des affaires/cartes inchangés. Aucun texte, écran ou changement T3/T4/T5 livré. Écart principal : le critère de fin n'est pas atteint et le check rapide reste rouge. Le partage des lectures à l'intérieur du lecteur groupé est local uniquement, pour éviter de recalculer les classements et rôles par paire ; les preuves restent produites par `mgmtRaisonsLire` et comparées aux lectures unitaires. Commit de l'état **inachevé**, pas une livraison validée ; pas de push.
+
+## DÉCISION du 13/10/2026 (Claude) sur le contre-exemple « sept familles impossibles »
+Le contre-exemple est une partie créée SANS passé (0 soirée, `mgmtDefault`) : elle n'a ni série, ni retour de blessure, ni revanche possibles, donc six familles seulement. Ce n'est pas le cas du jeu réel (six ans d'histoire, lot 1). **Règle retenue : la variété est maximale mais jamais bloquante.**
+1. Toutes les familles distinctes TANT QUE possible sur la carte ; quand les familles disponibles sont épuisées, la sélection autorise de REPRENDRE la famille de repli `meme-categorie-jamais-affrontes` (puis, à défaut, la famille la moins utilisée), mais jamais deux fois de suite et jamais pour un couple déjà choisi. Plus aucun `null` quand un couple apte existe.
+2. Les règles de variété existantes sont conservées (paire inédite, prénoms uniques, au plus deux combats de suite dans la même catégorie).
+3. Tests : (a) sur une partie AVEC passé (`mgmtPasseGenerer` à graine fixe, test lent éventuel) : sept raisons toutes de familles différentes ; (b) sur une partie SANS passé (graine 20261001, fighting-pacific-championship) : sept préliminaires obtenus, au moins six familles distinctes, au plus un doublon, jamais deux de suite.
+4. L'exigence « jamais la même deux fois sur une carte » du brief reste l'objectif ; elle est garantie dès que l'histoire fournit assez de familles. C'est un compromis de supervision, à signaler à Anthony au bilan.
+Aucune question ouverte : fais le commit « Monde lot 6 T2 : la raison d'abord » (sans « inachevé »).
