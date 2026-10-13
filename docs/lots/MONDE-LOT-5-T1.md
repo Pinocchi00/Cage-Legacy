@@ -1,5 +1,3 @@
-STOP — la politique de sélection héritée et la portée de « fin de contrat » restent à préciser (questions 1 et 2).
-
 # Monde lot 5 T1 — Le prédécesseur s'arrête en plein travail
 
 ## 1. Branche et dépendances
@@ -89,3 +87,8 @@ Ne pas réaliser clandestinement le lot 2 T3, ni inventer un prédécesseur spé
 1. **Bloquante — dépendance.** Le lot 2 T3 (main du prédécesseur) n'est pas présent ici : faut-il le réaliser/fusionner avant T1, conformément au plan, ou autorises-tu la sélection commune actuelle pour cette tranche, avec l'orientation par organisation différée ?
 2. **Bloquante — contrat.** « En fin de contrat avant la soirée » interdit-il seulement les sans-contrat/contrats épuisés, ou aussi un combattant dont le combat hérité serait le dernier (`mgmtContratRestants(f)===1`) ? Le modèle compte des combats, pas une date de fin ; quel seuil exact faut-il garantir ?
 3. **À préciser avec la sélection.** Pour cette première soirée, confirmes-tu une petite soirée à J+35 (rythme actuel), et quel critère doit faire hériter de deux plutôt que trois combats : deux fixes admis, ou variation déterministe demandée ? Aucune règle n'est écrite dans le brief.
+
+## 13. Décisions de Claude du 13/10/2026 (réponses aux questions du §12 ; Anthony laisse le technique à Claude)
+1. **Dépendance** : le lot 2 T3 n'est PAS un prérequis. Utiliser la sélection commune actuelle du prédécesseur ; l'orientation par organisation viendra avec le lot 2 T3, plus tard.
+2. **Contrat** : sont exclus les sans-contrat et les contrats épuisés (`mgmtContratRestants(f)<=0`). Un combattant dont le combat hérité est son DERNIER (`mgmtContratRestants(f)===1`) est ADMIS : l'événement « dernier combat de contrat » du lot 8 le signalera. Aucun autre seuil.
+3. **Soirée** : une petite soirée à J+35 (rythme actuel). Le nombre de combats hérités (2 ou 3) est tiré par la RNG à graine du prédécesseur au moment de la clôture, de façon déterministe : même graine, même nombre. Jamais de `Math.random`.
