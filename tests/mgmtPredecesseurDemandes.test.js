@@ -77,15 +77,18 @@ test('Monde lot 5 T2 — alléger recale les références des promesses et des r
       mgmtAddFact(m,{c:m.cycle,k:'demande',a:fs[1].id,want:'pause'}); mgmtRepondreDemande(m,j,'refuser');
       mgmtAddFact(m,{c:m.cycle,k:'refus',a:fs[1].id,d:999999});
       const ordre=m.facts.filter(x=>!MGMT_PASSE_FAITS_PERDUS.includes(x.k)).map(x=>{const y={...x};delete y.d;return y;});
+      /* ==== [ANCRE: MONDE_LOT5_T2_TEST_ALLEGEMENT_ATOMIQUE] — Monde lot 5 T2 ==== */
+      const valideHist=m.hist; m.hist=[null]; const invalideAvant=JSON.stringify(m);
+      const atomique=mgmtPasseAlleger(m)===false&&invalideAvant===JSON.stringify(m); m.hist=valideHist;
       mgmtPasseCloturer(m); const p=m.facts.find(x=>x.k==='promesse'&&x.a===fs[0].id&&x.c===m.cycle);
       const ref=m.facts.find(x=>x.k==='refus'&&x.a===fs[1].id&&x.d!==999999&&x.c===m.cycle);
       const avant=JSON.stringify(m); mgmtPasseCloturer(m);
-      return {p,demande:m.facts[p.d],ref,demandeRef:m.facts[ref.d],n:m.passe.nFacts,total:m.facts.length,
+      return {atomique,p,demande:m.facts[p.d],ref,demandeRef:m.facts[ref.d],n:m.passe.nFacts,total:m.facts.length,
         perdus:m.facts.some(x=>MGMT_PASSE_FAITS_PERDUS.includes(x.k)),invalide:m.facts.at(-1).d,
         ordre:JSON.stringify(ordre)===JSON.stringify(m.facts.map(x=>{const y={...x};delete y.d;return y;})),idem:avant===JSON.stringify(m)};`);
     assert.equal(r.demande.k,'demande'); for(const k of ['a','want','target']) assert.equal(r.p[k],r.demande[k]);
     assert.equal(r.demandeRef.k,'demande'); assert.equal(r.ref.a,r.demandeRef.a);
-    assert.equal(r.n,r.total); assert.equal(r.perdus,false); assert.equal(r.invalide,999999); assert.equal(r.ordre,true); assert.equal(r.idem,true);
+    assert.equal(r.n,r.total); assert.equal(r.perdus,false); assert.equal(r.invalide,999999); assert.equal(r.ordre,true); assert.equal(r.idem,true); assert.equal(r.atomique,true);
   }finally{w.close();}
 });
 test('Monde lot 5 T2 — les échéances survivent au passage de témoin et à la sauvegarde',()=>{

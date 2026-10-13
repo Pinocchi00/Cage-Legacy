@@ -161,6 +161,7 @@ function mgmtPasseAlleger(m){
     hist.push(e);
   }
    /* ==== [ANCRE: MONDE_LOT5_T2_ARCHIVE_LIENS] — Monde lot 5 T2 ==== */
+   /* Tous les combats sont validés avant de préparer les liens ; aucun fait original n'est muté. */
    const indices=new Map(), facts=[];
    m.facts.forEach((x,i)=>{
      if(x&&MGMT_PASSE_FAITS_PERDUS.includes(x.k)) return;

@@ -96,3 +96,34 @@ Ne pas répondre à la dernière pile lors de la clôture : elle contient les de
 
 ## DÉCISION du 13/10/2026 (Claude) — règle de volume pour TOUS les tests lents du lot 5
 Un test qui crée des parties de six ans (35 s la partie) utilise **deux graines (20261008 et 20261009) × huit organisations = 16 créations au plus**, jamais vingt graines (160 créations = plus d'une heure : le codeur et les outils se bloquaient dessus). Les décisions du lot 5 T1 et T2 sont alignées. Lance ce test **en tâche de fond ou à part**, jamais dans une commande bash de plus de 100 secondes. Aucune question : termine T2, commit « Monde lot 5 T2 : le prédécesseur répond aux demandes ».
+
+## Compte rendu
+
+Tranche terminée le 13/10/2026 sur `monde-lot-5-carte`. Reprise du travail T2 déjà présent dans les commits précédents ; aucun second système ajouté.
+
+### Fichiers et rôles
+- `mgmt-predecesseur.js` : réponse via la porte du joueur, garde de partie, photographie des demandes et comptage des seules réponses enregistrées ; opt-in après contrats/recrues, avant booking. Finition de l'indentation et du commentaire d'ordre dans cette reprise.
+- `mgmt-passe.js` : activation pendant le passé et recalage des références `d` après validation des combats, sans mutation des faits originaux ni réparation des liens historiques invalides. Finition de l'indentation et documentation de l'atomicité dans cette reprise.
+- `tests/mgmtPredecesseurDemandes.test.js` : six tests rapides déjà présents, renforcés ici par la preuve qu'un combat impossible à alléger laisse tout l'état inchangé.
+- `tests/mgmtPromessesHeriteesSixAns.test.js` : matrice existante de deux graines × huit organisations, cache local au fichier, intégrité et aller-retour compact.
+- `package.json` : les deux fichiers T2 étaient déjà inscrits dans `test` et `test:watch` ; `tools/check-rapide.js` écartait déjà la seule matrice T2 parmi ces deux fichiers. Aucune modification supplémentaire nécessaire.
+- `index.html`, `sw.js` : versions de cache remontées avec `node tools/_bump.js mgmt-predecesseur.js mgmt-passe.js`, sans déplacement de script.
+- La présente fiche : bilan de livraison. Rapports d'exécution dans `tools/reports/`, ignorés, non commités.
+
+### Tests ajoutés par T2 (intitulés)
+1. `Monde lot 5 T2 — promettre ou refuser réutilise la réponse du joueur`
+2. `Monde lot 5 T2 — la réponse est idempotente et ne consomme pas la RNG`
+3. `Monde lot 5 T2 — seul le passé active les réponses`
+4. `Monde lot 5 T2 — alléger recale les références des promesses et des refus`
+5. `Monde lot 5 T2 — les échéances survivent au passage de témoin et à la sauvegarde`
+6. `Monde lot 5 T2 — une promesse héritée se tient ou se rompt selon les règles existantes`
+7. `Monde lot 5 T2 — chaque promesse ouverte du premier jour renvoie à une demande de l'archive`
+
+### Résultats et écarts
+- Tests ciblés du §9 : **36/36**, aucun échec ; après renforcement d'atomicité, fichier rapide T2 : **6/6**.
+- Acceptation six ans exécutée une seule fois, en tâche de fond : **16/16** créations valides, **38** promesses ouvertes, **0** lien orphelin, test vert. Volume conforme à la décision finale, qui remplace les 160 créations initialement demandées.
+- `node tools/verif-versions.js` : aucun écart ; `npm run check:rapide` : **959/959**, **104** fichiers lancés, aucun échec. Contrôle complet réservé au bilan du lot.
+- `@eclaireur`, `@verif` et `@relecteur` appelés mais indisponibles : `Subagent depth limit reached (1)`. Lecture ciblée et vérification de secours exécutées directement ; **aucun verdict indépendant du relecteur obtenu**.
+- Aucune migration : version de sauvegarde **16** inchangée, aucun recalcul au chargement des parties closes, aucun texte ni écran nouveau.
+- La matrice T1 mentionnée au §9 n'a pas été relancée ni modifiée ; son défaut signalé dans la fiche ne fait pas partie de T2.
+- Questions pour Anthony : **aucune**.

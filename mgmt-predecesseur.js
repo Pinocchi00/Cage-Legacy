@@ -138,7 +138,7 @@ function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   let prolonges=0, resignes=0, recrues=0;
   const t0=Date.now();
   const champAvant=mgmtPredecesseurChampions(m);
-   /* Lot 5 T2 : répondre après les contrats et arrivées, avant pose et booking, pour juger les trois cycles futurs. */
+   /* Lot 5 T2 : les réponses opt-in suivent les contrats et arrivées, avant pose et booking : elles jugent trois cycles futurs, pas la carte immédiate. */
   m.pile.forEach(x=>{x.status='closed';x.decision='ignored';}); m.open=null;
   /* Il prolonge à l'avance : un contrat à un combat de la fin est renouvelé sur trois combats, à la bourse que le combattant demande. */
   for(const f of m.roster){ if(mgmtIsRetired(f)||f.libre||!f.ct) continue; if(mgmtContratRestants(f)>1) continue;
