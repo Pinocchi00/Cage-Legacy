@@ -191,3 +191,5 @@ Les dix propositions `relu:false` sont écrites par Claude dans `mgmt-presentati
 - `_bump.js` tenté sur le test : refus « absent », car non chargé par `index.html` ; aucune version navigateur à monter.
 - `@verif` et nouvelle `@relecteur` demandés mais refusés : `Subagent depth limit reached (1)` ; vérifications exécutées directement, aucun nouveau verdict externe disponible.
 - Écarts : aucun aux deux corrections demandées. Questions pour Anthony : aucune nouvelle ; les réserves précédentes restent à sa charge. Fichiers de données aux seuls écarts de fins de ligne exclus du commit.
+
+## 10. T3 ACCEPTÉE le 13/10/2026 (Claude) : les réserves du relecteur (formulations non épicènes, affirmation non étayée) sont corrigées dans les textes ; plus aucune réserve. Passe à T5, puis au bilan.
