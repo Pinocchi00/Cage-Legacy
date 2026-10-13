@@ -110,12 +110,26 @@ test('Monde lot 5 T2 — les échéances survivent au passage de témoin et à l
 });
 test('Monde lot 5 T2 — une promesse héritée se tient ou se rompt selon les règles existantes',()=>{
   const w=partie(true); try{
-    const r=lire(w,`${TROIS} ${DERNIERE} mgmtPasseCloturer(m); const avant=JSON.stringify(m.facts);
+    /* ==== [ANCRE: MONDE_LOT5_T2_TEST_SIGNATURE_ET_FAITS_COPIE] — Monde lot 5 T2 ==== */
+    const r=lire(w,`${TROIS} m.card.main=[];
+      const candidats=m.roster.filter(x=>!x.libre&&mgmtContratRestants(x)>0&&mgmtSelectable(m,x,null)&&!mgmtChampionIds(m).has(x.id));
+      const f=candidats.find(a=>candidats.some(b=>b.id!==a.id&&mgmtSelectable(m,b,a.id)));
+      const adversaire=candidats.find(b=>b.id!==f.id&&mgmtSelectable(m,b,f.id));
+      const i=m.facts.length; mgmtAddFact(m,{c:m.cycle,k:'demande',a:f.id,want:'carte-principale'});
+      mgmtRepondreDemande(m,i,'promettre'); const promesse=m.facts[m.facts.length-1];
+      mgmtPasseCloturer(m); m.card.main=[];
+      const histAvant=JSON.stringify(m.hist), soireesAvant=m.cal.faites.length;
+      const signe=!!mgmtBookMain(m,f.id,adversaire.id);
+      const surCarte=m.card.main.some(cf=>cf.slot==='main'&&(cf.a===f.id||cf.b===f.id));
+      const sansCombat=histAvant===JSON.stringify(m.hist)&&soireesAvant===m.cal.faites.length&&m.hist.every(h=>h.c<promesse.c);
+      const avant=JSON.stringify(m.facts);
       const etat=()=>mgmtPromesses(m,f).find(x=>x.c===promesse.c).etat;
       const signature=etat(); m.cycle=promesse.due; const limite=etat(); m.cycle++;
       const rompue=etat(), copie=JSON.parse(JSON.stringify(m));
       copie.hist.push({c:promesse.c+1,slot:'main',a:{id:f.id},b:{id:m.roster.find(x=>x.id!==f.id).id}});
-      return {signature,limite,rompue,tenue:mgmtPromesses(copie,f).find(x=>x.c===promesse.c).etat,faits:avant===JSON.stringify(m.facts)};`);
-    assert.deepEqual(r,{signature:'en cours',limite:'en cours',rompue:'rompue',tenue:'tenue',faits:true});
+      const faitsCopieAvant=JSON.stringify(copie.facts);
+      const tenue=mgmtPromesses(copie,f).find(x=>x.c===promesse.c).etat;
+      return {signe,surCarte,sansCombat,signature,limite,rompue,tenue,faits:avant===JSON.stringify(m.facts),faitsCopie:faitsCopieAvant===JSON.stringify(copie.facts)};`);
+    assert.deepEqual(r,{signe:true,surCarte:true,sansCombat:true,signature:'en cours',limite:'en cours',rompue:'rompue',tenue:'tenue',faits:true,faitsCopie:true});
   }finally{w.close();}
 });

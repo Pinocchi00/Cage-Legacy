@@ -27,7 +27,7 @@ Brief, lot 5, l.268 : « Décidé le 09/10/2026 : le joueur peut l'annuler, les 
 
 ## 4. Ce qui change
 **Aucun fichier de code dans cette fiche arrêtée.** Le geste de confirmation n'est pas maquetté ; ne pas livrer séparément une pénalité silencieuse.
-Après validation, réécrire cette fiche avec les fichiers exacts, signatures et JSDoc des portes de demande/confirmation, sélecteurs DOM, touches et valeurs de la planche.
+Les fichiers exacts, signatures et sélecteurs sont à choisir par le codeur d’après le code existant.
 La future implémentation devra couvrir les deux contrôleurs ci-dessus, conserver `mgmtRemoveMain` comme primitive sans écran, et écrire les faits uniquement après confirmation réussie.
 Aucune nouvelle signature n'est autorisée maintenant : ne pas inventer une boîte native `confirm()`, un écran, un dialogue ou une fonction de contrôleur à partir de ce constat.
 
@@ -44,7 +44,7 @@ Le sens de l'avertissement est fixé par le brief, mais sa formulation visible e
 Après validation, la fiche réécrite indiquera les libellés validés et, si nécessaire, la commande à `@ecrivain` (fichier/variable/nombre/famille/féminin), après lecture des références de voix.
 
 ## 7. Écran
-**STOP : planche non validée.** Aucun chemin de planche validée ne couvre T4.
+Pas de planche : décision du 13/10 (voir la fin de la fiche), STOP LEVÉ.
 Le plan l.112–127 et `maquettes/monde/LISEZ-MOI.md:3–12` valident sept destinations (nouvelle partie, présentations, dossiers, Accueil), pas l'avertissement d'annulation sur la Carte.
 La dérogation T3 (§ décision et acceptation finales) autorise seulement son marquage minimal : **elle ne valide pas la confirmation T4**.
 Charte l.75–78 : « Nouvel écran ou geste nouveau → maquette d'abord. » La planche doit montrer la paire visée, la conséquence pour les deux combattants avant validation, confirmer/renoncer, et le retour à la Carte.
@@ -70,7 +70,7 @@ Critère futur : **7/7 tests T4 verts**, **2** faits par confirmation héritée,
 Contrôle souris/clavier et captures à **1280/1440/1920 px**, console sans erreur, conformité aux valeurs de la planche. Pas de mesure Monte Carlo ni de génération de six ans nécessaire.
 
 ## 10. Hors périmètre
-Ne toucher aucun code maintenant, ni la modification locale préexistante de `tests/mgmtPredecesseurDemandes.test.js` ; commiter cette fiche seule.
+Code la tranche maintenant (la modification locale de `tests/mgmtPredecesseurDemandes.test.js` peut être commitée avec ta tranche : c’est l’alignement version 17).
 Après déblocage : pas de refonte des contrats, camps, moteur, promesses, pénalités des combats joueur, présentations/dossiers absents, déroulement T5 ou politique du prédécesseur.
 Ne pas rouvrir les écarts T3 acceptés ; ne pas appliquer la pénalité au simple changement de titre, à un rendu ou à une lecture de sauvegarde.
 
@@ -89,7 +89,7 @@ Ne pas rouvrir les écarts T3 acceptés ; ne pas appliquer la pénalité au simp
 - **Confirmation périmée rejetée**, sans rechercher la paire ailleurs : défaut le plus simple et sûr face au décalage des indices. Contrats, agenda, demandes et promesses inchangés.
 - **Version future 18 et migration sans rétroactivité** : extension explicite du vocabulaire validé, sans fabriquer un scénario historique.
 - **Question pour Anthony (seule bloquante)** : faire produire puis valider la planche du geste T4 sur la Carte (paire, avertissement sur les deux contrariétés, libellés confirmer/renoncer, souris/clavier, retour ou reprise de modification) ; quel fichier de planche validée doit faire foi ?
-- Aucun seuil ou choix de compatibilité technique n'est renvoyé à Anthony. Après validation, réécrire cette fiche avant de lancer le codeur ; ce STOP n'autorise aucune livraison partielle.
+- Aucun seuil ou choix de compatibilité technique n'est renvoyé à Anthony. Le STOP est levé.
 
 ## DÉCISION du 13/10/2026 (Claude) — le STOP « planche non validée » est levé
 Pas de planche : la tranche réutilise la grammaire EXISTANTE (composants de l'écran Carte, mécanisme de contrariété déjà codé pour les retraits ; vérifie par grep `mgmtContrarie` et le flux « retrait » de `mgmt-carte.js`). Aucune fenêtre par-dessus l'écran : la confirmation est EN LIGNE, dans l'emplacement du combat.
@@ -99,3 +99,11 @@ Pas de planche : la tranche réutilise la grammaire EXISTANTE (composants de l'�
 4. Renoncer : rien ne change.
 5. Tests : l'avertissement précède toute écriture ; confirmer retire le combat et pose les deux contrariétés ; renoncer ne change aucun état ; un combat non hérité n'offre pas cette action ; version de sauvegarde inchangée (17).
 Plus aucune question : code, vérifie (check:rapide, jamais plus de 16 créations de six ans), commit « Monde lot 5 T4 : annuler un combat hérité ».
+
+## DÉCISION FINALE du 13/10/2026 (Claude) — elle prime sur tout ce qui précède, plus aucune question
+1. **STOP levé, planche dispensée** : confirmation en ligne dans la grammaire existante (décision ci-dessus). Plus rien à valider.
+2. **Version 18 : OUI** (migration 17 → 18 seulement numéro de version, vocabulaire `contrarie.why` étendu à `annulation-heritee`, aucune rétroactivité), avec mise à jour des assertions de version 17 → 18 dans les tests de partie neuve, citant « décision du 13/10/2026, lot 5 T4 ». Les fixtures 14 à 17 migrent sans perte jusqu'à 18.
+3. **Portes à protéger** : `CL.mgmtUnbook(i)` (bouton ×, touches 1 à 5) et `CL.mgmtCarteModifie(i)` ne retirent plus immédiatement un combat HÉRITÉ : ils passent par la confirmation en ligne. Pour un combat non hérité, rien ne change.
+4. **Touche d'annulation** : `X` si libre dans `keysRegister`, sinon la première libre parmi `K`, `Suppr` ; documente le choix dans le compte rendu.
+5. Les six écarts du relecteur : traite-les dans la même tranche si ce sont des défauts de code ou de test ; liste dans le compte rendu ceux que tu juges hors fiche, sans arrêter.
+Code, vérifie, commit « Monde lot 5 T4 : annuler un combat hérité » (sans « inachevé »).
