@@ -117,3 +117,32 @@ Pas de fusion de dépendances, réécriture des six ans, second simulateur ou r�
 
 ## DÉCISION du 13/10/2026 (Claude) — réponse à la question bloquante du test 4
 La préparation de la date suivante (`mgmtAgendaSuivante`, `mgmt-screens.js:381`) à l'ouverture d'une partie est un comportement EXISTANT du jeu, présent avant le lot 5 : la tranche T5 vérifie que la suite est inchangée, donc ce comportement ne doit PAS être neutralisé et aucune correction de production n'est autorisée. **Le critère « JSON entier inchangé » est révisé** : la consultation de la carte héritée ne change la partie qu'en deux endroits admis, `lastEvent.vu` et `cal.prochaines` (qui gagne la prochaine date posée par le jeu à l'ouverture). L'assertion du test 4 compare le JSON entier privé de ces deux champs, et vérifie séparément que `cal.prochaines` n'a gagné que cette entrée de prochaine date (une seule, jour 70, sans toucher à la soirée héritée). Aucune autre différence n'est admise. Cite en commentaire « décision du 13/10/2026 : préparation de la date suivante existante ». Puis finis T5 : commit « Monde lot 5 T5 : la suite est inchangée » (sans « inachevé »), check:rapide vert.
+
+## Compte rendu
+
+### État final : terminé après la décision du 13/10/2026
+
+- `tests/mgmtSuiteHeritee.test.js` : finalisation du test de reprise existant. Comparaison entière hors des deux champs autorisés, vérification séparée de `vu=3`, ajout d'une seule prochaine date à J70 et conservation des entrées précédentes. Commentaire de décision et ancre ajoutés. Les assertions de fin, Résultats et Lendemain sans touchés sont désormais atteintes et vertes.
+- `docs/lots/MONDE-LOT-5-T5.md` : présent compte rendu final ; le diagnostic précédent reste conservé pour historique.
+- `package.json` : inscription du fichier T5 dans `test` et `test:watch` déjà livrée au commit inachevé, inchangée ici. Aucun fichier de production modifié.
+
+### Tests de la tranche (déjà ajoutés, désormais tous verts)
+
+1. `Monde lot 5 T5 — la première soirée conserve les paires héritées et leur ordre de passage`.
+2. `Monde lot 5 T5 — la provenance ne change ni le combat ni la recette`.
+3. `Monde lot 5 T5 — regarder passer et revoir ne rejouent pas la première soirée`.
+4. `Monde lot 5 T5 — reprendre la première soirée mène au lendemain puis aux résultats`.
+5. `Monde lot 5 T5 — le joueur automatique finit la carte héritée avec une reprise`.
+
+### Vérification finale
+
+- T5 : **5/5 verts** ; ciblée prescrite : **43/43 verts**. Première soirée : **9 traces**, **1 soirée joueur**, **0** combat hérité perdu/dupliqué, **0** simulation pendant consultation/reprise. Fin UI au cycle 5, validation vraie.
+- `@verif` indisponible (`Subagent depth limit reached (1)`) : repli direct, `node tools/verif-versions.js` **code 0, aucun écart** ; `npm run check:rapide` **vert, 975/975**, 107 fichiers lancés. Premier essai arrêté par le délai de l'outil à 200 s ; relance avec délai adapté achevée sans échec. Aucun test lent modifié, aucun check complet ni mesure (réservés au bilan du lot).
+- `@relecteur` appelé après vérification, indisponible avec la même erreur : **aucun verdict délégué**. `@eclaireur` également indisponible ; lecture ciblée du test désigné par la fiche.
+- Les tests ont réécrit les fins de ligne de `mgmt-retraits-data.js` et `mgmt-voix-data.js` sans diff de contenu ; ces fichiers ne sont pas ajoutés au commit.
+
+### Sauvegarde, écarts et questions pour Anthony
+
+- Aucun nouveau champ, changement de version ou migration ; `MGMT_SAVE_VERSION` reste 18. Aucun cache/index/service worker modifié.
+- Seul assouplissement : celui expressément autorisé par la décision du 13/10/2026 sur la préparation de la prochaine date. Aucun autre écart fonctionnel ; contrôle délégué indisponible signalé ci-dessus.
+- Questions pour Anthony : aucune ; la question bloquante précédente est résolue par la décision.

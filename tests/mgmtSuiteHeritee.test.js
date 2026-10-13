@@ -102,7 +102,15 @@ test('Monde lot 5 T5 — reprendre la première soirée mène au lendemain puis 
   const avant = win.eval('JSON.stringify(G.mgmt)'), seed = win.eval('SEED');
   win.eval('G.mgmt=null; MGMT_SOIREE=mgmtSoireeNeuve(0); CL.mgmtEnter(1);');
   assert.deepEqual(lire(win, 'return [G.screen,MGMT_SOIREE.index,G.mgmt.lastEvent.vu,G.mgmt.cycle,G.mgmt.eventsPlayed,validateMgmt(G.mgmt)];'), ['mgmt_soiree',3,3,4,4,true]);
-  assert.ok(win.eval('JSON.stringify(G.mgmt)') === avant, 'JSON entier inchangé après reprise, agenda compris');
+   /* ==== [ANCRE: MONDE_LOT5_T5_TESTS_REPRISE_DATE] — Monde lot 5 T5 ==== */
+   // décision du 13/10/2026 : préparation de la date suivante existante
+   const avantReprise = JSON.parse(avant), apresReprise = lire(win, 'return G.mgmt;');
+   assert.equal(apresReprise.cal.prochaines.length, avantReprise.cal.prochaines.length + 1);
+   assert.deepEqual(apresReprise.cal.prochaines.slice(0,-1), avantReprise.cal.prochaines);
+   assert.equal(apresReprise.cal.prochaines.at(-1).jour, 70);
+   delete avantReprise.lastEvent.vu; delete apresReprise.lastEvent.vu;
+   delete avantReprise.cal.prochaines; delete apresReprise.cal.prochaines;
+   assert.deepEqual(apresReprise, avantReprise, 'seuls lastEvent.vu et la prochaine date sont admis après reprise');
   assert.equal(win.eval('SEED'), seed);
   const traces = lire(win, 'return mgmtSoireeProgramme(G.mgmt).map(p=>p.trace);');
   assert.equal(traces.length, 9); assert.ok(traces.every(Boolean));
