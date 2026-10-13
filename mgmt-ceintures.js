@@ -69,7 +69,9 @@ function mgmtTitleMemoryRows(m){
         :(winner?'title_awarded':'title_vacant');
       const first=champion||winner||trace.a;
       const second=first===trace.a?trace.b:trace.a;
-      rows.set(fact,{label:MGMT_FACT_LABELS[key],a:first.name,b:second.name});
+      /* ==== [ANCRE: MGMT_FAITS_TITRE_SOURCE] — Monde lot 3 T1 ==== */
+      rows.set(fact,{label:MGMT_FACT_LABELS[key],a:first.name,b:second.name,
+        championId:champion?champion.id:null,winnerId:winner?winner.id:null});
       champions.set(fact.div,winner?winner.id:champion?champion.id:null);
     }
   }
