@@ -1,5 +1,3 @@
-STOP : rareté, diversité des ouvertures et accès aux données publiques à trancher par Anthony.
-
 # Monde lot 3 T1 — Le tri des faits
 
 ## 1. Branche
@@ -126,3 +124,9 @@ La soirée est calculée d'un bloc : ne pas présenter comme connus des résulta
 4. **Bloquante :** la rareté d'une paire se mesure-t-elle parmi toutes les paires de la catégorie,
    les paires bookables ou les combats de la carte ? Quelles familles sont propres à la paire,
    et faut-il aussi fusionner les faits individuels ? Quel instant de référence avant un combat ?
+
+## 13. Décisions de Claude du 13/10/2026 (réponses aux questions du §12 ; Anthony laisse le technique à Claude)
+1. **Rareté** : mesurée sur l'effectif actif de la CATÉGORIE de poids, dans l'organisation du joueur (pas le monde). Rareté d'un fait = part de la catégorie qui le partage ; plus c'est rare, plus il passe en premier. Départage : ordre fixe des familles (l'ordre de la liste de la fiche), puis identifiant. Valeurs : âge par tranches (≤22, 23–26, 27–30, 31–34, 35+) ; garde et allonge = valeur dans le quintile haut ou bas de la catégorie ; rang = top 3 de la catégorie ; mouvement = au moins 3 places gagnées ou perdues ; série = au moins 3 victoires ou 3 défaites de suite ; façon de gagner = une méthode qui fait au moins 60 % de ses victoires, avec au moins 4 victoires ; attente = au moins 6 mois.
+2. **Quota de six ouvertures par famille** : il contraint T2 (l'affichage), pas T1. T1 rend la liste triée de chaque combattant sans quota. Si les faits manquent, la liste est plus courte : jamais de fait inventé. « Aucune présentation identique » est vérifié par T2 sur le texte, pas par T1.
+3. **Données physiques** : un adaptateur limité aux champs publics garde et allonge est autorisé, même via `mgmtCombatProfile`, à condition de ne lire ni le niveau ni aucune statistique cachée du moteur, même indirectement. Interdit : tout ce qui permet de déduire le niveau.
+4. **Rareté d'une paire** : mesurée parmi toutes les paires possibles de la catégorie (effectif actif). Familles propres à la paire : même tranche d'âge, revanche ou trilogie, contraste de style (libellés publics), même camp, rangs voisins, adversaire commun, enjeu de titre. La présentation d'une paire peut ensuite compléter par les faits individuels des deux. Instant de référence : l'état courant de la partie (`m.cycle`) avant le combat.
