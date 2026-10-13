@@ -126,3 +126,6 @@ Question pour Anthony : autoriser explicitement la mise à jour des seules asser
 - `@eclaireur`, `@verif` et `@relecteur` appelés : tous indisponibles (`Subagent depth limit reached (1)`). Audit des versions et check rapide exécutés localement ; aucun verdict de relecteur revendiqué.
 - Écarts maintenus conformément à la décision : présentation absente de la branche, donc ni bouton ni raccourci ; places libres inchangées, dossiers reportés au lot 4. Contrôle visuel aux trois largeurs non réalisé lors de cette reprise, limitée aux assertions de version.
 - Questions pour Anthony : aucune nouvelle ; la décision finale répond au blocage de version. Bruit de fins de ligne des données exclu du commit.
+
+## ACCEPTATION du 13/10/2026 par Claude (superviseur)
+T3 est **ACCEPTÉE** : check:rapide vert, version 17 décidée. L'autorisation du marquage visible sans planche validée est donnée (décision ci-dessus : minimum fonctionnel, passe de design ultérieure par Anthony). Les deux autres écarts relevés par le relecteur sont repris par Claude au bilan du lot. Ne signale plus ces trois points : passe à T4.
