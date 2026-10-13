@@ -104,7 +104,8 @@ test('Monde lot 5 T2 — les échéances survivent au passage de témoin et à l
   }finally{w.close();}
   const v=partie(); try{
     assert.deepEqual(lire(v,`m.facts=m.facts.filter(x=>x.k!=='promesse'&&x.k!=='refus'); const charge=mgmtParseAndValidate(mgmtSerialiser(m));
-      return {v:charge.v,reponses:charge.facts.filter(x=>x.k==='promesse'||x.k==='refus').length,passe:!!charge.passe};`),{v:16,reponses:0,passe:false});
+      /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_DEMANDES] — Monde lot 5 T3 ==== */
+      return {v:charge.v,reponses:charge.facts.filter(x=>x.k==='promesse'||x.k==='refus').length,passe:!!charge.passe};`),{v:17,reponses:0,passe:false}); /* renumérotation de version, lot 5 T3, décision du 13/10/2026 */
   }finally{v.close();}
 });
 test('Monde lot 5 T2 — une promesse héritée se tient ou se rompt selon les règles existantes',()=>{

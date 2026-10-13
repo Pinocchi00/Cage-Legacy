@@ -114,3 +114,15 @@ Question pour Anthony : autoriser explicitement la mise à jour des seules asser
 1. **Autorisé** : monter `MGMT_SAVE_VERSION` à 17 (migration 16 → 17 sans perte, tests de migration 16 → 17 ajoutés) ET mettre à jour les assertions de version attendue 16 → 17 dans les tests existants (`mgmtNiveau`, `mgmtMarque`, `mgmtPredecesseurDemandes` et tout autre fichier qui attend 16 pour une partie NEUVE), avec en commentaire « renumérotation de version, lot 5 T3, décision du 13/10/2026 ». Les fixtures de sauvegarde 14, 15 et 16 doivent migrer sans perte jusqu'à 17. Rien d'autre n'est assoupli.
 2. « Le fichier local préexistant interdit de modification » = `mgmt-voix-data.js` et `mgmt-retraits-data.js` (bruit de fins de ligne des tests) : ils ne sont jamais commités ; ce n'est pas un obstacle au check rapide.
 3. Termine : `npm run check:rapide` vert, commit « Monde lot 5 T3 : la carte du premier jour » (sans « inachevé »).
+
+## Compte rendu — reprise après décision « version 17 »
+
+État atteint : **terminé selon les décisions finales de cette fiche**.
+
+- `tests/mgmtNiveau.test.js`, `tests/mgmtMarque.test.js`, `tests/mgmtEffectifs.test.js`, `tests/mgmtEmplacements.test.js`, `tests/mgmtHumanite.test.js`, `tests/mgmtPredecesseurDemandes.test.js` : seules les assertions de version finale passent de 16 à 17, avec le commentaire prescrit et les ancres T3. Fixtures anciennes et assertions métier inchangées. La modification T2 préexistante de `mgmtPredecesseurDemandes` reste hors commit.
+- Cette fiche : compte rendu de clôture. Aucun changement supplémentaire du code livré dans le commit inachevé ; migration 16 → 17 déjà présente, sans provenance rétroactive. Les fixtures 14 et 15 restent inchangées et leurs tests de migration passent jusqu'à 17.
+- Tests T3 déjà ajoutés dans le commit précédent, préfixe `Monde lot 5 T3 —` : `seuls les combats hérités portent la provenance`, `la lecture répétée ne crée aucun héritage`, `une ancienne sauvegarde ne reçoit aucune provenance`, `modifier un combat efface sa provenance`. Aucun nouvel intitulé dans cette reprise.
+- Vérification ciblée : **4/4 T3 verts**. `node tools/verif-versions.js` : aucun écart. `npm run check:rapide` : **VERT, 963/963 tests, 105 fichiers lancés** (journal terminé malgré le délai de retour de l'outil). Aucun test lent six ans ni Monte Carlo lancé ; check complet réservé au bilan du lot.
+- `@eclaireur`, `@verif` et `@relecteur` appelés : tous indisponibles (`Subagent depth limit reached (1)`). Audit des versions et check rapide exécutés localement ; aucun verdict de relecteur revendiqué.
+- Écarts maintenus conformément à la décision : présentation absente de la branche, donc ni bouton ni raccourci ; places libres inchangées, dossiers reportés au lot 4. Contrôle visuel aux trois largeurs non réalisé lors de cette reprise, limitée aux assertions de version.
+- Questions pour Anthony : aucune nouvelle ; la décision finale répond au blocage de version. Bruit de fins de ligne des données exclu du commit.
