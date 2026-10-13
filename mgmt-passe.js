@@ -110,6 +110,10 @@ function mgmtPasseCloturer(m){
   mgmtSallesInit(m);
   mgmtPasseAlleger(m);
   mgmtRangsInvalider(m);
+  /* ==== [ANCRE: MONDE_LOT5_T1_PASSAGE_CARTE] — Monde lot 5 T1 ==== */
+  if(mgmtAgendaPoser(m,MGMT_EVENT_WEEKS*7,'petite').ok){
+    mgmtPredecesseurCarteHeritee(m,p.soirees);
+  }
   return m;
 }
 

@@ -97,15 +97,16 @@ test('Monde lot 1 T3 — les dates : le passé avant 2027, le premier jour du jo
   assert.deepEqual(r.faites, [-105, -70, -35]);
   assert.ok(r.annees.every(a => a === 2026), 'trois soirées de 35 jours avant le 12 janvier 2027 : toutes en 2026');
   assert.deepEqual(r.n, [1, 2, 3]);
-  assert.equal(r.prochaines, 0);
+  /* ==== [ANCRE: MONDE_LOT5_T1_TEST_AGENDA_PASSE] — Monde lot 5 T1 ==== */
+  assert.equal(r.prochaines, 1);
   assert.equal(r.passe.soirees, PASSE_N); assert.equal(r.passe.origineJours, 35 * (PASSE_N + 1));
   assert.equal(r.ev, PASSE_N); assert.equal(r.joueur, 0, 'le joueur n\'a encore joué aucune soirée');
   assert.deepEqual(r.jourN, [-105, -70, -35]);
   /* Au-delà des 24 soirées gardées dans l'agenda, la date se retrouve par le décalage du passé (le rythme des 35 jours). */
   assert.equal(A.eval('(function(){const m=G.mgmt; m.cal.faites=[]; return [1,3].map(n=>mgmtAgendaJour(m,n)).join();})()'), '-105,-35');
-  /* Le jeu pose la soirée suivante à 35 jours, comme une partie sans passé. */
-  const suiv = A.eval(`(function(){ const m=G.mgmt; mgmtAgendaSuivante(m); return m.cal.prochaines[0].jour; })()`);
-  assert.equal(suiv, 35);
+  /* La clôture l'a déjà posée : l'appel de l'interface est un no-op. */
+  const suiv = JSON.parse(A.eval(`JSON.stringify((function(){ const m=G.mgmt; return [mgmtAgendaSuivante(m),m.cal.prochaines[0].jour]; })())`));
+  assert.deepEqual(suiv, [false, 35]);
 });
 
 /* ===================== Test 5 : le monde extérieur (point I) ===================== */
@@ -145,17 +146,27 @@ test('Monde lot 1 T4 — les contrats, blessures, attentes, ceintures et histori
     setSeed(${GRAINE});
     const m=mgmtPassePreparer('split',{soirees:2});
     for(let k=0;k<2;k++) mgmtPasseSoiree(m,k);
-    const corps=()=>JSON.stringify(m.roster.map(f=>[f.id,f.ct||null,!!f.libre,f.trauma||0,f.traumaFloor||0,f.susp||0,f.retired||null,f.lastCycle||0,f.level,f.raison,f.interactions]));
+    /* ==== [ANCRE: MONDE_LOT5_T1_TEST_PROMOTION_HERITEE] — Monde lot 5 T1 ==== */
+    /* Fiche §3.21 et §11 : mgmtBookMain conserve ses promotions ; seul le corps médical/contractuel reste identique. */
+    const promotions=m.roster.map(f=>({id:f.id,level:f.level,raison:f.raison,interactions:f.interactions}));
+    const corps=()=>JSON.stringify(m.roster.map(f=>[f.id,f.ct||null,!!f.libre,f.trauma||0,f.traumaFloor||0,f.susp||0,f.retired||null,f.lastCycle||0]));
     const avant={corps:corps(),histResume:JSON.stringify(m.hist.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L])),factsGardes:JSON.stringify(m.facts.filter(x=>!MGMT_PASSE_FAITS_PERDUS.includes(x.k))),titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null)),pile:JSON.stringify(m.pile),cycle:m.cycle,fil:m.fil?m.fil.length:0};
     const ageAvant=m.roster.map(f=>f.age).join();
     mgmtPasseCloturer(m);
     /* Monde lot 1 T5 (fiche MONDE-LOT-1-T5 §3) : à la clôture les combats s'allègent (mêmes combattants, même issue) et les faits perdus (contrats, départs, attentes) sont écartés ; tout le reste est conservé. */
     const resume=h=>JSON.stringify(h.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L]));
+    const engages=new Set(m.card.main.flatMap(cf=>[cf.a,cf.b]));
+    const promotion=promotions.every(p=>{const f=mgmtFighterById(m,p.id);
+      if(!engages.has(p.id)) return f.level===p.level&&f.raison===p.raison&&f.interactions===p.interactions;
+      const interactions=(Number.isSafeInteger(p.interactions)?p.interactions:0)+1;
+      return f.interactions===interactions&&f.level===(interactions>=3?3:Math.max(2,p.level))&&
+        (p.level<2?MGMT_RAISONS.some(r=>r.id===f.raison):f.raison===p.raison);});
     return {corps:corps()===avant.corps,hist:resume(m.hist)===avant.histResume,facts:JSON.stringify(m.facts)===avant.factsGardes,
+      promotion,
       titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null))===avant.titres,pile:JSON.stringify(m.pile)===avant.pile,
       cycle:m.cycle===avant.cycle,fil:(m.fil?m.fil.length:0)===avant.fil,nbHist:m.hist.length,nbFacts:m.facts.length,
       sous:m.roster.filter(f=>f.ct).length,n:m.roster.length,vieilli:m.roster.map(f=>f.age).join()!==ageAvant}; })())`));
-  for (const k of ['corps', 'hist', 'facts', 'titres', 'pile', 'cycle', 'fil']) assert.equal(r[k], true, 'conservé : ' + k);
+  for (const k of ['corps', 'hist', 'facts', 'titres', 'pile', 'cycle', 'fil', 'promotion']) assert.equal(r[k], true, 'conservé : ' + k);
   assert.ok(r.nbHist > 0 && r.nbFacts > 0, 'l\'histoire existe');
   assert.ok(r.sous > 0, 'des contrats sont en cours');
 });
