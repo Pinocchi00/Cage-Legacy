@@ -206,7 +206,7 @@ test('Monde lot 3 T3 — frontière soirée, pureté et rechargement',()=>{
     const a=lire(m),b=lire(lu),adaptes=programme.map(p=>mgmtPresentationCombatSoiree(m,p.i));
     let frontiere=true;
     for(const p of programme){const copie=JSON.parse(avant),x=mgmtPresentationCombat({m:copie,h:p.h},p.a.id,p.b.id);
-      copie.hist.slice(p.h).forEach(t=>{t.winner='D';t.family='KO';t.round=99;});
+      copie.hist.slice(p.h).forEach(t=>{t.winner='D';t.family='KO';t.round=99;t.rounds=99;});
       if(JSON.stringify(x)!==JSON.stringify(mgmtPresentationCombat({m:copie,h:p.h},p.a.id,p.b.id)))frontiere=false;
     }
     const p=programme[0],zero=mgmtPresentationCombat({m,h:0},p.a.id,p.b.id),fin=mgmtPresentationCombat({m,h:m.hist.length},p.a.id,p.b.id);
@@ -222,16 +222,18 @@ test('Monde lot 3 T3 — frontière soirée, pureté et rechargement',()=>{
   for(const [i,x] of r.adaptes.entries()){assert.deepEqual(x.presentation,r.a[i]);assert.deepEqual(Object.keys(x),['i','etiquette','rounds','titre','presentation']);}
 });
 test('Monde lot 3 T3 — féminin et dix propositions exportables',()=>{
-  const fs=require('node:fs'),path=require('node:path'),{execFileSync}=require('node:child_process');
+  const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{execFileSync}=require('node:child_process');
   fixture();win.eval("paireFixture.roster.forEach(f=>f.div=allDivisions().find(d=>d.gender==='F').id)");
   const p=lire("mgmtPresentationCombat({m:paireFixture},'a','b')");assert.ok(p);
   const modeles=lire('Object.values(MGMT_PRESENTATION_COMBAT_TEXTES)');
   assert.equal(modeles.length,10);assert.equal(new Set(modeles.map(x=>x.id)).size,10);assert.ok(modeles.every(x=>x.relu===false));
   for(const texte of p.faits.concat(p.cotes.flatMap(x=>x.faits),p.pronostics).map(x=>x.texte))assert.doesNotMatch(texte,/\{[^}]+\}/);
-  const out=path.join('C:/Users/antho/AppData/Local/Temp/opencode',`presentation-t3-${process.pid}.md`);
+  /* ==== [ANCRE: TEST_MGMT_PRESENTATION_COMBAT_EXPORT_TEMP] — Monde lot 3 T3 ==== */
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'presentation-t3-'));
+  const out=path.join(dir,'textes.md');
   try{execFileSync(process.execPath,['tools/exporter-textes.js','--out',out],{cwd:path.join(__dirname,'..')});
     const exporte=fs.readFileSync(out,'utf8');for(const m of modeles){assert.ok(exporte.includes('`MGMT_PRESENTATION_COMBAT_TEXTES.'+m.id+'`'));assert.ok(exporte.includes(m.texte));}
-  }finally{if(fs.existsSync(out))fs.unlinkSync(out);}
+  }finally{fs.rmSync(dir,{recursive:true,force:true});}
   // Décision du 13/10 : les réserves de forme sont relevées, pas réécrites par le codeur.
   const reserves=modeles.filter(m=>/\b(?:ils|combattants|gagnant|eux)\b/i.test(m.texte)).map(m=>m.id);
   assert.deepEqual(reserves,['meme_age','revanche','cage-hebdo','le-forum']);

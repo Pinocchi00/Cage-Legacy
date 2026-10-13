@@ -182,3 +182,12 @@ Les dix propositions `relu:false` sont écrites par Claude dans `mgmt-presentati
 - Réserves de forme relevées sans réécriture, suivant cette décision : `meme_age` (« combattants », et même tranche ne signifie pas même âge exact), `revanche` (« Ils »), `cage-hebdo` (« gagnant »), `le-forum` (« eux »).
 - Réserve de provenance du texte livré `tableau-noir` : la règle compare les rangs publics ; sa phrase affirme une gestion de distance/fatigue non établie par ces preuves. Proposition conservée, à corriger par le superviseur, pas par le codeur.
 - Question pour Anthony : relire/corriger ces cinq modèles avant leur affichage en T5 ; aucune autre décision technique demandée.
+
+### Reprise de relecture — 13/10/2026
+- `tests/mgmtPresentationCombat.test.js` : « Monde lot 3 T3 — frontière soirée, pureté et rechargement » mute aussi `t.rounds` à partir de chaque `p.h`, puis vérifie la présentation identique.
+- Même fichier : « Monde lot 3 T3 — féminin et dix propositions exportables » utilise `mkdtempSync` dans `os.tmpdir()` ; le répertoire d'export est supprimé dans `finally`, sans chemin propre à Anthony.
+- Aucun test ajouté ; seuls ces deux tests renforcés et cette fiche sont modifiés pour la reprise. Points 3 et 4 réservés à Anthony inchangés ; aucune migration ni modification du jeu.
+- Vérifications : T3 7/7 après chaque pas ; T1/T2/T3 23/23 ; audit versions vert ; check rapide relancé vert, 971/971 (premier essai : six échecs de lancement de sous-processus Node, code 3221225794, et délai outil dépassé).
+- `_bump.js` tenté sur le test : refus « absent », car non chargé par `index.html` ; aucune version navigateur à monter.
+- `@verif` et nouvelle `@relecteur` demandés mais refusés : `Subagent depth limit reached (1)` ; vérifications exécutées directement, aucun nouveau verdict externe disponible.
+- Écarts : aucun aux deux corrections demandées. Questions pour Anthony : aucune nouvelle ; les réserves précédentes restent à sa charge. Fichiers de données aux seuls écarts de fins de ligne exclus du commit.
