@@ -150,3 +150,35 @@ Questions pour Anthony : aucune décision à demander ; les textes passent par l
 
 ## 9. DÉCISION du 13/10/2026 — les 10 textes sont LIVRÉS (§6 : « demander au superviseur de livrer ces 10 propositions »)
 Les dix propositions `relu:false` sont écrites par Claude dans `mgmt-presentation-combat-data.js` (`MGMT_PRESENTATION_COMBAT_TEXTES`, clés du §6). Ne les réécris pas et n'appelle pas `@ecrivain` (limite de profondeur des sous-agents). Charge le fichier dans `index.html` après `mgmt-presentation-faits.js` avec `?v=`, résous les variables à l'écran (noms publics ; `{styles}` et `{rangs}` joints par « et »), et implémente T3. Si un test épicène/forme refuse une phrase, ne la réécris pas : liste-la dans le compte rendu et livre le reste ; le superviseur la corrigera. Plus aucune question : commit « Monde lot 3 T3 : la présentation du combat » (sans « inachevé »).
+
+## Compte rendu
+
+### Fichiers et livraison
+- `mgmt-presentation-combat.js` : paire canonique, trois faits de paire, deux côtés avec bilan, histoire publique et trois pronostics sourcés ; adaptateur à la frontière exacte du programme. Réutilise les portes T1/T2, sans moteur, DOM, cache, RNG ni écriture dans la partie.
+- `index.html` : charge les données livrées puis le compositeur après T2, avant combat ; versions montées par `_bump.js`. `sw.js` : cache b134, modification produite par cet outil seulement.
+- `tests/mgmtPresentationCombat.test.js` : sept tests, pièges sur sujets et traces, reconstruction publique, substitution historique W/L/D hors sélection T2, rechargement, gel et export temporaire des dix propositions.
+- `package.json` : test T3 ajouté à `test` et `test:watch`, sans exclusion du check rapide.
+- Cette fiche : compte rendu. Les dix textes livrés dans `mgmt-presentation-combat-data.js` restent inchangés.
+- Aucun écran basculé : le remplacement de l'avant-combat reste réservé à T5.
+
+### Tests ajoutés (intitulés exacts)
+- « Monde lot 3 T3 — paire canonique et invalides »
+- « Monde lot 3 T3 — trois voix nommées et pourcentage public »
+- « Monde lot 3 T3 — les voix peuvent se contredire »
+- « Monde lot 3 T3 — aucun niveau caché ni appel moteur »
+- « Monde lot 3 T3 — chaque phrase et preuve retrouve sa source »
+- « Monde lot 3 T3 — frontière soirée, pureté et rechargement »
+- « Monde lot 3 T3 — féminin et dix propositions exportables »
+
+### Vérifications et sauvegarde
+- Test T3 : 7/7 verts ; ensemble T1/T2/T3 : 23/23 verts, quota/diversité T2 conservés.
+- `node tools/verif-versions.js` : aucun écart ; `npm run check:rapide` : VERT, 971 tests, 105 fichiers lancés. Export temporaire : dix propositions retrouvées, aucun export ajouté au dépôt. Aucun Monte Carlo ni test lent modifié.
+- Migration : aucune ; version de sauvegarde 16, validation et migration inchangées.
+- `@eclaireur`, `@ecrivain`, `@verif` et `@relecteur` : appels refusés (`Subagent depth limit reached (1)`). Le superviseur a livré les textes et levé l'arrêt contenu ; vérification effectuée directement. Aucun verdict externe de relecture disponible.
+- Fins de ligne réécrites par les tests dans `mgmt-retraits-data.js` et `mgmt-voix-data.js` : aucun diff hors espaces, fichiers exclus du commit.
+
+### Écarts et questions pour Anthony
+- Jointure « et » des styles/rangs suivant la décision du 13/10, au lieu de « / » au §4. Aucune interface créée pour résoudre ces variables : substitution en texte brut, conformément au périmètre données T3.
+- Réserves de forme relevées sans réécriture, suivant cette décision : `meme_age` (« combattants », et même tranche ne signifie pas même âge exact), `revanche` (« Ils »), `cage-hebdo` (« gagnant »), `le-forum` (« eux »).
+- Réserve de provenance du texte livré `tableau-noir` : la règle compare les rangs publics ; sa phrase affirme une gestion de distance/fatigue non établie par ces preuves. Proposition conservée, à corriger par le superviseur, pas par le codeur.
+- Question pour Anthony : relire/corriger ces cinq modèles avant leur affichage en T5 ; aucune autre décision technique demandée.
