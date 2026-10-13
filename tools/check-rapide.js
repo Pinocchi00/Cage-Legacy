@@ -26,7 +26,9 @@ const LENTS = ['tests/mgmtCorrectionsLot12.test.js', 'tests/mgmtSoireeShow.test.
    'tests/mgmtPasseT6.test.js',
    /* ==== [ANCRE: MONDE_LOT5_T1_MATRICE_LENTE] — Monde lot 5 T1 ==== */
    /* 160 créations à 62 soirées : acceptation T1 à part, et check complet au bilan du lot. */
-   'tests/mgmtCarteHeriteeSixAns.test.js'];
+    'tests/mgmtCarteHeriteeSixAns.test.js',
+    /* ==== [ANCRE: MONDE_LOT5_T2_MATRICE_LENTE] — Monde lot 5 T2 ==== */
+    'tests/mgmtPromessesHeriteesSixAns.test.js'];
 const gardes = process.argv.slice(2).map(f => f.replace(/\\/g, '/'));
 const tous = require(path.join(racine, 'package.json')).scripts.test.replace(/^node --test\s+/, '').split(/\s+/).filter(Boolean);
 const ecartes = LENTS.filter(f => tous.includes(f) && !gardes.includes(f));

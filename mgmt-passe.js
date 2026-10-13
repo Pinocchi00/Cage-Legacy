@@ -77,7 +77,8 @@ function mgmtPassePreparer(orgId,opts){
 function mgmtPasseSoiree(m,k){
   const n=m.passe.soirees;
   /* T4 bis : il re-signe ses sans-contrat et recrute des jeunes en fin de passé (réglages opt-in du prédécesseur). */
-  const reglages={renouvelle:true,rotationTitres:n-20,recrues:{depuis:Math.max(0,n-MGMT_PASSE_FENETRE_RECRUES),pas:MGMT_PASSE_RECRUES_PAS,parSoiree:MGMT_PASSE_RECRUES_PAR_SOIREE,ageMax:MGMT_PASSE_RECRUES_AGE_MAX,fin:Math.max(0,n-MGMT_PASSE_RECRUES_FIN),finAgeMax:MGMT_PASSE_RECRUES_FIN_AGE_MAX,plan:m.passe.plan||{}}};
+   /* ==== [ANCRE: MONDE_LOT5_T2_PASSE_DEMANDES] — Monde lot 5 T2 ==== */
+   const reglages={renouvelle:true,demandes:true,rotationTitres:n-20,recrues:{depuis:Math.max(0,n-MGMT_PASSE_FENETRE_RECRUES),pas:MGMT_PASSE_RECRUES_PAS,parSoiree:MGMT_PASSE_RECRUES_PAR_SOIREE,ageMax:MGMT_PASSE_RECRUES_AGE_MAX,fin:Math.max(0,n-MGMT_PASSE_RECRUES_FIN),finAgeMax:MGMT_PASSE_RECRUES_FIN_AGE_MAX,plan:m.passe.plan||{}}};
   const s=mgmtPredecesseurSoiree(m,k,reglages);
   const fait=s.jouee?k+1:k;
   return {k:fait,n,jouee:s.jouee,termine:!s.jouee||fait>=n,annee:mgmtPasseAnnee(n,Math.min(fait,n-1))};
@@ -159,8 +160,19 @@ function mgmtPasseAlleger(m){
     if(!e||!mgmtValidFightTrace(e)) return false;
     hist.push(e);
   }
-  m.hist=hist;
-  m.facts=m.facts.filter(x=>!(x&&MGMT_PASSE_FAITS_PERDUS.includes(x.k)));
+   /* ==== [ANCRE: MONDE_LOT5_T2_ARCHIVE_LIENS] — Monde lot 5 T2 ==== */
+   const indices=new Map(), facts=[];
+   m.facts.forEach((x,i)=>{
+     if(x&&MGMT_PASSE_FAITS_PERDUS.includes(x.k)) return;
+     indices.set(i,facts.length); facts.push(x);
+   });
+   const recales=facts.map(x=>{
+     const demande=x&&Number.isSafeInteger(x.d)&&m.facts[x.d];
+     return x&&(x.k==='promesse'||x.k==='refus')&&demande&&demande.k==='demande'
+       ?Object.assign({},x,{d:indices.get(x.d)}):x;
+   });
+   m.hist=hist;
+   m.facts=recales;
   m.passe.nHist=hist.length; m.passe.nFacts=m.facts.length;
   return true;
 }

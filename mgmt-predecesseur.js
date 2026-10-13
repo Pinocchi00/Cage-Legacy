@@ -4,7 +4,7 @@
    il joue UNE soirée de la partie qu'on lui donne, sans écran. L'outil l'appelle au lieu de la recopier.
    Il ne recrute pas, ignore les affaires (il les ferme), et n'utilise pas mgmtAgendaProposer : les chiffres qu'il produit sont des ordres de grandeur.
    Le corps est le code de partie() de l'outil déplacé tel quel : mêmes appels, même ordre, mêmes bornes. L'ordre d'appel fixe la graine consommée —
-   rien ne se réordonne dans le joueur historique. T1 du lot 5 tire seulement la taille de la carte héritée via rnd().
+    rien ne se réordonne dans le joueur historique. T1 du lot 5 tire seulement la taille de la carte héritée via rnd(). T2 répond aux demandes du passé par opt-in, sans tirage.
    Le moteur lit G.mgmt (mgmtFightReady, mgmtSel, saveMgmt) : la fonction ne pose jamais G, elle exige G.mgmt === m. */
 
 /** Les réglages du prédécesseur. Aujourd'hui un seul : titreCadence — le titre se met en jeu quand k % titreCadence === 0
@@ -108,6 +108,20 @@ function mgmtPredecesseurCarteHeritee(m,k,reglages){
   return r.reclames+r.tetes;
 }
 
+/* ==== [ANCRE: MONDE_LOT5_T2_DEMANDES] — Monde lot 5 T2 ==== */
+/** Répond une fois aux demandes ouvertes, sans écran ni tirage RNG. @param {object} m Partie courante ; exige G.mgmt===m. @returns {{promises:number,refusees:number}} Réponses effectivement enregistrées. */
+function mgmtPredecesseurDemandes(m){
+  if(typeof G==='undefined'||!G||G.mgmt!==m) throw new Error('mgmtPredecesseurDemandes : G.mgmt doit être la partie jouée');
+  const demandes=mgmtDemandesOuvertes(m), compte={promises:0,refusees:0};
+  const admissible=f=>!!(f&&!mgmtIsRetired(f)&&!f.libre&&mgmtContratRestants(f)>0);
+  for(const d of demandes){
+    const f=mgmtFighterById(m,d.a), cible=d.target&&mgmtFighterById(m,d.target);
+    const promettre=admissible(f)&&(!d.target||(admissible(cible)&&cible.div===f.div));
+    if(mgmtRepondreDemande(m,d.i,promettre?'promettre':'refuser')) compte[promettre?'promises':'refusees']++;
+  }
+  return compte;
+}
+
 /* ==== [ANCRE: MONDE_LOT5_T1_JOUEUR_BOOKING_COMMUN] — Monde lot 5 T1 ==== */
 /** Joue UNE soirée de la partie m comme le joueur automatique de l'outil de mesure : décisions de la semaine, carte,
  *  soirée jouée, puis ouverture de la semaine suivante (mgmtNewPile). Sans écran ; ne recrute pas, ignore les affaires.
@@ -124,13 +138,15 @@ function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   let prolonges=0, resignes=0, recrues=0;
   const t0=Date.now();
   const champAvant=mgmtPredecesseurChampions(m);
-  /* Lot 5 T2 : le prédécesseur répondra aux demandes ici. */
+   /* Lot 5 T2 : répondre après les contrats et arrivées, avant pose et booking, pour juger les trois cycles futurs. */
   m.pile.forEach(x=>{x.status='closed';x.decision='ignored';}); m.open=null;
   /* Il prolonge à l'avance : un contrat à un combat de la fin est renouvelé sur trois combats, à la bourse que le combattant demande. */
   for(const f of m.roster){ if(mgmtIsRetired(f)||f.libre||!f.ct) continue; if(mgmtContratRestants(f)>1) continue;
     const b=mgmtBourseSouhaitee(m,f,true); const r=mgmtContratRenouveler(m,f.id,3,b); if(r.ok) prolonges++; else if(refus[r.raison]!==undefined) refus[r.raison]++; }
   if(cfg.renouvelle===true) resignes=mgmtPredecesseurResigne(m);
-  if(cfg.recrues) recrues=mgmtPredecesseurRecrute(m,k,cfg.recrues);
+   if(cfg.recrues) recrues=mgmtPredecesseurRecrute(m,k,cfg.recrues);
+   /* ==== [ANCRE: MONDE_LOT5_T2_SOIREE_DEMANDES] — Monde lot 5 T2 ==== */
+   if(cfg.demandes===true) mgmtPredecesseurDemandes(m);
   if(!m.cal.prochaines.length) mgmtAgendaPoser(m,m.cal.jour+MGMT_EVENT_WEEKS*7,'petite');
   const {reclames,tetes}=mgmtPredecesseurBooker(m,k,cfg,m.card.sizeMain,false);
   const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(!bulk) mgmtOfferBulk(m,true);

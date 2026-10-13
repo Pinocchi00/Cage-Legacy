@@ -93,3 +93,6 @@ Ne pas répondre à la dernière pile lors de la clôture : elle contient les de
 - Pas de minimum par graine : l'héritage doit découler des demandes réelles, non d'une promesse injectée ; la matrice impose une preuve non vide et vérifie toutes les promesses présentes.
 - Pas de montée de version : seul un index déjà existant est corrigé avant son premier enregistrement ; aucune nouvelle structure ni migration rétroactive.
 - Questions pour Anthony : **aucune**.
+
+## DÉCISION du 13/10/2026 (Claude) — règle de volume pour TOUS les tests lents du lot 5
+Un test qui crée des parties de six ans (35 s la partie) utilise **deux graines (20261008 et 20261009) × huit organisations = 16 créations au plus**, jamais vingt graines (160 créations = plus d'une heure : le codeur et les outils se bloquaient dessus). Les décisions du lot 5 T1 et T2 sont alignées. Lance ce test **en tâche de fond ou à part**, jamais dans une commande bash de plus de 100 secondes. Aucune question : termine T2, commit « Monde lot 5 T2 : le prédécesseur répond aux demandes ».
