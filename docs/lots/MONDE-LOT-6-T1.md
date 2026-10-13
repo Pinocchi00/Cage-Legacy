@@ -140,3 +140,12 @@ Tous commencent par `Monde lot 6 T1 — ` :
 - Selon l'autorisation du §14, **retour de blessure omis** : les faits `injury` ne conservent pas leur échéance de guérison. `f.susp` est une échéance courante, pas une date historique rattachée à la blessure citée ; impossible de prouver la fenêtre de trois cycles sans inventer le fait.
 - Donc **14 familles du brief plus le repli distinct** `meme-categorie-jamais-affrontes`, soit 15 identifiants livrés, et non les 15 familles originales toutes implémentées. Aucun enjeu de dépassement au classement n'est affirmé.
 - Questions pour Anthony : aucune question bloquante restante selon le §14. Si le retour de blessure doit être livré ultérieurement, il faudra conserver une échéance de guérison associée au fait ; rien n'a été ajouté à la sauvegarde dans cette tranche.
+
+### Reprise des deux écarts du relecteur
+- `mgmt-raisons.js` : seuil de longue attente comparé à la durée non arrondie ; seul le champ `fait.mois` restitué reste arrondi.
+- `tests/mgmtRaisons.test.js` : test existant `Monde lot 6 T1 — longue attente franchit le seuil public de six mois` corrigé conformément au §13.3 et à la demande de reprise : 5 cycles négatifs, 6 cycles positifs, preuve arrondie à 7 mois pour 6 cycles. Aucun nouvel intitulé.
+- `.opencode/agents/architecte.md` : instruction générale restaurée exactement à son état antérieur au commit `6f8e21f`. L'autorisation de trancher seul les règles techniques est retirée du diff de branche ; aucune nouvelle décision de politique dans cette reprise.
+- `index.html` et `sw.js` : versions du script et du cache montées par `node tools/_bump.js mgmt-raisons.js`.
+- Vérification : tests ciblés 28/28 ; check rapide 976/976, 103 fichiers lancés, 12 écartés ; audit des versions sans écart et `git diff --check` vert. Premier check interrompu par le timeout de 120 s, relance arrivée au bilan VERT (le shell signale encore son timeout de 300 s) ; audit exécuté séparément ensuite.
+- `@eclaireur`, `@verif` et `@relecteur` sollicités, tous refusés par `Subagent depth limit reached (1)` ; vérification locale de secours, sans verdict indépendant de relecture.
+- Aucune migration, aucun autre écart fonctionnel, aucune question bloquante pour Anthony. Les deux fichiers de données déjà modifiés uniquement en fins de ligne restent exclus du commit.

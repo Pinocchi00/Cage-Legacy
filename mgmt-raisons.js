@@ -73,8 +73,9 @@ function mgmtRaisonsLire(m,fs){
     if(jeune&&installe) ajoute('test-jeune',{source:'roles',a:f.id,b:contre.id,role,contreRole:autre,age:f.age,total:total(f),contreAge:contre.age,contreTotal:total(contre)});
     const s=series[j];
     if(s&&s.issue==='loss'&&s.n>=2) ajoute('derniere-chance',{source:'serie',a:f.id,...s});
-    const cycles=mgmtContratAttente(m,f), mois=Math.round(cycles*MGMT_EVENT_WEEKS/4.345);
-    if(mois>=6) ajoute('longue-attente',{source:'attente',a:f.id,cycles,mois,depuis:m.cycle-cycles});
+    /* ==== [ANCRE: MONDE_LOT6_T1_ATTENTE_SEUIL] — Monde lot 6 T1 ==== */
+    const cycles=mgmtContratAttente(m,f), mois=cycles*MGMT_EVENT_WEEKS/4.345;
+    if(mois>=6) ajoute('longue-attente',{source:'attente',a:f.id,cycles,mois:Math.round(mois),depuis:m.cycle-cycles});
     const rangContre=rangs.find(r=>r.id===contre.id);
     const compatible=d=>!['pause','carte-principale'].includes(d.want)
       &&((['revanche','trilogie'].includes(d.want)&&d.target===contre.id)

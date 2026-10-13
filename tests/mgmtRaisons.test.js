@@ -85,10 +85,12 @@ test('Monde lot 6 T1 — classement voisin accepte deux rangs mais pas trois',()
   }
 });
 test('Monde lot 6 T1 — longue attente franchit le seuil public de six mois',()=>{
-  for(const [cycles,attendu] of [[4,false],[5,true]]){
+  for(const [cycles,attendu] of [[5,false],[6,true]]){
     assert.equal(resultat(`A.lastCycle=B.lastCycle=20-${cycles};
       return aLa('longue-attente');`),attendu);
   }
+  assert.equal(resultat(`A.lastCycle=B.lastCycle=14;
+    return lit().find(r=>r.famille==='longue-attente').fait.mois;`),7);
 });
 test('Monde lot 6 T1 — vingt combats suffisent au vétéran malgré son âge',()=>{
   assert.equal(resultat(`A.age=B.age=30; A.W=10;A.L=10;A.D=0;
