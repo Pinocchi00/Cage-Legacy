@@ -1,4 +1,3 @@
-STOP : politique des raisons anciennes et des remplacements manuels non tranchée (§12).
 
 # Monde lot 6 T3 — La raison enregistrée
 
