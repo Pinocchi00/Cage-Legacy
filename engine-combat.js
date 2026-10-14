@@ -242,12 +242,14 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
   /** Coupure accumulée -> arcade qui "ferme" pour de bon (§9.2) : dégrade
    * composure/footwork (vision troublée), jamais un malus global, au plus
    * une fois par combattant et par combat. */
+  /* ==== [ANCRE: COMBAT_COHERENCE_1310_TYPES] — 13/10/2026 : les événements
+     non offensifs portent leur nature ; aucun tirage ni résultat modifié. ==== */
   const tryEyeInjury=(sideIsA,r,beatT,phase,mom)=>{
     const already=sideIsA?injuredEyeA:injuredEyeB, cuts=(sideIsA?st.A:st.B).cuts;
     if(already || cuts<INJURY_EYE_CUTS_THRESHOLD || rnd()>=INJURY_EYE_CHANCE) return;
     const f=sideIsA?A:B;
     if(sideIsA){ injuredEyeA=true; injEyeMultA=INJURY_EYE_MULT; } else { injuredEyeB=true; injEyeMultB=INJURY_EYE_MULT; }
-    log.push({r,phase,by:sideIsA?'me':'op',text:`[${formatTime(beatT)}] L’arcade de ${f.name} s’ouvre pour de bon, la vision se trouble.`,momentum:mom,
+    log.push({r,kind:'injury',phase,by:sideIsA?'me':'op',text:`[${formatTime(beatT)}] L’arcade de ${f.name} s’ouvre pour de bon, la vision se trouble.`,momentum:mom,
       snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
   };
   /** Coup lourd porté -> risque pour la main de SON AUTEUR (§9.2 "main
@@ -271,7 +273,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
     if(already || rnd()>=INJURY_KNEE_CHANCE*(dt/50)) return false;
     const f=sideIsA?A:B;
     if(sideIsA){ injuredKneeA=true; injKneeMultA=INJURY_KNEE_MULT; } else { injuredKneeB=true; injKneeMultB=INJURY_KNEE_MULT; }
-    log.push({r,phase,by:sideIsA?'me':'op',text:`[${formatTime(beatT)}] Le genou de ${f.name} lâche dans le scramble, visiblement affecté.`,momentum:mom,
+    log.push({r,kind:'injury',phase,by:sideIsA?'me':'op',text:`[${formatTime(beatT)}] Le genou de ${f.name} lâche dans le scramble, visiblement affecté.`,momentum:mom,
       snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
     return rnd()<INJURY_KNEE_END_CHANCE;
   };
@@ -360,7 +362,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         }
       }
       if(adaptBeatText){
-        log.push({r,phase:'debout',by:adaptBeatName===A.name?'me':'op',text:`[${formatTime(0)}] ${adaptBeatText}`,momentum,
+        log.push({r,kind:'adaptation',phase:'debout',by:adaptBeatName===A.name?'me':'op',text:`[${formatTime(0)}] ${adaptBeatText}`,momentum,
           snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
       }
     }
@@ -639,7 +641,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         }
         /* ==== [ANCRE: CORRECTIF_SUB_DANGER_MOTEUR] — voir ui-09 ==== */
         log.push({r,phase:'sol',top:topIsA?'A':'B',pos:groundPos,by:isMe?'me':'op',text:`[${formatTime(beatT)}] `+getUniqueLog(txtPool),momentum,sub:(subChT>0.03||subChB>0.03),snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
-        if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
+        if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method; last.by=finish.by===A?'me':'op';
           finish.time=beatT;
           last.text=`[${formatTime(beatT)}] [CRITIQUE] L\u2019arbitre s\u2019interpose ! Victoire par ${finish.method} de ${finish.by.name}.`; }
         }
@@ -920,7 +922,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
             log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] Takedown validé par ${A.name} !`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.B.tdDef+=(dt/50);
-            if(rnd()<dt/90) log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Bonne défense de ${B.name} sur la tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            if(rnd()<dt/90) log.push({r,kind:'takedownDefense',phase:'debout',by:'op',text:`[${formatTime(beatT)}] Bonne défense de ${B.name} sur la tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
         } else if(attB>0.14 && rnd()<0.18*lutteEnchaine(B.style)){ st.B.tdAtt+=(dt/50); handled=true;
           /* ==== [ANCRE: P7_L4_TAKEDOWN_NON_LINEAIRE] — voir ci-dessus, côté B. ==== */
@@ -929,7 +931,7 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
             log.push({r,phase:'debout',by:'op',text:`[${formatTime(beatT)}] Takedown explosif de ${B.name}, le combat passe au sol.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           } else {
             st.A.tdDef+=(dt/50);
-            if(rnd()<dt/90) log.push({r,phase:'debout',by:'me',text:`[${formatTime(beatT)}] ${A.name} repousse une tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+            if(rnd()<dt/90) log.push({r,kind:'takedownDefense',phase:'debout',by:'me',text:`[${formatTime(beatT)}] ${A.name} repousse une tentative d’amenée.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
           }
         }
         if(!handled && currentPhase==='debout'){
@@ -1256,11 +1258,13 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
              tel quel même pour un arrêt médical (méthode distincte, §2.4) —
              contrairement à la phase 'sol' (ANCRE juste au-dessus dans ce
              fichier) déjà générique ("Victoire par ${finish.method}"). ==== */
-          if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method;
+          if(finish){ const last=log[log.length-1]; last.finish=true; last.method=finish.method; last.by=finish.by===A?'me':'op';
             finish.time=beatT;
             last.text=finish.method==='Arrêt médical'
               ?`[${formatTime(beatT)}] [CRITIQUE] Le médecin de la commission arrête le combat : coupure trop sévère pour continuer.`
-              :`[${formatTime(beatT)}] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
+              :finish.method==='Blessure'
+                ?`[${formatTime(beatT)}] [CRITIQUE] Victoire par ${finish.method} — ${finish.detail}.`
+                :`[${formatTime(beatT)}] [CRITIQUE] KO foudroyant de ${finish.by.name} !`; }
           /* ==== [FIN ANCRE] ==== */
           }
           /* ==== [ANCRE: P7_L4_STYLE_POLICY_COMBAT] — §4.1 "distance
@@ -1362,10 +1366,10 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         foulWarnA++;
       } else if(sevRoll<0.92){
         dmgB=Math.max(0,dmgB-4);
-        log.push({r,phase:currentPhase,by:'op',text:`[${formatTime(beatT)}] Temps mort : ${B.name} récupère après une faute de ${A.name}.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        log.push({r,kind:'timeout',phase:currentPhase,by:'op',text:`[${formatTime(beatT)}] Temps mort : ${B.name} récupère après une faute de ${A.name}.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
       } else if(sevRoll<0.997){
         foulPointsA++; roundFoulPtsA++;
-        log.push({r,phase:currentPhase,by:'op',text:`[${formatTime(beatT)}] L’arbitre retire un point à ${A.name} pour une faute.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        log.push({r,kind:'pointDeduction',phase:currentPhase,by:'op',text:`[${formatTime(beatT)}] L’arbitre retire un point à ${A.name} pour une faute.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         if(foulPointsA>=2){
           finish={by:B,loser:A,method:'Disqualification',round:r,detail:'deuxième retrait de point',time:beatT};
           log.push({r,phase:currentPhase,by:'op',finish:true,method:'Disqualification',text:`[${formatTime(beatT)}] [CRITIQUE] Deuxième retrait de point : ${A.name} est disqualifié.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
@@ -1381,10 +1385,10 @@ function simulateFight(A,B,rounds=3,plan=null,planB=null,opts=null){ const a=eff
         foulWarnB++;
       } else if(sevRoll<0.92){
         dmgA=Math.max(0,dmgA-4);
-        log.push({r,phase:currentPhase,by:'me',text:`[${formatTime(beatT)}] Temps mort : ${A.name} récupère après une faute de ${B.name}.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        log.push({r,kind:'timeout',phase:currentPhase,by:'me',text:`[${formatTime(beatT)}] Temps mort : ${A.name} récupère après une faute de ${B.name}.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
       } else if(sevRoll<0.997){
         foulPointsB++; roundFoulPtsB++;
-        log.push({r,phase:currentPhase,by:'me',text:`[${formatTime(beatT)}] L’arbitre retire un point à ${B.name} pour une faute.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
+        log.push({r,kind:'pointDeduction',phase:currentPhase,by:'me',text:`[${formatTime(beatT)}] L’arbitre retire un point à ${B.name} pour une faute.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
         if(foulPointsB>=2){
           finish={by:A,loser:B,method:'Disqualification',round:r,detail:'deuxième retrait de point',time:beatT};
           log.push({r,phase:currentPhase,by:'me',finish:true,method:'Disqualification',text:`[${formatTime(beatT)}] [CRITIQUE] Deuxième retrait de point : ${B.name} est disqualifié.`,momentum,snapA:{h:st.A.dmgHead,b:st.A.dmgBody,l:st.A.dmgLegs},snapB:{h:st.B.dmgHead,b:st.B.dmgBody,l:st.B.dmgLegs}});
