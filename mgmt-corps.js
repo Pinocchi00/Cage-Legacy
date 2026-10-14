@@ -567,7 +567,10 @@ function mgmtApplyFight(m,f,opp,res,side){
     mgmtAddFact(m,{c:m.cycle,k:'retired',a:f.id});
   }else if(injury||days>=90){
     mgmtPromoteSilent(m,f,2);
-    mgmtAddFact(m,{c:m.cycle,k:injury?'injury':'susp',a:f.id});
+    /* Monde lot 8 T4a (N2, §5) : le nom de la blessure est gardé dans le fait
+       lui-même — il ne survit plus seulement dans m.lastEvent.touched, écrasé
+       à la soirée suivante. Optionnel : les faits d'avant n'en portent pas. */
+    mgmtAddFact(m,{c:m.cycle,k:injury?'injury':'susp',a:f.id,...(injury?{nom:injury.name}:{})});
   }
   if(!retired&&!injury&&!(days>0)) return null;
   return {id:f.id,retired:retired,injury:injury?injury.name:null,days:days};
@@ -672,6 +675,11 @@ function mgmtRunEvent(m){
   m.eventsPlayed=(Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0)+1;
   /* Lot 5 H7 : les décisions contraires de la soirée deviennent des faits. */
   mgmtContrariesApresSoiree(m,m.hist.slice(premier));
+  /* Monde lot 8 T4a : les événements de coût petit nés de la soirée (N3, N6,
+     N7, N10). Après les contraires, avant m.lastEvent et saveMgmt ; la carte
+     est encore entière mais on lit m.hist.slice(premier), jamais m.card
+     (vidé quelques lignes plus bas). Aucune fenêtre, aucune minuterie. */
+  mgmtMondeApresSoiree(m,premier);
   m.lastEvent={cycle:m.cycle,fights:fights,touched:touched,finance,e1:!!(debtBefore&&finance.recette>0)};
   m.card.main=[];
   m.card.prelims=[];

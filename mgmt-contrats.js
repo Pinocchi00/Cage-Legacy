@@ -133,12 +133,17 @@ function mgmtContratLiberer(m,id){
   return {ok:true,indemnite};
 }
 
-/** Après une soirée : le combat joué compte, un contrat épuisé fait un sans-contrat. */
+/** Après une soirée : le combat joué compte, un contrat épuisé fait un sans-contrat.
+ *  Monde lot 8 T4a (N8) : quand il ne reste qu'un combat, le fait dernier_combat
+ *  le dit AVANT l'épuisement — pour que le joueur ait le temps de prolonger.
+ *  Appelée seulement avec l'agenda (mgmtRunEvent) : les deux faits ne peuvent
+ *  donc pas tomber le même soir, l'une une soirée de combat avant l'autre. */
 function mgmtContratsApresSoiree(m,ids){
   for(const id of ids){
     const f=mgmtFighterById(m,id); if(!f||!f.ct) continue;
     f.ct.f++;
     if(f.ct.f>=f.ct.n){ delete f.ct; f.libre=true; mgmtAddFact(m,{c:m.cycle,k:'fin_contrat',a:f.id}); }
+    else if(f.ct.n-f.ct.f===1) mgmtAddFact(m,{c:m.cycle,k:'dernier_combat',a:f.id});
   }
 }
 
