@@ -34,7 +34,8 @@ function mgmtCampModele(ck,k){
 
 /** Lot 10 : une ville n'a qu'une salle — son modèle de nom se tire de la ville, pas du combattant. Ainsi les combattants d'une
  *  même ville s'entraînent ensemble (c'est ce que l'écran Camps montre) au lieu d'une salle par tête. */
-function mgmtCampSalleDeVille(ck,ville){ return duelFnv1a32('salle|'+mgmtSel()+ck+'|'+ville)%5; }
+/* ==== [ANCRE: MGMT_FAITS_CAMP_EXPLICITE] — Monde lot 3 T1 ==== */
+function mgmtCampSalleDeVille(ck,ville,contexte){ return duelFnv1a32('salle|'+mgmtSel(contexte)+ck+'|'+ville)%5; }
 
 /** Le nom d'une salle (corrections du 08/10, 5.6) : « de » + « Le Havre » donne « du Havre », « de » + « Les Sables » donne « des Sables », « d' » devant une
  *  voyelle ; « à » + « Le » donne « au », + « Les » « aux ». Les autres modèles posent la ville telle quelle. Pur. */
@@ -50,37 +51,37 @@ function mgmtCampNomPropre(modele,ville){
 }
 
 /** Un camp : {ville, ck, k (modèle), coachCle, nom, coach, qualite}. Pur. */
-function mgmtCampFait(ck,ville,k,coachCle){
+function mgmtCampFait(ck,ville,k,coachCle,contexte){
   const nom=mgmtCampNomPropre(mgmtCampModele(ck,k),ville);
-  const r=mgmtIdentiteStream('camp|'+ck+'|'+ville+'|'+k,'qualite');
+  const r=mgmtIdentiteStream('camp|'+ck+'|'+ville+'|'+k,'qualite',contexte);
   const u=r();
   return {ville,ck,k,coachCle,nom,coach:mgmtCoachNom(ck,ville+'|'+k+'|'+coachCle),
     qualite:u<0.2?-1:(u>0.8?1:0)};
 }
 
 /** Le camp d'origine : sa ville, ou (15 %) une autre ville de son pays. */
-function mgmtCampInitial(f){
-  const ck=mgmtIdentitePays(f);
-  let ville=mgmtIdentiteVille(f);
-  const r=mgmtIdentiteStream(f.id,'camp');
+function mgmtCampInitial(f,contexte){
+  const ck=mgmtIdentitePays(f,contexte);
+  let ville=mgmtIdentiteVille(f,contexte);
+  const r=mgmtIdentiteStream(f.id,'camp',contexte);
   if(r()<MGMT_CAMP_AILLEURS){
     const autres=MGMT_VILLES[ck].filter(v=>v!==ville);
     if(autres.length) ville=autres[Math.floor(r()*autres.length)];
   }
-  return mgmtCampFait(ck,ville,mgmtCampSalleDeVille(ck,ville),0);
+  return mgmtCampFait(ck,ville,mgmtCampSalleDeVille(ck,ville,contexte),0,contexte);
 }
 
 /** Les changements de camp et de coach d'un combattant de Split, du plus
  *  ancien au plus récent : lus dans les moments de vie gardés. Un moment à
  *  « part » < 1 ne change le camp que pour cette part des combattants
  *  (flux 'camp-part'). @returns {Array<{c:number,id:string,camp:boolean,coach:boolean,etranger:boolean}>} */
-function mgmtCampChangements(m,f){
+function mgmtCampChangements(m,f,contexte){
   const out=[];
   for(const x of m.facts||[]){
     if(!x||x.k!=='moment_vie'||x.a!==f.id) continue;
     const ch=MGMT_CAMP_CHANGEMENTS[x.m];
     if(!ch) continue;
-    const prend=ch.part===undefined||ch.part>=1||mgmtIdentiteStream(f.id,'camp-part|'+x.m+'|'+x.c)()<ch.part;
+    const prend=ch.part===undefined||ch.part>=1||mgmtIdentiteStream(f.id,'camp-part|'+x.m+'|'+x.c,contexte)()<ch.part;
     out.push({c:x.c,id:x.m,camp:!!ch.camp&&prend,coach:!!ch.coach,etranger:!!ch.etranger});
   }
   return out.sort((a,b)=>a.c-b.c);
@@ -90,15 +91,15 @@ function mgmtCampChangements(m,f){
  *  d'origine, puis un camp neuf à chaque changement (même pays, ou un autre
  *  pour « à l'étranger »), un nouveau coach à chaque départ de coach.
  *  Dérivé, jamais stocké. @returns {object} */
-function mgmtCamp(m,f,cycle){
+function mgmtCamp(m,f,cycle,contexte){
   const fin=Number.isSafeInteger(cycle)?cycle:m.cycle;
-  let camp=mgmtCampInitial(f), n=0, dernierChangement=null;
-  const changements=(m.roster||[]).some(o=>o.id===f.id)?mgmtCampChangements(m,f):[];
+  let camp=mgmtCampInitial(f,contexte), n=0, dernierChangement=null;
+  const changements=(m.roster||[]).some(o=>o.id===f.id)?mgmtCampChangements(m,f,contexte):[];
   for(const ch of changements){
     if(ch.c>fin) break;
     n++;
     if(ch.camp){
-      const r=mgmtIdentiteStream(f.id,'camp|'+n);
+      const r=mgmtIdentiteStream(f.id,'camp|'+n,contexte);
       let ck=camp.ck;
       if(ch.etranger){
         const autres=COUNTRY_KEYS.filter(k=>k!==ck&&MGMT_VILLES[k]);
@@ -106,10 +107,10 @@ function mgmtCamp(m,f,cycle){
       }
       const villes=MGMT_VILLES[ck].filter(v=>v!==camp.ville||ck!==camp.ck);
       const nv=villes[Math.floor(r()*villes.length)];
-      camp=mgmtCampFait(ck,nv,mgmtCampSalleDeVille(ck,nv),n);
+      camp=mgmtCampFait(ck,nv,mgmtCampSalleDeVille(ck,nv,contexte),n,contexte);
       dernierChangement={c:ch.c,id:ch.id,camp:true};
     }else if(ch.coach){
-      camp=mgmtCampFait(camp.ck,camp.ville,camp.k,n);
+      camp=mgmtCampFait(camp.ck,camp.ville,camp.k,n,contexte);
       dernierChangement={c:ch.c,id:ch.id,camp:false};
     }
   }

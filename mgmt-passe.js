@@ -77,7 +77,14 @@ function mgmtPassePreparer(orgId,opts){
 function mgmtPasseSoiree(m,k){
   const n=m.passe.soirees;
   /* T4 bis : il re-signe ses sans-contrat et recrute des jeunes en fin de passé (réglages opt-in du prédécesseur). */
-  const reglages={renouvelle:true,rotationTitres:n-20,recrues:{depuis:Math.max(0,n-MGMT_PASSE_FENETRE_RECRUES),pas:MGMT_PASSE_RECRUES_PAS,parSoiree:MGMT_PASSE_RECRUES_PAR_SOIREE,ageMax:MGMT_PASSE_RECRUES_AGE_MAX,fin:Math.max(0,n-MGMT_PASSE_RECRUES_FIN),finAgeMax:MGMT_PASSE_RECRUES_FIN_AGE_MAX,plan:m.passe.plan||{}}};
+/* Monde lot 2 T3 : par-dessus, la main de son organisation (mgmtPredecesseurReglages) décide de ses titres, de son âge et de ses noms,
+      et `garde` renouvelle plus tôt. Son socle de contrats, lui, reste celui du passé — mesuré, monde lot 1 T4 bis :
+      sans le renouvellement anticipé, l'effectif se vide et le passé s'arrête à 55 soirées au lieu de 62 ; avec lui mais sans anticipation,
+      l'effectif gonfle à 572 vivants (au lieu de 335 à 390) et il ne reste que 0,5 % de 20-23 ans. Le passé garde donc son socle ;
+      `laisseFiler` et `renouvelle:false` ne portent que sur mgmtPredecesseurSoiree appelé avec une politique. Question pour Anthony. */
+   /* ==== [ANCRE: MONDE_LOT5_T2_PASSE_DEMANDES] — Monde lot 5 T2 ==== */
+   const socle={renouvelle:true,demandes:true,rotationTitres:n-20,recrues:{depuis:Math.max(0,n-MGMT_PASSE_FENETRE_RECRUES),pas:MGMT_PASSE_RECRUES_PAS,parSoiree:MGMT_PASSE_RECRUES_PAR_SOIREE,ageMax:MGMT_PASSE_RECRUES_AGE_MAX,fin:Math.max(0,n-MGMT_PASSE_RECRUES_FIN),finAgeMax:MGMT_PASSE_RECRUES_FIN_AGE_MAX,plan:m.passe.plan||{}}};
+   const reglages=Object.assign({},socle,mgmtPredecesseurReglages(mgmtPredecesseurOrgId(m)),{renouvelle:socle.renouvelle,laisseFiler:false});
   const s=mgmtPredecesseurSoiree(m,k,reglages);
   const fait=s.jouee?k+1:k;
   return {k:fait,n,jouee:s.jouee,termine:!s.jouee||fait>=n,annee:mgmtPasseAnnee(n,Math.min(fait,n-1))};
@@ -110,6 +117,10 @@ function mgmtPasseCloturer(m){
   mgmtSallesInit(m);
   mgmtPasseAlleger(m);
   mgmtRangsInvalider(m);
+  /* ==== [ANCRE: MONDE_LOT5_T1_PASSAGE_CARTE] — Monde lot 5 T1 ==== */
+  if(mgmtAgendaPoser(m,MGMT_EVENT_WEEKS*7,'petite').ok){
+    mgmtPredecesseurCarteHeritee(m,p.soirees);
+  }
   return m;
 }
 
@@ -155,8 +166,20 @@ function mgmtPasseAlleger(m){
     if(!e||!mgmtValidFightTrace(e)) return false;
     hist.push(e);
   }
-  m.hist=hist;
-  m.facts=m.facts.filter(x=>!(x&&MGMT_PASSE_FAITS_PERDUS.includes(x.k)));
+   /* ==== [ANCRE: MONDE_LOT5_T2_ARCHIVE_LIENS] — Monde lot 5 T2 ==== */
+   /* Tous les combats sont validés avant de préparer les liens ; aucun fait original n'est muté. */
+   const indices=new Map(), facts=[];
+   m.facts.forEach((x,i)=>{
+     if(x&&MGMT_PASSE_FAITS_PERDUS.includes(x.k)) return;
+     indices.set(i,facts.length); facts.push(x);
+   });
+   const recales=facts.map(x=>{
+     const demande=x&&Number.isSafeInteger(x.d)&&m.facts[x.d];
+     return x&&(x.k==='promesse'||x.k==='refus')&&demande&&demande.k==='demande'
+       ?Object.assign({},x,{d:indices.get(x.d)}):x;
+   });
+   m.hist=hist;
+   m.facts=recales;
   m.passe.nHist=hist.length; m.passe.nFacts=m.facts.length;
   return true;
 }
