@@ -68,3 +68,11 @@ Aucune question bloquante restante : les décisions listées dans `MONDE-LOT-10-
 - Sauvegarde : aucune migration.
 - Écarts : le check rapide a échoué (45 fichiers de test en échec au lancement parallèle; test ciblé vert). `@verif` et `@relecteur` indisponibles. Restent à compléter les assertions des quatre états, l'erreur, l'affichage du dernier fait dans le compteur, et l'inscription dans package.json; aucune comparaison visuelle n'a pu être faite. Pas de commit tant que ces critères ne sont pas satisfaits.
 - Questions pour Anthony : aucune nouvelle question; demande de suivi sur le rendu d'erreur et sur les critères visuels non contrôlés.
+
+## REPRISE du superviseur — 14/10/2026 18 h 45 (le commit « inachevé » est à TERMINER, pas à refaire)
+Le code est dans le commit `99f2cb8` ; ne le réécris pas. Il reste exactement :
+1. Compléter `tests/mgmtNouvelleChargement.test.js` : les quatre états `debut`, `chargement`, `fin`, `erreur` (texte du bouton, présence/absence du bouton « Entrer dans {org} », barre pleine seulement à la fin), l'affichage du dernier fait dans la zone prévue, les compteurs (soirées, combats, champions couronnés, blessures — « Retraites » est remplacé par « Blessures », DECISIONS §1) et le test « aucun texte sous 22 px ».
+2. Inscrire ce fichier de test dans `package.json` (`test` ET `test:watch`) s'il n'y est pas.
+3. L'échec de `check:rapide` « 45 fichiers de test en échec au lancement parallèle » est causé par la charge de la machine (trois autres pistes tournent) : relance `npm run check:rapide` ; s'il échoue encore en bloc au lancement, lance les tests ciblés (`node --test` sur les fichiers `tests/mgmtNouvelle*.test.js`, `tests/mgmtCadre.test.js`, `tests/mgmtPrisePrise*.test.js` s'ils existent) et dis-le dans le compte rendu : ne conclus jamais « rouge » sur un échec de lancement.
+4. `node tools/_bump.js` pour les .js modifiés, `node tools/verif-versions.js origin/main`, puis commit `Monde lot 10 T1 : ...` SANS `inachevé`.
+La comparaison visuelle avec la planche est faite par le superviseur ensuite : ne la bloque pas.
