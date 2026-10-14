@@ -29,7 +29,7 @@ Fondement du brief : « À la création d'une partie, le jeu fait vivre l'organi
 Non. `MGMT_SAVE_VERSION` inchangée; aucune donnée persistée.
 
 ## Textes
-Commande `@ecrivain` : produire les textes fixes proposés par `maquettes/monde/refonte/LISEZ-MOI.md` §2 (bande d'arrivée et préfixe de la prochaine chose à faire), sans réplique/personnage inventé; fichier de données `mgmt-prise-en-main.js`, variable `MGMT_PRISE_TEXTES`, tous `relu:false`. La ligne « Sa fille » est exclue. Ne pas inventer les autres valeurs : elles viennent des données de la partie.
+**Textes : aucun sous-agent.** N'appelle AUCUN agent (@ecrivain est inaccessible depuis le codeur : « subagent depth limit reached »). Les textes fixes d'interface sont ceux « proposés » dans `maquettes/monde/refonte/LISEZ-MOI.md` §2 (bande d'arrivée, préfixe de la prochaine chose à faire) : copie-les tels quels dans `mgmt-prise-en-main.js`, marqués `relu:false`. Aucune réplique, aucun personnage inventé. Si un libellé manque dans le LISEZ-MOI, écris le plus simple et signale-le dans le compte rendu.
 
 ## Écran
 Planche validée : `maquettes/monde/refonte/MondeArrivee.html`; contrat : `maquettes/monde/refonte/LISEZ-MOI.md`, §2 et « Écarts et questions ».
@@ -70,3 +70,6 @@ Ne pas toucher à la simulation du passé, aux faits/archives, aux contrats, au 
 
 ## Questions pour Anthony
 Aucune question bloquante restante : planche et écarts sont tranchés dans `MONDE-LOT-10-DECISIONS.md`.
+
+## RAPPEL du superviseur — 14/10/2026 19 h 15
+Tu n'appelles AUCUN sous-agent (@eclaireur, @ecrivain, @verif, @relecteur sont inaccessibles depuis toi). Lis le code toi-même, écris les textes toi-même, lance toi-même `node tools/verif-versions.js origin/main` puis `npm run check:rapide` (ou les tests ciblés `node --test tests/<fichier>` si le lancement en bloc échoue), et commite. Le superviseur relit et compare à la planche.
