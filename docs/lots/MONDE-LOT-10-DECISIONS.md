@@ -15,3 +15,6 @@
 
 ## Règles de la tranche
 Aucun texte sous 22 px, rien ne déborde ni ne se superpose à 1280 / 1440 / 1920 (le cadre 1920×1080 est mis à l'échelle comme dans le jeu, `mfAjuste`). Les textes fixes d'interface « proposés » dans le LISEZ-MOI sont écrits par Claude : marque-les `relu:false`. Aucun chiffre inventé : chaque zone lit la donnée citée par le LISEZ-MOI. `esc()` sur toute donnée du joueur. Un test par état d'écran et un test « aucun texte sous 22 px » (même méthode que `tests/mgmtCadre.test.js`). Vérification visuelle dans le jeu réel (partie avec passé), comparée à la planche, aux trois largeurs.
+
+## Règle pour toutes les fiches du lot 10 (ajoutée le 14/10 19 h 15)
+Une fiche ne demande JAMAIS d'appeler un sous-agent (@ecrivain, @eclaireur, @verif, @relecteur) : le codeur ne peut pas les appeler (« subagent depth limit reached »). Les textes fixes sont copiés du LISEZ-MOI des planches, marqués `relu:false`. La vérification se fait par `node tools/verif-versions.js origin/main` et `npm run check:rapide` lancés par le codeur lui-même.
