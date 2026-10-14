@@ -60,37 +60,46 @@ function mgmtValidLine(o){
 function mgmtRaisonValide(raison,aid,bid){
   const objet=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
   if(!objet(raison)||!objet(raison.fait)||!mgmtValidId(aid)||!mgmtValidId(bid)||aid===bid) return false;
-  if(Object.keys(raison).sort().join(',')!=='fait,famille') return false;
+if(Object.keys(raison).sort().join(',')!=='fait,famille') return false;
   const f=raison.fait, entier=Number.isSafeInteger, compte=x=>entier(x)&&x>=0;
   const id=x=>x===aid||x===bid, paire=(a,b)=>id(a)&&id(b)&&a!==b;
   const age=x=>Number.isFinite(x)&&x>=0&&x<=100;
-  const deux=fn=>Array.isArray(f.combattants)&&f.combattants.length===2
-    &&f.combattants.every(objet)&&paire(f.combattants[0].a,f.combattants[1].a)&&f.combattants.every(fn);
+  /* Schéma fermé, famille par famille : toutes les clés attendues sont
+     présentes, aucune autre ne l'est. `opt` ne sert qu'à `target` d'une
+     demande « un-classe » sans cible — le lecteur écrit alors undefined, que
+     la sérialisation efface ; c'est la seule clé jamais portée par le
+     catalogue. Les sous-objets de `combattants` sont eux aussi fermés. */
+  const ouvert=(o,cles,opt)=>objet(o)&&cles.every(k=>Object.hasOwn(o,k))
+    &&Object.keys(o).every(k=>cles.includes(k)||(opt||[]).includes(k));
+  const deux=(cles,fn)=>Array.isArray(f.combattants)&&f.combattants.length===2
+    &&f.combattants.every(x=>ouvert(x,cles)&&fn(x))&&paire(f.combattants[0].a,f.combattants[1].a);
   const reclame=()=>paire(f.a,f.b)&&entier(f.c)&&['rivalite','trilogie','micro','reseaux'].includes(f.raison);
   switch(raison.famille){
-    case 'revanche': return f.source==='hist'&&compte(f.i)&&entier(f.c)&&paire(f.gagnant,f.perdant);
-    case 'rivalite-ouverte': return f.source==='reclames'?reclame()&&['micro','reseaux'].includes(f.raison)
-      :f.source==='facts'&&compte(f.i)&&entier(f.c)&&paire(f.a,f.target);
-    case 'series-croisees': return f.source==='serie'&&deux(x=>x.issue==='win'&&compte(x.n)&&x.n>=3);
-    case 'classement-voisin': return f.source==='classement'&&f.portee==='organization'&&!!divById(f.div)
-      &&deux(x=>compte(x.rang)&&x.rang>=1)&&Math.abs(f.combattants[0].rang-f.combattants[1].rang)<=2;
-    case 'test-jeune': return f.source==='roles'&&paire(f.a,f.b)&&age(f.age)&&age(f.contreAge)
+    case 'revanche': return ouvert(f,['source','i','c','gagnant','perdant'])&&f.source==='hist'&&compte(f.i)&&entier(f.c)&&paire(f.gagnant,f.perdant);
+    case 'rivalite-ouverte': return f.source==='reclames'?ouvert(f,['source','a','b','raison','c'])&&reclame()&&['micro','reseaux'].includes(f.raison)
+      :ouvert(f,['source','i','a','target','c'])&&f.source==='facts'&&compte(f.i)&&entier(f.c)&&paire(f.a,f.target);
+    case 'series-croisees': return ouvert(f,['source','combattants'])&&f.source==='serie'&&deux(['a','issue','n'],x=>x.issue==='win'&&compte(x.n)&&x.n>=3);
+    case 'classement-voisin': return ouvert(f,['source','portee','div','combattants'])&&f.source==='classement'&&f.portee==='organization'&&!!divById(f.div)
+      &&deux(['a','rang'],x=>compte(x.rang)&&x.rang>=1)&&Math.abs(f.combattants[0].rang-f.combattants[1].rang)<=2;
+    case 'test-jeune': return ouvert(f,['source','a','b','role','contreRole','age','total','contreAge','contreTotal'])
+      &&f.source==='roles'&&paire(f.a,f.b)&&age(f.age)&&age(f.contreAge)
       &&compte(f.total)&&compte(f.contreTotal)&&(f.role===null||typeof f.role==='string')
       &&(f.contreRole===null||typeof f.contreRole==='string');
-    case 'derniere-chance': return f.source==='serie'&&id(f.a)&&f.issue==='loss'&&compte(f.n)&&f.n>=2;
-    case 'longue-attente': return f.source==='attente'&&id(f.a)&&compte(f.cycles)&&compte(f.mois)&&f.mois>=6&&entier(f.depuis);
-    case 'demande-promesse': return f.source==='facts'&&compte(f.i)&&id(f.a)&&entier(f.c)
+    case 'derniere-chance': return ouvert(f,['source','a','issue','n'])&&f.source==='serie'&&id(f.a)&&f.issue==='loss'&&compte(f.n)&&f.n>=2;
+    case 'longue-attente': return ouvert(f,['source','a','cycles','mois','depuis'])&&f.source==='attente'&&id(f.a)&&compte(f.cycles)&&compte(f.mois)&&f.mois>=6&&entier(f.depuis);
+    case 'demande-promesse': return ouvert(f,['source','i','k','a','want','c',...(f.k==='promesse'?['due']:[])],['target'])
+      &&f.source==='facts'&&compte(f.i)&&id(f.a)&&entier(f.c)
       &&['demande','promesse'].includes(f.k)&&['revanche','trilogie','un-classe'].includes(f.want)
       &&(paire(f.a,f.target)||(f.want==='un-classe'&&(f.target===null||f.target===undefined)))
       &&(f.k!=='promesse'||entier(f.due)&&f.due>=f.c);
-    case 'fin-contrat': return f.source==='contrat'&&id(f.a)&&compte(f.n)&&compte(f.f)&&f.restants===1&&f.n-f.f===1;
-    case 'styles-opposes': return f.source==='bilan-public'&&deux(x=>['Finit par KO','Finit au sol'].includes(x.style))
+    case 'fin-contrat': return ouvert(f,['source','a','n','f','restants'])&&f.source==='contrat'&&id(f.a)&&compte(f.n)&&compte(f.f)&&f.restants===1&&f.n-f.f===1;
+    case 'styles-opposes': return ouvert(f,['source','combattants'])&&f.source==='bilan-public'&&deux(['a','style'],x=>['Finit par KO','Finit au sol'].includes(x.style))
       &&f.combattants[0].style!==f.combattants[1].style;
-    case 'derby': return f.source==='identite'&&paire(f.a,f.b)&&COUNTRY_KEYS.includes(f.pays)&&(f.ville===null||typeof f.ville==='string');
-    case 'debuts': return f.source==='hist'&&id(f.a)&&f.n===0;
-    case 'veteran': return f.source==='bilan'&&id(f.a)&&age(f.age)&&compte(f.total)&&(f.age>=33||f.total>=20);
-    case 'reclame-public': return f.source==='reclames'&&reclame();
-    case 'meme-categorie-jamais-affrontes': return f.source==='hist'&&paire(f.a,f.b)&&!!divById(f.div)&&f.n===0;
+    case 'derby': return ouvert(f,['source','a','b','pays','ville'])&&f.source==='identite'&&paire(f.a,f.b)&&COUNTRY_KEYS.includes(f.pays)&&(f.ville===null||typeof f.ville==='string');
+    case 'debuts': return ouvert(f,['source','a','n'])&&f.source==='hist'&&id(f.a)&&f.n===0;
+    case 'veteran': return ouvert(f,['source','a','age','total'])&&f.source==='bilan'&&id(f.a)&&age(f.age)&&compte(f.total)&&(f.age>=33||f.total>=20);
+    case 'reclame-public': return ouvert(f,['source','a','b','raison','c'])&&f.source==='reclames'&&reclame();
+    case 'meme-categorie-jamais-affrontes': return ouvert(f,['source','a','b','div','n'])&&f.source==='hist'&&paire(f.a,f.b)&&!!divById(f.div)&&f.n===0;
     default: return false;
   }
 }

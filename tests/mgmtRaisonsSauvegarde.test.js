@@ -70,6 +70,11 @@ test('Monde lot 6 T3 — les causes mal formées sont rejetées',()=>{
       if(!raison)return {valide:false};const valide=mgmtRaisonValide(raison,A.id,B.id),bad=[];
       const mutation=fn=>{const x=JSON.parse(JSON.stringify(raison));fn(x);bad.push(mgmtRaisonValide(x,A.id,B.id));};
       mutation(x=>x.famille='inconnue');mutation(x=>x.fait.source='inconnue');mutation(x=>delete x.fait);mutation(x=>x.fait=[]);
+      /* Schéma fermé : une clé en trop dans le fait ou dans un de ses
+         sous-objets est refusée, comme une clé attendue en moins. */
+      mutation(x=>x.fait.champEnTrop=1);mutation(x=>{delete x.fait.source;});
+      if(raison.fait.combattants){mutation(x=>x.fait.combattants[0].champEnTrop=1);
+        mutation(x=>{delete x.fait.combattants[0].a;});}
       mutation(x=>{const f=x.fait;const cle=['a','gagnant'].find(k=>f[k]!==undefined);if(cle)f[cle]='hors-paire';else f.combattants[0].a='hors-paire';});
       const f=raison.fait;for(const cle of ['i','n','cycles','total','f','rang'])if(f[cle]!==undefined){
         mutation(x=>x.fait[cle]=-1);mutation(x=>x.fait[cle]=0.5);mutation(x=>x.fait[cle]=NaN);}

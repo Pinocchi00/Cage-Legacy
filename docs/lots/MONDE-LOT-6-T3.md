@@ -155,6 +155,7 @@ Migration de sauvegarde
 - Aucun écart de comportement. Quatre fichiers de tests portaient la version en dur et passent de 16 à 17 (`mgmtEffectifs`, `mgmtMarque`, `mgmtNiveau`, plus `mgmtEmplacements` et `mgmtHumanite`), ce qu'exige la décision §12.3 ; dans `mgmtMarque`, la comparaison « rien d'autre ne bouge » ignore désormais le seul écart voulu — le marqueur `raison:null` — et l'intitulé du test vise 17. Aucune autre assertion touchée.
 - La section « Schémas de preuve » ci-dessus était déjà rédigée dans l'arbre de travail ; elle est reprise telle quelle, et `mgmtRaisonValide` la suit famille par famille.
 - Coût mesuré de l'extension du test de population : ~1 s par bloc (aller-retour sérialisation/validation), la boucle des 160 blocs passant de ~1 005 s (T2) à 1 011 s.
+- Reprise de validation post-commit : schémas des preuves désormais fermés (clés attendues exactes, y compris sous-objets `combattants`) ; le cas facultatif `target` et `due` suit le schéma émis par le lecteur. Tests négatifs ajoutés pour clés manquantes et clés supplémentaires.
 
 Questions pour Anthony
 - Aucune. Les deux questions bloquantes sont tranchées par la décision du 13/10/2026, les cas « absence/null » et « remplacement manuel » sont couverts par les tests.
