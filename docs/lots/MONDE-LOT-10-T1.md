@@ -61,3 +61,10 @@ Ne pas toucher aux règles de génération, de classement, à `mgmtPassePreparer
 
 ## Questions pour Anthony
 Aucune question bloquante restante : les décisions listées dans `MONDE-LOT-10-DECISIONS.md` tranchent les écarts de la planche pour T1.
+
+## Compte rendu
+- `mgmt-nouvelle.js` : compteurs incrémentaux de titres/blessures, progression ciblée sans rendu complet par soirée, positions de frise et état erreur/recommencer; version de cache montée.
+- `tests/mgmtNouvelleChargement.test.js` : ajout de `Chargement — états, compteurs, frise et dernier changement de ceinture` et `Chargement — une progression conserve les nœuds de l’écran`.
+- Sauvegarde : aucune migration.
+- Écarts : le check rapide a échoué (45 fichiers de test en échec au lancement parallèle; test ciblé vert). `@verif` et `@relecteur` indisponibles. Restent à compléter les assertions des quatre états, l'erreur, l'affichage du dernier fait dans le compteur, et l'inscription dans package.json; aucune comparaison visuelle n'a pu être faite. Pas de commit tant que ces critères ne sont pas satisfaits.
+- Questions pour Anthony : aucune nouvelle question; demande de suivi sur le rendu d'erreur et sur les critères visuels non contrôlés.

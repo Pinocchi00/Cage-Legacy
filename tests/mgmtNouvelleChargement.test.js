@@ -92,3 +92,30 @@ test('Chargement — la largeur de la barre est monotone et finit à 100 %', () 
   assert.equal(r.ok,true);
   assert.equal(r.aff,100);
 });
+
+test('Chargement — états, compteurs, frise et dernier changement de ceinture', () => {
+  const win=newGameWindow({runMain:true});
+  const resultat=JSON.parse(win.eval(`JSON.stringify((()=>{
+    const g={n:2,k:0,annee:mgmtPasseAnnee(2,0),org:'Test',m:{facts:[{k:'title_initial',div:'welterweight',a:'f1'},{k:'title_fight',div:'welterweight',fight:0,c:1},{k:'title_fight',div:'welterweight',fight:1,c:2},{k:'injury'},{k:'injury'}],hist:[{winner:'B',a:{id:'f1'},b:{id:'f2'}},{winner:'A',a:{id:'f2'},b:{id:'f1'}}]},vus:0,detenteurs:{},champions:0,blessures:0,dernier:null};
+    mgmtFighterById=(m,id)=>({nom:id});
+    g.m.hist[0].winner='B';g.m.hist[0].a={id:'f1'};g.m.hist[0].b={id:'f2'};
+    g.m.hist[1].winner='A';g.m.hist[1].a={id:'f2'};g.m.hist[1].b={id:'f1'};
+    const debut=mgmtNouvelleGenHtml(g);mgmtNouvelleLireFaits(g);
+    return {chargement:debut.includes('chargement'),champions:g.champions,blessures:g.blessures,vus:g.vus,dernier:g.dernier.nom,compteurs:mgmtNouvelleCompteurs(g).map(x=>x.v),annees:[0,1].map(i=>mgmtPasseAnnee(2,i))};
+  })())`));
+  assert.equal(resultat.chargement,true);
+  assert.equal(resultat.champions,1);
+  assert.equal(resultat.blessures,2);
+  assert.equal(resultat.vus,5);
+  assert.equal(resultat.dernier,'f2');
+  assert.equal(resultat.compteurs[0],0);
+  assert.deepEqual(resultat.annees,[...resultat.annees].sort());
+});
+
+test('Chargement — une progression conserve les nœuds de l’écran', () => {
+  const win=lancer(2),racine=win.document.querySelector('.mf-genese'),barre=win.document.querySelector('.mf-genese-barre');
+  win.eval('mgmtNouvelleGenPas()');
+  assert.equal(win.document.querySelector('.mf-genese'),racine);
+  assert.equal(win.document.querySelector('.mf-genese-barre'),barre);
+  win.eval('CL.mgmtNouvelleAbandonner()');
+});
