@@ -1,7 +1,7 @@
 ---
 description: Code une tranche du brief « Un monde qui a vécu » à partir de sa fiche (docs/lots/MONDE-LOT-N-TK.md), la teste, la fait vérifier et relire, puis la commite.
 mode: all
-model: opencode/space-bunny-free
+model: openai/gpt-6-luna
 permission:
   task:
     "*": deny
