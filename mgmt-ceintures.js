@@ -132,6 +132,8 @@ function mgmtSetTitle(m,idx,title){
   const fight=m.card.main[idx];
   if(title&&!mgmtCanTitle(m,fight)) return false;
   if(!title){ const ch=mgmtChampionIds(m); if(ch.has(fight.a)||ch.has(fight.b)) return false; }
+  /* ==== [ANCRE: MONDE_LOT5_T3_MODIFICATION] — Monde lot 5 T3 ==== */
+  if((fight.title===true)!==title) delete fight.herite;
   fight.title=title;
   return true;
 }

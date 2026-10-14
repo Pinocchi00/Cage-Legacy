@@ -171,7 +171,8 @@ test('Marque — une partie en version 14 se charge, se valide, ne s\u2019allume
     G.mgmt=mig;
     return {v:mig.v,valide:validateMgmt(JSON.parse(JSON.stringify(mig))),allumes:mig.roster.filter(o=>mgmtMarque(mig,o.id)).length,n:mig.roster.length};`);
   assert.ok(r,'la migration n\u2019a pas refusé la partie');
-  assert.equal(r.v,16,'chaîne 14 → 15 (lot 1) → 16 (lot 8) ; renumérotation de version à la fusion du lot 8, 12/10/2026'); assert.equal(r.n,364); assert.ok(r.valide,'la partie migrée se valide');
+  /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_MARQUE_14] — Monde lot 5 T3 ==== */
+  assert.equal(r.v,18,'chaîne 14 → 15 (lot 1) → 16 (lot 8) → 17 (lot 5 T3) → 18 (lot 5 T4)'); /* décision du 13/10/2026, lot 5 T4 */ assert.equal(r.n,364); assert.ok(r.valide,'la partie migrée se valide');
   assert.equal(r.allumes,0,'la migration part pleine : personne n\u2019est marqué');
   const charge=res(win,`G.mgmt=null; return !!mgmtParseAndValidate(JSON.stringify(G.brut));`);
   assert.ok(charge,'une v14 persistée se charge sans perte');
@@ -190,7 +191,8 @@ test('Marque — une partie en version 15 (le passé) migre vers 16 : la table d
     const sans=JSON.parse(JSON.stringify(mig)); delete sans.visites; sans.v=15;
     return {v:mig.v,valide:validateMgmt(JSON.parse(JSON.stringify(mig))),intact:JSON.stringify(sans)===JSON.stringify(G.ref),allumes:mig.roster.filter(o=>mgmtMarque(mig,o.id)).length};`);
   assert.ok(r,'la migration n’a pas refusé la partie');
-  assert.equal(r.v,16); assert.ok(r.valide); assert.ok(r.intact,'aucun autre champ ne bouge'); assert.equal(r.allumes,0);
+  /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_MARQUE_15] — Monde lot 5 T3 ==== */
+  assert.equal(r.v,18); /* décision du 13/10/2026, lot 5 T4 */ assert.ok(r.valide); assert.ok(r.intact,'aucun autre champ ne bouge'); assert.equal(r.allumes,0);
 });
 
 test('Marque — validateMgmt refuse une table des visites mal formée, mgmtRepair la reconstruit', () => {

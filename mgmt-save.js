@@ -260,6 +260,8 @@ function validateMgmt(raw){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(f.slot!=='main'&&f.slot!=='prelim') return false;
       if(f.title!==undefined&&typeof f.title!=='boolean') return false;
+      /* ==== [ANCRE: MONDE_LOT5_T3_VALIDATION] — Monde lot 5 T3 ==== */
+      if(f.herite!==undefined&&(f.herite!==true||f.slot!=='main')) return false;
     }
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
@@ -326,7 +328,8 @@ function validateMgmt(raw){
       if(f.target!==undefined&&f.target!==null&&!mgmtValidId(f.target)) return false;
       if(f.k==='promesse'&&(!Number.isSafeInteger(f.due)||f.due<f.c||!Number.isSafeInteger(f.d))) return false;
       if(f.k==='refus'&&!Number.isSafeInteger(f.d)) return false;
-      if(f.k==='contrarie'&&(!Number.isSafeInteger(f.p)||f.p<10||f.p>30||(f.why!=='titre'&&f.why!=='jeune'&&f.why!=='coequipier'&&f.why!=='fratrie'))) return false;
+      /* ==== [ANCRE: MONDE_LOT5_T4_VALIDATION] — Monde lot 5 T4 ==== */
+      if(f.k==='contrarie'&&(!Number.isSafeInteger(f.p)||f.p<10||f.p>30||(f.why!=='titre'&&f.why!=='jeune'&&f.why!=='coequipier'&&f.why!=='fratrie'&&f.why!=='annulation-heritee'))) return false;
     }
   }
   if(raw.lastEvent!==undefined&&raw.lastEvent!==null&&!mgmtValidEvent(raw.lastEvent)) return false;
@@ -484,6 +487,11 @@ function mgmtMigrate(raw){
     raw.v=16;
   }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MONDE_LOT5_T3_MIGRATION] — Monde lot 5 T3 ==== */
+  /* 16 → 17 : provenance facultative, jamais déduite pour une ancienne carte. */
+  if(raw.v===16) raw.v=17;
+  /* ==== [ANCRE: MONDE_LOT5_T4_MIGRATION] — Monde lot 5 T4 ==== */
+  if(raw.v===17) raw.v=18;
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }

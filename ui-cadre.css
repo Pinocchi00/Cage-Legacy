@@ -390,6 +390,15 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-car-slot.choisi{background:var(--mf-blanc);color:var(--mf-noir)}
 .mf-car-num{font-family:var(--mf-titre);font-weight:800;font-size:52px;line-height:.69;width:34px;flex:none}
 .mf-car-slot-c{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+/* ==== [ANCRE: MONDE_LOT5_T4_EN_LIGNE] — Monde lot 5 T4 ==== */
+.mf-car-slot.herite{height:auto;min-height:104px;padding-top:8px;padding-bottom:8px}
+.mf-car-annule{align-self:flex-start;font:inherit;font-size:22px;color:inherit;background:none;border:0;text-align:left;cursor:pointer}
+.mf-car-slot.mf-car-annulation{height:auto;min-height:104px;padding:12px 16px}
+.mf-car-avertissement{font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.mf-car-annulation-actions{display:flex;flex-wrap:wrap;gap:8px}
+.mf-car-annulation-actions button{font:inherit;font-size:22px;white-space:normal;color:var(--mf-noir);background:var(--mf-blanc);border:0;padding:6px 10px;cursor:pointer}
+/* ==== [ANCRE: MONDE_LOT5_T3_ESPACEMENT] — Monde lot 5 T3 ==== */
+.mf-car-slot.herite .mf-car-slot-c{gap:4px}
 .mf-car-slot-t{display:flex;align-items:center;gap:10px;white-space:nowrap}
 .mf-car-slot-t span{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em}
 .mf-car-slot-t em{font-style:normal;font-weight:600;font-size:22px;line-height:1;padding:3px 8px;border:2px solid currentColor}
