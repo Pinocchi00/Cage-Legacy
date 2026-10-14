@@ -31,7 +31,12 @@ const ARENE_COIN_DUREE=1.9;
 function areneCoupsSeed(S){
   let h=2166136261>>>0;
   const mange=s=>{ s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } };
-  mange(S.noms.a.complet); mange(S.noms.b.complet); mange(Math.round(S.finT*100)); mange(S.vainqueur); mange(S.methode);
+  /* ==== [ANCRE: COMBAT_COHERENCE_1310_GRAINE] — 13/10/2026 : renommer
+     un combattant ne modifie ni ses gestes ni les impacts du rejeu. ==== */
+  mange(Math.round(S.finT*100)); mange(S.vainqueur); mange(S.methode);
+  mange(JSON.stringify(S.res&&S.res.stats||{}));
+  mange(JSON.stringify(S.segs.map(s=>[s.t0,s.r,s.phase,s.top,s.posSol,s.posClinch,s.beat&&s.beat.by,s.beat&&s.beat.kind])));
+  /* ==== [FIN ANCRE] ==== */
   return h>>>0;
 }
 /** Tire une clé d'un objet de poids (≥ 0) ; null si tous nuls. */
@@ -79,7 +84,11 @@ function areneCoupsConstruire(S){
     const att=phase==='clinch'?s.clinchAtt:(phase==='sol'?s.groundAtt:s.distAtt);
     const ok=phase==='clinch'?s.clinchStrikes:(phase==='sol'?s.groundStrikes:s.distStrikes);
     if(!(att>0)) return 0.45;
-    return Math.max(0.12,Math.min(0.9,(ok||0)/att));
+    return Math.max(0,Math.min(1,(ok||0)/att));
+  };
+  const tentatives=(c,phase)=>{
+    const s=cote(c), n=phase==='sol'?s.groundAtt:(phase==='clinch'?s.clinchAtt:s.distAtt);
+    return Number.isFinite(n)?Math.max(0,n):1;
   };
   const pousse=(t,by,type,r,big,k)=>{
     coups.push({t:t,by:by,type:type||null,k:k||MGMT_COUP_NOMS[type]||'',r:r,
@@ -114,12 +123,12 @@ function areneCoupsConstruire(S){
     let t=debut+rng()*0.9;
     while(t<fin){
       let wA,wB;
-      if(ph==='sol'){ wA=sg.top==='B'?1:7; wB=sg.top==='B'?7:1; }
+      if(ph==='sol'){ wA=tentatives('A',ph)*(sg.top==='B'?1:7); wB=tentatives('B',ph)*(sg.top==='B'?7:1); }
       else{
-        const att=c=>Math.max(1,ph==='clinch'?cote(c).clinchAtt:cote(c).distAtt)||1;
-        wA=att('A'); wB=att('B');
+        wA=tentatives('A',ph); wB=tentatives('B',ph);
         if(sg.beat&&sg.beat.by==='me') wA*=1.6; else if(sg.beat&&sg.beat.by==='op') wB*=1.6;
       }
+      if(wA+wB<=0) break;
       const c=rng()*(wA+wB)<wA?'A':'B';
       const type=typeDe(c,ph);
       const u=rng();
@@ -138,19 +147,22 @@ function areneCoupsConstruire(S){
     const l=m.l;
     voixC.push({t:t,l:l,a:areneCoupsModele(m.t,j,l>=1),b:m.u?areneCoupsModele(m.u,j,true):null});
   };
-  const dit=(t,l,texte)=>voixC.push({t:t,l:l,a:texte,b:null});
+  const dit=(t,l,texte,apres)=>voixC.push({t:t,l:l,a:texte,b:null,horloge:true,apres:!!apres});
   voixC.push({t:0.3,l:0,a:'',b:null,salle:true});
   const dernierR=segs.length?segs[segs.length-1].r:1;
+  const arret=segs.find(s=>s.phase==='fini'), tempsFin=arret?arret.t0:S.finT;
   for(let r=1;r<=dernierR;r++){
     const tR=(r-1)*S.roundLen, fR=r*S.roundLen;
-    const fini=S.finT<fR-0.5;
     if(r===1) dit(2.0,1,MGMT_COMMENTAIRE.debut.t[Math.floor(rng()*MGMT_COMMENTAIRE.debut.t.length)]);
     else dit(tR+1.2,1,areneCoupsModele(MGMT_COMMENTAIRE.round.t[0],{N:r},true));
-    if(!fini){
-      if(fR-tR>12) dit(fR-7.5,0,MGMT_COMMENTAIRE.minute[0].t);
-      if(fR-tR>12) dit(fR-3.2,1,MGMT_COMMENTAIRE.dix[0].t);
-      dit(fR-0.1,2,MGMT_COMMENTAIRE.finRound[0].t);
-      if(r===dernierR&&(S.methode.indexOf('Décision')===0||S.methode.indexOf('Nul')===0)) dit(fR+1.8,0,MGMT_COMMENTAIRE.juges[Math.floor(rng()*MGMT_COMMENTAIRE.juges.length)].t);
+    {
+      /* ==== [ANCRE: COMBAT_COHERENCE_1310_ANNONCES] — 13/10/2026 :
+         les secondes annoncées sont celles du chronomètre du combat. ==== */
+      if(fR-60/S.echelle<tempsFin) dit(fR-60/S.echelle,0,MGMT_COMMENTAIRE.minute[0].t);
+      if(fR-10/S.echelle<tempsFin) dit(fR-10/S.echelle,1,MGMT_COMMENTAIRE.dix[0].t);
+      if(fR<=tempsFin&&(!arret||fR<tempsFin)) dit(fR,2,MGMT_COMMENTAIRE.finRound[0].t);
+      /* ==== [FIN ANCRE] ==== */
+      if(r===dernierR&&(S.methode.indexOf('Décision')===0||S.methode.indexOf('Nul')===0)) dit(fR+1.8,0,MGMT_COMMENTAIRE.juges[Math.floor(rng()*MGMT_COMMENTAIRE.juges.length)].t,true);
     }
   }
   for(let i=0;i<segs.length;i++){
@@ -189,16 +201,22 @@ function areneCoupsConstruire(S){
   if(bFin&&bFin.phase==='fini'){
     const g=S.vainqueur==='B'?'B':'A';
     const fam=S.methode.indexOf('KO')===0?'finKO':(S.methode.indexOf('Soumission')===0?'finSub':(S.methode.indexOf('Décision')===0||S.methode.indexOf('Nul')===0?null:'finStop'));
-    if(fam&&S.vainqueur!=='D') dire(bFin.t0+0.1,fam,{X:court(g),Y:court(autre(g))});
+    if(fam&&S.vainqueur!=='D'){
+      dire(bFin.t0+0.1,fam,{X:court(g),Y:court(autre(g))});
+      voixC[voixC.length-1].terminal=true;
+    }
   }
   /* tri, écarts : une réplique plus forte prend la place d'une plus faible qui la gêne */
   voixC.sort((x,y)=>x.t-y.t||y.l-x.l);
   const voix=[];
   for(const v of voixC){
+    if(v.t>tempsFin&&!v.terminal&&!v.apres) continue;
     const der=voix[voix.length-1];
     const duree=der&&der.salle?1.6:(der?(ARENE_VOIX_DUREE[der.l]||2):0);
     if(der&&v.t-der.t<duree*0.9+0.2){
-      if(v.l>der.l&&!der.salle) voix[voix.length-1]=v;
+      if(v.terminal) voix[voix.length-1]=v;
+      else if(!der.terminal&&v.horloge&&der.horloge) voix.push(v);
+      else if(!der.terminal&&(v.horloge||(!der.horloge&&v.l>der.l))&&!der.salle) voix[voix.length-1]=v;
       continue;
     }
     voix.push(v);
@@ -225,12 +243,12 @@ function areneCoupsConstruire(S){
   }
   for(let r=1;r<=dernierR;r++){
     const fR=r*S.roundLen;
-    if(S.finT>=fR-0.5&&fR-(r-1)*S.roundLen>12) crie(fR-3.0,(r%2)?'A':'B','dix');
+    if(fR-10/S.echelle<tempsFin) crie(fR-10/S.echelle,(r%2)?'A':'B','dix');
   }
   coinsC.sort((x,y)=>x.t-y.t);
   const coins=[], dernier={A:-99,B:-99};
   for(const c of coinsC){
-    if(c.t<0||c.t>S.finT-0.5) continue;
+    if(c.t<0||c.t>=tempsFin) continue;
     if(c.t-dernier[c.w]<ARENE_COIN_ECART) continue;
     dernier[c.w]=c.t; coins.push(c);
   }

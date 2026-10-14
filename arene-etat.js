@@ -111,8 +111,9 @@ function areneTempsCombat(b,defaut,echelle){
   const ech=echelle>0?echelle:1;
   return (ARENE_ROUND_LEN-Math.min(ARENE_ROUND_LEN,Math.max(0,reste)))/ech;
 }
-/** Les moments du moteur, horodatés, en ordre de combat. Le premier moment
- *  de finition clôt le combat (aucun moment ne le suit). @returns {Array} */
+/** Les moments du moteur et les ouvertures de round (roundStart), horodatés,
+ *  en ordre de combat. Le premier moment de finition clôt le combat
+ *  (aucun moment ne le suit). @returns {Array} */
 function areneBeats(res,echelle){
   const log=(res&&Array.isArray(res.log))?res.log:[];
   const ech=echelle>0?echelle:1, len=ARENE_ROUND_LEN/ech;
@@ -127,11 +128,21 @@ function areneBeats(res,echelle){
       top:(L.top==='A'||L.top==='B')?L.top:null,
       pos:(typeof L.pos==='string')?L.pos:null,
       by:(L.by==='me'||L.by==='op')?L.by:null,
+      kind:typeof L.kind==='string'?L.kind:null,
       text:typeof L.text==='string'?L.text:'',
       finish:!!L.finish, method:typeof L.method==='string'?L.method:null, sub:!!L.sub});
     if(L.finish) break;
   }
+  /* ==== [ANCRE: COMBAT_COHERENCE_1310_CLOCHES] — 13/10/2026 : une cloche
+     appartient à l'horloge, jamais au prochain commentaire du moteur. ==== */
+  const fin=beats.find(b=>b.finish);
+  const dernier=fin?fin.r:Math.max(1,...beats.map(b=>b.r),...(res&&Array.isArray(res.roundStats)?res.roundStats.map(s=>s.r||1):[]));
+  for(let r=1;r<=dernier;r++) beats.push({i:-1,r,t:(r-1)*len,phase:'debout',top:null,pos:null,
+    by:null,text:'',finish:false,method:null,sub:false,roundStart:true});
+  beats.sort((a,b)=>a.t-b.t||a.r-b.r||(a.roundStart?-1:0)-(b.roundStart?-1:0)||a.i-b.i);
+  beats.forEach((b,i)=>{ b.i=i; });
   return beats;
+  /* ==== [FIN ANCRE] ==== */
 }
 /** Transition de phase portée par un moment du moteur : le moteur journalise
  *  l'amener/la séparation/la relance DANS la phase d'où elle part — le
@@ -154,6 +165,15 @@ function areneBeatTapis(b){
   if(!b||typeof b.text!=='string'||b.text.indexOf('au tapis')<0) return null;
   return b.by==='me'?'B':'A';
 }
+
+/* ==== [ANCRE: COMBAT_COHERENCE_1310_NATURE] — le type vient du moteur ;
+   repli limité aux anciens journaux, qui ne portaient que du texte. ==== */
+function areneBeatSansFrappe(b){
+  if(!b) return true;
+  if(['timeout','pointDeduction','adaptation','injury','takedownDefense','refStandup'].includes(b.kind)) return true;
+  return !b.kind&&/Temps mort|retire un point|L’arcade|Le genou|commence à trouver|s’habitue peu à peu|Bonne défense|repousse une tentative/.test(b.text||'');
+}
+/* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: ARENE_T3_PAS] — Lot 3 T3 : moveStanding et escape du prototype
    validé, alimentés par les seuls faits de res.stats et par le déroulé. ==== */
@@ -226,6 +246,16 @@ function arenePasRef(sim,phase,dt){
 function arenePas(session,dt,t){
   const sim=session._pas,sg=areneSegDe(t,session.segs),rng=sim.rng;
   const A=sim.A,B=sim.B;
+  /* ==== [ANCRE: COMBAT_COHERENCE_1310_REPRISE] — la minute de repos est
+     parcourue par areneInstant ; le temps de combat reprend dans les coins. ==== */
+  if(sim.reprise<session.reprises.length&&t>=session.reprises[sim.reprise]){
+    sim.reprise++;
+    A.pos=areneCoinA(); B.pos=areneCoinB();
+    for(const f of [A,B]){ f.vel={x:0,y:0}; f.step=null; f.escapeCD=0; f.pinnedT=0; }
+    sim.segment=null; sim.target=null; sim.prefAt=null;
+    return [A.pos.x,A.pos.y,B.pos.x,B.pos.y,sim.ref.pos.x,sim.ref.pos.y];
+  }
+  /* ==== [FIN ANCRE] ==== */
   A.down=0; B.down=0; A.stun=0; B.stun=0;
   for(const w of session.tapis){
     if(t>=w.t0&&t<w.t1){
@@ -268,6 +298,14 @@ function areneImage(session,t){
     sim.frames.push(arenePas(session,step,n*step));
   }
   const a=sim.frames[idx],b=sim.frames[idx+1],k=t/step-idx;
+  /* Une pause n'a pas de durée de combat : ne jamais interpoler à travers
+     sa coupure. La continuité physique se mesure en temps d'affichage. */
+  const borne=session.reprises.find(b=>idx*step<b&&(idx+1)*step>=b);
+  if(borne!==undefined){
+    if(t<borne) return a.slice();
+    const ca=areneCoinA(),cb=areneCoinB();
+    return [ca.x,ca.y,cb.x,cb.y,a[4]+(b[4]-a[4])*k,a[5]+(b[5]-a[5])*k];
+  }
   return a.map((v,i)=>v+(b[i]-v)*k);
 }
 
@@ -521,7 +559,7 @@ function areneConstruire(res,noms,opts){
       act={type:'td',de:tr.top};
     }else if(phase==='sol'&&b.sub){
       act={type:'sub',de:top,boucle:true};
-    }else if((phase==='debout'||phase==='clinch'||phase==='sol')&&b.by&&!(tr&&tr.phase==='debout')){
+    }else if((phase==='debout'||phase==='clinch'||phase==='sol')&&b.by&&!areneBeatSansFrappe(b)&&!(tr&&tr.phase==='debout')){
       act={type:/kick/i.test(b.text)?'kick':'punch',de:(b.by==='op'?'B':'A')};
     }
     if(act){
@@ -552,6 +590,7 @@ function areneConstruire(res,noms,opts){
     for(let k=1;k<segs.length;k++) segs[k].i=k;
   }
   S.segs=segs;
+  S.reprises=[...new Set(segs.filter(s=>s.t0>0&&(s.nouvelleRonde||(s.beat&&s.beat.phase==='exam'))).map(s=>s.t0))];
   S.dureeCombat=Math.max(0.1,finT);
   const seed=(beatsOr.length*7919+Math.floor(finT*37)+
     (res.stats&&res.stats.A?Math.floor((res.stats.A.sigAtt||0)*101):0))>>>0;
@@ -559,24 +598,25 @@ function areneConstruire(res,noms,opts){
   S._pas={A:areneMobile(departA,areneProfil(res.stats&&res.stats.A)),
     B:areneMobile(departB,areneProfil(res.stats&&res.stats.B)),
     ref:{pos:{x:0,y:-0.4},vel:{x:0,y:0},side:{x:0,y:-2.3}},rng:areneAlea(seed),segment:null,target:null,
-    frames:[[departA.x,departA.y,departB.x,departB.y,0,-0.4]]};
+    reprise:0,frames:[[departA.x,departA.y,departB.x,departB.y,0,-0.4]]};
   /* Montage d'affichage : le temps de combat 1:1, une pause d'affichage
      (les pions regagnent leur coin) avant chaque round nouveau et avant la
-     première pause médicale. Les pauses n'occupent AUCUN temps de combat. */
+     chaque examen médical entre rounds. Les pauses n'occupent AUCUN temps de combat. */
   const montage=[];
-  let d=0; examVu=false;
+  let d=0, dernierePause=-1;
   for(let i=0;i<segs.length;i++){
     const sg=segs[i];
-    const pauseAvantRonde=sg.nouvelleRonde&&!(i>0&&segs[i-1].phase==='exam');
-    const pauseAvantExam=sg.phase==='exam'&&!examVu;
-    if(pauseAvantRonde||pauseAvantExam){
-      if(pauseAvantExam) examVu=true;
-       const image=areneImage(S,sg.t0);
+    const pauseAvantExam=sg.beat&&sg.beat.phase==='exam';
+    if((sg.nouvelleRonde||pauseAvantExam)&&sg.t0!==dernierePause){
+      dernierePause=sg.t0;
+       const image=areneImage(S,Math.max(0,sg.t0-0.0001));
        const depuisA={x:image[0],y:image[1]};
        const depuisB={x:image[2],y:image[3]};
-       montage.push({genre:'pause',d0:d,d1:d+pauseS,rNext:sg.r,
+       const marche=Math.max(areneDist(depuisA,areneCoinA()),areneDist(depuisB,areneCoinB()));
+       const repos=Math.max(pauseS,marche*0.75+0.5);
+       montage.push({genre:'pause',d0:d,d1:d+repos,rNext:pauseAvantExam&&!sg.beat.finish?sg.r+1:sg.r,t0:sg.t0,
          fromA:depuisA,fromB:depuisB,refX:image[4],refY:image[5]});
-      d+=pauseS;
+      d+=repos;
     }
     montage.push({genre:'combat',d0:d,d1:d+(sg.t1-sg.t0),t0:sg.t0,t1:sg.t1});
     d+=sg.t1-sg.t0;
@@ -624,8 +664,11 @@ function areneMoment(session,t){
   if(sg.phase==='sol'){
     if(e.top==='B'){ pB='sol-dessus'; pA='sol-dessous'; }
     else { pA='sol-dessus'; pB='sol-dessous'; }
-  }else if(sg.phase==='fini'&&session.vainqueur!=='D'){
+  }else if(sg.phase==='fini'&&session.vainqueur!=='D'&&session.methode.indexOf('KO')===0){
     if(session.vainqueur==='A'){ pB='tapis'; } else { pA='tapis'; }
+  }else if(sg.phase==='fini'&&sg.beat&&sg.beat.phase==='sol'){
+    if(sg.beat.top==='B'){pB='sol-dessus';pA='sol-dessous';}
+    else {pA='sol-dessus';pB='sol-dessous';}
   }else{
     for(const w of session.tapis){
       if(tt>=w.t0&&tt<w.t1){ if(w.cible==='A')pA='tapis'; else pB='tapis'; }
@@ -634,7 +677,9 @@ function areneMoment(session,t){
   e.postureA=pA; e.postureB=pB;
   /* Action en cours (signature) + éclat d'impact. */
   let act=sg.act;
-  if(!act&&sg.i>0){ const psg=session.segs[sg.i-1]; if(psg.act&&tt<psg.act.t1) act=psg.act; }
+  if(!act&&!e.fini&&sg.i>0&&!(sg.beat&&sg.beat.roundStart)&&!areneBeatSansFrappe(sg.beat)){
+    const psg=session.segs[sg.i-1]; if(psg.r===sg.r&&psg.act&&tt<psg.act.t1) act=psg.act;
+  }
   e.action=null; e.actionProg=0; e.flashA=0; e.flashB=0;
   if(act&&tt>=act.t0&&tt<act.t1){
     e.action=act;
@@ -649,7 +694,8 @@ function areneMoment(session,t){
   if(sg.texte&&(tt<sg.t0+ARENE_TEXTE_S||sg.phase==='fini')) e.texte=sg.texte;
   else if(sg.i>0){ const psg=session.segs[sg.i-1]; if(psg.texte&&tt<psg.t0+ARENE_TEXTE_S) e.texte=psg.texte; }
   /* Horloge du round (temps restant, convention du moteur). */
-  e.horloge=Math.min(ARENE_ROUND_LEN,Math.max(0,ARENE_ROUND_LEN-(tt-(sg.r-1)*session.roundLen)*session.echelle));
+  const tempsHorloge=sg.phase==='fini'?sg.t0:tt;
+  e.horloge=Math.min(ARENE_ROUND_LEN,Math.max(0,ARENE_ROUND_LEN-(tempsHorloge-(sg.r-1)*session.roundLen)*session.echelle));
   e.vainqueur=session.vainqueur; e.methode=session.methode;
   e.instable=!!(sg.morph&&tt-sg.t0<ARENE_MORPH_S);
   e.refX=image[4]; e.refY=image[5];
@@ -658,7 +704,7 @@ function areneMoment(session,t){
 
 /** État à l'instant d'AFFICHAGE d (montage : combat + pauses entre rounds).
  *  Les pauses occupent un temps d'affichage, jamais de temps de combat :
-  *  les pions restent à leur position pour éviter toute rupture de vitesse.
+ *  les pions regagnent leur coin avant la reprise du temps de combat.
  *  @returns {object} le même objet d'état d'affichage à chaque appel. */
 function areneInstant(session,d){
   const e=session._etatAff;
@@ -670,13 +716,15 @@ function areneInstant(session,d){
     else { ent=m; lo=mid+1; }
   }
   if(ent.genre==='pause'){
-     e.t=-1; e.phase='coins'; e.r=ent.rNext; e.top=null; e.posSol=null; e.posClinch=null;
-     e.ax=ent.fromA.x; e.ay=ent.fromA.y;
-     e.bx=ent.fromB.x; e.by=ent.fromB.y;
+     e.t=-1; e.pauseT=ent.t0; e.phase='coins'; e.r=ent.rNext; e.top=null; e.posSol=null; e.posClinch=null;
+     const u=Math.min(1,(dd-ent.d0)/Math.max(0.01,ent.d1-ent.d0-0.5)), k=areneLisse(u);
+     const ca=areneCoinA(), cb=areneCoinB();
+     e.ax=ent.fromA.x+(ca.x-ent.fromA.x)*k; e.ay=ent.fromA.y+(ca.y-ent.fromA.y)*k;
+     e.bx=ent.fromB.x+(cb.x-ent.fromB.x)*k; e.by=ent.fromB.y+(cb.y-ent.fromB.y)*k;
     e.d=areneDist({x:e.ax,y:e.ay},{x:e.bx,y:e.by});
     e.postureA='debout'; e.postureB='debout';
     e.action=null; e.actionProg=0; e.flashA=0; e.flashB=0; e.texte=null;
-    e.horloge=60; e.fini=false; e.instable=false;
+    e.horloge=60*(1-(dd-ent.d0)/(ent.d1-ent.d0)); e.fini=false; e.instable=false;
     e.vainqueur=session.vainqueur; e.methode=session.methode;
      e.refX=ent.refX; e.refY=ent.refY;
     return e;

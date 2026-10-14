@@ -194,7 +194,7 @@ test('Les coups — le nom du coup est celui que le moteur donne déjà (byType)
 test('Le commentaire et les coins — datés dans le combat, jamais l\'un sur l\'autre, textes marqués relu:false', () => {
   const win=neuve(7); touche(win,'Enter'); win.eval(`MGMT_SOIREE.index=8; CL.mgmtSoRegarder()`);   /* retours du 09/10 : les palmarès réels changent les premiers combats ; le principal (cinq rounds) est toujours assez long */
   const r=res(win,`const S=MGMT_COMBAT.session;
-    return {voix:S.voix.length,coins:S.coins.length,niv:[...new Set(S.voix.map(v=>v.l))].sort(),tri:S.voix.every((v,i)=>i===0||v.t>=S.voix[i-1].t),ecart:S.voix.every((v,i)=>i===0||v.t-S.voix[i-1].t>=1.5),
+    return {voix:S.voix.length,coins:S.coins.length,niv:[...new Set(S.voix.map(v=>v.l))].sort(),tri:S.voix.every((v,i)=>i===0||v.t>=S.voix[i-1].t),ecart:S.voix.every((v,i)=>i===0||v.t-S.voix[i-1].t>=1.5||(v.horloge&&S.voix[i-1].horloge)),
       coinsOk:['A','B'].every(w=>S.coins.filter(c=>c.w===w).every((c,i,l)=>i===0||c.t-l[i-1].t>=ARENE_COIN_ECART-1e-9)),
       vide:S.voix.some(v=>!v.salle&&(!v.a||/\\{|\\}/.test(v.a))),relu:[MGMT_COMMENTAIRE.relu,MGMT_COINS.relu,MGMT_SOIREE_TEXTES.relu,MGMT_AVANT_TEXTES.relu,MGMT_SOIREE_ECRAN.relu],
       salle:S.voix[0].salle===true};`);
