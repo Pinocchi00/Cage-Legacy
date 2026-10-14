@@ -18,11 +18,13 @@ Racine : `C:\Users\antho\Documents\`. Chaque piste a son dossier git (`git workt
 | Dossier | Branche | État au 14/10 19 h 30 |
 |---|---|---|
 | `cage-legacy-docs` | `main` (3139108 « Monde lot 8 T4a et T4b… (#170) ») | Référence. **Les PR fusionnent ici** (voir §6). Serveur d'aperçu : configuration `cage-legacy-docs`, port 8768 |
-| `cage-legacy-suivi` | `monde-lot-6-raisons` | Lot 6 : T1, T2, T3 faites et commitées (T3 : `77d2c36` + reprise `0f205c3`). **Reste T4, T5, bilan, fusion.** Un `check:rapide` était en cours |
-| `cage-legacy-arene` | `monde-lot-10-ecrans` | Lot 10 : T1 faite (`195f9c1`). T2 (arrivée) en codage, T3 (Résultats) puis bilan. Contient des commits d'outillage local (`.opencode/`, `opencode.json`) **à retirer avant la PR** (§6) |
+| `cage-legacy-suivi` | `monde-lot-6-raisons` | Lot 6 : T1, T2, T3 faites et commitées (T3 : `77d2c36` + reprise `0f205c3`), `check:rapide` **vert** (995 tests) sur T3. **Reste T4, T5, bilan, fusion.** Aucune fiche T4 ni T5 n'est écrite. Arbre propre, rien d'inachevé |
+| `cage-legacy-arene` | `monde-lot-10-ecrans` | Lot 10 : T1 faite (`195f9c1`) ; fiches T1 et T2 écrites (T2 prête, **aucun code de T2 écrit**). Reste T2 (arrivée), T3 (Résultats : fiche à écrire), bilan. Arbre propre. Contient des commits d'outillage local (`.opencode/`, `opencode.json`) **à retirer avant la PR** (§6) |
 | `cage-legacy-corps` | `monde-lot-9-vitesse` | Fusionnée (PR 169). Libre. Contient un `git stash` « relecteur lot 9 : modifications non vérifiées » (ignorable) |
 | `cage-legacy-fetes` | `monde-lot-8-suite` | Fusionnée (PR 170). Libre |
 | `Default Project`, `cage-check` | anciennes branches | **N'y touche pas** pour le jeu (copie ancienne) |
+
+**À la passation (14/10 19 h 45), plus aucun processus OpenCode ni aucun contrôle ne tourne**, et les arbres de travail sont propres (hors le bruit de fins de ligne de `mgmt-retraits-data.js` et `mgmt-voix-data.js`). Tu pars donc d'un état stable ; si tu relances des chefs OpenCode, n'en lance qu'un par dossier.
 
 Pour repartir d'un dossier libre : `git fetch origin && git switch -c <nouvelle-branche> origin/main`.
 Un `.codex/worktrees/combat-coherence` existe : c'est un travail de Codex déjà fusionné (c162852).
@@ -61,7 +63,8 @@ Un `.codex/worktrees/combat-coherence` existe : c'est un travail de Codex déjà
    - **Renumérotation obligatoire à la fusion** : la branche a `MGMT_SAVE_VERSION=17` avec une migration 16→17 (« raison enregistrée ») ; `main` est à 18 (le lot 5 a pris 17 et 18). La migration du lot 6 doit devenir **18→19**, `MGMT_SAVE_VERSION=19`, et les tests qui attendent `17` (`mgmtMarque`, `mgmtEffectifs`, `mgmtEmplacements`, `mgmtNiveau`, `mgmtHumanite`…) passent à 19, avec la décision citée.
    - Réserves connues : compromis de variété des raisons (« maximale mais jamais bloquante »), limite « une catégorie peut avoir un seul règne passé ». Textes `relu:false` à lister.
 2. **Lot 10 — La refonte de trois écrans** (`cage-legacy-arene`). Les planches validées par l'utilisateur (« validé », 14/10) sont dans `maquettes/monde/refonte/` (`LISEZ-MOI.md` = contrat de chaque écran : états, zones, « ce que le code devra lire »). Décisions : `docs/lots/MONDE-LOT-10-DECISIONS.md`.
-   - T1 chargement des six ans : **faite**. T2 « Votre arrivée » (`scr_mgmt_arrivee`, `mgmt-prise-en-main.js`) : en cours. T3 Résultats (`scr_mgmt_resultats`, `mgmt-suivi-cadre.js`) : à faire. Bilan.
+   - T1 chargement des six ans : **faite**. T2 « Votre arrivée » (`scr_mgmt_arrivee`, `mgmt-prise-en-main.js`) : fiche prête, code à écrire. T3 Résultats (`scr_mgmt_resultats`, `mgmt-suivi-cadre.js`) : fiche à écrire puis code. Bilan.
+   - Le codeur OpenCode s'est arrêté deux fois sur T2 par littéralisme (la fiche lui interdit d'appeler des sous-agents, sa méthode lui en prescrit) : la section « PRÉCISION » de `MONDE-LOT-10-T2.md` tranche. Si tu codes toi-même, ignore ce point.
    - Décisions déjà prises (ne pas rouvrir) : compteur « Retraites » remplacé par « Blessures » (le passé de six ans ne produit aucune retraite : à signaler à l'utilisateur) ; l'arrivée porte l'héritage et l'Accueil retire son bloc « héritage » ; la ligne « Sa fille » est retirée ; mois en minuscules ; « au plus tard : {Organisation} Fight Night 63 » au lieu de « cycle 63 ».
    - Après chaque écran : **comparaison visuelle avec la planche** aux trois largeurs, sur une partie avec passé (le chargement de six ans se gèle quand le panneau du navigateur est caché : utiliser une fenêtre visible).
 3. **Lot 4 — Les dossiers de Leïla** (6 tranches, brief §Lot 4). Dépend des lots 3 (fait) et 6. **Les planches existent déjà** (`maquettes/monde/MondeDossiersCombattant.html`, `MondeDossiersAdversaire.html`, validées le 10/10) : la T3 du brief est donc faite, il reste le code. T1 pile de combattants (fonction pure, 4 à 6, une raison chacun, jamais deux de la même famille), T2 pile d'adversaires (remplace la touche D), T4 écran (mode de l'écran Carte, ← → Entrée Échap F + touche liste), T5 souris, T6 cartes suivantes. **Le défaut de fond** (le meilleur choix reste-t-il évident ?) se vérifie en jouant après ce lot.
