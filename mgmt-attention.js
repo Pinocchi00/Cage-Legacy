@@ -271,7 +271,8 @@ const MGMT_MARQUE_FAITS=['moment_vie','demande','attend','injury','susp','retire
   /* Monde lot 8 T4a : les cinq événements de coût petit et la demande restée
      sans réponse — des faits datés portant l'identifiant du combattant, ils
      allument la marque comme les autres, sans code neuf ici. */
-  'top15','titre_vacant','regne_cap','dernier_combat','carte_camp','sans_reponse'];
+   'top15','titre_vacant','regne_cap','dernier_combat','carte_camp','sans_reponse',
+   'retraite_annoncee','depassement','challenger','vieux_combat'];
 
 /** La seule étiquette fonctionnelle de la marque : aria-label et infobulle. */
 const MGMT_MARQUE_LIBELLE={texte:'Du nouveau depuis ta dernière visite',relu:false};

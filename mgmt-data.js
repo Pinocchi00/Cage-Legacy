@@ -193,7 +193,13 @@ const MGMT_MONDE_PHRASES={
   regneCapMois:'{Il} tient sa ceinture depuis {n} mois.',
   dernierCombat:'Il ne {lui} reste qu’un combat sur son contrat.',
   carteCamp:'{Il} et {coeq}, du même camp, étaient sur la même soirée.',
-  sansReponse:'Sa demande est restée sans réponse — {want}.',
+   sansReponse:'Sa demande est restée sans réponse — {want}.',
+   retraiteAnnoncee:'{Il} annonce sa retraite : ce sera dans trois soirées, à {age} ans.',
+   depassement:'{Il} vient de passer devant {depasse} au classement ({div}).',
+   challenger:'{Il} se déclare pour la ceinture ({div}) et vise {champion}.',
+   vieuxCombatVoisins:'Son ancien combat contre {adv} redevient d’actualité : ils sont voisins au classement.',
+   vieuxCombatTitre:'Son ancien combat contre {adv} redevient d’actualité : une ceinture est en jeu.',
+   vieuxCombatBlessure:'Son ancien combat contre {adv} redevient d’actualité : {il} revient de blessure.',
   relu:false
 };
 /* ==== [FIN ANCRE] ==== */

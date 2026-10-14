@@ -808,6 +808,78 @@ function mgmtMondeCoequipiers(m,premier){
   }
 }
 
+/* ==== [ANCRE: MONDE_LOT8_T4B] — Monde lot 8 T4b ==== */
+/** N1 : annonce l'âge-seuil trois cycles avant, sans modifier la retraite. */
+function mgmtMondeAnnoncesRetraite(m){
+  if(!m||!Array.isArray(m.roster)) return;
+  for(const f of m.roster){
+    if(!f||mgmtIsRetired(f)||!Number.isFinite(f.age)) continue;
+    const seuil=mgmtRetireAge(f,m.cycle);
+    if(f.age>=seuil-3&&!((m.facts||[]).some(x=>x&&x.k==='retraite_annoncee'&&x.a===f.id)))
+      mgmtAddFact(m,{c:m.cycle,k:'retraite_annoncee',a:f.id,age:seuil});
+  }
+}
+/** N4 : enregistre le mieux classé des combattants dépassés après soirée. */
+function mgmtMondeDepassements(m,premier){
+  if(!m||!Array.isArray(m.hist)||!Array.isArray(m.roster)) return;
+  if(typeof mgmtRangsInvalider==='function') mgmtRangsInvalider(m);
+  const present=new Set();
+  for(let i=Math.max(0,premier);i<m.hist.length;i++){const t=m.hist[i]; if(t){if(t.a)present.add(t.a.id);if(t.b)present.add(t.b.id);}}
+  const ids=new Set(m.roster.filter(f=>f&&!mgmtIsRetired(f)).map(f=>f.id));
+  const divs=[...new Set(m.roster.map(f=>f&&f.div).filter(Boolean))];
+  for(const div of divs){
+    const rows=mgmtDivisionRanking(m,div,'organization'), rank=new Map(rows.map((r,i)=>[r.id,i+1]));
+    const cs=rows.slice(0,10).filter(r=>ids.has(r.id));
+    for(const b of cs){
+      if(!present.has(b.id)||(m.facts||[]).some(x=>x&&x.k==='depassement'&&x.b===b.id&&x.c===m.cycle)) continue;
+      const passe=cs.filter(a=>a.id!==b.id&&present.has(a.id)&&rank.get(a.id)<rank.get(b.id));
+      if(!passe.length) continue;
+      const a=passe[0],fight=mgmtMondeFightDuSoir(m,premier,a.id);
+      if(fight!==null) mgmtAddFact(m,{c:m.cycle,k:'depassement',a:a.id,b:b.id,div,fight});
+    }
+  }
+}
+/** N5 : annonce le prétendant courant une fois par champion/règne. */
+function mgmtMondeChallengers(m){
+  if(!m||!Array.isArray(m.roster)) return;
+  for(const div of [...new Set(m.roster.map(f=>f&&f.div).filter(Boolean))]){
+    const titre=mgmtSplitTitle(m,div), p=mgmtPretendant(m,div);
+    if(!titre||!titre.id||!p||p.id===titre.id) continue;
+    if((m.facts||[]).some(x=>x&&x.k==='challenger'&&x.div===div&&x.champion===titre.id&&x.since===titre.since&&x.a===p.id)) continue;
+    mgmtAddFact(m,{c:m.cycle,k:'challenger',a:p.id,div,champion:titre.id,since:titre.since});
+  }
+}
+/** N11 : réveille le combat historique le plus récent éligible par paire/an. */
+function mgmtMondeVieuxCombats(m){
+  if(!m||!Array.isArray(m.hist)||!Array.isArray(m.roster)) return;
+  const an=Math.round(MGMT_EXT_YEAR_WEEKS/MGMT_EVENT_WEEKS), roster=new Set(m.roster.filter(f=>f&&!mgmtIsRetired(f)).map(f=>f.id));
+  const fights=new Map();
+  m.hist.forEach((t,i)=>{if(!t||!t.a||!t.b||!roster.has(t.a.id)||!roster.has(t.b.id)) return;
+    const pair=[t.a.id,t.b.id].sort(),key=pair.join('|');
+    const old=fights.get(key)||[]; if(m.cycle-t.c>MGMT_RIVALITE_CYCLES) old.push({i,t,pair}); fights.set(key,old);
+  });
+  for(const old of fights.values()){
+    const entry=old[old.length-1]; if(!entry) continue;
+    const [a,b]=entry.pair, fa=mgmtFighterById(m,a),fb=mgmtFighterById(m,b); if(!fa||!fb) continue;
+    let raison=null;
+    const rank=(f)=>mgmtDivisionRanking(m,f.div,'organization').findIndex(x=>x.id===f.id)+1;
+    const ra=rank(fa),rb=rank(fb);
+    if(ra>0&&rb>0&&Math.abs(ra-rb)<=2) raison='voisins';
+    if(!raison&&(m.facts||[]).some(x=>x&&x.k==='title_fight'&&x.c===m.cycle&&Number.isSafeInteger(x.fight))&&
+      (m.facts||[]).some(x=>x&&x.k==='title_fight'&&x.c===m.cycle&&[a,b].some(id=>{const t=m.hist[x.fight];return t&&t.a&&t.b&&(t.a.id===id||t.b.id===id);}))) raison='titre';
+    if(!raison){
+      for(const f of [fa,fb]){
+        if(!Number.isSafeInteger(f.susp)||m.cycle!==f.susp+1) continue;
+        const depart=(m.facts||[]).filter(x=>x&&['injury','susp'].includes(x.k)&&x.a===f.id&&Number.isSafeInteger(x.c)).at(-1);
+        if(depart&&f.susp-depart.c+1>=3){raison='blessure';break;}
+      }
+    }
+    if(!raison) continue;
+    if((m.facts||[]).some(x=>x&&x.k==='vieux_combat'&&x.fight===entry.i&&x.cycleAnnee===Math.floor(m.cycle/an))) continue;
+    for(const [soi,autre] of [[a,b],[b,a]]) mgmtAddFact(m,{c:m.cycle,k:'vieux_combat',a:soi,b:autre,soi,fight:entry.i,raison,cycleAnnee:Math.floor(m.cycle/an)});
+  }
+}
+
 /** Après la soirée : N3, N6, N7, N10.
  *  @param {number} premier index du 1er combat du soir dans m.hist */
 function mgmtMondeApresSoiree(m,premier){
@@ -818,6 +890,8 @@ function mgmtMondeApresSoiree(m,premier){
   mgmtMondeTitresVacants(m);
   mgmtMondeRegneCaps(m);
   mgmtMondeCoequipiers(m,premier);
+  mgmtMondeDepassements(m,premier);
+  mgmtMondeVieuxCombats(m);
 }
 
 /** À l'ouverture du cycle : demandes expirées, N6 (retraite d'âge), N7 (mois). */
@@ -826,6 +900,8 @@ function mgmtMondeOuvreCycle(m){
   if(typeof mgmtDemandesExpire==='function') mgmtDemandesExpire(m);
   mgmtMondeTitresVacants(m);
   mgmtMondeRegneCaps(m);
+  mgmtMondeAnnoncesRetraite(m);
+  mgmtMondeChallengers(m);
 }
 
 /** Substitue des jetons {jeton} dans un gabarit. Pur. @returns {string} */
@@ -867,6 +943,20 @@ function mgmtMondePhrase(m,x){
   if(x.k==='sans_reponse'){
     const lib=(MGMT_DEMANDES&&x.want&&MGMT_DEMANDES[x.want])?MGMT_DEMANDES[x.want].libelle:'';
     return (typeof P.sansReponse==='string'&&lib)?mgmtMondeSub(P.sansReponse,{want:lib}):null;
+  }
+  if(x.k==='retraite_annoncee') return typeof P.retraiteAnnoncee==='string'?mgmtMondeSub(P.retraiteAnnoncee,{age:x.age}):null;
+  if(x.k==='depassement'){
+    const f=mgmtFighterById(m,x.b);
+    return typeof P.depassement==='string'&&f?mgmtMondeSub(P.depassement,{depasse:f.name,div:mgmtDivisionLabel(x.div)}):null;
+  }
+  if(x.k==='challenger'){
+    const f=mgmtFighterById(m,x.champion);
+    return typeof P.challenger==='string'&&f?mgmtMondeSub(P.challenger,{div:mgmtDivisionLabel(x.div),champion:f.name}):null;
+  }
+  if(x.k==='vieux_combat'){
+    const side=x.a, id=side===x.soi?x.b:x.a;
+    const f=mgmtFighterById(m,id), cle=x.raison==='titre'?'vieuxCombatTitre':(x.raison==='blessure'?'vieuxCombatBlessure':'vieuxCombatVoisins');
+    return typeof P[cle]==='string'&&f?mgmtMondeSub(P[cle],{adv:f.name}):null;
   }
   return null;
 }

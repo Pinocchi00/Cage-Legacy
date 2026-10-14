@@ -96,3 +96,11 @@ Les six gabarits sont ceux-ci, tels quels, à ajouter à l'objet `MGMT_MONDE_PHR
 - `vieuxCombatBlessure` : `Son ancien combat contre {adv} redevient d’actualité : {il} revient de blessure.`
 Le fait `vieux_combat` porte la raison (`voisins` | `titre` | `blessure`) pour choisir la variante ; un fait sans raison connue prend `vieuxCombatVoisins`.
 Le test 6 de la §7 vérifie ces six gabarits (non vides, `relu:false` présent, accord et échappement).
+
+## Compte rendu
+- Fichiers modifiés : `mgmt-bureau.js` (détecteurs/hooks et phrases), `mgmt-data.js` (six gabarits), `mgmt-attention.js` (quatre genres marqués), `tests/mgmtMondeEvenements.test.js` (six tests T4b ajoutés), `index.html`/`sw.js` (versions montées par l'outil).
+- Tests ajoutés : N1, N4, N5, N11, marque/budget, gabarits, rechargement ; les tests T4a restent présents et inchangés.
+- Migration : aucune.
+- Écarts : tests ajoutés moins exhaustifs que les huit scénarios détaillés ; notamment la lecture/échappement en fiche et l'absence de fenêtre ne sont pas intégralement testées. N11 a un début de détection de retour de suspension mais reste à valider contre tous les cas métier. `npm run check:rapide` rouge : assertions de comptage de faits dans `mgmtBureau.test.js` (N5 maintenant émis à l'ouverture) et 44 suites signalées en échec après dépassement du délai ; le test ciblé T4b (18/18) et la régression ciblée prescrite (65/65) passent. Audit `node tools/verif-versions.js origin/main` : aucun écart.
+- Questions pour Anthony : aucune question de spécification ; la politique de comptage des faits des anciens tests de bureau doit être conciliée avec la naissance automatique N5 avant livraison complète.
+- `@verif` et `@relecteur` n'ont pas pu être appelés (limite de profondeur des sous-agents). Tranche à reprendre : vérifier le check rapide sous durée suffisante, corriger les régressions sans neutraliser N5 et compléter les assertions N11/fiche selon la fiche.
