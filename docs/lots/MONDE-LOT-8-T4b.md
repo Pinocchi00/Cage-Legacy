@@ -75,9 +75,9 @@ N2 et sa montée/descente de catégorie (T4c), N9 (lot 9), T5 suites, T7 passé,
 - N11 « un an » et « trois soirées » sont des termes métier du jeu : ne pas substituer arbitrairement une conversion en cycles/calendrier ; voir questions.
 
 ## 11. Questions pour Anthony
-- **STOP — N1 :** « trois soirées avant » désigne-t-il trois ouvertures de cycle avant la soirée où l'âge atteint le seuil, ou trois soirées effectivement combattues par ce combattant ? Le code distingue ces horloges.
-- **STOP — N5 :** le brief/inventaire dit qu'un challenger « se déclare », mais ne précise pas si cela doit arriver automatiquement au premier cycle de chaque règne, quand le prétendant change, ou à une autre occasion ; quelle condition de naissance fait foi ?
-- **STOP — N11 :** « un réveil par an » : année calendaire via `m.cal.jour`, ou tranche fixe de 12 cycles ? Et pour les déclencheurs de titre/blessure, quel est l'ancien combat concerné si le combattant a plusieurs combats historiques avec le même adversaire ?
+- (TRANCHÉ par la DÉCISION du superviseur en bas de fiche) N1 : « trois soirées avant » désigne-t-il trois ouvertures de cycle avant la soirée où l'âge atteint le seuil, ou trois soirées effectivement combattues par ce combattant ? Le code distingue ces horloges.
+- (TRANCHÉ par la DÉCISION du superviseur en bas de fiche) N5 : le brief/inventaire dit qu'un challenger « se déclare », mais ne précise pas si cela doit arriver automatiquement au premier cycle de chaque règne, quand le prétendant change, ou à une autre occasion ; quelle condition de naissance fait foi ?
+- (TRANCHÉ par la DÉCISION du superviseur en bas de fiche) N11 : « un réveil par an » : année calendaire via `m.cal.jour`, ou tranche fixe de 12 cycles ? Et pour les déclencheurs de titre/blessure, quel est l'ancien combat concerné si le combattant a plusieurs combats historiques avec le même adversaire ?
 
 ## DÉCISION du superviseur — 14/10/2026 16 h 20 (réponses aux trois STOP ; Anthony laisse le technique à Claude)
 Le STOP de tête est périmé. Les trois questions sont tranchées, code sans demander :
