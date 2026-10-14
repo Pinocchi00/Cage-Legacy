@@ -1039,6 +1039,37 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ancien .mgmt-recru-nom{font:800 28px/1.05 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;color:#E9E6E1}
 .mf-ancien .mgmt-recru-go{font:800 26px/1 var(--mgmt-font-display);letter-spacing:var(--mf-titre-ls);text-transform:uppercase;background:var(--mf-jaune);color:#0D0B0B;border:0;padding:6px 16px}
 .mf-entete-ongs{display:flex;gap:8px}
+/* ==== [ANCRE: MGMT_PRESENTATION_STYLES] — Monde lot 3 T5 ==== */
+.mf-pr{position:absolute;left:300px;top:128px;width:1564px;height:856px;display:flex;flex-direction:column;gap:16px;color:#E9E6E1;font:500 25px/1.05 var(--mf-texte);background:#0D0B0B}
+.mf-pr-banniere{height:150px;flex:none;position:relative;overflow:hidden;background:#0D0B0B}
+.mf-pr-banniere:before{content:"";position:absolute;left:90.9px;top:-226.3px;width:1071.4px;height:602.6px;background:url('images/accueil-octogones.jpg?v=b29') 0 0/100% 100% no-repeat}
+.mf-pr.solo .mf-pr-banniere{height:260px}
+.mf-pr.solo .mf-pr-banniere:before{left:-234.6px;top:-356px;width:1728px;height:972px}
+.mf-pr-nom{position:absolute;left:32px;bottom:22px;width:570px;display:flex;flex-direction:column;gap:9px;font-family:var(--mf-titre);font-weight:800;line-height:.69;text-transform:uppercase;white-space:nowrap;text-shadow:2px 0 #0D0B0B,-2px 0 #0D0B0B,0 2px #0D0B0B,0 -2px #0D0B0B}
+.mf-pr-nom.b{left:auto;right:32px;align-items:flex-end}
+.mf-pr.solo .mf-pr-nom{bottom:30px;width:1000px;gap:16px}
+.mf-pr-vs{position:absolute;left:632px;width:300px;height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.mf-pr-vs b{font:800 92px/.69 var(--mf-titre)}
+.mf-pr-vs span{font-size:22px;line-height:1.1;text-align:center;background:#0D0B0B;border:2px solid #E9E6E1;padding:6px 10px}
+.mf-pr-cartouche{position:absolute;left:1094px;top:20px;width:470px;height:220px;box-sizing:border-box;border:2px solid #E9E6E1;background:#0D0B0B;padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:20px 18px;font-size:22px;line-height:1.1}
+.mf-pr-cartouche b{display:block;margin-top:9px;font:800 40px/.8 var(--mf-titre)}
+.mf-pr-rangee{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;flex:1;min-height:0}
+.mf-pr-rangee.bas{height:338px;flex:none}
+.mf-pr.solo .mf-pr-rangee.bas{height:226px;grid-template-columns:3fr 2fr}
+.mf-pr-panneau{box-sizing:border-box;min-width:0;min-height:0;border:2px solid #E9E6E1;padding:20px;background:#121010;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.mf-pr-panneau h2{margin:0 0 12px;font:800 40px/.75 var(--mf-titre)}
+.mf-pr-panneau h2:after{content:"";display:block;width:56px;height:8px;background:#E23A2B;margin-top:12px}
+.mf-pr-lignes{display:flex;flex-direction:column;gap:12px}
+.mf-pr-ligne{box-sizing:border-box;padding:7px 16px;background:#252121;font:500 25px/1.05 var(--mf-texte);overflow-wrap:anywhere}
+.mf-pr-media,.mf-pr-sujet,.mf-pr-noms{font-size:22px;line-height:1.1;margin-bottom:5px}
+.mf-pr-media{font-weight:600;color:#F0B220}
+.mf-pr-lien{padding:0;border:0;color:#E9E6E1;background:none;font:inherit;text-decoration:underline;cursor:pointer;overflow-wrap:anywhere}
+.mf-pr-lien.choisi{color:#F0B220;outline:2px solid #F0B220;outline-offset:2px}
+.mf-stage:has(.mf-pr){background:#0D0B0B url('images/cendre.jpg?v=b29') 0 0/1920px 1080px no-repeat}
+.mf-stage:has(.mf-pr) .mf-touches{gap:14px;width:1564px}
+.mf-stage:has(.mf-pr) .mf-touche-g{gap:6px}
+.mf-pr-entree{font:500 22px/1.1 var(--mf-texte);color:#E9E6E1;text-decoration:underline;align-self:flex-start}
+.mf-car-slot.choisi .mf-pr-entree{color:#0D0B0B}
 
 /* ==== [ANCRE: MGMT_FIDELITE_FICHE_CSS] — La fiche des planches (FicheFinal, FicheStyle, FicheCombats, FicheContrat, FicheOnEnDit, FicheChampion), reprise de fidélité du 07/10/2026.
    Les tunnels d'octogones sont ceux des planches : rouge derrière un combattant, jaune derrière un champion ; le même jaune derrière la carte du champion des

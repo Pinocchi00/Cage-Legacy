@@ -167,24 +167,15 @@ function mgmtSoCoteHtml(c,couleur){
     +`<div class="mf-so-ag"><div class="mf-so-s">CE QUE TU NE SAIS PAS</div>${inconnus||'<div class="mf-so-ro"><div class="mf-so-q">?</div><div>Rien d’autre à signaler.</div></div>'}</div>`
     +`<div class="mf-so-ag"><div class="mf-so-s">SON DERNIER COMBAT</div>${dernier}</div><div class="mf-so-pis">${pied}</div></div>`;
 }
+/* ==== [ANCRE: MGMT_PRESENTATION_SOIREE_RENDU] — Monde lot 3 T5 ==== */
 function scr_mgmt_soiree_avant(){
   if(!mgmtSoAgenda()) return scr_mgmt_bureau();
   const m=G.mgmt, prog=mgmtSoireeProgramme(m), i=Math.max(0,Math.min(prog.length-1,MGMT_SOIREE_UI.focus===null?MGMT_SOIREE.index:MGMT_SOIREE_UI.focus));
-  const av=mgmtAvantCombat(m,i);
-  if(!av) return mgmtSoireeFallback();
-  const a=av.a, b=av.b;
-  const banniere=`<div class="mf-so-ban3"><i class="mf-so-diag r"></i><i class="mf-so-diag c"></i>`
-    +`<div class="mf-so-nom g big"><span>${esc(soFirst(a))}</span><b>${esc(soLast(a))}</b></div>`
-    +`<div class="mf-so-eti g3">${esc(av.etiquette)}</div><div class="mf-so-poids p3"><div>${esc(mfNet(av.divLabel))}</div><div>${esc(soRounds(av.rounds))}</div></div>`
-    +`<div class="mf-so-nom d big"><span>${esc(soFirst(b))}</span><b>${esc(soLast(b))}</b></div><div class="mf-so-vs v3">VS</div></div>`;
-  const zones=av.zones.map(z=>`<div class="mf-so-zo"><div class="mf-so-zi${z.inconnu?' q':''}${z.avantage==='A'?' a':(z.avantage==='B'?' b':'')}">${z.inconnu?'?':''}</div><div class="mf-so-zt"><b>${esc(z.titre)}</b><span>${esc(z.texte)}</span></div></div>`).join('');
-  const entete=av.entete.a?`<div class="mf-so-eh"><div class="mf-so-ehl"><div class="mf-so-ehr"><i class="mf-so-sq a"></i><span>${esc(av.entete.a)}</span></div><div class="mf-so-ehr"><i class="mf-so-sq b"></i><span>${esc(av.entete.b)}</span></div><div class="mf-so-src">${esc(av.entete.source)}</div></div></div>`
-    :`<div class="mf-so-eh"><div class="mf-so-src">${esc(av.entete.source)}</div></div>`;
-  const centre=`<div class="mf-so-cent"><div class="mf-so-ah"><div><div class="mf-so-ti">COMMENT ÇA PEUT SE PASSER</div><i class="mf-so-bar"></i></div></div>${entete}<div class="mf-so-zs">${zones}</div>`
-    +`<div class="mf-so-pied2">${mfBouton('Regarder le combat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSoAvantRegarder()'})}${mfBouton('Retour',{touche:'Échap',onclick:'CL.mgmtSoAvantRetour()'})}</div></div>`;
-  const contenu=mgmtSoEntete(m,prog,MGMT_SOIREE.index)
-    +`<main class="mf-contenu mf-so mf-so-avant">${banniere}<div class="mf-so-tr">${mfPanneau(mgmtSoCoteHtml(a,'a'),'cote','mf-so-pa')}${mfPanneau(centre,'choisi','mf-so-pc3')}${mfPanneau(mgmtSoCoteHtml(b,'b'),'cote','mf-so-pa')}</div></main>`;
-  return mfEcran(contenu,{barre:'jeu',grise:true,m,touches:[{ks:['Échap'],t:'Retour à la soirée',onclick:'CL.mgmtSoAvantRetour()'},{ks:['Entrée'],t:'Regarder le combat',jaune:true,onclick:'CL.mgmtSoAvantRegarder()'}]});
+  const v=mgmtPresentationCadre();
+  if(!v||v.mode!=='soiree'||v.i!==i){
+    if(!mgmtPresentationOuvrir('soiree',[],{i,retour:'mgmt_soiree'})) return mgmtSoireeFallback();
+  }
+  return scr_mgmt_presentation();
 }
 function mgmtSoFinHtml(m,prog){
   const F=MGMT_SOIREE_ECRAN.fin, dernier=prog[prog.length-1];
@@ -260,7 +251,8 @@ Object.assign(CL,{
     if(MGMT_SOIREE.index>=n) return;
     MGMT_SOIREE.index++; MGMT_SOIREE_UI.focus=null; render();
   },
-  mgmtSoAvant(){ if(!mgmtSoAgenda()) return; if(MGMT_SOIREE_UI.focus===null) MGMT_SOIREE_UI.focus=Math.min(MGMT_SOIREE.index,G.mgmt.lastEvent.fights.length-1); CL.go('mgmt_soiree_avant'); },
+  /* ==== [ANCRE: MGMT_PRESENTATION_SOIREE_GESTE] — Monde lot 3 T5 ==== */
+  mgmtSoAvant(){ if(!mgmtSoAgenda()) return; const i=MGMT_SOIREE_UI.focus===null?Math.min(MGMT_SOIREE.index,G.mgmt.lastEvent.fights.length-1):MGMT_SOIREE_UI.focus; CL.mgmtPresentationOuvrir('soiree',[],{i,retour:'mgmt_soiree'}); },
   mgmtSoAvantRetour(){ CL.go('mgmt_soiree'); },
   mgmtSoAvantRegarder(){
     const f=MGMT_SOIREE_UI.focus;

@@ -286,6 +286,13 @@ function mgmtSuPresseSous(m,x){
   return x.b?`Sur ${mgmtSuCourt(m,x.a)} face à ${mgmtSuCourt(m,x.b)}.`:'';
 }
 
+/* ==== [ANCRE: MGMT_PRESENTATION_PRESSE_CIBLE] — Monde lot 3 T5 ==== */
+function mgmtSuPresentationCible(m,x){
+  if(!x) return null;
+  const t=Number.isSafeInteger(x.f)&&x.f>=0?m.hist[x.f]:null,h=t?x.f:undefined,a=t?t.a.id:x.a,b=t?t.b.id:x.b;
+  if(mgmtPresentationCombat({m,h},a,b)) return {mode:'combat',ids:[a,b],h};
+  return mgmtPresentationCombattant({m,h},a)?{mode:'combattant',ids:[a],h}:null;
+}
 function mgmtSuHeroPresse(m,x,voisine){
   const age=mgmtFilAge(m,x), surCarte=(x.k==='defi'||x.k==='public')&&mgmtFilSurCarte(m,x);
   let pied='';
@@ -296,6 +303,8 @@ function mgmtSuHeroPresse(m,x,voisine){
     if(!prep&&!surCarte) pied=`<div class="mf-su-statut"><span>Pas possible pour l’instant</span></div>`;
   }else if(Number.isSafeInteger(x.f)) pied=mfBouton('Voir le résultat',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuPrEntree()'});
   else pied=mfBouton('Sa fiche',{touche:'Entrée',jaune:true,onclick:'CL.mgmtSuPrEntree()'});
+  /* ==== [ANCRE: MGMT_PRESENTATION_PRESSE_BOUTON] — Monde lot 3 T5 ==== */
+  if(mgmtSuPresentationCible(m,x)) pied+=mfBouton('Présentation',{onclick:'CL.mgmtSuPresentation()'});
   const corps=x.k==='defi'&&x.t?`<div class="mf-su-quote"><div>« ${esc(x.t)} »</div><span>${esc(mgmtNomParId(m,x.a).name)}</span></div>`:`<div class="mf-su-quote"><span>${esc(mgmtSuPresseSous(m,x))}</span></div>`;
   return mgmtSuHero(MGMT_FIL_LIBELLES[x.k].toUpperCase(),age,mgmtSuPresseTitreHtml(m,x,104,520),corps,pied);
 }
@@ -480,6 +489,11 @@ Object.assign(CL,{
     if((x.k==='defi'||x.k==='public')&&mgmtFilPreparable(m,x)&&!mgmtFilSurCarte(m,x)) return CL.mgmtSuPreparer(x.a,x.b);
     if(Number.isSafeInteger(x.f)) return CL.mgmtSuResultatDe(x.f);
     if(mgmtFicheLigne(m,x.a)){ CL.mgmtFiche(x.a); if(x.k==='combattant'&&x.w==='demande') MGMT_FICHE.onglet='ondit'; render(); }
+  },
+  /* ==== [ANCRE: MGMT_PRESENTATION_PRESSE_GESTE] — Monde lot 3 T5 ==== */
+  mgmtSuPresentation(){
+    const m=G.mgmt,c=mgmtSuPresentationCible(m,mgmtFilListe(m,MGMT_SU_PR.filtre||null)[MGMT_SU_PR.i]);
+    return c?CL.mgmtPresentationOuvrir(c.mode,c.ids,{h:c.h}):false;
   },
   /** Ouvre la carte avec le premier combattant choisi et son adversaire visé : « Confirmer le combat » n'a plus qu'à être pressé. */
   mgmtSuPreparer(a,b){
