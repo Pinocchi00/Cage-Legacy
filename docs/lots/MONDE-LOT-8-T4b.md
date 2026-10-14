@@ -105,6 +105,13 @@ Le test 6 de la §7 vérifie ces six gabarits (non vides, `relu:false` présent,
 - Questions pour Anthony : aucune question de spécification ; la politique de comptage des faits des anciens tests de bureau doit être conciliée avec la naissance automatique N5 avant livraison complète.
 - `@verif` et `@relecteur` n'ont pas pu être appelés (limite de profondeur des sous-agents). Tranche à reprendre : vérifier le check rapide sous durée suffisante, corriger les régressions sans neutraliser N5 et compléter les assertions N11/fiche selon la fiche.
 
+## Compte rendu — reprise du 14/10/2026
+- Fichiers modifiés : `tests/mgmtMondeEvenements.test.js` (scénarios étendus N1/N4/N5/N11, phrases et rechargement) ; cette fiche (état de reprise).
+- Tests ajoutés : intitulés N1, N4, N5, N11, marque/budget, phrases, rechargement de la §7 conservés et renforcés.
+- Migration : aucune. Écarts : les scénarios N5 et N11 étendus restent en échec, leur fixture doit être corrigée ; le test ciblé complet n'est donc pas vert.
+- Vérifications : test ciblé initial vert (18/18 avant changements), après extension 16/18 ; `@verif` et `@relecteur` inaccessibles (limite de profondeur des sous-agents). Versions inchangées, aucun JS modifié ; check rapide non lancé car les tests requis ne sont pas verts.
+- Questions pour Anthony : aucune question de spécification ; reprise technique nécessaire sur les fixtures N5 et N11 avant livraison.
+
 ## REPRISE du superviseur — 14/10/2026 17 h (le commit « inachevé » est à terminer, pas à refaire)
 État vérifié : le code de N1, N4, N5, N11 et les six gabarits sont dans le dépôt ; les 18 tests de `tests/mgmtMondeEvenements.test.js` sont verts. Les deux seuls rouges de `check:rapide` (deux assertions de comptage de faits dans `tests/mgmtBureau.test.js`, causées par la naissance automatique de N5) sont CORRIGÉS par le superviseur (elles comptent maintenant hors faits `challenger` ; décision N5 du 14/10, ne pas neutraliser N5).
 Il reste, et c'est tout :

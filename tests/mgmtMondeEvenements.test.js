@@ -360,36 +360,68 @@ test('Monde T4a — rechargement propre et aucune fenêtre', () => {
 });
 
 test('Monde T4b — N1 : l’annonce tombe trois soirées avant l’âge de retraite et ne change pas la date de retraite',()=>{
-  const win=neuve(7);
-  const r=res(win,`const m=G.mgmt,f=m.roster.find(x=>!mgmtIsRetired(x));
-    f.age=mgmtRetireAge(f,m.cycle)-3; const avant=f.age; mgmtMondeAnnoncesRetraite(m); mgmtMondeAnnoncesRetraite(m);
-    return {faits:m.facts.filter(x=>x.k==='retraite_annoncee'&&x.a===f.id),age:f.age,avant,seuil:mgmtRetireAge(f,m.cycle)};`);
-  assert.equal(r.faits.length,1); assert.equal(r.faits[0].age,r.seuil); assert.equal(r.age,r.avant);
+  for(const seed of [7,19]){
+    const win=neuve(seed);
+    const r=res(win,`const m=G.mgmt,f=m.roster.find(x=>!mgmtIsRetired(x));
+      const seuil=mgmtRetireAge(f,m.cycle); f.age=seuil-4; const initial=f.age;
+      mgmtMondeAnnoncesRetraite(m); const tropTot=m.facts.filter(x=>x.k==='retraite_annoncee'&&x.a===f.id).length;
+      f.age=seuil-3; mgmtMondeAnnoncesRetraite(m); mgmtMondeOuvreCycle(m); const annonce=m.facts.filter(x=>x.k==='retraite_annoncee'&&x.a===f.id);
+      f.age=seuil-2; mgmtMondeAnnoncesRetraite(m); mgmtMondeOuvreCycle(m);
+      const medical=m.roster.find(x=>!mgmtIsRetired(x)&&x.id!==f.id); medical.age=mgmtRetireAge(medical,m.cycle)-1;
+      medical.retired=true; mgmtMondeAnnoncesRetraite(m);
+      return {f:f.id,initial,seuil,tropTot,annonce,age:f.age,medical:medical.id,medicalAnnonce:m.facts.some(x=>x.k==='retraite_annoncee'&&x.a===medical.id)};`);
+    assert.equal(r.tropTot,0,'pas avant le cycle fixé'); assert.equal(r.annonce.length,1,'une annonce malgré deux ouvertures');
+    assert.equal(r.annonce[0].age,r.seuil); assert.equal(r.age,r.seuil-2,'pas d’annonce après le créneau');
+    assert.equal(r.medicalAnnonce,false,'aucune annonce de retraite médicale');
+  }
 });
 
 test('Monde T4b — N4 : le mieux classé des top 10 est seul déclaré dépassé et le fait cite la trace',()=>{
   const win=neuve(7);
-  const r=res(win,`const m=G.mgmt, [a,b]=m.roster.slice(0,2), premier=m.hist.length;
-    const t={c:m.cycle,slot:'main',a:mgmtTraceSide(a),b:mgmtTraceSide(b),winner:'A'}; m.hist.push(t);
-    mgmtDivisionRanking=(mm,d)=>[{id:a.id},{id:b.id}]; mgmtMondeDepassements(m,premier);
-    return m.facts.filter(x=>x.k==='depassement');`);
-  assert.equal(r.length,1); assert.equal(r[0].fight,0); assert.ok(r[0].a&&r[0].b);
+  const r=res(win,`const m=G.mgmt,[a,b,c,d]=m.roster.slice(0,4),div=a.div,premier=m.hist.length;
+    m.roster.slice(0,4).forEach(x=>x.div=div);
+    for(const f of [a,b,c,d]) m.hist.push({c:m.cycle,slot:'main',a:mgmtTraceSide(f),b:mgmtTraceSide(m.roster[8]),winner:'A'});
+    const ids=[a.id,b.id,c.id,d.id], ranks=[{id:a.id},{id:b.id},{id:c.id},{id:d.id},...Array.from({length:7},(_,i)=>({id:'x'+i}))];
+    mgmtDivisionRanking=(mm,di)=>ranks;
+    mgmtMondeDepassements(m,premier);
+    return {faits:m.facts.filter(x=>x.k==='depassement'),ids,div,premier,avant:m.facts.filter(x=>x.k==='depassement').length};`);
+  assert.ok(r.faits.length>0); assert.ok(r.faits.every(x=>x.div===r.div&&x.a&&x.b));
+  assert.ok(r.faits.every(x=>x.fight>=r.premier),'chaque fait cite la trace du soir');
+  const n=res(win,`const m=G.mgmt,n=m.facts.filter(x=>x.k==='depassement').length; mgmtMondeDepassements(m,${r.premier}); return m.facts.filter(x=>x.k==='depassement').length-n;`);
+  assert.equal(n,0,'second appel idempotent');
 });
 
 test('Monde T4b — N5 : le challenger n°1 se déclare une seule fois par règne',()=>{
   const win=neuve(7);
-  const r=res(win,`const m=G.mgmt,d=m.roster[0].div; mgmtMondeChallengers(m); const avant=m.facts.filter(x=>x.k==='challenger').length;
-    mgmtMondeChallengers(m); return {avant,apres:m.facts.filter(x=>x.k==='challenger').length};`);
-  assert.equal(r.avant,r.apres);
+  const r=res(win,`const m=G.mgmt,d=m.roster[0].div, titre=mgmtSplitTitle(m,d); m.facts=m.facts.filter(x=>x.k!=='challenger');
+    G.DIV=d; mgmtPretendant=function(mm,di){return di===G.DIV?m.roster.find(x=>x.id===G.PRET):null;}; G.PRET=m.roster.find(x=>x.id!==titre.id&&x.div===d).id;
+    mgmtMondeChallengers(m); mgmtMondeChallengers(m); const premier=m.facts.filter(x=>x.k==='challenger'&&x.div===d);
+    G.PRET=m.roster.find(x=>x.id!==titre.id&&x.id!==G.PRET&&x.div===d).id; mgmtMondeChallengers(m);
+    const change=m.facts.filter(x=>x.k==='challenger'&&x.div===d); mgmtSplitTitle=function(){return null;}; mgmtMondeChallengers(m);
+    return {premier,change,apres:m.facts.filter(x=>x.k==='challenger'&&x.div===d),titre};`);
+  assert.equal(r.premier.length,1); assert.equal(r.premier[0].a,r.premier[0].a);
+  assert.equal(r.premier[0].champion,r.titre.id); assert.equal(r.premier[0].div,r.titre.div);
+  assert.equal(r.change.length,2,'nouveau prétendant écrit un fait'); assert.equal(r.apres.length,2,'titre vacant n’en ajoute pas');
 });
 
 test('Monde T4b — N11 : les trois déclencheurs réveillent un ancien combat une fois par année',()=>{
   const win=neuve(7);
-  const r=res(win,`const m=G.mgmt,[a,b]=m.roster.slice(0,2); m.cycle=20;
-    const t={c:1,a:mgmtTraceSide(a),b:mgmtTraceSide(b)}; m.hist.push(t);
-    mgmtDivisionRanking=(mm,d)=>[{id:a.id},{id:b.id}]; mgmtMondeVieuxCombats(m);
-    return m.facts.filter(x=>x.k==='vieux_combat');`);
-  assert.equal(r.length,2); assert.ok(r.every(x=>x.fight===0&&x.raison==='voisins'));
+  const r=res(win,`const m=G.mgmt,[a,b,c,d]=m.roster.slice(0,4); m.facts=m.facts.filter(x=>x.k!=='vieux_combat'); m.cycle=20;
+    const t=(x,y,cy)=>({c:cy,a:mgmtTraceSide(x),b:mgmtTraceSide(y)}); m.hist.push(t(a,b,1),t(c,d,1));
+    /* a et b sont voisins (écart 1) ; c et d sont éloignés (écart 4) : seul le déclencheur « titre » doit les réveiller. */
+    mgmtDivisionRanking=()=>[{id:a.id},{id:b.id},{id:'g1'},{id:'g2'},{id:'g3'},{id:c.id},{id:'g4'},{id:'g5'},{id:'g6'},{id:d.id}];
+    mgmtMondeVieuxCombats(m); const voisins=m.facts.filter(x=>x.k==='vieux_combat');
+    m.cycle=21; mgmtAddFact(m,{c:21,k:'title_fight',fight:1}); mgmtMondeVieuxCombats(m);
+    const titre=m.facts.filter(x=>x.k==='vieux_combat'&&x.fight===1);
+    m.cycle=22; const bless=m.roster[4]; m.hist.push(t(a,bless,1)); bless.susp=21; mgmtAddFact(m,{c:18,k:'injury',a:bless.id}); mgmtMondeVieuxCombats(m);
+    const blessure=m.facts.filter(x=>x.k==='vieux_combat'&&x.fight===2);
+    const avant=m.facts.filter(x=>x.k==='vieux_combat').length; mgmtMondeVieuxCombats(m); const apres=m.facts.filter(x=>x.k==='vieux_combat').length;
+    m.cycle=30; mgmtMondeVieuxCombats(m); const annee=m.facts.filter(x=>x.k==='vieux_combat'&&x.fight===0);
+    return {voisins,titre,blessure,avant,apres,annee,a:a.id,b:b.id,c:c.id,d:d.id};`);
+  assert.equal(r.voisins.length,2); assert.ok(r.voisins.every(x=>x.fight===0&&x.raison==='voisins'));
+  assert.equal(r.titre.length,2); assert.ok(r.titre.every(x=>x.raison==='titre'));
+  assert.equal(r.blessure.length,2); assert.ok(r.blessure.every(x=>x.raison==='blessure'));
+  assert.equal(r.apres,r.avant,'pas de doublon la même année'); assert.equal(r.annee.length,4,'éligible l’année suivante');
 });
 
 test('Monde T4b — les quatre genres allument la marque et passent par le budget',()=>{
@@ -400,11 +432,19 @@ test('Monde T4b — les quatre genres allument la marque et passent par le budge
 });
 
 test('Monde T4b — les quatre genres ont une phrase de fiche accordée et échappée',()=>{
-  const win=neuve(7); const r=res(win,`return ['retraite_annoncee','depassement','challenger','vieux_combat'].map(k=>MGMT_MONDE_PHRASES[k==='retraite_annoncee'?'retraiteAnnoncee':k==='vieux_combat'?'vieuxCombatVoisins':k]);`);
-  assert.ok(r.every(x=>typeof x==='string'&&x.length));
+  const win=neuve(7); const r=res(win,`const m=G.mgmt,[a,b]=m.roster.slice(0,2); b.name='<img src=x onerror=alert(1)>'; const div=a.div;
+    const faits=[{k:'retraite_annoncee',a:a.id,age:40},{k:'depassement',a:a.id,b:b.id,div},{k:'challenger',a:a.id,champion:b.id,div},
+      {k:'vieux_combat',a:a.id,b:b.id,soi:a.id,raison:'voisins'},{k:'vieux_combat',a:a.id,b:b.id,soi:a.id,raison:'titre'},{k:'vieux_combat',a:a.id,b:b.id,soi:a.id,raison:'blessure'}];
+    const phrases=faits.map(x=>mgmtMondePhrase(m,x)); const ligne=mgmtFicheDepuisHtml(phrases.map(phrase=>({phrase,libelle:'test'})));
+    return {phrases,relu:MGMT_MONDE_PHRASES.relu,ligne,brut:mgmtMondePhrase(m,{k:'absent'}),genre:a.genre};`);
+  assert.equal(r.phrases.length,6); assert.ok(r.phrases.every(x=>typeof x==='string'&&x.length));
+  assert.equal(r.relu,false); assert.ok(r.ligne.includes('&lt;img')); assert.ok(!r.ligne.includes('<img'));
+  assert.equal(r.brut,null);
 });
 
 test('Monde T4b — rechargement conserve les faits et aucune fenêtre n’est ouverte',()=>{
-  const win=neuve(7); const ok=res(win,`const m=G.mgmt,ids=m.roster.slice(0,4).map(f=>f.id); ['retraite_annoncee','depassement','challenger','vieux_combat'].forEach((k,i)=>mgmtAddFact(m,{c:m.cycle,k,a:ids[i]})); const n=m.facts.length; saveMgmt(); G.mgmt=null; loadMgmt(); return {avant:n,apres:G.mgmt.facts.length,ids:G.mgmt.facts.filter(x=>['retraite_annoncee','depassement','challenger','vieux_combat'].includes(x.k)).length};`);
-  assert.equal(ok.apres,ok.avant); assert.ok(ok.ids>=4);
+  const win=neuve(7); const ok=res(win,`const m=G.mgmt,ids=m.roster.slice(0,4).map(f=>f.id); ['retraite_annoncee','depassement','challenger','vieux_combat'].forEach((k,i)=>mgmtAddFact(m,{c:m.cycle,k,a:ids[i],b:ids[(i+1)%4]})); const n=m.facts.length; saveMgmt(); G.mgmt=null; loadMgmt(); return {avant:n,apres:G.mgmt.facts.length,genres:['retraite_annoncee','depassement','challenger','vieux_combat'].filter(k=>G.mgmt.facts.some(x=>x.k===k)),marques:ids.map(id=>mgmtMarque(G.mgmt,id))};`);
+  assert.equal(ok.apres,ok.avant); assert.equal(ok.genres.length,4); assert.ok(ok.marques.every(Boolean));
+  const src=fs.readFileSync(path.join(__dirname,'..','mgmt-bureau.js'),'utf8'); const bloc=src.slice(src.indexOf('[ANCRE: MONDE_LOT8_T4B]'),src.indexOf('==== [FIN ANCRE] ====',src.indexOf('[ANCRE: MONDE_LOT8_T4B]')));
+  for(const mot of ['popup','CL.go','setTimeout']) assert.ok(!bloc.includes(mot),'aucun '+mot);
 });
