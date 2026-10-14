@@ -1,5 +1,3 @@
-STOP
-
 # Monde lot 2 T3 — La main du prédécesseur
 
 ## Branche
@@ -76,3 +74,14 @@ Bloquée jusqu'à clarification des réglages et de leurs critères mesurables. 
 ## Compte rendu
 
 Fiche préparatoire arrêtée avant implémentation : les choix catégoriels existent dans les données, mais leur traduction comportementale n'est pas déterminée par le brief.
+
+## DÉCISION du superviseur — 14/10/2026 15 h 50 (réponses aux cinq questions ; Anthony laisse le technique à Claude)
+Le STOP de tête est périmé : TOUT ce qui suit est tranché, écris le code. Ne pose aucune question.
+**Principe** : un réglage « normal / equilibre / parfois-garde-historique » reproduit EXACTEMENT le comportement actuel. Les autres valeurs le déplacent d'un cran, jamais d'une règle d'exclusion ; tout reste déterministe (pas de `Math.random`).
+1. **titres** → `titreCadence` (une mise en titre toutes les N soirées où un couple champion–challenger valide existe ; lis `:59` et `:94-95` pour confirmer le sens) : `souvent` = 1, `normal` = 2 (= défaut historique), `rarement` = 4.
+2. **jeunes** : `equilibre` = historique. `fait-monter` : dans le choix des combattants de la carte principale, à égalité de score le PLUS JEUNE passe avant ; `protege-anciens` : à égalité de score le PLUS ÂGÉ passe avant. Un seul critère de départage, jamais une exclusion ; lis `mgmtPredecesseurBooker` pour trouver où se tranchent les égalités et ne change aucun score.
+3. **noms** : `jamais` = historique. `souvent` : à chaque soirée où l'effectif a une place libre, il recrute le combattant libre de plus haut renom (réutilise la mesure de renom déjà dans le code, `grep -n "renom" mgmt-*.js`) ; `parfois` : une soirée sur deux (soirée de rang pair). C'est distinct du recrutement de jeunes de `mgmtPredecesseurRecrute` : ajoute un critère `renom` à cette même fonction plutôt qu'un second mécanisme.
+4. **contrats** : `normal` = historique. `garde` : renouvelle un contrat dès qu'il lui reste 2 combats (au lieu du seuil actuel) et re-signe les sans-contrat à chaque soirée ; `laisse-filer` : ne renouvelle pas en anticipé et ne re-signe pas les sans-contrat, SAUF le champion en titre (on ne laisse pas filer la ceinture).
+5. **Où** : `mgmtPredecesseurReglages(orgId)` accepte un identifiant d'organisation OPTIONNEL. Sans argument il rend l'objet historique INCHANGÉ (c'est le défaut de l'outil de mesure : ne le change pas). Avec un `orgId` il lit `mgmtOrgIdentite(orgId).main` et traduit selon les règles 1 à 4. `mgmtPredecesseurCarteHeritee` et le moteur de passé (`mgmt-passe.js`) passent l'identifiant de l'organisation de la partie (résous le nom `m.org` par `mgmtOrgParNom`). Aucune donnée sauvegardée, `MGMT_SAVE_VERSION` inchangée.
+6. **Tests** (déterministes, sans statistique) dans `tests/mgmtPredecesseurOrganisations.test.js` : (a) `mgmtPredecesseurReglages()` sans argument est strictement égal à l'historique ; (b) les huit organisations produisent des réglages conformes à la table 1-4 (test de table) ; (c) à graine fixe que tu choisis ET que tu documentes dans le test, sur 8 soirées de prédécesseur : `titres:souvent` met strictement plus de titres en jeu que `rarement` ; `contrats:laisse-filer` renouvelle moins que `garde` ; `jeunes:fait-monter` a un âge moyen de carte principale ≤ à `protege-anciens` ; `noms:souvent` a un renom moyen de recrues ≥ à `jamais`. Si une graine ne départage pas, prends-en une autre : jamais d'assertion floue.
+7. Ajoute le test à `package.json` (`test` et `test:watch`), monte les `?v=` (`node tools/_bump.js`), `node tools/verif-versions.js origin/main`, `npm run check:rapide`, commit `Monde lot 2 T3 : ...`.
