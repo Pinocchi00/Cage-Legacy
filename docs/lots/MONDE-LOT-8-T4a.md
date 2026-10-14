@@ -1,6 +1,6 @@
-# Monde lot 8 T4a : cinq événements de coût petit, la demande restée sans réponse, le nom de la blessure
+﻿# Monde lot 8 T4a : cinq événements de coût petit, la demande restée sans réponse, le nom de la blessure
 
-**Branche** : `monde-lot-8-marques` (vérifiée : branche courante). **Prérequis** : T1 et T6 codées dans la branche. Vérifie : `grep -n "MGMT_MARQUE_FAITS" mgmt-attention.js` et `grep -n "function mgmtMarquesAllumees" mgmt-attention.js` doivent répondre. Sinon arrête-toi et écris-le dans ton compte rendu. La T2 n'est pas codée : voir §11. Cherche par nom de fonction, pas par numéro de ligne.
+**Branche** : `monde-lot-8-suite` (vérifiée : branche courante). **Prérequis** : T1 et T6 codées dans la branche. Vérifie : `grep -n "MGMT_MARQUE_FAITS" mgmt-attention.js` et `grep -n "function mgmtMarquesAllumees" mgmt-attention.js` doivent répondre. Sinon arrête-toi et écris-le dans ton compte rendu. La T2 n'est pas codée : voir §11. Cherche par nom de fonction, pas par numéro de ligne.
 
 ## 1. Objectif
 N3, N6, N7, N8 et N10 naissent comme des faits datés portant l'identifiant du combattant : ils allument la marque (T1) et passent par le budget (T6), sans jamais ouvrir de fenêtre. Une demande expirée écrit « restée sans réponse ». Le fait `injury` garde le nom de la blessure.
