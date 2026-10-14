@@ -109,3 +109,6 @@ combat ou de données des combattants extérieurs sans décision explicite.
    exigent-elles précisément ?
 8. Une interaction nouvelle est-elle attendue ? Si oui, fournir/valider sa
    planche avant de lancer le codeur.
+
+## DÉCISION du superviseur — 14/10/2026 18 h 30 : T4c (N2) est REPORTÉE après le festival
+N2 est le seul événement « gros » du lot 8 : la catégorie d'un combattant ne change jamais dans le jeu (`ligne.div` n'est affectée nulle part), donc N2 crée un système neuf qui touche classements, ceintures, traces de combat et mémoire des titres. Il n'est pas dans le minimum de la démo (lots 1 à 7 et trois premières tranches du lot 8). Les scénarios 12 et 13 qui en dépendent attendent aussi. Cette fiche reste en l'état pour plus tard ; la chaîne du lot 8 saute T4c.
