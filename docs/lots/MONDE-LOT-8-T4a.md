@@ -1,6 +1,6 @@
 # Monde lot 8 T4a : cinq événements de coût petit, la demande restée sans réponse, le nom de la blessure
 
-**Branche** : `monde-lot-8-marques` (vérifiée : branche courante). **Prérequis** : T1 et T6 codées dans la branche. Vérifie : `grep -n "MGMT_MARQUE_FAITS" mgmt-attention.js` et `grep -n "function mgmtMarquesAllumees" mgmt-attention.js` doivent répondre. Sinon arrête-toi et écris-le dans ton compte rendu. La T2 n'est pas codée : voir §11. Cherche par nom de fonction, pas par numéro de ligne.
+**Branche** : `monde-lot-8-suite` (vérifiée : branche courante). **Prérequis** : T1 et T6 codées dans la branche. Vérifie : `grep -n "MGMT_MARQUE_FAITS" mgmt-attention.js` et `grep -n "function mgmtMarquesAllumees" mgmt-attention.js` doivent répondre. Sinon arrête-toi et écris-le dans ton compte rendu. La T2 n'est pas codée : voir §11. Cherche par nom de fonction, pas par numéro de ligne.
 
 ## 1. Objectif
 N3, N6, N7, N8 et N10 naissent comme des faits datés portant l'identifiant du combattant : ils allument la marque (T1) et passent par le budget (T6), sans jamais ouvrir de fenêtre. Une demande expirée écrit « restée sans réponse ». Le fait `injury` garde le nom de la blessure.
@@ -117,3 +117,23 @@ T4b (N1, N4, N5, N11), T4c (N2), N9 (lot 9), les suites (T5), « Depuis ta derni
 1. N3 n'écrit des faits que pour les combattants du roster (la marque et la fiche ne suivent que Split) ; l'extérieur garde le constat du lendemain, sans fait. Te convient-il ?
 2. La règle du lendemain dit « entrée » seulement si le combattant était absent du classement précédent entier (un 18e devenu 12e n'est pas dit). Je la garde, pour que le fait et le lendemain restent d'accord. Dire plutôt toute entrée dans les 15 premiers ?
 3. Note de chaînage (pas une question) : la T2 n'est pas codée à l'écriture de cette fiche. Quand elle partira, son `mgmtDepuisVisite` devra appeler `mgmtMondePhrase` pour ces six genres — je l'écrirai dans la fiche T2. D'ici là, seuls « Ce qu'il demande » et « Son corps » lisent les faits T4a.
+
+## REPRISE du 14/10/2026 15 h 20 (superviseur) — état du disque, à terminer
+Le code de la tranche est ÉCRIT sur le disque (non commité) : mgmt-attention.js, mgmt-bureau.js, mgmt-contrats.js, mgmt-corps.js, mgmt-data.js, mgmt-ecran-fiche.js, mgmt-ecran-lendemain.js, mgmt-fiche-planche.js, mgmt-promesses.js, package.json, tests/mgmtMondeEvenements.test.js. NE le réécris PAS : corrige-le.
+Quatre tests de `tests/mgmtMondeEvenements.test.js` sont rouges ; ils parlent tous de l'écriture « une seule fois » (idempotence) :
+1. « N6 : la retraite du champion écrit la vacance à sa date, une seule fois » : un non-champion laisse 2 vacances au lieu de 0.
+2. « N7 : un règne dit ses caps une fois chacun » : 2 au lieu de 1 au premier passage.
+3. « une demande périmée écrit « restée sans réponse » une fois » : 2 au lieu de 1.
+4. « les six genres allument la marque et passent par le budget » : un genre n'allume pas sa marque.
+Cause probable commune : le fait est écrit deux fois (une fois par le chemin de l'événement, une fois par le chemin de rattrapage/rechargement), ou une clé d'idempotence manque. Trouve-la, corrige le CODE (jamais assouplir un test sans décision citée).
+Ensuite : `node tools/_bump.js` pour chaque fichier .js modifié (9 écarts de version signalés), `node tools/verif-versions.js origin/main`, `npm run check:rapide`, puis commit `Monde lot 8 T4a : ...` (pas `inachevé` sauf impossibilité réelle, dis alors précisément ce qui manque).
+
+## DÉCISION du superviseur — 14/10/2026 15 h 35 (suite à la relecture « À REPRENDRE »)
+1. **Chaînage avec la T2 : ACCEPTÉ.** `mgmtDepuisVisite` existe et appelle `mgmtMondePhrase` pour les six genres, comme la décision de la §5 le prévoyait. Aucune décision d'Anthony n'est nécessaire.
+2. **Libellés `Le classement`, `Une ceinture`, `Son contrat`, `Son camp` dans `MGMT_DEPUIS_LIBELLES` : ACCEPTÉS.** Ce sont des étiquettes fonctionnelles du même gabarit que les six existantes, marquées `relu:false` : Anthony les relira avec les autres textes. Ne les change pas, ne pose pas de question.
+3. **Reste à faire : trois tests rouges** dans `tests/mgmtMondeEvenements.test.js` (le test N6 est déjà réparé) :
+   - « N7 : un règne dit ses caps une fois chacun » : 2 au lieu de 1 au premier passage ;
+   - « une demande périmée écrit « restée sans réponse » une fois » : 2 au lieu de 1 ;
+   - « les six genres allument la marque et passent par le budget » : l'ensemble des genres allumés diffère de l'attendu.
+   Méthode : pour chacun, d'abord lis ce que le test fabrique (nombre de faits créés, cycle, graine). Si le CODE écrit deux fois le même fait, ajoute une clé d'idempotence (même motif que pour N6, déjà corrigé). Si c'est le TEST qui crée deux événements distincts, corrige le test et cite cette décision dans le commit. Ne conclus jamais « impossible » sans avoir lu les fonctions concernées.
+4. Puis : versions (`node tools/_bump.js`), `node tools/verif-versions.js origin/main`, `npm run check:rapide`, commit `Monde lot 8 T4a : ...`. Un commit `inachevé` n'est permis que si un test reste rouge ; dis alors lequel et pourquoi.

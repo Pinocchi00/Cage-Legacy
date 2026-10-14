@@ -318,9 +318,11 @@ test('MGMT accepter — les deux combattants passent en dossier avec une raison 
   }
   /* Lot 5 T1, décision du 02/10 : douze attributions initiales précèdent
      les interactions ; le booking laisse toujours exactement un fait. */
-  assert.equal(s.facts.length, 13);
+  /* Monde lot 8 T4b : N5 écrit un fait `challenger` par catégorie à la première ouverture de cycle (décision du superviseur du 14/10/2026) ; ce test compte les faits hors `challenger`. */
+  const horsChallenger=s.facts.filter(f=>f.k!=='challenger');
+  assert.equal(horsChallenger.length, 13);
   assert.equal(s.facts.filter(f=>f.k==='title_initial').length,12);
-  assert.equal(s.facts.at(-1).k, 'booked');
+  assert.equal(horsChallenger.at(-1).k, 'booked');
   const after = win.eval(`(function(){ const x=G.mgmt.pile.find(a=>a.id==='${o.id}'); return x?x.status:'cycle-suivant'; })()`);
   assert.ok(after==='closed'||win.eval(`G.mgmt.cycle`)===o.cycle+1, 'affaire clôturée ou cycle auto-ouvert');
 });
@@ -839,7 +841,7 @@ test('MGMT clavier chiffres — joue la réponse visible du même rang', () => {
   win.eval(`CL.mgmtOpen('k1')`);
   win.eval(`document.dispatchEvent(new KeyboardEvent('keydown',{key:'2',bubbles:true}))`);
   /* Lot 5 T1 : les douze faits initiaux restent, puis le refus. */
-  assert.equal(win.eval(`G.mgmt.facts.length`), 13, 'chiffre 2 : un seul fait de refus ajouté');
+  assert.equal(win.eval(`G.mgmt.facts.filter(f=>f.k!=='challenger').length`), 13, 'chiffre 2 : un seul fait de refus ajouté (hors challenger, N5 du lot 8 T4b)');
   assert.equal(win.eval(`G.mgmt.facts.at(-1).k`), 'refused');
   /* R4 : la troisième réponse visible est Ignorer — le clavier la joue. */
   win.eval(`(function(){
