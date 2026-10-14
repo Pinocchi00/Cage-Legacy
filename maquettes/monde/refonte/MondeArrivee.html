@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ton arrivée</title>
+<style>
+/* Socle commun des planches — valeurs portées de ui-cadre.css (MGMT_BRIEF_LOT4_CSS_CADRE) et des planches du 10/10. */
+@font-face{font-family:'Saira Extra Condensed';src:url('support/extracondensed-800.ttf') format('truetype');font-weight:800;font-display:block}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-500-latin.woff2') format('woff2');font-weight:500;font-display:block}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-500-ext.woff2') format('woff2');font-weight:500;font-display:block;unicode-range:U+0100-02FF,U+0304,U+0308,U+0329,U+1E00-1EFF}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-600-latin.woff2') format('woff2');font-weight:600;font-display:block}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-600-ext.woff2') format('woff2');font-weight:600;font-display:block;unicode-range:U+0100-02FF,U+0304,U+0308,U+0329,U+1E00-1EFF}
+:root{
+  --noir:#0D0B0B; --pan:#121010; --ligne:#252121; --blanc:#E9E6E1;
+  --rouge:#B32A1E; --rouge-vif:#E23A2B; --jaune:#F0B220;
+  --t2:rgba(233,230,225,.74); --sep:rgba(233,230,225,.16); --bord:rgba(233,230,225,.38);
+  --titre:'Saira Extra Condensed','Arial Narrow',sans-serif; --texte:'Saira Condensed','Arial Narrow',sans-serif;
+  --s:1;
+}
+html,body{margin:0;height:100%;background:var(--noir);overflow:hidden}
+.ecran{position:fixed;inset:0;overflow:hidden;background:var(--noir)}
+.stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;overflow:hidden;transform:translate(-50%,-50%) scale(var(--s));transform-origin:center center;
+  background:#171413 url('support/cendre.jpg') center/1920px 1080px no-repeat;color:var(--blanc);font-family:var(--texte);font-weight:500;line-height:1.2;user-select:none}
+.stage *{box-sizing:border-box}
+:where(.stage) button{appearance:none;margin:0;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-align:left;background:none}
+.stage button:focus-visible,.stage .focus{outline:3px solid var(--jaune);outline-offset:2px}
+
+/* Les deux familles */
+.T{font-family:var(--titre);font-weight:800;line-height:.8;white-space:nowrap;text-transform:uppercase}
+.lab{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--t2);white-space:nowrap;text-transform:uppercase}
+.t2{color:var(--t2)}
+.nom{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+
+/* L'en-tête */
+.entete{position:absolute;left:300px;top:20px;width:1564px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.entete-g,.entete-d{display:flex;align-items:center;gap:18px;min-width:0}
+.plaque{height:64px;padding:0 18px;border:2px solid var(--bord);background:var(--noir);display:flex;align-items:center;gap:14px;white-space:nowrap}
+.plaque .T{font-size:56px;line-height:.69}
+.plaque.petite .T{font-size:40px}
+.plaque .lab{color:var(--blanc);font-size:24px}
+.entete-lib{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.rouge{color:var(--rouge-vif)}
+
+/* La barre des sections : douze entrées de 69 px */
+.barre{position:absolute;left:0;top:0;width:260px;height:1080px;background:var(--noir);border-right:2px solid var(--bord);display:flex;flex-direction:column}
+.barre-logo{height:128px;flex:none;padding:0 22px;border-bottom:2px solid var(--sep);display:flex;align-items:center}
+.logo{display:inline-flex;align-items:center;gap:11px}
+.logo-mots{display:flex;flex-direction:column;gap:3px}
+.logo-mots b{font-family:var(--titre);font-weight:800;font-size:38.3px;line-height:.72}
+.logo-mots i{font-style:normal;font-family:var(--titre);font-weight:800;font-size:26px;line-height:.72}
+.sec{width:100%;height:69px;padding:0 22px 0 28px;border-bottom:2px solid var(--sep);display:flex;align-items:center;justify-content:space-between;font-family:var(--titre);font-weight:800;font-size:32px;line-height:1;white-space:nowrap}
+.sec.on{background:var(--blanc);color:var(--noir)}
+.sec-bas{margin-top:auto;border-top:2px solid var(--sep)}
+.sec-bas .sec{height:60px}
+.logo-seul{position:absolute;left:22px;top:20px}
+
+/* Le contenu */
+.contenu{position:absolute;left:300px;top:128px;width:1564px;height:856px}
+.contenu.large{left:56px;width:1808px}
+
+/* Le panneau : filet 2 px, liseré 5 px, coins coupés */
+.pan{--b:rgba(233,230,225,.5);display:flex;background:var(--b);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);min-width:0;min-height:0}
+.pan.choisi{--b:var(--blanc)}
+.pan>.p2{flex:1;min-width:0;display:flex;background:var(--noir);padding:5px;clip-path:polygon(17px 0,100% 0,100% calc(100% - 17px),calc(100% - 17px) 100%,0 100%,0 17px)}
+.pan>.p2>.p3{flex:1;min-width:0;background:var(--pan);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:15px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.pan-tete{display:flex;justify-content:space-between;align-items:flex-start;flex:none;gap:12px}
+.pan-titre{display:flex;flex-direction:column;gap:12px}
+.pan-titre .T{font-size:40px;line-height:.75}
+.trait{width:56px;height:8px;background:var(--rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.pan-tete .lab{color:var(--t2)}
+
+/* La tuile */
+.tuile{background:var(--ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
+.tuile .lab{color:var(--t2)}
+.tuile .T{font-size:40px}
+.tuile .s{font-size:22px;line-height:1;color:var(--t2);white-space:nowrap}
+
+/* Les lignes */
+.sous{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--t2);white-space:nowrap;text-transform:uppercase;flex:none}
+.ligne{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--sep);padding:9px 0;flex:none;min-width:0}
+.l1{font-size:24px;line-height:1.05}
+.l2{font-size:22px;line-height:1.05;color:var(--t2)}
+.col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.oct{flex:none;background:var(--rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.carte-l{background:var(--ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex:none;min-width:0}
+.aller{font-family:var(--titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--jaune);flex:none}
+
+/* L'action principale */
+.jaune-bloc{flex:none;background:var(--jaune);color:var(--noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.jaune-bloc .lab{color:var(--noir)}
+.jaune-bloc .T{font-size:44px;line-height:.85}
+.jaune-bloc .k{border-color:var(--noir);color:var(--noir);font-size:22px}
+.bouton{height:60px;padding:0 20px;background:var(--ligne);color:var(--blanc);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);display:inline-flex;align-items:center;gap:14px;white-space:nowrap}
+.bouton.jaune{background:var(--jaune);color:var(--noir)}
+.bouton .k{border-color:currentColor;color:inherit}
+.bouton .T{font-size:34px;line-height:1}
+
+/* Les touches */
+.touches{position:absolute;left:300px;top:1010px;height:48px;display:flex;align-items:center;gap:28px;font-size:24px;line-height:1;white-space:nowrap}
+.touches.large{left:56px}
+.tg{display:flex;align-items:center;gap:10px}
+.k{border:2px solid var(--blanc);color:var(--blanc);padding:5px 9px;font-size:24px;line-height:1;white-space:nowrap}
+.k.j{border-color:var(--jaune);color:var(--jaune)}
+
+/* Les états : un seul visible à la fois (?etat=…) */
+[data-etat]:not(.vis){display:none!important}
+
+</style>
+</head>
+<body data-etats="premiere sans-passe">
+
+<style>
+.ar{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;gap:16px}
+.ar-bande{height:140px;flex:none;background:var(--pan);border:2px solid var(--bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.ar-bande-g{display:flex;align-items:center;gap:26px;min-width:0}
+.ar-bande-g>.T{font-size:120px;line-height:.69}
+.ar-bande-g .col{gap:10px}
+.ar-bande-g .l1{font-size:26px}
+.ar-qui{font-size:30px;line-height:1;font-weight:600}
+.ar-tuiles{display:flex;gap:10px}
+.ar-tuiles .tuile{width:220px;height:112px}
+.ar-cols{flex:1;min-height:0;display:flex;gap:16px}
+.ar-cols>.pan{min-width:0}
+.ar-c1{flex:0 0 540px}.ar-c2{flex:0 0 600px}.ar-c3{flex:1}
+.ar-chiffres{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
+.ar-chiffres .tuile{height:92px;gap:12px}
+.ar-chiffres .v{font-family:var(--titre);font-weight:800;font-size:52px;line-height:.72;white-space:nowrap}
+.bloc{display:flex;flex-direction:column;gap:8px;flex:none;min-width:0}
+.bloc .l1{font-size:24px;line-height:1.1}
+.ch-l{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--sep);padding:7px 0;flex:none;min-width:0}
+.ch-l .div{width:200px;flex:none;font-size:22px;line-height:1;color:var(--t2);white-space:nowrap}
+.ch-l .n{flex:1;min-width:0;font-size:24px;line-height:1;white-space:nowrap}
+.ch-l .d{flex:none;font-size:22px;line-height:1;color:var(--t2);white-space:nowrap}
+.ch-l .oct{width:18px;height:18px}
+.ar-c2 .carte-l{margin-top:auto}
+.ar-pas{display:flex;flex-direction:column;gap:10px}
+.ar-pas .carte-l .l1{font-size:24px}
+.ar-num{font-family:var(--titre);font-weight:800;font-size:40px;line-height:.8;width:34px;flex:none}
+</style>
+<div class="ecran"><div class="stage">
+  <div class="logo-seul"><div class="logo"><svg width="64" height="64" viewBox="0 0 400 400" fill="none" role="img" aria-label="L’octogone rouge gravé" style="flex:none"><path d="M292.0 238.1L238.1 292.0L161.9 292.0L108.0 238.1L108.0 161.9L161.9 108.0L238.1 108.0L292.0 161.9Z" stroke="#E23A2B" stroke-width="15.0"/><path d="M331.0 254.3L254.3 331.0L145.7 331.0L69.0 254.3L69.0 145.7L145.7 69.0L254.3 69.0L331.0 145.7Z" stroke="#E23A2B" stroke-width="21.0"/><path d="M371.0 270.8L270.8 371.0L129.2 371.0L29.0 270.8L29.0 129.2L129.2 29.0L270.8 29.0L371.0 129.2Z" stroke="#E23A2B" stroke-width="12.0"/></svg><div class="logo-mots"><b>CAGE</b><i>LEGACY</i></div></div></div>
+  <div class="entete">
+    <div class="entete-g"><div class="plaque"><span class="T">MANAGEMENT</span></div><div class="entete-lib">Ton arrivée</div></div>
+    <div class="entete-d">
+      <div style="font-size:24px;line-height:1;color:var(--t2);white-space:nowrap">Dans 35 jours</div>
+      <div class="plaque"><span class="T" style="font-size:40px">16 FÉVRIER</span><span class="lab">FORUM DE MONTPELLIER</span></div>
+      <div class="plaque"><span class="T">SPLIT FIGHT NIGHT</span><span class="T rouge" data-etat="premiere">63</span><span class="T rouge" data-etat="sans-passe">1</span></div>
+    </div>
+  </div>
+
+  <main class="ar">
+    <div class="ar-bande">
+      <div class="ar-bande-g">
+        <div class="T">SPLIT</div>
+        <div class="col">
+          <div class="lab">Lyon · depuis 2004</div>
+          <div class="ar-qui">Tu es le nouveau matchmaker de Split.</div>
+          <div class="l1 t2">Mardi 12 janvier 2027, ton premier jour.</div>
+        </div>
+      </div>
+      <div class="ar-tuiles">
+        <div class="tuile"><div class="lab">Ton prédécesseur</div><div class="T">KADER MALIKA</div><div class="s">Parti à la retraite</div></div>
+        <div class="tuile"><div class="lab">Ton adjointe</div><div class="T">LEÏLA</div><div class="s">Sa fille</div></div>
+        <div class="tuile"><div class="lab">Ta première soirée</div><div class="T">DANS 35 J</div><div class="s" data-etat="premiere">Split Fight Night 63</div><div class="s" data-etat="sans-passe">Split Fight Night 1</div></div>
+      </div>
+    </div>
+
+    <div class="ar-cols">
+      <!-- 1 · Ce que Split a vécu -->
+      <div class="pan ar-c1"><div class="p2"><div class="p3">
+        <div class="pan-tete"><div class="pan-titre"><div class="T" data-etat="premiere">SIX ANS AVANT TOI</div><div class="T" data-etat="sans-passe">SPLIT AUJOURD’HUI</div><div class="trait"></div></div><div class="lab" data-etat="premiere">2021 → 2026</div></div>
+        <div class="ar-chiffres" data-etat="premiere">
+          <div class="tuile"><div class="v">62</div><div class="lab">Soirées</div></div>
+          <div class="tuile"><div class="v">558</div><div class="lab">Combats</div></div>
+          <div class="tuile"><div class="v">40</div><div class="lab">Champions couronnés</div></div>
+          <div class="tuile"><div class="v">164</div><div class="lab">Blessures</div></div>
+        </div>
+        <div class="bloc"><div class="sous">Ce qu’on en dit</div><div class="l1">Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.</div></div>
+        <div class="ligne"><div class="sous">Sa rivale</div><div class="l1">Garden of Blood</div></div>
+        <div class="bloc" data-etat="premiere"><div class="sous">Une rivalité en cours</div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Tidiane Bazin</span> et <span class="nom">Wout Theys</span></div><div class="l2">Une victoire chacun · le troisième combat</div></div></div></div>
+        <div class="bloc"><div class="sous">Les blessés</div>
+          <div class="carte-l" data-etat="premiere"><div class="col"><div class="l1">32 combattants indisponibles</div><div class="l2">Le plus long : <span class="nom">Tom Dupré</span>, 5 soirées</div></div><div class="aller">Effectif ›</div></div>
+          <div class="carte-l" data-etat="sans-passe"><div class="col"><div class="l1">8 combattants indisponibles</div></div><div class="aller">Effectif ›</div></div></div>
+      </div></div></div>
+
+      <!-- 2 · Ses champions -->
+      <div class="pan ar-c2"><div class="p2"><div class="p3">
+        <div class="pan-tete"><div class="pan-titre"><div class="T">SES DOUZE CHAMPIONS</div><div class="trait"></div></div><div class="lab">Aujourd’hui</div></div>
+        <div data-etat="premiere">
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche</div><div class="n"><span class="nom">Grégoire Zanetti</span></div><div class="d">depuis 2024</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq</div><div class="n"><span class="nom">Musa Batirov</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume</div><div class="n"><span class="nom">Thomas Courtois</span></div><div class="d">depuis 2022</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids léger</div><div class="n"><span class="nom">Michał Król</span></div><div class="d">depuis 2022</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-moyen</div><div class="n"><span class="nom">Kai Mahoney</span></div><div class="d">depuis 2025</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids moyen</div><div class="n"><span class="nom">Marc Pottier</span></div><div class="d">depuis 2025</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-lourd</div><div class="n"><span class="nom">Eli Drake</span></div><div class="d">depuis 2024</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids lourd</div><div class="n"><span class="nom">Nolan Fontaine</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids paille féminin</div><div class="n"><span class="nom">Alice Hughes</span></div><div class="d">depuis 2025</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche féminin</div><div class="n"><span class="nom">Ekaterine Janelidze</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq féminin</div><div class="n"><span class="nom">Julie Pagès</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume féminin</div><div class="n"><span class="nom">Saoirse Fahey</span></div><div class="d">depuis 2023</div></div>
+        </div>
+        <div data-etat="sans-passe">
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche</div><div class="n"><span class="nom">Grégoire Zanetti</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq</div><div class="n"><span class="nom">Guillaume Foucher</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume</div><div class="n"><span class="nom">Said Salikhov</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids léger</div><div class="n"><span class="nom">Junya Toda</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-moyen</div><div class="n"><span class="nom">Gaël Stassen</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids moyen</div><div class="n"><span class="nom">Fabio Rizzo</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-lourd</div><div class="n"><span class="nom">Sean Olson</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids lourd</div><div class="n"><span class="nom">Elias Hartmann</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids paille féminin</div><div class="n"><span class="nom">Valentina Ricci</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche féminin</div><div class="n"><span class="nom">Poppy Herbert</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq féminin</div><div class="n"><span class="nom">Aïcha Picard</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume féminin</div><div class="n"><span class="nom">Thaís Magalhães</span></div></div>
+        </div>
+        <div class="carte-l" data-etat="premiere"><div class="col"><div class="l1">Le plus long règne : <span class="nom">Michał Król</span></div><div class="l2">Poids léger · champion depuis 2022 · 10 défenses</div></div><div class="aller">Ceintures ›</div></div>
+        <div class="carte-l" data-etat="sans-passe"><div class="col"><div class="l1">Toutes les ceintures et leurs règnes</div></div><div class="aller">Ceintures ›</div></div>
+      </div></div></div>
+
+      <!-- 3 · Ce qu'il t'a laissé, et la première chose à faire -->
+      <div class="pan ar-c3"><div class="p2"><div class="p3">
+        <div class="pan-tete"><div class="pan-titre"><div class="T" data-etat="premiere">CE QU’IL T’A LAISSÉ</div><div class="T" data-etat="sans-passe">PAR OÙ COMMENCER</div><div class="trait"></div></div></div>
+        <div class="jaune-bloc focus">
+          <div class="lab">La prochaine chose à faire</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:16px"><div class="T">Ouvrir la carte</div><div class="k" style="font-size:24px">Entrée</div></div>
+          <div style="font-size:24px;line-height:1.1" data-etat="premiere">Kader Malika a signé 2 combats. Il en manque 3 en carte principale.</div>
+          <div style="font-size:24px;line-height:1.1" data-etat="sans-passe">Il manque 5 combats en carte principale.</div>
+        </div>
+        <div class="bloc" data-etat="premiere"><div class="sous">Ses promesses · 3</div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Tidiane Bazin</span> : le troisième combat</div><div class="l2">Au plus tard : ta première soirée</div></div><div class="aller">Décider ›</div></div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Doriane Etienne</span> : la carte principale</div><div class="l2">Au plus tard : Split Fight Night 64</div></div><div class="aller">Décider ›</div></div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Teerapat Chantarasri</span> : un classé</div><div class="l2">Au plus tard : Split Fight Night 65</div></div><div class="aller">Décider ›</div></div>
+        </div>
+        <div class="bloc" data-etat="premiere"><div class="sous">Ses contrats qui finissent · 4</div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Dupré</span>, <span class="nom">Stepanov</span>, <span class="nom">Reeves</span> et <span class="nom">Lira</span></div><div class="l2">Un dernier combat à leur contrat</div></div><div class="aller">Contrats ›</div></div>
+        </div>
+        <div class="bloc ar-pas" data-etat="sans-passe"><div class="sous">Tes premiers pas</div>
+          <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">1</div><div class="l1">Ouvre la Carte : cinq combats à composer.</div></div>
+          <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">2</div><div class="l1">Laisse Leïla proposer, ou choisis toi-même.</div></div>
+          <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">3</div><div class="l1">Quand la carte est complète, pose la soirée au Calendrier.</div></div>
+        </div>
+      </div></div></div>
+    </div>
+  </main>
+
+  <div class="touches large">
+    <div class="tg"><span class="k">↑</span><span class="k">↓</span><span>Choisir</span></div>
+    <div class="tg"><span class="k">Tab</span><span>Bloc suivant</span></div>
+    <div class="tg"><span class="k">Échap</span><span>Aller à l’accueil</span></div>
+    <div class="tg"><span class="k j">Entrée</span><span>Ouvrir</span></div>
+  </div>
+</div></div>
+
+<script>
+"use strict";
+/* Socle commun des planches : la mise à l'échelle du jeu (mfAjuste), le choix de l'état (?etat=…), et le contrôle (?audit=1). */
+(function(){
+  const q=new URLSearchParams(location.search);
+  function ajuste(){
+    const s=Math.min(innerWidth/1920,innerHeight/1080);
+    document.documentElement.style.setProperty('--s',String(Math.round(s*10000)/10000));
+  }
+  addEventListener('resize',ajuste); ajuste();
+
+  /* Les états : l'URL choisit, sinon le premier listé dans <body data-etats>. */
+  const etats=(document.body.dataset.etats||'').split(' ').filter(Boolean);
+  const etat=q.get('etat')&&etats.includes(q.get('etat'))?q.get('etat'):etats[0];
+  document.body.dataset.etat=etat;
+  for(const el of document.querySelectorAll('[data-etat]')){
+    if(el.dataset.etat.split(' ').includes(etat)) el.classList.add('vis');
+  }
+  window.PLANCHE={etat,q};
+
+  /* Le contrôle : texte sous 22 px, texte hors de son bloc, textes qui se chevauchent. */
+  function audit(){
+    const stage=document.querySelector('.stage'), s=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--s'))||1;
+    const err=[], textes=[];
+    const W=document.createTreeWalker(stage,NodeFilter.SHOW_TEXT);
+    const BLOCS='.p3,.tuile,.jaune-bloc,.carte-l,.bouton,.plaque,.sec,.k,.zone,.stage';
+    let n;
+    while((n=W.nextNode())){
+      if(!n.nodeValue.trim()) continue;
+      const el=n.parentElement; if(!el||!el.getClientRects().length) continue;
+      const cs=getComputedStyle(el); if(cs.visibility==='hidden'||+cs.opacity===0) continue;
+      const fs=parseFloat(cs.fontSize);
+      const quoi=n.nodeValue.trim().slice(0,40);
+      if(fs<22) err.push(`taille ${fs}px : « ${quoi} »`);
+      const r=document.createRange(); r.selectNodeContents(n);
+      /* L'encre des lettres, pas la boîte de la police : ±0,42 em autour du centre de la ligne (capitales et descendantes). */
+      const demi=0.42*fs*s;
+      const rects=[...r.getClientRects()].filter(x=>x.width>0).map(x=>{ const c=(x.top+x.bottom)/2; return {left:x.left,right:x.right,top:c-demi,bottom:c+demi}; });
+      const bloc=el.closest(BLOCS)||stage, b=bloc.getBoundingClientRect();
+      for(const x of rects){
+        if(x.left<b.left-1||x.right>b.right+1||x.top<b.top-1||x.bottom>b.bottom+1) err.push(`déborde de ${bloc.className.split(' ')[0]||'bloc'} : « ${quoi} » (${Math.round((x.right-b.right)/s)} px à droite, ${Math.round((x.bottom-b.bottom)/s)} px en bas)`);
+        textes.push({x,quoi,el});
+      }
+    }
+    for(let i=0;i<textes.length;i++) for(let j=i+1;j<textes.length;j++){
+      const a=textes[i].x, c=textes[j].x;
+      const w=Math.min(a.right,c.right)-Math.max(a.left,c.left), h=Math.min(a.bottom,c.bottom)-Math.max(a.top,c.top);
+      if(w>2*s&&h>4*s) err.push(`chevauchement : « ${textes[i].quoi} » / « ${textes[j].quoi} »`);
+    }
+    window.__audit={etat,textes:textes.length,erreurs:err};
+    document.body.setAttribute('data-audit',JSON.stringify(window.__audit));
+    document.title=(err.length?'AUDIT '+err.length+' ERREUR(S) — ':'AUDIT OK — ')+document.title;
+    console.log(JSON.stringify(window.__audit,null,1));
+    return window.__audit;
+  }
+  window.PLANCHE.audit=audit;
+  if(q.get('audit')==='1') (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(audit,50));
+})();
+
+</script>
+</body>
+</html>
