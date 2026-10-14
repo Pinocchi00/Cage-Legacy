@@ -1,5 +1,3 @@
-STOP
-
 # Monde lot 8 T4b — événements moyens N1, N4, N5, N11
 
 **Branche** : `monde-lot-8-suite` (branche courante vérifiée). Prérequis : T1, T6 et T4a présents. Si `mgmtMondeApresSoiree`, `mgmtMondeOuvreCycle` et les genres T4a de `MGMT_MARQUE_FAITS` manquent, STOP et signaler le prérequis absent. Lis les fonctions par leur nom : les numéros de ligne évoluent.
@@ -80,3 +78,10 @@ N2 et sa montée/descente de catégorie (T4c), N9 (lot 9), T5 suites, T7 passé,
 - **STOP — N1 :** « trois soirées avant » désigne-t-il trois ouvertures de cycle avant la soirée où l'âge atteint le seuil, ou trois soirées effectivement combattues par ce combattant ? Le code distingue ces horloges.
 - **STOP — N5 :** le brief/inventaire dit qu'un challenger « se déclare », mais ne précise pas si cela doit arriver automatiquement au premier cycle de chaque règne, quand le prétendant change, ou à une autre occasion ; quelle condition de naissance fait foi ?
 - **STOP — N11 :** « un réveil par an » : année calendaire via `m.cal.jour`, ou tranche fixe de 12 cycles ? Et pour les déclencheurs de titre/blessure, quel est l'ancien combat concerné si le combattant a plusieurs combats historiques avec le même adversaire ?
+
+## DÉCISION du superviseur — 14/10/2026 16 h 20 (réponses aux trois STOP ; Anthony laisse le technique à Claude)
+Le STOP de tête est périmé. Les trois questions sont tranchées, code sans demander :
+- **N1 « trois soirées avant »** = trois cycles, donc trois ouvertures de cycle avant le cycle où le combattant atteint l'âge de retraite calculé (`mgmtRetireAge`). Un cycle = une soirée du calendrier ; on ne compte pas les combats du combattant. Le fait `retraite_annoncee` est écrit à l'ouverture du cycle `seuil − 3`, une seule fois par combattant (garde sur `a`), et si le combattant est déjà plus près du seuil à la première lecture (partie chargée tard, rattrapage), il est annoncé UNE fois, jamais en série.
+- **N5** : le challenger se déclare automatiquement à l'ouverture du premier cycle où `mgmtPretendant` donne un prétendant distinct du champion pour un règne en cours, et de nouveau si le prétendant change ou si un nouveau règne commence. Clé unique : (div, champion, since, challenger). Titre vacant : aucune déclaration.
+- **N11** : « un réveil par an » = une tranche fixe d'une année de jeu, `Math.round(MGMT_EXT_YEAR_WEEKS/MGMT_EVENT_WEEKS)` cycles (10 aujourd'hui, à calculer depuis les constantes existantes, pas à écrire en dur) ; la clé est (paire triée, index du combat, `Math.floor(cycle/ANNEE)`). **Ancien combat concerné** : le combat le plus RÉCENT de la paire parmi ceux vieux de plus de `MGMT_RIVALITE_CYCLES` cycles (12) ; s'il n'y en a pas, aucun réveil. Les combats de moins de 12 cycles restent couverts par S36/S37, ne les double pas.
+Tu n'as aucune question à poser à Anthony.
