@@ -34,11 +34,12 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
      Décision du lot 2 T2 : le tirage des pays et des noms (mgmtOrgPaysPoids, mgmtPaysTire, MGMT_NOMS_AJOUTS) change les empreintes
      de création ; recalculées le 12/10/2026. La vraie propriété reste : même graine → même résultat (test 2), et sans option
      de passé, aucun effet de passé (mgmtNewRoster(m,{}) = mgmtNewRoster(m), ci-dessous). */
+  /* Décision du lot 8 T4a/T4b (14/10/2026) : les événements de coût petit écrivent de nouveaux faits (top15, challenger, caps de règne, nom de la blessure…) à la création et pendant les soirées : les empreintes de l'état complet sont recalculées ; la propriété gardée est inchangée (déterminisme, aucun état annexe). */
   const AVANT = {
-    'split|20261008': 'b21af921ac61f66f', 'split|20261009': '822ff68c20ecc9bf',
-    'ultimate-rim|20261008': 'b5e4a39517f83a4e', 'ultimate-rim|20261009': 'aff68002e268ee1a',
-    'fighting-pacific-championship|20261008': 'a48641fbc7bd0e3e', 'fighting-pacific-championship|20261009': 'ddc0dcc1ef8f5b79',
-    jouee3: '76424b29907c76a0',
+    'split|20261008': '31abaa7c00b38434', 'split|20261009': '82a96070f0d2b745',
+    'ultimate-rim|20261008': 'b70e328738b18c86', 'ultimate-rim|20261009': 'edeb7ea7b9ca440b',
+    'fighting-pacific-championship|20261008': 'f134107bbe74c713', 'fighting-pacific-championship|20261009': '0f29d777f2ba79d7',
+    jouee3: '4ad99fd1034adb64',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -280,7 +281,7 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
      (mgmtPickBulkPair, mgmtEligiblePairs et mgmtCartRows lisent une fois par combattant ce qu'ils lisaient une fois par paire). */
   /* Décision du lot 2 T2 : empreintes recalculées le 12/10/2026 (le tirage des pays et des noms décale le flux du RNG de création) ;
      la propriété gardée est inchangée : la version optimisée est déterministe et le calcul ne dépend d'aucun état annexe. */
-  const AVANT = { 20261008: '27c5eb0e634b437b', 20261009: '68e82338c8690944' };
+  const AVANT = { 20261008: '52cc8a69a2b66562', 20261009: '352baed12adca993' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });
