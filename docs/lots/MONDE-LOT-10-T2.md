@@ -73,3 +73,7 @@ Aucune question bloquante restante : planche et écarts sont tranchés dans `MON
 
 ## RAPPEL du superviseur — 14/10/2026 19 h 15
 Tu n'appelles AUCUN sous-agent (@eclaireur, @ecrivain, @verif, @relecteur sont inaccessibles depuis toi). Lis le code toi-même, écris les textes toi-même, lance toi-même `node tools/verif-versions.js origin/main` puis `npm run check:rapide` (ou les tests ciblés `node --test tests/<fichier>` si le lancement en bloc échoue), et commite. Le superviseur relit et compare à la planche.
+
+
+## PRÉCISION du superviseur — 14/10/2026 19 h 35 (ceci n'est PAS une contradiction avec ta méthode)
+Ta méthode prévoit d'appeler `@verif` et `@relecteur`. Ils sont INDISPONIBLES depuis toi (limite de profondeur des sous-agents). La procédure de repli est celle que le chef t'a déjà donnée : lance toi-même `node tools/verif-versions.js origin/main` puis `npm run check:rapide` (ou les tests ciblés), puis commite. Exécute ce repli et CONTINUE : ne t'arrête jamais pour cette raison.

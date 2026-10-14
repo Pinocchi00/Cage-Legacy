@@ -18,3 +18,7 @@ Aucun texte sous 22 px, rien ne déborde ni ne se superpose à 1280 / 1440 / 192
 
 ## Règle pour toutes les fiches du lot 10 (ajoutée le 14/10 19 h 15)
 Une fiche ne demande JAMAIS d'appeler un sous-agent (@ecrivain, @eclaireur, @verif, @relecteur) : le codeur ne peut pas les appeler (« subagent depth limit reached »). Les textes fixes sont copiés du LISEZ-MOI des planches, marqués `relu:false`. La vérification se fait par `node tools/verif-versions.js origin/main` et `npm run check:rapide` lancés par le codeur lui-même.
+
+
+## PRÉCISION du superviseur — 14/10/2026 19 h 35 (ceci n'est PAS une contradiction avec ta méthode)
+Ta méthode prévoit d'appeler `@verif` et `@relecteur`. Ils sont INDISPONIBLES depuis toi (limite de profondeur des sous-agents). La procédure de repli est celle que le chef t'a déjà donnée : lance toi-même `node tools/verif-versions.js origin/main` puis `npm run check:rapide` (ou les tests ciblés), puis commite. Exécute ce repli et CONTINUE : ne t'arrête jamais pour cette raison.
