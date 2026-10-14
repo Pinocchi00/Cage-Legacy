@@ -40,7 +40,7 @@ Tous les faits nouveaux portent `c` (cycle courant), `k`, `a` (id roster), et le
 Non. `MGMT_SAVE_VERSION` inchangée : les événements sont des faits append-only de `m.facts`. Aucun bloc de validation strict : les sauvegardes anciennes restent valides et les anciens faits incomplets ne doivent pas être rejetés. Vérifier qu'un rechargement conserve les nouveaux faits et leurs marques.
 
 ## 5. Textes
-Commande à passer à `@ecrivain` : « Écris 6 gabarits courts pour `MGMT_MONDE_PHRASES` dans `mgmt-data.js`, marqués `relu:false`, en français, phrases naturelles de fiche à la troisième personne, accords au féminin gérés au rendu par `{Il}`/`{il}`/`{lui}`. Variables : N1 annonce de retraite `{age}` ; N4 dépassement `{depasse}` et `{div}` ; N5 déclaration du challenger `{champion}` et `{div}` ; N11 vieux combat `{adv}` et `{raison}`. Fournis une phrase par événement, sauf N11 qui a trois variantes de raison (voisins, titre, retour de blessure), soit 6 gabarits au total. Variables seulement : aucun nom à inventer. Source de données : `MGMT_MONDE_PHRASES` dans `mgmt-data.js`, consommé par `mgmtMondePhrase(m,x)`. » Le codeur n'écrit ni ne retouche les formulations.
+Les six gabarits sont DÉJÀ ÉCRITS : ils sont dans la section « TEXTES livrés par Claude » en bas de cette fiche. N'appelle AUCUN sous-agent (@ecrivain est inaccessible depuis le codeur : « subagent depth limit reached »). Copie les six gabarits tels quels dans `MGMT_MONDE_PHRASES`, là où il vit déjà.
 
 ## 6. Écran
 Aucun nouvel écran ni planche : réutiliser la fiche existante. Aucun popup, défilé ni minuterie.
