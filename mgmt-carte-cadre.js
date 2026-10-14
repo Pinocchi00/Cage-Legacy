@@ -114,8 +114,9 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
       +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span><em>${esc(mgmtCarteCourt(fa?fa.div:''))}</em>${force?`<button type="button" class="mf-car-titre on" aria-pressed="true" disabled title="Le champion ne combat que pour sa ceinture">TITRE EN JEU</button>`      :((titre||mgmtCanTitle(m,fight))?`<button type="button" class="mf-car-titre${titre?' on':''}" aria-pressed="${titre}" onclick="CL.mgmtTitle(${i},${!titre})">${titre?'TITRE EN JEU':'SANS TITRE'}</button>`:'')}</div>`
       +`<div class="mf-car-slot-n" title="Modifier ce combat" onclick="CL.mgmtCarteModifie(${i})"><b>${esc(mfNet(fa?(fa.last||fa.name):'?'))}</b>${mfMarqueNom(m,fa&&fa.id)}<span>contre</span><b>${esc(mfNet(fb?(fb.last||fb.name):'?'))}</b>${mfMarqueNom(m,fb&&fb.id)}</div>`+provenance
       /* ==== [ANCRE: MONDE_LOT5_T4_ACTION] — Monde lot 5 T4 ==== */
-      +(fight.herite===true?`<button type="button" class="mf-car-annule" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtUnbook(${i})">${esc(MGMT_CARTE_ANNULATION.action)} [X]</button>`:'')+`</div>`
-      +`<div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
+      +(fight.herite===true?`<button type="button" class="mf-car-annule" onkeydown="if(event.key==='Enter'||event.key===' ')event.stopPropagation()" onclick="CL.mgmtUnbook(${i})">${esc(MGMT_CARTE_ANNULATION.action)} [X]</button>`:'')
+      /* ==== [ANCRE: MGMT_PRESENTATION_CARTE_SLOT] — Monde lot 3 T5 ==== */
+      +`<button type="button" class="mf-pr-entree" onclick="CL.mgmtCartePresentation(${i})">Présentation</button></div><div class="mf-car-slot-s">${MF_SVG_CONFIRME}<button type="button" class="mf-car-retire" aria-label="Retirer ce combat" onclick="CL.mgmtUnbook(${i})">×</button></div></div>`;
   }
   const pre=etatMain.pre===i;
   const pa=pre?mgmtFighterById(m,MGMT_CART.pick):null, pb=pre?etatMain.vise:null;
@@ -202,7 +203,8 @@ function scr_mgmt_carte_cadre(){
       :(!pickF&&vise&&mgmtSelectable(m,vise,null)&&!plein?mfBouton('Choisir ce combattant',{touche:'Entrée',jaune:true,onclick:`CL.mgmtPick('${esc(vise.id)}')`}):''))
     +(pickF?mfBouton('Retour',{touche:'Échap',onclick:'CL.mgmtCarteLeave()'}):'')
     +(pickF&&mgmtAgendaActif(m)?mfBouton('Proposer',{touche:'D',onclick:'CL.mgmtCarteProposer()'}):'')
-    +(A?mfBouton('Sa fiche',{touche:'F',onclick:`CL.mgmtCarteFiche()`}):'')+`</div>`;
+    /* ==== [ANCRE: MGMT_PRESENTATION_CARTE_VISE] — Monde lot 3 T5 ==== */
+    +(A?mfBouton('Présentation',{onclick:'CL.mgmtCartePresentation()'})+mfBouton('Sa fiche',{touche:'F',onclick:`CL.mgmtCarteFiche()`}):'')+`</div>`;
   const centre=`<div class="mf-car-c">${mgmtCarteBanniere(A,B,A?A.div:mgmtCarteDiv(m),rounds,pickF?'CL.mgmtCarteLeave()':'')}`
     +mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${prop?`<div class="mf-car-prop mf-ancien">${prop}</div>`:''}${faits}${boutons}`,'normal','mf-car-cmp')+`</div>`;
 
@@ -254,6 +256,13 @@ Object.assign(CL,{
     const f=mgmtCarteListe(m)[MGMT_CART.cursor||0];
     const i=f?m.card.main.findIndex(t=>t.herite===true&&(t.a===f.id||t.b===f.id)):-1;
     if(i>=0) CL.mgmtCarteAnnule(i,false);
+  },
+  /* ==== [ANCRE: MGMT_PRESENTATION_CARTE_GESTE] — Monde lot 3 T5 ==== */
+  mgmtCartePresentation(i){
+    const m=G.mgmt,liste=m.card.main.map(f=>({ids:[f.a,f.b]}));
+    if(Number.isSafeInteger(i)){const f=m.card.main[i];return f?CL.mgmtPresentationOuvrir('combat',[f.a,f.b],{liste}):false;}
+    const vise=mgmtCarteListe(m)[MGMT_CART.cursor||0],a=MGMT_CART.pick||vise?.id,b=MGMT_CART.pick&&vise?.id!==a?vise?.id:null;
+    return a?CL.mgmtPresentationOuvrir(b?'combat':'combattant',b?[a,b]:[a],b?{liste}:{}):false;
   },
   /** Un clic sur la liste : sans premier choix il choisit ; avec un premier choix il VISE (la confirmation se fait au bouton ou à Entrée). */
   mgmtCarteVise(id){

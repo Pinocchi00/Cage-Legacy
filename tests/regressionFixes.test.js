@@ -1358,9 +1358,12 @@ test('P8_L6_BELL_COMPAT — un beat bell hérité conserve son texte dans le rej
       log:[{r:1,phase:'bell',text:${JSON.stringify(legacyText)}},
         {r:2,phase:'debout',text:'[04:30] Le combat reprend.'}]};
     const s=areneConstruire(res,{a:'Moi',b:'Adversaire'});
-    return JSON.stringify({texte:areneMoment(s,165).texte,beats:areneBeats(res).length});
+    const beats=areneBeats(res);
+    return JSON.stringify({texte:areneMoment(s,165).texte,
+      beats:beats.filter(b=>!b.roundStart).length,cloches:beats.filter(b=>b.roundStart).length});
   })()`));
   assert.equal(result.beats,2);
+  assert.equal(result.cloches,2,'les deux ouvertures de round restent distinctes des deux événements historiques');
   assert.equal(result.texte,legacyText.replace(/^\[02:15\] /,''));
 });
 

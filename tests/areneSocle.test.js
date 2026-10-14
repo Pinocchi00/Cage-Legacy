@@ -23,7 +23,170 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { newGameWindow } = require('./helpers/loadGame');
 
+/* ==== [ANCRE: TEST_COMBAT_COHERENCE_1310_ROUNDS] — Cohérence du combat, 13/10/2026. ==== */
+test('COHÉRENCE — la cloche ouvre le round suivant même si son premier échange tarde', () => {
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`JSON.stringify((function(){
+    const res={winner:'A',method:'Décision unanime',roundStats:[{r:1},{r:2},{r:3}],log:[
+      {r:1,phase:'sol',top:'A',pos:'mount',text:'[00:10] Contrôle au sol.'},
+      {r:2,phase:'debout',text:'[04:30] Échange.'},
+      {r:3,phase:'debout',text:'[04:30] Échange.'}]};
+    return [1,7].map(echelle=>{
+      const s=areneConstruire(res,{a:'A',b:'B'},{echelle});
+      const e=areneMoment(s,307/echelle);
+      return {r:e.r,phase:e.phase,horloge:e.horloge};
+    });
+  })())`));
+  for(const e of r){ assert.equal(e.r,2); assert.equal(e.phase,'debout'); assert.ok(Math.abs(e.horloge-293)<0.01); }
+  win.close();
+});
+
+test('COHÉRENCE — la pause ramène chacun dans son coin et la reprise en repart sans saut visible', () => {
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`JSON.stringify((function(){
+    const s=areneConstruire({winner:'A',method:'Décision unanime',roundStats:[{r:1},{r:2}],log:[
+      {r:1,phase:'debout',text:'[04:59] Échange.'},{r:2,phase:'debout',text:'[04:30] Échange.'}
+    ]},{a:'A',b:'B'},{echelle:7,pause:3.4});
+    const p=s.montage.find(x=>x.genre==='pause'&&x.rNext===2);
+    const avant={...areneInstant(s,p.d0)}, fin={...areneInstant(s,p.d1-0.001)}, reprise={...areneInstant(s,p.d1)};
+    return {avant,fin,reprise,coinA:areneCoinA(),coinB:areneCoinB()};
+  })())`));
+  assert.ok(Math.hypot(r.fin.ax-r.coinA.x,r.fin.ay-r.coinA.y)<0.01,'A rejoint son coin');
+  assert.ok(Math.hypot(r.fin.bx-r.coinB.x,r.fin.by-r.coinB.y)<0.01,'B rejoint son coin');
+  assert.ok(Math.hypot(r.fin.ax-r.reprise.ax,r.fin.ay-r.reprise.ay)<0.02,'aucun saut à la reprise');
+  assert.ok(Math.hypot(r.avant.ax-r.fin.ax,r.avant.ay-r.fin.ay)>0.5,'retour au coin réellement parcouru');
+  assert.equal(r.reprise.r,2); assert.equal(r.reprise.phase,'debout');
+  assert.ok(Math.abs(r.reprise.horloge-300)<0.01);
+  win.close();
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_COMBAT_COHERENCE_1310_GESTES] — Cohérence du combat, 13/10/2026. ==== */
+test('COHÉRENCE — les examens successifs gardent une pause par round et une reprise sans téléportation', () => {
+  const win=newGameWindow();
+  const out=JSON.parse(win.eval(`JSON.stringify((function(){
+    const s=areneConstruire({winner:'A',method:'Décision unanime',roundStats:[{r:1},{r:2},{r:3}],log:[
+      {r:1,phase:'sol',top:'A',text:'[00:10] Contrôle.'}, {r:1,phase:'exam',text:'[00:00] Examen.'},
+      {r:2,phase:'sol',top:'B',text:'[00:10] Contrôle.'}, {r:2,phase:'exam',text:'[00:00] Examen.'},
+      {r:3,phase:'debout',text:'[04:30] Échange.'}
+    ]},{a:'A',b:'B'},{echelle:7});
+    return s.montage.filter(m=>m.genre==='pause').map(p=>{
+      const a={...areneInstant(s,p.d1-0.001)}, b={...areneInstant(s,p.d1)};
+      return {r:p.rNext,reprise:b.r,ecart:Math.max(Math.hypot(a.ax-b.ax,a.ay-b.ay),Math.hypot(a.bx-b.bx,a.by-b.by))};
+    });
+  })())`));
+  assert.deepEqual(out.map(x=>x.r),[2,3]);
+  for(const e of out){ assert.equal(e.r,e.reprise); assert.ok(e.ecart<0.02); }
+  win.close();
+});
+
+test('COHÉRENCE — arbitrage et adaptation ne produisent aucun coup ni impact', () => {
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`JSON.stringify((function(){
+    const out=[];
+    for(const kind of ['timeout','pointDeduction','adaptation','injury','takedownDefense']){
+      const s=areneConstruire({winner:'A',method:'Décision unanime',log:[
+        {r:1,phase:'debout',by:'op',kind,text:'[04:50] Événement sans frappe.'}
+      ]},{a:'A',b:'B'});
+      out.push({kind,action:areneMoment(s,10.1).action});
+    }
+    return out;
+  })())`));
+  for(const e of r) assert.equal(e.action,null,e.kind);
+  win.close();
+});
+
+test('COHÉRENCE — une disqualification ou un arrêt médical ne simule pas un KO', () => {
+  const win=newGameWindow();
+  const r=JSON.parse(win.eval(`JSON.stringify((function(){
+    return ['Disqualification','Arrêt médical','Blessure'].map(method=>{
+      const s=areneConstruire({winner:'B',method,round:1,log:[
+        {r:1,phase:'debout',by:'op',finish:true,method,text:'[03:00] Arrêt.'}
+      ]},{a:'A',b:'B'});
+      const e=areneMoment(s,120.1);
+      return {method,a:e.postureA,b:e.postureB,action:e.action};
+    });
+  })())`));
+  for(const e of r){ assert.equal(e.a,'debout',e.method); assert.equal(e.b,'debout'); assert.equal(e.action,null); }
+  win.close();
+});
+/* ==== [FIN ANCRE] ==== */
+
 /* Un combat réel du moteur, deux noms, une session d'arène. */
+/* ==== [ANCRE: TEST_COMBAT_COHERENCE_1310_HORLOGE] — 13/10/2026. ==== */
+test('COHÉRENCE — annonces à 1:00, 0:10 et 0:00, aux deux échelles de lecture', () => {
+  const win=newGameWindow();
+  const out=JSON.parse(win.eval(`JSON.stringify([1,7].map(echelle=>{
+    const s=areneConstruire({winner:'A',method:'Décision unanime',roundStats:[{r:1},{r:2}],log:[]},{a:'A',b:'B'},{echelle});
+    areneCoupsConstruire(s);
+    return [1,2].map(r=>({
+      minute:s.voix.some(v=>v.a===MGMT_COMMENTAIRE.minute[0].t&&Math.abs(v.t-(r*300-60)/echelle)<1e-9),
+      dix:s.voix.some(v=>v.a===MGMT_COMMENTAIRE.dix[0].t&&Math.abs(v.t-(r*300-10)/echelle)<1e-9),
+      cloche:s.voix.some(v=>v.a===MGMT_COMMENTAIRE.finRound[0].t&&Math.abs(v.t-r*300/echelle)<1e-9),
+      coin:s.coins.some(c=>MGMT_COINS.dix.includes(c.a)&&Math.abs(c.t-(r*300-10)/echelle)<1e-9)
+    }));
+  }))`));
+  for(const e of out.flat()) assert.deepEqual(e,{minute:true,dix:true,cloche:true,coin:true});
+  win.close();
+});
+
+test('COHÉRENCE — le chrono se fige à l’arrêt, les juges restent audibles après la cloche', () => {
+  const win=newGameWindow();
+  const out=JSON.parse(win.eval(`JSON.stringify((function(){
+    const stop=areneConstruire({winner:'A',method:'KO',log:[{r:1,phase:'debout',by:'me',finish:true,text:'[03:00] Arrêt.'}]},{a:'A',b:'B'},{echelle:7});
+    const horloge=areneMoment(stop,stop.dureeCombat).horloge;
+    const s=areneConstruire({winner:'A',method:'Décision unanime',roundStats:[{r:1}],log:[]},{a:'A',b:'B'},{echelle:7});
+    areneCoupsConstruire(s);
+    MGMT_COMBAT.session=s; MGMT_COMBAT.d=s.dureeAffichage; MGMT_COMBAT.fin=2.2;
+    MGMT_COMBAT.decision={decision:true}; MGMT_COMBAT.plan='cable';
+    const cx=mgmtCombatCx();
+    return {horloge,t:cx.t,fin:s.dureeCombat,voixT:cx.voixT,juges:MGMT_COMMENTAIRE.juges.some(v=>v.t===cx.voix.a)};
+  })())`));
+  assert.equal(out.horloge,180); assert.equal(out.t,out.fin);
+  assert.ok(out.voixT>out.t); assert.equal(out.juges,true);
+  win.close();
+});
+
+test('COHÉRENCE — un KO près de la cloche garde sa finition et seulement les annonces déjà franchies', () => {
+  const win=newGameWindow();
+  const out=JSON.parse(win.eval(`JSON.stringify(['00:04','00:30'].map(temps=>{
+    const s=areneConstruire({winner:'A',method:'KO',log:[{r:1,phase:'debout',by:'me',finish:true,text:'['+temps+'] Arrêt.'}]},{a:'A',b:'B'},{echelle:7});
+    areneCoupsConstruire(s);
+    return {minute:s.voix.some(v=>v.a===MGMT_COMMENTAIRE.minute[0].t),cloche:s.voix.some(v=>v.a===MGMT_COMMENTAIRE.finRound[0].t),terminal:!!s.voix[s.voix.length-1].terminal};
+  }))`));
+  for(const e of out) assert.deepEqual(e,{minute:true,cloche:false,terminal:true});
+  win.close();
+});
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: TEST_COMBAT_COHERENCE_1310_ECHANGES] — 13/10/2026. ==== */
+test('COHÉRENCE — zéro tentative reste zéro geste, zéro réussite reste zéro impact', () => {
+  const win=newGameWindow();
+  const out=JSON.parse(win.eval(`JSON.stringify((function(){
+    const zero={distAtt:0,clinchAtt:0,groundAtt:0,distStrikes:0,clinchStrikes:0,groundStrikes:0,byType:{}};
+    const faire=(A,B)=>{
+      const s=areneConstruire({winner:'A',method:'Décision unanime',roundStats:[{r:1}],log:[],stats:{A,B}},{a:'A',b:'B'},{echelle:7});
+      areneCoupsConstruire(s); return s.coups;
+    };
+    return {vide:faire(zero,zero),rates:faire({...zero,distAtt:30,byType:{jab:30}},zero)};
+  })())`));
+  assert.deepEqual(out.vide,[]);
+  assert.ok(out.rates.length>0); assert.ok(out.rates.every(c=>c.by==='A'&&c.r!==1));
+  win.close();
+});
+
+test('COHÉRENCE — un changement de nom ne réécrit pas les gestes du combat', () => {
+  const win=newGameWindow();
+  combatFrais(win,777001);
+  const out=JSON.parse(win.eval(`JSON.stringify((function(){
+    const a=areneConstruire(__res,{a:'A',b:'B'},{echelle:7}), b=areneConstruire(__res,{a:'C',b:'D'},{echelle:7});
+    areneCoupsConstruire(a); areneCoupsConstruire(b); return [a.coups,b.coups];
+  })())`));
+  assert.deepEqual(out[0],out[1]);
+  win.close();
+});
+/* ==== [FIN ANCRE] ==== */
+
 function combatFrais(win,seed){
   return win.eval(`(function(){
     setSeed(${seed});
