@@ -64,8 +64,22 @@ function blocs(){
         }
         if(m.lastEvent?.fights?.some(f=>[f.a,f.b].sort().join('|')===key))violations.revanche++;
       }
+      /* ==== [ANCRE: MONDE_LOT6_T3_POPULATION_PERSISTEE] — Monde lot 6 T3 ==== */
+      const preuves=ps.map(p=>({famille:p.raison.famille,preuve:mgmtRaisonsPourPaire(m,p.a,p.b).some(r=>JSON.stringify(r)===JSON.stringify(p.raison))}));
+      const original=mgmtBulkSelection;
+      let persiste=false;
+      try{
+        mgmtBulkSelection=()=>ps;
+        const aff=mgmtNewBulkAffair(m,new Set(),new Set(),false);
+        m.pile.push(aff);
+        const causes=JSON.stringify(ps.map(p=>p.raison));
+        persiste=JSON.stringify(aff.fights.map(f=>f.raison))===causes&&mgmtDecide(m,aff.id,'validate');
+        const recharge=mgmtParseAndValidate(mgmtSerialiser(m));
+        persiste=persiste&&JSON.stringify(m.card.prelims.map(f=>f.raison))===causes
+          &&!!recharge&&JSON.stringify(recharge.card.prelims.map(f=>f.raison))===causes;
+      }finally{mgmtBulkSelection=original;}
       blocs.push({seed,org:org.id,n,main:m.card.main.length,sizeMain:m.card.sizeMain,
-        ps:ps.map(p=>({famille:p.raison.famille,preuve:mgmtRaisonsPourPaire(m,p.a,p.b).some(r=>JSON.stringify(r)===JSON.stringify(p.raison))}))});
+        persiste,ps:preuves});
     }
     return {blocs,violations};
   })())`));
@@ -78,7 +92,7 @@ test('Monde lot 6 T2 — vingt graines et huit organisations maximisent la vari�
   for(const b of bs){assert.ok(b.ps,JSON.stringify(b));assert.equal(b.main,b.sizeMain);
     assert.equal(b.ps.length,b.n);assert.ok(new Set(b.ps.map(p=>p.famille)).size>=Math.min(6,b.n));
     for(let i=1;i<b.ps.length;i++)assert.notEqual(b.ps[i].famille,b.ps[i-1].famille);
-    assert.ok(b.ps.every(p=>p.preuve),JSON.stringify(b));}
+    assert.ok(b.ps.every(p=>p.preuve),JSON.stringify(b));assert.equal(b.persiste,true,JSON.stringify(b));}
 });
 test('Monde lot 6 T2 — sans passé sept préliminaires gardent au moins six familles',()=>{
   const b=blocs().blocs.find(b=>b.seed===20261001&&b.org==='fighting-pacific-championship');
@@ -112,8 +126,9 @@ test('Monde lot 6 T2 — une proposition neuve utilise la sélection sans change
     finally{mgmtBulkSelection=original;}
   })())`));
   assert.equal(r.calls,1);assert.ok(r.aff);assert.equal(r.aff.fights.length,r.n);
-  assert.equal(JSON.stringify(r.aff).includes('raison'),false);
-  for(const f of r.aff.fights)assert.deepEqual(Object.keys(f).sort(),['a','b','sloppy','slot','warned']);
+  /* ==== [ANCRE: MONDE_LOT6_T3_FORMAT_PERSISTE] — Monde lot 6 T3 ==== */
+  assert.equal(JSON.stringify(r.aff).includes('raison'),true);
+  for(const f of r.aff.fights){assert.deepEqual(Object.keys(f).sort(),['a','b','origine','raison','sloppy','slot','warned']);assert.equal(f.origine,'leila');}
 });
 test('Monde lot 6 T2 — le manque de familles ne produit pas de bloc partiel',()=>{
   assert.deepEqual(resultat(`setSeed(9);m.roster=[A,B];m.card.main=[];m.card.prelims=[];m.champions={};

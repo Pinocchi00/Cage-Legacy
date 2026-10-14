@@ -82,7 +82,15 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       v16 — la table des visites (m.visites, une paire d'entiers par combattant : mgmtVisitesInit, mgmt-attention.js).
       Rien à convertir sur les données : la table part pleine (tous vus) à l'instant de la migration
       (MONDE_LOT8_T1_MIGRATION, mgmt-save.js). v15 = le passé (monde lot 1 T3). Une v1 reste refusée. ==== */
-const MGMT_SAVE_VERSION=16;
+/* ==== [ANCRE: MONDE_LOT6_T3_VERSION] — Monde lot 6 T3 (Monde lot 6 T3) :
+   v17 — la preuve du choix de chaque combat de bloc et de carte
+   (f.raison {famille,fait} et f.origine 'leila'|'joueur', mgmt-carte.js,
+   mgmt-save.js). Rien à recalculer sur les données : une pile d'avant porte
+   `raison:null` (« cause non enregistrée »), jamais une justification
+   fabriquée après coup — la vraie cause historique est irrécupérable
+   (MONDE_LOT6_T3_MIGRATION). Un booking entièrement manuel reste sans champ
+   `raison`. ==== */
+const MGMT_SAVE_VERSION=17;
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;
@@ -595,7 +603,10 @@ function mgmtDecide(m,affairId,replyId){
       const key=slot==='main'?'main':'prelims';
       const cap=slot==='main'?m.card.sizeMain:m.card.sizePrelims;
       if(Number.isSafeInteger(cap)&&m.card[key].length<cap){
-        m.card[key].push({a:f.a,b:f.b,cycle:m.cycle,slot});
+        /* ==== [ANCRE: MONDE_LOT6_T3_VALIDATION_BLOC] — Monde lot 6 T3 ==== */
+        const pose={a:f.a,b:f.b,cycle:m.cycle,slot,raison:JSON.parse(JSON.stringify(f.raison))};
+        if(f.origine!==undefined) pose.origine=f.origine;
+        m.card[key].push(pose);
       }
     }
     aff.status='closed'; aff.decision='validated';

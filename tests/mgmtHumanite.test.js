@@ -76,7 +76,8 @@ test('H3 — migration 11 → 12 : chaque ancien profil et rejeu reste EXACTEMEN
         hist:hist===JSON.stringify(m.hist),rejeu:avant===JSON.stringify(mgmtReplayFight(m.hist[0]))&&avant===JSON.stringify(res),
         rng:seed===SEED,idempotent:premiere===JSON.stringify(m)};`);
     /* H4 : la même chaîne mène à l'effectifs 0 ; lot 2 du brief du 06/10 : jusqu'à la version 14. */
-    assert.deepEqual(r,{v:16,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
+    /* Monde lot 6 T3 : la preuve du choix est enregistrée (v17), la version attendue monte avec elle. */
+    assert.deepEqual(r,{v:17,valide:true,generation:true,profils:true,ext:true,hist:true,rejeu:true,rng:true,idempotent:true});
   }finally{ w.close(); }
 });
 

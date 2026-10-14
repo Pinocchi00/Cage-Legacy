@@ -212,12 +212,16 @@ function mgmtBulkReasonPairs(aptes){
 }
 
 /** Choisit les familles puis leurs paires pour un bloc neuf. @param {Object} m Partie. @param {Set<string>} used Prénoms à exclure. @param {Set<string>} seen Paires à exclure. @param {number} n Nombre de combats. @param {Object} stats Écrasements. @param {boolean} relaxed Assouplissement existant. @returns {Array<Object>|null} n résultats du picker avec raison, ou null ; ensembles fournis inchangés en cas d'échec. */
-function mgmtBulkSelection(m,used,seen,n,stats,relaxed){
+/* ==== [ANCRE: MONDE_LOT6_T3_CONTEXTE] — Monde lot 6 T3 ==== */
+/** @param {Array<Object>} [contexte=[]] Combats déjà conservés sur cette carte, dans leur ordre ; leurs raisons enregistrées initialisent les usages. */
+function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[]){
   const champions=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set();
   const aptes=m.roster.filter(f=>mgmtAvailable(m,f)&&!champions.has(f.id)
     &&!mgmtEngaged(m,f)&&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,f)));
   const index=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
   const localUsed=new Set(used), localSeen=new Set(seen), familles=new Map(), result=[];
+  for(const f of contexte) if(f.raison) familles.set(f.raison.famille,(familles.get(f.raison.famille)||0)+1);
+  let precedente=contexte[contexte.length-1]?.raison?.famille;
   let lastDiv=null, run=0;
   for(let i=0;i<n;i++){
     let p=null;
@@ -228,23 +232,23 @@ function mgmtBulkSelection(m,used,seen,n,stats,relaxed){
     }
     /* ==== [ANCRE: MONDE_LOT6_T2_VARIETE_MAXIMALE] — Monde lot 6 T2 ==== */
     // Décision du 13/10/2026 : épuiser les familles inédites avant toute
-    // reprise ; privilégier le repli, puis le moindre usage (ordre du catalogue
-    // à égalité), sans jamais reprendre la famille du combat précédent.
+    // reprise ; moindre usage (ordre du catalogue à égalité), puis la
+    // précédente seulement si elle seule permet encore une paire apte.
     if(!p){
-      const precedente=result[result.length-1]?.raison.famille;
-      const repli='meme-categorie-jamais-affrontes';
       const reprises=MGMT_RAISON_FAMILLES.filter(f=>familles.has(f)&&f!==precedente)
-        .sort((a,b)=>(a===repli?-1:b===repli?1:0)||familles.get(a)-familles.get(b));
+        .sort((a,b)=>familles.get(a)-familles.get(b));
       for(const famille of reprises){
         p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index);
         if(p) break;
       }
+      if(!p&&precedente) p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,precedente,index);
     }
     if(!p) return null;
     localUsed.add(p.a.first); localUsed.add(p.b.first);
     localSeen.add([p.a.id,p.b.id].sort().join('|'));
     run=p.div===lastDiv?run+1:1; lastDiv=p.div;
     familles.set(p.raison.famille,(familles.get(p.raison.famille)||0)+1); result.push(p);
+    precedente=p.raison.famille;
   }
   for(const first of localUsed) used.add(first);
   for(const key of localSeen) seen.add(key);
@@ -281,9 +285,10 @@ function mgmtNewBulkAffair(m,used,seen,relaxed){
      introuvable, l'appelant signale le shortfall et on ne remplit rien
      (lot 3a §5). */
   /* ==== [ANCRE: MONDE_LOT6_T2_PROPOSITION] — Monde lot 6 T2 ==== */
-  const selection=mgmtBulkSelection(m,used,seen,n,stats,relaxed);
+  /* ==== [ANCRE: MONDE_LOT6_T3_PROPOSITION] — Monde lot 6 T3 ==== */
+  const selection=mgmtBulkSelection(m,used,seen,n,stats,relaxed,m.card.prelims);
   if(!selection) return null;
-  const fights=selection.map(p=>({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned}));
+  const fights=selection.map(p=>({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))}));
   const aff={
     id:mgmtNextId(m),kind:'leila_bulk',exchange:'leila_bulk',
     speaker:'leila',a:fights[0].a,b:fights[0].b,fights,marked:null,
@@ -316,9 +321,11 @@ function mgmtSwapFight(m,affairId){
   const old=aff.fights[idx];
   seen.add([old.a,old.b].sort().join('|'));
   const stats=mgmtCrushStats(m);
-  const p=mgmtPickBulkPair(m,used,seen,null,0,stats);
+  /* ==== [ANCRE: MONDE_LOT6_T3_ECHANGE] — Monde lot 6 T3 ==== */
+  const contexte=m.card.prelims.concat(aff.fights.filter((f,i)=>i!==idx));
+  const p=mgmtBulkSelection(m,used,seen,1,stats,false,contexte)?.[0];
   if(!p) return false;
-  aff.fights[idx]={a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned};
+  aff.fights[idx]={a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))};
   /* R3 : la réaction concerne les combattants retirés (old), ceux que le
      texte dit devoir replacer — jamais les remplaçants. Le fait garde les
      deux paires explicitement. */
@@ -343,7 +350,10 @@ function mgmtBulkRemplacer(m,affairId,idx,newId,cote){
   if(!nf||!reste||nf.div!==reste.div||newId===fi.a||newId===fi.b) return false;
   if(!mgmtSelectable(m,nf,reste.id)) return false;
   if(aff.fights.some((x,i)=>i!==idx&&(x.a===newId||x.b===newId))) return false;
+  /* ==== [ANCRE: MONDE_LOT6_T3_JOUEUR] — Monde lot 6 T3 ==== */
+  const preuve=mgmtRaisonsPourPaire(m,nf,reste)[0]||null;
   if(premier) fi.a=newId; else fi.b=newId;
+  fi.origine='joueur'; fi.raison=JSON.parse(JSON.stringify(preuve));
   fi.sloppy=false; fi.warned=false;
   if(idx===0){ aff.a=fi.a; aff.b=fi.b; }
   return true;
@@ -354,7 +364,12 @@ function mgmtBulkMonter(m,affairId,idx){
   const aff=m.pile.find(a=>a.id===affairId);
   if(!aff||aff.status!=='open'||aff.kind!=='leila_bulk'||!Array.isArray(aff.fights)||!Number.isSafeInteger(idx)||idx<0||idx>=aff.fights.length) return false;
   const f=aff.fights[idx];
-  if(!mgmtBookMain(m,f.a,f.b)) return false;
+  /* ==== [ANCRE: MONDE_LOT6_T3_MONTER] — Monde lot 6 T3 ==== */
+  const raison=JSON.parse(JSON.stringify(f.raison)), origine=f.origine;
+  const pose=mgmtBookMain(m,f.a,f.b);
+  if(!pose) return false;
+  pose.raison=raison;
+  if(origine!==undefined) pose.origine=origine;
   /* mgmtBookMain a déjà retiré de la proposition tout combat devenu impossible, celui-ci compris. */
   const k=aff.fights.indexOf(f); if(k>=0) aff.fights.splice(k,1);
   aff.marked=null;

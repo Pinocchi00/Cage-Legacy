@@ -55,6 +55,59 @@ function mgmtValidLine(o){
   return true;
 }
 
+/* ==== [ANCRE: MONDE_LOT6_T3_SCHEMA] — Monde lot 6 T3 ==== */
+/** Vérifie une preuve enregistrée pour la paire, sans recalculer son actualité. @param {Object} raison Preuve {famille,fait}. @param {string} aid Premier id. @param {string} bid Second id. @returns {boolean} Structure et références de paire conformes au schéma T1. */
+function mgmtRaisonValide(raison,aid,bid){
+  const objet=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
+  if(!objet(raison)||!objet(raison.fait)||!mgmtValidId(aid)||!mgmtValidId(bid)||aid===bid) return false;
+  if(Object.keys(raison).sort().join(',')!=='fait,famille') return false;
+  const f=raison.fait, entier=Number.isSafeInteger, compte=x=>entier(x)&&x>=0;
+  const id=x=>x===aid||x===bid, paire=(a,b)=>id(a)&&id(b)&&a!==b;
+  const age=x=>Number.isFinite(x)&&x>=0&&x<=100;
+  const deux=fn=>Array.isArray(f.combattants)&&f.combattants.length===2
+    &&f.combattants.every(objet)&&paire(f.combattants[0].a,f.combattants[1].a)&&f.combattants.every(fn);
+  const reclame=()=>paire(f.a,f.b)&&entier(f.c)&&['rivalite','trilogie','micro','reseaux'].includes(f.raison);
+  switch(raison.famille){
+    case 'revanche': return f.source==='hist'&&compte(f.i)&&entier(f.c)&&paire(f.gagnant,f.perdant);
+    case 'rivalite-ouverte': return f.source==='reclames'?reclame()&&['micro','reseaux'].includes(f.raison)
+      :f.source==='facts'&&compte(f.i)&&entier(f.c)&&paire(f.a,f.target);
+    case 'series-croisees': return f.source==='serie'&&deux(x=>x.issue==='win'&&compte(x.n)&&x.n>=3);
+    case 'classement-voisin': return f.source==='classement'&&f.portee==='organization'&&!!divById(f.div)
+      &&deux(x=>compte(x.rang)&&x.rang>=1)&&Math.abs(f.combattants[0].rang-f.combattants[1].rang)<=2;
+    case 'test-jeune': return f.source==='roles'&&paire(f.a,f.b)&&age(f.age)&&age(f.contreAge)
+      &&compte(f.total)&&compte(f.contreTotal)&&(f.role===null||typeof f.role==='string')
+      &&(f.contreRole===null||typeof f.contreRole==='string');
+    case 'derniere-chance': return f.source==='serie'&&id(f.a)&&f.issue==='loss'&&compte(f.n)&&f.n>=2;
+    case 'longue-attente': return f.source==='attente'&&id(f.a)&&compte(f.cycles)&&compte(f.mois)&&f.mois>=6&&entier(f.depuis);
+    case 'demande-promesse': return f.source==='facts'&&compte(f.i)&&id(f.a)&&entier(f.c)
+      &&['demande','promesse'].includes(f.k)&&['revanche','trilogie','un-classe'].includes(f.want)
+      &&(paire(f.a,f.target)||(f.want==='un-classe'&&(f.target===null||f.target===undefined)))
+      &&(f.k!=='promesse'||entier(f.due)&&f.due>=f.c);
+    case 'fin-contrat': return f.source==='contrat'&&id(f.a)&&compte(f.n)&&compte(f.f)&&f.restants===1&&f.n-f.f===1;
+    case 'styles-opposes': return f.source==='bilan-public'&&deux(x=>['Finit par KO','Finit au sol'].includes(x.style))
+      &&f.combattants[0].style!==f.combattants[1].style;
+    case 'derby': return f.source==='identite'&&paire(f.a,f.b)&&COUNTRY_KEYS.includes(f.pays)&&(f.ville===null||typeof f.ville==='string');
+    case 'debuts': return f.source==='hist'&&id(f.a)&&f.n===0;
+    case 'veteran': return f.source==='bilan'&&id(f.a)&&age(f.age)&&compte(f.total)&&(f.age>=33||f.total>=20);
+    case 'reclame-public': return f.source==='reclames'&&reclame();
+    case 'meme-categorie-jamais-affrontes': return f.source==='hist'&&paire(f.a,f.b)&&!!divById(f.div)&&f.n===0;
+    default: return false;
+  }
+}
+/** Contrat de la cause portée par un combat, selon l'endroit où il vit.
+ * `bloc` = les combats d'une affaire en bloc (toujours pourvus), sinon la carte
+ * (un booking manuel n'en porte pas). Les anciennes causes restent
+ * explicitement inconnues ; jamais de lecture du monde.
+ * @param {Object} f Combat {a,b,origine?,raison?}.
+ * @param {boolean} bloc Combat d'une affaire en bloc.
+ * @returns {boolean} */
+function mgmtCombatRaisonValide(f,bloc){
+  if(f.origine!==undefined&&f.origine!=='leila'&&f.origine!=='joueur') return false;
+  if(f.raison===undefined) return !bloc&&f.origine===undefined;
+  if(f.raison===null) return f.origine!=='leila';
+  return mgmtRaisonValide(f.raison,f.a,f.b);
+}
+
 function mgmtValidAffair(a){
   if(!a||typeof a!=='object'||Array.isArray(a)) return false;
   if(!mgmtValidId(a.id)) return false;
@@ -70,6 +123,8 @@ function mgmtValidAffair(a){
     for(const f of a.fights){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(typeof f.sloppy!=='boolean'||typeof f.warned!=='boolean') return false;
+      /* ==== [ANCRE: MONDE_LOT6_T3_AFFAIRE] — Monde lot 6 T3 ==== */
+      if(!mgmtCombatRaisonValide(f,true)) return false;
       /* Lot 2 T1 : l'emplacement d'un combat de proposition est 'main' ou
          'prelim' quand il est porté (les blocs de Leïla proposent des
          préliminaires) — absent toléré pour une affaire d'avant la v5. */
@@ -260,6 +315,8 @@ function validateMgmt(raw){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(f.slot!=='main'&&f.slot!=='prelim') return false;
       if(f.title!==undefined&&typeof f.title!=='boolean') return false;
+      /* ==== [ANCRE: MONDE_LOT6_T3_CARTE] — Monde lot 6 T3 ==== */
+      if(!mgmtCombatRaisonValide(f,false)) return false;
     }
     if(raw.card.main.some(f=>f.slot!=='main')||raw.card.prelims.some(f=>f.slot!=='prelim')) return false;
   }
@@ -484,6 +541,19 @@ function mgmtMigrate(raw){
     raw.v=16;
   }
   /* ==== [FIN ANCRE] ==== */
+  /* ==== [ANCRE: MONDE_LOT6_T3_MIGRATION] — Monde lot 6 T3 ==== */
+if(raw.v===16){
+    /* Une preuve déjà présente n'est jamais écrasée : la migration ne marque
+       que ce qui n'en porte pas (une pile d'avant n'en porte aucune). */
+    const marque=f=>{ if(f&&typeof f==='object'&&f.raison===undefined) f.raison=null; };
+    for(const a of raw.pile||[]) if(a&&a.kind==='leila_bulk'&&Array.isArray(a.fights)){
+      for(const f of a.fights) marque(f);
+    }
+    if(raw.card) for(const cle of ['main','prelims']) if(Array.isArray(raw.card[cle])){
+      for(const f of raw.card[cle]) marque(f);
+    }
+    raw.v=17;
+  }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }

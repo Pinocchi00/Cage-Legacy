@@ -107,3 +107,54 @@ Ne pas répondre à ces questions à sa place ; les réponses déterminent la mi
 2. **Remplacement manuel par le joueur** : le geste est CONSERVÉ, jamais refusé. Il enregistre `{origine:'joueur', raison:<preuve si une famille s'applique à la nouvelle paire, sinon null>}` ; quand une preuve existe, elle est marquée comme trouvée pour le choix du joueur (`origine:'joueur'`), distincte d'une cause choisie par Leïla (`origine:'leila'`).
 3. **Version** : sur cette branche la version réelle est 16, tu passes à 17 (migration 16 → 17). Le superviseur renumérotera à la fusion avec les lots 5 (déjà 18) et 8 ; ne t'en occupe pas.
 Plus aucune question : code, vérifie, commit « Monde lot 6 T3 : la raison enregistrée » (sans « inachevé »).
+
+## Schémas de preuve (avant implémentation)
+Tous les faits sont des objets ; les ids cités appartiennent à la paire. Les indices et compteurs sont des entiers sûrs non négatifs ; les cycles sont des entiers sûrs (le passé peut précéder l'ouverture). Les tableaux de combattants portent exactement les deux ids distincts. Aucune actualité n'est relue.
+- revanche / hist : i, c, gagnant et perdant distincts.
+- rivalite-ouverte / reclames : a, b, c, raison micro ou reseaux ; / facts : i, a, target distinct, c.
+- series-croisees / serie : deux combattants {a,issue:win,n>=3}.
+- classement-voisin / classement : portee organization, div valide, deux {a,rang>=1}, écart <=2.
+- test-jeune / roles : a, b distincts, role et contreRole string ou null, age et contreAge finis [0,100], total et contreTotal non négatifs.
+- derniere-chance / serie : a, issue loss, n>=2.
+- longue-attente / attente : a, cycles, mois>=6, depuis.
+- demande-promesse / facts : i, k demande ou promesse, a, want revanche/trilogie/un-classe, target de la paire ou absent/null pour un-classe, c ; due entier >=c pour promesse.
+- fin-contrat / contrat : a, n, f, restants=1, n-f=1.
+- styles-opposes / bilan-public : deux {a,style}, KO et sol distincts.
+- derby / identite : a, b distincts, pays connu, ville string ou null.
+- debuts / hist : a, n=0.
+- veteran / bilan : a, age fini [0,100], total non négatif, age>=33 ou total>=20.
+- reclame-public / reclames : a, b distincts, c, raison rivalite/trilogie/micro/reseaux.
+- meme-categorie-jamais-affrontes / hist : a, b distincts, div valide, n=0.
+Les combats migrés portent raison:null sans origine inventée ; une origine leila exige une preuve, une origine joueur admet null. Le booking entièrement manuel reste sans champ raison.
+
+## Compte rendu
+Fichiers modifiés et leur rôle
+- `mgmt-carte.js` — `mgmtBulkSelection` prend un dernier argument `contexte` (JSDoc ajouté) : les raisons déjà conservées sur la carte initialisent les usages et la famille précédente ; le raccord T2 omis est écrit (reprises par moindre usage, puis la précédente seule) ; `mgmtNewBulkAffair` passe les préliminaires posés et enregistre `{origine:'leila',raison:<copie JSON détachée>}` ; `mgmtSwapFight` sélectionne par `mgmtBulkSelection` avec contexte (préliminaires posés + autres combats du bloc, sans le retiré), copie la preuve et laisse le bloc intact si échec ; `mgmtBulkRemplacer` efface l'ancienne cause et enregistre `{origine:'joueur',raison:<preuve|null>}` ; `mgmtBulkMonter` reporte la preuve sur l'objet réellement renvoyé par `mgmtBookMain` (garde faite avant l'appel, l'appel pouvant ouvrir une autre proposition).
+- `mgmt-bureau.js` — `MGMT_SAVE_VERSION=17` (commentaire de version complété) ; la branche validate recopie `raison`/`origine` du combat de bloc dans la carte, sans rien recalculer ni modifier promotions, capacités ou faits.
+- `mgmt-save.js` — `mgmtRaisonValide(raison,aid,bid)` : les quinze familles, schéma par schéma (clés `{famille,fait}` strictes, ids dans la paire, entiers sûrs non négatifs, tableaux de deux ids distincts, seuils structurels only) ; `mgmtCombatRaisonValide(f,bloc)` : origine `leila` exige une preuve, origine `joueur` admet `null`, combat sans champ réservé au booking manuel ; validation des combats de bloc et de carte ; migration 16 → 17 (`raison:null` sur les combats qui n'en portent pas, aucune origine inventée, aucun tirage, aucune perte).
+- `index.html`, `sw.js` — versions seules, via `node tools/_bump.js`.
+- `package.json` — `tests/mgmtRaisonsSauvegarde.test.js` inscrit dans `test` et `test:watch`.
+- `tests/mgmtRaisonsSelection.test.js` — assertion T2 « le format ne porte pas `raison` » remplacée (périmée) ; le test de population vérifie désormais, sur les 160 blocs, que la preuve de l'affaire puis de la carte égale le résultat sélectionné et survit à `mgmtSerialiser`/`mgmtParseAndValidate`, sans seconde boucle.
+- `tests/mgmtHumanite.test.js`, `tests/mgmtEmplacements.test.js` — seule la version attendue du format passe de 16 à 17, décision de cette tranche ; aucune autre assertion touchée.
+
+Tests ajoutés — `tests/mgmtRaisonsSauvegarde.test.js`, intitulés exacts de la fiche
+- `Monde lot 6 T3 — la proposition conserve exactement la preuve choisie`
+- `Monde lot 6 T3 — valider et recharger ne recalculent aucune cause`
+- `Monde lot 6 T3 — la revanche enregistrée conserve la source et le vrai vainqueur`
+- `Monde lot 6 T3 — les causes mal formées sont rejetées`
+- `Monde lot 6 T3 — changer une paire ne conserve pas sa vieille cause`
+- `Monde lot 6 T3 — faire monter conserve la cause sans en inventer au booking manuel`
+- `Monde lot 6 T3 — les familles posées comptent dans la nouvelle proposition`
+- `Monde lot 6 T3 — une pile ancienne charge et se rend sans erreur`
+- `Monde lot 6 T3 — une partie ancienne joue une soirée après migration`
+
+Migration de sauvegarde
+16 → 17, en place dans `mgmtMigrate` après le bloc du lot 8 : chaque combat de bloc et de carte qui ne porte pas déjà de preuve reçoit `raison:null`, sans `origine`. Une preuve déjà présente n'est jamais écrasée (un état v17 rangé en v16 par un test de migration voisin l'a révélé : l'écrasement rendait la partie invalide, `tests/mgmtTrace.test.js`). Paires, ordre, statuts, faits, historique, visites et carte conservés ; aucune simulation, aucun tirage. La validation accepte `null` et refuse une origine `leila` sans preuve.
+
+Écarts à la fiche
+- Aucun écart de comportement. Quatre fichiers de tests portaient la version en dur et passent de 16 à 17 (`mgmtEffectifs`, `mgmtMarque`, `mgmtNiveau`, plus `mgmtEmplacements` et `mgmtHumanite`), ce qu'exige la décision §12.3 ; dans `mgmtMarque`, la comparaison « rien d'autre ne bouge » ignore désormais le seul écart voulu — le marqueur `raison:null` — et l'intitulé du test vise 17. Aucune autre assertion touchée.
+- La section « Schémas de preuve » ci-dessus était déjà rédigée dans l'arbre de travail ; elle est reprise telle quelle, et `mgmtRaisonValide` la suit famille par famille.
+- Coût mesuré de l'extension du test de population : ~1 s par bloc (aller-retour sérialisation/validation), la boucle des 160 blocs passant de ~1 005 s (T2) à 1 011 s.
+
+Questions pour Anthony
+- Aucune. Les deux questions bloquantes sont tranchées par la décision du 13/10/2026, les cas « absence/null » et « remplacement manuel » sont couverts par les tests.
