@@ -1,7 +1,7 @@
 ---
 description: Enchaîne seul une liste de tranches du brief Monde (fiche, code, relecture, commit) en appelant les autres agents, et s'arrête au premier problème. Ne code jamais lui-même.
 mode: primary
-model: openai/gpt-6-luna
+model: openai/gpt-6-luna-fast
 permission:
   edit: deny
   bash:
