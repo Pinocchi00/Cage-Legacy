@@ -45,18 +45,18 @@ if (CREATION || SEMAINE) {
   const graine = Number(opt('--graine') || 20261008);
   const res = {};
   for (const id of orgIds) {
-    const t0 = Date.now();
     const code = `JSON.stringify((function(){
       mgmtRetraitProb=function(){return 0;};
       setSeed(${graine});
+      const __t0=Date.now();
       const m=mgmtPasseGenerer(${JSON.stringify(id)},{});
-      const creationMs=Date.now()-${t0};
+      const creationMs=Date.now()-__t0;
       let semaineMs=0, semaineSoirees=0;
       if (${SEMAINE ? 'true' : 'false'}) {
         G={theme:'dark',mgmt:m};
-        const t1=Date.now();
+        const __t1=Date.now();
         const s=mgmtPredecesseurSoiree(m,0,undefined,undefined);
-        semaineMs=Date.now()-t1;
+        semaineMs=Date.now()-__t1;
         semaineSoirees=s&&s.jouee?1:0;
       }
       return {creationMs:creationMs,semaineMs:semaineMs,soirees:m.eventsPlayed,cycle:m.cycle,semaineSoirees:semaineSoirees}; })())`;
@@ -65,19 +65,24 @@ if (CREATION || SEMAINE) {
     res[id] = r;
     console.error(`${id} : creation ${((r.creationMs)/1000).toFixed(1)} s${SEMAINE ? ', semaine ' + (r.semaineMs/1000).toFixed(2) + ' s' : ''}`);
   }
-  const premier = Date.now();
   const totalCreationMs = Object.keys(res).reduce((s,id)=>s+res[id].creationMs,0);
   const totalSemaineMs = Object.keys(res).reduce((s,id)=>s+res[id].semaineMs,0);
   if (json) { console.log(JSON.stringify(res, null, 1)); process.exit(0); }
   let md = `# Mesure création complète et semaine (Monde lot 9 T1)\\n\\n`;
   md += 'Commande exacte : node tools/mesure-management.js --creation' + (SEMAINE?' --semaine':'') + ' --graine ' + graine + (orgIds.length<8?' --orgs '+orgIds.join(','):'') + '\\n\\n';
   md += `Création complète (huit organisations) : ${(totalCreationMs/1000).toFixed(1)} s. Semaine de jeu : ${(totalSemaineMs/1000).toFixed(2)} s.\\n\\n`;
+  md += `Paramètres : graine fixe ${graine}, ${orgIds.length} organisation(s) (${orgIds.join(', ')}), création complète ${SEMAINE?'et une semaine de jeu':''}.\\n\\n`;
   md += `| Organisation | Création | Semaine | Soirées |\\n|---|---|---|---|\\n`;
   for (const id of orgIds) {
     const r = res[id];
     md += `| ${id} | ${(r.creationMs/1000).toFixed(1)} s | ${SEMAINE?(r.semaineMs/1000).toFixed(2)+' s':'—'} | ${r.soirees} |\\n`;
   }
   md += '\\n';
+  md += `Seuils Monde lot 9 T1 : création complète ≤ 180 s, semaine de jeu ≤ 5 s.\\n\\n`;
+  md += `Résultat de la machine de développement : création ${(totalCreationMs/1000).toFixed(1)} s ` +
+    `${totalCreationMs<=180000?'(≤ 180 s, conforme)':'(> 180 s, non conforme)'} ; semaine ${(totalSemaineMs/1000).toFixed(2)} s ` +
+    `${totalSemaineMs<=5000?'(≤ 5 s, conforme)':'(> 5 s, non conforme)'} .\\n\\n`;
+  md += `Mesure sur la seconde machine de référence : à exécuter plus tard avec la commande ci-dessus.\\n\\n`;
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(out, md);
   console.log(md);

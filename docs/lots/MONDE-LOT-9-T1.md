@@ -80,3 +80,9 @@ Aucun.
 
 ## DÉCISION du superviseur — 14/10/2026 15 h 40 (réponse à la question sur les deux machines)
 La question sur les machines ne bloque PAS le code. Le codeur fait : les trois leviers, l'outil de mesure étendu aux huit organisations (création complète et une semaine, graine fixe, rapport avec la commande exacte), les tests. La mesure officielle est faite ensuite : le superviseur la lance sur la machine de développement (celle d'Anthony) et inscrit le résultat dans le rapport ; la seconde machine sera mesurée plus tard avec la commande du rapport. Tu n'as donc aucune question à poser. Le STOP de tête est périmé.
+
+## Compte rendu (reprise)
+
+- `tools/mesure-management.js` : chronométrage de la création et de la semaine démarré et arrêté dans le contexte de simulation (`__t0`/`__t1`), plus de pont Node ; rapport enrichi (graine, paramètres, durée réelle, résultat de la machine de développement, seuils, seconde machine à mesurer).
+- `tests/mgmtMondeVitesse.test.js` : ouverture pour huit organisations avec vérification des ouvertures/calendriers ; booking direct vérifié par combattants et carte retenue sous graine fixe, plus absence de `mgmtCartRows` ; déterminisme inchangé.
+- Aucune migration de sauvegarde.
