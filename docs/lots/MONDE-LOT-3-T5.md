@@ -148,3 +148,92 @@ Routes indépendantes et ancien nom soirée conservé : compatibilité des appel
 Extérieurs/retraités restent en fiche : défaut simple conforme au domaine T2, pas de compositeur parallèle.
 Omettre les enrichissements absents suit T3 acceptée : la planche fixe la forme, pas des faits à inventer.
 Questions pour Anthony : aucune.
+
+## Compte rendu
+
+### Fichiers modifiés et leur rôle
+- `mgmt-presentation-ecrans.js` (nouveau, 181 lignes) — le rendu commun et les cinq entrées. Ancre
+  `MGMT_PRESENTATION_ENTREES` (état transitoire `MGMT_PRESENTATION_UI={pile:[]}` hors `G.mgmt`, remis à
+  zéro dès que `G.mgmt` change de partie) et `MGMT_PRESENTATION_PAGES` (mesure puis découpage aux espaces,
+  pages bornées sans boucle). Huit gestes exposés sur `CL`, plus `scr_mgmt_presentation` et les deux
+  routes `mgmt_presentation_combattant` / `mgmt_presentation_combat` ; `keysRegister` sur ces deux routes
+  et sur `mgmt_soiree_avant`.
+- `mgmt-carte-cadre.js` — bouton « Présentation » dans le cadre (A seul ou A/B visés) et sur chaque slot
+  confirmé (paire + liste `m.card.main`). Le geste modifier/retirer est intact ; `mgmtCarteModifie` n'est
+  jamais appelé.
+- `mgmt-prelims.js` — bouton « Présentation » quand le slot courant contient une paire ; liste des slots
+  avec `fight`, proposed compris, dans l'ordre affiché. Fiches et validation inchangées.
+- `mgmt-suivi-cadre.js` — bouton secondaire « Présentation » dans le pied de la nouvelle choisie ; la cible
+  historique prend `h=x.f` et ses ids quand `x.f` est un index valide, sinon le sujet seul. Entrée,
+  préparer, résultat et demande inchangés.
+- `mgmt-accueil.js` — `CL.mgmtAccueilNom` : T2 pour les actifs internes, `CL.mgmtFiche` en repli (extérieurs,
+  retraités). Les noms de la passe et la sélection d'événement passent par cette porte unique.
+- `mgmt-soiree-cadre.js` — `scr_mgmt_soiree_avant` délègue au rendu commun en mode soirée, sans second
+  avant-combat ; `CL.mgmtSoAvant` ouvre le cadre au focus courant et retourne vers `mgmt_soiree`.
+- `mgmt-screens.js` — les deux routes nouvelles et `mgmt_soiree_avant` acceptées comme retour de fiche
+  (le cadre et sa pile survivent au retour, `CL.mgmtFiche` n'est pas détourné globalement).
+- `ui-11-keys.js` — le dispatcher transmet l'événement au gestionnaire (`fn(e)`) pour lire `shiftKey` de
+  Tab. Aucun gestionnaire existant ne consomme l'argument.
+- `ui-cadre.css` — ancre `MGMT_PRESENTATION_STYLES`, familles `.mf-pr-*` seulement ; la fiche et les anciens
+  écrans ne sont pas touchés. Tunnel local `images/cendre.jpg`, images `images/accueil-octogones.jpg`, jamais
+  de `/_blob` ni de réseau.
+- `index.html` — nouveau `<script>` après `mgmt-accueil.js`, avant `mgmt-son.js`. Versions montées par
+  `tools/_bump.js` (`ui-cadre.css`, `ui-11-keys.js`, `mgmt-screens.js`, `mgmt-carte-cadre.js`,
+  `mgmt-prelims.js`, `mgmt-suivi-cadre.js`, `mgmt-soiree-cadre.js`, `mgmt-accueil.js`) ; `sw.js` passé de
+  `b134` à `b135` par le même outil. `index.html` reste en LF.
+- `package.json` — `tests/mgmtPresentationEntrees.test.js` ajouté aux scripts `test` et `test:watch`.
+  `check:rapide` tire sa liste du script `test` : le nouveau fichier y est donc inclus, sans toucher à
+  `tools/check-rapide.js`.
+
+### Tests ajoutés — `tests/mgmtPresentationEntrees.test.js` (7 tests, les intitulés de la fiche)
+1. « Monde lot 3 T5 — cinq entrées et retour exact » — ouverture à la souris depuis Carte, Préliminaires,
+   Soirée, Presse et Accueil ; bonne paire ou bon sujet ; Échap revient à chaque écran ; comparaison de
+   `G.mgmt`, `MGMT_CART`, `MGMT_PRELIMS`, `MGMT_SOIREE.index`, `MGMT_SU_PR` et `MGMT_ACCUEIL` avant/après.
+2. « Monde lot 3 T5 — soirée sans doublon ni fuite du résultat » — route `mgmt_soiree_avant` unique, `h=p.h`,
+   trois voix, contenu identique après modification des résultats à partir de `h`, barre grisée, index
+   inchangé, pas de « Regarder » au futur, regarder/retour qui avance l'index de 1 par la porte existante.
+3. « Monde lot 3 T5 — clavier, noms et fiche complète » — ←/→ bornées sans boucle, ↑↓ puis Entrée ouvrant le
+   bon id avec `h` conservé, Échap vers le parent, F puis retour retrouvant cadre et page, cinq onglets.
+4. « Monde lot 3 T5 — présentation sans moteur ni mutation » — attributs `niv/niveau/level/stats/phys/
+   skills/trauma` et appels moteur transformés en getters qui lèvent, sur les trois modes ; 0 lecture, 0
+   appel, `SEED` et `JSON G.mgmt` inchangés, deux rendus identiques.
+5. « Monde lot 3 T5 — trente contenus distincts et six ouvertures » — fixture T2 graine `faits`, 30 sujets,
+   0 soirée, 30 textes distincts hors noms et ids, quota collectif ≤ 6 par famille.
+6. « Monde lot 3 T5 — voix, pourcentage et sources affichées » — fixture T3 a/b 8–2 / 2–8 : Cage Hebdo à
+   68 %, trois noms exacts ; puis Split sur quatre soirées : chaque phrase rendue égale une phrase T2/T3,
+   chaque source retrouvable dans son type, 0 phrase d'histoire ≥ h, 0 variable résiduelle.
+7. « Monde lot 3 T5 — échappement, absents et pagination » — nom hostile rendu texte et 0 élément injecté,
+   paire invalide qui ne navigue pas, trou de Préliminaires sans bouton, extérieur en fiche ; texte long
+   féminin sur plusieurs pages, toutes les phrases accessibles sans perte.
+
+Test existant modifié : `tests/mgmtSoireeShow.test.js` — seules les rubriques de l'avant-combat sont
+remplacées par celles du rendu commun et les trois voix sont vérifiées ; les assertions de route
+(`mgmt_soiree_avant`), de barre grisée et de déroulé des neuf pastilles sont conservées, et aucun test de
+données n'est supprimé. La décision qui l'autorise est en fiche §12 (« ancien nom soirée conservé ») et
+§4 (« remplacer son rendu, garder sa route »).
+Test existant modifié : `tests/mgmtAccueil.test.js` — le test T4 suit le nom affiché jusqu'à la présentation
+et non plus jusqu'à la fiche, comportement imposé par la fiche §4 et la décision §12 (les extérieurs et
+retraités restant en fiche). Ancre `TEST_MGMT_PRESENTATION_ACCUEIL_ROUTE` et renommage de l'intitulé.
+
+### Migration de sauvegarde
+Aucune. `MGMT_SAVE_VERSION` reste 16 : l'état de présentation est transitoire et hors `G.mgmt` (vérifié par
+le test 4, `JSON G.mgmt` identique), aucune migration ni validation nouvelle.
+
+### Écarts à la fiche
+- Aucun écart de comportement. Deux précisions de réalisation : le dispatcher clavier global ne reçoit
+  plus l'événement (il ne le transmettait pas) ; c'était la seule façon de distinguer Tab de Maj+Tab, la
+  fiche l'exige. La mesure de hauteur d'une ligne (ancre `MGMT_PRESENTATION_PAGES`) se fait hors écran sur
+  un div éphémère, et se replie sur une estimation conservative quand le DOM n'a pas de mise en page — le
+  cas du harnais de test uniquement, jamais celui du navigateur.
+
+### Vérification
+- `node --test tests/mgmtPresentationEntrees.test.js tests/mgmtPresentationCombattant.test.js
+  tests/mgmtPresentationCombat.test.js tests/mgmtSoireeShow.test.js` : 38 tests, 38 verts.
+- `npm run check:rapide` : VERT — 978 tests, 0 échec, 106 fichiers de test lancés.
+- `node tools/verif-versions.js` : aucun écart par rapport à `main` (39 fichiers examinés).
+- Navigateur hors ligne (`tools/reports/monde-t5-browser.js`, non suivi) : cinq entrées × 1280/1440/1920,
+  parcours souris puis clavier, code de sortie 0 — 0 erreur console, 0 ligne hors de son panneau, corps
+  minimum 22 px, 0 défilement horizontal, retour exact à l'écran d'origine depuis chaque entrée.
+
+### Questions pour Anthony
+Aucune.

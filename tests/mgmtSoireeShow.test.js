@@ -48,8 +48,11 @@ test('La soirée en cinq moments — ouverture, entre-deux, attente du principal
   touche(win,'Enter');
   assert.ok(maj(win).includes('REGARDER LE COMBAT')); assert.ok(maj(win).includes('PASSER')); assert.ok(maj(win).includes('AVANT-COMBAT'));
   assert.equal(win.eval(`document.querySelectorAll('.mf-so-tag').length`),9,'les neuf pastilles');
-  touche(win,'f'); assert.equal(win.eval(`G.screen`),'mgmt_soiree_avant'); assert.ok(maj(win).includes('COMMENT ÇA PEUT SE PASSER'));
-  assert.ok(maj(win).includes('CE QUE TU AS VU')); assert.ok(maj(win).includes('CE QUE TU NE SAIS PAS')); assert.ok(maj(win).includes('SON DERNIER COMBAT'));
+  /* ==== [ANCRE: TEST_MGMT_PRESENTATION_SOIREE_RUBRIQUES] — Monde lot 3 T5 ==== */
+  touche(win,'f'); assert.equal(win.eval(`G.screen`),'mgmt_soiree_avant'); assert.ok(maj(win).includes('CE QUI LE REND UNIQUE'));
+  assert.ok(maj(win).includes('CE QUE CHACUN IMPOSE')); assert.ok(maj(win).includes('LEUR HISTOIRE')); assert.ok(maj(win).includes('LES PRONOSTICS'));
+  const voix=res(win,`const v=mgmtPresentationCadre(),noms=new Set();for(let page=0;page<v.pages;page++){const el=document.createElement('div');el.innerHTML=mgmtPresentationHtml(G.mgmt,{...v,page});for(const e of el.querySelectorAll('.mf-pr-media'))noms.add(e.textContent);}return [...noms];`);
+  assert.deepEqual(voix,['Cage Hebdo','Tableau Noir','Le Forum']);
   touche(win,'Escape'); assert.equal(win.eval(`G.screen`),'mgmt_soiree');
   for(let i=0;i<8;i++) touche(win,'p');
   assert.equal(win.eval(`MGMT_SOIREE.index`),8); assert.ok(maj(win).includes('COMBAT PRINCIPAL'),'l\'attente du principal');
