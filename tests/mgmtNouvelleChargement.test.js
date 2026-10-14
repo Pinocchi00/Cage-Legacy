@@ -96,7 +96,7 @@ test('Chargement — la largeur de la barre est monotone et finit à 100 %', () 
 test('Chargement — états, compteurs, frise et dernier changement de ceinture', () => {
   const win=newGameWindow({runMain:true});
   const resultat=JSON.parse(win.eval(`JSON.stringify((()=>{
-    const g={n:2,k:0,annee:mgmtPasseAnnee(2,0),org:'Test',m:{facts:[{k:'title_initial',div:'welterweight',a:'f1'},{k:'title_fight',div:'welterweight',fight:0,c:1},{k:'title_fight',div:'welterweight',fight:1,c:2},{k:'injury'},{k:'injury'}],hist:[{winner:'B',a:{id:'f1'},b:{id:'f2'}},{winner:'A',a:{id:'f2'},b:{id:'f1'}}]},vus:0,detenteurs:{},champions:0,blessures:0,dernier:null};
+    const g={n:2,k:0,annee:mgmtPasseAnnee(2,0),org:'Test',m:{facts:[{k:'title_initial',div:'H-fly',a:'f1'},{k:'title_fight',div:'H-fly',fight:0,c:1},{k:'title_fight',div:'H-fly',fight:1,c:2},{k:'injury'},{k:'injury'}],hist:[{winner:'B',a:{id:'f1'},b:{id:'f2'}},{winner:'A',a:{id:'f2'},b:{id:'f1'}}]},vus:0,detenteurs:{},champions:0,blessures:0,dernier:null};
     mgmtFighterById=(m,id)=>({nom:id});
     g.m.hist[0].winner='B';g.m.hist[0].a={id:'f1'};g.m.hist[0].b={id:'f2'};
     g.m.hist[1].winner='A';g.m.hist[1].a={id:'f2'};g.m.hist[1].b={id:'f1'};
@@ -110,6 +110,63 @@ test('Chargement — états, compteurs, frise et dernier changement de ceinture'
   assert.equal(resultat.dernier,'f2');
   assert.equal(resultat.compteurs[0],0);
   assert.deepEqual(resultat.annees,[...resultat.annees].sort());
+  const labels=JSON.parse(win.eval(`JSON.stringify(Array.from({length:6},(_,i)=>mgmtPasseAnnee(62,i)))`));
+  assert.equal(labels.length,6);
+});
+
+test('Chargement — états debut, chargement, fin et erreur', () => {
+  const win=newGameWindow({runMain:true});
+  const debut=win.eval(`(()=>{const g={n:2,k:0,annee:mgmtPasseAnnee(2,0),org:'Test',m:null,aff:0,detenteurs:{},vus:0,champions:0,blessures:0};return mgmtNouvelleGenHtml(g)})()`);
+  assert.match(debut,/mf-genese debut/);
+  assert.doesNotMatch(debut,/Entrer dans/);
+  assert.match(debut,/Six années à vivre/);
+  assert.deepEqual([...debut.matchAll(/<b>(\d+)<\/b><span>([^<]+)/g)].map(x=>[x[2],+x[1]]),[['soirées jouées',0],['combats',0],['champions couronnés',0],['blessures',0]]);
+  const charge=win.eval(`(()=>{const g={n:2,k:1,annee:mgmtPasseAnnee(2,1),org:'Test',m:{hist:[{}],facts:[]},aff:50,vus:0,detenteurs:{},champions:0,blessures:0};return mgmtNouvelleGenHtml(g)})()`);
+  assert.match(charge,/mf-genese chargement/);
+  assert.doesNotMatch(charge,/Entrer dans/);
+  assert.deepEqual([...charge.matchAll(/<b>(\d+)<\/b><span>([^<]+)/g)].map(x=>[x[2],+x[1]]),[['soirées jouées',1],['combats',1],['champions couronnés',0],['blessures',0]]);
+  const fin=win.eval(`(()=>{const g={n:2,k:2,annee:mgmtPasseAnnee(2,1),org:'Test',m:{hist:[],facts:[]},aff:100,pret:true,vus:0,detenteurs:{},champions:0,blessures:0};return mgmtNouvelleGenHtml(g)})()`);
+  assert.match(fin,/mf-genese fin/);
+  assert.match(fin,/width:100\.00%/);
+  assert.match(fin,/Entrer dans Test/);
+  assert.deepEqual([...fin.matchAll(/<b>(\d+)<\/b><span>([^<]+)/g)].map(x=>[x[2],+x[1]]),[['soirées jouées',2],['combats',0],['champions couronnés',0],['blessures',0]]);
+  const erreur=win.eval(`(()=>{const g={n:2,k:1,annee:mgmtPasseAnnee(2,1),org:'Test',m:{hist:[],facts:[]},aff:35,erreur:true,vus:0,detenteurs:{},champions:0,blessures:0};return mgmtNouvelleGenHtml(g)})()`);
+  assert.match(erreur,/mf-genese erreur/);
+  assert.match(erreur,/Recommencer/);
+  assert.match(erreur,/Choisir une autre organisation/);
+  assert.doesNotMatch(erreur,/Entrer dans/);
+  assert.match(erreur,/width:35.00%/); /* Planche : barre figée où l erreur est survenue, pas ramenée à zéro. */
+  win.eval(`CL.mgmtNouvelle(3); MGMT_NOUVELLE.gen={slot:3,orgId:'test',org:'Test',n:2,k:1,annee:2031,erreur:true,erreurAnnee:2031,erreurMessage:'incident contrôlé',aff:35,m:null,vus:0,detenteurs:{},champions:0,blessures:0};`);
+  const detail=win.eval('mgmtNouvelleGenHtml(MGMT_NOUVELLE.gen)');
+  assert.match(detail,/2031/); assert.match(detail,/emplacement 3/); assert.match(detail,/incident contrôlé/);
+  assert.match(detail,/Entrée/);
+  win.eval(`keysHandle({key:'Enter',code:'Enter',preventDefault(){}})`);
+  assert.equal(win.eval('MGMT_NOUVELLE.gen.erreur'),undefined);
+  win.eval('CL.mgmtNouvelleAbandonner()'); /* la génération relancée ne doit pas survivre au test */
+});
+
+test('Chargement — le dernier fait apparaît dans sa zone et les compteurs reflètent deux soirées', async () => {
+  const win=lancer(2);
+  await attendrePret(win);
+  const debut=Date.now();
+  while(Date.now()-debut<5000&&win.document.querySelector('.mf-genese-barre b').style.width!=='100%') await new Promise(r=>setTimeout(r,30));
+  const g=win.eval('MGMT_NOUVELLE.gen');
+  assert.equal(g.k,2);
+  assert.equal(win.document.querySelector('.mf-genese-barre b').style.width,'100%');
+  const compteurs=[...win.document.querySelectorAll('.mf-genese-cpt')].map(n=>[n.querySelector('span').textContent,n.querySelector('b').textContent]);
+  assert.deepEqual(compteurs.map(x=>x[0]),['soirées jouées','combats','champions couronnés','blessures']);
+  assert.equal(+compteurs[0][1],2);
+  assert.equal(+compteurs[1][1],win.eval('MGMT_NOUVELLE.gen.m.hist.length'));
+  assert.equal(+compteurs[2][1],g.champions);
+  assert.equal(+compteurs[3][1],g.blessures);
+  win.eval('CL.mgmtNouvelleAbandonner()');
+});
+
+test('Chargement — le dernier fait affiche un changement réel de ceinture', () => {
+  const win=newGameWindow({runMain:true});
+  win.eval(`(()=>{const g={n:2,k:2,annee:mgmtPasseAnnee(2,1),org:'Test',m:{hist:[{winner:'B',a:{id:'ancien'},b:{id:'nouveau'}}],facts:[{k:'title_initial',div:'H-fly',a:'ancien'},{k:'title_fight',div:'H-fly',fight:0,c:2}]},aff:100,pret:true,vus:0,detenteurs:{},champions:0,blessures:0,dernier:null};mgmtFighterById=(m,id)=>({nom:id});mgmtNouvelleLireFaits(g);CL.mgmtNouvelle(1);MGMT_NOUVELLE.gen=g;render();mgmtNouvelleProgression(g);})();`);
+  const fait=win.document.querySelector('.mf-genese-dernier-fait');
+  assert.ok(fait); assert.match(fait.textContent,/nouveau/); assert.match(fait.textContent,new RegExp(win.eval("mgmtDivisionLabel('H-fly')"))); assert.match(fait.textContent,/soirée 2/);
 });
 
 test('Chargement — une progression conserve les nœuds de l’écran', () => {

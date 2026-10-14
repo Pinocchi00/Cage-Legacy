@@ -113,11 +113,11 @@ function mgmtNouvelleGenHtml(g){
   const droite=`<div class="mf-genese-droite"><div class="mf-lecture-entete">Pendant que ça charge, ce qu’il faut savoir</div>`
     +`<div class="mf-lecture-carton"><div class="mf-lecture-titre">${esc(L[i].titre)}</div><div class="mf-lecture-texte">${esc(L[i].texte)}</div></div>`
     +`<div class="mf-lecture-pastilles">${pastilles}</div>`
-    +(g.pret?`<div class="mf-genese-entree">${mfBouton('Entrer dans '+g.org,{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleEntrer()'})}</div>`:'')
-    +`</div>`;
-  const contenu=`<div class="mf-genese ${g.erreur?'erreur':g.pret?'fin':g.m?'chargement':'debut'}" role="status" aria-live="polite">${gauche}${droite}${g.erreur?'<div class="mf-genese-erreur"><button type="button" onclick="CL.mgmtNouvelleRecommencer()">Recommencer</button><button type="button" onclick="CL.mgmtNouvelleAbandonner()">Choisir une autre organisation</button></div>':''}</div>`;
+     +(g.pret?`<div class="mf-genese-entree">${mfBouton('Entrer dans '+g.org,{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleEntrer()'})}</div>`:'')
+     +`</div>`;
+  const contenu=`<div class="mf-genese ${g.erreur?'erreur':g.pret?'fin':g.m?'chargement':'debut'}" role="status" aria-live="polite">${gauche}${droite}${g.erreur?`<div class="mf-genese-erreur"><p>Échec en ${esc(g.erreurAnnee||g.annee)}, emplacement ${esc(g.slot)} : ${esc(g.erreurMessage||'erreur inconnue')}</p><button type="button" onclick="CL.mgmtNouvelleRecommencer()">Recommencer</button><button type="button" onclick="CL.mgmtNouvelleAbandonner()">Choisir une autre organisation</button></div>`:''}</div>`;
   return mfEcran(contenu,{barre:'logo',plaque:'Management',libelle:'Nouvelle partie',
-    touches:[{ks:['Échap'],t:'Abandonner la création',onclick:'CL.mgmtNouvelleAbandonner()'},{ks:['←','→'],t:'Lire'}]});
+    touches:[{ks:['Échap'],t:'Abandonner la création',onclick:'CL.mgmtNouvelleAbandonner()'},...(g.erreur?[{ks:['Entrée'],t:'Recommencer',onclick:'CL.mgmtNouvelleRecommencer()'}]:[{ks:['←','→'],t:'Lire'}])]});
 }
 /** Actualise les nœuds de progression sans reconstruire l'écran. @param {object} g Génération active. @returns {void} Met à jour les textes et attributs ciblés. */
 function mgmtNouvelleProgression(g){
@@ -125,9 +125,9 @@ function mgmtNouvelleProgression(g){
   const rac=document.querySelector('.mf-genese'); if(!rac) return;
   const valeurs=mgmtNouvelleCompteurs(g), noeuds=rac.querySelectorAll('.mf-genese-cpt');
   valeurs.forEach((c,i)=>{if(noeuds[i]){const b=noeuds[i].querySelector('b'),s=noeuds[i].querySelector('span');if(b)b.textContent=c.v;if(s)s.textContent=c.k;}});
-  const texte=rac.querySelector('.mf-genese-gauche .mf-genese-texte:last-child');
-  if(texte) texte.textContent=g.erreur?'La création s’est arrêtée. Rien n’a été enregistré : l’emplacement reste libre.':g.pret?'Six ans sont écrits.':`Année ${g.annee} — soirée ${Math.min(g.k,g.n)} sur ${g.n}`;
-  const barre=rac.querySelector('.mf-genese-barre'); if(barre){barre.setAttribute('aria-valuenow',g.k);const b=barre.querySelector('b');if(b)b.style.width=Math.max(g.aff||0,100*g.k/Math.max(1,g.n))+'%';}
+   const texte=rac.querySelector('.mf-genese-gauche .mf-genese-texte:last-child');
+   if(texte) texte.textContent=g.erreur?`Échec en ${g.erreurAnnee||g.annee}, emplacement ${g.slot} : ${g.erreurMessage||'erreur inconnue'}`:g.pret?'Six ans sont écrits.':`Année ${g.annee} — soirée ${Math.min(g.k,g.n)} sur ${g.n}`;
+   const barre=rac.querySelector('.mf-genese-barre'); if(barre){barre.setAttribute('aria-valuenow',g.k);if(g.erreur)barre.classList.add('erreur');const b=barre.querySelector('b');if(b){b.style.width=g.erreur?(g.aff||0)+'%':Math.max(g.aff||0,100*g.k/Math.max(1,g.n))+'%';if(g.erreur)b.style.background='#777';}}
   const annees=rac.querySelectorAll('.mf-genese-an'); annees.forEach(el=>{const y=+el.dataset.year;el.classList.toggle('fait',g.pret||y<g.annee);el.classList.toggle('cours',!g.pret&&y===g.annee);});
   let fait=rac.querySelector('.mf-genese-dernier-fait');
   if(g.dernier){if(!fait){fait=document.createElement('div');fait.className='mf-genese-dernier-fait';rac.querySelector('.mf-genese-gauche').appendChild(fait);}fait.textContent=`${g.dernier.nom} prend la ceinture · ${g.dernier.division} · soirée ${g.dernier.soiree}`;}
@@ -197,7 +197,7 @@ function mgmtNouvelleGenPas(){
     }
   }catch(e){
     mgmtNouvelleGenNettoyer();
-    g.erreur=true; g.erreurAnnee=g.annee; if(G) G.mgmt=null;
+    g.erreur=true; g.erreurAnnee=g.annee; g.erreurMessage=e&&e.message?e.message:String(e); if(G) G.mgmt=null;
     render(); return;
   }
   mgmtNouvelleLireFaits(g);
@@ -300,7 +300,7 @@ keysRegister('mgmt_nouvelle',{
   ArrowRight(){ if(MGMT_NOUVELLE.gen) CL.mgmtNouvelleLectureDelta(1); else CL.mgmtNouvelleDeplacer(1,0); },
   ArrowUp(){ CL.mgmtNouvelleDeplacer(0,-1); },
   ArrowDown(){ CL.mgmtNouvelleDeplacer(0,1); },
-  Enter(){ if(MGMT_NOUVELLE.gen){ CL.mgmtNouvelleEntrer(); return; } CL.mgmtNouvelleLancer(); },
+  Enter(){ if(MGMT_NOUVELLE.gen){ if(MGMT_NOUVELLE.gen.erreur){CL.mgmtNouvelleRecommencer();return;} CL.mgmtNouvelleEntrer(); return; } CL.mgmtNouvelleLancer(); },
   Escape(){ if(MGMT_NOUVELLE.gen){ CL.mgmtNouvelleAbandonner(); return; } CL.mgmtNouvelleRetour(); },
 });
 /* ==== [FIN ANCRE] ==== */
