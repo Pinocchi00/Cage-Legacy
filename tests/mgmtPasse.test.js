@@ -150,7 +150,16 @@ test('Monde lot 1 T4 — les contrats, blessures, attentes, ceintures et histori
     /* Fiche §3.21 et §11 : mgmtBookMain conserve ses promotions ; seul le corps médical/contractuel reste identique. */
     const promotions=m.roster.map(f=>({id:f.id,level:f.level,raison:f.raison,interactions:f.interactions}));
     const corps=()=>JSON.stringify(m.roster.map(f=>[f.id,f.ct||null,!!f.libre,f.trauma||0,f.traumaFloor||0,f.susp||0,f.retired||null,f.lastCycle||0]));
-    const avant={corps:corps(),histResume:JSON.stringify(m.hist.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L])),factsGardes:JSON.stringify(m.facts.filter(x=>!MGMT_PASSE_FAITS_PERDUS.includes(x.k))),titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null)),pile:JSON.stringify(m.pile),cycle:m.cycle,fil:m.fil?m.fil.length:0};
+    /* ==== [ANCRE: MONDE_LOT5_T6_FAITS_CONSERVES] — Monde lot 5 T6 ==== */
+    /* décision du 13/10/2026 : le lot 5 ajoute des faits d'héritage à la clôture.
+       T2 recale aussi d : même demande, nouvel index après filtrage. */
+    const indices=new Map(), faits=[];
+    m.facts.forEach((x,i)=>{if(!MGMT_PASSE_FAITS_PERDUS.includes(x.k)){indices.set(i,faits.length);faits.push(x);}});
+    const faitsAttendus=faits.map(x=>{
+      const demande=Number.isSafeInteger(x.d)&&m.facts[x.d];
+      return ['promesse','refus'].includes(x.k)&&demande&&demande.k==='demande'?Object.assign({},x,{d:indices.get(x.d)}):x;
+    });
+    const avant={corps:corps(),histResume:JSON.stringify(m.hist.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L])),factsGardes:JSON.stringify(faitsAttendus),titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null)),pile:JSON.stringify(m.pile),cycle:m.cycle,fil:m.fil?m.fil.length:0};
     const ageAvant=m.roster.map(f=>f.age).join();
     mgmtPasseCloturer(m);
     /* Monde lot 1 T5 (fiche MONDE-LOT-1-T5 §3) : à la clôture les combats s'allègent (mêmes combattants, même issue) et les faits perdus (contrats, départs, attentes) sont écartés ; tout le reste est conservé. */
@@ -169,6 +178,30 @@ test('Monde lot 1 T4 — les contrats, blessures, attentes, ceintures et histori
   for (const k of ['corps', 'hist', 'facts', 'titres', 'pile', 'cycle', 'fil', 'promotion']) assert.equal(r[k], true, 'conservé : ' + k);
   assert.ok(r.nbHist > 0 && r.nbFacts > 0, 'l\'histoire existe');
   assert.ok(r.sous > 0, 'des contrats sont en cours');
+});
+
+/* ==== [ANCRE: MONDE_LOT5_T6_TEST_RECLAMATIONS] — Monde lot 5 T6 ==== */
+test('Monde lot 5 T6 — répondre à une demande ne retire pas son combat du booking porté', () => {
+  const win = newGameWindow({ runMain: true });
+  try {
+    const r = JSON.parse(win.eval(`JSON.stringify((function(){
+      setSeed(${GRAINE}); const m=mgmtPassePreparer('split',{soirees:2});
+      m.facts=[];
+      const candidats=mgmtCartRows(m).filter(f=>!f.libre&&mgmtContratRestants(f)>1&&mgmtSelectable(m,f,null));
+      const a=candidats.find(a=>candidats.some(b=>b.id!==a.id&&b.div===a.div&&mgmtSelectable(m,b,a.id)&&mgmtAvailable(m,a,b)));
+      const b=candidats.find(b=>b.id!==a.id&&b.div===a.div&&mgmtSelectable(m,b,a.id)&&mgmtAvailable(m,a,b));
+      mgmtAddFact(m,{c:m.cycle,k:'demande',a:a.id,want:'revanche',target:b.id});
+      const reclame=mgmtPublicReclame(m).some(r=>r.a===a.id&&r.b===b.id);
+      const s=mgmtPredecesseurSoiree(m,0,{demandes:true});
+      return {reclame,jouee:s.jouee,reclames:s.reclames,
+        reponse:m.facts.filter(x=>x.k==='promesse'&&x.d===0).length,
+        combat:m.hist.some(h=>h.slot==='main'&&h.a.id===a.id&&h.b.id===b.id),
+        ouverte:mgmtDemandesOuvertes(m).some(d=>d.i===0)};
+    })())`));
+    assert.equal(r.reclame, true); assert.equal(r.jouee, true);
+    assert.equal(r.reclames, 1); assert.equal(r.reponse, 1);
+    assert.equal(r.combat, true); assert.equal(r.ouverte, false);
+  } finally { win.close(); }
 });
 
 /* ===================== Test 8 : un champion par catégorie ===================== */

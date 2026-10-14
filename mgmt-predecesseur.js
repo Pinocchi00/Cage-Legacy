@@ -53,13 +53,15 @@ function mgmtPredecesseurChampions(m){ return allDivisions().map(d=>(mgmtSplitTi
 
 /* ==== [ANCRE: MONDE_LOT5_T1_BOOKING_PORTE] — Monde lot 5 T1 ==== */
 /** Booking commun porté du joueur historique : même ordre, mêmes gardes et titres.
- * limite borne la carte sans jeter de combats ; contrats ajoute seulement la garde de l'héritage. */
-function mgmtPredecesseurBooker(m,k,cfg,limite,contrats){
+ * limite borne la carte sans jeter de combats ; contrats ajoute seulement la garde de l'héritage.
+ * reclamations, si fourni, est le relevé public précédant les réponses de cette soirée. */
+function mgmtPredecesseurBooker(m,k,cfg,limite,contrats,reclamations){
   const cad=cfg.titreCadence, plafond=Math.min(limite,m.card.sizeMain);
   const admissible=f=>!contrats||!!(f&&!f.libre&&mgmtContratRestants(f)>0);
   let reclames=0, tetes=0;
   /* La carte principale : les combats réclamés d'abord, puis les meilleures têtes d'affiche de chaque catégorie. */
-  for(const r of mgmtPublicReclame(m)){ if(m.card.main.length>=plafond) break; const a=mgmtFighterById(m,r.a), b=mgmtFighterById(m,r.b);
+  /* ==== [ANCRE: MONDE_LOT5_T6_RECLAMATIONS_BOOKING] — Monde lot 5 T6 ==== */
+  for(const r of reclamations||mgmtPublicReclame(m)){ if(m.card.main.length>=plafond) break; const a=mgmtFighterById(m,r.a), b=mgmtFighterById(m,r.b);
     if(a&&b&&admissible(a)&&admissible(b)&&a.div===b.div&&mgmtSelectable(m,a,null)&&mgmtSelectable(m,b,a.id)){ if(mgmtBookMain(m,a.id,b.id)) reclames++; } }
   const divs=[...new Set(mgmtCartRows(m).map(f=>f.div))];
   /* Décision du 12/10/2026 : le prédécesseur fait tourner les combats de titre. Une catégorie qui n'a qu'un règne (ou aucun) est servie d'abord, chaque soirée,
@@ -149,9 +151,13 @@ function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   if(cfg.renouvelle===true) resignes=mgmtPredecesseurResigne(m);
    if(cfg.recrues) recrues=mgmtPredecesseurRecrute(m,k,cfg.recrues);
    /* ==== [ANCRE: MONDE_LOT5_T2_SOIREE_DEMANDES] — Monde lot 5 T2 ==== */
+   /* ==== [ANCRE: MONDE_LOT5_T6_RECLAMATIONS_AVANT_REPONSES] — Monde lot 5 T6 ==== */
+   /* Répondre ferme la demande, pas la réclamation déjà connue pour cette carte.
+      Photographier celle-ci préserve le booking porté ; ses gardes restent appliquées. */
+   const reclamations=cfg.demandes===true?mgmtPublicReclame(m):undefined;
    if(cfg.demandes===true) mgmtPredecesseurDemandes(m);
   if(!m.cal.prochaines.length) mgmtAgendaPoser(m,m.cal.jour+MGMT_EVENT_WEEKS*7,'petite');
-  const {reclames,tetes}=mgmtPredecesseurBooker(m,k,cfg,m.card.sizeMain,false);
+  const {reclames,tetes}=mgmtPredecesseurBooker(m,k,cfg,m.card.sizeMain,false,reclamations);
   const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(!bulk) mgmtOfferBulk(m,true);
   const bulk2=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk2) mgmtDecide(m,bulk2.id,'validate');
   m.pile.forEach(x=>{x.status='closed';});
