@@ -234,6 +234,79 @@ le test 4, `JSON G.mgmt` identique), aucune migration ni validation nouvelle.
 - Navigateur hors ligne (`tools/reports/monde-t5-browser.js`, non suivi) : cinq entrées × 1280/1440/1920,
   parcours souris puis clavier, code de sortie 0 — 0 erreur console, 0 ligne hors de son panneau, corps
   minimum 22 px, 0 défilement horizontal, retour exact à l'écran d'origine depuis chaque entrée.
+### Questions pour Anthony
+
+Aucune.
+
+---
+
+## Compte rendu — reprise du 14/10/2026
+
+Reprise demandée sur six écarts du relecteur. **Aucun fichier de code n'est modifié** : le commit
+de la tranche `f719833` est déjà conforme aux six points. La correction porte sur le périmètre du
+commit et sur ce compte rendu.
+
+### Les six écarts, un par un
+
+**1 et 2 — `mgmt-retraits-data.js`, `mgmt-voix-data.js` — rien à corriger.** Les deux fichiers
+sont listés ` M` par `git status`, mais `git diff` et `git diff --ignore-all-space --numstat` ne
+montrent **aucune différence de contenu** : le blob de l'index est identique à celui de HEAD
+(`18724479` et `2fa0a795`), seules les fins de ligne ont été réécrites en CRLF (le dépôt n'a pas de
+`.gitattributes`). Il n'y a donc aucun « changement à annuler » — et les deux fichiers ne sont pas
+ajoutés au commit, la règle des fins de ligne l'interdit. Les 16 modèles T2 et les 10 T3 sont
+intacts : leurs tests sont verts au §9 de vérification.
+
+**3, 4 et 6 — non applicables : ces changements ne sont pas dans la tranche.** `main...HEAD` est
+l'écart de la **branche** (T1 + T2 + T3 + configuration des agents + T5), pas celui du commit de la
+tranche. `git show --stat f719833` liste 16 fichiers et **aucun** de ceux visés par ces trois écarts.
+L'origine de chaque changement :
+
+| Écart | Fichiers | Commit d'origine | Tranche |
+|---|---|---|---|
+| 3 | `mgmt-camps.js`, `mgmt-ceintures.js`, `mgmt-humanite.js` | `809be63`, `0e8e9ad` | T1, acceptée par `83441e9` |
+| 6 | `mgmt-presentation-faits.js` | `809be63`, `0e8e9ad` | T1, acceptée |
+| 6 | `mgmt-presentation-combattant.js`, `mgmt-presentation-data.js` | `49bdeca`, `5461bc6`, `523fa34` | T2, acceptée par `d6f94a9` |
+| 6 | `mgmt-presentation-combat-data.js` | `d877e07`, `0300da3` | T3, acceptée par `03fdac0` |
+| 4 | fiches T1, T2, T3 | leurs propres commits | tranches acceptées |
+
+**Les retirer casserait la tranche elle-même.** `mgmt-presentation-ecrans.js:147` appelle
+`mgmtFaitsBase({m,h},id)`, et cette fonction n'est définie que dans `mgmt-presentation-faits.js:26` —
+le fichier T1 visé par l'écart 6. La supprimer casse le rendu de T5 et ses sept tests. De même,
+l'écart 3 effacerait le contexte et le sel explicites propagés par T1 dans `mgmt-humanite.js` et
+`mgmt-camps.js`, dont dépend toute la frontière historique `p.h` exigée par le §4 de cette fiche ;
+l'écart 4 effacerait les comptes rendus des trois tranches acceptées.
+
+**5 — `.opencode/agents/*.md`, `opencode.json`.** `codeur.md`, `eclaireur.md` et `verif.md` portent
+une modification non commitée d'une ligne chacun (choix de modèle) : c'est de la configuration
+d'agents en cours, elle **n'est pas ajoutée** à la tranche et reste dans le répertoire de travail.
+`opencode.json` est modifié par `9c4152b`, un commit « Agents : » distinct, jamais par T5.
+
+### Fichiers modifiés
+
+- `docs/lots/MONDE-LOT-3-T5.md` — ce compte rendu. Aucun autre.
+
+### Tests ajoutés
+
+Aucun. Les sept tests du §8 sont inchangés et verts.
+
+### Migration de sauvegarde
+
+Aucune. `MGMT_SAVE_VERSION` reste 16.
+
+### Vérification
+
+- `node --test tests/mgmtPresentationEntrees.test.js tests/mgmtPresentationCombattant.test.js
+  tests/mgmtPresentationCombat.test.js tests/mgmtSoireeShow.test.js` : 38 tests, 38 verts.
+- `npm run check:rapide` : VERT — 978 tests, 0 échec, 106 fichiers de test lancés.
+- `node tools/verif-versions.js` : aucun écart par rapport à `main` (39 fichiers examinés).
+- `@verif` et `@relecteur` indisponibles : « Subagent depth limit reached (1) », même refus que §3
+  pour `@eclaireur`. Vérification faite à la main, relecture à la main.
 
 ### Questions pour Anthony
-Aucune.
+
+1. Les écarts 3, 4 et 6 portent sur `main...HEAD` — la branche entière — et non sur le commit de la
+   tranche, qui ne contient aucun des fichiers visés. Veux-tu que je les applique malgré tout ? Cela
+   suppose de rouvrir trois tranches acceptées et de supprimer `mgmtFaitsBase`, donc de casser T5.
+   Sinon, la relecture porte sur `git show f719833`.
+2. Si `main...HEAD` doit devenir propre, il faut réécrire la branche ; `git rebase` et `git reset`
+   me sont interdits dans cette session. À faire par toi.
