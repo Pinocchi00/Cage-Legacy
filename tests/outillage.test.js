@@ -138,3 +138,20 @@ test('Monde lot 1 T2 — l’outil et la fonction du jeu donnent les mêmes chif
     return {caisse:Math.round(m.treasury*1000),pop:m.pop,effectif:m.roster.filter(f=>!mgmtIsRetired(f)).length,retraites:m.roster.filter(f=>mgmtIsRetired(f)).length}; })())`));
   for(const k of ['caisse','pop','effectif','retraites']) assert.equal(jeu[k],outil[k],k+' : l’outil et la fonction du jeu donnent le même chiffre');
 });
+
+test('Monde lot 9 T1 — l’outil mesure création complète et semaine sur huit organisations', {timeout:300000}, () => {
+  const sortie=execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'--creation','--semaine','--graine','20261008','--json'],{encoding:'utf8',timeout:300000,stdio:['ignore','pipe','ignore']});
+  const r=JSON.parse(sortie.slice(sortie.indexOf('{')));
+  assert.equal(Object.keys(r).length,8,'huit organisations');
+  let positif=0;
+  for(const id of Object.keys(r)){
+    assert.ok(r[id].creationMs>0,'durée de création positive pour '+id);
+    if (r[id].semaineMs>0) positif++;
+  }
+  assert.ok(positif===8,'huit durées de semaine positives');
+  const tmp=path.join(os.tmpdir(),'mesure-creation-semaine-test.md');
+  execFileSync(process.execPath,[path.join(racine,'tools','mesure-management.js'),'--creation','--semaine','--graine','20261008','--out',tmp],{stdio:'ignore',timeout:300000});
+  const md=fs.readFileSync(tmp,'utf8');
+  assert.match(md,/Création complète/);
+  assert.match(md,/Commande exacte/);
+});

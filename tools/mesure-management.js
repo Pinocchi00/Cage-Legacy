@@ -14,8 +14,10 @@
 const fs = require('fs');
 const path = require('path');
 const { newGameWindow } = require('../tests/helpers/loadGame');
-const args = process.argv.slice(2).filter((a, i, l) => !a.startsWith('--') && l[i - 1] !== '--out' && l[i - 1] !== '--orgs');
+const args = process.argv.slice(2).filter((a, i, l) => !a.startsWith('--') && l[i - 1] !== '--out' && l[i - 1] !== '--orgs' && l[i - 1] !== '--graine');
 const opt = n => { const i = process.argv.indexOf(n); return i >= 0 ? process.argv[i + 1] : null; };
+const CREATION = process.argv.includes('--creation') || process.argv.includes('--creer') || process.argv.includes('--create') || process.argv.includes('--creation-complete');
+const SEMAINE = process.argv.includes('--semaine') || process.argv.includes('--week') || process.argv.includes('--une-semaine') || process.argv.includes('--week-short');
 const SOIREES = args[0] ? Number(args[0]) : (process.argv.includes('--six-ans') ? 62 : 40);
 /* --ans : les points à un, deux et quatre ans (12, 24 et 48 soirées mensuelles), pour la relève et la hiérarchie (lot 13). */
 const ANS = process.argv.includes('--ans');
@@ -27,8 +29,60 @@ const SIX_ANNEES = 62;
 const POINTS = ANS ? [12, 24, 48].filter(p => p <= SOIREES) : [10, 20, 40].filter(p => p <= SOIREES).concat(SOIREES > 40 ? [SOIREES] : []);
 const out = opt('--out') || path.join(__dirname, 'reports', 'MESURE-MANAGEMENT.md');
 const json = process.argv.includes('--json');
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log(`Usage: node tools/mesure-management.js [soirées] [--orgs id1,id2] [--out chemin.md] [--json] [--graine N] [--six-ans] [--ans]`);
+  console.log(`       node tools/mesure-management.js --creation [--semaine] [--orgs id1,id2] [--graine N] [--json] [--out chemin.md]`);
+  console.log(`Mesure courte documentée par l'outil (Monde lot 9 T1) :`);
+  console.log(`  node tools/mesure-management.js --creation --semaine --graine 20261008 --json   (création complète + une semaine, huit organisations, graine fixe)`);
+  process.exit(0);
+}
 const win = newGameWindow({ runMain: true });
 const orgIds = opt('--orgs') ? opt('--orgs').split(',') : JSON.parse(win.eval('JSON.stringify(MGMT_ORGANISATIONS.map(o=>o.id))'));
+
+/* Monde lot 9 T1 : mesure de la création complète (et d'une semaine de jeu) sur les huit organisations.
+   Chronométrage à l'intérieur de win.eval (Date.now du contexte de simulation), pas autour du pont jsdom. */
+if (CREATION || SEMAINE) {
+  const graine = Number(opt('--graine') || 20261008);
+  const res = {};
+  for (const id of orgIds) {
+    const t0 = Date.now();
+    const code = `JSON.stringify((function(){
+      mgmtRetraitProb=function(){return 0;};
+      setSeed(${graine});
+      const m=mgmtPasseGenerer(${JSON.stringify(id)},{});
+      const creationMs=Date.now()-${t0};
+      let semaineMs=0, semaineSoirees=0;
+      if (${SEMAINE ? 'true' : 'false'}) {
+        G={theme:'dark',mgmt:m};
+        const t1=Date.now();
+        const s=mgmtPredecesseurSoiree(m,0,undefined,undefined);
+        semaineMs=Date.now()-t1;
+        semaineSoirees=s&&s.jouee?1:0;
+      }
+      return {creationMs:creationMs,semaineMs:semaineMs,soirees:m.eventsPlayed,cycle:m.cycle,semaineSoirees:semaineSoirees}; })())`;
+    const sortie = win.eval(code);
+    const r = JSON.parse(String(sortie).slice(String(sortie).indexOf('{')));
+    res[id] = r;
+    console.error(`${id} : creation ${((r.creationMs)/1000).toFixed(1)} s${SEMAINE ? ', semaine ' + (r.semaineMs/1000).toFixed(2) + ' s' : ''}`);
+  }
+  const premier = Date.now();
+  const totalCreationMs = Object.keys(res).reduce((s,id)=>s+res[id].creationMs,0);
+  const totalSemaineMs = Object.keys(res).reduce((s,id)=>s+res[id].semaineMs,0);
+  if (json) { console.log(JSON.stringify(res, null, 1)); process.exit(0); }
+  let md = `# Mesure création complète et semaine (Monde lot 9 T1)\\n\\n`;
+  md += 'Commande exacte : node tools/mesure-management.js --creation' + (SEMAINE?' --semaine':'') + ' --graine ' + graine + (orgIds.length<8?' --orgs '+orgIds.join(','):'') + '\\n\\n';
+  md += `Création complète (huit organisations) : ${(totalCreationMs/1000).toFixed(1)} s. Semaine de jeu : ${(totalSemaineMs/1000).toFixed(2)} s.\\n\\n`;
+  md += `| Organisation | Création | Semaine | Soirées |\\n|---|---|---|---|\\n`;
+  for (const id of orgIds) {
+    const r = res[id];
+    md += `| ${id} | ${(r.creationMs/1000).toFixed(1)} s | ${SEMAINE?(r.semaineMs/1000).toFixed(2)+' s':'—'} | ${r.soirees} |\\n`;
+  }
+  md += '\\n';
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, md);
+  console.log(md);
+  process.exit(0);
+}
 
 /** Une partie : le joueur automatique, soirée après soirée. @returns {object} les mesures aux points demandés. */
 function partie(orgId, seed) {

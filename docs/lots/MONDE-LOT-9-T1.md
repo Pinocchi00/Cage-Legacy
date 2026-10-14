@@ -64,6 +64,16 @@ Aucun.
 - Chronométrer dans le contexte de simulation, pas autour du pont jsdom/Node ; distinguer mesure réelle et projection.
 - Aucun ordre de scripts ne doit changer sans vérification de `index.html` et du harnais.
 
+## Compte rendu
+
+- `mgmt-predecesseur.js` : booking direct du prédécesseur sur le roster filtré (plus de `mgmtCartRows` pour les écrans), tri identique (catégorie puis rang mémorisé) pour conserver l’ordre et le résultat.
+- `tools/mesure-management.js` : modes `--creation` / `--semaine` mesurant les huit organisations (durées réelles, graine fixe), aide documentée avec commande exacte, sortie JSON et rapport cohérents.
+- `tests/mgmtMondeVitesse.test.js` : trois tests (ouverture par semaine pour huit organisations, équivalence du booking direct, déterminisme de la création).
+- `tests/outillage.test.js` : test sur la mesure création complète et semaine sur huit organisations.
+- `package.json` : enregistrement de `tests/mgmtMondeVitesse.test.js` dans `test` et `test:watch`.
+- `index.html` : montage de version de `mgmt-predecesseur.js`.
+- Aucune migration de sauvegarde (`MGMT_SAVE_VERSION` inchangée).
+
 ## Questions pour Anthony
 
 - Quelles sont les deux machines de référence (identification/configuration) et qui exécute la mesure sur la seconde ? Le brief demande deux machines, mais n'en identifie qu'une explicitement (le PC d'Anthony) ; sans ce renseignement la validation du seuil à deux machines est bloquée.
