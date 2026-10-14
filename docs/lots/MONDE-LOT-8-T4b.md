@@ -85,3 +85,14 @@ Le STOP de tête est périmé. Les trois questions sont tranchées, code sans de
 - **N5** : le challenger se déclare automatiquement à l'ouverture du premier cycle où `mgmtPretendant` donne un prétendant distinct du champion pour un règne en cours, et de nouveau si le prétendant change ou si un nouveau règne commence. Clé unique : (div, champion, since, challenger). Titre vacant : aucune déclaration.
 - **N11** : « un réveil par an » = une tranche fixe d'une année de jeu, `Math.round(MGMT_EXT_YEAR_WEEKS/MGMT_EVENT_WEEKS)` cycles (10 aujourd'hui, à calculer depuis les constantes existantes, pas à écrire en dur) ; la clé est (paire triée, index du combat, `Math.floor(cycle/ANNEE)`). **Ancien combat concerné** : le combat le plus RÉCENT de la paire parmi ceux vieux de plus de `MGMT_RIVALITE_CYCLES` cycles (12) ; s'il n'y en a pas, aucun réveil. Les combats de moins de 12 cycles restent couverts par S36/S37, ne les double pas.
 Tu n'as aucune question à poser à Anthony.
+
+## TEXTES livrés par Claude — 14/10/2026 16 h 35 (ne PAS appeler @ecrivain : un sous-agent ne peut pas l'appeler)
+Les six gabarits sont ceux-ci, tels quels, à ajouter à l'objet `MGMT_MONDE_PHRASES` existant (là où il vit déjà : cherche `grep -n "MGMT_MONDE_PHRASES={" mgmt-*.js`), qui porte déjà `relu:false`. Le codeur n'en change aucun mot, n'en invente aucun autre. Les jetons `{Il}` `{il}` `{lui}` sont accordés par `mgmtAccord` au rendu, comme pour T4a. Variables : `{age}` (l'âge de retraite calculé, entier), `{depasse}` (le nom de la personne dépassée), `{div}` (`mgmtDivisionLabel`), `{champion}` (le nom du champion), `{adv}` (le nom de l'autre combattant du combat réveillé).
+- `retraiteAnnoncee` : `{Il} annonce sa retraite : ce sera dans trois soirées, à {age} ans.`
+- `depassement` : `{Il} vient de passer devant {depasse} au classement ({div}).`
+- `challenger` : `{Il} se déclare pour la ceinture ({div}) et vise {champion}.`
+- `vieuxCombatVoisins` : `Son ancien combat contre {adv} redevient d’actualité : ils sont voisins au classement.`
+- `vieuxCombatTitre` : `Son ancien combat contre {adv} redevient d’actualité : une ceinture est en jeu.`
+- `vieuxCombatBlessure` : `Son ancien combat contre {adv} redevient d’actualité : {il} revient de blessure.`
+Le fait `vieux_combat` porte la raison (`voisins` | `titre` | `blessure`) pour choisir la variante ; un fait sans raison connue prend `vieuxCombatVoisins`.
+Le test 6 de la §7 vérifie ces six gabarits (non vides, `relu:false` présent, accord et échappement).
