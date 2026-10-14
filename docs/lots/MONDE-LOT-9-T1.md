@@ -1,5 +1,3 @@
-# STOP
-
 # Monde lot 9 T1 — accélérer et mesurer la simulation
 
 Branche attendue : `monde-lot-9-vitesse` — branche courante : `monde-lot-9-vitesse`.
@@ -69,3 +67,6 @@ Aucun.
 ## Questions pour Anthony
 
 - Quelles sont les deux machines de référence (identification/configuration) et qui exécute la mesure sur la seconde ? Le brief demande deux machines, mais n'en identifie qu'une explicitement (le PC d'Anthony) ; sans ce renseignement la validation du seuil à deux machines est bloquée.
+
+## DÉCISION du superviseur — 14/10/2026 15 h 40 (réponse à la question sur les deux machines)
+La question sur les machines ne bloque PAS le code. Le codeur fait : les trois leviers, l'outil de mesure étendu aux huit organisations (création complète et une semaine, graine fixe, rapport avec la commande exacte), les tests. La mesure officielle est faite ensuite : le superviseur la lance sur la machine de développement (celle d'Anthony) et inscrit le résultat dans le rapport ; la seconde machine sera mesurée plus tard avec la commande du rapport. Tu n'as donc aucune question à poser. Le STOP de tête est périmé.
