@@ -1,4 +1,4 @@
-﻿---
+---
 description: Écrit les textes visibles par le joueur (fiches d'identité, raisons de Leïla, présentations, pronostics, événements), en français, marqués relu:false, selon la commande donnée.
 mode: subagent
 model: openai/gpt-6-luna

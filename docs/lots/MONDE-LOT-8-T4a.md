@@ -1,4 +1,4 @@
-﻿# Monde lot 8 T4a : cinq événements de coût petit, la demande restée sans réponse, le nom de la blessure
+# Monde lot 8 T4a : cinq événements de coût petit, la demande restée sans réponse, le nom de la blessure
 
 **Branche** : `monde-lot-8-suite` (vérifiée : branche courante). **Prérequis** : T1 et T6 codées dans la branche. Vérifie : `grep -n "MGMT_MARQUE_FAITS" mgmt-attention.js` et `grep -n "function mgmtMarquesAllumees" mgmt-attention.js` doivent répondre. Sinon arrête-toi et écris-le dans ton compte rendu. La T2 n'est pas codée : voir §11. Cherche par nom de fonction, pas par numéro de ligne.
 

@@ -1,4 +1,4 @@
-﻿---
+---
 description: Lance la vérification rapide (ou complète si on le lui demande) et l'audit des versions de cache, et ne rend que les échecs. À appeler avant chaque relecture et chaque commit.
 mode: subagent
 model: opencode/step-5-preview-free

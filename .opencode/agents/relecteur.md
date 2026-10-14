@@ -1,4 +1,4 @@
-﻿---
+---
 description: Relit le diff d'une tranche contre sa fiche et les règles du dépôt, et rend ACCEPTÉ ou À REPRENDRE avec une liste numérotée. Ne modifie rien.
 mode: subagent
 model: openai/gpt-6-luna

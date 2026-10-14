@@ -1,4 +1,4 @@
-﻿---
+---
 description: Cherche dans le code de Cage Legacy et rend une réponse courte (fichier:ligne, signature, appelants). À appeler au lieu d'ouvrir soi-même beaucoup de fichiers. Lecture seule.
 mode: subagent
 model: opencode/step-5-preview-free
