@@ -127,3 +127,13 @@ Quatre tests de `tests/mgmtMondeEvenements.test.js` sont rouges ; ils parlent to
 4. « les six genres allument la marque et passent par le budget » : un genre n'allume pas sa marque.
 Cause probable commune : le fait est écrit deux fois (une fois par le chemin de l'événement, une fois par le chemin de rattrapage/rechargement), ou une clé d'idempotence manque. Trouve-la, corrige le CODE (jamais assouplir un test sans décision citée).
 Ensuite : `node tools/_bump.js` pour chaque fichier .js modifié (9 écarts de version signalés), `node tools/verif-versions.js origin/main`, `npm run check:rapide`, puis commit `Monde lot 8 T4a : ...` (pas `inachevé` sauf impossibilité réelle, dis alors précisément ce qui manque).
+
+## DÉCISION du superviseur — 14/10/2026 15 h 35 (suite à la relecture « À REPRENDRE »)
+1. **Chaînage avec la T2 : ACCEPTÉ.** `mgmtDepuisVisite` existe et appelle `mgmtMondePhrase` pour les six genres, comme la décision de la §5 le prévoyait. Aucune décision d'Anthony n'est nécessaire.
+2. **Libellés `Le classement`, `Une ceinture`, `Son contrat`, `Son camp` dans `MGMT_DEPUIS_LIBELLES` : ACCEPTÉS.** Ce sont des étiquettes fonctionnelles du même gabarit que les six existantes, marquées `relu:false` : Anthony les relira avec les autres textes. Ne les change pas, ne pose pas de question.
+3. **Reste à faire : trois tests rouges** dans `tests/mgmtMondeEvenements.test.js` (le test N6 est déjà réparé) :
+   - « N7 : un règne dit ses caps une fois chacun » : 2 au lieu de 1 au premier passage ;
+   - « une demande périmée écrit « restée sans réponse » une fois » : 2 au lieu de 1 ;
+   - « les six genres allument la marque et passent par le budget » : l'ensemble des genres allumés diffère de l'attendu.
+   Méthode : pour chacun, d'abord lis ce que le test fabrique (nombre de faits créés, cycle, graine). Si le CODE écrit deux fois le même fait, ajoute une clé d'idempotence (même motif que pour N6, déjà corrigé). Si c'est le TEST qui crée deux événements distincts, corrige le test et cite cette décision dans le commit. Ne conclus jamais « impossible » sans avoir lu les fonctions concernées.
+4. Puis : versions (`node tools/_bump.js`), `node tools/verif-versions.js origin/main`, `npm run check:rapide`, commit `Monde lot 8 T4a : ...`. Un commit `inachevé` n'est permis que si un test reste rouge ; dis alors lequel et pourquoi.
