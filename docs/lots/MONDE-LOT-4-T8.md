@@ -57,3 +57,12 @@ Bonne base, acceptée. Écarts à corriger, chacun en reprenant les valeurs inli
 7. En mode dossiers, **retire l'ancienne ligne de Leïla** en bas de l'écran (« Bienvenue. Choisissez un combattant, puis son adversaire. »).
 8. Aucun espace insécable ou idéographique dans le code (`no-irregular-whitespace`) : lance `npx eslint mgmt-carte-cadre.js`.
 Test à ajouter : `Monde lot 4 T8 — le contrat du dossier se lit en combats restants`. Commit `Monde lot 4 T8 : reprise d'après la planche`.
+
+## Compte rendu — reprise du 15/10/2026
+- `mgmt-carte-cadre.js` : cartouches d'étapes structurés, contrat calculé via `mgmtCarteContratTexte`, libellés organisation en capitales.
+- `ui-cadre.css` : règles d'alignement et tailles de la planche pour étapes, bannière, raison, voisins rectangulaires et lignes à pastille.
+- `mgmt-prise-en-main.js` : masque l'ancienne ligne de bienvenue lorsque l'écran Carte est en mode dossiers.
+- `index.html` et `sw.js` : versions/cache montés par `tools/_bump.js`.
+- `tests/mgmtDossiers.test.js` : test ajouté « Monde lot 4 T8 — le contrat du dossier se lit en combats restants ».
+- Tests ciblés `node --test --test-name-pattern="T8|T7" tests/mgmtDossiers.test.js` : 4/4 réussis. Fichier complet tenté mais dépasse 120 s. Le lancement de `npx eslint` n'a pas été autorisé par l'environnement.
+- Vérification versions `node tools/verif-versions.js origin/main` : aucun écart. Aucune migration. Écart restant : le SVG de motif octogonal conservé est un motif discret. Questions pour Anthony : aucune.

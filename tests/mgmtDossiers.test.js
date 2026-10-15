@@ -22,6 +22,9 @@ test('Monde lot 4 T8 — aucun identifiant interne n\'est affiché',()=>{
 test('Monde lot 4 T8 — l’étape 2 montre l’adversaire et le bouton pour mettre le combat sur la carte',()=>{
   const w=ouvreCible(0);try{w.eval('CL.mgmtCarteEntree()');const r=JSON.parse(w.eval(`(()=>{const e=document.createElement('div');e.innerHTML=mgmtCarteDossierHtml(G.mgmt);const d=MGMT_CART.dossiers[MGMT_CART.index],adv=mgmtFighterById(G.mgmt,d.adversaire.id),part=mgmtFighterById(G.mgmt,MGMT_CART.dossierCombattant);return JSON.stringify({html:e.innerHTML,adv:adv.last||adv.name,part:part.last||part.name,display:e.querySelector('.mf-dossier-nom strong').textContent,etape:MGMT_CART.etape})})()`));assert.equal(r.etape,2);assert.match(r.html,/ÉTAPE 2 SON ADVERSAIRE/);assert.equal(r.display.toLocaleLowerCase(),r.adv.toLocaleLowerCase(),'la bannière identifie l’adversaire');assert.match(r.html,new RegExp(`Mettre .* sur la carte`,'i'));assert.ok(r.html.toLocaleLowerCase().includes(r.part.toLocaleLowerCase())&&r.html.toLocaleLowerCase().includes(r.adv.toLocaleLowerCase()),'le bouton de confirmation contient les deux noms');}finally{w.close();}
 });
+test('Monde lot 4 T8 — le contrat du dossier se lit en combats restants',()=>{
+  const w=ouvreCible(0);try{const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;const f=m.roster.find(x=>x.ct&&!x.libre);if(!f)return {skip:true};const n=mgmtContratRestants(f);MGMT_CART.mode='dossiers';MGMT_CART.dossiers=[{combattant:f,adversaire:f,raison:null}];MGMT_CART.index=0;MGMT_CART.etape=1;const e=document.createElement('div');e.innerHTML=mgmtCarteDossierHtml(m);return JSON.stringify({n,text:e.textContent})})()`));if(r.skip)return;assert.ok(r.text.includes(`${r.n} COMBAT${r.n===1?'':'S'}`));}finally{w.close();}
+});
 
 test('Monde lot 4 T1 — une pile contient quatre à six combattants libres avec des familles distinctes',()=>{
   const r=ev(`setSeed(20261015);
