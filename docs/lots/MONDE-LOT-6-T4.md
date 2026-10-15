@@ -71,7 +71,12 @@ T5 (écriture des formulations/variantes), nouvelle famille de preuve ou seuil T
 3. Confirme-t-on que, pour `raison:null`, les zones de raison sont entièrement omises dans les Préliminaires, dossiers et présentation (T3 dit « réservé à l'affichage de T4, qui n'affiche alors rien ») ?
 
 ## Compte rendu
-Fiche en attente : le codeur ne démarre pas tant que la question bloquante 1 n'est pas tranchée et que les tests/appelants des interfaces lot 3/4 ne sont pas repérés.
+- `mgmt-raisons.js` : catalogue `MGMT_RAISON_PHRASES` et fonction pure `mgmtRaisonLignes(m,raison)` pour retourner deux lignes HTML échappées, sans relire les causes.
+- `mgmt-prelims.js` : l'écran affiche la raison enregistrée des propositions Leïla ; cause absente et origine joueur sont omises. L'ancien dérivé n'est plus utilisé.
+- `tests/mgmtRaisonAffichage.test.js` : tests « mgmtRaisonLignes rend deux lignes depuis la preuve sans relecture », « origine joueur et preuve absente ne produisent aucune ligne », « les préliminaires omettent une raison nulle sans exception » ; ajouté aux scripts `test` et `test:watch`.
+- Versions cache des deux fichiers JS incrémentées. Pas de migration ni de changement de format de sauvegarde.
+- Écart à la fiche : selon la précision du superviseur, aucun branchement présentation du combat ni dossiers (absents de cette branche) ; formulations immédiates comme décidé. Les chaînes prévues sont les formulations T4 disponibles ici, sans accords féminins (T5).
+- Questions pour Anthony : aucune.
 
 ## DÉCISION du superviseur — 15/10/2026 (les trois questions sont tranchées ; aucune question pour Anthony)
 1. **Ordre T4/T5** : T4 livre l'affichage avec UNE formulation par famille, écrite par toi d'après la colonne « Le fait cité » du brief (lot 6, tableau des quinze familles) : ligne 1 = le fait avec son chiffre ou son nom (lu dans les champs structurés de la raison, jamais inventé), ligne 2 = ce que le combat peut changer, sobre. Constante `MGMT_RAISON_PHRASES` (une entrée par famille, `relu:false`). T5 ajoutera ensuite deux variantes par famille et les accords au féminin dans cette même constante. Une seule fonction pure `mgmtRaisonLignes(m,raison)` rend `{l1,l2}` ou `null` : elle sera réutilisée par les dossiers du lot 4 (qui n'existent pas encore dans cette branche : n'affiche donc que sur les Préliminaires et dans la présentation du combat).

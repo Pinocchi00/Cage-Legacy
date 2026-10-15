@@ -11,6 +11,42 @@ const MGMT_RAISON_FAMILLES=Object.freeze([
 // Libellés publics de mgmtAnciensBilan, sans inférence sur les attributs.
 const MGMT_RAISON_STYLES=Object.freeze({'Finit par KO':'frappe','Finit au sol':'sol'});
 
+/* ==== [ANCRE: MONDE_LOT6_T4_RAISON_PHRASES] — Monde lot 6 T4 ==== */
+/** Textes provisoires structurés pour l'affichage des preuves, sans reconstituer leur origine. */
+const MGMT_RAISON_PHRASES=Object.freeze({
+  'revanche':['Un combat passé les oppose.','La revanche peut donner une suite à cette histoire.'],
+  'rivalite-ouverte':['Une demande de revanche les relie.','Le combat peut faire avancer cette rivalité.'],
+  'series-croisees':['Chacun arrive sur une série de victoires.','Le combat peut départager leurs dynamiques.'],
+  'classement-voisin':['Leurs rangs sont proches.','Le combat peut les départager au classement.'],
+  'test-jeune':['Un jeune espoir affronte un combattant installé.','Le combat peut mesurer son niveau.'],
+  'derniere-chance':['Une série de défaites rend ce combat important.','Le résultat peut relancer sa trajectoire.'],
+  'longue-attente':['Un combattant attend depuis plusieurs mois.','Le combat peut le remettre en activité.'],
+  'demande-promesse':['Une demande ou une promesse vise ce combat.','Le combat peut tenir cet engagement.'],
+  'fin-contrat':['Un contrat arrive à son terme.','Le combat peut peser sur la suite.'],
+  'styles-opposes':['Leurs bilans montrent des styles de victoire différents.','Le combat mettra ces styles à l’épreuve.'],
+  'derby':['Ils partagent le même pays.','Le combat peut faire valoir cette proximité.'],
+  'debuts':['Un combattant n’a pas encore de combat enregistré.','Le combat peut marquer ses débuts.'],
+  'veteran':['Un combattant possède une longue expérience.','Le combat peut éprouver cette expérience.'],
+  'reclame-public':['Le public a réclamé ce combat.','Le combat peut répondre à cette attente.'],
+  'meme-categorie-jamais-affrontes':['Ils évoluent dans la même catégorie et ne se sont jamais affrontés.','Le combat peut établir leur premier repère commun.']
+});
+
+/* ==== [ANCRE: MONDE_LOT6_T4_RAISON_LIGNES] — Monde lot 6 T4 ==== */
+/** Rend les deux lignes d'une preuve enregistrée, sans relecture de l'état de jeu.
+ * @param {Object} m Partie contenant le roster pour résoudre les noms utiles.
+ * @param {Object} raison Preuve persistée {famille,fait} et origine éventuelle.
+ * @returns {{l1:string,l2:string}|null} HTML échappé des deux lignes, ou null si affichage interdit.
+ */
+function mgmtRaisonLignes(m,raison){
+  if(!raison||raison.origine==='joueur'||!raison.famille||!raison.fait) return null;
+  const phrases=MGMT_RAISON_PHRASES[raison.famille]; if(!phrases) return null;
+  const f=raison.fait, noms=(f.combattants||[]).map(x=>mgmtFighterById(m,x.a)).filter(Boolean).map(x=>x.last||x.name);
+  const ids=[f.a,f.b,f.gagnant,f.perdant,f.target].filter(Boolean).map(id=>mgmtFighterById(m,id)).filter(Boolean).map(x=>x.last||x.name);
+  const chiffres=[f.rang,f.age,f.total,f.mois,f.cycles,f.n,f.restants].filter(Number.isFinite);
+  const detail=[...new Set(noms.concat(ids))].join(' · ')||chiffres.join(' · ');
+  return {l1:esc(detail?`${phrases[0]} (${detail})`:phrases[0]),l2:esc(phrases[1])};
+}
+
 /* ==== [ANCRE: MONDE_LOT6_T1_RAISON_LECTURE] — Monde lot 6 T1 ==== */
 /** Lit les familles justifiées pour deux combattants, sans mutation ni texte.
  * @param {Object} m Partie en mémoire.
