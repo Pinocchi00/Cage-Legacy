@@ -70,6 +70,22 @@ function mgmtExteriorStream(salt,seed){
   return mulberry32(duelFnv1a32(salt+'|'+(seed>>>0)));
 }
 
+/* ==== [ANCRE: MONDE_LOT9_T2C_LECTURE_COMMUNE] — Monde lot 9 T2c ==== */
+/** Effectifs des organisations extérieures, via la même porte pour tous les lecteurs. */
+function mgmtExteriorEffectifs(m,divId){
+  if(!m||m.mondeVivant!==true||!m.orgs||typeof m.orgs!=='object') return [];
+  const vus=new Set(), resultat=[];
+  for(const id of mgmtMondeVivantIds(m)){
+    const sous=m.orgs[id];
+    for(const f of (sous&&Array.isArray(sous.roster)?sous.roster:[])){
+      if(!f||f.div!==divId||!mgmtValidId(f.id)||mgmtIsRetired(f)||vus.has(f.id)) continue;
+      vus.add(f.id);
+      resultat.push(Object.assign({orgId:id},f));
+    }
+  }
+  return resultat;
+}
+
 /** Crée une ligne extérieure : SON IDENTITÉ, rien d'autre. L'identifiant
  *  vient du compteur de la partie (mgmtNextId), la graine du hachage de
  *  l'identifiant, le pays d'un flux propre au combattant, et la catégorie
@@ -116,6 +132,7 @@ function mgmtWorldLivingCount(m,divId){
       if(o&&o.div===divId&&mgmtValidExteriorLine(o)&&!mgmtExteriorRetired(o,cycle)) ids.add(o.id);
     }
   }
+  for(const o of mgmtExteriorEffectifs(m,divId)) ids.add(o.id);
   return ids.size;
 }
 

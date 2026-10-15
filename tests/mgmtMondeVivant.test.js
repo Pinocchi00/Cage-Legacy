@@ -129,3 +129,16 @@ test('Monde lot 9 T2b — une partie mondeVivant:false ne fait rien', () => {
   const win=creer(false), avant=win.eval('mgmtSerialiser(G.mgmt)'); win.eval('mgmtMondeVivantSemaine(G.mgmt)');
   assert.equal(win.eval('mgmtSerialiser(G.mgmt)'),avant);
 });
+
+test('Monde lot 9 T2c — les effectifs vivants alimentent le compte et le classement mondial', () => {
+  const win=creer(true);
+  const r=win.eval(`(function(){
+    const m=G.mgmt, id=mgmtMondeVivantIds(m)[0], sous=m.orgs[id];
+    const f=sous.roster.find(x=>!mgmtIsRetired(x));
+    const avant=mgmtWorldLivingCount(m,f.div), ranking=mgmtDivisionRanking(m,f.div,'world');
+    return {id:f.id,avant,compte:mgmtWorldLivingCount(m,f.div),classe:ranking.some(x=>x.id===f.id),org:mgmtExteriorEffectifs(m,f.div).find(x=>x.id===f.id).orgId};
+  })()`);
+  assert.equal(r.avant,r.compte);
+  assert.equal(r.classe,true);
+  assert.equal(r.org,win.eval('mgmtMondeVivantIds(G.mgmt)[0]'));
+});

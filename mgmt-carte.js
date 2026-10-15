@@ -600,6 +600,16 @@ function mgmtDivisionRankingCalcule(m,divId,scope,cycle){
         lastCycle:Number.isSafeInteger(last)?last:-1});
     }
   }
+  if(scope==='world'&&m.mondeVivant===true){
+    const deja=new Set(cands.map(o=>o.id));
+    for(const f of mgmtExteriorEffectifs(m,divId)){
+      if(deja.has(f.id)) continue;
+      const historique=mgmtRosterAuCycle(m.orgs[f.orgId],f,c);
+      if(!historique) continue;
+      deja.add(f.id);
+      cands.push(Object.assign({},historique,{orgId:f.orgId}));
+    }
+  }
   const scores=mgmtRangScores(m,cands,passe?c:undefined);
   cands.sort((x,y)=>mgmtRankingCompare(x,y,scores));
   return cands;
