@@ -58,7 +58,12 @@ function mgmtNouvelleBarreSuivante(aff,cible){
   const s=aff+(c-aff)*0.2;
   return (c-s<0.05)?c:s;
 }
-function mgmtNouvelleCible(g){ return g.pret?100:Math.max(0,Math.min(100,100*g.k/Math.max(1,g.n))); }
+function mgmtNouvelleCible(g){
+  if(g.pret) return 100;
+  /* Monde lot 9 T2a : avec les sept autres organisations, la barre compte le passé du joueur puis leurs pas. */
+  if(g.monde) return Math.max(0,Math.min(100,100*(g.k+(g.monde.fait/Math.max(1,g.monde.ids.length)))/Math.max(1,g.n+(g.monde.total/Math.max(1,g.monde.ids.length)))));
+  return Math.max(0,Math.min(100,100*g.k/Math.max(1,g.n)));
+}
 /** Les compteurs lus dans la partie en cours de création, à coût nul : soirées, combats, retraites (champions : non lisible à coût nul, donc absent). */
 function mgmtNouvelleCompteurs(g){
   const m=g.m;
@@ -147,11 +152,16 @@ function mgmtNouvelleGenPas(){
   if(!g||g.pret) return;
   try{
     if(!g.m){ g.m=mgmtPassePreparer(g.orgId,{soirees:g.n}); }
+    else if(g.monde){
+      if(mgmtMondeVivantPas(g.monde).termine){ g.pret=true; G.mgmt=null; render(); mgmtNouvelleBarreBoucle(g); return; }
+    }
     else{
       const r=mgmtPasseSoiree(g.m,g.k);
       g.k=r.k; g.annee=r.annee;
       if(r.termine){
         mgmtPasseCloturer(g.m);
+        /* Monde lot 9 T2a : la création réelle (sans nombre de soirées imposé) fait aussi vivre les sept autres organisations, pas à pas. */
+        if(g.avecMonde){ g.monde=mgmtMondeVivantPreparer(g.m,{soirees:g.n}); G.mgmt=null; render(); mgmtNouvelleGenSuite(g); return; }
         g.pret=true; G.mgmt=null;   /* la partie vit dans g.m jusqu au bouton */
         render();
         mgmtNouvelleBarreBoucle(g);
@@ -224,7 +234,8 @@ Object.assign(CL,{
     if(typeof mgmtDemoActive==='function'&&mgmtDemoActive()&&o.id!==CL_DEMO_ORG) return;
     if(MGMT_NOUVELLE.soirees===0){ CL.mgmtNouvelleCreer(); return; }   /* soirees:0 = une partie sans passé (tests, outils) */
     const n=Number.isSafeInteger(MGMT_NOUVELLE.soirees)&&MGMT_NOUVELLE.soirees>0?MGMT_NOUVELLE.soirees:MGMT_PASSE_SOIREES;
-    MGMT_NOUVELLE.gen={slot:MGMT_NOUVELLE.slot,orgId:o.id,org:o.nom,n,k:0,annee:mgmtPasseAnnee(n,0),m:null};
+    MGMT_NOUVELLE.gen={slot:MGMT_NOUVELLE.slot,orgId:o.id,org:o.nom,n,k:0,annee:mgmtPasseAnnee(n,0),m:null,
+      avecMonde:MGMT_NOUVELLE.monde===true||(MGMT_NOUVELLE.monde!==false&&MGMT_NOUVELLE.soirees===undefined)};   /* Monde lot 9 T2a : les sept organisations vivantes accompagnent la création réelle */
     render();
     mgmtNouvelleLectureArmer(MGMT_NOUVELLE.gen);
     mgmtNouvelleBarreBoucle(MGMT_NOUVELLE.gen);

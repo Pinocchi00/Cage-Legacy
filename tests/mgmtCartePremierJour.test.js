@@ -50,7 +50,7 @@ test('Monde lot 5 T3 — une ancienne sauvegarde ne reçoit aucune provenance', 
       old.card.main.forEach(f=>delete f.herite);const photo=JSON.stringify(old.card.main);
       const loaded=mgmtParseAndValidate(JSON.stringify(old));
       // Décision du 13/10/2026, lot 5 T4 : version 18.
-      return !!loaded&&loaded.v===18&&JSON.stringify(loaded.card.main)===photo&&validateMgmt(loaded);})()`), true);
+      return !!loaded&&loaded.v===20&&JSON.stringify(loaded.card.main)===photo&&validateMgmt(loaded);})()`), true); /* décision du 15/10/2026, monde lot 9 T2a : version 18 → 20 */
     assert.equal(win.eval(`(function(){const bad=JSON.parse(mgmtSerialiser(G.mgmt));
       bad.card.main[0].herite='true';return validateMgmt(bad);})()`), false);
   } finally { win.close(); }

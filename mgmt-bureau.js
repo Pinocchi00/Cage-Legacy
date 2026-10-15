@@ -84,7 +84,8 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       (MONDE_LOT8_T1_MIGRATION, mgmt-save.js). v15 = le passé (monde lot 1 T3). Une v1 reste refusée. ==== */
 /* ==== [ANCRE: MONDE_LOT5_T3_VERSION] — Monde lot 5 T3 ==== */
 /* ==== [ANCRE: MONDE_LOT5_T4_VERSION] — Monde lot 5 T4 ==== */
-const MGMT_SAVE_VERSION=18;
+/* Monde lot 9 T2a : 20 (18 sur main, 19 réservé au lot 6) — migration 18 → 20 : m.mondeVivant=false. */
+const MGMT_SAVE_VERSION=20;
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;

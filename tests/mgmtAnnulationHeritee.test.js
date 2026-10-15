@@ -169,8 +169,9 @@ test('Monde lot 5 T4 — la contrariété survit à la sauvegarde sans se recré
     assert.equal(w.eval(`(function(){const a=mgmtParseAndValidate(serialT4),b=mgmtParseAndValidate(mgmtSerialiser(a));
       return validateMgmt(a)&&JSON.stringify(a.card)===JSON.stringify(G.mgmt.card)&&JSON.stringify(a.facts)===JSON.stringify(G.mgmt.facts)&&JSON.stringify(b.facts)===JSON.stringify(a.facts);})()`),true);
     w.eval(`var oldT4=JSON.parse(${JSON.stringify(ancienne)}); oldT4.v=17; var chargeT4=mgmtParseAndValidate(JSON.stringify(oldT4));`);
-    assert.equal(w.eval('chargeT4.v'),18);
-    assert.equal(w.eval('JSON.stringify({...JSON.parse(mgmtSerialiser(chargeT4)),v:17})===JSON.stringify(oldT4)'),true);
+    assert.equal(w.eval('chargeT4.v'),20); /* décision du 15/10/2026, monde lot 9 T2a : 18 → 20 */
+    /* décision du 15/10/2026, monde lot 9 T2a : la migration 18 → 20 ajoute le seul champ mondeVivant=false */
+    assert.equal(w.eval('JSON.stringify({...JSON.parse(mgmtSerialiser(chargeT4)),v:17,mondeVivant:undefined})===JSON.stringify(oldT4)'),true);
     for(const [why,p] of [['inconnu',10],['annulation-heritee',9],['annulation-heritee',31],['annulation-heritee',10.5]]) {
       assert.equal(w.eval(`(function(){const m=JSON.parse(serialT4),f=m.facts.find(f=>f.why==='annulation-heritee'); f.why=${JSON.stringify(why)};f.p=${p};return validateMgmt(m);})()`),false);
     }
