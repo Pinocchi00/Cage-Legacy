@@ -61,3 +61,42 @@ test('Monde lot 9 T3 — avec le monde vivant, les huit organisations ont leurs 
     assert.ok(ra.n.filter(x=>x.puissance>0).length>1,'la puissance se partage entre plusieurs organisations');
   }finally{ a.close(); b.close(); }
 });
+
+/* Superviseur, 15/10/2026 : l'ordre officiel des organisations se lit dans le jeu (MGMT_ORGANISATIONS n'existe pas côté Node). */
+const ordreAttendu=(rows,ordre)=>rows.slice().sort((x,y)=>x.total-y.total||x.rangs.puissance-y.rangs.puissance||ordre.indexOf(x.id)-ordre.indexOf(y.id)).map(x=>x.id);
+
+test('Monde lot 9 T4 — huit lignes, rangs sans trou, totaux et ordre explicables',()=>{
+  const w=partie(true);
+  try{
+    const r=lire(w,`return {rows:mgmtOrgClassement(m),ordre:MGMT_ORGANISATIONS.map(o=>o.id)};`);
+    assert.equal(r.rows.length,8);
+    assert.deepEqual(r.rows.map(x=>x.rang),[1,2,3,4,5,6,7,8]);
+    for(const x of r.rows) assert.equal(x.total,Object.values(x.rangs).reduce((s,n)=>s+n,0),'total = somme des quatre rangs');
+    assert.deepEqual(r.rows.map(x=>x.id),ordreAttendu(r.rows,r.ordre),'ordre : total, puis puissance, puis ordre officiel');
+  }finally{w.close();}
+});
+
+test('Monde lot 9 T4 — changer la popularité change le rang de popularité et le total, et le classement suit les totaux',()=>{
+  /* Décision du 15/10/2026 précisée : le classement suit toujours la règle des totaux ; il ne bouge que si l'ordre des totaux bouge. */
+  const w=partie(true);
+  try{
+    const r=lire(w,`const avant=mgmtOrgClassement(m), id=avant[avant.length-1].id; m.orgs[id]?(m.orgs[id].pop+=100000):(m.pop+=100000);
+      return {avant,apres:mgmtOrgClassement(m),id,ordre:MGMT_ORGANISATIONS.map(o=>o.id)};`);
+    const a=r.avant.find(x=>x.id===r.id), b=r.apres.find(x=>x.id===r.id);
+    assert.equal(b.rangs.popularite,1,'la plus populaire');
+    assert.ok(b.total<a.total,'son total baisse');
+    assert.ok(b.rang<a.rang,'la dernière remonte au classement');
+    for(const k of ['stade','notoriete','puissance']) assert.equal(b.rangs[k],a.rangs[k],'les autres niveaux ne bougent pas : '+k);
+    assert.deepEqual(r.apres.map(x=>x.id),ordreAttendu(r.apres,r.ordre));
+  }finally{w.close();}
+});
+
+test('Monde lot 9 T4 — sans monde vivant, classement nul',()=>{
+  const w=partie(false);
+  try{assert.equal(lire(w,`return mgmtOrgClassement(m);`),null);}finally{w.close();}
+});
+
+test('Monde lot 9 T4 — à graine égale, le classement est identique',()=>{
+  const a=partie(true),b=partie(true);
+  try{assert.deepEqual(lire(a,`return mgmtOrgClassement(m);`),lire(b,`return mgmtOrgClassement(m);`));}finally{a.close();b.close();}
+});

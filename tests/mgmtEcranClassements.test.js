@@ -191,3 +191,54 @@ test('MGMT T6 — le sens de la tendance : gagner des places porte « +n », la 
   assert.equal(r.cP,'eq','place tenue : « = »');
   assert.equal(r.nouveau,'nouveau','absent d’hier : « nouveau »');
 });
+
+/* Superviseur, 15/10/2026 : l'écran Classements est celui du lot 10 (mgmt-suivi-cadre.js, MGMT_SU_CL, touche M pour le mondial) ;
+   la première version visait l'ancien écran (.mgmt-cl-row) et la fiche d'avant le lot 10. */
+test('Monde lot 9 T5 — le mondial classe les huit organisations ensemble par catégorie', () => {
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(20261015); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6});`);
+  const out=JSON.parse(win.eval(`(function(){ const m=G.mgmt, out=[];
+    for(const d of allDivisions()){
+      const world=mgmtDivisionRanking(m,d.id,'world'), lignes=mgmtClassementLignes(m,d.id,'world');
+      const orgs=new Set(world.map(r=>m.roster.some(f=>f.id===r.id)?mgmtPredecesseurOrgId(m):(mgmtExteriorCombattant(m,r.id)||{}).orgId));
+      G.screen='mgmt_classements'; MGMT_SU_CL.portee='organization'; render(); CL.mgmtSuClSexe(d.gender); CL.mgmtSuClDiv(d.id); CL.mgmtSuClPortee();
+      const libelle=document.getElementById('app').textContent;
+      const cartes=[...document.querySelectorAll('.mf-su-cartes [onclick]')].map(b=>b.getAttribute('onclick').split("'")[1]);
+      out.push({ids:world.map(r=>r.id),lignes:lignes.map(x=>x.id),rangs:lignes.map(x=>x.rang),orgs:[...orgs].filter(Boolean).length,mondial:/Mondial/.test(libelle),cartes});
+    }
+    return JSON.stringify(out); })()`));
+  assert.ok(out.length>0);
+  for(const x of out){
+    assert.deepEqual(x.lignes,x.ids,'l’écran suit le classement mondial, dans son ordre');
+    assert.equal(new Set(x.ids).size,x.ids.length,'aucun doublon');
+    assert.deepEqual(x.rangs,x.ids.map((_,i)=>i+1),'rangs 1 à N sans trou (pas de champion dans le mondial)');
+    assert.ok(x.mondial,'la touche M affiche le classement mondial');
+    assert.deepEqual(x.cartes,x.ids.slice(0,x.cartes.length),'les premières cartes sont les premiers mondiaux');
+  }
+  assert.ok(out.some(x=>x.orgs>=4),'le mondial mêle plusieurs organisations');
+});
+
+test('Monde lot 9 T5 — le rang mondial de la liste est celui de la fiche', () => {
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(20261015); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6});`);
+  const r=JSON.parse(win.eval(`(function(){ const m=G.mgmt, out=[];
+    for(const d of allDivisions()){
+      const world=mgmtDivisionRanking(m,d.id,'world');
+      const f=m.roster.find(x=>x.div===d.id&&!mgmtIsRetired(x)&&world.some(w=>w.id===x.id)); if(!f) continue;
+      const rang=world.findIndex(w=>w.id===f.id)+1;
+      CL.mgmtFiche(f.id); render();
+      const monde=(document.querySelector('.mf-fb-monde')||{}).textContent||'';
+      out.push({rang,situ:mgmtFicheSituation(m,f,'world'),monde});
+    }
+    return JSON.stringify(out); })()`));
+  assert.ok(r.length>0);
+  for(const x of r){
+    assert.ok(x.monde.toLowerCase().includes(x.situ.toLowerCase()),'la fiche affiche la situation mondiale : '+x.monde);
+    if(x.rang<=15) assert.ok(new RegExp('^'+x.rang+'\D').test(x.situ)||x.situ.startsWith(String(x.rang)),'le rang de la liste est celui de la fiche : '+x.rang+' / '+x.situ);
+  }
+});
+
+test('Monde lot 9 T5 — le classement mondial est déterministe à graine égale', () => {
+  const rankings=seed=>{const w=newGameWindow({runMain:true}); return JSON.parse(w.eval(`setSeed(${seed}); mgmtPasseGenerer('split',{soirees:6}); mgmtMondeVivantGenerer(G.mgmt,{soirees:6}); JSON.stringify(allDivisions().map(d=>mgmtDivisionRanking(G.mgmt,d.id,'world').map(x=>x.id)))`));};
+  assert.deepEqual(rankings(20261015),rankings(20261015));
+});
