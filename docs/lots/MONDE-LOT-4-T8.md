@@ -66,3 +66,12 @@ Test à ajouter : `Monde lot 4 T8 — le contrat du dossier se lit en combats re
 - `tests/mgmtDossiers.test.js` : test ajouté « Monde lot 4 T8 — le contrat du dossier se lit en combats restants ».
 - Tests ciblés `node --test --test-name-pattern="T8|T7" tests/mgmtDossiers.test.js` : 4/4 réussis. Fichier complet tenté mais dépasse 120 s. Le lancement de `npx eslint` n'a pas été autorisé par l'environnement.
 - Vérification versions `node tools/verif-versions.js origin/main` : aucun écart. Aucune migration. Écart restant : le SVG de motif octogonal conservé est un motif discret. Questions pour Anthony : aucune.
+
+## Compte rendu — reprise des écarts du relecteur
+- `tests/mgmtDossiers.test.js` : les tests couvrent explicitement un contrat avec 1 combat restant, plusieurs combats restants et l'absence de contrat, sans branche d'évitement. Le test de l'étape 2 contrôle séparément le texte et l'action du bouton de confirmation.
+- `mgmt-carte-cadre.js` : la raison utilise la paire du dossier ([combattant, adversaire]) aux deux étapes, conservant le choix de variante fondé sur les deux identifiants.
+- `ui-cadre.css` : couleurs du bandeau limitées aux enfants de Leïla ; le motif de bannière est placé derrière le nom et les valeurs du cartouche.
+- `index.html` et `sw.js` : versions du JS/CSS et cache montés par `tools/_bump.js`.
+- Tests ajoutés/modifiés : « Monde lot 4 T8 — l’étape 2 montre l’adversaire et le bouton pour mettre le combat sur la carte » ; « Monde lot 4 T8 — le contrat du dossier se lit en combats restants ».
+- Vérification : `node --test --test-name-pattern="T8|T7" tests/mgmtDossiers.test.js` (4/4) et `node tools/verif-versions.js origin/main` (aucun écart). Check rapide non lancé, conformément à l'instruction de contrôle rapide.
+- Migration : aucune. Écart à la fiche : aucun. Questions pour Anthony : aucune.

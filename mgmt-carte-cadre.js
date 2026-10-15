@@ -258,7 +258,7 @@ function mgmtCarteDossierHtml(m){
   const nom=f=>mfNet(f&&(f.last||f.name||f.first)||'');
   const dossierF=etape===2?adversaire:combattant;
   const gl=mgmtFicheLigne(m,dossierF.id),f=gl&&gl.f||dossierF;
-  const rang=mgmtDivisionRank(m,f,'organization'),reason=d.raison?mgmtRaisonLignes(m,{...d.raison,origine:d.origine},[combattant,adversaire]):null;
+  const rang=mgmtDivisionRank(m,f,'organization'),reason=d.raison?mgmtRaisonLignes(m,{...d.raison,origine:d.origine},[d.combattant,d.adversaire]):null;
   const famille=d.raison&&String(d.raison.famille||'').replace(/-/g,' ').toUpperCase();
   const raison=reason?`<section class="mf-dos-raison mf-dossier-raison"><h2>POURQUOI LEÏLA VOUS LE PROPOSE · ${esc(famille||'')}</h2><b>${reason.l1}</b><span>${reason.l2}</span></section>`:'';
   const lignes=mgmtPresentationLignes(m,{mode:'combattant',ids:[dossierF.id]}).panneaux;

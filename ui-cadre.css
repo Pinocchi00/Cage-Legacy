@@ -333,9 +333,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-dossiers .mf-dos-layout{height:100%;display:flex;flex-direction:column;gap:14px;min-height:0}
 .mf-dossiers .mf-dos-intro{height:112px;flex:none;border:2px solid var(--mf-bord);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:var(--mf-noir)}
 .mf-dossiers .mf-dos-intro>div:first-child{display:flex;flex-direction:column;gap:5px;min-width:0}
-.mf-dossiers .mf-dos-intro b{font-size:22px;color:var(--mf-jaune);letter-spacing:.06em}
+.mf-dossiers .mf-dos-intro>div:first-child>b{font-size:22px;color:var(--mf-jaune);letter-spacing:.06em}
 .mf-dossiers .mf-dos-intro strong{font-size:27px;line-height:1.05}
-.mf-dossiers .mf-dos-intro span{font-size:22px;color:var(--mf-texte2)}
+.mf-dossiers .mf-dos-intro>div:first-child>span{font-size:22px;color:var(--mf-texte2)}
 .mf-dossiers .mf-dos-steps{font-family:var(--mf-titre);font-size:24px;color:var(--mf-texte2);white-space:nowrap}.mf-dossiers .mf-dos-steps .courant{color:var(--mf-jaune)}.mf-dossiers .mf-dos-steps .fait{color:var(--mf-texte2)}
 .mf-dossiers .mf-dos-center{display:flex;gap:12px;flex:1;min-height:0;align-items:stretch}
 .mf-dossiers .mf-dos-center>.mf-dos-voisin{width:145px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);color:var(--mf-blanc);display:flex;flex-direction:column;justify-content:space-around;align-items:center;text-align:center;padding:12px;position:relative;border-radius:50%}
@@ -347,6 +347,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-dossiers .mf-dos-banner>div{display:flex;flex-direction:column;font-family:var(--mf-titre);line-height:.78}
 .mf-dossiers .mf-dos-banner small{font-size:38px}.mf-dossiers .mf-dos-banner strong{font-size:110px}
 .mf-dossiers .mf-dos-banner aside{display:flex;gap:16px}.mf-dossiers .mf-dos-banner aside span{display:flex;flex-direction:column;font-size:22px;color:var(--mf-texte2)}
+/* ==== [ANCRE: MONDE_LOT4_T8_BANNIERE_PLAN_AVANT] — Monde lot 4 T8 ==== */
+.mf-dossiers .mf-dos-banner:before{z-index:0}
+.mf-dossiers .mf-dos-banner>.mf-dossier-nom,.mf-dossiers .mf-dos-banner>aside{position:relative;z-index:1}
 .mf-dossiers .mf-dos-banner aside b{font-family:var(--mf-titre);font-size:32px;color:var(--mf-blanc)}
 .mf-dossiers .mf-dos-raison{min-height:88px;flex:none;background:var(--mf-rouge);padding:8px 14px;display:flex;flex-direction:column;gap:4px}
 .mf-dossiers .mf-dos-raison h2{margin:0;color:var(--mf-blanc)}.mf-dossiers .mf-dos-raison b{font-family:var(--mf-titre);font-size:29px;line-height:1}.mf-dossiers .mf-dos-raison span{font-size:22px}
