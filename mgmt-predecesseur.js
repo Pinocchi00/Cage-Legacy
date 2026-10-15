@@ -216,6 +216,11 @@ function mgmtPredecesseurDemandes(m){
  *   reclames:number,tetes:number,titres:number,champions:{avant:Array,apres:Array},decouvert:boolean,evenement:object|null}} */
 function mgmtPredecesseurSoiree(m,k,reglages,mesure){
   if(typeof G==='undefined'||!G||G.mgmt!==m) throw new Error('mgmtPredecesseurSoiree : G.mgmt doit être la partie jouée');
+  /* Fusion du lot 6 : le prédécesseur garde le tirage des préliminaires d'avant les raisons (MONDE_LOT6_PREDECESSEUR_SANS_RAISON, mgmt-carte.js). */
+  const avant=MGMT_PREDECESSEUR_EN_COURS; MGMT_PREDECESSEUR_EN_COURS=true;
+  try{ return mgmtPredecesseurSoireeJouer(m,k,reglages,mesure); }finally{ MGMT_PREDECESSEUR_EN_COURS=avant; }
+}
+function mgmtPredecesseurSoireeJouer(m,k,reglages,mesure){
   const cfg=Object.assign(mgmtPredecesseurReglages(),reglages||{});
   const refus={'trop-grand':0,caisse:0,'trop-bas':0,offre:0};
   let prolonges=0, resignes=0, recrues=0;

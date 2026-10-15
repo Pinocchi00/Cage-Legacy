@@ -1062,6 +1062,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-vs span{font-size:22px;line-height:1.1;text-align:center;background:#0D0B0B;border:2px solid #E9E6E1;padding:6px 10px}
 .mf-pr-cartouche{position:absolute;left:1094px;top:20px;width:470px;height:220px;box-sizing:border-box;border:2px solid #E9E6E1;background:#0D0B0B;padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:20px 18px;font-size:22px;line-height:1.1}
 .mf-pr-cartouche b{display:block;margin-top:9px;font:800 40px/.8 var(--mf-titre)}
+.mf-pr-raison{flex:none;height:56px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:0 16px;background:#0D0B0B;border-left:4px solid #E9E6E1;font:500 22px/1.1 var(--mf-texte);color:#E9E6E1}
+.mf-pr-raison span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mf-pr-rangee{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;flex:1;min-height:0}
 .mf-pr-rangee.bas{height:338px;flex:none}
 .mf-pr.solo .mf-pr-rangee.bas{height:226px;grid-template-columns:3fr 2fr}
