@@ -42,3 +42,9 @@ Le point 4 sera une session suivante. Ne t'arrête pas sur le nom d'un commit pr
 - Migration de sauvegarde : aucune. Écarts : le test ciblé a été interrompu deux fois par le délai d'outil de 120 s ; `node tools/verif-versions.js origin/main` ne signale que l'écart préexistant `mgmt-nouvelle.js`.
 - Questions pour Anthony : aucune.
 - Relecture : non appelée, aucun sous-agent disponible selon la règle de repli.
+
+## REPRISE 3 — superviseur, 15/10/2026 18 h
+Relecture de 9243019 : A et B acceptés, sauf le test « titres, offres et actualités sans monde vivant restent identiques », qui est vide (il passe `mondeVivant` de false à false). À faire, un commit par étape :
+A. Réécris ce test : partie `creer(false)` ; photographie titres, offre et actualités ; puis ajoute à cette même partie un `m.orgs` rempli (copie de celui d'une partie `creer(true)`, `mondeVivant` reste false) et re-photographie : les deux JSON sont identiques. Commit `Monde lot 9 T2c : le test de non-régression compare deux états`.
+B. Point 4 : `mgmt-recrutement.js` et `mgmt-accueil.js` lisent les combattants extérieurs par `mgmtExteriorCombattant` / `mgmtExteriorEffectifs` quand `m.mondeVivant===true`. Remets d'abord l'indentation d'origine de `mgmt-recrutement.js:33` (4 espaces). Test « Monde lot 9 T2c — le recrutement et l'accueil lisent les organisations vivantes ». Commit `Monde lot 9 T2c : recrutement et accueil`.
+C. `node tools/_bump.js mgmt-nouvelle.js` puis `node tools/verif-versions.js origin/main` sans écart. Commit `Monde lot 9 T2c : versions`.
