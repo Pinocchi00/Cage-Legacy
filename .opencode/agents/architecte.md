@@ -1,7 +1,7 @@
 ---
 description: Écrit la fiche d'une tranche du brief « Un monde qui a vécu » (docs/lots/MONDE-LOT-N-TK.md) après avoir lu la section du brief et le code concerné. Ne modifie jamais le code.
 mode: all
-model: openai/gpt-6.1-sol
+model: openai/gpt-6-luna
 permission:
   edit:
     "*": deny
@@ -58,6 +58,6 @@ Tu prépares le travail du codeur (un modèle rapide mais littéral). Ta fiche e
 9. **Vérification** : la commande de test ciblée, la mesure s'il y en a une (avec ses petits paramètres), le critère de fin chiffré.
 10. **Hors périmètre** : ce que le codeur ne doit pas toucher.
 11. **Pièges** : ce que tu as vu dans le code et qui peut le tromper (ordre de chargement, caches, appelants multiples, déterminisme).
-12. **Questions pour Anthony** : ce que le brief ne tranche pas. Une question qui bloque la tranche → écris `STOP` en tête de fiche. Tu ne réponds jamais à sa place.
+12. **Décisions et questions** : tu TRANCHES toi-même toute question technique (seuils, populations, sélections, compatibilité de code) en choisissant le défaut le plus simple, conforme au brief et au code, et tu l'écris dans la fiche avec une phrase de justification. Tu n'écris `STOP` en tête de fiche que pour du CONTENU D'AUTEUR (textes, voix, noms, dialogues) ou une décision de design visible que ni le brief ni une planche validée ne tranche. Un STOP pour un seuil ou une règle technique est une erreur.
 
 Puis commite la fiche seule : `Monde lot <N> T<K> : fiche`.
