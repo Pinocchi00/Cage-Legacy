@@ -1444,3 +1444,67 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-bloc{border-bottom:2px solid var(--mf-sep);padding:8px 0 10px;display:flex;flex-direction:column;gap:6px;flex:none}
 .mf-ac-t{font-size:24px;line-height:1.1}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT10_ARRIVEE_CSS] — Monde lot 10 : les styles de l'écran « Votre arrivée », portés de la planche
+   MondeArrivee (maquettes/monde/refonte). Tout est sous .mf-arr (racine de l'écran) : les classes génériques de la
+   planche (pan, lab, T, col, tuile, bloc, l1…) ne valent qu'à l'intérieur. Aucun texte sous 22 px. ==== */
+.mf-arr{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;gap:16px}
+.mf-arr *{box-sizing:border-box}
+.mf-arr .T{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;white-space:nowrap;text-transform:uppercase}
+.mf-arr .lab{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase}
+.mf-arr .t2{color:var(--mf-texte2)}
+.mf-arr .nom{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.mf-arr .col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mf-arr .l1{font-size:24px;line-height:1.05}
+.mf-arr .l2{font-size:22px;line-height:1.05;color:var(--mf-texte2)}
+.mf-arr .sous{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase;flex:none}
+.mf-arr .ligne{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--mf-sep);padding:9px 0;flex:none;min-width:0}
+.mf-arr .oct{flex:none;background:var(--mf-rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-arr .aller{font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune);flex:none;cursor:pointer}
+.mf-arr .carte-l{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex:none;min-width:0}
+.mf-arr .pan{--b:rgba(233,230,225,.5);display:flex;background:var(--b);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);min-width:0;min-height:0}
+.mf-arr .pan>.p2{flex:1;min-width:0;display:flex;background:var(--mf-noir);padding:5px;clip-path:polygon(17px 0,100% 0,100% calc(100% - 17px),calc(100% - 17px) 100%,0 100%,0 17px)}
+.mf-arr .pan>.p2>.p3{flex:1;min-width:0;background:var(--mf-panneau);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:15px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.mf-arr .pan-tete{display:flex;justify-content:space-between;align-items:flex-start;flex:none;gap:12px}
+.mf-arr .pan-titre{display:flex;flex-direction:column;gap:12px}
+.mf-arr .pan-titre .T{font-size:40px;line-height:.75}
+.mf-arr .trait{width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-arr .tuile{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
+.mf-arr .tuile .T{font-size:40px}
+.mf-arr .tuile .s{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-arr .jaune-bloc{flex:none;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.mf-arr .jaune-bloc.focus{outline:3px solid var(--mf-jaune);outline-offset:2px}
+.mf-arr .jaune-bloc .lab{color:var(--mf-noir)}
+.mf-arr .jaune-bloc .T{font-size:44px;line-height:.85}
+.mf-arr .jaune-bloc .k{border:2px solid var(--mf-noir);color:var(--mf-noir);padding:5px 9px;font-size:24px;line-height:1;white-space:nowrap}
+.mf-arr .ar-bande{height:140px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.mf-arr .ar-bande-g{display:flex;align-items:center;gap:26px;min-width:0}
+.mf-arr .ar-bande-g>.T{font-size:120px;line-height:.69}
+.mf-arr .ar-bande-g .col{gap:10px}
+.mf-arr .ar-bande-g .l1{font-size:26px}
+.mf-arr .ar-qui{font-size:30px;line-height:1;font-weight:600}
+.mf-arr .ar-tuiles{display:flex;gap:10px}
+.mf-arr .ar-tuiles .tuile{width:220px;height:112px}
+.mf-arr .ar-cols{flex:1;min-height:0;display:flex;gap:16px}
+.mf-arr .ar-cols>.pan{min-width:0}
+.mf-arr .ar-c1{flex:0 0 540px}.mf-arr .ar-c2{flex:0 0 600px}.mf-arr .ar-c3{flex:1}
+.mf-arr .ar-chiffres{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
+.mf-arr .ar-chiffres .tuile{height:92px;gap:12px}
+.mf-arr .ar-chiffres .v{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:52px;line-height:.72;white-space:nowrap}
+.mf-arr .bloc{display:flex;flex-direction:column;gap:8px;flex:none;min-width:0}
+.mf-arr .bloc .l1{font-size:24px;line-height:1.1}
+.mf-arr .ch-l{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep);padding:7px 0;flex:none;min-width:0}
+.mf-arr .ch-l .div{width:176px;flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-arr .ch-l .n{flex:1;min-width:0;overflow:hidden;padding-bottom:6px;margin-bottom:-6px;text-overflow:ellipsis;font-size:24px;line-height:1;white-space:nowrap}
+.mf-arr .ch-l .d{flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-arr .ch-l .oct{width:18px;height:18px}
+.mf-arr .ar-c2 .carte-l{margin-top:auto}
+.mf-arr .ar-pas{display:flex;flex-direction:column;gap:10px}
+.mf-arr .ar-pas .carte-l .l1{font-size:24px}
+.mf-arr .ar-num{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.8;width:34px;flex:none}
+/* ==== [FIN ANCRE] ==== */
+
+/* Monde lot 10 : liens accessibles dans les panneaux existants. */
+.mf-arr button.nom,.mf-arr button.aller{background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.mf-arr button.aller{font-family:var(--mf-titre);font-size:24px;font-weight:800;color:var(--mf-jaune)}
+.mf-arr .ar-action.focus,.mf-arr .ar-action:focus-visible{outline:2px solid var(--mf-jaune);outline-offset:2px}
+.mf-arr .jaune-bloc{cursor:pointer}

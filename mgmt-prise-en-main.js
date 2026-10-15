@@ -89,6 +89,30 @@ function mgmtArriveeAnneeSoiree(m,n){
   return new Date(mgmtJourDate(j).ts).getUTCFullYear();
 }
 
+/* ==== [ANCRE: MONDE_LOT10_ARRIVEE_INTERACTIONS] — Monde lot 10 reprise du 15/10/2026 ==== */
+/** Nom public ouvrant la fiche, sans interpoler un identifiant dans du JavaScript. */
+function mgmtArriveeNom(id,nom){
+  return `<button type="button" class="nom ar-action" data-id="${esc(id)}" onclick="CL.mgmtFiche(this.dataset.id)">${esc(nom)}</button>`;
+}
+/** Déplace la sélection dans les liens visibles ; Tab passe au prochain bloc. */
+function mgmtArriveeChoisir(delta,bloc){
+  const racine=document.querySelector('.mf-arr'); if(!racine) return;
+  const liens=[...racine.querySelectorAll('.ar-action')]; if(!liens.length) return;
+  const actuel=racine.querySelector('.ar-action.focus')||racine.querySelector('.jaune-bloc');
+  let i=liens.indexOf(actuel), suivant;
+  const groupe=x=>x.closest('.bloc,.ar-c2,.jaune-bloc')||x;
+  for(let n=1;n<=liens.length;n++){
+    suivant=liens[(i+delta*n+liens.length*2)%liens.length];
+    if(!bloc||groupe(suivant)!==groupe(actuel)) break;
+  }
+  for(const x of liens) x.classList.toggle('focus',x===suivant);
+  suivant.focus({preventScroll:true});
+}
+/** Active le lien choisi ; au premier affichage, le bloc jaune ouvre la Carte. */
+function mgmtArriveeOuvrir(){
+  const choisi=document.querySelector('.mf-arr .ar-action.focus');
+  if(choisi) choisi.click(); else CL.mgmtArriveeFin();
+}
 function scr_mgmt_arrivee(){
   const m=G&&G.mgmt; if(!m) return scr_mgmt_parties();
   if(mgmtSoireesJoueur(m)>0) return scr_mgmt_accueil();
@@ -147,8 +171,8 @@ function scr_mgmt_arrivee(){
     const annee=premiere&&t.id&&Number.isSafeInteger(dep)?mgmtArriveeAnneeSoiree(m,dep):null;
     const vac=!t.id;
     return `<div class="ch-l"><div class="oct"></div><div class="div">${esc(mgmtDivisionLabel(d.id))}</div>`
-      +`<div class="n">${vac?esc('Vacante'):`<span class="nom">${esc(nom)}</span>`}</div>`
-      +(annee!==null?`<div class="d">depuis ${esc(annee)}</div>`:'') ;
+      +`<div class="n">${vac?esc('Vacante'):mgmtArriveeNom(t.id,nom)}</div>`
+      +(annee!==null?`<div class="d">depuis ${esc(annee)}</div>`:'')+`</div>`;
   }).join('');
   // plus long règne
   const candRoles=divs.map(d=>{
@@ -178,7 +202,7 @@ function scr_mgmt_arrivee(){
 
   /* Contrats qui finissent. */
   const finContrats=(m.roster||[]).filter(f=>f&&!mgmtIsRetired(f)&&f.ct&&mgmtContratRestants(f)===1);
-  const namesFin=finContrats.map(f=>f.last||f.name||'').filter(Boolean);
+  const namesFin=finContrats;
 
   const passeAn0=premiere?mgmtPasseAnnee(m.passe.soirees,0):null;
   const passeAn1=premiere?mgmtPasseAnnee(m.passe.soirees,m.passe.soirees-1):null;
@@ -201,7 +225,6 @@ function scr_mgmt_arrivee(){
   const attend=mgmtAccueilContenu(m).attend.prochaine;
   const prochainTitre=attend?attend.titre:'Ouvrir la carte';
   const prochainDetail=attend?attend.detail:'';
-  const prochainOnclick=attend?attend.onclick:"CL.mgmtCarte()";
   const prefixTexte= nSigned>0 ? ( (pred? ( (pred.prenom+' '+pred.nom).trim() ):'Le matchmaker') + ' a signé ' + nSigned + ' combat' + (nSigned>1?'s':'') + '. ' ) : '';
 
   /* Col 1 bloc. */
@@ -209,10 +232,10 @@ function scr_mgmt_arrivee(){
   const anneesHtml=premiere?`<div class="lab">${esc(passeAn0)} → ${esc(passeAn1)}</div>`:'';
   const reputHtml=ident&&ident.reputation?`<div class="bloc"><div class="sous">Ce qu’on en dit</div><div class="l1">${esc(ident.reputation)}</div></div>`:'';
   const rivaleHtml=ident&&ident.rivale?`<div class="ligne"><div class="sous">Sa rivale</div><div class="l1">${esc((mgmtOrgParId(ident.rivale)||{}).nom||'')}</div></div>`:'';
-  const blessesHtml = blessuresNb>0? `<div class="bloc"><div class="sous">Les blessés</div>
-      <div class="carte-l"><div class="col"><div class="l1">${esc(blessuresNb+' combattant'+(blessuresNb>1?'s':'')+' indisponible'+(blessuresNb>1?'s':''))}</div>`+
-      (premiere&&pluslongBlesse?`<div class="l2">Le plus long : <span class="nom">${esc(pluslongBlesse.name||pluslongBlesse.last||'')}</span>, ${esc(blessesLongNb+' soirée'+(blessesLongNb>1?'s':''))}</div>`:'')+
-      `</div><div class="aller" onclick="CL.go('mgmt_effectif')">Effectif ›</div></div></div>` :'';
+  const blessesHtml = blesses.length>0? `<div class="bloc"><div class="sous">Les blessés</div>
+      <div class="carte-l"><div class="col"><div class="l1">${esc(blesses.length+' combattant'+(blesses.length>1?'s':'')+' indisponible'+(blesses.length>1?'s':''))}</div>`+
+      (premiere&&pluslongBlesse?`<div class="l2">Le plus long : ${mgmtArriveeNom(pluslongBlesse.id,pluslongBlesse.name||pluslongBlesse.last||'')}, ${esc(blessesLongNb+' soirée'+(blessesLongNb>1?'s':''))}</div>`:'')+
+      `</div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_effectif')">Effectif ›</button></div></div>` :'';
 
   const htmlCol1=`
     <div class="pan ar-c1"><div class="p2"><div class="p3">
@@ -221,13 +244,13 @@ function scr_mgmt_arrivee(){
       ${reputHtml}
       ${rivaleHtml}
       ${premiere && riv?`<div class="bloc"><div class="sous">Une rivalité en cours</div>
-         <div class="carte-l"><div class="col"><div class="l1"><span class="nom">${esc(nomRivA)}</span> et <span class="nom">${esc(nomRivB)}</span></div><div class="l2">${esc(texteRiv)}</div></div></div></div>`:''}
+         <div class="carte-l"><div class="col"><div class="l1">${mgmtArriveeNom(riv.a,nomRivA)} et ${mgmtArriveeNom(riv.b,nomRivB)}</div><div class="l2">${esc(texteRiv)}</div></div></div></div>`:''}
       ${blessesHtml}
     </div></div></div>`;
 
   /* Col2 champions. */
-  const plusLongHtml=plusLongReigne?`<div class="carte-l"><div class="col"><div class="l1">Le plus long règne : <span class="nom">${esc(plusLongReigne.nom)}</span></div><div class="l2">${esc(plusLongReigne.div)} · champion depuis ${esc(plusLongReigne.annee)} · ${esc(plusLongReigne.defenses)} défense${plusLongReigne.defenses>1?'s':''}</div></div><div class="aller" onclick="CL.go('mgmt_ceintures')">Ceintures ›</div></div>` :
-    `<div class="carte-l"><div class="col"><div class="l1">Toutes les ceintures et leurs règnes</div></div><div class="aller" onclick="CL.go('mgmt_ceintures')">Ceintures ›</div></div>`;
+  const plusLongHtml=plusLongReigne?`<div class="carte-l"><div class="col"><div class="l1">Le plus long règne : ${mgmtArriveeNom(plusLongReigne.id,plusLongReigne.nom)}</div><div class="l2">${esc(plusLongReigne.div)} · champion depuis ${esc(plusLongReigne.annee)} · ${esc(plusLongReigne.defenses)} défense${plusLongReigne.defenses>1?'s':''}</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>` :
+    `<div class="carte-l"><div class="col"><div class="l1">Toutes les ceintures et leurs règnes</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_ceintures')">Ceintures ›</button></div>`;
 
   const htmlCol2=`
     <div class="pan ar-c2"><div class="p2"><div class="p3">
@@ -238,9 +261,9 @@ function scr_mgmt_arrivee(){
 
   /* Col3. */
   const promBlock=premiere&&promList.length?`<div class="bloc"><div class="sous">Ses promesses · ${esc(promList.length)}</div>`+
-     promList.map(p=>`<div class="carte-l"><div class="col"><div class="l1"><span class="nom">${esc(p.nom)}</span> : ${esc(p.demande)}</div><div class="l2">Au plus tard : ${esc(p.echeance)}</div></div><div class="aller" onclick="CL.go('mgmt_cartes')">Décider ›</div></div>`).join('')+`</div>`:'';
+     promList.map(p=>`<div class="carte-l"><div class="col"><div class="l1">${mgmtArriveeNom(p.id,p.nom)} : ${esc(p.demande)}</div><div class="l2">Au plus tard : ${esc(p.echeance)}</div></div><button type="button" class="aller ar-action" onclick="CL.mgmtCarte()">Décider ›</button></div>`).join('')+`</div>`:'';
   const contratsBlock=premiere&&namesFin.length?`<div class="bloc"><div class="sous">Ses contrats qui finissent · ${esc(namesFin.length)}</div>
-     <div class="carte-l"><div class="col"><div class="l1">${namesFin.map(n=>`<span class="nom">${esc(n)}</span>`).join(', ')}</div><div class="l2">Un dernier combat à leur contrat</div></div><div class="aller" onclick="CL.go('mgmt_contrats')">Contrats ›</div></div></div>`:'';
+     <div class="carte-l"><div class="col"><div class="l1">${namesFin.map(f=>mgmtArriveeNom(f.id,f.last||f.name)).join(', ')}</div><div class="l2">Un dernier combat à leur contrat</div></div><button type="button" class="aller ar-action" onclick="CL.go('mgmt_contrats')">Contrats ›</button></div></div>`:'';
   const pasBlock=`<div class="bloc ar-pas"><div class="sous">Tes premiers pas</div>
      <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">1</div><div class="l1">Ouvre la Carte : cinq combats à composer.</div></div>
      <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">2</div><div class="l1">Laisse Leïla proposer, ou choisis toi-même.</div></div>
@@ -253,7 +276,7 @@ function scr_mgmt_arrivee(){
   const htmlCol3=`
     <div class="pan ar-c3"><div class="p2"><div class="p3">
       <div class="pan-tete"><div class="pan-titre"><div class="T">${premiere?'CE QU’IL T’A LAISSÉ':'PAR OÙ COMMENCER'}</div><div class="trait"></div></div></div>
-      <div class="jaune-bloc focus">
+      <div class="jaune-bloc ar-action focus" role="button" tabindex="0" onclick="CL.mgmtArriveeFin()">
         <div class="lab">La prochaine chose à faire</div>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:16px"><div class="T">${esc(prochainTitre)}</div><div class="k" style="font-size:24px">Entrée</div></div>
         ${jauneDetail}
@@ -277,13 +300,14 @@ function scr_mgmt_arrivee(){
     </div>
   </div>`;
 
-  const contenu=`<main class="ar">${headerLeftHtml}<div class="ar-cols">${htmlCol1}${htmlCol2}${htmlCol3}</div></main>`;
-  return mfEcran(contenu,{barre:'aucune',m,plaque:'Management',libelle:'Ton arrivée',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeFin()"}]});
+  const contenu=`<main class="ar mf-arr">${headerLeftHtml}<div class="ar-cols">${htmlCol1}${htmlCol2}${htmlCol3}</div></main>`;
+  return mfEcran(contenu,{barre:'logo',m,plaque:'Management',libelle:'Ton arrivée',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeOuvrir()"}]});
 }
 SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
 
 Object.assign(CL,{
+  mgmtArriveeOuvrir,
   mgmtArriveeFin(){ if(!G.mgmt||mgmtSoireesJoueur(G.mgmt)>0) return CL.go('mgmt_accueil'); CL.mgmtCarte(); },
 });
-keysRegister('mgmt_arrivee',{ Enter(){ CL.mgmtArriveeFin(); }, Escape(){ CL.go('mgmt_accueil'); } });
+keysRegister('mgmt_arrivee',{ ArrowUp(){mgmtArriveeChoisir(-1,false);}, ArrowDown(){mgmtArriveeChoisir(1,false);}, Tab(e){mgmtArriveeChoisir(e&&e.shiftKey?-1:1,true);}, Enter(){mgmtArriveeOuvrir();}, Escape(){CL.go('mgmt_accueil');} });
 /* ==== [FIN ANCRE] ==== */

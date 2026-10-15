@@ -20,6 +20,7 @@ const SANS_COMMENTAIRES = SOURCE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[
 function partieNeuve(graine) {
   const win = newGameWindow({ runMain: true });
   win.eval(`(function(){
+    MGMT_HUMANITE_ACTIVE=true;
     setSeed(${graine});
     const m=mgmtDefault('split'); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m);
     G={theme:'dark',mgmt:m}; mgmtAgendaInit(m);
