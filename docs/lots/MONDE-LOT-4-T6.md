@@ -100,3 +100,6 @@ Ne pas modifier le catalogue/sélection des piles T1/T2, les raisons du lot 6, l
 - Migration de sauvegarde : aucune.
 - Écart : T6 incomplète, notamment assertions dédiées absentes. La cible intermédiaire engendre un tableau `main` clairsemé; sa compatibilité avec tous les consommateurs du tableau nécessite un traitement plus large avant livraison.
 - Questions pour Anthony : faut-il autoriser explicitement les trous dans `m.card.main` et adapter tous ses consommateurs, ou maintenir une représentation compacte avec un index de place distinct ?
+
+## DÉCISION du superviseur — 15/10/2026
+T6 est ACCEPTÉE (46 tests ciblés verts). Le point laissé ouvert — les places intermédiaires « clairsemées » — est tranché ainsi : la carte reste une liste compacte (`m.card.main` sans trou, comme aujourd'hui) ; une « place libre » est toute position au-delà de la longueur de la liste, jusqu'à la taille de la carte ; retirer un combat referme la liste comme le fait déjà `mgmtUnbook`. Aucun changement de format. Réserve à reprendre au bilan seulement si un test montre un trou.
