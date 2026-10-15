@@ -103,3 +103,6 @@ Ne pas modifier le catalogue/sélection des piles T1/T2, les raisons du lot 6, l
 
 ## DÉCISION du superviseur — 15/10/2026
 T6 est ACCEPTÉE (46 tests ciblés verts). Le point laissé ouvert — les places intermédiaires « clairsemées » — est tranché ainsi : la carte reste une liste compacte (`m.card.main` sans trou, comme aujourd'hui) ; une « place libre » est toute position au-delà de la longueur de la liste, jusqu'à la taille de la carte ; retirer un combat referme la liste comme le fait déjà `mgmtUnbook`. Aucun changement de format. Réserve à reprendre au bilan seulement si un test montre un trou.
+
+## REPRISE — superviseur, 15/10/2026 18 h 30
+Le code de T6 est livré et la branche contient maintenant `main` (lots 3, 5, 10, 11) : `CL.mgmtCarteDossiersOuvrir(index)` existe, la présentation passe par `CL.mgmtPresentationOuvrir`. Il manque les **sept tests listés ci-dessus**, à écrire dans `tests/mgmtDossiers.test.js` avec exactement ces intitulés. Si un test révèle un défaut, corrige le code et dis-le dans le compte rendu ; ne modifie aucun test existant. Lance `node --test --test-name-pattern="T6" tests/mgmtDossiers.test.js` (délai 120 s). Commit `Monde lot 4 T6 : les tests des cartes suivantes`.
