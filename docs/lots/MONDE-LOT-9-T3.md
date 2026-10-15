@@ -60,9 +60,9 @@ Classement des organisations (T4), classement mondial lui-même (T5), staff (T6-
 - Le renom (`mgmtStar`) est déjà lu dans les contrats ; ne pas le confondre avec un niveau affichable. Aucun `Math.random()`.
 - Ne pas attribuer un rang mondial avant T5. Ordre des scripts fragile si un nouveau fichier est proposé.
 
-## Questions pour Anthony
+## Questions (toutes tranchées par la DÉCISION ci-dessous)
 
-- T3 doit-elle attendre la T5 pour calculer les quatre niveaux, ou livrer d'abord popularité/stade/notoriété puis compléter puissance en T5 ? Cette décision bloque la tranche.
+- T3 doit-elle attendre la T5 pour calculer les quatre niveaux, ou livrer d'abord popularité/stade/notoriété puis compléter puissance en T5 ? Tranché ci-dessous.
 - Pour le « stade », quelle règle précise définit « sait remplir » : capacité ≤ plafond de remplissage (actuellement `mgmtPopPlafond(m.pop)`) ou tolérance différente ?
 - Pour la notoriété, quel agrégat des « combattants les plus connus » veut-on (meilleur combattant seul, top N, moyenne, autre) ?
 - La puissance est-elle le rang du meilleur combattant mondial de l'organisation, une combinaison de plusieurs rangs, ou autre règle ?
