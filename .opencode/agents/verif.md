@@ -1,7 +1,7 @@
 ---
 description: Lance la vérification rapide (ou complète si on le lui demande) et l'audit des versions de cache, et ne rend que les échecs. À appeler avant chaque relecture et chaque commit.
 mode: subagent
-model: opencode/deepseek-v4.1-flash-free
+model: openai/gpt-6-luna-fast
 steps: 12
 permission:
   edit: deny
