@@ -42,15 +42,17 @@ test('T5 — la première arrivée : héritage avant la première soirée, semai
   assert.deepEqual([r.p1,r.h1,r.p2,r.h2,r.t1,r.t2,r.saved],[true,true,false,null,true,true,false]);
 });
 
-test('T4 — chaque nom affiché ouvre la fiche du bon combattant', () => {
+/* ==== [ANCRE: TEST_MGMT_PRESENTATION_ACCUEIL_ROUTE] — Monde lot 3 T5 ==== */
+/* Fiche T5 §4 et décision §12 : les actifs internes ouvrent T2, extérieurs/retraités restent en fiche. */
+test('T4 — chaque nom affiché ouvre la présentation du bon combattant actif', () => {
   const w=ouverte();
   const r=res(w,`const m=G.mgmt; ${apres}
     const ids=m.roster.filter(f=>!mgmtIsRetired(f)).slice(0,2).map(f=>f.id); for(const id of ids) m.facts.push({k:'injury',a:id,c:m.cycle});
     render(); const c=mgmtAccueilContenu(m); const noms=[...document.querySelectorAll('.mf-ac-nom')];
-    const premier=noms[0]; const attendu=(/mgmtFiche\\('([^']+)'\\)/.exec(premier.getAttribute('onclick'))||[])[1];
+    const premier=noms[0]; const attendu=(/mgmtAccueilNom\\('([^']+)'\\)/.exec(premier.getAttribute('onclick'))||[])[1];
     const nomAffiche=premier.textContent; premier.click();
-    return {lies:c.passe.length,noms:noms.length,ecran:G.screen,fiche:MGMT_FICHE.id,attendu,bon:mgmtFighterById(m,attendu).name===nomAffiche};`);
-  assert.ok(r.lies>=1&&r.noms>=1); assert.equal(r.ecran,'mgmt_fiche'); assert.equal(r.fiche,r.attendu); assert.equal(r.bon,true);
+    return {lies:c.passe.length,noms:noms.length,ecran:G.screen,sujet:mgmtPresentationCadre().ids[0],attendu,bon:mgmtFighterById(m,attendu).name===nomAffiche};`);
+  assert.ok(r.lies>=1&&r.noms>=1); assert.equal(r.ecran,'mgmt_presentation_combattant'); assert.equal(r.sujet,r.attendu); assert.equal(r.bon,true);
 });
 
 test('T6 — une demande ouverte se règle depuis l’Accueil', () => {

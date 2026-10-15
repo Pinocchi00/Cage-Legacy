@@ -39,7 +39,8 @@ function keysHandle(e){
   const fn=map[e.key];
   if(typeof fn!=='function') return false;
   if(typeof e.preventDefault==='function') e.preventDefault();
-  fn();
+  /* ==== [ANCRE: MGMT_PRESENTATION_TOUCHE_MODIFIEE] — Monde lot 3 T5 ==== */
+  fn(e);
   return true;
 }
 

@@ -5,21 +5,22 @@
 const MGMT_IDENTITE_GENERATION=1;
 
 /** Retours d'Anthony du 09/10/2026 (« sur une partie de A à Z tout doit toujours être différent ») : chaque partie neuve porte sa graine (`m.graine`, lue sur la RNG à la création), et tout ce qui se déduit d'un identifiant s'en sale — le combattant « mg1 » n'a plus le même métier, le même surnom, la même voix dans deux parties. Sans graine (une partie d'avant) : le sel est vide, rien ne bouge. */
-function mgmtSel(){
-  const m=typeof G!=='undefined'&&G&&G.mgmt;
+/* ==== [ANCRE: MGMT_FAITS_SEL_EXPLICITE] — Monde lot 3 T1 ==== */
+function mgmtSel(contexte){
+  const m=contexte===undefined?(typeof G!=='undefined'&&G&&G.mgmt):contexte;
   return m&&typeof m.graine==='string'&&m.graine?m.graine+'|':'';
 }
 /** La graine d'une partie neuve : l'état de la RNG à cet instant (lecture seule, aucun tirage). */
 function mgmtGraineNeuve(){ return (SEED>>>0).toString(36); }
-function mgmtIdentiteStream(id,couche){
-  return mulberry32(duelFnv1a32('mgmt-identite|'+mgmtSel()+String(id)+'|'+couche));
+function mgmtIdentiteStream(id,couche,contexte){
+  return mulberry32(duelFnv1a32('mgmt-identite|'+mgmtSel(contexte)+String(id)+'|'+couche));
 }
-function mgmtIdentitePick(id,couche,liste){
-  return liste[Math.floor(mgmtIdentiteStream(id,couche)()*liste.length)];
+function mgmtIdentitePick(id,couche,liste,contexte){
+  return liste[Math.floor(mgmtIdentiteStream(id,couche,contexte)()*liste.length)];
 }
 /** Retrouver l'origine ancienne sans consommer la RNG de la partie. Les
  *  homonymes entre pays suivent l'ordre stable de COUNTRIES. */
-function mgmtIdentitePays(f){
+function mgmtIdentitePays(f,contexte){
   if(f.ck&&COUNTRY_KEYS.includes(f.ck)) return f.ck;
   /* Lot 5 H2 bis : les noms retirés des listes (COUNTRY_LAST_ANCIENS) servent
      encore à retrouver l'origine d'une ancienne sauvegarde. */
@@ -27,12 +28,12 @@ function mgmtIdentitePays(f){
   const porte=ck=>COUNTRIES[ck].last.includes(f.last)||(anciens[ck]||[]).includes(f.last);
   const connu=COUNTRY_KEYS.find(ck=>porte(ck)
     ||!f.last&&COUNTRIES[ck].last.some(last=>String(f.name).endsWith(' '+last)));
-  return connu||mgmtIdentitePick(f.id,'pays-migration',COUNTRY_KEYS);
+  return connu||mgmtIdentitePick(f.id,'pays-migration',COUNTRY_KEYS,contexte);
 }
-function mgmtIdentiteVille(f){
-  const villes=MGMT_VILLES[mgmtIdentitePays(f)];
+function mgmtIdentiteVille(f,contexte){
+  const villes=MGMT_VILLES[mgmtIdentitePays(f,contexte)];
   const poids=villes.flatMap(v=>MGMT_VILLES_ECOLES.includes(v)?[v,v]:[v]);
-  return mgmtIdentitePick(f.id,'ville',poids);
+  return mgmtIdentitePick(f.id,'ville',poids,contexte);
 }
 /** Points ajoutés puis normalisés, sans arrondi qui modifierait la loi. */
 function mgmtIdentiteStylePoids(ck,ville){
@@ -40,14 +41,14 @@ function mgmtIdentiteStylePoids(ck,ville){
   const total=STYLE_KEYS.reduce((n,k)=>n+pays[k]+(decalage[k]||0),0);
   return Object.fromEntries(STYLE_KEYS.map(k=>[k,100*(pays[k]+(decalage[k]||0))/total]));
 }
-function mgmtIdentiteStyle(f){
-  const poids=mgmtIdentiteStylePoids(mgmtIdentitePays(f),mgmtIdentiteVille(f));
-  let tirage=mgmtIdentiteStream(f.id,'style')()*100;
+function mgmtIdentiteStyle(f,contexte){
+  const poids=mgmtIdentiteStylePoids(mgmtIdentitePays(f,contexte),mgmtIdentiteVille(f,contexte));
+  let tirage=mgmtIdentiteStream(f.id,'style',contexte)()*100;
   for(const k of STYLE_KEYS){ tirage-=poids[k]; if(tirage<0) return k; }
   return STYLE_KEYS[STYLE_KEYS.length-1];
 }
-function mgmtIdentiteMetier(f){
-  return mgmtIdentitePick(f.id,'metier',Object.values(MGMT_METIERS).flat()).texte;
+function mgmtIdentiteMetier(f,contexte){
+  return mgmtIdentitePick(f.id,'metier',Object.values(MGMT_METIERS).flat(),contexte).texte;
 }
 function mgmtIdentiteLangue(ck){
   if(['FR','BE','CH','MA','DZ','SN','CM'].includes(ck)) return 'fr';

@@ -83,14 +83,17 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
       Rien à convertir sur les données : la table part pleine (tous vus) à l'instant de la migration
       (MONDE_LOT8_T1_MIGRATION, mgmt-save.js). v15 = le passé (monde lot 1 T3). Une v1 reste refusée. ==== */
 /* ==== [ANCRE: MONDE_LOT6_T3_VERSION] — Monde lot 6 T3 (Monde lot 6 T3) :
-   v17 — la preuve du choix de chaque combat de bloc et de carte
+   v19 (ex-17 sur la branche du lot 6 ; 17 et 18 = lot 5) — la preuve du choix de chaque combat de bloc et de carte
    (f.raison {famille,fait} et f.origine 'leila'|'joueur', mgmt-carte.js,
    mgmt-save.js). Rien à recalculer sur les données : une pile d'avant porte
    `raison:null` (« cause non enregistrée »), jamais une justification
    fabriquée après coup — la vraie cause historique est irrécupérable
    (MONDE_LOT6_T3_MIGRATION). Un booking entièrement manuel reste sans champ
    `raison`. ==== */
-const MGMT_SAVE_VERSION=17;
+/* ==== [ANCRE: MONDE_LOT5_T3_VERSION] — Monde lot 5 T3 ==== */
+/* ==== [ANCRE: MONDE_LOT5_T4_VERSION] — Monde lot 5 T4 ==== */
+/* Renumérotation à la fusion du lot 6 (15/10/2026) : main porte 17 (lot 5 T3) et 18 (lot 5 T4) ; la preuve du choix du lot 6 T3 passe de 17 à 19. */
+const MGMT_SAVE_VERSION=19;
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;
@@ -423,6 +426,8 @@ function mgmtNewPile(m){
   /* Corrections du 08/10, lot 8 : les paliers d'attente deviennent des faits, et le dernier palier a sa sortie (ce crochet n'était appelé nulle part). */
   if(typeof mgmtContratsOuvreCycle==='function') mgmtContratsOuvreCycle(m);
   mgmtDemandesOuvreCycle(m);
+  /* Monde lot 8 T4a : une demande périmée sans réponse, une vacance de ceinture et un cap de règne naissent à l'ouverture du cycle — jamais une fenêtre. */
+  mgmtMondeOuvreCycle(m);
   /* Lot 10 : les nouvelles du cycle (défis, public, combattants qui attendent) entrent au fil. */
   if(typeof mgmtFilMettreAJour==='function') mgmtFilMettreAJour(m);
   m.pile=[];
@@ -651,3 +656,322 @@ function mgmtIgnore(m,affairId){
   if(m.open===affairId) m.open=mgmtNextOpen(m,affairId);
   return true;
 }
+
+/* ==== [ANCRE: MONDE_LOT8_T4A_EVENEMENTS] — Monde lot 8 T4a
+   (docs/lots/MONDE-LOT-8-T4a.md) : cinq événements de coût petit — le top 15
+   mondial (N3), la ceinture laissée vacante par un départ (N6), les caps d'un
+   règne (N7), le dernier combat d'un contrat (N8) et deux coéquipiers sur la
+   même soirée (N10) — plus la demande restée sans réponse (décision §2). Ils
+   naissent là où ils ont du sens : à la soirée pour les uns, à l'ouverture du
+   cycle pour les autres. Jamais une fenêtre, jamais une minuterie : chacun est
+   un fait daté de m.facts qui porte l'identifiant du combattant, donc allume sa
+   marque (T1) et passe par le budget (T6) sans qu'aucune des deux ne soit
+   recodée. Détection pure : aucune RNG, aucun DOM, chaque écriture gardée par
+   « pas de fait identique déjà présent » — deux appels de suite donnent le même
+   résultat. La lecture se fait dans deux sections de fiche existantes (« Ce
+   qu'il demande », « Son corps »), le reste est hors périmètre (§9). ==== */
+
+/** Entrées et sorties du top MGMT_CL_TOP mondial d'une division, règle du
+ *  lendemain (mgmt-ecran-lendemain.js) : même comparaison, même ordre. Pur.
+ *  @returns {{entrees:Array<{id:string,rang:number}>,sorties:Array<{id:string,rang:number|null}>}} */
+function mgmtTop15Mouvements(m,divId){
+  const entrees=[], sorties=[];
+  if(!m||!divById(divId)) return {entrees,sorties};
+  const cur=mgmtDivisionRanking(m,divId,'world');
+  const prev=mgmtDivisionRanking(m,divId,'world',m.cycle-1);
+  cur.forEach((row,i)=>{
+    if(i>=MGMT_CL_TOP) return;
+    if(prev.some(x=>x.id===row.id)) return;
+    entrees.push({id:row.id,rang:i+1});
+  });
+  prev.slice(0,MGMT_CL_TOP).forEach(row=>{
+    const j=cur.findIndex(x=>x.id===row.id);
+    if(j>=0&&j<MGMT_CL_TOP) return;
+    sorties.push({id:row.id,rang:j>=0?j+1:null});
+  });
+  return {entrees,sorties};
+}
+
+/** L'unique trace du soir (depuis `premier`) qui porte ce combattant, ou null
+ *  si le classement a bougé sans qu'il combatte. Pur. @returns {number|null} */
+function mgmtMondeFightDuSoir(m,premier,id){
+  if(!Array.isArray(m.hist)) return null;
+  for(let i=Math.max(0,premier);i<m.hist.length;i++){
+    const t=m.hist[i];
+    if(t&&((t.a&&t.a.id===id)||(t.b&&t.b.id===id))) return i;
+  }
+  return null;
+}
+
+/** N3 : écrit top15 pour chaque combattant du roster entrant ou sortant, avec
+ *  le combat qui l'explique. Pur (aucune RNG), idempotent. */
+function mgmtMondeTop15(m,premier){
+  if(!m||!Array.isArray(m.roster)||!Array.isArray(m.hist)) return;
+  const divs=[];
+  for(const t of m.hist.slice(Math.max(0,premier))){
+    if(!t) continue;
+    for(const side of [t.a,t.b]){
+      if(side&&side.div&&!divs.includes(side.div)) divs.push(side.div);
+    }
+  }
+  const dansRoster=new Set(m.roster.map(o=>o&&o.id).filter(Boolean));
+  for(const divId of divs){
+    const mv=mgmtTop15Mouvements(m,divId);
+    for(const entre of [true,false]){
+      for(const mvt of (entre?mv.entrees:mv.sorties)){
+        if(!dansRoster.has(mvt.id)) continue;
+        if((m.facts||[]).some(x=>x&&x.k==='top15'&&x.a===mvt.id&&x.c===m.cycle)) continue;
+        mgmtAddFact(m,{c:m.cycle,k:'top15',a:mvt.id,div:divId,entre,
+          fight:mgmtMondeFightDuSoir(m,premier,mvt.id)});
+      }
+    }
+  }
+}
+
+/** N6 : les vacances créées par les faits retired, relues comme
+ *  mgmtTitleMemoryRows (une seule traversée des faits). Pur.
+ *  @returns {Array<{c:number,div:string,a:string}>} */
+function mgmtMondeTitresVacants(m){
+  const out=[];
+  if(!m||!Array.isArray(m.facts)) return out;
+  const champions=new Map();
+  for(const x of m.facts){
+    if(!x) continue;
+    if(x.k==='title_initial') champions.set(x.div,x.a);
+    else if(x.k==='retired'){
+      /* Ancien format : a pouvait être un objet {id}. */
+      const id=typeof x.a==='string'?x.a:(x.a&&typeof x.a.id==='string'?x.a.id:null);
+      if(!id) continue;
+      for(const [div,champion] of champions){
+       if(champion&&champion===id){ out.push({c:x.c,div,a:id}); champions.set(div,null); }
+      }
+    }else if(x.k==='title_fight'){
+      const t=m.hist&&m.hist[x.fight];
+      if(!t) continue;
+      const g=t.winner==='A'?t.a:(t.winner==='B'?t.b:null);
+      const ancien=champions.get(x.div);
+      champions.set(x.div,g?g.id:(ancien||null));
+    }
+  }
+  const nouvelles=[];
+  for(const v of out){
+    if((m.facts||[]).some(y=>y&&y.k==='titre_vacant'&&y.div===v.div&&y.a===v.a&&y.c===v.c)) continue;
+    mgmtAddFact(m,{c:v.c,k:'titre_vacant',a:v.a,div:v.div});
+    nouvelles.push(v);
+  }
+  return nouvelles;
+}
+
+/** Les caps de défense et de mois d'un règne (décision §4). */
+const MGMT_REGNE_CAPS_DEF=[3,5,10];
+/** Les caps en mois, du plus petit au plus grand. */
+const MGMT_REGNE_CAPS_MOIS=[12,24,36];
+
+/** N7 : les caps de règne atteints et jamais dits. Un règne ne dit ses caps de
+ *  mois qu'un par appel (le plus haut atteint), chacun une seule fois — la
+ *  garde porte sur (a, div, cap, since). Pur. */
+function mgmtMondeRegneCaps(m){
+  if(!m||!Array.isArray(m.roster)||!Array.isArray(m.facts)) return;
+  const divs=[];
+  for(const o of m.roster){ if(o&&o.div&&!divs.includes(o.div)) divs.push(o.div); }
+  for(const div of divs){
+    const t=mgmtSplitTitle(m,div);
+    if(!t||!t.id||!Number.isSafeInteger(t.since)) continue;
+    for(const n of MGMT_REGNE_CAPS_DEF){
+      if(t.defenses!==n) continue;
+      const cap='D'+n;
+      if((m.facts||[]).some(x=>x&&x.k==='regne_cap'&&x.a===t.id&&x.div===div&&x.cap===cap&&x.since===t.since)) continue;
+      mgmtAddFact(m,{c:m.cycle,k:'regne_cap',a:t.id,div,cap,since:t.since});
+    }
+    const mois=Math.round((m.cycle-t.since)*MGMT_VOIX_MOIS_PAR_CYCLE);
+    let atteint=null;
+    for(const n of MGMT_REGNE_CAPS_MOIS){ if(mois>=n) atteint=n; }
+    if(atteint===null) continue;
+    const cap='M'+atteint;
+    if((m.facts||[]).some(x=>x&&x.k==='regne_cap'&&x.a===t.id&&x.div===div&&x.cap===cap&&x.since===t.since)) continue;
+    mgmtAddFact(m,{c:m.cycle,k:'regne_cap',a:t.id,div,cap,since:t.since});
+  }
+}
+
+/** N10 : un fait par combattant du roster ayant un coéquipier sur la soirée
+ *  sans l'affronter. Pur, idempotent. */
+function mgmtMondeCoequipiers(m,premier){
+  if(!m||!Array.isArray(m.roster)||!Array.isArray(m.hist)||typeof mgmtMemeCamp!=='function') return;
+  const ids=[];
+  for(const t of m.hist.slice(Math.max(0,premier))){
+    if(!t) continue;
+    for(const side of [t.a,t.b]){
+      if(side&&side.id&&!ids.includes(side.id)) ids.push(side.id);
+    }
+  }
+  const duSoir=m.hist.slice(Math.max(0,premier));
+  for(const id of ids){
+    if((m.facts||[]).some(x=>x&&x.k==='carte_camp'&&x.a===id&&x.c===m.cycle)) continue;
+    const f=mgmtFighterById(m,id);
+    if(!f) continue;
+    for(const autre of ids){
+      if(autre===id) continue;
+      const g=mgmtFighterById(m,autre);
+      if(!g||!mgmtMemeCamp(m,f,g)) continue;
+      const adversaire=duSoir.some(t=>t&&(
+        (t.a&&t.a.id===id&&t.b&&t.b.id===autre)||(t.b&&t.b.id===id&&t.a&&t.a.id===autre)));
+      if(adversaire) continue;
+      mgmtAddFact(m,{c:m.cycle,k:'carte_camp',a:id,b:autre});
+      break;
+    }
+  }
+}
+
+/* ==== [ANCRE: MONDE_LOT8_T4B] — Monde lot 8 T4b ==== */
+/** N1 : annonce l'âge-seuil trois cycles avant, sans modifier la retraite. */
+function mgmtMondeAnnoncesRetraite(m){
+  if(!m||!Array.isArray(m.roster)) return;
+  for(const f of m.roster){
+    if(!f||mgmtIsRetired(f)||!Number.isFinite(f.age)) continue;
+    const seuil=mgmtRetireAge(f,m.cycle);
+    if(f.age>=seuil-3&&!((m.facts||[]).some(x=>x&&x.k==='retraite_annoncee'&&x.a===f.id)))
+      mgmtAddFact(m,{c:m.cycle,k:'retraite_annoncee',a:f.id,age:seuil});
+  }
+}
+/** N4 : enregistre le mieux classé des combattants dépassés après soirée. */
+function mgmtMondeDepassements(m,premier){
+  if(!m||!Array.isArray(m.hist)||!Array.isArray(m.roster)) return;
+  if(typeof mgmtRangsInvalider==='function') mgmtRangsInvalider(m);
+  const present=new Set();
+  for(let i=Math.max(0,premier);i<m.hist.length;i++){const t=m.hist[i]; if(t){if(t.a)present.add(t.a.id);if(t.b)present.add(t.b.id);}}
+  const ids=new Set(m.roster.filter(f=>f&&!mgmtIsRetired(f)).map(f=>f.id));
+  const divs=[...new Set(m.roster.map(f=>f&&f.div).filter(Boolean))];
+  for(const div of divs){
+    const rows=mgmtDivisionRanking(m,div,'organization'), rank=new Map(rows.map((r,i)=>[r.id,i+1]));
+    const cs=rows.slice(0,10).filter(r=>ids.has(r.id));
+    for(const b of cs){
+      if(!present.has(b.id)||(m.facts||[]).some(x=>x&&x.k==='depassement'&&x.b===b.id&&x.c===m.cycle)) continue;
+      const passe=cs.filter(a=>a.id!==b.id&&present.has(a.id)&&rank.get(a.id)<rank.get(b.id));
+      if(!passe.length) continue;
+      const a=passe[0],fight=mgmtMondeFightDuSoir(m,premier,a.id);
+      if(fight!==null) mgmtAddFact(m,{c:m.cycle,k:'depassement',a:a.id,b:b.id,div,fight});
+    }
+  }
+}
+/** N5 : annonce le prétendant courant une fois par champion/règne. */
+function mgmtMondeChallengers(m){
+  if(!m||!Array.isArray(m.roster)) return;
+  for(const div of [...new Set(m.roster.map(f=>f&&f.div).filter(Boolean))]){
+    const titre=mgmtSplitTitle(m,div), p=mgmtPretendant(m,div);
+    if(!titre||!titre.id||!p||p.id===titre.id) continue;
+    if((m.facts||[]).some(x=>x&&x.k==='challenger'&&x.div===div&&x.champion===titre.id&&x.since===titre.since&&x.a===p.id)) continue;
+    mgmtAddFact(m,{c:m.cycle,k:'challenger',a:p.id,div,champion:titre.id,since:titre.since});
+  }
+}
+/** N11 : réveille le combat historique le plus récent éligible par paire/an. */
+function mgmtMondeVieuxCombats(m){
+  if(!m||!Array.isArray(m.hist)||!Array.isArray(m.roster)) return;
+  const an=Math.round(MGMT_EXT_YEAR_WEEKS/MGMT_EVENT_WEEKS), roster=new Set(m.roster.filter(f=>f&&!mgmtIsRetired(f)).map(f=>f.id));
+  const fights=new Map();
+  m.hist.forEach((t,i)=>{if(!t||!t.a||!t.b||!roster.has(t.a.id)||!roster.has(t.b.id)) return;
+    const pair=[t.a.id,t.b.id].sort(),key=pair.join('|');
+    const old=fights.get(key)||[]; if(m.cycle-t.c>MGMT_RIVALITE_CYCLES) old.push({i,t,pair}); fights.set(key,old);
+  });
+  for(const old of fights.values()){
+    const entry=old[old.length-1]; if(!entry) continue;
+    const [a,b]=entry.pair, fa=mgmtFighterById(m,a),fb=mgmtFighterById(m,b); if(!fa||!fb) continue;
+    let raison=null;
+    const rank=(f)=>mgmtDivisionRanking(m,f.div,'organization').findIndex(x=>x.id===f.id)+1;
+    const ra=rank(fa),rb=rank(fb);
+    if(ra>0&&rb>0&&Math.abs(ra-rb)<=2) raison='voisins';
+    if(!raison&&(m.facts||[]).some(x=>x&&x.k==='title_fight'&&x.c===m.cycle&&Number.isSafeInteger(x.fight))&&
+      (m.facts||[]).some(x=>x&&x.k==='title_fight'&&x.c===m.cycle&&[a,b].some(id=>{const t=m.hist[x.fight];return t&&t.a&&t.b&&(t.a.id===id||t.b.id===id);}))) raison='titre';
+    if(!raison){
+      for(const f of [fa,fb]){
+        if(!Number.isSafeInteger(f.susp)||m.cycle!==f.susp+1) continue;
+        const depart=(m.facts||[]).filter(x=>x&&['injury','susp'].includes(x.k)&&x.a===f.id&&Number.isSafeInteger(x.c)).at(-1);
+        if(depart&&f.susp-depart.c+1>=3){raison='blessure';break;}
+      }
+    }
+    if(!raison) continue;
+    if((m.facts||[]).some(x=>x&&x.k==='vieux_combat'&&x.fight===entry.i&&x.cycleAnnee===Math.floor(m.cycle/an))) continue;
+    for(const [soi,autre] of [[a,b],[b,a]]) mgmtAddFact(m,{c:m.cycle,k:'vieux_combat',a:soi,b:autre,soi,fight:entry.i,raison,cycleAnnee:Math.floor(m.cycle/an)});
+  }
+}
+
+/** Après la soirée : N3, N6, N7, N10.
+ *  @param {number} premier index du 1er combat du soir dans m.hist */
+function mgmtMondeApresSoiree(m,premier){
+  if(!m) return;
+  mgmtMondeTop15(m,premier);
+  /* N3 lit les rangs en pleine soirée : on vide le mémo pour ne laisser aucun rang tenu avant l'invalidation de fin de soirée (test T6 « le rang d'hier se retrouve »). */
+  if(typeof mgmtRangsInvalider==='function') mgmtRangsInvalider(m);
+  mgmtMondeTitresVacants(m);
+  mgmtMondeRegneCaps(m);
+  mgmtMondeCoequipiers(m,premier);
+  mgmtMondeDepassements(m,premier);
+  mgmtMondeVieuxCombats(m);
+}
+
+/** À l'ouverture du cycle : demandes expirées, N6 (retraite d'âge), N7 (mois). */
+function mgmtMondeOuvreCycle(m){
+  if(!m) return;
+  if(typeof mgmtDemandesExpire==='function') mgmtDemandesExpire(m);
+  mgmtMondeTitresVacants(m);
+  mgmtMondeRegneCaps(m);
+  mgmtMondeAnnoncesRetraite(m);
+  mgmtMondeChallengers(m);
+}
+
+/** Substitue des jetons {jeton} dans un gabarit. Pur. @returns {string} */
+function mgmtMondeSub(texte,jetons){
+  let s=String(texte);
+  for(const k of Object.keys(jetons)) s=s.split('{'+k+'}').join(String(jetons[k]));
+  return s;
+}
+
+/** La phrase de fiche d'un fait T4a (gabarits MGMT_MONDE_PHRASES, relu:false).
+ *  Texte brut, échappé au rendu ; les {Il} {il} {lui} sont accordés par
+ *  mgmtAccord au rendu de la fiche.
+ *  @returns {string|null} null si genre inconnu */
+function mgmtMondePhrase(m,x){
+  if(!m||!x||typeof x.k!=='string'||!MGMT_MONDE_PHRASES) return null;
+  const P=MGMT_MONDE_PHRASES;
+  if(x.k==='top15'){
+    const t=Number.isSafeInteger(x.fight)&&m.hist?m.hist[x.fight]:null;
+    const jetons={div:mgmtDivisionLabel(x.div)};
+    if(t&&t.a&&t.b&&x.a){
+      const adv=t.a.id===x.a?t.b:t.a;
+      if(adv&&adv.name) jetons.adv=adv.name;
+    }
+    const cle=(x.entre===false?'top15sortie':'top15entre')+(jetons.adv!==undefined?'Combat':'');
+    return typeof P[cle]==='string'?mgmtMondeSub(P[cle],jetons):null;
+  }
+  if(x.k==='titre_vacant') return typeof P.titreVacant==='string'?mgmtMondeSub(P.titreVacant,{div:mgmtDivisionLabel(x.div)}):null;
+  if(x.k==='regne_cap'){
+    if(typeof x.cap!=='string') return null;
+    if(x.cap[0]==='D') return typeof P.regneCapDefenses==='string'?mgmtMondeSub(P.regneCapDefenses,{n:x.cap.slice(1)}):null;
+    if(x.cap[0]==='M') return typeof P.regneCapMois==='string'?mgmtMondeSub(P.regneCapMois,{n:x.cap.slice(1)}):null;
+    return null;
+  }
+  if(x.k==='dernier_combat') return typeof P.dernierCombat==='string'?P.dernierCombat:null;
+  if(x.k==='carte_camp'){
+    const g=mgmtFighterById(m,x.b);
+    return (typeof P.carteCamp==='string'&&g)?mgmtMondeSub(P.carteCamp,{coeq:g.name}):null;
+  }
+  if(x.k==='sans_reponse'){
+    const lib=(MGMT_DEMANDES&&x.want&&MGMT_DEMANDES[x.want])?MGMT_DEMANDES[x.want].libelle:'';
+    return (typeof P.sansReponse==='string'&&lib)?mgmtMondeSub(P.sansReponse,{want:lib}):null;
+  }
+  if(x.k==='retraite_annoncee') return typeof P.retraiteAnnoncee==='string'?mgmtMondeSub(P.retraiteAnnoncee,{age:x.age}):null;
+  if(x.k==='depassement'){
+    const f=mgmtFighterById(m,x.b);
+    return typeof P.depassement==='string'&&f?mgmtMondeSub(P.depassement,{depasse:f.name,div:mgmtDivisionLabel(x.div)}):null;
+  }
+  if(x.k==='challenger'){
+    const f=mgmtFighterById(m,x.champion);
+    return typeof P.challenger==='string'&&f?mgmtMondeSub(P.challenger,{div:mgmtDivisionLabel(x.div),champion:f.name}):null;
+  }
+  if(x.k==='vieux_combat'){
+    const side=x.a, id=side===x.soi?x.b:x.a;
+    const f=mgmtFighterById(m,id), cle=x.raison==='titre'?'vieuxCombatTitre':(x.raison==='blessure'?'vieuxCombatBlessure':'vieuxCombatVoisins');
+    return typeof P[cle]==='string'&&f?mgmtMondeSub(P[cle],{adv:f.name}):null;
+  }
+  return null;
+}
+/* ==== [FIN ANCRE] ==== */

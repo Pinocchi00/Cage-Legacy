@@ -171,7 +171,8 @@ test('Marque — une partie en version 14 se charge, se valide, ne s\u2019allume
     G.mgmt=mig;
     return {v:mig.v,valide:validateMgmt(JSON.parse(JSON.stringify(mig))),allumes:mig.roster.filter(o=>mgmtMarque(mig,o.id)).length,n:mig.roster.length};`);
   assert.ok(r,'la migration n\u2019a pas refusé la partie');
-  assert.equal(r.v,17,'chaîne 14 → 15 (lot 1) → 16 (lot 8) → 17 (Monde lot 6 T3) ; renumérotation de version à la fusion du lot 8, 12/10/2026'); assert.equal(r.n,364); assert.ok(r.valide,'la partie migrée se valide');
+  /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_MARQUE_14] — Monde lot 5 T3 ==== */
+  assert.equal(r.v,19,'chaîne 14 → 15 (lot 1) → 16 (lot 8) → 17 (lot 5 T3) → 18 (lot 5 T4) → 19 (lot 6 T3)'); /* décision du 15/10/2026 : fusion du lot 6 */ assert.equal(r.n,364); assert.ok(r.valide,'la partie migrée se valide');
   assert.equal(r.allumes,0,'la migration part pleine : personne n\u2019est marqué');
   const charge=res(win,`G.mgmt=null; return !!mgmtParseAndValidate(JSON.stringify(G.brut));`);
   assert.ok(charge,'une v14 persistée se charge sans perte');
@@ -192,8 +193,9 @@ const r=res(win,`const mig=mgmtMigrate(G.brut); if(!mig) return null;
     for(const a of sans.pile) if(a.kind==='leila_bulk') for(const f of a.fights) delete f.raison;
     for(const cle of ['main','prelims']) for(const f of sans.card[cle]) delete f.raison;
     return {v:mig.v,valide:validateMgmt(JSON.parse(JSON.stringify(mig))),intact:JSON.stringify(sans)===JSON.stringify(G.ref),allumes:mig.roster.filter(o=>mgmtMarque(mig,o.id)).length};`);
-  assert.ok(r,'la migration n’y a pas refusé la partie');
-  assert.equal(r.v,17); assert.ok(r.valide); assert.ok(r.intact,'aucun autre champ ne bouge'); assert.equal(r.allumes,0);
+  assert.ok(r,'la migration n’a pas refusé la partie');
+  /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_MARQUE_15] — Monde lot 5 T3 ==== */
+  assert.equal(r.v,19); /* décision du 15/10/2026 : fusion du lot 6, sa migration « raison enregistrée » est 18 → 19 */ assert.ok(r.valide); assert.ok(r.intact,'aucun autre champ ne bouge'); assert.equal(r.allumes,0);
 });
 
 test('Marque — validateMgmt refuse une table des visites mal formée, mgmtRepair la reconstruit', () => {

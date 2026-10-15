@@ -332,6 +332,15 @@ function areneSalleCreer(cv){
     const v=cx.voix; if(cx.regl.commentaire!==false&&v&&(v.salle?cx.salleDit:v.a)&&X(40,v.l===0?860:(v.l===1?830:(v.b?600:740)),v.l>=2?W-40:1360,H)) return true;
     if(cx.regl.coins!==false&&cx.coins.length&&(X(40,120,700,300)||X(W-700,120,W-40,300))) return true;
     if(cx.titre&&cx.titre.alpha>0&&X(620,150,1300,440)) return true;
+    /* ==== [ANCRE: COMBAT_COHERENCE_1410_ARBITRE_TEXTE] — la consigne de
+       l'arbitre réserve sa place avant les étiquettes de coups. ==== */
+    if(cx.combattez>0){
+      const ref=salConv(cx.etat.refX,cx.etat.refY), p=P(ref[0],ref[1],0);
+      const w=Math.round(tw('« COMBATTEZ ! »',44)+34), h=Math.round(44*0.72+26);
+      const y=p[1]-0.082*cam.zoom*cam.ky-18;
+      if(X(p[0]-w/2-8,y-h-8,p[0]+w/2+8,y+8)) return true;
+    }
+    /* ==== [FIN ANCRE] ==== */
     return false;
   }
   function sideline(st,cx){
@@ -497,7 +506,7 @@ function areneSalleCreer(cv){
   }
   /* le commentaire : en bas à gauche, toujours droit. Les coins : en haut, chacun de son côté, sous les plaques. */
   function voices(cx){
-    const regl=cx.regl, t=cx.t, K=cx.carte;
+    const regl=cx.regl, t=cx.voixT===undefined?cx.t:cx.voixT, K=cx.carte;
     const cur=cx.voix, xb=56, yb=H-72-30;
     if(regl.commentaire!==false&&cur){
       const dt=t-cur.t, pop=salEase(dt/0.16), a=cur.salle?cx.salleDit:cur.a;

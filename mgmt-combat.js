@@ -136,9 +136,11 @@ function mgmtCombatPauseProg(S,d){
 function mgmtCombatCx(){
   const C=MGMT_COMBAT, S=C.session, e=areneInstant(S,C.d), R=MGMT_COMBAT_REGLAGES;
   const pp=mgmtCombatPauseProg(S,C.d), pause=pp>=0||e.phase==='coins';
-  let t=pause?(e.r-1)*S.roundLen:e.t;
+  let t=pause?e.pauseT:e.t;
   const termine=C.d>=S.dureeAffichage-1e-6;
   if(termine) t=S.dureeCombat;
+  /* Le chronomètre sportif s'arrête ; la parole continue jusqu'aux cartes. */
+  const voixT=t+(termine?C.fin:0);
   const eas=x=>salEase(x);
   const titre=pause?{n:e.r,alpha:Math.min(eas(pp/0.12),1-eas((pp-0.8)/0.2))}
     :((e.r===1&&C.d<2.3)?{n:1,alpha:Math.min(eas(C.d/0.3),1-eas((C.d-1.8)/0.5))}:null);
@@ -147,7 +149,7 @@ function mgmtCombatCx(){
   if(decisionTail) fade=Math.max(fade,eas((C.fin-(C.queue-0.9))/0.9));
   const noms={a:S.noms.a.court,b:S.noms.b.court};
   return {t:t,real:C.real,etat:e,session:S,plan:C.plan,planLibelle:areneSallePlanLibelle(C.plan,noms),planCourt:areneSallePlanLibelle(C.plan,noms,true),room:C.room,carte:C.carte,org:C.org,num:C.num,
-    regl:R,pause:pause,mode:C.mode,decT:C.decT,dec:C.decision,voix:areneVoixA(S,t),salleDit:C.salleDit,
+    regl:R,pause:pause,mode:C.mode,decT:C.decT,dec:C.decision,voix:areneVoixA(S,voixT),voixT:voixT,salleDit:C.salleDit,
     coins:(pause||C.mode==='dec')?[]:areneCoinsA(S,t),titre:titre,fade:fade,
     combattez:(e.r===1&&C.d>2.2&&C.d<3.3)?Math.min(eas((C.d-2.2)/0.15),1-eas((C.d-3.0)/0.3)):0,
     juges:decisionTail?(C.fin-1.1)/0.25:0,
