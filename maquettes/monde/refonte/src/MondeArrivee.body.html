@@ -1,0 +1,144 @@
+<!-- titre: Ton arrivée | etats: premiere sans-passe -->
+<style>
+.ar{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;gap:16px}
+.ar-bande{height:140px;flex:none;background:var(--pan);border:2px solid var(--bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.ar-bande-g{display:flex;align-items:center;gap:26px;min-width:0}
+.ar-bande-g>.T{font-size:120px;line-height:.69}
+.ar-bande-g .col{gap:10px}
+.ar-bande-g .l1{font-size:26px}
+.ar-qui{font-size:30px;line-height:1;font-weight:600}
+.ar-tuiles{display:flex;gap:10px}
+.ar-tuiles .tuile{width:220px;height:112px}
+.ar-cols{flex:1;min-height:0;display:flex;gap:16px}
+.ar-cols>.pan{min-width:0}
+.ar-c1{flex:0 0 540px}.ar-c2{flex:0 0 600px}.ar-c3{flex:1}
+.ar-chiffres{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
+.ar-chiffres .tuile{height:92px;gap:12px}
+.ar-chiffres .v{font-family:var(--titre);font-weight:800;font-size:52px;line-height:.72;white-space:nowrap}
+.bloc{display:flex;flex-direction:column;gap:8px;flex:none;min-width:0}
+.bloc .l1{font-size:24px;line-height:1.1}
+.ch-l{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--sep);padding:7px 0;flex:none;min-width:0}
+.ch-l .div{width:200px;flex:none;font-size:22px;line-height:1;color:var(--t2);white-space:nowrap}
+.ch-l .n{flex:1;min-width:0;font-size:24px;line-height:1;white-space:nowrap}
+.ch-l .d{flex:none;font-size:22px;line-height:1;color:var(--t2);white-space:nowrap}
+.ch-l .oct{width:18px;height:18px}
+.ar-c2 .carte-l{margin-top:auto}
+.ar-pas{display:flex;flex-direction:column;gap:10px}
+.ar-pas .carte-l .l1{font-size:24px}
+.ar-num{font-family:var(--titre);font-weight:800;font-size:40px;line-height:.8;width:34px;flex:none}
+</style>
+<div class="ecran"><div class="stage">
+  <div class="logo-seul">{{LOGO64}}</div>
+  <div class="entete">
+    <div class="entete-g"><div class="plaque"><span class="T">MANAGEMENT</span></div><div class="entete-lib">Ton arrivée</div></div>
+    <div class="entete-d">
+      <div style="font-size:24px;line-height:1;color:var(--t2);white-space:nowrap">Dans 35 jours</div>
+      <div class="plaque"><span class="T" style="font-size:40px">16 FÉVRIER</span><span class="lab">FORUM DE MONTPELLIER</span></div>
+      <div class="plaque"><span class="T">SPLIT FIGHT NIGHT</span><span class="T rouge" data-etat="premiere">63</span><span class="T rouge" data-etat="sans-passe">1</span></div>
+    </div>
+  </div>
+
+  <main class="ar">
+    <div class="ar-bande">
+      <div class="ar-bande-g">
+        <div class="T">SPLIT</div>
+        <div class="col">
+          <div class="lab">Lyon · depuis 2004</div>
+          <div class="ar-qui">Tu es le nouveau matchmaker de Split.</div>
+          <div class="l1 t2">Mardi 12 janvier 2027, ton premier jour.</div>
+        </div>
+      </div>
+      <div class="ar-tuiles">
+        <div class="tuile"><div class="lab">Ton prédécesseur</div><div class="T">KADER MALIKA</div><div class="s">Parti à la retraite</div></div>
+        <div class="tuile"><div class="lab">Ton adjointe</div><div class="T">LEÏLA</div><div class="s">Sa fille</div></div>
+        <div class="tuile"><div class="lab">Ta première soirée</div><div class="T">DANS 35 J</div><div class="s" data-etat="premiere">Split Fight Night 63</div><div class="s" data-etat="sans-passe">Split Fight Night 1</div></div>
+      </div>
+    </div>
+
+    <div class="ar-cols">
+      <!-- 1 · Ce que Split a vécu -->
+      <div class="pan ar-c1"><div class="p2"><div class="p3">
+        <div class="pan-tete"><div class="pan-titre"><div class="T" data-etat="premiere">SIX ANS AVANT TOI</div><div class="T" data-etat="sans-passe">SPLIT AUJOURD’HUI</div><div class="trait"></div></div><div class="lab" data-etat="premiere">2021 → 2026</div></div>
+        <div class="ar-chiffres" data-etat="premiere">
+          <div class="tuile"><div class="v">62</div><div class="lab">Soirées</div></div>
+          <div class="tuile"><div class="v">558</div><div class="lab">Combats</div></div>
+          <div class="tuile"><div class="v">40</div><div class="lab">Champions couronnés</div></div>
+          <div class="tuile"><div class="v">164</div><div class="lab">Blessures</div></div>
+        </div>
+        <div class="bloc"><div class="sous">Ce qu’on en dit</div><div class="l1">Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.</div></div>
+        <div class="ligne"><div class="sous">Sa rivale</div><div class="l1">Garden of Blood</div></div>
+        <div class="bloc" data-etat="premiere"><div class="sous">Une rivalité en cours</div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Tidiane Bazin</span> et <span class="nom">Wout Theys</span></div><div class="l2">Une victoire chacun · le troisième combat</div></div></div></div>
+        <div class="bloc"><div class="sous">Les blessés</div>
+          <div class="carte-l" data-etat="premiere"><div class="col"><div class="l1">32 combattants indisponibles</div><div class="l2">Le plus long : <span class="nom">Tom Dupré</span>, 5 soirées</div></div><div class="aller">Effectif ›</div></div>
+          <div class="carte-l" data-etat="sans-passe"><div class="col"><div class="l1">8 combattants indisponibles</div></div><div class="aller">Effectif ›</div></div></div>
+      </div></div></div>
+
+      <!-- 2 · Ses champions -->
+      <div class="pan ar-c2"><div class="p2"><div class="p3">
+        <div class="pan-tete"><div class="pan-titre"><div class="T">SES DOUZE CHAMPIONS</div><div class="trait"></div></div><div class="lab">Aujourd’hui</div></div>
+        <div data-etat="premiere">
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche</div><div class="n"><span class="nom">Grégoire Zanetti</span></div><div class="d">depuis 2024</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq</div><div class="n"><span class="nom">Musa Batirov</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume</div><div class="n"><span class="nom">Thomas Courtois</span></div><div class="d">depuis 2022</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids léger</div><div class="n"><span class="nom">Michał Król</span></div><div class="d">depuis 2022</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-moyen</div><div class="n"><span class="nom">Kai Mahoney</span></div><div class="d">depuis 2025</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids moyen</div><div class="n"><span class="nom">Marc Pottier</span></div><div class="d">depuis 2025</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-lourd</div><div class="n"><span class="nom">Eli Drake</span></div><div class="d">depuis 2024</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids lourd</div><div class="n"><span class="nom">Nolan Fontaine</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids paille féminin</div><div class="n"><span class="nom">Alice Hughes</span></div><div class="d">depuis 2025</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche féminin</div><div class="n"><span class="nom">Ekaterine Janelidze</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq féminin</div><div class="n"><span class="nom">Julie Pagès</span></div><div class="d">depuis 2026</div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume féminin</div><div class="n"><span class="nom">Saoirse Fahey</span></div><div class="d">depuis 2023</div></div>
+        </div>
+        <div data-etat="sans-passe">
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche</div><div class="n"><span class="nom">Grégoire Zanetti</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq</div><div class="n"><span class="nom">Guillaume Foucher</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume</div><div class="n"><span class="nom">Said Salikhov</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids léger</div><div class="n"><span class="nom">Junya Toda</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-moyen</div><div class="n"><span class="nom">Gaël Stassen</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids moyen</div><div class="n"><span class="nom">Fabio Rizzo</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mi-lourd</div><div class="n"><span class="nom">Sean Olson</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids lourd</div><div class="n"><span class="nom">Elias Hartmann</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids paille féminin</div><div class="n"><span class="nom">Valentina Ricci</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids mouche féminin</div><div class="n"><span class="nom">Poppy Herbert</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids coq féminin</div><div class="n"><span class="nom">Aïcha Picard</span></div></div>
+          <div class="ch-l"><div class="oct"></div><div class="div">Poids plume féminin</div><div class="n"><span class="nom">Thaís Magalhães</span></div></div>
+        </div>
+        <div class="carte-l" data-etat="premiere"><div class="col"><div class="l1">Le plus long règne : <span class="nom">Michał Król</span></div><div class="l2">Poids léger · champion depuis 2022 · 10 défenses</div></div><div class="aller">Ceintures ›</div></div>
+        <div class="carte-l" data-etat="sans-passe"><div class="col"><div class="l1">Toutes les ceintures et leurs règnes</div></div><div class="aller">Ceintures ›</div></div>
+      </div></div></div>
+
+      <!-- 3 · Ce qu'il t'a laissé, et la première chose à faire -->
+      <div class="pan ar-c3"><div class="p2"><div class="p3">
+        <div class="pan-tete"><div class="pan-titre"><div class="T" data-etat="premiere">CE QU’IL T’A LAISSÉ</div><div class="T" data-etat="sans-passe">PAR OÙ COMMENCER</div><div class="trait"></div></div></div>
+        <div class="jaune-bloc focus">
+          <div class="lab">La prochaine chose à faire</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:16px"><div class="T">Ouvrir la carte</div><div class="k" style="font-size:24px">Entrée</div></div>
+          <div style="font-size:24px;line-height:1.1" data-etat="premiere">Kader Malika a signé 2 combats. Il en manque 3 en carte principale.</div>
+          <div style="font-size:24px;line-height:1.1" data-etat="sans-passe">Il manque 5 combats en carte principale.</div>
+        </div>
+        <div class="bloc" data-etat="premiere"><div class="sous">Ses promesses · 3</div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Tidiane Bazin</span> : le troisième combat</div><div class="l2">Au plus tard : ta première soirée</div></div><div class="aller">Décider ›</div></div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Doriane Etienne</span> : la carte principale</div><div class="l2">Au plus tard : Split Fight Night 64</div></div><div class="aller">Décider ›</div></div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Teerapat Chantarasri</span> : un classé</div><div class="l2">Au plus tard : Split Fight Night 65</div></div><div class="aller">Décider ›</div></div>
+        </div>
+        <div class="bloc" data-etat="premiere"><div class="sous">Ses contrats qui finissent · 4</div>
+          <div class="carte-l"><div class="col"><div class="l1"><span class="nom">Dupré</span>, <span class="nom">Stepanov</span>, <span class="nom">Reeves</span> et <span class="nom">Lira</span></div><div class="l2">Un dernier combat à leur contrat</div></div><div class="aller">Contrats ›</div></div>
+        </div>
+        <div class="bloc ar-pas" data-etat="sans-passe"><div class="sous">Tes premiers pas</div>
+          <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">1</div><div class="l1">Ouvre la Carte : cinq combats à composer.</div></div>
+          <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">2</div><div class="l1">Laisse Leïla proposer, ou choisis toi-même.</div></div>
+          <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">3</div><div class="l1">Quand la carte est complète, pose la soirée au Calendrier.</div></div>
+        </div>
+      </div></div></div>
+    </div>
+  </main>
+
+  <div class="touches large">
+    <div class="tg"><span class="k">↑</span><span class="k">↓</span><span>Choisir</span></div>
+    <div class="tg"><span class="k">Tab</span><span>Bloc suivant</span></div>
+    <div class="tg"><span class="k">Échap</span><span>Aller à l’accueil</span></div>
+    <div class="tg"><span class="k j">Entrée</span><span>Ouvrir</span></div>
+  </div>
+</div></div>
