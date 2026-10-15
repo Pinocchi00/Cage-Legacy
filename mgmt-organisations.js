@@ -58,16 +58,19 @@ function mgmtOrgNiveaux(m,orgId){
   const roster=(partie.roster||[]).filter(f=>f&&!mgmtIsRetired(f));
   const pop=Number.isFinite(partie.pop)?partie.pop:(typeof mgmtOrgProfil==='function'&&partie===m?mgmtOrgProfil(m).popularite:0);
   const comptes=(partie.comptes||[]).slice(-12), salles=partie.salles||[];
-  const remplies=new Set(comptes.filter(c=>Number.isFinite(c.taux)&&c.taux>=0.8).map(c=>c.salle));
-  let salle=salles.filter(s=>remplies.has(s.nom)).sort((a,b)=>b.capacite-a.capacite)[0];
+  const remplies=new Set(comptes.filter(c=>Number.isFinite(c.taux)&&c.taux>=0.8).map(c=>c.salleId||c.salle));
+  let salle=salles.filter(s=>remplies.has(s.id)||remplies.has(s.nom)).sort((a,b)=>b.capacite-a.capacite)[0];
   if(!salle) salle=salles.slice().sort((a,b)=>a.capacite-b.capacite)[0]||null;
   const renom=roster.map(mgmtStar).sort((a,b)=>b-a).slice(0,5);
   let puissance=0;
   for(const div of allDivisions()){
-    (mgmtDivisionRanking(m,div.id,'world')||[]).slice(0,10).forEach((r,i)=>{
-      const f=mgmtExteriorCombattant(m,r.id);
-      if(f&&f.orgId===orgId) puissance+=11-(i+1);
-      else if(m.org===orgId&&(m.roster||[]).some(x=>x.id===r.id&&!x.retired)) puissance+=11-(i+1);
+    (mgmtDivisionRanking(partie,div.id,'world')||[]).forEach(r=>{
+      if(!Number.isSafeInteger(r.rang)||r.rang<1||r.rang>10) return;
+      if((partie.roster||[]).some(x=>x.id===r.id&&!mgmtIsRetired(x))) puissance+=11-r.rang;
+      else {
+        const f=mgmtExteriorCombattant(m,r.id);
+        if(f&&f.orgId===orgId) puissance+=11-r.rang;
+      }
     });
   }
   return {popularite:pop,stade:salle?salle.capacite:0,notoriete:renom.length?renom.reduce((a,b)=>a+b,0)/renom.length:0,puissance};

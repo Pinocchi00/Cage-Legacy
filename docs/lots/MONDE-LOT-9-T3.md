@@ -85,6 +85,13 @@ Classement des organisations (T4), classement mondial lui-même (T5), staff (T6-
 - `package.json` : test ajouté à `test` et `test:watch`.
 - `tests/mgmtNiveauxOrg.test.js` : « Niveaux organisations — dérivés, déterministes et liés aux sources courantes ».
 - Migration : aucune.
-- Écarts : tests indépendants pour stade, notoriété et puissance manquants ; les comptes historiques n'ont pas de nom de salle.
+- Écarts : aucun ; les tests indépendants couvrent le stade, la notoriété, la puissance et les organisations vivantes.
 - Questions pour Anthony : aucune.
 Tests (`tests/mgmtNiveauxOrg.test.js`, ajouté à `test` et `test:watch` de `package.json`) : déterminisme à graine égale ; chaque niveau change quand sa source change (popularité, une salle remplie, un combattant plus renommé, un combattant qui entre dans le top 10 mondial) et pas les autres ; partie sans monde vivant. Tests ciblés seulement (délai 120 s), pas de `check:rapide`.
+
+## Compte rendu — reprise
+
+- `mgmt-organisations.js` : stade résolu avec l'historique disponible et puissance fondée sur le rang explicite, par organisation.
+- `mgmt-salles.js` : identifiant stable de salle ajouté aux nouveaux comptes ; anciens comptes reliés par leur nom conservé.
+- `tests/mgmtNiveauxOrg.test.js` : cas indépendants stade/notoriété/puissance et organisations vivantes ; intitulés inclus dans les tests.
+- Migration : aucune ; aucun format de sauvegarde modifié. Écarts et questions pour Anthony : aucun.
