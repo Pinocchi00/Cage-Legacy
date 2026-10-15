@@ -174,6 +174,7 @@ function mgmtWorldQuota(m,divId){
  *  @returns {Array} le vivier extérieur. */
 function mgmtExteriorEnsure(m){
   if(!m||typeof m!=='object') return [];
+  if(m.mondeVivant===true) return [];
   if(!Array.isArray(m.exterieur)) m.exterieur=[];
   const cycle=Number.isSafeInteger(m.cycle)&&m.cycle>=0?m.cycle:0;
   for(const div of allDivisions()){

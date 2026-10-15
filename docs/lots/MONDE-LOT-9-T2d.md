@@ -30,13 +30,21 @@ Les écrans ; la mesure de la notoriété (signalée à part).
 
 ## Compte rendu
 - `mgmt-bureau.js`, `mgmt-passe.js`, `mgmt-save.js` : identifiants préfixés par sous-partie, conservation des douze derniers comptes réduits, migration v20 → v21 et validation de `idPrefixe`.
-- `tests/mgmtMondeVivant.test.js` : ajustement de la version attendue à 21 ; les tests T2d de collision, classement, stade/comptes et migration sont présents.
+- `mgmt-carte.js`, `mgmt-monde.js` : pour une partie monde vivant, le classement n'inclut plus l'ancien vivier et `mgmtExteriorEnsure` ne le crée plus.
+- `tests/mgmtMondeVivant.test.js` : ajustement de la version attendue à 21 ; tests T2d de collision, couverture réelle par organisation et catégorie, absence d'identifiants extérieurs, puissance positive, seuil/stade et migration.
 - `index.html`, `sw.js` : versions cache montées par `node tools/_bump.js` pour les fichiers JS modifiés.
 - Migration de sauvegarde : v20 → v21 ; les sauvegardes avec monde vivant sont renommées. Les sauvegardes antérieures dont les comptes ont déjà été effacés les gardent vides ; le stade se recalera au fil des soirées.
-- Vérifications : `node tools/verif-versions.js origin/main` passe. `node --test --test-name-pattern="T2d" tests/mgmtMondeVivant.test.js` dépasse le délai maximal de 120 s de l’outil lors de la création des mondes.
-- Écarts à la fiche : vérification ciblée non terminée à cause du délai ; aucun autre écart constaté.
+- Vérifications : `node --test --test-name-pattern="T2d" tests/mgmtMondeVivant.test.js` — 4/4 réussis (208,7 s, lancé avec délai étendu) ; `node tools/verif-versions.js origin/main` — passe ; `node --check` sur les trois fichiers JS modifiés — passe.
+- Écarts à la fiche : le test de comptes/stade prépare un compte à 80 % dans la plus grande salle afin de tester explicitement le seuil et le choix attendu. Aucun autre écart constaté.
 - Questions pour Anthony : aucune.
 
 ## AJOUT du superviseur — 15/10/2026 22 h 30 (fait partie de la tranche)
 3. **L'ancien vivier lu en plus du monde vivant.** Sur la partie relevée, le classement mondial de H-light a 328 lignes : 30 de Split et 298 de `m.exterieur` (l'ancien monde calculé), **aucune** des sept organisations vivantes. `mgmtDivisionRankingCalcule` (`mgmt-carte.js`) ajoute `m.exterieur` même quand `m.mondeVivant===true`. Décision T2 : le monde vivant **remplace** l'ancien vivier. Donc, quand `m.mondeVivant===true` : la portée `world` = l'effectif du joueur + `mgmtExteriorEffectifs(m,div)` ; `m.exterieur` n'est plus lu (et `mgmtExteriorEnsure` ne le recrée plus pour une telle partie). Les parties sans monde vivant gardent exactement l'ancien calcul.
 4. **Les tests doivent le prouver sur l'état réel** : pour chaque catégorie, le classement mondial contient au moins un combattant de chacune des sept organisations vivantes qui en a un non retraité dans cette catégorie, et aucun identifiant de `m.exterieur`. La puissance (T3) d'au moins cinq organisations est > 0 après la création.
+
+## Reprise — 15/10/2026
+- `mgmt-carte.js` : le classement `world` écarte `m.exterieur` lorsque `mondeVivant===true`; l'ancien parcours reste intact sinon.
+- `mgmt-monde.js` : `mgmtExteriorEnsure` retourne sans créer de vivier pour le monde vivant.
+- `tests/mgmtMondeVivant.test.js` : assertions sur toutes les catégories réelles, présence des organisations éligibles, absence des identifiants `m.exterieur`, puissance positive d'au moins cinq organisations et capacité attendue avec seuil 80 %.
+- Vérifications après reprise : test ciblé T2d 4/4 réussi en 208,7 s ; audit des versions réussi. Le premier lancement avec le délai par défaut de 120 s a été coupé ; le test a été relancé avec délai étendu et terminé.
+- Écarts à la fiche : aucun. Questions pour Anthony : aucune.
