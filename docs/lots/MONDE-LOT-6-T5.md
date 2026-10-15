@@ -69,3 +69,31 @@ Sélection des familles/paires et leurs seuils (T1/T2), persistance/migration (T
 1. **Féminin** : une paire de combattants est toujours dans la même catégorie ; le genre se lit sur la catégorie (catégorie féminine = féminin), par la fonction d'accord déjà utilisée par le jeu (`mgmtAccord` ou son équivalent trouvé par grep, jamais une seconde règle). Une preuve sans combattant identifié prend la forme de la catégorie de la paire. Aucune paire mixte n'existe.
 2. **Choix de la variante** : pur et déterministe, sans RNG de partie : l'index de la variante = un hachage simple et stable de (famille, identifiants triés des deux combattants) modulo le nombre de variantes. Un troisième argument OPTIONNEL `mgmtRaisonLignes(m,raison,paire)` est autorisé ; sans lui, la première variante (comportement de T4 inchangé, les tests de T4 restent verts).
 3. Textes : trois formulations par famille (ligne 1 et ligne 2), écrites par toi, marquées `relu:false`, sans réplique ni personnage inventés ; elles citent le fait avec son chiffre ou son nom.
+
+## Compte rendu
+
+Reprise de T5 après relecture (6 écarts). Aucun sous-agent n'était joignable (« depth limit reached ») : textes écrits directement, vérification faite localement.
+
+### Fichiers modifiés
+- `mgmt-raisons.js` — `MGMT_RAISON_PHRASES` passe à trois formulations par famille (`variantes:[{l1,l2,relu:false},…]`, la première étant celle de T4, entrée `relu:false` conservée pour T4) ; `mgmtRaisonLignes(m,raison,paire)` accepte le troisième argument optionnel, choisit la variante par hachage stable (djb2, aucun RNG) de `famille|ids triés` modulo le nombre de variantes, applique `mgmtAccord` selon la catégorie de la paire (`divById`), et reste sur la première variante sans `paire`. Ancres `MONDE_LOT6_T5_RAISON_VARIANTES` et `MONDE_LOT6_T5_RAISON_SELECTION` ajoutées ; ancres T4 conservées.
+- `mgmt-prelims.js:78` — l'appel d'affichage passe la paire `[fa,fb]` (écart 2 : sans troisième argument, la variante ne changeait jamais à l'écran).
+- `index.html` — `?v=` de `mgmt-raisons.js` et `mgmt-prelims.js` montés par `node tools/_bump.js` (LF conservé).
+- `tests/mgmtRaisonAffichage.test.js` — ancre `MONDE_LOT6_T5_TEST_VARIANTES` et quatre tests T5 ; les trois tests T4 sont inchangés.
+- `sw.js` — changement de fins de ligne non lié, retiré (`git checkout sw.js`).
+
+### Tests ajoutés
+- `Monde lot 6 T5 — chaque famille possède trois formulations marquées relu:false`
+- `Monde lot 6 T5 — les variantes respectent la preuve sans inventer de fait`
+- `Monde lot 6 T5 — les accords féminins sont corrects`
+- `Monde lot 6 T5 — le choix de formulation est déterministe`
+
+### Sauvegarde
+Aucune : pas de champ persistant, `MGMT_SAVE_VERSION`, migration ou validation touchés.
+
+### Écarts à la fiche
+- L'appel `mgmt-prelims.js:78` transmet la paire ; la fiche (§7) ne listait pas ce fichier, mais la décision du superviseur (§2) autorise le troisième argument, et sans lui ni variante ni accord n'apparaissaient à l'écran.
+- `node tools/verif-versions.js origin/main` signale un écart **pré-existant** : `mgmt-bureau.js` modifié sur la branche (commit T3 `77d2c36`) sans montée de `?v=` (identique à origin/main). Hors périmètre T5, non corrigé ici.
+- `sw.js` : seule une réécriture de fins de ligne était présente, restaurée.
+
+### Questions pour Anthony
+- L'écart de version `mgmt-bureau.js` (T3) doit-il être corrigé dans une tranche dédiée (montée `?v=`) ? Il est antérieur à T5.

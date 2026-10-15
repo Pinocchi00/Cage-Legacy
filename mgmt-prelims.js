@@ -75,7 +75,7 @@ function scr_mgmt_prelims(){
       +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp(`<b>${esc(ca.contrat)}</b>`,`<b>${esc(cb.contrat)}</b>`,'Contrat restant')
     :`<div class="mf-car-aide">${esc(P.aide?P.aide:m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE)?'Leïla prépare les préliminaires quand la carte principale est complète.':'Ce préliminaire n’est pas encore trouvé.')}</div>`;
   const trou=!bloc&&m.card.main.length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&m.card.prelims.length<(m.card.sizePrelims||MGMT_PRELIM_SIZE);
-  const lignesRaison=duo&&bloc&&s.etat==='avalider'?mgmtRaisonLignes(m,f.raison&&{...f.raison,origine:f.origine}):null;
+  const lignesRaison=duo&&bloc&&s.etat==='avalider'?mgmtRaisonLignes(m,f.raison&&{...f.raison,origine:f.origine},[fa,fb]):null;
   const pourquoi=lignesRaison?`<div class="mf-car-enjeux mf-pre-pourquoi"><div class="mf-cal-lib">Leïla · pourquoi elle le propose</div><div><span>${lignesRaison.l1}</span><span>${lignesRaison.l2}</span></div></div>`:'';
   const monte=bloc&&s.etat==='avalider'&&m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE);
   const boutons=`<div class="mf-car-boutons">`

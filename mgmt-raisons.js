@@ -12,42 +12,134 @@ const MGMT_RAISON_FAMILLES=Object.freeze([
 const MGMT_RAISON_STYLES=Object.freeze({'Finit par KO':'frappe','Finit au sol':'sol'});
 
 /* ==== [ANCRE: MONDE_LOT6_T4_RAISON_PHRASES] — Monde lot 6 T4 ==== */
-/** Textes provisoires structurés pour l'affichage des preuves, sans reconstituer leur origine. */
+/* ==== [ANCRE: MONDE_LOT6_T5_RAISON_VARIANTES] — Monde lot 6 T5 ==== */
+/** Textes provisoires structurés pour l'affichage des preuves, sans reconstituer leur origine.
+ *  Trois formulations par famille : la première est celle livrée par T4, les deux
+ *  suivantes sont des variantes ; toutes portent `relu:false` et n'emploient que
+ *  les champs réellement enregistrés dans la preuve. */
 const MGMT_RAISON_PHRASES=Object.freeze({
-  'revanche':{l1:'Revanche après la victoire de {gagnant}, soirée {c}.',l2:'La revanche peut donner une suite à cette histoire.',relu:false},
-  'rivalite-ouverte':{l1:'Revanche demandée pour la soirée {c}.',l2:'Le combat peut faire avancer cette rivalité.',relu:false},
-  'series-croisees':{l1:'Série de {nA} victoires pour {a} et {nB} pour {b}.',l2:'Le combat peut départager leurs dynamiques.',relu:false},
-  'classement-voisin':{l1:'Classement : {a} {rangA}, {b} {rangB}, catégorie {div}.',l2:'Le combat peut les départager au classement.',relu:false},
-  'test-jeune':{l1:'Test : {a}, {age} ans, face à {b}.',l2:'Le combat peut mesurer son niveau.',relu:false},
-  'derniere-chance':{l1:'{a} en série de {n} défaites.',l2:'Le résultat peut relancer sa trajectoire.',relu:false},
-  'longue-attente':{l1:'{a} attend depuis {mois} mois.',l2:'Le combat peut le remettre en activité.',relu:false},
-  'demande-promesse':{l1:'Engagement de {a} pour la soirée {c}.',l2:'Le combat peut tenir cet engagement.',relu:false},
-  'fin-contrat':{l1:'Dernier combat du contrat de {a} ({restants} restant).',l2:'Le combat peut peser sur la suite.',relu:false},
-  'styles-opposes':{l1:'Styles opposés : {styleA} et {styleB}.',l2:'Le combat mettra ces styles à l’épreuve.',relu:false},
-  'derby':{l1:'Derby : même pays, {pays}, catégorie {div}.',l2:'Le combat peut faire valoir cette proximité.',relu:false},
-  'debuts':{l1:'Débuts de {a} : {n} combat enregistré.',l2:'Le combat peut marquer ses débuts.',relu:false},
-  'veteran':{l1:'{a} : {age} ans, {total} combats.',l2:'Le combat peut éprouver cette expérience.',relu:false},
-  'reclame-public':{l1:'Combat réclamé par le public pour {c}.',l2:'Le combat peut répondre à cette attente.',relu:false},
-  'meme-categorie-jamais-affrontes':{l1:'Même catégorie ({div}), aucun affrontement enregistré.',l2:'Le combat peut établir leur premier repère commun.',relu:false}
+  'revanche':{relu:false,variantes:[
+    {l1:'Revanche après la victoire de {gagnant}, soirée {c}.',l2:'La revanche peut donner une suite à cette histoire.',relu:false},
+    {l1:'La soirée {c} a tourné pour {gagnant} ; la revanche peut rouvrir le dossier.',l2:'Ce combat peut répondre à cette soirée.',relu:false},
+    {l1:'{gagnant} l’a emporté en soirée {c} ; {il} peut reprendre cette histoire.',l2:'La revanche peut écrire la suite de la soirée {c}.',relu:false}
+  ]},
+  'rivalite-ouverte':{relu:false,variantes:[
+    {l1:'Revanche demandée pour la soirée {c}.',l2:'Le combat peut faire avancer cette rivalité.',relu:false},
+    {l1:'{a} avait réclamé ce combat pour la soirée {c}.',l2:'Le combat peut prolonger cette demande.',relu:false},
+    {l1:'{a} réclame ce combat pour la soirée {c} ; {il} ne lâche pas cette rivalité.',l2:'Le combat peut trancher cette rivalité ouverte.',relu:false}
+  ]},
+  'series-croisees':{relu:false,variantes:[
+    {l1:'Série de {nA} victoires pour {a} et {nB} pour {b}.',l2:'Le combat peut départager leurs dynamiques.',relu:false},
+    {l1:'{a} reste sur {nA} victoires, {b} sur {nB}.',l2:'Le combat peut croiser ces deux séries.',relu:false},
+    {l1:'{a} aligne {nA} victoires ; {il} peut confirmer cette série face à {b}.',l2:'Le combat peut départager deux séries encore vives.',relu:false}
+  ]},
+  'classement-voisin':{relu:false,variantes:[
+    {l1:'Classement : {a} {rangA}, {b} {rangB}, catégorie {div}.',l2:'Le combat peut les départager au classement.',relu:false},
+    {l1:'{a} est {rangA}, {b} est {rangB} en {div}.',l2:'Le combat peut faire bouger ce voisinage.',relu:false},
+    {l1:'Écart de classement en {div} : {rangA} contre {rangB}.',l2:'Le combat peut rapprocher ou écarter ces deux rangs.',relu:false}
+  ]},
+  'test-jeune':{relu:false,variantes:[
+    {l1:'Test : {a}, {age} ans, face à {b}.',l2:'Le combat peut mesurer son niveau.',relu:false},
+    {l1:'{a}, {age} ans, monte face à {b}.',l2:'Le combat peut situer son niveau réel.',relu:false},
+    {l1:'{a} a {age} ans ; {il} passe un vrai test contre {b}.',l2:'Le combat peut montrer où {il} en est.',relu:false}
+  ]},
+  'derniere-chance':{relu:false,variantes:[
+    {l1:'{a} en série de {n} défaites.',l2:'Le résultat peut relancer sa trajectoire.',relu:false},
+    {l1:'{a} enchaîne {n} défaites.',l2:'Le résultat peut décider de sa suite.',relu:false},
+    {l1:'{a} reste sur {n} défaites ; {il} joue gros ici.',l2:'Le combat peut relancer ou arrêter cette série.',relu:false}
+  ]},
+  'longue-attente':{relu:false,variantes:[
+    {l1:'{a} attend depuis {mois} mois.',l2:'Le combat peut le remettre en activité.',relu:false},
+    {l1:'{a} n’a plus combattu depuis {mois} mois ; {il} patiente encore.',l2:'Le combat peut raccourcir cette attente.',relu:false},
+    {l1:'{mois} mois sans combat pour {a} ; {il} attend une date.',l2:'Le combat peut rompre cette attente.',relu:false}
+  ]},
+  'demande-promesse':{relu:false,variantes:[
+    {l1:'Engagement de {a} pour la soirée {c}.',l2:'Le combat peut tenir cet engagement.',relu:false},
+    {l1:'{a} a pris un engagement pour la soirée {c}.',l2:'Le combat peut honorer cette promesse.',relu:false},
+    {l1:'{a} a promis ce combat pour {c} ; {il} peut le tenir.',l2:'Le combat peut répondre à cette promesse.',relu:false}
+  ]},
+  'fin-contrat':{relu:false,variantes:[
+    {l1:'Dernier combat du contrat de {a} ({restants} restant).',l2:'Le combat peut peser sur la suite.',relu:false},
+    {l1:'Contrat de {a} : {restants} combat restant.',l2:'Le combat peut décider de la suite du contrat.',relu:false},
+    {l1:'{restants} combat restant au contrat de {a} ; {il} est à un tournant.',l2:'Le combat peut peser sur son avenir.',relu:false}
+  ]},
+  'styles-opposes':{relu:false,variantes:[
+    {l1:'Styles opposés : {styleA} et {styleB}.',l2:'Le combat mettra ces styles à l’épreuve.',relu:false},
+    {l1:'{styleA} contre {styleB} : deux styles à l’opposé.',l2:'Le combat peut trancher ce duel de styles.',relu:false},
+    {l1:'Styles à l’opposé, {styleA} et {styleB}.',l2:'Le combat peut dire quel style tient.',relu:false}
+  ]},
+  'derby':{relu:false,variantes:[
+    {l1:'Derby : même pays, {pays}, catégorie {div}.',l2:'Le combat peut faire valoir cette proximité.',relu:false},
+    {l1:'Deux combattants du même pays : {pays}.',l2:'Le combat peut faire parler cette proximité.',relu:false},
+    {l1:'Même drapeau, {pays}, pour ce combat.',l2:'Le combat peut valoir un derby local.',relu:false}
+  ]},
+  'debuts':{relu:false,variantes:[
+    {l1:'Débuts de {a} : {n} combat enregistré.',l2:'Le combat peut marquer ses débuts.',relu:false},
+    {l1:'Premier combat enregistré pour {a}.',l2:'Le combat peut écrire sa première ligne.',relu:false},
+    {l1:'{a} n’a encore aucun combat enregistré ; {il} débute ici.',l2:'Le combat peut poser un premier repère.',relu:false}
+  ]},
+  'veteran':{relu:false,variantes:[
+    {l1:'{a} : {age} ans, {total} combats.',l2:'Le combat peut éprouver cette expérience.',relu:false},
+    {l1:'{total} combats et {age} ans pour {a}.',l2:'Le combat peut éprouver ce long parcours.',relu:false},
+    {l1:'{a}, {age} ans, {total} combats ; {il} en a vu d’autres.',l2:'Le combat peut ajouter une ligne à ce parcours.',relu:false}
+  ]},
+  'reclame-public':{relu:false,variantes:[
+    {l1:'Combat réclamé par le public pour {c}.',l2:'Le combat peut répondre à cette attente.',relu:false},
+    {l1:'Le public réclame ce combat pour la soirée {c}.',l2:'Le combat peut répondre à cette demande.',relu:false},
+    {l1:'Le public attend ce combat pour la soirée {c}.',l2:'Le combat peut combler cette attente.',relu:false}
+  ]},
+  'meme-categorie-jamais-affrontes':{relu:false,variantes:[
+    {l1:'Même catégorie ({div}), aucun affrontement enregistré.',l2:'Le combat peut établir leur premier repère commun.',relu:false},
+    {l1:'{div} : aucun affrontement enregistré dans cette catégorie.',l2:'Le combat peut poser un premier repère.',relu:false},
+    {l1:'Même catégorie {div}, premier face-à-face à venir.',l2:'Le combat peut créer un premier précédent.',relu:false}
+  ]}
 });
 
 /* ==== [ANCRE: MONDE_LOT6_T4_RAISON_LIGNES] — Monde lot 6 T4 ==== */
+/* ==== [ANCRE: MONDE_LOT6_T5_RAISON_SELECTION] — Monde lot 6 T5 ==== */
+/** Identifiants des deux combattants d'une paire (objets ou ids), triés ; vide sinon. */
+function mgmtRaisonIds(paire){
+  const xs=Array.isArray(paire)?paire:(paire&&(paire.a!=null||paire.b!=null)?[paire.a,paire.b]:[]);
+  const ids=xs.filter(x=>x!=null).map(x=>String(typeof x==='object'?x.id:x)).filter(Boolean);
+  return ids.length===2?ids.slice().sort():[];
+}
+/** Catégorie de la paire : première division portée par un combattant (objet ou id). */
+function mgmtRaisonDivision(m,paire){
+  const xs=Array.isArray(paire)?paire:(paire&&(paire.a!=null||paire.b!=null)?[paire.a,paire.b]:[]);
+  for(const x of xs){
+    if(!x) continue;
+    if(typeof x==='object'){ if(x.div) return x.div; continue; }
+    const f=mgmtFighterById(m,x); if(f&&f.div) return f.div;
+  }
+  return '';
+}
+/** Hachage stable d'une chaîne (djb2) : aucun RNG, même entrée → même index. */
+function mgmtRaisonHachage(s){ let h=5381; for(let i=0;i<s.length;i++) h=((h*33)^s.charCodeAt(i))>>>0; return h; }
 /** Rend les deux lignes d'une preuve enregistrée, sans relecture de l'état de jeu.
  * @param {Object} m Partie contenant le roster pour résoudre les noms utiles.
  * @param {Object} raison Preuve persistée {famille,fait} et origine éventuelle.
+ * @param {Array<Object|string>} [paire] Les deux combattants concernés : fixe la variante
+ *  (hachage stable des identifiants triés) et la catégorie d'accord ; absent, première variante.
  * @returns {{l1:string,l2:string}|null} HTML échappé des deux lignes, ou null si affichage interdit.
  */
-function mgmtRaisonLignes(m,raison){
+function mgmtRaisonLignes(m,raison,paire){
   if(!raison||raison.origine==='joueur'||!raison.famille||!raison.fait) return null;
-  const phrases=MGMT_RAISON_PHRASES[raison.famille]; if(!phrases) return null;
+  const entree=MGMT_RAISON_PHRASES[raison.famille]; if(!entree||!entree.variantes||!entree.variantes.length) return null;
   const f=raison.fait, fighter=id=>{const x=id&&mgmtFighterById(m,id);return x?(x.last||x.name):'Un combattant';};
   const cs=f.combattants||[], vars={a:fighter(f.a||cs[0]?.a),b:fighter(f.b||cs[1]?.a),gagnant:fighter(f.gagnant),
     mois:Number.isFinite(f.mois)?f.mois:'',cycles:Number.isFinite(f.cycles)?f.cycles:'',c:Number.isFinite(f.c)?f.c:'',div:f.div||'',
     rangA:cs[0]?.rang??'',rangB:cs[1]?.rang??'',age:f.age??'',total:f.total??'',n:f.n??'',restants:f.restants??'',pays:f.pays||'',
     nA:cs[0]?.n??'',nB:cs[1]?.n??'',styleA:cs[0]?.style||'',styleB:cs[1]?.style||''};
-  const l1=phrases.l1.replace(/\{(\w+)\}/g,(_,k)=>String(vars[k]));
-  if(/\{[^}]+\}/.test(l1)) return null;
-  return {l1:esc(l1),l2:esc(phrases.l2)};
+  const ids=mgmtRaisonIds(paire), variantes=entree.variantes;
+  const idx=ids.length===2?mgmtRaisonHachage(raison.famille+'|'+ids.join('|'))%variantes.length:0;
+  const phrases=variantes[idx], genre={div:mgmtRaisonDivision(m,paire)};
+  const rendu=src=>{
+    const rempli=String(src).replace(/\{(\w+)\}/g,(mot,k)=>Object.prototype.hasOwnProperty.call(vars,k)?String(vars[k]):mot);
+    return mgmtAccord(genre,rempli);
+  };
+  const l1=rendu(phrases.l1), l2=rendu(phrases.l2);
+  if(/\{[^}]+\}/.test(l1)||/\{[^}]+\}/.test(l2)) return null;
+  return {l1:esc(l1),l2:esc(l2)};
 }
 
 /* ==== [ANCRE: MONDE_LOT6_T1_RAISON_LECTURE] — Monde lot 6 T1 ==== */
