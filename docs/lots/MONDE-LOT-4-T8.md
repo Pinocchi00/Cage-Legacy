@@ -36,3 +36,10 @@ De haut en bas, comme la planche :
 
 ## Hors périmètre
 La logique des piles, le booking, les textes de raison (`MGMT_RAISON_PHRASES`).
+
+## Compte rendu
+- `mgmt-carte-cadre.js` : refonte du rendu des dossiers, raison, bannière et navigation ; aucun identifiant interne visible.
+- `ui-cadre.css` : styles dédiés au rendu `.mf-dossiers` avec jetons du cadre ; versions bumpées avec `_bump.js`.
+- `tests/mgmtDossiers.test.js` : trois tests T8 ajoutés (« le dossier montre la bannière, la raison de Leïla et les trois colonnes », « aucun identifiant interne n'est affiché », « l'étape 2 montre l'adversaire et le bouton pour mettre le combat sur la carte »).
+- Migration de sauvegarde : aucune. Écart : métriques de rang/contrat non disponibles par donnée dossier, affichage `—` pour le contrat et rang si absent.
+- Questions pour Anthony : vérifier l'écran aux résolutions spécifiées ; aucun relecteur disponible dans cette session.

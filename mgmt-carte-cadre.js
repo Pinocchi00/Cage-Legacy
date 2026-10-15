@@ -237,6 +237,7 @@ SCREENS.mgmt_carte=scr_mgmt_carte_cadre;
  * @returns {string} Fragment HTML de l’étape dossier courante.
  */
 function mgmtCarteDossierHtml(m){
+  /* ==== [ANCRE: MONDE_LOT4_T8_DOSSIER] — Monde lot 4 T8 ==== */
   const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
   const i=Math.max(0,Math.min(MGMT_CART.index||0,Math.max(0,pile.length-1)));
   MGMT_CART.index=pile.length?i:0;
@@ -245,34 +246,23 @@ function mgmtCarteDossierHtml(m){
   const combattant=etape===2?(mgmtFighterById(m,MGMT_CART.dossierCombattant)||d&&d.combattant): (d&&d.combattant);
   const adversaire=etape===2&&(d&&d.adversaire);
   const titre=combattant?esc(combattant.name||combattant.last||combattant.first):'';
-  /* IDs pour navigation */
-  const prevBtn=`<button type="button" aria-label="Précédent" onclick="CL.mgmtDossierSwipe(-1)">‹</button>`;
-  const nextBtn=`<button type="button" aria-label="Suivant" onclick="CL.mgmtDossierSwipe(1)">›</button>`;
   if(!d){
     return `<main class="mf-contenu mf-carte"><div class="mf-eff-aucun">Personne dans cette catégorie.</div>
       <div class="mf-car-boutons"><button type="button" onclick="CL.mgmtDossierListe()">Liste complète</button></div></main>`;
   }
-  /* raison */
-  const raisonTxt= d.raison && (d.raison.titre||d.raison.libelle||d.raison.texte||d.raison.raison);
-  const raisonFam= d.raison && d.raison.famille? esc(d.raison.famille):'';
-  const resume = etape===2 ? `<div class="mf-dossier-resume">${esc('Ce que serait ce combat')}</div>` : '';
-  const nomComb = combattant? esc(combattant.last||combattant.name||''):'';
-  const nomAdv = adversaire? esc(adversaire.last||adversaire.name||''):'';
-  const ident = etape===1? esc(d.combattant.id||'') : esc(d.adversaire.id||'');
-  const cadre = etape===1
-   ? `<div class="mf-dossier"><div class="mf-dossier-raison">${esc(raisonTxt||'')}</div><div class="mf-dossier-nom">${nomComb}</div><div class="mf-dossier-id" data-id="${ident}">${ident}</div></div>`
-   : `<div class="mf-dossier"><div class="mf-dossier-raison">${esc(raisonTxt||'')}</div><div class="mf-dossier-nom">${nomComb} <span>vs</span> ${nomAdv}</div><div class="mf-dossier-id" data-id="${ident}">${ident}</div>${resume}</div>`;
-  return `<main class="mf-contenu mf-carte mf-dossiers">
-    <div class="mf-dossier-etapes">Étape ${etape}</div>
-    <div class="mf-dossier-nav">${prevBtn}${cadre}${nextBtn}</div>
-    <div class="mf-car-boutons">
-      ${etape===1?`<button type="button" onclick="CL.mgmtCarteEntree()">Choisir</button>`:`<button type="button" onclick="CL.mgmtCarteEntree()">Confirmer</button>`}
-      <button type="button" onclick="CL.mgmtCarteEsc()">Retour</button>
-      <button type="button" onclick="CL.mgmtCarteFiche()">Fiche</button>
-      <button type="button" onclick="CL.mgmtCarteProposer()">D'autres dossiers</button>
-      <button type="button" onclick="CL.mgmtDossierListe()">Liste complète</button>
-      ${etape===2?`<button type="button" onclick="CL.mgmtDossierPresentation()">Présentation</button>`:''}
-    </div></main>`;
+  const nom=f=>mfNet(f&&(f.last||f.name||f.first)||'');
+  const dossierF=etape===2?adversaire:combattant;
+  const gl=mgmtFicheLigne(m,dossierF.id),f=gl&&gl.f||dossierF;
+  const rang=mgmtDivisionRank(m,f,m.org),reason=d.raison?mgmtRaisonLignes(m,{...d.raison,origine:d.origine},[combattant,adversaire]):null;
+  const famille=d.raison&&String(d.raison.famille||'').replace(/-/g,' ').toUpperCase();
+  const raison=reason?`<section class="mf-dos-raison mf-dossier-raison"><h2>POURQUOI LEÏLA VOUS LE PROPOSE · ${esc(famille||'')}</h2><b>${esc(reason.l1)}</b><span>${esc(reason.l2)}</span></section>`:'';
+  const lignes=mgmtPresentationLignes(m,{mode:'combattant',ids:[dossierF.id]}).panneaux;
+  const colonnes=lignes.slice(0,3).map((p,k)=>`<section><h2>${esc(['CE QUI LE DISTINGUE','SA FORCE · SA FAILLE','SON HISTOIRE ICI'][k])}</h2>${p.lignes.slice(0,k===0?3:3).map(x=>`<div class="mf-dos-ligne">${esc(x.texte)}</div>`).join('')}</section>`).join('');
+  const banniere=`<div class="mf-dos-banner"><div><small>${esc(mfNet(f.first||''))}</small><strong>${esc(mfNet(f.last||f.name||''))}</strong></div><aside><span>PALMARÈS<b>${esc(`${f.W||0}-${f.L||0}-${f.D||0}`)}</b></span><span>CHEZ ${esc(mgmtOrgNom(m))}<b>N°${rang===null||rang<0?'—':rang+1}</b></span><span>CONTRAT<b>—</b></span></aside></div>`;
+  const voisine=(delta,label)=>{const nd=pile[(i+delta+pile.length)%pile.length];return `<button class="mf-dos-voisin" onclick="CL.mgmtDossierIndex(${delta})"><span>DOSSIER ${label}</span><b>${esc(mfNet(nd.combattant.first||''))}</b><strong>${esc(nom(nd.combattant))}</strong><small>${esc(nd.raison?((mgmtRaisonLignes(m,nd.raison,[nd.combattant,nd.adversaire])||{}).l1||''):'')}</small></button>`;};
+  const k=(MGMT_CART.cible==null?((m.card.main||[]).findIndex(x=>!x)+1||1):MGMT_CART.cible+1),nomCourant=nom(dossierF);
+  const top=`<div class="mf-dos-intro"><div><b>LEÏLA, VOTRE ADJOINTE</b><strong>${etape===1?`« Voici ${pile.length} dossiers pour le combat ${k}. Faites-les défiler, puis choisissez. »`:`« Vous avez choisi ${esc(nom(combattant))}. Voici ${pile.length} adversaires possibles. »`}</strong><span>Combat ${k} · ${esc(String(mgmtDivisionLabel(combattant.div)||'').toLowerCase())} · ${etape===2?`${esc(nom(combattant))} contre ?`:`${m.roster.filter(x=>x.div===combattant.div&&mgmtSelectable(m,x,null)).length} combattants libres`} · la carte en est à ${(m.card.main||[]).filter(Boolean).length} combats sur ${m.card.sizeMain||MGMT_MAIN_SIZE}</span></div><div class="mf-dos-steps">ÉTAPE 1 LE COMBATTANT　›　ÉTAPE 2 SON ADVERSAIRE　›　ÉTAPE 3 SUR LA CARTE</div></div>`;
+  return `<main class="mf-contenu mf-carte mf-dossiers"><div class="mf-dos-layout">${top}<div class="mf-dos-center mf-dossier-nav">${pile.length>1?voisine(-1,'PRÉCÉDENT'):''}<article class="mf-dos-card mf-dossier">${banniere}${raison}<div class="mf-dos-cols">${colonnes}</div></article>${pile.length>1?voisine(1,'SUIVANT'):''}</div><div class="mf-dos-page">DOSSIER ${i+1} SUR ${pile.length}　　←　 →　 Flèches, clic sur un bord, ou glisser le dossier</div><div class="mf-dos-actions">${mfBouton('D’autres dossiers',{touche:'D',onclick:'CL.mgmtCarteProposer()'})}${mfBouton('Liste complète',{touche:'L',onclick:'CL.mgmtDossierListe()'})}${mfBouton(etape===1?'Sa fiche':'Présentation du combat',{touche:etape===1?'F':'P',onclick:etape===1?'CL.mgmtCarteFiche()':'CL.mgmtDossierPresentation()'})}${mfBouton(etape===1?`Choisir ${nomCourant}`:`Mettre ${nom(combattant)} – ${nom(adversaire)} sur la carte`,{touche:'Entrée',jaune:true,onclick:'CL.mgmtCarteEntree()'})}</div></div></main>`;
 }
 
 /* ==== [ANCRE: MONDE_LOT4_T5_GESTES] — Monde lot 4 T5 ==== */

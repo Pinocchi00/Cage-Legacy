@@ -9,6 +9,20 @@ win.eval(`setSeed(9); window.BASE=mgmtDefault(); mgmtNewRoster(BASE); mgmtExteri
 
 function ev(code){ return JSON.parse(win.eval(`JSON.stringify((()=>{${code}})())`)); }
 
+/* ==== [ANCRE: MONDE_LOT4_T8_TESTS] — Monde lot 4 T8 ==== */
+test('Monde lot 4 T8 — le dossier montre la bannière, la raison de Leïla et les trois colonnes',()=>{
+  const w=ouvreCible(0);
+  try{const r=JSON.parse(w.eval(`(()=>{const m=G.mgmt;MGMT_CART.index=0;MGMT_CART.etape=1;const e=document.createElement('div');e.innerHTML=mgmtCarteDossierHtml(m);const d=MGMT_CART.dossiers[MGMT_CART.index],rs=mgmtRaisonLignes(m,d.raison,[d.combattant,d.adversaire]);return JSON.stringify({text:e.textContent,last:d.combattant.last||d.combattant.name,l1:rs&&rs.l1,n:MGMT_CART.dossiers.length})})()`));
+    for(const t of [r.last,'PALMARÈS','POURQUOI LEÏLA VOUS LE PROPOSE',r.l1,'CE QUI LE DISTINGUE','SON HISTOIRE ICI',`DOSSIER 1 SUR ${r.n}`]) assert.ok(r.text.toLocaleLowerCase().includes(String(t).toLocaleLowerCase()),t);
+  }finally{w.close();}
+});
+test('Monde lot 4 T8 — aucun identifiant interne n\'est affiché',()=>{
+  const w=ouvreCible(0);try{const text=w.eval(`(()=>{const e=document.createElement('div');e.innerHTML=mgmtCarteDossierHtml(G.mgmt);return e.textContent})()`);assert.doesNotMatch(text,/\bmg\d+\b/);}finally{w.close();}
+});
+test('Monde lot 4 T8 — l’étape 2 montre l’adversaire et le bouton pour mettre le combat sur la carte',()=>{
+  const w=ouvreCible(0);try{w.eval('CL.mgmtCarteEntree()');const r=JSON.parse(w.eval(`(()=>{const e=document.createElement('div');e.innerHTML=mgmtCarteDossierHtml(G.mgmt);return JSON.stringify({text:e.textContent,html:e.innerHTML})})()`));assert.match(r.html,/ÉTAPE 2 SON ADVERSAIRE/);assert.match(r.html,/Mettre .* sur la carte/i);}finally{w.close();}
+});
+
 test('Monde lot 4 T1 — une pile contient quatre à six combattants libres avec des familles distinctes',()=>{
   const r=ev(`setSeed(20261015);
     const m=JSON.parse(JSON.stringify(BASE)); m.hist=[]; m.facts=[]; m.cycle=20; m.card.main=[]; m.card.prelims=[];
