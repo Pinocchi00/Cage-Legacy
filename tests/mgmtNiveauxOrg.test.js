@@ -62,31 +62,32 @@ test('Monde lot 9 T3 — avec le monde vivant, les huit organisations ont leurs 
   }finally{ a.close(); b.close(); }
 });
 
+/* Superviseur, 15/10/2026 : l'ordre officiel des organisations se lit dans le jeu (MGMT_ORGANISATIONS n'existe pas côté Node). */
+const ordreAttendu=(rows,ordre)=>rows.slice().sort((x,y)=>x.total-y.total||x.rangs.puissance-y.rangs.puissance||ordre.indexOf(x.id)-ordre.indexOf(y.id)).map(x=>x.id);
+
 test('Monde lot 9 T4 — huit lignes, rangs sans trou, totaux et ordre explicables',()=>{
   const w=partie(true);
   try{
-    const rows=lire(w,`return mgmtOrgClassement(m);`);
-    assert.equal(rows.length,8);
-    assert.deepEqual(rows.map(x=>x.rang),[1,2,3,4,5,6,7,8]);
-    for(const x of rows) assert.equal(x.total,Object.values(x.rangs).reduce((s,n)=>s+n,0));
-    for(let i=1;i<rows.length;i++){
-      const a=rows[i-1],b=rows[i];
-      const tieBreak=a.rangs.puissance<b.rangs.puissance||(a.rangs.puissance===b.rangs.puissance&&MGMT_ORGANISATIONS.findIndex(o=>o.id===a.id)<MGMT_ORGANISATIONS.findIndex(o=>o.id===b.id));
-      assert.ok(a.total<b.total||(a.total===b.total&&tieBreak));
-    }
+    const r=lire(w,`return {rows:mgmtOrgClassement(m),ordre:MGMT_ORGANISATIONS.map(o=>o.id)};`);
+    assert.equal(r.rows.length,8);
+    assert.deepEqual(r.rows.map(x=>x.rang),[1,2,3,4,5,6,7,8]);
+    for(const x of r.rows) assert.equal(x.total,Object.values(x.rangs).reduce((s,n)=>s+n,0),'total = somme des quatre rangs');
+    assert.deepEqual(r.rows.map(x=>x.id),ordreAttendu(r.rows,r.ordre),'ordre : total, puis puissance, puis ordre officiel');
   }finally{w.close();}
 });
 
-test('Monde lot 9 T4 — changer la popularité change les rangs seulement par les totaux',()=>{
+test('Monde lot 9 T4 — changer la popularité change le rang de popularité et le total, et le classement suit les totaux',()=>{
+  /* Décision du 15/10/2026 précisée : le classement suit toujours la règle des totaux ; il ne bouge que si l'ordre des totaux bouge. */
   const w=partie(true);
   try{
-    const r=lire(w,`const avant=mgmtOrgClassement(m), id=MGMT_ORGANISATIONS[7].id; m.orgs[id].pop+=100000; return {avant,apres:mgmtOrgClassement(m),id};`);
+    const r=lire(w,`const avant=mgmtOrgClassement(m), id=avant[avant.length-1].id; m.orgs[id]?(m.orgs[id].pop+=100000):(m.pop+=100000);
+      return {avant,apres:mgmtOrgClassement(m),id,ordre:MGMT_ORGANISATIONS.map(o=>o.id)};`);
     const a=r.avant.find(x=>x.id===r.id), b=r.apres.find(x=>x.id===r.id);
-    assert.notEqual(a.rangs.popularite,b.rangs.popularite);
-    assert.notEqual(a.total,b.total);
-    assert.notDeepEqual(r.avant.map(x=>x.id),r.apres.map(x=>x.id),'le changement de total modifie le classement global');
-    const ordreTotaux=xs=>xs.slice().sort((x,y)=>x.total-y.total||x.rangs.puissance-y.rangs.puissance||MGMT_ORGANISATIONS.findIndex(o=>o.id===x.id)-MGMT_ORGANISATIONS.findIndex(o=>o.id===y.id)).map(x=>x.id);
-    assert.deepEqual(r.apres.map(x=>x.id),ordreTotaux(r.apres));
+    assert.equal(b.rangs.popularite,1,'la plus populaire');
+    assert.ok(b.total<a.total,'son total baisse');
+    assert.ok(b.rang<a.rang,'la dernière remonte au classement');
+    for(const k of ['stade','notoriete','puissance']) assert.equal(b.rangs[k],a.rangs[k],'les autres niveaux ne bougent pas : '+k);
+    assert.deepEqual(r.apres.map(x=>x.id),ordreAttendu(r.apres,r.ordre));
   }finally{w.close();}
 });
 
