@@ -2,6 +2,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
+const touche=(win,key)=>win.eval(`keysHandle({key:${JSON.stringify(key)},preventDefault(){}})`);
 
 const win=newGameWindow({runMain:true});
 win.eval(`setSeed(9); window.BASE=mgmtDefault(); mgmtNewRoster(BASE); mgmtExteriorEnsure(BASE);`);
@@ -211,4 +212,159 @@ test('Monde lot 4 T2 — la même graine et le même état donnent la même pile
   assert.equal(a.beforeM,a.afterM);
   assert.equal(a.beforeG,a.afterG);
   assert.equal(a.beforeSeed,a.afterSeed);
+});
+
+test('Monde lot 4 T4 — Entrée choisit le combattant du dossier courant puis affiche ses adversaires',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  const cid=win.eval('MGMT_CART.dossiers[MGMT_CART.index].combattant.id');
+  assert.equal(win.eval('MGMT_CART.etape'),1);
+  touche(win,'Enter');
+  assert.equal(win.eval('MGMT_CART.etape'),2);
+  assert.equal(win.eval('MGMT_CART.dossierCombattant'),cid);
+  assert.ok(win.eval('MGMT_CART.dossiers.length')>0);
+  assert.equal(win.eval('G.mgmt.card.main.length'),0);
+});
+
+test('Monde lot 4 T4 — les flèches font défiler les dossiers sans changer la carte',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers(); CL.mgmtCarteEntree();`);
+  const ids=win.eval('MGMT_CART.dossiers.length');
+  const mainBefore=win.eval('JSON.stringify(G.mgmt.card.main)');
+  const idx0=win.eval('MGMT_CART.index');
+  touche(win,'ArrowRight');
+  const idx1=win.eval('MGMT_CART.index');
+  assert.notEqual(idx1,idx0);
+  touche(win,'ArrowLeft');
+  assert.equal(win.eval('MGMT_CART.index'),idx0);
+  assert.equal(win.eval('JSON.stringify(G.mgmt.card.main)'),mainBefore);
+});
+
+test('Monde lot 4 T4 — Échap revient à la liste ou à l’étape précédente',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  touche(win,'Escape');
+  assert.equal(win.eval('MGMT_CART.mode'),'liste');
+  assert.equal(win.eval('G.mgmt.card.main.length'),0);
+  // step2 -> step1
+  win.eval(`CL.mgmtDossiers(); CL.mgmtCarteEntree();`);
+  const cid=win.eval('MGMT_CART.dossierCombattant');
+  touche(win,'Escape');
+  assert.equal(win.eval('MGMT_CART.etape'),1);
+  assert.equal(win.eval('MGMT_CART.dossierCombattant'),cid);
+  assert.equal(win.eval('G.mgmt.card.main.length'),0);
+});
+
+test('Monde lot 4 T4 — confirmer un adversaire passe par mgmtBookMain et pose le combat choisi',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();
+   window.__book=[]; const __orig=mgmtBookMain; mgmtBookMain=(m,a,b)=>{window.__book.push([a,b]); return __orig(m,a,b);};`);
+  win.eval('CL.mgmtCarteEntree();');
+  const cid=win.eval('MGMT_CART.dossierCombattant');
+  const aid=win.eval('MGMT_CART.dossiers[MGMT_CART.index].adversaire.id');
+  touche(win,'Enter');
+  const books=JSON.parse(win.eval('JSON.stringify(window.__book)'));
+  assert.equal(books.length,1);
+  assert.equal(books[0][0],cid);
+  assert.equal(books[0][1],aid);
+  assert.equal(win.eval('G.mgmt.card.main.length'),1);
+  assert.equal(win.eval('G.mgmt.card.main[0].a'),cid);
+  assert.equal(win.eval('G.mgmt.card.main[0].b'),aid);
+});
+
+test('Monde lot 4 T4 — F ouvre la fiche du dossier courant',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  const cid=win.eval('MGMT_CART.dossiers[MGMT_CART.index].combattant.id');
+  win.eval('CL.mgmtCarteFiche();');
+  assert.equal(win.eval('MGMT_FICHE.id'),cid);
+  win.eval('CL.mgmtFicheRetour();');
+  win.eval('MGMT_CART.mode="dossiers"; render();');
+  win.eval('CL.mgmtCarteEntree();');
+  const aid=win.eval('MGMT_CART.dossiers[MGMT_CART.index].adversaire.id');
+  win.eval('CL.mgmtCarteFiche();');
+  assert.equal(win.eval('MGMT_FICHE.id'),aid);
+});
+
+test('Monde lot 4 T4 — D’autres dossiers ne répète aucun candidat déjà montré',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  const seen=JSON.parse(win.eval('JSON.stringify(MGMT_CART.dossiers.map(d=>d.combattant.id))'));
+  win.eval('CL.mgmtCarteProposer();');
+  const nids=JSON.parse(win.eval('JSON.stringify(MGMT_CART.dossiers.map(d=>d.combattant.id))'));
+  assert.equal(nids.some(x=>seen.includes(x)),false);
+});
+
+test('Monde lot 4 T4 — L bascule entre dossiers et liste complète sans perdre le choix',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers(); CL.mgmtCarteEntree();`);
+  const cid=win.eval('MGMT_CART.dossierCombattant');
+  const mainBefore=win.eval('G.mgmt.card.main.length');
+  win.eval('CL.mgmtDossierListe();');
+  assert.equal(win.eval('MGMT_CART.mode'),'liste');
+  assert.equal(win.eval('MGMT_CART.listeDepuisDossiers'),true);
+  assert.equal(win.eval('MGMT_CART.dossierCombattant'),cid);
+  win.eval('CL.mgmtDossierRetour();');
+  assert.equal(win.eval('MGMT_CART.mode'),'dossiers');
+  assert.equal(win.eval('G.mgmt.card.main.length'),mainBefore);
+});
+
+test('Monde lot 4 T4 — les actions souris correspondent aux actions clavier',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  const idx0=win.eval('MGMT_CART.index');
+  win.eval(`document.querySelector('.mf-dossier-nav button[aria-label="Suivant"]').click();`);
+  assert.notEqual(win.eval('MGMT_CART.index'),idx0);
+  win.eval(`document.querySelector('.mf-dossier-nav button[aria-label="Précédent"]').click();`);
+  assert.equal(win.eval('MGMT_CART.index'),idx0);
+  // contrôle F atteint la même action que la touche affichée
+  assert.ok(win.eval(`document.body.innerHTML.includes('mgmtCarteFiche')`));
+});
+
+test('Monde lot 4 T4 — la présentation du combat porte sur la paire active',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers(); CL.mgmtCarteEntree();
+   window.__pres=[]; CL.mgmtPresentationCombat=(a,b)=>{window.__pres.push([a,b]);};`);
+  const cid=win.eval('MGMT_CART.dossierCombattant');
+  const aid=win.eval('MGMT_CART.dossiers[MGMT_CART.index].adversaire.id');
+  win.eval('CL.mgmtDossierPresentation();');
+  const pres=JSON.parse(win.eval('JSON.stringify(window.__pres)'));
+  assert.equal(pres.length,1);
+  assert.equal(pres[0][0],cid);
+  assert.equal(pres[0][1],aid);
+  assert.equal(win.eval('G.mgmt.card.main.length'),0);
+});
+
+test('Monde lot 4 T4 — les noms joueurs injectés dans le rendu sont échappés',()=>{
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();
+   const d=MGMT_CART.dossiers[0]; const f=mgmtFighterById(G.mgmt,d.combattant.id);
+   f.name='<img src=x onerror=alert(1)>'; f.last='<img src=x onerror=alert(1)>'; f.first='<b>x</b>';
+   render();`);
+  assert.equal(win.eval(`document.querySelectorAll('#app img').length`),0);
+  assert.ok(win.eval(`document.getElementById('app').innerHTML.includes('&lt;')`));
+});
+
+test('Monde lot 4 T4 — dossiers et liste laissent le même état après le même booking',()=>{
+  const w1=newGameWindow({runMain:true});
+  const w2=newGameWindow({runMain:true});
+  w1.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers(); CL.mgmtCarteEntree(); CL.mgmtCarteEntree();`);
+  // liste route second
+  w2.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte');`);
+  // find first selectable fighter/adversaire like dossier not always same; instead trust dossier pair from w1
+  const cid=w1.eval('G.mgmt.card.main[0].a');
+  const aid=w1.eval('G.mgmt.card.main[0].b');
+  w2.eval(`MGMT_CART.pick='${cid}'; MGMT_CART.cursor=0; render();`);
+  w2.eval(`CL.mgmtPick('${aid}');`);
+  assert.equal(JSON.stringify(JSON.parse(w1.eval('JSON.stringify(G.mgmt.card)'))),JSON.stringify(JSON.parse(w2.eval('JSON.stringify(G.mgmt.card)'))));
+});
+
+test('Monde lot 4 T4 — le mode dossiers ne change pas après rechargement du même état seedé',()=>{
+  const w1=newGameWindow({runMain:true});
+  const w2=newGameWindow({runMain:true});
+  w1.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  w2.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  const a=JSON.parse(w1.eval('JSON.stringify(MGMT_CART.dossiers.map(d=>({c:d.combattant.id,a:d.adversaire&&d.adversaire.id,r:d.raison})))'));
+  const b=JSON.parse(w2.eval('JSON.stringify(MGMT_CART.dossiers.map(d=>({c:d.combattant.id,a:d.adversaire&&d.adversaire.id,r:d.raison})))'));
+  assert.deepEqual(a,b);
 });

@@ -100,5 +100,6 @@ Ne pas modifier les règles de sélection T1/T2, le catalogue de raisons du lot 
 - `mgmt-carte-cadre.js` : ajout du mode dossiers navigable (étape 1/2) à partir des piles T1/T2 et de `mgmtCarteDossierHtml`; clavier/souris équivalents (←/→, Entrée, Échap, F, D, L, P), échappement HTML.
 - `mgmt-ecran-carte.js` / `mgmt-emplacements.js` : état éphémère étendu dans `MGMT_CART`.
 - `index.html`, `sw.js` : montée de version de cache.
-- Tests ajoutés : aucune nouvelle déclaration (les T1/T2 existants couvrent les piles; les critères d’intégration ont été vérifiés manuellement via le harnais jsdom).
+- `tests/mgmtDossiers.test.js` : ajout des tests T4 d’interaction (navigation, Échap, booking espionné, F/D/L/P, souris, échappement, équivalence, rechargement).
+- Reprise : liaison de `mgmtDossierSwipe()` aux bords et clavier, sécurisation des IDs en attributs, affichage des raccourcis F et D, état vide existant, confirmation garantissant `mgmtBookMain`, restauration explicite du dossier à l’étape 1.
 - Questions pour Anthony : aucune.

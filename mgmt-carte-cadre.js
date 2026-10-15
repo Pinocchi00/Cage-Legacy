@@ -137,7 +137,7 @@ function mgmtCarteAdvLigne(m,f,i,choisi,homo){
   const sel=mgmtSelectable(m,f,MGMT_CART.pick);
   const raison=mgmtCarteNote(m,f,MGMT_CART.pick);
   const rg=mgmtRangAffichable(m,f);
-  return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${esc(f.id)}')">`
+  return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${escJsAttr(f.id)}')">`
     +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}${mfMarqueNom(m,f.id)}</b>`
     +`<i>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</i></span><span class="mf-car-adv-s">${esc(raison||' ')}</span></span></button>`;
 }
@@ -226,10 +226,10 @@ function mgmtCarteDossierHtml(m){
   const adversaire=etape===2&&(d&&d.adversaire);
   const titre=combattant?esc(combattant.name||combattant.last||combattant.first):'';
   /* IDs pour navigation */
-  const prevBtn=`<button type="button" aria-label="Précédent" onclick="CL.mgmtDossierIndex(-1)">‹</button>`;
-  const nextBtn=`<button type="button" aria-label="Suivant" onclick="CL.mgmtDossierIndex(1)">›</button>`;
+  const prevBtn=`<button type="button" aria-label="Précédent" onclick="CL.mgmtDossierSwipe(-1)">‹</button>`;
+  const nextBtn=`<button type="button" aria-label="Suivant" onclick="CL.mgmtDossierSwipe(1)">›</button>`;
   if(!d){
-    return `<main class="mf-contenu mf-carte"><div class="mf-eff-aucun">Aucun dossier disponible.</div>
+    return `<main class="mf-contenu mf-carte"><div class="mf-eff-aucun">Personne dans cette catégorie.</div>
       <div class="mf-car-boutons"><button type="button" onclick="CL.mgmtDossierListe()">Liste complète</button></div></main>`;
   }
   /* raison */
@@ -257,7 +257,17 @@ function mgmtCarteDossierHtml(m){
 
 function mgmtCarteDossiersEcran(m){
   const html=mgmtCarteDossierHtml(m);
-  return mfEcran? (typeof mfEcran==='function'? mfEcran(html,{barre:'jeu',courant:'carte',m}): html) : html;
+  const touches=[
+    {ks:['←','→'],t:'Défiler',onclick:'CL.mgmtDossierSwipe(-1)'},
+    {ks:['Entrée'],t:(MGMT_CART.etape===2?'Confirmer':'Choisir'),jaune:true,onclick:'CL.mgmtCarteEntree()'},
+    {ks:['Échap'],t:'Retour',onclick:'CL.mgmtCarteEsc()'},
+    {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},
+    {ks:['D'],t:'D’autres dossiers',onclick:'CL.mgmtCarteProposer()'},
+    {ks:['L'],t:'Liste',onclick:'CL.mgmtDossierListe()'}
+  ];
+  if(MGMT_CART.etape===2) touches.push({ks:['P'],t:'Présentation',onclick:'CL.mgmtDossierPresentation()'});
+  const opts={barre:'jeu',courant:'carte',m,plaque:'Carte',touches};
+  return mfEcran? (typeof mfEcran==='function'? mfEcran(html,opts): html) : html;
 }
 
 Object.assign(CL,{
@@ -322,8 +332,10 @@ Object.assign(CL,{
     const m=G.mgmt;
     if(MGMT_CART.mode!=='dossiers'){ CL.mgmtCarteLeave(); return; }
     if(MGMT_CART.etape===2){
-      MGMT_CART.etape=1; MGMT_CART.index=0;
-      if(Array.isArray(MGMT_CART.dossiers)&&MGMT_CART.dossiers.length){ /* keep chosen */ }
+      const cid=MGMT_CART.dossierCombattant;
+      MGMT_CART.dossierCombattant=cid;
+      MGMT_CART.etape=1;
+      MGMT_CART.index=0;
       render(); return;
     }
     // step1 -> list mode, conserve context
