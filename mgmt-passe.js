@@ -133,7 +133,9 @@ function mgmtPasseCloturer(m){
    au chargement (mgmtParseAndValidate → mgmtPasseDeployer). Le format compact n'existe que dans le fichier ; si quelque chose d'inattendu s'y oppose, la partie s'écrit
    en clair (plus lourde, jamais fausse). Aucun second système : la partie en mémoire est la même avec ou sans archive. */
 /** Les sortes de faits du passé qui ne servent à aucun lecteur : écartés à la clôture (QO-9 ne vaut que pour les faits du joueur). */
-const MGMT_PASSE_FAITS_PERDUS=['depart_attente','contrat','attend'];
+/* Monde lot 8 T4a/T4b : les faits d'événement nés pendant les six ans ne sont lus par personne tant que la tranche T7 (le passé lisible sur la fiche) n'existe pas ; ils sont écartés à la clôture pour tenir le budget de taille de la partie (420 Ko). */
+const MGMT_PASSE_FAITS_PERDUS=['depart_attente','contrat','attend',
+  'top15','titre_vacant','regne_cap','dernier_combat','carte_camp','depassement','challenger','vieux_combat','retraite_annoncee'];
 
 /** Le côté d'un combat du passé, reconstitué de la ligne de l'effectif et du bilan d'avant combat. Pur. */
 function mgmtPasseCote(f,age,W,L,D){

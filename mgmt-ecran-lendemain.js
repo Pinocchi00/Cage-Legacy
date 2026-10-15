@@ -167,25 +167,23 @@ function mgmtLendemainConstatsHtml(m){
       }
     }
     for(const divId of divs){
-      const cur=mgmtDivisionRanking(m,divId,'world');
-      const prev=mgmtDivisionRanking(m,divId,'world',m.cycle-1);
-      cur.forEach((row,i)=>{
-        if(i>=MGMT_CL_TOP) return;
-        if(prev.some(x=>x.id===row.id)) return;
-        const gl=mgmtFicheLigne(m,row.id), nom=gl?gl.f.name:'Combattant';
+      /* Monde lot 8 T4a : la même comparaison qu'avant, lue dans
+         mgmtTop15Mouvements (mgmt-bureau.js) — le fait et le lendemain
+         restent d'accord. HTML de sortie inchangé. */
+      const mv=mgmtTop15Mouvements(m,divId);
+      mv.entrees.forEach(({id,rang})=>{
+        const gl=mgmtFicheLigne(m,id), nom=gl?gl.f.name:'Combattant';
         out.push({gold:true,
           titre:`${esc(nom)} ${esc(MGMT_LD_LABELS.inTop)}`,
-          detail:`${esc(mgmtDivisionLabel(divId))} · ${esc(mgmtRankLabel(i+1,divId))} `
+          detail:`${esc(mgmtDivisionLabel(divId))} · ${esc(mgmtRankLabel(rang,divId))} `
             +`${esc(MGMT_LD_LABELS.world)}.`});
       });
-      prev.slice(0,MGMT_CL_TOP).forEach(row=>{
-        const j=cur.findIndex(x=>x.id===row.id);
-        if(j>=0&&j<MGMT_CL_TOP) return;
-        const gl=mgmtFicheLigne(m,row.id), nom=gl?gl.f.name:'Combattant';
+      mv.sorties.forEach(({id,rang})=>{
+        const gl=mgmtFicheLigne(m,id), nom=gl?gl.f.name:'Combattant';
         out.push({gold:false,
           titre:`${esc(nom)} ${esc(MGMT_LD_LABELS.outTop)}`,
-          detail:j>=0
-            ?`${esc(mgmtDivisionLabel(divId))} · ${esc(mgmtRankLabel(j+1,divId))} `
+          detail:rang!==null
+            ?`${esc(mgmtDivisionLabel(divId))} · ${esc(mgmtRankLabel(rang,divId))} `
               +`${esc(MGMT_LD_LABELS.world)}.`
             :`${esc(mgmtDivisionLabel(divId))} · ${esc(MGMT_LD_LABELS.worldHors)}.`});
       });

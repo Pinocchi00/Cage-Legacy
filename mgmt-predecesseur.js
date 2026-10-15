@@ -128,12 +128,20 @@ function mgmtPredecesseurChampions(m){ return allDivisions().map(d=>(mgmtSplitTi
 function mgmtPredecesseurBooker(m,k,cfg,limite,contrats,reclamations){
   const cad=cfg.titreCadence, plafond=Math.min(limite,m.card.sizeMain);
   const admissible=f=>!contrats||!!(f&&!f.libre&&mgmtContratRestants(f)>0);
+  /* Monde lot 9 T1 : chemin direct — on lit le roster filtré sans construire la liste préparée pour l'écran (mgmtCartRows).
+     Même tri que mgmtCartRows (catégorie puis rang mémorisé), même rang, sans produire la vue d'écran. */
+  const _order=allDivisions().map(d=>d.id);
+  const _dx=o=>{ const i=_order.indexOf(o.div); return i<0?_order.length:i; };
+  const _rangs=new Map();
+  const _lignes=m&&Array.isArray(m.roster)?m.roster.filter(o=>o&&!mgmtIsRetired(o)):[];
+  for(const o of _lignes) _rangs.set(o,mgmtDivisionRank(m,o)||0);
+  _lignes.sort((x,y)=>{ const a=_dx(x), b=_dx(y); if(a!==b) return a-b; const rx=_rangs.get(x), ry=_rangs.get(y); if(rx!==ry) return rx-ry; return x.id<y.id?-1:1; });
   let reclames=0, tetes=0;
   /* La carte principale : les combats réclamés d'abord, puis les meilleures têtes d'affiche de chaque catégorie. */
   /* ==== [ANCRE: MONDE_LOT5_T6_RECLAMATIONS_BOOKING] — Monde lot 5 T6 ==== */
   for(const r of reclamations||mgmtPublicReclame(m)){ if(m.card.main.length>=plafond) break; const a=mgmtFighterById(m,r.a), b=mgmtFighterById(m,r.b);
     if(a&&b&&admissible(a)&&admissible(b)&&a.div===b.div&&mgmtSelectable(m,a,null)&&mgmtSelectable(m,b,a.id)){ if(mgmtBookMain(m,a.id,b.id)) reclames++; } }
-  const divs=[...new Set(mgmtCartRows(m).map(f=>f.div))];
+  const divs=[...new Set(_lignes.map(f=>f.div))];
   /* Décision du 12/10/2026 : le prédécesseur fait tourner les combats de titre. Une catégorie qui n'a qu'un règne (ou aucun) est servie d'abord, chaque soirée,
      et son titre est mis en jeu : le champion contre le mieux placé des autres. Aucune issue forcée : le moteur joue le combat. Opt-in : rotationTitres = la soirée à partir de laquelle il s'applique (la première moitié du passé n'est pas touchée). */
   /* Deux catégories par soirée au plus (le plafond des titres d'une carte) (à tour de rôle) : les têtes d'affiche des autres catégories gardent leurs places, la caisse d'une petite organisation aussi. */
@@ -142,9 +150,9 @@ function mgmtPredecesseurBooker(m,k,cfg,limite,contrats,reclamations){
   const surCarte=d=>m.card.main.some(x=>{ const f=mgmtFighterById(m,x.a); return f&&f.div===d; });
   let essais=0;
   while(m.card.main.length<plafond&&essais++<60){
-    const prio=[...besoin].find(d=>!surCarte(d)&&mgmtCartRows(m).filter(f=>f.div===d&&admissible(f)&&mgmtSelectable(m,f,null)).length>=2);
+    const prio=[...besoin].find(d=>!surCarte(d)&&_lignes.filter(f=>f.div===d&&admissible(f)&&mgmtSelectable(m,f,null)).length>=2);
     const div=prio||divs[(k+m.card.main.length+essais)%divs.length];
-    const rows=mgmtCartRows(m).filter(f=>f.div===div&&admissible(f)&&mgmtSelectable(m,f,null)).sort((x,y)=>mgmtStar(y)-mgmtStar(x)||departageAge(x,y,cfg));
+    const rows=_lignes.filter(f=>f.div===div&&admissible(f)&&mgmtSelectable(m,f,null)).sort((x,y)=>mgmtStar(y)-mgmtStar(x)||departageAge(x,y,cfg));
     /* Le champion d'une catégorie délaissée peut être au dernier palier d'attente : il n'est plus « sélectionnable » seul, mais accepte un adversaire moins connu
        que lui (mgmtContratIndispo). On le prend quand même, avec le mieux placé de ceux qu'il accepte. */
     const champ=prio&&mgmtFighterById(m,mgmtSplitTitle(m,div).id);

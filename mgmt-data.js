@@ -179,6 +179,33 @@ const MGMT_FACT_LABELS={retired:'Fin de carrière médicale',injury:'Blessure',s
   /* Lot 5 T1, reprise Mémoire : libellés factuels demandés par Anthony. */
   title_retained:'Ceinture conservée',title_lost:'Ceinture perdue',title_awarded:'Ceinture attribuée',
   title_vacant:'Titre vacant'};
+/* ==== [ANCRE: MONDE_LOT8_T4A_PHRASES] — Monde lot 8 T4a (docs/lots/MONDE-LOT-8-T4a.md §5) :
+   les dix gabarits de phrase de fiche des événements de coût petit. Livrés par Claude
+   (10/10/2026), propositions relu:false — posées telles quelles, n'en inventer aucune autre.
+   Jetons : {div} (mgmtDivisionLabel), {adv} (l'adversaire du fait), {n}, {coeq} (le nom du
+   coéquipier), {want} (MGMT_DEMANDES[x.want].libelle) ; {Il} et {lui} sont accordés par
+   mgmtAccord au rendu de la fiche. mgmtMondePhrase (mgmt-bureau.js) rend du texte brut,
+   échappé là où il s'affiche. ==== */
+const MGMT_MONDE_PHRASES={
+  top15entre:'{Il} entre dans le top 15 mondial ({div}).',
+  top15entreCombat:'{Il} entre dans le top 15 mondial ({div}) après son combat contre {adv}.',
+  top15sortie:'{Il} sort du top 15 mondial ({div}).',
+  top15sortieCombat:'{Il} sort du top 15 mondial ({div}) après son combat contre {adv}.',
+  titreVacant:'Son départ laisse la ceinture sans champion ({div}).',
+  regneCapDefenses:'{Il} en est à {n} défenses de sa ceinture.',
+  regneCapMois:'{Il} tient sa ceinture depuis {n} mois.',
+  dernierCombat:'Il ne {lui} reste qu’un combat sur son contrat.',
+  carteCamp:'{Il} et {coeq}, du même camp, étaient sur la même soirée.',
+   sansReponse:'Sa demande est restée sans réponse — {want}.',
+   retraiteAnnoncee:'{Il} annonce sa retraite : ce sera dans trois soirées, à {age} ans.',
+   depassement:'{Il} vient de passer devant {depasse} au classement ({div}).',
+   challenger:'{Il} se déclare pour la ceinture ({div}) et vise {champion}.',
+   vieuxCombatVoisins:'Son ancien combat contre {adv} redevient d’actualité : ils sont voisins au classement.',
+   vieuxCombatTitre:'Son ancien combat contre {adv} redevient d’actualité : une ceinture est en jeu.',
+   vieuxCombatBlessure:'Son ancien combat contre {adv} redevient d’actualité : {il} revient de blessure.',
+  relu:false
+};
+/* ==== [FIN ANCRE] ==== */
 /* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_LOT2B_EXTERIEUR_DONNEES] — Lot 2B T1 le monde extérieur

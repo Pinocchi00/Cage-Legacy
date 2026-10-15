@@ -136,6 +136,30 @@ function mgmtDemandesOuvertes(m){
   return out;
 }
 
+/** Décision 2 du 10/10 : une demande périmée sans réponse devient un fait
+ *  sans_reponse, une fois (d = index du fait demande). La demande reste dans
+ *  m.facts — rien n'est retiré (§9), elle n'est simplement plus ouverte.
+ *  Aucune RNG, aucun DOM. */
+function mgmtDemandesExpire(m){
+  if(!m||!Array.isArray(m.facts)) return;
+  const repondus=new Set(), dits=new Set();
+  for(const x of m.facts){
+    if(!x) continue;
+    if((x.k==='promesse'||x.k==='refus')&&Number.isSafeInteger(x.d)) repondus.add(x.d);
+    if(x.k==='sans_reponse'&&Number.isSafeInteger(x.d)) dits.add(x.d);
+  }
+  /* Longueur figée avant d'écrire : les faits poussés ne se relisent pas, et
+     les index des faits d'avant ne bougent pas. */
+  const faits=m.facts, n=faits.length;
+  for(let i=0;i<n;i++){
+    const x=faits[i];
+    if(!x||x.k!=='demande') continue;
+    if(repondus.has(i)||dits.has(i)) continue;
+    if(m.cycle-x.c<=MGMT_DEMANDE_EXPIRE) continue;
+    mgmtAddFact(m,{c:m.cycle,k:'sans_reponse',a:x.a,want:x.want,...(x.target?{target:x.target}:{}),d:i});
+  }
+}
+
 /** Les demandes qu'un combattant peut formuler, selon son état. */
 function mgmtDemandesPossibles(m,f){
   const out=[];
