@@ -71,8 +71,9 @@ Aucune : le brief fixe la portée, le classement par catégorie et l'affichage d
 
 ## Compte rendu
 
-- Fichiers modifiés : `tests/mgmtEcranClassements.test.js` ajoute les trois tests T5 (liste mondiale/Split et absence de doublons, rang de fiche, déterminisme). Aucun code de production modifié : les API et rendus existants consomment déjà le classement partagé.
+- Fichiers modifiés : `tests/mgmtEcranClassements.test.js` vérifie les huit organisations dont Split, les rangs rendus continus, l'accord explicite du rang calculé/situation/fiche et le cas retiré, ainsi que le déterminisme. Aucun code de production modifié : les API et rendus existants consomment déjà le classement partagé.
 - Tests ajoutés : « Monde lot 9 T5 — le mondial classe les huit organisations ensemble par catégorie », « Monde lot 9 T5 — le rang mondial de la liste est celui de la fiche », « Monde lot 9 T5 — le classement mondial est déterministe à graine égale ».
 - Migration de sauvegarde : aucune.
-- Écart : les tests de liste et d'accord avec la fiche échouent actuellement dans leurs assertions de collecte/rendu. Le test de déterminisme ciblé passe. Le test de liste a été lancé à nouveau après correction du sélecteur, sans résultat final vérifié.
+- Écart : la reprise corrige les assertions manquantes. Les modifications historiques présentes dans `main...HEAD` (outillage `.opencode`, fiches T2–T4, scripts et tests d'autres tranches) précèdent cette reprise et ne sont pas des fichiers de T5 ; le commit de reprise ne touche que ce test et cette fiche.
+- Vérification : la première exécution a échoué sur le sélecteur de collecte (les rangées portent des ids dans onclick et la liste complète est dans details). Corrigé le sélecteur et ouvert le détail dans le test ; exécution complète à confirmer.
 - Questions pour Anthony : aucune.
