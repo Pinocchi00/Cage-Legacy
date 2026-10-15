@@ -68,3 +68,11 @@ Classement des organisations T4, formules des niveaux T3, staff T6-T9, carrière
 ## Questions pour Anthony
 
 Aucune : le brief fixe la portée, le classement par catégorie et l'affichage du rang sur la fiche ; les API et la planche Classements existent.
+
+## Compte rendu
+
+- Fichiers modifiés : `tests/mgmtEcranClassements.test.js` ajoute les trois tests T5 (liste mondiale/Split et absence de doublons, rang de fiche, déterminisme). Aucun code de production modifié : les API et rendus existants consomment déjà le classement partagé.
+- Tests ajoutés : « Monde lot 9 T5 — le mondial classe les huit organisations ensemble par catégorie », « Monde lot 9 T5 — le rang mondial de la liste est celui de la fiche », « Monde lot 9 T5 — le classement mondial est déterministe à graine égale ».
+- Migration de sauvegarde : aucune.
+- Écart : les tests de liste et d'accord avec la fiche échouent actuellement dans leurs assertions de collecte/rendu. Le test de déterminisme ciblé passe. Le test de liste a été lancé à nouveau après correction du sélecteur, sans résultat final vérifié.
+- Questions pour Anthony : aucune.
