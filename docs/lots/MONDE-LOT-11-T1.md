@@ -39,3 +39,6 @@ Supprimer des données ; réécrire un texte ; toucher aux surnoms ; toute autre
 - Un flux à graine qui n'avance plus peut décaler d'autres tirages : le test 4 le garde.
 - Les rôles servent de critère aux raisons (lot 6) et aux faits de présentation (lot 3) : ne coupe que l'affichage.
 - Pas de bloc vide ni de titre seul dans la fiche.
+
+## REPRISE du superviseur — 15/10/2026
+Ton code est sur le disque (non commité). `tests/mgmtVie.test.js` et `tests/mgmtAttention.test.js` sont rouges parce qu'ils testent les moments de vie, désormais coupés : c'est attendu. Comme le dit la section Tests, ces tests existants mettent `MGMT_HUMANITE_ACTIVE=true` dans leur montage (avant de créer la partie), avec le commentaire « décision d'Anthony du 15/10/2026 : humanité retirée pour l'instant, ce test vérifie le mécanisme interrupteur levé » — sans changer une seule assertion. Si l'interrupteur est une `const`, rends-le lisible par une fonction `mgmtHumaniteActive()` qui lit une variable globale modifiable pour les tests (`let MGMT_HUMANITE_ACTIVE=false`). Puis tests ciblés verts, versions, commit `Monde lot 11 T1 : retrait provisoire de l'humanité`.
