@@ -83,3 +83,10 @@ Ne pas faire la pile d'adversaires (T2), l'écran ou le mode dossier (T4), la so
 - Décision technique : maximum six dossiers, et tous les candidats restants sous quatre ; c'est la règle explicite du brief, sans compléter artificiellement une pile.
 - Décision technique : les ID déjà vus sont exclus localement au contexte de la place, et non persistés. Le brief demande l'absence de répétition pendant les demandes successives, pas un changement de sauvegarde.
 - Question pour Anthony : aucune.
+
+## Compte rendu
+- Fichiers modifiés : mgmt-carte.js (fonction mgmtDossiersCombattants, ancre MONDE_LOT4_T1_DOSSIERS) ; index.html/sw.js (version bump mgmt-carte.js) ; package.json (ajout du test) ; tests/mgmtDossiers.test.js.
+- Tests ajoutés : cinq tests Monde lot 4 T1 (taille/familles, retour sous quatre, preuve paire, non-répétition, déterminisme/pureté).
+- Pas de migration de sauvegarde.
+- Écarts à la fiche : aucun.
+- Questions pour Anthony : aucune.
