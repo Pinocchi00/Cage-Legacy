@@ -17,3 +17,14 @@ Tests ciblés de la sous-tranche (nouveau fichier `tests/mgmtMondeVivant.test.js
 - Écart à la fiche : portée implémentée pour l'effectif et le classement mondial ; les autres lecteurs directs de l'ancien `m.exterieur` (notamment titres/champions et les écrans qui consomment les traces) ne sont pas encore basculés. Ces consommateurs sont plus nombreux que les deux fonctions testées ; il faut compléter cette tranche avant de considérer le remplacement des lecteurs achevé. La lecture historique reste inchangée pour `mondeVivant!==true`.
 - Questions pour Anthony : aucune nouvelle question ; le travail restant est la bascule des lecteurs recensés hors effectif/classement.
 - Relecture : sous-agent indisponible selon la règle de repli du superviseur ; pas de verdict `@relecteur`.
+
+## REPRISE — superviseur, 15/10/2026
+Le commit 2276663 a basculé l'effectif et le classement mondial (`mgmtExteriorEffectifs`). Reste à basculer, chacun avec sa lecture `m.mondeVivant===true` → `m.orgs`, sinon l'ancien calcul STRICTEMENT inchangé :
+1. `mgmt-ceintures.js:153` `mgmtExteriorTitles(m,div,cycle)` : champions des organisations vivantes = ceux de leur sous-partie (`m.orgs[id]`, même lecture que les ceintures du joueur).
+2. `mgmt-contrats.js:207` `mgmtExteriorPourOffre(m,id)` : retrouve un combattant d'une organisation vivante via `mgmtExteriorEffectifs`.
+3. `mgmt-ecran-semaine.js` `mgmtSemaineMonde(m)` : les actualités du monde lisent les résultats des soirées des sous-parties (`m.orgs[id].hist` du cycle) quand le monde vit.
+4. `mgmt-recrutement.js` et `mgmt-accueil.js` : leurs lectures de `m.exterieur` passent par les mêmes fonctions (une fonction de lecture commune, pas de copie).
+Une partie avec `mondeVivant===true` ne doit plus afficher de combattant venu de l'ancien `m.exterieur`.
+Tests dans `tests/mgmtMondeVivant.test.js` (nommés `Monde lot 9 T2c — …`) : un par point 1 à 4, plus « une partie sans monde vivant garde exactement les mêmes titres, offres et actualités » (comparaison JSON avant/après sur une graine fixe).
+Le test `outillage.test.js` « l'outil mesure création complète et semaine » passe seul : son échec venait de la charge, rien à corriger. L'écart `mgmt-nouvelle.js` de `verif-versions` : monte sa version avec `node tools/_bump.js mgmt-nouvelle.js`.
+Lance seulement les tests ciblés avec `--test-name-pattern="T2c"` (délai de 120 s). Commit `Monde lot 9 T2c : les lecteurs du monde vivant (suite)`.
