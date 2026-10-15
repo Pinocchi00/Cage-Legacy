@@ -78,3 +78,6 @@ Fiche en attente : le codeur ne démarre pas tant que la question bloquante 1 n'
 2. **`origine:'joueur'`** : rien n'est affiché. La raison est celle de Leïla ; un combat posé par le joueur n'en porte pas à l'écran.
 3. **`raison:null`** (piles anciennes) : les zones sont entièrement omises, sans erreur.
 Les deux lignes tiennent dans le panneau actuel, aucun texte sous 22 px, `esc()` sur tout. Pas de sous-agent : textes écrits par toi, vérification par `node tools/verif-versions.js origin/main` et `npm run check:rapide`. Ne fusionne jamais `main`.
+
+## PRÉCISION du superviseur — 15/10/2026 09 h 40
+La présentation du combat (lot 3) n'existe PAS dans cette branche (elle est dans `main`, la branche du lot 6 est plus ancienne). T4 affiche donc les deux lignes UNIQUEMENT sur l'écran Préliminaires, et livre la fonction pure `mgmtRaisonLignes(m,raison)` testée. Le branchement dans la présentation du combat sera fait par le superviseur à la fusion avec `main`. Ce n'est pas un blocage : code et commite.
