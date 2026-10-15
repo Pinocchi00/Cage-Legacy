@@ -85,8 +85,9 @@ Ne pas faire la pile d'adversaires (T2), l'écran ou le mode dossier (T4), la so
 - Question pour Anthony : aucune.
 
 ## Compte rendu
-- Fichiers modifiés : mgmt-carte.js (filtre d’organisation dans mgmtDossiersCombattants, ancre MONDE_LOT4_T1_DOSSIERS) ; index.html/sw.js (version bump mgmt-carte.js, mgmt-bureau.js, mgmt-carte-cadre.js) ; tests/mgmtDossiers.test.js.
-- Tests modifiés : retour exact sous quatre candidats, non-répétition, déterminisme sur deux états indépendants, exclusion d’une autre organisation.
+- Fichiers modifiés : mgmt-carte.js (filtre d’organisation/catégorie dans mgmtDossiersCombattants, ancre MONDE_LOT4_T1_DOSSIERS) ; index.html/sw.js (version bump mgmt-carte.js) ; tests/mgmtDossiers.test.js.
+- Tests modifiés : retour exact sous quatre candidats, non-répétition, déterminisme sur deux états indépendants, exclusion d’une autre organisation et d’un adversaire étranger.
+- Versions : seul mgmt-carte.js est bumpé par T1 ; mgmt-bureau.js et mgmt-carte-cadre.js restent aux versions antérieures de la branche (modifiés avant T1, non concernés).
 - Pas de migration de sauvegarde.
 - Écarts à la fiche : aucun.
 - Questions pour Anthony : aucune.

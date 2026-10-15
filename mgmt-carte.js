@@ -868,8 +868,9 @@ function mgmtDossiersCombattants(m, exclureId, dejaVus){
   const famIndex=new Map(MGMT_RAISON_FAMILLES.map((f,i)=>[f,i]));
   const paires=[];
   for(const c of candidats){
-    const advs=m.roster.filter(a=>a&&a.id!==c.id
-      && (typeof mgmtSelectable==='function'?mgmtSelectable(m,a,c.id):true));
+   const advs=m.roster.filter(a=>a&&a.id!==c.id && dansOrg(a)
+       && a.div===c.div
+       && (typeof mgmtSelectable==='function'?mgmtSelectable(m,a,c.id):true));
     advs.sort((x,y)=>(x.id<y.id?-1:(x.id>y.id?1:0)));
     for(const a of advs) paires.push([c,a]);
   }

@@ -27,9 +27,10 @@ test('Monde lot 4 T1 — moins de quatre candidats admissibles sont tous retourn
       const mk=(id,div,org,ret)=>({id:id,name:id,first:id,last:'X',W:1,L:0,D:0,age:24,div:div,divName:'X',org:org,level:1,raison:null,interactions:0,retired:ret});
       const div='H-light';
       for(let i=0;i<${n};i++) m.roster.push(mk('c'+i,div,m.org,false));
+      m.roster.push(mk('part',div,m.org,false));
       m.roster.push(mk('adv',div,'Autre',false));
       for(let i=0;i<3;i++) m.roster.push(mk('r'+i,div,m.org,'medical'));
-      const pile=mgmtDossiersCombattants(m);
+      const pile=mgmtDossiersCombattants(m,'part');
       return {len:pile.length, ids:pile.map(d=>d.combattant.id).slice().sort()};`);
     const attendus=Array.from({length:n},(_,i)=>'c'+i).sort();
     assert.equal(r.len,n,'taille pour '+n);
@@ -71,8 +72,10 @@ test('Monde lot 4 T1 — les combattants d’une autre organisation sont exclus'
     for(const f of [{id:'x1',name:'X',first:'X',last:'Y',W:1,L:0,D:0,age:24,div:m.roster[0].div,divName:'X',org:'Autre',level:1,raison:null,interactions:0}]) m.roster.push(f);
     const autres=['x1'];
     const pile=mgmtDossiersCombattants(m);
-    return {leak: pile.some(d=>autres.includes(d.combattant.id))};`);
+    return {leak: pile.some(d=>autres.includes(d.combattant.id)),
+      advLeak: pile.some(d=>autres.includes(d.adversaire.id))};`);
   assert.equal(r.leak,false);
+  assert.equal(r.advLeak,false);
 });
 
 test('Monde lot 4 T1 — la même graine et le même état donnent la même pile sans effet de bord',()=>{
