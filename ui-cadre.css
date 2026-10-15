@@ -1500,3 +1500,9 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-arr .ar-pas .carte-l .l1{font-size:24px}
 .mf-arr .ar-num{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.8;width:34px;flex:none}
 /* ==== [FIN ANCRE] ==== */
+
+/* Monde lot 10 : liens accessibles dans les panneaux existants. */
+.mf-arr button.nom,.mf-arr button.aller{background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.mf-arr button.aller{font-family:var(--mf-titre);font-size:24px;font-weight:800;color:var(--mf-jaune)}
+.mf-arr .ar-action.focus,.mf-arr .ar-action:focus-visible{outline:2px solid var(--mf-jaune);outline-offset:2px}
+.mf-arr .jaune-bloc{cursor:pointer}
