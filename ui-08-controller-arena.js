@@ -68,7 +68,10 @@ function render(preserveScroll){ const app=document.getElementById('app'); if(!a
    careerTrackPreparation(G&&G.screen);
    app.innerHTML=(typeof careerPcWrap==='function'&&!(G&&G.screen&&String(G.screen).indexOf('mgmt_')===0))?careerPcWrap(G&&G.screen,fn()):fn();
    if(G&&G.screen==='arena') areneEcranDemarrer();
+   /* ==== [ANCRE: MONDE_LOT4_T5_BRANCHEMENT] — Monde lot 4 T5 ==== */
+   if(G&&G.screen==='mgmt_carte'&&MGMT_CART.mode==='dossiers') mgmtCarteDossierGestes(document.querySelector('.mf-dossier'));
    if(!preserveScroll && window.scrollTo) window.scrollTo(0,0); }
+
 function routeAfterOrgChange(){
   G.screen='hub'; save(); render();
 }

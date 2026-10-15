@@ -127,7 +127,8 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
       +`<div class="mf-car-slot-s"><div class="mf-eff-q" aria-hidden="true">?</div></div></div>`;
   }
   return `<div class="mf-car-slot vide${cur?' choisi':''}"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">`
-    +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span></div><div class="mf-car-slot-v">À composer</div></div></div>`;
+    +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span></div><div class="mf-car-slot-v">À composer</div>`
+    +`<button type="button" onclick="CL.mgmtCarteDossiersOuvrir(${i})">Dossiers</button></div></div>`;
 }
 
 /** Les noms de famille portés par plusieurs combattants de la liste (corrections du 08/10, 2.6) : on y ajoute l'initiale du prénom. */
@@ -155,12 +156,12 @@ function mgmtCarteAdvLigne(m,f,i,choisi,homo){
   const sel=mgmtSelectable(m,f,MGMT_CART.pick);
   const raison=mgmtCarteNote(m,f,MGMT_CART.pick);
   const rg=mgmtRangAffichable(m,f);
-  return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${esc(f.id)}')">`
+  return `<button type="button" class="mf-car-adv${choisi?' choisi':''}${sel?'':' off'}" onclick="CL.mgmtCarteVise('${escJsAttr(f.id)}')">`
     +`<span class="mf-car-adv-r">${esc(rg||'—')}</span><span class="mf-car-adv-c"><span class="mf-car-adv-nb"><b style="font-size:${mfCorps(f.last||f.name,200,34,24)}px">${esc(homo&&homo.has(mfNet(f.last||f.name))&&f.first?mfNet(f.first).charAt(0)+'. ':'')}${esc(mfNet(f.last||f.name))}${mfMarqueNom(m,f.id)}</b>`
     +`<i>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</i></span><span class="mf-car-adv-s">${esc(raison||' ')}</span></span></button>`;
 }
 
-function scr_mgmt_carte_cadre(){
+function scr_mgmt_carte_liste(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt;
   if(MGMT_CART.pick){ const pf=mgmtFighterById(m,MGMT_CART.pick); if(!pf||!mgmtSelectable(m,pf,null)) MGMT_CART.pick=null; }
@@ -222,9 +223,125 @@ function scr_mgmt_carte_cadre(){
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtCarteLeave()'},{ks:['↑','↓'],t:'Choisir'},{ks:['A','E'],t:'Section'},{ks:['C'],t:'Catégorie',onclick:'CL.mgmtCarteCategorie(1)'},
       {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},{ks:['Entrée'],t:pickF?'Confirmer':'Choisir',jaune:true,onclick:'CL.mgmtCarteEntree()'}]});
 }
+function scr_mgmt_carte_cadre(){
+  if(!G||!G.mgmt) return scr_mgmt_bureau();
+  const m=G.mgmt;
+  if(MGMT_CART.mode!=='dossiers') return scr_mgmt_carte_liste();
+  return mgmtCarteDossiersEcran(m);
+}
 SCREENS.mgmt_carte=scr_mgmt_carte_cadre;
 
+/** Rend le mode dossier courant de l’écran Carte à partir de l’état éphémère MGMT_CART.
+ * N’écrit aucune donnée dans la partie et ne réserve aucun combattant.
+ * @param {Object} m Partie en mémoire.
+ * @returns {string} Fragment HTML de l’étape dossier courante.
+ */
+function mgmtCarteDossierHtml(m){
+  /* ==== [ANCRE: MONDE_LOT4_T8_DOSSIER] — Monde lot 4 T8 ==== */
+  /* ==== [ANCRE: MONDE_LOT4_T8_PHRASES] — Monde lot 4 T8 ==== */
+  const PHRASES_LEILA={
+    etape1:{id:'dossiers.etape1',relu:false,texte:'« Voici {n} dossiers pour le combat {k}. Faites-les défiler, puis choisissez. »'},
+    etape2:{id:'dossiers.etape2',relu:false,texte:'« Vous avez choisi {nom}. Voici {n} adversaires possibles. »'}
+  };
+  const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+  const i=Math.max(0,Math.min(MGMT_CART.index||0,Math.max(0,pile.length-1)));
+  MGMT_CART.index=pile.length?i:0;
+  const d=pile.length?pile[i]:null;
+  const etape=MGMT_CART.etape===2?2:1;
+  const combattant=etape===2?(mgmtFighterById(m,MGMT_CART.dossierCombattant)||d&&d.combattant): (d&&d.combattant);
+  const adversaire=etape===2&&(d&&d.adversaire);
+  const titre=combattant?esc(combattant.name||combattant.last||combattant.first):'';
+  if(!d){
+    return `<main class="mf-contenu mf-carte"><div class="mf-eff-aucun">Personne dans cette catégorie.</div>
+      <div class="mf-car-boutons"><button type="button" onclick="CL.mgmtDossierListe()">Liste complète</button></div></main>`;
+  }
+  const nom=f=>mfNet(f&&(f.last||f.name||f.first)||'');
+  const dossierF=etape===2?adversaire:combattant;
+  const gl=mgmtFicheLigne(m,dossierF.id),f=gl&&gl.f||dossierF;
+  const rang=mgmtDivisionRank(m,f,'organization'),reason=d.raison?mgmtRaisonLignes(m,{...d.raison,origine:d.origine},[d.combattant,d.adversaire]):null;
+  const famille=d.raison&&String(d.raison.famille||'').replace(/-/g,' ').toUpperCase();
+  const raison=reason?`<section class="mf-dos-raison mf-dossier-raison"><h2>POURQUOI LEÏLA VOUS LE PROPOSE · ${esc(famille||'')}</h2><b>${reason.l1}</b><span>${reason.l2}</span></section>`:'';
+  const lignes=mgmtPresentationLignes(m,{mode:'combattant',ids:[dossierF.id]}).panneaux;
+  const colonnes=lignes.slice(0,3).map((p,k)=>`<section><h2>${esc(['CE QUI LE DISTINGUE','SA FORCE · SA FAILLE','SON HISTOIRE ICI'][k])}</h2>${p.lignes.slice(0,k===0?3:3).map(x=>`<div class="mf-dos-ligne">${esc(x.texte)}</div>`).join('')}</section>`).join('');
+   const banniere=`<div class="mf-dos-banner mf-pr-banniere"><div class="mf-dossier-nom"><small>${esc(mfNet(f.first||''))}</small><strong>${esc(mfNet(f.last||f.name||''))}</strong></div><aside><span>PALMARÈS<b>${esc(`${f.W||0}-${f.L||0}-${f.D||0}`)}</b></span><span>CHEZ ${esc(mgmtOrgNom(m).toUpperCase())}<b>${rang===null||rang<0?'—':'N°'+rang}</b></span><span>CONTRAT<b>${esc(mgmtCarteContratTexte(f))}</b></span></aside></div>`;
+  const voisine=(delta,label)=>{const nd=pile[(i+delta+pile.length)%pile.length],nf=etape===2?nd.adversaire:nd.combattant,nr=nd.raison?mgmtRaisonLignes(m,nd.raison,[nd.combattant,nd.adversaire]):null;return `<button aria-label="${label==='SUIVANT'?'Suivant':'Précédent'}" class="mf-dos-voisin" onclick="CL.mgmtDossierIndex(${delta})"><span>DOSSIER ${label}</span><b>${esc(mfNet(nf.first||''))}</b><strong>${esc(nom(nf))}</strong><small>${nr?nr.l1:''}</small><i>${delta<0?'‹':'›'}</i></button>`;};
+  const main=m.card.main||[],libre=main.findIndex(x=>!x),k=MGMT_CART.cible==null?(libre<0?main.length+1:libre+1):MGMT_CART.cible+1,nomCourant=nom(dossierF);
+  const introPhrase=etape===1?PHRASES_LEILA.etape1.texte.replace('{n}',pile.length).replace('{k}',k):PHRASES_LEILA.etape2.texte.replace('{nom}',esc(nom(combattant))).replace('{n}',pile.length);
+   const steps=[['LE COMBATTANT',1],['SON ADVERSAIRE',2],['SUR LA CARTE',3]].map(([label,n])=>{const s=n<etape?'fait':n===etape?'courant':'avenir';return `<div class="mf-dos-step ${s}" aria-label="ÉTAPE ${n} ${label}"><i>${s==='fait'?'✓':n}</i><span><small>ÉTAPE ${n}</small><b>${label}</b></span></div>`;}).join('<b class="mf-dos-chevron">›</b>');
+  const top=`<div class="mf-dos-intro"><div><b>LEÏLA, VOTRE ADJOINTE</b><strong>${introPhrase}</strong><span>Combat ${k} · ${esc(String(mgmtDivisionLabel(combattant.div)||'').toLowerCase())} · ${etape===2?`${esc(nom(combattant))} contre ?`:`${m.roster.filter(x=>x.div===combattant.div&&mgmtSelectable(m,x,null)).length} combattants libres`} · la carte en est à ${main.filter(Boolean).length} combats sur ${m.card.sizeMain||MGMT_MAIN_SIZE}</span></div><div class="mf-dos-steps">${steps}</div></div>`;
+  const points=pile.map((_,j)=>`<i class="${j===i?'actif':''}"></i>`).join('');
+  return `<main class="mf-contenu mf-carte mf-dossiers"><div class="mf-dos-layout">${top}<div class="mf-dos-center mf-dossier-nav">${pile.length>1?voisine(-1,'PRÉCÉDENT'):''}<article class="mf-dos-card mf-dossier">${banniere}${raison}<div class="mf-dos-cols">${colonnes}</div></article>${pile.length>1?voisine(1,'SUIVANT'):''}</div><div class="mf-dos-page"><span>${points} DOSSIER ${i+1} SUR ${pile.length}</span><span>← → Flèches, clic sur un bord, ou glisser le dossier</span></div><div class="mf-dos-actions">${mfBouton('D’autres dossiers',{touche:'D',onclick:'CL.mgmtCarteProposer()'})}${mfBouton('Liste complète',{touche:'L',onclick:'CL.mgmtDossierListe()'})}${mfBouton(etape===1?'Sa fiche':'Présentation du combat',{touche:etape===1?'F':'P',onclick:etape===1?'CL.mgmtCarteFiche()':'CL.mgmtDossierPresentation()'})}${mfBouton(etape===1?`Choisir ${nomCourant}`:`Mettre ${nom(combattant)} – ${nom(adversaire)} sur la carte`,{touche:'Entrée',jaune:true,onclick:'CL.mgmtCarteEntree()'})}</div></div></main>`;
+}
+
+/* ==== [ANCRE: MONDE_LOT4_T5_GESTES] — Monde lot 4 T5 ==== */
+/** Branche les gestes de souris du dossier sur la navigation existante.
+ * N'altère que l'index éphémère du dossier et ne modifie pas la carte.
+ * @param {HTMLElement} element Élément dossier rendu à l'écran.
+ * @returns {void}
+ */
+function mgmtCarteDossierGestes(element){
+  if(!element||element.__gestesDossierBound) return;
+  element.__gestesDossierBound=true;
+  const interactif=cible=>!!cible.closest('button,a,input,textarea,select,summary,label,[role="button"],[onclick]');
+  let depart=null;
+  // Un relâchement peut engendrer un clic après le nouveau rendu : l'absorber
+  // avant les actions des contrôles, puis retirer aussitôt cet écouteur temporaire.
+  const absorbeClic=()=>{
+    const stop=e=>{ e.preventDefault(); e.stopImmediatePropagation(); document.removeEventListener('click',stop,true); };
+    document.addEventListener('click',stop,true);
+    setTimeout(()=>document.removeEventListener('click',stop,true),0);
+  };
+  const relache=e=>{
+    document.removeEventListener('mouseup',relache);
+    const debut=depart; depart=null;
+    if(!debut||!element.isConnected||G.screen!=='mgmt_carte'||MGMT_CART.mode!=='dossiers') return;
+    const dx=e.clientX-debut.x,dy=e.clientY-debut.y;
+    if(Math.max(Math.abs(dx),Math.abs(dy))>=24) absorbeClic();
+    if(Math.abs(dx)>=24&&Math.abs(dx)>Math.abs(dy)) CL.mgmtDossierSwipe(dx<0?-1:1);
+  };
+  element.addEventListener('mousedown',e=>{
+    if(e.button!==0||interactif(e.target)) return;
+    depart={x:e.clientX,y:e.clientY};
+    document.addEventListener('mouseup',relache);
+    e.preventDefault();
+  });
+  element.addEventListener('click',e=>{
+    if(e.button!==0||!element.isConnected||interactif(e.target)) return;
+    const rect=element.getBoundingClientRect(),x=e.clientX-rect.left;
+    if(rect.width<=0||x<0||x>rect.width) return;
+    const delta=x<rect.width/4?-1:x>rect.width*3/4?1:0;
+    if(delta){ e.preventDefault(); CL.mgmtDossierSwipe(delta); }
+  });
+}
+
+function mgmtCarteDossiersEcran(m){
+  const html=mgmtCarteDossierHtml(m);
+  const touches=[
+    {ks:['←','→'],t:'Défiler',onclick:'CL.mgmtDossierSwipe(-1)'},
+    {ks:['Entrée'],t:(MGMT_CART.etape===2?'Confirmer':'Choisir'),jaune:true,onclick:'CL.mgmtCarteEntree()'},
+    {ks:['Échap'],t:MGMT_CART.etape===2?'Changer de combattant':'Retour à la carte',onclick:'CL.mgmtCarteEsc()'},
+    {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},
+    {ks:['D'],t:'D’autres dossiers',onclick:'CL.mgmtCarteProposer()'},
+    {ks:['L'],t:'Liste',onclick:'CL.mgmtDossierListe()'}
+  ];
+  if(MGMT_CART.etape===2) touches.push({ks:['P'],t:'Présentation',onclick:'CL.mgmtDossierPresentation()'});
+  const main=m.card.main||[],libre=main.findIndex(x=>!x);
+  const opts={barre:'jeu',courant:'carte',m,plaque:'Carte',libelle:'LES DOSSIERS DE LEÏLA',compteur:`COMBAT ${MGMT_CART.cible==null?(libre<0?main.length+1:libre+1):MGMT_CART.cible+1}`,droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,touches};
+  return mfEcran? (typeof mfEcran==='function'? mfEcran(html,opts): html) : html;
+}
+
 Object.assign(CL,{
+  /** Ouvre les dossiers pour l'emplacement principal libre demandé.
+   * Ne réserve aucun combattant et conserve l'emplacement jusqu'à confirmation.
+   * @param {number} index Index zéro-based de l'emplacement dans m.card.main.
+   * @returns {void}
+   */
+  mgmtCarteDossiersOuvrir(index){
+    const m=G&&G.mgmt;
+    if(!m||!Number.isSafeInteger(index)||index<0||index>=(m.card.sizeMain||MGMT_MAIN_SIZE)||m.card.main[index]) return;
+    MGMT_CART.cible=index;
+    if(!CL.mgmtCarteDossiersActiver()) MGMT_CART.cible=null;
+  },
   /* ==== [ANCRE: MONDE_LOT5_T4_CONFIRMATION] — Monde lot 5 T4 ==== */
   mgmtCarteAnnule(i,modifier){
     const m=G&&G.mgmt, fight=m&&m.card.main[i];
@@ -287,20 +404,138 @@ Object.assign(CL,{
     const i=ids.indexOf(mgmtCarteDiv(m));
     MGMT_CART.div=ids[(i+(delta<0?-1:1)+ids.length)%ids.length]; MGMT_CART.cursor=0; render();
   },
-  /** La préparation à la demande : l'assistante propose un adversaire au premier choix posé — le curseur s'y place, le joueur confirme. */
+  /** La préparation à la demande. En mode dossier, D demande une nouvelle pile selon l’étape. */
   mgmtCarteProposer(){
-    const m=G.mgmt; if(!MGMT_CART.pick||!mgmtAgendaActif(m)) return;
-    const o=mgmtAgendaProposer(m,MGMT_CART.pick); if(!o) return;
-    const i=mgmtCarteListe(m).findIndex(x=>x.id===o.id); if(i>=0){ MGMT_CART.cursor=i; render(); }
+    const m=G.mgmt; if(!mgmtAgendaActif(m)) return;
+    if(MGMT_CART.mode!=='dossiers'){
+      if(!MGMT_CART.pick) return;
+      const combattant=mgmtFighterById(m,MGMT_CART.pick); if(!combattant) return;
+      const pile=mgmtDossiersAdversaires(m,MGMT_CART.pick); if(!pile||!pile.length) return;
+      MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
+      return;
+    }
+    MGMT_CART.mode='dossiers';
+    if(MGMT_CART.etape===1){
+      const vus=Array.isArray(MGMT_CART.vusCombattants)?MGMT_CART.vusCombattants:[];
+      const pile=mgmtDossiersCombattants(m,null,vus);
+      if(!pile||!pile.length){ MGMT_CART.dossiers=[]; render(); return; }
+      MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
+      MGMT_CART.vusCombattants=vus.concat(pile.map(d=>d.combattant.id));
+      MGMT_CART.index=0; MGMT_CART.etape=1; MGMT_CART.dossierCombattant=null;
+    } else {
+      const cid=MGMT_CART.dossierCombattant; if(!cid){ MGMT_CART.etape=1; render(); return; }
+      const vus=(MGMT_CART.vusAdversaires&&MGMT_CART.vusAdversaires[cid])||[];
+      const pile=mgmtDossiersAdversaires(m,cid,vus);
+      if(!pile||!pile.length){ MGMT_CART.dossiers=[]; render(); return; }
+      MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
+      if(!MGMT_CART.vusAdversaires) MGMT_CART.vusAdversaires={};
+      MGMT_CART.vusAdversaires[cid]=vus.concat(pile.map(d=>d.adversaire.id));
+      MGMT_CART.index=0; MGMT_CART.etape=2;
+    }
+    render();
+  },
+  mgmtDossierIndex(delta){
+    const m=G.mgmt; const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+    if(!pile.length) return;
+    const n=pile.length; MGMT_CART.index=((MGMT_CART.index||0)+(delta<0?-1:1)+n)%n; render();
+  },
+  mgmtDossierSwipe(delta){ CL.mgmtDossierIndex(delta<0?-1:1); },
+  mgmtDossierEsc(){
+    const m=G.mgmt;
+    if(MGMT_CART.mode!=='dossiers'){ CL.mgmtCarteLeave(); return; }
+    if(MGMT_CART.etape===2){
+      const cid=MGMT_CART.dossierCombattant;
+      MGMT_CART.dossierCombattant=cid;
+      MGMT_CART.etape=1;
+      MGMT_CART.index=0;
+      render(); return;
+    }
+    // step1 -> list mode, conserve context
+    MGMT_CART.mode='liste'; MGMT_CART.listeDepuisDossiers=true; render();
+  },
+  mgmtDossierListe(){
+    if(MGMT_CART.mode!=='dossiers') return;
+    MGMT_CART.mode='liste'; MGMT_CART.listeDepuisDossiers=true; render();
+  },
+  mgmtDossierRetour(){
+    if(!MGMT_CART.listeDepuisDossiers) return;
+    MGMT_CART.mode='dossiers'; MGMT_CART.listeDepuisDossiers=false; render();
+  },
+  mgmtCarteEsc(){ return CL.mgmtDossierEsc(); },
+  mgmtDossiers(){ return CL.mgmtCarteDossiersActiver(); },
+  mgmtCarteDossiers(){ return CL.mgmtCarteDossiersActiver(); },
+  mgmtDossierEchap(){ return CL.mgmtDossierEsc(); },
+  mgmtDossierPresentation(){
+    const m=G.mgmt;
+    if(MGMT_CART.mode!=='dossiers') return;
+    const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+    const d=pile[MGMT_CART.index||0]; if(!d) return;
+    const a=d.combattant&&d.combattant.id; const b=MGMT_CART.etape===2&&(d.adversaire&&d.adversaire.id);
+    if(!a||!b) return;
+    /* Fusion de main : la présentation du lot 3 (mgmt-presentation-ecrans.js) ouvre le combat du dossier ; Échap revient aux dossiers. */
+    CL.mgmtPresentationOuvrir('combat',[a,b],{retour:'mgmt_carte'});
+  },
+  mgmtCarteDossiersActiver(){
+    // entre en mode dossier (étape combattant par défaut) sans booking
+    const m=G.mgmt; if(!mgmtAgendaActif(m)) return false;
+    MGMT_CART.mode='dossiers'; MGMT_CART.listeDepuisDossiers=false;
+    MGMT_CART.etape=1; MGMT_CART.index=0; MGMT_CART.dossierCombattant=null;
+    MGMT_CART.vusCombattants=[]; MGMT_CART.vusAdversaires={};
+    CL.mgmtCarteProposer(); // remplira pile T1 en mode dossier
+    if(MGMT_CART.mode!=='dossiers') MGMT_CART.mode='dossiers';
+    render(); return true;
   },
   mgmtCarteFiche(){
+    if(MGMT_CART.mode==='dossiers'){
+      const m=G.mgmt; const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+      const d=pile[MGMT_CART.index||0];
+      const id= d ? (MGMT_CART.etape===2 ? (d.adversaire&&d.adversaire.id) : (d.combattant&&d.combattant.id)) : null;
+      const f=id?mgmtFighterById(m,id):null;
+      if(f) CL.mgmtFicheParIndex(m.roster.indexOf(f));
+      return;
+    }
     const m=G.mgmt, f=(MGMT_CART.pick&&mgmtFighterById(m,MGMT_CART.pick))||mgmtCarteListe(m)[MGMT_CART.cursor||0];
     if(f) CL.mgmtFicheParIndex(m.roster.indexOf(f));
   },
   mgmtCarteEntree(){
     /* ==== [ANCRE: MONDE_LOT5_T4_ENTREE] — Monde lot 5 T4 ==== */
     if(MGMT_CART.annulation){ CL.mgmtCarteConfirmeAnnulation(); return; }
-    const m=G.mgmt, l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0];
+    const m=G.mgmt;
+    if(MGMT_CART.mode==='dossiers'){
+      const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+      const d=pile[MGMT_CART.index||0];
+      if(!d) return;
+      if(Number.isSafeInteger(MGMT_CART.cible)&&(MGMT_CART.cible<0||MGMT_CART.cible>=(m.card.sizeMain||MGMT_MAIN_SIZE)||m.card.main[MGMT_CART.cible])) { MGMT_CART.mode='liste'; MGMT_CART.cible=null; render(); return; }
+      if(MGMT_CART.etape===1){
+        MGMT_CART.dossierCombattant=d.combattant&&d.combattant.id;
+        // nouvelle pile adversaires
+        const vus=(MGMT_CART.vusAdversaires&&MGMT_CART.vusAdversaires[MGMT_CART.dossierCombattant])||[];
+        const pile2=mgmtDossiersAdversaires(m,MGMT_CART.dossierCombattant,vus);
+        MGMT_CART.dossiers=(pile2||[]).map(x=>({combattant:x.combattant,adversaire:x.adversaire,raison:x.raison}));
+        if(!MGMT_CART.vusAdversaires) MGMT_CART.vusAdversaires={};
+        if(pile2&&pile2.length) MGMT_CART.vusAdversaires[MGMT_CART.dossierCombattant]=vus.concat(pile2.map(x=>x.adversaire.id));
+        MGMT_CART.etape=2; MGMT_CART.index=0;
+        render(); return;
+      }
+      // confirm adversaire via porte
+      const cid=MGMT_CART.dossierCombattant;
+      const aid=d.adversaire&&d.adversaire.id;
+      if(!cid||!aid) return;
+      if(Number.isSafeInteger(MGMT_CART.cible)){
+        const index=MGMT_CART.cible;
+        if(m.card.main[index]||!mgmtSelectable(m,mgmtFighterById(m,cid),null)||!mgmtSelectable(m,mgmtFighterById(m,aid),cid)) return;
+        /* Superviseur, 15/10/2026 : la carte principale est une liste sans trou (mgmtUnbook et les retraits la resserrent) ;
+           le combat d'un dossier prend la première place libre, celle que mgmtBookMain lui donne. L'ancien code écrivait
+           main[index] après un pop et laissait un trou ([vide, combat]) quand la place visée n'était pas la première libre. */
+        if(!mgmtBookMain(m,cid,aid)) return;
+        saveMgmt();
+      } else { MGMT_CART.pick=cid; CL.mgmtPick(aid); }
+      // fermer mode dossier
+      MGMT_CART.mode='liste'; MGMT_CART.etape=1; MGMT_CART.index=0; MGMT_CART.dossierCombattant=null;
+      MGMT_CART.dossiers=[]; MGMT_CART.vusCombattants=[]; MGMT_CART.vusAdversaires={}; MGMT_CART.listeDepuisDossiers=false; MGMT_CART.cible=null;
+      render(); return;
+    }
+    const l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0];
     /* Brief démo, lot 4 (D8) : Entrée sur un combattant déjà engagé ne reste pas muet, le curseur passe au premier libre. */
     if(f&&!MGMT_CART.pick&&!mgmtSelectable(m,f,null)){ const i=l.findIndex(x=>mgmtSelectable(m,x,null)); if(i>=0){ MGMT_CART.cursor=i; render(); return; } }
     if(f) CL.mgmtPick(f.id);
@@ -310,8 +545,14 @@ keysRegister('mgmt_carte',{
   /* ==== [ANCRE: MONDE_LOT5_T4_TOUCHE_X] — Monde lot 5 T4 ==== */
   x(){ CL.mgmtCarteAnnuleVise(); },
   X(){ CL.mgmtCarteAnnuleVise(); },
-  ArrowUp(){ const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)-1+n)%n; render(); } },
-  ArrowDown(){ const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)+1)%n; render(); } },
+  ArrowUp(){ if(MGMT_CART.mode==='dossiers') return; const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)-1+n)%n; render(); } },
+  ArrowDown(){ if(MGMT_CART.mode==='dossiers') return; const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)+1)%n; render(); } },
+  ArrowLeft(){ if(MGMT_CART.mode==='dossiers'){ CL.mgmtDossierIndex(-1); return; } },
+  ArrowRight(){ if(MGMT_CART.mode==='dossiers'){ CL.mgmtDossierIndex(1); return; } },
+  l(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierListe(); else CL.mgmtDossierRetour(); },
+  L(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierListe(); else CL.mgmtDossierRetour(); },
+  p(){ CL.mgmtDossierPresentation(); },
+  P(){ CL.mgmtDossierPresentation(); },
   Enter(){ CL.mgmtCarteEntree(); },
   c(){ CL.mgmtCarteCategorie(1); },
   C(){ CL.mgmtCarteCategorie(1); },
@@ -324,7 +565,7 @@ keysRegister('mgmt_carte',{
   '3'(){ CL.mgmtUnbook(2); },
   '4'(){ CL.mgmtUnbook(3); },
   '5'(){ CL.mgmtUnbook(4); },
-  Escape(){ CL.mgmtCarteLeave(); },
-  Backspace(){ CL.mgmtCarteLeave(); },
+  Escape(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierEsc(); else if(MGMT_CART.listeDepuisDossiers) CL.mgmtDossierRetour(); else CL.mgmtCarteLeave(); },
+  Backspace(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierEsc(); else if(MGMT_CART.listeDepuisDossiers) CL.mgmtDossierRetour(); else CL.mgmtCarteLeave(); },
 });
 /* ==== [FIN ANCRE] ==== */
