@@ -489,11 +489,14 @@ test('Monde lot 4 T6 — confirmer un dossier remplit uniquement la place visée
   try{
     w.eval(`window.__books=[]; const __orig=mgmtBookMain; mgmtBookMain=(m,a,b)=>{window.__books.push([a,b]);return __orig(m,a,b);};`);
     w.eval('CL.mgmtCarteEntree(); CL.mgmtCarteEntree();');
+    /* Superviseur, 15/10/2026 : la carte est une liste sans trou ; la version précédente de ce test attendait [vide, combat]. */
     const ids=JSON.parse(w.eval('JSON.stringify(window.__books[0])'));
-    assert.equal(w.eval('G.mgmt.card.main.length'),2);
-    assert.equal(w.eval('G.mgmt.card.main[1].a'),ids[0]);
-    assert.equal(w.eval('G.mgmt.card.main[1].b'),ids[1]);
+    assert.equal(w.eval('G.mgmt.card.main.length'),1,'aucun trou dans la carte');
+    assert.equal(w.eval('G.mgmt.card.main.every(Boolean)'),true);
+    assert.equal(w.eval('G.mgmt.card.main[0].a'),ids[0]);
+    assert.equal(w.eval('G.mgmt.card.main[0].b'),ids[1]);
     assert.equal(w.eval('window.__books.length'),1);
+    assert.equal(w.eval('validateMgmt(G.mgmt)'),true);
   }finally{w.close();}
 });
 
@@ -520,9 +523,21 @@ test('Monde lot 4 T6 — un retrait libère une place accessible aux dossiers',(
 test('Monde lot 4 T6 — le retrait de veille laisse la place libre et remplaçable',()=>{
   const w=newGameWindow({runMain:true});
   try{
-    w.eval(`setSeed(20261015); CL.mgmtEnter(1); CL.go('mgmt_carte');`);
-    assert.ok(w.eval('G.mgmt.card.main.length>=0'));
-    assert.equal(w.eval('G.mgmt.card.main.length'),0,'aucun combat réservé automatiquement');
+    /* Superviseur, 15/10/2026 : la version précédente ne déclenchait aucun retrait. Carte complète, retrait forcé (probabilité 1). */
+    const r=JSON.parse(w.eval(`(function(){ setSeed(7); CL.mgmtEnter(1); const m=G.mgmt;
+      const divs=[...new Set(mgmtCartRows(m).map(f=>f.div))]; let e=0;
+      while(m.card.main.length<m.card.sizeMain&&e++<60){ const d=divs[e%divs.length]; const rows=mgmtCartRows(m).filter(f=>f.div===d&&mgmtSelectable(m,f,null)); const a=rows[0], b=a&&rows.find(x=>x.id!==a.id&&mgmtSelectable(m,x,a.id)); if(a&&b) mgmtBookMain(m,a.id,b.id); }
+      mgmtOfferBulk(m,true); const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk) mgmtDecide(m,bulk.id,'validate');
+      const plein=mgmtCardFull(m); m.effectifs=1; const p=mgmtRetraitProb; mgmtRetraitProb=()=>1; const fait=mgmtRetraitsAvantSoiree(m); mgmtRetraitProb=p;
+      const apres=m.card.main.length;
+      CL.go('mgmt_carte'); CL.mgmtCarteDossiersOuvrir(apres); const mode=MGMT_CART.mode;
+      CL.mgmtCarteEntree(); CL.mgmtCarteEntree();
+      return JSON.stringify({plein,fait:!!fait&&fait.slot,apres,taille:m.card.sizeMain,mode,fin:m.card.main.length,sansTrou:m.card.main.every(Boolean)}); })()`));
+    assert.equal(r.plein,true,'la carte était complète');
+    assert.equal(r.fait,'main','un combat principal s’est retiré');
+    assert.equal(r.apres,r.taille-1,'la place reste libre : aucun remplaçant automatique');
+    assert.equal(r.mode,'dossiers','la place libérée ouvre les dossiers');
+    assert.equal(r.fin,r.taille,'le dossier complète la carte'); assert.equal(r.sansTrou,true);
   }finally{w.close();}
 });
 

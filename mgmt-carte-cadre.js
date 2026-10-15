@@ -525,8 +525,11 @@ Object.assign(CL,{
       if(Number.isSafeInteger(MGMT_CART.cible)){
         const index=MGMT_CART.cible;
         if(m.card.main[index]||!mgmtSelectable(m,mgmtFighterById(m,cid),null)||!mgmtSelectable(m,mgmtFighterById(m,aid),cid)) return;
-        const fight=mgmtBookMain(m,cid,aid); if(!fight) return;
-        m.card.main.pop(); m.card.main[index]=fight; saveMgmt();
+        /* Superviseur, 15/10/2026 : la carte principale est une liste sans trou (mgmtUnbook et les retraits la resserrent) ;
+           le combat d'un dossier prend la première place libre, celle que mgmtBookMain lui donne. L'ancien code écrivait
+           main[index] après un pop et laissait un trou ([vide, combat]) quand la place visée n'était pas la première libre. */
+        if(!mgmtBookMain(m,cid,aid)) return;
+        saveMgmt();
       } else { MGMT_CART.pick=cid; CL.mgmtPick(aid); }
       // fermer mode dossier
       MGMT_CART.mode='liste'; MGMT_CART.etape=1; MGMT_CART.index=0; MGMT_CART.dossierCombattant=null;
