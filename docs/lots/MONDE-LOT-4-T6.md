@@ -91,3 +91,12 @@ Ne pas modifier le catalogue/sélection des piles T1/T2, les raisons du lot 6, l
 - Décision technique : une annulation laisse un emplacement libre; on ne remplace pas automatiquement le combattant retiré. Le joueur choisit et confirme le nouveau combat, conformément à « demande » et au principe de contrôle de booking.
 - Décision technique : tests de retrait de veille utilisent une graine fixe obtenue par recherche dans le test, puis verrouillée; ne pas rendre le hasard non déterministe pour faciliter le test.
 - Question pour Anthony : aucune.
+
+## Compte rendu
+
+- `mgmt-carte-cadre.js` : ajout d'une action Dossiers sur les emplacements vides et d'un contexte temporaire de cible; confirmation repasse par `mgmtBookMain`.
+- `index.html` et `sw.js` : versions de cache montées par `node tools/_bump.js mgmt-carte-cadre.js`.
+- Tests ajoutés : aucun. Tests ciblés existants exécutés : `mgmtDossiers.test.js`, `mgmtCalendrier.test.js`, `mgmtCarteCadre.test.js` (46 réussis).
+- Migration de sauvegarde : aucune.
+- Écart : T6 incomplète, notamment assertions dédiées absentes. La cible intermédiaire engendre un tableau `main` clairsemé; sa compatibilité avec tous les consommateurs du tableau nécessite un traitement plus large avant livraison.
+- Questions pour Anthony : faut-il autoriser explicitement les trous dans `m.card.main` et adapter tous ses consommateurs, ou maintenir une représentation compacte avec un index de place distinct ?

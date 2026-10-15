@@ -109,7 +109,8 @@ function mgmtCarteCombatLigne(m,i,fight,etatMain){
       +`<div class="mf-car-slot-s"><div class="mf-eff-q" aria-hidden="true">?</div></div></div>`;
   }
   return `<div class="mf-car-slot vide${cur?' choisi':''}"><div class="mf-car-num">${i+1}</div><div class="mf-car-slot-c">`
-    +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span></div><div class="mf-car-slot-v">À composer</div></div></div>`;
+    +`<div class="mf-car-slot-t"><span>${esc(nom.toUpperCase())}</span></div><div class="mf-car-slot-v">À composer</div>`
+    +`<button type="button" onclick="CL.mgmtCarteDossiersOuvrir(${i})">Dossiers</button></div></div>`;
 }
 
 /** Les noms de famille portés par plusieurs combattants de la liste (corrections du 08/10, 2.6) : on y ajoute l'initiale du prénom. */
@@ -312,6 +313,17 @@ function mgmtCarteDossiersEcran(m){
 }
 
 Object.assign(CL,{
+  /** Ouvre les dossiers pour l'emplacement principal libre demandé.
+   * Ne réserve aucun combattant et conserve l'emplacement jusqu'à confirmation.
+   * @param {number} index Index zéro-based de l'emplacement dans m.card.main.
+   * @returns {void}
+   */
+  mgmtCarteDossiersOuvrir(index){
+    const m=G&&G.mgmt;
+    if(!m||!Number.isSafeInteger(index)||index<0||index>=(m.card.sizeMain||MGMT_MAIN_SIZE)||m.card.main[index]) return;
+    MGMT_CART.cible=index;
+    if(!CL.mgmtCarteDossiersActiver()) MGMT_CART.cible=null;
+  },
   /** Un clic sur la liste : sans premier choix il choisit ; avec un premier choix il VISE (la confirmation se fait au bouton ou à Entrée). */
   mgmtCarteVise(id){
     const m=G.mgmt, f=mgmtFighterById(m,id); if(!f) return;
@@ -432,6 +444,7 @@ Object.assign(CL,{
       const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
       const d=pile[MGMT_CART.index||0];
       if(!d) return;
+      if(Number.isSafeInteger(MGMT_CART.cible)&&(MGMT_CART.cible<0||MGMT_CART.cible>=(m.card.sizeMain||MGMT_MAIN_SIZE)||m.card.main[MGMT_CART.cible])) { MGMT_CART.mode='liste'; MGMT_CART.cible=null; render(); return; }
       if(MGMT_CART.etape===1){
         MGMT_CART.dossierCombattant=d.combattant&&d.combattant.id;
         // nouvelle pile adversaires
@@ -447,11 +460,15 @@ Object.assign(CL,{
       const cid=MGMT_CART.dossierCombattant;
       const aid=d.adversaire&&d.adversaire.id;
       if(!cid||!aid) return;
-      MGMT_CART.pick=cid;
-      CL.mgmtPick(aid);
+      if(Number.isSafeInteger(MGMT_CART.cible)){
+        const index=MGMT_CART.cible;
+        if(m.card.main[index]||!mgmtSelectable(m,mgmtFighterById(m,cid),null)||!mgmtSelectable(m,mgmtFighterById(m,aid),cid)) return;
+        const fight=mgmtBookMain(m,cid,aid); if(!fight) return;
+        m.card.main.pop(); m.card.main[index]=fight; saveMgmt();
+      } else { MGMT_CART.pick=cid; CL.mgmtPick(aid); }
       // fermer mode dossier
       MGMT_CART.mode='liste'; MGMT_CART.etape=1; MGMT_CART.index=0; MGMT_CART.dossierCombattant=null;
-      MGMT_CART.dossiers=[]; MGMT_CART.vusCombattants=[]; MGMT_CART.vusAdversaires={}; MGMT_CART.listeDepuisDossiers=false;
+      MGMT_CART.dossiers=[]; MGMT_CART.vusCombattants=[]; MGMT_CART.vusAdversaires={}; MGMT_CART.listeDepuisDossiers=false; MGMT_CART.cible=null;
       render(); return;
     }
     const l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0];
