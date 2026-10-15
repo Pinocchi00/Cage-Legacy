@@ -92,8 +92,8 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    `raison`. ==== */
 /* ==== [ANCRE: MONDE_LOT5_T3_VERSION] — Monde lot 5 T3 ==== */
 /* ==== [ANCRE: MONDE_LOT5_T4_VERSION] — Monde lot 5 T4 ==== */
-/* Fusion de main (15/10/2026) : 19 = lot 6 T3 (la preuve du choix), 20 = lot 9 T2a (le monde vivant) — migration 19 → 20 : m.mondeVivant=false. */
-const MGMT_SAVE_VERSION=20;
+/* Monde lot 9 T2d : 21 — identifiants distincts et comptes conservés pour le monde vivant. */
+const MGMT_SAVE_VERSION=21;
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;
@@ -121,7 +121,7 @@ function mgmtDivisionPonderee(divs,u,profil){
 }
 
 /** Identifiant stable et déterministe (compteur de partie, pas de hasard). */
-function mgmtNextId(m){ const id='mg'+m.seq; m.seq++; return id; }
+function mgmtNextId(m){ const id=(m.idPrefixe||'mg')+m.seq; m.seq++; return id; }
 
 /**
  * Génère le roster de Split : 40 à 60 noms (CDC §9). Niveau 1 uniquement :

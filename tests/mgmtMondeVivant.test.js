@@ -21,7 +21,7 @@ test('Monde lot 9 T2a — même graine, deux créations identiques, sept organis
   assert.equal(a, b);
   const m = JSON.parse(a);
   assert.equal(m.mondeVivant, true);
-  assert.equal(m.v, 20);
+  assert.equal(m.v, 21);
   assert.deepEqual(Object.keys(m.orgs), JSON.parse(A.eval("JSON.stringify(MGMT_ORGANISATIONS.map(o=>o.id).filter(id=>id!=='split'))")), 'sept organisations, dans l\'ordre de MGMT_ORGANISATIONS');
   assert.equal(Object.keys(m.orgs).length, 7);
   for (const id of Object.keys(m.orgs)) {
@@ -45,7 +45,7 @@ test('Monde lot 9 T2a — une partie en version 18 se charge, se valide (mondeVi
     const s=mgmtPredecesseurSoiree(m,0,mgmtPredecesseurReglages('split'));
     return {charge:true,v:m.v,mondeVivant:m.mondeVivant,orgs:m.orgs===undefined,valide:validateMgmt(m),jouee:s.jouee,plus:m.eventsPlayed-avant};
   })()`);
-  assert.deepEqual(JSON.parse(JSON.stringify(r)), { charge: true, v: 20, mondeVivant: false, orgs: true, valide: true, jouee: true, plus: 1 });
+  assert.deepEqual(JSON.parse(JSON.stringify(r)), { charge: true, v: 21, mondeVivant: false, orgs: true, valide: true, jouee: true, plus: 1 }); /* lot 9 T2d : la migration continue jusqu’à 21 */
 });
 
 test('Monde lot 9 T2a — sauvegarde puis rechargement conservent m.orgs à l\'identique', () => {
@@ -190,4 +190,26 @@ test('Monde lot 9 T2c — les actualités lisent les résultats des soirées des
     s.hist=[{c:m.cycle,winner:'A',a:{id:'world-a',name:'Vainqueur vivant',div:f.div},b:{id:'world-b',name:'Perdant vivant',div:f.div}}];
     return mgmtSemaineMonde(m); })()`);
   assert.match(found,/Vainqueur vivant/); assert.match(found,/monde-vivant/);
+});
+
+/* ==== [ANCRE: TESTS_MONDE_LOT9_T2D] — Monde lot 9 T2d ==== */
+test('Monde lot 9 T2d — aucun identifiant vivant n’est porté par un autre combattant après création et semaine',()=>{
+  const win=creer(true);
+  const collision=()=>win.eval(`(function(){const all=[...G.mgmt.roster,...Object.values(G.mgmt.orgs).flatMap(s=>s.roster)];return all.length-new Set(all.map(f=>f.id)).size})()`);
+  assert.equal(collision(),0); win.eval('mgmtMondeVivantSemaine(G.mgmt)'); assert.equal(collision(),0);
+});
+test('Monde lot 9 T2d — le classement mondial compte tous les combattants classables des huit organisations',()=>{
+  const win=creer(true),r=win.eval(`(function(){const m=G.mgmt;return allDivisions().map(d=>{const rows=mgmtDivisionRanking(m,d.id,'world'),orgs=mgmtMondeVivantIds(m).filter(id=>m.orgs[id].roster.some(f=>f.div===d.id&&!mgmtIsRetired(f))),ids=new Set(rows.map(f=>f.id)),exterieur=new Set((m.exterieur||[]).map(f=>f.id));return {div:d.id,expected:[m,...Object.values(m.orgs)].reduce((n,s)=>n+s.roster.filter(f=>!mgmtIsRetired(f)&&f.div===d.id).length,0),actual:rows.length,orgsPresent:orgs.every(id=>m.orgs[id].roster.some(f=>f.div===d.id&&!mgmtIsRetired(f)&&ids.has(f.id))),exterieurPresent:rows.some(f=>exterieur.has(f.id))}})})()`);
+  for(const d of r){assert.equal(d.actual,d.expected,d.div);assert.ok(d.orgsPresent,d.div+' : organisations vivantes représentées');assert.equal(d.exterieurPresent,false,d.div+' : aucun ancien vivier');}
+  const puissance=win.eval(`MGMT_ORGANISATIONS.filter(o=>mgmtOrgNiveaux(G.mgmt,o.id)?.puissance>0).length`);
+  assert.ok(puissance>=5,'au moins cinq organisations ont une puissance positive après création');
+});
+test('Monde lot 9 T2d — une organisation conserve ses comptes et son stade après une semaine',()=>{
+  const win=creer(true); win.eval(`(function(){const s=G.mgmt.orgs[mgmtMondeVivantIds(G.mgmt)[0]],salle=s.salles.slice().sort((a,b)=>b.capacite-a.capacite)[0];s.comptes.push({salle:salle.nom,salleId:salle.id,taux:.8})})()`); win.eval('mgmtMondeVivantSemaine(G.mgmt)');
+  const r=win.eval(`(function(){const id=mgmtMondeVivantIds(G.mgmt)[0],s=G.mgmt.orgs[id],n=mgmtOrgNiveaux(G.mgmt,id),eligible=s.comptes.filter(c=>Number.isFinite(c.taux)&&c.taux>=.8).map(c=>c.salleId||c.salle),salle=s.salles.filter(x=>eligible.includes(x.id)||eligible.includes(x.nom)).sort((a,b)=>b.capacite-a.capacite)[0]||s.salles.slice().sort((a,b)=>a.capacite-b.capacite)[0];return {comptes:s.comptes,stade:n.stade,attendu:salle&&salle.capacite}})()`);
+  assert.ok(r.comptes.length>0); assert.deepEqual(Object.keys(r.comptes[0]).sort(),['salle','salleId','taux']); assert.equal(r.stade,r.attendu);
+});
+test('Monde lot 9 T2d — les migrations v20 préfixent le monde vivant et laissent inchangée une partie sans monde',()=>{
+  const win=creer(true),r=win.eval(`(function(){const vivant=JSON.parse(mgmtSerialiser(G.mgmt));vivant.v=20;for(const [id,s] of Object.entries(vivant.orgs)){const p='o'+MGMT_ORGANISATIONS.findIndex(o=>o.id===id)+'mg';s.idPrefixe=undefined;Object.keys(s).forEach(k=>{});const t=JSON.stringify(s).replace(/\\bo\\d+mg(\\d+)\\b/g,'mg$1');Object.assign(s,JSON.parse(t));}const mig=mgmtMigrate(vivant);const propre=JSON.parse(mgmtSerialiser(mgmtDefault('split')));propre.v=20;propre.mondeVivant=false;const avant=JSON.stringify(propre);const sans=mgmtMigrate(propre);return {v:mig.v,valid:validateMgmt(mig)&&mgmtMondeVivantValide(mig),unique:(()=>{const a=[...mig.roster,...Object.values(mig.orgs).flatMap(x=>x.roster)];return a.length===new Set(a.map(x=>x.id)).size})(),sans:JSON.stringify(sans)===avant.replace('"v":20','"v":21')}})()`);
+  assert.equal(r.v,21); assert.equal(r.valid,true); assert.equal(r.unique,true); assert.equal(r.sans,true);
 });

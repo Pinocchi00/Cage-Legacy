@@ -683,7 +683,7 @@ function mgmtDivisionRankingCalcule(m,divId,scope,cycle){
   const cands=(passe
     ?m.roster.filter(o=>o&&o.div===divId).map(o=>mgmtRosterAuCycle(m,o,c)).filter(Boolean)
     :m.roster.filter(o=>o&&o.div===divId&&!mgmtIsRetired(o)));;
-  if(scope==='world'&&Array.isArray(m.exterieur)){
+  if(scope==='world'&&m.mondeVivant!==true&&Array.isArray(m.exterieur)){
     const rosterIds=new Set(cands.map(o=>o.id));
     for(const line of m.exterieur){
       if(!line||line.div!==divId||rosterIds.has(line.id)) continue;
