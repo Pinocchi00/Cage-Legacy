@@ -1,8 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
 
-  "model": "opencode/cat-jam-free",
-  "small_model": "opencode/cat-jam-free",
+  "model": "openai/gpt-6-luna",
+  "small_model": "openai/gpt-6-luna",
   "default_agent": "codeur",
 
   "permission": {
