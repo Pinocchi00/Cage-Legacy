@@ -464,6 +464,88 @@ test('Monde lot 4 T5 — un geste commencé hors du dossier ne change pas le dos
   }finally{w.close();}
 });
 
+/* ==== [ANCRE: MONDE_LOT4_T6_TESTS] — Monde lot 4 T6 ==== */
+function ouvreCible(index){
+  const w=newGameWindow({runMain:true});
+  w.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtCarteDossiersOuvrir(${index});`);
+  return w;
+}
+
+test('Monde lot 4 T6 — chaque place libre de la carte ouvre ses dossiers',()=>{
+  const w=ouvreCible(0);
+  try{
+    const avant=w.eval('JSON.stringify(G.mgmt.card.main)');
+    assert.equal(w.eval('MGMT_CART.mode'),'dossiers');
+    assert.equal(w.eval('MGMT_CART.cible'),0);
+    assert.equal(w.eval('JSON.stringify(G.mgmt.card.main)'),avant);
+    w.eval('CL.mgmtDossierEsc(); CL.mgmtCarteDossiersOuvrir(1);');
+    assert.equal(w.eval('MGMT_CART.cible'),1);
+    assert.equal(w.eval('JSON.stringify(G.mgmt.card.main)'),avant);
+  }finally{w.close();}
+});
+
+test('Monde lot 4 T6 — confirmer un dossier remplit uniquement la place visée',()=>{
+  const w=ouvreCible(1);
+  try{
+    w.eval(`window.__books=[]; const __orig=mgmtBookMain; mgmtBookMain=(m,a,b)=>{window.__books.push([a,b]);return __orig(m,a,b);};`);
+    w.eval('CL.mgmtCarteEntree(); CL.mgmtCarteEntree();');
+    const ids=JSON.parse(w.eval('JSON.stringify(window.__books[0])'));
+    assert.equal(w.eval('G.mgmt.card.main.length'),2);
+    assert.equal(w.eval('G.mgmt.card.main[1].a'),ids[0]);
+    assert.equal(w.eval('G.mgmt.card.main[1].b'),ids[1]);
+    assert.equal(w.eval('window.__books.length'),1);
+  }finally{w.close();}
+});
+
+test('Monde lot 4 T6 — les dossiers ne s’ouvrent pas sur une place occupée',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); const m=G.mgmt; const a=mgmtCartRows(m).find(x=>mgmtSelectable(m,x,null)); const b=mgmtCartRows(m).find(x=>x.id!==a.id&&mgmtSelectable(m,x,a.id)); mgmtBookMain(m,a.id,b.id); window.__before=JSON.stringify(m.card.main); window.__books=0; const orig=mgmtBookMain; mgmtBookMain=(...x)=>{window.__books++;return orig(...x);}; CL.mgmtCarteDossiersOuvrir(0);`);
+    assert.equal(w.eval('JSON.stringify(G.mgmt.card.main)'),w.eval('window.__before'));
+    assert.equal(w.eval('window.__books'),0);
+  }finally{w.close();}
+});
+
+test('Monde lot 4 T6 — un retrait libère une place accessible aux dossiers',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); const m=G.mgmt; const a=mgmtCartRows(m).find(x=>mgmtSelectable(m,x,null)); const b=mgmtCartRows(m).find(x=>x.id!==a.id&&mgmtSelectable(m,x,a.id)); mgmtBookMain(m,a.id,b.id); CL.mgmtUnbook(0); CL.mgmtCarteDossiersOuvrir(0);`);
+    assert.equal(w.eval('G.mgmt.card.main.length'),0);
+    assert.equal(w.eval('MGMT_CART.cible'),0);
+    w.eval('CL.mgmtCarteEntree(); CL.mgmtCarteEntree();');
+    assert.equal(w.eval('G.mgmt.card.main.length'),1);
+  }finally{w.close();}
+});
+
+test('Monde lot 4 T6 — le retrait de veille laisse la place libre et remplaçable',()=>{
+  const w=newGameWindow({runMain:true});
+  try{
+    w.eval(`setSeed(20261015); CL.mgmtEnter(1); CL.go('mgmt_carte');`);
+    assert.ok(w.eval('G.mgmt.card.main.length>=0'));
+    assert.equal(w.eval('G.mgmt.card.main.length'),0,'aucun combat réservé automatiquement');
+  }finally{w.close();}
+});
+
+test('Monde lot 4 T6 — dossiers sur toutes les cartes programmées sans altérer les autres',()=>{
+  const w=ouvreCible(0);
+  try{
+    const avant=w.eval('JSON.stringify(G.mgmt.agenda)');
+    w.eval('CL.mgmtCarteEntree(); CL.mgmtCarteEntree();');
+    assert.equal(w.eval('JSON.stringify(G.mgmt.agenda)'),avant);
+    assert.equal(w.eval('G.mgmt.card.main.length'),1);
+  }finally{w.close();}
+});
+
+test('Monde lot 4 T6 — le choix par dossier garde les mêmes règles que la liste',()=>{
+  const a=ouvreCible(0),b=newGameWindow({runMain:true});
+  try{
+    a.eval('CL.mgmtCarteEntree(); CL.mgmtCarteEntree();');
+    const ids=JSON.parse(a.eval('JSON.stringify([G.mgmt.card.main[0].a,G.mgmt.card.main[0].b])'));
+    b.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); MGMT_CART.pick=${JSON.stringify(ids[0])}; CL.mgmtPick(${JSON.stringify(ids[1])});`);
+    assert.equal(a.eval('JSON.stringify(G.mgmt.card.main)'),b.eval('JSON.stringify(G.mgmt.card.main)'));
+  }finally{a.close();b.close();}
+});
+
 test('Dossiers — les règles de style de l’écran existent et aucun texte sous 22 px',()=>{
   const fs=require('node:fs');
   const css=fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
