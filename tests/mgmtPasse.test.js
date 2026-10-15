@@ -35,12 +35,13 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
      de création ; recalculées le 12/10/2026. La vraie propriété reste : même graine → même résultat (test 2), et sans option
      de passé, aucun effet de passé (mgmtNewRoster(m,{}) = mgmtNewRoster(m), ci-dessous). */
   /* Décision du lot 8 T4a/T4b (14/10/2026) : les événements de coût petit écrivent de nouveaux faits (top15, challenger, caps de règne, nom de la blessure…) à la création et pendant les soirées : les empreintes de l'état complet sont recalculées ; la propriété gardée est inchangée (déterminisme, aucun état annexe). */
+  /* Décision du lot 6 T3 (raison enregistrée sur chaque combat proposé) : empreintes de soirées recalculées le 15/10/2026. */
   /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
   const AVANT = {
     'split|20261008': '853ffd0a41fb91f6', 'split|20261009': 'e031a248be4f7ea3',
     'ultimate-rim|20261008': '2b299a6ce8056e79', 'ultimate-rim|20261009': '28813c0732d8c60e',
     'fighting-pacific-championship|20261008': '25c5ad7b370e4a27', 'fighting-pacific-championship|20261009': '81b03d5ea9f0de38',
-    jouee3: '21836bdfb13e8034',
+    jouee3: '66731cab915d0a45',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -283,7 +284,7 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
   /* Décision du lot 2 T2 : empreintes recalculées le 12/10/2026 (le tirage des pays et des noms décale le flux du RNG de création) ;
      la propriété gardée est inchangée : la version optimisée est déterministe et le calcul ne dépend d'aucun état annexe. */
   /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
-  const AVANT = { 20261008: 'ddb16d9147b57281', 20261009: '5605fab26b41e08c' };
+  const AVANT = { 20261008: 'e851b8445b11cc30', 20261009: '9506884c086db78a' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });
