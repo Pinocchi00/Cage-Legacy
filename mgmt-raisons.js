@@ -129,7 +129,7 @@ function mgmtRaisonLignes(m,raison,paire){
   const cs=f.combattants||[], vars={a:fighter(f.a||cs[0]?.a),b:fighter(f.b||cs[1]?.a),gagnant:fighter(f.gagnant),
     mois:Number.isFinite(f.mois)?f.mois:'',cycles:Number.isFinite(f.cycles)?f.cycles:'',c:Number.isFinite(f.c)?f.c:'',
     /* Superviseur, 15/10/2026 : le nom de la catégorie (« poids léger »), jamais son identifiant (« H-light »). */
-    div:f.div?(divById(f.div)?mgmtDivisionLabel(f.div).toLowerCase():''):'',
+    div:f.div?(divById(f.div)?mgmtDivisionLabel(f.div).toLowerCase():f.div):'',
     rangA:cs[0]?.rang??'',rangB:cs[1]?.rang??'',age:f.age??'',total:f.total??'',n:f.n??'',restants:f.restants??'',pays:f.pays||'',
     // Forme accordée au nombre : « 1 combat restant » / « 3 combats restants ».
     combatRestant:Number(f.restants)>1?'combats restants':'combat restant',
