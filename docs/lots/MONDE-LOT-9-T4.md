@@ -1,6 +1,5 @@
 # Monde lot 9 T4 — le classement des organisations
 
-STOP — le brief ne tranche pas la règle de classement. Ne pas coder avant réponse d’Anthony.
 
 ## Branche
 
@@ -54,7 +53,15 @@ Les quatre niveaux de T3 et leurs formules ; le classement mondial des combattan
 - La puissance dépend du classement mondial lu par `mgmtDivisionRanking`; ne pas recréer un calcul de puissance.
 - Ne pas ajouter un second état sauvegardé pour un résultat déjà dérivé. L’ordre de chargement des scripts est fragile si un nouveau fichier est proposé.
 
-## Questions pour Anthony
+## Questions (toutes tranchées par la DÉCISION ci-dessous)
 
 - Quelle règle produit le rang unique : un niveau prioritaire (lequel), une combinaison des rangs des quatre niveaux, ou une autre règle ? Comment départager les égalités de cette règle ?
 - Pour une partie sans monde vivant, le classement doit-il porter uniquement sur l’organisation du joueur, comme le permet T3, ou conserver les huit organisations simulées/évaluées ?
+
+## DÉCISION du superviseur — 15/10/2026 20 h 50 (le STOP est levé ; aucune question pour Anthony)
+1. **Fonction** : `mgmtOrgClassement(m)` (pure, recalculée à la lecture, rien en sauvegarde) → tableau de huit lignes `{id, rang, total, niveaux:{popularite,stade,notoriete,puissance}, rangs:{popularite,stade,notoriete,puissance}}`, dans l'ordre du rang. S'appuie sur `mgmtOrgNiveaux` et `mgmtOrgNiveauxRangs` (T3), sans les recopier.
+2. **Règle du rang unique** : `total` = somme des quatre rangs de niveau (chacun de 1 à 8) ; le plus petit total est premier. Égalité : le meilleur rang de puissance, puis l'ordre de `MGMT_ORGANISATIONS`. Ainsi chaque place s'explique par ses quatre rangs (« jamais sans raison que le test sache retrouver »).
+3. **Partie sans monde vivant** (`m.mondeVivant!==true`) : `mgmtOrgClassement(m)` renvoie `null` — un classement d'une seule organisation n'a pas de sens (c'est QO-11).
+4. **QO-11** : ajoute dans `docs/QUESTIONS-OUVERTES.md`, sous QO-11, la ligne « Fermée par le lot 9 T4 (15/10/2026) : un seul classement des huit organisations, lu par le rang (mgmtOrgClassement). »
+5. Pas d'écran dans T4 (écran de l'organisation : T11).
+Tests (`tests/mgmtNiveauxOrg.test.js`, sur de VRAIES parties créées comme les tests existants du fichier — aucune fonction du jeu remplacée par une fausse) : huit lignes, rangs 1 à 8 sans trou ; le total de chaque ligne est la somme de ses quatre rangs et l'ordre suit la règle ; changer la popularité d'une organisation (m.pop ou celle de sa sous-partie) change son rang de popularité, son total, et le classement seulement si l'ordre des totaux change ; partie sans monde vivant → null ; à graine égale, deux parties donnent le même classement. Tests ciblés seulement (délai 120 s ; ce fichier crée des mondes : lance-le avec `--test-name-pattern="T4"`), pas de `check:rapide`.
