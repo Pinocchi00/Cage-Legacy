@@ -61,3 +61,41 @@ test('Monde lot 9 T3 — avec le monde vivant, les huit organisations ont leurs 
     assert.ok(ra.n.filter(x=>x.puissance>0).length>1,'la puissance se partage entre plusieurs organisations');
   }finally{ a.close(); b.close(); }
 });
+
+test('Monde lot 9 T4 — huit lignes, rangs sans trou, totaux et ordre explicables',()=>{
+  const w=partie(true);
+  try{
+    const rows=lire(w,`return mgmtOrgClassement(m);`);
+    assert.equal(rows.length,8);
+    assert.deepEqual(rows.map(x=>x.rang),[1,2,3,4,5,6,7,8]);
+    for(const x of rows) assert.equal(x.total,Object.values(x.rangs).reduce((s,n)=>s+n,0));
+    for(let i=1;i<rows.length;i++){
+      const a=rows[i-1],b=rows[i];
+      const tieBreak=a.rangs.puissance<b.rangs.puissance||(a.rangs.puissance===b.rangs.puissance&&MGMT_ORGANISATIONS.findIndex(o=>o.id===a.id)<MGMT_ORGANISATIONS.findIndex(o=>o.id===b.id));
+      assert.ok(a.total<b.total||(a.total===b.total&&tieBreak));
+    }
+  }finally{w.close();}
+});
+
+test('Monde lot 9 T4 — changer la popularité change les rangs seulement par les totaux',()=>{
+  const w=partie(true);
+  try{
+    const r=lire(w,`const avant=mgmtOrgClassement(m), id=MGMT_ORGANISATIONS[7].id; m.orgs[id].pop+=100000; return {avant,apres:mgmtOrgClassement(m),id};`);
+    const a=r.avant.find(x=>x.id===r.id), b=r.apres.find(x=>x.id===r.id);
+    assert.notEqual(a.rangs.popularite,b.rangs.popularite);
+    assert.notEqual(a.total,b.total);
+    assert.notDeepEqual(r.avant.map(x=>x.id),r.apres.map(x=>x.id),'le changement de total modifie le classement global');
+    const ordreTotaux=xs=>xs.slice().sort((x,y)=>x.total-y.total||x.rangs.puissance-y.rangs.puissance||MGMT_ORGANISATIONS.findIndex(o=>o.id===x.id)-MGMT_ORGANISATIONS.findIndex(o=>o.id===y.id)).map(x=>x.id);
+    assert.deepEqual(r.apres.map(x=>x.id),ordreTotaux(r.apres));
+  }finally{w.close();}
+});
+
+test('Monde lot 9 T4 — sans monde vivant, classement nul',()=>{
+  const w=partie(false);
+  try{assert.equal(lire(w,`return mgmtOrgClassement(m);`),null);}finally{w.close();}
+});
+
+test('Monde lot 9 T4 — à graine égale, le classement est identique',()=>{
+  const a=partie(true),b=partie(true);
+  try{assert.deepEqual(lire(a,`return mgmtOrgClassement(m);`),lire(b,`return mgmtOrgClassement(m);`));}finally{a.close();b.close();}
+});

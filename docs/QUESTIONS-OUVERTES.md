@@ -350,6 +350,8 @@ classement, et le classement décide de ce que le patron peut exiger. Les trois
 questions se tiennent ; les séparer produirait un objectif qui ne veut rien dire,
 ce qui est exactement le défaut relevé ici.
 
+Fermée par le lot 9 T4 (15/10/2026) : un seul classement des huit organisations, lu par le rang (`mgmtOrgClassement`).
+
 ### QO-11 bis — la même question, posée sur les combattants (22/09/2026)
 
 **Le constat d'Anthony** : « on peut jouer avec autant de combattants par

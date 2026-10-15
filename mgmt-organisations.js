@@ -87,6 +87,21 @@ function mgmtOrgNiveauxRangs(m){
   return out;
 }
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MGMT_MONDE_LOT9_T4_CLASSEMENT] — Monde lot 9 T4 ==== */
+/** Classement global dérivé des quatre rangs de niveaux ; aucun état persistant. */
+function mgmtOrgClassement(m){
+  if(!m||m.mondeVivant!==true) return null;
+  const rangs=mgmtOrgNiveauxRangs(m);
+  const lignes=MGMT_ORGANISATIONS.map((o,index)=>{
+    const niveaux=mgmtOrgNiveaux(m,o.id), r=rangs[o.id];
+    if(!niveaux||!r) return null;
+    const total=['popularite','stade','notoriete','puissance'].reduce((s,k)=>s+r[k],0);
+    return {id:o.id,total,niveaux,rangs:r,index};
+  }).filter(Boolean);
+  lignes.sort((a,b)=>a.total-b.total||a.rangs.puissance-b.rangs.puissance||a.index-b.index);
+  return lignes.map((x,i)=>({id:x.id,rang:i+1,total:x.total,niveaux:x.niveaux,rangs:x.rangs}));
+}
+/* ==== [FIN ANCRE] ==== */
 
 /* ==== [ANCRE: MGMT_CORR0810_LOT12_ATOUTS] — Corrections du 08/10/2026, lot 12 (D6) : chaque ligne de l'écran Nouvelle partie correspond à un effet que le joueur constate.
    Les lignes ne sont plus écrites à la main : elles se DÉDUISENT du profil, réglage par réglage, et seuls les réglages que le jeu lit existent

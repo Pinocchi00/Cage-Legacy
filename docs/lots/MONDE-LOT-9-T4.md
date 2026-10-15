@@ -65,3 +65,12 @@ Les quatre niveaux de T3 et leurs formules ; le classement mondial des combattan
 4. **QO-11** : ajoute dans `docs/QUESTIONS-OUVERTES.md`, sous QO-11, la ligne « Fermée par le lot 9 T4 (15/10/2026) : un seul classement des huit organisations, lu par le rang (mgmtOrgClassement). »
 5. Pas d'écran dans T4 (écran de l'organisation : T11).
 Tests (`tests/mgmtNiveauxOrg.test.js`, sur de VRAIES parties créées comme les tests existants du fichier — aucune fonction du jeu remplacée par une fausse) : huit lignes, rangs 1 à 8 sans trou ; le total de chaque ligne est la somme de ses quatre rangs et l'ordre suit la règle ; changer la popularité d'une organisation (m.pop ou celle de sa sous-partie) change son rang de popularité, son total, et le classement seulement si l'ordre des totaux change ; partie sans monde vivant → null ; à graine égale, deux parties donnent le même classement. Tests ciblés seulement (délai 120 s ; ce fichier crée des mondes : lance-le avec `--test-name-pattern="T4"`), pas de `check:rapide`.
+
+## Compte rendu
+
+- `mgmt-organisations.js` : ajout de `mgmtOrgClassement(m)`, dérivé des API T3, somme des rangs et départages prescrits.
+- `tests/mgmtNiveauxOrg.test.js` : quatre tests ajoutés : « Monde lot 9 T4 — huit lignes, rangs sans trou, totaux et ordre explicables », « Monde lot 9 T4 — changer la popularité change les rangs seulement par les totaux », « Monde lot 9 T4 — sans monde vivant, classement nul », « Monde lot 9 T4 — à graine égale, le classement est identique ».
+- `docs/QUESTIONS-OUVERTES.md` : QO-11 fermée selon la décision. `index.html` version du script montée ; `sw.js` version de cache montée par l'outil de versionnage.
+- Sauvegarde : aucune migration.
+- Écarts à la fiche : aucun.
+- Questions pour Anthony : aucune.
