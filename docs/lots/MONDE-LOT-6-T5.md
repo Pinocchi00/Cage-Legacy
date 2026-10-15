@@ -1,4 +1,4 @@
-# STOP — Monde lot 6 T5 — Les phrases
+# Monde lot 6 T5 — Les phrases
 
 ## 1. Branche
 - Branche attendue : `monde-lot-6-raisons` (confirmée par T1 §13.1 et les fiches T2–T4).
@@ -64,3 +64,8 @@ Sélection des familles/paires et leurs seuils (T1/T2), persistance/migration (T
 ## 12. Questions pour Anthony
 1. **Bloquante — source du féminin :** quel champ déjà fiable doit déterminer le genre des combattants pour accorder les formulations, et quelle règle appliquer aux preuves sans genre explicite ou aux paires mixtes ? Le brief demande l'accord mais n'indique ni donnée ni règle ; aucune inférence par prénom n'est acceptable.
 2. **Bloquante — sélection des variantes :** comment choisir entre les trois formulations (cycle déterministe par carte, état/graine, ou autre) ? La sortie actuelle ne reçoit que `(m,raison)` et aucune fréquence ni portée de variété n'est spécifiée. Confirmer si le résultat doit rester pur/déterministe et si un nouvel argument est autorisé ; ne pas ajouter de champ à la sauvegarde par supposition.
+
+## DÉCISION du superviseur — 15/10/2026 (les deux questions sont tranchées, aucune pour Anthony)
+1. **Féminin** : une paire de combattants est toujours dans la même catégorie ; le genre se lit sur la catégorie (catégorie féminine = féminin), par la fonction d'accord déjà utilisée par le jeu (`mgmtAccord` ou son équivalent trouvé par grep, jamais une seconde règle). Une preuve sans combattant identifié prend la forme de la catégorie de la paire. Aucune paire mixte n'existe.
+2. **Choix de la variante** : pur et déterministe, sans RNG de partie : l'index de la variante = un hachage simple et stable de (famille, identifiants triés des deux combattants) modulo le nombre de variantes. Un troisième argument OPTIONNEL `mgmtRaisonLignes(m,raison,paire)` est autorisé ; sans lui, la première variante (comportement de T4 inchangé, les tests de T4 restent verts).
+3. Textes : trois formulations par famille (ligne 1 et ligne 2), écrites par toi, marquées `relu:false`, sans réplique ni personnage inventés ; elles citent le fait avec son chiffre ou son nom.
