@@ -86,6 +86,23 @@ function mgmtExteriorEffectifs(m,divId){
   return resultat;
 }
 
+/* ==== [ANCRE: MONDE_LOT9_T2C_LECTURE_COMBATTANT] — Monde lot 9 T2c ==== */
+/** Résout un combattant extérieur par l'unique source correspondant au mode de monde. */
+function mgmtExteriorCombattant(m,id){
+  if(!m||!mgmtValidId(id)) return null;
+  if(m.mondeVivant===true){
+    for(const orgId of mgmtMondeVivantIds(m)){
+      const sous=m.orgs&&m.orgs[orgId], f=(sous&&sous.roster||[]).find(x=>x&&x.id===id);
+      if(f&&!mgmtIsRetired(f)) return Object.assign({orgId},f);
+    }
+    return null;
+  }
+  const line=(m.exterieur||[]).find(x=>x&&x.id===id);
+  if(!line) return null;
+  const trace=mgmtExteriorTrace(line,m.cycle);
+  return trace?{id:line.id,orgId:null,name:trace.name,W:trace.pro.W,L:trace.pro.L,age:Math.floor(trace.age),div:line.div,trace}:null;
+}
+
 /** Crée une ligne extérieure : SON IDENTITÉ, rien d'autre. L'identifiant
  *  vient du compteur de la partie (mgmtNextId), la graine du hachage de
  *  l'identifiant, le pays d'un flux propre au combattant, et la catégorie

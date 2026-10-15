@@ -205,6 +205,10 @@ function mgmtContratSigner(m,id,n,b){
 }
 /** Une ligne provisoire pour juger une offre à un combattant du marché (jamais ajoutée à l'effectif). */
 function mgmtExteriorPourOffre(m,id){
+  if(m&&m.mondeVivant===true){
+    const f=mgmtExteriorCombattant(m,id);
+    return f?{id:f.id,name:f.name,W:f.W,L:f.L,D:f.D||0,age:Math.floor(f.age),div:f.div,orgId:f.orgId}:null;
+  }
   const line=(m.exterieur||[]).find(e=>e.id===id); if(!line) return null;
   const t=mgmtExteriorTrace(line,m.cycle); if(!t) return null;
   return {id:line.id,name:t.name,W:t.pro.W,L:t.pro.L,D:0,age:Math.floor(t.age),div:line.div};

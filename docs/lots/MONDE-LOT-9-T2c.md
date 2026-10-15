@@ -8,15 +8,15 @@ les lecteurs : les fonctions du monde extérieur (`mgmtExterior*`, `m.exterieur`
 ## Vérification
 Tests ciblés de la sous-tranche (nouveau fichier `tests/mgmtMondeVivant.test.js`, ajouté à `package.json` `test` et `test:watch`), `node tools/verif-versions.js origin/main`. Pas de `check:rapide` (le superviseur le lance). Commit `Monde lot 9 T2c : ...`.
 
-## Compte rendu
+## Compte rendu — reprise superviseur
 
-- Fichiers modifiés : `mgmt-monde.js` expose la lecture commune des effectifs des organisations vivantes et l'inclut dans le compte mondial ; `mgmt-carte.js` inclut leurs combattants au classement mondial ; `tests/mgmtMondeVivant.test.js` vérifie les deux lecteurs ; `index.html` et `sw.js` montent les versions après les changements JS ; cette fiche consigne le résultat.
-- Tests ajoutés : « Monde lot 9 T2c — les effectifs vivants alimentent le compte et le classement mondial ». Le fichier `mgmtMondeVivant.test.js` était déjà référencé dans les scripts `test` et `test:watch` de `package.json`, donc aucun changement nécessaire.
-- Vérification : `node --test --test-name-pattern="T2c" tests/mgmtMondeVivant.test.js` passe (1/1). Le fichier entier a été lancé, mais le délai de 120 s a interrompu son test d'écran existant ; les tests exécutés avant l'interruption étaient verts. `node tools/verif-versions.js origin/main` signale l'écart préexistant `mgmt-nouvelle.js` (modifié dans la branche, version identique à origin/main) ; ce fichier n'est pas modifié par cette tranche. Aucun `check:rapide` lancé, conformément à la consigne.
+- Fichiers modifiés : `mgmt-monde.js` ajoute un résolveur commun de combattant (source vivante ou trace historique) ; `mgmt-contrats.js` l'emploie pour les offres en mode vivant ; `mgmt-ceintures.js` lit le champion de chaque organisation vivante. Versions JS montées via `_bump.js`.
+- Tests ajoutés : aucun. Test ciblé préexistant : « Monde lot 9 T2c — les effectifs vivants alimentent le compte et le classement mondial ».
+- Vérification : `node --test --test-name-pattern="T2c" tests/mgmtMondeVivant.test.js` passe (1/1). `node tools/verif-versions.js origin/main` ne signale que l'écart préexistant `mgmt-nouvelle.js`. Aucun `check:rapide` lancé.
 - Migration de sauvegarde : aucune.
-- Écart à la fiche : portée implémentée pour l'effectif et le classement mondial ; les autres lecteurs directs de l'ancien `m.exterieur` (notamment titres/champions et les écrans qui consomment les traces) ne sont pas encore basculés. Ces consommateurs sont plus nombreux que les deux fonctions testées ; il faut compléter cette tranche avant de considérer le remplacement des lecteurs achevé. La lecture historique reste inchangée pour `mondeVivant!==true`.
-- Questions pour Anthony : aucune nouvelle question ; le travail restant est la bascule des lecteurs recensés hors effectif/classement.
-- Relecture : sous-agent indisponible selon la règle de repli du superviseur ; pas de verdict `@relecteur`.
+- Écarts à la fiche : tranche incomplète : l'actualité semaine, l'accueil et recrutement ne sont pas basculés vers `m.orgs`; il manque les tests exigés pour points 1–4 et la comparaison JSON héritée.
+- Questions pour Anthony : aucune nouvelle question ; terminer les lecteurs restants avant de considérer T2c achevée.
+- Relecture : non appelée, indisponibilité des sous-agents selon la règle de repli.
 
 ## REPRISE — superviseur, 15/10/2026
 Le commit 2276663 a basculé l'effectif et le classement mondial (`mgmtExteriorEffectifs`). Reste à basculer, chacun avec sa lecture `m.mondeVivant===true` → `m.orgs`, sinon l'ancien calcul STRICTEMENT inchangé :

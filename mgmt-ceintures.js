@@ -152,6 +152,15 @@ function mgmtBoutRounds(m,fight){
  *  @returns {{belts:Array,history:Array}} vues éphémères uniquement. */
 function mgmtExteriorTitles(m,div,cycle){
   const c=Number.isSafeInteger(cycle)?cycle:(m&&Number.isSafeInteger(m.cycle)?m.cycle:0);
+  if(m&&m.mondeVivant===true){
+    const ids=mgmtMondeVivantIds(m), belts=[], history=[];
+    for(const orgId of ids){
+      const sous=m.orgs&&m.orgs[orgId];
+      const title=sous?mgmtSplitTitle(sous,div):{id:null,defenses:0,since:null};
+      belts.push({org:MGMT_ORGANISATIONS.find(o=>o.id===orgId),orgIdx:MGMT_ORGANISATIONS.findIndex(o=>o.id===orgId),div,id:title.id,defenses:title.defenses,since:title.since});
+    }
+    return {belts,history};
+  }
   const belts=mgmtExtOrgs(m).map((org,i)=>({org,orgIdx:i,div,id:null,defenses:0,since:null}));
   const history=[];
   if(!m||!divById(div)) return {belts,history};
