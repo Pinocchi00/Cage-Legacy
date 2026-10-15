@@ -20,6 +20,7 @@ const SANS_COMMENTAIRES = SOURCE.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[
 function partieNeuve(graine) {
   const win = newGameWindow({ runMain: true });
   win.eval(`(function(){
+    MGMT_HUMANITE_ACTIVE=true;
     setSeed(${graine});
     const m=mgmtDefault('split'); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m);
     G={theme:'dark',mgmt:m}; mgmtAgendaInit(m);
@@ -51,9 +52,16 @@ test('Monde lot 1 T2 — mgmt-predecesseur.js est chargé après mgmt-agenda.js 
 test('Monde lot 1 T2 — le prédécesseur est sans écran : ni document, ni CL, ni window, ni localStorage, ni Math.random', () => {
   assert.equal(SOURCE.split(/\r?\n/)[0], '"use strict";', 'ligne 1 : "use strict";');
   assert.ok(SOURCE.includes('/* ==== [ANCRE: MONDE_LOT1_T2_PREDECESSEUR]') && SOURCE.includes('/* ==== [FIN ANCRE] ==== */'), "l'ancre et sa fin");
-  for (const motif of [/\bdocument\b/, /\bCL\b/, /\bwindow\b/, /\blocalStorage\b/, /Math\.random/, /\brnd\s*\(/, /\bsetSeed\b/]) {
+  /* ==== [ANCRE: MONDE_LOT5_T1_TEST_RNG_PREDECESSEUR] — Monde lot 5 T1 ==== */
+  /* Fiche §13 décision 3 : un tirage seedé de taille est désormais exigé pour l'héritage, pas pour le joueur historique. */
+  for (const motif of [/\bdocument\b/, /\bCL\b/, /\bwindow\b/, /\blocalStorage\b/, /Math\.random/, /\bsetSeed\b/]) {
     assert.ok(!motif.test(SANS_COMMENTAIRES), 'le source ne contient pas ' + motif);
   }
+  const win = newGameWindow();
+  assert.equal((SANS_COMMENTAIRES.match(/\brnd\s*\(/g)||[]).length, 1);
+  assert.match(win.mgmtPredecesseurCarteHeritee.toString(), /\brnd\s*\(/);
+  assert.doesNotMatch(win.mgmtPredecesseurSoiree.toString(), /\brnd\s*\(/);
+  win.close();
 });
 
 /* ===================== Test 3 ===================== */

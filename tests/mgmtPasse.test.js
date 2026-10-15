@@ -34,11 +34,14 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
      Décision du lot 2 T2 : le tirage des pays et des noms (mgmtOrgPaysPoids, mgmtPaysTire, MGMT_NOMS_AJOUTS) change les empreintes
      de création ; recalculées le 12/10/2026. La vraie propriété reste : même graine → même résultat (test 2), et sans option
      de passé, aucun effet de passé (mgmtNewRoster(m,{}) = mgmtNewRoster(m), ci-dessous). */
+  /* Décision du lot 8 T4a/T4b (14/10/2026) : les événements de coût petit écrivent de nouveaux faits (top15, challenger, caps de règne, nom de la blessure…) à la création et pendant les soirées : les empreintes de l'état complet sont recalculées ; la propriété gardée est inchangée (déterminisme, aucun état annexe). */
+  /* Décision du lot 6 T3 (raison enregistrée sur chaque combat proposé) : empreintes de soirées recalculées le 15/10/2026. */
+  /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
   const AVANT = {
-    'split|20261008': 'b21af921ac61f66f', 'split|20261009': '822ff68c20ecc9bf',
-    'ultimate-rim|20261008': 'b5e4a39517f83a4e', 'ultimate-rim|20261009': 'aff68002e268ee1a',
-    'fighting-pacific-championship|20261008': 'a48641fbc7bd0e3e', 'fighting-pacific-championship|20261009': 'ddc0dcc1ef8f5b79',
-    jouee3: '76424b29907c76a0',
+    'split|20261008': '853ffd0a41fb91f6', 'split|20261009': 'e031a248be4f7ea3',
+    'ultimate-rim|20261008': '2b299a6ce8056e79', 'ultimate-rim|20261009': '28813c0732d8c60e',
+    'fighting-pacific-championship|20261008': '25c5ad7b370e4a27', 'fighting-pacific-championship|20261009': '81b03d5ea9f0de38',
+    jouee3: '66731cab915d0a45',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -97,15 +100,16 @@ test('Monde lot 1 T3 — les dates : le passé avant 2027, le premier jour du jo
   assert.deepEqual(r.faites, [-105, -70, -35]);
   assert.ok(r.annees.every(a => a === 2026), 'trois soirées de 35 jours avant le 12 janvier 2027 : toutes en 2026');
   assert.deepEqual(r.n, [1, 2, 3]);
-  assert.equal(r.prochaines, 0);
+  /* ==== [ANCRE: MONDE_LOT5_T1_TEST_AGENDA_PASSE] — Monde lot 5 T1 ==== */
+  assert.equal(r.prochaines, 1);
   assert.equal(r.passe.soirees, PASSE_N); assert.equal(r.passe.origineJours, 35 * (PASSE_N + 1));
   assert.equal(r.ev, PASSE_N); assert.equal(r.joueur, 0, 'le joueur n\'a encore joué aucune soirée');
   assert.deepEqual(r.jourN, [-105, -70, -35]);
   /* Au-delà des 24 soirées gardées dans l'agenda, la date se retrouve par le décalage du passé (le rythme des 35 jours). */
   assert.equal(A.eval('(function(){const m=G.mgmt; m.cal.faites=[]; return [1,3].map(n=>mgmtAgendaJour(m,n)).join();})()'), '-105,-35');
-  /* Le jeu pose la soirée suivante à 35 jours, comme une partie sans passé. */
-  const suiv = A.eval(`(function(){ const m=G.mgmt; mgmtAgendaSuivante(m); return m.cal.prochaines[0].jour; })()`);
-  assert.equal(suiv, 35);
+  /* La clôture l'a déjà posée : l'appel de l'interface est un no-op. */
+  const suiv = JSON.parse(A.eval(`JSON.stringify((function(){ const m=G.mgmt; return [mgmtAgendaSuivante(m),m.cal.prochaines[0].jour]; })())`));
+  assert.deepEqual(suiv, [false, 35]);
 });
 
 /* ===================== Test 5 : le monde extérieur (point I) ===================== */
@@ -145,19 +149,62 @@ test('Monde lot 1 T4 — les contrats, blessures, attentes, ceintures et histori
     setSeed(${GRAINE});
     const m=mgmtPassePreparer('split',{soirees:2});
     for(let k=0;k<2;k++) mgmtPasseSoiree(m,k);
-    const corps=()=>JSON.stringify(m.roster.map(f=>[f.id,f.ct||null,!!f.libre,f.trauma||0,f.traumaFloor||0,f.susp||0,f.retired||null,f.lastCycle||0,f.level,f.raison,f.interactions]));
-    const avant={corps:corps(),histResume:JSON.stringify(m.hist.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L])),factsGardes:JSON.stringify(m.facts.filter(x=>!MGMT_PASSE_FAITS_PERDUS.includes(x.k))),titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null)),pile:JSON.stringify(m.pile),cycle:m.cycle,fil:m.fil?m.fil.length:0};
+    /* ==== [ANCRE: MONDE_LOT5_T1_TEST_PROMOTION_HERITEE] — Monde lot 5 T1 ==== */
+    /* Fiche §3.21 et §11 : mgmtBookMain conserve ses promotions ; seul le corps médical/contractuel reste identique. */
+    const promotions=m.roster.map(f=>({id:f.id,level:f.level,raison:f.raison,interactions:f.interactions}));
+    const corps=()=>JSON.stringify(m.roster.map(f=>[f.id,f.ct||null,!!f.libre,f.trauma||0,f.traumaFloor||0,f.susp||0,f.retired||null,f.lastCycle||0]));
+    /* ==== [ANCRE: MONDE_LOT5_T6_FAITS_CONSERVES] — Monde lot 5 T6 ==== */
+    /* décision du 13/10/2026 : le lot 5 ajoute des faits d'héritage à la clôture.
+       T2 recale aussi d : même demande, nouvel index après filtrage. */
+    const indices=new Map(), faits=[];
+    m.facts.forEach((x,i)=>{if(!MGMT_PASSE_FAITS_PERDUS.includes(x.k)){indices.set(i,faits.length);faits.push(x);}});
+    const faitsAttendus=faits.map(x=>{
+      const demande=Number.isSafeInteger(x.d)&&m.facts[x.d];
+      return ['promesse','refus'].includes(x.k)&&demande&&demande.k==='demande'?Object.assign({},x,{d:indices.get(x.d)}):x;
+    });
+    const avant={corps:corps(),histResume:JSON.stringify(m.hist.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L])),factsGardes:JSON.stringify(faitsAttendus),titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null)),pile:JSON.stringify(m.pile),cycle:m.cycle,fil:m.fil?m.fil.length:0};
     const ageAvant=m.roster.map(f=>f.age).join();
     mgmtPasseCloturer(m);
     /* Monde lot 1 T5 (fiche MONDE-LOT-1-T5 §3) : à la clôture les combats s'allègent (mêmes combattants, même issue) et les faits perdus (contrats, départs, attentes) sont écartés ; tout le reste est conservé. */
     const resume=h=>JSON.stringify(h.map(t=>[t.c,t.slot,t.a.id,t.b.id,t.winner,t.family,t.round,t.rounds,t.a.W,t.a.L,t.b.W,t.b.L]));
+    const engages=new Set(m.card.main.flatMap(cf=>[cf.a,cf.b]));
+    const promotion=promotions.every(p=>{const f=mgmtFighterById(m,p.id);
+      if(!engages.has(p.id)) return f.level===p.level&&f.raison===p.raison&&f.interactions===p.interactions;
+      const interactions=(Number.isSafeInteger(p.interactions)?p.interactions:0)+1;
+      return f.interactions===interactions&&f.level===(interactions>=3?3:Math.max(2,p.level))&&
+        (p.level<2?MGMT_RAISONS.some(r=>r.id===f.raison):f.raison===p.raison);});
     return {corps:corps()===avant.corps,hist:resume(m.hist)===avant.histResume,facts:JSON.stringify(m.facts)===avant.factsGardes,
+      promotion,
       titres:JSON.stringify(allDivisions().map(d=>(mgmtSplitTitle(m,d.id)||{}).id||null))===avant.titres,pile:JSON.stringify(m.pile)===avant.pile,
       cycle:m.cycle===avant.cycle,fil:(m.fil?m.fil.length:0)===avant.fil,nbHist:m.hist.length,nbFacts:m.facts.length,
       sous:m.roster.filter(f=>f.ct).length,n:m.roster.length,vieilli:m.roster.map(f=>f.age).join()!==ageAvant}; })())`));
-  for (const k of ['corps', 'hist', 'facts', 'titres', 'pile', 'cycle', 'fil']) assert.equal(r[k], true, 'conservé : ' + k);
+  for (const k of ['corps', 'hist', 'facts', 'titres', 'pile', 'cycle', 'fil', 'promotion']) assert.equal(r[k], true, 'conservé : ' + k);
   assert.ok(r.nbHist > 0 && r.nbFacts > 0, 'l\'histoire existe');
   assert.ok(r.sous > 0, 'des contrats sont en cours');
+});
+
+/* ==== [ANCRE: MONDE_LOT5_T6_TEST_RECLAMATIONS] — Monde lot 5 T6 ==== */
+test('Monde lot 5 T6 — répondre à une demande ne retire pas son combat du booking porté', () => {
+  const win = newGameWindow({ runMain: true });
+  try {
+    const r = JSON.parse(win.eval(`JSON.stringify((function(){
+      setSeed(${GRAINE}); const m=mgmtPassePreparer('split',{soirees:2});
+      m.facts=[];
+      const candidats=mgmtCartRows(m).filter(f=>!f.libre&&mgmtContratRestants(f)>1&&mgmtSelectable(m,f,null));
+      const a=candidats.find(a=>candidats.some(b=>b.id!==a.id&&b.div===a.div&&mgmtSelectable(m,b,a.id)&&mgmtAvailable(m,a,b)));
+      const b=candidats.find(b=>b.id!==a.id&&b.div===a.div&&mgmtSelectable(m,b,a.id)&&mgmtAvailable(m,a,b));
+      mgmtAddFact(m,{c:m.cycle,k:'demande',a:a.id,want:'revanche',target:b.id});
+      const reclame=mgmtPublicReclame(m).some(r=>r.a===a.id&&r.b===b.id);
+      const s=mgmtPredecesseurSoiree(m,0,{demandes:true});
+      return {reclame,jouee:s.jouee,reclames:s.reclames,
+        reponse:m.facts.filter(x=>x.k==='promesse'&&x.d===0).length,
+        combat:m.hist.some(h=>h.slot==='main'&&h.a.id===a.id&&h.b.id===b.id),
+        ouverte:mgmtDemandesOuvertes(m).some(d=>d.i===0)};
+    })())`));
+    assert.equal(r.reclame, true); assert.equal(r.jouee, true);
+    assert.equal(r.reclames, 1); assert.equal(r.reponse, 1);
+    assert.equal(r.combat, true); assert.equal(r.ouverte, false);
+  } finally { win.close(); }
 });
 
 /* ===================== Test 8 : un champion par catégorie ===================== */
@@ -236,7 +283,8 @@ test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', 
      (mgmtPickBulkPair, mgmtEligiblePairs et mgmtCartRows lisent une fois par combattant ce qu'ils lisaient une fois par paire). */
   /* Décision du lot 2 T2 : empreintes recalculées le 12/10/2026 (le tirage des pays et des noms décale le flux du RNG de création) ;
      la propriété gardée est inchangée : la version optimisée est déterministe et le calcul ne dépend d'aucun état annexe. */
-  const AVANT = { 20261008: '27c5eb0e634b437b', 20261009: '68e82338c8690944' };
+  /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
+  const AVANT = { 20261008: 'e851b8445b11cc30', 20261009: '9506884c086db78a' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });

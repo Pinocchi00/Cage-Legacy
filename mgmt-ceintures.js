@@ -69,7 +69,9 @@ function mgmtTitleMemoryRows(m){
         :(winner?'title_awarded':'title_vacant');
       const first=champion||winner||trace.a;
       const second=first===trace.a?trace.b:trace.a;
-      rows.set(fact,{label:MGMT_FACT_LABELS[key],a:first.name,b:second.name});
+      /* ==== [ANCRE: MGMT_FAITS_TITRE_SOURCE] — Monde lot 3 T1 ==== */
+      rows.set(fact,{label:MGMT_FACT_LABELS[key],a:first.name,b:second.name,
+        championId:champion?champion.id:null,winnerId:winner?winner.id:null});
       champions.set(fact.div,winner?winner.id:champion?champion.id:null);
     }
   }
@@ -130,6 +132,8 @@ function mgmtSetTitle(m,idx,title){
   const fight=m.card.main[idx];
   if(title&&!mgmtCanTitle(m,fight)) return false;
   if(!title){ const ch=mgmtChampionIds(m); if(ch.has(fight.a)||ch.has(fight.b)) return false; }
+  /* ==== [ANCRE: MONDE_LOT5_T3_MODIFICATION] — Monde lot 5 T3 ==== */
+  if((fight.title===true)!==title) delete fight.herite;
   fight.title=title;
   return true;
 }

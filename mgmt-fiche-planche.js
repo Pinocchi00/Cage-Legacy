@@ -266,11 +266,20 @@ function mgmtFicheContratPlanche(m,f){
 /** Les étiquettes fonctionnelles du bloc (12 caractères au plus : elles tiennent
  *  dans la colonne de 260 px, sans le b de 34 px). relu:false.
  *  @type {{vie:string,demande:string,attente:string,corps:string,resultat:string,titre:string,relu:boolean}} */
-const MGMT_DEPUIS_LIBELLES={vie:'Sa vie',demande:'Une demande',attente:'Une attente',corps:'Son corps',resultat:'Un résultat',titre:'Un titre',relu:false};
+const MGMT_DEPUIS_LIBELLES={vie:'Sa vie',demande:'Une demande',attente:'Une attente',corps:'Son corps',resultat:'Un résultat',titre:'Un titre',
+  /* Monde lot 8 T4a : les genres des événements de coût petit (top15, ceinture,
+     contrat, camp) — leur phrase vient de mgmtMondePhrase (mgmt-bureau.js). Même
+     gabarit d'étiquette fonctionnelle que les six ci-dessus. relu:false. */
+  classement:'Le classement',ceinture:'Une ceinture',contrat:'Son contrat',camp:'Son camp',relu:false};
+
+/** Le genre de fait → la sorte du bloc (Monde lot 8 T4a). Pur.
+ *  @type {{top15:string,titre_vacant:string,regne_cap:string,dernier_combat:string,carte_camp:string,sans_reponse:string}} */
+const MGMT_DEPUIS_SORTES={top15:'classement',titre_vacant:'ceinture',regne_cap:'ceinture',
+  dernier_combat:'contrat',carte_camp:'camp',sans_reponse:'demande'};
 
 /** Ce qui est arrivé à id depuis sa dernière visite, du plus récent au plus
  *  ancien. Pur, sans DOM, ne modifie rien.
- *  @returns {Array<{sorte:string,libelle:string,phrase:string,detail:string,c:number}>} sorte ∈ vie|demande|attente|corps|resultat|titre */
+ *  @returns {Array<{sorte:string,libelle:string,phrase:string,detail:string,c:number}>} sorte ∈ vie|demande|attente|corps|resultat|titre|classement|ceinture|contrat|camp */
 function mgmtDepuisVisite(m,id){
   const out=[];
   /* Le tri se fait d'abord sur les événements, avant de composer les phrases :
@@ -309,6 +318,13 @@ function mgmtDepuisVisite(m,id){
         if(phrase){ sorte='attente'; libelle=MGMT_DEPUIS_LIBELLES.attente; }
       }else if((x.k==='injury'||x.k==='susp'||x.k==='retired')&&MGMT_FACT_LABELS[x.k]){
         phrase=MGMT_FACT_LABELS[x.k]; sorte='corps'; libelle=MGMT_DEPUIS_LIBELLES.corps;
+      }else if(MGMT_DEPUIS_LIBELLES[MGMT_DEPUIS_SORTES[x.k]]!==undefined){
+        /* Monde lot 8 T4a : les événements de coût petit. La phrase vient de son
+           gabarit (mgmtMondePhrase, mgmt-bureau.js), l'étiquette est celle du
+           bloc — aucune mise en page neuve. sans_reponse reprend la sorte
+           'demande' (une demande, répondue ou non). */
+        phrase=mgmtMondePhrase(m,x)||'';
+        sorte=MGMT_DEPUIS_SORTES[x.k]; libelle=MGMT_DEPUIS_LIBELLES[sorte];
       }
     }else{
       const t=e.trace, side=t.a.id===id?'A':'B', adv=side==='A'?t.b:t.a;
@@ -354,7 +370,7 @@ function mgmtFicheOnEnDitHtml(m,f){
     return `<div class="mf-fi-oc"><div class="mf-fi-ocq"><span>${esc(lib)}</span><b>${esc(nom)}</b></div><div class="mf-fi-oct"><div class="mf-fi-ocp">${esc(citation)}</div><div class="mf-fi-rp">${esc(x.t?titre:age)}</div></div></div>`;
   }).join('');
   const identite=mgmtIdentite(m,f);
-  const reste=`<div class="mf-fi-ancien mf-ancien">${mgmtFicheVie(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheRivaux(m,f)}${mgmtFicheParole(m,f)}${mgmtFicheLien(m,f)}<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p></div>`;
+  const reste=`<div class="mf-fi-ancien mf-ancien">${mgmtFicheVie(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheRivaux(m,f)}${mgmtFicheParole(m,f)}${mgmtFicheLien(m,f)}${MGMT_HUMANITE_ACTIVE?`<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p>`:''}</div>`;
   return `<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p mf-fi-scroll">${depuis}${rows}${reste}</div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */

@@ -114,10 +114,12 @@ function mgmtRecGap(A,B){ return Math.abs((A.W+A.L)-(B.W+B.L)); }
  * @param {Map<string,Array<Object>>} [raisonsIndex] Preuves locales précalculées.
  * @returns {Object|null} Paire existante, avec raison {famille,fait} seulement si une famille est demandée. */
 /* ==== [ANCRE: MONDE_LOT6_T2_SELECTION] — Monde lot 6 T2 ==== */
-function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsIndex){
+function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsIndex,seulMode){
   if(famille&&!MGMT_RAISON_FAMILLES.includes(famille)) return null;
   const totals=stats||{total:0,streak:0};
-  const wantSloppy=rnd()<mgmtSloppyProb(totals.total,totals.streak);
+  /* Fusion du lot 6 (15/10/2026) : seulMode ('clean'|'sloppy') = le bâclage est tiré une fois par combat par l'appelant
+     (mgmtBulkSelection) et un seul mode est cherché ; sans lui, le comportement d'avant est inchangé. */
+  const wantSloppy=seulMode?seulMode==='sloppy':rnd()<mgmtSloppyProb(totals.total,totals.streak);
   const r=m.roster;
   /* Arbitrage lot 2 (revue) : les appariements restent toujours dans la même
      catégorie hommes/femmes — le dégradé joue sur la division et l'écart de
@@ -184,7 +186,7 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsI
     return out;
   };
   let cands=collect(wantSloppy?'sloppy':'clean');
-  if(cands.length===0) cands=collect(wantSloppy?'clean':'sloppy');
+  if(cands.length===0&&!seulMode) cands=collect(wantSloppy?'clean':'sloppy');
   if(cands.length===0) return null;
   /* Priorité (§T3) : les combattants inactifs depuis le plus longtemps —
      la paire retenue est prise parmi celles qui cumulent la plus longue
@@ -223,25 +225,33 @@ function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[]){
   for(const f of contexte) if(f.raison) familles.set(f.raison.famille,(familles.get(f.raison.famille)||0)+1);
   let precedente=contexte[contexte.length-1]?.raison?.famille;
   let lastDiv=null, run=0;
+  const totals=stats||{total:0,streak:0};
   for(let i=0;i<n;i++){
+    /* ==== [ANCRE: MONDE_LOT6_FUSION_BACLAGE] — fusion du lot 6 (15/10/2026) ====
+       Le bâclage se tire une fois par combat, comme avant le lot 6, et le mode voulu est épuisé dans toutes les familles avant l'autre :
+       retirer à chaque famille rendait presque chaque combat bâclé (catégories croisées, avant-combat impossible, recettes en baisse). */
+    const voulu=rnd()<mgmtSloppyProb(totals.total,totals.streak)?'sloppy':'clean';
     let p=null;
-    for(const famille of MGMT_RAISON_FAMILLES){
-      if(familles.has(famille)) continue;
-      p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index);
-      if(p) break;
-    }
-    /* ==== [ANCRE: MONDE_LOT6_T2_VARIETE_MAXIMALE] — Monde lot 6 T2 ==== */
-    // Décision du 13/10/2026 : épuiser les familles inédites avant toute
-    // reprise ; moindre usage (ordre du catalogue à égalité), puis la
-    // précédente seulement si elle seule permet encore une paire apte.
-    if(!p){
-      const reprises=MGMT_RAISON_FAMILLES.filter(f=>familles.has(f)&&f!==precedente)
-        .sort((a,b)=>familles.get(a)-familles.get(b));
-      for(const famille of reprises){
-        p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index);
+    for(const mode of [voulu,voulu==='sloppy'?'clean':'sloppy']){
+      for(const famille of MGMT_RAISON_FAMILLES){
+        if(familles.has(famille)) continue;
+        p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode);
         if(p) break;
       }
-      if(!p&&precedente) p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,precedente,index);
+      /* ==== [ANCRE: MONDE_LOT6_T2_VARIETE_MAXIMALE] — Monde lot 6 T2 ==== */
+      // Décision du 13/10/2026 : épuiser les familles inédites avant toute
+      // reprise ; moindre usage (ordre du catalogue à égalité), puis la
+      // précédente seulement si elle seule permet encore une paire apte.
+      if(!p){
+        const reprises=MGMT_RAISON_FAMILLES.filter(f=>familles.has(f)&&f!==precedente)
+          .sort((a,b)=>familles.get(a)-familles.get(b));
+        for(const famille of reprises){
+          p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode);
+          if(p) break;
+        }
+        if(!p&&precedente) p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,precedente,index,mode);
+      }
+      if(p) break;
     }
     if(!p) return null;
     localUsed.add(p.a.first); localUsed.add(p.b.first);
@@ -271,6 +281,8 @@ function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[]){
  * proposées, séries) et le repos pour le remplissage de fin de cycle —
  * jamais la carte (sanctuarisée) ni deux fois la même paire dans le bloc.
  * @returns {object|null} */
+/** Vrai pendant une soirée jouée par le prédécesseur (mgmtPredecesseurSoiree) : voir MONDE_LOT6_PREDECESSEUR_SANS_RAISON. */
+let MGMT_PREDECESSEUR_EN_COURS=false;
 function mgmtNewBulkAffair(m,used,seen,relaxed){
   if(mgmtCardFull(m)) return null;
   if(!m||!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return null;
@@ -286,9 +298,27 @@ function mgmtNewBulkAffair(m,used,seen,relaxed){
      (lot 3a §5). */
   /* ==== [ANCRE: MONDE_LOT6_T2_PROPOSITION] — Monde lot 6 T2 ==== */
   /* ==== [ANCRE: MONDE_LOT6_T3_PROPOSITION] — Monde lot 6 T3 ==== */
-  const selection=mgmtBulkSelection(m,used,seen,n,stats,relaxed,m.card.prelims);
-  if(!selection) return null;
-  const fights=selection.map(p=>({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))}));
+  /* ==== [ANCRE: MONDE_LOT6_PREDECESSEUR_SANS_RAISON] — fusion du lot 6 (15/10/2026) ====
+     Le prédécesseur (passé, organisations du monde, joueur automatique de l'outil) n'est pas Leïla : il garde le tirage d'avant le lot 6,
+     sans famille, et ses combats portent raison:null (« cause non enregistrée »). Le choix par familles vidait la caisse du passé
+     d'Ultimate Rim avant la fenêtre des recrues (aucune recrue sur trois graines) et allongeait la création. */
+  let fights;
+  if(MGMT_PREDECESSEUR_EN_COURS){
+    fights=[];
+    let lastDiv=null, run=0;
+    for(let i=0;i<n;i++){
+      const p=mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed);
+      if(!p) return null;
+      used.add(p.a.first); used.add(p.b.first);
+      seen.add([p.a.id,p.b.id].sort().join('|'));
+      run=(p.div===lastDiv)?run+1:1; lastDiv=p.div;
+      fights.push({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,raison:null});
+    }
+  }else{
+    const selection=mgmtBulkSelection(m,used,seen,n,stats,relaxed,m.card.prelims);
+    if(!selection) return null;
+    fights=selection.map(p=>({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))}));
+  }
   const aff={
     id:mgmtNextId(m),kind:'leila_bulk',exchange:'leila_bulk',
     speaker:'leila',a:fights[0].a,b:fights[0].b,fights,marked:null,

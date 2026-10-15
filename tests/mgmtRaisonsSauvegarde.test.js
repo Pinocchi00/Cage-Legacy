@@ -137,7 +137,7 @@ test('Monde lot 6 T3 — une pile ancienne charge et se rend sans erreur',()=>{
     /* Une preuve déjà portée n'est jamais écrasée par la migration. */
     bloc.fights[0].raison=JSON.parse(gardee);bloc.fights[0].origine=origine;
     const recharge=mgmtParseAndValidate(JSON.stringify(m));G.mgmt=recharge;G.screen='mgmt_prelims';
-    return [!!recharge&&recharge.v===17,!!recharge&&validateMgmt(recharge),
+    return [!!recharge&&recharge.v===19, /* décision du 15/10/2026 : migration du lot 6 renumérotée 18 → 19 */ !!recharge&&validateMgmt(recharge),
       JSON.stringify(avant)===JSON.stringify(recharge.pile.map(a=>({id:a.id,status:a.status,ids:(a.fights||[]).map(f=>[f.a,f.b])}))),
       recharge.pile.filter(a=>a.id!==bloc.id).every(a=>(a.fights||[]).every(f=>f.raison===null))
         &&JSON.stringify(recharge.pile.find(a=>a.id===bloc.id).fights[0].raison)===gardee,

@@ -182,6 +182,7 @@ function mgmtHistoriqueHtml(m,f){
    catalogue tel quel. Aucun relais, aucune ligne : « On ne sait pas encore ».
    Pas de charge, pas de jauge. ==== */
 function mgmtFicheVie(m,f){
+  if(!MGMT_HUMANITE_ACTIVE) return '';
   const lignes=mgmtVieRelayes(m,f).slice(0,8);
   const corps=lignes.length
     ?`<ul class="mgmt-fiche-vie-liste">${lignes.map(x=>`<li>${esc(x.moment.libelle)}${mgmtFicheRelaisHtml(x.moment)}</li>`).join('')}</ul>`
@@ -221,7 +222,11 @@ function mgmtFichePromesses(m,f){
   if(m.effectifs!==1) return '';
   const demandes=mgmtDemandesOuvertes(m).filter(d=>d.a===f.id);
   const prom=mgmtPromesses(m,f);
-  if(!demandes.length&&!prom.length) return '';
+  /* Monde lot 8 T4a : les demandes restées sans réponse se lisent ici, du
+     plus récent au plus ancien, trois au plus. */
+  const sans=(m.facts||[]).filter(x=>x&&x.k==='sans_reponse'&&x.a===f.id)
+    .sort((p,q)=>(q.c-p.c)||((q.d||0)-(p.d||0))).slice(0,3);
+  if(!demandes.length&&!prom.length&&!sans.length) return '';
   const lib=w=>MGMT_DEMANDES[w]?MGMT_DEMANDES[w].libelle:'';
   const nom=id=>{ const o=id&&mgmtFighterById(m,id); return o?o.name:''; };
   const etats={tenue:'Promesse tenue',rompue:'Promesse rompue','en cours':'Promesse en cours'};
@@ -229,8 +234,9 @@ function mgmtFichePromesses(m,f){
     +(demandes.length?demandes.map((d,k)=>`<p>${esc(lib(d.want))}${d.target?' — '+esc(nom(d.target)):''}</p>`
       +`<div class="mf-demande">${mfBouton('Promettre',{touche:k===0?'P':'',jaune:true,onclick:`CL.mgmtDemande(${esc(d.i)},'promettre')`})}`
       +`${mfBouton('Refuser',{touche:k===0?'R':'',onclick:`CL.mgmtDemande(${esc(d.i)},'refuser')`})}</div>`).join('')
-      :'<p>Rien pour le moment.</p>')
-    +(prom.length?`<ul class="mgmt-fiche-vie-liste">${prom.map(p=>`<li>${esc(etats[p.etat])} : ${esc(lib(p.want))}${p.target?' — '+esc(nom(p.target)):''}</li>`).join('')}</ul>`:'');
+      :(sans.length?'':'<p>Rien pour le moment.</p>'))
+    +(prom.length?`<ul class="mgmt-fiche-vie-liste">${prom.map(p=>`<li>${esc(etats[p.etat])} : ${esc(lib(p.want))}${p.target?' — '+esc(nom(p.target)):''}</li>`).join('')}</ul>`:'')
+    +(sans.length?`<ul class="mgmt-fiche-vie-liste">${sans.map(x=>`<li>${esc(mgmtMondePhrase(m,x)||'')}</li>`).join('')}</ul>`:'');
 }
 /* ==== [FIN ANCRE] ==== */
 /* ==== [ANCRE: MGMT_LOT5_H8_FICHE_ETENDUE] — La fiche devient l'écran le plus
@@ -238,6 +244,7 @@ function mgmtFichePromesses(m,f){
    quel) et son corps (disponibilité, blessures et suspensions gardées comme
    faits). Ni jauge ni chiffre. ==== */
 function mgmtFicheHistoire(identite){
+  if(!MGMT_HUMANITE_ACTIVE) return '';
   return `<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p>`;
 }
 function mgmtFicheCorps(m,f){
@@ -247,7 +254,12 @@ function mgmtFicheCorps(m,f){
     .sort((a,b)=>b.c-a.c).slice(0,5);
   const dispo=mgmtAvailable(m,ligne)?'Disponible':'Indisponible';
   return `<h3>Son corps</h3><p>${esc(dispo)}</p>`
-    +(faits.length?`<ul class="mgmt-fiche-vie-liste">${faits.map(x=>`<li>${esc(MGMT_FACT_LABELS[x.k])} <span class="mgmt-fiche-vie-relais">${esc(mgmtSoireeNomDate(m,x.c))}</span></li>`).join('')}</ul>`:'');
+    +(faits.length?`<ul class="mgmt-fiche-vie-liste">${faits.map(x=>{
+      /* Monde lot 8 T4a (N2, §5) : le fait injury porte le nom de la blessure.
+         Un fait d'avant n'en porte pas : le libellé seul, comme avant. */
+      const label=MGMT_FACT_LABELS[x.k]+((x.k==='injury'&&typeof x.nom==='string'&&x.nom)?` — ${x.nom}`:'');
+      return `<li>${esc(label)} <span class="mgmt-fiche-vie-relais">${esc(mgmtSoireeNomDate(m,x.c))}</span></li>`;
+    }).join('')}</ul>`:'');
 }
 /* ==== [FIN ANCRE] ==== */
 function scr_mgmt_fiche(){
@@ -267,7 +279,7 @@ function scr_mgmt_fiche(){
    return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head bar">`
      +`<h2 class="disp">La fiche</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
      +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
-      +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}${mot?` <span class="mgmt-fiche-mot">${esc(mot)}</span>`:''}</h2>`
+      +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${MGMT_HUMANITE_ACTIVE&&role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}${mot?` <span class="mgmt-fiche-mot">${esc(mot)}</span>`:''}</h2>`
      +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p>${mgmtFicheLien(m,f)}</div>`
      +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
      +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où {il} combat</h3>${mgmtFicheOctogone(m,f)}</section>`

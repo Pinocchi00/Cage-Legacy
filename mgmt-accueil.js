@@ -133,8 +133,9 @@ function mgmtAccueilContenu(m){
 /* ---- Le rendu ------------------------------------------------------------- */
 
 function mgmtAccueilParts(m,parts){
+  /* ==== [ANCRE: MGMT_PRESENTATION_ACCUEIL_NOMS] — Monde lot 3 T5 ==== */
   return parts.map(p=>p.id
-    ?`<button type="button" class="mf-ac-nom" onclick="CL.mgmtFiche('${esc(p.id)}')">${esc(p.nom)}</button>${mfMarqueNom(m,p.id)}`
+    ?`<button type="button" class="mf-ac-nom" onclick="CL.mgmtAccueilNom('${esc(p.id)}')">${esc(p.nom)}</button>${mfMarqueNom(m,p.id)}`
     :esc(p.t)).join('');
 }
 function mgmtAccueilTitre(texte,droite=''){
@@ -223,9 +224,7 @@ function scr_mgmt_accueil(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt, c=mgmtAccueilContenu(m);
   if(MGMT_ACCUEIL.cur>=c.passe.length) MGMT_ACCUEIL.cur=c.passe.length-1;
-  const corps=c.premiere&&c.heritage
-    ?`<div class="mf-ac-cols">${mgmtAccueilHeritage(m,c)}</div>`
-    :`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}<div class="mf-ac-colonne mf-ac-c5">${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div></div>`;
+  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}<div class="mf-ac-colonne mf-ac-c5">${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div></div>`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,
@@ -234,6 +233,8 @@ function scr_mgmt_accueil(){
 SCREENS.mgmt_accueil=scr_mgmt_accueil;
 
 Object.assign(CL,{
+  /* ==== [ANCRE: MGMT_PRESENTATION_ACCUEIL_GESTE] — Monde lot 3 T5 ==== */
+  mgmtAccueilNom(id){if(!CL.mgmtPresentationOuvrir('combattant',[id])) CL.mgmtFiche(id);},
   /** Le curseur des événements de la semaine. */
   mgmtAccueilDeplacer(dir){
     if(!G||!G.mgmt) return;
@@ -246,7 +247,8 @@ Object.assign(CL,{
   mgmtAccueilOuvrir(){
     if(!G||!G.mgmt) return;
     const r=mgmtAccueilContenu(G.mgmt).passe[MGMT_ACCUEIL.cur];
-    if(r){ CL.mgmtFiche(r.id); return; }
+    /* ==== [ANCRE: MGMT_PRESENTATION_ACCUEIL_EVENEMENT] — Monde lot 3 T5 ==== */
+    if(r){ CL.mgmtAccueilNom(r.id); return; }
     const b=typeof document!=='undefined'?document.querySelector('.mf-ac-jb'):null;
     if(b) b.click();
   },

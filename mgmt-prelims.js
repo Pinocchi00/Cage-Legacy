@@ -75,15 +75,16 @@ function scr_mgmt_prelims(){
       +mgmtCarteLigneComp(ca.forme,cb.forme,'3 derniers combats')+mgmtCarteLigneComp(`<b>${esc(ca.contrat)}</b>`,`<b>${esc(cb.contrat)}</b>`,'Contrat restant')
     :`<div class="mf-car-aide">${esc(P.aide?P.aide:m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE)?'Leïla prépare les préliminaires quand la carte principale est complète.':'Ce préliminaire n’est pas encore trouvé.')}</div>`;
   const trou=!bloc&&m.card.main.length>=(m.card.sizeMain||MGMT_MAIN_SIZE)&&m.card.prelims.length<(m.card.sizePrelims||MGMT_PRELIM_SIZE);
-  const raisons=duo&&bloc&&s.etat==='avalider'?mgmtPrelimsRaisons(m,fa,fb):[];
-  const pourquoi=raisons.length?`<div class="mf-car-enjeux mf-pre-pourquoi"><div class="mf-cal-lib">Leïla · pourquoi elle le propose</div><div>${raisons.map(r=>`<span>${esc(r)}</span>`).join('')}</div></div>`:'';
+  const lignesRaison=duo&&bloc&&s.etat==='avalider'?mgmtRaisonLignes(m,f.raison&&{...f.raison,origine:f.origine},[fa,fb]):null;
+  const pourquoi=lignesRaison?`<div class="mf-car-enjeux mf-pre-pourquoi"><div class="mf-cal-lib">Leïla · pourquoi elle le propose</div><div><span>${lignesRaison.l1}</span><span>${lignesRaison.l2}</span></div></div>`:'';
   const monte=bloc&&s.etat==='avalider'&&m.card.main.length<(m.card.sizeMain||MGMT_MAIN_SIZE);
   const boutons=`<div class="mf-car-boutons">`
     +(trou?mfBouton('Trouver un remplaçant',{touche:'Entrée',jaune:true,onclick:'CL.mgmtPrelimsRemplacer()'}):'')
     +(bloc?mfBouton('Valider la carte',{touche:'Entrée',jaune:true,onclick:'CL.mgmtPrelimsValider()'}):'')
     +(bloc&&s.etat==='avalider'?mfBouton('Changer',{touche:'C',onclick:'CL.mgmtPrelimsChanger()'}):'')
     +(bloc?mfBouton('Refaire',{touche:'R',onclick:'CL.mgmtPrelimsRefaire()'}):'')
-    +(duo?mfBouton('Fiches',{touche:'F',onclick:'CL.mgmtPrelimsFiche()'}):'')
+    /* ==== [ANCRE: MGMT_PRESENTATION_PRELIMS_BOUTON] — Monde lot 3 T5 ==== */
+    +(duo?mfBouton('Présentation',{onclick:'CL.mgmtPrelimsPresentation()'})+mfBouton('Fiches',{touche:'F',onclick:'CL.mgmtPrelimsFiche()'}):'')
     +(monte?mfBouton('Faire monter',{touche:'M',onclick:'CL.mgmtPrelimsMonter()'}):'')+`</div>`;
   const banniere=mgmtCarteBanniere(fa,fb,fa?fa.div:(allDivisions()[0]||{}).id,duo?3:'','');
   const centre=`<div class="mf-car-c">${banniere}${mfPanneau(`<div class="mf-car-comp-l">${comp}</div>${pourquoi}${boutons}`,'normal','mf-car-cmp')}</div>`;
@@ -122,6 +123,11 @@ function mgmtPrelimsReponse(action){
   return rep?{id:bloc.id,rep:rep.id}:null;
 }
 Object.assign(CL,{
+  /* ==== [ANCRE: MGMT_PRESENTATION_PRELIMS_GESTE] — Monde lot 3 T5 ==== */
+  mgmtPrelimsPresentation(){
+    const {slots}=mgmtPrelimsEmplacements(G.mgmt),f=slots[MGMT_PRELIMS.i||0]?.fight;
+    return f?CL.mgmtPresentationOuvrir('combat',[f.a,f.b],{liste:slots.filter(s=>s.fight).map(s=>({ids:[s.fight.a,s.fight.b]}))}):false;
+  },
   mgmtPrelimsVa(i){ if(Number.isSafeInteger(i)&&i>=0){ MGMT_PRELIMS.i=i; render(); } },
   /** Quel combattant du préliminaire proposé on remplace : le premier ou le second. */
   mgmtPrelimsCote(c){ MGMT_PRELIMS.cote=c==='a'?'a':'b'; render(); },

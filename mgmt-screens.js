@@ -319,6 +319,8 @@ Object.assign(CL,{
        carte ou les classements ; ailleurs, la semaine reste la maison. */
     const retour=G.screen==='mgmt_fiche'?MGMT_FICHE.retour:(G.screen==='mgmt_accueil'||G.screen==='mgmt_bureau'||G.screen==='mgmt_carte'
       ||G.screen==='mgmt_classements'||G.screen==='mgmt_effectif'||G.screen==='mgmt_vestiaire'||G.screen==='mgmt_recrutement'
+      /* ==== [ANCRE: MGMT_PRESENTATION_RETOUR_FICHE] — Monde lot 3 T5 ==== */
+      ||G.screen==='mgmt_presentation_combattant'||G.screen==='mgmt_presentation_combat'||G.screen==='mgmt_soiree_avant'
       ||G.screen==='mgmt_contrats'||G.screen==='mgmt_ceintures'||G.screen==='mgmt_camps'||G.screen==='mgmt_presse'||G.screen==='mgmt_resultats'||G.screen==='mgmt_prelims'||G.screen==='mgmt_finances'||G.screen==='mgmt_calendrier')?G.screen:'mgmt_carte';
     MGMT_FICHE={id,retour,cursor:0};
     /* Monde lot 8 T1 : ouvrir la fiche éteint la marque partout. */
@@ -406,6 +408,8 @@ Object.assign(CL,{
   },
   mgmtCarteLeave(){
     if(!G||!G.mgmt) return;
+    /* ==== [ANCRE: MONDE_LOT5_T4_RENONCER] — Monde lot 5 T4 ==== */
+    if(MGMT_CART.annulation){ CL.mgmtCarteRenonce(); return; }
     mgmtCartReset();
     CL.go('mgmt_carte');
   },
@@ -445,6 +449,8 @@ Object.assign(CL,{
   },
   mgmtUnbook(i){
     if(!G||!G.mgmt) return;
+    /* ==== [ANCRE: MONDE_LOT5_T4_RETRAIT] — Monde lot 5 T4 ==== */
+    if(G.mgmt.card.main[i]?.herite===true){ CL.mgmtCarteAnnule(i,false); return; }
     if(mgmtRemoveMain(G.mgmt,i)) saveMgmt();
     render();
   },

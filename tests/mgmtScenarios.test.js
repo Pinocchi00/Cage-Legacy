@@ -6,7 +6,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
-const NEUVE=`setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m,screen:'mgmt_bureau'};
+const NEUVE=`/* décision d'Anthony du 15/10/2026 : humanité retirée pour l'instant, ce test vérifie le mécanisme interrupteur levé */ MGMT_HUMANITE_ACTIVE=true; setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m,screen:'mgmt_bureau'};
   m.facts=[]; m.hist=[]; m.cycle=10; m.roster.forEach(o=>{ o.age=27; });
   const libres=m.roster.filter(o=>mgmtAvailable(m,o)&&!mgmtEngaged(m,o)); const [X,Y]=libres;
   const gagne=(c,g,p)=>m.hist.push({c,slot:'main',rounds:3,a:{id:g.id,W:g.W,L:g.L,D:0},b:{id:p.id,W:p.W,L:p.L,D:0},winner:'A',family:'dec',round:3});

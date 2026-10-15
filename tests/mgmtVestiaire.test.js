@@ -6,7 +6,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
-const NEUVE=`setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; MGMT_VESTIAIRE={div:'',role:'',dispo:false,lien:'',signe:false,page:0};`;
+const NEUVE=`/* décision d'Anthony du 15/10/2026 : humanité retirée pour l'instant, ce test vérifie le mécanisme interrupteur levé */ MGMT_HUMANITE_ACTIVE=true; setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m}; MGMT_VESTIAIRE={div:'',role:'',dispo:false,lien:'',signe:false,page:0};`;
 
 test('H8 — le vestiaire liste les 130 à 150 de Split, par pages, sans erreur ; la navigation y mène', () => {
   const win=newGameWindow();

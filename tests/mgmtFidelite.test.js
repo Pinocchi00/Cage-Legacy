@@ -61,7 +61,7 @@ test('Camps, Presse, Résultats : les libellés de l\'en-tête sont ceux des pla
   const win=neuve(3);
   win.eval(`CL.go('mgmt_camps')`); assert.match(res(win,`return document.querySelector('.mf-entete-lib').textContent;`),/^salles?$/i);
   win.eval(`CL.go('mgmt_presse')`); assert.match(res(win,`return document.querySelector('.mf-entete-lib').textContent;`),/nouvelles? cette semaine$/i);
-  win.eval(`CL.go('mgmt_resultats')`); assert.match(res(win,`return document.querySelector('.mf-entete-lib').textContent;`),/Fight Night \d+ · \d{1,2} [A-ZÉÛ]+/i);
+  win.eval(`CL.go('mgmt_resultats')`); assert.match(res(win,`return document.querySelector('.mf-entete-lib').textContent;`),/Fight Night \d+ · (?:[A-Za-zéû]+ )?\d{1,2} [A-ZÉÛ]+/i);
 });
 
 test('Les écrans sans planche propre sont dessinés en panneaux du cadre, avec leur plaque', () => {

@@ -1,0 +1,129 @@
+<!-- titre: Chargement des six ans | etats: chargement debut fin erreur -->
+<style>
+.ch{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;gap:48px}
+.ch-g{width:1040px;flex:none;display:flex;flex-direction:column;justify-content:center;gap:34px}
+.ch-d{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:28px}
+.ch-ident{display:flex;align-items:center;gap:26px}
+.ch-ident .T{font-size:120px;line-height:.69}
+.ch-ident .col{gap:10px}
+.ch-phrase{font-size:26px;line-height:1.05}
+.ch-maint{display:flex;align-items:center;gap:30px;min-height:150px}
+.ch-annee{font-family:var(--titre);font-weight:800;font-size:168px;line-height:.72;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ch-maint .col{gap:12px}
+.ch-soiree{font-size:48px}
+.ch-maint .l1{font-size:26px}
+/* La barre : une seule, découpée en six années à leur vraie place */
+.ch-barre{position:relative;height:44px;border:2px solid var(--bord);background:var(--noir)}
+.ch-barre b{position:absolute;left:0;top:0;bottom:0;width:0;background-color:var(--blanc);
+  background-image:repeating-linear-gradient(-45deg,rgba(13,11,11,0) 0 14px,rgba(13,11,11,.10) 14px 28px);background-size:40px 40px;
+  transition:width .6s linear}
+.ch-barre i{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--noir)}
+@media (prefers-reduced-motion:no-preference){ .ch-barre b.anime{animation:hachures 1.2s linear infinite} }
+@keyframes hachures{from{background-position:0 0}to{background-position:40px 0}}
+.ch-ans{position:relative;height:26px;margin-top:-22px}
+.ch-ans span{position:absolute;top:0;font-size:22px;line-height:1;white-space:nowrap;color:var(--t2);font-variant-numeric:tabular-nums}
+.ch-ans span.fait{color:var(--blanc)}
+.ch-ans span.cours{color:var(--blanc);font-weight:600}
+.ch-ans span.cours::after{content:'';position:absolute;left:0;right:0;top:30px;height:4px;background:var(--rouge-vif)}
+.ch-cpts{display:flex;gap:12px}
+.ch-cpts .tuile{flex:1;height:118px;gap:14px}
+.ch-cpts .v{font-family:var(--titre);font-weight:800;font-size:64px;line-height:.72;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ch-fait .l1{font-size:26px}
+.ch-d .pan{flex:none;height:560px}
+.ch-d .p3{padding:26px 30px;gap:22px}
+.ch-carton-t{font-size:72px;line-height:.8;margin-top:18px}
+.ch-carton{font-size:36px;line-height:1.3;max-width:660px}
+.ch-pastilles{margin-top:auto;display:flex;align-items:center;gap:12px}
+.ch-pastilles button{width:64px;height:64px;border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-family:var(--titre);font-weight:800;font-size:32px;line-height:1}
+.ch-pastilles button.on{background:var(--blanc);color:var(--noir);border-color:var(--blanc)}
+.ch-pastilles .t2{font-size:24px;margin-left:12px;white-space:nowrap}
+.ch-entree{height:132px;flex:none;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.ch-entree .bouton.grand{height:132px;width:100%;justify-content:space-between;padding:0 30px}
+.ch-entree .bouton.grand .T{font-size:64px}
+.ch-entree .bouton.grand .k{font-size:28px;padding:7px 12px}
+.ch-entree .bouton{width:100%;justify-content:space-between}
+.ch-attente{font-size:26px;line-height:1.1;color:var(--t2);border-top:2px solid var(--sep);padding-top:18px}
+.ch-err .barre-err{background-color:var(--t2)!important;background-image:none!important}
+</style>
+<div class="ecran"><div class="stage">
+  <div class="logo-seul">{{LOGO64}}</div>
+  <div class="entete">
+    <div class="entete-g"><div class="plaque"><span class="T">MANAGEMENT</span></div><div class="entete-lib">Nouvelle partie · six ans avant ton arrivée</div></div>
+    <div class="entete-d"><div class="entete-lib t2">Emplacement 1</div></div>
+  </div>
+
+  <div class="ch" role="status" aria-live="polite">
+    <div class="ch-g">
+      <div class="ch-ident">
+        <div class="T">SPLIT</div>
+        <div class="col"><div class="lab">Lyon · depuis 2004</div><div class="ch-phrase">Six années se jouent avant ton arrivée.</div></div>
+      </div>
+
+      <div class="ch-maint">
+        <div class="ch-annee" id="annee"><span data-etat="chargement erreur">2023</span><span data-etat="debut">2021</span><span data-etat="fin">2026</span></div>
+        <div class="col">
+          <div class="T ch-soiree" data-etat="chargement erreur">Split Fight Night <span id="fn">24</span></div>
+          <div class="T ch-soiree" data-etat="debut">Les combattants arrivent</div>
+          <div class="T ch-soiree" data-etat="fin">Six ans sont écrits</div>
+          <div class="l1" data-etat="chargement erreur">Soirée <span id="k">24</span> sur 62</div>
+          <div class="l1" data-etat="debut">La première soirée se prépare</div>
+          <div class="l1" data-etat="fin">62 soirées, de 2021 à 2026</div>
+          <div class="l2" data-etat="chargement debut erreur">Kader Malika compose les cartes</div>
+          <div class="l2" data-etat="fin">Kader Malika a composé les 62 cartes</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="ch-barre" role="progressbar" aria-label="Les six ans" aria-valuemin="0" aria-valuemax="62" aria-valuenow="24">
+          <b id="barre" class="anime" style="width:38.71%"></b>
+          <i style="left:14.52%"></i><i style="left:30.65%"></i><i style="left:48.39%"></i><i style="left:64.52%"></i><i style="left:82.26%"></i>
+        </div>
+      </div>
+      <div class="ch-ans" id="ans">
+        <span class="fait" style="left:0">2021</span><span class="fait" style="left:calc(14.52% + 10px)">2022</span><span class="cours" style="left:calc(30.65% + 10px)">2023</span><span style="left:calc(48.39% + 10px)">2024</span><span style="left:calc(64.52% + 10px)">2025</span><span style="left:calc(82.26% + 10px)">2026</span>
+      </div>
+
+      <div class="ch-cpts">
+        <div class="tuile"><div class="v" id="c1">24</div><div class="lab">Soirées jouées</div></div>
+        <div class="tuile"><div class="v" id="c2">216</div><div class="lab">Combats</div></div>
+        <div class="tuile"><div class="v" id="c3">18</div><div class="lab">Champions couronnés</div></div>
+        <div class="tuile"><div class="v" id="c4">0</div><div class="lab">Retraites</div></div>
+      </div>
+
+      <div class="carte-l ch-fait" data-etat="chargement fin">
+        <div style="display:flex;align-items:center;gap:16px;min-width:0"><div class="oct" style="width:26px;height:26px"></div>
+          <div class="col"><div class="lab">Le dernier fait marquant</div><div class="l1" id="fait">Saoirse Fahey prend la ceinture</div><div class="l2" id="fait2">Poids plume féminin · Split Fight Night 24</div></div></div>
+      </div>
+      <div class="carte-l ch-fait" data-etat="erreur">
+        <div class="col"><div class="l1">La création s’est arrêtée pendant l’année 2023.</div><div class="l2">Rien n’a été enregistré : l’emplacement 1 reste libre.</div></div>
+      </div>
+    </div>
+
+    <div class="ch-d">
+      <div class="pan"><div class="p2"><div class="p3">
+        <div class="pan-tete"><div class="pan-titre"><div class="T">CE QU’IL FAUT SAVOIR</div><div class="trait"></div></div><div class="lab" id="num">Carton 1 sur 5</div></div>
+        <div class="T ch-carton-t" id="ct">Tu es le matchmaker.</div>
+        <div class="ch-carton" id="cx">Tu ne diriges pas l’organisation : tu composes ses soirées. Tu choisis qui combat qui, et tu en réponds devant tout le monde.</div>
+        <div class="ch-pastilles" id="pastilles">
+          <button type="button" class="on" aria-label="Carton 1 sur 5">1</button><button type="button" aria-label="Carton 2 sur 5">2</button><button type="button" aria-label="Carton 3 sur 5">3</button><button type="button" aria-label="Carton 4 sur 5">4</button><button type="button" aria-label="Carton 5 sur 5">5</button>
+          <span class="t2">← → pour lire les autres</span>
+        </div>
+      </div></div></div>
+
+      <div class="ch-entree">
+        <div class="ch-attente" data-etat="chargement debut">Le bouton pour entrer apparaîtra à la fin des six ans.</div>
+        <button type="button" class="bouton jaune grand focus" data-etat="fin"><span class="T">Entrer dans Split</span><span class="k">Entrée</span></button>
+        <button type="button" class="bouton jaune" data-etat="erreur"><span class="T">Recommencer</span><span class="k">Entrée</span></button>
+        <button type="button" class="bouton" data-etat="erreur"><span class="T">Choisir une autre organisation</span><span class="k">Échap</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="touches large">
+    <div class="tg" data-etat="chargement debut fin"><span class="k">Échap</span><span>Abandonner la création</span></div>
+    <div class="tg"><span class="k">←</span><span class="k">→</span><span>Lire les cartons</span></div>
+    <div class="tg" data-etat="fin"><span class="k j">Entrée</span><span>Entrer dans Split</span></div>
+    <div class="tg" data-etat="erreur"><span class="k j">Entrée</span><span>Recommencer</span></div>
+    <div class="tg" data-etat="erreur"><span class="k">Échap</span><span>Choisir une autre organisation</span></div>
+  </div>
+</div></div>
