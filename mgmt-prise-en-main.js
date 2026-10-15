@@ -90,6 +90,7 @@ function mgmtArriveeAnneeSoiree(m,n){
 
 function scr_mgmt_arrivee(){
   const m=G&&G.mgmt; if(!m) return scr_mgmt_parties();
+  if(mgmtSoireesJoueur(m)>0) return scr_mgmt_accueil();
   const org=mgmtOrgNom(m);
   const orgObj=mgmtOrgParNom(org);
   const ident=orgObj?mgmtOrgIdentite(orgObj.id):null;
@@ -97,14 +98,11 @@ function scr_mgmt_arrivee(){
   const premiere=mgmtSoireesJoueur(m)===0&&!!m.passe;
   const etat=premiere?'premiere':'sans-passe';
 
-  const infos=mfSoireeInfos(m);
   const soir=m.cal&&m.cal.prochaines&&m.cal.prochaines[0]?m.cal.prochaines[0]:null;
-  const salle=soir&&typeof mgmtSalleParId==='function'?mgmtSalleParId(m,soir.salle):null;
-  const lieuLabel=salle?salle.nom.toUpperCase():(infos.lieu||'');
-  const fnNumber=premiere?((m.eventsPlayed||0)+1):1;
+  const fnNumber=(m.eventsPlayed||0)+1;
   const daysText=ou&&ou.soiree?ou.soiree.dans:'';
   const datePhraseLower=(()=>{
-    let d=mgmtAccueilDate(m);
+    let d=ou&&ou.date||'';
     for(const mx of MGMT_MOIS) d=d.split(mx).join(mx.toLowerCase());
     return d;
   })();
@@ -125,7 +123,7 @@ function scr_mgmt_arrivee(){
     }
   }
   const blesses=(m.roster||[]).filter(f=>f&&!mgmtIsRetired(f)&&Number.isSafeInteger(f.susp)&&f.susp>=m.cycle);
-  const blessuresNb=blesses.length;
+  const blessuresNb=faitsPasses.filter(f=>f&&f.k==='injury').length;
   const pluslongBlesse=blesses.reduce((a,f)=>(!a||(f.susp>a.susp)?f:a),null);
   const blessesLongNb=pluslongBlesse?Math.max(1,pluslongBlesse.susp-m.cycle+1):0;
 
@@ -197,7 +195,7 @@ function scr_mgmt_arrivee(){
 
   const headerPred=pred?`<div class="tuile"><div class="lab">Ton prédécesseur</div><div class="T">${esc((pred.prenom+' '+pred.nom).trim().toUpperCase())}</div><div class="s">${esc(pred.posteActuel||'')}</div></div>`:'';
   const headerAdj=adj?`<div class="tuile"><div class="lab">Ton adjointe</div><div class="T">${esc(String(adj.prenom||'').toUpperCase())}</div></div>`:'';
-  const headerPremiere=`<div class="tuile"><div class="lab">Ta première soirée</div><div class="T">DANS ${esc(String(daysText).replace(/^DANS /,''))}</div><div class="s">${premiere?esc(org+' Fight Night '+fnNumber):esc(org+' Fight Night 1')}</div></div>`;
+  const headerPremiere=`<div class="tuile"><div class="lab">Ta première soirée</div><div class="T">${esc(String(daysText))}</div><div class="s">${esc(ou&&ou.soiree&&ou.soiree.nom||'')}</div></div>`;
 
   const attend=mgmtAccueilContenu(m).attend.prochaine;
   const prochainTitre=attend?attend.titre:'Ouvrir la carte';
@@ -284,7 +282,7 @@ function scr_mgmt_arrivee(){
 SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
 
 Object.assign(CL,{
-  mgmtArriveeFin(){ CL.mgmtCarte(); },
+  mgmtArriveeFin(){ if(!G.mgmt||mgmtSoireesJoueur(G.mgmt)>0) return CL.go('mgmt_accueil'); CL.mgmtCarte(); },
 });
 keysRegister('mgmt_arrivee',{ Enter(){ CL.mgmtArriveeFin(); }, Escape(){ CL.go('mgmt_accueil'); } });
 /* ==== [FIN ANCRE] ==== */

@@ -5,7 +5,11 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 const res=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ ${code} })())`));
-const premier=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(20261008); mgmtPasseGenerer('split'); CL.mgmtEnter(1,{partie:G.mgmt});`); return w; };
+/* La génération des six ans dure ~55 s : elle n’a lieu qu’une fois (graine 20261008), puis chaque test reçoit une copie de la partie. */
+let PARTIE_JSON=null;
+const premier=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(20261008);`);
+  if(!PARTIE_JSON) PARTIE_JSON=w.eval(`JSON.stringify(mgmtPasseGenerer('split'))`);
+  w.eval(`G.mgmt=null; CL.mgmtEnter(1,undefined,{partie:JSON.parse(${JSON.stringify(PARTIE_JSON)})});`); return w; };
 const neuve=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(7); CL.mgmtEnter(1);`); return w; };
 
 test('Arrivée — état premiere : l\'héritage affiche les données de la partie et les douze champions', () => {
@@ -44,7 +48,7 @@ test('Arrivée — les compteurs six ans égalent m.passe.soirees, m.passe.nHist
 test('Arrivée — champions couronnés et blessures comptent les faits prescrits, sans compter les retraites', () => {
   const w=premier();
   const r=res(w,`const m=G.mgmt; const t=document.getElementById('app').textContent; return {blessures:t.includes('Blessures'), noCycle:!t.includes('cycle')};`);
-  assert.equal(r.blessures,true);
+  assert.equal(r.blessures,true); assert.equal(r.noCycle,true);
 });
 
 test('Arrivée — promesses affichent l\'échéance en Fight Night, jamais « cycle »', () => {
@@ -73,9 +77,15 @@ test('Arrivée — aucun texte sous 22 px', () => {
   }
 });
 
+test('Arrivée — après la première soirée, l’arrivée n’est plus présentée', () => {
+  const w=premier();
+  const r=res(w,`const m=G.mgmt; m.eventsPlayed=m.passe.soirees+1; CL.go('mgmt_arrivee'); return {ecran:document.querySelector('.ar')!==null};`);
+  assert.equal(r.ecran,false);
+});
+
+/* MONDE-LOT-10-DECISIONS §2 : l’Accueil ne garde plus que son bloc héritage retiré ; ses autres blocs restent (Échap depuis l’arrivée). */
 test('Accueil — seul le bloc héritage est retiré, les autres blocs restent', () => {
-  const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(7); CL.mgmtEnter(1); CL.mgmtArriveeFin();`);
-  const r=res(w,`const t=document.getElementById('app').textContent; return {accueil:G.screen, passe:t.includes('Ce qui')||true, noOrg:!t.includes('ORGANISATION')};`);
-  assert.equal(r.accueil,'mgmt_accueil');
-  assert.equal(r.noOrg,true);
+  const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_accueil');`);
+  const r=res(w,`const t=document.getElementById('app').textContent; return {accueil:G.screen, noOrg:!t.includes('ORGANISATION'), passe:t.includes('CE QUI S’EST PASSÉ'), attend:t.includes('CE QUI T’ATTEND'), ailleurs:t.includes('ET AILLEURS')};`);
+  assert.deepEqual(r,{accueil:'mgmt_accueil',noOrg:true,passe:true,attend:true,ailleurs:true});
 });
