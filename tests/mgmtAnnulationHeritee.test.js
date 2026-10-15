@@ -169,7 +169,7 @@ test('Monde lot 5 T4 — la contrariété survit à la sauvegarde sans se recré
     assert.equal(w.eval(`(function(){const a=mgmtParseAndValidate(serialT4),b=mgmtParseAndValidate(mgmtSerialiser(a));
       return validateMgmt(a)&&JSON.stringify(a.card)===JSON.stringify(G.mgmt.card)&&JSON.stringify(a.facts)===JSON.stringify(G.mgmt.facts)&&JSON.stringify(b.facts)===JSON.stringify(a.facts);})()`),true);
     w.eval(`var oldT4=JSON.parse(${JSON.stringify(ancienne)}); oldT4.v=17; var chargeT4=mgmtParseAndValidate(JSON.stringify(oldT4));`);
-    assert.equal(w.eval('chargeT4.v'),20); /* décision du 15/10/2026 : fusion du lot 6, migration 18 → 19 */ /* fusion du lot 9 (15/10/2026) : 19 → 20, mondeVivant=false */
+    assert.equal(w.eval('chargeT4.v'),21); /* décision du 15/10/2026 : fusion du lot 6, migration 18 → 19 */ /* fusion du lot 9 (15/10/2026) : 19 → 20, mondeVivant=false ; lot 9 T2d : 20 → 21, identifiants préfixés */
     /* Décision du lot 6 T3 : la migration marque raison:null sur les combats d'avant ; c'est le seul champ ajouté, il est écarté de la comparaison. */
     /* Comparaison du contenu, indépendante de l'ordre des clés (la chaîne de migrations 17 → 18 → 19 reconstruit certains objets). */
     assert.equal(w.eval(`(function(){const canon=o=>Array.isArray(o)?o.map(canon):(o&&typeof o==='object'?Object.keys(o).sort().reduce((r,k)=>{if(!(k==='raison'&&o[k]===null)&&!(k==='mondeVivant'&&o[k]===false)) r[k]=canon(o[k]);return r;},{}):o);return JSON.stringify(canon({...JSON.parse(mgmtSerialiser(chargeT4)),v:17}))===JSON.stringify(canon(oldT4));})()`),true);

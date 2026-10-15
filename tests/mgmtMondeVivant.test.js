@@ -45,7 +45,7 @@ test('Monde lot 9 T2a — une partie en version 18 se charge, se valide (mondeVi
     const s=mgmtPredecesseurSoiree(m,0,mgmtPredecesseurReglages('split'));
     return {charge:true,v:m.v,mondeVivant:m.mondeVivant,orgs:m.orgs===undefined,valide:validateMgmt(m),jouee:s.jouee,plus:m.eventsPlayed-avant};
   })()`);
-  assert.deepEqual(JSON.parse(JSON.stringify(r)), { charge: true, v: 20, mondeVivant: false, orgs: true, valide: true, jouee: true, plus: 1 });
+  assert.deepEqual(JSON.parse(JSON.stringify(r)), { charge: true, v: 21, mondeVivant: false, orgs: true, valide: true, jouee: true, plus: 1 }); /* lot 9 T2d : la migration continue jusqu’à 21 */
 });
 
 test('Monde lot 9 T2a — sauvegarde puis rechargement conservent m.orgs à l\'identique', () => {
