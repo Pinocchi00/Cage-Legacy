@@ -24,15 +24,16 @@ test('Monde lot 4 T1 — moins de quatre candidats admissibles sont tous retourn
   for(const n of [1,2,3]){
     const r=ev(`setSeed(20261016);
       const m=mgmtDefault(); m.roster=[]; m.hist=[]; m.facts=[]; m.cycle=20; m.card.main=[]; m.card.prelims=[];
-      const mk=(id,div)=>({id:id,name:id,first:id,last:'X',W:1,L:0,D:0,age:24,div:div,divName:'X',org:m.org,level:1,raison:null,interactions:0});
+      const mk=(id,div,org,ret)=>({id:id,name:id,first:id,last:'X',W:1,L:0,D:0,age:24,div:div,divName:'X',org:org,level:1,raison:null,interactions:0,retired:ret});
       const div='H-light';
-      for(let i=0;i<${n+2};i++) m.roster.push(mk('c'+i,div));
-      /* tous sauf ${n} sont indisponibles */
-      for(let i=${n};i<m.roster.length;i++) m.roster[i].retired='medical';
+      for(let i=0;i<${n};i++) m.roster.push(mk('c'+i,div,m.org,false));
+      m.roster.push(mk('adv',div,'Autre',false));
+      for(let i=0;i<3;i++) m.roster.push(mk('r'+i,div,m.org,'medical'));
       const pile=mgmtDossiersCombattants(m);
-      return {len:pile.length, ids:pile.map(d=>d.combattant.id)};`);
-    // number of matched dossiers may be less than n due to reasons; accept <=n
-    assert.ok(r.len>=0);
+      return {len:pile.length, ids:pile.map(d=>d.combattant.id).slice().sort()};`);
+    const attendus=Array.from({length:n},(_,i)=>'c'+i).sort();
+    assert.equal(r.len,n,'taille pour '+n);
+    assert.deepEqual(r.ids,attendus,'ids admissibles pour '+n);
   }
 });
 
@@ -64,16 +65,33 @@ test('Monde lot 4 T1 — redemander une pile ne répète pas les combattants dé
   assert.equal(r.repeat,false);
 });
 
+test('Monde lot 4 T1 — les combattants d’une autre organisation sont exclus',()=>{
+  const r=ev(`setSeed(20261020);
+    const m=JSON.parse(JSON.stringify(BASE)); m.hist=[]; m.facts=[]; m.cycle=20; m.card.main=[]; m.card.prelims=[];
+    for(const f of [{id:'x1',name:'X',first:'X',last:'Y',W:1,L:0,D:0,age:24,div:m.roster[0].div,divName:'X',org:'Autre',level:1,raison:null,interactions:0}]) m.roster.push(f);
+    const autres=['x1'];
+    const pile=mgmtDossiersCombattants(m);
+    return {leak: pile.some(d=>autres.includes(d.combattant.id))};`);
+  assert.equal(r.leak,false);
+});
+
 test('Monde lot 4 T1 — la même graine et le même état donnent la même pile sans effet de bord',()=>{
-  const a=ev(`setSeed(20261019);
+  const seed=20261019;
+  const w1=newGameWindow({runMain:true});
+  const w2=newGameWindow({runMain:true});
+  w1.eval(`setSeed(9); window.BASE=mgmtDefault(); mgmtNewRoster(BASE); mgmtExteriorEnsure(BASE);`);
+  w2.eval(`setSeed(9); window.BASE=mgmtDefault(); mgmtNewRoster(BASE); mgmtExteriorEnsure(BASE);`);
+  const a=JSON.parse(w1.eval(`JSON.stringify((()=>{setSeed(${seed});
     const m=JSON.parse(JSON.stringify(BASE)); m.hist=[]; m.facts=[]; m.cycle=20; m.card.main=[]; m.card.prelims=[];
-    const before=JSON.stringify(m); const g=JSON.stringify(G); const seed=SEED;
-    const p=mgmtDossiersCombattants(m);
-    return {res:JSON.stringify(p), before:JSON.stringify(m), g:JSON.stringify(G), seed:SEED, equal:before===JSON.stringify(m)&&g===JSON.stringify(G)&&seed===SEED};`);
-  const b=ev(`setSeed(20261019);
+    const beforeM=JSON.stringify(m); const beforeG=JSON.stringify(G); const beforeSeed=SEED;
+    const pile=mgmtDossiersCombattants(m);
+    return {res:JSON.stringify(pile),beforeM,afterM:JSON.stringify(m),beforeG,afterG:JSON.stringify(G),beforeSeed,afterSeed:SEED};})())`));
+  const b=JSON.parse(w2.eval(`JSON.stringify((()=>{setSeed(${seed});
     const m=JSON.parse(JSON.stringify(BASE)); m.hist=[]; m.facts=[]; m.cycle=20; m.card.main=[]; m.card.prelims=[];
-    const p=mgmtDossiersCombattants(m);
-    return {res:JSON.stringify(p)};`);
+    const pile=mgmtDossiersCombattants(m);
+    return {res:JSON.stringify(pile)};})())`));
   assert.equal(a.res,b.res);
-  assert.equal(a.equal,true);
+  assert.equal(a.beforeM,a.afterM);
+  assert.equal(a.beforeG,a.afterG);
+  assert.equal(a.beforeSeed,a.afterSeed);
 });

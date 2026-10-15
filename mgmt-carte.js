@@ -858,7 +858,9 @@ function mgmtDossiersCombattants(m, exclureId, dejaVus){
   if(!Array.isArray(dejaVus)) dejaVus=[];
   if(!m||!Array.isArray(m.roster)) return [];
   const dejaSet=new Set(dejaVus);
-  const candidats=m.roster.filter(f=>f&&mgmtValidId(f.id)
+  const orgJoueur=typeof mgmtOrgNom==='function'?mgmtOrgNom(m):m.org;
+  const dansOrg=f=>!!f && (f.org===m.org || f.org===orgJoueur);
+  const candidats=m.roster.filter(f=>f&&mgmtValidId(f.id) && dansOrg(f)
     && f.id!==exclureId && !dejaSet.has(f.id)
     && (typeof mgmtSelectable==='function'?mgmtSelectable(m,f,null):true));
   candidats.sort((a,b)=>(a.id<b.id?-1:(a.id>b.id?1:0)));
