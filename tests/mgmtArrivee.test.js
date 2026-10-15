@@ -89,3 +89,19 @@ test('Accueil — seul le bloc héritage est retiré, les autres blocs restent',
   const r=res(w,`const t=document.getElementById('app').textContent; return {accueil:G.screen, noOrg:!t.includes('ORGANISATION'), passe:t.includes('CE QUI S’EST PASSÉ'), attend:t.includes('CE QUI T’ATTEND'), ailleurs:t.includes('ET AILLEURS')};`);
   assert.deepEqual(r,{accueil:'mgmt_accueil',noOrg:true,passe:true,attend:true,ailleurs:true});
 });
+
+/* Monde lot 10 : l'écran produit des classes que la feuille du jeu doit styler (il apparaissait vide) ; tout est sous .mf-arr. */
+test('Arrivée — les règles CSS de l’écran existent, préfixées, et aucun texte n’y est sous 22 px', () => {
+  const css=fs.readFileSync(path.join(__dirname,'..','ui-cadre.css'),'utf8');
+  const regles=css.split('\n').filter(l=>/^\.mf-arr[ .{]/.test(l));
+  for(const sel of ['.ar-bande','.ar-tuiles','.ar-cols','.pan','.tuile','.lab','.T','.col','.ch-l','.jaune-bloc','.ar-chiffres']){
+    assert.ok(regles.some(l=>l.includes('.mf-arr '+sel)), 'règle manquante : .mf-arr '+sel);
+  }
+  assert.ok(!/(^|[\n,}])\s*\.(pan|lab|T|tuile|col)\s*[{,]/.test(css), 'classe générique non préfixée');
+  for(const l of regles){
+    for(const m of l.matchAll(/font-size\s*:\s*(\d+(?:\.\d+)?)px/g)) assert.ok(Number(m[1])>=22, 'texte sous 22 px : '+l);
+  }
+  const w=premier();
+  const r=res(w,`return {racine:!!document.querySelector('main.ar.mf-arr'),bande:!!document.querySelector('.mf-arr .ar-bande')};`);
+  assert.deepEqual(r,{racine:true,bande:true});
+});

@@ -148,7 +148,7 @@ function scr_mgmt_arrivee(){
     const vac=!t.id;
     return `<div class="ch-l"><div class="oct"></div><div class="div">${esc(mgmtDivisionLabel(d.id))}</div>`
       +`<div class="n">${vac?esc('Vacante'):`<span class="nom">${esc(nom)}</span>`}</div>`
-      +(annee!==null?`<div class="d">depuis ${esc(annee)}</div>`:'') ;
+      +(annee!==null?`<div class="d">depuis ${esc(annee)}</div>`:'')+`</div>`;
   }).join('');
   // plus long règne
   const candRoles=divs.map(d=>{
@@ -277,8 +277,8 @@ function scr_mgmt_arrivee(){
     </div>
   </div>`;
 
-  const contenu=`<main class="ar">${headerLeftHtml}<div class="ar-cols">${htmlCol1}${htmlCol2}${htmlCol3}</div></main>`;
-  return mfEcran(contenu,{barre:'aucune',m,plaque:'Management',libelle:'Ton arrivée',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeFin()"}]});
+  const contenu=`<main class="ar mf-arr">${headerLeftHtml}<div class="ar-cols">${htmlCol1}${htmlCol2}${htmlCol3}</div></main>`;
+  return mfEcran(contenu,{barre:'logo',m,plaque:'Management',libelle:'Ton arrivée',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeFin()"}]});
 }
 SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
 
