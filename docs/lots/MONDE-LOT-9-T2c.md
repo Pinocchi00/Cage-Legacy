@@ -28,3 +28,9 @@ Une partie avec `mondeVivant===true` ne doit plus afficher de combattant venu de
 Tests dans `tests/mgmtMondeVivant.test.js` (nommés `Monde lot 9 T2c — …`) : un par point 1 à 4, plus « une partie sans monde vivant garde exactement les mêmes titres, offres et actualités » (comparaison JSON avant/après sur une graine fixe).
 Le test `outillage.test.js` « l'outil mesure création complète et semaine » passe seul : son échec venait de la charge, rien à corriger. L'écart `mgmt-nouvelle.js` de `verif-versions` : monte sa version avec `node tools/_bump.js mgmt-nouvelle.js`.
 Lance seulement les tests ciblés avec `--test-name-pattern="T2c"` (délai de 120 s). Commit `Monde lot 9 T2c : les lecteurs du monde vivant (suite)`.
+
+## REPRISE 2 — superviseur, 15/10/2026 17 h 30
+Points 1 et 2 codés (09976ae). Cette session fait UNIQUEMENT, dans cet ordre, un commit après chaque étape :
+A. Les tests des points 1 et 2 et le test de non-régression (partie sans monde vivant : titres et offres identiques en JSON) dans `tests/mgmtMondeVivant.test.js`. Commit `Monde lot 9 T2c : tests des titres et des offres`.
+B. Le point 3 (`mgmtSemaineMonde`) et son test. Commit `Monde lot 9 T2c : les actualités du monde vivant`.
+Le point 4 sera une session suivante. Ne t'arrête pas sur le nom d'un commit précédent.
