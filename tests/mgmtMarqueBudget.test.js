@@ -14,7 +14,8 @@ const res=(win,code)=>JSON.parse(win.eval(`JSON.stringify((function(){${code}})(
 
 function neuve(seed){
   const win=newGameWindow({runMain:true});
-  win.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(${seed||7}); CL.mgmtEnter(1);`);
+  /* décision d'Anthony du 15/10/2026 : humanité retirée pour l'instant, ce test vérifie le mécanisme interrupteur levé */
+  win.eval(`MGMT_HUMANITE_ACTIVE=true; mgmtRetraitProb=function(){return 0;}; setSeed(${seed||7}); CL.mgmtEnter(1);`);
   return win;
 }
 
