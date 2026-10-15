@@ -160,7 +160,7 @@ function mgmtPasseEntree(par,r){
 }
 
 /** À la clôture : allège m.hist, écarte les faits perdus, note la part du passé. @returns {boolean} faux si un combat n'a pas pu s'alléger (rien n'est alors changé). */
-function mgmtPasseAlleger(m){
+function mgmtPasseAlleger(m,gardes){
   const par=new Map(m.roster.map(f=>[f.id,f]));
   const hist=[];
   for(const t of m.hist){
@@ -172,7 +172,7 @@ function mgmtPasseAlleger(m){
    /* Tous les combats sont validés avant de préparer les liens ; aucun fait original n'est muté. */
    const indices=new Map(), facts=[];
    m.facts.forEach((x,i)=>{
-     if(x&&MGMT_PASSE_FAITS_PERDUS.includes(x.k)) return;
+     if(x&&(MGMT_PASSE_FAITS_PERDUS.includes(x.k)||(gardes&&!gardes.includes(x.k)))) return;   /* T2a bis : `gardes` = les seules sortes de faits conservées (organisations vivantes) */
      indices.set(i,facts.length); facts.push(x);
    });
    const recales=facts.map(x=>{
@@ -304,6 +304,7 @@ function mgmtMondeVivantPas(etat){
         etat.k=r.termine?etat.n:r.k;
       }else{
         mgmtPasseCloturer(etat.sous);
+        mgmtMondeVivantAlleger(etat.sous);
         etat.m.orgs[id]=etat.sous; etat.sous=null; etat.i++;
         if(etat.i>=etat.ids.length){ etat.termine=true; etat.m.mondeVivant=true; }
       }
@@ -312,6 +313,17 @@ function mgmtMondeVivantPas(etat){
     etat.fait++;
   }finally{ G.mgmt=g0; SEED=seed0; }
   return {fait:etat.fait,total:etat.total,termine:etat.termine};
+}
+/** Les seules sortes de faits qu'une organisation vivante garde : celles relues par les classements, ceintures et blessures, et celles que la soirée du prédécesseur relit pour rejouer (demandes, promesses, contrariétés, cartes posées). */
+const MGMT_MONDE_FAITS_GARDES=['title_initial','title_fight','retired','injury','demande','promesse','refus','contrarie','booked'];
+/** T2a bis (budget 1,5 Mo sur disque) : à la clôture, la sous-partie ne garde que ce que ses lecteurs relisent — effectif, contrats, calendrier,
+ *  caisse, popularité, salles, graine, combats allégés et les faits utiles. Écarté : pile, lastEvent, fil, recettes, audiences, comptes, visites, cercle,
+ *  suivis, le vivier dérivé (m.exterieur : se recrée à la reprise par mgmtExteriorEnsure) et les autres faits. Ne touche jamais la partie du joueur. */
+function mgmtMondeVivantAlleger(m){
+  mgmtPasseAlleger(m,MGMT_MONDE_FAITS_GARDES);
+  m.pile=[]; m.open=null; m.lastEvent=null; m.recettes=[]; m.audiences=[]; m.comptes=[]; m.visites={}; m.cercle=[]; m.suivis=[]; m.exterieur=[];
+  delete m.fil;
+  return m;
 }
 /** Génère d'un coup les organisations vivantes d'une partie dont le passé est clos. @returns {object} la partie (m.orgs, m.mondeVivant) */
 function mgmtMondeVivantGenerer(m,opts){
