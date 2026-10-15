@@ -3,7 +3,8 @@
    cercle et suivis, connaissance progressive, conteur, Continuer. */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {newGameWindow}=require('./helpers/loadGame');
+const {newGameWindow:loadGameWindow}=require('./helpers/loadGame');
+function newGameWindow(){ const win=loadGameWindow(); win.eval("/* décision d'Anthony du 15/10/2026 : humanité retirée pour l'instant, ce test vérifie le mécanisme interrupteur levé */ MGMT_HUMANITE_ACTIVE=true;"); return win; }
 function result(win,code){ return JSON.parse(win.eval(`JSON.stringify((function(){${code}})())`)); }
 /* Corrections du 08/10, 3.3 : sans texte d'auteur un moment ne paraît pas dans la presse ; ces tests lisent le conteur, ils donnent donc un texte à chaque moment (fixture). */
 const NEUVE=`MGMT_MOMENTS.forEach(x=>{ x.texte=x.libelle; }); setSeed(9); const m=mgmtDefault(); mgmtNewRoster(m); mgmtExteriorEnsure(m); mgmtNewPile(m); G={theme:'dark',mgmt:m};`;

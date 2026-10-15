@@ -1,0 +1,3200 @@
+# Relecture d’Anthony — 15/10/2026
+
+Export des choix faits dans la page de relecture (https://claude.ai/artifact/8tXPyUSTj7KvZYGGG24JaZ) sur les 1904 textes `relu:false` de `main`.
+
+**363 OK, 1541 à corriger, 0 sans réponse.**
+
+| Famille | Fichier | Textes | OK | À corriger |
+|---|---|---|---|---|
+| Humanité (surnoms, métiers, milieux, moments de vie, rituels, rôles, trajectoires) | `mgmt-humanite-data.js` | 1020 | 199 | 821 |
+| Voix des combattants | `mgmt-voix-data.js` | 467 | 50 | 417 |
+| Médias | `mgmt-medias-data.js` | 95 | 20 | 75 |
+| Camps et salles | `mgmt-camps-data.js` | 25 | 20 | 5 |
+| Combat (commentaire, coins) | `mgmt-combat-data.js` | 65 | 35 | 30 |
+| Fiches d’identité des huit organisations (Monde lot 2) | `mgmt-organisations-identites-data.js` | 69 | 1 | 68 |
+| Écrans et mécanismes — mgmt-anciens.js | `mgmt-anciens.js` | 66 | 0 | 66 |
+| Écrans et mécanismes — mgmt-attention.js | `mgmt-attention.js` | 1 | 0 | 1 |
+| Écrans et mécanismes — mgmt-data.js | `mgmt-data.js` | 1 | 0 | 1 |
+| Écrans et mécanismes — mgmt-demo.js | `mgmt-demo.js` | 2 | 0 | 2 |
+| Écrans et mécanismes — mgmt-fiche-planche.js | `mgmt-fiche-planche.js` | 15 | 7 | 8 |
+| Écrans et mécanismes — mgmt-lendemain-cadre.js | `mgmt-lendemain-cadre.js` | 8 | 0 | 8 |
+| Écrans et mécanismes — mgmt-nouvelle.js | `mgmt-nouvelle.js` | 5 | 0 | 5 |
+| Écrans et mécanismes — mgmt-organisations-data.js | `mgmt-organisations-data.js` | 8 | 8 | 0 |
+| Écrans et mécanismes — mgmt-presentation-combat-data.js | `mgmt-presentation-combat-data.js` | 10 | 3 | 7 |
+| Écrans et mécanismes — mgmt-presentation-data.js | `mgmt-presentation-data.js` | 16 | 13 | 3 |
+| Écrans et mécanismes — mgmt-prise-en-main.js | `mgmt-prise-en-main.js` | 10 | 0 | 10 |
+| Écrans et mécanismes — mgmt-promesses.js | `mgmt-promesses.js` | 12 | 0 | 12 |
+| Écrans et mécanismes — mgmt-suivi.js | `mgmt-suivi.js` | 7 | 7 | 0 |
+| Écrans et mécanismes — stockage.js | `stockage.js` | 2 | 0 | 2 |
+
+## Humanité (surnoms, métiers, milieux, moments de vie, rituels, rôles, trajectoires) — 821 à corriger
+
+Fichier : `mgmt-humanite-data.js`
+
+- `MGMT_SURNOMS.fr.personnalite[0]` : Sang-Froid
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[1]` : Le Doux
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[10]` : Le Môme
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[20]` : La Loutre
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[7]` : Vétéran
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[8]` : Remplaçant de luxe
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[9]` : Bête noire
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[10]` : En perdition
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[11]` : Revenant
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[0]` : Météore
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[1]` : Bâtisseur
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[2]` : Éternel espoir
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[3]` : Gatekeeper heureux
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[4]` : Éclosion tardive
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[21]` : Le Lynx
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[5]` : Brisé
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[6]` : Voyageur
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[7]` : Vieux lion
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[8]` : Prodige éteint
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[9]` : Double vie
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[10]` : Rédemption
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[11]` : Fidèle
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[12]` : Mercenaire
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[13]` : Changement de poids
+  - **Anthony :** (sans note)
+- `MGMT_TRAJECTOIRES[14]` : Un seul soir
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[22]` : Le Renard
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[23]` : La Panthère
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[24]` : Le Faucon
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[25]` : Le Lion
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[26]` : Le Requin
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[27]` : Le Dogue
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[28]` : Le Cobra
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[29]` : Le Scorpion
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[11]` : Sans-Sommeil
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[30]` : La Hyène
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[31]` : Le Loup
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[32]` : Le Rhino
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[33]` : La Mule
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[34]` : L'Aigle
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[35]` : Le Putois
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[36]` : Le Furet
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[37]` : La Tortue
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[38]` : Le Hérisson
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[39]` : Le Cerf
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[12]` : Le Taiseux
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[1]` : Casse-Noix
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[2]` : Brise-Os
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[3]` : Brise-Glace
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[4]` : La Tenaille
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[5]` : La Gâchette
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[6]` : La Fronde
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[7]` : L'Aiguille
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[8]` : Main-Froide
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[10]` : Fil-de-Fer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[11]` : Tête-de-Bois
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[12]` : Vieux-Bois
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[13]` : L'Ardoise
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[14]` : Le Roc
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[15]` : La Grêle
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[16]` : L'Orage
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[17]` : La Marée
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[18]` : Coup-de-Grisou
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[14]` : Tête-de-Mule
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[20]` : Le Marteau
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[21]` : La Hache
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[22]` : Le Burin
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[23]` : L'Étau
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[24]` : La Masse
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[25]` : Le Pic
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[26]` : La Pince
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[27]` : Coup-de-Poing
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[28]` : Fer-Blanc
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[15]` : Le Grand Calme
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[30]` : La Tempête
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[31]` : Le Tonnerre
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[33]` : La Foudre
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[34]` : Le Béton
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[35]` : La Pierre
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[36]` : Le Fer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[37]` : Le Chêne
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[38]` : La Falaise
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.armes[39]` : Le Typhon
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[0]` : Tonneau
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[1]` : Quart-d'Heure
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[2]` : Bout-d'Allumette
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[3]` : Poids-Plume
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[5]` : Pas-de-Loup
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[6]` : La Rature
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[7]` : Double-Six
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[8]` : Le Cierge
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[9]` : Petit-Hiver
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[17]` : Le Sourire
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[10]` : Le Vieux
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[11]` : Deux-Temps
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[12]` : Chaussette
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[13]` : Gros-Câlin
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[14]` : La Sieste
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[15]` : Pantoufle
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[16]` : Le Pépère
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[17]` : Rondelet
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[18]` : Petit-Pois
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[19]` : Saucisson
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[18]` : Pas-de-Chance
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[20]` : Bouillon
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[21]` : Biscotte
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[22]` : Mimosa
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[23]` : Crevette
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[24]` : Zigoto
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[26]` : Bricolo
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[27]` : Chouquette
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[28]` : Patatras
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.droles[29]` : Gros-Nounours
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[19]` : L'Insolent
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[3]` : The Mailman
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[7]` : The Plumber
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[20]` : Le Calme
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[12]` : The Mechanic
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[15]` : The Landlord
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[17]` : The Ferryman
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[21]` : La Flèche
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[22]` : Le Sérieux
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[39]` : The Machine
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[23]` : Bon-Cœur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[40]` : The Closer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[42]` : The Janitor
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[46]` : The Drifter
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[24]` : Le Rusé
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[51]` : The Crowbar
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[52]` : The Fisherman
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[54]` : The Welder
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[55]` : The Ghost
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[56]` : The Barber
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[59]` : The Farmer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[60]` : Steel Toe
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[63]` : The Lumberjack
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[66]` : The Milkman
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[68]` : The Sheriff
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[26]` : Le Têtu
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[70]` : The Bouncer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[73]` : The Gardener
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[77]` : The Carpenter
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.en.general[79]` : The Hurricane
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[27]` : La Tornade
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[28]` : Sans-Peur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[29]` : Le Silencieux
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[3]` : La Teigne
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[30]` : Le Malin
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[31]` : Le Bagarreur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[32]` : Petit-Bras
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[2]` : El Alacrán
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[3]` : El Tlacuache
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[4]` : El Relámpago
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[33]` : Le Joyeux
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[13]` : El Cuervo
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[14]` : El Profe
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[15]` : El Panadero
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[16]` : El Cometa
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[18]` : El Terco
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[19]` : El Albañil
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[34]` : Rase-Mottes
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[20]` : El Toro
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[21]` : El Lobo
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[23]` : El Águila
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[24]` : El Cóndor
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[26]` : La Roca
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[27]` : El Yunque
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[28]` : El Sapo
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[29]` : La Piedra
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[35]` : Le Fidèle
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[30]` : El Huracán
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[32]` : El Carnicero
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[33]` : El Mecánico
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[34]` : El Doctor
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[35]` : El Cura
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[36]` : El Ñato
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[37]` : Pie de Plomo
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.es.general[38]` : El Pistolero
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[36]` : La Terreur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[37]` : Cœur-Vaillant
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[38]` : Le Discret
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[39]` : Le Fougueux
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[4]` : Tête-Brûlée
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[0]` : Le Notaire
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.ko.general[0]` : The Korean Bulldozer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.ko.general[2]` : The Korean Mailman
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.ko.general[5]` : The Korean Tiger
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[1]` : L'Horloger
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.ko.general[7]` : The Seoul Hammer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.ge.general[0]` : The Georgian Bull
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.ge.general[3]` : The Caucasus
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[2]` : Le Couvreur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[0]` : maçon
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[1]` : couvreur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[3]` : Le Plombier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[2]` : électricien
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[3]` : plombier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[4]` : carreleur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[5]` : plaquiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[6]` : peintre en bâtiment
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[7]` : charpentier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[8]` : menuisier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[9]` : grutier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[10]` : conducteur d'engins
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[11]` : soudeur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[4]` : Le Rémouleur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[12]` : chaudronnier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[13]` : ferrailleur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[14]` : échafaudeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[15]` : cordiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[16]` : paysagiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[17]` : élagueur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[18]` : démolisseur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[19]` : étancheur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[20]` : serrurier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[21]` : ferronnier
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[5]` : Le Facteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[22]` : vitrier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[23]` : solier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[24]` : façadier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[25]` : terrassier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[26]` : canalisateur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[27]` : ouvrier routier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[28]` : poseur de fenêtres
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[29]` : chauffagiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[30]` : ramoneur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[31]` : vitrier de chantier
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[6]` : Le Maçon
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[32]` : tailleur de pierre
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[33]` : coffreur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[34]` : ouvrier du béton
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[35]` : installateur de clim
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[36]` : monteur de cuisines
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[37]` : poseur de parquet
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[38]` : staffeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bâtiment et travaux[39]` : maçon-coffreur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[0]` : ouvrier en usine
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[1]` : cariste
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[7]` : L'Instit'
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[2]` : préparateur de commandes
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[3]` : docker
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[4]` : déménageur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[5]` : manutentionnaire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[6]` : mécanicien auto
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[7]` : carrossier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[8]` : mécanicien poids lourds
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[9]` : chaudronnier naval
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[10]` : ouvrier agricole
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[11]` : agent de tri postal
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[8]` : Le Docteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[12]` : ouvrier en abattoir
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[13]` : opérateur de ligne
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[14]` : magasinier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[15]` : tourneur-fraiseur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[16]` : ajusteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[17]` : opérateur sur machine
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[18]` : électromécanicien
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[19]` : contrôleur qualité
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[20]` : ouvrier en verrerie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[21]` : ouvrier papetier
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[9]` : Le Bûcheron
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[22]` : agent de maintenance
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[23]` : conducteur de presse
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[24]` : ouvrier du textile
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[25]` : ouvrier de scierie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[26]` : emballeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[27]` : chef d'équipe en entrepôt
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[28]` : ouvrier en fonderie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Industrie et logistique[29]` : monteur en chaîne
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[0]` : livreur à scooter
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[1]` : coursier à vélo
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[5]` : Casse-Cou
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[10]` : Le Boulanger
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[2]` : chauffeur routier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[3]` : chauffeur de bus
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[4]` : chauffeur VTC
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[5]` : taxi
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[6]` : ambulancier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[7]` : convoyeur de fonds
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[8]` : marin pêcheur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[9]` : matelot de commerce
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[10]` : conducteur de tram
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[11]` : conducteur de train
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[11]` : Le Ferrailleur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[12]` : aiguilleur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[13]` : livreur de colis
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[14]` : chauffeur de car
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[15]` : chauffeur-livreur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[16]` : mécanicien de bateau
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[17]` : pilote de remorqueur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[18]` : dépanneur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Transport[19]` : éboueur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[0]` : videur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[1]` : agent de sécurité
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[12]` : Le Carreleur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[2]` : maître-chien
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[3]` : pompier professionnel
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[4]` : pompier volontaire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[5]` : militaire du rang
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[6]` : parachutiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[7]` : commando
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[8]` : gendarme
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[9]` : policier municipal
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[10]` : gardien de prison
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[11]` : garde du corps
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[13]` : Le Grutier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[12]` : sauveteur en mer
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[13]` : surveillant de baignade
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[14]` : agent de ronde
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[15]` : surveillant de musée
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[16]` : agent de sûreté aéroportuaire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[17]` : policier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[18]` : CRS
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[19]` : légionnaire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[20]` : marin-pompier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[21]` : démineur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[14]` : Le Videur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[22]` : garde forestier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[23]` : garde-côte
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[24]` : agent de douane
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[25]` : agent de sécurité de stade
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[26]` : agent de contrôle de transport
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Sécurité et uniformes[27]` : surveillant de nuit
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[0]` : aide-soignant
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[1]` : infirmier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[2]` : kinésithérapeute
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[3]` : brancardier
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[15]` : Le Pompier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[4]` : ostéopathe
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[5]` : étudiant en médecine
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[6]` : préparateur en pharmacie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[7]` : auxiliaire de vie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[8]` : masseur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[9]` : éducateur spécialisé
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[10]` : aide-soignant de nuit
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[11]` : secouriste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[12]` : infirmier de bloc
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[13]` : ambulancier de nuit
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[16]` : Le Livreur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[14]` : podologue
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[15]` : agent hospitalier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[16]` : dentiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[17]` : préparateur de pharmacie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[18]` : sage-femme
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Santé et soin[19]` : technicien de laboratoire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[0]` : professeur d'EPS
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[1]` : professeur de maths
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[2]` : professeur d'histoire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[3]` : instituteur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[17]` : L'Huissier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[4]` : surveillant de collège
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[5]` : animateur de centre de loisirs
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[6]` : éducateur sportif
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[7]` : coach de fitness
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[8]` : maître-nageur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[9]` : entraîneur de foot des petits
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[10]` : professeur de physique
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[11]` : professeur de français
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[12]` : professeur de musique
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[13]` : conseiller d'éducation
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[18]` : Le Menuisier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[14]` : moniteur de colonie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[15]` : entraîneur de judo des enfants
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[16]` : moniteur de ski
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[17]` : moniteur d'auto-école
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[18]` : éducateur de rue
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Éducation et sport[19]` : surveillant de lycée
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[0]` : serveur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[1]` : barman
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[2]` : plongeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[3]` : cuisinier
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[19]` : Le Chaudronnier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[4]` : commis de cuisine
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[5]` : pizzaïolo
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[6]` : boulanger
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[7]` : pâtissier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[8]` : boucher
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[9]` : poissonnier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[10]` : vendeur en magasin de sport
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[11]` : caissier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[12]` : vendeur de téléphones
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[13]` : agent immobilier
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[6]` : Trompe-la-Mort
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[20]` : Le Cordiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[14]` : commercial
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[15]` : télévendeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[16]` : livreur de pizza
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[17]` : marchand sur les marchés
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[18]` : primeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[19]` : kebab du quartier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[20]` : réceptionniste d'hôtel
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[21]` : portier d'hôtel
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[22]` : sommelier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[23]` : charcutier
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[21]` : Le Soudeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[24]` : fromager
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[25]` : glacier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[26]` : vendeur de voitures
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[27]` : vendeur de meubles
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[28]` : chef de rayon
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[29]` : manager de fast-food
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[30]` : livreur de repas
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[31]` : serveur en brasserie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[32]` : gérant de bar
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[33]` : traiteur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[22]` : Le Docker
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[34]` : fleuriste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[35]` : cordonnier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[36]` : libraire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[37]` : pharmacien
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[38]` : buraliste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Commerce, hôtellerie, bouche[39]` : boulanger de nuit
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[0]` : agriculteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[1]` : éleveur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[2]` : berger
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[3]` : bûcheron
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[23]` : Le Cariste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[4]` : pêcheur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[5]` : mineur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[6]` : ouvrier viticole
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[7]` : saisonnier aux vendanges
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[8]` : jardinier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[9]` : apiculteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[10]` : maraîcher
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[11]` : céréalier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[12]` : arboriculteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[13]` : ostréiculteur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[24]` : Le Boucher
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[14]` : forestier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[15]` : conducteur de tracteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[16]` : ouvrier de ferme
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[17]` : marin de la marine marchande
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[18]` : saunier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Terre et mer[19]` : guide de haute montagne
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[0]` : danseur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[1]` : cascadeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[2]` : figurant
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[3]` : mannequin
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[25]` : Le Serveur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[4]` : tatoueur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[5]` : coiffeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[6]` : barbier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[7]` : DJ
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[8]` : rappeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[9]` : musicien de bal
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[10]` : photographe
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[11]` : graphiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[12]` : streamer
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[13]` : monteur vidéo
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[26]` : Le Barman
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[14]` : comédien
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[15]` : acteur de théâtre
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[16]` : machiniste de scène
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[17]` : technicien du son
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[18]` : régisseur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[19]` : peintre en lettres
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[20]` : sculpteur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[21]` : tailleur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[22]` : styliste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[23]` : journaliste
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[27]` : Le Cuisinier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[24]` : DJ de mariage
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[25]` : animateur radio
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[26]` : cameraman
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Arts, spectacle, image[27]` : régisseur de plateau
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[0]` : comptable
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[1]` : informaticien
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[2]` : développeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[3]` : technicien réseau
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[4]` : employé de banque
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[5]` : assistant juridique
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[28]` : Le Pâtissier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[6]` : agent d'assurance
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[7]` : employé de mairie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[8]` : agent de la Poste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[9]` : standardiste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[10]` : secrétaire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[11]` : gestionnaire de paie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[12]` : conseiller bancaire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[13]` : géomètre
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[14]` : dessinateur industriel
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[15]` : agent d'accueil
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[29]` : Le Mineur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[16]` : technicien de maintenance
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[17]` : ingénieur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[18]` : chef de projet
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Bureau et technique[19]` : expert-comptable
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[0]` : étudiant en droit
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[1]` : étudiant en STAPS
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[2]` : étudiant en ingénierie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[3]` : lycéen
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[4]` : apprenti
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[5]` : intérimaire
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.personnalite[7]` : Cœur-de-Pierre
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[30]` : Le Berger
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[6]` : saisonnier en station de ski
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[7]` : étudiant en lettres
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[8]` : étudiant en pharmacie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[9]` : étudiant en architecture
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[10]` : étudiant en gestion
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[11]` : étudiant en kinésithérapie
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[12]` : stagiaire
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Études et à-côtés[13]` : vendeur à la sauvette
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[0]` : lutteur olympique
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[1]` : judoka de haut niveau
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[31]` : Le Jardinier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[2]` : boxeur amateur de l'équipe nationale
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[3]` : kickboxeur professionnel
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[4]` : footballeur en centre de formation
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[5]` : rugbyman semi-pro
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[6]` : handballeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[7]` : haltérophile
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[8]` : champion de taekwondo
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[9]` : lutteur de lutte traditionnelle
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[10]` : nageur de haut niveau
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[11]` : cycliste amateur
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[32]` : Le Taxi
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[12]` : coureur de fond
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[13]` : gymnaste
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[14]` : escrimeur
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[15]` : joueur de basket
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[16]` : joueur de volley
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[17]` : boxeur thaï
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[18]` : pratiquant de capoeira
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.Autres sports[19]` : lanceur de poids
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[0]` : sans emploi
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[1]` : en foyer
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[33]` : Le Gendarme
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[2]` : a vécu dans la rue
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[3]` : a fait de la prison
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[4]` : a vendu dans son quartier
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[5]` : réfugié en attente de papiers
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[6]` : a voyagé sans but pendant trois ans
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[7]` : a vécu chez ses parents longtemps
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[8]` : a été à la charge de son frère
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[9]` : a tout quitté pour se battre
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[10]` : a erré de ville en ville
+  - **Anthony :** (sans note)
+- `MGMT_METIERS.La vie sans métier[11]` : a attendu un contrat qui n'est jamais venu
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[34]` : Le Pizzaïolo
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[0]` : quartier populaire d'une grande ville
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[1]` : cité de banlieue
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[2]` : centre-ville
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[3]` : petite ville industrielle
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[4]` : village de montagne
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[5]` : village de pêcheurs
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[6]` : campagne agricole
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[7]` : famille aisée
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[8]` : famille de sportifs
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[9]` : famille de militaires
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[35]` : Le Coiffeur
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[10]` : famille d'enseignants
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[11]` : famille nombreuse
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[12]` : fils ou fille unique
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[13]` : élevé par ses grands-parents
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[14]` : élevé par sa mère seule
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[15]` : élevé par son père seul
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[16]` : foyer de l'aide sociale à l'enfance
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[17]` : famille arrivée récemment dans le pays
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[18]` : enfance entre deux pays
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[19]` : famille de commerçants
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[36]` : Le Barbier
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[20]` : famille d'agriculteurs
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[21]` : enfance dans une salle de boxe (un parent coach)
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[22]` : petit village de plaine
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[23]` : quartier d'une ville portuaire
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[24]` : résidence de banlieue
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[25]` : ville universitaire
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[26]` : village de bord de mer
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[27]` : ferme isolée
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[28]` : immeuble de grande ville
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[29]` : famille d'artisans
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[37]` : Le Photographe
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[30]` : famille de médecins
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[31]` : famille de policiers
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[32]` : famille de chauffeurs
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[33]` : famille de cuisiniers
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[34]` : famille de musiciens
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[35]` : famille d'ouvriers
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[36]` : élevé par un oncle
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[37]` : élevé par une tante
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[38]` : élevé par ses frères et sœurs
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[39]` : enfance à l'internat
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[38]` : Le Danseur
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[40]` : enfance dans un camion de forain
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[41]` : enfance dans un hôtel familial
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[42]` : enfance entre trois villes
+  - **Anthony :** (sans note)
+- `MGMT_MILIEUX[43]` : famille de pêcheurs
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[0]` : un enfant est né cette semaine, toute la famille est ravie
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[1]` : annonce une grossesse, pause de carrière en vue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[2]` : sa compagne attend un enfant, combattre avant la naissance compte
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[3]` : perd un parent, la semaine est dure
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[4]` : perd un grand-parent, le prochain combat sera dédié à sa mémoire
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[5]` : perd un frère ou une sœur, le camp se fait en silence
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.metiers[39]` : Le Cascadeur
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[6]` : un parent est gravement malade, combattre près de chez soi compte beaucoup
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[7]` : un enfant est malade, le combat passe après
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[8]` : se marie ce week-end, la salle est invitée
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[9]` : se sépare, la forme s'en ressent
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[10]` : divorce, la semaine est lourde, l'argent aussi
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[11]` : se réconcilie, le sourire est revenu
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[12]` : montre son nouveau couple, les photos font le tour du web
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[13]` : un frère ou une sœur passe professionnel, la famille regarde
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[14]` : son enfant fait ses débuts dans un sport de combat
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[15]` : adopte un chien, les photos arrivent
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[0]` : La Mangouste
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[16]` : déménage pour se rapprocher de sa famille
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[17]` : une dispute de famille éclate en public, tout le monde en parle
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[18]` : sa famille viendra assister à son combat pour la première fois
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[19]` : retrouve sa famille au pays, les messages affluent
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[20]` : se blesse à l'entraînement, quelques semaines de repos
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[21]` : passe sur le billard, l'absence sera longue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[22]` : une commotion en sparring, le médecin demande du repos
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[23]` : tombe malade la semaine du combat, tout est à revoir
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[24]` : rate la pesée, une amende et une soirée tendue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[25]` : une coupe de poids trop dure, le camp s'inquiète
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[1]` : Le Frelon
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[26]` : monte d'une catégorie, tout se redessine
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[27]` : descend d'une catégorie, la coupe sera plus dure
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[28]` : reprend quinze kilos hors camp, la prochaine pesée fait peur
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[29]` : un contrôle antidopage positif, la suspension se profile
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[30]` : un coup de blues après le combat, plus un mot à personne
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[31]` : parle de sa dépression et fait une pause
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[32]` : arrête l'alcool, ça se voit déjà dans la forme
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[33]` : recommence à boire, l'entourage s'inquiète
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[34]` : ne dort plus pendant le camp, la forme baisse un peu
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[35]` : se blesse hors de la cage, une chute bête
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[2]` : Le Sanglier
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[36]` : une bagarre de bar fait la une, la main est abîmée
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[37]` : un mois de jeûne pendant le camp, pas de combat ce mois-là
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[38]` : ne coupera plus de poids, un changement de catégorie est à prévoir
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[39]` : un premier scanner du cerveau inquiète les médecins
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[40]` : quitte son travail pour se consacrer au combat
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[41]` : perd son emploi, tous les combats sont à prendre
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[42]` : reprend un travail, moins de temps pour l'entraînement
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[43]` : touche sa première grosse prime, un achat plaisir en vue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[44]` : achète une maison à ses parents, la salle applaudit
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[45]` : des dettes à payer, les combats à court préavis seront acceptés
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[3]` : La Belette
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[46]` : signe un nouveau sponsor, le logo est déjà sur le short
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[47]` : perd un sponsor, la presse le note
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[48]` : ouvre sa propre salle, l'après-carrière se prépare
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[49]` : lance sa marque de vêtements, la boutique ouvre samedi
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[50]` : un litige avec son manager, les négociations sont gelées
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[51]` : change d'agent, une nouvelle équipe arrive
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[52]` : sa bourse est publiée, tout le vestiaire la lit
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[53]` : réclame une augmentation, et le dit publiquement
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[54]` : passe une nuit en garde à vue, l'affaire est floue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[55]` : une condamnation tombe, une absence est à prévoir
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[4]` : L'Ours
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[56]` : un excès de vitesse fait le tour de la presse
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[57]` : un problème de visa l'empêche de combattre en France
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[58]` : obtient la nationalité, tout un pays se réjouit
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[59]` : obtient enfin ses papiers, combattre partout devient possible
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[60]` : une accusation fausse tombe, la justice rend son nom propre, le ton se durcit
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[61]` : un voisin de la salle porte plainte, le camp doit s'adapter
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[62]` : change de camp d'entraînement, son style va évoluer
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[63]` : se dispute avec son coach en public, un départ est possible
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[64]` : la mort de son coach endeuille la salle, un hommage est prévu
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[65]` : son coach prend sa retraite après trente ans de salle
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[5]` : Le Chat
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[66]` : s'entraîne maintenant avec un partenaire connu
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[67]` : un coéquipier est booké en face, la salle est partagée
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[68]` : reçoit une offre d'une autre organisation, l'équipe réfléchit
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[69]` : invité comme consultant à la télévision pour expliquer le sport
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[70]` : tourne dans un film, absence prévue pendant un cycle
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[71]` : un documentaire sur sa vie est en préparation
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[72]` : sa vidéo devient virale, tout le monde la partage
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[73]` : se clashe avec un combattant d'une autre organisation
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[74]` : un rival l'appelle en public, la réponse est attendue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[75]` : la presse invente un nouveau surnom, la salle l'adopte
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[6]` : La Guêpe
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[76]` : annonce sa retraite, la salle est émue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[77]` : revient de sa retraite, personne n'y croyait
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[78]` : un ancien coéquipier prend sa retraite, l'idée fait son chemin
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[79]` : un sparring tourne à la bagarre, la vidéo circule
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[80]` : obtient sa ceinture noire, tout le camp applaudit
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[81]` : obtient son diplôme, toute la famille est fière
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[82]` : déménage dans une autre ville, le camp change peut-être
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[83]` : part en camp à l'étranger, son style va évoluer
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[84]` : retourne vivre au pays, moins de combats pour Split en vue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[85]` : sa maison est détruite, tous les combats seront acceptés pour payer
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[86]` : part en pèlerinage, absence prévue pendant un cycle
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[87]` : des photos de vacances qui dérapent circulent sur le web
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[88]` : s'engage dans une association, l'équipe est fière
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[89]` : visite une école de son ancien quartier, les enfants l'applaudissent
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[90]` : quitte les réseaux sociaux, plus un mot sur le web
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[91]` : revient sur les réseaux avec beaucoup à dire
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[92]` : se fait tatouer le nom de sa ville sur le bras
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[93]` : change de religion, la presse en parle avec respect
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[94]` : participe à une émission de télé-réalité, la salle sourit
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[95]` : chante l'hymne avant un match de foot, le stade applaudit
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[8]` : P'tit Loup
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[96]` : première victoire par KO, la confiance revient
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[97]` : son premier KO subi, la peur s'installe
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[98]` : trois défaites de suite, l'idée d'arrêter revient
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[99]` : cinq victoires de suite, un classé est réclamé
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[100]` : entre dans le top 15, la division le regarde autrement
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[101]` : sort du top 15, la presse en parle
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[102]` : décroche la ceinture, la pression est là
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[103]` : perd sa ceinture, la presse le regarde
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[104]` : son combat est annulé la veille, la bourse est perdue
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[105]` : une victoire jugée volée, la revanche est demandée
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[106]` : un adversaire gravement blessé, le doute s'installe
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[107]` : un combat de l'année, tout le monde en parle
+  - **Anthony :** (sans note)
+- `MGMT_MOMENTS[108]` : son premier combat devant son public, l'émotion est grande
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[0]` : mange le même plat la veille de chaque combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[1]` : porte les mêmes chaussettes depuis son premier combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[2]` : ne se rase plus à partir du début du camp
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[3]` : se rase la tête le jour de la pesée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[4]` : appelle sa mère juste avant d'entrer
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[5]` : prie dans un coin du vestiaire
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[6]` : fait exactement cent pompes à l'échauffement
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[10]` : Le Blaireau
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[7]` : écoute la même chanson en boucle, toujours la même depuis ses débuts
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[8]` : change de chanson d'entrée à chaque combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[9]` : touche le grillage trois fois en entrant
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[10]` : entre toujours du pied gauche
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[11]` : embrasse le tapis avant le premier round
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[12]` : garde une photo de son enfant dans son sac
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[13]` : garde ses gants d'amateur dans son sac
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[14]` : fait bander ses mains par la même personne depuis dix ans
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[15]` : refuse de regarder son adversaire à la pesée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[16]` : fixe son adversaire sans cligner à la pesée
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[11]` : La Murène
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[17]` : dort une heure dans le vestiaire
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[18]` : vomit avant chaque combat, et dit que c'est bon signe
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[19]` : ne parle à personne les deux heures d'avant
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[20]` : chante dans les couloirs
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[21]` : danse pendant son entrée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[22]` : lit le même livre pendant tout le camp
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[23]` : regarde des dessins animés la veille
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[24]` : joue aux cartes avec son coach avant d'entrer
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[25]` : porte un bracelet de sa grand-mère au poignet sous les bandages
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[26]` : refuse le numéro 13 sur tout
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[12]` : Le Taureau
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[27]` : jeûne le jour du combat jusqu'à la pesée de contrôle
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[28]` : se fait couper les cheveux par son petit frère
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[29]` : ne dort pas la veille et dit que ça le rend méchant
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[30]` : se douche à l'eau glacée juste avant
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[31]` : écrit le nom de son adversaire sur un papier et le brûle
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[32]` : écrit une lettre à son père mort
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[33]` : serre la main de chaque membre de la sécurité
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[34]` : compte les marches jusqu'à la cage
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[35]` : mâche du chewing-gum jusqu'au dernier moment
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[36]` : met son protège-dents à l'envers pendant l'échauffement
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[13]` : L'Orque
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[37]` : porte le short de son premier combat professionnel, recousu dix fois
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[38]` : appelle son ancien prof de sport
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[39]` : mange un carré de chocolat entre chaque round d'échauffement
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[40]` : salue les quatre coins de la salle
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[41]` : tape sur l'épaule de l'arbitre en lui souhaitant bonne chance
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[42]` : se récite un poème
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[43]` : fait une sieste dans la voiture sur le parking
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[44]` : garde un caillou de son village dans sa chaussure pendant la pesée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[45]` : s'interdit de regarder les combats d'avant le sien
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[46]` : regarde tous les combats d'avant le sien
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[14]` : Le Bouc
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[47]` : rit tout seul pendant l'échauffement
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[48]` : fait l'inventaire de son sac trois fois
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[49]` : ne mange que de la nourriture de son pays pendant la semaine du combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[50]` : mange des pâtes avec du beurre trois heures avant le combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[51]` : coupe un bout de ruban de son premier combat et le garde dans sa chaussure
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[52]` : touche le sol du bout des doigts avant de monter
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[53]` : ne dit jamais un mot dans l'ascenseur de la salle
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[54]` : chante tout bas dans le couloir
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[55]` : porte le même pull à capuche à chaque entrée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[56]` : fait trois fois le tour de la cage avant le premier round
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[15]` : La Fouine
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[57]` : boit un thé chaud juste avant la pesée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[58]` : signe sa signature sur le bandage de sa main
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[59]` : écrit le nom de son fils sur son poignet
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[60]` : regarde un dessin animé la veille de chaque combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[61]` : laisse toujours une pièce dans le vestiaire
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[62]` : dort avec un vieux gant sous l'oreiller
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[63]` : mâche un chewing-gum à la menthe avant d'entrer
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[64]` : attache ses lacets exactement trois fois
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[65]` : enlève sa montre à l'entrée de la salle
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[66]` : lit une page du même livre à chaque camp
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[16]` : Le Coq
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[67]` : chante l'hymne de son club de foot
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[68]` : fait le signe de croix en regardant le plafond
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[69]` : salue le public dans les quatre directions
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[70]` : fait craquer ses doigts un à un devant son coin
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[71]` : embrasse le poing de son coach
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[72]` : garde un porte-bonheur offert par sa grand-mère
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[73]` : refuse de se laver les cheveux la veille
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[74]` : ne prend jamais l'ascenseur le jour du combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[75]` : fait un appel vidéo à son frère juste avant d'entrer
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[76]` : regarde le ciel avant de monter dans la cage
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[17]` : La Vipère
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[77]` : se frotte les mains avec de la craie de sa vieille salle
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[78]` : boit un jus d'orange à la même heure à chaque camp
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[79]` : porte un maillot de son équipe préférée sous son short
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[80]` : dessine une croix sur son bandage droit
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[81]` : frappe trois fois dans ses gants avant de monter
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[82]` : met son pied gauche en premier dans chaque cage
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[83]` : écrit une phrase sur un carnet avant chaque soirée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[84]` : fait une promenade seul à l'aube avant la pesée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[85]` : chante pour lui-même dans le vestiaire
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[86]` : laisse tomber un caillou dans sa poche à chaque victoire
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[18]` : Le Chacal
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[87]` : garde la veste de son premier coach dans son sac
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[88]` : refait son sac trois fois avant de partir
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[89]` : ne regarde jamais le public pendant l'entrée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[90]` : embrasse son coach sur le front avant de monter
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[91]` : tapote le tapis de la main avant de se lever
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[92]` : demande le même masseur à chaque soirée
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[93]` : mange une orange coupée en quartiers dans le vestiaire
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[94]` : arrive toujours trois heures avant la salle ouverte
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[95]` : écoute le même podcast la veille d'un combat
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[96]` : respire quatre fois devant le grillage
+  - **Anthony :** (sans note)
+- `MGMT_SURNOMS.fr.animaux[19]` : Le Corbeau
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[97]` : pose son sac toujours à la même place
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[98]` : boit de l'eau en trois gorgées exactes
+  - **Anthony :** (sans note)
+- `MGMT_RITUELS[99]` : se coiffe seul devant un miroir cassé
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[0]` : Espoir
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[1]` : Invaincu
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[2]` : Journeyman
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[3]` : Gatekeeper
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[4]` : Contender
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[5]` : Champion
+  - **Anthony :** (sans note)
+- `MGMT_ROLES[6]` : Ancien champion
+  - **Anthony :** (sans note)
+
+## Voix des combattants — 417 à corriger
+
+Fichier : `mgmt-voix-data.js`
+
+- `MGMT_VOIX[0].repliques[0]` (annonce) : Je suis dans la meilleure forme de ma vie. {adv} est un bon combattant, mais samedi vous verrez la meilleure version de moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[0].repliques[7]` (annonce) : Le camp s'est bien passé. Je suis [prêt|prête]. {adv} aussi, mais je suis plus [prêt|prête].
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[0].repliques[8]` (annonce) : Je remercie mon équipe pour ce camp. Samedi, on montre ce qu'on a travaillé.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[0].repliques[10]` (reseaux) : Dernière séance avant samedi. Merci à mes partenaires d'entraînement.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[0].repliques[11]` (reseaux) : Pesée faite, poids bon. Maintenant on se repose.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[0].repliques[13]` (victoire) : {adv} est costaud, mais on avait un plan. Ça a marché. Merci au coach.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[0].repliques[14]` (defaite) : Je n'ai rien à dire de plus. Bravo à {adv}. On retourne travailler.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[1]` (victoire) : Travail fait. Je rentre.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[2]` (defaite) : Il était meilleur ce soir. On retravaille.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[3]` (inactivite) : Je suis disponible. (Une fois.)
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[4]` (proposition) : D'accord. / Non.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[5]` (forfait) : [Blessé|Blessée]. Je reviendrai.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[7]` (annonce) : Entraînement fini. Combat samedi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[8]` (victoire) : Je rentre dormir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[9]` (defaite) : Perdu. On corrige.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[10]` (proposition) : Quand ? Oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[1].repliques[11]` (forfait) : Pas ce mois-ci. Le dos.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[2].repliques[0]` (annonce) : {adv}, mon ami, samedi je prends ta place au classement. Round deux, gauche au foie. Tu rentres en taxi, c'est moi qui paye.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[2].repliques[1]` (reseaux) : Météo de samedi pour {adv} : couvert au début, averses au deuxième round, fin de soirée allongée.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[2].repliques[4]` (proposition) : Tu veux que je fasse un spectacle devant qui, devant ses cousins ?
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[2].repliques[6]` (reseaux) : Il paraît que {adv} dort bien. Dites-lui de profiter de ses dernières nuits.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[2].repliques[7]` (victoire) : Round {round}. Je l'avais dit. Maintenant je mange.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[2].repliques[8]` (defaite) : Ce soir, le scénario a changé. Je reprends mon stylo.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[2].repliques[9]` (proposition) : Mon nom en gros sur l'affiche, et c'est oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[3].repliques[2]` (defaite) : Dieu merci quand même. Aujourd'hui c'était son jour, pas le mien.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[3].repliques[4]` (forfait) : C'est une épreuve. Ça pouvait être pire.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[3].repliques[5]` (annonce) : Ce qui doit arriver arrivera. Je serai dans la cage, c'est déjà beaucoup.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[3].repliques[6]` (victoire) : Ça devait finir comme ça. Je n'y suis pour rien.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[3].repliques[7]` (defaite) : Je savais. Ce n'est pas grave.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[3].repliques[8]` (proposition) : Si c'est écrit, c'est oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[3].repliques[9]` (forfait) : Une blessure. Elle devait arriver un jour.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[0]` (annonce) : Je ne pense pas à {adv}. Je pense au moment où la porte se ferme. Il n'y a plus de classement, juste deux [hommes|femmes] qui ont peur. Et qui avancent quand même.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[1]` (reseaux) : Levé avant le soleil. Le bois est froid. Encore six jours.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[2]` (victoire) : La peur était là, je l'ai laissée s'asseoir à côté de moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[3]` (defaite) : Mon corps était dans la cage, ma tête était déjà à la fin du combat. C'est ma faute.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[4]` (inactivite) : L'hiver aussi, c'est une saison.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[5]` (annonce) : La cage est petite. Le ciel est grand. Samedi, je regarde les deux.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[6]` (victoire) : Je regarde mes mains. Elles ont gagné, moi je suis resté calme.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[7]` (defaite) : Perdre apprend ce que gagner cache.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[8]` (reseaux) : Une montagne, un matin. Encore trois jours.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[4].repliques[9]` (proposition) : Je vais y réfléchir un moment. Oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[0]` (annonce) : {adv} a l'air d'un mec bien, mais il boxe comme mon oncle au mariage. J'ai mal au genou depuis un mois, mais je vais le finir quand même.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[2]` (victoire) : Je vous avais dit qu'il ne fallait pas parier contre moi ! Respect au mec, il m'a mis une droite, j'ai vu ma grand-mère. Et j'ai faim.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[3]` (defaite) : Il était meilleur que moi, rien à dire. J'étais nul ce soir. Je vais boire un coup, on en reparle lundi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[4]` (inactivite) : Ça fait {mois} mois que {org} me paye sans que je combatte. Je ne me plains pas, mais je préfère taper des gens.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[6]` (annonce) : {adv} est nul. Dites-le-lui de ma part. Samedi, je lui montre aussi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[7]` (reseaux) : Quelqu'un m'a dit de me calmer. J'ai ri tellement fort que j'en ai cassé ma chaise.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[8]` (victoire) : Dix minutes de travail, deux heures de bar. Mon plan est parfait.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[9]` (defaite) : J'ai perdu. Ça m'emmerde. Je ne vais pas dire que c'est de sa faute.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[10]` (proposition) : Lui ? Il a l'air gentil. Moi pas. Allez, oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[5].repliques[11]` (forfait) : Une cheville. J'ai marché sur un truc. Ne me demandez pas quoi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[0]` (annonce) : (par son interprète) Il dit qu'il est prêt. Il dit que {adv} sait pourquoi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[1]` (reseaux) : Publication en russe, sans traduction. Une photo : une balance, 70,3 kg.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[3]` (defaite) : (par son interprète) Il ne veut pas parler.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[4]` (inactivite) : (par son interprète) Il demande pourquoi personne ne dit son nom.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[5]` (proposition) : (par son interprète) Il a dit oui. Enfin, il a dit « quand ».
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[6]` (annonce) : (par son interprète) Il dit qu'il a bien travaillé. Il dit que {adv} aussi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[7]` (victoire) : (par son interprète) Il dit merci. Il pense à sa famille.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[8]` (defaite) : (par son interprète) Il dit qu'il reviendra. Il dit aussi qu'il a faim.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[9]` (reseaux) : Publication sans texte. Une photo de ses mains bandées.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[6].repliques[10]` (proposition) : (par son interprète) Il dit oui. Il veut d'abord savoir si c'est loin.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[1]` (reseaux) : Étape sept sur dix.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[2]` (defaite) : Ça repousse tout de six mois. Je reprends le plan.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[3]` (inactivite) : Chaque mois sans combat est un mois perdu. Je l'ai calculé : à ce rythme, {org} me coûte une ceinture.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[4]` (proposition-refusee) : Il est derrière moi au classement, ça m'apporte rien. Trouve-moi un classé.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[6]` (reseaux) : Étape huit sur dix. Tout est dans les temps.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[8]` (defaite) : Ça retarde le plan. Je change une ligne du tableau, pas le tableau.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[9]` (proposition) : Il est mieux classé que moi ? Alors oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[7].repliques[10]` (inactivite) : {mois} mois sans combat. Mon plan prévoyait trois semaines. Appelez-moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[8].repliques[2]` (defaite) : J'ai connu pire. Beaucoup pire. Demain je suis à la salle.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[8].repliques[4]` (forfait) : Le pire c'est pas la blessure, c'est les mois sans paie.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[8].repliques[5]` (annonce) : J'ai connu pire que {adv}. Beaucoup pire. Samedi, ça va aller.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[8].repliques[6]` (victoire) : Ça me fait du bien. J'avais oublié ce que ça faisait de gagner.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[8].repliques[7]` (defaite) : J'ai déjà perdu plus que ça. Demain, je retourne travailler.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[8].repliques[8]` (proposition) : Oui. J'ai besoin de combattre. Je ne dis pas non.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[8].repliques[9]` (inactivite) : {mois} mois sans combat. Je ne sais pas faire autre chose.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[9].repliques[1]` (victoire) : Merci à {adv}. Il m'a posé des problèmes. Au deuxième round, j'ai senti sa droite. Bravo à lui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[9].repliques[2]` (defaite) : C'est le jeu, il m'a eu sur les entrées, j'ai des choses à travailler. Merci à vous en tout cas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[9].repliques[6]` (defaite) : Bravo à lui. Je corrige mes erreurs et je reviens.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[9].repliques[7]` (proposition) : Avec plaisir. Dites-moi où signer.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[10].repliques[2]` (defaite) : Je veux la revanche. Tout de suite. Les juges ont vu un autre combat.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[10].repliques[3]` (defaite) : Revanche.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[10].repliques[4]` (proposition-refusee) : Encore un combat pour rien. Vous me faites tourner en rond.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[10].repliques[6]` (victoire) : Maintenant, le classé. Je ne le répéterai pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[10].repliques[7]` (defaite) : C'est une erreur. Je veux la revanche. Maintenant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[10].repliques[8]` (reseaux) : Jour 190 sans réponse. Les classés me bloquent ou me fuient.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[10].repliques[9]` (proposition) : Ce n'est pas ce que je demandais. Mais d'accord, une dernière fois.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[0]` (annonce) : {adv} il est fort, moi je suis gros, on va voir ce qui gagne.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[1]` (reseaux) : Pesée ratée de 200 grammes. J'ai pissé. C'est bon.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[3]` (victoire) : Ma stratégie c'était de taper. Ça a marché.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[4]` (defaite) : Il m'a endormi. C'était la meilleure sieste de ma semaine.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[5]` (proposition) : Il y a un buffet après ? Alors oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[6]` (forfait) : Je me suis pété le dos en me levant du canapé. C'est pas une blague. Enfin si, mais c'est vrai.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[7]` (annonce) : {adv} frappe fort, moi je mange fort. Qui tiendra le plus longtemps ?
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[8]` (victoire) : J'ai gagné et j'ai faim. Bonne soirée à tous, je vais au restaurant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[9]` (defaite) : J'ai perdu, mais j'ai eu un super sandwich avant. Ça compense.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[10]` (reseaux) : Pesée : 200 grammes de trop. J'ai couru, j'ai pleuré, j'ai ri. Ça passe.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[11].repliques[11]` (proposition) : Il y aura un traiteur ? Alors c'est oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[0]` (annonce) : J'ai hâte de discuter avec {adv}. On ne s'est jamais vraiment parlé. Samedi, on aura quinze minutes rien que tous les deux.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[1]` (pendant-le-combat) : T'as pas faim ? Moi j'ai faim.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[2]` (pendant-le-combat) : Oh pardon. Non en vrai, pas pardon.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[3]` (pendant-le-combat) : Encore ? On a dit pas de lutte aujourd'hui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[4]` (victoire) : Il m'a pas répondu de tout le combat, c'est malpoli franchement.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[5]` (defaite) : Là il m'a fermé la bouche, je le reconnais, c'est rare.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[6]` (annonce) : {adv}, tu es un bon gars. Je vais te dire plein de choses samedi. Tu vas aimer.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[7]` (victoire) : Il n'a pas voulu discuter. Je lui ai raconté ma semaine, ça lui a suffi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[8]` (defaite) : Il m'a fait taire, une fois. Je ne lui en veux pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[9]` (proposition) : On parle un peu ? Non ? Alors oui, c'est bon.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[12].repliques[10]` (reseaux) : Je cherche quelqu'un pour discuter. Pas un combattant. Un humain.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[0]` (annonce) : Mesdames et messieurs, soyons clairs : {adv} n'est pas un combattant, c'est un figurant. Il est là pour se tenir à côté de moi sur l'affiche. Et samedi, il va même rater ça.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[1]` (reseaux) : Chère ville de samedi, vous méritez mieux que {adv}. Je vous le dis avec amour.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[3]` (defaite) : Ce soir, j'ai combattu {adv}, l'arbitre, les juges, et une intoxication alimentaire. Trois contre un.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[4]` (sur-laffiche-dun-autre) : Si ces deux-là se battent, moi je paie ma place. Et je paie jamais.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[5]` (annonce) : Mesdames et messieurs, {adv} est venu ici pour tomber. Je suis venu pour l'aider.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[7]` (defaite) : Un incident. Une erreur d'arbitrage. Une mouche. Je cherche encore.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[8]` (reseaux) : Chère salle de samedi : mettez vos meilleurs vêtements. Je viens vous décevoir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[13].repliques[9]` (proposition) : Mon nom en gros et ma bourse en plus gros. Alors oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[0]` (annonce) : {adv} a une coupe de cheveux de prof de géo. Je vais lui arranger ça, avec les coudes.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[1]` (victoire) : Merci, vous êtes des malades, je vous aime tous. Même toi là-bas, qui m'as insulté à la pesée !
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[2]` (victoire) : Attendez. Il y a deux semaines, on a enterré un ami. Il ne parlait à personne. Les gars, si ça ne va pas, parlez. À n'importe qui, à moi si vous voulez. Je préfère que vous pleuriez sur mon épaule.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[3]` (defaite) : Je suis dégoûté, mais je vais bien, vraiment. On se voit au pub.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[4]` (annonce) : Je vais être sincère : j'ai peur, mais je suis content d'être là. Merci de m'écouter.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[5]` (victoire) : Je pleure comme un enfant. C'est la plus belle soirée de ma vie.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[6]` (defaite) : Je suis triste. Je vous remercie quand même d'être venus. Vous êtes super.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[7]` (reseaux) : Une photo de mon coach qui m'enlace. Trois jours avant, il me dit de pas pleurer.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[14].repliques[8]` (proposition) : Oui, avec tout mon cœur. Merci de penser à moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[0]` (annonce) : (en langue des signes) On me demande si le bruit du public me manque. Non. Moi, je n'entends pas {adv} parler. C'est un avantage.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[1]` (victoire) : (en langue des signes) Il y a des millions de sourds dans le monde. Ce soir, ils ont tous gagné avec moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[2]` (victoire) : (en langue des signes) Ses épaules parlent avant ses poings. Je lis les épaules.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[3]` (defaite) : (en langue des signes) Il a été meilleur. Je reviens.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[4]` (proposition) : (en langue des signes) Oui. Mais trouvez-moi un bon interprète pour la conférence, le dernier traduisait comme un pied.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[5]` (annonce) : (en langue des signes) Je n'ai pas peur du bruit. Je sens la salle dans mes pieds.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[6]` (victoire) : (en langue des signes) Je dédie ça à ceux qui m'ont dit que ce n'était pas possible.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[7]` (defaite) : (en langue des signes) Ce soir, il a été plus rapide. Je ne l'ai pas vu venir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[15].repliques[8]` (proposition) : (en langue des signes) Oui. Et faites en sorte que l'interprète soit à l'heure.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[0]` (annonce) : Je me suis entraîné avec les chevaux cette année. Pas à côté des chevaux. Avec.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[1]` (reseaux) : La lune était pleine hier. {adv} le sait. {adv} a vu.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[2]` (victoire) : (par son interprète) Il dit… qu'il remercie la montagne. Je crois. Ou sa mère. C'est le même mot.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[3]` (defaite) : Le tigre ne dort pas. Le tigre attend.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[4]` (proposition) : Il faut que je demande à mon corps. (Il ferme les yeux longtemps.) Il dit oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[5]` (annonce) : (par son interprète) Il dit qu'il a médité sur {adv}. Il dit que c'est un frère.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[6]` (victoire) : (par son interprète) Il dit que la nuit lui a parlé. Je n'ai pas tout compris.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[7]` (defaite) : (par son interprète) Il dit que ce n'est pas une défaite, c'est une page.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[8]` (reseaux) : Une photo d'un arbre. Pas de texte. Il reste trois jours.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[16].repliques[9]` (proposition) : (par son interprète) Il a regardé la lune. La lune dit oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[0]` (annonce) : On me demande si c'est dur de reprendre après ma fille. J'ai accouché pendant trente heures. {adv} ne me fait pas peur.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[1]` (reseaux) : Entraînement à 6 h, crèche à 8 h, sparring à 11 h. Moi, [fatigué|fatiguée] ? Non. Enfin si. Mais pas moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[2]` (victoire) : Ma fille est dans la salle. Elle a trois ans. Elle ne se souviendra pas de ce soir, mais un jour je lui montrerai la vidéo.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[3]` (defaite) : Ce qui me fait mal, ce n'est pas le coup. C'est que mon fils regardait.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[4]` (proposition-refusee) : Pas ce mois-là. C'est l'anniversaire du petit. Le mois d'après, qui tu veux.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[5]` (annonce) : Ce matin, j'ai préparé le sac de mon fils, puis le mien. Samedi, c'est moi qui gagne.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[6]` (victoire) : Je vais rentrer et je ferai des crêpes. Merci à ma mère qui garde les enfants.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[7]` (defaite) : J'ai perdu. Mon petit m'a dit : maman, ce n'est pas grave. Il a raison.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[8]` (reseaux) : Réveil à 5 h. Biberon, entraînement, école. Samedi, je me bats.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[17].repliques[9]` (proposition) : Je dois d'abord vérifier le calendrier de l'école. Après, oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[0]` (annonce) : Objectif identifié. On a étudié {adv} pendant huit semaines, on connaît son terrain, samedi on exécute.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[1]` (reseaux) : Dernière séance. Le groupe est prêt.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[2]` (victoire) : Mission remplie. Je remercie les gars du camp. C'est eux qui ont fait le travail.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[3]` (defaite) : J'ai pris une mauvaise décision au deuxième round. C'est moi qui l'ai prise. On corrige.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[4]` (proposition-a-court-preavis) : J'ai déjà été [appelé|appelée] avec deux heures de préavis pour des choses beaucoup moins drôles. Oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[5]` (annonce) : Mission claire : tenir trois rounds, finir au quatrième. On connaît son plan.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[6]` (victoire) : Mission accomplie. Merci à l'équipe. On rentre.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[7]` (defaite) : Échec de mission. Je prends la faute, on analyse, on repart.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[8]` (reseaux) : Briefing terminé. Rassemblement samedi 9 h.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[18].repliques[9]` (proposition) : Reçu. Dites-moi l'heure.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[0]` (annonce) : À vingt ans j'étais en cellule avec un mec qui voulait me planter pour une clope. {adv} franchement, c'est des vacances.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[1]` (victoire) : Les petits du quartier, je sais que vous regardez. La rue ne vous donnera rien. Moi, j'ai failli y rester.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[2]` (defaite) : J'ai perdu un combat. Avant je perdais des années. Ça va.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[3]` (inactivite) : Quand je ne combats pas, je tourne en rond. Et quand je tourne en rond, je connais la suite. Donnez-moi un combat.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[4]` (forfait) : Blessure. Je suis resté chez moi, je le précise. Je sais ce que les gens vont penser.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[5]` (annonce) : J'ai fait des erreurs, j'en fais moins. {adv} va le sentir samedi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[6]` (victoire) : Je dédie ça à ceux qui croient encore en moi. Ils sont peu, mais ils comptent.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[7]` (defaite) : Je ne vais pas craquer. Je rentre, je m'entraîne, je reviens.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[8]` (reseaux) : Pas de bar ce soir. Seulement du thé et du sommeil.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[19].repliques[9]` (proposition) : Oui. J'ai besoin d'un objectif, sinon je tourne en rond.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[1]` (reseaux) : Toute la team au premier rang samedi ! Ramenez le bruit, on va faire trembler la salle.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[3]` (defaite) : Il m'a allumé, je peux rien dire, il m'a allumé. Bon, on rentre, kebab.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[4]` (proposition-refusee) : Lui ? Il n'a aucun abonné, personne ne le connaît, même sa mère ne regarde pas ses combats. Trouve-moi un vrai nom.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[5]` (annonce) : {adv}, viens, on s'explique dans la cage. Le quartier sera là, il regardera.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[6]` (victoire) : C'est pour le quartier ! Pour la bande, pour ceux d'en bas, pour maman !
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[7]` (defaite) : J'ai perdu, mais on reste fiers. On rentre manger, on en reparle demain.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[8]` (reseaux) : Toute la rue sera là. Gardez la place pour les petits, devant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[20].repliques[9]` (proposition) : Lui ? Je le connais pas, mais ok, c'est bon. Envoie.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[0]` (annonce) : {adv} est un danseur. Je vais le mettre au sol, m'asseoir dessus, et le noyer pendant quinze minutes. Ce n'est pas beau, mais c'est efficace.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[1]` (reseaux) : Six heures de lutte aujourd'hui. Demain sept.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[2]` (victoire) : Je vous avais dit que c'était pas beau. Vous voulez du beau, allez au ballet.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[3]` (defaite) : Mon cardio a lâché au troisième. C'est pas lui, c'est moi. Je retourne courir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[4]` (proposition) : Un frappeur ? Parfait. Il va découvrir le sol.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[5]` (annonce) : Je vais prendre ses jambes, l'amener au sol, et attendre que ça passe. C'est sûr.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[6]` (victoire) : Quinze minutes au sol, ça fait mal aux genoux. Ça valait le coup.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[7]` (defaite) : Il s'est relevé trop vite. Je dois mieux contrôler. Je retourne au tapis.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[8]` (reseaux) : Séance de lutte du matin. Dix fois la même prise, jusqu'à ce que ça marche.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[21].repliques[9]` (proposition) : Un grand frappeur ? Très bien. Je l'emmène au sol, il va voir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[1]` (victoire) : Je dédie au village. Mon père m'a regardé, il a hoché la tête. Pour moi c'est plus qu'une ceinture.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[2]` (defaite) : J'ai fait honte à ma famille ce soir. Je rentre, je parle avec mon père, après on verra.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[4]` (proposition) : Je dois appeler mon père. (Il rappelle dix minutes plus tard.) C'est oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[5]` (annonce) : Toute la famille sera dans la salle. Je ne peux pas perdre devant eux.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[6]` (victoire) : Je dédie cette victoire à mes oncles, à ma tante, à toute la famille.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[7]` (defaite) : J'ai déçu les miens. On parle à la maison. Après, on verra.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[8]` (reseaux) : Trois cars de la famille arrivent samedi. Ils vont chanter fort.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[22].repliques[9]` (proposition) : Je demande à mon père. Il dit oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[0]` (annonce) : Samedi, ce n'est pas moi qui entre dans la cage. C'est tout le {pays}. J'ai reçu des messages de gens que je ne connais pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[2]` (defaite) : Je demande pardon à mon pays. Je vous ai déçus ce soir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[3]` (inactivite) : Au pays on me demande tous les jours quand je combats. Je sais plus quoi leur répondre.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[4]` (annonce) : Tout le {pays} regarde samedi. Je ne veux pas les décevoir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[5]` (victoire) : Pour tous ceux qui ont veillé là-bas. Je rentre à la maison avec un sourire.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[6]` (defaite) : Je m'excuse auprès du {pays}. Je reviendrai avec la tête haute.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[7]` (reseaux) : Les messages du {pays} arrivent par centaines. Je les lis tous.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[23].repliques[8]` (proposition) : Oui. Pour mon pays, oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[0]` (annonce) : Je vais le mettre KO au premier round. C'est pas une provocation, c'est une information.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[1]` (victoire) : Je vous l'avais dit. C'est tout.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[2]` (victoire) : J'avais dit premier round. Je me suis trompé. Ça m'arrive pas souvent.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[3]` (defaite) : Je ne l'avais pas vu. C'est la première fois que je ne vois pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[4]` (annonce) : Je vais le finir au troisième round. Ce n'est pas un défi, c'est un calendrier.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[5]` (victoire) : Troisième round, comme prévu. Je n'ai pas de mérite, je lis.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[6]` (defaite) : Je m'étais trompé de round. Je corrige ma prédiction.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[7]` (reseaux) : Rappel pour samedi : troisième round. Notez-le.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[24].repliques[8]` (proposition) : Il tombera en trois rounds. D'accord.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[0]` (annonce) : {adv} a un problème simple. Il baisse la main droite quand il lance son crochet gauche. Samedi, interrogation surprise.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[1]` (reseaux) : Rappel : le coude est une articulation, pas une option.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[2]` (victoire) : Copie rendue. Je lui mets 4 sur 20, mais c'est pour l'encourager.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[3]` (defaite) : Il connaissait la leçon mieux que moi. Je retourne réviser.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[4]` (annonce) : {adv} fait toujours la même erreur au deuxième round. Samedi, on la corrige.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[5]` (victoire) : Bon exercice. Je lui mets 12 sur 20, mais il a progressé.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[6]` (defaite) : J'ai raté mon cours. L'élève était meilleur que prévu.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[7]` (reseaux) : Séance de vidéo. Quatre-vingts minutes de notes. Tout est prêt.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[25].repliques[8]` (proposition) : Voyons son dossier. Très bien, c'est oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[0]` (annonce) : {adv} est le boss du niveau 3. Moi, je suis au niveau 9. Quelqu'un doit lui dire qu'il a raté des mises à jour.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[1]` (reseaux) : Nouvelle attaque spéciale débloquée. Samedi on la teste en ligne.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[2]` (victoire) : Combo complet, sa barre de vie à zéro, je n'ai même pas utilisé mon ultime. Merci pour les points d'expérience.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[3]` (defaite) : Game over. J'ai pas sauvegardé. Je relance une partie.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[4]` (proposition-refusee) : Lui ? C'est un mob de début de jeu. Donne-moi un boss.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[5]` (annonce) : {adv} est un ennemi de niveau 5. Moi je suis niveau 12. Pas de souci.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[6]` (victoire) : Combo parfait. Il m'a donné des points d'expérience. Merci {adv}.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[7]` (defaite) : Game over. Je recharge la sauvegarde et je recommence.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[8]` (reseaux) : Nouvelle compétence débloquée : esquive de gauche. Je la teste samedi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[26].repliques[9]` (proposition) : Un boss de fin ? Oui. Je prends toujours les boss.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[0]` (annonce) : J'espère que {adv} vient pour de vrai. Si on sort pas tous les deux défigurés, les gens ont été volés.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[1]` (reseaux) : Nez cassé à l'entraînement. Troisième fois. On y va.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[2]` (victoire) : Regardez sa tête, regardez la mienne. Ça c'est un combat. Je l'aime ce mec.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[3]` (defaite) : J'ai perdu, mais putain c'était beau. Je signerais pour le refaire demain.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[4]` (defaite) : Il a couru pendant quinze minutes. Il a gagné. Ça me donne envie de vomir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[5]` (annonce) : {adv} est venu pour se battre ? Alors on sera deux. Ça va saigner un peu.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[6]` (victoire) : Quel combat ! Je lui dois une bière. Et un pansement.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[7]` (defaite) : J'ai perdu, mais c'était un super combat. Je recommence quand tu veux.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[8]` (reseaux) : Nez cassé à l'entraînement. Troisième fois. Je suis content.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[27].repliques[9]` (proposition) : Quelqu'un qui frappe fort ? Oui, avec plaisir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[0]` (annonce) : Quelque part, un enfant regarde ça et pense qu'il ne peut pas. Samedi, c'est pour lui. {adv} est un grand combattant, mais moi, j'ai une mission.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[1]` (reseaux) : 4 h 50. Tout le monde dort. Pas moi. On se voit au sommet.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[2]` (victoire) : Je parle aux gamins de chez moi : on vous dira que c'est impossible. C'est faux. On se voit au sommet.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[3]` (defaite) : Aujourd'hui je suis tombé. Demain je me relève. C'est ça la leçon. On se voit au sommet.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[4]` (annonce) : Quelque part, un jeune regarde. Samedi, je lui montre que c'est possible.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[5]` (victoire) : À tous les jeunes qui regardent : travaillez, croyez, relevez-vous. On se voit au sommet.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[6]` (defaite) : Je suis tombé. Je me relève demain. Voilà la vraie leçon. On se voit au sommet.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[7]` (reseaux) : 4 h 40. Un grand verre d'eau. Aujourd'hui, on bouge. On se voit au sommet.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[28].repliques[8]` (proposition) : Je prends. Chaque combat est une leçon pour quelqu'un.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[0]` (annonce) : Quand j'ai commencé, on se battait dans des parkings. Le vainqueur prenait l'enveloppe, le perdant repartait sans dents. {adv} est né l'année de mon premier nez cassé.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[1]` (victoire) : Le petit il frappe fort, hein. Mais à mon âge on sait où sont les portes.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[2]` (defaite) : Il m'a sorti. Bravo gamin. Moi je vais aller mettre de la glace partout.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[3]` (proposition) : Un jeune ? Envoie. Il faut bien que quelqu'un leur apprenne.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[4]` (annonce) : {adv} est né quand j'avais déjà dix combats. Samedi, il apprend un truc.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[5]` (victoire) : Le métier, ça ne s'achète pas. Merci à ceux qui me l'ont appris.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[6]` (defaite) : Il était plus rapide. À mon âge, c'est normal. Je ne regrette rien.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[7]` (reseaux) : Chaque matin, mes genoux me disent bonjour. Chaque soir, je leur réponds.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[29].repliques[8]` (proposition) : Un jeune, encore ? Oui. Il faut bien que quelqu'un leur montre.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[2]` (victoire) : J'ai gagné. Je vais recevoir une prime qui paiera à peine le taxi. Merci à moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[3]` (defaite) : Trois juges, zéro yeux. Je fais appel. Je sais que ça sert à rien, je fais appel quand même.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[4]` (proposition) : Combien ? (Il ne demande rien d'autre.)
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[5]` (annonce) : Je vais me battre pour presque rien. Ça ne change pas grand-chose pour moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[6]` (victoire) : J'ai gagné. La bourse, vous la connaissez. Je n'ai rien d'autre à dire.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[7]` (defaite) : Perdu. Les juges, vous connaissez leur travail. Moi, le mien.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[8]` (reseaux) : Soirée sold out. Ma bourse : la même qu'avant. Quelqu'un a compris le système ?
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[30].repliques[9]` (inactivite) : {mois} mois sans combat. Je paie mon loyer avec du vent.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[0]` (annonce) : Euh… je suis content. Voilà. Merci.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[1]` (victoire) : Euh… merci. Merci à ma mère. Et… voilà. Merci {org}. Désolé je sais pas trop parler.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[2]` (defaite) : (il ne vient pas en conférence de presse ; son coach parle pour lui)
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[3]` (proposition) : Euh, oui, si vous pensez que c'est bien, oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[4]` (annonce) : Euh… je vais faire de mon mieux. Merci à ceux qui viennent.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[5]` (victoire) : Merci… merci beaucoup. Je… j'espère que ma mère regarde.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[6]` (proposition) : Oui, si c'est bien pour la carte. Je vous fais confiance.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[31].repliques[7]` (reseaux) : Camp terminé. Euh… voilà.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[0]` (annonce) : {adv} a demandé ce combat pour avoir des vues. Je comprends, moi aussi j'aimerais être moi. Code FIGHT10 sur la boisson énergisante, lien en bio.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[1]` (reseaux) : VLOG DE PESÉE EN LIGNE. Je vous montre tout. Même ce qu'il faut pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[2]` (victoire) : Allez vous abonner à {adv}. Il en a besoin : il a plus de dents que d'abonnés.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[3]` (defaite) : Vidéo demain. Je vous dis TOUT. Ce qui s'est vraiment passé. (Rien ne s'est passé.)
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[4]` (proposition-refusee) : Il fait pas de vues. Désolé mais il fait pas de vues.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[5]` (annonce) : {adv} n'a pas autant d'abonnés que moi, mais il a plus de dents. On verra samedi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[6]` (victoire) : Dix millions de vues sur ce KO. Abonnez-vous, likez, partagez.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[7]` (defaite) : Défaite. Mais mon contenu de ce soir est incroyable. Vidéo bientôt.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[8]` (reseaux) : Teasing de la pesée : vous n'allez pas croire ce que j'ai mangé avant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[32].repliques[9]` (proposition) : Combien de vues ? Dites-moi ça, après on parle.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[0]` (annonce) : J'ai traversé des choses pour être ici. Samedi c'est quinze minutes. Je sais faire quinze minutes.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[1]` (victoire) : Ma mère n'a pas pu venir, elle n'a pas le visa. Maman, j'ai gagné. Je t'appelle ce soir.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[2]` (defaite) : J'ai perdu un combat. Je n'ai pas perdu ma place. C'est différent.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[3]` (moment-de-vie-papiers-obtenus) : Aujourd'hui j'ai eu mes papiers. Je peux combattre partout maintenant. Même chez lui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[4]` (annonce) : J'ai quitté mon pays pour pouvoir faire ça. Samedi, je n'ai pas le droit de rater.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[5]` (victoire) : Je dédie ça à ceux qui sont restés là-bas et qui regardent sur un téléphone.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[6]` (defaite) : Je suis tombé. Je me relève. J'ai déjà traversé pire.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[33].repliques[7]` (proposition) : Oui. Chaque combat me rapproche des papiers.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[0]` (annonce) : Les gens viennent voir le nom. Samedi je veux qu'ils repartent avec le mien.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[1]` (victoire) : Papa était au premier rang. Pour une fois il a rien dit. Je crois que c'est un compliment.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[2]` (defaite) : Allez-y, dites-le, il n'est pas son père. Je sais. Je le sais depuis que j'ai huit ans.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[3]` (inactivite) : On croit que j'ai des passe-droits. J'attends comme tout le monde. Plus, même.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[4]` (annonce) : Tout le monde connaît mon nom. Samedi, ils vont connaître ma boxe.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[5]` (victoire) : Mon père m'a serré la main. C'est la première fois qu'il le fait en public.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[6]` (defaite) : Je ne veux pas qu'on parle de mon père. Je veux qu'on parle du combat.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[7]` (reseaux) : Un entraînement, un jus d'orange. Je n'ai pas de passe-droit, juste de la fatigue.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[34].repliques[8]` (proposition) : Choisissez-moi quelqu'un de difficile. Je veux le mériter.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[0]` (annonce) : Dans mon village, il n'y avait aucune fille dans les salles. Aujourd'hui, il y en a onze. Samedi, c'est pour les onze.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[1]` (reseaux) : Encore un gars qui me dit de faire du yoga. Viens au sparring demain, on fera du yoga ensemble.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[2]` (victoire) : Les petites qui regardent : on vous dira que c'est pas pour vous. C'est pour vous.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[3]` (defaite) : J'ai perdu. Ça veut pas dire qu'on avait tort d'essayer.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[4]` (annonce) : Il y a dix ans, nous étions trois dans la salle. Aujourd'hui, il y en a trente. Samedi, c'est pour elles.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[5]` (victoire) : Je dédie cette victoire à toutes celles qui ont commencé avant moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[6]` (defaite) : Je ne suis pas la première à perdre. Je ne serai pas la dernière à gagner.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[7]` (reseaux) : On m'a demandé si je me bats comme un homme. Je me bats comme moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[35].repliques[8]` (proposition) : Oui. Et prenez-moi quelqu'un de fort, je ne suis pas là pour faire joli.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[0]` (annonce) : J'ai échangé deux gardes avec un collègue pour le camp. Je lui dois un week-end et un kebab.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[1]` (victoire) : Lundi 7 h je suis au boulot. Les collègues vont me chambrer toute la journée, et j'ai hâte.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[2]` (defaite) : Bon. Lundi 7 h je suis au boulot. Au moins là-bas personne me tape.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[3]` (proposition-refusee) : Pas ce mois-là, je suis de nuit toute la semaine. Je peux pas lâcher l'équipe.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[4]` (annonce) : Combat samedi, boulot lundi. J'ai posé une demi-journée, j'ai hâte.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[5]` (victoire) : Je dormirai peu cette nuit. Lundi 6 h, je suis au travail. Je souris déjà.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[6]` (defaite) : Lundi, mes collègues vont me demander ce qui s'est passé. Je vais mentir un peu.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[7]` (reseaux) : Entraînement à 6 h, boulot de 9 h à 17 h, salle jusqu'à 21 h. Samedi, je me repose. Enfin non.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[36].repliques[8]` (proposition) : Je dois voir si mon chef me libère. Normalement, oui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[37].repliques[0]` (annonce) : J'ai mon partiel de pharmacologie mardi et mon combat samedi. Je sais lequel me fait le plus peur.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[37].repliques[1]` (victoire) : Je vais pouvoir payer l'inscription de l'année prochaine. Merci {adv}, sincèrement.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[37].repliques[2]` (defaite) : Traumatisme crânien léger, d'après le médecin. Je sais ce que ça veut dire, j'ai eu le cours. C'est pas rassurant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[37].repliques[3]` (annonce) : J'ai un examen mercredi et un combat samedi. Je ne sais pas lequel est le plus dur.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[37].repliques[5]` (defaite) : Je prends deux jours de repos. Après, je retourne aux cours. On verra.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[37].repliques[6]` (reseaux) : Révision de physiologie dans le vestiaire. Avant, pendant, après la pesée.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[37].repliques[7]` (proposition) : Oui, tant que ça ne tombe pas pendant les partiels.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[0]` (annonce) : Combat le 13 ? Non. Je plaisante pas. Changez la date ou changez de combattant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[1]` (reseaux) : Chaussettes lavées par erreur par ma copine. Je suis en deuil.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[2]` (victoire) : Vous voyez ? Même chaussettes. Je vous l'avais dit.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[3]` (defaite) : J'ai croisé un chat noir dans le parking. Je dis rien de plus.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[4]` (annonce) : Combat un vendredi 13 ? Non merci. Changez la date, ou je ne viens pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[5]` (victoire) : Même chaussettes, même caleçon, même chemin. Ça marche, je ne change rien.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[6]` (defaite) : Quelqu'un a marché sur mon sac dans le vestiaire. Voilà. Je ne dis rien de plus.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[7]` (reseaux) : J'ai trouvé un trèfle à quatre feuilles dans le parking. Samedi, c'est bon.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[38].repliques[8]` (proposition) : Quelle date ? Quel chiffre ? Dites-moi tout avant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[0]` (annonce) : Il y a cinq ans, j'étais comptable et je pesais 110 kilos. Je ne suis pas en retard : je suis en avance sur celui que j'étais.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[1]` (victoire) : Le type que j'étais à trente ans ne me croirait pas. Salut à lui.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[2]` (defaite) : Je perds un combat. J'ai déjà perdu une vie entière, alors ça va.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[3]` (annonce) : À mon âge, on ne court plus après le temps. Samedi, je cours après {adv}.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[4]` (victoire) : Je ne pensais pas gagner un jour. Le moi de vingt ans rigole.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[5]` (defaite) : J'ai perdu, et alors ? J'ai gagné quelque chose avant d'arriver ici.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[6]` (reseaux) : Footing à 6 h. Pesée à midi. Je fête mes 40 ans la semaine prochaine, on verra.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[39].repliques[7]` (proposition) : Oui, dites-moi seulement l'heure. Je me couche tôt.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[0]` (annonce) : Au judo on m'a appris à tomber. Ici j'apprends à ne pas tomber. C'est pas le même métier.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[1]` (victoire) : Projection de hanche, vingt ans que je la fais. Elle marche aussi avec des coups de poing, apparemment.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[2]` (defaite) : Il m'a frappé à un endroit où, au judo, personne frappe jamais. Leçon.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[3]` (annonce) : Dans mon ancien sport, on gagnait aux points. Ici, on gagne en frappant. Je m'adapte.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[4]` (victoire) : Ma vieille prise a servi. Ça marche aussi dans une cage.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[5]` (defaite) : Il a frappé là où mon ancien sport ne frappe pas. Je corrige.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[6]` (reseaux) : Séance de sparring avec mon ancien club. Ils me regardent bizarrement. Moi aussi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[40].repliques[7]` (proposition) : Oui. Je veux continuer à apprendre.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[0]` (annonce) : {adv}, ton cardio est comme un poème qui s'arrête à la deuxième strophe. Moi, je finis mes textes et mes combats.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[1]` (reseaux) : Nouveau son vendredi. Nouveau KO samedi. Même label : moi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[2]` (victoire) : J'avais écrit le couplet avant le combat. Il manquait juste la fin. Là, je l'ai.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[3]` (defaite) : Ce soir j'écris un morceau triste. Il va être très bon.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[4]` (annonce) : Samedi, j'écris un couplet sur le visage de {adv}. Je le chanterai après.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[5]` (victoire) : J'ai gagné. Le refrain est trouvé. Merci à tous, à vendredi pour le son.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[6]` (defaite) : Cette défaite fera un très bon morceau. Ne vous inquiétez pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[7]` (reseaux) : Un nouveau texte ce soir. Un nouveau KO samedi. Même combat, même rythme.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[41].repliques[8]` (proposition) : Oui, avec un bon éclairage et un bon son. Je fais ça aussi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[42].repliques[0]` (annonce) : Je vais être honnête : je dors mal depuis mon dernier combat. Mais je veux savoir si je suis encore moi. Samedi, je saurai.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[42].repliques[1]` (victoire) : J'ai gagné. Je sais pas encore si je suis content. Laissez-moi un peu.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[42].repliques[2]` (defaite) : Je crois que c'est fini. Je crois. Je vous dirai.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[42].repliques[3]` (annonce) : Je ne dors plus bien. Mais je suis là. C'est déjà beaucoup.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[42].repliques[4]` (victoire) : Je ne sais pas ce que je ressens. Peut-être du soulagement.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[42].repliques[5]` (defaite) : Je crois que c'est moins grave que ce que je craignais. Mais je ne sais pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[42].repliques[6]` (proposition) : Je vais y penser. Je vais dire oui. Je crois.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[0]` (annonce) : J'ai quatre petits frères. Deux vont à l'école, un est apprenti, un veut faire comme moi. Je vais lui dire non. Mais d'abord, samedi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[1]` (victoire) : L'inscription au permis de ma petite sœur est payée. Ça, c'est une ceinture.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[2]` (inactivite) : Chaque mois sans combat, c'est un mois où c'est ma mère qui compte. Je veux pas que ma mère compte.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[3]` (annonce) : Je me bats pour mes frères et sœurs. Samedi, je ne les décevrai pas.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[4]` (victoire) : Ça fait une année scolaire payée pour ma petite sœur. C'est ma ceinture.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[5]` (defaite) : Je dis à ma mère que ça va. Je suis fatigué, mais ça va.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[6]` (reseaux) : Réveil à 5 h, entraînement, dîner, devoirs de mon petit frère. Je dors à 23 h.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[43].repliques[7]` (proposition) : Oui. Dites-moi combien, et je signe.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[0]` (annonce) : J'ai pleuré en signant le contrat. Je pleurerai sans doute à la pesée. Et samedi, je le frapperai très fort. Les deux sont vrais.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[1]` (victoire) : (il pleure) Pardon. Pardon. Merci. J'ai eu tellement peur toute la semaine.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[2]` (defaite) : J'ai mal au cœur plus qu'au visage. C'est normal je crois.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[3]` (annonce) : Je suis très ému à l'idée d'y aller. J'ai déjà pleuré deux fois ce matin.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[4]` (victoire) : Merci, merci, merci. Je ne pensais pas que j'allais y arriver.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[5]` (defaite) : J'ai pleuré dans le vestiaire. Je reviens plus fort, je promets.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[6]` (reseaux) : Mon coach m'a pris dans ses bras. Je n'ai plus de larmes.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[44].repliques[7]` (proposition) : Oui, et merci de penser à moi. Ça me touche.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[0]` (annonce) : Vous me demandez mon plan ? Vous le verrez samedi. Lui aussi.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[1]` (victoire) : Round deux, j'ai changé de garde. Pourquoi ? Question suivante.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[2]` (defaite) : Il avait un meilleur plan. Je voudrais bien savoir lequel.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[3]` (micro-tendu) : Q. Tu joues aux échecs ? — R. Pourquoi, vous voulez perdre ?
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[4]` (annonce) : J'ai trois plans. Samedi, {adv} n'en verra qu'un. Il choisira le mauvais.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[5]` (victoire) : Le plan B était meilleur que le plan A. Je ne dis pas ce qu'est le plan C.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[6]` (defaite) : Il a lu mon jeu au premier round. Je note. On change tout.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[7]` (reseaux) : Une photo d'un échiquier. Pas de texte. Il reste deux jours.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[45].repliques[8]` (proposition) : Donnez-moi sa vidéo. Après, je dirai oui ou non.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[0]` (annonce) : Le camp s'est très bien passé. Enfin, les deux dernières semaines. Les deux premières, c'était plutôt un camp de base.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[1]` (pesee-ratee) : J'avais oublié que c'était aujourd'hui. Je suis pas fier. Enfin un peu quand même, il était bon ce burger.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[2]` (victoire) : On se retrouve tous au bar d'en face, c'est moi qui paye. Enfin c'est {org} qui paye, c'est ma bourse.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[3]` (defaite) : Je vais faire la fête quand même. On fête la défaite aussi, sinon on fête jamais rien.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[4]` (annonce) : Combat samedi, soirée dimanche. Je ne dis pas où, mais il y aura de la musique.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[5]` (victoire) : On rentre tard. On rentre bien. Merci à tous, je paye la tournée.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[6]` (defaite) : On va fêter ça quand même. Perdre, c'est aussi une occasion de boire à la santé des autres.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[7]` (reseaux) : J'ai promis de dormir tôt. J'ai menti. Voilà, c'est dit.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[46].repliques[8]` (proposition) : Oui, tant qu'il y a une fête après.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[0]` (annonce) : Il y a six ans, je ne montais pas un escalier sans m'arrêter. Samedi, je monte dans une cage. Je sais lequel était le plus dur.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[1]` (reseaux) : Photo de moi à 128 kilos, à côté de la pesée d'hier. Je la garde dans mon téléphone. Elle me regarde.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[2]` (victoire) : À tous ceux qui se regardent dans la glace et qui ont honte : moi aussi. Et regardez maintenant.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[3]` (defaite) : J'ai perdu. Mais le vieux moi, je l'ai battu il y a longtemps.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[4]` (annonce) : Je me suis levé tous les matins pendant cinq ans. Samedi, on voit si ça a payé.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[5]` (victoire) : À celui que j'étais : regarde-moi. À ceux qui m'ont suivi : merci.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[6]` (defaite) : Je ne perds pas, j'apprends. Le moi d'avant n'aurait pas essayé.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[7]` (reseaux) : Un vieux pantalon trop grand, accroché dans le vestiaire. Il me rappelle tout.
+  - **Anthony :** (sans note)
+- `MGMT_VOIX[47].repliques[8]` (proposition) : Oui. Je veux continuer à me surprendre.
+  - **Anthony :** (sans note)
+
+## Médias — 75 à corriger
+
+Fichier : `mgmt-medias-data.js`
+
+- `MGMT_MEDIAS_LIGNES[5]` (affiche) : {a} contre {b} sera en tête d’affiche de {org} {n}. Plusieurs sources le disent.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[6]` (affiche) : Info : {a} et {b} sont sur la même carte à {org} {n}. On saura tout à la pesée.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[10]` (lendemain) : {b} PARLE APRÈS SA DÉFAITE : SA RÉPONSE VA VOUS SURPRENDRE
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[11]` (rebook) : {a} se bat de nouveau cinq semaines après un KO. La médecin de la commission est prête à en parler. {org} ne répond pas.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[12]` (rebook) : {a} remonte dans la cage cinq semaines après son KO. Qui l’a décidé ? On ne sait pas.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[13]` (lendemain) : {a} finit le combat au round {round}. {b} suivait son plan, puis tout a changé en quelques secondes.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[14]` (lendemain) : {a} gagne aux points, sur {rounds} rounds. Il n’a pris aucun risque.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[16]` (lendemain) : Q. {a}, ta série, comment tu la vis ? — R. Je dors beaucoup. Je mange mal.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[17]` (lendemain) : Q. {a}, tu as eu peur ce soir ? — R. Avant, oui. Pendant, non. Pas le temps.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[18]` (lendemain) : Q. {a}, ton plat préféré avant une pesée ? — R. Celui que je n’ai pas le droit de manger.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[20]` (affiche) : Le combat de l’année : {a} contre {b}, à {org} {n}. Ne le ratez pas.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[21]` (lendemain) : Un grand moment : {a} a battu {b} à {org} {n}. C’est historique.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[23]` (lendemain) : {a} est le meilleur et vous n’êtes pas prêts
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[24]` (lendemain) : {b} est fini, qu’il arrête, rendez l’argent à {org}
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[26]` (affiche) : (Presse nationale — {pays}, traduit) Notre {a} combat à {org} {n}. Tout le pays va regarder, à toute heure.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[27]` (lendemain) : (Presse nationale — {pays}, traduit) Notre {a} a gagné en France. Les organisations françaises connaissent maintenant son nom.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[28]` (lendemain) : (Presse nationale — {pays}, traduit) Défaite pour notre {a}. L’organisation française lui a donné un adversaire trop fort.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[29]` (affiche) : {a} provoque {b} depuis trois semaines. {b} ne répond jamais. Ça ne va pas durer.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[30]` (affiche) : {a} S’EN PREND À {b} : LA RÉPONSE GLACÉE QUE PERSONNE N’ATTENDAIT
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[31]` (affiche) : {a} parle quinze minutes devant {b}, qui n’écoute pas. le feuilleton de la semaine
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[32]` (affiche) : {a} a touché un sujet très sensible pour {b}. {b} ne dit plus rien. C’est le combat le plus attendu de la saison.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[33]` (affiche) : deux prophètes sur la même affiche : {a} et {b} disent le contraire. l’un des deux a tort
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[34]` (affiche) : {a} veut se battre debout, {b} veut aller au sol. Quelqu’un va crier au vol samedi.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[35]` (affiche) : L’ancienne école contre la nouvelle : {a} contre {b}. Tout le monde regarde.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[36]` (affiche) : {a} réclame, {b} calcule. Deux façons de monter, un seul combat.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[37]` (affiche) : {a} se taira, {b} parlera pour deux. Qui dira « merci » le premier ?
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[38]` (affiche) : {a} se plaint des bourses, {b} remercie {org}. On a comparé les deux contrats.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[39]` (affiche) : {a} a encore provoqué {b}. {b} n’a pas répondu : il ne l’a pas lu.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[42]` (lendemain) : {a} et {b} ont fait la guerre pendant {round} rounds. Deux combattants contents, une salle debout.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[45]` (lendemain) : On a retrouvé {a} dans sa salle après {org} {n}. Il a apporté des croissants pour tout le monde. On est fans.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[46]` (affiche) : {org} {n} s’annonce chargée. Le combat principal : {a} contre {b}, en {cat}.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[49]` (lendemain) : {a} finit {b} au round {round}. Le public n’a rien à ajouter.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[52]` (affiche) : Je confirme : {a} contre {b} en tête d’affiche de {org} {n}. Rien ne change.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[53]` (affiche) : Tout est calé pour {a} contre {b} à {org} {n}. Je vous dis la suite.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[54]` (lendemain) : Résultat confirmé : {a} bat {b} à {org} {n}. Les deux camps se parlent déjà.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[55]` (lendemain) : On me dit que {a} n’était pas le favori de ses propres coachs. Il les a surpris.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[56]` (affiche) : {a} CONTRE {b} : CE QUE PERSONNE NE VOUS DIT SUR CE COMBAT
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[57]` (lendemain) : {a} EXPÉDIE {b} AU PREMIER ROUND : LA VIDÉO FAIT LE TOUR DU WEB
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[58]` (lendemain) : {b} ÉTAIT FAVORI ET PERD : CE QUI S’EST PASSÉ DANS SON COIN
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[59]` (lendemain) : {a} : TROISIÈME VICTOIRE DE SUITE, ET ÇA NE FAIT QUE COMMENCER
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[60]` (lendemain) : {a} GAGNE, MAIS PERSONNE N’EST CONTENT : VOICI POURQUOI
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[61]` (rebook) : Cinq semaines entre le KO de {a} et son nouveau combat. {org} confirme la date.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[62]` (rebook) : Un KO, cinq semaines, puis la cage : {a} revient. Personne ne dit qui l’a voulu.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[63]` (affiche) : {a} contre {b} : qui a choisi ce combat, et pourquoi maintenant ?
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[64]` (lendemain) : {b} perd contre {a}. Son camp avait-il bien préparé ce combat ?
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[65]` (affiche) : Ce qu’il faut regarder dans {a} contre {b} : les trois premiers rounds.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[66]` (lendemain) : {a} a gagné en trois temps : distance, clinch, fin au round {round}.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[67]` (lendemain) : {a} a pris les rounds courts, {b} les longs échanges. Les juges ont suivi {a}.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[68]` (lendemain) : {a} a gagné parce qu’il a fait un seul choix, et qu’il l’a tenu.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[69]` (affiche) : Q. {a}, {b} en face samedi : vous en pensez quoi ? — R. Je pense à ma pesée.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[70]` (lendemain) : Q. {a}, qu’avez-vous dit à {b} après le combat ? — R. Merci. Rien d’autre.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[71]` (lendemain) : Q. {a}, un mot sur ce soir ? — R. Je suis content. Je vais dormir.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[72]` (lendemain) : Q. {a}, les juges, vous les avez compris ? — R. Moi, j’ai fait mon travail.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[73]` (affiche) : Soirée {org} {n} : {a} contre {b}. Le public sera là, et vous aussi.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[74]` (lendemain) : Quel moment : {a} bat {b} à {org} {n}. On n’oubliera pas ce soir.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[75]` (lendemain) : En un seul round ! {a} bat {b} à {org} {n}. Incroyable.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[76]` (affiche) : {a} contre {b} : j’y serai, je prends mon billet
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[77]` (lendemain) : {a} a gagné, {b} a perdu, fin du sujet
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[78]` (lendemain) : {b} n’a même pas eu le temps de s’échauffer, merci {a}
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[79]` (lendemain) : les juges ont encore fait n’importe quoi, {a} n’a pas gagné ça
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[80]` (affiche) : (Presse nationale — {pays}, traduit) Notre {a} se bat à {org} {n}. Tout le pays veillera pour lui.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[81]` (lendemain) : (Presse nationale — {pays}, traduit) Notre {a} a battu {b}. Le pays entier a veillé pour ça.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[82]` (lendemain) : (Presse nationale — {pays}, traduit) Notre {a} a perdu. Nous l’attendons de nouveau, la tête haute.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[83]` (affiche) : {a} contre {b} à {org} {n}, ça va bouger. Venez dans la salle.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[84]` (affiche) : {a} combat à {org} {n}, tous ses potes de la salle seront là.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[85]` (lendemain) : {a} a gagné devant ses potes de la salle. Gros respect.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[86]` (affiche) : {a} a étudié {b} pendant huit semaines. {b} a surtout joué à des jeux vidéo.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[87]` (affiche) : {a} médite avant le combat. {b} plaisante dans le couloir. Même soirée.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[88]` (affiche) : {a} se couche à 21 h, {b} à l’aube. Ils se battent samedi.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[89]` (affiche) : {a} ne dit rien, {b} dit tout. Qui gagnera la bataille des mots ?
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[90]` (affiche) : {a} se bat loin de son pays. {b} combat devant le sien. La salle choisira.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[91]` (affiche) : {a} dit ce qu’il ressent, {b} dit ce qu’il pense. Les deux sont sur la même affiche.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[92]` (affiche) : {a} a un plan sur dix ans. {b} n’en a pas. Samedi, l’un des deux a raison.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[93]` (affiche) : {a} filme tout, {b} regarde le ciel. Deux façons de préparer le même combat.
+  - **Anthony :** (sans note)
+- `MGMT_MEDIAS_LIGNES[94]` (affiche) : {a} évite les chats noirs, {b} évite les bugs. Samedi, l’un des deux sera déçu.
+  - **Anthony :** (sans note)
+
+## Camps et salles — 5 à corriger
+
+Fichier : `mgmt-camps-data.js`
+
+- `MGMT_CAMP_SPECIALITES[0]` : Le contre à distance
+  - **Anthony :** (sans note)
+- `MGMT_CAMP_SPECIALITES[1]` : Le clinch et les coudes
+  - **Anthony :** (sans note)
+- `MGMT_CAMP_SPECIALITES[2]` : La lutte et le contrôle
+  - **Anthony :** (sans note)
+- `MGMT_CAMP_SPECIALITES[3]` : Le travail au sol
+  - **Anthony :** (sans note)
+- `MGMT_CAMP_SPECIALITES[4]` : Le cardio et les longs combats
+  - **Anthony :** (sans note)
+
+## Combat (commentaire, coins) — 30 à corriger
+
+Fichier : `mgmt-combat-data.js`
+
+- `MGMT_COMMENTAIRE.tourne[0]` : {X} tourne, il garde ses distances.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.tourne[2]` : {X} avance, {Y} recule.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.tourne[5]` : Rien de décisif pour l’instant : {X} observe.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.coupe[0]` : {X} LUI COUPE LA ROUTE !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.coupe[1]` : {X} AVANCE SANS S’ARRÊTER !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.coupe[2]` : {X} FERME LE CENTRE !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.coup[1]` : {X} lance {COUP}.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.coup[2]` : {COUP}, côté {X}.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.bloque[0]` : Bloqué. {X} avance encore.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.bloque[1]` : {Y} ferme sa garde.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.bloque[3]` : La garde de {Y} tient bon.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.esquive[1]` : Dans le vide : {Y} n’était déjà plus là.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.esquive[3]` : {X} manque sa cible : {Y} a bougé à temps.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.clinchCage[1]` : {X} PLAQUE {Y} CONTRE LES BARRES !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.clinchCentre[1]` : Corps à corps au centre : {X} serre {Y}.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.separe[0]` : Il sort. Retour au centre.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.separe[1]` : L’arbitre sépare. Retour au centre.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.separe[2]` : L’arbitre ramène les deux au centre.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.separe[3]` : Séparation. On repart debout.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.sol[0]` : {X} contrôle. {Y} cherche la sortie.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.releve[2]` : {X} RETROUVE SES JAMBES !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.releve[3]` : {X} S’ÉCHAPPE ET SE LÈVE !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.sub[2]` : {X} VISE UNE CLÉ !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.sub[3]` : {Y} SERRE LES DENTS, ÇA TIENT ENCORE !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.minute[1]` : Une minute à jouer dans ce round.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.juges[0]` : Les juges notent. Rien n’est joué.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.juges[1]` : Le round est fini. Les juges décideront.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.juges[2]` : Chaque juge se fait son avis. On verra les cartes.
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.finSub[1]` : ÇA TAPE ENCORE !
+  - **Anthony :** (sans note)
+- `MGMT_COMMENTAIRE.finStop[1]` : L’ARBITRE ARRÊTE TOUT !
+  - **Anthony :** (sans note)
+
+## Fiches d’identité des huit organisations (Monde lot 2) — 68 à corriger
+
+Fichier : `mgmt-organisations-identites-data.js`
+
+- `MGMT_ORG_IDENTITES['split'].reputation` (réputation) : Au milieu. Ni la plus grosse organisation, ni la plus mauvaise.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['split'].blessure` (blessure de son histoire) : L'organisation a perdu plusieurs combattants légendaires, partis rejoindre les plus grandes organisations parce qu'ils n'étaient pas respectés.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['split'].adjointe.parcours` (adjointe Leïla Malika, parcours) : Leïla Malika est sa fille.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['split'].adjointe.voix` (adjointe Leïla Malika, voix) : Elle s'excuse d'exister, elle n'a aucune autorité, elle s'occupe des combats de début de carte.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['split'].predecesseur.posteActuel` (prédécesseur Kader Malika, poste actuel) : Parti à la retraite.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].reputation` (réputation) : La plus grande scène du monde. On y vient pour l'argent et pour la lumière.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].blessure` (blessure de son histoire) : En 2015, sa plus grande vedette est partie en plein contrat, et le procès a duré trois ans.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.parcours` (adjointe Rachel Okafor, parcours) : Ancienne avocate, elle a négocié les contrats des vedettes avant de passer de l'autre côté de la table.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.voix` (adjointe Rachel Okafor, voix) : Rapide et précise. Elle tutoie tout le monde, parle en chiffres et en délais, et ne dit jamais non sans proposer autre chose.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.exemples[0]` (adjointe Rachel Okafor, exemple 1) : Trois vedettes, trois contrats à revoir avant l'été. On commence par lequel ?
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.exemples[1]` (adjointe Rachel Okafor, exemple 2) : Ce combat coûte cher. Il rapporte plus. Je signe ?
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].adjointe.exemples[2]` (adjointe Rachel Okafor, exemple 3) : Non. Mais j'ai mieux, et pour moins cher.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].predecesseur.depart` (prédécesseur Mitch Calloway, raison du départ) : Débauché par une chaîne de télévision qui lui offrait le triple.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['garden-of-blood'].predecesseur.posteActuel` (prédécesseur Mitch Calloway, poste actuel) : Directeur des sports de combat d'une grande chaîne américaine.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].reputation` (réputation) : Une petite maison sérieuse, où les champions apprennent avant de partir.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].blessure` (blessure de son histoire) : Chaque champion qu'elle a fait naître est parti signer plus gros après sa première défense.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].adjointe.parcours` (adjointe Femke Jansen, parcours) : Ancienne combattante amateur, elle a arrêté après une blessure au genou et n'a jamais quitté la salle.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].adjointe.voix` (adjointe Femke Jansen, voix) : Chaleureuse et un peu fataliste. Elle tutoie, appelle les combattants par leur prénom, et s'attend toujours à les voir partir.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].adjointe.exemples[0]` (adjointe Femke Jansen, exemple 1) : Il a encore gagné. Profites-en, il ne restera pas.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].adjointe.exemples[1]` (adjointe Femke Jansen, exemple 2) : On n'a pas l'argent pour ça. On a mieux : des gens qui ont faim.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].adjointe.exemples[2]` (adjointe Femke Jansen, exemple 3) : Je l'aime bien, celui-là. Ça ne veut rien dire, je les aime tous.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].predecesseur.depart` (prédécesseur Ruud Bakker, raison du départ) : Parti ouvrir sa propre salle d'entraînement.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['mma-korner'].predecesseur.posteActuel` (prédécesseur Ruud Bakker, poste actuel) : Patron d'une salle d'entraînement à Rotterdam.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].reputation` (réputation) : La jeune organisation de l'autre bout du monde, qui mise tout sur ses espoirs.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].blessure` (blessure de son histoire) : Sa toute première soirée a été annulée la veille, faute d'autorisation, et il a fallu un an pour en refaire une.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.parcours` (adjointe Tahlia Brennan, parcours) : Ancienne journaliste sportive, elle a suivi l'organisation dès sa première soirée et n'en est plus repartie.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.voix` (adjointe Tahlia Brennan, voix) : Enthousiaste et pressée. Elle tutoie, voit un futur champion dans chaque espoir, et l'annonce déjà sur les réseaux.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.exemples[0]` (adjointe Tahlia Brennan, exemple 1) : Lui, dans deux ans, il a une ceinture. Je te le promets.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.exemples[1]` (adjointe Tahlia Brennan, exemple 2) : Petite salle, oui. Mais elle sera pleine.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].adjointe.exemples[2]` (adjointe Tahlia Brennan, exemple 3) : On a créé cette ceinture l'an dernier. Elle attend son histoire.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].predecesseur.depart` (prédécesseur Liam Hargreaves, raison du départ) : Renvoyé après une soirée annulée qui a coûté une saison entière.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['ultimate-rim'].predecesseur.posteActuel` (prédécesseur Liam Hargreaves, poste actuel) : Matchmaker dans une ligue régionale de boxe.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].reputation` (réputation) : La plus ancienne. Un public fidèle, et des champions qui règnent longtemps.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].blessure` (blessure de son histoire) : En 2013, une soirée truquée a été prouvée, et la télévision nationale l'a lâchée pendant quatre ans.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.parcours` (adjointe Aiko Morimoto, parcours) : Entrée à l'accueil des soirées à vingt ans, elle connaît chaque ceinture et chaque champion depuis.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.voix` (adjointe Aiko Morimoto, voix) : Formelle et patiente. Elle vouvoie, rappelle l'histoire de chaque ceinture, et parle de la fin des champions avec respect.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.exemples[0]` (adjointe Aiko Morimoto, exemple 1) : Ce champion règne depuis quatre ans. Le public attend de savoir qui le remplacera.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.exemples[1]` (adjointe Aiko Morimoto, exemple 2) : Nous avons toujours fait ainsi. Vous pouvez le changer, mais pas trop vite.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].adjointe.exemples[2]` (adjointe Aiko Morimoto, exemple 3) : Il a trente-sept ans. Offrons-lui une belle sortie.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].predecesseur.depart` (prédécesseur Hideki Sawamura, raison du départ) : Parti après vingt-deux ans en poste, pour raisons de santé.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['fighting-pacific-championship'].predecesseur.posteActuel` (prédécesseur Hideki Sawamura, poste actuel) : Conseiller du président de l'organisation. Il assiste encore à chaque soirée.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].reputation` (réputation) : La maison des meilleures combattantes du monde.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].blessure` (blessure de son histoire) : Pendant ses cinq premières années, aucune chaîne ne voulait diffuser un combat principal féminin.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].adjointe.parcours` (adjointe Niamh Gallagher, parcours) : Première championne de l'organisation, elle a raccroché les gants pour s'occuper des cartes.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].adjointe.voix` (adjointe Niamh Gallagher, voix) : Directe et sèche. Elle tutoie, défend ses combattantes avant tout, et n'a aucune patience pour les excuses.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].adjointe.exemples[0]` (adjointe Niamh Gallagher, exemple 1) : La meilleure carte du pays, et ce sont elles qui la font.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].adjointe.exemples[1]` (adjointe Niamh Gallagher, exemple 2) : Les hommes ? Il en manque. Trouve-m'en.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].adjointe.exemples[2]` (adjointe Niamh Gallagher, exemple 3) : Pas de discours. Un nom, une date.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].predecesseur.depart` (prédécesseur Siobhan Carey, raison du départ) : A démissionné après un désaccord avec le patron sur les catégories masculines.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-6'].predecesseur.posteActuel` (prédécesseur Siobhan Carey, poste actuel) : Consultante pour une chaîne de télévision britannique.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].reputation` (réputation) : Beaucoup d'argent, des noms célèbres, et des salles encore à remplir.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].blessure` (blessure de son histoire) : Sa première grande soirée s'est jouée devant des milliers de sièges vides, et les photos ont fait le tour du monde.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].adjointe.parcours` (adjointe Sara Mansour, parcours) : Elle organisait des événements de luxe avant que l'organisation ne l'engage pour ses soirées.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].adjointe.voix` (adjointe Sara Mansour, voix) : Polie et brillante, toujours en représentation. Elle vouvoie, parle d'image et de prestige, et adoucit les mauvaises nouvelles.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].adjointe.exemples[0]` (adjointe Sara Mansour, exemple 1) : Le nom est parfait. La salle suivra, j'en suis sûre.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].adjointe.exemples[1]` (adjointe Sara Mansour, exemple 2) : Ce combattant coûte beaucoup. Il vaut davantage en photo.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].adjointe.exemples[2]` (adjointe Sara Mansour, exemple 3) : La salle était à moitié pleine. Disons à moitié prête.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].predecesseur.depart` (prédécesseur Karim Haddad, raison du départ) : Renvoyé : les salles restaient à moitié vides.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-7'].predecesseur.posteActuel` (prédécesseur Karim Haddad, poste actuel) : Agent de combattants, à Londres.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].reputation` (réputation) : Les poids lourds les plus durs du monde, et des catégories qui se cherchent.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].blessure` (blessure de son histoire) : En 2019, trois champions sont partis la même semaine, et leurs ceintures sont restées vacantes un an.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].adjointe.parcours` (adjointe Mariana Couto, parcours) : Ancienne arbitre, elle a quitté la cage pour passer derrière les cartes.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].adjointe.voix` (adjointe Mariana Couto, voix) : Calme et ironique. Elle vouvoie, parle des lourds avec fierté et des petites catégories avec un soupir.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].adjointe.exemples[0]` (adjointe Mariana Couto, exemple 1) : Nos lourds, personne ne veut les affronter. C'est bien notre problème.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].adjointe.exemples[1]` (adjointe Mariana Couto, exemple 2) : Une ceinture sans champion, c'est une ceinture qui attend. Nous en avons plusieurs.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].adjointe.exemples[2]` (adjointe Mariana Couto, exemple 3) : Vous voulez remplir les poids mouches ? Bonne chance. Je vous aiderai.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].predecesseur.depart` (prédécesseur Rodrigo Valença, raison du départ) : Parti à la retraite après vingt ans en poste.
+  - **Anthony :** (sans note)
+- `MGMT_ORG_IDENTITES['organisation-8'].predecesseur.posteActuel` (prédécesseur Rodrigo Valença, poste actuel) : Commentateur à la télévision brésilienne.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-anciens.js — 66 à corriger
+
+Fichier : `mgmt-anciens.js`
+
+- `MGMT_ANCIENS_TEXTES.koV[0]` : Deux coups de poing de suite, et le combat s’arrête.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[1]` : Un crochet au bon moment.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[2]` : Un contre : l’adversaire n’a rien vu venir.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[3]` : Une série de coups à la tête contre le grillage.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[4]` : Un coup de pied qui arrive de nulle part.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[5]` : Un crochet du gauche, net, au bon moment.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[6]` : Une série courte, puis l’adversaire est tombé.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[7]` : Un coup de genou dans le clinch.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[8]` : Un direct du bras arrière qui a tout arrêté.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koV[9]` : Un coup de coude en fin de mêlée.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[0]` : Un coup reçu en reculant, sans se protéger.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[1]` : Un contre reçu en s’approchant trop.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[2]` : Un coup reçu sans l’avoir vu venir.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[3]` : Les mains baissées en fin de round.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[4]` : Un mauvais début de combat, sans retour possible.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[5]` : Un crochet reçu, les mains trop basses.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[6]` : Un coup au corps, puis la tête a suivi.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[7]` : Un coup reçu en tournant le dos.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[8]` : Un contre arrivé sans prévenir.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.koD[9]` : Un genou reçu dans le clinch.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[0]` : Un étranglement dans une mêlée au sol.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[1]` : Un contrôle au sol, puis une clé de bras.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[2]` : Le dos est pris, puis l’étranglement.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[3]` : Une jambe laissée à portée, puis la soumission.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[4]` : Une soumission surprise depuis le sol.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[5]` : Un étranglement par derrière, sans échappatoire.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[6]` : Une clé de bras prise sur un retournement.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[7]` : Un triangle arrivé en plein scramble.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[8]` : Une clé de jambe sur une amenée ratée.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subV[9]` : Un étranglement guillotine au bon moment.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[0]` : Un étranglement, en défendant son dos.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[1]` : Dominé au sol, sans solution.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[2]` : Une clé de cheville surprise.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[3]` : La tête relevée trop tôt, le cou à découvert.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[4]` : Une amenée ratée, puis il est resté au sol.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[5]` : Une clé de bras prise en défendant le sol.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[6]` : Un triangle subi après une mauvaise garde.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[7]` : Une clé de cheville sur un retournement raté.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[8]` : Un étranglement par derrière, le dos tourné.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.subD[9]` : Le bras trop tendu, la clé est venue vite.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[0]` : Plus de coups que l’adversaire, round après round.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[1]` : Un combat contrôlé, sans risque.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[2]` : Un combat très dur, gagné de peu.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[3]` : Son jab a fait la différence.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[4]` : Une meilleure fin de combat.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[5]` : Un combat gagné au centre, round après round.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[6]` : Plus de précision, moins de risques.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[7]` : Une série de jabs qui a usé l’adversaire.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[8]` : Les trois rounds pris sur un meilleur rythme.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decV[9]` : Une victoire propre, sans moment dangereux.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[0]` : Moins de coups que l’adversaire, surtout à la fin.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[1]` : Trop de temps passé contre le grillage.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[2]` : Un combat serré, perdu de peu.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[3]` : Trop d’attente : les juges ont choisi l’autre.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[4]` : L’adversaire avait plus d’énergie à la fin.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[5]` : Un combat perdu à cause d’un mauvais deuxième round.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[6]` : Moins de précision, surtout dans le dernier round.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[7]` : Un combat trop prudent, perdu aux points.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[8]` : Un adversaire plus précis, round après round.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.decD[9]` : Trop de temps au sol sans rien produire.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.nul[0]` : Un combat égal, sans vrai gagnant.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.nul[1]` : Chacun a gagné deux rounds. Les juges n’ont pas choisi.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.nul[2]` : Deux styles qui s’annulent.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.nul[3]` : Trois rounds équilibrés, un nul logique.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.nul[4]` : Deux juges pour un, un pour l’autre : égalité.
+  - **Anthony :** (sans note)
+- `MGMT_ANCIENS_TEXTES.nul[5]` : Deux combattants fatigués, aucun vainqueur.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-attention.js — 1 à corriger
+
+Fichier : `mgmt-attention.js`
+
+- `MGMT_MARQUE_LIBELLE` : Du nouveau depuis ta dernière visite
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-data.js — 1 à corriger
+
+Fichier : `mgmt-data.js`
+
+- `MGMT_CARTE_PROVENANCE` : VIENT D'AVANT
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-demo.js — 2 à corriger
+
+Fichier : `mgmt-demo.js`
+
+- `MGMT_DEMO_FIN.titre` : Fin de la démo
+  - **Anthony :** (sans note)
+- `MGMT_DEMO_FIN.corps` : Vous avez monté cinq soirées. Le jeu complet vous attend : ajoutez Cage Legacy à votre liste de souhaits sur Steam.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-fiche-planche.js — 8 à corriger
+
+Fichier : `mgmt-fiche-planche.js`
+
+- `MGMT_FICHE_TEXTES.lignes.initiative` : PREND L’INITIATIVE
+  - **Anthony :** (sans note)
+- `MGMT_FICHE_TEXTES.lignes.loinJuste` : FRAPPE JUSTE DE LOIN
+  - **Anthony :** (sans note)
+- `MGMT_FICHE_TEXTES.lignes.loinVide` : FRAPPE DANS LE VIDE
+  - **Anthony :** (sans note)
+- `MGMT_FICHE_TEXTES.lignes.subitSol` : PERD SES MOYENS AU SOL
+  - **Anthony :** (sans note)
+- `MGMT_FICHE_TEXTES.lignes.vacille` : VACILLE QUAND ON LE TOUCHE
+  - **Anthony :** (sans note)
+- `MGMT_FICHE_TEXTES.lignes.poidsClinch` : IMPOSE SON POIDS
+  - **Anthony :** (sans note)
+- `MGMT_FICHE_TEXTES.lignes.rien` : RIEN DE MARQUANT
+  - **Anthony :** (sans note)
+- `MGMT_DEPUIS_LIBELLES` : Un titre
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-lendemain-cadre.js — 8 à corriger
+
+Fichier : `mgmt-lendemain-cadre.js`
+
+- `MGMT_LD_CRITERES.reclame.ok` : Le public a eu les combats qu’il réclamait.
+  - **Anthony :** (sans note)
+- `MGMT_LD_CRITERES.reclame.non` : Les combats réclamés n’ont pas eu lieu.
+  - **Anthony :** (sans note)
+- `MGMT_LD_CRITERES.reclame.neutre` : Personne ne réclamait de combat ce soir.
+  - **Anthony :** (sans note)
+- `MGMT_LD_CRITERES.serres.ok` : Des combats serrés ou finis avant la limite.
+  - **Anthony :** (sans note)
+- `MGMT_LD_CRITERES.serres.non` : Trop de décisions sans relief.
+  - **Anthony :** (sans note)
+- `MGMT_LD_CRITERES.noms.ok` : Des noms connus à l’affiche.
+  - **Anthony :** (sans note)
+- `MGMT_LD_CRITERES.noms.non` : Peu de noms connus à l’affiche.
+  - **Anthony :** (sans note)
+- `MGMT_LD_CRITERES.determination` : La salle n’a pas été conquise. Vous savez quoi changer pour la prochaine.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-nouvelle.js — 5 à corriger
+
+Fichier : `mgmt-nouvelle.js`
+
+- `MGMT_NOUVELLE_LECTURES[0]` : Tu ne diriges pas l’organisation : tu composes ses soirées. Tu choisis qui combat qui, et tu en réponds devant tout le monde.
+  - **Anthony :** (sans note)
+- `MGMT_NOUVELLE_LECTURES[1]` : Ton assistante te propose des combats et dit pourquoi. Tu acceptes, tu refuses, ou tu choisis toi-même dans la liste complète.
+  - **Anthony :** (sans note)
+- `MGMT_NOUVELLE_LECTURES[2]` : Ces six années sont jouées par le même moteur que tes soirées. Les champions, les rivalités, les blessés : tout ce que tu vas lire a eu lieu.
+  - **Anthony :** (sans note)
+- `MGMT_NOUVELLE_LECTURES[3]` : Un point à côté d’un nom dit qu’il lui est arrivé quelque chose depuis ta dernière visite. Ouvre sa fiche : la marque s’éteint.
+  - **Anthony :** (sans note)
+- `MGMT_NOUVELLE_LECTURES[4]` : Une carte principale de cinq combats, quatre préliminaires. Quand la carte est complète, tu poses la soirée et tu la lances.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-presentation-combat-data.js — 7 à corriger
+
+Fichier : `mgmt-presentation-combat-data.js`
+
+- `MGMT_PRESENTATION_COMBAT_TEXTES.meme_age` (même tranche d’âge) : Les deux sont dans la même tranche d’âge : {tranche} ans.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBAT_TEXTES.revanche` (revanche ou trilogie) : Cette paire s’est déjà affrontée {combats} fois : ce combat prolonge une histoire commune.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBAT_TEXTES.contraste_style` (contraste de styles publics) : Deux styles s’opposent : {styles}.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBAT_TEXTES.titre` (présence du détenteur de la ceinture) : La personne qui détient la ceinture de la catégorie, {champion}, figure dans ce combat.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBAT_TEXTES.cage-hebdo` (pronostic Cage Hebdo) : Les chiffres donnent la victoire à {vainqueur} à {pourcentage} %. Le combat reste à jouer, et c’est la seule vérité qui compte.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBAT_TEXTES.tableau-noir` (pronostic Tableau Noir) : Sur le papier, l’avantage va à {vainqueur}, d’après les bilans publics de la paire.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBAT_TEXTES.le-forum` (pronostic Le Forum) : Pour le Forum, {vainqueur} écrase tout et l’autre n’a rien à faire là.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-presentation-data.js — 3 à corriger
+
+Fichier : `mgmt-presentation-data.js`
+
+- `MGMT_PRESENTATION_COMBATTANT_TEXTES.metier` (métier public) : Dans la vie : {metier}.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBATTANT_TEXTES.moment` (moment de vie relayé) : Moment de vie récent : {moment}.
+  - **Anthony :** (sans note)
+- `MGMT_PRESENTATION_COMBATTANT_TEXTES.victoire_champion` (victoire sur un champion) : Victoire de prestige : {adversaire} portait la ceinture.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-prise-en-main.js — 10 à corriger
+
+Fichier : `mgmt-prise-en-main.js`
+
+- `MGMT_PRISE_TEXTES.arrivee.titre` : Vous êtes le matchmaker de {org}
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.arrivee.leila` : Je suis Leïla. Je vous aiderai pour les premiers combats.
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.arrivee.bouton` : Commencer
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.moments.carte_vide` : Bienvenue. Choisissez un combattant, puis son adversaire.
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.moments.premier_combat` : Un premier combat. Il en faut cinq sur la carte principale.
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.moments.carte_complete` : La carte principale est complète. Je prépare les préliminaires.
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.moments.prelims` : Voici mes préliminaires. Validez la carte, ou changez un combat.
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.moments.soiree_prete` : Tout est prêt. Ouvrez le calendrier pour jouer la soirée.
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.moments.premier_lendemain` : Première soirée terminée. Regardez comment le public a réagi.
+  - **Anthony :** (sans note)
+- `MGMT_PRISE_TEXTES.prete` : La soirée est prête.
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — mgmt-promesses.js — 12 à corriger
+
+Fichier : `mgmt-promesses.js`
+
+- `MGMT_TRAITS_MOTS.discipline.haut` : Professionnel
+  - **Anthony :** (sans note)
+- `MGMT_TRAITS_MOTS.ambition.haut` : Carriériste
+  - **Anthony :** (sans note)
+- `MGMT_TRAITS_MOTS.loyaute.haut` : Fidèle
+  - **Anthony :** (sans note)
+- `MGMT_TRAITS_MOTS.temperament.bas` : Instable
+  - **Anthony :** (sans note)
+- `MGMT_TRAITS_MOTS.exposition.haut` : Grande gueule
+  - **Anthony :** (sans note)
+- `MGMT_TRAITS_MOTS.exposition.bas` : Discret
+  - **Anthony :** (sans note)
+- `MGMT_TRAITS_MOTS.fairPlay.haut` : Réglo
+  - **Anthony :** (sans note)
+- `MGMT_DEMANDES.carte-principale` : La carte principale
+  - **Anthony :** (sans note)
+- `MGMT_DEMANDES.un-classe` : Un classé
+  - **Anthony :** (sans note)
+- `MGMT_DEMANDES.revanche` : Une revanche
+  - **Anthony :** (sans note)
+- `MGMT_DEMANDES.trilogie` : Le troisième combat
+  - **Anthony :** (sans note)
+- `MGMT_DEMANDES.pause` : Une pause
+  - **Anthony :** (sans note)
+
+## Écrans et mécanismes — stockage.js — 2 à corriger
+
+Fichier : `stockage.js`
+
+- `STOCKAGE_TEXTES.echec` : La sauvegarde a échoué. Votre partie n’est pas enregistrée.
+  - **Anthony :** (sans note)
+- `STOCKAGE_TEXTES.reessayer` : Réessayer
+  - **Anthony :** (sans note)

@@ -169,6 +169,7 @@ function mgmtVieFormeBaisse(m,f,cycle){
  *  RNG du jeu. @returns {number} moments vécus ce cycle. */
 function mgmtVieOuvreCycle(m){
   if(!m||!Array.isArray(m.roster)||!Number.isSafeInteger(m.cycle)) return 0;
+  if(!MGMT_HUMANITE_ACTIVE) return 0;
   /* Une partie d'avant H4 (effectifs 0) garde son comportement : les moments
      de vie ne s'ouvrent que dans une partie neuve, comme les nouveaux effectifs. */
   if(m.effectifs!==1) return 0;
