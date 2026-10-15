@@ -77,3 +77,6 @@ Tu n'appelles AUCUN sous-agent (@eclaireur, @ecrivain, @verif, @relecteur sont i
 
 ## PRÉCISION du superviseur — 14/10/2026 19 h 35 (ceci n'est PAS une contradiction avec ta méthode)
 Ta méthode prévoit d'appeler `@verif` et `@relecteur`. Ils sont INDISPONIBLES depuis toi (limite de profondeur des sous-agents). La procédure de repli est celle que le chef t'a déjà donnée : lance toi-même `node tools/verif-versions.js origin/main` puis `npm run check:rapide` (ou les tests ciblés), puis commite. Exécute ce repli et CONTINUE : ne t'arrête jamais pour cette raison.
+
+## DÉCISION du superviseur — 15/10/2026 09 h 30 (échecs de `tests/mgmtAccueil.test.js`)
+Les tests T1 et T5 de `tests/mgmtAccueil.test.js` attendaient le bloc « héritage » de l'Accueil. Ce bloc est RETIRÉ de l'Accueil par décision (`MONDE-LOT-10-DECISIONS.md` §2 : l'arrivée porte l'héritage). Adapte ces deux tests en citant cette décision dans un commentaire : ils vérifient désormais que l'Accueil n'a plus de bloc héritage et que le reste de l'Accueil est inchangé. Ne supprime aucune autre assertion. Ton travail en cours (`mgmt-accueil.js`, `mgmt-prise-en-main.js`, `tests/mgmtArrivee.test.js`) est sur le disque : termine-le, ne le refais pas.
