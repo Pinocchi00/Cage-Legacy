@@ -191,3 +191,23 @@ test('Monde lot 9 T2c — les actualités lisent les résultats des soirées des
     return mgmtSemaineMonde(m); })()`);
   assert.match(found,/Vainqueur vivant/); assert.match(found,/monde-vivant/);
 });
+
+/* ==== [ANCRE: TESTS_MONDE_LOT9_T2D] — Monde lot 9 T2d ==== */
+test('Monde lot 9 T2d — aucun identifiant vivant n’est porté par un autre combattant après création et semaine',()=>{
+  const win=creer(true);
+  const collision=()=>win.eval(`(function(){const all=[...G.mgmt.roster,...Object.values(G.mgmt.orgs).flatMap(s=>s.roster)];return all.length-new Set(all.map(f=>f.id)).size})()`);
+  assert.equal(collision(),0); win.eval('mgmtMondeVivantSemaine(G.mgmt)'); assert.equal(collision(),0);
+});
+test('Monde lot 9 T2d — le classement mondial compte tous les combattants classables des huit organisations',()=>{
+  const win=creer(true),r=win.eval(`(function(){const div=allDivisions()[0].id,expected=[G.mgmt,...Object.values(G.mgmt.orgs)].reduce((n,s)=>n+s.roster.filter(f=>!mgmtIsRetired(f)&&f.div===div).length,0);return {expected,actual:mgmtDivisionRanking(G.mgmt,div,'world').length}})()`);
+  assert.equal(r.actual,r.expected);
+});
+test('Monde lot 9 T2d — une organisation conserve ses comptes et son stade après une semaine',()=>{
+  const win=creer(true); win.eval('mgmtMondeVivantSemaine(G.mgmt)');
+  const r=win.eval(`(function(){const id=mgmtMondeVivantIds(G.mgmt)[0],s=G.mgmt.orgs[id],n=mgmtOrgNiveaux(G.mgmt,id);return {comptes:s.comptes,stade:n.stade,petite:Math.min(...s.salles.map(x=>x.capacite)),capacites:s.salles.map(x=>x.capacite)}})()`);
+  assert.ok(r.comptes.length>0); assert.deepEqual(Object.keys(r.comptes[0]).sort(),['salle','salleId','taux']); assert.ok(r.stade===r.petite||r.capacites.includes(r.stade));
+});
+test('Monde lot 9 T2d — les migrations v20 préfixent le monde vivant et laissent inchangée une partie sans monde',()=>{
+  const win=creer(true),r=win.eval(`(function(){const vivant=JSON.parse(mgmtSerialiser(G.mgmt));vivant.v=20;for(const [id,s] of Object.entries(vivant.orgs)){const p='o'+MGMT_ORGANISATIONS.findIndex(o=>o.id===id)+'mg';s.idPrefixe=undefined;Object.keys(s).forEach(k=>{});const t=JSON.stringify(s).replace(/\\bo\\d+mg(\\d+)\\b/g,'mg$1');Object.assign(s,JSON.parse(t));}const mig=mgmtMigrate(vivant);const propre=JSON.parse(mgmtSerialiser(mgmtDefault('split')));propre.v=20;propre.mondeVivant=false;const avant=JSON.stringify(propre);const sans=mgmtMigrate(propre);return {v:mig.v,valid:validateMgmt(mig)&&mgmtMondeVivantValide(mig),unique:(()=>{const a=[...mig.roster,...Object.values(mig.orgs).flatMap(x=>x.roster)];return a.length===new Set(a.map(x=>x.id)).size})(),sans:JSON.stringify(sans)===avant.replace('"v":20','"v":21')}})()`);
+  assert.equal(r.v,21); assert.equal(r.valid,true); assert.equal(r.unique,true); assert.equal(r.sans,true);
+});

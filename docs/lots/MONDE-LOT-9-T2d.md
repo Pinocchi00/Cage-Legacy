@@ -27,3 +27,7 @@ Deux défauts trouvés par le superviseur le 15/10/2026 sur une vraie partie (Sp
 
 ## Hors périmètre
 Les écrans ; la mesure de la notoriété (signalée à part).
+
+## AJOUT du superviseur — 15/10/2026 22 h 30 (fait partie de la tranche)
+3. **L'ancien vivier lu en plus du monde vivant.** Sur la partie relevée, le classement mondial de H-light a 328 lignes : 30 de Split et 298 de `m.exterieur` (l'ancien monde calculé), **aucune** des sept organisations vivantes. `mgmtDivisionRankingCalcule` (`mgmt-carte.js`) ajoute `m.exterieur` même quand `m.mondeVivant===true`. Décision T2 : le monde vivant **remplace** l'ancien vivier. Donc, quand `m.mondeVivant===true` : la portée `world` = l'effectif du joueur + `mgmtExteriorEffectifs(m,div)` ; `m.exterieur` n'est plus lu (et `mgmtExteriorEnsure` ne le recrée plus pour une telle partie). Les parties sans monde vivant gardent exactement l'ancien calcul.
+4. **Les tests doivent le prouver sur l'état réel** : pour chaque catégorie, le classement mondial contient au moins un combattant de chacune des sept organisations vivantes qui en a un non retraité dans cette catégorie, et aucun identifiant de `m.exterieur`. La puissance (T3) d'au moins cinq organisations est > 0 après la création.

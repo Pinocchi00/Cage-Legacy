@@ -291,6 +291,7 @@ function mgmtValidFightTrace(x){
 function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
+  if(raw.idPrefixe!==undefined&&(typeof raw.idPrefixe!=='string'||!MGMT_ID_RE.test(raw.idPrefixe))) return false;
   if(!mgmtOrgValide(raw.org)) return false;
   /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
   if(raw.mondeVivant!==undefined&&typeof raw.mondeVivant!=='boolean') return false;
@@ -577,6 +578,16 @@ function mgmtMigrate(raw){
   /* ==== [ANCRE: MONDE_LOT9_T2A_MIGRATION] — Monde lot 9 T2a (décision du superviseur du 15/10/2026), renumérotée 19 → 20 à la fusion du lot 6.
      Une partie d'avant porte m.mondeVivant=false et garde EXACTEMENT son ancien monde extérieur calculé ; rien d'autre ne bouge. ==== */
   if(raw.v===19){ raw.mondeVivant=false; raw.v=20; }
+  /* ==== [ANCRE: MONDE_LOT9_T2D_MIGRATION] — Monde lot 9 T2d : 20 → 21 ==== */
+  if(raw.v===20){
+    if(raw.mondeVivant===true&&raw.orgs&&typeof mgmtMondeVivantPrefixer==='function'){
+      for(const [id,sous] of Object.entries(raw.orgs)){
+        const k=MGMT_ORGANISATIONS.findIndex(o=>o.id===id);
+        if(k>=0) mgmtMondeVivantPrefixer(sous,'o'+k+'mg');
+      }
+    }
+    raw.v=21;
+  }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }

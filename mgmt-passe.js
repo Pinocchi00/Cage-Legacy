@@ -307,6 +307,7 @@ function mgmtMondeVivantPas(etat){
         etat.k=r.termine?etat.n:r.k;
       }else{
         mgmtPasseCloturer(etat.sous);
+        mgmtMondeVivantPrefixer(etat.sous,'o'+MGMT_ORGANISATIONS.findIndex(o=>o.id===id)+'mg');
         mgmtMondeVivantAlleger(etat.sous);
         etat.m.orgs[id]=etat.sous; etat.sous=null; etat.i++;
         if(etat.i>=etat.ids.length){ etat.termine=true; etat.m.mondeVivant=true; }
@@ -317,6 +318,17 @@ function mgmtMondeVivantPas(etat){
   }finally{ G.mgmt=g0; SEED=seed0; }
   return {fait:etat.fait,total:etat.total,termine:etat.termine};
 }
+/* ==== [ANCRE: MONDE_LOT9_T2D_PREFIXE] — Monde lot 9 T2d ==== */
+/** Renomme par sérialisation toutes les occurrences d'identifiants mgN de la sous-partie. */
+function mgmtMondeVivantPrefixer(sous,prefixe){
+  if(!sous||typeof sous!=='object'||!/^o\d+mg$/.test(prefixe)) throw new TypeError('Préfixe d’organisation invalide');
+  if(sous.idPrefixe===prefixe) return sous;
+  const texte=JSON.stringify(sous).replace(/\bmg(\d+)\b/g,prefixe+'$1');
+  const renomme=JSON.parse(texte);
+  Object.keys(sous).forEach(k=>delete sous[k]);
+  Object.assign(sous,renomme,{idPrefixe:prefixe});
+  return sous;
+}
 /** Les seules sortes de faits qu'une organisation vivante garde : celles relues par les classements, ceintures et blessures, et celles que la soirée du prédécesseur relit pour rejouer (demandes, promesses, contrariétés, cartes posées). */
 const MGMT_MONDE_FAITS_GARDES=['title_initial','title_fight','retired','injury','demande','promesse','refus','contrarie','booked'];
 /** T2a bis (budget 1,5 Mo sur disque) : à la clôture, la sous-partie ne garde que ce que ses lecteurs relisent — effectif, contrats, calendrier,
@@ -324,7 +336,7 @@ const MGMT_MONDE_FAITS_GARDES=['title_initial','title_fight','retired','injury',
  *  suivis, le vivier dérivé (m.exterieur : se recrée à la reprise par mgmtExteriorEnsure) et les autres faits. Ne touche jamais la partie du joueur. */
 function mgmtMondeVivantAlleger(m){
   mgmtPasseAlleger(m,MGMT_MONDE_FAITS_GARDES);
-  m.pile=[]; m.open=null; m.lastEvent=null; m.recettes=[]; m.audiences=[]; m.comptes=[]; m.visites={}; m.cercle=[]; m.suivis=[]; m.exterieur=[];
+  m.pile=[]; m.open=null; m.lastEvent=null; m.recettes=[]; m.audiences=[]; m.comptes=(m.comptes||[]).slice(-12).map(c=>({salle:c.salle,salleId:c.salleId,taux:c.taux})); m.visites={}; m.cercle=[]; m.suivis=[]; m.exterieur=[];
   delete m.fil;
   return m;
 }
