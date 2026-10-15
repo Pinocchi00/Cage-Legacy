@@ -58,3 +58,15 @@ Le code du commit 310fcd4 est accepté sur le principe. Il manque, et c'est tout
 2. Ce fichier n'a pas les cinq tests de la section Tests : écris-les tous, avec leurs intitulés exacts (fiche sans milieu/métier/rituel/trajectoire/moment ; aucune soirée ne fait naître de moment ni de marque ; aucun libellé de rôle à l'écran mais les raisons de Leïla fonctionnent ; à graine égale mêmes combats et même classement ; interrupteur remis à vrai = fiche d'avant).
 3. Vérifie `mgmt-fiche-cadre.js` (fiche) : rien à couper, ou coupe-le.
 Tests ciblés verts, versions, commit `Monde lot 11 T1 : tests du retrait`.
+
+## REPRISE 3 du superviseur — 15/10/2026 (contrôle complet : 11 échecs, tous attendus ou à expliquer)
+Le contrôle complet donne 1181/1192. Traite-les ainsi, sans toucher au code du jeu sauf au point C :
+**A. Tests qui vérifient une fonction d'humanité désormais coupée** : dans leur montage, mets `MGMT_HUMANITE_ACTIVE=true` avant de créer la partie, avec le commentaire « décision d'Anthony du 15/10/2026 : humanité retirée pour l'instant, ce test vérifie le mécanisme interrupteur levé » ; ne change aucune assertion :
+- `tests/mgmtMarqueBudget.test.js` (« mfMarqueNom ne dessine que les marques allumées ») ;
+- `tests/mgmtDepuis.test.js` (« chaque sorte comptée donne une ligne ») ;
+- `tests/mgmtScenarios.test.js` (« H10 bis — le deuil ») ;
+- `tests/mgmtVestiaire.test.js` (les trois « H8 ») ;
+- `tests/mgmtMarque.test.js` (« mgmtMarque allume pour un moment relayé »).
+**B. Empreintes** (`tests/mgmtPasse.test.js` : « optimisation du booking », « une partie créée sans le passé ») : les moments de vie ne naissent plus, l'état change : recalcule les empreintes et ajoute le commentaire « Décision d'Anthony du 15/10/2026 (humanité retirée) : empreintes recalculées ; la propriété gardée est le déterminisme. » (même motif que les précédents de ce fichier).
+**C. À EXPLIQUER avant de toucher** : `tests/mgmtPredecesseur.test.js` (« deux soirées de la graine 20261008 : compte rendu complet ») et `tests/mgmtArchive.test.js` (« sauvegarder puis recharger rend le même état en mémoire »). Lis ce qu'ils comparent. Si l'écart vient seulement des moments de vie absents (attendu), traite-les comme A ou B selon le cas. Si c'est autre chose (un champ perdu au rechargement, l'interrupteur qui change en cours de route), c'est un BUG du retrait : corrige le code.
+Puis `node --test` sur ces sept fichiers, versions, commit `Monde lot 11 T1 : tests existants alignés sur le retrait`.
