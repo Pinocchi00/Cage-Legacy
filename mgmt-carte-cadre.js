@@ -227,11 +227,12 @@ Object.assign(CL,{
     const i=ids.indexOf(mgmtCarteDiv(m));
     MGMT_CART.div=ids[(i+(delta<0?-1:1)+ids.length)%ids.length]; MGMT_CART.cursor=0; render();
   },
-  /** La préparation à la demande : l'assistante propose un adversaire au premier choix posé — le curseur s'y place, le joueur confirme. */
+  /** La préparation à la demande : pour un premier choix posé, Leïla pose quatre à six dossiers d'adversaires libres de sa catégorie (lot 4 T2). Pas de booking, pas de changement de curseur ni d'écran ; la réservation reste le chemin mgmtBookMain. */
   mgmtCarteProposer(){
     const m=G.mgmt; if(!MGMT_CART.pick||!mgmtAgendaActif(m)) return;
-    const o=mgmtAgendaProposer(m,MGMT_CART.pick); if(!o) return;
-    const i=mgmtCarteListe(m).findIndex(x=>x.id===o.id); if(i>=0){ MGMT_CART.cursor=i; render(); }
+    const combattant=mgmtFighterById(m,MGMT_CART.pick); if(!combattant) return;
+    const pile=mgmtDossiersAdversaires(m,MGMT_CART.pick); if(!pile||!pile.length) return;
+    MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
   },
   mgmtCarteFiche(){
     const m=G.mgmt, f=(MGMT_CART.pick&&mgmtFighterById(m,MGMT_CART.pick))||mgmtCarteListe(m)[MGMT_CART.cursor||0];

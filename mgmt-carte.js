@@ -927,3 +927,69 @@ function mgmtDossiersCombattants(m, exclureId, dejaVus){
   return chosen.map(t=>({combattant:t.c, raison:JSON.parse(JSON.stringify(t.r)), adversaire:t.a}));
 }
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT4_T2_DOSSIERS_ADVERSAIRES] — Monde lot 4 T2 ==== */
+function mgmtDossiersAdversaires(m, combattantId, dejaVus){
+  if(!Array.isArray(dejaVus)) dejaVus=[];
+  if(!m||!Array.isArray(m.roster)) return [];
+  const fc=mgmtFighterById(m,combattantId);
+  if(!fc||!mgmtValidId(combattantId)) return [];
+  if(typeof mgmtSelectable==='function'&&!mgmtSelectable(m,fc,null)) return [];
+  if(typeof mgmtEngaged==='function'&&mgmtEngaged(m,fc)) return [];
+  const dejaSet=new Set(dejaVus||[]);
+  const orgJoueur=typeof mgmtOrgNom==='function'?mgmtOrgNom(m):m.org;
+  const dansOrg=f=>!!f && (f.org===m.org || f.org===orgJoueur);
+  const candList=m.roster.filter(f=>f&&mgmtValidId(f.id)
+    && f.id!==combattantId && !dejaSet.has(f.id) && dansOrg(f) && f.div===fc.div
+    && (typeof mgmtSelectable==='function'?mgmtSelectable(m,f,combattantId):true));
+  candList.sort((a,b)=>(a.id<b.id?-1:(a.id>b.id?1:0)));
+  const famSet=new Set(MGMT_RAISON_FAMILLES);
+  const famIndex=new Map(MGMT_RAISON_FAMILLES.map((f,i)=>[f,i]));
+  const nFamily=MGMT_RAISON_FAMILLES.length;
+  const famsByCand=candList.map(()=>new Set());
+  const reasonByOppFam=new Map();
+  for(let ci=0; ci<candList.length; ci++){
+    const a=candList[ci];
+    const rs=(typeof mgmtRaisonsPourPaire==='function')?mgmtRaisonsPourPaire(m,fc,a):[];
+    if(!Array.isArray(rs)) continue;
+    for(const r of rs){
+      if(!r||!r.famille||!famSet.has(r.famille)) continue;
+      const fi=famIndex.get(r.famille);
+      if(fi===undefined) continue;
+      if(!famsByCand[ci].has(fi)) famsByCand[ci].add(fi);
+      const key=a.id+'|'+fi;
+      if(!reasonByOppFam.has(key)) reasonByOppFam.set(key, r);
+    }
+  }
+  const candIds=candList.map(c=>c.id);
+  const adj=candIds.map((_,ci)=>Array.from(famsByCand[ci]).sort((x,y)=>x-y));
+  const matchFam=new Array(nFamily).fill(-1);
+  const tryK=function(ci,visited){
+    for(const fi of adj[ci]){
+      if(visited[fi]) continue;
+      visited[fi]=true;
+      if(matchFam[fi]===-1 || tryK(matchFam[fi],visited)){
+        matchFam[fi]=ci;
+        return true;
+      }
+    }
+    return false;
+  };
+  for(let ci=0;ci<candIds.length;ci++){
+    tryK(ci,new Array(nFamily).fill(false));
+  }
+  const matched=[];
+  for(let fi=0;fi<nFamily;fi++){
+    const ci=matchFam[fi];
+    if(ci===-1) continue;
+    const opp=candList[ci];
+    if(!opp) continue;
+    const r=reasonByOppFam.get(opp.id+'|'+fi);
+    if(!r) continue;
+    matched.push({fi,opp,r});
+  }
+  matched.sort((x,y)=>x.fi-y.fi);
+  const chosen=matched.slice(0,6);
+  return chosen.map(t=>({combattant:JSON.parse(JSON.stringify(fc)), raison:JSON.parse(JSON.stringify(t.r)), adversaire:JSON.parse(JSON.stringify(t.opp))}));
+}
+/* ==== [FIN ANCRE] ==== */
