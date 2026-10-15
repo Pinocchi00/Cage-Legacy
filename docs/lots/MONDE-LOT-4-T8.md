@@ -38,8 +38,10 @@ De haut en bas, comme la planche :
 La logique des piles, le booking, les textes de raison (`MGMT_RAISON_PHRASES`).
 
 ## Compte rendu
-- `mgmt-carte-cadre.js` : refonte du rendu des dossiers, raison, bannière et navigation ; aucun identifiant interne visible.
-- `ui-cadre.css` : styles dédiés au rendu `.mf-dossiers` avec jetons du cadre ; versions bumpées avec `_bump.js`.
-- `tests/mgmtDossiers.test.js` : trois tests T8 ajoutés (« le dossier montre la bannière, la raison de Leïla et les trois colonnes », « aucun identifiant interne n'est affiché », « l'étape 2 montre l'adversaire et le bouton pour mettre le combat sur la carte »).
-- Migration de sauvegarde : aucune. Écart : métriques de rang/contrat non disponibles par donnée dossier, affichage `—` pour le contrat et rang si absent.
-- Questions pour Anthony : vérifier l'écran aux résolutions spécifiées ; aucun relecteur disponible dans cette session.
+- `mgmt-carte-cadre.js` : rendu et étapes du dossier corrigés, identité adversaire et voisins selon l'étape, raison déjà échappée, classement d'organisation, première place libre réelle, en-tête Carte, touches/libellés et phrases identifiées `relu:false`.
+- `ui-cadre.css` : neutralisation des anciennes règles T7 conflictuelles, bandeau opaque, motif octogonal, tailles validées, voisins ronds, pagination et alignements.
+- `index.html` : versions du JS et CSS bumpées ; `sw.js` : version de cache montée par l'outil.
+- `tests/mgmtDossiers.test.js` : test T8 de l'étape 2 renforcé (étape réelle, identité dans bannière, noms dans confirmation), sans réduire la couverture T1–T7.
+- Tests exécutés : « Monde lot 4 T8 — le dossier montre la bannière, la raison de Leïla et les trois colonnes », « Monde lot 4 T8 — aucun identifiant interne n'est affiché », « Monde lot 4 T8 — l'étape 2 montre l'adversaire et le bouton pour mettre le combat sur la carte » ; fichier complet `tests/mgmtDossiers.test.js` : 40/40.
+- Migration de sauvegarde : aucune. Écart de contrat : la fiche demande `{n} COMBATS`, mais la présentation réutilisée affiche `—` et ne fournit pas le nombre ; aucune décision n'est prise ici, l'affichage reste `—`. Rang désormais fourni par `mgmtDivisionRank` sans incrément supplémentaire.
+- Questions pour Anthony : aucune autre question ouverte par cette reprise.

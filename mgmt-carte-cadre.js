@@ -238,6 +238,11 @@ SCREENS.mgmt_carte=scr_mgmt_carte_cadre;
  */
 function mgmtCarteDossierHtml(m){
   /* ==== [ANCRE: MONDE_LOT4_T8_DOSSIER] — Monde lot 4 T8 ==== */
+  /* ==== [ANCRE: MONDE_LOT4_T8_PHRASES] — Monde lot 4 T8 ==== */
+  const PHRASES_LEILA={
+    etape1:{id:'dossiers.etape1',relu:false,texte:'« Voici {n} dossiers pour le combat {k}. Faites-les défiler, puis choisissez. »'},
+    etape2:{id:'dossiers.etape2',relu:false,texte:'« Vous avez choisi {nom}. Voici {n} adversaires possibles. »'}
+  };
   const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
   const i=Math.max(0,Math.min(MGMT_CART.index||0,Math.max(0,pile.length-1)));
   MGMT_CART.index=pile.length?i:0;
@@ -253,16 +258,19 @@ function mgmtCarteDossierHtml(m){
   const nom=f=>mfNet(f&&(f.last||f.name||f.first)||'');
   const dossierF=etape===2?adversaire:combattant;
   const gl=mgmtFicheLigne(m,dossierF.id),f=gl&&gl.f||dossierF;
-  const rang=mgmtDivisionRank(m,f,m.org),reason=d.raison?mgmtRaisonLignes(m,{...d.raison,origine:d.origine},[combattant,adversaire]):null;
+  const rang=mgmtDivisionRank(m,f,'organization'),reason=d.raison?mgmtRaisonLignes(m,{...d.raison,origine:d.origine},[combattant,adversaire]):null;
   const famille=d.raison&&String(d.raison.famille||'').replace(/-/g,' ').toUpperCase();
-  const raison=reason?`<section class="mf-dos-raison mf-dossier-raison"><h2>POURQUOI LEÏLA VOUS LE PROPOSE · ${esc(famille||'')}</h2><b>${esc(reason.l1)}</b><span>${esc(reason.l2)}</span></section>`:'';
+  const raison=reason?`<section class="mf-dos-raison mf-dossier-raison"><h2>POURQUOI LEÏLA VOUS LE PROPOSE · ${esc(famille||'')}</h2><b>${reason.l1}</b><span>${reason.l2}</span></section>`:'';
   const lignes=mgmtPresentationLignes(m,{mode:'combattant',ids:[dossierF.id]}).panneaux;
   const colonnes=lignes.slice(0,3).map((p,k)=>`<section><h2>${esc(['CE QUI LE DISTINGUE','SA FORCE · SA FAILLE','SON HISTOIRE ICI'][k])}</h2>${p.lignes.slice(0,k===0?3:3).map(x=>`<div class="mf-dos-ligne">${esc(x.texte)}</div>`).join('')}</section>`).join('');
-  const banniere=`<div class="mf-dos-banner"><div><small>${esc(mfNet(f.first||''))}</small><strong>${esc(mfNet(f.last||f.name||''))}</strong></div><aside><span>PALMARÈS<b>${esc(`${f.W||0}-${f.L||0}-${f.D||0}`)}</b></span><span>CHEZ ${esc(mgmtOrgNom(m))}<b>N°${rang===null||rang<0?'—':rang+1}</b></span><span>CONTRAT<b>—</b></span></aside></div>`;
-  const voisine=(delta,label)=>{const nd=pile[(i+delta+pile.length)%pile.length];return `<button class="mf-dos-voisin" onclick="CL.mgmtDossierIndex(${delta})"><span>DOSSIER ${label}</span><b>${esc(mfNet(nd.combattant.first||''))}</b><strong>${esc(nom(nd.combattant))}</strong><small>${esc(nd.raison?((mgmtRaisonLignes(m,nd.raison,[nd.combattant,nd.adversaire])||{}).l1||''):'')}</small></button>`;};
-  const k=(MGMT_CART.cible==null?((m.card.main||[]).findIndex(x=>!x)+1||1):MGMT_CART.cible+1),nomCourant=nom(dossierF);
-  const top=`<div class="mf-dos-intro"><div><b>LEÏLA, VOTRE ADJOINTE</b><strong>${etape===1?`« Voici ${pile.length} dossiers pour le combat ${k}. Faites-les défiler, puis choisissez. »`:`« Vous avez choisi ${esc(nom(combattant))}. Voici ${pile.length} adversaires possibles. »`}</strong><span>Combat ${k} · ${esc(String(mgmtDivisionLabel(combattant.div)||'').toLowerCase())} · ${etape===2?`${esc(nom(combattant))} contre ?`:`${m.roster.filter(x=>x.div===combattant.div&&mgmtSelectable(m,x,null)).length} combattants libres`} · la carte en est à ${(m.card.main||[]).filter(Boolean).length} combats sur ${m.card.sizeMain||MGMT_MAIN_SIZE}</span></div><div class="mf-dos-steps">ÉTAPE 1 LE COMBATTANT　›　ÉTAPE 2 SON ADVERSAIRE　›　ÉTAPE 3 SUR LA CARTE</div></div>`;
-  return `<main class="mf-contenu mf-carte mf-dossiers"><div class="mf-dos-layout">${top}<div class="mf-dos-center mf-dossier-nav">${pile.length>1?voisine(-1,'PRÉCÉDENT'):''}<article class="mf-dos-card mf-dossier">${banniere}${raison}<div class="mf-dos-cols">${colonnes}</div></article>${pile.length>1?voisine(1,'SUIVANT'):''}</div><div class="mf-dos-page">DOSSIER ${i+1} SUR ${pile.length}　　←　 →　 Flèches, clic sur un bord, ou glisser le dossier</div><div class="mf-dos-actions">${mfBouton('D’autres dossiers',{touche:'D',onclick:'CL.mgmtCarteProposer()'})}${mfBouton('Liste complète',{touche:'L',onclick:'CL.mgmtDossierListe()'})}${mfBouton(etape===1?'Sa fiche':'Présentation du combat',{touche:etape===1?'F':'P',onclick:etape===1?'CL.mgmtCarteFiche()':'CL.mgmtDossierPresentation()'})}${mfBouton(etape===1?`Choisir ${nomCourant}`:`Mettre ${nom(combattant)} – ${nom(adversaire)} sur la carte`,{touche:'Entrée',jaune:true,onclick:'CL.mgmtCarteEntree()'})}</div></div></main>`;
+  const banniere=`<div class="mf-dos-banner mf-pr-banniere"><div class="mf-dossier-nom"><small>${esc(mfNet(f.first||''))}</small><strong>${esc(mfNet(f.last||f.name||''))}</strong></div><aside><span>PALMARÈS<b>${esc(`${f.W||0}-${f.L||0}-${f.D||0}`)}</b></span><span>CHEZ ${esc(mgmtOrgNom(m))}<b>${rang===null||rang<0?'—':'N°'+rang}</b></span><span>CONTRAT<b>—</b></span></aside></div>`;
+  const voisine=(delta,label)=>{const nd=pile[(i+delta+pile.length)%pile.length],nf=etape===2?nd.adversaire:nd.combattant,nr=nd.raison?mgmtRaisonLignes(m,nd.raison,[nd.combattant,nd.adversaire]):null;return `<button aria-label="${label==='SUIVANT'?'Suivant':'Précédent'}" class="mf-dos-voisin" onclick="CL.mgmtDossierIndex(${delta})"><span>DOSSIER ${label}</span><b>${esc(mfNet(nf.first||''))}</b><strong>${esc(nom(nf))}</strong><small>${nr?nr.l1:''}</small><i>${delta<0?'‹':'›'}</i></button>`;};
+  const main=m.card.main||[],libre=main.findIndex(x=>!x),k=MGMT_CART.cible==null?(libre<0?main.length+1:libre+1):MGMT_CART.cible+1,nomCourant=nom(dossierF);
+  const introPhrase=etape===1?PHRASES_LEILA.etape1.texte.replace('{n}',pile.length).replace('{k}',k):PHRASES_LEILA.etape2.texte.replace('{nom}',esc(nom(combattant))).replace('{n}',pile.length);
+  const steps=[['ÉTAPE 1 LE COMBATTANT',etape>1?'fait':etape===1?'courant':'avenir'],['ÉTAPE 2 SON ADVERSAIRE',etape>2?'fait':etape===2?'courant':'avenir'],['ÉTAPE 3 SUR LA CARTE','avenir']].map(([t,s])=>`<span class="${s}">${s==='fait'?'✓ ':''}${t}</span>`).join(' <b>›</b> ');
+  const top=`<div class="mf-dos-intro"><div><b>LEÏLA, VOTRE ADJOINTE</b><strong>${introPhrase}</strong><span>Combat ${k} · ${esc(String(mgmtDivisionLabel(combattant.div)||'').toLowerCase())} · ${etape===2?`${esc(nom(combattant))} contre ?`:`${m.roster.filter(x=>x.div===combattant.div&&mgmtSelectable(m,x,null)).length} combattants libres`} · la carte en est à ${main.filter(Boolean).length} combats sur ${m.card.sizeMain||MGMT_MAIN_SIZE}</span></div><div class="mf-dos-steps">${steps}</div></div>`;
+  const points=pile.map((_,j)=>`<i class="${j===i?'actif':''}"></i>`).join('');
+  return `<main class="mf-contenu mf-carte mf-dossiers"><div class="mf-dos-layout">${top}<div class="mf-dos-center mf-dossier-nav">${pile.length>1?voisine(-1,'PRÉCÉDENT'):''}<article class="mf-dos-card mf-dossier">${banniere}${raison}<div class="mf-dos-cols">${colonnes}</div></article>${pile.length>1?voisine(1,'SUIVANT'):''}</div><div class="mf-dos-page"><span>${points}　DOSSIER ${i+1} SUR ${pile.length}</span><span>← →　Flèches, clic sur un bord, ou glisser le dossier</span></div><div class="mf-dos-actions">${mfBouton('D’autres dossiers',{touche:'D',onclick:'CL.mgmtCarteProposer()'})}${mfBouton('Liste complète',{touche:'L',onclick:'CL.mgmtDossierListe()'})}${mfBouton(etape===1?'Sa fiche':'Présentation du combat',{touche:etape===1?'F':'P',onclick:etape===1?'CL.mgmtCarteFiche()':'CL.mgmtDossierPresentation()'})}${mfBouton(etape===1?`Choisir ${nomCourant}`:`Mettre ${nom(combattant)} – ${nom(adversaire)} sur la carte`,{touche:'Entrée',jaune:true,onclick:'CL.mgmtCarteEntree()'})}</div></div></main>`;
 }
 
 /* ==== [ANCRE: MONDE_LOT4_T5_GESTES] — Monde lot 4 T5 ==== */
@@ -311,13 +319,14 @@ function mgmtCarteDossiersEcran(m){
   const touches=[
     {ks:['←','→'],t:'Défiler',onclick:'CL.mgmtDossierSwipe(-1)'},
     {ks:['Entrée'],t:(MGMT_CART.etape===2?'Confirmer':'Choisir'),jaune:true,onclick:'CL.mgmtCarteEntree()'},
-    {ks:['Échap'],t:'Retour',onclick:'CL.mgmtCarteEsc()'},
+    {ks:['Échap'],t:MGMT_CART.etape===2?'Changer de combattant':'Retour à la carte',onclick:'CL.mgmtCarteEsc()'},
     {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},
     {ks:['D'],t:'D’autres dossiers',onclick:'CL.mgmtCarteProposer()'},
     {ks:['L'],t:'Liste',onclick:'CL.mgmtDossierListe()'}
   ];
   if(MGMT_CART.etape===2) touches.push({ks:['P'],t:'Présentation',onclick:'CL.mgmtDossierPresentation()'});
-  const opts={barre:'jeu',courant:'carte',m,plaque:'Carte',touches};
+  const main=m.card.main||[],libre=main.findIndex(x=>!x);
+  const opts={barre:'jeu',courant:'carte',m,plaque:'Carte',libelle:'LES DOSSIERS DE LEÏLA',compteur:`COMBAT ${MGMT_CART.cible==null?(libre<0?main.length+1:libre+1):MGMT_CART.cible+1}`,droite:`${mgmtOrgNom(m)} Fight Night ${(m.eventsPlayed||0)+1}`,touches};
   return mfEcran? (typeof mfEcran==='function'? mfEcran(html,opts): html) : html;
 }
 
