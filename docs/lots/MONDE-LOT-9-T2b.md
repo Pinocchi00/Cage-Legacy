@@ -1,0 +1,9 @@
+# Monde lot 9 T2b — les huit organisations vivent : la semaine 
+
+Branche : `monde-lot-9-monde`. **Sous-tranche de la T2** : la spécification complète, les DÉCISIONS 1 et 2 sont dans `docs/lots/MONDE-LOT-9-T2.md` ; lis-les d'abord. Le commit « (inachevé) » 6fd1db4 n'a rien codé.
+
+## Périmètre de cette sous-tranche, et rien d'autre
+la semaine : à chaque ouverture de cycle du joueur, chaque organisation de `m.orgs` joue au plus une soirée selon son calendrier, ordre fixe, déterministe ; temps d'une semaine mesuré.
+
+## Vérification
+Tests ciblés de la sous-tranche (nouveau fichier `tests/mgmtMondeVivant.test.js`, ajouté à `package.json` `test` et `test:watch`), `node tools/verif-versions.js origin/main`. Pas de `check:rapide` (le superviseur le lance). Commit `Monde lot 9 T2b : ...`.
