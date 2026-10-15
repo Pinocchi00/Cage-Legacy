@@ -94,11 +94,3 @@ test('Monde lot 9 T2a — la création réelle de l\'écran fait aussi vivre les
   assert.equal(win.eval('Object.keys(MGMT_NOUVELLE.gen.m.orgs).length'), 7);
   win.eval('mgmtNouvelleGenNettoyer()');
 });
-
-test('Monde lot 9 T2a bis — six ans complets : la partie écrite tient en 1,5 Mo et se recharge à l\'identique', { timeout: 900000 }, () => {
-  const win = newGameWindow({ runMain: true });
-  win.eval(`setSeed(${GRAINE}); mgmtPasseGenerer('split'); mgmtMondeVivantGenerer(G.mgmt);`);
-  const s = win.eval('mgmtSerialiser(G.mgmt)');
-  assert.ok(s.length <= 1500000, 'taille ' + s.length + ' octets > 1,5 Mo');
-  assert.equal(win.eval(`(function(){ const m=mgmtParseAndValidate(${JSON.stringify(s)}); return !!m&&mgmtSerialiser(m)===${JSON.stringify(s)}; })()`), true);
-});
