@@ -101,7 +101,7 @@ test('Monde lot 1 T5 — un combat du passé ne se revoit pas : ni bouton mort, 
 test('Monde lot 1 T5 — les écrans qui lisent le passé continuent de fonctionner', () => {
   const r = JSON.parse(B.eval(`JSON.stringify((function(){
     const m=G.mgmt; const out={};
-    G.screen='mgmt_resultats'; out.resultats=String(scr_mgmt_resultats()).length>100; out.sansRevoir=!/Revoir ce combat/.test(scr_mgmt_resultats());
+    G.screen='mgmt_resultats'; out.resultats=String(scr_mgmt_resultats()).length>100; out.sansRevoir=!/Revoir le combat/.test(scr_mgmt_resultats());
     out.soirees=mgmtSoirees(m).length>=1;
     out.classements=allDivisions().every(d=>mgmtDivisionRanking(m,d.id,'organization').length>0);
     return out; })())`));

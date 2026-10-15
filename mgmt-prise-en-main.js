@@ -72,7 +72,8 @@ function mgmtProchaineChose(m){
 /** Le bloc du bas à droite de tous les écrans de la partie : la parole de Leïla (si un moment est à dire) et la prochaine chose à faire. */
 function mfPriseHtml(m,ecran,grise){
   if(!m||!G||G.mgmt!==m) return '';
-  const p=grise?null:mgmtProchaineChose(m), id=mgmtPriseMoment(m,ecran);
+  /* Monde lot 10 T3 : Résultats porte déjà la prochaine chose à faire dans son bloc jaune (même source) ; la ligne du bas ne la répète pas. */
+  const p=(grise||ecran==='mgmt_resultats')?null:mgmtProchaineChose(m), id=mgmtPriseMoment(m,ecran);
   const leila=id?`<div class="mf-prise-leila"><b>Leïla</b><span>${esc(MGMT_PRISE_TEXTES.moments[id].texte)}</span></div>`:'';
   const suite=p?`<button type="button" class="mf-prise-suite" onclick="${p.onclick}"><span>Prochaine étape</span><b>${esc(p.texte)}</b></button>`:'';
   /* Une seule ligne à la fois dans le bas de l'écran : la parole de Leïla quand un moment est à dire, sinon la prochaine étape. */

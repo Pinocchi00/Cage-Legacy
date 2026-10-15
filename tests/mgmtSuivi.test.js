@@ -211,14 +211,14 @@ test('Résultats — chaque soirée jouée est archivée, combat par combat, ave
   const r=res(win,`const m=G.mgmt, s=mgmtSoirees(m); return {n:s.length,numeros:s.map(x=>x.n),combats:s.map(x=>x.idx.length),total:m.hist.length,joues:m.eventsPlayed};`);
   assert.equal(r.n,3); assert.deepEqual(r.numeros,[1,2,3]); assert.equal(r.combats.reduce((a,b)=>a+b,0),r.total); assert.equal(r.joues,3);
   win.eval(`MGMT_SU_RE={s:0,i:0}; CL.go('mgmt_resultats');`);
-  /* Décision du 12/10/2026, retour d'Anthony (Monde lot 2 T8) : liste des soirées à gauche, tableau des combats à droite ;
-     ← → changent de soirée, ↑ ↓ de ligne, Tab passe de la liste au tableau. */
-  const t=texte(win); for(const s of ['SOIRÉE 3','SOIRÉE 2','SOIRÉE 1','PRINCIPAL','CO-PRINCIPAL']) assert.ok(t.includes(s),s);
-  assert.ok(win.eval(`/ bat |match nul/.test(document.querySelector('.mf-re-qui').textContent)`));
-  touche(win,'ArrowLeft'); assert.equal(win.eval('MGMT_SU_RE.s'),1); assert.ok(texte(win).includes('Soirée 2')||texte(win).includes('SOIRÉE 2'));
-  touche(win,'ArrowDown'); assert.equal(win.eval('MGMT_SU_RE.i'),1);
+  /* Monde lot 10 T3 : planche Résultats validée par Anthony le 14/10/2026 (MONDE-LOT-10-DECISIONS) — liste des soirées à gauche (« Fight Night N »), tableau des combats groupés au milieu
+     (« Combat principal », « Co-principal »), ← → changent de soirée, ↑ ↓ de ligne ; R (et non plus Entrée) revoit, Tab n'existe plus. */
+  const t=texte(win); for(const s of ['Fight Night 3','Fight Night 2','Fight Night 1','Combat principal']) assert.ok(t.includes(s),s);
+  assert.ok(win.eval(`/ bat |match nul/.test(document.querySelector('.mf-re-cb').textContent)`));
+  touche(win,'ArrowLeft'); assert.equal(win.eval('MGMT_SU_RE.s'),1); assert.ok(texte(win).includes('Fight Night 2'));
+  touche(win,'ArrowDown'); assert.equal(win.eval('MGMT_SU_RE.i'),1); assert.ok(texte(win).includes('Co-principal'));
   /* Lot 11 : avec l'agenda, revoir ouvre l'écran du combat animé (la planche « Le combat animé »), non plus l'arène d'origine ; le retour reste les résultats. */
-  touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_combat','Revoir ouvre le combat animé sur la trace');
+  touche(win,'r'); assert.equal(win.eval('G.screen'),'mgmt_combat','Revoir ouvre le combat animé sur la trace');
   assert.equal(win.eval('MGMT_COMBAT.retour'),'mgmt_resultats');
 });
 
@@ -231,7 +231,7 @@ test('Résultats — un combat de la première soirée se revoit à l’identiqu
   assert.equal(r.soirees,40); assert.equal(r.premier,1); assert.equal(r.dernier,40);
   assert.equal(r.rej,r.winner,'le rejeu rend le même vainqueur'); assert.ok(r.fidele,'le verdict rejoué est fidèle'); assert.ok(r.familleRejouee,'même méthode'); assert.ok(r.methode);
   win.eval(`MGMT_SU_RE={s:39,i:0}; CL.go('mgmt_resultats');`);
-  assert.ok(texte(win).includes('SOIRÉE 1')); assert.equal(win.eval(`mgmtSuResultatsListe(G.mgmt,mgmtSoirees(G.mgmt)[0]).length`),win.eval('mgmtSoirees(G.mgmt)[0].idx.length'));
+  assert.ok(texte(win).includes('Fight Night 1')); assert.equal(win.eval(`mgmtSuResultatsListe(G.mgmt,mgmtSoirees(G.mgmt)[0]).length`),win.eval('mgmtSoirees(G.mgmt)[0].idx.length'));
   const sauve=res(win,`return validateMgmt(JSON.parse(JSON.stringify(G.mgmt)));`);
   assert.ok(sauve,'quarante soirées plus tard la partie se sauvegarde');
 });
