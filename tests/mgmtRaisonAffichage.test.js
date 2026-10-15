@@ -10,7 +10,7 @@ test('Monde lot 6 T4 — mgmtRaisonLignes rend deux lignes depuis la preuve sans
   assert.match(r.l1,/7 mois/);
   assert.match(r.l1,/Un combattant/);
   assert.equal(win.eval("MGMT_RAISON_PHRASES['longue-attente'].relu"),false);
-  assert.match(r.l2,/remettre en activité/);
+  assert.match(r.l2,/relancer son activité/);
 });
 
 test('Monde lot 6 T4 — origine joueur et preuve absente ne produisent aucune ligne',()=>{
@@ -122,4 +122,63 @@ test('Monde lot 6 T5 — le choix de formulation est déterministe',()=>{
   assert.deepEqual(r.r1,r.r3,'l’ordre des identifiants ne change pas la variante (tri)');
   assert.match(r.sans.l1,/: 34 ans, 21 combats/,'sans paire : la première formulation de T4 est conservée');
   assert.match(r.sans.l2,/éprouver cette expérience/,'sans paire : la seconde ligne de T4 est conservée');
+});
+
+/* ==== [ANCRE: MONDE_LOT6_T5_TEST_REPRISE] — Monde lot 6 T5 ==== */
+test('Monde lot 6 T5 — longue-attente s’accorde au féminin sans forme masculine fixe',()=>{
+  const r=JSON.parse(win.eval(`(()=>{
+    const m=mgmtDefault(), base={famille:'longue-attente',fait:{source:'attente',a:'x',mois:7}};
+    const collecte=d=>{const vus=[],cles=new Set();
+      for(let i=0;i<2000&&vus.length<3;i++){const r=mgmtRaisonLignes(m,base,[{id:'p'+i,div:d},{id:'q'+i,div:d}]);
+        if(r){const t=r.l1+' '+r.l2;if(!cles.has(t)){cles.add(t);vus.push(t);}}}
+      return vus;};
+    return JSON.stringify({fem:collecte('F-fly'),mas:collecte('H-fly')});
+  })()`));
+  assert.equal(r.fem.length,3,'les trois variantes sont atteignables au féminin');
+  assert.equal(r.mas.length,3,'les trois variantes sont atteignables au masculin');
+  const femTxt=r.fem.join(' | '), masTxt=r.mas.join(' | ');
+  assert.ok(!/\{(Il|il|lui|delui)\}/.test(femTxt),'aucun jeton d’accord oublié pour une combattante');
+  assert.ok(!/\b(il|lui)\b/.test(femTxt),'aucun pronom masculin pour une combattante');
+  assert.ok(!/\ble\s+remettre\b/.test(femTxt),'plus de « le remettre » non accordable');
+  assert.match(femTxt,/\belle\b/,'la combattante s’accorde au féminin');
+  assert.ok(!/\{(Il|il|lui|delui)\}/.test(masTxt),'aucun jeton d’accord oublié pour un combattant');
+  assert.ok(!/\belle\b/.test(masTxt),'aucun féminin pour un combattant');
+});
+
+test('Monde lot 6 T5 — test-jeune s’adresse correctement à une combattante',()=>{
+  const r=JSON.parse(win.eval(`(()=>{
+    const m=mgmtDefault(), base={famille:'test-jeune',fait:{source:'roles',a:'x',b:'y',age:22}};
+    const vus=[],cles=new Set();
+    for(let i=0;i<2000&&vus.length<3;i++){const r=mgmtRaisonLignes(m,base,[{id:'p'+i,div:'F-fly'},{id:'q'+i,div:'F-fly'}]);
+      if(r){const t=r.l1+' '+r.l2;if(!cles.has(t)){cles.add(t);vus.push(t);}}}
+    return JSON.stringify(vus);
+  })()`));
+  assert.equal(r.length,3,'les trois variantes sont atteignables');
+  const txt=r.join(' | ');
+  assert.ok(!/\{(Il|il|lui|delui)\}/.test(txt),'aucun jeton d’accord oublié pour une combattante');
+  assert.ok(!/\b(il|lui)\b/.test(txt),'aucun pronom masculin pour une combattante');
+  assert.match(txt,/\belle\b/,'au moins une formulation accorde au féminin');
+  assert.ok(!/\bsa\s+niveau\b/.test(txt),'aucun accord fautif « sa niveau »');
+  assert.ok(!/\bson\s+niveau\b/.test(txt),'plus de « son niveau » à la référence ambiguë');
+  for(const t of r) assert.ok(t.includes('22'),'l’âge de la preuve est cité dans chaque variante');
+});
+
+test('Monde lot 6 T5 — fin-contrat accorde « combat restant » au nombre',()=>{
+  const r=JSON.parse(win.eval(`(()=>{
+    const m=mgmtDefault(), out={};
+    for(const n of [1,3]){
+      const base={famille:'fin-contrat',fait:{source:'contrat',a:'x',restants:n}}, vus=[], cles=new Set();
+      for(let i=0;i<2000&&vus.length<3;i++){const r=mgmtRaisonLignes(m,base,[{id:'p'+i,div:'H-fly'},{id:'q'+i,div:'H-fly'}]);
+        if(r){const t=r.l1+' '+r.l2;if(!cles.has(t)){cles.add(t);vus.push(t);}}}
+      out[n]=vus;
+    }
+    return JSON.stringify(out);
+  })()`));
+  assert.equal(r['1'].length,3,'les trois variantes sont atteignables au singulier');
+  assert.equal(r['3'].length,3,'les trois variantes sont atteignables au pluriel');
+  for(const t of r['1']){
+    assert.match(t,/1 combat restant\b/,'« 1 combat restant » accordé au singulier');
+    assert.ok(!/\b1\s+restant\b/.test(t),'plus de « 1 restant » sans nom');
+  }
+  for(const t of r['3']) assert.match(t,/3 combats restants\b/,'« 3 combats restants » accordé au pluriel');
 });

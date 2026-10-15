@@ -39,8 +39,8 @@ const MGMT_RAISON_PHRASES=Object.freeze({
     {l1:'Écart de classement en {div} : {rangA} contre {rangB}.',l2:'Le combat peut rapprocher ou écarter ces deux rangs.',relu:false}
   ]},
   'test-jeune':{relu:false,variantes:[
-    {l1:'Test : {a}, {age} ans, face à {b}.',l2:'Le combat peut mesurer son niveau.',relu:false},
-    {l1:'{a}, {age} ans, monte face à {b}.',l2:'Le combat peut situer son niveau réel.',relu:false},
+    {l1:'Test : {a}, {age} ans, face à {b}.',l2:'Le combat peut mesurer ce qu’{il} peut donner.',relu:false},
+    {l1:'{a}, {age} ans, monte face à {b}.',l2:'Le combat peut dire où {il} se situe.',relu:false},
     {l1:'{a} a {age} ans ; {il} passe un vrai test contre {b}.',l2:'Le combat peut montrer où {il} en est.',relu:false}
   ]},
   'derniere-chance':{relu:false,variantes:[
@@ -49,7 +49,7 @@ const MGMT_RAISON_PHRASES=Object.freeze({
     {l1:'{a} reste sur {n} défaites ; {il} joue gros ici.',l2:'Le combat peut relancer ou arrêter cette série.',relu:false}
   ]},
   'longue-attente':{relu:false,variantes:[
-    {l1:'{a} attend depuis {mois} mois.',l2:'Le combat peut le remettre en activité.',relu:false},
+    {l1:'{a} attend depuis {mois} mois.',l2:'Le combat peut relancer son activité.',relu:false},
     {l1:'{a} n’a plus combattu depuis {mois} mois ; {il} patiente encore.',l2:'Le combat peut raccourcir cette attente.',relu:false},
     {l1:'{mois} mois sans combat pour {a} ; {il} attend une date.',l2:'Le combat peut rompre cette attente.',relu:false}
   ]},
@@ -59,9 +59,9 @@ const MGMT_RAISON_PHRASES=Object.freeze({
     {l1:'{a} a promis ce combat pour {c} ; {il} peut le tenir.',l2:'Le combat peut répondre à cette promesse.',relu:false}
   ]},
   'fin-contrat':{relu:false,variantes:[
-    {l1:'Dernier combat du contrat de {a} ({restants} restant).',l2:'Le combat peut peser sur la suite.',relu:false},
-    {l1:'Contrat de {a} : {restants} combat restant.',l2:'Le combat peut décider de la suite du contrat.',relu:false},
-    {l1:'{restants} combat restant au contrat de {a} ; {il} est à un tournant.',l2:'Le combat peut peser sur son avenir.',relu:false}
+    {l1:'Dernier combat du contrat de {a} : {restants} {combatRestant}.',l2:'Le combat peut peser sur la suite.',relu:false},
+    {l1:'{a} en fin de contrat, {restants} {combatRestant}.',l2:'Le combat peut décider de la suite du contrat.',relu:false},
+    {l1:'{restants} {combatRestant} au contrat de {a} ; {il} est à un tournant.',l2:'Le combat peut peser sur son avenir.',relu:false}
   ]},
   'styles-opposes':{relu:false,variantes:[
     {l1:'Styles opposés : {styleA} et {styleB}.',l2:'Le combat mettra ces styles à l’épreuve.',relu:false},
@@ -129,6 +129,8 @@ function mgmtRaisonLignes(m,raison,paire){
   const cs=f.combattants||[], vars={a:fighter(f.a||cs[0]?.a),b:fighter(f.b||cs[1]?.a),gagnant:fighter(f.gagnant),
     mois:Number.isFinite(f.mois)?f.mois:'',cycles:Number.isFinite(f.cycles)?f.cycles:'',c:Number.isFinite(f.c)?f.c:'',div:f.div||'',
     rangA:cs[0]?.rang??'',rangB:cs[1]?.rang??'',age:f.age??'',total:f.total??'',n:f.n??'',restants:f.restants??'',pays:f.pays||'',
+    // Forme accordée au nombre : « 1 combat restant » / « 3 combats restants ».
+    combatRestant:Number(f.restants)>1?'combats restants':'combat restant',
     nA:cs[0]?.n??'',nB:cs[1]?.n??'',styleA:cs[0]?.style||'',styleB:cs[1]?.style||''};
   const ids=mgmtRaisonIds(paire), variantes=entree.variantes;
   const idx=ids.length===2?mgmtRaisonHachage(raison.famille+'|'+ids.join('|'))%variantes.length:0;

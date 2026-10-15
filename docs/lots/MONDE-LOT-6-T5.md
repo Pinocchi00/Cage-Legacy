@@ -97,3 +97,35 @@ Aucune : pas de champ persistant, `MGMT_SAVE_VERSION`, migration ou validation t
 
 ### Questions pour Anthony
 - L'écart de version `mgmt-bureau.js` (T3) doit-il être corrigé dans une tranche dédiée (montée `?v=`) ? Il est antérieur à T5.
+
+### Reprise T5 — écarts du relecteur (15/10/2026)
+
+Relecture : trois écarts de grammaire dans `mgmt-raisons.js`. Corrigés seuls, sans toucher au contrat de rendu, à la sélection déterministe ni à la sauvegarde.
+
+- `mgmt-raisons.js:52` (longue-attente, variante 1) : « Le combat peut le remettre en activité. » remplacé par « Le combat peut relancer son activité. » — plus de pronom objet masculin fixe (`le`), non accordable par `mgmtAccord`. Les deux autres variantes utilisaient déjà le jeton accordable `{il}` (« elle patiente », « elle attend ») ; un test le vérifie désormais, et l'absence de tout pronom masculin y est assertée.
+- `mgmt-raisons.js:42-43` (test-jeune) : « son niveau » (référence au combattant concerné) remplacé par des formes accordables — « ce qu’{il} peut donner » et « où {il} se situe » ; la troisième variante utilisait déjà `{il}`.
+- `mgmt-raisons.js:62-64` (fin-contrat) : « ({restants} restant) » et « {restants} combat restant » remplacés par le jeton `{combatRestant}`, accordé au nombre à l'affichage (« 1 combat restant » / « 3 combats restants »). Nouveau calcul `combatRestant`, dérivé de `f.restants` dans `mgmtRaisonLignes` (aucun champ sauvegardé, aucun RNG).
+
+### Fichiers modifiés (reprise)
+- `mgmt-raisons.js` — trois familles de `MGMT_RAISON_PHRASES` reformulées ; jeton d'affichage `combatRestant` ajouté aux variables de `mgmtRaisonLignes`.
+- `tests/mgmtRaisonAffichage.test.js` — ancre `MONDE_LOT6_T5_TEST_REPRISE` et trois tests T5 ; marqueur du test T4 (`/remettre en activité/` → `/relancer son activité/`) ajusté parce que la phrase citée par le relecteur change (intitulé T4 conservé).
+- `index.html` — `?v=` de `mgmt-raisons.js` monté par `node tools/_bump.js` (fins de ligne LF conservées).
+- `sw.js` — `SW_VERSION='b134'` → `'b135'` par le même outil (montée réelle, pas de réécriture de fins de ligne).
+
+### Tests ajoutés (reprise)
+- `Monde lot 6 T5 — longue-attente s’accorde au féminin sans forme masculine fixe`
+- `Monde lot 6 T5 — test-jeune s’adresse correctement à une combattante`
+- `Monde lot 6 T5 — fin-contrat accorde « combat restant » au nombre`
+
+### Sauvegarde (reprise)
+Aucune : `MGMT_SAVE_VERSION`, `mgmtMigrate` et `validateMgmt` intacts ; `combatRestant` est une donnée de présentation dérivée au rendu.
+
+### Vérification locale (reprise)
+- `node --test tests/mgmtRaisonAffichage.test.js` : 10/10.
+- `node --test tests/mgmtRaisonsSauvegarde.test.js` : 9/9.
+- `node tools/verif-versions.js origin/main` : 1 écart **pré-existant** (`mgmt-bureau.js`, commit T3 `77d2c36`), hors T5.
+- `npm run check:rapide` non lancé (règle du superviseur : délai). Sous-agents `@verif`/`@relecteur` injoignables (« Subagent depth limit reached ») : vérification et relecture faites localement, conformément à la règle de repli.
+
+### Questions pour Anthony (reprise)
+- Confirmer que le jeton `combatRestant` (pluriel d'affichage) est acceptable, `validateMgmt` n'acceptant aujourd'hui que `restants===1` pour `fin-contrat` ; la forme reste de toute façon correcte au singulier.
+
