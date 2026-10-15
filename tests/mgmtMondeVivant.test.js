@@ -142,3 +142,33 @@ test('Monde lot 9 T2c — les effectifs vivants alimentent le compte et le class
   assert.equal(r.classe,true);
   assert.equal(r.org,win.eval('mgmtMondeVivantIds(G.mgmt)[0]'));
 });
+
+test('Monde lot 9 T2c — les titres extérieurs reprennent les champions des organisations vivantes', () => {
+  const win=creer(true);
+  const r=win.eval(`(function(){ const m=G.mgmt,id=mgmtMondeVivantIds(m)[0],s=m.orgs[id],f=s.roster.find(x=>!mgmtIsRetired(x));
+    const t=mgmtSplitTitle(s,f.div); return {id,div:f.div,champ:t.id,titres:mgmtExteriorTitles(m,f.div).belts.find(b=>b.org.id===id).id}; })()`);
+  assert.ok(r.champ); assert.equal(r.titres,r.champ);
+});
+
+test('Monde lot 9 T2c — une offre extérieure retrouve le combattant de l’organisation vivante', () => {
+  const win=creer(true);
+  const r=win.eval(`(function(){ const m=G.mgmt,id=mgmtMondeVivantIds(m)[0],f=m.orgs[id].roster.find(x=>!mgmtIsRetired(x));
+    const cible=mgmtExteriorPourOffre(m,f.id); return {id:f.id,cible:cible&&cible.id,org:cible&&cible.orgId,record:cible&&[cible.W,cible.L,cible.D]}; })()`);
+  assert.equal(r.cible,r.id); assert.equal(r.org,win.eval('mgmtMondeVivantIds(G.mgmt)[0]')); assert.ok(Array.isArray(r.record));
+});
+
+test('Monde lot 9 T2c — titres, offres et actualités sans monde vivant restent identiques', () => {
+  const win=creer(false);
+  const r=win.eval(`(function(){ const m=G.mgmt,div=allDivisions()[0].id,id=(m.exterieur||[])[0]?.id;
+    const snap=()=>JSON.stringify({titles:mgmtExteriorTitles(m,div),offer:id?mgmtExteriorPourOffre(m,id):null,news:mgmtSemaineMonde(m)});
+    const before=snap(); m.mondeVivant=false; const after=snap(); return {before,after}; })()`);
+  assert.equal(r.after,r.before);
+});
+
+test('Monde lot 9 T2c — les actualités lisent les résultats des soirées des organisations vivantes', () => {
+  const win=creer(true);
+  const found=win.eval(`(function(){ const m=G.mgmt,id=mgmtMondeVivantIds(m)[0],s=m.orgs[id],f=s.roster.find(x=>!mgmtIsRetired(x));
+    s.hist=[{c:m.cycle,winner:'A',a:{id:'world-a',name:'Vainqueur vivant',div:f.div},b:{id:'world-b',name:'Perdant vivant',div:f.div}}];
+    return mgmtSemaineMonde(m); })()`);
+  assert.match(found,/Vainqueur vivant/); assert.match(found,/monde-vivant/);
+});

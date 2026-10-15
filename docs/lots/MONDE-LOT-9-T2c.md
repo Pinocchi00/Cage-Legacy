@@ -34,3 +34,11 @@ Points 1 et 2 codés (09976ae). Cette session fait UNIQUEMENT, dans cet ordre, u
 A. Les tests des points 1 et 2 et le test de non-régression (partie sans monde vivant : titres et offres identiques en JSON) dans `tests/mgmtMondeVivant.test.js`. Commit `Monde lot 9 T2c : tests des titres et des offres`.
 B. Le point 3 (`mgmtSemaineMonde`) et son test. Commit `Monde lot 9 T2c : les actualités du monde vivant`.
 Le point 4 sera une session suivante. Ne t'arrête pas sur le nom d'un commit précédent.
+
+## Compte rendu — reprise
+
+- Fichiers modifiés : `mgmt-ecran-semaine.js` lit une soirée courante d'une sous-partie en mode vivant ; `index.html` monte sa version de cache ; `tests/mgmtMondeVivant.test.js` couvre titres, offres, actualités et non-régression sans monde vivant.
+- Tests ajoutés : « Monde lot 9 T2c — les titres extérieurs reprennent les champions des organisations vivantes » ; « Monde lot 9 T2c — une offre extérieure retrouve le combattant de l’organisation vivante » ; « Monde lot 9 T2c — titres, offres et actualités sans monde vivant restent identiques » ; « Monde lot 9 T2c — les actualités lisent les résultats des soirées des organisations vivantes ».
+- Migration de sauvegarde : aucune. Écarts : le test ciblé a été interrompu deux fois par le délai d'outil de 120 s ; `node tools/verif-versions.js origin/main` ne signale que l'écart préexistant `mgmt-nouvelle.js`.
+- Questions pour Anthony : aucune.
+- Relecture : non appelée, aucun sous-agent disponible selon la règle de repli.

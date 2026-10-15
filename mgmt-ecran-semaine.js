@@ -49,6 +49,21 @@ function mgmtSemaineCarte(m){
    combattant de Split sans combat récent. Pas de voix ni de recrutement fictif. */
 function mgmtSemaineMonde(m){
   const news=[], used=new Set(), divisions=new Set(), types=new Map();
+  /* ==== [ANCRE: MONDE_LOT9_T2C_ACTUALITES] — Monde lot 9 T2c ==== */
+  if(m&&m.mondeVivant===true){
+    const ids=mgmtMondeVivantIds(m), soir=[];
+    for(const id of ids){
+      const sous=m.orgs&&m.orgs[id];
+      for(const h of (sous&&Array.isArray(sous.hist)?sous.hist:[])){
+        if(h&&h.c===m.cycle&&h.winner&&h.winner!=='D') soir.push({id,h});
+      }
+    }
+    if(soir.length){
+      const {id,h}=soir[0], w=h.winner==='A'?h.a:h.b, l=h.winner==='A'?h.b:h.a;
+      const div=divById(w&&w.div)||divById(l&&l.div);
+      if(div) return `<article class="mgmt-week-news" data-type="monde-vivant" data-division="${esc(div.id)}"><span class="mgmt-week-source">${esc(MGMT_ORGANISATIONS.find(o=>o.id===id)?.nom||id)}</span><p>${esc(w.name)} bat ${esc(l.name)} en ${esc(mgmtDivisionLabel(div))}.</p></article>`;
+    }
+  }
   /* Lot 5 H6 : le conteur. Les moments de la semaine passent d'abord (ton
      cercle, tes suivis, puis le vestiaire), dans le budget de trois à cinq
      informations ; les nouvelles du monde remplissent le reste. */
