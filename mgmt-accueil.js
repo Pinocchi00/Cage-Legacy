@@ -21,6 +21,8 @@ function mgmtAccueilNom(m,id){
   if(!id) return '';
   const f=mgmtFighterById(m,id);
   if(f) return f.name;
+  /* Monde lot 9 T2c : monde vivant, le nom vient de l'effectif de son organisation. */
+  if(m.mondeVivant===true){ const x=mgmtExteriorCombattant(m,id); return x?x.name:''; }
   const line=(m.exterieur||[]).find(e=>e&&e.id===id);
   if(line){ const t=mgmtExteriorTrace(line,m.cycle); return t?t.name:''; }
   return '';
@@ -93,9 +95,15 @@ function mgmtAccueilContenu(m){
   const divs=allDivisions();
   if(divs.length){
     const div=divs[(m.cycle||0)%divs.length];
+    /* ==== [ANCRE: MONDE_LOT9_T2C_ACCUEIL] — Monde lot 9 T2c : monde vivant, le premier mondial d'une organisation vivante. ==== */
+    if(m.mondeVivant===true){
+      const x=(mgmtDivisionRanking(m,div.id,'world')||[]).map(r=>mgmtExteriorCombattant(m,r.id)).find(Boolean);
+      if(x) ailleurs.push({parts:[{id:x.id,nom:x.name},mgmtAccueilT(' mène le classement mondial en '+mgmtDivisionLabel(div.id))],detail:(MGMT_ORGANISATIONS.find(o=>o.id===x.orgId)||{}).nom||''});
+    }else{
     const tete=(mgmtDivisionRanking(m,div.id,'world')||[]).find(r=>(m.exterieur||[]).some(e=>e.id===r.id));
     const line=tete&&m.exterieur.find(e=>e.id===tete.id), trace=line&&mgmtExteriorTrace(line,m.cycle);
     if(trace) ailleurs.push({parts:[{id:line.id,nom:trace.name},mgmtAccueilT(' mène le classement mondial en '+mgmtDivisionLabel(div.id))],detail:trace.orgs.length?trace.orgs[trace.orgs.length-1].name:''});
+    }
   }
   if(typeof mgmtMediasLignes==='function'){
     for(const p of mgmtMediasLignes(m)){

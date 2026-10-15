@@ -27,10 +27,11 @@ function mgmtRecrutables(m,divId){
   if(!m||!divById(divId)) return [];
   const ranking=mgmtDivisionRanking(m,divId,'world');
   const chezSplit=new Set((m.roster||[]).map(o=>o.id));
+  if(m.mondeVivant===true) return mgmtRecrutablesVivants(m,ranking,chezSplit);
   const out=[];
   ranking.forEach((o,i)=>{
     if(chezSplit.has(o.id)) return;
-  const line=(m.exterieur||[]).find(e=>e.id===o.id);
+    const line=(m.exterieur||[]).find(e=>e.id===o.id);
     if(!line) return;
     const trace=mgmtExteriorTrace(line,m.cycle);
     if(!trace) return;
@@ -43,6 +44,35 @@ function mgmtRecrutables(m,divId){
   return out;
 }
 
+/* ==== [ANCRE: MONDE_LOT9_T2C_RECRUTEMENT] — Monde lot 9 T2c ====
+   Monde vivant : les recrutables sont les sans-contrat des sept organisations (leur effectif réel, mgmtExteriorCombattant) ;
+   l'ancien calcul ci-dessus reste celui des parties d'avant le lot. */
+function mgmtRecrutablesVivants(m,ranking,chezSplit){
+  const out=[];
+  ranking.forEach((o,i)=>{
+    if(chezSplit.has(o.id)) return;
+    const f=mgmtExteriorCombattant(m,o.id); if(!f) return;
+    if(typeof mgmtContratsActif==='function'&&mgmtContratsActif(m)&&f.libre!==true) return;
+    const org=(MGMT_ORGANISATIONS.find(x=>x.id===f.orgId)||{}).nom||'';
+    out.push({id:f.id,rang:i+1,name:f.name,age:Math.floor(f.age),W:f.W,L:f.L,orgs:org?[org]:[],derniere:org});
+  });
+  return out;
+}
+/** Monde vivant : il quitte l'effectif de son organisation et entre chez le joueur avec sa ligne (bilan, âge, niveau). */
+function mgmtRecruterVivant(m,id){
+  const f=mgmtExteriorCombattant(m,id), sous=f&&m.orgs[f.orgId], div=f&&divById(f.div);
+  if(!f||!sous||!div) return null;
+  const i=sous.roster.findIndex(x=>x&&x.id===id); if(i<0) return null;
+  const ligne=JSON.parse(JSON.stringify(sous.roster[i]));
+  sous.roster.splice(i,1); if(typeof mgmtRangsInvalider==='function') mgmtRangsInvalider(sous);
+  delete ligne.libre; delete ligne.ct;
+  Object.assign(ligne,{divName:div.name,org:mgmtOrgNom(m),interactions:0});
+  m.roster.push(ligne);
+  mgmtRangsInvalider(m);
+  mgmtAddFact(m,{c:m.cycle,k:'recrue',a:ligne.id});
+  return ligne;
+}
+
 /** Recrute un combattant du monde extérieur : une ligne de Split à son âge et à
  *  son bilan, au niveau 1 ; le geste est un fait. @returns {object|null} la ligne. */
 function mgmtRecruter(m,id,interne){
@@ -50,6 +80,7 @@ function mgmtRecruter(m,id,interne){
   /* Lot 9 : avec l'agenda, aucun recrutement n'est gratuit — on signe un contrat (mgmtContratSigner). */
   if(!interne&&typeof mgmtContratsActif==='function'&&mgmtContratsActif(m)) return null;
   if(m.roster.some(o=>o.id===id)) return null;
+  if(m.mondeVivant===true) return mgmtRecruterVivant(m,id);
   const line=(m.exterieur||[]).find(e=>e.id===id);
   if(!line||mgmtExteriorRetired(line,m.cycle)) return null;
   const trace=mgmtExteriorTrace(line,m.cycle);

@@ -158,11 +158,30 @@ test('Monde lot 9 T2c — une offre extérieure retrouve le combattant de l’or
 });
 
 test('Monde lot 9 T2c — titres, offres et actualités sans monde vivant restent identiques', () => {
-  const win=creer(false);
+  const win=creer(false), vivant=creer(true), orgs=vivant.eval('JSON.stringify(G.mgmt.orgs)');
   const r=win.eval(`(function(){ const m=G.mgmt,div=allDivisions()[0].id,id=(m.exterieur||[])[0]?.id;
     const snap=()=>JSON.stringify({titles:mgmtExteriorTitles(m,div),offer:id?mgmtExteriorPourOffre(m,id):null,news:mgmtSemaineMonde(m)});
-    const before=snap(); m.mondeVivant=false; const after=snap(); return {before,after}; })()`);
+    const before=snap(); m.orgs=${JSON.stringify(orgs)}; const after=snap(); return {before,after,mode:m.mondeVivant}; })()`);
   assert.equal(r.after,r.before);
+  assert.notEqual(r.mode,true,'la partie reste sans monde vivant');
+});
+
+test('Monde lot 9 T2c — le recrutement et l’accueil lisent les organisations vivantes', () => {
+  const win=creer(true);
+  const r=JSON.parse(win.eval(`(function(){ const m=G.mgmt,org=mgmtMondeVivantIds(m)[0],s=m.orgs[org],f=s.roster.find(x=>!mgmtIsRetired(x));
+    f.libre=true; delete f.ct;
+    const recru=mgmtRecrutables(m,f.div).find(x=>x.id===f.id);
+    const nom=mgmtAccueilNom(m,f.id);
+    const vivants=new Set(mgmtExteriorEffectifs(m,f.div).map(x=>x.id).concat(...allDivisions().map(d=>mgmtExteriorEffectifs(m,d.id).map(x=>x.id))));
+    const ailleurs=mgmtAccueilContenu(m).ailleurs.filter(x=>/classement mondial/.test(x.parts.map(p=>p.t||'').join('')));
+    const ligne=mgmtRecruter(m,f.id,true);
+    return JSON.stringify({recru:!!recru,org:recru&&recru.derniere,orgNom:MGMT_ORGANISATIONS.find(o=>o.id===org).nom,nom:nom===f.name,
+      accueilVivant:ailleurs.every(x=>x.parts.some(p=>p.id&&vivants.has(p.id))),nAccueil:ailleurs.length,
+      entre:!!ligne&&m.roster.some(x=>x.id===f.id),parti:!s.roster.some(x=>x.id===f.id),recrue:m.facts.some(x=>x.k==='recrue'&&x.a===f.id),valide:validateMgmt(m)}); })()`));
+  assert.equal(r.recru,true,'le sans-contrat d’une organisation vivante est recrutable'); assert.equal(r.org,r.orgNom);
+  assert.equal(r.nom,true);
+  assert.ok(r.accueilVivant,'l’accueil ne cite que des combattants des organisations vivantes');
+  assert.equal(r.entre,true); assert.equal(r.parti,true,'il quitte son organisation'); assert.equal(r.recrue,true); assert.equal(r.valide,true);
 });
 
 test('Monde lot 9 T2c — les actualités lisent les résultats des soirées des organisations vivantes', () => {
