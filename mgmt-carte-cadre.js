@@ -255,6 +255,47 @@ function mgmtCarteDossierHtml(m){
     </div></main>`;
 }
 
+/* ==== [ANCRE: MONDE_LOT4_T5_GESTES] — Monde lot 4 T5 ==== */
+/** Branche les gestes de souris du dossier sur la navigation existante.
+ * N'altère que l'index éphémère du dossier et ne modifie pas la carte.
+ * @param {HTMLElement} element Élément dossier rendu à l'écran.
+ * @returns {void}
+ */
+function mgmtCarteDossierGestes(element){
+  if(!element||element.__gestesDossierBound) return;
+  element.__gestesDossierBound=true;
+  const interactif=cible=>!!cible.closest('button,a,input,textarea,select,summary,label,[role="button"],[onclick]');
+  let depart=null;
+  // Un relâchement peut engendrer un clic après le nouveau rendu : l'absorber
+  // avant les actions des contrôles, puis retirer aussitôt cet écouteur temporaire.
+  const absorbeClic=()=>{
+    const stop=e=>{ e.preventDefault(); e.stopImmediatePropagation(); document.removeEventListener('click',stop,true); };
+    document.addEventListener('click',stop,true);
+    setTimeout(()=>document.removeEventListener('click',stop,true),0);
+  };
+  const relache=e=>{
+    document.removeEventListener('mouseup',relache);
+    const debut=depart; depart=null;
+    if(!debut||!element.isConnected||G.screen!=='mgmt_carte'||MGMT_CART.mode!=='dossiers') return;
+    const dx=e.clientX-debut.x,dy=e.clientY-debut.y;
+    if(Math.max(Math.abs(dx),Math.abs(dy))>=24) absorbeClic();
+    if(Math.abs(dx)>=24&&Math.abs(dx)>Math.abs(dy)) CL.mgmtDossierSwipe(dx<0?-1:1);
+  };
+  element.addEventListener('mousedown',e=>{
+    if(e.button!==0||interactif(e.target)) return;
+    depart={x:e.clientX,y:e.clientY};
+    document.addEventListener('mouseup',relache);
+    e.preventDefault();
+  });
+  element.addEventListener('click',e=>{
+    if(e.button!==0||!element.isConnected||interactif(e.target)) return;
+    const rect=element.getBoundingClientRect(),x=e.clientX-rect.left;
+    if(rect.width<=0||x<0||x>rect.width) return;
+    const delta=x<rect.width/4?-1:x>rect.width*3/4?1:0;
+    if(delta){ e.preventDefault(); CL.mgmtDossierSwipe(delta); }
+  });
+}
+
 function mgmtCarteDossiersEcran(m){
   const html=mgmtCarteDossierHtml(m);
   const touches=[

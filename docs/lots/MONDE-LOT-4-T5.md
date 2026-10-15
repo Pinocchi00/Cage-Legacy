@@ -75,3 +75,23 @@ Ne pas modifier T1/T2 et leurs critères de sélection, le booking `mgmtBookMain
 - Décision technique : le glisser déclenche au relâchement, une seule fois, lorsque le déplacement horizontal atteint au moins 24 px et dépasse le déplacement vertical. Ce seuil ignore les tremblements sans exiger un long geste.
 - Décision technique : les déplacements par geste suivent l'enroulement de l'index existant pour conserver la même affordance que les flèches clavier.
 - Question pour Anthony : aucune.
+
+## Compte rendu — reprise Codex du 15/10/2026
+
+- Travail T5 existant conservé puis corrigé : clics sur les quarts latéraux du dossier et glisser horizontal d'au moins 24 px, aux deux étapes, délèguent à `CL.mgmtDossierSwipe`, donc au même index que le clavier.
+- `mgmt-carte-cadre.js` : géométrie réelle du dossier (y compris mise à l'échelle), contrôles interactifs exclus, bouton principal seul, relâchement hors dossier accepté. Les gestes verticaux et le clic consécutif au glisser sont absorbés sans navigation parasite. L'écouteur document existe uniquement pendant le geste ; un ancien dossier retiré du DOM ne navigue plus.
+- `ui-08-controller-arena.js` : branchement après chaque rendu du mode dossiers, sans masquer les exceptions.
+- `tests/mgmtDossiers.test.js` : quatre tests T5 renforcés, assertions T1/T2/T4 conservées. Comparaison exacte aux flèches clavier, éléments rendus renouvelés, seuil inclus 24 px / refus 23 px, contrôles bouton et lien, clic après glisser, vertical, bouton secondaire, départ extérieur et élément périmé. Carte et sélection de liste inchangées par navigation.
+- `index.html` / `sw.js` : montées de cache déjà préparées conservées, ordre des scripts inchangé, aucun nouveau script. Les fins de ligne de chaque fichier ont été préservées lors des éditions.
+
+### Vérification
+
+- `node --test tests/mgmtDossiers.test.js` : **29/29 verts**, environ 29 s.
+- `node tools/verif-versions.js HEAD` : **aucun écart**.
+- `git diff --check` : **vert**.
+- Lint ciblé sur les deux scripts : une erreur **préexistante en T4**, confirmée dans HEAD avant modification : `mgmtDossierPresentation` appelle `mgmtPresentationCombat`, absent des globaux de cette branche (ligne 404 après T5). Aucun écart lint dans les gestes ajoutés. Le branchement présentation du lot 3 reste à corriger par le superviseur à l'intégration ; pas de suppression ni d'assouplissement de lint.
+- Pas de `check:rapide` ni de contrôle complet : consigne explicite du superviseur pour cette reprise. Ils restent nécessaires avant acceptation/fusion du lot.
+
+### Périmètre
+
+Aucun changement de sauvegarde, texte auteur, sélection T1/T2, booking ou T6. Aucun push ni PR. Aucune question pour Anthony.

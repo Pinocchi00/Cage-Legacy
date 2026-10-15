@@ -368,3 +368,96 @@ test('Monde lot 4 T4 — le mode dossiers ne change pas après rechargement du m
   const b=JSON.parse(w2.eval('JSON.stringify(MGMT_CART.dossiers.map(d=>({c:d.combattant.id,a:d.adversaire&&d.adversaire.id,r:d.raison})))'));
   assert.deepEqual(a,b);
 });
+
+/* ==== [ANCRE: MONDE_LOT4_T5_TEST_SOURIS] — Monde lot 4 T5 ==== */
+function sourisDossier(w,type,cible,x,y=50,button=0){
+  cible.dispatchEvent(new w.MouseEvent(type,{clientX:x,clientY:y,button,bubbles:true,cancelable:true}));
+}
+function dossierVisible(w){
+  const el=w.document.querySelector('.mf-dossier'); assert.ok(el,'dossier rendu');
+  // jsdom ne calcule pas la géométrie. Simuler un dossier décalé et à l'échelle.
+  el.getBoundingClientRect=()=>({left:100,top:0,width:400,height:200,right:500,bottom:200});
+  return el;
+}
+function partieSouris(etape){
+  const w=newGameWindow({runMain:true});
+  w.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  if(etape===2) w.eval('CL.mgmtCarteEntree();');
+  assert.ok(w.eval('MGMT_CART.dossiers.length')>1);
+  return w;
+}
+
+test('Monde lot 4 T5 — un clic sur le bord gauche ou droit défile d’un dossier',()=>{
+  for(const etape of [1,2]){
+    const w=partieSouris(etape);
+    try{
+      const avant=w.eval('JSON.stringify(G.mgmt.card)'),pick=w.eval('MGMT_CART.pick');
+      for(const delta of [-1,1,1,-1]){
+        const index=w.eval('MGMT_CART.index');
+        touche(w,delta<0?'ArrowLeft':'ArrowRight'); const attendu=w.eval('MGMT_CART.index');
+        w.eval('MGMT_CART.index='+index+'; render();');
+        const el=dossierVisible(w); sourisDossier(w,'click',el.querySelector('.mf-dossier-nom'),delta<0?110:490);
+        assert.equal(w.eval('MGMT_CART.index'),attendu,'un pas comme au clavier');
+      }
+      const index=w.eval('MGMT_CART.index'); sourisDossier(w,'click',dossierVisible(w),300);
+      assert.equal(w.eval('MGMT_CART.index'),index,'centre inactif');
+      assert.equal(w.eval('JSON.stringify(G.mgmt.card)'),avant); assert.equal(w.eval('MGMT_CART.pick'),pick);
+    }finally{w.close();}
+  }
+});
+
+test('Monde lot 4 T5 — un glisser horizontal défile d’un dossier dans le sens du geste',()=>{
+  for(const etape of [1,2]){
+    const w=partieSouris(etape);
+    try{
+      const avant=w.eval('JSON.stringify(G.mgmt.card)');
+      for(const dx of [-24,24,-100,100]){
+        const index=w.eval('MGMT_CART.index'); touche(w,dx<0?'ArrowLeft':'ArrowRight');
+        const attendu=w.eval('MGMT_CART.index'); w.eval('MGMT_CART.index='+index+'; render();');
+        const el=dossierVisible(w); sourisDossier(w,'mousedown',el,300);
+        sourisDossier(w,'mousemove',el,300+dx);
+        sourisDossier(w,'mouseup',w.document,300+dx);
+        assert.equal(w.eval('MGMT_CART.index'),attendu,'seuil inclus, relâchement hors dossier');
+        sourisDossier(w,'click',dossierVisible(w),490);
+        assert.equal(w.eval('MGMT_CART.index'),attendu,'clic synthétisé après glisser absorbé');
+      }
+      const el=dossierVisible(w),index=w.eval('MGMT_CART.index');
+      sourisDossier(w,'mousedown',el,300); sourisDossier(w,'mouseup',el,323);
+      assert.equal(w.eval('MGMT_CART.index'),index,'23 pixels ne défilent pas');
+      assert.equal(w.eval('JSON.stringify(G.mgmt.card)'),avant);
+    }finally{w.close();}
+  }
+});
+
+test('Monde lot 4 T5 — les clics sur les contrôles et les gestes verticaux ne déclenchent pas de défilement parasite',()=>{
+  for(const etape of [1,2]){
+    const w=partieSouris(etape);
+    try{
+      const avant=w.eval('JSON.stringify(G.mgmt.card)'),index=w.eval('MGMT_CART.index');
+      for(const tag of ['button','a']){
+        const el=dossierVisible(w),controle=w.document.createElement(tag); let actions=0;
+        controle.addEventListener('click',()=>actions++); el.appendChild(controle);
+        sourisDossier(w,'mousedown',controle,110); sourisDossier(w,'mouseup',controle,160); sourisDossier(w,'click',controle,110);
+        assert.equal(actions,1); assert.equal(w.eval('MGMT_CART.index'),index,'contrôle au bord sans défilement');
+      }
+      const el=dossierVisible(w);
+      sourisDossier(w,'mousedown',el,110); sourisDossier(w,'mouseup',el,110,100); sourisDossier(w,'click',el,110,100);
+      assert.equal(w.eval('MGMT_CART.index'),index,'geste vertical et clic consécutif ignorés');
+      sourisDossier(w,'mousedown',el,300,50,2); sourisDossier(w,'mouseup',el,400,50,2);
+      assert.equal(w.eval('MGMT_CART.index'),index,'bouton secondaire ignoré');
+      assert.equal(w.eval('JSON.stringify(G.mgmt.card)'),avant);
+    }finally{w.close();}
+  }
+});
+
+test('Monde lot 4 T5 — un geste commencé hors du dossier ne change pas le dossier',()=>{
+  const w=partieSouris(1);
+  try{
+    const index=w.eval('MGMT_CART.index'),el=dossierVisible(w);
+    sourisDossier(w,'mousedown',w.document,300); sourisDossier(w,'mouseup',el,200);
+    assert.equal(w.eval('MGMT_CART.index'),index);
+    sourisDossier(w,'mousedown',el,300); w.eval('render();');
+    sourisDossier(w,'mouseup',w.document,200);
+    assert.equal(w.eval('MGMT_CART.index'),index,'un ancien dossier retiré ne navigue plus');
+  }finally{w.close();}
+});
