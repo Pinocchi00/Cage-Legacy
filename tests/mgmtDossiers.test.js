@@ -465,13 +465,19 @@ test('Monde lot 4 T5 — un geste commencé hors du dossier ne change pas le dos
 test('Dossiers — les règles de style de l’écran existent et aucun texte sous 22 px',()=>{
   const fs=require('node:fs');
   const css=fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
-  for(const selector of ['.mf-dossiers .mf-dossier{','.mf-dossiers .mf-dossier-raison{','.mf-dossiers .mf-dossier-nav{'])
-    assert.ok(css.includes(selector),`règle présente : ${selector}`);
-  const dossierCss=css.slice(css.indexOf('[ANCRE: MONDE_LOT4_T7_DOSSIERS_CSS]'));
-  const tailles=[...dossierCss.matchAll(/font-size:(\d+(?:\.\d+)?)px/g)].map(m=>+m[1]);
-  assert.ok(tailles.length>0);
-  assert.deepEqual(tailles.filter(t=>t<22),[],'aucune taille CSS des dossiers sous 22 px');
   const win=newGameWindow({runMain:true});
-  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
-  assert.ok(win.document.querySelector('.mf-dossiers .mf-dossier'));
+  try{
+    const feuille=win.document.createElement('style'); feuille.textContent=css; win.document.head.appendChild(feuille);
+    const regles=[...win.document.styleSheets].flatMap(f=>[...f.cssRules].map(r=>r.selectorText));
+    for(const selector of ['.mf-dossiers .mf-dossier','.mf-dossiers .mf-dossier-raison','.mf-dossiers .mf-dossier-nav'])
+      assert.ok(regles.includes(selector),`règle dans une feuille chargée : ${selector}`);
+    win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+    const textes=[...win.document.querySelectorAll('.mf-dossiers .mf-dossier, .mf-dossiers .mf-dossier *')]
+      .filter(el=>el.childElementCount===0&&el.textContent.trim());
+    assert.ok(textes.length>0,'textes du dossier rendus');
+    for(const el of textes){
+      const px=parseFloat(win.getComputedStyle(el).fontSize);
+      assert.ok(px>=22,`${el.className||el.tagName} calculé à ${px}px`);
+    }
+  }finally{win.close();}
 });

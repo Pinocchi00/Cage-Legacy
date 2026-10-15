@@ -23,7 +23,10 @@ Toute logique des piles ; les textes.
 ## Compte rendu
 - `ui-cadre.css` : styles préfixés `.mf-dossiers` pour la navigation, la carte et ses textes ; version CSS montée.
 - `index.html`, `sw.js` : versions de cache montées par l’outil de versionnage.
-- `tests/mgmtDossiers.test.js` : test « Dossiers — les règles de style de l’écran existent et aucun texte sous 22 px » (présence des sélecteurs, tailles CSS et présence des éléments rendus).
+- `tests/mgmtDossiers.test.js` : test « Dossiers — les règles de style de l’écran existent et aucun texte sous 22 px » (règles dans la feuille injectée au jsdom, tailles calculées des textes rendus).
 - Migration de sauvegarde : aucune. `mgmt-carte-cadre.js` inchangé.
 - Écarts : vérification des versions signale seulement l’écart hérité `mgmt-bureau.js` (`?v=b42xxxxxxxxx` vs origin/main), conforme à l’exception indiquée par la fiche.
-- Questions pour Anthony : aucune. Sous-agents verif/relecteur non disponibles (profondeur maximale atteinte) ; tests ciblés lancés localement, relecture non effectuée.
+- Planches : les fichiers `.html` cités par la fiche sont absents ; références accessibles dans ce dépôt : `maquettes/monde/MondeDossiersCombattant.dc.html` et `maquettes/monde/MondeDossiersAdversaire.dc.html` (également citées par les fiches T4/T6). Aucun contenu ni chemin n’a été inventé.
+- Reprise : le contrôle jsdom vérifie désormais les règles de la feuille chargée et les tailles calculées ; `ui-cadre.css` est versionné dans `index.html`, avec SW_VERSION montée par l’outil.
+- Vérification locale : `node --test tests/mgmtDossiers.test.js` (30/30) et `node --test tests/mgmtCadre.test.js` (12/12) ; `node tools/verif-versions.js origin/main` ne signale que l’écart hérité `mgmt-bureau.js`. Sous-agents non disponibles ; relecture indépendante non effectuée.
+- Questions pour Anthony : confirmer que les planches `.dc.html` accessibles satisfont les références `.html` de cette fiche.
