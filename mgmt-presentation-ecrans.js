@@ -149,14 +149,19 @@ function mgmtPresentationHtml(m,vue){
   const affiche=(f,cote)=>`<div class="mf-pr-nom ${cote}"><span style="font-size:${mfCorps(f.first||'',solo?1000:570,solo?64:40,22)}px">${esc(mfNet(f.first||''))}</span><b style="font-size:${mfCorps(f.last||f.name,solo?1000:570,solo?200:116,22)}px">${esc(mfNet(f.last||f.name))}</b></div>`;
   const rang=base.rang.findIndex(x=>x.id===a.id);
   const cartouche=solo?`<div class="mf-pr-cartouche"><div>PALMARÈS<b>${esc(a.W+'-'+a.L+'-'+(a.D||0))}</b></div><div>${esc('CHEZ '+mgmtOrgNom(m))}<b>${esc(rang<0?'—':'N°'+(rang+1))}</b></div><div>AU MONDE<b>—</b></div><div>CONTRAT<b>—</b></div></div>`:'';
+  /* ==== [ANCRE: MONDE_LOT6_PRESENTATION_RAISON] — Monde lot 6 ==== */
+  // Combat proposé par Leïla et porteur d'une raison : ses deux lignes en tête, lues sur la preuve enregistrée (rien si raison nulle ou origine joueur).
+  const carteRaison=!solo&&(vue.mode==='combat'||vue.mode==='soiree')?[...(m.card?.main||[]),...(m.card?.prelims||[])].find(x=>[x.a,x.b].sort().join('|')===vue.ids.slice().sort().join('|')):null;
+  const lignesRaison=carteRaison&&a&&b?mgmtRaisonLignes(m,carteRaison.raison&&{...carteRaison.raison,origine:carteRaison.origine},[a,b]):null;
+  const raison=lignesRaison?`<div class="mf-pr-raison"><span>${lignesRaison.l1}</span><span>${lignesRaison.l2}</span></div>`:'';
   const programme=vue.mode==='soiree'?mgmtPresentationCombatSoiree(m,vue.i):null;
   const carte=vue.mode==='combat'?[...(m.card?.main||[]),...(m.card?.prelims||[])].find(x=>[x.a,x.b].sort().join('|')===vue.ids.slice().sort().join('|')):null;
   const tag=programme?[programme.etiquette,programme.rounds+' ROUNDS',programme.titre?'TITRE':''].filter(Boolean).join(' · '):carte?[carte.rounds?carte.rounds+' ROUNDS':'',carte.title?'TITRE':''].filter(Boolean).join(' · '):'';
   const ban=`<div class="mf-pr-banniere">${affiche(a,'a')}${b?affiche(b,'b')+`<div class="mf-pr-vs"><b>VS</b>${tag?`<span>${esc(tag)}</span>`:''}</div>`:cartouche}</div>`;
-  const pages=panneaux.map((p,k)=>mgmtPresentationPaginer(m,vue,p.lignes,k<3?(solo?268:266):(solo?142:254),solo&&k===3?884:466));
+  const pages=panneaux.map((p,k)=>mgmtPresentationPaginer(m,vue,p.lignes,(k<3?(solo?268:266)-(raison?72:0):(solo?142:254)),solo&&k===3?884:466));
   vue.pages=Math.max(...pages.map(p=>p.length));vue.page=Math.min(vue.page,vue.pages-1);
   const panneau=(p,k)=>`<section class="mf-pr-panneau"><h2>${esc(p.titre)}</h2><div class="mf-pr-lignes">${(pages[k][vue.page]||[]).map(x=>mgmtPresentationLigneHtml(m,vue,x)).join('')}</div></section>`;
-  return `<main class="mf-pr ${solo?'solo':'duo'}">${ban}<div class="mf-pr-rangee">${panneaux.slice(0,3).map((p,k)=>panneau(p,k)).join('')}</div><div class="mf-pr-rangee bas">${panneaux.slice(3).map((p,k)=>panneau(p,k+3)).join('')}</div></main>`;
+  return `<main class="mf-pr ${solo?'solo':'duo'}">${ban}${raison}<div class="mf-pr-rangee">${panneaux.slice(0,3).map((p,k)=>panneau(p,k)).join('')}</div><div class="mf-pr-rangee bas">${panneaux.slice(3).map((p,k)=>panneau(p,k+3)).join('')}</div></main>`;
 }
 /** Écran complet du cadre courant ; retour d'origine si devenu invalide. @returns {string} */
 function scr_mgmt_presentation(){
