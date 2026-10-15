@@ -1,5 +1,5 @@
 # Monde lot 4 — Les dossiers de Leïla : cadre de travail (superviseur, 15/10/2026)
 
-Branche : `monde-lot-4-dossiers`, partie de la branche du lot 6 (`monde-lot-6-raisons`, T1 à T3 : les raisons existent, `mgmt-raisons.js`). Elle sera fusionnée APRÈS le lot 6 ; ne fusionne jamais `main` toi-même.
+**Branche attendue et courante : `monde-lot-4-dossiers`** (créée le 15/10 à partir de la branche du lot 6 pour disposer des raisons, `mgmt-raisons.js`). Elle sera fusionnée APRÈS le lot 6 ; ne fusionne jamais `main` toi-même. Ce n'est PAS une erreur de branche.
 Planches VALIDÉES par Anthony le 10/10 : `maquettes/monde/MondeDossiersCombattant.html` et `maquettes/monde/MondeDossiersAdversaire.html`. La tranche T3 du brief (la planche) est donc FAITE : la chaîne est T1, T2, T4, T5, T6.
 Règles : aucun sous-agent n'est appelable depuis le codeur (pas de @ecrivain, @verif, @relecteur) — il vérifie lui-même avec `node tools/verif-versions.js origin/main` et `npm run check:rapide`. Les textes fixes sont copiés des planches, marqués `relu:false`. Le superviseur tranche toute question technique : aucun STOP pour une question technique. Les dossiers posent le combat par `mgmtBookMain` (pas de second système de booking) ; la liste complète reste accessible.
