@@ -1,6 +1,5 @@
 # Monde lot 6 T4 — L'affichage de la raison
 
-STOP
 
 ## 1. Branche
 - Branche attendue : `monde-lot-6-raisons` (branche désignée par T1 et confirmée dans les comptes rendus T1–T3).
@@ -73,3 +72,9 @@ T5 (écriture des formulations/variantes), nouvelle famille de preuve ou seuil T
 
 ## Compte rendu
 Fiche en attente : le codeur ne démarre pas tant que la question bloquante 1 n'est pas tranchée et que les tests/appelants des interfaces lot 3/4 ne sont pas repérés.
+
+## DÉCISION du superviseur — 15/10/2026 (les trois questions sont tranchées ; aucune question pour Anthony)
+1. **Ordre T4/T5** : T4 livre l'affichage avec UNE formulation par famille, écrite par toi d'après la colonne « Le fait cité » du brief (lot 6, tableau des quinze familles) : ligne 1 = le fait avec son chiffre ou son nom (lu dans les champs structurés de la raison, jamais inventé), ligne 2 = ce que le combat peut changer, sobre. Constante `MGMT_RAISON_PHRASES` (une entrée par famille, `relu:false`). T5 ajoutera ensuite deux variantes par famille et les accords au féminin dans cette même constante. Une seule fonction pure `mgmtRaisonLignes(m,raison)` rend `{l1,l2}` ou `null` : elle sera réutilisée par les dossiers du lot 4 (qui n'existent pas encore dans cette branche : n'affiche donc que sur les Préliminaires et dans la présentation du combat).
+2. **`origine:'joueur'`** : rien n'est affiché. La raison est celle de Leïla ; un combat posé par le joueur n'en porte pas à l'écran.
+3. **`raison:null`** (piles anciennes) : les zones sont entièrement omises, sans erreur.
+Les deux lignes tiennent dans le panneau actuel, aucun texte sous 22 px, `esc()` sur tout. Pas de sous-agent : textes écrits par toi, vérification par `node tools/verif-versions.js origin/main` et `npm run check:rapide`. Ne fusionne jamais `main`.
