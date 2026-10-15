@@ -114,8 +114,11 @@ function mgmtFaitsIndividuels(base,f){
   add('bilan',[f.W,f.L,f.D||0],{W:f.W,L:f.L,D:f.D||0},[fiche(['W','L','D'])]);
   add('ville',mgmtIdentiteVille(f,m),{ville:mgmtIdentiteVille(f,m)},[fiche(['ville'])]);
   // La porte métier accepte le même sel explicite que les autres identités.
-  const metier=mgmtIdentiteMetier(f,m);
-  add('metier',metier,{metier},[fiche(['metier'])]);
+  /* Monde lot 11 (décision d'Anthony du 15/10/2026, docs/HUMANITE-A-REFAIRE.md) : l'ancien métier est retiré tant que l'interrupteur est baissé. */
+  if(mgmtHumaniteActive()){
+    const metier=mgmtIdentiteMetier(f,m);
+    add('metier',metier,{metier},[fiche(['metier'])]);
+  }
   for(const x of mgmtVieRelayes(m,f)){
     if(x.c>m.cycle) continue;
     const index=m.facts.findIndex(y=>y.k==='moment_vie'&&y.a===f.id&&y.c===x.c&&y.m===x.moment.id);

@@ -62,3 +62,13 @@ test('Humanité retirée — l\'interrupteur remis à vrai rend la fiche d\'avan
     assert.ok(r.id.metier&&r.texte.includes(r.id.metier),'l\'ancien métier revient avec l\'interrupteur levé');
   }finally{ w.close(); }
 });
+
+test('Humanité retirée — la présentation d\'un combattant ne dit pas son ancien métier', () => {
+  /* Fuite trouvée par le superviseur le 15/10/2026 sur l'écran des dossiers : « Dans la vie : chauffeur VTC ». */
+  const lire=actif=>{ const w=partie(9,actif); try{ return JSON.parse(w.eval(`(function(){ const m=G.mgmt; let n=0, metiers=0;
+      for(const f of m.roster.slice(0,20)){ const t=JSON.stringify(mgmtPresentationLignes(m,{mode:'combattant',ids:[f.id]}).panneaux); if(t.includes('Dans la vie')) n++; if(mgmtIdentite(m,f).metier) metiers++; }
+      return JSON.stringify({n,metiers}); })()`)); }finally{ w.close(); } };
+  const coupe=lire(false), leve=lire(true);
+  assert.equal(coupe.n,0,'aucun métier dans la présentation');
+  assert.ok(leve.metiers>0&&leve.n>0,'l\'interrupteur levé rend le métier à la présentation');
+});
