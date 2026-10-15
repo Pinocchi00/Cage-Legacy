@@ -129,9 +129,15 @@ test('Agenda — préparation à la demande : le joueur désigne un combattant, 
     return {o:!!o,div:o&&o.div===f.div,proche:o&&Math.abs((mgmtDivisionRank(m,o)||0)-rg)===Math.min(...meme),autre:o&&o.id!==f.id};`);
   assert.ok(r.o&&r.div&&r.proche&&r.autre);
   win.eval(`CL.go('mgmt_carte'); CL.mgmtCarteEntree();`);
-  const i0=win.eval('MGMT_CART.cursor'); touche(win,'d');
-  assert.equal(win.eval(`mgmtCarteListe(G.mgmt)[MGMT_CART.cursor].id`),win.eval(`mgmtAgendaProposer(G.mgmt,MGMT_CART.pick).id`),'le curseur se place sur l’adversaire proposé');
-  assert.ok(i0>=0);
+  const curseurAvant=win.eval('MGMT_CART.cursor');
+  const mainAvant=win.eval('G.mgmt.card.main.length');
+  touche(win,'d');
+  assert.equal(win.eval('G.mgmt.card.main.length'),mainAvant,'D ne booke aucun combat');
+  assert.equal(win.eval('MGMT_CART.cursor'),curseurAvant,'D ne déplace plus le curseur');
+  const dossiersJson=win.eval('JSON.stringify(Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers.map(d=>d.adversaire.id):[])');
+  const pileJson=win.eval('JSON.stringify(mgmtDossiersAdversaires(G.mgmt,MGMT_CART.pick).map(d=>d.adversaire.id))');
+  assert.equal(dossiersJson,pileJson,'D expose réellement la pile d’adversaires proposée');
+  assert.ok(JSON.parse(dossiersJson).length>=1,'D expose au moins un dossier');
 });
 
 test('Une soirée est toujours posée : l’ouverture pose la première, à cinq semaines, et la suivante se pose après une soirée jouée (demande d’Anthony du 08/10/2026 : les planches montrent la date sur chaque écran)', () => {

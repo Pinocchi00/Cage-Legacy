@@ -12,7 +12,7 @@ let MGMT_PARTIES={curseur:1,effacer:0};
 /** Remet à zéro les dix états d'interface du mode : ils vivent au niveau des
  *  modules et ne doivent jamais passer d'une partie à l'autre. */
 function mgmtInterfaceRaz(){
-  MGMT_CART={cursor:0,pick:null};
+  MGMT_CART={cursor:0,pick:null,mode:'liste',dossierCombattant:null,dossiers:[],etape:1,index:0,vusCombattants:[],vusAdversaires:{},listeDepuisDossiers:false,dragX:0};
   MGMT_CLASSEMENTS={div:'H-fly',scope:'world'};
   MGMT_FICHE={id:null,retour:'mgmt_carte',cursor:0};
   MGMT_SOIREE=mgmtSoireeNeuve(0);

@@ -318,6 +318,76 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-balayage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;pointer-events:none;z-index:60}
 .mf-balayage>[data-m="wipe"]{position:absolute;left:0;top:0;width:5000px;height:1080px;display:flex;transform:translateX(-5200px) skewX(-45deg);transform-origin:0 0;pointer-events:none}
 .mf-stage.mf-masque>*:not(.mf-fond):not(.mf-balayage){visibility:hidden}
+/* ==== [ANCRE: MONDE_LOT4_T7_DOSSIERS_CSS] — Monde lot 4 T7 ==== */
+.mf-dossiers{display:flex;flex-direction:column;gap:16px;}
+.mf-dossiers .mf-dossier-etapes{flex:none;font-family:var(--mf-titre);font-weight:800;font-size:32px;line-height:1;}
+.mf-dossiers .mf-dossier-nav{display:flex;align-items:stretch;gap:12px;flex:1;min-height:0;}
+.mf-dossiers .mf-dossier-nav>button{width:100px;flex:none;background:var(--mf-ligne);color:var(--mf-blanc);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:76px;line-height:1;}
+.mf-dossiers .mf-dossier{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;padding:40px;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);}
+.mf-dossiers .mf-dossier-raison{max-width:100%;font-size:28px;line-height:1.15;text-align:center;color:var(--mf-texte2);}
+.mf-dossiers .mf-dossier-nom{max-width:100%;font-family:var(--mf-titre);font-weight:800;font-size:110px;line-height:.8;text-align:center;overflow-wrap:anywhere;}
+.mf-dossiers .mf-dossier-nom span{font-size:44px;color:var(--mf-rouge-vif);}
+.mf-dossiers .mf-dossier-id{font-size:22px;line-height:1;color:var(--mf-texte2);}
+.mf-dossiers .mf-dossier-resume{font-size:24px;line-height:1.15;color:var(--mf-texte2);}
+/* ==== [ANCRE: MONDE_LOT4_T8_DOSSIERS_CSS] — Monde lot 4 T8 ==== */
+.mf-dossiers .mf-dos-layout{height:100%;display:flex;flex-direction:column;gap:14px;min-height:0}
+.mf-dossiers .mf-dos-intro{height:112px;flex:none;border:2px solid var(--mf-bord);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:var(--mf-noir)}
+.mf-dossiers .mf-dos-intro>div:first-child{display:flex;flex-direction:column;gap:5px;min-width:0}
+.mf-dossiers .mf-dos-intro>div:first-child>b{font-size:22px;color:var(--mf-jaune);letter-spacing:.06em}
+.mf-dossiers .mf-dos-intro strong{font-size:27px;line-height:1.05}
+.mf-dossiers .mf-dos-intro>div:first-child>span{font-size:22px;color:var(--mf-texte2)}
+.mf-dossiers .mf-dos-steps{font-family:var(--mf-titre);font-size:24px;color:var(--mf-texte2);white-space:nowrap}.mf-dossiers .mf-dos-steps .courant{color:var(--mf-jaune)}.mf-dossiers .mf-dos-steps .fait{color:var(--mf-texte2)}
+.mf-dossiers .mf-dos-center{display:flex;gap:12px;flex:1;min-height:0;align-items:stretch}
+.mf-dossiers .mf-dos-center>.mf-dos-voisin{width:145px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);color:var(--mf-blanc);display:flex;flex-direction:column;justify-content:space-around;align-items:center;text-align:center;padding:12px;position:relative;border-radius:50%}
+.mf-dossiers .mf-dos-voisin span,.mf-dossiers .mf-dos-card h2{font-size:22px;letter-spacing:.04em;color:var(--mf-texte2)}
+.mf-dossiers .mf-dos-voisin b,.mf-dossiers .mf-dos-voisin strong{font-family:var(--mf-titre);font-size:30px;line-height:.9}
+.mf-dossiers .mf-dos-voisin small{font-size:22px}
+.mf-dossiers .mf-dos-card{flex:1;min-width:0;min-height:0;background:var(--mf-panneau);padding:12px;display:flex;flex-direction:column;gap:10px;overflow:hidden;justify-content:flex-start;align-items:stretch}
+.mf-dossiers .mf-dos-banner{height:126px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:14px;background-color:var(--mf-noir);border:2px solid var(--mf-bord);background-image:none;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+.mf-dossiers .mf-dos-banner>div{display:flex;flex-direction:column;font-family:var(--mf-titre);line-height:.78}
+.mf-dossiers .mf-dos-banner small{font-size:38px}.mf-dossiers .mf-dos-banner strong{font-size:110px}
+.mf-dossiers .mf-dos-banner aside{display:flex;gap:16px}.mf-dossiers .mf-dos-banner aside span{display:flex;flex-direction:column;font-size:22px;color:var(--mf-texte2)}
+/* ==== [ANCRE: MONDE_LOT4_T8_BANNIERE_PLAN_AVANT] — Monde lot 4 T8 ==== */
+.mf-dossiers .mf-dos-banner:before{z-index:0}
+.mf-dossiers .mf-dos-banner>.mf-dossier-nom,.mf-dossiers .mf-dos-banner>aside{position:relative;z-index:1}
+.mf-dossiers .mf-dos-banner aside b{font-family:var(--mf-titre);font-size:32px;color:var(--mf-blanc)}
+.mf-dossiers .mf-dos-raison{min-height:88px;flex:none;background:var(--mf-rouge);padding:8px 14px;display:flex;flex-direction:column;gap:4px}
+.mf-dossiers .mf-dos-raison h2{margin:0;color:var(--mf-blanc)}.mf-dossiers .mf-dos-raison b{font-family:var(--mf-titre);font-size:29px;line-height:1}.mf-dossiers .mf-dos-raison span{font-size:22px}
+.mf-dossiers .mf-dos-cols{display:grid;grid-template-columns:5fr 4fr 4fr;gap:12px;min-height:0;overflow:hidden}
+.mf-dossiers .mf-dos-cols section{min-width:0;overflow:hidden}.mf-dossiers .mf-dos-cols h2{margin:0 0 7px}.mf-dossiers .mf-dos-ligne{font-size:22px;line-height:1.05;padding:8px;background:var(--mf-ligne);margin-bottom:6px}
+.mf-dossiers .mf-dos-page{height:36px;flex:none;font-family:var(--mf-titre);font-size:26px;display:flex;justify-content:space-between;align-items:center}.mf-dossiers .mf-dos-page i{display:inline-block;width:10px;height:10px;border:2px solid var(--mf-texte2);border-radius:50%;margin-right:5px}.mf-dossiers .mf-dos-page i.actif{background:var(--mf-jaune);border-color:var(--mf-jaune)}
+.mf-dossiers .mf-dos-actions{height:58px;flex:none;display:flex;gap:10px;align-items:center}.mf-dossiers .mf-dos-actions .mf-bouton{height:56px}.mf-dossiers .mf-dos-actions .mf-bouton:last-child{margin-left:auto}
+.mf-dossiers .mf-dossier-nav .mf-dossier-nom{display:flex;flex-direction:column;max-width:100%;font-family:var(--mf-titre);font-weight:800;line-height:.78;overflow-wrap:anywhere;text-align:left}.mf-dossiers .mf-dossier-nav .mf-dossier-nom small{font-size:38px}.mf-dossiers .mf-dossier-nav .mf-dossier-nom strong{font-size:110px}.mf-dossiers .mf-dos-banner{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 2 98 30 98 70 50 98 2 70 2 30Z' fill='none' stroke='%23e23a2b' stroke-opacity='.14' stroke-width='2'/%3E%3C/svg%3E");background-size:160px 160px}.mf-dossiers .mf-dos-voisin i{font-style:normal;font-size:40px;line-height:1}
+/* ==== [ANCRE: MONDE_LOT4_T8_REPRISE_PLANCHE] — Monde lot 4 T8 ==== */
+.mf-dossiers .mf-dos-steps{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.mf-dossiers .mf-dos-step{height:76px;padding:0 16px;display:flex;align-items:center;gap:12px;background:var(--mf-ligne);color:var(--mf-texte2);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-dossiers .mf-dos-step.courant{background:var(--mf-jaune);color:var(--mf-noir)}
+.mf-dossiers .mf-dos-step.fait{background:var(--mf-ligne)}
+.mf-dossiers .mf-dos-step i{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--mf-bord);color:var(--mf-noir);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%);font-style:normal;font-family:var(--mf-titre);font-size:28px}
+.mf-dossiers .mf-dos-step.courant i{background:var(--mf-noir);color:var(--mf-jaune)}
+.mf-dossiers .mf-dos-step.fait i{background:var(--mf-jaune);color:var(--mf-noir)}
+.mf-dossiers .mf-dos-step span{display:flex;flex-direction:column;gap:7px}
+.mf-dossiers .mf-dos-step small{font-size:22px;letter-spacing:.06em}
+.mf-dossiers .mf-dos-step b{font-family:var(--mf-titre);font-size:28px;line-height:.8}
+.mf-dossiers .mf-dos-chevron{font-family:var(--mf-titre);font-size:34px;color:var(--mf-texte2)}
+.mf-dossiers .mf-dos-banner{height:150px;align-items:stretch;padding:18px;background-color:var(--mf-noir)}
+.mf-dossiers .mf-dossier-nav .mf-dossier-nom{justify-content:flex-end;gap:9px;line-height:.8;padding-bottom:0}
+.mf-dossiers .mf-dossier-nav .mf-dossier-nom small{font-size:38px;line-height:.9}
+.mf-dossiers .mf-dossier-nav .mf-dossier-nom strong{font-size:110px;line-height:.69}
+.mf-dossiers .mf-dos-banner aside{align-items:center;padding:0 20px;background:rgba(13,11,11,.86);border:2px solid var(--mf-bord);gap:28px}
+.mf-dossiers .mf-dos-banner aside span{font-weight:600;letter-spacing:.04em;text-transform:uppercase;gap:9px}
+.mf-dossiers .mf-dos-banner aside b{font-size:40px;line-height:.8;color:var(--mf-blanc)}
+.mf-dossiers .mf-dos-raison{align-items:flex-start;text-align:left;justify-content:center;padding:12px 18px;gap:8px}
+.mf-dossiers .mf-dos-raison h2{font-size:22px;line-height:1;letter-spacing:.06em}
+.mf-dossiers .mf-dos-raison b{font-size:32px;line-height:.9}
+.mf-dossiers .mf-dos-center>.mf-dos-voisin{width:156px;border-radius:0;justify-content:space-between;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.mf-dossiers .mf-dos-voisin i{position:absolute;top:calc(50% - 42px);font-size:76px;width:84px;height:84px;border-radius:0;background:var(--mf-blanc);color:var(--mf-noir);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-dossiers .mf-dos-voisin b{margin-top:auto}
+.mf-dossiers .mf-dos-voisin small{margin-bottom:0}
+.mf-dossiers .mf-dos-cols{gap:14px}
+.mf-dossiers .mf-dos-cols section{display:flex;flex-direction:column;gap:8px}
+.mf-dossiers .mf-dos-ligne{position:relative;padding:7px 12px 7px 42px;min-height:42px;background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+.mf-dossiers .mf-dos-ligne:before{content:"";position:absolute;left:14px;top:calc(50% - 8px);width:16px;height:16px;background:var(--mf-jaune);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
 /* ==== [FIN ANCRE] ==== */
 
 /* ---- La Fiche : bannière et chiffres à gauche, cinq onglets à droite ------------ */

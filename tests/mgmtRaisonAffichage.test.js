@@ -245,3 +245,19 @@ test('Monde lot 6 — la présentation d’un combat de Leïla porte ses deux li
   const regle=css.match(/\.mf-pr-raison\{[^}]*\}/)[0];
   assert.ok(Number(regle.match(/font:\d+ (\d+)px/)[1])>=22,'aucun texte sous 22 px');
 });
+
+test('Monde lot 6 — une raison nomme la catégorie, jamais son identifiant', () => {
+  /* Défaut vu par le superviseur le 15/10/2026 sur l'écran des dossiers : « Écart de classement en H-light ». */
+  const w=newGameWindow({runMain:true});
+  try{
+    const r=JSON.parse(w.eval(`(function(){ const m=mgmtDefault('split'); G={theme:'dark',mgmt:m}; mgmtNewRoster(m);
+      const d=allDivisions()[0].id, l=m.roster.filter(f=>f.div===d);
+      const lignes=['classement-voisin','meme-categorie-jamais-affrontes'].map(famille=>{
+        const fait=famille==='classement-voisin'?{source:'classement',portee:'organization',div:d,combattants:[{a:l[0].id,rang:1},{a:l[1].id,rang:2}]}:{source:'hist',a:l[0].id,b:l[1].id,div:d,n:0};
+        return mgmtRaisonLignes(m,{famille,fait,origine:'leila'},[l[0],l[1]]); });
+      return JSON.stringify({lignes,d,label:mgmtDivisionLabel(d).toLowerCase()}); })()`));
+    const texte=JSON.stringify(r.lignes);
+    assert.ok(!texte.includes(r.d),'identifiant visible : '+texte);
+    assert.ok(texte.includes(r.label),'nom de la catégorie : '+texte);
+  }finally{ w.close(); }
+});

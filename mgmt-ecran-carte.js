@@ -27,9 +27,9 @@ const MGMT_CART_LABELS={open:'Carte principale',leave:'← Retour au bureau',
   complete:'Carte principale complète.',
   empty:'Aucun adversaire disponible dans la catégorie.',
   card:'Carte principale',list:'Combattants',dossier:'Dossier',prelims:'Préliminaires'};
-let MGMT_CART={cursor:0,pick:null};
+let MGMT_CART={cursor:0,pick:null,mode:'liste',dossierCombattant:null,dossiers:[],etape:1,index:0,vusCombattants:[],vusAdversaires:{},listeDepuisDossiers:false,dragX:0};
 
-function mgmtCartReset(){ MGMT_CART={cursor:0,pick:null}; }
+function mgmtCartReset(){ MGMT_CART={cursor:0,pick:null,mode:'liste',dossierCombattant:null,dossiers:[],etape:1,index:0,vusCombattants:[],vusAdversaires:{},listeDepuisDossiers:false,dragX:0}; }
 
 /* ==== [ANCRE: MGMT_DIVISION_FEMININ] — décision d'Anthony du 28/09/2026 :
    dans le management, une catégorie féminine s'affiche « Poids mouche

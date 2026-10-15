@@ -880,3 +880,146 @@ function mgmtClosePile(m){
   }
   return mgmtRefillBulk(m)?'refill':'stuck';
 }
+
+
+/* ==== [ANCRE: MONDE_LOT4_T1_DOSSIERS] — Monde lot 4 T1 ==== */
+function mgmtDossiersCombattants(m, exclureId, dejaVus){
+  if(exclureId===undefined) exclureId=null;
+  if(!Array.isArray(dejaVus)) dejaVus=[];
+  if(!m||!Array.isArray(m.roster)) return [];
+  const dejaSet=new Set(dejaVus);
+  const orgJoueur=typeof mgmtOrgNom==='function'?mgmtOrgNom(m):m.org;
+  const dansOrg=f=>!!f && (f.org===m.org || f.org===orgJoueur);
+  const candidats=m.roster.filter(f=>f&&mgmtValidId(f.id) && dansOrg(f)
+    && f.id!==exclureId && !dejaSet.has(f.id)
+    && (typeof mgmtSelectable==='function'?mgmtSelectable(m,f,null):true));
+  candidats.sort((a,b)=>(a.id<b.id?-1:(a.id>b.id?1:0)));
+  const famSet=new Set(MGMT_RAISON_FAMILLES);
+  const famIndex=new Map(MGMT_RAISON_FAMILLES.map((f,i)=>[f,i]));
+  const paires=[];
+  for(const c of candidats){
+   const advs=m.roster.filter(a=>a&&a.id!==c.id && dansOrg(a)
+       && a.div===c.div
+       && (typeof mgmtSelectable==='function'?mgmtSelectable(m,a,c.id):true));
+    advs.sort((x,y)=>(x.id<y.id?-1:(x.id>y.id?1:0)));
+    for(const a of advs) paires.push([c,a]);
+  }
+  const index=typeof mgmtRaisonsIndex==='function'?mgmtRaisonsIndex(m,paires):null;
+  const triples=[];
+  for(const [c,a] of paires){
+    const key=[c.id,a.id].sort().join('|');
+    const lst=index? (index.get(key)||[]) : (typeof mgmtRaisonsPourPaire==='function'?mgmtRaisonsPourPaire(m,c,a):[]);
+    for(const r of lst){
+      if(!r||!r.famille||!famSet.has(r.famille)) continue;
+      triples.push({c,a,r,fi:famIndex.get(r.famille)});
+    }
+  }
+  const candIds=candidats.map(c=>c.id);
+  const candIndex=new Map(candIds.map((id,i)=>[id,i]));
+  const adj=candIds.map(()=>new Set());
+  for(const t of triples){
+    const ci=candIndex.get(t.c.id);
+    if(ci===undefined) continue;
+    adj[ci].add(t.fi);
+  }
+  const matchFam=new Array(MGMT_RAISON_FAMILLES.length).fill(-1);
+  const tryK=function(ci,visited){
+    const fams=Array.from(adj[ci]).sort((x,y)=>x-y);
+    for(let k=0;k<fams.length;k++){
+      const fi=fams[k];
+      if(visited[fi]) continue;
+      visited[fi]=true;
+      if(matchFam[fi]===-1 || tryK(matchFam[fi],visited)){
+        matchFam[fi]=ci;
+        return true;
+      }
+    }
+    return false;
+  };
+  for(let ci=0;ci<candIds.length;ci++){
+    tryK(ci,new Array(MGMT_RAISON_FAMILLES.length).fill(false));
+  }
+  const matched=[];
+  for(let fi=0;fi<MGMT_RAISON_FAMILLES.length;fi++){
+    const ci=matchFam[fi];
+    if(ci===-1) continue;
+    const cid=candIds[ci];
+    const c=candidats.find(x=>x.id===cid);
+    if(!c) continue;
+    let best=null;
+    for(const t of triples){
+      if(t.c.id===cid && t.fi===fi && (!best || t.a.id<best.a.id)) best=t;
+    }
+    if(best) matched.push(best);
+  }
+  matched.sort((x,y)=>x.fi-y.fi);
+  const chosen=matched.slice(0,6);
+  return chosen.map(t=>({combattant:t.c, raison:JSON.parse(JSON.stringify(t.r)), adversaire:t.a}));
+}
+/* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT4_T2_DOSSIERS_ADVERSAIRES] — Monde lot 4 T2 ==== */
+function mgmtDossiersAdversaires(m, combattantId, dejaVus){
+  if(!Array.isArray(dejaVus)) dejaVus=[];
+  if(!m||!Array.isArray(m.roster)) return [];
+  const fc=mgmtFighterById(m,combattantId);
+  if(!fc||!mgmtValidId(combattantId)) return [];
+  if(typeof mgmtSelectable==='function'&&!mgmtSelectable(m,fc,null)) return [];
+  if(typeof mgmtEngaged==='function'&&mgmtEngaged(m,fc)) return [];
+  const dejaSet=new Set(dejaVus||[]);
+  const orgJoueur=typeof mgmtOrgNom==='function'?mgmtOrgNom(m):m.org;
+  const dansOrg=f=>!!f && (f.org===m.org || f.org===orgJoueur);
+  const candList=m.roster.filter(f=>f&&mgmtValidId(f.id)
+    && f.id!==combattantId && !dejaSet.has(f.id) && dansOrg(f) && f.div===fc.div
+    && (typeof mgmtSelectable==='function'?mgmtSelectable(m,f,combattantId):true));
+  candList.sort((a,b)=>(a.id<b.id?-1:(a.id>b.id?1:0)));
+  const famSet=new Set(MGMT_RAISON_FAMILLES);
+  const famIndex=new Map(MGMT_RAISON_FAMILLES.map((f,i)=>[f,i]));
+  const nFamily=MGMT_RAISON_FAMILLES.length;
+  const famsByCand=candList.map(()=>new Set());
+  const reasonByOppFam=new Map();
+  for(let ci=0; ci<candList.length; ci++){
+    const a=candList[ci];
+    const rs=(typeof mgmtRaisonsPourPaire==='function')?mgmtRaisonsPourPaire(m,fc,a):[];
+    if(!Array.isArray(rs)) continue;
+    for(const r of rs){
+      if(!r||!r.famille||!famSet.has(r.famille)) continue;
+      const fi=famIndex.get(r.famille);
+      if(fi===undefined) continue;
+      if(!famsByCand[ci].has(fi)) famsByCand[ci].add(fi);
+      const key=a.id+'|'+fi;
+      if(!reasonByOppFam.has(key)) reasonByOppFam.set(key, r);
+    }
+  }
+  const candIds=candList.map(c=>c.id);
+  const adj=candIds.map((_,ci)=>Array.from(famsByCand[ci]).sort((x,y)=>x-y));
+  const matchFam=new Array(nFamily).fill(-1);
+  const tryK=function(ci,visited){
+    for(const fi of adj[ci]){
+      if(visited[fi]) continue;
+      visited[fi]=true;
+      if(matchFam[fi]===-1 || tryK(matchFam[fi],visited)){
+        matchFam[fi]=ci;
+        return true;
+      }
+    }
+    return false;
+  };
+  for(let ci=0;ci<candIds.length;ci++){
+    tryK(ci,new Array(nFamily).fill(false));
+  }
+  const matched=[];
+  for(let fi=0;fi<nFamily;fi++){
+    const ci=matchFam[fi];
+    if(ci===-1) continue;
+    const opp=candList[ci];
+    if(!opp) continue;
+    const r=reasonByOppFam.get(opp.id+'|'+fi);
+    if(!r) continue;
+    matched.push({fi,opp,r});
+  }
+  matched.sort((x,y)=>x.fi-y.fi);
+  const chosen=matched.slice(0,6);
+  return chosen.map(t=>({combattant:JSON.parse(JSON.stringify(fc)), raison:JSON.parse(JSON.stringify(t.r)), adversaire:JSON.parse(JSON.stringify(t.opp))}));
+}
+/* ==== [FIN ANCRE] ==== */
