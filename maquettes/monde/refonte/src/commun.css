@@ -1,0 +1,100 @@
+/* Socle commun des planches — valeurs portées de ui-cadre.css (MGMT_BRIEF_LOT4_CSS_CADRE) et des planches du 10/10. */
+@font-face{font-family:'Saira Extra Condensed';src:url('support/extracondensed-800.ttf') format('truetype');font-weight:800;font-display:block}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-500-latin.woff2') format('woff2');font-weight:500;font-display:block}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-500-ext.woff2') format('woff2');font-weight:500;font-display:block;unicode-range:U+0100-02FF,U+0304,U+0308,U+0329,U+1E00-1EFF}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-600-latin.woff2') format('woff2');font-weight:600;font-display:block}
+@font-face{font-family:'Saira Condensed';src:url('support/condensed-600-ext.woff2') format('woff2');font-weight:600;font-display:block;unicode-range:U+0100-02FF,U+0304,U+0308,U+0329,U+1E00-1EFF}
+:root{
+  --noir:#0D0B0B; --pan:#121010; --ligne:#252121; --blanc:#E9E6E1;
+  --rouge:#B32A1E; --rouge-vif:#E23A2B; --jaune:#F0B220;
+  --t2:rgba(233,230,225,.74); --sep:rgba(233,230,225,.16); --bord:rgba(233,230,225,.38);
+  --titre:'Saira Extra Condensed','Arial Narrow',sans-serif; --texte:'Saira Condensed','Arial Narrow',sans-serif;
+  --s:1;
+}
+html,body{margin:0;height:100%;background:var(--noir);overflow:hidden}
+.ecran{position:fixed;inset:0;overflow:hidden;background:var(--noir)}
+.stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;overflow:hidden;transform:translate(-50%,-50%) scale(var(--s));transform-origin:center center;
+  background:#171413 url('support/cendre.jpg') center/1920px 1080px no-repeat;color:var(--blanc);font-family:var(--texte);font-weight:500;line-height:1.2;user-select:none}
+.stage *{box-sizing:border-box}
+:where(.stage) button{appearance:none;margin:0;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-align:left;background:none}
+.stage button:focus-visible,.stage .focus{outline:3px solid var(--jaune);outline-offset:2px}
+
+/* Les deux familles */
+.T{font-family:var(--titre);font-weight:800;line-height:.8;white-space:nowrap;text-transform:uppercase}
+.lab{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--t2);white-space:nowrap;text-transform:uppercase}
+.t2{color:var(--t2)}
+.nom{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+
+/* L'en-tête */
+.entete{position:absolute;left:300px;top:20px;width:1564px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.entete-g,.entete-d{display:flex;align-items:center;gap:18px;min-width:0}
+.plaque{height:64px;padding:0 18px;border:2px solid var(--bord);background:var(--noir);display:flex;align-items:center;gap:14px;white-space:nowrap}
+.plaque .T{font-size:56px;line-height:.69}
+.plaque.petite .T{font-size:40px}
+.plaque .lab{color:var(--blanc);font-size:24px}
+.entete-lib{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.rouge{color:var(--rouge-vif)}
+
+/* La barre des sections : douze entrées de 69 px */
+.barre{position:absolute;left:0;top:0;width:260px;height:1080px;background:var(--noir);border-right:2px solid var(--bord);display:flex;flex-direction:column}
+.barre-logo{height:128px;flex:none;padding:0 22px;border-bottom:2px solid var(--sep);display:flex;align-items:center}
+.logo{display:inline-flex;align-items:center;gap:11px}
+.logo-mots{display:flex;flex-direction:column;gap:3px}
+.logo-mots b{font-family:var(--titre);font-weight:800;font-size:38.3px;line-height:.72}
+.logo-mots i{font-style:normal;font-family:var(--titre);font-weight:800;font-size:26px;line-height:.72}
+.sec{width:100%;height:69px;padding:0 22px 0 28px;border-bottom:2px solid var(--sep);display:flex;align-items:center;justify-content:space-between;font-family:var(--titre);font-weight:800;font-size:32px;line-height:1;white-space:nowrap}
+.sec.on{background:var(--blanc);color:var(--noir)}
+.sec-bas{margin-top:auto;border-top:2px solid var(--sep)}
+.sec-bas .sec{height:60px}
+.logo-seul{position:absolute;left:22px;top:20px}
+
+/* Le contenu */
+.contenu{position:absolute;left:300px;top:128px;width:1564px;height:856px}
+.contenu.large{left:56px;width:1808px}
+
+/* Le panneau : filet 2 px, liseré 5 px, coins coupés */
+.pan{--b:rgba(233,230,225,.5);display:flex;background:var(--b);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);min-width:0;min-height:0}
+.pan.choisi{--b:var(--blanc)}
+.pan>.p2{flex:1;min-width:0;display:flex;background:var(--noir);padding:5px;clip-path:polygon(17px 0,100% 0,100% calc(100% - 17px),calc(100% - 17px) 100%,0 100%,0 17px)}
+.pan>.p2>.p3{flex:1;min-width:0;background:var(--pan);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:15px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.pan-tete{display:flex;justify-content:space-between;align-items:flex-start;flex:none;gap:12px}
+.pan-titre{display:flex;flex-direction:column;gap:12px}
+.pan-titre .T{font-size:40px;line-height:.75}
+.trait{width:56px;height:8px;background:var(--rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.pan-tete .lab{color:var(--t2)}
+
+/* La tuile */
+.tuile{background:var(--ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
+.tuile .lab{color:var(--t2)}
+.tuile .T{font-size:40px}
+.tuile .s{font-size:22px;line-height:1;color:var(--t2);white-space:nowrap}
+
+/* Les lignes */
+.sous{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--t2);white-space:nowrap;text-transform:uppercase;flex:none}
+.ligne{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--sep);padding:9px 0;flex:none;min-width:0}
+.l1{font-size:24px;line-height:1.05}
+.l2{font-size:22px;line-height:1.05;color:var(--t2)}
+.col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.oct{flex:none;background:var(--rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.carte-l{background:var(--ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex:none;min-width:0}
+.aller{font-family:var(--titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--jaune);flex:none}
+
+/* L'action principale */
+.jaune-bloc{flex:none;background:var(--jaune);color:var(--noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.jaune-bloc .lab{color:var(--noir)}
+.jaune-bloc .T{font-size:44px;line-height:.85}
+.jaune-bloc .k{border-color:var(--noir);color:var(--noir);font-size:22px}
+.bouton{height:60px;padding:0 20px;background:var(--ligne);color:var(--blanc);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);display:inline-flex;align-items:center;gap:14px;white-space:nowrap}
+.bouton.jaune{background:var(--jaune);color:var(--noir)}
+.bouton .k{border-color:currentColor;color:inherit}
+.bouton .T{font-size:34px;line-height:1}
+
+/* Les touches */
+.touches{position:absolute;left:300px;top:1010px;height:48px;display:flex;align-items:center;gap:28px;font-size:24px;line-height:1;white-space:nowrap}
+.touches.large{left:56px}
+.tg{display:flex;align-items:center;gap:10px}
+.k{border:2px solid var(--blanc);color:var(--blanc);padding:5px 9px;font-size:24px;line-height:1;white-space:nowrap}
+.k.j{border-color:var(--jaune);color:var(--jaune)}
+
+/* Les états : un seul visible à la fois (?etat=…) */
+[data-etat]:not(.vis){display:none!important}

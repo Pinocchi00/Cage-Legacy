@@ -1293,30 +1293,87 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pre-cote{flex:1;min-width:0;height:44px;border:0;background:var(--mf-ligne);color:var(--mf-blanc);font-family:var(--mf-titre);font-weight:800;font-size:28px;text-transform:uppercase;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 10px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 .mf-pre-cote.on{background:var(--mf-blanc);color:var(--mf-noir)}
 
-/* ==== Monde lot 2 T8 : Résultats — la liste des soirées et le tableau des combats (décision du 12/10/2026, retour d'Anthony) ==== */
-.mf-re{position:relative}
-.mf-re-grille{display:flex;gap:32px;height:760px}
-.mf-re-gauche{flex:none;width:520px;display:flex;flex-direction:column;gap:10px}
-.mf-re-lib,.mf-re-plus{font-weight:600;font-size:22px;line-height:1.1;letter-spacing:.06em;color:var(--mf-texte2)}
-.mf-re-liste{display:flex;flex-direction:column;gap:8px}
-.mf-re-s{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--mf-ligne);color:var(--mf-blanc);padding:10px 16px;border:2px solid transparent;font-size:24px;line-height:1.15}
-.mf-re-s b{font-weight:700;font-size:24px;letter-spacing:.02em}
-.mf-re-s span{font-size:24px;color:var(--mf-texte2);overflow-wrap:anywhere}
-.mf-re-s.sel{border-color:rgba(233,230,225,.5)}
-.mf-re-s.actif,.mf-re-l.actif{outline:3px solid #FFFFFF;outline-offset:-3px}
-.mf-re-droite{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
-.mf-re-titre{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:1.1}
-.mf-re-tab{display:flex;flex-direction:column;gap:6px}
-.mf-re-l{display:flex;align-items:center;gap:20px;text-align:left;background:var(--mf-ligne);color:var(--mf-blanc);padding:10px 16px;border:2px solid transparent;font-size:24px;line-height:1.15;min-width:0}
-.mf-re-l.sel{border-color:rgba(233,230,225,.5)}
-.mf-re-place{flex:none;width:190px;font-weight:700;font-size:22px;letter-spacing:.04em;color:var(--mf-texte2)}
-.mf-re-qui{flex:1;min-width:0;font-size:24px;overflow-wrap:anywhere}
-.mf-re-qui .g{font-weight:800;color:#F3EDE0}
-.mf-re-qui .p{color:var(--mf-texte2)}
-.mf-re-qui i{font-style:normal;color:var(--mf-texte2)}
-.mf-re-ceinture{font-style:normal;font-weight:800;font-size:22px;margin-left:14px;padding:2px 10px;background:var(--mf-jaune);color:var(--mf-noir);letter-spacing:.04em}
-.mf-re-meth{flex:none;width:280px;font-size:24px;color:var(--mf-blanc);font-weight:400}
-.mf-re-aide{margin-top:8px;font-size:24px;line-height:1.2;color:var(--mf-texte2)}
+/* ==== Monde lot 10 T3 : Résultats — trois colonnes (les soirées, les combats, le combat choisi) et la prochaine chose à faire. Valeurs portées de
+   maquettes/monde/refonte/MondeResultats.html (planche validée le 14/10/2026). Aucun texte sous 22 px. (Remplace le bloc du lot 2 T8.) ==== */
+.mf-re{display:flex;gap:16px}
+.mf-re-g{flex:0 0 400px;display:flex}
+.mf-re-g>.mf-panneau{flex:1}
+.mf-re-m{flex:0 0 700px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.mf-re-d{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.mf-re-plein{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.mf-re-plein>.mf-panneau,.mf-re-d>.mf-re-det{flex:1}
+.mf-re .mf-p3{padding:15px;gap:12px;overflow:hidden}
+.mf-re-T{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;white-space:nowrap;text-transform:uppercase}
+.mf-re-lab{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase}
+.mf-re-sous{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase;flex:none}
+.mf-re-l1{font-size:24px;line-height:1.05}
+.mf-re-l2{font-size:22px;line-height:1.05;color:var(--mf-texte2)}
+.mf-re-l2.fort{font-size:24px;color:var(--mf-blanc)}
+.mf-re-l2.note{line-height:1.15}
+.mf-re-l1.t2{color:var(--mf-texte2)}
+.mf-re-tete{display:flex;justify-content:space-between;align-items:flex-start;flex:none;gap:12px}
+.mf-re-tt{display:flex;flex-direction:column;gap:12px}
+.mf-re-tt .mf-re-T{font-size:40px;line-height:.75}
+.mf-re-trait{width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+/* La liste des soirées */
+.mf-re-liste{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0;overflow:hidden}
+.mf-re-liste .mf-re-sous:not(:first-child){margin-top:8px}
+.mf-re-so{display:flex;flex-direction:column;gap:8px;padding:8px 12px;flex:none;min-width:0;border:0;border-bottom:2px solid var(--mf-sep);background:none;color:inherit;text-align:left;font:inherit}
+.mf-re-so.sel{background:var(--mf-ligne);box-shadow:inset 0 0 0 2px var(--mf-blanc);border-bottom-color:transparent}
+.mf-re-so-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.mf-re-so-h .mf-re-T{font-size:30px;line-height:.8}
+.mf-re-so-h span{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-re-so .mf-re-l2,.mf-re-avenir .mf-re-l2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-re-avenir{padding:10px 12px;border:2px solid var(--mf-sep);flex:none;min-width:0}
+.mf-re-plus{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none}
+.mf-re-plus.bas{margin-top:auto}
+.mf-re-aller{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune);flex:none}
+/* La tête de la soirée */
+.mf-re-sdt{height:100px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 24px;display:flex;flex-direction:column;justify-content:center;gap:12px;min-width:0}
+.mf-re-sdt .mf-re-T{font-size:44px;line-height:.75}
+.mf-re-sdt .mf-re-l1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-re-sdt-h{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.mf-re-puce{border:2px solid var(--mf-bord);padding:6px 10px;font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mf-re-puce.a-toi{background:var(--mf-blanc);color:var(--mf-noir);border-color:var(--mf-blanc)}
+/* Le tableau des combats */
+.mf-re-tab{flex:1}
+.mf-re-tab .mf-p3{gap:2px}
+.mf-re-gr{display:flex;justify-content:space-between;align-items:flex-end;height:30px;padding-bottom:4px;flex:none}
+.mf-re-gr.haut{margin-top:6px}
+.mf-re-cb{display:flex;align-items:center;gap:16px;height:58px;padding:0 10px;flex:none;border:0;border-bottom:2px solid var(--mf-sep);min-width:0;background:none;color:inherit;text-align:left;font:inherit}
+.mf-re-cb.sel{background:var(--mf-ligne);box-shadow:inset 0 0 0 2px var(--mf-blanc);border-bottom-color:transparent}
+.mf-re-n{width:40px;height:40px;flex:none;border:2px solid var(--mf-bord);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:1}
+.mf-re-col{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.mf-re-cb .mf-re-l1{font-size:26px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-re-cb .mf-re-l2{line-height:1;white-space:nowrap;display:flex;align-items:center;gap:8px;overflow:hidden}
+.mf-re-cb .g{font-weight:600}
+.mf-re-cb .b{color:var(--mf-texte2)}
+.mf-re-ceinture{display:inline-flex;align-items:center;gap:8px;color:var(--mf-blanc)}
+.mf-re-oct{width:16px;height:16px;flex:none;background:var(--mf-rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+/* Le combat choisi */
+.mf-re-det .mf-p3{gap:10px}
+.mf-re-det-g{font-size:40px;line-height:.8;overflow:hidden;text-overflow:ellipsis}
+.mf-re-det-p{font-size:26px;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mf-re-det .mf-re-l2{overflow-wrap:anywhere}
+.mf-re-sous.haut{margin-top:8px}
+.mf-re-chg{display:flex;align-items:center;gap:12px;font-size:24px;line-height:1.1;padding:8px 0;border-bottom:2px solid var(--mf-sep);flex:none}
+.mf-re-chg i{flex:none;width:18px;height:18px;display:block}
+.mf-re-chg i.ceint{background:var(--mf-rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-re-chg i.monte{background:var(--mf-blanc);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.mf-re-chg i.recule{background:var(--mf-texte2);clip-path:polygon(0 0,100% 0,50% 100%)}
+.mf-re-chg i.reste{background:var(--mf-texte2);clip-path:polygon(0 35%,100% 35%,100% 65%,0 65%)}
+.mf-re-chg i.corps{border:3px solid var(--mf-blanc)}
+.mf-re-chg i.contrat{border:3px solid var(--mf-texte2)}
+.mf-re-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px;flex:none}
+.mf-re-actions .mf-bouton{justify-content:space-between;width:100%}
+.mf-re-vide-t{font-size:30px;line-height:1.2}
+/* La prochaine chose à faire */
+.mf-re-jaune{flex:none;height:170px;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;justify-content:center;gap:10px;border:0;text-align:left;font:inherit;min-width:0}
+.mf-re-jaune .mf-re-lab{color:var(--mf-noir)}
+.mf-re-jaune .mf-re-T{font-size:44px;line-height:.85;overflow:hidden;text-overflow:ellipsis}
+.mf-re-jh{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.mf-re-jaune .mf-k{border-color:var(--mf-noir);color:var(--mf-noir);flex:none}
+.mf-re-jd{font-size:24px;line-height:1.1;overflow:hidden}
 
 /* ==== [ANCRE: MONDE_LOT7_ACCUEIL_CSS] — Monde lot 7 : l'Accueil, valeurs portées de maquettes/monde/MondeAccueil.dc.html et
    MondeAccueilArrivee.dc.html. Aucun texte sous 22 px, aucune animation, rien par-dessus. ==== */

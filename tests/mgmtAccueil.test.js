@@ -8,13 +8,14 @@ const path=require('node:path');
 const {newGameWindow}=require('./helpers/loadGame');
 const res=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ ${code} })())`));
 const neuve=()=>{ const w=newGameWindow({runMain:true}); w.eval(`mgmtRetraitProb=function(){return 0;}; setSeed(7); CL.mgmtEnter(1);`); return w; };
-const ouverte=()=>{ const w=neuve(); w.eval(`CL.mgmtArriveeFin();`); return w; };
+/* Monde lot 10 T2 (MONDE-LOT-10-DECISIONS §2) : Entrée sur l’arrivée mène à la Carte, Échap à l’Accueil ; le montage ouvre donc l’Accueil comme Échap. */
+const ouverte=()=>{ const w=neuve(); w.eval(`CL.go('mgmt_accueil');`); return w; };
 /* Une partie « après la première soirée » : l'état seul change (aucune soirée jouée par le joueur = première arrivée). */
 const apres=`m.eventsPlayed=(m.passe?m.passe.soirees:0)+1;`;
 
 test('T1 — Accueil première section ; neuve : arrivée puis Accueil ; reprise : Accueil', () => {
   const w=neuve();
-  const r=res(w,`const premier=G.screen; CL.mgmtArriveeFin(); const ap=G.screen; const barre=[...document.querySelectorAll('.mf-barre-item[data-section]')].map(b=>b.dataset.section);
+  const r=res(w,`const premier=G.screen; CL.go('mgmt_accueil'); const ap=G.screen; const barre=[...document.querySelectorAll('.mf-barre-item[data-section]')].map(b=>b.dataset.section);
     const cur=document.querySelector('.mf-barre-item.cur'); G.mgmt=null; CL.mgmtEnter(1);
     return {premier,ap,reprise:G.screen,tete:barre.slice(0,2),n:MF_SECTIONS.length,cur:cur&&cur.dataset.section};`);
   assert.deepEqual(r,{premier:'mgmt_arrivee',ap:'mgmt_accueil',reprise:'mgmt_accueil',tete:['accueil','carte'],n:12,cur:'accueil'});
@@ -34,12 +35,14 @@ test('T2 — la fonction de contenu est pure : même partie, même résultat, pa
   assert.deepEqual(r.cles,['premiere','ou','passe','attend','ailleurs','heritage']);
 });
 
+/* Monde lot 10 T2 (MONDE-LOT-10-DECISIONS §2) : le bloc héritage quitte l’Accueil (l’arrivée le porte) ; la donnée `heritage` reste fournie,
+   le panneau « L’ORGANISATION » n’est plus affiché, et le reste de l’Accueil (« CE QUI S’EST PASSÉ ») est inchangé. */
 test('T5 — la première arrivée : héritage avant la première soirée, semaine ensuite, rien dans la sauvegarde', () => {
   const w=ouverte();
   const r=res(w,`const m=G.mgmt, av=mgmtAccueilContenu(m); const t1=document.getElementById('app').textContent;
     ${apres} render(); const ap=mgmtAccueilContenu(m); const t2=document.getElementById('app').textContent;
     return {p1:av.premiere,h1:!!av.heritage,p2:ap.premiere,h2:ap.heritage,t1:/ORGANISATION/.test(t1),t2:/CE QUI S.EST PASS/.test(t2),saved:Object.keys(m).includes('accueil')};`);
-  assert.deepEqual([r.p1,r.h1,r.p2,r.h2,r.t1,r.t2,r.saved],[true,true,false,null,true,true,false]);
+  assert.deepEqual([r.p1,r.h1,r.p2,r.h2,r.t1,r.t2,r.saved],[true,true,false,null,false,true,false]);
 });
 
 /* ==== [ANCRE: TEST_MGMT_PRESENTATION_ACCUEIL_ROUTE] — Monde lot 3 T5 ==== */

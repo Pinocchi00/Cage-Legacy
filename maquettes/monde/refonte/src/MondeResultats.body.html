@@ -1,0 +1,65 @@
+<!-- titre: Résultats | etats: joueur passe blessure contrat premier-jour vide -->
+<style>
+.re{position:absolute;left:300px;top:128px;width:1564px;height:856px;display:flex;gap:16px}
+.re-g{flex:0 0 400px;display:flex}
+.re-g>.pan{flex:1}
+.re-m{flex:0 0 700px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.re-d{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.re-plein{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+/* La liste des soirées */
+.so{display:flex;flex-direction:column;gap:8px;padding:8px 12px;flex:none;min-width:0;border-bottom:2px solid var(--sep)}
+.so.sel{background:var(--ligne);box-shadow:inset 0 0 0 2px var(--blanc);border-bottom-color:transparent}
+.so-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.so-h .T{font-size:30px;line-height:.8}
+.so-h span{font-size:22px;line-height:1;color:var(--t2);white-space:nowrap}
+.so .l2{white-space:nowrap}
+.so-a-venir{padding:10px 12px;border:2px solid var(--sep);flex:none}
+.re-plus{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none}
+/* La tête de la soirée */
+.re-tete{height:100px;flex:none;background:var(--pan);border:2px solid var(--bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 24px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.re-tete .T{font-size:44px;line-height:.75}
+.re-tete .l1{font-size:24px;color:var(--t2)}
+.re-tete-h{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.puce{border:2px solid var(--bord);padding:6px 10px;font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.puce.a-toi{background:var(--blanc);color:var(--noir);border-color:var(--blanc)}
+.re-tab{flex:1}
+.re-tab .p3{gap:2px}
+.gr{display:flex;justify-content:space-between;align-items:flex-end;height:30px;padding-bottom:4px;flex:none}
+.cb{display:flex;align-items:center;gap:16px;height:58px;padding:0 10px;flex:none;border-bottom:2px solid var(--sep);min-width:0}
+.cb.sel{background:var(--ligne);box-shadow:inset 0 0 0 2px var(--blanc);border-bottom-color:transparent}
+.cb-n{width:40px;height:40px;flex:none;border:2px solid var(--bord);display:flex;align-items:center;justify-content:center;font-family:var(--titre);font-weight:800;font-size:28px;line-height:1}
+.cb .l1{font-size:26px;line-height:1;white-space:nowrap}
+.cb .col{gap:5px}
+.cb .l2{line-height:1}
+.cb .l2{white-space:nowrap;display:flex;align-items:center;gap:8px}
+.cb .g{font-weight:600}
+.cb .b{color:var(--t2)}
+.ceinture{display:inline-flex;align-items:center;gap:8px;color:var(--blanc)}
+.ceinture .oct{width:16px;height:16px}
+/* Le combat choisi */
+.re-det{flex:1}
+.re-det .p3{gap:10px}
+.det-g{font-size:40px;line-height:.8}
+.det-p{font-size:26px;line-height:1}
+.chg{display:flex;align-items:center;gap:12px;font-size:24px;line-height:1.1;padding:8px 0;border-bottom:2px solid var(--sep);flex:none}
+.chg i{flex:none;width:18px;height:18px;display:block}
+.chg i.ceint{background:var(--rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.chg i.monte{background:var(--blanc);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.chg i.recule{background:var(--t2);clip-path:polygon(0 0,100% 0,50% 100%)}
+.chg i.reste{background:var(--t2);clip-path:polygon(0 35%,100% 35%,100% 65%,0 65%)}
+.chg i.corps{border:3px solid var(--blanc)}
+.chg i.contrat{border:3px solid var(--t2)}
+.det-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px;flex:none}
+.det-actions .bouton{justify-content:space-between;width:100%}
+.re-d .jaune-bloc{height:170px;justify-content:center}
+.vide-t{font-size:30px;line-height:1.2}
+</style>
+<div class="ecran"><div class="stage">
+  {{BARRE:RÉSULTATS}}
+  <div class="entete">
+    <div class="entete-g"><div class="plaque"><span class="T">RÉSULTATS</span></div><div class="entete-lib" id="lib"></div></div>
+    <div class="entete-d"><div style="font-size:24px;line-height:1;color:var(--t2);white-space:nowrap">Prochaine soirée</div><div class="plaque"><span class="T">SPLIT FIGHT NIGHT</span><span class="T rouge" id="prochaine"></span></div></div>
+  </div>
+  <main class="re" id="re"></main>
+  <div class="touches" id="touches"></div>
+</div></div>
