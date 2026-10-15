@@ -94,3 +94,38 @@ test('Monde lot 9 T2a — la création réelle de l\'écran fait aussi vivre les
   assert.equal(win.eval('Object.keys(MGMT_NOUVELLE.gen.m.orgs).length'), 7);
   win.eval('mgmtNouvelleGenNettoyer()');
 });
+
+function installerEcheances(win, jours) {
+  win.eval(`(function(){ const m=G.mgmt, jours=${JSON.stringify(jours)}; mgmtMondeVivantIds(m).forEach((id,i)=>{ const s=m.orgs[id], e=s.cal.prochaines[0]; e.jour=jours[i]; s.cal.prochaines=[e]; }); })()`);
+}
+
+test('Monde lot 9 T2b — une semaine fait jouer chaque organisation dont la soirée est due, et aucune autre', () => {
+  const win=creer(true), ids=JSON.parse(win.eval('JSON.stringify(mgmtMondeVivantIds(G.mgmt))'));
+  installerEcheances(win,[0,0,0,0,0,0,Number.MAX_SAFE_INTEGER]);
+  const t=Date.now();
+  const joue=win.eval(`(function(){ const m=G.mgmt, avant=Object.fromEntries(Object.entries(m.orgs).map(([id,s])=>[id,s.eventsPlayed])); mgmtMondeVivantSemaine(m); return Object.fromEntries(Object.entries(m.orgs).map(([id,s])=>[id,s.eventsPlayed-avant[id]])); })()`);
+  console.log(`Monde lot 9 T2b — semaine: ${Date.now()-t} ms`);
+  assert.deepEqual(JSON.parse(JSON.stringify(joue)),Object.fromEntries(ids.map((id,i)=>[id,i<6?1:0])));
+});
+
+test('Monde lot 9 T2b — la partie du joueur (empreinte) et SEED sont identiques avec et sans la semaine des sept', () => {
+  const avec=creer(true), sans=creer(false); installerEcheances(avec,[0,0,0,0,0,0,0]);
+  const empreinte=w=>w.eval(`(function(){ const m=G.mgmt; return JSON.stringify(Object.assign({},m,{orgs:0,mondeVivant:0}))+'|'+SEED; })()`);
+  const avant=empreinte(avec); avec.eval('mgmtMondeVivantSemaine(G.mgmt)');
+  assert.equal(empreinte(avec),avant); assert.equal(empreinte(avec),empreinte(sans));
+});
+
+test('Monde lot 9 T2b — deux parties à graine égale donnent les mêmes sept états après trois semaines', () => {
+  const a=creer(true), b=creer(true);
+  for(let i=0;i<3;i++){
+    for(const w of [a,b]){
+      w.eval(`G.mgmt.cal.jour+=7; G.mgmt.cycle++; (function(){ const s=G.mgmt.orgs[mgmtMondeVivantIds(G.mgmt)[0]]; if(!s.cal.prochaines.length) mgmtAgendaPoser(s,s.cal.jour+7,'petite'); const e=s.cal.prochaines[0]; if(e) e.jour=G.mgmt.cal.jour; })(); mgmtMondeVivantSemaine(G.mgmt)`);
+    }
+  }
+  assert.equal(a.eval('mgmtSerialiser(G.mgmt)'),b.eval('mgmtSerialiser(G.mgmt)'));
+});
+
+test('Monde lot 9 T2b — une partie mondeVivant:false ne fait rien', () => {
+  const win=creer(false), avant=win.eval('mgmtSerialiser(G.mgmt)'); win.eval('mgmtMondeVivantSemaine(G.mgmt)');
+  assert.equal(win.eval('mgmtSerialiser(G.mgmt)'),avant);
+});

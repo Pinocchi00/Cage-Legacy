@@ -325,6 +325,23 @@ function mgmtMondeVivantAlleger(m){
   delete m.fil;
   return m;
 }
+/* ==== [ANCRE: MONDE_LOT9_T2B_SEMAINE] — Monde lot 9 T2b ==== */
+/** Fait avancer chaque organisation vivante d'au plus une soirée échue à l'ouverture de cycle. */
+function mgmtMondeVivantSemaine(m){
+  if(!m||m.mondeVivant!==true||!m.orgs) return m;
+  const g0=G.mgmt, seed0=SEED;
+  try{
+    for(const orgId of mgmtMondeVivantIds(m)){
+      const sous=m.orgs[orgId], prochaine=sous&&sous.cal&&Array.isArray(sous.cal.prochaines)?sous.cal.prochaines[0]:null;
+      if(!prochaine||!Number.isFinite(prochaine.jour)||prochaine.jour>m.cal.jour) continue;
+      setSeed(((mgmtIdentiteStream(orgId,'semaine|'+m.cycle,m)()*4294967296)>>>0)||1);
+      G.mgmt=sous;
+      mgmtPredecesseurSoiree(sous,sous.eventsPlayed||0,mgmtPredecesseurReglages(orgId));
+      mgmtMondeVivantAlleger(sous);
+    }
+  }finally{ G.mgmt=g0; SEED=seed0; }
+  return m;
+}
 /** Génère d'un coup les organisations vivantes d'une partie dont le passé est clos. @returns {object} la partie (m.orgs, m.mondeVivant) */
 function mgmtMondeVivantGenerer(m,opts){
   const etat=mgmtMondeVivantPreparer(m,opts);

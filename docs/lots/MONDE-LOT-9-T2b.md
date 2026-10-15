@@ -26,3 +26,14 @@ T2a est ACCEPTÉE : tests verts, partie complète ≤ 1,5 Mo. Mais le test « T2
 - **Règle** : `if(m.mondeVivant!==true) return;` puis, pour chaque `orgId` de `m.orgs` dans l'ordre fixe, si `sous.cal.prochaines[0]` existe et que son jour est ≤ au jour du joueur (`m.cal.jour`, même échelle que le passé : vérifie dans `mgmtPasseCloturer` comment les jours ont été recalés et recale la sous-partie de la même façon si besoin), joue UNE soirée par `mgmtPredecesseurSoiree(sous,sous.eventsPlayed||0,mgmtPredecesseurReglages(orgId))`, puis `mgmtMondeVivantAlleger(sous)`.
 - **Tests** (dans `tests/mgmtMondeVivant.test.js`, passé court de 6 soirées) : une semaine fait jouer chaque organisation dont la soirée est due, et aucune autre ; la partie du joueur (empreinte) et `SEED` sont identiques avec et sans la semaine des sept ; deux parties à graine égale donnent les mêmes sept états après trois semaines ; une partie `mondeVivant:false` ne fait rien. Mesure le temps d'une semaine (console) et consigne-le.
 Pas de modification partielle : si un test reste rouge, dis lequel et pourquoi. Commit `Monde lot 9 T2b : la semaine` sans « inachevé » si les tests sont verts.
+
+## Compte rendu
+
+- Fichiers modifiés : `mgmt-passe.js` ajoute `mgmtMondeVivantSemaine`, qui joue au plus une soirée échue par organisation dans l'ordre de `MGMT_ORGANISATIONS`, avec RNG dérivée et restauration de `G.mgmt`/`SEED` ; `mgmt-bureau.js` branche cette simulation à l'ouverture du cycle après `mgmtMondeOuvreCycle` ; `tests/mgmtMondeVivant.test.js` couvre la semaine, l'isolation/déterminisme et le monde ancien ; `index.html` monte les versions des deux scripts modifiés et `sw.js` renouvelle son cache.
+- Mesure : semaine simulée (sept soirées dues) en **3 103 ms** pendant le test.
+- Tests ajoutés : « Monde lot 9 T2b — une semaine fait jouer chaque organisation dont la soirée est due, et aucune autre », « Monde lot 9 T2b — la partie du joueur (empreinte) et SEED sont identiques avec et sans la semaine des sept », « Monde lot 9 T2b — deux parties à graine égale donnent les mêmes sept états après trois semaines », « Monde lot 9 T2b — une partie mondeVivant:false ne fait rien ».
+- Tests ciblés : `node --test tests/mgmtMondeVivant.test.js` passe (10/10).
+- Migration de sauvegarde : aucune dans cette sous-tranche. La mesure six ans est déjà isolée dans `tools/mesure-monde-vivant.js` et ne fait pas partie de la suite ordinaire.
+- Écart à la fiche : aucun identifié.
+- Vérification : `node tools/verif-versions.js origin/main` signale uniquement l'écart préexistant hors tranche `mgmt-nouvelle.js` (`?v=b9xxxxxxxx`, identique à origin/main) ; versions des fichiers modifiés de cette tranche montées.
+- Questions pour Anthony : aucune. Relecture sous-agent non exécutée (repli sans sous-agent imposé par le superviseur).
