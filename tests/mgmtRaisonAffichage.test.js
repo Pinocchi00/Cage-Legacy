@@ -182,3 +182,46 @@ test('Monde lot 6 T5 — fin-contrat accorde « combat restant » au nombre',()=
   }
   for(const t of r['3']) assert.match(t,/3 combats restants\b/,'« 3 combats restants » accordé au pluriel');
 });
+
+/* ==== [ANCRE: MONDE_LOT6_T5_TEST_FIDELITE] — Monde lot 6 T5 : phrases fidèles aux preuves ==== */
+const toutesVariantes=(faitMonte,famille,fait,div)=>JSON.parse(win.eval(`(()=>{
+  const m=mgmtDefault(); m.roster=${JSON.stringify(faitMonte)};
+  const base={famille:${JSON.stringify(famille)},fait:${JSON.stringify(fait)}},vus=[],cles=new Set();
+  for(let i=0;i<3000&&vus.length<3;i++){const r=mgmtRaisonLignes(m,base,[{id:'p'+i,div:${JSON.stringify(div||'H-fly')}},{id:'q'+i,div:${JSON.stringify(div||'H-fly')}}]);
+    if(r){const t=r.l1+' '+r.l2;if(!cles.has(t)){cles.add(t);vus.push(t);}}}
+  return JSON.stringify(vus);})()`));
+
+test('Monde lot 6 T5 — la promesse ne dit que la demande ou la promesse notée en preuve',()=>{
+  for(const k of ['demande','promesse']){
+    const vs=toutesVariantes([{id:'x',last:'Alba'}],'demande-promesse',{source:'facts',i:1,k,a:'x',want:'revanche',target:'y',c:41},'F-fly');
+    assert.equal(vs.length,3);
+    for(const v of vs){
+      assert.ok(v.includes('Alba')&&v.includes('41'),k+' : le nom et la soirée de la preuve sont cités');
+      assert.ok(!/promi|promesse|tenir|honorer|engagement/i.test(v),k+' : aucune promesse ni engagement affirmés par la phrase');
+      assert.ok(!/\b(il|lui)\b/.test(v),k+' : aucun pronom hors preuve');
+    }
+  }
+});
+
+test('Monde lot 6 T5 — le derby nomme le pays, et la ville seulement si la preuve la porte',()=>{
+  const sans=toutesVariantes([],'derby',{source:'identite',a:'x',b:'y',pays:'Kiwiland',ville:null});
+  const avec=toutesVariantes([],'derby',{source:'identite',a:'x',b:'y',pays:'Kiwiland',ville:'Portville'});
+  assert.equal(sans.length,3); assert.equal(avec.length,3);
+  for(const v of sans){
+    assert.ok(v.includes('Kiwiland'),'le pays commun est nommé');
+    assert.ok(!/ville|local|catégorie|\.\s*\./i.test(v),'sans ville en preuve : ni ville ni « local » ni catégorie inventée');
+    assert.ok(!/,\s*[.:]/.test(v),'aucun trou de substitution');
+  }
+  for(const v of avec){ assert.ok(v.includes('Kiwiland')&&v.includes('Portville'),'pays et ville de la preuve nommés'); }
+});
+
+test('Monde lot 6 T5 — la revanche ne désigne comme vainqueur que celui de la preuve',()=>{
+  const roster=[{id:'g',last:'Gagne'},{id:'p',last:'Perd'}];
+  const vs=toutesVariantes(roster,'revanche',{source:'hist',i:3,c:41,gagnant:'g',perdant:'p'});
+  assert.equal(vs.length,3);
+  for(const v of vs){
+    assert.ok(v.includes('Gagne')&&v.includes('41'),'le vainqueur et la soirée de la preuve sont cités');
+    assert.ok(!v.includes('Perd'),'le perdant n’est pas présenté comme acteur de la phrase');
+    assert.ok(!/revanche (a |est )?(gagn|remport)/i.test(v),'aucun vainqueur de la revanche annoncé');
+  }
+});

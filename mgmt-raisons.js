@@ -19,9 +19,9 @@ const MGMT_RAISON_STYLES=Object.freeze({'Finit par KO':'frappe','Finit au sol':'
  *  les champs réellement enregistrés dans la preuve. */
 const MGMT_RAISON_PHRASES=Object.freeze({
   'revanche':{relu:false,variantes:[
-    {l1:'Revanche après la victoire de {gagnant}, soirée {c}.',l2:'La revanche peut donner une suite à cette histoire.',relu:false},
-    {l1:'La soirée {c} a tourné pour {gagnant} ; la revanche peut rouvrir le dossier.',l2:'Ce combat peut répondre à cette soirée.',relu:false},
-    {l1:'{gagnant} l’a emporté en soirée {c} ; {il} peut reprendre cette histoire.',l2:'La revanche peut écrire la suite de la soirée {c}.',relu:false}
+    {l1:'Déjà affrontés en soirée {c} : victoire de {gagnant}.',l2:'Ce combat peut donner une suite à cette soirée.',relu:false},
+    {l1:'Dernier affrontement en soirée {c}, remporté par {gagnant}.',l2:'Ce combat peut répondre à cette soirée.',relu:false},
+    {l1:'En soirée {c}, {gagnant} l’avait emporté entre eux.',l2:'Ce combat peut écrire la suite de cette soirée.',relu:false}
   ]},
   'rivalite-ouverte':{relu:false,variantes:[
     {l1:'Revanche demandée pour la soirée {c}.',l2:'Le combat peut faire avancer cette rivalité.',relu:false},
@@ -54,9 +54,9 @@ const MGMT_RAISON_PHRASES=Object.freeze({
     {l1:'{mois} mois sans combat pour {a} ; {il} attend une date.',l2:'Le combat peut rompre cette attente.',relu:false}
   ]},
   'demande-promesse':{relu:false,variantes:[
-    {l1:'Engagement de {a} pour la soirée {c}.',l2:'Le combat peut tenir cet engagement.',relu:false},
-    {l1:'{a} a pris un engagement pour la soirée {c}.',l2:'Le combat peut honorer cette promesse.',relu:false},
-    {l1:'{a} a promis ce combat pour {c} ; {il} peut le tenir.',l2:'Le combat peut répondre à cette promesse.',relu:false}
+    {l1:'Une demande de {a} est notée en soirée {c}.',l2:'Le combat peut répondre à cette demande.',relu:false},
+    {l1:'{a} a formulé une demande en soirée {c} ; ce combat y correspond.',l2:'Le combat peut y donner suite.',relu:false},
+    {l1:'En soirée {c}, {a} a exprimé une demande qui vise ce combat.',l2:'Le combat peut répondre à son attente.',relu:false}
   ]},
   'fin-contrat':{relu:false,variantes:[
     {l1:'Dernier combat du contrat de {a} : {restants} {combatRestant}.',l2:'Le combat peut peser sur la suite.',relu:false},
@@ -69,9 +69,9 @@ const MGMT_RAISON_PHRASES=Object.freeze({
     {l1:'Styles à l’opposé, {styleA} et {styleB}.',l2:'Le combat peut dire quel style tient.',relu:false}
   ]},
   'derby':{relu:false,variantes:[
-    {l1:'Derby : même pays, {pays}, catégorie {div}.',l2:'Le combat peut faire valoir cette proximité.',relu:false},
-    {l1:'Deux combattants du même pays : {pays}.',l2:'Le combat peut faire parler cette proximité.',relu:false},
-    {l1:'Même drapeau, {pays}, pour ce combat.',l2:'Le combat peut valoir un derby local.',relu:false}
+    {l1:'Derby : les deux combattants viennent du même pays, {pays}{villeCommune}.',l2:'Le combat peut faire valoir cette proximité.',relu:false},
+    {l1:'Deux combattants du même pays : {pays}{villeCommune}.',l2:'Le combat peut faire parler cette proximité.',relu:false},
+    {l1:'Même drapeau, {pays}{villeCommune}, pour ce combat.',l2:'Le combat oppose deux compatriotes.',relu:false}
   ]},
   'debuts':{relu:false,variantes:[
     {l1:'Débuts de {a} : {n} combat enregistré.',l2:'Le combat peut marquer ses débuts.',relu:false},
@@ -131,6 +131,8 @@ function mgmtRaisonLignes(m,raison,paire){
     rangA:cs[0]?.rang??'',rangB:cs[1]?.rang??'',age:f.age??'',total:f.total??'',n:f.n??'',restants:f.restants??'',pays:f.pays||'',
     // Forme accordée au nombre : « 1 combat restant » / « 3 combats restants ».
     combatRestant:Number(f.restants)>1?'combats restants':'combat restant',
+    // Ville commune : seulement si la preuve la porte (sinon rien, aucune ville supposée).
+    villeCommune:f.ville?', même ville : '+f.ville:'',
     nA:cs[0]?.n??'',nB:cs[1]?.n??'',styleA:cs[0]?.style||'',styleB:cs[1]?.style||''};
   const ids=mgmtRaisonIds(paire), variantes=entree.variantes;
   const idx=ids.length===2?mgmtRaisonHachage(raison.famille+'|'+ids.join('|'))%variantes.length:0;
