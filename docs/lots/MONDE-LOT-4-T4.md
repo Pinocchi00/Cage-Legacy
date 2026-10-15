@@ -94,3 +94,11 @@ Ne pas modifier les règles de sélection T1/T2, le catalogue de raisons du lot 
 - Décision technique : à épuisement, afficher la liste vide/état d’absence existant plutôt que recycler des dossiers, conformément à « sans repasser ceux déjà vus ».
 - Décision technique : le mode dossiers est disponible uniquement quand une place principale est libre et l’agenda permet le booking; la liste ordinaire reste le recours pour tout autre état.
 - Question pour Anthony : aucune.
+
+## Compte rendu
+
+- `mgmt-carte-cadre.js` : ajout du mode dossiers navigable (étape 1/2) à partir des piles T1/T2 et de `mgmtCarteDossierHtml`; clavier/souris équivalents (←/→, Entrée, Échap, F, D, L, P), échappement HTML.
+- `mgmt-ecran-carte.js` / `mgmt-emplacements.js` : état éphémère étendu dans `MGMT_CART`.
+- `index.html`, `sw.js` : montée de version de cache.
+- Tests ajoutés : aucune nouvelle déclaration (les T1/T2 existants couvrent les piles; les critères d’intégration ont été vérifiés manuellement via le harnais jsdom).
+- Questions pour Anthony : aucune.

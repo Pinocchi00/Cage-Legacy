@@ -142,7 +142,7 @@ function mgmtCarteAdvLigne(m,f,i,choisi,homo){
     +`<i>${esc(f.W)}-${esc(f.L)}-${esc(f.D||0)}</i></span><span class="mf-car-adv-s">${esc(raison||' ')}</span></span></button>`;
 }
 
-function scr_mgmt_carte_cadre(){
+function scr_mgmt_carte_liste(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt;
   if(MGMT_CART.pick){ const pf=mgmtFighterById(m,MGMT_CART.pick); if(!pf||!mgmtSelectable(m,pf,null)) MGMT_CART.pick=null; }
@@ -203,7 +203,62 @@ function scr_mgmt_carte_cadre(){
     touches:[{ks:['Échap'],t:'Retour',onclick:'CL.mgmtCarteLeave()'},{ks:['↑','↓'],t:'Choisir'},{ks:['A','E'],t:'Section'},{ks:['C'],t:'Catégorie',onclick:'CL.mgmtCarteCategorie(1)'},
       {ks:['F'],t:'Fiche',onclick:'CL.mgmtCarteFiche()'},{ks:['Entrée'],t:pickF?'Confirmer':'Choisir',jaune:true,onclick:'CL.mgmtCarteEntree()'}]});
 }
+function scr_mgmt_carte_cadre(){
+  if(!G||!G.mgmt) return scr_mgmt_bureau();
+  const m=G.mgmt;
+  if(MGMT_CART.mode!=='dossiers') return scr_mgmt_carte_liste();
+  return mgmtCarteDossiersEcran(m);
+}
 SCREENS.mgmt_carte=scr_mgmt_carte_cadre;
+
+/** Rend le mode dossier courant de l’écran Carte à partir de l’état éphémère MGMT_CART.
+ * N’écrit aucune donnée dans la partie et ne réserve aucun combattant.
+ * @param {Object} m Partie en mémoire.
+ * @returns {string} Fragment HTML de l’étape dossier courante.
+ */
+function mgmtCarteDossierHtml(m){
+  const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+  const i=Math.max(0,Math.min(MGMT_CART.index||0,Math.max(0,pile.length-1)));
+  MGMT_CART.index=pile.length?i:0;
+  const d=pile.length?pile[i]:null;
+  const etape=MGMT_CART.etape===2?2:1;
+  const combattant=etape===2?(mgmtFighterById(m,MGMT_CART.dossierCombattant)||d&&d.combattant): (d&&d.combattant);
+  const adversaire=etape===2&&(d&&d.adversaire);
+  const titre=combattant?esc(combattant.name||combattant.last||combattant.first):'';
+  /* IDs pour navigation */
+  const prevBtn=`<button type="button" aria-label="Précédent" onclick="CL.mgmtDossierIndex(-1)">‹</button>`;
+  const nextBtn=`<button type="button" aria-label="Suivant" onclick="CL.mgmtDossierIndex(1)">›</button>`;
+  if(!d){
+    return `<main class="mf-contenu mf-carte"><div class="mf-eff-aucun">Aucun dossier disponible.</div>
+      <div class="mf-car-boutons"><button type="button" onclick="CL.mgmtDossierListe()">Liste complète</button></div></main>`;
+  }
+  /* raison */
+  const raisonTxt= d.raison && (d.raison.titre||d.raison.libelle||d.raison.texte||d.raison.raison);
+  const raisonFam= d.raison && d.raison.famille? esc(d.raison.famille):'';
+  const resume = etape===2 ? `<div class="mf-dossier-resume">${esc('Ce que serait ce combat')}</div>` : '';
+  const nomComb = combattant? esc(combattant.last||combattant.name||''):'';
+  const nomAdv = adversaire? esc(adversaire.last||adversaire.name||''):'';
+  const ident = etape===1? esc(d.combattant.id||'') : esc(d.adversaire.id||'');
+  const cadre = etape===1
+   ? `<div class="mf-dossier"><div class="mf-dossier-raison">${esc(raisonTxt||'')}</div><div class="mf-dossier-nom">${nomComb}</div><div class="mf-dossier-id" data-id="${ident}">${ident}</div></div>`
+   : `<div class="mf-dossier"><div class="mf-dossier-raison">${esc(raisonTxt||'')}</div><div class="mf-dossier-nom">${nomComb} <span>vs</span> ${nomAdv}</div><div class="mf-dossier-id" data-id="${ident}">${ident}</div>${resume}</div>`;
+  return `<main class="mf-contenu mf-carte mf-dossiers">
+    <div class="mf-dossier-etapes">Étape ${etape}</div>
+    <div class="mf-dossier-nav">${prevBtn}${cadre}${nextBtn}</div>
+    <div class="mf-car-boutons">
+      ${etape===1?`<button type="button" onclick="CL.mgmtCarteEntree()">Choisir</button>`:`<button type="button" onclick="CL.mgmtCarteEntree()">Confirmer</button>`}
+      <button type="button" onclick="CL.mgmtCarteEsc()">Retour</button>
+      <button type="button" onclick="CL.mgmtCarteFiche()">Fiche</button>
+      <button type="button" onclick="CL.mgmtCarteProposer()">D'autres dossiers</button>
+      <button type="button" onclick="CL.mgmtDossierListe()">Liste complète</button>
+      ${etape===2?`<button type="button" onclick="CL.mgmtDossierPresentation()">Présentation</button>`:''}
+    </div></main>`;
+}
+
+function mgmtCarteDossiersEcran(m){
+  const html=mgmtCarteDossierHtml(m);
+  return mfEcran? (typeof mfEcran==='function'? mfEcran(html,{barre:'jeu',courant:'carte',m}): html) : html;
+}
 
 Object.assign(CL,{
   /** Un clic sur la liste : sans premier choix il choisit ; avec un premier choix il VISE (la confirmation se fait au bouton ou à Entrée). */
@@ -227,27 +282,140 @@ Object.assign(CL,{
     const i=ids.indexOf(mgmtCarteDiv(m));
     MGMT_CART.div=ids[(i+(delta<0?-1:1)+ids.length)%ids.length]; MGMT_CART.cursor=0; render();
   },
-  /** La préparation à la demande : pour un premier choix posé, Leïla pose quatre à six dossiers d'adversaires libres de sa catégorie (lot 4 T2). Pas de booking, pas de changement de curseur ni d'écran ; la réservation reste le chemin mgmtBookMain. */
+  /** La préparation à la demande. En mode dossier, D demande une nouvelle pile selon l’étape. */
   mgmtCarteProposer(){
-    const m=G.mgmt; if(!MGMT_CART.pick||!mgmtAgendaActif(m)) return;
-    const combattant=mgmtFighterById(m,MGMT_CART.pick); if(!combattant) return;
-    const pile=mgmtDossiersAdversaires(m,MGMT_CART.pick); if(!pile||!pile.length) return;
-    MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
+    const m=G.mgmt; if(!mgmtAgendaActif(m)) return;
+    if(MGMT_CART.mode!=='dossiers'){
+      if(!MGMT_CART.pick) return;
+      const combattant=mgmtFighterById(m,MGMT_CART.pick); if(!combattant) return;
+      const pile=mgmtDossiersAdversaires(m,MGMT_CART.pick); if(!pile||!pile.length) return;
+      MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
+      return;
+    }
+    MGMT_CART.mode='dossiers';
+    if(MGMT_CART.etape===1){
+      const vus=Array.isArray(MGMT_CART.vusCombattants)?MGMT_CART.vusCombattants:[];
+      const pile=mgmtDossiersCombattants(m,null,vus);
+      if(!pile||!pile.length){ MGMT_CART.dossiers=[]; render(); return; }
+      MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
+      MGMT_CART.vusCombattants=vus.concat(pile.map(d=>d.combattant.id));
+      MGMT_CART.index=0; MGMT_CART.etape=1; MGMT_CART.dossierCombattant=null;
+    } else {
+      const cid=MGMT_CART.dossierCombattant; if(!cid){ MGMT_CART.etape=1; render(); return; }
+      const vus=(MGMT_CART.vusAdversaires&&MGMT_CART.vusAdversaires[cid])||[];
+      const pile=mgmtDossiersAdversaires(m,cid,vus);
+      if(!pile||!pile.length){ MGMT_CART.dossiers=[]; render(); return; }
+      MGMT_CART.dossiers=pile.map(d=>({combattant:d.combattant,adversaire:d.adversaire,raison:d.raison}));
+      if(!MGMT_CART.vusAdversaires) MGMT_CART.vusAdversaires={};
+      MGMT_CART.vusAdversaires[cid]=vus.concat(pile.map(d=>d.adversaire.id));
+      MGMT_CART.index=0; MGMT_CART.etape=2;
+    }
+    render();
+  },
+  mgmtDossierIndex(delta){
+    const m=G.mgmt; const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+    if(!pile.length) return;
+    const n=pile.length; MGMT_CART.index=((MGMT_CART.index||0)+(delta<0?-1:1)+n)%n; render();
+  },
+  mgmtDossierSwipe(delta){ CL.mgmtDossierIndex(delta<0?-1:1); },
+  mgmtDossierEsc(){
+    const m=G.mgmt;
+    if(MGMT_CART.mode!=='dossiers'){ CL.mgmtCarteLeave(); return; }
+    if(MGMT_CART.etape===2){
+      MGMT_CART.etape=1; MGMT_CART.index=0;
+      if(Array.isArray(MGMT_CART.dossiers)&&MGMT_CART.dossiers.length){ /* keep chosen */ }
+      render(); return;
+    }
+    // step1 -> list mode, conserve context
+    MGMT_CART.mode='liste'; MGMT_CART.listeDepuisDossiers=true; render();
+  },
+  mgmtDossierListe(){
+    if(MGMT_CART.mode!=='dossiers') return;
+    MGMT_CART.mode='liste'; MGMT_CART.listeDepuisDossiers=true; render();
+  },
+  mgmtDossierRetour(){
+    if(!MGMT_CART.listeDepuisDossiers) return;
+    MGMT_CART.mode='dossiers'; MGMT_CART.listeDepuisDossiers=false; render();
+  },
+  mgmtCarteEsc(){ return CL.mgmtDossierEsc(); },
+  mgmtDossiers(){ return CL.mgmtCarteDossiersActiver(); },
+  mgmtCarteDossiers(){ return CL.mgmtCarteDossiersActiver(); },
+  mgmtDossierEchap(){ return CL.mgmtDossierEsc(); },
+  mgmtDossierPresentation(){
+    const m=G.mgmt;
+    if(MGMT_CART.mode!=='dossiers') return;
+    const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+    const d=pile[MGMT_CART.index||0]; if(!d) return;
+    const a=d.combattant&&d.combattant.id; const b=MGMT_CART.etape===2&&(d.adversaire&&d.adversaire.id);
+    if(!a||!b) return;
+    if(typeof mgmtPresentationCombat==='function'){ mgmtPresentationCombat({m:m,h:m.cycle||0},a,b); }
+    if(typeof CL.mgmtPresentationCombat==='function') CL.mgmtPresentationCombat(a,b);
+  },
+  mgmtCarteDossiersActiver(){
+    // entre en mode dossier (étape combattant par défaut) sans booking
+    const m=G.mgmt; if(!mgmtAgendaActif(m)) return false;
+    MGMT_CART.mode='dossiers'; MGMT_CART.listeDepuisDossiers=false;
+    MGMT_CART.etape=1; MGMT_CART.index=0; MGMT_CART.dossierCombattant=null;
+    MGMT_CART.vusCombattants=[]; MGMT_CART.vusAdversaires={};
+    CL.mgmtCarteProposer(); // remplira pile T1 en mode dossier
+    if(MGMT_CART.mode!=='dossiers') MGMT_CART.mode='dossiers';
+    render(); return true;
   },
   mgmtCarteFiche(){
+    if(MGMT_CART.mode==='dossiers'){
+      const m=G.mgmt; const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+      const d=pile[MGMT_CART.index||0];
+      const id= d ? (MGMT_CART.etape===2 ? (d.adversaire&&d.adversaire.id) : (d.combattant&&d.combattant.id)) : null;
+      const f=id?mgmtFighterById(m,id):null;
+      if(f) CL.mgmtFicheParIndex(m.roster.indexOf(f));
+      return;
+    }
     const m=G.mgmt, f=(MGMT_CART.pick&&mgmtFighterById(m,MGMT_CART.pick))||mgmtCarteListe(m)[MGMT_CART.cursor||0];
     if(f) CL.mgmtFicheParIndex(m.roster.indexOf(f));
   },
   mgmtCarteEntree(){
-    const m=G.mgmt, l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0];
+    const m=G.mgmt;
+    if(MGMT_CART.mode==='dossiers'){
+      const pile=Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers:[];
+      const d=pile[MGMT_CART.index||0];
+      if(!d) return;
+      if(MGMT_CART.etape===1){
+        MGMT_CART.dossierCombattant=d.combattant&&d.combattant.id;
+        // nouvelle pile adversaires
+        const vus=(MGMT_CART.vusAdversaires&&MGMT_CART.vusAdversaires[MGMT_CART.dossierCombattant])||[];
+        const pile2=mgmtDossiersAdversaires(m,MGMT_CART.dossierCombattant,vus);
+        MGMT_CART.dossiers=(pile2||[]).map(x=>({combattant:x.combattant,adversaire:x.adversaire,raison:x.raison}));
+        if(!MGMT_CART.vusAdversaires) MGMT_CART.vusAdversaires={};
+        if(pile2&&pile2.length) MGMT_CART.vusAdversaires[MGMT_CART.dossierCombattant]=vus.concat(pile2.map(x=>x.adversaire.id));
+        MGMT_CART.etape=2; MGMT_CART.index=0;
+        render(); return;
+      }
+      // confirm adversaire via porte
+      const cid=MGMT_CART.dossierCombattant;
+      const aid=d.adversaire&&d.adversaire.id;
+      if(!cid||!aid) return;
+      MGMT_CART.pick=cid;
+      CL.mgmtPick(aid);
+      // fermer mode dossier
+      MGMT_CART.mode='liste'; MGMT_CART.etape=1; MGMT_CART.index=0; MGMT_CART.dossierCombattant=null;
+      MGMT_CART.dossiers=[]; MGMT_CART.vusCombattants=[]; MGMT_CART.vusAdversaires={}; MGMT_CART.listeDepuisDossiers=false;
+      render(); return;
+    }
+    const l=mgmtCarteListe(m), f=l[MGMT_CART.cursor||0];
     /* Brief démo, lot 4 (D8) : Entrée sur un combattant déjà engagé ne reste pas muet, le curseur passe au premier libre. */
     if(f&&!MGMT_CART.pick&&!mgmtSelectable(m,f,null)){ const i=l.findIndex(x=>mgmtSelectable(m,x,null)); if(i>=0){ MGMT_CART.cursor=i; render(); return; } }
     if(f) CL.mgmtPick(f.id);
   },
 });
 keysRegister('mgmt_carte',{
-  ArrowUp(){ const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)-1+n)%n; render(); } },
-  ArrowDown(){ const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)+1)%n; render(); } },
+  ArrowUp(){ if(MGMT_CART.mode==='dossiers') return; const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)-1+n)%n; render(); } },
+  ArrowDown(){ if(MGMT_CART.mode==='dossiers') return; const n=mgmtCarteListe(G.mgmt).length; if(n){ MGMT_CART.cursor=((MGMT_CART.cursor||0)+1)%n; render(); } },
+  ArrowLeft(){ if(MGMT_CART.mode==='dossiers'){ CL.mgmtDossierIndex(-1); return; } },
+  ArrowRight(){ if(MGMT_CART.mode==='dossiers'){ CL.mgmtDossierIndex(1); return; } },
+  l(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierListe(); else CL.mgmtDossierRetour(); },
+  L(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierListe(); else CL.mgmtDossierRetour(); },
+  p(){ CL.mgmtDossierPresentation(); },
+  P(){ CL.mgmtDossierPresentation(); },
   Enter(){ CL.mgmtCarteEntree(); },
   c(){ CL.mgmtCarteCategorie(1); },
   C(){ CL.mgmtCarteCategorie(1); },
@@ -260,7 +428,7 @@ keysRegister('mgmt_carte',{
   '3'(){ CL.mgmtUnbook(2); },
   '4'(){ CL.mgmtUnbook(3); },
   '5'(){ CL.mgmtUnbook(4); },
-  Escape(){ CL.mgmtCarteLeave(); },
-  Backspace(){ CL.mgmtCarteLeave(); },
+  Escape(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierEsc(); else if(MGMT_CART.listeDepuisDossiers) CL.mgmtDossierRetour(); else CL.mgmtCarteLeave(); },
+  Backspace(){ if(MGMT_CART.mode==='dossiers') CL.mgmtDossierEsc(); else if(MGMT_CART.listeDepuisDossiers) CL.mgmtDossierRetour(); else CL.mgmtCarteLeave(); },
 });
 /* ==== [FIN ANCRE] ==== */
