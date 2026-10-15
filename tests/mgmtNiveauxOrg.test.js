@@ -1,44 +1,63 @@
 "use strict";
+/* ==== [ANCRE: TEST_MONDE_LOT9_T3_NIVEAUX_INDEPENDANTS] — Monde lot 9 T3 (docs/lots/MONDE-LOT-9-T3.md, DÉCISION du 15/10/2026) ====
+   Réécrit par le superviseur le 15/10/2026 : la première version simulait mgmtDivisionRanking avec un champ `rang` que le vrai
+   classement ne porte pas, et une partie dont `m.org` était un identifiant (c'est le nom) ; elle passait alors que la puissance valait
+   toujours 0 et que l'organisation du joueur n'avait aucun niveau. Ces tests lisent de vraies parties. */
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {newGameWindow}=require('./helpers/loadGame');
 
-test('Niveaux organisations — dérivés, déterministes et liés aux sources courantes',()=>{
-  const win=newGameWindow();
-  const result=JSON.parse(win.eval(`JSON.stringify((function(){
-    setSeed(19); const m={org:'split',pop:40,roster:[],salles:[{nom:'petite',capacite:800}],comptes:[],mondeVivant:false};
-    const a=mgmtOrgNiveaux(m,m.org), b=mgmtOrgNiveaux(m,m.org);
-    const p=a.popularite; m.pop=p+1; const c=mgmtOrgNiveaux(m,m.org);
-    return {a,b,c,r:mgmtOrgNiveauxRangs(m),ids:MGMT_ORGANISATIONS.map(o=>o.id),legacy:mgmtOrgNiveaux({org:m.org,roster:m.roster,mondeVivant:false},'garden-of-blood')};
-  })())`));
-  assert.deepEqual(result.a,result.b);
-  assert.equal(result.c.popularite,result.a.popularite+1);
-  assert.deepEqual(Object.keys(result.r).sort(),result.ids.sort());
-  assert.equal(result.legacy,null);
+const N=6, GRAINE=20261015;
+function partie(avecMonde){
+  const w=newGameWindow({runMain:true});
+  w.eval(`setSeed(${GRAINE}); mgmtPasseGenerer('split',{soirees:${N}});`);
+  if(avecMonde) w.eval(`mgmtMondeVivantGenerer(G.mgmt,{soirees:${N}});`);
+  return w;
+}
+const lire=(w,code)=>JSON.parse(w.eval(`JSON.stringify((function(){ const m=G.mgmt; ${code} })())`));
+
+test('Monde lot 9 T3 — sans monde vivant, seule l’organisation du joueur a ses quatre niveaux',()=>{
+  const w=partie(false);
+  try{
+    const r=lire(w,`return {moi:mgmtOrgNiveaux(m,mgmtPredecesseurOrgId(m)),autre:mgmtOrgNiveaux(m,'garden-of-blood'),rangs:mgmtOrgNiveauxRangs(m)};`);
+    assert.ok(r.moi,'Split a ses niveaux');
+    for(const k of ['popularite','stade','notoriete','puissance']) assert.ok(Number.isFinite(r.moi[k]),k);
+    assert.ok(r.moi.stade>0,'une salle'); assert.ok(r.moi.notoriete>0,'des combattants renommés');
+    assert.ok(r.moi.puissance>0,'des combattants dans le top 10 mondial');
+    assert.equal(r.autre,null);
+    assert.equal(r.rangs.split.puissance,1);
+  }finally{ w.close(); }
 });
 
-/* ==== [ANCRE: TEST_MONDE_LOT9_T3_NIVEAUX_INDEPENDANTS] — Monde lot 9 T3 ==== */
-test('Niveaux organisations — stade, notoriété et puissance suivent leurs règles propres',()=>{
-  const win=newGameWindow();
-  const result=JSON.parse(win.eval(`JSON.stringify((function(){
-    const m={org:'split',pop:40,mondeVivant:false,roster:[{id:'f1',div:'H-light',star:4},{id:'f2',div:'H-light',star:2}],salles:[{id:'s1',nom:'Petite',capacite:800},{id:'s2',nom:'Grande',capacite:4000}],comptes:[{salle:'Petite',taux:.9},{salle:'Grande',taux:.79}]};
-    const oldRank=mgmtDivisionRanking, oldResolve=mgmtExteriorCombattant, oldStar=mgmtStar;
-    mgmtDivisionRanking=(partie,div)=>div==='H-light'?[{id:'f1',rang:3},{id:'f2',rang:1},{id:'outside',rang:11}]:[]; mgmtExteriorCombattant=()=>null; mgmtStar=f=>f.star;
-    const a=mgmtOrgNiveaux(m,'split'); m.comptes=[{salle:'Grande',taux:.8}]; const b=mgmtOrgNiveaux(m,'split');
-    mgmtDivisionRanking=oldRank; mgmtExteriorCombattant=oldResolve; mgmtStar=oldStar; return {a,b};
-  })())`));
-  assert.equal(result.a.stade,800); assert.equal(result.b.stade,4000); assert.equal(result.a.notoriete,3); assert.equal(result.a.puissance,18);
+test('Monde lot 9 T3 — chaque niveau suit sa source, et seulement elle',()=>{
+  const w=partie(false);
+  try{
+    const r=lire(w,`const id=mgmtPredecesseurOrgId(m), avant=mgmtOrgNiveaux(m,id);
+      m.pop+=5; const pop=mgmtOrgNiveaux(m,id); m.pop-=5;
+      const grande=m.salles.slice().sort((a,b)=>b.capacite-a.capacite)[0];
+      const comptes=m.comptes; m.comptes=comptes.concat([{salle:grande.nom,salleId:grande.id,taux:0.95}]); const stade=mgmtOrgNiveaux(m,id); m.comptes=comptes;
+      const vivants=m.roster.filter(f=>!mgmtIsRetired(f));
+      const tete=allDivisions().map(d=>mgmtDivisionRanking(m,d.id,'world')[0]).find(x=>x&&vivants.some(f=>f.id===x.id));
+      if(tete){ m.roster.find(f=>f.id===tete.id).retired='age'; mgmtRangsInvalider(m); }
+      const sansTete=mgmtOrgNiveaux(m,id);
+      return {avant,pop,stade,grande:grande.capacite,sansTete,tete:!!tete};`);
+    assert.equal(r.pop.popularite,r.avant.popularite+5); assert.equal(r.pop.stade,r.avant.stade); assert.equal(r.pop.puissance,r.avant.puissance);
+    assert.equal(r.stade.stade,r.grande,'la grande salle remplie à 95 % devient le stade'); assert.equal(r.stade.popularite,r.avant.popularite);
+    assert.ok(r.tete,'Split a un numéro 1 mondial dans une catégorie');
+    assert.ok(r.sansTete.puissance<r.avant.puissance,'perdre un numéro 1 mondial fait baisser la puissance');
+    assert.equal(r.sansTete.popularite,r.avant.popularite);
+  }finally{ w.close(); }
 });
 
-test('Niveaux organisations — rang fourni et sous-partie vivante déterminent la puissance',()=>{
-  const win=newGameWindow();
-  const result=JSON.parse(win.eval(`JSON.stringify((function(){
-    const m={org:'split',mondeVivant:true,roster:[{id:'mine',div:'H-light'}],pop:40,orgs:{'garden-of-blood':{roster:[{id:'other',div:'H-light'}]}}};
-    const oldRank=mgmtDivisionRanking, oldResolve=mgmtExteriorCombattant;
-    mgmtDivisionRanking=(partie,div)=>div==='H-light'&&partie.roster.length?[{id:partie.roster[0].id,rang:partie.roster[0].id==='mine'?2:1}]:[];
-    mgmtExteriorCombattant=()=>null;
-    const a=mgmtOrgNiveaux(m,'split'), b=mgmtOrgNiveaux(m,'garden-of-blood');
-    mgmtDivisionRanking=oldRank; mgmtExteriorCombattant=oldResolve; return {a:a.puissance,b:b.puissance};
-  })())`));
-  assert.deepEqual(result,{a:9,b:10});
+test('Monde lot 9 T3 — avec le monde vivant, les huit organisations ont leurs niveaux et un rang de 1 à 8, à graine égale identiques',()=>{
+  const a=partie(true), b=partie(true);
+  try{
+    const code=`return {n:MGMT_ORGANISATIONS.map(o=>mgmtOrgNiveaux(m,o.id)),r:mgmtOrgNiveauxRangs(m)};`;
+    const ra=lire(a,code), rb=lire(b,code);
+    assert.deepEqual(ra,rb,'déterministe');
+    assert.ok(ra.n.every(Boolean),'huit organisations');
+    for(const k of ['popularite','stade','notoriete','puissance'])
+      assert.deepEqual(Object.values(ra.r).map(x=>x[k]).sort((x,y)=>x-y),[1,2,3,4,5,6,7,8],k);
+    assert.ok(ra.n.filter(x=>x.puissance>0).length>1,'la puissance se partage entre plusieurs organisations');
+  }finally{ a.close(); b.close(); }
 });

@@ -52,7 +52,8 @@ function mgmtOrgDecalageNiveau(profil,divId){
 function mgmtOrgNiveaux(m,orgId){
   if(!m||!MGMT_ORGANISATIONS.some(o=>o.id===orgId)) return null;
   let partie=null;
-  if(m.org===orgId) partie=m;
+  /* Superviseur, 15/10/2026 : m.org porte le NOM de l'organisation ; son identifiant vient de mgmtPredecesseurOrgId. */
+  if(mgmtPredecesseurOrgId(m)===orgId) partie=m;
   else if(m.mondeVivant===true&&m.orgs&&m.orgs[orgId]) partie=m.orgs[orgId];
   if(!partie) return null;
   const roster=(partie.roster||[]).filter(f=>f&&!mgmtIsRetired(f));
@@ -63,14 +64,13 @@ function mgmtOrgNiveaux(m,orgId){
   if(!salle) salle=salles.slice().sort((a,b)=>a.capacite-b.capacite)[0]||null;
   const renom=roster.map(mgmtStar).sort((a,b)=>b-a).slice(0,5);
   let puissance=0;
+  /* Le classement mondial se lit dans la partie du joueur (il réunit toutes les organisations) ; le rang est la position dans la liste
+     (les lignes ne portent pas de champ rang). Superviseur, 15/10/2026. */
+  const chezMoi=new Set(roster.map(f=>f.id));
   for(const div of allDivisions()){
-    (mgmtDivisionRanking(partie,div.id,'world')||[]).forEach(r=>{
-      if(!Number.isSafeInteger(r.rang)||r.rang<1||r.rang>10) return;
-      if((partie.roster||[]).some(x=>x.id===r.id&&!mgmtIsRetired(x))) puissance+=11-r.rang;
-      else {
-        const f=mgmtExteriorCombattant(m,r.id);
-        if(f&&f.orgId===orgId) puissance+=11-r.rang;
-      }
+    (mgmtDivisionRanking(m,div.id,'world')||[]).slice(0,10).forEach((r,i)=>{
+      const rang=i+1;
+      if(partie===m?chezMoi.has(r.id):(()=>{ const f=mgmtExteriorCombattant(m,r.id); return !!f&&f.orgId===orgId; })()) puissance+=11-rang;
     });
   }
   return {popularite:pop,stade:salle?salle.capacite:0,notoriete:renom.length?renom.reduce((a,b)=>a+b,0)/renom.length:0,puissance};
