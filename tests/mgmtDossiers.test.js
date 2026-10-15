@@ -324,14 +324,16 @@ test('Monde lot 4 T4 — les actions souris correspondent aux actions clavier',(
 test('Monde lot 4 T4 — la présentation du combat porte sur la paire active',()=>{
   const win=newGameWindow({runMain:true});
   win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers(); CL.mgmtCarteEntree();
-   window.__pres=[]; CL.mgmtPresentationCombat=(a,b)=>{window.__pres.push([a,b]);};`);
+   window.__pres=[]; const ouvrir=CL.mgmtPresentationOuvrir; CL.mgmtPresentationOuvrir=(mode,ids,o)=>{window.__pres.push([mode,...ids]); return ouvrir(mode,ids,o);};`);
+  /* Fusion de main (15/10/2026) : le lot 3 apporte la vraie présentation (CL.mgmtPresentationOuvrir) ; l'ancien espion visait
+     CL.mgmtPresentationCombat, qui n'a jamais existé hors de cette branche. La propriété gardée : la paire active, et aucun booking. */
   const cid=win.eval('MGMT_CART.dossierCombattant');
   const aid=win.eval('MGMT_CART.dossiers[MGMT_CART.index].adversaire.id');
   win.eval('CL.mgmtDossierPresentation();');
   const pres=JSON.parse(win.eval('JSON.stringify(window.__pres)'));
   assert.equal(pres.length,1);
-  assert.equal(pres[0][0],cid);
-  assert.equal(pres[0][1],aid);
+  assert.deepEqual(pres[0],['combat',cid,aid]);
+  assert.equal(win.eval('G.screen'),'mgmt_presentation_combat');
   assert.equal(win.eval('G.mgmt.card.main.length'),0);
 });
 
