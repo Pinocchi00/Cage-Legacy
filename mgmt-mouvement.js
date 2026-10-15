@@ -61,7 +61,7 @@ function mgmtMouvementHtml(m){
   const f=mgmtFighterById(m,c.id);
   if(!f) return '';
   const sur=mgmtIdentiteSurnomsDe(m,f.div).get(f.id)||'';
-  const role=mgmtRole(m,f);
+  const role=MGMT_HUMANITE_ACTIVE?mgmtRole(m,f):null;
   const libre=mgmtAvailable(m,f)&&!mgmtEngaged(m,f)&&mgmtMainPosable(m);
   const id=esc(f.id);
   return `<aside class="mgmt-popup" role="status" aria-live="polite">`

@@ -182,6 +182,7 @@ function mgmtHistoriqueHtml(m,f){
    catalogue tel quel. Aucun relais, aucune ligne : « On ne sait pas encore ».
    Pas de charge, pas de jauge. ==== */
 function mgmtFicheVie(m,f){
+  if(!MGMT_HUMANITE_ACTIVE) return '';
   const lignes=mgmtVieRelayes(m,f).slice(0,8);
   const corps=lignes.length
     ?`<ul class="mgmt-fiche-vie-liste">${lignes.map(x=>`<li>${esc(x.moment.libelle)}${mgmtFicheRelaisHtml(x.moment)}</li>`).join('')}</ul>`
@@ -243,6 +244,7 @@ function mgmtFichePromesses(m,f){
    quel) et son corps (disponibilité, blessures et suspensions gardées comme
    faits). Ni jauge ni chiffre. ==== */
 function mgmtFicheHistoire(identite){
+  if(!MGMT_HUMANITE_ACTIVE) return '';
   return `<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p>`;
 }
 function mgmtFicheCorps(m,f){
@@ -277,7 +279,7 @@ function scr_mgmt_fiche(){
    return `<div class="scr mgmt-wrap mgmt-fiche"><div class="mgmt-head bar">`
      +`<h2 class="disp">La fiche</h2><span class="mgmt-week-event">${esc(mgmtOrgNom(m))} ${esc(m.eventsPlayed+1)}</span></div>`
      +`<button class="mgmt-fiche-retour" onclick="CL.mgmtFicheRetour()">← Retour</button>`
-      +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}${mot?` <span class="mgmt-fiche-mot">${esc(mot)}</span>`:''}</h2>`
+      +`<div class="mgmt-fiche-hero"><div><h2 class="disp">${esc(f.name)} <span class="mgmt-fiche-surnom">« ${esc(identite.surnom)} »</span>${MGMT_HUMANITE_ACTIVE&&role?` <span class="mgmt-fiche-role">${esc(role.libelle)}</span>`:''}${mot?` <span class="mgmt-fiche-mot">${esc(mot)}</span>`:''}</h2>`
      +`<p><span class="mgmt-fiche-origine">de ${esc(identite.ville)} · ${esc(pays.name)}</span><br>${esc(mgmtDivisionLabel(f.div))}${org?' · '+esc(org):''} · ${esc(f.age)} ans · garde ${profile.stance==='southpaw'?'gaucher':'orthodoxe'}<br>${esc(ranks)}</p>${mgmtFicheLien(m,f)}</div>`
      +`<div class="mgmt-fiche-attrs">${attrs.map(([label,value])=>`<div><strong>${esc(value)}</strong><span>${label}</span></div>`).join('')}</div></div>`
      +`<div class="mgmt-cols mgmt-fiche-cols${trace?'':' mgmt-fiche-no-trace'}"><section class="mgmt-fiche-side"><h3>Où {il} combat</h3>${mgmtFicheOctogone(m,f)}</section>`

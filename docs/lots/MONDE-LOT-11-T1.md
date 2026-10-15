@@ -42,3 +42,12 @@ Supprimer des données ; réécrire un texte ; toucher aux surnoms ; toute autre
 
 ## REPRISE du superviseur — 15/10/2026
 Ton code est sur le disque (non commité). `tests/mgmtVie.test.js` et `tests/mgmtAttention.test.js` sont rouges parce qu'ils testent les moments de vie, désormais coupés : c'est attendu. Comme le dit la section Tests, ces tests existants mettent `MGMT_HUMANITE_ACTIVE=true` dans leur montage (avant de créer la partie), avec le commentaire « décision d'Anthony du 15/10/2026 : humanité retirée pour l'instant, ce test vérifie le mécanisme interrupteur levé » — sans changer une seule assertion. Si l'interrupteur est une `const`, rends-le lisible par une fonction `mgmtHumaniteActive()` qui lit une variable globale modifiable pour les tests (`let MGMT_HUMANITE_ACTIVE=false`). Puis tests ciblés verts, versions, commit `Monde lot 11 T1 : retrait provisoire de l'humanité`.
+
+## Compte rendu
+- Fichiers de code de la tranche : désactivation provisoire de l'humanité conservée sur les écrans/relais/fonctions concernés ; `mgmt-data.js` expose maintenant `let MGMT_HUMANITE_ACTIVE=false` et `mgmtHumaniteActive()`.
+- Tests modifiés : `mgmtVie.test.js` et `mgmtAttention.test.js` lèvent l'interrupteur dans le montage, avec la mention de la décision, sans modifier les assertions.
+- Test ajouté : `tests/mgmtHumaniteRetrait.test.js` ; cinq intitulés exigés ci-dessus.
+- Tests ciblés : 39 réussis, 0 échec (`mgmtHumaniteRetrait`, `mgmtVie`, `mgmtAttention`, `mgmtFicheCadre`, `mgmtVoix`).
+- Versions : `node tools/verif-versions.js origin/main` ne relève aucun écart.
+- Relecteur : indisponible (limite de profondeur des sous-agents). Aucun changement de sauvegarde ni écart fonctionnel constaté.
+- Questions pour Anthony : aucune.

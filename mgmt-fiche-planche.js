@@ -189,6 +189,7 @@ function mgmtFichePalmaresAmateurHtml(m,f){
 
 /** La trajectoire d'un combattant extérieur (sa trace) : amateur, organisations traversées, professionnel. Rien n'est stocké. */
 function mgmtFicheParcoursHtml(trace){
+  if(!MGMT_HUMANITE_ACTIVE) return '';
   const duree=o=>{
     if(o.from===null||o.to===null) return '';
     const sem=(o.to-o.from+1)*MGMT_EVENT_WEEKS;
@@ -370,7 +371,7 @@ function mgmtFicheOnEnDitHtml(m,f){
     return `<div class="mf-fi-oc"><div class="mf-fi-ocq"><span>${esc(lib)}</span><b>${esc(nom)}</b></div><div class="mf-fi-oct"><div class="mf-fi-ocp">${esc(citation)}</div><div class="mf-fi-rp">${esc(x.t?titre:age)}</div></div></div>`;
   }).join('');
   const identite=mgmtIdentite(m,f);
-  const reste=`<div class="mf-fi-ancien mf-ancien">${mgmtFicheVie(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheRivaux(m,f)}${mgmtFicheParole(m,f)}${mgmtFicheLien(m,f)}<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p></div>`;
+  const reste=`<div class="mf-fi-ancien mf-ancien">${mgmtFicheVie(m,f)}${mgmtFichePromesses(m,f)}${mgmtFicheRivaux(m,f)}${mgmtFicheParole(m,f)}${mgmtFicheLien(m,f)}${MGMT_HUMANITE_ACTIVE?`<h3>Son histoire</h3><p>Milieu : ${esc(identite.milieu)}</p><p>Ancien métier : ${esc(identite.metier)}</p>`:''}</div>`;
   return `<div class="mf-fi-ligne">${mfPanneau(`<div class="mf-fi-p mf-fi-scroll">${depuis}${rows}${reste}</div>`,'normal','mf-fi-pan mf-fi-fill')}</div>`;
 }
 /* ==== [FIN ANCRE] ==== */

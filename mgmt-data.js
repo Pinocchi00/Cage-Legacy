@@ -19,6 +19,10 @@
 /* ==== [ANCRE: MGMT_LOT1_DONNEES] — Lot 1 mode management : socle de données
    du bureau (voix, échanges, raisons, déclencheurs, cadrage). ==== */
 const MGMT_ORG='Split';
+/* ==== [ANCRE: MONDE_LOT11_T1_RETRAIT_HUMANITE] — Monde lot 11 T1 ==== */
+/* Décision d'Anthony du 15/10/2026 : retirer provisoirement les couches d'humanité. */
+let MGMT_HUMANITE_ACTIVE=false;
+function mgmtHumaniteActive(){ return MGMT_HUMANITE_ACTIVE; }
 /* ==== [ANCRE: MONDE_LOT5_T3_LIBELLE] — Monde lot 5 T3 ==== */
 /* Proposition Claude prescrite par la décision du 13/10/2026. */
 const MGMT_CARTE_PROVENANCE={texte:"VIENT D'AVANT",relu:false};

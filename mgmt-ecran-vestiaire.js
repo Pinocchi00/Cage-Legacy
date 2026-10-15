@@ -38,7 +38,7 @@ function mgmtVestiaireLignes(m){
     if(F.lien&&lien!==F.lien) continue;
     const signe=mgmtVestiaireSigne(m,f);
     if(F.signe&&!signe) continue;
-    const role=mgmtRole(m,f,classements);
+    const role=MGMT_HUMANITE_ACTIVE?mgmtRole(m,f,classements):null;
     if(F.role&&(!role||role.id!==F.role)) continue;
     out.push({f,lien,signe,role});
   }
@@ -61,7 +61,7 @@ function mgmtVestiaireLigneHtml(m,x,surnoms,i){
 function mgmtVestiaireAside(m,titre,ids,max){
   const lignes=ids.map(id=>{
     const f=mgmtFighterById(m,id); if(!f) return '';
-    const r=mgmtRole(m,f);
+    const r=MGMT_HUMANITE_ACTIVE?mgmtRole(m,f):null;
     return `<button type="button" class="mgmt-vest-mini" onclick="CL.mgmtFiche('${esc(f.id)}')">${esc(f.name)}${r?' — '+esc(r.libelle):''}, ${esc(mgmtDivisionLabel(f.div))}</button>`;
   }).join('');
   return `<div class="mgmt-vest-bloc"><h3>${esc(titre)} · ${esc(ids.length)}/${esc(max)}</h3>${lignes||'<p>Personne pour le moment.</p>'}</div>`;
@@ -84,7 +84,7 @@ function scr_mgmt_vestiaire(){
   const divChips=chip('Tous',!F.div,"CL.mgmtVestiaireFiltre('div','')")
     +allDivisions().map(d=>chip(mgmtDivisionLabel(d.id),F.div===d.id,`CL.mgmtVestiaireFiltre('div','${esc(d.id)}')`)).join('');
   const roles=`<select aria-label="Rôle" onchange="CL.mgmtVestiaireFiltre('role',this.value)"><option value="">Tous</option>`
-    +MGMT_ROLES.map(r=>`<option value="${esc(r.id)}"${F.role===r.id?' selected':''}>${esc(r.libelle)}</option>`).join('')+`</select>`;
+    +(MGMT_HUMANITE_ACTIVE?MGMT_ROLES.map(r=>`<option value="${esc(r.id)}"${F.role===r.id?' selected':''}>${esc(r.libelle)}</option>`).join(''):'')+`</select>`;
   const actifs=m.roster.filter(f=>!mgmtIsRetired(f)).length;
   const aDire=m.roster.filter(f=>!mgmtIsRetired(f)&&mgmtVestiaireSigne(m,f)).length;
   return `<div class="scr mgmt-wrap mgmt-vestiaire"><div class="mgmt-head bar"><h2 class="disp">Le vestiaire</h2>`
