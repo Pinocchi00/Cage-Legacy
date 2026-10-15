@@ -64,23 +64,47 @@ function mgmtNouvelleCible(g){
   if(g.monde) return Math.max(0,Math.min(100,100*(g.k+(g.monde.fait/Math.max(1,g.monde.ids.length)))/Math.max(1,g.n+(g.monde.total/Math.max(1,g.monde.ids.length)))));
   return Math.max(0,Math.min(100,100*g.k/Math.max(1,g.n)));
 }
-/** Les compteurs lus dans la partie en cours de création, à coût nul : soirées, combats, retraites (champions : non lisible à coût nul, donc absent). */
+/* ==== [ANCRE: MONDE_LOT10_T1_FAITS] — Monde lot 10 T1 ==== */
+/** Lit une seule fois les faits nouveaux et met à jour les compteurs de progression.
+ * @param {object} g Génération active. @returns {void} Modifie ses compteurs incrémentaux. */
+function mgmtNouvelleLireFaits(g){
+  const facts=g.m&&Array.isArray(g.m.facts)?g.m.facts:[];
+  const hist=g.m&&Array.isArray(g.m.hist)?g.m.hist:[];
+  while(g.vus<facts.length){
+    const f=facts[g.vus++];
+    if(!f) continue;
+    if(f.k==='title_initial') g.detenteurs[f.div]=f.a||null;
+    if(f.k==='title_fight'){
+      const combat=hist[f.fight];
+      const vainqueur=combat?(combat.winner==='A'?combat.a&&combat.a.id:(combat.winner==='B'?combat.b&&combat.b.id:null)):null;
+      const precedent=g.detenteurs[f.div];
+      if(vainqueur&&vainqueur!==precedent){
+        g.champions++;
+        g.detenteurs[f.div]=vainqueur;
+        const fighter=mgmtFighterById(g.m,vainqueur);
+        g.dernier={nom:fighter?fighter.nom||fighter.name||vainqueur:vainqueur,division:typeof mgmtDivisionLabel==='function'?mgmtDivisionLabel(f.div):f.div,soiree:f.c};
+      }
+    }
+    if(f.k==='injury') g.blessures++;
+  }
+}
+/** Compteurs réels de la partie, dont les faits sont lus incrémentalement. @param {object} g Génération. @returns {Array<object>} Libellés et valeurs. */
 function mgmtNouvelleCompteurs(g){
   const m=g.m;
-  let retraites=0;
-  if(m&&Array.isArray(m.facts)) for(const f of m.facts) if(f&&f.k==='retired') retraites++;
+  mgmtNouvelleLireFaits(g);
   return [
     {k:'soirées jouées',v:g.k},
     {k:'combats',v:m&&Array.isArray(m.hist)?m.hist.length:0},
-    {k:'retraites',v:retraites},
+    {k:'champions couronnés',v:g.champions||0},
+    {k:'blessures',v:g.blessures||0},
   ];
 }
 function mgmtNouvelleGenHtml(g){
   if(!Number.isFinite(g.aff)) g.aff=0;
   const a0=+mgmtPasseAnnee(g.n,0), an=+g.annee;
   const frise=Number.isFinite(a0)?Array.from({length:6},(_,i)=>{
-    const y=a0+i, cls=g.pret||y<an?'fait':(y===an?'cours':'');
-    return `<div class="mf-genese-an ${cls}">${esc(y)}${cls==='fait'?' ✓':''}</div>`;
+    const y=a0+i, idx=Array.from({length:g.n},(_,k)=>k).find(k=>+mgmtPasseAnnee(g.n,k)===y), pct=100*(idx===undefined?0:idx)/Math.max(1,g.n), cls=g.pret||y<an?'fait':(y===an?'cours':'');
+    return `<div class="mf-genese-an ${cls}" data-year="${y}" style="left:${pct}%">${esc(y)}${cls==='fait'?' ✓':''}</div>`;
   }).join(''):'';
   const compteurs=mgmtNouvelleCompteurs(g).map(c=>`<div class="mf-genese-cpt"><b>${esc(c.v)}</b><span>${esc(c.k)}</span></div>`).join('');
   const lib=g.pret?'Prêt. Six ans d’histoire sont écrits.':`Année ${g.annee} — soirée ${Math.min(g.k,g.n)} sur ${g.n}`;
@@ -94,11 +118,24 @@ function mgmtNouvelleGenHtml(g){
   const droite=`<div class="mf-genese-droite"><div class="mf-lecture-entete">Pendant que ça charge, ce qu’il faut savoir</div>`
     +`<div class="mf-lecture-carton"><div class="mf-lecture-titre">${esc(L[i].titre)}</div><div class="mf-lecture-texte">${esc(L[i].texte)}</div></div>`
     +`<div class="mf-lecture-pastilles">${pastilles}</div>`
-    +(g.pret?`<div class="mf-genese-entree">${mfBouton('Entrer dans '+g.org,{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleEntrer()'})}</div>`:'')
-    +`</div>`;
-  const contenu=`<div class="mf-genese" role="status" aria-live="polite">${gauche}${droite}</div>`;
+     +(g.pret?`<div class="mf-genese-entree">${mfBouton('Entrer dans '+g.org,{touche:'Entrée',jaune:true,onclick:'CL.mgmtNouvelleEntrer()'})}</div>`:'')
+     +`</div>`;
+  const contenu=`<div class="mf-genese ${g.erreur?'erreur':g.pret?'fin':g.m?'chargement':'debut'}" role="status" aria-live="polite">${gauche}${droite}${g.erreur?`<div class="mf-genese-erreur"><p>Échec en ${esc(g.erreurAnnee||g.annee)}, emplacement ${esc(g.slot)} : ${esc(g.erreurMessage||'erreur inconnue')}</p><button type="button" onclick="CL.mgmtNouvelleRecommencer()">Recommencer</button><button type="button" onclick="CL.mgmtNouvelleAbandonner()">Choisir une autre organisation</button></div>`:''}</div>`;
   return mfEcran(contenu,{barre:'logo',plaque:'Management',libelle:'Nouvelle partie',
-    touches:[{ks:['Échap'],t:'Abandonner la création',onclick:'CL.mgmtNouvelleAbandonner()'},{ks:['←','→'],t:'Lire'}]});
+    touches:[{ks:['Échap'],t:'Abandonner la création',onclick:'CL.mgmtNouvelleAbandonner()'},...(g.erreur?[{ks:['Entrée'],t:'Recommencer',onclick:'CL.mgmtNouvelleRecommencer()'}]:[{ks:['←','→'],t:'Lire'}])]});
+}
+/** Actualise les nœuds de progression sans reconstruire l'écran. @param {object} g Génération active. @returns {void} Met à jour les textes et attributs ciblés. */
+function mgmtNouvelleProgression(g){
+  if(typeof document==='undefined') return;
+  const rac=document.querySelector('.mf-genese'); if(!rac) return;
+  const valeurs=mgmtNouvelleCompteurs(g), noeuds=rac.querySelectorAll('.mf-genese-cpt');
+  valeurs.forEach((c,i)=>{if(noeuds[i]){const b=noeuds[i].querySelector('b'),s=noeuds[i].querySelector('span');if(b)b.textContent=c.v;if(s)s.textContent=c.k;}});
+   const texte=rac.querySelector('.mf-genese-gauche .mf-genese-texte:last-child');
+   if(texte) texte.textContent=g.erreur?`Échec en ${g.erreurAnnee||g.annee}, emplacement ${g.slot} : ${g.erreurMessage||'erreur inconnue'}`:g.pret?'Six ans sont écrits.':`Année ${g.annee} — soirée ${Math.min(g.k,g.n)} sur ${g.n}`;
+   const barre=rac.querySelector('.mf-genese-barre'); if(barre){barre.setAttribute('aria-valuenow',g.k);if(g.erreur)barre.classList.add('erreur');const b=barre.querySelector('b');if(b){b.style.width=g.erreur?(g.aff||0)+'%':Math.max(g.aff||0,100*g.k/Math.max(1,g.n))+'%';if(g.erreur)b.style.background='#777';}}
+  const annees=rac.querySelectorAll('.mf-genese-an'); annees.forEach(el=>{const y=+el.dataset.year;el.classList.toggle('fait',g.pret||y<g.annee);el.classList.toggle('cours',!g.pret&&y===g.annee);});
+  let fait=rac.querySelector('.mf-genese-dernier-fait');
+  if(g.dernier){if(!fait){fait=document.createElement('div');fait.className='mf-genese-dernier-fait';rac.querySelector('.mf-genese-gauche').appendChild(fait);}fait.textContent=`${g.dernier.nom} prend la ceinture · ${g.dernier.division} · soirée ${g.dernier.soiree}`;}
 }
 /** Le mouvement est écrit en script (mgmt-animations.js, décision du 07/10) : la lueur de la barre (coupée sous prefers-reduced-motion) et le fondu de 300 ms du carton. */
 function mgmtNouvelleMouvement(fondu){
@@ -151,7 +188,7 @@ function mgmtNouvelleGenPas(){
   const g=MGMT_NOUVELLE.gen;
   if(!g||g.pret) return;
   try{
-    if(!g.m){ g.m=mgmtPassePreparer(g.orgId,{soirees:g.n}); }
+    if(!g.m){ g.m=mgmtPassePreparer(g.orgId,{soirees:g.n}); mgmtNouvelleLireFaits(g); }
     else if(g.monde){
       if(mgmtMondeVivantPas(g.monde).termine){ g.pret=true; G.mgmt=null; render(); mgmtNouvelleBarreBoucle(g); return; }
     }
@@ -170,10 +207,11 @@ function mgmtNouvelleGenPas(){
     }
   }catch(e){
     mgmtNouvelleGenNettoyer();
-    MGMT_NOUVELLE.gen=null; if(G) G.mgmt=null;
+    g.erreur=true; g.erreurAnnee=g.annee; g.erreurMessage=e&&e.message?e.message:String(e); if(G) G.mgmt=null;
     render(); return;
   }
-  render();
+  mgmtNouvelleLireFaits(g);
+  mgmtNouvelleProgression(g);
   mgmtNouvelleGenSuite(g);
 }
 /** Laisse le navigateur peindre la barre, puis fait le pas suivant (s'arrête si la création a été abandonnée). */
@@ -234,7 +272,7 @@ Object.assign(CL,{
     if(typeof mgmtDemoActive==='function'&&mgmtDemoActive()&&o.id!==CL_DEMO_ORG) return;
     if(MGMT_NOUVELLE.soirees===0){ CL.mgmtNouvelleCreer(); return; }   /* soirees:0 = une partie sans passé (tests, outils) */
     const n=Number.isSafeInteger(MGMT_NOUVELLE.soirees)&&MGMT_NOUVELLE.soirees>0?MGMT_NOUVELLE.soirees:MGMT_PASSE_SOIREES;
-    MGMT_NOUVELLE.gen={slot:MGMT_NOUVELLE.slot,orgId:o.id,org:o.nom,n,k:0,annee:mgmtPasseAnnee(n,0),m:null,
+    MGMT_NOUVELLE.gen={slot:MGMT_NOUVELLE.slot,orgId:o.id,org:o.nom,n,k:0,annee:mgmtPasseAnnee(n,0),m:null,vus:0,detenteurs:{},champions:0,blessures:0,dernier:null,
       avecMonde:MGMT_NOUVELLE.monde===true||(MGMT_NOUVELLE.monde!==false&&MGMT_NOUVELLE.soirees===undefined)};   /* Monde lot 9 T2a : les sept organisations vivantes accompagnent la création réelle */
     render();
     mgmtNouvelleLectureArmer(MGMT_NOUVELLE.gen);
@@ -249,6 +287,8 @@ Object.assign(CL,{
     mgmtNouvelleLectureArmer(g); render(); mgmtNouvelleMouvement(true);
   },
   mgmtNouvelleLectureDelta(d){ const g=MGMT_NOUVELLE.gen; if(g) CL.mgmtNouvelleLecture((g.lec||0)+d); },
+  /** Recommence une génération interrompue en conservant l'organisation choisie. @returns {void} Relance l'écran de création. */
+  mgmtNouvelleRecommencer(){ const g=MGMT_NOUVELLE.gen;if(!g||!g.erreur)return;mgmtNouvelleGenNettoyer();MGMT_NOUVELLE.gen={slot:g.slot,orgId:g.orgId,org:g.org,n:g.n,k:0,annee:mgmtPasseAnnee(g.n,0),m:null,vus:0,detenteurs:{},champions:0,blessures:0,dernier:null};render();mgmtNouvelleLectureArmer(MGMT_NOUVELLE.gen);mgmtNouvelleBarreBoucle(MGMT_NOUVELLE.gen);mgmtNouvelleGenSuite(MGMT_NOUVELLE.gen); },
   /** La partie est prête : le bouton (ou Entrée) l'ouvre. */
   mgmtNouvelleEntrer(){
     const g=MGMT_NOUVELLE.gen;
@@ -271,7 +311,7 @@ keysRegister('mgmt_nouvelle',{
   ArrowRight(){ if(MGMT_NOUVELLE.gen) CL.mgmtNouvelleLectureDelta(1); else CL.mgmtNouvelleDeplacer(1,0); },
   ArrowUp(){ CL.mgmtNouvelleDeplacer(0,-1); },
   ArrowDown(){ CL.mgmtNouvelleDeplacer(0,1); },
-  Enter(){ if(MGMT_NOUVELLE.gen){ CL.mgmtNouvelleEntrer(); return; } CL.mgmtNouvelleLancer(); },
+  Enter(){ if(MGMT_NOUVELLE.gen){ if(MGMT_NOUVELLE.gen.erreur){CL.mgmtNouvelleRecommencer();return;} CL.mgmtNouvelleEntrer(); return; } CL.mgmtNouvelleLancer(); },
   Escape(){ if(MGMT_NOUVELLE.gen){ CL.mgmtNouvelleAbandonner(); return; } CL.mgmtNouvelleRetour(); },
 });
 /* ==== [FIN ANCRE] ==== */

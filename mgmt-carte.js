@@ -110,10 +110,16 @@ function mgmtRecGap(A,B){ return Math.abs((A.W+A.L)-(B.W+B.L)); }
  *   retenue est prise parmi celles qui cumulent la plus longue inactivité
  *   (jamais combattu sous Split = le plus inactif) ; à égalité, le tirage
  *   seedé garde la variété.
- * @returns {{a,b,sloppy,warned,div}|null} */
-function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
+ * @param {string} [famille] Famille obligatoire pour ce tirage.
+ * @param {Map<string,Array<Object>>} [raisonsIndex] Preuves locales précalculées.
+ * @returns {Object|null} Paire existante, avec raison {famille,fait} seulement si une famille est demandée. */
+/* ==== [ANCRE: MONDE_LOT6_T2_SELECTION] — Monde lot 6 T2 ==== */
+function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed,famille,raisonsIndex,seulMode){
+  if(famille&&!MGMT_RAISON_FAMILLES.includes(famille)) return null;
   const totals=stats||{total:0,streak:0};
-  const wantSloppy=rnd()<mgmtSloppyProb(totals.total,totals.streak);
+  /* Fusion du lot 6 (15/10/2026) : seulMode ('clean'|'sloppy') = le bâclage est tiré une fois par combat par l'appelant
+     (mgmtBulkSelection) et un seul mode est cherché ; sans lui, le comportement d'avant est inchangé. */
+  const wantSloppy=seulMode?seulMode==='sloppy':rnd()<mgmtSloppyProb(totals.total,totals.streak);
   const r=m.roster;
   /* Arbitrage lot 2 (revue) : les appariements restent toujours dans la même
      catégorie hommes/femmes — le dégradé joue sur la division et l'écart de
@@ -146,6 +152,7 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
     /* Lot 7 : la réservation — jamais un combattant du cercle ou des suivis du joueur. */
     &&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,o)));
   const sexes=aptes.map(genderOf);
+  if(famille&&!raisonsIndex) raisonsIndex=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
   const collect=mode=>{
     const out=[];
     for(let i=0;i<aptes.length;i++){
@@ -156,6 +163,8 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
       const key=[A.id,B.id].sort().join('|');
       if(seen.has(key)) continue;
       if(rematch.has(key)) continue;
+      const raison=famille?(raisonsIndex.get(key)||[]).find(r=>r.famille===famille):null;
+      if(famille&&!raison) continue;
       if(!relaxed){
         /* §T3 : repos sauf en mode assoupli. */
         if(repos(A)||repos(B)) continue;
@@ -171,13 +180,13 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
         const sloppy=(A.div!==B.div)||rankGap>MGMT_RANK_GAP||mgmtRecGap(A,B)>=MGMT_SLOPPY_GAP;
         if(mode==='clean'&&sloppy) continue;
         if(mode==='sloppy'&&!sloppy) continue;
-        out.push({A,B,sloppy,div:d,inact:inact(A)+inact(B)});
+        out.push({A,B,sloppy,div:d,inact:inact(A)+inact(B),raison});
       }
     }
     return out;
   };
   let cands=collect(wantSloppy?'sloppy':'clean');
-  if(cands.length===0) cands=collect(wantSloppy?'clean':'sloppy');
+  if(cands.length===0&&!seulMode) cands=collect(wantSloppy?'clean':'sloppy');
   if(cands.length===0) return null;
   /* Priorité (§T3) : les combattants inactifs depuis le plus longtemps —
      la paire retenue est prise parmi celles qui cumulent la plus longue
@@ -187,7 +196,73 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
   const top=cands.filter(c=>c.inact===best);
   const c=pick(top);
   const warned=c.sloppy&&rnd()<mgmtWarnProb(totals.total);
-  return {a:c.A,b:c.B,sloppy:c.sloppy,warned,div:c.div};
+  const result={a:c.A,b:c.B,sloppy:c.sloppy,warned,div:c.div};
+  if(famille) result.raison=c.raison;
+  return result;
+}
+
+/* ==== [ANCRE: MONDE_LOT6_T2_BLOC] — Monde lot 6 T2 ==== */
+/** Couples distincts, de même genre et sans homonymes, dans l'ordre du roster. */
+function mgmtBulkReasonPairs(aptes){
+  const paires=[], sexes=aptes.map(f=>divById(f.div)?.gender||null);
+  for(let i=0;i<aptes.length;i++){
+    for(let j=i+1;j<aptes.length;j++){
+      if(aptes[i].first!==aptes[j].first&&sexes[i]===sexes[j]) paires.push([aptes[i],aptes[j]]);
+    }
+  }
+  return paires;
+}
+
+/** Choisit les familles puis leurs paires pour un bloc neuf. @param {Object} m Partie. @param {Set<string>} used Prénoms à exclure. @param {Set<string>} seen Paires à exclure. @param {number} n Nombre de combats. @param {Object} stats Écrasements. @param {boolean} relaxed Assouplissement existant. @returns {Array<Object>|null} n résultats du picker avec raison, ou null ; ensembles fournis inchangés en cas d'échec. */
+/* ==== [ANCRE: MONDE_LOT6_T3_CONTEXTE] — Monde lot 6 T3 ==== */
+/** @param {Array<Object>} [contexte=[]] Combats déjà conservés sur cette carte, dans leur ordre ; leurs raisons enregistrées initialisent les usages. */
+function mgmtBulkSelection(m,used,seen,n,stats,relaxed,contexte=[]){
+  const champions=typeof mgmtChampionIds==='function'?mgmtChampionIds(m):new Set();
+  const aptes=m.roster.filter(f=>mgmtAvailable(m,f)&&!champions.has(f.id)
+    &&!mgmtEngaged(m,f)&&!(typeof mgmtAgendaReserve==='function'&&mgmtAgendaReserve(m,f)));
+  const index=mgmtRaisonsIndex(m,mgmtBulkReasonPairs(aptes));
+  const localUsed=new Set(used), localSeen=new Set(seen), familles=new Map(), result=[];
+  for(const f of contexte) if(f.raison) familles.set(f.raison.famille,(familles.get(f.raison.famille)||0)+1);
+  let precedente=contexte[contexte.length-1]?.raison?.famille;
+  let lastDiv=null, run=0;
+  const totals=stats||{total:0,streak:0};
+  for(let i=0;i<n;i++){
+    /* ==== [ANCRE: MONDE_LOT6_FUSION_BACLAGE] — fusion du lot 6 (15/10/2026) ====
+       Le bâclage se tire une fois par combat, comme avant le lot 6, et le mode voulu est épuisé dans toutes les familles avant l'autre :
+       retirer à chaque famille rendait presque chaque combat bâclé (catégories croisées, avant-combat impossible, recettes en baisse). */
+    const voulu=rnd()<mgmtSloppyProb(totals.total,totals.streak)?'sloppy':'clean';
+    let p=null;
+    for(const mode of [voulu,voulu==='sloppy'?'clean':'sloppy']){
+      for(const famille of MGMT_RAISON_FAMILLES){
+        if(familles.has(famille)) continue;
+        p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode);
+        if(p) break;
+      }
+      /* ==== [ANCRE: MONDE_LOT6_T2_VARIETE_MAXIMALE] — Monde lot 6 T2 ==== */
+      // Décision du 13/10/2026 : épuiser les familles inédites avant toute
+      // reprise ; moindre usage (ordre du catalogue à égalité), puis la
+      // précédente seulement si elle seule permet encore une paire apte.
+      if(!p){
+        const reprises=MGMT_RAISON_FAMILLES.filter(f=>familles.has(f)&&f!==precedente)
+          .sort((a,b)=>familles.get(a)-familles.get(b));
+        for(const famille of reprises){
+          p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,famille,index,mode);
+          if(p) break;
+        }
+        if(!p&&precedente) p=mgmtPickBulkPair(m,localUsed,localSeen,lastDiv,run,stats,relaxed,precedente,index,mode);
+      }
+      if(p) break;
+    }
+    if(!p) return null;
+    localUsed.add(p.a.first); localUsed.add(p.b.first);
+    localSeen.add([p.a.id,p.b.id].sort().join('|'));
+    run=p.div===lastDiv?run+1:1; lastDiv=p.div;
+    familles.set(p.raison.famille,(familles.get(p.raison.famille)||0)+1); result.push(p);
+    precedente=p.raison.famille;
+  }
+  for(const first of localUsed) used.add(first);
+  for(const key of localSeen) seen.add(key);
+  return result;
 }
 
 /**
@@ -206,6 +281,8 @@ function mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed){
  * proposées, séries) et le repos pour le remplissage de fin de cycle —
  * jamais la carte (sanctuarisée) ni deux fois la même paire dans le bloc.
  * @returns {object|null} */
+/** Vrai pendant une soirée jouée par le prédécesseur (mgmtPredecesseurSoiree) : voir MONDE_LOT6_PREDECESSEUR_SANS_RAISON. */
+let MGMT_PREDECESSEUR_EN_COURS=false;
 function mgmtNewBulkAffair(m,used,seen,relaxed){
   if(mgmtCardFull(m)) return null;
   if(!m||!m.card||!Array.isArray(m.card.main)||!Array.isArray(m.card.prelims)) return null;
@@ -215,19 +292,32 @@ function mgmtNewBulkAffair(m,used,seen,relaxed){
   const n=(Number.isSafeInteger(m.card.sizePrelims)?m.card.sizePrelims:MGMT_PRELIM_SIZE)-m.card.prelims.length;
   if(n<=0) return null;
   const stats=mgmtCrushStats(m);
-  const fights=[];
-  let lastDiv=null, run=0;
   /* §T3 : la proposition est un tout — Leïla propose les préliminaires
      MANQUANTS, jamais une carte partielle ; si un combat de la carte est
      introuvable, l'appelant signale le shortfall et on ne remplit rien
      (lot 3a §5). */
-  for(let i=0;i<n;i++){
-    const p=mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed);
-    if(!p) return null;
-    used.add(p.a.first); used.add(p.b.first);
-    seen.add([p.a.id,p.b.id].sort().join('|'));
-    run=(p.div===lastDiv)?run+1:1; lastDiv=p.div;
-    fights.push({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned});
+  /* ==== [ANCRE: MONDE_LOT6_T2_PROPOSITION] — Monde lot 6 T2 ==== */
+  /* ==== [ANCRE: MONDE_LOT6_T3_PROPOSITION] — Monde lot 6 T3 ==== */
+  /* ==== [ANCRE: MONDE_LOT6_PREDECESSEUR_SANS_RAISON] — fusion du lot 6 (15/10/2026) ====
+     Le prédécesseur (passé, organisations du monde, joueur automatique de l'outil) n'est pas Leïla : il garde le tirage d'avant le lot 6,
+     sans famille, et ses combats portent raison:null (« cause non enregistrée »). Le choix par familles vidait la caisse du passé
+     d'Ultimate Rim avant la fenêtre des recrues (aucune recrue sur trois graines) et allongeait la création. */
+  let fights;
+  if(MGMT_PREDECESSEUR_EN_COURS){
+    fights=[];
+    let lastDiv=null, run=0;
+    for(let i=0;i<n;i++){
+      const p=mgmtPickBulkPair(m,used,seen,lastDiv,run,stats,relaxed);
+      if(!p) return null;
+      used.add(p.a.first); used.add(p.b.first);
+      seen.add([p.a.id,p.b.id].sort().join('|'));
+      run=(p.div===lastDiv)?run+1:1; lastDiv=p.div;
+      fights.push({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,raison:null});
+    }
+  }else{
+    const selection=mgmtBulkSelection(m,used,seen,n,stats,relaxed,m.card.prelims);
+    if(!selection) return null;
+    fights=selection.map(p=>({a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))}));
   }
   const aff={
     id:mgmtNextId(m),kind:'leila_bulk',exchange:'leila_bulk',
@@ -261,9 +351,11 @@ function mgmtSwapFight(m,affairId){
   const old=aff.fights[idx];
   seen.add([old.a,old.b].sort().join('|'));
   const stats=mgmtCrushStats(m);
-  const p=mgmtPickBulkPair(m,used,seen,null,0,stats);
+  /* ==== [ANCRE: MONDE_LOT6_T3_ECHANGE] — Monde lot 6 T3 ==== */
+  const contexte=m.card.prelims.concat(aff.fights.filter((f,i)=>i!==idx));
+  const p=mgmtBulkSelection(m,used,seen,1,stats,false,contexte)?.[0];
   if(!p) return false;
-  aff.fights[idx]={a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned};
+  aff.fights[idx]={a:p.a.id,b:p.b.id,slot:'prelim',sloppy:p.sloppy,warned:p.warned,origine:'leila',raison:JSON.parse(JSON.stringify(p.raison))};
   /* R3 : la réaction concerne les combattants retirés (old), ceux que le
      texte dit devoir replacer — jamais les remplaçants. Le fait garde les
      deux paires explicitement. */
@@ -288,7 +380,10 @@ function mgmtBulkRemplacer(m,affairId,idx,newId,cote){
   if(!nf||!reste||nf.div!==reste.div||newId===fi.a||newId===fi.b) return false;
   if(!mgmtSelectable(m,nf,reste.id)) return false;
   if(aff.fights.some((x,i)=>i!==idx&&(x.a===newId||x.b===newId))) return false;
+  /* ==== [ANCRE: MONDE_LOT6_T3_JOUEUR] — Monde lot 6 T3 ==== */
+  const preuve=mgmtRaisonsPourPaire(m,nf,reste)[0]||null;
   if(premier) fi.a=newId; else fi.b=newId;
+  fi.origine='joueur'; fi.raison=JSON.parse(JSON.stringify(preuve));
   fi.sloppy=false; fi.warned=false;
   if(idx===0){ aff.a=fi.a; aff.b=fi.b; }
   return true;
@@ -299,7 +394,12 @@ function mgmtBulkMonter(m,affairId,idx){
   const aff=m.pile.find(a=>a.id===affairId);
   if(!aff||aff.status!=='open'||aff.kind!=='leila_bulk'||!Array.isArray(aff.fights)||!Number.isSafeInteger(idx)||idx<0||idx>=aff.fights.length) return false;
   const f=aff.fights[idx];
-  if(!mgmtBookMain(m,f.a,f.b)) return false;
+  /* ==== [ANCRE: MONDE_LOT6_T3_MONTER] — Monde lot 6 T3 ==== */
+  const raison=JSON.parse(JSON.stringify(f.raison)), origine=f.origine;
+  const pose=mgmtBookMain(m,f.a,f.b);
+  if(!pose) return false;
+  pose.raison=raison;
+  if(origine!==undefined) pose.origine=origine;
   /* mgmtBookMain a déjà retiré de la proposition tout combat devenu impossible, celui-ci compris. */
   const k=aff.fights.indexOf(f); if(k>=0) aff.fights.splice(k,1);
   aff.marked=null;

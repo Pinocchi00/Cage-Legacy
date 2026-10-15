@@ -1062,6 +1062,8 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pr-vs span{font-size:22px;line-height:1.1;text-align:center;background:#0D0B0B;border:2px solid #E9E6E1;padding:6px 10px}
 .mf-pr-cartouche{position:absolute;left:1094px;top:20px;width:470px;height:220px;box-sizing:border-box;border:2px solid #E9E6E1;background:#0D0B0B;padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:20px 18px;font-size:22px;line-height:1.1}
 .mf-pr-cartouche b{display:block;margin-top:9px;font:800 40px/.8 var(--mf-titre)}
+.mf-pr-raison{flex:none;height:56px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:0 16px;background:#0D0B0B;border-left:4px solid #E9E6E1;font:500 22px/1.1 var(--mf-texte);color:#E9E6E1}
+.mf-pr-raison span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mf-pr-rangee{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;flex:1;min-height:0}
 .mf-pr-rangee.bas{height:338px;flex:none}
 .mf-pr.solo .mf-pr-rangee.bas{height:226px;grid-template-columns:3fr 2fr}
@@ -1291,30 +1293,87 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-pre-cote{flex:1;min-width:0;height:44px;border:0;background:var(--mf-ligne);color:var(--mf-blanc);font-family:var(--mf-titre);font-weight:800;font-size:28px;text-transform:uppercase;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 10px;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
 .mf-pre-cote.on{background:var(--mf-blanc);color:var(--mf-noir)}
 
-/* ==== Monde lot 2 T8 : Résultats — la liste des soirées et le tableau des combats (décision du 12/10/2026, retour d'Anthony) ==== */
-.mf-re{position:relative}
-.mf-re-grille{display:flex;gap:32px;height:760px}
-.mf-re-gauche{flex:none;width:520px;display:flex;flex-direction:column;gap:10px}
-.mf-re-lib,.mf-re-plus{font-weight:600;font-size:22px;line-height:1.1;letter-spacing:.06em;color:var(--mf-texte2)}
-.mf-re-liste{display:flex;flex-direction:column;gap:8px}
-.mf-re-s{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--mf-ligne);color:var(--mf-blanc);padding:10px 16px;border:2px solid transparent;font-size:24px;line-height:1.15}
-.mf-re-s b{font-weight:700;font-size:24px;letter-spacing:.02em}
-.mf-re-s span{font-size:24px;color:var(--mf-texte2);overflow-wrap:anywhere}
-.mf-re-s.sel{border-color:rgba(233,230,225,.5)}
-.mf-re-s.actif,.mf-re-l.actif{outline:3px solid #FFFFFF;outline-offset:-3px}
-.mf-re-droite{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
-.mf-re-titre{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:1.1}
-.mf-re-tab{display:flex;flex-direction:column;gap:6px}
-.mf-re-l{display:flex;align-items:center;gap:20px;text-align:left;background:var(--mf-ligne);color:var(--mf-blanc);padding:10px 16px;border:2px solid transparent;font-size:24px;line-height:1.15;min-width:0}
-.mf-re-l.sel{border-color:rgba(233,230,225,.5)}
-.mf-re-place{flex:none;width:190px;font-weight:700;font-size:22px;letter-spacing:.04em;color:var(--mf-texte2)}
-.mf-re-qui{flex:1;min-width:0;font-size:24px;overflow-wrap:anywhere}
-.mf-re-qui .g{font-weight:800;color:#F3EDE0}
-.mf-re-qui .p{color:var(--mf-texte2)}
-.mf-re-qui i{font-style:normal;color:var(--mf-texte2)}
-.mf-re-ceinture{font-style:normal;font-weight:800;font-size:22px;margin-left:14px;padding:2px 10px;background:var(--mf-jaune);color:var(--mf-noir);letter-spacing:.04em}
-.mf-re-meth{flex:none;width:280px;font-size:24px;color:var(--mf-blanc);font-weight:400}
-.mf-re-aide{margin-top:8px;font-size:24px;line-height:1.2;color:var(--mf-texte2)}
+/* ==== Monde lot 10 T3 : Résultats — trois colonnes (les soirées, les combats, le combat choisi) et la prochaine chose à faire. Valeurs portées de
+   maquettes/monde/refonte/MondeResultats.html (planche validée le 14/10/2026). Aucun texte sous 22 px. (Remplace le bloc du lot 2 T8.) ==== */
+.mf-re{display:flex;gap:16px}
+.mf-re-g{flex:0 0 400px;display:flex}
+.mf-re-g>.mf-panneau{flex:1}
+.mf-re-m{flex:0 0 700px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.mf-re-d{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.mf-re-plein{flex:1;display:flex;flex-direction:column;gap:16px;min-width:0}
+.mf-re-plein>.mf-panneau,.mf-re-d>.mf-re-det{flex:1}
+.mf-re .mf-p3{padding:15px;gap:12px;overflow:hidden}
+.mf-re-T{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;white-space:nowrap;text-transform:uppercase}
+.mf-re-lab{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase}
+.mf-re-sous{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase;flex:none}
+.mf-re-l1{font-size:24px;line-height:1.05}
+.mf-re-l2{font-size:22px;line-height:1.05;color:var(--mf-texte2)}
+.mf-re-l2.fort{font-size:24px;color:var(--mf-blanc)}
+.mf-re-l2.note{line-height:1.15}
+.mf-re-l1.t2{color:var(--mf-texte2)}
+.mf-re-tete{display:flex;justify-content:space-between;align-items:flex-start;flex:none;gap:12px}
+.mf-re-tt{display:flex;flex-direction:column;gap:12px}
+.mf-re-tt .mf-re-T{font-size:40px;line-height:.75}
+.mf-re-trait{width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+/* La liste des soirées */
+.mf-re-liste{flex:1;display:flex;flex-direction:column;gap:12px;min-height:0;overflow:hidden}
+.mf-re-liste .mf-re-sous:not(:first-child){margin-top:8px}
+.mf-re-so{display:flex;flex-direction:column;gap:8px;padding:8px 12px;flex:none;min-width:0;border:0;border-bottom:2px solid var(--mf-sep);background:none;color:inherit;text-align:left;font:inherit}
+.mf-re-so.sel{background:var(--mf-ligne);box-shadow:inset 0 0 0 2px var(--mf-blanc);border-bottom-color:transparent}
+.mf-re-so-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.mf-re-so-h .mf-re-T{font-size:30px;line-height:.8}
+.mf-re-so-h span{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-re-so .mf-re-l2,.mf-re-avenir .mf-re-l2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-re-avenir{padding:10px 12px;border:2px solid var(--mf-sep);flex:none;min-width:0}
+.mf-re-plus{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none}
+.mf-re-plus.bas{margin-top:auto}
+.mf-re-aller{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune);flex:none}
+/* La tête de la soirée */
+.mf-re-sdt{height:100px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 24px;display:flex;flex-direction:column;justify-content:center;gap:12px;min-width:0}
+.mf-re-sdt .mf-re-T{font-size:44px;line-height:.75}
+.mf-re-sdt .mf-re-l1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-re-sdt-h{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.mf-re-puce{border:2px solid var(--mf-bord);padding:6px 10px;font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mf-re-puce.a-toi{background:var(--mf-blanc);color:var(--mf-noir);border-color:var(--mf-blanc)}
+/* Le tableau des combats */
+.mf-re-tab{flex:1}
+.mf-re-tab .mf-p3{gap:2px}
+.mf-re-gr{display:flex;justify-content:space-between;align-items:flex-end;height:30px;padding-bottom:4px;flex:none}
+.mf-re-gr.haut{margin-top:6px}
+.mf-re-cb{display:flex;align-items:center;gap:16px;height:58px;padding:0 10px;flex:none;border:0;border-bottom:2px solid var(--mf-sep);min-width:0;background:none;color:inherit;text-align:left;font:inherit}
+.mf-re-cb.sel{background:var(--mf-ligne);box-shadow:inset 0 0 0 2px var(--mf-blanc);border-bottom-color:transparent}
+.mf-re-n{width:40px;height:40px;flex:none;border:2px solid var(--mf-bord);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:28px;line-height:1}
+.mf-re-col{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.mf-re-cb .mf-re-l1{font-size:26px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mf-re-cb .mf-re-l2{line-height:1;white-space:nowrap;display:flex;align-items:center;gap:8px;overflow:hidden}
+.mf-re-cb .g{font-weight:600}
+.mf-re-cb .b{color:var(--mf-texte2)}
+.mf-re-ceinture{display:inline-flex;align-items:center;gap:8px;color:var(--mf-blanc)}
+.mf-re-oct{width:16px;height:16px;flex:none;background:var(--mf-rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+/* Le combat choisi */
+.mf-re-det .mf-p3{gap:10px}
+.mf-re-det-g{font-size:40px;line-height:.8;overflow:hidden;text-overflow:ellipsis}
+.mf-re-det-p{font-size:26px;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mf-re-det .mf-re-l2{overflow-wrap:anywhere}
+.mf-re-sous.haut{margin-top:8px}
+.mf-re-chg{display:flex;align-items:center;gap:12px;font-size:24px;line-height:1.1;padding:8px 0;border-bottom:2px solid var(--mf-sep);flex:none}
+.mf-re-chg i{flex:none;width:18px;height:18px;display:block}
+.mf-re-chg i.ceint{background:var(--mf-rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-re-chg i.monte{background:var(--mf-blanc);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.mf-re-chg i.recule{background:var(--mf-texte2);clip-path:polygon(0 0,100% 0,50% 100%)}
+.mf-re-chg i.reste{background:var(--mf-texte2);clip-path:polygon(0 35%,100% 35%,100% 65%,0 65%)}
+.mf-re-chg i.corps{border:3px solid var(--mf-blanc)}
+.mf-re-chg i.contrat{border:3px solid var(--mf-texte2)}
+.mf-re-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px;flex:none}
+.mf-re-actions .mf-bouton{justify-content:space-between;width:100%}
+.mf-re-vide-t{font-size:30px;line-height:1.2}
+/* La prochaine chose à faire */
+.mf-re-jaune{flex:none;height:170px;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;justify-content:center;gap:10px;border:0;text-align:left;font:inherit;min-width:0}
+.mf-re-jaune .mf-re-lab{color:var(--mf-noir)}
+.mf-re-jaune .mf-re-T{font-size:44px;line-height:.85;overflow:hidden;text-overflow:ellipsis}
+.mf-re-jh{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.mf-re-jaune .mf-k{border-color:var(--mf-noir);color:var(--mf-noir);flex:none}
+.mf-re-jd{font-size:24px;line-height:1.1;overflow:hidden}
 
 /* ==== [ANCRE: MONDE_LOT7_ACCUEIL_CSS] — Monde lot 7 : l'Accueil, valeurs portées de maquettes/monde/MondeAccueil.dc.html et
    MondeAccueilArrivee.dc.html. Aucun texte sous 22 px, aucune animation, rien par-dessus. ==== */
@@ -1385,3 +1444,67 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-bloc{border-bottom:2px solid var(--mf-sep);padding:8px 0 10px;display:flex;flex-direction:column;gap:6px;flex:none}
 .mf-ac-t{font-size:24px;line-height:1.1}
 /* ==== [FIN ANCRE] ==== */
+/* ==== [ANCRE: MONDE_LOT10_ARRIVEE_CSS] — Monde lot 10 : les styles de l'écran « Votre arrivée », portés de la planche
+   MondeArrivee (maquettes/monde/refonte). Tout est sous .mf-arr (racine de l'écran) : les classes génériques de la
+   planche (pan, lab, T, col, tuile, bloc, l1…) ne valent qu'à l'intérieur. Aucun texte sous 22 px. ==== */
+.mf-arr{position:absolute;left:56px;top:128px;width:1808px;height:856px;display:flex;flex-direction:column;gap:16px}
+.mf-arr *{box-sizing:border-box}
+.mf-arr .T{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;white-space:nowrap;text-transform:uppercase}
+.mf-arr .lab{font-weight:600;font-size:22px;line-height:1;letter-spacing:.06em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase}
+.mf-arr .t2{color:var(--mf-texte2)}
+.mf-arr .nom{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.mf-arr .col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mf-arr .l1{font-size:24px;line-height:1.05}
+.mf-arr .l2{font-size:22px;line-height:1.05;color:var(--mf-texte2)}
+.mf-arr .sous{font-weight:600;font-size:22px;line-height:1;letter-spacing:.04em;color:var(--mf-texte2);white-space:nowrap;text-transform:uppercase;flex:none}
+.mf-arr .ligne{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid var(--mf-sep);padding:9px 0;flex:none;min-width:0}
+.mf-arr .oct{flex:none;background:var(--mf-rouge-vif);clip-path:polygon(29.3% 0,70.7% 0,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0 70.7%,0 29.3%)}
+.mf-arr .aller{font-family:var(--mf-titre);font-weight:800;font-size:24px;line-height:1;white-space:nowrap;color:var(--mf-jaune);flex:none;cursor:pointer}
+.mf-arr .carte-l{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex:none;min-width:0}
+.mf-arr .pan{--b:rgba(233,230,225,.5);display:flex;background:var(--b);padding:2px;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);min-width:0;min-height:0}
+.mf-arr .pan>.p2{flex:1;min-width:0;display:flex;background:var(--mf-noir);padding:5px;clip-path:polygon(17px 0,100% 0,100% calc(100% - 17px),calc(100% - 17px) 100%,0 100%,0 17px)}
+.mf-arr .pan>.p2>.p3{flex:1;min-width:0;background:var(--mf-panneau);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:15px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.mf-arr .pan-tete{display:flex;justify-content:space-between;align-items:flex-start;flex:none;gap:12px}
+.mf-arr .pan-titre{display:flex;flex-direction:column;gap:12px}
+.mf-arr .pan-titre .T{font-size:40px;line-height:.75}
+.mf-arr .trait{width:56px;height:8px;background:var(--mf-rouge-vif);clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.mf-arr .tuile{background:var(--mf-ligne);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
+.mf-arr .tuile .T{font-size:40px}
+.mf-arr .tuile .s{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-arr .jaune-bloc{flex:none;background:var(--mf-jaune);color:var(--mf-noir);clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.mf-arr .jaune-bloc.focus{outline:3px solid var(--mf-jaune);outline-offset:2px}
+.mf-arr .jaune-bloc .lab{color:var(--mf-noir)}
+.mf-arr .jaune-bloc .T{font-size:44px;line-height:.85}
+.mf-arr .jaune-bloc .k{border:2px solid var(--mf-noir);color:var(--mf-noir);padding:5px 9px;font-size:24px;line-height:1;white-space:nowrap}
+.mf-arr .ar-bande{height:140px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.mf-arr .ar-bande-g{display:flex;align-items:center;gap:26px;min-width:0}
+.mf-arr .ar-bande-g>.T{font-size:120px;line-height:.69}
+.mf-arr .ar-bande-g .col{gap:10px}
+.mf-arr .ar-bande-g .l1{font-size:26px}
+.mf-arr .ar-qui{font-size:30px;line-height:1;font-weight:600}
+.mf-arr .ar-tuiles{display:flex;gap:10px}
+.mf-arr .ar-tuiles .tuile{width:220px;height:112px}
+.mf-arr .ar-cols{flex:1;min-height:0;display:flex;gap:16px}
+.mf-arr .ar-cols>.pan{min-width:0}
+.mf-arr .ar-c1{flex:0 0 540px}.mf-arr .ar-c2{flex:0 0 600px}.mf-arr .ar-c3{flex:1}
+.mf-arr .ar-chiffres{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
+.mf-arr .ar-chiffres .tuile{height:92px;gap:12px}
+.mf-arr .ar-chiffres .v{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:52px;line-height:.72;white-space:nowrap}
+.mf-arr .bloc{display:flex;flex-direction:column;gap:8px;flex:none;min-width:0}
+.mf-arr .bloc .l1{font-size:24px;line-height:1.1}
+.mf-arr .ch-l{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--mf-sep);padding:7px 0;flex:none;min-width:0}
+.mf-arr .ch-l .div{width:176px;flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-arr .ch-l .n{flex:1;min-width:0;overflow:hidden;padding-bottom:6px;margin-bottom:-6px;text-overflow:ellipsis;font-size:24px;line-height:1;white-space:nowrap}
+.mf-arr .ch-l .d{flex:none;font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap}
+.mf-arr .ch-l .oct{width:18px;height:18px}
+.mf-arr .ar-c2 .carte-l{margin-top:auto}
+.mf-arr .ar-pas{display:flex;flex-direction:column;gap:10px}
+.mf-arr .ar-pas .carte-l .l1{font-size:24px}
+.mf-arr .ar-num{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.8;width:34px;flex:none}
+/* ==== [FIN ANCRE] ==== */
+
+/* Monde lot 10 : liens accessibles dans les panneaux existants. */
+.mf-arr button.nom,.mf-arr button.aller{background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.mf-arr button.aller{font-family:var(--mf-titre);font-size:24px;font-weight:800;color:var(--mf-jaune)}
+.mf-arr .ar-action.focus,.mf-arr .ar-action:focus-visible{outline:2px solid var(--mf-jaune);outline-offset:2px}
+.mf-arr .jaune-bloc{cursor:pointer}

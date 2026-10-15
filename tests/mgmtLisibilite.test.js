@@ -42,28 +42,31 @@ test('Lisibilité — l\'en-tête met 24 px d\'espace entre ses éléments et pa
 test('Résultats — une date et un combat principal par soirée ; une ligne par combat ; aucun rouge sur un résultat', () => {
   const win=neuve(7); jouer(win,3,{titre:true});
   win.eval(`MGMT_SU_RE={s:0,i:0}; CL.go('mgmt_resultats');`);
-  assert.equal(win.eval(`document.querySelectorAll('.mf-re-s').length`),3);
+  /* Monde lot 10 T3 : planche Résultats validée par Anthony le 14/10/2026 (MONDE-LOT-10-DECISIONS) — les soirées s'appellent « Fight Night N », la date est longue avec l'année. */
+  assert.equal(win.eval(`document.querySelectorAll('.mf-re-so').length`),3);
   for(let k=0;k<3;k++){
-    const t=win.eval(`document.querySelectorAll('.mf-re-s')[${k}].textContent`);
-    assert.match(t,/SOIRÉE \d+ · \d+ /,'la date : '+t);
+    const t=win.eval(`document.querySelectorAll('.mf-re-so')[${k}].textContent`);
+    assert.match(t,/Fight Night \d+\d{1,2} [a-zéû]+ 20\d\d/,'la date : '+t);
     assert.match(t,/ bat | et .* : match nul/,'le combat principal en une ligne : '+t);
   }
   const n=win.eval(`mgmtSoirees(G.mgmt).slice().reverse()[0].idx.length`);
-  assert.equal(win.eval(`document.querySelectorAll('.mf-re-l').length`),n,'une ligne par combat de la soirée');
-  const html=win.eval(`document.querySelector('.mf-re-droite').innerHTML`);
+  assert.equal(win.eval(`document.querySelectorAll('.mf-re-cb').length`),n,'une ligne par combat de la soirée');
+  const html=win.eval(`document.querySelector('.mf-re-tab').innerHTML`);
   assert.ok(!/color:\s*(#B32A1E|#E23A2B|red)/i.test(html),'aucun style inline rouge sur un résultat');
   assert.ok(!/mf-su-ko|mf-su-h-titre/.test(html),'plus de DÉCISION géant');
-  const bloc=css().slice(css().indexOf('Monde lot 2 T8 : Résultats'));
-  assert.ok(!/rouge/.test(bloc),'pas de rouge dans le tableau des Résultats');
-  assert.match(texte(win),/Entrée : revoir le combat/);
+  /* Monde lot 10 T3 : planche Résultats validée par Anthony le 14/10/2026 (MONDE-LOT-10-DECISIONS) — la planche dessine la pastille de ceinture et le trait des titres en rouge vif ; le rouge ne colore ni le vainqueur ni le perdant. */
+  const bloc=css().slice(css().indexOf('Monde lot 10 T3 : Résultats'));
+  assert.ok(!/\.mf-re-cb \.(g|b)\{[^}]*rouge/.test(bloc),'le rouge ne colore aucun résultat');
+  assert.match(texte(win),/Revoir le combat/);
 });
 
-test('Résultats — un combat du passé : « pas de rediffusion », et Entrée ne lance aucune rediffusion', () => {
+test('Résultats — un combat du passé : « il ne se revoit pas », et ni Entrée ni R ne lancent de rediffusion', () => {
   const win=neuve(7); jouer(win,2);
-  win.eval(`G.mgmt.hist.forEach(t=>{ if(t.c===G.mgmt.hist[0].c) t.p=true; }); MGMT_SU_RE={s:1,i:0,zone:'table'}; CL.go('mgmt_resultats');`);
-  assert.match(texte(win),/pas de rediffusion/);
-  assert.ok(!/Revoir ce combat/.test(texte(win)));
-  touche(win,'Enter');
+  /* Monde lot 10 T3 : planche Résultats validée par Anthony le 14/10/2026 (MONDE-LOT-10-DECISIONS) — la phrase de la planche remplace « pas de rediffusion ». */
+  win.eval(`G.mgmt.hist.forEach(t=>{ if(t.c===G.mgmt.hist[0].c) t.p=true; }); MGMT_SU_RE={s:1,i:0}; CL.go('mgmt_resultats');`);
+  assert.match(texte(win),/ne se revoit pas/);
+  assert.ok(!/Revoir le combat/.test(texte(win)));
+  touche(win,'Enter'); touche(win,'r');
   assert.notEqual(win.eval('G.screen'),'mgmt_combat','aucune rediffusion');
 });
 

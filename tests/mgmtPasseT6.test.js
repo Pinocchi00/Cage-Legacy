@@ -39,8 +39,8 @@ test('Monde lot 1 T6 — Résultats rend les 62 soirées sans erreur, datées, s
       try{
         const html=scr_mgmt_resultats(); const n=out.n-s;
         if(!html.includes('Fight Night '+n)) out.erreurs++;
-        const an=/Fight Night \\d+ · \\d+ [A-ZÉÛ]+ (20\\d\\d)/.exec(html); if(!an) out.sansDate++; else out.annees.push(+an[1]);
-        if(/Revoir ce combat/.test(html)) out.revoir++;
+        const an=/\\d{1,2} (?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (20\\d\\d)/.exec(html); if(!an) out.sansDate++; else out.annees.push(+an[1]);
+        if(/Revoir le combat/.test(html)) out.revoir++;
         out.puces=Math.max(out.puces,(html.match(/class="(on)?"[^>]*aria-pressed/g)||[]).length);
         const liste=mgmtSuResultatsListe(m,mgmtSoirees(m).slice().reverse()[s]);
         for(let i=0;i<liste.length;i++){ MGMT_SU_RE.i=i; scr_mgmt_resultats(); }

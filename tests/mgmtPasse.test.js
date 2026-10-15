@@ -30,17 +30,21 @@ const sansVisites = j => { const o = JSON.parse(j); delete o.visites; return JSO
 
 /* ===================== Test 1 : la création sans passé n'a pas bougé (point A) ===================== */
 test('Monde lot 1 T3 — une partie créée sans le passé est identique à celle d\'avant la tranche (empreinte)', () => {
+  /* Fusion du lot 6 (15/10/2026, MONDE_LOT6_PREDECESSEUR_SANS_RAISON et MONDE_LOT6_FUSION_BACLAGE) : le prédécesseur reprend le tirage d'avant les raisons
+     (ses empreintes redeviennent celles de main) ; le bâclage de Leïla se tire une fois par combat (jouee3 recalculée). */
   /* Monde lot 9 T3 (DÉCISION du 15/10/2026, le stade) : chaque compte de soirée garde sa salle et son taux de remplissage ; empreintes des parties jouées recalculées, celles de création inchangées. */
   /* Empreintes relevées AVANT la tranche (commit 6417e12), la version de sauvegarde mise à 0 : seul le numéro de version a bougé.
      Décision du lot 2 T2 : le tirage des pays et des noms (mgmtOrgPaysPoids, mgmtPaysTire, MGMT_NOMS_AJOUTS) change les empreintes
      de création ; recalculées le 12/10/2026. La vraie propriété reste : même graine → même résultat (test 2), et sans option
      de passé, aucun effet de passé (mgmtNewRoster(m,{}) = mgmtNewRoster(m), ci-dessous). */
   /* Décision du lot 8 T4a/T4b (14/10/2026) : les événements de coût petit écrivent de nouveaux faits (top15, challenger, caps de règne, nom de la blessure…) à la création et pendant les soirées : les empreintes de l'état complet sont recalculées ; la propriété gardée est inchangée (déterminisme, aucun état annexe). */
+  /* Décision du lot 6 T3 (raison enregistrée sur chaque combat proposé) : empreintes de soirées recalculées le 15/10/2026. */
+  /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
   const AVANT = {
-    'split|20261008': '31abaa7c00b38434', 'split|20261009': '82a96070f0d2b745',
-    'ultimate-rim|20261008': 'b70e328738b18c86', 'ultimate-rim|20261009': 'edeb7ea7b9ca440b',
-    'fighting-pacific-championship|20261008': 'f134107bbe74c713', 'fighting-pacific-championship|20261009': '0f29d777f2ba79d7',
-    jouee3: '3dc06fc62c206aa8',
+    'split|20261008': '853ffd0a41fb91f6', 'split|20261009': 'e031a248be4f7ea3',
+    'ultimate-rim|20261008': '2b299a6ce8056e79', 'ultimate-rim|20261009': '28813c0732d8c60e',
+    'fighting-pacific-championship|20261008': '25c5ad7b370e4a27', 'fighting-pacific-championship|20261009': '81b03d5ea9f0de38',
+    jouee3: 'a5105862846049d8',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -278,12 +282,15 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
 
 /* ===================== Test 12 : la vitesse ne change aucun résultat (point H) ===================== */
 test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', () => {
+  /* Fusion du lot 6 (15/10/2026, MONDE_LOT6_PREDECESSEUR_SANS_RAISON et MONDE_LOT6_FUSION_BACLAGE) : le prédécesseur reprend le tirage d'avant les raisons
+     (ses empreintes redeviennent celles de main) ; le bâclage de Leïla se tire une fois par combat (jouee3 recalculée). */
   /* Monde lot 9 T3 (DÉCISION du 15/10/2026, le stade) : chaque compte de soirée garde sa salle et son taux de remplissage ; empreintes des parties jouées recalculées, celles de création inchangées. */
   /* Empreintes de l'état complet (JSON de la partie, version à 0) après six soirées du prédécesseur, relevées AVANT l'optimisation
      (mgmtPickBulkPair, mgmtEligiblePairs et mgmtCartRows lisent une fois par combattant ce qu'ils lisaient une fois par paire). */
   /* Décision du lot 2 T2 : empreintes recalculées le 12/10/2026 (le tirage des pays et des noms décale le flux du RNG de création) ;
      la propriété gardée est inchangée : la version optimisée est déterministe et le calcul ne dépend d'aucun état annexe. */
-  const AVANT = { 20261008: '9e5bc0b80e133ad2', 20261009: '828313974e842fe0' };
+  /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
+  const AVANT = { 20261008: '3ad02e15f1ac0145', 20261009: '6a6c8c853a025804' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });

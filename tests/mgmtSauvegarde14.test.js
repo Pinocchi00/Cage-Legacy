@@ -52,7 +52,7 @@ test('Monde lot 1 T7 — Résultats, Ceintures, fiche et rôles se rendent sans 
   const r = ev(`const m=mgmtParseAndValidate(window.__texte); G.mgmt=m; const out={erreurs:[]};
     const essaie=(nom,f)=>{ try{ f(); }catch(e){ out.erreurs.push(nom+' : '+e); } };
     G.screen='mgmt_resultats';
-    essaie('resultats',()=>{ const n=mgmtSoirees(m).length; out.soirees=n; for(let s=0;s<n;s++){ MGMT_SU_RE.s=s; MGMT_SU_RE.i=0; const h=scr_mgmt_resultats(); if(!/Revoir ce combat/.test(h)) out.erreurs.push('revoir absent soirée '+s); } });
+    essaie('resultats',()=>{ const n=mgmtSoirees(m).length; out.soirees=n; for(let s=0;s<n;s++){ MGMT_SU_RE.s=s; MGMT_SU_RE.i=0; const h=scr_mgmt_resultats(); if(!/Revoir le combat/.test(h)) out.erreurs.push('revoir absent soirée '+s); } });
     G.screen='mgmt_ceintures';
     essaie('ceintures',()=>{ MGMT_SU_CE.ouverte=false; scr_mgmt_ceintures(); for(const d of allDivisions()){ MGMT_SU_CE.ouverte=true; MGMT_SU_CE.div=d.id; scr_mgmt_ceintures(); } MGMT_SU_CE.ouverte=false; });
     essaie('fiches',()=>{ out.fiches=0; m.roster.forEach((f,i)=>{ if(i%6) return; MGMT_FICHE={id:f.id,retour:'mgmt_carte',cursor:0}; const l=mgmtFicheLigne(m,f.id); mgmtFicheCombatsHtml(m,f,l); out.fiches++; }); });

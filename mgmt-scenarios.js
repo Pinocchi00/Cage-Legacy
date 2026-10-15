@@ -74,7 +74,7 @@ function mgmtScenarios(m){
       out.push({k:'derniere-danse',a:f.id,want:'carte-principale',target:null});
     }
     /* n° 10 — le deuil */
-    if((m.facts||[]).some(x=>x&&x.k==='moment_vie'&&x.a===f.id&&MGMT_DEUIL_MOMENTS.includes(x.m)&&x.c>=m.cycle-1)
+    if(MGMT_HUMANITE_ACTIVE&&(m.facts||[]).some(x=>x&&x.k==='moment_vie'&&x.a===f.id&&MGMT_DEUIL_MOMENTS.includes(x.m)&&x.c>=m.cycle-1)
       &&mgmtIdentiteStream(f.id,'deuil|'+m.cycle)()<MGMT_DEUIL_PART){
       out.push({k:'deuil',a:f.id,want:'carte-principale',target:null});
     }

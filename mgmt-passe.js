@@ -121,6 +121,9 @@ function mgmtPasseCloturer(m){
   if(mgmtAgendaPoser(m,MGMT_EVENT_WEEKS*7,'petite').ok){
     mgmtPredecesseurCarteHeritee(m,p.soirees);
   }
+  /* Monde lot 11 T1 : la partie remise au joueur respecte la même règle que mgmtRepair — l'affaire ouverte est une affaire encore ouverte de la pile, sinon la première, sinon aucune. Sans cela un rechargement changeait m.open (révélé quand les moments de vie ont été coupés). */
+  { const cur=m.open!==null&&Array.isArray(m.pile)?m.pile.find(a=>a.id===m.open):null;
+    if(!cur||cur.status!=='open'){ const first=Array.isArray(m.pile)?m.pile.find(a=>a.status==='open'):null; m.open=first?first.id:null; } }
   return m;
 }
 

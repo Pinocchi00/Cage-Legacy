@@ -55,6 +55,68 @@ function mgmtValidLine(o){
   return true;
 }
 
+/* ==== [ANCRE: MONDE_LOT6_T3_SCHEMA] — Monde lot 6 T3 ==== */
+/** Vérifie une preuve enregistrée pour la paire, sans recalculer son actualité. @param {Object} raison Preuve {famille,fait}. @param {string} aid Premier id. @param {string} bid Second id. @returns {boolean} Structure et références de paire conformes au schéma T1. */
+function mgmtRaisonValide(raison,aid,bid){
+  const objet=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
+  if(!objet(raison)||!objet(raison.fait)||!mgmtValidId(aid)||!mgmtValidId(bid)||aid===bid) return false;
+if(Object.keys(raison).sort().join(',')!=='fait,famille') return false;
+  const f=raison.fait, entier=Number.isSafeInteger, compte=x=>entier(x)&&x>=0;
+  const id=x=>x===aid||x===bid, paire=(a,b)=>id(a)&&id(b)&&a!==b;
+  const age=x=>Number.isFinite(x)&&x>=0&&x<=100;
+  /* Schéma fermé, famille par famille : toutes les clés attendues sont
+     présentes, aucune autre ne l'est. `opt` ne sert qu'à `target` d'une
+     demande « un-classe » sans cible — le lecteur écrit alors undefined, que
+     la sérialisation efface ; c'est la seule clé jamais portée par le
+     catalogue. Les sous-objets de `combattants` sont eux aussi fermés. */
+  const ouvert=(o,cles,opt)=>objet(o)&&cles.every(k=>Object.hasOwn(o,k))
+    &&Object.keys(o).every(k=>cles.includes(k)||(opt||[]).includes(k));
+  const deux=(cles,fn)=>Array.isArray(f.combattants)&&f.combattants.length===2
+    &&f.combattants.every(x=>ouvert(x,cles)&&fn(x))&&paire(f.combattants[0].a,f.combattants[1].a);
+  const reclame=()=>paire(f.a,f.b)&&entier(f.c)&&['rivalite','trilogie','micro','reseaux'].includes(f.raison);
+  switch(raison.famille){
+    case 'revanche': return ouvert(f,['source','i','c','gagnant','perdant'])&&f.source==='hist'&&compte(f.i)&&entier(f.c)&&paire(f.gagnant,f.perdant);
+    case 'rivalite-ouverte': return f.source==='reclames'?ouvert(f,['source','a','b','raison','c'])&&reclame()&&['micro','reseaux'].includes(f.raison)
+      :ouvert(f,['source','i','a','target','c'])&&f.source==='facts'&&compte(f.i)&&entier(f.c)&&paire(f.a,f.target);
+    case 'series-croisees': return ouvert(f,['source','combattants'])&&f.source==='serie'&&deux(['a','issue','n'],x=>x.issue==='win'&&compte(x.n)&&x.n>=3);
+    case 'classement-voisin': return ouvert(f,['source','portee','div','combattants'])&&f.source==='classement'&&f.portee==='organization'&&!!divById(f.div)
+      &&deux(['a','rang'],x=>compte(x.rang)&&x.rang>=1)&&Math.abs(f.combattants[0].rang-f.combattants[1].rang)<=2;
+    case 'test-jeune': return ouvert(f,['source','a','b','role','contreRole','age','total','contreAge','contreTotal'])
+      &&f.source==='roles'&&paire(f.a,f.b)&&age(f.age)&&age(f.contreAge)
+      &&compte(f.total)&&compte(f.contreTotal)&&(f.role===null||typeof f.role==='string')
+      &&(f.contreRole===null||typeof f.contreRole==='string');
+    case 'derniere-chance': return ouvert(f,['source','a','issue','n'])&&f.source==='serie'&&id(f.a)&&f.issue==='loss'&&compte(f.n)&&f.n>=2;
+    case 'longue-attente': return ouvert(f,['source','a','cycles','mois','depuis'])&&f.source==='attente'&&id(f.a)&&compte(f.cycles)&&compte(f.mois)&&f.mois>=6&&entier(f.depuis);
+    case 'demande-promesse': return ouvert(f,['source','i','k','a','want','c',...(f.k==='promesse'?['due']:[])],['target'])
+      &&f.source==='facts'&&compte(f.i)&&id(f.a)&&entier(f.c)
+      &&['demande','promesse'].includes(f.k)&&['revanche','trilogie','un-classe'].includes(f.want)
+      &&(paire(f.a,f.target)||(f.want==='un-classe'&&(f.target===null||f.target===undefined)))
+      &&(f.k!=='promesse'||entier(f.due)&&f.due>=f.c);
+    case 'fin-contrat': return ouvert(f,['source','a','n','f','restants'])&&f.source==='contrat'&&id(f.a)&&compte(f.n)&&compte(f.f)&&f.restants===1&&f.n-f.f===1;
+    case 'styles-opposes': return ouvert(f,['source','combattants'])&&f.source==='bilan-public'&&deux(['a','style'],x=>['Finit par KO','Finit au sol'].includes(x.style))
+      &&f.combattants[0].style!==f.combattants[1].style;
+    case 'derby': return ouvert(f,['source','a','b','pays','ville'])&&f.source==='identite'&&paire(f.a,f.b)&&COUNTRY_KEYS.includes(f.pays)&&(f.ville===null||typeof f.ville==='string');
+    case 'debuts': return ouvert(f,['source','a','n'])&&f.source==='hist'&&id(f.a)&&f.n===0;
+    case 'veteran': return ouvert(f,['source','a','age','total'])&&f.source==='bilan'&&id(f.a)&&age(f.age)&&compte(f.total)&&(f.age>=33||f.total>=20);
+    case 'reclame-public': return ouvert(f,['source','a','b','raison','c'])&&f.source==='reclames'&&reclame();
+    case 'meme-categorie-jamais-affrontes': return ouvert(f,['source','a','b','div','n'])&&f.source==='hist'&&paire(f.a,f.b)&&!!divById(f.div)&&f.n===0;
+    default: return false;
+  }
+}
+/** Contrat de la cause portée par un combat, selon l'endroit où il vit.
+ * `bloc` = les combats d'une affaire en bloc (toujours pourvus), sinon la carte
+ * (un booking manuel n'en porte pas). Les anciennes causes restent
+ * explicitement inconnues ; jamais de lecture du monde.
+ * @param {Object} f Combat {a,b,origine?,raison?}.
+ * @param {boolean} bloc Combat d'une affaire en bloc.
+ * @returns {boolean} */
+function mgmtCombatRaisonValide(f,bloc){
+  if(f.origine!==undefined&&f.origine!=='leila'&&f.origine!=='joueur') return false;
+  if(f.raison===undefined) return !bloc&&f.origine===undefined;
+  if(f.raison===null) return f.origine!=='leila';
+  return mgmtRaisonValide(f.raison,f.a,f.b);
+}
+
 function mgmtValidAffair(a){
   if(!a||typeof a!=='object'||Array.isArray(a)) return false;
   if(!mgmtValidId(a.id)) return false;
@@ -70,6 +132,8 @@ function mgmtValidAffair(a){
     for(const f of a.fights){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(typeof f.sloppy!=='boolean'||typeof f.warned!=='boolean') return false;
+      /* ==== [ANCRE: MONDE_LOT6_T3_AFFAIRE] — Monde lot 6 T3 ==== */
+      if(!mgmtCombatRaisonValide(f,true)) return false;
       /* Lot 2 T1 : l'emplacement d'un combat de proposition est 'main' ou
          'prelim' quand il est porté (les blocs de Leïla proposent des
          préliminaires) — absent toléré pour une affaire d'avant la v5. */
@@ -262,6 +326,8 @@ function validateMgmt(raw){
       if(!f||typeof f.a!=='string'||typeof f.b!=='string') return false;
       if(f.slot!=='main'&&f.slot!=='prelim') return false;
       if(f.title!==undefined&&typeof f.title!=='boolean') return false;
+      /* ==== [ANCRE: MONDE_LOT6_T3_CARTE] — Monde lot 6 T3 ==== */
+      if(!mgmtCombatRaisonValide(f,false)) return false;
       /* ==== [ANCRE: MONDE_LOT5_T3_VALIDATION] — Monde lot 5 T3 ==== */
       if(f.herite!==undefined&&(f.herite!==true||f.slot!=='main')) return false;
     }
@@ -494,9 +560,23 @@ function mgmtMigrate(raw){
   if(raw.v===16) raw.v=17;
   /* ==== [ANCRE: MONDE_LOT5_T4_MIGRATION] — Monde lot 5 T4 ==== */
   if(raw.v===17) raw.v=18;
-  /* ==== [ANCRE: MONDE_LOT9_T2A_MIGRATION] — Monde lot 9 T2a (décision du superviseur du 15/10/2026) : 18 → 20. Une partie d'avant porte
-     m.mondeVivant=false et garde EXACTEMENT son ancien monde extérieur calculé ; rien d'autre ne bouge. ==== */
-  if(raw.v===18){ raw.mondeVivant=false; raw.v=20; }
+  /* Renumérotation à la fusion (15/10/2026) : la migration du lot 6 T3 passe de 16 → 17 à 18 → 19. */
+  /* ==== [ANCRE: MONDE_LOT6_T3_MIGRATION] — Monde lot 6 T3 ==== */
+  if(raw.v===18){
+    /* Une preuve déjà présente n'est jamais écrasée : la migration ne marque
+       que ce qui n'en porte pas (une pile d'avant n'en porte aucune). */
+    const marque=f=>{ if(f&&typeof f==='object'&&f.raison===undefined) f.raison=null; };
+    for(const a of raw.pile||[]) if(a&&a.kind==='leila_bulk'&&Array.isArray(a.fights)){
+      for(const f of a.fights) marque(f);
+    }
+    if(raw.card) for(const cle of ['main','prelims']) if(Array.isArray(raw.card[cle])){
+      for(const f of raw.card[cle]) marque(f);
+    }
+    raw.v=19;
+  }
+  /* ==== [ANCRE: MONDE_LOT9_T2A_MIGRATION] — Monde lot 9 T2a (décision du superviseur du 15/10/2026), renumérotée 19 → 20 à la fusion du lot 6.
+     Une partie d'avant porte m.mondeVivant=false et garde EXACTEMENT son ancien monde extérieur calculé ; rien d'autre ne bouge. ==== */
+  if(raw.v===19){ raw.mondeVivant=false; raw.v=20; }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }

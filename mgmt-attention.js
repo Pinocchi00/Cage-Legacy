@@ -290,6 +290,7 @@ function mgmtVisiteDe(m,id){
  *  partagée avec mgmtEvenementsDepuis. Pur. @returns {boolean} */
 function mgmtFaitMarque(x){
   if(!x||!MGMT_MARQUE_FAITS.includes(x.k)) return false;
+  if(!MGMT_HUMANITE_ACTIVE&&x.k==='moment_vie') return false;
   if(x.k==='moment_vie'){
     const moment=mgmtVieMomentById(x.m);
     if(!moment||!moment.relais.length||!mgmtVieTexte(moment)) return false;

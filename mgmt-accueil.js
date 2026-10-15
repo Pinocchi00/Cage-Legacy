@@ -232,9 +232,7 @@ function scr_mgmt_accueil(){
   if(!G||!G.mgmt) return scr_mgmt_bureau();
   const m=G.mgmt, c=mgmtAccueilContenu(m);
   if(MGMT_ACCUEIL.cur>=c.passe.length) MGMT_ACCUEIL.cur=c.passe.length-1;
-  const corps=c.premiere&&c.heritage
-    ?`<div class="mf-ac-cols">${mgmtAccueilHeritage(m,c)}</div>`
-    :`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}<div class="mf-ac-colonne mf-ac-c5">${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div></div>`;
+  const corps=`<div class="mf-ac-cols">${mgmtAccueilPasse(m,c)}<div class="mf-ac-colonne mf-ac-c5">${mgmtAccueilAttend(m,c)}${mgmtAccueilAilleurs(m,c)}</div></div>`;
   const contenu=`<main class="mf-contenu mf-ac">${mgmtAccueilBandeau(c,m)}${corps}</main>`;
   const droite=`${c.ou.org} Fight Night ${(m.eventsPlayed||0)+1}`;
   return mfEcran(contenu,{barre:'jeu',courant:'accueil',grise:false,m,plaque:'Accueil',libelle:'Semaine '+c.ou.semaine,droite,

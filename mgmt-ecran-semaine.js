@@ -98,7 +98,7 @@ function mgmtSemaineMonde(m){
   }
   for(const c of mgmtConteur(m)){
     if(news.length>=budget) break; /* le budget de la semaine tient, demandes comprises */
-    news.push({type:'vie',div:c.div,text:c.name+' : '+mgmtVieTexte(c.moment),id:c.id,source:c.moment.relais[0]});
+    if(MGMT_HUMANITE_ACTIVE) news.push({type:'vie',div:c.div,text:c.name+' : '+mgmtVieTexte(c.moment),id:c.id,source:c.moment.relais[0]});
     used.add(c.id);
   }
   const add=(type,div,text,id)=>{

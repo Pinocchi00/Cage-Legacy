@@ -132,7 +132,7 @@ function mgmtVoixContexte(m,f,situation){
     const v=calcul(); Object.defineProperty(ctx,cle,{value:v,enumerable:true}); return v; }});
   const identite=()=>mgmtIdentite(m,f);
   paresseux('pays',()=>COUNTRIES[mgmtIdentitePays(f)].name);
-  paresseux('metier',()=>identite().metier);
+  if(MGMT_HUMANITE_ACTIVE) paresseux('metier',()=>identite().metier);
   paresseux('surnom',()=>identite().surnom);
   paresseux('rang',()=>{ const r=mgmtDivisionRank(m,f,'world'); return r===null?null:mgmtRankLabel(r,divById(f.div)); });
   let adv=null;
