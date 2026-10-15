@@ -2,7 +2,6 @@
 
 Branche attendue : `monde-lot-9-monde` — branche courante : `monde-lot-9-monde`.
 
-STOP — la puissance dépend du classement mondial de T5, qui n'existe pas encore, et le brief ne fixe pas si T3 attend T5 ni quelle valeur/API produit l'indicateur « puissance » avant T5.
 
 ## Objectif
 
@@ -68,3 +67,13 @@ Classement des organisations (T4), classement mondial lui-même (T5), staff (T6-
 - Pour la notoriété, quel agrégat des « combattants les plus connus » veut-on (meilleur combattant seul, top N, moyenne, autre) ?
 - La puissance est-elle le rang du meilleur combattant mondial de l'organisation, une combinaison de plusieurs rangs, ou autre règle ?
 - Les quatre niveaux doivent-ils être recalculés à la lecture ou persistés dans la sauvegarde ?
+
+## DÉCISION du superviseur — 15/10/2026 18 h 45 (le STOP est levé ; aucune question pour Anthony)
+1. **Ordre** : T3 n'attend pas T5. La puissance lit `mgmtDivisionRanking(m,div,'world')`, le classement mondial calculé qui existe déjà ; T5 en fera un vrai classement **sans changer cette API**, la puissance suivra d'elle-même.
+2. **Popularité** : la valeur existante (`m.pop`, `mgmtOrgProfil(m).popularite` pour une sous-partie vivante).
+3. **Stade** : la plus grande capacité parmi les salles où une des 12 dernières soirées de l'organisation a rempli à 80 % ou plus (`finance.taux` des soirées passées : utilise l'historique existant des soirées ; s'il n'en garde pas assez, la dernière soirée de chaque salle) ; à défaut, la plus petite salle de l'organisation.
+4. **Notoriété** : la moyenne de `mgmtStar(f)` des 5 combattants non retirés les plus renommés de l'effectif (moins de 5 : la moyenne de ceux qui existent ; aucun : 0).
+5. **Puissance** : pour chaque catégorie, chaque combattant de l'organisation classé dans le top 10 mondial rapporte `11 - rang` points ; la puissance est la somme.
+6. **Lecture, pas de sauvegarde** : une fonction pure `mgmtOrgNiveaux(m,orgId)` → `{popularite,stade,notoriete,puissance}` (chiffres) et `mgmtOrgNiveauxRangs(m)` → pour chacune des huit organisations son rang (1 à 8) sur chaque niveau, égalités départagées par l'ordre de `MGMT_ORGANISATIONS`. Recalculé à la lecture ; aucun champ ajouté à la sauvegarde, aucune migration. Partie sans monde vivant (`m.mondeVivant!==true`) : seule l'organisation du joueur a des niveaux, les autres renvoient `null`.
+7. Pas d'écran dans T3 (l'écran de l'organisation est T11).
+Tests (`tests/mgmtNiveauxOrg.test.js`, ajouté à `test` et `test:watch` de `package.json`) : déterminisme à graine égale ; chaque niveau change quand sa source change (popularité, une salle remplie, un combattant plus renommé, un combattant qui entre dans le top 10 mondial) et pas les autres ; partie sans monde vivant. Tests ciblés seulement (délai 120 s), pas de `check:rapide`.
