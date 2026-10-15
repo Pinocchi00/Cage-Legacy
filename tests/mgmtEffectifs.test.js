@@ -19,7 +19,7 @@ test('H4 — partie neuve : version 14 (brief du 06/10, lot 2), effectifs 1, car
       constMin:MGMT_ROSTER_MIN,constMax:MGMT_ROSTER_MAX};
   `);
   /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_EFFECTIFS_NEUF] — Monde lot 5 T3 ==== */
-  assert.equal(r.v,19); /* décision du 15/10/2026 : fusion du lot 6, sa migration « raison enregistrée » est 18 → 19 */ assert.equal(r.effectifs,1);
+  assert.equal(r.v,20); /* décision du 15/10/2026 : fusion du lot 6, sa migration « raison enregistrée » est 18 → 19 */ assert.equal(r.effectifs,1); /* fusion du lot 9 (15/10/2026) : 19 → 20, mondeVivant=false */
   assert.equal(r.main,5); assert.equal(r.prelims,7);
   assert.ok(r.min>=330&&r.max<=390,`vestiaire ${r.min}–${r.max}`);
   assert.ok(r.valide,'la partie neuve passe la porte de sauvegarde');
@@ -63,7 +63,7 @@ test('H4 — migration 12 → 13 : une partie commencée garde son monde à 30, 
   `);
   /* Brief du 06/10, lot 2 : la chaîne continue jusqu'à la version 14 (13 → 14 : les niveaux). */
   /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_EFFECTIFS_MIGRE] — Monde lot 5 T3 ==== */
-  assert.equal(r.v,19); /* décision du 15/10/2026 : fusion du lot 6, sa migration « raison enregistrée » est 18 → 19 */ assert.equal(r.effectifs,0);
+  assert.equal(r.v,20); /* décision du 15/10/2026 : fusion du lot 6, sa migration « raison enregistrée » est 18 → 19 */ assert.equal(r.effectifs,0); /* fusion du lot 9 (15/10/2026) : 19 → 20, mondeVivant=false */
   assert.equal(r.n,r.avant.n,'aucun combattant ajouté ni retiré');
   assert.equal(r.prelims,4,'la carte garde ses quatre préliminaires');
   assert.deepEqual(r.vivants,r.avant.vivants,'le monde ne grossit pas en cours de route');

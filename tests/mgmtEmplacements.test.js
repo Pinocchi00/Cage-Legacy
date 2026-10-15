@@ -21,7 +21,7 @@ test('Emplacements — une partie d’avant le lot se retrouve dans l’emplacem
   assert.equal(r.cle,'cage-legacy-mgmt'); assert.equal(r.secours,'cage-legacy-mgmt_backup');
   assert.deepEqual(r.peek,[7,123]); assert.ok(r.intact,'lire un emplacement n’écrit rien');
   /* ==== [ANCRE: MONDE_LOT5_T3_VERSION_EMPLACEMENTS] — Monde lot 5 T3 ==== */
-  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,19); /* décision du 15/10/2026 : fusion du lot 6, sa migration « raison enregistrée » est 18 → 19 */
+  assert.equal(r.slot,1); assert.equal(r.cycle,7); assert.equal(r.caisse,123); assert.equal(r.v,20); /* décision du 15/10/2026 : fusion du lot 6, sa migration « raison enregistrée » est 18 → 19 */ /* fusion du lot 9 (15/10/2026) : 19 → 20, mondeVivant=false */
   assert.deepEqual(r.vides,[null,null]); assert.equal(r.dernier,1);
 });
 

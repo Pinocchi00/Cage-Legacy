@@ -32,6 +32,7 @@ const sansVisites = j => { const o = JSON.parse(j); delete o.visites; return JSO
 test('Monde lot 1 T3 — une partie créée sans le passé est identique à celle d\'avant la tranche (empreinte)', () => {
   /* Fusion du lot 6 (15/10/2026, MONDE_LOT6_PREDECESSEUR_SANS_RAISON et MONDE_LOT6_FUSION_BACLAGE) : le prédécesseur reprend le tirage d'avant les raisons
      (ses empreintes redeviennent celles de main) ; le bâclage de Leïla se tire une fois par combat (jouee3 recalculée). */
+  /* Monde lot 9 T3 (DÉCISION du 15/10/2026, le stade) : chaque compte de soirée garde sa salle et son taux de remplissage ; empreintes des parties jouées recalculées, celles de création inchangées. */
   /* Empreintes relevées AVANT la tranche (commit 6417e12), la version de sauvegarde mise à 0 : seul le numéro de version a bougé.
      Décision du lot 2 T2 : le tirage des pays et des noms (mgmtOrgPaysPoids, mgmtPaysTire, MGMT_NOMS_AJOUTS) change les empreintes
      de création ; recalculées le 12/10/2026. La vraie propriété reste : même graine → même résultat (test 2), et sans option
@@ -43,7 +44,7 @@ test('Monde lot 1 T3 — une partie créée sans le passé est identique à cell
     'split|20261008': '853ffd0a41fb91f6', 'split|20261009': 'e031a248be4f7ea3',
     'ultimate-rim|20261008': '2b299a6ce8056e79', 'ultimate-rim|20261009': '28813c0732d8c60e',
     'fighting-pacific-championship|20261008': '25c5ad7b370e4a27', 'fighting-pacific-championship|20261009': '81b03d5ea9f0de38',
-    jouee3: '5015943dd81a33cb',
+    jouee3: 'a5105862846049d8',
   };
   const win = newGameWindow({ runMain: true });
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
@@ -283,12 +284,13 @@ test('Monde lot 1 T3 — l\'écran montre la barre, avance pas à pas et ignore 
 test('Monde lot 1 T3 — l\'optimisation du booking ne change aucun résultat', () => {
   /* Fusion du lot 6 (15/10/2026, MONDE_LOT6_PREDECESSEUR_SANS_RAISON et MONDE_LOT6_FUSION_BACLAGE) : le prédécesseur reprend le tirage d'avant les raisons
      (ses empreintes redeviennent celles de main) ; le bâclage de Leïla se tire une fois par combat (jouee3 recalculée). */
+  /* Monde lot 9 T3 (DÉCISION du 15/10/2026, le stade) : chaque compte de soirée garde sa salle et son taux de remplissage ; empreintes des parties jouées recalculées, celles de création inchangées. */
   /* Empreintes de l'état complet (JSON de la partie, version à 0) après six soirées du prédécesseur, relevées AVANT l'optimisation
      (mgmtPickBulkPair, mgmtEligiblePairs et mgmtCartRows lisent une fois par combattant ce qu'ils lisaient une fois par paire). */
   /* Décision du lot 2 T2 : empreintes recalculées le 12/10/2026 (le tirage des pays et des noms décale le flux du RNG de création) ;
      la propriété gardée est inchangée : la version optimisée est déterministe et le calcul ne dépend d'aucun état annexe. */
   /* Décision d'Anthony du 15/10/2026 (humanité retirée, lot 11) : les moments de vie ne naissent plus, l'état change ; empreintes recalculées. La propriété gardée est le déterminisme. */
-  const AVANT = { 20261008: 'ddb16d9147b57281', 20261009: '5605fab26b41e08c' };
+  const AVANT = { 20261008: '3ad02e15f1ac0145', 20261009: '6a6c8c853a025804' };
   const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 16);
   for (const graine of Object.keys(AVANT)) {
     const win = newGameWindow({ runMain: true });

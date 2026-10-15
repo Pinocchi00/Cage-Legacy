@@ -163,7 +163,7 @@ function mgmtPasseEntree(par,r){
 }
 
 /** À la clôture : allège m.hist, écarte les faits perdus, note la part du passé. @returns {boolean} faux si un combat n'a pas pu s'alléger (rien n'est alors changé). */
-function mgmtPasseAlleger(m){
+function mgmtPasseAlleger(m,gardes){
   const par=new Map(m.roster.map(f=>[f.id,f]));
   const hist=[];
   for(const t of m.hist){
@@ -175,7 +175,7 @@ function mgmtPasseAlleger(m){
    /* Tous les combats sont validés avant de préparer les liens ; aucun fait original n'est muté. */
    const indices=new Map(), facts=[];
    m.facts.forEach((x,i)=>{
-     if(x&&MGMT_PASSE_FAITS_PERDUS.includes(x.k)) return;
+     if(x&&(MGMT_PASSE_FAITS_PERDUS.includes(x.k)||(gardes&&!gardes.includes(x.k)))) return;   /* T2a bis : `gardes` = les seules sortes de faits conservées (organisations vivantes) */
      indices.set(i,facts.length); facts.push(x);
    });
    const recales=facts.map(x=>{
@@ -248,13 +248,118 @@ function mgmtPasseDeployer(m){
   }catch(e){ return null; }
 }
 
-/** La partie écrite pour le disque : la part du passé en archive compacte, le reste tel quel. @returns {string} */
-function mgmtSerialiser(m){
+/** La partie (sans ses organisations) prête à s'écrire : la part du passé en archive compacte, le reste tel quel. Pur. @returns {object} */
+function mgmtSerialiserCorps(m){
   const a=mgmtPasseCompacter(m);
-  if(!a) return JSON.stringify(m);
-  return JSON.stringify(Object.assign({},m,{hist:m.hist.slice(m.passe.nHist),facts:m.facts.slice(m.passe.nFacts),passe:Object.assign({},m.passe,{archive:a})}));
+  if(!a) return m;
+  return Object.assign({},m,{hist:m.hist.slice(m.passe.nHist),facts:m.facts.slice(m.passe.nFacts),passe:Object.assign({},m.passe,{archive:a})});
+}
+/** La partie écrite pour le disque : la part du passé en archive compacte, le reste tel quel.
+ *  Monde lot 9 T2a : chaque organisation vivante (m.orgs) s'écrit de la même façon, dans la même chaîne. @returns {string} */
+function mgmtSerialiser(m){
+  const o=mgmtSerialiserCorps(m);
+  if(!m.orgs||typeof m.orgs!=='object') return JSON.stringify(o);
+  const orgs={};
+  for(const id of Object.keys(m.orgs)) orgs[id]=mgmtSerialiserCorps(m.orgs[id]);
+  return JSON.stringify(Object.assign({},o,{orgs}));
 }
 /* ==== [FIN ANCRE] ==== */
+
+/* ==== [ANCRE: MONDE_LOT9_T2A_ORGS_VIVANTES] — Monde lot 9 T2a, docs/lots/MONDE-LOT-9-T2.md (DÉCISIONS 1 et 2) ====
+   Les sept autres organisations vivent leurs six ans, chacune comme une vraie partie simulée par le MÊME code que le passé du prédécesseur
+   (mgmtPassePreparer / mgmtPasseSoiree / mgmtPasseCloturer), rangées dans m.orgs = {orgId: sous-partie}, dans l'ordre de MGMT_ORGANISATIONS.
+   Chaque sous-partie a sa graine dérivée (mgmtIdentiteStream(orgId,'monde',m)) ; sa RNG lui est propre d'un pas à l'autre (etat.seed).
+   Les créations de passé posent G.mgmt et la RNG globale : chaque pas les sauvegarde et les rend — la partie du joueur est donc celle
+   qu'elle serait sans les sept (même graine, même partie). Aucun lecteur n'est branché en T2a.
+     mgmtMondeVivantPreparer(m,opts) → l'état de génération      mgmtMondeVivantPas(etat) → un pas (prépare / une soirée / clôt)
+     mgmtMondeVivantGenerer(m,opts)  → tout d'un coup (tests, outils) ; m.mondeVivant=true à la fin */
+/** Les organisations vivantes d'une partie : toutes sauf la sienne, dans l'ordre de MGMT_ORGANISATIONS. Pur. @returns {string[]} */
+function mgmtMondeVivantIds(m){
+  const propre=mgmtPredecesseurOrgId(m);
+  return MGMT_ORGANISATIONS.map(o=>o.id).filter(id=>id!==propre);
+}
+/** La graine (entier 32 bits) de la sous-partie d'une organisation, dérivée de la partie du joueur. Pur. @returns {number} */
+function mgmtMondeVivantGraine(m,orgId){
+  return ((mgmtIdentiteStream(orgId,'monde',m)()*4294967296)>>>0)||1;
+}
+/** Prépare la génération : rien n'est encore joué. @param {object} m la partie du joueur, passé clos @param {{soirees?:number}} [opts]
+ *  @returns {{m:object,ids:string[],i:number,k:number,n:number,sous:object|null,seed:number,fait:number,total:number,termine:boolean}} */
+function mgmtMondeVivantPreparer(m,opts){
+  const n=opts&&Number.isSafeInteger(opts.soirees)&&opts.soirees>0?opts.soirees:MGMT_PASSE_SOIREES;
+  const ids=mgmtMondeVivantIds(m);
+  m.orgs={};
+  return {m,ids,i:0,k:0,n,sous:null,seed:1,fait:0,total:ids.length*(n+2),termine:ids.length===0};
+}
+/** Un pas : prépare l'organisation courante, ou joue une de ses soirées, ou la clôt. G.mgmt et la RNG globale sont rendus tels qu'ils étaient.
+ *  @returns {{fait:number,total:number,termine:boolean}} */
+function mgmtMondeVivantPas(etat){
+  if(etat.termine) return {fait:etat.fait,total:etat.total,termine:true};
+  const g0=G.mgmt, seed0=SEED;
+  try{
+    const id=etat.ids[etat.i];
+    if(!etat.sous){
+      setSeed(mgmtMondeVivantGraine(etat.m,id));
+      etat.sous=mgmtPassePreparer(id,{soirees:etat.n}); etat.k=0;
+    }else{
+      setSeed(etat.seed); G.mgmt=etat.sous;
+      if(etat.k<etat.n){
+        const r=mgmtPasseSoiree(etat.sous,etat.k);
+        etat.k=r.termine?etat.n:r.k;
+      }else{
+        mgmtPasseCloturer(etat.sous);
+        mgmtMondeVivantAlleger(etat.sous);
+        etat.m.orgs[id]=etat.sous; etat.sous=null; etat.i++;
+        if(etat.i>=etat.ids.length){ etat.termine=true; etat.m.mondeVivant=true; }
+      }
+    }
+    if(etat.sous) etat.seed=SEED;
+    etat.fait++;
+  }finally{ G.mgmt=g0; SEED=seed0; }
+  return {fait:etat.fait,total:etat.total,termine:etat.termine};
+}
+/** Les seules sortes de faits qu'une organisation vivante garde : celles relues par les classements, ceintures et blessures, et celles que la soirée du prédécesseur relit pour rejouer (demandes, promesses, contrariétés, cartes posées). */
+const MGMT_MONDE_FAITS_GARDES=['title_initial','title_fight','retired','injury','demande','promesse','refus','contrarie','booked'];
+/** T2a bis (budget 1,5 Mo sur disque) : à la clôture, la sous-partie ne garde que ce que ses lecteurs relisent — effectif, contrats, calendrier,
+ *  caisse, popularité, salles, graine, combats allégés et les faits utiles. Écarté : pile, lastEvent, fil, recettes, audiences, comptes, visites, cercle,
+ *  suivis, le vivier dérivé (m.exterieur : se recrée à la reprise par mgmtExteriorEnsure) et les autres faits. Ne touche jamais la partie du joueur. */
+function mgmtMondeVivantAlleger(m){
+  mgmtPasseAlleger(m,MGMT_MONDE_FAITS_GARDES);
+  m.pile=[]; m.open=null; m.lastEvent=null; m.recettes=[]; m.audiences=[]; m.comptes=[]; m.visites={}; m.cercle=[]; m.suivis=[]; m.exterieur=[];
+  delete m.fil;
+  return m;
+}
+/* ==== [ANCRE: MONDE_LOT9_T2B_SEMAINE] — Monde lot 9 T2b ==== */
+/** Fait avancer chaque organisation vivante d'au plus une soirée échue à l'ouverture de cycle. */
+function mgmtMondeVivantSemaine(m){
+  if(!m||m.mondeVivant!==true||!m.orgs) return m;
+  const g0=G.mgmt, seed0=SEED;
+  try{
+    for(const orgId of mgmtMondeVivantIds(m)){
+      const sous=m.orgs[orgId], prochaine=sous&&sous.cal&&Array.isArray(sous.cal.prochaines)?sous.cal.prochaines[0]:null;
+      if(!prochaine||!Number.isFinite(prochaine.jour)||prochaine.jour>m.cal.jour) continue;
+      setSeed(((mgmtIdentiteStream(orgId,'semaine|'+m.cycle,m)()*4294967296)>>>0)||1);
+      G.mgmt=sous;
+      mgmtPredecesseurSoiree(sous,sous.eventsPlayed||0,mgmtPredecesseurReglages(orgId));
+      mgmtMondeVivantAlleger(sous);
+    }
+  }finally{ G.mgmt=g0; SEED=seed0; }
+  return m;
+}
+/** Génère d'un coup les organisations vivantes d'une partie dont le passé est clos. @returns {object} la partie (m.orgs, m.mondeVivant) */
+function mgmtMondeVivantGenerer(m,opts){
+  const etat=mgmtMondeVivantPreparer(m,opts);
+  while(!etat.termine) mgmtMondeVivantPas(etat);
+  m.mondeVivant=true;
+  return m;
+}
+/** Les organisations vivantes d'une partie sont-elles bien formées ? (validateMgmt) Pur. @returns {boolean} */
+function mgmtMondeVivantValide(m){
+  if(m.mondeVivant!==true) return m.orgs===undefined&&(m.mondeVivant===undefined||m.mondeVivant===false);
+  if(!m.orgs||typeof m.orgs!=='object'||Array.isArray(m.orgs)) return false;
+  const attendus=mgmtMondeVivantIds(m), ids=Object.keys(m.orgs);
+  if(ids.length!==attendus.length||!ids.every((id,i)=>id===attendus[i])) return false;
+  return ids.every(id=>{ const o=m.orgs[id]; return o&&typeof o==='object'&&!Array.isArray(o)&&o.orgs===undefined&&o.mondeVivant===undefined&&validateMgmt(o); });
+}
 
 /** Les trois pas d'un coup, pour les tests et les outils. @returns {object} la partie close, posée en G.mgmt */
 function mgmtPasseGenerer(orgId,opts){

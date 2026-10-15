@@ -292,6 +292,8 @@ function validateMgmt(raw){
   if(!raw||typeof raw!=='object'||Array.isArray(raw)) return false;
   if(raw.v!==MGMT_SAVE_VERSION) return false;
   if(!mgmtOrgValide(raw.org)) return false;
+  /* Monde lot 9 T2a : les organisations vivantes (m.orgs) ou l'ancien monde (mondeVivant=false ou absent). */
+  if(raw.mondeVivant!==undefined&&typeof raw.mondeVivant!=='boolean') return false;
   if(!Number.isSafeInteger(raw.cycle)||raw.cycle<0) return false;
   if(!Number.isSafeInteger(raw.ageWeeks)||raw.ageWeeks<0||raw.ageWeeks>=MGMT_EXT_YEAR_WEEKS) return false;
   if(!Number.isSafeInteger(raw.seq)||raw.seq<1) return false;
@@ -572,6 +574,9 @@ function mgmtMigrate(raw){
     }
     raw.v=19;
   }
+  /* ==== [ANCRE: MONDE_LOT9_T2A_MIGRATION] — Monde lot 9 T2a (décision du superviseur du 15/10/2026), renumérotée 19 → 20 à la fusion du lot 6.
+     Une partie d'avant porte m.mondeVivant=false et garde EXACTEMENT son ancien monde extérieur calculé ; rien d'autre ne bouge. ==== */
+  if(raw.v===19){ raw.mondeVivant=false; raw.v=20; }
   if(raw.v!==MGMT_SAVE_VERSION) return null;
   return raw;
 }
@@ -695,7 +700,8 @@ function mgmtRepair(m){
 
 function mgmtParseAndValidate(raw){
   if(!raw) return null;
-  try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); return mgr&&validateMgmt(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
+  try{ const parsed=JSON.parse(raw); const mgr=mgmtPasseDeployer(mgmtMigrate(parsed)); if(mgr&&mgr.orgs&&typeof mgr.orgs==='object'&&!Array.isArray(mgr.orgs)){ for(const id of Object.keys(mgr.orgs)){ if(!mgmtPasseDeployer(mgr.orgs[id])) return null; } }   /* Monde lot 9 T2a : chaque organisation redéploie son archive */
+    return mgr&&validateMgmt(mgr)&&mgmtMondeVivantValide(mgr)?mgr:null; }   /* Monde lot 1 T5 : l'archive du passé se redéploie avant la validation */
   catch(e){ return null; }
 }
 

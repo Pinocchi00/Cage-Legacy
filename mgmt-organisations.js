@@ -47,6 +47,47 @@ function mgmtOrgDecalageNiveau(profil,divId){
 }
 /* ==== [FIN ANCRE] ==== */
 
+/* ==== [ANCRE: MGMT_MONDE_LOT9_T3_NIVEAUX] — Monde lot 9 T3 ==== */
+/** Niveaux dérivés de l'état courant ; aucune donnée n'est persistée. */
+function mgmtOrgNiveaux(m,orgId){
+  if(!m||!MGMT_ORGANISATIONS.some(o=>o.id===orgId)) return null;
+  let partie=null;
+  /* Superviseur, 15/10/2026 : m.org porte le NOM de l'organisation ; son identifiant vient de mgmtPredecesseurOrgId. */
+  if(mgmtPredecesseurOrgId(m)===orgId) partie=m;
+  else if(m.mondeVivant===true&&m.orgs&&m.orgs[orgId]) partie=m.orgs[orgId];
+  if(!partie) return null;
+  const roster=(partie.roster||[]).filter(f=>f&&!mgmtIsRetired(f));
+  const pop=Number.isFinite(partie.pop)?partie.pop:(typeof mgmtOrgProfil==='function'&&partie===m?mgmtOrgProfil(m).popularite:0);
+  const comptes=(partie.comptes||[]).slice(-12), salles=partie.salles||[];
+  const remplies=new Set(comptes.filter(c=>Number.isFinite(c.taux)&&c.taux>=0.8).map(c=>c.salleId||c.salle));
+  let salle=salles.filter(s=>remplies.has(s.id)||remplies.has(s.nom)).sort((a,b)=>b.capacite-a.capacite)[0];
+  if(!salle) salle=salles.slice().sort((a,b)=>a.capacite-b.capacite)[0]||null;
+  const renom=roster.map(mgmtStar).sort((a,b)=>b-a).slice(0,5);
+  let puissance=0;
+  /* Le classement mondial se lit dans la partie du joueur (il réunit toutes les organisations) ; le rang est la position dans la liste
+     (les lignes ne portent pas de champ rang). Superviseur, 15/10/2026. */
+  const chezMoi=new Set(roster.map(f=>f.id));
+  for(const div of allDivisions()){
+    (mgmtDivisionRanking(m,div.id,'world')||[]).slice(0,10).forEach((r,i)=>{
+      const rang=i+1;
+      if(partie===m?chezMoi.has(r.id):(()=>{ const f=mgmtExteriorCombattant(m,r.id); return !!f&&f.orgId===orgId; })()) puissance+=11-rang;
+    });
+  }
+  return {popularite:pop,stade:salle?salle.capacite:0,notoriete:renom.length?renom.reduce((a,b)=>a+b,0)/renom.length:0,puissance};
+}
+/** Rangs décroissants, égalités départagées par l'ordre canonique des organisations. */
+function mgmtOrgNiveauxRangs(m){
+  const values=MGMT_ORGANISATIONS.map(o=>({id:o.id,n:mgmtOrgNiveaux(m,o.id)}));
+  const out={};
+  for(const k of ['popularite','stade','notoriete','puissance']){
+    const rows=values.filter(x=>x.n).sort((a,b)=>b.n[k]-a.n[k]||MGMT_ORGANISATIONS.findIndex(o=>o.id===a.id)-MGMT_ORGANISATIONS.findIndex(o=>o.id===b.id));
+    rows.forEach((x,i)=>{if(!out[x.id]) out[x.id]={};out[x.id][k]=i+1;});
+    values.filter(x=>!x.n).forEach(x=>{if(!out[x.id])out[x.id]={};out[x.id][k]=null;});
+  }
+  return out;
+}
+/* ==== [FIN ANCRE] ==== */
+
 /* ==== [ANCRE: MGMT_CORR0810_LOT12_ATOUTS] — Corrections du 08/10/2026, lot 12 (D6) : chaque ligne de l'écran Nouvelle partie correspond à un effet que le joueur constate.
    Les lignes ne sont plus écrites à la main : elles se DÉDUISENT du profil, réglage par réglage, et seuls les réglages que le jeu lit existent
    (MGMT_ORG_REGLAGES_LUS — un test échoue si un profil porte un réglage hors de cette liste, ou si une ligne n'a pas de règle). Plus de promesse sans effet.

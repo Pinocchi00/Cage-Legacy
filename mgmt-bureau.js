@@ -92,8 +92,8 @@ const MGMT_BACKUP_KEY=MGMT_KEY+'_backup';
    `raison`. ==== */
 /* ==== [ANCRE: MONDE_LOT5_T3_VERSION] — Monde lot 5 T3 ==== */
 /* ==== [ANCRE: MONDE_LOT5_T4_VERSION] — Monde lot 5 T4 ==== */
-/* Renumérotation à la fusion du lot 6 (15/10/2026) : main porte 17 (lot 5 T3) et 18 (lot 5 T4) ; la preuve du choix du lot 6 T3 passe de 17 à 19. */
-const MGMT_SAVE_VERSION=19;
+/* Fusion de main (15/10/2026) : 19 = lot 6 T3 (la preuve du choix), 20 = lot 9 T2a (le monde vivant) — migration 19 → 20 : m.mondeVivant=false. */
+const MGMT_SAVE_VERSION=20;
 
 /** État management vierge. @returns {object} */
 /** Une partie neuve. `orgRef` : l'identifiant ou le nom d'une des huit organisations (brief du 06/10, lot 5) ;
@@ -428,6 +428,7 @@ function mgmtNewPile(m){
   mgmtDemandesOuvreCycle(m);
   /* Monde lot 8 T4a : une demande périmée sans réponse, une vacance de ceinture et un cap de règne naissent à l'ouverture du cycle — jamais une fenêtre. */
   mgmtMondeOuvreCycle(m);
+  if(typeof mgmtMondeVivantSemaine==='function') mgmtMondeVivantSemaine(m);
   /* Lot 10 : les nouvelles du cycle (défis, public, combattants qui attendent) entrent au fil. */
   if(typeof mgmtFilMettreAJour==='function') mgmtFilMettreAJour(m);
   m.pile=[];
