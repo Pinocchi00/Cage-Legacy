@@ -45,3 +45,15 @@ La logique des piles, le booking, les textes de raison (`MGMT_RAISON_PHRASES`).
 - Tests exécutés : « Monde lot 4 T8 — le dossier montre la bannière, la raison de Leïla et les trois colonnes », « Monde lot 4 T8 — aucun identifiant interne n'est affiché », « Monde lot 4 T8 — l'étape 2 montre l'adversaire et le bouton pour mettre le combat sur la carte » ; fichier complet `tests/mgmtDossiers.test.js` : 40/40.
 - Migration de sauvegarde : aucune. Écart de contrat : la fiche demande `{n} COMBATS`, mais la présentation réutilisée affiche `—` et ne fournit pas le nombre ; aucune décision n'est prise ici, l'affichage reste `—`. Rang désormais fourni par `mgmtDivisionRank` sans incrément supplémentaire.
 - Questions pour Anthony : aucune autre question ouverte par cette reprise.
+
+## REPRISE — superviseur, 15/10/2026 19 h 15 (écran joué à 1920 et comparé à `maquettes/monde/MondeDossiersCombattant.dc.html`)
+Bonne base, acceptée. Écarts à corriger, chacun en reprenant les valeurs inline de la planche `.dc.html` :
+1. **Étapes** : trois cartouches comme la planche (rond numéroté, `ÉTAPE n` au-dessus, libellé dessous ; l'étape courante sur fond jaune, une étape faite avec ✓ dans le rond, les autres grisées), séparés par `›`. Aujourd'hui c'est une ligne de texte.
+2. **Bannière** : le prénom est coupé en haut, à corriger ; le NOM à la taille de la planche ; le motif d'octogones rouges visible comme sur la planche ; le cartouche avec des valeurs grandes, et des libellés en capitales (`CHEZ SPLIT`, pas `CHEZ Split`).
+3. **CONTRAT** : `{n} COMBATS` avec `mgmtContratRestants(f)` (`1 COMBAT` au singulier), `—` seulement sans contrat.
+4. **Raison** : alignée à gauche comme la planche ; titre petit en capitales, l1 en gros et gras, l2 dessous.
+5. **Dossiers voisins** : panneaux rectangulaires comme la planche (pas des ovales) ; flèche ronde blanche centrée verticalement ; prénom, NOM et raison en bas.
+6. **Colonnes** : chaque ligne dans un pavé sombre avec la pastille jaune de la planche.
+7. En mode dossiers, **retire l'ancienne ligne de Leïla** en bas de l'écran (« Bienvenue. Choisissez un combattant, puis son adversaire. »).
+8. Aucun espace insécable ou idéographique dans le code (`no-irregular-whitespace`) : lance `npx eslint mgmt-carte-cadre.js`.
+Test à ajouter : `Monde lot 4 T8 — le contrat du dossier se lit en combats restants`. Commit `Monde lot 4 T8 : reprise d'après la planche`.
