@@ -134,8 +134,10 @@ test('Agenda — préparation à la demande : le joueur désigne un combattant, 
   touche(win,'d');
   assert.equal(win.eval('G.mgmt.card.main.length'),mainAvant,'D ne booke aucun combat');
   assert.equal(win.eval('MGMT_CART.cursor'),curseurAvant,'D ne déplace plus le curseur');
-  const proposés=win.eval('mgmtDossiersAdversaires(G.mgmt,MGMT_CART.pick).map(d=>d.adversaire.id)');
-  assert.ok(Array.isArray(proposés)&&proposés.length>=1,'D expose la pile d’adversaires pour le choix en cours');
+  const dossiersJson=win.eval('JSON.stringify(Array.isArray(MGMT_CART.dossiers)?MGMT_CART.dossiers.map(d=>d.adversaire.id):[])');
+  const pileJson=win.eval('JSON.stringify(mgmtDossiersAdversaires(G.mgmt,MGMT_CART.pick).map(d=>d.adversaire.id))');
+  assert.equal(dossiersJson,pileJson,'D expose réellement la pile d’adversaires proposée');
+  assert.ok(JSON.parse(dossiersJson).length>=1,'D expose au moins un dossier');
 });
 
 test('Une soirée est toujours posée : l’ouverture pose la première, à cinq semaines, et la suivante se pose après une soirée jouée (demande d’Anthony du 08/10/2026 : les planches montrent la date sur chaque écran)', () => {

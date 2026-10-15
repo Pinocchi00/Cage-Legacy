@@ -175,12 +175,19 @@ test('Monde lot 4 T2 — combattant absent ou invalide ne produit aucun adversai
   const r=ev(`setSeed(20261021);
     const m=JSON.parse(JSON.stringify(BASE)); m.hist=[]; m.facts=[]; m.cycle=20; m.card.main=[]; m.card.prelims=[];
     const f=m.roster.find(x=>mgmtSelectable(m,x,null));
+    const unknown=mgmtDossiersAdversaires(m,'aucun-id').length;
+    // indisponible (suspension jusqu'au cycle courant)
+    f.susp=m.cycle+5;
+    const indispo=mgmtDossiersAdversaires(m,f.id).length;
+    f.susp=0;
     // engagé sur la carte
     const advers=m.roster.find(x=>x.id!==f.id&&x.div===f.div&&mgmtSelectable(m,x,f.id));
     if(advers) mgmtBookMain(m,f.id,advers.id);
-    return {unknown:mgmtDossiersAdversaires(m,'aucun-id').length, engaged:mgmtDossiersAdversaires(m,f.id).length};`);
-  assert.equal(r.unknown,0);
-  assert.equal(r.engaged,0);
+    const engaged=mgmtDossiersAdversaires(m,f.id).length;
+    return {unknown:unknown, indispo:indispo, engaged:engaged};`);
+  assert.equal(r.unknown,0,'ID inconnu');
+  assert.equal(r.indispo,0,'combattant indisponible');
+  assert.equal(r.engaged,0,'combattant engagé');
 });
 
 test('Monde lot 4 T2 — la même graine et le même état donnent la même pile sans effet de bord',()=>{
