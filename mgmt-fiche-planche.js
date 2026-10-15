@@ -189,7 +189,6 @@ function mgmtFichePalmaresAmateurHtml(m,f){
 
 /** La trajectoire d'un combattant extérieur (sa trace) : amateur, organisations traversées, professionnel. Rien n'est stocké. */
 function mgmtFicheParcoursHtml(trace){
-  if(!MGMT_HUMANITE_ACTIVE) return '';
   const duree=o=>{
     if(o.from===null||o.to===null) return '';
     const sem=(o.to-o.from+1)*MGMT_EVENT_WEEKS;
