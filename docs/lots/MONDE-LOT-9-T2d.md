@@ -28,6 +28,15 @@ Deux défauts trouvés par le superviseur le 15/10/2026 sur une vraie partie (Sp
 ## Hors périmètre
 Les écrans ; la mesure de la notoriété (signalée à part).
 
+## Compte rendu
+- `mgmt-bureau.js`, `mgmt-passe.js`, `mgmt-save.js` : identifiants préfixés par sous-partie, conservation des douze derniers comptes réduits, migration v20 → v21 et validation de `idPrefixe`.
+- `tests/mgmtMondeVivant.test.js` : ajustement de la version attendue à 21 ; les tests T2d de collision, classement, stade/comptes et migration sont présents.
+- `index.html`, `sw.js` : versions cache montées par `node tools/_bump.js` pour les fichiers JS modifiés.
+- Migration de sauvegarde : v20 → v21 ; les sauvegardes avec monde vivant sont renommées. Les sauvegardes antérieures dont les comptes ont déjà été effacés les gardent vides ; le stade se recalera au fil des soirées.
+- Vérifications : `node tools/verif-versions.js origin/main` passe. `node --test --test-name-pattern="T2d" tests/mgmtMondeVivant.test.js` dépasse le délai maximal de 120 s de l’outil lors de la création des mondes.
+- Écarts à la fiche : vérification ciblée non terminée à cause du délai ; aucun autre écart constaté.
+- Questions pour Anthony : aucune.
+
 ## AJOUT du superviseur — 15/10/2026 22 h 30 (fait partie de la tranche)
 3. **L'ancien vivier lu en plus du monde vivant.** Sur la partie relevée, le classement mondial de H-light a 328 lignes : 30 de Split et 298 de `m.exterieur` (l'ancien monde calculé), **aucune** des sept organisations vivantes. `mgmtDivisionRankingCalcule` (`mgmt-carte.js`) ajoute `m.exterieur` même quand `m.mondeVivant===true`. Décision T2 : le monde vivant **remplace** l'ancien vivier. Donc, quand `m.mondeVivant===true` : la portée `world` = l'effectif du joueur + `mgmtExteriorEffectifs(m,div)` ; `m.exterieur` n'est plus lu (et `mgmtExteriorEnsure` ne le recrée plus pour une telle partie). Les parties sans monde vivant gardent exactement l'ancien calcul.
 4. **Les tests doivent le prouver sur l'état réel** : pour chaque catégorie, le classement mondial contient au moins un combattant de chacune des sept organisations vivantes qui en a un non retraité dans cette catégorie, et aucun identifiant de `m.exterieur`. La puissance (T3) d'au moins cinq organisations est > 0 après la création.

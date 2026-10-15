@@ -21,7 +21,7 @@ test('Monde lot 9 T2a — même graine, deux créations identiques, sept organis
   assert.equal(a, b);
   const m = JSON.parse(a);
   assert.equal(m.mondeVivant, true);
-  assert.equal(m.v, 20);
+  assert.equal(m.v, 21);
   assert.deepEqual(Object.keys(m.orgs), JSON.parse(A.eval("JSON.stringify(MGMT_ORGANISATIONS.map(o=>o.id).filter(id=>id!=='split'))")), 'sept organisations, dans l\'ordre de MGMT_ORGANISATIONS');
   assert.equal(Object.keys(m.orgs).length, 7);
   for (const id of Object.keys(m.orgs)) {
