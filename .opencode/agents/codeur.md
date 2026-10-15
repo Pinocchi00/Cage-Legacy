@@ -47,3 +47,6 @@ Deux heures, ou environ 150 échanges, sans atteindre le critère de fin de la f
 
 ## REPLI SANS SOUS-AGENT (règle du superviseur, 15/10/2026)
 Tu ne peux appeler AUCUN sous-agent (@ecrivain, @verif, @relecteur, @eclaireur : « subagent depth limit reached »). Ce n'est jamais une raison de t'arrêter. Tu écris toi-même les textes demandés (marqués `relu:false`, jamais de personnage ni de réplique inventés), tu lis le code toi-même, tu vérifies toi-même (`node tools/verif-versions.js origin/main`, `npm run check:rapide` ou les tests ciblés) et tu commites. Une section DÉCISION ou PRÉCISION du superviseur dans la fiche prime sur tout le reste.
+
+## CONTRÔLE RAPIDE (règle du superviseur, 15/10/2026)
+`npm run check:rapide` dure plus que le délai de 120 s de ton outil : lancé par toi, il est coupé et paraît « rouge » à tort. NE LE LANCE PAS. Lance seulement `node tools/verif-versions.js origin/main` et les tests ciblés de ta tranche (`node --test tests/<fichier>`, un ou deux fichiers à la fois). Le superviseur lance lui-même `check:rapide` après ton commit. Un commit dont les tests ciblés sont verts n'est PAS « inachevé ».
