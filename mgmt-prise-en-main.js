@@ -79,30 +79,212 @@ function mfPriseHtml(m,ecran,grise){
   return (leila||suite)?`<div class="mf-prise">${leila||suite}</div>`:'';
 }
 
-/* ---- T1 : l'arrivée --------------------------------------------------------------------------------------------------------------------- */
+/* ==== [ANCRE: MONDE_LOT_10_T2_ARRIVEE] — Monde lot 10 T2 ==== */
+/** L'année civile d'une soirée du calendrier (jour négatif du passé compris). Pur. */
+function mgmtArriveeAnneeSoiree(m,n){
+  if(!Number.isSafeInteger(n)||n<=0) return null;
+  const j=typeof mgmtSoireeJour==='function'?mgmtSoireeJour(m,n):null;
+  if(j===null||j===undefined) return null;
+  return new Date(mgmtJourDate(j).ts).getUTCFullYear();
+}
+
 function scr_mgmt_arrivee(){
   const m=G&&G.mgmt; if(!m) return scr_mgmt_parties();
-  const T=MGMT_PRISE_TEXTES.arrivee, org=mgmtOrgNom(m);
-  const faits=mgmtOrgApercu({profil:mgmtOrgProfil(m)}).filter(x=>['Caisse de départ','Popularité','Plus grande salle'].includes(x.k));
-  let quand='';
-  if(typeof mgmtAgendaActif==='function'&&mgmtAgendaActif(m)&&m.cal.prochaines[0]) quand='Votre première soirée a lieu dans '+Math.max(0,m.cal.prochaines[0].jour-m.cal.jour)+' jours.';
-  const pl=(n,s,p)=>n+' '+(n>1?p:s);
-  const soirees=Number.isSafeInteger(m.eventsPlayed)?m.eventsPlayed:0;
-  const combats=Array.isArray(m.hist)?m.hist.length:0;
-  const retraites=(m.facts||[]).filter(f=>f&&f.k==='retired').length;
-  const champions=typeof mgmtPredecesseurChampions==='function'?mgmtPredecesseurChampions(m).filter(Boolean).length:0;
-  const passe=m.passe?`<section class="mf-arrivee-bloc"><div class="mf-arrivee-h">Ce qui s'est passé avant toi</div><div class="mf-fin-ls"><div>${esc([pl(soirees,'soirée','soirées'),pl(combats,'combat','combats'),pl(champions,'champion en titre','champions en titre'),pl(retraites,'retraité','retraités')].join(', '))}</div></div></section>`:'';
-  const corps=`<div class="mf-arrivee-blocs">`
-    +`<section class="mf-arrivee-bloc"><div class="mf-arrivee-h">Ton organisation</div><div class="mf-fin-ls">${faits.map(x=>`<div>${esc(x.k)} : <b>${esc(x.v)}</b></div>`).join('')}${quand?`<div>${esc(quand)}</div>`:''}</div></section>`
-    +passe
-    +`<section class="mf-arrivee-bloc"><div class="mf-arrivee-h">Ce que tu dois faire maintenant</div><div class="mf-fin-ls"><div>1 · Ouvre la Carte : cinq combats à composer.</div><div>2 · Laisse Leïla proposer, ou choisis toi-même.</div><div>3 · Quand la carte est complète, pose la soirée au Calendrier.</div></div></section>`
-    +`</div>`
-    +`<div class="mf-prise-leila"><b>Leïla</b><span>${esc(T.leila.texte)}</span></div>`;
-  return mfEcran(`<main class="mf-contenu"><div class="mf-su-vide">${mfPanneau(`<div class="mf-fin-t">${esc(T.titre.texte.replace('{org}',org).toUpperCase())}</div>${corps}`,'normal','mf-fin-p mf-arrivee')}</div></main>`,
-    {barre:'aucune',m:null,plaque:'Management',libelle:'Votre arrivée',touches:[{ks:['Entrée'],t:T.bouton.texte,jaune:true,onclick:"CL.mgmtArriveeFin()"}]});
+  const org=mgmtOrgNom(m);
+  const orgObj=mgmtOrgParNom(org);
+  const ident=orgObj?mgmtOrgIdentite(orgObj.id):null;
+  const ou=mgmtAccueilContenu(m).ou;
+  const premiere=mgmtSoireesJoueur(m)===0&&!!m.passe;
+  const etat=premiere?'premiere':'sans-passe';
+
+  const infos=mfSoireeInfos(m);
+  const soir=m.cal&&m.cal.prochaines&&m.cal.prochaines[0]?m.cal.prochaines[0]:null;
+  const salle=soir&&typeof mgmtSalleParId==='function'?mgmtSalleParId(m,soir.salle):null;
+  const lieuLabel=salle?salle.nom.toUpperCase():(infos.lieu||'');
+  const fnNumber=premiere?((m.eventsPlayed||0)+1):1;
+  const daysText=ou&&ou.soiree?ou.soiree.dans:'';
+  const datePhraseLower=(()=>{
+    let d=mgmtAccueilDate(m);
+    for(const mx of MGMT_MOIS) d=d.split(mx).join(mx.toLowerCase());
+    return d;
+  })();
+
+  /* Nombre de champions couronnés pendant le passé (lecture incrémentale). */
+  const detenteurs={};
+  let championsCouronnes=0;
+  const faitsPasses=(m.facts||[]).slice(0,Number.isSafeInteger(m.passe&&m.passe.nFacts)?m.passe.nFacts:0);
+  for(const f of faitsPasses){
+    if(!f) continue;
+    if(f.k==='title_initial'){
+      if(f.div) detenteurs[f.div]=f.a||null;
+    }else if(f.k==='title_fight'){
+      const t=m.hist&&Number.isSafeInteger(f.fight)?m.hist[f.fight]:null;
+      const g=t?(t.winner==='A'?t.a:(t.winner==='B'?t.b:null)):null;
+      const div=f.div|| (t&&t.a?t.a.div:null);
+      if(g&&g.id&&(detenteurs[div]!==g.id)){ championsCouronnes++; if(div) detenteurs[div]=g.id; }
+    }
+  }
+  const blesses=(m.roster||[]).filter(f=>f&&!mgmtIsRetired(f)&&Number.isSafeInteger(f.susp)&&f.susp>=m.cycle);
+  const blessuresNb=blesses.length;
+  const pluslongBlesse=blesses.reduce((a,f)=>(!a||(f.susp>a.susp)?f:a),null);
+  const blessesLongNb=pluslongBlesse?Math.max(1,pluslongBlesse.susp-m.cycle+1):0;
+
+  /* Identité. */
+  const pred=ident&&ident.predecesseur?ident.predecesseur:null;
+  const adj=ident&&ident.adjointe?ident.adjointe:null;
+
+  /* Rivalité en cours. */
+  const riv=(mgmtRivalites(m)||[])[0]||null;
+  const nomRivA=riv?mgmtNomParId(m,riv.a).name:'';
+  const nomRivB=riv?mgmtNomParId(m,riv.b).name:'';
+  const texteRiv=riv?(riv.k==='trilogie'?'Une victoire chacun · le troisième combat':'Revanche due'):'';
+
+  /* Les douze champions. */
+  const divs=allDivisions();
+  const championsHtml=divs.map(d=>{
+    const t=mgmtSplitTitle(m,d.id)||{};
+    const nom=t.id?(mgmtNomParId(m,t.id).name||t.id):'Vacant';
+    const dep=t.since;
+    const annee=premiere&&t.id&&Number.isSafeInteger(dep)?mgmtArriveeAnneeSoiree(m,dep):null;
+    const vac=!t.id;
+    return `<div class="ch-l"><div class="oct"></div><div class="div">${esc(mgmtDivisionLabel(d.id))}</div>`
+      +`<div class="n">${vac?esc('Vacante'):`<span class="nom">${esc(nom)}</span>`}</div>`
+      +(annee!==null?`<div class="d">depuis ${esc(annee)}</div>`:'') ;
+  }).join('');
+  // plus long règne
+  const candRoles=divs.map(d=>{
+    const l=mgmtCeintureLignee(m,d.id);
+    const t=mgmtSplitTitle(m,d.id)||{};
+    if(!l||!l.actuel||!t.id) return null;
+    const annee=mgmtArriveeAnneeSoiree(m,l.actuel.depuis);
+    return {id:t.id,nom:mgmtNomParId(m,t.id).name,div:mgmtDivisionLabel(d.id),depuis:l.actuel.depuis,defenses:l.actuel.defenses,annee};
+  }).filter(Boolean);
+  candRoles.sort((a,b)=> (a.depuis-b.depuis) || (b.defenses-a.defenses));
+  const plusLongReigne=candRoles[0]||null;
+
+  /* Promesses. */
+  const vus=new Set();
+  const promesses=[];
+  for(const x of m.facts||[]){
+    if(!x||x.k!=='promesse'||vus.has(x.a)) continue;
+    vus.add(x.a);
+    const f=mgmtFighterById(m,x.a); if(!f||mgmtIsRetired(f)) continue;
+    for(const p of mgmtPromesses(m,f)){
+      if(p.etat!=='en cours'||!MGMT_DEMANDES[p.want]) continue;
+      const echeance=p.due===m.cycle?'ta première soirée':(org+' Fight Night '+((m.eventsPlayed||0)+1+(p.due-m.cycle)));
+      promesses.push({id:f.id,nom:f.name,demande:MGMT_DEMANDES[p.want].libelle.toLowerCase(),echeance});
+    }
+  }
+  const promList=promesses.slice(0,3);
+
+  /* Contrats qui finissent. */
+  const finContrats=(m.roster||[]).filter(f=>f&&!mgmtIsRetired(f)&&f.ct&&mgmtContratRestants(f)===1);
+  const namesFin=finContrats.map(f=>f.last||f.name||'').filter(Boolean);
+
+  const passeAn0=premiere?mgmtPasseAnnee(m.passe.soirees,0):null;
+  const passeAn1=premiere?mgmtPasseAnnee(m.passe.soirees,m.passe.soirees-1):null;
+
+  const nSigned=m.card&&Array.isArray(m.card.main)?m.card.main.filter(x=>x&&x.herite).length:0;
+
+  /* Col1 chiffres HTML. */
+  const chiffresHtml=`
+    <div class="ar-chiffres">
+      <div class="tuile"><div class="v">${esc(premiere?(m.passe.soirees):0)}</div><div class="lab">Soirées</div></div>
+      <div class="tuile"><div class="v">${esc(m.passe&&Number.isSafeInteger(m.passe.nHist)?m.passe.nHist:0)}</div><div class="lab">Combats</div></div>
+      <div class="tuile"><div class="v">${esc(championsCouronnes)}</div><div class="lab">Champions couronnés</div></div>
+      <div class="tuile"><div class="v">${esc(blessuresNb)}</div><div class="lab">Blessures</div></div>
+    </div>`;
+
+  const headerPred=pred?`<div class="tuile"><div class="lab">Ton prédécesseur</div><div class="T">${esc((pred.prenom+' '+pred.nom).trim().toUpperCase())}</div><div class="s">${esc(pred.posteActuel||'')}</div></div>`:'';
+  const headerAdj=adj?`<div class="tuile"><div class="lab">Ton adjointe</div><div class="T">${esc(String(adj.prenom||'').toUpperCase())}</div></div>`:'';
+  const headerPremiere=`<div class="tuile"><div class="lab">Ta première soirée</div><div class="T">DANS ${esc(String(daysText).replace(/^DANS /,''))}</div><div class="s">${premiere?esc(org+' Fight Night '+fnNumber):esc(org+' Fight Night 1')}</div></div>`;
+
+  const attend=mgmtAccueilContenu(m).attend.prochaine;
+  const prochainTitre=attend?attend.titre:'Ouvrir la carte';
+  const prochainDetail=attend?attend.detail:'';
+  const prochainOnclick=attend?attend.onclick:"CL.mgmtCarte()";
+  const prefixTexte= nSigned>0 ? ( (pred? ( (pred.prenom+' '+pred.nom).trim() ):'Le matchmaker') + ' a signé ' + nSigned + ' combat' + (nSigned>1?'s':'') + '. ' ) : '';
+
+  /* Col 1 bloc. */
+  const titreCol1=premiere?'SIX ANS AVANT TOI':'SPLIT AUJOURD’HUI';
+  const anneesHtml=premiere?`<div class="lab">${esc(passeAn0)} → ${esc(passeAn1)}</div>`:'';
+  const reputHtml=ident&&ident.reputation?`<div class="bloc"><div class="sous">Ce qu’on en dit</div><div class="l1">${esc(ident.reputation)}</div></div>`:'';
+  const rivaleHtml=ident&&ident.rivale?`<div class="ligne"><div class="sous">Sa rivale</div><div class="l1">${esc((mgmtOrgParId(ident.rivale)||{}).nom||'')}</div></div>`:'';
+  const blessesHtml = blessuresNb>0? `<div class="bloc"><div class="sous">Les blessés</div>
+      <div class="carte-l"><div class="col"><div class="l1">${esc(blessuresNb+' combattant'+(blessuresNb>1?'s':'')+' indisponible'+(blessuresNb>1?'s':''))}</div>`+
+      (premiere&&pluslongBlesse?`<div class="l2">Le plus long : <span class="nom">${esc(pluslongBlesse.name||pluslongBlesse.last||'')}</span>, ${esc(blessesLongNb+' soirée'+(blessesLongNb>1?'s':''))}</div>`:'')+
+      `</div><div class="aller" onclick="CL.go('mgmt_effectif')">Effectif ›</div></div></div>` :'';
+
+  const htmlCol1=`
+    <div class="pan ar-c1"><div class="p2"><div class="p3">
+      <div class="pan-tete"><div class="pan-titre"><div class="T">${esc(titreCol1)}</div><div class="trait"></div></div>${anneesHtml}</div>
+      ${premiere?chiffresHtml:''}
+      ${reputHtml}
+      ${rivaleHtml}
+      ${premiere && riv?`<div class="bloc"><div class="sous">Une rivalité en cours</div>
+         <div class="carte-l"><div class="col"><div class="l1"><span class="nom">${esc(nomRivA)}</span> et <span class="nom">${esc(nomRivB)}</span></div><div class="l2">${esc(texteRiv)}</div></div></div></div>`:''}
+      ${blessesHtml}
+    </div></div></div>`;
+
+  /* Col2 champions. */
+  const plusLongHtml=plusLongReigne?`<div class="carte-l"><div class="col"><div class="l1">Le plus long règne : <span class="nom">${esc(plusLongReigne.nom)}</span></div><div class="l2">${esc(plusLongReigne.div)} · champion depuis ${esc(plusLongReigne.annee)} · ${esc(plusLongReigne.defenses)} défense${plusLongReigne.defenses>1?'s':''}</div></div><div class="aller" onclick="CL.go('mgmt_ceintures')">Ceintures ›</div></div>` :
+    `<div class="carte-l"><div class="col"><div class="l1">Toutes les ceintures et leurs règnes</div></div><div class="aller" onclick="CL.go('mgmt_ceintures')">Ceintures ›</div></div>`;
+
+  const htmlCol2=`
+    <div class="pan ar-c2"><div class="p2"><div class="p3">
+      <div class="pan-tete"><div class="pan-titre"><div class="T">SES DOUZE CHAMPIONS</div><div class="trait"></div></div><div class="lab">Aujourd’hui</div></div>
+      ${championsHtml}
+      ${plusLongHtml}
+    </div></div></div>`;
+
+  /* Col3. */
+  const promBlock=premiere&&promList.length?`<div class="bloc"><div class="sous">Ses promesses · ${esc(promList.length)}</div>`+
+     promList.map(p=>`<div class="carte-l"><div class="col"><div class="l1"><span class="nom">${esc(p.nom)}</span> : ${esc(p.demande)}</div><div class="l2">Au plus tard : ${esc(p.echeance)}</div></div><div class="aller" onclick="CL.go('mgmt_cartes')">Décider ›</div></div>`).join('')+`</div>`:'';
+  const contratsBlock=premiere&&namesFin.length?`<div class="bloc"><div class="sous">Ses contrats qui finissent · ${esc(namesFin.length)}</div>
+     <div class="carte-l"><div class="col"><div class="l1">${namesFin.map(n=>`<span class="nom">${esc(n)}</span>`).join(', ')}</div><div class="l2">Un dernier combat à leur contrat</div></div><div class="aller" onclick="CL.go('mgmt_contrats')">Contrats ›</div></div></div>`:'';
+  const pasBlock=`<div class="bloc ar-pas"><div class="sous">Tes premiers pas</div>
+     <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">1</div><div class="l1">Ouvre la Carte : cinq combats à composer.</div></div>
+     <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">2</div><div class="l1">Laisse Leïla proposer, ou choisis toi-même.</div></div>
+     <div class="carte-l" style="justify-content:flex-start"><div class="ar-num">3</div><div class="l1">Quand la carte est complète, pose la soirée au Calendrier.</div></div>
+    </div>`;
+
+  const jauneDetail = premiere ? ( (prefixTexte?`<div style="font-size:24px;line-height:1.1">${esc(prefixTexte+ (prochainDetail?' '+prochainDetail:''))}</div>`:'') ) :
+      `<div style="font-size:24px;line-height:1.1">${esc(prochainDetail||'Il manque 5 combats en carte principale.')}</div>`;
+
+  const htmlCol3=`
+    <div class="pan ar-c3"><div class="p2"><div class="p3">
+      <div class="pan-tete"><div class="pan-titre"><div class="T">${premiere?'CE QU’IL T’A LAISSÉ':'PAR OÙ COMMENCER'}</div><div class="trait"></div></div></div>
+      <div class="jaune-bloc focus">
+        <div class="lab">La prochaine chose à faire</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:16px"><div class="T">${esc(prochainTitre)}</div><div class="k" style="font-size:24px">Entrée</div></div>
+        ${jauneDetail}
+      </div>
+      ${premiere?promBlock:''}
+      ${premiere?contratsBlock:''}
+      ${premiere?'':pasBlock}
+    </div></div></div>`;
+
+  const headerLeftHtml=`<div class="ar-bande">
+    <div class="ar-bande-g">
+      <div class="T">${esc(org.toUpperCase())}</div>
+      <div class="col">
+        <div class="lab">${esc((ident&&ident.ville?ident.ville+' · ':'')+(ident&&ident.annee?'DEPUIS '+ident.annee:'').toUpperCase())}</div>
+        <div class="ar-qui">Tu es le nouveau matchmaker de ${esc(org)}.</div>
+        <div class="l1 t2">${esc(datePhraseLower)}, ton premier jour.</div>
+      </div>
+    </div>
+    <div class="ar-tuiles">
+      ${headerPred}${headerAdj}${headerPremiere}
+    </div>
+  </div>`;
+
+  const contenu=`<main class="ar">${headerLeftHtml}<div class="ar-cols">${htmlCol1}${htmlCol2}${htmlCol3}</div></main>`;
+  return mfEcran(contenu,{barre:'aucune',m,plaque:'Management',libelle:'Ton arrivée',droite: (org+' Fight Night'),touches:[{ks:['↑','↓'],t:'Choisir'},{ks:['Tab'],t:'Bloc suivant'},{ks:['Échap'],t:'Aller à l’accueil',onclick:"CL.go('mgmt_accueil')"},{ks:['Entrée'],t:'Ouvrir',jaune:true,onclick:"CL.mgmtArriveeFin()"}]});
 }
 SCREENS.mgmt_arrivee=scr_mgmt_arrivee;
-/* Monde lot 7 (décision du 12/10/2026) : « Commencer » mène à l'Accueil, qui présente l'héritage. */
-Object.assign(CL,{ mgmtArriveeFin(){ CL.go('mgmt_accueil'); } });
-keysRegister('mgmt_arrivee',{ Enter(){ CL.mgmtArriveeFin(); }, Escape(){ CL.mgmtArriveeFin(); } });
+
+Object.assign(CL,{
+  mgmtArriveeFin(){ CL.mgmtCarte(); },
+});
+keysRegister('mgmt_arrivee',{ Enter(){ CL.mgmtArriveeFin(); }, Escape(){ CL.go('mgmt_accueil'); } });
 /* ==== [FIN ANCRE] ==== */
