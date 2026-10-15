@@ -1,7 +1,7 @@
 ---
 description: Cherche dans le code de Cage Legacy et rend une réponse courte (fichier:ligne, signature, appelants). À appeler au lieu d'ouvrir soi-même beaucoup de fichiers. Lecture seule.
 mode: subagent
-model: openai/gpt-6-luna-fast
+model: openai/gpt-6-luna
 steps: 25
 permission:
   edit: deny
