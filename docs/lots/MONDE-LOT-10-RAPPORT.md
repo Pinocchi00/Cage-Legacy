@@ -27,3 +27,15 @@ Branche `monde-lot-10-ecrans`. Contrat : `docs/lots/MONDE-LOT-10-DECISIONS.md` e
 ## Vérification
 
 `npm run check` complet : résultat consigné dans le message de fusion du superviseur. Vérification visuelle dans le jeu réel, aux trois largeurs, laissée au superviseur.
+
+## Reprise arrivée — 15/10/2026
+
+Sur la branche `monde-lot-10-arrivee-style`, après `ff52d17` :
+- Le bloc Les blessés compte les combattants actuellement indisponibles ; le compteur historique Blessures reste le nombre de faits du passé. Aucun bloc Les blessés sans indisponible actuel.
+- Les noms soulignés ouvrent les fiches (identifiant échappé dans un attribut de données, jamais dans du JavaScript construit).
+- Décider mène à la Carte ; le bloc jaune est cliquable. Les flèches parcourent les actions, Tab change de bloc (Maj+Tab inverse), Entrée ouvre la sélection, initialement le bloc jaune. Échap garde son rôle.
+- Styles locaux des contrôles : mêmes panneaux et typographie ; aucune simulation, sauvegarde ou règle de jeu modifiée.
+
+Vérification de cette reprise : `node --test tests/mgmtArrivee.test.js tests/mgmtAccueil.test.js` : **24/24**, zéro échec, 45,5 s. Quatre tests de régression ajoutés (indisponibilités, liens et échappement, clavier/souris, promesses). Syntaxe JavaScript et ESLint du fichier jeu verts (le dossier tests est ignoré par ESLint conformément à sa configuration). Versions JS/CSS/SW montées.
+
+Restent au superviseur avant fusion : contrôle global requis et comparaison visuelle du jeu réel avec la planche à 1280/1440/1920. Ces vérifications ne sont pas prétendues réalisées par les tests DOM.
