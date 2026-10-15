@@ -51,3 +51,10 @@ Ton code est sur le disque (non commité). `tests/mgmtVie.test.js` et `tests/mgm
 - Versions : `node tools/verif-versions.js origin/main` ne relève aucun écart.
 - Relecteur : indisponible (limite de profondeur des sous-agents). Aucun changement de sauvegarde ni écart fonctionnel constaté.
 - Questions pour Anthony : aucune.
+
+## REPRISE 2 du superviseur — 15/10/2026
+Le code du commit 310fcd4 est accepté sur le principe. Il manque, et c'est tout ce qu'il reste à faire :
+1. `tests/mgmtHumaniteRetrait.test.js` n'est PAS dans `package.json` : ajoute-le à `test` ET `test:watch`.
+2. Ce fichier n'a pas les cinq tests de la section Tests : écris-les tous, avec leurs intitulés exacts (fiche sans milieu/métier/rituel/trajectoire/moment ; aucune soirée ne fait naître de moment ni de marque ; aucun libellé de rôle à l'écran mais les raisons de Leïla fonctionnent ; à graine égale mêmes combats et même classement ; interrupteur remis à vrai = fiche d'avant).
+3. Vérifie `mgmt-fiche-cadre.js` (fiche) : rien à couper, ou coupe-le.
+Tests ciblés verts, versions, commit `Monde lot 11 T1 : tests du retrait`.
