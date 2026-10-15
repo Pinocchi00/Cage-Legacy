@@ -76,4 +76,15 @@ Classement des organisations (T4), classement mondial lui-même (T5), staff (T6-
 5. **Puissance** : pour chaque catégorie, chaque combattant de l'organisation classé dans le top 10 mondial rapporte `11 - rang` points ; la puissance est la somme.
 6. **Lecture, pas de sauvegarde** : une fonction pure `mgmtOrgNiveaux(m,orgId)` → `{popularite,stade,notoriete,puissance}` (chiffres) et `mgmtOrgNiveauxRangs(m)` → pour chacune des huit organisations son rang (1 à 8) sur chaque niveau, égalités départagées par l'ordre de `MGMT_ORGANISATIONS`. Recalculé à la lecture ; aucun champ ajouté à la sauvegarde, aucune migration. Partie sans monde vivant (`m.mondeVivant!==true`) : seule l'organisation du joueur a des niveaux, les autres renvoient `null`.
 7. Pas d'écran dans T3 (l'écran de l'organisation est T11).
+
+## Compte rendu
+
+- `mgmt-organisations.js` : ajout des calculs dérivés de niveaux et rangs.
+- `mgmt-salles.js` : conservation du nom de salle dans l'historique.
+- `index.html` : versions des fichiers JavaScript modifiés.
+- `package.json` : test ajouté à `test` et `test:watch`.
+- `tests/mgmtNiveauxOrg.test.js` : « Niveaux organisations — dérivés, déterministes et liés aux sources courantes ».
+- Migration : aucune.
+- Écarts : tests indépendants pour stade, notoriété et puissance manquants ; les comptes historiques n'ont pas de nom de salle.
+- Questions pour Anthony : aucune.
 Tests (`tests/mgmtNiveauxOrg.test.js`, ajouté à `test` et `test:watch` de `package.json`) : déterminisme à graine égale ; chaque niveau change quand sa source change (popularité, une salle remplie, un combattant plus renommé, un combattant qui entre dans le top 10 mondial) et pas les autres ; partie sans monde vivant. Tests ciblés seulement (délai 120 s), pas de `check:rapide`.
