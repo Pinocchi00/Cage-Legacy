@@ -461,3 +461,17 @@ test('Monde lot 4 T5 — un geste commencé hors du dossier ne change pas le dos
     assert.equal(w.eval('MGMT_CART.index'),index,'un ancien dossier retiré ne navigue plus');
   }finally{w.close();}
 });
+
+test('Dossiers — les règles de style de l’écran existent et aucun texte sous 22 px',()=>{
+  const fs=require('node:fs');
+  const css=fs.readFileSync(require('node:path').join(__dirname,'..','ui-cadre.css'),'utf8');
+  for(const selector of ['.mf-dossiers .mf-dossier{','.mf-dossiers .mf-dossier-raison{','.mf-dossiers .mf-dossier-nav{'])
+    assert.ok(css.includes(selector),`règle présente : ${selector}`);
+  const dossierCss=css.slice(css.indexOf('[ANCRE: MONDE_LOT4_T7_DOSSIERS_CSS]'));
+  const tailles=[...dossierCss.matchAll(/font-size:(\d+(?:\.\d+)?)px/g)].map(m=>+m[1]);
+  assert.ok(tailles.length>0);
+  assert.deepEqual(tailles.filter(t=>t<22),[],'aucune taille CSS des dossiers sous 22 px');
+  const win=newGameWindow({runMain:true});
+  win.eval(`setSeed(7); CL.mgmtEnter(1); CL.go('mgmt_carte'); CL.mgmtDossiers();`);
+  assert.ok(win.document.querySelector('.mf-dossiers .mf-dossier'));
+});

@@ -318,6 +318,17 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-balayage{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;pointer-events:none;z-index:60}
 .mf-balayage>[data-m="wipe"]{position:absolute;left:0;top:0;width:5000px;height:1080px;display:flex;transform:translateX(-5200px) skewX(-45deg);transform-origin:0 0;pointer-events:none}
 .mf-stage.mf-masque>*:not(.mf-fond):not(.mf-balayage){visibility:hidden}
+/* ==== [ANCRE: MONDE_LOT4_T7_DOSSIERS_CSS] — Monde lot 4 T7 ==== */
+.mf-dossiers{display:flex;flex-direction:column;gap:16px;}
+.mf-dossiers .mf-dossier-etapes{flex:none;font-family:var(--mf-titre);font-weight:800;font-size:32px;line-height:1;}
+.mf-dossiers .mf-dossier-nav{display:flex;align-items:stretch;gap:12px;flex:1;min-height:0;}
+.mf-dossiers .mf-dossier-nav>button{width:100px;flex:none;background:var(--mf-ligne);color:var(--mf-blanc);display:flex;align-items:center;justify-content:center;font-family:var(--mf-titre);font-weight:800;font-size:76px;line-height:1;}
+.mf-dossiers .mf-dossier{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;padding:40px;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);}
+.mf-dossiers .mf-dossier-raison{max-width:100%;font-size:28px;line-height:1.15;text-align:center;color:var(--mf-texte2);}
+.mf-dossiers .mf-dossier-nom{max-width:100%;font-family:var(--mf-titre);font-weight:800;font-size:110px;line-height:.8;text-align:center;overflow-wrap:anywhere;}
+.mf-dossiers .mf-dossier-nom span{font-size:44px;color:var(--mf-rouge-vif);}
+.mf-dossiers .mf-dossier-id{font-size:22px;line-height:1;color:var(--mf-texte2);}
+.mf-dossiers .mf-dossier-resume{font-size:24px;line-height:1.15;color:var(--mf-texte2);}
 /* ==== [FIN ANCRE] ==== */
 
 /* ---- La Fiche : bannière et chiffres à gauche, cinq onglets à droite ------------ */

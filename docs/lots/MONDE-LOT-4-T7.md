@@ -19,3 +19,11 @@ Dans `tests/mgmtDossiers.test.js` : `Dossiers — les règles de style de l'écr
 
 ## Hors périmètre
 Toute logique des piles ; les textes.
+
+## Compte rendu
+- `ui-cadre.css` : styles préfixés `.mf-dossiers` pour la navigation, la carte et ses textes ; version CSS montée.
+- `index.html`, `sw.js` : versions de cache montées par l’outil de versionnage.
+- `tests/mgmtDossiers.test.js` : test « Dossiers — les règles de style de l’écran existent et aucun texte sous 22 px » (présence des sélecteurs, tailles CSS et présence des éléments rendus).
+- Migration de sauvegarde : aucune. `mgmt-carte-cadre.js` inchangé.
+- Écarts : vérification des versions signale seulement l’écart hérité `mgmt-bureau.js` (`?v=b42xxxxxxxxx` vs origin/main), conforme à l’exception indiquée par la fiche.
+- Questions pour Anthony : aucune. Sous-agents verif/relecteur non disponibles (profondeur maximale atteinte) ; tests ciblés lancés localement, relecture non effectuée.
