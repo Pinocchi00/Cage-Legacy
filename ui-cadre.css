@@ -1478,7 +1478,14 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 
 /* ==== [ANCRE: MONDE_LOT7_ACCUEIL_CSS] — Monde lot 7 : l'Accueil, valeurs portées de maquettes/monde/MondeAccueil.dc.html et
    MondeAccueilArrivee.dc.html. Aucun texte sous 22 px, aucune animation, rien par-dessus. ==== */
-.mf-ac{display:flex;flex-direction:column;gap:16px}
+/* ==== [ANCRE: ACCUEIL_PLANCHE_COLONNES] — Monde lot 12 T2 ==== */
+.mf-ac{display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+.mf-ac-cols>.mf-ac-p{flex:1 1 0;min-width:0}
+.mf-ac .mf-ac-hd{flex-wrap:wrap;gap:12px}
+.mf-ac .mf-ac-h{white-space:normal;line-height:1}
+.mf-ac .mf-ac-jp,.mf-ac .mf-ac-ev,.mf-ac .mf-ac-aide{flex-wrap:wrap}
+.mf-ac .mf-ac-lib{white-space:normal}
+.mf-ac .mf-ac-rt,.mf-ac .mf-ac-evt,.mf-ac .mf-ac-ap{overflow-wrap:anywhere}
 .mf-ac-band{height:140px;flex:none;background:var(--mf-panneau);border:2px solid var(--mf-bord);clip-path:polygon(16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%,0 16px);padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .mf-ac-id{display:flex;align-items:center;gap:26px;min-width:0}
 .mf-ac-org{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.69;white-space:nowrap}
@@ -1490,7 +1497,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-tl,.mf-ac-ts{font-size:22px;line-height:1;color:var(--mf-texte2);white-space:nowrap;overflow:hidden}
 .mf-ac-tl{font-weight:600}
 .mf-ac-tv{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;line-height:.8;white-space:nowrap}
-.mf-ac-cols{display:flex;gap:16px;min-height:0;flex:1}
+.mf-ac-cols{display:flex;gap:16px;min-height:700px;flex:1 0 auto}
 .mf-ac-colonne{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0}
 .mf-ac-c3{flex:none;min-height:0}
 .mf-ac-c4{flex:4;min-width:0}
@@ -1499,7 +1506,7 @@ body.mf-actif{background:var(--mf-noir);overflow:hidden}
 .mf-ac-fixe{flex:none}
 .mf-ac-souple{flex:1;min-height:0}
 .mf-ac-p>.mf-p2>.mf-p3{padding:15px;gap:12px;overflow:hidden}
-.mf-ac-haut>.mf-p2>.mf-p3{overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--mf-bord) transparent}
+.mf-ac-haut>.mf-p2>.mf-p3{overflow:visible}
 .mf-ac-hd{display:flex;justify-content:space-between;align-items:flex-start;flex:none}
 .mf-ac-h{font-family:var(--mf-titre);letter-spacing:var(--mf-titre-ls);font-weight:800;font-size:40px;line-height:.75;white-space:nowrap}
 .mf-ac-trait{width:56px;height:8px;margin-top:12px;background:#E23A2B;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}

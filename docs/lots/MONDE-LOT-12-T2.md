@@ -15,3 +15,15 @@ Branche : `monde-lot-12-fidelite`. Commun à toutes les tranches du lot 12 : **r
 
 ## Tests (`tests/mgmtAccueil.test.js`)
 `Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochaine soirée et une action par affaire`. Commit `Monde lot 12 T2 : l’Accueil comme sa planche`.
+
+## Compte rendu
+
+- `mgmt-accueil.js` : trois panneaux frères, bandeau de la prochaine soirée dès la première visite, mois en minuscules, action jaune sans répétition, une action par demande et liste complète des affaires ; panneaux sans donnée masqués (R4). Les demandes ouvrent leur fiche existante, les affaires gardent leur échange existant. Textes repris de la planche marqués `relu:false` dans la donnée de prochaine action.
+- `ui-cadre.css` : colonnes égales, retours à la ligne et défilement du contenu global plutôt qu’un ascenseur dans les affaires.
+- `mgmt-prise-en-main.js` : suppression de la ligne « Prochaine étape » sur l’Accueil uniquement.
+- `index.html` et `sw.js` : versions de cache des trois fichiers et du service worker montées avec `_bump.js`, ordre des scripts inchangé.
+- `tests/mgmtAccueil.test.js` : ajout de « Monde lot 12 T2 — l’Accueil a trois colonnes, le bandeau de la prochaine soirée et une action par affaire ». Adaptations des tests T5 (panneau vide masqué, règle R4 de cette fiche) et T6 (action Répondre, écart 4 de cette fiche).
+- Vérifications locales : 10/10 tests Accueil, 8/8 tests Prise en main ; `node tools/verif-versions.js origin/main` sans écart. Aucun test lent touché ; `check:rapide` réservé au superviseur.
+- Relecture locale du diff et de la planche effectuée sans sous-agent. La comparaison visuelle en jeu à 1280, 1440 et 1920 reste au superviseur ; elle n’est pas attestée par les tests DOM.
+- Migration de sauvegarde : aucune. Modifications T2 déjà présentes au début de la session reprises et vérifiées ; configurations `.opencode` et `opencode.json` laissées hors commit.
+- Écarts : colonnes égales selon l’écart 1 explicite de la fiche, bien que le HTML de la planche porte des proportions 5/5/3. Questions pour Anthony : aucune.
