@@ -172,6 +172,6 @@ keysRegister('mgmt_effectif',{
   G(){ CL.mgmtEffectifSexe(); },
   Tab(){ CL.mgmtEffectifCategorie(1); },
   Enter(){ CL.mgmtEffectifOuvrir(); },
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 /* ==== [FIN ANCRE] ==== */

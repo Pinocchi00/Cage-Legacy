@@ -781,7 +781,7 @@ keysRegister('mgmt_classements',{
   m(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); }, M(){ if(mgmtSuAgenda()) CL.mgmtSuClPortee(); },
   Tab(){ if(mgmtSuAgenda()) CL.mgmtSuClCategorie(1); },
   Enter(){ if(mgmtSuAgenda()) CL.mgmtSuClOuvrir(); },
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_ceintures',{
   ArrowLeft(){ if(!MGMT_SU_CE.ouverte) CL.mgmtSuCeDeplacer(-1,0); },
@@ -791,20 +791,20 @@ keysRegister('mgmt_ceintures',{
   g(){ CL.mgmtSuCeSexe(); }, G(){ CL.mgmtSuCeSexe(); },
   Tab(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeCategorie(1); },
   Enter(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeFiche(); else CL.mgmtSuCeOuvre(); },
-  Escape(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeFerme(); else CL.go('mgmt_carte'); },
+  Escape(){ if(MGMT_SU_CE.ouverte) CL.mgmtSuCeFerme(); else CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_camps',{
   ArrowLeft(){ CL.mgmtSuCaDeplacer(-1); },
   ArrowRight(){ CL.mgmtSuCaDeplacer(1); },
   Enter(){ CL.mgmtSuCaVoir(); },
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_presse',{
   ArrowLeft(){ CL.mgmtSuPrDeplacer(-1); },
   ArrowRight(){ CL.mgmtSuPrDeplacer(1); },
   Tab(){ CL.mgmtSuPrFiltreSuivant(); },
   Enter(){ CL.mgmtSuPrEntree(); },
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 keysRegister('mgmt_resultats',{
   ArrowLeft(){ CL.mgmtSuReSoireeDe(1); },
@@ -814,6 +814,6 @@ keysRegister('mgmt_resultats',{
   r(){ CL.mgmtSuReRevoir(); }, R(){ CL.mgmtSuReRevoir(); },
   f(){ CL.mgmtSuReFiche(); }, F(){ CL.mgmtSuReFiche(); },
   Enter(){ CL.mgmtSuReProchaine(); },
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 /* ==== [FIN ANCRE] ==== */

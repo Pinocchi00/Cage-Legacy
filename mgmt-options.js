@@ -34,6 +34,7 @@ const MGMT_OP_LIGNES={
   ],
   partie:[
     {cle:'sauver',lib:'SAUVEGARDER',aide:'La partie s’enregistre aussi toute seule après chaque soirée.',action:'SAUVEGARDER MAINTENANT',touche:'Entrée'},
+    {cle:'arrivee',lib:'REVOIR MON ARRIVÉE',aide:'L’écran de ton arrivée : l’organisation, ce que tu hérites, la première soirée.',action:'OUVRIR'},
     {cle:'changer',lib:'CHANGER DE PARTIE',aide:'Ouvre les trois emplacements. La partie en cours est sauvegardée avant.',action:'OUVRIR LES EMPLACEMENTS'},
     {cle:'exporter',lib:'EXPORTER LA PARTIE',aide:'Un fichier de cette partie, à garder ou à envoyer. Il se relit avec « Importer ».',action:'EXPORTER'},
     {cle:'importer',lib:'IMPORTER UNE PARTIE',aide:'Relit un fichier exporté dans cet emplacement. Un fichier abîmé ou d’une version inconnue est refusé, rien n’est écrasé.',action:'CHOISIR UN FICHIER'},
@@ -181,6 +182,7 @@ Object.assign(CL,{
   mgmtOpAction(cle){
     const m=G&&G.mgmt; if(!m||MGMT_OP.onglet!=='partie') return;
     if(cle==='sauver'){ saveMgmt(); MGMT_OP.message='Partie sauvegardée.'; render(); }
+    else if(cle==='arrivee') CL.go('mgmt_arrivee');
     else if(cle==='exporter'){ saveMgmt(); MGMT_OP.message=mgmtPartieTelecharger(m)?'Partie exportée.':'L’export a échoué.'; render(); }
     else if(cle==='importer') mgmtPartieChoisirFichier();
     else if(cle==='changer'){ saveMgmt(); CL.mgmtParties(); }

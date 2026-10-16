@@ -208,6 +208,6 @@ keysRegister('mgmt_calendrier',{
   l(){ if(!MGMT_CALENDRIER.pose) CL.mgmtCalendrierPasser(); },
   L(){ if(!MGMT_CALENDRIER.pose) CL.mgmtCalendrierPasser(); },
   Delete(){ if(!MGMT_CALENDRIER.pose) CL.mgmtCalendrierRetirer(); },
-  Escape(){ if(MGMT_CALENDRIER.pose) CL.mgmtCalendrierPoseFermer(); else CL.go('mgmt_carte'); },
+  Escape(){ if(MGMT_CALENDRIER.pose) CL.mgmtCalendrierPoseFermer(); else CL.go('mgmt_accueil'); },
 });
 /* ==== [FIN ANCRE] ==== */

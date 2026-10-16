@@ -189,6 +189,6 @@ keysRegister('mgmt_contrats',{
   l(){ CL.mgmtContratsLiberer(); },
   L(){ CL.mgmtContratsLiberer(); },
   Enter(){ CL.mgmtContratsPropose(); },
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 /* ==== [FIN ANCRE] ==== */
