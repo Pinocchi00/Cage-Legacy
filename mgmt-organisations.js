@@ -74,7 +74,7 @@ function mgmtOrgNiveaux(m,orgId){
   const remplies=new Set(comptes.filter(c=>Number.isFinite(c.taux)&&c.taux>=0.8).map(c=>c.salleId||c.salle));
   let salle=salles.filter(s=>remplies.has(s.id)||remplies.has(s.nom)).sort((a,b)=>b.capacite-a.capacite)[0];
   if(!salle) salle=salles.slice().sort((a,b)=>a.capacite-b.capacite)[0]||null;
-  const renom=roster.map(f=>({f,renom:mgmtRenom(partie,f)})).sort((a,b)=>b.renom-a.renom||((b.f.W||0)+(b.f.L||0)+(b.f.D||0))-((a.f.W||0)+(a.f.L||0)+(a.f.D||0))||String(a.f.id).localeCompare(String(b.f.id))).slice(0,5);
+  const renom=roster.map(f=>({f,renom:mgmtRenom(partie,f)})).sort((a,b)=>b.renom-a.renom||((b.f.W||0)+(b.f.L||0)+(b.f.D||0))-((a.f.W||0)+(a.f.L||0)+(a.f.D||0))||(String(a.f.id)<String(b.f.id)?-1:String(a.f.id)>String(b.f.id)?1:0)).slice(0,5);
   let puissance=0;
   /* Le classement mondial se lit dans la partie du joueur (il réunit toutes les organisations) ; le rang est la position dans la liste
      (les lignes ne portent pas de champ rang). Superviseur, 15/10/2026. */
@@ -85,7 +85,7 @@ function mgmtOrgNiveaux(m,orgId){
       if(partie===m?chezMoi.has(r.id):(()=>{ const f=mgmtExteriorCombattant(m,r.id); return !!f&&f.orgId===orgId; })()) puissance+=11-rang;
     });
   }
-  return {popularite:pop,stade:salle?salle.capacite:0,notoriete:renom.reduce((s,x)=>s+x.renom,0),notoriete5:renom.map(x=>({id:x.f.id,nom:x.f.name,W:x.f.W,titres:x.renom-(Number.isSafeInteger(x.f.W)?x.f.W:0)})),puissance};
+  return {popularite:pop,stade:salle?salle.capacite:0,notoriete:renom.reduce((s,x)=>s+x.renom,0),notoriete5:renom.map(x=>({id:x.f.id,nom:x.f.name,W:x.f.W,titres:(x.renom-(Number.isSafeInteger(x.f.W)?x.f.W:0))/2})),puissance};
 }
 /** Rangs décroissants, égalités départagées par l'ordre canonique des organisations. */
 function mgmtOrgNiveauxRangs(m){
