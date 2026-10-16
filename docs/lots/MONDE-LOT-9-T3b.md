@@ -29,3 +29,10 @@ Décision d'Anthony du 15/10/2026 (« prends une mesure logique, la meilleure »
 - Vérification ciblée T3/T4 : 9 tests réussis. `node tools/verif-versions.js origin/main` : aucun écart.
 - Écarts à la fiche : aucun. Questions pour Anthony : aucune.
 - Relecture par agent indisponible (sous-agent non appelable) ; relecture manuelle effectuée.
+
+## Compte rendu — reprise demandée par le relecteur
+- Les modifications non commitées de `.opencode/agents/*.md` et `opencode.json` ont été laissées intactes et hors du commit.
+- L'historique de la branche comporte déjà les commits T2e (`19a2db8`, `2ea9fc4`) avant le commit T3b. Les changements T2e sont des commits antérieurs, et non des changements de l'arbre de travail ; les retirer du diff `main...HEAD` exige de réécrire l'historique de la branche et de rejouer T3b. Cette opération n'a pas été faite pour éviter de déplacer ou supprimer des commits préexistants sans instruction explicite. Écart restant : les changements T2e (`docs/lots/MONDE-LOT-9-T2e.md`, `mgmt-carte.js`, `tests/mgmtMondeVivant.test.js`, `index.html`, `sw.js`) restent dans le diff de branche.
+- L'écart concernant les modifications non commitées des fichiers d'agents est corrigé pour cette tranche : aucun de ces fichiers n'est inclus dans les commits de reprise.
+- Vérification de versions : `node tools/verif-versions.js origin/main` passe sans écart. Le test ciblé `node --test --test-name-pattern="T3|T4" tests/mgmtNiveauxOrg.test.js` a dépassé le délai de 120 s de l'outil avant d'afficher son bilan ; résultat indéterminé.
+- Questions pour Anthony : confirmer si une réécriture de l'historique de la branche est souhaitée pour séparer T2e de T3b.
