@@ -15,10 +15,10 @@ const JOUER=`function jouer(){ const m=G.mgmt; m.pile.forEach(x=>{x.status='clos
   const bulk=m.pile.find(a=>a.kind==='leila_bulk'&&a.status==='open'); if(bulk) mgmtDecide(m,bulk.id,'validate');
   return mgmtAgendaJouer(m); }`;
 
-test('Sans l’interrupteur, l’accueil offre tous les modes', () => {
+test('Sans l’interrupteur, l’accueil n’offre plus que le management, les options et Quitter (décision d’Anthony du 16/10/2026)', () => {
   const w=newGameWindow({runMain:true});
   const r=res(w,`G.screen='title'; render(); const t=document.getElementById('app').textContent; return {n:mfMenu().length,total:MF_MENU.length,carriere:t.includes('Carrière'),duel:t.includes('Duel entre amis')};`);
-  assert.equal(r.n,r.total); assert.equal(r.carriere,true); assert.equal(r.duel,true);
+  assert.equal(r.n,r.total); assert.equal(r.carriere,false); assert.equal(r.duel,false);
 });
 
 test('Avec l’interrupteur, l’accueil n’offre que le management, les options et Quitter, et aucune touche ne mène ailleurs', () => {

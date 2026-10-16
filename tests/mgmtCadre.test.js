@@ -118,8 +118,11 @@ test('Accueil — sans soirée prévue : le titre et le menu sur le fond cendré
   const html=win.scr_title();
   assert.ok(html.includes('mf-ecran')&&html.includes('CAGE<br>LEGACY')&&!html.includes('mf-accueil-logo'));
   assert.ok(!html.includes('mf-affiche')&&!html.includes('title-resume'));
-  for(const t of ['Management','Matchmaker','Carrière','Duel entre amis','Panthéon','Succès','Options','Quitter']) assert.ok(html.includes(t),t);
-  for(const a of ['CL.mgmtParties()',"CL.go('intro')",'CL.duelEnter()',"CL.go('hof')","CL.go('ach')"]) assert.ok(html.includes(a),a);
+  /* Décision d'Anthony du 16/10/2026 : plus de Carrière, Duel entre amis, Panthéon ni Succès dans le menu. */
+  for(const t of ['Management','Matchmaker','Options','Quitter']) assert.ok(html.includes(t),t);
+  for(const t of ['Carrière','Duel entre amis','Panthéon','Succès']) assert.ok(!html.includes(t),'absent : '+t);
+  for(const a of ['CL.mgmtParties()']) assert.ok(html.includes(a),a);
+  for(const a of ["CL.go('intro')",'CL.duelEnter()',"CL.go('hof')","CL.go('ach')"]) assert.ok(!html.includes(a),'plus de lien : '+a);
   assert.equal((html.match(/mf-menu[^"]*"[^>]*>(?:(?!<\/nav>)[\s\S])*?class="[^"]*\bon\b/g)||[]).length>=0,true);
   assert.equal((html.match(/class="[^"]*\bon\b[^"]*"/g)||[]).length,1,'une seule entrée jaune : l’action principale');
 });
@@ -146,14 +149,11 @@ test('Accueil — au clavier : ↑ ↓ choisissent en sautant le grisé, Entrée
   const win=newGameWindow({runMain:true});
   win.eval(`G.screen='title'; render();`);
   assert.equal(win.eval('MF_ACCUEIL.i'),0);
-  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'carriere');
-  touche(win,'ArrowDown'); touche(win,'ArrowDown'); touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'succes');
-  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','Options est livrée au lot 12 : le curseur s’y arrête');
+  /* Décision d'Anthony du 16/10/2026 : le menu se réduit à Management, Options et Quitter (grisé). */
+  touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','le curseur passe de Management à Options');
   touche(win,'ArrowDown'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'management','Quitter, grisé, est sauté : on revient au début');
-  touche(win,'ArrowUp'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','en remontant depuis le début, le curseur s’arrête sur Options (Quitter, grisé, est sauté)');
-  touche(win,'ArrowUp'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'succes');
-  touche(win,'ArrowUp'); touche(win,'ArrowUp'); touche(win,'ArrowUp'); touche(win,'ArrowUp'); assert.equal(win.eval('MF_ACCUEIL.i'),0);
-  touche(win,'ArrowDown'); touche(win,'Enter'); assert.equal(win.eval('G.screen'),'intro','Entrée ouvre la Carrière');
+  touche(win,'ArrowUp'); assert.equal(win.eval('MF_MENU[MF_ACCUEIL.i].id'),'options','en remontant depuis le début, le curseur s’arrête sur Options');
+  touche(win,'ArrowUp'); assert.equal(win.eval('MF_ACCUEIL.i'),0);
   win.eval(`G.screen='title'; MF_ACCUEIL.i=0; render();`);
   touche(win,'Enter'); assert.equal(win.eval('G.screen'),'mgmt_parties','Entrée sur Management ouvre « Choisis une partie »');
   win.eval(`CL.mgmtLeave();`);

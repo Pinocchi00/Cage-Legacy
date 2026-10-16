@@ -386,12 +386,9 @@ keysRegister('mgmt_confirmation',{
 
 let MF_ACCUEIL={i:0};
 /** Les entrées de l'accueil. `fn` : l'action au clavier ; `action` : la même au clic. */
+/* Décision d'Anthony du 16/10/2026 : on réduit au minimum, plus de Carrière, de Duel entre amis, de Panthéon ni de Succès dans le menu (le code reste, rien n'y mène). */
 const MF_MENU=[
   {id:'management',t:'Management',sous:'Matchmaker',action:'CL.mgmtParties()',fn:()=>CL.mgmtParties(),classe:'title-management'},
-  {id:'carriere',t:'Carrière',action:"CL.go('intro')",fn:()=>CL.go('intro')},
-  {id:'duel',t:'Duel entre amis',action:'CL.duelEnter()',fn:()=>CL.duelEnter()},
-  {id:'pantheon',t:'Panthéon',action:"CL.go('hof')",fn:()=>CL.go('hof')},
-  {id:'succes',t:'Succès',bas:true,action:"CL.go('ach')",fn:()=>CL.go('ach')},
   {id:'options',t:'Options',bas:true,action:'CL.mgmtOptions()',fn:()=>CL.mgmtOptions()},
   {id:'quitter',t:'Quitter',bas:true,grise:true},
 ];
