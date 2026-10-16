@@ -26,7 +26,7 @@ Légende : 🔴 erreur · 🟠 illogique · 🟡 réalisme · 🔵 visuel · ⚪
 - [ ] ⚪ **A5** **Accents perdus en majuscules** : « CEDRIC TCHAKOUTE » (Résultats), « TUBARAO » (Classements). Ailleurs « Cédric » est bien accentué.
 - [ ] ⚪ **A6** **Apostrophes** droites et courbes mélangées (Nouvelle partie : « l'argent », « l'autre bout du monde » ; ailleurs « ’ »).
 - [ ] ⚪ **A7** **Langues mélangées** : surnoms en anglais et en français (« Steel Toe », « The Beast », « La Marée », « Le Petit de Milwaukee ») ; la présentation d'un combat écrit « sambo et wrestler » alors que le jeu dit « Lutte ».
-- [ ] 🟠 **A8** Le menu principal propose toujours **Carrière, Duel entre amis, Panthéon, Succès** (en attente de ta décision pour la démo).
+- [x] 🟠 **A8** Le menu principal ne propose plus **Carrière, Duel entre amis, Panthéon, Succès** (décision d'Anthony du 16/10/2026).
 - [ ] 🟠 **A9** Écran **« La semaine » (ancien)** : on peut tomber dessus (le Lendemain sans soirée jouée) ; il est étroit, centré, et **coupe les mots au milieu** (« Tchakou-te », « Ekaterin-e Janelidz-e »). À supprimer ou à brancher sur le nouveau cadre.
 - [ ] 🟠 **A10** Écran **Organisation** (ancien) : bouton « ← Retour à la semaine » (cet écran n'existe plus), seulement l'effectif et la trésorerie, la liste des Femmes est coupée en bas, c'est « Finances » qui est surligné dans la barre. Le vrai écran de l'organisation est le lot 9 T11.
 
