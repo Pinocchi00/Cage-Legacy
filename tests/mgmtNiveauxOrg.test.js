@@ -62,6 +62,22 @@ test('Monde lot 9 T3 — avec le monde vivant, les huit organisations ont leurs 
   }finally{ a.close(); b.close(); }
 });
 
+/* ==== [ANCRE: TEST_MONDE_LOT9_T3B_NOTORIETE] — Monde lot 9 T3b ==== */
+test('Monde lot 9 T3b — la notoriété départage les huit organisations',()=>{
+  const w=partie(true);
+  try{
+    const valeurs=lire(w,`return MGMT_ORGANISATIONS.map(o=>mgmtOrgNiveaux(m,o.id).notoriete);`);
+    assert.ok(new Set(valeurs).size>=6,`${new Set(valeurs).size} valeurs distinctes : ${valeurs.join(', ')}`);
+  }finally{w.close();}
+});
+
+test('Monde lot 9 T3b — le renom compte les victoires et les titres',()=>{
+  const w=partie(false);
+  try{
+    assert.equal(lire(w,`const f={id:'vainqueur',W:1}; const s={facts:[{k:'title_fight',fight:0}],hist:[{winner:'A',a:{id:'vainqueur'},b:{id:'autre'}}]}; return mgmtRenom(s,f);`),3);
+  }finally{w.close();}
+});
+
 /* Superviseur, 15/10/2026 : l'ordre officiel des organisations se lit dans le jeu (MGMT_ORGANISATIONS n'existe pas côté Node). */
 const ordreAttendu=(rows,ordre)=>rows.slice().sort((x,y)=>x.total-y.total||x.rangs.puissance-y.rangs.puissance||ordre.indexOf(x.id)-ordre.indexOf(y.id)).map(x=>x.id);
 

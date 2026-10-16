@@ -213,3 +213,21 @@ test('Monde lot 9 T2d — les migrations v20 préfixent le monde vivant et laiss
   const win=creer(true),r=win.eval(`(function(){const vivant=JSON.parse(mgmtSerialiser(G.mgmt));vivant.v=20;for(const [id,s] of Object.entries(vivant.orgs)){const p='o'+MGMT_ORGANISATIONS.findIndex(o=>o.id===id)+'mg';s.idPrefixe=undefined;Object.keys(s).forEach(k=>{});const t=JSON.stringify(s).replace(/\\bo\\d+mg(\\d+)\\b/g,'mg$1');Object.assign(s,JSON.parse(t));}const mig=mgmtMigrate(vivant);const propre=JSON.parse(mgmtSerialiser(mgmtDefault('split')));propre.v=20;propre.mondeVivant=false;const avant=JSON.stringify(propre);const sans=mgmtMigrate(propre);return {v:mig.v,valid:validateMgmt(mig)&&mgmtMondeVivantValide(mig),unique:(()=>{const a=[...mig.roster,...Object.values(mig.orgs).flatMap(x=>x.roster)];return a.length===new Set(a.map(x=>x.id)).size})(),sans:JSON.stringify(sans)===avant.replace('"v":20','"v":21')}})()`);
   assert.equal(r.v,21); assert.equal(r.valid,true); assert.equal(r.unique,true); assert.equal(r.sans,true);
 });
+
+/* ==== [ANCRE: TESTS_MONDE_LOT9_T2E] — Monde lot 9 T2e ==== */
+test('Monde lot 9 T2e — le top 10 mondial mêle les organisations vivantes sans domination de Split',()=>{
+  const win=creer(true),r=win.eval(`(function(){const m=G.mgmt;return allDivisions().map(d=>{const top=mgmtDivisionRanking(m,d.id,'world').slice(0,10);return {split:top.filter(f=>m.roster.some(x=>x.id===f.id)).length,orgs:new Set(top.map(f=>f.orgId||'split')).size}})})()`);
+  for(const d of r){assert.ok(d.split<=6,`Split occupe ${d.split} places`);assert.ok(d.orgs>=3,`${d.orgs} organisations dans le top 10`);}
+});
+
+test('Monde lot 9 T2e — une victoire vivante et une victoire Split sont évaluées par la même loi',()=>{
+  const win=creer(true),r=win.eval(`(function(){const m=G.mgmt,org=mgmtMondeVivantIds(m)[0],s=m.orgs[org],div=allDivisions()[0].id;
+    const cible=x=>x.roster.find(f=>f.div===div&&!mgmtIsRetired(f));
+    const vivant=cible(s),split=cible(m);
+    function victoire(partie,f){const rival=partie.roster.find(x=>x.div===f.div&&x.id!==f.id&&!mgmtIsRetired(x));const avant=mgmtDivisionRankingCalcule(m,div,'world').findIndex(x=>x.id===f.id);const scoresAvant=mgmtRangScores(partie,[f],partie.cycle).get(f.id);const combat={c:partie.cycle-1,winner:'B',a:{id:rival.id},b:{id:f.id}};partie.hist.push(combat);f.W++;const apres=mgmtDivisionRankingCalcule(m,div,'world').findIndex(x=>x.id===f.id);const scoresApres=mgmtRangScores(partie,[f],partie.cycle).get(f.id);f.W--;partie.hist.pop();return {avant,apres,variation:scoresApres-scoresAvant,gagnant:combat.winner==='B'&&combat.b.id===f.id};}
+    return {vivant:victoire(s,vivant,'v'),split:victoire(m,split,'s')};})()`);
+  assert.ok(r.vivant.gagnant&&r.split.gagnant,'le combattant testé est bien le vainqueur dans chaque partie');
+  assert.ok(r.vivant.apres<=r.vivant.avant,'la victoire vivante ne fait pas reculer');
+  assert.ok(r.split.apres<=r.split.avant,'la victoire Split ne fait pas reculer');
+  assert.equal(r.vivant.variation,r.split.variation,'la victoire ajoute le même score sous-partie pour les deux organisations');
+});
