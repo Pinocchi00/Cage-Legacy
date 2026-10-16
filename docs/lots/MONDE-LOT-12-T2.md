@@ -27,3 +27,11 @@ Branche : `monde-lot-12-fidelite`. Commun à toutes les tranches du lot 12 : **r
 - Relecture locale du diff et de la planche effectuée sans sous-agent. La comparaison visuelle en jeu à 1280, 1440 et 1920 reste au superviseur ; elle n’est pas attestée par les tests DOM.
 - Migration de sauvegarde : aucune. Modifications T2 déjà présentes au début de la session reprises et vérifiées ; configurations `.opencode` et `opencode.json` laissées hors commit.
 - Écarts : colonnes égales selon l’écart 1 explicite de la fiche, bien que le HTML de la planche porte des proportions 5/5/3. Questions pour Anthony : aucune.
+
+## Compte rendu — reprise bloquée
+
+- Vérification préalable : branche `monde-lot-12-fidelite` conforme.
+- Le point 1 de la reprise suppose des affaires de type promesse et contrat avec leur échange existant. Or `mgmt-save.js`, fonction `mgmtValidAffair()`, n'accepte que `leila_propose`, `leila_react`, `leila_bulk`, `leila_react_swap` et `leila_react_crush`. `mgmtAccueilContenu()` construit les lignes depuis les demandes ouvertes et cette pile uniquement ; aucune ligne promesse ou contrat n'y est produite. Les exemples de la planche ne constituent pas des échanges implémentés.
+- Questions pour Anthony : faut-il ajouter à l'Accueil les promesses et les contrats issus des autres écrans ? Si oui, quels critères les font apparaître, et quelles actions existantes doivent ouvrir « Décider › » et « Prolonger › » ? Quelle action de la planche faut-il associer à chacun des cinq types d'affaires de Leïla ?
+- Arrêt sur ce trou de spécification conformément à la règle de tranche. Aucun changement de simulation, de sauvegarde, de CSS ou de test ; aucun test ajouté. Les points 2 à 5 ne sont pas corrigés dans cette reprise. Les configurations non commitées restent hors livraison ; aucun travail des autres tranches n'est supprimé ni déplacé.
+- Seule cette fiche est modifiée par cette reprise. Aucun résultat de vérification visuelle ou de test fonctionnel n'est revendiqué.
