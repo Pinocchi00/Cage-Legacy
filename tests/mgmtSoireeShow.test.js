@@ -146,10 +146,10 @@ test('L\'avant-combat — une zone jamais observée est dite inconnue, ce qui es
   assert.ok(vu.length>0,'après quelques soirées, des combattants ont été vus');
   for(const x of r){
     for(const k of [0,1]){
-      if(x.vus[k]===0){ assert.equal(x.lignes[k],0,'jamais vu : rien n\'est dit de lui'); assert.equal(x.profil[k],'PAS ENCORE VU'); assert.ok(x.inc[k].length>0); }
-      else assert.ok(x.lignes[k]>0&&x.lignes[k]<=3);
+      /* Décision d'Anthony du 16/10/2026 : tout se sait d'un combattant, vu ou non. */
+      assert.ok(x.lignes[k]>0&&x.lignes[k]<=3); assert.notEqual(x.profil[k],'PAS ENCORE VU'); assert.equal(x.inc[k].length,0);
     }
-    if(x.vus[0]===0&&x.vus[1]===0) assert.ok(x.zones.every(z=>z[1]),'aucun des deux vu : toutes les zones sont inconnues');
+    
   }
 });
 

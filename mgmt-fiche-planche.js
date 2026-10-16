@@ -43,7 +43,7 @@ const MGMT_FICHE_TEXTES={
 /** La lecture d'un combattant pour la fiche : la même que l'avant-combat de la soirée (tout ce que le joueur a vu, rien de plus). */
 function mgmtFicheLecture(m,f){
   if(!m||!f||typeof mgmtObservation!=='function') return {vus:0,n:0,profil:MGMT_AVANT_TEXTES.profils.inconnu,lignes:[],inconnus:[],zones:{}};
-  const o=mgmtObservation(m,f.id,Array.isArray(m.hist)?m.hist.length:0,0);
+  const o=mgmtObservation(m,f.id,Array.isArray(m.hist)?m.hist.length:0,0,f);
   const L=MGMT_AVANT_TEXTES.lignes, cles=Object.keys(L);
   o.detail=o.lignes.map(txt=>{ const k=cles.find(c=>L[c]===txt); return Object.assign({k:k||'rien',txt},MGMT_FICHE_TEXTES.lignes[k||'rien']); });
   const I=MGMT_AVANT_TEXTES.inconnus, ik=Object.keys(I);
@@ -137,7 +137,7 @@ function mgmtFicheApercuHtml(m,f,line){
   const vus=lec.vus;
   const p1=mgmtFichePanneau('Ce que tu as vu',vus+' combat'+(vus>1?'s':''),
     `<div class="mf-fi-profil">${esc(profil)}</div><div class="mf-fi-lgs">${lignes}</div>`
-    +`<div class="mf-fi-bas"><div class="mf-fi-bt">CE QUE TU NE SAIS PAS</div>${inconnus||'<div class="mf-fi-lg"><b class="q">?</b><div>Rien de plus à savoir pour l’instant</div></div>'}</div>`);
+    +(inconnus?`<div class="mf-fi-bas"><div class="mf-fi-bt">CE QUE TU NE SAIS PAS</div>${inconnus}</div>`:''));
   const p2=mgmtFichePanneau('Dans la cage','',`<div class="mf-fi-cagebox">${mgmtFicheCageHtml(m,f,330)}</div>${mgmtFicheLegendeHtml()}`);
   const taille=Number.isFinite(phys.height)?(phys.height/100).toFixed(2).replace('.',',')+' m':'?';
   const allonge=Number.isFinite(phys.reach)?(phys.reach/100).toFixed(2).replace('.',',')+' m':'?';
@@ -155,9 +155,9 @@ function mgmtFicheApercuHtml(m,f,line){
 
 /** Style : la cage et les lignes façon, force, faille, inconnu, allonge. */
 function mgmtFicheStyleHtml(m,f){
-  const lec=mgmtFicheLecture(m,f), T=MGMT_FICHE_TEXTES, vu=lec.n?`Vu dans ses ${lec.n} combat${lec.n>1?'s':''}`:'Jamais vu';
+  const lec=mgmtFicheLecture(m,f), T=MGMT_FICHE_TEXTES, vu=lec.n?`Vu dans ses ${lec.n} combat${lec.n>1?'s':''}`:'D’après son profil';
   const rows=[];
-  rows.push({lab:'FAÇON',signe:'',t:lec.profil,src:lec.n?vu:'',p:T.profils[lec.profil]||''});
+  rows.push({lab:'FAÇON',signe:'',t:lec.profil,src:vu,p:T.profils[lec.profil]||''});
   const forces=lec.detail.filter(l=>l.s==='+').slice(0,2), failles=lec.detail.filter(l=>l.s==='−').slice(0,1);
   forces.forEach(l=>rows.push({lab:'FORCE',signe:'+',t:l.t,src:vu,p:l.p}));
   failles.forEach(l=>rows.push({lab:'FAILLE',signe:'−',t:l.t,src:vu,p:l.p}));

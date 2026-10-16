@@ -43,7 +43,7 @@ const MGMT_AVANT_TEXTES={
     allonge:'{x} a {n} cm d’allonge de plus.',
     inconnu:'Personne ne sait. {x} n’y est jamais allé.', inconnu2:'Personne ne sait. Ni {x} ni {y} n’y sont allés.', autre:'{x} n’y est jamais allé.',
   },
-  entete:{impose:'{x} impose son combat', imposeAutre:'{x} impose le sien', source:'D’après ce que tu as vu de leurs combats.', rien:'On ne sait pas encore ce que chacun impose.'},
+  entete:{impose:'{x} impose son combat', imposeAutre:'{x} impose le sien', source:'D’après leurs combats et leur profil.', rien:'On ne sait pas encore ce que chacun impose.'},
   dernier:{aucun:'Aucun combat vu sous ton affiche', ligne:'{famille}, {round}, contre {adv}'},
 };
 const MGMT_OBS_MAX=8;
@@ -148,9 +148,28 @@ function mgmtObsAvant(m,id,h){
 }
 function mgmtObsSomme(a,b){ for(const k of Object.keys(b)) a[k]=(a[k]||0)+b[k]; }
 
+/** Ce qu'on lit d'un combattant sans avoir vu un seul de ses combats : son style, ses qualités, la force de chaque zone, tirés de son profil
+ *  (décision d'Anthony du 16/10/2026 : tout se sait). Pur. @returns {{profil:string,lignes:string[],zones:{centre:number,cage:number,sol:number}}} */
+function mgmtLectureStyle(ligne){
+  const p=mgmtCombatProfile(ligne), a=p.attrs||{}, T=MGMT_AVANT_TEXTES, L=T.lignes;
+  const moy=(...k)=>k.reduce((s,x)=>s+(Number.isFinite(a[x])?a[x]:50),0)/k.length;
+  const centre=moy('jab','cross','hook','kick','handSpeed','footSpeed'), cage=moy('clinchStr','strength','tdd'), sol=moy('takedown','submission','topControl','guardWork','gnp');
+  const f=x=>Math.max(-1,Math.min(1,(x-50)/40));
+  const zones={centre:f(centre),cage:f(cage),sol:f(sol)};
+  const m=Math.max(centre,cage,sol);
+  let profil=T.profils.complet; const lignes=[];
+  if(m-Math.min(centre,cage,sol)>=6){
+    if(m===sol){ profil=T.profils.sol; lignes.push(L.amenee); }
+    else if(m===cage){ profil=T.profils.clinch; lignes.push(L.corps); }
+    else{ profil=(p.style==='boxer'||p.style==='karate')?T.profils.distance:T.profils.sort; lignes.push(L.loinJuste); }
+  }
+  if(sol>=cage+6&&sol>=centre-6&&lignes.length<2&&profil!==T.profils.sol) lignes.push(L.controleSol);
+  if(!lignes.length) lignes.push(L.rien);
+  return {profil,lignes,zones};
+}
 /** Ce que le joueur sait d'un combattant avant le combat d'index h : combats vus, ce qu'il a vu, ce qu'il ne sait pas,
  *  chaque zone vue ou non. Ne lit que m.hist avant h. @returns {object} */
-function mgmtObservation(m,id,h,roundsCombat){
+function mgmtObservation(m,id,h,roundsCombat,ligne){
   const passes=mgmtObsAvant(m,id,h), vus=passes.length;
   const f=MGMT_OBS_ZERO(), o=MGMT_OBS_ZERO();
   let n=0, cage=false, sol=false, clinch=false, maxRounds=0;
@@ -178,7 +197,7 @@ function mgmtObservation(m,id,h,roundsCombat){
     let best=[0.1,T.profils.complet];
     for(const s of scores) if(s[0]>best[0]) best=s;
     profil=best[1];
-  }
+  }else if(ligne) profil=mgmtLectureStyle(ligne).profil;
   /* Ce qu'il a fait, en trois lignes au plus. */
   const L=T.lignes, lignes=[];
   if(n>0){
@@ -196,15 +215,9 @@ function mgmtObservation(m,id,h,roundsCombat){
     else if(cage&&clinch&&f.clinchCtrlSec<o.clinchCtrlSec*0.7) cand.push(L.subitCage);
     for(const c of cand){ if(lignes.length<3&&!lignes.includes(c)) lignes.push(c); }
     if(!lignes.length) lignes.push(L.rien);
-  }
-  /* Ce qu'il ne sait pas : une zone jamais vue, un nombre de rounds jamais vu. */
-  const I=T.inconnus, inconnus=[];
-  if(n===0){ inconnus.push(I.style,I.faille); }
-  else{
-    if(!sol) inconnus.push(I.sol);
-    if(!cage) inconnus.push(I.cage);
-    if(roundsCombat>maxRounds&&maxRounds>0) inconnus.push(I.rounds.replace('{r}',MGMT_SOIREE_TEXTES.rounds[roundsCombat]||String(roundsCombat)));
-  }
+  }else if(ligne) mgmtLectureStyle(ligne).lignes.forEach(x=>lignes.push(x));
+  /* Décision d'Anthony du 16/10/2026 : tout se sait d'un combattant, comme quand on regarde ses combats — plus de « ce que tu ne sais pas ». */
+  const inconnus=[];
   /* La force dans chaque zone, de −1 à 1, seulement si la zone a été vue. */
   const diff=(a,b)=>(a-b)/(a+b+1);
   const zones={
@@ -212,7 +225,8 @@ function mgmtObservation(m,id,h,roundsCombat){
     cage:{vu:cage&&clinch,force:diff(f.clinchCtrlSec+f.clinchStrikes*3,o.clinchCtrlSec+o.clinchStrikes*3)},
     sol:{vu:sol,force:diff(f.groundCtrlSec+f.td*20+f.groundStrikes*3,o.groundCtrlSec+o.td*20+o.groundStrikes*3)},
   };
-  return {vus,n,profil,lignes:lignes,inconnus:inconnus.slice(0,3),zones};
+  if(ligne){ const lu=mgmtLectureStyle(ligne).zones; for(const k of Object.keys(zones)) if(!zones[k].vu) zones[k]={vu:true,force:lu[k]}; }
+  return {vus,n,profil,lignes:lignes,inconnus:inconnus,zones};
 }
 
 /* ---- Le côté d'un combattant dans l'avant-combat -------------------------------------------------------------------- */
@@ -264,8 +278,8 @@ function mgmtBilanAvant(side){ return side.W+'-'+side.L+'-'+(side.D||0); }
 /** Le côté d'un combattant : tout ce que l'écran peut montrer de lui avant le combat. */
 function mgmtAvantCote(m,p,cote){
   const t=p.trace, s=cote==='A'?t.a:t.b, ligne=mgmtTraceLine(s);
-  const ob=mgmtObservation(m,s.id,p.h,p.rounds);
-  const style=ob.n>0?mgmtCommentIlCombat(ligne):null;
+  const ob=mgmtObservation(m,s.id,p.h,p.rounds,ligne);
+  const style=mgmtCommentIlCombat(ligne);
   return {id:s.id,name:s.name,first:s.first||'',last:s.last||s.name,
     vus:ob.vus,profil:ob.profil,lignes:ob.lignes,inconnus:ob.inconnus,zones:ob.zones,
     style:style?style.style.toUpperCase():'',garde:style?style.garde:'',
@@ -323,9 +337,7 @@ function mgmtAvantCombat(m,i){
     }
     return {id,titre,texte,inconnu,avantage};
   });
-  const entete=(A.vus>0&&B.vus>0)
-    ?{a:Z.entete.impose.replace('{x}',nA),b:Z.entete.imposeAutre.replace('{x}',nB),source:Z.entete.source}
-    :{a:'',b:'',source:Z.entete.rien};
+  const entete={a:Z.entete.impose.replace('{x}',nA),b:Z.entete.imposeAutre.replace('{x}',nB),source:Z.entete.source};
   return {i,etiquette:p.nom,court:p.court,titre:p.titre,rounds:p.rounds,div:p.div,divLabel:mgmtDivisionLabel(p.div),
     a:A,b:B,zones,entete,enjeux:mgmtSoireeEnjeux(m,p,A,B)};
 }

@@ -161,11 +161,11 @@ function mgmtSoCoteHtml(c,couleur){
     :`<div class="mf-so-ro"><div class="mf-so-q">?</div><div>${esc(MGMT_AVANT_TEXTES.dernier.aucun)}</div></div>`;
   const pied=[['Classement',c.rang===null?'—':c.rang],['Palmarès',c.palmares],['Allonge',c.allonge]]
     .map(([k,v])=>`<div class="mf-so-pi"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
-  return `<div class="mf-so-av ${couleur}"><div class="mf-so-ah"><div><div class="mf-so-ti">${esc(soLast(c))}</div><i class="mf-so-bar"></i></div><span>${esc(c.vus)} combat${c.vus>1?'s':''} vu${c.vus>1?'s':''}</span></div>`
+  return `<div class="mf-so-av ${couleur}"><div class="mf-so-ah"><div><div class="mf-so-ti">${esc(soLast(c))}</div><i class="mf-so-bar"></i></div>${c.vus?`<span>${esc(c.vus)} combat${c.vus>1?'s':''} vu${c.vus>1?'s':''}</span>`:''}</div>`
     +`<div class="mf-so-ag"><div class="mf-so-s">CE QUE TU AS VU</div><div class="mf-so-prof">${esc(c.profil)}</div></div>`
     +`<div class="mf-so-aj">${lignes}</div>`
-    +`<div class="mf-so-ag"><div class="mf-so-s">CE QUE TU NE SAIS PAS</div>${inconnus||'<div class="mf-so-ro"><div class="mf-so-q">?</div><div>Rien d’autre à signaler.</div></div>'}</div>`
-    +`<div class="mf-so-ag"><div class="mf-so-s">SON DERNIER COMBAT</div>${dernier}</div><div class="mf-so-pis">${pied}</div></div>`;
+    +(inconnus?`<div class="mf-so-ag"><div class="mf-so-s">CE QUE TU NE SAIS PAS</div>${inconnus}</div>`:'')
+    +(c.dernier?`<div class="mf-so-ag"><div class="mf-so-s">SON DERNIER COMBAT</div>${dernier}</div>`:'')+`<div class="mf-so-pis">${pied}</div></div>`;
 }
 /* ==== [ANCRE: MGMT_PRESENTATION_SOIREE_RENDU] — Monde lot 3 T5 ==== */
 function scr_mgmt_soiree_avant(){

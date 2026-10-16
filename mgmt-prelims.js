@@ -180,6 +180,6 @@ keysRegister('mgmt_prelims',{
   m(){ CL.mgmtPrelimsMonter(); },
   M(){ CL.mgmtPrelimsMonter(); },
   Tab(){ CL.mgmtPrelimsCote(MGMT_PRELIMS.cote==='a'?'b':'a'); },
-  Escape(){ CL.go('mgmt_carte'); },
+  Escape(){ CL.go('mgmt_accueil'); },
 });
 /* ==== [FIN ANCRE] ==== */

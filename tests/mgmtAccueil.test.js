@@ -23,7 +23,7 @@ test('T1 — Accueil première section ; neuve : arrivée puis Accueil ; reprise
 
 test('T1 — une partie laissée en pleine soirée mène toujours à la soirée (avant l’Accueil)', () => {
   const src=fs.readFileSync(path.join(__dirname,'..','mgmt-screens.js'),'utf8');
-  const i=src.indexOf("mgmtSoireeReprendre(G.mgmt); CL.go('mgmt_soiree')"), j=src.indexOf("CL.go('mgmt_accueil');");
+  const i=src.indexOf("mgmtSoireeReprendre(G.mgmt); CL.go('mgmt_soiree')"), j=src.indexOf("CL.go('mgmt_accueil');",i);   /* 16/10/2026 : des touches Échap contiennent aussi cet appel, plus haut dans le fichier : on cherche donc après la reprise */
   assert.ok(i>0&&j>i,'la reprise de soirée passe avant l’ouverture de l’Accueil');
 });
 
